@@ -37,6 +37,7 @@ function icon(name, size = 22) {
 const BASE_CSS = `
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 html{-webkit-text-size-adjust:100%;-webkit-tap-highlight-color:transparent;overflow-x:hidden}
+html,body{scrollbar-width:none}::-webkit-scrollbar{display:none}
 body{min-height:100vh;min-height:100dvh;font-family:"Segoe UI Variable Display","Segoe UI Variable","SF Pro Display","Segoe UI",Inter,system-ui,-apple-system,Roboto,sans-serif;color:var(--text);background:var(--bg1);line-height:1.45;overflow-x:hidden;-webkit-font-smoothing:antialiased;font-size:16px}
 body::before{content:"";position:fixed;inset:-18%;z-index:-2;pointer-events:none;background:
  radial-gradient(38% 30% at 16% 10%,var(--glow-soft),transparent 70%),

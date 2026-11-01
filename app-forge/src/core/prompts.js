@@ -15,6 +15,7 @@ const DESIGN_RULES = `
 - Typografie: System-Schriften ("Segoe UI Variable", "SF Pro Display", Inter, system-ui, Roboto, sans-serif), klare Skala (z. B. 32/22/17/15/13px), Zahlen mit font-variant-numeric: tabular-nums, großzügige Zeilenhöhe.
 - Bewegung: Mikro-Animationen 150–350ms (transform/opacity), sanftes Einblenden von Listenelementen, animierte Fortschrittsringe/-balken; @media (prefers-reduced-motion: reduce) schaltet Animationen ab.
 - Layout: mobile-first 360–430px, max-width 480px zentriert, 8px-Raster, safe-area-insets (env()), Tipp-Flächen >= 44px, kein horizontales Scrollen, Bottom-Navigation oder ein klar fokussierter Hauptscreen.
+- Scrollbalken ausblenden wie in nativen Apps (scrollbar-width:none; ::-webkit-scrollbar{display:none}), Scrollen bleibt möglich.
 - Icons: inline SVG mit einheitlicher Strichstärke. Leere Zustände mit kleiner Illustration und klarer Handlungsaufforderung.
 - Kontrast: Text >= 4.5:1. Farben ausschließlich über CSS-Variablen aus der Palette.
 `;

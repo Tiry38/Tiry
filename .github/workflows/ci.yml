@@ -1,0 +1,51 @@
+name: CI – Tests & Design-Abnahme
+
+on:
+  push:
+    paths: ['app-forge/**', '.github/workflows/ci.yml']
+  pull_request:
+    paths: ['app-forge/**']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    defaults:
+      run:
+        working-directory: app-forge
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: app-forge/package-lock.json
+      - run: npm ci
+      - name: Unit- und Pipeline-Tests
+        run: npm test
+      - name: Browser für das Test-Labor
+        run: npx playwright install --with-deps chromium
+      - name: Selbsttest aller Premium-Vorlagen (Handy-Format)
+        run: npm run selftest -- --quick
+      - name: End-to-End-Test der Windows-Oberfläche (Electron unter Xvfb)
+        run: xvfb-run -a -s "-screen 0 1600x1000x24" npx electron . --smoke --no-sandbox --disable-gpu
+        env:
+          FORGE_DATA_DIR: ${{ runner.temp }}/forge-data
+          FORGE_SMOKE_OUT: ${{ runner.temp }}/smoke
+      - name: Screenshots hochladen
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ui-und-app-screenshots
+          path: |
+            ${{ runner.temp }}/smoke
+            app-forge/.selftest/shots
+          if-no-files-found: ignore

@@ -3,3 +3,5 @@ dist/
 out/
 *.log
 .selftest/
+cloud/site/
+cloud/.firebaserc

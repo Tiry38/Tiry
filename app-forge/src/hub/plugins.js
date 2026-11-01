@@ -38,7 +38,15 @@ class PluginManager {
   }
 
   _envOk(plugin) {
-    return !plugin.env || !!this.hub.env[plugin.env];
+    if (plugin.env && !this.hub.env[plugin.env]) return false;
+    if (typeof plugin.available === 'function') {
+      try {
+        return !!plugin.available(this.hub.env);
+      } catch {
+        return false;
+      }
+    }
+    return true;
   }
 
   _makeCtx(entry) {

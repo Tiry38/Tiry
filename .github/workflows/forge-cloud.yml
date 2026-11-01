@@ -1,0 +1,105 @@
+name: Forge Cloud Autopilot
+
+# Läuft ohne deinen PC: erschafft/verbessert Apps in der Cloud, speichert die Bibliothek im Branch
+# "forge-library" und veröffentlicht Galerie + Fernsteuerung auf Firebase Hosting (falls eingerichtet).
+# Zeitplan läuft nur auf dem Standard-Branch und nur, wenn ANTHROPIC_API_KEY hinterlegt ist.
+on:
+  schedule:
+    - cron: '17 */6 * * *'
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: 'Aufgabe'
+        type: choice
+        options: [autopilot, create, evolve, trends, commands]
+        default: autopilot
+      count:
+        description: 'Anzahl Schritte / Apps (1–10)'
+        type: number
+        default: 2
+
+permissions:
+  contents: write
+
+concurrency:
+  group: forge-cloud
+  cancel-in-progress: false
+
+jobs:
+  forge:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    env:
+      HAS_AI: ${{ secrets.ANTHROPIC_API_KEY != '' }}
+      HAS_FIREBASE: ${{ secrets.FIREBASE_SERVICE_ACCOUNT != '' && secrets.FIREBASE_PROJECT_ID != '' }}
+    steps:
+      - name: Zeitplan ohne API-Key überspringen
+        if: github.event_name == 'schedule' && env.HAS_AI != 'true'
+        run: echo "Kein ANTHROPIC_API_KEY – geplanter Lauf übersprungen (manuell startbar)." >> "$GITHUB_STEP_SUMMARY"
+
+      - uses: actions/checkout@v4
+        if: github.event_name != 'schedule' || env.HAS_AI == 'true'
+
+      - uses: actions/setup-node@v4
+        if: github.event_name != 'schedule' || env.HAS_AI == 'true'
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: app-forge/package-lock.json
+
+      - name: Abhängigkeiten + Test-Labor
+        if: github.event_name != 'schedule' || env.HAS_AI == 'true'
+        working-directory: app-forge
+        run: |
+          npm ci
+          npx playwright install --with-deps chromium
+
+      - name: App-Bibliothek laden (Branch forge-library)
+        if: github.event_name != 'schedule' || env.HAS_AI == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          REMOTE="https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+          if git ls-remote --exit-code --heads origin forge-library >/dev/null 2>&1; then
+            git clone --depth 1 --branch forge-library "$REMOTE" forge-data
+          else
+            mkdir forge-data && cd forge-data && git init -q -b forge-library && git remote add origin "$REMOTE"
+          fi
+          printf 'logs/\nbackups/\nexports/\n_stage-*/\n' > forge-data/.gitignore
+
+      - name: Forge ausführen
+        if: github.event_name != 'schedule' || env.HAS_AI == 'true'
+        working-directory: app-forge
+        env:
+          FORGE_MODE: ${{ inputs.mode || 'autopilot' }}
+          FORGE_COUNT: ${{ inputs.count || 2 }}
+          FORGE_DATA_DIR: ${{ github.workspace }}/forge-data
+          FORGE_SITE_DIR: ${{ github.workspace }}/app-forge/cloud/site
+          FORGE_MODEL: ${{ vars.FORGE_MODEL }}
+          FORGE_DAILY_USD: ${{ vars.FORGE_DAILY_USD }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+          FIREBASE_PROJECT_ID: ${{ secrets.FIREBASE_PROJECT_ID }}
+          FIREBASE_WEB_CONFIG: ${{ secrets.FIREBASE_WEB_CONFIG }}
+        run: node scripts/cloud-run.js
+
+      - name: Bibliothek sichern
+        if: always() && (github.event_name != 'schedule' || env.HAS_AI == 'true')
+        working-directory: forge-data
+        run: |
+          [ -d .git ] || exit 0
+          git config user.name "forge-bot"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -q -m "Forge: ${{ inputs.mode || 'autopilot' }} $(date -u +%Y-%m-%d_%H%M)" || { echo "Keine Änderungen."; exit 0; }
+          git push -q origin HEAD:forge-library
+
+      - name: Galerie + Fernsteuerung auf Firebase Hosting
+        if: env.HAS_FIREBASE == 'true' && (github.event_name != 'schedule' || env.HAS_AI == 'true')
+        uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          repoToken: ${{ secrets.GITHUB_TOKEN }}
+          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+          projectId: ${{ secrets.FIREBASE_PROJECT_ID }}
+          channelId: live
+          entryPoint: ./app-forge/cloud

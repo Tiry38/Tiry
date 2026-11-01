@@ -1,0 +1,44 @@
+name: Windows-Programm bauen & ausliefern
+
+# Jede Änderung auf dem Hauptzweig baut einen neuen Installer und veröffentlicht ihn als GitHub-Release.
+# Das installierte Programm findet das Release automatisch (electron-updater) und aktualisiert sich selbst.
+on:
+  push:
+    branches: [main, master]
+    paths: ['app-forge/**']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: build-windows
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: windows-latest
+    timeout-minutes: 40
+    defaults:
+      run:
+        working-directory: app-forge
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: app-forge/package-lock.json
+      - run: npm ci
+      - run: npm test
+      - name: Versionsnummer setzen (1.0.<Lauf>)
+        shell: bash
+        run: npm version "1.0.${{ github.run_number }}" --no-git-tag-version --allow-same-version
+      - name: Installer bauen und als Release veröffentlichen
+        run: npx electron-builder --win --x64 --publish always
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - uses: actions/upload-artifact@v4
+        with:
+          name: windows-installer
+          path: app-forge/dist/*.exe

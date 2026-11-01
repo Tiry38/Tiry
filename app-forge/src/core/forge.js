@@ -23,6 +23,11 @@ const { biasSeed, trendHint } = require('./trends');
 const DESIGN_GATE = 7; // Mindest-Designnote (1–10), sonst wird verworfen
 const POLISH_BELOW = 8.5; // Durchschnitt darunter => Feinschliff-Runde
 
+function trendWeight(trends) {
+  const w = trends && typeof trends.weight === 'function' ? Number(trends.weight()) : 0.6;
+  return Number.isFinite(w) ? Math.max(0, Math.min(1, w)) : 0.6;
+}
+
 function rand32() {
   return (Math.random() * 4294967296) >>> 0;
 }
@@ -127,7 +132,7 @@ class Forge {
     const seed = rand32();
     const report = trends && trends.get();
     const rng = createRng(seed);
-    const { opportunity } = biasSeed(randomSeed(seed), report, rng, 0.6);
+    const { opportunity } = biasSeed(randomSeed(seed), report, rng, trendWeight(trends));
     const hint = opportunity ? opportunity.category : undefined;
     this.stage('idea', 'Wähle Premium-Vorlage, Palette und Namen …');
     const draft = offline.buildOfflineApp({ seed, appId: 'draft-app', lang: this.lang, preferType, categoryHint: hint });
@@ -163,7 +168,7 @@ class Forge {
     let seed = randomSeed(seedNum);
     if (preferType === 'game' || preferType === 'tool') seed = { ...seed, type: preferType };
     const report = trends && trends.get();
-    const biased = preferType === 'any' ? biasSeed(seed, report, rng, 0.6) : { seed, opportunity: null };
+    const biased = preferType === 'any' ? biasSeed(seed, report, rng, trendWeight(trends)) : { seed, opportunity: null };
     seed = biased.seed;
     const existing = library.list().map((a) => a.name);
     this.stage('idea', `Idee: ${seed.type === 'game' ? 'Spiel' : 'App'} · ${seed.category} · für ${seed.audience}${biased.opportunity ? ' · Trend-Chance' : ''}`);

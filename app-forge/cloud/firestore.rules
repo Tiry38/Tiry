@@ -1,0 +1,32 @@
+rules_version = '2';
+// Nur DU (Google-Login mit deiner E-Mail) darfst lesen und Befehle senden.
+// Die Forge selbst (PC + Cloud) arbeitet mit dem Service-Account und umgeht diese Regeln.
+// WICHTIG: DEINE-EMAIL@example.com durch deine Google-Adresse ersetzen, dann veröffentlichen.
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function isOwner() {
+      return request.auth != null
+        && request.auth.token.email_verified == true
+        && request.auth.token.email == 'DEINE-EMAIL@example.com';
+    }
+    match /status/{target} {
+      allow read: if isOwner();
+    }
+    match /apps/{appId} {
+      allow read: if isOwner();
+    }
+    match /events/{eventId} {
+      allow read: if isOwner();
+    }
+    match /commands/{cmdId} {
+      allow read: if isOwner();
+      allow create: if isOwner()
+        && request.resource.data.status == 'pending'
+        && request.resource.data.action in ['forge.create', 'forge.evolve', 'forge.test', 'autopilot.set', 'autopilot.runNow', 'trends.refresh', 'export.app']
+        && request.resource.data.target in ['any', 'desktop', 'cloud'];
+    }
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
