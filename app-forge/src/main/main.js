@@ -206,6 +206,13 @@ async function uiTour(out, appId, result) {
       await js(`document.querySelector('.nav-item[data-view="${view}"]').click()`);
       await wait(view === 'network' ? 1800 : 1300);
       await shot(`ui-${w}-${view}`);
+      if (view === 'settings' && w === 1440) {
+        await js(`document.querySelector('[data-aimode="api"]').click()`);
+        await wait(900);
+        await shot('ui-1440-settings-api');
+        await js(`document.querySelector('[data-aimode="free"]').click()`);
+        await wait(900);
+      }
     }
     if (appId) {
       await js(`document.querySelector('.nav-item[data-view="studio"]').click()`);

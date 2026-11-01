@@ -77,14 +77,17 @@ const ai = {
   id: 'ai.anthropic',
   name: 'Claude KI',
   kind: 'ai',
-  description: 'Claude (Anthropic) für Konzepte, Code, Design-Review, Fehlerbehebung und Trend-Recherche. Ohne Key läuft alles im Offline-Modus.',
+  description: 'Claude (Anthropic). Gratis-Modus: die KI-Arbeit erledigt die nächtliche Claude-Code-Sitzung über dein Claude-Abo (0 € extra). API-Modus: Dauerbetrieb im Programm, kostet API-Guthaben.',
   provides: ['ai'],
   settings: [
+    { key: 'mode', label: 'KI-Modus', type: 'select', default: 'free', options: [{ value: 'free', label: 'Gratis (Claude-Abo, nachts in der Cloud)' }, { value: 'api', label: 'API-Key (Dauerbetrieb, kostet)' }] },
     { key: 'apiKey', label: 'Anthropic API-Key', type: 'password', secret: true, default: '', help: 'Erstellen unter console.anthropic.com → API Keys. Wird verschlüsselt gespeichert.' },
     { key: 'model', label: 'Modell', type: 'select', default: 'claude-opus-5-5', options: MODELS }
   ],
   start(ctx) {
-    const apiKey = ctx.config.get('apiKey') || process.env.ANTHROPIC_API_KEY || '';
+    // Gratis-Modus: niemals API-Kosten – ein gespeicherter Key bleibt unbenutzt, bis du auf „API-Key“ umstellst.
+    const mode = ctx.config.get('mode') === 'api' ? 'api' : 'free';
+    const apiKey = mode === 'api' ? ctx.config.get('apiKey') || process.env.ANTHROPIC_API_KEY || '' : '';
     const client = new AiClient({
       apiKey,
       model: ctx.config.get('model') || 'claude-opus-5-5',
@@ -92,13 +95,15 @@ const ai = {
       limits: () => ctx.settings.get('budget', { dailyUsd: 5, dailyCalls: 60 }),
       emit: (type, payload) => ctx.bus.emit(type, payload)
     });
+    client.mode = mode;
     ctx.provide('ai', client);
-    ctx.action('ai.usage', () => client.usage(), { description: 'KI-Nutzung und Kosten' });
+    ctx.action('ai.usage', () => ({ ...client.usage(), mode }), { description: 'KI-Nutzung und Kosten' });
     ctx.action('ai.test', () => client.test(), { description: 'Verbindung testen', expose: false });
   },
   health(ctx) {
     const c = ctx.get('ai');
-    return c && c.isAvailable() ? { ok: true, message: `Bereit (${c.model})` } : { ok: false, message: 'Kein API-Key – Offline-Modus' };
+    if (c && c.isAvailable()) return { ok: true, message: `API-Modus bereit (${c.model})` };
+    return c && c.mode === 'api' ? { ok: false, message: 'API-Modus gewählt, aber kein API-Key hinterlegt' } : { ok: true, message: 'Gratis-Modus – keine API-Kosten' };
   }
 };
 
@@ -221,7 +226,7 @@ const forge = {
     }, { description: 'App testen' });
     ctx.action('forge.status', () => {
       const c = ctx.get('ai');
-      return { aiAvailable: aiOn(), mode: aiOn() ? 'ai' : 'offline', model: c ? c.model : null, busy: ctx.jobs.isBusy() };
+      return { aiAvailable: aiOn(), mode: aiOn() ? 'ai' : 'offline', aiMode: c && c.mode === 'api' ? 'api' : 'free', model: c ? c.model : null, busy: ctx.jobs.isBusy() };
     }, { description: 'Modus und Status' });
     // Synchrone Varianten für Cloud-Läufe (warten auf das Ergebnis)
     ctx.action('forge.createNow', async ({ type = 'any' } = {}) => {

@@ -16,9 +16,16 @@ Spiele und Werkzeuge, zufällig, aber mit Sinn-Check. Modernes, organisches Desi
    ```
 3. **Installer bauen:** `npm run dist` → `dist/Tiry App Forge Setup x.y.z.exe`.
 
-**Ohne API-Key** läuft das Programm im Offline-Modus: Es erschafft Apps aus 6 Premium-Vorlagen (Gewohnheiten, Fokus, Budget, Wasser, Timing-Spiel, Memory) mit zufälligen Paletten, Stilen und Namen.
+**Standard: Gratis-Modus – 0 € KI-Kosten.**
+- Das Programm erschafft Apps aus 6 Premium-Vorlagen (Gewohnheiten, Fokus, Budget, Wasser, Timing-Spiel, Memory) mit zufälligen Paletten, Stilen und Namen.
+- Völlig neue KI-Apps baut jede Nacht eine Claude-Code-Sitzung über dein Claude-Abo. Ablauf: [docs/GRATIS-MODUS.md](docs/GRATIS-MODUS.md).
+- Diese Apps holt das Programm automatisch aus der Cloud (Cloud → „Cloud-Apps holen“).
 
-**Mit API-Key** (Einstellungen → KI) erfindet Claude völlig neue Apps, repariert Fehler, bewertet das Design und entwickelt die Apps weiter. Key erstellen: console.anthropic.com → API Keys.
+**Umstellung auf API-Key (Dauerbetrieb, kostet):** Einstellungen → KI-Modus → „API-Key“ → Key eintragen → Speichern.
+- Danach erfindet, repariert, bewertet und entwickelt Claude rund um die Uhr direkt im Programm.
+- Grobe Schätzung: 1–3 US$ pro neuer App mit Opus 5.5, mit Sonnet 5.5 etwa die Hälfte.
+- Das Tagesbudget begrenzt die Kosten; Standard sind 5 US$ pro Tag.
+- Zurück auf „Gratis“ stellt die Kosten sofort ab.
 
 ---
 
@@ -57,9 +64,10 @@ Alles hängt als „Kabel“ (Plugin) am zentralen Hub. Die Ansicht **Netzwerk**
 
 ## Cloud: läuft ohne deinen PC
 
-- **GitHub Actions** (`.github/workflows/forge-cloud.yml`): alle 6 Stunden ein Autopilot-Lauf. Die Bibliothek liegt im Branch `forge-library`.
-- **Firebase Hosting:** Galerie aller Apps plus Fernsteuerungs-Seite (Google-Login, nur deine E-Mail).
-- **Claude Code App:** Sitzung mit diesem Repository starten. Claude arbeitet in der Cloud am Programm, `CLAUDE.md` erklärt ihm das Projekt.
+- **Nächtliche Claude-Sitzung (Gratis-Modus):** Sie baut 1 neue App, verbessert 1 App und speichert alles im Branch `forge-library`. Dafür nutzt sie `scripts/forge-cli.js` und `scripts/library-sync.sh`.
+- **GitHub Actions** (`.github/workflows/forge-cloud.yml`): Alle 6 Stunden werden Galerie und Fernsteuerung veröffentlicht. Mit API-Key erschafft dieser Lauf zusätzlich selbst Apps.
+- **Firebase Hosting:** Galerie aller Apps plus Fernsteuerungs-Seite (Google-Login, nur deine E-Mail). Der kostenlose Spark-Tarif reicht.
+- **Claude Code App:** Sitzung mit diesem Repository starten. Claude arbeitet in der Cloud am Programm; `CLAUDE.md` erklärt ihm das Projekt.
 - **Auto-Update:** Jede Änderung auf dem Hauptzweig baut einen neuen Installer (`build-windows.yml`). Das Programm aktualisiert sich selbst.
 
 Einrichtung Schritt für Schritt: **[cloud/README.md](cloud/README.md)**.
@@ -86,7 +94,7 @@ Einrichtung Schritt für Schritt: **[cloud/README.md](cloud/README.md)**.
 ## Entwicklung
 
 ```
-npm test                       # 28 Tests: Hub, Kern, KI-Pipeline (simuliert), Claude-Client (Fake-Server)
+npm test                       # 33 Tests: Hub, Kern, KI-Pipeline (simuliert), Claude-Client (Fake-Server), Gratis-Modus
 npm run selftest -- --quick    # alle Vorlagen im Handy-Format testen (Playwright)
 node scripts/cloud-run.js      # kopfloser Lauf wie in der Cloud (FORGE_MODE=autopilot|create|evolve|trends|commands)
 ```

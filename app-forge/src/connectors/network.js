@@ -305,24 +305,63 @@ const firebase = {
   }
 };
 
+/** Holt Apps aus dem Cloud-Branch „forge-library“ (z. B. aus der nächtlichen Gratis-Sitzung) in die lokale Bibliothek. */
+async function pullLibrary({ repo, token, lib, branch = 'forge-library', fetchImpl = fetch }) {
+  const auth = token ? { authorization: `Bearer ${token}` } : {};
+  const treeRes = await fetchImpl(`https://api.github.com/repos/${repo}/git/trees/${branch}?recursive=1`, { headers: { ...auth, accept: 'application/vnd.github+json', 'x-github-api-version': '2022-11-28' } });
+  if (treeRes.status === 404) return { imported: 0, updated: 0, skipped: 0, message: token ? 'Cloud-Bibliothek ist noch leer.' : 'Cloud-Bibliothek nicht gefunden – noch leer oder privates Repository (dann GitHub-Token eintragen).' };
+  if (!treeRes.ok) throw new Error(`GitHub ${treeRes.status}: ${(await treeRes.text()).slice(0, 160)}`);
+  const tree = (await treeRes.json()).tree || [];
+  const raw = async (p) => {
+    const r = await fetchImpl(`https://raw.githubusercontent.com/${repo}/${branch}/${p.split('/').map(encodeURIComponent).join('/')}`, { headers: auth });
+    if (!r.ok) throw new Error(`Download ${p}: HTTP ${r.status}`);
+    return Buffer.from(await r.arrayBuffer());
+  };
+  const ids = tree.map((t) => (/^apps\/([a-z0-9][a-z0-9-]{2,62})\/meta\.json$/.exec(t.path) || [])[1]).filter(Boolean);
+  const res = { imported: 0, updated: 0, skipped: 0, apps: [] };
+  for (const id of ids) {
+    const remote = JSON.parse((await raw(`apps/${id}/meta.json`)).toString('utf8'));
+    if (remote.id !== id || !Number.isInteger(remote.currentVersion)) continue;
+    const local = lib.exists(id) ? lib.readMeta(id) : null;
+    if (local && (local.updatedAt || 0) >= (remote.updatedAt || 0)) {
+      res.skipped++;
+      continue;
+    }
+    const prefix = `apps/${id}/v${remote.currentVersion}/`;
+    const files = tree.filter((t) => t.type === 'blob' && t.path.startsWith(prefix) && /^[\w.-]+$/.test(t.path.slice(prefix.length)));
+    if (!files.some((f) => f.path.endsWith('/index.html'))) continue;
+    const dir = lib.versionDir(id, remote.currentVersion);
+    fs.mkdirSync(dir, { recursive: true });
+    for (const f of files) fs.writeFileSync(path.join(dir, f.path.slice(prefix.length)), await raw(f.path));
+    lib.writeMeta(remote);
+    res[local ? 'updated' : 'imported']++;
+    res.apps.push({ id, name: remote.name, version: remote.currentVersion, isNew: !local, meta: remote });
+  }
+  res.message = `${res.imported} neue, ${res.updated} aktualisierte App(s) aus der Cloud.`;
+  return res;
+}
+
 const github = {
   id: 'cloud.github',
   name: 'GitHub Cloud-Autopilot',
   kind: 'integration',
-  description: 'Startet den Cloud-Autopilot (GitHub Actions) – erschafft und verbessert Apps, auch wenn dein PC aus ist.',
-  defaultEnabled: false,
+  description: 'Holt die Apps der nächtlichen Gratis-Sitzung aus der Cloud und startet Cloud-Läufe (GitHub Actions) – auch wenn dein PC aus ist.',
+  requires: ['library'],
   settings: [
     { key: 'repo', label: 'Repository (besitzer/name)', type: 'text', default: 'Tiry38/Tiry' },
-    { key: 'token', label: 'GitHub-Token (Actions: Lesen & Schreiben)', type: 'password', secret: true, default: '' },
+    { key: 'token', label: 'GitHub-Token (nur für private Repos und Cloud-Läufe nötig)', type: 'password', secret: true, default: '' },
+    { key: 'autoPull', label: 'Cloud-Apps automatisch holen', type: 'boolean', default: true },
+    { key: 'pullHours', label: 'Abgleich alle (Stunden)', type: 'number', default: 6 },
     { key: 'workflow', label: 'Workflow-Datei', type: 'text', default: 'forge-cloud.yml' },
     { key: 'ref', label: 'Branch', type: 'text', default: 'main' }
   ],
   start(ctx) {
     const token = ctx.config.get('token');
-    if (!token) throw new Error('GitHub-Token fehlt.');
     const repo = ctx.config.get('repo');
     const wf = ctx.config.get('workflow');
+    const lib = ctx.require('library');
     const gh = async (method, p, body) => {
+      if (!token) throw new Error('Für Cloud-Läufe wird ein GitHub-Token benötigt (Netzwerk → GitHub).');
       const res = await fetch(`https://api.github.com/repos/${repo}${p}`, {
         method,
         headers: { authorization: `Bearer ${token}`, accept: 'application/vnd.github+json', 'x-github-api-version': '2022-11-28', 'content-type': 'application/json' },
@@ -331,15 +370,35 @@ const github = {
       if (!res.ok) throw new Error(`GitHub ${res.status}: ${(await res.text()).slice(0, 160)}`);
       return res.status === 204 ? {} : res.json();
     };
+    let lastPull = null;
+    const pull = async (source = 'ui') => {
+      const r = await pullLibrary({ repo, token, lib });
+      lastPull = { at: Date.now(), message: r.message };
+      for (const a of r.apps) {
+        if (a.isNew) ctx.bus.emit('app.created', { app: a.meta });
+        else ctx.bus.emit('app.version.created', { appId: a.id, name: a.name, version: (a.meta.versions || []).find((v) => v.n === a.version) || { n: a.version, title: 'Cloud-Update' } });
+      }
+      ctx.bus.emit('library.synced', { imported: r.imported, updated: r.updated, source });
+      return { imported: r.imported, updated: r.updated, skipped: r.skipped, message: r.message };
+    };
+    ctx.action('github.pullLibrary', () => pull('ui'), { description: 'Cloud-Apps holen' });
     ctx.action('github.status', async () => {
+      const base = { repo, workflow: wf, lastPull, canDispatch: !!token, lastRuns: [] };
+      if (!token) return { configured: false, ...base };
       const data = await gh('GET', `/actions/workflows/${wf}/runs?per_page=6`);
-      return { configured: true, repo, workflow: wf, lastRuns: (data.workflow_runs || []).map((r) => ({ id: r.id, status: r.status, conclusion: r.conclusion, createdAt: r.created_at, url: r.html_url, event: r.event })) };
+      return { configured: true, ...base, lastRuns: (data.workflow_runs || []).map((r) => ({ id: r.id, status: r.status, conclusion: r.conclusion, createdAt: r.created_at, url: r.html_url, event: r.event })) };
     }, { description: 'Cloud-Läufe' });
     ctx.action('github.dispatch', async ({ mode = 'autopilot', count = 1 } = {}) => {
       await gh('POST', `/actions/workflows/${wf}/dispatches`, { ref: ctx.config.get('ref') || 'main', inputs: { mode: String(mode), count: String(Math.max(1, Math.min(10, Number(count) || 1))) } });
       ctx.bus.emit('log', { level: 'success', message: `Cloud-Lauf gestartet (${mode})` });
       return { ok: true };
     }, { description: 'Cloud-Lauf starten', expose: false });
+    if (ctx.config.get('autoPull') && !ctx.env.cloud) {
+      const run = () => pull('auto').catch((err) => ctx.log('warn', `Cloud-Apps holen: ${err.message}`));
+      const first = setTimeout(run, 20000);
+      const timer = setInterval(run, Math.max(1, Number(ctx.config.get('pullHours')) || 6) * 3600e3);
+      ctx.onStop(() => { clearTimeout(first); clearInterval(timer); });
+    }
   }
 };
 
@@ -351,3 +410,4 @@ const planned = [
 ];
 
 module.exports = [lan, api, webhooks, backup, firebase, github, ...planned];
+module.exports.pullLibrary = pullLibrary;

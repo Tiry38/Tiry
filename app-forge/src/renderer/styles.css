@@ -304,3 +304,5 @@ select.input option { background: #14102a; }
 .step { display: grid; grid-template-columns: 36px minmax(0, 1fr); gap: 14px; align-items: start; font-size: 13.5px; line-height: 1.5; }
 .step .small { margin-top: 2px; line-height: 1.55; }
 .step-n { width: 36px; height: 36px; border-radius: 50%; display: grid; place-items: center; font-weight: 800; color: #fff; background: var(--grad-flow); background-size: 300% 100%; animation: flow 10s ease-in-out infinite; box-shadow: 0 10px 22px -10px rgba(236, 72, 153, 0.8); }
+.step-n { font-size: 13px; }
+.step-n svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }

@@ -28,6 +28,30 @@ function trendWeight(trends) {
   return Number.isFinite(w) ? Math.max(0, Math.min(1, w)) : 0.6;
 }
 
+/** Neue Version nur übernehmen, wenn sie nicht schlechter ist und das Design-Gate besteht. */
+function acceptDecision(score, baseline, review) {
+  const designOk = !review || review.design >= DESIGN_GATE;
+  if (score >= baseline - 3 && designOk) return { accept: true, reason: `Score ${baseline} → ${score}` };
+  return { accept: false, reason: !designOk ? `Design fiel auf ${review.design}/10` : `Score würde sinken (${baseline} → ${score})` };
+}
+
+const CONCEPT_REQUIRED = ['name', 'tagline', 'type', 'category', 'target_audience', 'problem_or_fun', 'core_loop', 'monetization', 'store_short_description', 'store_full_description'];
+
+function validateConcept(c) {
+  if (!c || typeof c !== 'object') throw new Error('Konzept fehlt.');
+  const missing = CONCEPT_REQUIRED.filter((k) => !c[k] || !String(c[k]).trim());
+  if (missing.length) throw new Error(`Konzept unvollständig: ${missing.join(', ')}`);
+  if (!['game', 'tool'].includes(c.type)) throw new Error('Konzept: type muss "game" oder "tool" sein.');
+  if (!Array.isArray(c.features) || c.features.length < 2) throw new Error('Konzept: mindestens 2 features.');
+  if (!Array.isArray(c.keywords) || !c.keywords.length) throw new Error('Konzept: keywords fehlen.');
+  const s = c.sense_check;
+  if (s) {
+    const weakest = Math.min(s.usefulness, s.clarity, s.originality, s.feasibility, s.market_fit);
+    if (!(weakest >= 7)) throw new Error(`Sinn-Check nicht bestanden (schwächster Wert ${weakest}/10).`);
+  }
+  return c;
+}
+
 function rand32() {
   return (Math.random() * 4294967296) >>> 0;
 }
@@ -273,6 +297,92 @@ class Forge {
     return { ok: report.ok, errors: report.errors, warnings: report.warnings, tech: report.tech, at: Date.now() };
   }
 
+  // ------------------------------------------------------------------ Gratis-Modus (Claude-Abo-Sitzung als KI)
+  /** Design/Palette/Stil eines extern gebauten Konzepts auflösen. */
+  designFor(concept) {
+    const base = PALETTES.find((p) => p.id === concept.palette) || PALETTES[0];
+    const palette = paletteFromSuggestion(concept.design, base);
+    const style = STYLES.find((s) => s.id === concept.style) || STYLES[0];
+    const glyph = String(concept.icon_glyph || concept.name || 'A').trim().slice(0, 2);
+    return { palette, style, glyph };
+  }
+
+  /** Testet eine HTML-App ohne sie zu übernehmen (für die Fix-Schleife der Abo-Sitzung). */
+  async checkHtml({ html, concept, dir }) {
+    const doc = extractHtml(html) || String(html || '');
+    const { palette, glyph } = this.designFor(concept || { name: 'App' });
+    const info = { name: (concept && concept.name) || 'App', glyph, tagline: (concept && concept.tagline) || '', palette };
+    fs.mkdirSync(dir, { recursive: true });
+    const res = await this.writeAndTest({ appId: 'check', dir, html: doc, info, version: 1 });
+    return { report: res.report, screenshot: res.screenshot ? path.join(dir, 'screenshot.png') : null, dir };
+  }
+
+  /** Übernimmt eine extern gebaute App (z. B. aus der nächtlichen Claude-Sitzung) – gleiche Gates wie die KI-Pipeline. */
+  async importApp({ html, concept, review = null, source = 'abo', job } = {}) {
+    const { library, emit, settings } = this.d;
+    validateConcept(concept);
+    const doc = extractHtml(html) || String(html || '');
+    if (library.list().some((a) => a.name === concept.name)) throw new Error(`Name „${concept.name}“ existiert bereits.`);
+    const { palette, style, glyph } = this.designFor(concept);
+    const appId = library.newId(concept.name);
+    const info = { name: concept.name, glyph, tagline: concept.tagline, palette };
+    const dir = library.stage(appId);
+    try {
+      const res = await this.buildLoop({ appId, dir, html: doc, info, version: 1, job, system: '', maxRounds: 0 });
+      if (!res.report.ok) {
+        const err = new Error(`Test nicht bestanden: ${res.report.errors.slice(0, 3).join(' | ')}`);
+        err.report = res.report;
+        throw err;
+      }
+      const rv = review ? clampReview(review) : null;
+      if (rv && rv.design < DESIGN_GATE) throw new Error(`Design-Gate: nur ${rv.design}/10 – nicht gut genug.`);
+      const score = totalScore(res.report.tech, rv);
+      const minScore = settings.get('core.minScore', 65);
+      if (score < minScore) throw new Error(`Gesamtscore ${score} unter Mindestwert ${minScore}.`);
+      const meta = this.metaFrom({ appId, concept, palette, style, glyph, source });
+      meta.lastTest = this.testSummary(res.report);
+      const out = library.createApp(meta, dir, { title: 'Erste Version', description: concept.tagline, score, tech: res.report.tech, review: rv, source });
+      emit('app.created', { app: out.meta });
+      return out.meta;
+    } catch (err) {
+      library.discard(dir);
+      if (!library.exists(appId)) library.remove(appId);
+      throw err;
+    }
+  }
+
+  /** Übernimmt eine extern verbesserte Version nur, wenn sie nicht schlechter ist (sonst verworfen). */
+  async importVersion(appId, { html, title, description = '', kind = 'feature', review = null, source = 'abo', job } = {}) {
+    const { library, emit } = this.d;
+    if (!title) throw new Error('Titel der Verbesserung fehlt.');
+    const meta = library.readMeta(appId);
+    const current = await this.test(appId, { job });
+    const lastV = meta.versions.find((v) => v.n === meta.currentVersion) || {};
+    const baseline = current.ok ? totalScore(current.tech, lastV.review) : 0;
+    const version = (meta.versions.reduce((m, v) => Math.max(m, v.n), 0) || 0) + 1;
+    const dir = library.stage(appId);
+    const info = { name: meta.name, glyph: meta.glyph, tagline: meta.tagline, palette: meta.palette };
+    try {
+      const res = await this.buildLoop({ appId, dir, html: extractHtml(html) || String(html || ''), info, version, job, system: '', maxRounds: 0 });
+      const rv = review ? clampReview(review) : null;
+      const score = res.report.ok ? totalScore(res.report.tech, rv) : 0;
+      const decision = res.report.ok ? acceptDecision(score, baseline, rv) : { accept: false, reason: `Tests nicht bestanden: ${res.report.errors.slice(0, 2).join(' | ')}` };
+      if (!decision.accept) {
+        library.discard(dir);
+        library.reject(appId, { title, reason: decision.reason });
+        emit('app.version.rejected', { appId, reason: decision.reason, title });
+        return { changed: false, reason: decision.reason, report: res.report };
+      }
+      const out = library.commit(appId, dir, { kind: kind === 'bugfix' ? 'fix' : 'evolve', title, description, score, tech: res.report.tech, review: rv, source });
+      library.update(appId, { lastTest: this.testSummary(res.report) });
+      emit('app.version.created', { appId, version: out.version, name: meta.name });
+      return { changed: true, version: out.version, reason: decision.reason, report: res.report };
+    } catch (err) {
+      library.discard(dir);
+      throw err;
+    }
+  }
+
   // ------------------------------------------------------------------ Testen
   async test(appId, { job } = {}) {
     const { library, tester, emit } = this.d;
@@ -325,10 +435,7 @@ class Forge {
       } else {
         review = await this.review({ concept: meta.concept, html: res.html, report: res.report, screenshot: res.screenshot, job });
         score = totalScore(res.report.tech, review);
-        const designOk = !review || review.design >= DESIGN_GATE;
-        decision = score >= baseline - 3 && designOk
-          ? { accept: true, reason: `Score ${baseline} → ${score}` }
-          : { accept: false, reason: !designOk ? `Design fiel auf ${review.design}/10` : `Score würde sinken (${baseline} → ${score})` };
+        decision = acceptDecision(score, baseline, review);
       }
       decision = await this.d.waterfall('version.accept', decision, { appId, plan, score, baseline, report: res.report, review });
       if (!decision.accept) {
@@ -350,4 +457,4 @@ class Forge {
   }
 }
 
-module.exports = { Forge, DESIGN_GATE };
+module.exports = { Forge, DESIGN_GATE, validateConcept, acceptDecision };

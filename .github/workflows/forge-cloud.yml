@@ -1,8 +1,10 @@
 name: Forge Cloud Autopilot
 
-# Läuft ohne deinen PC: erschafft/verbessert Apps in der Cloud, speichert die Bibliothek im Branch
-# "forge-library" und veröffentlicht Galerie + Fernsteuerung auf Firebase Hosting (falls eingerichtet).
-# Zeitplan läuft nur auf dem Standard-Branch und nur, wenn ANTHROPIC_API_KEY hinterlegt ist.
+# Läuft ohne deinen PC.
+# - GRATIS-MODUS (kein ANTHROPIC_API_KEY): veröffentlicht Galerie + Fernsteuerung, arbeitet Fernbefehle ab.
+#   Neue KI-Apps baut die nächtliche Claude-Code-Sitzung über dein Claude-Abo (siehe app-forge/docs/GRATIS-MODUS.md).
+# - API-MODUS (Secret ANTHROPIC_API_KEY gesetzt): erschafft und verbessert Apps selbst (kostet API-Guthaben).
+# Die Bibliothek liegt im Branch "forge-library". Zeitpläne laufen nur auf dem Standard-Branch.
 on:
   schedule:
     - cron: '17 */6 * * *'
@@ -11,7 +13,7 @@ on:
       mode:
         description: 'Aufgabe'
         type: choice
-        options: [autopilot, create, evolve, trends, commands]
+        options: [autopilot, create, evolve, trends, commands, publish]
         default: autopilot
       count:
         description: 'Anzahl Schritte / Apps (1–10)'
@@ -32,48 +34,51 @@ jobs:
     env:
       HAS_AI: ${{ secrets.ANTHROPIC_API_KEY != '' }}
       HAS_FIREBASE: ${{ secrets.FIREBASE_SERVICE_ACCOUNT != '' && secrets.FIREBASE_PROJECT_ID != '' }}
+      FORGE_DATA_DIR: ${{ github.workspace }}/forge-data
     steps:
-      - name: Zeitplan ohne API-Key überspringen
-        if: github.event_name == 'schedule' && env.HAS_AI != 'true'
-        run: echo "Kein ANTHROPIC_API_KEY – geplanter Lauf übersprungen (manuell startbar)." >> "$GITHUB_STEP_SUMMARY"
+      - name: Lohnt sich der Lauf?
+        id: gate
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ] || [ "$HAS_AI" = "true" ] || [ "$HAS_FIREBASE" = "true" ]; then
+            echo "go=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "go=false" >> "$GITHUB_OUTPUT"
+            echo "Gratis-Modus ohne Firebase: nichts zu veröffentlichen – Lauf übersprungen (spart Minuten)." >> "$GITHUB_STEP_SUMMARY"
+          fi
 
       - uses: actions/checkout@v4
-        if: github.event_name != 'schedule' || env.HAS_AI == 'true'
+        if: steps.gate.outputs.go == 'true'
+        with:
+          fetch-depth: 1
 
       - uses: actions/setup-node@v4
-        if: github.event_name != 'schedule' || env.HAS_AI == 'true'
+        if: steps.gate.outputs.go == 'true'
         with:
           node-version: 22
           cache: npm
           cache-dependency-path: app-forge/package-lock.json
 
       - name: Abhängigkeiten + Test-Labor
-        if: github.event_name != 'schedule' || env.HAS_AI == 'true'
+        if: steps.gate.outputs.go == 'true'
         working-directory: app-forge
         run: |
           npm ci
           npx playwright install --with-deps chromium
 
       - name: App-Bibliothek laden (Branch forge-library)
-        if: github.event_name != 'schedule' || env.HAS_AI == 'true'
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        if: steps.gate.outputs.go == 'true'
         run: |
-          REMOTE="https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
-          if git ls-remote --exit-code --heads origin forge-library >/dev/null 2>&1; then
-            git clone --depth 1 --branch forge-library "$REMOTE" forge-data
-          else
-            mkdir forge-data && cd forge-data && git init -q -b forge-library && git remote add origin "$REMOTE"
-          fi
-          printf 'logs/\nbackups/\nexports/\n_stage-*/\n' > forge-data/.gitignore
+          git config --global user.name "forge-bot"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          bash app-forge/scripts/library-sync.sh pull
 
       - name: Forge ausführen
-        if: github.event_name != 'schedule' || env.HAS_AI == 'true'
+        if: steps.gate.outputs.go == 'true'
         working-directory: app-forge
         env:
-          FORGE_MODE: ${{ inputs.mode || 'autopilot' }}
+          # Ohne API-Key: Gratis-Modus → nur veröffentlichen (keine Kosten). Manuell gewählte Modi laufen offline.
+          FORGE_MODE: ${{ inputs.mode || (env.HAS_AI == 'true' && 'autopilot' || 'publish') }}
           FORGE_COUNT: ${{ inputs.count || 2 }}
-          FORGE_DATA_DIR: ${{ github.workspace }}/forge-data
           FORGE_SITE_DIR: ${{ github.workspace }}/app-forge/cloud/site
           FORGE_MODEL: ${{ vars.FORGE_MODEL }}
           FORGE_DAILY_USD: ${{ vars.FORGE_DAILY_USD }}
@@ -84,18 +89,12 @@ jobs:
         run: node scripts/cloud-run.js
 
       - name: Bibliothek sichern
-        if: always() && (github.event_name != 'schedule' || env.HAS_AI == 'true')
-        working-directory: forge-data
+        if: always() && steps.gate.outputs.go == 'true'
         run: |
-          [ -d .git ] || exit 0
-          git config user.name "forge-bot"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add -A
-          git commit -q -m "Forge: ${{ inputs.mode || 'autopilot' }} $(date -u +%Y-%m-%d_%H%M)" || { echo "Keine Änderungen."; exit 0; }
-          git push -q origin HEAD:forge-library
+          bash app-forge/scripts/library-sync.sh push "Forge-Lauf ${{ inputs.mode || 'zeitplan' }} $(date -u +%Y-%m-%d_%H%M)"
 
       - name: Galerie + Fernsteuerung auf Firebase Hosting
-        if: env.HAS_FIREBASE == 'true' && (github.event_name != 'schedule' || env.HAS_AI == 'true')
+        if: env.HAS_FIREBASE == 'true' && steps.gate.outputs.go == 'true'
         uses: FirebaseExtended/action-hosting-deploy@v0
         with:
           repoToken: ${{ secrets.GITHUB_TOKEN }}

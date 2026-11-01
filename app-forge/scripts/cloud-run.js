@@ -4,7 +4,8 @@
  * Läuft in GitHub Actions (PC kann aus sein) oder lokal mit Node.
  *
  * Umgebungsvariablen:
- *   FORGE_MODE              autopilot | create | evolve | trends | commands   (Standard: autopilot)
+ *   FORGE_MODE              autopilot | create | evolve | trends | commands | publish   (Standard: autopilot)
+ *                           publish = nur Fernbefehle, Galerie bauen und synchronisieren (Gratis-Modus)
  *   FORGE_COUNT             Anzahl Schritte/Apps (Standard: 2)
  *   FORGE_DATA_DIR          Datenordner (Standard: ./forge-data)
  *   FORGE_SITE_DIR          Ausgabe der Galerie-Website für Firebase Hosting (optional)
@@ -42,6 +43,8 @@ async function waitJobs(hub, res) {
   // Cloud-Einstellungen
   hub.settings.set('budget.dailyUsd', Number(process.env.FORGE_DAILY_USD) || hub.settings.get('budget.dailyUsd', 5));
   if (process.env.FORGE_MODEL) hub.settings.set('plugins.ai.anthropic.config.model', process.env.FORGE_MODEL);
+  // API-Modus nur, wenn ein Key als Secret hinterlegt ist – sonst Gratis-Modus (keine Kosten).
+  hub.settings.set('plugins.ai.anthropic.config.mode', process.env.ANTHROPIC_API_KEY ? 'api' : 'free');
   hub.settings.set('plugins.publish.lan.enabled', false);
   hub.settings.set('plugins.api.local.enabled', false);
   hub.settings.set('plugins.radar.trends.config.refreshHours', 24 * 7);

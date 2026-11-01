@@ -6,19 +6,26 @@ Einmalig ca. 20 Minuten. Jeder Schritt ist optional; das Programm läuft auch oh
 
 ---
 
-## 1. GitHub: Cloud-Autopilot (Pflicht für „PC aus“)
+## 1. Gratis-Modus: Basis (0 €)
 
-1. Code auf den Hauptzweig (`main`) bringen. Zeitpläne laufen nur dort.
-2. Repository → **Settings → Secrets and variables → Actions → New repository secret**:
-   - `ANTHROPIC_API_KEY`: dein Claude-API-Key.
-3. Optional unter **Variables**:
-   - `FORGE_MODEL`: z. B. `claude-sonnet-5-5` (günstiger); Standard ist `claude-opus-5-5`.
-   - `FORGE_DAILY_USD`: Tagesbudget in US$, Standard 5.
-4. Fertig. Alle 6 Stunden läuft der Autopilot. Manuell starten: **Actions → Forge Cloud Autopilot → Run workflow**, geht auch in der GitHub-App am Handy.
+1. **Claude Zugriff auf das Repository geben:**
+   - https://claude.ai/connect-github öffnen und GitHub verbinden.
+   - Die Claude GitHub App für `Tiry38/Tiry` installieren.
+2. **Hauptzweig `main` anlegen:** Zeitpläne und Auto-Updates laufen nur dort. Den Arbeitsbranch per Pull Request nach `main` mergen oder ihn umbenennen.
+3. **Nächtliche Claude-Sitzung:** Sie wird als geplante Aufgabe eingerichtet und folgt [`docs/GRATIS-MODUS.md`](../docs/GRATIS-MODUS.md). Sie läuft über dein Claude-Abo und zählt nur gegen dein Nutzungslimit.
+4. **Windows-Programm:** Es holt die Apps automatisch aus der Cloud (Cloud → „Cloud-Apps holen“).
+   - Öffentliches Repository: kein Token nötig.
+   - Privates Repository: unter Netzwerk → „GitHub Cloud-Autopilot“ einen GitHub-Token mit Lesezugriff eintragen.
+5. Der GitHub-Ablauf **Forge Cloud Autopilot** veröffentlicht alle 6 Stunden Galerie und Fernsteuerung (Firebase, Schritt 2).
+   - Öffentliches Repository: kostenlos.
+   - Privates Repository: etwa 15 Minuten pro Tag; das liegt unter den 2.000 Freiminuten pro Monat.
 
-Die App-Bibliothek liegt im Branch `forge-library`. Ergebnisse stehen in der Zusammenfassung jedes Laufs.
-
----
+**Umstellung auf API-Key (Dauerbetrieb, kostet):**
+- **Cloud:** Repository → Settings → Secrets and variables → Actions → Secret `ANTHROPIC_API_KEY` anlegen.
+  - Ab dann erschafft und verbessert der 6-Stunden-Lauf selbst Apps.
+  - Optionale Variablen: `FORGE_MODEL` (z. B. `claude-sonnet-5-5`) und `FORGE_DAILY_USD` (Tagesbudget, Standard 5).
+- **PC:** Einstellungen → KI-Modus → „API-Key“.
+- Secret löschen bzw. „Gratis“ wählen: keine Kosten mehr.
 
 ## 2. Firebase: Galerie + Fernsteuerungs-Seite
 
@@ -32,7 +39,7 @@ Die App-Bibliothek liegt im Branch `forge-library`. Ergebnisse stehen in der Zus
    - `FIREBASE_SERVICE_ACCOUNT`: kompletter Inhalt der JSON-Datei aus Schritt 5.
    - `FIREBASE_PROJECT_ID`: Projekt-ID.
    - `FIREBASE_WEB_CONFIG`: das `firebaseConfig`-JSON aus Schritt 6.
-8. Nächster Cloud-Lauf → Galerie unter `https://<projekt-id>.web.app`, Fernsteuerung unter `https://<projekt-id>.web.app/remote`.
+8. Nächster Cloud-Lauf (auch im Gratis-Modus) → Galerie unter `https://<projekt-id>.web.app`, Fernsteuerung unter `https://<projekt-id>.web.app/remote`.
 
 **Falls das Hosting-Deployment mit „permission denied“ scheitert:** In der Google Cloud Console (IAM) dem Dienstkonto die Rolle **Firebase Hosting Admin** geben.
 

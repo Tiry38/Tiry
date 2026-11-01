@@ -12,6 +12,14 @@ testet, bewertet und dauerhaft selbst weiterentwickelt. Besitzer: Tiry. UI-Sprac
 - `node scripts/cloud-run.js` – Kopfloser Lauf (wie GitHub Actions), Modus über `FORGE_MODE`.
 - `npm start` – Programm starten (Windows). `npm run dist` – Installer bauen.
 
+## Gratis-Modus (Standard) vs. API-Modus
+- **Gratis (Standard):** Keine API-Kosten. Die KI-Arbeit erledigt eine nächtliche Claude-Code-Sitzung über das
+  Claude-Abo – Ablauf exakt nach `app-forge/docs/GRATIS-MODUS.md`, Werkzeug `node scripts/forge-cli.js`
+  (brief / check / import / evolve / list / html / lesson), Bibliothek per `bash scripts/library-sync.sh pull|push`
+  im Branch `forge-library`. Das Windows-Programm holt die Apps automatisch („Cloud-Apps holen“).
+- **API-Modus:** Einstellungen → KI-Modus → „API-Key“ (Desktop) bzw. Secret `ANTHROPIC_API_KEY` (Cloud).
+  Ein gespeicherter Key wird im Gratis-Modus nie benutzt.
+
 ## Architektur: Hub + Kabel
 - `src/hub/` – Nervensystem: EventBus (`x.y`, `x.*`, `*`), Registry (Fähigkeiten), Actions (gemeinsame
   Befehlsschicht für UI, REST-API, Autopilot, Firebase), Hooks (Wasserfall + `veto`), JobQueue, Settings, PluginManager.
