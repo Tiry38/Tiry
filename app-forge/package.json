@@ -1,0 +1,62 @@
+{
+  "name": "tiry-app-forge",
+  "productName": "Tiry App Forge",
+  "version": "1.0.0",
+  "description": "Windows-Programm, das automatisch sinnvolle, moderne Handy-Apps erzeugt, testet und dauerhaft selbst weiterentwickelt.",
+  "main": "src/main/main.js",
+  "author": "Kevin Thirolf",
+  "license": "UNLICENSED",
+  "private": true,
+  "scripts": {
+    "start": "electron .",
+    "test": "node --test test/",
+    "selftest": "node scripts/selftest.js",
+    "dist": "electron-builder --win --x64",
+    "dist:publish": "electron-builder --win --x64 --publish always"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^1.3.0",
+    "electron-updater": "^6.8.11"
+  },
+  "devDependencies": {
+    "electron": "^45.2.1",
+    "electron-builder": "^26.18.0",
+    "playwright": "^1.63.0"
+  },
+  "build": {
+    "appId": "de.tiry.appforge",
+    "productName": "Tiry App Forge",
+    "directories": {
+      "output": "dist",
+      "buildResources": "build"
+    },
+    "files": [
+      "src/**/*",
+      "package.json"
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "icon": "build/icon.png"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "shortcutName": "Tiry App Forge"
+    },
+    "publish": [
+      {
+        "provider": "github",
+        "owner": "tiry38",
+        "repo": "tiry"
+      }
+    ]
+  }
+}
