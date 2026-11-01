@@ -11,7 +11,9 @@ Einmalig ca. 20 Minuten. Jeder Schritt ist optional; das Programm läuft auch oh
 1. **Claude Zugriff auf das Repository geben:**
    - https://claude.ai/connect-github öffnen und GitHub verbinden.
    - Die Claude GitHub App für `Tiry38/Tiry` installieren.
-2. **Hauptzweig `main` anlegen:** Zeitpläne und Auto-Updates laufen nur dort. Den Arbeitsbranch per Pull Request nach `main` mergen oder ihn umbenennen.
+2. **`main` als Standard-Branch:** Auto-Updates bauen aus `main`, Zeitpläne laufen nur auf dem Standard-Branch.
+   - Im Browser (nicht in der GitHub-App) https://github.com/Tiry38/Tiry/settings öffnen.
+   - Abschnitt **Default branch** → Pfeil-Symbol ⇄ → `main` → **Update** → bestätigen.
 3. **Nächtliche Claude-Sitzung:** Sie wird als geplante Aufgabe eingerichtet und folgt [`docs/GRATIS-MODUS.md`](../docs/GRATIS-MODUS.md). Sie läuft über dein Claude-Abo und zählt nur gegen dein Nutzungslimit.
 4. **Windows-Programm:** Es holt die Apps automatisch aus der Cloud (Cloud → „Cloud-Apps holen“).
    - Öffentliches Repository: kein Token nötig.

@@ -5,7 +5,7 @@ name: Windows-Programm bauen & ausliefern
 on:
   push:
     branches: [main, master]
-    paths: ['app-forge/**']
+    paths: ['app-forge/**', '.github/workflows/build-windows.yml']
   workflow_dispatch:
 
 permissions:
@@ -34,10 +34,33 @@ jobs:
       - name: Versionsnummer setzen (1.0.<Lauf>)
         shell: bash
         run: npm version "1.0.${{ github.run_number }}" --no-git-tag-version --allow-same-version
-      - name: Installer bauen und als Release veröffentlichen
-        run: npx electron-builder --win --x64 --publish always
+      - name: Installer bauen
+        run: npx electron-builder --win --x64 --publish never
+      # Tag + Release selbst anlegen: GitHub lehnt veröffentlichte Releases ohne vorhandenen Tag ab (422).
+      # latest.yml gehört dazu – daraus liest das installierte Programm (electron-updater) die neue Version.
+      - name: Release veröffentlichen (Tag, Installer, Update-Infos)
+        shell: bash
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          VER="1.0.${{ github.run_number }}"
+          TAG="v$VER"
+          ls -la dist
+          test -f dist/latest.yml || { echo "dist/latest.yml fehlt"; exit 1; }
+          if git ls-remote --exit-code --tags origin "refs/tags/$TAG" >/dev/null; then
+            echo "Tag $TAG existiert bereits"
+          else
+            git tag "$TAG" "$GITHUB_SHA"
+            git push origin "refs/tags/$TAG"
+          fi
+          FILES=(dist/*.exe dist/*.exe.blockmap dist/latest.yml)
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            gh release upload "$TAG" "${FILES[@]}" --clobber
+          else
+            gh release create "$TAG" "${FILES[@]}" --verify-tag --latest \
+              --title "Tiry App Forge $VER" \
+              --notes "Automatischer Build von ${GITHUB_SHA::7}. Neu installieren: die .exe herunterladen und ausführen. Bereits installierte Programme aktualisieren sich selbst."
+          fi
       - uses: actions/upload-artifact@v4
         with:
           name: windows-installer
