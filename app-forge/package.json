@@ -50,7 +50,8 @@
       "oneClick": false,
       "allowToChangeInstallationDirectory": true,
       "createDesktopShortcut": true,
-      "shortcutName": "Tiry App Forge"
+      "shortcutName": "Tiry App Forge",
+      "artifactName": "Tiry-App-Forge-Setup-${version}.${ext}"
     },
     "publish": [
       {

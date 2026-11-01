@@ -47,6 +47,9 @@ jobs:
           TAG="v$VER"
           ls -la dist
           test -f dist/latest.yml || { echo "dist/latest.yml fehlt"; exit 1; }
+          # Auto-Update lädt genau die Datei aus latest.yml – Name muss 1:1 passen (keine Leerzeichen).
+          EXE=$(sed -n 's/^path: //p' dist/latest.yml | tr -d '\r')
+          test -f "dist/$EXE" || { echo "latest.yml verweist auf fehlende Datei: $EXE"; exit 1; }
           if git ls-remote --exit-code --tags origin "refs/tags/$TAG" >/dev/null; then
             echo "Tag $TAG existiert bereits"
           else
