@@ -1,0 +1,158 @@
+{
+  "id": "polster-e0f5a2",
+  "name": "Polster",
+  "tagline": "Wie lange trägt dich dein Geld?",
+  "type": "tool",
+  "category": "Finanzen & Sparen",
+  "source": "abo",
+  "template": null,
+  "glyph": "◐",
+  "palette": {
+    "id": "custom",
+    "mode": "dark",
+    "bg": [
+      "#1a0614",
+      "#2e0a24",
+      "#3f0d33"
+    ],
+    "accent": [
+      "#f43f5e",
+      "#a855f7"
+    ],
+    "glow": "#a855f7",
+    "text": "#f8fafc",
+    "muted": "#a5adc4",
+    "onAccent": "#0b0b14"
+  },
+  "style": {
+    "id": "glass",
+    "name": "Glassmorphism",
+    "radius": 24,
+    "blur": 18
+  },
+  "concept": {
+    "name": "Polster",
+    "tagline": "Wie lange trägt dich dein Geld?",
+    "type": "tool",
+    "category": "Finanzen & Sparen",
+    "target_audience": "Kreative Selbstständige, Freelancer und Künstler mit unregelmäßigem Einkommen",
+    "problem_or_fun": "Kreative mit schwankenden Aufträgen wissen selten, wie viele Tage ihr Geldpolster noch reicht und wie viel vom letzten Honorar eigentlich der Steuer gehört. Banking-Apps zeigen nur einen Kontostand, keinen Puffer in Tagen.",
+    "core_loop": "Honorar oder Ausgabe in 3 Sekunden eintragen → Polster-Ring zeigt sofort die verbleibenden Tage → Steuertopf füllt sich automatisch → Stand per Text-Kopie teilen.",
+    "features": [
+      "Polster in Tagen: Guthaben geteilt durch deinen Tagesbedarf, als animierter Ring",
+      "Blitz-Eintrag für Honorare und Ausgaben mit Kategorie-Pillen",
+      "Automatischer Steuertopf: einstellbarer Anteil jedes Honorars wird zurückgelegt",
+      "Ziel-Polster (z. B. 90 Tage) mit Fortschritt",
+      "30-Tage-Fluss: Einnahmen vs. Ausgaben",
+      "Verlauf mit Löschen und Rückgängig",
+      "Stand als Text kopieren und teilen",
+      "100 % offline, keine Bankanbindung, keine Konten"
+    ],
+    "screens": [
+      "Polster (Start mit Ring und Blitz-Eintrag)",
+      "Verlauf",
+      "Einstellungen"
+    ],
+    "retention_hook": "Jedes Honorar lässt den Ring sichtbar wachsen; das Ziel-Polster in Tagen ist ein greifbarer, motivierender Meilenstein.",
+    "monetization": "Einmalkauf „Pro“: mehrere Töpfe (z. B. Equipment, Urlaub), CSV-Export, zusätzliche Themes.",
+    "design_direction": "Dunkle Beeren-Aurora, organischer morphender Blob hinter einem Verlaufsring, Glas-Pillen, weiche Glows – ruhig und natürlich wie ein Atemzug.",
+    "icon_glyph": "◐",
+    "store_short_description": "Dein Geldpolster in Tagen – offline, ohne Bank, gemacht für Kreative.",
+    "store_full_description": "Polster beantwortet die wichtigste Frage für Selbstständige: Wie viele Tage komme ich mit meinem Geld noch aus? Trage Honorare und Ausgaben in Sekunden ein, und der Polster-Ring zeigt dir sofort deinen Puffer in Tagen. Ein einstellbarer Anteil jedes Honorars wandert automatisch in deinen Steuertopf, damit die Nachzahlung keine Überraschung wird. Setze dir ein Ziel-Polster, behalte deinen 30-Tage-Fluss im Blick und teile deinen Stand per Text-Kopie. Keine Bankanbindung, keine Anmeldung, keine Datensammlung – alles bleibt auf deinem Gerät.",
+    "keywords": [
+      "Freelancer",
+      "Budget",
+      "Puffer",
+      "Steuer-Rücklage",
+      "Ausgaben",
+      "Kreative",
+      "offline",
+      "Sparen"
+    ],
+    "palette": "berry",
+    "style": "glass",
+    "design": {
+      "background": [
+        "#1a0614",
+        "#2e0a24",
+        "#3f0d33"
+      ],
+      "accent": [
+        "#f43f5e",
+        "#a855f7"
+      ],
+      "mode": "dark"
+    },
+    "sense_check": {
+      "usefulness": 8,
+      "clarity": 9,
+      "originality": 7,
+      "feasibility": 9,
+      "market_fit": 8,
+      "verdict": "Puffer in Tagen plus automatische Steuer-Rücklage ist für Selbstständige mit schwankendem Einkommen echter Mehrwert, offline und datensparsam. Budget-Apps gibt es viele, die Tage-Perspektive mit Steuertopf für Kreative ist aber eine klare Nische."
+    }
+  },
+  "trend": null,
+  "lastTest": {
+    "ok": true,
+    "errors": [],
+    "warnings": [],
+    "tech": 100,
+    "at": 1793501819821
+  },
+  "createdAt": 1793501722580,
+  "updatedAt": 1793501819821,
+  "currentVersion": 2,
+  "versions": [
+    {
+      "n": 1,
+      "createdAt": 1793501722580,
+      "kind": "create",
+      "title": "Erste Version",
+      "description": "Wie lange trägt dich dein Geld?",
+      "score": 88,
+      "tech": 100,
+      "review": {
+        "design": 8,
+        "ux": 8,
+        "sense": 8,
+        "polish": 8,
+        "summary": "Starke Hero-Komposition: morphender Blob hinter einem Verlaufsring (Rose→Violett→Bernstein) mit großer Verlaufszahl, Aurora-Hintergrund, Glas-Pillen mit Verlaufs-Haarlinien, schwebende Pillen-Navigation. Kernnutzen (Polster in Tagen + automatischer Steuertopf) ist sofort verständlich, Eintrag in einem Bottom-Sheet in Sekunden. Kein Baukasten-Look, alles organisch und pillenförmig.",
+        "bugs": [],
+        "improvements": [
+          "Leerer Zustand des Rings könnte eine kurze Einführung bieten",
+          "Fluss-Bereich als echte Welle/Mini-Diagramm statt zwei Balken",
+          "Mehrere Töpfe (Pro-Funktion)"
+        ]
+      },
+      "source": "abo"
+    },
+    {
+      "n": 2,
+      "createdAt": 1793501819819,
+      "kind": "evolve",
+      "title": "Polster-Kurve & Schnellstart",
+      "description": "30-Tage-Polster-Kurve als animierte Verlaufslinie mit Trend-Pille; im Leerzustand Glas-Pille zum Monatsbedarf (UX: Ring bleibt sonst bei 0).",
+      "score": 90,
+      "tech": 100,
+      "review": {
+        "design": 8,
+        "ux": 9,
+        "sense": 8,
+        "polish": 8,
+        "summary": "Neue Polster-Kurve: animiert gezeichnete Verlaufslinie (Violett→Rose→Bernstein) mit weichem Flächen-Glow zeigt, wie sich das freie Polster über 30 Tage entwickelt hat, plus Trend-Pille. Im Leerzustand führt eine Glas-Pille direkt zum Monatsbedarf, damit der Ring nicht dauerhaft bei 0 bleibt. Bestehende Funktionen und gespeicherte Daten unverändert.",
+        "bugs": [],
+        "improvements": [
+          "Kurve antippen für Tageswerte",
+          "Mehrere Töpfe als Pro-Funktion"
+        ]
+      },
+      "source": "abo"
+    }
+  ],
+  "rejected": [],
+  "evolveCount": 1,
+  "lastEvolvedAt": 1793501819819,
+  "lastCheckedAt": 1793501810962,
+  "score": 90
+}

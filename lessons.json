@@ -1,0 +1,30 @@
+[
+  {
+    "text": "Bottom-Sheets mit deckendem Verlauf hinterlegen – halbtransparente Sheets lassen Inhalte durchscheinen.",
+    "hits": 1,
+    "source": "abo",
+    "createdAt": 1793501828667,
+    "lastSeen": 1793501828667
+  },
+  {
+    "text": "Kein filter:drop-shadow auf SVG-Ringen/Kurven in großen Elementen – erzeugt eckige Clipping-Kanten; Glow per box-shadow am runden Container.",
+    "hits": 1,
+    "source": "abo",
+    "createdAt": 1793501828626,
+    "lastSeen": 1793501828626
+  },
+  {
+    "text": "Globale svg-Regeln (stroke/fill) erben auf Diagramm-Pfade: Flächen-Pfade explizit mit stroke:none versehen.",
+    "hits": 1,
+    "source": "abo",
+    "createdAt": 1793501828582,
+    "lastSeen": 1793501828582
+  },
+  {
+    "text": "concept.json: Feld type muss exakt \"game\" oder \"tool\" sein (nicht utility/app).",
+    "hits": 1,
+    "source": "abo",
+    "createdAt": 1793501828537,
+    "lastSeen": 1793501828537
+  }
+]
