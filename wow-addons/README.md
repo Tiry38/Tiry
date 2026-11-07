@@ -15,20 +15,22 @@ wie man schon mit Level 10–20 Gold macht – mit echten Preisen des eigenen Se
 |---|---|
 | Start | Persönlicher Goldplan: Top 3 Goldwege für Level, Berufe und aktuelle AH-Preise |
 | Goldwege | 16 Methoden als aufklappbare Anleitungen (Forever-bestätigt bzw. Classic-Wissen gekennzeichnet) |
-| Marktpreise | Live-Preise von 126 Materialien inkl. neuer Forever-Materialien, Auctionator-Einkaufslisten, AH-Sofortsuche |
+| Marktpreise | Live-Preise der wichtigsten Gold-Materialien (126 kuratiert) inkl. neuer Forever-Materialien, Einkaufslisten, AH-Sofortsuche |
+| Datenbank | **Alle 18.416 Gegenstände** von WoW Forever auf Deutsch: Suche (Name/ID), Filter nach Kategorie, Qualität, Level, Sortierung nach AH-/Händlerpreis |
 | Scanner | Händler-Flips (automatisch beim Händler) und Taschen-Check (AH oder Händler?) |
 | Rezepte | Gewinn jedes gelernten Rezepts mit aktuellen Preisen |
 | Goldtagebuch | Gold pro Sitzung, pro Stunde, 14-Tage-Verlauf |
 | AH-Schule | Auktionshaus und Auctionator für Einsteiger |
 | Einstellungen | Minikarten-Knopf, Chat-Hinweise, Animationen, AH-Anteil, Fenstergröße |
 
-Befehle: `/gold`, `/gold wege`, `/gold markt`, `/gold scan`, `/gold rezepte`, `/gold tagebuch`, `/gold ah`, `/gold minimap`, `/gold reset`.
+Befehle: `/gold`, `/gold suche`, `/gold wege`, `/gold markt`, `/gold scan`, `/gold rezepte`, `/gold tagebuch`, `/gold ah`, `/gold minimap`, `/gold reset`.
 
 ## Technik & Prüfung
 - Alle verwendeten Spiel-Funktionen wurden gegen Blizzards Forever-UI-Quellcode (1.60.1) geprüft.
 - `lua5.1 tests/run_tests.lua` – lädt das Addon in einem strengen Nachbau des Forever-Clients
   (nur Widget-Methoden und Ereignisse, die es in Forever gibt) und spielt alle Seiten und Abläufe durch.
 - `python3 tools/make_media.py` – erzeugt alle Grafiken; `python3 tools/gen_items.py` – Item-Datenbank aus Wowhead-Forever-Daten.
+- `python3 tools/gen_alldb.py <csv-ordner>` – komplette Item-Datenbank aus den Forever-Spieldaten (DB2 ItemSparse/Item/ItemClass/ItemSubClass, Build 1.60.1.70862, über wago.tools). 908 interne Platzhalter ("Monster - …", "Deprecated", "OLD…") werden ausgelassen.
 - Schrift: Poppins (SIL Open Font License, siehe `Goldrausch/Media/Fonts/OFL.txt`).
 
 ## Grenzen (ehrlich)

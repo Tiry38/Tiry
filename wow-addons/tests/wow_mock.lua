@@ -32,6 +32,7 @@ local ALLOWED = {
   Frame = allowed("SimpleFrameAPI"),
   Button = allowed("SimpleFrameAPI", "SimpleButtonAPI"),
   ScrollFrame = allowed("SimpleFrameAPI", "SimpleScrollFrameAPI"),
+  EditBox = allowed("SimpleFrameAPI", "SimpleEditBoxAPI"),
   Texture = allowed("SimpleRegionAPI", "SimpleTextureBaseAPI", "SimpleTextureAPI"),
   MaskTexture = allowed("SimpleRegionAPI", "SimpleTextureBaseAPI", "SimpleMaskTextureAPI"),
   FontString = allowed("SimpleRegionAPI", "SimpleFontStringAPI"),

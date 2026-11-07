@@ -235,8 +235,10 @@ function ns.Item(id)
     c.name, c.link, c.quality, c.stack, c.icon, c.sell, c.loaded = name, link, quality, stack, icon, sellPrice or 0, true
   else
     local static = ns.ITEMS and ns.ITEMS[id]
+    local db = (not static) and ns.DB and ns.DB.Get(id)
+    if db then static = { de = db.name, q = db.q, sell = db.sell, stack = db.stack } end
     c.name = c.name or (static and static.de) or ("Item " .. id)
-    c.icon = c.icon or (GetItemIconByID and GetItemIconByID(id)) or 134400 -- Fragezeichen-Symbol
+    c.icon = c.icon or (db and db.icon ~= 0 and db.icon) or (GetItemIconByID and GetItemIconByID(id)) or 134400 -- Fragezeichen-Symbol
     c.quality = c.quality or (static and static.q) or 1
     c.sell = c.sell or (static and static.sell) or 0
     c.stack = c.stack or (static and static.stack) or 20

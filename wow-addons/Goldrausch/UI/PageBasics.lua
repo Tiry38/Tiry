@@ -6,7 +6,7 @@ local C = UI.C
 local page = {
   title = "AH-Schule",
   subtitle = "Auktionshaus und Auctionator – einfach erklärt, ohne Fachchinesisch.",
-  icon = "book", label = "AH-Schule", order = 7,
+  icon = "book", label = "AH-Schule", order = 8,
 }
 
 function page.build(self, content, width)

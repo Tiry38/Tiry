@@ -8,7 +8,7 @@ local S = ns.Scanner
 local page = {
   title = "Rezept-Gewinne",
   subtitle = "Welche deiner Rezepte gerade Gold bringen – Materialkosten gegen AH-Preis.",
-  icon = "flask", label = "Rezepte", order = 5,
+  icon = "flask", label = "Rezepte", order = 6,
 }
 
 function page.build(self, content, width)

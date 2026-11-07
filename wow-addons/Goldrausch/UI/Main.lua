@@ -434,7 +434,7 @@ SlashCmdList.GOLDRAUSCH = function(msg)
   msg = strtrim and strtrim((msg or ""):lower()) or (msg or ""):lower()
   local map = {
     [""] = nil, start = "home", home = "home", wege = "methods", methoden = "methods", guide = "methods",
-    markt = "market", preise = "market", scan = "scanner", scanner = "scanner", taschen = "scanner",
+    markt = "market", preise = "market", db = "database", datenbank = "database", suche = "database", items = "database", scan = "scanner", scanner = "scanner", taschen = "scanner",
     rezepte = "recipes", craft = "recipes", tagebuch = "tracker", tracker = "tracker",
     schule = "basics", ah = "basics", hilfe = "basics", optionen = "settings", einstellungen = "settings",
   }

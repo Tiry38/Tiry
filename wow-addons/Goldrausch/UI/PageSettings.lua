@@ -6,7 +6,7 @@ local C = UI.C
 local page = {
   title = "Einstellungen",
   subtitle = "Alles so, wie du es magst.",
-  icon = "gear", label = "Einstellungen", order = 8,
+  icon = "gear", label = "Einstellungen", order = 9,
 }
 
 local function stepper(parent, label, desc, getter, setter, step, min, max, fmt, width)

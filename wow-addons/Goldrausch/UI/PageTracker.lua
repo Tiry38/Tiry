@@ -9,7 +9,7 @@ local DAYS = 14
 local page = {
   title = "Goldtagebuch",
   subtitle = "Wie viel Gold du wirklich machst – pro Sitzung, pro Stunde und pro Tag.",
-  icon = "chart", label = "Goldtagebuch", order = 6,
+  icon = "chart", label = "Goldtagebuch", order = 7,
 }
 
 local function bigStat(parent, w, label, grad)

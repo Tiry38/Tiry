@@ -614,3 +614,42 @@ end
 function Stack:Finish(extra)
   self.content:SetHeight(self.y + (extra or 20))
 end
+
+----------------------------------------------------------------------------
+-- Suchfeld (runde Pille mit Lupe)
+----------------------------------------------------------------------------
+function UI.SearchBox(parent, width, placeholder, onChange)
+  local f = CreateFrame("Frame", nil, parent)
+  f:SetSize(width, 38)
+  f.bg = UI.Round(f, 19, "BACKGROUND", 0)
+  f.bg:SetColor(C.inset, 1)
+  f.icon = f:CreateTexture(nil, "ARTWORK")
+  f.icon:SetTexture(UI.Icon("scan"))
+  f.icon:SetSize(16, 16)
+  f.icon:SetPoint("LEFT", 16, 0)
+  f.icon:SetVertexColor(C.gold[1], C.gold[2], C.gold[3], 1)
+  local eb = CreateFrame("EditBox", nil, f)
+  eb:SetPoint("TOPLEFT", 42, -4)
+  eb:SetPoint("BOTTOMRIGHT", -16, 4)
+  eb:SetAutoFocus(false)
+  eb:SetMaxLetters(60)
+  local ok, res = pcall(eb.SetFont, eb, ns.MEDIA .. "Fonts\\Poppins-Regular.ttf", 14, "")
+  if not ok or res == false then pcall(eb.SetFont, eb, STANDARD_TEXT_FONT or "Fonts\\FRIZQT__.TTF", 14, "") end
+  eb:SetTextColor(C.text[1], C.text[2], C.text[3], 1)
+  f.hint = UI.Text(f, 13, "regular", C.dim)
+  f.hint:SetPoint("LEFT", 42, 0)
+  f.hint:SetText(placeholder or "Suchen ...")
+  eb:SetScript("OnTextChanged", function(self)
+    local t = self:GetText() or ""
+    f.hint:SetShown(t == "")
+    if onChange then onChange(t) end
+  end)
+  eb:SetScript("OnEscapePressed", function(self) self:ClearFocus() end)
+  eb:SetScript("OnEnterPressed", function(self) self:ClearFocus() end)
+  eb:SetScript("OnEditFocusGained", function() f.bg:SetColor(C.cardHi, 1) end)
+  eb:SetScript("OnEditFocusLost", function() f.bg:SetColor(C.inset, 1) end)
+  f:EnableMouse(true)
+  f:SetScript("OnMouseDown", function() eb:SetFocus() end)
+  f.edit = eb
+  return f
+end

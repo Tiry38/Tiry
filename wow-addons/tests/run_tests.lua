@@ -98,6 +98,32 @@ local function runScenario(label, opts)
     check(label .. ": AH-Suche gestartet", W.searched ~= nil)
   end
 
+  -- Komplette Item-Datenbank
+  step("Datenbank-Seite", function()
+    ns.UI.Show("database")
+    local p = ns.UI.pages.database
+    local eb = p.search.edit
+    for _, q in ipairs({ "leinen", "ROTE TASCHE", "Gekräuselte", "ÖL", "2589", "zzzzzz", "" }) do
+      eb:SetText(q) ; W.call(eb, "OnTextChanged", true) ; W.flush()
+    end
+    for _, seg in ipairs({ p.segCat, p.segQual, p.segSort }) do
+      for _, b in ipairs(seg.buttons) do b:Click() ; W.flush() end
+    end
+    p.segCat:Select("all", true) ; p.segQual:Select("all", true) ; p.segSort:Select("name", true)
+    p.usableBtn:Click() ; p.usableBtn:Click()
+    p.more:Click()
+    p.listBtn:Click()
+  end)
+  local DB = ns.DB
+  check(label .. ": Datenbank vollständig", #DB.Load() == ns.ALLDB_COUNT and ns.ALLDB_COUNT > 18000, tostring(#DB.Load()))
+  check(label .. ": Leinenstoff per ID", DB.Get(2589) and DB.Get(2589).name == "Leinenstoff")
+  check(label .. ": Umlaut-Suche", #DB.Search("gekräuselte") >= 1 and #DB.Search("GEKRÄUSELTE") >= 1)
+  check(label .. ": Mehrwort-Suche", #DB.Search("rote tasche") >= 1)
+  check(label .. ": ID-Suche", #DB.Search("249427") == 1)
+  local t0 = os.clock() ; DB.Search("stoff", nil, "ah") ; local dt = os.clock() - t0
+  check(label .. ": Suche schnell (" .. string.format("%.0f", dt * 1000) .. " ms)", dt < 0.25)
+  check(label .. ": Fallback-Name aus Datenbank", ns.Item(4306).name == "Seidenstoff")
+
   -- Händler mit einem lohnenden Rezept (begrenzter Vorrat)
   step("Händler-Scan", function()
     W.merchant = {
@@ -174,7 +200,7 @@ local function runScenario(label, opts)
     Goldrausch_OnAddonCompartmentClick("Goldrausch", "LeftButton")
     Goldrausch_OnAddonCompartmentEnter("Goldrausch", UIParent)
     Goldrausch_OnAddonCompartmentLeave("Goldrausch", UIParent)
-    for _, c in ipairs({ "wege", "markt", "scan", "rezepte", "tagebuch", "ah", "optionen", "minimap", "minimap", "reset", "quatsch" }) do
+    for _, c in ipairs({ "db", "suche", "wege", "markt", "scan", "rezepte", "tagebuch", "ah", "optionen", "minimap", "minimap", "reset", "quatsch" }) do
       SlashCmdList.GOLDRAUSCH(c)
     end
   end)

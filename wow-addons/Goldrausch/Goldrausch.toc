@@ -16,7 +16,9 @@
 
 Core.lua
 Data_Items.lua
+Data_AllItems.lua
 Data.lua
+Database.lua
 Market.lua
 Scanner.lua
 Tracker.lua
@@ -26,6 +28,7 @@ UI\Main.lua
 UI\PageHome.lua
 UI\PageMethods.lua
 UI\PageMarket.lua
+UI\PageDatabase.lua
 UI\PageScanner.lua
 UI\PageRecipes.lua
 UI\PageTracker.lua

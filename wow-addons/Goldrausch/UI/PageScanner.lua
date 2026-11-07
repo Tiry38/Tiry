@@ -15,7 +15,7 @@ local ADVICE = {
 local page = {
   title = "Scanner",
   subtitle = "Findet Händler-Schnäppchen zum Weiterverkaufen und sagt dir, wohin deine Beute gehört.",
-  icon = "scan", label = "Scanner", order = 4,
+  icon = "scan", label = "Scanner", order = 5,
 }
 
 local function statCard(parent, w, label, color)
