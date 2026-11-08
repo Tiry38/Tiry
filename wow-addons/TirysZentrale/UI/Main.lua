@@ -635,6 +635,31 @@ SlashCmdList.TIRYSZENTRALE = function(msg)
     rezepte = "recipes", craft = "recipes", crafting = "recipes", farm = "farm", farmen = "farm", buch = "ledger", verkaeufe = "ledger", ["verkäufe"] = "ledger", kuerschner = "skinning", ["kürschner"] = "skinning", leder = "skinning", skin = "skinning", tagebuch = "tracker", tracker = "tracker",
     schule = "basics", ah = "basics", hilfe = "basics", optionen = "settings", einstellungen = "settings",
   }
+  if msg == "fehler" then
+    local list = ns.ErrorLog()
+    if #list == 0 then
+      ns.Print("Keine Fehler gespeichert – alles läuft.")
+    else
+      ns.Print(#list .. " gespeicherte Fehler (neueste zuerst):")
+      for i = 1, math.min(#list, 10) do
+        local e = list[i]
+        DEFAULT_CHAT_FRAME:AddMessage(string.format("|cffff6b81%d.|r %s |cff93a39d(%dx, %s, v%s)|r", i, e.msg:sub(1, 200), e.count or 1,
+          date("%d.%m. %H:%M", e.time or 0), tostring(e.version or "?")))
+      end
+      ns.Print("Leeren: |cffff9929/tz fehler leeren|r")
+    end
+    return
+  end
+  if msg == "fehler leeren" then
+    wipe(ns.ErrorLog())
+    ns.Print("Fehlerliste geleert.")
+    return
+  end
+  if msg == "fehlertest" then
+    ns.Print("Löse einen Test-Fehler aus ...")
+    C_Timer.After(0.1, function() error("Testfehler – die Fehleranzeige funktioniert, alles gut!") end)
+    return
+  end
   if msg == "suche" or msg == "suchen" or msg == "s" then
     UI.Search.Show()
     return

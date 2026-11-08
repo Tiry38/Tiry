@@ -420,7 +420,10 @@ function M.install(opts)
     assert(type(r) == "number" and type(g) == "number" and type(b) == "number", "CreateColor braucht Zahlen")
     return { r = r, g = g, b = b, a = a or 1, GetRGBA = function(s) return s.r, s.g, s.b, s.a end }
   end
-  G.geterrorhandler = function() return function(err) table.insert(M.errors, debug.traceback(tostring(err), 2)) end end
+  local defaultHandler = function(err) table.insert(M.errors, debug.traceback(tostring(err), 2)) end
+  M.errorHandler = defaultHandler
+  G.geterrorhandler = function() return M.errorHandler end
+  G.seterrorhandler = function(fn) assert(type(fn) == "function") M.errorHandler = fn end
   G.C_Timer = {
     After = function(sec, fn) assert(type(sec) == "number" and type(fn) == "function") table.insert(M.timers, fn) end,
     NewTicker = function(sec, fn) return { Cancel = function() end } end,

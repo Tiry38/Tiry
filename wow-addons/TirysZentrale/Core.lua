@@ -11,6 +11,38 @@ TirysZentrale = ns -- einziger Namens-Export (für Slash-Befehl, Addon-Menü und
 ----------------------------------------------------------------------------
 -- Sicheres Aufrufen: ein Fehler in einem Modul legt nie das ganze Addon lahm
 ----------------------------------------------------------------------------
+-- Eigene Fehleranzeige: Manche Clients zeigen Lua-Fehler gar nicht an. Fehler aus Tiry's Zentrale
+-- erscheinen deshalb im Chat und werden gespeichert (/tz fehler zeigt sie). Andere Addons bleiben unberührt.
+local errlog, shown = {}, {}
+function ns.LogError(err)
+  local msg = tostring(err or "?"):gsub("^.-AddOns[\\/]", "")
+  local log = (TirysZentraleDB and type(TirysZentraleDB) == "table") and TirysZentraleDB or nil
+  local list = log and (type(log.errorLog) == "table" and log.errorLog or {}) or errlog
+  if log then log.errorLog = list end
+  for _, e in ipairs(list) do
+    if e.msg == msg then e.count, e.time = (e.count or 1) + 1, time() return end
+  end
+  table.insert(list, 1, { msg = msg, time = time(), count = 1, version = ns.version })
+  while #list > 20 do table.remove(list) end
+  if not shown[msg] and DEFAULT_CHAT_FRAME then
+    shown[msg] = true
+    DEFAULT_CHAT_FRAME:AddMessage("|cffff6b81Tiry's Zentrale – Fehler:|r " .. msg:sub(1, 160) .. "  |cff93a39d(/tz fehler zeigt alle – bitte an Tiry's Entwickler schicken)|r")
+  end
+end
+
+function ns.ErrorLog()
+  return (TirysZentraleDB and TirysZentraleDB.errorLog) or errlog
+end
+
+-- In die globale Fehlerbehandlung einklinken (Kette: der bisherige Handler läuft immer weiter)
+if seterrorhandler and geterrorhandler then
+  local previous = geterrorhandler()
+  seterrorhandler(function(msg, ...)
+    if type(msg) == "string" and msg:find("TirysZentrale", 1, true) then pcall(ns.LogError, msg) end
+    if previous then return previous(msg, ...) end
+  end)
+end
+
 -- Der Fehler-Handler läuft innerhalb von xpcall, damit BugSack & Co. den vollen Stack sehen.
 local function handler(err)
   local h = geterrorhandler and geterrorhandler()

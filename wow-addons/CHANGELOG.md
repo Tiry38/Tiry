@@ -1,5 +1,12 @@
 # Changelog – Tiry's Zentrale
 
+## 5.0.1 (08.11.2026)
+- **Eigene Fehleranzeige:** Im WoW-Forever-Client erschien bei Tiry selbst mit `scriptErrors 1` kein Fehlerfenster. Fehler aus Tiry's Zentrale stehen jetzt direkt im Chat (rot, einmal pro Fehler) und werden gespeichert.
+  - `/tz fehler` zeigt die letzten 10 gespeicherten Fehler.
+  - `/tz fehler leeren` leert die Liste.
+  - `/tz fehlertest` löst einen Testfehler aus, um die Anzeige zu prüfen.
+  - Die Fehlerbehandlung anderer Addons und des Spiels läuft unverändert weiter.
+
 ## 5.0.0 (08.11.2026)
 
 ### Neu (jeweils mit Nutzen für Einsteiger)

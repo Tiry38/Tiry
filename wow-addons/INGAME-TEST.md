@@ -6,6 +6,7 @@ Zum Abhaken im Spiel. Vorher einmal eingeben:
 /reload
 ```
 Bei jeder roten Fehlermeldung: Screenshot machen und den Punkt notieren.
+Zeigt dein Client keine Fehlerfenster: Tiry's Zentrale schreibt eigene Fehler rot in den Chat. `/tz fehler` listet alle gespeicherten Fehler, `/tz fehlertest` prüft, ob die Anzeige funktioniert.
 
 ## Start
 - [ ] Im Charakterauswahl-Bildschirm unter „AddOns“: **Tiry's Zentrale** ist aktiviert und nicht als „veraltet“ markiert

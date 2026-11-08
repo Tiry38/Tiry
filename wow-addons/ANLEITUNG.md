@@ -27,4 +27,4 @@
 - Fachbegriffe erklärt **Lernen → Glossar**.
 - Im **Kampf** kauft, verkauft und craftet das Addon nichts. Nach dem Kampf einfach nochmal klicken.
 - Tastenkürzel: Optionen → Tastaturbelegung → „Tiry's Zentrale“.
-- Befehle: `/tz` (Fenster), `/tz suche`, `/tz assistent`, `/tz wegpunkt` (Kartenpunkt löschen), `/tz leeren` (Craft-Liste leeren), `/tz reset` (Fenster in die Mitte).
+- Befehle: `/tz` (Fenster), `/tz suche`, `/tz assistent`, `/tz wegpunkt` (Kartenpunkt löschen), `/tz leeren` (Craft-Liste leeren), `/tz reset` (Fenster in die Mitte), `/tz fehler` (gespeicherte Fehler anzeigen).
