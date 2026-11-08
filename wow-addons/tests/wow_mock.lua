@@ -413,7 +413,21 @@ function M.install(opts)
   G.GetMerchantItemID = function(i) local m = M.merchant[i]; return m and m.id end
   G.GetMerchantItemLink = function(i) local m = M.merchant[i]; return m and ("|Hitem:" .. m.id .. "|h") end
   G.ATTACHMENTS_MAX_RECEIVE = 16
-  G.GetInboxNumItems = function() return #(M.inbox or {}), #(M.inbox or {}) end
+  G.AUCTION_EXPIRED_MAIL_SUBJECT = "Auktion abgelaufen: %s"
+  G.GetRealmName = function() return "Forever-Testrealm" end
+  -- Post: M.mails = { { subject, money, daysLeft, invoice = { type, item, player, bid, count } } }
+  G.GetInboxHeaderInfo = function(i)
+    local m = (M.mails or {})[i]
+    if not m then return nil end
+    return 1, nil, "Auktionshaus", m.subject or "", m.money or 0, 0, m.daysLeft or 29.5, m.items or 0
+  end
+  G.GetInboxInvoiceInfo = function(i)
+    local m = (M.mails or {})[i]
+    local v = m and m.invoice
+    if not v then return nil end
+    return v[1], v[2], v[3], v[4], v[4], 0, 0, 0, 0, 0, v[5]
+  end
+  G.GetInboxNumItems = function() local n = math.max(#(M.inbox or {}), #(M.mails or {})) return n, n end
   G.GetInboxItem = function(i, slot) local m = (M.inbox or {})[i]; local a = m and m[slot]; if a then return "Item", a[1], 1, a[2] end end
   G.BuyMerchantItem = function(i, n) assert(type(i) == "number") M.bought = (M.bought or 0) + (n or 1) end
   G.MerchantFrame = make("Frame", UIParent, "MerchantFrame")

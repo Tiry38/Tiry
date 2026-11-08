@@ -306,6 +306,42 @@ local function runScenario(label, opts)
     assert(p.Sellable(279978) and p.Sellable(2312), "verkäuflich")
   end) end
 
+  -- Verkaufsbuch (Post-Rechnungen) + eigene Verkaufsquote + Bestand aller Charaktere
+  step("Verkaufsbuch", function()
+    TirysZentraleDB.ledger = nil
+    W.inbox = {}
+    W.mails = {
+      { subject = "Auktion erfolgreich: Leinentasche", money = 950, invoice = { "seller", "Leinentasche", "Käufer1", 1000, 1 } },
+      { subject = "Auktion erfolgreich: Leinentasche", money = 950, daysLeft = 28.2, invoice = { "seller", "Leinentasche", "Käufer2", 1000, 1 } },
+      { subject = "Auktion abgelaufen: Leinentasche", daysLeft = 27.0 },
+      { subject = "Gekauft: Leinenstoff", invoice = { "buyer", "Leinenstoff", "Händler3", 1200, 20 } },
+    }
+    W.fire("MAIL_INBOX_UPDATE") ; W.flush()
+    W.fire("MAIL_INBOX_UPDATE") ; W.flush() -- zweimal lesen darf nichts doppelt zählen
+    local L = ns.Ledger
+    local rate, n = L.SaleRate(4238)
+    assert(n == 3 and math.abs(rate - 2 / 3) < 0.001, "Quote 2 von 3: " .. tostring(rate) .. " / " .. tostring(n))
+    local t = L.Totals(30)
+    assert(t.income == 1900 and t.spent == 1200 and t.profit == 700 and t.sold == 2 and t.expired == 1, "Summen")
+    ns.UI.Show("ledger")
+    for _, b in ipairs(ns.UI.pages.ledger.seg.buttons) do b:Click() end
+    -- Ladenhüter-Filter im Craft-Planer
+    W.mails = {}
+    for i = 1, 4 do W.mails[i] = { subject = "Auktion abgelaufen: Leinenstoffballen", daysLeft = 20 + i } end
+    W.fire("MAIL_INBOX_UPDATE") ; W.flush()
+    local r2, n2 = L.SaleRate(2996)
+    assert(r2 == 0 and n2 == 4, "Ladenhüter erkannt")
+    W.mails = nil
+    -- Bestand: zweiter Charakter im Speicher
+    TirysZentraleDB.inv["Forever-Testrealm"]["Twink"] = { bags = { [2589] = 7 }, bank = { [2589] = 3 }, mail = {}, money = 5000 }
+    local chars, total = ns.Inv.Count(2589)
+    assert(total >= 10, "Bestand über Chars: " .. total)
+    local gl, gtotal = ns.Inv.Gold()
+    assert(#gl >= 2 and gtotal >= 5000, "Gold aller Chars")
+    W.tooltipHook(GameTooltip, { id = 4238 })
+    ns.UI.RefreshPage("ledger")
+  end)
+
   -- Preis-Strings (TSM-Stil): Rechnen, TSM-Namen, Fehler, Marktwert
   step("Preis-Strings", function()
     local PS = ns.PriceString

@@ -32,6 +32,8 @@ Skinning.lua
 Autopilot.lua
 Extras.lua
 Shopping.lua
+Ledger.lua
+Inventory.lua
 UI\Widgets.lua
 UI\ItemList.lua
 UI\Main.lua
@@ -44,6 +46,7 @@ UI\PageDatabase.lua
 UI\PageScanner.lua
 UI\PageRecipes.lua
 UI\PageTracker.lua
+UI\PageLedger.lua
 UI\PageBasics.lua
 UI\PageSettings.lua
 UI\MerchantHelper.lua

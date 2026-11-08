@@ -60,6 +60,14 @@ local function addLines(tooltip, itemID)
   local hint = X.FarmHint(itemID)
   if hint then lines[#lines + 1] = "Farmen: " .. hint end
   if itemID >= 200000 and ns.DB.Get(itemID) then lines[#lines + 1] = "Neu in WoW Forever" end
+  local chars, total = ns.Inv.Count(itemID)
+  if #chars > 1 or (#chars == 1 and not chars[1].me) then
+    local parts = {}
+    for i = 1, math.min(#chars, 4) do parts[#parts + 1] = chars[i].name .. " " .. chars[i].total end
+    lines[#lines + 1] = "Bestand alle Chars: " .. total .. " (" .. table.concat(parts, ", ") .. ")"
+  end
+  local rate, n = ns.Ledger.SaleRate(itemID)
+  if rate then lines[#lines + 1] = string.format("Deine Verkaufsquote: %d %% (%d Auktionen)", math.floor(rate * 100 + 0.5), n) end
   if #lines == 0 then return end
   tooltip:AddLine(" ")
   tooltip:AddLine("Tiry's Zentrale", 1, 0.84, 0.29)

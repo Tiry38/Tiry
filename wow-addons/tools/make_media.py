@@ -457,6 +457,15 @@ def icon_paw():
     return p.image()
 
 
+def icon_receipt():
+    p = Pen(width=0.075)
+    p.line([(0.26, 0.14), (0.26, 0.86), (0.36, 0.8), (0.46, 0.86), (0.54, 0.8), (0.64, 0.86), (0.74, 0.8), (0.74, 0.14), (0.26, 0.14)])
+    p.line([(0.36, 0.34), (0.64, 0.34)])
+    p.line([(0.36, 0.5), (0.64, 0.5)])
+    p.line([(0.36, 0.66), (0.54, 0.66)])
+    return p.image()
+
+
 def icon_minus():
     p = Pen(width=0.1)
     p.line([(0.28, 0.5), (0.72, 0.5)])
@@ -480,7 +489,7 @@ def main():
         "flask": icon_flask, "chart": icon_chart, "book": icon_book, "gear": icon_gear,
         "close": icon_close, "chevron": icon_chevron, "check": icon_check, "star": icon_star,
         "cart": icon_cart, "refresh": icon_refresh, "info": icon_info, "bag": icon_bag,
-        "pin": icon_pin, "bolt": icon_bolt, "warn": icon_warn, "minus": icon_minus, "plus": icon_plus, "db": icon_db, "paw": icon_paw,
+        "pin": icon_pin, "bolt": icon_bolt, "warn": icon_warn, "minus": icon_minus, "plus": icon_plus, "db": icon_db, "paw": icon_paw, "receipt": icon_receipt,
     }
     for name, fn in icons.items():
         save(fn(), "i_" + name)

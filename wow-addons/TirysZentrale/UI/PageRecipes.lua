@@ -426,6 +426,8 @@ function page.Entries(self)
       stats.unsellable = stats.unsellable + 1
     elseif c.onlySafe and (unknown > 0 or not revenue) then
       stats.noPrice = stats.noPrice + 1
+    elseif c.skipSlow ~= false and (function() local rt, n = ns.Ledger.SaleRate(r.out) return rt and n >= 4 and rt < 0.25 end)() then
+      stats.slow = (stats.slow or 0) + 1
     elseif c.freshOnly ~= false and not (M.Age(r.out) and M.Age(r.out) <= 3) then
       stats.old = (stats.old or 0) + 1
     else
@@ -483,6 +485,8 @@ function page.refresh(self)
         notes[#notes + 1] = UI.Hex(d[2]) .. d[1] .. "|r"
         notes[#notes + 1] = "herstellbar: " .. craftable(r)
       end
+      local rate = ns.Ledger.SaleRate(r.out)
+      if rate then notes[#notes + 1] = "verkauft sich: " .. math.floor(rate * 100 + 0.5) .. " %" end
       for _, q in ipairs(queue()) do
         if q.recipe == r.id then notes[#notes + 1] = "|cffffd24a" .. q.n .. "× geplant|r" end
       end
@@ -525,6 +529,7 @@ function page.refresh(self)
     if st.noPrice > 0 then why[#why + 1] = st.noPrice .. " ohne AH-Preis" end
     if st.unsellable > 0 then why[#why + 1] = st.unsellable .. " nicht verkäuflich (gebunden)" end
     if (st.old or 0) > 0 then why[#why + 1] = st.old .. " mit altem Preis (über 3 Tage)" end
+    if (st.slow or 0) > 0 then why[#why + 1] = st.slow .. " Ladenhüter (deine Verkaufsquote unter 25 %)" end
     if st.hidden > 0 then why[#why + 1] = st.hidden .. " ausgeblendet" end
     self.info:SetText(string.format("%s (Skill %d): |cff61eb8f%d Rezepte bringen Gold.|r %s\nPreise: %s",
       ns.ProfName(ns.PROF[self.prof]), rank, #list, #why > 0 and ("Nicht gezeigt: " .. table.concat(why, ", ") .. ".") or "", M.LastScanText()))
