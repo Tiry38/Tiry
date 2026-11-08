@@ -92,6 +92,8 @@ local DEFAULTS = {
   lootAlertMin = 5000, -- ab 50 Silber AH-Wert melden
   ahHint = true,       -- beim Öffnen des AH sagen, was eingestellt werden sollte
   merchantPanel = true, -- Händler-Panel neben dem Händlerfenster
+  autoRepair = true,    -- beim Händler automatisch reparieren
+  tooltipInfo = true,   -- Zusatzinfos im Item-Tooltip
   -- Craft-Filter: Empfehlung wächst mit jedem Level; die Faktoren sind dein persönlicher Stil (1 = Empfehlung)
   craft = { marginFactor = 1, profitFactor = 1, onlySafe = true, onlySkill = false },
   ahCut = 5,          -- Prozent, den das Auktionshaus beim Verkauf einbehält

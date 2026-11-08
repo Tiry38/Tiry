@@ -253,6 +253,38 @@ local function runScenario(label, opts)
     if not ns.ZONE_FACTION[map] then check(label .. ": Zone ohne Fraktion " .. map, false) end
   end
 
+  -- Kürschner-Zentrale
+  local K = ns.Skin
+  check(label .. ": Häuten-Formel", K.MaxLevel(87) == 18 and K.MaxLevel(150) == 30 and K.MaxLevel(1) == 10 and K.SkillFor(25) == 125)
+  check(label .. ": Häut-Spots passend", #K.Spots(18) > 0)
+  step("Kürschner-Seite", function()
+    W.repairCost = 1234
+    ns.UI.Show("skinning")
+    local p = ns.UI.pages.skinning
+    p.spotRows[1]:Click()
+    for _, r in ipairs(p.specialRows) do if r:IsEnabled() then r:Click() end end
+    -- Leder looten -> eigener Fundort
+    W.bags[3] = { { itemID = 2318, stackCount = 4, quality = 1 } }
+    W.fire("BAG_UPDATE_DELAYED") ; W.flush()
+    ns.UI.RefreshPage("skinning")
+    if p.mineRows[1]:IsShown() then p.mineRows[1]:Click() end
+    p.craftBtn:Click()
+    -- Händler: automatisch reparieren
+    W.fire("MERCHANT_SHOW") ; W.flush() ; W.fire("MERCHANT_CLOSED") ; W.flush()
+  end)
+  check(label .. ": eigener Fundort gemerkt", (select(2, K.MySpots("leather"))) >= 1)
+  check(label .. ": automatisch repariert", W.repaired == true)
+  -- Tooltip-Erweiterung
+  step("Item-Tooltip", function()
+    assert(W.tooltipHook, "Tooltip-Haken fehlt")
+    GameTooltip.lines = {}
+    W.tooltipHook(GameTooltip, { id = 2996 })
+    W.tooltipHook(GameTooltip, { id = 249427 })
+    W.tooltipHook(GameTooltip, { id = 2447 })
+    W.combat = true ; W.tooltipHook(GameTooltip, { id = 2589 }) ; W.combat = false
+  end)
+  check(label .. ": Tooltip zeigt Rezept-Info", table.concat(GameTooltip.lines, "|"):find("deiner Rezepte") ~= nil, table.concat(GameTooltip.lines, " | "))
+
   -- AH-Scan per Knopf und Erkennung
   step("AH-Scan-Knopf", function()
     W.fire("AUCTION_HOUSE_SHOW") ; W.flush()
@@ -333,7 +365,7 @@ local function runScenario(label, opts)
     TirysZentrale_OnAddonCompartmentClick("TirysZentrale", "LeftButton")
     TirysZentrale_OnAddonCompartmentEnter("TirysZentrale", UIParent)
     TirysZentrale_OnAddonCompartmentLeave("TirysZentrale", UIParent)
-    for _, c in ipairs({ "farm", "craft", "db", "suche", "wege", "markt", "scan", "rezepte", "tagebuch", "ah", "optionen", "minimap", "minimap", "reset", "quatsch" }) do
+    for _, c in ipairs({ "leder", "kuerschner", "farm", "craft", "db", "suche", "wege", "markt", "scan", "rezepte", "tagebuch", "ah", "optionen", "minimap", "minimap", "reset", "quatsch" }) do
       SlashCmdList.TIRYSZENTRALE(c)
     end
   end)

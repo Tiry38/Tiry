@@ -69,6 +69,19 @@ de_npc = lookup(os.path.join(qdb, "l10n/Classic/lookupNpcs/deDE.lua"), r'\n\[(\d
 de_obj = lookup(os.path.join(qdb, "l10n/Classic/lookupObjects/deDE.lua"), r'\n\[(\d+)\] = "((?:[^"\\]|\\.)*)"')
 
 points = collections.defaultdict(list)  # (gruppe, band) -> [(zone, x, y, name)]
+skin = collections.defaultdict(list)    # 5er-Levelband -> [(zone, x, y, name, lo, hi)]
+SKIN_BANDS = [(i, i + 4) for i in range(1, 61, 5)]
+# Spezial-Leder: Item -> Tiernamen (englische Namen in der QuestieDB)
+SPECIAL = {  # Item -> (Tiernamen, Mindestlevel der Tiere)
+    15422: (re.compile(r"Frostsaber", re.I), 50),
+    15419: (re.compile(r"Angerclaw|Warbear", re.I), 47),
+    15417: (re.compile(r"Devilsaur", re.I), 50),
+    15423: (re.compile(r"Chimaera", re.I), 45),
+    8167: (re.compile(r"^(?!.*Crocolisk).*(Turtle|Snapjaw|Shellhide)", re.I), 30),
+    8154: (re.compile(r"Scorpid", re.I), 35),
+    4461: (re.compile(r"Raptor", re.I), 25),
+}
+special = collections.defaultdict(list)
 zone_levels = collections.defaultdict(list)
 for line in open(spawns_path, encoding="utf-8"):
     f = line.rstrip("\n").split("\t")
@@ -99,6 +112,13 @@ for line in open(spawns_path, encoding="utf-8"):
         group = None
         if BEAST.search(name) and not NOT_BEAST.search(name):
             group = "leather"
+            for item, (rx, minlvl) in SPECIAL.items():
+                if rx.search(name) and lo >= minlvl:
+                    special[item].append((zone, x, y, de_npc.get(oid, name), lo, hi))
+            for sb in SKIN_BANDS:
+                mid = (lo + hi) / 2
+                if sb[0] <= mid <= sb[1] + 0.5:
+                    skin[sb].append((zone, x, y, de_npc.get(oid, name), lo, hi))
         elif HUMANOID.search(name):
             group = "cloth"
         elif ELEMENT.search(name):
@@ -174,6 +194,43 @@ for b in BANDS:
             total += 1
             lines.append(f"      {{ map = {u}, x = {x}, y = {y}, n = {n}, names = {{ {', '.join(q(s) for s in names)} }}, items = {{ {', '.join(str(i) for i in items)} }} }},")
         lines.append("    },")
+    lines.append("  },")
+lines.append("}")
+# Häut-Spots in 5er-Schritten mit Tierlevel (+ Spezial-Leder nach Item-ID)
+lines.append("ns.SKIN_SPOTS = {")
+keys = [(sb[0], skin.get(sb, [])) for sb in SKIN_BANDS] + [(item, special.get(item, [])) for item in SPECIAL]
+for key, raw in keys:
+    sb = (key, 0)
+    pts = [(p[0], p[1], p[2], p[3], None, p[4], p[5]) for p in raw]
+    grid = collections.defaultdict(list)
+    for p_ in pts:
+        grid[(p_[0], int(p_[1] // 4), int(p_[2] // 4))].append(p_)
+    scored = []
+    for (z, gx, gy) in grid:
+        near = []
+        for dx in (-1, 0, 1):
+            for dy in (-1, 0, 1):
+                near += grid.get((z, gx + dx, gy + dy), [])
+        scored.append((len(near), z, gx, gy, near))
+    scored.sort(key=lambda s_: -s_[0])
+    chosen = []
+    for n, z, gx, gy, near in scored:
+        if n < (1 if key > 100 else 4):
+            break
+        if any(c[1] == z and abs(c[2] - gx) <= 3 and abs(c[3] - gy) <= 3 for c in chosen):
+            continue
+        chosen.append((n, z, gx, gy, near))
+        if len(chosen) >= (3 if key > 100 else 6):
+            break
+    lines.append(f"  [{sb[0]}] = {{")
+    for n, z, gx, gy, near in chosen:
+        x = sum(p_[1] for p_ in near) / len(near)
+        y = sum(p_[2] for p_ in near) / len(near)
+        names = [nm for nm, _ in collections.Counter(p_[3] for p_ in near).most_common(3)]
+        lo = min(p_[5] for p_ in near)
+        hi = max(p_[6] for p_ in near)
+        total += 1
+        lines.append(f"    {{ map = {ZONES[z]}, x = {round(x, 1)}, y = {round(y, 1)}, n = {n}, lo = {lo}, hi = {hi}, names = {{ {', '.join(q(s_) for s_ in names)} }} }},")
     lines.append("  },")
 lines.append("}")
 open(out_path, "w", encoding="utf-8").write("\n".join(lines) + "\n")

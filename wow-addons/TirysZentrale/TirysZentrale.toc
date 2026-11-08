@@ -3,7 +3,7 @@
 ## Notes: Deine Gold-Zentrale für WoW Forever: Craft-Planer wie TSM, Kürschner-Zentrale, Farm-Spots auf der Karte, Live-Preise (Auctionator), Autopilot und komplette deutsche Item-Datenbank.
 ## Notes-deDE: Deine Gold-Zentrale für WoW Forever: Craft-Planer wie TSM, Kürschner-Zentrale, Farm-Spots auf der Karte, Live-Preise (Auctionator), Autopilot und komplette deutsche Item-Datenbank.
 ## Author: Tiry
-## Version: 2.0.0
+## Version: 3.0.0
 ## Category-enUS: Auctions
 ## Category-deDE: Auktionen
 ## SavedVariables: TirysZentraleDB
@@ -27,13 +27,16 @@ Maps.lua
 Market.lua
 Scanner.lua
 Tracker.lua
+Skinning.lua
 Autopilot.lua
+Extras.lua
 UI\Widgets.lua
 UI\ItemList.lua
 UI\Main.lua
 UI\PageHome.lua
 UI\PageMethods.lua
 UI\PageFarm.lua
+UI\PageSkinning.lua
 UI\PageMarket.lua
 UI\PageDatabase.lua
 UI\PageScanner.lua

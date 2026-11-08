@@ -72,7 +72,7 @@ ns.On("MERCHANT_SHOW", function()
     local flips = S.merchant.flips
     if #flips > 0 and ns.settings and ns.settings.merchantAlert then
       local best = flips[1]
-      ns.Print(string.format("%d Flip-Chance%s bei %s! Beste: %s (+%s pro Stück). Details: /gold scan",
+      ns.Print(string.format("%d Flip-Chance%s bei %s! Beste: %s (+%s pro Stück). Details: /tz scan",
         #flips, #flips == 1 and "" or "n", S.merchant.name or "diesem Händler",
         ns.Item(best.id).link or ns.Item(best.id).name, ns.Money(best.profit)))
     end

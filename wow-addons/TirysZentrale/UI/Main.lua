@@ -101,10 +101,10 @@ local function buildSidebar(f)
   local y = -86
   for _, def in ipairs(UI.order) do
     local b = CreateFrame("Button", nil, side)
-    b:SetSize(SIDE_W - 34, 36)
+    b:SetSize(SIDE_W - 34, 34)
     b:SetPoint("TOPLEFT", 12, y)
     b.key = def.key
-    b.bg = UI.Round(b, 18, "BACKGROUND", 0)
+    b.bg = UI.Round(b, 17, "BACKGROUND", 0)
     b.icon = b:CreateTexture(nil, "ARTWORK")
     b.icon:SetTexture(UI.Icon(def.icon))
     b.icon:SetSize(18, 18)
@@ -140,7 +140,7 @@ local function buildSidebar(f)
       UI.Show(self.key)
     end)
     f.nav[def.key] = b
-    y = y - 40
+    y = y - 37
   end
 
   -- Auctionator-Status unten
@@ -435,7 +435,7 @@ ns.Listen("LOGIN", function()
   if not ns.settings.welcomeShown then
     ns.settings.welcomeShown = true
     C_Timer.After(6, function()
-      ns.Print("Willkommen! Tippe |cffffd24a/gold|r oder klick auf die Goldmünze an der Minikarte.")
+      ns.Print("Willkommen! Tippe |cffffd24a/tz|r oder klick auf die Goldmünze an der Minikarte.")
     end)
   end
 end)
@@ -448,7 +448,7 @@ SlashCmdList.TIRYSZENTRALE = function(msg)
   local map = {
     [""] = nil, start = "home", home = "home", wege = "methods", methoden = "methods", guide = "methods",
     markt = "market", preise = "market", db = "database", datenbank = "database", suche = "database", items = "database", scan = "scanner", scanner = "scanner", taschen = "scanner",
-    rezepte = "recipes", craft = "recipes", crafting = "recipes", farm = "farm", farmen = "farm", tagebuch = "tracker", tracker = "tracker",
+    rezepte = "recipes", craft = "recipes", crafting = "recipes", farm = "farm", farmen = "farm", kuerschner = "skinning", ["kürschner"] = "skinning", leder = "skinning", skin = "skinning", tagebuch = "tracker", tracker = "tracker",
     schule = "basics", ah = "basics", hilfe = "basics", optionen = "settings", einstellungen = "settings",
   }
   if msg == "minimap" then

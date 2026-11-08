@@ -447,6 +447,16 @@ def icon_db():
     return p.image()
 
 
+def icon_paw():
+    p = Pen()
+    p.circle(0.5, 0.64, 0.17, fill=True)
+    p.circle(0.27, 0.42, 0.08, fill=True)
+    p.circle(0.41, 0.28, 0.085, fill=True)
+    p.circle(0.59, 0.28, 0.085, fill=True)
+    p.circle(0.73, 0.42, 0.08, fill=True)
+    return p.image()
+
+
 def icon_minus():
     p = Pen(width=0.1)
     p.line([(0.28, 0.5), (0.72, 0.5)])
@@ -470,7 +480,7 @@ def main():
         "flask": icon_flask, "chart": icon_chart, "book": icon_book, "gear": icon_gear,
         "close": icon_close, "chevron": icon_chevron, "check": icon_check, "star": icon_star,
         "cart": icon_cart, "refresh": icon_refresh, "info": icon_info, "bag": icon_bag,
-        "pin": icon_pin, "bolt": icon_bolt, "warn": icon_warn, "minus": icon_minus, "plus": icon_plus, "db": icon_db,
+        "pin": icon_pin, "bolt": icon_bolt, "warn": icon_warn, "minus": icon_minus, "plus": icon_plus, "db": icon_db, "paw": icon_paw,
     }
     for name, fn in icons.items():
         save(fn(), "i_" + name)

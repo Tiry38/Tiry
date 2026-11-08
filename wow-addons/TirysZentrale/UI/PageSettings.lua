@@ -52,11 +52,19 @@ function page.build(self, content, width)
   add(UI.Toggle(content, "Minikarten-Knopf", function() return s.minimap.show end, function(v)
     s.minimap.show = v
     UI.UpdateMinimap()
-  end, "Die Goldmünze an der Minikarte. Tiry's Zentrale ist zusätzlich immer im Addon-Menü der Minikarte und über /gold erreichbar.", width), 54)
+  end, "Die Goldmünze an der Minikarte. Tiry's Zentrale ist zusätzlich immer im Addon-Menü der Minikarte und über /tz erreichbar.", width), 54)
 
   add(UI.Toggle(content, "Autopilot: Schrott automatisch verkaufen", function() return s.autoJunk end, function(v)
     s.autoJunk = v
   end, "Beim Händler wird alles Graue sofort verkauft (wie der Müll-Knopf, nur automatisch).", width), 54)
+
+  add(UI.Toggle(content, "Automatisch reparieren", function() return s.autoRepair end, function(v)
+    s.autoRepair = v
+  end, "Repariert deine Ausrüstung beim Händler sofort (wenn du genug Gold hast) – wie bei Leatrix Plus.", width), 54)
+
+  add(UI.Toggle(content, "Infos im Item-Tooltip", function() return s.tooltipInfo end, function(v)
+    s.tooltipInfo = v
+  end, "Zeigt im Tooltip, in welchen deiner Rezepte ein Material steckt, wo du es für dein Level farmst und ob es neu in Forever ist.", width), 54)
 
   add(UI.Toggle(content, "Händler-Panel", function() return s.merchantPanel end, function(v)
     s.merchantPanel = v
@@ -100,10 +108,10 @@ function page.build(self, content, width)
   st:Add(reset, 34, 24)
 
   st:Title("Befehle", 15, C.text, 2)
-  st:Para("|cffffd24a/gold|r – Fenster öffnen/schließen\n"
-    .. "|cffffd24a/gold wege|r · |cffffd24a/gold markt|r · |cffffd24a/gold scan|r · |cffffd24a/gold rezepte|r · |cffffd24a/gold tagebuch|r · |cffffd24a/gold ah|r\n"
-    .. "|cffffd24a/gold minimap|r – Minikarten-Knopf an/aus\n"
-    .. "|cffffd24a/gold reset|r – Fenster in die Mitte setzen", 12, C.muted, 16)
+  st:Para("|cffffd24a/tz|r – Fenster öffnen/schließen\n"
+    .. "|cffffd24a/tz leder|r · |cffffd24a/tz farm|r · |cffffd24a/tz craft|r · |cffffd24a/tz suche|r · |cffffd24a/tz wege|r · |cffffd24a/tz markt|r · |cffffd24a/tz scan|r · |cffffd24a/tz rezepte|r · |cffffd24a/tz tagebuch|r · |cffffd24a/tz ah|r\n"
+    .. "|cffffd24a/tz minimap|r – Minikarten-Knopf an/aus\n"
+    .. "|cffffd24a/tz reset|r – Fenster in die Mitte setzen", 12, C.muted, 16)
   st:Para("Tiry's Zentrale " .. tostring(ns.version) .. " · gebaut für WoW Forever (1.60.1). Preise kommen aus Auctionator – "
     .. "Tiry's Zentrale selbst liest nie etwas im Hintergrund aus und schickt keine Daten weg.", 11, C.dim, 10)
   st:Finish()

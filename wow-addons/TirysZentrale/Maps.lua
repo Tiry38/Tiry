@@ -25,7 +25,12 @@ function Maps.Spots(group, bandKey)
 end
 
 function Maps.ZoneName(mapID)
-  return ns.ZONE_NAMES[mapID] or ("Karte " .. tostring(mapID))
+  if ns.ZONE_NAMES[mapID] then return ns.ZONE_NAMES[mapID] end
+  if C_Map and C_Map.GetMapInfo then
+    local ok, info = pcall(C_Map.GetMapInfo, mapID)
+    if ok and info and info.name then return info.name end
+  end
+  return "Karte " .. tostring(mapID)
 end
 
 -- Setzt den Wegpunkt; der Pfeil am Bildschirmrand führt dich hin

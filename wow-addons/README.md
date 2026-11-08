@@ -1,31 +1,33 @@
-# Tiry's Zentrale – Gold-Guide-Addon für WoW Forever
+# Tiry's Zentrale – Gold- und Berufe-Addon für WoW Forever
 
 Addon für **World of Warcraft: Forever** (Client 1.60.1, Interface 16001). Zeigt Einsteigern Schritt für Schritt,
 wie man schon mit Level 10–20 Gold macht – mit echten Preisen des eigenen Servers über **Auctionator**.
 
 ## Installation (Windows)
-1. `dist/Tiry's Zentrale.zip` herunterladen und entpacken.
-2. Den Ordner `Tiry's Zentrale` nach `World of Warcraft\_forever_\Interface\AddOns\` kopieren
-   (danach muss es `...\AddOns\Tiry's Zentrale\TirysZentrale.toc` geben – kein doppelter Ordner).
+1. `dist/TirysZentrale.zip` herunterladen und entpacken.
+2. Den Ordner `TirysZentrale` nach `World of Warcraft\_forever_\Interface\AddOns\` kopieren
+   (danach muss es `...\AddOns\TirysZentrale\TirysZentrale.toc` geben – kein doppelter Ordner).
 3. Optional, aber empfohlen: **Auctionator** (Version für WoW Forever) installieren.
-4. Spiel starten → `/gold` eingeben oder auf die Goldmünze an der Minikarte klicken.
+4. Spiel starten → `/tz` eingeben oder auf die Goldmünze an der Minikarte klicken.
 
 ## Was drin ist
 | Seite | Funktion |
 |---|---|
 | Start | Persönlicher Goldplan: Top 3 Goldwege für Level, Berufe und aktuelle AH-Preise |
+| Kürschner-Zentrale | Häuten-Rechner (bis welches Tierlevel dein Skill reicht), Leder nach Tierlevel mit Live-Preisen, beste Häut-Spots für dein Level (5er-Schritte, mit Tierlevel und Kartenpunkt), Spezial-Leder mit Fundorten, eigene gemerkte Fundorte |
 | Farm-Guide | Level 1–60: welche Materialgruppe gerade am meisten bringt (mit deinen Berufen abgeglichen) + 109 berechnete Farm-Hotspots – Klick setzt Wegpunkt mit Pfeil und öffnet die Karte |
 | Goldwege | 16 Methoden als aufklappbare Anleitungen (Forever-bestätigt bzw. Classic-Wissen gekennzeichnet) |
 | Marktpreise | Live-Preise der wichtigsten Gold-Materialien (126 kuratiert) inkl. neuer Forever-Materialien, Einkaufslisten, AH-Sofortsuche |
 | Datenbank | **Alle 18.416 Gegenstände** von WoW Forever auf Deutsch: Suche (Name/ID), Filter nach Kategorie, Qualität, Level, Sortierung nach AH-/Händlerpreis |
 | Scanner | Händler-Flips (automatisch beim Händler) und Taschen-Check (AH oder Händler?) |
-| Craft-Planer | Wie TSM Crafting: 1.967 Rezepte aus den Forever-Spieldaten, gelernte Rezepte automatisch erkannt (ohne Berufsfenster), zwei Regler (% und Gold) mit Level-Empfehlung, "Lernen lohnt sich", Skill-Farben, herstellbare Menge, Warteschlange, fehlendes Material als Auctionator-Liste, Craften per Knopf |
+| Craft-Planer | Wie TSM Crafting: 1.967 Rezepte aus den Forever-Spieldaten, gelernte Rezepte automatisch erkannt (ohne Berufsfenster), zwei Regler (% und Gold): Empfehlung wächst mit jedem Level, eigener Stil wächst mit, teure Items brauchen weniger %, "Lernen lohnt sich", Skill-Farben, herstellbare Menge, Warteschlange, fehlendes Material als Auctionator-Liste, Craften per Knopf |
+| Extras | Item-Tooltip (in welchen deiner Rezepte, wo farmen, neu in Forever), automatisch reparieren |
 | Gold-Autopilot | Schrott automatisch verkaufen, Händler-Panel (Händler-Ware verkaufen, Flips kaufen per Klick), Beute-Radar mit Warnung bei wertvoller Beute, AH-Hinweis |
 | Goldtagebuch | Gold pro Sitzung, pro Stunde, 14-Tage-Verlauf |
 | AH-Schule | Auktionshaus und Auctionator für Einsteiger |
 | Einstellungen | Minikarten-Knopf, Chat-Hinweise, Animationen, AH-Anteil, Fenstergröße |
 
-Befehle: `/gold`, `/gold farm`, `/gold craft`, `/gold suche`, `/gold wege`, `/gold markt`, `/gold scan`, `/gold rezepte`, `/gold tagebuch`, `/gold ah`, `/gold minimap`, `/gold reset`.
+Befehle: `/tz` (oder `/zentrale`, `/gold`), `/tz leder`, `/tz farm`, `/tz craft`, `/tz suche`, `/tz wege`, `/tz markt`, `/tz scan`, `/tz rezepte`, `/tz tagebuch`, `/tz ah`, `/tz minimap`, `/tz reset`.
 
 ## AH-Scan
 Knopf "AH scannen" oben im Fenster startet am offenen AH den Auctionator-Scan. Jeder Scan (auch direkt in Auctionator) wird automatisch erkannt; der Stand steht unter dem Knopf.

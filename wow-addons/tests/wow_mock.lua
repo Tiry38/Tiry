@@ -383,7 +383,17 @@ function M.install(opts)
   G.C_Map = {
     CanSetUserWaypointOnMap = function(map) return true end,
     SetUserWaypoint = function(p) assert(p and p.map) M.waypoint = p end,
+    GetBestMapForUnit = function(u) assert(u == "player") return 1413 end,
+    GetPlayerMapPosition = function(map, u) return { GetXY = function() return 0.502, 0.421 end } end,
+    GetMapInfo = function(map) return { name = "Karte" .. map } end,
   }
+  G.TooltipDataProcessor = { AddTooltipPostCall = function(kind, fn) assert(kind == 0, "Item-Tooltip-Typ") M.tooltipHook = fn end }
+  G.Enum.TooltipDataType = { Item = 0, Spell = 1, Unit = 2 }
+  G.InCombatLockdown = function() return M.combat == true end
+  G.ItemRefTooltip = {}
+  G.CanMerchantRepair = function() return true end
+  G.GetRepairAllCost = function() return M.repairCost or 0, (M.repairCost or 0) > 0 end
+  G.RepairAllItems = function() M.repaired = true end
   G.C_SuperTrack = { SetSuperTrackedUserWaypoint = function(v) M.superTracked = v end }
   G.OpenWorldMap = function(map) M.mapOpened = map end
   -- Berufe

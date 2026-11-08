@@ -146,6 +146,7 @@ local function onBagsChanged()
     if gained > 0 then
       local channel, unit = M.BestSale(id)
       local value = (unit or 0) * gained
+      ns.Fire("LOOT_GAINED", id, gained)
       local s = A.session
       s.value = s.value + value
       s.items = s.items + gained
@@ -209,7 +210,7 @@ ns.On("AUCTION_HOUSE_SHOW", function()
       if e.advice == "AH" then n = n + 1 total = total + (e.ah or 0) end
     end
     if n > 0 then
-      ns.Print(string.format("Du hast |cffffd24a%d Items für ca. %s|r dabei, die ins AH gehören. Auctionator > Reiter \"Verkaufen\" – Liste: /gold scan", n, ns.Money(total)))
+      ns.Print(string.format("Du hast |cffffd24a%d Items für ca. %s|r dabei, die ins AH gehören. Auctionator > Reiter \"Verkaufen\" – Liste: /tz scan", n, ns.Money(total)))
     end
   end)
 end)
