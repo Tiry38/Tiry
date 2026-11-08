@@ -306,6 +306,51 @@ local function runScenario(label, opts)
     assert(p.Sellable(279978) and p.Sellable(2312), "verkäuflich")
   end) end
 
+  -- Preis-Strings (TSM-Stil): Rechnen, TSM-Namen, Fehler, Marktwert
+  step("Preis-Strings", function()
+    local PS = ns.PriceString
+    local function ev(str, ctx)
+      local fn, err = PS.Compile(str)
+      assert(fn, "String sollte gültig sein: " .. str .. " / " .. tostring(err))
+      return fn({ get = function(src) return ctx[src] end })
+    end
+    local c = { ahprice = 1000, market = 700, vendorbuy = nil, crafting = 400, levelgold = 2500 }
+    assert(ev("min(ahprice, 125% market)", c) == 875, "min mit Prozent")
+    assert(ev("first(vendorbuy, ahprice, market)", c) == 1000, "first überspringt fehlende Werte")
+    assert(ev("max(15% crafting, levelgold)", c) == 2500, "max")
+    assert(ev("max(120%crafting, dbmarket)", c) == 700, "TSM-Schreibweise ohne Leerzeichen + dbmarket")
+    assert(ev("crafting/1.4/0.95", c) - 400 / 1.4 / 0.95 < 0.001, "Division wie im TSM-Guide")
+    assert(ev("1g50s + 20c", c) == 15020, "Geld-Zahlen")
+    assert(ev("avg(ahprice, market) - 50", c) == 800, "avg und Minus")
+    assert(ev("min(vendorbuy)", c) == nil, "nur fehlende Werte -> kein Wert")
+    for _, bad in ipairs({ "min(ahprice", "foo + 1", "ahprice $ 2", "", "max()" }) do
+      local fn, err = PS.Compile(bad)
+      assert(not fn and err, "ungültig: " .. bad)
+    end
+    assert(not PS.Set("craftValue", "kaputt(") and PS.Get("craftValue") == PS.DEFAULTS.craftValue, "kaputter String wird nicht übernommen")
+    assert(PS.Set("craftValue", "ahprice") and PS.Get("craftValue") == "ahprice", "eigener String")
+    PS.Reset()
+    assert(PS.Get("craftValue") == PS.DEFAULTS.craftValue, "zurücksetzen")
+    -- Marktwert = Median der Tagespreise
+    TirysZentraleDB.priceHistory = { [999001] = { ["2026-11-01"] = 100, ["2026-11-02"] = 300, ["2026-11-03"] = 200 } }
+    assert(PS.Market(999001) == 200, "Median")
+    TirysZentraleDB.priceHistory[999001]["2026-11-04"] = 1000
+    assert(PS.Market(999001) == 250, "Median gerade Anzahl")
+    for i = 1, 20 do PS.Record(999002, 100 + i) end
+    -- Editor-Feld im Craft-Planer
+    local p = ns.UI.pages.recipes
+    ns.UI.Show("recipes")
+    local box = p.strings.minProfit.box
+    box:SetText("max(20% crafting, 5s)")
+    W.call(box, "OnEnterPressed")
+    assert(PS.Get("minProfit") == "max(20% crafting, 5s)", "String aus dem Feld übernommen")
+    box:SetText("max(20% crafting")
+    W.call(box, "OnEnterPressed")
+    assert(PS.Get("minProfit") == "max(20% crafting, 5s)", "Fehlerhafter String ändert nichts")
+    PS.Reset() ; p.refresh(p)
+    p.fresh:Click() ; p.fresh:Click()
+  end)
+
   -- TSM-Ablauf: Mindestgewinn eintippen -> Liste erstellen -> Einkaufsfenster -> kaufen -> Post -> craften
   if opts.auctionator ~= false then step("Einkaufsfenster wie TSM", function()
     local P = ns.ParseMoney

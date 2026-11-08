@@ -29,6 +29,9 @@ wie man schon mit Level 10–20 Gold macht – mit echten Preisen des eigenen Se
 
 Befehle: `/tz` (oder `/zentrale`, `/gold`), `/tz leder`, `/tz farm`, `/tz craft`, `/tz suche`, `/tz wege`, `/tz markt`, `/tz scan`, `/tz rezepte`, `/tz tagebuch`, `/tz ah`, `/tz minimap`, `/tz reset`.
 
+## Profi-Strings (wie TSM)
+Im Craft-Planer: Materialpreis `first(vendorbuy, ahprice, market)`, Verkaufswert `min(ahprice, 125% market)`, Mindestgewinn `max(15% crafting, levelgold)`. `market` = eigener Marktwert (Median der Tagespreise der letzten 14 Tage aus deinen Scans). TSM-Namen (`dbmarket`, `dbminbuyout`) werden verstanden; Funktionen `min`, `max`, `first`, `avg`, Rechnen `+ - * /`, Zahlen wie `120% crafting`, `5g`, `1g50s`. Zusätzlich: nur frische Preise (max. 3 Tage).
+
 ## AH-Scan
 Knopf "AH scannen" oben im Fenster startet am offenen AH den Auctionator-Scan. Jeder Scan (auch direkt in Auctionator) wird automatisch erkannt; der Stand steht unter dem Knopf.
 

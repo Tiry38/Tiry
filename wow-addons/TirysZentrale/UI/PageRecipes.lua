@@ -126,6 +126,61 @@ function page.build(self, content, width)
   self.scanBtn:SetScript("OnClick", function() M.StartScan() end)
   st:Add(pills, 30, 12)
 
+  -- Profi-Strings wie bei TSM (Materialpreis, Verkaufswert, Mindestgewinn)
+  local PS = ns.PriceString
+  local sc = CreateFrame("Frame", nil, content)
+  sc:SetSize(width, 214)
+  sc.bg = UI.Round(sc, 18, "BACKGROUND", 0)
+  sc.bg:SetColor(C.card, 1)
+  local st1 = UI.Text(sc, 14, "bold", C.text)
+  st1:SetPoint("TOPLEFT", 18, -14)
+  st1:SetText("Profi-Strings (wie TSM)")
+  local st2 = UI.Para(sc, 10, C.dim, width - 250)
+  st2:SetPoint("TOPLEFT", st1, "BOTTOMLEFT", 0, -4)
+  st2:SetText("Quellen: ahprice, market (dein 14-Tage-Marktwert), vendorbuy, vendorsell, crafting, levelgold – TSM-Namen wie dbmarket gehen auch. Enter übernimmt.")
+  local reset = UI.Button(sc, "Empfohlene Strings", "soft", 190, 30, "star")
+  reset:SetPoint("TOPRIGHT", -14, -12)
+  reset:SetScript("OnClick", function() PS.Reset() page.refresh(self) end)
+  self.strings = {}
+  local defs = {
+    { "matPrice", "Materialpreis" }, { "craftValue", "Verkaufswert" }, { "minProfit", "Mindestgewinn" },
+  }
+  for i, d in ipairs(defs) do
+    local rowY = -56 - (i - 1) * 48
+    local lab = UI.Text(sc, 12, "semibold", C.muted)
+    lab:SetPoint("TOPLEFT", 18, rowY - 9)
+    lab:SetText(d[2])
+    local box = CreateFrame("EditBox", nil, sc)
+    box:SetSize(width - 300, 32)
+    box:SetPoint("TOPLEFT", 140, rowY)
+    box:SetAutoFocus(false)
+    box:SetMaxLetters(200)
+    box:SetTextInsets(12, 12, 0, 0)
+    local ok, res = pcall(box.SetFont, box, ns.MEDIA .. "Fonts\\Poppins-Regular.ttf", 12, "")
+    if not ok or res == false then pcall(box.SetFont, box, STANDARD_TEXT_FONT or "Fonts\\FRIZQT__.TTF", 12, "") end
+    box:SetTextColor(1, 1, 1, 1)
+    box.bg = UI.Round(box, 16, "BACKGROUND", 2)
+    box.bg:SetColor(C.inset, 1)
+    local status = UI.Text(sc, 11, "semibold", C.green)
+    status:SetPoint("LEFT", box, "RIGHT", 10, 0)
+    status:SetWidth(140)
+    status:SetWordWrap(false)
+    box:SetScript("OnEnterPressed", function(b)
+      local okSet, err = PS.Set(d[1], b:GetText())
+      b:ClearFocus()
+      if not okSet then ns.Print("|cffff6b81String-Fehler (" .. d[2] .. "):|r " .. tostring(err)) end
+      page.refresh(self)
+    end)
+    box:SetScript("OnEscapePressed", function(b) b:ClearFocus() page.refresh(self) end)
+    box:SetScript("OnEditFocusGained", function(b) b.bg:SetColor(C.cardHi, 1) end)
+    box:SetScript("OnEditFocusLost", function(b) b.bg:SetColor(C.inset, 1) end)
+    self.strings[d[1]] = { box = box, status = status }
+  end
+  self.fresh = UI.Pill(sc, "Nur frische Preise (max. 3 Tage)", function() return cfg().freshOnly ~= false end,
+    function(v) cfg().freshOnly = v end, function() page.refresh(self) end)
+  self.fresh:SetPoint("BOTTOMLEFT", 18, 14)
+  st:Add(sc, 214, 12)
+
   -- Wie bei TSM: alle lohnenden Rezepte auf einen Klick in die Liste, Einkaufsfenster dazu
   local mk = CreateFrame("Frame", nil, content)
   mk:SetSize(width, 36)
@@ -371,10 +426,17 @@ function page.Entries(self)
       stats.unsellable = stats.unsellable + 1
     elseif c.onlySafe and (unknown > 0 or not revenue) then
       stats.noPrice = stats.noPrice + 1
-    elseif not profit or profit < math.max(minProfit, 1) then
-      stats.tooLow = stats.tooLow + 1
+    elseif c.freshOnly ~= false and not (M.Age(r.out) and M.Age(r.out) <= 3) then
+      stats.old = (stats.old or 0) + 1
     else
-      out[#out + 1] = { r = r, profit = profit, revenue = revenue, cost = cost, unknown = unknown }
+      -- Mindestgewinn aus dem Profi-String (Standard: max(15% crafting, levelgold))
+      local need = ns.PriceString.Eval("minProfit", r.out, { crafting = cost }) or minProfit
+      need = math.max(need, 1)
+      if not profit or profit < need then
+        stats.tooLow = stats.tooLow + 1
+      else
+        out[#out + 1] = { r = r, profit = profit, revenue = revenue, cost = cost, unknown = unknown, need = need }
+      end
     end
   end
   table.sort(out, function(x, y) return x.profit > y.profit end)
@@ -397,6 +459,12 @@ function page.refresh(self)
   self.unhideBtn:SetLabel("Ausgeblendete zurückholen (" .. hiddenCount .. ")")
   self.unhideBtn:SetEnabled(hiddenCount > 0)
   self.perRecipe:Refresh()
+  self.fresh:Refresh()
+  for key, w in pairs(self.strings) do
+    if not w.box:HasFocus() then w.box:SetText(ns.PriceString.Get(key)) end
+    local custom = ns.settings.priceStrings and ns.settings.priceStrings[key]
+    w.status:SetText((custom and custom ~= ns.PriceString.DEFAULTS[key]) and "|cffffd24aeigener String|r" or "|cff61eb8fempfohlen|r")
+  end
 
   local profs = buildSegments(self)
   local entries = {}
@@ -432,7 +500,7 @@ function page.refresh(self)
           profit = "|cff61eb8f+|r" .. ns.Money(e.profit),
         },
         tip = { "Material: " .. (#mats > 0 and table.concat(mats, ", ") or "keins"),
-          "Verkauf: " .. ns.Money(e.revenue) .. " (AH-Preis nach Gebühr) · Gewinn " .. ns.Money(e.profit),
+          "Verkauf: " .. ns.Money(e.revenue) .. " (Verkaufswert nach Gebühr) · Gewinn " .. ns.Money(e.profit) .. " · nötig: " .. ns.Money(e.need),
           "Linksklick: 1× in die Craft-Liste · × oder Rechtsklick: Rezept ausblenden" },
         action = function()
           hidden()[r.id] = true
@@ -456,6 +524,7 @@ function page.refresh(self)
     if st.tooLow > 0 then why[#why + 1] = st.tooLow .. " unter deinem Mindestgewinn" end
     if st.noPrice > 0 then why[#why + 1] = st.noPrice .. " ohne AH-Preis" end
     if st.unsellable > 0 then why[#why + 1] = st.unsellable .. " nicht verkäuflich (gebunden)" end
+    if (st.old or 0) > 0 then why[#why + 1] = st.old .. " mit altem Preis (über 3 Tage)" end
     if st.hidden > 0 then why[#why + 1] = st.hidden .. " ausgeblendet" end
     self.info:SetText(string.format("%s (Skill %d): |cff61eb8f%d Rezepte bringen Gold.|r %s\nPreise: %s",
       ns.ProfName(ns.PROF[self.prof]), rank, #list, #why > 0 and ("Nicht gezeigt: " .. table.concat(why, ", ") .. ".") or "", M.LastScanText()))

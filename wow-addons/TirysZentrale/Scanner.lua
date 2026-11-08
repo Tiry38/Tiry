@@ -231,16 +231,19 @@ end
 
 -- Gewinn eines gespeicherten Rezepts mit aktuellen Preisen
 function S.RecipeProfit(r)
+  local PS = ns.PriceString
   local cost, unknown = 0, 0
   for _, reagent in ipairs(r.reagents) do
-    local unit = M.BuyCost(reagent.id)
+    local unit
+    if PS then unit = PS.Eval("matPrice", reagent.id) else unit = M.BuyCost(reagent.id) end
     if unit then
       cost = cost + unit * reagent.n
     else
       unknown = unknown + 1
     end
   end
-  local price = M.Price(r.out)
+  local price
+  if PS then price = PS.Eval("craftValue", r.out) else price = M.Price(r.out) end
   local revenue = price and M.Net(price) * r.qty or nil
   local profit = revenue and (revenue - cost) or nil
   return profit, revenue, cost, unknown
