@@ -1,5 +1,15 @@
 # Changelog – Tiry's Zentrale
 
+## 5.2.0 (08.11.2026)
+- **Rezepte zum Kaufen werden als Rezept angezeigt** (Muster, Pläne, Formel, Rezept, Bauplan …), nicht mehr als das Item, das sie herstellen.
+  - Die Zuordnung Rezept → Rezept-Item stammt **exakt aus den Forever-Spieldaten**: Ein Rezept-Item hat als zweiten Effekt den Rezept-Zauber (ItemXItemEffect/ItemEffect, Build 70862). Neuer Generator `tools/gen_recipe_items.py`, neue Datei `Data_RecipeItems.lua`.
+  - Ergebnis: 1.496 von 1.967 Rezepten haben ein Rezept-Item. Die übrigen lernt man beim Lehrer und sie sind als „(Lehrer)“ markiert.
+- **Craft-Planer → „Lernen lohnt sich“:**
+  - Jede Zeile zeigt das Rezept-Item mit Gewinn pro Craft, Preis des Rezepts im AH und „nach X Crafts bezahlt“. Ein Hinweis „gibt dir Skill“ zeigt, ob es zum Skill-Plan passt.
+  - **Klick** sucht das Rezept im AH. **Shift-Klick** legt es in die Auctionator-Suche.
+  - Der Knopf heißt in dieser Ansicht „Rezepte suchen“: Bei offenem AH sucht er alle angezeigten Rezepte, sonst legt er die Auctionator-Liste „Zentrale: Rezepte“ an.
+- **Berufe-Berater → „Hol dir diese Rezepte“:** die 8 lohnendsten Rezepte, die du noch nicht kannst, über alle deine Berufe. Spalten: Gewinn/Craft, Rezept im AH, Bezahlt nach. Dazu der Knopf „Alle Rezepte im AH suchen“.
+
 ## 5.1.0 (08.11.2026)
 - **Neu: Markt → Meine Auktionen**
   - **Beim Öffnen des AH, ohne Klick:** Tiry's Zentrale liest deine eigenen Auktionen (`C_AuctionHouse.QueryOwnedAuctions`).

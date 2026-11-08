@@ -70,6 +70,19 @@ function R.IsKnown(r)
   return scanned and scanned[r.id] == true or false
 end
 
+-- Rezept-Item zum Kaufen (Muster, Pläne, Formel ...) – nil = lernt man beim Lehrer
+function R.RecipeItem(r)
+  return r and ns.RECIPE_ITEMS and ns.RECIPE_ITEMS[r.id]
+end
+
+-- Lohnt sich das Rezept? Rückgabe: Rezept-Item, Preis im AH (oder nil), Crafts bis es bezahlt ist (oder nil)
+function R.Payback(r, profitPerCraft)
+  local item = R.RecipeItem(r)
+  local price = item and ns.Market.Price(item)
+  local crafts = (price and profitPerCraft and profitPerCraft > 0) and math.ceil(price / profitPerCraft) or nil
+  return item, price, crafts
+end
+
 -- Skill-Farbe wie im Spiel: 0 orange, 1 gelb, 2 grün, 3 grau
 function R.Difficulty(r, rank)
   if not rank then return nil end

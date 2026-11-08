@@ -238,7 +238,12 @@ function page.build(self, content, width)
   self.makeBtn = UI.Button(mk, "Liste erstellen", "primary", 170, 34, "star")
   self.makeBtn:SetPoint("LEFT", self.perRecipe, "RIGHT", 40, 0)
   self.makeBtn:SetScript("OnClick", function() page.MakeList(self) end)
-  UI.SetTooltip(self.makeBtn, "Liste erstellen", "Legt alle Rezepte, die gerade angezeigt werden (also Gold bringen), in die Craft-Liste und öffnet das Einkaufsfenster mit den Materialien.")
+  UI.SetTooltip(self.makeBtn, function()
+    if self.view == "learnable" then
+      return "Rezepte suchen", "Sucht die angezeigten Rezepte (Muster, Pläne, Formeln ...) im AH. Ist das AH zu, wird eine Auctionator-Einkaufsliste \"Zentrale: Rezepte\" angelegt."
+    end
+    return "Liste erstellen", "Legt alle Rezepte, die gerade angezeigt werden (also Gold bringen), in die Craft-Liste und öffnet das Einkaufsfenster mit den Materialien."
+  end)
   self.shopBtn = UI.Button(mk, "Einkaufsfenster", "cool", 170, 34, "cart")
   self.shopBtn:SetPoint("LEFT", self.makeBtn, "RIGHT", 10, 0)
   self.shopBtn:SetScript("OnClick", function() ns.Shop.Toggle() end)
@@ -355,7 +360,22 @@ function page.Reload(self)
   ns.Print("Craft-Planer aktualisiert – " .. M.LastScanText() .. ".")
 end
 
+-- "Lernen lohnt sich": alle gezeigten Rezept-Items im AH suchen (bzw. als Auctionator-Liste anlegen)
+function page.SearchRecipes(self)
+  local ids = {}
+  for i = 1, math.min(#(self.learnIDs or {}), 20) do ids[i] = self.learnIDs[i] end
+  if #ids == 0 then ns.Print("Gerade ist kein lohnendes Rezept zum Kaufen dabei (die übrigen lernst du beim Lehrer).") return end
+  if M.ahOpen then
+    local ok, err = M.SearchNow(ids)
+    if not ok then ns.Print("|cffff6b81" .. tostring(err) .. "|r") end
+  else
+    local ok, n = M.CreateShoppingList("Zentrale: Rezepte", ids)
+    ns.Print(ok and ("Liste |cffff9929Zentrale: Rezepte|r angelegt (" .. n .. " Rezepte). Im AH: Auctionator > Einkaufen.") or ("|cffff6b81" .. tostring(n) .. "|r"))
+  end
+end
+
 function page.MakeList(self)
+  if self.view == "learnable" then return page.SearchRecipes(self) end
   local list = page.Entries(self)
   if #list == 0 then
     ns.Print("Gerade bringt kein Rezept genug Gold – Mindestgewinn senken oder im AH scannen.")
@@ -540,6 +560,7 @@ function page.refresh(self)
   self.profit:Refresh()
   for _, p in ipairs(self.pills) do p:Refresh() end
   self.viewSeg:Select(self.view)
+  self.makeBtn:SetLabel(self.view == "learnable" and "Rezepte suchen" or "Liste erstellen")
   self.recText:SetText((auto and ("|cffff9929Empfehlung für Level " .. ns.player.level .. ": " .. ns.Money(preset.profit) .. "|r – wächst mit jedem Level mit.")
     or ("|cffff9929Eigener Wert.|r Empfehlung für Level " .. ns.player.level .. ": " .. ns.Money(preset.profit) .. "."))
     .. " Gewinn = AH-Verkauf nach Gebühr minus Material.")
@@ -566,12 +587,26 @@ function page.refresh(self)
     self.info:SetText("Du hast noch keinen Herstellungsberuf (z. B. Lederverarbeitung, Schneiderei, Alchemie). Lern einen beim Lehrer – dann erscheint er hier automatisch.")
   else
     local list, rank, st = page.Entries(self)
+    local learnIDs = {}
+    self.learnIDs = learnIDs
     for _, e in ipairs(list) do
       local r = e.r
       local notes = {}
-      if self.view == "learnable" then
-        notes[#notes + 1] = "|cffff6b81noch nicht gelernt|r"
-        if r.yellow > 0 then notes[#notes + 1] = "gelb ab Skill " .. r.yellow end
+      local learn = self.view == "learnable"
+      local ri, riPrice, payback
+      if learn then
+        ri, riPrice, payback = R.Payback(r, e.profit)
+        notes[#notes + 1] = "macht " .. ns.Item(r.out).name
+        if not ri then
+          notes[#notes + 1] = "|cffff9929beim Lehrer lernen|r"
+        elseif riPrice then
+          notes[#notes + 1] = "Rezept im AH: " .. ns.Money(riPrice) .. (payback and (" – nach " .. payback .. " Crafts bezahlt") or "")
+        else
+          notes[#notes + 1] = "Rezept: noch kein AH-Preis"
+        end
+        local d = R.Difficulty(r, rank)
+        if d and d <= 1 then notes[#notes + 1] = "|cff61eb8fgibt dir Skill|r" end
+        if ri then learnIDs[#learnIDs + 1] = ri end
       else
         local d = DIFF[R.Difficulty(r, rank) or 3]
         notes[#notes + 1] = UI.Hex(d[2]) .. d[1] .. "|r"
@@ -588,7 +623,8 @@ function page.refresh(self)
         mats[#mats + 1] = re.n .. "× " .. ns.Item(re.id).name .. " (" .. (unit and ns.Money(unit * re.n) or "kein Preis") .. ")"
       end
       entries[#entries + 1] = {
-        id = r.out, name = r.name .. (r.qty > 1 and (" (" .. r.qty .. "×)") or ""),
+        id = learn and (ri or r.out) or r.out,
+        name = learn and (ri and ns.Item(ri).name or (r.name .. " (Lehrer)")) or (r.name .. (r.qty > 1 and (" (" .. r.qty .. "×)") or "")),
         note = table.concat(notes, " · "),
         cells = {
           cost = (e.unknown > 0 and "|cffff9929min.|r " or "") .. ns.Money(e.cost),
@@ -597,7 +633,9 @@ function page.refresh(self)
         },
         tip = { "Material: " .. (#mats > 0 and table.concat(mats, ", ") or "keins"),
           "Verkauf: " .. ns.Money(e.revenue) .. " (Verkaufswert nach Gebühr) · Gewinn " .. ns.Money(e.profit) .. " · nötig: " .. ns.Money(e.need),
-          "Linksklick: 1× in die Craft-Liste · × oder Rechtsklick: Rezept ausblenden" },
+          learn and (ri and "Linksklick: Rezept im AH suchen · Shift-Klick: Rezept in die Auctionator-Suche legen · Rechtsklick: ausblenden"
+            or "Lernst du beim Lehrer deines Berufs · Rechtsklick: ausblenden")
+            or "Linksklick: 1× in die Craft-Liste · × oder Rechtsklick: Rezept ausblenden" },
         action = function()
           hidden()[r.id] = true
           ns.Print(r.name .. " ausgeblendet. Zurückholen: Knopf \"Ausgeblendete zurückholen\".")
@@ -608,6 +646,14 @@ function page.refresh(self)
           if button == "RightButton" then
             hidden()[r.id] = true
             ns.Print(r.name .. " ausgeblendet. Zurückholen: Knopf \"Ausgeblendete zurückholen\".")
+          elseif learn then
+            if ri then
+              local ok, err = M.SearchNow({ ri })
+              if not ok then ns.Print("|cffff6b81" .. tostring(err) .. "|r Tipp: Shift-Klick legt das Rezept in die Auctionator-Suche.") end
+            else
+              ns.Print(r.name .. " lernst du beim Lehrer für " .. ns.ProfName(ns.PROF[r.prof]) .. ".")
+            end
+            return
           else
             addToQueue(r, 1)
           end

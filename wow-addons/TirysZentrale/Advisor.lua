@@ -141,3 +141,30 @@ function AD.ToQueue(plan)
   end
   return #plan.steps
 end
+
+-- Rezept-Tipps: Rezepte, die du noch NICHT kannst, für deinen Skill erreichbar sind und pro Craft
+-- mindestens deinen Mindestgewinn bringen. Mit Rezept-Item (zum Kaufen) und "nach X Crafts bezahlt".
+function AD.RecipeTips(limit)
+  local _, minProfit = R.Filter()
+  local out = {}
+  for _, key in ipairs(R.MyProfessions()) do
+    local list, rank = R.List(key, "learnable")
+    for _, r in ipairs(list) do
+      local profit, revenue, _, unknown = ns.Scanner.RecipeProfit(r)
+      local e = ns.DB.Get(r.out)
+      local bound = e and (e.bind == 1 or e.bind == 4)
+      if profit and revenue and unknown == 0 and not bound and profit >= math.max(minProfit, 1) then
+        local item, price, payback = R.Payback(r, profit)
+        local d = R.Difficulty(r, rank)
+        out[#out + 1] = { r = r, profit = profit, item = item, price = price, payback = payback,
+          skillUp = d ~= nil and d <= 1, prof = key }
+      end
+    end
+  end
+  table.sort(out, function(a, b)
+    if a.profit ~= b.profit then return a.profit > b.profit end
+    return a.r.name < b.r.name
+  end)
+  while #out > (limit or 8) do table.remove(out) end
+  return out
+end

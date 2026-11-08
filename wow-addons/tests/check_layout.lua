@@ -16,7 +16,7 @@ W.skills = {
 }
 W.known = { [2881] = true, [2152] = true, [2164] = true, [2158] = true, [3817] = true, [1229432] = true, [3816] = true }
 W.itemInfo = {}
-W.prices = { [2318] = 32, [783] = 45, [2319] = 120, [4232] = 160, [2304] = 900, [2312] = 9500, [2307] = 12000,
+W.prices = { [4244] = 30000, [4243] = 500, [4231] = 300, [4293] = 9000, [2318] = 32, [783] = 45, [2319] = 120, [4232] = 160, [2304] = 900, [2312] = 9500, [2307] = 12000,
   [4233] = 900, [4231] = 280, [279978] = 196, [2589] = 60, [2592] = 120, [249427] = 4000, [2770] = 40, [2447] = 25 }
 W.install({})
 TirysZentraleDB, TirysZentraleCharDB = nil, nil
@@ -61,6 +61,15 @@ for _, def in ipairs(ns.UI.order) do
   total = total + #probs
   if OUT then L.dump(frame, OUT .. "/" .. def.key .. ".tsv") end
   frame.__h = ns.UI.HEIGHT
+end
+-- Craft-Planer: "Lernen lohnt sich" (Rezept-Items)
+do
+  local rp = ns.UI.pages.recipes
+  ns.UI.Show("recipes") ; rp.view = "learnable" ; ns.UI.RefreshPage("recipes")
+  frame.__h = math.max(ns.UI.HEIGHT, (rp.frame.content.__h or 0) + 140)
+  for _, p in ipairs(L.problems(frame)) do print("[recipes+lernen] " .. p) total = total + 1 end
+  if OUT then L.dump(frame, OUT .. "/recipes_learn.tsv") end
+  frame.__h = ns.UI.HEIGHT ; rp.view = "known" ; ns.UI.RefreshPage("recipes")
 end
 -- Craft-Planer mit aufgeklappten Optionen
 do

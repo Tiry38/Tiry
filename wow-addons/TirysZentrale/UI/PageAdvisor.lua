@@ -62,6 +62,31 @@ function page.build(self, content, width)
   self.stepSeg:Select(25)
   self.planText = UI.Para(content, 13, C.text, width)
   self.planTop = st.y
+  -- Hol dir diese Rezepte (Position wird in refresh berechnet)
+  self.tipTitle = UI.Text(content, 17, "bold", C.text)
+  self.tipTitle:SetText("Hol dir diese Rezepte")
+  self.tipHint = UI.Para(content, 12, C.muted, width)
+  self.tipHint:SetText("Rezepte, die du noch nicht kannst, die dein Skill schafft und die pro Craft mindestens deinen Mindestgewinn bringen. "
+    .. "Klick: im AH suchen · Shift-Klick: Rezept in die Auctionator-Suche legen (Suchfeld vorher anklicken).")
+  self.tipList = UI.ItemList(content, width, {
+    { key = "profit", label = "Gewinn/Craft", width = 110, bold = true },
+    { key = "price", label = "Rezept im AH", width = 110 },
+    { key = "back", label = "Bezahlt nach", width = 110 },
+  })
+  self.tipBtn = UI.Button(content, "Alle Rezepte im AH suchen", "cool", 280, 34, "scan")
+  self.tipBtn:SetScript("OnClick", function()
+    local ids = {}
+    for _, t in ipairs(self.tips or {}) do if t.item then ids[#ids + 1] = t.item end end
+    if #ids == 0 then ns.Print("Diese Rezepte lernst du alle beim Lehrer.") return end
+    if ns.Market.ahOpen then
+      local ok, err = ns.Market.SearchNow(ids)
+      if not ok then ns.Print("|cffff6b81" .. tostring(err) .. "|r") end
+    else
+      local ok, n = ns.Market.CreateShoppingList("Zentrale: Rezepte", ids)
+      ns.Print(ok and ("Liste |cffff9929Zentrale: Rezepte|r angelegt (" .. n .. "). Im AH: Auctionator > Einkaufen.") or ("|cffff6b81" .. tostring(n) .. "|r"))
+    end
+  end)
+
   self.queueBtn = UI.Button(content, "In die Craft-Liste + Einkaufsliste", "primary", 330, 36, "cart")
   self.queueBtn:SetScript("OnClick", function()
     local n = AD.ToQueue(self.plan)
@@ -157,6 +182,48 @@ function page.refresh(self)
   self.queueBtn:SetPoint("TOPLEFT", content, "TOPLEFT", 0, -y)
   self.queueBtn:SetShown(self.plan ~= nil)
   if self.plan then y = y + 36 + 14 end
+
+  -- Hol dir diese Rezepte
+  y = y + 12
+  self.tipTitle:ClearAllPoints()
+  self.tipTitle:SetPoint("TOPLEFT", content, "TOPLEFT", 0, -y)
+  y = y + 30
+  self.tipHint:ClearAllPoints()
+  self.tipHint:SetPoint("TOPLEFT", content, "TOPLEFT", 0, -y)
+  y = y + math.ceil(self.tipHint:GetStringHeight()) + 10
+  local tips = AD.RecipeTips(8)
+  self.tips = tips
+  local entries = {}
+  for _, t in ipairs(tips) do
+    local r = t.r
+    local notes = { "macht " .. ns.Item(r.out).name, ns.ProfName(ns.PROF[t.prof]) }
+    if t.skillUp then notes[#notes + 1] = "|cff61eb8fgibt dir Skill|r" end
+    if not t.item then notes[#notes + 1] = "|cffff9929beim Lehrer lernen|r" end
+    entries[#entries + 1] = {
+      id = t.item or r.out,
+      name = t.item and ns.Item(t.item).name or (r.name .. " (Lehrer)"),
+      note = table.concat(notes, " · "),
+      cells = {
+        profit = "|cffff9929+|r" .. ns.Money(t.profit),
+        price = t.item and (t.price and ns.Money(t.price) or "|cff8a9a94kein Angebot|r") or "|cff8a9a94Lehrer|r",
+        back = t.payback and (t.payback .. " Crafts") or "–",
+      },
+      tip = { t.item and "Klick: im AH suchen · Shift-Klick: in die Auctionator-Suche legen" or "Lernst du beim Lehrer deines Berufs." },
+      onClick = function()
+        if not t.item then ns.Print(r.name .. " lernst du beim Lehrer für " .. ns.ProfName(ns.PROF[t.prof]) .. ".") return end
+        local ok, err = ns.Market.SearchNow({ t.item })
+        if not ok then ns.Print("|cffff6b81" .. tostring(err) .. "|r Tipp: Shift-Klick legt das Rezept in die Auctionator-Suche.") end
+      end,
+    }
+  end
+  self.tipList:ClearAllPoints()
+  self.tipList:SetPoint("TOPLEFT", content, "TOPLEFT", 0, -y)
+  y = y + self.tipList:SetEntries(entries, #profs == 0 and "Lern zuerst einen Herstellungsberuf – dann siehst du hier, welche Rezepte sich lohnen."
+    or "Gerade bringt kein neues Rezept genug Gold (oder es fehlen AH-Preise). Tipp: einmal im AH scannen.") + 12
+  self.tipBtn:ClearAllPoints()
+  self.tipBtn:SetPoint("TOPLEFT", content, "TOPLEFT", 0, -y)
+  self.tipBtn:SetShown(#tips > 0)
+  if #tips > 0 then y = y + 34 + 12 end
   content:SetHeight(y + 30)
 end
 

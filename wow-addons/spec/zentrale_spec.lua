@@ -362,3 +362,56 @@ describe("Meine Auktionen", function()
     assert.are.same({}, W.errors)
   end)
 end)
+
+describe("Rezepte zum Kaufen (Muster, Pläne ...)", function()
+  local ns, W
+  setup(function()
+    ns, W = E.load({
+      prices = { [4244] = 30000, [4243] = 500, [4231] = 300, [2320] = 10, [4293] = 9000, [2318] = 32 },
+      itemInfo = { [4293] = { name = "Muster: Lederweste des Hügelwächters", stack = 1 } },
+    })
+    SlashCmdList.TIRYSZENTRALE("")
+    ns.UI.Wizard.Finish()
+  end)
+
+  it("kennt das Rezept-Item zum Rezept (aus den Spieldaten)", function()
+    local r = ns.Recipes.Get(3762)
+    assert.are.equal(4293, ns.Recipes.RecipeItem(r))
+    local item, price, crafts = ns.Recipes.Payback(r, 3000)
+    assert.are.equal(4293, item)
+    assert.are.equal(9000, price)
+    assert.are.equal(3, crafts)
+  end)
+
+  it("Craft-Planer 'Lernen lohnt sich' zeigt das Rezept-Item, Shift-Klick legt es in die Suche", function()
+    ns.UI.Show("recipes")
+    local p = ns.UI.pages.recipes
+    p.prof, p.view = "LEATHERWORKING", "learnable"
+    ns.UI.RefreshPage("recipes")
+    local row
+    for _, rw in ipairs(p.list.rows) do if rw:IsShown() and rw.itemID == 4293 then row = rw end end
+    assert.truthy(row, "Zeile mit Muster fehlt")
+    assert.truthy(row.name:GetText():find("Muster", 1, true))
+    W.shift = true
+    local orig = IsShiftKeyDown
+    IsShiftKeyDown = function() return true end
+    row:Click()
+    IsShiftKeyDown = orig
+    assert.truthy(W.linked and W.linked:find("4293", 1, true))
+    assert.are.equal("Rezepte suchen", p.makeBtn.text:GetText())
+    p.makeBtn:Click() -- AH zu -> Auctionator-Liste "Zentrale: Rezepte"
+    assert.truthy(W.lists["Zentrale: Rezepte"])
+    assert.are.same({}, W.errors)
+  end)
+
+  it("Berufe-Berater empfiehlt das Rezept mit 'bezahlt nach'", function()
+    local tips = ns.Advisor.RecipeTips(8)
+    local found
+    for _, t in ipairs(tips) do if t.r.id == 3762 then found = t end end
+    assert.truthy(found)
+    assert.are.equal(4293, found.item)
+    assert.truthy(found.payback and found.payback >= 1)
+    ns.UI.Show("advisor")
+    assert.are.same({}, W.errors)
+  end)
+end)
