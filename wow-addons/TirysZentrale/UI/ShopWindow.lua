@@ -84,14 +84,14 @@ local function create()
   UI.SetTooltip(f.craft, "Nächstes craften", "Stellt der Reihe nach her, wofür du alles Material hast. Ist das Berufsfenster zu, öffnet der erste Klick es, der zweite stellt her.")
   -- Herstellungs-Balken: zeigt, wie lange das aktuelle Herstellen noch dauert (falls der Spiel-Balken verdeckt ist)
   local cb = CreateFrame("Frame", nil, f)
-  cb:SetSize(W - 28, 30)
-  cb.bg = UI.Round(cb, 15, "BACKGROUND", 0)
+  cb:SetSize(W - 28, 50)
+  cb.bg = UI.Round(cb, 20, "BACKGROUND", 0)
   cb.bg:SetColor(C.inset, 1)
   cb.fill = CreateFrame("Frame", nil, cb)
   cb.fill:SetPoint("TOPLEFT")
   cb.fill:SetPoint("BOTTOMLEFT")
   cb.fill:SetWidth(30)
-  cb.fill.bg = UI.Round(cb.fill, 15, "ARTWORK", 0)
+  cb.fill.bg = UI.Round(cb.fill, 20, "ARTWORK", 0)
   cb.fill.bg:SetGradient(UI.GRAD, 0.55) -- halbtransparent: weißer Text bleibt lesbar
   -- Symbol und Text auf eigener Ebene ÜBER der Füllung
   local top = CreateFrame("Frame", nil, cb)
@@ -101,12 +101,17 @@ local function create()
   cb.icon:SetSize(22, 22)
   cb.icon:SetPoint("LEFT", 5, 0)
   cb.text = UI.Text(top, 12, "semibold", C.text, "OVERLAY")
-  cb.text:SetPoint("LEFT", cb.icon, "RIGHT", 8, 0)
+  cb.text:SetPoint("TOPLEFT", 35, -6)
   cb.text:SetWidth(W - 150)
   cb.text:SetWordWrap(false)
   cb.time = UI.Text(top, 12, "bold", C.text, "OVERLAY")
-  cb.time:SetPoint("RIGHT", -12, 0)
+  cb.time:SetPoint("TOPRIGHT", -14, -6)
   cb.time:SetJustifyH("RIGHT")
+  -- zweite Zeile: wie lange dauert ALLES auf der Liste noch?
+  cb.total = UI.Text(top, 12, "semibold", C.text, "OVERLAY")
+  cb.total:SetPoint("BOTTOMLEFT", 35, 6)
+  cb.total:SetWidth(W - 90)
+  cb.total:SetWordWrap(false)
   cb:Hide()
   cb:SetScript("OnUpdate", function(self)
     if not self.endMs then return end
@@ -114,7 +119,14 @@ local function create()
     local total = math.max(self.endMs - self.startMs, 1)
     local p = ns.Clamp((now - self.startMs) / total, 0, 1)
     self.fill:SetWidth(math.max((W - 28) * p, 30))
-    self.time:SetText((string.format("%.1f s", math.max(self.endMs - now, 0) / 1000):gsub("%.", ",")))
+    local left = math.max(self.endMs - now, 0)
+    self.time:SetText((string.format("%.1f s", left / 1000):gsub("%.", ",")))
+    if self.restMs and self.restCrafts and self.restCrafts > 0 then
+      self.total:SetText(string.format("Gesamt: %s%s · %d %s", self.estimated and "ca. " or "",
+        Shop.Duration(left + self.restMs), self.restCrafts + 1, self.restCrafts + 1 == 1 and "Craft" or "Crafts"))
+    else
+      self.total:SetText("Letzter Craft auf der Liste")
+    end
   end)
   f.cast = cb
   f:Hide()
@@ -221,7 +233,7 @@ function Shop.Refresh()
       local item = ns.Item(c.recipe.out)
       if c.intermediate then
         -- günstiger selbst hergestellt als gekauft (eigenes Rezept) -> kommt vor den eigentlichen Crafts
-        UI.FitText(r.name, string.format("|cff7fc8ff%d×|r %s |cff93a39d· selbst, spart Gold|r", c.n * (c.recipe.qty or 1), item.name or c.recipe.name), W - 160)
+        UI.FitText(r.name, string.format("|cff7fc8ff%d×|r %s |cff93a39d· selbst|r", c.n * (c.recipe.qty or 1), item.name or c.recipe.name), W - 160)
       else
         UI.FitText(r.name, string.format("|cffff9929%d×|r %s", c.n * (c.recipe.qty or 1), item.name or c.recipe.name), W - 160)
       end
@@ -302,7 +314,7 @@ function Shop.Refresh()
     win.cast:ClearAllPoints()
     win.cast:SetPoint("TOPLEFT", win, "TOPLEFT", 14, -(y + 4))
     win.cast:Show()
-    y = y + 38
+    y = y + 58
   else
     win.cast:Hide()
   end
@@ -346,6 +358,44 @@ ns.Listen("MERCHANT_SCANNED", function()
   if ns.Scanner.merchant.open and ns.settings.shopAutoOpen ~= false and #(Shop.VendorPlan()) > 0 then Shop.Show() end
 end)
 
+-- Herstell-Dauer je Rezept lernen (Name = Zaubername im Spiel)
+function Shop.LearnCastTime(name, ms)
+  if not name or type(ms) ~= "number" or ms <= 0 or ms > 60000 then return end
+  ns.db.castTimes = ns.db.castTimes or {}
+  ns.db.castTimes[name] = math.floor(ms)
+end
+
+-- "2:35 Min." bzw. "41 s"
+function Shop.Duration(ms)
+  local sec = math.floor(ms / 1000 + 0.5)
+  if sec < 60 then return sec .. " s" end
+  if sec < 3600 then return string.format("%d:%02d Min.", math.floor(sec / 60), sec % 60) end
+  return string.format("%d:%02d Std.", math.floor(sec / 3600), math.floor(sec % 3600 / 60))
+end
+
+-- Nach dem gerade laufenden Craft: wie viele Crafts (ganze Liste inkl. Zwischenprodukte) und wie lange noch?
+-- Dauer unbekannter Rezepte = Dauer des aktuellen Crafts (dann "ca.").
+-- Rückgabe: leftOfThis, restMs, restCrafts, estimated
+function Shop.RemainingAfter(name, curMs)
+  local times = ns.db.castTimes or {}
+  local leftOfThis, restMs, restCrafts, estimated = nil, 0, 0, false
+  for _, e in ipairs(Shop.CraftOrder()) do
+    local r = e.recipe
+    local n = e.n
+    if r.name == name and not leftOfThis then
+      leftOfThis = n
+      n = n - 1 -- der laufende Craft zählt nicht mit
+    end
+    if n > 0 then
+      local t = times[r.name]
+      if not t then t, estimated = curMs, true end
+      restMs = restMs + t * n
+      restCrafts = restCrafts + n
+    end
+  end
+  return leftOfThis, restMs, restCrafts, estimated
+end
+
 -- Herstellungs-Balken: nur für Berufs-Zauber des Spielers (UnitCastingInfo: isTradeskill)
 local function castUpdate(_, unit)
   if unit ~= "player" or not win then return end
@@ -354,12 +404,10 @@ local function castUpdate(_, unit)
   if ok and name and isTradeskill and type(startMs) == "number" and type(endMs) == "number" then
     cb.startMs, cb.endMs = startMs, endMs
     cb.icon:SetTexture(tex)
-    -- wie viele davon stehen noch auf der Craft-Liste?
-    local left
-    for _, e in ipairs(ns.char.queue or {}) do
-      local r = ns.Recipes.Get(e.recipe)
-      if r and r.name == name then left = e.n end
-    end
+    Shop.LearnCastTime(name, endMs - startMs)
+    -- wie viele davon stehen noch auf der Liste, und wie lange dauert der Rest?
+    local left, restMs, restCrafts, estimated = Shop.RemainingAfter(name, endMs - startMs)
+    cb.restMs, cb.restCrafts, cb.estimated = restMs, restCrafts, estimated
     UI.FitText(cb.text, name .. (left and ("  ·  noch " .. left) or ""), W - 150)
   else
     cb.startMs, cb.endMs = nil, nil

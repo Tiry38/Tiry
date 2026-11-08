@@ -708,6 +708,27 @@ describe("Selbst herstellen oder kaufen (Zwischenprodukte)", function()
   end)
 end)
 
+describe("Herstellungs-Balken: Gesamtdauer", function()
+  it("rechnet Rest der ganzen Liste mit gelernten Dauern", function()
+    local ns = E.load({})
+    ns.char.queue = { { recipe = 2164, prof = "LEATHERWORKING", n = 3 }, { recipe = 2158, prof = "LEATHERWORKING", n = 2 } }
+    local a, b = ns.Recipes.Get(2164), ns.Recipes.Get(2158)
+    -- noch keine Dauer für b bekannt -> Schätzung mit der aktuellen Dauer
+    local left, rest, crafts, est = ns.Shop.RemainingAfter(a.name, 3000)
+    assert.are.equal(3, left)
+    assert.are.equal(4, crafts)          -- 2 weitere von a + 2 von b
+    assert.are.equal(4 * 3000, rest)
+    assert.is_true(est)
+    ns.Shop.LearnCastTime(a.name, 3000)
+    ns.Shop.LearnCastTime(b.name, 5000)
+    left, rest, crafts, est = ns.Shop.RemainingAfter(a.name, 3000)
+    assert.are.equal(2 * 3000 + 2 * 5000, rest)
+    assert.is_false(est)
+    assert.are.equal("16 s", ns.Shop.Duration(16000))
+    assert.are.equal("2:05 Min.", ns.Shop.Duration(125000))
+  end)
+end)
+
 describe("Hergestellt -> Craft-Liste abhaken (alle Wege, nie doppelt)", function()
   local function setup3(ns, W)
     ns.char.queue = { { recipe = 2164, prof = "LEATHERWORKING", n = 3 } }

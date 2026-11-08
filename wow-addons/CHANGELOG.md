@@ -1,5 +1,10 @@
 # Changelog – Tiry's Zentrale
 
+## 5.6.1 (08.11.2026)
+**Herstellungs-Balken: Gesamtdauer der ganzen Liste.**
+- Oben wie bisher der aktuelle Craft mit Sekunden. Neu darunter: „Gesamt: 2:35 Min. · 12 Crafts“ – alles, was noch auf der Liste steht, inkl. selbst hergestellter Zwischenprodukte.
+- Die Dauer je Rezept lernt das Addon beim Herstellen. Unbekannte Rezepte werden mit der aktuellen Dauer geschätzt („ca.“).
+
 ## 5.6.0 (08.11.2026)
 **Selbst herstellen oder kaufen? Das Addon rechnet es für jedes Material aus.**
 - Beispiel: Geschmeidiger mittlerer Balg. Ist Mittlerer Balg + Salz günstiger als der fertige Balg im AH, rechnet der Craft-Planer mit dem günstigeren Weg.
