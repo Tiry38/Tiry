@@ -81,35 +81,30 @@ function page.build(self, content, width)
   self.view = "known"
   local st = UI.Stack(content)
 
-  -- Filterkarte: zwei große Regler + Empfehlung
+  -- Filterkarte: EIN Regler (Mindestgewinn in Gold), Empfehlung wächst mit deinem Level
   local fc = CreateFrame("Frame", nil, content)
-  fc:SetSize(width, 150)
+  fc:SetSize(width, 128)
   fc.bg = UI.Round(fc, 22, "BACKGROUND", 0)
   fc.bg:SetGradient({ { 0.26, 0.15, 0.06 }, { 0.22, 0.09, 0.20 }, { 0.12, 0.10, 0.30 } }, 0.95)
   local title = UI.Text(fc, 15, "bold", C.text)
   title:SetPoint("TOPLEFT", 20, -16)
-  title:SetText("Zeig mir nur Rezepte mit ...")
-  local half = math.floor((width - 50) / 2)
+  title:SetText("Zeig mir Rezepte mit mindestens so viel Gewinn pro Craft:")
   local refresh = function() page.refresh(self) end
-  self.margin = UI.Stepper(fc, "Gewinn mindestens", half, function() return (select(1, R.Filter())) end,
-    function(v) R.SetMargin(v) end, 5, 0, 500, function(v) return v .. " %" end)
-  self.margin:SetPoint("TOPLEFT", 20, -44)
-  self.margin.onChange = refresh
-  self.profit = UI.Stepper(fc, "und mindestens", half, function() return (select(2, R.Filter())) end,
+  self.profit = UI.Stepper(fc, "Mindestgewinn", 340, function() return (select(2, R.Filter())) end,
     function(v) R.SetProfit(v) end,
     function(v, dir)
       local base = (dir > 0) and v or v - 1
       if base < 10000 then return 500 elseif base < 100000 then return 5000 end
       return 50000
-    end, 0, 10000000, function(v) return v == 0 and "egal" or ns.Money(v) end)
-  self.profit:SetPoint("TOPRIGHT", -20, -44)
+    end, 0, 10000000, function(v) return v == 0 and "alles" or ns.Money(v) end)
+  self.profit:SetPoint("TOPLEFT", 20, -44)
   self.profit.onChange = refresh
-  self.recText = UI.Para(fc, 11, C.muted, width - 250)
-  self.recText:SetPoint("TOPLEFT", 20, -92)
-  self.recBtn = UI.Button(fc, "Empfehlung nutzen", "primary", 190, 32, "star")
-  self.recBtn:SetPoint("BOTTOMRIGHT", -20, 16)
+  self.recBtn = UI.Button(fc, "Empfehlung für mein Level", "primary", 240, 34, "star")
+  self.recBtn:SetPoint("TOPRIGHT", -20, -44)
   self.recBtn:SetScript("OnClick", function() R.ResetStyle() page.refresh(self) end)
-  st:Add(fc, 150, 14)
+  self.recText = UI.Para(fc, 11, C.muted, width - 40)
+  self.recText:SetPoint("TOPLEFT", 20, -88)
+  st:Add(fc, 128, 14)
 
   self.segHolder = CreateFrame("Frame", nil, content)
   self.segHolder:SetSize(width, 30)
@@ -118,15 +113,14 @@ function page.build(self, content, width)
   st:Add(self.viewSeg, self.viewSeg:GetHeight(), 8)
   local pills = CreateFrame("Frame", nil, content)
   pills:SetSize(width, 30)
-  local x = 0
   self.pills = {}
-  for _, def in ipairs({ { "Nur sichere Preise", "onlySafe" }, { "Nur mit Skill-Up", "onlySkill" } }) do
-    local p = UI.Pill(pills, def[1], function() return cfg()[def[2]] end, function(v) cfg()[def[2]] = v end, refresh)
-    p:SetPoint("TOPLEFT", x, 0)
-    x = x + p:GetWidth() + 8
-    self.pills[#self.pills + 1] = p
-  end
-  self.scanBtn = UI.Button(pills, "AH scannen", "cool", 150, 30, "refresh")
+  local p = UI.Pill(pills, "Nur mit bekannten Preisen", function() return cfg().onlySafe end, function(v) cfg().onlySafe = v end, refresh)
+  p:SetPoint("TOPLEFT", 0, 0)
+  self.pills[1] = p
+  self.unhideBtn = UI.Button(pills, "Ausgeblendete zurückholen", "soft", 230, 30, "refresh")
+  self.unhideBtn:SetPoint("LEFT", p, "RIGHT", 8, 0)
+  self.unhideBtn:SetScript("OnClick", function() ns.char.hiddenRecipes = {} page.refresh(self) end)
+  self.scanBtn = UI.Button(pills, "AH scannen", "cool", 140, 30, "refresh")
   self.scanBtn:SetPoint("TOPRIGHT")
   self.scanBtn:SetScript("OnClick", function() M.StartScan() end)
   st:Add(pills, 30, 12)
@@ -134,10 +128,9 @@ function page.build(self, content, width)
   self.info = UI.Para(content, 12, C.gold, width)
   st:Add(self.info, 34, 8)
   self.list = UI.ItemList(content, width, {
-    { key = "cost", label = "Material", width = 82 },
-    { key = "revenue", label = "Erlös", width = 82 },
-    { key = "profit", label = "Gewinn", width = 92, bold = true },
-    { key = "margin", label = "in %", width = 56 },
+    { key = "cost", label = "Material", width = 84 },
+    { key = "revenue", label = "Verkauf", width = 84 },
+    { key = "profit", label = "Gewinn", width = 96, bold = true },
   })
   st:Add(self.list, nil)
   self.listTop = st.y
@@ -310,82 +303,113 @@ local function buildSegments(self)
   return profs
 end
 
-function page.refresh(self)
+-- Kann das Ergebnis im AH verkauft werden? (beim Aufheben gebunden / Quest = nein)
+local function sellable(itemID)
+  local e = ns.DB.Get(itemID)
+  return not (e and (e.bind == 1 or e.bind == 4))
+end
+page.Sellable = sellable
+
+local function hidden() ns.char.hiddenRecipes = ns.char.hiddenRecipes or {} return ns.char.hiddenRecipes end
+
+-- Alle Rezepte, die der Spieler sehen soll – sortiert nach Gold-Gewinn pro Craft (oben = am meisten Gold)
+function page.Entries(self)
   local c = cfg()
-  local minMargin, minProfit, auto = R.Filter()
+  local _, minProfit = R.Filter()
+  local list, rank = R.List(self.prof, self.view)
+  local out, stats = {}, { total = #list, unsellable = 0, noPrice = 0, tooLow = 0, hidden = 0 }
+  for _, r in ipairs(list) do
+    local profit, revenue, cost, unknown = S.RecipeProfit(r)
+    if hidden()[r.id] then
+      stats.hidden = stats.hidden + 1
+    elseif not sellable(r.out) then
+      stats.unsellable = stats.unsellable + 1
+    elseif c.onlySafe and (unknown > 0 or not revenue) then
+      stats.noPrice = stats.noPrice + 1
+    elseif not profit or profit < math.max(minProfit, 1) then
+      stats.tooLow = stats.tooLow + 1
+    else
+      out[#out + 1] = { r = r, profit = profit, revenue = revenue, cost = cost, unknown = unknown }
+    end
+  end
+  table.sort(out, function(x, y) return x.profit > y.profit end)
+  return out, rank, stats
+end
+
+function page.refresh(self)
+  local _, minProfit, auto = R.Filter()
   local preset = R.Preset()
-  self.margin:Refresh()
   self.profit:Refresh()
   for _, p in ipairs(self.pills) do p:Refresh() end
   self.viewSeg:Select(self.view)
-  self.recText:SetText((auto and ("|cff61eb8fEmpfehlung für Level " .. ns.player.level .. "|r – wächst mit jedem Level mit.") or
-    ("|cffffd24aDein Stil:|r " .. R.StyleText() .. " (Empfehlung Level " .. ns.player.level .. ": " .. preset.margin .. " % · " .. ns.Money(preset.profit) .. "). Wächst mit."))
-    .. "\nTeure Items brauchen automatisch weniger Prozent (bis zur Hälfte) – 5 Gold Gewinn bei 15 % ist besser als 10 Silber bei 40 %.")
+  self.recText:SetText((auto and ("|cff61eb8fEmpfehlung für Level " .. ns.player.level .. ": " .. ns.Money(preset.profit) .. "|r – wächst mit jedem Level mit.")
+    or ("|cffffd24aEigener Wert.|r Empfehlung für Level " .. ns.player.level .. ": " .. ns.Money(preset.profit) .. "."))
+    .. " Gewinn = Verkauf im AH (nach Gebühr) minus Materialwert. Oben steht immer, was am meisten Gold bringt.")
   self.recBtn:SetEnabled(not auto)
   self.scanBtn:SetEnabled(M.ahOpen == true and M.HasAuctionator())
+  local hiddenCount = 0
+  for _ in pairs(hidden()) do hiddenCount = hiddenCount + 1 end
+  self.unhideBtn:SetLabel("Ausgeblendete zurückholen (" .. hiddenCount .. ")")
+  self.unhideBtn:SetEnabled(hiddenCount > 0)
 
   local profs = buildSegments(self)
-  local entries, total = {}, 0
+  local entries = {}
   if #profs == 0 then
     self.info:SetText("Du hast noch keinen Herstellungsberuf (z. B. Lederverarbeitung, Schneiderei, Alchemie). Lern einen beim Lehrer – dann erscheint er hier automatisch.")
   else
-    local list, rank = R.List(self.prof, self.view)
-    for _, r in ipairs(list) do
-      total = total + 1
-      local profit, revenue, cost, unknown = S.RecipeProfit(r)
-      local margin = (profit and cost and cost > 0) and (profit / cost * 100) or nil
-      local diff = R.Difficulty(r, rank)
-      local pass = true
-      if c.onlySafe and (unknown > 0 or not revenue) then pass = false end
-      if c.onlySkill and self.view == "known" and not (diff == 0 or diff == 1) then pass = false end
-      local needMargin = R.RequiredMargin(minMargin, minProfit, revenue)
-      if pass and minMargin > 0 and not (margin and margin >= needMargin) then pass = false end
-      if pass and minProfit > 0 and not (profit and profit >= minProfit) then pass = false end
-      if pass then
-        local notes = {}
-        if self.view == "learnable" then
-          notes[#notes + 1] = "|cffff6b81noch nicht gelernt – Lehrer/Rezept|r"
-          if r.yellow > 0 then notes[#notes + 1] = "gelb ab Skill " .. r.yellow end
-        else
-          local d = DIFF[diff or 3]
-          notes[#notes + 1] = UI.Hex(d[2]) .. d[1] .. "|r"
-          notes[#notes + 1] = "herstellbar: " .. craftable(r)
-        end
-        for _, e in ipairs(queue()) do
-          if e.recipe == r.id then notes[#notes + 1] = "|cffffd24a" .. e.n .. "× geplant|r" end
-        end
-        local mats = {}
-        for _, re in ipairs(r.reagents) do
-          local unit = M.BuyCost(re.id)
-          mats[#mats + 1] = re.n .. "× " .. ns.Item(re.id).name .. " (" .. (unit and ns.Money(unit * re.n) or "kein Preis") .. ")"
-        end
-        entries[#entries + 1] = {
-          id = r.out, name = r.name .. (r.qty > 1 and (" (" .. r.qty .. "×)") or ""), sortValue = profit or -math.huge,
-          note = table.concat(notes, " · "),
-          cells = {
-            cost = (unknown > 0 and "|cffffd24amin.|r " or "") .. ns.Money(cost),
-            revenue = revenue and ns.Money(revenue) or "–",
-            profit = profit and ((profit >= 0 and "|cff61eb8f+|r" or "") .. ns.Money(profit)) or "–",
-            margin = margin and ((margin >= 0 and "|cff61eb8f" or "|cffff6b81") .. math.floor(margin + 0.5) .. "|r") or "–",
-          },
-          tip = { "Material: " .. (#mats > 0 and table.concat(mats, ", ") or "keins"),
-            string.format("Nötige Marge für dieses Item: %d %%%s", math.floor(needMargin + 0.5), needMargin < minMargin and " (teures Item = weniger nötig)" or ""),
-            "Linksklick: +1 in die Warteschlange · Rechtsklick: -1" },
-          onClick = function(_, button)
-            addToQueue(r, button == "RightButton" and -1 or 1)
-            UI.PlayClick()
-            page.refresh(self)
-          end,
-        }
+    local list, rank, st = page.Entries(self)
+    for _, e in ipairs(list) do
+      local r = e.r
+      local notes = {}
+      if self.view == "learnable" then
+        notes[#notes + 1] = "|cffff6b81noch nicht gelernt|r"
+        if r.yellow > 0 then notes[#notes + 1] = "gelb ab Skill " .. r.yellow end
+      else
+        local d = DIFF[R.Difficulty(r, rank) or 3]
+        notes[#notes + 1] = UI.Hex(d[2]) .. d[1] .. "|r"
+        notes[#notes + 1] = "herstellbar: " .. craftable(r)
       end
+      for _, q in ipairs(queue()) do
+        if q.recipe == r.id then notes[#notes + 1] = "|cffffd24a" .. q.n .. "× geplant|r" end
+      end
+      local mats = {}
+      for _, re in ipairs(r.reagents) do
+        local unit = M.BuyCost(re.id)
+        mats[#mats + 1] = re.n .. "× " .. ns.Item(re.id).name .. " (" .. (unit and ns.Money(unit * re.n) or "kein Preis") .. ")"
+      end
+      entries[#entries + 1] = {
+        id = r.out, name = r.name .. (r.qty > 1 and (" (" .. r.qty .. "×)") or ""),
+        note = table.concat(notes, " · "),
+        cells = {
+          cost = (e.unknown > 0 and "|cffffd24amin.|r " or "") .. ns.Money(e.cost),
+          revenue = ns.Money(e.revenue),
+          profit = "|cff61eb8f+|r" .. ns.Money(e.profit),
+        },
+        tip = { "Material: " .. (#mats > 0 and table.concat(mats, ", ") or "keins"),
+          "Verkauf: " .. ns.Money(e.revenue) .. " (AH-Preis nach Gebühr) · Gewinn " .. ns.Money(e.profit),
+          "Linksklick: in die Warteschlange · Rechtsklick: Rezept ausblenden" },
+        onClick = function(_, button)
+          if button == "RightButton" then
+            hidden()[r.id] = true
+            ns.Print(r.name .. " ausgeblendet. Zurückholen: Knopf \"Ausgeblendete zurückholen\".")
+          else
+            addToQueue(r, 1)
+          end
+          UI.PlayClick()
+          page.refresh(self)
+        end,
+      }
     end
-    table.sort(entries, function(a, b) return a.sortValue > b.sortValue end)
-    local scan = M.LastScanText()
-    self.info:SetText(string.format("%s (Skill %d): %d von %d %s erfüllen deine Filter. Preise: %s",
-      ns.ProfName(ns.PROF[self.prof]), rank, #entries, total,
-      self.view == "known" and "gelernten Rezepten" or "lernbaren Rezepten", scan))
+    local why = {}
+    if st.tooLow > 0 then why[#why + 1] = st.tooLow .. " unter deinem Mindestgewinn" end
+    if st.noPrice > 0 then why[#why + 1] = st.noPrice .. " ohne AH-Preis" end
+    if st.unsellable > 0 then why[#why + 1] = st.unsellable .. " nicht verkäuflich (gebunden)" end
+    if st.hidden > 0 then why[#why + 1] = st.hidden .. " ausgeblendet" end
+    self.info:SetText(string.format("%s (Skill %d): |cff61eb8f%d Rezepte bringen Gold.|r %s\nPreise: %s",
+      ns.ProfName(ns.PROF[self.prof]), rank, #list, #why > 0 and ("Nicht gezeigt: " .. table.concat(why, ", ") .. ".") or "", M.LastScanText()))
   end
-  local empty = (#profs == 0) and "" or ("Kein Rezept erfüllt die Filter. Tipp: Regler senken, \"Nur sichere Preise\" ausschalten oder im AH scannen.")
+  local empty = (#profs == 0) and "" or (not M.HasAuctionator() and "Ohne Auctionator kennt Tiry's Zentrale keine AH-Preise – und ohne Preise lässt sich kein Gewinn berechnen. Installiere Auctionator für WoW Forever und scanne einmal im AH."
+    or "Gerade bringt kein Rezept genug Gold. Tipp: Mindestgewinn senken oder im AH scannen (alte Preise).")
   local h = self.list:SetEntries(entries, empty)
 
   -- Warteschlange

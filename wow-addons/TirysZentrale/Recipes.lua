@@ -227,7 +227,7 @@ end
 -- Levelaufstieg: Filter wachsen automatisch mit -> kurz Bescheid sagen
 ns.Listen("PLAYER_CHANGED", function()
   if not ns.settings then return end
-  local m, p = R.Filter()
-  ns.Print(string.format("Level %d! Deine Craft-Filter sind mitgewachsen: mind. |cffffd24a%d %%|r und |cffffd24a%s|r Gewinn pro Craft.",
-    ns.player.level, m, ns.Money(p)))
+  local _, p = R.Filter()
+  ns.Print(string.format("Level %d! Dein Mindestgewinn im Craft-Planer ist mitgewachsen: |cffffd24a%s|r pro Craft.",
+    ns.player.level, ns.Money(p)))
 end)

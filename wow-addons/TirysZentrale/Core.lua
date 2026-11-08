@@ -274,7 +274,8 @@ ns.On("ITEM_DATA_LOAD_RESULT", onItemData)
 ----------------------------------------------------------------------------
 local GOLD_C, SILVER_C, COPPER_C = "|cffffd24a", "|cffd5d9e6", "|cffe8a066"
 
--- Kompakt: 12g 34s 5k (ganze Kupfer, ohne Nullen)
+-- Kompakt mit echten Münz-Symbolen aus dem Spiel (keine "k"-Abkürzung, die man als "Tausend" liest)
+local ICON_G, ICON_S, ICON_C = "|A:coin-gold:11:11:1:0|a", "|A:coin-silver:11:11:1:0|a", "|A:coin-copper:11:11:1:0|a"
 function ns.Money(copper, opts)
   if copper == nil then return "|cff8f88b3–|r" end
   local neg = copper < 0
@@ -288,11 +289,11 @@ function ns.Money(copper, opts)
     if g >= 1000 then
       gs = gs:reverse():gsub("(%d%d%d)", "%1."):reverse():gsub("^%.", "")
     end
-    parts[#parts + 1] = GOLD_C .. gs .. "g|r"
+    parts[#parts + 1] = GOLD_C .. gs .. "|r" .. ICON_G
   end
-  if s > 0 and (g < 100 or (opts and opts.full)) then parts[#parts + 1] = SILVER_C .. s .. "s|r" end
-  if c > 0 and g == 0 and (s < 10 or (opts and opts.full)) then parts[#parts + 1] = COPPER_C .. c .. "k|r" end
-  if #parts == 0 then parts[1] = COPPER_C .. "0k|r" end
+  if s > 0 and (g < 100 or (opts and opts.full)) then parts[#parts + 1] = SILVER_C .. s .. "|r" .. ICON_S end
+  if c > 0 and g == 0 and (s < 10 or (opts and opts.full)) then parts[#parts + 1] = COPPER_C .. c .. "|r" .. ICON_C end
+  if #parts == 0 then parts[1] = COPPER_C .. "0|r" .. ICON_C end
   local out = table.concat(parts, " ")
   if neg then out = "|cffff6b81-|r" .. out end
   return out

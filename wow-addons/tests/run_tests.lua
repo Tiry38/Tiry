@@ -179,13 +179,16 @@ local function runScenario(label, opts)
   step("Craft-Planer", function()
     local p = ns.UI.pages.recipes
     ns.UI.Show("recipes")
-    TirysZentraleDB.settings.craft.marginFactor = 0
     TirysZentraleDB.settings.craft.profitFactor = 0
     TirysZentraleDB.settings.craft.onlySafe = false
     p.prof = "TAILORING"
     p.refresh(p)
     local row = p.list.rows[1]
-    W.call(row, "OnClick", "LeftButton") ; W.call(row, "OnClick", "LeftButton") ; W.call(row, "OnClick", "RightButton")
+    if row and row:IsShown() then
+      W.call(row, "OnClick", "LeftButton") ; W.call(row, "OnClick", "LeftButton")
+    else
+      TirysZentraleCharDB.queue = { { recipe = 3755, prof = "TAILORING", n = 2 } } -- ohne Preise: direkt einplanen
+    end
     p.queueCard.buy:Click()
     W.bags[0][5] = { itemID = 2996, stackCount = 20, quality = 1 }
     W.bags[0][6] = { itemID = 2320, stackCount = 20, quality = 1 }
@@ -193,7 +196,6 @@ local function runScenario(label, opts)
     p.refresh(p)
     p.queueCard.craft:Click()
     for _, pl in ipairs(p.pills) do pl:Click() pl:Click() end
-    W.call(p.margin, "OnShow")
     W.fire("TRADE_SKILL_CLOSE") ; W.flush()
   end)
   check(label .. ": Rezept gecraftet", (W.crafted or 0) >= 1, tostring(W.crafted))
@@ -255,28 +257,54 @@ local function runScenario(label, opts)
   step("Empfehlung & Regler", function()
     local p = ns.UI.pages.recipes
     p.recBtn:Click()
-    assert(TirysZentraleDB.settings.craft.marginFactor == 1 and select(3, R.Filter()) == true)
-    local m1 = select(1, R.Filter())
-    W.call(p.margin, "OnShow")
-    local plus = nil
-    for _, ch in ipairs(p.margin.__children) do if ch.__kind == "Button" and not plus then plus = ch end end
+    assert(select(3, R.Filter()) == true, "Empfehlung aktiv")
+    local g1 = select(2, R.Filter())
+    local plus
+    for _, ch in ipairs(p.profit.__children) do if ch.__kind == "Button" and not plus then plus = ch end end
     plus:Click()
-    assert(select(3, R.Filter()) == false, "Regler muss eigenen Stil setzen")
-    assert(select(1, R.Filter()) == m1 + 5, "Regler übernimmt Empfehlung + Schritt")
+    assert(select(3, R.Filter()) == false, "Regler setzt eigenen Wert")
+    assert(select(2, R.Filter()) > g1, "Mindestgewinn steigt mit Plus")
+    p.recBtn:Click()
     p.viewSeg:Select("learnable", true)
     p.viewSeg:Select("known", true)
     for _, b in ipairs(p.segments.buttons) do b:Click() end
     W.fire("NEW_RECIPE_LEARNED", 2152) ; W.flush()
     W.fire("SKILL_LINES_CHANGED") ; W.flush()
   end)
-  check(label .. ": Empfehlung je Level", R.Preset(15).margin == 30 and R.Preset(60).profit == 80000 and R.Preset(25).profit == 5000)
-  -- Stil wächst mit: +5 Prozentpunkte bei Level 20 bleiben als Faktor erhalten
-  local before = select(1, R.Filter())
+  check(label .. ": Empfehlung je Level", R.Preset(15).profit == 1800 and R.Preset(25).profit == 5000 and R.Preset(60).profit == 80000, R.Preset(15).profit)
+  local g20 = select(2, R.Filter())
   W.level = 40 ; W.fire("PLAYER_LEVEL_UP", 40) ; W.flush()
-  local m40, p40 = R.Filter()
-  check(label .. ": Filter wachsen mit Level", p40 > 2500 and m40 ~= before, m40 .. " / " .. p40)
-  check(label .. ": teure Items brauchen weniger %", R.RequiredMargin(30, 2500, 1000000) == 15 and R.RequiredMargin(30, 2500, 5000) == 30)
+  check(label .. ": Mindestgewinn wächst mit Level", select(2, R.Filter()) > g20)
   W.level = 20 ; W.fire("PLAYER_LEVEL_UP", 20) ; W.flush()
+
+  -- Rechentest mit festen Zahlen (AH-Gebühr 5 %):
+  -- Leinentasche: Verkauf 1000 -> netto 950; Material 3 Leinenstoffballen à 100 + 3 Grober Faden à 10 (Händler) = 330 -> Gewinn 620
+  -- Leinenstoffballen: Verkauf 100 -> netto 95; Material 2 Leinenstoff à 60 = 120 -> Verlust, darf NICHT erscheinen
+  -- Feine Lederhandschuhe sind beim Anlegen gebunden (handelbar), werden also gezeigt, wenn Preise da sind
+  if opts.auctionator ~= false then step("Rechentest Craft-Planer", function()
+    W.prices[4238], W.prices[2996], W.prices[2589] = 1000, 100, 60
+    TirysZentraleDB.vendorBuy[2320] = 10
+    TirysZentraleDB.settings.craft.profitFactor = 0
+    TirysZentraleDB.settings.craft.onlySafe = true
+    TirysZentraleCharDB.hiddenRecipes = {}
+    local p = ns.UI.pages.recipes
+    p.prof, p.view = "TAILORING", "known"
+    local list = p.Entries(p)
+    assert(#list == 1, "nur die Leinentasche bringt Gewinn, gefunden: " .. #list)
+    assert(list[1].r.id == 3755 and list[1].revenue == 950 and list[1].cost == 330 and list[1].profit == 620,
+      string.format("Zahlen falsch: %s %s %s", tostring(list[1].revenue), tostring(list[1].cost), tostring(list[1].profit)))
+    -- Mindestgewinn über dem Gewinn -> Liste leer
+    TirysZentraleDB.settings.craft.profitFactor = 1000
+    assert(#p.Entries(p) == 0, "Mindestgewinn filtert")
+    TirysZentraleDB.settings.craft.profitFactor = 0
+    -- Rechtsklick blendet aus, Knopf holt zurück
+    ns.UI.Show("recipes") ; p.refresh(p)
+    W.call(p.list.rows[1], "OnClick", "RightButton")
+    assert(#p.Entries(p) == 0 and TirysZentraleCharDB.hiddenRecipes[3755], "ausgeblendet")
+    p.unhideBtn:Click()
+    assert(#p.Entries(p) == 1, "zurückgeholt")
+    assert(p.Sellable(279978) and p.Sellable(2312), "verkäuflich")
+  end) end
 
   -- Karte
   step("Karten-Wegpunkt", function()
