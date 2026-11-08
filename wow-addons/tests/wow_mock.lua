@@ -465,6 +465,12 @@ function M.install(opts)
   G.TooltipDataProcessor = { AddTooltipPostCall = function(kind, fn) assert(kind == 0, "Item-Tooltip-Typ") M.tooltipHook = fn end }
   G.Enum.TooltipDataType = { Item = 0, Spell = 1, Unit = 2 }
   G.InCombatLockdown = function() return M.combat == true end
+  G.UnitCastingInfo = function(unit)
+    assert(type(unit) == "string")
+    local c = M.casting
+    if not c then return nil end
+    return c.name, c.name, 136246, c.start, c.stop, c.trade ~= false, "cast-guid", false, c.spell or 0, nil, 0
+  end
   G.ItemRefTooltip = {}
   G.CanMerchantRepair = function() return true end
   G.GetRepairAllCost = function() return M.repairCost or 0, (M.repairCost or 0) > 0 end

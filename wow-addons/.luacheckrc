@@ -25,7 +25,7 @@ read_globals = {
   "GetLocale", "GetMerchantItemID", "GetMerchantItemInfo", "GetMerchantItemMaxStack", "GetMerchantNumItems",
   "GetMoney", "GetMoneyString", "GetProfessionInfo", "GetProfessions", "GetRealZoneText", "GetRealmName",
   "GetRepairAllCost", "GetTime", "HandleModifiedItemClick", "InCombatLockdown", "IsShiftKeyDown", "OpenWorldMap",
-  "PlaySound", "RepairAllItems", "UnitClass", "UnitFactionGroup", "UnitLevel", "UnitName", "date", "geterrorhandler",
+  "PlaySound", "RepairAllItems", "UnitCastingInfo", "UnitClass", "UnitFactionGroup", "UnitLevel", "UnitName", "date", "geterrorhandler",
   "strtrim", "time", "tinsert", "wipe", "seterrorhandler",
   -- Rahmen, Tabellen, Konstanten
   "Auctionator", "ChatFrameUtil", "DEFAULT_CHAT_FRAME", "GameFontNormal", "GameTooltip", "ItemRefTooltip",

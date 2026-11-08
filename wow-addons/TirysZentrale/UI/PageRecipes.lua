@@ -336,33 +336,84 @@ end
 
 -- Wartet auf das hergestellte Item: erst wenn es in der Tasche liegt, wird die Warteschlange verringert
 local pendingCraft
-ns.Listen("LOOT_GAINED", function(_, itemID, gained)
-  if pendingCraft and pendingCraft.out == itemID then
-    local r = R.Get(pendingCraft.recipe)
-    if r then
-      local crafts = math.max(1, math.floor(gained / math.max(r.qty, 1) + 0.5))
-      addToQueue(r, -math.min(crafts, pendingCraft.left))
-      pendingCraft.left = pendingCraft.left - crafts
-      if pendingCraft.left <= 0 then pendingCraft = nil end
-      UI.RefreshPage("recipes")
-      ns.Fire("SHOP_CHANGED")
-    end
-    return
-  end
-  -- Selbst im Berufsfenster hergestellt (ohne "Nächstes craften"): Steht das Item auf der Craft-Liste,
-  -- zählt es als erledigt -> Liste und Einkaufsliste werden kleiner.
-  if not S.tradeOpen then return end
+-- Hergestellt? -> auf der Craft-Liste abhaken. Drei unabhängige Wege (egal ob über "Nächstes craften" oder direkt
+-- im Berufsfenster): (a) TRADE_SKILL_ITEM_CRAFTED_RESULT (Item + Menge), (b) UNIT_SPELLCAST_SUCCEEDED (Rezept-Zauber),
+-- (c) neues Item in der Tasche. Pro kurzem Zeitfenster zählt das MAXIMUM eines Weges -> nie doppelt gezählt.
+local marks = { a = {}, b = {}, c = {} }
+
+local function queueEntryFor(fn)
   for _, e in ipairs(queue()) do
     local r = R.Get(e.recipe)
-    if r and r.out == itemID then
-      local crafts = math.max(1, math.floor(gained / math.max(r.qty, 1) + 0.5))
-      addToQueue(r, -math.min(crafts, e.n))
-      ns.Print(string.format("Hergestellt: %d× %s – auf der Craft-Liste abgehakt.", crafts, r.name))
-      UI.RefreshPage("recipes")
-      ns.Fire("SHOP_CHANGED")
-      return
+    if r and fn(r) then return r, e end
+  end
+end
+
+local function resolveMarks()
+  local total = {}
+  for _, path in pairs(marks) do
+    for id, n in pairs(path) do total[id] = math.max(total[id] or 0, n) end
+  end
+  marks = { a = {}, b = {}, c = {} }
+  local changed = false
+  for id, n in pairs(total) do
+    local r, e = queueEntryFor(function(x) return x.id == id end)
+    if r and e then
+      local done = math.min(n, e.n)
+      addToQueue(r, -done)
+      if pendingCraft and pendingCraft.recipe == r.id then
+        pendingCraft.left = pendingCraft.left - done
+        if pendingCraft.left <= 0 then pendingCraft = nil end
+      end
+      ns.Print(string.format("Hergestellt: %d× %s – auf der Craft-Liste abgehakt%s.", done, r.name,
+        e.n > 0 and (", noch " .. e.n) or ""))
+      changed = true
     end
   end
+  if changed then
+    UI.RefreshPage("recipes")
+    ns.Fire("SHOP_CHANGED")
+  end
+end
+
+local recentEvent = {} -- [Rezept] = Zeitpunkt der letzten Meldung über (a) oder (b)
+local function mark(path, r, crafts)
+  local now = GetTime()
+  if path == "c" then
+    -- Taschen-Weg nur, wenn Blizzard das Herstellen nicht schon gemeldet hat (sonst doppelt, falls die Tasche später kommt)
+    if recentEvent[r.id] and now - recentEvent[r.id] < 3 then return end
+  else
+    recentEvent[r.id] = now
+  end
+  marks[path][r.id] = (marks[path][r.id] or 0) + crafts
+  ns.Debounce("craftmarks", 0.8, resolveMarks)
+end
+page.MarkCrafted = mark
+
+-- (a) Blizzard meldet das Herstellungs-Ergebnis
+ns.On("TRADE_SKILL_ITEM_CRAFTED_RESULT", function(_, data)
+  local itemID = type(data) == "table" and data.itemID
+  if not itemID or itemID == 0 then return end
+  local r = queueEntryFor(function(x) return x.out == itemID end)
+  if r then mark("a", r, math.max(1, math.floor((data.quantity or r.qty) / math.max(r.qty, 1) + 0.5))) end
+end)
+
+-- (b) Rezept-Zauber erfolgreich gewirkt (Zauber-Nummer = Rezept; abweichende Nummern über das Ergebnis-Item)
+ns.On("UNIT_SPELLCAST_SUCCEEDED", function(_, unit, _, spellID)
+  local ok, isPlayer = pcall(function() return unit == "player" and type(spellID) == "number" end)
+  if not (ok and isPlayer) then return end
+  local r = queueEntryFor(function(x) return x.id == spellID end)
+  if not r then
+    local live = R.FromLive and R.FromLive(spellID)
+    if live then r = queueEntryFor(function(x) return x.out == live.out end) end
+  end
+  if r then mark("b", r, 1) end
+end)
+
+-- (c) Ergebnis-Item neu in der Tasche (Rückfall)
+ns.Listen("LOOT_GAINED", function(_, itemID, gained)
+  if not (S.tradeOpen or pendingCraft) then return end
+  local r = queueEntryFor(function(x) return x.out == itemID end)
+  if r then mark("c", r, math.max(1, math.floor(gained / math.max(r.qty, 1) + 0.5))) end
 end)
 
 function page.Reload(self)

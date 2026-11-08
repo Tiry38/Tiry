@@ -97,5 +97,12 @@ local shopProbs = L.problems(TirysZentraleShopWindow)
 for _, p in ipairs(shopProbs) do print("[shop] " .. p) end
 total = total + #shopProbs
 if OUT then L.dump(TirysZentraleShopWindow, OUT .. "/shop.tsv") end
+-- Einkaufsliste mit laufendem Herstellungs-Balken
+W.casting = { name = "Feine Lederhandschuhe", start = W.now * 1000 - 1200, stop = W.now * 1000 + 1800 }
+W.fire("UNIT_SPELLCAST_START", "player", "guid", 2164) W.flush()
+W.call(TirysZentraleShopWindow.cast, "OnUpdate", 0.1)
+for _, p in ipairs(L.problems(TirysZentraleShopWindow)) do print("[shop+balken] " .. p) total = total + 1 end
+if OUT then L.dump(TirysZentraleShopWindow, OUT .. "/shop_cast.tsv") end
+W.casting = nil
 print(string.format("%d Layout-Probleme gefunden", total))
 os.exit(total == 0 and 0 or 1)

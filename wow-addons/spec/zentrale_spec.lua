@@ -594,3 +594,74 @@ describe("Auktionen: Gold im Briefkasten", function()
     assert.are.same({}, W.errors)
   end)
 end)
+
+describe("Hergestellt -> Craft-Liste abhaken (alle Wege, nie doppelt)", function()
+  local function setup3(ns, W)
+    ns.char.queue = { { recipe = 2164, prof = "LEATHERWORKING", n = 3 } }
+    W.bags = { [0] = {} }
+    W.fire("BAG_UPDATE_DELAYED") W.flush()
+  end
+  local out = 4247 -- Ergebnis von Rezept 2164 laut Daten (wird unten geprüft)
+
+  it("Weg (a): TRADE_SKILL_ITEM_CRAFTED_RESULT – auch bei geschlossenem Berufsfenster", function()
+    local ns, W = E.load({})
+    out = ns.Recipes.Get(2164).out
+    setup3(ns, W)
+    W.fire("TRADE_SKILL_ITEM_CRAFTED_RESULT", { itemID = out, quantity = 1, itemGUID = "x", hyperlink = "" }) W.flush()
+    assert.are.equal(2, ns.char.queue[1].n)
+  end)
+
+  it("Weg (b): UNIT_SPELLCAST_SUCCEEDED mit der Rezept-Nummer", function()
+    local ns, W = E.load({})
+    setup3(ns, W)
+    W.fire("UNIT_SPELLCAST_SUCCEEDED", "player", "guid", 2164) W.flush()
+    W.fire("UNIT_SPELLCAST_SUCCEEDED", "target", "guid", 2164) W.flush() -- fremde Einheit zählt nicht
+    assert.are.equal(2, ns.char.queue[1].n)
+  end)
+
+  it("alle drei Wege für EIN Herstellen -> nur einmal abgehakt; Einkaufsliste schrumpft", function()
+    local ns, W = E.load({})
+    setup3(ns, W)
+    W.recipes = {}
+    W.fire("TRADE_SKILL_SHOW") W.flush()
+    W.prints = {}
+    W.fire("UNIT_SPELLCAST_SUCCEEDED", "player", "guid", 2164)
+    W.fire("TRADE_SKILL_ITEM_CRAFTED_RESULT", { itemID = out, quantity = 1, itemGUID = "x", hyperlink = "" })
+    W.bags = { [0] = { { itemID = out, stackCount = 1, quality = 2 } } }
+    W.fire("BAG_UPDATE_DELAYED")
+    W.flush()
+    assert.are.equal(2, ns.char.queue[1].n)
+    assert.truthy(E.chat(W):find("noch 2", 1, true))
+    -- die nächsten zwei
+    W.fire("UNIT_SPELLCAST_SUCCEEDED", "player", "guid", 2164) W.flush()
+    W.fire("UNIT_SPELLCAST_SUCCEEDED", "player", "guid", 2164) W.flush()
+    assert.are.equal(0, #ns.char.queue)
+    local list = ns.Shop.List()
+    assert.are.equal(0, #list)
+    assert.are.same({}, W.errors)
+  end)
+end)
+
+describe("Herstellungs-Balken in der Einkaufsliste", function()
+  it("erscheint beim Herstellen, zeigt Restzeit und verschwindet danach", function()
+    local ns, W = E.load({})
+    ns.char.queue = { { recipe = 2164, prof = "LEATHERWORKING", n = 3 } }
+    ns.Shop.Show()
+    local win = TirysZentraleShopWindow
+    local name = ns.Recipes.Get(2164).name
+    W.casting = { name = name, start = W.now * 1000, stop = W.now * 1000 + 3000 }
+    W.fire("UNIT_SPELLCAST_START", "player", "guid", 2164) W.flush()
+    assert.is_true(win.cast:IsShown())
+    assert.truthy(win.cast.text:GetText():find("noch 3", 1, true) or win.cast.text:GetText():find("...", 1, true))
+    W.call(win.cast, "OnUpdate", 0.1)
+    assert.truthy(win.cast.time:GetText():find("s", 1, true))
+    -- Zauber anderer Art (kein Beruf) -> kein Balken
+    W.casting = { name = "Feuerball", start = 0, stop = 1, trade = false }
+    W.fire("UNIT_SPELLCAST_START", "player", "guid", 133) W.flush()
+    assert.is_false(win.cast:IsShown())
+    W.casting = nil
+    W.fire("UNIT_SPELLCAST_STOP", "player", "guid", 2164) W.flush()
+    assert.is_false(win.cast:IsShown())
+    assert.are.same({}, W.errors)
+  end)
+end)

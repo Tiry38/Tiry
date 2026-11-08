@@ -82,6 +82,41 @@ local function create()
   f.craft:SetPoint("BOTTOMRIGHT", -14, 14)
   f.craft:SetScript("OnClick", function() UI.pages.recipes.CraftNext(UI.pages.recipes) end)
   UI.SetTooltip(f.craft, "Nächstes craften", "Stellt der Reihe nach her, wofür du alles Material hast. Ist das Berufsfenster zu, öffnet der erste Klick es, der zweite stellt her.")
+  -- Herstellungs-Balken: zeigt, wie lange das aktuelle Herstellen noch dauert (falls der Spiel-Balken verdeckt ist)
+  local cb = CreateFrame("Frame", nil, f)
+  cb:SetSize(W - 28, 30)
+  cb.bg = UI.Round(cb, 15, "BACKGROUND", 0)
+  cb.bg:SetColor(C.inset, 1)
+  cb.fill = CreateFrame("Frame", nil, cb)
+  cb.fill:SetPoint("TOPLEFT")
+  cb.fill:SetPoint("BOTTOMLEFT")
+  cb.fill:SetWidth(30)
+  cb.fill.bg = UI.Round(cb.fill, 15, "ARTWORK", 0)
+  cb.fill.bg:SetGradient(UI.GRAD, 0.55) -- halbtransparent: weißer Text bleibt lesbar
+  -- Symbol und Text auf eigener Ebene ÜBER der Füllung
+  local top = CreateFrame("Frame", nil, cb)
+  top:SetAllPoints()
+  top:SetFrameLevel(cb.fill:GetFrameLevel() + 2)
+  cb.icon = top:CreateTexture(nil, "OVERLAY")
+  cb.icon:SetSize(22, 22)
+  cb.icon:SetPoint("LEFT", 5, 0)
+  cb.text = UI.Text(top, 12, "semibold", C.text, "OVERLAY")
+  cb.text:SetPoint("LEFT", cb.icon, "RIGHT", 8, 0)
+  cb.text:SetWidth(W - 150)
+  cb.text:SetWordWrap(false)
+  cb.time = UI.Text(top, 12, "bold", C.text, "OVERLAY")
+  cb.time:SetPoint("RIGHT", -12, 0)
+  cb.time:SetJustifyH("RIGHT")
+  cb:Hide()
+  cb:SetScript("OnUpdate", function(self)
+    if not self.endMs then return end
+    local now = GetTime() * 1000
+    local total = math.max(self.endMs - self.startMs, 1)
+    local p = ns.Clamp((now - self.startMs) / total, 0, 1)
+    self.fill:SetWidth(math.max((W - 28) * p, 30))
+    self.time:SetText((string.format("%.1f s", math.max(self.endMs - now, 0) / 1000):gsub("%.", ",")))
+  end)
+  f.cast = cb
   f:Hide()
   tinsert(UISpecialFrames, "TirysZentraleShopWindow")
   return f
@@ -257,6 +292,15 @@ function Shop.Refresh()
     y = y + ROW
   end
   for i = shown + 1, #win.rows do win.rows[i]:Hide() end
+  -- Herstellungs-Balken über den Knöpfen
+  if win.cast.endMs then
+    win.cast:ClearAllPoints()
+    win.cast:SetPoint("TOPLEFT", win, "TOPLEFT", 14, -(y + 4))
+    win.cast:Show()
+    y = y + 38
+  else
+    win.cast:Hide()
+  end
   win:SetHeight(math.max(y + 60, 160))
   if #plan > 0 then
     win.search.mode = "vendor"
@@ -296,3 +340,32 @@ end)
 ns.Listen("MERCHANT_SCANNED", function()
   if ns.Scanner.merchant.open and ns.settings.shopAutoOpen ~= false and #(Shop.VendorPlan()) > 0 then Shop.Show() end
 end)
+
+-- Herstellungs-Balken: nur für Berufs-Zauber des Spielers (UnitCastingInfo: isTradeskill)
+local function castUpdate(_, unit)
+  if unit ~= "player" or not win then return end
+  local ok, name, _, tex, startMs, endMs, isTradeskill = pcall(UnitCastingInfo, "player")
+  local cb = win.cast
+  if ok and name and isTradeskill and type(startMs) == "number" and type(endMs) == "number" then
+    cb.startMs, cb.endMs = startMs, endMs
+    cb.icon:SetTexture(tex)
+    -- wie viele davon stehen noch auf der Craft-Liste?
+    local left
+    for _, e in ipairs(ns.char.queue or {}) do
+      local r = ns.Recipes.Get(e.recipe)
+      if r and r.name == name then left = e.n end
+    end
+    UI.FitText(cb.text, name .. (left and ("  ·  noch " .. left) or ""), W - 150)
+  else
+    cb.startMs, cb.endMs = nil, nil
+  end
+  if win:IsShown() then Shop.Refresh() end
+end
+for _, ev in ipairs({ "UNIT_SPELLCAST_START", "UNIT_SPELLCAST_DELAYED" }) do ns.On(ev, castUpdate) end
+for _, ev in ipairs({ "UNIT_SPELLCAST_STOP", "UNIT_SPELLCAST_FAILED", "UNIT_SPELLCAST_INTERRUPTED" }) do
+  ns.On(ev, function(_, unit)
+    if unit ~= "player" or not win then return end
+    win.cast.startMs, win.cast.endMs = nil, nil
+    if win:IsShown() then Shop.Refresh() end
+  end)
+end

@@ -1,5 +1,13 @@
 # Changelog – Tiry's Zentrale
 
+## 5.4.0 (08.11.2026)
+- **Craft-Liste leert sich jetzt zuverlässig nach dem Herstellen.** Gemeldet von Tiry: 1× hergestellt, die Liste zeigte weiter 3×.
+  - Vorher wurde nur über neue Items in der Tasche bei offenem Berufsfenster erkannt.
+  - Jetzt gibt es **drei unabhängige Wege**: Blizzards Herstellungs-Meldung `TRADE_SKILL_ITEM_CRAFTED_RESULT` (Item + Menge), der gewirkte Rezept-Zauber `UNIT_SPELLCAST_SUCCEEDED` und als Rückfall das neue Item in der Tasche.
+  - **Nie doppelt:** Pro kurzem Zeitfenster zählt das Maximum eines Weges. Der Taschen-Weg zählt nicht, wenn Blizzard dasselbe Rezept in den letzten 3 Sekunden schon gemeldet hat.
+  - Im Chat steht „Hergestellt: 1× … – abgehakt, noch 2“. Craft-Liste und Einkaufsliste werden sofort kleiner.
+- **Herstellungs-Balken in der Einkaufsliste:** Er zeigt Rezept, „noch N auf der Liste“, Fortschritt und Restzeit (z. B. „1,8 s“). Praktisch, wenn ein Fenster den Spiel-Balken verdeckt. Er erscheint nur bei Berufs-Zaubern (`UnitCastingInfo`: isTradeskill).
+
 ## 5.3.1 (08.11.2026)
 - **Auktionen:** Jede Auktion zeigt jetzt Stückpreis **und Gesamtwert** (Menge × Preis). Darunter steht eine **Summenzeile**: „Zusammen: N Auktionen · X Stück“ mit Gesamtwert und „nach Gebühr ca. …“. Sie rechnet sich bei jedem Verkauf, jedem neuen Einstellen und jedem AH-Besuch neu. Abgelaufene zählen nicht mit.
 
