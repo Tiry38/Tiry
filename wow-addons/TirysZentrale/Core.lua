@@ -26,7 +26,7 @@ function ns.LogError(err)
   while #list > 20 do table.remove(list) end
   if not shown[msg] and DEFAULT_CHAT_FRAME then
     shown[msg] = true
-    DEFAULT_CHAT_FRAME:AddMessage("|cffff6b81Tiry's Zentrale – Fehler:|r " .. msg:sub(1, 160) .. "  |cff93a39d(/tz fehler zeigt alle – bitte an Tiry's Entwickler schicken)|r")
+    DEFAULT_CHAT_FRAME:AddMessage("|cffff6b81Tiry's Zentrale – Fehler:|r " .. msg:sub(1, 160) .. "  |cff93a39d(/tz fehler zeigt alle)|r")
   end
 end
 
