@@ -20,11 +20,12 @@ describe("Grundfunktion mit Auctionator", function()
     assert.truthy(ns.professions[165])
   end)
 
-  it("hat höchstens 7 Hauptpunkte im Menü und alle Ansichten sind erreichbar", function()
+  it("hat höchstens 8 Hauptpunkte im Menü und alle Ansichten sind erreichbar", function()
     SlashCmdList.TIRYSZENTRALE("")
     local n = 0
     for _ in pairs(TirysZentraleMainFrame.nav) do n = n + 1 end
-    assert.is_true(n <= 7)
+    assert.is_true(n <= 8)
+    assert.truthy(TirysZentraleMainFrame.nav.auktionen, "Menüpunkt Auktionen fehlt")
     for _, def in ipairs(ns.UI.order) do
       assert.truthy(ns.UI.GroupOf(def.key), "Ansicht ohne Menüpunkt: " .. def.key)
     end
@@ -556,5 +557,40 @@ describe("Craft-Liste: selbst gecraftet zählt, Ruf-Rezepte draußen, leere List
     p.hiddenRow.chips[1]:Click()
     assert.is_nil(next(ns.char.hiddenRecipes))
     assert.truthy(p.list.rows[1]:IsShown())
+  end)
+end)
+
+describe("Auktionen: Gold im Briefkasten", function()
+  it("Verkauf -> Gold im Briefkasten (geschätzt), Briefkasten öffnen -> genau, abholen -> weg", function()
+    local ns, W = E.load({})
+    W.owned = { { auctionID = 21, itemKey = { itemID = 2318 }, status = 0, quantity = 20, timeLeftSeconds = 7200, buyoutAmount = 40 } }
+    W.fire("AUCTION_HOUSE_SHOW") W.flush()
+    W.fire("OWNED_AUCTIONS_UPDATED") W.flush()
+    W.fire("AUCTION_HOUSE_CLOSED") W.flush()
+    W.prints = {}
+    -- fern vom AH verkauft
+    W.fire("AUCTION_HOUSE_SHOW_FORMATTED_NOTIFICATION", 4, "Leichtes Leder", 21)
+    local gold, est = ns.AH.MailGold()
+    assert.are.equal(math.floor(40 * 20 * 0.95), gold) -- 800 nach 5 % Gebühr
+    assert.is_true(est)
+    assert.truthy(E.chat(W):find("Briefkasten", 1, true))
+    assert.are.equal(0, ns.AH.Summary().active) -- nicht mehr in der Auktionsliste
+    assert.truthy(ns.Guide.NextStep().title:find("Gold abholen", 1, true))
+    -- Briefkasten öffnen: der Verkaufsbrief ist da (genauer Betrag)
+    W.mails = { { subject = "Auktion erfolgreich: Leichtes Leder", money = 760, invoice = { "seller", "Leichtes Leder", "Käufer", 800, 20 } } }
+    W.fire("MAIL_SHOW") W.flush()
+    gold, est = ns.AH.MailGold()
+    assert.are.equal(760, gold)
+    assert.is_false(est)
+    assert.is_true(ns.AH.Store().sold[1].inMail)
+    -- Gold abgeholt
+    W.mails = {}
+    W.fire("MAIL_INBOX_UPDATE") W.flush()
+    W.fire("MAIL_CLOSED") W.flush()
+    gold = ns.AH.MailGold()
+    assert.are.equal(0, gold)
+    assert.is_false(ns.AH.Store().sold[1].inMail)
+    assert.is_falsy(ns.Guide.NextStep().title:find("Gold abholen", 1, true))
+    assert.are.same({}, W.errors)
   end)
 end)

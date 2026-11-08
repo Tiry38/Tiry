@@ -22,6 +22,14 @@ function G.NextStep()
       text = "Im Briefkasten liegt Post mit Gold oder Items, die in weniger als 3 Tagen verfällt. Geh zum nächsten Briefkasten.",
       button = "Verstanden", action = function() ns.char.mailExpires = nil UI.RefreshPage("home") end }
   end
+  -- 2b) Gold aus Verkäufen liegt im Briefkasten
+  local mailGold, est = 0, false
+  if ns.AH then mailGold, est = ns.AH.MailGold() end
+  if mailGold and mailGold > 0 then
+    return { title = "Gold abholen: " .. (est and "ca. " or "") .. ns.Money(mailGold), icon = "receipt",
+      text = "Deine Auktionen haben sich verkauft – das Gold liegt im Briefkasten. Sobald du es abholst, verschwindet dieser Hinweis von selbst.",
+      button = "Meine Auktionen", action = function() UI.Show("auctions") end }
+  end
   -- 3) Preise fehlen oder sind alt
   local scanAge = ns.db and ns.db.lastScan and (time() - ns.db.lastScan) or nil
   if M.Status() == "empty" or not scanAge or scanAge > 86400 then

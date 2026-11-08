@@ -17,7 +17,8 @@ UI.GROUPS = {
   { key = "start", label = "Start", icon = "home", views = { { "home", "Goldplan" }, { "methods", "Goldwege" } } },
   { key = "farmen", label = "Farmen", icon = "pin", views = { { "farm", "Farm-Guide" }, { "skinning", "Kürschner" }, { "session", "Farm-Session" } } },
   { key = "berufe", label = "Berufe", icon = "flask", views = { { "recipes", "Craft-Planer" }, { "advisor", "Berufe-Berater" } } },
-  { key = "markt", label = "Markt", icon = "coins", views = { { "market", "Preise" }, { "auctions", "Meine Auktionen" }, { "alerts", "Preisalarm" }, { "scanner", "Taschen & Händler" }, { "database", "Item-Suche" } } },
+  { key = "markt", label = "Markt", icon = "coins", views = { { "market", "Preise" }, { "alerts", "Preisalarm" }, { "scanner", "Taschen & Händler" }, { "database", "Item-Suche" } } },
+  { key = "auktionen", label = "Auktionen", icon = "receipt", views = { { "auctions", "Meine Auktionen" } } },
   { key = "gold", label = "Mein Gold", icon = "chart", views = { { "tracker", "Goldtagebuch" }, { "ledger", "Verkaufsbuch" } } },
   { key = "lernen", label = "Lernen", icon = "book", views = { { "basics", "AH-Schule" }, { "glossary", "Glossar" } } },
   { key = "settings", label = "Einstellungen", icon = "gear", views = { { "settings", "Einstellungen" } } },
@@ -236,8 +237,8 @@ local function buildSidebar(f)
     if ok and info then
       local crest = side:CreateTexture(nil, "BACKGROUND", nil, -3)
       crest:SetAtlas("charactercreate-icon-horde")
-      crest:SetSize(120, 120)
-      crest:SetPoint("BOTTOM", side, "BOTTOM", 0, 116)
+      crest:SetSize(96, 96)
+      crest:SetPoint("BOTTOM", side, "BOTTOM", 0, 108)
       crest:SetDesaturated(true)
       crest:SetVertexColor(C.amber[1], C.amber[2], C.amber[3], 0.22)
       f.hordeCrest = crest

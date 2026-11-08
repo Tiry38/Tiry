@@ -278,8 +278,15 @@ function AW.OnNotify(notification, name, auctionID)
   end
   if notification == SOLD then
     if found then found.status, found.soldTime = "sold", time() end
-    table.insert(s.sold, 1, { id = found and found.id or ns.DB.IDByName(name), name = name or (found and ns.Item(found.id).name) or "?",
-      qty = found and found.qty, unit = found and found.unit, time = time() })
+    local itemName = name or (found and ns.Item(found.id).name) or "?"
+    -- erwartetes Gold (nach AH-Gebühr) -> "kommt in den Briefkasten"
+    local amount = (found and found.unit) and math.floor(found.unit * found.qty * M.CutFactor()) or nil
+    table.insert(s.sold, 1, { id = found and found.id or ns.DB.IDByName(name), name = itemName,
+      qty = found and found.qty, unit = found and found.unit, time = time(), amount = amount, inMail = true })
+    local m = AW.Mail()
+    table.insert(m.pending, { name = itemName, amount = amount or 0, time = time() })
+    ns.Print(string.format("|cffff9929Verkauft:|r %s%s – %s kommt in deinen Briefkasten.", itemName,
+      (found and found.qty and found.qty > 1) and (" (" .. found.qty .. "×)") or "", amount and ("ca. " .. ns.Money(amount)) or "das Gold"))
     while #s.sold > 40 do table.remove(s.sold) end
     if PlaySound and SOUNDKIT and SOUNDKIT.AUCTION_WINDOW_OPEN then pcall(PlaySound, SOUNDKIT.AUCTION_WINDOW_OPEN) end
   elseif found then
@@ -290,6 +297,83 @@ end
 
 ns.On("AUCTION_HOUSE_SHOW_FORMATTED_NOTIFICATION", function(_, notification, text, auctionID)
   AW.OnNotify(notification, text, auctionID)
+end)
+
+----------------------------------------------------------------------------
+-- Gold im Briefkasten: geschätzt ab dem Verkauf, genau sobald der Briefkasten offen war.
+-- Abgeholt (Gold aus der Post genommen) -> verschwindet automatisch.
+----------------------------------------------------------------------------
+function AW.Mail()
+  local s = store()
+  s.mail = s.mail or {}
+  s.mail.known = s.mail.known or 0      -- genau gezählt beim letzten Briefkasten-Besuch (Verkaufserlöse)
+  s.mail.pending = s.mail.pending or {} -- Verkäufe seit dem letzten Besuch (Schätzung)
+  return s.mail
+end
+
+-- Gesamt, davon geschätzt?
+function AW.MailGold()
+  local m = AW.Mail()
+  local est = 0
+  for _, p in ipairs(m.pending) do est = est + (p.amount or 0) end
+  return m.known + est, est > 0, m
+end
+
+function AW.ScanMailbox()
+  if not (GetInboxNumItems and GetInboxHeaderInfo) then return end
+  local m = AW.Mail()
+  local known, names = 0, {}
+  for i = 1, GetInboxNumItems() or 0 do
+    local _, _, _, _, money = GetInboxHeaderInfo(i)
+    local invoiceType, itemName
+    if GetInboxInvoiceInfo then invoiceType, itemName = GetInboxInvoiceInfo(i) end
+    if invoiceType == "seller" and (money or 0) > 0 then
+      known = known + money
+      if itemName then names[itemName] = (names[itemName] or 0) + 1 end
+    end
+  end
+  m.known, m.scanned = known, time()
+  -- Verkäufe, deren Brief jetzt da ist, sind im genauen Betrag enthalten. Ältere als 2 Tage: weg (abgeholt/Fehler).
+  local left = {}
+  for k, v in pairs(names) do left[k] = v end
+  for i = #m.pending, 1, -1 do
+    local p = m.pending[i]
+    if p.name and (left[p.name] or 0) > 0 then
+      left[p.name] = left[p.name] - 1
+      table.remove(m.pending, i)
+    elseif time() - (p.time or 0) > 2 * 86400 then
+      table.remove(m.pending, i)
+    end
+  end
+  -- Verkaufsliste: liegt das Gold noch im Briefkasten oder ist es abgeholt?
+  local inBox = {}
+  for k, v in pairs(names) do inBox[k] = v end
+  for _, e in ipairs(store().sold) do
+    if e.inMail then
+      local stillPending = false
+      for _, p in ipairs(m.pending) do if p.name == e.name and p.time == e.time then stillPending = true end end
+      if (inBox[e.name] or 0) > 0 then
+        inBox[e.name] = inBox[e.name] - 1
+      elseif not stillPending then
+        e.inMail = false -- abgeholt
+      end
+    end
+  end
+  ns.Fire("AUCTIONS_CHANGED")
+end
+
+ns.On("MAIL_SHOW", function() ns.Debounce("ahmail", 0.6, AW.ScanMailbox) end)
+ns.On("MAIL_INBOX_UPDATE", function() ns.Debounce("ahmail", 0.4, AW.ScanMailbox) end)
+ns.On("MAIL_CLOSED", function() AW.ScanMailbox() end)
+
+-- Beim Einloggen erinnern
+ns.Listen("LOGIN", function()
+  C_Timer.After(12, function()
+    local gold, estimated = AW.MailGold()
+    if gold and gold > 0 then
+      ns.Print(string.format("Im Briefkasten liegen %s%s aus Auktionsverkäufen – hol es dir ab!", estimated and "ca. " or "", ns.Money(gold)))
+    end
+  end)
 end)
 
 -- Zusammenfassung für Anzeige und Startseite
@@ -309,7 +393,9 @@ function AW.Summary()
   end
   local today, soldToday = date("%Y-%m-%d", time()), 0
   for _, e in ipairs(s.sold) do if date("%Y-%m-%d", e.time) == today then soldToday = soldToday + 1 end end
-  return { active = active, value = value, undercut = undercut, expired = expiredGuess, soldToday = soldToday, time = s.time }
+  local mailGold, mailEstimated = AW.MailGold()
+  return { active = active, value = value, undercut = undercut, expired = expiredGuess, soldToday = soldToday, time = s.time,
+    mailGold = mailGold, mailEstimated = mailEstimated }
 end
 
 ns.Listen("AUCTIONS_CHANGED", function()

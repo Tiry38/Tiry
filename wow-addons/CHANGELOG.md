@@ -1,5 +1,16 @@
 # Changelog – Tiry's Zentrale
 
+## 5.3.0 (08.11.2026)
+- **Eigener Menüpunkt „Auktionen“** (zwischen Markt und Mein Gold). Das Menü hat jetzt 8 Hauptpunkte.
+  - **Kacheln:** Im AH (Anzahl) · **Wert im AH** · **Im Briefkasten** · Unterboten. Darunter „Heute verkauft“ und der Stand.
+  - **Liste „Im Auktionshaus“:** Menge, dein Preis, günstigster fremder Preis, Status (unterboten / am günstigsten / abgelaufen – Post), Restzeit.
+  - **Liste „Verkauft“:** Erlös nach AH-Gebühr und ob das Gold **im Briefkasten** liegt oder schon **abgeholt** ist.
+- **Gold im Briefkasten**
+  - **Verkauf (auch fern vom AH):** Die Auktion verschwindet aus „Im Auktionshaus“. Im Chat steht „Verkauft: … – ca. X kommt in deinen Briefkasten“, die Kachel „Im Briefkasten“ zählt hoch (geschätzt, „ca.“).
+  - **Briefkasten öffnen:** Der genaue Betrag kommt aus den Verkaufsbelegen (GetInboxInvoiceInfo „seller“ mit Gold).
+  - **Gold abgeholt:** Es verschwindet automatisch, und der Verkauf steht auf „abgeholt“.
+  - **Beim Einloggen** kommt eine Erinnerung, wenn noch Gold im Briefkasten liegt. Auf der Startseite wird es zum „nächsten Schritt: Gold abholen“.
+
 ## 5.2.4 (08.11.2026)
 - **Selbst gecraftet zählt als erledigt.** Stellst du im Berufsfenster etwas her, das auf der Craft-Liste steht, wird es abgehakt, auch ohne den Knopf „Nächstes craften“. Craft-Liste und Einkaufsliste schrumpfen sofort, und im Chat steht „Hergestellt: 2× … – abgehakt“. Vorher verlangte die Einkaufsliste danach das Material erneut.
 - **Ruf-Rezepte komplett draußen.** 168 Rezepte gibt es nur mit Ruf bei einer Fraktion (aus den Spieldaten: MinFactionID des Rezept-Items). Sie erscheinen weder in „Lernen lohnt sich“ noch im Berufe-Berater.

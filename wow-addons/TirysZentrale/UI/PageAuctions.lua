@@ -7,7 +7,7 @@ local AW = ns.AH
 
 local page = {
   title = "Meine Auktionen",
-  subtitle = "Was du im AH hast, was verkauft wurde und wo dich jemand unterboten hat.",
+  subtitle = "Was du im AH hast, was es wert ist, was verkauft wurde und was im Briefkasten liegt.",
   icon = "receipt", label = "Meine Auktionen", order = 30,
 }
 
@@ -46,7 +46,10 @@ function page.build(self, content, width)
   local cw = math.floor((width - 36) / 4)
   local row = CreateFrame("Frame", nil, content)
   row:SetSize(width, 70)
-  self.stats = { stat(row, cw, "IM AH"), stat(row, cw, "UNTERBOTEN"), stat(row, cw, "HEUTE VERKAUFT"), stat(row, cw, "STAND") }
+  self.stats = { stat(row, cw, "IM AH"), stat(row, cw, "WERT IM AH"), stat(row, cw, "IM BRIEFKASTEN"), stat(row, cw, "UNTERBOTEN") }
+  UI.SetTooltip(self.stats[3], "Gold im Briefkasten", "Erlös deiner verkauften Auktionen (nach AH-Gebühr). \"ca.\" = geschätzt seit dem Verkauf – "
+    .. "genau wird es, sobald du den Briefkasten öffnest. Holst du das Gold ab, verschwindet es hier von selbst.")
+  self.stats[3]:EnableMouse(true)
   for i, f in ipairs(self.stats) do f:SetPoint("TOPLEFT", (i - 1) * (cw + 12), 0) end
   st:Add(row, 70, 14)
 
@@ -83,26 +86,28 @@ function page.build(self, content, width)
     { key = "state", label = "Status", width = 130, bold = true },
   })
   self.soldTitle = UI.Text(content, 17, "bold", C.text)
-  self.soldTitle:SetText("Verkauft (Gold kommt per Post)")
+  self.soldTitle:SetText("Verkauft")
   self.sold = UI.ItemList(content, width, {
     { key = "qty", label = "Menge", width = 60 },
-    { key = "price", label = "Preis", width = 100 },
-    { key = "when", label = "Wann", width = 110 },
+    { key = "gold", label = "Erlös", width = 100 },
+    { key = "where", label = "Gold", width = 130 },
+    { key = "when", label = "Wann", width = 100 },
   }, { action = true })
 end
 
 function page.refresh(self)
   local s = AW.Store()
   local sum = AW.Summary()
-  self.stats[1].value:SetText(sum.active .. "  |cff93a39d" .. ns.Money(sum.value) .. "|r")
-  self.stats[2].value:SetText(sum.undercut > 0 and ("|cffff6b81" .. sum.undercut .. "|r") or "0")
-  self.stats[3].value:SetText(tostring(sum.soldToday))
-  self.stats[4].value:SetText(ago(sum.time))
+  self.stats[1].value:SetText(sum.active .. (sum.active == 1 and " Auktion" or " Auktionen"))
+  self.stats[2].value:SetText(ns.Money(sum.value))
+  self.stats[3].value:SetText(sum.mailGold > 0 and ((sum.mailEstimated and "ca. " or "") .. ns.Money(sum.mailGold)) or "leer")
+  self.stats[4].value:SetText(sum.undercut > 0 and ("|cffff6b81" .. sum.undercut .. "|r") or "0")
   local nextIn = AW.NextAutoIn()
   local auto = nextIn > 0 and ("Nächste automatische Prüfung in " .. nextIn .. " Min. – \"Jetzt prüfen\" geht immer.")
     or "Beim nächsten Öffnen des Auktionshauses wird automatisch geprüft und gescannt."
-  self.hint:SetText(M.ahOpen and ("Auktionshaus offen: Deine Auktionen sind eingelesen. " .. auto)
-    or "Stand von deinem letzten AH-Besuch. Verkäufe erkennt Tiry's Zentrale überall sofort – ob du unterboten wurdest, sieht man nur am Auktionshaus.")
+  local stand = "Heute verkauft: " .. sum.soldToday .. " · Stand: " .. ago(sum.time) .. ". "
+  self.hint:SetText(stand .. (M.ahOpen and ("Auktionshaus offen: Deine Auktionen sind eingelesen. " .. auto)
+    or "Verkäufe erkennt Tiry's Zentrale überall sofort – ob du unterboten wurdest, sieht man nur am Auktionshaus."))
   self.checkBtn:SetEnabled(M.ahOpen == true)
   self.listBtn:SetEnabled(sum.undercut > 0 and M.HasAuctionator())
 
@@ -148,7 +153,8 @@ function page.refresh(self)
     if i > 20 then break end
     sold[#sold + 1] = {
       id = e.id, name = (not e.id) and e.name or nil,
-      cells = { qty = e.qty and tostring(e.qty) or "?", price = e.unit and ns.Money(e.unit) or "–", when = date("%d.%m. %H:%M", e.time) },
+      cells = { qty = e.qty and tostring(e.qty) or "?", gold = e.amount and ns.Money(e.amount) or "–",
+        where = e.inMail and "|cffff9929im Briefkasten|r" or "|cff93a39dabgeholt|r", when = date("%d.%m. %H:%M", e.time) },
       action = function() table.remove(s.sold, i) page.refresh(self) end,
       actionTip = "Aus der Liste entfernen",
     }

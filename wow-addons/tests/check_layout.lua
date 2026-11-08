@@ -32,6 +32,17 @@ TirysZentraleDB.vendorBuy[2320] = 10
 TirysZentraleDB.vendorBuy[4289] = 50
 for id, p in pairs(W.prices) do TirysZentraleDB.priceHistory = TirysZentraleDB.priceHistory or {} TirysZentraleDB.priceHistory[id] = { ["2026-11-06"] = p, ["2026-11-07"] = p } end
 TirysZentraleCharDB.hiddenRecipes = { [2881] = true, [3816] = true }
+TirysZentraleCharDB.auctions = {
+  time = W.now - 600,
+  list = {
+    { auctionID = 1, id = 2318, qty = 20, unit = 40, status = "active", expires = W.now + 3600 * 20, competitor = 35, undercut = true, checked = W.now - 600 },
+    { auctionID = 2, id = 249427, qty = 2, unit = 4200, status = "active", expires = W.now + 3600 * 8, competitor = 4500, undercut = false, checked = W.now - 600 },
+    { auctionID = 3, id = 4238, qty = 1, unit = 950, status = "active", expires = W.now - 60 },
+  },
+  sold = { { id = 2319, name = "Mittleres Leder", qty = 10, unit = 120, amount = 1140, time = W.now - 1800, inMail = true },
+           { id = 2589, name = "Leinenstoff", qty = 20, unit = 60, amount = 1140, time = W.now - 86400, inMail = false } },
+  mail = { known = 0, pending = { { name = "Mittleres Leder", amount = 1140, time = W.now - 1800 } } },
+}
 TirysZentraleCharDB.queue = { { recipe = 2164, prof = "LEATHERWORKING", n = 2 }, { recipe = 2158, prof = "LEATHERWORKING", n = 1 } }
 W.bags = { [0] = { { itemID = 2318, stackCount = 18, quality = 1 }, { itemID = 249427, stackCount = 2, quality = 2 }, { itemID = 3300, stackCount = 3, quality = 0 } } }
 
