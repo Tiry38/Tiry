@@ -509,3 +509,52 @@ describe("× im Craft-Planer", function()
     assert.are.same({}, W.errors)
   end)
 end)
+
+describe("Craft-Liste: selbst gecraftet zählt, Ruf-Rezepte draußen, leere Liste", function()
+  it("hakt Crafts aus dem Berufsfenster auf der Liste ab (auch ohne 'Nächstes craften')", function()
+    local ns, W = E.load({})
+    ns.char.queue = { { recipe = 2164, prof = "LEATHERWORKING", n = 2 } }
+    local r = ns.Recipes.Get(2164)
+    W.bags = { [0] = {} }
+    W.fire("BAG_UPDATE_DELAYED") W.flush() -- Ausgangslage merken
+    W.recipes = {}
+    W.fire("TRADE_SKILL_SHOW") W.flush()
+    W.bags = { [0] = { { itemID = r.out, stackCount = 2, quality = 2 } } } -- 2 Stück selbst hergestellt
+    W.fire("BAG_UPDATE_DELAYED") W.flush()
+    assert.are.equal(0, #ns.char.queue)
+    local _, open = ns.Shop.List()
+    assert.are.equal(0, open) -- Einkaufsliste leer
+  end)
+
+  it("lässt Rezepte, die Ruf brauchen, komplett draußen", function()
+    local ns = E.load({ skills = { { name = "Lederverarbeitung", skillID = 165, isHeader = false, rank = 300, maxRank = 300 } } })
+    for _, r in ipairs(ns.Recipes.List("LEATHERWORKING", "learnable")) do
+      assert.is_false(ns.Recipes.NeedsRep(r), r.name)
+    end
+    local repCount = 0
+    for id in pairs(ns.RECIPE_ITEMS) do if ns.RECIPE_ITEMS[id][3] == 1 then repCount = repCount + 1 end end
+    assert.is_true(repCount > 100) -- Daten enthalten die Ruf-Markierung
+  end)
+
+  it("zeigt bei leerer Liste 'Alle ausgeblendeten zurückholen'", function()
+    local ns = E.load({ prices = { [4244] = 30000, [4243] = 500, [4231] = 300, [2320] = 10, [4293] = 9000 } })
+    SlashCmdList.TIRYSZENTRALE("") ns.UI.Wizard.Finish()
+    ns.UI.Show("recipes")
+    local p = ns.UI.pages.recipes
+    p.prof, p.view = "LEATHERWORKING", "learnable"
+    ns.UI.RefreshPage("recipes")
+    -- alles wegklicken
+    for _ = 1, 50 do
+      local row = p.list.rows[1]
+      if not (row and row:IsShown()) then break end
+      row.action:Click()
+    end
+    p.lastHidden = nil
+    ns.UI.RefreshPage("recipes")
+    assert.is_true(p.hiddenRow:IsShown())
+    assert.is_true(p.hiddenRow.chips[1].restoreAll)
+    p.hiddenRow.chips[1]:Click()
+    assert.is_nil(next(ns.char.hiddenRecipes))
+    assert.truthy(p.list.rows[1]:IsShown())
+  end)
+end)

@@ -337,14 +337,31 @@ end
 -- Wartet auf das hergestellte Item: erst wenn es in der Tasche liegt, wird die Warteschlange verringert
 local pendingCraft
 ns.Listen("LOOT_GAINED", function(_, itemID, gained)
-  if not pendingCraft or pendingCraft.out ~= itemID then return end
-  local r = R.Get(pendingCraft.recipe)
-  if r then
-    local crafts = math.max(1, math.floor(gained / math.max(r.qty, 1) + 0.5))
-    addToQueue(r, -math.min(crafts, pendingCraft.left))
-    pendingCraft.left = pendingCraft.left - crafts
-    if pendingCraft.left <= 0 then pendingCraft = nil end
-    UI.RefreshPage("recipes")
+  if pendingCraft and pendingCraft.out == itemID then
+    local r = R.Get(pendingCraft.recipe)
+    if r then
+      local crafts = math.max(1, math.floor(gained / math.max(r.qty, 1) + 0.5))
+      addToQueue(r, -math.min(crafts, pendingCraft.left))
+      pendingCraft.left = pendingCraft.left - crafts
+      if pendingCraft.left <= 0 then pendingCraft = nil end
+      UI.RefreshPage("recipes")
+      ns.Fire("SHOP_CHANGED")
+    end
+    return
+  end
+  -- Selbst im Berufsfenster hergestellt (ohne "Nächstes craften"): Steht das Item auf der Craft-Liste,
+  -- zählt es als erledigt -> Liste und Einkaufsliste werden kleiner.
+  if not S.tradeOpen then return end
+  for _, e in ipairs(queue()) do
+    local r = R.Get(e.recipe)
+    if r and r.out == itemID then
+      local crafts = math.max(1, math.floor(gained / math.max(r.qty, 1) + 0.5))
+      addToQueue(r, -math.min(crafts, e.n))
+      ns.Print(string.format("Hergestellt: %d× %s – auf der Craft-Liste abgehakt.", crafts, r.name))
+      UI.RefreshPage("recipes")
+      ns.Fire("SHOP_CHANGED")
+      return
+    end
   end
 end)
 
@@ -692,19 +709,29 @@ function page.refresh(self)
   local hr = self.hiddenRow
   for _, c in ipairs(hr.chips) do c:Hide() end
   local last = self.lastHidden and hidden()[self.lastHidden] and R.Get(self.lastHidden)
-  if last then
+  local hiddenNow = 0
+  for _ in pairs(hidden()) do hiddenNow = hiddenNow + 1 end
+  -- Liste leer, weil alles weggeklickt wurde? Dann direkt hier alle zurückholen können.
+  local restoreAll = not last and #entries == 0 and hiddenNow > 0
+  if last or restoreAll then
     local c = hr.chips[1]
     if not c then
       c = UI.Button(hr, "", "ghost", 100, 28, "refresh")
-      c:SetScript("OnClick", function()
-        if self.lastHidden then hidden()[self.lastHidden] = nil end
+      c:SetScript("OnClick", function(b)
+        if b.restoreAll then
+          ns.char.hiddenRecipes = {}
+        elseif self.lastHidden then
+          hidden()[self.lastHidden] = nil
+        end
         self.lastHidden = nil
         page.refresh(self)
       end)
-      UI.SetTooltip(c, "Rückgängig", "Holt das gerade ausgeblendete Rezept zurück.")
+      UI.SetTooltip(c, "Zurückholen", "Holt ausgeblendete Rezepte wieder in die Liste.")
       hr.chips[1] = c
     end
-    UI.FitText(c.text, "Rückgängig: " .. last.name, UI.CONTENT_W - 220)
+    c.restoreAll = restoreAll
+    hr.label:SetText(restoreAll and "Liste leer?" or "Gerade ausgeblendet:")
+    UI.FitText(c.text, restoreAll and ("Alle " .. hiddenNow .. " ausgeblendeten Rezepte zurückholen") or ("Rückgängig: " .. last.name), UI.CONTENT_W - 220)
     c:SetWidth(math.ceil(c.text:GetStringWidth()) + 48)
     c:ClearAllPoints()
     c:SetPoint("TOPLEFT", hr, "TOPLEFT", 150, 0)

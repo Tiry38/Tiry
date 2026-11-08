@@ -1,5 +1,10 @@
 # Changelog – Tiry's Zentrale
 
+## 5.2.4 (08.11.2026)
+- **Selbst gecraftet zählt als erledigt.** Stellst du im Berufsfenster etwas her, das auf der Craft-Liste steht, wird es abgehakt, auch ohne den Knopf „Nächstes craften“. Craft-Liste und Einkaufsliste schrumpfen sofort, und im Chat steht „Hergestellt: 2× … – abgehakt“. Vorher verlangte die Einkaufsliste danach das Material erneut.
+- **Ruf-Rezepte komplett draußen.** 168 Rezepte gibt es nur mit Ruf bei einer Fraktion (aus den Spieldaten: MinFactionID des Rezept-Items). Sie erscheinen weder in „Lernen lohnt sich“ noch im Berufe-Berater.
+- **Leere Liste nach versehentlichem ×:** Steht in der Liste nichts mehr, weil alles weggeklickt ist, erscheint dort der Knopf „Alle N ausgeblendeten Rezepte zurückholen“.
+
 ## 5.2.3 (08.11.2026)
 - **× im Craft-Planer heißt jetzt: weg.** Die große „Ausgeblendet“-Chip-Wolke ist entfernt.
   - Nur das **zuletzt** ausgeblendete Rezept zeigt eine kleine Zeile „Rückgängig: …“, für ein Versehen.

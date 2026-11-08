@@ -537,7 +537,9 @@ local function runScenario(label, opts)
     assert(TirysZentraleDB.settings.craft.onlySafe == true, "Filter zurückgesetzt")
     -- Alte Ausgeblendete erscheinen NICHT als Chip-Wolke
     TirysZentraleCharDB.hiddenRecipes = { [2152] = true } ; p.lastHidden = nil ; p.refresh(p)
-    assert(not p.hiddenRow:IsShown(), "keine Chip-Wolke für alte Ausgeblendete")
+    local chips = 0
+    for _, c in ipairs(p.hiddenRow.chips) do if c:IsShown() then chips = chips + 1 end end
+    assert(not p.hiddenRow:IsShown() or (chips == 1 and p.hiddenRow.chips[1].restoreAll), "keine Chip-Wolke für alte Ausgeblendete")
     -- × an einer Zeile: weg, nur EIN Rückgängig für genau dieses Rezept
     TirysZentraleCharDB.hiddenRecipes = {} ; p.refresh(p)
     local row = p.list.rows[1]

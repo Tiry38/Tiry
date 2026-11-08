@@ -24,16 +24,17 @@ for r in rd("ItemXItemEffect.csv"):
             continue
         bonding = int(it.get("Bonding") or 0)
         req = int(it.get("RequiredSkillRank") or 0)
-        by_spell.setdefault(spell, []).append((bonding == 1, item_id, req))  # handelbare zuerst, dann kleinste ID
+        rep = 1 if int(it.get("MinFactionID") or 0) > 0 else 0  # braucht Ruf bei einer Fraktion
+        by_spell.setdefault(spell, []).append((rep, bonding == 1, item_id, req))  # ohne Ruf, handelbar, kleinste ID zuerst
 
 out = ["-- AUTOMATISCH ERZEUGT von wow-addons/tools/gen_recipe_items.py – nicht von Hand bearbeiten.",
-       "-- Rezept-Zauber -> { Rezept-Item (Muster, Pläne, Formel ...), nötiger Berufsskill } aus WoW Forever 1.60.1.70862.",
+       "-- Rezept-Zauber -> { Rezept-Item (Muster, Pläne, Formel ...), nötiger Berufsskill, braucht Ruf (1/0) } aus WoW Forever 1.60.1.70862.",
        "-- Rezepte ohne Eintrag lernt man beim Lehrer.",
        "local _, ns = ...",
        "ns.RECIPE_ITEMS = {"]
 for spell in sorted(by_spell):
-    _, best, req = sorted(by_spell[spell])[0]
-    out.append(f"  [{spell}] = {{ {best}, {req} }},")
+    rep, _, best, req = sorted(by_spell[spell])[0]
+    out.append(f"  [{spell}] = {{ {best}, {req}, {rep} }},")
 out.append("}")
 open(os.path.join(here, "..", "TirysZentrale", "Data_RecipeItems.lua"), "w", encoding="utf-8").write("\n".join(out) + "\n")
 print(len(by_spell), "Rezepte mit Rezept-Item von", len(recipes))

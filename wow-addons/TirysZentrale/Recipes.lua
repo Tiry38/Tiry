@@ -76,6 +76,12 @@ function R.RecipeItem(r)
   return e and e[1]
 end
 
+-- Braucht das Rezept Ruf bei einer Fraktion? (aus den Spieldaten: MinFactionID des Rezept-Items)
+function R.NeedsRep(r)
+  local e = ns.RECIPE_ITEMS and ns.RECIPE_ITEMS[r.id]
+  return e and e[3] == 1 or false
+end
+
 -- Ab welchem Berufsskill lernbar? Rückgabe: Skill, exakt (true = aus dem Rezept-Item in den Spieldaten)
 -- Lehrer-Rezepte: nicht in den Spieldaten -> Schätzung "gelb minus 20" (Median bei den 1.495 kaufbaren Rezepten)
 R.TRAINER_GAP = 20
@@ -146,7 +152,7 @@ function R.List(profKey, mode)
     local known = R.IsKnown(r)
     if mode == "known" and known then
       out[#out + 1] = r
-    elseif mode == "learnable" and not known then
+    elseif mode == "learnable" and not known and not R.NeedsRep(r) then -- Ruf-Rezepte erstmal komplett draußen
       -- Für DEINEN Skill: kaufbare Rezepte mit exakter Anforderung (jetzt oder in bis zu 10 Punkten),
       -- Lehrer-Rezepte nur, wenn sie für dich schon gelb sind oder die Schätzung passt
       local state = R.LearnState(r, rank)
