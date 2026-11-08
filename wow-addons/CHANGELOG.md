@@ -1,5 +1,10 @@
 # Changelog – Tiry's Zentrale
 
+## 5.7.0 (08.11.2026)
+**Craft-Planer sortieren:** Klick auf MATERIAL, VERKAUF oder GEWINN sortiert teuer zuerst, nochmal klicken günstig zuerst. Ein Pfeil zeigt die Richtung. Die Wahl bleibt gespeichert.
+
+**Neues Rezept gelernt ohne aktuellen AH-Preis:** Hinweis im Chat, und beim nächsten Öffnen des Auktionshauses wird sofort gescannt (nicht erst nach 30 Minuten). Danach steht das Rezept automatisch im Craft-Planer, wenn es Gewinn bringt.
+
 ## 5.6.2 (08.11.2026)
 **„Nächstes craften“ meldet sich, wenn die nächste Sorte dran ist.**
 - Blizzard erlaubt pro Klick nur einen Herstell-Auftrag (eine Sorte, beliebig viele Stück). Ist eine Sorte fertig und du hast Material für die nächste: Der Knopf leuchtet grün, ein kurzer Ton kommt, oben steht „Fertig! Als Nächstes: 4× Dunkle Lederschultern“.

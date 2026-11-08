@@ -261,7 +261,11 @@ function page.build(self, content, width)
     { key = "cost", label = "Material", width = 84 },
     { key = "revenue", label = "Verkauf", width = 84 },
     { key = "profit", label = "Gewinn", width = 96, bold = true },
-  }, { action = true })
+  }, { action = true, onSort = function(key)
+    local c = cfg()
+    if c.sortKey == key then c.sortDesc = (c.sortDesc == false) else c.sortKey, c.sortDesc = key, true end
+    page.refresh(self)
+  end })
   self.listTop = st.y
 
   -- Ausgeblendete Rezepte einzeln zurückholen (Klick auf den Chip)
@@ -716,6 +720,17 @@ function page.refresh(self)
     self.info:SetText("Du hast noch keinen Herstellungsberuf (z. B. Lederverarbeitung, Schneiderei, Alchemie). Lern einen beim Lehrer – dann erscheint er hier automatisch.")
   else
     local list, rank, st = page.Entries(self)
+    -- Sortierung per Klick auf die Spaltenüberschrift (Standard: Gewinn, höchster zuerst)
+    local c = cfg()
+    local sk = (c.sortKey == "cost" or c.sortKey == "revenue" or c.sortKey == "profit") and c.sortKey or "profit"
+    local desc = c.sortDesc ~= false
+    table.sort(list, function(x, y)
+      local a, b = x[sk] or 0, y[sk] or 0
+      if a == b then return (x.profit or 0) > (y.profit or 0) end
+      if desc then return a > b end
+      return a < b
+    end)
+    self.list:SetSort(sk, desc)
     local learnIDs = {}
     self.learnIDs = learnIDs
     for _, e in ipairs(list) do

@@ -17,6 +17,7 @@ function UI.ItemList(parent, width, columns, opts)
   head:SetPoint("TOPLEFT")
   head:SetSize(width, 24)
   local x = (opts and opts.action) and (width - 34) or width
+  list.heads = {}
   for i = #columns, 1, -1 do
     local col = columns[i]
     local t = UI.Text(head, 10, "semibold", C.dim)
@@ -25,7 +26,52 @@ function UI.ItemList(parent, width, columns, opts)
     t:SetPoint("RIGHT", head, "LEFT", x - 12, 0)
     t:SetText(col.label:upper())
     col.x = x - 12
+    list.heads[col.key] = { text = t, col = col }
+    -- Sortieren per Klick auf die Spaltenüberschrift
+    if opts and opts.onSort then
+      local b = UI.SafeButton(head)
+      b:SetSize(col.width + 8, 24)
+      b:SetPoint("RIGHT", head, "LEFT", x - 8, 0)
+      b.arrow = b:CreateTexture(nil, "OVERLAY")
+      b.arrow:SetTexture(UI.Icon("chevron"))
+      b.arrow:SetSize(12, 12)
+      b.arrow:SetPoint("RIGHT", t, "RIGHT", 0, 0)
+      b.arrow:Hide()
+      b:SetScript("OnClick", function() UI.PlayClick() opts.onSort(col.key) end)
+      b:SetScript("OnEnter", function(self)
+        t:SetTextColor(C.text[1], C.text[2], C.text[3], 1)
+        GameTooltip:SetOwner(self, "ANCHOR_TOP")
+        GameTooltip:SetText("Sortieren: " .. col.label, 1, 1, 1)
+        GameTooltip:AddLine("Klick: teuer zuerst. Nochmal klicken: günstig zuerst.", 0.8, 0.8, 0.8, true)
+        GameTooltip:Show()
+      end)
+      b:SetScript("OnLeave", function()
+        GameTooltip:Hide()
+        list:SetSort(list.sortKey, list.sortDesc)
+      end)
+      list.heads[col.key].btn = b
+    end
     x = x - col.width - 10
+  end
+
+  -- Sortier-Anzeige: aktive Spalte hell + Pfeil (unten = teuer zuerst, oben = günstig zuerst)
+  function list:SetSort(key, desc)
+    self.sortKey, self.sortDesc = key, desc
+    for k, h in pairs(self.heads) do
+      local on = k == key
+      local c = on and C.text or C.dim
+      h.text:SetTextColor(c[1], c[2], c[3], 1)
+      h.text:SetText(h.col.label:upper())
+      if h.btn then
+        h.btn.arrow:SetShown(on)
+        if on then
+          h.btn.arrow:SetRotation(desc and -math.pi / 2 or math.pi / 2)
+          h.btn.arrow:ClearAllPoints()
+          h.btn.arrow:SetPoint("RIGHT", h.text, "RIGHT", 0, 0)
+          h.text:SetText(h.col.label:upper() .. "    ") -- Platz für den Pfeil
+        end
+      end
+    end
   end
   local nameHead = UI.Text(head, 10, "semibold", C.dim)
   nameHead:SetPoint("LEFT", 54, 0)

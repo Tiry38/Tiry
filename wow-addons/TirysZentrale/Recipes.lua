@@ -186,6 +186,12 @@ ns.On("NEW_RECIPE_LEARNED", function(_, recipeID)
     ns.Print(string.format("Neues Rezept: |cffff9929%s|r – Gewinn pro Craft laut AH: %s", r.name,
       (profit >= 0 and "|cffff9929+" or "|cffff6b81") .. ns.Money(profit) .. "|r"))
   end
+  -- Preis fehlt oder ist alt? Beim nächsten AH-Besuch sofort scannen (nicht erst nach 30 Min.)
+  local age = ns.Market.Age(r.out)
+  if not profit or not age or age > 3 then
+    ns.db.lastAutoCheck = nil
+    ns.Print("Für " .. r.name .. " fehlt ein aktueller AH-Preis – beim nächsten Öffnen des Auktionshauses wird automatisch gescannt, dann steht es im Craft-Planer.")
+  end
 end)
 
 -- Beim Öffnen des Berufsfensters: gelernte Rezepte merken (Rückfall, falls der Client einen Zauber nicht meldet)

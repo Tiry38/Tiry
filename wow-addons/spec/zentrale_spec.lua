@@ -753,6 +753,39 @@ describe("Nächste Sorte ist dran: Knopf leuchtet", function()
   end)
 end)
 
+describe("Craft-Planer: Sortieren per Spaltenkopf", function()
+  it("Klick auf Material sortiert teuer zuerst, nochmal günstig zuerst", function()
+    local ns = E.load({ prices = { [2318] = 3000, [2319] = 1200, [4234] = 2000, [2408] = 1000, [2320] = 10,
+      [2312] = 90000, [2307] = 90000, [2304] = 90000 } })
+    SlashCmdList.TIRYSZENTRALE("") ns.UI.Wizard.Finish()
+    ns.Recipes.SetProfit(0)
+    ns.UI.Show("recipes")
+    local p = ns.UI.pages.recipes
+    p.prof, p.view = "LEATHERWORKING", "known"
+    local function sorted(desc)
+      local list = p.Entries(p)
+      table.sort(list, function(x, y) if desc then return x.cost > y.cost end return x.cost < y.cost end)
+      return list
+    end
+    local head = p.list.heads.cost.btn
+    head:Click()
+    assert.are.equal("cost", ns.settings.craft.sortKey)
+    assert.is_true(ns.settings.craft.sortDesc)
+    assert.is_true(p.list.sortDesc)
+    head:Click()
+    assert.is_false(ns.settings.craft.sortDesc)
+    assert.are.equal("cost", p.list.sortKey)
+    assert.is_false(p.list.sortDesc)
+    -- angezeigte Reihenfolge = günstig zuerst
+    local want = sorted(false)
+    assert.truthy(#want >= 2)
+    ns.UI.RefreshPage("recipes")
+    for i, e in ipairs(want) do
+      assert.truthy(p.list.rows[i].name:GetText():find(e.r.name, 1, true))
+    end
+  end)
+end)
+
 describe("Hergestellt -> Craft-Liste abhaken (alle Wege, nie doppelt)", function()
   local function setup3(ns, W)
     ns.char.queue = { { recipe = 2164, prof = "LEATHERWORKING", n = 3 } }
