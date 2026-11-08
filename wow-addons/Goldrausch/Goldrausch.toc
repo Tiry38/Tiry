@@ -3,7 +3,7 @@
 ## Notes: Gold-Guide für WoW Forever: die besten Goldwege ab Level 10, Live-Preise (Auctionator), Händler-Flips, Taschen-Check, Rezept-Gewinne und Goldtagebuch.
 ## Notes-deDE: Gold-Guide für WoW Forever: die besten Goldwege ab Level 10, Live-Preise (Auctionator), Händler-Flips, Taschen-Check, Rezept-Gewinne und Goldtagebuch.
 ## Author: Tiry
-## Version: 1.0.0
+## Version: 1.2.0
 ## Category-enUS: Auctions
 ## Category-deDE: Auktionen
 ## SavedVariables: GoldrauschDB
@@ -18,15 +18,18 @@ Core.lua
 Data_Items.lua
 Data_AllItems.lua
 Data.lua
+Data_Farm.lua
 Database.lua
 Market.lua
 Scanner.lua
 Tracker.lua
+Autopilot.lua
 UI\Widgets.lua
 UI\ItemList.lua
 UI\Main.lua
 UI\PageHome.lua
 UI\PageMethods.lua
+UI\PageFarm.lua
 UI\PageMarket.lua
 UI\PageDatabase.lua
 UI\PageScanner.lua
@@ -34,3 +37,4 @@ UI\PageRecipes.lua
 UI\PageTracker.lua
 UI\PageBasics.lua
 UI\PageSettings.lua
+UI\MerchantHelper.lua

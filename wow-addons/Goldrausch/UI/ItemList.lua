@@ -79,11 +79,11 @@ function UI.ItemList(parent, width, columns)
       self.bg:SetColor(C.card, self.zebra and 0.45 or 0)
       GameTooltip:Hide()
     end)
-    row:SetScript("OnClick", function(self)
+    row:SetScript("OnClick", function(self, button)
       if self.itemID and IsShiftKeyDown() then
         ns.LinkItem(self.itemID)
       elseif self.onClick then
-        self.onClick(self)
+        self.onClick(self, button)
       end
     end)
     list.rows[i] = row

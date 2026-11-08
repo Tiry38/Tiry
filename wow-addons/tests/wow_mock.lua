@@ -375,6 +375,7 @@ function M.install(opts)
     end,
     GetItemIconByID = function(id) assert(type(id) == "number") return 134400 end,
     RequestLoadItemDataByID = function(id) assert(type(id) == "number") end,
+    GetItemCount = function(id, bank) assert(id ~= nil) local n = 0 for _, b in pairs(M.bags or {}) do for _, it in pairs(b) do if it.itemID == id then n = n + (it.stackCount or 1) end end end return n end,
   }
   -- Berufe
   G.C_SkillInfo = {
@@ -386,12 +387,17 @@ function M.install(opts)
   G.C_Container = {
     GetContainerNumSlots = function(bag) return (M.bags and M.bags[bag]) and #M.bags[bag] or 0 end,
     GetContainerItemInfo = function(bag, slot) local b = M.bags and M.bags[bag]; return b and b[slot] or nil end,
+    UseContainerItem = function(bag, slot) assert(type(bag) == "number" and type(slot) == "number") M.sold = (M.sold or 0) + 1 M.bags[bag][slot] = nil end,
   }
   -- Händler
   G.GetMerchantNumItems = function() return #(M.merchant or {}) end
   G.GetMerchantItemID = function(i) local m = M.merchant[i]; return m and m.id end
   G.GetMerchantItemLink = function(i) local m = M.merchant[i]; return m and ("|Hitem:" .. m.id .. "|h") end
+  G.BuyMerchantItem = function(i, n) assert(type(i) == "number") M.bought = (M.bought or 0) + (n or 1) end
+  G.MerchantFrame = make("Frame", UIParent, "MerchantFrame")
   G.C_MerchantFrame = {
+    GetNumJunkItems = function() return M.junk or 0 end,
+    SellAllJunkItems = function() M.junkSold = true M.junk = 0 end,
     GetItemInfo = function(i)
       local m = M.merchant[i]
       if not m then return nil end
@@ -402,7 +408,7 @@ function M.install(opts)
   -- Berufsfenster
   G.C_TradeSkillUI = {
     GetFilteredRecipeIDs = function() local ids = {} for id in pairs(M.recipes or {}) do ids[#ids + 1] = id end table.sort(ids) return ids end,
-    GetRecipeInfo = function(id) local r = M.recipes[id]; return r and { name = r.name, learned = true, isRecraft = false, relativeDifficulty = 0 } end,
+    GetRecipeInfo = function(id) local r = M.recipes[id]; return r and { name = r.name, learned = r.learned ~= false, isRecraft = false, relativeDifficulty = r.diff or 0, canSkillUp = true } end,
     GetRecipeSchematic = function(id, isRecraft)
       assert(type(isRecraft) == "boolean", "GetRecipeSchematic braucht isRecraft (bool)")
       local r = M.recipes[id]
@@ -412,7 +418,8 @@ function M.install(opts)
       end
       return { recipeID = id, outputItemID = r.out, quantityMin = 1, quantityMax = 1, reagentSlotSchematics = slots }
     end,
-    GetBaseProfessionInfo = function() return { professionName = "Schneiderei" } end,
+    GetBaseProfessionInfo = function() return { professionName = "Schneiderei", skillLevel = 60, maxSkillLevel = 150 } end,
+    CraftRecipe = function(id, n) assert(type(id) == "number" and type(n) == "number") M.crafted = (M.crafted or 0) + n end,
   }
   -- Auctionator (öffentliche API v1, Argumentprüfung wie im Original)
   if opts.auctionator ~= false then

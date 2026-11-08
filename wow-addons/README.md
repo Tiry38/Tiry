@@ -14,16 +14,18 @@ wie man schon mit Level 10–20 Gold macht – mit echten Preisen des eigenen Se
 | Seite | Funktion |
 |---|---|
 | Start | Persönlicher Goldplan: Top 3 Goldwege für Level, Berufe und aktuelle AH-Preise |
+| Farm-Guide | Level 1–60: Gebiete je Fraktion + welche Materialgruppe (Kräuter/Erz/Leder/Stoff/Elemente) gerade am meisten bringt – mit deinen Berufen abgeglichen |
 | Goldwege | 16 Methoden als aufklappbare Anleitungen (Forever-bestätigt bzw. Classic-Wissen gekennzeichnet) |
 | Marktpreise | Live-Preise der wichtigsten Gold-Materialien (126 kuratiert) inkl. neuer Forever-Materialien, Einkaufslisten, AH-Sofortsuche |
 | Datenbank | **Alle 18.416 Gegenstände** von WoW Forever auf Deutsch: Suche (Name/ID), Filter nach Kategorie, Qualität, Level, Sortierung nach AH-/Händlerpreis |
 | Scanner | Händler-Flips (automatisch beim Händler) und Taschen-Check (AH oder Händler?) |
-| Rezepte | Gewinn jedes gelernten Rezepts mit aktuellen Preisen |
+| Craft-Planer | Wie TSM Crafting: alle Rezepte deiner Berufe (auch ungelernte), Filter "Min. Gewinn in %" / "Min. Gewinn pro Craft" / sichere Preise / Skill-Up, herstellbare Menge, Warteschlange, fehlendes Material als Auctionator-Liste, Craften per Knopf |
+| Gold-Autopilot | Schrott automatisch verkaufen, Händler-Panel (Händler-Ware verkaufen, Flips kaufen per Klick), Beute-Radar mit Warnung bei wertvoller Beute, AH-Hinweis |
 | Goldtagebuch | Gold pro Sitzung, pro Stunde, 14-Tage-Verlauf |
 | AH-Schule | Auktionshaus und Auctionator für Einsteiger |
 | Einstellungen | Minikarten-Knopf, Chat-Hinweise, Animationen, AH-Anteil, Fenstergröße |
 
-Befehle: `/gold`, `/gold suche`, `/gold wege`, `/gold markt`, `/gold scan`, `/gold rezepte`, `/gold tagebuch`, `/gold ah`, `/gold minimap`, `/gold reset`.
+Befehle: `/gold`, `/gold farm`, `/gold craft`, `/gold suche`, `/gold wege`, `/gold markt`, `/gold scan`, `/gold rezepte`, `/gold tagebuch`, `/gold ah`, `/gold minimap`, `/gold reset`.
 
 ## Technik & Prüfung
 - Alle verwendeten Spiel-Funktionen wurden gegen Blizzards Forever-UI-Quellcode (1.60.1) geprüft.

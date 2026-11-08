@@ -54,6 +54,22 @@ function page.build(self, content, width)
     UI.UpdateMinimap()
   end, "Die Goldmünze an der Minikarte. Goldrausch ist zusätzlich immer im Addon-Menü der Minikarte und über /gold erreichbar.", width), 54)
 
+  add(UI.Toggle(content, "Autopilot: Schrott automatisch verkaufen", function() return s.autoJunk end, function(v)
+    s.autoJunk = v
+  end, "Beim Händler wird alles Graue sofort verkauft (wie der Müll-Knopf, nur automatisch).", width), 54)
+
+  add(UI.Toggle(content, "Händler-Panel", function() return s.merchantPanel end, function(v)
+    s.merchantPanel = v
+  end, "Zeigt neben dem Händlerfenster: Händler-Ware verkaufen und Flip-Schnäppchen kaufen mit einem Klick.", width), 54)
+
+  add(UI.Toggle(content, "Beute-Radar", function() return s.lootAlerts end, function(v)
+    s.lootAlerts = v
+  end, "Meldet im Chat, wenn du etwas Wertvolles lootest (ab 50 Silber AH-Wert oder seltene Forever-Materialien).", width), 54)
+
+  add(UI.Toggle(content, "AH-Hinweis", function() return s.ahHint end, function(v)
+    s.ahHint = v
+  end, "Sagt dir beim Öffnen des Auktionshauses, welche Items du einstellen solltest.", width), 54)
+
   add(UI.Toggle(content, "Händler-Hinweis im Chat", function() return s.merchantAlert end, function(v)
     s.merchantAlert = v
   end, "Meldet im Chat, wenn ein Händler etwas verkauft, das du im AH mit Gewinn weiterverkaufen kannst.", width), 54)

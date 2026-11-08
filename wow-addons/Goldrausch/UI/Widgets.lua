@@ -653,3 +653,53 @@ function UI.SearchBox(parent, width, placeholder, onChange)
   f.edit = eb
   return f
 end
+
+----------------------------------------------------------------------------
+-- Kompakter Regler:  Beschriftung   (-)  Wert  (+)
+----------------------------------------------------------------------------
+function UI.Stepper(parent, label, width, getter, setter, step, min, max, format)
+  local f = CreateFrame("Frame", nil, parent)
+  f:SetSize(width, 34)
+  f.bg = UI.Round(f, 17, "BACKGROUND", 0)
+  f.bg:SetColor(C.card, 1)
+  f.label = UI.Text(f, 12, "semibold", C.muted)
+  f.label:SetPoint("LEFT", 14, 0)
+  f.label:SetText(label)
+  local plus = UI.IconButton(f, "plus", 26)
+  plus:SetPoint("RIGHT", -4, 0)
+  f.value = UI.Text(f, 12, "bold", C.gold)
+  f.value:SetWidth(76)
+  f.value:SetJustifyH("CENTER")
+  f.value:SetPoint("RIGHT", plus, "LEFT", -2, 0)
+  local minus = UI.IconButton(f, "minus", 26)
+  minus:SetPoint("RIGHT", f.value, "LEFT", -2, 0)
+  function f:Refresh() self.value:SetText(format(getter())) end
+  local function change(dir)
+    local v = getter() + dir * (type(step) == "function" and step(getter(), dir) or step)
+    setter(math.max(min, math.min(max, v)))
+    f:Refresh()
+    if f.onChange then f.onChange() end
+  end
+  plus:SetScript("OnClick", function() change(1) end)
+  minus:SetScript("OnClick", function() change(-1) end)
+  f:Refresh()
+  return f
+end
+
+-- Kleiner Umschalter als Pille (an = Verlauf)
+function UI.Pill(parent, label, getter, setter, onChange)
+  local b = UI.Button(parent, label, "soft", nil, 30)
+  b:SetWidth(math.ceil(b.text:GetStringWidth()) + 34)
+  local function paint()
+    b.style = getter() and "primary" or "soft"
+    b:Paint()
+  end
+  b:SetScript("OnClick", function()
+    setter(not getter())
+    paint()
+    if onChange then onChange() end
+  end)
+  b.Refresh = paint
+  paint()
+  return b
+end

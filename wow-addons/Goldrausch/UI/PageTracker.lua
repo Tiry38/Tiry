@@ -82,6 +82,10 @@ function page.build(self, content, width)
 
   self.best = UI.Para(content, 12, C.muted, width)
   st:Add(self.best, 20, 12)
+
+  st:Title("Beute-Radar dieser Sitzung", 16, C.text, 4)
+  self.radar = UI.Para(content, 12, C.muted, width)
+  st:Add(self.radar, 150, 12)
   st:Para("So nutzt du das Tagebuch: Starte eine Farm-Runde, schau nach 30–60 Minuten auf \"Gold pro Stunde\" und vergleiche Methoden. "
     .. "Die Methode mit dem besten Wert machst du öfter. Gezählt wird jede Änderung deines Golds (Beute, Quests, Verkäufe, Einkäufe).", 12, C.dim, 10)
   st:Finish()
@@ -119,6 +123,17 @@ function page.refresh(self)
     bar.label:SetText(d.label)
     bar.value:SetText(d.net ~= 0 and ns.Money(d.net) or "")
   end
+  local A = ns.Auto
+  local lph = A.LootPerHour()
+  local lines = { string.format("Beute-Wert: |cffffd24a%s|r (%d Items)  ·  pro Stunde: |cffffd24a%s|r",
+    ns.Money(A.session.value), A.session.items, lph and ns.Money(math.floor(lph)) or "misst ...") }
+  lines[#lines + 1] = "|cff9a93bdWert = was du beim besten Verkaufsweg (AH nach Gebühr oder Händler) bekommst – auch für noch nicht verkaufte Beute.|r"
+  for i = 1, math.min(#A.session.log, 6) do
+    local e = A.session.log[i]
+    lines[#lines + 1] = string.format("%s× %s  %s  |cff9a93bd(%s)|r", e.n, ns.Item(e.id).name, ns.Money(e.value), e.channel == "AH" and "AH" or "Händler")
+  end
+  self.radar:SetText(table.concat(lines, "\n"))
+
   local best = T.BestDay()
   if best and best.net > 0 then
     self.best:SetText("Dein bester Tag: |cffffd24a" .. best.key .. "|r mit " .. ns.Money(best.net) .. " Plus.")

@@ -173,6 +173,62 @@ local function runScenario(label, opts)
   end)
   check(label .. ": Rezepte gespeichert", GoldrauschCharDB.recipes and GoldrauschCharDB.recipes["Schneiderei"] and #GoldrauschCharDB.recipes["Schneiderei"].list == 2)
 
+  -- Craft-Planer: Filter, Warteschlange, Craften
+  step("Craft-Planer", function()
+    local p = ns.UI.pages.recipes
+    ns.UI.Show("recipes")
+    GoldrauschDB.settings.craft.minMargin = 0
+    GoldrauschDB.settings.craft.onlySafe = false
+    p.refresh(p)
+    local row = p.list.rows[1]
+    W.call(row, "OnClick", "LeftButton") ; W.call(row, "OnClick", "LeftButton") ; W.call(row, "OnClick", "RightButton")
+    p.queueCard.buy:Click()
+    W.bags[0][5] = { itemID = 2996, stackCount = 20, quality = 1 }
+    W.bags[0][6] = { itemID = 2320, stackCount = 20, quality = 1 }
+    W.fire("TRADE_SKILL_SHOW") ; W.flush()
+    p.refresh(p)
+    p.queueCard.craft:Click()
+    for _, pl in ipairs(p.pills) do pl:Click() pl:Click() end
+    W.call(p.margin, "OnShow")
+    W.fire("TRADE_SKILL_CLOSE") ; W.flush()
+  end)
+  check(label .. ": Rezept gecraftet", (W.crafted or 0) >= 1, tostring(W.crafted))
+
+  -- Farm-Guide: alle Levelbereiche
+  step("Farm-Guide", function()
+    ns.UI.Show("farm")
+    local p = ns.UI.pages.farm
+    for _, b in ipairs(p.segments.buttons) do b:Click() W.flush() end
+    p.cards[1].listBtn:Click()
+  end)
+
+  -- Autopilot: Schrott, Händler-Panel, Verkaufen, Flips kaufen, Beute-Radar
+  step("Autopilot beim Händler", function()
+    W.junk = 3
+    W.merchant = { { id = 5771, name = "Muster: Rote Leinentasche", price = 200, avail = 2 } }
+    W.prices[2934] = 1 -- Verdorbene Lederfetzen: AH schlechter als Händler (7 Kupfer)
+    W.fire("MERCHANT_SHOW") ; W.flush()
+    local panel = GoldrauschMerchantPanel
+    assert(panel and panel:IsShown(), "Händler-Panel fehlt")
+    panel.sell:Click() ; W.flush()
+    panel.buy:Click() ; W.flush()
+    W.fire("MERCHANT_CLOSED") ; W.flush()
+  end)
+  check(label .. ": Schrott automatisch verkauft", W.junkSold == true)
+  if opts.auctionator ~= false and not opts.noData then
+    check(label .. ": Händler-Ware verkauft", (W.sold or 0) >= 1, tostring(W.sold))
+    check(label .. ": Flips gekauft", (W.bought or 0) == 2, tostring(W.bought))
+  end
+  step("Beute-Radar", function()
+    W.fire("BAG_UPDATE_DELAYED") ; W.flush()
+    W.bags[2] = { { itemID = 249427, stackCount = 3, quality = 2 } }
+    W.fire("BAG_UPDATE_DELAYED") ; W.flush()
+    W.fire("AUCTION_HOUSE_SHOW") ; W.flush()
+    W.fire("AUCTION_HOUSE_CLOSED") ; W.flush()
+    ns.UI.Show("tracker")
+  end)
+  check(label .. ": Beute erkannt", ns.Auto.session.items >= 3, tostring(ns.Auto.session.items))
+
   -- Gold
   step("Goldänderung", function()
     W.money = 60000 ; W.fire("PLAYER_MONEY")
@@ -200,7 +256,7 @@ local function runScenario(label, opts)
     Goldrausch_OnAddonCompartmentClick("Goldrausch", "LeftButton")
     Goldrausch_OnAddonCompartmentEnter("Goldrausch", UIParent)
     Goldrausch_OnAddonCompartmentLeave("Goldrausch", UIParent)
-    for _, c in ipairs({ "db", "suche", "wege", "markt", "scan", "rezepte", "tagebuch", "ah", "optionen", "minimap", "minimap", "reset", "quatsch" }) do
+    for _, c in ipairs({ "farm", "craft", "db", "suche", "wege", "markt", "scan", "rezepte", "tagebuch", "ah", "optionen", "minimap", "minimap", "reset", "quatsch" }) do
       SlashCmdList.GOLDRAUSCH(c)
     end
   end)

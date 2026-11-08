@@ -182,15 +182,17 @@ end
 
 function S.ScanRecipes()
   if not (C_TradeSkillUI and C_TradeSkillUI.GetRecipeInfo and C_TradeSkillUI.GetRecipeSchematic) then return 0 end
-  local profName = "Beruf"
+  local profName, rank, maxRank = "Beruf", nil, nil
   if C_TradeSkillUI.GetBaseProfessionInfo then
     local info = C_TradeSkillUI.GetBaseProfessionInfo()
-    if info and info.professionName and info.professionName ~= "" then profName = info.professionName end
+    if info and info.professionName and info.professionName ~= "" then
+      profName, rank, maxRank = info.professionName, info.skillLevel, info.maxSkillLevel
+    end
   end
-  local list = {}
+  local list, learned = {}, 0
   for _, recipeID in ipairs(recipeIDs()) do
     local info = C_TradeSkillUI.GetRecipeInfo(recipeID)
-    if info and info.learned and not info.isRecraft then
+    if info and not info.isRecraft then
       local schematic = C_TradeSkillUI.GetRecipeSchematic(recipeID, false)
       if schematic and schematic.outputItemID then
         local reagents = {}
@@ -199,17 +201,30 @@ function S.ScanRecipes()
             reagents[#reagents + 1] = { id = slot.reagents[1].itemID, n = slot.quantityRequired or 1 }
           end
         end
+        if info.learned then learned = learned + 1 end
         list[#list + 1] = {
           id = recipeID, name = info.name, out = schematic.outputItemID,
           qty = ((schematic.quantityMin or 1) + (schematic.quantityMax or schematic.quantityMin or 1)) / 2,
-          reagents = reagents, difficulty = info.relativeDifficulty,
+          reagents = reagents, difficulty = info.relativeDifficulty, learned = info.learned and true or false,
+          skillUp = info.canSkillUp and true or false,
         }
       end
     end
   end
   if #list > 0 and ns.char then
     ns.char.recipes = ns.char.recipes or {}
-    ns.char.recipes[profName] = { time = time(), list = list }
+    local old = ns.char.recipes[profName]
+    -- Nicht gelernte Rezepte nur übernehmen, wenn der Client sie liefert (Filter im Berufsfenster)
+    if old and learned == #list then
+      for _, r in ipairs(old.list) do
+        if not r.learned then
+          local known = false
+          for _, n in ipairs(list) do if n.id == r.id then known = true break end end
+          if not known then list[#list + 1] = r end
+        end
+      end
+    end
+    ns.char.recipes[profName] = { time = time(), list = list, rank = rank, maxRank = maxRank }
   end
   return #list
 end
@@ -237,6 +252,17 @@ local function rescan()
     if n and n > 0 then ns.Fire("RECIPES_SCANNED") end
   end)
 end
-ns.On("TRADE_SKILL_SHOW", rescan)
+ns.On("TRADE_SKILL_SHOW", function()
+  S.tradeOpen = true
+  if C_TradeSkillUI and C_TradeSkillUI.GetBaseProfessionInfo then
+    local info = C_TradeSkillUI.GetBaseProfessionInfo()
+    S.openProf = info and info.professionName
+  end
+  rescan()
+end)
+ns.On("TRADE_SKILL_CLOSE", function()
+  S.tradeOpen = false
+  ns.Fire("RECIPES_SCANNED")
+end)
 ns.On("TRADE_SKILL_LIST_UPDATE", rescan)
 ns.On("TRADE_SKILL_DATA_SOURCE_CHANGED", rescan)
