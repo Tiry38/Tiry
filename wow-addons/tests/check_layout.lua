@@ -31,6 +31,7 @@ TirysZentraleDB.lastScan = W.now - 1200
 TirysZentraleDB.vendorBuy[2320] = 10
 TirysZentraleDB.vendorBuy[4289] = 50
 for id, p in pairs(W.prices) do TirysZentraleDB.priceHistory = TirysZentraleDB.priceHistory or {} TirysZentraleDB.priceHistory[id] = { ["2026-11-06"] = p, ["2026-11-07"] = p } end
+TirysZentraleCharDB.hiddenRecipes = { [2881] = true, [3816] = true }
 TirysZentraleCharDB.queue = { { recipe = 2164, prof = "LEATHERWORKING", n = 2 }, { recipe = 2158, prof = "LEATHERWORKING", n = 1 } }
 W.bags = { [0] = { { itemID = 2318, stackCount = 18, quality = 1 }, { itemID = 249427, stackCount = 2, quality = 2 }, { itemID = 3300, stackCount = 3, quality = 0 } } }
 
@@ -43,22 +44,22 @@ for _, def in ipairs(ns.UI.order) do
   ns.UI.RefreshPage(def.key)
   -- volle Seitenhöhe anzeigen (Scroll-Inhalt komplett), damit alles geprüft/gezeichnet wird
   local content = def.frame.content
-  local fullH = math.max(600, (content.__h or 0) + 140)
+  local fullH = math.max(ns.UI.HEIGHT, (content.__h or 0) + 140)
   frame.__h = fullH
   local probs = L.problems(frame)
   for _, p in ipairs(probs) do print("[" .. def.key .. "] " .. p) end
   total = total + #probs
   if OUT then L.dump(frame, OUT .. "/" .. def.key .. ".tsv") end
-  frame.__h = 600
+  frame.__h = ns.UI.HEIGHT
 end
 -- Craft-Planer mit aufgeklappten Optionen
 do
   local rp = ns.UI.pages.recipes
   ns.UI.Show("recipes") ; rp.proOpen = true ; ns.UI.RefreshPage("recipes")
-  frame.__h = math.max(600, (rp.frame.content.__h or 0) + 140)
+  frame.__h = math.max(ns.UI.HEIGHT, (rp.frame.content.__h or 0) + 140)
   for _, p in ipairs(L.problems(frame)) do print("[recipes+optionen] " .. p) total = total + 1 end
   if OUT then L.dump(frame, OUT .. "/recipes_open.tsv") end
-  frame.__h = 600 ; rp.proOpen = false
+  frame.__h = ns.UI.HEIGHT ; rp.proOpen = false
 end
 -- Einkaufsfenster und Händler-Panel
 ns.Shop.Show()

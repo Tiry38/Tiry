@@ -3,7 +3,8 @@ local ADDON, ns = ...
 local UI = ns.UI
 local C = UI.C
 
-local WIDTH, HEIGHT = 940, 600
+local WIDTH, HEIGHT = 1140, 720 -- groß und luftig; passt sich kleinen Bildschirmen automatisch an
+UI.WIDTH, UI.HEIGHT = WIDTH, HEIGHT
 local SIDE_W = 214
 local PAD = 26
 UI.CONTENT_W = WIDTH - SIDE_W - PAD * 2 - 14 -- nutzbare Breite einer Seite (ohne Scrollleiste)
@@ -205,6 +206,13 @@ local function buildHeader(f)
       .. "auch wenn du direkt in Auctionator scannst.\n\nStand: " .. ns.Market.LastScanText()
   end)
   f.scanBtn = scan
+  -- Gesetzten Wegpunkt wieder entfernen
+  local wp = UI.Button(f, "Wegpunkt", "soft", 120, 30, "close")
+  wp:SetPoint("RIGHT", scan, "LEFT", -10, 0)
+  wp:SetScript("OnClick", function() ns.Maps.Clear() end)
+  UI.SetTooltip(wp, "Wegpunkt entfernen", "Löscht den Kartenpunkt, den Tiry's Zentrale gesetzt hat.")
+  wp:Hide()
+  f.wpBtn = wp
   f.scanInfo = UI.Text(f, 10, "semibold", C.dim)
   f.scanInfo:SetPoint("TOPRIGHT", scan, "BOTTOMRIGHT", -4, -6)
 
@@ -231,7 +239,7 @@ local function createFrame()
     self:StopMovingOrSizing()
     savePosition()
   end)
-  f:SetScale(ns.Clamp(tonumber(ns.settings.scale) or 1, 0.7, 1.3))
+  f:SetScale(UI.FitScale())
   local p = ns.settings.point
   if type(p) == "table" and p[1] then
     f:SetPoint(p[1], UIParent, p[2] or p[1], p[3] or 0, p[4] or 0)
@@ -308,6 +316,7 @@ function UI.Show(key)
     UI.RefreshPage(key)
   end
   for _, b in pairs(frame.nav) do b:Paint() end
+  frame.wpBtn:SetShown(ns.Maps.HasWaypoint())
   ns.settings.lastPage = key
   if not frame:IsShown() then frame:Show() end
 end
@@ -335,8 +344,17 @@ function UI.SetBadge(key, text)
   end
 end
 
+-- Eigene Fenstergröße (Einstellungen) × automatische Anpassung, damit das Fenster immer ganz auf den Bildschirm passt
+function UI.FitScale()
+  local user = ns.Clamp(tonumber(ns.settings.scale) or 1, 0.7, 1.3)
+  local sw, sh = UIParent:GetWidth() or 0, UIParent:GetHeight() or 0
+  local fit = 1
+  if sw > 0 and sh > 0 then fit = math.min(1, (sw - 40) / (WIDTH * user), (sh - 40) / (HEIGHT * user)) end
+  return user * fit
+end
+
 function UI.ApplyScale()
-  if frame then frame:SetScale(ns.Clamp(tonumber(ns.settings.scale) or 1, 0.7, 1.3)) end
+  if frame then frame:SetScale(UI.FitScale()) end
 end
 
 -- Seiten bei neuen Daten aktualisieren (nur die sichtbare)
@@ -350,6 +368,9 @@ for _, msg in ipairs({ "PRICES_UPDATED", "ITEMS_UPDATED", "PROFESSIONS_CHANGED",
   "MERCHANT_SCANNED", "BAGS_SCANNED", "RECIPES_SCANNED", "AH_STATE", "LOOT_VALUED" }) do
   ns.Listen(msg, function() ns.Debounce("refresh", 0.15, refreshVisible) end)
 end
+ns.Listen("WAYPOINT_CHANGED", function()
+  if frame then frame.wpBtn:SetShown(ns.Maps.HasWaypoint()) end
+end)
 ns.Listen("MONEY_CHANGED", function()
   if UI.IsShown("tracker") or UI.IsShown("home") then ns.Debounce("refresh", 0.3, refreshVisible) end
 end)
@@ -454,6 +475,10 @@ SlashCmdList.TIRYSZENTRALE = function(msg)
     rezepte = "recipes", craft = "recipes", crafting = "recipes", farm = "farm", farmen = "farm", buch = "ledger", verkaeufe = "ledger", ["verkäufe"] = "ledger", kuerschner = "skinning", ["kürschner"] = "skinning", leder = "skinning", skin = "skinning", tagebuch = "tracker", tracker = "tracker",
     schule = "basics", ah = "basics", hilfe = "basics", optionen = "settings", einstellungen = "settings",
   }
+  if msg == "wegpunkt" or msg == "wp" then
+    ns.Maps.Clear()
+    return
+  end
   if msg == "leeren" then
     UI.pages.recipes.ClearQueue()
     return

@@ -30,7 +30,9 @@ wie man schon mit Level 10–20 Gold macht – mit echten Preisen des eigenen Se
 | AH-Schule | Auktionshaus und Auctionator für Einsteiger |
 | Einstellungen | Minikarten-Knopf, Chat-Hinweise, Animationen, AH-Anteil, Fenstergröße |
 
-Befehle: `/tz` (oder `/zentrale`, `/gold`), `/tz leder`, `/tz farm`, `/tz craft`, `/tz suche`, `/tz wege`, `/tz markt`, `/tz scan`, `/tz rezepte`, `/tz tagebuch`, `/tz ah`, `/tz minimap`, `/tz reset`.
+**Alles rückgängig machbar:** × an jedem Regler (zurück auf Standard/Empfehlung), × an jedem Profi-String, ausgeblendete Rezepte einzeln per Klick zurückholen, "Alles leeren" mit Rückgängig-Knopf, Material in der Einkaufsliste per × überspringen und per ↺ zurückholen, Wegpunkt-Knopf oben im Fenster löscht den Kartenpunkt, "Alle Einstellungen auf Standard" (Sicherheitsabfrage per zweitem Klick). Das Fenster ist 1140 × 720 groß und verkleinert sich automatisch, wenn der Bildschirm kleiner ist.
+
+Befehle: `/tz`, `/tz wegpunkt`, `/tz leeren` (oder `/zentrale`, `/gold`), `/tz leder`, `/tz farm`, `/tz craft`, `/tz suche`, `/tz wege`, `/tz markt`, `/tz scan`, `/tz rezepte`, `/tz tagebuch`, `/tz ah`, `/tz minimap`, `/tz reset`.
 
 ## Profi-Strings (wie TSM)
 Im Craft-Planer: Materialpreis `first(vendorbuy, ahprice, market)`, Verkaufswert `min(ahprice, 125% market)`, Mindestgewinn `max(15% crafting, levelgold)`. `market` = eigener Marktwert (Median der Tagespreise der letzten 14 Tage aus deinen Scans). TSM-Namen (`dbmarket`, `dbminbuyout`) werden verstanden; Funktionen `min`, `max`, `first`, `avg`, Rechnen `+ - * /`, Zahlen wie `120% crafting`, `5g`, `1g50s`. Zusätzlich: nur frische Preise (max. 3 Tage).

@@ -743,6 +743,28 @@ function UI.Stepper(parent, label, width, getter, setter, step, min, max, format
   end
   plus:SetScript("OnClick", function() change(1) end)
   minus:SetScript("OnClick", function() change(-1) end)
+  -- Rückgängig: × rechts neben dem Regler, sobald der Wert vom Standard abweicht
+  function f:SetDefault(def, onReset)
+    self.default, self.onReset = def, onReset
+    if not self.reset then
+      self.reset = UI.IconButton(self, "close", 24, "Zurück auf Standard")
+      self.reset:SetPoint("LEFT", self, "RIGHT", 6, 0)
+      self.reset:SetScript("OnClick", function()
+        local d = type(self.default) == "function" and self.default() or self.default
+        if self.onReset then self.onReset() else setter(d) end
+        self:Refresh()
+        if self.onChange then self.onChange() end
+      end)
+    end
+    self:Refresh()
+  end
+  function f:Refresh()
+    self.value:SetText(format(getter()))
+    if self.reset then
+      local d = type(self.default) == "function" and self.default() or self.default
+      self.reset:SetShown(getter() ~= d)
+    end
+  end
   f:Refresh()
   return f
 end

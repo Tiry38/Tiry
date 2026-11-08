@@ -125,8 +125,10 @@ function page.build(self, content, width)
     "Auf die Zahl klicken und selbst eintragen: 45 = 45 Silber, 1g 20s, 1,5g. Enter übernimmt.")
   self.profit:SetPoint("TOPLEFT", 20, -16)
   self.profit.onChange = refresh
+  self.profit:SetDefault(function() return R.Preset().profit end, function() R.ResetStyle() end)
   self.recBtn = UI.Button(fc, "Empfehlung für mein Level", "primary", 240, 34, "star")
   self.recBtn:SetPoint("TOPRIGHT", -20, -16)
+  UI.SetTooltip(self.recBtn, "Zurück zur Empfehlung", "Setzt den Mindestgewinn wieder auf die Empfehlung für dein Level. Die wächst dann automatisch mit.")
   self.recBtn:SetScript("OnClick", function() R.ResetStyle() page.refresh(self) end)
   self.recText = UI.Para(fc, 11, C.muted, width - 40)
   self.recText:SetPoint("TOPLEFT", 20, -60)
@@ -157,6 +159,10 @@ function page.build(self, content, width)
   self.unhideBtn:SetPoint("TOPRIGHT", -14, -48)
   self.unhideBtn:SetScript("OnClick", function() ns.char.hiddenRecipes = {} page.refresh(self) end)
   UI.SetTooltip(self.unhideBtn, "Ausgeblendete zurückholen", "Holt alle Rezepte zurück, die du mit × ausgeblendet hast.")
+  self.filterReset = UI.Button(sc, "Filter: Standard", "soft", 160, 30, "close")
+  self.filterReset:SetPoint("RIGHT", self.unhideBtn, "LEFT", -8, 0)
+  self.filterReset:SetScript("OnClick", function() cfg().onlySafe = true cfg().freshOnly = true page.refresh(self) end)
+  UI.SetTooltip(self.filterReset, "Filter zurücksetzen", "Beide Filter wieder an: nur Rezepte mit bekannten und frischen Preisen.")
   local OFF = 84
   local st1 = UI.Text(sc, 14, "bold", C.text)
   st1:SetPoint("TOPLEFT", 18, -18 - OFF)
@@ -177,7 +183,7 @@ function page.build(self, content, width)
     lab:SetPoint("TOPLEFT", 18, -y - 9)
     lab:SetText(d[2])
     local box = CreateFrame("EditBox", nil, sc)
-    box:SetSize(width - 150 - 18 - 110, 32)
+    box:SetSize(width - 150 - 18 - 140, 32)
     box:SetPoint("TOPLEFT", 150, -y)
     box:SetAutoFocus(false)
     box:SetMaxLetters(200)
@@ -191,6 +197,13 @@ function page.build(self, content, width)
     status:SetPoint("LEFT", box, "RIGHT", 10, 0)
     status:SetWidth(96)
     status:SetWordWrap(false)
+    local undo = UI.IconButton(sc, "close", 26, "Zurück zum empfohlenen String")
+    undo:SetPoint("LEFT", status, "RIGHT", 2, 0)
+    undo:SetScript("OnClick", function()
+      if ns.settings.priceStrings then ns.settings.priceStrings[d[1]] = nil end
+      box:ClearFocus()
+      page.refresh(self)
+    end)
     box:SetScript("OnEnterPressed", function(b)
       local okSet, err = PS.Set(d[1], b:GetText())
       b:ClearFocus()
@@ -200,7 +213,7 @@ function page.build(self, content, width)
     box:SetScript("OnEscapePressed", function(b) b:ClearFocus() page.refresh(self) end)
     box:SetScript("OnEditFocusGained", function(b) b.bg:SetColor(C.cardHi, 1) end)
     box:SetScript("OnEditFocusLost", function(b) b.bg:SetColor(C.inset, 1) end)
-    self.strings[d[1]] = { box = box, status = status }
+    self.strings[d[1]] = { box = box, status = status, undo = undo }
     y = y + 44
   end
   sc:SetHeight(y + 8)
@@ -214,8 +227,9 @@ function page.build(self, content, width)
     function(v) cfg().perRecipe = v end, 1, 1, 50, function(v) return v .. "×" end,
     function(t) return tonumber((t or ""):match("%d+")) end, "Wie oft jedes lohnende Rezept auf die Liste soll. Auf die Zahl klicken zum Eintragen.")
   self.perRecipe:SetPoint("LEFT")
+  self.perRecipe:SetDefault(2)
   self.makeBtn = UI.Button(mk, "Liste erstellen", "primary", 170, 34, "star")
-  self.makeBtn:SetPoint("LEFT", self.perRecipe, "RIGHT", 10, 0)
+  self.makeBtn:SetPoint("LEFT", self.perRecipe, "RIGHT", 40, 0)
   self.makeBtn:SetScript("OnClick", function() page.MakeList(self) end)
   UI.SetTooltip(self.makeBtn, "Liste erstellen", "Legt alle Rezepte, die gerade angezeigt werden (also Gold bringen), in die Craft-Liste und öffnet das Einkaufsfenster mit den Materialien.")
   self.shopBtn = UI.Button(mk, "Einkaufsfenster", "cool", 170, 34, "cart")
@@ -231,6 +245,14 @@ function page.build(self, content, width)
     { key = "profit", label = "Gewinn", width = 96, bold = true },
   }, { action = true })
   self.listTop = st.y
+
+  -- Ausgeblendete Rezepte einzeln zurückholen (Klick auf den Chip)
+  self.hiddenRow = CreateFrame("Frame", nil, content)
+  self.hiddenRow:SetWidth(width)
+  self.hiddenRow.label = UI.Text(self.hiddenRow, 11, "semibold", C.dim)
+  self.hiddenRow.label:SetPoint("TOPLEFT", 0, -8)
+  self.hiddenRow.label:SetText("Ausgeblendet:")
+  self.hiddenRow.chips = {}
 
   -- Warteschlange
   local qc = UI.Card(content, 20, C.card)
@@ -254,7 +276,9 @@ function page.build(self, content, width)
   qc.craft:SetScript("OnClick", function() page.CraftNext(self) end)
   UI.SetTooltip(qc.craft, "Craften", "Bei offenem Berufsfenster: stellt den ersten passenden Eintrag her – so oft dein Material reicht.")
   qc.clear = UI.Button(qc, "Alles leeren", "danger", 150, 34, "close")
-  qc.clear:SetScript("OnClick", function() page.ClearQueue() end)
+  qc.clear:SetScript("OnClick", function()
+    if #queue() == 0 and page.undoQueue then page.UndoClear() else page.ClearQueue() end
+  end)
   qc.rows = {}
   qc.mats = UI.Para(qc, 12, C.muted, width - 40)
 end
@@ -319,15 +343,29 @@ function page.MakeList(self)
     if q[i].prof == self.prof then table.remove(q, i) end
   end
   for _, e in ipairs(list) do q[#q + 1] = { recipe = e.r.id, prof = e.r.prof, n = per } end
+  ns.Shop.ResetSkips()
   ns.Print(string.format("Craft-Liste erstellt: %d Rezepte je %d×. Das Einkaufsfenster zeigt dir, was du noch kaufen musst.", #list, per))
   ns.Shop.Show()
   page.refresh(self)
 end
 
 function page.ClearQueue()
+  if #queue() > 0 then
+    page.undoQueue = {}
+    for i, e in ipairs(queue()) do page.undoQueue[i] = { recipe = e.recipe, prof = e.prof, n = e.n } end
+  end
   wipe(queue())
   pendingCraft = nil
-  ns.Print("Craft-Warteschlange geleert.")
+  ns.Print("Craft-Warteschlange geleert. Aus Versehen? Knopf |cffffd24aRückgängig|r in der Warteschlange.")
+  UI.RefreshPage("recipes")
+end
+
+function page.UndoClear()
+  if not page.undoQueue then return end
+  local q = queue()
+  for _, e in ipairs(page.undoQueue) do q[#q + 1] = e end
+  page.undoQueue = nil
+  ns.Print("Craft-Warteschlange wiederhergestellt.")
   UI.RefreshPage("recipes")
 end
 
@@ -480,6 +518,8 @@ function page.refresh(self)
     or ("|cffffd24aEigener Wert.|r Empfehlung für Level " .. ns.player.level .. ": " .. ns.Money(preset.profit) .. "."))
     .. " Gewinn = AH-Verkauf nach Gebühr minus Material.")
   self.recBtn:SetEnabled(not auto)
+  self.recBtn:SetLabel(auto and "Empfehlung aktiv" or "Zurück zur Empfehlung")
+  self.filterReset:SetShown(not (cfg().onlySafe and cfg().freshOnly ~= false))
   local hiddenCount = 0
   for _ in pairs(hidden()) do hiddenCount = hiddenCount + 1 end
   self.unhideBtn:SetLabel("Ausgeblendete (" .. hiddenCount .. ")")
@@ -488,7 +528,9 @@ function page.refresh(self)
   for key, w in pairs(self.strings) do
     if not w.box:HasFocus() then w.box:SetText(ns.PriceString.Get(key)) end
     local custom = ns.settings.priceStrings and ns.settings.priceStrings[key]
-    w.status:SetText((custom and custom ~= ns.PriceString.DEFAULTS[key]) and "|cffffd24aeigener String|r" or "|cff61eb8fempfohlen|r")
+    local isCustom = custom and custom ~= ns.PriceString.DEFAULTS[key]
+    w.status:SetText(isCustom and "|cffffd24aeigener String|r" or "|cff61eb8fempfohlen|r")
+    w.undo:SetShown(isCustom and true or false)
   end
 
   local profs = buildSegments(self)
@@ -571,9 +613,50 @@ function page.refresh(self)
   self.list:SetPoint("TOPLEFT", content, "TOPLEFT", 0, -listTop)
   local h = self.list:SetEntries(entries, empty)
 
+  local y = listTop + h + 14
+  -- Ausgeblendete als Chips: Klick holt das Rezept zurück
+  local hr = self.hiddenRow
+  local ids = {}
+  for id in pairs(hidden()) do if R.Get(id) then ids[#ids + 1] = id end end
+  table.sort(ids, function(a, b) return R.Get(a).name < R.Get(b).name end)
+  for _, c in ipairs(hr.chips) do c:Hide() end
+  if #ids > 0 then
+    local cx, cy = 96, 0
+    for i, id in ipairs(ids) do
+      local r = R.Get(id)
+      local c = hr.chips[i]
+      if not c then
+        c = UI.Button(hr, "", "ghost", 100, 28, "refresh")
+        c:SetScript("OnClick", function(b)
+          hidden()[b.recipeID] = nil
+          ns.Print(R.Get(b.recipeID).name .. " ist wieder in der Liste.")
+          page.refresh(self)
+        end)
+        UI.SetTooltip(c, "Zurückholen", "Klick: Rezept wieder anzeigen.")
+        hr.chips[i] = c
+      end
+      c.recipeID = id
+      c:SetLabel(r.name)
+      local cw = math.ceil(c.text:GetStringWidth()) + 48
+      c:SetWidth(cw)
+      if cx + cw > UI.CONTENT_W and cx > 96 then cx, cy = 96, cy + 34 end
+      c:ClearAllPoints()
+      c:SetPoint("TOPLEFT", hr, "TOPLEFT", cx, -cy)
+      c:Show()
+      cx = cx + cw + 6
+    end
+    hr:SetHeight(cy + 28)
+    hr:ClearAllPoints()
+    hr:SetPoint("TOPLEFT", content, "TOPLEFT", 0, -y)
+    hr:Show()
+    y = y + cy + 28 + 14
+  else
+    hr:Hide()
+  end
+  y = y + 6
+
   -- Warteschlange
   local qc = self.queueCard
-  local y = listTop + h + 20
   qc:ClearAllPoints()
   qc:SetPoint("TOPLEFT", self.frame.content, "TOPLEFT", 0, -y)
   local mats, cost, profit, crafts = ns.QueueMaterials()
@@ -619,7 +702,13 @@ function page.refresh(self)
   qc.clear:ClearAllPoints(); qc.clear:SetPoint("LEFT", qc.craft, "RIGHT", 10, 0)
   qc.buy:SetEnabled(#mats > 0 and M.HasAuctionator())
   qc.craft:SetEnabled(#lines > 0 and S.tradeOpen == true)
-  qc.clear:SetEnabled(#queue() > 0)
+  if #queue() == 0 and page.undoQueue then
+    qc.clear:SetLabel("Rückgängig")
+    qc.clear:SetEnabled(true)
+  else
+    qc.clear:SetLabel("Alles leeren")
+    qc.clear:SetEnabled(#queue() > 0)
+  end
   local qh = qy + 34 + 20
   qc:SetHeight(qh)
   y = y + qh + 20

@@ -48,6 +48,7 @@ function Maps.Show(spot, what)
     end)
   end
   if OpenWorldMap then pcall(OpenWorldMap, spot.map) end
+  if ok then Maps.active = true ns.Fire("WAYPOINT_CHANGED") end
   ns.Print(string.format("%s: |cffffd24a%s %.0f, %.0f|r%s", what or "Farm-Stelle", zone, spot.x, spot.y,
     ok and " – Wegpunkt gesetzt, folge dem Pfeil." or " – öffne die Karte und lauf zu diesen Koordinaten."))
   return ok
@@ -61,4 +62,20 @@ function Maps.ShowBest(group, what)
     return false
   end
   return Maps.Show(spots[1], what)
+end
+
+-- Wegpunkt wieder entfernen (Knopf "Wegpunkt ×" oben im Fenster, /tz wegpunkt)
+function Maps.HasWaypoint()
+  if C_Map and C_Map.HasUserWaypoint then
+    local ok, has = pcall(C_Map.HasUserWaypoint)
+    if ok then return has and Maps.active == true end
+  end
+  return Maps.active == true
+end
+
+function Maps.Clear()
+  if C_Map and C_Map.ClearUserWaypoint then pcall(C_Map.ClearUserWaypoint) end
+  Maps.active = nil
+  ns.Print("Wegpunkt entfernt.")
+  ns.Fire("WAYPOINT_CHANGED")
 end

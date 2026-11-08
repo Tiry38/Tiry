@@ -6,7 +6,7 @@ local C = UI.C
 local M = ns.Market
 local Shop = ns.Shop
 
-local W, ROW, CROW = 340, 40, 30
+local W, ROW, CROW = 380, 42, 32
 local win
 
 local function create()
@@ -54,7 +54,7 @@ local function create()
   f.more = UI.Text(f, 10, "regular", C.dim)
 
   -- Linker Knopf passt sich an: beim Händler kaufen, sonst im AH suchen
-  f.search = UI.Button(f, "Im AH suchen", "soft", 166, 32, "scan")
+  f.search = UI.Button(f, "Im AH suchen", "soft", 186, 34, "scan")
   f.search:SetPoint("BOTTOMLEFT", 14, 14)
   f.search:SetScript("OnClick", function(self)
     if self.mode == "vendor" then
@@ -77,7 +77,7 @@ local function create()
     end
     return "Im AH suchen", "Bei offenem Auktionshaus: Auctionator sucht alle fehlenden Materialien auf einmal. Was du kaufst, wird hier sofort abgezogen."
   end)
-  f.craft = UI.Button(f, "Nächstes craften", "primary", 146, 32, "bolt")
+  f.craft = UI.Button(f, "Nächstes craften", "primary", 164, 34, "bolt")
   f.craft:SetPoint("BOTTOMRIGHT", -14, 14)
   f.craft:SetScript("OnClick", function() UI.pages.recipes.CraftNext(UI.pages.recipes) end)
   UI.SetTooltip(f.craft, "Nächstes craften", "Stellt der Reihe nach her, wofür du alles Material hast. Ist das Berufsfenster zu, öffnet der erste Klick es, der zweite stellt her.")
@@ -96,12 +96,19 @@ local function row(i)
   r.icon:SetPoint("LEFT", 6, 0)
   r.name = UI.Text(r, 12, "semibold", C.text)
   r.name:SetPoint("TOPLEFT", r.icon, "TOPRIGHT", 8, 0)
-  r.name:SetWidth(W - 150)
+  r.name:SetWidth(W - 176)
   r.name:SetWordWrap(false)
   r.sub = UI.Text(r, 10, "regular", C.dim)
   r.sub:SetPoint("TOPLEFT", r.name, "BOTTOMLEFT", 0, -2)
+  r.toggle = UI.IconButton(r, "close", 24)
+  r.toggle:SetPoint("RIGHT", -6, 0)
+  r.toggle:SetScript("OnClick", function() Shop.ToggleSkip(r.id) end)
+  UI.SetTooltip(r.toggle, function()
+    if r.skipped then return "Zurückholen", "Material wieder auf die Einkaufsliste setzen." end
+    return "Brauch ich nicht kaufen", "Nimmt das Material von der Liste (z. B. weil es ein anderer Charakter hat). ↺ holt es zurück."
+  end)
   r.count = UI.Text(r, 14, "bold", C.gold)
-  r.count:SetPoint("RIGHT", -10, 0)
+  r.count:SetPoint("RIGHT", r.toggle, "LEFT", -6, 0)
   r:SetScript("OnEnter", function(self)
     GameTooltip:SetOwner(self, "ANCHOR_LEFT")
     pcall(GameTooltip.SetItemByID, GameTooltip, self.id)
@@ -220,8 +227,16 @@ function Shop.Refresh()
     r.id = e.id
     r.icon:SetItem(e.id)
     local item = ns.Item(e.id)
-    r.name:SetText(item.name)
-    if e.missing > 0 then
+    UI.FitText(r.name, item.name, W - 176)
+    r.skipped = e.skipped
+    r.toggle.icon:SetTexture(UI.Icon(e.skipped and "refresh" or "close"))
+    r.toggle:SetShown(e.missing > 0 or e.skipped == true)
+    if e.skipped then
+      r.bg:SetColor(C.inset, 0.6)
+      r.name:SetTextColor(C.dim[1], C.dim[2], C.dim[3], 1)
+      r.count:SetText("")
+      r.sub:SetText(string.format("%d / %d · übersprungen", e.have, e.need))
+    elseif e.missing > 0 then
       r.bg:SetColor(vendorHas[e.id] and C.cardHi or C.card, 1)
       r.name:SetTextColor(C.text[1], C.text[2], C.text[3], 1)
       r.count:SetText(e.missing .. "×")

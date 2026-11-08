@@ -449,6 +449,8 @@ function M.install(opts)
   G.C_Map = {
     CanSetUserWaypointOnMap = function(map) return true end,
     SetUserWaypoint = function(p) assert(p and p.map) M.waypoint = p end,
+    HasUserWaypoint = function() return M.waypoint ~= nil end,
+    ClearUserWaypoint = function() M.waypoint = nil end,
     GetBestMapForUnit = function(u) assert(u == "player") return 1413 end,
     GetPlayerMapPosition = function(map, u) return { GetXY = function() return 0.502, 0.421 end } end,
     GetMapInfo = function(map) return { name = "Karte" .. map } end,

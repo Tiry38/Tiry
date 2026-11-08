@@ -512,6 +512,65 @@ local function runScenario(label, opts)
   end) end
 
   -- Karte
+  step("Rückgängig überall", function()
+    local p = ns.UI.pages.recipes
+    ns.UI.Show("recipes")
+    -- Mindestgewinn: eigener Wert -> × zurück zur Empfehlung
+    ns.Recipes.SetProfit(12345) ; p.refresh(p)
+    assert(p.profit.reset:IsShown(), "× am Mindestgewinn sichtbar")
+    p.profit.reset:Click()
+    assert(select(3, ns.Recipes.Filter()) == true and not p.profit.reset:IsShown(), "× setzt auf Empfehlung zurück")
+    -- Je Rezept
+    TirysZentraleDB.settings.craft.perRecipe = 7 ; p.refresh(p)
+    assert(p.perRecipe.reset:IsShown(), "× an Je Rezept")
+    p.perRecipe.reset:Click()
+    assert(TirysZentraleDB.settings.craft.perRecipe == 2, "Je Rezept wieder 2")
+    -- Profi-String
+    ns.PriceString.Set("matPrice", "ahprice") ; p.refresh(p)
+    assert(p.strings.matPrice.undo:IsShown(), "× am Profi-String")
+    p.strings.matPrice.undo:Click()
+    assert(ns.PriceString.Get("matPrice") == ns.PriceString.DEFAULTS.matPrice, "String wieder empfohlen")
+    -- Filter
+    TirysZentraleDB.settings.craft.onlySafe = false ; p.refresh(p)
+    assert(p.filterReset:IsShown(), "Filter-Standard-Knopf sichtbar")
+    p.filterReset:Click()
+    assert(TirysZentraleDB.settings.craft.onlySafe == true, "Filter zurückgesetzt")
+    -- Ausgeblendetes Rezept einzeln zurückholen
+    TirysZentraleCharDB.hiddenRecipes = { [2152] = true } ; p.refresh(p)
+    assert(p.hiddenRow:IsShown() and p.hiddenRow.chips[1]:IsShown(), "Chip für ausgeblendetes Rezept")
+    p.hiddenRow.chips[1]:Click()
+    assert(not TirysZentraleCharDB.hiddenRecipes[2152] and not p.hiddenRow:IsShown(), "Chip holt Rezept zurück")
+    -- Warteschlange leeren -> Rückgängig
+    TirysZentraleCharDB.queue = { { recipe = 2152, prof = "LEATHERWORKING", n = 3 } } ; p.refresh(p)
+    p.queueCard.clear:Click()
+    assert(#TirysZentraleCharDB.queue == 0 and p.queueCard.clear.text:GetText() == "Rückgängig", "Rückgängig-Knopf nach Leeren")
+    p.queueCard.clear:Click()
+    assert(#TirysZentraleCharDB.queue == 1 and TirysZentraleCharDB.queue[1].n == 3, "Warteschlange wiederhergestellt")
+    -- Einkaufsliste: Material überspringen und zurückholen
+    ns.Shop.Show() ; W.flush()
+    local first = ns.Shop.List()[1]
+    if first and first.missing > 0 then
+      ns.Shop.ToggleSkip(first.id)
+      local e2 ; for _, e in ipairs((ns.Shop.List())) do if e.id == first.id then e2 = e end end
+      assert(e2.skipped and e2.missing == 0, "Material übersprungen")
+      ns.Shop.ToggleSkip(first.id)
+      for _, e in ipairs((ns.Shop.List())) do if e.id == first.id then e2 = e end end
+      assert(not e2.skipped and e2.missing > 0, "Material zurückgeholt")
+    end
+    TirysZentraleCharDB.queue = {}
+    -- Einstellungen: zwei Klicks setzen alles zurück
+    TirysZentraleDB.settings.ahCut = 9 ; TirysZentraleDB.settings.autoJunk = false
+    ns.Recipes.SetProfit(999)
+    ns.UI.Show("settings")
+    local sp = ns.UI.pages.settings
+    local all = sp.resetAll
+    assert(all and all.text:GetText() == "Alle Einstellungen auf Standard", "Knopf Alle Einstellungen auf Standard")
+    all:Click() ; assert(TirysZentraleDB.settings.ahCut == 9, "erster Klick fragt nur")
+    all:Click()
+    assert(TirysZentraleDB.settings.ahCut == 5 and TirysZentraleDB.settings.autoJunk == true, "alles auf Standard")
+    assert(select(3, ns.Recipes.Filter()) == true, "Mindestgewinn wieder Empfehlung")
+  end)
+
   step("Karten-Wegpunkt", function()
     ns.UI.Show("farm")
     local p = ns.UI.pages.farm
@@ -524,6 +583,11 @@ local function runScenario(label, opts)
     for _, c in ipairs(mp.cards) do for _, b in ipairs(c.mapBtns or {}) do if b:IsShown() then b:Click() end end end
   end)
   check(label .. ": Wegpunkt gesetzt", W.waypoint ~= nil and W.superTracked == true and W.mapOpened ~= nil)
+  step("Wegpunkt entfernen", function()
+    assert(TirysZentraleMainFrame.wpBtn:IsShown(), "Knopf Wegpunkt × sichtbar")
+    TirysZentraleMainFrame.wpBtn:Click() ; W.flush()
+    assert(W.waypoint == nil and not TirysZentraleMainFrame.wpBtn:IsShown(), "Wegpunkt gelöscht")
+  end)
   local spots = 0
   for _, band in pairs(ns.SPOTS) do for _, g in pairs(band) do spots = spots + #g end end
   check(label .. ": Hotspots vorhanden", spots > 80, tostring(spots))

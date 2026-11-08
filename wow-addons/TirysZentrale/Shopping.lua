@@ -12,6 +12,7 @@ local function state()
   local s = ns.char.shop
   s.purchased = s.purchased or {} -- seit dem letzten Briefkasten-Besuch gekauft
   s.inbox = s.inbox or {}         -- Inhalt des Briefkastens beim letzten Besuch
+  s.skip = s.skip or {}           -- per × übersprungen ("brauch ich nicht kaufen"), ↺ holt es zurück
   return s
 end
 
@@ -42,9 +43,10 @@ function Shop.List()
   local list, open, cost = {}, 0, 0
   for id, need in pairs(Shop.Needs()) do
     local have = Shop.Have(id)
-    local missing = math.max(0, need - have)
+    local skipped = state().skip[id] and need > have or nil
+    local missing = skipped and 0 or math.max(0, need - have)
     local unit, where = M.BuyCost(id)
-    list[#list + 1] = { id = id, need = need, have = math.min(have, need), missing = missing, unit = unit, where = where }
+    list[#list + 1] = { id = id, need = need, have = math.min(have, need), missing = missing, unit = unit, where = where, skipped = skipped }
     if missing > 0 then
       open = open + 1
       cost = cost + (unit or 0) * missing
@@ -55,6 +57,18 @@ function Shop.List()
     return ns.Item(a.id).name < ns.Item(b.id).name
   end)
   return list, open, cost
+end
+
+-- × / ↺ an einer Material-Zeile
+function Shop.ToggleSkip(id)
+  local s = state()
+  s.skip[id] = not s.skip[id] or nil
+  ns.Fire("SHOP_CHANGED")
+end
+
+function Shop.ResetSkips()
+  state().skip = {}
+  ns.Fire("SHOP_CHANGED")
 end
 
 -- Fehlende Materialien, die man beim Händler kaufen sollte (günstiger als AH oder nur dort)

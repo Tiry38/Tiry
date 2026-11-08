@@ -115,6 +115,16 @@ local function applyDefaults(target, defaults)
   end
 end
 
+-- Alle Einstellungen auf Standard (Fensterposition, Seite und Begrüßung bleiben erhalten)
+local KEEP = { point = true, shopPoint = true, welcomeShown = true, lastPage = true }
+function ns.ResetSettings()
+  for k in pairs(ns.settings) do
+    if not KEEP[k] then ns.settings[k] = nil end
+  end
+  applyDefaults(ns.settings, DEFAULTS)
+  ns.Fire("SETTINGS_RESET")
+end
+
 ns.On("ADDON_LOADED", function(_, name)
   if name ~= ADDON then return end
   TirysZentraleDB = type(TirysZentraleDB) == "table" and TirysZentraleDB or {}

@@ -9,7 +9,7 @@ local page = {
   icon = "gear", label = "Einstellungen", order = 9,
 }
 
-local function stepper(parent, label, desc, getter, setter, step, min, max, fmt, width)
+local function stepper(parent, label, desc, getter, setter, step, min, max, fmt, width, def)
   local f = CreateFrame("Frame", nil, parent)
   f:SetSize(width, 54)
   f.label = UI.Text(f, 13, "semibold", C.text)
@@ -26,7 +26,13 @@ local function stepper(parent, label, desc, getter, setter, step, min, max, fmt,
   value:SetPoint("RIGHT", plus, "LEFT", -6, 0)
   local minus = UI.IconButton(f, "minus", 28, "Weniger")
   minus:SetPoint("RIGHT", value, "LEFT", -6, 0)
-  function f:Refresh() value:SetText(string.format(fmt, getter())) end
+  local undo = UI.IconButton(f, "close", 26, "Zurück auf Standard")
+  undo:SetPoint("RIGHT", minus, "LEFT", -8, 0)
+  undo:SetScript("OnClick", function() setter(def) f:Refresh() end)
+  function f:Refresh()
+    value:SetText(string.format(fmt, getter()))
+    undo:SetShown(def ~= nil and getter() ~= def)
+  end
   plus:SetScript("OnClick", function()
     setter(math.min(max, getter() + step))
     f:Refresh()
@@ -96,11 +102,11 @@ function page.build(self, content, width)
   end, "Blendet auf der Seite \"Goldwege\" alles aus, wofür dein Level noch nicht reicht.", width), 54)
 
   add(stepper(content, "AH-Gebühr", "So viel Prozent behält das Auktionshaus vom Verkaufspreis ein. Standard: 5 %. Alle Gewinne werden damit berechnet.",
-    function() return tonumber(s.ahCut) or 5 end, function(v) s.ahCut = v end, 1, 0, 30, "%d %%", width), 54)
+    function() return tonumber(s.ahCut) or 5 end, function(v) s.ahCut = v end, 1, 0, 30, "%d %%", width, 5), 54)
 
   add(stepper(content, "Fenstergröße", "Skaliert das Tiry's Zentrale-Fenster.",
     function() return math.floor((tonumber(s.scale) or 1) * 100 + 0.5) end,
-    function(v) s.scale = v / 100; UI.ApplyScale() end, 5, 70, 130, "%d %%", width), 54)
+    function(v) s.scale = v / 100; UI.ApplyScale() end, 5, 70, 130, "%d %%", width, 100), 54)
 
   st:Space(10)
   local reset = UI.Button(content, "Fensterposition zurücksetzen", "soft", 260, 34, "refresh")
@@ -109,12 +115,35 @@ function page.build(self, content, width)
     UI.frame:ClearAllPoints()
     UI.frame:SetPoint("CENTER")
   end)
-  st:Add(reset, 34, 24)
+  st:Add(reset, 34, 12)
+
+  -- Alles zurück auf Standard: zweiter Klick bestätigt (kein Versehen)
+  local all = UI.Button(content, "Alle Einstellungen auf Standard", "danger", 300, 34, "close")
+  all:SetScript("OnClick", function(b)
+    if b.armed then
+      b.armed = nil
+      ns.ResetSettings()
+      UI.ApplyScale()
+      UI.UpdateMinimap()
+      UI.UpdateAnimations()
+      b:SetLabel("Alle Einstellungen auf Standard")
+      ns.Print("Alle Einstellungen stehen wieder auf Standard (Craft-Liste und Daten bleiben erhalten).")
+      page.refresh(self)
+    else
+      b.armed = true
+      b:SetLabel("Sicher? Nochmal klicken")
+      C_Timer.After(4, function() if b.armed then b.armed = nil b:SetLabel("Alle Einstellungen auf Standard") end end)
+    end
+  end)
+  UI.SetTooltip(all, "Alles auf Standard", "Setzt alle Schalter, Regler, Filter und Profi-Strings zurück. Deine Craft-Liste, Preise und Verkaufsbuch bleiben.")
+  self.resetAll = all
+  st:Add(all, 34, 24)
 
   st:Title("Befehle", 15, C.text, 2)
   st:Para("|cffffd24a/tz|r – Fenster öffnen/schließen\n"
     .. "|cffffd24a/tz leder|r · |cffffd24a/tz farm|r · |cffffd24a/tz craft|r · |cffffd24a/tz suche|r · |cffffd24a/tz wege|r · |cffffd24a/tz markt|r · |cffffd24a/tz scan|r · |cffffd24a/tz rezepte|r · |cffffd24a/tz tagebuch|r · |cffffd24a/tz ah|r\n"
     .. "|cffffd24a/tz minimap|r – Minikarten-Knopf an/aus\n"
+    .. "|cffffd24a/tz wegpunkt|r – gesetzten Kartenpunkt löschen · |cffffd24a/tz leeren|r – Craft-Liste leeren\n"
     .. "|cffffd24a/tz reset|r – Fenster in die Mitte setzen", 12, C.muted, 16)
   st:Para("Tiry's Zentrale " .. tostring(ns.version) .. " · gebaut für WoW Forever (1.60.1). Preise kommen aus Auctionator – "
     .. "Tiry's Zentrale selbst liest nie etwas im Hintergrund aus und schickt keine Daten weg.", 11, C.dim, 10)
