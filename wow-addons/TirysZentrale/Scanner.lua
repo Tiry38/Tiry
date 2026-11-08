@@ -253,8 +253,10 @@ local function makerIndex()
   local R = ns.Recipes
   for _, key in ipairs(R.MyProfessions()) do
     for _, r in ipairs((R.List(key, "known"))) do
-      -- nur echte Zwischenprodukte: gleiche Menge raus, kein Rezept, das sein eigenes Ergebnis braucht
-      if r.out and (r.qty or 0) > 0 and not makers[r.out] then
+      -- nur echte Zwischenprodukte mit Zusatz (z. B. Balg + Salz -> Geschmeidiger Balg).
+      -- Reine Umwandlungen aus EINEM Material (Lederfetzen -> Leichtes Leder, Leichtes -> Mittleres Leder)
+      -- werden nie vorgeschlagen.
+      if r.out and (r.qty or 0) > 0 and not makers[r.out] and #r.reagents >= 2 then
         local loops = false
         for _, re in ipairs(r.reagents) do if re.id == r.out then loops = true end end
         if not loops then makers[r.out] = r end

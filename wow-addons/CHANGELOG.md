@@ -1,5 +1,8 @@
 # Changelog – Tiry's Zentrale
 
+## 5.8.1 (08.11.2026)
+- **Selbst herstellen nur noch bei Zwischenprodukten mit Zusatz** (z. B. Balg + Salz → Geschmeidiger Balg). Reine Umwandlungen aus einem einzigen Material (Lederfetzen → Leichtes Leder, Leichtes → Mittleres Leder) werden nicht mehr vorgeschlagen – Leder wird gekauft.
+
 ## 5.8.0 (08.11.2026)
 **Herstellen mit echten Zahlen.**
 - **Neu: Craften → „Ergebnis“.** Was dir Herstellen wirklich gebracht hat: hergestellt, verkauft, echter Gewinn pro Stück und gesamt (7/30/60 Tage). Materialkosten = was du im AH wirklich bezahlt hast (Ø 30 Tage), Erlös = Verkaufsbrief. Verlust-Rezepte sind rot markiert.

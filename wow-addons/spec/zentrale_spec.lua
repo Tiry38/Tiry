@@ -697,6 +697,14 @@ describe("Selbst herstellen oder kaufen (Zwischenprodukte)", function()
     assert.is_false(ns.HasProf(ns.PROF.TAILORING))
   end)
 
+  it("reines Leder (Lederfetzen -> Leichtes Leder) wird nie selbst hergestellt", function()
+    -- Rezept 2881: 3 Verdorbene Lederfetzen -> 1 Leichtes Leder, Fetzen wären viel billiger
+    local ns = E.load({ prices = { [2318] = 3000, [2934] = 10 }, known = { [2881] = true, [2152] = true } })
+    local _, how = ns.Scanner.MatCost(2318)
+    assert.are.equal("buy", how)
+    assert.is_nil(ns.Scanner.Maker(2318))
+  end)
+
   it("kaufen bleibt, wenn der fertige Balg billiger ist", function()
     local cheap = {}
     for k, v in pairs(prices) do cheap[k] = v end
