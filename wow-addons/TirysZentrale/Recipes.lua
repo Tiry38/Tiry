@@ -33,6 +33,26 @@ function R.Get(spellID)
   return bySpell[spellID]
 end
 
+-- Rezept über das Ergebnis-Item finden (Berufsfenster-Nummern können von den Zauber-Nummern abweichen)
+function R.ByOutput(itemID, profKey)
+  R.Load()
+  for key, list in pairs(byProf) do
+    if not profKey or key == profKey then
+      for _, r in ipairs(list) do
+        if r.out == itemID then return r end
+      end
+    end
+  end
+end
+
+-- Nummer aus dem Berufsfenster -> unser Rezept (über das Ergebnis-Item)
+function R.FromLive(recipeID)
+  if not (C_TradeSkillUI and C_TradeSkillUI.GetRecipeSchematic) then return nil end
+  local ok, s = pcall(C_TradeSkillUI.GetRecipeSchematic, recipeID, false)
+  if ok and s and s.outputItemID then return R.ByOutput(s.outputItemID) end
+  return nil
+end
+
 -- Schlüssel (z. B. "LEATHERWORKING") aus der Skill-ID
 function R.ProfKey(skillID)
   for key, id in pairs(ns.PROF) do
@@ -96,7 +116,7 @@ end
 
 -- Neues Rezept gelernt -> sofort melden, ob es Gold bringt
 ns.On("NEW_RECIPE_LEARNED", function(_, recipeID)
-  local r = recipeID and R.Get(recipeID)
+  local r = recipeID and (R.FromLive(recipeID) or R.Get(recipeID))
   ns.Fire("PROFESSIONS_CHANGED")
   if not r then return end
   local profit = ns.Scanner.RecipeProfit(r)
@@ -112,7 +132,10 @@ ns.Listen("RECIPES_SCANNED", function()
   ns.char.learned = ns.char.learned or {}
   for _, data in pairs(ns.char.recipes or {}) do
     for _, r in ipairs(data.list) do
-      if r.learned then ns.char.learned[r.id] = true end
+      if r.learned then
+        local own = R.ByOutput(r.out)
+        ns.char.learned[own and own.id or r.id] = true
+      end
     end
   end
 end)

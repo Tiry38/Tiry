@@ -212,6 +212,25 @@ local function runScenario(label, opts)
     W.fire("TRADE_SKILL_CLOSE") ; W.flush()
   end)
 
+  -- Forever-Fall: Berufsfenster nummeriert anders als das Zauberbuch -> trotzdem das RICHTIGE Item herstellen
+  step("Craft mit abweichenden Nummern", function()
+    local saved = W.recipes
+    W.recipes = {
+      [90001] = { name = "Lagerzelt", out = 279978, reagents = { { 2318, 5 } } },
+      [90002] = { name = "Leinentasche", out = 4238, reagents = { { 2996, 3 }, { 2320, 3 } } },
+    }
+    TirysZentraleCharDB.queue = { { recipe = 3755, prof = "TAILORING", n = 1 } }
+    W.crafted, W.craftedID = 0, nil
+    W.fire("TRADE_SKILL_SHOW") ; W.flush()
+    ns.UI.Show("recipes")
+    ns.UI.pages.recipes.queueCard.craft:Click()
+    assert(W.craftedID == 90002, "muss Leinentasche (90002) herstellen, nicht " .. tostring(W.craftedID))
+    W.fire("NEW_RECIPE_LEARNED", 90002) ; W.flush()
+    W.fire("TRADE_SKILL_CLOSE") ; W.flush()
+    W.recipes = saved
+    TirysZentraleCharDB.learned = nil
+  end)
+
   -- Rezept-Datenbank + automatische Erkennung + Level-Empfehlung
   local R = ns.Recipes
   local all = 0
