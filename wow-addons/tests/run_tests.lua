@@ -487,6 +487,26 @@ local function runScenario(label, opts)
     ns.Shop.Toggle() ; ns.Shop.Toggle()
     W.call(win.rows[1], "OnEnter") ; W.call(win.rows[1], "OnLeave")
     win.search:Click()
+    -- Was wird gecraftet? + Händler kauft fehlendes Material mit einem Klick
+    TirysZentraleCharDB.queue = { { recipe = 3755, prof = "TAILORING", n = 2 } }
+    W.bags[0] = {}
+    local crafts = ns.Shop.Crafts()
+    assert(#crafts == 1 and crafts[1].n == 2 and crafts[1].status == "fehlt", "Craft-Anzeige: 2x Leinentasche, Material fehlt")
+    ns.Shop.Refresh()
+    assert(win.crafts[1]:IsShown() and win.crafts[1].name:GetText():find("Leinentasche"), "Fenster zeigt, was gecraftet wird")
+    W.merchant = { { id = 2320, name = "Grober Faden", price = 10, maxStack = 4 }, { id = 2996, name = "Leinenstoffballen", price = 500, avail = 0 } }
+    W.bought, W.boughtByID = 0, {}
+    W.fire("MERCHANT_SHOW") ; W.flush()
+    local plan = ns.Shop.VendorPlan()
+    assert(#plan == 1 and plan[1].id == 2320 and plan[1].qty == 6, "Händler-Plan: 6 Faden (Ballen ausverkauft)")
+    assert(win.search.mode == "vendor", "Knopf wird zu 'Beim Händler kaufen'")
+    win.search:Click()
+    assert(W.boughtByID[2320] == 6, "6 Faden gekauft, in Stapeln <= MaxStack: " .. tostring(W.boughtByID[2320]))
+    local ok2 = ns.Shop.BuyFromVendor()
+    assert(not ok2, "Doppelklick-Schutz")
+    W.fire("MERCHANT_CLOSED") ; W.flush()
+    assert(win.search.mode == "ah", "ohne Händler wieder AH-Suche")
+    W.bought, W.boughtByID, W.merchant = nil, nil, {}
     W.bags = savedBags
     TirysZentraleCharDB.queue, TirysZentraleCharDB.hiddenRecipes = {}, {}
   end) end

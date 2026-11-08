@@ -8,7 +8,7 @@ local panel
 
 local function create()
   local p = CreateFrame("Frame", "TirysZentraleMerchantPanel", UIParent)
-  p:SetSize(270, 250)
+  p:SetSize(270, 292)
   p:SetFrameStrata("HIGH")
   p.bg = UI.Round(p, 20, "BACKGROUND", -8)
   p.bg:SetColor(C.bg)
@@ -61,8 +61,22 @@ local function create()
       .. "\n\nGewinn laut letztem AH-Scan nach AH-Gebühr. Kauft nur Ware mit begrenztem Vorrat."
   end)
 
+  p.mats = UI.Button(p, "Craft-Material kaufen", "primary", 242, 34, "bolt")
+  p.mats:SetPoint("TOPLEFT", 14, -196)
+  p.mats:SetScript("OnClick", function()
+    local ok, res = ns.Shop.BuyFromVendor()
+    ns.Print(ok and ("Gekauft: " .. res) or ("|cffff6b81" .. res .. "|r"))
+  end)
+  UI.SetTooltip(p.mats, function()
+    local plan, cost = ns.Shop.VendorPlan()
+    if #plan == 0 then return "Craft-Material kaufen", "Dieser Händler verkauft nichts, was deiner Craft-Liste noch fehlt." end
+    local names = {}
+    for _, e in ipairs(plan) do names[#names + 1] = e.qty .. "× " .. ns.Item(e.id).name .. "  " .. ns.Money(e.cost) end
+    return "Kauft für " .. ns.Money(cost), table.concat(names, "\n") .. "\n\nGenau die fehlende Menge aus deiner Einkaufsliste – nur gegen Gold."
+  end)
+
   p.more = UI.Button(p, "Details im Scanner", "soft", 242, 30, "scan")
-  p.more:SetPoint("TOPLEFT", 14, -196)
+  p.more:SetPoint("TOPLEFT", 14, -238)
   p.more:SetScript("OnClick", function() UI.Show("scanner") end)
   p:Hide()
   return p
@@ -80,6 +94,9 @@ function A.RefreshPanel()
     ns.settings.autoJunk and "wird automatisch verkauft" or "Autopilot aus (Einstellungen)"))
   panel.sell:SetEnabled(#list > 0)
   panel.buy:SetEnabled(#plan > 0 and GetMoney() >= cost)
+  local mats = ns.Shop.VendorPlan()
+  panel.mats:SetLabel(#mats > 0 and ("Craft-Material kaufen (" .. #mats .. ")") or "Craft-Material kaufen")
+  panel.mats:SetEnabled(#mats > 0)
 end
 
 ns.Listen("MERCHANT_SCANNED", function()
@@ -97,6 +114,9 @@ ns.Listen("MERCHANT_SCANNED", function()
   elseif panel then
     panel:Hide()
   end
+end)
+ns.Listen("SHOP_CHANGED", function()
+  if panel and panel:IsShown() then ns.Debounce("panel", 0.4, A.RefreshPanel) end
 end)
 ns.On("BAG_UPDATE_DELAYED", function()
   if panel and panel:IsShown() then ns.Debounce("panel", 0.4, A.RefreshPanel) end

@@ -76,20 +76,45 @@ function ns.QueueMaterials()
   return list, cost, profit, crafts
 end
 
+-- Schritt-Überschrift: Kreis mit Nummer + Text (macht die Seite in 3 Schritten lesbar)
+local function stepHead(parent, n, text, width)
+  local f = CreateFrame("Frame", nil, parent)
+  f:SetSize(width, 28)
+  local dot = CreateFrame("Frame", nil, f)
+  dot:SetSize(26, 26)
+  dot:SetPoint("LEFT")
+  dot.bg = UI.Round(dot, 13, "ARTWORK", 0)
+  dot.bg:SetGradient(UI.GRAD, 1)
+  local num = UI.Text(dot, 13, "bold", C.dark)
+  num:SetPoint("CENTER", 0, 0)
+  num:SetText(n)
+  f.text = UI.Text(f, 15, "bold", C.text)
+  f.text:SetPoint("LEFT", dot, "RIGHT", 10, 0)
+  f.text:SetText(text)
+  return f
+end
+
 ----------------------------------------------------------------------------
 function page.build(self, content, width)
   self.view = "known"
   local st = UI.Stack(content)
 
-  -- Filterkarte: EIN Regler (Mindestgewinn in Gold), Empfehlung wächst mit deinem Level
+  local refresh = function() page.refresh(self) end
+
+  -- Schritt 1: Beruf + Ansicht
+  st:Add(stepHead(content, 1, "Beruf wählen", width), 28, 10)
+  self.segHolder = CreateFrame("Frame", nil, content)
+  self.segHolder:SetSize(width, 30)
+  st:Add(self.segHolder, 30, 8)
+  self.viewSeg = UI.Segments(content, VIEWS, function(v) self.view = v page.refresh(self) end, width)
+  st:Add(self.viewSeg, self.viewSeg:GetHeight(), 18)
+
+  -- Schritt 2: EIN Regler (Mindestgewinn), Empfehlung wächst mit deinem Level
+  st:Add(stepHead(content, 2, "Wie viel Gewinn pro Craft mindestens?", width), 28, 10)
   local fc = CreateFrame("Frame", nil, content)
-  fc:SetSize(width, 128)
+  fc:SetSize(width, 92)
   fc.bg = UI.Round(fc, 22, "BACKGROUND", 0)
   fc.bg:SetGradient({ { 0.26, 0.15, 0.06 }, { 0.22, 0.09, 0.20 }, { 0.12, 0.10, 0.30 } }, 0.95)
-  local title = UI.Text(fc, 15, "bold", C.text)
-  title:SetPoint("TOPLEFT", 20, -16)
-  title:SetText("Zeig mir Rezepte mit mindestens so viel Gewinn pro Craft:")
-  local refresh = function() page.refresh(self) end
   self.profit = UI.Stepper(fc, "Mindestgewinn", 340, function() return (select(2, R.Filter())) end,
     function(v) R.SetProfit(v) end,
     function(v, dir)
@@ -98,61 +123,62 @@ function page.build(self, content, width)
       return 50000
     end, 0, 10000000, function(v) return v == 0 and "alles" or ns.Money(v) end, ns.ParseMoney,
     "Auf die Zahl klicken und selbst eintragen: 45 = 45 Silber, 1g 20s, 1,5g. Enter übernimmt.")
-  self.profit:SetPoint("TOPLEFT", 20, -44)
+  self.profit:SetPoint("TOPLEFT", 20, -16)
   self.profit.onChange = refresh
   self.recBtn = UI.Button(fc, "Empfehlung für mein Level", "primary", 240, 34, "star")
-  self.recBtn:SetPoint("TOPRIGHT", -20, -44)
+  self.recBtn:SetPoint("TOPRIGHT", -20, -16)
   self.recBtn:SetScript("OnClick", function() R.ResetStyle() page.refresh(self) end)
   self.recText = UI.Para(fc, 11, C.muted, width - 40)
-  self.recText:SetPoint("TOPLEFT", 20, -88)
-  st:Add(fc, 128, 14)
+  self.recText:SetPoint("TOPLEFT", 20, -60)
+  st:Add(fc, 92, 18)
 
-  self.segHolder = CreateFrame("Frame", nil, content)
-  self.segHolder:SetSize(width, 30)
-  st:Add(self.segHolder, 30, 8)
-  self.viewSeg = UI.Segments(content, VIEWS, function(v) self.view = v page.refresh(self) end, width)
-  st:Add(self.viewSeg, self.viewSeg:GetHeight(), 8)
-  local pills = CreateFrame("Frame", nil, content)
-  pills:SetSize(width, 30)
+  -- Filter (stecken in "Mehr Optionen", damit die Seite übersichtlich bleibt)
   self.pills = {}
-  local p = UI.Pill(pills, "Nur mit bekannten Preisen", function() return cfg().onlySafe end, function(v) cfg().onlySafe = v end, refresh)
-  p:SetPoint("TOPLEFT", 0, 0)
-  self.pills[1] = p
-  self.unhideBtn = UI.Button(pills, "Ausgeblendete zurückholen", "soft", 230, 30, "refresh")
-  self.unhideBtn:SetPoint("LEFT", p, "RIGHT", 8, 0)
-  self.unhideBtn:SetScript("OnClick", function() ns.char.hiddenRecipes = {} page.refresh(self) end)
-  self.scanBtn = UI.Button(pills, "AH scannen", "cool", 140, 30, "refresh")
-  self.scanBtn:SetPoint("TOPRIGHT")
-  self.scanBtn:SetScript("OnClick", function() M.StartScan() end)
-  st:Add(pills, 30, 12)
-
-  -- Profi-Strings wie bei TSM (Materialpreis, Verkaufswert, Mindestgewinn)
+  -- Profi-Strings wie bei TSM – einklappbar am Seitenende (Positionen werden in refresh berechnet)
   local PS = ns.PriceString
+  self.proToggle = UI.Button(content, "Mehr Optionen: Filter & Profi-Strings", "soft", 330, 32, "gear")
+  self.proToggle:SetScript("OnClick", function() self.proOpen = not self.proOpen page.refresh(self) end)
   local sc = CreateFrame("Frame", nil, content)
-  sc:SetSize(width, 214)
+  sc:SetWidth(width)
   sc.bg = UI.Round(sc, 18, "BACKGROUND", 0)
   sc.bg:SetColor(C.card, 1)
+  local fh = UI.Text(sc, 14, "bold", C.text)
+  fh:SetPoint("TOPLEFT", 18, -18)
+  fh:SetText("Filter")
+  local p = UI.Pill(sc, "Nur mit bekannten Preisen", function() return cfg().onlySafe end, function(v) cfg().onlySafe = v end, refresh)
+  p:SetPoint("TOPLEFT", 18, -48)
+  self.pills[1] = p
+  self.fresh = UI.Pill(sc, "Nur frische Preise", function() return cfg().freshOnly ~= false end,
+    function(v) cfg().freshOnly = v end, refresh)
+  self.fresh:SetPoint("LEFT", p, "RIGHT", 8, 0)
+  UI.SetTooltip(self.fresh, "Nur frische Preise", "Nur Rezepte, deren AH-Preis höchstens 3 Tage alt ist – alte Preise führen zu falschen Gewinnen.")
+  self.pills[2] = self.fresh
+  self.unhideBtn = UI.Button(sc, "Ausgeblendete (0)", "soft", 170, 30, "refresh")
+  self.unhideBtn:SetPoint("TOPRIGHT", -14, -48)
+  self.unhideBtn:SetScript("OnClick", function() ns.char.hiddenRecipes = {} page.refresh(self) end)
+  UI.SetTooltip(self.unhideBtn, "Ausgeblendete zurückholen", "Holt alle Rezepte zurück, die du mit × ausgeblendet hast.")
+  local OFF = 84
   local st1 = UI.Text(sc, 14, "bold", C.text)
-  st1:SetPoint("TOPLEFT", 18, -14)
+  st1:SetPoint("TOPLEFT", 18, -18 - OFF)
   st1:SetText("Profi-Strings (wie TSM)")
-  local st2 = UI.Para(sc, 10, C.dim, width - 250)
-  st2:SetPoint("TOPLEFT", st1, "BOTTOMLEFT", 0, -4)
-  st2:SetText("Quellen: ahprice, market (dein 14-Tage-Marktwert), vendorbuy, vendorsell, crafting, levelgold – TSM-Namen wie dbmarket gehen auch. Enter übernimmt.")
   local reset = UI.Button(sc, "Empfohlene Strings", "soft", 190, 30, "star")
-  reset:SetPoint("TOPRIGHT", -14, -12)
+  reset:SetPoint("TOPRIGHT", -14, -12 - OFF)
   reset:SetScript("OnClick", function() PS.Reset() page.refresh(self) end)
+  local st2 = UI.Para(sc, 11, C.dim, width - 36)
+  st2:SetPoint("TOPLEFT", 18, -52 - OFF)
+  st2:SetText("Quellen: ahprice, market (dein 14-Tage-Marktwert), vendorbuy, vendorsell, crafting, levelgold. TSM-Namen wie dbmarket gehen auch. Enter übernimmt, fehlerhafte Strings werden nicht gespeichert.")
+  local y = OFF + 52 + math.ceil(st2:GetStringHeight()) + 14
   self.strings = {}
   local defs = {
     { "matPrice", "Materialpreis" }, { "craftValue", "Verkaufswert" }, { "minProfit", "Mindestgewinn" },
   }
-  for i, d in ipairs(defs) do
-    local rowY = -56 - (i - 1) * 48
+  for _, d in ipairs(defs) do
     local lab = UI.Text(sc, 12, "semibold", C.muted)
-    lab:SetPoint("TOPLEFT", 18, rowY - 9)
+    lab:SetPoint("TOPLEFT", 18, -y - 9)
     lab:SetText(d[2])
     local box = CreateFrame("EditBox", nil, sc)
-    box:SetSize(width - 300, 32)
-    box:SetPoint("TOPLEFT", 140, rowY)
+    box:SetSize(width - 150 - 18 - 110, 32)
+    box:SetPoint("TOPLEFT", 150, -y)
     box:SetAutoFocus(false)
     box:SetMaxLetters(200)
     box:SetTextInsets(12, 12, 0, 0)
@@ -163,7 +189,7 @@ function page.build(self, content, width)
     box.bg:SetColor(C.inset, 1)
     local status = UI.Text(sc, 11, "semibold", C.green)
     status:SetPoint("LEFT", box, "RIGHT", 10, 0)
-    status:SetWidth(140)
+    status:SetWidth(96)
     status:SetWordWrap(false)
     box:SetScript("OnEnterPressed", function(b)
       local okSet, err = PS.Set(d[1], b:GetText())
@@ -175,13 +201,13 @@ function page.build(self, content, width)
     box:SetScript("OnEditFocusGained", function(b) b.bg:SetColor(C.cardHi, 1) end)
     box:SetScript("OnEditFocusLost", function(b) b.bg:SetColor(C.inset, 1) end)
     self.strings[d[1]] = { box = box, status = status }
+    y = y + 44
   end
-  self.fresh = UI.Pill(sc, "Nur frische Preise (max. 3 Tage)", function() return cfg().freshOnly ~= false end,
-    function(v) cfg().freshOnly = v end, function() page.refresh(self) end)
-  self.fresh:SetPoint("BOTTOMLEFT", 18, 14)
-  st:Add(sc, 214, 12)
+  sc:SetHeight(y + 8)
+  self.proCard = sc
 
-  -- Wie bei TSM: alle lohnenden Rezepte auf einen Klick in die Liste, Einkaufsfenster dazu
+  -- Schritt 3: wie bei TSM alle lohnenden Rezepte auf einen Klick in die Liste, Einkaufsfenster dazu
+  st:Add(stepHead(content, 3, "Liste erstellen, einkaufen, craften", width), 28, 10)
   local mk = CreateFrame("Frame", nil, content)
   mk:SetSize(width, 36)
   self.perRecipe = UI.Stepper(mk, "Je Rezept", 230, function() return cfg().perRecipe or 2 end,
@@ -198,13 +224,12 @@ function page.build(self, content, width)
   st:Add(mk, 36, 12)
 
   self.info = UI.Para(content, 12, C.gold, width)
-  st:Add(self.info, 34, 8)
+  self.infoTop = st.y
   self.list = UI.ItemList(content, width, {
     { key = "cost", label = "Material", width = 84 },
     { key = "revenue", label = "Verkauf", width = 84 },
     { key = "profit", label = "Gewinn", width = 96, bold = true },
   }, { action = true })
-  st:Add(self.list, nil)
   self.listTop = st.y
 
   -- Warteschlange
@@ -216,7 +241,7 @@ function page.build(self, content, width)
   qc.title:SetText("Craft-Warteschlange")
   qc.text = UI.Para(qc, 12, C.muted, width - 40)
   qc.text:SetPoint("TOPLEFT", qc.title, "BOTTOMLEFT", 0, -8)
-  qc.buy = UI.Button(qc, "Fehlendes Material als Einkaufsliste", "primary", 300, 34, "cart")
+  qc.buy = UI.Button(qc, "Als Auctionator-Liste", "primary", 220, 34, "cart")
   qc.buy:SetScript("OnClick", function()
     local mats = ns.QueueMaterials()
     local ids = {}
@@ -225,7 +250,7 @@ function page.build(self, content, width)
     local ok, n = M.CreateShoppingList("Zentrale: Craft-Material", ids)
     ns.Print(ok and ("Liste |cffffd24aTiry's Zentrale: Craft-Material|r angelegt (" .. n .. " Items). Im AH: Auctionator > Einkaufen > Suche alles.") or ("|cffff6b81" .. tostring(n) .. "|r"))
   end)
-  qc.craft = UI.Button(qc, "Nächstes craften", "cool", 190, 34, "bolt")
+  qc.craft = UI.Button(qc, "Nächstes craften", "cool", 180, 34, "bolt")
   qc.craft:SetScript("OnClick", function() page.CraftNext(self) end)
   UI.SetTooltip(qc.craft, "Craften", "Bei offenem Berufsfenster: stellt den ersten passenden Eintrag her – so oft dein Material reicht.")
   qc.clear = UI.Button(qc, "Alles leeren", "danger", 150, 34, "close")
@@ -453,15 +478,13 @@ function page.refresh(self)
   self.viewSeg:Select(self.view)
   self.recText:SetText((auto and ("|cff61eb8fEmpfehlung für Level " .. ns.player.level .. ": " .. ns.Money(preset.profit) .. "|r – wächst mit jedem Level mit.")
     or ("|cffffd24aEigener Wert.|r Empfehlung für Level " .. ns.player.level .. ": " .. ns.Money(preset.profit) .. "."))
-    .. " Gewinn = Verkauf im AH (nach Gebühr) minus Materialwert. Oben steht immer, was am meisten Gold bringt.")
+    .. " Gewinn = AH-Verkauf nach Gebühr minus Material.")
   self.recBtn:SetEnabled(not auto)
-  self.scanBtn:SetEnabled(M.ahOpen == true and M.HasAuctionator())
   local hiddenCount = 0
   for _ in pairs(hidden()) do hiddenCount = hiddenCount + 1 end
-  self.unhideBtn:SetLabel("Ausgeblendete zurückholen (" .. hiddenCount .. ")")
+  self.unhideBtn:SetLabel("Ausgeblendete (" .. hiddenCount .. ")")
   self.unhideBtn:SetEnabled(hiddenCount > 0)
   self.perRecipe:Refresh()
-  self.fresh:Refresh()
   for key, w in pairs(self.strings) do
     if not w.box:HasFocus() then w.box:SetText(ns.PriceString.Get(key)) end
     local custom = ns.settings.priceStrings and ns.settings.priceStrings[key]
@@ -470,6 +493,7 @@ function page.refresh(self)
 
   local profs = buildSegments(self)
   local entries = {}
+  ns.Debounce("shopwin", 0.2, ns.Shop.Refresh)
   if #profs == 0 then
     self.info:SetText("Du hast noch keinen Herstellungsberuf (z. B. Lederverarbeitung, Schneiderei, Alchemie). Lern einen beim Lehrer – dann erscheint er hier automatisch.")
   else
@@ -531,16 +555,25 @@ function page.refresh(self)
     if (st.old or 0) > 0 then why[#why + 1] = st.old .. " mit altem Preis (über 3 Tage)" end
     if (st.slow or 0) > 0 then why[#why + 1] = st.slow .. " Ladenhüter (deine Verkaufsquote unter 25 %)" end
     if st.hidden > 0 then why[#why + 1] = st.hidden .. " ausgeblendet" end
-    self.info:SetText(string.format("%s (Skill %d): |cff61eb8f%d Rezepte bringen Gold.|r %s\nPreise: %s",
-      ns.ProfName(ns.PROF[self.prof]), rank, #list, #why > 0 and ("Nicht gezeigt: " .. table.concat(why, ", ") .. ".") or "", M.LastScanText()))
+    self.info:SetText(string.format("|cff61eb8f%d %s bringen Gold|r  ·  Skill %d  ·  Preise: %s%s",
+      #list, #list == 1 and "Rezept" or "Rezepte", rank, M.LastScanText(),
+      #why > 0 and ("\n|cff9a93bdNicht gezeigt: " .. table.concat(why, ", ") .. ".|r") or ""))
   end
   local empty = (#profs == 0) and "" or (not M.HasAuctionator() and "Ohne Auctionator kennt Tiry's Zentrale keine AH-Preise – und ohne Preise lässt sich kein Gewinn berechnen. Installiere Auctionator für WoW Forever und scanne einmal im AH."
     or "Gerade bringt kein Rezept genug Gold. Tipp: Mindestgewinn senken oder im AH scannen (alte Preise).")
+  -- Info-Text messen, Liste direkt darunter (nichts kann sich mehr überlappen)
+  local content = self.frame.content
+  self.info:ClearAllPoints()
+  self.info:SetPoint("TOPLEFT", content, "TOPLEFT", 0, -self.infoTop)
+  local infoH = (#profs == 0 and #entries == 0 and self.info:GetText() == "") and 0 or math.ceil(self.info:GetStringHeight())
+  local listTop = self.infoTop + infoH + 12
+  self.list:ClearAllPoints()
+  self.list:SetPoint("TOPLEFT", content, "TOPLEFT", 0, -listTop)
   local h = self.list:SetEntries(entries, empty)
 
   -- Warteschlange
   local qc = self.queueCard
-  local y = self.listTop + h + 20
+  local y = listTop + h + 20
   qc:ClearAllPoints()
   qc:SetPoint("TOPLEFT", self.frame.content, "TOPLEFT", 0, -y)
   local mats, cost, profit, crafts = ns.QueueMaterials()
@@ -565,7 +598,7 @@ function page.refresh(self)
     local row = qc.rows[i] or queueRow(qc, width)
     qc.rows[i] = row
     row.recipe = l.r
-    row.text:SetText("|cffffd24a" .. l.n .. "×|r  " .. l.r.name .. "  |cff9a93bd" .. ns.ProfName(ns.PROF[l.r.prof]) .. "|r")
+    row.text:SetText("|cffffd24a" .. l.n .. "×|r  " .. l.r.name)
     row:ClearAllPoints()
     row:SetPoint("TOPLEFT", qc, "TOPLEFT", 20, -qy)
     row:Show()
@@ -589,7 +622,22 @@ function page.refresh(self)
   qc.clear:SetEnabled(#queue() > 0)
   local qh = qy + 34 + 20
   qc:SetHeight(qh)
-  self.frame.content:SetHeight(y + qh + 30)
+  y = y + qh + 20
+
+  -- Profi-Strings (eingeklappt, damit die Seite übersichtlich bleibt)
+  self.proToggle:ClearAllPoints()
+  self.proToggle:SetPoint("TOPLEFT", content, "TOPLEFT", 0, -y)
+  self.proToggle:SetLabel(self.proOpen and "Mehr Optionen ausblenden" or "Mehr Optionen: Filter & Profi-Strings")
+  y = y + 32 + 12
+  self.proCard:ClearAllPoints()
+  if self.proOpen then
+    self.proCard:SetPoint("TOPLEFT", content, "TOPLEFT", 0, -y)
+    self.proCard:Show()
+    y = y + self.proCard:GetHeight() + 12
+  else
+    self.proCard:Hide()
+  end
+  content:SetHeight(y + 20)
 end
 
 ns.Listen("PROFESSIONS_CHANGED", function() local p = UI.pages.recipes if p then p.segKey = nil end end)

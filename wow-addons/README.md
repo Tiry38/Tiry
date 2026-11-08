@@ -20,7 +20,8 @@ wie man schon mit Level 10–20 Gold macht – mit echten Preisen des eigenen Se
 | Marktpreise | Live-Preise der wichtigsten Gold-Materialien (126 kuratiert) inkl. neuer Forever-Materialien, Einkaufslisten, AH-Sofortsuche |
 | Datenbank | **Alle 18.416 Gegenstände** von WoW Forever auf Deutsch: Suche (Name/ID), Filter nach Kategorie, Qualität, Level, Sortierung nach AH-/Händlerpreis |
 | Scanner | Händler-Flips (automatisch beim Händler) und Taschen-Check (AH oder Händler?) |
-| Craft-Planer | Wie TSM Crafting: 1.967 Rezepte aus den Forever-Spieldaten, gelernte Rezepte automatisch erkannt (ohne Berufsfenster), zwei Regler (% und Gold): Empfehlung wächst mit jedem Level, eigener Stil wächst mit, teure Items brauchen weniger %, "Lernen lohnt sich", Skill-Farben, herstellbare Menge, Warteschlange, fehlendes Material als Auctionator-Liste, Craften per Knopf |
+| Craft-Planer | Wie TSM Crafting, in 3 Schritten: 1. Beruf wählen, 2. Mindestgewinn (ein Regler, Empfehlung wächst mit dem Level), 3. "Liste erstellen" → Einkaufsfenster → "Nächstes craften". 1.967 Rezepte aus den Forever-Spieldaten, gelernte Rezepte automatisch erkannt, Rezepte per × ausblenden. Filter und Profi-Strings unter "Mehr Optionen" |
+| Einkaufsfenster | Zeigt oben, was du herstellst (mit Status bereit / Post holen / fehlt Material), darunter nur das Material. Gekauftes verschwindet sofort (auch im Briefkasten). Am AH: "Im AH suchen" (Auctionator), beim Händler: "Beim Händler kaufen" – ein Klick kauft genau die fehlende Menge |
 | Verkaufsbuch | Wie TSM Accounting/Journalator: Verkäufe, Käufe, abgelaufene Auktionen automatisch aus der Post; eigene Verkaufsquote pro Item (Ersatz für TSMs Region-Sale-Rate), Bestseller, Ladenhüter, Gold aller Charaktere |
 | Schnäppchen-Radar | Prüft jede AH-Suche (auch Auctionator) gegen deinen Marktwert und meldet Angebote unter 65 % |
 | Extras | Item-Tooltip (Rezepte, Farm-Ort, neu in Forever, Bestand aller Chars, Verkaufsquote, Mindest-Verkaufspreis), Post-Bilanz, Warnung vor ablaufender Post, "Heute für dich" auf der Startseite, automatisch reparieren |
@@ -38,6 +39,7 @@ Im Craft-Planer: Materialpreis `first(vendorbuy, ahprice, market)`, Verkaufswert
 Knopf "AH scannen" oben im Fenster startet am offenen AH den Auctionator-Scan. Jeder Scan (auch direkt in Auctionator) wird automatisch erkannt; der Stand steht unter dem Knopf.
 
 ## Technik & Prüfung
+- `lua5.1 tests/check_layout.lua <ordner>` – öffnet jede Seite, meldet überlappende oder abgeschnittene Texte (exakte Poppins-Maße) und exportiert sie; `python3 tools/render_pages.py <ordner>` zeichnet sie als PNG.
 - Alle verwendeten Spiel-Funktionen wurden gegen Blizzards Forever-UI-Quellcode (1.60.1) geprüft.
 - `lua5.1 tests/run_tests.lua` – lädt das Addon in einem strengen Nachbau des Forever-Clients
   (nur Widget-Methoden und Ereignisse, die es in Forever gibt) und spielt alle Seiten und Abläufe durch.

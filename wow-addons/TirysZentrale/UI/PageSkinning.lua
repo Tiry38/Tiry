@@ -7,7 +7,7 @@ local K = ns.Skin
 
 local page = {
   title = "Kürschner-Zentrale",
-  subtitle = "Wo du für dein Level das beste Leder häutest – mit Kartenpunkt und Live-Preisen.",
+  subtitle = "Das beste Leder für dein Level – mit Kartenpunkt und Live-Preisen.",
   icon = "paw", label = "Kürschner", order = 2.6,
 }
 
@@ -30,7 +30,8 @@ local function spotRow(parent, width)
   b.title:SetPoint("TOPLEFT", b.dot, "TOPRIGHT", 12, -1)
   b.sub = UI.Text(b, 11, "regular", C.muted)
   b.sub:SetPoint("TOPLEFT", b.title, "BOTTOMLEFT", 0, -3)
-  b.sub:SetWidth(width - 210)
+  b.sub:SetWidth(width - 190)
+  b.sub:SetJustifyH("LEFT")
   b.sub:SetWordWrap(false)
   b.go = UI.Chip(b, "Wegpunkt", C.teal)
   b.go:SetPoint("RIGHT", -14, 0)
@@ -40,7 +41,7 @@ local function spotRow(parent, width)
   function b:Set(spot, title, sub, what, grad)
     self.spot, self.what = spot, what
     self.title:SetText(title)
-    self.sub:SetText(sub)
+    UI.FitText(self.sub, sub, width - 190)
     self.dot.bg:SetGradient(grad or UI.GRAD, 1)
   end
   return b
@@ -140,7 +141,7 @@ function page.refresh(self)
     hero.skill.value:SetText(rank .. " / " .. maxRank)
     hero.skill.sub:SetText(rank >= maxRank and "|cffff6b81Maximum – beim Lehrer die nächste Stufe lernen!|r" or "Kürschnerei")
     hero.reach.value:SetText("Level " .. maxSkin)
-    hero.reach.sub:SetText("Tiere darüber kannst du noch nicht häuten")
+    hero.reach.sub:SetText("höchstes häutbares Tier")
   else
     hero.skill.value:SetText("–")
     hero.skill.sub:SetText("|cffff6b81Noch keine Kürschnerei gelernt|r")
@@ -182,7 +183,7 @@ function page.refresh(self)
     if s then
       local t = K.TierFor(s.hi)
       row:Set(s, string.format("%s  %.0f, %.0f", ns.Maps.ZoneName(s.map), s.x, s.y),
-        string.format("%s · Level %d–%d · %d Tiere · %s", table.concat(s.names, ", "), s.lo, s.hi, s.n, t.label),
+        string.format("Level %d–%d · %d Tiere · %s · %s", s.lo, s.hi, s.n, t.label, table.concat(s.names, ", ")),
         "Häuten: " .. table.concat(s.names, ", "), i == 1 and UI.GRAD or UI.GRAD_COOL)
       y = place(self, row, y, 52) + 8
     else

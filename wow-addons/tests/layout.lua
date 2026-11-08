@@ -1,0 +1,210 @@
+-- Layout-Prüfung für den WoW-Nachbau: löst alle Anker auf (wie der Client), findet Überlappungen
+-- und exportiert die sichtbaren Elemente zum Zeichnen (tools/render_pages.py).
+local W = require("wow_mock")
+local L = {}
+
+local FRAC = {
+  TOPLEFT = { 0, 1 }, TOP = { 0.5, 1 }, TOPRIGHT = { 1, 1 }, LEFT = { 0, 0.5 }, CENTER = { 0.5, 0.5 },
+  RIGHT = { 1, 0.5 }, BOTTOMLEFT = { 0, 0 }, BOTTOM = { 0.5, 0 }, BOTTOMRIGHT = { 1, 0 },
+}
+
+local cache
+function L.reset() cache = {} end
+
+local function isShown(o)
+  local p = o
+  while p do
+    if not p.__shown then return false end
+    p = p.__parent
+  end
+  return true
+end
+L.isShown = isShown
+
+local function ownSize(o)
+  local w, h = o.__w or 0, o.__h or 0
+  if o.__kind == "FontString" then
+    if w <= 0 then w = o:GetStringWidth() end
+    if h <= 0 then h = o:GetStringHeight() end
+  end
+  return w, h
+end
+
+-- Rechteck { l, b, r, t } in Bildschirmkoordinaten (y nach oben)
+function L.rect(o)
+  if not o then return nil end
+  if cache[o] then return cache[o] end
+  if o.__name == "UIParent" then
+    cache[o] = { l = 0, b = 0, r = o.__w, t = o.__h }
+    return cache[o]
+  end
+  cache[o] = { l = 0, b = 0, r = 0, t = 0 } -- Schutz vor Zyklen
+  local parent = o.__parent
+  -- Scroll-Inhalt sitzt oben links im Scrollrahmen, verschoben um die Scrollposition
+  if parent and parent.__child == o then
+    local pr = L.rect(parent)
+    local w, h = ownSize(o)
+    local off = parent.__scroll or 0
+    cache[o] = { l = pr.l, t = pr.t + off, r = pr.l + w, b = pr.t + off - h }
+    return cache[o]
+  end
+  if o.__allPoints then
+    local rel = (o.__allPoints == true) and parent or o.__allPoints
+    if type(rel) == "string" then rel = _G[rel] end
+    local rr = L.rect(rel or parent)
+    cache[o] = { l = rr.l, b = rr.b, r = rr.r, t = rr.t }
+    return cache[o]
+  end
+  local hx, vy = {}, {}
+  for point, a in pairs(o.__points) do
+    local rel = a[1]
+    if type(rel) == "string" then rel = _G[rel] end
+    local relPoint = a[2]
+    local x, y = a[3] or 0, a[4] or 0
+    if type(rel) ~= "table" then -- SetPoint("TOPLEFT", 10, -5)
+      x, y = (type(a[1]) == "number") and a[1] or 0, (type(a[2]) == "number") and a[2] or 0
+      rel, relPoint = parent, point
+    end
+    relPoint = (type(relPoint) == "string") and relPoint or point
+    local rr = L.rect(rel or parent)
+    local f, rf = FRAC[point], FRAC[relPoint]
+    hx[#hx + 1] = { f = f[1], v = rr.l + (rr.r - rr.l) * rf[1] + x }
+    vy[#vy + 1] = { f = f[2], v = rr.b + (rr.t - rr.b) * rf[2] + y }
+  end
+  local w, h = ownSize(o)
+  local function axis(list, size)
+    if #list == 0 then return 0, size end
+    for i = 1, #list do
+      for j = i + 1, #list do
+        if list[i].f ~= list[j].f then
+          local a, b = list[i], list[j]
+          local s = (b.v - a.v) / (b.f - a.f)
+          return a.v - a.f * s, s
+        end
+      end
+    end
+    return list[1].v - list[1].f * size, size
+  end
+  local l, ww = axis(hx, w)
+  local b, hh = axis(vy, h)
+  cache[o] = { l = l, b = b, r = l + ww, t = b + hh }
+  return cache[o]
+end
+
+local function inter(a, b, pad)
+  pad = pad or 0
+  local w = math.min(a.r + pad, b.r + pad) - math.max(a.l - pad, b.l - pad)
+  local h = math.min(a.t + pad, b.t + pad) - math.max(a.b - pad, b.b - pad)
+  return w, h
+end
+
+local function isAncestor(a, b)
+  local p = b.__parent
+  while p do
+    if p == a then return true end
+    p = p.__parent
+  end
+  return false
+end
+
+local function walk(o, fn)
+  fn(o)
+  for _, c in ipairs(o.__children or {}) do walk(c, fn) end
+end
+L.walk = walk
+
+-- Text-Rechteck = tatsächlich belegte Fläche (Breite der Zeilen, nicht die volle Feldbreite)
+local function textRect(fs)
+  local r = L.rect(fs)
+  local tw = fs:GetStringWidth()
+  local th = fs:GetStringHeight()
+  local just = fs.__justH or "CENTER"
+  local l = r.l
+  if (r.r - r.l) > tw then
+    if just == "CENTER" then l = r.l + ((r.r - r.l) - tw) / 2 elseif just == "RIGHT" then l = r.r - tw end
+  end
+  local t = r.t
+  if (r.t - r.b) > th and (fs.__justV or "MIDDLE") == "MIDDLE" then t = r.t - ((r.t - r.b) - th) / 2 end
+  return { l = l, r = l + tw, t = t, b = t - th }
+end
+L.textRect = textRect
+
+-- Findet überlappende Texte und Texte, die in fremde Bedienelemente ragen
+function L.problems(root, clipRect)
+  L.reset()
+  local texts, controls, out = {}, {}, {}
+  walk(root, function(o)
+    if not isShown(o) then return end
+    if o.__kind == "FontString" and W.strip(o.__text or "") ~= "" then
+      local tr = textRect(o)
+      if not clipRect or (tr.t > clipRect.b and tr.b < clipRect.t) then texts[#texts + 1] = { o = o, r = tr } end
+    elseif (o.__kind == "Button" or o.__kind == "EditBox") and (o.__w or 0) > 0 then
+      controls[#controls + 1] = { o = o, r = L.rect(o) }
+    end
+  end)
+  for i = 1, #texts do
+    for j = i + 1, #texts do
+      local w, h = inter(texts[i].r, texts[j].r, 1)
+      if w > 0.01 and h > 0.01 then -- Rundungsfehler ignorieren
+        out[#out + 1] = string.format("Text überlappt Text: \"%s\" <-> \"%s\"", W.strip(texts[i].o.__text):sub(1, 40), W.strip(texts[j].o.__text):sub(1, 40))
+      end
+    end
+    for _, c in ipairs(controls) do
+      if not isAncestor(c.o, texts[i].o) and not isAncestor(texts[i].o.__parent, c.o) and texts[i].o.__parent ~= c.o then
+        local w, h = inter(texts[i].r, c.r, 2)
+        if w > 0 and h > 0 then
+          out[#out + 1] = string.format("Text ragt in Bedienelement: \"%s\"", W.strip(texts[i].o.__text):sub(1, 50))
+        end
+      end
+    end
+    -- einzeilige Texte, die über ihr Feld hinausgehen (würden im Spiel abgeschnitten)
+    local o = texts[i].o
+    if o.__wrap == false and (o.__w or 0) > 0 and o:GetUnboundedStringWidth() > o.__w + 1 then
+      out[#out + 1] = string.format("Text abgeschnitten (%d > %d px): \"%s\"", o:GetUnboundedStringWidth(), o.__w, W.strip(o.__text):sub(1, 50))
+    end
+  end
+  return out
+end
+
+-- Export zum Zeichnen: eine Zeile pro sichtbarem Element in Zeichenreihenfolge
+local LAYERS = { BACKGROUND = 1, BORDER = 2, ARTWORK = 3, OVERLAY = 4, HIGHLIGHT = 5 }
+function L.dump(root, path)
+  L.reset()
+  local f = assert(io.open(path, "w"))
+  local function emit(o)
+    if not isShown(o) then return end
+    local regions = {}
+    for _, c in ipairs(o.__children or {}) do
+      if c.__kind == "Texture" or c.__kind == "FontString" then regions[#regions + 1] = c end
+    end
+    table.sort(regions, function(a, b)
+      local la, lb = LAYERS[a.__layer] or 3, LAYERS[b.__layer] or 3
+      if la ~= lb then return la < lb end
+      return (a.__sub or 0) < (b.__sub or 0)
+    end)
+    for _, rgn in ipairs(regions) do
+      if rgn.__shown then
+        local r = L.rect(rgn)
+        if rgn.__kind == "Texture" then
+          local c = rgn.__color or { 1, 1, 1, 1 }
+          local g = rgn.__grad
+          local coord = rgn.__coord and table.concat(rgn.__coord, ",") or ""
+          f:write(table.concat({ "T", r.l, r.b, r.r, r.t, tostring(rgn.__file), c[1], c[2], c[3], (c[4] or 1) * (rgn.__alpha or 1),
+            g and g[1] or "", g and table.concat(g[2], ",") or "", g and table.concat(g[3], ",") or "", coord, rgn.__blend or "" }, "\t"), "\n")
+        else
+          local tc = rgn.__tc
+          local lines = W.lines(rgn)
+          f:write(table.concat({ "F", r.l, r.b, r.r, r.t, rgn.__weight or "regular", rgn.__size or 12, tc[1], tc[2], tc[3], tc[4] or 1,
+            rgn.__justH or "CENTER", rgn.__justV or "MIDDLE", rgn.__spacing or 0, table.concat(lines, "\31") }, "\t"), "\n")
+        end
+      end
+    end
+    for _, c in ipairs(o.__children or {}) do
+      if c.__kind ~= "Texture" and c.__kind ~= "FontString" and c.__kind ~= "MaskTexture" then emit(c) end
+    end
+  end
+  emit(root)
+  f:close()
+end
+
+return L

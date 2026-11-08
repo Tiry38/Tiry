@@ -124,14 +124,14 @@ function UI.ItemList(parent, width, columns, opts)
         local item = ns.Item(e.id)
         row.icon:SetItem(e.id)
         local q = UI.QUALITY[item.quality or 1] or UI.QUALITY[1]
-        row.name:SetText(e.name or item.name)
+        UI.FitText(row.name, e.name or item.name, list.nameWidth)
         row.name:SetTextColor(q[1], q[2], q[3], 1)
       else
         row.icon:SetIcon(e.icon or UI.TEX.logo, e.iconColor)
-        row.name:SetText(e.name or "")
+        UI.FitText(row.name, e.name or "", list.nameWidth)
         row.name:SetTextColor(C.text[1], C.text[2], C.text[3], 1)
       end
-      row.note:SetText(e.note or "")
+      UI.FitText(row.note, e.note or "", list.nameWidth)
       if e.note and e.note ~= "" then
         row.name:SetPoint("LEFT", row.icon, "RIGHT", 12, 7)
       else

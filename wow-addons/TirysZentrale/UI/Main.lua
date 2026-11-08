@@ -94,7 +94,10 @@ local function buildSidebar(f)
   mark:SetSize(136, 34)
   mark:SetPoint("LEFT", logo, "RIGHT", 4, 4)
   local sub = UI.Text(side, 10, "semibold", C.dim)
-  sub:SetPoint("TOPLEFT", mark, "BOTTOMLEFT", 8, 4)
+  sub:SetPoint("TOPLEFT", logo, "BOTTOMLEFT", 2, -6)
+  sub:SetWidth(SIDE_W - 44)
+  sub:SetJustifyH("LEFT")
+  sub:SetWordWrap(false)
   sub:SetText("GOLD & BERUFE · WOW FOREVER")
 
   f.nav = {}

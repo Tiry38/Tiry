@@ -1,12 +1,12 @@
--- Tiry's Zentrale – kleines Einkaufsfenster (wie TSM): nur die Materialien der Craft-Liste,
--- Gekauftes verschwindet sofort, rechts unten "Nächstes craften".
+-- Tiry's Zentrale – kleines Einkaufsfenster (wie TSM): oben was du herstellst, darunter nur die Materialien.
+-- Gekauftes verschwindet sofort. Am AH: "Im AH suchen", beim Händler: "Beim Händler kaufen" (ein Klick kauft alles).
 local ADDON, ns = ...
 local UI = ns.UI
 local C = UI.C
 local M = ns.Market
 local Shop = ns.Shop
 
-local W, ROW = 320, 40
+local W, ROW, CROW = 340, 40, 30
 local win
 
 local function create()
@@ -46,16 +46,38 @@ local function create()
   f.summary:SetPoint("TOPLEFT", 16, -44)
   f.rows = {}
 
-  f.search = UI.Button(f, "Im AH suchen", "soft", 136, 32, "scan")
+  f.craftHead = UI.Text(f, 10, "semibold", C.dim)
+  f.craftHead:SetText("DU STELLST HER")
+  f.matHead = UI.Text(f, 10, "semibold", C.dim)
+  f.matHead:SetText("MATERIAL")
+  f.crafts = {}
+  f.more = UI.Text(f, 10, "regular", C.dim)
+
+  -- Linker Knopf passt sich an: beim Händler kaufen, sonst im AH suchen
+  f.search = UI.Button(f, "Im AH suchen", "soft", 166, 32, "scan")
   f.search:SetPoint("BOTTOMLEFT", 14, 14)
-  f.search:SetScript("OnClick", function()
+  f.search:SetScript("OnClick", function(self)
+    if self.mode == "vendor" then
+      local ok, res = Shop.BuyFromVendor()
+      ns.Print(ok and ("Gekauft: " .. res) or ("|cffff6b81" .. res .. "|r"))
+      return
+    end
     local ids = Shop.MissingIDs(true)
     if #ids == 0 then ns.Print("Im AH ist nichts mehr zu kaufen.") return end
     local ok, err = M.SearchNow(ids)
     if not ok then ns.Print("|cffff6b81" .. tostring(err) .. "|r") end
   end)
-  UI.SetTooltip(f.search, "Im AH suchen", "Bei offenem Auktionshaus: Auctionator sucht alle fehlenden Materialien auf einmal. Was du kaufst, wird hier sofort abgezogen.")
-  f.craft = UI.Button(f, "Nächstes craften", "primary", 150, 32, "bolt")
+  UI.SetTooltip(f.search, function()
+    if f.search.mode == "vendor" then
+      local plan, cost = Shop.VendorPlan()
+      local names = {}
+      for _, p in ipairs(plan) do names[#names + 1] = p.qty .. "× " .. ns.Item(p.id).name .. "  " .. ns.Money(p.cost) end
+      return "Beim Händler kaufen (" .. ns.Money(cost) .. ")", table.concat(names, "\n")
+        .. "\n\nKauft genau die fehlende Menge, die dieser Händler hat – nur gegen Gold. Rückkauf beim Händler ist möglich."
+    end
+    return "Im AH suchen", "Bei offenem Auktionshaus: Auctionator sucht alle fehlenden Materialien auf einmal. Was du kaufst, wird hier sofort abgezogen."
+  end)
+  f.craft = UI.Button(f, "Nächstes craften", "primary", 146, 32, "bolt")
   f.craft:SetPoint("BOTTOMRIGHT", -14, 14)
   f.craft:SetScript("OnClick", function() UI.pages.recipes.CraftNext(UI.pages.recipes) end)
   UI.SetTooltip(f.craft, "Nächstes craften", "Stellt der Reihe nach her, wofür du alles Material hast. Ist das Berufsfenster zu, öffnet der erste Klick es, der zweite stellt her.")
@@ -91,17 +113,105 @@ local function row(i)
   return r
 end
 
+local STATUS = {
+  bereit = { "bereit", C.green },
+  post = { "Post holen", C.gold },
+  fehlt = { "fehlt Material", C.red },
+}
+
+local function craftRow(i)
+  local r = win.crafts[i]
+  if r then return r end
+  r = CreateFrame("Button", nil, win)
+  r:SetSize(W - 28, CROW - 4)
+  r.icon = UI.ItemIcon(r, 24)
+  r.icon:SetPoint("LEFT", 4, 0)
+  r.status = UI.Text(r, 10, "semibold", C.green)
+  r.status:SetPoint("RIGHT", -8, 0)
+  r.status:SetJustifyH("RIGHT")
+  r.name = UI.Text(r, 12, "semibold", C.text)
+  r.name:SetPoint("LEFT", r.icon, "RIGHT", 8, 0)
+  r.name:SetWidth(W - 160)
+  r.name:SetJustifyH("LEFT")
+  r.name:SetWordWrap(false)
+  r:SetScript("OnEnter", function(self)
+    GameTooltip:SetOwner(self, "ANCHOR_LEFT")
+    pcall(GameTooltip.SetItemByID, GameTooltip, self.id)
+    GameTooltip:Show()
+  end)
+  r:SetScript("OnLeave", function() GameTooltip:Hide() end)
+  r:SetScript("OnClick", function(self) if IsShiftKeyDown() then ns.LinkItem(self.id) end end)
+  win.crafts[i] = r
+  return r
+end
+
 function Shop.Refresh()
   if not win or not win:IsShown() then return end
   local list, open, cost = Shop.List()
+  local plan, planCost = Shop.VendorPlan()
   if #list == 0 then
     win.summary:SetText("Die Craft-Liste ist leer. Im Craft-Planer auf |cffffd24aListe erstellen|r klicken.")
   elseif open == 0 then
     win.summary:SetText("|cff61eb8fAlles da!|r Hol deine Post aus dem Briefkasten und klick auf |cffffd24aNächstes craften|r.")
+  elseif #plan > 0 then
+    win.summary:SetText(string.format("Dieser Händler hat |cff61eb8f%d %s|r für dich. Ein Klick auf |cffffd24aBeim Händler kaufen|r holt alles für %s.",
+      #plan, #plan == 1 and "Material" or "Materialien", ns.Money(planCost)))
   else
     win.summary:SetText(string.format("Noch |cffffd24a%d %s|r zu kaufen, ca. %s. Gekauftes verschwindet sofort.", open, open == 1 and "Material" or "Materialien", ns.Money(cost)))
   end
-  local y = 44 + math.ceil(win.summary:GetStringHeight()) + 10
+  local y = 44 + math.ceil(win.summary:GetStringHeight()) + 12
+
+  -- Was wird hergestellt?
+  local crafts = Shop.Crafts()
+  local shownC = 0
+  if #crafts > 0 then
+    win.craftHead:ClearAllPoints()
+    win.craftHead:SetPoint("TOPLEFT", win, "TOPLEFT", 18, -y)
+    win.craftHead:Show()
+    y = y + 18
+    for i, c in ipairs(crafts) do
+      if i > 5 then break end
+      shownC = i
+      local r = craftRow(i)
+      r.id = c.recipe.out
+      r.icon:SetItem(c.recipe.out)
+      local item = ns.Item(c.recipe.out)
+      r.name:SetText(string.format("|cffffd24a%d×|r %s", c.n * (c.recipe.qty or 1), item.name or c.recipe.name))
+      local st = STATUS[c.status]
+      r.status:SetText(st[1])
+      r.status:SetTextColor(st[2][1], st[2][2], st[2][3], 1)
+      r:ClearAllPoints()
+      r:SetPoint("TOPLEFT", win, "TOPLEFT", 14, -y)
+      r:Show()
+      y = y + CROW
+    end
+    if #crafts > 5 then
+      win.more:SetText(string.format("+ %d weitere im Craft-Planer", #crafts - 5))
+      win.more:ClearAllPoints()
+      win.more:SetPoint("TOPLEFT", win, "TOPLEFT", 46, -y)
+      win.more:Show()
+      y = y + 16
+    else
+      win.more:Hide()
+    end
+    y = y + 8
+  else
+    win.craftHead:Hide()
+    win.more:Hide()
+  end
+  for i = shownC + 1, #win.crafts do win.crafts[i]:Hide() end
+
+  -- Material
+  if #list > 0 then
+    win.matHead:ClearAllPoints()
+    win.matHead:SetPoint("TOPLEFT", win, "TOPLEFT", 18, -y)
+    win.matHead:Show()
+    y = y + 18
+  else
+    win.matHead:Hide()
+  end
+  local vendorHas = {}
+  for _, p in ipairs(plan) do vendorHas[p.id] = true end
   local shown = 0
   for i, e in ipairs(list) do
     if i > 9 then break end
@@ -112,12 +222,13 @@ function Shop.Refresh()
     local item = ns.Item(e.id)
     r.name:SetText(item.name)
     if e.missing > 0 then
-      r.bg:SetColor(C.card, 1)
+      r.bg:SetColor(vendorHas[e.id] and C.cardHi or C.card, 1)
       r.name:SetTextColor(C.text[1], C.text[2], C.text[3], 1)
       r.count:SetText(e.missing .. "×")
       r.count:SetTextColor(C.gold[1], C.gold[2], C.gold[3], 1)
-      r.sub:SetText(string.format("%d / %d · %s", e.have, e.need,
-        e.unit and (ns.Money(e.unit) .. (e.where == "HAENDLER" and " beim Händler" or " im AH")) or "kein Preis"))
+      local where = vendorHas[e.id] and " |cff61eb8fhier beim Händler|r"
+        or (e.where == "HAENDLER" and " beim Händler" or " im AH")
+      r.sub:SetText(string.format("%d / %d · %s", e.have, e.need, e.unit and (ns.Money(e.unit) .. where) or "kein Preis"))
     else
       r.bg:SetColor(C.inset, 0.6)
       r.name:SetTextColor(C.dim[1], C.dim[2], C.dim[3], 1)
@@ -131,7 +242,15 @@ function Shop.Refresh()
   end
   for i = shown + 1, #win.rows do win.rows[i]:Hide() end
   win:SetHeight(math.max(y + 60, 160))
-  win.search:SetEnabled(open > 0 and M.ahOpen == true)
+  if #plan > 0 then
+    win.search.mode = "vendor"
+    win.search:SetLabel("Beim Händler kaufen")
+    win.search:SetEnabled(true)
+  else
+    win.search.mode = "ah"
+    win.search:SetLabel("Im AH suchen")
+    win.search:SetEnabled(open > 0 and M.ahOpen == true)
+  end
   win.craft:SetEnabled(#(ns.char.queue or {}) > 0)
 end
 
@@ -145,7 +264,7 @@ function Shop.Toggle()
   if win and win:IsShown() then win:Hide() else Shop.Show() end
 end
 
-for _, msg in ipairs({ "SHOP_CHANGED", "AH_STATE", "PRICES_UPDATED", "ITEMS_UPDATED", "RECIPES_SCANNED" }) do
+for _, msg in ipairs({ "SHOP_CHANGED", "AH_STATE", "PRICES_UPDATED", "ITEMS_UPDATED", "RECIPES_SCANNED", "MERCHANT_SCANNED" }) do
   ns.Listen(msg, function() ns.Debounce("shopwin", 0.2, Shop.Refresh) end)
 end
 
@@ -155,4 +274,9 @@ ns.Listen("AH_STATE", function()
     local _, open = Shop.List()
     if open > 0 then Shop.Show() end
   end
+end)
+
+-- Beim Händler: Fenster zeigen, wenn er etwas aus der Einkaufsliste verkauft
+ns.Listen("MERCHANT_SCANNED", function()
+  if ns.Scanner.merchant.open and ns.settings.shopAutoOpen ~= false and #(Shop.VendorPlan()) > 0 then Shop.Show() end
 end)

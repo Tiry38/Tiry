@@ -68,7 +68,7 @@ end
 function page.build(self, content, width)
   self.cat, self.qual, self.sort, self.shown = "all", "all", "name", PAGE_SIZE
   self.text = ""
-  page.subtitle = "Alle " .. ns.ALLDB_COUNT .. " Gegenstände aus den Spieldaten von WoW Forever – auf Deutsch, mit Live-AH-Preis."
+  page.subtitle = "Alle " .. ns.ALLDB_COUNT .. " Gegenstände von WoW Forever – auf Deutsch, mit AH-Preis."
   local st = UI.Stack(content)
   self.search = UI.SearchBox(content, width, "Name oder Item-ID eingeben, z. B. \"seide\" oder \"rote tasche\"", function(t)
     self.text = t

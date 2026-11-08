@@ -85,6 +85,19 @@ function UI.Text(parent, size, weight, color, layer)
 end
 
 -- Mehrzeiliger Absatz mit fester Breite
+-- Setzt Text einzeilig und kürzt ihn wortweise mit "...", bis er in maxW passt (nichts ragt mehr heraus)
+function UI.FitText(fs, text, maxW)
+  fs:SetText(text)
+  if not maxW or fs:GetUnboundedStringWidth() <= maxW then return end
+  local words = {}
+  for w in text:gmatch("%S+") do words[#words + 1] = w end
+  for n = #words - 1, 1, -1 do
+    local t = table.concat(words, " ", 1, n):gsub("[,·%-–]+$", "") .. " ..."
+    fs:SetText(t)
+    if fs:GetUnboundedStringWidth() <= maxW then return end
+  end
+end
+
 function UI.Para(parent, size, color, width, weight)
   local fs = UI.Text(parent, size or 13, weight or "regular", color or C.muted)
   fs:SetJustifyV("TOP")

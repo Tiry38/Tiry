@@ -4,6 +4,8 @@ local M = {}
 local HERE = (debug.getinfo(1, "S").source:match("^@(.*/)") or "./")
 M.ROOT = HERE .. "../"
 local API = dofile(HERE .. "forever_widget_api.lua")
+local METRICS = dofile(HERE .. "font_metrics.lua")
+M.METRICS = METRICS
 local EVENTS = dofile(HERE .. "forever_events.lua")
 
 M.errors = {}
@@ -202,6 +204,7 @@ function Obj.CreateTexture(o, name, layer, template, sub)
   if layer then assert(LAYERS[layer], "Ungültige Ebene: " .. tostring(layer)) end
   if sub then assert(sub >= -8 and sub <= 7, "Sublevel außerhalb -8..7: " .. tostring(sub)) end
   local t = make("Texture", o, name)
+  t.__layer, t.__sub = layer or "ARTWORK", sub or 0
   table.insert(M.textures, t)
   return t
 end
@@ -212,6 +215,8 @@ function Obj.CreateFontString(o, name, layer)
   if layer then assert(LAYERS[layer], "Ungültige Ebene: " .. tostring(layer)) end
   local f = make("FontString", o, name)
   f.__text = ""
+  f.__layer = layer or "OVERLAY"
+  f.__wrap, f.__spacing, f.__justH, f.__tc = true, 0, "CENTER", { 1, 1, 1, 1 }
   table.insert(M.fonts, f)
   return f
 end
@@ -226,17 +231,19 @@ function Obj.SetTexture(o, file, wrapH, wrapV)
   if type(file) == "string" then checkAddonFile(file, { "tga", "blp" }) end
   o.__file = file
 end
-function Obj.SetColorTexture(o, r, g, b, a) assert(type(r) == "number") end
-function Obj.SetTexCoord(o, ...) local n = select("#", ...) assert(n == 4 or n == 8, "SetTexCoord braucht 4 oder 8 Werte") end
+function Obj.SetColorTexture(o, r, g, b, a) assert(type(r) == "number") o.__file = "WHITE" o.__color = { r, g, b, a or 1 } o.__grad = nil end
+function Obj.SetTexCoord(o, ...) local n = select("#", ...) assert(n == 4 or n == 8, "SetTexCoord braucht 4 oder 8 Werte") o.__coord = { ... } end
 function Obj.SetVertexColor(o, r, g, b, a)
   assert(type(r) == "number" and type(g) == "number" and type(b) == "number", "SetVertexColor braucht Zahlen")
   if a ~= nil then assert(type(a) == "number", "Alpha muss Zahl sein") end
+  o.__color = { r, g, b, a or 1 } o.__grad = nil
 end
 function Obj.SetGradient(o, orient, c1, c2)
   assert(orient == "HORIZONTAL" or orient == "VERTICAL", "Ungültige Ausrichtung")
   assert(type(c1) == "table" and c1.GetRGBA and type(c2) == "table" and c2.GetRGBA, "SetGradient braucht ColorMixin-Objekte")
+  o.__grad = { orient, { c1:GetRGBA() }, { c2:GetRGBA() } }
 end
-function Obj.SetBlendMode(o, m) assert(BLEND[m], "Ungültiger Blendmodus: " .. tostring(m)) end
+function Obj.SetBlendMode(o, m) assert(BLEND[m], "Ungültiger Blendmodus: " .. tostring(m)) o.__blend = m end
 function Obj.AddMaskTexture(o, m) assert(m and m.__kind == "MaskTexture", "AddMaskTexture braucht MaskTexture") end
 function Obj.SetRotation(o, r) assert(type(r) == "number") end
 
@@ -246,6 +253,8 @@ function Obj.SetFont(o, file, size, flags)
   assert(type(size) == "number" and size > 0, "SetFont: Größe fehlt")
   if file:match("^Interface\\AddOns\\TirysZentrale\\") then checkAddonFile(file, { "ttf" }) end
   o.__font = file
+  o.__size = size
+  o.__weight = file:find("ExtraBold") and "bold" or (file:find("SemiBold") and "semibold" or "regular")
   return true
 end
 function Obj.SetText(o, t)
@@ -255,20 +264,77 @@ function Obj.SetText(o, t)
 end
 function Obj.SetFormattedText(o, fmt, ...) Obj.SetText(o, string.format(fmt, ...)) end
 function Obj.GetText(o) return o.__text end
-function Obj.SetTextColor(o, r, g, b, a) assert(type(r) == "number" and type(g) == "number" and type(b) == "number", "SetTextColor braucht Zahlen") end
-local function visible(text) return (text or ""):gsub("|c%x%x%x%x%x%x%x%x", ""):gsub("|r", ""):gsub("|T.-|t", "XX") end
-function Obj.GetStringWidth(o) return #visible(o.__text) * 6.5 end
-function Obj.GetStringHeight(o)
-  local w = o.__w > 0 and o.__w or 400
-  local chars = #visible(o.__text)
-  local lines = 0
-  for line in (visible(o.__text) .. "\n"):gmatch("(.-)\n") do lines = lines + math.max(1, math.ceil(#line * 6.5 / w)) end
-  return math.max(lines, 1) * 16 + (chars > 0 and 0 or 0)
+function Obj.SetTextColor(o, r, g, b, a) assert(type(r) == "number" and type(g) == "number" and type(b) == "number", "SetTextColor braucht Zahlen") o.__tc = { r, g, b, a or 1 } end
+
+-- Exakte Textmaße mit den Poppins-Zeichenbreiten
+local function strip(text)
+  text = tostring(text or "")
+  text = text:gsub("|c%x%x%x%x%x%x%x%x", ""):gsub("|r", "")
+  text = text:gsub("|A[^|]*|a", "\1"):gsub("|T[^|]*|t", "\1") -- Symbole = 1 Platzhalter
+  return text
 end
-function Obj.SetJustifyH(o, j) assert(JUSTH[j], "Ungültig JustifyH: " .. tostring(j)) end
-function Obj.SetJustifyV(o, j) assert(JUSTV[j], "Ungültig JustifyV: " .. tostring(j)) end
-function Obj.SetWordWrap(o, v) end
-function Obj.SetSpacing(o, s) assert(type(s) == "number") end
+M.strip = strip
+local function charWidth(o, ch)
+  local t = METRICS[o.__weight or "regular"]
+  if ch == "\1" then return 1.0 end
+  return t[ch] or 0.6
+end
+local function utf8chars(s)
+  local out = {}
+  for ch in s:gmatch("[%z\1-\127\194-\244][\128-\191]*") do
+    local b1, b2, b3 = ch:byte(1, 3)
+    local cp = b1
+    if b1 >= 240 then cp = 0x2000 elseif b1 >= 224 then cp = ((b1 % 16) * 4096) + ((b2 % 64) * 64) + (b3 % 64)
+    elseif b1 >= 192 then cp = ((b1 % 32) * 64) + (b2 % 64) end
+    out[#out + 1] = (ch == "\1") and "\1" or cp
+  end
+  return out
+end
+function M.textWidth(o, s)
+  local w = 0
+  for _, cp in ipairs(utf8chars(s)) do w = w + charWidth(o, cp) end
+  return w * (o.__size or 12)
+end
+-- Zeilen nach Wortumbruch
+function M.lines(o)
+  local text = strip(o.__text)
+  local maxW = (o.__wrap ~= false and o.__w and o.__w > 0) and o.__w or nil
+  local out = {}
+  for para in (text .. "\n"):gmatch("(.-)\n") do
+    if not maxW then
+      out[#out + 1] = para
+    else
+      local line = ""
+      for word in para:gmatch("%S+") do
+        local try = (line == "") and word or (line .. " " .. word)
+        if M.textWidth(o, try) <= maxW + 0.5 or line == "" then
+          line = try
+        else
+          out[#out + 1] = line
+          line = word
+        end
+      end
+      out[#out + 1] = line
+    end
+  end
+  return out
+end
+function Obj.GetStringWidth(o)
+  local best = 0
+  for _, l in ipairs(M.lines(o)) do best = math.max(best, M.textWidth(o, l)) end
+  return best
+end
+function Obj.GetUnboundedStringWidth(o) return M.textWidth(o, strip(o.__text)) end
+function Obj.GetStringHeight(o)
+  local n = #M.lines(o)
+  local size = o.__size or 12
+  -- Zeilenhöhe im Spiel liegt bei Poppins sichtbar über der Schriftgröße -> 1,2 x Größe (vorsichtig gerechnet)
+  return n * size * 1.2 + math.max(n - 1, 0) * (o.__spacing or 0)
+end
+function Obj.SetJustifyH(o, j) assert(JUSTH[j], "Ungültig JustifyH: " .. tostring(j)) o.__justH = j end
+function Obj.SetJustifyV(o, j) assert(JUSTV[j], "Ungültig JustifyV: " .. tostring(j)) o.__justV = j end
+function Obj.SetWordWrap(o, v) o.__wrap = v and true or false end
+function Obj.SetSpacing(o, s) assert(type(s) == "number") o.__spacing = s end
 function Obj.SetShadowColor(o, r, g, b, a) assert(type(r) == "number") end
 function Obj.SetShadowOffset(o, x, y) assert(type(x) == "number" and type(y) == "number") end
 
@@ -435,7 +501,15 @@ function M.install(opts)
   end
   G.GetInboxNumItems = function() local n = math.max(#(M.inbox or {}), #(M.mails or {})) return n, n end
   G.GetInboxItem = function(i, slot) local m = (M.inbox or {})[i]; local a = m and m[slot]; if a then return "Item", a[1], 1, a[2] end end
-  G.BuyMerchantItem = function(i, n) assert(type(i) == "number") M.bought = (M.bought or 0) + (n or 1) end
+  G.BuyMerchantItem = function(i, n)
+    assert(type(i) == "number")
+    local m = M.merchant and M.merchant[i]
+    if m and m.maxStack then assert((n or 1) <= m.maxStack, "mehr als GetMerchantItemMaxStack pro Kauf") end
+    M.bought = (M.bought or 0) + (n or 1)
+    M.boughtByID = M.boughtByID or {}
+    if m then M.boughtByID[m.id] = (M.boughtByID[m.id] or 0) + (n or 1) end
+  end
+  G.GetMerchantItemMaxStack = function(i) local m = M.merchant and M.merchant[i]; return m and (m.maxStack or 200) or 0 end
   G.MerchantFrame = make("Frame", UIParent, "MerchantFrame")
   G.C_MerchantFrame = {
     GetNumJunkItems = function() return M.junk or 0 end,

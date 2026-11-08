@@ -6,7 +6,7 @@ local M = ns.Market
 
 local page = {
   title = "Farm-Guide",
-  subtitle = "Wo du mit deinem Level am meisten Gold farmst – nach echten Preisen deines Servers.",
+  subtitle = "Wo du mit deinem Level am meisten Gold farmst – mit echten Preisen.",
   icon = "pin", label = "Farm-Guide", order = 2.5,
 }
 

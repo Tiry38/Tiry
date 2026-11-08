@@ -14,7 +14,7 @@ local ADVICE = {
 
 local page = {
   title = "Scanner",
-  subtitle = "Findet Händler-Schnäppchen zum Weiterverkaufen und sagt dir, wohin deine Beute gehört.",
+  subtitle = "Händler-Schnäppchen zum Weiterverkaufen – und wohin deine Beute gehört.",
   icon = "scan", label = "Scanner", order = 5,
 }
 
