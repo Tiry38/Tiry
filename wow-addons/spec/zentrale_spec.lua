@@ -729,6 +729,30 @@ describe("Herstellungs-Balken: Gesamtdauer", function()
   end)
 end)
 
+describe("Nächste Sorte ist dran: Knopf leuchtet", function()
+  it("nach dem letzten Craft einer Sorte leuchtet 'Nächstes craften', Klick löscht es", function()
+    local ns, W = E.load({})
+    local a, b = ns.Recipes.Get(2164), ns.Recipes.Get(2158)
+    ns.char.queue = { { recipe = 2158, prof = "LEATHERWORKING", n = 1 } }
+    -- alles Material für b in der Tasche
+    local slots = {}
+    for _, re in ipairs(b.reagents) do slots[#slots + 1] = { itemID = re.id, stackCount = re.n * 2, quality = 1 } end
+    W.bags = { [0] = slots }
+    ns.Shop.Show()
+    W.casting = { name = a.name, start = W.now * 1000, stop = W.now * 1000 + 3000 }
+    W.fire("UNIT_SPELLCAST_START", "player", "g", a.id) W.flush()
+    assert.is_nil(ns.Shop.signal)
+    W.casting = nil
+    W.fire("UNIT_SPELLCAST_STOP", "player", "g", a.id) W.flush()
+    assert.truthy(ns.Shop.signal and ns.Shop.signal:find(ns.Item(b.out).name, 1, true))
+    assert.is_true(TirysZentraleShopWindow.craftGlow:IsShown())
+    TirysZentraleShopWindow.craft:Click()
+    assert.is_nil(ns.Shop.signal)
+    assert.is_false(TirysZentraleShopWindow.craftGlow:IsShown())
+    assert.are.same({}, W.errors)
+  end)
+end)
+
 describe("Hergestellt -> Craft-Liste abhaken (alle Wege, nie doppelt)", function()
   local function setup3(ns, W)
     ns.char.queue = { { recipe = 2164, prof = "LEATHERWORKING", n = 3 } }

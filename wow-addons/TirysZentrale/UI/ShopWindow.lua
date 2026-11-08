@@ -80,7 +80,23 @@ local function create()
   end)
   f.craft = UI.Button(f, "Nächstes craften", "primary", 164, 34, "bolt")
   f.craft:SetPoint("BOTTOMRIGHT", -14, 14)
-  f.craft:SetScript("OnClick", function() UI.pages.recipes.CraftNext(UI.pages.recipes) end)
+  f.craft:SetScript("OnClick", function() Shop.ClearSignal() UI.pages.recipes.CraftNext(UI.pages.recipes) end)
+  -- Leuchten: "Die nächste Sorte ist dran" (pulsiert, solange du noch nicht geklickt hast)
+  local cg = CreateFrame("Frame", nil, f)
+  cg:SetPoint("CENTER", f.craft, "CENTER")
+  cg:SetSize(230, 110)
+  cg:SetFrameLevel(math.max(f.craft:GetFrameLevel() - 1, 0))
+  cg.tex = UI.Glow(cg, C.green or { 0.38, 0.92, 0.56 }, 230, 0.9, "BACKGROUND")
+  cg.tex:SetAllPoints()
+  cg.anim = cg:CreateAnimationGroup()
+  cg.anim:SetLooping("BOUNCE")
+  local fade = cg.anim:CreateAnimation("Alpha")
+  fade:SetFromAlpha(1)
+  fade:SetToAlpha(0.25)
+  fade:SetDuration(0.7)
+  fade:SetSmoothing("IN_OUT")
+  cg:Hide()
+  f.craftGlow = cg
   UI.SetTooltip(f.craft, "Nächstes craften", "Stellt der Reihe nach her, wofür du alles Material hast. Ist das Berufsfenster zu, öffnet der erste Klick es, der zweite stellt her.")
   -- Herstellungs-Balken: zeigt, wie lange das aktuelle Herstellen noch dauert (falls der Spiel-Balken verdeckt ist)
   local cb = CreateFrame("Frame", nil, f)
@@ -214,6 +230,9 @@ function Shop.Refresh()
   else
     win.summary:SetText(string.format("Noch |cffff9929%d %s|r zu kaufen, ca. %s. Gekauftes verschwindet sofort.", open, open == 1 and "Material" or "Materialien", ns.Money(cost)))
   end
+  if Shop.signal then
+    win.summary:SetText("|cff61eb8fFertig!|r Als Nächstes: |cffff9929" .. Shop.signal .. "|r – klick auf |cffff9929Nächstes craften|r.")
+  end
   local y = 44 + math.ceil(win.summary:GetStringHeight()) + 12
 
   -- Was wird hergestellt?
@@ -329,6 +348,13 @@ function Shop.Refresh()
     win.search:SetEnabled(open > 0 and M.ahOpen == true)
   end
   win.craft:SetEnabled(#(ns.char.queue or {}) > 0)
+  if Shop.signal then
+    win.craftGlow:Show()
+    if ns.settings.animations ~= false then win.craftGlow.anim:Play() else win.craftGlow.anim:Stop() end
+  else
+    win.craftGlow.anim:Stop()
+    win.craftGlow:Hide()
+  end
 end
 
 function Shop.Show()
@@ -357,6 +383,31 @@ end)
 ns.Listen("MERCHANT_SCANNED", function()
   if ns.Scanner.merchant.open and ns.settings.shopAutoOpen ~= false and #(Shop.VendorPlan()) > 0 then Shop.Show() end
 end)
+
+----------------------------------------------------------------------------
+-- "Nächste Sorte ist dran": Eine Sorte ist fertig hergestellt, für die nächste hast du alles Material.
+-- Blizzard erlaubt pro Klick nur einen Herstell-Auftrag -> Knopf leuchtet + kurzer Ton, damit du weißt: klicken.
+----------------------------------------------------------------------------
+function Shop.ClearSignal()
+  if not Shop.signal then return end
+  Shop.signal = nil
+  if win and win:IsShown() then Shop.Refresh() end
+end
+
+function Shop.CheckNext()
+  local ok, casting = pcall(UnitCastingInfo, "player")
+  if ok and casting then return end -- es läuft noch ein Craft (gleiche Sorte)
+  for _, c in ipairs(Shop.Crafts()) do
+    if c.status == "bereit" then
+      local item = ns.Item(c.recipe.out)
+      Shop.signal = c.n * (c.recipe.qty or 1) .. "× " .. (item.name or c.recipe.name)
+      if ns.settings.craftSound ~= false and PlaySound and SOUNDKIT and SOUNDKIT.MAP_PING then pcall(PlaySound, SOUNDKIT.MAP_PING) end
+      if win and win:IsShown() then Shop.Refresh() end
+      return true
+    end
+  end
+  Shop.ClearSignal()
+end
 
 -- Herstell-Dauer je Rezept lernen (Name = Zaubername im Spiel)
 function Shop.LearnCastTime(name, ms)
@@ -404,6 +455,8 @@ local function castUpdate(_, unit)
   if ok and name and isTradeskill and type(startMs) == "number" and type(endMs) == "number" then
     cb.startMs, cb.endMs = startMs, endMs
     cb.icon:SetTexture(tex)
+    Shop.crafting = true
+    Shop.signal = nil
     Shop.LearnCastTime(name, endMs - startMs)
     -- wie viele davon stehen noch auf der Liste, und wie lange dauert der Rest?
     local left, restMs, restCrafts, estimated = Shop.RemainingAfter(name, endMs - startMs)
@@ -419,6 +472,11 @@ for _, ev in ipairs({ "UNIT_SPELLCAST_STOP", "UNIT_SPELLCAST_FAILED", "UNIT_SPEL
   ns.On(ev, function(_, unit)
     if unit ~= "player" or not win then return end
     win.cast.startMs, win.cast.endMs = nil, nil
+    -- Sorte fertig? Kurz warten: beim Mehrfach-Herstellen startet der nächste Craft sofort wieder
+    if Shop.crafting then
+      Shop.crafting = false
+      C_Timer.After(1.5, function() if not Shop.crafting then Shop.CheckNext() end end)
+    end
     if win:IsShown() then Shop.Refresh() end
   end)
 end

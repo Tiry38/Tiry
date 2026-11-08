@@ -1,5 +1,10 @@
 # Changelog – Tiry's Zentrale
 
+## 5.6.2 (08.11.2026)
+**„Nächstes craften“ meldet sich, wenn die nächste Sorte dran ist.**
+- Blizzard erlaubt pro Klick nur einen Herstell-Auftrag (eine Sorte, beliebig viele Stück). Ist eine Sorte fertig und du hast Material für die nächste: Der Knopf leuchtet grün, ein kurzer Ton kommt, oben steht „Fertig! Als Nächstes: 4× Dunkle Lederschultern“.
+- Klick (oder die Taste aus der Tastaturbelegung) startet die nächste Sorte, das Leuchten geht aus.
+
 ## 5.6.1 (08.11.2026)
 **Herstellungs-Balken: Gesamtdauer der ganzen Liste.**
 - Oben wie bisher der aktuelle Craft mit Sekunden. Neu darunter: „Gesamt: 2:35 Min. · 12 Crafts“ – alles, was noch auf der Liste steht, inkl. selbst hergestellter Zwischenprodukte.
