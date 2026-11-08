@@ -342,6 +342,46 @@ local function runScenario(label, opts)
     ns.UI.RefreshPage("ledger")
   end)
 
+  -- Schnäppchen-Radar, Post-Bilanz, Ablauf-Warnung, Heute für dich, Mindestpreis
+  step("Schnäppchen-Radar & Post", function()
+    local D = ns.Deals
+    D.found = {}
+    TirysZentraleDB.priceHistory = TirysZentraleDB.priceHistory or {}
+    TirysZentraleDB.priceHistory[13468] = { ["2026-11-01"] = 500000, ["2026-11-02"] = 520000, ["2026-11-03"] = 480000 }
+    W.ahResults = { [13468] = { { 250000, 2 }, { 300000, 1 }, { 400000, 5 }, { 200000, 3, true } } }
+    W.prints = {}
+    W.fire("COMMODITY_SEARCH_RESULTS_UPDATED", 13468) ; W.flush()
+    local d = D.found[13468]
+    assert(d and d.qty == 3 and d.price == 250000 and d.ref == 500000, "Schnäppchen: nur fremde Angebote unter 65 %")
+    assert(math.floor(d.save) == 500000 * 3 - (250000 * 2 + 300000), "Ersparnis")
+    assert(table.concat(W.prints, " "):find("Schnäppchen") ~= nil, "Chat-Hinweis")
+    -- ohne 2 Tage Historie kein Radar
+    W.ahResults[2589] = { { 1, 20 } }
+    TirysZentraleDB.priceHistory[2589] = { ["2026-11-03"] = 60 }
+    W.fire("COMMODITY_SEARCH_RESULTS_UPDATED", 2589) ; W.flush()
+    assert(D.found[2589] == nil, "zu wenig Historie")
+    W.fire("ITEM_SEARCH_RESULTS_UPDATED", { itemID = 13468 }) ; W.flush()
+    ns.UI.Show("scanner")
+    -- Post-Bilanz und Ablauf-Warnung
+    W.money = 100000 ; W.fire("MAIL_SHOW") ; W.flush()
+    W.mails = { { subject = "x", money = 5000, daysLeft = 1.5 } }
+    W.fire("MAIL_INBOX_UPDATE") ; W.flush()
+    W.money = 105000 ; W.prints = {}
+    W.fire("MAIL_CLOSED") ; W.flush()
+    assert(table.concat(W.prints, " "):find("Post%-Bilanz") ~= nil, "Post-Bilanz")
+    assert(TirysZentraleCharDB.mailExpires and TirysZentraleCharDB.mailExpires - W.now < 2 * 86400, "Ablaufzeit gemerkt")
+    W.mails = nil
+    -- Startseite: Heute für dich
+    ns.UI.Show("home")
+    local rows = ns.UI.pages.home.today.rows
+    assert(rows[1]:IsShown() and rows[1].text:GetText() ~= "", "Heute für dich gefüllt")
+    for _, r in ipairs(rows) do if r:IsShown() then r:Click() end end
+    -- Tooltip: Mindestpreis
+    GameTooltip.lines = {}
+    W.tooltipHook(GameTooltip, { id = 2589 })
+    assert(table.concat(GameTooltip.lines, "|"):find("Nicht unter") ~= nil, "Mindestpreis im Tooltip: " .. table.concat(GameTooltip.lines, " | "))
+  end)
+
   -- Preis-Strings (TSM-Stil): Rechnen, TSM-Namen, Fehler, Marktwert
   step("Preis-Strings", function()
     local PS = ns.PriceString

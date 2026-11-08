@@ -72,6 +72,37 @@ function page.build(self, content, width)
   self.hero = hero
   st:Add(hero, 132, 20)
 
+  -- Heute für dich: die 3 Aktionen mit dem meisten Gold (ohne Einrichtung)
+  local today = UI.Card(content, 20, C.card)
+  today:SetSize(width, 176)
+  local tt = UI.Text(today, 16, "bold", C.text)
+  tt:SetPoint("TOPLEFT", 20, -16)
+  tt:SetText("Heute für dich")
+  today.rows = {}
+  for i = 1, 3 do
+    local r = CreateFrame("Button", nil, today)
+    r:SetSize(width - 40, 38)
+    r:SetPoint("TOPLEFT", 20, -48 - (i - 1) * 42)
+    r.bg = UI.Round(r, 19, "BACKGROUND", 1)
+    r.bg:SetColor(C.inset, 1)
+    r.num = UI.Chip(r, tostring(i), C.gold, true)
+    r.num:SetPoint("LEFT", 10, 0)
+    r.text = UI.Text(r, 12, "semibold", C.text)
+    r.text:SetPoint("LEFT", r.num, "RIGHT", 10, 0)
+    r.text:SetWidth(width - 160)
+    r.text:SetWordWrap(false)
+    r.go = r:CreateTexture(nil, "ARTWORK")
+    r.go:SetTexture(UI.Icon("chevron"))
+    r.go:SetSize(14, 14)
+    r.go:SetPoint("RIGHT", -14, 0)
+    r:SetScript("OnEnter", function(self) self.bg:SetColor(C.cardHi, 1) end)
+    r:SetScript("OnLeave", function(self) self.bg:SetColor(C.inset, 1) end)
+    r:SetScript("OnClick", function(self) UI.PlayClick() if self.action then self.action() end end)
+    today.rows[i] = r
+  end
+  self.today = today
+  st:Add(today, 176, 20)
+
   st:Title("Top 3 für dich – gerade jetzt", 17, C.text, 2)
   self.topHint = UI.Para(content, 11, C.dim, width)
   st:Add(self.topHint, 16, 10)
@@ -208,6 +239,44 @@ function page.refresh(self)
     else
       card:Hide()
     end
+  end
+
+  -- Heute für dich
+  local acts = {}
+  local scanAge = ns.db.lastScan and (time() - ns.db.lastScan) or nil
+  if M.HasAuctionator() and (not scanAge or scanAge > 86400) then
+    acts[#acts + 1] = { "AH scannen – deine Preise sind " .. (scanAge and "älter als 1 Tag" or "noch nicht erfasst"), function() M.StartScan() end }
+  end
+  if ns.Deals and #ns.Deals.List() > 0 then
+    local d = ns.Deals.List()[1]
+    acts[#acts + 1] = { string.format("Schnäppchen kaufen: %s (spart %s)", ns.Item(d.id).name, ns.Money(d.save)), function() UI.Show("scanner") end }
+  end
+  ns.Scanner.ScanBags()
+  local ahN, ahV = 0, 0
+  for _, e in ipairs(ns.Scanner.bags.items) do if e.advice == "AH" then ahN = ahN + 1 ahV = ahV + (e.ah or 0) end end
+  if ahN > 0 then acts[#acts + 1] = { string.format("%d Items für ca. %s ins AH stellen", ahN, ns.Money(ahV)), function() UI.Show("scanner") end } end
+  local rp = UI.pages.recipes
+  if rp and rp.frame and #ns.Recipes.MyProfessions() > 0 then
+    local n, sum = 0, 0
+    local savedProf = rp.prof
+    for _, key in ipairs(ns.Recipes.MyProfessions()) do
+      rp.prof = key
+      local list = rp.Entries(rp)
+      n = n + #list
+      for _, e in ipairs(list) do sum = sum + e.profit end
+    end
+    rp.prof = savedProf
+    if n > 0 then acts[#acts + 1] = { string.format("%d Rezepte bringen Gold – zusammen ca. %s pro Durchgang", n, ns.Money(sum)), function() UI.Show("recipes") end } end
+  elseif #ns.Recipes.MyProfessions() > 0 then
+    acts[#acts + 1] = { "Craft-Planer öffnen: deine Rezepte nach Gewinn", function() UI.Show("recipes") end }
+  end
+  acts[#acts + 1] = { "Farm-Spot für dein Level ansehen", function() UI.Show(ns.HasProf(ns.PROF.SKINNING) and "skinning" or "farm") end }
+  acts[#acts + 1] = { "Verkaufsbuch: was sich wirklich verkauft", function() UI.Show("ledger") end }
+  for i, r in ipairs(self.today.rows) do
+    local a = acts[i]
+    r.text:SetText(a and a[1] or "")
+    r.action = a and a[2]
+    r:SetShown(a ~= nil)
   end
 
   local goal

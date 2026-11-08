@@ -66,6 +66,17 @@ local function addLines(tooltip, itemID)
     for i = 1, math.min(#chars, 4) do parts[#parts + 1] = chars[i].name .. " " .. chars[i].total end
     lines[#lines + 1] = "Bestand alle Chars: " .. total .. " (" .. table.concat(parts, ", ") .. ")"
   end
+  -- Mindest-Verkaufspreis: nie unter Händlerpreis bzw. Herstellungskosten (günstigstes eigenes Rezept)
+  local floor = ns.Market.VendorSell(itemID) or 0
+  local r = ns.Recipes.ByOutput(itemID)
+  if r and ns.Recipes.IsKnown(r) then
+    local _, _, cost, unknown = ns.Scanner.RecipeProfit(r)
+    if cost and unknown == 0 and r.qty > 0 then floor = math.max(floor, math.ceil(cost / r.qty / ns.Market.CutFactor())) end
+  end
+  local e = ns.DB.Get(itemID)
+  if floor > 0 and not (e and e.bind == 1) then
+    lines[#lines + 1] = "Nicht unter " .. ns.Money(floor) .. " pro Stück verkaufen"
+  end
   local rate, n = ns.Ledger.SaleRate(itemID)
   if rate then lines[#lines + 1] = string.format("Deine Verkaufsquote: %d %% (%d Auktionen)", math.floor(rate * 100 + 0.5), n) end
   if #lines == 0 then return end

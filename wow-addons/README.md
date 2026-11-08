@@ -21,7 +21,9 @@ wie man schon mit Level 10–20 Gold macht – mit echten Preisen des eigenen Se
 | Datenbank | **Alle 18.416 Gegenstände** von WoW Forever auf Deutsch: Suche (Name/ID), Filter nach Kategorie, Qualität, Level, Sortierung nach AH-/Händlerpreis |
 | Scanner | Händler-Flips (automatisch beim Händler) und Taschen-Check (AH oder Händler?) |
 | Craft-Planer | Wie TSM Crafting: 1.967 Rezepte aus den Forever-Spieldaten, gelernte Rezepte automatisch erkannt (ohne Berufsfenster), zwei Regler (% und Gold): Empfehlung wächst mit jedem Level, eigener Stil wächst mit, teure Items brauchen weniger %, "Lernen lohnt sich", Skill-Farben, herstellbare Menge, Warteschlange, fehlendes Material als Auctionator-Liste, Craften per Knopf |
-| Extras | Item-Tooltip (in welchen deiner Rezepte, wo farmen, neu in Forever), automatisch reparieren |
+| Verkaufsbuch | Wie TSM Accounting/Journalator: Verkäufe, Käufe, abgelaufene Auktionen automatisch aus der Post; eigene Verkaufsquote pro Item (Ersatz für TSMs Region-Sale-Rate), Bestseller, Ladenhüter, Gold aller Charaktere |
+| Schnäppchen-Radar | Prüft jede AH-Suche (auch Auctionator) gegen deinen Marktwert und meldet Angebote unter 65 % |
+| Extras | Item-Tooltip (Rezepte, Farm-Ort, neu in Forever, Bestand aller Chars, Verkaufsquote, Mindest-Verkaufspreis), Post-Bilanz, Warnung vor ablaufender Post, "Heute für dich" auf der Startseite, automatisch reparieren |
 | Gold-Autopilot | Schrott automatisch verkaufen, Händler-Panel (Händler-Ware verkaufen, Flips kaufen per Klick), Beute-Radar mit Warnung bei wertvoller Beute, AH-Hinweis |
 | Goldtagebuch | Gold pro Sitzung, pro Stunde, 14-Tage-Verlauf |
 | AH-Schule | Auktionshaus und Auctionator für Einsteiger |

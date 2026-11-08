@@ -413,6 +413,12 @@ function M.install(opts)
   G.GetMerchantItemID = function(i) local m = M.merchant[i]; return m and m.id end
   G.GetMerchantItemLink = function(i) local m = M.merchant[i]; return m and ("|Hitem:" .. m.id .. "|h") end
   G.ATTACHMENTS_MAX_RECEIVE = 16
+  G.C_AuctionHouse = {
+    GetNumCommoditySearchResults = function(id) return #((M.ahResults or {})[id] or {}) end,
+    GetCommoditySearchResultInfo = function(id, i) local r = (M.ahResults or {})[id] r = r and r[i] if r then return { itemID = id, unitPrice = r[1], quantity = r[2], containsOwnerItem = r[3] or false } end end,
+    GetNumItemSearchResults = function(key) return #((M.ahResults or {})[key.itemID] or {}) end,
+    GetItemSearchResultInfo = function(key, i) local r = (M.ahResults or {})[key.itemID] r = r and r[i] if r then return { buyoutAmount = r[1], quantity = r[2], containsOwnerItem = r[3] or false } end end,
+  }
   G.AUCTION_EXPIRED_MAIL_SUBJECT = "Auktion abgelaufen: %s"
   G.GetRealmName = function() return "Forever-Testrealm" end
   -- Post: M.mails = { { subject, money, daysLeft, invoice = { type, item, player, bid, count } } }

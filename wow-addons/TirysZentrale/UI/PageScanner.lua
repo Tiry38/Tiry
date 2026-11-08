@@ -48,6 +48,18 @@ function page.build(self, content, width)
   st:Add(self.flipList, nil)
   self.flipTop = st.y
 
+  -- Schnäppchen-Radar (wird beim Suchen im AH gefüllt)
+  self.dealTitle = UI.Text(content, 17, "bold", C.text)
+  self.dealTitle:SetText("Schnäppchen im AH")
+  self.dealHint = UI.Para(content, 12, C.muted, width)
+  self.dealHint:SetText("Läuft automatisch mit: Sobald du im AH etwas suchst (auch über Auctionator), meldet Tiry's Zentrale Angebote unter 65 % deines Marktwerts. "
+    .. "Ladenhüter (deine Verkaufsquote unter 30 %) zählen nicht. Der Marktwert braucht Scans von mindestens 2 Tagen.")
+  self.dealList = UI.ItemList(content, width, {
+    { key = "price", label = "Ab", width = 84 },
+    { key = "ref", label = "Marktwert", width = 90 },
+    { key = "save", label = "Ersparnis", width = 96, bold = true },
+  })
+
   -- Bereich 2: Taschen-Check (Position wird in refresh gesetzt)
   self.bagHead = CreateFrame("Frame", nil, content)
   self.bagHead:SetSize(width, 230)
@@ -144,6 +156,20 @@ function page.refresh(self)
 
   -- Taschen
   local y = self.flipTop + fh + 28
+  self.dealTitle:ClearAllPoints() ; self.dealTitle:SetPoint("TOPLEFT", content, "TOPLEFT", 0, -y)
+  y = y + 28
+  self.dealHint:ClearAllPoints() ; self.dealHint:SetPoint("TOPLEFT", content, "TOPLEFT", 0, -y)
+  y = y + math.ceil(self.dealHint:GetStringHeight()) + 10
+  local deals = {}
+  for _, d in ipairs(ns.Deals.List()) do
+    deals[#deals + 1] = {
+      id = d.id, note = d.qty .. " Stück unter 65 % des Marktwerts",
+      cells = { price = ns.Money(d.price), ref = ns.Money(d.ref), save = "|cff61eb8f" .. ns.Money(d.save) .. "|r" },
+      tip = { "Im AH kaufen, später zum Marktwert wieder einstellen.", "Shift-Klick: Link in den Chat" },
+    }
+  end
+  self.dealList:ClearAllPoints() ; self.dealList:SetPoint("TOPLEFT", content, "TOPLEFT", 0, -y)
+  y = y + self.dealList:SetEntries(deals, "Noch keine Schnäppchen in dieser Sitzung – such im AH nach Items.") + 28
   self.bagHead:ClearAllPoints()
   self.bagHead:SetPoint("TOPLEFT", content, "TOPLEFT", 0, -y)
   if (S.bags.time or 0) == 0 or (time() - S.bags.time) > 2 then

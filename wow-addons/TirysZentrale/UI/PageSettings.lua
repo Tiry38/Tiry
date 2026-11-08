@@ -58,6 +58,10 @@ function page.build(self, content, width)
     s.autoJunk = v
   end, "Beim Händler wird alles Graue sofort verkauft (wie der Müll-Knopf, nur automatisch).", width), 54)
 
+  add(UI.Toggle(content, "Schnäppchen-Radar", function() return s.dealRadar ~= false end, function(v)
+    s.dealRadar = v
+  end, "Meldet beim Suchen im AH Angebote unter 65 % deines Marktwerts (nicht bei Ladenhütern).", width), 54)
+
   add(UI.Toggle(content, "Automatisch reparieren", function() return s.autoRepair end, function(v)
     s.autoRepair = v
   end, "Repariert deine Ausrüstung beim Händler sofort (wenn du genug Gold hast) – wie bei Leatrix Plus.", width), 54)
