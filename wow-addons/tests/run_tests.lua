@@ -197,6 +197,20 @@ local function runScenario(label, opts)
     W.fire("TRADE_SKILL_CLOSE") ; W.flush()
   end)
   check(label .. ": Rezept gecraftet", (W.crafted or 0) >= 1, tostring(W.crafted))
+  check(label .. ": richtiges Rezept markiert", W.opened == W.craftedID and (W.craftedID == 3755 or W.craftedID == 2963), tostring(W.craftedID))
+  step("Craft-Ergebnis kommt an", function()
+    local before = 0
+    for _, e in ipairs(TirysZentraleCharDB.queue or {}) do before = before + e.n end
+    W.fire("TRADE_SKILL_SHOW") ; W.flush()
+    W.bags[4] = { { itemID = W.craftedID == 3755 and 4238 or 2996, stackCount = 1, quality = 1 } }
+    W.fire("BAG_UPDATE_DELAYED") ; W.flush()
+    local after = 0
+    for _, e in ipairs(TirysZentraleCharDB.queue or {}) do after = after + e.n end
+    assert(after < before or before == 0, "Warteschlange muss nach dem Herstellen sinken: " .. before .. " -> " .. after)
+    ns.UI.pages.recipes.CraftCheck()
+    SlashCmdList.TIRYSZENTRALE("craftcheck")
+    W.fire("TRADE_SKILL_CLOSE") ; W.flush()
+  end)
 
   -- Rezept-Datenbank + automatische Erkennung + Level-Empfehlung
   local R = ns.Recipes

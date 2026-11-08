@@ -147,6 +147,9 @@ local function onBagsChanged()
       local channel, unit = M.BestSale(id)
       local value = (unit or 0) * gained
       ns.Fire("LOOT_GAINED", id, gained)
+      if ns.Scanner.tradeOpen then
+        -- Hergestellte Items sind keine Beute (nur die Craft-Warteschlange zählt sie)
+      else
       local s = A.session
       s.value = s.value + value
       s.items = s.items + gained
@@ -161,6 +164,7 @@ local function onBagsChanged()
           item.link or item.name, gained > 1 and (" x" .. gained) or "", ns.Money(value),
           "nicht zum Händler!"))
         if PlaySound and SOUNDKIT and SOUNDKIT.IG_BACKPACK_COIN_SELECT then pcall(PlaySound, SOUNDKIT.IG_BACKPACK_COIN_SELECT) end
+      end
       end
     end
   end

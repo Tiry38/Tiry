@@ -175,6 +175,46 @@ local function openProfKey()
   end
 end
 
+-- Rezept im OFFENEN Berufsfenster finden: Nummer muss gelernt sein UND genau unser Ergebnis-Item herstellen
+local function liveIDs()
+  local ids = {}
+  if C_TradeSkillUI.GetAllRecipeIDs then ids = C_TradeSkillUI.GetAllRecipeIDs() or {} end
+  if #ids == 0 and C_TradeSkillUI.GetFilteredRecipeIDs then ids = C_TradeSkillUI.GetFilteredRecipeIDs() or {} end
+  return ids
+end
+
+local function producesOutput(id, out)
+  local ok, s = pcall(C_TradeSkillUI.GetRecipeSchematic, id, false)
+  return ok and s and s.outputItemID == out
+end
+
+local function isLearned(id)
+  local ok, info = pcall(C_TradeSkillUI.GetRecipeInfo, id)
+  return ok and info and info.learned
+end
+
+function page.ResolveLive(r)
+  if isLearned(r.id) and producesOutput(r.id, r.out) then return r.id, "direkt" end
+  for _, id in ipairs(liveIDs()) do
+    if isLearned(id) and producesOutput(id, r.out) then return id, "über Berufsfenster" end
+  end
+  return nil
+end
+
+-- Wartet auf das hergestellte Item: erst wenn es in der Tasche liegt, wird die Warteschlange verringert
+local pendingCraft
+ns.Listen("LOOT_GAINED", function(_, itemID, gained)
+  if not pendingCraft or pendingCraft.out ~= itemID then return end
+  local r = R.Get(pendingCraft.recipe)
+  if r then
+    local crafts = math.max(1, math.floor(gained / math.max(r.qty, 1) + 0.5))
+    addToQueue(r, -math.min(crafts, pendingCraft.left))
+    pendingCraft.left = pendingCraft.left - crafts
+    if pendingCraft.left <= 0 then pendingCraft = nil end
+    UI.RefreshPage("recipes")
+  end
+end)
+
 function page.CraftNext(self)
   if not (S.tradeOpen and C_TradeSkillUI and C_TradeSkillUI.CraftRecipe) then
     ns.Print("Öffne zuerst das Berufsfenster.")
@@ -186,15 +226,36 @@ function page.CraftNext(self)
     if r and (not key or r.prof == key) then
       local n = math.min(e.n, craftable(r))
       if n > 0 then
-        C_TradeSkillUI.CraftRecipe(r.id, n)
-        addToQueue(r, -n)
-        ns.Print(string.format("Stelle %d× %s her.", n, r.name))
-        page.refresh(self)
+        local liveID = page.ResolveLive(r)
+        if not liveID then
+          ns.Print("|cffff6b81" .. r.name .. "|r ist im offenen Berufsfenster nicht als gelerntes Rezept zu finden – bitte dort direkt herstellen.")
+          return
+        end
+        -- Rezept im Berufsfenster markieren, damit du siehst, was hergestellt wird
+        if C_TradeSkillUI.OpenRecipe then pcall(C_TradeSkillUI.OpenRecipe, liveID) end
+        -- Exakt wie Blizzards eigener Herstellen-Knopf: leere Materialliste (Grundmaterial nimmt das Spiel selbst)
+        C_TradeSkillUI.CraftRecipe(liveID, n, {}, nil, nil, false)
+        pendingCraft = { recipe = r.id, out = r.out, left = n }
+        ns.Print(string.format("Stelle |cffffd24a%d× %s|r her.", n, r.name))
         return
       end
     end
   end
   ns.Print("Nichts in der Warteschlange, das du mit deinem Material in diesem Beruf herstellen kannst.")
+end
+
+-- Prüfbefehl /tz craftcheck: zeigt je Eintrag, welches Rezept im Berufsfenster benutzt würde
+function page.CraftCheck()
+  if not (S.tradeOpen and C_TradeSkillUI) then ns.Print("Öffne zuerst das Berufsfenster.") return end
+  if #queue() == 0 then ns.Print("Warteschlange ist leer.") return end
+  for _, e in ipairs(queue()) do
+    local r = R.Get(e.recipe)
+    if r then
+      local liveID, how = page.ResolveLive(r)
+      ns.Print(string.format("%s: Datenbank %d -> Berufsfenster %s (%s), Ergebnis-Item %d",
+        r.name, r.id, tostring(liveID or "nicht gefunden"), how or "-", r.out))
+    end
+  end
 end
 
 local function buildSegments(self)

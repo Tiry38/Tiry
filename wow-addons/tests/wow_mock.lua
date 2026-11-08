@@ -438,7 +438,8 @@ function M.install(opts)
       return { recipeID = id, outputItemID = r.out, quantityMin = 1, quantityMax = 1, reagentSlotSchematics = slots }
     end,
     GetBaseProfessionInfo = function() return { professionName = "Schneiderei", skillLevel = 60, maxSkillLevel = 150 } end,
-    CraftRecipe = function(id, n) assert(type(id) == "number" and type(n) == "number") M.crafted = (M.crafted or 0) + n end,
+    CraftRecipe = function(id, n, reagents) assert(type(id) == "number" and type(n) == "number") assert(type(reagents) == "table", "Materialliste wie Blizzard") M.crafted = (M.crafted or 0) + n M.craftedID = id end,
+    OpenRecipe = function(id) assert(type(id) == "number") M.opened = id end,
   }
   -- Auctionator (öffentliche API v1, Argumentprüfung wie im Original)
   if opts.auctionator ~= false then

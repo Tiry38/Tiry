@@ -451,6 +451,10 @@ SlashCmdList.TIRYSZENTRALE = function(msg)
     rezepte = "recipes", craft = "recipes", crafting = "recipes", farm = "farm", farmen = "farm", kuerschner = "skinning", ["kürschner"] = "skinning", leder = "skinning", skin = "skinning", tagebuch = "tracker", tracker = "tracker",
     schule = "basics", ah = "basics", hilfe = "basics", optionen = "settings", einstellungen = "settings",
   }
+  if msg == "craftcheck" then
+    UI.pages.recipes.CraftCheck()
+    return
+  end
   if msg == "minimap" then
     ns.settings.minimap.show = not ns.settings.minimap.show
     UI.UpdateMinimap()
