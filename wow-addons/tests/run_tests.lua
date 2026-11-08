@@ -306,6 +306,70 @@ local function runScenario(label, opts)
     assert(p.Sellable(279978) and p.Sellable(2312), "verkäuflich")
   end) end
 
+  -- TSM-Ablauf: Mindestgewinn eintippen -> Liste erstellen -> Einkaufsfenster -> kaufen -> Post -> craften
+  if opts.auctionator ~= false then step("Einkaufsfenster wie TSM", function()
+    local P = ns.ParseMoney
+    assert(P("45") == 4500 and P("1g 20s") == 12000 and P("1,5g") == 15000 and P("80s") == 8000 and P("50k") == 50 and P("abc") == nil, "Geld-Eingabe")
+    local p = ns.UI.pages.recipes
+    ns.UI.Show("recipes")
+    -- freie Eingabe am Regler
+    p.profit.hit:Click()
+    p.profit.edit:SetText("2s")
+    W.call(p.profit.edit, "OnEnterPressed")
+    assert(select(2, ns.Recipes.Filter()) == 200, "eingetippter Mindestgewinn: " .. select(2, ns.Recipes.Filter()))
+    W.prices[4238], W.prices[2996], W.prices[2589] = 1000, 100, 60
+    TirysZentraleDB.vendorBuy[2320] = 10
+    TirysZentraleCharDB.hiddenRecipes = {}
+    TirysZentraleCharDB.queue = {}
+    p.prof, p.view = "TAILORING", "known"
+    local savedBags = W.bags
+    W.bags = { [0] = {} }
+    p.refresh(p)
+    -- Liste erstellen (je Rezept 3x)
+    p.perRecipe.hit:Click() ; p.perRecipe.edit:SetText("3") ; W.call(p.perRecipe.edit, "OnEnterPressed")
+    p.makeBtn:Click()
+    assert(#TirysZentraleCharDB.queue == 1 and TirysZentraleCharDB.queue[1].recipe == 3755 and TirysZentraleCharDB.queue[1].n == 3, "Liste erstellt")
+    local win = TirysZentraleShopWindow
+    assert(win and win:IsShown(), "Einkaufsfenster offen")
+    local need = {}
+    for _, e in ipairs((ns.Shop.List())) do need[e.id] = e.missing end
+    assert(need[2996] == 9 and need[2320] == 9, "Bedarf 9 Ballen + 9 Faden: " .. tostring(need[2996]) .. "/" .. tostring(need[2320]))
+    -- im AH gekauft -> sofort weg
+    W.fire("COMMODITY_PURCHASED", 2996, 9) ; W.flush()
+    for _, e in ipairs((ns.Shop.List())) do need[e.id] = e.missing end
+    assert(need[2996] == 0, "Kauf wird abgezogen")
+    -- Briefkasten: Ware liegt dort -> weiter gezählt, kein Doppelzählen
+    W.inbox = { { { 2996, 9 } } }
+    W.fire("MAIL_SHOW") ; W.flush()
+    for _, e in ipairs((ns.Shop.List())) do need[e.id] = e.missing end
+    assert(need[2996] == 0, "Briefkasten zählt mit")
+    -- Post geholt: jetzt in den Taschen, Briefkasten leer
+    W.inbox = {}
+    W.bags[0] = { { itemID = 2996, stackCount = 9, quality = 1 }, { itemID = 2320, stackCount = 9, quality = 1 } }
+    W.fire("MAIL_INBOX_UPDATE") ; W.fire("BAG_UPDATE_DELAYED") ; W.flush()
+    local _, open = ns.Shop.List()
+    assert(open == 0, "alles da")
+    -- Berufsfenster zu -> erster Klick öffnet es, zweiter stellt her
+    W.crafted, W.openedSkill = 0, nil
+    win.craft:Click()
+    assert(W.openedSkill == 197, "Schneiderei geöffnet")
+    W.recipes = { [3755] = { name = "Leinentasche", out = 4238, reagents = { { 2996, 3 }, { 2320, 3 } } } }
+    W.fire("TRADE_SKILL_SHOW") ; W.flush()
+    win.craft:Click()
+    assert(W.crafted == 3 and W.craftedID == 3755, "3 Leinentaschen hergestellt")
+    W.fire("TRADE_SKILL_CLOSE") ; W.flush()
+    -- x an der Rezeptzeile blendet aus
+    p.refresh(p)
+    p.list.rows[1].action:Click()
+    assert(TirysZentraleCharDB.hiddenRecipes[3755], "x blendet aus")
+    win.close = nil
+    ns.Shop.Toggle() ; ns.Shop.Toggle()
+    W.call(win.rows[1], "OnEnter") ; W.call(win.rows[1], "OnLeave")
+    win.search:Click()
+    W.bags = savedBags
+    TirysZentraleCharDB.queue, TirysZentraleCharDB.hiddenRecipes = {}, {}
+  end) end
+
   -- Karte
   step("Karten-Wegpunkt", function()
     ns.UI.Show("farm")

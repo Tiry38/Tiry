@@ -6,7 +6,7 @@ local C = UI.C
 local ROW_H = 44
 
 -- columns: { { key, label, width, align } ... } – Werte liefert fill(row, data) -> { [key] = text }
-function UI.ItemList(parent, width, columns)
+function UI.ItemList(parent, width, columns, opts)
   local list = CreateFrame("Frame", nil, parent)
   list:SetWidth(width)
   list.rows = {}
@@ -16,7 +16,7 @@ function UI.ItemList(parent, width, columns)
   local head = CreateFrame("Frame", nil, list)
   head:SetPoint("TOPLEFT")
   head:SetSize(width, 24)
-  local x = width
+  local x = (opts and opts.action) and (width - 34) or width
   for i = #columns, 1, -1 do
     local col = columns[i]
     local t = UI.Text(head, 10, "semibold", C.dim)
@@ -59,6 +59,23 @@ function UI.ItemList(parent, width, columns)
       t:SetWordWrap(false)
       row.cells[col.key] = t
     end
+    if opts and opts.action then
+      row.action = UI.IconButton(row, "close", 24)
+      row.action:SetPoint("RIGHT", -6, 0)
+      row.action:SetScript("OnClick", function(b)
+        local r = b:GetParent()
+        if r.actionFn then r.actionFn(r) end
+      end)
+      row.action:HookScript("OnEnter", function(b)
+        local r = b:GetParent()
+        if r.actionTip then
+          GameTooltip:SetOwner(b, "ANCHOR_RIGHT")
+          GameTooltip:SetText(r.actionTip, 1, 0.84, 0.29)
+          GameTooltip:Show()
+        end
+      end)
+      row.action:HookScript("OnLeave", function() GameTooltip:Hide() end)
+    end
     row:SetScript("OnEnter", function(self)
       self.bg:SetColor(C.cardHi, 0.85)
       if self.itemID then
@@ -99,6 +116,8 @@ function UI.ItemList(parent, width, columns)
       row.itemID = e.id
       row.tipLines = e.tip
       row.onClick = e.onClick
+      row.actionFn, row.actionTip = e.action, e.actionTip
+      if row.action then row.action:SetShown(e.action ~= nil) end
       row.zebra = (i % 2 == 0)
       row.bg:SetColor(C.card, row.zebra and 0.45 or 0)
       if e.id then

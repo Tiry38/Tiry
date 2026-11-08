@@ -95,7 +95,8 @@ local DEFAULTS = {
   autoRepair = true,    -- beim Händler automatisch reparieren
   tooltipInfo = true,   -- Zusatzinfos im Item-Tooltip
   -- Craft-Filter: Empfehlung wächst mit jedem Level; die Faktoren sind dein persönlicher Stil (1 = Empfehlung)
-  craft = { marginFactor = 1, profitFactor = 1, onlySafe = true, onlySkill = false },
+  craft = { marginFactor = 1, profitFactor = 1, onlySafe = true, onlySkill = false, perRecipe = 2 },
+  shopAutoOpen = true,  -- Einkaufsfenster beim Öffnen des AH zeigen, wenn noch etwas fehlt
   ahCut = 5,          -- Prozent, den das Auktionshaus beim Verkauf einbehält
   showOnlyMyLevel = false,
   faction = "AUTO",   -- AUTO / Alliance / Horde

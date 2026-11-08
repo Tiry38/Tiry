@@ -412,6 +412,9 @@ function M.install(opts)
   G.GetMerchantNumItems = function() return #(M.merchant or {}) end
   G.GetMerchantItemID = function(i) local m = M.merchant[i]; return m and m.id end
   G.GetMerchantItemLink = function(i) local m = M.merchant[i]; return m and ("|Hitem:" .. m.id .. "|h") end
+  G.ATTACHMENTS_MAX_RECEIVE = 16
+  G.GetInboxNumItems = function() return #(M.inbox or {}), #(M.inbox or {}) end
+  G.GetInboxItem = function(i, slot) local m = (M.inbox or {})[i]; local a = m and m[slot]; if a then return "Item", a[1], 1, a[2] end end
   G.BuyMerchantItem = function(i, n) assert(type(i) == "number") M.bought = (M.bought or 0) + (n or 1) end
   G.MerchantFrame = make("Frame", UIParent, "MerchantFrame")
   G.C_MerchantFrame = {
@@ -438,6 +441,7 @@ function M.install(opts)
       return { recipeID = id, outputItemID = r.out, quantityMin = 1, quantityMax = 1, reagentSlotSchematics = slots }
     end,
     GetBaseProfessionInfo = function() return { professionName = "Schneiderei", skillLevel = 60, maxSkillLevel = 150 } end,
+    OpenTradeSkill = function(skill) assert(type(skill) == "number") M.openedSkill = skill return true end,
     CraftRecipe = function(id, n, reagents) assert(type(id) == "number" and type(n) == "number") assert(type(reagents) == "table", "Materialliste wie Blizzard") M.crafted = (M.crafted or 0) + n M.craftedID = id end,
     OpenRecipe = function(id) assert(type(id) == "number") M.opened = id end,
   }

@@ -662,7 +662,7 @@ end
 ----------------------------------------------------------------------------
 -- Kompakter Regler:  Beschriftung   (-)  Wert  (+)
 ----------------------------------------------------------------------------
-function UI.Stepper(parent, label, width, getter, setter, step, min, max, format)
+function UI.Stepper(parent, label, width, getter, setter, step, min, max, format, parse, hint)
   local f = CreateFrame("Frame", nil, parent)
   f:SetSize(width, 34)
   f.bg = UI.Round(f, 17, "BACKGROUND", 0)
@@ -679,6 +679,49 @@ function UI.Stepper(parent, label, width, getter, setter, step, min, max, format
   local minus = UI.IconButton(f, "minus", 26)
   minus:SetPoint("RIGHT", f.value, "LEFT", -2, 0)
   function f:Refresh() self.value:SetText(format(getter())) end
+  -- Freie Eingabe: Klick auf den Wert -> Eingabefeld (Enter übernimmt, Esc bricht ab)
+  if parse then
+    local hit = CreateFrame("Button", nil, f)
+    hit:SetAllPoints(f.value)
+    local eb = CreateFrame("EditBox", nil, f)
+    eb:SetSize(84, 24)
+    eb:SetPoint("CENTER", f.value, "CENTER")
+    eb:SetAutoFocus(false)
+    eb:SetMaxLetters(12)
+    eb:SetJustifyH("CENTER")
+    local ok, res = pcall(eb.SetFont, eb, ns.MEDIA .. "Fonts\\Poppins-SemiBold.ttf", 12, "")
+    if not ok or res == false then pcall(eb.SetFont, eb, STANDARD_TEXT_FONT or "Fonts\\FRIZQT__.TTF", 12, "") end
+    eb:SetTextColor(1, 1, 1, 1)
+    eb.bg = UI.Round(eb, 10, "BACKGROUND", 3)
+    eb.bg:SetColor(C.inset, 1)
+    eb:Hide()
+    local function finish(apply)
+      if apply then
+        local v = parse(eb:GetText())
+        if v then
+          setter(math.max(min, math.min(max, v)))
+          if f.onChange then f.onChange() end
+        else
+          ns.Print("Bitte eine Zahl eingeben, z. B. 45 (Silber), 1g 20s oder 1,5g.")
+        end
+      end
+      eb:ClearFocus()
+      eb:Hide()
+      f.value:Show()
+      f:Refresh()
+    end
+    eb:SetScript("OnEnterPressed", function() finish(true) end)
+    eb:SetScript("OnEscapePressed", function() finish(false) end)
+    eb:SetScript("OnEditFocusLost", function() if eb:IsShown() then finish(true) end end)
+    hit:SetScript("OnClick", function()
+      f.value:Hide()
+      eb:SetText("")
+      eb:Show()
+      eb:SetFocus()
+    end)
+    if hint then UI.SetTooltip(hit, "Selbst eintragen", hint) end
+    f.edit, f.hit = eb, hit
+  end
   local function change(dir)
     local v = getter() + dir * (type(step) == "function" and step(getter(), dir) or step)
     setter(math.max(min, math.min(max, v)))

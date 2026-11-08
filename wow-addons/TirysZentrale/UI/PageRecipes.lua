@@ -65,7 +65,7 @@ function ns.QueueMaterials()
   end
   local list, cost = {}, 0
   for id, n in pairs(need) do
-    local missing = math.max(0, n - itemCount(id))
+    local missing = math.max(0, n - ns.Shop.Have(id))
     if missing > 0 then
       local unit, where = M.BuyCost(id)
       list[#list + 1] = { id = id, n = missing, unit = unit, where = where }
@@ -96,7 +96,8 @@ function page.build(self, content, width)
       local base = (dir > 0) and v or v - 1
       if base < 10000 then return 500 elseif base < 100000 then return 5000 end
       return 50000
-    end, 0, 10000000, function(v) return v == 0 and "alles" or ns.Money(v) end)
+    end, 0, 10000000, function(v) return v == 0 and "alles" or ns.Money(v) end, ns.ParseMoney,
+    "Auf die Zahl klicken und selbst eintragen: 45 = 45 Silber, 1g 20s, 1,5g. Enter übernimmt.")
   self.profit:SetPoint("TOPLEFT", 20, -44)
   self.profit.onChange = refresh
   self.recBtn = UI.Button(fc, "Empfehlung für mein Level", "primary", 240, 34, "star")
@@ -125,13 +126,29 @@ function page.build(self, content, width)
   self.scanBtn:SetScript("OnClick", function() M.StartScan() end)
   st:Add(pills, 30, 12)
 
+  -- Wie bei TSM: alle lohnenden Rezepte auf einen Klick in die Liste, Einkaufsfenster dazu
+  local mk = CreateFrame("Frame", nil, content)
+  mk:SetSize(width, 36)
+  self.perRecipe = UI.Stepper(mk, "Je Rezept", 230, function() return cfg().perRecipe or 2 end,
+    function(v) cfg().perRecipe = v end, 1, 1, 50, function(v) return v .. "×" end,
+    function(t) return tonumber((t or ""):match("%d+")) end, "Wie oft jedes lohnende Rezept auf die Liste soll. Auf die Zahl klicken zum Eintragen.")
+  self.perRecipe:SetPoint("LEFT")
+  self.makeBtn = UI.Button(mk, "Liste erstellen", "primary", 170, 34, "star")
+  self.makeBtn:SetPoint("LEFT", self.perRecipe, "RIGHT", 10, 0)
+  self.makeBtn:SetScript("OnClick", function() page.MakeList(self) end)
+  UI.SetTooltip(self.makeBtn, "Liste erstellen", "Legt alle Rezepte, die gerade angezeigt werden (also Gold bringen), in die Craft-Liste und öffnet das Einkaufsfenster mit den Materialien.")
+  self.shopBtn = UI.Button(mk, "Einkaufsfenster", "cool", 170, 34, "cart")
+  self.shopBtn:SetPoint("LEFT", self.makeBtn, "RIGHT", 10, 0)
+  self.shopBtn:SetScript("OnClick", function() ns.Shop.Toggle() end)
+  st:Add(mk, 36, 12)
+
   self.info = UI.Para(content, 12, C.gold, width)
   st:Add(self.info, 34, 8)
   self.list = UI.ItemList(content, width, {
     { key = "cost", label = "Material", width = 84 },
     { key = "revenue", label = "Verkauf", width = 84 },
     { key = "profit", label = "Gewinn", width = 96, bold = true },
-  })
+  }, { action = true })
   st:Add(self.list, nil)
   self.listTop = st.y
 
@@ -210,6 +227,23 @@ ns.Listen("LOOT_GAINED", function(_, itemID, gained)
   end
 end)
 
+function page.MakeList(self)
+  local list = page.Entries(self)
+  if #list == 0 then
+    ns.Print("Gerade bringt kein Rezept genug Gold – Mindestgewinn senken oder im AH scannen.")
+    return
+  end
+  local per = cfg().perRecipe or 2
+  local q = queue()
+  for i = #q, 1, -1 do
+    if q[i].prof == self.prof then table.remove(q, i) end
+  end
+  for _, e in ipairs(list) do q[#q + 1] = { recipe = e.r.id, prof = e.r.prof, n = per } end
+  ns.Print(string.format("Craft-Liste erstellt: %d Rezepte je %d×. Das Einkaufsfenster zeigt dir, was du noch kaufen musst.", #list, per))
+  ns.Shop.Show()
+  page.refresh(self)
+end
+
 function page.ClearQueue()
   wipe(queue())
   pendingCraft = nil
@@ -240,8 +274,19 @@ local function queueRow(qc, width)
 end
 
 function page.CraftNext(self)
-  if not (S.tradeOpen and C_TradeSkillUI and C_TradeSkillUI.CraftRecipe) then
-    ns.Print("Öffne zuerst das Berufsfenster.")
+  if not (C_TradeSkillUI and C_TradeSkillUI.CraftRecipe) then return end
+  if not S.tradeOpen then
+    -- Berufsfenster für den ersten Eintrag öffnen, für den du Material hast
+    for _, e in ipairs(queue()) do
+      local r = R.Get(e.recipe)
+      if r and craftable(r) > 0 and C_TradeSkillUI.OpenTradeSkill then
+        local ok = pcall(C_TradeSkillUI.OpenTradeSkill, ns.PROF[r.prof])
+        ns.Print(ok and ("Berufsfenster " .. ns.ProfName(ns.PROF[r.prof]) .. " geöffnet – klick nochmal auf |cffffd24aNächstes craften|r.")
+          or "Öffne bitte das Berufsfenster und klick dann nochmal.")
+        return
+      end
+    end
+    ns.Print("Für nichts in der Craft-Liste hast du schon alles Material. Erst einkaufen bzw. Post holen.")
     return
   end
   local key = openProfKey()
@@ -351,6 +396,7 @@ function page.refresh(self)
   for _ in pairs(hidden()) do hiddenCount = hiddenCount + 1 end
   self.unhideBtn:SetLabel("Ausgeblendete zurückholen (" .. hiddenCount .. ")")
   self.unhideBtn:SetEnabled(hiddenCount > 0)
+  self.perRecipe:Refresh()
 
   local profs = buildSegments(self)
   local entries = {}
@@ -387,7 +433,13 @@ function page.refresh(self)
         },
         tip = { "Material: " .. (#mats > 0 and table.concat(mats, ", ") or "keins"),
           "Verkauf: " .. ns.Money(e.revenue) .. " (AH-Preis nach Gebühr) · Gewinn " .. ns.Money(e.profit),
-          "Linksklick: in die Warteschlange · Rechtsklick: Rezept ausblenden" },
+          "Linksklick: 1× in die Craft-Liste · × oder Rechtsklick: Rezept ausblenden" },
+        action = function()
+          hidden()[r.id] = true
+          ns.Print(r.name .. " ausgeblendet. Zurückholen: Knopf \"Ausgeblendete zurückholen\".")
+          page.refresh(self)
+        end,
+        actionTip = "Rezept ausblenden",
         onClick = function(_, button)
           if button == "RightButton" then
             hidden()[r.id] = true
