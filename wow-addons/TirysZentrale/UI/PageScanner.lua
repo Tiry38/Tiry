@@ -1,5 +1,5 @@
 -- Tiry's Zentrale – Seite "Scanner": Händler-Flips und Taschen-Check
-local ADDON, ns = ...
+local _, ns = ...
 local UI = ns.UI
 local C = UI.C
 local M = ns.Market
@@ -100,7 +100,7 @@ function page.build(self, content, width)
     end
     local ok, n = M.CreateShoppingList("Zentrale: Meine Verkäufe", ids)
     if ok then
-      ns.Print("Liste |cffff9929Tiry's Zentrale: Meine Verkäufe|r angelegt (" .. n .. " Items) – so prüfst du die aktuelle Konkurrenz vor dem Einstellen.")
+      ns.Print("Liste |cffff9929Zentrale: Meine Verkäufe|r angelegt (" .. n .. " Items) – so prüfst du die aktuelle Konkurrenz vor dem Einstellen.")
     else
       ns.Print("|cffff6b81" .. tostring(n) .. "|r")
     end
@@ -117,7 +117,6 @@ end
 
 function page.refresh(self)
   local content = self.frame.content
-  local width = UI.CONTENT_W
   S.bagsWanted = true
 
   -- Händler

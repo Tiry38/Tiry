@@ -1,7 +1,7 @@
 -- Tiry's Zentrale – Extras nach Vorbild beliebter Addons:
 -- * Item-Tooltip (wie TSM/Auctionator): wofür DU das Item brauchst, wo du es farmst, ob es neu in Forever ist
 -- * Automatisch reparieren beim Händler (wie Leatrix Plus)
-local ADDON, ns = ...
+local _, ns = ...
 
 local X = {}
 ns.Extras = X
@@ -102,12 +102,13 @@ end)
 -- Automatisch reparieren
 ----------------------------------------------------------------------------
 ns.On("MERCHANT_SHOW", function()
-  if not (ns.settings and ns.settings.autoRepair) then return end
+  if not (ns.settings and ns.settings.autoRepair) or ns.InCombat() then return end
   if not (CanMerchantRepair and GetRepairAllCost and RepairAllItems) or not CanMerchantRepair() then return end
   local cost, canRepair = GetRepairAllCost()
   if canRepair and cost and cost > 0 then
     if GetMoney() >= cost then
-      RepairAllItems()
+      -- eigenes Gold (nicht die Gildenbank) – wie Blizzards Knopf "Alles reparieren"
+      if not pcall(RepairAllItems, false) then return end
       ns.Print("Ausrüstung repariert für " .. ns.Money(cost) .. ".")
     else
       ns.Print("|cffff6b81Nicht genug Gold zum Reparieren|r (" .. ns.Money(cost) .. ").")

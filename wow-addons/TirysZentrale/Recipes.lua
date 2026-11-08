@@ -1,6 +1,6 @@
 -- Tiry's Zentrale – Rezept-Datenbank (alle Rezepte aus den Forever-Spieldaten) + automatische Erkennung,
 -- was du gelernt hast (C_SpellBook.IsSpellKnown) und wie dein Skill dazu steht.
-local ADDON, ns = ...
+local _, ns = ...
 
 local R = {}
 ns.Recipes = R
@@ -191,11 +191,6 @@ function R.Filter()
   return margin, profit, (c.marginFactor == 1 and c.profitFactor == 1)
 end
 
-function R.SetMargin(v)
-  local p = R.Preset()
-  style().marginFactor = (p.margin > 0) and ns.Clamp(v / p.margin, 0, 20) or 1
-end
-
 function R.SetProfit(v)
   local p = R.Preset()
   style().profitFactor = (p.profit > 0) and ns.Clamp(v / p.profit, 0, 50) or 1
@@ -204,24 +199,6 @@ end
 function R.ResetStyle()
   local c = style()
   c.marginFactor, c.profitFactor = 1, 1
-end
-
--- Text "Dein Stil": wie weit du von der Empfehlung abweichst
-function R.StyleText()
-  local c = style()
-  local function pct(f)
-    local d = math.floor((f - 1) * 100 + 0.5)
-    if d == 0 then return "wie empfohlen" end
-    return (d > 0 and ("+" .. d .. " % strenger") or (d .. " % lockerer"))
-  end
-  return "Prozent " .. pct(c.marginFactor) .. ", Gold " .. pct(c.profitFactor)
-end
-
--- Teure Items brauchen weniger Prozent: ab dem 5-fachen Mindestgewinn als Erlös sinkt die Hürde, höchstens auf die Hälfte
-function R.RequiredMargin(margin, minProfit, revenue)
-  if not revenue or revenue <= 0 or minProfit <= 0 then return margin end
-  local scale = math.sqrt((minProfit * 5) / revenue)
-  return margin * ns.Clamp(scale, 0.5, 1)
 end
 
 -- Levelaufstieg: Filter wachsen automatisch mit -> kurz Bescheid sagen

@@ -117,7 +117,7 @@ local function runScenario(label, opts)
     p.listBtn:Click()
   end)
   local DB = ns.DB
-  check(label .. ": Datenbank vollständig", #DB.Load() == ns.ALLDB_COUNT and ns.ALLDB_COUNT > 18000, tostring(#DB.Load()))
+  check(label .. ": Datenbank vollständig", DB.Count() == ns.ALLDB_COUNT and ns.ALLDB_COUNT > 18000, tostring(DB.Count()))
   check(label .. ": Leinenstoff per ID", DB.Get(2589) and DB.Get(2589).name == "Leinenstoff")
   check(label .. ": Umlaut-Suche", #DB.Search("gekräuselte") >= 1 and #DB.Search("GEKRÄUSELTE") >= 1)
   check(label .. ": Mehrwort-Suche", #DB.Search("rote tasche") >= 1)

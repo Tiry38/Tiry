@@ -1,5 +1,5 @@
 -- Tiry's Zentrale – Seite "Item-Datenbank": alle Gegenstände von WoW Forever (deutsch), durchsuchbar
-local ADDON, ns = ...
+local _, ns = ...
 local UI = ns.UI
 local C = UI.C
 local M = ns.Market
@@ -107,7 +107,7 @@ function page.build(self, content, width)
     for i = 1, math.min(#(self.results or {}), 100) do ids[#ids + 1] = self.results[i].id end
     local ok, n = M.CreateShoppingList("Zentrale: Datenbank-Suche", ids)
     if ok then
-      ns.Print("Liste |cffff9929Tiry's Zentrale: Datenbank-Suche|r angelegt (" .. n .. " Items, max. 100).")
+      ns.Print("Liste |cffff9929Zentrale: Datenbank-Suche|r angelegt (" .. n .. " Items, max. 100).")
     else
       ns.Print("|cffff6b81" .. tostring(n) .. "|r")
     end
@@ -133,10 +133,29 @@ end
 
 function page.refresh(self)
   if self.frame and UI.frame then UI.frame.header.sub:SetText(page.subtitle) end
-  local results = D.Search(self.text, filterFn(self), self.sort)
-  self.results = results
-  self.count:SetText(string.format("%s Treffer%s", #results >= 1000 and (math.floor(#results / 1000) .. "." .. string.format("%03d", #results % 1000)) or #results,
-    #results > self.shown and (" – zeige die ersten " .. self.shown) or ""))
+  -- Ohne Suchwort und ohne Kategorie: nicht alle 18.000 Items laden (spart Speicher und Ruckler)
+  if (self.text or "") == "" and self.cat == "all" then
+    self.results, self.total = {}, 0
+    self.count:SetText("Tippe oben einen Namen ein (z. B. \"seide\") oder wähle eine Kategorie.")
+  else
+    -- Nur neu suchen, wenn sich Suche/Filter geändert haben (Preis-Updates sortieren nur neu)
+    local key = table.concat({ self.text or "", tostring(self.cat), tostring(self.qual), tostring(self.sort), tostring(self.usable), ns.player.level }, "|")
+    if key ~= self.lastKey or self.sort == "ah" then
+      local all = D.Search(self.text, filterFn(self), self.sort)
+      self.total = #all
+      -- nur so viele behalten, wie angezeigt werden (Rest gibt der Speicher wieder frei)
+      local keep = {}
+      for i = 1, math.min(#all, math.max(self.shown, 100)) do keep[i] = all[i] end
+      self.results, self.lastKey, self.lastShown = keep, key, self.shown
+    elseif self.shown > (self.lastShown or 0) and self.shown > #self.results then
+      self.lastKey = nil
+      return page.refresh(self)
+    end
+    local n = self.total
+    self.count:SetText(string.format("%s Treffer%s", n >= 1000 and (math.floor(n / 1000) .. "." .. string.format("%03d", n % 1000)) or n,
+      n > self.shown and (" – zeige die ersten " .. self.shown) or ""))
+  end
+  local results = self.results
   self.listBtn:SetEnabled(M.HasAuctionator() and #results > 0)
   local entries = {}
   for i = 1, math.min(#results, self.shown) do
@@ -165,9 +184,10 @@ function page.refresh(self)
       tip = tip,
     }
   end
-  local h = self.list:SetEntries(entries, "Nichts gefunden. Tipp: Nur einen Wortteil eingeben, z. B. \"erz\".")
+  local idle = (self.text or "") == "" and self.cat == "all"
+  local h = self.list:SetEntries(entries, idle and "" or "Nichts gefunden. Tipp: Nur einen Wortteil eingeben, z. B. \"erz\".")
   local y = self.listTop + h + 12
-  if #results > self.shown then
+  if (self.total or 0) > self.shown then
     self.more:ClearAllPoints()
     self.more:SetPoint("TOPLEFT", self.frame.content, "TOPLEFT", 0, -y)
     self.more:Show()

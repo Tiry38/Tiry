@@ -1,7 +1,8 @@
 -- Tiry's Zentrale – Gold-Autopilot: Schrott automatisch verkaufen, Händler-Verkauf und Flip-Kauf per Klick,
 -- Beute-Radar (Wert jeder neuen Beute live, Warnung bei wertvollen Items).
--- Alles, was Gold ausgibt oder Items verkauft (außer grauem Schrott), passiert NUR nach deinem Klick.
-local ADDON, ns = ...
+-- Alles, was Gold ausgibt oder Items verkauft, passiert NUR nach deinem Klick – Ausnahmen (abschaltbar in den
+-- Einstellungen): grauen Schrott verkaufen und reparieren, wie Blizzards eigene Händler-Knöpfe.
+local _, ns = ...
 
 local A = {}
 ns.Auto = A
@@ -15,12 +16,14 @@ local SELL_PER_CLICK = 12 -- so viele Items kann der Händler zurückkaufen lass
 local junkMoneyBefore
 
 ns.On("MERCHANT_SHOW", function()
-  if not (ns.settings and ns.settings.autoJunk) then return end
+  if not (ns.settings and ns.settings.autoJunk) or ns.InCombat() then return end
   if not (C_MerchantFrame and C_MerchantFrame.SellAllJunkItems and C_MerchantFrame.GetNumJunkItems) then return end
+  -- Nur wenn der Händler Blizzards eigenen "Schrott verkaufen"-Knopf anbietet
+  if C_MerchantFrame.IsSellAllJunkEnabled and not C_MerchantFrame.IsSellAllJunkEnabled() then return end
   local n = C_MerchantFrame.GetNumJunkItems() or 0
   if n > 0 then
     junkMoneyBefore = GetMoney()
-    C_MerchantFrame.SellAllJunkItems()
+    if not pcall(C_MerchantFrame.SellAllJunkItems) then junkMoneyBefore = nil return end
     C_Timer.After(1.2, function()
       if junkMoneyBefore then
         local gained = GetMoney() - junkMoneyBefore
@@ -67,6 +70,7 @@ end
 
 -- Verkauft bis zu 12 Items (nur auf Klick, nur bei offenem Händler)
 function A.SellVendorItems()
+  if ns.CombatBlocked() then return 0 end
   if not ns.Scanner.merchant.open then return 0 end
   local list = A.VendorCandidates()
   local sold = 0
@@ -88,9 +92,11 @@ function A.FlipBuyPlan()
     if f.available and f.available > 0 then
       for index = 1, (GetMerchantNumItems and GetMerchantNumItems() or 0) do
         if GetMerchantItemID(index) == f.id then
-          plan[#plan + 1] = { index = index, id = f.id, qty = f.available, cost = f.unit * f.available, profit = f.profit * f.available }
-          cost = cost + f.unit * f.available
-          profit = profit + f.profit * f.available
+          -- numAvailable zählt Händler-Einträge (Bündel), BuyMerchantItem will Stückzahlen
+          local qty = f.available * math.max(f.stack or 1, 1)
+          plan[#plan + 1] = { index = index, id = f.id, qty = qty, cost = f.unit * qty, profit = f.profit * qty }
+          cost = cost + f.unit * qty
+          profit = profit + f.profit * qty
           break
         end
       end
@@ -100,11 +106,19 @@ function A.FlipBuyPlan()
 end
 
 function A.BuyFlips()
+  if ns.InCombat() then return false, "Im Kampf gesperrt – bitte nach dem Kampf nochmal klicken." end
   local plan, cost = A.FlipBuyPlan()
   if #plan == 0 then return false, "Keine Flips mit begrenztem Vorrat bei diesem Händler." end
   if GetMoney() < cost then return false, "Nicht genug Gold für alle Flips (" .. ns.Money(cost) .. " nötig)." end
   for _, p in ipairs(plan) do
-    BuyMerchantItem(p.index, p.qty)
+    local left = p.qty
+    local max = GetMerchantItemMaxStack and GetMerchantItemMaxStack(p.index) or left
+    if not max or max < 1 then max = left end
+    while left > 0 do
+      local n = math.min(left, max)
+      BuyMerchantItem(p.index, n)
+      left = left - n
+    end
   end
   return true, #plan
 end
@@ -147,9 +161,8 @@ local function onBagsChanged()
       local channel, unit = M.BestSale(id)
       local value = (unit or 0) * gained
       ns.Fire("LOOT_GAINED", id, gained)
-      if ns.Scanner.tradeOpen then
-        -- Hergestellte Items sind keine Beute (nur die Craft-Warteschlange zählt sie)
-      else
+      -- Hergestellte Items sind keine Beute (nur die Craft-Warteschlange zählt sie)
+      if not ns.Scanner.tradeOpen then
       local s = A.session
       s.value = s.value + value
       s.items = s.items + gained

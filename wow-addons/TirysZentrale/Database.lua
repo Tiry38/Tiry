@@ -1,6 +1,10 @@
 -- Tiry's Zentrale – komplette Item-Datenbank (alle Gegenstände von WoW Forever, deutsch)
--- Die Rohdaten (Data_AllItems.lua) werden erst beim ersten Gebrauch eingelesen.
-local ADDON, ns = ...
+-- Speicherschonend: Die Rohdaten (Data_AllItems.lua, ~1 MB Text) werden NICHT mehr komplett in Tabellen
+-- verwandelt (das kostete 17,5 MB und 76 ms Ruckler). Stattdessen:
+--   * D.Get(id)     -> Index ID -> Textposition (einmalig ~20 ms), dann nur diese eine Zeile lesen (Cache)
+--   * D.Search(...) -> durchsucht den Text direkt, baut nur die Treffer als Tabellen
+--   * D.IDByName    -> Namensindex erst, wenn er gebraucht wird (Verkaufsbuch)
+local _, ns = ...
 
 local D = {}
 ns.DB = D
@@ -12,30 +16,75 @@ function D.Lower(s)
   return (s:gsub("\195[\132\150\156]", UPPER))
 end
 
-function D.Load()
-  if D.list then return D.list end
-  local list, byID = {}, {}
-  local raw = ns.ALLDB_RAW or ""
-  for id, name, q, c, s, icon, sell, stack, req, ilvl, bind in
-      raw:gmatch("(%d+)\t([^\t\n]+)\t(%d+)\t(%d+)\t(%d+)\t(%d+)\t(%d+)\t(%d+)\t(%d+)\t(%d+)\t(%d+)") do
-    local e = {
-      id = tonumber(id), name = name, q = tonumber(q), class = tonumber(c), sub = tonumber(s),
-      icon = tonumber(icon), sell = tonumber(sell), stack = tonumber(stack), req = tonumber(req),
-      ilvl = tonumber(ilvl), bind = tonumber(bind),
-    }
-    e.lname = D.Lower(name)
-    e.skey = e.lname:gsub("\195\164", "a"):gsub("\195\182", "o"):gsub("\195\188", "u"):gsub("\195\159", "ss")
-    list[#list + 1] = e
-    byID[e.id] = e
-  end
-  D.list, D.byID = list, byID
-  ns.ALLDB_RAW = nil -- Rohtext freigeben
-  return list
+local function sortKey(lname)
+  return (lname:gsub("\195\164", "a"):gsub("\195\182", "o"):gsub("\195\188", "u"):gsub("\195\159", "ss"))
 end
 
+-- Interne Platzhalter des Spiels, die kein Spieler je sieht
+local JUNK = { "(DNT)", "DNT ", "NYI", "OBSOLETE", "DEPRECATED", "Deprecated", "[PH]", "Monster -", "zzOLD", "QA " }
+local function isJunk(name)
+  for i = 1, #JUNK do
+    if name:find(JUNK[i], 1, true) then return true end
+  end
+  return false
+end
+D.IsJunk = isJunk
+
+local raw         -- "\n" .. Rohtext (jede Zeile beginnt mit \n)
+local index       -- [id] = Position direkt hinter "ID\t"
+local cache = {}  -- [id] = Eintrag
+local LINE = "^([^\t\n]+)\t(%d+)\t(%d+)\t(%d+)\t(%d+)\t(%d+)\t(%d+)\t(%d+)\t(%d+)\t(%d+)"
+
+local function source()
+  if not raw then
+    raw = "\n" .. (ns.ALLDB_RAW or "")
+    ns.ALLDB_RAW = nil -- nur noch eine Kopie im Speicher
+  end
+  return raw
+end
+
+local function build(id, pos)
+  local name, q, c, s, icon, sell, stack, req, ilvl, bind = source():match(LINE, pos)
+  if not name then return nil end
+  return {
+    id = id, name = name, q = tonumber(q), class = tonumber(c), sub = tonumber(s), icon = tonumber(icon),
+    sell = tonumber(sell), stack = tonumber(stack), req = tonumber(req), ilvl = tonumber(ilvl), bind = tonumber(bind),
+  }
+end
+
+local function buildIndex()
+  if index then return index end
+  index = {}
+  for id, pos in source():gmatch("\n(%d+)\t()") do index[tonumber(id)] = pos end
+  return index
+end
+
+-- Ein Item nach ID (nil, wenn unbekannt)
 function D.Get(id)
-  D.Load()
-  return D.byID[id]
+  id = tonumber(id)
+  if not id then return nil end
+  local e = cache[id]
+  if e ~= nil then return e or nil end
+  local pos = buildIndex()[id]
+  e = pos and build(id, pos) or false
+  cache[id] = e
+  return e or nil
+end
+
+-- Anzahl der Einträge (für Tests und Anzeige)
+function D.Count()
+  local n = 0
+  for _ in pairs(buildIndex()) do n = n + 1 end
+  return n
+end
+
+-- Durchläuft alle Items ohne sie zu speichern: fn(entry) – Rückgabe true bricht ab
+function D.Each(fn)
+  local src = source()
+  for id, pos in src:gmatch("\n(%d+)\t()") do
+    local e = build(tonumber(id), pos)
+    if e and fn(e) then return end
+  end
 end
 
 function D.ClassName(e)
@@ -43,7 +92,7 @@ function D.ClassName(e)
 end
 
 function D.SubName(e)
-  return ns.ITEM_SUBCLASSES[e.class * 100 + e.sub]
+  return e and ns.ITEM_SUBCLASSES[e.class * 100 + e.sub]
 end
 
 local BIND = { [1] = "Beim Aufheben gebunden", [2] = "Beim Anlegen gebunden", [3] = "Beim Benutzen gebunden", [4] = "Questgegenstand" }
@@ -51,36 +100,64 @@ function D.BindText(e)
   return BIND[e.bind]
 end
 
--- Suche: Textteile müssen alle vorkommen (z. B. "rot tasche"); Filter und Sortierung optional
-function D.Search(text, filter, sortKey)
-  local list = D.Load()
+-- Item-ID über den (deutschen) Namen; handelbare Items bevorzugt. Index erst beim ersten Bedarf.
+local nameIndex
+function D.IDByName(name)
+  if not name then return nil end
+  if not nameIndex then
+    nameIndex = {}
+    local bound = {}
+    for id, nm, bind in source():gmatch("\n(%d+)\t([^\t\n]+)\t%d+\t%d+\t%d+\t%d+\t%d+\t%d+\t%d+\t%d+\t(%d+)") do
+      local cur = nameIndex[nm]
+      if not cur or (bound[nm] and bind ~= "1") then
+        nameIndex[nm] = tonumber(id)
+        bound[nm] = (bind == "1")
+      end
+    end
+  end
+  return nameIndex[name]
+end
+
+-- Suche: alle Wörter müssen im Namen vorkommen (z. B. "rot tasche"); Filter und Sortierung optional.
+-- Nur Treffer werden zu Tabellen – nach der Suche gibt der Speicher alles wieder frei.
+function D.Search(text, filter, sortBy)
   local words = {}
   for w in D.Lower(text or ""):gmatch("%S+") do words[#words + 1] = w end
   local idQuery = tonumber(text or "")
   local out = {}
-  for i = 1, #list do
-    local e = list[i]
-    local ok = true
-    if idQuery then
-      ok = (e.id == idQuery)
-    else
+  if idQuery then
+    local e = D.Get(idQuery)
+    if e and (not filter or filter(e)) then out[1] = e end
+    return out
+  end
+  local src = source()
+  for id, pos in src:gmatch("\n(%d+)\t()") do
+    local name = src:match("^([^\t\n]+)", pos)
+    local ok = name and not isJunk(name)
+    if ok and #words > 0 then
+      local lname = D.Lower(name)
       for w = 1, #words do
-        if not e.lname:find(words[w], 1, true) then ok = false break end
+        if not lname:find(words[w], 1, true) then ok = false break end
       end
     end
-    if ok and filter then ok = filter(e) end
-    if ok then out[#out + 1] = e end
+    if ok then
+      local e = cache[tonumber(id)] or build(tonumber(id), pos)
+      if e and (not filter or filter(e)) then out[#out + 1] = e end
+    end
   end
   local M = ns.Market
-  if sortKey == "ah" then
-    for _, e in ipairs(out) do e._ah = M.Price(e.id) or -1 end
-    table.sort(out, function(a, b) if a._ah ~= b._ah then return a._ah > b._ah end return a.name < b.name end)
-  elseif sortKey == "sell" then
+  if sortBy == "ah" then
+    local price = {}
+    for _, e in ipairs(out) do price[e] = M.Price(e.id) or -1 end
+    table.sort(out, function(a, b) if price[a] ~= price[b] then return price[a] > price[b] end return a.name < b.name end)
+  elseif sortBy == "sell" then
     table.sort(out, function(a, b) if a.sell ~= b.sell then return a.sell > b.sell end return a.name < b.name end)
-  elseif sortKey == "level" then
+  elseif sortBy == "level" then
     table.sort(out, function(a, b) if a.req ~= b.req then return a.req > b.req end if a.ilvl ~= b.ilvl then return a.ilvl > b.ilvl end return a.name < b.name end)
   else
-    table.sort(out, function(a, b) if a.skey ~= b.skey then return a.skey < b.skey end return a.id < b.id end)
+    local key = {}
+    for _, e in ipairs(out) do key[e] = sortKey(D.Lower(e.name)) end
+    table.sort(out, function(a, b) if key[a] ~= key[b] then return key[a] < key[b] end return a.id < b.id end)
   end
   return out
 end

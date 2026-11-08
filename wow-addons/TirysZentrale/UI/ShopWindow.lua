@@ -1,6 +1,6 @@
 -- Tiry's Zentrale – kleines Einkaufsfenster (wie TSM): oben was du herstellst, darunter nur die Materialien.
 -- Gekauftes verschwindet sofort. Am AH: "Im AH suchen", beim Händler: "Beim Händler kaufen" (ein Klick kauft alles).
-local ADDON, ns = ...
+local _, ns = ...
 local UI = ns.UI
 local C = UI.C
 local M = ns.Market
@@ -106,7 +106,7 @@ local function row(i)
   r.toggle:SetScript("OnClick", function() Shop.ToggleSkip(r.id) end)
   UI.SetTooltip(r.toggle, function()
     if r.skipped then return "Zurückholen", "Material wieder auf die Einkaufsliste setzen." end
-    return "Brauch ich nicht kaufen", "Nimmt das Material von der Liste (z. B. weil es ein anderer Charakter hat). ↺ holt es zurück."
+    return "Brauch ich nicht kaufen", "Nimmt das Material von der Liste (z. B. weil es ein anderer Charakter hat). Der Pfeil-Knopf holt es zurück."
   end)
   r.count = UI.Text(r, 14, "bold", C.hi)
   r.count:SetPoint("RIGHT", r.toggle, "LEFT", -6, 0)

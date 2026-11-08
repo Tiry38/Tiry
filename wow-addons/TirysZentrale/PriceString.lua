@@ -9,7 +9,7 @@
 -- Funktionen: min(...), max(...), first(...), avg(...); Rechnen: + - * / und Klammern
 -- Zahlen: 120% crafting (= 1,2 x crafting), 5g, 50s, 20c, 1g50s, oder Kupfer als Zahl
 -- Fehlt ein Wert (z. B. kein AH-Preis), ignorieren min/max/avg ihn; first nimmt den ersten vorhandenen.
-local ADDON, ns = ...
+local _, ns = ...
 
 local PS = {}
 ns.PriceString = PS

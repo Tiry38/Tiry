@@ -1,7 +1,7 @@
 -- Tiry's Zentrale – Verkaufsbuch (wie TSM Accounting / Journalator):
 -- liest AH-Rechnungen aus der Post (verkauft, gekauft, abgelaufen) und berechnet daraus
 -- deine EIGENE Verkaufsquote pro Item – der Ersatz für TSMs Region-Verkaufsquote.
-local ADDON, ns = ...
+local _, ns = ...
 
 local L = {}
 ns.Ledger = L
@@ -20,18 +20,8 @@ local function book()
 end
 
 -- Item-ID über den (deutschen) Namen aus der Datenbank; handelbare Items bevorzugt
-local nameIndex
 function L.IDByName(name)
-  if not name then return nil end
-  if not nameIndex then
-    nameIndex = {}
-    for _, e in ipairs(ns.DB.Load()) do
-      local cur = nameIndex[e.name]
-      if not cur or (cur.bind == 1 and e.bind ~= 1) then nameIndex[e.name] = e end
-    end
-  end
-  local e = nameIndex[name]
-  return e and e.id
+  return ns.DB.IDByName(name)
 end
 
 local function prune(list)
@@ -59,11 +49,12 @@ function L.ScanInbox()
   local added = 0
   local now = time()
   for i = 1, GetInboxNumItems() or 0 do
-    local _, _, sender, subject, money, _, daysLeft, itemCount = GetInboxHeaderInfo(i)
+    local _, _, _, subject, money, _, daysLeft, itemCount = GetInboxHeaderInfo(i)
     local arrived = math.floor((now - (MAIL_DAYS - (daysLeft or MAIL_DAYS)) * 86400) / 3600) -- auf die Stunde
-    local invoiceType, itemName, player, bid, _, _, _, _, _, _, count
+    local invoiceType, itemName, player, bid, count
     if GetInboxInvoiceInfo then
-      invoiceType, itemName, player, bid, _, _, _, _, _, _, count = GetInboxInvoiceInfo(i)
+      local r = { GetInboxInvoiceInfo(i) }
+      invoiceType, itemName, player, bid, count = r[1], r[2], r[3], r[4], r[11]
     end
     if invoiceType == "seller" or invoiceType == "buyer" then
       local key = invoiceType .. "|" .. tostring(itemName) .. "|" .. tostring(player) .. "|" .. tostring(bid) .. "|" .. arrived

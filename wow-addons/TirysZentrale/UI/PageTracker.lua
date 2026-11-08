@@ -1,5 +1,5 @@
 -- Tiry's Zentrale – Seite "Goldtagebuch": Sitzung, Gold pro Stunde, 14-Tage-Verlauf
-local ADDON, ns = ...
+local _, ns = ...
 local UI = ns.UI
 local C = UI.C
 local T = ns.Tracker

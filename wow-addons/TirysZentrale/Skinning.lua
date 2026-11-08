@@ -1,6 +1,6 @@
 -- Tiry's Zentrale – Kürschner-Zentrale: Häuten-Rechner, Leder nach Tierlevel, Spezial-Leder,
 -- eigene Fundorte (wie GatherMate: merkt sich, wo DU gehäutet/gesammelt hast).
-local ADDON, ns = ...
+local _, ns = ...
 
 local K = {}
 ns.Skin = K

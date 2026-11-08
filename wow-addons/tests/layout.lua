@@ -157,6 +157,18 @@ function L.problems(root, clipRect)
         end
       end
     end
+    -- Text ragt unten/rechts aus seiner Karte (Elternrahmen mit fester Größe, kein Scroll-Inhalt)
+    do
+      local o = texts[i].o
+      local par = o.__parent
+      if par and par.__kind ~= "ScrollFrame" and not (par.__parent and par.__parent.__child == par) and (par.__w or 0) > 0 and (par.__h or 0) > 0 then
+        local pr = L.rect(par)
+        local tr = texts[i].r
+        if tr.b < pr.b - 3 and tr.t <= pr.t + 1 and tr.t > pr.b then
+          out[#out + 1] = string.format("Text ragt unten aus dem Rahmen (%d px): \"%s\"", math.floor(pr.b - tr.b), W.strip(o.__text):sub(1, 50))
+        end
+      end
+    end
     -- einzeilige Texte, die über ihr Feld hinausgehen (würden im Spiel abgeschnitten)
     local o = texts[i].o
     if o.__wrap == false and (o.__w or 0) > 0 and o:GetUnboundedStringWidth() > o.__w + 1 then

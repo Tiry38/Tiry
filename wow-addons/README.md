@@ -10,37 +10,34 @@ wie man schon mit Level 10–20 Gold macht – mit echten Preisen des eigenen Se
 3. Optional, aber empfohlen: **Auctionator** (Version für WoW Forever) installieren.
 4. Spiel starten → `/tz` eingeben oder auf die Goldmünze an der Minikarte klicken.
 
-## Was drin ist
-| Seite | Funktion |
-|---|---|
-| Start | Persönlicher Goldplan: Top 3 Goldwege für Level, Berufe und aktuelle AH-Preise |
-| Kürschner-Zentrale | Häuten-Rechner (bis welches Tierlevel dein Skill reicht), Leder nach Tierlevel mit Live-Preisen, beste Häut-Spots für dein Level (5er-Schritte, mit Tierlevel und Kartenpunkt), Spezial-Leder mit Fundorten, eigene gemerkte Fundorte |
-| Farm-Guide | Level 1–60: welche Materialgruppe gerade am meisten bringt (mit deinen Berufen abgeglichen) + 109 berechnete Farm-Hotspots – Klick setzt Wegpunkt mit Pfeil und öffnet die Karte |
-| Goldwege | 16 Methoden als aufklappbare Anleitungen (Forever-bestätigt bzw. Classic-Wissen gekennzeichnet) |
-| Marktpreise | Live-Preise der wichtigsten Gold-Materialien (126 kuratiert) inkl. neuer Forever-Materialien, Einkaufslisten, AH-Sofortsuche |
-| Datenbank | **Alle 18.416 Gegenstände** von WoW Forever auf Deutsch: Suche (Name/ID), Filter nach Kategorie, Qualität, Level, Sortierung nach AH-/Händlerpreis |
-| Scanner | Händler-Flips (automatisch beim Händler) und Taschen-Check (AH oder Händler?) |
-| Craft-Planer | Wie TSM Crafting, in 3 Schritten: 1. Beruf wählen, 2. Mindestgewinn (ein Regler, Empfehlung wächst mit dem Level), 3. "Liste erstellen" → Einkaufsfenster → "Nächstes craften". 1.967 Rezepte aus den Forever-Spieldaten, gelernte Rezepte automatisch erkannt, Rezepte per × ausblenden. Filter und Profi-Strings unter "Mehr Optionen" |
-| Einkaufsfenster | Zeigt oben, was du herstellst (mit Status bereit / Post holen / fehlt Material), darunter nur das Material. Gekauftes verschwindet sofort (auch im Briefkasten). Am AH: "Im AH suchen" (Auctionator), beim Händler: "Beim Händler kaufen" – ein Klick kauft genau die fehlende Menge |
-| Verkaufsbuch | Wie TSM Accounting/Journalator: Verkäufe, Käufe, abgelaufene Auktionen automatisch aus der Post; eigene Verkaufsquote pro Item (Ersatz für TSMs Region-Sale-Rate), Bestseller, Ladenhüter, Gold aller Charaktere |
-| Schnäppchen-Radar | Prüft jede AH-Suche (auch Auctionator) gegen deinen Marktwert und meldet Angebote unter 65 % |
-| Extras | Item-Tooltip (Rezepte, Farm-Ort, neu in Forever, Bestand aller Chars, Verkaufsquote, Mindest-Verkaufspreis), Post-Bilanz, Warnung vor ablaufender Post, "Heute für dich" auf der Startseite, automatisch reparieren |
-| Gold-Autopilot | Schrott automatisch verkaufen, Händler-Panel (Händler-Ware verkaufen, Flips kaufen per Klick), Beute-Radar mit Warnung bei wertvoller Beute, AH-Hinweis |
-| Goldtagebuch | Gold pro Sitzung, pro Stunde, 14-Tage-Verlauf |
-| AH-Schule | Auktionshaus und Auctionator für Einsteiger |
-| Einstellungen | Minikarten-Knopf, Chat-Hinweise, Animationen, AH-Anteil, Fenstergröße |
+Anleitung für Einsteiger: **`ANLEITUNG.md`** · Prüfbericht: **`AUDIT.md`** · Änderungen: **`CHANGELOG.md`** · Ingame-Checkliste: **`INGAME-TEST.md`**
 
-**Alles rückgängig machbar:** × an jedem Regler (zurück auf Standard/Empfehlung), × an jedem Profi-String, ausgeblendete Rezepte einzeln per Klick zurückholen, "Alles leeren" mit Rückgängig-Knopf, Material in der Einkaufsliste per × überspringen und per ↺ zurückholen, Wegpunkt-Knopf oben im Fenster löscht den Kartenpunkt, "Alle Einstellungen auf Standard" (Sicherheitsabfrage per zweitem Klick). Design: Anthrazit + Neon-Grün, wichtige Hervorhebungen in Orange (Items behalten ihre Qualitätsfarbe), mit dezenten Horde-Motiven (eigenes Kriegsemblem mit gekreuzten Äxten, Stammesmuster, Zacken-Ecken; dazu das Horde-Wappen aus dem Spiel-Client, falls vorhanden). Das Fenster ist 1140 × 720 groß und verkleinert sich automatisch, wenn der Bildschirm kleiner ist.
+## Was drin ist (7 Menüpunkte, darunter Reiter)
+| Menüpunkt | Reiter | Funktion |
+|---|---|---|
+| **Start** | Goldplan, Goldwege | „Dein nächster Schritt“ (genau eine Handlung), Heute für dich, Top 3, „Neu in Forever – deine Chancen“ mit Live-Preisen; 16 Goldwege als Anleitungen |
+| **Farmen** | Farm-Guide, Kürschner, Farm-Session | Farm-Spots für dein Level mit Wegpunkt, Kürschner-Zentrale, Farm-Session (Gold pro Stunde live, Bestmarke, Verlauf) |
+| **Berufe** | Craft-Planer, Berufe-Berater | Craft-Liste in 3 Schritten mit Einkaufsliste und „Nächstes craften“; Berater: beste Sammelberufe nach Live-Preisen + günstigster Skill-Plan |
+| **Markt** | Preise, Preisalarm, Taschen & Händler, Item-Suche | Live-Preise, Wunschpreis-Alarm, Händler-Flips und Taschen-Check, alle 18.416 Items auf Deutsch |
+| **Mein Gold** | Goldtagebuch, Verkaufsbuch | Gold pro Tag/Stunde, Verkäufe aus der Post, eigene Verkaufsquote, Gold aller Charaktere |
+| **Lernen** | AH-Schule, Glossar | Auktionshaus einfach erklärt, 20 Begriffe |
+| **Einstellungen** | – | Schalter, Experten-Modus (Preisformeln), Fenstergröße, alles auf Standard |
 
-Befehle: `/tz`, `/tz wegpunkt`, `/tz leeren` (oder `/zentrale`, `/gold`), `/tz leder`, `/tz farm`, `/tz craft`, `/tz suche`, `/tz wege`, `/tz markt`, `/tz scan`, `/tz rezepte`, `/tz tagebuch`, `/tz ah`, `/tz minimap`, `/tz reset`.
+Dazu: Einsteiger-Assistent beim ersten Start, globale Suche (Seitenleiste, `/tz suche`), Einkaufsfenster mit Händler-Kauf per Klick, Händler-Panel, Schnäppchen-Radar, Beute-Radar, Item-Tooltip-Infos, Tastenkürzel, Fenster per Ziehgriff skalierbar und andockbar, Kampf-Sperre. Alles rückgängig machbar (×, Rückgängig, Zurückholen).
 
-## Profi-Strings (wie TSM)
-Im Craft-Planer: Materialpreis `first(vendorbuy, ahprice, market)`, Verkaufswert `min(ahprice, 125% market)`, Mindestgewinn `max(15% crafting, levelgold)`. `market` = eigener Marktwert (Median der Tagespreise der letzten 14 Tage aus deinen Scans). TSM-Namen (`dbmarket`, `dbminbuyout`) werden verstanden; Funktionen `min`, `max`, `first`, `avg`, Rechnen `+ - * /`, Zahlen wie `120% crafting`, `5g`, `1g50s`. Zusätzlich: nur frische Preise (max. 3 Tage).
+Design: Anthrazit + Neon-Grün, Hervorhebungen in Orange, dezente Horde-Motive, Schrift Poppins (min. 12).
+
+Befehle: `/tz` (oder `/zentrale`, `/gold`), `/tz suche`, `/tz assistent`, `/tz wegpunkt`, `/tz leeren`, `/tz leder`, `/tz farm`, `/tz craft`, `/tz wege`, `/tz markt`, `/tz scan`, `/tz rezepte`, `/tz tagebuch`, `/tz buch`, `/tz ah`, `/tz minimap`, `/tz reset`.
+
+## Preisformeln (Experten-Modus)
+Im Craft-Planer unter „Mehr Optionen“, sobald der Experten-Modus an ist: Materialpreis `first(vendorbuy, ahprice, market)`, Verkaufswert `min(ahprice, 125% market)`, Mindestgewinn `max(15% crafting, levelgold)`. `market` = eigener Marktwert (Median der Tagespreise der letzten 14 Tage). Gängige Kurznamen (`dbmarket`, `dbminbuyout`) werden verstanden; Funktionen `min`, `max`, `first`, `avg`, Rechnen `+ - * /`, Zahlen wie `120% crafting`, `5g`, `1g50s`.
 
 ## AH-Scan
-Knopf "AH scannen" oben im Fenster startet am offenen AH den Auctionator-Scan. Jeder Scan (auch direkt in Auctionator) wird automatisch erkannt; der Stand steht unter dem Knopf.
+Knopf „AH scannen“ oben im Fenster startet am offenen AH den Auctionator-Scan (wenn Auctionator ihn gerade zulässt – sonst ehrliche Meldung). Neue Preise werden automatisch erkannt; „Preise von vor X“ steht unter dem Knopf.
 
 ## Technik & Prüfung
+- `busted` (im Ordner `wow-addons`) – Tests mit/ohne Auctionator, ohne Scandaten, ohne Berufe, fehlende API, Kampf-Sperre, Rechnungen, Tastenkürzel, Schrift-Glyphen.
+- `luacheck TirysZentrale` – statische Prüfung mit WoW-Globals-Liste (`.luacheckrc`).
 - `lua5.1 tests/check_layout.lua <ordner>` – öffnet jede Seite, meldet überlappende oder abgeschnittene Texte (exakte Poppins-Maße) und exportiert sie; `python3 tools/render_pages.py <ordner>` zeichnet sie als PNG.
 - Alle verwendeten Spiel-Funktionen wurden gegen Blizzards Forever-UI-Quellcode (1.60.1) geprüft.
 - `lua5.1 tests/run_tests.lua` – lädt das Addon in einem strengen Nachbau des Forever-Clients
@@ -55,4 +52,5 @@ Knopf "AH scannen" oben im Fenster startet am offenen AH den Auctionator-Scan. J
 ## Grenzen (ehrlich)
 - Blizzard hat für Forever keine offiziellen Zahlen zu AH-Anteil und Laufzeiten veröffentlicht – der AH-Anteil ist einstellbar (Standard 5 %).
 - Ohne Auctionator gibt es nur Händlerpreise; Händler-Flips brauchen Auctionator.
-- Getestet im Nachbau, nicht im echten Spielclient. Bei einem Lua-Fehler bitte die Fehlermeldung schicken.
+- Getestet im Nachbau, nicht im echten Spielclient – Checkliste in `INGAME-TEST.md`. Bei einem Lua-Fehler bitte die Fehlermeldung schicken.
+- Für den Scan-Start gibt es keine öffentliche Auctionator-Funktion; der Knopf nutzt abgesichert Auctionators eigenen Scan-Code (Details: `AUDIT.md`).

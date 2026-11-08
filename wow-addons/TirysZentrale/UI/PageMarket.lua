@@ -1,5 +1,5 @@
 -- Tiry's Zentrale – Seite "Marktpreise": Live-Preise wichtiger Materialien (Auctionator)
-local ADDON, ns = ...
+local _, ns = ...
 local UI = ns.UI
 local C = UI.C
 local M = ns.Market
@@ -32,11 +32,11 @@ local foreverIDs
 local function foreverMaterials()
   if foreverIDs then return foreverIDs end
   foreverIDs = {}
-  for _, e in ipairs(ns.DB.Load()) do
-    if e.id >= 200000 and e.class == 7 and e.bind ~= 1 and not e.name:find("NYI") then
+  ns.DB.Each(function(e)
+    if e.id >= 200000 and e.class == 7 and e.bind ~= 1 and not ns.DB.IsJunk(e.name) then
       foreverIDs[#foreverIDs + 1] = e.id
     end
-  end
+  end)
   return foreverIDs
 end
 
@@ -56,7 +56,7 @@ function page.build(self, content, width)
   self.filter = "all"
   local st = UI.Stack(content)
 
-  local intro = st:Para("Tipp: Fahr mit der Maus über ein Item für Details. |cffff9929Shift-Klick|r legt den Link in den Chat. "
+  st:Para("Tipp: Fahr mit der Maus über ein Item für Details. |cffff9929Shift-Klick|r legt den Link in den Chat. "
     .. "\"Stapel netto\" = Wert von einem vollen Stapel nach Abzug der AH-Gebühr.", 12, C.muted, 14)
 
   self.segments = UI.Segments(content, FILTERS, function(v)

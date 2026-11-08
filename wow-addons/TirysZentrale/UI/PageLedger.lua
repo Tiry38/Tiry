@@ -1,5 +1,5 @@
 -- Tiry's Zentrale – Seite "Verkaufsbuch": was du wirklich verdienst, was sich verkauft, Gold aller Charaktere
-local ADDON, ns = ...
+local _, ns = ...
 local UI = ns.UI
 local C = UI.C
 local L = ns.Ledger

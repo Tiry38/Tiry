@@ -1,5 +1,5 @@
 -- Tiry's Zentrale – Seite "Goldwege": alle Methoden als aufklappbare Karten mit Live-Werten
-local ADDON, ns = ...
+local _, ns = ...
 local UI = ns.UI
 local C = UI.C
 local M = ns.Market
@@ -122,7 +122,7 @@ local function fillCard(card, m, expanded, width)
   local value, valueID = ns.MethodValue(m)
   if value then
     card.value:SetText(ns.Money(value))
-    card.valueSub:SetText("1 Stapel " .. ns.Item(valueID).name)
+    UI.FitText(card.valueSub, "1 Stapel " .. ns.Item(valueID).name, 200)
   else
     card.value:SetText(m.items and "|cff8a9a94kein Preis|r" or "")
     card.valueSub:SetText(m.items and "AH einmal scannen" or "")
@@ -223,11 +223,11 @@ local function fillCard(card, m, expanded, width)
         card.listBtn = UI.Button(card.detail, "Als Einkaufsliste", "soft", 180, 30, "cart")
         card.listBtn:SetScript("OnClick", function(self)
           local meth = self.method
-          local ok, n = M.CreateShoppingList("Zentrale: " .. meth.title, meth.items)
+          local ok, count = M.CreateShoppingList("Zentrale: " .. meth.title, meth.items)
           if ok then
-            ns.Print("Liste |cffff9929Tiry's Zentrale: " .. meth.title .. "|r angelegt (" .. n .. " Items). Im AH: Auctionator > Einkaufen.")
+            ns.Print("Liste |cffff9929Zentrale: " .. meth.title .. "|r angelegt (" .. count .. " Items). Im AH: Auctionator > Einkaufen.")
           else
-            ns.Print("|cffff6b81" .. tostring(n) .. "|r")
+            ns.Print("|cffff6b81" .. tostring(count) .. "|r")
           end
         end)
       end

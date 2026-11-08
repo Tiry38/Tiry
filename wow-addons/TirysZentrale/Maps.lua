@@ -1,5 +1,5 @@
 -- Tiry's Zentrale – Karte: Farm-Stellen als Wegpunkt (mit Pfeil) setzen und Weltkarte öffnen
-local ADDON, ns = ...
+local _, ns = ...
 
 local Maps = {}
 ns.Maps = Maps
@@ -41,7 +41,8 @@ function Maps.Show(spot, what)
   if C_Map and C_Map.SetUserWaypoint and UiMapPoint and UiMapPoint.CreateFromCoordinates then
     ok = pcall(function()
       if C_Map.CanSetUserWaypointOnMap and not C_Map.CanSetUserWaypointOnMap(spot.map) then error("map") end
-      C_Map.SetUserWaypoint(UiMapPoint.CreateFromCoordinates(spot.map, spot.x / 100, spot.y / 100))
+      local wasSet = C_Map.SetUserWaypoint(UiMapPoint.CreateFromCoordinates(spot.map, spot.x / 100, spot.y / 100))
+      if wasSet == false then error("nicht gesetzt") end
       if C_SuperTrack and C_SuperTrack.SetSuperTrackedUserWaypoint then
         C_SuperTrack.SetSuperTrackedUserWaypoint(true)
       end

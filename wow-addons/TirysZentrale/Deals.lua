@@ -1,6 +1,6 @@
 -- Tiry's Zentrale – Schnäppchen-Radar (Deal-Finder) + Post-Bilanz + Warnung vor ablaufender Post
 -- Radar: liest JEDE AH-Suche mit (auch Auctionator-Suchen) und meldet Angebote deutlich unter deinem Marktwert.
-local ADDON, ns = ...
+local _, ns = ...
 
 local D = {}
 ns.Deals = D
@@ -62,7 +62,11 @@ ns.On("ITEM_SEARCH_RESULTS_UPDATED", function(_, itemKey)
   local offers = {}
   for i = 1, math.min(C_AuctionHouse.GetNumItemSearchResults(itemKey) or 0, 60) do
     local r = C_AuctionHouse.GetItemSearchResultInfo(itemKey, i)
-    if r and r.buyoutAmount then offers[#offers + 1] = { price = r.buyoutAmount, qty = r.quantity or 1, own = r.containsOwnerItem } end
+    -- buyoutAmount ist der Preis der GANZEN Auktion -> auf Stückpreis umrechnen
+    if r and r.buyoutAmount then
+      local qty = math.max(r.quantity or 1, 1)
+      offers[#offers + 1] = { price = math.floor(r.buyoutAmount / qty), qty = qty, own = r.containsOwnerItem }
+    end
   end
   D.Evaluate(itemKey.itemID, offers)
 end)

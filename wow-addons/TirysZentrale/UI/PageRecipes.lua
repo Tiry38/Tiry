@@ -1,6 +1,6 @@
--- Tiry's Zentrale – Seite "Craft-Planer" (wie TSM Crafting): erkennt deine Berufe und gelernten Rezepte automatisch,
+-- Tiry's Zentrale – Seite "Craft-Planer": erkennt deine Berufe und gelernten Rezepte automatisch,
 -- zwei einfache Gold-Filter mit Level-Empfehlung, Warteschlange, fehlendes Material, Craften per Knopf.
-local ADDON, ns = ...
+local _, ns = ...
 local UI = ns.UI
 local C = UI.C
 local M = ns.Market
@@ -136,9 +136,9 @@ function page.build(self, content, width)
 
   -- Filter (stecken in "Mehr Optionen", damit die Seite übersichtlich bleibt)
   self.pills = {}
-  -- Profi-Strings wie bei TSM – einklappbar am Seitenende (Positionen werden in refresh berechnet)
+  -- "Mehr Optionen" – einklappbar am Seitenende (Positionen werden in refresh berechnet)
   local PS = ns.PriceString
-  self.proToggle = UI.Button(content, "Mehr Optionen: Filter & Profi-Strings", "soft", 330, 32, "gear")
+  self.proToggle = UI.Button(content, "Mehr Optionen: Filter", "soft", 330, 32, "gear")
   self.proToggle:SetScript("OnClick", function() self.proOpen = not self.proOpen page.refresh(self) end)
   local sc = CreateFrame("Frame", nil, content)
   sc:SetWidth(width)
@@ -164,25 +164,30 @@ function page.build(self, content, width)
   self.filterReset:SetScript("OnClick", function() cfg().onlySafe = true cfg().freshOnly = true page.refresh(self) end)
   UI.SetTooltip(self.filterReset, "Filter zurücksetzen", "Beide Filter wieder an: nur Rezepte mit bekannten und frischen Preisen.")
   local OFF = 84
-  local st1 = UI.Text(sc, 14, "bold", C.text)
-  st1:SetPoint("TOPLEFT", 18, -18 - OFF)
-  st1:SetText("Profi-Strings (wie TSM)")
-  local reset = UI.Button(sc, "Empfohlene Strings", "soft", 190, 30, "star")
-  reset:SetPoint("TOPRIGHT", -14, -12 - OFF)
+  -- Preisformeln: nur im Experten-Modus (Einstellungen) sichtbar
+  local fx = CreateFrame("Frame", nil, sc)
+  fx:SetPoint("TOPLEFT", 0, -OFF)
+  fx:SetWidth(width)
+  self.formulaFrame = fx
+  local st1 = UI.Text(fx, 14, "bold", C.text)
+  st1:SetPoint("TOPLEFT", 18, -18)
+  st1:SetText("Preisformeln (Experten)")
+  local reset = UI.Button(fx, "Empfohlene Formeln", "soft", 190, 30, "star")
+  reset:SetPoint("TOPRIGHT", -14, -12)
   reset:SetScript("OnClick", function() PS.Reset() page.refresh(self) end)
-  local st2 = UI.Para(sc, 11, C.dim, width - 36)
-  st2:SetPoint("TOPLEFT", 18, -52 - OFF)
-  st2:SetText("Quellen: ahprice, market (dein 14-Tage-Marktwert), vendorbuy, vendorsell, crafting, levelgold. TSM-Namen wie dbmarket gehen auch. Enter übernimmt, fehlerhafte Strings werden nicht gespeichert.")
-  local y = OFF + 52 + math.ceil(st2:GetStringHeight()) + 14
+  local st2 = UI.Para(fx, 11, C.dim, width - 36)
+  st2:SetPoint("TOPLEFT", 18, -52)
+  st2:SetText("Quellen: ahprice, market (dein 14-Tage-Marktwert), vendorbuy, vendorsell, crafting, levelgold. Bekannte Kurznamen wie dbmarket gehen auch. Enter übernimmt, fehlerhafte Formeln werden nicht gespeichert.")
+  local y = 52 + math.ceil(st2:GetStringHeight()) + 14
   self.strings = {}
   local defs = {
     { "matPrice", "Materialpreis" }, { "craftValue", "Verkaufswert" }, { "minProfit", "Mindestgewinn" },
   }
   for _, d in ipairs(defs) do
-    local lab = UI.Text(sc, 12, "semibold", C.muted)
+    local lab = UI.Text(fx, 12, "semibold", C.muted)
     lab:SetPoint("TOPLEFT", 18, -y - 9)
     lab:SetText(d[2])
-    local box = CreateFrame("EditBox", nil, sc)
+    local box = CreateFrame("EditBox", nil, fx)
     box:SetSize(width - 150 - 18 - 140, 32)
     box:SetPoint("TOPLEFT", 150, -y)
     box:SetAutoFocus(false)
@@ -193,11 +198,11 @@ function page.build(self, content, width)
     box:SetTextColor(1, 1, 1, 1)
     box.bg = UI.Round(box, 16, "BACKGROUND", 2)
     box.bg:SetColor(C.inset, 1)
-    local status = UI.Text(sc, 11, "semibold", C.green)
+    local status = UI.Text(fx, 11, "semibold", C.green)
     status:SetPoint("LEFT", box, "RIGHT", 10, 0)
     status:SetWidth(96)
     status:SetWordWrap(false)
-    local undo = UI.IconButton(sc, "close", 26, "Zurück zum empfohlenen String")
+    local undo = UI.IconButton(fx, "close", 26, "Zurück zur empfohlenen Formel")
     undo:SetPoint("LEFT", status, "RIGHT", 2, 0)
     undo:SetScript("OnClick", function()
       if ns.settings.priceStrings then ns.settings.priceStrings[d[1]] = nil end
@@ -207,7 +212,7 @@ function page.build(self, content, width)
     box:SetScript("OnEnterPressed", function(b)
       local okSet, err = PS.Set(d[1], b:GetText())
       b:ClearFocus()
-      if not okSet then ns.Print("|cffff6b81String-Fehler (" .. d[2] .. "):|r " .. tostring(err)) end
+      if not okSet then ns.Print("|cffff6b81Formel-Fehler (" .. d[2] .. "):|r " .. tostring(err)) end
       page.refresh(self)
     end)
     box:SetScript("OnEscapePressed", function(b) b:ClearFocus() page.refresh(self) end)
@@ -216,10 +221,12 @@ function page.build(self, content, width)
     self.strings[d[1]] = { box = box, status = status, undo = undo }
     y = y + 44
   end
-  sc:SetHeight(y + 8)
+  fx:SetHeight(y)
+  self.proFullH, self.proFilterH = OFF + y + 8, OFF + 4
+  sc:SetHeight(self.proFullH)
   self.proCard = sc
 
-  -- Schritt 3: wie bei TSM alle lohnenden Rezepte auf einen Klick in die Liste, Einkaufsfenster dazu
+  -- Schritt 3: alle lohnenden Rezepte auf einen Klick in die Liste, Einkaufsfenster dazu
   st:Add(stepHead(content, 3, "Liste erstellen, einkaufen, craften", width), 28, 10)
   local mk = CreateFrame("Frame", nil, content)
   mk:SetSize(width, 36)
@@ -270,7 +277,7 @@ function page.build(self, content, width)
     for _, m in ipairs(mats) do ids[#ids + 1] = m.id end
     if #ids == 0 then ns.Print("Du hast schon alles Material in den Taschen.") return end
     local ok, n = M.CreateShoppingList("Zentrale: Craft-Material", ids)
-    ns.Print(ok and ("Liste |cffff9929Tiry's Zentrale: Craft-Material|r angelegt (" .. n .. " Items). Im AH: Auctionator > Einkaufen > Suche alles.") or ("|cffff6b81" .. tostring(n) .. "|r"))
+    ns.Print(ok and ("Liste |cffff9929Zentrale: Craft-Material|r angelegt (" .. n .. " Items). Im AH: Auctionator > Einkaufen > Suche alles.") or ("|cffff6b81" .. tostring(n) .. "|r"))
   end)
   qc.craft = UI.Button(qc, "Nächstes craften", "cool", 180, 34, "bolt")
   qc.craft:SetScript("OnClick", function() page.CraftNext(self) end)
@@ -294,8 +301,7 @@ end
 -- Rezept im OFFENEN Berufsfenster finden: Nummer muss gelernt sein UND genau unser Ergebnis-Item herstellen
 local function liveIDs()
   local ids = {}
-  if C_TradeSkillUI.GetAllRecipeIDs then ids = C_TradeSkillUI.GetAllRecipeIDs() or {} end
-  if #ids == 0 and C_TradeSkillUI.GetFilteredRecipeIDs then ids = C_TradeSkillUI.GetFilteredRecipeIDs() or {} end
+  if C_TradeSkillUI.GetFilteredRecipeIDs then ids = C_TradeSkillUI.GetFilteredRecipeIDs() or {} end
   return ids
 end
 
@@ -392,13 +398,15 @@ local function queueRow(qc, width)
 end
 
 function page.CraftNext(self)
+  if ns.CombatBlocked() then return end
   if not (C_TradeSkillUI and C_TradeSkillUI.CraftRecipe) then return end
   if not S.tradeOpen then
     -- Berufsfenster für den ersten Eintrag öffnen, für den du Material hast
     for _, e in ipairs(queue()) do
       local r = R.Get(e.recipe)
       if r and craftable(r) > 0 and C_TradeSkillUI.OpenTradeSkill then
-        local ok = pcall(C_TradeSkillUI.OpenTradeSkill, ns.PROF[r.prof])
+        local okCall, opened = pcall(C_TradeSkillUI.OpenTradeSkill, ns.PROF[r.prof])
+        local ok = okCall and opened ~= false
         ns.Print(ok and ("Berufsfenster " .. ns.ProfName(ns.PROF[r.prof]) .. " geöffnet – klick nochmal auf |cffff9929Nächstes craften|r.")
           or "Öffne bitte das Berufsfenster und klick dann nochmal.")
         return
@@ -509,7 +517,7 @@ function page.Entries(self)
 end
 
 function page.refresh(self)
-  local _, minProfit, auto = R.Filter()
+  local _, _, auto = R.Filter()
   local preset = R.Preset()
   self.profit:Refresh()
   for _, p in ipairs(self.pills) do p:Refresh() end
@@ -716,7 +724,10 @@ function page.refresh(self)
   -- Profi-Strings (eingeklappt, damit die Seite übersichtlich bleibt)
   self.proToggle:ClearAllPoints()
   self.proToggle:SetPoint("TOPLEFT", content, "TOPLEFT", 0, -y)
-  self.proToggle:SetLabel(self.proOpen and "Mehr Optionen ausblenden" or "Mehr Optionen: Filter & Profi-Strings")
+  local expert = ns.settings.expertMode == true
+  self.proToggle:SetLabel(self.proOpen and "Mehr Optionen ausblenden" or (expert and "Mehr Optionen: Filter & Preisformeln" or "Mehr Optionen: Filter"))
+  self.formulaFrame:SetShown(expert)
+  self.proCard:SetHeight(expert and self.proFullH or self.proFilterH)
   y = y + 32 + 12
   self.proCard:ClearAllPoints()
   if self.proOpen then

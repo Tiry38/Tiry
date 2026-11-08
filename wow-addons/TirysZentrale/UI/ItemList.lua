@@ -1,5 +1,5 @@
 -- Tiry's Zentrale – wiederverwendbare Item-Liste (Zeilen mit Symbol, Name, Wertespalten)
-local ADDON, ns = ...
+local _, ns = ...
 local UI = ns.UI
 local C = UI.C
 

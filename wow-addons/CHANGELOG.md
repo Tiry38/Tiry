@@ -1,0 +1,57 @@
+# Changelog – Tiry's Zentrale
+
+## 5.0.0 (08.11.2026)
+
+### Neu (jeweils mit Nutzen für Einsteiger)
+- **Einsteiger-Assistent** beim ersten Öffnen, 3 Schritte: was erkannt wurde, Preis-Status, erster Goldweg. *Nutzen: Man weiß nach 30 Sekunden, was das Addon kann und was zu tun ist.* Erneut aufrufbar über `/tz assistent` oder die Einstellungen.
+- **„Dein nächster Schritt“** oben auf der Startseite: genau eine Handlung mit Knopf. Beispiele: Auctionator fehlt → Post läuft ab → Preise alt → Preisalarm → einkaufen/craften → Taschen verkaufen → Liste erstellen → Sammelberuf lernen → farmen. *Nutzen: nie mehr „Was mache ich jetzt?“.*
+- **Berufe-Berater:**
+  - Welche Sammelberufe auf deinem Level gerade am meisten bringen, nach Live-AH-Preisen.
+  - Passender Herstellungsberuf für deine Klasse.
+  - **Skill-Plan:** der günstigste Weg zum nächsten Skill-Ziel mit deinen Rezepten, Erfolgschance nach Skill-Farbe eingerechnet, Materialliste dazu. Ein Klick legt den Plan in die Craft-Liste und die Einkaufsliste.
+  - *Nutzen: Berufe wählen und skillen ohne Gold zu verschwenden.*
+- **Farm-Session:** Start und Stopp, Gold und Beutewert live, Gold pro Stunde, Bestmarke, frühere Sessions mit × löschbar. Händler- und Post-Einnahmen werden nicht doppelt gezählt. *Nutzen: Man sieht ehrlich, welcher Spot sich lohnt.*
+- **Preisalarm:** Item suchen, Wunschpreis eintragen. Meldung nach jedem Scan und bei jeder AH-Suche, dazu eine Zahl am Menüpunkt. *Nutzen: günstig einkaufen, ohne dauernd das AH abzusuchen.*
+- **Globale Suche** über Items, Rezepte, Goldwege und Begriffe (Feld in der Seitenleiste, `/tz suche`, Tastenkürzel). Enter öffnet den ersten Treffer.
+- **Glossar:** 20 Begriffe in einfacher Sprache.
+- **„Neu in Forever – deine Chancen“** auf der Startseite: 12 neue seltene Materialien und Alchemie-Produkte mit Live-Preis. Deine Berufe stehen vorn, ein Klick sucht im AH.
+- **Tastenkürzel** (Bindings.xml): Fenster, Suche, Einkaufsliste, Nächstes craften.
+- **Fenster:** per Ziehgriff unten rechts skalierbar, rastet an Bildschirmrändern und in der Mitte ein, passt sich kleinen Bildschirmen automatisch an.
+- **Experten-Modus** (Einstellungen): Die Preisformeln im Craft-Planer sind nur dort sichtbar.
+- **Kampf-Sperre:** Kaufen, Verkaufen, Craften, Schrottverkauf und Reparatur passieren nie im Kampf.
+
+### Ausgemistet / geändert (mit Grund)
+- **Menü von 12 auf 7 Hauptpunkte:** Start · Farmen · Berufe · Markt · Mein Gold · Lernen · Einstellungen. Die bisherigen Seiten sind jetzt Reiter darunter. *Grund: Übersicht – 12 gleichrangige Punkte waren zu viel.* Der zuletzt benutzte Reiter wird gemerkt.
+- **Fremde Markennamen aus der Oberfläche entfernt** („wie TSM“, „wie Leatrix Plus“, „Profi-Strings (wie TSM)“ → „Preisformeln“). *Grund: eigene Marke, keine Verwechslung.* Die Quellenangaben (QuestieDB, Spieldaten, Poppins) bleiben in `LIZENZ.txt` und in den Hinweisen.
+- **Toter Code entfernt:**
+  - `Recipes.SetMargin`, `Recipes.StyleText`, `Recipes.RequiredMargin`: Prozent-Filter, seit 4.x nicht mehr in Benutzung.
+  - `ns.MoneyIcons`: nie aufgerufen.
+  - Der Zweig `C_TradeSkillUI.GetAllRecipeIDs`: diese Funktion gibt es in Forever nicht.
+- **Item-Datenbank umgebaut:** Sie wird nicht mehr komplett eingelesen, sondern über einen Index nach ID abgefragt. *Grund: 17,5 MB Speicher und 76 ms Ruckler beim ersten Tooltip.* Ein Load-on-Demand-Modul gibt es **nicht**, Begründung in `AUDIT.md` Abschnitt 5.
+- **Item-Suche:** Ohne Suchwort wird nichts mehr komplett geladen. Interne Platzhalter („DNT“, „NYI“, „OBSOLETE“) werden ausgeblendet.
+- **Mindestschriftgröße 12** überall (vorher teils 10 und 11).
+- **Datenalter ehrlich beschriftet:** „Preise von vor X“ statt „Scan vor X“, weil Auctionator die Preise auch bei normalen Suchen aktualisiert.
+- Wegpunkt- und Suchknopf sitzen jetzt in der Seitenleiste, weil sie im Kopfbereich mit langen Untertiteln kollidierten.
+
+### Behoben (Details mit Datei:Zeile in AUDIT.md)
+- Schnäppchen-Radar: Einzel-Auktionen wurden als Stückpreis gelesen, dadurch waren die Ersparnisse falsch.
+- Bankbestand zählte die Taschenplätze der Bank statt der Fächer.
+- Flip-Kauf: falsche Menge bei Händlerware im Bündel.
+- AH-Scan-Knopf meldete „Scan läuft/fertig“, obwohl Auctionator den Scan in der 15-Minuten-Sperre abgelehnt hatte.
+- Schrott wird nur noch verkauft, wenn der Händler Blizzards Schrott-Knopf anbietet. Reparatur und Schrottverkauf laufen in `pcall`.
+- Berufe lesen klappt das Skill-Fenster des Spielers nicht mehr auf.
+- Rezepte im Berufsfenster werden auch bei aktivem Suchfeld oder Filter gefunden.
+- Kleinere Punkte:
+  - Rückgabewerte von `RegisterEvent`, `OpenTradeSkill` und `SetUserWaypoint` werden geprüft.
+  - `## Category` in der .toc ergänzt.
+  - Falsche Listennamen in Chat-Meldungen korrigiert.
+- Drei Zeichen, die es in der Schrift nicht gibt (★, ↺, →), sind ersetzt. Ein neuer Test verhindert das künftig.
+
+### Prüfung
+- `luacheck`: 0 Warnungen, 0 Fehler
+- `busted`: 20/20
+- `tests/run_tests.lua`: 816/816
+- Layout-Prüfung: 0 Probleme
+
+## 4.5.0 und früher
+Siehe Git-Verlauf: Anthrazit/Neon-Grün-Design, Horde-Motive, orange Hervorhebungen, alles rückgängig machbar, Händler-Einkauf per Klick, Craft-Planer mit Einkaufsliste, Verkaufsbuch, Schnäppchen-Radar, Kürschner-Zentrale, komplette Item-Datenbank.

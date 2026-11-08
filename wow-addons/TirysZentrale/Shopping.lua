@@ -1,7 +1,7 @@
 -- Tiry's Zentrale – Einkaufsliste für die Craft-Warteschlange (wie TSM):
 -- Bedarf = Material aller geplanten Crafts; vorhanden = Taschen + Bank + Briefkasten + gerade im AH gekauft.
 -- Gekauftes wird sofort abgezogen (Ereignis COMMODITY_PURCHASED), auch wenn es noch im Briefkasten liegt.
-local ADDON, ns = ...
+local _, ns = ...
 
 local Shop = {}
 ns.Shop = Shop
@@ -83,7 +83,6 @@ end
 -- Was wird gecraftet? Je Eintrag der Warteschlange: Status "bereit" (alles in den Taschen),
 -- "post" (Rest liegt im Briefkasten / ist gekauft) oder "fehlt". Material wird der Reihe nach verteilt.
 function Shop.Crafts()
-  local s = state()
   local bags, all, out = {}, {}, {}
   for _, e in ipairs(ns.char.queue or {}) do
     local r = ns.Recipes.Get(e.recipe)
@@ -154,6 +153,7 @@ end
 
 local lastBuy = 0
 function Shop.BuyFromVendor()
+  if ns.InCombat() then return false, "Im Kampf gesperrt – bitte nach dem Kampf nochmal klicken." end
   if not ns.Scanner.merchant.open then return false, "Kein Händler offen." end
   if GetTime() - lastBuy < 1 then return false, "Moment – der letzte Kauf kommt gerade an." end
   local plan, cost = Shop.VendorPlan()

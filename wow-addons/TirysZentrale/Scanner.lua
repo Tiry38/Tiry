@@ -1,5 +1,5 @@
 -- Tiry's Zentrale – Scanner: Händler-Flips, Taschenwert, Rezept-Gewinne
-local ADDON, ns = ...
+local _, ns = ...
 
 local S = {}
 ns.Scanner = S
@@ -169,15 +169,27 @@ end)
 ----------------------------------------------------------------------------
 local BASIC = (Enum and Enum.CraftingReagentType and Enum.CraftingReagentType.Basic) or 1
 
+-- Rezept-Nummern im offenen Berufsfenster. GetFilteredRecipeIDs hängt von Suchfeld/Filtern ab -> zusätzlich
+-- alle eigenen Rezept-Nummern dieses Berufs abfragen, die der Client kennt (GetRecipeInfo liefert etwas).
 local function recipeIDs()
-  local ids
-  if C_TradeSkillUI.GetAllRecipeIDs then
-    ids = C_TradeSkillUI.GetAllRecipeIDs()
+  local ids, seen = {}, {}
+  if C_TradeSkillUI.GetFilteredRecipeIDs then
+    for _, id in ipairs(C_TradeSkillUI.GetFilteredRecipeIDs() or {}) do
+      if not seen[id] then seen[id] = true ids[#ids + 1] = id end
+    end
   end
-  if (not ids or #ids == 0) and C_TradeSkillUI.GetFilteredRecipeIDs then
-    ids = C_TradeSkillUI.GetFilteredRecipeIDs()
+  local key = S.openProfKey and S.openProfKey()
+  local R = ns.Recipes
+  if key and R then
+    R.Load()
+    for _, r in ipairs(R.List(key, "known")) do
+      if not seen[r.id] then
+        local ok, info = pcall(C_TradeSkillUI.GetRecipeInfo, r.id)
+        if ok and info then seen[r.id] = true ids[#ids + 1] = r.id end
+      end
+    end
   end
-  return ids or {}
+  return ids
 end
 
 function S.ScanRecipes()
@@ -249,18 +261,32 @@ function S.RecipeProfit(r)
   return profit, revenue, cost, unknown
 end
 
+local function readOpenProf()
+  if C_TradeSkillUI and C_TradeSkillUI.GetBaseProfessionInfo then
+    local info = C_TradeSkillUI.GetBaseProfessionInfo()
+    S.openProf = info and info.professionName
+  end
+end
+
+-- Schlüssel (z. B. "LEATHERWORKING") des offenen Berufsfensters
+function S.openProfKey()
+  if not S.tradeOpen or not S.openProf then return nil end
+  for key, id in pairs(ns.PROF) do
+    local p = ns.professions[id]
+    if p and p.name == S.openProf then return key end
+  end
+end
+
 local function rescan()
   ns.Debounce("recipes", 0.8, function()
+    if S.tradeOpen then readOpenProf() end
     local n = S.ScanRecipes()
     if n and n > 0 then ns.Fire("RECIPES_SCANNED") end
   end)
 end
 ns.On("TRADE_SKILL_SHOW", function()
   S.tradeOpen = true
-  if C_TradeSkillUI and C_TradeSkillUI.GetBaseProfessionInfo then
-    local info = C_TradeSkillUI.GetBaseProfessionInfo()
-    S.openProf = info and info.professionName
-  end
+  readOpenProf()
   rescan()
 end)
 ns.On("TRADE_SKILL_CLOSE", function()

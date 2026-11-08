@@ -1,5 +1,5 @@
 -- Tiry's Zentrale – Seite "AH-Schule": Auktionshaus und Auctionator für Einsteiger
-local ADDON, ns = ...
+local _, ns = ...
 local UI = ns.UI
 local C = UI.C
 

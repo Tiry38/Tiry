@@ -1,5 +1,5 @@
 -- Tiry's Zentrale – Seite "Kürschner": Häuten-Rechner, beste Spots für dein Level, Leder & Preise, Spezial-Leder, eigene Fundorte
-local ADDON, ns = ...
+local _, ns = ...
 local UI = ns.UI
 local C = UI.C
 local M = ns.Market

@@ -1,5 +1,5 @@
 -- Tiry's Zentrale – Seite "Farm-Guide": Wo farme ich mit meinem Level was – sortiert nach Live-Wert
-local ADDON, ns = ...
+local _, ns = ...
 local UI = ns.UI
 local C = UI.C
 local M = ns.Market
@@ -52,7 +52,7 @@ local function groupCard(parent, width)
   card.listBtn:SetPoint("BOTTOMRIGHT", -16, 14)
   card.listBtn:SetScript("OnClick", function(self)
     local ok, n = M.CreateShoppingList("Zentrale: Farm " .. self.label, self.ids)
-    ns.Print(ok and ("Liste |cffff9929Tiry's Zentrale: Farm " .. self.label .. "|r angelegt (" .. n .. " Items).") or ("|cffff6b81" .. tostring(n) .. "|r"))
+    ns.Print(ok and ("Liste |cffff9929Zentrale: Farm " .. self.label .. "|r angelegt (" .. n .. " Items).") or ("|cffff6b81" .. tostring(n) .. "|r"))
   end)
   return card
 end
@@ -195,7 +195,7 @@ function page.refresh(self)
       c.icon:SetItem(e.id)
       local item = ns.Item(e.id)
       local q = UI.QUALITY[item.quality or 1] or UI.QUALITY[1]
-      c.name:SetText(item.name)
+      UI.FitText(c.name, item.name, 112)
       c.name:SetTextColor(q[1], q[2], q[3], 1)
       c.price:SetText(e.price and (ns.Money(e.price) .. " / Stk.") or "kein AH-Preis")
       c:ClearAllPoints()

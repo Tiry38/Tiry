@@ -1,5 +1,5 @@
 -- Tiry's Zentrale – Goldtagebuch: Sitzung, Tage, Gold pro Stunde
-local ADDON, ns = ...
+local _, ns = ...
 
 local T = {}
 ns.Tracker = T

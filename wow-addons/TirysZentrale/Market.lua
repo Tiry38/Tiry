@@ -159,9 +159,10 @@ ns.Listen("LOGIN", function()
   if a and a.RegisterForDBUpdate then
     pcall(a.RegisterForDBUpdate, ADDON, function()
       ns.Debounce("prices", 1, function()
-        if ns.db then ns.db.lastScan = time() end
+        if ns.db then ns.db.lastScan = time() end -- jede Preis-Aktualisierung (auch Suchen im AH)
         if M.scanRequested then
           M.scanRequested = nil
+          if ns.db then ns.db.lastFullScan = time() end
           ns.Print("|cffff9929Scan fertig!|r Tiry's Zentrale rechnet jetzt mit den neuen Preisen.")
         end
         ns.Fire("PRICES_UPDATED")
@@ -180,31 +181,45 @@ function M.StartScan()
     ns.Print("Stell dich ans Auktionshaus und öffne es – dann scannt Tiry's Zentrale mit einem Klick.")
     return false
   end
-  local st = Auctionator.State
-  local ok = pcall(function()
-    local full = Auctionator.Config and Auctionator.Config.Get and Auctionator.Config.Options
-      and Auctionator.Config.Get(Auctionator.Config.Options.REPLICATE_SCAN)
-    local frame = full and st.FullScanFrameRef or st.IncrementalScanFrameRef or st.FullScanFrameRef
+  -- Auctionator hat KEINE öffentliche Funktion zum Scan-Start. Wir nutzen seinen eigenen Scan-Knopf-Code nur,
+  -- wenn er genau so vorhanden ist und Auctionator den Scan gerade zulässt (15-Minuten-Sperre, laufender Scan).
+  -- Alles abgesichert: Fehlt etwas, kommt nur eine Anleitung – nie ein Fehler.
+  local okCall, started, reason = pcall(function()
+    local st, cfg = Auctionator.State, Auctionator.Config
+    if type(st) ~= "table" then return false, "unknown" end
+    local full = type(cfg) == "table" and type(cfg.Get) == "function" and type(cfg.Options) == "table"
+      and cfg.Get(cfg.Options.REPLICATE_SCAN)
+    local frame = (full and st.FullScanFrameRef) or st.IncrementalScanFrameRef or st.FullScanFrameRef
+    if type(frame) ~= "table" or type(frame.InitiateScan) ~= "function" then return false, "unknown" end
+    if frame.inProgress or frame.doingFullScan then return false, "running" end
+    if type(frame.CanInitiate) == "function" and not frame:CanInitiate() then return false, "cooldown" end
     frame:InitiateScan()
+    return true
   end)
-  if ok then
+  if okCall and started then
     M.scanRequested = true
     ns.Print("Scan läuft ... Tiry's Zentrale meldet sich, sobald die Preise da sind.")
-  else
-    ns.Print("Bitte im AH den Reiter |cffff9929Auctionator|r öffnen und auf |cffff9929Scannen|r klicken – Tiry's Zentrale erkennt den Scan automatisch.")
+    return true
   end
-  return ok
+  if okCall and reason == "running" then
+    ns.Print("Auctionator scannt schon – einfach warten, die Preise kommen gleich.")
+  elseif okCall and reason == "cooldown" then
+    ns.Print("Auctionator erlaubt den Komplett-Scan nur alle 15 Minuten. Bitte kurz warten – deine Preise sind noch frisch.")
+  else
+    ns.Print("Bitte im AH den Reiter |cffff9929Auctionator|r öffnen und auf |cffff9929Scannen|r klicken – Tiry's Zentrale erkennt neue Preise automatisch.")
+  end
+  return false
 end
 
 function M.LastScanText()
   local t = ns.db and ns.db.lastScan
   if not t then return M.HasAuctionator() and "Auctionator-Daten (Scan-Zeit unbekannt)" or "keine (Auctionator fehlt)" end
   local mins = math.floor((time() - t) / 60)
-  if mins < 2 then return "gerade gescannt" end
-  if mins < 120 then return "Scan vor " .. mins .. " Min." end
+  if mins < 2 then return "Preise gerade aktualisiert" end
+  if mins < 120 then return "Preise von vor " .. mins .. " Min." end
   local h = math.floor(mins / 60)
-  if h < 48 then return "Scan vor " .. h .. " Std." end
-  return "Scan vor " .. math.floor(h / 24) .. " Tagen – bitte neu scannen"
+  if h < 48 then return "Preise von vor " .. h .. " Std." end
+  return "Preise von vor " .. math.floor(h / 24) .. " Tagen – bitte neu scannen"
 end
 
 -- Status für die Anzeige

@@ -35,8 +35,8 @@ function ns.On(event, fn)
   if not listeners[event] then
     listeners[event] = {}
     -- Unbekannte Ereignisse würden einen Fehler werfen -> abgesichert registrieren
-    local ok = pcall(eventFrame.RegisterEvent, eventFrame, event)
-    if not ok then
+    local ok, registered = pcall(eventFrame.RegisterEvent, eventFrame, event)
+    if not ok or registered == false then
       listeners[event] = nil
       return false
     end
@@ -99,6 +99,7 @@ local DEFAULTS = {
   shopAutoOpen = true,  -- Einkaufsfenster beim Öffnen des AH zeigen, wenn noch etwas fehlt
   ahCut = 5,          -- Prozent, den das Auktionshaus beim Verkauf einbehält
   showOnlyMyLevel = false,
+  expertMode = false,  -- Preisformeln im Craft-Planer zeigen (für Profis)
   faction = "AUTO",   -- AUTO / Alliance / Horde
   welcomeShown = false,
   lastPage = "home",
@@ -186,6 +187,16 @@ ns.professions = {} -- [skillID] = { name, rank, maxRank }
 
 local function readSkillLines()
   local result = {}
+  -- Bevorzugt: direkt nach Skill-ID fragen (ändert nichts am Skill-Fenster des Spielers)
+  if C_SkillInfo and C_SkillInfo.GetSkillLineInfoByID then
+    for id in pairs(KNOWN_PROF) do
+      local ok, info = pcall(C_SkillInfo.GetSkillLineInfoByID, id)
+      if ok and info and info.name and info.name ~= "" and (info.maxRank or 0) > 0 then
+        result[id] = { name = info.name, rank = info.rank or 0, maxRank = info.maxRank or 0 }
+      end
+    end
+    if next(result) then return result end
+  end
   if C_SkillInfo and C_SkillInfo.GetNumSkillLines and C_SkillInfo.GetSkillLineInfo then
     -- Zusammengeklappte Überschriften verstecken ihre Zeilen -> von hinten nach vorn aufklappen
     if C_SkillInfo.ExpandSkillHeader then
@@ -310,16 +321,6 @@ function ns.Money(copper, opts)
   return out
 end
 
--- Mit Münz-Symbolen (für große Anzeigen)
-function ns.MoneyIcons(copper)
-  if copper == nil then return "–" end
-  if GetMoneyString then
-    local ok, s = pcall(GetMoneyString, math.floor(math.abs(copper) + 0.5), true)
-    if ok and s then return (copper < 0 and "-" or "") .. s end
-  end
-  return ns.Money(copper)
-end
-
 function ns.Plural(n, one, many)
   return n == 1 and one or many
 end
@@ -332,6 +333,19 @@ function ns.Clamp(v, lo, hi)
   if v < lo then return lo end
   if v > hi then return hi end
   return v
+end
+
+-- Kampf-Sperre: Käufe, Verkäufe und Craften nie im Kampf (Blizzard sperrt dort viele Aktionen)
+function ns.InCombat()
+  return InCombatLockdown and InCombatLockdown() or false
+end
+
+function ns.CombatBlocked()
+  if ns.InCombat() then
+    ns.Print("|cffff6b81Im Kampf gesperrt|r – bitte nach dem Kampf nochmal klicken.")
+    return true
+  end
+  return false
 end
 
 -- Kurze Chat-Meldung im Addon-Stil

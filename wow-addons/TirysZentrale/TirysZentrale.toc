@@ -1,9 +1,10 @@
 ## Interface: 16001
 ## Title: |cff8cff4dTiry's|r |cff26ff73Zentrale|r
-## Notes: Deine Gold-Zentrale für WoW Forever: Craft-Planer wie TSM, Kürschner-Zentrale, Farm-Spots auf der Karte, Live-Preise (Auctionator), Autopilot und komplette deutsche Item-Datenbank.
-## Notes-deDE: Deine Gold-Zentrale für WoW Forever: Craft-Planer wie TSM, Kürschner-Zentrale, Farm-Spots auf der Karte, Live-Preise (Auctionator), Autopilot und komplette deutsche Item-Datenbank.
+## Notes: Deine Gold-Zentrale für WoW Forever: Craft-Planer mit Einkaufsliste, Kürschner-Zentrale, Farm-Spots auf der Karte, Live-Preise (Auctionator), Autopilot und komplette deutsche Item-Datenbank.
+## Notes-deDE: Deine Gold-Zentrale für WoW Forever: Craft-Planer mit Einkaufsliste, Kürschner-Zentrale, Farm-Spots auf der Karte, Live-Preise (Auctionator), Autopilot und komplette deutsche Item-Datenbank.
 ## Author: Tiry
-## Version: 4.5.0
+## Version: 5.0.0
+## Category: Auctions
 ## Category-enUS: Auctions
 ## Category-deDE: Auktionen
 ## SavedVariables: TirysZentraleDB
@@ -35,6 +36,10 @@ Shopping.lua
 Ledger.lua
 Inventory.lua
 Deals.lua
+Session.lua
+Alerts.lua
+Advisor.lua
+Guide.lua
 UI\Widgets.lua
 UI\ItemList.lua
 UI\Main.lua
@@ -50,5 +55,12 @@ UI\PageTracker.lua
 UI\PageLedger.lua
 UI\PageBasics.lua
 UI\PageSettings.lua
+UI\PageSession.lua
+UI\PageAlerts.lua
+UI\PageAdvisor.lua
+Guide.lua
+UI\PageGlossary.lua
 UI\MerchantHelper.lua
 UI\ShopWindow.lua
+UI\Wizard.lua
+UI\Search.lua

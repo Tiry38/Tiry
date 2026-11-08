@@ -1,5 +1,5 @@
 -- Tiry's Zentrale – Design-System: Farben, Schrift, runde Formen, Bausteine
-local ADDON, ns = ...
+local _, ns = ...
 
 local UI = {}
 ns.UI = UI
@@ -114,9 +114,10 @@ function UI.SetFont(fs, size, weight, flags)
   end
 end
 
+UI.MIN_FONT = 12 -- gut lesbar: keine Schrift kleiner als 12
 function UI.Text(parent, size, weight, color, layer)
   local fs = parent:CreateFontString(nil, layer or "OVERLAY")
-  UI.SetFont(fs, size or 13, weight)
+  UI.SetFont(fs, math.max(size or 13, UI.MIN_FONT), weight)
   local c = color or C.text
   fs:SetTextColor(c[1], c[2], c[3], c[4] or 1)
   fs:SetJustifyH("LEFT")
@@ -126,7 +127,6 @@ function UI.Text(parent, size, weight, color, layer)
   return fs
 end
 
--- Mehrzeiliger Absatz mit fester Breite
 -- Setzt Text einzeilig und kürzt ihn wortweise mit "...", bis er in maxW passt (nichts ragt mehr heraus)
 function UI.FitText(fs, text, maxW)
   fs:SetText(text)
@@ -140,6 +140,7 @@ function UI.FitText(fs, text, maxW)
   end
 end
 
+-- Mehrzeiliger Absatz mit fester Breite
 function UI.Para(parent, size, color, width, weight)
   local fs = UI.Text(parent, size or 13, weight or "regular", color or C.muted)
   fs:SetJustifyV("TOP")

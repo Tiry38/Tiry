@@ -1,5 +1,5 @@
 -- Tiry's Zentrale – Seite "Einstellungen"
-local ADDON, ns = ...
+local _, ns = ...
 local UI = ns.UI
 local C = UI.C
 
@@ -70,7 +70,7 @@ function page.build(self, content, width)
 
   add(UI.Toggle(content, "Automatisch reparieren", function() return s.autoRepair end, function(v)
     s.autoRepair = v
-  end, "Repariert deine Ausrüstung beim Händler sofort (wenn du genug Gold hast) – wie bei Leatrix Plus.", width), 54)
+  end, "Repariert deine Ausrüstung beim Händler sofort (wenn du genug Gold hast) – so musst du nie daran denken.", width), 54)
 
   add(UI.Toggle(content, "Infos im Item-Tooltip", function() return s.tooltipInfo end, function(v)
     s.tooltipInfo = v
@@ -101,14 +101,21 @@ function page.build(self, content, width)
     s.showOnlyMyLevel = v
   end, "Blendet auf der Seite \"Goldwege\" alles aus, wofür dein Level noch nicht reicht.", width), 54)
 
+  add(UI.Toggle(content, "Experten-Modus", function() return s.expertMode == true end, function(v)
+    s.expertMode = v
+  end, "Zeigt im Craft-Planer die Preisformeln (Materialpreis, Verkaufswert, Mindestgewinn) zum Selbst-Einstellen. Für Einsteiger nicht nötig.", width), 54)
+
   add(stepper(content, "AH-Gebühr", "So viel Prozent behält das Auktionshaus vom Verkaufspreis ein. Standard: 5 %. Alle Gewinne werden damit berechnet.",
     function() return tonumber(s.ahCut) or 5 end, function(v) s.ahCut = v end, 1, 0, 30, "%d %%", width, 5), 54)
 
-  add(stepper(content, "Fenstergröße", "Skaliert das Tiry's Zentrale-Fenster.",
+  add(stepper(content, "Fenstergröße", "Skaliert das Fenster. Geht auch direkt: unten rechts am Fenster ziehen.",
     function() return math.floor((tonumber(s.scale) or 1) * 100 + 0.5) end,
     function(v) s.scale = v / 100; UI.ApplyScale() end, 5, 70, 130, "%d %%", width, 100), 54)
 
   st:Space(10)
+  local wiz = UI.Button(content, "Einsteiger-Assistent nochmal zeigen", "soft", 330, 34, "star")
+  wiz:SetScript("OnClick", function() UI.Show("home") UI.Wizard.Show() end)
+  st:Add(wiz, 34, 12)
   local reset = UI.Button(content, "Fensterposition zurücksetzen", "soft", 260, 34, "refresh")
   reset:SetScript("OnClick", function()
     s.point = nil
@@ -144,7 +151,9 @@ function page.build(self, content, width)
     .. "|cffff9929/tz leder|r · |cffff9929/tz farm|r · |cffff9929/tz craft|r · |cffff9929/tz suche|r · |cffff9929/tz wege|r · |cffff9929/tz markt|r · |cffff9929/tz scan|r · |cffff9929/tz rezepte|r · |cffff9929/tz tagebuch|r · |cffff9929/tz ah|r\n"
     .. "|cffff9929/tz minimap|r – Minikarten-Knopf an/aus\n"
     .. "|cffff9929/tz wegpunkt|r – gesetzten Kartenpunkt löschen · |cffff9929/tz leeren|r – Craft-Liste leeren\n"
-    .. "|cffff9929/tz reset|r – Fenster in die Mitte setzen", 12, C.muted, 16)
+    .. "|cffff9929/tz suche|r – alles durchsuchen · |cffff9929/tz assistent|r – Einsteiger-Assistent\n"
+    .. "|cffff9929/tz reset|r – Fenster in die Mitte setzen\n"
+    .. "Tastenkürzel: WoW-Menü > Optionen > Tastaturbelegung > \"Tiry's Zentrale\"", 12, C.muted, 16)
   st:Para("Tiry's Zentrale " .. tostring(ns.version) .. " · gebaut für WoW Forever (1.60.1). Preise kommen aus Auctionator – "
     .. "Tiry's Zentrale selbst liest nie etwas im Hintergrund aus und schickt keine Daten weg.", 11, C.dim, 10)
   st:Finish()

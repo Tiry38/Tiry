@@ -38,6 +38,16 @@ W.bags = { [0] = { { itemID = 2318, stackCount = 18, quality = 1 }, { itemID = 2
 ns.UI.Show("home")
 local frame = TirysZentraleMainFrame
 local total = 0
+-- Einsteiger-Assistent (modal über dem Fenster): einzeln prüfen und zeichnen, dann schließen
+assert(ns.UI.Wizard.IsShown(), "Assistent beim ersten Öffnen")
+for step = 1, 3 do
+  ns.UI.Wizard.Go(step)
+  for _, p in ipairs(L.problems(ns.UI.Wizard.frame)) do
+    print("[assistent " .. step .. "] " .. p) total = total + 1
+  end
+  if OUT then L.dump(frame, OUT .. "/wizard" .. step .. ".tsv") end
+end
+ns.UI.Wizard.Finish()
 for _, def in ipairs(ns.UI.order) do
   ns.UI.Show(def.key)
   W.flush()

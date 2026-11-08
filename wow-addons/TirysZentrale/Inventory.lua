@@ -1,6 +1,6 @@
 -- Tiry's Zentrale – Bestand über alle Charaktere (wie TSM ItemTracker / Syndicator):
 -- Taschen, Bank und Post jedes Charakters + Gold, gespeichert pro Realm.
-local ADDON, ns = ...
+local _, ns = ...
 
 local I = {}
 ns.Inv = I
@@ -30,7 +30,18 @@ local function readContainers(list)
 end
 
 local BAGS = { 0, 1, 2, 3, 4, 5 }
-local BANK = { -2, 6, 7, 8, 9, 10, 11, 12, 13, 14 }
+-- Bank in Forever: Fächer 6–14 (Enum.BagIndex.CharacterBankTab_1..9). -2 sind nur die Taschenplätze der Bank.
+local function bankTabs()
+  if C_Bank and C_Bank.FetchPurchasedBankTabData and Enum and Enum.BankType then
+    local ok, data = pcall(C_Bank.FetchPurchasedBankTabData, Enum.BankType.Character)
+    if ok and type(data) == "table" and #data > 0 then
+      local ids = {}
+      for _, t in ipairs(data) do ids[#ids + 1] = t.ID end
+      return ids
+    end
+  end
+  return { 6, 7, 8, 9, 10, 11, 12, 13, 14 }
+end
 
 function I.UpdateBags()
   local c = me()
@@ -41,7 +52,7 @@ end
 
 function I.UpdateBank()
   local c = me()
-  c.bank = readContainers(BANK)
+  c.bank = readContainers(bankTabs())
 end
 
 function I.UpdateMail()

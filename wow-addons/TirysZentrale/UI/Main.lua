@@ -1,5 +1,5 @@
 -- Tiry's Zentrale – Hauptfenster mit Menü, Seitenverwaltung, Minikarten-Knopf, Befehle
-local ADDON, ns = ...
+local _, ns = ...
 local UI = ns.UI
 local C = UI.C
 
@@ -11,6 +11,35 @@ UI.CONTENT_W = WIDTH - SIDE_W - PAD * 2 - 14 -- nutzbare Breite einer Seite (ohn
 
 UI.pages = {}
 UI.order = {}
+
+-- Menü: 7 Hauptpunkte, darunter Reiter (Ansichten). Ansichten, die es nicht gibt, werden übersprungen.
+UI.GROUPS = {
+  { key = "start", label = "Start", icon = "home", views = { { "home", "Goldplan" }, { "methods", "Goldwege" } } },
+  { key = "farmen", label = "Farmen", icon = "pin", views = { { "farm", "Farm-Guide" }, { "skinning", "Kürschner" }, { "session", "Farm-Session" } } },
+  { key = "berufe", label = "Berufe", icon = "flask", views = { { "recipes", "Craft-Planer" }, { "advisor", "Berufe-Berater" } } },
+  { key = "markt", label = "Markt", icon = "coins", views = { { "market", "Preise" }, { "alerts", "Preisalarm" }, { "scanner", "Taschen & Händler" }, { "database", "Item-Suche" } } },
+  { key = "gold", label = "Mein Gold", icon = "chart", views = { { "tracker", "Goldtagebuch" }, { "ledger", "Verkaufsbuch" } } },
+  { key = "lernen", label = "Lernen", icon = "book", views = { { "basics", "AH-Schule" }, { "glossary", "Glossar" } } },
+  { key = "settings", label = "Einstellungen", icon = "gear", views = { { "settings", "Einstellungen" } } },
+}
+
+-- Zu welchem Hauptpunkt gehört eine Ansicht?
+function UI.GroupOf(viewKey)
+  for _, g in ipairs(UI.GROUPS) do
+    for _, v in ipairs(g.views) do
+      if v[1] == viewKey then return g end
+    end
+  end
+end
+
+local function availableViews(g)
+  local out = {}
+  for _, v in ipairs(g.views) do
+    if UI.pages[v[1]] then out[#out + 1] = { value = v[1], label = v[2] } end
+  end
+  return out
+end
+UI.AvailableViews = availableViews
 
 -- Seiten melden sich hier an: key, { title, subtitle, icon, label, build(page, content, width), refresh(page) }
 function UI.RegisterPage(key, def)
@@ -28,6 +57,25 @@ local frame
 local function savePosition()
   local point, _, relPoint, x, y = frame:GetPoint(1)
   ns.settings.point = { point, relPoint, x, y }
+end
+
+-- Andocken: liegt das Fenster nach dem Ziehen nah (< 30 px) an einem Bildschirmrand oder der Mitte, rastet es dort ein
+local SNAP = 30
+local function snap(f)
+  local s = f:GetEffectiveScale() / UIParent:GetEffectiveScale()
+  local l, t = f:GetLeft() * s, f:GetTop() * s
+  local w, h = f:GetWidth() * s, f:GetHeight() * s
+  local sw, sh = UIParent:GetWidth(), UIParent:GetHeight()
+  if not (l and t and sw and sh) then return end
+  local x, y = l, t
+  if math.abs(l) < SNAP then x = 0 elseif math.abs(sw - (l + w)) < SNAP then x = sw - w
+  elseif math.abs((l + w / 2) - sw / 2) < SNAP then x = (sw - w) / 2 end
+  if math.abs(sh - t) < SNAP then y = sh elseif math.abs(t - h) < SNAP then y = h
+  elseif math.abs((t - h / 2) - sh / 2) < SNAP then y = (sh + h) / 2 end
+  if x ~= l or y ~= t then
+    f:ClearAllPoints()
+    f:SetPoint("TOPLEFT", UIParent, "BOTTOMLEFT", x / s, y / s)
+  end
 end
 
 local function buildBackground(f)
@@ -107,28 +155,51 @@ local function buildSidebar(f)
   sub:SetWidth(SIDE_W - 44)
   sub:SetJustifyH("LEFT")
   sub:SetWordWrap(false)
-  sub:SetText("GOLD & BERUFE · WOW FOREVER")
+  sub:SetText("GOLD · BERUFE · FOREVER")
+
+  -- Globale Suche (auch per Tastenkürzel)
+  local search = CreateFrame("Button", nil, side)
+  search:SetSize(SIDE_W - 34, 34)
+  search:SetPoint("TOPLEFT", 12, -88)
+  search.bg = UI.Round(search, 17, "BACKGROUND", 0)
+  search.bg:SetColor(C.inset, 1)
+  search.icon = search:CreateTexture(nil, "ARTWORK")
+  search.icon:SetTexture(UI.Icon("scan"))
+  search.icon:SetSize(15, 15)
+  search.icon:SetPoint("LEFT", 16, 0)
+  search.icon:SetVertexColor(C.gold[1], C.gold[2], C.gold[3], 1)
+  search.text = UI.Text(search, 13, "regular", C.dim)
+  search.text:SetPoint("LEFT", search.icon, "RIGHT", 10, 0)
+  search.text:SetText("Suchen ...")
+  search:SetScript("OnEnter", function(self) self.bg:SetColor(C.cardHi, 1) end)
+  search:SetScript("OnLeave", function(self) self.bg:SetColor(C.inset, 1) end)
+  search:SetScript("OnClick", function() UI.PlayClick() UI.Search.Toggle() end)
+  UI.SetTooltip(search, "Alles durchsuchen", "Items, Rezepte, Goldwege und Begriffe auf einmal. Tipp: Tastenkürzel in den WoW-Tastaturbelegungen unter \"Tiry's Zentrale\".")
 
   f.nav = {}
-  local y = -86
-  for _, def in ipairs(UI.order) do
+  local y = -134
+  for _, g in ipairs(UI.GROUPS) do
+    local views = availableViews(g)
+    if #views > 0 then
     local b = CreateFrame("Button", nil, side)
-    b:SetSize(SIDE_W - 34, 32)
+    b:SetSize(SIDE_W - 34, 38)
     b:SetPoint("TOPLEFT", 12, y)
-    b.key = def.key
-    b.bg = UI.Round(b, 16, "BACKGROUND", 0)
+    b.key = g.key
+    b.first = views[1].value
+    b.bg = UI.Round(b, 19, "BACKGROUND", 0)
     b.icon = b:CreateTexture(nil, "ARTWORK")
-    b.icon:SetTexture(UI.Icon(def.icon))
+    b.icon:SetTexture(UI.Icon(g.icon))
     b.icon:SetSize(18, 18)
     b.icon:SetPoint("LEFT", 16, 0)
-    b.text = UI.Text(b, 13, "semibold", C.muted)
+    b.text = UI.Text(b, 14, "semibold", C.muted)
     b.text:SetPoint("LEFT", b.icon, "RIGHT", 12, 0)
-    b.text:SetText(def.label or def.title)
+    b.text:SetText(g.label)
     b.badge = UI.Chip(b, "", C.rose, true)
     b.badge:SetPoint("RIGHT", -10, 0)
     b.badge:Hide()
     function b:Paint()
-      local active = (UI.current == self.key)
+      local cg = UI.current and UI.GroupOf(UI.current)
+      local active = (cg and cg.key == self.key)
       if active then
         self.bg:SetGradient(UI.GRAD, 1)
         self.bg:SetShown(true)
@@ -149,10 +220,13 @@ local function buildSidebar(f)
     b:SetScript("OnLeave", b.Paint)
     b:SetScript("OnClick", function(self)
       UI.PlayClick()
-      UI.Show(self.key)
+      -- zuletzt benutzten Reiter des Hauptpunkts wieder öffnen
+      local last = ns.settings.lastView and ns.settings.lastView[self.key]
+      UI.Show((last and UI.pages[last]) and last or self.first)
     end)
-    f.nav[def.key] = b
-    y = y - 35
+    f.nav[g.key] = b
+    y = y - 44
+    end
   end
 
   -- Echtes Horde-Wappen aus dem Spiel (Atlas aus der Charaktererstellung), ganz dezent über dem Status.
@@ -163,7 +237,7 @@ local function buildSidebar(f)
       local crest = side:CreateTexture(nil, "BACKGROUND", nil, -3)
       crest:SetAtlas("charactercreate-icon-horde")
       crest:SetSize(120, 120)
-      crest:SetPoint("BOTTOM", side, "BOTTOM", 0, 80)
+      crest:SetPoint("BOTTOM", side, "BOTTOM", 0, 116)
       crest:SetDesaturated(true)
       crest:SetVertexColor(C.amber[1], C.amber[2], C.amber[3], 0.22)
       f.hordeCrest = crest
@@ -196,7 +270,7 @@ end
 
 function UI.UpdateStatus()
   if not frame then return end
-  local state, text = ns.Market.Status()
+  local state = ns.Market.Status()
   local c = (state == "ok" and C.green) or (state == "empty" and C.hi) or C.red
   frame.status.dot:SetVertexColor(c[1], c[2], c[3], 1)
   frame.status.text:SetText(state == "ok" and "Live-Preise aktiv" or (state == "empty" and "AH einmal scannen" or "Auctionator fehlt"))
@@ -229,9 +303,9 @@ local function buildHeader(f)
       .. "auch wenn du direkt in Auctionator scannst.\n\nStand: " .. ns.Market.LastScanText()
   end)
   f.scanBtn = scan
-  -- Gesetzten Wegpunkt wieder entfernen
-  local wp = UI.Button(f, "Wegpunkt", "soft", 120, 30, "close")
-  wp:SetPoint("RIGHT", scan, "LEFT", -10, 0)
+  -- Gesetzten Wegpunkt wieder entfernen (unten in der Seitenleiste, über dem Status)
+  local wp = UI.Button(f.side, "Wegpunkt löschen", "soft", SIDE_W - 34, 32, "close")
+  wp:SetPoint("BOTTOMLEFT", f.side, "BOTTOMLEFT", 12, 70)
   wp:SetScript("OnClick", function() ns.Maps.Clear() end)
   UI.SetTooltip(wp, "Wegpunkt entfernen", "Löscht den Kartenpunkt, den Tiry's Zentrale gesetzt hat.")
   wp:Hide()
@@ -260,6 +334,7 @@ local function createFrame()
   f:SetScript("OnDragStart", function(self) self:StartMoving() end)
   f:SetScript("OnDragStop", function(self)
     self:StopMovingOrSizing()
+    ns.Safe(snap, self)
     savePosition()
   end)
   f:SetScale(UI.FitScale())
@@ -275,6 +350,41 @@ local function createFrame()
   buildBackground(f)
   buildSidebar(f)
   buildHeader(f)
+
+  -- Reiter des aktuellen Hauptpunkts (nur wenn er mehrere Ansichten hat)
+  local tabs = CreateFrame("Frame", nil, f)
+  tabs:SetPoint("TOPLEFT", SIDE_W + PAD - 4, -92)
+  tabs:SetSize(UI.CONTENT_W, 30)
+  tabs.bars = {}
+  f.tabs = tabs
+
+  -- Größe per Ziehgriff unten rechts (ändert die Fenstergröße stufenlos, wie in den Einstellungen)
+  local grip = CreateFrame("Button", nil, f)
+  grip:SetSize(22, 22)
+  grip:SetPoint("BOTTOMRIGHT", -6, 6)
+  grip:SetFrameLevel(f:GetFrameLevel() + 20)
+  grip.tex = grip:CreateTexture(nil, "OVERLAY")
+  grip.tex:SetTexture(UI.TEX.corner)
+  grip.tex:SetAllPoints()
+  grip.tex:SetTexCoord(1, 0, 1, 0)
+  grip.tex:SetVertexColor(C.gold[1], C.gold[2], C.gold[3], 0.8)
+  UI.SetTooltip(grip, "Fenstergröße", "Ziehen: Fenster größer oder kleiner machen. Zurücksetzen: Einstellungen > Fenstergröße ×.")
+  grip:SetScript("OnMouseDown", function(self)
+    local startX = GetCursorPosition()
+    local startScale = tonumber(ns.settings.scale) or 1
+    self:SetScript("OnUpdate", function()
+      local x = GetCursorPosition()
+      local delta = (x - startX) / (UIParent:GetEffectiveScale() * WIDTH)
+      ns.settings.scale = math.floor(ns.Clamp(startScale + delta, 0.7, 1.3) * 100 + 0.5) / 100
+      UI.ApplyScale()
+    end)
+  end)
+  grip:SetScript("OnMouseUp", function(self)
+    self:SetScript("OnUpdate", nil)
+    savePosition()
+    if UI.IsShown("settings") then UI.RefreshPage("settings") end
+  end)
+  f.grip = grip
 
   -- Inhaltsbereich
   local body = CreateFrame("Frame", nil, f)
@@ -331,6 +441,25 @@ function UI.Show(key)
     if def.frame then def.frame:SetShown(k == key) end
   end
   UI.current = key
+  -- Reiter zeigen/verstecken und Inhalt darunter schieben
+  local g = UI.GroupOf(key)
+  local views = g and availableViews(g) or {}
+  for gk, bar in pairs(frame.tabs.bars) do bar:SetShown(g and gk == g.key and #views > 1) end
+  if g and #views > 1 then
+    local bar = frame.tabs.bars[g.key]
+    if not bar then
+      bar = UI.Segments(frame.tabs, views, function(v) UI.PlayClick() UI.Show(v) end, UI.CONTENT_W)
+      bar:SetPoint("TOPLEFT")
+      frame.tabs.bars[g.key] = bar
+    end
+    bar:Select(key)
+    bar:Show()
+    ns.settings.lastView = ns.settings.lastView or {}
+    ns.settings.lastView[g.key] = key
+  end
+  frame.body:ClearAllPoints()
+  frame.body:SetPoint("TOPLEFT", SIDE_W + PAD - 4, (g and #views > 1) and -134 or -92)
+  frame.body:SetPoint("BOTTOMRIGHT", -PAD + 10, 18)
   local def = ensurePage(key)
   if def then
     def.frame:Show()
@@ -357,8 +486,9 @@ function UI.IsShown(key)
 end
 
 function UI.SetBadge(key, text)
-  if not frame or not frame.nav[key] then return end
-  local badge = frame.nav[key].badge
+  local g = UI.GroupOf(key)
+  if not frame or not g or not frame.nav[g.key] then return end
+  local badge = frame.nav[g.key].badge
   if text and text ~= "" then
     badge:Set(text, C.rose, true)
     badge:Show()
@@ -487,6 +617,13 @@ ns.Listen("LOGIN", function()
   end
 end)
 
+-- Namen für die Tastaturbelegung (Bindings.xml)
+BINDING_HEADER_TIRYSZENTRALE = "Tiry's Zentrale"
+BINDING_NAME_TIRYSZENTRALE_TOGGLE = "Fenster öffnen/schließen"
+BINDING_NAME_TIRYSZENTRALE_SEARCH = "Suche öffnen"
+BINDING_NAME_TIRYSZENTRALE_SHOP = "Einkaufsliste öffnen/schließen"
+BINDING_NAME_TIRYSZENTRALE_CRAFTNEXT = "Nächstes craften"
+
 SLASH_TIRYSZENTRALE1 = "/tz"
 SLASH_TIRYSZENTRALE2 = "/zentrale"
 SLASH_TIRYSZENTRALE3 = "/gold"
@@ -494,10 +631,19 @@ SlashCmdList.TIRYSZENTRALE = function(msg)
   msg = strtrim and strtrim((msg or ""):lower()) or (msg or ""):lower()
   local map = {
     [""] = nil, start = "home", home = "home", wege = "methods", methoden = "methods", guide = "methods",
-    markt = "market", preise = "market", db = "database", datenbank = "database", suche = "database", items = "database", scan = "scanner", scanner = "scanner", taschen = "scanner",
+    markt = "market", preise = "market", db = "database", datenbank = "database", items = "database", scan = "scanner", scanner = "scanner", taschen = "scanner",
     rezepte = "recipes", craft = "recipes", crafting = "recipes", farm = "farm", farmen = "farm", buch = "ledger", verkaeufe = "ledger", ["verkäufe"] = "ledger", kuerschner = "skinning", ["kürschner"] = "skinning", leder = "skinning", skin = "skinning", tagebuch = "tracker", tracker = "tracker",
     schule = "basics", ah = "basics", hilfe = "basics", optionen = "settings", einstellungen = "settings",
   }
+  if msg == "suche" or msg == "suchen" or msg == "s" then
+    UI.Search.Show()
+    return
+  end
+  if msg == "assistent" then
+    UI.Show("home")
+    UI.Wizard.Show()
+    return
+  end
   if msg == "wegpunkt" or msg == "wp" then
     ns.Maps.Clear()
     return

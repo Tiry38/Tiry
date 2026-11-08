@@ -1,5 +1,5 @@
 -- Tiry's Zentrale – Händler-Panel: erscheint neben dem Händlerfenster mit Ein-Klick-Aktionen
-local ADDON, ns = ...
+local _, ns = ...
 local UI = ns.UI
 local C = UI.C
 local A = ns.Auto

@@ -1,5 +1,5 @@
 -- Tiry's Zentrale – Startseite: persönlicher Goldplan
-local ADDON, ns = ...
+local _, ns = ...
 local UI = ns.UI
 local C = UI.C
 local M = ns.Market
@@ -70,7 +70,38 @@ function page.build(self, content, width)
   hero.money:SetPoint("TOPLEFT", hero.info, "BOTTOMLEFT", 0, -12)
   hero.profs = {}
   self.hero = hero
-  st:Add(hero, 132, 20)
+  st:Add(hero, 132, 16)
+
+  -- Dein nächster Schritt: genau EINE Handlung
+  local ns_ = CreateFrame("Frame", nil, content)
+  ns_:SetSize(width, 112)
+  ns_.bg = UI.Round(ns_, 22, "BACKGROUND", 0)
+  ns_.bg:SetColor(C.cardHi, 1)
+  ns_.glow = UI.Glow(ns_, C.hi, 260, 0.18, "BACKGROUND")
+  ns_.glow:SetPoint("LEFT", 40, 0)
+  ns_.icon = CreateFrame("Frame", nil, ns_)
+  ns_.icon:SetSize(54, 54)
+  ns_.icon:SetPoint("LEFT", 22, 0)
+  ns_.icon.bg = UI.Round(ns_.icon, 27, "ARTWORK", 0)
+  ns_.icon.bg:SetGradient(UI.GRAD, 1)
+  ns_.icon.tex = ns_.icon:CreateTexture(nil, "OVERLAY")
+  ns_.icon.tex:SetSize(26, 26)
+  ns_.icon.tex:SetPoint("CENTER")
+  ns_.icon.tex:SetVertexColor(C.dark[1], C.dark[2], C.dark[3], 1)
+  ns_.label = UI.Text(ns_, 12, "semibold", C.hi)
+  ns_.label:SetPoint("TOPLEFT", 94, -20)
+  ns_.label:SetText("DEIN NÄCHSTER SCHRITT")
+  ns_.title = UI.Text(ns_, 17, "bold", C.text)
+  ns_.title:SetPoint("TOPLEFT", ns_.label, "BOTTOMLEFT", 0, -4)
+  ns_.title:SetWidth(width - 360)
+  ns_.title:SetWordWrap(false)
+  ns_.text = UI.Para(ns_, 12, C.muted, width - 360)
+  ns_.text:SetPoint("TOPLEFT", ns_.title, "BOTTOMLEFT", 0, -4)
+  ns_.btn = UI.Button(ns_, "", "primary", 220, 40, "chevron")
+  ns_.btn:SetPoint("RIGHT", -22, 0)
+  ns_.btn:SetScript("OnClick", function() if self.nextAction then self.nextAction() end end)
+  self.next = ns_
+  st:Add(ns_, 112, 20)
 
   -- Heute für dich: die 3 Aktionen mit dem meisten Gold (ohne Einrichtung)
   local today = UI.Card(content, 20, C.card)
@@ -95,9 +126,9 @@ function page.build(self, content, width)
     r.go:SetTexture(UI.Icon("chevron"))
     r.go:SetSize(14, 14)
     r.go:SetPoint("RIGHT", -14, 0)
-    r:SetScript("OnEnter", function(self) self.bg:SetColor(C.cardHi, 1) end)
-    r:SetScript("OnLeave", function(self) self.bg:SetColor(C.inset, 1) end)
-    r:SetScript("OnClick", function(self) UI.PlayClick() if self.action then self.action() end end)
+    r:SetScript("OnEnter", function(row) row.bg:SetColor(C.cardHi, 1) end)
+    r:SetScript("OnLeave", function(row) row.bg:SetColor(C.inset, 1) end)
+    r:SetScript("OnClick", function(row) UI.PlayClick() if row.action then row.action() end end)
     today.rows[i] = r
   end
   self.today = today
@@ -116,6 +147,44 @@ function page.build(self, content, width)
     self.tops[i] = c
   end
   st:Add(row, 176, 22)
+
+  st:Title("Neu in Forever – deine Chancen", 17, C.text, 2)
+  st:Para("Seltene neue Materialien und neue Alchemie-Produkte. Deine Berufe stehen vorne. Klick = im AH suchen (AH muss offen sein).", 12, C.dim, 10)
+  local fw = math.floor((width - 36) / 4)
+  local grid = CreateFrame("Frame", nil, content)
+  grid:SetSize(width, 3 * 64 - 8)
+  self.chances = {}
+  for i = 1, 12 do
+    local b = CreateFrame("Button", nil, grid)
+    b:SetSize(fw, 56)
+    b:SetPoint("TOPLEFT", ((i - 1) % 4) * (fw + 12), -math.floor((i - 1) / 4) * 64)
+    b.bg = UI.Round(b, 16, "BACKGROUND", 0)
+    b.bg:SetColor(C.card, 1)
+    b.icon = UI.ItemIcon(b, 34)
+    b.icon:SetPoint("LEFT", 10, 0)
+    b.name = UI.Text(b, 12, "semibold", C.text)
+    b.name:SetPoint("TOPLEFT", b.icon, "TOPRIGHT", 8, 0)
+    b.name:SetWidth(fw - 62)
+    b.name:SetWordWrap(false)
+    b.price = UI.Text(b, 12, "bold", C.hi)
+    b.price:SetPoint("TOPLEFT", b.name, "BOTTOMLEFT", 0, -3)
+    b:SetScript("OnEnter", function(btn)
+      btn.bg:SetColor(C.cardHi, 1)
+      GameTooltip:SetOwner(btn, "ANCHOR_RIGHT")
+      pcall(GameTooltip.SetItemByID, GameTooltip, btn.id)
+      GameTooltip:AddLine(" ")
+      GameTooltip:AddLine(btn.how or "", 1, 0.6, 0.16, true)
+      GameTooltip:Show()
+    end)
+    b:SetScript("OnLeave", function(btn) btn.bg:SetColor(C.card, 1) GameTooltip:Hide() end)
+    b:SetScript("OnClick", function(btn)
+      if IsShiftKeyDown() then ns.LinkItem(btn.id) return end
+      local ok, err = M.SearchNow({ btn.id })
+      if not ok then ns.Print("|cffff6b81" .. tostring(err) .. "|r") end
+    end)
+    self.chances[i] = b
+  end
+  st:Add(grid, 3 * 64 - 8, 22)
 
   st:Title("Schnellstart für Einsteiger", 17, C.text, 4)
   local steps = {
@@ -170,6 +239,28 @@ local FACTION = { Alliance = "Allianz", Horde = "Horde" }
 function page.refresh(self)
   local p = ns.player
   ns.UpdatePlayer()
+  -- Einsteiger-Assistent beim allerersten Öffnen
+  if not ns.settings.wizardDone and UI.Wizard and not UI.Wizard.IsShown() and not self.wizardTried then
+    self.wizardTried = true
+    UI.Wizard.Show()
+  end
+  -- Nächster Schritt
+  local step = ns.Guide.NextStep()
+  self.next.title:SetText(step.title)
+  self.next.text:SetText(step.text)
+  self.next.btn:SetLabel(step.button)
+  self.next.icon.tex:SetTexture(UI.Icon(step.icon or "star"))
+  self.nextAction = step.action
+  -- Forever-Chancen
+  for i, c in ipairs(ns.Guide.ForeverChances()) do
+    local b = self.chances[i]
+    if b then
+      b.id, b.how = c.id, c.how .. (c.mine and " – passt zu deinem Beruf!" or "")
+      b.icon:SetItem(c.id)
+      UI.FitText(b.name, ns.Item(c.id).name, b:GetWidth() - 62)
+      b.price:SetText((c.price and ns.Money(c.price) or "|cff8a9a94kein Preis|r") .. (c.mine and "  |cff61eb8f· dein Beruf|r" or ""))
+    end
+  end
   local hero = self.hero
   hero.hello:SetText("Hey " .. (p.name ~= "" and p.name or "Abenteurer") .. "!")
   hero.info:SetText("Level " .. p.level .. "  ·  " .. (FACTION[p.faction] or p.faction))
