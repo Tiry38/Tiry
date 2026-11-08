@@ -221,6 +221,9 @@ function page.refresh(self)
 
   -- Kreislauf
   local loop = self.loop
+  -- Wochenbilanz (echter Gewinn aus dem Herstell-Buch) statt Erklärtext, sobald es Daten gibt
+  local week = ns.CraftBook.WeekLine()
+  UI.FitText(loop.sub, week or "Immer der orange markierte Schritt ist dran. Ist er erledigt, kommt der nächste.", loop:GetWidth() - 40)
   for i, st in ipairs(ns.Guide.CraftLoop()) do
     local r = loop.rows[i]
     r.title:SetText(st.title)

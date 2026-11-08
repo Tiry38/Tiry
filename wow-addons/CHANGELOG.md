@@ -1,5 +1,14 @@
 # Changelog – Tiry's Zentrale
 
+## 5.8.0 (08.11.2026)
+**Herstellen mit echten Zahlen.**
+- **Neu: Craften → „Ergebnis“.** Was dir Herstellen wirklich gebracht hat: hergestellt, verkauft, echter Gewinn pro Stück und gesamt (7/30/60 Tage). Materialkosten = was du im AH wirklich bezahlt hast (Ø 30 Tage), Erlös = Verkaufsbrief. Verlust-Rezepte sind rot markiert.
+- **Empfohlene Menge („Je Rezept: auto“, neuer Standard).** Pro Rezept so viele, wie sich bei dir in einer Woche verkaufen, minus was schon in Taschen, Bank und im AH liegt. Ohne Verkaufsdaten vorsichtig: 2 Stück (Stapelware 5). Im Craft-Planer steht pro Rezept „mach 3×“ oder „schon 4 im Umlauf“.
+- **Craft-Planer:** zeigt bei Rezepten mit Verkäufen den echten Gewinn pro Stück.
+- **Neu einstellen (Auktionen):** unterbotene, abgelaufene und frisch hergestellte Items mit Preisvorschlag (günstigstes Angebot minus 1 Kupfer, nie unter „Nicht unter“). Liegt der Markt unter deinen Kosten: Hinweis „lieber warten“. „Neu einstellen: Suchliste“ legt alles als Auctionator-Liste an. Einstellen selbst bleibt ein Klick in Auctionator.
+- **Skillen mit Gewinn (Was lernen?):** Der Skill-Plan rechnet netto – Material minus AH-Verkauf des Ergebnisses – und nimmt Material, das du günstiger selbst herstellst. Rezepte, die beim Skillen Gold bringen, gewinnen.
+- **Startseite:** Wochenbilanz im Gold-Kreislauf („Diese Woche: +12g echt verdient · 8 verkauft · bestes: …“).
+
 ## 5.7.0 (08.11.2026)
 **Craft-Planer sortieren:** Klick auf MATERIAL, VERKAUF oder GEWINN sortiert teuer zuerst, nochmal klicken günstig zuerst. Ein Pfeil zeigt die Richtung. Die Wahl bleibt gespeichert.
 

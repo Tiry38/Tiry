@@ -230,11 +230,14 @@ function page.build(self, content, width)
   st:Add(stepHead(content, 3, "Liste erstellen, einkaufen, herstellen", width), 28, 10)
   local mk = CreateFrame("Frame", nil, content)
   mk:SetSize(width, 36)
-  self.perRecipe = UI.Stepper(mk, "Je Rezept", 230, function() return cfg().perRecipe or 2 end,
-    function(v) cfg().perRecipe = v end, 1, 1, 50, function(v) return v .. "×" end,
-    function(t) return tonumber((t or ""):match("%d+")) end, "Wie oft jedes lohnende Rezept auf die Liste soll. Auf die Zahl klicken zum Eintragen.")
+  -- 0 = "auto": so viele, wie sich bei dir verkaufen (minus was schon da ist)
+  if not cfg().perRecipeAuto then cfg().perRecipeAuto, cfg().perRecipe = true, 0 end
+  self.perRecipe = UI.Stepper(mk, "Je Rezept", 230, function() return cfg().perRecipe or 0 end,
+    function(v) cfg().perRecipe = v end, 1, 0, 50, function(v) return v == 0 and "auto" or (v .. "×") end,
+    function(t) if (t or ""):lower():find("auto") then return 0 end return tonumber((t or ""):match("%d+")) end,
+    "Wie oft jedes lohnende Rezept auf die Liste soll. \"auto\" = so viele, wie sich bei dir in einer Woche verkaufen, minus was schon in Taschen, Bank und im AH liegt.")
   self.perRecipe:SetPoint("LEFT")
-  self.perRecipe:SetDefault(2)
+  self.perRecipe:SetDefault(0)
   self.makeBtn = UI.Button(mk, "Liste erstellen", "primary", 170, 34, "star")
   self.makeBtn:SetPoint("LEFT", self.perRecipe, "RIGHT", 40, 0)
   self.makeBtn:SetScript("OnClick", function() page.MakeList(self) end)
@@ -393,6 +396,7 @@ local function resolveMarks()
       -- merken, was du hergestellt hast -> Schritt "Verkaufen"
       ns.char.craftedOut = ns.char.craftedOut or {}
       ns.char.craftedOut[r.out] = (ns.char.craftedOut[r.out] or 0) + done * math.max(r.qty, 1)
+      ns.CraftBook.Record(r, done) -- echte Kosten merken -> "Ergebnis"
       if pendingCraft and pendingCraft.recipe == r.id then
         pendingCraft.left = pendingCraft.left - done
         if pendingCraft.left <= 0 then pendingCraft = nil end
@@ -482,16 +486,39 @@ function page.MakeList(self)
     ns.Print("Gerade bringt kein Rezept genug Gold – Mindestgewinn senken oder im AH scannen.")
     return
   end
-  local per = cfg().perRecipe or 2
   local q = queue()
   for i = #q, 1, -1 do
     if q[i].prof == self.prof then table.remove(q, i) end
   end
-  for _, e in ipairs(list) do q[#q + 1] = { recipe = e.r.id, prof = e.r.prof, n = per } end
+  local added, skipped = page.FillQueue(list)
   ns.Shop.ResetSkips()
-  ns.Print(string.format("Craft-Liste erstellt: %d Rezepte je %d×. Das Einkaufsfenster zeigt dir, was du noch kaufen musst.", #list, per))
+  ns.Print(page.ListText(added, skipped, ""))
   ns.Shop.Show()
   page.refresh(self)
+end
+
+-- Rezepte in die Craft-Liste: feste Menge oder "auto" (empfohlene Menge je Rezept)
+function page.FillQueue(list)
+  local per = cfg().perRecipe or 0
+  local q, added, skipped = queue(), 0, 0
+  for _, e in ipairs(list) do
+    local n = per
+    if per == 0 then n = ns.CraftBook.Suggest(e.r) end
+    if n > 0 then
+      q[#q + 1] = { recipe = e.r.id, prof = e.r.prof, n = n }
+      added = added + 1
+    else
+      skipped = skipped + 1
+    end
+  end
+  return added, skipped
+end
+
+function page.ListText(added, skipped, suffix)
+  local per = cfg().perRecipe or 0
+  local how = per == 0 and "in empfohlener Menge" or ("je " .. per .. "×")
+  return string.format("Craft-Liste erstellt%s: %d Rezepte %s.%s Jetzt einkaufen – die Einkaufsliste ist offen.", suffix, added, how,
+    skipped > 0 and (" " .. skipped .. " übersprungen, davon liegt schon genug in Taschen/AH.") or "")
 end
 
 -- Craft-Liste für ALLE deine Berufe auf einmal (Startseite: "Liste erstellen")
@@ -514,12 +541,10 @@ function page.MakeListAll()
     UI.Show("recipes")
     return
   end
-  local per = cfg().perRecipe or 2
-  local q = queue()
-  wipe(q)
-  for _, e in ipairs(list) do q[#q + 1] = { recipe = e.r.id, prof = e.r.prof, n = per } end
+  wipe(queue())
+  local added, skipped = page.FillQueue(list)
   ns.Shop.ResetSkips()
-  ns.Print(string.format("Craft-Liste erstellt: %d Rezepte je %d× (alle Berufe). Jetzt einkaufen – die Einkaufsliste ist offen.", #list, per))
+  ns.Print(page.ListText(added, skipped, " (alle Berufe)"))
   ns.Shop.Show()
   if self.frame then page.refresh(self) end
 end
@@ -757,6 +782,10 @@ function page.refresh(self)
         local d = DIFF[R.Difficulty(r, rank) or 3]
         notes[#notes + 1] = UI.Hex(d[2]) .. d[1] .. "|r"
         notes[#notes + 1] = "herstellbar: " .. craftable(r)
+        local sug, why = ns.CraftBook.Suggest(r)
+        notes[#notes + 1] = sug > 0 and ("|cff61eb8fmach " .. sug .. "×|r") or ("|cff93a39d" .. why .. "|r")
+        local real, nSold = ns.CraftBook.RealPerUnit(r.out)
+        if real then notes[#notes + 1] = (real >= 0 and "|cff61eb8fechte " or "|cffff6b81echte ") .. ns.Money(math.abs(real)) .. (real >= 0 and " Gewinn" or " Verlust") .. "/Stück (" .. nSold .. " verkauft)|r" end
       end
       local rate = ns.Ledger.SaleRate(r.out)
       if rate then notes[#notes + 1] = "verkauft sich: " .. math.floor(rate * 100 + 0.5) .. " %" end

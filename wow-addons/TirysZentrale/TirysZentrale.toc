@@ -3,7 +3,7 @@
 ## Notes: Deine Gold-Zentrale für WoW Forever: Craft-Planer mit Einkaufsliste, Kürschner-Zentrale, Farm-Spots auf der Karte, Live-Preise (Auctionator), Autopilot und komplette deutsche Item-Datenbank.
 ## Notes-deDE: Deine Gold-Zentrale für WoW Forever: Craft-Planer mit Einkaufsliste, Kürschner-Zentrale, Farm-Spots auf der Karte, Live-Preise (Auctionator), Autopilot und komplette deutsche Item-Datenbank.
 ## Author: Tiry
-## Version: 5.7.0
+## Version: 5.8.0
 ## Category: Auctions
 ## Category-enUS: Auctions
 ## Category-deDE: Auktionen
@@ -42,6 +42,7 @@ Alerts.lua
 Advisor.lua
 Guide.lua
 AuctionWatch.lua
+CraftBook.lua
 UI\Widgets.lua
 UI\ItemList.lua
 UI\Main.lua
@@ -62,6 +63,7 @@ UI\PageAlerts.lua
 UI\PageAdvisor.lua
 UI\PageGlossary.lua
 UI\PageAuctions.lua
+UI\PageResults.lua
 UI\MerchantHelper.lua
 UI\ShopWindow.lua
 UI\Wizard.lua

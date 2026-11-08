@@ -78,12 +78,25 @@ end
 local function craftCost(r)
   local cost = 0
   for _, re in ipairs(r.reagents) do
-    local unit = M.BuyCost(re.id)
+    local unit = ns.Scanner.MatCost(re.id) -- günstigster Weg: kaufen oder (mit eigenem Rezept) selbst herstellen
     if not unit then return nil end
     cost = cost + unit * re.n
   end
   return cost
 end
+
+-- Was bringt das Ergebnis im AH zurück? (nur verkäuflich, frischer Preis, kein Ladenhüter) – sonst 0
+local function resale(r)
+  local e = ns.DB.Get(r.out)
+  if e and (e.bind == 1 or e.bind == 4) then return 0 end
+  local age = M.Age(r.out)
+  local price = M.Price(r.out)
+  if not price or not age or age > 3 then return 0 end
+  local rate, n = ns.Ledger.SaleRate(r.out)
+  if rate and n >= 4 and rate < 0.25 then return 0 end
+  return math.floor(M.Net(price) * math.max(r.qty or 1, 1))
+end
+AD.Resale = resale
 
 -- Skill-Plan: von deinem Skill bis zum Ziel (Standard +25, höchstens bis zum Maximum)
 -- Rückgabe: steps { recipe, from, to, crafts, cost }, mats { [id] = n }, total, reached
@@ -95,14 +108,19 @@ function AD.Plan(profKey, steps)
   local target = math.min(start + (steps or 25), (p.maxRank and p.maxRank > 0) and p.maxRank or start + (steps or 25))
   if target <= start then return nil, "Du bist am Maximum – beim Lehrer die nächste Stufe lernen." end
   local known = R.List(profKey, "known")
-  local costs = {}
-  for _, r in ipairs(known) do costs[r] = craftCost(r) end
-  local plan, mats, total = {}, {}, 0
+  -- Skillen mit Gewinn: gezählt wird, was ein Craft NETTO kostet (Material minus AH-Verkauf des Ergebnisses).
+  -- So gewinnen Rezepte, die beim Skillen sogar Gold bringen.
+  local costs, nets = {}, {}
+  for _, r in ipairs(known) do
+    costs[r] = craftCost(r)
+    if costs[r] then nets[r] = costs[r] - resale(r) end
+  end
+  local plan, mats, total, netTotal = {}, {}, 0, 0
   local skill = start
   while skill < target do
     local best, bestPer, bestCrafts
     for _, r in ipairs(known) do
-      local c = costs[r]
+      local c = nets[r]
       local chance = AD.Chance(r, skill)
       if c and chance >= 0.2 then -- unter 20 % ist zu teuer/unsicher
         local crafts = 1 / chance
@@ -123,10 +141,12 @@ function AD.Plan(profKey, steps)
   for _, s in ipairs(plan) do
     s.crafts = math.ceil(s.exp - 0.001)
     s.cost = costs[s.recipe] * s.crafts
+    s.net = nets[s.recipe] * s.crafts -- negativ = du verdienst beim Skillen
     total = total + s.cost
+    netTotal = netTotal + s.net
     for _, re in ipairs(s.recipe.reagents) do mats[re.id] = (mats[re.id] or 0) + re.n * s.crafts end
   end
-  return { steps = plan, mats = mats, total = total, start = start, reached = skill, target = target }
+  return { steps = plan, mats = mats, total = total, net = netTotal, start = start, reached = skill, target = target }
 end
 
 -- Plan in die Craft-Liste übernehmen (dann zeigt die Einkaufsliste das Material)

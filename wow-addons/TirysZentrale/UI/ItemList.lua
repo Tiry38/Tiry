@@ -26,7 +26,7 @@ function UI.ItemList(parent, width, columns, opts)
     t:SetPoint("RIGHT", head, "LEFT", x - 12, 0)
     t:SetText(col.label:upper())
     col.x = x - 12
-    list.heads[col.key] = { text = t, col = col }
+    list.heads[col.key] = { text = t, col = col, head = head }
     -- Sortieren per Klick auf die Spaltenüberschrift
     if opts and opts.onSort then
       local b = UI.SafeButton(head)
@@ -34,7 +34,7 @@ function UI.ItemList(parent, width, columns, opts)
       b:SetPoint("RIGHT", head, "LEFT", x - 8, 0)
       b.arrow = b:CreateTexture(nil, "OVERLAY")
       b.arrow:SetTexture(UI.Icon("chevron"))
-      b.arrow:SetSize(12, 12)
+      b.arrow:SetSize(10, 10)
       b.arrow:SetPoint("RIGHT", t, "RIGHT", 0, 0)
       b.arrow:Hide()
       b:SetScript("OnClick", function() UI.PlayClick() opts.onSort(col.key) end)
@@ -61,14 +61,15 @@ function UI.ItemList(parent, width, columns, opts)
       local on = k == key
       local c = on and C.text or C.dim
       h.text:SetTextColor(c[1], c[2], c[3], 1)
-      h.text:SetText(h.col.label:upper())
+      -- aktive Spalte: Text 14 px nach links, rechts daneben der Pfeil
+      h.text:ClearAllPoints()
+      h.text:SetPoint("RIGHT", h.head, "LEFT", h.col.x - ((on and h.btn) and 14 or 0), 0)
       if h.btn then
         h.btn.arrow:SetShown(on)
         if on then
           h.btn.arrow:SetRotation(desc and -math.pi / 2 or math.pi / 2)
           h.btn.arrow:ClearAllPoints()
-          h.btn.arrow:SetPoint("RIGHT", h.text, "RIGHT", 0, 0)
-          h.text:SetText(h.col.label:upper() .. "    ") -- Platz für den Pfeil
+          h.btn.arrow:SetPoint("RIGHT", h.head, "LEFT", h.col.x, 0)
         end
       end
     end

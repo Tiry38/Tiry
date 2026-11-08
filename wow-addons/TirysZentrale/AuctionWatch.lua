@@ -532,3 +532,62 @@ ns.Listen("AUCTIONS_CHANGED", function()
   local n = AW.Summary().undercut
   if ns.UI and ns.UI.SetBadge then ns.UI.SetBadge("auctions", n > 0 and tostring(n) or nil) end
 end)
+
+----------------------------------------------------------------------------
+-- Neu einstellen: unterboten, abgelaufen (zurück in der Tasche) oder frisch hergestellt
+-- Preisvorschlag = günstigstes Angebot minus 1 Kupfer, aber NIE unter "Nicht unter" (Materialkosten nach Gebühr).
+-- Einstellen selbst machst du in Auctionator (Blizzard erlaubt Addons kein Einstellen ohne Klick).
+----------------------------------------------------------------------------
+function AW.Floor(id)
+  local r = ns.Recipes.ByOutput(id)
+  if not r then return nil end
+  local unit = ns.CraftBook.UnitCost(id)
+  if not unit then
+    local _, _, cost, unknown = ns.Scanner.RecipeProfit(r)
+    if not cost or unknown > 0 or (r.qty or 0) <= 0 then return nil end
+    unit = cost / r.qty
+  end
+  return math.max(math.ceil(unit / M.CutFactor()), M.VendorSell(id) or 0)
+end
+
+local function suggest(id, competitor)
+  local base = competitor or M.Price(id)
+  local floor = AW.Floor(id)
+  if not base then return floor, floor, false end
+  local s = math.max(base - 1, 1)
+  if floor and s < floor then return floor, floor, true end -- Markt liegt unter deinen Kosten: lieber warten
+  return s, floor, false
+end
+AW.Suggest = suggest
+
+function AW.RelistList()
+  local s = store()
+  local list, seen = {}, {}
+  local function bagCount(id) return (C_Item and C_Item.GetItemCount and C_Item.GetItemCount(id, false)) or 0 end
+  -- a) unterboten (liegt noch im AH)
+  for _, a in ipairs(s.list) do
+    if a.status == "active" and a.undercut and not (a.expires and a.expires < time()) then
+      local price, floor, wait = suggest(a.id, a.competitor)
+      list[#list + 1] = { id = a.id, qty = a.qty, where = "unterboten", price = price, floor = floor, wait = wait, mine = a.unit }
+      seen[a.id .. "|ah"] = true
+    end
+  end
+  -- b) abgelaufen und zurück in der Tasche
+  for _, a in ipairs(s.list) do
+    local expired = a.status == "expired" or (a.status == "active" and a.expires and a.expires < time())
+    if expired and not seen[a.id] and bagCount(a.id) > 0 then
+      local price, floor, wait = suggest(a.id)
+      list[#list + 1] = { id = a.id, qty = bagCount(a.id), where = "abgelaufen", price = price, floor = floor, wait = wait }
+      seen[a.id] = true
+    end
+  end
+  -- c) frisch hergestellt, noch nicht eingestellt
+  for _, e in ipairs((ns.Guide.ReadyToSell())) do
+    if not seen[e.id] then
+      local price, floor, wait = suggest(e.id)
+      list[#list + 1] = { id = e.id, qty = e.n, where = "hergestellt", price = price, floor = floor, wait = wait }
+      seen[e.id] = true
+    end
+  end
+  return list
+end

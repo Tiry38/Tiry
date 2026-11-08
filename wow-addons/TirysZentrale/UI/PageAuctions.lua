@@ -66,16 +66,27 @@ function page.build(self, content, width)
     ns.Print("Prüfe deine Auktionen ...")
   end)
   UI.SetTooltip(self.checkBtn, "Jetzt prüfen", "Liest deine Auktionen neu und vergleicht sie mit den günstigsten fremden Angeboten. Geht nur bei offenem Auktionshaus – passiert beim Öffnen aber auch automatisch.")
-  self.listBtn = UI.Button(actions, "Unterbotene als Suchliste", "soft", 260, 34, "cart")
+  self.listBtn = UI.Button(actions, "Neu einstellen: Suchliste", "soft", 260, 34, "cart")
   self.listBtn:SetPoint("LEFT", self.checkBtn, "RIGHT", 10, 0)
   self.listBtn:SetScript("OnClick", function()
     local ids, seen = {}, {}
-    for _, a in ipairs(AW.UndercutList()) do if not seen[a.id] then seen[a.id] = true ids[#ids + 1] = a.id end end
-    local ok, n = M.CreateShoppingList("Zentrale: Unterboten", ids)
-    ns.Print(ok and ("Liste |cffff9929Zentrale: Unterboten|r angelegt (" .. n .. " Items). Neu einstellen geht am schnellsten in Auctionator > \"Unterboten\".")
-      or ("|cffff6b81" .. tostring(n) .. "|r"))
+    for _, a in ipairs(AW.RelistList()) do if not seen[a.id] then seen[a.id] = true ids[#ids + 1] = a.id end end
+    local ok, n = M.CreateShoppingList("Zentrale: Neu einstellen", ids)
+    ns.Print(ok and ("Liste |cffff9929Zentrale: Neu einstellen|r angelegt (" .. n .. " Items) – zeigt dir die Konkurrenz. "
+      .. "Einstellen: Auctionator > Verkaufen > Item anklicken, Preis aus \"Vorschlag\" nehmen.") or ("|cffff6b81" .. tostring(n) .. "|r"))
   end)
+  UI.SetTooltip(self.listBtn, "Neu einstellen", "Legt alle Items aus \"Neu einstellen\" als Auctionator-Suchliste an, damit du die aktuelle Konkurrenz siehst.")
   st:Add(actions, 34, 18)
+
+  -- Neu einstellen: unterboten, abgelaufen, frisch hergestellt – mit Preisvorschlag
+  self.relistTitle = UI.Text(content, 17, "bold", C.text)
+  self.relistTitle:SetText("Neu einstellen")
+  self.relist = UI.ItemList(content, width, {
+    { key = "qty", label = "Menge", width = 56 },
+    { key = "where", label = "Warum", width = 96 },
+    { key = "price", label = "Vorschlag", width = 96, bold = true },
+    { key = "floor", label = "Nicht unter", width = 96 },
+  })
 
   self.activeTitle = UI.Text(content, 17, "bold", C.text)
   self.activeTitle:SetText("Im Auktionshaus")
@@ -135,7 +146,8 @@ function page.refresh(self)
   self.hint:SetText(stand .. (M.ahOpen and ("Auktionshaus offen: Deine Auktionen sind eingelesen. " .. auto)
     or "Verkäufe erkennt Tiry's Zentrale überall sofort – ob du unterboten wurdest, sieht man nur am Auktionshaus."))
   self.checkBtn:SetEnabled(M.ahOpen == true)
-  self.listBtn:SetEnabled(sum.undercut > 0 and M.HasAuctionator())
+  local relist = AW.RelistList()
+  self.listBtn:SetEnabled(#relist > 0 and M.HasAuctionator())
 
   local entries = {}
   for _, a in ipairs(s.list) do
@@ -168,6 +180,42 @@ function page.refresh(self)
   end)
   local content = self.frame.content
   local y = 70 + 14 + 34 + 10 + 34 + 18
+  -- Neu einstellen (nur wenn es etwas gibt)
+  local WHY = { unterboten = "|cffff6b81unterboten|r", abgelaufen = "|cffff9929abgelaufen|r", hergestellt = "|cff61eb8fhergestellt|r" }
+  local re = {}
+  for _, e in ipairs(relist) do
+    re[#re + 1] = {
+      id = e.id,
+      note = e.wait and "|cffff9929AH-Preis liegt unter deinen Kosten – lieber warten oder zum Vorschlag einstellen|r"
+        or (e.mine and ("du: " .. ns.Money(e.mine) .. "/Stück") or "Klick: im AH suchen · Shift-Klick: verlinken"),
+      cells = { qty = tostring(e.qty), where = WHY[e.where] or e.where,
+        price = e.price and ns.Money(e.price) or "|cff8a9a94kein Preis|r", floor = e.floor and ns.Money(e.floor) or "–" },
+      tip = { "Vorschlag = günstigstes Angebot minus 1 Kupfer, nie unter \"Nicht unter\".",
+        "\"Nicht unter\" = deine Materialkosten pro Stück nach AH-Gebühr.",
+        "Einstellen: Auctionator > Verkaufen > Item anklicken." },
+      onClick = function()
+        if M.ahOpen then
+          local ok, err = M.SearchNow({ e.id })
+          if not ok then ns.Print("|cffff6b81" .. tostring(err) .. "|r") end
+        else
+          ns.Print("Öffne das Auktionshaus – dann zeigt ein Klick die aktuelle Konkurrenz.")
+        end
+      end,
+    }
+  end
+  if #re > 0 then
+    self.relistTitle:ClearAllPoints()
+    self.relistTitle:SetPoint("TOPLEFT", content, "TOPLEFT", 0, -y)
+    self.relistTitle:Show()
+    y = y + 30
+    self.relist:ClearAllPoints()
+    self.relist:SetPoint("TOPLEFT", content, "TOPLEFT", 0, -y)
+    self.relist:Show()
+    y = y + self.relist:SetEntries(re, "") + 18
+  else
+    self.relistTitle:Hide()
+    self.relist:Hide()
+  end
   self.activeTitle:ClearAllPoints()
   self.activeTitle:SetPoint("TOPLEFT", content, "TOPLEFT", 0, -y)
   y = y + 30

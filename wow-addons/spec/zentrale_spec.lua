@@ -786,6 +786,87 @@ describe("Craft-Planer: Sortieren per Spaltenkopf", function()
   end)
 end)
 
+describe("Herstell-Buch: echter Gewinn, Menge, Neu einstellen, Wochenbilanz", function()
+  it("echter Gewinn = Verkaufsbrief minus bezahltes Material", function()
+    local ns, W = E.load({ prices = { [2318] = 300, [2304] = 2000 } })
+    local outName = ns.Item(2304).name
+    -- 10 Leichtes Leder im AH gekauft für zusammen 1000 (= 100 pro Stück, AH-Preis heute 300)
+    W.mails = { { subject = "Auktion gewonnen", money = 0, invoice = { "buyer", ns.Item(2318).name, "Händler", 1000, 10 } } }
+    W.fire("MAIL_SHOW") W.flush()
+    W.mails = {}
+    W.fire("MAIL_CLOSED") W.flush()
+    assert.are.equal(100, ns.CraftBook.PaidUnit(2318))
+    -- 2× Leichtes Rüstungsset hergestellt
+    ns.char.queue = { { recipe = 2152, prof = "LEATHERWORKING", n = 2 } }
+    W.fire("UNIT_SPELLCAST_SUCCEEDED", "player", "g", 2152) W.flush()
+    W.fire("UNIT_SPELLCAST_SUCCEEDED", "player", "g", 2152) W.flush()
+    assert.are.equal(100, ns.CraftBook.UnitCost(2304))
+    -- 1 verkauft: 900 nach Gebühr im Brief
+    W.mails = { { subject = "Auktion erfolgreich", money = 900, invoice = { "seller", outName, "Käufer", 950, 1 } } }
+    W.fire("MAIL_SHOW") W.flush()
+    local list, t = ns.CraftBook.Report(7)
+    assert.are.equal(2304, list[1].id)
+    assert.are.equal(2, list[1].made)
+    assert.are.equal(1, list[1].sold)
+    assert.are.equal(800, list[1].profit)
+    assert.are.equal(800, t.profit)
+    assert.truthy(ns.CraftBook.WeekLine():find("echt verdient", 1, true))
+    assert.are.equal(800, (ns.CraftBook.RealPerUnit(2304)))
+    ns.UI.Show("results")
+    assert.truthy(ns.UI.pages.results.list.rows[1]:IsShown())
+    ns.UI.Show("home")
+    assert.are.same({}, W.errors)
+  end)
+
+  it("empfohlene Menge: vorsichtig ohne Verkäufe, sonst Wochenabsatz minus Bestand", function()
+    local ns, W = E.load({ prices = { [2318] = 300, [2304] = 2000 } })
+    local r = ns.Recipes.Get(2152)
+    local n = ns.CraftBook.Suggest(r)
+    assert.are.equal((ns.Item(2304).stack or 1) > 1 and 5 or 2, n)
+    -- 3 Verkäufe à 2 Stück in den letzten 14 Tagen -> 3 pro Woche
+    ns.db.ledger = { sales = {}, buys = {}, expired = {}, seen = {} }
+    for i = 1, 3 do table.insert(ns.db.ledger.sales, { t = W.now - i * 86400, id = 2304, n = 2, money = 1000 }) end
+    assert.are.equal(3, (ns.CraftBook.Suggest(r)))
+    -- 3 liegen schon in der Tasche -> nichts mehr herstellen
+    W.bags = { [0] = { { itemID = 2304, stackCount = 3, quality = 2 } } }
+    local k, why = ns.CraftBook.Suggest(r)
+    assert.are.equal(0, k)
+    assert.truthy(why:find("Umlauf", 1, true))
+    -- "auto" in der Craft-Liste: übersprungen
+    ns.settings.craft.perRecipe = 0
+    local added, skipped = ns.UI.pages.recipes.FillQueue({ { r = r } })
+    assert.are.equal(0, added)
+    assert.are.equal(1, skipped)
+  end)
+
+  it("neu einstellen: Vorschlag = Konkurrenz minus 1 Kupfer, nie unter den Kosten", function()
+    local ns, W = E.load({ prices = { [2318] = 300, [2304] = 2000 } })
+    local s = ns.AH.Store()
+    s.list = { { auctionID = 1, id = 2304, qty = 1, unit = 5000, status = "active", undercut = true, competitor = 4000, expires = W.now + 3600 } }
+    local l = ns.AH.RelistList()
+    assert.are.equal("unterboten", l[1].where)
+    assert.are.equal(3999, l[1].price)
+    assert.are.equal(math.ceil(300 / 0.95), l[1].floor)
+    s.list[1].competitor = 200
+    l = ns.AH.RelistList()
+    assert.are.equal(l[1].floor, l[1].price)
+    assert.is_true(l[1].wait)
+    ns.UI.Show("auctions")
+    assert.is_true(ns.UI.pages.auctions.relist:IsShown())
+    assert.are.same({}, W.errors)
+  end)
+
+  it("Skill-Plan rechnet netto (Material minus Verkauf)", function()
+    local ns = E.load({ prices = { [2318] = 300, [2320] = 10, [4231] = 500, [2304] = 2000, [2312] = 5000, [2307] = 4000 } })
+    local plan = ns.Advisor.Plan("LEATHERWORKING", 10)
+    if plan and #plan.steps > 0 then
+      assert.truthy(plan.net <= plan.total)
+      assert.truthy(plan.steps[1].net)
+    end
+    assert.are.equal(math.floor(2000 * 0.95), ns.Advisor.Resale(ns.Recipes.Get(2152)))
+  end)
+end)
+
 describe("Hergestellt -> Craft-Liste abhaken (alle Wege, nie doppelt)", function()
   local function setup3(ns, W)
     ns.char.queue = { { recipe = 2164, prof = "LEATHERWORKING", n = 3 } }

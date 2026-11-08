@@ -163,14 +163,17 @@ function page.refresh(self)
     else
       self.plan = plan
       for _, s in ipairs(plan.steps) do
-        lines[#lines + 1] = string.format("|cffff9929Skill %d bis %d:|r %d× %s  |cff93a39d(%s)|r", s.from, s.to, s.crafts, s.recipe.name, ns.Money(s.cost))
+        local back = s.net and (s.net <= 0 and ("|cff61eb8f+" .. ns.Money(-s.net) .. " Gewinn|r") or ("netto " .. ns.Money(s.net))) or ns.Money(s.cost)
+        lines[#lines + 1] = string.format("|cffff9929Skill %d bis %d:|r %d× %s  |cff93a39d(Material %s · %s)|r", s.from, s.to, s.crafts, s.recipe.name, ns.Money(s.cost), back)
       end
       local mats = {}
       for id, n in pairs(plan.mats) do mats[#mats + 1] = n .. "× " .. ns.Item(id).name end
       table.sort(mats)
       lines[#lines + 1] = ""
       lines[#lines + 1] = "|cffff9929Material zusammen:|r " .. table.concat(mats, ", ")
-      lines[#lines + 1] = string.format("|cffff9929Kosten gesamt: %s|r%s", ns.Money(plan.total),
+      local netText = plan.net <= 0 and ("|cff61eb8fdu verdienst dabei sogar " .. ns.Money(-plan.net) .. "|r")
+        or ("nach dem Verkauf der Ergebnisse netto nur " .. ns.Money(plan.net))
+      lines[#lines + 1] = string.format("|cffff9929Material gesamt: %s|r · %s%s", ns.Money(plan.total), netText,
         plan.reached < plan.target and string.format("  |cff93a39d(reicht bis Skill %d – danach neue Rezepte lernen)|r", plan.reached) or "")
     end
   end

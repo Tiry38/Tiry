@@ -23,6 +23,8 @@ Auf der Startseite steht dein **Gold-Kreislauf**. Der orange Schritt ist immer d
 3. **Herstellen:** **„Nächstes craften“** oder ganz normal im Berufsfenster. Jedes Stück wird von selbst abgehakt.
 4. **Verkaufen:** Unter **Craften → Craft-Planer → Schritt 4** stehen deine hergestellten Items mit **„Nicht unter“**-Preis. Im AH: Auctionator → „Verkaufen“ → Item anklicken. Nie unter diesem Preis verkaufen.
 
+Was dir Herstellen wirklich gebracht hat, zeigt **Craften → „Ergebnis“**. „Je Rezept: auto“ macht von jedem Rezept nur so viele, wie sich bei dir verkaufen.
+
 Was du als Nächstes lernen solltest, zeigt **Craften → „Was lernen?“**: Rezepte für deinen Skill, die sich lohnen. Shift-Klick legt sie direkt in die Auctionator-Suche.
 
 ## Gut zu wissen

@@ -15,7 +15,7 @@ UI.order = {}
 -- Menü: 7 Hauptpunkte, darunter Reiter (Ansichten). Ansichten, die es nicht gibt, werden übersprungen.
 UI.GROUPS = {
   { key = "start", label = "Start", icon = "home", views = { { "home", "Goldplan" }, { "methods", "Goldwege" } } },
-  { key = "berufe", label = "Craften", icon = "flask", views = { { "recipes", "Craft-Planer" }, { "advisor", "Was lernen?" } } },
+  { key = "berufe", label = "Craften", icon = "flask", views = { { "recipes", "Craft-Planer" }, { "advisor", "Was lernen?" }, { "results", "Ergebnis" } } },
   { key = "farmen", label = "Farmen", icon = "pin", views = { { "farm", "Farm-Guide" }, { "skinning", "Kürschner" }, { "session", "Farm-Session" } } },
   { key = "markt", label = "Markt", icon = "coins", views = { { "market", "Preise" }, { "alerts", "Preisalarm" }, { "scanner", "Taschen & Händler" }, { "database", "Item-Suche" } } },
   { key = "auktionen", label = "Auktionen", icon = "receipt", views = { { "auctions", "Meine Auktionen" } } },
@@ -528,7 +528,7 @@ local function refreshVisible()
   end
 end
 for _, msg in ipairs({ "PRICES_UPDATED", "ITEMS_UPDATED", "PROFESSIONS_CHANGED", "PLAYER_CHANGED",
-  "MERCHANT_SCANNED", "BAGS_SCANNED", "RECIPES_SCANNED", "AH_STATE", "LOOT_VALUED" }) do
+  "MERCHANT_SCANNED", "BAGS_SCANNED", "RECIPES_SCANNED", "AH_STATE", "LOOT_VALUED", "CRAFTBOOK_CHANGED", "AUCTIONS_CHANGED" }) do
   ns.Listen(msg, function() ns.Debounce("refresh", 0.15, refreshVisible) end)
 end
 ns.Listen("WAYPOINT_CHANGED", function()

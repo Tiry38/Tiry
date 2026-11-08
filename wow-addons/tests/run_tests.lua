@@ -528,7 +528,7 @@ local function runScenario(label, opts)
     TirysZentraleDB.settings.craft.perRecipe = 7 ; p.refresh(p)
     assert(p.perRecipe.reset:IsShown(), "× an Je Rezept")
     p.perRecipe.reset:Click()
-    assert(TirysZentraleDB.settings.craft.perRecipe == 2, "Je Rezept wieder 2")
+    assert(TirysZentraleDB.settings.craft.perRecipe == 0, "Je Rezept wieder auto")
     -- Profi-String
     ns.PriceString.Set("matPrice", "ahprice") ; p.refresh(p)
     assert(p.strings.matPrice.undo:IsShown(), "× am Profi-String")
