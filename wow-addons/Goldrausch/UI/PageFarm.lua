@@ -47,6 +47,7 @@ local function groupCard(parent, width)
   card.how = UI.Para(card, 11, C.muted, width - 220)
   card.how:SetPoint("TOPLEFT", 16, -46)
   card.icons = {}
+  card.spots = {}
   card.listBtn = UI.Button(card, "Einkaufsliste", "soft", 150, 28, "cart")
   card.listBtn:SetPoint("BOTTOMRIGHT", -16, 14)
   card.listBtn:SetScript("OnClick", function(self)
@@ -54,6 +55,23 @@ local function groupCard(parent, width)
     ns.Print(ok and ("Liste |cffffd24aGoldrausch: Farm " .. self.label .. "|r angelegt (" .. n .. " Items).") or ("|cffff6b81" .. tostring(n) .. "|r"))
   end)
   return card
+end
+
+-- Knopf "Auf Karte": setzt den Wegpunkt zu einer berechneten Farm-Stelle
+local function spotButton(card, i)
+  local b = card.spots[i]
+  if b then return b end
+  b = UI.Button(card, "", "soft", 200, 30, "pin")
+  UI.SetFont(b.text, 11, "semibold")
+  b:SetScript("OnClick", function(self) ns.Maps.Show(self.spot, self.what) end)
+  UI.SetTooltip(b, function(self)
+    local s = self.spot
+    if not s then return end
+    return ns.Maps.ZoneName(s.map) .. string.format(" %.0f, %.0f", s.x, s.y),
+      s.n .. " Fundpunkte in der Nähe (QuestieDB-Daten).\nZum Beispiel: " .. table.concat(s.names, ", ") .. "\n\nKlick = Wegpunkt mit Pfeil + Karte öffnen."
+  end)
+  card.spots[i] = b
+  return b
 end
 
 local function itemChip(card, i)
@@ -141,11 +159,16 @@ function page.refresh(self)
 
   -- Gebiete
   local faction = ns.Faction()
-  local zones = {}
-  for _, z in ipairs(band[faction] or {}) do zones[#zones + 1] = z end
-  for _, z in ipairs(band.both or {}) do zones[#zones + 1] = z end
+  local zones, seen = {}, {}
+  for _, key in ipairs(ns.FARM_ORDER) do
+    for _, s in ipairs(ns.Maps.Spots(key, band.key)) do
+      local name = ns.Maps.ZoneName(s.map)
+      if not seen[name] then seen[name] = true zones[#zones + 1] = name end
+    end
+  end
+  for _, z in ipairs(band.both or {}) do if z:find("Zephras") then zones[#zones + 1] = z end end
   self.zones:SetText("|cffffd24aGebiete (" .. (faction == "Horde" and "Horde" or "Allianz") .. "):|r " .. table.concat(zones, " · ")
-    .. "\n|cffffd24aTipp:|r " .. (band.tip or "") .. "\n|cff9a93bdGebiete = bewährtes Classic-Wissen. Preise = live von deinem Server.|r")
+    .. "\n|cffffd24aTipp:|r " .. (band.tip or "") .. "\n|cff9a93bdStellen = dichteste Fundorte aus der Forever-Datenbank von QuestieDB. Preise = live von deinem Server.|r")
   self.zones:ClearAllPoints()
   self.zones:SetPoint("TOPLEFT", self.frame.content, "TOPLEFT", 0, -self.top)
   local y = self.top + math.ceil(self.zones:GetStringHeight()) + 16
@@ -181,7 +204,24 @@ function page.refresh(self)
     end
     for j = #r.list + 1, #card.icons do card.icons[j]:Hide() end
     local rows = math.ceil(#r.list / perRow)
-    local h = 78 + rows * 40 + 50
+    local spotY = 78 + rows * 40 + 6
+    local spots = ns.Maps.Spots(r.key, band.key)
+    local bw = math.floor((width - 32 - 16) / 3)
+    for j = 1, 3 do
+      local s = spots[j]
+      local b = spotButton(card, j)
+      if s then
+        b.spot, b.what = s, r.g.label .. " (" .. table.concat(s.names, ", ") .. ")"
+        b:SetSize(bw, 30)
+        b:SetLabel(string.format("%s %.0f,%.0f", ns.Maps.ZoneName(s.map), s.x, s.y))
+        b:ClearAllPoints()
+        b:SetPoint("TOPLEFT", card, "TOPLEFT", 16 + (j - 1) * (bw + 8), -spotY)
+        b:Show()
+      else
+        b:Hide()
+      end
+    end
+    local h = spotY + (#spots > 0 and 40 or 0) + 50
     card:SetHeight(h)
     card.listBtn.ids, card.listBtn.label = r.ids, r.g.label
     card.listBtn:SetEnabled(M.HasAuctionator())

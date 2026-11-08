@@ -157,6 +157,7 @@ local function fillCard(card, m, expanded, width)
   for _, fs in ipairs(card.detailTexts) do fs:Hide() end
   if card.itemLine then card.itemLine:Hide() end
   if card.listBtn then card.listBtn:Hide() end
+  for _, b in ipairs(card.mapBtns or {}) do b:Hide() end
   if expanded then
     local dy = 0
     local n = 0
@@ -182,6 +183,30 @@ local function fillCard(card, m, expanded, width)
       dy = dy + 6
       add("Profi-Tipps", 13, C.gold, "bold", 4)
       for _, tip in ipairs(m.tips) do add("•  " .. tip, 12, C.muted, "regular", 5) end
+    end
+    if m.farm then
+      local spots = ns.Maps.Spots(m.farm)
+      if #spots > 0 then
+        dy = dy + 6
+        add("Wo genau? (dein Level " .. ns.player.level .. ")", 13, C.gold, "bold", 4)
+        card.mapBtns = card.mapBtns or {}
+        for j = 1, math.min(#spots, 3) do
+          local s = spots[j]
+          local b = card.mapBtns[j]
+          if not b then
+            b = UI.Button(card.detail, "", "cool", 200, 30, "pin")
+            b:SetScript("OnClick", function(self) ns.Maps.Show(self.spot, self.what) end)
+            card.mapBtns[j] = b
+          end
+          b.spot, b.what = s, m.title
+          b:SetLabel(string.format("%s %.0f,%.0f", ns.Maps.ZoneName(s.map), s.x, s.y))
+          b:ClearAllPoints()
+          b:SetPoint("TOPLEFT", card.detail, "TOPLEFT", (j - 1) * 208, -dy)
+          b:Show()
+        end
+        dy = dy + 38
+        add("Klick = Wegpunkt mit Pfeil + Karte. Beispiele dort: " .. table.concat(spots[1].names, ", "), 11, C.dim, "regular", 6)
+      end
     end
     if m.items and #m.items > 0 then
       dy = dy + 6

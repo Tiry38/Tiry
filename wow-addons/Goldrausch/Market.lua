@@ -153,15 +153,59 @@ ns.On("AUCTION_HOUSE_CLOSED", function()
   ns.Fire("AH_STATE")
 end)
 
--- Auctionator meldet neue Preise -> Oberfläche aktualisieren
+-- Auctionator meldet neue Preise (eigener Scan, Goldrausch-Knopf oder Auto-Scan) -> merken und anzeigen
 ns.Listen("LOGIN", function()
   local a = api()
   if a and a.RegisterForDBUpdate then
     pcall(a.RegisterForDBUpdate, ADDON, function()
-      ns.Debounce("prices", 1, function() ns.Fire("PRICES_UPDATED") end)
+      ns.Debounce("prices", 1, function()
+        if ns.db then ns.db.lastScan = time() end
+        if M.scanRequested then
+          M.scanRequested = nil
+          ns.Print("|cff61eb8fScan fertig!|r Goldrausch rechnet jetzt mit den neuen Preisen.")
+        end
+        ns.Fire("PRICES_UPDATED")
+      end)
     end)
   end
 end)
+
+-- Startet denselben Scan wie Auctionators eigener Knopf "Scannen" (Reiter Auctionator)
+function M.StartScan()
+  if not M.HasAuctionator() then
+    ns.Print("|cffff6b81Auctionator fehlt|r – bitte die Forever-Version installieren.")
+    return false
+  end
+  if not M.ahOpen then
+    ns.Print("Stell dich ans Auktionshaus und öffne es – dann scannt Goldrausch mit einem Klick.")
+    return false
+  end
+  local st = Auctionator.State
+  local ok = pcall(function()
+    local full = Auctionator.Config and Auctionator.Config.Get and Auctionator.Config.Options
+      and Auctionator.Config.Get(Auctionator.Config.Options.REPLICATE_SCAN)
+    local frame = full and st.FullScanFrameRef or st.IncrementalScanFrameRef or st.FullScanFrameRef
+    frame:InitiateScan()
+  end)
+  if ok then
+    M.scanRequested = true
+    ns.Print("Scan läuft ... Goldrausch meldet sich, sobald die Preise da sind.")
+  else
+    ns.Print("Bitte im AH den Reiter |cffffd24aAuctionator|r öffnen und auf |cffffd24aScannen|r klicken – Goldrausch erkennt den Scan automatisch.")
+  end
+  return ok
+end
+
+function M.LastScanText()
+  local t = ns.db and ns.db.lastScan
+  if not t then return M.HasAuctionator() and "Auctionator-Daten (Scan-Zeit unbekannt)" or "keine (Auctionator fehlt)" end
+  local mins = math.floor((time() - t) / 60)
+  if mins < 2 then return "gerade gescannt" end
+  if mins < 120 then return "Scan vor " .. mins .. " Min." end
+  local h = math.floor(mins / 60)
+  if h < 48 then return "Scan vor " .. h .. " Std." end
+  return "Scan vor " .. math.floor(h / 24) .. " Tagen – bitte neu scannen"
+end
 
 -- Status für die Anzeige
 function M.Status()

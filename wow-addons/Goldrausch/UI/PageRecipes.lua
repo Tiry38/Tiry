@@ -1,18 +1,24 @@
--- Goldrausch – Seite "Craft-Planer" (wie TSM Crafting): Rezepte mit Gewinn-Filtern, Warteschlange, Materialliste
+-- Goldrausch – Seite "Craft-Planer" (wie TSM Crafting): erkennt deine Berufe und gelernten Rezepte automatisch,
+-- zwei einfache Gold-Filter mit Level-Empfehlung, Warteschlange, fehlendes Material, Craften per Knopf.
 local ADDON, ns = ...
 local UI = ns.UI
 local C = UI.C
 local M = ns.Market
 local S = ns.Scanner
+local R = ns.Recipes
 
 local DIFF = {
   [0] = { "orange", { 1, 0.5, 0.25 } }, [1] = { "gelb", { 1, 1, 0 } },
   [2] = { "grün", { 0.25, 0.75, 0.25 } }, [3] = { "grau", { 0.5, 0.5, 0.5 } },
 }
+local VIEWS = {
+  { value = "known", label = "Meine Rezepte" },
+  { value = "learnable", label = "Lernen lohnt sich" },
+}
 
 local page = {
   title = "Craft-Planer",
-  subtitle = "Was du mit deinen Berufen herstellen solltest – gefiltert nach Gewinn, wie bei TSM.",
+  subtitle = "Erkennt deine Berufe und Rezepte automatisch – und zeigt, was dir Gold bringt.",
   icon = "flask", label = "Craft-Planer", order = 6,
 }
 
@@ -23,7 +29,6 @@ local function itemCount(id)
   return 0
 end
 
--- Wie oft kann ich das Rezept mit meinen Taschen herstellen?
 local function craftable(r)
   local n
   for _, re in ipairs(r.reagents) do
@@ -35,33 +40,26 @@ end
 
 local function queue() ns.char.queue = ns.char.queue or {} return ns.char.queue end
 
-local function findRecipe(prof, id)
-  local data = (ns.char.recipes or {})[prof]
-  if not data then return nil end
-  for _, r in ipairs(data.list) do if r.id == id then return r end end
-end
-
-local function addToQueue(prof, r, delta)
+local function addToQueue(r, delta)
   local q = queue()
   for i, e in ipairs(q) do
-    if e.prof == prof and e.recipe == r.id then
+    if e.recipe == r.id then
       e.n = e.n + delta
       if e.n <= 0 then table.remove(q, i) end
       return
     end
   end
-  if delta > 0 then q[#q + 1] = { prof = prof, recipe = r.id, n = delta } end
+  if delta > 0 then q[#q + 1] = { recipe = r.id, prof = r.prof, n = delta } end
 end
 
--- Benötigte Materialien der Warteschlange minus Taschen
+-- Benötigtes Material der Warteschlange minus Taschen
 function ns.QueueMaterials()
   local need, profit, crafts = {}, 0, 0
   for _, e in ipairs(queue()) do
-    local r = findRecipe(e.prof, e.recipe)
+    local r = R.Get(e.recipe)
     if r then
       crafts = crafts + e.n
-      local p = S.RecipeProfit(r)
-      profit = profit + (p or 0) * e.n
+      profit = profit + (S.RecipeProfit(r) or 0) * e.n
       for _, re in ipairs(r.reagents) do need[re.id] = (need[re.id] or 0) + re.n * e.n end
     end
   end
@@ -78,41 +76,70 @@ function ns.QueueMaterials()
   return list, cost, profit, crafts
 end
 
+----------------------------------------------------------------------------
 function page.build(self, content, width)
+  self.view = "known"
   local st = UI.Stack(content)
-  st:Para("Öffne jedes Berufsfenster einmal – Goldrausch kennt dann alle deine Rezepte (auch nicht gelernte, wenn das Berufsfenster sie zeigt). "
-    .. "|cffffd24aLinksklick|r = 1× in die Warteschlange, |cffffd24aRechtsklick|r = 1× raus. Gewinn = AH-Erlös nach Gebühr − Materialwert.", 12, C.muted, 12)
+
+  -- Filterkarte: zwei große Regler + Empfehlung
+  local fc = CreateFrame("Frame", nil, content)
+  fc:SetSize(width, 150)
+  fc.bg = UI.Round(fc, 22, "BACKGROUND", 0)
+  fc.bg:SetGradient({ { 0.26, 0.15, 0.06 }, { 0.22, 0.09, 0.20 }, { 0.12, 0.10, 0.30 } }, 0.95)
+  local title = UI.Text(fc, 15, "bold", C.text)
+  title:SetPoint("TOPLEFT", 20, -16)
+  title:SetText("Zeig mir nur Rezepte mit ...")
+  local half = math.floor((width - 50) / 2)
+  local refresh = function() page.refresh(self) end
+  local function takeOver()
+    local c = cfg()
+    if c.auto ~= false then
+      local p = R.Preset()
+      c.minMargin, c.minProfit, c.auto = p.margin, p.profit, false
+    end
+  end
+  self.margin = UI.Stepper(fc, "Gewinn mindestens", half, function() return (select(1, R.Filter())) end,
+    function(v) takeOver() cfg().minMargin = v end, 5, 0, 500, function(v) return v .. " %" end)
+  self.margin:SetPoint("TOPLEFT", 20, -44)
+  self.margin.onChange = refresh
+  self.profit = UI.Stepper(fc, "und mindestens", half, function() return (select(2, R.Filter())) end,
+    function(v) takeOver() cfg().minProfit = v end,
+    function(v, dir)
+      local base = (dir > 0) and v or v - 1
+      if base < 10000 then return 500 elseif base < 100000 then return 5000 end
+      return 50000
+    end, 0, 10000000, function(v) return v == 0 and "egal" or ns.Money(v) end)
+  self.profit:SetPoint("TOPRIGHT", -20, -44)
+  self.profit.onChange = refresh
+  self.recText = UI.Para(fc, 11, C.muted, width - 250)
+  self.recText:SetPoint("TOPLEFT", 20, -92)
+  self.recBtn = UI.Button(fc, "Empfehlung nutzen", "primary", 190, 32, "star")
+  self.recBtn:SetPoint("BOTTOMRIGHT", -20, 16)
+  self.recBtn:SetScript("OnClick", function() cfg().auto = true page.refresh(self) end)
+  st:Add(fc, 150, 14)
+
   self.segHolder = CreateFrame("Frame", nil, content)
   self.segHolder:SetSize(width, 30)
-  st:Add(self.segHolder, 30, 12)
-
-  -- Filter (wie TSM-Gruppen-Einstellungen)
-  local f = CreateFrame("Frame", nil, content)
-  f:SetSize(width, 76)
-  local half = math.floor((width - 10) / 2)
-  local refresh = function() page.refresh(self) end
-  self.margin = UI.Stepper(f, "Min. Gewinn in %", half, function() return cfg().minMargin end, function(v) cfg().minMargin = v end,
-    10, 0, 500, function(v) return v .. " %" end)
-  self.margin:SetPoint("TOPLEFT")
-  self.margin.onChange = refresh
-  self.minProfit = UI.Stepper(f, "Min. Gewinn pro Craft", half, function() return cfg().minProfit end, function(v) cfg().minProfit = v end,
-    function(v, dir) if v + dir * 1 < 10000 then return 1000 end return 10000 end, 0, 10000000, function(v) return v == 0 and "egal" or ns.Money(v) end)
-  self.minProfit:SetPoint("TOPRIGHT")
-  self.minProfit.onChange = refresh
+  st:Add(self.segHolder, 30, 8)
+  self.viewSeg = UI.Segments(content, VIEWS, function(v) self.view = v page.refresh(self) end, width)
+  st:Add(self.viewSeg, self.viewSeg:GetHeight(), 8)
+  local pills = CreateFrame("Frame", nil, content)
+  pills:SetSize(width, 30)
   local x = 0
   self.pills = {}
-  for _, def in ipairs({
-    { "Nur gelernte", "onlyLearned" }, { "Nur sichere Preise", "onlySafe" }, { "Nur mit Skill-Up", "onlySkill" },
-  }) do
-    local p = UI.Pill(f, def[1], function() return cfg()[def[2]] end, function(v) cfg()[def[2]] = v end, refresh)
-    p:SetPoint("TOPLEFT", x, -44)
+  for _, def in ipairs({ { "Nur sichere Preise", "onlySafe" }, { "Nur mit Skill-Up", "onlySkill" } }) do
+    local p = UI.Pill(pills, def[1], function() return cfg()[def[2]] end, function(v) cfg()[def[2]] = v end, refresh)
+    p:SetPoint("TOPLEFT", x, 0)
     x = x + p:GetWidth() + 8
     self.pills[#self.pills + 1] = p
   end
-  st:Add(f, 76, 12)
+  self.scanBtn = UI.Button(pills, "AH scannen", "cool", 150, 30, "refresh")
+  self.scanBtn:SetPoint("TOPRIGHT")
+  self.scanBtn:SetScript("OnClick", function() M.StartScan() end)
+  st:Add(pills, 30, 12)
 
   self.info = UI.Para(content, 12, C.gold, width)
-  st:Add(self.info, 18, 8)
+  st:Add(self.info, 34, 8)
   self.list = UI.ItemList(content, width, {
     { key = "cost", label = "Material", width = 82 },
     { key = "revenue", label = "Erlös", width = 82 },
@@ -123,9 +150,9 @@ function page.build(self, content, width)
   self.listTop = st.y
 
   -- Warteschlange
-  self.queueCard = UI.Card(content, 20, C.card)
-  self.queueCard:SetWidth(width)
-  local qc = self.queueCard
+  local qc = UI.Card(content, 20, C.card)
+  qc:SetWidth(width)
+  self.queueCard = qc
   qc.title = UI.Text(qc, 16, "bold", C.text)
   qc.title:SetPoint("TOPLEFT", 20, -18)
   qc.title:SetText("Craft-Warteschlange")
@@ -138,13 +165,21 @@ function page.build(self, content, width)
     for _, m in ipairs(mats) do ids[#ids + 1] = m.id end
     if #ids == 0 then ns.Print("Du hast schon alles Material in den Taschen.") return end
     local ok, n = M.CreateShoppingList("Goldrausch: Craft-Material", ids)
-    ns.Print(ok and ("Liste |cffffd24aGoldrausch: Craft-Material|r angelegt (" .. n .. " Items). Im AH: Auctionator > Einkaufen.") or ("|cffff6b81" .. tostring(n) .. "|r"))
+    ns.Print(ok and ("Liste |cffffd24aGoldrausch: Craft-Material|r angelegt (" .. n .. " Items). Im AH: Auctionator > Einkaufen > Suche alles.") or ("|cffff6b81" .. tostring(n) .. "|r"))
   end)
   qc.craft = UI.Button(qc, "Nächstes craften", "cool", 190, 34, "bolt")
   qc.craft:SetScript("OnClick", function() page.CraftNext(self) end)
-  UI.SetTooltip(qc.craft, "Craften", "Funktioniert, während das passende Berufsfenster offen ist: stellt den ersten Eintrag der Warteschlange her (so oft dein Material reicht).")
+  UI.SetTooltip(qc.craft, "Craften", "Bei offenem Berufsfenster: stellt den ersten passenden Eintrag her – so oft dein Material reicht.")
   qc.clear = UI.Button(qc, "Leeren", "soft", 100, 34, "close")
   qc.clear:SetScript("OnClick", function() ns.char.queue = {} page.refresh(self) end)
+end
+
+local function openProfKey()
+  if not S.tradeOpen or not S.openProf then return nil end
+  for key, id in pairs(ns.PROF) do
+    local p = ns.professions[id]
+    if p and p.name == S.openProf then return key end
+  end
 end
 
 function page.CraftNext(self)
@@ -152,80 +187,93 @@ function page.CraftNext(self)
     ns.Print("Öffne zuerst das Berufsfenster.")
     return
   end
+  local key = openProfKey()
   for _, e in ipairs(queue()) do
-    if e.prof == S.openProf then
-      local r = findRecipe(e.prof, e.recipe)
-      local n = r and math.min(e.n, craftable(r)) or 0
-      if r and n > 0 then
+    local r = R.Get(e.recipe)
+    if r and (not key or r.prof == key) then
+      local n = math.min(e.n, craftable(r))
+      if n > 0 then
         C_TradeSkillUI.CraftRecipe(r.id, n)
-        addToQueue(e.prof, r, -n)
+        addToQueue(r, -n)
         ns.Print(string.format("Stelle %d× %s her.", n, r.name))
         page.refresh(self)
         return
       end
     end
   end
-  ns.Print("Nichts in der Warteschlange für " .. (S.openProf or "diesen Beruf") .. ", das du mit deinem Material herstellen kannst.")
+  ns.Print("Nichts in der Warteschlange, das du mit deinem Material in diesem Beruf herstellen kannst.")
 end
 
 local function buildSegments(self)
-  local names = {}
-  for name in pairs(ns.char.recipes or {}) do names[#names + 1] = name end
-  table.sort(names)
-  local key = table.concat(names, "|")
+  local profs = R.MyProfessions()
+  local key = table.concat(profs, "|")
   if self.segKey ~= key then
     self.segKey = key
     if self.segments then self.segments:Hide() end
     self.segments = nil
-    if #names > 0 then
+    if #profs > 0 then
       local opts = {}
-      for _, n in ipairs(names) do opts[#opts + 1] = { value = n, label = n } end
+      for _, p in ipairs(profs) do opts[#opts + 1] = { value = p, label = ns.ProfName(ns.PROF[p]) } end
       self.segments = UI.Segments(self.segHolder, opts, function(v) self.prof = v page.refresh(self) end, UI.CONTENT_W)
       self.segments:SetPoint("TOPLEFT")
     end
   end
-  if not self.prof or not (ns.char.recipes or {})[self.prof] then self.prof = names[1] end
+  local valid = false
+  for _, p in ipairs(profs) do if p == self.prof then valid = true end end
+  if not valid then self.prof = profs[1] end
   if self.segments and self.prof then self.segments:Select(self.prof) end
-  return names
+  return profs
 end
 
 function page.refresh(self)
   local c = cfg()
+  local minMargin, minProfit, auto = R.Filter()
+  local preset = R.Preset()
   self.margin:Refresh()
-  self.minProfit:Refresh()
+  self.profit:Refresh()
   for _, p in ipairs(self.pills) do p:Refresh() end
-  local names = buildSegments(self)
-  local data = self.prof and (ns.char.recipes or {})[self.prof]
-  local entries, total, shown = {}, 0, 0
-  if data then
-    for _, r in ipairs(data.list) do
+  self.viewSeg:Select(self.view)
+  self.recText:SetText((auto and "|cff61eb8fAutomatisch für dein Level " .. ns.player.level .. " eingestellt.|r " or
+    ("|cffffd24aEigene Werte.|r Empfohlen für Level " .. ns.player.level .. ": " .. preset.margin .. " % und " .. ns.Money(preset.profit) .. ". ")) .. preset.why)
+  self.recBtn:SetEnabled(not auto)
+  self.scanBtn:SetEnabled(M.ahOpen == true and M.HasAuctionator())
+
+  local profs = buildSegments(self)
+  local entries, total = {}, 0
+  if #profs == 0 then
+    self.info:SetText("Du hast noch keinen Herstellungsberuf (z. B. Lederverarbeitung, Schneiderei, Alchemie). Lern einen beim Lehrer – dann erscheint er hier automatisch.")
+  else
+    local list, rank = R.List(self.prof, self.view)
+    for _, r in ipairs(list) do
       total = total + 1
       local profit, revenue, cost, unknown = S.RecipeProfit(r)
       local margin = (profit and cost and cost > 0) and (profit / cost * 100) or nil
+      local diff = R.Difficulty(r, rank)
       local pass = true
-      if c.onlyLearned and r.learned == false then pass = false end
       if c.onlySafe and (unknown > 0 or not revenue) then pass = false end
-      if c.onlySkill and not (r.difficulty == 0 or r.difficulty == 1) then pass = false end
-      if pass and c.minMargin > 0 and not (margin and margin >= c.minMargin) then pass = false end
-      if pass and c.minProfit > 0 and not (profit and profit >= c.minProfit) then pass = false end
+      if c.onlySkill and self.view == "known" and not (diff == 0 or diff == 1) then pass = false end
+      if pass and minMargin > 0 and not (margin and margin >= minMargin) then pass = false end
+      if pass and minProfit > 0 and not (profit and profit >= minProfit) then pass = false end
       if pass then
-        shown = shown + 1
-        local d = DIFF[r.difficulty or 3]
-        local can = r.learned ~= false and craftable(r) or 0
         local notes = {}
-        if r.learned == false then notes[#notes + 1] = "|cffff6b81nicht gelernt – beim Lehrer/Händler holen|r" end
-        if d and r.learned ~= false then notes[#notes + 1] = UI.Hex(d[2]) .. d[1] .. "|r" end
-        notes[#notes + 1] = "herstellbar: " .. can
-        local inQueue = 0
-        for _, e in ipairs(queue()) do if e.prof == self.prof and e.recipe == r.id then inQueue = e.n end end
-        if inQueue > 0 then notes[#notes + 1] = "|cffffd24a" .. inQueue .. "× in Warteschlange|r" end
+        if self.view == "learnable" then
+          notes[#notes + 1] = "|cffff6b81noch nicht gelernt – Lehrer/Rezept|r"
+          if r.yellow > 0 then notes[#notes + 1] = "gelb ab Skill " .. r.yellow end
+        else
+          local d = DIFF[diff or 3]
+          notes[#notes + 1] = UI.Hex(d[2]) .. d[1] .. "|r"
+          notes[#notes + 1] = "herstellbar: " .. craftable(r)
+        end
+        for _, e in ipairs(queue()) do
+          if e.recipe == r.id then notes[#notes + 1] = "|cffffd24a" .. e.n .. "× geplant|r" end
+        end
         local mats = {}
         for _, re in ipairs(r.reagents) do
           local unit = M.BuyCost(re.id)
           mats[#mats + 1] = re.n .. "× " .. ns.Item(re.id).name .. " (" .. (unit and ns.Money(unit * re.n) or "kein Preis") .. ")"
         end
         entries[#entries + 1] = {
-          id = r.out, name = r.name, sortValue = profit or -math.huge,
+          id = r.out, name = r.name .. (r.qty > 1 and (" (" .. r.qty .. "×)") or ""), sortValue = profit or -math.huge,
           note = table.concat(notes, " · "),
           cells = {
             cost = (unknown > 0 and "|cffffd24amin.|r " or "") .. ns.Money(cost),
@@ -233,9 +281,9 @@ function page.refresh(self)
             profit = profit and ((profit >= 0 and "|cff61eb8f+|r" or "") .. ns.Money(profit)) or "–",
             margin = margin and ((margin >= 0 and "|cff61eb8f" or "|cffff6b81") .. math.floor(margin + 0.5) .. "|r") or "–",
           },
-          tip = { "Material: " .. (#mats > 0 and table.concat(mats, ", ") or "keins"), "Linksklick: +1 Warteschlange · Rechtsklick: -1" },
+          tip = { "Material: " .. (#mats > 0 and table.concat(mats, ", ") or "keins"), "Linksklick: +1 in die Warteschlange · Rechtsklick: -1" },
           onClick = function(_, button)
-            addToQueue(self.prof, r, button == "RightButton" and -1 or 1)
+            addToQueue(r, button == "RightButton" and -1 or 1)
             UI.PlayClick()
             page.refresh(self)
           end,
@@ -243,12 +291,13 @@ function page.refresh(self)
       end
     end
     table.sort(entries, function(a, b) return a.sortValue > b.sortValue end)
-    self.info:SetText(string.format("%s%s: %d von %d Rezepten erfüllen deine Filter.",
-      self.prof, data.rank and (" (" .. data.rank .. "/" .. (data.maxRank or "?") .. ")") or "", shown, total))
-  else
-    self.info:SetText(#names == 0 and "Noch keine Rezepte bekannt – öffne dein Berufsfenster (z. B. Lederverarbeitung)." or "")
+    local scan = M.LastScanText()
+    self.info:SetText(string.format("%s (Skill %d): %d von %d %s erfüllen deine Filter. Preise: %s",
+      ns.ProfName(ns.PROF[self.prof]), rank, #entries, total,
+      self.view == "known" and "gelernten Rezepten" or "lernbaren Rezepten", scan))
   end
-  local h = self.list:SetEntries(entries, data and "Kein Rezept erfüllt die Filter. Tipp: \"Min. Gewinn in %\" senken oder \"Nur sichere Preise\" ausschalten." or "Öffne dein Berufsfenster, damit Goldrausch deine Rezepte kennt.")
+  local empty = (#profs == 0) and "" or ("Kein Rezept erfüllt die Filter. Tipp: Regler senken, \"Nur sichere Preise\" ausschalten oder im AH scannen.")
+  local h = self.list:SetEntries(entries, empty)
 
   -- Warteschlange
   local qc = self.queueCard
@@ -258,8 +307,8 @@ function page.refresh(self)
   local mats, cost, profit, crafts = ns.QueueMaterials()
   local lines = {}
   for _, e in ipairs(queue()) do
-    local r = findRecipe(e.prof, e.recipe)
-    if r then lines[#lines + 1] = "|cffffd24a" .. e.n .. "×|r " .. r.name .. " |cff9a93bd(" .. e.prof .. ")|r" end
+    local r = R.Get(e.recipe)
+    if r then lines[#lines + 1] = "|cffffd24a" .. e.n .. "×|r " .. r.name .. " |cff9a93bd(" .. ns.ProfName(ns.PROF[r.prof]) .. ")|r" end
   end
   local matLines = {}
   for i = 1, math.min(#mats, 12) do
@@ -284,5 +333,7 @@ function page.refresh(self)
   qc:SetHeight(qh)
   self.frame.content:SetHeight(y + qh + 30)
 end
+
+ns.Listen("PROFESSIONS_CHANGED", function() local p = UI.pages.recipes if p then p.segKey = nil end end)
 
 UI.RegisterPage("recipes", page)

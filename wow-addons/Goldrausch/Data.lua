@@ -27,7 +27,7 @@ ns.METHODS = {
     tips = { "Taschen, die du verkaufen willst, nicht anlegen – sie werden nicht mehr automatisch ausgerüstet und bleiben so verkaufbar." },
   },
   {
-    key = "cloth", cat = "noprof", minLevel = 5, effort = 1, source = "classic", icon = "pin",
+    key = "cloth", cat = "noprof", farm = "cloth", minLevel = 5, effort = 1, source = "classic", icon = "pin",
     items = { 2589, 2592, 4306 },
     title = "Stoff sammeln (geht nebenbei)",
     summary = "Humanoide Gegner (Menschen, Orcs, Gnolle, Trolle …) lassen Stoff fallen. Schneider und Erste-Hilfe-Spieler kaufen ihn ständig.",
@@ -44,7 +44,7 @@ ns.METHODS = {
     tips = { "Forever-Bonus: Die neuen \"Waylaid Crates\" verlangen u. a. 40 Leinenstoff bzw. Leinenstoffballen – das erhöht die Nachfrage." },
   },
   {
-    key = "skinning", cat = "gather", minLevel = 1, prof = P.SKINNING, effort = 1, source = "forever", icon = "pin",
+    key = "skinning", cat = "gather", farm = "leather", minLevel = 1, prof = P.SKINNING, effort = 1, source = "forever", icon = "pin",
     items = { 2318, 783, 2319, 249427 },
     title = "Kürschnerei – das beste Start-Gold",
     summary = "Jedes erlegte Tier wird zu Leder. Laut Mein-MMO der stärkste Goldberuf für den Anfang – perfekt zum Questen.",
@@ -60,7 +60,7 @@ ns.METHODS = {
     },
   },
   {
-    key = "herbalism", cat = "gather", minLevel = 1, prof = P.HERBALISM, effort = 1, source = "forever", icon = "pin",
+    key = "herbalism", cat = "gather", farm = "herb", minLevel = 1, prof = P.HERBALISM, effort = 1, source = "forever", icon = "pin",
     items = { 2447, 765, 2449, 785, 2450, 2453, 249399 },
     title = "Kräuterkunde – Alchemisten brauchen Nachschub",
     summary = "Pflanzen an der Minikarte pflücken. Alchemisten kaufen Kräuter für Tränke – die Nachfrage hört nie auf.",
@@ -76,7 +76,7 @@ ns.METHODS = {
     },
   },
   {
-    key = "mining", cat = "gather", minLevel = 1, prof = P.MINING, effort = 2, source = "forever", icon = "pin",
+    key = "mining", cat = "gather", farm = "ore", minLevel = 1, prof = P.MINING, effort = 2, source = "forever", icon = "pin",
     items = { 2770, 2771, 2835, 2836, 249391, 774, 818 },
     title = "Bergbau – Erz, Steine und Pyrit",
     summary = "Erzadern abbauen. Schmiede und Ingenieure brauchen Kupfer, Zinn und Steine in großen Mengen.",
@@ -89,7 +89,7 @@ ns.METHODS = {
     tips = { "Erz verkauft sich meist besser als Barren – vergleiche beides in den Marktpreisen." },
   },
   {
-    key = "scarce", cat = "gather", minLevel = 1, effort = 2, source = "forever", icon = "star",
+    key = "scarce", cat = "gather", farm = "herb", minLevel = 1, effort = 2, source = "forever", icon = "star",
     items = { 249399, 249391, 249427 },
     title = "Seltene Forever-Materialien",
     summary = "Jede Pflanze, Ader und jedes häutbare Tier kann ein seltenes \"Scarce\"-Material droppen. Händler zahlen dafür fast nichts – Spieler viel.",

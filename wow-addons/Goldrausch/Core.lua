@@ -90,9 +90,10 @@ local DEFAULTS = {
   autoJunk = true,     -- grauen Schrott beim Händler automatisch verkaufen
   lootAlerts = true,   -- Beute-Radar: Warnung bei wertvoller Beute
   lootAlertMin = 5000, -- ab 50 Silber AH-Wert melden
-  ahHint = true,
+  ahHint = true,       -- beim Öffnen des AH sagen, was eingestellt werden sollte
   merchantPanel = true, -- Händler-Panel neben dem Händlerfenster
-  craft = { minMargin = 40, minProfit = 0, onlyLearned = true, onlySafe = true, onlySkill = false },       -- beim Öffnen des AH sagen, was eingestellt werden sollte
+  -- Craft-Filter: auto = Werte folgen der Level-Empfehlung, bis du selbst etwas einstellst
+  craft = { auto = true, minMargin = 30, minProfit = 2500, onlySafe = true, onlySkill = false },
   ahCut = 5,          -- Prozent, den das Auktionshaus beim Verkauf einbehält
   showOnlyMyLevel = false,
   faction = "AUTO",   -- AUTO / Alliance / Horde

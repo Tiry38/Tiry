@@ -377,6 +377,15 @@ function M.install(opts)
     RequestLoadItemDataByID = function(id) assert(type(id) == "number") end,
     GetItemCount = function(id, bank) assert(id ~= nil) local n = 0 for _, b in pairs(M.bags or {}) do for _, it in pairs(b) do if it.itemID == id then n = n + (it.stackCount or 1) end end end return n end,
   }
+  -- Zauberbuch, Karte, Wegpunkte
+  G.C_SpellBook = { IsSpellKnown = function(id, bank) assert(type(id) == "number") return (M.known or {})[id] == true end }
+  G.UiMapPoint = { CreateFromCoordinates = function(map, x, y) assert(type(map) == "number" and x >= 0 and x <= 1 and y >= 0 and y <= 1, "Koordinaten 0..1") return { map = map, x = x, y = y } end }
+  G.C_Map = {
+    CanSetUserWaypointOnMap = function(map) return true end,
+    SetUserWaypoint = function(p) assert(p and p.map) M.waypoint = p end,
+  }
+  G.C_SuperTrack = { SetSuperTrackedUserWaypoint = function(v) M.superTracked = v end }
+  G.OpenWorldMap = function(map) M.mapOpened = map end
   -- Berufe
   G.C_SkillInfo = {
     GetNumSkillLines = function() return #(M.skills or {}) end,
@@ -434,7 +443,11 @@ function M.install(opts)
       CreateShoppingList = function(c, name, terms) verify(c) assert(type(name) == "string" and type(terms) == "table") M.lists[name] = terms end,
       MultiSearchExact = function(c, terms) verify(c) assert(type(terms) == "table") M.searched = terms end,
       RegisterForDBUpdate = function(c, cb) verify(c) assert(type(cb) == "function") M.dbCallback = cb end,
-    } } }
+    } },
+      State = { FullScanFrameRef = { InitiateScan = function() M.scanStarted = true end },
+        IncrementalScanFrameRef = { InitiateScan = function() M.scanStarted = true end } },
+      Config = { Options = { REPLICATE_SCAN = "replicate_scan" }, Get = function() return true end },
+    }
   else
     G.Auctionator = nil
   end

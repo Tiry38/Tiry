@@ -173,6 +173,7 @@ function UI.UpdateStatus()
   local c = (state == "ok" and C.green) or (state == "empty" and C.gold) or C.red
   frame.status.dot:SetVertexColor(c[1], c[2], c[3], 1)
   frame.status.text:SetText(state == "ok" and "Live-Preise aktiv" or (state == "empty" and "AH einmal scannen" or "Auctionator fehlt"))
+  frame.scanInfo:SetText(ns.Market.LastScanText())
 end
 
 local function buildHeader(f)
@@ -184,13 +185,25 @@ local function buildHeader(f)
   h.title:SetPoint("TOPLEFT", 0, -2)
   h.sub = UI.Text(h, 12, "regular", C.muted)
   h.sub:SetPoint("TOPLEFT", h.title, "BOTTOMLEFT", 0, -5)
-  h.sub:SetWidth(WIDTH - SIDE_W - PAD * 2 - 60)
+  h.sub:SetWidth(WIDTH - SIDE_W - PAD * 2 - 200)
   h.sub:SetWordWrap(false)
   f.header = h
 
   local close = UI.IconButton(f, "close", 30, "Schließen")
   close:SetPoint("TOPRIGHT", -18, -18)
   close:SetScript("OnClick", function() f:Hide() end)
+
+  -- AH-Scan per Klick (startet Auctionators Scan) + Stand der Preise
+  local scan = UI.Button(f, "AH scannen", "cool", 136, 30, "refresh")
+  scan:SetPoint("RIGHT", close, "LEFT", -10, 0)
+  scan:SetScript("OnClick", function() ns.Market.StartScan() end)
+  UI.SetTooltip(scan, function()
+    return "Preise aktualisieren", "Am offenen Auktionshaus: startet den Auctionator-Scan. Goldrausch erkennt jeden Scan automatisch – "
+      .. "auch wenn du direkt in Auctionator scannst.\n\nStand: " .. ns.Market.LastScanText()
+  end)
+  f.scanBtn = scan
+  f.scanInfo = UI.Text(f, 10, "semibold", C.dim)
+  f.scanInfo:SetPoint("TOPRIGHT", scan, "BOTTOMRIGHT", -4, -6)
 
   -- Verlaufslinie unter der Überschrift
   local line = f:CreateTexture(nil, "ARTWORK")

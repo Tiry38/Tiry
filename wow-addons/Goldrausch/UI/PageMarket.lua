@@ -6,6 +6,7 @@ local M = ns.Market
 
 local FILTERS = {
   { value = "all", label = "Alle" },
+  { value = "forever", label = "Neu in Forever" },
   { value = "cloth", label = "Stoff" },
   { value = "leather", label = "Leder" },
   { value = "ore", label = "Erz & Steine" },
@@ -26,7 +27,21 @@ local page = {
   icon = "coins", label = "Marktpreise", order = 3,
 }
 
+-- Alle handelbaren neuen Forever-Materialien direkt aus der Spieldaten-Datenbank
+local foreverIDs
+local function foreverMaterials()
+  if foreverIDs then return foreverIDs end
+  foreverIDs = {}
+  for _, e in ipairs(ns.DB.Load()) do
+    if e.id >= 200000 and e.class == 7 and e.bind ~= 1 and not e.name:find("NYI") then
+      foreverIDs[#foreverIDs + 1] = e.id
+    end
+  end
+  return foreverIDs
+end
+
 local function currentIDs()
+  if page.filter == "forever" then return foreverMaterials() end
   local ids = {}
   for _, id in ipairs(ns.ITEM_ORDER) do
     local cat = ns.ITEMS[id].cat
@@ -105,7 +120,7 @@ function page.refresh(self)
 
   local entries = {}
   for _, id in ipairs(currentIDs()) do
-    local static = ns.ITEMS[id]
+    local static = ns.ITEMS[id] or { cat = "forever", stack = 20 }
     local item = ns.Item(id)
     local price = M.Price(id)
     local net = price and M.Net(price)
@@ -120,7 +135,7 @@ function page.refresh(self)
     end
     entries[#entries + 1] = {
       id = id,
-      note = FILTER_NAMES[static.cat] or "",
+      note = (static.cat == "forever") and ("Neu in Forever · " .. (ns.DB.SubName(ns.DB.Get(id)) or "Handwerkswaren")) or (FILTER_NAMES[static.cat] or ""),
       sortValue = net and net * stack or -1,
       cells = {
         ah = price and ns.Money(price) or "|cff8f88b3–|r",

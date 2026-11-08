@@ -18,6 +18,7 @@ local CATS = {
   { value = 12, label = "Quest" },
   { value = 15, label = "Verschiedenes" },
   { value = "other", label = "Sonstige" },
+  { value = "forever", label = "Neu in Forever" },
 }
 local MAIN = { [0] = true, [1] = true, [2] = true, [4] = true, [7] = true, [9] = true, [12] = true, [15] = true }
 
@@ -45,7 +46,9 @@ local page = {
 local function filterFn(self)
   local cat, qual, usable = self.cat, self.qual, self.usable
   return function(e)
-    if cat == "other" then
+    if cat == "forever" then
+      if e.id < 200000 then return false end
+    elseif cat == "other" then
       if MAIN[e.class] then return false end
     elseif cat ~= "all" and e.class ~= cat then
       return false

@@ -26,11 +26,13 @@ local function runScenario(label, opts)
     { name = "Berufe", isHeader = true, isCollapsed = true },
     { name = "Kürschnerei", skillID = 393, isHeader = false, rank = 87, maxRank = 150 },
     { name = "Schneiderei", skillID = 197, isHeader = false, rank = 60, maxRank = 150 },
+    { name = "Lederverarbeitung", skillID = 165, isHeader = false, rank = 45, maxRank = 75 },
     { name = "Waffenfertigkeiten", isHeader = true, isCollapsed = false },
     { name = "Dolche", skillID = 173, isHeader = false, rank = 100, maxRank = 100 },
   }
   W.itemInfo = opts.itemInfo or { [2589] = { name = "Leinenstoff", sell = 13 }, [4238] = { name = "Leinentasche", sell = 200, stack = 1 } }
   W.prices = opts.prices or { [2589] = 60, [2592] = 120, [2318] = 90, [2770] = 40, [4238] = 900, [2320] = 30, [249427] = 4000, [5771] = 30000 }
+  W.known = { [3755] = true, [2963] = true, [2881] = true, [2152] = true }
   W.install({ auctionator = opts.auctionator, locale = opts.locale })
   GoldrauschDB, GoldrauschCharDB = opts.db, nil
 
@@ -177,8 +179,11 @@ local function runScenario(label, opts)
   step("Craft-Planer", function()
     local p = ns.UI.pages.recipes
     ns.UI.Show("recipes")
+    GoldrauschDB.settings.craft.auto = false
     GoldrauschDB.settings.craft.minMargin = 0
+    GoldrauschDB.settings.craft.minProfit = 0
     GoldrauschDB.settings.craft.onlySafe = false
+    p.prof = "TAILORING"
     p.refresh(p)
     local row = p.list.rows[1]
     W.call(row, "OnClick", "LeftButton") ; W.call(row, "OnClick", "LeftButton") ; W.call(row, "OnClick", "RightButton")
@@ -193,6 +198,72 @@ local function runScenario(label, opts)
     W.fire("TRADE_SKILL_CLOSE") ; W.flush()
   end)
   check(label .. ": Rezept gecraftet", (W.crafted or 0) >= 1, tostring(W.crafted))
+
+  -- Rezept-Datenbank + automatische Erkennung + Level-Empfehlung
+  local R = ns.Recipes
+  local all = 0
+  for _, list in pairs(R.Load()) do all = all + #list end
+  check(label .. ": Rezept-Datenbank", all > 1900, tostring(all))
+  local lwKnown = R.List("LEATHERWORKING", "known")
+  check(label .. ": gelernte Rezepte erkannt", #lwKnown == 2, tostring(#lwKnown))
+  check(label .. ": lernbare Rezepte", #R.List("LEATHERWORKING", "learnable") > 0)
+  check(label .. ": Skill-Farbe", R.Difficulty(R.Get(2881), 45) == 3 and R.Difficulty(R.Get(2881), 31) == 2 and R.Difficulty(R.Get(2881), 25) == 1 and R.Difficulty(R.Get(2881), 10) == 0)
+  step("Empfehlung & Regler", function()
+    local p = ns.UI.pages.recipes
+    p.recBtn:Click()
+    assert(GoldrauschDB.settings.craft.auto == true)
+    local m1 = select(1, R.Filter())
+    W.call(p.margin, "OnShow")
+    local plus = nil
+    for _, ch in ipairs(p.margin.__children) do if ch.__kind == "Button" and not plus then plus = ch end end
+    plus:Click()
+    assert(GoldrauschDB.settings.craft.auto == false, "Regler muss Automatik abschalten")
+    assert(select(1, R.Filter()) == m1 + 5, "Regler übernimmt Empfehlung + Schritt")
+    p.viewSeg:Select("learnable", true)
+    p.viewSeg:Select("known", true)
+    for _, b in ipairs(p.segments.buttons) do b:Click() end
+    W.fire("NEW_RECIPE_LEARNED", 2152) ; W.flush()
+    W.fire("SKILL_LINES_CHANGED") ; W.flush()
+  end)
+  check(label .. ": Empfehlung je Level", R.Preset(15).margin == 30 and R.Preset(60).profit == 80000)
+
+  -- Karte
+  step("Karten-Wegpunkt", function()
+    ns.UI.Show("farm")
+    local p = ns.UI.pages.farm
+    p.segments:Select("10-20", true)
+    p.cards[1].spots[1]:Click()
+    ns.UI.Show("methods")
+    local mp = ns.UI.pages.methods
+    for _, m in ipairs(ns.METHODS) do mp.expanded[m.key] = true end
+    mp.refresh(mp)
+    for _, c in ipairs(mp.cards) do for _, b in ipairs(c.mapBtns or {}) do if b:IsShown() then b:Click() end end end
+  end)
+  check(label .. ": Wegpunkt gesetzt", W.waypoint ~= nil and W.superTracked == true and W.mapOpened ~= nil)
+  local spots = 0
+  for _, band in pairs(ns.SPOTS) do for _, g in pairs(band) do spots = spots + #g end end
+  check(label .. ": Hotspots vorhanden", spots > 80, tostring(spots))
+  for map in pairs(ns.ZONE_NAMES) do
+    if not ns.ZONE_FACTION[map] then check(label .. ": Zone ohne Fraktion " .. map, false) end
+  end
+
+  -- AH-Scan per Knopf und Erkennung
+  step("AH-Scan-Knopf", function()
+    W.fire("AUCTION_HOUSE_SHOW") ; W.flush()
+    GoldrauschMainFrame.scanBtn:Click()
+    if W.dbCallback then W.dbCallback() end
+    W.flush()
+    W.fire("AUCTION_HOUSE_CLOSED") ; W.flush()
+    ns.UI.Show("market")
+    ns.UI.pages.market.segments:Select("forever", true)
+    ns.UI.Show("database")
+    ns.UI.pages.database.segCat:Select("forever", true)
+  end)
+  if opts.auctionator ~= false then
+    check(label .. ": Scan gestartet", W.scanStarted == true)
+    check(label .. ": Scan erkannt", GoldrauschDB.lastScan ~= nil)
+  end
+  check(label .. ": Neu-in-Forever-Liste", #ns.UI.pages.market.list.rows > 30)
 
   -- Farm-Guide: alle Levelbereiche
   step("Farm-Guide", function()
