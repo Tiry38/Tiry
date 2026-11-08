@@ -567,8 +567,8 @@ function page.CraftNext(self)
   if not (C_TradeSkillUI and C_TradeSkillUI.CraftRecipe) then return end
   if not S.tradeOpen then
     -- Berufsfenster für den ersten Eintrag öffnen, für den du Material hast
-    for _, e in ipairs(queue()) do
-      local r = R.Get(e.recipe)
+    for _, e in ipairs(ns.Shop.CraftOrder()) do
+      local r = e.recipe
       if r and craftable(r) > 0 and C_TradeSkillUI.OpenTradeSkill then
         local okCall, opened = pcall(C_TradeSkillUI.OpenTradeSkill, ns.PROF[r.prof])
         local ok = okCall and opened ~= false
@@ -581,8 +581,9 @@ function page.CraftNext(self)
     return
   end
   local key = openProfKey()
-  for _, e in ipairs(queue()) do
-    local r = R.Get(e.recipe)
+  -- erst Zwischenprodukte (z. B. Geschmeidiger Balg), dann die Craft-Liste
+  for _, e in ipairs(ns.Shop.CraftOrder()) do
+    local r = e.recipe
     if r and (not key or r.prof == key) then
       local n = math.min(e.n, craftable(r))
       if n > 0 then
@@ -595,7 +596,7 @@ function page.CraftNext(self)
         if C_TradeSkillUI.OpenRecipe then pcall(C_TradeSkillUI.OpenRecipe, liveID) end
         -- Exakt wie Blizzards eigener Herstellen-Knopf: leere Materialliste (Grundmaterial nimmt das Spiel selbst)
         C_TradeSkillUI.CraftRecipe(liveID, n, {}, nil, nil, false)
-        pendingCraft = { recipe = r.id, out = r.out, left = n }
+        pendingCraft = (not e.intermediate) and { recipe = r.id, out = r.out, left = n } or nil
         ns.Print(string.format("Stelle |cffff9929%d× %s|r her.", n, r.name))
         return
       end
@@ -749,8 +750,13 @@ function page.refresh(self)
       end
       local mats = {}
       for _, re in ipairs(r.reagents) do
-        local unit = M.BuyCost(re.id)
-        mats[#mats + 1] = re.n .. "× " .. ns.Item(re.id).name .. " (" .. (unit and ns.Money(unit * re.n) or "kein Preis") .. ")"
+        local unit, how, buy = S.MatCost(re.id)
+        local line = re.n .. "× " .. ns.Item(re.id).name .. " (" .. (unit and ns.Money(math.floor(unit * re.n + 0.5)) or "kein Preis") .. ")"
+        if how == "make" then
+          line = line .. " – selbst herstellen" .. (buy and (", kaufen: " .. ns.Money(buy * re.n)) or "")
+          notes[#notes + 1] = "|cff7fc8ff" .. ns.Item(re.id).name .. " selbst herstellen|r"
+        end
+        mats[#mats + 1] = line
       end
       entries[#entries + 1] = {
         id = learn and (ri or r.out) or r.out,

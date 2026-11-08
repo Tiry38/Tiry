@@ -26,16 +26,68 @@ function Shop.Have(id)
   return bagsAndBank(id) + (s.inbox[id] or 0) + (s.purchased[id] or 0)
 end
 
--- Gesamtbedarf aller Crafts in der Warteschlange
-function Shop.Needs()
-  local need = {}
+-- Plan für die Warteschlange: Was wird gekauft, was stellst du vorher selbst her?
+-- Zwischenprodukte (z. B. Geschmeidiger Balg) werden selbst hergestellt, wenn du das Rezept hast und es
+-- günstiger ist als kaufen. Was davon schon in den Taschen liegt, wird zuerst verbraucht.
+-- Rückgabe: need = { [itemID] = Menge zu besorgen/haben }, makes = { { recipe, n } } (in Herstell-Reihenfolge)
+function Shop.Plan()
+  local total = {}
   for _, e in ipairs(ns.char.queue or {}) do
     local r = ns.Recipes.Get(e.recipe)
     if r then
-      for _, re in ipairs(r.reagents) do need[re.id] = (need[re.id] or 0) + re.n * e.n end
+      for _, re in ipairs(r.reagents) do total[re.id] = (total[re.id] or 0) + re.n * e.n end
     end
   end
-  return need
+  local S = ns.Scanner
+  local crafts, recipeOf, order = {}, {}, {}
+  for _ = 1, 8 do -- bis nichts mehr nachrückt (Zwischenprodukte von Zwischenprodukten)
+    local changed = false
+    local ids = {}
+    for id in pairs(total) do ids[#ids + 1] = id end
+    table.sort(ids)
+    for _, id in ipairs(ids) do
+      local _, how, _, _, r = S.MatCost(id)
+      if how == "make" and r then
+        local want = math.max(0, math.ceil((total[id] - Shop.Have(id)) / r.qty))
+        local delta = want - (crafts[id] or 0)
+        if delta ~= 0 then
+          if not crafts[id] then order[#order + 1] = id end
+          crafts[id], recipeOf[id], changed = want, r, true
+          for _, re in ipairs(r.reagents) do total[re.id] = math.max(0, (total[re.id] or 0) + re.n * delta) end
+        end
+      end
+    end
+    if not changed then break end
+  end
+  local need, makes = {}, {}
+  for id, n in pairs(total) do
+    local made = (crafts[id] or 0) * (recipeOf[id] and recipeOf[id].qty or 1)
+    local rest = math.max(0, n - made) -- nur der Teil, der aus den Taschen kommt
+    if rest > 0 then need[id] = rest end
+  end
+  -- Herstell-Reihenfolge: tiefste Zwischenprodukte zuerst
+  for i = #order, 1, -1 do
+    local id = order[i]
+    if crafts[id] > 0 then makes[#makes + 1] = { recipe = recipeOf[id], n = crafts[id], intermediate = true } end
+  end
+  return need, makes
+end
+
+-- Gesamtbedarf aller Crafts in der Warteschlange (nur, was gekauft werden muss bzw. schon da ist)
+function Shop.Needs()
+  return (Shop.Plan())
+end
+
+-- Reihenfolge zum Herstellen: erst Zwischenprodukte, dann die Craft-Liste
+function Shop.CraftOrder()
+  local _, makes = Shop.Plan()
+  local out = {}
+  for _, m in ipairs(makes) do out[#out + 1] = m end
+  for _, e in ipairs(ns.char.queue or {}) do
+    local r = ns.Recipes.Get(e.recipe)
+    if r then out[#out + 1] = { recipe = r, n = e.n } end
+  end
+  return out
 end
 
 -- Liste für das Fenster: noch zu kaufen zuerst, Erledigtes unten
@@ -84,8 +136,8 @@ end
 -- "post" (Rest liegt im Briefkasten / ist gekauft) oder "fehlt". Material wird der Reihe nach verteilt.
 function Shop.Crafts()
   local bags, all, out = {}, {}, {}
-  for _, e in ipairs(ns.char.queue or {}) do
-    local r = ns.Recipes.Get(e.recipe)
+  for _, e in ipairs(Shop.CraftOrder()) do
+    local r = e.recipe
     if r then
       local status = "bereit"
       for _, re in ipairs(r.reagents) do
@@ -104,7 +156,12 @@ function Shop.Crafts()
         bags[re.id] = math.max(0, bags[re.id] - need)
         all[re.id] = math.max(0, all[re.id] - need)
       end
-      out[#out + 1] = { recipe = r, n = e.n, status = status }
+      out[#out + 1] = { recipe = r, n = e.n, status = status, intermediate = e.intermediate }
+      -- Zwischenprodukt hergestellt -> steht danach für die nächsten Crafts in den Taschen
+      if e.intermediate and status == "bereit" then
+        bags[r.out] = (bags[r.out] or (C_Item and C_Item.GetItemCount and C_Item.GetItemCount(r.out) or 0)) + e.n * r.qty
+        all[r.out] = (all[r.out] or Shop.Have(r.out)) + e.n * r.qty
+      end
     end
   end
   return out

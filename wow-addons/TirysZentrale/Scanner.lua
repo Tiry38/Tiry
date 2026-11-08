@@ -241,24 +241,89 @@ function S.ScanRecipes()
   return #list
 end
 
--- Gewinn eines gespeicherten Rezepts mit aktuellen Preisen
+----------------------------------------------------------------------------
+-- Selbst herstellen oder kaufen? (z. B. Geschmeidiger mittlerer Balg = Mittlerer Balg + Salz)
+-- Nur über Rezepte, die DU gelernt hast, in Berufen, die DU hast. Nie Rezepte anderer Berufe.
+----------------------------------------------------------------------------
+local makers, makersAt
+local function makerIndex()
+  local now = GetTime()
+  if makers and makersAt and now - makersAt < 10 then return makers end
+  makers, makersAt = {}, now
+  local R = ns.Recipes
+  for _, key in ipairs(R.MyProfessions()) do
+    for _, r in ipairs((R.List(key, "known"))) do
+      -- nur echte Zwischenprodukte: gleiche Menge raus, kein Rezept, das sein eigenes Ergebnis braucht
+      if r.out and (r.qty or 0) > 0 and not makers[r.out] then
+        local loops = false
+        for _, re in ipairs(r.reagents) do if re.id == r.out then loops = true end end
+        if not loops then makers[r.out] = r end
+      end
+    end
+  end
+  return makers
+end
+local function resetMakers() makers = nil end
+ns.Listen("RECIPES_SCANNED", resetMakers)
+ns.Listen("PROFESSIONS_CHANGED", resetMakers)
+S.ResetMakers = resetMakers
+
+-- Eigenes Rezept für ein Material (oder nil)
+function S.Maker(itemID) return makerIndex()[itemID] end
+
+local function buyCost(id)
+  local PS = ns.PriceString
+  if PS then return PS.Eval("matPrice", id) end
+  return M.BuyCost(id)
+end
+
+-- Stückkosten eines Materials: günstiger von Kaufen und Selbst-Herstellen.
+-- Rückgabe: unit, "buy"|"make"|nil, buyUnit, makeUnit, recipe
+function S.MatCost(id, depth, seen)
+  depth = depth or 0
+  local buy = buyCost(id)
+  local r = depth < 3 and makerIndex()[id] or nil
+  if r and not (seen and seen[id]) then
+    seen = seen or {}
+    seen[id] = true
+    local c, ok = 0, true
+    for _, re in ipairs(r.reagents) do
+      local u = S.MatCost(re.id, depth + 1, seen)
+      if not u then ok = false break end
+      c = c + u * re.n
+    end
+    seen[id] = nil
+    if ok then
+      local make = c / r.qty
+      if not buy or make < buy then return make, "make", buy, make, r end
+      return buy, "buy", buy, make, r
+    end
+  end
+  return buy, buy and "buy" or nil, buy, nil, nil
+end
+
+-- Gewinn eines gespeicherten Rezepts mit aktuellen Preisen.
+-- 5. Rückgabe: Materialien, die du günstiger selbst herstellst { { id, saves = Ersparnis pro Craft } }
 function S.RecipeProfit(r)
   local PS = ns.PriceString
-  local cost, unknown = 0, 0
+  local cost, unknown, makes = 0, 0, {}
   for _, reagent in ipairs(r.reagents) do
-    local unit
-    if PS then unit = PS.Eval("matPrice", reagent.id) else unit = M.BuyCost(reagent.id) end
+    local unit, how, buy = S.MatCost(reagent.id)
     if unit then
       cost = cost + unit * reagent.n
+      if how == "make" then
+        makes[#makes + 1] = { id = reagent.id, saves = buy and math.floor((buy - unit) * reagent.n) or nil }
+      end
     else
       unknown = unknown + 1
     end
   end
+  cost = math.floor(cost + 0.5)
   local price
   if PS then price = PS.Eval("craftValue", r.out) else price = M.Price(r.out) end
   local revenue = price and M.Net(price) * r.qty or nil
   local profit = revenue and (revenue - cost) or nil
-  return profit, revenue, cost, unknown
+  return profit, revenue, cost, unknown, makes
 end
 
 local function readOpenProf()

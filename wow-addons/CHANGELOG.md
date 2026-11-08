@@ -1,5 +1,13 @@
 # Changelog – Tiry's Zentrale
 
+## 5.6.0 (08.11.2026)
+**Selbst herstellen oder kaufen? Das Addon rechnet es für jedes Material aus.**
+- Beispiel: Geschmeidiger mittlerer Balg. Ist Mittlerer Balg + Salz günstiger als der fertige Balg im AH, rechnet der Craft-Planer mit dem günstigeren Weg.
+- Gilt für alle Zwischenprodukte (Bälge, Leder, Stoffballen, Barren …), auch mehrstufig – aber **nur mit Rezepten, die du selbst gelernt hast, in Berufen, die du hast**. Nie Rezepte fremder Berufe.
+- Einkaufsliste: kauft die günstigeren Rohstoffe statt des fertigen Zwischenprodukts. Was du davon schon in den Taschen hast, wird zuerst verbraucht.
+- „Du stellst her“ und „Nächstes craften“: erst die Zwischenprodukte (blau, „selbst, spart Gold“), dann die eigentlichen Crafts.
+- Craft-Planer: Hinweis „… selbst herstellen“ am Rezept, im Material-Tooltip steht der Kaufpreis zum Vergleich.
+
 ## 5.5.1 (08.11.2026)
 **Auktionen: Gold zeigt jetzt den echten Weg – unterwegs, im Briefkasten, abgeholt.**
 - Nach einem Verkauf verschickt das Spiel das Gold mit Verzögerung (Blizzard-Code: die Auktion bleibt bis dahin als „Verkauft“ mit Restzeit in deiner Auktionsliste). Bisher stand sofort „im Briefkasten“ – falsch. Jetzt: **unterwegs** (mit Restzeit), dann **im Briefkasten**, dann **abgeholt**.

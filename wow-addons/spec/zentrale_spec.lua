@@ -652,6 +652,62 @@ describe("Craft-Planer: Mindestgewinn 'alles'", function()
   end)
 end)
 
+describe("Selbst herstellen oder kaufen (Zwischenprodukte)", function()
+  local prices = { [4233] = 1000, [4232] = 200, [4289] = 50, [2312] = 300, [2321] = 100, [4340] = 100, [4248] = 9000 }
+
+  it("Geschmeidiger mittlerer Balg: selbst herstellen ist günstiger -> Rechnung + Einkaufsliste + Reihenfolge", function()
+    local ns, W = E.load({ prices = prices, known = { [3765] = true, [3817] = true } })
+    local r = ns.Recipes.Get(3765) -- Dunkle Lederhandschuhe (braucht 1 Geschmeidigen mittleren Balg)
+    local unit, how = ns.Scanner.MatCost(4233)
+    assert.are.equal("make", how)
+    assert.are.equal(250, unit) -- Mittlerer Balg 200 + Salz 50 statt 1000 im AH
+    local _, _, cost, _, makes = ns.Scanner.RecipeProfit(r)
+    assert.are.equal(300 + 250 + 100 + 100, cost)
+    assert.are.equal(4233, makes[1].id)
+    assert.are.equal(750, makes[1].saves)
+    -- Einkaufsliste: Balg + Salz statt fertigem Balg, Balg zuerst herstellen
+    ns.char.queue = { { recipe = 3765, prof = "LEATHERWORKING", n = 2 } }
+    local need, made = ns.Shop.Plan()
+    assert.is_nil(need[4233])
+    assert.are.equal(2, need[4232])
+    assert.are.equal(2, need[4289])
+    assert.are.equal(3817, made[1].recipe.id)
+    assert.are.equal(2, made[1].n)
+    local order = ns.Shop.CraftOrder()
+    assert.are.equal(3817, order[1].recipe.id)
+    assert.are.equal(3765, order[2].recipe.id)
+    -- schon 1 fertiger Balg in der Tasche -> nur noch 1 selbst herstellen
+    W.bags = { [0] = { { itemID = 4233, stackCount = 1, quality = 1 } } }
+    need, made = ns.Shop.Plan()
+    assert.are.equal(1, need[4233])
+    assert.are.equal(1, need[4232])
+    assert.are.equal(1, made[1].n)
+    assert.are.same({}, W.errors)
+  end)
+
+  it("ohne gelerntes Rezept (oder fremder Beruf) wird immer gekauft", function()
+    local ns = E.load({ prices = prices, known = { [3765] = true } })
+    local _, how = ns.Scanner.MatCost(4233)
+    assert.are.equal("buy", how)
+    ns.char.queue = { { recipe = 3765, prof = "LEATHERWORKING", n = 1 } }
+    local need, made = ns.Shop.Plan()
+    assert.are.equal(1, need[4233])
+    assert.are.equal(0, #made)
+    -- Schneiderei-Rezept gelernt, aber kein Schneider: zählt nicht
+    assert.is_false(ns.HasProf(ns.PROF.TAILORING))
+  end)
+
+  it("kaufen bleibt, wenn der fertige Balg billiger ist", function()
+    local cheap = {}
+    for k, v in pairs(prices) do cheap[k] = v end
+    cheap[4233] = 200
+    local ns = E.load({ prices = cheap, known = { [3765] = true, [3817] = true } })
+    local unit, how = ns.Scanner.MatCost(4233)
+    assert.are.equal("buy", how)
+    assert.are.equal(200, unit)
+  end)
+end)
+
 describe("Hergestellt -> Craft-Liste abhaken (alle Wege, nie doppelt)", function()
   local function setup3(ns, W)
     ns.char.queue = { { recipe = 2164, prof = "LEATHERWORKING", n = 3 } }

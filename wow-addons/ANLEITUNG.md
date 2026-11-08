@@ -19,6 +19,7 @@
 Auf der Startseite steht dein **Gold-Kreislauf**. Der orange Schritt ist immer dran:
 1. **Planen:** Klick auf **„Liste erstellen“**. Alle Rezepte deiner Berufe, die gerade Gold bringen, landen auf der Craft-Liste.
 2. **Einkaufen:** Die **Einkaufsliste** zeigt nur das fehlende Material. Beim Händler: „Beim Händler kaufen“. Im AH: „Im AH suchen“. Gekauftes verschwindet von selbst.
+   Kannst du ein Material (z. B. Geschmeidiger Balg) selbst günstiger herstellen, kauft die Liste die Rohstoffe dafür. Das gilt nur mit deinen eigenen Rezepten.
 3. **Herstellen:** **„Nächstes craften“** oder ganz normal im Berufsfenster. Jedes Stück wird von selbst abgehakt.
 4. **Verkaufen:** Unter **Craften → Craft-Planer → Schritt 4** stehen deine hergestellten Items mit **„Nicht unter“**-Preis. Im AH: Auctionator → „Verkaufen“ → Item anklicken. Nie unter diesem Preis verkaufen.
 
