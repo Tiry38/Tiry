@@ -483,3 +483,29 @@ describe("AH-Scan höchstens alle 30 Minuten", function()
     assert.truthy(W.searchedKeys)
   end)
 end)
+
+describe("× im Craft-Planer", function()
+  it("blendet das Rezept aus, zeigt nur EIN Rückgängig, keine Wolke", function()
+    local ns, W = E.load({ prices = { [4244] = 30000, [4243] = 500, [4231] = 300, [2320] = 10, [4293] = 9000 } })
+    SlashCmdList.TIRYSZENTRALE("") ns.UI.Wizard.Finish()
+    ns.UI.Show("recipes")
+    local p = ns.UI.pages.recipes
+    p.prof, p.view = "LEATHERWORKING", "learnable"
+    ns.UI.RefreshPage("recipes")
+    local row = p.list.rows[1]
+    assert.truthy(row and row:IsShown(), "keine Zeile")
+    -- zwei Rezepte nacheinander weg
+    row.action:Click()
+    local second = p.list.rows[1]
+    if second and second:IsShown() then second.action:Click() end
+    local n = 0
+    for _ in pairs(ns.char.hiddenRecipes) do n = n + 1 end
+    assert.is_true(n >= 1)
+    local shownChips = 0
+    for _, c in ipairs(p.hiddenRow.chips) do if c:IsShown() then shownChips = shownChips + 1 end end
+    assert.are.equal(1, shownChips) -- nur das letzte
+    p.hiddenRow.chips[1]:Click()
+    assert.is_falsy(p.hiddenRow:IsShown())
+    assert.are.same({}, W.errors)
+  end)
+end)

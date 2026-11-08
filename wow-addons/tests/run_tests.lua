@@ -535,11 +535,20 @@ local function runScenario(label, opts)
     assert(p.filterReset:IsShown(), "Filter-Standard-Knopf sichtbar")
     p.filterReset:Click()
     assert(TirysZentraleDB.settings.craft.onlySafe == true, "Filter zurückgesetzt")
-    -- Ausgeblendetes Rezept einzeln zurückholen
-    TirysZentraleCharDB.hiddenRecipes = { [2152] = true } ; p.refresh(p)
-    assert(p.hiddenRow:IsShown() and p.hiddenRow.chips[1]:IsShown(), "Chip für ausgeblendetes Rezept")
-    p.hiddenRow.chips[1]:Click()
-    assert(not TirysZentraleCharDB.hiddenRecipes[2152] and not p.hiddenRow:IsShown(), "Chip holt Rezept zurück")
+    -- Alte Ausgeblendete erscheinen NICHT als Chip-Wolke
+    TirysZentraleCharDB.hiddenRecipes = { [2152] = true } ; p.lastHidden = nil ; p.refresh(p)
+    assert(not p.hiddenRow:IsShown(), "keine Chip-Wolke für alte Ausgeblendete")
+    -- × an einer Zeile: weg, nur EIN Rückgängig für genau dieses Rezept
+    TirysZentraleCharDB.hiddenRecipes = {} ; p.refresh(p)
+    local row = p.list.rows[1]
+    if row and row:IsShown() and row.action and row.action:IsShown() then
+      local before = 0
+      row.action:Click()
+      for _ in pairs(TirysZentraleCharDB.hiddenRecipes) do before = before + 1 end
+      assert(before == 1 and p.hiddenRow:IsShown() and p.hiddenRow.chips[1].text:GetText():find("Rückgängig"), "× blendet aus + ein Rückgängig")
+      p.hiddenRow.chips[1]:Click()
+      assert(next(TirysZentraleCharDB.hiddenRecipes) == nil and not p.hiddenRow:IsShown(), "Rückgängig holt es zurück")
+    end
     -- Warteschlange leeren -> Rückgängig
     TirysZentraleCharDB.queue = { { recipe = 2152, prof = "LEATHERWORKING", n = 3 } } ; p.refresh(p)
     p.queueCard.clear:Click()

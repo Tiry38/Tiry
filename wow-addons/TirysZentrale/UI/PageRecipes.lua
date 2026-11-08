@@ -269,7 +269,7 @@ function page.build(self, content, width)
   self.hiddenRow:SetWidth(width)
   self.hiddenRow.label = UI.Text(self.hiddenRow, 11, "semibold", C.dim)
   self.hiddenRow.label:SetPoint("TOPLEFT", 0, -8)
-  self.hiddenRow.label:SetText("Ausgeblendet:")
+  self.hiddenRow.label:SetText("Gerade ausgeblendet:")
   self.hiddenRow.chips = {}
 
   -- Warteschlange
@@ -640,14 +640,14 @@ function page.refresh(self)
             or "Linksklick: 1× in die Craft-Liste · × oder Rechtsklick: Rezept ausblenden" },
         action = function()
           hidden()[r.id] = true
-          ns.Print(r.name .. " ausgeblendet. Zurückholen: Knopf \"Ausgeblendete zurückholen\".")
+          self.lastHidden = r.id
           page.refresh(self)
         end,
-        actionTip = "Rezept ausblenden",
+        actionTip = "Weg damit (Rezept ausblenden)",
         onClick = function(_, button)
           if button == "RightButton" then
             hidden()[r.id] = true
-            ns.Print(r.name .. " ausgeblendet. Zurückholen: Knopf \"Ausgeblendete zurückholen\".")
+            self.lastHidden = r.id
           elseif learn then
             if ri then
               local ok, err = M.SearchNow({ ri })
@@ -688,42 +688,32 @@ function page.refresh(self)
   local h = self.list:SetEntries(entries, empty)
 
   local y = listTop + h + 14
-  -- Ausgeblendete als Chips: Klick holt das Rezept zurück
+  -- Nur das ZULETZT ausgeblendete Rezept als kleines "Rückgängig" (alle anderen: Mehr Optionen > Ausgeblendete)
   local hr = self.hiddenRow
-  local ids = {}
-  for id in pairs(hidden()) do if R.Get(id) then ids[#ids + 1] = id end end
-  table.sort(ids, function(a, b) return R.Get(a).name < R.Get(b).name end)
   for _, c in ipairs(hr.chips) do c:Hide() end
-  if #ids > 0 then
-    local cx, cy = 96, 0
-    for i, id in ipairs(ids) do
-      local r = R.Get(id)
-      local c = hr.chips[i]
-      if not c then
-        c = UI.Button(hr, "", "ghost", 100, 28, "refresh")
-        c:SetScript("OnClick", function(b)
-          hidden()[b.recipeID] = nil
-          ns.Print(R.Get(b.recipeID).name .. " ist wieder in der Liste.")
-          page.refresh(self)
-        end)
-        UI.SetTooltip(c, "Zurückholen", "Klick: Rezept wieder anzeigen.")
-        hr.chips[i] = c
-      end
-      c.recipeID = id
-      c:SetLabel(r.name)
-      local cw = math.ceil(c.text:GetStringWidth()) + 48
-      c:SetWidth(cw)
-      if cx + cw > UI.CONTENT_W and cx > 96 then cx, cy = 96, cy + 34 end
-      c:ClearAllPoints()
-      c:SetPoint("TOPLEFT", hr, "TOPLEFT", cx, -cy)
-      c:Show()
-      cx = cx + cw + 6
+  local last = self.lastHidden and hidden()[self.lastHidden] and R.Get(self.lastHidden)
+  if last then
+    local c = hr.chips[1]
+    if not c then
+      c = UI.Button(hr, "", "ghost", 100, 28, "refresh")
+      c:SetScript("OnClick", function()
+        if self.lastHidden then hidden()[self.lastHidden] = nil end
+        self.lastHidden = nil
+        page.refresh(self)
+      end)
+      UI.SetTooltip(c, "Rückgängig", "Holt das gerade ausgeblendete Rezept zurück.")
+      hr.chips[1] = c
     end
-    hr:SetHeight(cy + 28)
+    UI.FitText(c.text, "Rückgängig: " .. last.name, UI.CONTENT_W - 220)
+    c:SetWidth(math.ceil(c.text:GetStringWidth()) + 48)
+    c:ClearAllPoints()
+    c:SetPoint("TOPLEFT", hr, "TOPLEFT", 150, 0)
+    c:Show()
+    hr:SetHeight(28)
     hr:ClearAllPoints()
     hr:SetPoint("TOPLEFT", content, "TOPLEFT", 0, -y)
     hr:Show()
-    y = y + cy + 28 + 14
+    y = y + 28 + 14
   else
     hr:Hide()
   end

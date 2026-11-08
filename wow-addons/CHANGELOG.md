@@ -1,5 +1,11 @@
 # Changelog – Tiry's Zentrale
 
+## 5.2.3 (08.11.2026)
+- **× im Craft-Planer heißt jetzt: weg.** Die große „Ausgeblendet“-Chip-Wolke ist entfernt.
+  - Nur das **zuletzt** ausgeblendete Rezept zeigt eine kleine Zeile „Rückgängig: …“, für ein Versehen.
+  - Alle Ausgeblendeten auf einmal holst du still unter „Mehr Optionen“ > „Ausgeblendete (N)“ zurück.
+- **Alte Platzhalter mit „OLD“ ausgefiltert**, z. B. „Muster: Doppelt genähte Lederhandschuhe OLD“. Das Rezept zeigt jetzt das echte Muster (Item 5974, Skill 160 statt fälschlich 125). Das gilt auch in der Item-Suche.
+
 ## 5.2.2 (08.11.2026)
 - **AH-Scan und Unterboten-Prüfung laufen höchstens alle 30 Minuten**, statt bei jedem Öffnen. Wer oft am AH vorbeiläuft, kann sofort einstellen.
   - Den Abstand stellst du unter Einstellungen > „AH-Scan höchstens alle“ ein (5–240 Min., × setzt auf 30 zurück).

@@ -26,7 +26,7 @@ local function isJunk(name)
   for i = 1, #JUNK do
     if name:find(JUNK[i], 1, true) then return true end
   end
-  return false
+  return name:find("%f[%w]OLD%f[%W]") ~= nil -- alte Platzhalter wie "... OLD" (nicht "Gold")
 end
 D.IsJunk = isJunk
 

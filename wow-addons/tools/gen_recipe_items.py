@@ -20,7 +20,7 @@ for r in rd("ItemXItemEffect.csv"):
     it = items.get(item_id)
     if spell in recipes and it is not None:
         name = it["Display_lang"]
-        if any(j in name for j in JUNK):
+        if any(j in name for j in JUNK) or re.search(r"\bOLD\b", name):
             continue
         bonding = int(it.get("Bonding") or 0)
         req = int(it.get("RequiredSkillRank") or 0)
