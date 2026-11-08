@@ -17,13 +17,13 @@ local function topCard(parent, w)
   card.bg:SetColor(C.card)
   card.glow = UI.Glow(card, C.amber, 220, 0, "BACKGROUND")
   card.glow:SetPoint("TOP", 0, 40)
-  card.rank = UI.Chip(card, "", C.gold, true)
+  card.rank = UI.Chip(card, "", C.hi, true)
   card.rank:SetPoint("TOPLEFT", 16, -16)
   card.icon = UI.ItemIcon(card, 44)
   card.icon:SetPoint("TOPRIGHT", -16, -14)
   card.title = UI.Para(card, 14, C.text, w - 32, "bold")
   card.title:SetPoint("TOPLEFT", 16, -64)
-  card.value = UI.Text(card, 17, "bold", C.gold)
+  card.value = UI.Text(card, 17, "bold", C.hi)
   card.value:SetPoint("BOTTOMLEFT", 16, 40)
   card.sub = UI.Text(card, 10, "semibold", C.dim)
   card.sub:SetPoint("BOTTOMLEFT", 16, 22)
@@ -66,7 +66,7 @@ function page.build(self, content, width)
   hero.hello:SetPoint("TOPLEFT", 24, -22)
   hero.info = UI.Text(hero, 12, "semibold", C.muted)
   hero.info:SetPoint("TOPLEFT", hero.hello, "BOTTOMLEFT", 0, -6)
-  hero.money = UI.Text(hero, 20, "bold", C.gold)
+  hero.money = UI.Text(hero, 20, "bold", C.hi)
   hero.money:SetPoint("TOPLEFT", hero.info, "BOTTOMLEFT", 0, -12)
   hero.profs = {}
   self.hero = hero
@@ -85,7 +85,7 @@ function page.build(self, content, width)
     r:SetPoint("TOPLEFT", 20, -48 - (i - 1) * 42)
     r.bg = UI.Round(r, 19, "BACKGROUND", 1)
     r.bg:SetColor(C.inset, 1)
-    r.num = UI.Chip(r, tostring(i), C.gold, true)
+    r.num = UI.Chip(r, tostring(i), C.hi, true)
     r.num:SetPoint("LEFT", 10, 0)
     r.text = UI.Text(r, 12, "semibold", C.text)
     r.text:SetPoint("LEFT", r.num, "RIGHT", 10, 0)
@@ -182,10 +182,10 @@ function page.refresh(self)
   table.sort(ids)
   local x = 0
   for i, id in ipairs(ids) do
-    local c = hero.profs[i] or UI.Chip(hero, "", C.gold)
+    local c = hero.profs[i] or UI.Chip(hero, "", C.hi)
     hero.profs[i] = c
     local pr = ns.professions[id]
-    c:Set(pr.name .. " " .. pr.rank .. "/" .. pr.maxRank, C.gold)
+    c:Set(pr.name .. " " .. pr.rank .. "/" .. pr.maxRank, C.hi)
     c:ClearAllPoints()
     c:SetPoint("TOPLEFT", hero.money, "TOPRIGHT", 18 + x, -2)
     c:Show()
@@ -224,7 +224,7 @@ function page.refresh(self)
     local r = ranked[i]
     card.method = r and r.m
     if r then
-      card.rank:Set("#" .. i, i == 1 and C.gold or (i == 2 and C.teal or C.violet), true)
+      card.rank:Set("#" .. i, i == 1 and C.hi or (i == 2 and C.teal or C.violet), true)
       card.title:SetText(r.m.title)
       if r.m.items and r.m.items[1] then card.icon:SetItem(r.m.items[1]) else card.icon:SetIcon(UI.Icon(r.m.icon or "star"), C.gold) end
       local value, id = ns.MethodValue(r.m)
@@ -283,7 +283,7 @@ function page.refresh(self)
   for _, g in ipairs(ns.GOALS) do
     if p.level <= g.level then goal = g break end
   end
-  self.goal:SetText(goal and ("|cff8cff4dSparziel:|r " .. goal.text) or "")
+  self.goal:SetText(goal and ("|cffff9929Sparziel:|r " .. goal.text) or "")
 end
 
 UI.RegisterPage("home", page)

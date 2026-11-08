@@ -64,7 +64,7 @@ function page.build(self, content, width)
     bar:SetScript("OnEnter", function(me)
       if not me.data then return end
       GameTooltip:SetOwner(me, "ANCHOR_TOP")
-      GameTooltip:SetText(me.data.label, 0.55, 1, 0.30)
+      GameTooltip:SetText(me.data.label, 1, 0.6, 0.16)
       GameTooltip:AddDoubleLine("Eingenommen", ns.Money(me.data.earned), 0.86, 0.92, 0.89)
       GameTooltip:AddDoubleLine("Ausgegeben", ns.Money(me.data.spent), 0.86, 0.92, 0.89)
       GameTooltip:AddDoubleLine("Ergebnis", ns.Money(me.data.net), 1, 1, 1)
@@ -125,7 +125,7 @@ function page.refresh(self)
   end
   local A = ns.Auto
   local lph = A.LootPerHour()
-  local lines = { string.format("Beute-Wert: |cff8cff4d%s|r (%d Items)  ·  pro Stunde: |cff8cff4d%s|r",
+  local lines = { string.format("Beute-Wert: |cffff9929%s|r (%d Items)  ·  pro Stunde: |cffff9929%s|r",
     ns.Money(A.session.value), A.session.items, lph and ns.Money(math.floor(lph)) or "misst ...") }
   lines[#lines + 1] = "|cff93a39dWert = was du beim besten Verkaufsweg (AH nach Gebühr oder Händler) bekommst – auch für noch nicht verkaufte Beute.|r"
   for i = 1, math.min(#A.session.log, 6) do
@@ -136,7 +136,7 @@ function page.refresh(self)
 
   local best = T.BestDay()
   if best and best.net > 0 then
-    self.best:SetText("Dein bester Tag: |cff8cff4d" .. best.key .. "|r mit " .. ns.Money(best.net) .. " Plus.")
+    self.best:SetText("Dein bester Tag: |cffff9929" .. best.key .. "|r mit " .. ns.Money(best.net) .. " Plus.")
   else
     self.best:SetText("Noch kein Gewinntag gespeichert – leg los!")
   end

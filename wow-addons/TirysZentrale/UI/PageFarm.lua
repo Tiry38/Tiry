@@ -34,13 +34,13 @@ end
 local function groupCard(parent, width)
   local card = UI.Card(parent, 18, C.card)
   card:SetWidth(width)
-  card.rank = UI.Chip(card, "", C.gold, true)
+  card.rank = UI.Chip(card, "", C.hi, true)
   card.rank:SetPoint("TOPLEFT", 16, -16)
   card.title = UI.Text(card, 15, "bold", C.text)
   card.title:SetPoint("LEFT", card.rank, "RIGHT", 10, 0)
   card.prof = UI.Chip(card, "", C.green)
   card.prof:SetPoint("LEFT", card.title, "RIGHT", 10, 0)
-  card.value = UI.Text(card, 16, "bold", C.gold)
+  card.value = UI.Text(card, 16, "bold", C.hi)
   card.value:SetPoint("TOPRIGHT", -18, -16)
   card.valueSub = UI.Text(card, 10, "semibold", C.dim)
   card.valueSub:SetPoint("TOPRIGHT", card.value, "BOTTOMRIGHT", 0, -3)
@@ -52,7 +52,7 @@ local function groupCard(parent, width)
   card.listBtn:SetPoint("BOTTOMRIGHT", -16, 14)
   card.listBtn:SetScript("OnClick", function(self)
     local ok, n = M.CreateShoppingList("Zentrale: Farm " .. self.label, self.ids)
-    ns.Print(ok and ("Liste |cff8cff4dTiry's Zentrale: Farm " .. self.label .. "|r angelegt (" .. n .. " Items).") or ("|cffff6b81" .. tostring(n) .. "|r"))
+    ns.Print(ok and ("Liste |cffff9929Tiry's Zentrale: Farm " .. self.label .. "|r angelegt (" .. n .. " Items).") or ("|cffff6b81" .. tostring(n) .. "|r"))
   end)
   return card
 end
@@ -112,7 +112,7 @@ function page.build(self, content, width)
   self.best = UI.Card(content, 20, C.card)
   self.best:SetSize(width, 96)
   self.best.bg:SetGradient({ { 0.07, 0.27, 0.19 }, { 0.09, 0.18, 0.16 }, { 0.14, 0.16, 0.17 } }, 0.95)
-  self.best.label = UI.Text(self.best, 10, "semibold", C.gold)
+  self.best.label = UI.Text(self.best, 10, "semibold", C.hi)
   self.best.label:SetPoint("TOPLEFT", 20, -16)
   self.best.text = UI.Para(self.best, 14, C.text, width - 40, "semibold")
   self.best.text:SetPoint("TOPLEFT", self.best.label, "BOTTOMLEFT", 0, -6)
@@ -150,7 +150,7 @@ function page.refresh(self)
   local r1 = ranked[1]
   self.best.label:SetText(mine and "DEIN BESTER FARM JETZT (LEVEL " .. ns.player.level .. ")" or ("LEVEL " .. band.key))
   if r1 and r1.value then
-    self.best.text:SetText(string.format("%s farmen – vor allem |cff8cff4d%s|r: %s pro Stapel im AH.%s",
+    self.best.text:SetText(string.format("%s farmen – vor allem |cffff9929%s|r: %s pro Stapel im AH.%s",
       r1.g.label, ns.Item(r1.bestID).name, ns.Money(r1.value),
       (not r1.can) and ("\n|cffff6b81Dafür brauchst du " .. ns.ProfName(r1.g.prof) .. ".|r") or ""))
   else
@@ -167,8 +167,8 @@ function page.refresh(self)
     end
   end
   for _, z in ipairs(band.both or {}) do if z:find("Zephras") then zones[#zones + 1] = z end end
-  self.zones:SetText("|cff8cff4dGebiete (" .. (faction == "Horde" and "Horde" or "Allianz") .. "):|r " .. table.concat(zones, " · ")
-    .. "\n|cff8cff4dTipp:|r " .. (band.tip or "") .. "\n|cff93a39dStellen = dichteste Fundorte aus der Forever-Datenbank von QuestieDB. Preise = live von deinem Server.|r")
+  self.zones:SetText("|cffff9929Gebiete (" .. (faction == "Horde" and "Horde" or "Allianz") .. "):|r " .. table.concat(zones, " · ")
+    .. "\n|cffff9929Tipp:|r " .. (band.tip or "") .. "\n|cff93a39dStellen = dichteste Fundorte aus der Forever-Datenbank von QuestieDB. Preise = live von deinem Server.|r")
   self.zones:ClearAllPoints()
   self.zones:SetPoint("TOPLEFT", self.frame.content, "TOPLEFT", 0, -self.top)
   local y = self.top + math.ceil(self.zones:GetStringHeight()) + 16
@@ -176,7 +176,7 @@ function page.refresh(self)
   for i, r in ipairs(ranked) do
     local card = self.cards[i] or groupCard(self.frame.content, width)
     self.cards[i] = card
-    card.rank:Set("#" .. i, i == 1 and C.gold or C.violet, true)
+    card.rank:Set("#" .. i, i == 1 and C.hi or C.violet, true)
     card.title:SetText(r.g.label)
     if r.g.prof then
       card.prof:Set(r.can and (ns.ProfName(r.g.prof) .. " vorhanden") or (ns.ProfName(r.g.prof) .. " fehlt"), r.can and C.green or C.red)

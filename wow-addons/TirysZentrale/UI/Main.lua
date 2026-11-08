@@ -197,7 +197,7 @@ end
 function UI.UpdateStatus()
   if not frame then return end
   local state, text = ns.Market.Status()
-  local c = (state == "ok" and C.green) or (state == "empty" and C.gold) or C.red
+  local c = (state == "ok" and C.green) or (state == "empty" and C.hi) or C.red
   frame.status.dot:SetVertexColor(c[1], c[2], c[3], 1)
   frame.status.text:SetText(state == "ok" and "Live-Preise aktiv" or (state == "empty" and "AH einmal scannen" or "Auctionator fehlt"))
   frame.scanInfo:SetText(ns.Market.LastScanText())
@@ -434,7 +434,7 @@ local function createMini()
   mini:SetScript("OnEnter", function(self)
     hl:SetAlpha(0.55)
     GameTooltip:SetOwner(self, "ANCHOR_LEFT")
-    GameTooltip:SetText("Tiry's Zentrale", 0.55, 1, 0.30)
+    GameTooltip:SetText("Tiry's Zentrale", 1, 0.6, 0.16)
     GameTooltip:AddLine("Linksklick: Gold-Guide öffnen", 0.9, 0.9, 1)
     GameTooltip:AddLine("Rechtsklick: Scanner (Händler & Taschen)", 0.9, 0.9, 1)
     GameTooltip:AddLine("Ziehen: Knopf verschieben", 0.7, 0.7, 0.85)
@@ -482,7 +482,7 @@ ns.Listen("LOGIN", function()
   if not ns.settings.welcomeShown then
     ns.settings.welcomeShown = true
     C_Timer.After(6, function()
-      ns.Print("Willkommen! Tippe |cff8cff4d/tz|r oder klick auf die Goldmünze an der Minikarte.")
+      ns.Print("Willkommen! Tippe |cffff9929/tz|r oder klick auf die Goldmünze an der Minikarte.")
     end)
   end
 end)
@@ -542,7 +542,7 @@ end
 
 function TirysZentrale_OnAddonCompartmentEnter(_, menuButton)
   GameTooltip:SetOwner(menuButton or UIParent, "ANCHOR_LEFT")
-  GameTooltip:SetText("Tiry's Zentrale", 0.55, 1, 0.30)
+  GameTooltip:SetText("Tiry's Zentrale", 1, 0.6, 0.16)
   GameTooltip:AddLine("Linksklick: Gold-Guide · Rechtsklick: Scanner", 0.9, 0.9, 1)
   GameTooltip:Show()
 end

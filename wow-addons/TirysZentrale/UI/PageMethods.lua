@@ -71,7 +71,7 @@ local function createCard(parent, width)
   card.title:SetWordWrap(false)
   card.summary = UI.Para(card, 12, C.muted, width - 72 - 230) -- rechts bleibt Platz für den Wert
   card.summary:SetPoint("TOPLEFT", card.title, "BOTTOMLEFT", 0, -6)
-  card.value = UI.Text(card, 15, "bold", C.gold)
+  card.value = UI.Text(card, 15, "bold", C.hi)
   card.value:SetPoint("TOPRIGHT", -46, -18)
   card.valueSub = UI.Text(card, 10, "semibold", C.dim)
   card.valueSub:SetPoint("TOPRIGHT", card.value, "BOTTOMRIGHT", 0, -3)
@@ -93,7 +93,7 @@ local function createCard(parent, width)
 end
 
 local function chip(card, i)
-  card.chips[i] = card.chips[i] or UI.Chip(card, "", C.gold)
+  card.chips[i] = card.chips[i] or UI.Chip(card, "", C.hi)
   return card.chips[i]
 end
 
@@ -135,10 +135,10 @@ local function fillCard(card, m, expanded, width)
   if m.minLevel and m.minLevel > 1 then tags[#tags + 1] = { "ab Level " .. m.minLevel, available and C.teal or C.red } end
   if m.prof then
     local has = ns.HasProf(m.prof)
-    tags[#tags + 1] = { profName(m.prof) .. (has and " (" .. ns.ProfRank(m.prof) .. ")" or ""), has and C.green or C.gold }
+    tags[#tags + 1] = { profName(m.prof) .. (has and " (" .. ns.ProfRank(m.prof) .. ")" or ""), has and C.green or C.hi }
   end
   tags[#tags + 1] = { EFFORT[m.effort or 1], C.muted }
-  tags[#tags + 1] = { m.source == "forever" and "Forever bestätigt" or "Classic-Wissen", m.source == "forever" and C.gold or C.teal }
+  tags[#tags + 1] = { m.source == "forever" and "Forever bestätigt" or "Classic-Wissen", m.source == "forever" and C.hi or C.teal }
   if not available then tags[#tags + 1] = { why, C.red } end
   local y = 16 + 22 + 6 + math.ceil(card.summary:GetStringHeight()) + 10
   local x = 72
@@ -172,26 +172,26 @@ local function fillCard(card, m, expanded, width)
       fs:SetPoint("TOPLEFT", card.detail, "TOPLEFT", 0, -dy)
       dy = dy + math.ceil(fs:GetStringHeight()) + (gap or 6)
     end
-    add("So geht's", 13, C.gold, "bold", 6)
+    add("So geht's", 13, C.hi, "bold", 6)
     for i, step in ipairs(m.steps or {}) do
-      add("|cff8cff4d" .. i .. ".|r  " .. step, 12, C.text, "regular", 6)
+      add("|cffff9929" .. i .. ".|r  " .. step, 12, C.text, "regular", 6)
     end
     local where = m.where and m.where[ns.Faction()]
     if where then
       dy = dy + 6
-      add("Wo?", 13, C.gold, "bold", 4)
+      add("Wo?", 13, C.hi, "bold", 4)
       add(where, 12, C.muted, "regular", 6)
     end
     if m.tips and #m.tips > 0 then
       dy = dy + 6
-      add("Profi-Tipps", 13, C.gold, "bold", 4)
+      add("Profi-Tipps", 13, C.hi, "bold", 4)
       for _, tip in ipairs(m.tips) do add("•  " .. tip, 12, C.muted, "regular", 5) end
     end
     if m.farm then
       local spots = ns.Maps.Spots(m.farm)
       if #spots > 0 then
         dy = dy + 6
-        add("Wo genau? (dein Level " .. ns.player.level .. ")", 13, C.gold, "bold", 4)
+        add("Wo genau? (dein Level " .. ns.player.level .. ")", 13, C.hi, "bold", 4)
         card.mapBtns = card.mapBtns or {}
         for j = 1, math.min(#spots, 3) do
           local s = spots[j]
@@ -225,7 +225,7 @@ local function fillCard(card, m, expanded, width)
           local meth = self.method
           local ok, n = M.CreateShoppingList("Zentrale: " .. meth.title, meth.items)
           if ok then
-            ns.Print("Liste |cff8cff4dTiry's Zentrale: " .. meth.title .. "|r angelegt (" .. n .. " Items). Im AH: Auctionator > Einkaufen.")
+            ns.Print("Liste |cffff9929Tiry's Zentrale: " .. meth.title .. "|r angelegt (" .. n .. " Items). Im AH: Auctionator > Einkaufen.")
           else
             ns.Print("|cffff6b81" .. tostring(n) .. "|r")
           end

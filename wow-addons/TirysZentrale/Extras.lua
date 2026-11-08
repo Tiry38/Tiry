@@ -81,7 +81,7 @@ local function addLines(tooltip, itemID)
   if rate then lines[#lines + 1] = string.format("Deine Verkaufsquote: %d %% (%d Auktionen)", math.floor(rate * 100 + 0.5), n) end
   if #lines == 0 then return end
   tooltip:AddLine(" ")
-  tooltip:AddLine("Tiry's Zentrale", 0.55, 1, 0.30)
+  tooltip:AddLine("Tiry's Zentrale", 1, 0.6, 0.16)
   for _, l in ipairs(lines) do tooltip:AddLine(l, 0.86, 0.84, 0.95, true) end
 end
 

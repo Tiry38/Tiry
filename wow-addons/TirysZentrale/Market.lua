@@ -162,7 +162,7 @@ ns.Listen("LOGIN", function()
         if ns.db then ns.db.lastScan = time() end
         if M.scanRequested then
           M.scanRequested = nil
-          ns.Print("|cff61eb8fScan fertig!|r Tiry's Zentrale rechnet jetzt mit den neuen Preisen.")
+          ns.Print("|cffff9929Scan fertig!|r Tiry's Zentrale rechnet jetzt mit den neuen Preisen.")
         end
         ns.Fire("PRICES_UPDATED")
       end)
@@ -191,7 +191,7 @@ function M.StartScan()
     M.scanRequested = true
     ns.Print("Scan läuft ... Tiry's Zentrale meldet sich, sobald die Preise da sind.")
   else
-    ns.Print("Bitte im AH den Reiter |cff8cff4dAuctionator|r öffnen und auf |cff8cff4dScannen|r klicken – Tiry's Zentrale erkennt den Scan automatisch.")
+    ns.Print("Bitte im AH den Reiter |cffff9929Auctionator|r öffnen und auf |cffff9929Scannen|r klicken – Tiry's Zentrale erkennt den Scan automatisch.")
   end
   return ok
 end

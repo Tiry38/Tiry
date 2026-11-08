@@ -160,7 +160,7 @@ local function onBagsChanged()
       local threshold = (ns.settings and ns.settings.lootAlertMin) or 5000
       if ns.settings and ns.settings.lootAlerts and (scarce or (channel == "AH" and value >= threshold)) then
         local item = ns.Item(id)
-        ns.Print(string.format("|cff61eb8fWertvoll:|r %s%s - ca. %s im AH - %s",
+        ns.Print(string.format("|cffff9929Wertvoll:|r %s%s - ca. %s im AH - %s",
           item.link or item.name, gained > 1 and (" x" .. gained) or "", ns.Money(value),
           "nicht zum Händler!"))
         if PlaySound and SOUNDKIT and SOUNDKIT.IG_BACKPACK_COIN_SELECT then pcall(PlaySound, SOUNDKIT.IG_BACKPACK_COIN_SELECT) end
@@ -214,7 +214,7 @@ ns.On("AUCTION_HOUSE_SHOW", function()
       if e.advice == "AH" then n = n + 1 total = total + (e.ah or 0) end
     end
     if n > 0 then
-      ns.Print(string.format("Du hast |cff8cff4d%d Items für ca. %s|r dabei, die ins AH gehören. Auctionator > Reiter \"Verkaufen\" – Liste: /tz scan", n, ns.Money(total)))
+      ns.Print(string.format("Du hast |cffff9929%d Items für ca. %s|r dabei, die ins AH gehören. Auctionator > Reiter \"Verkaufen\" – Liste: /tz scan", n, ns.Money(total)))
     end
   end)
 end)

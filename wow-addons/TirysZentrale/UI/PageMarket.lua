@@ -56,7 +56,7 @@ function page.build(self, content, width)
   self.filter = "all"
   local st = UI.Stack(content)
 
-  local intro = st:Para("Tipp: Fahr mit der Maus über ein Item für Details. |cff8cff4dShift-Klick|r legt den Link in den Chat. "
+  local intro = st:Para("Tipp: Fahr mit der Maus über ein Item für Details. |cffff9929Shift-Klick|r legt den Link in den Chat. "
     .. "\"Stapel netto\" = Wert von einem vollen Stapel nach Abzug der AH-Gebühr.", 12, C.muted, 14)
 
   self.segments = UI.Segments(content, FILTERS, function(v)
@@ -75,7 +75,7 @@ function page.build(self, content, width)
     local name = "Zentrale: " .. (FILTER_NAMES[self.filter] or "Alle")
     local ok, n, missing = M.CreateShoppingList(name, ids)
     if ok then
-      ns.Print(string.format("Einkaufsliste |cff8cff4d%s|r mit %d Einträgen angelegt. Im AH: Reiter 'Auctionator' > 'Einkaufen'.", name, n))
+      ns.Print(string.format("Einkaufsliste |cffff9929%s|r mit %d Einträgen angelegt. Im AH: Reiter 'Auctionator' > 'Einkaufen'.", name, n))
       if missing and missing > 0 then ns.Print(missing .. " Item(s) lädt der Client noch – Klick später nochmal für die komplette Liste.") end
     else
       ns.Print("|cffff6b81" .. tostring(n) .. "|r")
@@ -92,7 +92,7 @@ function page.build(self, content, width)
   UI.SetTooltip(self.searchBtn, "Sofort-Suche", "Funktioniert, während das Auktionshaus offen ist: Auctionator sucht alle Items dieser Liste und zeigt dir die günstigsten Angebote.")
   st:Add(actions, 34, 16)
 
-  self.status = UI.Para(content, 12, C.gold, width)
+  self.status = UI.Para(content, 12, C.hi, width)
   st:Add(self.status, 18, 8)
 
   self.list = UI.ItemList(content, width, {
@@ -109,9 +109,9 @@ end
 function page.refresh(self)
   local state, text = M.Status()
   if state == "ok" then
-    self.status:SetText("|cff61eb8f•|r " .. text .. "  ·  AH-Gebühr: " .. (ns.settings.ahCut or 5) .. " %")
+    self.status:SetText("|cffff9929•|r " .. text .. "  ·  AH-Gebühr: " .. (ns.settings.ahCut or 5) .. " %")
   elseif state == "empty" then
-    self.status:SetText("|cff8cff4d•|r " .. text)
+    self.status:SetText("|cffff9929•|r " .. text)
   else
     self.status:SetText("|cffff6b81•|r Auctionator nicht gefunden – es werden nur Händlerpreise gezeigt. Installiere Auctionator für WoW Forever.")
   end

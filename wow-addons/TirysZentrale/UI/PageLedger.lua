@@ -106,7 +106,7 @@ function page.refresh(self)
   self.goldTitle:ClearAllPoints() ; self.goldTitle:SetPoint("TOPLEFT", content, "TOPLEFT", 0, -y)
   y = y + 28
   local list, total = ns.Inv.Gold()
-  local lines = { "Gesamt: |cff8cff4d" .. ns.Money(total) .. "|r" }
+  local lines = { "Gesamt: |cffff9929" .. ns.Money(total) .. "|r" }
   for _, c in ipairs(list) do lines[#lines + 1] = "•  " .. c.name .. ": " .. ns.Money(c.money) end
   self.gold:SetText(table.concat(lines, "\n"))
   self.gold:ClearAllPoints() ; self.gold:SetPoint("TOPLEFT", content, "TOPLEFT", 0, -y)

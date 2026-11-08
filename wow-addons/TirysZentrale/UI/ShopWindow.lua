@@ -108,7 +108,7 @@ local function row(i)
     if r.skipped then return "Zurückholen", "Material wieder auf die Einkaufsliste setzen." end
     return "Brauch ich nicht kaufen", "Nimmt das Material von der Liste (z. B. weil es ein anderer Charakter hat). ↺ holt es zurück."
   end)
-  r.count = UI.Text(r, 14, "bold", C.gold)
+  r.count = UI.Text(r, 14, "bold", C.hi)
   r.count:SetPoint("RIGHT", r.toggle, "LEFT", -6, 0)
   r:SetScript("OnEnter", function(self)
     GameTooltip:SetOwner(self, "ANCHOR_LEFT")
@@ -123,7 +123,7 @@ end
 
 local STATUS = {
   bereit = { "bereit", C.green },
-  post = { "Post holen", C.gold },
+  post = { "Post holen", C.hi },
   fehlt = { "fehlt Material", C.red },
 }
 
@@ -158,14 +158,14 @@ function Shop.Refresh()
   local list, open, cost = Shop.List()
   local plan, planCost = Shop.VendorPlan()
   if #list == 0 then
-    win.summary:SetText("Die Craft-Liste ist leer. Im Craft-Planer auf |cff8cff4dListe erstellen|r klicken.")
+    win.summary:SetText("Die Craft-Liste ist leer. Im Craft-Planer auf |cffff9929Liste erstellen|r klicken.")
   elseif open == 0 then
-    win.summary:SetText("|cff61eb8fAlles da!|r Hol deine Post aus dem Briefkasten und klick auf |cff8cff4dNächstes craften|r.")
+    win.summary:SetText("|cffff9929Alles da!|r Hol deine Post aus dem Briefkasten und klick auf |cffff9929Nächstes craften|r.")
   elseif #plan > 0 then
-    win.summary:SetText(string.format("Dieser Händler hat |cff61eb8f%d %s|r für dich. Ein Klick auf |cff8cff4dBeim Händler kaufen|r holt alles für %s.",
+    win.summary:SetText(string.format("Dieser Händler hat |cffff9929%d %s|r für dich. Ein Klick auf |cffff9929Beim Händler kaufen|r holt alles für %s.",
       #plan, #plan == 1 and "Material" or "Materialien", ns.Money(planCost)))
   else
-    win.summary:SetText(string.format("Noch |cff8cff4d%d %s|r zu kaufen, ca. %s. Gekauftes verschwindet sofort.", open, open == 1 and "Material" or "Materialien", ns.Money(cost)))
+    win.summary:SetText(string.format("Noch |cffff9929%d %s|r zu kaufen, ca. %s. Gekauftes verschwindet sofort.", open, open == 1 and "Material" or "Materialien", ns.Money(cost)))
   end
   local y = 44 + math.ceil(win.summary:GetStringHeight()) + 12
 
@@ -184,7 +184,7 @@ function Shop.Refresh()
       r.id = c.recipe.out
       r.icon:SetItem(c.recipe.out)
       local item = ns.Item(c.recipe.out)
-      r.name:SetText(string.format("|cff8cff4d%d×|r %s", c.n * (c.recipe.qty or 1), item.name or c.recipe.name))
+      r.name:SetText(string.format("|cffff9929%d×|r %s", c.n * (c.recipe.qty or 1), item.name or c.recipe.name))
       local st = STATUS[c.status]
       r.status:SetText(st[1])
       r.status:SetTextColor(st[2][1], st[2][2], st[2][3], 1)
@@ -241,8 +241,8 @@ function Shop.Refresh()
       r.bg:SetColor(vendorHas[e.id] and C.cardHi or C.card, 1)
       r.name:SetTextColor(C.text[1], C.text[2], C.text[3], 1)
       r.count:SetText(e.missing .. "×")
-      r.count:SetTextColor(C.gold[1], C.gold[2], C.gold[3], 1)
-      local where = vendorHas[e.id] and " |cff61eb8fhier beim Händler|r"
+      r.count:SetTextColor(C.hi[1], C.hi[2], C.hi[3], 1)
+      local where = vendorHas[e.id] and " |cffff9929hier beim Händler|r"
         or (e.where == "HAENDLER" and " beim Händler" or " im AH")
       r.sub:SetText(string.format("%d / %d · %s", e.have, e.need, e.unit and (ns.Money(e.unit) .. where) or "kein Preis"))
     else

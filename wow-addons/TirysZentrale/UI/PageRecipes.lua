@@ -237,7 +237,7 @@ function page.build(self, content, width)
   self.shopBtn:SetScript("OnClick", function() ns.Shop.Toggle() end)
   st:Add(mk, 36, 12)
 
-  self.info = UI.Para(content, 12, C.gold, width)
+  self.info = UI.Para(content, 12, C.hi, width)
   self.infoTop = st.y
   self.list = UI.ItemList(content, width, {
     { key = "cost", label = "Material", width = 84 },
@@ -270,7 +270,7 @@ function page.build(self, content, width)
     for _, m in ipairs(mats) do ids[#ids + 1] = m.id end
     if #ids == 0 then ns.Print("Du hast schon alles Material in den Taschen.") return end
     local ok, n = M.CreateShoppingList("Zentrale: Craft-Material", ids)
-    ns.Print(ok and ("Liste |cff8cff4dTiry's Zentrale: Craft-Material|r angelegt (" .. n .. " Items). Im AH: Auctionator > Einkaufen > Suche alles.") or ("|cffff6b81" .. tostring(n) .. "|r"))
+    ns.Print(ok and ("Liste |cffff9929Tiry's Zentrale: Craft-Material|r angelegt (" .. n .. " Items). Im AH: Auctionator > Einkaufen > Suche alles.") or ("|cffff6b81" .. tostring(n) .. "|r"))
   end)
   qc.craft = UI.Button(qc, "Nächstes craften", "cool", 180, 34, "bolt")
   qc.craft:SetScript("OnClick", function() page.CraftNext(self) end)
@@ -356,7 +356,7 @@ function page.ClearQueue()
   end
   wipe(queue())
   pendingCraft = nil
-  ns.Print("Craft-Warteschlange geleert. Aus Versehen? Knopf |cff8cff4dRückgängig|r in der Warteschlange.")
+  ns.Print("Craft-Warteschlange geleert. Aus Versehen? Knopf |cffff9929Rückgängig|r in der Warteschlange.")
   UI.RefreshPage("recipes")
 end
 
@@ -399,7 +399,7 @@ function page.CraftNext(self)
       local r = R.Get(e.recipe)
       if r and craftable(r) > 0 and C_TradeSkillUI.OpenTradeSkill then
         local ok = pcall(C_TradeSkillUI.OpenTradeSkill, ns.PROF[r.prof])
-        ns.Print(ok and ("Berufsfenster " .. ns.ProfName(ns.PROF[r.prof]) .. " geöffnet – klick nochmal auf |cff8cff4dNächstes craften|r.")
+        ns.Print(ok and ("Berufsfenster " .. ns.ProfName(ns.PROF[r.prof]) .. " geöffnet – klick nochmal auf |cffff9929Nächstes craften|r.")
           or "Öffne bitte das Berufsfenster und klick dann nochmal.")
         return
       end
@@ -423,7 +423,7 @@ function page.CraftNext(self)
         -- Exakt wie Blizzards eigener Herstellen-Knopf: leere Materialliste (Grundmaterial nimmt das Spiel selbst)
         C_TradeSkillUI.CraftRecipe(liveID, n, {}, nil, nil, false)
         pendingCraft = { recipe = r.id, out = r.out, left = n }
-        ns.Print(string.format("Stelle |cff8cff4d%d× %s|r her.", n, r.name))
+        ns.Print(string.format("Stelle |cffff9929%d× %s|r her.", n, r.name))
         return
       end
     end
@@ -514,8 +514,8 @@ function page.refresh(self)
   self.profit:Refresh()
   for _, p in ipairs(self.pills) do p:Refresh() end
   self.viewSeg:Select(self.view)
-  self.recText:SetText((auto and ("|cff61eb8fEmpfehlung für Level " .. ns.player.level .. ": " .. ns.Money(preset.profit) .. "|r – wächst mit jedem Level mit.")
-    or ("|cff8cff4dEigener Wert.|r Empfehlung für Level " .. ns.player.level .. ": " .. ns.Money(preset.profit) .. "."))
+  self.recText:SetText((auto and ("|cffff9929Empfehlung für Level " .. ns.player.level .. ": " .. ns.Money(preset.profit) .. "|r – wächst mit jedem Level mit.")
+    or ("|cffff9929Eigener Wert.|r Empfehlung für Level " .. ns.player.level .. ": " .. ns.Money(preset.profit) .. "."))
     .. " Gewinn = AH-Verkauf nach Gebühr minus Material.")
   self.recBtn:SetEnabled(not auto)
   self.recBtn:SetLabel(auto and "Empfehlung aktiv" or "Zurück zur Empfehlung")
@@ -529,7 +529,7 @@ function page.refresh(self)
     if not w.box:HasFocus() then w.box:SetText(ns.PriceString.Get(key)) end
     local custom = ns.settings.priceStrings and ns.settings.priceStrings[key]
     local isCustom = custom and custom ~= ns.PriceString.DEFAULTS[key]
-    w.status:SetText(isCustom and "|cff8cff4deigener String|r" or "|cff61eb8fempfohlen|r")
+    w.status:SetText(isCustom and "|cffff9929eigener String|r" or "|cffff9929empfohlen|r")
     w.undo:SetShown(isCustom and true or false)
   end
 
@@ -554,7 +554,7 @@ function page.refresh(self)
       local rate = ns.Ledger.SaleRate(r.out)
       if rate then notes[#notes + 1] = "verkauft sich: " .. math.floor(rate * 100 + 0.5) .. " %" end
       for _, q in ipairs(queue()) do
-        if q.recipe == r.id then notes[#notes + 1] = "|cff8cff4d" .. q.n .. "× geplant|r" end
+        if q.recipe == r.id then notes[#notes + 1] = "|cffff9929" .. q.n .. "× geplant|r" end
       end
       local mats = {}
       for _, re in ipairs(r.reagents) do
@@ -565,9 +565,9 @@ function page.refresh(self)
         id = r.out, name = r.name .. (r.qty > 1 and (" (" .. r.qty .. "×)") or ""),
         note = table.concat(notes, " · "),
         cells = {
-          cost = (e.unknown > 0 and "|cff8cff4dmin.|r " or "") .. ns.Money(e.cost),
+          cost = (e.unknown > 0 and "|cffff9929min.|r " or "") .. ns.Money(e.cost),
           revenue = ns.Money(e.revenue),
-          profit = "|cff61eb8f+|r" .. ns.Money(e.profit),
+          profit = "|cffff9929+|r" .. ns.Money(e.profit),
         },
         tip = { "Material: " .. (#mats > 0 and table.concat(mats, ", ") or "keins"),
           "Verkauf: " .. ns.Money(e.revenue) .. " (Verkaufswert nach Gebühr) · Gewinn " .. ns.Money(e.profit) .. " · nötig: " .. ns.Money(e.need),
@@ -597,7 +597,7 @@ function page.refresh(self)
     if (st.old or 0) > 0 then why[#why + 1] = st.old .. " mit altem Preis (über 3 Tage)" end
     if (st.slow or 0) > 0 then why[#why + 1] = st.slow .. " Ladenhüter (deine Verkaufsquote unter 25 %)" end
     if st.hidden > 0 then why[#why + 1] = st.hidden .. " ausgeblendet" end
-    self.info:SetText(string.format("|cff61eb8f%d %s bringen Gold|r  ·  Skill %d  ·  Preise: %s%s",
+    self.info:SetText(string.format("|cffff9929%d %s bringen Gold|r  ·  Skill %d  ·  Preise: %s%s",
       #list, #list == 1 and "Rezept" or "Rezepte", rank, M.LastScanText(),
       #why > 0 and ("\n|cff93a39dNicht gezeigt: " .. table.concat(why, ", ") .. ".|r") or ""))
   end
@@ -674,14 +674,14 @@ function page.refresh(self)
   if #lines == 0 then
     qc.text:SetText("Leer. Klick oben auf ein Rezept, um es einzuplanen (Rechtsklick nimmt es wieder raus).")
   else
-    qc.text:SetText(string.format("%d Crafts geplant · erwarteter Gewinn |cff61eb8f%s|r · Material-Einkauf %s", crafts, ns.Money(profit), ns.Money(cost)))
+    qc.text:SetText(string.format("%d Crafts geplant · erwarteter Gewinn |cffff9929%s|r · Material-Einkauf %s", crafts, ns.Money(profit), ns.Money(cost)))
   end
   local qy = 56 + math.ceil(qc.text:GetStringHeight()) + 10
   for i, l in ipairs(lines) do
     local row = qc.rows[i] or queueRow(qc, width)
     qc.rows[i] = row
     row.recipe = l.r
-    row.text:SetText("|cff8cff4d" .. l.n .. "×|r  " .. l.r.name)
+    row.text:SetText("|cffff9929" .. l.n .. "×|r  " .. l.r.name)
     row:ClearAllPoints()
     row:SetPoint("TOPLEFT", qc, "TOPLEFT", 20, -qy)
     row:Show()
@@ -689,7 +689,7 @@ function page.refresh(self)
   end
   for i = #lines + 1, #qc.rows do qc.rows[i]:Hide() end
   if #lines > 0 then
-    qc.mats:SetText("|cff8cff4dFehlt noch:|r " .. (#matLines > 0 and ("\n" .. table.concat(matLines, "\n")) or "nichts – alles in den Taschen!"))
+    qc.mats:SetText("|cffff9929Fehlt noch:|r " .. (#matLines > 0 and ("\n" .. table.concat(matLines, "\n")) or "nichts – alles in den Taschen!"))
     qc.mats:ClearAllPoints()
     qc.mats:SetPoint("TOPLEFT", qc, "TOPLEFT", 20, -(qy + 6))
     qc.mats:Show()

@@ -49,7 +49,7 @@ function Maps.Show(spot, what)
   end
   if OpenWorldMap then pcall(OpenWorldMap, spot.map) end
   if ok then Maps.active = true ns.Fire("WAYPOINT_CHANGED") end
-  ns.Print(string.format("%s: |cff8cff4d%s %.0f, %.0f|r%s", what or "Farm-Stelle", zone, spot.x, spot.y,
+  ns.Print(string.format("%s: |cffff9929%s %.0f, %.0f|r%s", what or "Farm-Stelle", zone, spot.x, spot.y,
     ok and " – Wegpunkt gesetzt, folge dem Pfeil." or " – öffne die Karte und lauf zu diesen Koordinaten."))
   return ok
 end

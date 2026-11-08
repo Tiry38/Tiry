@@ -39,7 +39,7 @@ function D.Evaluate(itemID, offers)
   D.found[itemID] = deal
   if not old or old.qty ~= deal.qty or old.price ~= deal.price then
     local item = ns.Item(itemID)
-    ns.Print(string.format("|cff61eb8fSchnäppchen:|r %d× %s ab %s (Marktwert %s) – du sparst ca. %s.",
+    ns.Print(string.format("|cffff9929Schnäppchen:|r %d× %s ab %s (Marktwert %s) – du sparst ca. %s.",
       qty, item.link or item.name, ns.Money(best), ns.Money(ref), ns.Money(deal.save)))
     if PlaySound and SOUNDKIT and SOUNDKIT.AUCTION_WINDOW_OPEN then pcall(PlaySound, SOUNDKIT.AUCTION_WINDOW_OPEN) end
     ns.Fire("DEALS_CHANGED")
@@ -88,7 +88,7 @@ ns.On("MAIL_CLOSED", function()
   local sold = ns.Ledger.Totals(1).sold - (mailSales or 0)
   mailMoney = nil
   if gained > 0 then
-    ns.Print(string.format("Post-Bilanz: |cff8cff4d+%s|r%s. Details im Verkaufsbuch (/tz buch).", ns.Money(gained),
+    ns.Print(string.format("Post-Bilanz: |cffff9929+%s|r%s. Details im Verkaufsbuch (/tz buch).", ns.Money(gained),
       sold > 0 and string.format(" (%d neue Verkäufe)", sold) or ""))
   end
 end)

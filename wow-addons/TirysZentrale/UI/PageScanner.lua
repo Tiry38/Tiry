@@ -7,7 +7,7 @@ local S = ns.Scanner
 
 local ADVICE = {
   AH = { "Ins AH", C.green },
-  HAENDLER = { "Händler", C.gold },
+  HAENDLER = { "Händler", C.hi },
   SCHROTT = { "Schrott", C.dim },
   BEHALTEN = { "Behalten", C.violet },
 }
@@ -36,8 +36,8 @@ function page.build(self, content, width)
   st:Title("Händler-Flips", 17, C.text, 2)
   st:Para("Sprich einen Händler an – Tiry's Zentrale vergleicht automatisch jedes Angebot mit dem AH-Preis. "
     .. "Lohnt sich ein Kauf zum Weiterverkaufen, siehst du ihn hier (und im Chat). "
-    .. "Achte besonders auf Ware mit |cff8cff4dbegrenztem Vorrat|r (z. B. Rezepte): die ist im AH oft viel mehr wert.", 12, C.muted, 12)
-  self.merchantInfo = UI.Para(content, 12, C.gold, width)
+    .. "Achte besonders auf Ware mit |cffff9929begrenztem Vorrat|r (z. B. Rezepte): die ist im AH oft viel mehr wert.", 12, C.muted, 12)
+  self.merchantInfo = UI.Para(content, 12, C.hi, width)
   st:Add(self.merchantInfo, 18, 8)
   self.flipList = UI.ItemList(content, width, {
     { key = "buy", label = "Kaufpreis", width = 90 },
@@ -70,10 +70,10 @@ function page.build(self, content, width)
   head.desc = UI.Para(head, 12, C.muted, width)
   head.desc:SetPoint("TOPLEFT", head.title, "BOTTOMLEFT", 0, -8)
   head.desc:SetText("Zeigt, was deine Taschen wert sind und wo du jedes Item am besten verkaufst. "
-    .. "Grauer Schrott: beim Händler einfach auf den |cff8cff4dMüll-Knopf (\"Schrott verkaufen\")|r klicken.")
+    .. "Grauer Schrott: beim Händler einfach auf den |cffff9929Müll-Knopf (\"Schrott verkaufen\")|r klicken.")
   local cw = math.floor((width - 30) / 4)
   head.cards = {
-    statCard(head, cw, "Händlerwert", C.gold),
+    statCard(head, cw, "Händlerwert", C.hi),
     statCard(head, cw, "AH-Potenzial", C.green),
     statCard(head, cw, "Bester Mix", C.text),
     statCard(head, cw, "Grauer Schrott", C.muted),
@@ -100,7 +100,7 @@ function page.build(self, content, width)
     end
     local ok, n = M.CreateShoppingList("Zentrale: Meine Verkäufe", ids)
     if ok then
-      ns.Print("Liste |cff8cff4dTiry's Zentrale: Meine Verkäufe|r angelegt (" .. n .. " Items) – so prüfst du die aktuelle Konkurrenz vor dem Einstellen.")
+      ns.Print("Liste |cffff9929Tiry's Zentrale: Meine Verkäufe|r angelegt (" .. n .. " Items) – so prüfst du die aktuelle Konkurrenz vor dem Einstellen.")
     else
       ns.Print("|cffff6b81" .. tostring(n) .. "|r")
     end
@@ -142,7 +142,7 @@ function page.refresh(self)
       cells = {
         buy = ns.Money(f.unit),
         ah = ns.Money(f.net),
-        profit = "|cff61eb8f+|r" .. ns.Money(f.profit),
+        profit = "|cffff9929+|r" .. ns.Money(f.profit),
         stock = f.available > 0 and tostring(f.available) or "unbegr.",
       },
       tip = {
@@ -164,7 +164,7 @@ function page.refresh(self)
   for _, d in ipairs(ns.Deals.List()) do
     deals[#deals + 1] = {
       id = d.id, note = d.qty .. " Stück unter 65 % des Marktwerts",
-      cells = { price = ns.Money(d.price), ref = ns.Money(d.ref), save = "|cff61eb8f" .. ns.Money(d.save) .. "|r" },
+      cells = { price = ns.Money(d.price), ref = ns.Money(d.ref), save = "|cffff9929" .. ns.Money(d.save) .. "|r" },
       tip = { "Im AH kaufen, später zum Marktwert wieder einstellen.", "Shift-Klick: Link in den Chat" },
     }
   end

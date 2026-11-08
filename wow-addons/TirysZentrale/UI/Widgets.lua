@@ -37,6 +37,7 @@ local C = {
   green  = { 0.380, 0.920, 0.560 },
   red    = { 1.000, 0.440, 0.520 },
   dark   = { 0.030, 0.070, 0.050 },
+  hi     = { 1.000, 0.600, 0.160 }, -- Hervorhebung (Orange): wichtige Texte, Werte, Zahlen
 }
 UI.C = C
 UI.GRAD = { C.gold, C.amber, C.rose }        -- Haupt-Verlauf
@@ -284,7 +285,7 @@ function UI.SetTooltip(frame, title, body)
     if type(t) == "function" then t, b = t(self) end
     if not t then return end
     GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
-    GameTooltip:SetText(t, 0.55, 1, 0.30)
+    GameTooltip:SetText(t, 1, 0.6, 0.16)
     if b then GameTooltip:AddLine(b, 0.86, 0.92, 0.89, true) end
     GameTooltip:Show()
   end)
@@ -397,10 +398,10 @@ end
 function UI.Chip(parent, text, color, filled)
   local f = CreateFrame("Frame", nil, parent)
   f.bg = UI.Round(f, 10, "BACKGROUND", 2)
-  f.text = UI.Text(f, 11, "semibold", color or C.gold)
+  f.text = UI.Text(f, 11, "semibold", color or C.hi)
   f.text:SetPoint("CENTER", 0, 0)
   function f:Set(t, c, isFilled)
-    c = c or C.gold
+    c = c or C.hi
     self.text:SetText(t)
     if isFilled then
       self.bg:SetColor(c, 1)
@@ -726,7 +727,7 @@ function UI.Stepper(parent, label, width, getter, setter, step, min, max, format
   f.label:SetText(label)
   local plus = UI.IconButton(f, "plus", 26)
   plus:SetPoint("RIGHT", -4, 0)
-  f.value = UI.Text(f, 12, "bold", C.gold)
+  f.value = UI.Text(f, 12, "bold", C.hi)
   f.value:SetWidth(76)
   f.value:SetJustifyH("CENTER")
   f.value:SetPoint("RIGHT", plus, "LEFT", -2, 0)
