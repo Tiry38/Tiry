@@ -18,9 +18,10 @@ MEDIA = os.path.join(ADDON, "Media")
 FONTS = os.path.join(MEDIA, "Fonts")
 SS = 4  # Supersampling-Faktor für glatte Kanten
 
-GOLD = (255, 214, 74)
-AMBER = (255, 138, 0)
-ROSE = (255, 61, 129)
+# Anthrazit + Neon-Grün: Neon-Lime -> Neon-Grün -> Smaragd
+GOLD = (140, 255, 77)
+AMBER = (38, 255, 115)
+ROSE = (0, 199, 140)
 
 
 def save(img, name):
@@ -156,14 +157,14 @@ def logo(size=256):
     # Münzkörper mit diagonalem 3-Farben-Verlauf
     body_mask = Image.new("L", (big, big), 0)
     ImageDraw.Draw(body_mask).ellipse((pad, pad, big - pad, big - pad), fill=255)
-    grad = gradient_rgb(big, big, [(255, 236, 140), GOLD, AMBER, (240, 90, 40)], angle_deg=55)
+    grad = gradient_rgb(big, big, [(215, 255, 170), GOLD, AMBER, (0, 120, 80)], angle_deg=55)
     body = Image.fromarray(np.uint8(grad), "RGB").convert("RGBA")
     body.putalpha(body_mask)
     img = Image.alpha_composite(img, body)
     d = ImageDraw.Draw(img)
     # Innenring
     inset = int(big * 0.13)
-    d.ellipse((inset, inset, big - inset, big - inset), outline=(255, 245, 205, 235), width=int(big * 0.018))
+    d.ellipse((inset, inset, big - inset, big - inset), outline=(225, 255, 235, 235), width=int(big * 0.018))
     # Großes G
     font = ImageFont.truetype(os.path.join(FONTS, "Poppins-ExtraBold.ttf"), int(big * 0.56))
     text = "T"
@@ -172,12 +173,12 @@ def logo(size=256):
     tx = (big - tw) / 2 - bbox[0]
     ty = (big - th) / 2 - bbox[1] + big * 0.005
     shadow = Image.new("RGBA", (big, big), (0, 0, 0, 0))
-    ImageDraw.Draw(shadow).text((tx + big * 0.012, ty + big * 0.02), text, font=font, fill=(120, 40, 0, 150))
+    ImageDraw.Draw(shadow).text((tx + big * 0.012, ty + big * 0.02), text, font=font, fill=(0, 55, 38, 160))
     shadow = shadow.filter(ImageFilter.GaussianBlur(big * 0.012))
     img = Image.alpha_composite(img, shadow)
     tmask = Image.new("L", (big, big), 0)
     ImageDraw.Draw(tmask).text((tx, ty), text, font=font, fill=255)
-    tgrad = gradient_rgb(big, big, [(255, 252, 235), (255, 226, 150), (255, 190, 90)], angle_deg=90)
+    tgrad = gradient_rgb(big, big, [(255, 255, 255), (225, 255, 235), (175, 240, 205)], angle_deg=90)
     tl = Image.fromarray(np.uint8(tgrad), "RGB").convert("RGBA")
     tl.putalpha(tmask)
     img = Image.alpha_composite(img, tl)
@@ -210,11 +211,11 @@ def wordmark(w=512, h=128):
     ty = (big_h - th) / 2 - bbox[1]
     mask = Image.new("L", (big_w, big_h), 0)
     ImageDraw.Draw(mask).text((tx, ty), text, font=font, fill=255)
-    grad = gradient_rgb(big_w, big_h, [(255, 236, 140), GOLD, AMBER, ROSE], angle_deg=8)
+    grad = gradient_rgb(big_w, big_h, [(220, 255, 180), GOLD, AMBER, ROSE], angle_deg=8)
     txt = Image.fromarray(np.uint8(grad), "RGB").convert("RGBA")
     txt.putalpha(mask)
     glow_mask = mask.filter(ImageFilter.GaussianBlur(big_h * 0.06))
-    glow_img = Image.new("RGBA", (big_w, big_h), (255, 150, 40, 0))
+    glow_img = Image.new("RGBA", (big_w, big_h), (40, 255, 120, 0))
     glow_img.putalpha(Image.fromarray(np.uint8(np.array(glow_mask) * 0.55), "L"))
     out = Image.alpha_composite(glow_img, txt)
     return down(out, (w, h))

@@ -17,22 +17,23 @@ function UI.Icon(name) return MEDIA .. "i_" .. name end
 -- Farben (Kontrast der Texte auf den Karten >= 4.5:1)
 ----------------------------------------------------------------------------
 local C = {
-  bg     = { 0.055, 0.043, 0.102, 0.97 },
-  side   = { 0.075, 0.060, 0.140, 0.92 },
-  card   = { 0.125, 0.106, 0.216, 0.96 },
-  cardHi = { 0.170, 0.145, 0.282, 0.98 },
-  inset  = { 0.090, 0.075, 0.165, 0.95 },
-  text   = { 0.965, 0.955, 1.000 },
-  muted  = { 0.760, 0.730, 0.890 },
-  dim    = { 0.600, 0.570, 0.745 },
-  gold   = { 1.000, 0.840, 0.290 },
-  amber  = { 1.000, 0.540, 0.000 },
-  rose   = { 1.000, 0.240, 0.510 },
-  teal   = { 0.180, 0.890, 0.770 },
-  violet = { 0.560, 0.420, 1.000 },
+  -- Anthrazit + Neon-Grün: dunkle Anthrazit-Flächen, Verläufe Neon-Lime -> Neon-Grün -> Smaragd
+  bg     = { 0.078, 0.090, 0.090, 0.97 },
+  side   = { 0.100, 0.114, 0.114, 0.94 },
+  card   = { 0.140, 0.157, 0.157, 0.96 },
+  cardHi = { 0.186, 0.207, 0.204, 0.98 },
+  inset  = { 0.106, 0.120, 0.120, 0.95 },
+  text   = { 0.950, 0.970, 0.960 },
+  muted  = { 0.760, 0.810, 0.790 },
+  dim    = { 0.570, 0.630, 0.600 },
+  gold   = { 0.550, 1.000, 0.300 }, -- Akzent Neon-Lime – Name bleibt für den Code
+  amber  = { 0.150, 1.000, 0.450 }, -- Neon-Grün
+  rose   = { 0.000, 0.780, 0.550 }, -- leuchtendes Smaragd
+  teal   = { 0.100, 0.950, 0.800 },
+  violet = { 0.220, 0.400, 0.360 }, -- Schiefergrün
   green  = { 0.380, 0.920, 0.560 },
   red    = { 1.000, 0.440, 0.520 },
-  dark   = { 0.090, 0.050, 0.020 },
+  dark   = { 0.030, 0.070, 0.050 },
 }
 UI.C = C
 UI.GRAD = { C.gold, C.amber, C.rose }        -- Haupt-Verlauf
@@ -243,8 +244,8 @@ function UI.SetTooltip(frame, title, body)
     if type(t) == "function" then t, b = t(self) end
     if not t then return end
     GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
-    GameTooltip:SetText(t, 1, 0.84, 0.29)
-    if b then GameTooltip:AddLine(b, 0.86, 0.84, 0.95, true) end
+    GameTooltip:SetText(t, 0.55, 1, 0.30)
+    if b then GameTooltip:AddLine(b, 0.86, 0.92, 0.89, true) end
     GameTooltip:Show()
   end)
   frame:HookScript("OnLeave", function() GameTooltip:Hide() end)
@@ -292,7 +293,7 @@ function UI.Button(parent, label, style, width, height, icon)
       self.glow:SetVertexColor(C.violet[1], C.violet[2], C.violet[3])
       self.glow:SetAlpha(hover and 0.5 or 0)
     elseif self.style == "danger" then
-      self.bg:SetColor(C.rose, self:IsEnabled() and (hover and 0.55 or 0.32) or 0.12)
+      self.bg:SetColor(C.red, self:IsEnabled() and (hover and 0.55 or 0.32) or 0.12)
       self.text:SetTextColor(1, 1, 1, self:IsEnabled() and 1 or 0.45)
       if self.icon then self.icon:SetVertexColor(1, 1, 1, self:IsEnabled() and 1 or 0.45) end
       self.glow:SetAlpha(0)

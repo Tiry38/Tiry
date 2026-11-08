@@ -411,7 +411,7 @@ local function createMini()
   mini:SetScript("OnEnter", function(self)
     hl:SetAlpha(0.55)
     GameTooltip:SetOwner(self, "ANCHOR_LEFT")
-    GameTooltip:SetText("Tiry's Zentrale", 1, 0.84, 0.29)
+    GameTooltip:SetText("Tiry's Zentrale", 0.55, 1, 0.30)
     GameTooltip:AddLine("Linksklick: Gold-Guide öffnen", 0.9, 0.9, 1)
     GameTooltip:AddLine("Rechtsklick: Scanner (Händler & Taschen)", 0.9, 0.9, 1)
     GameTooltip:AddLine("Ziehen: Knopf verschieben", 0.7, 0.7, 0.85)
@@ -459,7 +459,7 @@ ns.Listen("LOGIN", function()
   if not ns.settings.welcomeShown then
     ns.settings.welcomeShown = true
     C_Timer.After(6, function()
-      ns.Print("Willkommen! Tippe |cffffd24a/tz|r oder klick auf die Goldmünze an der Minikarte.")
+      ns.Print("Willkommen! Tippe |cff8cff4d/tz|r oder klick auf die Goldmünze an der Minikarte.")
     end)
   end
 end)
@@ -519,7 +519,7 @@ end
 
 function TirysZentrale_OnAddonCompartmentEnter(_, menuButton)
   GameTooltip:SetOwner(menuButton or UIParent, "ANCHOR_LEFT")
-  GameTooltip:SetText("Tiry's Zentrale", 1, 0.84, 0.29)
+  GameTooltip:SetText("Tiry's Zentrale", 0.55, 1, 0.30)
   GameTooltip:AddLine("Linksklick: Gold-Guide · Rechtsklick: Scanner", 0.9, 0.9, 1)
   GameTooltip:Show()
 end

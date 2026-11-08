@@ -56,7 +56,7 @@ function page.build(self, content, width)
   self.filter = "all"
   local st = UI.Stack(content)
 
-  local intro = st:Para("Tipp: Fahr mit der Maus über ein Item für Details. |cffffd24aShift-Klick|r legt den Link in den Chat. "
+  local intro = st:Para("Tipp: Fahr mit der Maus über ein Item für Details. |cff8cff4dShift-Klick|r legt den Link in den Chat. "
     .. "\"Stapel netto\" = Wert von einem vollen Stapel nach Abzug der AH-Gebühr.", 12, C.muted, 14)
 
   self.segments = UI.Segments(content, FILTERS, function(v)
@@ -75,7 +75,7 @@ function page.build(self, content, width)
     local name = "Zentrale: " .. (FILTER_NAMES[self.filter] or "Alle")
     local ok, n, missing = M.CreateShoppingList(name, ids)
     if ok then
-      ns.Print(string.format("Einkaufsliste |cffffd24a%s|r mit %d Einträgen angelegt. Im AH: Reiter 'Auctionator' > 'Einkaufen'.", name, n))
+      ns.Print(string.format("Einkaufsliste |cff8cff4d%s|r mit %d Einträgen angelegt. Im AH: Reiter 'Auctionator' > 'Einkaufen'.", name, n))
       if missing and missing > 0 then ns.Print(missing .. " Item(s) lädt der Client noch – Klick später nochmal für die komplette Liste.") end
     else
       ns.Print("|cffff6b81" .. tostring(n) .. "|r")
@@ -111,7 +111,7 @@ function page.refresh(self)
   if state == "ok" then
     self.status:SetText("|cff61eb8f•|r " .. text .. "  ·  AH-Gebühr: " .. (ns.settings.ahCut or 5) .. " %")
   elseif state == "empty" then
-    self.status:SetText("|cffffd24a•|r " .. text)
+    self.status:SetText("|cff8cff4d•|r " .. text)
   else
     self.status:SetText("|cffff6b81•|r Auctionator nicht gefunden – es werden nur Händlerpreise gezeigt. Installiere Auctionator für WoW Forever.")
   end
@@ -138,10 +138,10 @@ function page.refresh(self)
       note = (static.cat == "forever") and ("Neu in Forever · " .. (ns.DB.SubName(ns.DB.Get(id)) or "Handwerkswaren")) or (FILTER_NAMES[static.cat] or ""),
       sortValue = net and net * stack or -1,
       cells = {
-        ah = price and ns.Money(price) or "|cff8f88b3–|r",
-        vendor = vendor > 0 and ns.Money(vendor) or "|cff8f88b3–|r",
-        stack = net and ns.Money(net * stack) or (vendor > 0 and ("|cff9a93bd" .. ns.Money(vendor * stack) .. "|r") or "|cff8f88b3–|r"),
-        age = price and M.AgeText(id) or "|cff8f88b3–|r",
+        ah = price and ns.Money(price) or "|cff8a9a94–|r",
+        vendor = vendor > 0 and ns.Money(vendor) or "|cff8a9a94–|r",
+        stack = net and ns.Money(net * stack) or (vendor > 0 and ("|cff93a39d" .. ns.Money(vendor * stack) .. "|r") or "|cff8a9a94–|r"),
+        age = price and M.AgeText(id) or "|cff8a9a94–|r",
       },
       tip = tip,
     }

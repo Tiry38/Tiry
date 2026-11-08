@@ -36,7 +36,7 @@ function page.build(self, content, width)
   st:Title("Händler-Flips", 17, C.text, 2)
   st:Para("Sprich einen Händler an – Tiry's Zentrale vergleicht automatisch jedes Angebot mit dem AH-Preis. "
     .. "Lohnt sich ein Kauf zum Weiterverkaufen, siehst du ihn hier (und im Chat). "
-    .. "Achte besonders auf Ware mit |cffffd24abegrenztem Vorrat|r (z. B. Rezepte): die ist im AH oft viel mehr wert.", 12, C.muted, 12)
+    .. "Achte besonders auf Ware mit |cff8cff4dbegrenztem Vorrat|r (z. B. Rezepte): die ist im AH oft viel mehr wert.", 12, C.muted, 12)
   self.merchantInfo = UI.Para(content, 12, C.gold, width)
   st:Add(self.merchantInfo, 18, 8)
   self.flipList = UI.ItemList(content, width, {
@@ -70,7 +70,7 @@ function page.build(self, content, width)
   head.desc = UI.Para(head, 12, C.muted, width)
   head.desc:SetPoint("TOPLEFT", head.title, "BOTTOMLEFT", 0, -8)
   head.desc:SetText("Zeigt, was deine Taschen wert sind und wo du jedes Item am besten verkaufst. "
-    .. "Grauer Schrott: beim Händler einfach auf den |cffffd24aMüll-Knopf (\"Schrott verkaufen\")|r klicken.")
+    .. "Grauer Schrott: beim Händler einfach auf den |cff8cff4dMüll-Knopf (\"Schrott verkaufen\")|r klicken.")
   local cw = math.floor((width - 30) / 4)
   head.cards = {
     statCard(head, cw, "Händlerwert", C.gold),
@@ -100,7 +100,7 @@ function page.build(self, content, width)
     end
     local ok, n = M.CreateShoppingList("Zentrale: Meine Verkäufe", ids)
     if ok then
-      ns.Print("Liste |cffffd24aTiry's Zentrale: Meine Verkäufe|r angelegt (" .. n .. " Items) – so prüfst du die aktuelle Konkurrenz vor dem Einstellen.")
+      ns.Print("Liste |cff8cff4dTiry's Zentrale: Meine Verkäufe|r angelegt (" .. n .. " Items) – so prüfst du die aktuelle Konkurrenz vor dem Einstellen.")
     else
       ns.Print("|cffff6b81" .. tostring(n) .. "|r")
     end

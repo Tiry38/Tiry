@@ -214,7 +214,7 @@ ns.On("AUCTION_HOUSE_SHOW", function()
       if e.advice == "AH" then n = n + 1 total = total + (e.ah or 0) end
     end
     if n > 0 then
-      ns.Print(string.format("Du hast |cffffd24a%d Items für ca. %s|r dabei, die ins AH gehören. Auctionator > Reiter \"Verkaufen\" – Liste: /tz scan", n, ns.Money(total)))
+      ns.Print(string.format("Du hast |cff8cff4d%d Items für ca. %s|r dabei, die ins AH gehören. Auctionator > Reiter \"Verkaufen\" – Liste: /tz scan", n, ns.Money(total)))
     end
   end)
 end)

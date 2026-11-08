@@ -70,7 +70,7 @@ function UI.ItemList(parent, width, columns, opts)
         local r = b:GetParent()
         if r.actionTip then
           GameTooltip:SetOwner(b, "ANCHOR_RIGHT")
-          GameTooltip:SetText(r.actionTip, 1, 0.84, 0.29)
+          GameTooltip:SetText(r.actionTip, 0.55, 1, 0.30)
           GameTooltip:Show()
         end
       end)
@@ -85,7 +85,7 @@ function UI.ItemList(parent, width, columns, opts)
         if self.tipLines then
           GameTooltip:AddLine(" ")
           for _, line in ipairs(self.tipLines) do
-            GameTooltip:AddLine(line, 1, 0.84, 0.29, true)
+            GameTooltip:AddLine(line, 0.55, 1, 0.30, true)
           end
         end
         GameTooltip:AddLine("Shift-Klick: Link in den Chat", 0.6, 0.57, 0.75)

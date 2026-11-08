@@ -88,7 +88,7 @@ function A.RefreshPanel()
   local list = A.VendorCandidates()
   local plan, cost, profit = A.FlipBuyPlan()
   local flips = #ns.Scanner.merchant.flips
-  panel.info:SetText(string.format("Händler-Verkauf: |cffffd24a%d Items, %s|r\nFlip-Chancen: |cff61eb8f%d|r%s\nSchrott: %s",
+  panel.info:SetText(string.format("Händler-Verkauf: |cff8cff4d%d Items, %s|r\nFlip-Chancen: |cff61eb8f%d|r%s\nSchrott: %s",
     #list, ns.Money(vendorTotal), flips,
     #plan > 0 and (" – kaufen für " .. ns.Money(cost) .. ", Gewinn " .. ns.Money(profit)) or "",
     ns.settings.autoJunk and "wird automatisch verkauft" or "Autopilot aus (Einstellungen)"))

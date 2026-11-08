@@ -124,7 +124,7 @@ local function fillCard(card, m, expanded, width)
     card.value:SetText(ns.Money(value))
     card.valueSub:SetText("1 Stapel " .. ns.Item(valueID).name)
   else
-    card.value:SetText(m.items and "|cff8f88b3kein Preis|r" or "")
+    card.value:SetText(m.items and "|cff8a9a94kein Preis|r" or "")
     card.valueSub:SetText(m.items and "AH einmal scannen" or "")
   end
   card.chev:SetRotation(expanded and (-math.pi / 2) or 0)
@@ -174,7 +174,7 @@ local function fillCard(card, m, expanded, width)
     end
     add("So geht's", 13, C.gold, "bold", 6)
     for i, step in ipairs(m.steps or {}) do
-      add("|cffffd24a" .. i .. ".|r  " .. step, 12, C.text, "regular", 6)
+      add("|cff8cff4d" .. i .. ".|r  " .. step, 12, C.text, "regular", 6)
     end
     local where = m.where and m.where[ns.Faction()]
     if where then
@@ -216,7 +216,7 @@ local function fillCard(card, m, expanded, width)
       local parts = {}
       for _, id in ipairs(m.items) do
         local price = M.Price(id)
-        parts[#parts + 1] = ns.Item(id).name .. " " .. (price and ns.Money(price) or "|cff8f88b3–|r")
+        parts[#parts + 1] = ns.Item(id).name .. " " .. (price and ns.Money(price) or "|cff8a9a94–|r")
       end
       add("Live-Preise (pro Stück): " .. table.concat(parts, "  ·  "), 11, C.dim, "regular", 10)
       if not card.listBtn then
@@ -225,7 +225,7 @@ local function fillCard(card, m, expanded, width)
           local meth = self.method
           local ok, n = M.CreateShoppingList("Zentrale: " .. meth.title, meth.items)
           if ok then
-            ns.Print("Liste |cffffd24aTiry's Zentrale: " .. meth.title .. "|r angelegt (" .. n .. " Items). Im AH: Auctionator > Einkaufen.")
+            ns.Print("Liste |cff8cff4dTiry's Zentrale: " .. meth.title .. "|r angelegt (" .. n .. " Items). Im AH: Auctionator > Einkaufen.")
           else
             ns.Print("|cffff6b81" .. tostring(n) .. "|r")
           end

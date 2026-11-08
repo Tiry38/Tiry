@@ -68,7 +68,7 @@ function page.build(self, content, width)
   local hero = CreateFrame("Frame", nil, content)
   hero:SetSize(width, 168)
   hero.bg = UI.Round(hero, 22, "BACKGROUND", 0)
-  hero.bg:SetGradient({ { 0.20, 0.13, 0.05 }, { 0.10, 0.17, 0.12 }, { 0.08, 0.12, 0.24 } }, 0.97)
+  hero.bg:SetGradient({ { 0.10, 0.25, 0.15 }, { 0.08, 0.18, 0.15 }, { 0.12, 0.15, 0.17 } }, 0.97)
   local glow = UI.Glow(hero, C.teal, 320, 0.18, "BACKGROUND")
   glow:SetPoint("CENTER", hero, "RIGHT", -60, 0)
   UI.Drift(glow, -60, 10, 8, 0.2, 0.08)
@@ -162,7 +162,7 @@ function page.refresh(self)
     if rank >= need then
       hero.next:SetText("Skill reicht für " .. nextTier.label .. " – dir fehlt nur noch Level " .. nextTier.from .. ".")
     else
-      hero.next:SetText(string.format("Noch |cffffd24a%d Skillpunkte|r bis %s (Tiere ab Level %d, Skill %d).", need - rank, nextTier.label, nextTier.from, need))
+      hero.next:SetText(string.format("Noch |cff8cff4d%d Skillpunkte|r bis %s (Tiere ab Level %d, Skill %d).", need - rank, nextTier.label, nextTier.from, need))
     end
   else
     hero.bar.fill:SetWidth(width - 44)
@@ -204,15 +204,15 @@ function page.refresh(self)
       id = id, note = note,
       cells = {
         lvl = lvl,
-        ah = price and ns.Money(price) or "|cff8f88b3–|r",
-        stack = price and ns.Money(M.Net(price) * stack) or "|cff8f88b3–|r",
+        ah = price and ns.Money(price) or "|cff8a9a94–|r",
+        stack = price and ns.Money(M.Net(price) * stack) or "|cff8a9a94–|r",
       },
       tip = { price and ("Bester Verkauf: " .. ((select(1, M.BestSale(id)) == "AH") and "Auktionshaus" or "Händler")) or "Noch kein AH-Preis – oben auf \"AH scannen\"." },
     }
   end
   for _, id in ipairs(tier.items) do add(id, tier.from .. "–" .. (tier.to - 1), "Deine Stufe jetzt") end
   if nextTier then for _, id in ipairs(nextTier.items) do add(id, nextTier.from .. "–" .. (nextTier.to - 1), "Nächste Stufe") end end
-  for _, id in ipairs(K.FOREVER) do add(id, "alle", "|cffffd24aNeu in Forever|r · selten, von jedem häutbaren Tier") end
+  for _, id in ipairs(K.FOREVER) do add(id, "alle", "|cff8cff4dNeu in Forever|r · selten, von jedem häutbaren Tier") end
   local h = self.leatherList:SetEntries(entries)
   y = place(self, self.leatherList, y, h) + 20
 
@@ -258,7 +258,7 @@ function page.refresh(self)
   end
   y = y + 10
 
-  self.tips:SetText("|cffffd24aProfi-Tipps|r\n"
+  self.tips:SetText("|cff8cff4dProfi-Tipps|r\n"
     .. "•  Häute auch Tiere, die andere Spieler erlegt haben – das kostet nichts und bringt Skill.\n"
     .. "•  Orange und gelbe Tiere (im Tooltip) bringen Skillpunkte, grüne seltener, graue nie.\n"
     .. "•  Makelloses Leder & Co. nie zum Händler – der Beute-Radar warnt dich.\n"

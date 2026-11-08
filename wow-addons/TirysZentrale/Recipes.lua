@@ -121,7 +121,7 @@ ns.On("NEW_RECIPE_LEARNED", function(_, recipeID)
   if not r then return end
   local profit = ns.Scanner.RecipeProfit(r)
   if profit then
-    ns.Print(string.format("Neues Rezept: |cffffd24a%s|r – Gewinn pro Craft laut AH: %s", r.name,
+    ns.Print(string.format("Neues Rezept: |cff8cff4d%s|r – Gewinn pro Craft laut AH: %s", r.name,
       (profit >= 0 and "|cff61eb8f+" or "|cffff6b81") .. ns.Money(profit) .. "|r"))
   end
 end)
@@ -228,6 +228,6 @@ end
 ns.Listen("PLAYER_CHANGED", function()
   if not ns.settings then return end
   local _, p = R.Filter()
-  ns.Print(string.format("Level %d! Dein Mindestgewinn im Craft-Planer ist mitgewachsen: |cffffd24a%s|r pro Craft.",
+  ns.Print(string.format("Level %d! Dein Mindestgewinn im Craft-Planer ist mitgewachsen: |cff8cff4d%s|r pro Craft.",
     ns.player.level, ns.Money(p)))
 end)

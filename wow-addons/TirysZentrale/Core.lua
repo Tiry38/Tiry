@@ -288,7 +288,7 @@ local GOLD_C, SILVER_C, COPPER_C = "|cffffd24a", "|cffd5d9e6", "|cffe8a066"
 -- Kompakt mit echten Münz-Symbolen aus dem Spiel (keine "k"-Abkürzung, die man als "Tausend" liest)
 local ICON_G, ICON_S, ICON_C = "|A:coin-gold:11:11:1:0|a", "|A:coin-silver:11:11:1:0|a", "|A:coin-copper:11:11:1:0|a"
 function ns.Money(copper, opts)
-  if copper == nil then return "|cff8f88b3–|r" end
+  if copper == nil then return "|cff8a9a94–|r" end
   local neg = copper < 0
   copper = math.floor(math.abs(copper) + 0.5)
   local g = math.floor(copper / 10000)
@@ -338,7 +338,7 @@ end
 function ns.Print(msg)
   local frame = DEFAULT_CHAT_FRAME
   if frame then
-    frame:AddMessage("|cffffd24aTiry's|r |cffff8a00Zentrale|r: " .. msg)
+    frame:AddMessage("|cff8cff4dTiry's|r |cff26ff73Zentrale|r: " .. msg)
   end
 end
 

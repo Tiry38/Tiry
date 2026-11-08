@@ -107,7 +107,7 @@ function page.build(self, content, width)
     for i = 1, math.min(#(self.results or {}), 100) do ids[#ids + 1] = self.results[i].id end
     local ok, n = M.CreateShoppingList("Zentrale: Datenbank-Suche", ids)
     if ok then
-      ns.Print("Liste |cffffd24aTiry's Zentrale: Datenbank-Suche|r angelegt (" .. n .. " Items, max. 100).")
+      ns.Print("Liste |cff8cff4dTiry's Zentrale: Datenbank-Suche|r angelegt (" .. n .. " Items, max. 100).")
     else
       ns.Print("|cffff6b81" .. tostring(n) .. "|r")
     end
@@ -158,8 +158,8 @@ function page.refresh(self)
       id = e.id, name = e.name,
       note = table.concat(parts, " · "),
       cells = {
-        ah = price and ns.Money(price) or "|cff8f88b3–|r",
-        vendor = e.sell > 0 and ns.Money(e.sell) or "|cff8f88b3–|r",
+        ah = price and ns.Money(price) or "|cff8a9a94–|r",
+        vendor = e.sell > 0 and ns.Money(e.sell) or "|cff8a9a94–|r",
         stack = e.stack > 1 and tostring(e.stack) or "1",
       },
       tip = tip,

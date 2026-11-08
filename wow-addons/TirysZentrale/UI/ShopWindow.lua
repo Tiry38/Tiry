@@ -157,14 +157,14 @@ function Shop.Refresh()
   local list, open, cost = Shop.List()
   local plan, planCost = Shop.VendorPlan()
   if #list == 0 then
-    win.summary:SetText("Die Craft-Liste ist leer. Im Craft-Planer auf |cffffd24aListe erstellen|r klicken.")
+    win.summary:SetText("Die Craft-Liste ist leer. Im Craft-Planer auf |cff8cff4dListe erstellen|r klicken.")
   elseif open == 0 then
-    win.summary:SetText("|cff61eb8fAlles da!|r Hol deine Post aus dem Briefkasten und klick auf |cffffd24aNächstes craften|r.")
+    win.summary:SetText("|cff61eb8fAlles da!|r Hol deine Post aus dem Briefkasten und klick auf |cff8cff4dNächstes craften|r.")
   elseif #plan > 0 then
-    win.summary:SetText(string.format("Dieser Händler hat |cff61eb8f%d %s|r für dich. Ein Klick auf |cffffd24aBeim Händler kaufen|r holt alles für %s.",
+    win.summary:SetText(string.format("Dieser Händler hat |cff61eb8f%d %s|r für dich. Ein Klick auf |cff8cff4dBeim Händler kaufen|r holt alles für %s.",
       #plan, #plan == 1 and "Material" or "Materialien", ns.Money(planCost)))
   else
-    win.summary:SetText(string.format("Noch |cffffd24a%d %s|r zu kaufen, ca. %s. Gekauftes verschwindet sofort.", open, open == 1 and "Material" or "Materialien", ns.Money(cost)))
+    win.summary:SetText(string.format("Noch |cff8cff4d%d %s|r zu kaufen, ca. %s. Gekauftes verschwindet sofort.", open, open == 1 and "Material" or "Materialien", ns.Money(cost)))
   end
   local y = 44 + math.ceil(win.summary:GetStringHeight()) + 12
 
@@ -183,7 +183,7 @@ function Shop.Refresh()
       r.id = c.recipe.out
       r.icon:SetItem(c.recipe.out)
       local item = ns.Item(c.recipe.out)
-      r.name:SetText(string.format("|cffffd24a%d×|r %s", c.n * (c.recipe.qty or 1), item.name or c.recipe.name))
+      r.name:SetText(string.format("|cff8cff4d%d×|r %s", c.n * (c.recipe.qty or 1), item.name or c.recipe.name))
       local st = STATUS[c.status]
       r.status:SetText(st[1])
       r.status:SetTextColor(st[2][1], st[2][2], st[2][3], 1)

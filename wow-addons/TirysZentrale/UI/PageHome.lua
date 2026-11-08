@@ -53,7 +53,7 @@ function page.build(self, content, width)
   local hero = CreateFrame("Frame", nil, content)
   hero:SetSize(width, 132)
   hero.bg = UI.Round(hero, 22, "BACKGROUND", 0)
-  hero.bg:SetGradient({ { 0.26, 0.15, 0.06 }, { 0.22, 0.09, 0.20 }, { 0.12, 0.10, 0.30 } }, 0.95)
+  hero.bg:SetGradient({ { 0.07, 0.27, 0.19 }, { 0.09, 0.18, 0.16 }, { 0.14, 0.16, 0.17 } }, 0.95)
   local shine = UI.Glow(hero, C.gold, 300, 0.25, "BACKGROUND")
   shine:SetPoint("CENTER", hero, "TOPLEFT", 80, -20)
   UI.Drift(shine, 120, -20, 7, 0.3, 0.12)
@@ -195,7 +195,7 @@ function page.refresh(self)
   if #ids == 0 then
     local c = hero.profs[1] or UI.Chip(hero, "", C.rose)
     hero.profs[1] = c
-    c:Set("Noch keine Berufe – lern zwei Sammelberufe!", C.rose)
+    c:Set("Noch keine Berufe – lern zwei Sammelberufe!", C.red)
     c:ClearAllPoints()
     c:SetPoint("TOPLEFT", hero.money, "TOPRIGHT", 18, -2)
     c:Show()
@@ -283,7 +283,7 @@ function page.refresh(self)
   for _, g in ipairs(ns.GOALS) do
     if p.level <= g.level then goal = g break end
   end
-  self.goal:SetText(goal and ("|cffffd24aSparziel:|r " .. goal.text) or "")
+  self.goal:SetText(goal and ("|cff8cff4dSparziel:|r " .. goal.text) or "")
 end
 
 UI.RegisterPage("home", page)

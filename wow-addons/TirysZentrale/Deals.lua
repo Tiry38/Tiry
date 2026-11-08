@@ -88,7 +88,7 @@ ns.On("MAIL_CLOSED", function()
   local sold = ns.Ledger.Totals(1).sold - (mailSales or 0)
   mailMoney = nil
   if gained > 0 then
-    ns.Print(string.format("Post-Bilanz: |cffffd24a+%s|r%s. Details im Verkaufsbuch (/tz buch).", ns.Money(gained),
+    ns.Print(string.format("Post-Bilanz: |cff8cff4d+%s|r%s. Details im Verkaufsbuch (/tz buch).", ns.Money(gained),
       sold > 0 and string.format(" (%d neue Verkäufe)", sold) or ""))
   end
 end)

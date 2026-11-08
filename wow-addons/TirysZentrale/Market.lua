@@ -191,7 +191,7 @@ function M.StartScan()
     M.scanRequested = true
     ns.Print("Scan läuft ... Tiry's Zentrale meldet sich, sobald die Preise da sind.")
   else
-    ns.Print("Bitte im AH den Reiter |cffffd24aAuctionator|r öffnen und auf |cffffd24aScannen|r klicken – Tiry's Zentrale erkennt den Scan automatisch.")
+    ns.Print("Bitte im AH den Reiter |cff8cff4dAuctionator|r öffnen und auf |cff8cff4dScannen|r klicken – Tiry's Zentrale erkennt den Scan automatisch.")
   end
   return ok
 end

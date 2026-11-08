@@ -140,11 +140,11 @@ function page.build(self, content, width)
   st:Add(all, 34, 24)
 
   st:Title("Befehle", 15, C.text, 2)
-  st:Para("|cffffd24a/tz|r – Fenster öffnen/schließen\n"
-    .. "|cffffd24a/tz leder|r · |cffffd24a/tz farm|r · |cffffd24a/tz craft|r · |cffffd24a/tz suche|r · |cffffd24a/tz wege|r · |cffffd24a/tz markt|r · |cffffd24a/tz scan|r · |cffffd24a/tz rezepte|r · |cffffd24a/tz tagebuch|r · |cffffd24a/tz ah|r\n"
-    .. "|cffffd24a/tz minimap|r – Minikarten-Knopf an/aus\n"
-    .. "|cffffd24a/tz wegpunkt|r – gesetzten Kartenpunkt löschen · |cffffd24a/tz leeren|r – Craft-Liste leeren\n"
-    .. "|cffffd24a/tz reset|r – Fenster in die Mitte setzen", 12, C.muted, 16)
+  st:Para("|cff8cff4d/tz|r – Fenster öffnen/schließen\n"
+    .. "|cff8cff4d/tz leder|r · |cff8cff4d/tz farm|r · |cff8cff4d/tz craft|r · |cff8cff4d/tz suche|r · |cff8cff4d/tz wege|r · |cff8cff4d/tz markt|r · |cff8cff4d/tz scan|r · |cff8cff4d/tz rezepte|r · |cff8cff4d/tz tagebuch|r · |cff8cff4d/tz ah|r\n"
+    .. "|cff8cff4d/tz minimap|r – Minikarten-Knopf an/aus\n"
+    .. "|cff8cff4d/tz wegpunkt|r – gesetzten Kartenpunkt löschen · |cff8cff4d/tz leeren|r – Craft-Liste leeren\n"
+    .. "|cff8cff4d/tz reset|r – Fenster in die Mitte setzen", 12, C.muted, 16)
   st:Para("Tiry's Zentrale " .. tostring(ns.version) .. " · gebaut für WoW Forever (1.60.1). Preise kommen aus Auctionator – "
     .. "Tiry's Zentrale selbst liest nie etwas im Hintergrund aus und schickt keine Daten weg.", 11, C.dim, 10)
   st:Finish()

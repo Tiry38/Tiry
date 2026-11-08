@@ -1,9 +1,9 @@
 ## Interface: 16001
-## Title: |cffffd24aTiry's|r |cffff8a00Zentrale|r
+## Title: |cff8cff4dTiry's|r |cff26ff73Zentrale|r
 ## Notes: Deine Gold-Zentrale für WoW Forever: Craft-Planer wie TSM, Kürschner-Zentrale, Farm-Spots auf der Karte, Live-Preise (Auctionator), Autopilot und komplette deutsche Item-Datenbank.
 ## Notes-deDE: Deine Gold-Zentrale für WoW Forever: Craft-Planer wie TSM, Kürschner-Zentrale, Farm-Spots auf der Karte, Live-Preise (Auctionator), Autopilot und komplette deutsche Item-Datenbank.
 ## Author: Tiry
-## Version: 4.2.0
+## Version: 4.3.0
 ## Category-enUS: Auctions
 ## Category-deDE: Auktionen
 ## SavedVariables: TirysZentraleDB

@@ -64,9 +64,9 @@ function page.build(self, content, width)
     bar:SetScript("OnEnter", function(me)
       if not me.data then return end
       GameTooltip:SetOwner(me, "ANCHOR_TOP")
-      GameTooltip:SetText(me.data.label, 1, 0.84, 0.29)
-      GameTooltip:AddDoubleLine("Eingenommen", ns.Money(me.data.earned), 0.86, 0.84, 0.95)
-      GameTooltip:AddDoubleLine("Ausgegeben", ns.Money(me.data.spent), 0.86, 0.84, 0.95)
+      GameTooltip:SetText(me.data.label, 0.55, 1, 0.30)
+      GameTooltip:AddDoubleLine("Eingenommen", ns.Money(me.data.earned), 0.86, 0.92, 0.89)
+      GameTooltip:AddDoubleLine("Ausgegeben", ns.Money(me.data.spent), 0.86, 0.92, 0.89)
       GameTooltip:AddDoubleLine("Ergebnis", ns.Money(me.data.net), 1, 1, 1)
       GameTooltip:Show()
     end)
@@ -100,7 +100,7 @@ function page.refresh(self)
     self.rate.value:SetText(ns.Money(math.floor(perHour)))
     self.rate.sub:SetText("Hochrechnung dieser Sitzung")
   else
-    self.rate.value:SetText("|cff8f88b3misst ...|r")
+    self.rate.value:SetText("|cff8a9a94misst ...|r")
     self.rate.sub:SetText("ab 5 Minuten Spielzeit")
   end
   local days = T.Days(DAYS)
@@ -125,18 +125,18 @@ function page.refresh(self)
   end
   local A = ns.Auto
   local lph = A.LootPerHour()
-  local lines = { string.format("Beute-Wert: |cffffd24a%s|r (%d Items)  ·  pro Stunde: |cffffd24a%s|r",
+  local lines = { string.format("Beute-Wert: |cff8cff4d%s|r (%d Items)  ·  pro Stunde: |cff8cff4d%s|r",
     ns.Money(A.session.value), A.session.items, lph and ns.Money(math.floor(lph)) or "misst ...") }
-  lines[#lines + 1] = "|cff9a93bdWert = was du beim besten Verkaufsweg (AH nach Gebühr oder Händler) bekommst – auch für noch nicht verkaufte Beute.|r"
+  lines[#lines + 1] = "|cff93a39dWert = was du beim besten Verkaufsweg (AH nach Gebühr oder Händler) bekommst – auch für noch nicht verkaufte Beute.|r"
   for i = 1, math.min(#A.session.log, 6) do
     local e = A.session.log[i]
-    lines[#lines + 1] = string.format("%s× %s  %s  |cff9a93bd(%s)|r", e.n, ns.Item(e.id).name, ns.Money(e.value), e.channel == "AH" and "AH" or "Händler")
+    lines[#lines + 1] = string.format("%s× %s  %s  |cff93a39d(%s)|r", e.n, ns.Item(e.id).name, ns.Money(e.value), e.channel == "AH" and "AH" or "Händler")
   end
   self.radar:SetText(table.concat(lines, "\n"))
 
   local best = T.BestDay()
   if best and best.net > 0 then
-    self.best:SetText("Dein bester Tag: |cffffd24a" .. best.key .. "|r mit " .. ns.Money(best.net) .. " Plus.")
+    self.best:SetText("Dein bester Tag: |cff8cff4d" .. best.key .. "|r mit " .. ns.Money(best.net) .. " Plus.")
   else
     self.best:SetText("Noch kein Gewinntag gespeichert – leg los!")
   end

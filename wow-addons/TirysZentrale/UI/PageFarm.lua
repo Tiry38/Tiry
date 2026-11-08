@@ -52,7 +52,7 @@ local function groupCard(parent, width)
   card.listBtn:SetPoint("BOTTOMRIGHT", -16, 14)
   card.listBtn:SetScript("OnClick", function(self)
     local ok, n = M.CreateShoppingList("Zentrale: Farm " .. self.label, self.ids)
-    ns.Print(ok and ("Liste |cffffd24aTiry's Zentrale: Farm " .. self.label .. "|r angelegt (" .. n .. " Items).") or ("|cffff6b81" .. tostring(n) .. "|r"))
+    ns.Print(ok and ("Liste |cff8cff4dTiry's Zentrale: Farm " .. self.label .. "|r angelegt (" .. n .. " Items).") or ("|cffff6b81" .. tostring(n) .. "|r"))
   end)
   return card
 end
@@ -111,7 +111,7 @@ function page.build(self, content, width)
   st:Add(self.segments, self.segments:GetHeight(), 12)
   self.best = UI.Card(content, 20, C.card)
   self.best:SetSize(width, 96)
-  self.best.bg:SetGradient({ { 0.26, 0.15, 0.06 }, { 0.22, 0.09, 0.20 }, { 0.12, 0.10, 0.30 } }, 0.95)
+  self.best.bg:SetGradient({ { 0.07, 0.27, 0.19 }, { 0.09, 0.18, 0.16 }, { 0.14, 0.16, 0.17 } }, 0.95)
   self.best.label = UI.Text(self.best, 10, "semibold", C.gold)
   self.best.label:SetPoint("TOPLEFT", 20, -16)
   self.best.text = UI.Para(self.best, 14, C.text, width - 40, "semibold")
@@ -150,7 +150,7 @@ function page.refresh(self)
   local r1 = ranked[1]
   self.best.label:SetText(mine and "DEIN BESTER FARM JETZT (LEVEL " .. ns.player.level .. ")" or ("LEVEL " .. band.key))
   if r1 and r1.value then
-    self.best.text:SetText(string.format("%s farmen – vor allem |cffffd24a%s|r: %s pro Stapel im AH.%s",
+    self.best.text:SetText(string.format("%s farmen – vor allem |cff8cff4d%s|r: %s pro Stapel im AH.%s",
       r1.g.label, ns.Item(r1.bestID).name, ns.Money(r1.value),
       (not r1.can) and ("\n|cffff6b81Dafür brauchst du " .. ns.ProfName(r1.g.prof) .. ".|r") or ""))
   else
@@ -167,8 +167,8 @@ function page.refresh(self)
     end
   end
   for _, z in ipairs(band.both or {}) do if z:find("Zephras") then zones[#zones + 1] = z end end
-  self.zones:SetText("|cffffd24aGebiete (" .. (faction == "Horde" and "Horde" or "Allianz") .. "):|r " .. table.concat(zones, " · ")
-    .. "\n|cffffd24aTipp:|r " .. (band.tip or "") .. "\n|cff9a93bdStellen = dichteste Fundorte aus der Forever-Datenbank von QuestieDB. Preise = live von deinem Server.|r")
+  self.zones:SetText("|cff8cff4dGebiete (" .. (faction == "Horde" and "Horde" or "Allianz") .. "):|r " .. table.concat(zones, " · ")
+    .. "\n|cff8cff4dTipp:|r " .. (band.tip or "") .. "\n|cff93a39dStellen = dichteste Fundorte aus der Forever-Datenbank von QuestieDB. Preise = live von deinem Server.|r")
   self.zones:ClearAllPoints()
   self.zones:SetPoint("TOPLEFT", self.frame.content, "TOPLEFT", 0, -self.top)
   local y = self.top + math.ceil(self.zones:GetStringHeight()) + 16
@@ -185,7 +185,7 @@ function page.refresh(self)
       card.prof:Set("kein Beruf nötig", C.teal)
       card.prof:Show()
     end
-    card.value:SetText(r.value and ns.Money(r.value) or "|cff8f88b3kein Preis|r")
+    card.value:SetText(r.value and ns.Money(r.value) or "|cff8a9a94kein Preis|r")
     card.valueSub:SetText(r.value and ("Stapel " .. ns.Item(r.bestID).name) or "AH scannen")
     card.how:SetText(r.g.how)
     local perRow = math.floor((width - 32) / 158)
