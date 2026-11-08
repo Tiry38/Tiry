@@ -667,9 +667,10 @@ function page.Entries(self)
     elseif c.freshOnly ~= false and not (M.Age(r.out) and M.Age(r.out) <= 3) then
       stats.old = (stats.old or 0) + 1
     else
-      -- Mindestgewinn aus dem Profi-String (Standard: max(15% crafting, levelgold))
-      local need = ns.PriceString.Eval("minProfit", r.out, { crafting = cost }) or minProfit
-      need = math.max(need, 1)
+      -- Regler auf "alles" (0) = jedes Rezept mit Gewinn, ohne Zuschlag. Sonst Profi-String
+      -- (Standard: max(15% crafting, levelgold)).
+      local need = 1
+      if minProfit > 0 then need = math.max(ns.PriceString.Eval("minProfit", r.out, { crafting = cost }) or minProfit, 1) end
       if not profit or profit < need then
         stats.tooLow = stats.tooLow + 1
       else

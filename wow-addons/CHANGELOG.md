@@ -1,5 +1,17 @@
 # Changelog – Tiry's Zentrale
 
+## 5.5.1 (08.11.2026)
+**Auktionen: Gold zeigt jetzt den echten Weg – unterwegs, im Briefkasten, abgeholt.**
+- Nach einem Verkauf verschickt das Spiel das Gold mit Verzögerung (Blizzard-Code: die Auktion bleibt bis dahin als „Verkauft“ mit Restzeit in deiner Auktionsliste). Bisher stand sofort „im Briefkasten“ – falsch. Jetzt: **unterwegs** (mit Restzeit), dann **im Briefkasten**, dann **abgeholt**.
+- „Im Briefkasten“ wird es erst, wenn der Brief wirklich da ist: Briefkasten geöffnet, Blizzard meldet neue Post vom Auktionshaus, oder die gemessene Lieferzeit ist um („sollte im Briefkasten sein“).
+- Die Lieferzeit misst das Addon selbst (Verkauf → Brief) und nimmt den Mittelwert der letzten 10 Verkäufe. Am AH wird die Restzeit direkt aus der Auktionsliste übernommen.
+- Verkäufe, während du offline warst, werden nachgetragen (aus der Auktionsliste am AH oder aus dem Verkaufsbrief).
+- Betrag im Briefkasten = exakter Betrag aus dem Brief.
+- „Gold abholen“ auf der Startseite erst, wenn das Gold angekommen ist.
+
+**Craft-Planer: Mindestgewinn „alles“ zeigt jetzt wirklich alles mit Gewinn.**
+- Bisher galt intern trotzdem ein Zuschlag von 15 % der Materialkosten – Rezepte mit kleinem Gewinn (z. B. 2 Silber bei 25 Silber Material) fehlten. Bei „alles“ zählt jetzt jeder Gewinn ab 1 Kupfer.
+
 ## 5.5.0 (08.11.2026)
 **Hauptthema ist jetzt Gold durch Herstellen: Material kaufen, herstellen, teurer verkaufen.**
 - **Startseite = Gold-Kreislauf** mit vier Schritten, je einem Knopf und Haken, wenn erledigt. Der orange Schritt ist dran.

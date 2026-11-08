@@ -22,7 +22,7 @@ local function store()
   ns.char.auctions = ns.char.auctions or {}
   local s = ns.char.auctions
   s.list = s.list or {} -- { auctionID, id, key, qty, unit, status, expires, competitor, undercut, checked, soldTime }
-  s.sold = s.sold or {} -- { id, name, qty, unit, time }
+  s.sold = s.sold or {} -- { id, name, auctionID, qty, unit, time, amount, exact, state = way|mail|done, eta, offline }
   return s
 end
 AW.Store = store
@@ -69,11 +69,14 @@ function AW.ReadOwned()
         key = { itemID = k.itemID, itemLevel = k.itemLevel or 0, itemSuffix = k.itemSuffix or 0, battlePetSpeciesID = k.battlePetSpeciesID or 0 },
         status = (info.status == STATUS_SOLD) and "sold" or "active",
         expires = info.timeLeftSeconds and (time() + info.timeLeftSeconds) or (prev and prev.expires),
+        -- verkauft: Blizzard zeigt hier die Zeit bis das Gold verschickt wird
+        sendIn = (info.status == STATUS_SOLD) and info.timeLeftSeconds or nil,
         competitor = prev and prev.competitor, undercut = prev and prev.undercut, checked = prev and prev.checked,
       }
     end
   end
   s.list, s.time = list, time()
+  AW.SyncSoldFromOwned()
   ns.Fire("AUCTIONS_CHANGED")
 end
 
@@ -259,11 +262,82 @@ ns.On("AUCTION_CANCELED", function(_, auctionID)
 end)
 
 ----------------------------------------------------------------------------
--- Verkauft / abgelaufen: Blizzard meldet das überall (auch fern vom AH)
+-- Verkauft -> Gold UNTERWEGS -> IM BRIEFKASTEN -> ABGEHOLT
+-- So läuft es im Spiel (Blizzard-Code, Forever-Build): Nach dem Verkauf bleibt die Auktion mit Status
+-- "Verkauft" in der eigenen Auktionsliste, bis das Gold verschickt ist (Blizzard zeigt dort "Eingehend" + Restzeit).
+-- Erst dann kommt der Brief "Auktion erfolgreich" mit dem Gold. Darum zeigt die Zentrale nach dem Verkauf
+-- zuerst "unterwegs" – und erst "im Briefkasten", wenn der Brief wirklich da ist:
+--   * Briefkasten geöffnet und Verkaufsbrief gefunden (genau, mit exaktem Betrag), oder
+--   * Blizzard meldet neue Post vom Auktionshaus (UPDATE_PENDING_MAIL + Absender), oder
+--   * die gemessene/gemeldete Lieferzeit ist abgelaufen ("sollte da sein").
+-- Die Lieferzeit misst die Zentrale selbst (Verkauf -> Brief) und merkt sie sich.
 ----------------------------------------------------------------------------
+local WAY, MAIL, DONE = "way", "mail", "done"
+
+local function nameOf(e) return e.name or (e.id and ns.Item(e.id).name) end
+
+-- alte Einträge (bis 5.5.0: inMail) umstellen
+local function migrate(s)
+  for _, e in ipairs(s.sold) do
+    if not e.state then e.state = e.inMail and MAIL or DONE end
+    e.inMail = nil
+  end
+  if s.mail then s.mail.pending, s.mail.known = nil, nil end
+end
+
+-- gemessene Lieferzeiten (Sekunden), Mittelwert der letzten 10
+local function delays()
+  ns.db.ahMailDelays = ns.db.ahMailDelays or {}
+  return ns.db.ahMailDelays
+end
+function AW.LearnDelay(sec)
+  if not sec or sec < 0 or sec > 3 * 3600 then return end
+  local d = delays()
+  table.insert(d, math.floor(sec))
+  while #d > 10 do table.remove(d, 1) end
+end
+function AW.TypicalDelay()
+  local d = delays()
+  if #d == 0 then return nil end
+  local t = {}
+  for i, v in ipairs(d) do t[i] = v end
+  table.sort(t)
+  return t[math.ceil(#t / 2)] -- Median
+end
+
+-- Absender der Verkaufsbriefe (lernt die Zentrale beim Öffnen des Briefkastens)
+local function senders()
+  ns.db.ahSenders = ns.db.ahSenders or {}
+  return ns.db.ahSenders
+end
+
+local function eta(e)
+  if e.eta then return e.eta end
+  local d = AW.TypicalDelay()
+  return d and (e.time + d) or nil
+end
+AW.ETA = eta
+
+-- Zustand eines Verkaufs für die Anzeige: "way" | "mail" | "done"; arrivedGuess = nur über die Zeit geschätzt
+function AW.SoldState(e)
+  if e.state == WAY then
+    local t = eta(e)
+    if t and time() >= t then return MAIL, true end
+  end
+  return e.state, false
+end
+
+local function addSold(entry)
+  local s = store()
+  table.insert(s.sold, 1, entry)
+  while #s.sold > 40 do table.remove(s.sold) end
+  return entry
+end
+
 function AW.OnNotify(notification, name, auctionID)
   if notification ~= SOLD and notification ~= EXPIRED then return end
   local s = store()
+  migrate(s)
   local found
   for _, a in ipairs(s.list) do
     if a.status == "active" and ((auctionID and a.auctionID == auctionID) or (not auctionID and name and ns.Item(a.id).name == name)) then
@@ -279,15 +353,14 @@ function AW.OnNotify(notification, name, auctionID)
   if notification == SOLD then
     if found then found.status, found.soldTime = "sold", time() end
     local itemName = name or (found and ns.Item(found.id).name) or "?"
-    -- erwartetes Gold (nach AH-Gebühr) -> "kommt in den Briefkasten"
+    -- erwartetes Gold (nach AH-Gebühr); genau wird es mit dem Brief
     local amount = (found and found.unit) and math.floor(found.unit * found.qty * M.CutFactor()) or nil
-    table.insert(s.sold, 1, { id = found and found.id or ns.DB.IDByName(name), name = itemName,
-      qty = found and found.qty, unit = found and found.unit, time = time(), amount = amount, inMail = true })
-    local m = AW.Mail()
-    table.insert(m.pending, { name = itemName, amount = amount or 0, time = time() })
-    ns.Print(string.format("|cffff9929Verkauft:|r %s%s – %s kommt in deinen Briefkasten.", itemName,
-      (found and found.qty and found.qty > 1) and (" (" .. found.qty .. "×)") or "", amount and ("ca. " .. ns.Money(amount)) or "das Gold"))
-    while #s.sold > 40 do table.remove(s.sold) end
+    addSold({ id = found and found.id or ns.DB.IDByName(name), name = itemName, auctionID = auctionID or (found and found.auctionID),
+      qty = found and found.qty, unit = found and found.unit, time = time(), amount = amount, state = WAY })
+    local d = AW.TypicalDelay()
+    ns.Print(string.format("|cffff9929Verkauft:|r %s%s – %s. Das Gold ist unterwegs zu deinem Briefkasten%s.", itemName,
+      (found and found.qty and found.qty > 1) and (" (" .. found.qty .. "×)") or "", amount and ("ca. " .. ns.Money(amount)) or "Erlös",
+      d and (" (kommt meist nach ca. " .. math.max(1, math.floor(d / 60 + 0.5)) .. " Min.)") or ""))
     if PlaySound and SOUNDKIT and SOUNDKIT.AUCTION_WINDOW_OPEN then pcall(PlaySound, SOUNDKIT.AUCTION_WINDOW_OPEN) end
   elseif found then
     found.status, found.soldTime = "expired", time()
@@ -299,66 +372,83 @@ ns.On("AUCTION_HOUSE_SHOW_FORMATTED_NOTIFICATION", function(_, notification, tex
   AW.OnNotify(notification, text, auctionID)
 end)
 
-----------------------------------------------------------------------------
--- Gold im Briefkasten: geschätzt ab dem Verkauf, genau sobald der Briefkasten offen war.
--- Abgeholt (Gold aus der Post genommen) -> verschwindet automatisch.
-----------------------------------------------------------------------------
-function AW.Mail()
+-- Am AH: verkaufte Auktionen stehen dort mit Restzeit bis zum Versand -> genaue Ankunftszeit.
+-- Verkäufe, die passiert sind, während du offline warst, tauchen nur hier auf -> nachtragen.
+function AW.SyncSoldFromOwned()
   local s = store()
-  s.mail = s.mail or {}
-  s.mail.known = s.mail.known or 0      -- genau gezählt beim letzten Briefkasten-Besuch (Verkaufserlöse)
-  s.mail.pending = s.mail.pending or {} -- Verkäufe seit dem letzten Besuch (Schätzung)
-  return s.mail
-end
-
--- Gesamt, davon geschätzt?
-function AW.MailGold()
-  local m = AW.Mail()
-  local est = 0
-  for _, p in ipairs(m.pending) do est = est + (p.amount or 0) end
-  return m.known + est, est > 0, m
-end
-
-function AW.ScanMailbox()
-  if not (GetInboxNumItems and GetInboxHeaderInfo) then return end
-  local m = AW.Mail()
-  local known, names = 0, {}
-  for i = 1, GetInboxNumItems() or 0 do
-    local _, _, _, _, money = GetInboxHeaderInfo(i)
-    local invoiceType, itemName
-    if GetInboxInvoiceInfo then invoiceType, itemName = GetInboxInvoiceInfo(i) end
-    if invoiceType == "seller" and (money or 0) > 0 then
-      known = known + money
-      if itemName then names[itemName] = (names[itemName] or 0) + 1 end
-    end
-  end
-  m.known, m.scanned = known, time()
-  -- Verkäufe, deren Brief jetzt da ist, sind im genauen Betrag enthalten. Ältere als 2 Tage: weg (abgeholt/Fehler).
-  local left = {}
-  for k, v in pairs(names) do left[k] = v end
-  for i = #m.pending, 1, -1 do
-    local p = m.pending[i]
-    if p.name and (left[p.name] or 0) > 0 then
-      left[p.name] = left[p.name] - 1
-      table.remove(m.pending, i)
-    elseif time() - (p.time or 0) > 2 * 86400 then
-      table.remove(m.pending, i)
-    end
-  end
-  -- Verkaufsliste: liegt das Gold noch im Briefkasten oder ist es abgeholt?
-  local inBox = {}
-  for k, v in pairs(names) do inBox[k] = v end
-  for _, e in ipairs(store().sold) do
-    if e.inMail then
-      local stillPending = false
-      for _, p in ipairs(m.pending) do if p.name == e.name and p.time == e.time then stillPending = true end end
-      if (inBox[e.name] or 0) > 0 then
-        inBox[e.name] = inBox[e.name] - 1
-      elseif not stillPending then
-        e.inMail = false -- abgeholt
+  migrate(s)
+  for _, a in ipairs(s.list) do
+    if a.status == "sold" then
+      local e
+      for _, x in ipairs(s.sold) do
+        if x.auctionID and x.auctionID == a.auctionID then e = x break end
       end
+      if not e then
+        e = addSold({ id = a.id, name = ns.Item(a.id).name, auctionID = a.auctionID, qty = a.qty, unit = a.unit, time = time(),
+          amount = a.unit and math.floor(a.unit * a.qty * M.CutFactor()) or nil, state = WAY, offline = true })
+      end
+      if e.state == WAY and a.sendIn then e.eta = time() + a.sendIn end
     end
   end
+end
+
+----------------------------------------------------------------------------
+-- Briefkasten
+----------------------------------------------------------------------------
+-- Gold aus Verkäufen: im Briefkasten (genau oder geschätzt) und noch unterwegs
+function AW.MailGold()
+  local s = store()
+  migrate(s)
+  local inBox, estimated, onWay = 0, false, 0
+  for _, e in ipairs(s.sold) do
+    local st, guess = AW.SoldState(e)
+    if st == MAIL then
+      inBox = inBox + (e.amount or 0)
+      if guess or not e.exact then estimated = true end
+    elseif st == WAY then
+      onWay = onWay + (e.amount or 0)
+    end
+  end
+  return inBox, estimated, onWay
+end
+
+-- Briefe lesen: Verkaufsbriefe (Rechnung "seller" mit Gold) den Verkäufen zuordnen.
+function AW.ScanMailbox()
+  if not (GetInboxNumItems and GetInboxHeaderInfo and GetInboxInvoiceInfo) then return end
+  local s = store()
+  migrate(s)
+  local letters = {}
+  for i = 1, GetInboxNumItems() or 0 do
+    local _, _, sender, _, money = GetInboxHeaderInfo(i)
+    local invoiceType, itemName = GetInboxInvoiceInfo(i)
+    if invoiceType == "seller" and (money or 0) > 0 and itemName then
+      letters[#letters + 1] = { name = itemName, money = money }
+      if sender and sender ~= "" then senders()[sender] = true end
+    end
+  end
+  -- 1) Briefe den Verkäufen zuordnen (älteste zuerst)
+  local used = {}
+  for li, l in ipairs(letters) do
+    local best
+    for _, e in ipairs(s.sold) do
+      if not used[e] and e.state ~= DONE and nameOf(e) == l.name then best = e end -- letzte Treffer = ältester
+    end
+    if best then
+      used[best] = true
+      if best.state == WAY and not best.offline then AW.LearnDelay(time() - best.time) end
+      best.state, best.amount, best.exact = MAIL, l.money, true
+    else
+      -- Verkauf, den die Zentrale nicht mitbekommen hat (z. B. offline verkauft)
+      local e = addSold({ id = ns.DB.IDByName(l.name), name = l.name, time = time(), amount = l.money, exact = true, state = MAIL, offline = true })
+      used[e] = true
+    end
+    letters[li].matched = true
+  end
+  -- 2) Was als "im Briefkasten" galt, aber keinen Brief mehr hat -> abgeholt
+  for _, e in ipairs(s.sold) do
+    if e.state == MAIL and not used[e] then e.state = DONE end
+  end
+  s.mailScanned = time()
   ns.Fire("AUCTIONS_CHANGED")
 end
 
@@ -366,12 +456,51 @@ ns.On("MAIL_SHOW", function() ns.Debounce("ahmail", 0.6, AW.ScanMailbox) end)
 ns.On("MAIL_INBOX_UPDATE", function() ns.Debounce("ahmail", 0.4, AW.ScanMailbox) end)
 ns.On("MAIL_CLOSED", function() AW.ScanMailbox() end)
 
+-- Fern vom Briefkasten: Blizzard meldet neue Post. Ist der Absender das Auktionshaus (oder noch unbekannt),
+-- ist der älteste unterwegs befindliche Verkauf angekommen.
+function AW.OnNewMail()
+  if not (HasNewMail and HasNewMail()) then return end
+  local s = store()
+  migrate(s)
+  local oldest
+  for _, e in ipairs(s.sold) do if e.state == WAY then oldest = e end end
+  if not oldest then return end
+  local known = senders()
+  if next(known) and GetLatestThreeSenders then
+    local hit = false
+    for _, name in ipairs({ GetLatestThreeSenders() }) do if known[name] then hit = true end end
+    if not hit then return end
+  end
+  if not oldest.offline then AW.LearnDelay(time() - oldest.time) end
+  oldest.state = MAIL
+  ns.Print(string.format("|cff61eb8fIm Briefkasten:|r Gold für %s%s ist angekommen.", nameOf(oldest) or "deinen Verkauf",
+    oldest.amount and (" (ca. " .. ns.Money(oldest.amount) .. ")") or ""))
+  ns.Fire("AUCTIONS_CHANGED")
+end
+ns.On("UPDATE_PENDING_MAIL", function() if not AW.mailOpen then ns.Debounce("ahnewmail", 0.5, AW.OnNewMail) end end)
+ns.On("MAIL_SHOW", function() AW.mailOpen = true end)
+ns.On("MAIL_CLOSED", function() AW.mailOpen = false end)
+
+-- Lieferzeit abgelaufen -> Anzeige aktualisieren (auch ohne Ereignis)
+C_Timer.NewTicker(30, function()
+  local s = ns.char and ns.char.auctions
+  if not s or not s.sold then return end
+  for _, e in ipairs(s.sold) do
+    if e.state == WAY then
+      local t = eta(e)
+      if t and time() >= t and not e.dueShown then e.dueShown = true ns.Fire("AUCTIONS_CHANGED") end
+    end
+  end
+end)
+
 -- Beim Einloggen erinnern
 ns.Listen("LOGIN", function()
   C_Timer.After(12, function()
-    local gold, estimated = AW.MailGold()
+    local gold, estimated, onWay = AW.MailGold()
     if gold and gold > 0 then
       ns.Print(string.format("Im Briefkasten liegen %s%s aus Auktionsverkäufen – hol es dir ab!", estimated and "ca. " or "", ns.Money(gold)))
+    elseif onWay and onWay > 0 then
+      ns.Print(string.format("Unterwegs zu deinem Briefkasten: ca. %s aus Auktionsverkäufen.", ns.Money(onWay)))
     end
   end)
 end)
@@ -394,9 +523,9 @@ function AW.Summary()
   end
   local today, soldToday = date("%Y-%m-%d", time()), 0
   for _, e in ipairs(s.sold) do if date("%Y-%m-%d", e.time) == today then soldToday = soldToday + 1 end end
-  local mailGold, mailEstimated = AW.MailGold()
+  local mailGold, mailEstimated, onWay = AW.MailGold()
   return { active = active, items = items, value = value, undercut = undercut, expired = expiredGuess, soldToday = soldToday, time = s.time,
-    mailGold = mailGold, mailEstimated = mailEstimated }
+    mailGold = mailGold, mailEstimated = mailEstimated, onWay = onWay }
 end
 
 ns.Listen("AUCTIONS_CHANGED", function()

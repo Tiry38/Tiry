@@ -47,8 +47,8 @@ function page.build(self, content, width)
   local row = CreateFrame("Frame", nil, content)
   row:SetSize(width, 70)
   self.stats = { stat(row, cw, "IM AH"), stat(row, cw, "WERT IM AH"), stat(row, cw, "IM BRIEFKASTEN"), stat(row, cw, "UNTERBOTEN") }
-  UI.SetTooltip(self.stats[3], "Gold im Briefkasten", "Erlös deiner verkauften Auktionen (nach AH-Gebühr). \"ca.\" = geschätzt seit dem Verkauf – "
-    .. "genau wird es, sobald du den Briefkasten öffnest. Holst du das Gold ab, verschwindet es hier von selbst.")
+  UI.SetTooltip(self.stats[3], "Gold im Briefkasten", "Nach einem Verkauf ist das Gold erst ein paar Minuten unterwegs, dann liegt es im Briefkasten. "
+    .. "\"ca.\" = geschätzt – genau wird es, sobald du den Briefkasten öffnest. Holst du das Gold ab, verschwindet es hier von selbst.")
   self.stats[3]:EnableMouse(true)
   for i, f in ipairs(self.stats) do f:SetPoint("TOPLEFT", (i - 1) * (cw + 12), 0) end
   st:Add(row, 70, 14)
@@ -106,6 +106,19 @@ function page.build(self, content, width)
   }, { action = true })
 end
 
+-- Unterwegs -> im Briefkasten -> abgeholt
+local function whereText(e)
+  local st, guess = AW.SoldState(e)
+  if st == "way" then
+    local t = AW.ETA(e)
+    if t then return "|cff7fc8ffunterwegs · ca. " .. math.max(1, math.ceil((t - time()) / 60)) .. " Min.|r" end
+    return "|cff7fc8ffunterwegs|r"
+  elseif st == "mail" then
+    return guess and "|cffff9929sollte im Briefkasten sein|r" or "|cffff9929im Briefkasten|r"
+  end
+  return "|cff93a39dabgeholt|r"
+end
+
 function page.refresh(self)
   local s = AW.Store()
   local sum = AW.Summary()
@@ -116,7 +129,9 @@ function page.refresh(self)
   local nextIn = AW.NextAutoIn()
   local auto = nextIn > 0 and ("Nächste automatische Prüfung in " .. nextIn .. " Min. – \"Jetzt prüfen\" geht immer.")
     or "Beim nächsten Öffnen des Auktionshauses wird automatisch geprüft und gescannt."
-  local stand = "Heute verkauft: " .. sum.soldToday .. " · Stand: " .. ago(sum.time) .. ". "
+  local stand = "Heute verkauft: " .. sum.soldToday
+    .. ((sum.onWay or 0) > 0 and (" · |cff7fc8ffunterwegs zum Briefkasten: ca. " .. ns.Money(sum.onWay) .. "|r") or "")
+    .. " · Stand: " .. ago(sum.time) .. ". "
   self.hint:SetText(stand .. (M.ahOpen and ("Auktionshaus offen: Deine Auktionen sind eingelesen. " .. auto)
     or "Verkäufe erkennt Tiry's Zentrale überall sofort – ob du unterboten wurdest, sieht man nur am Auktionshaus."))
   self.checkBtn:SetEnabled(M.ahOpen == true)
@@ -178,7 +193,7 @@ function page.refresh(self)
     sold[#sold + 1] = {
       id = e.id, name = (not e.id) and e.name or nil,
       cells = { qty = e.qty and tostring(e.qty) or "?", gold = e.amount and ns.Money(e.amount) or "–",
-        where = e.inMail and "|cffff9929im Briefkasten|r" or "|cff93a39dabgeholt|r", when = date("%d.%m. %H:%M", e.time) },
+        where = whereText(e), when = date("%d.%m. %H:%M", e.time) },
       action = function() table.remove(s.sold, i) page.refresh(self) end,
       actionTip = "Aus der Liste entfernen",
     }

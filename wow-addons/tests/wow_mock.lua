@@ -521,6 +521,8 @@ function M.install(opts)
     if not v then return nil end
     return v[1], v[2], v[3], v[4], v[4], 0, 0, 0, 0, 0, v[5]
   end
+  G.HasNewMail = function() return M.newMail and true or false end
+  G.GetLatestThreeSenders = function() if M.newMail then return "Auktionshaus" end end
   G.GetInboxNumItems = function() local n = math.max(#(M.inbox or {}), #(M.mails or {})) return n, n end
   G.GetInboxItem = function(i, slot) local m = (M.inbox or {})[i]; local a = m and m[slot]; if a then return "Item", a[1], 1, a[2] end end
   G.BuyMerchantItem = function(i, n)

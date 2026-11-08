@@ -560,38 +560,95 @@ describe("Craft-Liste: selbst gecraftet zählt, Ruf-Rezepte draußen, leere List
   end)
 end)
 
-describe("Auktionen: Gold im Briefkasten", function()
-  it("Verkauf -> Gold im Briefkasten (geschätzt), Briefkasten öffnen -> genau, abholen -> weg", function()
-    local ns, W = E.load({})
+describe("Auktionen: Gold unterwegs -> Briefkasten -> abgeholt", function()
+  local function sell(ns, W)
     W.owned = { { auctionID = 21, itemKey = { itemID = 2318 }, status = 0, quantity = 20, timeLeftSeconds = 7200, buyoutAmount = 40 } }
     W.fire("AUCTION_HOUSE_SHOW") W.flush()
     W.fire("OWNED_AUCTIONS_UPDATED") W.flush()
     W.fire("AUCTION_HOUSE_CLOSED") W.flush()
     W.prints = {}
-    -- fern vom AH verkauft
     W.fire("AUCTION_HOUSE_SHOW_FORMATTED_NOTIFICATION", 4, "Leichtes Leder", 21)
-    local gold, est = ns.AH.MailGold()
-    assert.are.equal(math.floor(40 * 20 * 0.95), gold) -- 800 nach 5 % Gebühr
-    assert.is_true(est)
-    assert.truthy(E.chat(W):find("Briefkasten", 1, true))
-    assert.are.equal(0, ns.AH.Summary().active) -- nicht mehr in der Auktionsliste
-    assert.truthy(ns.Guide.NextStep().title:find("Gold abholen", 1, true))
-    -- Briefkasten öffnen: der Verkaufsbrief ist da (genauer Betrag)
+  end
+
+  it("nach dem Verkauf: unterwegs (nicht im Briefkasten), Brief da -> genau, abholen -> weg", function()
+    local ns, W = E.load({})
+    sell(ns, W)
+    local gold, _, onWay = ns.AH.MailGold()
+    local est
+    assert.are.equal(0, gold)
+    assert.are.equal(math.floor(40 * 20 * 0.95), onWay) -- 760 nach 5 % Gebühr, aber noch unterwegs
+    assert.truthy(E.chat(W):find("unterwegs", 1, true))
+    assert.are.equal("way", (ns.AH.SoldState(ns.AH.Store().sold[1])))
+    assert.are.equal(0, ns.AH.Summary().active)
+    assert.is_falsy(ns.Guide.NextStep().title:find("Gold abholen", 1, true))
+    -- 3 Minuten später: Briefkasten öffnen, Verkaufsbrief ist da
+    W.now = W.now + 180
     W.mails = { { subject = "Auktion erfolgreich: Leichtes Leder", money = 760, invoice = { "seller", "Leichtes Leder", "Käufer", 800, 20 } } }
     W.fire("MAIL_SHOW") W.flush()
-    gold, est = ns.AH.MailGold()
+    gold, est, onWay = ns.AH.MailGold()
     assert.are.equal(760, gold)
     assert.is_false(est)
-    assert.is_true(ns.AH.Store().sold[1].inMail)
+    assert.are.equal(0, onWay)
+    assert.are.equal(180, ns.AH.TypicalDelay()) -- Lieferzeit gelernt
+    assert.truthy(ns.Guide.NextStep().title:find("Gold abholen", 1, true))
     -- Gold abgeholt
     W.mails = {}
     W.fire("MAIL_INBOX_UPDATE") W.flush()
     W.fire("MAIL_CLOSED") W.flush()
-    gold = ns.AH.MailGold()
-    assert.are.equal(0, gold)
-    assert.is_false(ns.AH.Store().sold[1].inMail)
-    assert.is_falsy(ns.Guide.NextStep().title:find("Gold abholen", 1, true))
+    assert.are.equal(0, (ns.AH.MailGold()))
+    assert.are.equal("done", ns.AH.Store().sold[1].state)
     assert.are.same({}, W.errors)
+  end)
+
+  it("neue Post fern vom Briefkasten -> im Briefkasten; gelernte Lieferzeit -> 'sollte da sein'", function()
+    local ns, W = E.load({})
+    sell(ns, W)
+    W.now = W.now + 200
+    W.newMail = true
+    W.fire("UPDATE_PENDING_MAIL") W.flush()
+    assert.are.equal("mail", ns.AH.Store().sold[1].state)
+    assert.truthy(E.chat(W):find("Im Briefkasten", 1, true))
+    -- zweiter Verkauf: Lieferzeit (200 s) ist bekannt -> nach Ablauf "sollte da sein"
+    W.newMail = false
+    W.fire("AUCTION_HOUSE_SHOW_FORMATTED_NOTIFICATION", 4, "Leichtes Leder", nil)
+    local e = ns.AH.Store().sold[1]
+    assert.are.equal("way", (ns.AH.SoldState(e)))
+    W.now = W.now + 201
+    local st, guess = ns.AH.SoldState(e)
+    assert.are.equal("mail", st)
+    assert.is_true(guess)
+    assert.are.same({}, W.errors)
+  end)
+
+  it("offline verkauft: Brief ohne bekannten Verkauf wird nachgetragen", function()
+    local ns, W = E.load({})
+    W.mails = { { subject = "Auktion erfolgreich: Leichtes Leder", money = 500, invoice = { "seller", "Leichtes Leder", "Käufer", 520, 10 } } }
+    W.fire("MAIL_SHOW") W.flush()
+    assert.are.equal(500, (ns.AH.MailGold()))
+    assert.is_true(ns.AH.Store().sold[1].offline)
+  end)
+end)
+
+describe("Craft-Planer: Mindestgewinn 'alles'", function()
+  it("zeigt auch Rezepte mit kleinem Gewinn (kein 15-%-Zuschlag auf die Materialkosten)", function()
+    local ns, W = E.load({ prices = { [2318] = 3000, [2319] = 1200, [4234] = 2000, [2408] = 1000, [2320] = 10 } })
+    SlashCmdList.TIRYSZENTRALE("") ns.UI.Wizard.Finish()
+    ns.UI.Show("recipes")
+    local p = ns.UI.pages.recipes
+    p.prof, p.view = "LEATHERWORKING", "known"
+    -- Verkaufspreis so setzen, dass der Gewinn ~2 Silber ist, aber unter 15 % der Materialkosten liegt
+    local r = ns.Recipes.Get(2152)
+    W.prices[r.out] = 1
+    local _, _, cost = ns.Scanner.RecipeProfit(r)
+    assert.truthy(cost and cost > 2000)
+    W.prices[r.out] = math.ceil((cost + 200) / 0.95)
+    local profit = ns.Scanner.RecipeProfit(r)
+    assert.truthy(profit > 0 and profit < cost * 0.15)
+    local function has(list) for _, e in ipairs(list) do if e.r.id == 2152 then return true end end end
+    ns.Recipes.SetProfit(0)
+    assert.is_true(has(p.Entries(p)))
+    ns.Recipes.SetProfit(100)
+    assert.is_nil(has(p.Entries(p)))
   end)
 end)
 
