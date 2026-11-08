@@ -1,5 +1,12 @@
 # Changelog – Tiry's Zentrale
 
+## 5.0.2 (08.11.2026)
+- **Fehleranzeige funktioniert jetzt auch in Forever.** Tirys Test zeigte, dass Forever Fehler nicht an eigene Fehler-Handler weiterreicht. Tiry's Zentrale fängt Fehler deshalb selbst ab, an diesen Stellen:
+  - Ereignisse, Timer und Seitenaufbau
+  - **alle Knöpfe**: Klick, Maus drüber, Ziehen (18 Knopf-Arten über `UI.SafeButton`/`UI.Guard`)
+
+  Ein Fehler bricht nie das Fenster und steht rot im Chat. `/tz fehlertest` läuft jetzt über denselben Weg.
+
 ## 5.0.1 (08.11.2026)
 - **Eigene Fehleranzeige:** Im WoW-Forever-Client erschien bei Tiry selbst mit `scriptErrors 1` kein Fehlerfenster. Fehler aus Tiry's Zentrale stehen jetzt direkt im Chat (rot, einmal pro Fehler) und werden gespeichert.
   - `/tz fehler` zeigt die letzten 10 gespeicherten Fehler.

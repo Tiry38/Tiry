@@ -90,7 +90,7 @@ end
 local function row(i)
   local r = win.rows[i]
   if r then return r end
-  r = CreateFrame("Button", nil, win)
+  r = UI.SafeButton(win)
   r:SetSize(W - 28, ROW - 4)
   r.bg = UI.Round(r, 14, "BACKGROUND", 0)
   r.icon = UI.ItemIcon(r, 28)
@@ -130,7 +130,7 @@ local STATUS = {
 local function craftRow(i)
   local r = win.crafts[i]
   if r then return r end
-  r = CreateFrame("Button", nil, win)
+  r = UI.SafeButton(win)
   r:SetSize(W - 28, CROW - 4)
   r.icon = UI.ItemIcon(r, 24)
   r.icon:SetPoint("LEFT", 4, 0)

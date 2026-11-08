@@ -89,7 +89,7 @@ local function create()
   p.box.edit:SetScript("OnEnterPressed", function() if p.hits and p.hits[1] then open(p.hits[1]) end end)
   p.rows = {}
   for i = 1, MAX_ROWS do
-    local b = CreateFrame("Button", nil, p)
+    local b = UI.SafeButton(p)
     b:SetSize(580, 30)
     b:SetPoint("TOP", 0, -66 - (i - 1) * 31)
     b.bg = UI.Round(b, 15, "BACKGROUND", 2)

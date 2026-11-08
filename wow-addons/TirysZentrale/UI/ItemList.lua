@@ -35,7 +35,7 @@ function UI.ItemList(parent, width, columns, opts)
   local function getRow(i)
     local row = list.rows[i]
     if row then return row end
-    row = CreateFrame("Button", nil, list)
+    row = UI.SafeButton(list)
     row:SetSize(width, ROW_H - 4)
     row:RegisterForClicks("LeftButtonUp", "RightButtonUp")
     row.bg = UI.Round(row, 14, "BACKGROUND", 0)

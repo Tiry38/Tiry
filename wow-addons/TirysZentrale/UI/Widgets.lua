@@ -296,6 +296,25 @@ end
 ----------------------------------------------------------------------------
 -- Knöpfe
 ----------------------------------------------------------------------------
+-- Klicks & Co. abgesichert: Ein Fehler in einem Knopf landet in der eigenen Fehleranzeige (/tz fehler)
+-- statt still zu verschwinden – und bricht nie das ganze Fenster.
+local GUARDED = { OnClick = true, OnEnter = true, OnLeave = true, OnMouseDown = true, OnMouseUp = true, OnDragStart = true, OnDragStop = true }
+function UI.Guard(frame)
+  local set = frame.SetScript
+  frame.SetScript = function(self, script, fn, ...)
+    if type(fn) == "function" and GUARDED[script] then
+      local f = fn
+      fn = function(...) return ns.Safe(f, ...) end
+    end
+    return set(self, script, fn, ...)
+  end
+  return frame
+end
+
+function UI.SafeButton(parent, name)
+  return UI.Guard(CreateFrame("Button", name, parent))
+end
+
 local function playClick()
   if PlaySound and SOUNDKIT and SOUNDKIT.U_CHAT_SCROLL_BUTTON then
     pcall(PlaySound, SOUNDKIT.U_CHAT_SCROLL_BUTTON)
@@ -305,7 +324,7 @@ UI.PlayClick = playClick
 
 -- style: "primary" (Verlauf), "soft" (Karte), "ghost" (nur Umriss-Wirkung)
 function UI.Button(parent, label, style, width, height, icon)
-  local b = CreateFrame("Button", nil, parent)
+  local b = UI.SafeButton(parent)
   b:SetSize(width or 140, height or 32)
   b.style = style or "primary"
   b.bg = UI.Round(b, (height or 32) / 2, "BACKGROUND", 1)
@@ -361,7 +380,7 @@ end
 
 -- Runder Symbol-Knopf (z. B. Schließen)
 function UI.IconButton(parent, icon, size, tip)
-  local b = CreateFrame("Button", nil, parent)
+  local b = UI.SafeButton(parent)
   b:SetSize(size or 28, size or 28)
   b.bg = b:CreateTexture(nil, "BACKGROUND")
   b.bg:SetTexture(UI.TEX.circle)
@@ -537,7 +556,7 @@ end
 -- Schalter (Ein/Aus)
 ----------------------------------------------------------------------------
 function UI.Toggle(parent, label, getter, setter, desc, width)
-  local f = CreateFrame("Button", nil, parent)
+  local f = UI.SafeButton(parent)
   f:SetSize(width or 520, desc and 54 or 36)
   f.label = UI.Text(f, 13, "semibold", C.text)
   f.label:SetPoint("TOPLEFT", 0, desc and -4 or -10)
@@ -585,7 +604,7 @@ function UI.Segments(parent, options, onChange, width)
   local maxW = width or 600
   local x, y, rowH = 0, 0, 30
   for i, opt in ipairs(options) do
-    local b = CreateFrame("Button", nil, f)
+    local b = UI.SafeButton(f)
     b.value = opt.value
     b.bg = UI.Round(b, 14, "BACKGROUND", 0)
     b.text = UI.Text(b, 12, "semibold", C.muted)
@@ -737,7 +756,7 @@ function UI.Stepper(parent, label, width, getter, setter, step, min, max, format
   function f:Refresh() self.value:SetText(format(getter())) end
   -- Freie Eingabe: Klick auf den Wert -> Eingabefeld (Enter übernimmt, Esc bricht ab)
   if parse then
-    local hit = CreateFrame("Button", nil, f)
+    local hit = UI.SafeButton(f)
     hit:SetAllPoints(f.value)
     local eb = CreateFrame("EditBox", nil, f)
     eb:SetSize(84, 24)

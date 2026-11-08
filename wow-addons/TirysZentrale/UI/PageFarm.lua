@@ -77,7 +77,7 @@ end
 local function itemChip(card, i)
   local c = card.icons[i]
   if c then return c end
-  c = CreateFrame("Button", nil, card)
+  c = UI.SafeButton(card)
   c:SetSize(150, 34)
   c.icon = UI.ItemIcon(c, 28)
   c.icon:SetPoint("LEFT")

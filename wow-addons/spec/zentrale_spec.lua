@@ -263,3 +263,24 @@ describe("Eigene Fehleranzeige", function()
     assert.are.equal(0, #ns.ErrorLog())
   end)
 end)
+
+describe("Fehler beim Klicken (Forever reicht Fehler nicht weiter)", function()
+  it("fängt Fehler in Knöpfen selbst ab und zeigt sie im Chat", function()
+    local ns, W = E.load({})
+    W.prints = {}
+    local b = ns.UI.Button(UIParent, "Test", "soft", 100, 30)
+    b:SetScript("OnClick", function() error("Knopf kaputt") end)
+    assert.has_no.errors(function() b:Click() end)
+    assert.truthy(E.chat(W):find("Knopf kaputt", 1, true))
+    assert.are.equal(1, ns.ErrorLog()[1].count) -- nicht doppelt gezählt
+  end)
+
+  it("/tz fehlertest erscheint im Chat", function()
+    local ns, W = E.load({})
+    W.prints = {}
+    SlashCmdList.TIRYSZENTRALE("fehlertest")
+    W.flush()
+    assert.truthy(E.chat(W):find("Testfehler", 1, true))
+    assert.truthy(ns.ErrorLog()[1].msg:find("Testfehler", 1, true))
+  end)
+end)

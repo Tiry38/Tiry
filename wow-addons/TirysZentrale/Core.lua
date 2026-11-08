@@ -38,15 +38,21 @@ end
 if seterrorhandler and geterrorhandler then
   local previous = geterrorhandler()
   seterrorhandler(function(msg, ...)
-    if type(msg) == "string" and msg:find("TirysZentrale", 1, true) then pcall(ns.LogError, msg) end
+    if not ns.skipLog and type(msg) == "string" and msg:find("TirysZentrale", 1, true) then pcall(ns.LogError, msg) end
     if previous then return previous(msg, ...) end
   end)
 end
 
 -- Der Fehler-Handler läuft innerhalb von xpcall, damit BugSack & Co. den vollen Stack sehen.
+-- Forever reicht Fehler nicht zuverlässig an eigene Handler durch -> hier SELBST protokollieren.
 local function handler(err)
+  pcall(ns.LogError, err)
   local h = geterrorhandler and geterrorhandler()
-  if h then h(err) end
+  if h then
+    ns.skipLog = true -- nicht doppelt zählen, falls unser Ketten-Handler mitläuft
+    pcall(h, err)
+    ns.skipLog = nil
+  end
   return err
 end
 

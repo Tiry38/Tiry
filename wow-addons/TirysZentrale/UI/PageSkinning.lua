@@ -13,7 +13,7 @@ local page = {
 
 -- Zeile für eine Farm-Stelle (ganze Zeile klickbar = Wegpunkt)
 local function spotRow(parent, width)
-  local b = CreateFrame("Button", nil, parent)
+  local b = UI.SafeButton(parent)
   b:SetSize(width, 52)
   b.bg = UI.Round(b, 16, "BACKGROUND", 0)
   b.bg:SetColor(C.card)

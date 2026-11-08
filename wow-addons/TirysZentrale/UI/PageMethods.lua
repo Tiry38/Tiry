@@ -55,7 +55,7 @@ ns.ProfName = profName
 -- Karte für eine Methode
 ----------------------------------------------------------------------------
 local function createCard(parent, width)
-  local card = CreateFrame("Button", nil, parent)
+  local card = UI.SafeButton(parent)
   card:SetWidth(width)
   card.bg = UI.Round(card, 18, "BACKGROUND", 0)
   card.bg:SetColor(C.card)

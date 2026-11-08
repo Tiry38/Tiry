@@ -11,7 +11,7 @@ local page = {
 }
 
 local function topCard(parent, w)
-  local card = CreateFrame("Button", nil, parent)
+  local card = UI.SafeButton(parent)
   card:SetSize(w, 176)
   card.bg = UI.Round(card, 20, "BACKGROUND", 0)
   card.bg:SetColor(C.card)
@@ -111,7 +111,7 @@ function page.build(self, content, width)
   tt:SetText("Heute für dich")
   today.rows = {}
   for i = 1, 3 do
-    local r = CreateFrame("Button", nil, today)
+    local r = UI.SafeButton(today)
     r:SetSize(width - 40, 38)
     r:SetPoint("TOPLEFT", 20, -48 - (i - 1) * 42)
     r.bg = UI.Round(r, 19, "BACKGROUND", 1)
@@ -155,7 +155,7 @@ function page.build(self, content, width)
   grid:SetSize(width, 3 * 64 - 8)
   self.chances = {}
   for i = 1, 12 do
-    local b = CreateFrame("Button", nil, grid)
+    local b = UI.SafeButton(grid)
     b:SetSize(fw, 56)
     b:SetPoint("TOPLEFT", ((i - 1) % 4) * (fw + 12), -math.floor((i - 1) / 4) * 64)
     b.bg = UI.Round(b, 16, "BACKGROUND", 0)

@@ -158,7 +158,7 @@ local function buildSidebar(f)
   sub:SetText("GOLD · BERUFE · FOREVER")
 
   -- Globale Suche (auch per Tastenkürzel)
-  local search = CreateFrame("Button", nil, side)
+  local search = UI.SafeButton(side)
   search:SetSize(SIDE_W - 34, 34)
   search:SetPoint("TOPLEFT", 12, -88)
   search.bg = UI.Round(search, 17, "BACKGROUND", 0)
@@ -181,7 +181,7 @@ local function buildSidebar(f)
   for _, g in ipairs(UI.GROUPS) do
     local views = availableViews(g)
     if #views > 0 then
-    local b = CreateFrame("Button", nil, side)
+    local b = UI.SafeButton(side)
     b:SetSize(SIDE_W - 34, 38)
     b:SetPoint("TOPLEFT", 12, y)
     b.key = g.key
@@ -359,7 +359,7 @@ local function createFrame()
   f.tabs = tabs
 
   -- Größe per Ziehgriff unten rechts (ändert die Fenstergröße stufenlos, wie in den Einstellungen)
-  local grip = CreateFrame("Button", nil, f)
+  local grip = UI.SafeButton(f)
   grip:SetSize(22, 22)
   grip:SetPoint("BOTTOMRIGHT", -6, 6)
   grip:SetFrameLevel(f:GetFrameLevel() + 20)
@@ -545,7 +545,7 @@ end
 
 local function createMini()
   if mini or not Minimap then return end
-  mini = CreateFrame("Button", "TirysZentraleMinimapButton", Minimap)
+  mini = UI.SafeButton(Minimap, "TirysZentraleMinimapButton")
   mini:SetSize(34, 34)
   mini:SetFrameStrata("MEDIUM")
   mini:SetFrameLevel(Minimap:GetFrameLevel() + 8)
@@ -657,7 +657,8 @@ SlashCmdList.TIRYSZENTRALE = function(msg)
   end
   if msg == "fehlertest" then
     ns.Print("Löse einen Test-Fehler aus ...")
-    C_Timer.After(0.1, function() error("Testfehler – die Fehleranzeige funktioniert, alles gut!") end)
+    -- läuft wie ein echter Klick/Timer durch die eigene Absicherung
+    C_Timer.After(0.1, function() ns.Safe(function() error("Testfehler – die Fehleranzeige funktioniert, alles gut!") end) end)
     return
   end
   if msg == "suche" or msg == "suchen" or msg == "s" then
