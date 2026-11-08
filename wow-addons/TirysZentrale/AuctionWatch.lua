@@ -379,13 +379,14 @@ end)
 -- Zusammenfassung für Anzeige und Startseite
 function AW.Summary()
   local s = store()
-  local active, value, undercut, expiredGuess = 0, 0, 0, 0
+  local active, value, undercut, expiredGuess, items = 0, 0, 0, 0, 0
   for _, a in ipairs(s.list) do
     if a.status == "active" then
       if a.expires and a.expires < time() then
         expiredGuess = expiredGuess + 1
       else
         active = active + 1
+        items = items + a.qty
         value = value + (a.unit or 0) * a.qty
         if a.undercut then undercut = undercut + 1 end
       end
@@ -394,7 +395,7 @@ function AW.Summary()
   local today, soldToday = date("%Y-%m-%d", time()), 0
   for _, e in ipairs(s.sold) do if date("%Y-%m-%d", e.time) == today then soldToday = soldToday + 1 end end
   local mailGold, mailEstimated = AW.MailGold()
-  return { active = active, value = value, undercut = undercut, expired = expiredGuess, soldToday = soldToday, time = s.time,
+  return { active = active, items = items, value = value, undercut = undercut, expired = expiredGuess, soldToday = soldToday, time = s.time,
     mailGold = mailGold, mailEstimated = mailEstimated }
 end
 

@@ -80,11 +80,22 @@ function page.build(self, content, width)
   self.activeTitle = UI.Text(content, 17, "bold", C.text)
   self.activeTitle:SetText("Im Auktionshaus")
   self.active = UI.ItemList(content, width, {
-    { key = "qty", label = "Menge", width = 60 },
-    { key = "mine", label = "Dein Preis", width = 100 },
-    { key = "other", label = "Günstigster", width = 100 },
-    { key = "state", label = "Status", width = 130, bold = true },
+    { key = "qty", label = "Menge", width = 56 },
+    { key = "mine", label = "Stückpreis", width = 90 },
+    { key = "total", label = "Wert", width = 96, bold = true },
+    { key = "other", label = "Günstigster", width = 90 },
+    { key = "state", label = "Status", width = 120, bold = true },
   })
+  -- Summenzeile unter der Liste
+  self.totalRow = CreateFrame("Frame", nil, content)
+  self.totalRow:SetSize(width, 44)
+  self.totalRow.bg = UI.Round(self.totalRow, 16, "BACKGROUND", 0)
+  self.totalRow.bg:SetColor(C.cardHi, 1)
+  self.totalRow.label = UI.Text(self.totalRow, 14, "bold", C.text)
+  self.totalRow.label:SetPoint("LEFT", 18, 0)
+  self.totalRow.value = UI.Text(self.totalRow, 15, "bold", C.hi)
+  self.totalRow.value:SetPoint("RIGHT", -18, 0)
+  self.totalRow.value:SetJustifyH("RIGHT")
   self.soldTitle = UI.Text(content, 17, "bold", C.text)
   self.soldTitle:SetText("Verkauft")
   self.sold = UI.ItemList(content, width, {
@@ -126,6 +137,7 @@ function page.refresh(self)
         cells = {
           qty = tostring(a.qty),
           mine = a.unit and ns.Money(a.unit) or "–",
+          total = a.unit and ns.Money(a.unit * a.qty) or "–",
           other = a.competitor and ns.Money(a.competitor) or "|cff8a9a94–|r",
           state = state,
         },
@@ -146,7 +158,19 @@ function page.refresh(self)
   y = y + 30
   self.active:ClearAllPoints()
   self.active:SetPoint("TOPLEFT", content, "TOPLEFT", 0, -y)
-  y = y + self.active:SetEntries(entries, "Keine Auktionen bekannt. Öffne einmal das Auktionshaus – dann liest Tiry's Zentrale deine Auktionen automatisch.") + 22
+  y = y + self.active:SetEntries(entries, "Keine Auktionen bekannt. Öffne einmal das Auktionshaus – dann liest Tiry's Zentrale deine Auktionen automatisch.") + 8
+  -- Zusammen: alle laufenden Auktionen (abgelaufene zählen nicht)
+  if sum.active > 0 then
+    self.totalRow.label:SetText(string.format("Zusammen: %d %s · %d Stück", sum.active, sum.active == 1 and "Auktion" or "Auktionen", sum.items or 0))
+    self.totalRow.value:SetText(ns.Money(sum.value) .. "  |cff93a39d(nach Gebühr ca. " .. ns.Money(math.floor(sum.value * M.CutFactor())) .. ")|r")
+    self.totalRow:ClearAllPoints()
+    self.totalRow:SetPoint("TOPLEFT", content, "TOPLEFT", 0, -y)
+    self.totalRow:Show()
+    y = y + 44 + 22
+  else
+    self.totalRow:Hide()
+    y = y + 14
+  end
 
   local sold = {}
   for i, e in ipairs(s.sold) do

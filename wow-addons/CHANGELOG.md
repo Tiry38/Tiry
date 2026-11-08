@@ -1,5 +1,8 @@
 # Changelog – Tiry's Zentrale
 
+## 5.3.1 (08.11.2026)
+- **Auktionen:** Jede Auktion zeigt jetzt Stückpreis **und Gesamtwert** (Menge × Preis). Darunter steht eine **Summenzeile**: „Zusammen: N Auktionen · X Stück“ mit Gesamtwert und „nach Gebühr ca. …“. Sie rechnet sich bei jedem Verkauf, jedem neuen Einstellen und jedem AH-Besuch neu. Abgelaufene zählen nicht mit.
+
 ## 5.3.0 (08.11.2026)
 - **Eigener Menüpunkt „Auktionen“** (zwischen Markt und Mein Gold). Das Menü hat jetzt 8 Hauptpunkte.
   - **Kacheln:** Im AH (Anzahl) · **Wert im AH** · **Im Briefkasten** · Unterboten. Darunter „Heute verkauft“ und der Stand.
