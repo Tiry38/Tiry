@@ -27,6 +27,7 @@ local function create()
   if type(sp) == "table" and sp[1] then f:SetPoint(sp[1], UIParent, sp[2], sp[3], sp[4]) else f:SetPoint("RIGHT", UIParent, "RIGHT", -80, 40) end
   f.bg = UI.Round(f, 20, "BACKGROUND", -8)
   f.bg:SetColor(C.bg)
+  UI.Ornaments(f, { w = W, h = 900, pattern = 0.05, corners = 0.35, cornerSize = 44, inset = 4 })
   local glow = UI.Glow(f, C.teal, 260, 0.16, "BACKGROUND")
   glow:SetPoint("TOP", 0, 60)
 

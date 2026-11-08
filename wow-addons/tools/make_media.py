@@ -473,6 +473,126 @@ def icon_minus():
     return p.image()
 
 
+# ---------------------------------------------------------------------------
+# Horde-Stil (eigene Entwürfe, keine Blizzard-Grafik): Kriegsemblem, Stammesmuster, Zacken-Ecke
+# ---------------------------------------------------------------------------
+def _bezier(p0, p1, p2, n=40):
+    return [((1 - t) ** 2 * p0[0] + 2 * (1 - t) * t * p1[0] + t * t * p2[0],
+             (1 - t) ** 2 * p0[1] + 2 * (1 - t) * t * p1[1] + t * t * p2[1]) for t in (i / (n - 1) for i in range(n))]
+
+
+def war_emblem(size=512):
+    """Kriegsemblem: Zackenschild, gekreuzte Streitäxte, Dornen-Krone."""
+    big = size * SS
+    m = Image.new("L", (big, big), 0)
+    d = ImageDraw.Draw(m)
+    c = big / 2
+    lw = max(3, int(big * 0.012))
+    # Zackenrand (24 Zacken)
+    pts = []
+    for i in range(48):
+        a = 2 * math.pi * i / 48 - math.pi / 2
+        r = big * (0.48 if i % 2 == 0 else 0.43)
+        pts.append((c + math.cos(a) * r, c + math.sin(a) * r))
+    d.polygon(pts, outline=255, width=lw)
+    d.ellipse((c - big * 0.39, c - big * 0.39, c + big * 0.39, c + big * 0.39), outline=255, width=lw)
+    d.ellipse((c - big * 0.37, c - big * 0.37, c + big * 0.37, c + big * 0.37), outline=150, width=max(2, lw // 2))
+    # Nieten
+    for i in range(12):
+        a = 2 * math.pi * i / 12
+        x, y = c + math.cos(a) * big * 0.405, c + math.sin(a) * big * 0.405
+        d.ellipse((x - lw * 1.4, y - lw * 1.4, x + lw * 1.4, y + lw * 1.4), fill=255)
+    # Gekreuzte Streitäxte
+    for sx in (-1, 1):
+        x0, y0 = c - sx * big * 0.22, c + big * 0.25   # Griffende unten
+        x1, y1 = c + sx * big * 0.17, c - big * 0.20   # Kopf oben
+        d.line([(x0, y0), (x1, y1)], fill=255, width=int(big * 0.028))
+        # Wicklungen am Griff
+        for t in (0.15, 0.22, 0.29):
+            gx, gy = x0 + (x1 - x0) * t, y0 + (y1 - y0) * t
+            d.line([(gx - big * 0.025, gy - sx * big * 0.0), (gx + big * 0.025, gy)], fill=0, width=max(2, lw // 2))
+        # Klinge: Halbmond nach außen
+        ux, uy = (x1 - x0), (y1 - y0)
+        L = math.hypot(ux, uy); ux, uy = ux / L, uy / L
+        nx, ny = uy * sx, -ux * sx
+        nx, ny = -nx, -ny
+        base1 = (x1 - ux * big * 0.02, y1 - uy * big * 0.02)
+        base2 = (x1 - ux * big * 0.15, y1 - uy * big * 0.15)
+        tip1 = (base1[0] + nx * big * 0.15 + ux * big * 0.06, base1[1] + ny * big * 0.15 + uy * big * 0.06)
+        tip2 = (base2[0] + nx * big * 0.15 - ux * big * 0.06, base2[1] + ny * big * 0.15 - uy * big * 0.06)
+        mid = (x1 - ux * big * 0.085 + nx * big * 0.10, y1 - uy * big * 0.085 + ny * big * 0.10)
+        blade = [base1, tip1] + _bezier(tip1, (mid[0] + nx * big * 0.03, mid[1] + ny * big * 0.03), tip2) + [tip2, base2]
+        d.polygon(blade, fill=255)
+        # Dorn auf der Gegenseite
+        sp = (x1 - ux * big * 0.08 - nx * big * 0.07, y1 - uy * big * 0.08 - ny * big * 0.07)
+        d.polygon([(x1 - ux * big * 0.05, y1 - uy * big * 0.05), sp, (x1 - ux * big * 0.11, y1 - uy * big * 0.11)], fill=255)
+        # Spitze oben
+        d.polygon([(x1 - nx * big * 0.014, y1 - ny * big * 0.014), (x1 + ux * big * 0.06, y1 + uy * big * 0.06),
+                   (x1 + nx * big * 0.014, y1 + ny * big * 0.014)], fill=255)
+    # Zacken-Krone unten zwischen den Griffen (drei Dornen)
+    for dx, h in ((-0.05, 0.08), (0, 0.12), (0.05, 0.08)):
+        x = c + dx * big
+        d.polygon([(x - big * 0.022, c + big * 0.33), (x + big * 0.022, c + big * 0.33), (x, c + big * (0.33 - h))], fill=255)
+    # Zacken-Raute in der Mitte (Kreuzungspunkt)
+    r = big * 0.045
+    d.polygon([(c, c - r * 1.6), (c + r, c), (c, c + r * 1.6), (c - r, c)], fill=255)
+    return down(white_from_mask(m), (size, size))
+
+
+def tribal_tile(size=256):
+    """Nahtloses Stammesmuster wie Kriegsbemalung auf Horde-Bannern: Zickzack-Bänder, Zacken, Punkte."""
+    big = size * SS
+    m = Image.new("L", (big, big), 0)
+    d = ImageDraw.Draw(m)
+    lw = max(2, int(big * 0.009))
+    wl = big / 4                 # Wellenlänge: 4 pro Kachel -> nahtlos
+    for row, (y, amp) in enumerate(((big * 0.25, big * 0.06), (big * 0.75, big * 0.06))):
+        for off in (-big * 0.025, big * 0.025):
+            pts = []
+            for k in range(-1, 6):
+                pts.append((k * wl, y + off - amp))
+                pts.append((k * wl + wl / 2, y + off + amp))
+            d.line(pts, fill=255, width=lw)
+        # Zacken unter/über dem Band
+        for k in range(-1, 6):
+            x = k * wl + (wl / 2 if row else 0)
+            sgn = 1 if row == 0 else -1
+            base = y + sgn * (amp + big * 0.06)
+            d.polygon([(x - big * 0.022, base), (x + big * 0.022, base), (x, base + sgn * big * 0.06)], fill=255)
+    # Rauten mit Punkt zwischen den Bändern (versetzt)
+    for k in range(-1, 6):
+        for (y, shift) in ((big * 0.5, 0), (0, wl / 2), (big, wl / 2)):
+            x = k * wl + shift + wl / 4
+            r = big * 0.028
+            d.polygon([(x, y - r), (x + r, y), (x, y + r), (x - r, y)], outline=255, width=lw)
+            d.ellipse((x - lw, y - lw, x + lw, y + lw), fill=255)
+    return down(white_from_mask(m), (size, size))
+
+
+def spike_corner(size=128):
+    """Zacken-Ecke (oben links): Kante mit Dornen und Hauer – wie Horde-Rahmen."""
+    big = size * SS
+    m = Image.new("L", (big, big), 0)
+    d = ImageDraw.Draw(m)
+    lw = max(2, int(big * 0.03))
+    o = big * 0.07
+    d.line([(o, o), (big, o)], fill=255, width=lw)
+    d.line([(o, o), (o, big)], fill=255, width=lw)
+    # Dornen nach innen, kleiner werdend
+    for i, t in enumerate((0.22, 0.42, 0.62, 0.80)):
+        h = big * (0.16 - i * 0.03)
+        w = big * 0.04
+        x = big * t
+        d.polygon([(x - w, o), (x + w, o), (x + w * 0.3, o + h)], fill=255)
+        d.polygon([(o, x - w), (o, x + w), (o + h, x + w * 0.3)], fill=255)
+    # großer Eck-Dorn nach außen (diagonal) + Hauer-Bogen
+    d.polygon([(o - big * 0.0, o + big * 0.09), (o + big * 0.09, o), (o - big * 0.06, o - big * 0.06)], fill=255)
+    tusk = _bezier((o + big * 0.10, o + big * 0.32), (o + big * 0.12, o + big * 0.12), (o + big * 0.34, o + big * 0.10)) + \
+        _bezier((o + big * 0.30, o + big * 0.15), (o + big * 0.17, o + big * 0.17), (o + big * 0.15, o + big * 0.30))
+    d.polygon(tusk, fill=255)
+    return down(white_from_mask(m), (size, size))
+
+
 def main():
     os.makedirs(MEDIA, exist_ok=True)
     print("Erzeuge Grafiken in", MEDIA)
@@ -485,6 +605,9 @@ def main():
     save(sparkle(64), "sparkle")
     save(logo(256), "logo")
     save(wordmark(512, 128), "wordmark")
+    save(war_emblem(512), "emblem")
+    save(tribal_tile(256), "tribal")
+    save(spike_corner(128), "corner")
     icons = {
         "home": icon_home, "compass": icon_compass, "coins": icon_coins, "scan": icon_scan,
         "flask": icon_flask, "chart": icon_chart, "book": icon_book, "gear": icon_gear,

@@ -231,6 +231,8 @@ function Obj.SetTexture(o, file, wrapH, wrapV)
   if type(file) == "string" then checkAddonFile(file, { "tga", "blp" }) end
   o.__file = file
 end
+function Obj.SetDesaturated(o, v) o.__desat = v end
+function Obj.SetAtlas(o, name) assert(type(name) == "string") o.__file = "ATLAS:" .. name end
 function Obj.SetColorTexture(o, r, g, b, a) assert(type(r) == "number") o.__file = "WHITE" o.__color = { r, g, b, a or 1 } o.__grad = nil end
 function Obj.SetTexCoord(o, ...) local n = select("#", ...) assert(n == 4 or n == 8, "SetTexCoord braucht 4 oder 8 Werte") o.__coord = { ... } end
 function Obj.SetVertexColor(o, r, g, b, a)
@@ -446,6 +448,8 @@ function M.install(opts)
   -- Zauberbuch, Karte, Wegpunkte
   G.C_SpellBook = { IsSpellKnown = function(id, bank) assert(type(id) == "number") return (M.known or {})[id] == true end }
   G.UiMapPoint = { CreateFromCoordinates = function(map, x, y) assert(type(map) == "number" and x >= 0 and x <= 1 and y >= 0 and y <= 1, "Koordinaten 0..1") return { map = map, x = x, y = y } end }
+  -- Atlanten, die im Forever-Client belegt sind (Camelot-Charaktererstellung)
+  G.C_Texture = { GetAtlasInfo = function(name) if name == "charactercreate-icon-horde" then return { width = 128, height = 128, file = 1 } end end }
   G.C_Map = {
     CanSetUserWaypointOnMap = function(map) return true end,
     SetUserWaypoint = function(p) assert(p and p.map) M.waypoint = p end,

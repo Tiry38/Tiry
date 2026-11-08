@@ -10,7 +10,10 @@ UI.TEX = {
   circle = MEDIA .. "circle", ring = MEDIA .. "ring", glow = MEDIA .. "glow",
   blob1 = MEDIA .. "blob1", blob2 = MEDIA .. "blob2", wave = MEDIA .. "wave",
   sparkle = MEDIA .. "sparkle", logo = MEDIA .. "logo", wordmark = MEDIA .. "wordmark",
+  emblem = MEDIA .. "emblem", tribal = MEDIA .. "tribal", corner = MEDIA .. "corner",
 }
+
+
 function UI.Icon(name) return MEDIA .. "i_" .. name end
 
 ----------------------------------------------------------------------------
@@ -39,6 +42,43 @@ UI.C = C
 UI.GRAD = { C.gold, C.amber, C.rose }        -- Haupt-Verlauf
 UI.GRAD_COOL = { C.teal, C.violet, C.rose }  -- Zweit-Verlauf
 UI.GRAD_FRESH = { C.green, C.teal, C.violet }
+
+-- Horde-Stil im Hintergrund: Stammesmuster (gekachelt) + Zacken-Ecken. Sehr dezent, frisst keine Klicks.
+-- opts: w, h (Größe für die Kachelung), pattern (Alpha), corners (Alpha), cornerSize, inset
+function UI.Ornaments(frame, opts)
+  opts = opts or {}
+  local holder = CreateFrame("Frame", nil, frame)
+  holder:SetPoint("TOPLEFT", opts.inset or 8, -(opts.inset or 8))
+  holder:SetPoint("BOTTOMRIGHT", -(opts.inset or 8), opts.inset or 8)
+  holder:SetFrameLevel(frame:GetFrameLevel())
+  holder:SetClipsChildren(true)
+  local accent = C.amber
+  if (opts.pattern or 0) > 0 then
+    local t = holder:CreateTexture(nil, "BACKGROUND", nil, -6)
+    t:SetTexture(UI.TEX.tribal, "REPEAT", "REPEAT")
+    t:SetPoint("TOPLEFT")
+    t:SetSize(opts.w, opts.h)
+    t:SetTexCoord(0, opts.w / 160, 0, opts.h / 160)
+    t:SetVertexColor(accent[1], accent[2], accent[3], opts.pattern)
+    holder.pattern = t
+  end
+  local cs = opts.cornerSize or 64
+  local coords = {
+    { "TOPLEFT", 0, 1, 0, 1 }, { "TOPRIGHT", 1, 0, 0, 1 },
+    { "BOTTOMLEFT", 0, 1, 1, 0 }, { "BOTTOMRIGHT", 1, 0, 1, 0 },
+  }
+  holder.corners = {}
+  for _, cdef in ipairs(coords) do
+    local t = holder:CreateTexture(nil, "BACKGROUND", nil, -5)
+    t:SetTexture(UI.TEX.corner)
+    t:SetSize(cs, cs)
+    t:SetPoint(cdef[1])
+    t:SetTexCoord(cdef[2], cdef[3], cdef[4], cdef[5])
+    t:SetVertexColor(C.gold[1], C.gold[2], C.gold[3], opts.corners or 0.3)
+    holder.corners[#holder.corners + 1] = t
+  end
+  return holder
+end
 
 function UI.Hex(c)
   return string.format("|cff%02x%02x%02x", math.floor(c[1] * 255), math.floor(c[2] * 255), math.floor(c[3] * 255))

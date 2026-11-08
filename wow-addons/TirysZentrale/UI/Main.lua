@@ -46,6 +46,14 @@ local function buildBackground(f)
     { tex = UI.TEX.blob1, color = C.violet, size = 460, x = 520, y = 40, a = 0.14, dx = -40, dy = -50, d = 13 },
     { tex = UI.TEX.blob2, color = C.teal, size = 300, x = -60, y = -380, a = 0.10, dx = 50, dy = 30, d = 10 },
   }
+  -- Horde-Stil: Stammesmuster, Zacken-Ecken, großes Kriegsemblem unten rechts (alles sehr dezent)
+  UI.Ornaments(f, { w = WIDTH, h = HEIGHT, pattern = 0.045, corners = 0.32, cornerSize = 84, inset = 6 })
+  local emblem = clip:CreateTexture(nil, "BACKGROUND", nil, -6)
+  emblem:SetTexture(UI.TEX.emblem)
+  emblem:SetSize(440, 440)
+  emblem:SetPoint("CENTER", clip, "BOTTOMRIGHT", -260, 250)
+  emblem:SetVertexColor(C.amber[1], C.amber[2], C.amber[3], 0.07)
+  UI.Drift(emblem, 0, 0, 7, 1, 0.6)
   for _, b in ipairs(blobs) do
     local t = clip:CreateTexture(nil, "BACKGROUND", nil, -7)
     t:SetTexture(b.tex)
@@ -145,6 +153,21 @@ local function buildSidebar(f)
     end)
     f.nav[def.key] = b
     y = y - 35
+  end
+
+  -- Echtes Horde-Wappen aus dem Spiel (Atlas aus der Charaktererstellung), ganz dezent über dem Status.
+  -- Gibt es den Atlas im Client nicht, wird einfach nichts gezeigt.
+  if C_Texture and C_Texture.GetAtlasInfo then
+    local ok, info = pcall(C_Texture.GetAtlasInfo, "charactercreate-icon-horde")
+    if ok and info then
+      local crest = side:CreateTexture(nil, "BACKGROUND", nil, -3)
+      crest:SetAtlas("charactercreate-icon-horde")
+      crest:SetSize(120, 120)
+      crest:SetPoint("BOTTOM", side, "BOTTOM", 0, 80)
+      crest:SetDesaturated(true)
+      crest:SetVertexColor(C.amber[1], C.amber[2], C.amber[3], 0.22)
+      f.hordeCrest = crest
+    end
   end
 
   -- Auctionator-Status unten

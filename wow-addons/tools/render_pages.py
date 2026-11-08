@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Zeichnet die von tests/check_layout.lua exportierten Seiten als PNG (Vorschau ohne Spiel).
 Aufruf: python3 tools/render_pages.py <ordner mit *.tsv>"""
-import glob, os, sys
+import glob, math, os, sys
 from PIL import Image, ImageDraw, ImageFont, ImageChops
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -86,11 +86,28 @@ def render(path):
                 piece = gradient(w, h, orient, c1, c2)
             else:
                 piece = None
+            if name.startswith("ATLAS:"):  # Spiel-Atlas gibt es offline nicht -> weglassen
+                continue
             src = texture(name)
             if src is not None:
                 if coord and len(coord) == 4:
+                    u0, u1, v0, v1 = coord
+                    flip_x, flip_y = u0 > u1, v0 > v1
+                    u0, u1 = min(u0, u1), max(u0, u1)
+                    v0, v1 = min(v0, v1), max(v0, v1)
                     sw, sh = src.size
-                    src = src.crop((int(coord[0] * sw), int(coord[2] * sh), max(int(coord[1] * sw), int(coord[0] * sw) + 1), max(int(coord[3] * sh), int(coord[2] * sh) + 1)))
+                    if u1 > 1 or v1 > 1:  # REPEAT-Kachelung
+                        nx, ny = max(1, math.ceil(u1)), max(1, math.ceil(v1))
+                        tiled = Image.new("RGBA", (sw * nx, sh * ny))
+                        for ix in range(nx):
+                            for iy in range(ny):
+                                tiled.paste(src, (ix * sw, iy * sh))
+                        src = tiled
+                    src = src.crop((int(u0 * sw), int(v0 * sh), max(int(u1 * sw), int(u0 * sw) + 1), max(int(v1 * sh), int(v0 * sh) + 1)))
+                    if flip_x:
+                        src = src.transpose(Image.FLIP_LEFT_RIGHT)
+                    if flip_y:
+                        src = src.transpose(Image.FLIP_TOP_BOTTOM)
                 src = src.resize((w, h), Image.LANCZOS)
                 if piece is not None:
                     alpha = src.split()[3]
