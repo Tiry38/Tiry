@@ -451,6 +451,10 @@ SlashCmdList.TIRYSZENTRALE = function(msg)
     rezepte = "recipes", craft = "recipes", crafting = "recipes", farm = "farm", farmen = "farm", kuerschner = "skinning", ["kürschner"] = "skinning", leder = "skinning", skin = "skinning", tagebuch = "tracker", tracker = "tracker",
     schule = "basics", ah = "basics", hilfe = "basics", optionen = "settings", einstellungen = "settings",
   }
+  if msg == "leeren" then
+    UI.pages.recipes.ClearQueue()
+    return
+  end
   if msg == "craftcheck" then
     UI.pages.recipes.CraftCheck()
     return

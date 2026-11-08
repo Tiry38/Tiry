@@ -230,6 +230,18 @@ local function runScenario(label, opts)
     W.recipes = saved
     TirysZentraleCharDB.learned = nil
   end)
+  step("Warteschlange bearbeiten und leeren", function()
+    TirysZentraleCharDB.queue = { { recipe = 3755, prof = "TAILORING", n = 2 }, { recipe = 2963, prof = "TAILORING", n = 1 } }
+    ns.UI.Show("recipes")
+    local qc = ns.UI.pages.recipes.queueCard
+    qc.rows[1].plus:Click() ; qc.rows[1].minus:Click() ; qc.rows[2].del:Click()
+    assert(#TirysZentraleCharDB.queue == 1 and TirysZentraleCharDB.queue[1].n == 2, "Zeilen-Knöpfe")
+    qc.clear:Click()
+    assert(#TirysZentraleCharDB.queue == 0, "Alles leeren")
+    TirysZentraleCharDB.queue = { { recipe = 3755, prof = "TAILORING", n = 1 } }
+    SlashCmdList.TIRYSZENTRALE("leeren")
+    assert(#TirysZentraleCharDB.queue == 0, "/tz leeren")
+  end)
 
   -- Rezept-Datenbank + automatische Erkennung + Level-Empfehlung
   local R = ns.Recipes

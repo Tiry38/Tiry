@@ -163,8 +163,10 @@ function page.build(self, content, width)
   qc.craft = UI.Button(qc, "Nächstes craften", "cool", 190, 34, "bolt")
   qc.craft:SetScript("OnClick", function() page.CraftNext(self) end)
   UI.SetTooltip(qc.craft, "Craften", "Bei offenem Berufsfenster: stellt den ersten passenden Eintrag her – so oft dein Material reicht.")
-  qc.clear = UI.Button(qc, "Leeren", "soft", 100, 34, "close")
-  qc.clear:SetScript("OnClick", function() ns.char.queue = {} page.refresh(self) end)
+  qc.clear = UI.Button(qc, "Alles leeren", "danger", 150, 34, "close")
+  qc.clear:SetScript("OnClick", function() page.ClearQueue() end)
+  qc.rows = {}
+  qc.mats = UI.Para(qc, 12, C.muted, width - 40)
 end
 
 local function openProfKey()
@@ -214,6 +216,35 @@ ns.Listen("LOOT_GAINED", function(_, itemID, gained)
     UI.RefreshPage("recipes")
   end
 end)
+
+function page.ClearQueue()
+  wipe(queue())
+  pendingCraft = nil
+  ns.Print("Craft-Warteschlange geleert.")
+  UI.RefreshPage("recipes")
+end
+
+-- Zeile in der Warteschlange: Name + Knöpfe -1, +1, entfernen
+local function queueRow(qc, width)
+  local row = CreateFrame("Frame", nil, qc)
+  row:SetSize(width - 40, 30)
+  row.bg = UI.Round(row, 15, "BACKGROUND", 1)
+  row.bg:SetColor(C.inset, 0.9)
+  row.text = UI.Text(row, 12, "semibold", C.text)
+  row.text:SetPoint("LEFT", 14, 0)
+  row.text:SetWidth(width - 200)
+  row.text:SetWordWrap(false)
+  row.del = UI.IconButton(row, "close", 24, "Entfernen")
+  row.del:SetPoint("RIGHT", -4, 0)
+  row.plus = UI.IconButton(row, "plus", 24, "Einmal mehr")
+  row.plus:SetPoint("RIGHT", row.del, "LEFT", -4, 0)
+  row.minus = UI.IconButton(row, "minus", 24, "Einmal weniger")
+  row.minus:SetPoint("RIGHT", row.plus, "LEFT", -4, 0)
+  row.minus:SetScript("OnClick", function(b) addToQueue(row.recipe, -1) UI.RefreshPage("recipes") end)
+  row.plus:SetScript("OnClick", function(b) addToQueue(row.recipe, 1) UI.RefreshPage("recipes") end)
+  row.del:SetScript("OnClick", function(b) addToQueue(row.recipe, -999) UI.RefreshPage("recipes") end)
+  return row
+end
 
 function page.CraftNext(self)
   if not (S.tradeOpen and C_TradeSkillUI and C_TradeSkillUI.CraftRecipe) then
@@ -363,10 +394,11 @@ function page.refresh(self)
   qc:ClearAllPoints()
   qc:SetPoint("TOPLEFT", self.frame.content, "TOPLEFT", 0, -y)
   local mats, cost, profit, crafts = ns.QueueMaterials()
+  local width = UI.CONTENT_W
   local lines = {}
   for _, e in ipairs(queue()) do
     local r = R.Get(e.recipe)
-    if r then lines[#lines + 1] = "|cffffd24a" .. e.n .. "×|r " .. r.name .. " |cff9a93bd(" .. ns.ProfName(ns.PROF[r.prof]) .. ")|r" end
+    if r then lines[#lines + 1] = { r = r, n = e.n } end
   end
   local matLines = {}
   for i = 1, math.min(#mats, 12) do
@@ -374,20 +406,38 @@ function page.refresh(self)
     matLines[#matLines + 1] = m.n .. "× " .. ns.Item(m.id).name .. " " .. (m.unit and ("(" .. ns.Money(m.unit * m.n) .. (m.where == "HAENDLER" and ", Händler" or ", AH") .. ")") or "(kein Preis)")
   end
   if #lines == 0 then
-    qc.text:SetText("Leer. Klick oben auf ein Rezept, um es einzuplanen.")
+    qc.text:SetText("Leer. Klick oben auf ein Rezept, um es einzuplanen (Rechtsklick nimmt es wieder raus).")
   else
-    qc.text:SetText(string.format("%d Crafts geplant · erwarteter Gewinn |cff61eb8f%s|r · Material-Einkauf %s\n\n%s\n\n|cffffd24aFehlt noch:|r %s",
-      crafts, ns.Money(profit), ns.Money(cost), table.concat(lines, "\n"),
-      #matLines > 0 and ("\n" .. table.concat(matLines, "\n")) or "nichts – alles in den Taschen!"))
+    qc.text:SetText(string.format("%d Crafts geplant · erwarteter Gewinn |cff61eb8f%s|r · Material-Einkauf %s", crafts, ns.Money(profit), ns.Money(cost)))
   end
-  local th = math.ceil(qc.text:GetStringHeight())
-  qc.buy:ClearAllPoints(); qc.buy:SetPoint("TOPLEFT", 20, -(56 + th + 12))
+  local qy = 56 + math.ceil(qc.text:GetStringHeight()) + 10
+  for i, l in ipairs(lines) do
+    local row = qc.rows[i] or queueRow(qc, width)
+    qc.rows[i] = row
+    row.recipe = l.r
+    row.text:SetText("|cffffd24a" .. l.n .. "×|r  " .. l.r.name .. "  |cff9a93bd" .. ns.ProfName(ns.PROF[l.r.prof]) .. "|r")
+    row:ClearAllPoints()
+    row:SetPoint("TOPLEFT", qc, "TOPLEFT", 20, -qy)
+    row:Show()
+    qy = qy + 34
+  end
+  for i = #lines + 1, #qc.rows do qc.rows[i]:Hide() end
+  if #lines > 0 then
+    qc.mats:SetText("|cffffd24aFehlt noch:|r " .. (#matLines > 0 and ("\n" .. table.concat(matLines, "\n")) or "nichts – alles in den Taschen!"))
+    qc.mats:ClearAllPoints()
+    qc.mats:SetPoint("TOPLEFT", qc, "TOPLEFT", 20, -(qy + 6))
+    qc.mats:Show()
+    qy = qy + 6 + math.ceil(qc.mats:GetStringHeight()) + 12
+  else
+    qc.mats:Hide()
+  end
+  qc.buy:ClearAllPoints(); qc.buy:SetPoint("TOPLEFT", 20, -qy)
   qc.craft:ClearAllPoints(); qc.craft:SetPoint("LEFT", qc.buy, "RIGHT", 10, 0)
   qc.clear:ClearAllPoints(); qc.clear:SetPoint("LEFT", qc.craft, "RIGHT", 10, 0)
   qc.buy:SetEnabled(#mats > 0 and M.HasAuctionator())
   qc.craft:SetEnabled(#lines > 0 and S.tradeOpen == true)
-  qc.clear:SetEnabled(#lines > 0)
-  local qh = 56 + th + 12 + 34 + 20
+  qc.clear:SetEnabled(#queue() > 0)
+  local qh = qy + 34 + 20
   qc:SetHeight(qh)
   self.frame.content:SetHeight(y + qh + 30)
 end

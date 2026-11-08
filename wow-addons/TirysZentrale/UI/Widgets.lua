@@ -278,6 +278,11 @@ function UI.Button(parent, label, style, width, height, icon)
       if self.icon then self.icon:SetVertexColor(1, 1, 1, 1) end
       self.glow:SetVertexColor(C.violet[1], C.violet[2], C.violet[3])
       self.glow:SetAlpha(hover and 0.5 or 0)
+    elseif self.style == "danger" then
+      self.bg:SetColor(C.rose, self:IsEnabled() and (hover and 0.55 or 0.32) or 0.12)
+      self.text:SetTextColor(1, 1, 1, self:IsEnabled() and 1 or 0.45)
+      if self.icon then self.icon:SetVertexColor(1, 1, 1, self:IsEnabled() and 1 or 0.45) end
+      self.glow:SetAlpha(0)
     else
       local base = hover and C.cardHi or C.card
       self.bg:SetColor(base, self.style == "ghost" and (hover and 0.9 or 0.55) or 1)
