@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Erzeugt Goldrausch/Data_AllItems.lua: ALLE Gegenstände aus den Spieldaten von WoW Forever (deutsch).
+"""Erzeugt TirysZentrale/Data_AllItems.lua: ALLE Gegenstände aus den Spieldaten von WoW Forever (deutsch).
 
 Quelle: DB2-Tabellen ItemSparse, Item, ItemClass, ItemSubClass des Forever-Builds über wago.tools, z. B.
   https://wago.tools/db2/ItemSparse/csv?build=1.60.1.70862&locale=deDE
@@ -10,7 +10,7 @@ import csv, os, re, sys
 src = sys.argv[1]
 BUILD = "1.60.1.70862"
 here = os.path.dirname(os.path.abspath(__file__))
-out = os.path.normpath(os.path.join(here, "..", "Goldrausch", "Data_AllItems.lua"))
+out = os.path.normpath(os.path.join(here, "..", "TirysZentrale", "Data_AllItems.lua"))
 bad = re.compile(r'(^Monster - |^Deprecated|DEPRECATED|^zz|\[PH\]|^TEST|^Test |^OLD|^QA |^\(OLD\)|Unused|UNUSED|^NPC Equip)')
 items = {r['ID']: r for r in csv.DictReader(open(os.path.join(src, 'Item.csv'), encoding='utf-8'))}
 rows, skipped = [], 0

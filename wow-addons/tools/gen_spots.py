@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Erzeugt Goldrausch/Data_Spots.lua: die besten Farm-Stellen (Kartenpunkte) je Levelbereich und Materialgruppe.
+"""Erzeugt TirysZentrale/Data_Spots.lua: die besten Farm-Stellen (Kartenpunkte) je Levelbereich und Materialgruppe.
 
 Quellen (nur als Daten gelesen, kein Code ausgeführt):
 - Fundorte von Kräutern/Erzen und Gegner-Positionen + Level: QuestieDB (https://github.com/Questie/QuestieDB,
@@ -15,7 +15,7 @@ import collections, csv, os, re, sys
 
 spawns_path, uimap_path, qdb = sys.argv[1], sys.argv[2], sys.argv[3]
 here = os.path.dirname(os.path.abspath(__file__))
-out_path = os.path.normpath(os.path.join(here, "..", "Goldrausch", "Data_Spots.lua"))
+out_path = os.path.normpath(os.path.join(here, "..", "TirysZentrale", "Data_Spots.lua"))
 
 ZONES = {12: 1429, 1: 1426, 141: 1438, 14: 1411, 215: 1412, 85: 1420, 40: 1436, 38: 1432, 148: 1439, 17: 1413,
          130: 1421, 44: 1433, 10: 1431, 11: 1437, 267: 1424, 331: 1440, 406: 1442, 45: 1417, 400: 1441, 405: 1443,

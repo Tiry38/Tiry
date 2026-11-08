@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Erzeugt Goldrausch/Data_Items.lua aus den geprüften Wowhead-Forever-Daten (items_forever.json).
+"""Erzeugt TirysZentrale/Data_Items.lua aus den geprüften Wowhead-Forever-Daten (items_forever.json).
 
 Daten holen/aktualisieren:  python3 fetch_items.py <id,id,...>   (schreibt items.json -> nach items_forever.json kopieren)
 Quelle: https://nether.wowhead.com/forever/tooltip/item/<id>?locale=3 (deDE) bzw. ohne locale (enUS)
@@ -29,7 +29,7 @@ def lua_str(s):
 lines = [
     "-- AUTOMATISCH ERZEUGT von wow-addons/tools/gen_items.py – nicht von Hand bearbeiten.",
     "-- Quelle: Wowhead-Datenbank für WoW Forever (Item-ID, deutscher Name, Qualität, Händler-Verkaufspreis, Stapelgröße).",
-    "-- Im Spiel zeigt Goldrausch immer den Namen aus dem Client an; diese Namen sind nur der Rückfall.",
+    "-- Im Spiel zeigt Tiry's Zentrale immer den Namen aus dem Client an; diese Namen sind nur der Rückfall.",
     "local _, ns = ...",
     "ns.ITEMS = {",
 ]
@@ -45,6 +45,6 @@ for cat, ids in CATS:
         order.append(i)
 lines.append("}")
 lines.append("ns.ITEM_ORDER = { " + ", ".join(str(i) for i in order) + " }")
-out = os.path.normpath(os.path.join(HERE, "..", "Goldrausch", "Data_Items.lua"))
+out = os.path.normpath(os.path.join(HERE, "..", "TirysZentrale", "Data_Items.lua"))
 open(out, "w", encoding="utf-8").write("\n".join(lines) + "\n")
 print("geschrieben:", out, len(order), "Items")

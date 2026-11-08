@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Erzeugt alle Grafiken (TGA, 32 Bit mit Alpha) für das WoW-Addon Goldrausch.
+"""Erzeugt alle Grafiken (TGA, 32 Bit mit Alpha) für das WoW-Addon Tiry's Zentrale.
 
 Aufruf:  python3 wow-addons/tools/make_media.py
 Benötigt: Pillow, numpy. Schrift: Poppins (liegt im Addon unter Media/Fonts).
@@ -13,7 +13,7 @@ import numpy as np
 from PIL import Image, ImageDraw, ImageFilter, ImageFont
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-ADDON = os.path.normpath(os.path.join(HERE, "..", "Goldrausch"))
+ADDON = os.path.normpath(os.path.join(HERE, "..", "TirysZentrale"))
 MEDIA = os.path.join(ADDON, "Media")
 FONTS = os.path.join(MEDIA, "Fonts")
 SS = 4  # Supersampling-Faktor für glatte Kanten
@@ -166,7 +166,7 @@ def logo(size=256):
     d.ellipse((inset, inset, big - inset, big - inset), outline=(255, 245, 205, 235), width=int(big * 0.018))
     # Großes G
     font = ImageFont.truetype(os.path.join(FONTS, "Poppins-ExtraBold.ttf"), int(big * 0.56))
-    text = "G"
+    text = "T"
     bbox = d.textbbox((0, 0), text, font=font)
     tw, th = bbox[2] - bbox[0], bbox[3] - bbox[1]
     tx = (big - tw) / 2 - bbox[0]
@@ -197,7 +197,7 @@ def logo(size=256):
 def wordmark(w=512, h=128):
     big_w, big_h = w * SS, h * SS
     font = ImageFont.truetype(os.path.join(FONTS, "Poppins-ExtraBold.ttf"), int(big_h * 0.62))
-    text = "Goldrausch"
+    text = "Tiry's Zentrale"
     tmp = ImageDraw.Draw(Image.new("L", (10, 10)))
     bbox = tmp.textbbox((0, 0), text, font=font)
     tw, th = bbox[2] - bbox[0], bbox[3] - bbox[1]

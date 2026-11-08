@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
-"""Erzeugt Goldrausch/Data_Recipes.lua: alle herstellbaren Rezepte der Forever-Spieldaten.
+"""Erzeugt TirysZentrale/Data_Recipes.lua: alle herstellbaren Rezepte der Forever-Spieldaten.
 Quelle (wago.tools, Build 1.60.1.70862): SkillLineAbility, SpellReagents, SpellEffect (Effekt 24 = Item herstellen),
 SpellName (deDE), ItemSparse (deDE) zur Prüfung, dass Ergebnis und Material echte Items sind.
 Aufruf: python3 gen_recipes.py <csv-ordner>"""
 import csv, os, sys, collections
 src = sys.argv[1]
 here = os.path.dirname(os.path.abspath(__file__))
-out = os.path.normpath(os.path.join(here, "..", "Goldrausch", "Data_Recipes.lua"))
+out = os.path.normpath(os.path.join(here, "..", "TirysZentrale", "Data_Recipes.lua"))
 PROFS = {171: "ALCHEMY", 164: "BLACKSMITHING", 333: "ENCHANTING", 202: "ENGINEERING", 165: "LEATHERWORKING",
          197: "TAILORING", 185: "COOKING", 129: "FIRST_AID", 186: "MINING"}
 def rd(n): return csv.DictReader(open(os.path.join(src, n), encoding="utf-8"))

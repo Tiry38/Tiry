@@ -1,0 +1,7 @@
+Tiry's Zentrale – Gold-Guide für WoW Forever
+Lizenz: GNU General Public License v3.0 (siehe LICENSE-GPL-3.0.md)
+
+Enthaltene Daten und Quellen:
+- Data_Spots.lua: Farm-Stellen berechnet aus den Fundorten der QuestieDB (https://github.com/Questie/QuestieDB), GPL-3.0.
+- Data_AllItems.lua, Data_Recipes.lua, Zonennamen: Spieldaten von WoW Forever 1.60.1.70862 (DB2), bezogen über wago.tools.
+- Schrift Poppins: SIL Open Font License 1.1 (Media/Fonts/OFL.txt).

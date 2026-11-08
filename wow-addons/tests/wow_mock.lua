@@ -1,4 +1,4 @@
--- Strenger Nachbau der WoW-Forever-Umgebung (Lua 5.1) für Goldrausch-Tests.
+-- Strenger Nachbau der WoW-Forever-Umgebung (Lua 5.1) für Tiry's Zentrale-Tests.
 -- Widget-Methoden sind nur erlaubt, wenn sie in Blizzards Forever-API-Doku stehen (forever_widget_api.lua).
 local M = {}
 local HERE = (debug.getinfo(1, "S").source:match("^@(.*/)") or "./")
@@ -66,12 +66,12 @@ end
 -- Pfade aus dem Addon-Ordner müssen als Datei existieren
 local function checkAddonFile(path, exts)
   if type(path) ~= "string" then return end
-  local rel = path:match("^Interface\\AddOns\\Goldrausch\\(.*)$")
+  local rel = path:match("^Interface\\AddOns\\TirysZentrale\\(.*)$")
   if not rel then return end
   rel = rel:gsub("\\", "/")
   for _, ext in ipairs(exts) do
     local candidate = rel:lower():match("%." .. ext .. "$") and rel or (rel .. "." .. ext)
-    if fileExists(M.ROOT .. "Goldrausch/" .. candidate) then return end
+    if fileExists(M.ROOT .. "TirysZentrale/" .. candidate) then return end
   end
   error("Datei fehlt im Addon: " .. path, 3)
 end
@@ -244,7 +244,7 @@ function Obj.SetRotation(o, r) assert(type(r) == "number") end
 function Obj.SetFont(o, file, size, flags)
   assert(type(file) == "string" and file ~= "", "SetFont: Datei fehlt")
   assert(type(size) == "number" and size > 0, "SetFont: Größe fehlt")
-  if file:match("^Interface\\AddOns\\Goldrausch\\") then checkAddonFile(file, { "ttf" }) end
+  if file:match("^Interface\\AddOns\\TirysZentrale\\") then checkAddonFile(file, { "ttf" }) end
   o.__font = file
   return true
 end

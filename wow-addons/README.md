@@ -1,12 +1,12 @@
-# Goldrausch – Gold-Guide-Addon für WoW Forever
+# Tiry's Zentrale – Gold-Guide-Addon für WoW Forever
 
 Addon für **World of Warcraft: Forever** (Client 1.60.1, Interface 16001). Zeigt Einsteigern Schritt für Schritt,
 wie man schon mit Level 10–20 Gold macht – mit echten Preisen des eigenen Servers über **Auctionator**.
 
 ## Installation (Windows)
-1. `dist/Goldrausch.zip` herunterladen und entpacken.
-2. Den Ordner `Goldrausch` nach `World of Warcraft\_forever_\Interface\AddOns\` kopieren
-   (danach muss es `...\AddOns\Goldrausch\Goldrausch.toc` geben – kein doppelter Ordner).
+1. `dist/Tiry's Zentrale.zip` herunterladen und entpacken.
+2. Den Ordner `Tiry's Zentrale` nach `World of Warcraft\_forever_\Interface\AddOns\` kopieren
+   (danach muss es `...\AddOns\Tiry's Zentrale\TirysZentrale.toc` geben – kein doppelter Ordner).
 3. Optional, aber empfohlen: **Auctionator** (Version für WoW Forever) installieren.
 4. Spiel starten → `/gold` eingeben oder auf die Goldmünze an der Minikarte klicken.
 
@@ -38,8 +38,8 @@ Knopf "AH scannen" oben im Fenster startet am offenen AH den Auctionator-Scan. J
 - `python3 tools/gen_alldb.py <csv-ordner>` – komplette Item-Datenbank aus den Forever-Spieldaten (DB2 ItemSparse/Item/ItemClass/ItemSubClass, Build 1.60.1.70862, über wago.tools). 908 interne Platzhalter ("Monster - …", "Deprecated", "OLD…") werden ausgelassen.
 - `python3 tools/gen_recipes.py <csv-ordner>` – Rezept-Datenbank (DB2 SkillLineAbility, SpellReagents, SpellEffect, SpellName).
 - `python3 tools/gen_spots.py <spawns.tsv> <UiMap.csv> <questiedb>` – Farm-Hotspots aus QuestieDB-Fundorten (Daten werden nur gelesen, nie ausgeführt).
-- Lizenz: GPL-3.0 (wegen der QuestieDB-Daten), siehe `Goldrausch/LIZENZ.txt`.
-- Schrift: Poppins (SIL Open Font License, siehe `Goldrausch/Media/Fonts/OFL.txt`).
+- Lizenz: GPL-3.0 (wegen der QuestieDB-Daten), siehe `TirysZentrale/LIZENZ.txt`.
+- Schrift: Poppins (SIL Open Font License, siehe `TirysZentrale/Media/Fonts/OFL.txt`).
 
 ## Grenzen (ehrlich)
 - Blizzard hat für Forever keine offiziellen Zahlen zu AH-Anteil und Laufzeiten veröffentlicht – der AH-Anteil ist einstellbar (Standard 5 %).

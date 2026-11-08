@@ -1,7 +1,7 @@
--- Goldrausch – Ladetest gegen den strengen Forever-Nachbau. Aufruf: lua5.1 wow-addons/tests/run_tests.lua
+-- Tiry's Zentrale – Ladetest gegen den strengen Forever-Nachbau. Aufruf: lua5.1 wow-addons/tests/run_tests.lua
 package.path = package.path .. ";" .. (arg[0]:match("^(.*/)") or "./") .. "?.lua"
 local HERE = arg[0]:match("^(.*/)") or "./"
-local ROOT = HERE .. "../Goldrausch/"
+local ROOT = HERE .. "../TirysZentrale/"
 
 local passed, failed = 0, 0
 local function check(name, cond, msg)
@@ -10,7 +10,7 @@ end
 
 local function tocFiles()
   local files = {}
-  for line in io.lines(ROOT .. "Goldrausch.toc") do
+  for line in io.lines(ROOT .. "TirysZentrale.toc") do
     if not line:match("^##") and line:match("%S") then files[#files + 1] = (line:gsub("\\", "/"):gsub("%s+$", "")) end
   end
   return files
@@ -34,14 +34,14 @@ local function runScenario(label, opts)
   W.prices = opts.prices or { [2589] = 60, [2592] = 120, [2318] = 90, [2770] = 40, [4238] = 900, [2320] = 30, [249427] = 4000, [5771] = 30000 }
   W.known = { [3755] = true, [2963] = true, [2881] = true, [2152] = true }
   W.install({ auctionator = opts.auctionator, locale = opts.locale })
-  GoldrauschDB, GoldrauschCharDB = opts.db, nil
+  TirysZentraleDB, TirysZentraleCharDB = opts.db, nil
 
   local ns = {}
   for _, f in ipairs(tocFiles()) do
     local chunk, err = loadfile(ROOT .. f)
     check(label .. ": lädt " .. f, chunk ~= nil, err)
     if chunk then
-      local ok, e = pcall(chunk, "Goldrausch", ns)
+      local ok, e = pcall(chunk, "TirysZentrale", ns)
       check(label .. ": führt " .. f .. " aus", ok, e)
     end
   end
@@ -51,13 +51,13 @@ local function runScenario(label, opts)
     W.flush()
   end
 
-  step("ADDON_LOADED", function() W.fire("ADDON_LOADED", "Goldrausch") end)
+  step("ADDON_LOADED", function() W.fire("ADDON_LOADED", "TirysZentrale") end)
   step("PLAYER_LOGIN", function() W.fire("PLAYER_LOGIN") W.fire("PLAYER_ENTERING_WORLD", true, false) end)
   check(label .. ": Berufe erkannt", ns.professions[393] and ns.professions[197] and not ns.professions[173], "Kürschnerei/Schneiderei")
-  check(label .. ": SavedVariables", type(GoldrauschDB) == "table" and type(GoldrauschCharDB) == "table")
+  check(label .. ": SavedVariables", type(TirysZentraleDB) == "table" and type(TirysZentraleCharDB) == "table")
 
-  step("Slash /gold öffnet", function() SlashCmdList.GOLDRAUSCH("") end)
-  check(label .. ": Fenster sichtbar", GoldrauschMainFrame and GoldrauschMainFrame:IsShown())
+  step("Slash /gold öffnet", function() SlashCmdList.TIRYSZENTRALE("") end)
+  check(label .. ": Fenster sichtbar", TirysZentraleMainFrame and TirysZentraleMainFrame:IsShown())
   for _, def in ipairs(ns.UI.order) do
     step("Seite " .. def.key, function() ns.UI.Show(def.key) end)
     check(label .. ": Seite " .. def.key .. " gebaut", def.frame ~= nil)
@@ -96,7 +96,7 @@ local function runScenario(label, opts)
     W.call(row, "OnLeave")
   end)
   if opts.auctionator ~= false and not opts.noData then
-    check(label .. ": Einkaufsliste angelegt", W.lists and W.lists["Goldrausch: Stoff"] ~= nil)
+    check(label .. ": Einkaufsliste angelegt", W.lists and W.lists["Zentrale: Stoff"] ~= nil)
     check(label .. ": AH-Suche gestartet", W.searched ~= nil)
   end
 
@@ -142,7 +142,7 @@ local function runScenario(label, opts)
     check(label .. ": Flip gefunden", #ns.Scanner.merchant.flips == 1 and ns.Scanner.merchant.flips[1].id == 5771)
     check(label .. ": Chat-Hinweis", #W.prints > 0)
   end
-  check(label .. ": Händlerpreis gemerkt", GoldrauschDB.vendorBuy[2320] == 10)
+  check(label .. ": Händlerpreis gemerkt", TirysZentraleDB.vendorBuy[2320] == 10)
   step("Händler schließen", function() W.fire("MERCHANT_CLOSED") W.flush() end)
 
   -- Taschen
@@ -173,16 +173,15 @@ local function runScenario(label, opts)
     W.flush()
     ns.UI.Show("recipes")
   end)
-  check(label .. ": Rezepte gespeichert", GoldrauschCharDB.recipes and GoldrauschCharDB.recipes["Schneiderei"] and #GoldrauschCharDB.recipes["Schneiderei"].list == 2)
+  check(label .. ": Rezepte gespeichert", TirysZentraleCharDB.recipes and TirysZentraleCharDB.recipes["Schneiderei"] and #TirysZentraleCharDB.recipes["Schneiderei"].list == 2)
 
   -- Craft-Planer: Filter, Warteschlange, Craften
   step("Craft-Planer", function()
     local p = ns.UI.pages.recipes
     ns.UI.Show("recipes")
-    GoldrauschDB.settings.craft.auto = false
-    GoldrauschDB.settings.craft.minMargin = 0
-    GoldrauschDB.settings.craft.minProfit = 0
-    GoldrauschDB.settings.craft.onlySafe = false
+    TirysZentraleDB.settings.craft.marginFactor = 0
+    TirysZentraleDB.settings.craft.profitFactor = 0
+    TirysZentraleDB.settings.craft.onlySafe = false
     p.prof = "TAILORING"
     p.refresh(p)
     local row = p.list.rows[1]
@@ -211,13 +210,13 @@ local function runScenario(label, opts)
   step("Empfehlung & Regler", function()
     local p = ns.UI.pages.recipes
     p.recBtn:Click()
-    assert(GoldrauschDB.settings.craft.auto == true)
+    assert(TirysZentraleDB.settings.craft.marginFactor == 1 and select(3, R.Filter()) == true)
     local m1 = select(1, R.Filter())
     W.call(p.margin, "OnShow")
     local plus = nil
     for _, ch in ipairs(p.margin.__children) do if ch.__kind == "Button" and not plus then plus = ch end end
     plus:Click()
-    assert(GoldrauschDB.settings.craft.auto == false, "Regler muss Automatik abschalten")
+    assert(select(3, R.Filter()) == false, "Regler muss eigenen Stil setzen")
     assert(select(1, R.Filter()) == m1 + 5, "Regler übernimmt Empfehlung + Schritt")
     p.viewSeg:Select("learnable", true)
     p.viewSeg:Select("known", true)
@@ -225,7 +224,14 @@ local function runScenario(label, opts)
     W.fire("NEW_RECIPE_LEARNED", 2152) ; W.flush()
     W.fire("SKILL_LINES_CHANGED") ; W.flush()
   end)
-  check(label .. ": Empfehlung je Level", R.Preset(15).margin == 30 and R.Preset(60).profit == 80000)
+  check(label .. ": Empfehlung je Level", R.Preset(15).margin == 30 and R.Preset(60).profit == 80000 and R.Preset(25).profit == 5000)
+  -- Stil wächst mit: +5 Prozentpunkte bei Level 20 bleiben als Faktor erhalten
+  local before = select(1, R.Filter())
+  W.level = 40 ; W.fire("PLAYER_LEVEL_UP", 40) ; W.flush()
+  local m40, p40 = R.Filter()
+  check(label .. ": Filter wachsen mit Level", p40 > 2500 and m40 ~= before, m40 .. " / " .. p40)
+  check(label .. ": teure Items brauchen weniger %", R.RequiredMargin(30, 2500, 1000000) == 15 and R.RequiredMargin(30, 2500, 5000) == 30)
+  W.level = 20 ; W.fire("PLAYER_LEVEL_UP", 20) ; W.flush()
 
   -- Karte
   step("Karten-Wegpunkt", function()
@@ -250,7 +256,7 @@ local function runScenario(label, opts)
   -- AH-Scan per Knopf und Erkennung
   step("AH-Scan-Knopf", function()
     W.fire("AUCTION_HOUSE_SHOW") ; W.flush()
-    GoldrauschMainFrame.scanBtn:Click()
+    TirysZentraleMainFrame.scanBtn:Click()
     if W.dbCallback then W.dbCallback() end
     W.flush()
     W.fire("AUCTION_HOUSE_CLOSED") ; W.flush()
@@ -261,7 +267,7 @@ local function runScenario(label, opts)
   end)
   if opts.auctionator ~= false then
     check(label .. ": Scan gestartet", W.scanStarted == true)
-    check(label .. ": Scan erkannt", GoldrauschDB.lastScan ~= nil)
+    check(label .. ": Scan erkannt", TirysZentraleDB.lastScan ~= nil)
   end
   check(label .. ": Neu-in-Forever-Liste", #ns.UI.pages.market.list.rows > 30)
 
@@ -279,7 +285,7 @@ local function runScenario(label, opts)
     W.merchant = { { id = 5771, name = "Muster: Rote Leinentasche", price = 200, avail = 2 } }
     W.prices[2934] = 1 -- Verdorbene Lederfetzen: AH schlechter als Händler (7 Kupfer)
     W.fire("MERCHANT_SHOW") ; W.flush()
-    local panel = GoldrauschMerchantPanel
+    local panel = TirysZentraleMerchantPanel
     assert(panel and panel:IsShown(), "Händler-Panel fehlt")
     panel.sell:Click() ; W.flush()
     panel.buy:Click() ; W.flush()
@@ -320,22 +326,22 @@ local function runScenario(label, opts)
 
   -- Minikarte, Addon-Menü, Befehle
   step("Minikarte & Befehle", function()
-    local b = GoldrauschMinimapButton
+    local b = TirysZentraleMinimapButton
     W.call(b, "OnEnter") ; W.call(b, "OnLeave")
     W.call(b, "OnClick", "RightButton") ; W.call(b, "OnClick", "LeftButton")
     W.call(b, "OnDragStart") ; W.call(b, "OnUpdate") ; W.call(b, "OnDragStop")
-    Goldrausch_OnAddonCompartmentClick("Goldrausch", "LeftButton")
-    Goldrausch_OnAddonCompartmentEnter("Goldrausch", UIParent)
-    Goldrausch_OnAddonCompartmentLeave("Goldrausch", UIParent)
+    TirysZentrale_OnAddonCompartmentClick("TirysZentrale", "LeftButton")
+    TirysZentrale_OnAddonCompartmentEnter("TirysZentrale", UIParent)
+    TirysZentrale_OnAddonCompartmentLeave("TirysZentrale", UIParent)
     for _, c in ipairs({ "farm", "craft", "db", "suche", "wege", "markt", "scan", "rezepte", "tagebuch", "ah", "optionen", "minimap", "minimap", "reset", "quatsch" }) do
-      SlashCmdList.GOLDRAUSCH(c)
+      SlashCmdList.TIRYSZENTRALE(c)
     end
   end)
   step("Auctionator meldet neue Preise", function()
     if W.dbCallback then W.dbCallback() end
     W.fire("GET_ITEM_INFO_RECEIVED", 2592, true)
   end)
-  step("Fenster schließen", function() GoldrauschMainFrame:Hide() end)
+  step("Fenster schließen", function() TirysZentraleMainFrame:Hide() end)
   step("Levelaufstieg", function() W.fire("PLAYER_LEVEL_UP", 21) end)
 
   check(label .. ": keine Laufzeitfehler", #W.errors == 0, table.concat(W.errors, "\n"))
