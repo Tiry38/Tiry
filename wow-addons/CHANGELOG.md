@@ -1,5 +1,12 @@
 # Changelog – Tiry's Zentrale
 
+## 5.2.1 (08.11.2026)
+- **Rezept-Empfehlungen passen jetzt genau zu deinem Skill.**
+  - **Kaufbare Rezepte:** Die exakte Skill-Anforderung kommt aus den Spieldaten (ItemSparse.RequiredSkillRank, z. B. „Muster: Feine Lederhandschuhe“ = Lederverarbeitung 50). Sie werden als „jetzt lernbar“ gezeigt, oder als „ab Skill X (noch Y Punkte)“, wenn höchstens 10 Punkte fehlen. Vorher waren es bis zu ~40 Punkte darüber.
+  - **Lehrer-Rezepte:** Die Lernstufe steht nicht in den Spieldaten. Als sicher lernbar gelten sie, wenn sie für dich schon gelb sind. Sonst steht dort „Lehrer: ab ca. Skill X“ (gelb minus 20, Median der 1.495 kaufbaren Rezepte; die Spanne reicht von 0 bis 40).
+  - **„Lohnt sich“ ist strenger:** mindestens dein Mindestgewinn pro Craft, AH-Preis höchstens 3 Tage alt, kein Ladenhüter, Rezept nach höchstens 30 Crafts bezahlt. Jetzt lernbare Rezepte stehen zuerst.
+  - Wie bisher nur für deine eigenen Berufe.
+
 ## 5.2.0 (08.11.2026)
 - **Rezepte zum Kaufen werden als Rezept angezeigt** (Muster, Pläne, Formel, Rezept, Bauplan …), nicht mehr als das Item, das sie herstellen.
   - Die Zuordnung Rezept → Rezept-Item stammt **exakt aus den Forever-Spieldaten**: Ein Rezept-Item hat als zweiten Effekt den Rezept-Zauber (ItemXItemEffect/ItemEffect, Build 70862). Neuer Generator `tools/gen_recipe_items.py`, neue Datei `Data_RecipeItems.lua`.

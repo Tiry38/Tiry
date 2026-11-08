@@ -72,7 +72,34 @@ end
 
 -- Rezept-Item zum Kaufen (Muster, Pläne, Formel ...) – nil = lernt man beim Lehrer
 function R.RecipeItem(r)
-  return r and ns.RECIPE_ITEMS and ns.RECIPE_ITEMS[r.id]
+  local e = r and ns.RECIPE_ITEMS and ns.RECIPE_ITEMS[r.id]
+  return e and e[1]
+end
+
+-- Ab welchem Berufsskill lernbar? Rückgabe: Skill, exakt (true = aus dem Rezept-Item in den Spieldaten)
+-- Lehrer-Rezepte: nicht in den Spieldaten -> Schätzung "gelb minus 20" (Median bei den 1.495 kaufbaren Rezepten)
+R.TRAINER_GAP = 20
+function R.LearnSkill(r)
+  local e = ns.RECIPE_ITEMS and ns.RECIPE_ITEMS[r.id]
+  if e and e[2] and e[2] > 0 then return e[2], true end
+  if r.yellow and r.yellow > 0 then return math.max(1, r.yellow - R.TRAINER_GAP), false end
+  return r.minSkill or 1, false
+end
+
+-- Kann ich das Rezept jetzt lernen? "now" (sicher), "soon" (bis 10 Punkte fehlen) oder nil
+function R.LearnState(r, rank)
+  if not rank or rank <= 0 then return nil end
+  if r.grey > 0 and rank >= r.grey then return nil end -- bringt keinen Skill mehr; Gold zählt trotzdem -> unten
+  local req, exact = R.LearnSkill(r)
+  if exact then
+    if req <= rank then return "now", req, true end
+    if req <= rank + 10 then return "soon", req, true end
+    return nil
+  end
+  -- Lehrer: sicher, wenn das Rezept für dich schon gelb ist (Lernstufe liegt immer darunter)
+  if r.yellow > 0 and r.yellow <= rank then return "now", req, false end
+  if req <= rank then return "maybe", req, false end
+  return nil
 end
 
 -- Lohnt sich das Rezept? Rückgabe: Rezept-Item, Preis im AH (oder nil), Crafts bis es bezahlt ist (oder nil)
@@ -81,6 +108,19 @@ function R.Payback(r, profitPerCraft)
   local price = item and ns.Market.Price(item)
   local crafts = (price and profitPerCraft and profitPerCraft > 0) and math.ceil(price / profitPerCraft) or nil
   return item, price, crafts
+end
+
+-- Text: wann lernbar
+function R.LearnText(r, rank)
+  local state, req, exact = R.LearnState(r, rank)
+  if not state then
+    local q, ex = R.LearnSkill(r)
+    if ex and q <= (rank or 0) then return "|cff61eb8fjetzt lernbar|r" end
+    return nil
+  end
+  if state == "now" then return "|cff61eb8fjetzt lernbar|r" .. (exact and (" (ab Skill " .. req .. ")") or "") end
+  if state == "soon" then return "|cffff9929ab Skill " .. req .. "|r (noch " .. (req - rank) .. " Punkte)" end
+  return "|cffff9929Lehrer: ab ca. Skill " .. req .. "|r"
 end
 
 -- Skill-Farbe wie im Spiel: 0 orange, 1 gelb, 2 grün, 3 grau
@@ -107,11 +147,14 @@ function R.List(profKey, mode)
     if mode == "known" and known then
       out[#out + 1] = r
     elseif mode == "learnable" and not known then
-      -- In Reichweite: noch nicht grau und höchstens ~40 Punkte über deinem Skill
-      local reach = (r.yellow > 0 and r.yellow or r.minSkill) - 15
-      if rank > 0 and reach <= rank + 40 and (r.grey == 0 or r.grey > rank) then
-        out[#out + 1] = r
+      -- Für DEINEN Skill: kaufbare Rezepte mit exakter Anforderung (jetzt oder in bis zu 10 Punkten),
+      -- Lehrer-Rezepte nur, wenn sie für dich schon gelb sind oder die Schätzung passt
+      local state = R.LearnState(r, rank)
+      if not state and rank > 0 and r.grey > 0 and rank >= r.grey then
+        local req, exact = R.LearnSkill(r)
+        if exact and req <= rank then state = "now" end -- grau, aber lernbar: bringt Gold, nur keinen Skill
       end
+      if state then out[#out + 1] = r end
     end
   end
   return out, rank

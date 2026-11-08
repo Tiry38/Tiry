@@ -596,6 +596,8 @@ function page.refresh(self)
       local ri, riPrice, payback
       if learn then
         ri, riPrice, payback = R.Payback(r, e.profit)
+        local lt = R.LearnText(r, rank)
+        if lt then notes[#notes + 1] = lt end
         notes[#notes + 1] = "macht " .. ns.Item(r.out).name
         if not ri then
           notes[#notes + 1] = "|cffff9929beim Lehrer lernen|r"

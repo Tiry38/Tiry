@@ -415,3 +415,39 @@ describe("Rezepte zum Kaufen (Muster, Pläne ...)", function()
     assert.are.same({}, W.errors)
   end)
 end)
+
+describe("Rezept-Tipps passen zu Skill und Beruf", function()
+  local prices = { [4244] = 30000, [4243] = 500, [4231] = 300, [2320] = 10, [4293] = 9000 }
+  local function load(rank, extraSkills)
+    local skills = { { name = "Lederverarbeitung", skillID = 165, isHeader = false, rank = rank, maxRank = 150 } }
+    for _, s in ipairs(extraSkills or {}) do skills[#skills + 1] = s end
+    return E.load({ prices = prices, skills = skills })
+  end
+  local function has(ns, id)
+    for _, t in ipairs(ns.Advisor.RecipeTips(50)) do if t.r.id == id then return t end end
+  end
+
+  it("Muster braucht Skill 75: bei 40 nicht dabei, bei 66 als 'bald', bei 80 als 'jetzt lernbar'", function()
+    local ns = load(40)
+    assert.is_nil(has(ns, 3762))
+    ns = load(66)
+    local t = has(ns, 3762)
+    assert.truthy(t) assert.are.equal("soon", t.state) assert.are.equal(75, t.req)
+    ns = load(80)
+    t = has(ns, 3762)
+    assert.truthy(t) assert.are.equal("now", t.state)
+    assert.truthy(t.learnText:find("jetzt lernbar", 1, true))
+  end)
+
+  it("zeigt nur Rezepte deiner Berufe", function()
+    local ns = load(80)
+    for _, t in ipairs(ns.Advisor.RecipeTips(50)) do assert.are.equal("LEATHERWORKING", t.prof) end
+  end)
+
+  it("lohnt sich nicht, wenn das Rezept zu teuer ist (mehr als 30 Crafts)", function()
+    prices[4293] = 9000000
+    local ns = load(80)
+    assert.is_nil(has(ns, 3762))
+    prices[4293] = 9000
+  end)
+end)

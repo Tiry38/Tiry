@@ -66,8 +66,8 @@ function page.build(self, content, width)
   self.tipTitle = UI.Text(content, 17, "bold", C.text)
   self.tipTitle:SetText("Hol dir diese Rezepte")
   self.tipHint = UI.Para(content, 12, C.muted, width)
-  self.tipHint:SetText("Rezepte, die du noch nicht kannst, die dein Skill schafft und die pro Craft mindestens deinen Mindestgewinn bringen. "
-    .. "Klick: im AH suchen · Shift-Klick: Rezept in die Auctionator-Suche legen (Suchfeld vorher anklicken).")
+  self.tipHint:SetText("Nur für deine Berufe und deinen Skill: Rezepte, die du jetzt (oder in bis zu 10 Punkten) lernen kannst, mit frischem Preis, "
+    .. "mindestens deinem Mindestgewinn pro Craft und in höchstens 30 Crafts bezahlt. Klick: im AH suchen · Shift-Klick: in die Auctionator-Suche.")
   self.tipList = UI.ItemList(content, width, {
     { key = "profit", label = "Gewinn/Craft", width = 110, bold = true },
     { key = "price", label = "Rezept im AH", width = 110 },
@@ -196,7 +196,8 @@ function page.refresh(self)
   local entries = {}
   for _, t in ipairs(tips) do
     local r = t.r
-    local notes = { "macht " .. ns.Item(r.out).name, ns.ProfName(ns.PROF[t.prof]) }
+    local notes = { t.learnText or "", "macht " .. ns.Item(r.out).name, ns.ProfName(ns.PROF[t.prof]) }
+    if notes[1] == "" then table.remove(notes, 1) end
     if t.skillUp then notes[#notes + 1] = "|cff61eb8fgibt dir Skill|r" end
     if not t.item then notes[#notes + 1] = "|cffff9929beim Lehrer lernen|r" end
     entries[#entries + 1] = {

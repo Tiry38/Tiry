@@ -142,8 +142,9 @@ function AD.ToQueue(plan)
   return #plan.steps
 end
 
--- Rezept-Tipps: Rezepte, die du noch NICHT kannst, für deinen Skill erreichbar sind und pro Craft
--- mindestens deinen Mindestgewinn bringen. Mit Rezept-Item (zum Kaufen) und "nach X Crafts bezahlt".
+-- Rezept-Tipps für DEINE Berufe und DEINEN Skill: Rezepte, die du noch nicht kannst, jetzt (oder in bis zu
+-- 10 Skillpunkten) lernen kannst und die sich lohnen: Mindestgewinn pro Craft, frischer Preis (max. 3 Tage),
+-- kein Ladenhüter, Rezept nach höchstens 30 Crafts bezahlt. Jetzt lernbare zuerst.
 function AD.RecipeTips(limit)
   local _, minProfit = R.Filter()
   local out = {}
@@ -153,15 +154,25 @@ function AD.RecipeTips(limit)
       local profit, revenue, _, unknown = ns.Scanner.RecipeProfit(r)
       local e = ns.DB.Get(r.out)
       local bound = e and (e.bind == 1 or e.bind == 4)
-      if profit and revenue and unknown == 0 and not bound and profit >= math.max(minProfit, 1) then
+      local age = M.Age(r.out)
+      local rate, n = ns.Ledger.SaleRate(r.out)
+      local slow = rate and n >= 4 and rate < 0.25
+      if profit and revenue and unknown == 0 and not bound and not slow and age and age <= 3
+          and profit >= math.max(minProfit, 1) then
         local item, price, payback = R.Payback(r, profit)
-        local d = R.Difficulty(r, rank)
-        out[#out + 1] = { r = r, profit = profit, item = item, price = price, payback = payback,
-          skillUp = d ~= nil and d <= 1, prof = key }
+        if not payback or payback <= 30 then -- Rezept muss sich in höchstens 30 Crafts bezahlt machen
+          local state, req, exact = R.LearnState(r, rank)
+          local d = R.Difficulty(r, rank)
+          out[#out + 1] = { r = r, profit = profit, item = item, price = price, payback = payback,
+            skillUp = d ~= nil and d <= 1, prof = key, state = state or "now", req = req, exact = exact,
+            learnText = R.LearnText(r, rank) }
+        end
       end
     end
   end
+  local ORDER = { now = 1, soon = 2, maybe = 3 }
   table.sort(out, function(a, b)
+    if ORDER[a.state] ~= ORDER[b.state] then return ORDER[a.state] < ORDER[b.state] end
     if a.profit ~= b.profit then return a.profit > b.profit end
     return a.r.name < b.r.name
   end)
