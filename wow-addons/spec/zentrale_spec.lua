@@ -451,3 +451,35 @@ describe("Rezept-Tipps passen zu Skill und Beruf", function()
     prices[4293] = 9000
   end)
 end)
+
+describe("AH-Scan höchstens alle 30 Minuten", function()
+  it("scannt beim zweiten Öffnen nicht erneut, nach 30 Minuten wieder", function()
+    local ns, W = E.load({})
+    W.owned = { { auctionID = 1, itemKey = { itemID = 2318 }, status = 0, quantity = 5, timeLeftSeconds = 7200, buyoutAmount = 40 } }
+    local function visit()
+      W.scanStarted, W.searchedKeys, W.ownedQueried = nil, nil, 0
+      W.fire("AUCTION_HOUSE_SHOW") W.flush()
+      W.fire("OWNED_AUCTIONS_UPDATED") W.flush()
+      W.fire("COMMODITY_SEARCH_RESULTS_UPDATED", 2318) W.flush()
+      W.fire("AUCTION_HOUSE_CLOSED") W.flush()
+    end
+    visit()
+    assert.truthy(W.scanStarted)
+    assert.truthy(W.searchedKeys)
+    W.now = W.now + 10 * 60 -- 10 Minuten später wieder am AH
+    visit()
+    assert.are.equal(1, W.ownedQueried) -- eigene Auktionen werden trotzdem gelesen
+    assert.is_nil(W.scanStarted)
+    assert.is_nil(W.searchedKeys)
+    assert.are.equal(20, ns.AH.NextAutoIn())
+    W.now = W.now + 21 * 60 -- 31 Minuten nach dem ersten Besuch
+    visit()
+    assert.truthy(W.scanStarted)
+    -- "Jetzt prüfen" geht immer
+    W.searchedKeys = nil
+    W.fire("AUCTION_HOUSE_SHOW") W.flush()
+    ns.AH.CheckNow()
+    W.fire("OWNED_AUCTIONS_UPDATED") W.flush()
+    assert.truthy(W.searchedKeys)
+  end)
+end)

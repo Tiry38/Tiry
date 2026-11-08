@@ -1,5 +1,11 @@
 # Changelog – Tiry's Zentrale
 
+## 5.2.2 (08.11.2026)
+- **AH-Scan und Unterboten-Prüfung laufen höchstens alle 30 Minuten**, statt bei jedem Öffnen. Wer oft am AH vorbeiläuft, kann sofort einstellen.
+  - Den Abstand stellst du unter Einstellungen > „AH-Scan höchstens alle“ ein (5–240 Min., × setzt auf 30 zurück).
+  - Eigene Auktionen lesen läuft weiter bei jedem Öffnen. Das ist eine einzige Abfrage, also sofort fertig.
+  - „Jetzt prüfen“ unter Markt > Meine Auktionen geht jederzeit. Die Ansicht zeigt, in wie vielen Minuten die nächste automatische Prüfung fällig ist.
+
 ## 5.2.1 (08.11.2026)
 - **Rezept-Empfehlungen passen jetzt genau zu deinem Skill.**
   - **Kaufbare Rezepte:** Die exakte Skill-Anforderung kommt aus den Spieldaten (ItemSparse.RequiredSkillRank, z. B. „Muster: Feine Lederhandschuhe“ = Lederverarbeitung 50). Sie werden als „jetzt lernbar“ gezeigt, oder als „ab Skill X (noch Y Punkte)“, wenn höchstens 10 Punkte fehlen. Vorher waren es bis zu ~40 Punkte darüber.

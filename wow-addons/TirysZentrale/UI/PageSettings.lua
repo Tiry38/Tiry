@@ -113,6 +113,9 @@ function page.build(self, content, width)
     s.expertMode = v
   end, "Zeigt im Craft-Planer die Preisformeln (Materialpreis, Verkaufswert, Mindestgewinn) zum Selbst-Einstellen. Für Einsteiger nicht nötig.", width), 54)
 
+  add(stepper(content, "AH-Scan höchstens alle", "Automatischer Scan und Unterboten-Prüfung beim Öffnen des AH – höchstens so oft. Standard: 30 Minuten. \"Jetzt prüfen\" unter Markt > Meine Auktionen geht immer.",
+    function() return tonumber(s.ahScanInterval) or 30 end, function(v) s.ahScanInterval = v end, 5, 5, 240, "%d Min.", width, 30), 54)
+
   add(stepper(content, "AH-Gebühr", "So viel Prozent behält das Auktionshaus vom Verkaufspreis ein. Standard: 5 %. Alle Gewinne werden damit berechnet.",
     function() return tonumber(s.ahCut) or 5 end, function(v) s.ahCut = v end, 1, 0, 30, "%d %%", width, 5), 54)
 

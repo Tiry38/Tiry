@@ -195,25 +195,56 @@ end
 ----------------------------------------------------------------------------
 -- Ablauf beim Öffnen des AH (ohne Klick): eigene Auktionen -> Unterboten-Prüfung -> Auctionator-Scan
 ----------------------------------------------------------------------------
+-- Scan und Unterboten-Prüfung höchstens alle X Minuten (Einstellung, Standard 30) – wer oft am AH vorbeiläuft,
+-- will einstellen und nicht jedes Mal warten. Eigene Auktionen lesen ist eine einzige Abfrage und läuft immer.
+function AW.IntervalMinutes()
+  return ns.Clamp(tonumber(ns.settings.ahScanInterval) or 30, 5, 240)
+end
+
+function AW.AutoDue()
+  local last = ns.db and ns.db.lastAutoCheck
+  return not last or (time() - last) >= AW.IntervalMinutes() * 60
+end
+
+-- Minuten bis zur nächsten automatischen Prüfung (0 = beim nächsten Öffnen)
+function AW.NextAutoIn()
+  local last = ns.db and ns.db.lastAutoCheck
+  if not last then return 0 end
+  return math.max(0, math.ceil((last + AW.IntervalMinutes() * 60 - time()) / 60))
+end
+
 local wantCheck = false
+local function runChecks()
+  if ns.db then ns.db.lastAutoCheck = time() end
+  local scan = function() if ns.settings.ahAutoScan ~= false and M.ahOpen then M.StartScan({ quiet = true }) end end
+  if ns.settings.ahUndercut ~= false then AW.CheckUndercuts(scan) else scan() end
+end
+
 ns.Listen("AH_STATE", function()
   if not M.ahOpen then wipe(queue) pending = nil AW.checking = false return end
   C_Timer.After(1, function()
     if not M.ahOpen then return end
-    wantCheck = true
-    if not AW.QueryOwned() then
+    wantCheck = AW.AutoDue()
+    if not AW.QueryOwned() and wantCheck then
       wantCheck = false
+      if ns.db then ns.db.lastAutoCheck = time() end
       if ns.settings.ahAutoScan ~= false then M.StartScan({ quiet = true }) end
     end
   end)
 end)
 
+-- "Jetzt prüfen" (Knopf): sofort, unabhängig vom Zeitabstand
+function AW.CheckNow()
+  wantCheck = true
+  if not AW.QueryOwned() then wantCheck = false return false end
+  return true
+end
+
 ns.On("OWNED_AUCTIONS_UPDATED", function()
   AW.ReadOwned()
   if wantCheck then
     wantCheck = false
-    local scan = function() if ns.settings.ahAutoScan ~= false and M.ahOpen then M.StartScan({ quiet = true }) end end
-    if ns.settings.ahUndercut ~= false then AW.CheckUndercuts(scan) else scan() end
+    runChecks()
   end
 end)
 
