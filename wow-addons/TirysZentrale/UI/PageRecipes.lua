@@ -242,6 +242,12 @@ function page.build(self, content, width)
   self.shopBtn = UI.Button(mk, "Einkaufsfenster", "cool", 170, 34, "cart")
   self.shopBtn:SetPoint("LEFT", self.makeBtn, "RIGHT", 10, 0)
   self.shopBtn:SetScript("OnClick", function() ns.Shop.Toggle() end)
+  -- Liste neu berechnen: Berufe/Rezepte neu lesen, mit aktuellen Preisen rechnen (am AH zusätzlich scannen)
+  self.refreshBtn = UI.Button(mk, "Aktualisieren", "soft", 170, 34, "refresh")
+  self.refreshBtn:SetPoint("LEFT", self.shopBtn, "RIGHT", 10, 0)
+  self.refreshBtn:SetScript("OnClick", function() page.Reload(self) end)
+  UI.SetTooltip(self.refreshBtn, "Aktualisieren", "Liest deine Berufe und Rezepte neu und rechnet alles mit den aktuellen Preisen. "
+    .. "Ist das Auktionshaus offen, werden auch neue Preise gescannt. Ist das Berufsfenster offen, werden neu gelernte Rezepte sofort erkannt.")
   st:Add(mk, 36, 12)
 
   self.info = UI.Para(content, 12, C.hi, width)
@@ -336,6 +342,18 @@ ns.Listen("LOOT_GAINED", function(_, itemID, gained)
     UI.RefreshPage("recipes")
   end
 end)
+
+function page.Reload(self)
+  ns.UpdateProfessions()
+  self.segKey = nil
+  if S.tradeOpen and S.ScanRecipes then
+    local n = S.ScanRecipes()
+    if n and n > 0 then ns.Fire("RECIPES_SCANNED") end
+  end
+  if M.ahOpen then M.StartScan() end
+  page.refresh(self)
+  ns.Print("Craft-Planer aktualisiert – " .. M.LastScanText() .. ".")
+end
 
 function page.MakeList(self)
   local list = page.Entries(self)

@@ -493,6 +493,13 @@ function M.install(opts)
     GetCommoditySearchResultInfo = function(id, i) local r = (M.ahResults or {})[id] r = r and r[i] if r then return { itemID = id, unitPrice = r[1], quantity = r[2], containsOwnerItem = r[3] or false } end end,
     GetNumItemSearchResults = function(key) return #((M.ahResults or {})[key.itemID] or {}) end,
     GetItemSearchResultInfo = function(key, i) local r = (M.ahResults or {})[key.itemID] r = r and r[i] if r then return { buyoutAmount = r[1], quantity = r[2], containsOwnerItem = r[3] or false } end end,
+    QueryOwnedAuctions = function(sorts) assert(type(sorts) == "table") M.ownedQueried = (M.ownedQueried or 0) + 1 end,
+    GetNumOwnedAuctions = function() return #(M.owned or {}) end,
+    GetOwnedAuctionInfo = function(i) return (M.owned or {})[i] end,
+    SendSearchQuery = function(key, sorts, separate) assert(type(key) == "table" and type(sorts) == "table" and type(separate) == "boolean") M.searchedKeys = M.searchedKeys or {} table.insert(M.searchedKeys, key.itemID) end,
+    IsThrottledMessageSystemReady = function() return true end,
+    GetItemKeyInfo = function(key) return { itemID = key.itemID, isCommodity = not (M.nonCommodity or {})[key.itemID] } end,
+    MakeItemKey = function(id) return { itemID = id, itemLevel = 0, itemSuffix = 0, battlePetSpeciesID = 0 } end,
   }
   G.AUCTION_EXPIRED_MAIL_SUBJECT = "Auktion abgelaufen: %s"
   G.GetRealmName = function() return "Forever-Testrealm" end

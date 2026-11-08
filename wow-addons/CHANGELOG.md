@@ -1,5 +1,17 @@
 # Changelog – Tiry's Zentrale
 
+## 5.1.0 (08.11.2026)
+- **Neu: Markt → Meine Auktionen**
+  - **Beim Öffnen des AH, ohne Klick:** Tiry's Zentrale liest deine eigenen Auktionen (`C_AuctionHouse.QueryOwnedAuctions`).
+  - **Unterboten-Prüfung:** Für jedes Item werden die günstigsten **fremden** Angebote abgefragt, gedrosselt nach Blizzards Takt (`AUCTION_HOUSE_THROTTLED_SYSTEM_READY`). Ergebnis im Chat, als Zahl am Menüpunkt „Markt“ und als „nächster Schritt“ auf der Startseite.
+  - **Verkäufe** erkennt das Addon **überall**, auch fern vom AH. Blizzard meldet sie mit `AUCTION_HOUSE_SHOW_FORMATTED_NOTIFICATION` (laut Blizzard-Code „whether or not AH UI is shown“). Der Eintrag wandert dann sofort in „Verkauft“.
+  - Abgelaufene Auktionen werden als „abgelaufen – Post“ markiert.
+  - „Unterbotene als Suchliste“ für Auctionator. Verkaufte Einträge lassen sich per × entfernen.
+  - Ehrlich: Ob du unterboten wurdest, sieht man nur **am AH**. Fremde Angebote liefert Blizzard nur dort.
+- **AH automatisch scannen:** Nach der Unterboten-Prüfung startet beim Öffnen des AH von selbst der Preis-Scan von Auctionator. Auctionator erlaubt ihn alle 15 Minuten; ist er gesperrt, bleibt es still. Beides ist in den Einstellungen abschaltbar.
+- **Craft-Planer: Knopf „Aktualisieren“.** Er liest Berufe und Rezepte neu (bei offenem Berufsfenster auch neu gelernte), rechnet mit aktuellen Preisen und scannt bei offenem AH.
+- **Behoben:** `Guide.lua` stand doppelt in der .toc und wurde zweimal geladen. Ein neuer Test prüft jetzt, dass jede Datei genau einmal geladen wird und existiert.
+
 ## 5.0.2 (08.11.2026)
 - **Fehleranzeige funktioniert jetzt auch in Forever.** Tirys Test zeigte, dass Forever Fehler nicht an eigene Fehler-Handler weiterreicht. Tiry's Zentrale fängt Fehler deshalb selbst ab, an diesen Stellen:
   - Ereignisse, Timer und Seitenaufbau

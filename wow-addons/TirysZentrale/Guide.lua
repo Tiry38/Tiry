@@ -36,6 +36,13 @@ function G.NextStep()
       text = ns.Alerts.ActiveCount() .. " Item(s) liegen unter deinem Wunschpreis.",
       button = "Ansehen", action = function() UI.Show("alerts") end }
   end
+  -- 4b) Eigene Auktionen unterboten
+  local under = ns.AH and ns.AH.Summary().undercut or 0
+  if under > 0 then
+    return { title = under .. " Auktion" .. (under == 1 and "" or "en") .. " unterboten", icon = "receipt",
+      text = "Jemand verkauft günstiger als du. Am schnellsten neu einstellen: Auctionator > Reiter \"Unterboten\".",
+      button = "Meine Auktionen", action = function() UI.Show("auctions") end }
+  end
   -- 5) Craft-Liste: einkaufen oder craften
   local queue = ns.char and ns.char.queue or {}
   if #queue > 0 then

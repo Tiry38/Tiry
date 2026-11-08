@@ -101,6 +101,14 @@ function page.build(self, content, width)
     s.showOnlyMyLevel = v
   end, "Blendet auf der Seite \"Goldwege\" alles aus, wofür dein Level noch nicht reicht.", width), 54)
 
+  add(UI.Toggle(content, "AH automatisch scannen", function() return s.ahAutoScan ~= false end, function(v)
+    s.ahAutoScan = v
+  end, "Beim Öffnen des Auktionshauses startet Tiry's Zentrale den Preis-Scan von Auctionator von selbst (Auctionator erlaubt ihn alle 15 Minuten).", width), 54)
+
+  add(UI.Toggle(content, "Eigene Auktionen auf Unterbieten prüfen", function() return s.ahUndercut ~= false end, function(v)
+    s.ahUndercut = v
+  end, "Beim Öffnen des Auktionshauses wird geprüft, ob jemand deine Auktionen unterboten hat – Ergebnis im Chat und unter Markt > Meine Auktionen.", width), 54)
+
   add(UI.Toggle(content, "Experten-Modus", function() return s.expertMode == true end, function(v)
     s.expertMode = v
   end, "Zeigt im Craft-Planer die Preisformeln (Materialpreis, Verkaufswert, Mindestgewinn) zum Selbst-Einstellen. Für Einsteiger nicht nötig.", width), 54)

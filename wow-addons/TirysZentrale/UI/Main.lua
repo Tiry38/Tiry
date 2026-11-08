@@ -17,7 +17,7 @@ UI.GROUPS = {
   { key = "start", label = "Start", icon = "home", views = { { "home", "Goldplan" }, { "methods", "Goldwege" } } },
   { key = "farmen", label = "Farmen", icon = "pin", views = { { "farm", "Farm-Guide" }, { "skinning", "Kürschner" }, { "session", "Farm-Session" } } },
   { key = "berufe", label = "Berufe", icon = "flask", views = { { "recipes", "Craft-Planer" }, { "advisor", "Berufe-Berater" } } },
-  { key = "markt", label = "Markt", icon = "coins", views = { { "market", "Preise" }, { "alerts", "Preisalarm" }, { "scanner", "Taschen & Händler" }, { "database", "Item-Suche" } } },
+  { key = "markt", label = "Markt", icon = "coins", views = { { "market", "Preise" }, { "auctions", "Meine Auktionen" }, { "alerts", "Preisalarm" }, { "scanner", "Taschen & Händler" }, { "database", "Item-Suche" } } },
   { key = "gold", label = "Mein Gold", icon = "chart", views = { { "tracker", "Goldtagebuch" }, { "ledger", "Verkaufsbuch" } } },
   { key = "lernen", label = "Lernen", icon = "book", views = { { "basics", "AH-Schule" }, { "glossary", "Glossar" } } },
   { key = "settings", label = "Einstellungen", icon = "gear", views = { { "settings", "Einstellungen" } } },
@@ -485,9 +485,18 @@ function UI.IsShown(key)
   return frame and frame:IsShown() and UI.current == key
 end
 
+-- Zahl am Menüpunkt: Werte mehrerer Ansichten eines Hauptpunkts werden zusammengezählt
+local badgeValues = {}
 function UI.SetBadge(key, text)
   local g = UI.GroupOf(key)
+  badgeValues[key] = tonumber(text) or (text and text ~= "" and text) or nil
   if not frame or not g or not frame.nav[g.key] then return end
+  local sum, other = 0, nil
+  for _, v in ipairs(g.views) do
+    local val = badgeValues[v[1]]
+    if type(val) == "number" then sum = sum + val elseif val then other = val end
+  end
+  text = sum > 0 and tostring(sum) or other
   local badge = frame.nav[g.key].badge
   if text and text ~= "" then
     badge:Set(text, C.rose, true)

@@ -44,6 +44,15 @@ Geprüfte Schwerpunkte (Details im Anhang):
 | A11 | Beim Berufswechsel wurde der offene Beruf nicht neu gelesen | **behoben** `Scanner.lua:272` (`S.openProfKey`, Neulesen bei jedem Rescan) |
 | A12 | Ohne Beleg, aber abgesichert: `GetMerchantItemInfo`, globales `GetItemInfo`/`GetItemIcon`, `AUCTION_EXPIRED_MAIL_SUBJECT` | **bewusst gelassen**: Nur Rückfall hinter `C_*`-Funktionen bzw. mit festem deutschem Text. Schadet nicht. |
 
+### Nachtrag 5.1.0: neue AH-Funktionen (geprüft gegen `AuctionHouseDocumentation.lua`)
+- `QueryOwnedAuctions(sorts)`, `GetNumOwnedAuctions()`, `GetOwnedAuctionInfo(i)` → `OwnedAuctionInfo` mit den Feldern `auctionID`, `itemKey`, `status` (Active/Sold), `quantity`, `timeLeftSeconds` und `buyoutAmount`.
+- `SendSearchQuery(itemKey, sorts, separateOwnerItems)`, `IsThrottledMessageSystemReady()`, `GetItemKeyInfo(itemKey).isCommodity`, `MakeItemKey(itemID)`.
+- Keine dieser Funktionen hat ein Einschränkungs-Flag (nur `SecretArguments = "AllowedWhenUntainted"`). Sie laufen also auch ohne Klick, so wie Auctionators eigener Auto-Scan.
+- Ereignisse: `OWNED_AUCTIONS_UPDATED`, `AUCTION_HOUSE_THROTTLED_SYSTEM_READY`, `AUCTION_HOUSE_AUCTION_CREATED`, `AUCTION_CANCELED` und `AUCTION_HOUSE_SHOW_FORMATTED_NOTIFICATION` (notification, text, auctionID).
+  - Laut `Blizzard_ChatFrameUtil.lua:3` kommt diese Meldung „whether or not AH UI is shown“, also auch fern vom AH.
+  - Werte laut `AuctionHouseEnumsDocumentation.lua:117-118`: AuctionSold = 4, AuctionExpired = 5.
+- Preis pro Stück: Bei Stapelware ist `buyoutAmount` der Stückpreis, bei Einzel-Items der Preis der ganzen Auktion. Unterschieden wird über `isCommodity`, getestet in busted „Meine Auktionen“.
+
 ## 2. Auctionator
 
 - **Öffentliche API v1 (Auctionator v342, 07.11.):** Genutzt werden 7 Funktionen, alle korrekt aufgerufen: `GetAuctionPriceByItemID`, `GetAuctionAgeByItemID`, `GetVendorPriceByItemID`, `ConvertToSearchString`, `CreateShoppingList`, `MultiSearchExact`, `RegisterForDBUpdate`.

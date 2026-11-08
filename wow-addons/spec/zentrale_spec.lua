@@ -284,3 +284,81 @@ describe("Fehler beim Klicken (Forever reicht Fehler nicht weiter)", function()
     assert.truthy(ns.ErrorLog()[1].msg:find("Testfehler", 1, true))
   end)
 end)
+
+describe(".toc", function()
+  it("lädt jede Datei genau einmal, und jede Datei existiert", function()
+    local seen = {}
+    for _, f in ipairs(E.tocFiles()) do
+      assert.is_nil(seen[f], "doppelt: " .. f)
+      seen[f] = true
+      assert.truthy(io.open("TirysZentrale/" .. f), "fehlt: " .. f)
+    end
+  end)
+end)
+
+describe("Meine Auktionen", function()
+  local ns, W
+  setup(function()
+    ns, W = E.load({})
+    W.owned = {
+      { auctionID = 11, itemKey = { itemID = 2318 }, status = 0, quantity = 20, timeLeftSeconds = 3600 * 20, buyoutAmount = 40 },
+      { auctionID = 12, itemKey = { itemID = 2589 }, status = 0, quantity = 10, timeLeftSeconds = 3600 * 5, buyoutAmount = 70 },
+      { auctionID = 13, itemKey = { itemID = 4238 }, status = 0, quantity = 2, timeLeftSeconds = 3600, buyoutAmount = 2000 },
+    }
+    W.nonCommodity = { [4238] = true } -- Tasche: Einzel-Item -> buyoutAmount ist der Preis der ganzen Auktion
+  end)
+
+  it("liest beim Öffnen des AH automatisch die eigenen Auktionen und prüft auf Unterbieten", function()
+    W.ahResults = { [2318] = { { 35, 50 }, { 40, 20, true } }, [2589] = { { 80, 5 } }, [4238] = { { 1500, 1 } } }
+    W.prints = {}
+    W.fire("AUCTION_HOUSE_SHOW") W.flush()
+    assert.truthy(W.ownedQueried)
+    W.fire("OWNED_AUCTIONS_UPDATED") W.flush()
+    -- der Reihe nach: erst Leder, dann Leinen, dann Tasche (Antworten simulieren)
+    W.fire("COMMODITY_SEARCH_RESULTS_UPDATED", 2318) W.flush()
+    W.fire("COMMODITY_SEARCH_RESULTS_UPDATED", 2589) W.flush()
+    W.fire("ITEM_SEARCH_RESULTS_UPDATED", { itemID = 4238 }) W.flush()
+    local byID = {}
+    for _, a in ipairs(ns.AH.Store().list) do byID[a.id] = a end
+    assert.are.equal(40, byID[2318].unit)
+    assert.is_true(byID[2318].undercut) -- 35 < 40 (eigenes Angebot zählt nicht)
+    assert.is_false(byID[2589].undercut) -- 80 > 70
+    assert.are.equal(1000, byID[4238].unit) -- 2000 für 2 Stück
+    assert.is_false(byID[4238].undercut) -- 1500 > 1000
+    assert.truthy(E.chat(W):find("unterboten", 1, true))
+    assert.are.equal(1, ns.AH.Summary().undercut)
+    assert.truthy(W.scanStarted) -- danach automatisch der Auctionator-Scan
+  end)
+
+  it("erkennt Verkäufe auch fern vom AH", function()
+    W.fire("AUCTION_HOUSE_CLOSED") W.flush()
+    W.fire("AUCTION_HOUSE_SHOW_FORMATTED_NOTIFICATION", 4, "Leinenstoff", 12)
+    local sold = ns.AH.Store().sold
+    assert.are.equal(1, #sold)
+    assert.are.equal(2589, sold[1].id)
+    assert.are.equal(1, ns.AH.Summary().soldToday)
+    for _, a in ipairs(ns.AH.Store().list) do
+      if a.auctionID == 12 then assert.are.equal("sold", a.status) end
+    end
+  end)
+
+  it("Ansicht und Knöpfe laufen ohne Fehler", function()
+    SlashCmdList.TIRYSZENTRALE("")
+    ns.UI.Wizard.Finish()
+    ns.UI.Show("auctions")
+    local p = ns.UI.pages.auctions
+    p.checkBtn:Click()
+    p.listBtn:Click()
+    p.sold.rows[1].action:Click()
+    assert.are.equal(0, #ns.AH.Store().sold)
+    assert.are.same({}, W.errors)
+  end)
+
+  it("Craft-Planer: Aktualisieren-Knopf", function()
+    ns.UI.Show("recipes")
+    W.prints = {}
+    ns.UI.pages.recipes.refreshBtn:Click()
+    assert.truthy(E.chat(W):find("aktualisiert", 1, true))
+    assert.are.same({}, W.errors)
+  end)
+end)

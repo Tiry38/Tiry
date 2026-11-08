@@ -172,13 +172,15 @@ ns.Listen("LOGIN", function()
 end)
 
 -- Startet denselben Scan wie Auctionators eigener Knopf "Scannen" (Reiter Auctionator)
-function M.StartScan()
+-- opts.quiet: automatischer Scan beim Öffnen des AH – keine Meldung, wenn er gerade nicht geht
+function M.StartScan(opts)
+  local quiet = opts and opts.quiet
   if not M.HasAuctionator() then
-    ns.Print("|cffff6b81Auctionator fehlt|r – bitte die Forever-Version installieren.")
+    if not quiet then ns.Print("|cffff6b81Auctionator fehlt|r – bitte die Forever-Version installieren.") end
     return false
   end
   if not M.ahOpen then
-    ns.Print("Stell dich ans Auktionshaus und öffne es – dann scannt Tiry's Zentrale mit einem Klick.")
+    if not quiet then ns.Print("Stell dich ans Auktionshaus und öffne es – dann scannt Tiry's Zentrale mit einem Klick.") end
     return false
   end
   -- Auctionator hat KEINE öffentliche Funktion zum Scan-Start. Wir nutzen seinen eigenen Scan-Knopf-Code nur,
@@ -198,9 +200,11 @@ function M.StartScan()
   end)
   if okCall and started then
     M.scanRequested = true
-    ns.Print("Scan läuft ... Tiry's Zentrale meldet sich, sobald die Preise da sind.")
+    ns.Print(quiet and "Scanne das AH automatisch ... (abschaltbar in den Einstellungen)"
+      or "Scan läuft ... Tiry's Zentrale meldet sich, sobald die Preise da sind.")
     return true
   end
+  if quiet then return false end
   if okCall and reason == "running" then
     ns.Print("Auctionator scannt schon – einfach warten, die Preise kommen gleich.")
   elseif okCall and reason == "cooldown" then
