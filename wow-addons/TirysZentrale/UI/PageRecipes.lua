@@ -227,7 +227,7 @@ function page.build(self, content, width)
   self.proCard = sc
 
   -- Schritt 3: alle lohnenden Rezepte auf einen Klick in die Liste, Einkaufsfenster dazu
-  st:Add(stepHead(content, 3, "Liste erstellen, einkaufen, craften", width), 28, 10)
+  st:Add(stepHead(content, 3, "Liste erstellen, einkaufen, herstellen", width), 28, 10)
   local mk = CreateFrame("Frame", nil, content)
   mk:SetSize(width, 36)
   self.perRecipe = UI.Stepper(mk, "Je Rezept", 230, function() return cfg().perRecipe or 2 end,
@@ -271,6 +271,32 @@ function page.build(self, content, width)
   self.hiddenRow.label:SetPoint("TOPLEFT", 0, -8)
   self.hiddenRow.label:SetText("Gerade ausgeblendet:")
   self.hiddenRow.chips = {}
+
+  -- Schritt 4: Verkaufen (Position wird in refresh berechnet)
+  self.sellHead = stepHead(content, 4, "Verkaufen", width)
+  self.sellHint = UI.Para(content, 12, C.muted, width)
+  self.sellHint:SetText("So geht's: Auktionshaus öffnen > Auctionator > Reiter \"Verkaufen\" > Item in deiner Tasche anklicken > einstellen. "
+    .. "Nie unter dem Mindestpreis verkaufen – darunter machst du Verlust.")
+  self.sellList = UI.ItemList(content, width, {
+    { key = "n", label = "Menge", width = 60 },
+    { key = "price", label = "AH-Preis", width = 100 },
+    { key = "floor", label = "Nicht unter", width = 100 },
+    { key = "value", label = "Wert", width = 100, bold = true },
+  })
+  self.sellBtn = UI.Button(content, "Konkurrenz im AH prüfen", "cool", 280, 34, "scan")
+  self.sellBtn:SetScript("OnClick", function()
+    local ids = {}
+    for _, e in ipairs(self.sellItems or {}) do ids[#ids + 1] = e.id end
+    if #ids == 0 then return end
+    if M.ahOpen then
+      local ok, err = M.SearchNow(ids)
+      if not ok then ns.Print("|cffff6b81" .. tostring(err) .. "|r") end
+    else
+      local ok, n = M.CreateShoppingList("Zentrale: Verkaufen", ids)
+      ns.Print(ok and ("Liste |cffff9929Zentrale: Verkaufen|r angelegt (" .. n .. "). Im AH siehst du so sofort die aktuellen Preise.") or ("|cffff6b81" .. tostring(n) .. "|r"))
+    end
+  end)
+  UI.SetTooltip(self.sellBtn, "Konkurrenz prüfen", "Sucht deine hergestellten Items im AH, damit du siehst, zu welchem Preis andere gerade verkaufen.")
 
   -- Warteschlange
   local qc = UI.Card(content, 20, C.card)
@@ -360,6 +386,9 @@ local function resolveMarks()
     if r and e then
       local done = math.min(n, e.n)
       addToQueue(r, -done)
+      -- merken, was du hergestellt hast -> Schritt "Verkaufen"
+      ns.char.craftedOut = ns.char.craftedOut or {}
+      ns.char.craftedOut[r.out] = (ns.char.craftedOut[r.out] or 0) + done * math.max(r.qty, 1)
       if pendingCraft and pendingCraft.recipe == r.id then
         pendingCraft.left = pendingCraft.left - done
         if pendingCraft.left <= 0 then pendingCraft = nil end
@@ -459,6 +488,36 @@ function page.MakeList(self)
   ns.Print(string.format("Craft-Liste erstellt: %d Rezepte je %d×. Das Einkaufsfenster zeigt dir, was du noch kaufen musst.", #list, per))
   ns.Shop.Show()
   page.refresh(self)
+end
+
+-- Craft-Liste für ALLE deine Berufe auf einmal (Startseite: "Liste erstellen")
+-- Zum Schritt "Verkaufen" springen
+function page.ScrollToSell()
+  local p = page
+  if not (p.frame and p.sellTop) then return end
+  local sf = p.frame.scroll
+  if sf and sf.SetVerticalScroll then
+    local range = sf.GetVerticalScrollRange and sf:GetVerticalScrollRange() or p.sellTop
+    pcall(sf.SetVerticalScroll, sf, math.min(p.sellTop, range or p.sellTop))
+  end
+end
+
+function page.MakeListAll()
+  local self = page
+  local list = ns.Guide.Profitable()
+  if #list == 0 then
+    ns.Print("Gerade bringt kein Rezept genug Gold – einmal im AH scannen oder den Mindestgewinn im Craft-Planer senken.")
+    UI.Show("recipes")
+    return
+  end
+  local per = cfg().perRecipe or 2
+  local q = queue()
+  wipe(q)
+  for _, e in ipairs(list) do q[#q + 1] = { recipe = e.r.id, prof = e.r.prof, n = per } end
+  ns.Shop.ResetSkips()
+  ns.Print(string.format("Craft-Liste erstellt: %d Rezepte je %d× (alle Berufe). Jetzt einkaufen – die Einkaufsliste ist offen.", #list, per))
+  ns.Shop.Show()
+  if self.frame then page.refresh(self) end
 end
 
 function page.ClearQueue()
@@ -854,6 +913,39 @@ function page.refresh(self)
   local qh = qy + 34 + 20
   qc:SetHeight(qh)
   y = y + qh + 20
+
+  -- Schritt 4: Verkaufen – hergestellte Items in der Tasche
+  self.sellTop = y
+  self.sellHead:ClearAllPoints()
+  self.sellHead:SetPoint("TOPLEFT", content, "TOPLEFT", 0, -y)
+  y = y + 28 + 10
+  self.sellHint:ClearAllPoints()
+  self.sellHint:SetPoint("TOPLEFT", content, "TOPLEFT", 0, -y)
+  y = y + math.ceil(self.sellHint:GetStringHeight()) + 10
+  local sell = ns.Guide.ReadyToSell()
+  self.sellItems = sell
+  local sellEntries = {}
+  for _, e in ipairs(sell) do
+    sellEntries[#sellEntries + 1] = {
+      id = e.id,
+      note = e.below and "|cffff6b81AH-Preis liegt unter deinen Kosten – lieber warten|r" or (e.price and "lohnt sich" or "noch kein AH-Preis"),
+      cells = {
+        n = tostring(e.n),
+        price = e.price and ns.Money(e.price) or "|cff8a9a94–|r",
+        floor = e.floor and ns.Money(e.floor) or "|cff8a9a94–|r",
+        value = e.price and ns.Money(e.price * e.n) or "|cff8a9a94–|r",
+      },
+      tip = { "Nicht unter = deine Materialkosten pro Stück (nach AH-Gebühr).", "Shift-Klick: Link in den Chat bzw. in die Auctionator-Suche." },
+    }
+  end
+  self.sellList:ClearAllPoints()
+  self.sellList:SetPoint("TOPLEFT", content, "TOPLEFT", 0, -y)
+  y = y + self.sellList:SetEntries(sellEntries, "Noch nichts hergestellt. Sobald du etwas von deiner Craft-Liste herstellst, steht es hier.") + 10
+  self.sellBtn:ClearAllPoints()
+  self.sellBtn:SetPoint("TOPLEFT", content, "TOPLEFT", 0, -y)
+  self.sellBtn:SetShown(#sell > 0)
+  if #sell > 0 then y = y + 34 + 14 end
+  y = y + 10
 
   -- Profi-Strings (eingeklappt, damit die Seite übersichtlich bleibt)
   self.proToggle:ClearAllPoints()

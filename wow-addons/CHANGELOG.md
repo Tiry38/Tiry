@@ -1,5 +1,20 @@
 # Changelog – Tiry's Zentrale
 
+## 5.5.0 (08.11.2026)
+**Hauptthema ist jetzt Gold durch Herstellen: Material kaufen, herstellen, teurer verkaufen.**
+- **Startseite = Gold-Kreislauf** mit vier Schritten, je einem Knopf und Haken, wenn erledigt. Der orange Schritt ist dran.
+  1. **Planen:** „X Rezepte bringen gerade Gold – bis zu Y pro Stück“ → **Liste erstellen** (für alle deine Berufe auf einmal).
+  2. **Einkaufen:** fehlendes Material und Kosten → Einkaufsliste.
+  3. **Herstellen:** wie viele Stück jetzt gehen → Nächstes craften.
+  4. **Verkaufen:** hergestellte Items in der Tasche mit Wert → Verkaufsliste.
+- **Startseite entrümpelt:** „Heute für dich“, „Top 3“ und „Schnellstart“ sind weg. Die Goldwege bleiben als Reiter. Ein Hinweis erscheint nur noch, wenn etwas außerhalb des Kreislaufs wichtig ist, z. B. Auctionator fehlt, Gold im Briefkasten oder alte Preise.
+- **Neu im Craft-Planer: Schritt 4 „Verkaufen“.**
+  - Liste deiner hergestellten Items mit AH-Preis, **„Nicht unter“** (deine Materialkosten pro Stück nach AH-Gebühr) und Wert. Liegt der AH-Preis unter deinen Kosten, steht dort „lieber warten“.
+  - Knopf „Konkurrenz im AH prüfen“ und eine kurze Anleitung zum Einstellen mit Auctionator.
+  - Gezählt wird nur, was du **wirklich hergestellt** hast (beim Abhaken gemerkt) oder was als Ergebnis auf deiner Liste steht. Material wie Leichtes Leder zählt nie.
+- **Menü:** „Berufe“ heißt jetzt **„Craften“** und steht direkt unter Start. Der Berater-Reiter heißt **„Was lernen?“**.
+- Ohne Herstellungsberuf schlägt der „nächste Schritt“ vor, einen zu lernen, statt nur Sammelberufe.
+
 ## 5.4.0 (08.11.2026)
 - **Craft-Liste leert sich jetzt zuverlässig nach dem Herstellen.** Gemeldet von Tiry: 1× hergestellt, die Liste zeigte weiter 3×.
   - Vorher wurde nur über neue Items in der Tasche bei offenem Berufsfenster erkannt.

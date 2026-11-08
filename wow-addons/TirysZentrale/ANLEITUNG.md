@@ -15,12 +15,14 @@
 2. Der **Einsteiger-Assistent** zeigt in 3 Schritten, was erkannt wurde und was du zuerst tun solltest.
 3. Einmal zum **Auktionshaus** gehen, es öffnen und oben im Fenster auf **„AH scannen“** klicken. Ab dann rechnet alles mit den echten Preisen deines Servers.
 
-## Die 5 wichtigsten Klicks
-1. **Start → „Dein nächster Schritt“:** Der Knopf rechts sagt dir immer genau, was jetzt am meisten bringt. Einfach draufklicken.
-2. **Markt → Taschen & Händler:** zeigt, was in deinen Taschen ins AH gehört und was zum Händler.
-3. **Berufe → Craft-Planer → „Liste erstellen“:** Alle Rezepte, die gerade Gold bringen, landen in der Craft-Liste. Die **Einkaufsliste** zeigt das fehlende Material. Beim Händler kaufst du per Klick mit „Beim Händler kaufen“, im AH mit „Im AH suchen“. Danach „Nächstes craften“.
-4. **Farmen → Farm-Guide:** Klick auf einen Spot setzt einen **Wegpunkt mit Pfeil**. Vorher unter „Farm-Session“ auf Start drücken: Dann siehst du dein Gold pro Stunde.
-5. **Suchen** (oben in der Seitenleiste): ein Wort eintippen, z. B. „leder“. Du findest Items, Rezepte, Goldwege und Erklärungen.
+## So machst du Gold (die Startseite führt dich)
+Auf der Startseite steht dein **Gold-Kreislauf**. Der orange Schritt ist immer dran:
+1. **Planen:** Klick auf **„Liste erstellen“**. Alle Rezepte deiner Berufe, die gerade Gold bringen, landen auf der Craft-Liste.
+2. **Einkaufen:** Die **Einkaufsliste** zeigt nur das fehlende Material. Beim Händler: „Beim Händler kaufen“. Im AH: „Im AH suchen“. Gekauftes verschwindet von selbst.
+3. **Herstellen:** **„Nächstes craften“** oder ganz normal im Berufsfenster. Jedes Stück wird von selbst abgehakt.
+4. **Verkaufen:** Unter **Craften → Craft-Planer → Schritt 4** stehen deine hergestellten Items mit **„Nicht unter“**-Preis. Im AH: Auctionator → „Verkaufen“ → Item anklicken. Nie unter diesem Preis verkaufen.
+
+Was du als Nächstes lernen solltest, zeigt **Craften → „Was lernen?“**: Rezepte für deinen Skill, die sich lohnen. Shift-Klick legt sie direkt in die Auctionator-Suche.
 
 ## Gut zu wissen
 - Alles lässt sich rückgängig machen: **×** neben Reglern, **Rückgängig** nach „Alles leeren“, ausgeblendete Rezepte per Klick zurückholen.

@@ -12,13 +12,16 @@ wie man schon mit Level 10–20 Gold macht – mit echten Preisen des eigenen Se
 
 Anleitung für Einsteiger: **`ANLEITUNG.md`** · Prüfbericht: **`AUDIT.md`** · Änderungen: **`CHANGELOG.md`** · Ingame-Checkliste: **`INGAME-TEST.md`**
 
-## Was drin ist (7 Menüpunkte, darunter Reiter)
+**Hauptthema: Gold durch Herstellen.** Die Startseite führt durch den Gold-Kreislauf: Planen → Einkaufen → Herstellen → Verkaufen.
+
+## Was drin ist (8 Menüpunkte, darunter Reiter)
 | Menüpunkt | Reiter | Funktion |
 |---|---|---|
-| **Start** | Goldplan, Goldwege | „Dein nächster Schritt“ (genau eine Handlung), Heute für dich, Top 3, „Neu in Forever – deine Chancen“ mit Live-Preisen; 16 Goldwege als Anleitungen |
+| **Start** | Goldplan, Goldwege | Gold-Kreislauf (Planen/Einkaufen/Herstellen/Verkaufen, je ein Knopf), wichtige Hinweise, „Neu in Forever – deine Chancen“; 16 Goldwege als Anleitungen |
+| **Craften** | Craft-Planer, Was lernen? | Craft-Liste in 4 Schritten inkl. Verkaufen mit Mindestpreis; Berater: lohnende Rezepte für deinen Skill (als Rezept-Item zum Kaufen), Skill-Plan, beste Sammelberufe |
 | **Farmen** | Farm-Guide, Kürschner, Farm-Session | Farm-Spots für dein Level mit Wegpunkt, Kürschner-Zentrale, Farm-Session (Gold pro Stunde live, Bestmarke, Verlauf) |
-| **Berufe** | Craft-Planer, Berufe-Berater | Craft-Liste in 3 Schritten mit Einkaufsliste und „Nächstes craften“; Berater: beste Sammelberufe nach Live-Preisen + günstigster Skill-Plan |
 | **Markt** | Preise, Preisalarm, Taschen & Händler, Item-Suche | Live-Preise, Wunschpreis-Alarm, Händler-Flips und Taschen-Check, alle 18.416 Items auf Deutsch |
+| **Auktionen** | Meine Auktionen | Alle eigenen Auktionen mit Wert und Summe, unterboten?, Verkäufe (auch unterwegs erkannt), Gold im Briefkasten |
 | **Mein Gold** | Goldtagebuch, Verkaufsbuch | Gold pro Tag/Stunde, Verkäufe aus der Post, eigene Verkaufsquote, Gold aller Charaktere |
 | **Lernen** | AH-Schule, Glossar | Auktionshaus einfach erklärt, 20 Begriffe |
 | **Einstellungen** | – | Schalter, Experten-Modus (Preisformeln), Fenstergröße, alles auf Standard |

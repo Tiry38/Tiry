@@ -15,8 +15,8 @@ UI.order = {}
 -- Menü: 7 Hauptpunkte, darunter Reiter (Ansichten). Ansichten, die es nicht gibt, werden übersprungen.
 UI.GROUPS = {
   { key = "start", label = "Start", icon = "home", views = { { "home", "Goldplan" }, { "methods", "Goldwege" } } },
+  { key = "berufe", label = "Craften", icon = "flask", views = { { "recipes", "Craft-Planer" }, { "advisor", "Was lernen?" } } },
   { key = "farmen", label = "Farmen", icon = "pin", views = { { "farm", "Farm-Guide" }, { "skinning", "Kürschner" }, { "session", "Farm-Session" } } },
-  { key = "berufe", label = "Berufe", icon = "flask", views = { { "recipes", "Craft-Planer" }, { "advisor", "Berufe-Berater" } } },
   { key = "markt", label = "Markt", icon = "coins", views = { { "market", "Preise" }, { "alerts", "Preisalarm" }, { "scanner", "Taschen & Händler" }, { "database", "Item-Suche" } } },
   { key = "auktionen", label = "Auktionen", icon = "receipt", views = { { "auctions", "Meine Auktionen" } } },
   { key = "gold", label = "Mein Gold", icon = "chart", views = { { "tracker", "Goldtagebuch" }, { "ledger", "Verkaufsbuch" } } },

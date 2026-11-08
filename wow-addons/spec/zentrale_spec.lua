@@ -665,3 +665,42 @@ describe("Herstellungs-Balken in der Einkaufsliste", function()
     assert.are.same({}, W.errors)
   end)
 end)
+
+describe("Gold-Kreislauf (Startseite)", function()
+  it("führt durch Planen, Einkaufen, Herstellen, Verkaufen", function()
+    local ns, W = E.load({ prices = { [4244] = 30000, [4243] = 500, [4231] = 300, [2320] = 10, [2318] = 32, [2319] = 120, [4234] = 2000, [2408] = 1000 } })
+    SlashCmdList.TIRYSZENTRALE("") ns.UI.Wizard.Finish()
+    local function states()
+      local s = {}
+      for _, st in ipairs(ns.Guide.CraftLoop()) do s[st.key] = st.state end
+      return s
+    end
+    ns.char.queue = {}
+    local s = states()
+    assert.are.equal("now", s.plan)
+    -- Liste für alle Berufe
+    ns.UI.pages.recipes.MakeListAll()
+    if #ns.char.queue > 0 then
+      s = states()
+      assert.are.equal("done", s.plan)
+      assert.truthy(s.buy == "now" or s.buy == "done")
+    end
+    -- 2× hergestellt (wie im Spiel: Rezept-Zauber gewirkt) -> Verkaufen ist dran
+    local r = ns.Recipes.Get(2164)
+    ns.char.queue = { { recipe = 2164, prof = "LEATHERWORKING", n = 2 } }
+    W.fire("UNIT_SPELLCAST_SUCCEEDED", "player", "g", 2164) W.flush()
+    W.fire("UNIT_SPELLCAST_SUCCEEDED", "player", "g", 2164) W.flush()
+    assert.are.equal(0, #ns.char.queue)
+    W.bags = { [0] = { { itemID = r.out, stackCount = 2, quality = 2 }, { itemID = 2318, stackCount = 18, quality = 1 } } }
+    local sell = ns.Guide.ReadyToSell()
+    assert.are.equal(1, #sell) -- Leichtes Leder (Rohmaterial) zählt NICHT als hergestellt
+    assert.are.equal(2, sell[1].n)
+    assert.are.equal(r.out, sell[1].id)
+    s = states()
+    assert.are.equal("now", s.sell)
+    ns.UI.Show("home")
+    ns.UI.Show("recipes")
+    assert.truthy(ns.UI.pages.recipes.sellList.rows[1]:IsShown())
+    assert.are.same({}, W.errors)
+  end)
+end)

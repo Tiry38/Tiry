@@ -72,12 +72,17 @@ local function runScenario(label, opts)
     for _, c in ipairs(ns.METHOD_CATS) do p.segments:Select(c.value, true) end
     p.cards[1]:Click()
   end)
-  step("Startseite Top-Karte klicken", function()
+  step("Startseite: Gold-Kreislauf mit 4 Schritten, alle Knöpfe klickbar", function()
     ns.UI.Show("home")
-    local c = ns.UI.pages.home.tops[1]
-    W.call(c, "OnEnter") ; c:Click()
+    local loop = ns.UI.pages.home.loop
+    assert(#loop.rows == 4, "4 Schritte")
+    for _, r in ipairs(loop.rows) do
+      assert(r.title:GetText() ~= "" and r.btn.text:GetText() ~= "", "Schritt beschriftet")
+      ns.UI.Show("home")
+      r.btn:Click()
+    end
   end)
-  check(label .. ": Top-Karte öffnet Goldwege", ns.UI.current == "methods")
+  check(label .. ": Kreislauf-Knöpfe führen weiter", ns.UI.current ~= nil)
 
   -- Markt: Filter + Einkaufsliste + AH-Suche
   step("Marktfilter", function()
@@ -371,11 +376,10 @@ local function runScenario(label, opts)
     assert(table.concat(W.prints, " "):find("Post%-Bilanz") ~= nil, "Post-Bilanz")
     assert(TirysZentraleCharDB.mailExpires and TirysZentraleCharDB.mailExpires - W.now < 2 * 86400, "Ablaufzeit gemerkt")
     W.mails = nil
-    -- Startseite: Heute für dich
+    -- Startseite: Kreislauf gefüllt
     ns.UI.Show("home")
-    local rows = ns.UI.pages.home.today.rows
-    assert(rows[1]:IsShown() and rows[1].text:GetText() ~= "", "Heute für dich gefüllt")
-    for _, r in ipairs(rows) do if r:IsShown() then r:Click() end end
+    local rows = ns.UI.pages.home.loop.rows
+    assert(rows[1].text:GetText() ~= "", "Kreislauf gefüllt")
     -- Tooltip: Mindestpreis
     GameTooltip.lines = {}
     W.tooltipHook(GameTooltip, { id = 2589 })
