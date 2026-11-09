@@ -31,7 +31,14 @@ Dateien/Sounds reicht `/reload` nicht). Version in allen 4 TOCs und in `VERSION`
 
 ## Harte Grenzen von WoW Forever (geprüft)
 - **Im Kampf** sind Aura-Daten „secret“: `C_UnitAuras.*` wirft Fehler, `UNIT_AURA`-Daten sind gesperrt.
-  Lösungen: Blizzards Cooldown-Manager, Ersatz-Signale (Zauberzeit, Leuchten, Overlay), außerhalb des Kampfes Auren.
+  Ersatz-Signale (Zauberzeit, Leuchten, Kampftext) haben bei ProcAlarm 1.x im Kampf nicht ausgelöst (Tiry, 09.11.).
+- **Funktioniert im Kampf (Blizzards offizieller Weg, Forever-Client-Code `Blizzard_AuraContainer`):**
+  `CreateFrame("AuraContainer", nil, parent, "CustomAuraContainerTemplate")` + `AddAuraSlot(key, "HELPFUL",
+  {candidateFilters = {includeSpellIDs = {[id] = true}}, initializeFrame = fn})` – das Spiel zeigt den Slot nur bei
+  aktivem Buff; im `initializeFrame` eigene Optik als Kinder bauen und per `SetIcon`, `SetDurationCooldown`,
+  `SetDurationText`, `SetApplicationCount`, `AddAuraShownAnimation` übergeben. Nur außerhalb des Kampfes aufbauen.
+  Ton: `C_UnitAuras.AddAuraSound(Enum.UnitAuraSoundTrigger.Added, {unitToken, spellID, soundFileName, …})`.
+  Blizzards Forever-UI-Code zum Nachlesen: github.com/reckhou/WoWBlzCode (Ordner `Forever/`).
 - WeakAuras-Forever führt **keinen eigenen Custom-Code** aus → für Logik ein eigenes Add-on bauen.
 - Add-ons zeichnen **nur flach über die 3D-Welt** – keine Verdeckung durch Gegenstände möglich.
 - Kein Bot / keine Automatisierung des Spielens (abgelehnt, bleibt so). Keine 1:1-Kopien fremder Add-ons.

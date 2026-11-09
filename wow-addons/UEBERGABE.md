@@ -8,7 +8,7 @@ in Sitzungen auf **Tiry38/Tiry** weiter. Alle Dateien liegen in diesem Ordner, P
 | Add-on | Version | Zweck | Stand |
 |---|---|---|---|
 | **LevelPilot** | 4.0.0 | Levelrouten Horde 22–30, Pfeil, Lichtstrahl, Auto-Quests, XP-Cockpit, Flug/Ruhestein-Rat | ausgeliefert, **Spieltest offen** |
-| **ProcAlarm** | 1.1.0 | Hexer: Auslöser „Schattentrance“ (17941) → blinkendes Icon unter dem Charakter | ausgeliefert, **Kampftest offen** |
+| **ProcAlarm** | 2.0.0 | Hexer: Schattentrance (17941) → Alarm über Blizzard-Aura-Slot (zeigt sich auch im Kampf) + Spiel-Ton `AddAuraSound` | ausgeliefert, **Kampftest offen** |
 | **EnhanceHUD** | 1.2.0 | Verstärker-Schamanen-HUD (Frost/Feuer-Design) | ausgeliefert |
 | **Blitzschild** | 1.2.0 | Blitzschlagschild Ladungen/Zeit | im Kampf nicht möglich (secret values) → Cooldown-Manager „Verfolgte Leisten“ + WA nur außerhalb des Kampfes |
 | **MiniPost** | – | Post-Symbol unter der Uhr, andere Minimap-Knöpfe unsichtbar | ausgeliefert, Test offen |
@@ -40,7 +40,7 @@ Amboss-/Schloss-Sound (max. 1–2 s)“.
 - Ob Forever `C_TaxiMap.GetTaxiNodesForMap`, Item-Abklingzeit (Ruhestein 6948) und `GetBindLocation` freigibt.
 - Flug-/Ruhestein-Zeiten sind Schätzungen (Flug ~30 Yards/s, 20 s Nebenzeit).
 - Questbewertung (`qual.py`) ist eine Schätzung – die DB hat keine XP-Werte und keine Dropchancen.
-- ProcAlarm: welcher der 5 Erkennungswege im Kampf funktioniert (`/proc diag` direkt nach dem Proc).
+- ProcAlarm 2.0: ob Forever die eigenen Animationen/Restzeit am Aura-Slot annimmt (`/proc diag` → „Teile“).
 
 ## Nächste Schritte
 1. Tirys Spieltest-Rückmeldung zu LevelPilot 4.0 abwarten und gezielt nachbessern.

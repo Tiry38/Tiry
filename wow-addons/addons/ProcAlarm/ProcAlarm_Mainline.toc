@@ -1,8 +1,8 @@
 ## Interface: 16001
 ## Title: |cffb04dffProc|r|cff40ff59Alarm|r
-## Notes: Hexenmeister: Schattentrance - blinkendes Icon unter dem Charakter, Schattenblitz sofort.
+## Notes: Hexenmeister: Schattentrance-Alarm, auch im Kampf (Blizzard-Aura-Slot + Spiel-Ton).
 ## Author: Tiry
-## Version: 1.1.0
+## Version: 2.0.0
 ## SavedVariablesPerCharacter: ProcAlarmDB
 
 ProcAlarm.lua

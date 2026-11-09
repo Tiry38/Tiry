@@ -1,22 +1,138 @@
-local T=0; function GetTime() return T end
-local function obj() local o={} return setmetatable(o,{__index=function(t,k) return function(...) if k=="GetCenter" then return 100,100 end if k=="CreateAnimationGroup" or k=="CreateAnimation" or k=="CreateTexture" or k=="CreateFontString" or k=="CreateMaskTexture" then return obj() end if k=="GetScale" then return 1 end end end}) end
-local frames={}
-function CreateFrame(t,n,p,tpl) local f=obj(); local scripts={}; rawset(f,"SetScript",function(s,k,fn) scripts[k]=fn end); rawset(f,"_s",scripts); frames[#frames+1]=f; return f end
-UIParent=obj(); STANDARD_TEXT_FONT="x"; SlashCmdList={}; SOUNDKIT={RAID_WARNING=8959}
-function PlaySound() print("SOUND") end
-function IsPlayerSpell(id) return id==1088 end
-local ct=3000; C_Spell={GetSpellInfo=function(id) return {castTime=ct} end, GetSpellTexture=function() return 1 end, GetSpellName=function() return "Schattentrance" end}
-local incombat=false
-C_UnitAuras={GetPlayerAuraBySpellID=function() if incombat then error("secret") end return nil end}
+-- ProcAlarm 2.0 - Simulation: Blizzard-Aura-Slot (CustomAuraContainerTemplate), Spiel-Ton, Kampf/Boss-Sperren.
+-- Aufruf aus addons/:  cd addons && lua5.1 ../tests/proc.lua
+local T = 0; function GetTime() return T end
+local fails, oks = 0, 0
+local function check(c, name) if c then oks = oks + 1 else fails = fails + 1; print("FEHLER: " .. name) end end
+local out = {}
+print_ = print
+function print(s) out[#out + 1] = tostring(s) end
+local function said(p) for _, l in ipairs(out) do if l:find(p, 1, true) then return true end end return false end
+
+local function obj(kind)
+  local o = { _kind = kind, _shown = true, _scripts = {} }
+  return setmetatable(o, { __index = function(t, k)
+    return function(self, ...)
+      if k == "GetCenter" then return 100, 100 end
+      if k == "GetScale" or k == "GetFrameLevel" then return 1 end
+      if k == "CreateAnimationGroup" then local g = obj("ag"); g.playing = false
+        rawset(g, "Play", function(s) s.playing = true end); rawset(g, "Stop", function(s) s.playing = false end); return g end
+      if k == "CreateAnimation" or k == "CreateTexture" or k == "CreateFontString" or k == "CreateMaskTexture" then return obj(k) end
+      if k == "SetScript" then local a = { ... }; t._scripts[a[1]] = a[2]; return end
+      if k == "Show" then t._shown = true return end
+      if k == "Hide" then t._shown = false return end
+      if k == "IsShown" then return t._shown end
+      if k == "SetText" then t._text = (...) return end
+    end
+  end })
+end
+
+local incombat, encounter = false, false
+function InCombatLockdown() return incombat end
+UIParent = obj("UIParent"); STANDARD_TEXT_FONT = "x"; SlashCmdList = {}
+local played = {}
+function PlaySoundFile(f) played[#played + 1] = f end
+C_Spell = { GetSpellTexture = function() return 136223 end }
+C_AddOns = { IsAddOnLoaded = function() return false end, LoadAddOn = function(n) loadedAC = n end }
+C_XMLUtil = { GetTemplateInfo = function(n) return n == "CustomAuraContainerTemplate" and {} or nil end }
+Enum = { UnitAuraSoundTrigger = { Added = 0 }, AddOnRestrictionType = { Encounter = 1 } }
+C_RestrictedActions = { IsAddOnRestrictionActive = function() return encounter end }
+local buff = false
+local sounds, soundSeq = {}, 0
+C_UnitAuras = {
+  GetPlayerAuraBySpellID = function(id) if incombat then error("secret") end return (buff and id == 17941) and {} or nil end,
+  AddAuraSound = function(trig, info) soundSeq = soundSeq + 1; sounds[soundSeq] = info; return soundSeq end,
+  RemoveAuraSound = function(id) sounds[id] = nil end,
+}
+
+-- Blizzard-Aura-Container nachgebaut: Slot-Knopf wird vom "Spiel" gezeigt, solange der Buff da ist.
+local slotBtn, slotOpts, containers = nil, nil, 0
+local frames = {}
+function CreateFrame(kind, name, parent, tpl)
+  local f = obj(kind); frames[#frames + 1] = f
+  if kind == "AuraContainer" then
+    containers = containers + 1
+    rawset(f, "AddAuraSlot", function(self, key, filter, opts)
+      slotOpts = opts
+      local b = obj("AuraButton"); b._shown = false; b.anims = {}
+      rawset(b, "SetIcon", function(s, x) s.icon = x end)
+      rawset(b, "SetDurationCooldown", function(s, x) s.cd = x end)
+      rawset(b, "SetDurationText", function(s, x) s.text = x end)
+      rawset(b, "AddAuraShownAnimation", function(s, g) s.anims[#s.anims + 1] = g end)
+      opts.initializeFrame(b)
+      slotBtn = b
+      return b
+    end)
+  end
+  return f
+end
+local function gameAura(on)   -- so wie CustomAuraButtonPrivateMixin:ApplyVisibility
+  buff = on
+  if not slotBtn then return end
+  local inc = slotOpts.candidateFilters.includeSpellIDs
+  local match = on and inc[17941] == true
+  local was = slotBtn._shown
+  slotBtn._shown = match
+  if match and not was then for _, g in ipairs(slotBtn.anims) do g:Play() end
+  elseif not match then for _, g in ipairs(slotBtn.anims) do g:Stop() end end
+end
+
 dofile("ProcAlarm/ProcAlarm.lua")
-local F=frames[1]
-local E=frames[#frames]; local P=F.poll
-E._s.OnEvent(E,"ADDON_LOADED","ProcAlarm"); E._s.OnEvent(E,"PLAYER_LOGIN")
-local function tick(n) for i=1,n do T=T+0.1; P._s.OnUpdate(P,0.1) end end
-incombat=true; tick(3); ct=0; tick(2); print("on after proc")
+local E = frames[#frames]
+local P = _G.ProcAlarmPreview or nil
+local function ev(...) E._scripts.OnEvent(E, ...) end
+
+-- 1) /reload mitten im Kampf: kein Aufbau, wartet
+incombat = true
+ev("ADDON_LOADED", "ProcAlarm")
+check(containers == 0, "kein Aufbau im Kampf")
+ev("PLAYER_LOGIN")
+check(said("wartet"), "Login-Meldung nennt 'wartet'")
+check(sounds[1] ~= nil, "Spiel-Ton auch im Kampf eingetragen (keine Bosssperre)")
+-- 2) Kampfende: Aufbau
+incombat = false
+ev("PLAYER_REGEN_ENABLED")
+check(containers == 1, "Container nach Kampfende gebaut")
+check(loadedAC == "Blizzard_AuraContainer", "Blizzard_AuraContainer geladen")
+check(slotOpts and slotOpts.candidateFilters.includeSpellIDs[17941] == true, "Filter = Menge {[17941]=true}")
+check(slotBtn.icon and slotBtn.cd and slotBtn.text, "Symbol/Ablauf/Restzeit an Blizzard uebergeben")
+check(#slotBtn.anims == 3, "3 Animationen registriert")
+ev("PLAYER_REGEN_ENABLED")
+check(containers == 1, "nicht doppelt gebaut")
+-- 3) Proc im Kampf: das Spiel zeigt, Add-on liest nichts
+incombat = true
+gameAura(true)
+check(slotBtn._shown, "Slot sichtbar bei Schattentrance im Kampf")
+check(slotBtn.anims[1].playing and slotBtn.anims[2].playing, "Blinken + Ring laufen")
+gameAura(false)
+check(not slotBtn._shown and not slotBtn.anims[1].playing, "weg nach Schattenblitz/Ablauf")
+-- 4) Ton
+local s = sounds[1]
+check(s.spellID == 17941 and s.unitToken == "player" and s.soundFileName:find("trance.ogg", 1, true), "Ton-Eintrag korrekt")
+check(s.throttleSeconds >= 0 and s.throttleSeconds <= 5, "throttle 0-5")
+incombat = false
+SlashCmdList.PROCALARM("sound")
+check(next(sounds) == nil, "Ton aus entfernt Eintrag")
+encounter = true
+SlashCmdList.PROCALARM("sound")
+check(next(sounds) == nil and said("Ton"), "im Bosskampf: wartet")
+encounter = false
+ev("ENCOUNTER_END")
+check(next(sounds) ~= nil, "nach Bosskampf eingetragen")
+-- 5) Diagnose, Test, Verschieben
+out = {}
+buff = true
 SlashCmdList.PROCALARM("diag")
-ct=3000; E._s.OnEvent(E,"UNIT_SPELLCAST_SUCCEEDED","player","g",1088); tick(2)
+check(said("aktiv") and said("eingetragen") and said("Symbol"), "diag meldet Slot/Ton/Teile")
+check(said("gerade aktiv: |cff40ff59ja"), "diag erkennt Buff ausserhalb des Kampfes")
+out = {}
+incombat = true
 SlashCmdList.PROCALARM("diag")
-print("GLOW"); E._s.OnEvent(E,"SPELL_ACTIVATION_OVERLAY_GLOW_SHOW",1088); tick(5); SlashCmdList.PROCALARM("diag"); tick(120); print("TEST")
-SlashCmdList.PROCALARM("test"); tick(20); SlashCmdList.PROCALARM("unlock"); SlashCmdList.PROCALARM("lock"); SlashCmdList.PROCALARM("")
-print("DONE")
+check(said("gesperrt (normal)"), "diag im Kampf ohne Fehler")
+incombat = false
+SlashCmdList.PROCALARM("test")
+check(#played == 1, "Test spielt Ton")
+SlashCmdList.PROCALARM("unlock"); SlashCmdList.PROCALARM("lock"); SlashCmdList.PROCALARM("groesse 1.4"); SlashCmdList.PROCALARM("reset"); SlashCmdList.PROCALARM("")
+check(ProcAlarmDB.scale == 1 and ProcAlarmDB.unlocked == nil, "reset/lock")
+print_(string.format("%d ok, %d Fehler", oks, fails))
+if fails > 0 then os.exit(1) end
+print_("PROC TESTS OK")
