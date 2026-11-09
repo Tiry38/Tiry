@@ -1,8 +1,8 @@
--- ProcAlarm 2.0 - Simulation: Blizzard-Aura-Slot (CustomAuraContainerTemplate), Spiel-Ton, Kampf/Boss-Sperren.
+-- ProcAlarm 2.1 - Simulation: Blizzard-Aura-Slot (CustomAuraContainerTemplate), Kampf-Sperre, kein Ton.
 -- Aufruf aus addons/:  cd addons && lua5.1 ../tests/proc.lua
 local T = 0; function GetTime() return T end
 local fails, oks = 0, 0
-local function check(c, name) if c then oks = oks + 1 else fails = fails + 1; print("FEHLER: " .. name) end end
+local function check(c, name) if c then oks = oks + 1 else fails = fails + 1; print_("FEHLER: " .. name) end end
 local out = {}
 print_ = print
 function print(s) out[#out + 1] = tostring(s) end
@@ -87,7 +87,6 @@ ev("ADDON_LOADED", "ProcAlarm")
 check(containers == 0, "kein Aufbau im Kampf")
 ev("PLAYER_LOGIN")
 check(said("wartet"), "Login-Meldung nennt 'wartet'")
-check(sounds[1] ~= nil, "Spiel-Ton auch im Kampf eingetragen (keine Bosssperre)")
 -- 2) Kampfende: Aufbau
 incombat = false
 ev("PLAYER_REGEN_ENABLED")
@@ -95,34 +94,24 @@ check(containers == 1, "Container nach Kampfende gebaut")
 check(loadedAC == "Blizzard_AuraContainer", "Blizzard_AuraContainer geladen")
 check(slotOpts and slotOpts.candidateFilters.includeSpellIDs[17941] == true, "Filter = Menge {[17941]=true}")
 check(slotBtn.icon and slotBtn.cd and slotBtn.text, "Symbol/Ablauf/Restzeit an Blizzard uebergeben")
-check(#slotBtn.anims == 3, "3 Animationen registriert")
+check(#slotBtn.anims == 1, "nur Blinken registriert (kein Ring)")
 ev("PLAYER_REGEN_ENABLED")
 check(containers == 1, "nicht doppelt gebaut")
 -- 3) Proc im Kampf: das Spiel zeigt, Add-on liest nichts
 incombat = true
 gameAura(true)
 check(slotBtn._shown, "Slot sichtbar bei Schattentrance im Kampf")
-check(slotBtn.anims[1].playing and slotBtn.anims[2].playing, "Blinken + Ring laufen")
+check(slotBtn.anims[1].playing, "Blinken laeuft")
 gameAura(false)
 check(not slotBtn._shown and not slotBtn.anims[1].playing, "weg nach Schattenblitz/Ablauf")
--- 4) Ton
-local s = sounds[1]
-check(s.spellID == 17941 and s.unitToken == "player" and s.soundFileName:find("trance.ogg", 1, true), "Ton-Eintrag korrekt")
-check(s.throttleSeconds >= 0 and s.throttleSeconds <= 5, "throttle 0-5")
+-- 4) kein Ton (Kampf vorbei)
 incombat = false
-SlashCmdList.PROCALARM("sound")
-check(next(sounds) == nil, "Ton aus entfernt Eintrag")
-encounter = true
-SlashCmdList.PROCALARM("sound")
-check(next(sounds) == nil and said("Ton"), "im Bosskampf: wartet")
-encounter = false
-ev("ENCOUNTER_END")
-check(next(sounds) ~= nil, "nach Bosskampf eingetragen")
+check(next(sounds) == nil and #played == 0, "kein Ton eingetragen")
 -- 5) Diagnose, Test, Verschieben
 out = {}
 buff = true
 SlashCmdList.PROCALARM("diag")
-check(said("aktiv") and said("eingetragen") and said("Symbol"), "diag meldet Slot/Ton/Teile")
+check(said("aktiv") and said("Symbol") and not said("Ton"), "diag meldet Slot/Teile, kein Ton")
 check(said("gerade aktiv: |cff40ff59ja"), "diag erkennt Buff ausserhalb des Kampfes")
 out = {}
 incombat = true
@@ -130,7 +119,7 @@ SlashCmdList.PROCALARM("diag")
 check(said("gesperrt (normal)"), "diag im Kampf ohne Fehler")
 incombat = false
 SlashCmdList.PROCALARM("test")
-check(#played == 1, "Test spielt Ton")
+check(#played == 0 and next(sounds) == nil, "Test ohne Ton")
 SlashCmdList.PROCALARM("unlock"); SlashCmdList.PROCALARM("lock"); SlashCmdList.PROCALARM("groesse 1.4"); SlashCmdList.PROCALARM("reset"); SlashCmdList.PROCALARM("")
 check(ProcAlarmDB.scale == 1 and ProcAlarmDB.unlocked == nil, "reset/lock")
 print_(string.format("%d ok, %d Fehler", oks, fails))

@@ -1,4 +1,4 @@
--- ProcAlarm 2.0.0 - Schattentrance (Hexenmeister)
+-- ProcAlarm 2.1.0 - Schattentrance (Hexenmeister)
 --
 -- Warum neu: WoW Forever sperrt Aura-Daten im Kampf (Midnight-Regeln, "secret values").
 -- Ein Add-on darf die Schattentrance im Kampf NICHT lesen. Version 1.x hat es ueber
@@ -8,22 +8,21 @@
 --  * Anzeige: ein Blizzard-Aura-Slot (CustomAuraContainerTemplate, AddAuraSlot mit
 --    includeSpellIDs = {[17941] = true}). Das SPIEL zeigt den Slot nur, solange die
 --    Schattentrance aktiv ist - auch im Kampf. Unser Alarm haengt als Kind daran, das Spiel
---    setzt Symbol, Ablauf-Kreis und Restzeit selbst und startet unsere Animationen.
---  * Ton: C_UnitAuras.AddAuraSound - das Spiel spielt ihn ab, sobald der Buff kommt.
+--    setzt Symbol, Ablauf-Kreis und Restzeit selbst und startet unser Blinken.
+--  * Kein Ton, kein gruener Ring/Glow (Tirys Wunsch, 2.1.0).
 --  * Das Add-on selbst liest im Kampf nichts.
 -- Aufbau nur ausserhalb des Kampfes (der Slot ist fuer Add-ons gesperrt, solange Auren geheim sind).
 
-local VERSION = "2.0.0"
+local VERSION = "2.1.0"
 local TRANCE = 17941                       -- Buff "Schattentrance" (in Forever bestaetigt)
 local TRANCE_SET = { [TRANCE] = true }     -- includeSpellIDs ist eine Menge, keine Liste
 local DUR = 10
 local SIZE = 76
-local SOUNDFILE = "Interface\\AddOns\\ProcAlarm\\Media\\trance.ogg"
 local ICON = "Interface\\Icons\\Spell_Shadow_Twilight"
-local DEF = { x = 0, y = -150, scale = 1, sound = true }
+local DEF = { x = 0, y = -150, scale = 1 }
 
 local DB
-local live = { state = "aus", why = nil, slot = nil, container = nil, soundID = nil, soundWhy = nil, parts = {} }
+local live = { state = "aus", why = nil, slot = nil, container = nil, parts = {} }
 
 -- ---------- Helfer ----------
 local function msg(t) print("|cffb04dffProc|r|cff40ff59Alarm|r: " .. t) end
@@ -45,13 +44,6 @@ end
 
 local function inCombat() return InCombatLockdown and InCombatLockdown() end
 
-local function encounterLock()
-  if not (C_RestrictedActions and C_RestrictedActions.IsAddOnRestrictionActive and Enum and Enum.AddOnRestrictionType) then
-    return false
-  end
-  local ok, r = pcall(C_RestrictedActions.IsAddOnRestrictionActive, Enum.AddOnRestrictionType.Encounter)
-  return ok and plain(r) == true
-end
 
 -- ---------- Anker (Position, Groesse, Ziehen) ----------
 local A = CreateFrame("Frame", "ProcAlarmAnchor", UIParent)
@@ -79,7 +71,7 @@ A:SetScript("OnDragStop", function(s)
 end)
 
 -- ---------- Optik (einmal fuer den Live-Slot, einmal fuer Vorschau/Test) ----------
--- Neon-Violett-Glow, drehender gruener Sternring, rundes Symbol mit Ablauf-Kreis,
+-- Violetter Glow, rundes Symbol mit Ablauf-Kreis,
 -- grosse Restzeit, "SCHATTENTRANCE!" oben, "Schattenblitz sofort" unten.
 local function build(parent)
   local V = CreateFrame("Frame", nil, parent)
@@ -95,12 +87,6 @@ local function build(parent)
   glow:SetBlendMode("ADD")
   glow:SetVertexColor(0.65, 0.25, 1, 0.95)
 
-  local ring = V:CreateTexture(nil, "BORDER")
-  ring:SetTexture("Interface\\Cooldown\\star4")
-  ring:SetPoint("CENTER")
-  ring:SetSize(SIZE * 2, SIZE * 2)
-  ring:SetBlendMode("ADD")
-  ring:SetVertexColor(0.22, 1, 0.42, 0.85)
 
   local icon = V:CreateTexture(nil, "ARTWORK")
   icon:SetAllPoints()
@@ -114,12 +100,6 @@ local function build(parent)
     icon:AddMaskTexture(m)
   end)
 
-  local edge = V:CreateTexture(nil, "OVERLAY")
-  edge:SetTexture("Interface\\GLUES\\Models\\UI_Draenei\\GenericGlow64")
-  edge:SetPoint("CENTER")
-  edge:SetSize(SIZE * 1.25, SIZE * 1.25)
-  edge:SetBlendMode("ADD")
-  edge:SetVertexColor(0.22, 1, 0.42, 0.55)
 
   local cd = CreateFrame("Cooldown", nil, V, "CooldownFrameTemplate")
   cd:SetAllPoints(icon)
@@ -164,21 +144,8 @@ local function build(parent)
   pcall(function() if not a3.SetScaleFrom then a3:SetScale(1.12, 1.12) end end)
   a3:SetDuration(0.32) a3:SetSmoothing("IN_OUT")
 
-  -- Sternring dreht sich
-  local spin = V:CreateAnimationGroup()
-  spin:SetLooping("REPEAT")
-  local r1 = spin:CreateAnimation("Rotation")
-  r1:SetTarget(ring) r1:SetDegrees(-360) r1:SetDuration(2.4)
 
-  -- Einschlag beim Auftauchen (einmal)
-  local pop = V:CreateAnimationGroup()
-  local p1 = pop:CreateAnimation("Scale")
-  p1:SetTarget(edge)
-  pcall(function() p1:SetScaleFrom(2.4, 2.4) p1:SetScaleTo(1, 1) end)
-  pcall(function() if not p1.SetScaleFrom then p1:SetScale(0.42, 0.42) end end)
-  p1:SetDuration(0.28) p1:SetSmoothing("OUT")
-
-  return { V = V, icon = icon, cd = cd, timer = timer, pulse = pulse, spin = spin, pop = pop }
+  return { V = V, icon = icon, cd = cd, timer = timer, pulse = pulse }
 end
 
 -- ---------- Live: Blizzard-Aura-Slot ----------
@@ -197,8 +164,6 @@ local function initSlot(button)
   hook("Ablauf", function() button:SetDurationCooldown(p.cd) end)
   hook("Restzeit", function() button:SetDurationText(p.timer) end)
   hook("Blinken", function() button:AddAuraShownAnimation(p.pulse) end)
-  hook("Ring", function() button:AddAuraShownAnimation(p.spin) end)
-  hook("Einschlag", function() button:AddAuraShownAnimation(p.pop) end)
 end
 
 local function buildLive()
@@ -228,28 +193,6 @@ local function buildLive()
   return ok
 end
 
--- ---------- Live: Ton durch das Spiel ----------
-local function soundOff()
-  if live.soundID and C_UnitAuras and C_UnitAuras.RemoveAuraSound then
-    pcall(C_UnitAuras.RemoveAuraSound, live.soundID)
-  end
-  live.soundID = nil
-end
-
-local function soundApply()
-  soundOff()
-  live.soundWhy = nil
-  if not DB.sound then live.soundWhy = "aus (/proc sound)" return end
-  if not (C_UnitAuras and C_UnitAuras.AddAuraSound) then live.soundWhy = "Client kann keine Aura-Toene" return end
-  if encounterLock() then live.soundWhy = "Bosskampf - wird danach eingetragen" live.soundPending = true return end
-  live.soundPending = false
-  local trig = (Enum and Enum.UnitAuraSoundTrigger and Enum.UnitAuraSoundTrigger.Added) or 0
-  local ok, id = pcall(C_UnitAuras.AddAuraSound, trig, {
-    unitToken = "player", spellID = TRANCE, soundFileName = SOUNDFILE,
-    outputChannel = "Master", throttleSeconds = 1,
-  })
-  if ok and id then live.soundID = id else live.soundWhy = ok and "vom Spiel abgelehnt" or tostring(id) end
-end
 
 -- ---------- Vorschau / Test (eigene Kopie, nicht der Live-Slot) ----------
 local P = CreateFrame("Frame", "ProcAlarmPreview", A)
@@ -261,7 +204,7 @@ P:SetScript("OnUpdate", function(s)
   local left = tEnd - GetTime()
   if left <= 0 then
     if DB and DB.unlocked then prev.timer:SetText("") return end
-    s:Hide() prev.pulse:Stop() prev.spin:Stop()
+    s:Hide() prev.pulse:Stop()
     return
   end
   prev.timer:SetText(left >= 3 and string.format("%d", math.ceil(left)) or string.format("%.1f", left))
@@ -270,7 +213,7 @@ end)
 local function preview(seconds)
   tEnd = GetTime() + seconds
   pcall(function() prev.cd:SetCooldown(GetTime(), seconds) end)
-  P:Show() prev.pop:Play() prev.pulse:Play() prev.spin:Play()
+  P:Show() prev.pulse:Play()
 end
 
 -- ---------- Ereignisse ----------
@@ -278,7 +221,6 @@ local E = CreateFrame("Frame")
 E:RegisterEvent("ADDON_LOADED")
 E:RegisterEvent("PLAYER_LOGIN")
 E:RegisterEvent("PLAYER_REGEN_ENABLED")
-pcall(E.RegisterEvent, E, "ENCOUNTER_END")
 
 E:SetScript("OnEvent", function(_, ev, a1)
   if ev == "ADDON_LOADED" then
@@ -286,19 +228,15 @@ E:SetScript("OnEvent", function(_, ev, a1)
     ProcAlarmDB = ProcAlarmDB or {}
     DB = ProcAlarmDB
     for k, v in pairs(DEF) do if DB[k] == nil then DB[k] = v end end
-    DB.lock, DB.unlocked = nil, nil              -- Altlast 1.x / nie fest gespeichert
+    DB.lock, DB.unlocked, DB.sound = nil, nil, nil   -- Altlasten 1.x/2.0
     place()
     buildLive()                                   -- so frueh wie moeglich (Blizzard: bis PLAYER_LOGIN konfigurieren)
   elseif ev == "PLAYER_LOGIN" then
     buildLive()
-    soundApply()
     local st = live.state == "an" and "|cff40ff59bereit|r" or ("|cffff5555" .. live.state .. "|r")
     msg(VERSION .. " " .. st .. " - Ausloeser: |cffc77dffSchattentrance|r. |cffaaaaaa/proc test · /proc unlock · /proc diag|r")
   elseif ev == "PLAYER_REGEN_ENABLED" then
     if live.state ~= "an" then buildLive() end
-    if live.soundPending then soundApply() end
-  elseif ev == "ENCOUNTER_END" then
-    if live.soundPending then soundApply() end
   end
 end)
 
@@ -310,7 +248,6 @@ SlashCmdList.PROCALARM = function(arg)
   local cmd, val = arg:match("^(%S*)%s*(.-)$")
   if cmd == "test" then
     preview(DUR)
-    if DB.sound then pcall(PlaySoundFile, SOUNDFILE, "Master") end
   elseif cmd == "unlock" then
     if inCombat() then msg("erst nach dem Kampf.") return end
     DB.unlocked = true
@@ -326,10 +263,6 @@ SlashCmdList.PROCALARM = function(arg)
     local n = tonumber(val)
     if inCombat() then msg("erst nach dem Kampf.") return end
     if n and n >= 0.5 and n <= 2.5 then DB.scale = n place() msg("Groesse " .. n) else msg("/proc groesse 0.5 - 2.5") end
-  elseif cmd == "sound" then
-    DB.sound = not DB.sound
-    soundApply()
-    msg("Ton " .. (DB.sound and "|cff40ff59an|r" or "|cffff5555aus|r"))
   elseif cmd == "reset" then
     if inCombat() then msg("erst nach dem Kampf.") return end
     DB.x, DB.y, DB.scale = DEF.x, DEF.y, DEF.scale
@@ -338,7 +271,6 @@ SlashCmdList.PROCALARM = function(arg)
     msg("Version " .. VERSION .. " · Ausloeser Buff " .. TRANCE)
     msg("Blizzard-Aura-Slot: " .. (live.state == "an" and "|cff40ff59aktiv|r (zeigt sich auch im Kampf)" or ("|cffff5555" .. live.state .. "|r " .. tostring(live.why or ""))))
     if #live.parts > 0 then msg("Teile: " .. table.concat(live.parts, ", ")) end
-    msg("Spiel-Ton: " .. (live.soundID and "|cff40ff59eingetragen|r" or ("|cffff5555nein|r " .. tostring(live.soundWhy or ""))))
     if inCombat() then
       msg("Im Kampf: Buff-Abfrage gesperrt (normal).")
     else
@@ -346,6 +278,6 @@ SlashCmdList.PROCALARM = function(arg)
       msg("Schattentrance gerade aktiv: " .. (ok and (a and "|cff40ff59ja|r" or "nein") or "|cffff5555gesperrt|r"))
     end
   else
-    msg("|cff40ff59/proc test|r Vorschau · |cff40ff59unlock|r/|cff40ff59lock|r verschieben · |cff40ff59groesse 1.3|r · |cff40ff59sound|r · |cff40ff59reset|r · |cff40ff59diag|r")
+    msg("|cff40ff59/proc test|r Vorschau · |cff40ff59unlock|r/|cff40ff59lock|r verschieben · |cff40ff59groesse 1.3|r · |cff40ff59reset|r · |cff40ff59diag|r")
   end
 end
