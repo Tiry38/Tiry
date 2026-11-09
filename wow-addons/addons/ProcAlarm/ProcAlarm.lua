@@ -1,4 +1,4 @@
--- ProcAlarm 1.0.0 - Einbruch der Nacht / Schattentrance (Hexenmeister)
+-- ProcAlarm 1.1.0 - Schattentrance (Hexenmeister)
 -- Mehrere Erkennungswege, weil WoW Forever im Kampf Aura-Daten sperrt:
 --  1) Schattenblitz-Zauberzeit = 0 (Schattentrance macht ihn sofort)
 --  2) Blizzard-Leuchten am Schattenblitz (SPELL_ACTIVATION_OVERLAY_GLOW_SHOW)
@@ -91,7 +91,7 @@ cd:SetSwipeColor(0, 0, 0, 0.55)
 local top = F:CreateFontString(nil, "OVERLAY")
 top:SetFont(STANDARD_TEXT_FONT, 22, "OUTLINE")
 top:SetPoint("BOTTOM", F, "TOP", 0, 10)
-top:SetText("|cffb04dffPROC!|r")
+top:SetText("|cffb04dffSCHATTENTRANCE!|r")
 top:SetShadowOffset(2, -2)
 
 local timer = F:CreateFontString(nil, "OVERLAY")
@@ -244,7 +244,7 @@ E:SetScript("OnEvent", function(_, ev, a1, a2, a3)
     for k, v in pairs(DEF) do if DB[k] == nil then DB[k] = v end end
     place()
   elseif ev == "PLAYER_LOGIN" then
-    msg("geladen. |cffaaaaaa/proc test · /proc unlock · /proc diag|r")
+    msg("geladen - Ausloeser: |cffb04dffSchattentrance|r. |cffaaaaaa/proc test · /proc unlock · /proc diag|r")
   elseif ev == "SPELL_ACTIVATION_OVERLAY_GLOW_SHOW" then
     if isSB(a1) then Show("leuchten") end
   elseif ev == "SPELL_ACTIVATION_OVERLAY_GLOW_HIDE" then

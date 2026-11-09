@@ -8,7 +8,7 @@ in Sitzungen auf **Tiry38/Tiry** weiter. Alle Dateien liegen in diesem Ordner, P
 | Add-on | Version | Zweck | Stand |
 |---|---|---|---|
 | **LevelPilot** | 4.0.0 | Levelrouten Horde 22–30, Pfeil, Lichtstrahl, Auto-Quests, XP-Cockpit, Flug/Ruhestein-Rat | ausgeliefert, **Spieltest offen** |
-| **ProcAlarm** | 1.0.0 | Hexer: „Einbruch der Nacht“ (Schattentrance 17941) → blinkendes Icon unter dem Charakter | ausgeliefert, **Kampftest offen** |
+| **ProcAlarm** | 1.1.0 | Hexer: Auslöser „Schattentrance“ (17941) → blinkendes Icon unter dem Charakter | ausgeliefert, **Kampftest offen** |
 | **EnhanceHUD** | 1.2.0 | Verstärker-Schamanen-HUD (Frost/Feuer-Design) | ausgeliefert |
 | **Blitzschild** | 1.2.0 | Blitzschlagschild Ladungen/Zeit | im Kampf nicht möglich (secret values) → Cooldown-Manager „Verfolgte Leisten“ + WA nur außerhalb des Kampfes |
 | **MiniPost** | – | Post-Symbol unter der Uhr, andere Minimap-Knöpfe unsichtbar | ausgeliefert, Test offen |
