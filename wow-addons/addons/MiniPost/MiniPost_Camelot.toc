@@ -1,0 +1,8 @@
+## Interface: 16001
+## Title: |cff4dd9ffMini|r|cffff6a14Post|r
+## Notes: Post-Symbol unter die Uhr, alle anderen Minimap-Knoepfe unsichtbar.
+## Author: Tiry
+## Version: 1.0.0
+## OptionalDeps: SexyMap, Blizzard_TimeManager
+
+MiniPost.lua

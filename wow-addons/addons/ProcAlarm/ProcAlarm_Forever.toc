@@ -1,0 +1,8 @@
+## Interface: 16001
+## Title: |cffb04dffProc|r|cff40ff59Alarm|r
+## Notes: Hexenmeister: Einbruch der Nacht (Schattentrance) - blinkendes Icon unter dem Charakter.
+## Author: Tiry
+## Version: 1.0.0
+## SavedVariablesPerCharacter: ProcAlarmDB
+
+ProcAlarm.lua

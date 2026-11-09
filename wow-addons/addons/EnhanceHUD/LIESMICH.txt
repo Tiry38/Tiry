@@ -1,0 +1,15 @@
+EnhanceHUD 1.1.0 (Frost & Feuer) – HUD fuer Verstaerker-Schamanen (WoW Classic Era / Anniversary / TBC)
+
+INSTALLATION
+1. Ordner "EnhanceHUD" nach  World of Warcraft\_classic_era_\Interface\AddOns\
+   (TBC/Anniversary: _anniversary_ bzw. _classic_ statt _classic_era_)
+2. Spiel starten -> Charakterauswahl -> AddOns -> EnhanceHUD anhaken.
+   Steht es auf "veraltet": oben "Veraltete AddOns laden" anhaken.
+
+BEDIENUNG
+/enh            Optionen (alles einzeln an/aus, Groesse, Sperren, Test)
+/enh unlock     HUD verschieben (Linksklick ziehen), danach /enh lock
+/enh scale 1.2  Groesse
+/enh test       Proc-Anzeige + Warnung testen
+/enh stats      Gesamt-Statistik (DPS, Procs, Proc-Rate)
+/enh reset      Position zuruecksetzen

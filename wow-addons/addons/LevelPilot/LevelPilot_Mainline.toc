@@ -1,0 +1,13 @@
+## Interface: 16001
+## Title: |cff39ff6bLevel|r|cffd8d8d8Pilot|r
+## Notes: Levelrouten mit Pfeil, Quest-Liste nach Entfernung, Auto-Quests, XP-Cockpit.
+## Author: Tiry
+## Version: 4.0.0
+## OptionalDeps: Questie, QuestieDB
+## SavedVariablesPerCharacter: LevelPilotDB
+
+Route.lua
+Nav.lua
+Fly.lua
+Routes\Horde_22_30.lua
+LevelPilot.lua

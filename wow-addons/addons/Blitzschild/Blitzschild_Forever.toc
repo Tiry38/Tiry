@@ -1,0 +1,8 @@
+## Interface: 16001
+## Title: |cff4dd9ffBlitz|r|cffff6a14schild|r
+## Notes: Blitzschlagschild: Zeit + Aufladungen, auch im Kampf (WoW Forever).
+## Author: Tiry
+## Version: 1.2.0
+## SavedVariablesPerCharacter: BlitzschildDB
+
+Blitzschild.lua

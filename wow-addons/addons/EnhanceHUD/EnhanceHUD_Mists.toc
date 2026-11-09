@@ -1,0 +1,8 @@
+## Interface: 50500
+## Title: |cff4dd9ffEnhance|r|cffff6a14HUD|r
+## Notes: Alles-in-einem-HUD fuer Verstaerker-Schamanen: Swing-Timer, Windzorn-Procs, Totems, Abklingzeiten, Schild, Waffenbuffs, Warnungen, Kampf-Auswertung.
+## Author: Tiry
+## Version: 1.2.0
+## SavedVariablesPerCharacter: EnhanceHUDDB
+
+EnhanceHUD.lua

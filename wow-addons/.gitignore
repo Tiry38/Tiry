@@ -1,0 +1,8 @@
+qdb/
+tools/full.json
+tools/forever.json
+tools/nav.json
+tools/*.wav
+tools/__pycache__/
+sndtmp/
+*.zip

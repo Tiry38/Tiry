@@ -1,0 +1,8 @@
+## Interface: 16001
+## Title: |cff4dd9ffChat|r|cffff6a14Hoch|r
+## Notes: Chat dauerhaft hoeher, alle Reiter buendig.
+## Author: Tiry
+## Version: 1.4.0
+## SavedVariables: ChatHochDB
+
+ChatHoch.lua
