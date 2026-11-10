@@ -6,6 +6,9 @@ argument-hint: "[zentrale|levelpilot|proc|hagel|blitzschild|chathoch|minipost|en
 
 # WoW-Add-on-Tests
 
+> **Branch:** Die Add-ons liegen (bis Tiry sie nach `main` holt) im Branch `claude/wow-addons`. Fehlt der Ordner
+> `wow-addons/TirysZentrale` im Arbeitsordner: `git fetch origin claude/wow-addons` und auf diesem Branch arbeiten.
+
 Ein Befehl für alle Tests (Lua 5.1 gegen den Forever-Nachbau, busted, luacheck, Layout, Syntax):
 
 ```bash

@@ -6,6 +6,9 @@ argument-hint: "<Name in CamelCase> <kurze Beschreibung>"
 
 # Neues Add-on anlegen: $ARGUMENTS
 
+> **Branch:** Die Add-ons liegen (bis Tiry sie nach `main` holt) im Branch `claude/wow-addons`. Fehlt der Ordner
+> `wow-addons/TirysZentrale` im Arbeitsordner: `git fetch origin claude/wow-addons` und auf diesem Branch arbeiten.
+
 Vorher Skill `wow-forever` laden (API-Grenzen, Design). Klären, ob es das schon als Funktion in einem
 bestehenden Add-on gibt (`wow-addons/UEBERGABE.md`) – dann lieber dort einbauen.
 

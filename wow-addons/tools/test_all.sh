@@ -38,6 +38,12 @@ want() {
   return 1
 }
 
+if [ ! -d "$ROOT/TirysZentrale" ] || [ ! -d "$ROOT/addons" ]; then
+  echo "Die Add-ons fehlen in diesem Arbeitsstand – sie liegen im Branch claude/wow-addons:"
+  echo "  git fetch origin claude/wow-addons && git checkout claude/wow-addons"
+  exit 2
+fi
+
 TARGETS=("$@")
 A="$ROOT/addons"
 T="$ROOT/tests"

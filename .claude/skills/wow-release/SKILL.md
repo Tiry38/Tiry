@@ -7,6 +7,9 @@ disable-model-invocation: true
 
 # Add-on ausliefern: $ARGUMENTS
 
+> **Branch:** Die Add-ons liegen (bis Tiry sie nach `main` holt) im Branch `claude/wow-addons`. Fehlt der Ordner
+> `wow-addons/TirysZentrale` im Arbeitsordner: `git fetch origin claude/wow-addons` und auf diesem Branch arbeiten.
+
 Feste Regeln (gelten immer):
 - **Nie nach `main` mergen oder pushen**, außer Tiry beauftragt es ausdrücklich in dieser Sitzung.
 - Gepusht wird nur auf den Arbeits-Branch der Sitzung (bei WoW-Arbeit `claude/wow-addons`):

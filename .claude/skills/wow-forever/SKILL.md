@@ -5,6 +5,9 @@ description: Geprüftes Wissen über WoW Forever (Interface 16001) für Add-on-C
 
 # WoW Forever – Wissen für Add-on-Code
 
+> **Branch:** Die Add-ons liegen (bis Tiry sie nach `main` holt) im Branch `claude/wow-addons`. Fehlt der Ordner
+> `wow-addons/TirysZentrale` im Arbeitsordner: `git fetch origin claude/wow-addons` und auf diesem Branch arbeiten.
+
 Projektleitfaden: `wow-addons/CLAUDE.md`, Stand und offene Punkte: `wow-addons/UEBERGABE.md` (zuerst lesen).
 Unsicheres immer als unsicher benennen – vieles ist nur im Spiel prüfbar.
 

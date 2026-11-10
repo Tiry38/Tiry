@@ -38,7 +38,10 @@ def find_addon(name):
         base = os.path.basename(path)
         if os.path.isdir(path) and any(f.lower().endswith(".toc") for f in os.listdir(path)):
             return base, path
-    known = ["TirysZentrale"] + (sorted(os.listdir(addons)) if os.path.isdir(addons) else [])
+    if not os.path.isdir(addons):
+        sys.exit("Die Add-ons fehlen in diesem Arbeitsstand – sie liegen im Branch claude/wow-addons "
+                 "(git fetch origin claude/wow-addons && git checkout claude/wow-addons).")
+    known = ["TirysZentrale"] + sorted(os.listdir(addons))
     sys.exit("Add-on '%s' nicht gefunden. Bekannt: %s" % (name, ", ".join(known)))
 
 
