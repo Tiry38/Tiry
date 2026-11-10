@@ -576,10 +576,14 @@ end)
 -- "Nicht unter": Materialkosten (falls selbst hergestellt) UND Händlerpreis – jeweils so, dass nach AH-Gebühr und
 -- erwartetem Einstellgebühr-Verlust (Forever: Gebühr weg bei Ablauf) mehr übrig bleibt. Unter dem Händlerpreis
 -- einzustellen lohnt nie: Dann direkt zum Händler.
-function AW.Floor(id)
+function AW.VendorFloor(id)
   local risk = M.DepositRisk and M.DepositRisk(id) or 0
   local vendor = M.VendorSell(id) or 0
-  local vfloor = vendor > 0 and math.ceil((vendor + risk) / M.CutFactor()) or nil
+  return vendor > 0 and math.ceil((vendor + risk) / M.CutFactor()) or nil, risk
+end
+
+function AW.Floor(id)
+  local vfloor, risk = AW.VendorFloor(id)
   local r = ns.Recipes.ByOutput(id)
   if not r then return vfloor end
   local unit = ns.CraftBook.UnitCost(id)

@@ -51,7 +51,8 @@ function X.FarmHint(itemID)
   return nil
 end
 
-local function addLines(tooltip, itemID)
+-- Zeilen für den Item-Tooltip (auch für Tests); "Nicht unter" = derselbe Wert wie Craft-Planer und Meine Auktionen
+function X.TooltipLines(itemID)
   local lines = {}
   local used = X.UsedIn(itemID)
   if used and #used > 0 then
@@ -66,13 +67,12 @@ local function addLines(tooltip, itemID)
     for i = 1, math.min(#chars, 4) do parts[#parts + 1] = chars[i].name .. " " .. chars[i].total end
     lines[#lines + 1] = "Bestand alle Chars: " .. total .. " (" .. table.concat(parts, ", ") .. ")"
   end
-  -- Mindest-Verkaufspreis: nie unter Händlerpreis bzw. Herstellungskosten (günstigstes eigenes Rezept)
-  local floor = ns.Market.VendorSell(itemID) or 0
-  local r = ns.Recipes.ByOutput(itemID)
-  if r and ns.Recipes.IsKnown(r) then
-    local _, _, cost, unknown = ns.Scanner.RecipeProfit(r)
-    if cost and unknown == 0 and r.qty > 0 then floor = math.max(floor, math.ceil(cost / r.qty / ns.Market.CutFactor())) end
-  end
+  -- Mindest-Verkaufspreis (AW.Floor): Händlerpreis bzw. Herstellungskosten plus Anzahlungs-Risiko, nach AH-Gebühr.
+  -- Rezept eines fremden Berufs: nur der Händlerpreis zählt (du hast es nicht selbst hergestellt).
+  local AW, r = ns.AH, ns.Recipes.ByOutput(itemID)
+  local floor
+  if r and not ns.Recipes.IsKnown(r) then floor = AW.VendorFloor(itemID) else floor = AW.Floor(itemID) end
+  floor = floor or 0
   local e = ns.DB.Get(itemID)
   if floor > 0 and not (e and e.bind == 1) then
     lines[#lines + 1] = "Nicht unter " .. ns.Money(floor) .. " pro Stück verkaufen"
@@ -82,6 +82,14 @@ local function addLines(tooltip, itemID)
   if ns.Demand and (ns.Demand.PerDay(itemID) or select(4, ns.Demand.PerDay(itemID))) then
     lines[#lines + 1] = "Absatz: " .. ns.Demand.Text(itemID)
   end
+  local PS = ns.PriceString
+  local trend = PS and PS.TrendAdvice and select(2, PS.TrendAdvice(itemID))
+  if trend then lines[#lines + 1] = trend end
+  return lines
+end
+
+local function addLines(tooltip, itemID)
+  local lines = X.TooltipLines(itemID)
   if #lines == 0 then return end
   tooltip:AddLine(" ")
   tooltip:AddLine("Tiry's Zentrale", 1, 0.6, 0.16)

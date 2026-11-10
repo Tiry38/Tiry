@@ -1098,6 +1098,18 @@ describe("Absatz: Verkäufe pro Tag aus zwei AH-Scans", function()
       W.fire("REPLICATE_ITEM_LIST_UPDATE") W.flush()
     end
     assert.are.equal("slow", D.Class(4238))
+    -- Handel > Preise: Spalte "Pro Tag" und Absatz im Tooltip
+    ns.UI.Show("market")
+    local mp = ns.UI.pages.market
+    local got
+    local orig = mp.list.SetEntries
+    mp.list.SetEntries = function(me, entries, ...) got = entries return orig(me, entries, ...) end
+    ns.UI.RefreshPage("market")
+    local row
+    for _, e in ipairs(got or {}) do if e.id == 2318 then row = e end end
+    assert.truthy(row, "Leichtes Leder fehlt in den Preisen")
+    assert.truthy(row.cells.perday:find("^~%d"), row.cells.perday)
+    assert.truthy(table.concat(row.tip, " "):find("/Tag verkauft", 1, true))
     -- Kleinvieh: 5c Gewinn je Leder bei hohem Absatz schlägt 50 Gold Gewinn bei einem Ladenhüter
     local list = D.Sort({ { id = 4238, qty = 1, profit = 500000 }, { id = 2318, qty = 1, profit = 5 } })
     assert.are.equal(2318, list[1].id)
@@ -1153,6 +1165,9 @@ describe("Goldmacher-Werkzeuge", function()
     assert.are.equal(1, #ready)
     assert.are.equal(ns.AH.Floor(2304), ready[1].floor)
     assert.are.equal(math.ceil((300 + ns.Market.DepositRisk(2304)) / 0.95), ready[1].floor)
+    -- Item-Tooltip zeigt denselben Wert
+    local tip = table.concat(ns.Extras.TooltipLines(2304), " | ")
+    assert.truthy(tip:find("Nicht unter " .. ns.Money(ready[1].floor), 1, true), tip)
     noErrors(W)
   end)
 

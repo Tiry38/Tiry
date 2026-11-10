@@ -124,6 +124,7 @@ function page.build(self, content, width)
     { key = "ah", label = "AH-Preis", width = 92 },
     { key = "vendor", label = "Händler", width = 78 },
     { key = "stack", label = "Stapel netto", width = 104, bold = true },
+    { key = "perday", label = "Pro Tag", width = 70 },
     { key = "age", label = "Stand", width = 96 },
   })
   st:Add(self.list, nil)
@@ -208,6 +209,8 @@ function page.refresh(self)
     else
       tip[#tip + 1] = "Noch kein AH-Preis bekannt – einmal im AH scannen."
     end
+    local perDay = ns.Demand and ns.Demand.PerDay and ns.Demand.PerDay(id)
+    if ns.Demand and ns.Demand.Text then tip[#tip + 1] = "Absatz: " .. ns.Demand.Text(id) end
     entries[#entries + 1] = {
       id = id,
       note = (static.cat == "forever") and ("Neu in Forever · " .. (ns.DB.SubName(ns.DB.Get(id)) or "Handwerkswaren")) or (FILTER_NAMES[static.cat] or ""),
@@ -217,6 +220,7 @@ function page.refresh(self)
         ah = price and ns.Money(price) or "|cff8a9a94–|r",
         vendor = vendor > 0 and ns.Money(vendor) or "|cff8a9a94–|r",
         stack = net and ns.Money(net * stack) or (vendor > 0 and ("|cff93a39d" .. ns.Money(vendor * stack) .. "|r") or "|cff8a9a94–|r"),
+        perday = perDay and ("~" .. (perDay >= 10 and tostring(math.floor(perDay + 0.5)) or (string.format("%.1f", perDay):gsub("%.", ",")))) or "|cff8a9a94–|r",
         age = price and M.AgeText(id) or "|cff8a9a94–|r",
       },
       tip = tip,
