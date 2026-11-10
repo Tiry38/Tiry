@@ -141,6 +141,7 @@ local DEFAULTS = {
   showOnlyMyLevel = false,
   expertMode = false,
   ahAutoScan = true,   -- beim Öffnen des AH automatisch scannen (über Auctionator)
+  ahFullScan = true,   -- Komplett-Scan bevorzugen: ein Scan füllt alle Reiter (Preise, Absatz, Schnäppchen, Unterboten)
   ahUndercut = true,   -- beim Öffnen des AH eigene Auktionen auf Unterbieten prüfen
   ahScanInterval = 30, -- Scan + Unterboten-Prüfung höchstens alle X Minuten  -- Preisformeln im Craft-Planer zeigen (für Profis)
   faction = "AUTO",   -- AUTO / Alliance / Horde

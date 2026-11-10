@@ -528,7 +528,8 @@ local function refreshVisible()
   end
 end
 for _, msg in ipairs({ "PRICES_UPDATED", "ITEMS_UPDATED", "PROFESSIONS_CHANGED", "PLAYER_CHANGED",
-  "MERCHANT_SCANNED", "BAGS_SCANNED", "RECIPES_SCANNED", "AH_STATE", "LOOT_VALUED", "CRAFTBOOK_CHANGED", "AUCTIONS_CHANGED" }) do
+  "MERCHANT_SCANNED", "BAGS_SCANNED", "RECIPES_SCANNED", "AH_STATE", "LOOT_VALUED", "CRAFTBOOK_CHANGED", "AUCTIONS_CHANGED",
+  "DEMAND_UPDATED", "SNIPES_CHANGED" }) do
   ns.Listen(msg, function() ns.Debounce("refresh", 0.15, refreshVisible) end)
 end
 ns.Listen("WAYPOINT_CHANGED", function()

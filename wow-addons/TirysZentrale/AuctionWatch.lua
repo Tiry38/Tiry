@@ -72,6 +72,7 @@ function AW.ReadOwned()
         -- verkauft: Blizzard zeigt hier die Zeit bis das Gold verschickt wird
         sendIn = (info.status == STATUS_SOLD) and info.timeLeftSeconds or nil,
         competitor = prev and prev.competitor, undercut = prev and prev.undercut, checked = prev and prev.checked,
+        viaScan = prev and prev.viaScan,
       }
     end
   end
@@ -121,12 +122,15 @@ function AW.Next()
   end)
 end
 
-function AW.CheckUndercuts(afterwards)
+function AW.CheckUndercuts(afterwards, force)
   wipe(queue)
   pending = nil
   local seen = {}
   for _, a in ipairs(store().list) do
-    if a.status == "active" and a.unit and not seen[a.id] then
+    -- Stapelware, die der Komplett-Scan gerade (< 10 Min.) geprüft hat, nicht nochmal einzeln suchen
+    -- ("Jetzt prüfen" sucht trotzdem)
+    local fresh = not force and a.commodity and a.viaScan and (time() - a.viaScan) < 600
+    if a.status == "active" and a.unit and not seen[a.id] and not fresh then
       seen[a.id] = true
       queue[#queue + 1] = a
     end
@@ -169,6 +173,35 @@ end)
 ns.On("AUCTION_HOUSE_THROTTLED_SYSTEM_READY", function()
   if AW.checking and not pending then AW.Next() end
 end)
+
+-- Komplett-Scan: Für welche Items lohnt das Mitlesen? Deine aktive Stapelware (bei Einzel-Items unterscheiden
+-- sich Varianten wie "des Affen"/"des Adlers" – die prüft weiter die Einzelsuche).
+function AW.ReplicateTargets()
+  local out = {}
+  for _, a in ipairs(store().list) do
+    if a.status == "active" and a.commodity and a.unit and not (a.expires and a.expires < time()) then out[a.id] = true end
+  end
+  return out
+end
+
+-- Ergebnis des Komplett-Scans übernehmen: günstigstes fremdes Angebot je Item (nil = keine Konkurrenz)
+function AW.FromReplicate(targets, cheapest)
+  local n, under = 0, 0
+  for id in pairs(targets or {}) do
+    setResult(id, cheapest and cheapest[id])
+    n = n + 1
+  end
+  local now = time()
+  for _, a in ipairs(store().list) do
+    if targets[a.id] and a.status == "active" then a.viaScan = now end
+  end
+  if n == 0 then return 0 end
+  for _, a in ipairs(store().list) do
+    if a.status == "active" and a.undercut then under = under + 1 end
+  end
+  if under > 0 then AW.Report() else ns.Fire("AUCTIONS_CHANGED") end
+  return n
+end
 
 -- Wie viele eigene Auktionen sind unterboten?
 function AW.UndercutList()
@@ -216,11 +249,13 @@ function AW.NextAutoIn()
   return math.max(0, math.ceil((last + AW.IntervalMinutes() * 60 - time()) / 60))
 end
 
-local wantCheck = false
+local wantCheck, forced = false, false
 local function runChecks()
   if ns.db then ns.db.lastAutoCheck = time() end
   local scan = function() if ns.settings.ahAutoScan ~= false and M.ahOpen then M.StartScan({ quiet = true }) end end
-  if ns.settings.ahUndercut ~= false then AW.CheckUndercuts(scan) else scan() end
+  local force = forced
+  forced = false
+  if ns.settings.ahUndercut ~= false or force then AW.CheckUndercuts(scan, force) else scan() end
 end
 
 ns.Listen("AH_STATE", function()
@@ -238,8 +273,8 @@ end)
 
 -- "Jetzt prüfen" (Knopf): sofort, unabhängig vom Zeitabstand
 function AW.CheckNow()
-  wantCheck = true
-  if not AW.QueryOwned() then wantCheck = false return false end
+  wantCheck, forced = true, true
+  if not AW.QueryOwned() then wantCheck, forced = false, false return false end
   return true
 end
 
