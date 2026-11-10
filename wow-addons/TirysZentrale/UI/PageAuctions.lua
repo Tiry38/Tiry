@@ -98,14 +98,21 @@ function page.build(self, content, width)
     { key = "state", label = "Status", width = 120, bold = true },
   })
   -- Summenzeile unter der Liste
+  -- Summe als leuchtende Glas-Pille
   self.totalRow = CreateFrame("Frame", nil, content)
-  self.totalRow:SetSize(width, 44)
-  self.totalRow.bg = UI.Round(self.totalRow, 16, "BACKGROUND", 0)
-  self.totalRow.bg:SetColor(C.cardHi, 1)
+  self.totalRow:SetSize(width, 48)
+  local tshape = UI.PillShape(self.totalRow, 48, 0, true)
+  tshape.edge:SetGradient(UI.GRAD_EDGE, 0.6)
+  tshape.body:SetGradientV(UI.GLASS.hero[1], UI.GLASS.hero[2], 1)
+  tshape.gloss:SetAlpha(0.4)
+  self.totalRow.bg = tshape.body
+  self.totalRow.glow = UI.Glow(self.totalRow, C.amber, 260, 0.16, "BORDER")
+  self.totalRow.glow:SetHeight(46)
+  self.totalRow.glow:SetPoint("CENTER", self.totalRow, "RIGHT", -90, 0)
   self.totalRow.label = UI.Text(self.totalRow, 14, "bold", C.text)
-  self.totalRow.label:SetPoint("LEFT", 18, 0)
-  self.totalRow.value = UI.Text(self.totalRow, 15, "bold", C.hi)
-  self.totalRow.value:SetPoint("RIGHT", -18, 0)
+  self.totalRow.label:SetPoint("LEFT", 24, 0)
+  self.totalRow.value = UI.Text(self.totalRow, 17, "bold", C.gold)
+  self.totalRow.value:SetPoint("RIGHT", -24, 0)
   self.totalRow.value:SetJustifyH("RIGHT")
   self.soldTitle = UI.Text(content, 17, "bold", C.text)
   self.soldTitle:SetText("Verkauft")
@@ -229,7 +236,7 @@ function page.refresh(self)
     self.totalRow:ClearAllPoints()
     self.totalRow:SetPoint("TOPLEFT", content, "TOPLEFT", 0, -y)
     self.totalRow:Show()
-    y = y + 44 + 22
+    y = y + 48 + 22
   else
     self.totalRow:Hide()
     y = y + 14

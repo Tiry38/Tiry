@@ -57,23 +57,27 @@ ns.ProfName = profName
 local function createCard(parent, width)
   local card = UI.SafeButton(parent)
   card:SetWidth(width)
-  card.bg = UI.Round(card, 18, "BACKGROUND", 0)
-  card.bg:SetColor(C.card)
+  -- Glaskarte; beim Überfahren leuchtet der Rand Neon
+  card.glass = UI.Glass(card, { radius = 24, body = UI.GLASS.card, sheen = 0.045, line = 0.28 })
+  card.bg = card.glass.body
+  -- Leuchtstreifen links: Neon = Forever bestätigt, Türkis-Blau = Classic-Wissen
   card.accent = CreateFrame("Frame", nil, card)
-  card.accent:SetSize(5, 40)
-  card.accent:SetPoint("TOPLEFT", 0, -18)
+  card.accent:SetSize(4, 44)
+  card.accent:SetPoint("TOPLEFT", 1, -18)
   card.accent.bg = UI.Round(card.accent, 2, "ARTWORK", 0)
-  card.icon = UI.ItemIcon(card, 40)
-  card.icon:SetPoint("TOPLEFT", 18, -16)
+  card.accent.glow = UI.Glow(card.accent, C.amber, 60, 0.35, "ARTWORK")
+  card.accent.glow:SetPoint("CENTER")
+  card.icon = UI.ItemIcon(card, 44)
+  card.icon:SetPoint("TOPLEFT", 18, -14)
   card.title = UI.Text(card, 15, "bold", C.text)
   card.title:SetPoint("TOPLEFT", card.icon, "TOPRIGHT", 14, -1)
   card.title:SetWidth(width - 260)
   card.title:SetWordWrap(false)
   card.summary = UI.Para(card, 12, C.muted, width - 72 - 230) -- rechts bleibt Platz für den Wert
   card.summary:SetPoint("TOPLEFT", card.title, "BOTTOMLEFT", 0, -6)
-  card.value = UI.Text(card, 15, "bold", C.hi)
+  card.value = UI.Text(card, 16, "bold", C.gold)
   card.value:SetPoint("TOPRIGHT", -46, -18)
-  card.valueSub = UI.Text(card, 10, "semibold", C.dim)
+  card.valueSub = UI.Text(card, 12, "semibold", C.dim)
   card.valueSub:SetPoint("TOPRIGHT", card.value, "BOTTOMRIGHT", 0, -3)
   card.valueSub:SetWidth(200)
   card.valueSub:SetJustifyH("RIGHT")
@@ -87,13 +91,19 @@ local function createCard(parent, width)
   card.detail:SetPoint("TOPLEFT", 74, 0)
   card.detail:SetSize(width - 100, 10)
   card.detailTexts = {}
-  card:SetScript("OnEnter", function(self) self.bg:SetColor(C.cardHi) end)
-  card:SetScript("OnLeave", function(self) self.bg:SetColor(C.card) end)
+  card:SetScript("OnEnter", function(self)
+    self.glass:SetEdge("neon", 0.65)
+    self.glass:SetBody(UI.GLASS.pill[1], UI.GLASS.pill[2])
+  end)
+  card:SetScript("OnLeave", function(self)
+    self.glass:SetEdge("light")
+    self.glass:SetBody(UI.GLASS.card[1], UI.GLASS.card[2])
+  end)
   return card
 end
 
 local function chip(card, i)
-  card.chips[i] = card.chips[i] or UI.Chip(card, "", C.hi)
+  card.chips[i] = card.chips[i] or UI.Chip(card, "", C.gold)
   return card.chips[i]
 end
 
@@ -117,7 +127,9 @@ local function fillCard(card, m, expanded, width)
   card.title:SetText(m.title)
   card.title:SetTextColor(available and C.text[1] or C.dim[1], available and C.text[2] or C.dim[2], available and C.text[3] or C.dim[3], 1)
   card.summary:SetText(m.summary)
-  card.accent.bg:SetGradient(m.source == "forever" and UI.GRAD or UI.GRAD_COOL, 1)
+  local fc = m.source == "forever" and C.amber or C.aqua
+  card.accent.bg:SetGradientV(m.source == "forever" and C.amber or C.teal, m.source == "forever" and C.teal or C.aqua, 1)
+  card.accent.glow:SetVertexColor(fc[1], fc[2], fc[3], 0.35)
 
   local value, valueID = ns.MethodValue(m)
   if value then
@@ -138,7 +150,7 @@ local function fillCard(card, m, expanded, width)
     tags[#tags + 1] = { profName(m.prof) .. (has and " (" .. ns.ProfRank(m.prof) .. ")" or ""), has and C.green or C.hi }
   end
   tags[#tags + 1] = { EFFORT[m.effort or 1], C.muted }
-  tags[#tags + 1] = { m.source == "forever" and "Forever bestätigt" or "Classic-Wissen", m.source == "forever" and C.hi or C.teal }
+  tags[#tags + 1] = { m.source == "forever" and "Forever bestätigt" or "Classic-Wissen", m.source == "forever" and C.amber or C.teal }
   if not available then tags[#tags + 1] = { why, C.red } end
   local y = 16 + 22 + 6 + math.ceil(card.summary:GetStringHeight()) + 10
   local x = 72
@@ -172,26 +184,26 @@ local function fillCard(card, m, expanded, width)
       fs:SetPoint("TOPLEFT", card.detail, "TOPLEFT", 0, -dy)
       dy = dy + math.ceil(fs:GetStringHeight()) + (gap or 6)
     end
-    add("So geht's", 13, C.hi, "bold", 6)
+    add("So geht's", 13, C.amber, "bold", 6)
     for i, step in ipairs(m.steps or {}) do
       add("|cff39ff6b" .. i .. ".|r  " .. step, 12, C.text, "regular", 6)
     end
     local where = m.where and m.where[ns.Faction()]
     if where then
       dy = dy + 6
-      add("Wo?", 13, C.hi, "bold", 4)
+      add("Wo?", 13, C.amber, "bold", 4)
       add(where, 12, C.muted, "regular", 6)
     end
     if m.tips and #m.tips > 0 then
       dy = dy + 6
-      add("Profi-Tipps", 13, C.hi, "bold", 4)
+      add("Profi-Tipps", 13, C.amber, "bold", 4)
       for _, tip in ipairs(m.tips) do add("•  " .. tip, 12, C.muted, "regular", 5) end
     end
     if m.farm then
       local spots = ns.Maps.Spots(m.farm)
       if #spots > 0 then
         dy = dy + 6
-        add("Wo genau? (dein Level " .. ns.player.level .. ")", 13, C.hi, "bold", 4)
+        add("Wo genau? (dein Level " .. ns.player.level .. ")", 13, C.amber, "bold", 4)
         card.mapBtns = card.mapBtns or {}
         for j = 1, math.min(#spots, 3) do
           local s = spots[j]
@@ -261,8 +273,8 @@ function page.build(self, content, width)
     self.frame.scroll:ScrollToTop()
   end, width)
   st:Add(self.segments, self.segments:GetHeight(), 10)
-  self.hint = UI.Para(content, 11, C.dim, width)
-  st:Add(self.hint, 16, 10)
+  self.hint = UI.Para(content, 12, C.dim, width)
+  st:Add(self.hint, 34, 10)
   self.top = st.y
 end
 
@@ -275,7 +287,7 @@ end
 
 function page.refresh(self)
   local width = UI.CONTENT_W
-  self.hint:SetText("Karte anklicken = Anleitung aufklappen. Gold-Streifen = für Forever bestätigt, Türkis = bewährtes Classic-Wissen. "
+  self.hint:SetText("Karte anklicken = Anleitung aufklappen. Neon-Streifen = für Forever bestätigt, Türkis-Blau = bewährtes Classic-Wissen. "
     .. "Wert rechts = ein Stapel des wertvollsten Materials nach AH-Gebühr.")
   local list = {}
   for _, m in ipairs(ns.METHODS) do

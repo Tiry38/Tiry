@@ -7,7 +7,7 @@ local S = ns.Scanner
 
 local ADVICE = {
   AH = { "Ins AH", C.green },
-  HAENDLER = { "Händler", C.hi },
+  HAENDLER = { "Händler", C.aqua },
   SCHROTT = { "Schrott", C.dim },
   BEHALTEN = { "Behalten", C.violet },
 }
@@ -37,7 +37,7 @@ function page.build(self, content, width)
   st:Para("Sprich einen Händler an – Tiry's Zentrale vergleicht automatisch jedes Angebot mit dem AH-Preis. "
     .. "Lohnt sich ein Kauf zum Weiterverkaufen, siehst du ihn hier (und im Chat). "
     .. "Achte besonders auf Ware mit |cffff9929begrenztem Vorrat|r (z. B. Rezepte): die ist im AH oft viel mehr wert.", 12, C.muted, 12)
-  self.merchantInfo = UI.Para(content, 12, C.hi, width)
+  self.merchantInfo = UI.Para(content, 12, C.muted, width)
   st:Add(self.merchantInfo, 18, 8)
   self.flipList = UI.ItemList(content, width, {
     { key = "buy", label = "Kaufpreis", width = 90 },
@@ -73,7 +73,7 @@ function page.build(self, content, width)
     .. "Grauer Schrott: beim Händler einfach auf den |cff39ff6bMüll-Knopf (\"Schrott verkaufen\")|r klicken.")
   local cw = math.floor((width - 30) / 4)
   head.cards = {
-    statCard(head, cw, "Händlerwert", C.hi),
+    statCard(head, cw, "Händlerwert", C.aqua),
     statCard(head, cw, "AH-Potenzial", C.green),
     statCard(head, cw, "Bester Mix", C.text),
     statCard(head, cw, "Grauer Schrott", C.muted),

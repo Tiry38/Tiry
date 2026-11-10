@@ -92,7 +92,7 @@ function page.build(self, content, width)
   UI.SetTooltip(self.searchBtn, "Sofort-Suche", "Funktioniert, während das Auktionshaus offen ist: Auctionator sucht alle Items dieser Liste und zeigt dir die günstigsten Angebote.")
   st:Add(actions, 34, 16)
 
-  self.status = UI.Para(content, 12, C.hi, width)
+  self.status = UI.Para(content, 12, C.muted, width)
   st:Add(self.status, 18, 8)
 
   self.list = UI.ItemList(content, width, {

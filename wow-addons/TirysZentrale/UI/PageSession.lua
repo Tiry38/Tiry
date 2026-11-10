@@ -17,24 +17,19 @@ local function duration(sec)
   return string.format("%d Min. %02d Sek.", m, sec % 60)
 end
 
-local function stat(parent, w, label)
-  local f = CreateFrame("Frame", nil, parent)
-  f:SetSize(w, 58)
-  f.label = UI.Text(f, 12, "semibold", C.dim)
-  f.label:SetPoint("TOPLEFT")
-  f.label:SetText(label)
-  f.value = UI.Text(f, 20, "bold", C.text)
-  f.value:SetPoint("TOPLEFT", f.label, "BOTTOMLEFT", 0, -6)
-  return f
+local function stat(parent, w, label, accent)
+  return UI.StatPill(parent, w, label, accent)
 end
 
 function page.build(self, content, width)
   local st = UI.Stack(content)
-  local card = CreateFrame("Frame", nil, content)
+  local card = UI.Card(content, 26, nil, { hero = true })
   card:SetSize(width, 214)
-  card.bg = UI.Round(card, 22, "BACKGROUND", 0)
-  card.bg:SetGradient({ { 0.07, 0.27, 0.19 }, { 0.09, 0.18, 0.16 }, { 0.14, 0.16, 0.17 } }, 0.95)
-  card.state = UI.Text(card, 16, "bold", C.text)
+  card.shine = UI.Glow(card, C.amber, 460, 0.16, "BORDER")
+  card.shine:SetHeight(190)
+  card.shine:SetPoint("CENTER", card, "LEFT", 230, 0)
+  UI.Drift(card.shine, 200, 0, 8, 0.3, 0.12)
+  card.state = UI.Text(card, 18, "bold", C.text)
   card.state:SetPoint("TOPLEFT", 24, -22)
   card.zone = UI.Text(card, 12, "regular", C.muted)
   card.zone:SetPoint("TOPLEFT", card.state, "BOTTOMLEFT", 0, -6)
@@ -44,12 +39,13 @@ function page.build(self, content, width)
     if S.Current() then S.Stop() else S.Start() end
     page.refresh(self)
   end)
-  local cw = math.floor((width - 48) / 4)
+  local cw = math.floor((width - 48 - 36) / 4)
   card.stats = {
-    stat(card, cw, "GOLD BEKOMMEN"), stat(card, cw, "BEUTE-WERT"), stat(card, cw, "ZUSAMMEN"), stat(card, cw, "PRO STUNDE"),
+    stat(card, cw, "GOLD BEKOMMEN", C.amber), stat(card, cw, "BEUTE-WERT", C.teal), stat(card, cw, "ZUSAMMEN", C.aqua),
+    stat(card, cw, "PRO STUNDE", C.amber),
   }
-  for i, f in ipairs(card.stats) do f:SetPoint("TOPLEFT", 24 + (i - 1) * cw, -96) end
-  card.stats[4].value:SetTextColor(C.hi[1], C.hi[2], C.hi[3], 1)
+  for i, f in ipairs(card.stats) do f:SetPoint("TOPLEFT", 24 + (i - 1) * (cw + 12), -92) end
+  card.stats[4].value:SetTextColor(C.gold[1], C.gold[2], C.gold[3], 1)
   card.best = UI.Para(card, 12, C.muted, width - 48)
   card.best:SetPoint("TOPLEFT", 24, -168)
   self.card = card
@@ -79,15 +75,22 @@ local function histRow(self, i, width)
   if r then return r end
   r = CreateFrame("Frame", nil, self.frame.content)
   r:SetSize(width, 44)
-  r.bg = UI.Round(r, 16, "BACKGROUND", 0)
-  r.bg:SetColor(C.card, 1)
+  local shape = UI.PillShape(r, 44, 0, false)
+  shape.edge:SetGradientV({ 0.60, 1.00, 0.85, 0.16 }, { 0.20, 0.55, 0.65, 0.05 })
+  shape.body:SetGradientV(UI.GLASS.card[1], UI.GLASS.card[2], 0.8)
+  r.bg = shape.body
+  r.dot = r:CreateTexture(nil, "ARTWORK")
+  r.dot:SetTexture(UI.TEX.circle)
+  r.dot:SetSize(8, 8)
+  r.dot:SetPoint("LEFT", 18, 0)
+  UI.SetGradV(r.dot, C.amber, C.teal, 1)
   r.title = UI.Text(r, 13, "semibold", C.text)
-  r.title:SetPoint("LEFT", 16, 0)
+  r.title:SetPoint("LEFT", 36, 0)
   r.title:SetWidth(width - 360)
   r.title:SetWordWrap(false)
   r.total = UI.Text(r, 13, "bold", C.text)
   r.total:SetPoint("RIGHT", -170, 0)
-  r.per = UI.Text(r, 13, "bold", C.hi)
+  r.per = UI.Text(r, 13, "bold", C.gold)
   r.per:SetPoint("RIGHT", -46, 0)
   r.del = UI.IconButton(r, "close", 26, "Diese Session löschen")
   r.del:SetPoint("RIGHT", -10, 0)

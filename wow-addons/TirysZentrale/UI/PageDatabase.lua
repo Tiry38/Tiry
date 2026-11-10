@@ -115,7 +115,7 @@ function page.build(self, content, width)
   UI.SetTooltip(self.listBtn, "Einkaufsliste", "Legt die ersten 100 Treffer als Auctionator-Einkaufsliste an – so scannst du ihre AH-Preise mit einem Klick.")
   st:Add(opts, 34, 10)
 
-  self.count = UI.Para(content, 12, C.hi, width)
+  self.count = UI.Para(content, 12, C.gold, width)
   st:Add(self.count, 18, 8)
   self.list = UI.ItemList(content, width, {
     { key = "ah", label = "AH-Preis", width = 92 },

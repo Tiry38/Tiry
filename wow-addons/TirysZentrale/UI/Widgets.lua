@@ -702,6 +702,35 @@ function UI.Card(parent, radius, color, opts)
   return f
 end
 
+-- Kennzahl als Glas-Pille (statt Kachel): Leuchtpunkt, kleines Etikett, große Zahl
+function UI.StatPill(parent, w, label, accent, h)
+  h = h or 60
+  local f = CreateFrame("Frame", nil, parent)
+  f:SetSize(w, h)
+  local shape = pill(f, h, 0, true)
+  f.edge, f.bg, f.gloss = shape.edge, shape.body, shape.gloss
+  f.edge:SetGradientV({ 0.60, 1.00, 0.85, 0.30 }, { 0.20, 0.55, 0.65, 0.08 })
+  f.bg:SetGradientV(UI.GLASS.pill[1], UI.GLASS.pill[2], 0.92)
+  f.gloss:SetAlpha(0.35)
+  local c = accent or C.amber
+  f.glow = UI.Glow(f, c, 46, 0.45, "ARTWORK")
+  f.glow:SetPoint("CENTER", f, "LEFT", 24, 0)
+  f.dot = tex(f, "ARTWORK", 1, UI.TEX.circle)
+  f.dot:SetSize(9, 9)
+  f.dot:SetPoint("CENTER", f, "LEFT", 24, 0)
+  setGradV(f.dot, c, lerp(c, C.aqua, 0.5), 1)
+  f.label = UI.Text(f, 12, "semibold", C.dim)
+  f.label:SetPoint("TOPLEFT", 40, -(h - 42) / 2)
+  f.label:SetText(label or "")
+  f.value = UI.Text(f, 18, "bold", C.text)
+  f.value:SetPoint("TOPLEFT", f.label, "BOTTOMLEFT", 0, -3)
+  function f:SetAccent(col)
+    self.glow:SetVertexColor(col[1], col[2], col[3], 0.45)
+    setGradV(self.dot, col, lerp(col, C.aqua, 0.5), 1)
+  end
+  return f
+end
+
 -- Kleine Pille als Etikett ("Level 10+", "AH", ...): getönter Glaskörper + leuchtender Rand
 function UI.Chip(parent, text, color, filled)
   local f = CreateFrame("Frame", nil, parent)

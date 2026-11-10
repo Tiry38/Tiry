@@ -137,8 +137,9 @@ function page.build(self, content, width)
   st:Add(stepHead(content, 2, "Wie viel Gewinn pro Craft mindestens?", width), 28, 10)
   local fc = UI.Card(content, 24, nil, { hero = true })
   fc:SetSize(width, 92)
-  fc.shine = UI.Glow(fc, C.amber, 260, 0.14, "BACKGROUND")
-  fc.shine:SetPoint("CENTER", fc, "LEFT", 120, 10)
+  fc.shine = UI.Glow(fc, C.amber, 420, 0.14, "BORDER")
+  fc.shine:SetHeight(104)
+  fc.shine:SetPoint("CENTER", fc, "LEFT", 210, 0)
   self.profit = UI.Stepper(fc, "Mindestgewinn", 340, function() return (select(2, R.Filter())) end,
     function(v) R.SetProfit(v) end,
     function(v, dir)
