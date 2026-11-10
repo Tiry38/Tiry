@@ -18,7 +18,7 @@ Aktueller Stand und offene Punkte: **[`UEBERGABE.md`](UEBERGABE.md)** – zuerst
 - `tools/` – Python-Werkzeuge (Routen, Grafiken, Sounds). Immer mit `python3 -I` starten.
 - `tests/` – Lua-5.1-Simulationen der WoW-API (`lua5.1`). Aufruf aus dem Add-on-Ordner, z. B.
   `cd addons/LevelPilot && lua5.1 ../../tests/v4.lua` (muss „ALLE TESTS OK“ melden), außerdem `lp.lua`, `lp2.lua`,
-  `nav.lua`, `fly.lua` (Exit-Code 0 = ok). ProcAlarm/Schlaghagel: `cd addons && lua5.1 ../tests/proc.lua` bzw. `PROC_CLASS=SHAMAN|WARLOCK lua5.1 ../tests/hagel.lua`.
+  `nav.lua`, `fly.lua`, `route.lua` (Exit-Code 0 = ok). ProcAlarm/Schlaghagel: `cd addons && lua5.1 ../tests/proc.lua` bzw. `PROC_CLASS=SHAMAN|WARLOCK lua5.1 ../tests/hagel.lua`.
   Spell-Daten der Live-Version: github.com/simulationcraft/simc-forever (`SpellDataDump/allspells.txt`). Vor jeder Auslieferung alle laufen lassen + `luac5.1 -p` auf alle .lua.
 - `weakauras/` – WeakAura-Importtexte und Generatoren.
 - `previews/` – Vorschaubilder und Sound-Vorhördateien.
@@ -41,15 +41,19 @@ Dateien/Sounds reicht `/reload` nicht). Version in allen 4 TOCs und in `VERSION`
   Ton: `C_UnitAuras.AddAuraSound(Enum.UnitAuraSoundTrigger.Added, {unitToken, spellID, soundFileName, …})`.
   Blizzards Forever-UI-Code zum Nachlesen: github.com/reckhou/WoWBlzCode (Ordner `Forever/`).
 - WeakAuras-Forever führt **keinen eigenen Custom-Code** aus → für Logik ein eigenes Add-on bauen.
+- **Reittier erst ab Stufe 40** (Forever) – Routen bis 40 sind Fußwege; ausgeruhte XP verdoppeln Mob-XP.
 - Add-ons zeichnen **nur flach über die 3D-Welt** – keine Verdeckung durch Gegenstände möglich.
 - Kein Bot / keine Automatisierung des Spielens (abgelehnt, bleibt so). Keine 1:1-Kopien fremder Add-ons.
 
 ## Routen-Werkzeugkette (LevelPilot)
-1. `fulldb.py` → `full.json` (Quests/NPCs/Objekte/Items aus QuestieDB-Forever), `nav.py` → `nav.json` (NPC-Laufwege).
-2. `make_route.py` → Abschnitte (Zone, Stufe, Quest-Liste), Qualitätsfilter `qual.py` (Ertrag/Zeit, streicht
-   langsame Quests, markiert Begleit-/Elite-Quests als „slow“), Generator `gen_route.py` (gierig nach Nähe +
-   Or-Opt-Wegoptimierung) → `gen_steps.json`, `auto_slow.json`.
-3. `build.py` → prüft jeden Schritt gegen die Forever-DB (muss „0 Probleme“ melden), schreibt `Horde_22_30.lua`
-   → nach `addons/LevelPilot/Routes/` kopieren.
-Quellen der Questauswahl: Konsens freier Speedrun-Routen (Joana, Warcraft Tavern, Guidelime Ettern/Freezy3/
-Sevenleaves/Milksmuggler, WoW-Pro); Quests, die mindestens 3 von 5 Quellen abgeben.
+1. `fulldb.py` → `full.json` (Quests/NPCs/Objekte/Items aus QuestieDB-Forever), `nav.py` → `nav.json`,
+   `qdb.py` → `forever.json` (für `verify.py`/`build.py`). Alle drei .gitignored, bei Bedarf neu erzeugen.
+2. `xpmodel.py` – XP-/Zeitmodell: Quest-XP aus `QuestieDB/support/Forever/QuestXP`, Dropchancen aus
+   `support/Forever/DropTables`, Mob-XP-Formel Classic, Laufen 7 Yards/s (Reittier erst ab 40).
+3. `plan.py` – Planer: Abschnitte (Gebiet, Hub, kuratierte Quests + Auto-Pool), Stufen-Simulation (Quest ≤ Stufe+2),
+   gierig nach Nähe + Or-Opt, Grenzkosten-Filter gegen Grind-Tempo, Grind-/Kontroll-Schritte.
+4. `make_route.py [key]` – Routen in `ROUTES` (`horde_22_30`, `horde_30_40`), Einstiegsstufen per `tune()` →
+   `gen_steps_<key>.json`. Dann `build.py [key]` → prüft gegen Forever-DB, schreibt `addons/LevelPilot/Routes/`.
+   Neue Routendatei in alle 4 TOCs eintragen. `tests/route.lua` prüft Routenwahl + Dateien.
+Quellen der Gebietsreihenfolge: Konsens freier Speedrun-Routen (Joana, Warcraft Tavern, Guidelime, WoW-Pro, Bustea),
+danach per Modell verglichen; Gebiete mit nur 1–3 Quests werden gestrichen.

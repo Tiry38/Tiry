@@ -47,7 +47,8 @@ def lstr(x):
 
 
 def check_steps(R):
-    problems, out = [], []
+    problems, hints, out = [], [], []
+    in_route = set(x.get("q") for x in R if x.get("q"))
     accepted, done = set(), set()
     for i, s in enumerate(R, 1):
         s = dict(s)
@@ -74,10 +75,14 @@ def check_steps(R):
             if nx: s["nxt"] = sorted(set(nx))[:40]
             if q in NOTES and not s.get("note"): s["note"] = NOTES[q]
             if s["t"] == "accept":
+                # Vorquest gar nicht in der Route = vor Routenbeginn erledigt (sonst ueberspringt die Engine) -> Hinweis
                 miss = [p for p in (v[11] or []) if p not in done]
-                if miss: problems.append(f"#{i} {q} {v[0]} (accept): Vorquests fehlen vorher {miss}")
+                if [p for p in miss if p in in_route]: problems.append(f"#{i} {q} {v[0]} (accept): Vorquests fehlen vorher {miss}")
+                elif miss: hints.append(f"#{i} {q} {v[0]}: Vorquest {miss} vor Routenbeginn")
                 sg = v[12] or []
-                if sg and not any(p in done for p in sg): problems.append(f"#{i} {q} {v[0]} (accept): eine von {sg} nötig")
+                if sg and not any(p in done for p in sg):
+                    if any(p in in_route for p in sg): problems.append(f"#{i} {q} {v[0]} (accept): eine von {sg} nötig")
+                    else: hints.append(f"#{i} {q} {v[0]}: eine von {sg} vor Routenbeginn")
                 if v[3] and v[3] > s["l"] + 1: problems.append(f"#{i} {q} {v[0]}: Mindeststufe {v[3]} > Abschnitt {s['l']}")
                 accepted.add(q)
             else:
@@ -88,7 +93,7 @@ def check_steps(R):
             if not ids: problems.append(f"#{i} NPC '{s['npc']}' nicht gefunden")
             else: s["npcid"] = ids[0]
         out.append(s)
-    return out, problems
+    return out, problems, hints
 
 
 def lua_step(s):
@@ -122,9 +127,10 @@ def lua_step(s):
 
 def build(path):
     D = json.load(open(path))
-    out, problems = check_steps(D["steps"])
-    print("%s: %d Schritte, %d Probleme" % (D["key"], len(out), len(problems)))
+    out, problems, hints = check_steps(D["steps"])
+    print("%s: %d Schritte, %d Probleme, %d Hinweise" % (D["key"], len(out), len(problems), len(hints)))
     for p in problems: print("  ", p)
+    for h in hints: print("   Hinweis:", h)
     L = ['-- AUTOMATISCH ERZEUGT (LevelPilot Routen-Werkzeug: make_route.py + build.py) · geprüft gegen Questies Forever-Datenbank',
          'LevelPilot_Routes = LevelPilot_Routes or {}',
          'LevelPilot_Routes[%s] = { name = %s, faction = "Horde", min = %d, max = %d, steps = {'

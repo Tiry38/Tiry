@@ -241,8 +241,9 @@ def evaluate(steps, L0=22, xp0=0, verbose=True):
 
 
 if __name__ == "__main__":
-    steps = json.load(open(os.path.join(HERE, sys.argv[1] if len(sys.argv) > 1 else "route.json")))
-    blocks, per_q, _ = evaluate(steps)
+    D = json.load(open(os.path.join(HERE, sys.argv[1] if len(sys.argv) > 1 else "gen_steps_horde_22_30.json")))
+    steps, L0 = (D["steps"], D.get("L0", 22)) if isinstance(D, dict) else (D, 22)
+    blocks, per_q, _ = evaluate(steps, L0)
     print("\n-- Quests nach XP/Min (Arbeit + anteilige Wege) --")
     rows = []
     for q, d in per_q.items():

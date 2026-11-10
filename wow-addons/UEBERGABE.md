@@ -1,4 +1,4 @@
-# Übergabe – Stand 09.11.2026
+# Übergabe – Stand 10.11.2026
 
 Diese Arbeit lief bisher in einer Cloud-Sitzung, die am Repository Velocenter-Planer hing. Ab jetzt geht es
 in Sitzungen auf **Tiry38/Tiry** weiter. Alle Dateien liegen in diesem Ordner, Projektleitfaden: `CLAUDE.md`.
@@ -7,7 +7,7 @@ in Sitzungen auf **Tiry38/Tiry** weiter. Alle Dateien liegen in diesem Ordner, P
 
 | Add-on | Version | Zweck | Stand |
 |---|---|---|---|
-| **LevelPilot** | 4.0.0 | Levelrouten Horde 22–30, Pfeil, Lichtstrahl, Auto-Quests, XP-Cockpit, Flug/Ruhestein-Rat | ausgeliefert, **Spieltest offen** |
+| **LevelPilot** | 4.1.0 | Levelrouten Horde **22–30 und 30–40** (neu geplant nach XP/Zeit-Modell), Pfeil, Lichtstrahl, Auto-Quests, XP-Cockpit, Flug/Ruhestein-Rat, neues Design | ausgeliefert, **Spieltest offen** |
 | **ProcAlarm** | 2.1.0 | **für Tirys Kollegen (Hexer)**: Schattentrance (17941) über Blizzard-Aura-Slot, auch im Kampf; violetter Glow + Blinken, ohne Ton, ohne grünen Ring | ausgeliefert, **Kampftest offen** |
 | **Schlaghagel** | 1.0.0 | **Tirys Verstärker**: Schlaghagel-Buff (16257) über Blizzard-Aura-Slot, auch im Kampf; Ladungen groß, Restzeit, türkiser Glow + Blinken wie ProcAlarm, ohne Ton; `/hagel` | ausgeliefert, **Kampftest offen** |
 | **EnhanceHUD** | 1.2.0 | Verstärker-Schamanen-HUD (Frost/Feuer-Design) | ausgeliefert |
@@ -15,7 +15,36 @@ in Sitzungen auf **Tiry38/Tiry** weiter. Alle Dateien liegen in diesem Ordner, P
 | **MiniPost** | – | Post-Symbol unter der Uhr, andere Minimap-Knöpfe unsichtbar | ausgeliefert, Test offen |
 | **ChatHoch** | 1.4.0 | Chat höher, Reiter bündig (ClampRectInsets von ChatFrame1) | ausgeliefert; Tiry hatte noch 1.3.0 geladen |
 
-## LevelPilot 4.0 – was zuletzt gebaut wurde (09.11.)
+## LevelPilot 4.1 – Routen neu geplant (10.11.)
+Tirys Kritik an 4.0: „Effizienz 0“, „schickt mich an den Arsch der Welt“, „Greif falsch“, „Quests, die ewig dauern“,
+„oft nur 1–2 Quests, dann anderes Gebiet“. Ursachen (geprüft) und Lösungen:
+
+| Ursache | Lösung |
+|---|---|
+| Routenstufen ~2 Stufen zu optimistisch → Quests „später“ → Sprung ins nächste Gebiet | Planer simuliert die echte Stufe (Quest- + Mob-XP) und setzt Grind-Schritte, wo Quests fehlen |
+| Langsame Quests in der Route, live übersprungen → XP-Löcher | Grenzkosten-Filter: Quest bleibt nur, wenn XP/Min (inkl. Umweg) ≥ 85 % Grind-Tempo; max. 35 Min Arbeit; Drop < 15 % raus |
+| Bei Stufe 29 schickte die 22–30-Route zurück ins Brachland | Vorausregel: alte Annehmen-Schritte (2+ Stufen unter dir) fallen weg, **sobald die Route schon weiter ist** – ein neues Gebiet wird nie übersprungen |
+| Routenwahl nahm Route außerhalb ihres Bereichs | `R.Pick` nimmt nur passende Route (oder eine, die max. 2 Stufen höher beginnt) |
+| Flugrat nutzte unbekannte Flugpunkte, Flugzeit zu kurz | nur bekannte Punkte (erst nach einmal Flugmeister ansprechen), Umweg ×1,45 + 30 s, echte Flugdauer wird gemessen |
+
+**Forever-Fakten (Recherche, Stand 10.11.):** Reittier erst ab Stufe 40 → 22–40 alles zu Fuß (7 Yards/s);
+XP-Kurve unverändert; ausgeruhte XP verdoppeln Mob-XP; Dungeon-Quest-XP > 2× Classic, Dungeon-Mob-XP gekürzt;
+kein Dungeonfinder; ~1000 neue Forever-Quests sind noch **nicht** in Questies Forever-DB → nicht routbar.
+
+**Ergebnis laut Modell** (Durchschnittsspieler ohne ausgeruhte XP, zu Fuß – absolute Zeiten pessimistisch, Vergleiche belastbar):
+- 22–30: 885 Min, 7 Blöcke (Orgrimmar → Brachland → Steinkrallen → Brachland → Eschental → Hügelland → Tausend Nadeln), Rest-Grind am Ende ~1 Stufe.
+- 30–40: 1561 Min, 7 Blöcke (Tausend Nadeln → Hügelland → Arathi → Schlingendorntal → Desolace → Düstermarschen → Arathi);
+  2. Schlingendorntal-Besuch (3 Quests) und Ödland (5 Quests, Weg durch Allianz-Gebiet) gestrichen – brachten ~0 Min.
+- Ehrlich: 30–40 braucht laut Modell ~40 % Grind-XP – die soloeffizienten Classic-Quests reichen nicht. Dungeons
+  (verdoppelte Quest-XP) wären schneller, gehen aber nur in Gruppe.
+
+### Werkzeugkette (neu)
+`python3 -I make_route.py [key]` (Planer `plan.py` + Modell `xpmodel.py`, schreibt `gen_steps_<key>.json`) →
+`python3 -I build.py [key]` (prüft gegen Forever-DB, schreibt `Routes/<Datei>.lua`, muss „0 Probleme“ melden).
+„Hinweis: Vorquest vor Routenbeginn“ = Kette beginnt vor der Route; fehlt die Vorquest, überspringt die Engine die Quest.
+Bewertung einer fertigen Route: `python3 -I xpmodel.py gen_steps_<key>.json`.
+
+## LevelPilot 4.0 – was davor gebaut wurde (09.11.)
 Tirys Auftrag: „überarbeite das ganze Add-on in allen Bereichen – Funktionen, Sinn, Logik, Übersichtlichkeit,
 Design, Netzpunkte, Schnelligkeits-Logik, Verfolgungs-Logik, keine Dauer-Sounds, Strahl wie Waypoint UI, epischer
 Amboss-/Schloss-Sound (max. 1–2 s)“.
@@ -40,17 +69,20 @@ Amboss-/Schloss-Sound (max. 1–2 s)“.
 ### Bekannte Unsicherheiten (nur im Spiel prüfbar)
 - Ob Forever `C_TaxiMap.GetTaxiNodesForMap`, Item-Abklingzeit (Ruhestein 6948) und `GetBindLocation` freigibt.
 - Flug-/Ruhestein-Zeiten sind Schätzungen (Flug ~30 Yards/s, 20 s Nebenzeit).
-- Questbewertung (`qual.py`) ist eine Schätzung – die DB hat keine XP-Werte und keine Dropchancen.
+- Questbewertung (`xpmodel.py`): XP aus Questies Forever-XP-Tabelle, Dropchancen aus Questies Droptabellen; Kill-/Laufzeiten sind Annahmen.
+- 30–40-Reisehinweise (Brackenwall, Schattenflucht) setzen voraus, dass Tiry die Flugpunkte erst zu Fuß holt.
 - ProcAlarm 2.1: ob Forever Blinken/Restzeit am Aura-Slot annimmt (`/proc diag` → „Teile“).
 
 ## Nächste Schritte
 1. Tirys Spieltest-Rückmeldung zu LevelPilot 4.0 abwarten und gezielt nachbessern.
-2. **Routen 30–40, 40–50, 50–60** mit derselben Werkzeugkette (Konsens + Qualitätsfilter + Generator + Prüfung).
-3. ProcAlarm nach `/proc diag`-Screenshot anpassen; ChatHoch 1.4.0 / MiniPost-Rückmeldung.
+2. **Routen 40–50, 50–60** mit derselben Kette (`make_route.py` neuen Schlüssel in `ROUTES` + Abschnitte).
+3. Sobald Questie die neuen Forever-Quests führt (IDs 9xxxx): Pool neu rechnen – könnte den Grind-Anteil deutlich senken.
+4. ProcAlarm nach `/proc diag`-Screenshot anpassen; ChatHoch 1.4.0 / MiniPost-Rückmeldung.
 
 ## Verlauf der wichtigsten Rückmeldungen (Kurzfassung)
 - Strahl alt = „Kindergrafik“, Sound alt = „wie Kirby, der Luft einsaugt“ → beides neu (4.0).
 - Route schickte zu Orten, an denen er schon war / zu Quests, die er schon hatte → Engine 4.
 - „Kackquests“ → Qualitätsfilter + Auto-Annehmen nur Routen-Quests + Rechtsklick sperrt eine Quest dauerhaft.
+- „Effizienz 0 / Arsch der Welt / 1–2 Quests, dann anderes Gebiet“ → Routen neu geplant (4.1).
 - Wunsch: Strahl hinter Gegenständen → technisch nicht möglich (so mitgeteilt); umgesetzt: Punkt immer sichtbar,
   Strahl wächst mit der Nähe.
