@@ -1,8 +1,8 @@
 ## Interface: 16001
 ## Title: |cffb04dffProc|r|cff40ff59Alarm|r
-## Notes: Proc-Anzeige auch im Kampf (Blizzard-Aura-Slot): Hexer Schattentrance, Schamane Schlaghagel. Ohne Ton.
+## Notes: Hexenmeister: Schattentrance-Alarm, auch im Kampf (Blizzard-Aura-Slot), ohne Ton.
 ## Author: Tiry
-## Version: 2.2.0
+## Version: 2.1.0
 ## SavedVariablesPerCharacter: ProcAlarmDB
 
 ProcAlarm.lua

@@ -1,8 +1,5 @@
--- ProcAlarm 2.2 - Simulation (Klasse per Umgebungsvariable PROC_CLASS=WARLOCK|SHAMAN|MAGE): Blizzard-Aura-Slot (CustomAuraContainerTemplate), Kampf-Sperre, kein Ton.
+-- ProcAlarm 2.1 - Simulation: Blizzard-Aura-Slot (CustomAuraContainerTemplate), Kampf-Sperre, kein Ton.
 -- Aufruf aus addons/:  cd addons && lua5.1 ../tests/proc.lua
-local CLASS = os.getenv("PROC_CLASS") or "WARLOCK"
-local ID = ({ WARLOCK = 17941, SHAMAN = 16257 })[CLASS]
-function UnitClass() return "x", CLASS end
 local T = 0; function GetTime() return T end
 local fails, oks = 0, 0
 local function check(c, name) if c then oks = oks + 1 else fails = fails + 1; print_("FEHLER: " .. name) end end
@@ -42,7 +39,7 @@ C_RestrictedActions = { IsAddOnRestrictionActive = function() return encounter e
 local buff = false
 local sounds, soundSeq = {}, 0
 C_UnitAuras = {
-  GetPlayerAuraBySpellID = function(id) if incombat then error("secret") end return (buff and id == ID) and {} or nil end,
+  GetPlayerAuraBySpellID = function(id) if incombat then error("secret") end return (buff and id == 17941) and {} or nil end,
   AddAuraSound = function(trig, info) soundSeq = soundSeq + 1; sounds[soundSeq] = info; return soundSeq end,
   RemoveAuraSound = function(id) sounds[id] = nil end,
 }
@@ -61,7 +58,6 @@ function CreateFrame(kind, name, parent, tpl)
       rawset(b, "SetDurationCooldown", function(s, x) s.cd = x end)
       rawset(b, "SetDurationText", function(s, x) s.text = x end)
       rawset(b, "AddAuraShownAnimation", function(s, g) s.anims[#s.anims + 1] = g end)
-      rawset(b, "SetApplicationCount", function(s, x) s.count = x end)
       opts.initializeFrame(b)
       slotBtn = b
       return b
@@ -73,7 +69,7 @@ local function gameAura(on)   -- so wie CustomAuraButtonPrivateMixin:ApplyVisibi
   buff = on
   if not slotBtn then return end
   local inc = slotOpts.candidateFilters.includeSpellIDs
-  local match = on and inc[ID] == true
+  local match = on and inc[17941] == true
   local was = slotBtn._shown
   slotBtn._shown = match
   if match and not was then for _, g in ipairs(slotBtn.anims) do g:Play() end
@@ -85,16 +81,6 @@ local E = frames[#frames]
 local P = _G.ProcAlarmPreview or nil
 local function ev(...) E._scripts.OnEvent(E, ...) end
 
--- 0) Klasse ohne Proc (z. B. Magier): still, kein Aufbau, kein Fehler
-if not ID then
-  ev("ADDON_LOADED", "ProcAlarm"); ev("PLAYER_LOGIN"); ev("PLAYER_REGEN_ENABLED")
-  check(containers == 0 and #out == 0, "andere Klasse: nichts gebaut, keine Meldung")
-  SlashCmdList.PROCALARM("test")
-  check(said("keinen Proc"), "andere Klasse: Hinweis bei /proc")
-  print_(string.format("%s: %d ok, %d Fehler", CLASS, oks, fails))
-  if fails > 0 then os.exit(1) end
-  print_("PROC TESTS OK") os.exit(0)
-end
 -- 1) /reload mitten im Kampf: kein Aufbau, wartet
 incombat = true
 ev("ADDON_LOADED", "ProcAlarm")
@@ -106,28 +92,18 @@ incombat = false
 ev("PLAYER_REGEN_ENABLED")
 check(containers == 1, "Container nach Kampfende gebaut")
 check(loadedAC == "Blizzard_AuraContainer", "Blizzard_AuraContainer geladen")
-check(slotOpts and slotOpts.candidateFilters.includeSpellIDs[ID] == true, "Filter = Menge {[ID]=true}")
-local n = 0 for _ in pairs(slotOpts.candidateFilters.includeSpellIDs) do n = n + 1 end
-check(n == 1, "genau eine Buff-ID")
+check(slotOpts and slotOpts.candidateFilters.includeSpellIDs[17941] == true, "Filter = Menge {[17941]=true}")
 check(slotBtn.icon and slotBtn.cd and slotBtn.text, "Symbol/Ablauf/Restzeit an Blizzard uebergeben")
-if CLASS == "SHAMAN" then
-  check(#slotBtn.anims == 0, "Schamane: Blinken standardmaessig aus")
-  check(rawget(slotBtn, "count") ~= nil, "Schamane: Ladungen an Blizzard uebergeben")
-  check(said("Schlaghagel"), "Login nennt Schlaghagel")
-else
-  check(#slotBtn.anims == 1, "Hexer: nur Blinken registriert (kein Ring)")
-  check(rawget(slotBtn, "count") == nil, "Hexer: keine Ladungsanzeige")
-  check(said("Schattentrance"), "Login nennt Schattentrance")
-end
+check(#slotBtn.anims == 1, "nur Blinken registriert (kein Ring)")
 ev("PLAYER_REGEN_ENABLED")
 check(containers == 1, "nicht doppelt gebaut")
 -- 3) Proc im Kampf: das Spiel zeigt, Add-on liest nichts
 incombat = true
 gameAura(true)
 check(slotBtn._shown, "Slot sichtbar bei Schattentrance im Kampf")
-check(CLASS == "SHAMAN" or slotBtn.anims[1].playing, "Blinken laeuft (Hexer)")
+check(slotBtn.anims[1].playing, "Blinken laeuft")
 gameAura(false)
-check(not slotBtn._shown and (CLASS == "SHAMAN" or not slotBtn.anims[1].playing), "weg nach Verbrauch/Ablauf")
+check(not slotBtn._shown and not slotBtn.anims[1].playing, "weg nach Schattenblitz/Ablauf")
 -- 4) kein Ton (Kampf vorbei)
 incombat = false
 check(next(sounds) == nil and #played == 0, "kein Ton eingetragen")
@@ -146,9 +122,6 @@ SlashCmdList.PROCALARM("test")
 check(#played == 0 and next(sounds) == nil, "Test ohne Ton")
 SlashCmdList.PROCALARM("unlock"); SlashCmdList.PROCALARM("lock"); SlashCmdList.PROCALARM("groesse 1.4"); SlashCmdList.PROCALARM("reset"); SlashCmdList.PROCALARM("")
 check(ProcAlarmDB.scale == 1 and ProcAlarmDB.unlocked == nil, "reset/lock")
-local b0 = ProcAlarmDB.blink
-SlashCmdList.PROCALARM("blinken")
-check(ProcAlarmDB.blink == not b0 and said("/reload"), "blinken umschalten")
-print_(string.format("%s: %d ok, %d Fehler", CLASS, oks, fails))
+print_(string.format("%d ok, %d Fehler", oks, fails))
 if fails > 0 then os.exit(1) end
 print_("PROC TESTS OK")

@@ -8,7 +8,8 @@ in Sitzungen auf **Tiry38/Tiry** weiter. Alle Dateien liegen in diesem Ordner, P
 | Add-on | Version | Zweck | Stand |
 |---|---|---|---|
 | **LevelPilot** | 4.0.0 | Levelrouten Horde 22–30, Pfeil, Lichtstrahl, Auto-Quests, XP-Cockpit, Flug/Ruhestein-Rat | ausgeliefert, **Spieltest offen** |
-| **ProcAlarm** | 2.2.0 | Proc-Anzeige über Blizzard-Aura-Slot (auch im Kampf), **ohne Ton, ohne grünen Ring**: Hexer Schattentrance (17941, Blinken an), Schamane Schlaghagel (16257, Ladungen, Blinken aus; `/proc blinken`) | ausgeliefert, **Kampftest offen** |
+| **ProcAlarm** | 2.1.0 | **für Tirys Kollegen (Hexer)**: Schattentrance (17941) über Blizzard-Aura-Slot, auch im Kampf; violetter Glow + Blinken, ohne Ton, ohne grünen Ring | ausgeliefert, **Kampftest offen** |
+| **Schlaghagel** | 1.0.0 | **Tirys Verstärker**: Schlaghagel-Buff (16257) über Blizzard-Aura-Slot, auch im Kampf; Ladungen groß, Restzeit, türkiser Glow + Blinken wie ProcAlarm, ohne Ton; `/hagel` | ausgeliefert, **Kampftest offen** |
 | **EnhanceHUD** | 1.2.0 | Verstärker-Schamanen-HUD (Frost/Feuer-Design) | ausgeliefert |
 | **Blitzschild** | 1.2.0 | Blitzschlagschild Ladungen/Zeit | im Kampf nicht möglich (secret values) → Cooldown-Manager „Verfolgte Leisten“ + WA nur außerhalb des Kampfes |
 | **MiniPost** | – | Post-Symbol unter der Uhr, andere Minimap-Knöpfe unsichtbar | ausgeliefert, Test offen |
