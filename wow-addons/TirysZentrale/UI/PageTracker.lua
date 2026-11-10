@@ -12,36 +12,25 @@ local page = {
   icon = "chart", label = "Goldtagebuch", order = 7,
 }
 
-local function bigStat(parent, w, label, grad)
-  local card = UI.Card(parent, 18, C.card)
-  card:SetSize(w, 92)
-  local stripe = CreateFrame("Frame", nil, card)
-  stripe:SetSize(w - 32, 4)
-  stripe:SetPoint("TOPLEFT", 16, -12)
-  stripe.bg = UI.Round(stripe, 2, "ARTWORK", 0)
-  stripe.bg:SetGradient(grad or UI.GRAD, 1)
-  card.label = UI.Text(card, 10, "semibold", C.dim)
-  card.label:SetPoint("TOPLEFT", 16, -26)
-  card.label:SetText(label:upper())
-  card.value = UI.Text(card, 20, "bold", C.text)
-  card.value:SetPoint("TOPLEFT", card.label, "BOTTOMLEFT", 0, -6)
-  card.sub = UI.Text(card, 11, "regular", C.muted)
-  card.sub:SetPoint("TOPLEFT", card.value, "BOTTOMLEFT", 0, -4)
-  return card
+-- Kennzahl als Glas-Pille mit Leuchtpunkt und Unterzeile
+local function bigStat(parent, w, label, accent)
+  local f = UI.StatPill(parent, w, label, accent, 88, true)
+  UI.SetFont(f.value, 20, "bold")
+  return f
 end
 
 function page.build(self, content, width)
   local st = UI.Stack(content)
   local cw = math.floor((width - 24) / 3)
   local row = CreateFrame("Frame", nil, content)
-  row:SetSize(width, 92)
-  self.session = bigStat(row, cw, "Diese Sitzung", UI.GRAD)
+  row:SetSize(width, 88)
+  self.session = bigStat(row, cw, "Diese Sitzung", C.teal)
   self.session:SetPoint("TOPLEFT")
-  self.rate = bigStat(row, cw, "Gold pro Stunde", UI.GRAD_COOL)
+  self.rate = bigStat(row, cw, "Gold pro Stunde", C.amber)
   self.rate:SetPoint("LEFT", self.session, "RIGHT", 12, 0)
-  self.today = bigStat(row, cw, "Heute", UI.GRAD_FRESH)
+  self.today = bigStat(row, cw, "Heute", C.aqua)
   self.today:SetPoint("LEFT", self.rate, "RIGHT", 12, 0)
-  st:Add(row, 92, 22)
+  st:Add(row, 88, 22)
 
   st:Title("Die letzten 14 Tage", 16, C.text, 4)
   -- Balkendiagramm (Gewinn pro Tag)

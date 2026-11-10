@@ -41,8 +41,8 @@ function page.build(self, content, width)
   end)
   local cw = math.floor((width - 48 - 36) / 4)
   card.stats = {
-    stat(card, cw, "GOLD BEKOMMEN", C.amber), stat(card, cw, "BEUTE-WERT", C.teal), stat(card, cw, "ZUSAMMEN", C.aqua),
-    stat(card, cw, "PRO STUNDE", C.amber),
+    stat(card, cw, "Gold bekommen", C.amber), stat(card, cw, "Beute-Wert", C.teal), stat(card, cw, "Zusammen", C.aqua),
+    stat(card, cw, "Pro Stunde", C.amber),
   }
   for i, f in ipairs(card.stats) do f:SetPoint("TOPLEFT", 24 + (i - 1) * (cw + 12), -92) end
   card.stats[4].value:SetTextColor(C.gold[1], C.gold[2], C.gold[3], 1)

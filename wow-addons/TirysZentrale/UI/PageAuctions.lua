@@ -40,7 +40,7 @@ function page.build(self, content, width)
   local cw = math.floor((width - 36) / 4)
   local row = CreateFrame("Frame", nil, content)
   row:SetSize(width, 70)
-  self.stats = { stat(row, cw, "IM AH", C.amber), stat(row, cw, "WERT IM AH", C.teal), stat(row, cw, "IM BRIEFKASTEN", C.aqua), stat(row, cw, "UNTERBOTEN", C.hi) }
+  self.stats = { stat(row, cw, "Im AH", C.amber), stat(row, cw, "Wert im AH", C.teal), stat(row, cw, "Im Briefkasten", C.aqua), stat(row, cw, "Unterboten", C.hi) }
   UI.SetTooltip(self.stats[3], "Gold im Briefkasten", "Nach einem Verkauf ist das Gold erst ein paar Minuten unterwegs, dann liegt es im Briefkasten. "
     .. "\"ca.\" = geschätzt – genau wird es, sobald du den Briefkasten öffnest. Holst du das Gold ab, verschwindet es hier von selbst.")
   self.stats[3]:EnableMouse(true)
@@ -236,7 +236,7 @@ function page.refresh(self)
     local tip = { AW.WholeSilver and AW.WholeSilver(e.id)
         and "Vorschlag = günstigstes Angebot, abgerundet auf ganze Silber (Einzel-Items ohne Kupfer), nie unter \"Nicht unter\"."
         or "Vorschlag = günstigstes Angebot minus 1 Kupfer, nie unter \"Nicht unter\".",
-      "\"Nicht unter\" = deine Materialkosten pro Stück nach AH-Gebühr.",
+      "\"Nicht unter\" = Materialkosten bzw. Händlerpreis pro Stück plus Anzahlungs-Risiko, nach AH-Gebühr.",
       "Einstellen: Auctionator > Verkaufen > Item anklicken." }
     if post < e.qty then tip[#tip + 1] = "Menge: " .. post .. " von " .. e.qty .. " einstellen – nicht den Markt fluten." end
     re[#re + 1] = {

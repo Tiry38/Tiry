@@ -703,7 +703,7 @@ function UI.Card(parent, radius, color, opts)
 end
 
 -- Kennzahl als Glas-Pille (statt Kachel): Leuchtpunkt, kleines Etikett, große Zahl
-function UI.StatPill(parent, w, label, accent, h)
+function UI.StatPill(parent, w, label, accent, h, withSub)
   h = h or 60
   local f = CreateFrame("Frame", nil, parent)
   f:SetSize(w, h)
@@ -720,10 +720,20 @@ function UI.StatPill(parent, w, label, accent, h)
   f.dot:SetPoint("CENTER", f, "LEFT", 24, 0)
   setGradV(f.dot, c, lerp(c, C.aqua, 0.5), 1)
   f.label = UI.Text(f, 12, "semibold", C.dim)
-  f.label:SetPoint("TOPLEFT", 40, -(h - 42) / 2)
+  -- mit Unterzeile (withSub): drei Zeilen senkrecht mittig, sonst zwei
+  f.label:SetPoint("TOPLEFT", withSub and 44 or 40, -math.floor((h - (withSub and 58 or 42)) / 2))
   f.label:SetText(label or "")
   f.value = UI.Text(f, 18, "bold", C.text)
   f.value:SetPoint("TOPLEFT", f.label, "BOTTOMLEFT", 0, -3)
+  if withSub then
+    f.glow:SetPoint("CENTER", f, "LEFT", 26, 0)
+    f.dot:SetPoint("CENTER", f, "LEFT", 26, 0)
+    f.sub = UI.Text(f, 11, "regular", C.muted)
+    f.sub:SetPoint("TOPLEFT", f.value, "BOTTOMLEFT", 0, -3)
+    f.sub:SetWidth(w - 44 - math.floor(h / 3))
+    f.sub:SetJustifyH("LEFT")
+    f.sub:SetWordWrap(false)
+  end
   function f:SetAccent(col)
     self.glow:SetVertexColor(col[1], col[2], col[3], 0.45)
     setGradV(self.dot, col, lerp(col, C.aqua, 0.5), 1)

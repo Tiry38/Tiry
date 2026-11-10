@@ -1047,7 +1047,7 @@ function page.refresh(self)
         floor = e.floor and ns.Money(e.floor) or "|cff8a9a94–|r",
         value = e.price and ns.Money(e.price * e.n) or "|cff8a9a94–|r",
       },
-      tip = { "Nicht unter = deine Materialkosten pro Stück (nach AH-Gebühr).", "Shift-Klick: Link in den Chat bzw. in die Auctionator-Suche." },
+      tip = { "Nicht unter = Materialkosten bzw. Händlerpreis pro Stück plus Anzahlungs-Risiko, nach AH-Gebühr – darunter verlierst du Gold.", "Shift-Klick: Link in den Chat bzw. in die Auctionator-Suche." },
     }
   end
   self.sellList:ClearAllPoints()

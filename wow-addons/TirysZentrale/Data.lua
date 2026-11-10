@@ -293,39 +293,41 @@ ns.GOALS = {
 -- AH-Schule (für Dummies)
 ns.BASICS = {
   {
-    title = "1. Auctionator einrichten (einmalig)",
+    title = "1. Einrichten und scannen",
     lines = {
-      "Installiere Auctionator in der Version für WoW Forever (z. B. über CurseForge oder Wago).",
-      "Geh zum Auktionator in einer Hauptstadt und öffne das Auktionshaus.",
-      "Reiter \"Auctionator\" anklicken, dann \"Scannen\". Der Scan liest alle Preise deines Servers.",
-      "Fertig: Tiry's Zentrale zeigt ab jetzt überall echte Preise. Scan alle 1–2 Tage wiederholen.",
+      "Installiere Auctionator in der Version für WoW Forever (z. B. über CurseForge oder Wago) – Tiry's Zentrale nutzt seine Preisdatenbank.",
+      "Auktionshaus öffnen und oben rechts in der Zentrale auf \"AH scannen\" klicken: Der Komplett-Scan liest alle Angebote deines Servers – für alle Reiter auf einmal.",
+      "Blizzard erlaubt den Komplett-Scan nur alle 15 Minuten. Dazwischen macht der Knopf einen Schnell-Scan.",
+      "Bei jedem AH-Besuch einmal scannen: Je öfter, desto genauer werden Marktwert und \"Verkäufe pro Tag\".",
     },
   },
   {
     title = "2. Verkaufen in 4 Klicks",
     lines = {
-      "Reiter \"Verkaufen\" öffnen. Links siehst du deine Taschen.",
-      "Item anklicken: Auctionator schlägt automatisch einen Preis knapp unter dem günstigsten Angebot vor.",
-      "Menge prüfen (am besten volle Stapel) und \"Auktion erstellen\" klicken.",
-      "Abgelaufene Auktionen kommen per Post zurück – einfach neu einstellen.",
+      "In Auctionator den Reiter \"Verkaufen\" öffnen. Links siehst du deine Taschen.",
+      "Item anklicken: Auctionator schlägt einen Preis knapp unter dem günstigsten Angebot vor.",
+      "Mit \"Nicht unter\" aus der Zentrale vergleichen (Tooltip oder Handel > Meine Auktionen) und \"Auktion erstellen\" klicken.",
+      "Abgelaufene Auktionen kommen per Post zurück – Handel > Meine Auktionen zeigt, was sich neu einstellen lohnt.",
     },
   },
   {
     title = "3. Die goldenen Regeln",
     lines = {
       "Nie unter Händlerpreis verkaufen – dann lieber direkt zum Händler.",
-      "Mindestgebühr beachten: Aktuell kostet jede Auktion mindestens 1 Silber Anzahlung (Blizzard will das wieder auf 1 Kupfer senken). Kleinkram lohnt sich nicht.",
+      "Anzahlung beachten: Jede Auktion kostet aktuell mindestens 1 Silber. Bei Verkauf kommt sie zurück, bei Ablauf oder Abbruch ist sie weg. Kleinkram lohnt sich darum kaum.",
       "Das AH behält beim Verkauf einen Anteil ein. Tiry's Zentrale rechnet standardmäßig mit 5 % (Classic-Wert) – änderbar in den Einstellungen.",
+      "Einzel-Items (Ausrüstung) zu ganzen Silberbeträgen einstellen: Krumme Kupferbeträge lösen oft den \"Internen Auktionsfehler\" aus.",
       "Nicht panisch unterbieten: Wer 50 % billiger anbietet, verschenkt Gold. Wenige Kupfer darunter reichen.",
-      "Viele Angebote, langsamer Markt? Lieber ein paar Tage warten oder Material weiterverarbeiten.",
+      "Nur so viel einstellen, wie der Markt schluckt: Die Zentrale nennt dir die Menge (\"Verkäufe pro Tag\").",
     },
   },
   {
     title = "4. Unterboten? So reagierst du",
     lines = {
-      "Reiter \"Unterboten\" öffnen und \"Scan\" klicken: Auctionator zeigt, wer dich unterboten hat.",
-      "\"Unterbotene abbrechen\" holt die Auktion zurück – dann mit neuem Preis einstellen.",
-      "Achtung: Abbrechen kostet die Anzahlung. Bei billigen Items lohnt es sich nicht.",
+      "Handel > Meine Auktionen zeigt nach jedem Scan, wer dich unterboten hat – mit Preisvorschlag, nie unter \"Nicht unter\".",
+      "Abbrechen geht im AH bzw. im Abbruch-Reiter von Auctionator (englisch \"Cancelling\") – dann mit neuem Preis einstellen.",
+      "Achtung: Abbrechen kostet die Anzahlung. Bei billigen Items oft lieber auslaufen lassen.",
+      "Zweimal abgelaufen und nie verkauft? Dann billiger einstellen oder beim Händler verkaufen.",
     },
   },
   {

@@ -28,7 +28,7 @@ function page.build(self, content, width)
   local cw = math.floor((width - 36) / 4)
   local row = CreateFrame("Frame", nil, content)
   row:SetSize(width, 70)
-  self.stats = { stat(row, cw, "ECHT VERDIENT", C.amber), stat(row, cw, "VERKAUFT", C.teal), stat(row, cw, "HERGESTELLT", C.aqua), stat(row, cw, "BESTES ITEM", C.amber) }
+  self.stats = { stat(row, cw, "Echt verdient", C.amber), stat(row, cw, "Verkauft", C.teal), stat(row, cw, "Hergestellt", C.aqua), stat(row, cw, "Bestes Item", C.amber) }
   for i, f in ipairs(self.stats) do f:SetPoint("TOPLEFT", (i - 1) * (cw + 12), 0) end
   st:Add(row, 70, 12)
   self.hint = UI.Para(content, 12, C.muted, width)

@@ -101,7 +101,7 @@ function page.build(self, content, width)
     end, "Repariert deine Ausrüstung beim Händler sofort (wenn du genug Gold hast) – so musst du nie daran denken."),
     toggle("AH automatisch scannen", function() return s.ahAutoScan ~= false end, function(v)
       s.ahAutoScan = v
-    end, "Beim Öffnen des Auktionshauses startet Tiry's Zentrale den Preis-Scan von Auctionator von selbst (Auctionator erlaubt ihn alle 15 Minuten)."),
+    end, "Beim Öffnen des Auktionshauses scannt Tiry's Zentrale von selbst – Komplett-Scan, sobald Blizzard ihn erlaubt (alle 15 Minuten), sonst Schnell-Scan."),
     toggle("Komplett-Scan: alles auf einmal", function() return s.ahFullScan ~= false end, function(v)
       s.ahFullScan = v
     end, "Preise, Absatz, Schnäppchen und Unterboten in einem Durchgang – ein Scan aktualisiert alle Reiter. Blizzard erlaubt ihn alle 15 Minuten, dazwischen werden nur die Preise schnell gescannt."),
@@ -207,13 +207,14 @@ function page.build(self, content, width)
 
   st:Title("Befehle", 15, C.text, 2)
   st:Para("|cff39ff6b/tz|r – Fenster öffnen/schließen\n"
-    .. "|cff39ff6b/tz leder|r · |cff39ff6b/tz farm|r · |cff39ff6b/tz craft|r · |cff39ff6b/tz suche|r · |cff39ff6b/tz wege|r · |cff39ff6b/tz markt|r · |cff39ff6b/tz scan|r · |cff39ff6b/tz rezepte|r · |cff39ff6b/tz tagebuch|r · |cff39ff6b/tz ah|r\n"
+    .. "|cff39ff6b/tz leder|r · |cff39ff6b/tz farm|r · |cff39ff6b/tz craft|r · |cff39ff6b/tz suche|r · |cff39ff6b/tz wege|r · |cff39ff6b/tz markt|r · |cff39ff6b/tz scan|r · |cff39ff6b/tz rezepte|r · |cff39ff6b/tz tagebuch|r · |cff39ff6b/tz buch|r · |cff39ff6b/tz handel|r · |cff39ff6b/tz ah|r\n"
+    .. "|cff39ff6b/tz schnapp|r – Schnäppchen im AH (aus dem letzten Komplett-Scan)\n"
     .. "|cff39ff6b/tz minimap|r – Minikarten-Knopf an/aus\n"
     .. "|cff39ff6b/tz wegpunkt|r – gesetzten Kartenpunkt löschen · |cff39ff6b/tz leeren|r – Craft-Liste leeren\n"
     .. "|cff39ff6b/tz suche|r – alles durchsuchen · |cff39ff6b/tz assistent|r – Einsteiger-Assistent\n"
     .. "|cff39ff6b/tz reset|r – Fenster in die Mitte setzen\n"
     .. "Tastenkürzel: WoW-Menü > Optionen > Tastaturbelegung > \"Tiry's Zentrale\"", 12, C.muted, 16)
-  st:Para("Tiry's Zentrale " .. tostring(ns.version) .. " · gebaut für WoW Forever (1.60.1). Preise kommen aus Auctionator – "
+  st:Para("Tiry's Zentrale " .. tostring(ns.version) .. " · gebaut für WoW Forever 1.60.1 (Interface 16001). Preise kommen aus Auctionator – "
     .. "Tiry's Zentrale selbst liest nie etwas im Hintergrund aus und schickt keine Daten weg.", 12, C.dim, 10)
   st:Finish()
 end

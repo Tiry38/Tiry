@@ -570,7 +570,7 @@ end)
 
 ----------------------------------------------------------------------------
 -- Neu einstellen: unterboten, abgelaufen (zurück in der Tasche) oder frisch hergestellt
--- Preisvorschlag = günstigstes Angebot minus 1 Kupfer, aber NIE unter "Nicht unter" (Materialkosten nach Gebühr).
+-- Preisvorschlag = günstigstes Angebot minus 1 Kupfer (Einzel-Items: ganze Silber), aber NIE unter "Nicht unter" (AW.Floor).
 -- Einstellen selbst machst du in Auctionator (Blizzard erlaubt Addons kein Einstellen ohne Klick).
 ----------------------------------------------------------------------------
 -- "Nicht unter": Materialkosten (falls selbst hergestellt) UND Händlerpreis – jeweils so, dass nach AH-Gebühr und

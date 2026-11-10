@@ -13,9 +13,9 @@ local page = {
 ns.GLOSSARY = {
   { "AH (Auktionshaus)", "Marktplatz der Spieler. Du stellst Items ein, andere kaufen sie – das Geld kommt per Post." },
   { "AH-Gebühr", "Anteil, den das AH vom Verkaufspreis behält. Tiry's Zentrale rechnet mit deinem Wert aus den Einstellungen (Standard 5 %)." },
-  { "Einstellgebühr (Kaution)", "Kosten beim Einstellen einer Auktion. Spieler berichten in Forever von 1 Silber pro Auktion – bei Billigware lohnt sich das kaum." },
+  { "Einstellgebühr (Kaution)", "Anzahlung beim Einstellen einer Auktion – in Forever aktuell mindestens 1 Silber pro Angebot. Bei Verkauf zurück, bei Ablauf oder Abbruch weg. Bei Billigware lohnt sich das kaum." },
   { "Auctionator", "Kostenloses Addon fürs AH. Es scannt die Preise; Tiry's Zentrale liest sie über Auctionators offizielle Schnittstelle." },
-  { "Scan", "Auctionator liest alle Preise im AH ein. Danach rechnet Tiry's Zentrale mit echten Preisen deines Servers." },
+  { "Scan", "Knopf \"AH scannen\" (oben rechts): liest alle Angebote im AH ein – ein Scan für alle Reiter. Komplett-Scan alle 15 Min., dazwischen Schnell-Scan." },
   { "Stapel", "Mehrere gleiche Items auf einem Platz in der Tasche, z. B. 20 Leder. \"Stapel netto\" = Wert eines vollen Stapels nach AH-Gebühr." },
   { "Händlerpreis", "Was ein NPC-Händler dir für ein Item zahlt. Liegt der AH-Preis darunter, verkaufst du lieber beim Händler." },
   { "Marktwert", "Dein eigener Durchschnittspreis: Mittelwert (Median) der Tagespreise deiner Scans der letzten 14 Tage." },

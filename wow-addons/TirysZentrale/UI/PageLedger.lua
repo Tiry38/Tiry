@@ -14,22 +14,9 @@ local page = {
   icon = "receipt", label = "Verkaufsbuch", order = 7.5,
 }
 
-local function kpi(parent, w, label, grad)
-  local card = UI.Card(parent, 18, C.card)
-  card:SetSize(w, 86)
-  local stripe = CreateFrame("Frame", nil, card)
-  stripe:SetSize(w - 32, 4)
-  stripe:SetPoint("TOPLEFT", 16, -12)
-  stripe.bg = UI.Round(stripe, 2, "ARTWORK", 0)
-  stripe.bg:SetGradient(grad, 1)
-  card.label = UI.Text(card, 10, "semibold", C.dim)
-  card.label:SetPoint("TOPLEFT", 16, -24)
-  card.label:SetText(label:upper())
-  card.value = UI.Text(card, 18, "bold", C.text)
-  card.value:SetPoint("TOPLEFT", card.label, "BOTTOMLEFT", 0, -6)
-  card.sub = UI.Text(card, 10, "regular", C.muted)
-  card.sub:SetPoint("TOPLEFT", card.value, "BOTTOMLEFT", 0, -3)
-  return card
+-- Kennzahl als Glas-Pille mit Leuchtpunkt und Unterzeile
+local function kpi(parent, w, label, accent)
+  return UI.StatPill(parent, w, label, accent, 84, true)
 end
 
 local function pct(r) return r and (math.floor(r * 100 + 0.5) .. " %") or "–" end
@@ -43,13 +30,13 @@ function page.build(self, content, width)
   st:Add(self.seg, self.seg:GetHeight(), 12)
   local cw = math.floor((width - 36) / 4)
   local row = CreateFrame("Frame", nil, content)
-  row:SetSize(width, 86)
+  row:SetSize(width, 84)
   self.k = {
-    kpi(row, cw, "Eingenommen", UI.GRAD_FRESH), kpi(row, cw, "Ausgegeben", UI.GRAD_COOL),
-    kpi(row, cw, "Gewinn", UI.GRAD), kpi(row, cw, "Verkaufsquote", UI.GRAD_FRESH),
+    kpi(row, cw, "Eingenommen", C.amber), kpi(row, cw, "Ausgegeben", C.aqua),
+    kpi(row, cw, "Gewinn", C.teal), kpi(row, cw, "Verkaufsquote", C.amber),
   }
   for i, k in ipairs(self.k) do k:SetPoint("TOPLEFT", (i - 1) * (cw + 12), 0) end
-  st:Add(row, 86, 16)
+  st:Add(row, 84, 16)
   self.hint = UI.Para(content, 11, C.dim, width)
   self.hint:SetText("So funktioniert's: Öffne nach dem Verkaufen den Briefkasten – Tiry's Zentrale liest die AH-Rechnungen (verkauft, gekauft, abgelaufen). "
     .. "Die Verkaufsquote zeigt, wie viele deiner Auktionen wirklich verkauft wurden. Der Craft-Planer nutzt sie, um Ladenhüter auszusortieren.")
