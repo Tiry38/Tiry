@@ -6,3 +6,4 @@ tools/*.wav
 tools/__pycache__/
 sndtmp/
 *.zip
+tools/Horde_*.lua

@@ -317,6 +317,7 @@ function R.OnLanded() STATE.landedAt = GetTime() end
 -- Quest grau? Classic-Quest-XP: volle XP bis 5 Stufen unter dir, dann 80/60/40/20/10 %
 R.maxDiff = 5
 R.maxAbove = 3
+R.ahead = 2         -- Annehmen ueberspringen, wenn du 2+ Stufen ueber der Planung bist UND die Route dort schon weiter ist
 local function greyFor(ql, lvl)
   if not ql then return false end
   if R.maxDiff and (lvl - ql) > R.maxDiff then return true end
@@ -549,16 +550,20 @@ end
 ---------------------------------------------------------------------------
 function R.Pick(faction, lvl, wanted)
   if wanted and LevelPilot_Routes[wanted] then return wanted end
-  local best
+  local best, bmin
   for key, r in pairs(LevelPilot_Routes) do
-    if (not r.faction or r.faction == faction) and lvl >= (r.min or 1) and lvl < (r.max or 99) then best = key end
+    if (not r.faction or r.faction == faction) and lvl >= (r.min or 1) and lvl < (r.max or 99) then
+      if not bmin or (r.min or 1) > bmin then best, bmin = key, (r.min or 1) end   -- passendste (hoechster Start)
+    end
   end
   if not best then
+    -- keine Route fuer diese Stufe: nur eine knapp darunter beginnende nehmen (max. 2 Stufen frueher),
+    -- nie eine Route, aus der du rausgewachsen bist (die schickt dich nur zurueck in alte Gebiete)
     local bd
     for key, r in pairs(LevelPilot_Routes) do
       if (not r.faction or r.faction == faction) then
-        local d = math.abs((r.min or 1) - lvl)
-        if not bd or d < bd then best, bd = key, d end
+        local d = (r.min or 1) - lvl
+        if d > 0 and d <= 2 and (not bd or d < bd) then best, bd = key, d end
       end
     end
   end
@@ -578,8 +583,32 @@ function R.Current(route, lvl, skipped, n, cur)
       state[i] = (d == true) and "done" or (d == "skip" and "skip") or (d == "later" and "later") or "open"
     end
   end
+  -- Rausgewachsen: Route ist schon weiter (spaeterer Schritt erledigt) und du bist 2+ Stufen ueber der
+  -- Planung eines alten Annehmen-Schritts -> nicht zurueckschicken. Nur rueckwaerts: ein Gebiet, in das du
+  -- erst kommst, wird nie uebersprungen, auch wenn du ueber Plan bist.
+  if R.ahead then
+    local progI
+    for i = #steps, 1, -1 do
+      local s = steps[i]
+      if state[i] == "done" and s.q and (s.t == "accept" or s.t == "turnin") then progI = i; break end
+    end
+    local progL = progI and steps[progI].l
+    if progL then
+      for i = 1, progI - 1 do
+        local s = steps[i]
+        if s.t == "accept" and s.l and s.l < progL and lvl >= s.l + R.ahead
+           and (state[i] == "open" or state[i] == "later") then state[i] = "skip" end
+      end
+    end
+  end
   -- Reisen/Trainer: nur noetig, wenn im folgenden Abschnitt noch etwas offen ist,
   -- und erledigt, sobald dort schon etwas angenommen/abgegeben wurde (du warst also schon da)
+  for i, s in ipairs(steps) do
+    if s.t == "grind" and not state[i] then
+      -- Grinden/Stufen-Kontrolle: offen nur, solange die Stufe fehlt und vorher nichts mehr offen ist
+      state[i] = (lvl >= (s.to or 0)) and "done" or "open"
+    end
+  end
   for i, s in ipairs(steps) do
     if not s.q and not state[i] then
       local d = R.StepDone(s, lvl, (cur and cur.i == i) and cur or nil)
@@ -618,6 +647,7 @@ function R.Current(route, lvl, skipped, n, cur)
       local ok = true
       if s.t == "turnin" and s.q and not (ready(s.q) or flagged(s.q)) then ok = false end
       if s.t == "complete" and s.q and not inLog(s.q) then ok = false end
+      if s.t == "grind" and i ~= first then ok = false end     -- erst Quests, dann (falls noetig) grinden
       if ok then
         local d
         pcall(function() d = R.StepDist(s) end)

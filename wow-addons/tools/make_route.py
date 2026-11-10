@@ -1,74 +1,123 @@
+# Routen-Abschnitte (Speedrun-Konsens) -> plan.py (Stufe mitrechnen, Grenz-XP/Minute-Filter)
+# Start: cd tools && python3 -I make_route.py && python3 -I build.py
 import sys, json
 import os as _os
-BASE=_os.path.abspath(_os.path.join(_os.path.dirname(_os.path.abspath(__file__)),".."))+"/"  # = wow-addons/
-sys.path.insert(0, _os.path.dirname(_os.path.abspath(__file__)))
-from gen_route import generate, Q, N
+HERE = _os.path.dirname(_os.path.abspath(__file__)); _os.chdir(HERE)
+sys.path.insert(0, HERE)
+from gen_route import Q, N
 def npc(name):
     ids=[int(k) for k,v in N.items() if v["name"]==name and v["sp"]]
     return (name, ids[0]) if ids else (name, None)
+# Reihenfolge per Rechnung gewaehlt (tools/plan.py: 12 Varianten verglichen, Zeit bis Stufe 30 zu Fuss -
+# Forever-Reittier erst ab 40). Gewinner: lange Bloecke je Zone, kein Abschnitt mit nur 1-2 Quests,
+# am wenigsten Grinden. Deckt sich mit den Speedrun-Routen (Brachland/Steinkralle 22-25, Eschental 25-27,
+# Huegelland 27-29, Tausend Nadeln 29-30).
+_B=[1528,1530,1535,1536, 868,843,879,906,893,4921,899,878,5052,865,1069,1061, 846,849,885,1095]
+_S=[1069,1062,6461,6284,1093,1094,1090,1092,1095,1096,6301,6381,1087,1058,6282,6393,5881,1088,6283]
+_A=[6383,23,24,2,247,6503,6544,25,1918,824,6641,216,6462,6442,6441,1088]
+_H=[493,494,496,498,499,501,502,527,528,546,567,529,532,539,509,1536]
+_N=[5881,4542,4841,1149,4821,4865,4770,4767,5064,4904,4881,4966,5147]
 SEG=[
  dict(name="Orgrimmar", l=22, areas=[1637], hub=npc("Kardris Dreamseeker"), travel="train", tnote="Klassenlehrer – neue Zauber",
-      q=[1528,1061,235]),
- dict(name="Brachland", l=22, areas=[17], near_npcs=[], hub=npc("Omusa Thunderhorn"), tnote="Camp Taurajo – Ruhestein hier setzen",
-      q=[1528,1530,1535,1536, 868,843,879,906,893,4921,899,878,5052,865,1069,1061]),
- dict(name="Steinkrallengebirge", l=23, areas=[406], near_npcs=["Seereth Stonebreak","Makaba Flathoof"], hub=npc("Tharm"), tnote="Sonnenfels – Ruhestein hier setzen",
-      q=[1069,1062,6461,6284,1093,1094,1090,1092,1095,1096,6301,6381,1087,1058,6282,6393,5881,1088]),
- dict(name="Brachland", l=25, areas=[17], hub=npc("Omusa Thunderhorn"), tnote="Camp Taurajo – Ruhestein hier setzen",
-      q=[846,849,885,1095,4921,899]),
- dict(name="Tausend Nadeln", l=25, areas=[400], hub=npc("Nyse"), travel="go", tnote="Südlich zum Großen Aufzug, dann Freiwindposten",
-      q=[5881,4542,4841,1149,4821,4865]),
- dict(name="Donnerfels", l=26, areas=[1638], hub=npc("Tal"), tnote="Donnerfels – Schamanenlehrer, Quests abholen",
-      q=[1195]),
- dict(name="Eschental", l=26, areas=[331], hub=npc("Vhulgra"), tnote="Splitterholzposten – Ruhestein hier setzen",
-      q=[6383,23,24,2,247,6503,6544,25,1918,824,1195,6641,216,6462,6442,6441,1088]),
- dict(name="Steinkrallengebirge", l=28, areas=[406], hub=npc("Tharm"), tnote="Sonnenfels",
-      q=[1088,6283,1095,1096]),
- dict(name="Donnerfels", l=28, areas=[1638], hub=npc("Tal"), tnote="Donnerfels – trainieren, Ruhestein setzen",
-      q=[1195,1196]),
- dict(name="Tausend Nadeln", l=28, areas=[400], hub=npc("Nyse"), tnote="Freiwindposten",
-      q=[1196,1197,4865,4770,4767,5064,4904,4881,4966,5147]),
- dict(name="Hügelland", l=29, areas=[267,130], hub=npc("Zarise"), tnote="Tarrens Mühle (Zeppelin → Unterstadt → Flug)",
-      q=[493,494,496,498,499,501,502,527,528,546,567,529,532,539,509,1536]),
+      q=[1528,1061,235], pool=False, nocheck=True),
+ dict(name="Brachland", l=22, areas=[17], hub=npc("Omusa Thunderhorn"), tnote="Camp Taurajo – Ruhestein hier setzen", q=_B),
+ dict(name="Steinkrallengebirge", l=24, areas=[406], near_npcs=["Seereth Stonebreak","Makaba Flathoof"], hub=npc("Tharm"),
+      tnote="Sonnenfels", q=_S),
+ dict(name="Brachland", l=25, areas=[17], hub=npc("Omusa Thunderhorn"), tnote="Camp Taurajo", q=_B),
+ dict(name="Eschental", l=26, areas=[331], hub=npc("Vhulgra"), tnote="Splitterholzposten – Ruhestein hier setzen", q=_A),
+ dict(name="Hügelland", l=27, areas=[267,130], hub=npc("Zarise"),
+      tnote="Tarrens Mühle: Flug Orgrimmar → Zeppelin Tirisfal → Unterstadt → Flug Tarrens Mühle. Ruhestein hier setzen", q=_H),
+ dict(name="Tausend Nadeln", l=29, areas=[400], hub=npc("Nyse"),
+      tnote="Freiwindposten: Ruhestein/Zeppelin nach Orgrimmar → Flug Richtung Camp Taurajo → Großer Aufzug", q=_N),
 ]
-# ---- Qualitaetsfilter: nur schnelle, effiziente Quests ----
-import statistics
-from qual import assess
-score={}; info={}
-for seg in SEG:
-    rs=[assess(q,seg["areas"]) for q in seg["q"]]
-    med=statistics.median([r["score"] for r in rs]) if rs else 1
-    for r in rs:
-        rel=r["score"]/med
-        score[r["q"]]=min(score.get(r["q"],9),rel); info[r["q"]]=r
-DROP=set(q for q,v in score.items() if v<0.5)
-SLOWQ=set(q for q,v in score.items() if 0.5<=v<0.62)|set(q for q,r in info.items() if r["esc"] or r["elite"])
-# Vorquests behalten, wenn eine behaltene Quest sie braucht
-allq=set(score)
-changed=True
-while changed:
-    changed=False
-    for q in allq-DROP:
-        v=Q[str(q)]
-        for p in (v[11] or [])+(v[12] or []):
-            if p in DROP: DROP.discard(p); SLOWQ.add(p); changed=True
-for seg in SEG: seg["q"]=[q for q in seg["q"] if q not in DROP]
-SLOWQ-={1195,1196,1197}  # Heilige Flamme: starke Kette, Wert nur durch Abschnittswechsel unterschaetzt
-json.dump(sorted(SLOWQ-DROP),open("auto_slow.json","w"))
-print("gestrichen:",sorted((q,Q[str(q)][0]) for q in DROP))
-print("Speed-Modus ueberspringt:",sorted((q,Q[str(q)][0]) for q in SLOWQ-DROP))
-steps,done,acc=generate(SEG)
-print(len(steps),"Schritte")
-for s in SEG: 
-    if s["left"]: print("offen in",s["name"],s["l"],":",s["left"])
-json.dump(steps,open("gen_steps.json","w"))
-for s in steps[:40]: print(s["l"],s["z"],s["t"],s["q"],Q[str(s["q"])][0] if s["q"] else s.get("note"))
-from gen_route import giver, finisher, objective_pts, centroid
-print("---- Diagnose")
-acc_set=set(s["q"] for s in steps if s["t"]=="accept"); comp=set(s["q"] for s in steps if s["t"]=="complete"); tin=set(s["q"] for s in steps if s["t"]=="turnin")
-allq=sorted(set(q for s in SEG for q in s["q"]))
-for q in allq:
-    v=Q[str(q)]
-    st=("A" if q in acc_set else "-")+("C" if q in comp else "-")+("T" if q in tin else "-")
-    if st!="ACT" and not (st=="A-T"):
-        g=giver(q); f=finisher(q); o=objective_pts(q)
-        print(q,v[0],"lvl",v[3],v[4],st,"pre",v[11],v[12],"giverAreas",sorted(set(p[0] for p,_ in g))[:4],"finAreas",sorted(set(p[0] for p,_ in f))[:4],"objAreas",sorted(set(p[0] for p in o))[:4])
+PROTECT = {1528, 1530, 1535, 1536}   # Ruf des Wassers: Wassertotem fuer Schamanen (Klassenquest, nicht wegen XP)
+
+def with_pool(SEG, lo=19, hi=31, cls_ok=64):
+    """Kuratierte Liste + alle passenden Horde-Quests der Zone (nicht in Staedten)."""
+    import plan
+    out = []
+    for s in SEG:
+        s = dict(s); s["q"] = list(s["q"])
+        if s.get("pool", s["areas"][0] not in (1637, 1638, 1497)):
+            for q in plan.auto_pool(s["areas"], lo, hi, cls_ok, zones=set(s["areas"])):
+                if q not in s["q"]: s["q"].append(q)
+        out.append(s)
+    return out
+
+
+# ---------------- Route 30-40 (Speedrun-Konsens Joana / Bustea(Nightfall) / WoW-Pro, siehe UEBERGABE.md) ----------------
+_TN2 = [4542,4841,4821,4865,4767,5147,5064,5062,1131,1149,4881,1196,1197,1130,
+        5762,1111,1175,1105,1176,1110,1104,1178,1106,1145,1146,1147,1148,1184,1112,1114]
+_STV = [583,185,186,187,188,190,191,192,194,195,196,581,582,596,629,568,569,570,572,638,605,189,213,201,
+        1180,1181,1182,1183,575,577,584,209,1240,1261,598]
+_HIL = [552,553,544,556,545,557,1136,7321,533,529,532,539,550,567,509,1164,503,506,507,508]
+_ARA = [655,672,674,675,677,678,671,701,702,847,642,651,1164,676]
+_DES = [1362,1365,1368,1431,1432,1433,1436,1434,1435,1480,1481,5561,5501,5741,6027,6161,6142,6143,5386,5381,1366,1370,5763,5421]
+_DUS = [1268,1269,1251,1321,1201,1202,1177,1238,1218,1206,1239]
+_BAD = [710,711,1108,703,1419,1418,698,1424,1392,1389]
+SEG30 = [   # per Modell verglichen: kein Gebiet mit nur 1-3 Quests (2. Schlingendorntal und Ödland brachten ~0 Min bzw. Weg durch Allianz-Gebiet)
+ dict(name="Tausend Nadeln", l=30, areas=[400], hub=npc("Nyse"), tnote="Freiwindposten – dann Schimmernde Ebene (Rennbahn)", q=_TN2),
+ dict(name="Hügelland", l=32, minL=32, areas=[267, 36], hub=npc("Zarise"),
+      tnote="Tarrens Mühle: Flug Orgrimmar → Zeppelin Tirisfal → Flug Tarrens Mühle. Ruhestein hier", q=_HIL),
+ dict(name="Arathihochland", l=32, minL=32, areas=[45], hub=npc("Urda"), tnote="Hammerfall: Flug Tarrens Mühle → Hammerfall", q=_ARA),
+ dict(name="Schlingendorntal", l=34, minL=34, areas=[33], hub=npc("Thysta"),
+      tnote="Grom'gol: Flug Unterstadt, Zeppelin Tirisfal → Grom'gol. Ruhestein Grom'gol", q=_STV),
+ dict(name="Desolace", l=35, minL=35, areas=[405], hub=npc("Thalon"),
+      tnote="Schattenflucht: Zeppelin Grom'gol → Orgrimmar, Flug Sonnenfels, südlich nach Desolace laufen – Flugpunkt holen", q=_DES),
+ dict(name="Düstermarschen", l=36, minL=36, areas=[15], hub=npc("Shardi"),
+      tnote="Brackenwall: Flug Camp Taurajo, östlich in die Düstermarschen – Flugpunkt holen, Ruhestein hier", q=_DUS),
+ dict(name="Arathihochland", l=38, minL=38, areas=[45], hub=npc("Urda"), tnote="Hammerfall: Zeppelin Grom'gol → Tirisfal, Flug Hammerfall", q=_ARA),
+]
+
+ROUTES = {
+ "horde_22_30": dict(SEG=SEG, L0=22, goal=30, lo=19, hi=31, name="Horde 22–30 · Speedrun", rmin=20, rmax=30, file="Horde_22_30.lua"),
+ "horde_30_40": dict(SEG=SEG30, L0=30, goal=40, lo=28, hi=42, name="Horde 30–40 · Speedrun", rmin=30, rmax=40, file="Horde_30_40.lua"),
+}
+
+
+def tune(key, segs, log=print):
+    """Einstiegsstufe je Abschnitt suchen (Koordinatensuche): vorher grinden, wenn die Zone dadurch schneller wird."""
+    from plan import plan
+    import xpmodel as X
+    R = ROUTES[key]
+    def cost(ss):
+        st = plan(ss, L0=R["L0"], xp0=0, protect=PROTECT, log=lambda *a: None, goal=R["goal"])[0]
+        return X.evaluate(st, R["L0"], 0, verbose=False)[2][2]
+    best = cost(segs)
+    for rnd in range(2):
+        changed = False
+        for i in range(1, len(segs)):
+            base_l = segs[i]["l"]
+            for m in (None, base_l - 1, base_l, base_l + 1):
+                if m == segs[i].get("minL"): continue
+                trial = [dict(x) for x in segs]
+                if m is None: trial[i].pop("minL", None)
+                else: trial[i]["minL"] = m
+                c = cost(trial)
+                if c < best - 1:
+                    best, segs, changed = c, trial, True
+                    log("  %s: Einstieg ab Stufe %s -> %.0f Min" % (segs[i]["name"], m, c))
+        if not changed: break
+    return segs
+
+
+def run(key="horde_22_30", write=True, log=print, SEG_=None, do_tune=True):
+    from plan import plan
+    import xpmodel as X
+    R = ROUTES[key]
+    segs = with_pool([dict(s, q=[q for q in s["q"] if str(q) in Q]) for s in (SEG_ or R["SEG"])], R["lo"], R["hi"])
+    if do_tune: segs = tune(key, segs, log)
+    steps, S, val, removed, why, segs = plan(segs, L0=R["L0"], xp0=0, protect=PROTECT, log=log, goal=R["goal"])
+    if write:
+        log("gestrichen (Grenz-XP/Min unter Grind-Tempo):")
+        for q in sorted(removed): log("  %5d %-36s %s" % (q, Q[str(q)][0][:36], why.get(q)))
+        json.dump(dict(key=key, name=R["name"], min=R["rmin"], max=R["rmax"], file=R["file"], steps=steps),
+                  open("gen_steps_%s.json" % key, "w"))
+        log("%d Schritte" % len(steps))
+    return steps, X.evaluate(steps, R["L0"], 0, verbose=write)
+
+
+if __name__ == "__main__":
+    keys = sys.argv[1:] or list(ROUTES)
+    for k in keys:
+        print("=====", k); run(k)

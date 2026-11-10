@@ -10,4 +10,5 @@ Route.lua
 Nav.lua
 Fly.lua
 Routes\Horde_22_30.lua
+Routes\Horde_30_40.lua
 LevelPilot.lua

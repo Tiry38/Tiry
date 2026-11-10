@@ -4,10 +4,10 @@
 local F = {}
 LP_Fly = F
 
-local RUN, MOUNT = 7.0, 11.2          -- Yards/s zu Fuss / Reittier 60 %
+local RUN, MOUNT = 7.0, 11.2          -- Yards/s zu Fuss / Reittier 60 % (Forever: Reittier erst ab 40)
 local FLY = 30.0                      -- Yards/s Greif/Windreiter (Naeherung)
-local DETOUR_RUN, DETOUR_FLY = 1.2, 1.25
-local OVERHEAD = 20                   -- Ansprechen, Abheben, Landen (s)
+local DETOUR_RUN, DETOUR_FLY = 1.2, 1.45  -- Flugrouten laufen ueber Zwischenpunkte und Kurven
+local OVERHEAD = 30                   -- Ansprechen, Abheben, Landen, vom Flugmeister weg (s)
 local MIN_SAVE, MIN_RATIO = 60, 0.75  -- erst ab 1 Min. und 25 % Ersparnis anzeigen
 
 local function vec(x, y) if CreateVector2D then return CreateVector2D(x, y) end return { x = x, y = y } end
@@ -36,6 +36,7 @@ end
 local function db()
   LevelPilotDB = LevelPilotDB or {}
   LevelPilotDB.fp = LevelPilotDB.fp or {}
+  LevelPilotDB.ft = LevelPilotDB.ft or {}   -- gemessene Flugzeiten "von>nach" = Sekunden
   return LevelPilotDB
 end
 
@@ -148,9 +149,12 @@ function F.Advice(t, key)
   local list = nodes(cmap)
   if #list < 2 then return nil end
   local d = db()
+  -- Nur Flugpunkte, die du kennst. Ohne einmal einen Flugmeister angesprochen zu haben, kein Flug-Rat
+  -- (sonst empfiehlt der Pilot Punkte, die du noch gar nicht entdeckt hast).
+  if not d.fpSeen then return nil end
   local known = {}
   for _, n in ipairs(list) do
-    if n.cont == pc and (not d.fpSeen or d.fp[n.id]) then known[#known + 1] = n end
+    if n.cont == pc and d.fp[n.id] then known[#known + 1] = n end
   end
   if #known < 2 then return nil end
   local spd = groundSpeed()
@@ -167,7 +171,7 @@ function F.Advice(t, key)
       local b = ends[j]
       if a ~= b then
         local walk1 = dd(a, pwx, pwy) * DETOUR_RUN / spd
-        local air = math.sqrt((a.wx - b.wx) ^ 2 + (a.wy - b.wy) ^ 2) * DETOUR_FLY / FLY
+        local air = d.ft[a.id .. ">" .. b.id] or (math.sqrt((a.wx - b.wx) ^ 2 + (a.wy - b.wy) ^ 2) * DETOUR_FLY / FLY)
         local walk2 = dd(b, twx, twy) * DETOUR_RUN / spd
         local tot = walk1 + air + OVERHEAD + walk2
         if not best or tot < best.fly then
@@ -206,7 +210,7 @@ function F.Advice(t, key)
     kind = "fly", run = runT, fly = best.fly, save = save,
     from = short(best.from.name), to = short(best.to.name),
     fmap = best.from.map, fx = best.from.x, fy = best.from.y,
-    atFM = best.walk1 < 60, sure = d.fpSeen and true or false,
+    atFM = best.walk1 < 60, sure = true, measured = d.ft[best.from.id .. ">" .. best.to.id] and true or false,
   }
   return last
 end
@@ -228,9 +232,47 @@ local function autoTake()
   end)
 end
 
+-- Flugzeit messen: beim Abflug Start/Ziel merken, bei der Landung Dauer speichern (naechstes Mal exakt)
+local flight = nil
+local function nodeAtSlot(slot)
+  local from, to
+  pcall(function()
+    local mapID = GetTaxiMapID and GetTaxiMapID()
+    local CUR = Enum and Enum.FlightPathState and Enum.FlightPathState.Current or 0
+    for _, n in ipairs(C_TaxiMap.GetAllTaxiNodes(mapID) or {}) do
+      if n.state == CUR then from = n.nodeID end
+      if n.slotIndex == slot then to = n.nodeID end
+    end
+  end)
+  return from, to
+end
+if hooksecurefunc and TakeTaxiNode then
+  pcall(hooksecurefunc, "TakeTaxiNode", function(slot)
+    local from, to = nodeAtSlot(slot)
+    if from and to and from ~= to then flight = { from = from, to = to, t0 = GetTime(), up = false } end
+  end)
+end
+local function flightTick()
+  if not flight then return end
+  local on = UnitOnTaxi and UnitOnTaxi("player")
+  if on then flight.up = true return end
+  if flight.up then
+    local dur = GetTime() - flight.t0
+    if dur > 10 and dur < 1200 then db().ft[flight.from .. ">" .. flight.to] = math.floor(dur + 0.5) end
+    flight = nil
+  elseif GetTime() - flight.t0 > 15 then flight = nil end   -- nie abgehoben
+end
+F.FlightTick = flightTick
+
 local E = CreateFrame("Frame")
 pcall(E.RegisterEvent, E, "TAXIMAP_OPENED")
-E:SetScript("OnEvent", function()
-  F.Learn()
-  if C_Timer and C_Timer.After then C_Timer.After(0.25, autoTake) else autoTake() end
+pcall(E.RegisterEvent, E, "PLAYER_CONTROL_GAINED")
+pcall(E.RegisterEvent, E, "PLAYER_CONTROL_LOST")
+E:SetScript("OnEvent", function(_, ev)
+  if ev == "TAXIMAP_OPENED" then
+    F.Learn()
+    if C_Timer and C_Timer.After then C_Timer.After(0.25, autoTake) else autoTake() end
+  else
+    if C_Timer and C_Timer.After then C_Timer.After(0.5, flightTick) else flightTick() end
+  end
 end)
