@@ -1,9 +1,12 @@
--- Tiry's Zentrale – wiederverwendbare Item-Liste (Zeilen mit Symbol, Name, Wertespalten)
+-- Tiry's Zentrale – wiederverwendbare Item-Liste: gestapelte Glas-Pillen (Symbol-Kugel, Name, Werte rechts)
+-- statt Tabelle; darüber eine schlanke Sortier-Leiste (aktiver Wert leuchtet Neon mit Pfeil)
 local _, ns = ...
 local UI = ns.UI
 local C = UI.C
 
-local ROW_H = 44
+local ROW_H = 48   -- Abstand der Zeilen (Pille 42 hoch + 6 Luft)
+local PILL_H = 42
+local HEAD_H = 30
 
 -- columns: { { key, label, width, align } ... } – Werte liefert fill(row, data) -> { [key] = text }
 function UI.ItemList(parent, width, columns, opts)
@@ -12,19 +15,21 @@ function UI.ItemList(parent, width, columns, opts)
   list.rows = {}
   list.columns = columns
 
-  -- Kopfzeile
+  -- Kopf: schlanke Sortier-Leiste (Glas-Kapsel, kein Tabellenkopf)
   local head = CreateFrame("Frame", nil, list)
   head:SetPoint("TOPLEFT")
-  head:SetSize(width, 24)
-  local x = (opts and opts.action) and (width - 34) or width
+  head:SetSize(width, HEAD_H - 4)
+  head.track = UI.Round(head, (HEAD_H - 4) / 2, "BACKGROUND", 0)
+  head.track:SetGradientV({ 0.10, 0.125, 0.122, 0.55 }, { 0.05, 0.06, 0.066, 0.55 })
+  local x = (opts and opts.action) and (width - 40) or (width - 6)
   list.heads = {}
   for i = #columns, 1, -1 do
     local col = columns[i]
-    local t = UI.Text(head, 10, "semibold", C.dim)
+    local t = UI.Text(head, 12, "semibold", C.dim)
     t:SetWidth(col.width)
     t:SetJustifyH(col.align or "RIGHT")
     t:SetPoint("RIGHT", head, "LEFT", x - 12, 0)
-    t:SetText(col.label:upper())
+    t:SetText(col.label)
     col.x = x - 12
     list.heads[col.key] = { text = t, col = col, head = head }
     -- Sortieren per Klick auf die Spaltenüberschrift
@@ -59,7 +64,7 @@ function UI.ItemList(parent, width, columns, opts)
     self.sortKey, self.sortDesc = key, desc
     for k, h in pairs(self.heads) do
       local on = k == key
-      local c = on and C.text or C.dim
+      local c = on and C.amber or C.dim
       h.text:SetTextColor(c[1], c[2], c[3], 1)
       -- aktive Spalte: Text 14 px nach links, rechts daneben der Pfeil
       h.text:ClearAllPoints()
@@ -68,32 +73,46 @@ function UI.ItemList(parent, width, columns, opts)
         h.btn.arrow:SetShown(on)
         if on then
           h.btn.arrow:SetRotation(desc and -math.pi / 2 or math.pi / 2)
+          h.btn.arrow:SetVertexColor(C.amber[1], C.amber[2], C.amber[3], 1)
           h.btn.arrow:ClearAllPoints()
           h.btn.arrow:SetPoint("RIGHT", h.head, "LEFT", h.col.x, 0)
         end
       end
     end
   end
-  local nameHead = UI.Text(head, 10, "semibold", C.dim)
-  nameHead:SetPoint("LEFT", 54, 0)
-  nameHead:SetText("ITEM")
-  list.nameWidth = x - 54 - 8
+  local nameHead = UI.Text(head, 12, "semibold", C.dim)
+  nameHead:SetPoint("LEFT", 60, 0)
+  nameHead:SetText("Item")
+  list.nameHead = nameHead
+  list.nameWidth = x - 60 - 8
 
   local function getRow(i)
     local row = list.rows[i]
     if row then return row end
     row = UI.SafeButton(list)
-    row:SetSize(width, ROW_H - 4)
+    row:SetSize(width, PILL_H)
     row:RegisterForClicks("LeftButtonUp", "RightButtonUp")
-    row.bg = UI.Round(row, 14, "BACKGROUND", 0)
-    row.bg:SetColor(C.card, 0.0)
-    row.icon = UI.ItemIcon(row, 32)
-    row.icon:SetPoint("LEFT", 10, 0)
+    -- Glas-Pille: Lichtkante + Körper (beim Überfahren Neon-Rand)
+    local shape = UI.PillShape(row, PILL_H, 0, false)
+    row.edge, row.bg = shape.edge, shape.body
+    function row:Paint(hover)
+      if hover then
+        self.edge:SetGradient(UI.GRAD_EDGE, 0.55)
+        self.bg:SetGradientV(UI.GLASS.pillHi[1], UI.GLASS.pillHi[2], 0.92)
+      else
+        self.edge:SetGradientV({ 0.60, 1.00, 0.85, 0.13 }, { 0.20, 0.55, 0.65, 0.04 })
+        self.bg:SetGradientV(UI.GLASS.card[1], UI.GLASS.card[2], 0.62)
+      end
+    end
+    row.icon = UI.ItemIcon(row, 34)
+    row.icon:SetPoint("LEFT", 4, 0)
     row.name = UI.Text(row, 13, "semibold", C.text)
-    row.name:SetPoint("LEFT", row.icon, "RIGHT", 12, 6)
+    row.name:SetPoint("LEFT", row.icon, "RIGHT", 14, 6)
     row.name:SetWidth(list.nameWidth)
     row.name:SetWordWrap(false)
-    row.note = UI.Text(row, 10, "regular", C.dim)
+    row.chip = UI.Chip(row, "", C.gold)
+    row.chip:Hide()
+    row.note = UI.Text(row, 12, "regular", C.dim)
     row.note:SetPoint("TOPLEFT", row.name, "BOTTOMLEFT", 0, -2)
     row.note:SetWidth(list.nameWidth)
     row.note:SetWordWrap(false)
@@ -107,8 +126,8 @@ function UI.ItemList(parent, width, columns, opts)
       row.cells[col.key] = t
     end
     if opts and opts.action then
-      row.action = UI.IconButton(row, "close", 24)
-      row.action:SetPoint("RIGHT", -6, 0)
+      row.action = UI.IconButton(row, "close", 28)
+      row.action:SetPoint("RIGHT", -7, 0)
       row.action:SetScript("OnClick", function(b)
         local r = b:GetParent()
         if r.actionFn then r.actionFn(r) end
@@ -117,14 +136,14 @@ function UI.ItemList(parent, width, columns, opts)
         local r = b:GetParent()
         if r.actionTip then
           GameTooltip:SetOwner(b, "ANCHOR_RIGHT")
-          GameTooltip:SetText(r.actionTip, 1, 0.6, 0.16)
+          GameTooltip:SetText(r.actionTip, 0.22, 1, 0.42)
           GameTooltip:Show()
         end
       end)
       row.action:HookScript("OnLeave", function() GameTooltip:Hide() end)
     end
     row:SetScript("OnEnter", function(self)
-      self.bg:SetColor(C.cardHi, 0.85)
+      self:Paint(true)
       if self.itemID then
         GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
         local ok = pcall(GameTooltip.SetItemByID, GameTooltip, self.itemID)
@@ -132,7 +151,7 @@ function UI.ItemList(parent, width, columns, opts)
         if self.tipLines then
           GameTooltip:AddLine(" ")
           for _, line in ipairs(self.tipLines) do
-            GameTooltip:AddLine(line, 1, 0.6, 0.16, true)
+            GameTooltip:AddLine(line, 0.47, 1, 0.58, true)
           end
         end
         GameTooltip:AddLine("Shift-Klick: Link in den Chat", 0.6, 0.57, 0.75)
@@ -140,7 +159,7 @@ function UI.ItemList(parent, width, columns, opts)
       end
     end)
     row:SetScript("OnLeave", function(self)
-      self.bg:SetColor(C.card, self.zebra and 0.45 or 0)
+      self:Paint(false)
       GameTooltip:Hide()
     end)
     row:SetScript("OnClick", function(self, button)
@@ -154,35 +173,51 @@ function UI.ItemList(parent, width, columns, opts)
     return row
   end
 
-  -- entries: Liste von Tabellen { id = itemID, note = "...", cells = { key = text }, tip = { lines } }
+  -- entries: Liste von Tabellen { id = itemID, note = "...", cells = { key = text }, tip = { lines },
+  --          chip = { Text, Farbe } (optional, kleines Etikett hinter dem Namen) }
   function list:SetEntries(entries, emptyText)
     for i, e in ipairs(entries) do
       local row = getRow(i)
       row:ClearAllPoints()
-      row:SetPoint("TOPLEFT", self, "TOPLEFT", 0, -26 - (i - 1) * ROW_H)
+      row:SetPoint("TOPLEFT", self, "TOPLEFT", 0, -HEAD_H - (i - 1) * ROW_H)
       row.itemID = e.id
       row.tipLines = e.tip
       row.onClick = e.onClick
       row.actionFn, row.actionTip = e.action, e.actionTip
       if row.action then row.action:SetShown(e.action ~= nil) end
-      row.zebra = (i % 2 == 0)
-      row.bg:SetColor(C.card, row.zebra and 0.45 or 0)
+      row:Paint(false)
+      local chipW = 0
+      if e.chip then
+        row.chip:Set(e.chip[1], e.chip[2])
+        chipW = row.chip:GetWidth() + 8
+      end
+      row.chip:SetShown(e.chip ~= nil)
+      local nameMax = list.nameWidth - chipW
       if e.id then
         local item = ns.Item(e.id)
         row.icon:SetItem(e.id)
         local q = UI.QUALITY[item.quality or 1] or UI.QUALITY[1]
-        UI.FitText(row.name, e.name or item.name, list.nameWidth)
+        UI.FitText(row.name, e.name or item.name, nameMax)
         row.name:SetTextColor(q[1], q[2], q[3], 1)
       else
         row.icon:SetIcon(e.icon or UI.TEX.logo, e.iconColor)
-        UI.FitText(row.name, e.name or "", list.nameWidth)
+        UI.FitText(row.name, e.name or "", nameMax)
         row.name:SetTextColor(C.text[1], C.text[2], C.text[3], 1)
+      end
+      if e.chip then
+        -- Name nur so breit wie sein Text, Chip direkt dahinter
+        local nw = math.min(nameMax, math.ceil(row.name:GetUnboundedStringWidth()) + 2)
+        row.name:SetWidth(nw)
+        row.chip:ClearAllPoints()
+        row.chip:SetPoint("LEFT", row.name, "RIGHT", 6, 0)
+      else
+        row.name:SetWidth(list.nameWidth)
       end
       UI.FitText(row.note, e.note or "", list.nameWidth)
       if e.note and e.note ~= "" then
-        row.name:SetPoint("LEFT", row.icon, "RIGHT", 12, 7)
+        row.name:SetPoint("LEFT", row.icon, "RIGHT", 14, 8)
       else
-        row.name:SetPoint("LEFT", row.icon, "RIGHT", 12, 0)
+        row.name:SetPoint("LEFT", row.icon, "RIGHT", 14, 0)
       end
       for key, fs in pairs(row.cells) do
         local v = e.cells and e.cells[key]
@@ -195,16 +230,16 @@ function UI.ItemList(parent, width, columns, opts)
     end
     if not self.empty then
       self.empty = UI.Para(self, 12, C.dim, width - 40)
-      self.empty:SetPoint("TOPLEFT", 16, -36)
+      self.empty:SetPoint("TOPLEFT", 16, -HEAD_H - 10)
       self.empty:SetJustifyH("LEFT")
     end
     self.empty:SetText(#entries == 0 and (emptyText or "Keine Einträge.") or "")
     self.empty:SetShown(#entries == 0)
-    local h = 26 + math.max(#entries, 1) * ROW_H + ((#entries == 0) and 20 or 0)
+    local h = HEAD_H + math.max(#entries, 1) * ROW_H + ((#entries == 0) and 20 or 0)
     self:SetHeight(h)
     return h
   end
 
-  list:SetHeight(26)
+  list:SetHeight(HEAD_H)
   return list
 end

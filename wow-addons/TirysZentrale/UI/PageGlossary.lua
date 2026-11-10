@@ -45,7 +45,7 @@ function page.build(self, content, width)
   for i, g in ipairs(ns.GLOSSARY) do
     local card = UI.Card(content, 16, C.card)
     card:SetWidth(width)
-    card.word = UI.Text(card, 14, "bold", C.hi)
+    card.word = UI.Text(card, 14, "bold", C.gold)
     card.word:SetPoint("TOPLEFT", 18, -14)
     card.word:SetText(g[1])
     card.text = UI.Para(card, 12, C.muted, width - 36)

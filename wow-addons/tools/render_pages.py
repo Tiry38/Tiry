@@ -1,8 +1,13 @@
 #!/usr/bin/env python3
 """Zeichnet die von tests/check_layout.lua exportierten Seiten als PNG (Vorschau ohne Spiel).
-Aufruf: python3 tools/render_pages.py <ordner mit *.tsv>"""
-import glob, math, os, sys
+Aufruf: python3 tools/render_pages.py <ordner mit *.tsv>
+Optional: TZ_ICON_DIR=<ordner> mit Spielsymbolen als <name>.jpg/.png (klein geschrieben, z. B. inv_misc_coin_02.jpg)
+-> Interface\\Icons\\... wird dann echt gezeichnet, sonst als neutraler Platzhalter.
+ADD-Texturen werden wie im Spiel additiv gemischt."""
+import glob, math, os, re, sys
 from PIL import Image, ImageDraw, ImageFont, ImageChops
+
+TOKEN = re.compile(r"\|c[0-9a-fA-F]{8}|\|r|\x01|[^|\x01]+|\|")
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ADDON = os.path.join(HERE, "..", "TirysZentrale")
@@ -18,6 +23,22 @@ def font(weight, size):
     return _font[key]
 
 
+ICON_DIR = os.environ.get("TZ_ICON_DIR")
+
+
+def placeholder(size=64):
+    """Neutraler Platzhalter für Spielsymbole (Item-/Blizzard-Icons gibt es offline nicht)."""
+    y, x = [v.astype("float32") / (size - 1) for v in __import__("numpy").mgrid[0:size, 0:size]]
+    import numpy as np
+    t = np.clip(0.55 * x + 0.45 * y, 0, 1)[..., None]
+    top, bot = np.array([78, 92, 96], "float32"), np.array([34, 40, 46], "float32")
+    rgb = top * (1 - t) + bot * t
+    hl = np.clip(1 - np.hypot(x - 0.32, y - 0.28) / 0.42, 0, 1)[..., None] ** 2 * 40
+    rgb = np.clip(rgb + hl, 0, 255)
+    a = np.full((size, size, 1), 255, "float32")
+    return Image.fromarray(np.uint8(np.concatenate([rgb, a], axis=2)), "RGBA")
+
+
 def texture(name):
     if name in _tex:
         return _tex[name]
@@ -27,8 +48,35 @@ def texture(name):
         p = os.path.join(ADDON, "Media", fn)
         if os.path.exists(p):
             img = Image.open(p).convert("RGBA")
+    elif name.lower().startswith("interface\\icons\\"):
+        base = name.split("\\")[-1].lower()
+        for ext in (".jpg", ".png"):
+            p = os.path.join(ICON_DIR, base + ext) if ICON_DIR else None
+            if p and os.path.exists(p):
+                img = Image.open(p).convert("RGBA")
+                break
+        if img is None:
+            img = placeholder()
+    elif name.replace(".", "").isdigit():
+        img = placeholder()
     _tex[name] = img
     return img
+
+
+def add_onto(canvas, piece, pos):
+    """Additive Mischung wie SetBlendMode("ADD"): Ziel += Farbe * Alpha."""
+    import numpy as np
+    x0, y0 = pos
+    W, H = canvas.size
+    w, h = piece.size
+    cx0, cy0, cx1, cy1 = max(0, x0), max(0, y0), min(W, x0 + w), min(H, y0 + h)
+    if cx1 <= cx0 or cy1 <= cy0:
+        return
+    src = np.asarray(piece.crop((cx0 - x0, cy0 - y0, cx1 - x0, cy1 - y0)), dtype=np.float32)
+    region = canvas.crop((cx0, cy0, cx1, cy1))
+    dst = np.asarray(region, dtype=np.float32).copy()
+    dst[..., :3] = np.clip(dst[..., :3] + src[..., :3] * (src[..., 3:4] / 255.0), 0, 255)
+    canvas.paste(Image.fromarray(np.uint8(dst), "RGBA"), (cx0, cy0))
 
 
 def tint(img, rgba):
@@ -115,15 +163,17 @@ def render(path):
                 else:
                     piece = tint(src, col)
             elif piece is None:
-                if name.replace(".", "").isdigit():  # Item-Symbol (Datei-ID) -> Platzhalter
-                    piece = Image.new("RGBA", (w, h), (120, 110, 90, 255))
-                else:
-                    piece = Image.new("RGBA", (w, h), tuple(int(255 * v) for v in col))
+                piece = Image.new("RGBA", (w, h), tuple(int(255 * v) for v in col))
+            if len(r) > 15 and r[15]:  # Maske (rund) anwenden
+                m = texture(r[15])
+                if m is not None:
+                    ma = m.split()[3].resize(piece.size, Image.LANCZOS)
+                    piece = piece.copy()
+                    piece.putalpha(ImageChops.multiply(piece.split()[3], ma))
             if r[14] == "ADD":
-                faded = piece.copy()
-                faded.putalpha(faded.split()[3].point(lambda v: int(v * 0.6)))
-                piece = faded
-            canvas.alpha_composite(piece, (x0, y0))
+                add_onto(canvas, piece, (x0, y0))
+            else:
+                canvas.alpha_composite(piece, (x0, y0))
         else:
             weight, size = r[5], float(r[6])
             col = tuple(int(255 * float(v)) for v in r[7:11])
@@ -134,11 +184,28 @@ def render(path):
             total = lh * len(lines)
             ty = y0 if justV == "TOP" else y0 + (h - total) / 2 if justV == "MIDDLE" else y1 - total
             d = ImageDraw.Draw(canvas)
+            coin = size * SCALE * 0.78
+            state = None  # aktuelle |c-Farbe (gilt über Zeilenumbrüche hinweg)
             for i, line in enumerate(lines):
-                line = line.replace("\x01", "◆")
-                lw = d.textlength(line, font=f)
+                # Farbcodes |cAARRGGBB ... |r und Symbole (\x01 = |T...|t, z. B. Münzen)
+                segs = []
+                for tok in TOKEN.findall(line):
+                    if tok.startswith("|c") and len(tok) == 10:
+                        state = tuple(int(tok[k:k + 2], 16) for k in (4, 6, 8)) + (col[3],)
+                    elif tok == "|r":
+                        state = None
+                    else:
+                        segs.append((tok, state or col))
+                lw = sum((coin + 2) if s == "\x01" else d.textlength(s, font=f) for s, _ in segs)
                 tx = x0 if justH == "LEFT" else (x1 - lw if justH == "RIGHT" else x0 + (w - lw) / 2)
-                d.text((tx, ty + i * lh), line, font=f, fill=col)
+                cy = ty + i * lh + size * SCALE * 0.62
+                for s, c in segs:
+                    if s == "\x01":
+                        d.ellipse((tx + 1, cy - coin / 2, tx + 1 + coin, cy + coin / 2), fill=(232, 190, 72, 255), outline=(150, 110, 30, 255))
+                        tx += coin + 2
+                    else:
+                        d.text((tx, ty + i * lh), s, font=f, fill=c)
+                        tx += d.textlength(s, font=f)
     out = path[:-4] + ".png"
     canvas.convert("RGB").save(out)
     return out

@@ -11,15 +11,9 @@ local page = {
   icon = "receipt", label = "Meine Auktionen", order = 30,
 }
 
-local function stat(parent, w, label)
-  local f = UI.Card(parent, 16, C.card)
-  f:SetSize(w, 70)
-  f.label = UI.Text(f, 12, "semibold", C.dim)
-  f.label:SetPoint("TOPLEFT", 16, -12)
-  f.label:SetText(label)
-  f.value = UI.Text(f, 18, "bold", C.text)
-  f.value:SetPoint("TOPLEFT", f.label, "BOTTOMLEFT", 0, -6)
-  return f
+-- Kennzahl als Glas-Pille mit Leuchtpunkt (statt Kachel)
+local function stat(parent, w, label, accent)
+  return UI.StatPill(parent, w, label, accent, 70)
 end
 
 local function ago(t)
@@ -46,7 +40,7 @@ function page.build(self, content, width)
   local cw = math.floor((width - 36) / 4)
   local row = CreateFrame("Frame", nil, content)
   row:SetSize(width, 70)
-  self.stats = { stat(row, cw, "IM AH"), stat(row, cw, "WERT IM AH"), stat(row, cw, "IM BRIEFKASTEN"), stat(row, cw, "UNTERBOTEN") }
+  self.stats = { stat(row, cw, "IM AH", C.amber), stat(row, cw, "WERT IM AH", C.teal), stat(row, cw, "IM BRIEFKASTEN", C.aqua), stat(row, cw, "UNTERBOTEN", C.hi) }
   UI.SetTooltip(self.stats[3], "Gold im Briefkasten", "Nach einem Verkauf ist das Gold erst ein paar Minuten unterwegs, dann liegt es im Briefkasten. "
     .. "\"ca.\" = geschätzt – genau wird es, sobald du den Briefkasten öffnest. Holst du das Gold ab, verschwindet es hier von selbst.")
   self.stats[3]:EnableMouse(true)
@@ -72,11 +66,34 @@ function page.build(self, content, width)
     local ids, seen = {}, {}
     for _, a in ipairs(AW.RelistList()) do if not seen[a.id] then seen[a.id] = true ids[#ids + 1] = a.id end end
     local ok, n = M.CreateShoppingList("Zentrale: Neu einstellen", ids)
-    ns.Print(ok and ("Liste |cffff9929Zentrale: Neu einstellen|r angelegt (" .. n .. " Items) – zeigt dir die Konkurrenz. "
+    ns.Print(ok and ("Liste |cff39ff6bZentrale: Neu einstellen|r angelegt (" .. n .. " Items) – zeigt dir die Konkurrenz. "
       .. "Einstellen: Auctionator > Verkaufen > Item anklicken, Preis aus \"Vorschlag\" nehmen.") or ("|cffff6b81" .. tostring(n) .. "|r"))
   end)
   UI.SetTooltip(self.listBtn, "Neu einstellen", "Legt alle Items aus \"Neu einstellen\" als Auctionator-Suchliste an, damit du die aktuelle Konkurrenz siehst.")
-  st:Add(actions, 34, 18)
+  st:Add(actions, 34, 14)
+
+  -- Beste Verkaufszeit (aus den AH-Scans bzw. deinen Verkäufen)
+  local tf = CreateFrame("Frame", nil, content)
+  tf:SetSize(width, 20)
+  tf.dot = tf:CreateTexture(nil, "ARTWORK")
+  tf.dot:SetTexture(UI.TEX.circle)
+  tf.dot:SetSize(8, 8)
+  tf.dot:SetPoint("LEFT", 2, 0)
+  UI.SetGradV(tf.dot, C.amber, C.teal, 1)
+  tf.text = UI.Text(tf, 12, "regular", C.muted)
+  tf.text:SetPoint("LEFT", 18, 0)
+  tf.text:SetWidth(width - 20)
+  tf.text:SetWordWrap(false)
+  tf:EnableMouse(true)
+  UI.SetTooltip(tf, function()
+    local b = ns.Timing and ns.Timing.Best()
+    if not b then
+      return "Beste Verkaufszeit", "Wird gemessen: Nach ein paar AH-Scans zu verschiedenen Uhrzeiten (oder einigen eigenen Verkäufen) steht hier, wann am meisten gekauft wird."
+    end
+    return "Beste Verkaufszeit", (b.text or "") .. (b.tip and ("\n\n" .. b.tip) or "")
+  end)
+  self.timing = tf
+  st:Add(tf, 20, 18)
 
   -- Neu einstellen: unterboten, abgelaufen, frisch hergestellt – mit Preisvorschlag
   self.relistTitle = UI.Text(content, 17, "bold", C.text)
@@ -98,14 +115,21 @@ function page.build(self, content, width)
     { key = "state", label = "Status", width = 120, bold = true },
   })
   -- Summenzeile unter der Liste
+  -- Summe als leuchtende Glas-Pille
   self.totalRow = CreateFrame("Frame", nil, content)
-  self.totalRow:SetSize(width, 44)
-  self.totalRow.bg = UI.Round(self.totalRow, 16, "BACKGROUND", 0)
-  self.totalRow.bg:SetColor(C.cardHi, 1)
+  self.totalRow:SetSize(width, 48)
+  local tshape = UI.PillShape(self.totalRow, 48, 0, true)
+  tshape.edge:SetGradient(UI.GRAD_EDGE, 0.6)
+  tshape.body:SetGradientV(UI.GLASS.hero[1], UI.GLASS.hero[2], 1)
+  tshape.gloss:SetAlpha(0.4)
+  self.totalRow.bg = tshape.body
+  self.totalRow.glow = UI.Glow(self.totalRow, C.amber, 260, 0.16, "BORDER")
+  self.totalRow.glow:SetHeight(46)
+  self.totalRow.glow:SetPoint("CENTER", self.totalRow, "RIGHT", -90, 0)
   self.totalRow.label = UI.Text(self.totalRow, 14, "bold", C.text)
-  self.totalRow.label:SetPoint("LEFT", 18, 0)
-  self.totalRow.value = UI.Text(self.totalRow, 15, "bold", C.hi)
-  self.totalRow.value:SetPoint("RIGHT", -18, 0)
+  self.totalRow.label:SetPoint("LEFT", 24, 0)
+  self.totalRow.value = UI.Text(self.totalRow, 17, "bold", C.gold)
+  self.totalRow.value:SetPoint("RIGHT", -24, 0)
   self.totalRow.value:SetJustifyH("RIGHT")
   self.soldTitle = UI.Text(content, 17, "bold", C.text)
   self.soldTitle:SetText("Verkauft")
@@ -179,20 +203,49 @@ function page.refresh(self)
     return ns.Item(x.id).name < ns.Item(y.id).name
   end)
   local content = self.frame.content
-  local y = 70 + 14 + 34 + 10 + 34 + 18
+  local y = 70 + 14 + 34 + 10 + 34 + 14 + 20 + 18
+  -- Verkaufszeit-Zeile
+  local T = ns.Timing
+  local good, best = false, nil
+  if T then good, best = T.IsGoodTime() if not best then best = T.Best() end end
+  if best and best.text and best.text ~= "" then
+    UI.FitText(self.timing.text, UI.NEON_HEX .. "Verkaufszeit:|r " .. best.text
+      .. (good and " · |cffff9929jetzt ist Hauptbetrieb|r" or ""), UI.CONTENT_W - 20)
+  else
+    self.timing.text:SetText(UI.NEON_HEX .. "Verkaufszeit:|r wird gemessen – nach ein paar AH-Scans zu verschiedenen Uhrzeiten steht hier, wann am meisten gekauft wird.")
+  end
   -- Neu einstellen (nur wenn es etwas gibt)
   local WHY = { unterboten = "|cffff6b81unterboten|r", abgelaufen = "|cffff9929abgelaufen|r", hergestellt = "|cff61eb8fhergestellt|r" }
   local re = {}
   for _, e in ipairs(relist) do
+    local post = e.post or e.qty
+    local note
+    if e.stale then
+      -- 2× abgelaufen, nie verkauft: jedes Einstellen kostet Gebühr
+      note = string.format("|cffff9929%d× abgelaufen, nie verkauft – billiger einstellen oder zum Händler%s|r", e.expired or 2,
+        e.vendor and (" (" .. ns.Money(e.vendor) .. "/Stück)") or "")
+    elseif e.full then
+      note = "|cffff9929Markt voll – nicht nachlegen, lieber halten|r"
+    elseif e.wait then
+      note = "|cffff9929AH-Preis liegt unter deinen Kosten – lieber warten oder zum Vorschlag einstellen|r"
+    elseif post < e.qty then
+      note = "Nur " .. post .. " einstellen – so viele gehen in ca. 3 Tagen weg, der Rest später"
+    else
+      note = e.mine and ("du: " .. ns.Money(e.mine) .. "/Stück") or "Klick: Angebote im AH zeigen · Shift-Klick: verlinken"
+    end
+    local tip = { AW.WholeSilver and AW.WholeSilver(e.id)
+        and "Vorschlag = günstigstes Angebot, abgerundet auf ganze Silber (Einzel-Items ohne Kupfer), nie unter \"Nicht unter\"."
+        or "Vorschlag = günstigstes Angebot minus 1 Kupfer, nie unter \"Nicht unter\".",
+      "\"Nicht unter\" = deine Materialkosten pro Stück nach AH-Gebühr.",
+      "Einstellen: Auctionator > Verkaufen > Item anklicken." }
+    if post < e.qty then tip[#tip + 1] = "Menge: " .. post .. " von " .. e.qty .. " einstellen – nicht den Markt fluten." end
     re[#re + 1] = {
       id = e.id,
-      note = e.wait and "|cffff9929AH-Preis liegt unter deinen Kosten – lieber warten oder zum Vorschlag einstellen|r"
-        or (e.mine and ("du: " .. ns.Money(e.mine) .. "/Stück") or "Klick: im AH suchen · Shift-Klick: verlinken"),
-      cells = { qty = tostring(e.qty), where = WHY[e.where] or e.where,
+      note = note,
+      chip = (e.stale and { "Ladenhüter", C.hi }) or (e.full and { "Markt voll", C.hi }) or nil,
+      cells = { qty = post < e.qty and (post .. "/" .. e.qty) or tostring(e.qty), where = WHY[e.where] or e.where,
         price = e.price and ns.Money(e.price) or "|cff8a9a94kein Preis|r", floor = e.floor and ns.Money(e.floor) or "–" },
-      tip = { "Vorschlag = günstigstes Angebot minus 1 Kupfer, nie unter \"Nicht unter\".",
-        "\"Nicht unter\" = deine Materialkosten pro Stück nach AH-Gebühr.",
-        "Einstellen: Auctionator > Verkaufen > Item anklicken." },
+      tip = tip,
       onClick = function()
         if M.ahOpen then
           local ok, err = M.SearchNow({ e.id })
@@ -229,7 +282,7 @@ function page.refresh(self)
     self.totalRow:ClearAllPoints()
     self.totalRow:SetPoint("TOPLEFT", content, "TOPLEFT", 0, -y)
     self.totalRow:Show()
-    y = y + 44 + 22
+    y = y + 48 + 22
   else
     self.totalRow:Hide()
     y = y + 14

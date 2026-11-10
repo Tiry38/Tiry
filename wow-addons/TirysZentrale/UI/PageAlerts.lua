@@ -35,11 +35,14 @@ function page.build(self, content, width)
 
   -- Auswahl + Wunschpreis
   local pick = CreateFrame("Frame", nil, content)
-  pick:SetSize(width, 44)
-  pick.bg = UI.Round(pick, 22, "BACKGROUND", 0)
-  pick.bg:SetColor(C.card, 1)
-  pick.icon = UI.ItemIcon(pick, 30)
-  pick.icon:SetPoint("LEFT", 8, 0)
+  pick:SetSize(width, 48)
+  local pshape = UI.PillShape(pick, 48, 0, true)
+  pshape.edge:SetGradient(UI.GRAD_EDGE, 0.5)
+  pshape.body:SetGradientV(UI.GLASS.hero[1], UI.GLASS.hero[2], 1)
+  pshape.gloss:SetAlpha(0.35)
+  pick.bg = pshape.body
+  pick.icon = UI.ItemIcon(pick, 36)
+  pick.icon:SetPoint("LEFT", 6, 0)
   pick.name = UI.Text(pick, 13, "semibold", C.text)
   pick.name:SetPoint("LEFT", pick.icon, "RIGHT", 10, 0)
   pick.name:SetWidth(width - 520)
@@ -53,7 +56,9 @@ function page.build(self, content, width)
   local ok, res = pcall(box.SetFont, box, ns.MEDIA .. "Fonts\\Poppins-SemiBold.ttf", 13, "")
   if not ok or res == false then pcall(box.SetFont, box, STANDARD_TEXT_FONT or "Fonts\\FRIZQT__.TTF", 13, "") end
   box:SetTextColor(1, 1, 1, 1)
-  box.bg = UI.Round(box, 15, "BACKGROUND", 2)
+  local bshape = UI.PillShape(box, 30, 2, false)
+  bshape.edge:SetGradient(UI.GRAD_EDGE, 0.45)
+  box.bg = bshape.body
   box.bg:SetColor(C.inset, 1)
   local lab = UI.Text(pick, 12, "semibold", C.muted)
   lab:SetPoint("RIGHT", box, "LEFT", -8, 0)
@@ -133,7 +138,7 @@ function page.refresh(self)
   self.pickFrame:ClearAllPoints()
   self.pickFrame:SetPoint("TOPLEFT", content, "TOPLEFT", 0, -y)
   if not self.pickInit then self.pickInit = true page.refreshPick(self) end
-  y = y + 44 + 22
+  y = y + 48 + 22
   self.listTitle:ClearAllPoints()
   self.listTitle:SetPoint("TOPLEFT", content, "TOPLEFT", 0, -y)
   y = y + 32
@@ -149,7 +154,7 @@ function page.refresh(self)
         state = hit and "|cffff9929jetzt kaufen!|r" or "|cff93a39dwartet|r",
       },
       tip = { "Preis jetzt: " .. (a.now and ns.Money(a.now) or "unbekannt (AH scannen)") .. " · " .. M.AgeText(a.id),
-        "Klick: im AH suchen (Auktionshaus muss offen sein) · ×: Alarm löschen" },
+        "Klick: Angebote im AH zeigen (Auktionshaus muss offen sein) · ×: Alarm löschen" },
       action = function() A.Remove(a.id) page.refresh(self) end,
       actionTip = "Alarm löschen",
       onClick = function()

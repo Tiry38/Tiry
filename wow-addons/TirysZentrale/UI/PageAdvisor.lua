@@ -15,13 +15,13 @@ local STEPS = { { value = 10, label = "+10 Skill" }, { value = 25, label = "+25 
 local function gatherCard(parent, w)
   local c = UI.Card(parent, 18, C.card)
   c:SetSize(w, 118)
-  c.rank = UI.Chip(c, "", C.hi, true)
+  c.rank = UI.Chip(c, "", C.amber, true)
   c.rank:SetPoint("TOPLEFT", 16, -14)
   c.icon = UI.ItemIcon(c, 36)
   c.icon:SetPoint("TOPRIGHT", -14, -12)
   c.name = UI.Text(c, 15, "bold", C.text)
   c.name:SetPoint("TOPLEFT", 16, -48)
-  c.value = UI.Text(c, 14, "bold", C.hi)
+  c.value = UI.Text(c, 15, "bold", C.gold)
   c.value:SetPoint("TOPLEFT", c.name, "BOTTOMLEFT", 0, -6)
   c.have = UI.Text(c, 12, "semibold", C.dim)
   c.have:SetPoint("TOPLEFT", c.value, "BOTTOMLEFT", 0, -4)
@@ -67,13 +67,14 @@ function page.build(self, content, width)
   self.tipTitle:SetText("Hol dir diese Rezepte")
   self.tipHint = UI.Para(content, 12, C.muted, width)
   self.tipHint:SetText("Nur für deine Berufe und deinen Skill: Rezepte, die du jetzt (oder in bis zu 10 Punkten) lernen kannst, mit frischem Preis, "
-    .. "mindestens deinem Mindestgewinn pro Craft und in höchstens 30 Crafts bezahlt. Klick: im AH suchen · Shift-Klick: in die Auctionator-Suche.")
+    .. "mindestens deinem Mindestgewinn pro Craft und in höchstens 30 Crafts bezahlt. Klick: Angebote im AH zeigen · Shift-Klick: in die Auctionator-Suche.")
   self.tipList = UI.ItemList(content, width, {
     { key = "profit", label = "Gewinn/Craft", width = 110, bold = true },
     { key = "price", label = "Rezept im AH", width = 110 },
     { key = "back", label = "Bezahlt nach", width = 110 },
   })
-  self.tipBtn = UI.Button(content, "Alle Rezepte im AH suchen", "cool", 280, 34, "scan")
+  self.tipBtn = UI.Button(content, "Angebote zeigen", "cool", 280, 34, "scan")
+  UI.SetTooltip(self.tipBtn, "Angebote zeigen", "Nur zum Kaufen – die Preise aktualisiert der Scan oben für alle Reiter. Sucht alle Rezepte dieser Liste im AH; ist das AH zu, wird eine Auctionator-Liste \"Zentrale: Rezepte\" angelegt.")
   self.tipBtn:SetScript("OnClick", function()
     local ids = {}
     for _, t in ipairs(self.tips or {}) do if t.item then ids[#ids + 1] = t.item end end
@@ -83,7 +84,7 @@ function page.build(self, content, width)
       if not ok then ns.Print("|cffff6b81" .. tostring(err) .. "|r") end
     else
       local ok, n = ns.Market.CreateShoppingList("Zentrale: Rezepte", ids)
-      ns.Print(ok and ("Liste |cffff9929Zentrale: Rezepte|r angelegt (" .. n .. "). Im AH: Auctionator > Einkaufen.") or ("|cffff6b81" .. tostring(n) .. "|r"))
+      ns.Print(ok and ("Liste |cff39ff6bZentrale: Rezepte|r angelegt (" .. n .. "). Im AH: Auctionator > Einkaufen.") or ("|cffff6b81" .. tostring(n) .. "|r"))
     end
   end)
 
@@ -127,7 +128,7 @@ function page.refresh(self)
   self.gHint:SetText(string.format("Gerechnet für deinen Levelbereich %s mit den Live-Preisen der wichtigsten Materialien (Durchschnitt der 3 teuersten, ein voller Stapel nach AH-Gebühr).", band.key))
   for i, c in ipairs(self.gCards) do
     local r = ranked[i]
-    c.rank:Set("#" .. i, i == 1 and C.hi or C.teal, true)
+    c.rank:Set("#" .. i, i == 1 and C.amber or C.teal, true)
     c.name:SetText(ns.ProfName(r.id))
     c.value:SetText(r.value and (ns.Money(r.value) .. " pro Stapel") or "noch kein Preis")
     if r.best then c.icon:SetItem(r.best) else c.icon:SetIcon(UI.Icon("star"), C.gold) end
@@ -137,12 +138,12 @@ function page.refresh(self)
   local a, b = ranked[1], ranked[2]
   local text
   if withPrice >= 2 then
-    text = string.format("Empfehlung: |cffff9929%s + %s|r – die beiden bringen dir auf Level %d gerade am meisten.", ns.ProfName(a.id), ns.ProfName(b.id), ns.player.level)
+    text = string.format("Empfehlung: |cff39ff6b%s + %s|r – die beiden bringen dir auf Level %d gerade am meisten.", ns.ProfName(a.id), ns.ProfName(b.id), ns.player.level)
   else
     text = "Empfehlung: zwei Sammelberufe (z. B. Kürschnerei + Kräuterkunde). Für eine genaue Rangliste einmal im AH scannen."
   end
   if craft then
-    text = text .. "\nSpäter passt zu deiner Klasse: |cffff9929" .. ns.ProfName(ns.PROF[craft[1]]) .. "|r – " .. craft[2] .. "."
+    text = text .. "\nSpäter passt zu deiner Klasse: |cff39ff6b" .. ns.ProfName(ns.PROF[craft[1]]) .. "|r – " .. craft[2] .. "."
   end
   self.advice:SetText(text)
 
@@ -164,16 +165,16 @@ function page.refresh(self)
       self.plan = plan
       for _, s in ipairs(plan.steps) do
         local back = s.net and (s.net <= 0 and ("|cff61eb8f+" .. ns.Money(-s.net) .. " Gewinn|r") or ("netto " .. ns.Money(s.net))) or ns.Money(s.cost)
-        lines[#lines + 1] = string.format("|cffff9929Skill %d bis %d:|r %d× %s  |cff93a39d(Material %s · %s)|r", s.from, s.to, s.crafts, s.recipe.name, ns.Money(s.cost), back)
+        lines[#lines + 1] = string.format("|cff39ff6bSkill %d bis %d:|r %d× %s  |cff93a39d(Material %s · %s)|r", s.from, s.to, s.crafts, s.recipe.name, ns.Money(s.cost), back)
       end
       local mats = {}
       for id, n in pairs(plan.mats) do mats[#mats + 1] = n .. "× " .. ns.Item(id).name end
       table.sort(mats)
       lines[#lines + 1] = ""
-      lines[#lines + 1] = "|cffff9929Material zusammen:|r " .. table.concat(mats, ", ")
+      lines[#lines + 1] = "|cff39ff6bMaterial zusammen:|r " .. table.concat(mats, ", ")
       local netText = plan.net <= 0 and ("|cff61eb8fdu verdienst dabei sogar " .. ns.Money(-plan.net) .. "|r")
         or ("nach dem Verkauf der Ergebnisse netto nur " .. ns.Money(plan.net))
-      lines[#lines + 1] = string.format("|cffff9929Material gesamt: %s|r · %s%s", ns.Money(plan.total), netText,
+      lines[#lines + 1] = string.format("|cff39ff6bMaterial gesamt: %s|r · %s%s", ns.Money(plan.total), netText,
         plan.reached < plan.target and string.format("  |cff93a39d(reicht bis Skill %d – danach neue Rezepte lernen)|r", plan.reached) or "")
     end
   end
@@ -208,11 +209,11 @@ function page.refresh(self)
       name = t.item and ns.Item(t.item).name or (r.name .. " (Lehrer)"),
       note = table.concat(notes, " · "),
       cells = {
-        profit = "|cffff9929+|r" .. ns.Money(t.profit),
+        profit = "|cff39ff6b+|r" .. ns.Money(t.profit),
         price = t.item and (t.price and ns.Money(t.price) or "|cff8a9a94kein Angebot|r") or "|cff8a9a94Lehrer|r",
         back = t.payback and (t.payback .. " Crafts") or "–",
       },
-      tip = { t.item and "Klick: im AH suchen · Shift-Klick: in die Auctionator-Suche legen" or "Lernst du beim Lehrer deines Berufs." },
+      tip = { t.item and "Klick: Angebote im AH zeigen · Shift-Klick: in die Auctionator-Suche legen" or "Lernst du beim Lehrer deines Berufs." },
       onClick = function()
         if not t.item then ns.Print(r.name .. " lernst du beim Lehrer für " .. ns.ProfName(ns.PROF[t.prof]) .. ".") return end
         local ok, err = ns.Market.SearchNow({ t.item })

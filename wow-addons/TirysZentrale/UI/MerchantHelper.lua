@@ -8,26 +8,37 @@ local panel
 
 local function create()
   local p = CreateFrame("Frame", "TirysZentraleMerchantPanel", UIParent)
-  p:SetSize(270, 292)
+  p:SetSize(290, 318)
   p:SetFrameStrata("HIGH")
-  p.bg = UI.Round(p, 20, "BACKGROUND", -8)
-  p.bg:SetColor(C.bg)
-  UI.Ornaments(p, { w = 270, h = 300, pattern = 0.05, corners = 0.35, cornerSize = 44, inset = 4 })
-  local glow = UI.Glow(p, C.amber, 260, 0.18, "BACKGROUND")
-  glow:SetPoint("TOP", 0, 60)
-  local logo = p:CreateTexture(nil, "ARTWORK")
+  -- Neon-Glas wie das Hauptfenster
+  p.glass = UI.Glass(p, { radius = 24, edgeMode = "neon", edge = 0.72, halo = 0.22, haloPad = 22,
+    body = UI.GLASS.window, sheen = 0.05, sheenH = 60, line = 0.5 })
+  p.bg = p.glass.body
+  UI.Ornaments(p, { w = 290, h = 320, pattern = 0.04, corners = 0.30, cornerSize = 44, inset = 4 })
+  local glow = UI.Glow(p, C.amber, 300, 0.14, "BORDER")
+  glow:SetHeight(130)
+  glow:SetPoint("TOP", p, "TOPLEFT", 90, 8)
+  UI.Drift(glow, 100, 0, 9, 0.35, 0.10)
+  local glow2 = UI.Glow(p, C.aqua, 260, 0.09, "BORDER")
+  glow2:SetHeight(120)
+  glow2:SetPoint("BOTTOM", p, "BOTTOMRIGHT", -80, -4)
+  local ring = p:CreateTexture(nil, "ARTWORK")
+  ring:SetTexture(UI.TEX.ringgrad)
+  ring:SetSize(40, 40)
+  ring:SetPoint("TOPLEFT", 14, -12)
+  local logo = p:CreateTexture(nil, "ARTWORK", nil, 1)
   logo:SetTexture(UI.TEX.logo)
-  logo:SetSize(28, 28)
-  logo:SetPoint("TOPLEFT", 14, -12)
-  local title = UI.Text(p, 14, "bold", C.text)
-  title:SetPoint("LEFT", logo, "RIGHT", 8, 0)
-  title:SetText("Gold-Autopilot")
+  logo:SetSize(32, 32)
+  logo:SetPoint("CENTER", ring, "CENTER")
+  local title = UI.Text(p, 16, "bold", C.text)
+  title:SetPoint("LEFT", ring, "RIGHT", 10, 0)
+  title:SetText(UI.GradText("Gold-Autopilot", C.amber, C.teal))
 
-  p.info = UI.Para(p, 11, C.muted, 242)
-  p.info:SetPoint("TOPLEFT", 14, -50)
+  p.info = UI.Para(p, 12, C.muted, 258)
+  p.info:SetPoint("TOPLEFT", 18, -64)
 
-  p.sell = UI.Button(p, "Händler-Ware verkaufen", "primary", 242, 34, "coins")
-  p.sell:SetPoint("TOPLEFT", 14, -112)
+  p.sell = UI.Button(p, "Händler-Ware verkaufen", "primary", 258, 38, "coins")
+  p.sell:SetPoint("TOPLEFT", 16, -124)
   p.sell:SetScript("OnClick", function()
     local n = A.SellVendorItems()
     ns.Print(n > 0 and (n .. " Items verkauft, die beim Händler mehr bringen als im AH.") or "Nichts zu verkaufen.")
@@ -42,8 +53,8 @@ local function create()
       .. "\n\nNur Handwerkswaren und Verschiedenes – nie Ausrüstung oder Quest-Items. Rückkauf beim Händler ist möglich."
   end)
 
-  p.buy = UI.Button(p, "Flip-Schnäppchen kaufen", "cool", 242, 34, "cart")
-  p.buy:SetPoint("TOPLEFT", 14, -154)
+  p.buy = UI.Button(p, "Flip-Schnäppchen kaufen", "cool", 258, 38, "cart")
+  p.buy:SetPoint("TOPLEFT", 16, -170)
   p.buy:SetScript("OnClick", function()
     local ok, res = A.BuyFlips()
     if ok then
@@ -62,8 +73,8 @@ local function create()
       .. "\n\nGewinn laut letztem AH-Scan nach AH-Gebühr. Kauft nur Ware mit begrenztem Vorrat."
   end)
 
-  p.mats = UI.Button(p, "Craft-Material kaufen", "primary", 242, 34, "bolt")
-  p.mats:SetPoint("TOPLEFT", 14, -196)
+  p.mats = UI.Button(p, "Craft-Material kaufen", "primary", 258, 38, "bolt")
+  p.mats:SetPoint("TOPLEFT", 16, -216)
   p.mats:SetScript("OnClick", function()
     local ok, res = ns.Shop.BuyFromVendor()
     ns.Print(ok and ("Gekauft: " .. res) or ("|cffff6b81" .. res .. "|r"))
@@ -76,8 +87,8 @@ local function create()
     return "Kauft für " .. ns.Money(cost), table.concat(names, "\n") .. "\n\nGenau die fehlende Menge aus deiner Einkaufsliste – nur gegen Gold."
   end)
 
-  p.more = UI.Button(p, "Details im Scanner", "soft", 242, 30, "scan")
-  p.more:SetPoint("TOPLEFT", 14, -238)
+  p.more = UI.Button(p, "Details im Scanner", "soft", 258, 34, "scan")
+  p.more:SetPoint("TOPLEFT", 16, -264)
   p.more:SetScript("OnClick", function() UI.Show("scanner") end)
   p:Hide()
   return p
@@ -89,7 +100,7 @@ function A.RefreshPanel()
   local list = A.VendorCandidates()
   local plan, cost, profit = A.FlipBuyPlan()
   local flips = #ns.Scanner.merchant.flips
-  panel.info:SetText(string.format("Händler-Verkauf: |cffff9929%d Items, %s|r\nFlip-Chancen: |cffff9929%d|r%s\nSchrott: %s",
+  panel.info:SetText(string.format("Händler-Verkauf: |cff39ff6b%d Items, %s|r\nFlip-Chancen: |cff39ff6b%d|r%s\nSchrott: %s",
     #list, ns.Money(vendorTotal), flips,
     #plan > 0 and (" – kaufen für " .. ns.Money(cost) .. ", Gewinn " .. ns.Money(profit)) or "",
     ns.settings.autoJunk and "wird automatisch verkauft" or "Autopilot aus (Einstellungen)"))

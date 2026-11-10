@@ -21,7 +21,7 @@ local function steps()
   local next = ns.Guide.NextStep()
   return {
     { title = "Hallo " .. (p.name ~= "" and p.name or "Abenteurer") .. "! Das habe ich erkannt",
-      text = string.format("Fraktion: |cffff9929%s|r · Level |cffff9929%d|r · %s\nBerufe: %s\n\nAlles weitere passt Tiry's Zentrale automatisch an dich an – auch wenn du aufsteigst.",
+      text = string.format("Fraktion: |cff39ff6b%s|r · Level |cff39ff6b%d|r · %s\nBerufe: %s\n\nAlles weitere passt Tiry's Zentrale automatisch an dich an – auch wenn du aufsteigst.",
         FACTION[p.faction] or p.faction, p.level, CLASS[p.class] or p.class,
         #profs > 0 and table.concat(profs, ", ") or "noch keine – kein Problem, der Berufe-Berater hilft dir") },
     { title = "Preise: Auctionator",
@@ -45,9 +45,14 @@ local function create(parent)
   local card = CreateFrame("Frame", nil, o)
   card:SetSize(600, 330)
   card:SetPoint("CENTER", 0, 20)
-  card.bg = UI.Round(card, 24, "BACKGROUND", 1)
-  card.bg:SetGradient({ { 0.07, 0.27, 0.19 }, { 0.09, 0.18, 0.16 }, { 0.14, 0.16, 0.17 } }, 1)
-  card.step = UI.Text(card, 12, "semibold", C.hi)
+  card.glass = UI.Glass(card, { radius = 28, edgeMode = "neon", edge = 0.8, halo = 0.3, haloPad = 34,
+    body = UI.GLASS.hero, sheen = 0.06, sheenH = 70, line = 0.55 })
+  card.bg = card.glass.body
+  card.shine = UI.Glow(card, C.amber, 360, 0.16, "BORDER")
+  card.shine:SetHeight(260)
+  card.shine:SetPoint("CENTER", card, "LEFT", 200, 20)
+  UI.Drift(card.shine, 160, -20, 9, 0.3, 0.1)
+  card.step = UI.Text(card, 12, "bold", C.amber)
   card.step:SetPoint("TOPLEFT", 28, -24)
   card.title = UI.Text(card, 19, "bold", C.text)
   card.title:SetPoint("TOPLEFT", card.step, "BOTTOMLEFT", 0, -8)

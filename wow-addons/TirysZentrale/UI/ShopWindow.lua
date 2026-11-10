@@ -1,13 +1,53 @@
 -- Tiry's Zentrale – kleines Einkaufsfenster (wie TSM): oben was du herstellst, darunter nur die Materialien.
--- Gekauftes verschwindet sofort. Am AH: "Im AH suchen", beim Händler: "Beim Händler kaufen" (ein Klick kauft alles).
+-- Gekauftes verschwindet sofort. Am AH: "Angebote zeigen", beim Händler: "Beim Händler kaufen" (ein Klick kauft alles).
 local _, ns = ...
 local UI = ns.UI
 local C = UI.C
 local M = ns.Market
 local Shop = ns.Shop
 
-local W, ROW, CROW = 380, 42, 32
+local W, ROW, CROW = 400, 48, 34
+local PILL = ROW - 6
+local SUB_W = W - 156 -- Platz für die zweite Zeile (bis vor die Stückzahl)
 local win
+
+-- Abschnitts-Kopf: Neon-Punkt + Text + auslaufende Lichtlinie
+local function sectionHead(f, text)
+  local h = UI.Text(f, 12, "semibold", C.muted)
+  h:SetText(text)
+  h.dot = f:CreateTexture(nil, "ARTWORK")
+  h.dot:SetTexture(UI.TEX.circle)
+  h.dot:SetSize(7, 7)
+  h.dot:SetPoint("RIGHT", h, "LEFT", -7, 0)
+  UI.SetGradV(h.dot, C.amber, C.teal, 1)
+  h.line = UI.Hairline(f, C.teal, 0.30)
+  h.line:SetPoint("LEFT", h, "RIGHT", 10, 0)
+  h.line:SetPoint("RIGHT", f, "RIGHT", -20, 0)
+  return h
+end
+
+local function placeHead(h, y)
+  h:ClearAllPoints()
+  h:SetPoint("TOPLEFT", win, "TOPLEFT", 30, -y)
+  h:Show()
+  h.dot:Show()
+  h.line:Show()
+end
+
+local function hideHead(h)
+  h:Hide()
+  h.dot:Hide()
+  h.line:Hide()
+end
+
+-- Erste Fassung, die passt; sonst die letzte wortweise kürzen
+local function fitFirst(fs, maxW, list)
+  for i = 1, #list - 1 do
+    fs:SetText(list[i])
+    if fs:GetUnboundedStringWidth() <= maxW then return end
+  end
+  UI.FitText(fs, list[#list], maxW)
+end
 
 local function create()
   local f = CreateFrame("Frame", "TirysZentraleShopWindow", UIParent)
@@ -25,38 +65,56 @@ local function create()
   end)
   local sp = ns.settings.shopPoint
   if type(sp) == "table" and sp[1] then f:SetPoint(sp[1], UIParent, sp[2], sp[3], sp[4]) else f:SetPoint("RIGHT", UIParent, "RIGHT", -80, 40) end
-  f.bg = UI.Round(f, 20, "BACKGROUND", -8)
-  f.bg:SetColor(C.bg)
-  UI.Ornaments(f, { w = W, h = 900, pattern = 0.05, corners = 0.35, cornerSize = 44, inset = 4 })
-  local glow = UI.Glow(f, C.teal, 260, 0.16, "BACKGROUND")
-  glow:SetPoint("TOP", 0, 60)
+  -- Neon-Glas wie das Hauptfenster: Leuchtrand, Halo, Glanz oben, weiche Lichtflecken
+  f.glass = UI.Glass(f, { radius = 26, edgeMode = "neon", edge = 0.72, halo = 0.22, haloPad = 24,
+    body = UI.GLASS.window, sheen = 0.05, sheenH = 70, line = 0.5 })
+  f.bg = f.glass.body
+  UI.Ornaments(f, { w = W, h = 900, pattern = 0.04, corners = 0.30, cornerSize = 44, inset = 4 })
+  local glow = UI.Glow(f, C.amber, 340, 0.13, "BORDER")
+  glow:SetHeight(150)
+  glow:SetPoint("TOP", f, "TOPLEFT", 120, 10)
+  UI.Drift(glow, 120, 0, 9, 0.35, 0.10)
+  local glow2 = UI.Glow(f, C.aqua, 300, 0.10, "BORDER")
+  glow2:SetHeight(140)
+  glow2:SetPoint("BOTTOM", f, "BOTTOMRIGHT", -110, -6)
 
-  local icon = f:CreateTexture(nil, "ARTWORK")
+  -- Kopf: Verlaufs-Kugel mit Einkaufswagen + Titel
+  local orb = f:CreateTexture(nil, "ARTWORK")
+  orb:SetTexture(UI.TEX.circle)
+  orb:SetSize(34, 34)
+  orb:SetPoint("TOPLEFT", 18, -16)
+  UI.SetGradV(orb, C.amber, C.teal, 1)
+  local orbGlow = UI.Glow(f, C.amber, 70, 0.30, "BORDER")
+  orbGlow:SetPoint("CENTER", orb, "CENTER")
+  local gloss = f:CreateTexture(nil, "ARTWORK", nil, 2)
+  gloss:SetTexture(UI.TEX.gloss)
+  gloss:SetAllPoints(orb)
+  gloss:SetBlendMode("ADD")
+  gloss:SetVertexColor(1, 1, 1, 0.30)
+  local icon = f:CreateTexture(nil, "OVERLAY")
   icon:SetTexture(UI.Icon("cart"))
   icon:SetSize(18, 18)
-  icon:SetPoint("TOPLEFT", 16, -16)
-  icon:SetVertexColor(C.gold[1], C.gold[2], C.gold[3], 1)
-  f.title = UI.Text(f, 14, "bold", C.text)
-  f.title:SetPoint("LEFT", icon, "RIGHT", 8, 0)
-  f.title:SetText("Einkaufsliste")
-  local close = UI.IconButton(f, "close", 26, "Schließen")
-  close:SetPoint("TOPRIGHT", -12, -12)
+  icon:SetPoint("CENTER", orb, "CENTER")
+  icon:SetVertexColor(0.03, 0.07, 0.06, 1)
+  f.title = UI.Text(f, 17, "bold", C.text)
+  f.title:SetPoint("LEFT", orb, "RIGHT", 12, 0)
+  f.title:SetText(UI.GradText("Einkaufsliste", C.amber, C.teal))
+  local close = UI.IconButton(f, "close", 30, "Schließen")
+  close:SetPoint("TOPRIGHT", -16, -18)
   close:SetScript("OnClick", function() f:Hide() end)
 
-  f.summary = UI.Para(f, 11, C.muted, W - 32)
-  f.summary:SetPoint("TOPLEFT", 16, -44)
+  f.summary = UI.Para(f, 12, C.muted, W - 40)
+  f.summary:SetPoint("TOPLEFT", 20, -64)
   f.rows = {}
 
-  f.craftHead = UI.Text(f, 10, "semibold", C.dim)
-  f.craftHead:SetText("DU STELLST HER")
-  f.matHead = UI.Text(f, 10, "semibold", C.dim)
-  f.matHead:SetText("MATERIAL")
+  f.craftHead = sectionHead(f, "Du stellst her")
+  f.matHead = sectionHead(f, "Material")
   f.crafts = {}
-  f.more = UI.Text(f, 10, "regular", C.dim)
+  f.more = UI.Text(f, 12, "regular", C.dim)
 
   -- Linker Knopf passt sich an: beim Händler kaufen, sonst im AH suchen
-  f.search = UI.Button(f, "Im AH suchen", "soft", 186, 34, "scan")
-  f.search:SetPoint("BOTTOMLEFT", 14, 14)
+  f.search = UI.Button(f, "Angebote zeigen", "soft", 196, 38, "scan")
+  f.search:SetPoint("BOTTOMLEFT", 16, 16)
   f.search:SetScript("OnClick", function(self)
     if self.mode == "vendor" then
       local ok, res = Shop.BuyFromVendor()
@@ -76,10 +134,10 @@ local function create()
       return "Beim Händler kaufen (" .. ns.Money(cost) .. ")", table.concat(names, "\n")
         .. "\n\nKauft genau die fehlende Menge, die dieser Händler hat – nur gegen Gold. Rückkauf beim Händler ist möglich."
     end
-    return "Im AH suchen", "Bei offenem Auktionshaus: Auctionator sucht alle fehlenden Materialien auf einmal. Was du kaufst, wird hier sofort abgezogen."
+    return "Angebote zeigen", "Nur zum Kaufen – die Preise aktualisiert der Scan oben für alle Reiter.\n\nBei offenem Auktionshaus: Auctionator sucht alle fehlenden Materialien auf einmal. Was du kaufst, wird hier sofort abgezogen."
   end)
-  f.craft = UI.Button(f, "Nächstes craften", "primary", 164, 34, "bolt")
-  f.craft:SetPoint("BOTTOMRIGHT", -14, 14)
+  f.craft = UI.Button(f, "Nächstes craften", "primary", 160, 38, "bolt")
+  f.craft:SetPoint("BOTTOMRIGHT", -16, 16)
   f.craft:SetScript("OnClick", function() Shop.ClearSignal() UI.pages.recipes.CraftNext(UI.pages.recipes) end)
   -- Leuchten: "Die nächste Sorte ist dran" (pulsiert, solange du noch nicht geklickt hast)
   local cg = CreateFrame("Frame", nil, f)
@@ -100,33 +158,41 @@ local function create()
   UI.SetTooltip(f.craft, "Nächstes craften", "Stellt der Reihe nach her, wofür du alles Material hast. Ist das Berufsfenster zu, öffnet der erste Klick es, der zweite stellt her.")
   -- Herstellungs-Balken: zeigt, wie lange das aktuelle Herstellen noch dauert (falls der Spiel-Balken verdeckt ist)
   local cb = CreateFrame("Frame", nil, f)
-  cb:SetSize(W - 28, 50)
-  cb.bg = UI.Round(cb, 20, "BACKGROUND", 0)
-  cb.bg:SetColor(C.inset, 1)
+  cb:SetSize(W - 32, 50)
+  cb.glass = UI.Glass(cb, { radius = 25, edgeMode = "neon", edge = 0.45, body = UI.GLASS.card, sheen = 0.05, sheenH = 22, line = 0.3 })
+  cb.bg = cb.glass.body
   cb.fill = CreateFrame("Frame", nil, cb)
   cb.fill:SetPoint("TOPLEFT")
   cb.fill:SetPoint("BOTTOMLEFT")
-  cb.fill:SetWidth(30)
-  cb.fill.bg = UI.Round(cb.fill, 20, "ARTWORK", 0)
-  cb.fill.bg:SetGradient(UI.GRAD, 0.55) -- halbtransparent: weißer Text bleibt lesbar
+  cb.fill:SetWidth(50)
+  cb.fill.bg = UI.Round(cb.fill, 25, "ARTWORK", 0)
+  cb.fill.bg:SetGradient(UI.GRAD, 0.50) -- halbtransparent: weißer Text bleibt lesbar
+  cb.fill.gloss = UI.Round(cb.fill, 24, "ARTWORK", 1, 1, 22)
+  cb.fill.gloss:SetGradientV({ 1, 1, 1, 0.18 }, { 1, 1, 1, 0 })
   -- Symbol und Text auf eigener Ebene ÜBER der Füllung
   local top = CreateFrame("Frame", nil, cb)
   top:SetAllPoints()
   top:SetFrameLevel(cb.fill:GetFrameLevel() + 2)
   cb.icon = top:CreateTexture(nil, "OVERLAY")
-  cb.icon:SetSize(22, 22)
-  cb.icon:SetPoint("LEFT", 5, 0)
+  cb.icon:SetSize(30, 30)
+  cb.icon:SetPoint("LEFT", 10, 0)
+  if top.CreateMaskTexture then
+    local mask = top:CreateMaskTexture()
+    mask:SetTexture(UI.TEX.circle, "CLAMPTOBLACKADDITIVE", "CLAMPTOBLACKADDITIVE")
+    mask:SetAllPoints(cb.icon)
+    cb.icon:AddMaskTexture(mask)
+  end
   cb.text = UI.Text(top, 12, "semibold", C.text, "OVERLAY")
-  cb.text:SetPoint("TOPLEFT", 35, -6)
-  cb.text:SetWidth(W - 150)
+  cb.text:SetPoint("TOPLEFT", 50, -8)
+  cb.text:SetWidth(W - 160)
   cb.text:SetWordWrap(false)
   cb.time = UI.Text(top, 12, "bold", C.text, "OVERLAY")
-  cb.time:SetPoint("TOPRIGHT", -14, -6)
+  cb.time:SetPoint("TOPRIGHT", -20, -8)
   cb.time:SetJustifyH("RIGHT")
   -- zweite Zeile: wie lange dauert ALLES auf der Liste noch?
   cb.total = UI.Text(top, 12, "semibold", C.text, "OVERLAY")
-  cb.total:SetPoint("BOTTOMLEFT", 35, 6)
-  cb.total:SetWidth(W - 90)
+  cb.total:SetPoint("BOTTOMLEFT", 50, 8)
+  cb.total:SetWidth(W - 110)
   cb.total:SetWordWrap(false)
   cb:Hide()
   cb:SetScript("OnUpdate", function(self)
@@ -134,7 +200,7 @@ local function create()
     local now = GetTime() * 1000
     local total = math.max(self.endMs - self.startMs, 1)
     local p = ns.Clamp((now - self.startMs) / total, 0, 1)
-    self.fill:SetWidth(math.max((W - 28) * p, 30))
+    self.fill:SetWidth(math.max((W - 32) * p, 50))
     local left = math.max(self.endMs - now, 0)
     self.time:SetText((string.format("%.1f s", left / 1000):gsub("%.", ",")))
     if self.restMs and self.restCrafts and self.restCrafts > 0 then
@@ -154,34 +220,64 @@ local function row(i)
   local r = win.rows[i]
   if r then return r end
   r = UI.SafeButton(win)
-  r:SetSize(W - 28, ROW - 4)
-  r.bg = UI.Round(r, 14, "BACKGROUND", 0)
-  r.icon = UI.ItemIcon(r, 28)
-  r.icon:SetPoint("LEFT", 6, 0)
-  r.name = UI.Text(r, 12, "semibold", C.text)
-  r.name:SetPoint("TOPLEFT", r.icon, "TOPRIGHT", 8, 0)
-  r.name:SetWidth(W - 176)
+  r:SetSize(W - 32, PILL)
+  r.shape = UI.PillShape(r, PILL, 0, false)
+  r.bg = r.shape.body
+  r.icon = UI.ItemIcon(r, 34)
+  r.icon:SetPoint("LEFT", 4, 0)
+  r.name = UI.Text(r, 13, "semibold", C.text)
+  r.name:SetPoint("LEFT", r.icon, "RIGHT", 10, 8)
+  r.name:SetWidth(W - 180)
   r.name:SetWordWrap(false)
-  r.sub = UI.Text(r, 10, "regular", C.dim)
-  r.sub:SetPoint("TOPLEFT", r.name, "BOTTOMLEFT", 0, -2)
-  r.toggle = UI.IconButton(r, "close", 24)
-  r.toggle:SetPoint("RIGHT", -6, 0)
+  r.sub = UI.Text(r, 12, "regular", C.dim)
+  r.sub:SetPoint("LEFT", r.icon, "RIGHT", 10, -9)
+  r.sub:SetWidth(SUB_W)
+  r.sub:SetWordWrap(false)
+  r.toggle = UI.IconButton(r, "close", 28)
+  r.toggle:SetPoint("RIGHT", -7, 0)
   r.toggle:SetScript("OnClick", function() Shop.ToggleSkip(r.id) end)
   UI.SetTooltip(r.toggle, function()
     if r.skipped then return "Zurückholen", "Material wieder auf die Einkaufsliste setzen." end
     return "Brauch ich nicht kaufen", "Nimmt das Material von der Liste (z. B. weil es ein anderer Charakter hat). Der Pfeil-Knopf holt es zurück."
   end)
-  r.count = UI.Text(r, 14, "bold", C.hi)
-  r.count:SetPoint("RIGHT", r.toggle, "LEFT", -6, 0)
+  r.count = UI.Text(r, 15, "bold", C.gold)
+  r.count:SetPoint("RIGHT", r.toggle, "LEFT", -8, 0)
   r:SetScript("OnEnter", function(self)
     GameTooltip:SetOwner(self, "ANCHOR_LEFT")
     pcall(GameTooltip.SetItemByID, GameTooltip, self.id)
+    if self.maxUnit and not self.skipped then
+      GameTooltip:AddLine(" ")
+      GameTooltip:AddLine("Kaufen bis: " .. ns.Money(self.maxUnit) .. " pro Stück", 0.22, 1, 0.42)
+      if self.overMax then
+        GameTooltip:AddLine("Aktuell teurer (" .. ns.Money(self.unit) .. ") – lieber warten.", 1, 0.60, 0.16, true)
+      else
+        GameTooltip:AddLine("Bis zu diesem Preis lohnt sich dein Craft noch.", 0.75, 0.82, 0.80, true)
+      end
+    end
     GameTooltip:Show()
   end)
   r:SetScript("OnLeave", function() GameTooltip:Hide() end)
   r:SetScript("OnClick", function(self) if IsShiftKeyDown() then ns.LinkItem(self.id) end end)
   win.rows[i] = r
   return r
+end
+
+-- Zeile einfärben: offen (Glas), hier beim Händler (Neon), zu teuer (Orange-Rand), erledigt/übersprungen (zurückgenommen)
+local function paintRow(r, kind)
+  local e, b = r.shape.edge, r.shape.body
+  if kind == "vendor" then
+    e:SetGradient(UI.GRAD_EDGE, 0.60)
+    b:SetGradientV(UI.GLASS.pillHi[1], UI.GLASS.pillHi[2])
+  elseif kind == "over" then
+    e:SetColor(C.hi, 0.42)
+    b:SetGradientV(UI.GLASS.card[1], UI.GLASS.card[2], 0.85)
+  elseif kind == "open" then
+    e:SetGradientV({ 0.60, 1.00, 0.85, 0.18 }, { 0.20, 0.55, 0.65, 0.05 })
+    b:SetGradientV(UI.GLASS.card[1], UI.GLASS.card[2], 0.85)
+  else
+    e:SetGradientV({ 0.60, 1.00, 0.85, 0.07 }, { 0.20, 0.55, 0.65, 0.02 })
+    b:SetGradientV(UI.GLASS.card[1], UI.GLASS.card[2], 0.38)
+  end
 end
 
 local STATUS = {
@@ -194,15 +290,19 @@ local function craftRow(i)
   local r = win.crafts[i]
   if r then return r end
   r = UI.SafeButton(win)
-  r:SetSize(W - 28, CROW - 4)
-  r.icon = UI.ItemIcon(r, 24)
-  r.icon:SetPoint("LEFT", 4, 0)
-  r.status = UI.Text(r, 10, "semibold", C.green)
-  r.status:SetPoint("RIGHT", -8, 0)
+  r:SetSize(W - 32, CROW - 4)
+  r.icon = UI.ItemIcon(r, 28)
+  r.icon:SetPoint("LEFT", 6, 0)
+  r.status = UI.Text(r, 12, "semibold", C.green)
+  r.status:SetPoint("RIGHT", -12, 0)
   r.status:SetJustifyH("RIGHT")
-  r.name = UI.Text(r, 12, "semibold", C.text)
-  r.name:SetPoint("LEFT", r.icon, "RIGHT", 8, 0)
-  r.name:SetWidth(W - 160)
+  r.dot = r:CreateTexture(nil, "ARTWORK")
+  r.dot:SetTexture(UI.TEX.circle)
+  r.dot:SetSize(8, 8)
+  r.dot:SetPoint("RIGHT", r.status, "LEFT", -7, 0)
+  r.name = UI.Text(r, 13, "semibold", C.text)
+  r.name:SetPoint("LEFT", r.icon, "RIGHT", 10, 0)
+  r.name:SetWidth(W - 214)
   r.name:SetJustifyH("LEFT")
   r.name:SetWordWrap(false)
   r:SetScript("OnEnter", function(self)
@@ -221,28 +321,26 @@ function Shop.Refresh()
   local list, open, cost = Shop.List()
   local plan, planCost = Shop.VendorPlan()
   if #list == 0 then
-    win.summary:SetText("Die Craft-Liste ist leer. Im Craft-Planer auf |cffff9929Liste erstellen|r klicken.")
+    win.summary:SetText("Die Craft-Liste ist leer. Im Craft-Planer auf |cff39ff6bListe erstellen|r klicken.")
   elseif open == 0 then
-    win.summary:SetText("|cffff9929Alles da!|r Hol deine Post aus dem Briefkasten und klick auf |cffff9929Nächstes craften|r.")
+    win.summary:SetText("|cff39ff6bAlles da!|r Hol deine Post aus dem Briefkasten und klick auf |cff39ff6bNächstes craften|r.")
   elseif #plan > 0 then
-    win.summary:SetText(string.format("Dieser Händler hat |cffff9929%d %s|r für dich. Ein Klick auf |cffff9929Beim Händler kaufen|r holt alles für %s.",
+    win.summary:SetText(string.format("Dieser Händler hat |cff39ff6b%d %s|r für dich. Ein Klick auf |cff39ff6bBeim Händler kaufen|r holt alles für %s.",
       #plan, #plan == 1 and "Material" or "Materialien", ns.Money(planCost)))
   else
-    win.summary:SetText(string.format("Noch |cffff9929%d %s|r zu kaufen, ca. %s. Gekauftes verschwindet sofort.", open, open == 1 and "Material" or "Materialien", ns.Money(cost)))
+    win.summary:SetText(string.format("Noch |cff39ff6b%d %s|r zu kaufen, ca. %s. Gekauftes verschwindet sofort.", open, open == 1 and "Material" or "Materialien", ns.Money(cost)))
   end
   if Shop.signal then
-    win.summary:SetText("|cff61eb8fFertig!|r Als Nächstes: |cffff9929" .. Shop.signal .. "|r – klick auf |cffff9929Nächstes craften|r.")
+    win.summary:SetText("|cff61eb8fFertig!|r Als Nächstes: |cff39ff6b" .. Shop.signal .. "|r – klick auf |cff39ff6bNächstes craften|r.")
   end
-  local y = 44 + math.ceil(win.summary:GetStringHeight()) + 12
+  local y = 64 + math.ceil(win.summary:GetStringHeight()) + 16
 
   -- Was wird hergestellt?
   local crafts = Shop.Crafts()
   local shownC = 0
   if #crafts > 0 then
-    win.craftHead:ClearAllPoints()
-    win.craftHead:SetPoint("TOPLEFT", win, "TOPLEFT", 18, -y)
-    win.craftHead:Show()
-    y = y + 18
+    placeHead(win.craftHead, y)
+    y = y + 22
     for i, c in ipairs(crafts) do
       if i > 5 then break end
       shownC = i
@@ -252,42 +350,41 @@ function Shop.Refresh()
       local item = ns.Item(c.recipe.out)
       if c.intermediate then
         -- günstiger selbst hergestellt als gekauft (eigenes Rezept) -> kommt vor den eigentlichen Crafts
-        UI.FitText(r.name, string.format("|cff7fc8ff%d×|r %s |cff93a39d· selbst|r", c.n * (c.recipe.qty or 1), item.name or c.recipe.name), W - 160)
+        UI.FitText(r.name, string.format("|cff26f2d9%d×|r %s |cff93a39d· selbst|r", c.n * (c.recipe.qty or 1), item.name or c.recipe.name), W - 214)
       else
-        UI.FitText(r.name, string.format("|cffff9929%d×|r %s", c.n * (c.recipe.qty or 1), item.name or c.recipe.name), W - 160)
+        UI.FitText(r.name, string.format("|cff39ff6b%d×|r %s", c.n * (c.recipe.qty or 1), item.name or c.recipe.name), W - 214)
       end
       local st = STATUS[c.status]
       r.status:SetText(st[1])
       r.status:SetTextColor(st[2][1], st[2][2], st[2][3], 1)
+      r.dot:SetVertexColor(st[2][1], st[2][2], st[2][3], 1)
       r:ClearAllPoints()
-      r:SetPoint("TOPLEFT", win, "TOPLEFT", 14, -y)
+      r:SetPoint("TOPLEFT", win, "TOPLEFT", 16, -y)
       r:Show()
       y = y + CROW
     end
     if #crafts > 5 then
       win.more:SetText(string.format("+ %d weitere im Craft-Planer", #crafts - 5))
       win.more:ClearAllPoints()
-      win.more:SetPoint("TOPLEFT", win, "TOPLEFT", 46, -y)
+      win.more:SetPoint("TOPLEFT", win, "TOPLEFT", 60, -y)
       win.more:Show()
-      y = y + 16
+      y = y + 20
     else
       win.more:Hide()
     end
-    y = y + 8
+    y = y + 12
   else
-    win.craftHead:Hide()
+    hideHead(win.craftHead)
     win.more:Hide()
   end
   for i = shownC + 1, #win.crafts do win.crafts[i]:Hide() end
 
   -- Material
   if #list > 0 then
-    win.matHead:ClearAllPoints()
-    win.matHead:SetPoint("TOPLEFT", win, "TOPLEFT", 18, -y)
-    win.matHead:Show()
-    y = y + 18
+    placeHead(win.matHead, y)
+    y = y + 24
   else
-    win.matHead:Hide()
+    hideHead(win.matHead)
   end
   local vendorHas = {}
   for _, p in ipairs(plan) do vendorHas[p.id] = true end
@@ -299,31 +396,41 @@ function Shop.Refresh()
     r.id = e.id
     r.icon:SetItem(e.id)
     local item = ns.Item(e.id)
-    UI.FitText(r.name, item.name, W - 176)
+    UI.FitText(r.name, item.name, W - 180)
     r.skipped = e.skipped
+    r.unit, r.maxUnit, r.overMax = e.unit, e.maxUnit, e.overMax
     r.toggle.icon:SetTexture(UI.Icon(e.skipped and "refresh" or "close"))
     r.toggle:SetShown(e.missing > 0 or e.skipped == true)
     if e.skipped then
-      r.bg:SetColor(C.inset, 0.6)
+      paintRow(r, "done")
       r.name:SetTextColor(C.dim[1], C.dim[2], C.dim[3], 1)
       r.count:SetText("")
       r.sub:SetText(string.format("%d / %d · übersprungen", e.have, e.need))
     elseif e.missing > 0 then
-      r.bg:SetColor(vendorHas[e.id] and C.cardHi or C.card, 1)
+      local here = vendorHas[e.id]
+      paintRow(r, here and "vendor" or (e.overMax and "over") or "open")
       r.name:SetTextColor(C.text[1], C.text[2], C.text[3], 1)
       r.count:SetText(e.missing .. "×")
-      r.count:SetTextColor(C.hi[1], C.hi[2], C.hi[3], 1)
-      local where = vendorHas[e.id] and " |cffff9929hier beim Händler|r"
-        or (e.where == "HAENDLER" and " beim Händler" or " im AH")
-      r.sub:SetText(string.format("%d / %d · %s", e.have, e.need, e.unit and (ns.Money(e.unit) .. where) or "kein Preis"))
+      local cc = (e.overMax and not here) and C.hi or C.gold
+      r.count:SetTextColor(cc[1], cc[2], cc[3], 1)
+      local have = string.format("%d / %d", e.have, e.need)
+      local limit = e.maxUnit and (" · kaufen bis " .. ns.Money(e.maxUnit)) or ""
+      if e.overMax and not here then
+        -- aktueller Preis über dem Kaufen-bis-Preis: lieber warten
+        fitFirst(r.sub, SUB_W, { have .. " · |cffff9929zu teuer – warten|r" .. limit, have .. " · |cffff9929zu teuer – warten|r" })
+      else
+        local where = here and " |cff39ff6bhier beim Händler|r" or (e.where == "HAENDLER" and " beim Händler" or " im AH")
+        local price = e.unit and (ns.Money(e.unit) .. where) or "kein Preis"
+        fitFirst(r.sub, SUB_W, { have .. " · " .. price .. limit, have .. " · " .. price })
+      end
     else
-      r.bg:SetColor(C.inset, 0.6)
+      paintRow(r, "done")
       r.name:SetTextColor(C.dim[1], C.dim[2], C.dim[3], 1)
-      r.count:SetText("|A:common-icon-checkmark:14:14|a")
+      r.count:SetText("|A:common-icon-checkmark:16:16|a")
       r.sub:SetText(e.need .. " / " .. e.need .. " · erledigt")
     end
     r:ClearAllPoints()
-    r:SetPoint("TOPLEFT", win, "TOPLEFT", 14, -y)
+    r:SetPoint("TOPLEFT", win, "TOPLEFT", 16, -y)
     r:Show()
     y = y + ROW
   end
@@ -331,20 +438,20 @@ function Shop.Refresh()
   -- Herstellungs-Balken über den Knöpfen
   if win.cast.endMs then
     win.cast:ClearAllPoints()
-    win.cast:SetPoint("TOPLEFT", win, "TOPLEFT", 14, -(y + 4))
+    win.cast:SetPoint("TOPLEFT", win, "TOPLEFT", 16, -(y + 6))
     win.cast:Show()
-    y = y + 58
+    y = y + 62
   else
     win.cast:Hide()
   end
-  win:SetHeight(math.max(y + 60, 160))
+  win:SetHeight(math.max(y + 68, 180))
   if #plan > 0 then
     win.search.mode = "vendor"
     win.search:SetLabel("Beim Händler kaufen")
     win.search:SetEnabled(true)
   else
     win.search.mode = "ah"
-    win.search:SetLabel("Im AH suchen")
+    win.search:SetLabel("Angebote zeigen")
     win.search:SetEnabled(open > 0 and M.ahOpen == true)
   end
   win.craft:SetEnabled(#(ns.char.queue or {}) > 0)
@@ -461,7 +568,7 @@ local function castUpdate(_, unit)
     -- wie viele davon stehen noch auf der Liste, und wie lange dauert der Rest?
     local left, restMs, restCrafts, estimated = Shop.RemainingAfter(name, endMs - startMs)
     cb.restMs, cb.restCrafts, cb.estimated = restMs, restCrafts, estimated
-    UI.FitText(cb.text, name .. (left and ("  ·  noch " .. left) or ""), W - 150)
+    UI.FitText(cb.text, name .. (left and ("  ·  noch " .. left) or ""), W - 160)
   else
     cb.startMs, cb.endMs = nil, nil
   end

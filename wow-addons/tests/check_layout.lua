@@ -49,6 +49,13 @@ W.bags = { [0] = { { itemID = 2318, stackCount = 18, quality = 1 }, { itemID = 2
 ns.UI.Show("home")
 local frame = TirysZentraleMainFrame
 local total = 0
+-- Fensterhöhe für die komplette Seite: Inhalt + Abstand Fensteroberkante -> Seitenbereich + Rand unten
+local function fullHeight(content)
+  frame.__h = ns.UI.HEIGHT
+  L.reset()
+  local fr, br = L.rect(frame), L.rect(frame.body)
+  return math.max(ns.UI.HEIGHT, (content.__h or 0) + (fr.t - br.t) + 24)
+end
 -- Einsteiger-Assistent (modal über dem Fenster): einzeln prüfen und zeichnen, dann schließen
 assert(ns.UI.Wizard.IsShown(), "Assistent beim ersten Öffnen")
 for step = 1, 3 do
@@ -65,7 +72,7 @@ for _, def in ipairs(ns.UI.order) do
   ns.UI.RefreshPage(def.key)
   -- volle Seitenhöhe anzeigen (Scroll-Inhalt komplett), damit alles geprüft/gezeichnet wird
   local content = def.frame.content
-  local fullH = math.max(ns.UI.HEIGHT, (content.__h or 0) + 140)
+  local fullH = fullHeight(content)
   frame.__h = fullH
   local probs = L.problems(frame)
   for _, p in ipairs(probs) do print("[" .. def.key .. "] " .. p) end
@@ -77,16 +84,33 @@ end
 do
   local rp = ns.UI.pages.recipes
   ns.UI.Show("recipes") ; rp.view = "learnable" ; ns.UI.RefreshPage("recipes")
-  frame.__h = math.max(ns.UI.HEIGHT, (rp.frame.content.__h or 0) + 140)
+  frame.__h = fullHeight(rp.frame.content)
   for _, p in ipairs(L.problems(frame)) do print("[recipes+lernen] " .. p) total = total + 1 end
   if OUT then L.dump(frame, OUT .. "/recipes_learn.tsv") end
   frame.__h = ns.UI.HEIGHT ; rp.view = "known" ; ns.UI.RefreshPage("recipes")
+end
+-- Handel > Preise: Ansicht "Schnäppchen" (Beispiel-Liste aus einem Komplett-Scan, über /tz schnapp)
+do
+  local saved, savedT = ns.Snipe.list, ns.Snipe.time
+  ns.Snipe.list = {
+    { id = 2318, kind = "haendler", count = 12, cost = 120, profit = 360, unit = 10, ref = 40 },
+    { id = 2319, kind = "markt", count = 20, cost = 3000, profit = 2400, unit = 150, ref = 330 },
+  }
+  ns.Snipe.time = time() - 300
+  SlashCmdList.TIRYSZENTRALE("schnapp")
+  local mp = ns.UI.pages.market
+  frame.__h = fullHeight(mp.frame.content)
+  for _, p in ipairs(L.problems(frame)) do print("[market+schnapp] " .. p) total = total + 1 end
+  if OUT then L.dump(frame, OUT .. "/market_snipe.tsv") end
+  frame.__h = ns.UI.HEIGHT
+  ns.Snipe.list, ns.Snipe.time = saved, savedT
+  mp.segments:Select("all", true)
 end
 -- Craft-Planer mit aufgeklappten Optionen
 do
   local rp = ns.UI.pages.recipes
   ns.UI.Show("recipes") ; rp.proOpen = true ; ns.UI.RefreshPage("recipes")
-  frame.__h = math.max(ns.UI.HEIGHT, (rp.frame.content.__h or 0) + 140)
+  frame.__h = fullHeight(rp.frame.content)
   for _, p in ipairs(L.problems(frame)) do print("[recipes+optionen] " .. p) total = total + 1 end
   if OUT then L.dump(frame, OUT .. "/recipes_open.tsv") end
   frame.__h = ns.UI.HEIGHT ; rp.proOpen = false

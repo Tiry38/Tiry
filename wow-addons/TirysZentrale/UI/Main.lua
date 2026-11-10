@@ -3,25 +3,42 @@ local _, ns = ...
 local UI = ns.UI
 local C = UI.C
 
-local WIDTH, HEIGHT = 1140, 720 -- groß und luftig; passt sich kleinen Bildschirmen automatisch an
+local WIDTH, HEIGHT = 1140, 760 -- groß und luftig; passt sich kleinen Bildschirmen automatisch an
 UI.WIDTH, UI.HEIGHT = WIDTH, HEIGHT
-local SIDE_W = 214
-local PAD = 26
-UI.CONTENT_W = WIDTH - SIDE_W - PAD * 2 - 14 -- nutzbare Breite einer Seite (ohne Scrollleiste)
+local PAD = 24
+local HEADER_H = 104 -- Kopfzeile mit Marke, Dock und Schnellknöpfen
+UI.CONTENT_W = WIDTH - PAD * 2 - 14 -- nutzbare Breite einer Seite (ohne Scrollleiste)
 
 UI.pages = {}
 UI.order = {}
 
--- Menü: 7 Hauptpunkte, darunter Reiter (Ansichten). Ansichten, die es nicht gibt, werden übersprungen.
+-- Menü: 5 Bereiche im Dock entlang des Gold-Kreislaufs + 2 Schnellknöpfe (Lernen, Einstellungen).
+-- Jeder Bereich hat Reiter (Ansichten); Ansichten, die es nicht gibt, werden übersprungen.
+-- views: { Schlüssel, Reiter-Name, Symbol }. game = echtes Blizzard-Symbol im Dock (Rückfall: eigenes Symbol).
+-- legacy = frühere Menü-Schlüssel (gespeicherter "zuletzt benutzter Reiter" bleibt erhalten).
 UI.GROUPS = {
-  { key = "start", label = "Start", icon = "home", views = { { "home", "Goldplan" }, { "methods", "Goldwege" } } },
-  { key = "berufe", label = "Craften", icon = "flask", views = { { "recipes", "Craft-Planer" }, { "advisor", "Was lernen?" }, { "results", "Ergebnis" } } },
-  { key = "farmen", label = "Farmen", icon = "pin", views = { { "farm", "Farm-Guide" }, { "skinning", "Kürschner" }, { "session", "Farm-Session" } } },
-  { key = "markt", label = "Markt", icon = "coins", views = { { "market", "Preise" }, { "alerts", "Preisalarm" }, { "scanner", "Taschen & Händler" }, { "database", "Item-Suche" } } },
-  { key = "auktionen", label = "Auktionen", icon = "receipt", views = { { "auctions", "Meine Auktionen" } } },
-  { key = "gold", label = "Mein Gold", icon = "chart", views = { { "tracker", "Goldtagebuch" }, { "ledger", "Verkaufsbuch" } } },
-  { key = "lernen", label = "Lernen", icon = "book", views = { { "basics", "AH-Schule" }, { "glossary", "Glossar" } } },
-  { key = "settings", label = "Einstellungen", icon = "gear", views = { { "settings", "Einstellungen" } } },
+  { key = "start", label = "Start", icon = "home", game = "Interface\\Icons\\INV_Misc_Map_01",
+    tip = "Dein Gold-Plan: der nächste Schritt und alle Goldwege auf einen Blick.",
+    views = { { "home", "Goldplan", "home" }, { "methods", "Goldwege", "compass" } } },
+  { key = "berufe", label = "Herstellen", icon = "flask", game = "Interface\\Icons\\Trade_BlackSmithing",
+    tip = "Rezepte planen, Material günstig einkaufen und mit Gewinn herstellen.",
+    views = { { "recipes", "Craft-Planer", "flask" }, { "advisor", "Was lernen?", "star" }, { "results", "Ergebnis", "chart" } } },
+  { key = "farmen", label = "Farmen", icon = "pin", game = "Interface\\Icons\\INV_Misc_Pelt_Wolf_01",
+    tip = "Wo du mit deinem Level am meisten Gold farmst – mit Kürschner-Guide und Live-Messung.",
+    views = { { "farm", "Farm-Guide", "pin" }, { "skinning", "Kürschner", "paw" }, { "session", "Farm-Session", "bolt" } } },
+  { key = "handel", label = "Handel", icon = "coins", game = "Interface\\Icons\\INV_Misc_Coin_02", legacy = { "auktionen", "markt" },
+    tip = "Alles rund ums Auktionshaus: deine Auktionen, Preise, Preisalarm, Händler-Schnäppchen und Item-Suche.",
+    views = { { "auctions", "Meine Auktionen", "receipt" }, { "market", "Preise", "coins" }, { "alerts", "Preisalarm", "warn" },
+      { "scanner", "Taschen & Händler", "bag" }, { "database", "Item-Suche", "db" } } },
+  { key = "gold", label = "Mein Gold", icon = "chart", game = "Interface\\Icons\\INV_Misc_Bag_10",
+    tip = "Wie viel Gold du wirklich machst: Goldtagebuch und Verkaufsbuch.",
+    views = { { "tracker", "Goldtagebuch", "chart" }, { "ledger", "Verkaufsbuch", "book" } } },
+  { key = "lernen", label = "Lernen", icon = "help", util = true,
+    tip = "AH-Schule und Glossar: Auktionshaus und alle Begriffe einfach erklärt.",
+    views = { { "basics", "AH-Schule", "book" }, { "glossary", "Glossar", "info" } } },
+  { key = "settings", label = "Einstellungen", icon = "gear", util = true,
+    tip = "Fenster, Preise, Töne und Anzeige so einstellen, wie du es magst.",
+    views = { { "settings", "Einstellungen", "gear" } } },
 }
 
 -- Zu welchem Hauptpunkt gehört eine Ansicht?
@@ -36,7 +53,8 @@ end
 local function availableViews(g)
   local out = {}
   for _, v in ipairs(g.views) do
-    if UI.pages[v[1]] then out[#out + 1] = { value = v[1], label = v[2] } end
+    local def = UI.pages[v[1]]
+    if def then out[#out + 1] = { value = v[1], label = v[2], icon = v[3], tip = (def.subtitle or "") ~= "" and def.subtitle or nil } end
   end
   return out
 end
@@ -49,6 +67,22 @@ function UI.RegisterPage(key, def)
   table.insert(UI.order, def)
   table.sort(UI.order, function(a, b) return (a.order or 99) < (b.order or 99) end)
 end
+
+-- Zuletzt benutzter Reiter eines Bereichs (auch aus den früheren Menüpunkten Markt/Auktionen)
+local function lastViewOf(g)
+  local lv = ns.settings.lastView or {}
+  local last = lv[g.key]
+  if not (last and UI.pages[last] and UI.GroupOf(last) == g) then
+    last = nil
+    for _, old in ipairs(g.legacy or {}) do
+      local v = lv[old]
+      if v and UI.pages[v] and UI.GroupOf(v) == g then last = v break end
+    end
+  end
+  local views = availableViews(g)
+  return last or (views[1] and views[1].value)
+end
+UI.LastViewOf = lastViewOf
 
 ----------------------------------------------------------------------------
 -- Fenster
@@ -80,29 +114,31 @@ local function snap(f)
 end
 
 local function buildBackground(f)
-  f.bg = UI.Round(f, 22, "BACKGROUND", -8)
-  f.bg:SetColor(C.bg)
+  -- Das ganze Fenster ist eine Neon-Glasfläche: Leuchtrand Neon-Grün -> Türkis -> Aqua, äußeres Leuchten, Glanz oben
+  f.glass = UI.Glass(f, { radius = 26, edgeMode = "neon", edge = 0.85, halo = 0.26, haloPad = 44,
+    body = UI.GLASS.window, sheen = 0.045, sheenH = 90, line = 0.55, sub = -6 })
+  f.bg = f.glass.body
 
-  -- Leuchtende, langsam treibende Farbflächen (Glas-Effekt)
+  -- Aurora: leuchtende, langsam treibende Farbflächen hinter dem Glas
   local clip = CreateFrame("Frame", nil, f)
-  clip:SetPoint("TOPLEFT", 10, -10)
-  clip:SetPoint("BOTTOMRIGHT", -10, 10)
+  clip:SetPoint("TOPLEFT", 2, -2)
+  clip:SetPoint("BOTTOMRIGHT", -2, 2)
   clip:SetClipsChildren(true)
   clip:SetFrameLevel(f:GetFrameLevel())
+  f.aurora = clip
   local blobs = {
-    { tex = UI.TEX.blob1, color = C.amber, size = 420, x = 120, y = -40, a = 0.16, dx = 60, dy = -30, d = 9 },
-    { tex = UI.TEX.blob2, color = C.rose, size = 380, x = 640, y = -330, a = 0.13, dx = -50, dy = 40, d = 11 },
-    { tex = UI.TEX.blob1, color = C.violet, size = 460, x = 520, y = 40, a = 0.14, dx = -40, dy = -50, d = 13 },
-    { tex = UI.TEX.blob2, color = C.teal, size = 300, x = -60, y = -380, a = 0.10, dx = 50, dy = 30, d = 10 },
+    { tex = UI.TEX.blob1, color = C.amber, size = 560, x = -120, y = 60, a = 0.11, dx = 70, dy = -40, d = 11 },
+    { tex = UI.TEX.blob2, color = C.teal, size = 520, x = 700, y = -420, a = 0.09, dx = -60, dy = 50, d = 13 },
+    { tex = UI.TEX.blob1, color = C.aqua, size = 600, x = 560, y = 120, a = 0.08, dx = -50, dy = -60, d = 15 },
+    { tex = UI.TEX.blob2, color = C.rose, size = 420, x = 40, y = -480, a = 0.07, dx = 60, dy = 40, d = 12 },
   }
-  -- Horde-Stil: Stammesmuster, Zacken-Ecken, großes Kriegsemblem unten rechts (alles sehr dezent)
-  UI.Ornaments(f, { w = WIDTH, h = HEIGHT, pattern = 0.045, corners = 0.32, cornerSize = 84, inset = 6 })
+  -- Horde-Stil nur ganz dezent: feines Stammesmuster + Kriegsemblem unten rechts
+  UI.Ornaments(f, { w = WIDTH, h = HEIGHT, pattern = 0.018, corners = 0, inset = 4 })
   local emblem = clip:CreateTexture(nil, "BACKGROUND", nil, -6)
   emblem:SetTexture(UI.TEX.emblem)
-  emblem:SetSize(440, 440)
-  emblem:SetPoint("CENTER", clip, "BOTTOMRIGHT", -260, 250)
-  emblem:SetVertexColor(C.amber[1], C.amber[2], C.amber[3], 0.07)
-  UI.Drift(emblem, 0, 0, 7, 1, 0.6)
+  emblem:SetSize(420, 420)
+  emblem:SetPoint("CENTER", clip, "BOTTOMRIGHT", -200, 170)
+  emblem:SetVertexColor(C.amber[1], C.amber[2], C.amber[3], 0.035)
   for _, b in ipairs(blobs) do
     local t = clip:CreateTexture(nil, "BACKGROUND", nil, -7)
     t:SetTexture(b.tex)
@@ -113,150 +149,71 @@ local function buildBackground(f)
     UI.Drift(t, b.dx, b.dy, b.d, 1, 0.55)
   end
 
-  -- Seitenleiste als eigene Glasfläche
-  local side = CreateFrame("Frame", nil, f)
-  side:SetPoint("TOPLEFT", 10, -10)
-  side:SetPoint("BOTTOMLEFT", 10, 10)
-  side:SetWidth(SIDE_W - 10)
-  side.bg = UI.Round(side, 18, "BACKGROUND", -5)
-  side.bg:SetColor(C.side)
-  f.side = side
+  -- Kopfzeile: etwas dunklere Glasbahn + leuchtende Trennlinie darunter
+  local band = clip:CreateTexture(nil, "BACKGROUND", nil, -5)
+  band:SetTexture("Interface\\Buttons\\WHITE8X8")
+  band:SetPoint("TOPLEFT", clip, "TOPLEFT", 0, 0)
+  band:SetPoint("TOPRIGHT", clip, "TOPRIGHT", 0, 0)
+  band:SetHeight(HEADER_H - 2)
+  UI.SetGradV(band, { 0.0, 0.0, 0.0, 0.0 }, { 0.0, 0.0, 0.0, 0.22 }, 1)
+  local sep = UI.Hairline(f, C.teal, 0.55, "ARTWORK", true)
+  sep:SetPoint("TOPLEFT", f, "TOPLEFT", 30, -HEADER_H)
+  sep:SetPoint("TOPRIGHT", f, "TOPRIGHT", -30, -HEADER_H)
+  local sepGlow = UI.Hairline(f, C.amber, 0.22, "ARTWORK", true)
+  sepGlow:SetHeight(6)
+  sepGlow:SetPoint("TOPLEFT", f, "TOPLEFT", 120, -HEADER_H + 3)
+  sepGlow:SetPoint("TOPRIGHT", f, "TOPRIGHT", -120, -HEADER_H + 3)
 
-  -- Welle als Zierde unten in der Seitenleiste
-  local wave = side:CreateTexture(nil, "BACKGROUND", nil, -4)
-  wave:SetTexture(UI.TEX.wave)
-  wave:SetPoint("BOTTOMLEFT", 0, 0)
-  wave:SetPoint("BOTTOMRIGHT", 0, 0)
-  wave:SetHeight(56)
-  pcall(wave.SetGradient, wave, "HORIZONTAL", CreateColor(C.gold[1], C.gold[2], C.gold[3], 0.22), CreateColor(C.rose[1], C.rose[2], C.rose[3], 0.22))
+  -- Echtes Horde-Wappen aus dem Spiel (Atlas), ganz dezent unten links. Gibt es den Atlas nicht, bleibt es leer.
+  if C_Texture and C_Texture.GetAtlasInfo then
+    local ok, info = pcall(C_Texture.GetAtlasInfo, "charactercreate-icon-horde")
+    if ok and info then
+      local crest = clip:CreateTexture(nil, "BACKGROUND", nil, -4)
+      crest:SetAtlas("charactercreate-icon-horde")
+      crest:SetSize(150, 150)
+      crest:SetPoint("BOTTOMLEFT", clip, "BOTTOMLEFT", -20, -24)
+      crest:SetDesaturated(true)
+      crest:SetVertexColor(C.amber[1], C.amber[2], C.amber[3], 0.07)
+      f.hordeCrest = crest
+    end
+  end
 end
 
-local function buildSidebar(f)
-  local side = f.side
-  local logo = side:CreateTexture(nil, "ARTWORK")
+-- Marke oben links: Logo-Kugel + Schriftzug + Live-Status
+local function buildBrand(f)
+  local logo = f:CreateTexture(nil, "ARTWORK")
   logo:SetTexture(UI.TEX.logo)
-  logo:SetSize(46, 46)
-  logo:SetPoint("TOPLEFT", 16, -16)
-  local logoGlow = UI.Glow(side, C.amber, 120, 0.45, "BACKGROUND")
+  logo:SetSize(50, 50)
+  logo:SetPoint("TOPLEFT", f, "TOPLEFT", PAD, -27)
+  local logoGlow = UI.Glow(f, C.amber, 130, 0.42, "BACKGROUND")
   logoGlow:SetPoint("CENTER", logo, "CENTER")
   UI.Drift(logoGlow, 0, 0, 3, 0.45, 0.15)
-
-  local spark = side:CreateTexture(nil, "OVERLAY")
+  local spark = f:CreateTexture(nil, "OVERLAY")
   spark:SetTexture(UI.TEX.sparkle)
   spark:SetSize(14, 14)
   spark:SetPoint("TOPRIGHT", logo, "TOPRIGHT", 4, 4)
   UI.Drift(spark, 0, 0, 1.6, 1, 0.1)
 
-  local mark = side:CreateTexture(nil, "ARTWORK")
+  local mark = f:CreateTexture(nil, "ARTWORK")
   mark:SetTexture(UI.TEX.wordmark)
-  mark:SetSize(136, 34)
-  mark:SetPoint("LEFT", logo, "RIGHT", 4, 4)
-  local sub = UI.Text(side, 10, "semibold", C.dim)
-  sub:SetPoint("TOPLEFT", logo, "BOTTOMLEFT", 2, -6)
-  sub:SetWidth(SIDE_W - 44)
-  sub:SetJustifyH("LEFT")
-  sub:SetWordWrap(false)
-  sub:SetText("GOLD · BERUFE · FOREVER")
+  mark:SetSize(144, 36)
+  mark:SetPoint("TOPLEFT", logo, "TOPRIGHT", 2, 3)
 
-  -- Globale Suche (auch per Tastenkürzel)
-  local search = UI.SafeButton(side)
-  search:SetSize(SIDE_W - 34, 34)
-  search:SetPoint("TOPLEFT", 12, -88)
-  search.bg = UI.Round(search, 17, "BACKGROUND", 0)
-  search.bg:SetColor(C.inset, 1)
-  search.icon = search:CreateTexture(nil, "ARTWORK")
-  search.icon:SetTexture(UI.Icon("scan"))
-  search.icon:SetSize(15, 15)
-  search.icon:SetPoint("LEFT", 16, 0)
-  search.icon:SetVertexColor(C.gold[1], C.gold[2], C.gold[3], 1)
-  search.text = UI.Text(search, 13, "regular", C.dim)
-  search.text:SetPoint("LEFT", search.icon, "RIGHT", 10, 0)
-  search.text:SetText("Suchen ...")
-  search:SetScript("OnEnter", function(self) self.bg:SetColor(C.cardHi, 1) end)
-  search:SetScript("OnLeave", function(self) self.bg:SetColor(C.inset, 1) end)
-  search:SetScript("OnClick", function() UI.PlayClick() UI.Search.Toggle() end)
-  UI.SetTooltip(search, "Alles durchsuchen", "Items, Rezepte, Goldwege und Begriffe auf einmal. Tipp: Tastenkürzel in den WoW-Tastaturbelegungen unter \"Tiry's Zentrale\".")
-
-  f.nav = {}
-  local y = -134
-  for _, g in ipairs(UI.GROUPS) do
-    local views = availableViews(g)
-    if #views > 0 then
-    local b = UI.SafeButton(side)
-    b:SetSize(SIDE_W - 34, 38)
-    b:SetPoint("TOPLEFT", 12, y)
-    b.key = g.key
-    b.first = views[1].value
-    b.bg = UI.Round(b, 19, "BACKGROUND", 0)
-    b.icon = b:CreateTexture(nil, "ARTWORK")
-    b.icon:SetTexture(UI.Icon(g.icon))
-    b.icon:SetSize(18, 18)
-    b.icon:SetPoint("LEFT", 16, 0)
-    b.text = UI.Text(b, 14, "semibold", C.muted)
-    b.text:SetPoint("LEFT", b.icon, "RIGHT", 12, 0)
-    b.text:SetText(g.label)
-    b.badge = UI.Chip(b, "", C.rose, true)
-    b.badge:SetPoint("RIGHT", -10, 0)
-    b.badge:Hide()
-    function b:Paint()
-      local cg = UI.current and UI.GroupOf(UI.current)
-      local active = (cg and cg.key == self.key)
-      if active then
-        self.bg:SetGradient(UI.GRAD, 1)
-        self.bg:SetShown(true)
-        self.text:SetTextColor(C.dark[1], C.dark[2], C.dark[3], 1)
-        self.icon:SetVertexColor(C.dark[1], C.dark[2], C.dark[3], 1)
-      elseif self:IsMouseOver() then
-        self.bg:SetColor(C.cardHi, 0.9)
-        self.bg:SetShown(true)
-        self.text:SetTextColor(C.text[1], C.text[2], C.text[3], 1)
-        self.icon:SetVertexColor(C.gold[1], C.gold[2], C.gold[3], 1)
-      else
-        self.bg:SetShown(false)
-        self.text:SetTextColor(C.muted[1], C.muted[2], C.muted[3], 1)
-        self.icon:SetVertexColor(C.muted[1], C.muted[2], C.muted[3], 1)
-      end
-    end
-    b:SetScript("OnEnter", b.Paint)
-    b:SetScript("OnLeave", b.Paint)
-    b:SetScript("OnClick", function(self)
-      UI.PlayClick()
-      -- zuletzt benutzten Reiter des Hauptpunkts wieder öffnen
-      local last = ns.settings.lastView and ns.settings.lastView[self.key]
-      UI.Show((last and UI.pages[last]) and last or self.first)
-    end)
-    f.nav[g.key] = b
-    y = y - 44
-    end
-  end
-
-  -- Echtes Horde-Wappen aus dem Spiel (Atlas aus der Charaktererstellung), ganz dezent über dem Status.
-  -- Gibt es den Atlas im Client nicht, wird einfach nichts gezeigt.
-  if C_Texture and C_Texture.GetAtlasInfo then
-    local ok, info = pcall(C_Texture.GetAtlasInfo, "charactercreate-icon-horde")
-    if ok and info then
-      local crest = side:CreateTexture(nil, "BACKGROUND", nil, -3)
-      crest:SetAtlas("charactercreate-icon-horde")
-      crest:SetSize(96, 96)
-      crest:SetPoint("BOTTOM", side, "BOTTOM", 0, 108)
-      crest:SetDesaturated(true)
-      crest:SetVertexColor(C.amber[1], C.amber[2], C.amber[3], 0.22)
-      f.hordeCrest = crest
-    end
-  end
-
-  -- Auctionator-Status unten
-  local status = CreateFrame("Frame", nil, side)
-  status:SetSize(SIDE_W - 34, 44)
-  status:SetPoint("BOTTOMLEFT", 12, 16)
-  status.bg = UI.Round(status, 14, "BACKGROUND", 1)
-  status.bg:SetColor(C.inset, 0.95)
+  -- Live-Status (Auctionator) unter dem Schriftzug
+  local status = CreateFrame("Frame", nil, f)
+  status:SetSize(150, 18)
+  status:SetPoint("TOPLEFT", mark, "BOTTOMLEFT", 10, -1)
   status.dot = status:CreateTexture(nil, "ARTWORK")
   status.dot:SetTexture(UI.TEX.circle)
-  status.dot:SetSize(10, 10)
-  status.dot:SetPoint("LEFT", 12, 0)
-  status.text = UI.Para(status, 10, C.muted, SIDE_W - 70, "semibold")
-  status.text:SetPoint("LEFT", status.dot, "RIGHT", 9, 0)
+  status.dot:SetSize(8, 8)
+  status.dot:SetPoint("LEFT", 0, 0)
+  status.glow = UI.Glow(status, C.green, 26, 0.5, "BACKGROUND")
+  status.glow:SetPoint("CENTER", status.dot, "CENTER")
+  UI.Drift(status.glow, 0, 0, 1.4, 1, 0.25)
+  status.text = UI.Text(status, 12, "semibold", C.muted)
+  status.text:SetPoint("LEFT", status.dot, "RIGHT", 7, 0)
+  status.text:SetWordWrap(false)
+  status.text:SetWidth(134)
   UI.SetTooltip(status, function()
     local state, text = ns.Market.Status()
     if state == "missing" then
@@ -269,58 +226,157 @@ local function buildSidebar(f)
   f.status = status
 end
 
+-- Dock: 5 große Glas-Kugeln mit echten Blizzard-Symbolen, entlang des Gold-Kreislaufs
+local ITEM_W, DOCK_H, ORB, ORB_ACTIVE = 92, 94, 50, 58
+local function buildDock(f)
+  local list = {}
+  for _, g in ipairs(UI.GROUPS) do
+    if not g.util and #availableViews(g) > 0 then list[#list + 1] = g end
+  end
+  local dock = CreateFrame("Frame", nil, f)
+  dock:SetSize(#list * ITEM_W + 20, DOCK_H)
+  -- mittig zwischen Marke (links) und Schnellknöpfen (rechts)
+  dock:SetPoint("TOP", f, "TOPLEFT", 520, -6)
+  dock.glass = UI.Glass(dock, { radius = 30, body = { { 0.10, 0.13, 0.13, 0.80 }, { 0.035, 0.045, 0.052, 0.86 } },
+    edge = 0.34, sheen = 0.06, sheenH = 36, line = 0.40 })
+  f.dock = dock
+  f.nav = {}
+  for i, g in ipairs(list) do
+    local b = UI.SafeButton(dock)
+    b:SetSize(ITEM_W, DOCK_H - 6)
+    b:SetPoint("TOPLEFT", 10 + (i - 1) * ITEM_W, -3)
+    b.key = g.key
+    b.first = availableViews(g)[1].value
+    b.orb = UI.Orb(b, ORB)
+    b.orb:SetPoint("TOP", b, "TOP", 0, -7)
+    b.orb:SetGameIcon(g.game, g.icon)
+    b.label = UI.Text(b, 12, "semibold", C.muted)
+    b.label:SetPoint("TOP", b, "TOP", 0, -63)
+    b.label:SetJustifyH("CENTER")
+    b.label:SetWordWrap(false)
+    b.label:SetText(g.label)
+    b.dot = b:CreateTexture(nil, "OVERLAY")
+    b.dot:SetTexture(UI.TEX.fade)
+    b.dot:SetSize(26, 3)
+    b.dot:SetPoint("TOP", b.label, "BOTTOM", 0, -3)
+    b.dot:SetBlendMode("ADD")
+    b.badge = UI.Chip(b, "", C.hi, true)
+    b.badge:SetPoint("CENTER", b.orb, "TOPRIGHT", -4, -4)
+    b.badge:SetFrameLevel(b:GetFrameLevel() + 5)
+    b.badge:Hide()
+    function b:Paint()
+      local cg = UI.current and UI.GroupOf(UI.current)
+      local active = (cg and cg.key == self.key)
+      local hover = self:IsMouseOver()
+      local s = active and ORB_ACTIVE or ORB
+      self.orb:SetSize(s, s)
+      self.orb:ClearAllPoints()
+      self.orb:SetPoint("TOP", self, "TOP", 0, active and -3 or -7)
+      self.orb:SetActive(active, hover)
+      local c = active and C.amber or (hover and C.text or C.muted)
+      self.label:SetTextColor(c[1], c[2], c[3], 1)
+      self.dot:SetVertexColor(C.amber[1], C.amber[2], C.amber[3], active and 1 or 0)
+    end
+    b:SetScript("OnEnter", b.Paint)
+    b:SetScript("OnLeave", b.Paint)
+    b:SetScript("OnClick", function(self)
+      UI.PlayClick()
+      -- zuletzt benutzten Reiter des Bereichs wieder öffnen
+      UI.Show(lastViewOf(g) or self.first)
+    end)
+    UI.SetTooltip(b, g.label, g.tip)
+    f.nav[g.key] = b
+  end
+end
+
 function UI.UpdateStatus()
   if not frame then return end
   local state = ns.Market.Status()
   local c = (state == "ok" and C.green) or (state == "empty" and C.hi) or C.red
   frame.status.dot:SetVertexColor(c[1], c[2], c[3], 1)
+  frame.status.glow:SetVertexColor(c[1], c[2], c[3], 0.5)
   frame.status.text:SetText(state == "ok" and "Live-Preise aktiv" or (state == "empty" and "AH einmal scannen" or "Auctionator fehlt"))
-  frame.scanInfo:SetText(ns.Market.LastScanText())
+  frame.scanInfo:SetText("Stand: " .. ns.Market.LastScanText() .. " · gilt für alle Reiter")
 end
 
+-- Rechts oben: Suche · Lernen (?) · Einstellungen · AH scannen · Schließen
 local function buildHeader(f)
-  local h = CreateFrame("Frame", nil, f)
-  h:SetPoint("TOPLEFT", SIDE_W + PAD - 4, -18)
-  h:SetPoint("TOPRIGHT", -PAD, -18)
-  h:SetHeight(58)
-  h.title = UI.Text(h, 24, "bold", C.text)
-  h.title:SetPoint("TOPLEFT", 0, -2)
-  h.sub = UI.Text(h, 12, "regular", C.muted)
-  h.sub:SetPoint("TOPLEFT", h.title, "BOTTOMLEFT", 0, -5)
-  h.sub:SetWidth(WIDTH - SIDE_W - PAD * 2 - 200)
-  h.sub:SetWordWrap(false)
-  f.header = h
-
-  local close = UI.IconButton(f, "close", 30, "Schließen")
-  close:SetPoint("TOPRIGHT", -18, -18)
+  local close = UI.IconButton(f, "close", 32, "Schließen")
+  close:SetPoint("TOPRIGHT", f, "TOPRIGHT", -18, -38)
   close:SetScript("OnClick", function() f:Hide() end)
 
   -- AH-Scan per Klick (startet Auctionators Scan) + Stand der Preise
-  local scan = UI.Button(f, "AH scannen", "cool", 136, 30, "refresh")
-  scan:SetPoint("RIGHT", close, "LEFT", -10, 0)
+  local scan = UI.Button(f, "AH scannen", "primary", 138, 34, "refresh")
+  scan:SetPoint("RIGHT", close, "LEFT", -12, 0)
   scan:SetScript("OnClick", function() ns.Market.StartScan() end)
   UI.SetTooltip(scan, function()
-    return "Preise aktualisieren", "Am offenen Auktionshaus: startet den Auctionator-Scan. Tiry's Zentrale erkennt jeden Scan automatisch – "
+    return "Preise aktualisieren – für alle Reiter", "Am offenen Auktionshaus: startet den Auctionator-Scan. Ein Scan aktualisiert alle Reiter "
+      .. "(Preise, Absatz, Schnäppchen, Unterboten). Tiry's Zentrale erkennt jeden Scan automatisch – "
       .. "auch wenn du direkt in Auctionator scannst.\n\nStand: " .. ns.Market.LastScanText()
   end)
   f.scanBtn = scan
-  -- Gesetzten Wegpunkt wieder entfernen (unten in der Seitenleiste, über dem Status)
-  local wp = UI.Button(f.side, "Wegpunkt löschen", "soft", SIDE_W - 34, 32, "close")
-  wp:SetPoint("BOTTOMLEFT", f.side, "BOTTOMLEFT", 12, 70)
+  f.scanInfo = UI.Text(f, 12, "semibold", C.dim)
+  f.scanInfo:SetPoint("TOPRIGHT", close, "BOTTOMRIGHT", -2, -8)
+  f.scanInfo:SetJustifyH("RIGHT")
+
+  -- Schnellknöpfe: Einstellungen, Lernen, Suche (von rechts nach links)
+  local function quick(key, icon, anchor, tipTitle, tipText, onClick)
+    local b = UI.IconButton(f, icon, 36)
+    b:SetPoint("RIGHT", anchor, "LEFT", -8, 0)
+    b.key = key
+    b.badge = UI.Chip(b, "", C.hi, true)
+    b.badge:SetPoint("CENTER", b, "TOPRIGHT", -3, -3)
+    b.badge:SetFrameLevel(b:GetFrameLevel() + 5)
+    b.badge:Hide()
+    b:SetScript("OnClick", onClick)
+    UI.SetTooltip(b, tipTitle, tipText)
+    local basePaint = b:GetScript("OnEnter")
+    function b:Paint()
+      local cg = key and UI.current and UI.GroupOf(UI.current)
+      local active = cg and cg.key == key
+      if basePaint then basePaint(self) end
+      if active then
+        UI.SetGradH(self.ring, C.amber, C.aqua, 1)
+        self.icon:SetVertexColor(C.amber[1], C.amber[2], C.amber[3], 1)
+        self.glow:SetAlpha(0.4)
+      end
+    end
+    b:HookScript("OnEnter", function(self) self:Paint() end)
+    b:HookScript("OnLeave", function(self) self:Paint() end)
+    return b
+  end
+  local gear = quick("settings", "gear", scan, "Einstellungen", UI.GROUPS[7].tip, function()
+    UI.Show("settings")
+  end)
+  local help = quick("lernen", "help", gear, "Lernen: AH-Schule & Glossar", UI.GROUPS[6].tip, function()
+    UI.Show(lastViewOf(UI.GroupOf("basics")) or "basics")
+  end)
+  local search = quick(nil, "scan", help, "Alles durchsuchen",
+    "Items, Rezepte, Goldwege und Begriffe auf einmal. Tipp: Tastenkürzel in den WoW-Tastaturbelegungen unter \"Tiry's Zentrale\".",
+    function() UI.Search.Toggle() end)
+  f.nav.settings, f.nav.lernen, f.searchBtn = gear, help, search
+
+  -- Seitentitel groß + ein Satz "was du hier machst"
+  local h = CreateFrame("Frame", nil, f)
+  h:SetPoint("TOPLEFT", f, "TOPLEFT", PAD, -HEADER_H - 14)
+  h:SetPoint("TOPRIGHT", f, "TOPRIGHT", -PAD, -HEADER_H - 14)
+  h:SetHeight(58)
+  h.title = UI.Text(h, 24, "bold", C.text)
+  h.title:SetPoint("TOPLEFT", 0, -2)
+  h.title:SetWordWrap(false)
+  h.sub = UI.Text(h, 13, "regular", C.muted)
+  h.sub:SetPoint("TOPLEFT", h.title, "BOTTOMLEFT", 0, -4)
+  h.sub:SetWidth(UI.CONTENT_W - 200)
+  h.sub:SetWordWrap(false)
+  f.header = h
+
+  -- Gesetzten Wegpunkt wieder entfernen (rechts neben dem Titel)
+  local wp = UI.Button(f, "Wegpunkt löschen", "soft", 168, 32, "close")
+  wp:SetPoint("TOPRIGHT", h, "TOPRIGHT", -12, -6)
   wp:SetScript("OnClick", function() ns.Maps.Clear() end)
   UI.SetTooltip(wp, "Wegpunkt entfernen", "Löscht den Kartenpunkt, den Tiry's Zentrale gesetzt hat.")
   wp:Hide()
   f.wpBtn = wp
-  f.scanInfo = UI.Text(f, 10, "semibold", C.dim)
-  f.scanInfo:SetPoint("TOPRIGHT", scan, "BOTTOMRIGHT", -4, -6)
-
-  -- Verlaufslinie unter der Überschrift
-  local line = f:CreateTexture(nil, "ARTWORK")
-  line:SetTexture("Interface\\Buttons\\WHITE8X8")
-  line:SetHeight(2)
-  line:SetPoint("TOPLEFT", h, "BOTTOMLEFT", 0, -2)
-  line:SetWidth(120)
-  pcall(line.SetGradient, line, "HORIZONTAL", CreateColor(C.gold[1], C.gold[2], C.gold[3], 1), CreateColor(C.rose[1], C.rose[2], C.rose[3], 0))
 end
 
 local function createFrame()
@@ -349,13 +405,14 @@ local function createFrame()
   tinsert(UISpecialFrames, "TirysZentraleMainFrame") -- ESC schließt das Fenster
 
   buildBackground(f)
-  buildSidebar(f)
+  buildBrand(f)
+  buildDock(f)
   buildHeader(f)
 
-  -- Reiter des aktuellen Hauptpunkts (nur wenn er mehrere Ansichten hat)
+  -- Reiter des aktuellen Bereichs (große, gleich breite Glas-Pillen)
   local tabs = CreateFrame("Frame", nil, f)
-  tabs:SetPoint("TOPLEFT", SIDE_W + PAD - 4, -92)
-  tabs:SetSize(UI.CONTENT_W, 30)
+  tabs:SetPoint("TOPLEFT", PAD, -HEADER_H - 12)
+  tabs:SetSize(UI.CONTENT_W, 46)
   tabs.bars = {}
   f.tabs = tabs
 
@@ -368,7 +425,7 @@ local function createFrame()
   grip.tex:SetTexture(UI.TEX.corner)
   grip.tex:SetAllPoints()
   grip.tex:SetTexCoord(1, 0, 1, 0)
-  grip.tex:SetVertexColor(C.gold[1], C.gold[2], C.gold[3], 0.8)
+  grip.tex:SetVertexColor(C.teal[1], C.teal[2], C.teal[3], 0.55)
   UI.SetTooltip(grip, "Fenstergröße", "Ziehen: Fenster größer oder kleiner machen. Zurücksetzen: Einstellungen > Fenstergröße ×.")
   grip:SetScript("OnMouseDown", function(self)
     local startX = GetCursorPosition()
@@ -389,8 +446,8 @@ local function createFrame()
 
   -- Inhaltsbereich
   local body = CreateFrame("Frame", nil, f)
-  body:SetPoint("TOPLEFT", SIDE_W + PAD - 4, -92)
-  body:SetPoint("BOTTOMRIGHT", -PAD + 10, 18)
+  body:SetPoint("TOPLEFT", PAD, -HEADER_H - 82)
+  body:SetPoint("BOTTOMRIGHT", -PAD + 10, 16)
   f.body = body
 
   f:SetScript("OnShow", function()
@@ -435,6 +492,8 @@ function UI.RefreshPage(key)
   end
 end
 
+local badgeValues = {}
+
 function UI.Show(key)
   if not frame then createFrame() end
   if not UI.pages[key] then key = "home" end
@@ -442,30 +501,39 @@ function UI.Show(key)
     if def.frame then def.frame:SetShown(k == key) end
   end
   UI.current = key
-  -- Reiter zeigen/verstecken und Inhalt darunter schieben
+  -- Reiter zeigen/verstecken; Titel + Satz darunter, Inhalt darunter
   local g = UI.GroupOf(key)
   local views = g and availableViews(g) or {}
-  for gk, bar in pairs(frame.tabs.bars) do bar:SetShown(g and gk == g.key and #views > 1) end
-  if g and #views > 1 then
+  local hasTabs = g and #views > 1
+  for gk, bar in pairs(frame.tabs.bars) do bar:SetShown(hasTabs and gk == g.key) end
+  if hasTabs then
     local bar = frame.tabs.bars[g.key]
     if not bar then
-      bar = UI.Segments(frame.tabs, views, function(v) UI.PlayClick() UI.Show(v) end, UI.CONTENT_W)
+      bar = UI.Tabs(frame.tabs, views, function(v) UI.Show(v) end, UI.CONTENT_W, 36)
       bar:SetPoint("TOPLEFT")
       frame.tabs.bars[g.key] = bar
+      for _, v in ipairs(views) do
+        local val = badgeValues[v.value]
+        if val then bar:SetBadge(v.value, tostring(val)) end
+      end
     end
     bar:Select(key)
     bar:Show()
     ns.settings.lastView = ns.settings.lastView or {}
     ns.settings.lastView[g.key] = key
   end
+  local top = HEADER_H + (hasTabs and 58 or 12)
+  frame.header:ClearAllPoints()
+  frame.header:SetPoint("TOPLEFT", frame, "TOPLEFT", PAD, -top - 4)
+  frame.header:SetPoint("TOPRIGHT", frame, "TOPRIGHT", -PAD, -top - 4)
   frame.body:ClearAllPoints()
-  frame.body:SetPoint("TOPLEFT", SIDE_W + PAD - 4, (g and #views > 1) and -134 or -92)
-  frame.body:SetPoint("BOTTOMRIGHT", -PAD + 10, 18)
+  frame.body:SetPoint("TOPLEFT", PAD, -top - 70)
+  frame.body:SetPoint("BOTTOMRIGHT", -PAD + 10, 16)
   local def = ensurePage(key)
   if def then
     def.frame:Show()
-    frame.header.title:SetText(def.title)
-    frame.header.sub:SetText(def.subtitle or "")
+    frame.header.title:SetText(UI.GradText(def.title, { 0.86, 1.0, 0.90 }, C.amber))
+    UI.FitText(frame.header.sub, def.subtitle or "", UI.CONTENT_W - 200)
     UI.RefreshPage(key)
   end
   for _, b in pairs(frame.nav) do b:Paint() end
@@ -486,12 +554,14 @@ function UI.IsShown(key)
   return frame and frame:IsShown() and UI.current == key
 end
 
--- Zahl am Menüpunkt: Werte mehrerer Ansichten eines Hauptpunkts werden zusammengezählt
-local badgeValues = {}
+-- Zahl am Dock-Symbol (Summe aller Reiter eines Bereichs) und am jeweiligen Reiter
 function UI.SetBadge(key, text)
   local g = UI.GroupOf(key)
   badgeValues[key] = tonumber(text) or (text and text ~= "" and text) or nil
-  if not frame or not g or not frame.nav[g.key] then return end
+  if not frame or not g then return end
+  local bar = frame.tabs.bars[g.key]
+  if bar then bar:SetBadge(key, badgeValues[key] and tostring(badgeValues[key]) or nil) end
+  if not frame.nav[g.key] then return end
   local sum, other = 0, nil
   for _, v in ipairs(g.views) do
     local val = badgeValues[v[1]]
@@ -500,13 +570,12 @@ function UI.SetBadge(key, text)
   text = sum > 0 and tostring(sum) or other
   local badge = frame.nav[g.key].badge
   if text and text ~= "" then
-    badge:Set(text, C.rose, true)
+    badge:Set(text, C.hi, true)
     badge:Show()
   else
     badge:Hide()
   end
 end
-
 -- Eigene Fenstergröße (Einstellungen) × automatische Anpassung, damit das Fenster immer ganz auf den Bildschirm passt
 function UI.FitScale()
   local user = ns.Clamp(tonumber(ns.settings.scale) or 1, 0.7, 1.3)
@@ -565,17 +634,21 @@ local function createMini()
   local bg = mini:CreateTexture(nil, "BACKGROUND")
   bg:SetTexture(UI.TEX.circle)
   bg:SetAllPoints()
-  bg:SetVertexColor(C.bg[1], C.bg[2], C.bg[3], 0.95)
+  UI.SetGradV(bg, { 0.10, 0.13, 0.13 }, { 0.03, 0.04, 0.05 }, 0.96)
   local icon = mini:CreateTexture(nil, "ARTWORK")
   icon:SetTexture(UI.TEX.logo)
-  icon:SetPoint("TOPLEFT", 3, -3)
-  icon:SetPoint("BOTTOMRIGHT", -3, 3)
-  local hl = UI.Glow(mini, C.gold, 64, 0, "OVERLAY")
+  icon:SetPoint("TOPLEFT", 4, -4)
+  icon:SetPoint("BOTTOMRIGHT", -4, 4)
+  local ring = mini:CreateTexture(nil, "OVERLAY")
+  ring:SetTexture(UI.TEX.ringgrad)
+  ring:SetAllPoints()
+  ring:SetVertexColor(1, 1, 1, 0.85)
+  local hl = UI.Glow(mini, C.amber, 70, 0, "BACKGROUND")
   hl:SetPoint("CENTER")
   mini:SetScript("OnEnter", function(self)
     hl:SetAlpha(0.55)
     GameTooltip:SetOwner(self, "ANCHOR_LEFT")
-    GameTooltip:SetText("Tiry's Zentrale", 1, 0.6, 0.16)
+    GameTooltip:SetText("Tiry's Zentrale", 0.22, 1, 0.42)
     GameTooltip:AddLine("Linksklick: Gold-Guide öffnen", 0.9, 0.9, 1)
     GameTooltip:AddLine("Rechtsklick: Scanner (Händler & Taschen)", 0.9, 0.9, 1)
     GameTooltip:AddLine("Ziehen: Knopf verschieben", 0.7, 0.7, 0.85)
@@ -645,6 +718,9 @@ SlashCmdList.TIRYSZENTRALE = function(msg)
     markt = "market", preise = "market", db = "database", datenbank = "database", items = "database", scan = "scanner", scanner = "scanner", taschen = "scanner",
     rezepte = "recipes", craft = "recipes", crafting = "recipes", farm = "farm", farmen = "farm", buch = "ledger", verkaeufe = "ledger", ["verkäufe"] = "ledger", kuerschner = "skinning", ["kürschner"] = "skinning", leder = "skinning", skin = "skinning", tagebuch = "tracker", tracker = "tracker",
     schule = "basics", ah = "basics", hilfe = "basics", optionen = "settings", einstellungen = "settings",
+    -- Namen der neuen Bereiche
+    handel = "auctions", auktionen = "auctions", herstellen = "recipes", lernen = "basics", glossar = "glossary",
+    alarm = "alerts", preisalarm = "alerts", ergebnis = "results", session = "session", verkaufsbuch = "ledger",
   }
   if msg == "fehler" then
     local list = ns.ErrorLog()
@@ -707,6 +783,13 @@ SlashCmdList.TIRYSZENTRALE = function(msg)
     ns.Print("Fensterposition zurückgesetzt.")
     return
   end
+  if msg == "schnapp" or msg == "schnäppchen" or msg == "schnaeppchen" or msg == "snipe" then
+    -- Schnäppchen-Liste aus dem letzten Komplett-Scan (Handel > Preise > Schnäppchen)
+    UI.Show("market")
+    local p = UI.pages.market
+    if p and p.segments then p.segments:Select("snipe", true) end
+    return
+  end
   if msg == "" then
     UI.ToggleWindow()
   else
@@ -725,7 +808,7 @@ end
 
 function TirysZentrale_OnAddonCompartmentEnter(_, menuButton)
   GameTooltip:SetOwner(menuButton or UIParent, "ANCHOR_LEFT")
-  GameTooltip:SetText("Tiry's Zentrale", 1, 0.6, 0.16)
+  GameTooltip:SetText("Tiry's Zentrale", 0.22, 1, 0.42)
   GameTooltip:AddLine("Linksklick: Gold-Guide · Rechtsklick: Scanner", 0.9, 0.9, 1)
   GameTooltip:Show()
 end

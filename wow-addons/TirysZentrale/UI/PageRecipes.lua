@@ -11,6 +11,20 @@ local DIFF = {
   [0] = { "orange", { 1, 0.5, 0.25 } }, [1] = { "gelb", { 1, 1, 0 } },
   [2] = { "grün", { 0.25, 0.75, 0.25 } }, [3] = { "grau", { 0.5, 0.5, 0.5 } },
 }
+-- Absatz-Chip je Rezept: Text + Farbe aus ns.Demand.LABEL ({ Text, Hex })
+local function hexColor(hex)
+  return { tonumber(hex:sub(1, 2), 16) / 255, tonumber(hex:sub(3, 4), 16) / 255, tonumber(hex:sub(5, 6), 16) / 255 }
+end
+local DEMAND_CHIP = {}
+for k, l in pairs(ns.Demand.LABEL) do DEMAND_CHIP[k] = { l[1], hexColor(l[2]) } end
+
+-- Stand der Absatz-Messung als kurze Zeile
+local function demandStatus()
+  local n, _, scans = ns.Demand.Status()
+  if (n or 0) > 0 then return "Absatz gemessen für " .. n .. " Items" end
+  if (scans or 0) >= 1 then return "Absatz: noch 1 AH-Scan (15 Min.–12 Std. nach dem letzten)" end
+  return "Absatz: 2× im AH scannen (15 Min.–12 Std. Abstand)"
+end
 local VIEWS = {
   { value = "known", label = "Meine Rezepte" },
   { value = "learnable", label = "Lernen lohnt sich" },
@@ -21,6 +35,7 @@ local page = {
   subtitle = "Erkennt deine Berufe und Rezepte automatisch – und zeigt, was dir Gold bringt.",
   icon = "flask", label = "Craft-Planer", order = 6,
 }
+page.DemandStatus = demandStatus
 
 local function cfg() return ns.settings.craft end
 
@@ -81,15 +96,24 @@ local function stepHead(parent, n, text, width)
   local f = CreateFrame("Frame", nil, parent)
   f:SetSize(width, 28)
   local dot = CreateFrame("Frame", nil, f)
-  dot:SetSize(26, 26)
+  dot:SetSize(28, 28)
   dot:SetPoint("LEFT")
-  dot.bg = UI.Round(dot, 13, "ARTWORK", 0)
-  dot.bg:SetGradient(UI.GRAD, 1)
+  dot.glow = UI.Glow(dot, C.amber, 64, 0.32, "BACKGROUND")
+  dot.glow:SetPoint("CENTER")
+  dot.bg = dot:CreateTexture(nil, "ARTWORK")
+  dot.bg:SetTexture(UI.TEX.circle)
+  dot.bg:SetAllPoints()
+  UI.SetGradV(dot.bg, C.amber, C.teal, 1)
+  dot.gloss = dot:CreateTexture(nil, "ARTWORK", nil, 1)
+  dot.gloss:SetTexture(UI.TEX.gloss)
+  dot.gloss:SetAllPoints()
+  dot.gloss:SetBlendMode("ADD")
+  dot.gloss:SetVertexColor(1, 1, 1, 0.3)
   local num = UI.Text(dot, 13, "bold", C.dark)
   num:SetPoint("CENTER", 0, 0)
   num:SetText(n)
   f.text = UI.Text(f, 15, "bold", C.text)
-  f.text:SetPoint("LEFT", dot, "RIGHT", 10, 0)
+  f.text:SetPoint("LEFT", dot, "RIGHT", 12, 0)
   f.text:SetText(text)
   return f
 end
@@ -111,10 +135,11 @@ function page.build(self, content, width)
 
   -- Schritt 2: EIN Regler (Mindestgewinn), Empfehlung wächst mit deinem Level
   st:Add(stepHead(content, 2, "Wie viel Gewinn pro Craft mindestens?", width), 28, 10)
-  local fc = CreateFrame("Frame", nil, content)
+  local fc = UI.Card(content, 24, nil, { hero = true })
   fc:SetSize(width, 92)
-  fc.bg = UI.Round(fc, 22, "BACKGROUND", 0)
-  fc.bg:SetGradient({ { 0.07, 0.27, 0.19 }, { 0.09, 0.18, 0.16 }, { 0.14, 0.16, 0.17 } }, 0.95)
+  fc.shine = UI.Glow(fc, C.amber, 420, 0.14, "BORDER")
+  fc.shine:SetHeight(104)
+  fc.shine:SetPoint("CENTER", fc, "LEFT", 210, 0)
   self.profit = UI.Stepper(fc, "Mindestgewinn", 340, function() return (select(2, R.Filter())) end,
     function(v) R.SetProfit(v) end,
     function(v, dir)
@@ -140,10 +165,8 @@ function page.build(self, content, width)
   local PS = ns.PriceString
   self.proToggle = UI.Button(content, "Mehr Optionen: Filter", "soft", 330, 32, "gear")
   self.proToggle:SetScript("OnClick", function() self.proOpen = not self.proOpen page.refresh(self) end)
-  local sc = CreateFrame("Frame", nil, content)
+  local sc = UI.Card(content, 24, C.card)
   sc:SetWidth(width)
-  sc.bg = UI.Round(sc, 18, "BACKGROUND", 0)
-  sc.bg:SetColor(C.card, 1)
   local fh = UI.Text(sc, 14, "bold", C.text)
   fh:SetPoint("TOPLEFT", 18, -18)
   fh:SetText("Filter")
@@ -155,14 +178,20 @@ function page.build(self, content, width)
   self.fresh:SetPoint("LEFT", p, "RIGHT", 8, 0)
   UI.SetTooltip(self.fresh, "Nur frische Preise", "Nur Rezepte, deren AH-Preis höchstens 3 Tage alt ist – alte Preise führen zu falschen Gewinnen.")
   self.pills[2] = self.fresh
+  self.slowPill = UI.Pill(sc, "Ladenhüter ausblenden", function() return cfg().skipSlow ~= false end,
+    function(v) cfg().skipSlow = v end, refresh)
+  self.slowPill:SetPoint("LEFT", self.fresh, "RIGHT", 8, 0)
+  UI.SetTooltip(self.slowPill, "Ladenhüter ausblenden", "Blendet Rezepte aus, deren Ergebnis sich laut Absatz-Messung kaum verkauft "
+    .. "(Markt über 12 Std. beobachtet oder deine eigene Verkaufsquote unter 25 %).")
+  self.pills[3] = self.slowPill
   self.unhideBtn = UI.Button(sc, "Ausgeblendete (0)", "soft", 170, 30, "refresh")
   self.unhideBtn:SetPoint("TOPRIGHT", -14, -48)
   self.unhideBtn:SetScript("OnClick", function() ns.char.hiddenRecipes = {} page.refresh(self) end)
   UI.SetTooltip(self.unhideBtn, "Ausgeblendete zurückholen", "Holt alle Rezepte zurück, die du mit × ausgeblendet hast.")
   self.filterReset = UI.Button(sc, "Filter: Standard", "soft", 160, 30, "close")
   self.filterReset:SetPoint("RIGHT", self.unhideBtn, "LEFT", -8, 0)
-  self.filterReset:SetScript("OnClick", function() cfg().onlySafe = true cfg().freshOnly = true page.refresh(self) end)
-  UI.SetTooltip(self.filterReset, "Filter zurücksetzen", "Beide Filter wieder an: nur Rezepte mit bekannten und frischen Preisen.")
+  self.filterReset:SetScript("OnClick", function() cfg().onlySafe = true cfg().freshOnly = true cfg().skipSlow = true page.refresh(self) end)
+  UI.SetTooltip(self.filterReset, "Filter zurücksetzen", "Alle Filter wieder an: nur Rezepte mit bekannten und frischen Preisen, ohne Ladenhüter.")
   local OFF = 84
   -- Preisformeln: nur im Experten-Modus (Einstellungen) sichtbar
   local fx = CreateFrame("Frame", nil, sc)
@@ -196,7 +225,9 @@ function page.build(self, content, width)
     local ok, res = pcall(box.SetFont, box, ns.MEDIA .. "Fonts\\Poppins-Regular.ttf", 12, "")
     if not ok or res == false then pcall(box.SetFont, box, STANDARD_TEXT_FONT or "Fonts\\FRIZQT__.TTF", 12, "") end
     box:SetTextColor(1, 1, 1, 1)
-    box.bg = UI.Round(box, 16, "BACKGROUND", 2)
+    local bshape = UI.PillShape(box, 32, 2, false)
+    box.edge, box.bg = bshape.edge, bshape.body
+    box.edge:SetGradientV({ 0.60, 1.00, 0.85, 0.22 }, { 0.20, 0.55, 0.65, 0.08 })
     box.bg:SetColor(C.inset, 1)
     local status = UI.Text(fx, 11, "semibold", C.green)
     status:SetPoint("LEFT", box, "RIGHT", 10, 0)
@@ -216,8 +247,11 @@ function page.build(self, content, width)
       page.refresh(self)
     end)
     box:SetScript("OnEscapePressed", function(b) b:ClearFocus() page.refresh(self) end)
-    box:SetScript("OnEditFocusGained", function(b) b.bg:SetColor(C.cardHi, 1) end)
-    box:SetScript("OnEditFocusLost", function(b) b.bg:SetColor(C.inset, 1) end)
+    box:SetScript("OnEditFocusGained", function(b) b.bg:SetColor(C.cardHi, 1) b.edge:SetGradient(UI.GRAD_EDGE, 0.7) end)
+    box:SetScript("OnEditFocusLost", function(b)
+      b.bg:SetColor(C.inset, 1)
+      b.edge:SetGradientV({ 0.60, 1.00, 0.85, 0.22 }, { 0.20, 0.55, 0.65, 0.08 })
+    end)
     self.strings[d[1]] = { box = box, status = status, undo = undo }
     y = y + 44
   end
@@ -243,7 +277,7 @@ function page.build(self, content, width)
   self.makeBtn:SetScript("OnClick", function() page.MakeList(self) end)
   UI.SetTooltip(self.makeBtn, function()
     if self.view == "learnable" then
-      return "Rezepte suchen", "Sucht die angezeigten Rezepte (Muster, Pläne, Formeln ...) im AH. Ist das AH zu, wird eine Auctionator-Einkaufsliste \"Zentrale: Rezepte\" angelegt."
+      return "Rezepte suchen", "Nur zum Kaufen – die Preise aktualisiert der Scan oben für alle Reiter. Sucht die angezeigten Rezepte (Muster, Pläne, Formeln ...) im AH. Ist das AH zu, wird eine Auctionator-Einkaufsliste \"Zentrale: Rezepte\" angelegt."
     end
     return "Liste erstellen", "Legt alle Rezepte, die gerade angezeigt werden (also Gold bringen), in die Craft-Liste und öffnet das Einkaufsfenster mit den Materialien."
   end)
@@ -258,12 +292,13 @@ function page.build(self, content, width)
     .. "Ist das Auktionshaus offen, werden auch neue Preise gescannt. Ist das Berufsfenster offen, werden neu gelernte Rezepte sofort erkannt.")
   st:Add(mk, 36, 12)
 
-  self.info = UI.Para(content, 12, C.hi, width)
+  self.info = UI.Para(content, 12, C.muted, width)
   self.infoTop = st.y
   self.list = UI.ItemList(content, width, {
     { key = "cost", label = "Material", width = 84 },
     { key = "revenue", label = "Verkauf", width = 84 },
-    { key = "profit", label = "Gewinn", width = 96, bold = true },
+    { key = "profit", label = "Gewinn", width = 92, bold = true },
+    { key = "goldDay", label = "Gold/Tag", width = 96, bold = true },
   }, { action = true, onSort = function(key)
     local c = cfg()
     if c.sortKey == key then c.sortDesc = (c.sortDesc == false) else c.sortKey, c.sortDesc = key, true end
@@ -290,7 +325,7 @@ function page.build(self, content, width)
     { key = "floor", label = "Nicht unter", width = 100 },
     { key = "value", label = "Wert", width = 100, bold = true },
   })
-  self.sellBtn = UI.Button(content, "Konkurrenz im AH prüfen", "cool", 280, 34, "scan")
+  self.sellBtn = UI.Button(content, "Konkurrenz-Angebote zeigen", "cool", 280, 34, "scan")
   self.sellBtn:SetScript("OnClick", function()
     local ids = {}
     for _, e in ipairs(self.sellItems or {}) do ids[#ids + 1] = e.id end
@@ -300,10 +335,10 @@ function page.build(self, content, width)
       if not ok then ns.Print("|cffff6b81" .. tostring(err) .. "|r") end
     else
       local ok, n = M.CreateShoppingList("Zentrale: Verkaufen", ids)
-      ns.Print(ok and ("Liste |cffff9929Zentrale: Verkaufen|r angelegt (" .. n .. "). Im AH siehst du so sofort die aktuellen Preise.") or ("|cffff6b81" .. tostring(n) .. "|r"))
+      ns.Print(ok and ("Liste |cff39ff6bZentrale: Verkaufen|r angelegt (" .. n .. "). Im AH siehst du so sofort die aktuellen Preise.") or ("|cffff6b81" .. tostring(n) .. "|r"))
     end
   end)
-  UI.SetTooltip(self.sellBtn, "Konkurrenz prüfen", "Sucht deine hergestellten Items im AH, damit du siehst, zu welchem Preis andere gerade verkaufen.")
+  UI.SetTooltip(self.sellBtn, "Konkurrenz-Angebote zeigen", "Sucht deine hergestellten Items im AH, damit du siehst, zu welchem Preis andere gerade verkaufen. Die Preise selbst aktualisiert der Scan oben für alle Reiter.")
 
   -- Warteschlange
   local qc = UI.Card(content, 20, C.card)
@@ -321,7 +356,7 @@ function page.build(self, content, width)
     for _, m in ipairs(mats) do ids[#ids + 1] = m.id end
     if #ids == 0 then ns.Print("Du hast schon alles Material in den Taschen.") return end
     local ok, n = M.CreateShoppingList("Zentrale: Craft-Material", ids)
-    ns.Print(ok and ("Liste |cffff9929Zentrale: Craft-Material|r angelegt (" .. n .. " Items). Im AH: Auctionator > Einkaufen > Suche alles.") or ("|cffff6b81" .. tostring(n) .. "|r"))
+    ns.Print(ok and ("Liste |cff39ff6bZentrale: Craft-Material|r angelegt (" .. n .. " Items). Im AH: Auctionator > Einkaufen > Suche alles.") or ("|cffff6b81" .. tostring(n) .. "|r"))
   end)
   qc.craft = UI.Button(qc, "Nächstes craften", "cool", 180, 34, "bolt")
   qc.craft:SetScript("OnClick", function() page.CraftNext(self) end)
@@ -475,7 +510,7 @@ function page.SearchRecipes(self)
     if not ok then ns.Print("|cffff6b81" .. tostring(err) .. "|r") end
   else
     local ok, n = M.CreateShoppingList("Zentrale: Rezepte", ids)
-    ns.Print(ok and ("Liste |cffff9929Zentrale: Rezepte|r angelegt (" .. n .. " Rezepte). Im AH: Auctionator > Einkaufen.") or ("|cffff6b81" .. tostring(n) .. "|r"))
+    ns.Print(ok and ("Liste |cff39ff6bZentrale: Rezepte|r angelegt (" .. n .. " Rezepte). Im AH: Auctionator > Einkaufen.") or ("|cffff6b81" .. tostring(n) .. "|r"))
   end
 end
 
@@ -556,7 +591,7 @@ function page.ClearQueue()
   end
   wipe(queue())
   pendingCraft = nil
-  ns.Print("Craft-Warteschlange geleert. Aus Versehen? Knopf |cffff9929Rückgängig|r in der Warteschlange.")
+  ns.Print("Craft-Warteschlange geleert. Aus Versehen? Knopf |cff39ff6bRückgängig|r in der Warteschlange.")
   UI.RefreshPage("recipes")
 end
 
@@ -573,18 +608,25 @@ end
 local function queueRow(qc, width)
   local row = CreateFrame("Frame", nil, qc)
   row:SetSize(width - 40, 30)
-  row.bg = UI.Round(row, 15, "BACKGROUND", 1)
-  row.bg:SetColor(C.inset, 0.9)
-  row.text = UI.Text(row, 12, "semibold", C.text)
-  row.text:SetPoint("LEFT", 14, 0)
+  -- kein Kasten: Neon-Punkt + Text, darunter eine weich auslaufende Haarlinie
+  row.dot = row:CreateTexture(nil, "ARTWORK")
+  row.dot:SetTexture(UI.TEX.circle)
+  row.dot:SetSize(8, 8)
+  row.dot:SetPoint("LEFT", 4, 0)
+  UI.SetGradV(row.dot, C.amber, C.teal, 1)
+  row.line = UI.Hairline(row, C.teal, 0.22)
+  row.line:SetPoint("BOTTOMLEFT", 0, -2)
+  row.line:SetPoint("BOTTOMRIGHT", 0, -2)
+  row.text = UI.Text(row, 13, "semibold", C.text)
+  row.text:SetPoint("LEFT", 22, 0)
   row.text:SetWidth(width - 200)
   row.text:SetWordWrap(false)
-  row.del = UI.IconButton(row, "close", 24, "Entfernen")
+  row.del = UI.IconButton(row, "close", 28, "Entfernen")
   row.del:SetPoint("RIGHT", -4, 0)
-  row.plus = UI.IconButton(row, "plus", 24, "Einmal mehr")
-  row.plus:SetPoint("RIGHT", row.del, "LEFT", -4, 0)
-  row.minus = UI.IconButton(row, "minus", 24, "Einmal weniger")
-  row.minus:SetPoint("RIGHT", row.plus, "LEFT", -4, 0)
+  row.plus = UI.IconButton(row, "plus", 28, "Einmal mehr")
+  row.plus:SetPoint("RIGHT", row.del, "LEFT", -6, 0)
+  row.minus = UI.IconButton(row, "minus", 28, "Einmal weniger")
+  row.minus:SetPoint("RIGHT", row.plus, "LEFT", -6, 0)
   row.minus:SetScript("OnClick", function(b) addToQueue(row.recipe, -1) UI.RefreshPage("recipes") end)
   row.plus:SetScript("OnClick", function(b) addToQueue(row.recipe, 1) UI.RefreshPage("recipes") end)
   row.del:SetScript("OnClick", function(b) addToQueue(row.recipe, -999) UI.RefreshPage("recipes") end)
@@ -601,7 +643,7 @@ function page.CraftNext(self)
       if r and craftable(r) > 0 and C_TradeSkillUI.OpenTradeSkill then
         local okCall, opened = pcall(C_TradeSkillUI.OpenTradeSkill, ns.PROF[r.prof])
         local ok = okCall and opened ~= false
-        ns.Print(ok and ("Berufsfenster " .. ns.ProfName(ns.PROF[r.prof]) .. " geöffnet – klick nochmal auf |cffff9929Nächstes craften|r.")
+        ns.Print(ok and ("Berufsfenster " .. ns.ProfName(ns.PROF[r.prof]) .. " geöffnet – klick nochmal auf |cff39ff6bNächstes craften|r.")
           or "Öffne bitte das Berufsfenster und klick dann nochmal.")
         return
       end
@@ -626,7 +668,7 @@ function page.CraftNext(self)
         -- Exakt wie Blizzards eigener Herstellen-Knopf: leere Materialliste (Grundmaterial nimmt das Spiel selbst)
         C_TradeSkillUI.CraftRecipe(liveID, n, {}, nil, nil, false)
         pendingCraft = (not e.intermediate) and { recipe = r.id, out = r.out, left = n } or nil
-        ns.Print(string.format("Stelle |cffff9929%d× %s|r her.", n, r.name))
+        ns.Print(string.format("Stelle |cff39ff6b%d× %s|r her.", n, r.name))
         return
       end
     end
@@ -678,7 +720,7 @@ page.Sellable = sellable
 
 local function hidden() ns.char.hiddenRecipes = ns.char.hiddenRecipes or {} return ns.char.hiddenRecipes end
 
--- Alle Rezepte, die der Spieler sehen soll – sortiert nach Gold-Gewinn pro Craft (oben = am meisten Gold)
+-- Alle Rezepte, die der Spieler sehen soll – sortiert nach Absatz und Gold pro Tag (oben = bringt am meisten)
 function page.Entries(self)
   local c = cfg()
   local _, minProfit = R.Filter()
@@ -692,8 +734,6 @@ function page.Entries(self)
       stats.unsellable = stats.unsellable + 1
     elseif c.onlySafe and (unknown > 0 or not revenue) then
       stats.noPrice = stats.noPrice + 1
-    elseif c.skipSlow ~= false and (function() local rt, n = ns.Ledger.SaleRate(r.out) return rt and n >= 4 and rt < 0.25 end)() then
-      stats.slow = (stats.slow or 0) + 1
     elseif c.freshOnly ~= false and not (M.Age(r.out) and M.Age(r.out) <= 3) then
       stats.old = (stats.old or 0) + 1
     else
@@ -704,11 +744,19 @@ function page.Entries(self)
       if not profit or profit < need then
         stats.tooLow = stats.tooLow + 1
       else
-        out[#out + 1] = { r = r, profit = profit, revenue = revenue, cost = cost, unknown = unknown, need = need }
+        out[#out + 1] = { r = r, id = r.out, qty = r.qty, profit = profit, revenue = revenue, cost = cost, unknown = unknown, need = need }
       end
     end
   end
-  table.sort(out, function(x, y) return x.profit > y.profit end)
+  -- Rangfolge nach Absatz: was sich verkauft (Gold pro Tag) vor "unbekannt" vor Ladenhütern
+  ns.Demand.Sort(out)
+  if c.skipSlow ~= false then
+    local kept = {}
+    for _, e in ipairs(out) do
+      if e.demand == "slow" then stats.slow = (stats.slow or 0) + 1 else kept[#kept + 1] = e end
+    end
+    out = kept
+  end
   return out, rank, stats
 end
 
@@ -719,12 +767,12 @@ function page.refresh(self)
   for _, p in ipairs(self.pills) do p:Refresh() end
   self.viewSeg:Select(self.view)
   self.makeBtn:SetLabel(self.view == "learnable" and "Rezepte suchen" or "Liste erstellen")
-  self.recText:SetText((auto and ("|cffff9929Empfehlung für Level " .. ns.player.level .. ": " .. ns.Money(preset.profit) .. "|r – wächst mit jedem Level mit.")
-    or ("|cffff9929Eigener Wert.|r Empfehlung für Level " .. ns.player.level .. ": " .. ns.Money(preset.profit) .. "."))
+  self.recText:SetText((auto and ("|cff39ff6bEmpfehlung für Level " .. ns.player.level .. ": " .. ns.Money(preset.profit) .. "|r – wächst mit jedem Level mit.")
+    or ("|cff39ff6bEigener Wert.|r Empfehlung für Level " .. ns.player.level .. ": " .. ns.Money(preset.profit) .. "."))
     .. " Gewinn = AH-Verkauf nach Gebühr minus Material.")
   self.recBtn:SetEnabled(not auto)
   self.recBtn:SetLabel(auto and "Empfehlung aktiv" or "Zurück zur Empfehlung")
-  self.filterReset:SetShown(not (cfg().onlySafe and cfg().freshOnly ~= false))
+  self.filterReset:SetShown(not (cfg().onlySafe and cfg().freshOnly ~= false and cfg().skipSlow ~= false))
   local hiddenCount = 0
   for _ in pairs(hidden()) do hiddenCount = hiddenCount + 1 end
   self.unhideBtn:SetLabel("Ausgeblendete (" .. hiddenCount .. ")")
@@ -734,7 +782,7 @@ function page.refresh(self)
     if not w.box:HasFocus() then w.box:SetText(ns.PriceString.Get(key)) end
     local custom = ns.settings.priceStrings and ns.settings.priceStrings[key]
     local isCustom = custom and custom ~= ns.PriceString.DEFAULTS[key]
-    w.status:SetText(isCustom and "|cffff9929eigener String|r" or "|cffff9929empfohlen|r")
+    w.status:SetText(isCustom and "|cff39ff6beigener String|r" or "|cff39ff6bempfohlen|r")
     w.undo:SetShown(isCustom and true or false)
   end
 
@@ -745,16 +793,22 @@ function page.refresh(self)
     self.info:SetText("Du hast noch keinen Herstellungsberuf (z. B. Lederverarbeitung, Schneiderei, Alchemie). Lern einen beim Lehrer – dann erscheint er hier automatisch.")
   else
     local list, rank, st = page.Entries(self)
-    -- Sortierung per Klick auf die Spaltenüberschrift (Standard: Gewinn, höchster zuerst)
+    -- Sortierung per Klick auf die Spaltenüberschrift (Standard: Gold/Tag = Rangfolge nach Absatz)
     local c = cfg()
-    local sk = (c.sortKey == "cost" or c.sortKey == "revenue" or c.sortKey == "profit") and c.sortKey or "profit"
+    local sk = (c.sortKey == "cost" or c.sortKey == "revenue" or c.sortKey == "profit") and c.sortKey or "goldDay"
     local desc = c.sortDesc ~= false
-    table.sort(list, function(x, y)
-      local a, b = x[sk] or 0, y[sk] or 0
-      if a == b then return (x.profit or 0) > (y.profit or 0) end
-      if desc then return a > b end
-      return a < b
-    end)
+    if sk == "goldDay" then
+      if not desc then
+        for i = 1, math.floor(#list / 2) do list[i], list[#list + 1 - i] = list[#list + 1 - i], list[i] end
+      end
+    else
+      table.sort(list, function(x, y)
+        local a, b = x[sk] or 0, y[sk] or 0
+        if a == b then return (x.profit or 0) > (y.profit or 0) end
+        if desc then return a > b end
+        return a < b
+      end)
+    end
     self.list:SetSort(sk, desc)
     local learnIDs = {}
     self.learnIDs = learnIDs
@@ -787,10 +841,14 @@ function page.refresh(self)
         local real, nSold = ns.CraftBook.RealPerUnit(r.out)
         if real then notes[#notes + 1] = (real >= 0 and "|cff61eb8fechte " or "|cffff6b81echte ") .. ns.Money(math.abs(real)) .. (real >= 0 and " Gewinn" or " Verlust") .. "/Stück (" .. nSold .. " verkauft)|r" end
       end
+      -- Absatz (Label steht als Chip neben dem Namen, hier die Zahlen dazu)
+      local dt = ns.Demand.Text(r.out)
+      local detail = dt:match("·%s*(.+)$")
+      if detail and e.demand ~= "unknown" then notes[#notes + 1] = detail end
       local rate = ns.Ledger.SaleRate(r.out)
       if rate then notes[#notes + 1] = "verkauft sich: " .. math.floor(rate * 100 + 0.5) .. " %" end
       for _, q in ipairs(queue()) do
-        if q.recipe == r.id then notes[#notes + 1] = "|cffff9929" .. q.n .. "× geplant|r" end
+        if q.recipe == r.id then notes[#notes + 1] = "|cff39ff6b" .. q.n .. "× geplant|r" end
       end
       local mats = {}
       for _, re in ipairs(r.reagents) do
@@ -806,14 +864,17 @@ function page.refresh(self)
         id = learn and (ri or r.out) or r.out,
         name = learn and (ri and ns.Item(ri).name or (r.name .. " (Lehrer)")) or (r.name .. (r.qty > 1 and (" (" .. r.qty .. "×)") or "")),
         note = table.concat(notes, " · "),
+        chip = DEMAND_CHIP[e.demand or "unknown"],
         cells = {
           cost = (e.unknown > 0 and "|cffff9929min.|r " or "") .. ns.Money(e.cost),
           revenue = ns.Money(e.revenue),
-          profit = "|cffff9929+|r" .. ns.Money(e.profit),
+          profit = UI.NEON_HEX .. "+|r" .. ns.Money(e.profit),
+          goldDay = e.goldDay and ("~" .. ns.Money(e.goldDay)) or "|cff8a9a94–|r",
         },
         tip = { "Material: " .. (#mats > 0 and table.concat(mats, ", ") or "keins"),
-          "Verkauf: " .. ns.Money(e.revenue) .. " (Verkaufswert nach Gebühr) · Gewinn " .. ns.Money(e.profit) .. " · nötig: " .. ns.Money(e.need),
-          learn and (ri and "Linksklick: Rezept im AH suchen · Shift-Klick: Rezept in die Auctionator-Suche legen · Rechtsklick: ausblenden"
+          "Erlös (nach AH-Gebühr & Einstellgebühr-Risiko): " .. ns.Money(e.revenue) .. " · Gewinn " .. ns.Money(e.profit) .. " · nötig: " .. ns.Money(e.need),
+          "Absatz: " .. dt .. (e.goldDay and (" · ~" .. ns.Money(e.goldDay) .. " Gold/Tag") or ""),
+          learn and (ri and "Linksklick: Rezept-Angebote im AH zeigen · Shift-Klick: Rezept in die Auctionator-Suche legen · Rechtsklick: ausblenden"
             or "Lernst du beim Lehrer deines Berufs · Rechtsklick: ausblenden")
             or "Linksklick: 1× in die Craft-Liste · × oder Rechtsklick: Rezept ausblenden" },
         action = function()
@@ -847,10 +908,10 @@ function page.refresh(self)
     if st.noPrice > 0 then why[#why + 1] = st.noPrice .. " ohne AH-Preis" end
     if st.unsellable > 0 then why[#why + 1] = st.unsellable .. " nicht verkäuflich (gebunden)" end
     if (st.old or 0) > 0 then why[#why + 1] = st.old .. " mit altem Preis (über 3 Tage)" end
-    if (st.slow or 0) > 0 then why[#why + 1] = st.slow .. " Ladenhüter (deine Verkaufsquote unter 25 %)" end
+    if (st.slow or 0) > 0 then why[#why + 1] = st.slow .. " Ladenhüter (verkaufen sich kaum)" end
     if st.hidden > 0 then why[#why + 1] = st.hidden .. " ausgeblendet" end
-    self.info:SetText(string.format("|cffff9929%d %s bringen Gold|r  ·  Skill %d  ·  Preise: %s%s",
-      #list, #list == 1 and "Rezept" or "Rezepte", rank, M.LastScanText(),
+    self.info:SetText(string.format("%s%d %s bringen Gold|r  ·  Skill %d  ·  Preise: %s  ·  %s%s", UI.NEON_HEX,
+      #list, #list == 1 and "Rezept" or "Rezepte", rank, M.LastScanText(), page.DemandStatus(),
       #why > 0 and ("\n|cff93a39dNicht gezeigt: " .. table.concat(why, ", ") .. ".|r") or ""))
   end
   local empty = (#profs == 0) and "" or (not M.HasAuctionator() and "Ohne Auctionator kennt Tiry's Zentrale keine AH-Preise – und ohne Preise lässt sich kein Gewinn berechnen. Installiere Auctionator für WoW Forever und scanne einmal im AH."
@@ -926,14 +987,14 @@ function page.refresh(self)
   if #lines == 0 then
     qc.text:SetText("Leer. Klick oben auf ein Rezept, um es einzuplanen (Rechtsklick nimmt es wieder raus).")
   else
-    qc.text:SetText(string.format("%d Crafts geplant · erwarteter Gewinn |cffff9929%s|r · Material-Einkauf %s", crafts, ns.Money(profit), ns.Money(cost)))
+    qc.text:SetText(string.format("%d Crafts geplant · erwarteter Gewinn |cff39ff6b%s|r · Material-Einkauf %s", crafts, ns.Money(profit), ns.Money(cost)))
   end
   local qy = 56 + math.ceil(qc.text:GetStringHeight()) + 10
   for i, l in ipairs(lines) do
     local row = qc.rows[i] or queueRow(qc, width)
     qc.rows[i] = row
     row.recipe = l.r
-    row.text:SetText("|cffff9929" .. l.n .. "×|r  " .. l.r.name)
+    row.text:SetText("|cff39ff6b" .. l.n .. "×|r  " .. l.r.name)
     row:ClearAllPoints()
     row:SetPoint("TOPLEFT", qc, "TOPLEFT", 20, -qy)
     row:Show()

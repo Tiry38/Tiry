@@ -7,7 +7,7 @@ local S = ns.Scanner
 
 local ADVICE = {
   AH = { "Ins AH", C.green },
-  HAENDLER = { "Händler", C.hi },
+  HAENDLER = { "Händler", C.aqua },
   SCHROTT = { "Schrott", C.dim },
   BEHALTEN = { "Behalten", C.violet },
 }
@@ -18,14 +18,11 @@ local page = {
   icon = "scan", label = "Scanner", order = 5,
 }
 
+-- Kennzahl als Glas-Pille: Leuchtpunkt und Zahl in der Akzentfarbe
 local function statCard(parent, w, label, color)
-  local card = UI.Card(parent, 16, C.card)
-  card:SetSize(w, 70)
-  card.label = UI.Text(card, 10, "semibold", C.dim)
-  card.label:SetPoint("TOPLEFT", 16, -14)
-  card.label:SetText(label:upper())
-  card.value = UI.Text(card, 18, "bold", color or C.text)
-  card.value:SetPoint("TOPLEFT", card.label, "BOTTOMLEFT", 0, -6)
+  local card = UI.StatPill(parent, w, label, color ~= C.text and color or C.teal, 70)
+  local c = color or C.text
+  card.value:SetTextColor(c[1], c[2], c[3], 1)
   return card
 end
 
@@ -37,7 +34,7 @@ function page.build(self, content, width)
   st:Para("Sprich einen Händler an – Tiry's Zentrale vergleicht automatisch jedes Angebot mit dem AH-Preis. "
     .. "Lohnt sich ein Kauf zum Weiterverkaufen, siehst du ihn hier (und im Chat). "
     .. "Achte besonders auf Ware mit |cffff9929begrenztem Vorrat|r (z. B. Rezepte): die ist im AH oft viel mehr wert.", 12, C.muted, 12)
-  self.merchantInfo = UI.Para(content, 12, C.hi, width)
+  self.merchantInfo = UI.Para(content, 12, C.muted, width)
   st:Add(self.merchantInfo, 18, 8)
   self.flipList = UI.ItemList(content, width, {
     { key = "buy", label = "Kaufpreis", width = 90 },
@@ -70,10 +67,10 @@ function page.build(self, content, width)
   head.desc = UI.Para(head, 12, C.muted, width)
   head.desc:SetPoint("TOPLEFT", head.title, "BOTTOMLEFT", 0, -8)
   head.desc:SetText("Zeigt, was deine Taschen wert sind und wo du jedes Item am besten verkaufst. "
-    .. "Grauer Schrott: beim Händler einfach auf den |cffff9929Müll-Knopf (\"Schrott verkaufen\")|r klicken.")
+    .. "Grauer Schrott: beim Händler einfach auf den |cff39ff6bMüll-Knopf (\"Schrott verkaufen\")|r klicken.")
   local cw = math.floor((width - 30) / 4)
   head.cards = {
-    statCard(head, cw, "Händlerwert", C.hi),
+    statCard(head, cw, "Händlerwert", C.aqua),
     statCard(head, cw, "AH-Potenzial", C.green),
     statCard(head, cw, "Bester Mix", C.text),
     statCard(head, cw, "Grauer Schrott", C.muted),
@@ -100,7 +97,7 @@ function page.build(self, content, width)
     end
     local ok, n = M.CreateShoppingList("Zentrale: Meine Verkäufe", ids)
     if ok then
-      ns.Print("Liste |cffff9929Zentrale: Meine Verkäufe|r angelegt (" .. n .. " Items) – so prüfst du die aktuelle Konkurrenz vor dem Einstellen.")
+      ns.Print("Liste |cff39ff6bZentrale: Meine Verkäufe|r angelegt (" .. n .. " Items) – so prüfst du die aktuelle Konkurrenz vor dem Einstellen.")
     else
       ns.Print("|cffff6b81" .. tostring(n) .. "|r")
     end
@@ -141,7 +138,7 @@ function page.refresh(self)
       cells = {
         buy = ns.Money(f.unit),
         ah = ns.Money(f.net),
-        profit = "|cffff9929+|r" .. ns.Money(f.profit),
+        profit = "|cff39ff6b+|r" .. ns.Money(f.profit),
         stock = f.available > 0 and tostring(f.available) or "unbegr.",
       },
       tip = {
@@ -163,7 +160,7 @@ function page.refresh(self)
   for _, d in ipairs(ns.Deals.List()) do
     deals[#deals + 1] = {
       id = d.id, note = d.qty .. " Stück unter 65 % des Marktwerts",
-      cells = { price = ns.Money(d.price), ref = ns.Money(d.ref), save = "|cffff9929" .. ns.Money(d.save) .. "|r" },
+      cells = { price = ns.Money(d.price), ref = ns.Money(d.ref), save = "|cff39ff6b" .. ns.Money(d.save) .. "|r" },
       tip = { "Im AH kaufen, später zum Marktwert wieder einstellen.", "Shift-Klick: Link in den Chat" },
     }
   end
@@ -185,9 +182,15 @@ function page.refresh(self)
   local bagEntries = {}
   for _, e in ipairs(b.items) do
     local adv = ADVICE[e.advice] or ADVICE.HAENDLER
+    -- Rohstoff-Check: verarbeiten / Trend / behalten / Markt voll
+    local tipCol = (e.process and UI.NEON_HEX) or (e.trend == "fällt" and "|cffff9929") or (e.trend == "steigt" and UI.TEAL_HEX)
+      or (e.tip and e.tip:find("^Markt voll") and "|cffff9929") or (e.tip and UI.TEAL_HEX) or nil
+    local chip = (e.process and { "verarbeiten", C.amber }) or (e.trend == "fällt" and { "Preis fällt", C.hi })
+      or (e.trend == "steigt" and { "Preis steigt", C.teal }) or nil
     bagEntries[#bagEntries + 1] = {
       id = e.id,
-      note = e.bound and "Seelengebunden – nur Händler" or nil,
+      chip = chip,
+      note = e.bound and "Seelengebunden – nur Händler" or (e.tip and (tipCol .. e.tip .. "|r")) or nil,
       cells = {
         count = tostring(e.count),
         vendor = e.vendor > 0 and ns.Money(e.vendor) or "–",
@@ -196,7 +199,8 @@ function page.refresh(self)
       },
       tip = { e.advice == "AH" and "Im AH bringt es deutlich mehr als beim Händler." or
         (e.advice == "SCHROTT" and "Grau = Schrott: beim Händler verkaufen." or
-        (e.advice == "BEHALTEN" and "Kein Händlerwert – behalten oder für Berufe/Quests nutzen." or "Beim Händler verkaufen ist hier am besten.")) },
+        (e.advice == "BEHALTEN" and "Kein Händlerwert – behalten oder für Berufe/Quests nutzen." or "Beim Händler verkaufen ist hier am besten.")),
+        e.tip },
     }
   end
   local bagY = y + 214

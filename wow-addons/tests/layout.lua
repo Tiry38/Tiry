@@ -178,11 +178,41 @@ function L.problems(root, clipRect)
   return out
 end
 
+-- Zeilen wie W.lines, aber Farbcodes (|cAARRGGBB ... |r) bleiben erhalten, damit die Vorschau farbig zeichnet
+local function colorLines(o)
+  local raw = tostring(o.__text or ""):gsub("|A[^|]*|a", "\1"):gsub("|T[^|]*|t", "\1")
+  local maxW = (o.__wrap ~= false and o.__w and o.__w > 0) and o.__w or nil
+  local out = {}
+  for para in (raw .. "\n"):gmatch("(.-)\n") do
+    if not maxW then
+      out[#out + 1] = para
+    else
+      local line = ""
+      for word in para:gmatch("%S+") do
+        local try = (line == "") and word or (line .. " " .. word)
+        if W.textWidth(o, W.strip(try)) <= maxW + 0.5 or line == "" then
+          line = try
+        else
+          out[#out + 1] = line
+          line = word
+        end
+      end
+      out[#out + 1] = line
+    end
+  end
+  return out
+end
+
 -- Export zum Zeichnen: eine Zeile pro sichtbarem Element in Zeichenreihenfolge
 local LAYERS = { BACKGROUND = 1, BORDER = 2, ARTWORK = 3, OVERLAY = 4, HIGHLIGHT = 5 }
 function L.dump(root, path)
   L.reset()
   local f = assert(io.open(path, "w"))
+  -- Masken (z. B. runde Item-Symbole): Ziel-Textur -> Maskendatei, damit die Vorschau sie rund zeichnet
+  local masks = {}
+  walk(root, function(o)
+    if o.__kind == "MaskTexture" and type(o.__allPoints) == "table" and o.__file then masks[o.__allPoints] = o.__file end
+  end)
   local function emit(o)
     if not isShown(o) then return end
     local regions = {}
@@ -202,10 +232,11 @@ function L.dump(root, path)
           local g = rgn.__grad
           local coord = rgn.__coord and table.concat(rgn.__coord, ",") or ""
           f:write(table.concat({ "T", r.l, r.b, r.r, r.t, tostring(rgn.__file), c[1], c[2], c[3], (c[4] or 1) * (rgn.__alpha or 1),
-            g and g[1] or "", g and table.concat(g[2], ",") or "", g and table.concat(g[3], ",") or "", coord, rgn.__blend or "" }, "\t"), "\n")
+            g and g[1] or "", g and table.concat(g[2], ",") or "", g and table.concat(g[3], ",") or "", coord, rgn.__blend or "",
+            masks[rgn] and tostring(masks[rgn]) or "" }, "\t"), "\n")
         else
           local tc = rgn.__tc
-          local lines = W.lines(rgn)
+          local lines = colorLines(rgn)
           f:write(table.concat({ "F", r.l, r.b, r.r, r.t, rgn.__weight or "regular", rgn.__size or 12, tc[1], tc[2], tc[3], tc[4] or 1,
             rgn.__justH or "CENTER", rgn.__justV or "MIDDLE", rgn.__spacing or 0, table.concat(lines, "\31") }, "\t"), "\n")
         end

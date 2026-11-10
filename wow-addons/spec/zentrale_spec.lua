@@ -25,10 +25,28 @@ describe("Grundfunktion mit Auctionator", function()
     local n = 0
     for _ in pairs(TirysZentraleMainFrame.nav) do n = n + 1 end
     assert.is_true(n <= 8)
-    assert.truthy(TirysZentraleMainFrame.nav.auktionen, "Menüpunkt Auktionen fehlt")
+    -- Dock: genau 5 Bereiche entlang des Gold-Kreislaufs; Handel = Auktionen + Markt zusammengelegt
+    local dock = {}
+    for _, g in ipairs(ns.UI.GROUPS) do if not g.util then dock[#dock + 1] = g.label end end
+    assert.are.same({ "Start", "Herstellen", "Farmen", "Handel", "Mein Gold" }, dock)
+    assert.truthy(TirysZentraleMainFrame.nav.handel, "Menüpunkt Handel fehlt")
+    assert.are.equal("handel", ns.UI.GroupOf("auctions").key)
+    assert.are.equal("handel", ns.UI.GroupOf("market").key)
+    assert.truthy(TirysZentraleMainFrame.nav.lernen and TirysZentraleMainFrame.nav.settings, "Schnellknöpfe Lernen/Einstellungen fehlen")
     for _, def in ipairs(ns.UI.order) do
       assert.truthy(ns.UI.GroupOf(def.key), "Ansicht ohne Menüpunkt: " .. def.key)
     end
+    -- Jeder Bereich ist per Klick erreichbar und öffnet eine eigene Ansicht
+    for key, b in pairs(TirysZentraleMainFrame.nav) do
+      if b.key then
+        b:Click()
+        assert.are.equal(key, ns.UI.GroupOf(ns.UI.current).key, "Klick auf " .. key)
+      end
+    end
+    -- Gespeicherter Reiter aus dem alten Menüpunkt "Markt" wird im Bereich Handel wieder geöffnet
+    ns.settings.lastView = { markt = "alerts" }
+    TirysZentraleMainFrame.nav.handel:Click()
+    assert.are.equal("alerts", ns.UI.current)
     openAll(ns)
     noErrors(W)
   end)
