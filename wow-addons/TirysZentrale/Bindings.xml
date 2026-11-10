@@ -1,0 +1,14 @@
+<Bindings>
+	<Binding name="TIRYSZENTRALE_TOGGLE" header="TIRYSZENTRALE">
+		TirysZentrale.UI.ToggleWindow()
+	</Binding>
+	<Binding name="TIRYSZENTRALE_SEARCH">
+		TirysZentrale.UI.Search.Toggle()
+	</Binding>
+	<Binding name="TIRYSZENTRALE_SHOP">
+		TirysZentrale.Shop.Toggle()
+	</Binding>
+	<Binding name="TIRYSZENTRALE_CRAFTNEXT">
+		TirysZentrale.UI.pages.recipes.CraftNext(TirysZentrale.UI.pages.recipes)
+	</Binding>
+</Bindings>
