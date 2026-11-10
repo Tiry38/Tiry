@@ -18,7 +18,8 @@ Aktueller Stand und offene Punkte: **[`UEBERGABE.md`](UEBERGABE.md)** – zuerst
 - `tools/` – Python-Werkzeuge (Routen, Grafiken, Sounds). Immer mit `python3 -I` starten.
 - `tests/` – Lua-5.1-Simulationen der WoW-API (`lua5.1`). Aufruf aus dem Add-on-Ordner, z. B.
   `cd addons/LevelPilot && lua5.1 ../../tests/v4.lua` (muss „ALLE TESTS OK“ melden), außerdem `lp.lua`, `lp2.lua`,
-  `nav.lua`, `fly.lua` (Exit-Code 0 = ok). Vor jeder Auslieferung alle laufen lassen + `luac5.1 -p` auf alle .lua.
+  `nav.lua`, `fly.lua` (Exit-Code 0 = ok). ProcAlarm: `cd addons && PROC_CLASS=WARLOCK|SHAMAN|MAGE lua5.1 ../tests/proc.lua`.
+  Spell-Daten der Live-Version: github.com/simulationcraft/simc-forever (`SpellDataDump/allspells.txt`). Vor jeder Auslieferung alle laufen lassen + `luac5.1 -p` auf alle .lua.
 - `weakauras/` – WeakAura-Importtexte und Generatoren.
 - `previews/` – Vorschaubilder und Sound-Vorhördateien.
 - `qdb/` – **nicht im Repo** (.gitignore): `git clone https://github.com/Questie/QuestieDB.git qdb/QuestieDB`
