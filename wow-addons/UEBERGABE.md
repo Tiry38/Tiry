@@ -38,6 +38,12 @@ kein Dungeonfinder; ~1000 neue Forever-Quests sind noch **nicht** in Questies Fo
 - Ehrlich: 30–40 braucht laut Modell ~40 % Grind-XP – die soloeffizienten Classic-Quests reichen nicht. Dungeons
   (verdoppelte Quest-XP) wären schneller, gehen aber nur in Gruppe.
 
+### Design 4.1 „Neon Glass“ (LevelPilot.lua)
+Glas-Fenster mit Neon-Verlaufskante, Stufenring + XP-Kapsel (inkl. Erholt), Hero-Karte für den aktuellen Schritt,
+Zeitleiste der nächsten Schritte, Grind-Schritte „bis St. X“, Flug-Kapsel, ROUTE|QUESTS-Umschalter, Einstellungs-Panel
+(`···` bzw. `/lp menu`), Glas-Tooltips, gleitende Fertig-Meldung. Vorschau (Mock): `previews/LevelPilot_Design_4.1.png`.
+Ohne passende Route (z. B. ab 40) zeigt das Fenster automatisch die angenommenen Quests.
+
 ### Werkzeugkette (neu)
 `python3 -I make_route.py [key]` (Planer `plan.py` + Modell `xpmodel.py`, schreibt `gen_steps_<key>.json`) →
 `python3 -I build.py [key]` (prüft gegen Forever-DB, schreibt `Routes/<Datei>.lua`, muss „0 Probleme“ melden).
