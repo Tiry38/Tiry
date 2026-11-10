@@ -854,7 +854,7 @@ describe("Herstell-Buch: echter Gewinn, Menge, Neu einstellen, Wochenbilanz", fu
     local l = ns.AH.RelistList()
     assert.are.equal("unterboten", l[1].where)
     assert.are.equal(3999, l[1].price)
-    assert.are.equal(math.ceil(300 / 0.95), l[1].floor)
+    assert.are.equal(math.ceil((300 + ns.Market.DepositRisk(2304)) / 0.95), l[1].floor)
     s.list[1].competitor = 200
     l = ns.AH.RelistList()
     assert.are.equal(l[1].floor, l[1].price)
@@ -1187,6 +1187,39 @@ describe("Goldmacher-Werkzeuge", function()
     assert.truthy(leather, "Leichtes Leder in der Liste")
     assert.truthy(leather.process, "Verarbeiten erkannt")
     assert.truthy(leather.tip:find("Verarbeiten zu"))
+    noErrors(W)
+  end)
+
+  it("Kaufen bis: höchster Materialpreis, bei dem der Craft noch Gewinn bringt", function()
+    local ns, W = E.load({ prices = { [2318] = 300, [2320] = 10, [4231] = 500, [2312] = 5000 } })
+    ns.Recipes.SetProfit(0) -- Mindestgewinn 0 -> "kaufen bis" = Gewinnschwelle (+1 Kupfer)
+    ns.char.queue = { { recipe = 2164, prof = "LEATHERWORKING", n = 1 } }
+    local _, revenue = ns.Scanner.RecipeProfit(ns.Recipes.Get(2164))
+    local max = ns.Shop.MaxPrice(2318)
+    assert.are.equal(math.floor((revenue - 500 - 20 - 1) / 4), max)
+    local e
+    for _, x in ipairs((ns.Shop.List())) do if x.id == 2318 then e = x end end
+    assert.are.equal(max, e.maxUnit)
+    assert.falsy(e.overMax)
+    -- genau zum Grenzpreis bleibt Gewinn übrig, darüber nicht mehr
+    W.prices[2318] = max
+    assert.is_true(ns.Scanner.RecipeProfit(ns.Recipes.Get(2164)) >= 1)
+    W.prices[2318] = max + 50
+    for _, x in ipairs((ns.Shop.List())) do if x.id == 2318 then e = x end end
+    assert.is_true(e.overMax)
+    noErrors(W)
+  end)
+
+  it("Neu einstellen: nur so viele wie in 3 Tagen weggehen, Markt voll erkannt", function()
+    local ns, W = E.load({ prices = { [2318] = 300, [2304] = 2000 } })
+    W.bags = { [0] = { { itemID = 2304, stackCount = 10, quality = 2 } } }
+    ns.AH.Store().list = { { auctionID = 1, id = 2304, qty = 10, unit = 2000, status = "expired" } }
+    ns.Demand.Store().stats[2304] = { s = 1, h = 24, q = 100, t = W.now } -- 1/Tag, 100 im Angebot
+    local l = ns.AH.RelistList()
+    assert.are.equal("abgelaufen", l[1].where)
+    assert.are.equal(math.min(10, ns.Demand.MarketBatch(2304)), l[1].post)
+    assert.is_true(l[1].post < l[1].qty)
+    assert.is_true(l[1].full)
     noErrors(W)
   end)
 end)

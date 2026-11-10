@@ -547,7 +547,9 @@ function AW.Floor(id)
     if not cost or unknown > 0 or (r.qty or 0) <= 0 then return nil end
     unit = cost / r.qty
   end
-  return math.max(math.ceil(unit / M.CutFactor()), M.VendorSell(id) or 0)
+  -- erwarteter Einstellgebühr-Verlust (Forever: Gebühr weg bei Ablauf) gehört zu den Kosten
+  local risk = M.DepositRisk and M.DepositRisk(id) or 0
+  return math.max(math.ceil((unit + risk) / M.CutFactor()), M.VendorSell(id) or 0)
 end
 
 local function suggest(id, competitor)
@@ -588,6 +590,14 @@ function AW.RelistList()
       list[#list + 1] = { id = e.id, qty = e.n, where = "hergestellt", price = price, floor = floor, wait = wait }
       seen[e.id] = true
     end
+  end
+  -- Goldmacher-Regel "nicht den Markt fluten": nur so viele einstellen, wie in ~3 Tagen weggehen
+  -- (post = empfohlene Menge, full = Angebot reicht für über 2 Wochen -> Preise gedrückt, lieber halten)
+  local D = ns.Demand
+  for _, e in ipairs(list) do
+    local batch = D and D.MarketBatch(e.id)
+    e.post = (batch and e.where ~= "unterboten") and math.min(e.qty, batch) or e.qty
+    e.full = D and D.Full(e.id) or nil
   end
   return list
 end
