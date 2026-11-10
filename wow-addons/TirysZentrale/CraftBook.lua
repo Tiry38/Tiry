@@ -2,8 +2,8 @@
 -- * Beim Herstellen merkt es sich die echten Materialkosten (Ø deiner AH-Einkäufe der letzten 30 Tage,
 --   sonst der günstigere Weg aus Kaufen/Selbst-Herstellen).
 -- * Beim Verkauf (Verkaufsbuch = AH-Briefe) wird der echte Erlös dagegen gerechnet.
--- * Empfohlene Menge pro Rezept: so viele, wie sich bei dir in einer Woche verkaufen – minus was schon in
---   Taschen/Bank und im AH liegt.
+-- * Empfohlene Menge pro Rezept: so viele, wie sich bei dir in einer Woche verkaufen (ohne eigene Verkäufe:
+--   dein Anteil am gemessenen AH-Absatz von 3 Tagen) – minus was schon in Taschen/Bank und im AH liegt.
 local _, ns = ...
 
 local CB = {}
@@ -168,6 +168,14 @@ function CB.Suggest(r)
     want = math.ceil(soldUnits / 2)
     if sales / (sales + expired) < 0.5 then want = math.floor(want / 2) end
     why = string.format("verkauft ~%d/Woche", math.ceil(soldUnits / 2))
+  elseif ns.Demand and ns.Demand.Class(out) == "slow" then
+    -- Markt gemessen: verkauft sich kaum -> nichts auf Vorrat herstellen
+    want, why = 0, "Ladenhüter im AH – lieber nicht"
+  elseif ns.Demand and ns.Demand.MarketBatch(out) then
+    -- noch keine eigenen Verkäufe, aber der Markt ist gemessen: dein Anteil an 3 Tagen Verkäufen
+    local perDay = ns.Demand.PerDay(out)
+    want = ns.Demand.MarketBatch(out)
+    why = string.format("Markt: ~%d/Tag verkauft", math.max(1, math.floor(perDay + 0.5)))
   else
     -- noch keine Erfahrung: vorsichtig starten
     local stack = (ns.Item(out).stack or 1) > 1

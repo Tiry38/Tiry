@@ -38,7 +38,10 @@ local function groupValue(ids)
   local vals = {}
   for _, id in ipairs(ids or {}) do
     local p = M.Price(id)
-    if p then vals[#vals + 1] = { id = id, stack = M.Net(p) * (ns.Item(id).stack or 20) } end
+    if p then
+      local stack = ns.Item(id).stack or 20
+      vals[#vals + 1] = { id = id, stack = M.NetAfterDeposit(id, stack, p) * stack }
+    end
   end
   if #vals == 0 then return nil end
   table.sort(vals, function(a, b) return a.stack > b.stack end)
@@ -86,15 +89,15 @@ local function craftCost(r)
 end
 
 -- Was bringt das Ergebnis im AH zurück? (nur verkäuflich, frischer Preis, kein Ladenhüter) – sonst 0
+-- Netto nach AH-Gebühr und Einstellgebühr-Risiko
 local function resale(r)
   local e = ns.DB.Get(r.out)
   if e and (e.bind == 1 or e.bind == 4) then return 0 end
   local age = M.Age(r.out)
   local price = M.Price(r.out)
   if not price or not age or age > 3 then return 0 end
-  local rate, n = ns.Ledger.SaleRate(r.out)
-  if rate and n >= 4 and rate < 0.25 then return 0 end
-  return math.floor(M.Net(price) * math.max(r.qty or 1, 1))
+  if ns.Demand.Class(r.out) == "slow" then return 0 end
+  return math.max(0, math.floor(M.NetAfterDeposit(r.out, nil, price) * math.max(r.qty or 1, 1)))
 end
 AD.Resale = resale
 
@@ -175,15 +178,14 @@ function AD.RecipeTips(limit)
       local e = ns.DB.Get(r.out)
       local bound = e and (e.bind == 1 or e.bind == 4)
       local age = M.Age(r.out)
-      local rate, n = ns.Ledger.SaleRate(r.out)
-      local slow = rate and n >= 4 and rate < 0.25
+      local slow = ns.Demand.Class(r.out) == "slow"
       if profit and revenue and unknown == 0 and not bound and not slow and age and age <= 3
           and profit >= math.max(minProfit, 1) then
         local item, price, payback = R.Payback(r, profit)
         if not payback or payback <= 30 then -- Rezept muss sich in höchstens 30 Crafts bezahlt machen
           local state, req, exact = R.LearnState(r, rank)
           local d = R.Difficulty(r, rank)
-          out[#out + 1] = { r = r, profit = profit, item = item, price = price, payback = payback,
+          out[#out + 1] = { r = r, id = r.out, qty = r.qty, profit = profit, item = item, price = price, payback = payback,
             skillUp = d ~= nil and d <= 1, prof = key, state = state or "now", req = req, exact = exact,
             learnText = R.LearnText(r, rank) }
         end
@@ -191,10 +193,12 @@ function AD.RecipeTips(limit)
     end
   end
   local ORDER = { now = 1, soon = 2, maybe = 3 }
+  -- Jetzt lernbar zuerst; dann was sich oft verkauft und am Tag am meisten bringt (Kleinvieh macht auch Mist)
+  ns.Demand.Sort(out)
+  for i, e in ipairs(out) do e.pos = i end
   table.sort(out, function(a, b)
     if ORDER[a.state] ~= ORDER[b.state] then return ORDER[a.state] < ORDER[b.state] end
-    if a.profit ~= b.profit then return a.profit > b.profit end
-    return a.r.name < b.r.name
+    return a.pos < b.pos
   end)
   while #out > (limit or 8) do table.remove(out) end
   return out

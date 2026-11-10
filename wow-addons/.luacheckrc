@@ -21,7 +21,7 @@ read_globals = {
   "C_SpellBook", "C_SuperTrack", "C_Texture", "C_Timer", "C_TradeSkillUI", "Enum", "TooltipDataProcessor", "UiMapPoint",
   -- Funktionen
   "BuyMerchantItem", "CanMerchantRepair", "ChatEdit_InsertLink", "CreateColor", "CreateFrame", "GetCursorPosition",
-  "GetInboxHeaderInfo", "GetInboxInvoiceInfo", "GetInboxItem", "GetInboxNumItems", "GetItemIcon", "GetItemInfo",
+  "GetCVar", "ItemLocation", "GetInboxHeaderInfo", "GetInboxInvoiceInfo", "GetInboxItem", "GetInboxNumItems", "GetItemIcon", "GetItemInfo",
   "GetLocale", "GetMerchantItemID", "GetMerchantItemInfo", "GetMerchantItemMaxStack", "GetMerchantNumItems",
   "GetMoney", "GetMoneyString", "GetProfessionInfo", "GetProfessions", "GetRealZoneText", "GetRealmName",
   "GetRepairAllCost", "GetTime", "HandleModifiedItemClick", "InCombatLockdown", "IsShiftKeyDown", "OpenWorldMap",

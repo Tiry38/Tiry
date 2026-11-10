@@ -871,7 +871,11 @@ describe("Herstell-Buch: echter Gewinn, Menge, Neu einstellen, Wochenbilanz", fu
       assert.truthy(plan.net <= plan.total)
       assert.truthy(plan.steps[1].net)
     end
-    assert.are.equal(math.floor(2000 * 0.95), ns.Advisor.Resale(ns.Recipes.Get(2152)))
+    -- Verkauf netto nach AH-Gebühr minus Einstellgebühr-Risiko (1 Silber je 10er-Angebot, 1 Fehlversuch erwartet)
+    local r = ns.Recipes.Get(2152)
+    local risk = ns.Market.DepositRisk(r.out)
+    assert.truthy(risk > 0)
+    assert.are.equal(math.floor(2000 * 0.95) - risk, ns.Advisor.Resale(r))
   end)
 end)
 
@@ -982,5 +986,104 @@ describe("Gold-Kreislauf (Startseite)", function()
     ns.UI.Show("recipes")
     assert.truthy(ns.UI.pages.recipes.sellList.rows[1]:IsShown())
     assert.are.same({}, W.errors)
+  end)
+end)
+
+describe("Einstellgebühr (Forever: mind. 1 Silber, weg bei Ablauf)", function()
+  it("schätzt ohne AH: Minimum je Angebot oder Anteil am Händlerpreis", function()
+    local ns, W = E.load({ itemInfo = { [4238] = { name = "Leinentasche", sell = 200, stack = 1 },
+      [5000] = { name = "Teures Schwert", sell = 5000, stack = 1 } } })
+    local M = ns.Market
+    assert.are.equal(2, M.Duration())
+    assert.are.equal(100, (M.Deposit(4238, 1)))         -- 20 % von 2s = 40c < 1 Silber Minimum
+    assert.are.equal(1000, (M.Deposit(5000, 1)))        -- 20 % von 50s
+    ns.settings.ahDeposit = 1                          -- wenn Blizzard auf 1 Kupfer senkt
+    assert.are.equal(40, (M.Deposit(4238, 1)))
+    noErrors(W)
+  end)
+
+  it("nimmt bei offenem AH Blizzards exakten Betrag und merkt ihn sich", function()
+    local ns, W = E.load({ itemInfo = { [2318] = { name = "Leichtes Leder", sell = 10, stack = 20 } } })
+    local M = ns.Market
+    C_AuctionHouse.CalculateCommodityDeposit = function(id, duration, qty)
+      assert.are.equal(2318, id) assert.are.equal(2, duration)
+      return 15 * qty
+    end
+    M.ahOpen = true
+    local v, exact = M.Deposit(2318, 20)
+    assert.are.equal(300, v) assert.is_true(exact)
+    M.ahOpen = false
+    v, exact = M.Deposit(2318, 10)
+    assert.are.equal(150, v) assert.is_false(exact)    -- gemerkt und auf die Menge umgerechnet
+    noErrors(W)
+  end)
+
+  it("Risiko pro Stück = Gebühr je Stück × erwartete Fehlversuche aus der Verkaufsquote", function()
+    local ns, W = E.load({ itemInfo = { [4238] = { name = "Leinentasche", sell = 200, stack = 1 } } })
+    local M = ns.Market
+    assert.are.equal(1, M.ExpectedRelists(4238))        -- ohne Daten: jede 2. Auktion läuft ab
+    assert.are.equal(100, M.DepositRisk(4238))
+    ns.db.ledger = { sales = {}, buys = {}, expired = {} }
+    for i = 1, 4 do table.insert(ns.db.ledger.sales, { id = 4238, t = W.now - i, money = 900, n = 1 }) end
+    assert.are.equal(0, M.ExpectedRelists(4238))        -- verkauft sich immer -> Gebühr kommt immer zurück
+    assert.are.equal(0, M.DepositRisk(4238))
+    noErrors(W)
+  end)
+end)
+
+describe("Absatz: Verkäufe pro Tag aus zwei AH-Scans", function()
+  it("zählt nur Angebote, die vor Ablauf verschwunden sind, und erkennt Umstellen", function()
+    local ns, W = E.load()
+    local D = ns.Demand
+    local a = { b = { ["100|Xa"] = { q = 5, s = 43200 }, ["120|Yo"] = { q = 3, s = 0 } } }
+    local b = { b = { ["100|Xa"] = { q = 2, s = 43200 } } }
+    local sold, observable = D.Compare(a, b, 3600)
+    assert.are.equal(3, sold) assert.is_true(observable)  -- Yo hatte < 1 Std. Rest: kann abgelaufen sein
+    -- Xa nimmt seine 5 raus und stellt sie billiger neu ein -> kein Verkauf
+    sold = D.Compare({ b = { ["100|Xa"] = { q = 5, s = 43200 } } }, { b = { ["90|Xa"] = { q = 5, s = 43200 } } }, 3600)
+    assert.are.equal(0, sold)
+    noErrors(W)
+  end)
+
+  it("liest den Komplett-Scan mit, misst Verkäufe/Tag und stuft Kleinvieh vor Ladenhüter", function()
+    local ns, W = E.load({ itemInfo = { [2318] = { name = "Leichtes Leder", sell = 10, stack = 20 },
+      [4238] = { name = "Leinentasche", sell = 200, stack = 1 } } })
+    local D = ns.Demand
+    local auctions
+    C_AuctionHouse.GetNumReplicateItems = function() return #auctions end
+    C_AuctionHouse.GetReplicateItemInfo = function(i)
+      local a = auctions[i + 1]
+      return nil, nil, a.q, 1, true, 1, nil, 0, 0, a.price * a.q, 0, nil, nil, a.owner, a.owner, 0, a.id, true
+    end
+    C_AuctionHouse.GetReplicateItemTimeLeft = function(i) return auctions[i + 1].band end
+    ns.char.watch = { [2318] = true, [4238] = true }
+    ns.Market.ahOpen = true
+    auctions = {
+      { id = 2318, q = 20, price = 40, owner = "Ana", band = 3 }, { id = 2318, q = 20, price = 42, owner = "Bo", band = 3 },
+      { id = 4238, q = 1, price = 90000, owner = "Cy", band = 3 },
+    }
+    W.fire("REPLICATE_ITEM_LIST_UPDATE") W.flush()
+    W.now = W.now + 2 * 3600
+    auctions = {
+      { id = 2318, q = 6, price = 40, owner = "Ana", band = 3 },  -- 14 + 20 (Bo komplett) verkauft
+      { id = 4238, q = 1, price = 90000, owner = "Cy", band = 3 },
+    }
+    W.fire("REPLICATE_ITEM_LIST_UPDATE") W.flush()
+    local perDay, src = D.PerDay(2318)
+    assert.are.equal("markt", src)
+    assert.are.equal(34 * 12, math.floor(perDay + 0.5))   -- 34 Stück in 2 Std.
+    assert.are.equal("fast", D.Class(2318))
+    assert.truthy(D.Text(2318, true):find("Schnelldreher"))
+    -- Tasche: über 12 Std. beobachtet, nichts verkauft -> Ladenhüter
+    for _ = 1, 6 do
+      W.now = W.now + 2 * 3600
+      W.fire("REPLICATE_ITEM_LIST_UPDATE") W.flush()
+    end
+    assert.are.equal("slow", D.Class(4238))
+    -- Kleinvieh: 5c Gewinn je Leder bei hohem Absatz schlägt 50 Gold Gewinn bei einem Ladenhüter
+    local list = D.Sort({ { id = 4238, qty = 1, profit = 500000 }, { id = 2318, qty = 1, profit = 5 } })
+    assert.are.equal(2318, list[1].id)
+    assert.truthy(list[1].goldDay and list[1].goldDay > 0)
+    noErrors(W)
   end)
 end)

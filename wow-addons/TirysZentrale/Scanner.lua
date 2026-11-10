@@ -43,7 +43,7 @@ function S.ScanMerchant()
       end
       local ahPrice = M.Price(itemID)
       if ahPrice then
-        local net = M.Net(ahPrice)
+        local net = M.NetAfterDeposit(itemID, nil, ahPrice)
         local profit = net - unit
         -- Mindestens 20 % und 50 Kupfer Gewinn pro Stück, sonst lohnt der Aufwand nicht
         if profit >= 50 and profit >= unit * 0.2 then
@@ -126,7 +126,7 @@ function S.ScanBags()
   for _, e in pairs(byID) do
     local vendorUnit = e.noValue and 0 or M.VendorSell(e.id)
     local ahUnit = (not e.bound) and M.Price(e.id) or nil
-    local ahNet = ahUnit and M.Net(ahUnit) or nil
+    local ahNet = ahUnit and M.NetAfterDeposit(e.id, M.ListSize(e.id, e.count), ahUnit) or nil
     e.vendor = vendorUnit * e.count
     e.ah = ahNet and ahNet * e.count or nil
     if e.quality == 0 then
@@ -305,7 +305,9 @@ function S.MatCost(id, depth, seen)
 end
 
 -- Gewinn eines gespeicherten Rezepts mit aktuellen Preisen.
--- 5. Rückgabe: Materialien, die du günstiger selbst herstellst { { id, saves = Ersparnis pro Craft } }
+-- Erlös = AH-Preis nach AH-Gebühr minus erwartetem Einstellgebühr-Verlust (Forever: mind. 1 Silber je Angebot,
+-- weg bei Ablauf). 5. Rückgabe: Materialien, die du günstiger selbst herstellst { { id, saves = Ersparnis pro Craft } }
+-- 6. Rückgabe: davon Einstellgebühr-Risiko pro Craft (Kupfer)
 function S.RecipeProfit(r)
   local PS = ns.PriceString
   local cost, unknown, makes = 0, 0, {}
@@ -323,9 +325,13 @@ function S.RecipeProfit(r)
   cost = math.floor(cost + 0.5)
   local price
   if PS then price = PS.Eval("craftValue", r.out) else price = M.Price(r.out) end
-  local revenue = price and M.Net(price) * r.qty or nil
+  local revenue, deposit
+  if price then
+    deposit = M.DepositRisk(r.out) * r.qty
+    revenue = M.Net(price) * r.qty - deposit
+  end
   local profit = revenue and (revenue - cost) or nil
-  return profit, revenue, cost, unknown, makes
+  return profit, revenue, cost, unknown, makes, deposit
 end
 
 local function readOpenProf()

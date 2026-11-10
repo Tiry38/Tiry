@@ -79,6 +79,9 @@ local function addLines(tooltip, itemID)
   end
   local rate, n = ns.Ledger.SaleRate(itemID)
   if rate then lines[#lines + 1] = string.format("Deine Verkaufsquote: %d %% (%d Auktionen)", math.floor(rate * 100 + 0.5), n) end
+  if ns.Demand and (ns.Demand.PerDay(itemID) or select(4, ns.Demand.PerDay(itemID))) then
+    lines[#lines + 1] = "Absatz: " .. ns.Demand.Text(itemID)
+  end
   if #lines == 0 then return end
   tooltip:AddLine(" ")
   tooltip:AddLine("Tiry's Zentrale", 1, 0.6, 0.16)

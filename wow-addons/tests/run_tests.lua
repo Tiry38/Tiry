@@ -282,8 +282,10 @@ local function runScenario(label, opts)
   check(label .. ": Mindestgewinn wächst mit Level", select(2, R.Filter()) > g20)
   W.level = 20 ; W.fire("PLAYER_LEVEL_UP", 20) ; W.flush()
 
-  -- Rechentest mit festen Zahlen (AH-Gebühr 5 %):
-  -- Leinentasche: Verkauf 1000 -> netto 950; Material 3 Leinenstoffballen à 100 + 3 Grober Faden à 10 (Händler) = 330 -> Gewinn 620
+  -- Rechentest mit festen Zahlen (AH-Gebühr 5 %, Einstellgebühr 1 Silber je Angebot, ohne Verkaufsdaten 50 % Quote
+  -- = 1 erwarteter Fehlversuch):
+  -- Leinentasche: Verkauf 1000 -> netto 950 - 100 Gebühr-Risiko = 850; Material 3 Leinenstoffballen à 100
+  -- + 3 Grober Faden à 10 (Händler) = 330 -> Gewinn 520
   -- Leinenstoffballen: Verkauf 100 -> netto 95; Material 2 Leinenstoff à 60 = 120 -> Verlust, darf NICHT erscheinen
   -- Feine Lederhandschuhe sind beim Anlegen gebunden (handelbar), werden also gezeigt, wenn Preise da sind
   if opts.auctionator ~= false then step("Rechentest Craft-Planer", function()
@@ -296,7 +298,7 @@ local function runScenario(label, opts)
     p.prof, p.view = "TAILORING", "known"
     local list = p.Entries(p)
     assert(#list == 1, "nur die Leinentasche bringt Gewinn, gefunden: " .. #list)
-    assert(list[1].r.id == 3755 and list[1].revenue == 950 and list[1].cost == 330 and list[1].profit == 620,
+    assert(list[1].r.id == 3755 and list[1].revenue == 850 and list[1].cost == 330 and list[1].profit == 520,
       string.format("Zahlen falsch: %s %s %s", tostring(list[1].revenue), tostring(list[1].cost), tostring(list[1].profit)))
     -- Mindestgewinn über dem Gewinn -> Liste leer
     TirysZentraleDB.settings.craft.profitFactor = 1000

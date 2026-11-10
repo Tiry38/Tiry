@@ -136,6 +136,7 @@ local DEFAULTS = {
   craft = { marginFactor = 1, profitFactor = 1, onlySafe = true, onlySkill = false, perRecipe = 2, freshOnly = true, skipSlow = true },
   shopAutoOpen = true,  -- Einkaufsfenster beim Öffnen des AH zeigen, wenn noch etwas fehlt
   ahCut = 5,          -- Prozent, den das Auktionshaus beim Verkauf einbehält
+  ahDeposit = 100,    -- Einstellgebühr je Angebot in Kupfer, solange das AH noch keinen exakten Wert geliefert hat (Forever: mind. 1 Silber)
   showOnlyMyLevel = false,
   expertMode = false,
   ahAutoScan = true,   -- beim Öffnen des AH automatisch scannen (über Auctionator)
@@ -171,7 +172,7 @@ ns.On("ADDON_LOADED", function(_, name)
   if name ~= ADDON then return end
   TirysZentraleDB = type(TirysZentraleDB) == "table" and TirysZentraleDB or {}
   TirysZentraleCharDB = type(TirysZentraleCharDB) == "table" and TirysZentraleCharDB or {}
-  applyDefaults(TirysZentraleDB, { settings = DEFAULTS, vendorBuy = {} })
+  applyDefaults(TirysZentraleDB, { settings = DEFAULTS, vendorBuy = {}, deposits = {} })
   applyDefaults(TirysZentraleCharDB, { days = {}, sessions = {} })
   ns.db = TirysZentraleDB
   ns.settings = TirysZentraleDB.settings

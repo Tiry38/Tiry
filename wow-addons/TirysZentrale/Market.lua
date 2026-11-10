@@ -60,9 +60,114 @@ function M.Net(price)
   return math.floor(price * M.CutFactor())
 end
 
--- Bester Verkaufsweg für ein Item: "AH" oder "HAENDLER", Wert pro Stück (netto)
-function M.BestSale(itemID)
-  local ah = M.Net(M.Price(itemID))
+----------------------------------------------------------------------------
+-- Einstellgebühr (Kaution): In Forever kostet jedes Angebot mindestens 1 Silber (Wowhead-News vom 05.11.2026).
+-- Sie kommt zurück, wenn das Item verkauft wird – verloren ist sie nur, wenn das Angebot abläuft oder du es
+-- abbrichst. Echte Kosten pro Verkauf = Gebühr × erwartete Fehlversuche (aus deiner eigenen Verkaufsquote).
+-- Den exakten Betrag rechnet Blizzard nur bei offenem AH aus -> er wird pro Item gemerkt.
+----------------------------------------------------------------------------
+-- Laufzeit-Stufe 1–3 (kurz/mittel/lang) wie in Blizzards Verkaufsfenster gewählt, sonst mittel
+function M.Duration()
+  local ok, d = pcall(function() return GetCVar and tonumber(GetCVar("auctionHouseDurationDropdown")) end)
+  d = ok and tonumber(d) or nil
+  if not d or d < 1 or d > 3 then return 2 end
+  return math.floor(d)
+end
+
+-- Typische Angebotsgröße: Ausrüstung einzeln, Stapelware als Menge (deine Menge, sonst bis 20 Stück)
+function M.ListSize(itemID, have)
+  local stack = ns.Item(itemID).stack or 1
+  if stack <= 1 then return 1 end
+  return math.max(1, math.floor(have or math.min(stack, 20)))
+end
+
+-- Exakter Betrag von Blizzard (nur bei offenem AH). Ausrüstung braucht ein Item in der Tasche (ItemLocation).
+local function exactDeposit(itemID, qty, loc, d)
+  local AH = C_AuctionHouse
+  if not (M.ahOpen and AH) then return nil end
+  local ok, v
+  if loc and AH.CalculateItemDeposit then
+    ok, v = pcall(AH.CalculateItemDeposit, loc, d, qty)
+  elseif AH.CalculateCommodityDeposit then
+    ok, v = pcall(AH.CalculateCommodityDeposit, itemID, d, qty)
+  end
+  if ok and type(v) == "number" and v >= 0 then return v end
+  return nil
+end
+
+-- Schätzung, solange Blizzard noch nichts gesagt hat: Forever-Berichte nennen 5 / 20 / 60 % des Händlerpreises
+-- je Laufzeit (wowforever.be, 06.11.2026; Wowheads Beispiel passt zu 60 %) – nicht offiziell bestätigt.
+M.DEPOSIT_SHARE = { 0.05, 0.20, 0.60 }
+
+-- Einstellgebühr für EIN Angebot mit qty Stück (Kupfer). 2. Rückgabe: true = exakt von Blizzard
+function M.Deposit(itemID, qty, loc)
+  qty = math.max(math.floor(qty or 1), 1)
+  local d = M.Duration()
+  local cache = ns.db and ns.db.deposits
+  local v = itemID and exactDeposit(itemID, qty, loc, d)
+  if v then
+    if cache then
+      local c = type(cache[itemID]) == "table" and cache[itemID] or {}
+      c[d] = { v = v, q = qty, t = time() }
+      cache[itemID] = c
+    end
+    return v, true
+  end
+  local floor = math.max(tonumber(ns.settings and ns.settings.ahDeposit) or 100, 0)
+  local c = cache and itemID and type(cache[itemID]) == "table" and cache[itemID][d]
+  if type(c) == "table" and tonumber(c.v) and tonumber(c.q) and c.q > 0 then
+    -- gemerkten Betrag auf die Menge umrechnen; das Minimum je Angebot bleibt bestehen
+    return math.max(math.floor(c.v * qty / c.q + 0.5), math.min(floor, c.v)), false
+  end
+  local vendor = itemID and M.VendorSell(itemID) or 0
+  return math.max(floor, math.floor(vendor * qty * M.DEPOSIT_SHARE[d] + 0.5)), false
+end
+
+-- Deine Verkaufsquote über alle Items (ab 10 Angeboten in 30 Tagen), kurz gemerkt
+local overall = { t = -100 }
+local function overallRate()
+  local now = GetTime and GetTime() or 0
+  if now - overall.t > 60 then
+    overall.t, overall.p = now, nil
+    local L = ns.Ledger
+    local ok, tot = pcall(function() return L and L.Totals and L.Totals(30) end)
+    if ok and tot and tot.rate and (tot.sold + tot.expired) >= 10 then overall.p = tot.rate end
+  end
+  return overall.p
+end
+function M.ResetRateCache() overall.t = -100 end
+
+-- Erwartete Fehlversuche (abgelaufene Angebote) bis zum Verkauf: (1 − Quote) / Quote, höchstens 4.
+-- Quote: deine Quote für dieses Item (ab 4 Angeboten) > gemessener Absatz im AH > deine Gesamtquote > 50 %
+function M.ExpectedRelists(itemID)
+  local L, p = ns.Ledger, nil
+  if L and L.SaleRate and itemID then
+    local rate, n = L.SaleRate(itemID)
+    if rate and n and n >= 4 then p = rate end
+  end
+  if not p and itemID and ns.Demand then p = ns.Demand.SellChance(itemID) end
+  p = ns.Clamp(p or overallRate() or 0.5, 0.2, 1)
+  return (1 - p) / p
+end
+
+-- Erwarteter Gebühren-Verlust pro verkauftem Stück (Kupfer)
+function M.DepositRisk(itemID, qty, loc)
+  if not itemID then return 0 end
+  qty = math.max(math.floor(qty or M.ListSize(itemID)), 1)
+  local dep = M.Deposit(itemID, qty, loc)
+  return math.floor(dep / qty * M.ExpectedRelists(itemID) + 0.5)
+end
+
+-- AH-Erlös pro Stück nach Gebühr UND Einstellgebühr-Risiko (nil ohne Preis)
+function M.NetAfterDeposit(itemID, qty, price)
+  local net = M.Net(price or M.Price(itemID))
+  if not net then return nil end
+  return net - M.DepositRisk(itemID, qty)
+end
+
+-- Bester Verkaufsweg für ein Item: "AH" oder "HAENDLER", Wert pro Stück (netto, inkl. Einstellgebühr-Risiko)
+function M.BestSale(itemID, qty)
+  local ah = M.NetAfterDeposit(itemID, qty)
   local vendor = M.VendorSell(itemID)
   if ah and ah > vendor then
     return "AH", ah, vendor
@@ -144,9 +249,53 @@ function M.SearchNow(itemIDs)
   return true
 end
 
+-- Bei offenem AH die exakten Einstellgebühren für Taschen-Items und eigene Rezept-Ergebnisse merken
+function M.LearnDeposits()
+  if not (M.ahOpen and C_AuctionHouse) then return 0 end
+  local n, seen = 0, {}
+  if C_Container and C_Container.GetContainerNumSlots and C_Container.GetContainerItemInfo then
+    for bag = 0, NUM_TOTAL_EQUIPPED_BAG_SLOTS or NUM_BAG_SLOTS or 4 do
+      for slot = 1, C_Container.GetContainerNumSlots(bag) or 0 do
+        local info = C_Container.GetContainerItemInfo(bag, slot)
+        local id = info and info.itemID
+        if id and not seen[id] and not info.isBound then
+          seen[id] = true
+          local loc
+          if (ns.Item(id).stack or 1) <= 1 and ItemLocation and ItemLocation.CreateFromBagAndSlot then
+            loc = ItemLocation:CreateFromBagAndSlot(bag, slot)
+          end
+          local _, exact = M.Deposit(id, loc and 1 or M.ListSize(id, info.stackCount), loc)
+          if exact then n = n + 1 end
+        end
+      end
+    end
+  end
+  local R = ns.Recipes
+  if R and R.List and R.MyProfessions then
+    for _, key in ipairs(R.MyProfessions()) do
+      for _, r in ipairs(R.List(key, "known") or {}) do
+        local id = r.out
+        if id and not seen[id] and (ns.Item(id).stack or 1) > 1 then
+          seen[id] = true
+          local _, exact = M.Deposit(id, M.ListSize(id))
+          if exact then n = n + 1 end
+        end
+      end
+    end
+  end
+  return n
+end
+
 ns.On("AUCTION_HOUSE_SHOW", function()
   M.ahOpen = true
   ns.Fire("AH_STATE")
+  if C_Timer and C_Timer.After then
+    C_Timer.After(1.5, function()
+      ns.Safe(function()
+        if M.LearnDeposits() > 0 then ns.Fire("PRICES_UPDATED") end
+      end)
+    end)
+  end
 end)
 ns.On("AUCTION_HOUSE_CLOSED", function()
   M.ahOpen = false

@@ -56,7 +56,9 @@ function A.VendorCandidates()
         local db = ns.DB and ns.DB.Get(info.itemID)
         local vendor = M.VendorSell(info.itemID)
         local ah = M.Price(info.itemID)
-        if db and SAFE_CLASSES[db.class] and vendor > 0 and ah and M.Net(ah) <= vendor then
+        -- AH lohnt nur, wenn nach AH-Gebühr und Einstellgebühr-Risiko mehr übrig bleibt als beim Händler
+        if db and SAFE_CLASSES[db.class] and vendor > 0 and ah
+            and M.NetAfterDeposit(info.itemID, M.ListSize(info.itemID, info.stackCount), ah) <= vendor then
           local value = vendor * (info.stackCount or 1)
           list[#list + 1] = { bag = bag, slot = slot, id = info.itemID, count = info.stackCount or 1, value = value }
           total = total + value
