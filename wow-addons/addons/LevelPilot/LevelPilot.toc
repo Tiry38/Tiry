@@ -2,7 +2,7 @@
 ## Title: |cff39ff6bLevel|r|cffd8d8d8Pilot|r
 ## Notes: Levelrouten mit Pfeil, Quest-Liste nach Entfernung, Auto-Quests, XP-Cockpit.
 ## Author: Tiry
-## Version: 4.0.0
+## Version: 4.1.0
 ## OptionalDeps: Questie, QuestieDB
 ## SavedVariablesPerCharacter: LevelPilotDB
 

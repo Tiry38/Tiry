@@ -5,7 +5,7 @@
 -- Datenquelle: Blizzards eigene Questmarkierungen (nur angenommene Quests).
 ---------------------------------------------------------------------------
 local ADDON = ...
-local VERSION = "4.0.0"
+local VERSION = "4.1.0"
 local floor, max, min, abs, sqrt, atan2, pi, fmt = math.floor, math.max, math.min, math.abs, math.sqrt, math.atan2, math.pi, string.format
 local BT = BackdropTemplateMixin and "BackdropTemplate" or nil
 local FONT = STANDARD_TEXT_FONT or "Fonts\\FRIZQT__.TTF"
@@ -498,7 +498,7 @@ local function routeTarget()
 end
 
 local function baseTarget()
-  if DB and DB.mode == "route" then return routeTarget() end
+  if DB and DB.mode == "route" and RT.key then return routeTarget() end
   if PIN then
     for _, t in ipairs(TARGETS) do if t.id == PIN then return t end end
     PIN = nil
@@ -1224,8 +1224,8 @@ function Refresh(rescan)
   CHIPS[3].v:SetText(xph > 0 and ("|cffffffff" .. fmtTime(need / xph * 3600) .. "|r") or "|cff6b7076–|r")
   M.xi = { lvl = lvl, cur = cur, mx = mx, rest = rest, xph = xph }
 
-  if DB.mode == "route" then
-    routeUpdate()
+  if DB.mode == "route" then routeUpdate() end
+  if DB.mode == "route" and RT.key then      -- ohne passende Route (z. B. ab 40): Quest-Ansicht
     local route = RT.key and LevelPilot_Routes[RT.key]
     -- Eintraege bilden: gleiche Aufgabe beim gleichen NPC wird EIN Eintrag ("3 Quests annehmen")
     local items, byKey = {}, {}
@@ -1345,7 +1345,8 @@ function Refresh(rescan)
   end
 
   -- Quest-Ansicht
-  subHead:SetText("Angenommene Quests  ·  nach Entfernung")
+  subHead:SetText(DB.mode == "route" and ("Keine Route für Stufe " .. lvl .. "  ·  angenommene Quests")
+    or "Angenommene Quests  ·  nach Entfernung")
   empty:SetText("Keine angenommenen Quests auf dieser Karte.\nNeue Quests zeigt dir Questie (gelbes !).")
   local tgt = currentTarget()
   local n = collapsed and 0 or min(#TARGETS, DB.rows or 6)
