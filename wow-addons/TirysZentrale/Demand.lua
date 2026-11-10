@@ -103,12 +103,36 @@ function D.Compare(a, b, gap)
   return sold, observable
 end
 
+-- Marktweites Kauf-Profil nach Uhrzeit: verkaufte Stück und Beobachtungsstunden je Stunde (0–23),
+-- anteilig auf die Stunden zwischen zwei Scans verteilt
+local function addHourly(s, from, to, sold)
+  s.hourly = s.hourly or {}
+  local span = to - from
+  if span <= 0 then return end
+  if s.hourlyT and to > s.hourlyT then
+    local f = 0.5 ^ ((to - s.hourlyT) / 86400 / HALF_LIFE)
+    for _, b in pairs(s.hourly) do b.s, b.h = b.s * f, b.h * f end
+  end
+  s.hourlyT = to
+  local x = from
+  while x < to do
+    local nextHour = (math.floor(x / 3600) + 1) * 3600
+    local stop = math.min(nextHour, to)
+    local h = tonumber(date("%H", x)) or 0
+    local b = s.hourly[h] or { s = 0, h = 0 }
+    s.hourly[h] = b
+    local part = (stop - x) / span
+    b.s, b.h = b.s + sold * part, b.h + (stop - x) / 3600
+    x = stop
+  end
+end
+
 -- Neue Momentaufnahme verarbeiten (Zeit t). Gibt die Zahl der Items mit neuer Messung zurück.
 function D.Ingest(items, t)
   local s = store()
   if not s then return 0 end
   local prev = s.snap
-  local measured = 0
+  local measured, totalSold = 0, 0
   local gap = prev and (t - (prev.t or 0)) or nil
   local usable = gap and gap >= MIN_GAP and gap <= MAX_GAP
   for id, now in pairs(items) do
@@ -127,6 +151,7 @@ function D.Ingest(items, t)
         st.s = st.s + sold
         st.h = st.h + gap / 3600
         measured = measured + 1
+        totalSold = totalSold + sold
       end
     end
   end
@@ -146,10 +171,12 @@ function D.Ingest(items, t)
           st.s = st.s + sold
           st.h = st.h + gap / 3600
           measured = measured + 1
+          totalSold = totalSold + sold
         end
       end
     end
   end
+  if usable and measured > 0 then addHourly(s, prev.t, t, totalSold) end
   s.snap = { t = t, items = items }
   s.scans = (s.scans or 0) + 1
   D.version = (D.version or 0) + 1
@@ -169,6 +196,8 @@ function D.ReadReplicate()
   if total <= 0 then return false end
   reading = true
   local watch = D.Watchlist()
+  local snipe = ns.Snipe
+  if snipe then snipe.Begin() end
   local items, sellers = {}, {}
   local t = time()
   local index = 0
@@ -178,6 +207,7 @@ function D.ReadReplicate()
     for i = index, last - 1 do
       local ok, _, _, count, _, _, _, _, _, _, buyout, _, _, _, owner, _, _, itemID =
         pcall(AH.GetReplicateItemInfo, i)
+      if ok and snipe then snipe.Collect(itemID, count, buyout, owner) end
       if ok and itemID and watch[itemID] and count and count > 0 and buyout and buyout > 0 then
         local unit = math.floor(buyout / count)
         local okT, band = pcall(AH.GetReplicateItemTimeLeft or function() return nil end, i)
@@ -205,6 +235,7 @@ function D.ReadReplicate()
       reading = nil
       local n = D.Ingest(items, t)
       ns.Fire("DEMAND_UPDATED", n)
+      if snipe then ns.Safe(snipe.Finish) end
     end
   end
   ns.Safe(step)
@@ -246,6 +277,33 @@ function D.PerDay(itemID)
 end
 
 local function stackable(itemID) return (ns.Item(itemID).stack or 1) > 1 end
+
+-- Markt-Tiefe: Für wie viele Tage reicht das aktuelle Angebot beim gemessenen Absatz? (nil = unbekannt)
+-- Über 14 Tage = "Markt voll": neue Angebote warten lange, Preise werden gedrückt.
+function D.DaysOfSupply(itemID)
+  local perDay, _, _, supply = D.PerDay(itemID)
+  if not supply then return nil end
+  if supply == 0 then return 0 end
+  if not perDay then return nil end
+  if perDay <= 0 then return math.huge end
+  return supply / perDay
+end
+
+function D.Full(itemID)
+  local d = D.DaysOfSupply(itemID)
+  return d ~= nil and d > 14
+end
+
+-- Kauf-Profil des Marktes nach Uhrzeit: rates[0..23] = Stück pro Beobachtungsstunde, abgedeckte Stunden
+function D.HourProfile()
+  local s = store()
+  local rates, covered = {}, 0
+  for h = 0, 23 do
+    local b = s and s.hourly and s.hourly[h]
+    if b and b.h >= 0.5 then rates[h] = b.s / b.h covered = covered + 1 end
+  end
+  return rates, covered
+end
 
 -- Schwellen: Stapelware (Leder, Tränke, Stoff) verkauft sich in größeren Mengen als Ausrüstung
 D.LIMITS = { stack = { fast = 20, ok = 4 }, single = { fast = 2, ok = 0.5 } }
@@ -295,6 +353,14 @@ function D.Text(itemID, plain)
     parts[#parts + 1] = "~" .. fmt(perDay) .. "/Tag verkauft" .. (src == "eigene" and " (deine Verkäufe)" or "")
   end
   if supply then parts[#parts + 1] = supply .. " im Angebot" end
+  local days = D.DaysOfSupply(itemID)
+  local function color(hex, text) return plain and text or ("|cff" .. hex .. text .. "|r") end
+  if days and days > 0 and days < math.huge then
+    local txt = "reicht für " .. fmt(days) .. " Tage"
+    parts[#parts + 1] = days > 14 and color("ff6b81", txt .. " (Markt voll)") or txt
+  elseif days == 0 then
+    parts[#parts + 1] = color("61eb8f", "ausverkauft – gute Chance")
+  end
   if c == "unknown" and not perDay then parts[#parts + 1] = "2 AH-Scans im Abstand von 15 Min.–12 Std. messen es" end
   return table.concat(parts, " · ")
 end

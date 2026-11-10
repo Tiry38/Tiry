@@ -1087,3 +1087,106 @@ describe("Absatz: Verkäufe pro Tag aus zwei AH-Scans", function()
     noErrors(W)
   end)
 end)
+
+describe("Goldmacher-Werkzeuge", function()
+  local function replicate(W, getAuctions)
+    C_AuctionHouse.GetNumReplicateItems = function() return #getAuctions() end
+    C_AuctionHouse.GetReplicateItemInfo = function(i)
+      local a = getAuctions()[i + 1]
+      return nil, nil, a.q, 1, true, 1, nil, 0, 0, a.price * a.q, 0, nil, nil, a.owner, a.owner, 0, a.id, true
+    end
+    C_AuctionHouse.GetReplicateItemTimeLeft = function(i) return getAuctions()[i + 1].band or 3 end
+  end
+
+  it("Schnäppchen-Scan: unter Händlerpreis (sicher) und unter Marktwert, eigene Angebote nie", function()
+    local ns, W = E.load({ itemInfo = { [4238] = { name = "Leinentasche", sell = 200, stack = 1 },
+      [2318] = { name = "Leichtes Leder", sell = 10, stack = 20 } } })
+    ns.db.priceHistory = { [2318] = { ["2026-11-01"] = 100, ["2026-11-02"] = 100, ["2026-11-03"] = 100 } }
+    local auctions = {
+      { id = 4238, q = 1, price = 100, owner = "Fremd" },   -- 1 Silber unter Händlerpreis
+      { id = 4238, q = 1, price = 50, owner = "Tiry" },     -- eigenes Angebot: nie melden
+      { id = 2318, q = 40, price = 20, owner = "Bo" },      -- 20 % vom Marktwert
+      { id = 2318, q = 20, price = 99, owner = "Cy" },      -- normaler Preis
+    }
+    replicate(W, function() return auctions end)
+    ns.Market.ahOpen = true
+    W.fire("REPLICATE_ITEM_LIST_UPDATE") W.flush()
+    local list = ns.Snipe.list
+    assert.are.equal(2, #list)
+    assert.are.equal("haendler", list[1].kind)
+    assert.are.equal(4238, list[1].id)
+    assert.are.equal(100, list[1].profit)
+    assert.are.equal(1, list[1].count)
+    assert.are.equal("markt", list[2].kind)
+    assert.are.equal(40, list[2].count)
+    -- Weiterverkauf netto (5 % Gebühr, Einstellgebühr-Risiko 5c/Stück) minus Einkauf
+    assert.are.equal((95 - ns.Market.DepositRisk(2318)) * 40 - 800, list[2].profit)
+    assert.truthy(E.chat(W):find("Schnäppchen%-Scan"))
+    -- gekaufte Händler-Schnäppchen nimmt der Verkaufen-Knopf beim Händler mit
+    ns.Snipe.SearchAll("haendler")
+    assert.is_true(ns.Snipe.IsVendorSnipe(4238))
+    noErrors(W)
+  end)
+
+  it("Preis-Trend: fällt / steigt / zu wenig Daten", function()
+    local ns, W = E.load()
+    ns.db.priceHistory = {
+      [1] = { ["2026-11-01"] = 100, ["2026-11-02"] = 100, ["2026-11-03"] = 100, ["2026-11-04"] = 60, ["2026-11-05"] = 60, ["2026-11-06"] = 60 },
+      [2] = { ["2026-11-01"] = 100, ["2026-11-02"] = 100, ["2026-11-03"] = 130, ["2026-11-04"] = 130, ["2026-11-05"] = 130 },
+      [3] = { ["2026-11-01"] = 100, ["2026-11-02"] = 100 },
+    }
+    local tr, text = ns.PriceString.TrendAdvice(1)
+    assert.are.equal("fällt", tr)
+    assert.truthy(text:find("40 %%"))
+    assert.are.equal("steigt", (ns.PriceString.TrendAdvice(2)))
+    assert.is_nil(ns.PriceString.TrendAdvice(3))
+    noErrors(W)
+  end)
+
+  it("Markt-Tiefe: Angebot geteilt durch Tagesabsatz", function()
+    local ns, W = E.load()
+    local s = ns.Demand.Store()
+    s.stats[2318] = { s = 10, h = 24, q = 200, t = W.now } -- 10 Stück/Tag, 200 im Angebot
+    assert.are.equal(20, ns.Demand.DaysOfSupply(2318))
+    assert.is_true(ns.Demand.Full(2318))
+    assert.truthy(ns.Demand.Text(2318, true):find("Markt voll"))
+    s.stats[2319] = { s = 0, h = 24, q = 0, t = W.now }
+    assert.are.equal(0, ns.Demand.DaysOfSupply(2319))
+    noErrors(W)
+  end)
+
+  it("Beste Verkaufszeit aus deinen Verkäufen", function()
+    local ns, W = E.load()
+    ns.db.ledger = { sales = {}, buys = {}, expired = {} }
+    -- 10 Verkäufe jeweils um 20 Uhr Ortszeit, 2 um 8 Uhr
+    local function at(hour, daysAgo)
+      local t = W.now - daysAgo * 86400
+      for _ = 1, 24 do
+        if tonumber(os.date("%H", t)) == hour then return t end
+        t = t - 3600
+      end
+    end
+    for d = 1, 10 do table.insert(ns.db.ledger.sales, { id = 2318, t = at(20, d), money = 100, n = 1 }) end
+    for d = 1, 2 do table.insert(ns.db.ledger.sales, { id = 2318, t = at(8, d), money = 100, n = 1 }) end
+    local best = ns.Timing.Best()
+    assert.truthy(best)
+    assert.are.equal("eigene", best.source)
+    assert.is_true(best.from >= 18 and best.from <= 20)
+    assert.truthy(best.text:find("Uhr"))
+    noErrors(W)
+  end)
+
+  it("Rohstoff-Check: verarbeiten, wenn das Rezept mehr bringt als roh verkaufen", function()
+    local ns, W = E.load({
+      prices = { [2318] = 30, [2304] = 2000, [2320] = 10 },
+      bags = { [0] = { { itemID = 2318, stackCount = 10, quality = 1 } } },
+    })
+    ns.Scanner.ScanBags()
+    local leather
+    for _, e in ipairs(ns.Scanner.bags.items) do if e.id == 2318 then leather = e end end
+    assert.truthy(leather, "Leichtes Leder in der Liste")
+    assert.truthy(leather.process, "Verarbeiten erkannt")
+    assert.truthy(leather.tip:find("Verarbeiten zu"))
+    noErrors(W)
+  end)
+end)

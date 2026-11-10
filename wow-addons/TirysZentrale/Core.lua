@@ -136,6 +136,7 @@ local DEFAULTS = {
   craft = { marginFactor = 1, profitFactor = 1, onlySafe = true, onlySkill = false, perRecipe = 2, freshOnly = true, skipSlow = true },
   shopAutoOpen = true,  -- Einkaufsfenster beim Öffnen des AH zeigen, wenn noch etwas fehlt
   ahCut = 5,          -- Prozent, den das Auktionshaus beim Verkauf einbehält
+  snipeAlert = true,  -- nach jedem Komplett-Scan Schnäppchen (unter Händler-/Marktwert) im Chat melden
   ahDeposit = 100,    -- Einstellgebühr je Angebot in Kupfer, solange das AH noch keinen exakten Wert geliefert hat (Forever: mind. 1 Silber)
   showOnlyMyLevel = false,
   expertMode = false,
