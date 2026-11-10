@@ -76,7 +76,30 @@ function page.build(self, content, width)
       .. "Einstellen: Auctionator > Verkaufen > Item anklicken, Preis aus \"Vorschlag\" nehmen.") or ("|cffff6b81" .. tostring(n) .. "|r"))
   end)
   UI.SetTooltip(self.listBtn, "Neu einstellen", "Legt alle Items aus \"Neu einstellen\" als Auctionator-Suchliste an, damit du die aktuelle Konkurrenz siehst.")
-  st:Add(actions, 34, 18)
+  st:Add(actions, 34, 14)
+
+  -- Beste Verkaufszeit (aus den AH-Scans bzw. deinen Verkäufen)
+  local tf = CreateFrame("Frame", nil, content)
+  tf:SetSize(width, 20)
+  tf.dot = tf:CreateTexture(nil, "ARTWORK")
+  tf.dot:SetTexture(UI.TEX.circle)
+  tf.dot:SetSize(8, 8)
+  tf.dot:SetPoint("LEFT", 2, 0)
+  UI.SetGradV(tf.dot, C.amber, C.teal, 1)
+  tf.text = UI.Text(tf, 12, "regular", C.muted)
+  tf.text:SetPoint("LEFT", 18, 0)
+  tf.text:SetWidth(width - 20)
+  tf.text:SetWordWrap(false)
+  tf:EnableMouse(true)
+  UI.SetTooltip(tf, function()
+    local b = ns.Timing and ns.Timing.Best()
+    if not b then
+      return "Beste Verkaufszeit", "Wird gemessen: Nach ein paar AH-Scans zu verschiedenen Uhrzeiten (oder einigen eigenen Verkäufen) steht hier, wann am meisten gekauft wird."
+    end
+    return "Beste Verkaufszeit", (b.text or "") .. (b.tip and ("\n\n" .. b.tip) or "")
+  end)
+  self.timing = tf
+  st:Add(tf, 20, 18)
 
   -- Neu einstellen: unterboten, abgelaufen, frisch hergestellt – mit Preisvorschlag
   self.relistTitle = UI.Text(content, 17, "bold", C.text)
@@ -186,20 +209,49 @@ function page.refresh(self)
     return ns.Item(x.id).name < ns.Item(y.id).name
   end)
   local content = self.frame.content
-  local y = 70 + 14 + 34 + 10 + 34 + 18
+  local y = 70 + 14 + 34 + 10 + 34 + 14 + 20 + 18
+  -- Verkaufszeit-Zeile
+  local T = ns.Timing
+  local good, best = false, nil
+  if T then good, best = T.IsGoodTime() if not best then best = T.Best() end end
+  if best and best.text and best.text ~= "" then
+    UI.FitText(self.timing.text, UI.NEON_HEX .. "Verkaufszeit:|r " .. best.text
+      .. (good and " · |cffff9929jetzt ist Hauptbetrieb|r" or ""), UI.CONTENT_W - 20)
+  else
+    self.timing.text:SetText(UI.NEON_HEX .. "Verkaufszeit:|r wird gemessen – nach ein paar AH-Scans zu verschiedenen Uhrzeiten steht hier, wann am meisten gekauft wird.")
+  end
   -- Neu einstellen (nur wenn es etwas gibt)
   local WHY = { unterboten = "|cffff6b81unterboten|r", abgelaufen = "|cffff9929abgelaufen|r", hergestellt = "|cff61eb8fhergestellt|r" }
   local re = {}
   for _, e in ipairs(relist) do
+    local post = e.post or e.qty
+    local note
+    if e.stale then
+      -- 2× abgelaufen, nie verkauft: jedes Einstellen kostet Gebühr
+      note = string.format("|cffff9929%d× abgelaufen, nie verkauft – billiger einstellen oder zum Händler%s|r", e.expired or 2,
+        e.vendor and (" (" .. ns.Money(e.vendor) .. "/Stück)") or "")
+    elseif e.full then
+      note = "|cffff9929Markt voll – nicht nachlegen, lieber halten|r"
+    elseif e.wait then
+      note = "|cffff9929AH-Preis liegt unter deinen Kosten – lieber warten oder zum Vorschlag einstellen|r"
+    elseif post < e.qty then
+      note = "Nur " .. post .. " einstellen – so viele gehen in ca. 3 Tagen weg, der Rest später"
+    else
+      note = e.mine and ("du: " .. ns.Money(e.mine) .. "/Stück") or "Klick: Angebote im AH zeigen · Shift-Klick: verlinken"
+    end
+    local tip = { AW.WholeSilver and AW.WholeSilver(e.id)
+        and "Vorschlag = günstigstes Angebot, abgerundet auf ganze Silber (Einzel-Items ohne Kupfer), nie unter \"Nicht unter\"."
+        or "Vorschlag = günstigstes Angebot minus 1 Kupfer, nie unter \"Nicht unter\".",
+      "\"Nicht unter\" = deine Materialkosten pro Stück nach AH-Gebühr.",
+      "Einstellen: Auctionator > Verkaufen > Item anklicken." }
+    if post < e.qty then tip[#tip + 1] = "Menge: " .. post .. " von " .. e.qty .. " einstellen – nicht den Markt fluten." end
     re[#re + 1] = {
       id = e.id,
-      note = e.wait and "|cffff9929AH-Preis liegt unter deinen Kosten – lieber warten oder zum Vorschlag einstellen|r"
-        or (e.mine and ("du: " .. ns.Money(e.mine) .. "/Stück") or "Klick: Angebote im AH zeigen · Shift-Klick: verlinken"),
-      cells = { qty = tostring(e.qty), where = WHY[e.where] or e.where,
+      note = note,
+      chip = (e.stale and { "Ladenhüter", C.hi }) or (e.full and { "Markt voll", C.hi }) or nil,
+      cells = { qty = post < e.qty and (post .. "/" .. e.qty) or tostring(e.qty), where = WHY[e.where] or e.where,
         price = e.price and ns.Money(e.price) or "|cff8a9a94kein Preis|r", floor = e.floor and ns.Money(e.floor) or "–" },
-      tip = { "Vorschlag = günstigstes Angebot minus 1 Kupfer, nie unter \"Nicht unter\".",
-        "\"Nicht unter\" = deine Materialkosten pro Stück nach AH-Gebühr.",
-        "Einstellen: Auctionator > Verkaufen > Item anklicken." },
+      tip = tip,
       onClick = function()
         if M.ahOpen then
           local ok, err = M.SearchNow({ e.id })

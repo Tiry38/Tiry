@@ -783,6 +783,13 @@ SlashCmdList.TIRYSZENTRALE = function(msg)
     ns.Print("Fensterposition zurückgesetzt.")
     return
   end
+  if msg == "schnapp" or msg == "schnäppchen" or msg == "schnaeppchen" or msg == "snipe" then
+    -- Schnäppchen-Liste aus dem letzten Komplett-Scan (Handel > Preise > Schnäppchen)
+    UI.Show("market")
+    local p = UI.pages.market
+    if p and p.segments then p.segments:Select("snipe", true) end
+    return
+  end
   if msg == "" then
     UI.ToggleWindow()
   else

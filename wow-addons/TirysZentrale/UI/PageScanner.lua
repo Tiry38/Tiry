@@ -185,9 +185,15 @@ function page.refresh(self)
   local bagEntries = {}
   for _, e in ipairs(b.items) do
     local adv = ADVICE[e.advice] or ADVICE.HAENDLER
+    -- Rohstoff-Check: verarbeiten / Trend / behalten / Markt voll
+    local tipCol = (e.process and UI.NEON_HEX) or (e.trend == "fällt" and "|cffff9929") or (e.trend == "steigt" and UI.TEAL_HEX)
+      or (e.tip and e.tip:find("^Markt voll") and "|cffff9929") or (e.tip and UI.TEAL_HEX) or nil
+    local chip = (e.process and { "verarbeiten", C.amber }) or (e.trend == "fällt" and { "Preis fällt", C.hi })
+      or (e.trend == "steigt" and { "Preis steigt", C.teal }) or nil
     bagEntries[#bagEntries + 1] = {
       id = e.id,
-      note = e.bound and "Seelengebunden – nur Händler" or nil,
+      chip = chip,
+      note = e.bound and "Seelengebunden – nur Händler" or (e.tip and (tipCol .. e.tip .. "|r")) or nil,
       cells = {
         count = tostring(e.count),
         vendor = e.vendor > 0 and ns.Money(e.vendor) or "–",
@@ -196,7 +202,8 @@ function page.refresh(self)
       },
       tip = { e.advice == "AH" and "Im AH bringt es deutlich mehr als beim Händler." or
         (e.advice == "SCHROTT" and "Grau = Schrott: beim Händler verkaufen." or
-        (e.advice == "BEHALTEN" and "Kein Händlerwert – behalten oder für Berufe/Quests nutzen." or "Beim Händler verkaufen ist hier am besten.")) },
+        (e.advice == "BEHALTEN" and "Kein Händlerwert – behalten oder für Berufe/Quests nutzen." or "Beim Händler verkaufen ist hier am besten.")),
+        e.tip },
     }
   end
   local bagY = y + 214
