@@ -302,7 +302,7 @@ local function craftRow(i)
   r.dot:SetPoint("RIGHT", r.status, "LEFT", -7, 0)
   r.name = UI.Text(r, 13, "semibold", C.text)
   r.name:SetPoint("LEFT", r.icon, "RIGHT", 10, 0)
-  r.name:SetWidth(W - 172)
+  r.name:SetWidth(W - 214)
   r.name:SetJustifyH("LEFT")
   r.name:SetWordWrap(false)
   r:SetScript("OnEnter", function(self)
@@ -350,9 +350,9 @@ function Shop.Refresh()
       local item = ns.Item(c.recipe.out)
       if c.intermediate then
         -- günstiger selbst hergestellt als gekauft (eigenes Rezept) -> kommt vor den eigentlichen Crafts
-        UI.FitText(r.name, string.format("|cff26f2d9%d×|r %s |cff93a39d· selbst|r", c.n * (c.recipe.qty or 1), item.name or c.recipe.name), W - 172)
+        UI.FitText(r.name, string.format("|cff26f2d9%d×|r %s |cff93a39d· selbst|r", c.n * (c.recipe.qty or 1), item.name or c.recipe.name), W - 214)
       else
-        UI.FitText(r.name, string.format("|cff39ff6b%d×|r %s", c.n * (c.recipe.qty or 1), item.name or c.recipe.name), W - 172)
+        UI.FitText(r.name, string.format("|cff39ff6b%d×|r %s", c.n * (c.recipe.qty or 1), item.name or c.recipe.name), W - 214)
       end
       local st = STATUS[c.status]
       r.status:SetText(st[1])

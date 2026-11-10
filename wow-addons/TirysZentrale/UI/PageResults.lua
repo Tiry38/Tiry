@@ -14,15 +14,9 @@ local page = {
   icon = "chart", label = "Ergebnis", order = 2.7,
 }
 
-local function stat(parent, w, label)
-  local f = UI.Card(parent, 16, C.card)
-  f:SetSize(w, 70)
-  f.label = UI.Text(f, 12, "semibold", C.dim)
-  f.label:SetPoint("TOPLEFT", 16, -12)
-  f.label:SetText(label)
-  f.value = UI.Text(f, 18, "bold", C.text)
-  f.value:SetPoint("TOPLEFT", f.label, "BOTTOMLEFT", 0, -6)
-  return f
+-- Kennzahl als Glas-Pille mit Leuchtpunkt (statt Kachel)
+local function stat(parent, w, label, accent)
+  return UI.StatPill(parent, w, label, accent, 70)
 end
 
 function page.build(self, content, width)
@@ -34,7 +28,7 @@ function page.build(self, content, width)
   local cw = math.floor((width - 36) / 4)
   local row = CreateFrame("Frame", nil, content)
   row:SetSize(width, 70)
-  self.stats = { stat(row, cw, "ECHT VERDIENT"), stat(row, cw, "VERKAUFT"), stat(row, cw, "HERGESTELLT"), stat(row, cw, "BESTES ITEM") }
+  self.stats = { stat(row, cw, "ECHT VERDIENT", C.amber), stat(row, cw, "VERKAUFT", C.teal), stat(row, cw, "HERGESTELLT", C.aqua), stat(row, cw, "BESTES ITEM", C.amber) }
   for i, f in ipairs(self.stats) do f:SetPoint("TOPLEFT", (i - 1) * (cw + 12), 0) end
   st:Add(row, 70, 12)
   self.hint = UI.Para(content, 12, C.muted, width)
@@ -61,7 +55,7 @@ function page.refresh(self)
   self.stats[1].value:SetText(t.sold > 0 and signed(t.profit) or "–")
   self.stats[2].value:SetText(t.sold .. " Stück")
   self.stats[3].value:SetText(t.made .. " Stück")
-  UI.FitText(self.stats[4].value, t.best and (ns.Item(t.best.id).name or "?") or "–", self.stats[4]:GetWidth() - 28)
+  UI.FitText(self.stats[4].value, t.best and (ns.Item(t.best.id).name or "?") or "–", self.stats[4]:GetWidth() - 64)
   local entries = {}
   for _, x in ipairs(list) do
     local note

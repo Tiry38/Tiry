@@ -11,15 +11,9 @@ local page = {
   icon = "receipt", label = "Meine Auktionen", order = 30,
 }
 
-local function stat(parent, w, label)
-  local f = UI.Card(parent, 16, C.card)
-  f:SetSize(w, 70)
-  f.label = UI.Text(f, 12, "semibold", C.dim)
-  f.label:SetPoint("TOPLEFT", 16, -12)
-  f.label:SetText(label)
-  f.value = UI.Text(f, 18, "bold", C.text)
-  f.value:SetPoint("TOPLEFT", f.label, "BOTTOMLEFT", 0, -6)
-  return f
+-- Kennzahl als Glas-Pille mit Leuchtpunkt (statt Kachel)
+local function stat(parent, w, label, accent)
+  return UI.StatPill(parent, w, label, accent, 70)
 end
 
 local function ago(t)
@@ -46,7 +40,7 @@ function page.build(self, content, width)
   local cw = math.floor((width - 36) / 4)
   local row = CreateFrame("Frame", nil, content)
   row:SetSize(width, 70)
-  self.stats = { stat(row, cw, "IM AH"), stat(row, cw, "WERT IM AH"), stat(row, cw, "IM BRIEFKASTEN"), stat(row, cw, "UNTERBOTEN") }
+  self.stats = { stat(row, cw, "IM AH", C.amber), stat(row, cw, "WERT IM AH", C.teal), stat(row, cw, "IM BRIEFKASTEN", C.aqua), stat(row, cw, "UNTERBOTEN", C.hi) }
   UI.SetTooltip(self.stats[3], "Gold im Briefkasten", "Nach einem Verkauf ist das Gold erst ein paar Minuten unterwegs, dann liegt es im Briefkasten. "
     .. "\"ca.\" = geschätzt – genau wird es, sobald du den Briefkasten öffnest. Holst du das Gold ab, verschwindet es hier von selbst.")
   self.stats[3]:EnableMouse(true)

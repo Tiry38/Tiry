@@ -18,14 +18,11 @@ local page = {
   icon = "scan", label = "Scanner", order = 5,
 }
 
+-- Kennzahl als Glas-Pille: Leuchtpunkt und Zahl in der Akzentfarbe
 local function statCard(parent, w, label, color)
-  local card = UI.Card(parent, 16, C.card)
-  card:SetSize(w, 70)
-  card.label = UI.Text(card, 10, "semibold", C.dim)
-  card.label:SetPoint("TOPLEFT", 16, -14)
-  card.label:SetText(label:upper())
-  card.value = UI.Text(card, 18, "bold", color or C.text)
-  card.value:SetPoint("TOPLEFT", card.label, "BOTTOMLEFT", 0, -6)
+  local card = UI.StatPill(parent, w, label, color ~= C.text and color or C.teal, 70)
+  local c = color or C.text
+  card.value:SetTextColor(c[1], c[2], c[3], 1)
   return card
 end
 

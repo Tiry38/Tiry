@@ -89,6 +89,23 @@ do
   if OUT then L.dump(frame, OUT .. "/recipes_learn.tsv") end
   frame.__h = ns.UI.HEIGHT ; rp.view = "known" ; ns.UI.RefreshPage("recipes")
 end
+-- Handel > Preise: Ansicht "Schnäppchen" (Beispiel-Liste aus einem Komplett-Scan, über /tz schnapp)
+do
+  local saved, savedT = ns.Snipe.list, ns.Snipe.time
+  ns.Snipe.list = {
+    { id = 2318, kind = "haendler", count = 12, cost = 120, profit = 360, unit = 10, ref = 40 },
+    { id = 2319, kind = "markt", count = 20, cost = 3000, profit = 2400, unit = 150, ref = 330 },
+  }
+  ns.Snipe.time = time() - 300
+  SlashCmdList.TIRYSZENTRALE("schnapp")
+  local mp = ns.UI.pages.market
+  frame.__h = fullHeight(mp.frame.content)
+  for _, p in ipairs(L.problems(frame)) do print("[market+schnapp] " .. p) total = total + 1 end
+  if OUT then L.dump(frame, OUT .. "/market_snipe.tsv") end
+  frame.__h = ns.UI.HEIGHT
+  ns.Snipe.list, ns.Snipe.time = saved, savedT
+  mp.segments:Select("all", true)
+end
 -- Craft-Planer mit aufgeklappten Optionen
 do
   local rp = ns.UI.pages.recipes
