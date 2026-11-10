@@ -1127,6 +1127,17 @@ describe("Goldmacher-Werkzeuge", function()
     noErrors(W)
   end)
 
+  it("Nicht unter: Craft-Planer und Neu-Einstellen zeigen denselben Preis", function()
+    local ns, W = E.load({ prices = { [2318] = 300, [2304] = 2000 } })
+    ns.char.queue = { { recipe = 2152, prof = "LEATHERWORKING", n = 1 } }
+    W.bags = { [0] = { { itemID = 2304, stackCount = 3, quality = 2 } } }
+    local ready = ns.Guide.ReadyToSell()
+    assert.are.equal(1, #ready)
+    assert.are.equal(ns.AH.Floor(2304), ready[1].floor)
+    assert.are.equal(math.ceil((300 + ns.Market.DepositRisk(2304)) / 0.95), ready[1].floor)
+    noErrors(W)
+  end)
+
   it("Ein Scan für alle Reiter: Komplett-Scan zuerst, sonst Schnell-Scan", function()
     local ns, W = E.load()
     ns.Market.ahOpen = true

@@ -183,11 +183,14 @@ function G.ReadyToSell()
     local e = ns.DB.Get(id)
     if not (e and (e.bind == 1 or e.bind == 4)) then
       local price = M.Price(id)
-      local _, _, cost, unknown = S.RecipeProfit(r)
-      -- nie unter: Materialkosten pro Stück, nach AH-Gebühr
-      local floor = (cost and unknown == 0 and r.qty > 0) and math.ceil(cost / r.qty / M.CutFactor()) or nil
-      local vendor = M.VendorSell(id)
-      if floor then floor = math.max(floor, vendor) end
+      -- nie unter: dieselbe Rechnung wie beim Neu-Einstellen (Kosten bzw. Händlerpreis nach AH-Gebühr und
+      -- Einstellgebühr-Risiko), damit Craft-Planer und Auktionen denselben Preis zeigen
+      local floor = ns.AH and ns.AH.Floor and ns.AH.Floor(id)
+      if not floor then
+        local _, _, cost, unknown = S.RecipeProfit(r)
+        floor = (cost and unknown == 0 and r.qty > 0) and math.ceil(cost / r.qty / M.CutFactor()) or nil
+        if floor then floor = math.max(floor, M.VendorSell(id)) end
+      end
       list[#list + 1] = { id = id, n = n, price = price, floor = floor, below = price and floor and price < floor }
       value = value + (price or 0) * n
     end
