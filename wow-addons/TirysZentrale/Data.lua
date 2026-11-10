@@ -27,7 +27,7 @@ ns.METHODS = {
     tips = {
       "Taschen, die du verkaufen willst, nicht anlegen – sie werden nicht mehr automatisch ausgerüstet und bleiben so verkaufbar.",
       "Die Einstellgebühr bekommst du zurück, wenn das Item verkauft wird – verloren ist sie nur bei Ablauf. Tiry's Zentrale rechnet dieses Risiko in jeden Gewinn ein.",
-      "Bekannter AH-Fehler (Blizzard-Forum, seit 06.11.): Einstellen UNTER dem günstigsten Angebot bricht teils mit \"Interner Auktionsfehler\" ab. Dann den Preis des günstigsten Angebots übernehmen oder später erneut versuchen.",
+      "Bekannter AH-Fehler (Blizzard-Forum, seit 06.11.): Einstellen UNTER dem günstigsten Angebot bricht teils mit \"Interner Auktionsfehler\" ab. Blizzard (09.11.): \"Kupfer weglassen hilft\" – betroffen ist vor allem Ausrüstung. Tiry's Zentrale schlägt für Einzel-Items deshalb nur ganze Silberbeträge vor.",
     },
   },
   {
@@ -118,6 +118,8 @@ ns.METHODS = {
       "Mit \"Als Einkaufsliste\" holst du dir alle Preise auf einen Klick in Auctionator.",
     },
     tips = {
+      "Leere Kiste prüfen: Bringt sie im AH mehr als das billigste passende Paket, verkauf sie leer (Beta-Scan: leere Kiste 20s43, billigstes Paket 2s60 – im Spiel gegenchecken).",
+      "Günstigste Gunst laut Beta-Daten: 2 Geschmeidige leichte Bälge = 10 Gunst (rund 43 Kupfer je Punkt). Gunst lässt sich nicht direkt in Gold tauschen.",
       "Die Mengen stammen aus Method.gg (Forever-Guide). Dass die Nachfrage steigt, ist eine Ableitung – prüf es an den Live-Preisen.",
       "Seit dem Hotfix vom 09.11. fallen Kisten auch in Dungeons – mehr Kisten im Umlauf heißt mehr Nachfrage nach den Paketen.",
       "Laut Beta-Tabellen (wow.gg) bringen 2 geschmeidige Bälge doppelt so viel Händler-Gunst wie 20 Leder derselben Stufe – geschmeidige Bälge dürften deshalb besonders gefragt sein (Ableitung).",
@@ -149,6 +151,21 @@ ns.METHODS = {
     tips = {
       "Dungeons geben seit dem 09.11. außerdem +50 % Erfahrung – Leveln und Aufträge sammeln geht jetzt in einem.",
       "Die Details (Belohnungen, Handel) stammen aus Beta-Daten (forevermastery.com) – im Spiel prüfen.",
+    },
+  },
+  {
+    key = "raidprep", cat = "trade", minLevel = 20, effort = 1, source = "forever", icon = "star",
+    items = { 4304, 8170, 8173, 15564, 4265, 4234 },
+    title = "Vor dem Raid-Start auf Vorrat legen (ab 09.12.)",
+    summary = "Laut Forever-Fanseiten öffnen am 09.12.2026 die ersten Raids. Dann brauchen viele Stufe-60-Spieler gleichzeitig Leder, Rüstungssets und Verbrauchsgüter.",
+    steps = {
+      "Ab Ende November Dickes und Unverwüstliches Leder sowie Rüstungssets günstig kaufen oder herstellen, solange viele noch leveln.",
+      "In der Woche vor dem 09.12. die Preise in den Marktpreisen beobachten: Steigt der Trend, stückweise verkaufen statt alles auf einmal.",
+      "Nur so viel horten, wie sich laut Absatz-Messung in ein paar Tagen verkaufen lässt – der Rest kostet bei Ablauf Einstellgebühr.",
+    },
+    tips = {
+      "Ableitung aus Classic-Erfahrung, kein Blizzard-Versprechen: Ob die Preise wirklich steigen, zeigt erst der Trend in deinen Scans.",
+      "Der wöchentliche Reset-Tag für Forever ist noch nicht angekündigt – deine stärksten Verkaufstage lernt Tiry's Zentrale aus deinen Verkäufen.",
     },
   },
   {
