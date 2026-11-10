@@ -25,8 +25,15 @@ Aktueller Stand und offene Punkte: **[`UEBERGABE.md`](UEBERGABE.md)** – zuerst
 - `qdb/` – **nicht im Repo** (.gitignore): `git clone https://github.com/Questie/QuestieDB.git qdb/QuestieDB`
   (Questies Datenbank; Forever-Daten in `data/Forever/`). Wird nur für die Routen-Werkzeuge gebraucht.
 
+## Claude-Skills (Plugin „wow-werkstatt“)
+`.claude/skills/` im Repo-Hauptordner: **`wow-tests`** (alle Tests: `bash wow-addons/tools/test_all.sh [ziel]`),
+**`wow-release`** (Version + ZIP: `python3 -I wow-addons/tools/release.py <Add-on> <Version>`, nur auf Wunsch),
+**`wow-forever`** (geprüftes Forever-/AH-Wissen), **`wow-neues-addon`** (Gerüst nach Standard).
+Plugin-Manifest `.claude/.claude-plugin/plugin.json`, Marketplace `.claude-plugin/marketplace.json` („tiry“).
+Prüfen: `claude plugin validate .claude` und `claude plugin validate .`.
+
 ## Ausliefern
-Add-on-Ordner zippen (`cd addons && zip -qr ../LevelPilot.zip LevelPilot`), ZIP an Tiry schicken.
+Version + ZIP mit `python3 -I tools/release.py <Add-on> <Version>` (alle TOCs, `VERSION`, ZIP nach `dist/`), ZIP an Tiry schicken.
 Einbau bei ihm: alten Ordner in `Interface\AddOns` löschen, entpacken, **WoW komplett neu starten** (bei neuen
 Dateien/Sounds reicht `/reload` nicht). Version in allen 4 TOCs und in `VERSION` der Haupt-Lua hochzählen.
 

@@ -1116,6 +1116,88 @@ describe("Goldmacher-Werkzeuge", function()
     C_AuctionHouse.GetReplicateItemTimeLeft = function(i) return getAuctions()[i + 1].band or 3 end
   end
 
+  it("Ein Scan für alle Reiter: Komplett-Scan zuerst, sonst Schnell-Scan", function()
+    local ns, W = E.load()
+    ns.Market.ahOpen = true
+    local which, fullOK = nil, true
+    Auctionator.State.FullScanFrameRef = { InitiateScan = function() which = "komplett" end, CanInitiate = function() return fullOK end }
+    Auctionator.State.IncrementalScanFrameRef = { InitiateScan = function() which = "schnell" end, CanInitiate = function() return true end }
+    assert.is_true(ns.Market.StartScan())
+    assert.are.equal("komplett", which)
+    assert.truthy(E.chat(W):find("alle Reiter", 1, true))
+    -- Komplett-Scan gesperrt (15 Min.) -> Schnell-Scan aktualisiert trotzdem alle Preise
+    fullOK = false
+    assert.is_true(ns.Market.StartScan())
+    assert.are.equal("schnell", which)
+    -- beide gesperrt -> ehrliche Meldung, kein Fehler
+    Auctionator.State.IncrementalScanFrameRef.CanInitiate = function() return false end
+    assert.is_false(ns.Market.StartScan())
+    assert.truthy(E.chat(W):find("15 Minuten", 1, true))
+    -- Scan fertig -> eine Meldung für alle Reiter, alle Seiten rechnen neu
+    W.dbCallback() W.flush()
+    assert.truthy(E.chat(W):find("Alle Reiter", 1, true))
+    noErrors(W)
+  end)
+
+  it("Unterboten aus dem Komplett-Scan, eigene Angebote zählen nicht", function()
+    local ns, W = E.load({ itemInfo = { [2318] = { name = "Leichtes Leder", sell = 10, stack = 20 },
+      [4238] = { name = "Leinentasche", sell = 200, stack = 1 } } })
+    local s = ns.AH.Store()
+    s.list = {
+      { auctionID = 1, id = 2318, qty = 20, unit = 50, status = "active", commodity = true, expires = W.now + 7200 },
+      { auctionID = 2, id = 4238, qty = 1, unit = 500, status = "active", commodity = false, expires = W.now + 7200 },
+    }
+    local auctions = {
+      { id = 2318, q = 20, price = 50, owner = "Tiry" },  -- dein eigenes Angebot
+      { id = 2318, q = 10, price = 45, owner = "Bo" },    -- unterbietet dich
+      { id = 2318, q = 5, price = 30, owner = "Tiry" },   -- noch ein eigenes, zählt nicht
+      { id = 4238, q = 1, price = 100, owner = "Cy" },    -- Einzel-Item: prüft weiter die Einzelsuche
+    }
+    replicate(W, function() return auctions end)
+    ns.Market.ahOpen = true
+    W.fire("REPLICATE_ITEM_LIST_UPDATE") W.flush()
+    assert.is_true(s.list[1].undercut)
+    assert.are.equal(45, s.list[1].competitor)
+    assert.is_nil(s.list[2].undercut)
+    assert.truthy(E.chat(W):find("unterboten", 1, true))
+    -- frisch geprüfte Stapelware wird nicht nochmal einzeln gesucht
+    s.list[2] = nil
+    ns.AH.CheckUndercuts()
+    assert.is_false(ns.AH.checking)
+    -- keine Konkurrenz mehr -> nicht mehr unterboten
+    auctions = { { id = 2318, q = 20, price = 50, owner = "Tiry" } }
+    W.now = W.now + 900
+    W.fire("REPLICATE_ITEM_LIST_UPDATE") W.flush()
+    assert.is_false(s.list[1].undercut)
+    noErrors(W)
+  end)
+
+  it("Abgebrochener Komplett-Scan zählt nicht als Verkauf", function()
+    local ns, W = E.load({ itemInfo = { [2318] = { name = "Leichtes Leder", sell = 10, stack = 20 } } })
+    ns.char.watch = { [2318] = true }
+    local auctions = {}
+    for i = 1, 300 do auctions[i] = { id = 2318, q = 1, price = 40, owner = "S" .. i } end
+    replicate(W, function() return auctions end)
+    ns.Market.ahOpen = true
+    W.fire("REPLICATE_ITEM_LIST_UPDATE") W.flush()
+    local st = ns.Demand.Store()
+    assert.are.equal(1, st.scans)
+    -- Blizzard drosselt: nur 50 von 300 Angeboten kommen an -> keine 250 "Verkäufe"
+    W.now = W.now + 3600
+    local short = {}
+    for i = 1, 50 do short[i] = auctions[i] end
+    auctions = short
+    W.fire("REPLICATE_ITEM_LIST_UPDATE") W.flush()
+    assert.are.equal(1, st.scans)
+    assert.truthy(E.chat(W):find("unvollständig", 1, true))
+    assert.is_nil(ns.Demand.PerDay(2318))
+    -- zweimal hintereinander klein -> Markt ist wirklich geschrumpft, wird übernommen
+    W.now = W.now + 3600
+    W.fire("REPLICATE_ITEM_LIST_UPDATE") W.flush()
+    assert.are.equal(2, st.scans)
+    noErrors(W)
+  end)
+
   it("Schnäppchen-Scan: unter Händlerpreis (sicher) und unter Marktwert, eigene Angebote nie", function()
     local ns, W = E.load({ itemInfo = { [4238] = { name = "Leinentasche", sell = 200, stack = 1 },
       [2318] = { name = "Leichtes Leder", sell = 10, stack = 20 } } })

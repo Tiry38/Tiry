@@ -325,7 +325,7 @@ ns.Listen("LOGIN", function()
         if M.scanRequested then
           M.scanRequested = nil
           if ns.db then ns.db.lastFullScan = time() end
-          ns.Print("|cffff9929Scan fertig!|r Tiry's Zentrale rechnet jetzt mit den neuen Preisen.")
+          ns.Print("|cffff9929Scan fertig!|r Alle Reiter rechnen jetzt mit den neuen Preisen.")
         end
         ns.Fire("PRICES_UPDATED")
       end)
@@ -335,6 +335,9 @@ end)
 
 -- Startet denselben Scan wie Auctionators eigener Knopf "Scannen" (Reiter Auctionator)
 -- opts.quiet: automatischer Scan beim Öffnen des AH – keine Meldung, wenn er gerade nicht geht
+-- EIN Scan für alle Reiter: Bevorzugt der Komplett-Scan (Blizzard-Liste aller Angebote, alle 15 Min. erlaubt).
+-- Er liefert in einem Durchgang die Preise (Auctionator), Absatz/Markt-Tiefe, Schnäppchen und den Unterboten-Check
+-- deiner Stapelware. Ist er gesperrt, aktualisiert der Schnell-Scan von Auctionator wenigstens alle Preise.
 function M.StartScan(opts)
   local quiet = opts and opts.quiet
   if not M.HasAuctionator() then
@@ -351,26 +354,55 @@ function M.StartScan(opts)
   local okCall, started, reason = pcall(function()
     local st, cfg = Auctionator.State, Auctionator.Config
     if type(st) ~= "table" then return false, "unknown" end
-    local full = type(cfg) == "table" and type(cfg.Get) == "function" and type(cfg.Options) == "table"
-      and cfg.Get(cfg.Options.REPLICATE_SCAN)
-    local frame = (full and st.FullScanFrameRef) or st.IncrementalScanFrameRef or st.FullScanFrameRef
-    if type(frame) ~= "table" or type(frame.InitiateScan) ~= "function" then return false, "unknown" end
-    if frame.inProgress or frame.doingFullScan then return false, "running" end
-    if type(frame.CanInitiate) == "function" and not frame:CanInitiate() then return false, "cooldown" end
-    frame:InitiateScan()
-    return true
+    local full, inc = st.FullScanFrameRef, st.IncrementalScanFrameRef
+    local function usable(f) return type(f) == "table" and type(f.InitiateScan) == "function" end
+    local order
+    if ns.settings.ahFullScan ~= false then
+      order = { { full, "komplett" }, { inc, "schnell" } }
+    else
+      local cfgFull = type(cfg) == "table" and type(cfg.Get) == "function" and type(cfg.Options) == "table"
+        and cfg.Get(cfg.Options.REPLICATE_SCAN)
+      order = cfgFull and { { full, "komplett" }, { inc, "schnell" } } or { { inc, "schnell" }, { full, "komplett" } }
+    end
+    local any, cooldown = false, false
+    for _, o in ipairs(order) do
+      local f = o[1]
+      if usable(f) then
+        any = true
+        if f.inProgress or f.doingFullScan then return false, "running" end
+      end
+    end
+    for _, o in ipairs(order) do
+      local f, kind = o[1], o[2]
+      if usable(f) then
+        if type(f.CanInitiate) == "function" and not f:CanInitiate() then
+          cooldown = true
+        else
+          f:InitiateScan()
+          return true, kind, cooldown
+        end
+      end
+    end
+    if not any then return false, "unknown" end
+    return false, "cooldown"
   end)
   if okCall and started then
     M.scanRequested = true
-    ns.Print(quiet and "Scanne das AH automatisch ... (abschaltbar in den Einstellungen)"
-      or "Scan läuft ... Tiry's Zentrale meldet sich, sobald die Preise da sind.")
+    M.scanKind = reason
+    if quiet then
+      ns.Print("Scanne das AH automatisch ... (abschaltbar in den Einstellungen)")
+    elseif reason == "komplett" then
+      ns.Print("Komplett-Scan läuft ... Preise, Absatz, Schnäppchen und Unterboten – für alle Reiter auf einmal.")
+    else
+      ns.Print("Schnell-Scan läuft (Komplett-Scan erst in ein paar Minuten wieder erlaubt) – alle Preise werden aktualisiert.")
+    end
     return true
   end
   if quiet then return false end
   if okCall and reason == "running" then
     ns.Print("Auctionator scannt schon – einfach warten, die Preise kommen gleich.")
   elseif okCall and reason == "cooldown" then
-    ns.Print("Auctionator erlaubt den Komplett-Scan nur alle 15 Minuten. Bitte kurz warten – deine Preise sind noch frisch.")
+    ns.Print("Blizzard erlaubt den Komplett-Scan nur alle 15 Minuten. Bitte kurz warten – deine Preise sind noch frisch.")
   else
     ns.Print("Bitte im AH den Reiter |cffff9929Auctionator|r öffnen und auf |cffff9929Scannen|r klicken – Tiry's Zentrale erkennt neue Preise automatisch.")
   end

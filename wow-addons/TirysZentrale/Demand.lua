@@ -198,6 +198,11 @@ function D.ReadReplicate()
   local watch = D.Watchlist()
   local snipe = ns.Snipe
   if snipe then snipe.Begin() end
+  -- deine eigene Stapelware im AH: günstigstes fremdes Angebot gleich mitlesen (Unterboten-Check ohne Einzelsuche)
+  local AW = ns.AH
+  local mine = AW and AW.ReplicateTargets and AW.ReplicateTargets() or {}
+  local me = UnitName and UnitName("player") or nil
+  local cheapest = {}
   local items, sellers = {}, {}
   local t = time()
   local index = 0
@@ -208,6 +213,13 @@ function D.ReadReplicate()
       local ok, _, _, count, _, _, _, _, _, _, buyout, _, _, _, owner, _, _, itemID =
         pcall(AH.GetReplicateItemInfo, i)
       if ok and snipe then snipe.Collect(itemID, count, buyout, owner) end
+      if ok and itemID and mine[itemID] and count and count > 0 and buyout and buyout > 0 then
+        local own = type(owner) == "string" and me and (owner == me or owner:match("^([^%-]+)") == me)
+        if not own then
+          local unit = math.floor(buyout / count)
+          if not cheapest[itemID] or unit < cheapest[itemID] then cheapest[itemID] = unit end
+        end
+      end
       if ok and itemID and watch[itemID] and count and count > 0 and buyout and buyout > 0 then
         local unit = math.floor(buyout / count)
         local okT, band = pcall(AH.GetReplicateItemTimeLeft or function() return nil end, i)
@@ -233,12 +245,36 @@ function D.ReadReplicate()
       C_Timer.After(0, function() ns.Safe(step) end)
     else
       reading = nil
-      local n = D.Ingest(items, t)
-      ns.Fire("DEMAND_UPDATED", n)
+      if D.Complete(total) then
+        local n = D.Ingest(items, t)
+        ns.Fire("DEMAND_UPDATED", n)
+      end
       if snipe then ns.Safe(snipe.Finish) end
+      if AW and AW.FromReplicate then ns.Safe(AW.FromReplicate, mine, cheapest) end
     end
   end
   ns.Safe(step)
+  return true
+end
+
+-- Schutz vor abgebrochenen Scans: Liefert Blizzard (z. B. gedrosselt) nur einen Bruchteil der üblichen Angebote,
+-- sähe alles Fehlende wie "verkauft" aus. Dann keine Absatz-Messung. Schrumpft der Markt wirklich
+-- (zwei kleine Scans hintereinander, ähnlich groß), wird das als neuer Normalwert übernommen.
+function D.Complete(total)
+  local s = store()
+  if not s then return true end
+  local last = s.lastTotal
+  if last and last >= 200 and total < last * 0.4 then
+    local low = s.lowTotal
+    if low and total >= low * 0.8 and total <= low * 1.25 then
+      s.lastTotal, s.lowTotal = total, nil
+      return true
+    end
+    s.lowTotal = total
+    ns.Print(string.format("|cffff6b81Komplett-Scan unvollständig|r (%d statt ~%d Angebote) – Absatz-Messung diesmal übersprungen.", total, last))
+    return false
+  end
+  s.lastTotal, s.lowTotal = total, nil
   return true
 end
 
