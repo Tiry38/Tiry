@@ -139,7 +139,20 @@ function M.ResetRateCache() overall.t = -100 end
 
 -- Erwartete Fehlversuche (abgelaufene Angebote) bis zum Verkauf: (1 − Quote) / Quote, höchstens 4.
 -- Quote: deine Quote für dieses Item (ab 4 Angeboten) > gemessener Absatz im AH > deine Gesamtquote > 50 %
+-- Pro Bildaufbau gemerkt (Listen rechnen das für hunderte Rezepte); neu bei neuen Verkaufsbuch-Einträgen/Messungen
+local relCache, relStamp = {}, nil
 function M.ExpectedRelists(itemID)
+  local b = ns.db and ns.db.ledger
+  local stamp = tostring(GetTime and GetTime() or 0) .. ":" .. (b and (#(b.sales or {}) + #(b.expired or {})) or 0)
+    .. ":" .. tostring(ns.Demand and ns.Demand.version or 0)
+  if stamp ~= relStamp then relCache, relStamp = {}, stamp end
+  if itemID and relCache[itemID] then return relCache[itemID] end
+  local v = M.ComputeRelists(itemID)
+  if itemID then relCache[itemID] = v end
+  return v
+end
+
+function M.ComputeRelists(itemID)
   local L, p = ns.Ledger, nil
   if L and L.SaleRate and itemID then
     local rate, n = L.SaleRate(itemID)

@@ -152,6 +152,7 @@ function D.Ingest(items, t)
   end
   s.snap = { t = t, items = items }
   s.scans = (s.scans or 0) + 1
+  D.version = (D.version or 0) + 1
   if measured > 0 then s.measured = t end
   return measured
 end
@@ -220,14 +221,11 @@ end)
 ----------------------------------------------------------------------------
 -- Deine eigenen verkauften Stück pro Tag (Verkaufsbuch, 14 Tage)
 local function ownPerDay(itemID)
-  local b = ns.db and ns.db.ledger
-  if not (b and b.sales) then return nil, 0 end
-  local limit, units, n = time() - 14 * 86400, 0, 0
-  for _, s in ipairs(b.sales) do
-    if s.id == itemID and s.t >= limit then units, n = units + (s.n or 1), n + 1 end
-  end
-  if n == 0 then return nil, 0 end
-  return units / 14, n
+  local L = ns.Ledger
+  if not (ns.db and ns.db.ledger and L and L.Index) then return nil, 0 end
+  local e = L.Index(14)[itemID]
+  if not e or e.sold == 0 then return nil, 0 end
+  return e.units / 14, e.sold
 end
 
 -- Verkäufe pro Tag (Stück). Rückgabe: perDay oder nil, Quelle "markt"|"eigene", Beobachtungsstunden, Angebot
