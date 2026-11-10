@@ -573,26 +573,39 @@ end)
 -- Preisvorschlag = günstigstes Angebot minus 1 Kupfer, aber NIE unter "Nicht unter" (Materialkosten nach Gebühr).
 -- Einstellen selbst machst du in Auctionator (Blizzard erlaubt Addons kein Einstellen ohne Klick).
 ----------------------------------------------------------------------------
+-- "Nicht unter": Materialkosten (falls selbst hergestellt) UND Händlerpreis – jeweils so, dass nach AH-Gebühr und
+-- erwartetem Einstellgebühr-Verlust (Forever: Gebühr weg bei Ablauf) mehr übrig bleibt. Unter dem Händlerpreis
+-- einzustellen lohnt nie: Dann direkt zum Händler.
 function AW.Floor(id)
+  local risk = M.DepositRisk and M.DepositRisk(id) or 0
+  local vendor = M.VendorSell(id) or 0
+  local vfloor = vendor > 0 and math.ceil((vendor + risk) / M.CutFactor()) or nil
   local r = ns.Recipes.ByOutput(id)
-  if not r then return nil end
+  if not r then return vfloor end
   local unit = ns.CraftBook.UnitCost(id)
   if not unit then
     local _, _, cost, unknown = ns.Scanner.RecipeProfit(r)
-    if not cost or unknown > 0 or (r.qty or 0) <= 0 then return nil end
+    if not cost or unknown > 0 or (r.qty or 0) <= 0 then return vfloor end
     unit = cost / r.qty
   end
-  -- erwarteter Einstellgebühr-Verlust (Forever: Gebühr weg bei Ablauf) gehört zu den Kosten
-  local risk = M.DepositRisk and M.DepositRisk(id) or 0
-  return math.max(math.ceil((unit + risk) / M.CutFactor()), M.VendorSell(id) or 0)
+  return math.max(math.ceil((unit + risk) / M.CutFactor()), vfloor or 0)
+end
+
+-- Ausrüstung und andere Einzel-Items: ganze Silberbeträge. Blizzard (Forum, 09.11.2026): "Kupfer weglassen hilft"
+-- gegen den "Internen Auktionsfehler" – Stapelware ist nicht betroffen und bleibt bei 1 Kupfer darunter.
+function AW.WholeSilver(id)
+  return (ns.Item(id).stack or 1) <= 1
 end
 
 local function suggest(id, competitor)
   local base = competitor or M.Price(id)
   local floor = AW.Floor(id)
-  if not base then return floor, floor, false end
+  local silver = AW.WholeSilver(id)
+  local function up(v) return (silver and v and v >= 100) and math.ceil(v / 100) * 100 or v end
+  if not base then return up(floor), floor, false end
   local s = math.max(base - 1, 1)
-  if floor and s < floor then return floor, floor, true end -- Markt liegt unter deinen Kosten: lieber warten
+  if silver and base > 100 then s = math.floor((base - 1) / 100) * 100 end -- 3g 45s 27c -> 3g 45s, 3g 45s -> 3g 44s
+  if floor and s < floor then return up(floor), floor, true end -- Markt liegt unter deinen Kosten: lieber warten
   return s, floor, false
 end
 AW.Suggest = suggest
@@ -628,11 +641,20 @@ function AW.RelistList()
   end
   -- Goldmacher-Regel "nicht den Markt fluten": nur so viele einstellen, wie in ~3 Tagen weggehen
   -- (post = empfohlene Menge, full = Angebot reicht für über 2 Wochen -> Preise gedrückt, lieber halten)
+  -- stale = in 14 Tagen mind. 2× abgelaufen und nie verkauft: jedes Einstellen kostet Gebühr ->
+  -- billiger einstellen oder zum Händler (vendor = Händlerpreis pro Stück, falls er etwas zahlt)
   local D = ns.Demand
+  local idx = ns.Ledger and ns.Ledger.Index and ns.Ledger.Index(14) or {}
   for _, e in ipairs(list) do
     local batch = D and D.MarketBatch(e.id)
     e.post = (batch and e.where ~= "unterboten") and math.min(e.qty, batch) or e.qty
     e.full = D and D.Full(e.id) or nil
+    local x = idx[e.id]
+    if x and x.expired >= 2 and x.sold == 0 then
+      e.stale, e.expired = true, x.expired
+      local v = M.VendorSell(e.id) or 0
+      e.vendor = v > 0 and v or nil
+    end
   end
   return list
 end

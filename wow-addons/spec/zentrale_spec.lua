@@ -1098,6 +1098,35 @@ describe("Goldmacher-Werkzeuge", function()
     C_AuctionHouse.GetReplicateItemTimeLeft = function(i) return getAuctions()[i + 1].band or 3 end
   end
 
+  it("Einstellpreis: Ausrüstung ohne Kupfer, nie unter Händlerpreis, Ladenhüter-Warnung", function()
+    local ns, W = E.load({ prices = {}, itemInfo = {
+      [4238] = { name = "Leinentasche", sell = 200, stack = 1 },
+      [2318] = { name = "Leichtes Leder", sell = 10, stack = 20 },
+      [6070] = { name = "Grüner Gürtel", sell = 0, stack = 1 } } })
+    local Suggest = ns.AH.Suggest
+    -- Einzel-Item: ganze Silber, ein Silber-Schritt unter der Konkurrenz (Blizzard: "Kupfer weglassen hilft")
+    assert.are.equal(34500, (Suggest(6070, 34527)))
+    assert.are.equal(34400, (Suggest(6070, 34500)))
+    -- Stapelware bleibt bei 1 Kupfer darunter
+    assert.are.equal(44, (Suggest(2318, 45)))
+    -- Händler zahlt 2 Silber: AH-Preis darunter lohnt nie -> warten / Händler
+    local floor = math.ceil((200 + ns.Market.DepositRisk(4238)) / 0.95)
+    local price, f, wait = Suggest(4238, 150)
+    assert.are.equal(floor, f)
+    assert.is_true(wait)
+    assert.are.equal(math.ceil(floor / 100) * 100, price)
+    assert.are.equal(0, price % 100)
+    -- 2× abgelaufen, nie verkauft -> Hinweis billiger oder Händler
+    W.bags = { [0] = { { itemID = 4238, stackCount = 1, quality = 1 } } }
+    ns.AH.Store().list = { { auctionID = 9, id = 4238, qty = 1, unit = 900, status = "expired" } }
+    ns.db.ledger = { sales = {}, buys = {}, expired = { { id = 4238, t = W.now - 86400 }, { id = 4238, t = W.now - 3 * 86400 } } }
+    local l = ns.AH.RelistList()
+    assert.is_true(l[1].stale)
+    assert.are.equal(2, l[1].expired)
+    assert.are.equal(200, l[1].vendor)
+    noErrors(W)
+  end)
+
   it("Ein Scan für alle Reiter: Komplett-Scan zuerst, sonst Schnell-Scan", function()
     local ns, W = E.load()
     ns.Market.ahOpen = true
