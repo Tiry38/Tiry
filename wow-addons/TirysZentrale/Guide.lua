@@ -111,12 +111,12 @@ end
 -- Zuordnung zu Berufen laut Wowhead Forever / Forever-Guides). Wert = Live-Preis aus Auctionator.
 ns.FOREVER_CHANCES = {
   { id = 249427, prof = "SKINNING", how = "Seltener Fund beim Häuten" },
-  { id = 249428, prof = "SKINNING", how = "Seltener Fund beim Häuten (höhere Level)" },
+  { id = 249428, prof = "SKINNING", how = "Seltener Fund beim Häuten (höhere Level) – Preis fiel stark, nicht horten" },
   { id = 249429, prof = "SKINNING", how = "Seltener Fund beim Häuten (Level 60)" },
-  { id = 249399, prof = "HERBALISM", how = "Seltener Fund beim Kräutersammeln" },
+  { id = 249399, prof = "HERBALISM", how = "Selten an mittleren Kräutern (u. a. Wilddornrose, Beulengras, Königsblut) – Preis gestiegen" },
   { id = 249424, prof = "HERBALISM", how = "Seltener Fund beim Kräutersammeln" },
   { id = 249274, prof = "HERBALISM", how = "Seltener Fund beim Kräutersammeln" },
-  { id = 249391, prof = "MINING", how = "Seltener Fund beim Bergbau" },
+  { id = 249391, prof = "MINING", how = "Seltener Fund an Kupfer- und Zinnadern" },
   { id = 249425, prof = "MINING", how = "Seltener Fund beim Bergbau" },
   { id = 249426, prof = "MINING", how = "Seltener Fund beim Bergbau" },
   { id = 249409, prof = "ALCHEMY", how = "Neu: stellt die Alchemie her" },

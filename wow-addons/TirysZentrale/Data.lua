@@ -24,7 +24,11 @@ ns.METHODS = {
       "Unbekannte neue Items (z. B. grüne Ausrüstung) vor dem Verkaufen im AH nachschauen.",
       "Kleinkram, der nur ein paar Kupfer wert ist, NICHT ins AH: Die Mindestgebühr liegt aktuell bei 1 Silber pro Auktion.",
     },
-    tips = { "Taschen, die du verkaufen willst, nicht anlegen – sie werden nicht mehr automatisch ausgerüstet und bleiben so verkaufbar." },
+    tips = {
+      "Taschen, die du verkaufen willst, nicht anlegen – sie werden nicht mehr automatisch ausgerüstet und bleiben so verkaufbar.",
+      "Die Einstellgebühr bekommst du zurück, wenn das Item verkauft wird – verloren ist sie nur bei Ablauf. Tiry's Zentrale rechnet dieses Risiko in jeden Gewinn ein.",
+      "Bekannter AH-Fehler (Blizzard-Forum, seit 06.11.): Einstellen UNTER dem günstigsten Angebot bricht teils mit \"Interner Auktionsfehler\" ab. Dann den Preis des günstigsten Angebots übernehmen oder später erneut versuchen.",
+    },
   },
   {
     key = "cloth", cat = "noprof", farm = "cloth", minLevel = 5, effort = 1, source = "classic", icon = "pin",
@@ -53,9 +57,11 @@ ns.METHODS = {
       "Beim Questen jedes Tier häuten (Wölfe, Eber, Katzen, Raptoren …). Dein Skill steigt automatisch mit.",
       "Leichtes Leder und Leichte Bälge ab ca. Level 5–20, Mittleres Leder ab ca. Level 20.",
       "Selten fällt \"Makelloses Leder\" (neues Forever-Material) – das gehört ins AH, nicht zum Händler!",
+      "Leder roh und zügig verkaufen, nicht horten: In der Startwoche sind die Lederpreise schnell gefallen (z. B. Schweres Leder in 3 Tagen um mehr als die Hälfte, timesaver.gg).",
     },
     tips = {
       "Perfektes Paar: Kürschnerei + Kräuterkunde oder Bergbau – zwei Sammelberufe = doppelte Beute.",
+      "Lederverarbeitung: Für \"Geschmeidiger schwerer Balg\" reicht seit dem Hotfix vom 06.11. Skill 125 (vorher 140). Ob sich das Gerben lohnt, zeigt die Rezepte-Seite – in der Startwoche war die Marge knapp bis negativ.",
       "Jäger und Druiden töten ohnehin viele Tiere – ideale Kürschner.",
     },
   },
@@ -111,7 +117,39 @@ ns.METHODS = {
       "Stell diese Materialien in genau diesen Mengen ein (z. B. 20er-Stapel) – Kisten-Sammler kaufen ganze Pakete.",
       "Mit \"Als Einkaufsliste\" holst du dir alle Preise auf einen Klick in Auctionator.",
     },
-    tips = { "Die Mengen stammen aus Method.gg (Forever-Guide). Dass die Nachfrage steigt, ist eine Ableitung – prüf es an den Live-Preisen." },
+    tips = {
+      "Die Mengen stammen aus Method.gg (Forever-Guide). Dass die Nachfrage steigt, ist eine Ableitung – prüf es an den Live-Preisen.",
+      "Seit dem Hotfix vom 09.11. fallen Kisten auch in Dungeons – mehr Kisten im Umlauf heißt mehr Nachfrage nach den Paketen.",
+      "Laut Beta-Tabellen (wow.gg) bringen 2 geschmeidige Bälge doppelt so viel Händler-Gunst wie 20 Leder derselben Stufe – geschmeidige Bälge dürften deshalb besonders gefragt sein (Ableitung).",
+    },
+  },
+  {
+    key = "smallfry", cat = "trade", minLevel = 5, effort = 1, source = "forever", icon = "scan",
+    items = { 1251, 2581, 3530, 4238, 2304, 2862, 7964 },
+    title = "Kleinvieh macht auch Mist – Schnelldreher",
+    summary = "Gerade jetzt leveln sehr viele Spieler. Billige Massenware (Verbände, Taschen, Rüstungssets, Wetzsteine) geht ständig weg – kleiner Gewinn mal viele Verkäufe schlägt den großen Ladenhüter.",
+    steps = {
+      "Im AH zweimal scannen (15 Min. bis 12 Std. Abstand). Tiry's Zentrale misst daraus, wie viel sich pro Tag wirklich verkauft.",
+      "Rezepte-Seite und Rezept-Tipps sortieren nach Gold pro Tag: Schnelldreher oben, Ladenhüter unten.",
+      "Kleine Mengen einstellen und lieber täglich nachlegen statt horten – dann bleibt dein Preis vorne.",
+      "Was als \"Ladenhüter\" markiert ist, nicht nachproduzieren – die Einstellgebühr frisst sonst den Gewinn.",
+    },
+    tips = { "Die Messung ist eine Schätzung: Angebote, die zwischen zwei Scans eingestellt UND gekauft werden, sieht niemand. Je öfter du scannst, desto genauer." },
+  },
+  {
+    key = "writs", cat = "trade", minLevel = 10, effort = 1, source = "forever", icon = "cart",
+    title = "Handwerker-Aufträge (Writs) nutzen",
+    summary = "Gegner ab Stufe 10 lassen versiegelte Handwerker-Aufträge fallen – seit dem Hotfix vom 09.11. auch in Dungeons. Aufträge sind handelbar.",
+    steps = {
+      "Versiegelten Auftrag öffnen: Du bekommst einen zufälligen Auftrag dieser Stufe (Geselle, Experte, Fachmann).",
+      "Abliefern braucht laut Forever-Guides keinen Beruf – den verlangten Gegenstand kannst du auch im AH kaufen.",
+      "Belohnung: Ruf und ein Münzbeutel. Ist der verlangte Gegenstand teurer als die Belohnung, verkauf den Auftrag lieber im AH.",
+      "Mit Beruf: Gegenstände, die Aufträge oft verlangen, auf Vorrat herstellen – Auftrags-Besitzer kaufen sie.",
+    },
+    tips = {
+      "Dungeons geben seit dem 09.11. außerdem +50 % Erfahrung – Leveln und Aufträge sammeln geht jetzt in einem.",
+      "Die Details (Belohnungen, Handel) stammen aus Beta-Daten (forevermastery.com) – im Spiel prüfen.",
+    },
   },
   {
     key = "flips", cat = "trade", minLevel = 1, effort = 1, source = "forever", icon = "scan",
@@ -190,7 +228,7 @@ ns.METHODS = {
   },
   {
     key = "stones", cat = "craft", minLevel = 5, prof = P.BLACKSMITHING, effort = 2, source = "forever", icon = "bolt",
-    items = { 2862, 2863, 2835, 2836 },
+    items = { 2862, 2863, 7964, 7965, 2835, 2836 },
     title = "Schmiedekunst – Wetzsteine",
     summary = "In Forever wirken Schamanen-Waffenverzauberungen jetzt zusätzlich zu Wetzsteinen und Ölen – mehr Spieler nutzen sie.",
     steps = {
@@ -198,7 +236,10 @@ ns.METHODS = {
       "Rezepte-Seite: Gewinn gegenüber dem reinen Steinpreis prüfen.",
       "Kleine Stapel (5–10) einstellen.",
     },
-    tips = { "Mit Bergbau sammelst du die Steine selbst." },
+    tips = {
+      "Mit Bergbau sammelst du die Steine selbst.",
+      "Laut foreverecon (10.11., US-Allianz) brachten Robuster Wetzstein (+3s) und Robuster Gewichtsstein (+4s) Gewinn pro Craft – prüf es an deinen Live-Preisen.",
+    },
   },
   {
     key = "enchanting", cat = "craft", minLevel = 5, prof = P.ENCHANTING, effort = 2, source = "classic", icon = "star",
