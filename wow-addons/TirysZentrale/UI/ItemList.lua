@@ -235,7 +235,8 @@ function UI.ItemList(parent, width, columns, opts)
     end
     self.empty:SetText(#entries == 0 and (emptyText or "Keine Einträge.") or "")
     self.empty:SetShown(#entries == 0)
-    local h = HEAD_H + math.max(#entries, 1) * ROW_H + ((#entries == 0) and 20 or 0)
+    -- leer: nur so hoch wie der Hinweis (keine Lücke einer ganzen Zeile)
+    local h = #entries == 0 and (HEAD_H + 10 + math.ceil(self.empty:GetStringHeight()) + 18) or (HEAD_H + #entries * ROW_H)
     self:SetHeight(h)
     return h
   end

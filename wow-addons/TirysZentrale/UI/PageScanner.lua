@@ -50,7 +50,8 @@ function page.build(self, content, width)
   self.dealTitle:SetText("Schnäppchen im AH")
   self.dealHint = UI.Para(content, 12, C.muted, width)
   self.dealHint:SetText("Läuft automatisch mit: Sobald du im AH etwas suchst (auch über Auctionator), meldet Tiry's Zentrale Angebote unter 65 % deines Marktwerts. "
-    .. "Ladenhüter (deine Verkaufsquote unter 30 %) zählen nicht. Der Marktwert braucht Scans von mindestens 2 Tagen.")
+    .. "Ladenhüter (deine Verkaufsquote unter 30 %) zählen nicht. Der Marktwert braucht Scans von mindestens 2 Tagen. "
+    .. "Alle Schnäppchen aus dem letzten Komplett-Scan: Handel > Preise > \"Schnäppchen\" (/tz schnapp).")
   self.dealList = UI.ItemList(content, width, {
     { key = "price", label = "Ab", width = 84 },
     { key = "ref", label = "Marktwert", width = 90 },
