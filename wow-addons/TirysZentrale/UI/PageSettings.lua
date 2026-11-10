@@ -102,6 +102,9 @@ function page.build(self, content, width)
     toggle("AH automatisch scannen", function() return s.ahAutoScan ~= false end, function(v)
       s.ahAutoScan = v
     end, "Beim Öffnen des Auktionshauses startet Tiry's Zentrale den Preis-Scan von Auctionator von selbst (Auctionator erlaubt ihn alle 15 Minuten)."),
+    toggle("Komplett-Scan: alles auf einmal", function() return s.ahFullScan ~= false end, function(v)
+      s.ahFullScan = v
+    end, "Preise, Absatz, Schnäppchen und Unterboten in einem Durchgang – ein Scan aktualisiert alle Reiter. Blizzard erlaubt ihn alle 15 Minuten, dazwischen werden nur die Preise schnell gescannt."),
     toggle("Eigene Auktionen auf Unterbieten prüfen", function() return s.ahUndercut ~= false end, function(v)
       s.ahUndercut = v
     end, "Beim Öffnen des Auktionshauses wird geprüft, ob jemand deine Auktionen unterboten hat – Ergebnis im Chat und unter Markt > Meine Auktionen."),

@@ -277,7 +277,7 @@ function page.build(self, content, width)
   self.makeBtn:SetScript("OnClick", function() page.MakeList(self) end)
   UI.SetTooltip(self.makeBtn, function()
     if self.view == "learnable" then
-      return "Rezepte suchen", "Sucht die angezeigten Rezepte (Muster, Pläne, Formeln ...) im AH. Ist das AH zu, wird eine Auctionator-Einkaufsliste \"Zentrale: Rezepte\" angelegt."
+      return "Rezepte suchen", "Nur zum Kaufen – die Preise aktualisiert der Scan oben für alle Reiter. Sucht die angezeigten Rezepte (Muster, Pläne, Formeln ...) im AH. Ist das AH zu, wird eine Auctionator-Einkaufsliste \"Zentrale: Rezepte\" angelegt."
     end
     return "Liste erstellen", "Legt alle Rezepte, die gerade angezeigt werden (also Gold bringen), in die Craft-Liste und öffnet das Einkaufsfenster mit den Materialien."
   end)
@@ -325,7 +325,7 @@ function page.build(self, content, width)
     { key = "floor", label = "Nicht unter", width = 100 },
     { key = "value", label = "Wert", width = 100, bold = true },
   })
-  self.sellBtn = UI.Button(content, "Konkurrenz im AH prüfen", "cool", 280, 34, "scan")
+  self.sellBtn = UI.Button(content, "Konkurrenz-Angebote zeigen", "cool", 280, 34, "scan")
   self.sellBtn:SetScript("OnClick", function()
     local ids = {}
     for _, e in ipairs(self.sellItems or {}) do ids[#ids + 1] = e.id end
@@ -338,7 +338,7 @@ function page.build(self, content, width)
       ns.Print(ok and ("Liste |cff39ff6bZentrale: Verkaufen|r angelegt (" .. n .. "). Im AH siehst du so sofort die aktuellen Preise.") or ("|cffff6b81" .. tostring(n) .. "|r"))
     end
   end)
-  UI.SetTooltip(self.sellBtn, "Konkurrenz prüfen", "Sucht deine hergestellten Items im AH, damit du siehst, zu welchem Preis andere gerade verkaufen.")
+  UI.SetTooltip(self.sellBtn, "Konkurrenz-Angebote zeigen", "Sucht deine hergestellten Items im AH, damit du siehst, zu welchem Preis andere gerade verkaufen. Die Preise selbst aktualisiert der Scan oben für alle Reiter.")
 
   -- Warteschlange
   local qc = UI.Card(content, 20, C.card)
@@ -874,7 +874,7 @@ function page.refresh(self)
         tip = { "Material: " .. (#mats > 0 and table.concat(mats, ", ") or "keins"),
           "Erlös (nach AH-Gebühr & Einstellgebühr-Risiko): " .. ns.Money(e.revenue) .. " · Gewinn " .. ns.Money(e.profit) .. " · nötig: " .. ns.Money(e.need),
           "Absatz: " .. dt .. (e.goldDay and (" · ~" .. ns.Money(e.goldDay) .. " Gold/Tag") or ""),
-          learn and (ri and "Linksklick: Rezept im AH suchen · Shift-Klick: Rezept in die Auctionator-Suche legen · Rechtsklick: ausblenden"
+          learn and (ri and "Linksklick: Rezept-Angebote im AH zeigen · Shift-Klick: Rezept in die Auctionator-Suche legen · Rechtsklick: ausblenden"
             or "Lernst du beim Lehrer deines Berufs · Rechtsklick: ausblenden")
             or "Linksklick: 1× in die Craft-Liste · × oder Rechtsklick: Rezept ausblenden" },
         action = function()

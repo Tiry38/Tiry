@@ -83,13 +83,13 @@ function page.build(self, content, width)
   end)
   UI.SetTooltip(self.listBtn, "Einkaufsliste anlegen", "Legt in Auctionator eine Liste mit allen Items dieser Kategorie an. Damit scannst du im AH alle Preise mit einem Klick.")
 
-  self.searchBtn = UI.Button(actions, "Jetzt im AH suchen", "soft", 190, 34, "scan")
+  self.searchBtn = UI.Button(actions, "Angebote zeigen", "soft", 190, 34, "scan")
   self.searchBtn:SetPoint("LEFT", self.listBtn, "RIGHT", 10, 0)
   self.searchBtn:SetScript("OnClick", function()
     local ok, err = M.SearchNow(currentIDs())
     if not ok then ns.Print("|cffff6b81" .. tostring(err) .. "|r") end
   end)
-  UI.SetTooltip(self.searchBtn, "Sofort-Suche", "Funktioniert, während das Auktionshaus offen ist: Auctionator sucht alle Items dieser Liste und zeigt dir die günstigsten Angebote.")
+  UI.SetTooltip(self.searchBtn, "Angebote zeigen", "Nur zum Kaufen – die Preise aktualisiert der Scan oben für alle Reiter.\n\nFunktioniert, während das Auktionshaus offen ist: Auctionator sucht alle Items dieser Liste und zeigt dir die günstigsten Angebote.")
   st:Add(actions, 34, 16)
 
   self.status = UI.Para(content, 12, C.muted, width)

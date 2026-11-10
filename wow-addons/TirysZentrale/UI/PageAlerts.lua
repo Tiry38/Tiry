@@ -154,7 +154,7 @@ function page.refresh(self)
         state = hit and "|cffff9929jetzt kaufen!|r" or "|cff93a39dwartet|r",
       },
       tip = { "Preis jetzt: " .. (a.now and ns.Money(a.now) or "unbekannt (AH scannen)") .. " · " .. M.AgeText(a.id),
-        "Klick: im AH suchen (Auktionshaus muss offen sein) · ×: Alarm löschen" },
+        "Klick: Angebote im AH zeigen (Auktionshaus muss offen sein) · ×: Alarm löschen" },
       action = function() A.Remove(a.id) page.refresh(self) end,
       actionTip = "Alarm löschen",
       onClick = function()

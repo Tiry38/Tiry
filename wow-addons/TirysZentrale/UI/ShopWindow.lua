@@ -1,5 +1,5 @@
 -- Tiry's Zentrale – kleines Einkaufsfenster (wie TSM): oben was du herstellst, darunter nur die Materialien.
--- Gekauftes verschwindet sofort. Am AH: "Im AH suchen", beim Händler: "Beim Händler kaufen" (ein Klick kauft alles).
+-- Gekauftes verschwindet sofort. Am AH: "Angebote zeigen", beim Händler: "Beim Händler kaufen" (ein Klick kauft alles).
 local _, ns = ...
 local UI = ns.UI
 local C = UI.C
@@ -113,7 +113,7 @@ local function create()
   f.more = UI.Text(f, 12, "regular", C.dim)
 
   -- Linker Knopf passt sich an: beim Händler kaufen, sonst im AH suchen
-  f.search = UI.Button(f, "Im AH suchen", "soft", 196, 38, "scan")
+  f.search = UI.Button(f, "Angebote zeigen", "soft", 196, 38, "scan")
   f.search:SetPoint("BOTTOMLEFT", 16, 16)
   f.search:SetScript("OnClick", function(self)
     if self.mode == "vendor" then
@@ -134,7 +134,7 @@ local function create()
       return "Beim Händler kaufen (" .. ns.Money(cost) .. ")", table.concat(names, "\n")
         .. "\n\nKauft genau die fehlende Menge, die dieser Händler hat – nur gegen Gold. Rückkauf beim Händler ist möglich."
     end
-    return "Im AH suchen", "Bei offenem Auktionshaus: Auctionator sucht alle fehlenden Materialien auf einmal. Was du kaufst, wird hier sofort abgezogen."
+    return "Angebote zeigen", "Nur zum Kaufen – die Preise aktualisiert der Scan oben für alle Reiter.\n\nBei offenem Auktionshaus: Auctionator sucht alle fehlenden Materialien auf einmal. Was du kaufst, wird hier sofort abgezogen."
   end)
   f.craft = UI.Button(f, "Nächstes craften", "primary", 160, 38, "bolt")
   f.craft:SetPoint("BOTTOMRIGHT", -16, 16)
@@ -451,7 +451,7 @@ function Shop.Refresh()
     win.search:SetEnabled(true)
   else
     win.search.mode = "ah"
-    win.search:SetLabel("Im AH suchen")
+    win.search:SetLabel("Angebote zeigen")
     win.search:SetEnabled(open > 0 and M.ahOpen == true)
   end
   win.craft:SetEnabled(#(ns.char.queue or {}) > 0)

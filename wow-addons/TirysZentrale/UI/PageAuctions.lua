@@ -194,7 +194,7 @@ function page.refresh(self)
     re[#re + 1] = {
       id = e.id,
       note = e.wait and "|cffff9929AH-Preis liegt unter deinen Kosten – lieber warten oder zum Vorschlag einstellen|r"
-        or (e.mine and ("du: " .. ns.Money(e.mine) .. "/Stück") or "Klick: im AH suchen · Shift-Klick: verlinken"),
+        or (e.mine and ("du: " .. ns.Money(e.mine) .. "/Stück") or "Klick: Angebote im AH zeigen · Shift-Klick: verlinken"),
       cells = { qty = tostring(e.qty), where = WHY[e.where] or e.where,
         price = e.price and ns.Money(e.price) or "|cff8a9a94kein Preis|r", floor = e.floor and ns.Money(e.floor) or "–" },
       tip = { "Vorschlag = günstigstes Angebot minus 1 Kupfer, nie unter \"Nicht unter\".",

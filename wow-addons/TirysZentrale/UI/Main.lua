@@ -296,7 +296,7 @@ function UI.UpdateStatus()
   frame.status.dot:SetVertexColor(c[1], c[2], c[3], 1)
   frame.status.glow:SetVertexColor(c[1], c[2], c[3], 0.5)
   frame.status.text:SetText(state == "ok" and "Live-Preise aktiv" or (state == "empty" and "AH einmal scannen" or "Auctionator fehlt"))
-  frame.scanInfo:SetText(ns.Market.LastScanText())
+  frame.scanInfo:SetText("Stand: " .. ns.Market.LastScanText() .. " · gilt für alle Reiter")
 end
 
 -- Rechts oben: Suche · Lernen (?) · Einstellungen · AH scannen · Schließen
@@ -310,13 +310,14 @@ local function buildHeader(f)
   scan:SetPoint("RIGHT", close, "LEFT", -12, 0)
   scan:SetScript("OnClick", function() ns.Market.StartScan() end)
   UI.SetTooltip(scan, function()
-    return "Preise aktualisieren", "Am offenen Auktionshaus: startet den Auctionator-Scan. Tiry's Zentrale erkennt jeden Scan automatisch – "
+    return "Preise aktualisieren – für alle Reiter", "Am offenen Auktionshaus: startet den Auctionator-Scan. Ein Scan aktualisiert alle Reiter "
+      .. "(Preise, Absatz, Schnäppchen, Unterboten). Tiry's Zentrale erkennt jeden Scan automatisch – "
       .. "auch wenn du direkt in Auctionator scannst.\n\nStand: " .. ns.Market.LastScanText()
   end)
   f.scanBtn = scan
   f.scanInfo = UI.Text(f, 12, "semibold", C.dim)
-  f.scanInfo:SetPoint("TOP", scan, "BOTTOM", 0, -6)
-  f.scanInfo:SetJustifyH("CENTER")
+  f.scanInfo:SetPoint("TOPRIGHT", close, "BOTTOMRIGHT", -2, -8)
+  f.scanInfo:SetJustifyH("RIGHT")
 
   -- Schnellknöpfe: Einstellungen, Lernen, Suche (von rechts nach links)
   local function quick(key, icon, anchor, tipTitle, tipText, onClick)

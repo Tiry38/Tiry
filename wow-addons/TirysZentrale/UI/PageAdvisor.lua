@@ -67,13 +67,14 @@ function page.build(self, content, width)
   self.tipTitle:SetText("Hol dir diese Rezepte")
   self.tipHint = UI.Para(content, 12, C.muted, width)
   self.tipHint:SetText("Nur für deine Berufe und deinen Skill: Rezepte, die du jetzt (oder in bis zu 10 Punkten) lernen kannst, mit frischem Preis, "
-    .. "mindestens deinem Mindestgewinn pro Craft und in höchstens 30 Crafts bezahlt. Klick: im AH suchen · Shift-Klick: in die Auctionator-Suche.")
+    .. "mindestens deinem Mindestgewinn pro Craft und in höchstens 30 Crafts bezahlt. Klick: Angebote im AH zeigen · Shift-Klick: in die Auctionator-Suche.")
   self.tipList = UI.ItemList(content, width, {
     { key = "profit", label = "Gewinn/Craft", width = 110, bold = true },
     { key = "price", label = "Rezept im AH", width = 110 },
     { key = "back", label = "Bezahlt nach", width = 110 },
   })
-  self.tipBtn = UI.Button(content, "Alle Rezepte im AH suchen", "cool", 280, 34, "scan")
+  self.tipBtn = UI.Button(content, "Angebote zeigen", "cool", 280, 34, "scan")
+  UI.SetTooltip(self.tipBtn, "Angebote zeigen", "Nur zum Kaufen – die Preise aktualisiert der Scan oben für alle Reiter. Sucht alle Rezepte dieser Liste im AH; ist das AH zu, wird eine Auctionator-Liste \"Zentrale: Rezepte\" angelegt.")
   self.tipBtn:SetScript("OnClick", function()
     local ids = {}
     for _, t in ipairs(self.tips or {}) do if t.item then ids[#ids + 1] = t.item end end
@@ -212,7 +213,7 @@ function page.refresh(self)
         price = t.item and (t.price and ns.Money(t.price) or "|cff8a9a94kein Angebot|r") or "|cff8a9a94Lehrer|r",
         back = t.payback and (t.payback .. " Crafts") or "–",
       },
-      tip = { t.item and "Klick: im AH suchen · Shift-Klick: in die Auctionator-Suche legen" or "Lernst du beim Lehrer deines Berufs." },
+      tip = { t.item and "Klick: Angebote im AH zeigen · Shift-Klick: in die Auctionator-Suche legen" or "Lernst du beim Lehrer deines Berufs." },
       onClick = function()
         if not t.item then ns.Print(r.name .. " lernst du beim Lehrer für " .. ns.ProfName(ns.PROF[t.prof]) .. ".") return end
         local ok, err = ns.Market.SearchNow({ t.item })
