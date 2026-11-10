@@ -11,11 +11,9 @@ local BT = BackdropTemplateMixin and "BackdropTemplate" or nil
 local FONT = STANDARD_TEXT_FONT or "Fonts\\FRIZQT__.TTF"
 local WHITE = "Interface\\Buttons\\WHITE8X8"
 
-local NEON  = { 0.22, 1.00, 0.42 }
-local NEON2 = { 0.10, 0.75, 0.55 }
-local DARK  = { 0.09, 0.10, 0.11 }
-local DARK2 = { 0.15, 0.16, 0.18 }
-local REST  = { 0.20, 0.75, 1.00 }
+local NEON  = { 0.22, 1.00, 0.42 }   -- Neon-Gruen #39FF6B
+local TEAL  = { 0.15, 0.95, 0.85 }   -- Tuerkis
+local AQUA  = { 0.16, 0.70, 1.00 }   -- Eisblau (dritte Verlaufsfarbe)
 
 local TITLE = "|cff39ff6bLevel|r|cffd8d8d8Pilot|r"
 local function P(m) DEFAULT_CHAT_FRAME:AddMessage(TITLE .. " " .. m) end
@@ -85,41 +83,47 @@ local function UI(p, size, bold)
   return f
 end
 
--- Abgerundetes Rechteck aus 9 Teilen (Ecken = Viertelkreise)
+-- Abgerundetes Rechteck (9-Slice). inset = Abstand zum Rahmenrand (z. B. 1 fuer Kante + Koerper auf EINEM Frame)
 local RoundOld
-local function Round(parent, layer, sub, r, col, blend)
+local function Round(parent, layer, sub, r, col, blend, inset)
   if SLICE then
     -- eine glatte, gerechnete Rundflaeche statt zusammengesetzter Teile
     local small = r <= 9
     local t = MT(parent, layer or "BACKGROUND", sub or 0, small and "card_s" or "card", blend)
-    t:SetAllPoints(); Slice(t, small and 8 or 14)
-    local o = { parts = { t } }
+    local i = inset or 0
+    if i ~= 0 then t:SetPoint("TOPLEFT", i, -i); t:SetPoint("BOTTOMRIGHT", -i, i) else t:SetAllPoints() end
+    Slice(t, small and 8 or 14)
+    local o = { parts = { t }, tex = t }
     function o:SetColor(cr, cg, cb, ca)
       if t.SetGradient and CreateColor then pcall(t.SetGradient, t, "HORIZONTAL", CreateColor(cr, cg, cb, ca or 1), CreateColor(cr, cg, cb, ca or 1)) end
       t:SetVertexColor(cr, cg, cb, ca or 1)
     end
     function o:SetGradient(c1, c2) t:SetVertexColor(1, 1, 1, 1); Grad(t, "HORIZONTAL", c1[1], c1[2], c1[3], c1[4] or 1, c2[1], c2[2], c2[3], c2[4] or 1) end
+    -- senkrechter Verlauf: oben -> unten
+    function o:SetGradientV(top, bot) t:SetVertexColor(1, 1, 1, 1); Grad(t, "VERTICAL", bot[1], bot[2], bot[3], bot[4] or 1, top[1], top[2], top[3], top[4] or 1) end
     function o:SetShown(v) t:SetShown(v) end
     function o:SetAlpha(v) t:SetAlpha(v) end
     o:SetColor(col[1], col[2], col[3], col[4])
     return o
   end
-  return RoundOld(parent, layer, sub, r, col, blend)
+  return RoundOld(parent, layer, sub, r, col, blend, inset)
 end
-function RoundOld(parent, layer, sub, r, col, blend)
+function RoundOld(parent, layer, sub, r, col, blend, inset)
   local o = { parts = {} }
+  local i = inset or 0
   local function T(file)
     local t = parent:CreateTexture(nil, layer or "BACKGROUND", nil, sub or 0)
     t:SetTexture(file or WHITE); if blend then t:SetBlendMode(blend) end
     o.parts[#o.parts + 1] = t; return t
   end
-  for _, c in ipairs({ { 0, .5, 0, .5, "TOPLEFT" }, { .5, 1, 0, .5, "TOPRIGHT" }, { 0, .5, .5, 1, "BOTTOMLEFT" }, { .5, 1, .5, 1, "BOTTOMRIGHT" } }) do
-    local t = T(CIRCLE); t:SetTexCoord(c[1], c[2], c[3], c[4]); t:SetSize(r, r); t:SetPoint(c[5])
+  for _, c in ipairs({ { 0, .5, 0, .5, "TOPLEFT", i, -i }, { .5, 1, 0, .5, "TOPRIGHT", -i, -i }, { 0, .5, .5, 1, "BOTTOMLEFT", i, i }, { .5, 1, .5, 1, "BOTTOMRIGHT", -i, i } }) do
+    local t = T(CIRCLE); t:SetTexCoord(c[1], c[2], c[3], c[4]); t:SetSize(r, r); t:SetPoint(c[5], c[6], c[7])
   end
-  local top = T(); top:SetPoint("TOPLEFT", r, 0); top:SetPoint("TOPRIGHT", -r, 0); top:SetHeight(r)
-  local bot = T(); bot:SetPoint("BOTTOMLEFT", r, 0); bot:SetPoint("BOTTOMRIGHT", -r, 0); bot:SetHeight(r)
-  local mid = T(); mid:SetPoint("TOPLEFT", 0, -r); mid:SetPoint("BOTTOMRIGHT", 0, r)
+  local top = T(); top:SetPoint("TOPLEFT", r + i, -i); top:SetPoint("TOPRIGHT", -r - i, -i); top:SetHeight(r)
+  local bot = T(); bot:SetPoint("BOTTOMLEFT", r + i, i); bot:SetPoint("BOTTOMRIGHT", -r - i, i); bot:SetHeight(r)
+  local mid = T(); mid:SetPoint("TOPLEFT", i, -r - i); mid:SetPoint("BOTTOMRIGHT", -i, r + i)
   o.left = { o.parts[1], o.parts[3] }; o.right = { o.parts[2], o.parts[4] }; o.span = { top, bot, mid }
+  o.topP = { o.parts[1], o.parts[2], top }; o.botP = { o.parts[3], o.parts[4], bot }; o.mid = mid
   function o:SetColor(cr, cg, cb, ca)
     for _, t in ipairs(self.parts) do
       if t.SetGradient and CreateColor then pcall(t.SetGradient, t, "HORIZONTAL", CreateColor(cr, cg, cb, ca or 1), CreateColor(cr, cg, cb, ca or 1)) end
@@ -132,13 +136,31 @@ function RoundOld(parent, layer, sub, r, col, blend)
     for _, t in ipairs(self.right) do t:SetVertexColor(c2[1], c2[2], c2[3], c2[4] or 1) end
     for _, t in ipairs(self.span) do t:SetVertexColor(1, 1, 1, 1); Grad(t, "HORIZONTAL", c1[1], c1[2], c1[3], c1[4] or 1, c2[1], c2[2], c2[3], c2[4] or 1) end
   end
+  -- Farbverlauf oben -> unten (bei Kapseln exakt: obere Haelfte c1 -> Mitte, untere Mitte -> c2)
+  function o:SetGradientV(c1, c2)
+    local a1, a2 = c1[4] or 1, c2[4] or 1
+    if self.capsule then
+      local m = { (c1[1] + c2[1]) / 2, (c1[2] + c2[2]) / 2, (c1[3] + c2[3]) / 2, (a1 + a2) / 2 }
+      for _, t in ipairs(self.topP) do t:SetVertexColor(1, 1, 1, 1); Grad(t, "VERTICAL", m[1], m[2], m[3], m[4], c1[1], c1[2], c1[3], a1) end
+      for _, t in ipairs(self.botP) do t:SetVertexColor(1, 1, 1, 1); Grad(t, "VERTICAL", c2[1], c2[2], c2[3], a2, m[1], m[2], m[3], m[4]) end
+      return
+    end
+    for _, t in ipairs(self.topP) do t:SetVertexColor(c1[1], c1[2], c1[3], a1) end
+    for _, t in ipairs(self.botP) do t:SetVertexColor(c2[1], c2[2], c2[3], a2) end
+    self.mid:SetVertexColor(1, 1, 1, 1); Grad(self.mid, "VERTICAL", c2[1], c2[2], c2[3], a2, c1[1], c1[2], c1[3], a1)
+  end
   function o:SetShown(v) for _, t in ipairs(self.parts) do t:SetShown(v) end end
   function o:SetAlpha(v) for _, t in ipairs(self.parts) do t:SetAlpha(v) end end
   o:SetColor(col[1], col[2], col[3], col[4])
   return o
 end
+-- Kapsel (Pille) mit exakt halbrunden Enden – fuer duenne Leisten, Schalter, Knoepfe
+local function Capsule(parent, layer, sub, h, col, blend, inset)
+  local o = RoundOld(parent, layer, sub, h / 2 - (inset or 0), col, blend, inset)
+  o.capsule = true
+  return o
+end
 
--- Text Buchstabe fuer Buchstabe einfaerben (Neon -> Tuerkis)
 -- Blizzards eigene Spielsymbole (Atlas). Mehrere Namen je Typ, der erste vorhandene gewinnt.
 local ATLAS = {
   accept   = { "QuestNormal", "Quest-Campaign-Available" },
@@ -152,8 +174,8 @@ local ATLAS = {
   note     = { "poi-workorders", "Crosshair_unableinteract_48" },
 }
 local atlasOK = {}
--- setzt das Symbol; true = Blizzard-Atlas, false = eigene Grafik
-local function SetIcon(tex, typ)
+-- setzt das Symbol; true = Blizzard-Atlas, false = eigene Grafik (weiss bzw. in r,g,b eingefaerbt)
+local function SetIcon(tex, typ, r, g, b)
   local hit = atlasOK[typ]
   if hit == nil then
     hit = false
@@ -166,50 +188,149 @@ local function SetIcon(tex, typ)
   if hit then
     tex:SetAtlas(hit); tex:SetVertexColor(1, 1, 1, 1); return true
   end
-  tex:SetTexture(MEDIA .. "i_" .. typ); tex:SetVertexColor(0.04, 0.05, 0.06, 0.92); return false
+  tex:SetTexture(MEDIA .. "i_" .. typ); tex:SetTexCoord(0, 1, 0, 1); tex:SetVertexColor(r or 1, g or 1, b or 1, 1); return false
 end
 
-local function GradText(txt, c1, c2)
+-- Text Buchstabe fuer Buchstabe einfaerben (2 oder 3 Farben)
+local function GradText(txt, c1, c2, c3)
   local chars = {}
   for ch in txt:gmatch("[%z\1-\127\194-\244][\128-\191]*") do chars[#chars + 1] = ch end
   local out = {}
   for i, ch in ipairs(chars) do
     local t = #chars > 1 and (i - 1) / (#chars - 1) or 0
-    out[#out + 1] = fmt("|cff%02x%02x%02x%s|r", floor((c1[1] + (c2[1] - c1[1]) * t) * 255), floor((c1[2] + (c2[2] - c1[2]) * t) * 255), floor((c1[3] + (c2[3] - c1[3]) * t) * 255), ch)
+    local a, b = c1, c2
+    if c3 then if t < 0.5 then t = t * 2 else a, b, t = c2, c3, (t - 0.5) * 2 end end
+    out[#out + 1] = fmt("|cff%02x%02x%02x%s|r", floor((a[1] + (b[1] - a[1]) * t) * 255), floor((a[2] + (b[2] - a[2]) * t) * 255), floor((a[3] + (b[3] - a[3]) * t) * 255), ch)
   end
   return table.concat(out)
 end
-local TEAL = { 0.15, 0.95, 0.85 }
 
--- Schwebendes Glas-Panel: Neon-Halo, feine Leuchtkante, Anthrazit-Koerper
-local function Panel(f, glow)
-  if SLICE then
-    local gl = CreateFrame("Frame", nil, f); gl:SetPoint("TOPLEFT", -40, 40); gl:SetPoint("BOTTOMRIGHT", 40, -40)
-    gl:SetFrameLevel(math.max(0, f:GetFrameLevel() - 1))
-    local g = MT(gl, "BACKGROUND", 0, "glow", "ADD"); g:SetAllPoints(); Slice(g, 60)
-    g:SetVertexColor(1, 1, 1, 1); Grad(g, "HORIZONTAL", NEON[1], NEON[2], NEON[3], 0.30, TEAL[1], TEAL[2], TEAL[3], 0.18)
-    local b = MT(f, "BACKGROUND", 0, "panel"); b:SetAllPoints(); Slice(b, 30)
-    f.glow = { SetAlpha = function(_, a) g:SetAlpha(a) end }
-    return
+-- Haarlinie, die zu beiden Enden ausblendet (zwei Verlaufs-Haelften)
+local function Hairline(p, layer, sub, vertical, a, cr, cg, cb)
+  cr, cg, cb = cr or 1, cg or 1, cb or 1
+  local h1, h2 = Tex(p, layer, sub), Tex(p, layer, sub)
+  local o = { h1, h2, h1 = h1, h2 = h2 }
+  function o:Place(rel, x1, y1, x2, y2)
+    for _, t in ipairs(self) do t:ClearAllPoints() end
+    if vertical then
+      local mid = (y1 + y2) / 2
+      h1:SetPoint("TOPLEFT", rel, "TOPLEFT", x1, y1); h1:SetSize(1, max(1, y1 - mid))
+      h2:SetPoint("TOPLEFT", rel, "TOPLEFT", x1, mid); h2:SetSize(1, max(1, mid - y2))
+      Grad(h1, "VERTICAL", cr, cg, cb, a, cr, cg, cb, 0); Grad(h2, "VERTICAL", cr, cg, cb, 0, cr, cg, cb, a)
+    else
+      local mid = (x1 + x2) / 2
+      h1:SetPoint("TOPLEFT", rel, "TOPLEFT", x1, y1); h1:SetSize(max(1, mid - x1), 1)
+      h2:SetPoint("TOPLEFT", rel, "TOPLEFT", mid, y1); h2:SetSize(max(1, x2 - mid), 1)
+      Grad(h1, "HORIZONTAL", cr, cg, cb, 0, cr, cg, cb, a); Grad(h2, "HORIZONTAL", cr, cg, cb, a, cr, cg, cb, 0)
+    end
   end
-  local halo = CreateFrame("Frame", nil, f)
-  halo:SetPoint("TOPLEFT", -10, 10); halo:SetPoint("BOTTOMRIGHT", 10, -10); halo:SetFrameLevel(math.max(0, f:GetFrameLevel() - 1))
-  f.halo = { Round(halo, "BACKGROUND", 0, 22, { NEON[1], NEON[2], NEON[3], 0.05 }), }
-  local h2 = CreateFrame("Frame", nil, f)
-  h2:SetPoint("TOPLEFT", -5, 5); h2:SetPoint("BOTTOMRIGHT", 5, -5); h2:SetFrameLevel(math.max(0, f:GetFrameLevel() - 1))
-  f.halo[2] = Round(h2, "BACKGROUND", 1, 17, { NEON[1], NEON[2], NEON[3], 0.08 })
-  f.edge = Round(f, "BACKGROUND", 2, 14, { NEON[1], NEON[2], NEON[3], 0.45 })
-  f.edge:SetGradient({ NEON[1], NEON[2], NEON[3], 0.75 }, { TEAL[1], TEAL[2], TEAL[3], 0.35 })
-  local body = CreateFrame("Frame", nil, f)
-  body:SetPoint("TOPLEFT", 1, -1); body:SetPoint("BOTTOMRIGHT", -1, 1); body:SetFrameLevel(f:GetFrameLevel())
-  f.body = Round(body, "BACKGROUND", 3, 13, { 0.055, 0.063, 0.072, 0.97 })
-  f.body:SetGradient({ 0.035, 0.075, 0.06, 0.97 }, { 0.05, 0.055, 0.075, 0.97 })   -- tiefes Gruen -> Nachtblau
-  local depth = Tex(body, "BACKGROUND", 5); depth:SetPoint("BOTTOMLEFT", 13, 1); depth:SetPoint("BOTTOMRIGHT", -13, 1); depth:SetHeight(60)
-  Grad(depth, "VERTICAL", 0, 0, 0, 0.35, 0, 0, 0, 0)
-  -- weicher Lichtschein oben (innerhalb der Rundung)
-  local sheen = Tex(body, "BACKGROUND", 4); sheen:SetPoint("TOPLEFT", 13, -1); sheen:SetPoint("TOPRIGHT", -13, -1); sheen:SetHeight(40)
-  Grad(sheen, "VERTICAL", 1, 1, 1, 0, NEON[1], NEON[2], NEON[3], 0.07)
-  if glow then f.glow = f.halo[2] end
+  function o:SetShown(v) h1:SetShown(v); h2:SetShown(v) end
+  return o
+end
+
+-- Lichtkante oben: blendet links und rechts weich aus
+local function TopLine(f, inset, a, layer, sub, y)
+  y = y or 0
+  local h1, h2 = Tex(f, layer or "BORDER", sub or 0), Tex(f, layer or "BORDER", sub or 0)
+  h1:SetPoint("TOPLEFT", f, "TOPLEFT", inset, y); h1:SetPoint("TOPRIGHT", f, "TOP", 0, y); h1:SetHeight(1)
+  h2:SetPoint("TOPLEFT", f, "TOP", 0, y); h2:SetPoint("TOPRIGHT", f, "TOPRIGHT", -inset, y); h2:SetHeight(1)
+  Grad(h1, "HORIZONTAL", 1, 1, 1, 0, 1, 1, 1, a); Grad(h2, "HORIZONTAL", 1, 1, 1, a, 1, 1, 1, 0)
+  local o = { h1 = h1, h2 = h2 }
+  function o:SetShown(v) h1:SetShown(v); h2:SetShown(v) end
+  return o
+end
+
+---------------------------------------------------------------------------
+-- Neon-Glas: schwebende Flaeche mit Aussen-Leuchten, Verlaufskante, tiefem
+-- Anthrazit-Koerper, Lichtkante oben und langsam treibenden Farbwolken (Aurora)
+---------------------------------------------------------------------------
+local AURORA = {}
+local function Glass(f, o)
+  o = o or {}
+  local r = o.r or 14
+  local pad = o.pad or 36
+  local gl = CreateFrame("Frame", nil, f); gl:SetPoint("TOPLEFT", -pad, pad); gl:SetPoint("BOTTOMRIGHT", pad, -pad)
+  gl:SetFrameLevel(max(0, (f:GetFrameLevel() or 1) - 1))
+  local g
+  if SLICE then
+    g = MT(gl, "BACKGROUND", 0, "glow", "ADD"); g:SetAllPoints(); Slice(g, 60)
+    g:SetVertexColor(1, 1, 1, 1); Grad(g, "HORIZONTAL", NEON[1], NEON[2], NEON[3], o.glowA or 0.30, AQUA[1], AQUA[2], AQUA[3], (o.glowA or 0.30) * 0.75)
+  else
+    g = Round(gl, "BACKGROUND", 0, 22, { NEON[1], NEON[2], NEON[3], 0.07 }, nil, 28)
+  end
+  -- Verlaufskante (1 px sichtbar) + Koerper darauf
+  f.edge = Round(f, "BACKGROUND", 0, r, { 1, 1, 1, 1 })
+  f.edge:SetGradient({ NEON[1], NEON[2], NEON[3], 0.80 }, { AQUA[1], AQUA[2], AQUA[3], 0.50 })
+  f.body = Round(f, "BACKGROUND", 1, r, { 1, 1, 1, 1 }, nil, 1)
+  f.body:SetGradientV({ 0.072, 0.092, 0.088, 0.96 }, { 0.030, 0.034, 0.048, 0.97 })
+  -- feiner Farbschleier (gruen -> blau) ueber den ganzen Koerper
+  f.tint = Round(f, "BACKGROUND", 2, r, { 1, 1, 1, 1 }, "ADD", 1)
+  f.tint:SetGradient({ NEON[1], NEON[2], NEON[3], 0.05 }, { AQUA[1], AQUA[2], AQUA[3], 0.035 })
+  -- Aurora: drei weiche Farbwolken, die langsam treiben
+  if o.aurora then
+    f.aur = {}
+    for k, d in ipairs({ { NEON, 0.10, 240, 170, 0.11, 0.13, 0 }, { TEAL, 0.07, 200, 150, 0.09, 0.12, 2.1 }, { AQUA, 0.09, 220, 160, 0.13, 0.08, 4.2 } }) do
+      local t = MT(f, "BORDER", k - 1, "dot", "ADD"); t:SetVertexColor(d[1][1], d[1][2], d[1][3], d[2])
+      t:SetPoint("CENTER", f, "TOPLEFT", 60 * k, -40); t:SetSize(40, 40)
+      f.aur[k] = { t = t, w = d[3], h = d[4], sx = d[5], sy = d[6], ph = d[7] }
+    end
+    AURORA[f] = true
+  end
+  -- Lichtschein + Lichtkante oben (innerhalb der Rundung)
+  local sheen = Tex(f, "BORDER", 4); sheen:SetPoint("TOPLEFT", r, -1); sheen:SetPoint("TOPRIGHT", -r, -1); sheen:SetHeight(o.sheenH or 34)
+  Grad(sheen, "VERTICAL", 1, 1, 1, 0, 1, 1, 1, 0.045)
+  f.topLine = TopLine(f, r, 0.30, "BORDER", 5, -1)
+  f.glow = { SetAlpha = function(_, a) g:SetAlpha(a) end }
+end
+local Panel = function(f) Glass(f) end   -- alter Name, gleiche Optik
+
+local function GlassTick(f, now)
+  local w, h = f:GetWidth() or 0, f:GetHeight() or 0
+  if w < 40 or h < 40 then return end
+  for _, b in ipairs(f.aur) do
+    local bw, bh = min(w * 0.85, b.w), min(h * 0.85, b.h)
+    b.t:SetSize(bw, bh)
+    local cx = w * (0.5 + 0.34 * math.sin(now * b.sx + b.ph))
+    local cy = h * (0.5 + 0.32 * math.cos(now * b.sy + b.ph * 1.7))
+    cx = max(bw / 2, min(w - bw / 2, cx)); cy = max(bh / 2, min(h - bh / 2, cy))
+    b.t:SetPoint("CENTER", f, "TOPLEFT", cx, -cy)
+  end
+end
+
+---------------------------------------------------------------------------
+-- Leucht-Kugel: Halo, Verlaufsring, dunkle Glasscheibe, Glanz, Spielsymbol
+---------------------------------------------------------------------------
+local function OrbBadge(p, size)
+  local o = {}
+  o.halo  = MT(p, "BORDER", 6, "dot", "ADD")
+  o.ring  = MT(p, "ARTWORK", 0, "ctx_ring", "ADD")
+  o.disc  = MT(p, "ARTWORK", 1, "ctx_disc"); o.disc:SetVertexColor(0.032, 0.042, 0.048, 0.97)
+  o.gloss = MT(p, "ARTWORK", 2, "ctx_gloss", "ADD"); o.gloss:SetVertexColor(1, 1, 1, 0.22)
+  o.icon  = p:CreateTexture(nil, "ARTWORK", nil, 3)
+  o.halo:SetAlpha(0.3)
+  for _, t in ipairs({ o.halo, o.ring, o.gloss, o.icon }) do t:SetPoint("CENTER", o.disc, "CENTER") end
+  function o:SetSize(s)
+    self.size = s
+    self.halo:SetSize(s * 2.2, s * 2.2); self.ring:SetSize(s * 1.62, s * 1.62)
+    self.disc:SetSize(s * 1.49, s * 1.49); self.gloss:SetSize(s * 1.49, s * 1.49)
+    local k = self.atlas and 0.80 or 0.54; self.icon:SetSize(s * k, s * k)
+  end
+  function o:SetPoint(...) self.disc:ClearAllPoints(); self.disc:SetPoint(...) end
+  -- Ring: eine Farbe oder Verlauf (c unten -> c2 oben)
+  function o:Tint(c, c2, a)
+    self.ring:SetVertexColor(1, 1, 1, 1)
+    if c2 then Grad(self.ring, "VERTICAL", c[1], c[2], c[3], a or 1, c2[1], c2[2], c2[3], a or 1)
+    else self.ring:SetVertexColor(c[1], c[2], c[3], a or 1) end
+    self.halo:SetVertexColor(c[1], c[2], c[3], 1)
+  end
+  function o:Icon(typ, r, g, b)
+    self.atlas = SetIcon(self.icon, typ or "note", r, g, b)
+    self:SetSize(self.size or size)
+    return self.atlas
+  end
+  function o:SetShown(v) for _, t in ipairs({ self.halo, self.ring, self.disc, self.gloss, self.icon }) do t:SetShown(v) end end
+  o:SetSize(size)
+  return o
 end
 
 local function fmtNum(n)
@@ -423,11 +544,22 @@ local function xpPerHour()
 end
 
 ---------------------------------------------------------------------------
--- Hauptfenster
+-- Hauptfenster · Design 4.1 "Neon Glass"
+-- Kopf (Stufen-Kugel, Titel, Glasknoepfe) · fluessige XP-Leiste · Kennzahlen-Band
+-- Hero-Karte + Zeitleiste · Flug-Kapsel · Bedienleiste (Segment + Schalter)
 ---------------------------------------------------------------------------
-local W, ROWH = 336, 34
+local W = 340
+local HEAD_H = 128        -- Kopf + XP + Kennzahlen (= Hoehe eingeklappt)
+local listTop = -132
+local DOCK_H = 44         -- Bedienleiste unten inkl. Rand
+local TLX = 44            -- x der Zeitleiste (Mitte aller Kugeln)
+local COL = { accept = "ffd24d", turnin = "39ff6b", complete = "3ee8d0", fly = "4fd2ff", hearth = "4fd2ff",
+  train = "c78bff", go = "4fd2ff", grind = "ff8a3d", note = "aaaaaa" }
+local function hex(col) return tonumber(col:sub(1, 2), 16) / 255, tonumber(col:sub(3, 4), 16) / 255, tonumber(col:sub(5, 6), 16) / 255 end
+local function lighten(r, g, b, k) k = k or 0.45; return { r + (1 - r) * k, g + (1 - g) * k, b + (1 - b) * k } end
+
 local M = CreateFrame("Frame", "LevelPilotFrame", UIParent)
-M:SetSize(W, 120)
+M:SetSize(W, 160)
 M:SetClampedToScreen(true)
 M:SetMovable(true); M:EnableMouse(true); M:RegisterForDrag("LeftButton")
 M:SetScript("OnDragStart", function(s) if not DB.locked then s:StartMoving() end end)
@@ -435,131 +567,233 @@ M:SetScript("OnDragStop", function(s)
   s:StopMovingOrSizing()
   local p, _, _, x, y = s:GetPoint(); DB.point, DB.x, DB.y = p, x, y
 end)
-Panel(M, true)
+Glass(M, { aurora = true })
 
-local head = UI(M, 17, true); head:SetPoint("TOPLEFT", 14, -11)
-head:SetText(GradText("LEVELPILOT", NEON, TEAL))
-local subHead = UI(M, 10); subHead:SetPoint("TOPLEFT", head, "BOTTOMLEFT", 1, -1); subHead:SetTextColor(0.55, 0.6, 0.62)
+local Refresh      -- vorab
+local OpenSettings -- vorab
 
-local function Pill(txt, w, fn)
-  local b = CreateFrame("Button", nil, M)
-  b:SetSize(w, 18)
-  b.bg = Round(b, "BACKGROUND", 0, 9, { 1, 1, 1, 0.06 })
-  b.on = Round(b, "BORDER", 0, 9, { NEON[1], NEON[2], NEON[3], 0.18 })
-  b.on:SetGradient({ NEON[1], NEON[2], NEON[3], 0.32 }, { TEAL[1], TEAL[2], TEAL[3], 0.14 })
-  b.hl = Round(b, "HIGHLIGHT", 0, 9, { NEON[1], NEON[2], NEON[3], 0.15 })
-  b.t = UI(b, 10, true); b.t:SetPoint("CENTER", 0, 0); b.t:SetText(txt)
-  b:SetScript("OnClick", fn)
-  function b:Set(active, label)
-    self.on:SetShown(active)
-    self.t:SetText(label or self.t:GetText())
-    self.t:SetTextColor(active and NEON[1] or 0.62, active and NEON[2] or 0.65, active and NEON[3] or 0.68)
+---------------------------------------------------------------------------
+-- Glas-Tooltip (ersetzt den grauen Standard-Tooltip)
+---------------------------------------------------------------------------
+local TIP = CreateFrame("Frame", "LevelPilotTip", UIParent)
+TIP:SetFrameStrata("TOOLTIP"); TIP:SetClampedToScreen(true); TIP:SetSize(200, 60); TIP:Hide()
+Glass(TIP, { r = 12, glowA = 0.22, sheenH = 22, pad = 42 })
+TIP.lines, TIP.n = {}, 0
+function TIP:Begin(owner, side)
+  self.owner, self.side, self.n = owner, side, 0
+  for _, l in ipairs(self.lines) do l:Hide() end
+  return self
+end
+function TIP:Line(txt, r, g, b, big)
+  if not txt or txt == "" then return end
+  self.n = self.n + 1
+  local l = self.lines[self.n]
+  if not l then l = UI(self, 11); l:SetJustifyH("LEFT"); l:SetWordWrap(true); self.lines[self.n] = l end
+  l:SetFont(FONT_UI, big and 13 or 11, big and "OUTLINE" or "")
+  l:SetTextColor(r or 0.82, g or 0.87, b or 0.88); l:SetWidth(0); l:SetText(txt); l:Show()
+end
+function TIP:Open()
+  local wmax = 0
+  for i = 1, self.n do
+    local l = self.lines[i]
+    local w = (l.GetUnboundedStringWidth and l:GetUnboundedStringWidth()) or l:GetStringWidth() or 0
+    if w > wmax then wmax = w end
   end
-  return b
+  local w = max(150, min(290, wmax + 2))
+  local y = -12
+  for i = 1, self.n do
+    local l = self.lines[i]
+    l:ClearAllPoints(); l:SetWidth(w); l:SetPoint("TOPLEFT", 14, y)
+    y = y - (l:GetStringHeight() or 12) - (i == 1 and 6 or 3)
+  end
+  self:SetSize(w + 28, -y + 9)
+  -- links neben das Fenster, sonst rechts daneben
+  self:ClearAllPoints()
+  local o, s = self.owner, self.side or self.owner
+  local sl, ol = s:GetLeft(), o:GetLeft()
+  if sl and ol and sl > w + 70 then
+    self:SetPoint("TOPRIGHT", o, "TOPLEFT", -(ol - sl) - 14, 0)
+  else
+    local sr, orr = s:GetRight(), o:GetRight()
+    self:SetPoint("TOPLEFT", o, "TOPRIGHT", (sr and orr) and (sr - orr + 14) or 14, 0)
+  end
+  self:Show()
+end
+local function TipLeave() TIP:Hide() end
+
+---------------------------------------------------------------------------
+-- Kopf
+---------------------------------------------------------------------------
+local lvlTxt, subHead, bColIc, LO
+do
+  local lvlOrb = CreateFrame("Button", nil, M); lvlOrb:SetSize(40, 40); lvlOrb:SetPoint("TOPLEFT", 14, -12)
+  LO = OrbBadge(lvlOrb, 36); LO:SetPoint("CENTER"); LO:Tint(NEON, AQUA); LO.icon:Hide()
+  lvlTxt = UI(lvlOrb, 15, true); lvlTxt:SetPoint("CENTER", 0, 0)
+  lvlOrb:SetScript("OnEnter", function(self)
+    local x = M.xi; if not x then return end
+    TIP:Begin(self, M):Line("Stufe " .. x.lvl, NEON[1], NEON[2], NEON[3], true)
+    TIP:Line(fmt("%s / %s XP  ·  %.1f %%", fmtNum(x.cur), fmtNum(x.mx), x.cur / x.mx * 100), 1, 1, 1)
+    if x.rest > 0 then TIP:Line(fmt("Erholt: %s XP (%d %%)", fmtNum(x.rest), floor(x.rest / x.mx * 100 + 0.5)), 0.25, 0.71, 1) end
+    TIP:Line(x.xph > 0 and ("XP pro Stunde: " .. fmtNum(x.xph)) or "XP pro Stunde: wird gemessen …", 0.75, 0.8, 0.82)
+    TIP:Line("/lp xp startet die Messung neu", 0.5, 0.55, 0.58)
+    TIP:Open()
+  end)
+  lvlOrb:SetScript("OnLeave", TipLeave)
+
+  local head = UI(M, 16, true); head:SetPoint("TOPLEFT", lvlOrb, "TOPRIGHT", 10, -5)
+  head:SetText(GradText("LEVELPILOT", NEON, TEAL, AQUA))
+  subHead = UI(M, 10); subHead:SetPoint("TOPLEFT", head, "BOTTOMLEFT", 0, -3); subHead:SetWidth(W - 64 - 84)
+  subHead:SetJustifyH("LEFT"); subHead:SetWordWrap(false); subHead:SetTextColor(0.58, 0.63, 0.66)
+
+  -- runde Glasknoepfe (Scheibe, feiner Ring, Neon beim Ueberfahren)
+  local function GlassButton(size, fn, tip)
+    local b = CreateFrame("Button", nil, M); b:SetSize(size, size)
+    local d = MT(b, "BACKGROUND", 0, "ctx_disc"); d:SetPoint("CENTER"); d:SetSize(size * 1.49, size * 1.49); d:SetVertexColor(1, 1, 1, 0.07)
+    local rg = MT(b, "BORDER", 0, "ctx_ring", "ADD"); rg:SetPoint("CENTER"); rg:SetSize(size * 1.47, size * 1.47); rg:SetVertexColor(1, 1, 1, 0.13)
+    local h1 = MT(b, "HIGHLIGHT", 0, "ctx_disc", "ADD"); h1:SetPoint("CENTER"); h1:SetSize(size * 1.49, size * 1.49); h1:SetVertexColor(NEON[1], NEON[2], NEON[3], 0.16)
+    local h2 = MT(b, "HIGHLIGHT", 1, "ctx_ring", "ADD"); h2:SetPoint("CENTER"); h2:SetSize(size * 1.47, size * 1.47); h2:SetVertexColor(NEON[1], NEON[2], NEON[3], 0.9)
+    b:SetScript("OnClick", fn)
+    b:SetScript("OnEnter", function(self) TIP:Begin(self, M):Line(type(tip) == "function" and tip() or tip, 0.85, 0.9, 0.9); TIP:Open() end)
+    b:SetScript("OnLeave", TipLeave)
+    return b
+  end
+  local bCol = GlassButton(26, function() DB.collapsed = not DB.collapsed; Refresh(true) end,
+    function() return DB and DB.collapsed and "Ausklappen" or "Einklappen" end)
+  bCol:SetPoint("TOPRIGHT", -14, -17)
+  bColIc = MT(bCol, "ARTWORK", 0, "i_arrow"); bColIc:SetPoint("CENTER"); bColIc:SetSize(11, 11); bColIc:SetVertexColor(0.85, 0.9, 0.9, 1)
+  local bMenu = GlassButton(26, function() OpenSettings() end, "Einstellungen")
+  bMenu:SetPoint("RIGHT", bCol, "LEFT", -7, 0)
+  for k = -1, 1 do local d = Tex(bMenu, "ARTWORK", 0, CIRCLE); d:SetSize(3.5, 3.5); d:SetPoint("CENTER", k * 5.5, 0); d:SetVertexColor(0.85, 0.9, 0.9, 1) end
 end
 
-local Refresh -- vorab
-local bCol = Pill("–", 22, function() DB.collapsed = not DB.collapsed; Refresh(true) end)
-bCol:SetPoint("TOPRIGHT", -12, -12)
-local bAuto = Pill("AUTO", 44, function()
-  DB.auto = not DB.auto; P("Auto-Annehmen/-Abgeben: " .. (DB.auto and "|cff39ff6ban|r" or "|cffff5050aus|r")); Refresh(true)
-end)
-bAuto:SetPoint("RIGHT", bCol, "LEFT", -5, 0)
-local bArrow = Pill("PFEIL", 44, function() DB.arrow = not DB.arrow; Refresh(true) end)
-bArrow:SetPoint("RIGHT", bAuto, "LEFT", -5, 0)
-local bMode = Pill("ROUTE", 54, function()
-  DB.mode = (DB.mode == "route") and "quests" or "route"; Refresh(true)
-end)
-bMode:SetPoint("RIGHT", bArrow, "LEFT", -5, 0)
+---------------------------------------------------------------------------
+-- XP: fluessige Leiste mit Leuchten, Funke und Lichtlauf
+---------------------------------------------------------------------------
+local X = { W = W - 28, fw = 8 }   -- XP-Leiste
+do
+  X.L = UI(M, 10); X.L:SetPoint("TOPLEFT", 16, -61); X.L:SetTextColor(0.62, 0.67, 0.7)
+  X.txt = UI(M, 10, true); X.txt:SetPoint("TOPRIGHT", -16, -61)
+  local xpFrame = CreateFrame("Frame", nil, M); xpFrame:SetPoint("TOPLEFT", 14, -76); xpFrame:SetSize(X.W, 8)
+  Capsule(xpFrame, "BACKGROUND", 0, 8, { 1, 1, 1, 1 }):SetGradientV({ 0, 0, 0, 0.75 }, { 1, 1, 1, 0.07 })
+  X.restF = CreateFrame("Frame", nil, xpFrame); X.restF:SetPoint("TOPLEFT"); X.restF:SetSize(8, 8)
+  Capsule(X.restF, "BORDER", 0, 8, { 1, 1, 1, 1 }):SetGradient({ AQUA[1], AQUA[2], AQUA[3], 0.18 }, { AQUA[1], AQUA[2], AQUA[3], 0.55 })
+  X.fill = CreateFrame("Frame", nil, xpFrame); X.fill:SetPoint("TOPLEFT"); X.fill:SetSize(8, 8)
+  X.fill:SetFrameLevel(X.restF:GetFrameLevel() + 1)
+  local xpGlow = MT(X.fill, "BACKGROUND", 0, "dot", "ADD"); xpGlow:SetPoint("TOPLEFT", -10, 9); xpGlow:SetPoint("BOTTOMRIGHT", 10, -9)
+  xpGlow:SetVertexColor(NEON[1], NEON[2], NEON[3], 0.22)
+  Capsule(X.fill, "ARTWORK", 0, 8, { 1, 1, 1, 1 }):SetGradient({ 0.10, 0.78, 0.80, 1 }, { NEON[1], NEON[2], NEON[3], 1 })
+  local xpGloss = Tex(X.fill, "ARTWORK", 1); xpGloss:SetPoint("TOPLEFT", 4, -1); xpGloss:SetPoint("TOPRIGHT", -4, -1); xpGloss:SetHeight(3)
+  Grad(xpGloss, "VERTICAL", 1, 1, 1, 0, 1, 1, 1, 0.38)
+  X.shine = MT(X.fill, "OVERLAY", 0, "dot", "ADD"); X.shine:SetSize(46, 10); X.shine:SetVertexColor(1, 1, 1, 1); X.shine:Hide()
+  local xpSpark = MT(X.fill, "OVERLAY", 1, "dot", "ADD"); xpSpark:SetSize(20, 20); xpSpark:SetPoint("CENTER", X.fill, "RIGHT", -3, 0)
+  xpSpark:SetVertexColor(0.8, 1, 0.88, 0.95)
+end
 
--- XP-Kapsel
-local XPW = W - 28
-local xpFrame = CreateFrame("Frame", nil, M)
-xpFrame:SetPoint("TOPLEFT", 14, -50); xpFrame:SetSize(XPW, 12)
-Round(xpFrame, "BACKGROUND", 0, 6, { 0, 0, 0, 0.55 })
-local xpRestF = CreateFrame("Frame", nil, xpFrame); xpRestF:SetPoint("TOPLEFT"); xpRestF:SetHeight(12); xpRestF:SetWidth(12)
-local xpRestR = Round(xpRestF, "BORDER", 0, 6, { REST[1], REST[2], REST[3], 0.35 })
-xpRestR:SetGradient({ REST[1], REST[2], REST[3], 0.15 }, { REST[1], REST[2], REST[3], 0.45 })
-local xpFill = CreateFrame("Frame", nil, xpFrame); xpFill:SetPoint("TOPLEFT"); xpFill:SetHeight(12); xpFill:SetWidth(12)
-xpFill:SetFrameLevel(xpRestF:GetFrameLevel() + 1)
-local xpFillR = Round(xpFill, "ARTWORK", 0, 6, { NEON[1], NEON[2], NEON[3], 1 })
-xpFillR:SetGradient({ 0.05, 0.62, 0.55, 1 }, { NEON[1], NEON[2], NEON[3], 1 })
-local xpGrad = Tex(xpFill, "ARTWORK", 1); xpGrad:SetPoint("TOPLEFT", 6, 0); xpGrad:SetPoint("BOTTOMRIGHT", -6, 0)
-Grad(xpGrad, "HORIZONTAL", NEON2[1], NEON2[2], NEON2[3], 1, NEON[1], NEON[2], NEON[3], 1)
-local xpGloss = Tex(xpFill, "OVERLAY", 0); xpGloss:SetPoint("TOPLEFT", 6, -1); xpGloss:SetPoint("TOPRIGHT", -6, -1); xpGloss:SetHeight(4)
-xpGloss:SetVertexColor(1, 1, 1, 0.22)
-local xpSpark = MT(xpFrame, "OVERLAY", 2, "dot", "ADD"); xpSpark:SetSize(22, 22); xpSpark:SetVertexColor(0.75, 1, 0.85, 0.9)
-local xpTxt = UI(M, 10); xpTxt:SetPoint("BOTTOMRIGHT", xpFrame, "TOPRIGHT", 0, 3); xpTxt:SetTextColor(0.75, 0.8, 0.82)
-local xpRestFrame, xpBar = xpRestF, xpFrame -- Kompatibilitaet
-
--- Info-Chips
+-- Kennzahlen-Band: Symbol mit Leuchten, grosse Zahl, kleine Beschriftung – ohne Kaesten
 local CHIPS = {}
-for i = 1, 3 do
-  local c = CreateFrame("Frame", nil, M)
-  c:SetSize((W - 28 - 12) / 3, 34)
-  c:SetPoint("TOPLEFT", xpFrame, "BOTTOMLEFT", (i - 1) * ((W - 28 - 12) / 3 + 6), -8)
-  Round(c, "BACKGROUND", 0, 10, { 1, 1, 1, 0.045 }):SetGradient({ 1, 1, 1, 0.075 }, { NEON[1], NEON[2], NEON[3], 0.035 })
-  c.ic = MT(c, "ARTWORK", 0, ({ "i_xph", "i_need", "i_time" })[i]); c.ic:SetSize(14, 14); c.ic:SetPoint("TOPLEFT", 8, -6)
-  c.ic:SetVertexColor(NEON[1], NEON[2], NEON[3], 0.9)
-  c.v = UI(c, 14, true); c.v:SetPoint("TOP", 6, -4)
-  c.l = UI(c, 9); c.l:SetPoint("BOTTOM", 0, 4); c.l:SetTextColor(0.5, 0.55, 0.58)
-  CHIPS[i] = c
+do
+  local SW = (W - 28) / 3
+  for i = 1, 3 do
+    local c = CreateFrame("Frame", nil, M); c:SetSize(SW, 30); c:SetPoint("TOPLEFT", 14 + (i - 1) * SW, -94)
+    local col = ({ NEON, TEAL, AQUA })[i]
+    c.ic = MT(c, "ARTWORK", 0, ({ "i_xph", "i_need", "i_time" })[i]); c.ic:SetSize(15, 15); c.ic:SetPoint("LEFT", i == 1 and 4 or 14, 0)
+    c.ic:SetVertexColor(col[1], col[2], col[3], 1)
+    c.g = MT(c, "BACKGROUND", 0, "dot", "ADD"); c.g:SetSize(34, 34); c.g:SetPoint("CENTER", c.ic, "CENTER"); c.g:SetVertexColor(col[1], col[2], col[3], 0.30)
+    c.v = UI(c, 15, true); c.v:SetPoint("TOPLEFT", c.ic, "TOPRIGHT", 8, 4)
+    c.l = UI(c, 8); c.l:SetPoint("TOPLEFT", c.v, "BOTTOMLEFT", 0, -2); c.l:SetTextColor(0.5, 0.55, 0.58)
+    CHIPS[i] = c
+  end
+  CHIPS[1].l:SetText("XP / STUNDE"); CHIPS[2].l:SetText("FEHLENDE XP"); CHIPS[3].l:SetText("BIS LEVEL-UP")
+  for i = 2, 3 do Hairline(M, "BORDER", 2, true, 0.16):Place(M, 14 + (i - 1) * SW, -94, 0, -124) end
 end
-CHIPS[1].l:SetText("XP / STUNDE"); CHIPS[2].l:SetText("FEHLENDE XP"); CHIPS[3].l:SetText("BIS LEVEL UP")
-local stat = UI(M, 1) -- alte Statuszeile (unsichtbar)
+local divider = Hairline(M, "BORDER", 2, false, 0.13); divider:Place(M, 14, -(HEAD_H - 1), W - 14, 0)
 
--- Karten (Schritte / Quests)
+---------------------------------------------------------------------------
+-- Schritte: Hero-Karte (aktueller Schritt) + Zeitleiste (naechste Schritte)
+---------------------------------------------------------------------------
 local ROWS = {}
-local listTop = -116
-local SYM = { accept = "!", turnin = "?", complete = "×", fly = "»", hearth = "»", go = "»", train = "+", grind = "×", note = "i" }
+local TL = Tex(M, "BORDER", 3)                       -- Zeitachse hinter den Kugeln
+TL:SetWidth(2); Grad(TL, "VERTICAL", TEAL[1], TEAL[2], TEAL[3], 0.04, NEON[1], NEON[2], NEON[3], 0.55); TL:Hide()
+local ETA_W = 58                                      -- Platz fuer "ca. 2 min" rechts neben der Linie
+local PW = W - 24 - 66 - 14 - ETA_W                   -- Breite der Fortschrittslinie
 for i = 1, 10 do
   local r = CreateFrame("Button", nil, M)
-  r:SetHeight(30)
-  r.bgR = Round(r, "BACKGROUND", 0, 10, { 1, 1, 1, 0.04 })
-  r.bgR:SetGradient({ 1, 1, 1, 0.065 }, { 1, 1, 1, 0.015 })
-  r.sel = Round(r, "BORDER", 0, 10, { NEON[1], NEON[2], NEON[3], 0.10 })
-  r.sel:SetGradient({ NEON[1], NEON[2], NEON[3], 0.26 }, { TEAL[1], TEAL[2], TEAL[3], 0.03 })
-  r.selEdge = Tex(r, "BORDER", 1); r.selEdge:SetPoint("TOPLEFT", 10, 0); r.selEdge:SetPoint("TOPRIGHT", -10, 0); r.selEdge:SetHeight(1)
-  Grad(r.selEdge, "HORIZONTAL", NEON[1], NEON[2], NEON[3], 0.8, TEAL[1], TEAL[2], TEAL[3], 0)
-  Round(r, "HIGHLIGHT", 0, 10, { NEON[1], NEON[2], NEON[3], 0.08 })
-  r.halo = MT(r, "ARTWORK", 0, "dot", "ADD"); r.halo:SetSize(40, 40)
-  r.bar = MT(r, "ARTWORK", 1, "orb"); r.bar:SetSize(22, 22)            -- leuchtende Kugel in Typ-Farbe
-  r.icon = MT(r, "ARTWORK", 2, "i_note"); r.icon:SetPoint("CENTER", r.bar, "CENTER"); r.icon:SetVertexColor(0.04, 0.05, 0.06, 0.92)
-  r.sym = UI(r, 13, true); r.sym:SetPoint("CENTER", r.bar, "CENTER", 0, 0); r.sym:SetTextColor(0.05, 0.06, 0.07)
-  r.title = UI(r, 12, true); r.title:SetJustifyH("LEFT"); r.title:SetWordWrap(false)
-  r.sub = UI(r, 10); r.sub:SetJustifyH("LEFT"); r.sub:SetWordWrap(false); r.sub:SetTextColor(0.55, 0.6, 0.62)
+  r:SetHeight(26); r.h = 26
+  r.hero = {}
+  if SLICE then
+    r.glow = MT(r, "BACKGROUND", -8, "glow", "ADD"); r.glow:SetPoint("TOPLEFT", -30, 30); r.glow:SetPoint("BOTTOMRIGHT", 30, -30); Slice(r.glow, 60)
+    r.hero[#r.hero + 1] = r.glow
+  end
+  r.wash = Round(r, "BACKGROUND", 0, 14, { 1, 1, 1, 1 })
+  r.base = Round(r, "BACKGROUND", 1, 14, { 1, 1, 1, 1 }); r.base:SetGradientV({ 1, 1, 1, 0.07 }, { 1, 1, 1, 0.012 })
+  r.edge = TopLine(r, 14, 0.28, "BORDER", 0)
+  r.hero[#r.hero + 1] = r.wash; r.hero[#r.hero + 1] = r.base; r.hero[#r.hero + 1] = r.edge
+  Round(r, "HIGHLIGHT", 0, 8, { 1, 1, 1, 1 }, "ADD"):SetGradient({ NEON[1], NEON[2], NEON[3], 0.10 }, { AQUA[1], AQUA[2], AQUA[3], 0.02 })
+  r.orb = OrbBadge(r, 20)
+  r.title = UI(r, 12); r.title:SetJustifyH("LEFT"); r.title:SetWordWrap(false)
+  r.sub = UI(r, 10); r.sub:SetJustifyH("LEFT"); r.sub:SetWordWrap(false); r.sub:SetTextColor(0.6, 0.65, 0.67)
   r.dist = UI(r, 13, true); r.dist:SetJustifyH("RIGHT")
-  r.tag = UI(r, 9, true); r.tag:SetJustifyH("RIGHT")
   r.kind = UI(r, 10, true); r.kind:SetJustifyH("LEFT"); r.kind:SetWordWrap(false)
   r.eta = UI(r, 10); r.eta:SetJustifyH("RIGHT"); r.eta:SetTextColor(0.62, 0.68, 0.7)
+  -- Etikett als Pille (z. B. "ab St. 26", "+1.4k XP")
+  r.tagF = CreateFrame("Frame", nil, r); r.tagF:SetSize(50, 16); r.tagF:Hide()
+  r.tagBg = Capsule(r.tagF, "BACKGROUND", 0, 16, { 1, 1, 1, 0.08 })
+  r.tag = UI(r.tagF, 9, true); r.tag:SetPoint("CENTER", 0, 0)
+  -- Fortschritt (nur Hero): Questziele bzw. XP beim Grinden
+  r.pf = CreateFrame("Frame", nil, r); r.pf:SetHeight(4); r.pf:SetPoint("BOTTOMLEFT", 66, 10); r.pf:SetPoint("BOTTOMRIGHT", -14 - ETA_W, 10); r.pf:Hide()
+  Capsule(r.pf, "BACKGROUND", 0, 4, { 1, 1, 1, 0.09 })
+  r.pff = CreateFrame("Frame", nil, r.pf); r.pff:SetPoint("TOPLEFT"); r.pff:SetSize(4, 4)
+  r.pfg = MT(r.pff, "BACKGROUND", 0, "dot", "ADD"); r.pfg:SetPoint("TOPLEFT", -8, 8); r.pfg:SetPoint("BOTTOMRIGHT", 8, -8)
+  r.pfr = Capsule(r.pff, "ARTWORK", 0, 4, { 1, 1, 1, 1 })
+
+  function r:SetTag(txt, cr, cg, cb)
+    if not txt then self.tagF:Hide(); return end
+    self.tag:SetText(txt)
+    if cr then self.tag:SetTextColor(cr, cg, cb); self.tagBg:SetColor(cr, cg, cb, 0.16)
+    else self.tag:SetTextColor(0.85, 0.9, 0.92); self.tagBg:SetColor(1, 1, 1, 0.08) end
+    self.tagF:SetWidth(max(30, (self.tag:GetStringWidth() or 36) + 14)); self.tagF:Show()
+  end
+  function r:SetProgress(frac, cr, cg, cb)
+    if not frac then self.pf:Hide(); return end
+    frac = max(0, min(1, frac))
+    self.pff:SetWidth(max(4, PW * frac))
+    self.pfr:SetGradient({ cr, cg, cb, 1 }, { NEON[1], NEON[2], NEON[3], 1 })
+    self.pfg:SetVertexColor(cr, cg, cb, 0.35); self.pf:Show()
+  end
+  function r:SetWash(cr, cg, cb, a)
+    a = a or 0.24
+    self.wash:SetGradient({ cr, cg, cb, a }, { cr, cg, cb, a * 0.12 })
+    if self.glow then self.glow:SetVertexColor(1, 1, 1, 1); Grad(self.glow, "HORIZONTAL", cr, cg, cb, a * 0.9, cr, cg, cb, a * 0.2) end
+  end
   function r:Style(kind)
-    local hero = kind == "hero"
-    self:SetHeight(hero and 68 or (kind == "quest" and 40 or 26))
-    local bs = hero and 32 or (kind == "quest" and 20 or 16)
-    self.bar:ClearAllPoints(); self.bar:SetPoint("LEFT", hero and 12 or 9, 0); self.bar:SetSize(bs, bs)
-    self.halo:ClearAllPoints(); self.halo:SetPoint("CENTER", self.bar, "CENTER"); self.halo:SetSize(bs * 2.2, bs * 2.2)
-    self.halo:SetShown(hero); self.sym:Hide()
-    self.icon:SetSize(bs * 0.62, bs * 0.62)
-    local tx = (hero and 12 or 9) + bs + 10
-    for _, f in ipairs({ self.title, self.sub, self.dist, self.tag, self.kind, self.eta }) do f:ClearAllPoints() end
+    local hero, quest = kind == "hero", kind == "quest"
+    self.h = hero and 80 or (quest and 42 or 26)
+    self:SetHeight(self.h); self:SetAlpha(1)
+    for _, p in ipairs(self.hero) do p:SetShown(hero) end
+    self.orb:SetSize(hero and 44 or (quest and 26 or 20)); self.orb:SetPoint("CENTER", self, "LEFT", 32, 0)
+    self.orb.halo:SetShown(hero); self.orb.icon:SetDesaturated(false)
+    self.tagF:Hide(); self.pf:Hide()
+    for _, f in ipairs({ self.title, self.sub, self.dist, self.kind, self.eta, self.tagF }) do f:ClearAllPoints() end
+    local rw = W - 24
     if hero then
-      self.kind:Show(); self.eta:Show(); self.sub:Show(); self.tag:Hide()
-      self.kind:SetPoint("TOPLEFT", tx, -9); self.kind:SetPoint("RIGHT", -72, 0)
-      self.title:SetFont(FONT_UI, 14, "OUTLINE"); self.title:SetPoint("TOPLEFT", self.kind, "BOTTOMLEFT", 0, -3); self.title:SetPoint("RIGHT", -72, 0)
-      self.sub:SetPoint("TOPLEFT", self.title, "BOTTOMLEFT", 0, -4); self.sub:SetPoint("RIGHT", -10, 0)
-      self.dist:SetFont(FONT_UI, 17, "OUTLINE"); self.dist:SetPoint("TOPRIGHT", -12, -9)
-      self.eta:SetPoint("TOPRIGHT", self.dist, "BOTTOMRIGHT", 0, -4)
+      self.kind:Show(); self.eta:Show(); self.sub:Show()
+      -- Entfernung oben rechts auf der Art-Zeile, Titel ueber die volle Breite, Zeit am Ende der Fortschrittslinie
+      self.kind:SetPoint("TOPLEFT", 66, -12); self.kind:SetWidth(rw - 66 - 14 - 72)
+      self.dist:SetFont(FONT_UI, 15, "OUTLINE"); self.dist:SetPoint("TOPRIGHT", -14, -8)
+      self.title:SetFont(FONT_UI, 15, "OUTLINE"); self.title:SetPoint("TOPLEFT", self.kind, "BOTTOMLEFT", 0, -3); self.title:SetWidth(rw - 66 - 14)
+      self.sub:SetFont(FONT_UI, 10.5, ""); self.sub:SetPoint("TOPLEFT", self.title, "BOTTOMLEFT", 0, -5); self.sub:SetWidth(rw - 66 - 14)
+      self.eta:SetPoint("RIGHT", self, "BOTTOMRIGHT", -14, 12)
     elseif kind == "compact" then
-      self.kind:Hide(); self.eta:Hide(); self.sub:Hide(); self.tag:Show()
-      self.title:SetFont(FONT_UI, 12, ""); self.title:SetPoint("LEFT", tx, 0); self.title:SetPoint("RIGHT", -66, 0)
-      self.dist:SetFont(FONT_UI, 11, ""); self.dist:SetPoint("RIGHT", -10, 0)
-      self.tag:SetPoint("RIGHT", -10, 0)
+      self.kind:Hide(); self.eta:Hide(); self.sub:Hide()
+      self.title:SetFont(FONT_UI, 12, ""); self.title:SetPoint("LEFT", 52, 0); self.title:SetWidth(rw - 52 - 78)
+      self.dist:SetFont(FONT_UI, 11, ""); self.dist:SetPoint("RIGHT", -12, 0)
+      self.tagF:SetPoint("RIGHT", -10, 0)
     else
-      self.kind:Hide(); self.eta:Hide(); self.sub:Show(); self.tag:Show()
-      self.title:SetFont(FONT_UI, 12, ""); self.title:SetPoint("TOPLEFT", tx, -6); self.title:SetPoint("RIGHT", -74, 0)
-      self.sub:SetPoint("TOPLEFT", self.title, "BOTTOMLEFT", 0, -3); self.sub:SetPoint("RIGHT", -74, 0)
-      self.dist:SetFont(FONT_UI, 12, "OUTLINE"); self.dist:SetPoint("TOPRIGHT", -12, -6)
-      self.tag:SetPoint("TOPRIGHT", self.dist, "BOTTOMRIGHT", 0, -4)
+      self.kind:Hide(); self.eta:Hide(); self.sub:Show()
+      self.title:SetFont(FONT_UI, 12.5, ""); self.title:SetPoint("TOPLEFT", 56, -7); self.title:SetWidth(rw - 56 - 86)
+      self.sub:SetFont(FONT_UI, 10, ""); self.sub:SetPoint("TOPLEFT", self.title, "BOTTOMLEFT", 0, -3); self.sub:SetWidth(rw - 56 - 86)
+      self.dist:SetFont(FONT_UI, 12, "OUTLINE"); self.dist:SetPoint("TOPRIGHT", -12, -7)
+      self.tagF:SetPoint("TOPRIGHT", -10, -22)
     end
   end
   r:Style("compact")
@@ -586,95 +820,263 @@ for i = 1, 10 do
     Refresh(true)
   end)
   r:SetScript("OnEnter", function(self)
-    if DB.mode == "route" and self.stepIdx then
-      GameTooltip:SetOwner(self, "ANCHOR_LEFT")
-      GameTooltip:AddLine(self.tTitle or "", NEON[1], NEON[2], NEON[3])
-      if self.tProg and self.tProg ~= "" then GameTooltip:AddLine(self.tProg, 1, 1, 1, true) end
-      if self.group and #self.group > 1 then
-        local route = LevelPilot_Routes[RT.key]
-        for _, gi in ipairs(self.group) do GameTooltip:AddLine("· " .. LP_Route.StepTitle(route.steps[gi]), 0.85, 0.9, 0.9) end
-      end
-      GameTooltip:AddLine("Rechtsklick: " .. ((self.group and #self.group > 1) and "erste Quest sperren" or "Quest sperren (kommt nie wieder)"), 0.55, 0.58, 0.6)
-      GameTooltip:Show()
-      return
-    end
-    if not self.qid then return end
-    GameTooltip:SetOwner(self, "ANCHOR_LEFT")
-    GameTooltip:AddLine(self.tTitle or "", NEON[1], NEON[2], NEON[3])
-    if self.tProg and self.tProg ~= "" then GameTooltip:AddLine(self.tProg, 1, 1, 1, true) end
-    if self.tXP then GameTooltip:AddLine("Belohnung: " .. fmtNum(self.tXP) .. " XP", 0.6, 0.9, 1) end
-    GameTooltip:AddLine("Linksklick: Pfeil festhalten · Rechtsklick: lösen", 0.55, 0.58, 0.6)
-    GameTooltip:Show()
+    if not self.tip then return end
+    TIP:Begin(self, M)
+    for _, l in ipairs(self.tip) do TIP:Line(l[1], l[2], l[3], l[4], l[5]) end
+    TIP:Open()
   end)
-  r:SetScript("OnLeave", function() GameTooltip:Hide() end)
+  r:SetScript("OnLeave", TipLeave)
   r:Hide()
   ROWS[i] = r
 end
 
--- Karten untereinander anordnen, liefert Gesamthoehe der Liste
+-- Karten anordnen + Zeitachse ziehen; liefert die Unterkante der Liste (positiv)
 local function LayoutRows(n, mode)
   local y = listTop
+  local tlTop, tlBot
   for i = 1, n do
     local r = ROWS[i]
-    r:Style(mode == "route" and (i == 1 and "hero" or "compact") or "quest")
-    r:ClearAllPoints()
-    r:SetPoint("TOPLEFT", 12, y); r:SetPoint("TOPRIGHT", -12, y)
-    y = y - r:GetHeight() - (i == 1 and mode == "route" and 8 or 4)
+    local kind = mode == "route" and (i == 1 and "hero" or "compact") or "quest"
+    r:Style(kind)
+    r:ClearAllPoints(); r:SetPoint("TOPLEFT", 12, y); r:SetPoint("TOPRIGHT", -12, y)
+    if kind == "hero" then tlTop = y - r.h + 2
+    else tlTop = tlTop or (y - r.h / 2); tlBot = y - r.h / 2 end
+    y = y - r.h - (kind == "hero" and 10 or (kind == "quest" and 4 or 2))
+  end
+  if tlTop and tlBot and tlTop > tlBot then
+    TL:ClearAllPoints(); TL:SetPoint("TOP", M, "TOPLEFT", TLX, tlTop); TL:SetHeight(tlTop - tlBot); TL:Show()
+  else
+    TL:Hide()
   end
   return -y
 end
-local empty = UI(M, 11); empty:SetPoint("TOPLEFT", 16, listTop - 6); empty:SetTextColor(0.6, 0.65, 0.68)
+local empty = UI(M, 11); empty:SetPoint("TOPLEFT", 18, listTop - 8); empty:SetWidth(W - 36); empty:SetTextColor(0.6, 0.65, 0.68)
 empty:SetText("Keine angenommenen Quests auf dieser Karte.\nNeue Quests zeigt dir Questie (gelbes !).")
 empty:SetJustifyH("LEFT")
 
--- Flug-Hinweis (Karte unter der Liste)
-local FB = CreateFrame("Button", nil, M); FB:SetHeight(46); FB:Hide()
-local fbEdge = Round(FB, "BACKGROUND", 0, 12, { 1, 1, 1, 1 })
-fbEdge:SetGradient({ 0.31, 0.82, 1, 0.85 }, { 0.22, 1, 0.42, 0.55 })
-local fbBody = CreateFrame("Frame", nil, FB); fbBody:SetPoint("TOPLEFT", 1, -1); fbBody:SetPoint("BOTTOMRIGHT", -1, 1)
-Round(fbBody, "BACKGROUND", 1, 11, { 1, 1, 1, 1 }):SetGradient({ 0.03, 0.09, 0.13, 0.97 }, { 0.04, 0.06, 0.07, 0.97 })
-local fbIcon = fbBody:CreateTexture(nil, "ARTWORK"); fbIcon:SetSize(28, 28); fbIcon:SetPoint("LEFT", 9, 0)
-local fbT = UI(fbBody, 14, true); fbT:SetPoint("TOPLEFT", 46, -7); fbT:SetPoint("RIGHT", -8, 0); fbT:SetJustifyH("LEFT"); fbT:SetWordWrap(false)
-local fbS = UI(fbBody, 11); fbS:SetPoint("TOPLEFT", fbT, "BOTTOMLEFT", 0, -4); fbS:SetPoint("RIGHT", -8, 0); fbS:SetJustifyH("LEFT"); fbS:SetWordWrap(false)
-fbS:SetTextColor(0.78, 0.84, 0.88)
-FB:SetScript("OnClick", function()
-  if FLYADV then FLYIGN[FLYADV.key] = (not FLYIGN[FLYADV.key]) or nil; if Refresh then Refresh() end end
-end)
-FB:SetScript("OnEnter", function(self)
-  local a = FLYADV; if not a then return end
-  GameTooltip:SetOwner(self, "ANCHOR_LEFT")
-  GameTooltip:AddLine("Fliegen oder laufen?", 0.31, 0.82, 1)
-  GameTooltip:AddLine(fmt("Laufen: ca. %s  ·  Fliegen: ca. %s (inkl. Weg zum Flugmeister)", fmtTime(a.run), fmtTime(a.fly)), 1, 1, 1, true)
-  GameTooltip:AddLine("Flug: " .. a.from .. "  →  " .. a.to, 0.8, 0.85, 0.9, true)
-  if not a.sure then GameTooltip:AddLine("Sprich einmal einen Flugmeister an – dann kenne ich deine entdeckten Flugpunkte genau.", 1, 0.82, 0.3, true) end
-  if DB.auto then GameTooltip:AddLine("Am Flugmeister wird der Flug automatisch gewählt (Umschalt halten = nicht).", 0.6, 0.9, 1, true) end
-  GameTooltip:AddLine("Klick: " .. (FLYIGN[a.key] and "doch fliegen" or "lieber laufen"), 0.55, 0.58, 0.6)
-  GameTooltip:Show()
-end)
-FB:SetScript("OnLeave", function() GameTooltip:Hide() end)
--- y = Unterkante der Liste (negativ); liefert die Zusatzhoehe
-local function FlyBanner(y)
-  pcall(currentTarget)
-  local a = FLYADV
-  if not DB or DB.collapsed or not a then FB:Hide(); return 0 end
-  if not SetIcon(fbIcon, "fly") then fbIcon:SetVertexColor(0.31, 0.82, 1, 1) end
-  if a.kind == "hearth" then
-    SetIcon(fbIcon, "hearth")
-    fbT:SetText(fmt("|cff4fd2ffRUHESTEIN SPART CA. %s|r", fmtTime(a.save):upper()))
-    fbS:SetText(fmt("Nach %s  ·  Laufen %s, Ruhestein %s", a.to, fmtTime(a.run), fmtTime(a.fly)))
-  elseif FLYIGN[a.key] then
-    fbT:SetText("|cff8a8f93LAUFEN GEWÄHLT|r")
-    fbS:SetText(fmt("Fliegen wäre ca. %s schneller  ·  Klick: doch fliegen", fmtTime(a.save)))
-  elseif a.atFM then
-    fbT:SetText("|cff4fd2ffJETZT FLIEGEN|r  |cffffffff→ " .. a.to .. "|r")
-    fbS:SetText(DB.auto and "Flugmeister ansprechen – Flug wird automatisch gewählt" or "Flugmeister ansprechen")
-  else
-    fbT:SetText(fmt("|cff4fd2ffFLIEGEN SPART CA. %s|r", fmtTime(a.save):upper()))
-    fbS:SetText(fmt("%s → %s  ·  Laufen %s · Fliegen %s%s", a.from, a.to, fmtTime(a.run), fmtTime(a.fly), a.sure and "" or "  ·  |cffffd24d?|r"))
+---------------------------------------------------------------------------
+-- Flug-Kapsel (Fliegen / Ruhestein spart Zeit)
+---------------------------------------------------------------------------
+local FlyBanner
+do
+  local FB = CreateFrame("Button", nil, M); FB:SetHeight(50); FB:Hide()
+  if SLICE then
+    local g = MT(FB, "BACKGROUND", -8, "glow", "ADD"); g:SetPoint("TOPLEFT", -36, 36); g:SetPoint("BOTTOMRIGHT", 36, -36); Slice(g, 60)
+    g:SetVertexColor(1, 1, 1, 1); Grad(g, "HORIZONTAL", AQUA[1], AQUA[2], AQUA[3], 0.22, TEAL[1], TEAL[2], TEAL[3], 0.05)
   end
-  FB:ClearAllPoints(); FB:SetPoint("TOPLEFT", 12, y - 6); FB:SetPoint("TOPRIGHT", -12, y - 6)
-  FB:Show()
-  return 56
+  Round(FB, "BACKGROUND", 0, 14, { 1, 1, 1, 1 }):SetGradient({ AQUA[1], AQUA[2], AQUA[3], 0.26 }, { TEAL[1], TEAL[2], TEAL[3], 0.04 })
+  Round(FB, "BACKGROUND", 1, 14, { 1, 1, 1, 1 }):SetGradientV({ 1, 1, 1, 0.07 }, { 1, 1, 1, 0.01 })
+  TopLine(FB, 14, 0.30, "BORDER", 0)
+  Round(FB, "HIGHLIGHT", 0, 14, { 1, 1, 1, 1 }, "ADD"):SetGradient({ AQUA[1], AQUA[2], AQUA[3], 0.12 }, { AQUA[1], AQUA[2], AQUA[3], 0.02 })
+  local fbOrb = OrbBadge(FB, 30); fbOrb:SetPoint("CENTER", FB, "LEFT", 32, 0); fbOrb:Tint(AQUA, TEAL); fbOrb.halo:SetAlpha(0.35)
+  local fbT = UI(FB, 13, true); fbT:SetPoint("TOPLEFT", 56, -9); fbT:SetWidth(W - 24 - 56 - 12); fbT:SetJustifyH("LEFT"); fbT:SetWordWrap(false)
+  local fbS = UI(FB, 10.5); fbS:SetPoint("TOPLEFT", fbT, "BOTTOMLEFT", 0, -4); fbS:SetWidth(W - 24 - 56 - 12); fbS:SetJustifyH("LEFT"); fbS:SetWordWrap(false)
+  fbS:SetTextColor(0.78, 0.84, 0.88)
+  FB:SetScript("OnClick", function()
+    if FLYADV then FLYIGN[FLYADV.key] = (not FLYIGN[FLYADV.key]) or nil; if Refresh then Refresh() end end
+  end)
+  FB:SetScript("OnEnter", function(self)
+    local a = FLYADV; if not a then return end
+    TIP:Begin(self, M):Line("Fliegen oder laufen?", AQUA[1], AQUA[2], AQUA[3], true)
+    TIP:Line(fmt("Laufen: ca. %s  ·  Fliegen: ca. %s (inkl. Weg zum Flugmeister)", fmtTime(a.run), fmtTime(a.fly)), 1, 1, 1)
+    TIP:Line("Flug: " .. a.from .. "  →  " .. a.to, 0.8, 0.85, 0.9)
+    if not a.sure then TIP:Line("Sprich einmal einen Flugmeister an – dann kenne ich deine entdeckten Flugpunkte genau.", 1, 0.82, 0.3) end
+    if DB.auto then TIP:Line("Am Flugmeister wird der Flug automatisch gewählt (Umschalt halten = nicht).", 0.6, 0.9, 1) end
+    TIP:Line("Klick: " .. (FLYIGN[a.key] and "doch fliegen" or "lieber laufen"), 0.5, 0.55, 0.58)
+    TIP:Open()
+  end)
+  FB:SetScript("OnLeave", TipLeave)
+  -- y = Unterkante der Liste (negativ); liefert die Zusatzhoehe
+  function FlyBanner(y)
+    pcall(currentTarget)
+    local a = FLYADV
+    if not DB or DB.collapsed or not a then FB:Hide(); return 0 end
+    fbOrb:Icon(a.kind == "hearth" and "hearth" or "fly", AQUA[1], AQUA[2], AQUA[3])
+    if a.kind == "hearth" then
+      fbT:SetText(fmt("|cff4fd2ffRUHESTEIN SPART CA. %s|r", fmtTime(a.save):upper()))
+      fbS:SetText(fmt("Nach %s  ·  Laufen %s, Ruhestein %s", a.to, fmtTime(a.run), fmtTime(a.fly)))
+    elseif FLYIGN[a.key] then
+      fbT:SetText("|cff8a8f93LAUFEN GEWÄHLT|r")
+      fbS:SetText(fmt("Fliegen wäre ca. %s schneller  ·  Klick: doch fliegen", fmtTime(a.save)))
+    elseif a.atFM then
+      fbT:SetText("|cff4fd2ffJETZT FLIEGEN|r  |cffffffff→ " .. a.to .. "|r")
+      fbS:SetText(DB.auto and "Flugmeister ansprechen – Flug wird automatisch gewählt" or "Flugmeister ansprechen")
+    else
+      fbT:SetText(fmt("|cff4fd2ffFLIEGEN SPART CA. %s|r", fmtTime(a.save):upper()))
+      fbS:SetText(fmt("%s → %s  ·  Laufen %s · Fliegen %s%s", a.from, a.to, fmtTime(a.run), fmtTime(a.fly), a.sure and "" or "  ·  |cffffd24d?|r"))
+    end
+    FB:ClearAllPoints(); FB:SetPoint("TOPLEFT", 12, y - 4); FB:SetPoint("TOPRIGHT", -12, y - 4)
+    FB:Show()
+    return 58
+  end
+end
+
+---------------------------------------------------------------------------
+-- Bedienleiste: Segment ROUTE | QUESTS + Schalter PFEIL / AUTO
+---------------------------------------------------------------------------
+local DK, Switch, SyncDock, DockTick, SET
+do
+  local SWITCHES = {}
+  -- iOS-artiger Schalter: Kapsel (Neon-Verlauf wenn an), weisser Knopf mit Schatten, gleitet weich
+  function Switch(parent, label, get, fn, w, tip)
+    local b = CreateFrame("Button", nil, parent); b:SetSize(w or 66, 24)
+    b.l = UI(b, 9, true); b.l:SetPoint("RIGHT", b, "RIGHT", -36, 0); b.l:SetText(label)
+    local tr = CreateFrame("Frame", nil, b); tr:SetSize(30, 16); tr:SetPoint("RIGHT", 0, 0)
+    b.off = Capsule(tr, "BACKGROUND", 0, 16, { 1, 1, 1, 1 }); b.off:SetGradientV({ 0, 0, 0, 0.5 }, { 1, 1, 1, 0.10 })
+    b.glow = MT(tr, "BACKGROUND", 1, "dot", "ADD"); b.glow:SetPoint("TOPLEFT", -12, 9); b.glow:SetPoint("BOTTOMRIGHT", 12, -9)
+    b.glow:SetVertexColor(NEON[1], NEON[2], NEON[3], 0.28)
+    b.on = Capsule(tr, "BORDER", 0, 16, { 1, 1, 1, 1 }); b.on:SetGradient({ NEON[1], NEON[2], NEON[3], 1 }, { TEAL[1], TEAL[2], TEAL[3], 1 })
+    b.sh = MT(tr, "ARTWORK", 0, "dot"); b.sh:SetSize(20, 20); b.sh:SetVertexColor(0, 0, 0, 0.55)
+    b.knob = MT(tr, "ARTWORK", 1, "ctx_disc"); b.knob:SetSize(18, 18); b.knob:SetVertexColor(1, 1, 1, 1)
+    if (w or 66) > 100 then Capsule(b, "HIGHLIGHT", 0, 24, { 1, 1, 1, 1 }, "ADD"):SetGradient({ NEON[1], NEON[2], NEON[3], 0.07 }, { AQUA[1], AQUA[2], AQUA[3], 0.02 }) end
+    b.tr, b.get = tr, get
+    function b:Place()
+      self.knob:SetPoint("CENTER", self.tr, "LEFT", self.x, 0); self.sh:SetPoint("CENTER", self.tr, "LEFT", self.x, -1)
+    end
+    function b:Sync(instant)
+      local v = self.get() and true or false
+      self.on:SetShown(v); self.glow:SetShown(v)
+      self.l:SetTextColor(v and 0.85 or 0.5, v and 0.95 or 0.55, v and 0.88 or 0.58)
+      self.tx = v and 22 or 8
+      if instant or not self.x then self.x = self.tx end
+      self:Place()
+    end
+    function b:Tick(el)
+      if self.x and self.tx and abs(self.x - self.tx) > 0.2 then self.x = self.x + (self.tx - self.x) * min(1, el * 14); self:Place() end
+    end
+    b:SetScript("OnClick", function() fn(); b:Sync() end)
+    if tip then
+      b:SetScript("OnEnter", function(self) TIP:Begin(self, M):Line(tip, 0.85, 0.9, 0.9); TIP:Open() end)
+      b:SetScript("OnLeave", TipLeave)
+    end
+    SWITCHES[#SWITCHES + 1] = b
+    return b
+  end
+
+  DK = CreateFrame("Frame", nil, M); DK:SetHeight(26); DK:SetPoint("BOTTOMLEFT", 14, 12); DK:SetPoint("BOTTOMRIGHT", -14, 12)
+  local seg = CreateFrame("Frame", nil, DK); seg:SetSize(150, 26); seg:SetPoint("LEFT", 0, 0)
+  Capsule(seg, "BACKGROUND", 0, 26, { 1, 1, 1, 1 }):SetGradientV({ 0, 0, 0, 0.55 }, { 1, 1, 1, 0.05 })
+  local thumb = CreateFrame("Frame", nil, seg); thumb:SetSize(72, 22); thumb:SetPoint("LEFT", 2, 0)
+  local thG = MT(thumb, "BACKGROUND", 0, "dot", "ADD"); thG:SetPoint("TOPLEFT", -14, 10); thG:SetPoint("BOTTOMRIGHT", 14, -10)
+  thG:SetVertexColor(NEON[1], NEON[2], NEON[3], 0.30)
+  Capsule(thumb, "BORDER", 0, 22, { 1, 1, 1, 1 }):SetGradient({ NEON[1], NEON[2], NEON[3], 1 }, { TEAL[1], TEAL[2], TEAL[3], 1 })
+  local thGl = Tex(thumb, "ARTWORK", 0); thGl:SetPoint("TOPLEFT", 8, -1); thGl:SetPoint("TOPRIGHT", -8, -1); thGl:SetHeight(9)
+  Grad(thGl, "VERTICAL", 1, 1, 1, 0, 1, 1, 1, 0.32)
+  local segL = CreateFrame("Frame", nil, seg); segL:SetAllPoints(); segL:SetFrameLevel(thumb:GetFrameLevel() + 1)
+  local SEG = {}
+  for k, def in ipairs({ { "ROUTE", "route" }, { "QUESTS", "quests" } }) do
+    local b = CreateFrame("Button", nil, segL); b:SetSize(75, 26); b:SetPoint("LEFT", (k - 1) * 75, 0)
+    b.t = UI(b, 10, true); b.t:SetPoint("CENTER", 0, 0); b.t:SetText(def[1])
+    b:SetScript("OnClick", function() if DB.mode ~= def[2] then DB.mode = def[2]; Refresh(true) end end)
+    b.mode = def[2]; SEG[k] = b
+  end
+  local segX, segTX = 2, 2
+  local swAuto = Switch(DK, "AUTO", function() return DB.auto end, function()
+    DB.auto = not DB.auto; P("Auto-Annehmen/-Abgeben: " .. (DB.auto and "|cff39ff6ban|r" or "|cffff5050aus|r")); Refresh(true)
+  end, 66, "Quests der Route automatisch annehmen und abgeben (Umschalt halten = kurz aus)")
+  swAuto:SetPoint("RIGHT", DK, "RIGHT", 0, 0)
+  local swArrow = Switch(DK, "PFEIL", function() return DB.arrow end, function() DB.arrow = not DB.arrow; Refresh(true) end, 66, "Pfeil mit Kompass ein-/ausblenden")
+  swArrow:SetPoint("RIGHT", swAuto, "LEFT", -6, 0)
+  function SyncDock()
+    segTX = (DB.mode == "quests") and 76 or 2
+    for _, b in ipairs(SEG) do
+      local on = b.mode == DB.mode
+      b.t:SetTextColor(on and 0.03 or 0.6, on and 0.09 or 0.65, on and 0.06 or 0.68)
+    end
+    swAuto:Sync(); swArrow:Sync()
+    if SET and SET:IsShown() then for _, s in ipairs(SET.sw) do s:Sync() end end
+  end
+  function DockTick(el)
+    for _, s in ipairs(SWITCHES) do s:Tick(el) end
+    if abs(segX - segTX) > 0.2 then segX = segX + (segTX - segX) * min(1, el * 12); thumb:SetPoint("LEFT", seg, "LEFT", segX, 0) end
+  end
+end
+
+---------------------------------------------------------------------------
+-- Einstellungen (Glas-Popover neben dem Fenster)
+---------------------------------------------------------------------------
+do
+  local SETDEF = {
+    { "Auto-Annehmen / -Abgeben", "auto", function() return DB.auto end },
+    { "Pfeil mit Kompass", "pfeil", function() return DB.arrow end },
+    { "Neon-Strahl am Ziel", "strahl", function() return DB.beam end },
+    { "Blizzard-Wegpunkt", "marker", function() return DB.pin end },
+    { "Flug-Tipp (Fliegen statt Laufen)", "flug", function() return DB.fly ~= false end },
+    { "Wegenetz-Führung", "wege", function() return DB.wege end },
+    { "Speed-Modus", "speed", function() return DB.speed end },
+    { "Fertig-Meldung", "toast", function() return DB.toast end },
+    { "Im Kampf abdunkeln", "kampf", function() return DB.fade end },
+    { "Töne", "sound", function() return DB.sound ~= false end },
+    { "Fenster & Pfeil gesperrt", function() return DB.locked and "unlock" or "lock" end, function() return DB.locked end },
+  }
+  function OpenSettings(force)
+    if not DB then return end
+    if not SET then
+      SET = CreateFrame("Frame", "LevelPilotSettings", M)
+      SET:SetFrameStrata("DIALOG"); SET:SetSize(276, 44 + #SETDEF * 27 + 100); SET:EnableMouse(true); SET:SetClampedToScreen(true); SET:Hide()
+      Glass(SET, { aurora = true })
+      local h = UI(SET, 13, true); h:SetPoint("TOPLEFT", 18, -17); h:SetText(GradText("EINSTELLUNGEN", NEON, TEAL, AQUA))
+      -- Schliessen: X aus zwei gedrehten Linien auf einer Glasscheibe
+      local x = CreateFrame("Button", nil, SET); x:SetSize(22, 22); x:SetPoint("TOPRIGHT", -12, -11)
+      local xd = MT(x, "BACKGROUND", 0, "ctx_disc"); xd:SetPoint("CENTER"); xd:SetSize(33, 33); xd:SetVertexColor(1, 1, 1, 0.06)
+      local xh = MT(x, "HIGHLIGHT", 0, "ctx_disc", "ADD"); xh:SetPoint("CENTER"); xh:SetSize(33, 33); xh:SetVertexColor(1, 0.35, 0.35, 0.25)
+      for _, rot in ipairs({ pi / 4, -pi / 4 }) do
+        local l = Tex(x, "ARTWORK", 0); l:SetSize(10, 1.6); l:SetPoint("CENTER"); l:SetVertexColor(0.85, 0.9, 0.9, 1); pcall(l.SetRotation, l, rot)
+      end
+      x:SetScript("OnClick", function() SET:Hide() end)
+      SET.sw = {}
+      for k, d in ipairs(SETDEF) do
+        local y = -44 - (k - 1) * 27
+        if k > 1 then Hairline(SET, "BORDER", 6, false, 0.07):Place(SET, 22, y, 254, 0) end
+        local sw = Switch(SET, "", d[3], function()
+          SlashCmdList.LEVELPILOT(type(d[2]) == "function" and d[2]() or d[2])
+          for _, s in ipairs(SET.sw) do s:Sync() end
+          SyncDock()
+        end, 252)
+        sw:SetPoint("TOPLEFT", 12, y - 1)
+        local l = UI(sw, 11.5); l:SetPoint("LEFT", 10, 0); l:SetText(d[1]); l:SetTextColor(0.82, 0.87, 0.88)
+        SET.sw[#SET.sw + 1] = sw
+      end
+      -- Ton bei neuem Ziel: Segment AMBOSS | SCHLOSS
+      local ty = -44 - #SETDEF * 27 - 10
+      local tl = UI(SET, 11.5); tl:SetPoint("TOPLEFT", 22, ty - 5); tl:SetText("Ton bei neuem Ziel"); tl:SetTextColor(0.82, 0.87, 0.88)
+      local ts = CreateFrame("Frame", nil, SET); ts:SetSize(126, 22); ts:SetPoint("TOPRIGHT", -20, ty)
+      Capsule(ts, "BACKGROUND", 0, 22, { 1, 1, 1, 1 }):SetGradientV({ 0, 0, 0, 0.55 }, { 1, 1, 1, 0.05 })
+      local tth = CreateFrame("Frame", nil, ts); tth:SetSize(60, 18); tth:SetPoint("LEFT", 2, 0)
+      Capsule(tth, "BORDER", 0, 18, { 1, 1, 1, 1 }):SetGradient({ NEON[1], NEON[2], NEON[3], 1 }, { TEAL[1], TEAL[2], TEAL[3], 1 })
+      local tlb = CreateFrame("Frame", nil, ts); tlb:SetAllPoints(); tlb:SetFrameLevel(tth:GetFrameLevel() + 1)
+      SET.ton = {}
+      for k, d in ipairs({ { "AMBOSS", "amboss" }, { "SCHLOSS", "schloss" } }) do
+        local b = CreateFrame("Button", nil, tlb); b:SetSize(63, 22); b:SetPoint("LEFT", (k - 1) * 63, 0)
+        b.t = UI(b, 9, true); b.t:SetPoint("CENTER", 0, 0); b.t:SetText(d[1]); b.v = d[2]
+        b:SetScript("OnClick", function() if (DB.ton or "amboss") ~= d[2] then SlashCmdList.LEVELPILOT("ton") end; SET:Sync() end)
+        SET.ton[k] = b
+      end
+      -- Zuruecksetzen (Geister-Knopf, rot beim Ueberfahren)
+      local rb = CreateFrame("Button", nil, SET); rb:SetSize(240, 26); rb:SetPoint("BOTTOM", 0, 30)
+      Capsule(rb, "BACKGROUND", 0, 26, { 1, 1, 1, 1 }):SetGradient({ 1, 1, 1, 0.09 }, { 1, 1, 1, 0.04 })
+      Capsule(rb, "HIGHLIGHT", 0, 26, { 1, 1, 1, 1 }, "ADD"):SetGradient({ 1, 0.35, 0.35, 0.18 }, { 1, 0.55, 0.24, 0.10 })
+      rb.t = UI(rb, 10.5, true); rb.t:SetPoint("CENTER", 0, 0); rb.t:SetText("Layout & Schalter zurücksetzen"); rb.t:SetTextColor(0.85, 0.88, 0.9)
+      rb:SetScript("OnClick", function() SlashCmdList.LEVELPILOT("reset"); SET:Sync() end)
+      local ft = UI(SET, 9); ft:SetPoint("BOTTOM", 0, 12); ft:SetText("Alle Befehle: /lp hilfe"); ft:SetTextColor(0.45, 0.5, 0.52)
+      function SET:Sync()
+        for _, s in ipairs(self.sw) do s:Sync() end
+        local cur = DB.ton or "amboss"
+        for k, b in ipairs(self.ton) do
+          local on = b.v == cur
+          b.t:SetTextColor(on and 0.03 or 0.6, on and 0.09 or 0.65, on and 0.06 or 0.68)
+          if on then tth:SetPoint("LEFT", 2 + (k - 1) * 62, 0) end
+        end
+        SyncDock()
+      end
+      if UISpecialFrames then tinsert(UISpecialFrames, "LevelPilotSettings") end
+    end
+    if SET:IsShown() and not force then SET:Hide(); return end
+    SET:ClearAllPoints()
+    local l = M:GetLeft()
+    if l and l > 300 then SET:SetPoint("TOPRIGHT", M, "TOPLEFT", -16, 0) else SET:SetPoint("TOPLEFT", M, "TOPRIGHT", 16, 0) end
+    SET:Show(); SET:Sync()
+  end
 end
 
 ---------------------------------------------------------------------------
@@ -698,31 +1100,67 @@ local arrowGlow = MT(A, "ARTWORK", 0, "arrow_glow", "ADD"); arrowGlow:SetPoint("
 arrowGlow:SetVertexColor(NEON[1], NEON[2], NEON[3], 0.9)
 local arrow = MT(A, "ARTWORK", 1, "arrow"); arrow:SetPoint("CENTER"); arrow:SetSize(52, 52)
 local rim = arrowGlow
-local disc, discSheen = compass, compass
-local aPill = CreateFrame("Frame", nil, A); aPill:SetSize(168, 28); aPill:SetPoint("TOP", A, "BOTTOM", 0, -6)
-local aPillEdge = Round(aPill, "BACKGROUND", 0, 14, { 1, 1, 1, 1 })
-aPillEdge:SetGradient({ NEON[1], NEON[2], NEON[3], 0.8 }, { TEAL[1], TEAL[2], TEAL[3], 0.5 })
-local aPillBody = CreateFrame("Frame", nil, aPill); aPillBody:SetPoint("TOPLEFT", 1, -1); aPillBody:SetPoint("BOTTOMRIGHT", -1, 1)
-Round(aPillBody, "BACKGROUND", 1, 13, { 1, 1, 1, 1 }):SetGradient({ 0.03, 0.07, 0.06, 0.95 }, { 0.05, 0.055, 0.08, 0.95 })
-local aIcon = MT(aPillBody, "ARTWORK", 0, "i_go"); aIcon:SetSize(14, 14); aIcon:SetPoint("LEFT", 9, 0); aIcon:SetVertexColor(NEON[1], NEON[2], NEON[3], 1)
-local aDist = UI(aPillBody, 14, true); aDist:SetPoint("CENTER", 6, 0)
-local aName = UI(A, 12, true); aName:SetPoint("TOP", aPill, "BOTTOM", 0, -4); aName:SetWidth(280); aName:SetWordWrap(false)
+-- Glas-Pille unter dem Kompass: Spielsymbol der Aufgabe + Entfernung
+local aIcon, aDist, aName
+do
+  local aPill = CreateFrame("Frame", nil, A); aPill:SetSize(176, 30); aPill:SetPoint("TOP", A, "BOTTOM", 0, -4)
+  Glass(aPill, { glowA = 0.26, sheenH = 14, pad = 46 })
+  aIcon = aPill:CreateTexture(nil, "ARTWORK"); aIcon:SetSize(18, 18); aIcon:SetPoint("LEFT", 9, 0)
+  aDist = UI(aPill, 14, true); aDist:SetPoint("CENTER", 8, 0)
+  aName = UI(A, 12, true); aName:SetPoint("TOP", aPill, "BOTTOM", 0, -6); aName:SetWidth(280); aName:SetWordWrap(false)
+end
 local aHere = UI(A, 20, true); aHere:SetPoint("CENTER"); aHere:SetText("|cff39ff6bDA!|r"); aHere:Hide()
+local aTyp
 
--- Fertig-Meldung: schwebende Neon-Pille
-local T = CreateFrame("Frame", nil, UIParent)
-T:SetSize(440, 44); T:SetPoint("CENTER", UIParent, "CENTER", 0, 160); T:SetFrameStrata("HIGH"); T:Hide()
-local tGlow = CreateFrame("Frame", nil, T); tGlow:SetPoint("TOPLEFT", -8, 8); tGlow:SetPoint("BOTTOMRIGHT", 8, -8)
-Round(tGlow, "BACKGROUND", 0, 30, { NEON[1], NEON[2], NEON[3], 0.12 })
-Round(T, "BACKGROUND", 1, 22, { NEON[1], NEON[2], NEON[3], 0.55 })
-local tBody = CreateFrame("Frame", nil, T); tBody:SetPoint("TOPLEFT", 1, -1); tBody:SetPoint("BOTTOMRIGHT", -1, 1)
-Round(tBody, "BACKGROUND", 2, 21, { 0.045, 0.05, 0.058, 0.95 })
-local tTxt = UI(tBody, 17, true); tTxt:SetPoint("CENTER")
-local toastT = 0
-function Toast(msg)
-  if not DB.toast then return end
-  tTxt:SetText(msg); toastT = 3; T:SetAlpha(1); T:Show()
-  pcall(PlaySound, (SOUNDKIT and SOUNDKIT.UI_QUEST_COMPLETE) or 878, "SFX")
+---------------------------------------------------------------------------
+-- Fertig-Meldung: Glas-Kapsel mit Leucht-Kugel, gleitet weich herein
+---------------------------------------------------------------------------
+local ToastTick
+do
+  local T = CreateFrame("Frame", nil, UIParent)
+  T:SetSize(320, 50); T:SetPoint("CENTER", UIParent, "CENTER", 0, 158); T:SetFrameStrata("HIGH"); T:Hide()
+  Glass(T, { glowA = 0.40, sheenH = 22 })
+  local tOrb = OrbBadge(T, 30); tOrb:SetPoint("CENTER", T, "LEFT", 31, 0); tOrb.halo:SetAlpha(0.4)
+  local tTxt = UI(T, 15, true); tTxt:SetPoint("LEFT", 56, 0); tTxt:SetJustifyH("LEFT")
+  local toastT, toastAge = 0, 0
+  function Toast(msg, typ)
+    if not DB.toast then return end
+    local bad = msg:find("GESPERRT") ~= nil
+    typ = typ or ((bad or msg:find("NICHT MEHR DA")) and "note" or "turnin")
+    local c = bad and { 1, 0.32, 0.32 } or (typ == "note" and { 1, 0.82, 0.30 } or NEON)
+    tOrb:Tint(c, typ == "turnin" and TEAL or nil); tOrb:Icon(typ, c[1], c[2], c[3])
+    tTxt:SetText(msg)
+    T:SetWidth(max(260, min(560, (tTxt:GetStringWidth() or 0) + 86)))
+    toastT, toastAge = 3.2, 0; T:SetAlpha(0); T:Show()
+    pcall(PlaySound, (SOUNDKIT and SOUNDKIT.UI_QUEST_COMPLETE) or 878, "SFX")
+  end
+  function ToastTick(el)
+    if toastT <= 0 then return end
+    toastT = toastT - el; toastAge = toastAge + el
+    local k = min(1, toastAge * 4)
+    T:SetPoint("CENTER", UIParent, "CENTER", 0, 140 + 18 * (1 - (1 - k) ^ 3))
+    T:SetAlpha(max(0, min(1, toastAge * 5, toastT * 1.5)))
+    if toastT <= 0 then T:Hide() end
+  end
+end
+
+-- Animationen (pro Bild): Aurora, XP-Lichtlauf, atmende Kugeln, gleitende Schalter, Meldung
+local function Glow(now)
+  for f in pairs(AURORA) do if f:IsVisible() then GlassTick(f, now) end end
+  local ph = (now % 3.4) / 3.4
+  if ph < 0.5 and M:IsVisible() then
+    local k = ph / 0.5
+    X.shine:SetPoint("CENTER", X.fill, "LEFT", X.fw * k, 0); X.shine:SetAlpha(0.55 * math.sin(k * pi)); X.shine:Show()
+  else
+    X.shine:Hide()
+  end
+  LO.halo:SetAlpha(0.20 + 0.12 * math.sin(now * 1.7))
+  ROWS[1].orb.halo:SetAlpha(0.28 + 0.16 * math.sin(now * 2.2))
+end
+local function Animate(now, el)
+  pcall(ToastTick, el)          -- zuerst: Meldung muss immer verschwinden
+  pcall(DockTick, el)
+  pcall(Glow, now)
 end
 
 ---------------------------------------------------------------------------
@@ -736,33 +1174,55 @@ local function levelColor(lvl)
   return 0.8, 0.8, 0.8
 end
 
-local function hex(col) return tonumber(col:sub(1, 2), 16) / 255, tonumber(col:sub(3, 4), 16) / 255, tonumber(col:sub(5, 6), 16) / 255 end
+-- Anteil erledigter Questziele (0..1), nil = unbekannt
+local function questFrac(qid)
+  local sum, n = 0, 0
+  pcall(function()
+    for _, o in ipairs(QL.GetQuestObjectives(qid) or {}) do
+      n = n + 1
+      if o.finished then sum = sum + 1
+      elseif o.numRequired and o.numRequired > 0 then sum = sum + min(1, (o.numFulfilled or 0) / o.numRequired) end
+    end
+  end)
+  if n == 0 then return nil end
+  return sum / n
+end
+
+-- Grinden: Unterzeile + Fortschritt (nur wenn das Ziel die naechste Stufe ist)
+local function grindInfo(st)
+  local lvl, cur, mx = UnitLevel("player"), UnitXP("player"), max(1, UnitXPMax("player"))
+  local to = st.to or (lvl + 1)
+  if lvl >= to then return "Stufe " .. to .. " erreicht", 1 end
+  if to == lvl + 1 then return "Stufe " .. to .. " erreichen  ·  noch " .. fmtNum(mx - cur) .. " XP", cur / mx end
+  return "Stufe " .. to .. " erreichen  ·  noch " .. (to - lvl) .. " Stufen", nil
+end
 
 function Refresh(rescan)
   if not DB then return end
   if rescan then scanTargets() end
-  bAuto:Set(DB.auto); bArrow:Set(DB.arrow)
-  bCol:Set(false, DB.collapsed and "+" or "–")
-  bMode:Set(true, DB.mode == "route" and "ROUTE" or "QUESTS")
+  local collapsed = DB.collapsed
+  pcall(bColIc.SetRotation, bColIc, collapsed and pi or 0)
+  DK:SetShown(not collapsed); divider:SetShown(not collapsed)
+  if collapsed then TL:Hide() end
+  SyncDock()
 
-  -- XP-Kapsel
+  -- XP
+  local lvl = UnitLevel("player")
   local cur, mx = UnitXP("player"), max(1, UnitXPMax("player"))
   local rest = GetXPExhaustion() or 0
   local pct = cur / mx
-  local fw = max(12, XPW * pct)
-  xpFill:SetWidth(fw)
-  xpSpark:ClearAllPoints(); xpSpark:SetPoint("CENTER", xpFrame, "LEFT", fw - 4, 0)
-  xpRestF:SetWidth(min(XPW, max(12, XPW * (cur + rest) / mx))); xpRestF:SetShown(rest > 0)
-  local lvl = UnitLevel("player")
-  xpTxt:SetText(fmt("|cffffffffStufe %d|r  ·  %.1f%%%s", lvl, pct * 100, rest > 0 and fmt("  ·  |cff66ccffErholt %d%%|r", floor(rest / mx * 100 + 0.5)) or ""))
+  X.fw = max(8, X.W * pct)
+  X.fill:SetWidth(X.fw)
+  X.restF:SetWidth(min(X.W, max(8, X.W * (cur + rest) / mx))); X.restF:SetShown(rest > 0)
+  lvlTxt:SetText("|cffffffff" .. lvl .. "|r")
+  X.L:SetText(fmt("|cffd8dde0%s|r  |cff6b7076/ %s XP|r", fmtNum(cur), fmtNum(mx)))
+  X.txt:SetText(fmt("|cffffffff%.1f %%|r%s", pct * 100, rest > 0 and fmt("   |cff3fb6ffErholt %d %%|r", floor(rest / mx * 100 + 0.5)) or ""))
   local xph = xpPerHour()
   local need = mx - cur
-  CHIPS[1].v:SetText(xph > 0 and ("|cff39ff6b" .. fmtNum(xph) .. "|r") or "|cff6b7076–|r")
+  CHIPS[1].v:SetText(xph > 0 and ("|cffffffff" .. fmtNum(xph) .. "|r") or "|cff6b7076–|r")
   CHIPS[2].v:SetText("|cffffffff" .. fmtNum(need) .. "|r")
-  CHIPS[3].v:SetText(xph > 0 and ("|cff39ff6b" .. fmtTime(need / xph * 3600) .. "|r") or "|cff6b7076–|r")
-
-  local COL = { accept = "ffd24d", turnin = "39ff6b", complete = "e8eef0", fly = "4fd2ff", hearth = "4fd2ff",
-    train = "c78bff", go = "4fd2ff", grind = "ff8a3d", note = "aaaaaa" }
+  CHIPS[3].v:SetText(xph > 0 and ("|cffffffff" .. fmtTime(need / xph * 3600) .. "|r") or "|cff6b7076–|r")
+  M.xi = { lvl = lvl, cur = cur, mx = mx, rest = rest, xph = xph }
 
   if DB.mode == "route" then
     routeUpdate()
@@ -789,8 +1249,8 @@ function Refresh(rescan)
     RT.items = items
     local heroStep = route and RT.idx and route.steps[RT.idx]
     subHead:SetText(route and ((DB.speed and "|cff39ff6bSPEED|r  ·  " or "") .. ((heroStep and heroStep.z) and ("|cffd8dde0" .. heroStep.z .. "|r  ·  ") or "") .. (route.name or "")) or "keine Route")
-    local n = DB.collapsed and 0 or math.min(#items, DB.rows or 6)
-    local listH = LayoutRows(n, "route")
+    local n = collapsed and 0 or math.min(#items, DB.rows or 6)
+    local bottom = LayoutRows(n, "route")
     local heroT = heroStep and LP_Route.StepTarget(heroStep)
     for i, r in ipairs(ROWS) do
       local it = items[i]
@@ -804,26 +1264,33 @@ function Refresh(rescan)
         local col = COL[st.t] or "ffffff"
         local cr, cg, cb = hex(col)
         local label = (LP_Route.TYPE[st.t] or st.t)
+        local grind = st.t == "grind"
+        local later = LP_Route.state and LP_Route.state[si] == "later"
+        local d = LP_Route.StepDist(st)
         r.stepIdx, r.qid, r.group = si, st.q, it.steps
-        r.tTitle = (cnt > 1 and (cnt .. " Quests " .. label:lower()) or label) .. (cnt > 1 and "" or (": " .. title))
-        local sub = {}
+        local sub, gfrac = {}, nil
         if st.t == "complete" and st.q then
           local pr = questProgress(st.q); if pr ~= "" then sub[#sub + 1] = pr end
         end
-        if st.t == "grind" then sub[#sub + 1] = "Stufe " .. (st.to or "?") .. " erreichen" end
+        if grind then local gt; gt, gfrac = grindInfo(st); sub[#sub + 1] = gt end
         if st.note then sub[#sub + 1] = st.note end
-        r.tProg = table.concat(sub, " · ") .. ((st.z and ("  |cff8a8f93" .. st.z .. "|r")) or "")
-        r.bar:SetVertexColor(cr, cg, cb, 1)
-        r.halo:SetVertexColor(cr, cg, cb, 0.35)
-        local atlas = SetIcon(r.icon, st.t or "note")
-        r.bar:SetShown(not atlas)
-        local bs = r.bar:GetWidth(); r.icon:SetSize(atlas and bs * 1.05 or bs * 0.62, atlas and bs * 1.05 or bs * 0.62)
-        local later = LP_Route.state and LP_Route.state[si] == "later"
-        local d = LP_Route.StepDist(st)
+        -- Tooltip-Inhalt
+        local tip = { { grind and ("Grinden bis Stufe " .. (st.to or "?")) or ((cnt > 1 and (cnt .. " Quests " .. label:lower())) or (label .. ": " .. title)), cr, cg, cb, true } }
+        if grind then tip[#tip + 1] = { (title:gsub("^Grinden:%s*", "")), 1, 1, 1 } end
+        if #sub > 0 then tip[#tip + 1] = { table.concat(sub, " · "), 1, 1, 1 } end
+        if cnt > 1 then for _, gi in ipairs(it.steps) do tip[#tip + 1] = { "· " .. LP_Route.StepTitle(route.steps[gi]), 0.85, 0.9, 0.9 } end end
+        if st.z then tip[#tip + 1] = { st.z, 0.55, 0.6, 0.62 } end
+        if later then tip[#tip + 1] = { "Freigeschaltet ab Stufe " .. math.max(st.rl or 0, (st.ql or 0) - 3), 1, 0.54, 0.24 } end
+        tip[#tip + 1] = { "Rechtsklick: " .. (st.q and ((cnt > 1) and "erste Quest sperren" or "Quest sperren (kommt nie wieder)") or "Schritt überspringen"), 0.5, 0.55, 0.58 }
+        r.tip = tip
         if i == 1 then
-          r.kind:SetText(fmt("|cff%s%s|r", col, (cnt > 1 and (cnt .. " QUESTS " .. label:upper()) or label:upper())))
+          -- Hero-Karte: Typ-Farbe als Lichtschleier, grosse Kugel, Fortschrittslinie
+          r:SetWash(cr, cg, cb)
+          r.orb:Tint({ cr, cg, cb }, lighten(cr, cg, cb)); r.orb:Icon(st.t or "note", cr, cg, cb)
+          r.kind:SetText(fmt("|cff%s%s|r", col, grind and ("GRINDEN  ·  BIS STUFE " .. (st.to or "?")) or (cnt > 1 and (cnt .. " QUESTS " .. label:upper()) or label:upper())))
+          local ht = grind and (titles[1]:gsub("^Grinden:%s*", "")) or titles[1]
           -- Gruppe: erster Name gross, die anderen in der Zeile darunter (nichts wird abgeschnitten)
-          r.title:SetText("|cffffffff" .. titles[1] .. "|r" .. (cnt > 1 and ("  |cff8a9396+" .. (cnt - 1) .. "|r") or ""))
+          r.title:SetText("|cffffffff" .. ht .. "|r" .. (cnt > 1 and ("  |cff8a9396+" .. (cnt - 1) .. "|r") or ""))
           if cnt > 1 then table.insert(sub, 1, "|cffd8dde0auch:|r " .. table.concat(titles, ", ", 2)) end
           -- Was liegt direkt daneben? (andere offene Schritte im Umkreis von ~110 m)
           local near = {}
@@ -844,68 +1311,75 @@ function Refresh(rescan)
           r.dist:SetText(d and ("|cffffffff" .. fmtDist(d) .. "|r") or "")
           local spd = (LP_Fly and LP_Fly.Speed and LP_Fly.Speed()) or 7
           r.eta:SetText((d and d > 25) and ("ca. " .. fmtTime(d * 1.15 / spd)) or (d and "|cff39ff6bhier|r" or ""))
+          local frac = grind and gfrac or ((st.t == "complete" and st.q) and questFrac(st.q) or nil)
+          r:SetProgress(frac, cr, cg, cb)
         else
+          -- Zeitleiste: kleine Kugel, Titel, Entfernung oder Etikett
           local pre = cnt > 1 and fmt("|cff%s%d×|r ", col, cnt) or ""
-          r.title:SetText(pre .. (later and "|cff8a8f93" or "|cffd8dde0") .. title .. "|r")
+          r.title:SetText(pre .. (later and "|cff7d8388" or "|cffd8dde0") .. title .. "|r")
           if later then
-            r.dist:SetText(""); r.tag:SetText("|cffff8a3dab Stufe " .. math.max(st.rl or 0, (st.ql or 0) - 3) .. "|r")
-            r.bar:SetVertexColor(0.35, 0.37, 0.4, 1)
+            r.orb:Tint({ 0.42, 0.45, 0.48 }); r.orb:Icon(st.t or "note", 0.55, 0.58, 0.6); r.orb.icon:SetDesaturated(true)
+            r.dist:SetText(""); r:SetTag("ab St. " .. math.max(st.rl or 0, (st.ql or 0) - 3), 1, 0.54, 0.24)
           else
-            r.tag:SetText(""); r.dist:SetText(d and ("|cff8a9396" .. fmtDist(d) .. "|r") or "")
+            r.orb:Tint({ cr, cg, cb }, nil, 0.85); r.orb:Icon(st.t or "note", cr, cg, cb)
+            if grind then r.dist:SetText(""); r:SetTag("bis St. " .. (st.to or "?"), 1, 0.54, 0.24)
+            else r.dist:SetText(d and ("|cff8a9396" .. fmtDist(d) .. "|r") or "") end
           end
+          r:SetAlpha(max(0.5, 1 - (i - 2) * 0.09))
         end
-        r.sel:SetShown(i == 1); r.selEdge:SetShown(i == 1)
         r:Show()
       else
-        r.stepIdx, r.qid, r.group = nil, nil, nil; r:Hide()
+        r.stepIdx, r.qid, r.group, r.tip = nil, nil, nil, nil; r:Hide()
       end
     end
     if not route then
-      empty:SetText("Keine Route für deine Fraktion/Stufe gefunden.\nOben auf QUESTS umschalten.")
-    elseif n == 0 and not DB.collapsed then
+      empty:SetText("Keine Route für deine Fraktion/Stufe gefunden.\nUnten auf QUESTS umschalten.")
+    elseif n == 0 and not collapsed then
       empty:SetText("Route " .. (route.name or "") .. " erledigt – nächster Abschnitt folgt.")
     end
-    empty:SetShown(not DB.collapsed and n == 0)
-    local flyH = FlyBanner(n > 0 and -listH or (listTop - 36))
-    M:SetHeight(DB.collapsed and 108 or ((n > 0 and listH + 8 or -listTop + 40) + flyH))
+    empty:SetShown(not collapsed and n == 0)
+    local flyH = FlyBanner(n > 0 and -bottom or (listTop - 40))
+    M:SetHeight(collapsed and HEAD_H or ((n > 0 and bottom or (-listTop + 40)) + flyH + DOCK_H))
     A:SetShown(DB.arrow and RT.idx ~= nil and M:IsShown())
     return
   end
 
   -- Quest-Ansicht
-  subHead:SetText("Angenommene Quests · nach Entfernung")
+  subHead:SetText("Angenommene Quests  ·  nach Entfernung")
   empty:SetText("Keine angenommenen Quests auf dieser Karte.\nNeue Quests zeigt dir Questie (gelbes !).")
   local tgt = currentTarget()
-  local n = DB.collapsed and 0 or min(#TARGETS, DB.rows or 6)
-  local listH = LayoutRows(n, "quests")
+  local n = collapsed and 0 or min(#TARGETS, DB.rows or 6)
+  local bottom = LayoutRows(n, "quests")
   for i, r in ipairs(ROWS) do
     local t = TARGETS[i]
     if i <= n and t then
-      r.qid, r.tTitle, r.tProg, r.tXP = t.id, t.title, t.prog, t.xp
+      r.qid, r.stepIdx, r.group = t.id, nil, nil
       local cr, cg, cb = levelColor(t.lvl)
       if t.turnin then cr, cg, cb = NEON[1], NEON[2], NEON[3] end
-      r.bar:SetVertexColor(cr, cg, cb, 1)
-      r.sym:SetText("")
-      local atlas = SetIcon(r.icon, t.turnin and "turnin" or "complete")
-      r.bar:SetShown(not atlas)
-      local bs = r.bar:GetWidth(); r.icon:SetSize(atlas and bs * 1.05 or bs * 0.62, atlas and bs * 1.05 or bs * 0.62)
+      r.orb:Tint({ cr, cg, cb }, nil, 0.9); r.orb:Icon(t.turnin and "turnin" or "complete", cr, cg, cb)
       r.title:SetText("|cffffffff" .. t.title .. "|r")
       r.sub:SetText(t.turnin and "|cff39ff6bAlles erledigt – zum Abgeben|r" or (t.prog ~= "" and t.prog or "Ziel auf der Karte"))
       r.dist:SetText("|cffffffff" .. fmtDist(t.dist) .. "|r")
       local tags = {}
       if t.xp then tags[#tags + 1] = "|cff66ccff+" .. fmtNum(t.xp) .. " XP|r" end
       if PIN == t.id then tags[#tags + 1] = "|cffffd24dFIX|r" end
-      r.tag:SetText(table.concat(tags, " "))
-      local sel = tgt and tgt.id == t.id
-      r.sel:SetShown(sel); r.selEdge:SetShown(sel)
+      r:SetTag(#tags > 0 and table.concat(tags, "  ") or nil)
+      local sel = (tgt and tgt.id == t.id) and true or false
+      if sel then r:SetWash(NEON[1], NEON[2], NEON[3], 0.20) end
+      r.wash:SetShown(sel); r.base:SetShown(sel); r.edge:SetShown(sel)
+      local tip = { { t.title, NEON[1], NEON[2], NEON[3], true } }
+      if t.prog and t.prog ~= "" then tip[#tip + 1] = { t.prog, 1, 1, 1 } end
+      if t.xp then tip[#tip + 1] = { "Belohnung: " .. fmtNum(t.xp) .. " XP", 0.4, 0.8, 1 } end
+      tip[#tip + 1] = { "Linksklick: Pfeil festhalten · Rechtsklick: lösen", 0.5, 0.55, 0.58 }
+      r.tip = tip
       r:Show()
     else
-      r.qid = nil; r:Hide()
+      r.qid, r.tip = nil, nil; r:Hide()
     end
   end
-  empty:SetShown(not DB.collapsed and #TARGETS == 0)
-  local flyH = FlyBanner(n > 0 and -listH or (listTop - 36))
-  M:SetHeight(DB.collapsed and 108 or ((n > 0 and listH + 8 or -listTop + 40) + flyH))
+  empty:SetShown(not collapsed and #TARGETS == 0)
+  local flyH = FlyBanner(n > 0 and -bottom or (listTop - 40))
+  M:SetHeight(collapsed and HEAD_H or ((n > 0 and bottom or (-listTop + 40)) + flyH + DOCK_H))
   A:SetShown(DB.arrow and tgt ~= nil and M:IsShown())
 end
 
@@ -935,6 +1409,11 @@ local function UpdateArrow(now)
   if not A:IsShown() then return end
   local tgt = currentTarget()
   if not tgt then A:Hide(); return end
+  local typ = tgt.step and tgt.step.t or (tgt.turnin and "turnin" or "complete")
+  if typ ~= aTyp then
+    aTyp = typ
+    local at = SetIcon(aIcon, typ, NEON[1], NEON[2], NEON[3]); aIcon:SetSize(at and 20 or 14, at and 20 or 14)
+  end
   local east, north, viaLen
   SetBlizzPin(tgt)
   local aim = tgt
@@ -1196,11 +1675,7 @@ E:SetScript("OnUpdate", function(_, el)
   if not DB then return end
   local now = GetTime()
   acc = acc + el; accScan = accScan + el
-  if toastT > 0 then
-    toastT = toastT - el
-    T:SetAlpha(min(1, toastT * 1.5))
-    if toastT <= 0 then T:Hide() end
-  end
+  pcall(Animate, now, el)
   if acc >= 0.05 then acc = 0; pcall(UpdateArrow, now) end
   pcall(UpdateBeam, now, el)
   if UnitOnTaxi("player") then E.onTaxi = true end
@@ -1243,13 +1718,10 @@ local cxT = UI(CX, 11, true); cxT:SetPoint("TOP", cxD, "BOTTOM", 0, -2); cxT:Set
 
 -- Pinpoint (nah): ruhige Glas-Pille ueber dem Ziel mit Aufgabe + Pfeil nach unten
 local PP = CreateFrame("Frame", nil, UIParent); PP:SetSize(240, 44); PP:SetFrameStrata("LOW"); PP:Hide()
-local ppEdge = Round(PP, "BACKGROUND", 0, 14, { 1, 1, 1, 1 })
-ppEdge:SetGradient({ NEON[1], NEON[2], NEON[3], 0.7 }, { TEAL[1], TEAL[2], TEAL[3], 0.35 })
-local ppBody = CreateFrame("Frame", nil, PP); ppBody:SetPoint("TOPLEFT", 1, -1); ppBody:SetPoint("BOTTOMRIGHT", -1, 1)
-Round(ppBody, "BACKGROUND", 1, 13, { 1, 1, 1, 1 }):SetGradient({ 0.03, 0.065, 0.055, 0.95 }, { 0.045, 0.05, 0.07, 0.95 })
-local ppIcon = ppBody:CreateTexture(nil, "ARTWORK"); ppIcon:SetSize(22, 22); ppIcon:SetPoint("LEFT", 10, 0)
-local ppT = UI(ppBody, 13, true); ppT:SetPoint("TOPLEFT", 40, -8); ppT:SetPoint("RIGHT", -10, 0); ppT:SetJustifyH("LEFT"); ppT:SetWordWrap(false)
-local ppS = UI(ppBody, 11); ppS:SetPoint("BOTTOMLEFT", 40, 8); ppS:SetPoint("RIGHT", -10, 0); ppS:SetJustifyH("LEFT"); ppS:SetWordWrap(false); ppS:SetTextColor(0.66, 0.9, 0.76)
+Glass(PP, { glowA = 0.24, sheenH = 18, pad = 40 })
+local ppIcon = PP:CreateTexture(nil, "ARTWORK"); ppIcon:SetSize(22, 22); ppIcon:SetPoint("LEFT", 10, 0)
+local ppT = UI(PP, 13, true); ppT:SetPoint("TOPLEFT", 40, -8); ppT:SetWidth(190); ppT:SetJustifyH("LEFT"); ppT:SetWordWrap(false)
+local ppS = UI(PP, 11); ppS:SetPoint("BOTTOMLEFT", 40, 8); ppS:SetWidth(190); ppS:SetJustifyH("LEFT"); ppS:SetWordWrap(false); ppS:SetTextColor(0.66, 0.9, 0.76)
 local ppArrow = MT(PP, "OVERLAY", 0, "arrow"); ppArrow:SetSize(20, 20); ppArrow:SetRotation(math.pi)
 
 -- Navigator (Ziel ausserhalb des Bildes): kleines Symbol am Rand + Richtungspfeil
@@ -1457,9 +1929,9 @@ function LP_ShowText(text, title, onOk)
     sf:SetScript("OnMouseWheel", function(self, d) self:SetVerticalScroll(math.max(0, self:GetVerticalScroll() - d * 30)) end)
     local function NeonBtn(txt, w, primary)
       local b = CreateFrame("Button", nil, TW); b:SetSize(w, 26)
-      local bg = Round(b, "BACKGROUND", 0, 13, { 1, 1, 1, 0.08 })
-      if primary then bg:SetGradient({ NEON[1], NEON[2], NEON[3], 0.85 }, { TEAL[1], TEAL[2], TEAL[3], 0.75 }) else bg:SetGradient({ 1, 1, 1, 0.10 }, { 1, 1, 1, 0.04 }) end
-      Round(b, "HIGHLIGHT", 0, 13, { 1, 1, 1, 0.12 })
+      local bg = Capsule(b, "BACKGROUND", 0, 26, { 1, 1, 1, 0.08 })
+      if primary then bg:SetGradient({ NEON[1], NEON[2], NEON[3], 1 }, { TEAL[1], TEAL[2], TEAL[3], 1 }) else bg:SetGradient({ 1, 1, 1, 0.10 }, { 1, 1, 1, 0.04 }) end
+      Capsule(b, "HIGHLIGHT", 0, 26, { 1, 1, 1, 0.14 }, "ADD")
       b.t = UI(b, 12, true); b.t:SetPoint("CENTER"); b.t:SetText(txt)
       b.t:SetTextColor(primary and 0.03 or 0.85, primary and 0.08 or 0.9, primary and 0.05 or 0.9)
       return b
@@ -1583,6 +2055,7 @@ SlashCmdList.LEVELPILOT = function(msg)
     M:ClearAllPoints(); M:SetPoint(DB.point, UIParent, DB.point, DB.x, DB.y)
     A:ClearAllPoints(); A:SetPoint(DB.apoint, UIParent, DB.apoint, DB.ax, DB.ay)
     Refresh(true); P("zurückgesetzt.")
+  elseif c == "menu" or c == "menü" or c == "einstellungen" or c == "optionen" then OpenSettings(true)
   elseif c == "xp" then XPS.start, XPS.gained = GetTime(), 0; P("XP/h neu gestartet.")
   elseif c == "weiter" then
     if RT.key and RT.idx then SkipStep(RT.idx); P("Schritt übersprungen. Zurückholen: /lp zurueck") end; Refresh(true)
@@ -1596,6 +2069,6 @@ SlashCmdList.LEVELPILOT = function(msg)
     local R = LP_Route
     P("Route: " .. tostring(RT.key and LevelPilot_Routes[RT.key].name) .. " · Schritt " .. tostring(RT.idx) .. " · Questie-Daten: " .. ((R and R.HasQuestie()) and "|cff39ff6bja|r" or "|cffff5050nein|r"))
   else
-    P("/lp (an/aus) · /lp weiter · /lp zurueck · /lp neu · /lp route · /lp punkt (neu|weg) · /lp export · /lp import · /lp wege · /lp speed · /lp strahl · /lp ton · /lp kampf · /lp flug · /lp entsperren · /lp sound · /lp gruen · /way x y · /lp auto · /lp pfeil · /lp marker · /lp lock · /lp unlock · /lp toast · /lp xp · /lp reset")
+    P("/lp (an/aus) · /lp menu · /lp weiter · /lp zurueck · /lp neu · /lp route · /lp punkt (neu|weg) · /lp export · /lp import · /lp wege · /lp speed · /lp strahl · /lp ton · /lp kampf · /lp flug · /lp entsperren · /lp sound · /lp gruen · /way x y · /lp auto · /lp pfeil · /lp marker · /lp lock · /lp unlock · /lp toast · /lp xp · /lp reset")
   end
 end
