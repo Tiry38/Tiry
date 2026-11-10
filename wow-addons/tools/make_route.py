@@ -55,7 +55,8 @@ _ARA = [655,672,674,675,677,678,671,701,702,847,642,651,1164,676]
 _DES = [1362,1365,1368,1431,1432,1433,1436,1434,1435,1480,1481,5561,5501,5741,6027,6161,6142,6143,5386,5381,1366,1370,5763,5421]
 _DUS = [1268,1269,1251,1321,1201,1202,1177,1238,1218,1206,1239]
 _BAD = [710,711,1108,703,1419,1418,698,1424,1392,1389]
-SEG30 = [   # per Modell verglichen: kein Gebiet mit nur 1-3 Quests (2. Schlingendorntal und Ödland brachten ~0 Min bzw. Weg durch Allianz-Gebiet)
+SEG30 = [   # per Modell verglichen: kein Gebiet mit nur 1-3 Quests; Ödland (5 Quests, Weg durch Allianz-Gebiet) gestrichen,
+            # Schlingendorntal zum Schluss erst ab 39 (Stufe-41-Quests: 13 statt 3 Quests, -26 Min)
  dict(name="Tausend Nadeln", l=30, areas=[400], hub=npc("Nyse"), tnote="Freiwindposten – dann Schimmernde Ebene (Rennbahn)", q=_TN2),
  dict(name="Hügelland", l=32, minL=32, areas=[267, 36], hub=npc("Zarise"),
       tnote="Tarrens Mühle: Flug Orgrimmar → Zeppelin Tirisfal → Flug Tarrens Mühle. Ruhestein hier", q=_HIL),
@@ -67,6 +68,8 @@ SEG30 = [   # per Modell verglichen: kein Gebiet mit nur 1-3 Quests (2. Schlinge
  dict(name="Düstermarschen", l=36, minL=36, areas=[15], hub=npc("Shardi"),
       tnote="Brackenwall: Flug Camp Taurajo, östlich in die Düstermarschen – Flugpunkt holen, Ruhestein hier", q=_DUS),
  dict(name="Arathihochland", l=38, minL=38, areas=[45], hub=npc("Urda"), tnote="Hammerfall: Zeppelin Grom'gol → Tirisfal, Flug Hammerfall", q=_ARA),
+ dict(name="Schlingendorntal", l=39, minL=39, areas=[33], hub=npc("Thysta"),
+      tnote="Grom'gol: Flug Unterstadt, Zeppelin Tirisfal → Grom'gol (Nesingwary/Beutebucht Stufe-41-Quests)", q=_STV),
 ]
 
 ROUTES = {

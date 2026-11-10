@@ -242,6 +242,20 @@ def last_pos(steps):
 BAD = set()
 
 
+def pre_ok_L(q, done, route_set, L0):
+    """Vorquests erfuellt? Nicht in der Route = nur dann schon erledigt, wenn sie klar unter der Startstufe liegt
+    (sonst haette man sie vor Routenbeginn gar nicht machen koennen -> Quest waere im Spiel nicht annehmbar)."""
+    def ok(p):
+        if p in done: return True
+        if p in route_set: return False
+        v = Q.get(str(p))
+        return bool(v) and (v[4] or 0) < L0 - 1
+    v = Q[str(q)]
+    if any(not ok(p) for p in (v[11] or [])): return False
+    sg = v[12] or []
+    return not sg or any(ok(p) for p in sg)
+
+
 def generate(segments, L0, xp0, extra_done=(), goal=None):
     route_set = set()
     for seg in segments: route_set |= set(seg["q"])
@@ -265,7 +279,7 @@ def generate(segments, L0, xp0, extra_done=(), goal=None):
                 if q in accepted or q in done: continue
                 v = Q[str(q)]
                 if v[15] and any(e in accepted or e in done for e in v[15]): continue   # schliessen sich aus
-                if not pre_ok(q, done, route_set): continue
+                if not pre_ok_L(q, done, route_set, L0): continue
                 if (v[3] or 0) > S.L or (v[4] or 0) > S.L + PLAN_ABOVE: continue
                 if q in BAD or start_level(q) > S.L + PLAN_ABOVE: continue
                 g = c_giver(q)
