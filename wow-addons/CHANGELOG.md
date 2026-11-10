@@ -1,5 +1,44 @@
 # Changelog – Tiry's Zentrale
 
+## 6.0.0 (10.11.2026)
+**Neues Design „Neon-Glas“ – chicer als LevelPilot.**
+- **Dock-Navigation:** fünf runde Leuchtknöpfe oben (Start · Herstellen · Farmen · Handel · Mein Gold) mit Blizzard-Symbolen. Lernen (?) und Einstellungen (Zahnrad) sitzen als runde Knöpfe oben rechts neben Suche und „AH scannen“.
+- **Leichter zu verstehen:** „Markt“ und „Auktionen“ sind jetzt ein Punkt **„Handel“** (Meine Auktionen zuerst). „Craften“ heißt **„Herstellen“**. Reiter als Pillen, die aktive leuchtet im Verlauf.
+- **Glas überall:** Anthrazit-Glas, Neon-Grün/Türkis-Verläufe, weiche Glows, große Radien. Kennzahlen (Auktionen, Ergebnis, Taschen-Check, Farm-Session, Verkaufsbuch, Goldtagebuch) als **Glas-Pillen mit Leuchtpunkt**. Startseite mit Begrüßung, Gold und Berufs-Chips.
+- **Einstellungen in Gruppen:** Automatik · Hinweise & Radar · Gold-Rechnung · Ansicht. Einkaufsfenster und Händler-Panel im selben Look.
+- **Handel → Preise:** neue Spalte **„Pro Tag“** (gemessene Verkäufe) und Ansicht **„Schnäppchen“**.
+
+**Gold-Logik neu durchdacht (Forever-Stand 10.11.2026).**
+- **Einstellgebühr im Gewinn.** Forever verlangt je Angebot mindestens 1 Silber (Wowhead, 05.11.); sie kommt bei Verkauf zurück, verloren ist sie bei Ablauf oder Abbruch. Jeder Gewinn (Craft-Planer, Rezept-Tipps, Skill-Plan, Taschen-Check, Händler-Flips, Händler-Autopilot) zieht jetzt das **Risiko** ab: Gebühr je Stück × erwartete Fehlversuche (aus deiner Verkaufsquote bzw. dem gemessenen Absatz). Bei offenem AH nimmt das Addon Blizzards **exakten** Betrag und merkt ihn sich; vorher schätzt es (Minimum aus den Einstellungen, sonst Anteil am Händlerpreis).
+- **Neu: Absatz-Messung („Verkäufe pro Tag“).** Bei jedem Komplett-Scan liest Tiry's Zentrale die Angebotsliste mit und vergleicht sie mit dem letzten Scan: Was vor Ablauf verschwunden ist, wurde gekauft (Umstellen desselben Verkäufers zählt nicht). Daraus: **Schnelldreher / verkauft sich / Ladenhüter** und „~35/Tag verkauft · 240 im Angebot“ – auch im Item-Tooltip. Zwei Scans im Abstand von 15 Min. bis 12 Std. reichen für den Start.
+- **Kleinvieh macht auch Mist.** Craft-Empfehlungen sortieren nach **realistischem Gold pro Tag** (Gewinn × dein Anteil an den Tagesverkäufen): billige Massenware mit hohem Absatz steht vor teuren Ladenhütern; Ladenhüter fallen raus. Die empfohlene Herstell-Menge nutzt den gemessenen Markt, solange du selbst noch nichts verkauft hast.
+- **Goldwege aktualisiert:** neu „Kleinvieh – Schnelldreher“ und „Handwerker-Aufträge (Writs)“ (seit Hotfix 09.11. auch in Dungeons, +50 % EP). Kisten, Kürschnern (Leder roh und zügig verkaufen, Gerbgestell ab 125), Wetzsteine, bekannter Unterbieten-Fehler im AH.
+- **Schneller:** Das Verkaufsbuch wird pro Änderung einmal zusammengefasst – große Craft-Listen rechnen etwa 5× schneller.
+
+**Goldmacher-Werkzeuge (aus Goldmacher-Praxis, auf Forever angepasst).**
+- **Schnäppchen-Scan:** Jeder Komplett-Scan prüft JEDES Angebot. „Unter Händlerpreis“ = kaufen, beim Händler verkaufen, sicherer Gewinn (der Verkaufen-Knopf beim Händler nimmt sie danach mit). „Unter Marktwert“ = höchstens 65 % deines 14-Tage-Marktwerts, kein Ladenhüter, Gewinn nach AH-Gebühr und Einstellgebühr-Risiko. Liste per `/tz schnapp`, Suche mit einem Klick in Auctionator. Gekauft wird nie automatisch – das bleibt dein Klick.
+- **Preis-Trend:** Steigt oder fällt ein Item gegenüber seinem 14-Tage-Mittel? „Verkaufen statt horten“ bzw. „halten lohnt“ im Taschen-Check und im Item-Tooltip.
+- **Markt-Tiefe:** Für wie viele Tage reicht das aktuelle Angebot beim gemessenen Absatz? Über 2 Wochen = **„Markt voll“** – nicht nachlegen.
+- **Beste Verkaufszeit:** Wann im AH am meisten gekauft wird (gemessen) bzw. wann deine Sachen weggehen, plus stärkster Wochentag. Tipp: kurz davor einstellen.
+- **Rohstoff-Check:** Lohnt Verarbeiten (z. B. Leder zu Rüstungsset) mehr als roh verkaufen? Steht direkt am Item im Taschen-Check.
+- **„Kaufen bis“ in der Einkaufsliste:** höchster Stückpreis je Material, bei dem dein Craft noch den Mindestgewinn bringt – auch über selbst hergestellte Zwischenprodukte. Liegt der AH-Preis drüber, warnt die Liste: lieber warten.
+- **Neu einstellen mit Maß:** Empfohlene Menge = Verkäufe von ~3 Tagen (Markt nicht fluten, Preis halten). „Nicht unter“ rechnet jetzt auch das Einstellgebühr-Risiko mit ein – im Item-Tooltip, Craft-Planer und in Meine Auktionen derselbe Wert.
+
+**Ein AH-Scan für alle Reiter.**
+- Der Scan-Knopf startet bevorzugt den **Komplett-Scan** (alle 15 Min. erlaubt): Preise, Absatz, Markt-Tiefe, Schnäppchen und der Unterboten-Check deiner Stapelware kommen in **einem** Durchgang – kein Reiter muss einzeln neu gesucht werden. Ist der Komplett-Scan gesperrt, aktualisiert der Schnell-Scan trotzdem alle Preise. Abschaltbar: Einstellungen → „Komplett-Scan“.
+- Die Knöpfe in den einzelnen Reitern heißen jetzt „Angebote zeigen“ – sie sind nur zum Kaufen da, nicht zum Aktualisieren.
+- Schutz: Kommt ein Scan nur halb an (Blizzard drosselt), zählt Tiry's Zentrale das Fehlende **nicht** als verkauft.
+
+**Aus den Goldmacher-Foren (Stand 10.11.).**
+- **Ausrüstung ohne Kupfer:** Einzel-Items werden in ganzen Silbern vorgeschlagen (3g 45s 27c → 3g 45s). Blizzard bestätigt am 09.11.: „Kupfer weglassen hilft“ gegen den „Internen Auktionsfehler“.
+- **Nie unter Händlerpreis:** „Nicht unter“ berücksichtigt jetzt auch den Händlerpreis (nach Gebühr und Gebühr-Risiko) – auch bei gefundenen, nicht hergestellten Items.
+- **2× abgelaufen, nie verkauft:** Hinweis beim Neu-Einstellen „billiger oder zum Händler“ – jedes weitere Einstellen kostet Gebühr.
+- **Goldwege:** neu „Vor dem Raid-Start auf Vorrat legen (ab 09.12.)“; Waylaid-Kisten: leere Kiste vs. Paket, günstigste Gunst.
+
+**Texte auf Forever-Stand.**
+- **AH-Schule** neu: eigener „AH scannen“-Knopf statt Auctionator-Reiter, Anzahlung 1 Silber (zurück bei Verkauf, weg bei Ablauf/Abbruch), Ausrüstung in ganzen Silbern, Unterboten über „Meine Auktionen“, Menge nach Verkäufen pro Tag.
+- **Glossar:** Einstellgebühr und Scan aktualisiert. Befehle neu: `/tz handel`, `/tz schnapp`, `/tz buch`.
+
 ## 5.8.1 (08.11.2026)
 - **Selbst herstellen nur noch bei Zwischenprodukten mit Zusatz** (z. B. Balg + Salz → Geschmeidiger Balg). Reine Umwandlungen aus einem einzigen Material (Lederfetzen → Leichtes Leder, Leichtes → Mittleres Leder) werden nicht mehr vorgeschlagen – Leder wird gekauft.
 

@@ -1,4 +1,4 @@
-# Ingame-Test – Tiry's Zentrale 5.0.0
+# Ingame-Test – Tiry's Zentrale 6.0.0
 
 Zum Abhaken im Spiel. Vorher einmal eingeben:
 ```
@@ -18,20 +18,31 @@ Zeigt dein Client keine Fehlerfenster: Tiry's Zentrale schreibt eigene Fehler ro
 - [ ] Addon-Fach der Minikarte: Eintrag „Tiry's Zentrale“ vorhanden
 
 ## Menü und Seiten (jede einmal anklicken)
-- [ ] **Start:** Goldplan mit „Dein nächster Schritt“ (der Knopf tut etwas Sinnvolles), Goldwege
+- [ ] **Dock oben:** fünf runde Knöpfe Start · Herstellen · Farmen · Handel · Mein Gold, jeweils mit **Blizzard-Symbol** (keine leeren Kreise); der aktive leuchtet
+- [ ] **Start:** Goldplan mit Gold-Kreislauf (der orange Schritt-Knopf tut etwas Sinnvolles), Goldwege (19)
+- [ ] **Herstellen:** Craft-Planer, Was lernen? (Skill-Plan, wenn du einen Herstellungsberuf hast), Ergebnis
 - [ ] **Farmen:** Farm-Guide (Klick auf einen Spot setzt einen Wegpunkt mit Pfeil), Kürschner, Farm-Session
-- [ ] **Berufe:** Craft-Planer, Berufe-Berater (Skill-Plan erscheint, wenn du einen Herstellungsberuf hast)
-- [ ] **Markt:** Preise, Preisalarm, Taschen & Händler, Item-Suche
-- [ ] **Mein Gold:** Goldtagebuch, Verkaufsbuch
-- [ ] **Lernen:** AH-Schule, Glossar
-- [ ] **Einstellungen:** Schalter umlegen, Regler-× setzt zurück, „Alle Einstellungen auf Standard“ fragt erst nach
-- [ ] Unten in der Seitenleiste ist das **Horde-Wappen** dezent zu sehen. Fehlt es, ist das kein Fehler (der Atlas steht nur im Code der Charaktererstellung).
-- [ ] Schrift überall gut lesbar, nichts überlappt, nichts ragt aus Karten
+- [ ] **Handel:** Meine Auktionen, Preise (Spalte „Pro Tag“), Preisalarm, Taschen & Händler, Item-Suche
+- [ ] **Mein Gold:** Goldtagebuch, Verkaufsbuch (Kennzahlen als Glas-Pillen)
+- [ ] **? oben rechts:** AH-Schule, Glossar · **Zahnrad:** Einstellungen in Gruppen; Schalter umlegen, Regler-× setzt zurück, „Alle Einstellungen auf Standard“ fragt erst nach
+- [ ] Glas-Flächen, Neon-Verläufe und Leuchtpunkte sehen sauber aus (keine eckigen Kanten, keine Pixel-Treppen)
+- [ ] Horde-Motive dezent im Hintergrund. Fehlen sie, ist das kein Fehler (Atlas nur im Code der Charaktererstellung).
+- [ ] Schrift überall gut lesbar, nichts überlappt, nichts ragt aus Pillen oder Karten
+
+## Ein Scan für alle Reiter (neu in 6.0)
+- [ ] AH öffnen → „AH scannen“: Chat meldet **„Komplett-Scan läuft … für alle Reiter auf einmal“**. Fehlt der Komplett-Scan in deiner Auctionator-Version, kommt „Schnell-Scan läuft“ – bitte melden, welcher.
+- [ ] Nach dem Scan: „Scan fertig! Alle Reiter rechnen jetzt mit den neuen Preisen.“ – Preise, Craft-Planer, Meine Auktionen, Schnäppchen ändern sich **ohne** extra Suche
+- [ ] Sofort nochmal „AH scannen“: Meldung, dass der Komplett-Scan nur alle 15 Minuten geht (dann Schnell-Scan)
+- [ ] 15 Min. bis 12 Std. später erneut scannen → im Item-Tooltip steht „Absatz: … ~X/Tag verkauft · Y im Angebot“
+- [ ] `/tz schnapp` öffnet Handel → Preise → Schnäppchen; Klick sucht das Item in Auctionator, **kauft nichts**
+- [ ] Meine Auktionen → Neu einstellen: Menge „Nur N einstellen“, Ausrüstung in **ganzen Silbern**, nie unter „Nicht unter“
+- [ ] Item-Tooltip „Nicht unter“ = derselbe Wert wie im Craft-Planer (Schritt 4) und in Meine Auktionen
+- [ ] Einkaufsfenster: Tooltip eines Materials zeigt „Kaufen bis: …“
 
 ## Fenster
 - [ ] Unten rechts am Griff ziehen → Fenster wird größer oder kleiner
 - [ ] Fenster nah an einen Bildschirmrand ziehen → rastet dort ein
-- [ ] Suche in der Seitenleiste: „leder“ eintippen → Items, Rezepte, Begriffe. Enter öffnet den ersten Treffer.
+- [ ] Suche (Lupe oben rechts): „leder“ eintippen → Items, Rezepte, Begriffe. Enter öffnet den ersten Treffer.
 - [ ] Optionen > Tastaturbelegung: Abschnitt „Tiry's Zentrale“ mit 4 Einträgen. Einen belegen und testen.
 
 ## Händler
