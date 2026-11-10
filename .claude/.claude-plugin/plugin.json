@@ -1,0 +1,9 @@
+{
+  "name": "wow-werkstatt",
+  "displayName": "WoW-Add-on-Werkstatt",
+  "version": "1.0.0",
+  "description": "Tirys Werkzeuge für die WoW-Forever-Add-ons: alle Tests mit einem Befehl, Ausliefern (Version + ZIP), geprüftes Forever-Wissen und neues Add-on nach Standard.",
+  "author": { "name": "Tiry" },
+  "repository": "https://github.com/Tiry38/Tiry",
+  "keywords": ["wow", "addons", "forever", "lua"]
+}

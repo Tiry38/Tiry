@@ -13,3 +13,13 @@ Windows-Programm, das automatisch sinnvolle Handy-Apps im Premium-Design erschaf
 Eigene World-of-Warcraft-Add-ons (LevelPilot, ProcAlarm, EnhanceHUD u. a.) samt Routen-Werkzeugen und Tests.
 
 - Projektleitfaden für Claude: [`wow-addons/CLAUDE.md`](wow-addons/CLAUDE.md) · Stand: [`wow-addons/UEBERGABE.md`](wow-addons/UEBERGABE.md)
+
+### Claude-Werkzeuge für die Add-ons (Plugin „wow-werkstatt“)
+Skills in [`.claude/skills/`](.claude/skills/) – laden automatisch in jeder Claude-Code-Sitzung auf diesem Repo
+(auch in der Cloud): `/wow-tests`, `/wow-release <Add-on> <Version>`, `/wow-forever`, `/wow-neues-addon`.
+Dieselben Skills als Plugin für Claude Code (Desktop/Terminal), solange sie nur im Branch `claude/wow-addons` liegen:
+
+```
+/plugin marketplace add Tiry38/Tiry#claude/wow-addons
+/plugin install wow-werkstatt@tiry
+```

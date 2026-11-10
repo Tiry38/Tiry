@@ -1,0 +1,12 @@
+{
+  "name": "tiry",
+  "description": "Tirys private Claude-Code-Plugins",
+  "owner": { "name": "Tiry" },
+  "plugins": [
+    {
+      "name": "wow-werkstatt",
+      "source": "./.claude",
+      "description": "Tests, Ausliefern, Forever-Wissen und neue Add-ons für die WoW-Forever-Add-ons."
+    }
+  ]
+}
