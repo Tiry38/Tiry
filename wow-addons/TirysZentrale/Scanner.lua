@@ -102,6 +102,45 @@ local function lastBag()
   return NUM_TOTAL_EQUIPPED_BAG_SLOTS or NUM_BAG_SLOTS or 4
 end
 
+-- Rohstoff-Check: Wert je Stück eines Materials, wenn du es mit einem eigenen Rezept verarbeitest
+-- = (Erlös des Ergebnisses − Kosten der übrigen Materialien) / benötigte Menge.
+-- Nur Ergebnisse mit frischem AH-Preis (max. 3 Tage), handelbar und kein Ladenhüter.
+-- idx: { [Material-ID] = { Rezepte } } aus S.ReagentIndex() (einmal pro Durchlauf bauen)
+function S.ReagentIndex()
+  local idx, R = {}, ns.Recipes
+  if not (R and R.MyProfessions and R.List) then return idx end
+  for _, key in ipairs(R.MyProfessions()) do
+    for _, r in ipairs(R.List(key, "known")) do
+      for _, re in ipairs(r.reagents) do
+        idx[re.id] = idx[re.id] or {}
+        table.insert(idx[re.id], r)
+      end
+    end
+  end
+  return idx
+end
+
+function S.ProcessValue(id, idx)
+  idx = idx or S.ReagentIndex()
+  local best
+  for _, r in ipairs(idx[id] or {}) do
+    local n = 0
+    for _, re in ipairs(r.reagents) do if re.id == id then n = n + re.n end end
+    local e = ns.DB.Get(r.out)
+    local bound = e and (e.bind == 1 or e.bind == 4)
+    local age = M.Age(r.out)
+    if n > 0 and not bound and age and age <= 3 and not (ns.Demand and ns.Demand.Class(r.out) == "slow") then
+      local _, revenue, cost, unknown = S.RecipeProfit(r)
+      if revenue and unknown == 0 then
+        local own = S.MatCost(id) or 0
+        local value = math.floor((revenue - (cost - own * n)) / n)
+        if not best or value > best.value then best = { recipe = r, out = r.out, value = value } end
+      end
+    end
+  end
+  return best
+end
+
 function S.ScanBags()
   local b = S.bags
   wipe(b.items)
@@ -123,6 +162,9 @@ function S.ScanBags()
       end
     end
   end
+  local idx = S.ReagentIndex()
+  local needs = (ns.Shop and ns.Shop.Needs and ns.Safe(ns.Shop.Needs)) or {}
+  local PS = ns.PriceString
   for _, e in pairs(byID) do
     local vendorUnit = e.noValue and 0 or M.VendorSell(e.id)
     local ahUnit = (not e.bound) and M.Price(e.id) or nil
@@ -142,6 +184,25 @@ function S.ScanBags()
     else
       e.advice = "BEHALTEN"
       e.best = 0
+    end
+    -- Rohstoff-Check: behalten (Craft-Liste), verarbeiten, jetzt verkaufen oder halten?
+    if e.quality ~= 0 and not e.bound then
+      local rawUnit = math.max(ahNet or 0, vendorUnit)
+      if needs[e.id] then
+        e.tip = "Behalten: wird für deine Craft-Liste gebraucht"
+      else
+        local p = S.ProcessValue(e.id, idx)
+        if p and p.value > rawUnit * 1.1 and p.value - rawUnit >= 5 then
+          e.process = p
+          e.tip = string.format("Verarbeiten zu %s: +%s je Stück mehr als roh", ns.Item(p.out).name, ns.Money(p.value - rawUnit))
+        elseif e.advice == "AH" and PS and PS.TrendAdvice then
+          local tr, txt = PS.TrendAdvice(e.id)
+          if tr == "fällt" or tr == "steigt" then e.trend, e.tip = tr, txt end
+        end
+        if not e.tip and e.advice == "AH" and ns.Demand and ns.Demand.Full(e.id) then
+          e.tip = "Markt voll – nur kleine Mengen einstellen oder warten"
+        end
+      end
     end
     b.vendorTotal = b.vendorTotal + e.vendor
     b.ahTotal = b.ahTotal + (e.ah or 0)

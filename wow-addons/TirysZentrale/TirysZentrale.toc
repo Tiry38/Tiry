@@ -36,6 +36,8 @@ Extras.lua
 Shopping.lua
 Ledger.lua
 Demand.lua
+Snipe.lua
+Timing.lua
 Inventory.lua
 Deals.lua
 Session.lua

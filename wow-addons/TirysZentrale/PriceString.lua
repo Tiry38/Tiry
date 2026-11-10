@@ -58,6 +58,38 @@ function PS.Market(itemID)
   return math.floor((v[n / 2] + v[n / 2 + 1]) / 2 + 0.5)
 end
 
+-- Preis-Trend: Median der letzten 3 Scan-Tage gegen den Median der Tage davor (mind. 2 ältere Tage).
+-- Rückgabe: Veränderung als Anteil (z. B. -0.35 = 35 % gefallen) und Anzahl Tage – oder nil
+function PS.Trend(itemID)
+  local t = ns.db and ns.db.priceHistory and ns.db.priceHistory[itemID]
+  if not t then return nil end
+  local days = {}
+  for d in pairs(t) do days[#days + 1] = d end
+  if #days < 5 then return nil end
+  table.sort(days, function(a, b) return a > b end)
+  local function median(from, to)
+    local v = {}
+    for i = from, to do v[#v + 1] = t[days[i]] end
+    table.sort(v)
+    local n = #v
+    if n % 2 == 1 then return v[(n + 1) / 2] end
+    return (v[n / 2] + v[n / 2 + 1]) / 2
+  end
+  local recent, older = median(1, 3), median(4, #days)
+  if not older or older <= 0 then return nil end
+  return recent / older - 1, #days
+end
+
+-- Kurzer Rat aus dem Trend: "fällt" (verkaufen statt horten), "steigt" (halten lohnt), "stabil" – oder nil
+function PS.TrendAdvice(itemID)
+  local tr, n = PS.Trend(itemID)
+  if not tr then return nil end
+  local pct = math.floor(math.abs(tr) * 100 + 0.5)
+  if tr <= -0.1 then return "fällt", string.format("Preis fällt (-%d %% in %d Tagen) – verkaufen statt horten", pct, n), tr end
+  if tr >= 0.1 then return "steigt", string.format("Preis steigt (+%d %% in %d Tagen) – halten lohnt", pct, n), tr end
+  return "stabil", string.format("Preis stabil (%d Tage)", n), tr
+end
+
 -- Nach jedem Scan: Preise aller Materialien und Ergebnisse deiner Rezepte + Markt-Items merken
 function PS.RecordAll()
   if not (ns.Market.HasAuctionator() and ns.db) then return 0 end

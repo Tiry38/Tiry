@@ -57,8 +57,10 @@ function A.VendorCandidates()
         local vendor = M.VendorSell(info.itemID)
         local ah = M.Price(info.itemID)
         -- AH lohnt nur, wenn nach AH-Gebühr und Einstellgebühr-Risiko mehr übrig bleibt als beim Händler
-        if db and SAFE_CLASSES[db.class] and vendor > 0 and ah
-            and M.NetAfterDeposit(info.itemID, M.ListSize(info.itemID, info.stackCount), ah) <= vendor then
+        local ahNet = ah and M.NetAfterDeposit(info.itemID, M.ListSize(info.itemID, info.stackCount), ah)
+        -- gekaufte Händler-Schnäppchen (Schnäppchen-Scanner) gehen immer mit, solange das AH nicht mehr bringt
+        local snipe = ns.Snipe and ns.Snipe.IsVendorSnipe(info.itemID) and vendor > 0 and (not ahNet or ahNet <= vendor)
+        if snipe or (db and SAFE_CLASSES[db.class] and vendor > 0 and ah and ahNet <= vendor) then
           local value = vendor * (info.stackCount or 1)
           list[#list + 1] = { bag = bag, slot = slot, id = info.itemID, count = info.stackCount or 1, value = value }
           total = total + value

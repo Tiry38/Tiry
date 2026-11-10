@@ -90,15 +90,87 @@ function Shop.CraftOrder()
   return out
 end
 
+----------------------------------------------------------------------------
+-- "Kaufen bis": höchster Stückpreis für ein Material, bei dem JEDER geplante Craft, der es braucht,
+-- noch deinen Mindestgewinn bringt. Goldmacher-Regel: Material nie teurer kaufen, als der Craft hergibt –
+-- sonst arbeitest du für das AH. Zwischenprodukte (Leder -> Balg -> Rüstung) werden mitgerechnet.
+-- Rückgabe: Kupfer pro Stück (0 = Craft lohnt sich gar nicht) oder nil (kein Verkaufspreis bekannt)
+----------------------------------------------------------------------------
+local function minProfitFor(r, cost)
+  local _, minProfit = ns.Recipes.Filter()
+  if minProfit <= 0 then return 1 end
+  local PS = ns.PriceString
+  return math.max(PS and PS.Eval("minProfit", r.out, { crafting = cost }) or minProfit, 1)
+end
+
+-- übrige Materialkosten eines Rezepts ohne das Material id (nil, wenn eines davon keinen Preis hat)
+local function otherCost(r, id)
+  local c, n = 0, 0
+  for _, re in ipairs(r.reagents) do
+    if re.id == id then
+      n = n + re.n
+    else
+      local u = ns.Scanner.MatCost(re.id)
+      if not u then return nil, n end
+      c = c + u * re.n
+    end
+  end
+  return c, n
+end
+
+local function maxPrice(id, makes, depth, seen)
+  local best
+  local function take(v)
+    v = math.max(0, math.floor(v))
+    if not best or v < best then best = v end
+  end
+  -- direkt in der Craft-Liste
+  for _, e in ipairs(ns.char.queue or {}) do
+    local r = ns.Recipes.Get(e.recipe)
+    if r then
+      local other, n = otherCost(r, id)
+      if n > 0 and other then
+        local _, revenue, cost = ns.Scanner.RecipeProfit(r)
+        if revenue then take((revenue - other - minProfitFor(r, cost)) / n) end
+      end
+    end
+  end
+  -- über ein Zwischenprodukt, das du selbst herstellst (Gewinn steckt schon im Endprodukt)
+  if depth < 3 then
+    for _, m in ipairs(makes or {}) do
+      local r = m.recipe
+      if r and r.out ~= id and not seen[r.out] then
+        local other, n = otherCost(r, id)
+        if n > 0 and other then
+          seen[r.out] = true
+          local outMax = maxPrice(r.out, makes, depth + 1, seen)
+          seen[r.out] = nil
+          if outMax then take((outMax * (r.qty or 1) - other) / n) end
+        end
+      end
+    end
+  end
+  return best
+end
+
+function Shop.MaxPrice(id, makes)
+  if makes == nil then makes = select(2, Shop.Plan()) end
+  return maxPrice(id, makes, 0, {})
+end
+
 -- Liste für das Fenster: noch zu kaufen zuerst, Erledigtes unten
+-- maxUnit = "kaufen bis" (Kupfer/Stück), overMax = aktueller Preis liegt darüber -> lieber warten
 function Shop.List()
   local list, open, cost = {}, 0, 0
-  for id, need in pairs(Shop.Needs()) do
+  local needs, makes = Shop.Plan()
+  for id, need in pairs(needs) do
     local have = Shop.Have(id)
     local skipped = state().skip[id] and need > have or nil
     local missing = skipped and 0 or math.max(0, need - have)
     local unit, where = M.BuyCost(id)
-    list[#list + 1] = { id = id, need = need, have = math.min(have, need), missing = missing, unit = unit, where = where, skipped = skipped }
+    local maxUnit = Shop.MaxPrice(id, makes)
+    list[#list + 1] = { id = id, need = need, have = math.min(have, need), missing = missing, unit = unit, where = where,
+      skipped = skipped, maxUnit = maxUnit, overMax = (maxUnit and unit and unit > maxUnit) or nil }
     if missing > 0 then
       open = open + 1
       cost = cost + (unit or 0) * missing

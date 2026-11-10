@@ -95,14 +95,37 @@ ns.On("MAIL_SHOW", function() ns.Debounce("ledger", 1, L.ScanInbox) end)
 -- Auswertung
 ----------------------------------------------------------------------------
 -- Verkaufsquote eines Items (verkaufte Auktionen / (verkaufte + abgelaufene)) der letzten 30 Tage
+-- Zusammenfassung pro Item für einen Zeitraum: { sold = Auktionen, units = Stück, expired = abgelaufen }.
+-- Gemerkt, bis neue Einträge dazukommen oder eine Minute vergeht (Listen fragen hunderte Items ab).
+local idxCache = {}
+function L.Index(days)
+  days = days or 30
+  local b = book()
+  local now = time()
+  local stamp = #b.sales .. ":" .. #b.expired .. ":" .. math.floor(now / 60)
+  local c = idxCache[days]
+  if c and c.stamp == stamp and c.book == b then return c.items end
+  local limit, items = now - days * 86400, {}
+  local function get(id)
+    local e = items[id]
+    if not e then e = { sold = 0, units = 0, expired = 0 } items[id] = e end
+    return e
+  end
+  for _, s in ipairs(b.sales) do
+    if s.id and s.t >= limit then local e = get(s.id) e.sold, e.units = e.sold + 1, e.units + (s.n or 1) end
+  end
+  for _, x in ipairs(b.expired) do
+    if x.id and x.t >= limit then local e = get(x.id) e.expired = e.expired + 1 end
+  end
+  idxCache[days] = { stamp = stamp, book = b, items = items }
+  return items
+end
+
 function L.SaleRate(itemID, days)
   if not ns.db or not ns.db.ledger then return nil end
-  local b, limit = book(), time() - (days or 30) * 86400
-  local sold, expired = 0, 0
-  for _, s in ipairs(b.sales) do if s.id == itemID and s.t >= limit then sold = sold + 1 end end
-  for _, e in ipairs(b.expired) do if e.id == itemID and e.t >= limit then expired = expired + 1 end end
-  if sold + expired == 0 then return nil, 0 end
-  return sold / (sold + expired), sold + expired
+  local e = L.Index(days or 30)[itemID]
+  if not e or e.sold + e.expired == 0 then return nil, 0 end
+  return e.sold / (e.sold + e.expired), e.sold + e.expired
 end
 
 -- Summen eines Zeitraums
