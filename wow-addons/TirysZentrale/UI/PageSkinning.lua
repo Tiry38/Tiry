@@ -162,7 +162,7 @@ function page.refresh(self)
     if rank >= need then
       hero.next:SetText("Skill reicht für " .. nextTier.label .. " – dir fehlt nur noch Level " .. nextTier.from .. ".")
     else
-      hero.next:SetText(string.format("Noch |cffff9929%d Skillpunkte|r bis %s (Tiere ab Level %d, Skill %d).", need - rank, nextTier.label, nextTier.from, need))
+      hero.next:SetText(string.format("Noch |cff39ff6b%d Skillpunkte|r bis %s (Tiere ab Level %d, Skill %d).", need - rank, nextTier.label, nextTier.from, need))
     end
   else
     hero.bar.fill:SetWidth(width - 44)
@@ -212,7 +212,7 @@ function page.refresh(self)
   end
   for _, id in ipairs(tier.items) do add(id, tier.from .. "–" .. (tier.to - 1), "Deine Stufe jetzt") end
   if nextTier then for _, id in ipairs(nextTier.items) do add(id, nextTier.from .. "–" .. (nextTier.to - 1), "Nächste Stufe") end end
-  for _, id in ipairs(K.FOREVER) do add(id, "alle", "|cffff9929Neu in Forever|r · selten, von jedem häutbaren Tier") end
+  for _, id in ipairs(K.FOREVER) do add(id, "alle", "|cff39ff6bNeu in Forever|r · selten, von jedem häutbaren Tier") end
   local h = self.leatherList:SetEntries(entries)
   y = place(self, self.leatherList, y, h) + 20
 
@@ -258,7 +258,7 @@ function page.refresh(self)
   end
   y = y + 10
 
-  self.tips:SetText("|cffff9929Profi-Tipps|r\n"
+  self.tips:SetText("|cff39ff6bProfi-Tipps|r\n"
     .. "•  Häute auch Tiere, die andere Spieler erlegt haben – das kostet nichts und bringt Skill.\n"
     .. "•  Orange und gelbe Tiere (im Tooltip) bringen Skillpunkte, grüne seltener, graue nie.\n"
     .. "•  Makelloses Leder & Co. nie zum Händler – der Beute-Radar warnt dich.\n"

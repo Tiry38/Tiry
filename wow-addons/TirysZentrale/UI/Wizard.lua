@@ -21,7 +21,7 @@ local function steps()
   local next = ns.Guide.NextStep()
   return {
     { title = "Hallo " .. (p.name ~= "" and p.name or "Abenteurer") .. "! Das habe ich erkannt",
-      text = string.format("Fraktion: |cffff9929%s|r · Level |cffff9929%d|r · %s\nBerufe: %s\n\nAlles weitere passt Tiry's Zentrale automatisch an dich an – auch wenn du aufsteigst.",
+      text = string.format("Fraktion: |cff39ff6b%s|r · Level |cff39ff6b%d|r · %s\nBerufe: %s\n\nAlles weitere passt Tiry's Zentrale automatisch an dich an – auch wenn du aufsteigst.",
         FACTION[p.faction] or p.faction, p.level, CLASS[p.class] or p.class,
         #profs > 0 and table.concat(profs, ", ") or "noch keine – kein Problem, der Berufe-Berater hilft dir") },
     { title = "Preise: Auctionator",

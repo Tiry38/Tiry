@@ -56,7 +56,7 @@ function page.build(self, content, width)
   self.filter = "all"
   local st = UI.Stack(content)
 
-  st:Para("Tipp: Fahr mit der Maus über ein Item für Details. |cffff9929Shift-Klick|r legt den Link in den Chat. "
+  st:Para("Tipp: Fahr mit der Maus über ein Item für Details. |cff39ff6bShift-Klick|r legt den Link in den Chat. "
     .. "\"Stapel netto\" = Wert von einem vollen Stapel nach Abzug der AH-Gebühr.", 12, C.muted, 14)
 
   self.segments = UI.Segments(content, FILTERS, function(v)
@@ -75,7 +75,7 @@ function page.build(self, content, width)
     local name = "Zentrale: " .. (FILTER_NAMES[self.filter] or "Alle")
     local ok, n, missing = M.CreateShoppingList(name, ids)
     if ok then
-      ns.Print(string.format("Einkaufsliste |cffff9929%s|r mit %d Einträgen angelegt. Im AH: Reiter 'Auctionator' > 'Einkaufen'.", name, n))
+      ns.Print(string.format("Einkaufsliste |cff39ff6b%s|r mit %d Einträgen angelegt. Im AH: Reiter 'Auctionator' > 'Einkaufen'.", name, n))
       if missing and missing > 0 then ns.Print(missing .. " Item(s) lädt der Client noch – Klick später nochmal für die komplette Liste.") end
     else
       ns.Print("|cffff6b81" .. tostring(n) .. "|r")
@@ -109,9 +109,9 @@ end
 function page.refresh(self)
   local state, text = M.Status()
   if state == "ok" then
-    self.status:SetText("|cffff9929•|r " .. text .. "  ·  AH-Gebühr: " .. (ns.settings.ahCut or 5) .. " %")
+    self.status:SetText("|cff39ff6b•|r " .. text .. "  ·  AH-Gebühr: " .. (ns.settings.ahCut or 5) .. " %")
   elseif state == "empty" then
-    self.status:SetText("|cffff9929•|r " .. text)
+    self.status:SetText("|cff39ff6b•|r " .. text)
   else
     self.status:SetText("|cffff6b81•|r Auctionator nicht gefunden – es werden nur Händlerpreise gezeigt. Installiere Auctionator für WoW Forever.")
   end

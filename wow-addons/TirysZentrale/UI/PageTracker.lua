@@ -125,7 +125,7 @@ function page.refresh(self)
   end
   local A = ns.Auto
   local lph = A.LootPerHour()
-  local lines = { string.format("Beute-Wert: |cffff9929%s|r (%d Items)  ·  pro Stunde: |cffff9929%s|r",
+  local lines = { string.format("Beute-Wert: |cff39ff6b%s|r (%d Items)  ·  pro Stunde: |cff39ff6b%s|r",
     ns.Money(A.session.value), A.session.items, lph and ns.Money(math.floor(lph)) or "misst ...") }
   lines[#lines + 1] = "|cff93a39dWert = was du beim besten Verkaufsweg (AH nach Gebühr oder Händler) bekommst – auch für noch nicht verkaufte Beute.|r"
   for i = 1, math.min(#A.session.log, 6) do
@@ -136,7 +136,7 @@ function page.refresh(self)
 
   local best = T.BestDay()
   if best and best.net > 0 then
-    self.best:SetText("Dein bester Tag: |cffff9929" .. best.key .. "|r mit " .. ns.Money(best.net) .. " Plus.")
+    self.best:SetText("Dein bester Tag: |cff39ff6b" .. best.key .. "|r mit " .. ns.Money(best.net) .. " Plus.")
   else
     self.best:SetText("Noch kein Gewinntag gespeichert – leg los!")
   end

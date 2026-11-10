@@ -403,6 +403,91 @@ def icon_info():
     return p.image()
 
 
+def icon_help():
+    p = Pen()
+    p.arc(0.5, 0.36, 0.17, 190, 400)
+    p.line([(0.62, 0.47), (0.5, 0.56), (0.5, 0.64)])
+    p.circle(0.5, 0.8, 0.055, fill=True)
+    return p.image()
+
+
+def icon_dock():
+    """Kreis mit vier Punkten (Übersicht / Bereiche)."""
+    p = Pen()
+    for cx, cy in ((0.32, 0.32), (0.68, 0.32), (0.32, 0.68), (0.68, 0.68)):
+        p.circle(cx, cy, 0.11, fill=True)
+    return p.image()
+
+
+# ---------------------------------------------------------------- Neon-Glas (Design 6.0)
+def ring_thin(size=128, thickness=0.045):
+    return ring(size, thickness)
+
+
+def ring_grad(size=256, thickness=0.06):
+    """Farbiger Ring mit umlaufendem Verlauf Neon-Grün -> Türkis -> Aqua -> Neon-Grün (fertig eingefärbt)."""
+    big = size * SS
+    m = Image.new("L", (big, big), 0)
+    d = ImageDraw.Draw(m)
+    d.ellipse((0, 0, big - 1, big - 1), fill=255)
+    t = int(big * thickness)
+    d.ellipse((t, t, big - 1 - t, big - 1 - t), fill=0)
+    mask = down(m, (size, size))
+    y, x = np.mgrid[0:size, 0:size].astype(np.float32)
+    c = (size - 1) / 2.0
+    ang = (np.arctan2(y - c, x - c) + math.pi * 1.25) % (2 * math.pi) / (2 * math.pi)
+    stops = [(57, 255, 107), (38, 242, 217), (41, 179, 255), (120, 255, 200), (57, 255, 107)]
+    out = np.zeros((size, size, 3), np.float32)
+    n = len(stops) - 1
+    for i in range(n):
+        lo, hi = i / n, (i + 1) / n
+        sel = (ang >= lo) & (ang <= hi)
+        f = ((ang - lo) / (hi - lo))[sel][:, None]
+        out[sel] = np.array(stops[i], np.float32) * (1 - f) + np.array(stops[i + 1], np.float32) * f
+    img = Image.fromarray(np.uint8(out), "RGB").convert("RGBA")
+    img.putalpha(mask)
+    return img
+
+
+def gloss(size=128):
+    """Glanzlicht für runde Glas-Knöpfe: helle Kappe oben, weich nach unten auslaufend."""
+    big = size * SS
+    m = Image.new("L", (big, big), 0)
+    ImageDraw.Draw(m).ellipse((int(big * 0.14), int(big * 0.05), int(big * 0.86), int(big * 0.58)), fill=255)
+    m = m.filter(ImageFilter.GaussianBlur(big * 0.025))
+    y = np.mgrid[0:big, 0:big][0].astype(np.float32) / big
+    fade = np.clip(1.0 - (y - 0.05) / 0.5, 0, 1) ** 1.6
+    circle_m = Image.new("L", (big, big), 0)
+    ImageDraw.Draw(circle_m).ellipse((0, 0, big - 1, big - 1), fill=255)
+    a = np.array(m, np.float32) / 255.0 * fade * (np.array(circle_m, np.float32) / 255.0)
+    return white_from_mask(down(Image.fromarray(np.uint8(a * 255), "L"), (size, size)))
+
+
+def shade(size=128):
+    """Innenschatten für runde Symbole: Mitte klar, Rand dunkel (Tiefe wie Glas)."""
+    y, x = np.mgrid[0:size, 0:size].astype(np.float32)
+    c = (size - 1) / 2.0
+    r = np.sqrt((x - c) ** 2 + (y - c) ** 2) / c
+    a = np.clip((r - 0.55) / 0.45, 0, 1) ** 1.8
+    a = a * (r <= 1.0)
+    img = Image.new("RGBA", (size, size), (0, 0, 0, 0))
+    img.putalpha(Image.fromarray(np.uint8(a * 235), "L"))
+    big = Image.new("L", (size * SS, size * SS), 0)
+    ImageDraw.Draw(big).ellipse((0, 0, size * SS - 1, size * SS - 1), fill=255)
+    edge = np.array(down(big, (size, size)), np.float32) / 255.0
+    arr = np.array(img).astype(np.float32)
+    arr[..., 3] = arr[..., 3] * edge
+    return Image.fromarray(np.uint8(arr), "RGBA")
+
+
+def fade_line(w=256, h=8):
+    """Haarlinie, die zu beiden Enden weich ausläuft."""
+    x = np.linspace(0, 1, w, dtype=np.float32)
+    a = np.clip(np.sin(np.pi * x), 0, 1) ** 1.4
+    arr = np.tile(a[None, :], (h, 1))
+    return white_from_mask(Image.fromarray(np.uint8(arr * 255), "L"))
+
+
 def icon_bag():
     p = Pen()
     p.rrect(0.2, 0.36, 0.8, 0.84, 0.12)
@@ -608,12 +693,19 @@ def main():
     save(war_emblem(512), "emblem")
     save(tribal_tile(256), "tribal")
     save(spike_corner(128), "corner")
+    # Neon-Glas (Design 6.0)
+    save(ring_thin(128), "ringthin")
+    save(ring_grad(256), "ringgrad")
+    save(gloss(128), "gloss")
+    save(shade(128), "shade")
+    save(fade_line(256, 8), "fade")
     icons = {
         "home": icon_home, "compass": icon_compass, "coins": icon_coins, "scan": icon_scan,
         "flask": icon_flask, "chart": icon_chart, "book": icon_book, "gear": icon_gear,
         "close": icon_close, "chevron": icon_chevron, "check": icon_check, "star": icon_star,
         "cart": icon_cart, "refresh": icon_refresh, "info": icon_info, "bag": icon_bag,
         "pin": icon_pin, "bolt": icon_bolt, "warn": icon_warn, "minus": icon_minus, "plus": icon_plus, "db": icon_db, "paw": icon_paw, "receipt": icon_receipt,
+        "help": icon_help, "dock": icon_dock,
     }
     for name, fn in icons.items():
         save(fn(), "i_" + name)

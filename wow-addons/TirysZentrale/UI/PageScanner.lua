@@ -70,7 +70,7 @@ function page.build(self, content, width)
   head.desc = UI.Para(head, 12, C.muted, width)
   head.desc:SetPoint("TOPLEFT", head.title, "BOTTOMLEFT", 0, -8)
   head.desc:SetText("Zeigt, was deine Taschen wert sind und wo du jedes Item am besten verkaufst. "
-    .. "Grauer Schrott: beim Händler einfach auf den |cffff9929Müll-Knopf (\"Schrott verkaufen\")|r klicken.")
+    .. "Grauer Schrott: beim Händler einfach auf den |cff39ff6bMüll-Knopf (\"Schrott verkaufen\")|r klicken.")
   local cw = math.floor((width - 30) / 4)
   head.cards = {
     statCard(head, cw, "Händlerwert", C.hi),
@@ -100,7 +100,7 @@ function page.build(self, content, width)
     end
     local ok, n = M.CreateShoppingList("Zentrale: Meine Verkäufe", ids)
     if ok then
-      ns.Print("Liste |cffff9929Zentrale: Meine Verkäufe|r angelegt (" .. n .. " Items) – so prüfst du die aktuelle Konkurrenz vor dem Einstellen.")
+      ns.Print("Liste |cff39ff6bZentrale: Meine Verkäufe|r angelegt (" .. n .. " Items) – so prüfst du die aktuelle Konkurrenz vor dem Einstellen.")
     else
       ns.Print("|cffff6b81" .. tostring(n) .. "|r")
     end
@@ -141,7 +141,7 @@ function page.refresh(self)
       cells = {
         buy = ns.Money(f.unit),
         ah = ns.Money(f.net),
-        profit = "|cffff9929+|r" .. ns.Money(f.profit),
+        profit = "|cff39ff6b+|r" .. ns.Money(f.profit),
         stock = f.available > 0 and tostring(f.available) or "unbegr.",
       },
       tip = {
@@ -163,7 +163,7 @@ function page.refresh(self)
   for _, d in ipairs(ns.Deals.List()) do
     deals[#deals + 1] = {
       id = d.id, note = d.qty .. " Stück unter 65 % des Marktwerts",
-      cells = { price = ns.Money(d.price), ref = ns.Money(d.ref), save = "|cffff9929" .. ns.Money(d.save) .. "|r" },
+      cells = { price = ns.Money(d.price), ref = ns.Money(d.ref), save = "|cff39ff6b" .. ns.Money(d.save) .. "|r" },
       tip = { "Im AH kaufen, später zum Marktwert wieder einstellen.", "Shift-Klick: Link in den Chat" },
     }
   end

@@ -174,7 +174,7 @@ local function fillCard(card, m, expanded, width)
     end
     add("So geht's", 13, C.hi, "bold", 6)
     for i, step in ipairs(m.steps or {}) do
-      add("|cffff9929" .. i .. ".|r  " .. step, 12, C.text, "regular", 6)
+      add("|cff39ff6b" .. i .. ".|r  " .. step, 12, C.text, "regular", 6)
     end
     local where = m.where and m.where[ns.Faction()]
     if where then
@@ -225,7 +225,7 @@ local function fillCard(card, m, expanded, width)
           local meth = self.method
           local ok, count = M.CreateShoppingList("Zentrale: " .. meth.title, meth.items)
           if ok then
-            ns.Print("Liste |cffff9929Zentrale: " .. meth.title .. "|r angelegt (" .. count .. " Items). Im AH: Auctionator > Einkaufen.")
+            ns.Print("Liste |cff39ff6bZentrale: " .. meth.title .. "|r angelegt (" .. count .. " Items). Im AH: Auctionator > Einkaufen.")
           else
             ns.Print("|cffff6b81" .. tostring(count) .. "|r")
           end

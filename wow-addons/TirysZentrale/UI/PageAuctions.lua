@@ -72,7 +72,7 @@ function page.build(self, content, width)
     local ids, seen = {}, {}
     for _, a in ipairs(AW.RelistList()) do if not seen[a.id] then seen[a.id] = true ids[#ids + 1] = a.id end end
     local ok, n = M.CreateShoppingList("Zentrale: Neu einstellen", ids)
-    ns.Print(ok and ("Liste |cffff9929Zentrale: Neu einstellen|r angelegt (" .. n .. " Items) – zeigt dir die Konkurrenz. "
+    ns.Print(ok and ("Liste |cff39ff6bZentrale: Neu einstellen|r angelegt (" .. n .. " Items) – zeigt dir die Konkurrenz. "
       .. "Einstellen: Auctionator > Verkaufen > Item anklicken, Preis aus \"Vorschlag\" nehmen.") or ("|cffff6b81" .. tostring(n) .. "|r"))
   end)
   UI.SetTooltip(self.listBtn, "Neu einstellen", "Legt alle Items aus \"Neu einstellen\" als Auctionator-Suchliste an, damit du die aktuelle Konkurrenz siehst.")

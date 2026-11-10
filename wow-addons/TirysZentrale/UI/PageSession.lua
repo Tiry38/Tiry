@@ -122,7 +122,7 @@ function page.refresh(self)
   card.btn:Paint()
   page.refreshLive(self)
   local best = S.Best()
-  card.best:SetText(best and string.format("Deine beste Session: |cffff9929%s pro Stunde|r in %s (%s).", ns.Money(best.perHour), best.zone or "?", duration(best.elapsed))
+  card.best:SetText(best and string.format("Deine beste Session: |cff39ff6b%s pro Stunde|r in %s (%s).", ns.Money(best.perHour), best.zone or "?", duration(best.elapsed))
     or "Noch keine Bestmarke – nach deiner ersten Session (mind. 5 Minuten) siehst du hier deinen Rekord.")
 
   local width = UI.CONTENT_W

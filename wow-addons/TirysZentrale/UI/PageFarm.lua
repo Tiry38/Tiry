@@ -52,7 +52,7 @@ local function groupCard(parent, width)
   card.listBtn:SetPoint("BOTTOMRIGHT", -16, 14)
   card.listBtn:SetScript("OnClick", function(self)
     local ok, n = M.CreateShoppingList("Zentrale: Farm " .. self.label, self.ids)
-    ns.Print(ok and ("Liste |cffff9929Zentrale: Farm " .. self.label .. "|r angelegt (" .. n .. " Items).") or ("|cffff6b81" .. tostring(n) .. "|r"))
+    ns.Print(ok and ("Liste |cff39ff6bZentrale: Farm " .. self.label .. "|r angelegt (" .. n .. " Items).") or ("|cffff6b81" .. tostring(n) .. "|r"))
   end)
   return card
 end
@@ -150,7 +150,7 @@ function page.refresh(self)
   local r1 = ranked[1]
   self.best.label:SetText(mine and "DEIN BESTER FARM JETZT (LEVEL " .. ns.player.level .. ")" or ("LEVEL " .. band.key))
   if r1 and r1.value then
-    self.best.text:SetText(string.format("%s farmen – vor allem |cffff9929%s|r: %s pro Stapel im AH.%s",
+    self.best.text:SetText(string.format("%s farmen – vor allem |cff39ff6b%s|r: %s pro Stapel im AH.%s",
       r1.g.label, ns.Item(r1.bestID).name, ns.Money(r1.value),
       (not r1.can) and ("\n|cffff6b81Dafür brauchst du " .. ns.ProfName(r1.g.prof) .. ".|r") or ""))
   else
@@ -167,8 +167,8 @@ function page.refresh(self)
     end
   end
   for _, z in ipairs(band.both or {}) do if z:find("Zephras") then zones[#zones + 1] = z end end
-  self.zones:SetText("|cffff9929Gebiete (" .. (faction == "Horde" and "Horde" or "Allianz") .. "):|r " .. table.concat(zones, " · ")
-    .. "\n|cffff9929Tipp:|r " .. (band.tip or "") .. "\n|cff93a39dStellen = dichteste Fundorte aus der Forever-Datenbank von QuestieDB. Preise = live von deinem Server.|r")
+  self.zones:SetText("|cff39ff6bGebiete (" .. (faction == "Horde" and "Horde" or "Allianz") .. "):|r " .. table.concat(zones, " · ")
+    .. "\n|cff39ff6bTipp:|r " .. (band.tip or "") .. "\n|cff93a39dStellen = dichteste Fundorte aus der Forever-Datenbank von QuestieDB. Preise = live von deinem Server.|r")
   self.zones:ClearAllPoints()
   self.zones:SetPoint("TOPLEFT", self.frame.content, "TOPLEFT", 0, -self.top)
   local y = self.top + math.ceil(self.zones:GetStringHeight()) + 16

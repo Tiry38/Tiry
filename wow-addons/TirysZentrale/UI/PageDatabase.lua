@@ -107,7 +107,7 @@ function page.build(self, content, width)
     for i = 1, math.min(#(self.results or {}), 100) do ids[#ids + 1] = self.results[i].id end
     local ok, n = M.CreateShoppingList("Zentrale: Datenbank-Suche", ids)
     if ok then
-      ns.Print("Liste |cffff9929Zentrale: Datenbank-Suche|r angelegt (" .. n .. " Items, max. 100).")
+      ns.Print("Liste |cff39ff6bZentrale: Datenbank-Suche|r angelegt (" .. n .. " Items, max. 100).")
     else
       ns.Print("|cffff6b81" .. tostring(n) .. "|r")
     end

@@ -83,7 +83,7 @@ function page.build(self, content, width)
       if not ok then ns.Print("|cffff6b81" .. tostring(err) .. "|r") end
     else
       local ok, n = ns.Market.CreateShoppingList("Zentrale: Rezepte", ids)
-      ns.Print(ok and ("Liste |cffff9929Zentrale: Rezepte|r angelegt (" .. n .. "). Im AH: Auctionator > Einkaufen.") or ("|cffff6b81" .. tostring(n) .. "|r"))
+      ns.Print(ok and ("Liste |cff39ff6bZentrale: Rezepte|r angelegt (" .. n .. "). Im AH: Auctionator > Einkaufen.") or ("|cffff6b81" .. tostring(n) .. "|r"))
     end
   end)
 
@@ -137,12 +137,12 @@ function page.refresh(self)
   local a, b = ranked[1], ranked[2]
   local text
   if withPrice >= 2 then
-    text = string.format("Empfehlung: |cffff9929%s + %s|r – die beiden bringen dir auf Level %d gerade am meisten.", ns.ProfName(a.id), ns.ProfName(b.id), ns.player.level)
+    text = string.format("Empfehlung: |cff39ff6b%s + %s|r – die beiden bringen dir auf Level %d gerade am meisten.", ns.ProfName(a.id), ns.ProfName(b.id), ns.player.level)
   else
     text = "Empfehlung: zwei Sammelberufe (z. B. Kürschnerei + Kräuterkunde). Für eine genaue Rangliste einmal im AH scannen."
   end
   if craft then
-    text = text .. "\nSpäter passt zu deiner Klasse: |cffff9929" .. ns.ProfName(ns.PROF[craft[1]]) .. "|r – " .. craft[2] .. "."
+    text = text .. "\nSpäter passt zu deiner Klasse: |cff39ff6b" .. ns.ProfName(ns.PROF[craft[1]]) .. "|r – " .. craft[2] .. "."
   end
   self.advice:SetText(text)
 
@@ -164,16 +164,16 @@ function page.refresh(self)
       self.plan = plan
       for _, s in ipairs(plan.steps) do
         local back = s.net and (s.net <= 0 and ("|cff61eb8f+" .. ns.Money(-s.net) .. " Gewinn|r") or ("netto " .. ns.Money(s.net))) or ns.Money(s.cost)
-        lines[#lines + 1] = string.format("|cffff9929Skill %d bis %d:|r %d× %s  |cff93a39d(Material %s · %s)|r", s.from, s.to, s.crafts, s.recipe.name, ns.Money(s.cost), back)
+        lines[#lines + 1] = string.format("|cff39ff6bSkill %d bis %d:|r %d× %s  |cff93a39d(Material %s · %s)|r", s.from, s.to, s.crafts, s.recipe.name, ns.Money(s.cost), back)
       end
       local mats = {}
       for id, n in pairs(plan.mats) do mats[#mats + 1] = n .. "× " .. ns.Item(id).name end
       table.sort(mats)
       lines[#lines + 1] = ""
-      lines[#lines + 1] = "|cffff9929Material zusammen:|r " .. table.concat(mats, ", ")
+      lines[#lines + 1] = "|cff39ff6bMaterial zusammen:|r " .. table.concat(mats, ", ")
       local netText = plan.net <= 0 and ("|cff61eb8fdu verdienst dabei sogar " .. ns.Money(-plan.net) .. "|r")
         or ("nach dem Verkauf der Ergebnisse netto nur " .. ns.Money(plan.net))
-      lines[#lines + 1] = string.format("|cffff9929Material gesamt: %s|r · %s%s", ns.Money(plan.total), netText,
+      lines[#lines + 1] = string.format("|cff39ff6bMaterial gesamt: %s|r · %s%s", ns.Money(plan.total), netText,
         plan.reached < plan.target and string.format("  |cff93a39d(reicht bis Skill %d – danach neue Rezepte lernen)|r", plan.reached) or "")
     end
   end
@@ -208,7 +208,7 @@ function page.refresh(self)
       name = t.item and ns.Item(t.item).name or (r.name .. " (Lehrer)"),
       note = table.concat(notes, " · "),
       cells = {
-        profit = "|cffff9929+|r" .. ns.Money(t.profit),
+        profit = "|cff39ff6b+|r" .. ns.Money(t.profit),
         price = t.item and (t.price and ns.Money(t.price) or "|cff8a9a94kein Angebot|r") or "|cff8a9a94Lehrer|r",
         back = t.payback and (t.payback .. " Crafts") or "–",
       },
