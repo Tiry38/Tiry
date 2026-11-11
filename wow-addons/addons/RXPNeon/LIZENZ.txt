@@ -1,0 +1,18 @@
+RXPNeon – Neon-Glas-Optik und deutsche Schritt-Texte für RestedXP Guides (WoW Forever)
+
+Code (RXPNeon.lua, Deutsch.lua) und Grafiken (Media/):
+  GNU General Public License v3.0 (siehe LICENSE-GPL-3.0.md).
+  Grafiken erzeugt mit wow-addons/tools/rxn_media.py bzw. aus LevelPilot übernommen (eigene Werke).
+  Es sind keine Dateien, kein Code und keine Grafiken von RestedXP enthalten. RXPNeon ist ein Zusatz,
+  der nur die öffentliche Theme-Schnittstelle von RestedXP Guides nutzt und deren Texte zur Laufzeit übersetzt.
+
+Namen.lua (deutsche Namen von NPCs, Gegenständen, Objekten, Quests und Orten):
+  NPC-, Gegenstands-, Objekt- und Quest-Namen aus der QuestieDB (https://github.com/Questie/QuestieDB,
+  Forever-Daten und l10n deDE), GPL-3.0. Ortsnamen aus den Spieldaten des Forever-Clients
+  (AreaTable, TaxiNodes, über wago.tools). Erzeugt mit wow-addons/tools/rxn_names.py.
+
+Phrasen.lua (deutsche Fassungen von Satzbausteinen aus RestedXP-Guide-Texten):
+  Übersetzung von Textbausteinen der RestedXP Guides (© RestedXP), deren Guide-Texte unter
+  Creative Commons BY-NC-SA 4.0 stehen. Diese Übersetzung steht daher ebenfalls unter
+  CC BY-NC-SA 4.0 (https://creativecommons.org/licenses/by-nc-sa/4.0/): Namensnennung RestedXP,
+  nicht kommerziell, Weitergabe unter gleichen Bedingungen.

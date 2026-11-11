@@ -352,3 +352,32 @@ Aus 4.2 weiter offen: `C_Map.GetMapPosFromWorldPos`, Flugmeister-IDs, Hochplatea
 - /castsequence + Makro anlegen/ändern in Forever (Code folgt der Retail-API; WinduTotemMacro nutzt sie in Forever auch).
 - Totem-/Buff-Daten außerhalb des Kampfes lesbar (im Kampf sind sie gesperrt → Makro bleibt fest).
 - Reichweite gibt es nur für Buff-Totems; Verbrennung/Magma/Erdbindung usw. gelten als „steht“, solange sie laufen.
+
+
+# Ingame-Test – RXPNeon 1.0.0
+
+## Start
+- [ ] `RXPGuides` und `RXPNeon` liegen in `Interface\AddOns`, WoW **komplett neu gestartet**, beide in der Add-on-Liste an.
+- [ ] Zygor aus (sonst zwei Pfeile gleichzeitig).
+- [ ] Nach dem Einloggen: RXP-Fenster mit Neon-Kopfkapsel, dunkler Glas-Fläche, grün-türkisem Rand; Fußzeile „RXP … v4.11.x“ lesbar.
+- [ ] Kein Guide geladen bzw. falsche Stufe → unten im Fenster Knopf **GUIDE FÜR STUFE X LADEN** mit deutschem Guide-Namen. Klick lädt ihn (nicht im Kampf).
+- [ ] `/rxn` zeigt Version, Befehle und den empfohlenen Guide.
+
+## Texte
+- [ ] Schritte deutsch: „Sprich mit …“, „Annehmen: <deutscher Quest-Titel>“, „Abgeben: …“, „Töte … Plündere sie für …“, „Flieg nach …“.
+- [ ] NPC- und Gegenstandsnamen in Farbe sind die deutschen Namen aus dem Spiel (mit Questlog/Tooltip vergleichen).
+- [ ] Quests werden trotz deutscher Titel **abgehakt** (RXP prüft über die Quest-ID; Annehmen/Abgeben einmal testen).
+- [ ] Guide-Auswahlmenü: Guide-Namen deutsch („28-30 Tausend Nadeln“, „(Horde)“).
+- [ ] `/rxn englisch` → Originaltexte, `/rxn deutsch` → wieder deutsch.
+
+## Optik
+- [ ] Aktueller Schritt: Glas-Karte mit Neon-Balken links, Nummer als grün-türkise Pille; Liste darunter mit runden Zeilen, Maus-Über leuchtet.
+- [ ] Haken-Kreise grün/türkis, Pfeil mit grünem Glow, Text darunter lesbar.
+- [ ] `/rxn aus` → altes RXP-Theme zurück, Skin weg; `/rxn an` → Neon wieder da.
+- [ ] Fenster verschieben, Größe ändern, Guide wechseln, `/reload`: kein Lua-Fehler.
+
+## Nur im Spiel prüfbar (ehrlich)
+- Nur das klassische RXP-Fenster (v1) wird gestylt, nicht das Beta-Fenster (v2) aus den RXP-Einstellungen.
+- Freie Hinweissätze der Guides sind teils noch englisch (keine Vorlage für jeden Satz); Zaubernamen in [Klammern] bleiben englisch.
+- Quest-Titel, die in der Namenstabelle fehlen, holt RXPNeon live vom Spiel (`C_QuestLog.GetTitleForQuestID`) – klappt nur, wenn das Spiel die Quest kennt.
+- Klassen-Symbol im Kopf (rund) kommt aus Blizzards `UI-Classes-Circles` – in der Vorschau nicht darstellbar.

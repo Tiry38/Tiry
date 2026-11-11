@@ -176,8 +176,9 @@ function Obj.GetAlpha(o) return o.__alpha end
 function Obj.IsMouseOver(o) return o.__mouseOver == true end
 function Obj.EnableMouse() end
 function Obj.EnableMouseWheel() end
-function Obj.SetFrameStrata(o, s) assert(STRATA[s], "Ungültige Strata: " .. tostring(s)) end
-function Obj.SetFrameLevel(o, l) assert(type(l) == "number") o.__level = l end
+function Obj.SetFrameStrata(o, s) assert(STRATA[s], "Ungültige Strata: " .. tostring(s)) o.__strata = s end
+function Obj.GetFrameStrata(o) return o.__strata or (o.__parent and o.__parent.GetFrameStrata and o.__parent:GetFrameStrata()) or "MEDIUM" end
+function Obj.SetFrameLevel(o, l) assert(type(l) == "number") o.__level = l; o.__lvlSet = true end
 function Obj.GetFrameLevel(o) return o.__level end
 function Obj.RegisterEvent(o, e)
   if not EVENTS[e] then error("Ereignis existiert in Forever nicht: " .. tostring(e)) end

@@ -37,6 +37,14 @@ Aktueller Stand und offene Punkte: **[`UEBERGABE.md`](UEBERGABE.md)** – zuerst
   Wird nur für die Routen-Werkzeuge gebraucht. Beide GPL-3.0 → LevelPilot und Tiry's Zentrale tragen `LIZENZ.txt` +
   `LICENSE-GPL-3.0.md` (Repo ist öffentlich; neue Datenquellen dort eintragen).
 
+## RXPNeon (Zusatz für RestedXP Guides)
+`addons/RXPNeon/`: Theme „Tiry Neon“ über `RXP:RegisterTheme` + Skin per `hooksecurefunc` (RXPFrame:UpdateVisuals,
+RXP.SetStep/LoadGuide/SetupArrow) und Live-Übersetzung (Hook auf `RXP.ReplaceNpcIds` und `RXP.settings.ReplaceColors`,
+nur Schritte, nie Quest-Elemente). `Namen.lua` erzeugt `tools/rxn_names.py <RXPGuides-Pfad> [<CSV-Cache>]` (QuestieDB-l10n +
+AreaTable/TaxiNodes), Grafiken `tools/rxn_media.py`, Satzregeln von Hand in `Phrasen.lua` (CC BY-NC-SA, RXP-Texte).
+**Kein RXP- oder Zygor-Code/-Textur ins Repo.** Test: `cd addons/RXPNeon && lua5.1 ../../tests/rxn.lua [vorschau-ordner]`
+(„RXN TESTS OK“); Vorschau mit `L.dump(…, {levels = true})` = Zeichenreihenfolge nach Strata/Frame-Level wie im Spiel.
+
 ## Claude-Skills (Plugin „wow-werkstatt“)
 `.claude/skills/` im Repo-Hauptordner: **`wow-tests`** (alle Tests: `bash wow-addons/tools/test_all.sh [ziel]`),
 **`wow-release`** (Version + ZIP: `python3 -I wow-addons/tools/release.py <Add-on> <Version>`, nur auf Wunsch),

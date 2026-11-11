@@ -205,7 +205,9 @@ end
 
 -- Export zum Zeichnen: eine Zeile pro sichtbarem Element in Zeichenreihenfolge
 local LAYERS = { BACKGROUND = 1, BORDER = 2, ARTWORK = 3, OVERLAY = 4, HIGHLIGHT = 5 }
-function L.dump(root, path)
+-- opts.levels = true: Frames wie im Spiel nach Strata + Frame-Level zeichnen (sonst Baum-Reihenfolge)
+local STRATA_ORDER = { BACKGROUND = 1, LOW = 2, MEDIUM = 3, HIGH = 4, DIALOG = 5, FULLSCREEN = 6, FULLSCREEN_DIALOG = 7, TOOLTIP = 8 }
+function L.dump(root, path, opts)
   L.reset()
   local f = assert(io.open(path, "w"))
   -- Masken (z. B. runde Item-Symbole): Ziel-Textur -> Maskendatei, damit die Vorschau sie rund zeichnet
@@ -242,11 +244,33 @@ function L.dump(root, path)
         end
       end
     end
+    if opts and opts.levels then return end
     for _, c in ipairs(o.__children or {}) do
       if c.__kind ~= "Texture" and c.__kind ~= "FontString" and c.__kind ~= "MaskTexture" then emit(c) end
     end
   end
-  emit(root)
+  if opts and opts.levels then
+    -- Effektive Ebene: gesetzte Ebene, sonst Eltern + 1 (wie beim Erzeugen im Spiel); Strata erbt vom Eltern-Frame
+    local frames, n = {}, 0
+    local function collect(o, plevel, pstrata)
+      local lvl = o.__lvlSet and o.__level or (plevel + 1)
+      local st = o.__strata or pstrata
+      n = n + 1
+      frames[#frames + 1] = { o = o, lvl = lvl, st = STRATA_ORDER[st] or 3, i = n }
+      for _, c in ipairs(o.__children or {}) do
+        if c.__kind ~= "Texture" and c.__kind ~= "FontString" and c.__kind ~= "MaskTexture" then collect(c, lvl, st) end
+      end
+    end
+    collect(root, 0, root.__strata or "MEDIUM")
+    table.sort(frames, function(a, b)
+      if a.st ~= b.st then return a.st < b.st end
+      if a.lvl ~= b.lvl then return a.lvl < b.lvl end
+      return a.i < b.i
+    end)
+    for _, e in ipairs(frames) do emit(e.o) end
+  else
+    emit(root)
+  end
   f:close()
 end
 

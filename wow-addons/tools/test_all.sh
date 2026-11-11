@@ -83,6 +83,7 @@ if want blitzschild; then
   run "Blitzschild: bs2" "$A/Blitzschild" - lua5.1 "$T/bs2.lua"
 fi
 if want totemtakt; then run "TotemTakt (Makro-Simulation + Layout)" "$A/TotemTakt" "TOTEM TESTS OK" lua5.1 "$T/totem.lua"; fi
+if want rxn; then run "RXPNeon (Skin + Deutsch + Tipp + Layout)" "$A/RXPNeon" "RXN TESTS OK" lua5.1 "$T/rxn.lua"; fi
 if want chathoch; then run "ChatHoch" "$A/ChatHoch" - lua5.1 "$T/ch.lua"; fi
 if want minipost; then run "MiniPost" "$A/MiniPost" - lua5.1 "$T/mp.lua"; fi
 if want enhancehud; then

@@ -1,0 +1,12 @@
+## Interface: 16001
+## Title: |cff39ff6bRXP|r|cff2de2e6Neon|r
+## Notes: Neon-Glas-Optik und deutsche Schritt-Texte fuer RestedXP Guides (/rxn).
+## Author: Tiry
+## Version: 1.0.0
+## Dependencies: RXPGuides
+## SavedVariables: RXPNeonDB
+
+Namen.lua
+Phrasen.lua
+Deutsch.lua
+RXPNeon.lua
