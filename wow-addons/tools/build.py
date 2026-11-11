@@ -98,6 +98,7 @@ def check_steps(R):
 
 def lua_step(s):
     f = [f't = "{s["t"]}"', f'l = {s["l"]}', f'z = {lstr(s["z"])}']
+    if s.get("seg") is not None: f.append(f'seg = {int(s["seg"]) + 1}')
     if s["t"] == "grind":
         f.append(f'to = {s["to"]}')
         if s.get("gnpc"): f.append(f'npc = {s["gnpc"]}')
@@ -125,16 +126,53 @@ def lua_step(s):
     return '  { ' + ', '.join(f) + ' },'
 
 
+def hub_name(s):
+    """Ort eines Reise-Schritts: 'Splitterholzposten – Ruhestein hier setzen' -> 'Splitterholzposten'."""
+    t = s.get("note") if s["t"] != "train" else None
+    t = t or s.get("to") or ""
+    for sep in (" – ", ": ", " - "):
+        t = t.split(sep)[0]
+    return t.strip()
+
+
+def segments(out):
+    """Abschnitte der Route (Gebietsblöcke des Planers): Gebiet, Ort (erster Reise-Schritt), Stufen."""
+    segs = {}
+    for s in out:
+        k = s.get("seg")
+        if k is None: continue
+        g = segs.setdefault(k, {"z": s["z"], "hub": "", "l0": s["l"], "l1": s["l"], "n": 0})
+        g["l1"] = max(g["l1"], s["l"]); g["n"] += 1
+        if not g["hub"] and s["t"] in ("fly", "go", "hearth") and not s.get("q"):
+            g["hub"] = hub_name(s)
+    return [segs[k] for k in sorted(segs)]
+
+
+def model_xpm(D):
+    """Modell-Tempo der Route (XP pro Minute, ohne ausgeruhte XP) – Maßstab für 'lohnt der Umweg?'."""
+    try:
+        import xpmodel
+        _, _, (_, _, tot_t, tot_x) = xpmodel.evaluate(D["steps"], D.get("L0", 22), verbose=False)
+        return int(round(tot_x / tot_t)) if tot_t > 0 else None
+    except Exception as e:  # Modell fehlt (z. B. ohne QuestieDB) -> Add-on misst selbst
+        print("   (kein Modell-Tempo:", e, ")")
+        return None
+
+
 def build(path):
     D = json.load(open(path))
     out, problems, hints = check_steps(D["steps"])
     print("%s: %d Schritte, %d Probleme, %d Hinweise" % (D["key"], len(out), len(problems), len(hints)))
     for p in problems: print("  ", p)
     for h in hints: print("   Hinweis:", h)
+    segs = segments(out)
+    xpm = model_xpm(D)
     L = ['-- AUTOMATISCH ERZEUGT (LevelPilot Routen-Werkzeug: make_route.py + build.py) · geprüft gegen Questies Forever-Datenbank',
          'LevelPilot_Routes = LevelPilot_Routes or {}',
-         'LevelPilot_Routes[%s] = { name = %s, faction = "Horde", min = %d, max = %d, steps = {'
-         % (lstr(D["key"]), lstr(D["name"]), D["min"], D["max"])]
+         'LevelPilot_Routes[%s] = { name = %s, faction = "Horde", min = %d, max = %d,%s'
+         % (lstr(D["key"]), lstr(D["name"]), D["min"], D["max"], (" xpm = %d," % xpm) if xpm else ""),
+         '  segs = {' + ', '.join('{ z = %s, hub = %s, l0 = %d, l1 = %d }' % (lstr(g["z"]), lstr(g["hub"] or g["z"]), g["l0"], g["l1"]) for g in segs) + ' },',
+         '  steps = {']
     L += [lua_step(s) for s in out]
     L.append('} }')
     open(D["file"], "w", encoding="utf-8").write("\n".join(L) + "\n")

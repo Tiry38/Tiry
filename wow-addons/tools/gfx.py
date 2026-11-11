@@ -1,5 +1,6 @@
-import numpy as np, math
+import numpy as np, math, sys
 import os as _os
+ONLY=set(sys.argv[1:])   # z. B. "python3 -I tools/gfx.py i_trash" -> nur diese Symbole neu zeichnen
 BASE=_os.path.abspath(_os.path.join(_os.path.dirname(_os.path.abspath(__file__)),".."))+"/"  # = wow-addons/
 from PIL import Image, ImageDraw, ImageFilter
 OUT=BASE+"addons/LevelPilot/Media/"
@@ -73,10 +74,28 @@ def ic_loop(d,S,_):
     s=S
     d.arc([10*s,10*s,54*s,54*s],start=200,end=520,fill=W,width=6*s)
     d.polygon([(10*s,14*s),(26*s,14*s),(14*s,28*s)],fill=W)
-ICONS={"i_accept":(ic_scroll,"plus"),"i_turnin":(ic_scroll,"check"),"i_complete":(ic_swords,None),"i_fly":(ic_wing,None),
+def ic_trash(d,S,_):
+    s=S
+    d.rounded_rectangle([10*s,12*s,54*s,18*s],radius=3*s,fill=W)
+    d.rounded_rectangle([25*s,6*s,39*s,13*s],radius=3*s,outline=W,width=3*s)
+    d.polygon([(14*s,22*s),(50*s,22*s),(46*s,58*s),(18*s,58*s)],fill=W)
+    for x in (25,32,39): d.rounded_rectangle([(x-1.5)*s,28*s,(x+1.5)*s,52*s],radius=1.5*s,fill=(0,0,0,0))
+def ic_flag(d,S,_):
+    s=S
+    d.rounded_rectangle([12*s,6*s,17*s,60*s],radius=2*s,fill=W)
+    d.polygon([(17*s,9*s),(36*s,6*s),(54*s,12*s),(46*s,22*s),(54*s,32*s),(36*s,28*s),(17*s,33*s)],fill=W)
+def ic_log(d,S,_):
+    s=S
+    d.rounded_rectangle([10*s,6*s,54*s,58*s],radius=7*s,outline=W,width=4*s)
+    for y in (20,32,44):
+        d.ellipse([17*s,(y-3)*s,23*s,(y+3)*s],fill=W); d.rounded_rectangle([28*s,(y-2)*s,47*s,(y+2)*s],radius=2*s,fill=W)
+ICONS={"i_trash":(ic_trash,None),"i_flag":(ic_flag,None),"i_log":(ic_log,None),"i_accept":(ic_scroll,"plus"),"i_turnin":(ic_scroll,"check"),"i_complete":(ic_swords,None),"i_fly":(ic_wing,None),
  "i_hearth":(ic_house,None),"i_go":(ic_pin,None),"i_train":(ic_book,None),"i_grind":(ic_sword,None),"i_note":(ic_info,None),
  "i_xph":(ic_bolt,None),"i_need":(ic_target,None),"i_time":(ic_hourglass,None),"i_route":(ic_map,None),"i_arrow":(ic_nav,None),"i_auto":(ic_loop,None)}
-for n,(f,a) in ICONS.items(): save(ss(64,lambda d,S,b,f=f,a=a: f(d,S,a)),n)
+for n,(f,a) in ICONS.items():
+    if ONLY and n not in ONLY: continue
+    save(ss(64,lambda d,S,b,f=f,a=a: f(d,S,a)),n)
+if ONLY: raise SystemExit(0)
 
 # ---------------- Flaechen ----------------
 def grad_img(w,h,c1,c2,diag=True,alpha=1.0):

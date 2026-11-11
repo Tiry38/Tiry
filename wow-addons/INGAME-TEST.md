@@ -116,33 +116,43 @@ Alles oben ist im Forever-Nachbau getestet, aber nicht im echten Client. Besonde
 
 ---
 
-# Ingame-Test – LevelPilot 4.2.0
-Einbau: alten Ordner `LevelPilot` löschen, ZIP entpacken, **WoW komplett neu starten** (neue Dateien `Walk.lua`,
-`Travel.lua`). Zum Vergleich hilft ein Screenshot der Weltkarte mit Pfeil und LevelPilot-Fenster.
+# Ingame-Test – LevelPilot 5.0.0
+Einbau: alten Ordner `LevelPilot` löschen, ZIP entpacken, **WoW komplett neu starten** (neue Grafiken
+`i_trash`, `i_flag`, `i_log`). Für Rückmeldungen hilft ein Screenshot vom Fenster **und** vom Questlog-Check.
 
-## Start
-- [ ] Einloggen ohne Lua-Fehler, Chat meldet „v4.2.0 bereit“
-- [ ] Erstes Öffnen der Liste: höchstens ein kurzer Ruckler (Wegenetz wird einmal je Kontinent ausgepackt)
-- [ ] Danach beim Laufen kein Ruckeln durch LevelPilot (Gegenprobe: `/lp` ausblenden)
+## Start und Einstieg
+- [ ] Einloggen ohne Lua-Fehler, Chat meldet „v5.0.0 bereit“
+- [ ] Nach wenigen Sekunden (Questlog + Questie geladen): Meldung **„EINSTIEG“** oben und im Chat
+  „Plan: Einstieg bei Schritt N von M (Gebiet · Hub) – erkannt an …“
+- [ ] Der Einstieg passt zu deinem Stand (Gebiet, in dem du gerade Quests hast) – **Schrittnummer notieren**
+- [ ] Falsch? `/lp schritt <Nr>` setzt ihn von Hand, `/lp einstieg` sucht neu (bitte melden, was falsch war)
 
-## Der Fall Zoram'gar (dein Screenshot)
-- [ ] Mit Steinkrallen-Zielen am Flugmeister **Zoram'gar-Außenposten**: Flug-Kapsel rät **„Flug nach Sonnenfels“**
-  (Tooltip: Laufweg, Zwischenlandung(en), „Nach der Landung noch … zu Fuß“)
-- [ ] Gleiche Stelle mit Geisterwolf: Rat kommt trotzdem (spart laut Modell ~1,5 Min)
-- [ ] Ohne Flug: Pfeil zeigt nach **Osten zum Talondeep-Pfad**, nicht quer über die Berge; Zusatz „über Talondeep-Pfad“
-- [ ] Zoram'gar-Quests im Log, die im Eschental erledigt werden: Die Liste nimmt sie zuerst, statt dich 7 km wegzuschicken
+## Fester Plan (das Herzstück von 5.0)
+- [ ] Das Ziel springt **nicht** mehr hin und her, nur weil eine andere Quest näher ist – die Reihenfolge bleibt
+- [ ] Erledigst du etwas früher nebenbei, rückt der Plan von selbst weiter (nie zurück)
+- [ ] Liste zeigt den Ablauf in Plan-Reihenfolge: Annehmen → Erledigen → Abgeben – auch für Quests, die du gleich erst annimmst
+- [ ] Held-Karte: „ANNEHMEN · SCHRITT 74“ o. ä.; bei nicht fertiger Abgabe „ERST ERLEDIGEN, DANN ABGEBEN“ mit Weg zum Questziel
+- [ ] **Plan-Band** unter den Kennzahlen: „3/7 Gebiet · Hub“, „SCHRITT n/m“, Leiste je Abschnitt, Leuchtpunkt am aktuellen Platz;
+  Tooltip zeigt Abschnitt, nächstes Gebiet, übersprungene Schritte; Klick sucht den Einstieg neu
+- [ ] **Stufen-Pille**: IM PLAN / VORAUS +x / HINTER PLAN −x; Klick = Plan-Stand im Chat (`/lp plan`)
+- [ ] **Sprung**: Bist du nachweislich weiter (Plan-Quests woanders angenommen, Plan-Ziel > ~900 m weg), meldet
+  LevelPilot nach ~3 s „PLAN SPRINGT MIT“ + Chatzeile mit der Zahl übersprungener Schritte
+- [ ] `/lp zurueck` macht den letzten Sprung (oder das letzte Überspringen) rückgängig; danach 30 Min. kein neuer Sprung
+- [ ] Im Flug kein Sprung
+- [ ] Auto-Annehmen nur für Quests, die im Plan bald dran sind (Rest: Chat-Hinweis „gerade nicht in deinem Plan“)
 
-## Pfeil und Liste allgemein
-- [ ] Pfeil-Text „Weg“ statt „direkt/Luftlinie“, wenn der Weg um Hindernisse führt; Entfernung = Laufweg
-- [ ] Pfeil führt in Etappen (Wegpunkt springt weiter), steht am Ende auf dem Ziel
-- [ ] Entfernungen in der Liste wirken realistisch (Berge/Schluchten länger als Luftlinie)
-- [ ] Sonnenfels → Gipfel: Weg über den Mirkfallonsee
-- [ ] Freiwindposten/Großer Aufzug: Pfeil führt zum Aufzug (Zusatz „über Aufzug“ bzw. „über Großer Aufzug“ / „über Aufzug Freiwindposten“)
+## Questlog-Check
+- [ ] Log-Pille rechts: „LOG x/25 · N LÖSCHEN“ (bzw. ABGEBEN / PRÜFEN / WIRD VOLL) – Klick oder `/lp log` öffnet das Panel
+- [ ] **Rot = löschen** mit Grund (grau – bringt kaum noch XP / nicht im Plan / übersprungener Teil des Plans / fertig, aber Abgabe zu weit); Klassenquests bleiben immer
+- [ ] **Gelb = prüfen** (z. B. Dungeon-/Gruppenquest, nicht im Plan) – Löschen-Knopf gedämpft
+- [ ] **LÖSCHEN** öffnet Blizzards Abbrechen-Dialog – gelöscht wird erst mit deinem Klick auf „Annehmen“
+- [ ] **Grün = abgeben**: fertige Quests mit Abgabe in der Nähe, wenn sich der Umweg lohnt
+- [ ] **Blau = behalten** mit „Schritt N“, fertige Quests mit „fertig“
+- [ ] Warnung „Log wird voll“, bevor der Plan mehr Plätze braucht, als frei sind
 
-## Flug-Rat
-- [ ] Rat nur mit Flugpunkten, die du kennst (einmal mit Flugmeister gesprochen)
-- [ ] Nahe Ziele (< 400 Yards): kein Flug-Rat
-- [ ] Nach einem Flug: gemessene Flugzeit fließt ein (zweiter Rat für dieselbe Strecke rechnet mit echter Zeit)
+## Aus 4.2 weiter gültig
+- [ ] Pfeil und Entfernungen über echten Laufweg („über Talondeep-Pfad“, Aufzüge), Flug-Rat nur mit bekannten Flugpunkten
+- [ ] Erstes Öffnen: höchstens ein kurzer Ruckler (Wegenetz), danach kein Ruckeln durch LevelPilot
 
 ## Speicher
 ```
@@ -151,7 +161,9 @@ Einbau: alten Ordner `LevelPilot` löschen, ZIP entpacken, **WoW komplett neu st
 - [ ] nach 10 Minuten Questen: ______ KB (erwartet: grob 6–12 MB, nicht 30+ MB)
 
 ## Was nur im Spiel geprüft werden kann (ehrlich)
-Alles oben ist im Lua-Nachbau mit echten Forever-Kartengrenzen getestet (`tests/travel.lua`), aber nicht im Client.
-Unsicher: `C_Map.GetMapPosFromWorldPos` im Forever-Client, ob die Flugmeister-IDs der Flugkarte zu den Daten passen,
-Anbindung auf Hochplateaus (Donnerfels), `GetUnitSpeed` in Geisterwolf, echte Ruckler-Dauer.
-
+Plan, Einstieg, Sprung und Questlog-Check sind im Lua-Nachbau getestet (`tests/plan.lua`, 54 Prüfungen), das Fenster im
+strengen Forever-Nachbau gezeichnet (`tests/lp_layout.lua` → `previews/LevelPilot_5.0_*.png`) – aber nicht im Client.
+Unsicher: Einstieg mit **echten** Questie-Daten (Nachbau mit nachgestellten Questgebern), wie sich die Sprung-Schwellen
+(900/450 m, 3 s) anfühlen, ob Forever `QuestMapQuestOptions_AbandonQuest`, `C_QuestLog.GetMaxNumQuestsCanAccept` und
+`C_QuestLog.GetQuestTagInfo` (Dungeon/Gruppe) liefert (Rückfälle sind eingebaut), Schriftbreiten im echten Client.
+Aus 4.2 weiter offen: `C_Map.GetMapPosFromWorldPos`, Flugmeister-IDs, Hochplateaus (Donnerfels), `GetUnitSpeed` im Geisterwolf.

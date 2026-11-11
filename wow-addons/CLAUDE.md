@@ -18,7 +18,10 @@ Aktueller Stand und offene Punkte: **[`UEBERGABE.md`](UEBERGABE.md)** – zuerst
 - `tools/` – Python-Werkzeuge (Routen, Grafiken, Sounds). Immer mit `python3 -I` starten.
 - `tests/` – Lua-5.1-Simulationen der WoW-API (`lua5.1`). Aufruf aus dem Add-on-Ordner, z. B.
   `cd addons/LevelPilot && lua5.1 ../../tests/v4.lua` (muss „ALLE TESTS OK“ melden), außerdem `lp.lua`, `lp2.lua`,
-  `nav.lua`, `fly.lua`, `route.lua`, `travel.lua` (Wegenetz, Flug-Rat, Rechenzeit; meldet „TRAVEL TESTS OK“) (Exit-Code 0 = ok). ProcAlarm/Schlaghagel: `cd addons && lua5.1 ../tests/proc.lua` bzw. `PROC_CLASS=SHAMAN|WARLOCK lua5.1 ../tests/hagel.lua`.
+  `nav.lua`, `fly.lua`, `route.lua`, `travel.lua` (Wegenetz, Flug-Rat, Rechenzeit; meldet „TRAVEL TESTS OK“),
+  `plan.lua` (fester Plan, Einstieg, Sprung, Questlog-Check; „PLAN TESTS OK“) (Exit-Code 0 = ok).
+  Fenster-Vorschau LevelPilot: `lua5.1 tests/lp_layout.lua <ordner>` (aus `wow-addons/`, strenger Forever-Nachbau,
+  meldet „LP LAYOUT OK“) → `python3 -I tools/render_pages.py <ordner>` → PNGs ansehen. Nach UI-Änderungen Pflicht. ProcAlarm/Schlaghagel: `cd addons && lua5.1 ../tests/proc.lua` bzw. `PROC_CLASS=SHAMAN|WARLOCK lua5.1 ../tests/hagel.lua`.
   Spell-Daten der Live-Version: github.com/simulationcraft/simc-forever (`SpellDataDump/allspells.txt`). Vor jeder Auslieferung alle laufen lassen + `luac5.1 -p` auf alle .lua.
 - `weakauras/` – WeakAura-Importtexte und Generatoren.
 - `previews/` – Vorschaubilder und Sound-Vorhördateien.
@@ -72,4 +75,7 @@ Dateien/Sounds reicht `/reload` nicht). Version in allen 4 TOCs und in `VERSION`
 Quellen der Gebietsreihenfolge: Konsens freier Speedrun-Routen (Joana, Warcraft Tavern, Guidelime, WoW-Pro, Bustea),
 danach per Modell verglichen; Gebiete mit nur 1–3 Quests werden gestrichen.
 Die Reihenfolge **innerhalb** der Gebiete und die Wege berechnet der Planer – nicht von Speedrunnern übernommen;
-Tiry gegenüber genau so benennen. Live entscheidet `Route.lua`/`Fly.lua` per Laufweg (Walk.lua) und Flugnetz.
+Tiry gegenüber genau so benennen. Live gilt seit 5.0 ein **fester Plan** (`Route.lua`, `R.Plan`): gespeicherter Zeiger
+je Route (`DB.plan`), nur vorwärts; Einstieg (`R.Entry`) aus angenommenen Quests am Ort, Sprung nur mit Beweis (umkehrbar
+`/lp zurueck`), Questlog-Check `R.LogAdvice`. Keine Umsortierung nach Entfernung – Tiry will eine nachvollziehbare
+Reihenfolge. Laufweg (Walk.lua) und Flugnetz (`Fly.lua`) liefern Entfernungen, Pfeil und Flug-Rat.

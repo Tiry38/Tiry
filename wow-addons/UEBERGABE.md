@@ -8,13 +8,48 @@ in Sitzungen auf **Tiry38/Tiry** weiter. Alle Dateien liegen in diesem Ordner, P
 | Add-on | Version | Zweck | Stand |
 |---|---|---|---|
 | **Tiry's Zentrale** | 6.1.0 | Gold- und Berufe-Addon (`TirysZentrale/`, Doku `ZENTRALE.md`): Neon-Glas-Design mit Dock, **ein AH-Scan für alle Reiter**, Verkäufe pro Tag, Gold pro Tag, Schnäppchen, Markt-Tiefe, Kaufen bis, Neu einstellen mit Menge, Anzahlung im Gewinn, **Tooltip als Preis-Liste (6.1)** | ausgeliefert, **Spieltest offen** (Checkliste `INGAME-TEST.md`) |
-| **LevelPilot** | 4.2.0 | Levelrouten Horde **22–30 und 30–40**, **echte Laufwege (Navmesh) statt Luftlinie** für Zielwahl, Pfeil, Entfernungen und Flug-Rat, Flugnetz mit Umsteigen, Pfeil, Lichtstrahl, Auto-Quests, XP-Cockpit | ausgeliefert, **Spieltest offen** (Checkliste `INGAME-TEST.md`, Teil LevelPilot) |
+| **LevelPilot** | 5.0.0 | Levelrouten Horde **22–30 und 30–40** als **fester Plan** (Einstieg erkennt deinen Stand, Sprung nur mit Beweis, `/lp zurueck`), **Questlog-Check** mit Löschen-Knopf, Plan-Band + Status-Pillen, echte Laufwege, Flug-Rat, Pfeil, Lichtstrahl, Auto-Quests, XP-Cockpit | ausgeliefert, **Spieltest offen** (Checkliste `INGAME-TEST.md`, Teil LevelPilot) |
 | **ProcAlarm** | 2.1.0 | **für Tirys Kollegen (Hexer)**: Schattentrance (17941) über Blizzard-Aura-Slot, auch im Kampf; violetter Glow + Blinken, ohne Ton, ohne grünen Ring | ausgeliefert, **Kampftest offen** |
 | **Schlaghagel** | 1.0.0 | **Tirys Verstärker**: Schlaghagel-Buff (16257) über Blizzard-Aura-Slot, auch im Kampf; Ladungen groß, Restzeit, türkiser Glow + Blinken wie ProcAlarm, ohne Ton; `/hagel` | ausgeliefert, **Kampftest offen** |
 | **EnhanceHUD** | 1.2.0 | Verstärker-Schamanen-HUD (Frost/Feuer-Design) | ausgeliefert |
 | **Blitzschild** | 1.2.0 | Blitzschlagschild Ladungen/Zeit | im Kampf nicht möglich (secret values) → Cooldown-Manager „Verfolgte Leisten“ + WA nur außerhalb des Kampfes |
 | **MiniPost** | – | Post-Symbol unter der Uhr, andere Minimap-Knöpfe unsichtbar | ausgeliefert, Test offen |
 | **ChatHoch** | 1.4.0 | Chat höher, Reiter bündig (ClampRectInsets von ChatFrame1) | ausgeliefert; Tiry hatte noch 1.3.0 geladen |
+
+## LevelPilot 5.0 – fester Plan, Einstieg, Questlog-Check (11.11.)
+Tirys Kritik an 4.2: „fehlt noch immer die Logik“, „rafft nicht, wie der aktuelle Stand von einem selber ist und was
+man dann am besten macht“, Wunsch: **Empfehlung, welche Quests aus dem Log raus sollen**, „ein **fester Plan**, in den
+man da einspringt, wo er vorher gesehen hat“, „komplett überarbeiten“ + etwas mehr Style. Ursachen und Lösungen:
+
+| Ursache (geprüft) | Lösung |
+|---|---|
+| 4.x wählte das Ziel **jede Sekunde neu** (nächster offener Schritt + nahe Extras mit Aufschlag) → Ziel sprang, Reihenfolge nicht nachvollziehbar | **Plan-Engine 5** (`Route.lua`): gespeicherter **Zeiger** je Route (`DB.plan`), läuft nur **vorwärts** über Erledigtes; keine Umsortierung nach Entfernung. Offenes hinter dem Zeiger = „verpasst“ |
+| Kein Begriff vom eigenen Stand: wer mitten im Gebiet einloggt, bekam den Anfang der Route oder springende Ziele | **Einstieg** (`R.Entry`): 1. angenommene Plan-Quests, deren Geber bei dir steht (≤ 600 yd) 2. Abgaben bei dir (frühester Abschnitt) 3. frisch angenommen/abgegeben (2 h) 4. angenommene Quests im Log 5. Abgaben im Log 6. Stufe. Wartet, bis Questlog + Questie bereit sind (max. 20 s). Meldung „EINSTIEG“ + Chat mit Grund |
+| Wer vom Plan abweicht, wurde zurückgeschickt | **Sprung** nur mit Beweis: Plan-Ziel > 900 yd weg **und** ein späterer Plan-Schritt (Quest angenommen bzw. frisch abgegeben) ≤ 450 yd bei dir, 3 s lang, nicht im Flug. Umkehrbar mit `/lp zurueck` (danach 30 Min. Sperre) |
+| Questlog voll mit Altlasten, nichts sagte, was raus kann | **Questlog-Check** (`R.LogAdvice` + Panel): löschen / abgeben / prüfen / behalten mit Grund, Umweg-Rechnung gegen dein XP-Tempo, Platzbedarf der nächsten 80 Schritte („Log wird voll“), **LÖSCHEN** öffnet Blizzards Abbrechen-Dialog (`QuestMapQuestOptions_AbandonQuest`, Rückfall `SetAbandonQuest` + Popup) |
+| Auto-Annehmen nahm alles, was irgendwo in der Route stand | nur Quests im Fenster **Zeiger … +60 Schritte** (`R.Wants`) |
+
+**Einstiegs-Fehlgriff im Nachbau gefunden und behoben:** Eine in Sonnenfels angenommene Quest, die der Plan erst
+100 Schritte später in Camp Taurajo abgibt, zog den Einstieg dorthin (Schritt 106 statt 74). Abgaben zählen jetzt nur
+im selben Abschnitt mit; Testfall in `tests/plan.lua`.
+**Fraktion:** `UnitFactionGroup` lieferte den **übersetzten** Namen statt „Horde“/„Alliance“ – auf deutschem Client
+zufällig gleich, jetzt sauber das englische Kürzel.
+
+**Oberfläche 5.0:** Plan-Band unter den Kennzahlen (Abschnitt x/y, Gebiet · Hub, Schritt n/m, Kapsel je Abschnitt
+mit Verlauf, pulsierender Leuchtpunkt; Klick = neuer Einstieg), zwei Glas-Pillen (Stufe gegen Plan, Log x/25 mit
+Handlungsbedarf), Held-Karte „ANNEHMEN · SCHRITT 74“, Liste in Plan-Reihenfolge inkl. **geplanter** Folge-Schritte
+(Erledigen/Abgeben von Quests, die gleich erst angenommen werden), Questlog-Panel (rote Verlaufs-Knöpfe, Füllstand,
+Legende). Neue Befehle: `/lp einstieg`, `/lp schritt <Nr>`, `/lp zurueck`, `/lp log`, `/lp plan`.
+Routendateien tragen jetzt Abschnitte (`segs`, `seg` je Schritt) und ein Modell-Tempo (`xpm`) – `tools/build.py`.
+
+**Fenster-Vorschau ohne Spiel (neu):** `lua5.1 tests/lp_layout.lua <ordner>` lädt LevelPilot im strengen
+Forever-Nachbau (`tests/wow_mock.lua`, nur Widget-Methoden aus Blizzards Forever-API), Szenario Stufe 24 in Sonnenfels
+mit Altlasten im Log, prüft Überlappungen/abgeschnittene Texte und exportiert Zeichendaten; `python3 -I
+tools/render_pages.py <ordner>` zeichnet sie (Arial-Narrow-Maße, 9-Slice, Kreis-Maske, Drehung jetzt nachgebildet).
+Bilder: `previews/LevelPilot_5.0_*.png`. Läuft in `tools/test_all.sh` mit.
+
+**Nur im Spiel prüfbar:** Einstieg mit echten Questie-Daten, Sprung-Schwellen im Spielgefühl, Abbrechen-Dialog und
+`GetMaxNumQuestsCanAccept`/`GetQuestTagInfo` in Forever (Rückfälle eingebaut), Schriftbreiten im Client.
 
 ## LevelPilot 4.2 – echte Laufwege statt Luftlinie (11.11.)
 Tirys Kritik an 4.1 (Screenshot Zoram'gar-Flugpunkt): Quests am Flugpunkt angenommen, der Pfeil schickt ihn „den
@@ -118,7 +153,7 @@ Amboss-/Schloss-Sound (max. 1–2 s)“.
 - ProcAlarm 2.1: ob Forever Blinken/Restzeit am Aura-Slot annimmt (`/proc diag` → „Teile“).
 
 ## Nächste Schritte
-1. Tirys Spieltest-Rückmeldung zu LevelPilot 4.2 abwarten (Zoram'gar → Steinkrallen: Flug-Rat, Pfeil über Talondeep) und gezielt nachbessern.
+1. Tirys Spieltest-Rückmeldung zu LevelPilot 5.0 abwarten (Einstieg-Schrittnummer, Sprung, Questlog-Check) und gezielt nachbessern.
 2. **Routen 40–50, 50–60** mit derselben Kette (`make_route.py` neuen Schlüssel in `ROUTES` + Abschnitte).
 3. Sobald Questie die neuen Forever-Quests führt (IDs 9xxxx): Pool neu rechnen – könnte den Grind-Anteil deutlich senken.
 4. ProcAlarm nach `/proc diag`-Screenshot anpassen; ChatHoch 1.4.0 / MiniPost-Rückmeldung.

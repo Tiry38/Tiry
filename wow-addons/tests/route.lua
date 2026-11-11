@@ -1,6 +1,6 @@
 -- LevelPilot: Routen-Auswahl, Vorausregel (nicht zurueckschicken, aber neues Gebiet nie ueberspringen), Routendateien
 -- Aufruf: cd addons/LevelPilot && lua5.1 ../../tests/route.lua   (Exit 0 = ok)
-local Tm=1000 function GetTime() return Tm end
+local Tm=1000 function GetTime() return Tm end function time() return 1700000000 end
 local Obj={} Obj.__index=function(t,k) if type(k)=="string" and k:sub(1,2)=="__" then return nil end return function() end end
 function CreateFrame() return setmetatable({},Obj) end
 UIParent=CreateFrame() SlashCmdList={} function wipe(t) for k in pairs(t) do t[k]=nil end return t end
@@ -42,30 +42,36 @@ for key,r in pairs(LevelPilot_Routes) do
   check(key..": Planstufen im Bereich", maxl<=r.max)
 end
 
-print("== C: Vorausregel")
+print("== C: Einstieg nach Stufe (ohne Quests im Log)")
 local route={steps={
-  {t="accept",q=1,l=22,z="A",ql=25},     -- ql 25 ist bei Stufe 29 noch nicht grau
-  {t="turnin",q=1,l=22,z="A",ql=25},
-  {t="accept",q=2,l=27,z="B",ql=27},
-  {t="turnin",q=2,l=27,z="B",ql=27},
-  {t="accept",q=3,l=28,z="B",ql=28},
+  {t="accept",q=1,l=22,z="A",ql=25,seg=1},     -- ql 25 ist bei Stufe 29 noch nicht grau
+  {t="turnin",q=1,l=22,z="A",ql=25,seg=1},
+  {t="accept",q=2,l=27,z="B",ql=27,seg=2},
+  {t="turnin",q=2,l=27,z="B",ql=27,seg=2},
+  {t="accept",q=3,l=28,z="B",ql=28,seg=2},
 }}
-LOG={} DONE={[2]=true}
-local i1=R.Current(route,29,nil,5)
-check("Stufe 29, Route schon in Gebiet B: alter Schritt (Stufe 22) nicht mehr Ziel", i1==5)
-local i2=R.Current(route,23,nil,5)
-check("Stufe 23: alter Schritt bleibt Ziel", i2==1)
-DONE={}
-check("Stufe 29, Route noch nicht weiter: alter Schritt bleibt Ziel", R.Current(route,29,nil,5)==1)
-DONE={}
-local route2={steps={{t="accept",q=10,l=34,z="S",ql=34},{t="accept",q=11,l=35,z="D",ql=35}}}
-local i3=R.Current(route2,37,nil,5)
-check("Stufe 37 ueber Plan, Gebiet noch nicht besucht: wird NICHT uebersprungen", i3==1)
+LOG={} DONE={}
+local i1=R.Plan(route,29,nil,{},5)
+check("Stufe 29 neu: Einstieg dort, wo der Plan mit Stufe 28+ rechnet", i1==5)
+local i2=R.Plan(route,23,nil,{},5)
+check("Stufe 23 neu: Einstieg am Anfang", i2==1)
+local P={k="accept:1",i=1}
+check("gespeicherter Zeiger gilt, auch wenn du drueber bist (fester Plan)", R.Plan(route,29,nil,P,5)==1)
+local route2={steps={{t="accept",q=10,l=34,z="S",ql=34,seg=1},{t="accept",q=11,l=35,z="D",ql=35,seg=2}}}
+local i3=R.Plan(route2,37,nil,{},5)
+check("Stufe 37, alles ueber Plan: Gebiet wird NICHT uebersprungen", i3==1)
 
 print("== D: 30-40 frisch bei Stufe 30")
 DONE={} LOG={}
-local i4=R.Current(LevelPilot_Routes.horde_30_40,30,nil,5)
+local i4=R.Plan(LevelPilot_Routes.horde_30_40,30,nil,{},5)
 check("erster Schritt = Reise nach Freiwindposten", i4==1 and LevelPilot_Routes.horde_30_40.steps[1].t=="fly")
+print("== E: Abschnitte + Modell-Tempo in den Routendateien")
+for key,r in pairs(LevelPilot_Routes) do
+  local ok = type(r.segs)=="table" and #r.segs>=3 and type(r.xpm)=="number" and r.xpm>100
+  local maxSeg = 0
+  for _,s in ipairs(r.steps) do if type(s.seg)~="number" or not r.segs[s.seg] then ok=false end if s.seg and s.seg>maxSeg then maxSeg=s.seg end end
+  check(key..": "..#r.segs.." Abschnitte, Tempo "..tostring(r.xpm).." XP/min, jeder Schritt hat seinen Abschnitt", ok and maxSeg==#r.segs)
+end
 
 print(fails==0 and "ROUTE TESTS OK" or ("FEHLER: "..fails))
 if fails>0 then os.exit(1) end

@@ -16,8 +16,14 @@ SCALE = 1.5
 _tex, _font = {}, {}
 
 
+NARROW = "/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf"  # Arial-maßgleich; x 0,82 = Arial Narrow (WoW ARIALN.TTF)
+SQUEEZE = {"narrow": 0.82}
+
+
 def font(weight, size):
     key = (weight, size)
+    if key not in _font and weight == "narrow":
+        _font[key] = ImageFont.truetype(NARROW, max(6, int(round(size * SCALE))))
     if key not in _font:
         _font[key] = ImageFont.truetype(os.path.join(ADDON, "Media", "Fonts", FONTS.get(weight, FONTS["regular"])), max(6, int(round(size * SCALE))))
     return _font[key]
@@ -43,9 +49,11 @@ def texture(name):
     if name in _tex:
         return _tex[name]
     img = None
-    if "TirysZentrale\\Media\\" in name:
-        fn = name.split("Media\\")[-1] + ".tga"
-        p = os.path.join(ADDON, "Media", fn)
+    if "TirysZentrale\\Media\\" in name or "LevelPilot\\Media\\" in name:
+        fn = name.split("Media\\")[-1]
+        fn = fn if fn.lower().endswith((".tga", ".blp")) else fn + ".tga"
+        base = ADDON if "TirysZentrale" in name else os.path.join(HERE, "..", "addons", "LevelPilot")
+        p = os.path.join(base, "Media", fn.replace("\\", os.sep))
         if os.path.exists(p):
             img = Image.open(p).convert("RGBA")
     elif name.lower().startswith("interface\\icons\\"):
@@ -57,10 +65,41 @@ def texture(name):
                 break
         if img is None:
             img = placeholder()
+    elif name.lower() == "interface\\characterframe\\tempportraitalphamask":
+        img = circle()
     elif name.replace(".", "").isdigit():
         img = placeholder()
     _tex[name] = img
     return img
+
+
+def circle(size=256):
+    """Blizzards runde Alpha-Maske (TempPortraitAlphaMask): weißer Kreis, weiche Kante."""
+    big = Image.new("L", (size * 4, size * 4), 0)
+    ImageDraw.Draw(big).ellipse((0, 0, size * 4 - 1, size * 4 - 1), fill=255)
+    a = big.resize((size, size), Image.LANCZOS)
+    img = Image.new("RGBA", (size, size), (255, 255, 255, 0))
+    img.putalpha(a)
+    return img
+
+
+def nine_slice(src, w, h, m):
+    """9-Slice wie SetTextureSliceMargins (Modus 0 = Mitte/Kanten gestreckt); Ränder in Texturpixeln -> UI-Pixel x SCALE."""
+    sw, sh = src.size
+    l, t, r, b = [int(v) for v in m]
+    L, T, R, B = [max(1, int(round(v * SCALE))) for v in (l, t, r, b)]
+    if L + R > w:
+        L = R = max(1, w // 2)
+    if T + B > h:
+        T = B = max(1, h // 2)
+    out = Image.new("RGBA", (w, h))
+    xs = [(0, l, 0, L), (l, sw - r, L, w - R), (sw - r, sw, w - R, w)]
+    ys = [(0, t, 0, T), (t, sh - b, T, h - B), (sh - b, sh, h - B, h)]
+    for sx0, sx1, dx0, dx1 in xs:
+        for sy0, sy1, dy0, dy1 in ys:
+            if dx1 > dx0 and dy1 > dy0 and sx1 > sx0 and sy1 > sy0:
+                out.paste(src.crop((sx0, sy0, sx1, sy1)).resize((dx1 - dx0, dy1 - dy0), Image.LANCZOS), (dx0, dy0))
+    return out
 
 
 def add_onto(canvas, piece, pos):
@@ -103,6 +142,28 @@ def gradient(w, h, orient, c1, c2):
             for x in range(w):
                 px[x, h - 1 - i] = c
     return img
+
+
+def draw_seg(canvas, d, x, y, s, f, fill, squeeze, outline):
+    """Ein Textstück zeichnen; schmale Schrift horizontal gestaucht, OUTLINE = schwarze Kontur wie im Spiel."""
+    w = d.textlength(s, font=f)
+    if squeeze == 1 and not outline:
+        d.text((x, y), s, font=f, fill=fill)
+        return w
+    asc, desc = f.getmetrics()
+    pad = 3
+    tmp = Image.new("RGBA", (int(w) + 2 * pad + 2, asc + desc + 2 * pad))
+    kw = {"stroke_width": max(1, int(round(SCALE * 0.8))), "stroke_fill": (0, 0, 0, int(fill[3] * 0.85))} if outline else {}
+    ImageDraw.Draw(tmp).text((pad, pad), s, font=f, fill=fill, **kw)
+    if squeeze != 1:
+        tmp = tmp.resize((max(1, int(tmp.width * squeeze)), tmp.height), Image.LANCZOS)
+    ox, oy = int(round(x - pad * squeeze)), int(round(y - pad))
+    W, H = canvas.size
+    cx0, cy0 = max(0, -ox), max(0, -oy)
+    cx1, cy1 = min(tmp.width, W - ox), min(tmp.height, H - oy)
+    if cx1 > cx0 and cy1 > cy0:
+        canvas.alpha_composite(tmp.crop((cx0, cy0, cx1, cy1)), (ox + cx0, oy + cy0))
+    return w * squeeze
 
 
 def render(path):
@@ -156,7 +217,10 @@ def render(path):
                         src = src.transpose(Image.FLIP_LEFT_RIGHT)
                     if flip_y:
                         src = src.transpose(Image.FLIP_TOP_BOTTOM)
-                src = src.resize((w, h), Image.LANCZOS)
+                if len(r) > 16 and r[16]:
+                    src = nine_slice(src, w, h, r[16].split(","))
+                else:
+                    src = src.resize((w, h), Image.LANCZOS)
                 if piece is not None:
                     alpha = src.split()[3]
                     piece.putalpha(ImageChops.multiply(alpha, piece.split()[3]))
@@ -170,15 +234,25 @@ def render(path):
                     ma = m.split()[3].resize(piece.size, Image.LANCZOS)
                     piece = piece.copy()
                     piece.putalpha(ImageChops.multiply(piece.split()[3], ma))
+            if len(r) > 17 and r[17] and float(r[17]) != 0:  # SetRotation: um die Mitte drehen (Bogenmaß)
+                cx, cy = x0 + w / 2, y0 + h / 2
+                piece = piece.rotate(math.degrees(float(r[17])), expand=True, resample=Image.BICUBIC)
+                x0, y0 = int(round(cx - piece.width / 2)), int(round(cy - piece.height / 2))
             if r[14] == "ADD":
                 add_onto(canvas, piece, (x0, y0))
             else:
-                canvas.alpha_composite(piece, (x0, y0))
+                W_, H_ = canvas.size
+                cx0, cy0 = max(0, -x0), max(0, -y0)
+                cx1, cy1 = min(piece.width, W_ - x0), min(piece.height, H_ - y0)
+                if cx1 > cx0 and cy1 > cy0:
+                    canvas.alpha_composite(piece.crop((cx0, cy0, cx1, cy1)), (x0 + cx0, y0 + cy0))
         else:
             weight, size = r[5], float(r[6])
             col = tuple(int(255 * float(v)) for v in r[7:11])
             justH, justV, spacing = r[11], r[12], float(r[13])
             lines = r[14].split("\x1f")
+            outline = len(r) > 15 and r[15] == "OUTLINE"
+            sq = SQUEEZE.get(weight, 1)
             f = font(weight, size)
             lh = (size * 1.2 + spacing) * SCALE
             total = lh * len(lines)
@@ -196,7 +270,7 @@ def render(path):
                         state = None
                     else:
                         segs.append((tok, state or col))
-                lw = sum((coin + 2) if s == "\x01" else d.textlength(s, font=f) for s, _ in segs)
+                lw = sum((coin + 2) if s == "\x01" else d.textlength(s, font=f) * sq for s, _ in segs)
                 tx = x0 if justH == "LEFT" else (x1 - lw if justH == "RIGHT" else x0 + (w - lw) / 2)
                 cy = ty + i * lh + size * SCALE * 0.62
                 for s, c in segs:
@@ -204,8 +278,7 @@ def render(path):
                         d.ellipse((tx + 1, cy - coin / 2, tx + 1 + coin, cy + coin / 2), fill=(232, 190, 72, 255), outline=(150, 110, 30, 255))
                         tx += coin + 2
                     else:
-                        d.text((tx, ty + i * lh), s, font=f, fill=c)
-                        tx += d.textlength(s, font=f)
+                        tx += draw_seg(canvas, d, tx, ty + i * lh, s, f, c, sq, outline)
     out = path[:-4] + ".png"
     canvas.convert("RGB").save(out)
     return out

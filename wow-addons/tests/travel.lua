@@ -8,7 +8,7 @@ local fails = 0
 local function check(ok, msg) print((ok and "OK    " or "FEHLER") .. "  " .. msg); if not ok then fails = fails + 1 end end
 
 local Tm = 1000
-function GetTime() return Tm end
+function GetTime() return Tm end function time() return 1700000000 + math.floor(Tm) end
 local Obj = {}; Obj.__index = function() return function() end end
 function CreateFrame() return setmetatable({}, Obj) end
 function wipe(t) for k in pairs(t) do t[k] = nil end return t end
@@ -122,7 +122,7 @@ check(fin and fin < 400, "am Ende steht man vor dem Ziel")
 check(via["Talondeep-Pfad"], "unterwegs: 'über Talondeep-Pfad'")
 check(walked > 5500 and walked < 9000, string.format("gelaufene Strecke %.0f yd passt zum Laufweg (Navmesh 6747)", walked))
 
-print("== 4. Schrittwahl nach echtem Weg + Quests aus dem Log mitnehmen")
+print("== 4. Fester Plan: Ziel = Plan-Schritt, Weg/Flug-Rat dafuer nach echtem Gelaende")
 PMAP, PX, PY = 1440, 0.1224, 0.338
 local function S(t, q, m, x, y, l) return { t = t, q = q, map = m, x = x / 100, y = y / 100, l = l or 24, ql = 23, rl = 20 } end
 local steps2 = {
@@ -133,30 +133,30 @@ steps2[#steps2 + 1] = S("complete", 216, 1440, 35.0, 37.9, 26)
 steps2[#steps2 + 1] = S("complete", 6462, 1440, 40.7, 33.6, 26)
 local route = { steps = steps2 }
 LOG = { [1087] = true, [1058] = true, [6301] = true }
-local best = R.Current(route, 24, {}, 5)
+local PL = {}
+local best = R.Plan(route, 24, {}, PL, 5)
 print("   ohne Zoram'gar-Quests im Log -> Schritt " .. tostring(best) .. " (q " .. tostring(steps2[best] and steps2[best].q) .. ")")
-check(steps2[best] and (steps2[best].q == 1087 or steps2[best].q == 1058 or steps2[best].q == 6301), "naechstes Ziel: Steinkrallen-Quest")
+check(best == 1 and steps2[best].q == 1087, "Plan beginnt mit dem ersten Steinkrallen-Schritt")
 LOG[216], LOG[6462] = true, true
 Tm = Tm + 10
-best = R.Current(route, 24, {}, 5)
+best = R.Plan(route, 24, {}, PL, 5)
 print("   mit Zoram'gar-Quests im Log -> Schritt " .. tostring(best) .. " (q " .. tostring(steps2[best] and steps2[best].q) .. ")")
-check(steps2[best] and (steps2[best].q == 216 or steps2[best].q == 6462), "Quests aus dem Log direkt am Flugpunkt kommen zuerst (statt 7 km Fussweg)")
--- Sonnenfels: dort ist der Gipfel naeher als Zoram'gar-Quests -> Steinkrallen zuerst
+check(best == 1, "Quests im Log werfen den Plan nicht um (Reihenfolge bleibt)")
 PMAP, PX, PY = 1442, 0.475, 0.61
 Tm = Tm + 10
-best = R.Current(route, 24, {}, 5)
-check(steps2[best] and steps2[best].map == 1442, "in Sonnenfels: Steinkrallen-Schritt (Eschental-Quests 5+ km weg)")
+best = R.Plan(route, 24, {}, PL, 5)
+check(best == 1 and steps2[best].map == 1442, "in Sonnenfels: derselbe Plan-Schritt")
 local cost, _, st = R.StepCost(steps2[3])
 check(cost and st and cost > st, string.format("Sonnenfels -> Mirkfallonsee: Laufweg %.0f yd > Luftlinie %.0f yd", cost or -1, st or -1))
 -- zurueck nach Zoram'gar ohne die Eschental-Quests: naechster Steinkrallen-Schritt + Flug-Rat dorthin
 PMAP, PX, PY = 1440, 0.1224, 0.338
 LOG[216], LOG[6462] = nil, nil
 Tm = Tm + 10
-best = R.Current(route, 24, {}, 5)
+best = R.Plan(route, 24, {}, PL, 5)
 local tb = R.StepTarget(steps2[best])
 local a = F.Advice(tb, "best")
 print("   Ziel q " .. steps2[best].q .. ": " .. (a and string.format("Flug %s -> %s spart %.0f s", a.from, a.to, a.save) or "kein Flug-Rat"))
-check(a and a.to == "Sonnenfels", "Flug-Rat fuer den gewaehlten Steinkrallen-Schritt: nach Sonnenfels fliegen")
+check(a and a.to == "Sonnenfels", "Flug-Rat fuer den Plan-Schritt: von Zoram'gar nach Sonnenfels fliegen")
 
 print("== 5. Rechenzeit (Spieler laeuft 3 km durchs Eschental, Liste + Pfeil + Flug-Rat jede Sekunde)")
 LOG[216], LOG[6462] = true, true
@@ -164,8 +164,9 @@ LOG[216], LOG[6462] = true, true
 W.Flush(); R.ResetPath(); collectgarbage()
 PMAP, PX, PY = 1440, 0.1224, 0.338
 local tc = os.clock()
+local PP = {}
 do
-  local b = R.Current(route, 24, {}, 5)
+  local b = R.Plan(route, 24, {}, PP, 5)
   local tb2 = b and R.StepTarget(steps2[b])
   if tb2 then R.Route(tb2); F.Advice(tb2, "kalt" .. b) end
   for j = 1, 5 do R.StepCost(steps2[j], nil, 2500) end
@@ -178,7 +179,7 @@ for k = 1, 150 do
   PMAP, PX, PY = 1440, 0.1224 + k * 0.0035, 0.338 + k * 0.0002
   Tm = Tm + 1
   local t1 = os.clock()
-  local b = R.Current(route, 24, {}, 5)
+  local b = R.Plan(route, 24, {}, PP, 5)
   local tb2 = b and R.StepTarget(steps2[b])
   if tb2 then R.Route(tb2); F.Advice(tb2, "lauf" .. b) end
   for j = 1, 5 do R.StepCost(steps2[j], nil, 2500) end

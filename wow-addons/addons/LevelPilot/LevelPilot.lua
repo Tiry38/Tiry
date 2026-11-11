@@ -1,11 +1,12 @@
 ---------------------------------------------------------------------------
--- LevelPilot 4.0.0 (Tiry) · Anthrazit & Neon-Gruen
--- Pfeil zum naechsten Questziel · Liste nach Entfernung · Abgeben-Hinweis
--- Auto-Annehmen/-Abgeben · XP-Cockpit (XP/h, Zeit bis Level, Erholt)
--- Datenquelle: Blizzards eigene Questmarkierungen (nur angenommene Quests).
+-- LevelPilot 5 (Tiry) · Anthrazit & Neon-Gruen
+-- Fester Plan mit Zeiger (Route.lua) · Einstieg erkennt deinen Stand · Questlog-Check
+-- Pfeil ueber echte Laufwege · Flug-Rat · Auto-Annehmen/-Abgeben · XP-Cockpit
+-- Datenquellen: Routen-Plan, Questie (Geber/Ziele), Blizzards Questlog.
 ---------------------------------------------------------------------------
 local ADDON = ...
-local VERSION = "4.2.0"
+local VERSION = "5.0.0"
+local time = time or (os and os.time)   -- Spielzeit-Uhr (Sekunden seit 1970)
 local floor, max, min, abs, sqrt, atan2, pi, fmt = math.floor, math.max, math.min, math.abs, math.sqrt, math.atan2, math.pi, string.format
 local BT = BackdropTemplateMixin and "BackdropTemplate" or nil
 local FONT = STANDARD_TEXT_FONT or "Fonts\\FRIZQT__.TTF"
@@ -30,7 +31,7 @@ local DEF = {
   ton = "amboss", fade = true,
 }
 -- Daten (bleiben bei /lp reset erhalten)
-local DATA = { skipK = {}, skipLog = {}, nav = {}, ban = {}, qmem = { acc = {}, done = {} } }
+local DATA = { skipK = {}, skipLog = {}, nav = {}, ban = {}, qmem = { acc = {}, done = {}, at = {} }, plan = {} }
 local function copy(v)
   if type(v) ~= "table" then return v end
   local o = {}; for k, x in pairs(v) do o[k] = copy(x) end; return o
@@ -460,19 +461,30 @@ local function scanTargets()
   end)
 end
 
--- Routen-Zustand
-local RT = { key = nil, idx = nil, list = {}, cur = nil }
+-- Routen-Zustand: Plan-Zeiger (gespeichert je Route in DB.plan), aktuelles Ziel, Liste
+local RT = { key = nil, idx = nil, list = {}, cur = nil, ptr = nil, info = nil, logReady = false, loginT = nil, wait = false }
+local announce -- weiter unten (Meldung bei Einstieg/Sprung)
 local function routeUpdate()
   if not (DB and LP_Route) then return end
   local R = LP_Route
-  local _, faction = UnitFactionGroup("player")
+  local faction = UnitFactionGroup("player")   -- englisches Kürzel ("Horde"/"Alliance"), nicht der übersetzte Name
   local lvl = UnitLevel("player")
   RT.key = R.Pick(faction, lvl, DB.route)
   local route = RT.key and LevelPilot_Routes[RT.key]
-  DB.skipK[RT.key or "-"] = DB.skipK[RT.key or "-"] or {}
-  local idx, list = R.Current(route, lvl, DB.skipK[RT.key or "-"], DB.rows or 6, RT.cur)
+  local rk = RT.key or "-"
+  DB.skipK[rk] = DB.skipK[rk] or {}
+  DB.plan[rk] = DB.plan[rk] or {}
+  local plan = DB.plan[rk]
+  -- Einstieg erst, wenn Questlog und Questie-Daten da sind (sonst falscher Stand), spaetestens nach 20 s
+  RT.wait = false
+  if route and not plan.k then
+    local ready = RT.logReady and (R.HasQuestie() or (RT.loginT and GetTime() - RT.loginT > 20))
+    if not ready then RT.wait = true; RT.idx, RT.list, RT.info, RT.ptr = nil, {}, nil, nil; return end
+  end
+  local idx, list, info = R.Plan(route, lvl, DB.skipK[rk], plan, DB.rows or 6, RT.cur)
   if idx ~= RT.idx then RT.cur = idx and { i = idx, since = GetTime() } or nil end
-  RT.idx, RT.list = idx, list or {}
+  RT.idx, RT.list, RT.info, RT.ptr = idx, list or {}, info, info and info.ptr
+  if info and (info.entry or info.jumped) and announce then announce(route, info) end
 end
 
 -- Schritt ueberspringen / zurueckholen (ueber stabilen Schluessel, nicht ueber die Nummer)
@@ -483,7 +495,7 @@ local function SkipStep(i)
   local k = LP_Route.StepKey(s)
   DB.skipK[RT.key] = DB.skipK[RT.key] or {}
   DB.skipK[RT.key][k] = true
-  table.insert(DB.skipLog, { r = RT.key, k = k })
+  table.insert(DB.skipLog, { r = RT.key, k = k, t = time() })
   while #DB.skipLog > 50 do table.remove(DB.skipLog, 1) end
 end
 
@@ -491,9 +503,10 @@ local function routeTarget()
   local route = RT.key and LevelPilot_Routes[RT.key]
   local s = route and RT.idx and route.steps[RT.idx]
   if not s then return end
-  local t = LP_Route.StepTarget(s)
+  local t, first = LP_Route.GoalTarget(s)
   if not t then return { title = LP_Route.StepTitle(s), step = s } end
-  t.title = LP_Route.StepTitle(s); t.step = s; t.turnin = (s.t == "turnin")
+  t = { map = t.map, x = t.x, y = t.y, npc = t.npc, spot = t.spot, count = t.count }
+  t.title = LP_Route.StepTitle(s); t.step = s; t.turnin = (s.t == "turnin") and not first; t.first = first
   return t
 end
 
@@ -549,8 +562,9 @@ end
 -- Hero-Karte + Zeitleiste · Flug-Kapsel · Bedienleiste (Segment + Schalter)
 ---------------------------------------------------------------------------
 local W = 340
-local HEAD_H = 128        -- Kopf + XP + Kennzahlen (= Hoehe eingeklappt)
-local listTop = -132
+local HEAD_Q, HEAD_R = 128, 188   -- Kopf + XP + Kennzahlen (+ Plan-Band im Routen-Modus) = Hoehe eingeklappt
+local HEAD_H = HEAD_R
+local listTop = -(HEAD_H + 4)
 local DOCK_H = 44         -- Bedienleiste unten inkl. Rand
 local TLX = 44            -- x der Zeitleiste (Mitte aller Kugeln)
 local COL = { accept = "ffd24d", turnin = "39ff6b", complete = "3ee8d0", fly = "4fd2ff", hearth = "4fd2ff",
@@ -571,6 +585,7 @@ Glass(M, { aurora = true })
 
 local Refresh      -- vorab
 local OpenSettings -- vorab
+local LOGP         -- Questlog-Check (vorab, damit Einstellungen es schliessen koennen)
 
 ---------------------------------------------------------------------------
 -- Glas-Tooltip (ersetzt den grauen Standard-Tooltip)
@@ -699,14 +714,76 @@ do
     c.ic = MT(c, "ARTWORK", 0, ({ "i_xph", "i_need", "i_time" })[i]); c.ic:SetSize(15, 15); c.ic:SetPoint("LEFT", i == 1 and 4 or 14, 0)
     c.ic:SetVertexColor(col[1], col[2], col[3], 1)
     c.g = MT(c, "BACKGROUND", 0, "dot", "ADD"); c.g:SetSize(34, 34); c.g:SetPoint("CENTER", c.ic, "CENTER"); c.g:SetVertexColor(col[1], col[2], col[3], 0.30)
-    c.v = UI(c, 15, true); c.v:SetPoint("TOPLEFT", c.ic, "TOPRIGHT", 8, 4)
-    c.l = UI(c, 8); c.l:SetPoint("TOPLEFT", c.v, "BOTTOMLEFT", 0, -2); c.l:SetTextColor(0.5, 0.55, 0.58)
+    c.v = UI(c, 15, true); c.v:SetPoint("TOPLEFT", c.ic, "TOPRIGHT", 8, 9)
+    c.l = UI(c, 8); c.l:SetPoint("BOTTOMLEFT", c, "BOTTOMLEFT", (i == 1 and 4 or 14) + 23, 1); c.l:SetTextColor(0.5, 0.55, 0.58)
     CHIPS[i] = c
   end
   CHIPS[1].l:SetText("XP / STUNDE"); CHIPS[2].l:SetText("FEHLENDE XP"); CHIPS[3].l:SetText("BIS LEVEL-UP")
   for i = 2, 3 do Hairline(M, "BORDER", 2, true, 0.16):Place(M, 14 + (i - 1) * SW, -94, 0, -124) end
 end
 local divider = Hairline(M, "BORDER", 2, false, 0.13); divider:Place(M, 14, -(HEAD_H - 1), W - 14, 0)
+
+---------------------------------------------------------------------------
+-- Lagebild: Plan-Band (Abschnitte als Kapseln, leuchtender Zeiger) + Status-Pillen
+---------------------------------------------------------------------------
+local BAND = {}
+local OpenLog   -- Questlog-Check (weiter unten)
+do
+  local BW = W - 28
+  local B = CreateFrame("Button", nil, M); B:SetPoint("TOPLEFT", 14, -128); B:SetSize(BW, 30)
+  BAND.f = B
+  BAND.ic = MT(B, "ARTWORK", 0, "i_flag"); BAND.ic:SetSize(11, 11); BAND.ic:SetPoint("TOPLEFT", 1, -6)
+  BAND.icG = MT(B, "BACKGROUND", 0, "dot", "ADD"); BAND.icG:SetSize(26, 26); BAND.icG:SetPoint("CENTER", BAND.ic, "CENTER")
+  BAND.lbl = UI(B, 10.5); BAND.lbl:SetPoint("TOPLEFT", 18, -5); BAND.lbl:SetWidth(BW - 18 - 86)
+  BAND.lbl:SetJustifyH("LEFT"); BAND.lbl:SetWordWrap(false)
+  BAND.step = UI(B, 10, true); BAND.step:SetPoint("TOPRIGHT", 0, -5); BAND.step:SetJustifyH("RIGHT")
+  -- Spur: eine Kapsel je Abschnitt, Fuellung mit Verlauf, Zeiger als Leuchtpunkt
+  BAND.track = CreateFrame("Frame", nil, B); BAND.track:SetPoint("TOPLEFT", 0, -22); BAND.track:SetSize(BW, 6)
+  BAND.segs = {}
+  for k = 1, 12 do
+    local g = CreateFrame("Frame", nil, BAND.track); g:SetHeight(6); g:SetWidth(10)
+    g.bg = Capsule(g, "BACKGROUND", 0, 6, { 1, 1, 1, 0.08 })
+    g.fill = CreateFrame("Frame", nil, g); g.fill:SetPoint("TOPLEFT"); g.fill:SetSize(6, 6)
+    g.fg = Capsule(g.fill, "ARTWORK", 0, 6, { 1, 1, 1, 1 })
+    g:Hide(); BAND.segs[k] = g
+  end
+  local mk = CreateFrame("Frame", nil, BAND.track); mk:SetSize(14, 14); mk:SetFrameLevel(BAND.track:GetFrameLevel() + 6)
+  BAND.mk = mk
+  BAND.mkG = MT(mk, "BACKGROUND", 0, "dot", "ADD"); BAND.mkG:SetSize(34, 34); BAND.mkG:SetPoint("CENTER"); BAND.mkG:SetVertexColor(NEON[1], NEON[2], NEON[3], 0.9)
+  BAND.mkR = MT(mk, "ARTWORK", 0, "ctx_ring", "ADD"); BAND.mkR:SetSize(15, 15); BAND.mkR:SetPoint("CENTER"); BAND.mkR:SetVertexColor(NEON[1], NEON[2], NEON[3], 1)
+  BAND.mkD = MT(mk, "ARTWORK", 1, "ctx_disc"); BAND.mkD:SetSize(9, 9); BAND.mkD:SetPoint("CENTER"); BAND.mkD:SetVertexColor(1, 1, 1, 1)
+  B:SetScript("OnClick", function() SlashCmdList.LEVELPILOT("einstieg") end)
+  B:SetScript("OnEnter", function(self) if BAND.tip then TIP:Begin(self, M); for _, l in ipairs(BAND.tip) do TIP:Line(l[1], l[2], l[3], l[4], l[5]) end; TIP:Open() end end)
+  B:SetScript("OnLeave", TipLeave)
+
+  -- Status-Pillen: Glas-Kapsel mit Farbschleier, Leuchtsymbol, Text
+  local function Pill(anchor, x)
+    local b = CreateFrame("Button", nil, M); b:SetHeight(22); b:SetWidth(120)
+    b:SetPoint(anchor, M, anchor, x, -160)
+    b.glow = MT(b, "BACKGROUND", 0, "glow", "ADD"); b.glow:SetPoint("TOPLEFT", -16, 16); b.glow:SetPoint("BOTTOMRIGHT", 16, -16)
+    if SLICE then Slice(b.glow, 60) else b.glow:Hide() end
+    b.bg = Capsule(b, "BACKGROUND", 1, 22, { 1, 1, 1, 1 })
+    b.sh = Capsule(b, "BORDER", 0, 22, { 1, 1, 1, 1 }, nil, 1); b.sh:SetGradientV({ 1, 1, 1, 0.07 }, { 1, 1, 1, 0.0 })
+    Capsule(b, "HIGHLIGHT", 0, 22, { 1, 1, 1, 1 }, "ADD"):SetGradient({ 1, 1, 1, 0.08 }, { 1, 1, 1, 0.02 })
+    b.ic = MT(b, "ARTWORK", 0, "i_flag"); b.ic:SetSize(11, 11); b.ic:SetPoint("LEFT", 9, 0)
+    b.t = UI(b, 9.5, true); b.t:SetPoint("LEFT", 25, 0); b.t:SetJustifyH("LEFT"); b.t:SetWordWrap(false)
+    function b:Set(txt, c, icon)
+      self.t:SetText(txt)
+      self.ic:SetTexture(MEDIA .. icon); self.ic:SetVertexColor(c[1], c[2], c[3], 1)
+      self.bg:SetGradient({ c[1], c[2], c[3], 0.22 }, { c[1], c[2], c[3], 0.06 })
+      self.glow:SetVertexColor(1, 1, 1, 1); Grad(self.glow, "HORIZONTAL", c[1], c[2], c[3], 0.16, c[1], c[2], c[3], 0.03)
+      self:SetWidth(min(BW / 2 - 4, (self.t:GetStringWidth() or 60) + 36))
+    end
+    b:SetScript("OnEnter", function(self) if self.tip then TIP:Begin(self, M); for _, l in ipairs(self.tip) do TIP:Line(l[1], l[2], l[3], l[4], l[5]) end; TIP:Open() end end)
+    b:SetScript("OnLeave", TipLeave)
+    return b
+  end
+  BAND.pLvl = Pill("TOPLEFT", 14)
+  BAND.pLog = Pill("TOPRIGHT", -14)
+  BAND.pLog:SetScript("OnClick", function() if OpenLog then OpenLog() end end)
+  BAND.pLvl:SetScript("OnClick", function() SlashCmdList.LEVELPILOT("plan") end)
+  function BAND:SetShown(v) self.f:SetShown(v); self.pLvl:SetShown(v); self.pLog:SetShown(v) end
+end
 
 ---------------------------------------------------------------------------
 -- Schritte: Hero-Karte (aktueller Schritt) + Zeitleiste (naechste Schritte)
@@ -1074,11 +1151,183 @@ do
       if UISpecialFrames then tinsert(UISpecialFrames, "LevelPilotSettings") end
     end
     if SET:IsShown() and not force then SET:Hide(); return end
+    if LOGP and LOGP:IsShown() then LOGP:Hide() end
     SET:ClearAllPoints()
     local l = M:GetLeft()
     if l and l > 300 then SET:SetPoint("TOPRIGHT", M, "TOPLEFT", -16, 0) else SET:SetPoint("TOPLEFT", M, "TOPRIGHT", 16, 0) end
     SET:Show(); SET:Sync()
   end
+end
+
+
+---------------------------------------------------------------------------
+-- Questlog-Check (Glas-Popover): was behalten, abgeben, loeschen – mit Grund
+---------------------------------------------------------------------------
+local LOGADV = nil          -- letztes Ergebnis von LP_Route.LogAdvice
+local CAT = {
+  delete = { c = { 1.00, 0.36, 0.36 }, c2 = { 1.00, 0.55, 0.24 }, icon = "trash",  label = "LÖSCHEN" },
+  turnin = { c = NEON,                 c2 = TEAL,                 icon = "turnin", label = "ABGEBEN" },
+  check  = { c = { 1.00, 0.78, 0.30 }, c2 = { 1.00, 0.55, 0.24 }, icon = "note",   label = "PRÜFEN" },
+  keep   = { c = AQUA,                 c2 = TEAL,                 icon = "flag",   label = "BEHALTEN" },
+}
+local function CloseX(parent, fn)
+  local x = CreateFrame("Button", nil, parent); x:SetSize(22, 22); x:SetPoint("TOPRIGHT", -12, -11)
+  local xd = MT(x, "BACKGROUND", 0, "ctx_disc"); xd:SetPoint("CENTER"); xd:SetSize(33, 33); xd:SetVertexColor(1, 1, 1, 0.06)
+  local xh = MT(x, "HIGHLIGHT", 0, "ctx_disc", "ADD"); xh:SetPoint("CENTER"); xh:SetSize(33, 33); xh:SetVertexColor(1, 0.35, 0.35, 0.25)
+  for _, rot in ipairs({ pi / 4, -pi / 4 }) do
+    local l = Tex(x, "ARTWORK", 0); l:SetSize(10, 1.6); l:SetPoint("CENTER"); l:SetVertexColor(0.85, 0.9, 0.9, 1); pcall(l.SetRotation, l, rot)
+  end
+  x:SetScript("OnClick", fn)
+  return x
+end
+local LW = 312
+local function LogRow(i)
+  local r = CreateFrame("Button", nil, LOGP); r:SetHeight(36)
+  r.wash = Round(r, "BACKGROUND", 0, 12, { 1, 1, 1, 1 })
+  Round(r, "HIGHLIGHT", 0, 12, { 1, 1, 1, 1 }, "ADD"):SetGradient({ 1, 1, 1, 0.06 }, { 1, 1, 1, 0.01 })
+  r.orb = OrbBadge(r, 14); r.orb:SetPoint("CENTER", r, "LEFT", 20, 0)
+  r.title = UI(r, 11.5); r.title:SetJustifyH("LEFT"); r.title:SetWordWrap(false)
+  r.why = UI(r, 9.5); r.why:SetJustifyH("LEFT"); r.why:SetWordWrap(false)
+  r.right = UI(r, 9.5, true); r.right:SetJustifyH("RIGHT")
+  -- Knopf "LOESCHEN": rote Verlaufs-Kapsel, oeffnet Blizzards Abbrechen-Dialog
+  local b = CreateFrame("Button", nil, r); b:SetSize(70, 22); b:SetPoint("RIGHT", -8, 0)
+  b.g = MT(b, "BACKGROUND", 0, "dot", "ADD"); b.g:SetPoint("TOPLEFT", -12, 9); b.g:SetPoint("BOTTOMRIGHT", 12, -9); b.g:SetVertexColor(1, 0.36, 0.36, 0.25)
+  b.bg = Capsule(b, "BORDER", 0, 22, { 1, 1, 1, 1 }); b.bg:SetGradient({ 1, 0.30, 0.34, 0.95 }, { 1, 0.52, 0.22, 0.95 })
+  Capsule(b, "HIGHLIGHT", 0, 22, { 1, 1, 1, 1 }, "ADD"):SetGradient({ 1, 1, 1, 0.22 }, { 1, 1, 1, 0.08 })
+  b.ic = MT(b, "ARTWORK", 0, "i_trash"); b.ic:SetSize(10, 10); b.ic:SetPoint("LEFT", 9, 0); b.ic:SetVertexColor(0.12, 0.02, 0.02, 1)
+  b.t = UI(b, 9, true); b.t:SetPoint("LEFT", 22, 0); b.t:SetText("|cff1e0505LÖSCHEN|r"); b.t:SetShadowColor(0, 0, 0, 0)
+  b:SetScript("OnClick", function()
+    local q = r.q; if not q then return end
+    local ok, why = LP_Route.Abandon(q)
+    if not ok then P("|cffff5050Konnte nicht abbrechen:|r " .. tostring(why)) end
+  end)
+  r.del = b
+  r:SetScript("OnEnter", function(self) if self.tip then TIP:Begin(self, LOGP); for _, l in ipairs(self.tip) do TIP:Line(l[1], l[2], l[3], l[4], l[5]) end; TIP:Open() end end)
+  r:SetScript("OnLeave", TipLeave)
+  return r
+end
+
+local function LogFill()
+  if not (LOGP and LOGP:IsShown()) then return end
+  local a = LOGADV
+  local used, mx = a and a.used or 0, a and a.max or 25
+  LOGP.num:SetText(fmt("|cffffffff%d|r|cff6b7076 / %d|r", used, mx))
+  local frac = max(0, min(1, used / max(1, mx)))
+  local hot = frac >= 0.9 and { 1, 0.36, 0.36 } or (frac >= 0.75 and { 1, 0.78, 0.30 } or NEON)
+  LOGP.mfill:SetWidth(max(8, (LW - 36) * frac))
+  LOGP.mfg:SetGradient({ TEAL[1], TEAL[2], TEAL[3], 1 }, { hot[1], hot[2], hot[3], 1 })
+  local sum = {}
+  if a then
+    if a.del > 0 then sum[#sum + 1] = fmt("|cffff5c5c%d löschen|r", a.del) end
+    if a.tin > 0 then sum[#sum + 1] = fmt("|cff39ff6b%d abgeben|r", a.tin) end
+    if a.chk > 0 then sum[#sum + 1] = fmt("|cffffc84d%d prüfen|r", a.chk) end
+    sum[#sum + 1] = fmt("|cff4fd2ff%d behalten|r", a.keep)
+  end
+  LOGP.sum:SetText(#sum > 0 and table.concat(sum, "  ·  ") or "Questlog wird gelesen …")
+  local warn
+  if a and a.full then
+    warn = fmt("|cffffc84dLog wird voll|r: bis Schritt %d brauchst du %d Plätze – lösche die roten.", a.peakAt or 0, a.peak)
+  elseif a and a.del == 0 and a.tin == 0 and a.chk == 0 and used > 0 then
+    warn = "|cff39ff6bAlles sauber|r – jede Quest gehört in deinen Plan."
+  end
+  LOGP.warn:SetText(warn or ""); LOGP.warn:SetShown(warn ~= nil)
+  local y = warn and -112 or -96
+  local shown, keepHead = 0, false
+  for i = 1, #LOGP.rows do LOGP.rows[i]:Hide() end
+  LOGP.kh:Hide(); LOGP.more:Hide()
+  local list = a and a.list or {}
+  local MAXH = 560
+  for i, e in ipairs(list) do
+    local def = CAT[e.cat] or CAT.keep
+    local compact = e.cat == "keep"
+    if compact and not keepHead then
+      keepHead = true
+      LOGP.kh:ClearAllPoints(); LOGP.kh:SetPoint("TOPLEFT", 22, y - 6); LOGP.kh:Show()
+      y = y - 22
+    end
+    if -y > MAXH then
+      LOGP.more:ClearAllPoints(); LOGP.more:SetPoint("TOPLEFT", 22, y - 4)
+      LOGP.more:SetText(fmt("+ %d weitere", #list - i + 1)); LOGP.more:Show(); y = y - 20
+      break
+    end
+    shown = shown + 1
+    local r = LOGP.rows[shown]; if not r then r = LogRow(shown); LOGP.rows[shown] = r end
+    r.q = e.q
+    local h = compact and 26 or 38
+    r:SetHeight(h); r:ClearAllPoints(); r:SetPoint("TOPLEFT", 12, y); r:SetPoint("TOPRIGHT", -12, y)
+    r.orb:SetSize(compact and 10 or 14); r.orb:Tint(def.c, def.c2, compact and 0.7 or 1); r.orb:Icon(def.icon, def.c[1], def.c[2], def.c[3])
+    r.orb.halo:SetShown(not compact)
+    r.wash:SetShown(not compact)
+    if not compact then r.wash:SetGradient({ def.c[1], def.c[2], def.c[3], 0.13 }, { def.c[1], def.c[2], def.c[3], 0.01 }) end
+    r.title:ClearAllPoints(); r.why:ClearAllPoints(); r.right:ClearAllPoints()
+    local action = e.cat == "delete" or e.cat == "check"
+    r.del:SetShown(action)
+    if action then r.del.bg:SetGradient(e.cat == "delete" and { 1, 0.30, 0.34, 0.95 } or { 1, 0.70, 0.28, 0.55 }, e.cat == "delete" and { 1, 0.52, 0.22, 0.95 } or { 1, 0.52, 0.22, 0.45 }) end
+    if compact then
+      r.title:SetFont(FONT_UI, 11, ""); r.title:SetPoint("LEFT", 36, 0); r.title:SetWidth(LW - 24 - 36 - 96)
+      r.title:SetText("|cffc6ccd0" .. e.title .. "|r")
+      r.right:SetPoint("RIGHT", -10, 0); r.right:SetWidth(92); r.right:SetFont(FONT_UI, 9.5, "")
+      local fertig = LP_Route.Ready and LP_Route.Ready(e.q) and "|cff39ff6bfertig|r |cff6b7076·|r " or ""
+      r.right:SetText(fertig .. (e.step and (e.step == (RT.idx or -1) and "|cff39ff6bJETZT|r" or ("|cff8a9396Schritt " .. e.step .. "|r")) or ("|cff8a9396" .. (e.why:match("^später") and "später" or e.why) .. "|r")))
+      r.why:Hide(); r.right:Show()
+    else
+      r.title:SetFont(FONT_UI, 12, ""); r.title:SetPoint("TOPLEFT", 40, -6); r.title:SetWidth(LW - 24 - 40 - (action and 86 or 70))
+      r.title:SetText("|cffffffff" .. e.title .. "|r")
+      r.why:SetPoint("TOPLEFT", r.title, "BOTTOMLEFT", 0, -3); r.why:SetWidth(LW - 24 - 40 - (action and 86 or 70))
+      r.why:SetText(e.why); r.why:SetTextColor(def.c[1] * 0.55 + 0.4, def.c[2] * 0.55 + 0.4, def.c[3] * 0.55 + 0.4); r.why:Show()
+      if e.cat == "turnin" then
+        r.right:SetPoint("RIGHT", -12, 0); r.right:SetWidth(70); r.right:SetFont(FONT_UI, 9.5, "OUTLINE")
+        r.right:SetText("|cff39ff6bABGEBEN|r"); r.right:Show()
+      else r.right:Hide() end
+    end
+    local tip = { { e.title, def.c[1], def.c[2], def.c[3], true }, { def.label .. " – " .. e.why, 1, 1, 1 } }
+    if e.xp then tip[#tip + 1] = { "Belohnung: " .. fmtNum(e.xp) .. " XP", 0.4, 0.8, 1 } end
+    if e.step then tip[#tip + 1] = { "Im Plan: Schritt " .. e.step, 0.75, 0.8, 0.82 } end
+    if action then tip[#tip + 1] = { "LÖSCHEN öffnet Blizzards Abbrechen-Dialog – du bestätigst selbst.", 0.5, 0.55, 0.58 } end
+    r.tip = tip
+    r:Show()
+    y = y - h - (compact and 1 or 4)
+  end
+  if #list == 0 then
+    LOGP.more:ClearAllPoints(); LOGP.more:SetPoint("TOPLEFT", 22, y - 4); LOGP.more:SetText("Keine Quests im Log."); LOGP.more:Show(); y = y - 22
+  end
+  LOGP:SetHeight(-y + 40)
+end
+
+function OpenLog(force)
+  if not DB then return end
+  if not LOGP then
+    LOGP = CreateFrame("Frame", "LevelPilotLog", M)
+    LOGP:SetFrameStrata("DIALOG"); LOGP:SetSize(LW, 200); LOGP:EnableMouse(true); LOGP:SetClampedToScreen(true); LOGP:Hide()
+    Glass(LOGP, { aurora = true })
+    local ic = MT(LOGP, "ARTWORK", 0, "i_log"); ic:SetSize(14, 14); ic:SetPoint("TOPLEFT", 18, -17); ic:SetVertexColor(NEON[1], NEON[2], NEON[3], 1)
+    local icg = MT(LOGP, "BACKGROUND", 3, "dot", "ADD"); icg:SetSize(34, 34); icg:SetPoint("CENTER", ic, "CENTER"); icg:SetVertexColor(NEON[1], NEON[2], NEON[3], 0.35)
+    local h = UI(LOGP, 13, true); h:SetPoint("LEFT", ic, "RIGHT", 8, 0); h:SetText(GradText("QUESTLOG-CHECK", NEON, TEAL, AQUA))
+    CloseX(LOGP, function() LOGP:Hide() end)
+    LOGP.num = UI(LOGP, 20, true); LOGP.num:SetPoint("TOPLEFT", 20, -44)
+    local nl = UI(LOGP, 8.5); nl:SetPoint("BOTTOMLEFT", LOGP.num, "BOTTOMRIGHT", 8, 3); nl:SetText("QUESTS IM LOG"); nl:SetTextColor(0.5, 0.55, 0.58)
+    local meter = CreateFrame("Frame", nil, LOGP); meter:SetPoint("TOPLEFT", 18, -70); meter:SetSize(LW - 36, 8)
+    Capsule(meter, "BACKGROUND", 0, 8, { 1, 1, 1, 1 }):SetGradientV({ 0, 0, 0, 0.7 }, { 1, 1, 1, 0.07 })
+    LOGP.mfill = CreateFrame("Frame", nil, meter); LOGP.mfill:SetPoint("TOPLEFT"); LOGP.mfill:SetSize(8, 8)
+    local mg = MT(LOGP.mfill, "BACKGROUND", 0, "dot", "ADD"); mg:SetPoint("TOPLEFT", -10, 9); mg:SetPoint("BOTTOMRIGHT", 10, -9); mg:SetVertexColor(TEAL[1], TEAL[2], TEAL[3], 0.25)
+    LOGP.mfg = Capsule(LOGP.mfill, "ARTWORK", 0, 8, { 1, 1, 1, 1 })
+    LOGP.sum = UI(LOGP, 10); LOGP.sum:SetPoint("TOPLEFT", 20, -84); LOGP.sum:SetWidth(LW - 40); LOGP.sum:SetJustifyH("LEFT"); LOGP.sum:SetWordWrap(false)
+    LOGP.warn = UI(LOGP, 9.5); LOGP.warn:SetPoint("TOPLEFT", 20, -99); LOGP.warn:SetWidth(LW - 40); LOGP.warn:SetJustifyH("LEFT"); LOGP.warn:SetWordWrap(false)
+    LOGP.warn:SetTextColor(0.78, 0.83, 0.86)
+    LOGP.kh = UI(LOGP, 8.5, true); LOGP.kh:SetText("BEHALTEN  ·  GEHÖRT IN DEINEN PLAN"); LOGP.kh:SetTextColor(0.31, 0.82, 1)
+    LOGP.more = UI(LOGP, 9.5); LOGP.more:SetTextColor(0.55, 0.6, 0.62)
+    local ft = UI(LOGP, 9); ft:SetPoint("BOTTOM", 0, 14); ft:SetText("Rot = raus damit · Grün = abgeben · Blau = gehört in den Plan"); ft:SetTextColor(0.45, 0.5, 0.52)
+    LOGP.rows = {}
+    if UISpecialFrames then tinsert(UISpecialFrames, "LevelPilotLog") end
+  end
+  if LOGP:IsShown() and not force then LOGP:Hide(); return end
+  if SET and SET:IsShown() then SET:Hide() end
+  LOGP:ClearAllPoints()
+  local l = M:GetLeft()
+  if l and l > LW + 30 then LOGP:SetPoint("TOPRIGHT", M, "TOPLEFT", -16, 0) else LOGP:SetPoint("TOPLEFT", M, "TOPRIGHT", 16, 0) end
+  LOGP:Show()
+  if Refresh then Refresh(true) end
+  LogFill()
 end
 
 ---------------------------------------------------------------------------
@@ -1157,6 +1406,9 @@ local function Glow(now)
     X.shine:Hide()
   end
   LO.halo:SetAlpha(0.20 + 0.12 * math.sin(now * 1.7))
+  if BAND.mk:IsShown() then
+    BAND.mkG:SetAlpha(0.55 + 0.35 * math.sin(now * 2.6)); BAND.mkR:SetAlpha(0.75 + 0.25 * math.sin(now * 2.6))
+  end
   ROWS[1].orb.halo:SetAlpha(0.28 + 0.16 * math.sin(now * 2.2))
 end
 local function Animate(now, el)
@@ -1199,6 +1451,119 @@ local function grindInfo(st)
   return "Stufe " .. to .. " erreichen  ·  noch " .. (to - lvl) .. " Stufen", nil
 end
 
+-- Lagebild fuellen: Abschnitt, Schritt x/y, Kapseln je Abschnitt, Zeiger, Stufen- und Log-Pille
+local LOGT = 0
+local function UpdateLog(force)
+  if not (LP_Route and LP_Route.LogAdvice) then return end
+  local t = GetTime()
+  if not force and t - LOGT < 2 then return end
+  LOGT = t
+  local route = RT.key and LevelPilot_Routes[RT.key]
+  local x = M.xi
+  local ok, a = pcall(LP_Route.LogAdvice, route, RT.key, UnitLevel("player"), RT.ptr, RT.idx,
+    { xpm = route and route.xpm, xph = x and x.xph, speed = (LP_Fly and LP_Fly.Speed and LP_Fly.Speed()) or 7 })
+  if ok then LOGADV = a end
+  pcall(LogFill)
+end
+
+local function DrawBand(route)
+  local p, N = RT.ptr or 1, #route.steps
+  local hero = RT.idx and route.steps[RT.idx]
+  local here = route.steps[math.min(p, N)]
+  local segs = route.segs or {}
+  local si = (hero and hero.seg) or (here and here.seg) or 1
+  local sd = segs[si]
+  local nSeg = math.max(#segs, 1)
+  BAND.lbl:SetText(sd and fmt("|cff39ff6b%d/%d|r  |cffffffff%s|r |cff8a9396·|r |cffd8dde0%s|r", si, nSeg, sd.z, sd.hub) or (route.name or ""))
+  BAND.step:SetText(RT.wait and "|cff8a9396…|r" or fmt("|cff8a9396SCHRITT|r |cffffffff%d|r|cff6b7076/%d|r", math.min(RT.idx or p, N), N))
+  -- Kapseln: Breite nach Schrittzahl des Abschnitts
+  local prog = LP_Route.Progress(route, p)
+  local BW = W - 28
+  local GAP = 4
+  local cnt = 0
+  for k = 1, #BAND.segs do if prog[k] then cnt = k end end
+  local x, mkX = 0, nil
+  local usable = BW - GAP * math.max(0, cnt - 1)
+  -- Breite nach Schrittzahl, kleine Abschnitte mindestens 10 px – die Summe passt exakt in die Spur
+  local MINW, small, bigN = 10, 0, 0
+  for k = 1, cnt do local pg = prog[k]; if pg then if usable * pg.n / N < MINW then small = small + 1 else bigN = bigN + pg.n end end end
+  local rest = usable - small * MINW
+  for k, g in ipairs(BAND.segs) do
+    local pg = prog[k]
+    if pg and k <= cnt then
+      local w = (usable * pg.n / N < MINW) and MINW or rest * pg.n / math.max(bigN, 1)
+      g:ClearAllPoints(); g:SetPoint("LEFT", BAND.track, "LEFT", x, 0); g:SetWidth(w)
+      local frac = (pg.done or 0) / pg.n
+      local cur = k == si
+      g.bg:SetColor(1, 1, 1, cur and 0.16 or 0.07)
+      if frac > 0 then
+        g.fill:SetWidth(math.max(6, w * frac)); g.fill:Show()
+        if frac >= 1 then g.fg:SetGradient({ TEAL[1], TEAL[2], TEAL[3], 0.55 }, { NEON[1], NEON[2], NEON[3], 0.55 })
+        else g.fg:SetGradient({ TEAL[1], TEAL[2], TEAL[3], 1 }, { NEON[1], NEON[2], NEON[3], 1 }) end
+      else g.fill:Hide() end
+      if cur then mkX = x + w * frac end
+      g:Show()
+      x = x + w + GAP
+    else
+      g:Hide()
+    end
+  end
+  BAND.mk:SetShown(mkX ~= nil and not RT.wait)
+  if mkX then BAND.mk:ClearAllPoints(); BAND.mk:SetPoint("CENTER", BAND.track, "LEFT", math.max(5, math.min(BW - 5, mkX)), 0) end
+  BAND.ic:SetVertexColor(TEAL[1], TEAL[2], TEAL[3], 1); BAND.icG:SetVertexColor(TEAL[1], TEAL[2], TEAL[3], 0.35)
+  -- Tooltip des Bandes
+  local tip = { { "Dein Plan  ·  Schritt " .. math.min(RT.idx or p, N) .. " von " .. N, NEON[1], NEON[2], NEON[3], true } }
+  if sd then tip[#tip + 1] = { fmt("Abschnitt %d/%d: %s · %s (Stufe %d–%d)", si, nSeg, sd.z, sd.hub, sd.l0, sd.l1), 1, 1, 1 } end
+  local nx = segs[si + 1]
+  if nx then tip[#tip + 1] = { fmt("Danach: %s · %s", nx.z, nx.hub), 0.75, 0.8, 0.82 } end
+  local missed = 0
+  for _, st in pairs(LP_Route.state or {}) do if st == "missed" then missed = missed + 1 end end
+  if missed > 0 then tip[#tip + 1] = { missed .. " Schritte hinter dir übersprungen (werden nicht mehr angesteuert)", 1, 0.78, 0.3 } end
+  tip[#tip + 1] = { "Die Reihenfolge ist fest – erledigst du etwas früher, rückt der Plan von selbst weiter.", 0.62, 0.68, 0.7 }
+  tip[#tip + 1] = { "Klick: Einstieg neu suchen  ·  /lp schritt <Nr> setzt ihn von Hand", 0.5, 0.55, 0.58 }
+  BAND.tip = tip
+  -- Stufen-Pille: Stufe gegen Plan-Stufe des aktuellen Schritts (mit XP-Anteil)
+  local lvl, xi = UnitLevel("player"), M.xi
+  local exact = lvl + ((xi and xi.mx > 0) and xi.cur / xi.mx or 0)
+  local planL = hero and hero.l or (here and here.l) or lvl
+  local diff = exact - (planL + 0.5)
+  local ltip = { { "Stufe gegen Plan", AQUA[1], AQUA[2], AQUA[3], true },
+    { fmt("Du: Stufe %.1f  ·  Plan rechnet hier mit Stufe %d", exact, planL), 1, 1, 1 } }
+  if diff >= 0.9 then
+    BAND.pLvl:Set(fmt("VORAUS  +%.1f", diff), AQUA, "i_xph")
+    ltip[#ltip + 1] = { "Du bist schneller als geplant – Quests bleiben grün, alles gut.", 0.75, 0.8, 0.82 }
+    if diff >= 3 then ltip[#ltip + 1] = { "Weit voraus? Klick aufs Plan-Band sucht den passenden Einstieg neu.", 0.31, 0.82, 1 } end
+  elseif diff <= -0.9 then
+    BAND.pLvl:Set(fmt("HINTER PLAN  %.1f", diff), { 1, 0.54, 0.24 }, "i_xph")
+    ltip[#ltip + 1] = { "Etwas langsamer als geplant. Der Plan enthält Grind-Schritte, die das auffangen;", 0.75, 0.8, 0.82 }
+    ltip[#ltip + 1] = { "Quests mit fehlender Stufe warten im Plan (\"ab St. X\").", 0.75, 0.8, 0.82 }
+  else
+    BAND.pLvl:Set("IM PLAN  ·  ST. " .. planL, NEON, "i_flag")
+    ltip[#ltip + 1] = { "Stufe passt genau zum Plan.", 0.75, 0.8, 0.82 }
+  end
+  ltip[#ltip + 1] = { "Klick: Plan-Stand im Chat", 0.5, 0.55, 0.58 }
+  BAND.pLvl.tip = ltip
+  -- Log-Pille
+  local a = LOGADV
+  if a then
+    local txt = fmt("LOG %d/%d", a.used, a.max)
+    local c = TEAL
+    if a.del > 0 then txt = txt .. fmt("  ·  |cffff6b6b%d LÖSCHEN|r", a.del); c = { 1, 0.36, 0.36 }
+    elseif a.full then txt = txt .. "  ·  |cffffc84dWIRD VOLL|r"; c = { 1, 0.78, 0.30 }
+    elseif a.tin > 0 then txt = txt .. fmt("  ·  |cff39ff6b%d ABGEBEN|r", a.tin); c = NEON
+    elseif a.chk > 0 then txt = txt .. fmt("  ·  |cffffc84d%d PRÜFEN|r", a.chk); c = { 1, 0.78, 0.30 } end
+    BAND.pLog:Set(txt, c, "i_log")
+    local tt = { { "Questlog-Check", c[1], c[2], c[3], true }, { fmt("%d von %d Plätzen belegt", a.used, a.max), 1, 1, 1 } }
+    if a.del > 0 then tt[#tt + 1] = { a.del .. " Quests stören den Plan – löschen", 1, 0.42, 0.42 } end
+    if a.tin > 0 then tt[#tt + 1] = { a.tin .. " fertige Quests lohnen die Abgabe", NEON[1], NEON[2], NEON[3] } end
+    if a.full then tt[#tt + 1] = { fmt("Bis Schritt %d brauchst du %d Plätze", a.peakAt or 0, a.peak), 1, 0.78, 0.3 } end
+    tt[#tt + 1] = { "Klick: Liste mit Grund je Quest + Löschen-Knopf", 0.5, 0.55, 0.58 }
+    BAND.pLog.tip = tt
+  else
+    BAND.pLog:Set("LOG  …", TEAL, "i_log"); BAND.pLog.tip = nil
+  end
+end
+
 function Refresh(rescan)
   if not DB then return end
   if rescan then scanTargets() end
@@ -1227,8 +1592,17 @@ function Refresh(rescan)
   M.xi = { lvl = lvl, cur = cur, mx = mx, rest = rest, xph = xph }
 
   if DB.mode == "route" then routeUpdate() end
+  -- Kopf: im Routen-Modus mit Plan-Band (Lagebild)
+  local band = DB.mode == "route" and RT.key ~= nil
+  HEAD_H = band and HEAD_R or HEAD_Q
+  listTop = -(HEAD_H + 4)
+  divider:Place(M, 14, -(HEAD_H - 1), W - 14, 0)
+  empty:ClearAllPoints(); empty:SetPoint("TOPLEFT", 18, listTop - 8)
+  BAND:SetShown(band)
+  if band then UpdateLog(RT.logDirty); RT.logDirty = false end
   if DB.mode == "route" and RT.key then      -- ohne passende Route (z. B. ab 40): Quest-Ansicht
     local route = RT.key and LevelPilot_Routes[RT.key]
+    DrawBand(route)
     -- Eintraege bilden: gleiche Aufgabe beim gleichen NPC wird EIN Eintrag ("3 Quests annehmen")
     local items, byKey = {}, {}
     for _, si in ipairs(RT.list) do
@@ -1250,7 +1624,7 @@ function Refresh(rescan)
     end
     RT.items = items
     local heroStep = route and RT.idx and route.steps[RT.idx]
-    subHead:SetText(route and ((DB.speed and "|cff39ff6bSPEED|r  ·  " or "") .. ((heroStep and heroStep.z) and ("|cffd8dde0" .. heroStep.z .. "|r  ·  ") or "") .. (route.name or "")) or "keine Route")
+    subHead:SetText(route and ((DB.speed and "|cff39ff6bSPEED|r  ·  " or "") .. "|cffd8dde0FESTER PLAN|r  ·  " .. (route.name or ""):gsub("%s*·%s*Speedrun$", "")) or "keine Route")
     local n = collapsed and 0 or math.min(#items, DB.rows or 6)
     local bottom = LayoutRows(n, "route")
     local heroT = heroStep and LP_Route.StepTarget(heroStep)
@@ -1269,7 +1643,12 @@ function Refresh(rescan)
         local grind = st.t == "grind"
         local later = LP_Route.state and LP_Route.state[si] == "later"
         -- Laufweg ueber das Wegenetz (aktuelles Ziel bis 8 km, Listenzeilen bis 2,5 km; weiter: Luftlinie)
-        local d = LP_Route.StepCost and LP_Route.StepCost(st, nil, i == 1 and 8000 or 2500) or LP_Route.StepDist(st)
+        local d
+        if i == 1 and st.t == "turnin" and st.q and not LP_Route.Ready(st.q) then
+          local gt = LP_Route.GoalTarget(st); d = gt and LP_Route.Dist(gt)
+        else
+          d = LP_Route.StepCost and LP_Route.StepCost(st, nil, i == 1 and 8000 or 2500) or LP_Route.StepDist(st)
+        end
         r.stepIdx, r.qid, r.group = si, st.q, it.steps
         local sub, gfrac = {}, nil
         if st.t == "complete" and st.q then
@@ -1290,7 +1669,9 @@ function Refresh(rescan)
           -- Hero-Karte: Typ-Farbe als Lichtschleier, grosse Kugel, Fortschrittslinie
           r:SetWash(cr, cg, cb)
           r.orb:Tint({ cr, cg, cb }, lighten(cr, cg, cb)); r.orb:Icon(st.t or "note", cr, cg, cb)
-          r.kind:SetText(fmt("|cff%s%s|r", col, grind and ("GRINDEN  ·  BIS STUFE " .. (st.to or "?")) or (cnt > 1 and (cnt .. " QUESTS " .. label:upper()) or label:upper())))
+          local notReady = st.t == "turnin" and st.q and not LP_Route.Ready(st.q)
+          local kindTxt = grind and ("GRINDEN  ·  BIS STUFE " .. (st.to or "?")) or (notReady and "ERST ERLEDIGEN, DANN ABGEBEN") or (cnt > 1 and (cnt .. " QUESTS " .. label:upper()) or label:upper())
+          r.kind:SetText(fmt("|cff%s%s|r  |cff8a9396·|r  |cffb8c2c6SCHRITT %d|r", col, kindTxt, si))
           local ht = grind and (titles[1]:gsub("^Grinden:%s*", "")) or titles[1]
           -- Gruppe: erster Name gross, die anderen in der Zeile darunter (nichts wird abgeschnitten)
           r.title:SetText("|cffffffff" .. ht .. "|r" .. (cnt > 1 and ("  |cff8a9396+" .. (cnt - 1) .. "|r") or ""))
@@ -1306,6 +1687,22 @@ function Refresh(rescan)
                 if dd and dd < 120 then near[#near + 1] = LP_Route.StepTitle(o) end
               end
               if #near >= 2 then break end
+            end
+          end
+          if #near < 2 and LP_Route.state then
+            for k = (RT.ptr or 1), #route.steps do
+              local o = route.steps[k]
+              if k ~= si and o.t == "complete" and o.q and LP_Route.state[k] == "open" and LP_Route.InLog(o.q) then
+                local ot = LP_Route.StepTarget(o)
+                local dd = ot and LP_Route.Dist(ot)
+                if dd and dd < 150 then
+                  local nm = LP_Route.StepTitle(o)
+                  local dup = false
+                  for _, x in ipairs(near) do if x == nm then dup = true end end
+                  if not dup then near[#near + 1] = nm end
+                end
+              end
+              if #near >= 2 or k > (RT.ptr or 1) + 40 then break end
             end
           end
           local line = sub
@@ -1337,6 +1734,8 @@ function Refresh(rescan)
     end
     if not route then
       empty:SetText("Keine Route für deine Fraktion/Stufe gefunden.\nUnten auf QUESTS umschalten.")
+    elseif RT.wait then
+      empty:SetText("Lese Questlog und Questie-Daten …\nDann erkenne ich, wo du im Plan stehst.")
     elseif n == 0 and not collapsed then
       empty:SetText("Route " .. (route.name or "") .. " erledigt – nächster Abschnitt folgt.")
     end
@@ -1476,21 +1875,14 @@ local function routeWants(qid)
   if not qid then return false end
   if DB.ban[qid] then return false end
   local route = LevelPilot_Routes[RT.key]; if not route then return true end
-  for i, st in ipairs(route.steps) do
-    if st.t == "accept" and (st.q == qid) then
-      local stt = LP_Route.state and LP_Route.state[i]
-      return stt ~= "skip"
-    end
-    if st.t == "accept" and st.alt then
-      for _, a in ipairs(st.alt) do if a == qid then return true end end
-    end
-  end
-  return false
+  return LP_Route.Wants(route, qid, RT.ptr)
 end
 local function routeWantsTitle(title)
   if not (DB and DB.mode == "route" and RT.key) then return true end
   local route = LevelPilot_Routes[RT.key]; if not (route and title) then return false end
-  for i, st in ipairs(route.steps) do
+  local p = RT.ptr or 1
+  for i = p, math.min(#route.steps, p + LP_Route.WANT_SPAN) do
+    local st = route.steps[i]
     if st.t == "accept" and st.q and LP_Route.state and LP_Route.state[i] == "open" and LP_Route.StepTitle(st) == title then return true end
   end
   return false
@@ -1500,7 +1892,7 @@ local function hintNotWanted(qid, title)
   local k = qid or title
   if not k or notWanted[k] then return end
   notWanted[k] = true
-  P("|cffffd24d" .. (title or ("Quest " .. tostring(qid))) .. "|r ist nicht in der Route (langsam/unnötig) – nicht automatisch angenommen.")
+  P("|cffffd24d" .. (title or ("Quest " .. tostring(qid))) .. "|r ist gerade nicht in deinem Plan – nicht automatisch angenommen.")
 end
 
 local function gossipAuto()
@@ -1577,6 +1969,25 @@ end
 ---------------------------------------------------------------------------
 -- Ereignisse
 ---------------------------------------------------------------------------
+-- Einstieg/Sprung melden (Fenster-Meldung + Chat mit Grund und Rueckweg)
+local WHY = { hier = "an deinen Quests hier vor Ort", frisch = "an deinen zuletzt angenommenen/abgegebenen Quests",
+  log = "an den Quests in deinem Log", stufe = "an deiner Stufe", start = "Routenanfang" }
+function announce(route, info)
+  local p = info.jumped and info.jumped.to or info.ptr
+  local s = route.steps[math.min(p or 1, #route.steps)]
+  local sd = s and route.segs and route.segs[s.seg or 1]
+  local where = sd and (sd.z .. " · " .. sd.hub) or (s and s.z or "")
+  if info.jumped then
+    Toast(fmt("|cff4fd2ffPLAN SPRINGT MIT|r  ·  Schritt %d  ·  %s", p, where), "go")
+    P(fmt("Plan: Sprung von Schritt %d auf |cff39ff6b%d|r (%s) – du machst schon Quests von dort. %d offene Schritte dazwischen übersprungen.  |cff8a8f93Rückgängig: /lp zurueck|r",
+      info.jumped.from, p, where, info.jumped.n))
+  elseif info.entry then
+    Toast(fmt("|cff39ff6bEINSTIEG|r  ·  Schritt %d  ·  %s", p or 1, where), "go")
+    P(fmt("Plan: Einstieg bei Schritt |cff39ff6b%d|r von %d (%s) – erkannt %s.  |cff8a8f93Falsch? /lp schritt <Nr> oder /lp einstieg|r",
+      p or 1, #route.steps, where, WHY[info.entry] or ""))
+  end
+end
+
 local DONE = {}
 local function checkCompleted(silent)
   pcall(function()
@@ -1615,17 +2026,20 @@ E:SetScript("OnEvent", function(_, ev, a1, ...)
       pcall(E.RegisterEvent, E, e)
     end
     if not DB.maxDiffUser then DB.maxDiff = 5 end   -- Standard: 100 % XP
-    if LP_Route then LP_Route.mem = DB.qmem; LP_Route.ScanLog(false); LP_Route.ban = DB.ban; LP_Route.UserNav = DB.nav; LP_Route.speed = DB.speed; LP_Route.maxDiff = DB.maxDiff end
+    DB.qmem.at = DB.qmem.at or {}
+    RT.loginT = GetTime()
+    if LP_Route then LP_Route.mem = DB.qmem; LP_Route.PruneStamps(); LP_Route.ScanLog(false); LP_Route.ban = DB.ban; LP_Route.UserNav = DB.nav; LP_Route.speed = DB.speed; LP_Route.maxDiff = DB.maxDiff end
     if Quiet then Quiet(8) end
     xpTrack(); checkCompleted(true); Refresh(true)
     P("v" .. VERSION .. " bereit – /lp für Befehle. Umschalt halten = Auto-Quest kurz aus.")
     if oldSkip then P("Hinweis: alte übersprungene Schritte wurden zurückgesetzt (sie passten nicht mehr zur neuen Route).") end
     return
   end
+  if ev == "QUEST_ACCEPTED" or ev == "QUEST_TURNED_IN" or ev == "QUEST_REMOVED" or ev == "QUEST_LOG_UPDATE" then RT.logDirty = true end
   if LP_Route and LP_Route.OnAccepted then
     if ev == "QUEST_ACCEPTED" then LP_Route.OnAccepted((... and type(...) == "number") and ... or a1)
     elseif ev == "QUEST_TURNED_IN" then LP_Route.OnTurnedIn(a1)
-    elseif ev == "QUEST_LOG_UPDATE" then LP_Route.ScanLog(true)
+    elseif ev == "QUEST_LOG_UPDATE" then LP_Route.ScanLog(true); RT.logReady = true
     elseif ev == "PLAYER_ENTERING_WORLD" then LP_Route.ScanLog(false)
     elseif ev == "QUEST_REMOVED" then LP_Route.ScanLog(false); LP_Route.OnRemoved(a1) end
   end
@@ -2070,17 +2484,54 @@ SlashCmdList.LEVELPILOT = function(msg)
   elseif c == "menu" or c == "menü" or c == "einstellungen" or c == "optionen" then OpenSettings(true)
   elseif c == "xp" then XPS.start, XPS.gained = GetTime(), 0; P("XP/h neu gestartet.")
   elseif c == "weiter" then
-    if RT.key and RT.idx then SkipStep(RT.idx); P("Schritt übersprungen. Zurückholen: /lp zurueck") end; Refresh(true)
+    if RT.key and RT.idx then SkipStep(RT.idx); P("Schritt " .. RT.idx .. " übersprungen. Zurückholen: /lp zurueck") end; Refresh(true)
   elseif c == "zurueck" or c == "zurück" then
-    local last = table.remove(DB.skipLog)
-    if last and DB.skipK[last.r] then DB.skipK[last.r][last.k] = nil; P("Schritt zurückgeholt.") else P("Nichts übersprungen.") end
+    -- das Letzte rueckgaengig: Sprung des Plans oder uebersprungener Schritt
+    local plan = RT.key and DB.plan[RT.key]
+    local lastJ = plan and plan.hist and plan.hist[#plan.hist]
+    local lastS = DB.skipLog[#DB.skipLog]
+    if lastJ and (not lastS or (lastJ.t or 0) >= (lastS.t or 0)) then
+      table.remove(plan.hist)
+      plan.k, plan.i, plan.hold = lastJ.k, lastJ.i, time() + 1800
+      P("Sprung rückgängig – Plan wieder bei Schritt " .. tostring(lastJ.i) .. ". (30 min kein automatischer Sprung)")
+    elseif lastS then
+      table.remove(DB.skipLog)
+      if DB.skipK[lastS.r] then DB.skipK[lastS.r][lastS.k] = nil end
+      P("Schritt zurückgeholt.")
+    else P("Nichts zum Zurücknehmen.") end
     Refresh(true)
+  elseif c == "einstieg" then
+    local plan = RT.key and DB.plan[RT.key]
+    if plan then plan.k, plan.i, plan.hold = nil, nil, nil end
+    P("Suche deinen Einstieg neu (Questlog + Ort + Stufe) …"); Refresh(true)
+  elseif c == "schritt" then
+    local n = tonumber((msg or ""):match("(%d+)"))
+    local route = RT.key and LevelPilot_Routes[RT.key]
+    if route and n and route.steps[n] then
+      local plan = DB.plan[RT.key]
+      plan.hist = plan.hist or {}
+      if plan.k then table.insert(plan.hist, { k = plan.k, i = plan.i, t = time() }) end
+      plan.k, plan.i, plan.hold = LP_Route.StepKey(route.steps[n]), n, time() + 1800
+      P("Plan auf Schritt " .. n .. " gesetzt (erledigte Schritte danach werden übersprungen). Rückgängig: /lp zurueck"); Refresh(true)
+    else P("Benutzung: /lp schritt <Nummer>  (1–" .. (route and #route.steps or "?") .. ")") end
+  elseif c == "log" or c == "questlog" then OpenLog(true)
+  elseif c == "plan" then
+    local route = RT.key and LevelPilot_Routes[RT.key]
+    if not route then P("Keine Route für deine Stufe.") return end
+    local s = RT.idx and route.steps[RT.idx]
+    local sd = s and route.segs and route.segs[s.seg or 1]
+    local missed = 0
+    for _, st in pairs(LP_Route.state or {}) do if st == "missed" then missed = missed + 1 end end
+    P(fmt("Plan %s: Schritt |cff39ff6b%s|r von %d%s · Ziel: %s%s", route.name or RT.key, tostring(RT.idx or "–"), #route.steps,
+      sd and (" · " .. sd.z .. " · " .. sd.hub) or "", s and ((LP_Route.TYPE[s.t] or s.t) .. " " .. LP_Route.StepTitle(s)) or "–",
+      missed > 0 and fmt(" · %d hinter dir übersprungen", missed) or ""))
   elseif c == "neu" then
-    if RT.key then DB.skipK[RT.key] = {} end; wipe(DB.skipLog); P("Übersprungene Schritte zurückgesetzt."); Refresh(true)
+    if RT.key then DB.skipK[RT.key] = {}; DB.plan[RT.key] = {} end; wipe(DB.skipLog)
+    P("Übersprungene Schritte zurückgesetzt, Einstieg wird neu gesucht."); Refresh(true)
   elseif c == "route" then
     local R = LP_Route
     P("Route: " .. tostring(RT.key and LevelPilot_Routes[RT.key].name) .. " · Schritt " .. tostring(RT.idx) .. " · Questie-Daten: " .. ((R and R.HasQuestie()) and "|cff39ff6bja|r" or "|cffff5050nein|r"))
   else
-    P("/lp (an/aus) · /lp menu · /lp weiter · /lp zurueck · /lp neu · /lp route · /lp punkt (neu|weg) · /lp export · /lp import · /lp wege · /lp speed · /lp strahl · /lp ton · /lp kampf · /lp flug · /lp entsperren · /lp sound · /lp gruen · /way x y · /lp auto · /lp pfeil · /lp marker · /lp lock · /lp unlock · /lp toast · /lp xp · /lp reset")
+    P("/lp (an/aus) · /lp menu · /lp plan · /lp log · /lp weiter · /lp zurueck · /lp einstieg · /lp schritt <Nr> · /lp neu · /lp route · /lp punkt (neu|weg) · /lp export · /lp import · /lp wege · /lp speed · /lp strahl · /lp ton · /lp kampf · /lp flug · /lp entsperren · /lp sound · /lp gruen · /way x y · /lp auto · /lp pfeil · /lp marker · /lp lock · /lp unlock · /lp toast · /lp xp · /lp reset")
   end
 end

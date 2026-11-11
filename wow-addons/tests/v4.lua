@@ -1,5 +1,5 @@
 -- LevelPilot 4: Logik-Tests mit steuerbarer Uhr, Position und Questlog
-local Tm=1000 function GetTime() return Tm end
+local Tm=1000 function GetTime() return Tm end function time() return 1700000000 + Tm end
 local Obj={} Obj.__index=function(t,k)
   if type(k)=="string" and k:sub(1,2)=="__" then return nil end
   if k=="GetWidth" then return function() return 280 end end
@@ -92,14 +92,14 @@ local function cur() refresh() local idx=nil for i,s in ipairs(route.steps) do e
 
 print("== A: Reise-Schritt")
 refresh()
-local idx=R.Current(route,22,{},6,nil)
+local idx=R.Plan(route,22,{},{},6,nil)
 check("weit weg: erst zum Hub reisen", idx==1)
 LOG[101]=true refresh()
-idx=R.Current(route,22,{},6,nil)
+idx=R.Plan(route,22,{},{},6,nil)
 check("schon eine Quest vom Hub angenommen -> Reise gilt als erledigt", R.state[1]=="done")
 LOG[101]=nil refresh()
 PX,PY=0.30,0.30 refresh()
-idx=R.Current(route,22,{},6,nil)
+idx=R.Plan(route,22,{},{},6,nil)
 check("am Hub angekommen -> Reise erledigt", R.state[1]=="done")
 
 print("== B: Gruppieren + Anzeige")
@@ -108,11 +108,12 @@ local found=false for _,f in ipairs(frames) do end
 -- Texte stehen in der Ausgabe ("2 QUESTS ANNEHMEN")
 
 print("== C: Auto-Annehmen nur Routen-Quests")
+LevelPilotDB.plan.test = {} LOG = {} refresh()   -- frischer Plan am Hub
 local accepted=0 AcceptQuest=function() accepted=accepted+1 end
 local QID=101 GetQuestID=function() return QID end GetTitleText=function() return "Fremde Quest" end
 E._OnEvent(E,"QUEST_DETAIL") check("Routen-Quest wird angenommen", accepted==1)
 QID=999 E._OnEvent(E,"QUEST_DETAIL") check("fremde Quest wird NICHT angenommen", accepted==1)
-local hint=false for _,m in ipairs(chat) do if m:find("nicht in der Route") then hint=true end end
+local hint=false for _,m in ipairs(chat) do if m:find("nicht in deinem Plan") then hint=true end end
 check("Hinweis im Chat", hint)
 LevelPilotDB.ban[102]=true QID=102 E._OnEvent(E,"QUEST_DETAIL") check("gesperrte Quest wird NICHT angenommen", accepted==1)
 LevelPilotDB.ban[102]=nil
@@ -123,17 +124,18 @@ local t=R.StepTarget(route.steps[4])
 check("Ziel bei der Gruppe (40/40), nicht beim Einzelspawn (80/80)", t and math.abs(t.x-0.41)<0.02 and math.abs(t.y-0.403)<0.02)
 check("Gruppe aus 3 Spawns", t and t.count==3)
 
-print("== E: Hysterese (kein Hin-und-her)")
+print("== E: fester Plan (kein Hin-und-her, keine Umsortierung nach Entfernung)")
 local D={}
 local orig=R.StepDist
 R.StepDist=function(s) return D[s] end
 LOG[102]=true refresh()
+local PL={ k="complete:101", i=4 }
 D[route.steps[4]]=100; D[route.steps[7]]=60
-local i1=R.Current(route,22,{},6,{i=4,since=0})
-check("neues Ziel nur knapp besser -> aktuelles bleibt", i1==4)
+local i1=R.Plan(route,22,{},PL,6,{i=4,since=0})
+check("anderes Ziel naeher -> Plan-Schritt bleibt", i1==4)
 D[route.steps[7]]=10
-local i2=R.Current(route,22,{},6,{i=4,since=0})
-check("neues Ziel deutlich besser -> Wechsel", i2==7)
+local i2=R.Plan(route,22,{},PL,6,{i=4,since=0})
+check("anderes Ziel viel naeher -> Plan-Schritt bleibt trotzdem", i2==4)
 R.StepDist=orig
 
 print("== F: Questlog-Abgleich")

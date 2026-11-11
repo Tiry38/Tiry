@@ -233,12 +233,12 @@ function L.dump(root, path)
           local coord = rgn.__coord and table.concat(rgn.__coord, ",") or ""
           f:write(table.concat({ "T", r.l, r.b, r.r, r.t, tostring(rgn.__file), c[1], c[2], c[3], (c[4] or 1) * (rgn.__alpha or 1),
             g and g[1] or "", g and table.concat(g[2], ",") or "", g and table.concat(g[3], ",") or "", coord, rgn.__blend or "",
-            masks[rgn] and tostring(masks[rgn]) or "" }, "\t"), "\n")
+            masks[rgn] and tostring(masks[rgn]) or "", rgn.__slice and table.concat(rgn.__slice, ",") or "", rgn.__rot or "" }, "\t"), "\n")
         else
           local tc = rgn.__tc
           local lines = colorLines(rgn)
           f:write(table.concat({ "F", r.l, r.b, r.r, r.t, rgn.__weight or "regular", rgn.__size or 12, tc[1], tc[2], tc[3], tc[4] or 1,
-            rgn.__justH or "CENTER", rgn.__justV or "MIDDLE", rgn.__spacing or 0, table.concat(lines, "\31") }, "\t"), "\n")
+            rgn.__justH or "CENTER", rgn.__justV or "MIDDLE", rgn.__spacing or 0, table.concat(lines, "\31"), rgn.__outline and "OUTLINE" or "" }, "\t"), "\n")
         end
       end
     end

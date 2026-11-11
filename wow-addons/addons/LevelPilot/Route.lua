@@ -1,9 +1,10 @@
 ---------------------------------------------------------------------------
--- LevelPilot · Routen-Engine 4
--- Waehlt die Route passend zu Fraktion + Level, ueberspringt Erledigtes und
--- Unpassendes, waehlt live den sinnvollsten naechsten Schritt (mit Hysterese)
--- und liefert Zielpunkte: Questgeber/Abgabe (Questie), Questziele = naechste
--- Gegner-/Objekt-Gruppe aus Questie, sonst Blizzards Questbereich.
+-- LevelPilot · Routen-Engine 5 (fester Plan)
+-- Waehlt die Route passend zu Fraktion + Level, fuehrt einen Plan-Zeiger, der nur vorwaerts
+-- ueber Erledigtes laeuft (Reihenfolge des Planers gilt), erkennt beim Einstieg deinen Stand
+-- (Questlog + Ort + Stufe), springt mit, wenn du nachweislich weiter bist, prueft das Questlog
+-- (behalten / abgeben / loeschen) und liefert Zielpunkte: Questgeber/Abgabe (Questie),
+-- Questziele = naechste Gegner-/Objekt-Gruppe aus Questie, sonst Blizzards Questbereich.
 ---------------------------------------------------------------------------
 LevelPilot_Routes = LevelPilot_Routes or {}
 LP_Route = {}
@@ -239,8 +240,15 @@ function R.ScanLog(trusted)
   for q in pairs(ids) do R.mem.acc[q] = true end
   memoReset()
 end
-function R.OnAccepted(q) if q then R.mem.acc[q] = true; R.mem.done[q] = nil; memoReset() end end
-function R.OnTurnedIn(q) if q then R.mem.done[q] = true; R.mem.acc[q] = nil; memoReset() end end
+local function stamp(q) R.mem.at = R.mem.at or {}; R.mem.at[q] = (time and time()) or os.time() end
+function R.OnAccepted(q) if q then R.mem.acc[q] = true; R.mem.done[q] = nil; stamp(q); memoReset() end end
+function R.OnTurnedIn(q) if q then R.mem.done[q] = true; R.mem.acc[q] = nil; stamp(q); memoReset() end end
+-- Zeitstempel aelter als 3 Tage vergessen (SavedVariables klein halten)
+function R.PruneStamps()
+  local at = R.mem.at; if not at then return end
+  local t0 = ((time and time()) or os.time()) - 3 * 86400
+  for q, t in pairs(at) do if t < t0 then at[q] = nil end end
+end
 function R.OnRemoved(q)
   if q and not LOGC.ids[q] then R.mem.acc[q] = nil end
   memoReset()
@@ -317,9 +325,6 @@ function R.OnLanded() STATE.landedAt = GetTime() end
 -- Quest grau? Classic-Quest-XP: volle XP bis 5 Stufen unter dir, dann 80/60/40/20/10 %
 R.maxDiff = 5
 R.maxAbove = 3
-R.EXTRA_YD = 1800   -- Quest aus dem Log mitnehmen, wenn der echte Laufweg hoechstens so lang ist ...
-R.EXTRA_PEN = 120   -- ... mit diesem Aufschlag gegenueber der Routen-Reihenfolge (Yards)
-R.ahead = 2         -- Annehmen ueberspringen, wenn du 2+ Stufen ueber der Planung bist UND die Route dort schon weiter ist
 local function greyFor(ql, lvl)
   if not ql then return false end
   if R.maxDiff and (lvl - ql) > R.maxDiff then return true end
@@ -522,6 +527,22 @@ function R.StepDist(s)
   return t and distTo(t), t
 end
 
+-- Ziel fuer den Pfeil: wie StepTarget, aber eine Abgabe, deren Quest noch nicht fertig ist,
+-- fuehrt zuerst zu den Questzielen (zweites Ergebnis true = "erst erledigen")
+local gcache = setmetatable({}, { __mode = "k" })
+function R.GoalTarget(s)
+  if s and s.t == "turnin" and s.q and inLog(s.q) and not ready(s.q) then
+    local now = GetTime()
+    local c = gcache[s]
+    if c and now - c.t < 1.5 then return c.v, true end
+    local v = objectiveTarget(s.q)
+    if v then v = { map = v.map, x = v.x, y = v.y, spot = v.spot, count = v.count } end
+    gcache[s] = { t = now, v = v }
+    if v then return v, true end
+  end
+  return R.StepTarget(s)
+end
+
 -- Weltpunkt eines Ziels { map, x, y } (Travel.lua) – nil ohne Wegenetz
 function R.WorldOf(t)
   if t and t.map and t.x and LP_Walk and LP_Walk.Point then return LP_Walk.Point(t.map, t.x, t.y) end
@@ -594,47 +615,44 @@ function R.Pick(faction, lvl, wanted)
   return best
 end
 
--- Index des aktuellen Schritts + Liste der naechsten n
--- skipped: Tabelle StepKey -> true
-function R.Current(route, lvl, skipped, n, cur)
-  memoReset()
-  local steps = route and route.steps or {}
+-- Index je Quest: in welchen Schritten der Route kommt sie vor? (gepuffert je Route)
+local QIDX = setmetatable({}, { __mode = "k" })
+local function questIndex(route)
+  local ix = QIDX[route]
+  if ix then return ix end
+  ix = {}
+  for i, s in ipairs(route.steps or {}) do
+    if s.q then
+      local e = ix[s.q]; if not e then e = {}; ix[s.q] = e end
+      if s.t == "accept" and not e.acc then e.acc = i
+      elseif s.t == "complete" and not e.cmp then e.cmp = i
+      elseif s.t == "turnin" and not e.tin then e.tin = i end
+    end
+  end
+  QIDX[route] = ix
+  return ix
+end
+R.QuestIndex = questIndex
+
+local function now() if time then return time() end return os.time() end
+R.Now = now
+
+-- Zustand aller Schritte: done / skip / later / open (Reise-Schritte nach "warst du schon da / brauchst du es noch")
+local function computeState(steps, lvl, skipped, cur)
   local state = {}
   for i, s in ipairs(steps) do
     if skipped and skipped[R.StepKey(s)] then state[i] = "skip"
     elseif s.q then
       local d = R.StepDone(s, lvl, (cur and cur.i == i) and cur or nil)
       state[i] = (d == true) and "done" or (d == "skip" and "skip") or (d == "later" and "later") or "open"
-    end
-  end
-  -- Rausgewachsen: Route ist schon weiter (spaeterer Schritt erledigt) und du bist 2+ Stufen ueber der
-  -- Planung eines alten Annehmen-Schritts -> nicht zurueckschicken. Nur rueckwaerts: ein Gebiet, in das du
-  -- erst kommst, wird nie uebersprungen, auch wenn du ueber Plan bist.
-  if R.ahead then
-    local progI
-    for i = #steps, 1, -1 do
-      local s = steps[i]
-      if state[i] == "done" and s.q and (s.t == "accept" or s.t == "turnin") then progI = i; break end
-    end
-    local progL = progI and steps[progI].l
-    if progL then
-      for i = 1, progI - 1 do
-        local s = steps[i]
-        if s.t == "accept" and s.l and s.l < progL and lvl >= s.l + R.ahead
-           and (state[i] == "open" or state[i] == "later") then state[i] = "skip" end
-      end
-    end
-  end
-  -- Reisen/Trainer: nur noetig, wenn im folgenden Abschnitt noch etwas offen ist,
-  -- und erledigt, sobald dort schon etwas angenommen/abgegeben wurde (du warst also schon da)
-  for i, s in ipairs(steps) do
-    if s.t == "grind" and not state[i] then
-      -- Grinden/Stufen-Kontrolle: offen nur, solange die Stufe fehlt und vorher nichts mehr offen ist
+    elseif s.t == "grind" then
       state[i] = (lvl >= (s.to or 0)) and "done" or "open"
     end
   end
+  -- Reisen/Trainer: noetig, wenn im folgenden Abschnitt noch etwas offen ist; erledigt, sobald dort
+  -- schon etwas angenommen/abgegeben wurde (du warst also schon da)
   for i, s in ipairs(steps) do
-    if not s.q and not state[i] then
+    if not state[i] then
       local d = R.StepDone(s, lvl, (cur and cur.i == i) and cur or nil)
       if d == true then state[i] = "done"
       else
@@ -653,93 +671,433 @@ function R.Current(route, lvl, skipped, n, cur)
       end
     end
   end
-  local out, first = {}, nil
-  for i = 1, #steps do
+  return state
+end
+R.ComputeState = computeState
+
+---------------------------------------------------------------------------
+-- Plan-Engine 5: fester Plan mit Zeiger
+-- Der Zeiger steht auf deinem Platz in der Route und laeuft nur VORWAERTS ueber Erledigtes und
+-- Unpassendes. Keine Umsortierung nach Entfernung: die Reihenfolge des Plans gilt. Offenes VOR dem
+-- Zeiger ist "verpasst" und wird nicht mehr angesteuert (der Questlog-Check sagt, was davon weg kann).
+-- Einstieg (noch kein Zeiger, neue Route, /lp einstieg): Stand aus Questlog + Ort + Stufe erkennen.
+-- Sprung: machst du nachweislich spaetere Schritte und das Plan-Ziel ist weit weg, zieht der Zeiger
+-- nach (umkehrbar mit /lp zurueck). Nie automatisch rueckwaerts.
+---------------------------------------------------------------------------
+R.ENTRY_NEAR = 600     -- Einstieg: Geber/Abgabe einer Quest im Log so nah = "hier stehst du im Plan"
+R.JUMP_FAR = 900       -- Sprung nur, wenn das Plan-Ziel weiter weg ist (Luftlinie, Yards)
+R.JUMP_NEAR = 450      -- ... und ein Beweis-Schritt so nah bei dir liegt
+R.JUMP_SPAN = 150      -- so weit voraus wird nach Beweisen gesucht
+R.JUMP_DWELL = 3       -- Sekunden, die derselbe Beweis bestehen muss (kein Sprung im Vorbeifliegen)
+R.FRESH = 7200         -- "frisch" = in den letzten 2 h abgegeben
+R.LATER_SPAN = 30      -- Schritt mit fehlender Stufe wartet so lange im Plan (gleicher Abschnitt)
+R.WANT_SPAN = 60       -- Auto-Annehmen nur fuer Quests, die bald dran sind
+
+local JC = setmetatable({}, { __mode = "k" })   -- Sprung-Kandidat je Plan (nur im Speicher)
+local function findKey(steps, k, hint)
+  if not k then return end
+  if k == "END" then return #steps + 1 end
+  if hint and steps[hint] and R.StepKey(steps[hint]) == k then return hint end
+  local best, bd
+  for i, s in ipairs(steps) do
+    if R.StepKey(s) == k then
+      local d = hint and math.abs(i - hint) or i
+      if not bd or d < bd then best, bd = i, d end
+    end
+  end
+  return best
+end
+
+local function nextOpen(state, from, to)
+  for i = from, to do
     local st = state[i]
-    if st == "open" or st == "later" then
-      out[#out + 1] = i
-      if not first and st == "open" then first = i end
-      if #out >= math.max(n or 5, 14) and first then break end
+    if st == nil then return end
+    if st == "open" then return i end
+  end
+end
+
+-- Zeiger vorwaerts: ueber Erledigtes/Unpassendes; ein Schritt mit fehlender Stufe wartet,
+-- solange der naechste offene Schritt im selben Abschnitt und nah im Plan liegt
+local function advance(steps, state, p)
+  local N = #steps
+  while p <= N do
+    local st = state[p]
+    if st == "done" or st == "skip" then p = p + 1
+    elseif st == "later" then
+      local h = nextOpen(state, p + 1, N)
+      if h and (h - p > R.LATER_SPAN or steps[h].seg ~= steps[p].seg) then p = p + 1 else break end
+    else break end
+  end
+  return p
+end
+
+-- Einstieg: wo stehst du im Plan?
+-- Fortschritt zeigen ANGENOMMENE Quests (eine spaetere Quest kann man nicht ohne den Weg dorthin haben).
+-- Abgaben zaehlen nur im selben Abschnitt mit – sonst zoege eine Quest, die der Plan erst viel spaeter
+-- abgibt, den Einstieg weit nach vorn. Reihenfolge:
+-- 1. angenommene Quests, deren Geber bei dir ist  2. Abgaben bei dir (fruehester Abschnitt)
+-- 3. frisch abgegeben/angenommen  4. angenommene Quests im Log  5. Abgaben im Log  6. Stufe
+local function cluster(steps, list)
+  local top = list[#list]
+  local a = top
+  for k = #list, 1, -1 do
+    local i = list[k]
+    if steps[i].seg == steps[top].seg and top - i <= 80 then a = i end
+  end
+  return a
+end
+-- Anfang des Abschnitts (hoechstens 80 Schritte zurueck); Erledigtes ueberspringt danach advance()
+local function segStart(steps, i)
+  local j = i
+  while j > 1 and steps[j - 1].seg == steps[i].seg and i - (j - 1) <= 80 do j = j - 1 end
+  return j
+end
+R.SegStart = segStart
+local function withSeg(steps, acc, tin)
+  local top = acc[#acc]
+  local out = {}
+  for _, i in ipairs(acc) do out[#out + 1] = i end
+  for _, i in ipairs(tin) do if i < top and steps[i].seg == steps[top].seg then out[#out + 1] = i end end
+  table.sort(out)
+  return out
+end
+function R.Entry(route, state, lvl)
+  local steps = route.steps
+  local nearA, nearT, allA, allT = {}, {}, {}, {}
+  for i, s in ipairs(steps) do
+    local acc = s.t == "accept" and state[i] == "done"
+    local tin = s.t == "turnin" and state[i] == "open"
+    if s.q and (acc or tin) and inLog(s.q) then
+      local t = R.StepTarget(s)
+      local d = t and distTo(t)
+      local near = d and d <= R.ENTRY_NEAR
+      if acc then
+        allA[#allA + 1] = i
+        if near then nearA[#nearA + 1] = i end
+      else
+        allT[#allT + 1] = i
+        if near then nearT[#nearT + 1] = i end
+      end
     end
   end
-  -- Live-Auswahl: unter den naechsten offenen Schritten den sinnvollsten waehlen.
-  -- Echter Laufweg (Wegenetz, nicht Luftlinie) + leichte Strafe je Position (Grundreihenfolge bleibt),
-  -- Abgaben nur, wenn fertig.
-  local pw = LP_Walk and LP_Walk.Player and LP_Walk.Player() or nil
-  local best, bestScore, rank, scores = nil, nil, 0, {}
-  local inOut = {}
-  for _, i in ipairs(out) do inOut[i] = true end
-  -- 1. machbare Kandidaten mit Untergrenze (Luftlinie ist nie laenger als der Laufweg)
-  local cands = {}
-  for _, i in ipairs(out) do
-    if state[i] == "open" then
-      local s = steps[i]
-      local ok = true
-      if s.t == "turnin" and s.q and not (ready(s.q) or flagged(s.q)) then ok = false end
-      if s.t == "complete" and s.q and not inLog(s.q) then ok = false end
-      if s.t == "grind" and i ~= first then ok = false end     -- erst Quests, dann (falls noetig) grinden
+  if #nearA > 0 then return cluster(steps, withSeg(steps, nearA, nearT)), "hier" end
+  if #nearT > 0 then return segStart(steps, nearT[1]), "hier" end
+  local at = R.mem.at
+  if at then
+    local bi, bt
+    local t0 = now() - R.FRESH
+    for i, s in ipairs(steps) do
+      if s.q and (s.t == "accept" or s.t == "turnin") and state[i] == "done" and at[s.q] and at[s.q] >= t0 then
+        if not bt or at[s.q] > bt or (at[s.q] == bt and i > bi) then bi, bt = i, at[s.q] end
+      end
+    end
+    if bi then return bi, "frisch" end
+  end
+  if #allA > 0 then return cluster(steps, allA), "log" end
+  if #allT > 0 then return segStart(steps, allT[1]), "log" end
+  for i, s in ipairs(steps) do
+    if (s.l or 0) >= lvl - 1 and state[i] ~= "done" and state[i] ~= "skip" then return i, "stufe" end
+  end
+  return 1, "start"
+end
+
+-- Beweis, dass du schon weiter bist (kleinster Index): Quest im Log, deren Geber bei dir steht,
+-- oder eine frisch abgegebene Quest, deren Abgabe bei dir ist
+local function evidence(steps, state, p, plan, hd)
+  local N = #steps
+  local at = R.mem.at or {}
+  local t0 = math.max(plan.since or 0, now() - R.FRESH)
+  for j = p + 1, math.min(N, p + R.JUMP_SPAN) do
+    local s = steps[j]
+    if s.q and state[j] == "done" and (s.t == "accept" or s.t == "turnin") then
+      local ok
+      if s.t == "accept" then ok = inLog(s.q)
+      else ok = at[s.q] and at[s.q] >= t0 end
       if ok then
-        local d0
-        pcall(function() d0 = R.StepDist(s) end)
-        local base = rank * 20 - ((s.t == "turnin") and 15 or 0)  -- Abgabe raeumt das Log, schaltet Folgequests frei
-        cands[#cands + 1] = { i = i, lb = (d0 or 1e6) + base, base = base, far = not d0 }
-        rank = rank + 1                                        -- nur machbare Schritte zaehlen als "Position"
-      end
-      if rank >= 12 then break end
-    end
-  end
-  -- Mitnehmen: Quests, die schon im Log sind und deren Ziel/Abgabe ganz in der Naehe liegt, auch wenn die
-  -- Route sie erst spaeter vorsieht (z. B. am Flugpunkt angenommen). Nur echter Laufweg bis EXTRA_YD.
-  local extras = {}
-  if pw and first then
-    local n = 0
-    for i = first + 1, #steps do
-      local s = steps[i]
-      if not inOut[i] and state[i] == "open" and s.q and (s.t == "complete" or s.t == "turnin") and inLog(s.q)
-         and (s.t == "complete" or ready(s.q)) then
-        local d0
-        pcall(function() d0 = R.StepDist(s) end)
-        if d0 and d0 <= R.EXTRA_YD then
-          local base = 12 * 20 + R.EXTRA_PEN - ((s.t == "turnin") and 15 or 0)
-          cands[#cands + 1] = { i = i, lb = d0 + base, base = base, extra = true }
-        end
-        n = n + 1
-        if n >= 30 then break end
+        local t = R.StepTarget(s)
+        local d = t and distTo(t)
+        if d and d <= R.JUMP_NEAR then return j end
       end
     end
   end
-  -- 2. echter Laufweg (Wegenetz) in Reihenfolge der Untergrenze; was schon schlechter ist als das Beste,
-  --    braucht keine Wegsuche (exakt dasselbe Ergebnis, viel weniger Rechnen)
-  table.sort(cands, function(a, b) return a.lb < b.lb end)
-  local curI = cur and cur.i
-  for _, c in ipairs(cands) do
-    local score = c.lb
-    if not c.far and (not bestScore or c.lb < bestScore or c.i == curI) then
-      local d
-      pcall(function() d = R.StepCost(steps[c.i], pw) end)
-      if d then score = d + c.base end
-    end
-    if c.extra then
-      if score - c.base <= R.EXTRA_YD then scores[c.i] = score; extras[#extras + 1] = c.i else score = nil end
-    else
-      scores[c.i] = score
-    end
-    if score and (not bestScore or score < bestScore) then best, bestScore = c.i, score end
-  end
-  R.extras = extras
-  if not best then best = first end
-  -- Hysterese: das aktuelle Ziel nur wechseln, wenn das neue klar besser ist (kein Hin-und-her)
-  if cur and cur.i and scores[cur.i] and best ~= cur.i and bestScore then
-    local cs = scores[cur.i]
-    if bestScore > cs - 40 and bestScore > cs * 0.75 then best = cur.i end
-  end
-  local ordered = {}
-  if best then ordered[1] = best end
-  for _, i in ipairs(out) do if i ~= best then ordered[#ordered + 1] = i end end
-  for _, i in ipairs(extras) do if i ~= best and #ordered < (n or 5) then ordered[#ordered + 1] = i end end
-  while #ordered > (n or 5) do table.remove(ordered) end
+end
+
+-- route, lvl, skipped (StepKey -> true), plan (gespeicherter Zeiger, wird fortgeschrieben),
+-- n (Listenlaenge), cur ({ i, since } = aktuelles Ziel seit)
+-- Rueckgabe: Ziel-Index, Liste der naechsten Schritte, info { ptr, hero, n, entry, jumped }
+function R.Plan(route, lvl, skipped, plan, n, cur)
+  memoReset()
+  local steps = route and route.steps or {}
+  local N = #steps
+  plan = plan or {}
+  plan.hist = plan.hist or {}
+  local state = computeState(steps, lvl, skipped, cur)
   R.state = state
-  return best, ordered
+  local info = { n = N }
+  R.info = info
+  if N == 0 then return nil, {}, info end
+  -- 1. Zeiger holen oder einsteigen
+  local p = findKey(steps, plan.k, plan.i)
+  if not p then
+    local why
+    p, why = R.Entry(route, state, lvl)
+    info.entry = why
+    plan.since = now()
+    JC[plan] = nil
+  end
+  p = advance(steps, state, p)
+  -- 2. Sprung nach vorn: Plan-Ziel weit weg + Beweis bei dir
+  local hero = nextOpen(state, p, N)
+  -- (nach /lp zurueck oder /lp schritt haelt der Zeiger 30 min still: deine Wahl gilt)
+  if not (UnitOnTaxi and UnitOnTaxi("player")) and p <= N and not (plan.hold and now() < plan.hold) then
+    local ht = hero and R.StepTarget(steps[hero])
+    local hd = ht and distTo(ht)
+    local j
+    if not hd or hd > R.JUMP_FAR then j = evidence(steps, state, p, plan, hd) end
+    if j then
+      local gt = GetTime()
+      local jc = JC[plan]
+      if not jc or jc.j ~= j then jc = { j = j, t = gt }; JC[plan] = jc end
+      if gt - jc.t >= R.JUMP_DWELL then
+        local from = p
+        table.insert(plan.hist, { k = R.StepKey(steps[p]), i = p, t = now() })
+        while #plan.hist > 20 do table.remove(plan.hist, 1) end
+        p = advance(steps, state, j)
+        local skippedN = 0
+        for i = from, p - 1 do if state[i] == "open" or state[i] == "later" then skippedN = skippedN + 1 end end
+        info.jumped = { from = from, to = p, n = skippedN }
+        plan.since = now()
+        JC[plan] = nil
+      end
+    else
+      JC[plan] = nil
+    end
+  end
+  plan.i = p
+  plan.k = (p <= N) and R.StepKey(steps[p]) or "END"
+  -- 3. verpasst: Offenes vor dem Zeiger; Abgaben, deren Erledigen-Schritt verpasst wurde (und nicht fertig)
+  for i = 1, math.min(p - 1, N) do
+    if state[i] == "open" or state[i] == "later" then state[i] = "missed" end
+  end
+  local qx = questIndex(route)
+  for i = p, N do
+    local s = steps[i]
+    if s.t == "turnin" and state[i] == "open" and s.q and not ready(s.q) then
+      local c = qx[s.q] and qx[s.q].cmp
+      if c and c < p and state[c] == "missed" then state[i] = "missed" end
+    end
+  end
+  hero = nextOpen(state, p, N)
+  info.ptr, info.hero = p, hero
+  -- 4. Liste: Ziel + naechste offene (oder wartende) Schritte in Plan-Reihenfolge.
+  -- Erledigen/Abgeben einer Quest, die der Plan vorher noch annimmt, ist "geplant" (sichtbar, aber erst
+  -- nach der Annahme ansteuerbar) – so steht der ganze Ablauf in der Liste.
+  local list = {}
+  if hero then list[1] = hero end
+  local accAhead = {}
+  for i = p, N do
+    local s, st = steps[i], state[i]
+    if s.t == "accept" and s.q and (st == "open" or st == "later") then accAhead[s.q] = true end
+    if st == "skip" and s.q and (s.t == "complete" or s.t == "turnin") and accAhead[s.q] then st = "planned"; state[i] = st end
+    if i ~= hero and (st == "open" or st == "later" or st == "planned") then
+      list[#list + 1] = i
+      if #list >= (n or 5) then break end
+    end
+  end
+  return hero, list, info
+end
+
+-- Plan-Fortschritt: erledigte/uebersprungene Schritte bis zum Zeiger (fuer das Plan-Band)
+function R.Progress(route, p)
+  local segs = {}
+  for i, s in ipairs(route.steps or {}) do
+    local k = s.seg or 1
+    local g = segs[k]; if not g then g = { n = 0, first = i }; segs[k] = g end
+    g.n = g.n + 1
+    if i < (p or 1) then g.done = (g.done or 0) + 1 end
+  end
+  return segs
+end
+
+-- Soll diese Quest automatisch angenommen werden? Nur Annehmen-Schritte ab dem Zeiger, die bald dran sind
+function R.Wants(route, qid, p)
+  if not (route and qid) then return false end
+  local state = R.state or {}
+  p = p or 1
+  for i, s in ipairs(route.steps) do
+    if s.t == "accept" and (s.q == qid or (s.alt and (function() for _, a in ipairs(s.alt) do if a == qid then return true end end end)())) then
+      local st = state[i]
+      if i >= p and i <= p + R.WANT_SPAN and st ~= "skip" and st ~= "missed" then return true end
+    end
+  end
+  return false
+end
+
+---------------------------------------------------------------------------
+-- Questlog-Check: was behalten, abgeben, loeschen? (mit Grund)
+-- keep = gehoert in den Plan · turnin = jetzt abgeben lohnt · delete = raus damit · check = selbst entscheiden
+---------------------------------------------------------------------------
+R.TURNIN_NEAR = 350    -- Abgabe so nah = immer mitnehmen
+R.OBJ_NEAR = 350       -- Questziel so nah = noch mitnehmen
+local GROUP_TAG = { [1] = "Gruppenquest", [41] = "PvP", [62] = "Schlachtzug", [81] = "Dungeon", [85] = "Heroisch", [88] = "Schlachtzug", [89] = "Schlachtzug" }
+
+local function classQuest(q, steps, ix)
+  local e = ix and ix[q]
+  local i = e and (e.acc or e.cmp or e.tin)
+  if i and steps[i].cls then return true end
+  local rc = qQuery(q, "requiredClasses")
+  return type(rc) == "number" and rc > 0
+end
+
+local function otherRoute(q, curKey)
+  for key, r in pairs(LevelPilot_Routes or {}) do
+    if key ~= curKey then
+      local e = questIndex(r)[q]
+      if e then return key, r, (e.acc or e.cmp or e.tin) end
+    end
+  end
+end
+
+local function turninDist(q)
+  local pts = questPoints(q, "finishedBy")
+  local best, d = nearestFast(pts)
+  if best and not d then d = distTo(best) end
+  return d, best
+end
+
+-- Rueckgabe: { list = { {q, title, cat, why, step, xp} }, used, max, del, tin, chk, keep, peak, peakAt }
+function R.LogAdvice(route, routeKey, lvl, p, hero, opt)
+  opt = opt or {}
+  local steps = route and route.steps or {}
+  local ix = route and questIndex(route) or {}
+  local state = R.state or {}
+  local out = { list = {}, used = 0, max = 25, del = 0, tin = 0, chk = 0, keep = 0 }
+  local entries = {}
+  pcall(function()
+    for i = 1, (QL.GetNumQuestLogEntries() or 0) do
+      local info = QL.GetInfo(i)
+      if info and not info.isHeader and info.questID and info.questID > 0 and not info.isHidden then entries[#entries + 1] = info end
+    end
+  end)
+  out.used = #entries
+  pcall(function() if QL.GetMaxNumQuestsCanAccept then local m = QL.GetMaxNumQuestsCanAccept(); if type(m) == "number" and m > 0 then out.max = m end end end)
+  local spd = opt.speed or 7
+  local xpm = math.max(opt.xpm or 0, (opt.xph or 0) / 60)
+  for _, e in ipairs(entries) do
+    local q = e.questID
+    local a = { q = q, title = e.title or ("Quest " .. q), lvl = e.level }
+    local rdy = ready(q)
+    local okX, xp = pcall(GetQuestLogRewardXP, q)
+    a.xp = (okX and type(xp) == "number" and xp > 0) and xp or nil
+    local ex = ix[q]
+    local tag
+    pcall(function()
+      local ti = QL.GetQuestTagInfo and QL.GetQuestTagInfo(q)
+      if ti and ti.tagID and GROUP_TAG[ti.tagID] then tag = ti.tagName or GROUP_TAG[ti.tagID] end
+    end)
+    local function detour()
+      local d = turninDist(q)
+      if not d then return nil end
+      if d <= R.TURNIN_NEAR then return "near", d end
+      local mins = (2 * d * 1.25 / spd) / 60
+      if a.xp and xpm > 0 and a.xp / math.max(0.5, mins) >= xpm then return "worth", d, mins end
+      return "far", d, mins
+    end
+    if R.ban and R.ban[q] then
+      a.cat, a.why = "delete", "von dir gesperrt"
+    elseif classQuest(q, steps, ix) then
+      a.cat, a.why = "keep", "Klassenquest"
+      local k = ex and ((not rdy and ex.cmp) or ex.tin)
+      if k and state[k] ~= "missed" and k >= (p or 1) then a.step = k end
+    elseif ex then
+      local cmpI, tinI = ex.cmp, ex.tin
+      local cmpLive = cmpI and cmpI >= (p or 1) and state[cmpI] ~= "missed"
+      local tinLive = tinI and tinI >= (p or 1) and state[tinI] ~= "missed"
+      if rdy then
+        if tinLive then
+          a.cat, a.step = "keep", tinI
+          a.why = (tinI == hero) and "jetzt abgeben – ist dran" or ("Abgabe in Schritt " .. tinI)
+        else
+          local how, _, mins = detour()
+          if how == "near" then a.cat, a.why = "turnin", "fertig – Abgabe ganz nah"
+          elseif how == "worth" then a.cat, a.why = "turnin", string.format("fertig – Umweg %d min lohnt sich", math.floor(mins + 0.5))
+          else a.cat, a.why = "delete", how == "far" and string.format("fertig, aber Abgabe zu weit (%d min Umweg)", math.floor((mins or 0) + 0.5)) or "fertig, Abgabe nicht im Plan" end
+        end
+      elseif R.Grey(e.level or (cmpI and steps[cmpI].ql) or (tinI and steps[tinI].ql), lvl) then
+        a.cat, a.why = "delete", "grau – bringt kaum noch XP"
+      elseif cmpLive or (not cmpI and tinLive) then
+        a.cat = "keep"; a.step = cmpLive and cmpI or tinI
+        a.why = (a.step == hero) and "ist jetzt dran" or ("im Plan · Schritt " .. a.step)
+      else
+        local ot = objectiveTarget(q)
+        local d = ot and distTo(ot)
+        if d and d <= R.OBJ_NEAR then a.cat, a.why = "check", "Ziel ist hier – mitnehmen oder löschen"
+        else a.cat, a.why = "delete", "übersprungener Teil des Plans" end
+      end
+    else
+      local okey, oroute, oi = otherRoute(q, routeKey)
+      if rdy then
+        local how, _, mins = detour()
+        if okey and oi then a.cat, a.why = "keep", "später im Plan (" .. (oroute.name or okey) .. ")"
+        elseif how == "near" then a.cat, a.why = "turnin", "fertig – Abgabe ganz nah"
+        elseif how == "worth" then a.cat, a.why = "turnin", string.format("fertig – Umweg %d min lohnt sich", math.floor(mins + 0.5))
+        else a.cat, a.why = "delete", "fertig, aber nicht im Plan und Abgabe weit weg" end
+      elseif R.Grey(e.level, lvl) then a.cat, a.why = "delete", "grau – bringt kaum noch XP"
+      elseif okey then
+        local minL = oroute.min or 0
+        a.cat, a.why = "keep", "später im Plan (" .. (oroute.name or okey) .. (minL > lvl and (", ab St. " .. minL) or "") .. ")"
+      elseif tag then a.cat, a.why = "check", tag .. " – nicht im Plan"
+      else a.cat, a.why = "delete", "nicht im Plan" end
+    end
+    if a.cat == "delete" then out.del = out.del + 1
+    elseif a.cat == "turnin" then out.tin = out.tin + 1
+    elseif a.cat == "check" then out.chk = out.chk + 1
+    else out.keep = out.keep + 1 end
+    out.list[#out.list + 1] = a
+  end
+  local ORDER = { delete = 1, turnin = 2, check = 3, keep = 4 }
+  table.sort(out.list, function(x, y)
+    if ORDER[x.cat] ~= ORDER[y.cat] then return ORDER[x.cat] < ORDER[y.cat] end
+    if (x.step or 1e9) ~= (y.step or 1e9) then return (x.step or 1e9) < (y.step or 1e9) end
+    return x.q < y.q
+  end)
+  -- Platzbedarf: wie voll wird das Log auf den naechsten Schritten?
+  local cnt = out.used - out.del - out.tin
+  local peak, peakAt = cnt, nil
+  if p then
+    local sim = {}
+    for i = p, math.min(#steps, p + 80) do
+      local s, st = steps[i], state[i]
+      if s.q then
+        if s.t == "accept" and (st == "open" or st == "later") then
+          cnt = cnt + 1; sim[s.q] = true
+          if cnt > peak then peak, peakAt = cnt, i end
+        elseif s.t == "turnin" and (st == "open" or sim[s.q]) then cnt = cnt - 1 end
+      end
+    end
+  end
+  out.peak, out.peakAt = peak, peakAt
+  out.full = peak > out.max
+  return out
+end
+
+-- Quest im Blizzard-Dialog abbrechen lassen (du bestaetigst selbst)
+function R.Abandon(q)
+  local okC, can = pcall(function() return not QL.CanAbandonQuest or QL.CanAbandonQuest(q) end)
+  if okC and can == false then return false, "kann nicht abgebrochen werden" end
+  if QuestMapQuestOptions_AbandonQuest then
+    local ok = pcall(QuestMapQuestOptions_AbandonQuest, q)
+    if ok then return true end
+  end
+  local ok = pcall(function()
+    local old = QL.GetSelectedQuest and QL.GetSelectedQuest()
+    QL.SetSelectedQuest(q)
+    QL.SetAbandonQuest()
+    local title = QL.GetTitleForQuestID and QL.GetTitleForQuestID(q) or ("Quest " .. q)
+    StaticPopup_Show("ABANDON_QUEST", title)
+    if old then QL.SetSelectedQuest(old) end
+  end)
+  return ok, (not ok) and "Blizzard-Dialog nicht verfügbar" or nil
 end
 
 ---------------------------------------------------------------------------

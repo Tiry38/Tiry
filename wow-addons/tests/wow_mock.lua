@@ -68,12 +68,12 @@ end
 -- Pfade aus dem Addon-Ordner müssen als Datei existieren
 local function checkAddonFile(path, exts)
   if type(path) ~= "string" then return end
-  local rel = path:match("^Interface\\AddOns\\TirysZentrale\\(.*)$")
+  local addon, rel = path:match("^Interface\\AddOns\\([^\\]+)\\(.*)$")
   if not rel then return end
   rel = rel:gsub("\\", "/")
   for _, ext in ipairs(exts) do
     local candidate = rel:lower():match("%." .. ext .. "$") and rel or (rel .. "." .. ext)
-    if fileExists(M.ROOT .. "TirysZentrale/" .. candidate) then return end
+    if fileExists(M.ROOT .. addon .. "/" .. candidate) or fileExists(M.ROOT .. "addons/" .. addon .. "/" .. candidate) then return end
   end
   error("Datei fehlt im Addon: " .. path, 3)
 end
@@ -247,7 +247,12 @@ function Obj.SetGradient(o, orient, c1, c2)
 end
 function Obj.SetBlendMode(o, m) assert(BLEND[m], "Ungültiger Blendmodus: " .. tostring(m)) o.__blend = m end
 function Obj.AddMaskTexture(o, m) assert(m and m.__kind == "MaskTexture", "AddMaskTexture braucht MaskTexture") end
-function Obj.SetRotation(o, r) assert(type(r) == "number") end
+function Obj.SetRotation(o, r) assert(type(r) == "number") o.__rot = r end
+function Obj.SetTextureSliceMargins(o, l, t, r, b)
+  assert(type(l) == "number" and type(t) == "number" and type(r) == "number" and type(b) == "number", "SetTextureSliceMargins braucht 4 Zahlen")
+  o.__slice = { l, t, r, b }
+end
+function Obj.SetTextureSliceMode(o, m) assert(m == 0 or m == 1, "SliceMode 0 (gestreckt) oder 1 (gekachelt)") o.__sliceMode = m end
 
 -- Schrift
 function Obj.SetFont(o, file, size, flags)
@@ -256,7 +261,8 @@ function Obj.SetFont(o, file, size, flags)
   if file:match("^Interface\\AddOns\\TirysZentrale\\") then checkAddonFile(file, { "ttf" }) end
   o.__font = file
   o.__size = size
-  o.__weight = file:find("ExtraBold") and "bold" or (file:find("SemiBold") and "semibold" or "regular")
+  o.__weight = file:find("ExtraBold") and "bold" or (file:find("SemiBold") and "semibold" or (file:upper():find("ARIALN") and "narrow" or "regular"))
+  o.__outline = type(flags) == "string" and flags:find("OUTLINE") and true or nil
   return true
 end
 function Obj.SetText(o, t)
