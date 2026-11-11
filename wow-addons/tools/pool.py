@@ -128,7 +128,8 @@ def pick():
         if xp < 200: no("unter 200 XP"); continue
         mx = X.MOBMAX.get(int(q)); ml = X.mob_level(q)
         ez = [p for p in easy_pts(q) if p[0] in OPEN]
-        out.append(dict(q=q, n=v[0], ql=ql, rl=rl, ml=ml, mx=mx if (mx and ml and mx > ml + 2) else None, xp=xp, wm=round(wt, 1),
+        lvs = X.MOBLVS.get(int(q)) or []
+        out.append(dict(q=q, n=v[0], ql=ql, rl=rl, ml=ml, mx=mx if (mx and ml and mx > ml + 2) else None, mv=lvs if len(lvs) > 1 else None, xp=xp, wm=round(wt, 1),
                         pre=v[11] or None, pres=v[12] or None,
                         a=pt(g[0][0]), c=dense(ez or [p for p in pts if p[0] in OPEN]) if pts else None, t=pt(f[0])))
     return out, why
@@ -144,6 +145,7 @@ def write(pool):
              "xp = %d" % e["xp"], "wm = %g" % e["wm"]]
         if e["ml"]: f.append("ml = %g" % round(e["ml"], 1))
         if e.get("mx"): f.append("mx = %g" % round(e["mx"], 1))
+        if e.get("mv"): f.append("mv = {%s}" % ", ".join("%g" % round(x, 1) for x in e["mv"]))
         if e["pre"]: f.append("pre = {%s}" % ", ".join(str(a) for a in e["pre"]))
         if e["pres"]: f.append("pres = {%s}" % ", ".join(str(a) for a in e["pres"]))
         for k in ("a", "c", "t"):

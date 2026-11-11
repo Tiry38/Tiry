@@ -157,7 +157,12 @@ Alles oben ist im Forever-Nachbau getestet, aber nicht im echten Client. Besonde
 
 ---
 
-# Ingame-Test – LevelPilot 6.0.2
+# Ingame-Test – LevelPilot 6.0.3
+
+## Neu in 6.0.3
+- [ ] Elixier der Schmerzen im Log: Karte zeigt „Elixier der Schmerzen“ erledigen (nicht „ERST ERLEDIGEN … +1.4k XP“ für Teil 2).
+- [ ] Stufe 28: Pfeil führt zu den wilden Berglöwen (~Stufe 28), nicht zu Stufe 23–24 und nicht zu Stufe 32+.
+- [ ] Neue Live-Quests liegen höchstens 3 Stufen unter dir; `/lp warum` zählt aussortierte als „zu leicht“.
 
 ## Neu in 6.0.2
 - [ ] Elixier der Schmerzen (Berglöwenblut) mit Stufe 28: Pfeil führt zu den **hungernden Berglöwen (Stufe 23–24)**, nicht zu Stufe-32-Löwen. Karte zeigt „nur Gegner ~St. 24 · St. 34 meiden“.

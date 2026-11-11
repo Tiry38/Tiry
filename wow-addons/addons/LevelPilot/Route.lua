@@ -216,7 +216,7 @@ function R.ScanLog(trusted)
       local info = QL.GetInfo(i)
       if info and not info.isHeader then
         if info.questID then ids[info.questID] = true end
-        if info.title then titles[info.title] = true end
+        if info.title then titles[info.title] = info.questID or titles[info.title] or true end
       end
     end
   end)
@@ -226,7 +226,7 @@ function R.ScanLog(trusted)
       numQuests = numQuests or nq
       for i = 1, (n or 0) do
         local title, _, _, isHeader, _, _, _, qid = GetQuestLogTitle(i)
-        if title and not isHeader then titles[title] = true; if qid then ids[qid] = true end end
+        if title and not isHeader then titles[title] = qid or titles[title] or true; if qid then ids[qid] = true end end
       end
     end
   end)
@@ -268,6 +268,14 @@ local function uniqueTitle(q)
         if st.q and st.n then
           if seen[st.n] and seen[st.n] ~= st.q then dupName[st.n] = true end
           seen[st.n] = seen[st.n] or st.q
+        end
+      end
+    end
+    for _, list in pairs(LevelPilot_Pool or {}) do      -- auch der Quest-Pool (Kettenteile wie Elixir of Pain 501/502)
+      for _, e in ipairs(type(list) == "table" and list or {}) do
+        if e.q and e.n then
+          if seen[e.n] and seen[e.n] ~= e.q then dupName[e.n] = true end
+          seen[e.n] = seen[e.n] or e.q
         end
       end
     end
@@ -313,7 +321,10 @@ local function inLog(q)
   end
   if not r then
     local t = uniqueTitle(q)
-    r = (t and LOGC.titles[t]) and true or false
+    -- nur per Name, wenn das Log zu diesem Titel keine ANDERE Quest-ID kennt (Tiry 11.11.: "Elixier der Schmerzen"
+    -- Teil 1 im Log -> Teil 2 mit gleichem Namen galt als angenommen: "erst erledigen" fuer eine Quest, die er nicht hat)
+    local v = t and LOGC.titles[t]
+    r = (v == true or v == q) and true or false
   end
   MEMO.l[q] = r
   return r
@@ -444,22 +455,30 @@ local function addPts(dst, src, cap)
 end
 -- Nur Gegner, die du schaffst (Tiry 11.11.: Berglöwenblut droppen hungernde Löwen Stufe 23-24 UND Berglöwen Stufe 32 –
 -- der Pfeil nahm den naechsten, egal welche Stufe). Von mehreren Quellen bleiben die bis Stufe+1; gibt es keine, die schwaechsten.
+-- Und nicht zu leicht (Tiry 11.11.: "Stufe-23-Mobs sind wieder zu niedrig"): bevorzugt Stufe-3 bis Stufe+1.
+R.mobBelow = 3
 local function easyNpcs(list)
-  local lim = ((UnitLevel and UnitLevel("player")) or 60) + (R.mobAbove or 1)
-  local ok, low, lowLv = {}, {}, nil
+  local lvl = (UnitLevel and UnitLevel("player")) or 60
+  local hi, lo = lvl + (R.mobAbove or 1), lvl - (R.mobBelow or 3)
+  local win, ok, okLv, low, lowLv = {}, {}, nil, {}, nil
   for _, n in ipairs(list) do
     local lv = nQuery(n, "maxLevel") or nQuery(n, "minLevel")
-    if type(lv) ~= "number" or lv <= lim then ok[#ok + 1] = n end
-    if type(lv) == "number" then
+    if type(lv) ~= "number" then win[#win + 1] = n
+    else
+      if lv <= hi then
+        if lv >= lo then win[#win + 1] = n end
+        if not okLv or lv > okLv then ok, okLv = { n }, lv elseif lv == okLv then ok[#ok + 1] = n end
+      end
       if not lowLv or lv < lowLv then low, lowLv = { n }, lv elseif lv == lowLv then low[#low + 1] = n end
     end
   end
-  if #ok > 0 then return ok end
-  return #low > 0 and low or list
+  if #win > 0 then return win end      -- passend zu deiner Stufe
+  if #ok > 0 then return ok end        -- alle zu leicht: die staerksten davon (mehr XP je Kill)
+  return #low > 0 and low or list      -- alle zu stark: die schwaechsten
 end
 R.EasyNpcs = easyNpcs
 local function objectiveGroups(q)
-  local lim = ((UnitLevel and UnitLevel("player")) or 60) + (R.mobAbove or 1)
+  local lim = (UnitLevel and UnitLevel("player")) or 60
   if objCache[q] and objCache[q .. "L"] == lim then return objCache[q] end
   local G = { monster = {}, object = {}, item = {}, event = {} }
   local ob = qQuery(q, "objectives")
@@ -1064,7 +1083,7 @@ local function poolLoad()
   for k, e in ipairs(src) do
     local b = R.POOL0 + (k - 1) * 3
     for j, t in ipairs({ "accept", "complete", "turnin" }) do
-      POOL.steps[b + j] = { t = t, q = e.q, n = e.n, ql = e.ql, rl = e.rl, ml = e.ml, mx = e.mx, pool = true, pxp = e.xp,
+      POOL.steps[b + j] = { t = t, q = e.q, n = e.n, ql = e.ql, rl = e.rl, ml = e.ml, mx = e.mx, mv = e.mv, pool = true, pxp = e.xp,
         xp = (t == "accept") and e.xp or nil, wm = (t == "accept") and e.wm or nil,
         pre = (t == "accept") and e.pre or nil, pres = (t == "accept") and e.pres or nil,
         fb = (t == "accept" and e.a) or (t == "complete" and e.c) or (t == "turnin" and e.t) or nil }
@@ -1114,6 +1133,7 @@ local function poolBest(mainIx, lvl, refQl, skipQ)
     local why = (q == skipQ or (R.ban and R.ban[q])) and "aus" or flagged(q) and "erledigt" or mi and "Route"
       or ((e.ql or 0) > refQl or (e.rl or 0) > lvl) and "Stufe" or (e.ml or 0) > lvl + (R.mobAbove or 1) and "Gegner"
       or greyFor(e.ql, lvl) and "grau" or nil
+    if not why and not inLog(q) and ((e.ql or 0) < lvl - (R.questBelow or 3) or not R.MobFit(e, lvl)) then why = "zu leicht" end
     local x = not why and P.ix[q]
     local log = x and inLog(q)
     if x and not log and R.StepDone(P.steps[x.acc], lvl) ~= false then why = "Vorquest" end
@@ -1175,6 +1195,26 @@ R.PoolBest = poolBest
 -- Schritt (Annehmen vor Erledigen vor Abgeben). Ein neues Gebiet nur, wenn es klar besser ist (R.LIVE_STICK).
 ---------------------------------------------------------------------------
 R.live = true
+R.questBelow = 3       -- neue Quests hoechstens 3 Stufen unter dir (Tiry 11.11.: nicht zu leicht – Stufe 23 bei 28 ist zu niedrig)
+-- Gegner passen, wenn die staerkste schaffbare Sorte (bis Stufe+1) hoechstens R.mobBelow unter dir liegt
+-- Gegnerstufe, zu der der Pfeil fuehrt (gleiche Regel wie easyNpcs: passend > staerkste leichte > schwaechste starke)
+function R.MobPick(e, lvl)
+  if not e.ml then return end
+  local hi, lo = lvl + (R.mobAbove or 1), lvl - (R.mobBelow or 3)
+  local win, ok, low
+  for _, v in ipairs(e.mv or { e.ml }) do
+    if v <= hi and v >= lo and (not win or v > win) then win = v end
+    if v <= hi and (not ok or v > ok) then ok = v end
+    if not low or v < low then low = v end
+  end
+  return win or ok or low
+end
+function R.MobFit(e, lvl)
+  if not e.ml then return true end
+  local top = (e.ml <= lvl + (R.mobAbove or 1)) and e.ml or nil
+  for _, v in ipairs(e.mv or {}) do if v <= lvl + (R.mobAbove or 1) and (not top or v > top) then top = v end end
+  return top ~= nil and top >= lvl - (R.mobBelow or 3)
+end
 R.LIVE_HUB = 700       -- Yards: Annehmen/Abgeben hoechstens so weit vom Hub (Gebietskern)
 R.LIVE_FIELD = 2500    -- Yards: Questziel hoechstens so weit vom Hub (Umland)
 R.LIVE_STICK = 1.3     -- neues Gebiet erst ab 30 % mehr XP/Min (kein Hin und Her)
@@ -1214,7 +1254,7 @@ local function liveCands(P, lvl)
       elseif log then ok = (e.ml or 0) <= mob and not greyFor(e.ql, lvl)
       else
         ok = (e.rl or 0) <= lvl and (e.ql or 0) <= lvl + 1 and (e.ml or 0) <= mob and not greyFor(e.ql, lvl)
-          and R.StepDone(P.steps[x.acc], lvl) == false
+          and (e.ql or 0) >= lvl - R.questBelow and R.MobFit(e, lvl) and R.StepDone(P.steps[x.acc], lvl) == false
       end
       local A, C, T = wp(e.a), wp(e.c), wp(e.t)
       if ok and T then
@@ -1696,7 +1736,7 @@ function R.LogAdvice(route, routeKey, lvl, p, hero, opt)
     if R.ban and R.ban[q] then
       a.cat, a.why = "delete", "von dir gesperrt"
     elseif R.info and R.info.live and R.info.live.qs[q] then
-      a.cat, a.why = "keep", "im aktuellen Quest-Gebiet (Live) – passt zu deiner Stufe"
+      a.cat, a.why = "keep", "im Live-Gebiet · ist dran"
     elseif R.info and R.info.live and R.info.live.fit[q] then
       a.cat, a.why = "keep", rdy and "Abgabe später" or "passt · später dran"
     elseif R.info and R.info.detour == q then

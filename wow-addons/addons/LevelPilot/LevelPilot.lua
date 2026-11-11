@@ -5,7 +5,7 @@
 -- Datenquellen: Routen-Plan, Questie (Geber/Ziele), Blizzards Questlog.
 ---------------------------------------------------------------------------
 local ADDON = ...
-local VERSION = "6.0.2"
+local VERSION = "6.0.3"
 local time = time or (os and os.time)   -- Spielzeit-Uhr (Sekunden seit 1970)
 local floor, max, min, abs, sqrt, atan2, pi, fmt = math.floor, math.max, math.min, math.abs, math.sqrt, math.atan2, math.pi, string.format
 local BT = BackdropTemplateMixin and "BackdropTemplate" or nil
@@ -1810,10 +1810,13 @@ function Refresh(rescan)
           if st.pool then   -- Extra-Quest aus dem Pool (nicht im Plan): XP zeigen (Questlevel/Gegner im Tooltip)
             table.insert(sub, 1, fmt("|cffffd75e+%s XP|r", fmtNum(LP_Route.XPAt(st.pxp or 0, st.ql, UnitLevel("player") or 1))))
             -- gleiche Beute auch bei staerkeren Gegnern (Tiry 11.11.: Stufe-32-Berglöwen statt der hungernden Stufe 23-24)
-            if st.mx and st.ml and st.t == "complete" then
-              table.insert(sub, 1, fmt("|cffff8a3dnur Gegner ~St. %d · St. %d meiden|r", floor(st.ml + 0.5), floor(st.mx + 0.5)))
-              table.insert(tip, 2, { fmt("Dieselbe Beute gibt es auch bei stärkeren Gegnern derselben Art (bis Stufe %d). Nimm nur die mit Stufe ~%d – der Pfeil führt zu ihnen. Stufe steht am Ziel-Rahmen.",
-                floor(st.mx + 0.5), floor(st.ml + 0.5)), 1, 0.54, 0.24 })
+            local pk = st.mv and st.mx and st.t == "complete" and LP_Route.MobPick and LP_Route.MobPick(st, UnitLevel("player") or 1)
+            if pk then
+              local lv = UnitLevel("player") or 1
+              local hard = st.mx and st.mx > lv + 1
+              table.insert(sub, 1, fmt("|cffff8a3dGegner ~St. %d nehmen%s|r", floor(pk + 0.5), hard and fmt(" · St. %d meiden", floor(st.mx + 0.5)) or ""))
+              table.insert(tip, 2, { fmt("Dieselbe Beute gibt es bei mehreren Gegnersorten (Stufe %d–%d). Der Pfeil führt zu denen mit Stufe ~%d: passend zu deiner Stufe %d – nicht zu stark, nicht zu leicht. Stufe steht am Ziel-Rahmen.",
+                floor(st.mv[1] + 0.5), floor(st.mv[#st.mv] + 0.5), floor(pk + 0.5), lv), 1, 0.54, 0.24 })
             end
             local lv = RT.info and RT.info.live
             table.insert(tip, 2, { lv and fmt("Live-Gebiet %s: %d Quests nah beieinander (~%d XP/Min mit Weg). Questlevel %d%s – %s. Reihenfolge: Annehmen, Erledigen, Abgeben. Details: /lp warum",
@@ -2694,7 +2697,7 @@ function RT.Why()
   end
   if not d then P("Quest-Pool noch nicht berechnet (Position/Questie fehlt)."); return end
   local parts = {}
-  for _, k in ipairs({ "erledigt", "Stufe", "Gegner", "Vorquest", "grau", "Route", "aus" }) do
+  for _, k in ipairs({ "erledigt", "Stufe", "Gegner", "zu leicht", "Vorquest", "grau", "Route", "aus" }) do
     if d.cnt[k] then parts[#parts + 1] = fmt("%s %d", k, d.cnt[k]) end
   end
   P(fmt("Quest-Pool Stufe %d: |cff39ff6b%d passen|r · nicht passend: %s", d.lvl or 0, d.cand or 0, table.concat(parts, ", ")))

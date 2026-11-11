@@ -91,6 +91,7 @@ innerhalb `R.LIVE_CORE` (350 yd, Single-Linkage), Mitglieder = Annehmen/Abgeben 
 `R.LIVE_FIELD` (2500) vom Hub + Grenzkosten >= `QUEST_PREF` x Grind; Rate = XP / (Weg + Arbeit + Rundtour); gewaehlt
 wird das Gebiet mit den meisten XP unter denen >= `R.LIVE_BIG` (0.8) x beste Rate. Wechsel nur bei Ueberschneidung oder
 >= `R.LIVE_STICK` (1.3) x. Tour: naechster erlaubter Schritt nach Naehe. Unter `QUEST_PREF` x Grind → fester Plan.
+Fenster (6.0.3): neue Quests `ql >= Stufe - R.questBelow` (3), Gegner per `R.MobFit`/`R.MobPick` (Pool `mv` = alle Gegnerstufen) und Pfeil per `easyNpcs` bevorzugt Stufe-3..+1. Questlog per Name nur, wenn das Log zu dem Titel keine andere Quest-ID hat (Kettenteile gleichen Namens).
 Test: `tests/regress/live.lua` (echte Karten/Pool). UI: Kopfzeile/Band/`/lp warum` zeigen das Gebiet.
 **Nur Solo-Leveling** (Tiry 11.11.): keine Elite-/Gruppen-/Dungeonquests – `bad_quest` prueft Elite auch fuer kuratierte
 Quests, `fill.py` bricht bei Elite-Aufhol-Quests ab. Speedrun-Daten liefern nur die Gebietsreihenfolge, keine Tempo-/Grind-Werte.

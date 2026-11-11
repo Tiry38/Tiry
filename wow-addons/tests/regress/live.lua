@@ -60,7 +60,7 @@ local names, hard = {}, 0
 for q in pairs(li.qs) do
   local e = POOLQ[q]
   names[#names + 1] = e.n .. " (" .. e.ql .. ")"
-  if e.ql > LVL + 1 or (e.ml or 0) > LVL + 1 or e.rl > LVL then hard = hard + 1 end
+  if e.ql > LVL + 1 or (e.ml or 0) > LVL + 1 or e.rl > LVL or e.ql < LVL - 3 then hard = hard + 1 end   -- zu schwer oder zu leicht
 end
 table.sort(names)
 print(string.format("area: %s · %d Quests · %d XP · %.0f XP/Min · Weg %.1f Min", tostring(li.zone), li.n, li.xp, li.rate, li.trip or -1))
@@ -122,7 +122,7 @@ local hb, lb, ib = run()
 local lv = ib.live
 local nb, hardB = {}, 0
 for q in pairs(lv and lv.qs or {}) do local e = POOLQ[q] nb[#nb + 1] = e.n .. " (" .. e.ql .. ")"
-  if e.ql > LVL + 1 or (e.ml or 0) > LVL + 1 or e.rl > LVL then hardB = hardB + 1 end end
+  if e.ql > LVL + 1 or (e.ml or 0) > LVL + 1 or e.rl > LVL or e.ql < LVL - 3 then hardB = hardB + 1 end end
 table.sort(nb)
 print(string.format("B area: %s · %d Quests · %d XP · %.0f XP/Min · Weg %.1f Min · hero %s", tostring(lv and lv.zone), lv and lv.n or 0, lv and lv.xp or 0, lv and lv.rate or 0, lv and lv.trip or -1, R.StepKey(steps[hb])))
 print("  " .. table.concat(nb, ", "))

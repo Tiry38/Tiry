@@ -127,6 +127,7 @@ def _count(text, name, default):
 MOBLV = {}
 MOBSEL = {}
 MOBMAX = {}
+MOBLVS = {}
 
 
 def mob_level(q):
@@ -184,6 +185,7 @@ def work(q, L):
     MOBLV[int(q)] = max(lvs) if lvs else None          # hoechste (mittlere) Gegnerstufe der Questziele
     MOBSEL[int(q)] = set(need)                          # die Gegner, mit denen gerechnet wird (Pfeil fuehrt nur zu denen)
     alt = [npc_level(n) for n in alls if npc_level(n)]
+    MOBLVS[int(q)] = sorted(set(alt + [lv for _, lv, _ in need.values() if lv]))   # alle Gegnerstufen (Quelle frei waehlbar)
     MOBMAX[int(q)] = max(alt) if alt else None          # staerkste Gegnersorte mit derselben Beute (zum Warnen)
     for kills, lv, el in need.values():
         t += kills * T_KILL * (3 if el else 1); mxp += kills * mob_xp(lv, L, el)
