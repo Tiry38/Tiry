@@ -157,6 +157,13 @@ Alles oben ist im Forever-Nachbau getestet, aber nicht im echten Client. Besonde
 
 ---
 
+# Ingame-Test – LevelPilot 5.1.8
+
+## Neu in 5.1.8
+- [ ] Knöpfe NEU BERECHNEN, ROUTE/QUESTS, AMBOSS/SCHLOSS: Schrift auf Grün klar lesbar.
+- [ ] Weit weg vom Grind-Platz (z. B. Donnerfels): kommt eine Extra-Quest, wenn sie mit Weg schneller ist als Hinfliegen + Grinden?
+- [ ] Früher ausgelassene Route-Quests in der Nähe tauchen als EXTRA auf.
+
 # Ingame-Test – LevelPilot 5.1.7
 
 ## Neu in 5.1.7 (nur Solo)

@@ -25,6 +25,9 @@ local cases = {
       and o:find("after: hero accept:102 detour 102 wants102 true", 1, true) ~= nil
       and o:find("detour steps: complete:102 turnin:102 | back to plan: accept:101 detour nil", 1, true) ~= nil
       and o:find("at plan target: switched=nil", 1, true) ~= nil end },
+  { "grind_weg", "Route.lua", "Stufe 27 in Donnerfels, Grind-Ziel weit weg (Tiry 11.11.): verpasste Route-Quest wird Extra-Quest; Weg zum Grind-Platz zaehlt mit",
+    function(o) return o:find("missed route quest: hero accept:6462 pool=true detour 6462", 1, true) ~= nil
+      and o:find("grind travel: far accept:6621 detour=6621 | near grind:4124:27:Tausend Nadeln detour=nil", 1, true) ~= nil end },
   { "pool_extra", "Route.lua", "Stufe 27, Route sagt Grinden (Tiry 11.11.): passende Extra-Quest aus dem Pool (Vorquest da, Quest/Gegner <= Stufe+1), danach die naechste",
     function(o) return o:find("level 27: hero accept:5062 pool=true detour 5062 auto=true", 1, true) ~= nil
       and o:find("wants5062 true", 1, true) ~= nil

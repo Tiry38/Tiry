@@ -1076,6 +1076,7 @@ local function tripMin(a, b)
   if d then return d * 1.25 / R.WALK_YPM end
 end
 local function poolBest(mainIx, lvl, refQl, skipQ)
+  local route0 = R.curSteps
   local P = poolLoad()
   if not P then return end
   local pm, px, py = R.PlayerMapPos()
@@ -1084,7 +1085,12 @@ local function poolBest(mainIx, lvl, refQl, skipQ)
   local cand = {}
   for _, e in ipairs(P.list) do
     local q = e.q
-    if q ~= skipQ and not (mainIx and mainIx[q]) and (e.ql or 0) <= refQl and (e.ml or 0) <= lvl + (R.mobAbove or 1)
+    local mi = mainIx and mainIx[q]
+    -- Route-Quest: bleibt Sache des Plans – ausser der Plan hat sie verpasst/uebersprungen (z. B. Lieferquest nach
+    -- Donnerfels, die der Zeiger hinter sich liess): dann ist sie eine Extra-Quest wie jede andere
+    local rs = mi and mi.acc and R.state and R.state[mi.acc]
+    if mi and (rs == "missed" or rs == "skip") and not (route0 and route0[mi.acc] and route0[mi.acc].fill) then mi = nil end
+    if q ~= skipQ and not mi and (e.ql or 0) <= refQl and (e.ml or 0) <= lvl + (R.mobAbove or 1)
       and (e.rl or 0) <= lvl and not greyFor(e.ql, lvl) and not flagged(q) and not (R.ban and R.ban[q]) then
       local x = P.ix[q]
       local log = inLog(q)
@@ -1134,6 +1140,7 @@ function R.Plan(route, lvl, skipped, plan, n, cur)
   plan.hist = plan.hist or {}
   local state = computeState(steps, lvl, skipped, cur, findKey(steps, plan.k, plan.i))
   R.state = state
+  R.curSteps = steps
   local info = { n = N }
   R.info = info
   if N == 0 then return nil, {}, info end
@@ -1240,7 +1247,15 @@ function R.Plan(route, lvl, skipped, plan, n, cur)
       local b = bestAlt(steps, qx, state, lvl + 1, nil, R.AUTO_YD)
       local pb = PL and poolBest(qx, lvl, lvl + 1)
       if pb and (not b or pb.rate > b.rate) then b = pb end
-      if b and b.rate > grindRate(lvl) * R.QUEST_PREF then plan.detour = { q = b.q, t = t, auto = true, pool = b.pool } end
+      -- fair: zum Grinden muss man auch erst hin (Tiry 11.11.: in Donnerfels, Grind-Gegner 5,5 km weg)
+      local gr = grindRate(lvl)
+      if steps[hero].t == "grind" and UnitXP and UnitXPMax then
+        local need = math.max(0, (UnitXPMax("player") or 0) - (UnitXP("player") or 0))
+        local pm, px, py = R.PlayerMapPos()
+        local tt = px and R.StepTarget(steps[hero]) and tripMin({ map = pm, x = px, y = py }, R.StepTarget(steps[hero]))
+        if need > 0 and tt and tt > 1 then gr = need / (need / gr + tt) end
+      end
+      if b and b.rate > gr * R.QUEST_PREF then plan.detour = { q = b.q, t = t, auto = true, pool = b.pool } end
     end
   end
   -- Abstecher aus "Neu berechnen": bis die Quest abgegeben ist (hoechstens 1 Stunde)

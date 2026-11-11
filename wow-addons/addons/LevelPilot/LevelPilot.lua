@@ -5,7 +5,7 @@
 -- Datenquellen: Routen-Plan, Questie (Geber/Ziele), Blizzards Questlog.
 ---------------------------------------------------------------------------
 local ADDON = ...
-local VERSION = "5.1.7"
+local VERSION = "5.1.8"
 local time = time or (os and os.time)   -- Spielzeit-Uhr (Sekunden seit 1970)
 local floor, max, min, abs, sqrt, atan2, pi, fmt = math.floor, math.max, math.min, math.abs, math.sqrt, math.atan2, math.pi, string.format
 local BT = BackdropTemplateMixin and "BackdropTemplate" or nil
@@ -463,6 +463,13 @@ end
 
 -- Routen-Zustand: Plan-Zeiger (gespeichert je Route in DB.plan), aktuelles Ziel, Liste
 local RT = { key = nil, idx = nil, list = {}, cur = nil, ptr = nil, info = nil, logReady = false, loginT = nil, wait = false }
+-- Schrift auf Neon-Flaeche: dunkel OHNE schwarze Kontur/Schatten (sonst Matsch, Tiry-Screenshot 11.11.);
+-- auf Glas: hell mit Kontur. size = Schriftgroesse des Labels.
+function RT.Ink(f, dark, size)
+  if not f:SetFont(FONT_UI, size, dark and "" or "OUTLINE") then f:SetFont(FONT, size, "") end
+  if dark then f:SetShadowOffset(0, 0); f:SetShadowColor(0, 0, 0, 0); f:SetTextColor(0.02, 0.07, 0.05)
+  else f:SetShadowColor(0, 0, 0, 0.9); f:SetShadowOffset(1, -1); f:SetTextColor(0.6, 0.65, 0.68) end
+end
 local announce -- weiter unten (Meldung bei Einstieg/Sprung)
 local function routeUpdate()
   if not (DB and LP_Route) then return end
@@ -1068,7 +1075,7 @@ do
     segTX = (DB.mode == "quests") and 76 or 2
     for _, b in ipairs(SEG) do
       local on = b.mode == DB.mode
-      b.t:SetTextColor(on and 0.03 or 0.6, on and 0.09 or 0.65, on and 0.06 or 0.68)
+      RT.Ink(b.t, on, 10)
     end
     swAuto:Sync(); swArrow:Sync()
     if SET and SET:IsShown() then for _, s in ipairs(SET.sw) do s:Sync() end end
@@ -1143,7 +1150,7 @@ do
       local nb = CreateFrame("Button", nil, SET); nb:SetSize(240, 30); nb:SetPoint("BOTTOM", 0, 64)
       Capsule(nb, "BACKGROUND", 0, 30, { 1, 1, 1, 1 }):SetGradient({ NEON[1], NEON[2], NEON[3], 1 }, { TEAL[1], TEAL[2], TEAL[3], 1 })
       Capsule(nb, "HIGHLIGHT", 0, 30, { 1, 1, 1, 1 }, "ADD"):SetGradient({ 1, 1, 1, 0.22 }, { 1, 1, 1, 0.08 })
-      nb.t = UI(nb, 11, true); nb.t:SetPoint("CENTER", 0, 0); nb.t:SetText("NEU BERECHNEN"); nb.t:SetTextColor(0.03, 0.09, 0.06)
+      nb.t = UI(nb, 11.5, true); nb.t:SetPoint("CENTER", 0, 0); nb.t:SetText("NEU BERECHNEN"); RT.Ink(nb.t, true, 11.5)
       nb:SetScript("OnClick", function() RT.Rethink() end)
       nb:SetScript("OnEnter", function(b)
         TIP:Begin(b, SET)
@@ -1167,7 +1174,7 @@ do
         local cur = DB.ton or "amboss"
         for k, b in ipairs(self.ton) do
           local on = b.v == cur
-          b.t:SetTextColor(on and 0.03 or 0.6, on and 0.09 or 0.65, on and 0.06 or 0.68)
+          RT.Ink(b.t, on, 9)
           if on then tth:SetPoint("LEFT", 2 + (k - 1) * 62, 0) end
         end
         SyncDock()
