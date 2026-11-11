@@ -333,6 +333,44 @@ tick(1, 0.25)
 R.Plan = origPlan
 check("20 Questlog-Ereignisse am Stück -> 1 Neuaufbau (gebündelt, vorher 20)", nPlan == 1)
 
+-- Prüfer-Funde 5.0.2 (Fenster/Ereignisse)
+local function rowsShown() local n = 0 for _, r in ipairs(LevelPilotLog.rows or {}) do if r:IsShown() then n = n + 1 end end return n end
+-- (1) keine passende Route (z. B. ab 40): Questlog-Check zaehlt Plaetze, gibt aber keinen Loesch-/Abgabe-Rat
+local tMin, tRoute = route.min, LevelPilotDB.route
+route.min, LevelPilotDB.route = 30, nil      -- Stufe 24, Route startet erst bei 30 -> keine Route
+if not LevelPilotLog:IsShown() then SlashCmdList.LEVELPILOT("log") end
+E._OnEvent(E, "QUEST_LOG_UPDATE") tick(12, 0.25)
+check("ohne Route: kein Plan-Rat (0 Zeilen), Hinweis 'Kein Plan aktiv', Platzzahl echt (4 / 25)",
+  rowsShown() == 0 and (LevelPilotLog.sum:GetText() or ""):find("Kein Plan aktiv", 1, true) ~= nil
+  and (LevelPilotLog.num:GetText() or ""):find("ffffff4|r", 1, true) ~= nil)
+route.min, LevelPilotDB.route = tMin, tRoute
+E._OnEvent(E, "QUEST_LOG_UPDATE") tick(12, 0.25)
+check("mit Route wieder: Questlog-Check zeigt Zeilen", rowsShown() > 0)
+-- (2) Quest-Fenster ohne Quest-ID: jede fremde Quest bekommt ihren eigenen Hinweis
+local accN = 0
+AcceptQuest = function() accN = accN + 1 end
+GetQuestID = function() return 0 end
+local TT
+GetTitleText = function() return TT end
+local n0 = #chat
+TT = "Fremde Quest A" E._OnEvent(E, "QUEST_DETAIL")
+TT = "Fremde Quest B" E._OnEvent(E, "QUEST_DETAIL")
+local hints = 0 for i = n0 + 1, #chat do if chat[i]:find("nicht in deinem Plan", 1, true) then hints = hints + 1 end end
+check("Quest-Fenster ohne ID: 2 fremde Quests -> 2 Hinweise, nichts angenommen (vorher 1)", hints == 2 and accN == 0)
+AcceptQuest, GetQuestID, GetTitleText = nil, nil, nil
+-- (3) Hauptfenster versteckt: Questlog-Check rechnet nicht im Hintergrund (Panel haengt am Fenster)
+rawset(LevelPilotLog, "IsVisible", function(s) return s:IsShown() and LevelPilotFrame:IsShown() end)
+if not LevelPilotLog:IsShown() then SlashCmdList.LEVELPILOT("log") end
+SlashCmdList.LEVELPILOT("")   -- Fenster aus
+local nAdv, origAdv = 0, R.LogAdvice
+R.LogAdvice = function(...) nAdv = nAdv + 1 return origAdv(...) end
+for _ = 1, 4 do E._OnEvent(E, "QUEST_LOG_UPDATE") tick(12, 0.25) end
+local hiddenN = nAdv
+SlashCmdList.LEVELPILOT("") tick(2)   -- Fenster wieder an -> sofort frisch
+R.LogAdvice = origAdv
+rawset(LevelPilotLog, "IsVisible", nil)
+check("Fenster versteckt: 0 Questlog-Checks in 12 s (vorher alle 2 s), nach dem Öffnen sofort frisch", hiddenN == 0 and nAdv >= 1)
+
 print("== I: Prüfer-Funde 5.0.1 (Plan-Engine)")
 -- I1: im Hub spaetere Hub-Quest mit angenommen (Auto-Annehmen), Questziele weit weg -> KEIN Sprung
 GIVER[611], GIVER[612], GIVER[613] = 701, 701, 701

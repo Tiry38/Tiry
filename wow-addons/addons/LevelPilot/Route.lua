@@ -1047,6 +1047,7 @@ function R.LogAdvice(route, routeKey, lvl, p, hero, opt)
   end)
   out.used = #entries
   pcall(function() if QL.GetMaxNumQuestsCanAccept then local m = QL.GetMaxNumQuestsCanAccept(); if type(m) == "number" and m > 0 then out.max = m end end end)
+  if not route then out.noRoute = true; return out end   -- ohne Route kein Plan-Urteil: nur Plaetze zaehlen
   local spd = opt.speed or 7
   local xpm = math.max(opt.xpm or 0, (opt.xph or 0) / 60)
   for _, e in ipairs(entries) do

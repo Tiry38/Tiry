@@ -1217,7 +1217,7 @@ local function LogRow(i)
 end
 
 local function LogFill()
-  if not (LOGP and LOGP:IsShown()) then return end
+  if not (LOGP and LOGP:IsVisible()) then return end
   local a = LOGADV
   local used, mx = a and a.used or 0, a and a.max or 25
   LOGP.num:SetText(fmt("|cffffffff%d|r|cff6b7076 / %d|r", used, mx))
@@ -1232,11 +1232,12 @@ local function LogFill()
     if a.chk > 0 then sum[#sum + 1] = fmt("|cffffc84d%d prüfen|r", a.chk) end
     sum[#sum + 1] = fmt("|cff4fd2ff%d behalten|r", a.keep)
   end
+  if a and a.noRoute then sum = { "|cff8a9396Kein Plan aktiv|r – Lösch-/Abgabe-Rat gibt es nur mit Route" } end
   LOGP.sum:SetText(#sum > 0 and table.concat(sum, "  ·  ") or "Questlog wird gelesen …")
   local warn
   if a and a.full then
     warn = fmt("|cffffc84dLog wird voll|r: bis Schritt %d brauchst du %d Plätze – lösche die roten.", a.peakAt or 0, a.peak)
-  elseif a and a.del == 0 and a.tin == 0 and a.chk == 0 and used > 0 then
+  elseif a and not a.noRoute and a.del == 0 and a.tin == 0 and a.chk == 0 and used > 0 then
     warn = "|cff39ff6bAlles sauber|r – jede Quest gehört in deinen Plan."
   end
   LOGP.warn:SetText(warn or ""); LOGP.warn:SetShown(warn ~= nil)
@@ -1298,7 +1299,7 @@ local function LogFill()
     y = y - h - (compact and 1 or 4)
   end
   if #list == 0 then
-    LOGP.more:ClearAllPoints(); LOGP.more:SetPoint("TOPLEFT", 22, y - 4); LOGP.more:SetText("Keine Quests im Log."); LOGP.more:Show(); y = y - 22
+    LOGP.more:ClearAllPoints(); LOGP.more:SetPoint("TOPLEFT", 22, y - 4); LOGP.more:SetText((a and a.noRoute and used > 0) and fmt("%d Quests im Log – ohne Route keine Einordnung.", used) or "Keine Quests im Log."); LOGP.more:Show(); y = y - 22
   end
   LOGP:SetHeight(-y + 40)
 end
@@ -1612,7 +1613,8 @@ function Refresh(rescan)
   divider:Place(M, 14, -(HEAD_H - 1), W - 14, 0)
   empty:ClearAllPoints(); empty:SetPoint("TOPLEFT", 18, listTop - 8)
   BAND:SetShown(band)
-  if (band or (LOGP and LOGP:IsShown())) and UpdateLog(RT.logDirty) then RT.logDirty = false end
+  -- Log-Check nur, wenn ihn jemand sieht (Band im Fenster oder offenes Panel); sonst bleibt logDirty fuer spaeter
+  if ((band and M:IsVisible()) or (LOGP and LOGP:IsVisible())) and UpdateLog(RT.logDirty) then RT.logDirty = false end
   if DB.mode == "route" and RT.key then      -- ohne passende Route (z. B. ab 40): Quest-Ansicht
     local route = RT.key and LevelPilot_Routes[RT.key]
     DrawBand(route)
@@ -2086,7 +2088,7 @@ E:SetScript("OnEvent", function(_, ev, a1, ...)
     return
   end
   -- am NPC zaehlt der aktuelle Stand (z. B. Folgequest direkt nach der Abgabe)
-  if RT.want and (ev == "GOSSIP_SHOW" or ev == "QUEST_GREETING" or ev == "QUEST_DETAIL") then Refresh(true) end
+  if RT.want and (ev == "GOSSIP_SHOW" or ev == "QUEST_GREETING" or ev == "QUEST_DETAIL") then pcall(Refresh, true) end
   if ev == "GOSSIP_SHOW" then pcall(offerCheck, "gossip"); gossipAuto(); return end
   if ev == "QUEST_GREETING" then pcall(offerCheck, "greeting"); greetingAuto(); return end
   if ev == "QUEST_DETAIL" then
@@ -2096,7 +2098,7 @@ E:SetScript("OnEvent", function(_, ev, a1, ...)
       local want
       if not qid or qid == 0 then want = routeWantsTitle(GetTitleText and GetTitleText() or nil) else want = routeWants(qid) end
       if want then pcall(AcceptQuest)
-      else hintNotWanted(qid, GetTitleText and GetTitleText() or nil) end
+      else hintNotWanted((qid and qid ~= 0) and qid or nil, GetTitleText and GetTitleText() or nil) end
     end
     return
   end
@@ -2225,7 +2227,7 @@ end
 -- Strahl laeuft je Frame: Ziel-Infos hoechstens 4x pro Sekunde (und sofort nach jedem Refresh) neu lesen
 local TIC = { t = -1 }
 local function TargetInfoC(now)
-  if now - TIC.t < 0.25 and TIC.t >= (RT.lastR or 0) and TIC.w == MANUALWAY then return TIC[1], TIC[2], TIC[3], TIC[4] end
+  if now - TIC.t < 0.25 and TIC.t > (RT.lastR or 0) and TIC.w == MANUALWAY then return TIC[1], TIC[2], TIC[3], TIC[4] end
   TIC.t, TIC.w = now, MANUALWAY
   TIC[1], TIC[2], TIC[3], TIC[4] = TargetInfo()
   return TIC[1], TIC[2], TIC[3], TIC[4]
@@ -2343,7 +2345,7 @@ function UpdateBeam(now, el)
   PP:SetShown(near and true or false)
   if near then
     PP:ClearAllPoints(); PP:SetPoint("BOTTOM", CX, "TOP", 0, 22 + 4 * math.abs(math.sin(now * 2.5)))
-    SetIcon(ppIcon, typ or "go")
+    if ppIcon.lpTyp ~= (typ or "go") then ppIcon.lpTyp = typ or "go"; SetIcon(ppIcon, typ or "go") end
     ppT:SetText("|cffffffff" .. (title or "") .. "|r"); ppS:SetText(sub ~= "" and sub or fmtDist(d))
     ppArrow:ClearAllPoints(); ppArrow:SetPoint("TOP", PP, "BOTTOM", 0, -1)
     ppArrow:SetVertexColor(NEON[1], NEON[2], NEON[3], 1)
