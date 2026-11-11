@@ -1027,10 +1027,109 @@ R.AUTO_EVERY = 20      -- Sekunden: so oft sucht der Plan beim Warten/Grinden na
 R.AUTO_YD = 2500       -- automatisch nur Quests in der Naehe (ganzer Weg hoechstens ~2,5 km); weiter weg nur per Knopf
 local function grindRate(lvl) return (lvl * 5 + 45) / R.GRIND_MIN end
 
+-- Quest-Pool (5.1.6, Tiry 11.11.: "immer ganz genau auf mein Level"): alle Solo-Quests im Freien aus Questies
+-- Forever-Datenbank (Routes/Pool_Horde.lua, tools/pool.py). Hat die Route an deiner Stufe nichts Machbares
+-- (warten/grinden), sucht der Plan dort die Quest mit den meisten XP pro Minute – Weg zu Fuss oder per Flug
+-- eingerechnet, Quest UND Gegner hoechstens deine Stufe +1, keine Elite. Pool-Schritte haengen ueber einen
+-- Index ab R.POOL0 an der Route (Metatabelle: #steps/ipairs sehen sie nicht).
+R.POOL0 = 100000
+R.QUEST_PREF = 0.65    -- Quest statt Grinden, solange Grinden nicht >1,5x schneller waere: Tiry will Quests, und das
+                       -- Grind-Tempo des Modells (0,8 Min./Gegner) ist eher optimistisch (volle Gebiete, Pausen)
+R.POOL_TOP = 12        -- so viele Kandidaten (nach bestmoeglicher Rate vorsortiert) bekommen eine echte Wegrechnung
+local POOL = {}
+local function poolLoad()
+  if POOL.ix then return POOL end
+  local f = UnitFactionGroup and UnitFactionGroup("player")
+  local src = LevelPilot_Pool and f and LevelPilot_Pool[f]
+  if type(src) ~= "table" then return end
+  POOL.steps, POOL.ix, POOL.list = {}, {}, {}
+  for k, e in ipairs(src) do
+    local b = R.POOL0 + (k - 1) * 3
+    for j, t in ipairs({ "accept", "complete", "turnin" }) do
+      POOL.steps[b + j] = { t = t, q = e.q, n = e.n, ql = e.ql, rl = e.rl, ml = e.ml, pool = true, pxp = e.xp,
+        xp = (t == "accept") and e.xp or nil, wm = (t == "accept") and e.wm or nil,
+        pre = (t == "accept") and e.pre or nil, pres = (t == "accept") and e.pres or nil }
+    end
+    POOL.ix[e.q] = { acc = b + 1, cmp = b + 2, tin = b + 3 }
+    POOL.list[#POOL.list + 1] = e
+  end
+  return POOL
+end
+R.PoolLoad = poolLoad
+local function poolAttach(steps)
+  local P = poolLoad()
+  if P and steps and getmetatable(steps) == nil then setmetatable(steps, { __index = P.steps }) end
+  return P
+end
+-- XP sinkt, wenn die Quest unter deiner Stufe liegt (Classic: ab 6 Stufen darunter)
+local function xpAt(xp, ql, lvl)
+  local d = lvl - (ql or lvl)
+  if d <= 5 then return xp end
+  return xp * math.max(0.1, 1 - (d - 5) * 0.2)
+end
+R.XPAt = xpAt
+-- Reisezeit (Minuten) zwischen zwei Zielen: Flug ueber bekannte Flugpunkte, wenn schneller (Fly.lua)
+local function tripMin(a, b)
+  local ok, sec = pcall(function() return LP_Fly and LP_Fly.TripSec and LP_Fly.TripSec(a, b) end)
+  if ok and sec then return sec / 60 end
+  local d = R.Between(a, b)
+  if d then return d * 1.25 / R.WALK_YPM end
+end
+local function poolBest(mainIx, lvl, refQl, skipQ)
+  local P = poolLoad()
+  if not P then return end
+  local pm, px, py = R.PlayerMapPos()
+  if not px then return end
+  local me = { map = pm, x = px, y = py }
+  local cand = {}
+  for _, e in ipairs(P.list) do
+    local q = e.q
+    if q ~= skipQ and not (mainIx and mainIx[q]) and (e.ql or 0) <= refQl and (e.ml or 0) <= lvl + (R.mobAbove or 1)
+      and (e.rl or 0) <= lvl and not greyFor(e.ql, lvl) and not flagged(q) and not (R.ban and R.ban[q]) then
+      local x = P.ix[q]
+      local log = inLog(q)
+      if log or R.StepDone(P.steps[x.acc], lvl) == false then
+        local xp = xpAt(e.xp or 0, e.ql, lvl)
+        local wm = (log and ready(q)) and 0 or (e.wm or 2)
+        cand[#cand + 1] = { e = e, x = x, log = log, xp = xp, wm = wm, bound = xp / (wm + 0.6) }
+      end
+    end
+  end
+  table.sort(cand, function(a, b) return a.bound > b.bound end)
+  local best
+  for k = 1, math.min(#cand, R.POOL_TOP) do
+    local c = cand[k]
+    local q = c.e.q
+    local pts = {}
+    if not c.log then pts[#pts + 1] = R.StepTarget(P.steps[c.x.acc]) or false end
+    if not (c.log and ready(q)) then
+      local ct = R.StepTarget(P.steps[c.x.cmp])
+      if ct then pts[#pts + 1] = ct end          -- Lieferquest: kein eigenes Ziel
+    end
+    pts[#pts + 1] = R.StepTarget(P.steps[c.x.tin]) or false
+    local min, prev, ok = c.wm + 0.3 * #pts, me, true
+    for _, pt in ipairs(pts) do
+      local m = pt and tripMin(prev, pt)
+      if not m then ok = false; break end
+      min, prev = min + m, pt
+    end
+    if ok then
+      local r = c.xp / min
+      if not best or r > best.rate then
+        local first = c.log and (ready(q) and c.x.tin or c.x.cmp) or c.x.acc
+        best = { q = q, rate = r, first = first, ql = c.e.ql, min = min, name = R.StepTitle(P.steps[c.x.acc]), pool = true, xp = c.xp }
+      end
+    end
+  end
+  return best
+end
+R.PoolBest = poolBest
+
 function R.Plan(route, lvl, skipped, plan, n, cur)
   memoReset()
   local steps = route and route.steps or {}
   local N = #steps
+  local PL = poolAttach(route and route.steps)
   plan = plan or {}
   plan.hist = plan.hist or {}
   local state = computeState(steps, lvl, skipped, cur, findKey(steps, plan.k, plan.i))
@@ -1126,26 +1225,31 @@ function R.Plan(route, lvl, skipped, plan, n, cur)
   -- Immer passend zu DEINER Stufe (Tiry 11.11.): muesstest du warten oder grinden, sucht der Plan selbst die
   -- schnellste machbare Quest (Weg + Arbeit, nie schwerer als Stufe+1, keine Elite). Nur wenn sie mehr XP/Min
   -- bringt als Grinden; sonst bleibt "Grinden bis X" mit Mob-Zahl.
+  if plan.detour and plan.detour.q and flagged(plan.detour.q) then plan.detour, plan.autoT = nil, nil end   -- abgegeben: gleich weiter
   if not plan.detour and hero and (state[hero] == "later" or steps[hero].t == "grind") then
     local t = now()
     if t - (plan.autoT or 0) >= R.AUTO_EVERY then
       plan.autoT = t
       local b = bestAlt(steps, qx, state, lvl + 1, nil, R.AUTO_YD)
-      if b and b.rate > grindRate(lvl) then plan.detour = { q = b.q, t = t, auto = true } end
+      local pb = PL and poolBest(qx, lvl, lvl + 1)
+      if pb and (not b or pb.rate > b.rate) then b = pb end
+      if b and b.rate > grindRate(lvl) * R.QUEST_PREF then plan.detour = { q = b.q, t = t, auto = true, pool = b.pool } end
     end
   end
   -- Abstecher aus "Neu berechnen": bis die Quest abgegeben ist (hoechstens 1 Stunde)
   local dt = plan.detour
   if dt then
-    local e, idx = dt.q and qx[dt.q], nil
+    local e, idx = dt.q and (dt.pool and PL and PL.ix or qx)[dt.q], nil
     if e and not flagged(dt.q) and now() - (dt.t or 0) < 3600 then
       if not inLog(dt.q) then
         idx = e.acc
-        if idx and state[idx] ~= "open" and state[idx] ~= "missed" then idx = nil end
+        if dt.pool then
+          if R.StepDone(steps[idx], lvl) ~= false then idx = nil end
+        elseif idx and state[idx] ~= "open" and state[idx] ~= "missed" then idx = nil end
       elseif ready(dt.q) then idx = e.tin
       else idx = e.cmp or e.tin end
     end
-    if idx then state[idx] = "open"; hero = idx; info.detour, info.detourAuto = dt.q, dt.auto else plan.detour = nil end
+    if idx then state[idx] = "open"; hero = idx; info.detour, info.detourAuto, info.detourPool = dt.q, dt.auto, dt.pool else plan.detour = nil end
   end
   info.ptr, info.hero, info.back = p, hero, back[1] and #back or nil
   -- 4. Liste: Ziel + naechste offene (oder wartende) Schritte in Plan-Reihenfolge.
@@ -1183,11 +1287,13 @@ function R.Rethink(route, lvl, plan, skipped)
     if ql then refQl = math.max(lvl, ql) end
   end
   refQl = math.min(refQl, lvl + 2)
-  res.base = res.heroRate or res.grind
+  res.base = res.heroRate or res.grind * R.QUEST_PREF / R.DETOUR_GAIN   -- statt Grinden/Warten: wie der Auto-Vorschlag
   local best = bestAlt(steps, ix, state, refQl, hs and hs.q)
+  local pb = poolBest(ix, lvl, math.min(refQl, lvl + 1), hs and hs.q)   -- Pool: nie ueber Stufe +1
+  if pb and (not best or pb.rate > best.rate) then best = pb end
   res.best, res.refQl = best, refQl
   if best and best.rate > res.base * R.DETOUR_GAIN then
-    plan.detour = { q = best.q, t = now() }
+    plan.detour = { q = best.q, t = now(), pool = best.pool }
     res.switched = true
   end
   return res
@@ -1294,6 +1400,8 @@ function R.LogAdvice(route, routeKey, lvl, p, hero, opt)
     end
     if R.ban and R.ban[q] then
       a.cat, a.why = "delete", "von dir gesperrt"
+    elseif R.info and R.info.detour == q then
+      a.cat, a.why = "keep", R.info.detourPool and "Extra-Quest passend zu deiner Stufe – ist dran" or "Abstecher – ist dran"
     elseif classQuest(q, steps, ix) then
       a.cat, a.why = "keep", "Klassenquest"
       local k = ex and ((not rdy and ex.cmp) or ex.tin)

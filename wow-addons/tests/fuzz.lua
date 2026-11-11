@@ -27,7 +27,8 @@ C_QuestLog.GetInfo = function(i)
   return q and { questID = q, title = "Quest " .. q, level = QLVL and QLVL[q], isHeader = false } or nil
 end
 local function syncLog() LOGORDER = {} for q in pairs(LOG) do LOGORDER[#LOGORDER + 1] = q end table.sort(LOGORDER) end
-dofile("Route.lua") dofile("Routes/Horde_22_30.lua") dofile("Routes/Horde_30_40.lua")
+function UnitFactionGroup() return "Horde" end
+dofile("Route.lua") dofile("Routes/Horde_22_30.lua") dofile("Routes/Horde_30_40.lua") dofile("Routes/Pool_Horde.lua")   -- 5.1.6: mit Quest-Pool
 local R = LP_Route
 local fails = 0
 local function check(name, c) print((c and "  ok   " or "  FEHLER ") .. name) if not c then fails = fails + 1 end end
@@ -44,6 +45,12 @@ local function hubPos(route, seg)
   return HUB[key]
 end
 local function target(route, s)
+  if s.pool then   -- Extra-Quests aus dem Pool: verstreut, je Quest fester Ort
+    local a = (s.q * 1.618) % 1
+    local b = (s.q * 2.718) % 1
+    local o = s.t == "complete" and 0.01 or (s.t == "turnin" and 0.004 or 0)
+    return { map = 9999, x = 0.1 + math.floor(a * 8) * 0.1 + 0.015 + o, y = 0.1 + math.floor(b * 2) * 0.1 + 0.01 }   -- neben einem Hub
+  end
   local h = hubPos(route, s.seg)
   if s.t == "complete" or s.t == "grind" then
     local a = ((s.q or 7) * 2.399) % (2 * math.pi)
@@ -128,6 +135,7 @@ local function fuzz(key, seed, N)
     lastPtr = (plan.k == "END") and #steps + 1 or p
     -- erlaubt seit 5.1.3: wartender Schritt genau am Zeiger ("WARTET ab X · noch N XP"),
     -- zurueckgeholte Aufhol-Quest hinter dem Zeiger (offen, fill > Stufe)
+    if hero and steps[hero] and steps[hero].pool then POOLN = (POOLN or 0) + 1 end
     local waitOk = hero == p and R.state[hero] == "later"
     if hero and R.state[hero] ~= "open" and not waitOk then print("  Ziel nicht offen: " .. hero .. " " .. tostring(R.state[hero])) errs = errs + 1 end
     -- erlaubt seit 5.1.5: Abstecher (Knopf oder automatisch beim Warten/Grinden) auf eine machbare Quest
@@ -159,7 +167,7 @@ local function fuzz(key, seed, N)
     end
     if errs > 8 then break end
   end
-  print(string.format("== %s Seed %d: %d Aktionen, Fehler %d, R.Plan max %.2f ms, Ende Zeiger %s", key, seed, N, errs, worst * 1000, tostring(plan.k)))
+  print(string.format("== %s Seed %d: %d Aktionen, Fehler %d, R.Plan max %.2f ms, Ende Zeiger %s, Extra-Quest-Ziele %d", key, seed, N, errs, worst * 1000, tostring(plan.k), POOLN or 0)) POOLN = 0
   return errs
 end
 local total = 0

@@ -79,6 +79,11 @@ Dateien/Sounds reicht `/reload` nicht). Version in allen 4 TOCs und in `VERSION`
    `gen_steps_<key>.json`; danach setzt `fill.py` Aufhol-Quests ein (Schritte mit `fill = Stufe`: nur fuer Spieler
    hinter dem Plan, ab dieser Stufe uebersprungen; Grund: Planer-Grindtempo ~300 XP/Min ist optimistisch). Alle Annehmen-Schritte tragen `xp` (Quest + Mobs), `wm` (Arbeitsminuten) `ml` (höchste mittlere Gegnerstufe, `xpmodel.mob_level`) und ggf. `hard` (Elite) – Basis für `R.Rethink` (Menü „Neu berechnen“, `plan.detour`); `R.FillBudget` in
    `Route.lua` nimmt nur so viele Aufhol-Quests, wie laut `UnitXP`/`UnitXPMax` bis zur Stufe fehlen (Rest = Mobs, `R.fillInfo`). Dann `build.py [key]` → prüft gegen Forever-DB, schreibt `addons/LevelPilot/Routes/`.
+   `pool.py` → `Routes/Pool_Horde.lua` (Quest-Pool, 5.1.6): alle Solo-Quests im Freien (keine Elite/Begleit/Dungeon/Klasse/Beruf/Ruf,
+   Start nicht per Gegenstand, Fundorte bekannt) mit ql/rl/ml/xp/wm/pre/pres. Live (`Route.lua`): Pool-Schritte haengen per
+   Metatabelle ab Index `R.POOL0` an `route.steps` (`#steps`/`ipairs` sehen sie nicht); ist das Ziel Warten/Grinden, waehlt
+   `poolBest` alle 20 s die Quest mit den meisten XP/Min (Weg per `LP_Fly.TripSec`, Quest/Gegner <= Stufe+1), wenn sie
+   mindestens `R.QUEST_PREF` (0.65) x Grind-Tempo bringt → `plan.detour.pool`. UI zeigt sie als „EXTRA“.
    Neue Routendatei in alle 4 TOCs eintragen. `tests/route.lua` prüft Routenwahl + Dateien.
 Quellen der Gebietsreihenfolge: Konsens freier Speedrun-Routen (Joana, Warcraft Tavern, Guidelime, WoW-Pro, Bustea),
 danach per Modell verglichen; Gebiete mit nur 1–3 Quests werden gestrichen.

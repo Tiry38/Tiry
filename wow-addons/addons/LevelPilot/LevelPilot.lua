@@ -5,7 +5,7 @@
 -- Datenquellen: Routen-Plan, Questie (Geber/Ziele), Blizzards Questlog.
 ---------------------------------------------------------------------------
 local ADDON = ...
-local VERSION = "5.1.5"
+local VERSION = "5.1.6"
 local time = time or (os and os.time)   -- Spielzeit-Uhr (Sekunden seit 1970)
 local floor, max, min, abs, sqrt, atan2, pi, fmt = math.floor, math.max, math.min, math.abs, math.sqrt, math.atan2, math.pi, string.format
 local BT = BackdropTemplateMixin and "BackdropTemplate" or nil
@@ -1148,8 +1148,9 @@ do
       nb:SetScript("OnEnter", function(b)
         TIP:Begin(b, SET)
         TIP:Line("Neu berechnen", NEON[1], NEON[2], NEON[3], true)
-        TIP:Line("Prüft mit Entfernung + Arbeit, ob eine andere Quest gerade mehr XP pro Minute bringt.", 1, 1, 1)
-        TIP:Line("Nie schwerer als dein Plan-Ziel, keine Elite-/Gruppenquests. Erst ab 15 % mehr wird umgeplant.", 0.31, 0.82, 1)
+        TIP:Line("Prüft mit Weg (zu Fuß oder Flug) + Arbeit, ob eine andere Quest gerade mehr XP pro Minute bringt –", 1, 1, 1)
+        TIP:Line("auch Extra-Quests außerhalb der Route (alle Solo-Quests der Forever-Datenbank).", 1, 1, 1)
+        TIP:Line("Quest und Gegner höchstens deine Stufe +1, keine Elite-/Gruppenquests. Erst ab 15 % mehr wird umgeplant.", 0.31, 0.82, 1)
         TIP:Line("Danach geht der Plan normal weiter.", 0.55, 0.6, 0.62)
         TIP:Open()
       end)
@@ -1517,7 +1518,7 @@ local function DrawBand(route)
   local sd = segs[si]
   local nSeg = math.max(#segs, 1)
   BAND.lbl:SetText(sd and fmt("|cff39ff6b%d/%d|r  |cffffffff%s|r |cff8a9396·|r |cffd8dde0%s|r", si, nSeg, sd.z, sd.hub) or (route.name or ""))
-  BAND.step:SetText(RT.wait and "|cff8a9396…|r" or fmt("|cff8a9396SCHRITT|r |cffffffff%d|r|cff6b7076/%d|r", math.min(RT.idx or p, N), N))
+  BAND.step:SetText(RT.wait and "|cff8a9396…|r" or fmt("|cff8a9396SCHRITT|r |cffffffff%d|r|cff6b7076/%d|r", math.min((RT.idx and RT.idx <= N) and RT.idx or p, N), N))
   -- Kapseln: Breite nach Schrittzahl des Abschnitts
   local prog = LP_Route.Progress(route, p)
   local BW = W - 28
@@ -1686,7 +1687,7 @@ function Refresh(rescan)
         local cr, cg, cb = hex(col)
         local label = (LP_Route.TYPE[st.t] or st.t)
         local grind = st.t == "grind"
-        local later = LP_Route.state and LP_Route.state[si] == "later"
+        local later = not st.pool and LP_Route.state and LP_Route.state[si] == "later"
         local planned = LP_Route.state and LP_Route.state[si] == "planned"
         local needL = math.max(st.rl or 0, (st.ql or 0) - (LP_Route.maxAbove or 2), math.ceil((st.ml or 0) - (LP_Route.mobAbove or 1)))
         -- Laufweg ueber das Wegenetz (aktuelles Ziel bis 8 km, Listenzeilen bis 2,5 km; weiter: Luftlinie)
@@ -1738,15 +1739,21 @@ function Refresh(rescan)
                 or "|cffff8a3dStufe fehlt|r – Mobs mitnehmen")
             end
           end
-          if RT.info and RT.info.detour and RT.info.detour == st.q then table.insert(sub, 1, RT.info.detourAuto and "|cff39ff6bPasst zu deiner Stufe|r · statt Warten" or "|cff39ff6bAbstecher|r · lohnt mehr") end
-          r.kind:SetText(fmt("|cff%s%s|r  |cff8a9396·|r  |cffb8c2c6SCHRITT %d|r", later and "ff8a3d" or col, kindTxt, si))
+          if st.pool then   -- Extra-Quest aus dem Pool (nicht im Plan): XP zeigen (Questlevel/Gegner im Tooltip)
+            table.insert(sub, 1, fmt("|cffffd75e+%s XP|r", fmtNum(LP_Route.XPAt(st.pxp or 0, st.ql, UnitLevel("player") or 1))))
+            table.insert(tip, 2, { fmt("Extra-Quest (nicht im Plan): Questlevel %d%s – passt zu deiner Stufe, bringt mehr XP/Min als Grinden. Danach geht der Plan weiter.",
+              st.ql or 0, st.ml and fmt(", Gegner ~Stufe %d", floor(st.ml + 0.5)) or ""), 0.22, 1, 0.42 })
+          end
+          if RT.info and RT.info.detour and RT.info.detour == st.q then table.insert(sub, 1, (RT.info.detourAuto or st.pool) and ("|cff39ff6bPasst zu deiner Stufe|r" .. (st.pool and "" or " · statt Warten")) or "|cff39ff6bAbstecher|r · lohnt mehr") end
+          r.kind:SetText(st.pool and fmt("|cff%s%s|r  |cff8a9396·|r  |cff39ff6bEXTRA|r", col, (notReady and "ERST ERLEDIGEN") or label:upper())
+            or fmt("|cff%s%s|r  |cff8a9396·|r  |cffb8c2c6SCHRITT %d|r", later and "ff8a3d" or col, kindTxt, si))
           local ht = grind and (titles[1]:gsub("^Grinden:%s*", "")) or titles[1]
           -- Gruppe: erster Name gross, die anderen in der Zeile darunter (nichts wird abgeschnitten)
           r.title:SetText("|cffffffff" .. ht .. "|r" .. (cnt > 1 and ("  |cff8a9396+" .. (cnt - 1) .. "|r") or ""))
           if cnt > 1 then table.insert(sub, 1, "|cffd8dde0auch:|r " .. table.concat(titles, ", ", 2)) end
           -- Was liegt direkt daneben? (andere offene Schritte im Umkreis von ~110 m)
           local near = {}
-          if heroT and not later then
+          if heroT and not later and not st.pool then
             for k = 2, #items do
               local o = route.steps[items[k].steps[1]]
               if o and o.q and LP_Route.state[items[k].steps[1]] == "open" then
@@ -1757,7 +1764,7 @@ function Refresh(rescan)
               if #near >= 2 then break end
             end
           end
-          if #near < 2 and LP_Route.state and not later then
+          if #near < 2 and LP_Route.state and not later and not st.pool then
             for k = (RT.ptr or 1), #route.steps do
               local o = route.steps[k]
               if k ~= si and o.t == "complete" and o.q and LP_Route.state[k] == "open" and LP_Route.InLog(o.q) then

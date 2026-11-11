@@ -157,7 +157,15 @@ Alles oben ist im Forever-Nachbau getestet, aber nicht im echten Client. Besonde
 
 ---
 
-# Ingame-Test – LevelPilot 5.1.5
+# Ingame-Test – LevelPilot 5.1.6
+
+## Neu in 5.1.6 (Extra-Quests aus dem Quest-Pool)
+- [ ] Stufe 27, Route sagt „Grinden bis 28“: nach spätestens 20 s kommt eine **EXTRA**-Quest („Passt zu deiner Stufe · +X XP“), z. B. Sacred Fire (Whitereach Post) oder King of the Foulweald (Eschental, nur wenn die Vorquest erledigt ist).
+- [ ] Extra-Quest wird automatisch angenommen, Pfeil führt zu Ziel und Abgabe, danach die nächste Extra-Quest oder wieder der Plan.
+- [ ] Keine Extra-Quest mit Gegnern über deiner Stufe +1, keine Dungeon-/Elite-/Begleitquest.
+- [ ] Menü „Neu berechnen“ findet auch Extra-Quests; Questlog-Check sagt bei der Extra-Quest „ist dran“ (nicht löschen).
+- [ ] Kein Ruckeln alle 20 s beim Grinden (Bewertung mit Flugzeiten läuft dann im Hintergrund).
+
 
 ## Neu in 5.1.5 (Quests passend zu deiner Stufe)
 - [ ] Keine geplante Quest hat Gegner über **deiner Stufe +1** (Tooltip der Quest: „Gegner ~Stufe N“). Liegt eine drüber, steht sie auf „ab St. N“ und wird übersprungen, bis du so weit bist.

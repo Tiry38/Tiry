@@ -25,6 +25,11 @@ local cases = {
       and o:find("after: hero accept:102 detour 102 wants102 true", 1, true) ~= nil
       and o:find("detour steps: complete:102 turnin:102 | back to plan: accept:101 detour nil", 1, true) ~= nil
       and o:find("at plan target: switched=nil", 1, true) ~= nil end },
+  { "pool_extra", "Route.lua", "Stufe 27, Route sagt Grinden (Tiry 11.11.): passende Extra-Quest aus dem Pool (Vorquest da, Quest/Gegner <= Stufe+1), danach die naechste",
+    function(o) return o:find("level 27: hero accept:5062 pool=true detour 5062 auto=true", 1, true) ~= nil
+      and o:find("wants5062 true", 1, true) ~= nil
+      and o:find("steps: complete:5062 turnin:5062 | next accept:5881", 1, true) ~= nil
+      and o:find("too hard 0", 1, true) ~= nil end },
   { "netz_anbindung", "Travel.lua", "Splitter (Dach/Fels) neben dem Spieler: Hauptnetz bleibt angebunden (0 Verluste)",
     function(o) return o:find("cont 0: 0 of", 1, true) ~= nil and o:find("cont 1: 0 of", 1, true) ~= nil end },
   { "aufzug_hinweis", "Travel.lua", "Donnerfels-Aufzug: Hinweis an allen 5 Stellen davor",

@@ -65,6 +65,12 @@ LP_Route.StepTarget=function() return {map=1454,x=0.205,y=0.51} end
 GetTime=function() return 2000 end C_Map.GetPlayerMapPosition=function() return {x=0.49,y=0.69} end
 LOGT=true E._OnEvent(E,"QUEST_LOG_UPDATE") LOGT=false
 print("want",LP_Fly.want, LP_Fly.Advice({map=1454,x=0.205,y=0.51},"zz"), GetTime and GetTime())
+-- 5.1.6: Reisezeit zwischen zwei Zielen (Quest-Pool): Flug nur, wenn schneller; gepuffert; gleiche Werte
+local t1 = LP_Fly.TripSec({map=1454,x=0.52,y=0.70},{map=1454,x=0.205,y=0.51})
+local t2 = LP_Fly.TripSec({map=1454,x=0.52,y=0.70},{map=1454,x=0.205,y=0.51})
+local tn = LP_Fly.TripSec({map=1454,x=0.52,y=0.70},{map=1454,x=0.521,y=0.70})
+print("Trip:", t1 and math.floor(t1), t2 and math.floor(t2), tn and math.floor(tn))
+assert(t1 and t1 > 0 and t1 == t2 and tn and tn < 5, "TripSec")
 print("FLYTEST OK")
 -- Am NPC: Quest nicht angeboten -> ueberspringen
 UnitGUID=function() return "Creature-0-1-1-1-3344-0000" end

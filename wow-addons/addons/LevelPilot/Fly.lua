@@ -253,6 +253,63 @@ function F.Advice(t, key)
   return last
 end
 
+-- Reisezeit zwischen zwei Zielen { map, x, y } in Sekunden: zu Fuss (Luftlinie x Umweg) oder per Flug ueber
+-- bekannte Flugpunkte (je 3 naechste an beiden Enden), was schneller ist. nil = anderer Kontinent.
+-- Fuer die Quest-Bewertung (Quest-Pool, "Neu berechnen") – schnell, ohne Wegsuche.
+local TRIP, TRIPT = {}, 0
+function F.TripSec(a, b)
+  if not (a and b and a.map and b.map) then return end
+  -- gepuffert (60 s, ~0,5 %-Raster): Geber -> Ziel -> Abgabe bleiben gleich, nur der Spieler wandert
+  local now = GetTime()
+  if now - TRIPT > 60 then TRIP, TRIPT = {}, now end
+  local key = a.map .. ":" .. math.floor(a.x * 200) .. ":" .. math.floor(a.y * 200) .. ">" .. b.map .. ":" .. math.floor(b.x * 200) .. ":" .. math.floor(b.y * 200)
+  local c = TRIP[key]
+  if c then return c > 0 and c or nil end
+  local v = F.TripCalc(a, b)
+  TRIP[key] = v or -1
+  return v
+end
+function F.TripCalc(a, b)
+  local ac, ax, ay = world(a.map, a.x, a.y)
+  local bc, bx, by = world(b.map, b.x, b.y)
+  if not ac or not bc or ac ~= bc then return end
+  local spd = groundSpeed()
+  local run = math.sqrt((bx - ax) ^ 2 + (by - ay) ^ 2) * DETOUR_RUN / spd
+  if run < 180 then return run end            -- unter 3 Min. zu Fuss lohnt kein Flug
+  local d = db()
+  if not d.fpSeen then return run end
+  local cmap = continentMap(a.map)
+  local list = cmap and nodes(cmap) or {}
+  local known, knownSet = {}, {}
+  for _, n in ipairs(list) do
+    if n.cont == ac and d.fp[n.id] then known[#known + 1] = n; knownSet[n.id] = true end
+  end
+  if #known < 2 then return run end
+  local function near(x, y)
+    local t = {}
+    for i, n in ipairs(known) do t[i] = n end
+    table.sort(t, function(p, q) return (p.wx - x) ^ 2 + (p.wy - y) ^ 2 < (q.wx - x) ^ 2 + (q.wy - y) ^ 2 end)
+    return t
+  end
+  local s1, s2 = near(ax, ay), near(bx, by)
+  local best = run
+  for i = 1, math.min(3, #s1) do
+    for j = 1, math.min(3, #s2) do
+      local p, q = s1[i], s2[j]
+      if p ~= q then
+        local air = airTime(ac, p, q, knownSet, d)
+        if air then
+          local w1 = math.sqrt((p.wx - ax) ^ 2 + (p.wy - ay) ^ 2) * DETOUR_RUN / spd
+          local w2 = math.sqrt((bx - q.wx) ^ 2 + (by - q.wy) ^ 2) * DETOUR_RUN / spd
+          local tot = w1 + air + OVERHEAD + w2
+          if tot < best then best = tot end
+        end
+      end
+    end
+  end
+  return best
+end
+
 -- Am Flugmeister: Flug zum empfohlenen Ziel automatisch waehlen (wie Auto-Quest; Umschalt = aus)
 local function autoTake()
   local d = db()
