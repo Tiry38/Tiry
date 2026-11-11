@@ -130,8 +130,9 @@ function AD.Plan(profKey, steps)
       local chance = AD.Chance(r, skill)
       if c and chance >= 0.2 then -- unter 20 % ist zu teuer/unsicher
         local crafts = 1 / chance
-        -- Kosten wachsen mit jedem Fehlversuch; Gewinn NICHT (sonst gewinnt die schlechteste Chance = 5x so viele Crafts)
-        local per = c >= 0 and c * crafts or c
+        -- Kosten wachsen mit jedem Fehlversuch. Gewinn-Rezepte: Gewinn je Craft mal Chance – ein sicheres +1 mit
+        -- etwas Gewinn schlägt fünf unsichere Versuche (5× Material, 5× Ware für den Markt) mit kaum mehr Gewinn.
+        local per = c >= 0 and c * crafts or c * chance
         if not best or per < bestPer then best, bestPer, bestCrafts = r, per, crafts end
       end
     end

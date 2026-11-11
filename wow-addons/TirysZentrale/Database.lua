@@ -43,12 +43,19 @@ local function source()
   return raw
 end
 
+-- Blizzard-Hotfixes (Data_Hotfix.lua) liegen über den Spieldaten: Händlerpreis und Bindung
+local function hotfix(kind, id)
+  local h = ns.HOTFIX and ns.HOTFIX[kind]
+  return h and h[id]
+end
+
 local function build(id, pos)
   local name, q, c, s, icon, sell, stack, req, ilvl, bind = source():match(LINE, pos)
   if not name then return nil end
   return {
     id = id, name = name, q = tonumber(q), class = tonumber(c), sub = tonumber(s), icon = tonumber(icon),
-    sell = tonumber(sell), stack = tonumber(stack), req = tonumber(req), ilvl = tonumber(ilvl), bind = tonumber(bind),
+    sell = hotfix("sell", id) or tonumber(sell), stack = tonumber(stack), req = tonumber(req), ilvl = tonumber(ilvl),
+    bind = hotfix("bind", id) or tonumber(bind),
   }
 end
 
@@ -109,9 +116,10 @@ function D.IDByName(name)
     local bound = {}
     for id, nm, bind in source():gmatch("\n(%d+)\t([^\t\n]+)\t%d+\t%d+\t%d+\t%d+\t%d+\t%d+\t%d+\t%d+\t(%d+)") do
       local cur = nameIndex[nm]
-      if not cur or (bound[nm] and bind ~= "1") then
+      local isBound = (hotfix("bind", tonumber(id)) or tonumber(bind)) == 1
+      if not cur or (bound[nm] and not isBound) then
         nameIndex[nm] = tonumber(id)
-        bound[nm] = (bind == "1")
+        bound[nm] = isBound
       end
     end
   end

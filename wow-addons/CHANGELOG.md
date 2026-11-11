@@ -4,14 +4,14 @@
 **Komplett-Überarbeitung: neue gekoppelte Funktionen, Gold-Rechnung geprüft, Forever-Hotfixes eingebaut.**
 
 **Neu: Sparziel auf der Startseite.**
-- Worauf sparst du? Vorschlag nach Stufe: **Reiten lernen** (ab 40, laut Guides ca. 100 Gold, mit Ruf weniger) bzw. **Schnelles Reiten** (ab 60, ca. 1.000 Gold), außerdem Klassen-Fähigkeiten oder ein eigener Betrag (Schritte 10/25/100 Gold oder eintippen, z. B. „250“).
-- Fortschrittsbalken aus **Tasche + Post + eigene Auktionen** (Auktionen nur zur Hälfte – nicht alles verkauft sich), dazu „fehlt noch“ und das Gold aller Charaktere.
+- Worauf sparst du? Vorschlag: **Reiten lernen** (ab 40, laut Guides 100 Gold inkl. erstem Reittier, „Wohlwollend“ −10 %) – bleibt auch ab Stufe 40 stehen, bis du Reiten kannst –, danach **Schnelles Reiten** (ab 60, 1.000 g Training + 200 g Reittier = **1.200 Gold**), außerdem Klassen-Fähigkeiten oder ein eigener Betrag (Schritte 10/25/100 Gold oder eintippen, z. B. „250“ oder „1.200“ – der Punkt ist ein Tausenderpunkt).
+- Fortschrittsbalken aus **Tasche + Post + eigene Auktionen** (Auktionen nur zur Hälfte – nicht alles verkauft sich), dazu „fehlt noch“ und das Gold aller Charaktere. Reicht es nur mit der Post: „Post abholen – dann geschafft!“.
 - **Prognose in Spieltagen** aus deinem Gold-Tagebuch (Ø Gewinn pro Tag, nur Tage mit Bewegung).
-- **„Schneller ans Ziel“**: bis zu 3 konkrete Schritte mit Goldbetrag – Post abholen, Taschen ins AH, Händler-Ware, Craft-Liste abarbeiten, beste Farm-Runde wiederholen. Ein Klick öffnet die passende Seite.
+- **„Schneller ans Ziel“**: bis zu 3 konkrete Schritte mit Goldbetrag – Taschen ins AH, Händler-Ware, Craft-Liste abarbeiten, beste Farm-Runde wiederholen (Post zählt schon im Fortschritt, deshalb kein eigener Schritt). Ein Klick öffnet die passende Seite.
 - Ziel erreicht → einmal Chat-Meldung + Ton.
 
 **Neu: Unterwegs-Gold (gekoppelt mit LevelPilot).**
-- Karte auf der Startseite: Was Kräuter, Erze, Leder und Stoff im **aktuellen Gebiet** pro Stück bringen (AH nach Gebühr oder Händler, was mehr bringt) – nur für deine Berufe. „Hinführen“ setzt den Kartenpunkt.
+- Karte auf der Startseite: Was Kräuter, Erze, Leder, Stoff und Elemente im **aktuellen Gebiet** pro Stück bringen (AH nach Gebühr oder Händler, was mehr bringt) – nur für deine Berufe und **nur, was du mit deinem Skill schon sammeln kannst** (Kräuter/Erz nach Sammel-Skill, Leder nach Tierlevel); Wertvolleres zeigt der Tooltip als „ab Skill X“. Elemente je Fundstelle aus den echten Beute-Listen (Feralas = Wasser, Ödland = Erde). „Hinführen“ setzt den Kartenpunkt; beim Gebietswechsel aktualisiert sich die Karte, in Städten bleibt der Ortsname stehen.
 - „Mit Kräuterkunde hier zusätzlich …“: zeigt, was dir ohne den passenden Sammelberuf entgeht.
 - **Nächste Gebiete deiner LevelPilot-Route** mit ihrem besten Material (liest LevelPilots Route nur, ändert nichts).
 - Einmal pro Gebiet und Sitzung ein kurzer Chat-Hinweis (Einstellungen → Hinweise & Radar → „Unterwegs-Gold im Chat“).
@@ -21,9 +21,11 @@
 - **Seelengebundene Rezepte** (in Forever 798 von 1.496): keine AH-Suche mehr, kein erfundener AH-Preis, stattdessen „nur selbst holen – beim Händler / als Beute / aus einer Quest“.
 - **Zufallsmengen** als Spanne: Grobes Dynamit „1–3×“ (gerechnet wird mit dem Mittelwert).
 
-**Forever-Hotfixes (Blizzard, 06.11. und 10.11.2026).**
+**Forever-Hotfixes (Blizzard, 05.11. bis 10.11.2026) – wirken überall (Datenbank, Tooltip, Snipe-Scanner, Händler-Untergrenzen).**
 - **Anzahlung jetzt mindestens 1 Kupfer** (vorher 1 Silber). Standard umgestellt, alte gemerkte Gebühren werden einmal gelöscht (beim nächsten AH-Besuch kommen die exakten). Texte zu „Kleinkram lohnt nicht“ angepasst.
-- Gerbrahmen ab Skill **125** (vorher 140), Grober Schleifstein gibt Skill bis **90** (vorher 75), Eisengranate Händlerpreis **1 Silber 25 Kupfer** (vorher 5 Silber).
+- Gerbrahmen ab Skill **125** (vorher 140), Grober Schleifstein gibt Skill bis **90** (vorher 75), Lagerfeuer des Gesellen ab Kochen **90** (vorher 140).
+- Händlerpreise: Eisengranate **1 Silber 25 Kupfer** (vorher 5 Silber), Schwaches Arkanelixier **5 Kupfer** (vorher 25), Milde Gewürze **1 Kupfer** (vorher 2) – auch wenn das Spiel noch den alten Wert meldet.
+- Flinkschlagschuss und Flinkfederpfeil **nicht mehr seelengebunden**; Rassen-Reittiere vom Händler (47) **jetzt seelengebunden**.
 
 **Prüfrunde: 4 unabhängige Prüfer, jeder Fund mit Test (30 neue Prüftests).**
 - Gold-Rechnung: Craft-Liste und Einkaufsliste rechnen dieselben Materialien (auch selbst hergestellte Zwischenprodukte), „Nicht unter“ für gesammelte Ware ohne fremdes Rezept, „Kaufen bis“ passt zum Mindestgewinn, Berater und Planer nutzen denselben Mindestgewinn, Skill-Plan nimmt die richtige Skill-Chance und denselben Verkaufswert, Rezepte ohne Skill-Grenzen, Verkaufswert ohne AH-Preis, Munition (200er-Stapel) bei der Anzahlung.
@@ -34,6 +36,16 @@
 - Schnellsuche baut nur die Treffer, die sie zeigt (spürbar schneller), `/tz KÜRSCHNER` mit Großbuchstaben geht, doppelter Punkt in „Stand: vor 10 Min.“ weg.
 - Farm-Daten: Erz-Fundorte zählen Spawn-Pool-Punkte nur noch einmal (Arathi: 37 echte Punkte statt 228) und zeigen nur Erze, die zur Stufe passen; Schildkrötenschuppe hat jetzt Fundorte; Frostsäbler ab 55, Teufelssaurier ab 54.
 - Texte: Schwacher Heiltrank braucht auch eine Leere Phiole, Kisten verlangen 40 Leinenstoff **oder** 20 Ballen, Lagerfeuer ab Kochen 1, „die meisten“ Essen geben +5 % EP, Kräutersuche nicht zusammen mit Mineraliensuche.
+
+**Prüfrunde 2: 2 weitere Prüfer (Code, Gold-Rechnung/Texte) + Blizzard-Artikel wörtlich nachgelesen – 20 Funde, jeder mit Test (28 neue Prüftests, alle fallen auf dem alten Stand durch).**
+- **Suche ruckelfrei:** sortierter Namens-Index statt 18.500 Items je Tastendruck – ca. 1 ms statt 100–150 ms.
+- Sparziel: „1.000“ war 1 Gold (jetzt 1.000), Hinweis bei falscher Eingabe passt zum Feld, „alle Charaktere“ war nie zu sehen (falsches Modul), kein „ca. 0 Spieltage“.
+- Einstellgebühr: der Zurücksetzen-Knopf stellte wieder 1 Silber ein – jetzt 1 Kupfer.
+- Preis-Tooltip: Ø, Tief/Hoch und Trend nur noch aus den letzten 14 Tagen (nach einer Spielpause zählen alte Tage nicht mehr mit).
+- Neu einstellen: statt „Nur 0 einstellen“ klar „Liegt schon genug von dir im AH“.
+- Skill-Plan: bei Gewinn-Rezepten zählt die Chance mit – ein sicheres +1 schlägt fünf unsichere Versuche.
+- Goldbarren/Echtsilberbarren: Rezept-Scan und Tooltip nehmen das Verhütten (Bergbau) statt der Alchemie-Transmutation.
+- Texte: Forever-AH verkauft Stapelware stückweise – „20er-Stapel“-Tipps umgeschrieben.
 
 ## 6.1.0 (11.11.2026)
 **Item-Tooltip als Preis-Liste – wie Auctionator, nur stylischer.**

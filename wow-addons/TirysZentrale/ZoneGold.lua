@@ -57,7 +57,7 @@ end
 -- Index je Karte (einmal gebaut): Gruppen mit Item-IDs, Stufenbereich und bester Stelle
 ----------------------------------------------------------------------------
 local index
-local function addGroup(map, group, items, spot, lo, hi)
+local function addGroup(map, group, items, spot, lo, hi, itemLo)
   local z = index[map]
   if not z then
     z = { map = map, groups = {} }
@@ -68,7 +68,14 @@ local function addGroup(map, group, items, spot, lo, hi)
     g = { key = group, items = {}, n = 0 }
     z.groups[group] = g
   end
-  for _, id in ipairs(items or {}) do g.items[id] = true end
+  for _, id in ipairs(items or {}) do
+    g.items[id] = true
+    -- Leder: niedrigstes Tierlevel, bei dem es das Item hier gibt (für den Kürschner-Skill)
+    if itemLo then
+      g.lvl = g.lvl or {}
+      g.lvl[id] = math.min(g.lvl[id] or itemLo, itemLo)
+    end
+  end
   g.n = g.n + (spot.n or 0)
   if not g.spot or (spot.n or 0) > (g.spot.n or 0) then g.spot = spot end
   if lo then
@@ -86,12 +93,17 @@ function Z.Index()
     for group, spots in pairs(band) do
       for _, s in ipairs(spots) do
         local items = s.items
+        local itemLo
         if not items or #items == 0 then
-          -- Leder/Stoff/Besonderes: Items aus dem Farm-Guide dieses Levelbereichs
-          items = b and b.groups and b.groups[group] or {}
-          if group == "leather" and lo then items = leatherFor(math.floor((lo + hi) / 2)) end
+          if group == "special" then
+            items = {} -- Besonderes nur mit echter Beute je Stelle (sonst falsches Element)
+          else
+            -- Leder/Stoff: Items aus dem Farm-Guide dieses Levelbereichs
+            items = b and b.groups and b.groups[group] or {}
+          end
+          if group == "leather" and lo then items, itemLo = leatherFor(math.floor((lo + hi) / 2)), lo end
         end
-        addGroup(s.map, group, items, s, lo, hi)
+        if #items > 0 then addGroup(s.map, group, items, s, lo, hi, itemLo) end
       end
     end
   end
@@ -99,9 +111,9 @@ function Z.Index()
   for key, spots in pairs(ns.SKIN_SPOTS or {}) do
     for _, s in ipairs(spots) do
       if key < 1000 then
-        addGroup(s.map, "leather", leatherFor(math.floor(((s.lo or key) + (s.hi or key)) / 2)), s, s.lo, s.hi)
+        addGroup(s.map, "leather", leatherFor(math.floor(((s.lo or key) + (s.hi or key)) / 2)), s, s.lo, s.hi, s.lo or key)
       else
-        addGroup(s.map, "leather", { key }, s, s.lo, s.hi)
+        addGroup(s.map, "leather", { key }, s, s.lo, s.hi, s.lo)
       end
     end
   end
@@ -127,29 +139,54 @@ local function usable(group)
   return ns.HasProf(g.prof)
 end
 
+-- Kannst du das Item hier schon sammeln? Kräuter/Erz nach Sammel-Skill, Leder nach Tierlevel (Kürschner-Skill).
+-- rank = dein Skill (fehlt der Beruf: was auf deiner Stufe erreichbar wäre, ca. 5 × Stufe). Rückgabe ok, nötiger Skill
+local function reachable(key, g, id, rank)
+  if key == "herb" or key == "ore" then
+    local need = ns.GATHER_SKILL and ns.GATHER_SKILL[id]
+    return not need or need <= rank, need
+  elseif key == "leather" and g.lvl and g.lvl[id] and ns.Skin then
+    local lvl = g.lvl[id]
+    return lvl <= ns.Skin.MaxLevel(rank), ns.Skin.SkillFor(lvl)
+  end
+  return true
+end
+
 -- Gebiet bewerten. Rückgabe { map, name, groups = { {key, label, usable, items = {{id, value, src}}, best, spot, lo, hi} },
 -- score (Summe der besten Stückwerte aller nutzbaren Gruppen), missed (beste Gruppe, für die dir der Beruf fehlt) }
 function Z.ForMap(map)
   local z = map and Z.Index()[map]
   if not z then return nil end
   local out = { map = map, name = ns.Maps.ZoneName(map), groups = {}, score = 0 }
+  local level = (ns.player and ns.player.level) or (UnitLevel and UnitLevel("player")) or 1
   for _, key in ipairs(GROUP_ORDER) do
     local g = z.groups[key]
     if g then
-      local items = {}
+      local info = ns.FARM_GROUPS and ns.FARM_GROUPS[key]
+      local canUse = usable(key)
+      local rank = (info and info.prof) and (canUse and ns.ProfRank(info.prof) or math.min(300, level * 5)) or 300
+      local items, later = {}, nil
       for id in pairs(g.items) do
         local v, src = Z.UnitValue(id)
-        if v then items[#items + 1] = { id = id, value = v, src = src } end
+        if v then
+          local ok, need = reachable(key, g, id, rank)
+          if ok then
+            items[#items + 1] = { id = id, value = v, src = src }
+          elseif not later or v > later.value or (v == later.value and id < later.id) then
+            later = { id = id, value = v, src = src, skill = need }
+          end
+        end
       end
       table.sort(items, function(a, b)
         if a.value ~= b.value then return a.value > b.value end
         return a.id < b.id
       end)
       if #items > 0 then
-        local info = ns.FARM_GROUPS and ns.FARM_GROUPS[key]
-        local e = { key = key, label = info and info.label or key, usable = usable(key), items = items,
+        local e = { key = key, label = info and info.label or key, usable = canUse, items = items,
           best = items[1].value, spot = g.spot, lo = g.lo, hi = g.hi, prof = info and info.prof,
-          profName = info and info.prof and PROF_NAME[info.prof] }
+          profName = info and info.prof and PROF_NAME[info.prof],
+          -- wertvoller, aber noch über deinem Skill: "ab Skill X"
+          later = later and later.value > items[1].value and later or nil }
         if e.usable then
           out.groups[#out.groups + 1] = e
           out.score = out.score + e.best
@@ -170,14 +207,15 @@ function Z.CurrentMap()
   if not (C_Map and C_Map.GetBestMapForUnit) then return nil end
   local ok, map = pcall(C_Map.GetBestMapForUnit, "player")
   if not ok or not map then return nil end
-  local idx = Z.Index()
+  local idx, start = Z.Index(), map
   for _ = 1, 4 do
     if idx[map] or (ns.ZONE_NAMES and ns.ZONE_NAMES[map]) then return map end
     local okInfo, info = pcall(C_Map.GetMapInfo, map)
     if not (okInfo and info and info.parentMapID and info.parentMapID > 0) then break end
     map = info.parentMapID
   end
-  return map
+  -- kein übergeordnetes Gebiet mit Daten (Stadt, Mondlichtung …): beim Ort bleiben, nicht bis "Kosmos" hochlaufen
+  return start
 end
 
 ----------------------------------------------------------------------------
@@ -264,4 +302,9 @@ function Z.ZoneTip()
   return true
 end
 
-ns.On("ZONE_CHANGED_NEW_AREA", function() ns.Debounce("zonetip", 2, function() ns.Safe(Z.ZoneTip) end) end)
+ns.On("ZONE_CHANGED_NEW_AREA", function()
+  ns.Debounce("zonetip", 2, function()
+    ns.Safe(Z.ZoneTip)
+    ns.Fire("ZONE_ENTERED") -- Startseite (Unterwegs-Gold) zeigt das neue Gebiet
+  end)
+end)

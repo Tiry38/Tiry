@@ -5,11 +5,11 @@ local _, ns = ...
 local R = {}
 ns.Recipes = R
 
-local byProf, bySpell, byOut
+local byProf, bySpell, byOut, dupOut -- dupOut[item] = alle Rezepte, wenn mehrere Berufe dasselbe Item herstellen
 
 function R.Load()
   if byProf then return byProf end
-  byProf, bySpell, byOut = {}, {}, {}
+  byProf, bySpell, byOut, dupOut = {}, {}, {}, {}
   for prof, spell, name, out, qty, minSkill, yellow, grey, mats in
       (ns.RECIPES_RAW or ""):gmatch("(%u[%u_]*)\t(%d+)\t([^\t]+)\t(%d+)\t(%d+)\t(%d+)\t(%d+)\t(%d+)\t([^\n]+)") do
     local reagents = {}
@@ -30,7 +30,12 @@ function R.Load()
     byProf[prof] = byProf[prof] or {}
     table.insert(byProf[prof], r)
     bySpell[r.id] = r
-    if not byOut[r.out] then byOut[r.out] = r end
+    if not byOut[r.out] then
+      byOut[r.out] = r
+    else
+      dupOut[r.out] = dupOut[r.out] or { byOut[r.out] }
+      table.insert(dupOut[r.out], r)
+    end
   end
   ns.RECIPES_RAW = nil
   return byProf
@@ -44,7 +49,16 @@ end
 -- Rezept über das Ergebnis-Item finden (Berufsfenster-Nummern können von den Zauber-Nummern abweichen)
 function R.ByOutput(itemID, profKey)
   R.Load()
-  if not profKey then return byOut[itemID] end -- Index statt Volllauf (Tooltip, Rezept-Scan)
+  if not profKey then
+    -- Index statt Volllauf (Tooltip, Rezept-Scan). Gibt es das Item in zwei Berufen (Goldbarren: Bergbau und
+    -- Alchemie), zählt das Rezept, das du kannst – sonst das deines Berufs, sonst das erste.
+    local dup = dupOut[itemID]
+    if dup then
+      for _, r in ipairs(dup) do if R.IsKnown(r) then return r end end
+      for _, r in ipairs(dup) do if ns.HasProf(ns.PROF[r.prof]) then return r end end
+    end
+    return byOut[itemID]
+  end
   for key, list in pairs(byProf) do
     if not profKey or key == profKey then
       for _, r in ipairs(list) do
@@ -55,10 +69,19 @@ function R.ByOutput(itemID, profKey)
 end
 
 -- Nummer aus dem Berufsfenster -> unser Rezept (über das Ergebnis-Item)
+-- Gleiches Ergebnis-Item in zwei Berufen (z. B. Goldbarren: Verhütten im Bergbau und Transmutation in der Alchemie):
+-- erst die Zauber-Nummer mit passendem Ergebnis, dann der Beruf des offenen Berufsfensters, erst zuletzt irgendeiner.
+function R.Match(recipeID, outputItemID, profKey)
+  local r = recipeID and R.Get(recipeID)
+  if r and r.out == outputItemID then return r end
+  profKey = profKey or (ns.Scanner and ns.Scanner.openProfKey and ns.Scanner.openProfKey())
+  return (profKey and R.ByOutput(outputItemID, profKey)) or R.ByOutput(outputItemID)
+end
+
 function R.FromLive(recipeID)
   if not (C_TradeSkillUI and C_TradeSkillUI.GetRecipeSchematic) then return nil end
   local ok, s = pcall(C_TradeSkillUI.GetRecipeSchematic, recipeID, false)
-  if ok and s and s.outputItemID then return R.ByOutput(s.outputItemID) end
+  if ok and s and s.outputItemID then return R.Match(recipeID, s.outputItemID) end
   return nil
 end
 
@@ -253,10 +276,16 @@ end)
 ns.Listen("RECIPES_SCANNED", function()
   if not (C_TradeSkillUI and C_TradeSkillUI.GetRecipeInfo) then return end
   ns.char.learned = ns.char.learned or {}
-  for _, data in pairs(ns.char.recipes or {}) do
+  for profName, data in pairs(ns.char.recipes or {}) do
+    -- Beruf dieses Fensters (über den Namen), damit Goldbarren nicht als Alchemie-Transmutation zählt
+    local key
+    for k, id in pairs(ns.PROF) do
+      local p = ns.professions[id]
+      if p and p.name == profName then key = k end
+    end
     for _, r in ipairs(data.list) do
       if r.learned then
-        local own = R.ByOutput(r.out)
+        local own = R.Match(r.id, r.out, key or "?")
         ns.char.learned[own and own.id or r.id] = true
       end
     end

@@ -612,6 +612,9 @@ end
 ns.Listen("WAYPOINT_CHANGED", function()
   if frame then frame.wpBtn:SetShown(ns.Maps.HasWaypoint()) end
 end)
+ns.Listen("ZONE_ENTERED", function()
+  if UI.IsShown("home") then ns.Debounce("refresh", 0.3, refreshVisible) end
+end)
 ns.Listen("MONEY_CHANGED", function()
   if UI.IsShown("tracker") or UI.IsShown("home") then ns.Debounce("refresh", 0.3, refreshVisible) end
 end)

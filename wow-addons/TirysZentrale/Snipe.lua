@@ -16,6 +16,8 @@ local cur          -- Sammeltabelle des laufenden Scans
 local me
 
 local function vendorPrice(id)
+  local hot = ns.HOTFIX and ns.HOTFIX.sell[id] -- Blizzard-Hotfix vor Spiel-Cache und Spieldaten
+  if hot then return hot end
   local sell = GetItemInfo and select(11, GetItemInfo(id))
   if type(sell) == "number" then return sell end
   local e = ns.DB and ns.DB.Get(id)

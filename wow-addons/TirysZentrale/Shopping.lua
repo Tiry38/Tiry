@@ -352,10 +352,22 @@ ns.On("MAIL_INBOX_UPDATE", function() ns.Debounce("inbox", 0.3, scanInbox) end)
 ns.On("BAG_UPDATE_DELAYED", function() ns.Debounce("shopbags", 0.4, function() ns.Fire("SHOP_CHANGED") end) end)
 
 ----------------------------------------------------------------------------
--- Geldbetrag aus Text lesen: "45" = 45 Silber, "1g", "1g 20s", "1,5g", "80s", "50k"/"50c" = Kupfer
+-- Geldbetrag aus Text lesen: "45" = 45 Silber, "1g", "1g 20s", "1,5g", "1.200g", "80s", "50k"/"50c" = Kupfer
 ----------------------------------------------------------------------------
+-- Deutsche Schreibweise: Punkt = Tausender ("1.200", "12.500g" – so zeigt ns.Money große Beträge), Komma = Dezimal ("1,5g").
+-- Ein Punkt mit genau 3 Ziffern dahinter ist ein Tausenderpunkt; "1.5" bleibt 1,5.
+function ns.NormNumber(text)
+  text = tostring(text or "")
+  local prev
+  repeat
+    prev = text
+    text = text:gsub("(%d)%.(%d%d%d)%f[%D]", "%1%2")
+  until text == prev
+  return (text:gsub(",", "."))
+end
+
 function ns.ParseMoney(text)
-  text = (text or ""):lower():gsub(",", ".")
+  text = ns.NormNumber((text or ""):lower())
   if text:match("^%s*$") then return nil end
   local total, found = 0, false
   for num, unit in text:gmatch("([%d%.]+)%s*([gskc]?)") do

@@ -38,7 +38,7 @@ ns.METHODS = {
     steps = {
       "Leinenstoff fällt bei niedrigen Humanoiden (etwa Level 5–15), Wollstoff etwa ab 15, Seidenstoff etwa ab 23.",
       "Beim Questen in Gebieten mit vielen Humanoiden jeden Gegner looten – nichts liegen lassen.",
-      "Volle 20er-Stapel ins AH stellen statt einzelner Stücke: Käufer suchen Stapel, und du hast weniger Klicks beim Einstellen.",
+      "Stapelware (Stoff, Kräuter, Erz …) mit der ganzen Menge als ein Angebot einstellen: Das Forever-AH verkauft sie stückweise, die Stapelgröße spielt keine Rolle – ein Angebot heißt weniger Klicks.",
       "Liegt der AH-Preis unter dem Händlerpreis, verkauf ihn beim Händler – Tiry's Zentrale zeigt dir beides.",
     },
     where = {
@@ -74,7 +74,7 @@ ns.METHODS = {
       "Kräuterkunde lernen, dann \"Kräutersuche\" aktivieren: Kräuter erscheinen als gelbe Punkte auf der Minikarte.",
       "Friedensblume und Silberblatt gleich am Anfang, später Erdwurzel, Maguskönigskraut, Wilddornrose, Beulengras.",
       "Neu in Forever: Aus Kräutern von Erdwurzel bis Königsblut kann \"Gekräuselte Flechte\" fallen – selten und gefragt.",
-      "Kräuter im 20er-Stapel ins AH. Tipp: In Forever läuft die Kräutersuche gleichzeitig mit der Jäger-Fährtensuche – aber nicht zusammen mit der Mineraliensuche.",
+      "Kräuter mit der ganzen Menge als ein Angebot ins AH (Stapelware wird stückweise gekauft). Tipp: In Forever läuft die Kräutersuche gleichzeitig mit der Jäger-Fährtensuche – aber nicht zusammen mit der Mineraliensuche.",
     },
     tips = {
       "Tauren pflücken dank \"Cultivation\" ein Kraut doppelt – starker Vorteil.",
@@ -102,7 +102,7 @@ ns.METHODS = {
     steps = {
       "Gekräuselte Flechte (Kräuter), Pyrit (Erz) und Makelloses Leder (Kürschnern) nie zum Händler bringen.",
       "In den Marktpreisen unter \"Selten\" den aktuellen AH-Wert prüfen.",
-      "Einzeln oder in kleinen Stapeln einstellen – Käufer brauchen oft nur wenige Stück.",
+      "Nicht alles auf einmal einstellen: Käufer brauchen oft nur wenige Stück – lieber nachlegen, wenn verkauft, statt den Preis selbst zu drücken.",
     },
     tips = { "Der Schwarzmarkt-Händler in Powderfuse Port verkauft seltene Materialien zum Festpreis – das ist die Preis-Obergrenze." },
   },
@@ -114,7 +114,7 @@ ns.METHODS = {
     steps = {
       "Gefragt sind u. a.: 20 Kupfer- oder Zinnerz, 20 Friedensblume oder Silberblatt, 10 Erdwurzel/Maguskönigskraut/Wilddornrose.",
       "Außerdem 40 Leinenstoff, 20 Leichtes Leder, 20 Leinenstoffballen, 2 Geschmeidige leichte Bälge, 20 Seltsamer Staub.",
-      "Stell diese Materialien in genau diesen Mengen ein (z. B. 20er-Stapel) – Kisten-Sammler kaufen ganze Pakete.",
+      "Kisten-Sammler kaufen genau diese Mengen zusammen – Stapelware kauft man im AH stückweise, entscheidend ist ein guter Stückpreis.",
       "Mit \"Als Einkaufsliste\" holst du dir alle Preise auf einen Klick in Auctionator.",
     },
     tips = {
@@ -189,7 +189,7 @@ ns.METHODS = {
       "Kochkunst lernen (Nebenberuf – zählt nicht zu deinen zwei Hauptberufen).",
       "Fleisch beim Questen sammeln, am Lagerfeuer kochen.",
       "Prüf in \"Rezepte\" (nach einmal Berufsfenster öffnen), welches Essen über den Fleischkosten verkauft wird.",
-      "Bonus: Schon ab Kochen-Skill 1 baust du ein \"Einfaches Lagerfeuer\" (1 Einfaches Holz) – Lager-Buffs für die Gruppe, und Stationen wie Gerbrahmen oder Spinnrad stellt man daneben auf.",
+      "Bonus: Schon ab Kochen-Skill 1 baust du ein \"Einfaches Lagerfeuer\" (1 Einfaches Holz) – Lager-Buffs für die Gruppe, und Stationen wie Gerbrahmen oder Spinnrad stellt man daneben auf. Das \"Lagerfeuer des Gesellen\" stellst du seit dem Hotfix vom 10.11. schon ab Kochen 90 auf (vorher 140).",
     },
     tips = { "Dass sich XP-Essen gut verkauft, ist eine Ableitung aus dem neuen Buff – die Live-Preise zeigen, ob es auf deinem Server stimmt." },
   },
@@ -202,7 +202,7 @@ ns.METHODS = {
       "Angeln beim Lehrer lernen, Angel beim Angelhändler kaufen.",
       "Rohe Fische in Seen und Flüssen der Startgebiete angeln.",
       "Öliges Schwarzmaul und Feuerflossenschnapper (Küste) sind für Alchemie/Kochen gefragt (Classic-Erfahrung).",
-      "Fische im 20er-Stapel ins AH, nur wenn der Preis klar über dem Händlerpreis liegt.",
+      "Fische ins AH, nur wenn der Stückpreis klar über dem Händlerpreis liegt.",
     },
     tips = { "Forever hat neue Fische, die nur zu bestimmten Zeiten beißen – neue Fänge immer im AH prüfen." },
   },
@@ -251,7 +251,7 @@ ns.METHODS = {
     steps = {
       "Rauer Wetzstein aus Rauem Stein, Grober Wetzstein aus Grobem Stein herstellen.",
       "Rezepte-Seite: Gewinn gegenüber dem reinen Steinpreis prüfen.",
-      "Kleine Stapel (5–10) einstellen.",
+      "Kleine Mengen (5–10) einstellen und nachlegen, wenn verkauft.",
     },
     tips = {
       "Mit Bergbau sammelst du die Steine selbst.",

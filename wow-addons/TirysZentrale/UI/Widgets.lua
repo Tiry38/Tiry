@@ -1349,6 +1349,7 @@ function UI.Stepper(parent, label, width, getter, setter, step, min, max, format
     local hit = UI.SafeButton(f)
     hit:SetAllPoints(f.value)
     local eb = CreateFrame("EditBox", nil, f)
+    f.edit = eb
     eb:SetSize(84, 24)
     eb:SetPoint("CENTER", f.value, "CENTER")
     eb:SetAutoFocus(false)
@@ -1369,7 +1370,7 @@ function UI.Stepper(parent, label, width, getter, setter, step, min, max, format
           setter(math.max(min, math.min(max, v)))
           if f.onChange then f.onChange() end
         else
-          ns.Print("Bitte eine Zahl eingeben, z. B. 45 (Silber), 1g 20s oder 1,5g.")
+          ns.Print(f.badInput or "Bitte eine Zahl eingeben, z. B. 45 (Silber), 1g 20s oder 1,5g.")
         end
       end
       eb:ClearFocus()

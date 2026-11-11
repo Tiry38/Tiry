@@ -316,16 +316,17 @@ function ns.Item(id)
   if c and c.loaded then return c end
   c = c or { id = id }
   local name, link, quality, _, _, _, _, stack, _, icon, sellPrice = GetItemInfo(id)
+  local hotSell = ns.HOTFIX and ns.HOTFIX.sell[id] -- Blizzard-Hotfix geht vor (Spiel-Cache kann alt sein)
   if name then
-    c.name, c.link, c.quality, c.stack, c.icon, c.sell, c.loaded = name, link, quality, stack, icon, sellPrice or 0, true
+    c.name, c.link, c.quality, c.stack, c.icon, c.sell, c.loaded = name, link, quality, stack, icon, hotSell or sellPrice or 0, true
   else
     local static = ns.ITEMS and ns.ITEMS[id]
     local db = (not static) and ns.DB and ns.DB.Get(id)
-    if db then static = { de = db.name, q = db.q, sell = (ns.HOTFIX and ns.HOTFIX.sell[id]) or db.sell, stack = db.stack } end
+    if db then static = { de = db.name, q = db.q, sell = db.sell, stack = db.stack } end -- db.sell enthält den Hotfix
     c.name = c.name or (static and static.de) or ("Item " .. id)
     c.icon = c.icon or (db and db.icon ~= 0 and db.icon) or (GetItemIconByID and GetItemIconByID(id)) or 134400 -- Fragezeichen-Symbol
     c.quality = c.quality or (static and static.q) or 1
-    c.sell = c.sell or (static and static.sell) or 0
+    c.sell = hotSell or c.sell or (static and static.sell) or 0
     c.stack = c.stack or (static and static.stack) or 20
     if RequestLoad and not c.requested then
       c.requested = true

@@ -552,3 +552,248 @@ describe("P1 Suche ruckelfrei (sortierter Namens-Index)", function()
     end
   end)
 end)
+
+describe("P2 Unterwegs-Gold: nur was du mit deinem Skill sammeln kannst", function()
+  local herb40 = { { name = "Berufe", isHeader = true, isCollapsed = false },
+    { name = "Kräuterkunde", skillID = 182, isHeader = false, rank = 40, maxRank = 75 } }
+  local function group(info, key) for _, g in ipairs(info.groups) do if g.key == key then return g end end end
+  it("Kräuterkunde 40 im Brachland: kein Königsblut (125), dafür Hinweis 'ab Skill 125'", function()
+    local ns, W = E.load({ skills = herb40, prices = { [3356] = 3000, [765] = 20, [2449] = 30, [2447] = 25, [785] = 60 } })
+    local g = group(ns.ZoneGold.ForMap(1413), "herb")
+    assert.truthy(g)
+    for _, it in ipairs(g.items) do
+      assert.truthy((ns.GATHER_SKILL[it.id] or 0) <= 40, ns.Item(it.id).name)
+    end
+    assert.truthy(g.later and g.later.id == 3356 and g.later.skill == 125)
+    assert.are.same({}, W.errors)
+  end)
+  it("Kürschnerei 102 in Tausend Nadeln: keine Schildkrötenschuppe (Tiere ab Stufe 30)", function()
+    local ns = E.load({ prices = { [8167] = 4700, [2318] = 32, [2319] = 120, [4232] = 160 } })
+    assert.are.equal(20, ns.Skin.MaxLevel(102))
+    local info = ns.ZoneGold.ForMap(1441)
+    local g = info and group(info, "leather")
+    for _, it in ipairs(g and g.items or {}) do assert.are_not.equal(8167, it.id) end
+    -- mit Skill 175 ist sie dabei
+    local ns2 = E.load({ prices = { [8167] = 4700 }, skills = { { name = "Berufe", isHeader = true, isCollapsed = false },
+      { name = "Kürschnerei", skillID = 393, isHeader = false, rank = 175, maxRank = 225 } } })
+    local g2 = group(ns2.ZoneGold.ForMap(1441), "leather")
+    local has = false
+    for _, it in ipairs(g2.items) do if it.id == 8167 then has = true end end
+    assert.is_true(has)
+  end)
+  it("fehlender Beruf: Vorschau nur bis ca. 5 × Stufe (Stufe 21 -> kein Königsblut)", function()
+    local ns = E.load({ prices = { [3356] = 3000, [765] = 20, [2449] = 30 } })
+    local m = ns.ZoneGold.ForMap(1413).missed
+    if m and m.key == "herb" then
+      for _, it in ipairs(m.items) do assert.truthy((ns.GATHER_SKILL[it.id] or 0) <= 105) end
+    end
+  end)
+  it("Elemente je Stelle: Feralas = Elementarwasser, Ödland = Elementarerde", function()
+    local ns = E.load({ prices = { [7068] = 9000, [7067] = 3000, [7070] = 2000, [12808] = 9999 } })
+    local fer = group(ns.ZoneGold.ForMap(1444), "special")
+    assert.are.equal(7070, fer.items[1].id)
+    for _, it in ipairs(fer.items) do assert.are_not.equal(7068, it.id) end
+    local bad = group(ns.ZoneGold.ForMap(1418), "special")
+    assert.are.equal(7067, bad.items[1].id)
+    for _, it in ipairs(bad.items) do assert.are_not.equal(7068, it.id) end
+    for _, band in pairs(ns.SPOTS) do
+      for _, s in ipairs(band.special or {}) do assert.truthy(#s.items > 0, "Stelle ohne Beute: " .. s.names[1]) end
+    end
+  end)
+  it("in der Stadt: Gebiet bleibt Orgrimmar (nicht 'Kosmos')", function()
+    local ns = E.load({})
+    _G.C_Map.GetBestMapForUnit = function() return 1454 end
+    local parents = { [1454] = 1414, [1414] = 947, [947] = 946 }
+    _G.C_Map.GetMapInfo = function(m) return { name = "Karte" .. m, parentMapID = parents[m] } end
+    assert.are.equal(1454, ns.ZoneGold.CurrentMap())
+  end)
+  it("Gebietswechsel aktualisiert die Startseiten-Karte", function()
+    local ns, W = E.load({ prices = { [4232] = 3000, [2319] = 2000 } })
+    SlashCmdList.TIRYSZENTRALE("") ns.UI.Wizard.Finish()
+    ns.UI.Show("home")
+    local card = ns.UI.pages.home.zoneCard
+    assert.truthy(card.title:GetText():find("Brachland", 1, true))
+    _G.C_Map.GetBestMapForUnit = function() return 1442 end
+    W.fire("ZONE_CHANGED_NEW_AREA") W.flush() W.flush()
+    assert.truthy(card.title:GetText():find("Steinkrallen", 1, true), card.title:GetText())
+    assert.are.same({}, W.errors)
+  end)
+end)
+
+describe("P3 Sparziel: Eingabe, Reitkosten, Anzeige", function()
+  local G = 10000
+  it("deutsche Tausenderpunkte: 1.200 = 1.200 Gold, 1,5 = 1,5 Gold, 1.5 bleibt 1,5", function()
+    local ns = E.load({})
+    local GZ = ns.Goal
+    assert.are.equal(1200 * G, GZ.ParseAmount("1.200"))
+    assert.are.equal(1000 * G, GZ.ParseAmount("1.000"))
+    assert.are.equal(1000000 * G, GZ.ParseAmount("1.000.000"))
+    assert.are.equal(15000, GZ.ParseAmount("1,5"))
+    assert.are.equal(15000, GZ.ParseAmount("1.5"))
+    assert.are.equal(25005000, GZ.ParseAmount("2.500,5"))
+    assert.are.equal(1200 * G, ns.ParseMoney("1.200g"))
+    assert.are.equal(1200 * G + 5000, ns.ParseMoney("1.200g 50s"))
+    assert.are.equal(4500, ns.ParseMoney("45"))
+    assert.are.equal(15000, ns.ParseMoney("1,5g"))
+  end)
+  it("1.000 im Ziel-Feld eintippen: Ziel 1.000 Gold, kein falsches 'erreicht'", function()
+    local ns, W = E.load({ level = 25, money = 50 * G })
+    SlashCmdList.TIRYSZENTRALE("") ns.UI.Wizard.Finish()
+    ns.UI.Show("home")
+    local st = ns.UI.pages.home.goalCard.amount
+    local eb = st.edit
+    assert.truthy(eb)
+    eb:SetText("1.000")
+    eb:GetScript("OnEnterPressed")(eb)
+    assert.are.equal(1000 * G, ns.Goal.Get().amount)
+    W.fire("PLAYER_MONEY") W.flush()
+    assert.falsy(E.chat(W):find("Sparziel erreicht", 1, true))
+    eb:SetText("quatsch")
+    eb:GetScript("OnEnterPressed")(eb)
+    assert.truthy(E.chat(W):find("250 (= 250 Gold)", 1, true))
+  end)
+  it("Schnelles Reiten = 1.000 g Training + 200 g Reittier", function()
+    local ns = E.load({})
+    for _, p in ipairs(ns.Goal.PRESETS) do
+      if p.key == "ride60" then assert.are.equal(1200 * G, p.amount) end
+      if p.key == "ride40" then assert.are.equal(100 * G, p.amount) end
+    end
+  end)
+  it("Post deckt den Rest: kein 'ca. 0 Spieltage', kein Post-Schritt doppelt", function()
+    local ns, W = E.load({ level = 25, money = 80 * G })
+    ns.Goal.Set("custom", 100 * G)
+    ns.AH.Summary = function() return { mailGold = 25 * G, onWay = 0, value = 0 } end
+    local st = ns.Goal.Status()
+    assert.are.equal(0, st.missing)
+    assert.are.equal(20 * G, st.missingNow)
+    for _, b in ipairs(ns.Goal.Boosts()) do assert.are_not.equal("mail", b.key) end
+    SlashCmdList.TIRYSZENTRALE("") ns.UI.Wizard.Finish()
+    ns.UI.Show("home")
+    local card = ns.UI.pages.home.goalCard
+    assert.are.equal("Post abholen – dann geschafft!", card.eta:GetText())
+    assert.falsy(card.chip:IsShown() and card.chip.text and card.chip.text:GetText() == "Geschafft!")
+    assert.are.same({}, W.errors)
+  end)
+  it("Gold aller Charaktere wird angezeigt (Modul ns.Inv)", function()
+    local ns = E.load({ level = 25, money = 30 * G })
+    ns.Inv.UpdateBags()
+    local realm = ns.db.inv[next(ns.db.inv)]
+    realm["Zweitchar"] = { money = 70 * G, bags = {}, bank = {}, mail = {} }
+    local st = ns.Goal.Status()
+    assert.are.equal(100 * G, st.allChars)
+  end)
+  it("Einstellgebühr: Regler-× setzt auf 1 Kupfer zurück (nicht 1 Silber)", function()
+    local ns = E.load({})
+    local src = io.open("TirysZentrale/UI/PageSettings.lua"):read("*a")
+    assert.truthy(src:find("function%(v%) return ns.Money%(v%) end, 1%)"), "Standardwert des Reglers = 1")
+    assert.are.equal(1, ns.settings.ahDeposit)
+  end)
+end)
+
+describe("P4 Blizzard-Hotfixes wirken überall", function()
+  it("Eisengranate: Händlerpreis 1s 25c auch wenn das Spiel noch 5s meldet; kein falsches Händler-Schnäppchen", function()
+    local ns = E.load({ itemInfo = { [4390] = { name = "Eisengranate", stack = 10, sell = 500 } } })
+    assert.are.equal(125, ns.Item(4390).sell)
+    assert.are.equal(125, ns.Market.VendorSell(4390))
+    assert.are.equal(125, ns.DB.Get(4390).sell)
+    ns.Snipe.Begin()
+    ns.Snipe.Collect(4390, 10, 2000, "Fremder") -- 10 Stück für 20 Silber = 2s je Stück
+    ns.Snipe.Finish()
+    for _, e in ipairs(ns.Snipe.list) do assert.are_not.equal(4390, e.id) end
+  end)
+  it("Schwaches Arkanelixier 5c, Milde Gewürze 1c (Datenbank und Sortierung)", function()
+    local ns = E.load({})
+    assert.are.equal(5, ns.DB.Get(247754).sell)
+    assert.are.equal(1, ns.DB.Get(2678).sell)
+    for _, e in ipairs(ns.DB.Search("arkanelixier", nil, "sell")) do
+      if e.id == 247754 then assert.are.equal(5, e.sell) end
+    end
+  end)
+  it("Flinkschlagschuss/Flinkfederpfeil handelbar, Rassen-Reittiere vom Händler seelengebunden", function()
+    local ns = E.load({})
+    assert.are.equal(0, ns.DB.Get(274388).bind)
+    assert.are.equal(0, ns.DB.Get(274387).bind)
+    assert.are.equal(1, ns.DB.Get(1132).bind)  -- Horn des Waldwolfs
+    assert.are.equal(1, ns.DB.Get(18796).bind) -- Horn des schnellen braunen Wolfs
+    assert.are.equal(3, ns.DB.Get(12302).bind) -- Zügel des Frostsäblers (kein Rassen-Händler laut QuestieDB) unverändert
+  end)
+end)
+
+describe("P5 Skill-Plan: bei Gewinn zählt auch die Chance", function()
+  it("100 %% mit etwas Gewinn schlägt 20 %% mit kaum mehr Gewinn (5 Crafts je Punkt)", function()
+    local ns = E.load({ prices = { [2318] = 100, [2319] = 100, [2304] = 470, [4239] = 480 },
+      itemInfo = { [2304] = { name = "A", stack = 20, sell = 1 }, [4239] = { name = "B", stack = 20, sell = 1 } },
+      skills = { { name = "Lederverarbeitung", skillID = 165, isHeader = false, rank = 100, maxRank = 150 } } })
+    local A = { id = 1, name = "A", out = 2304, qty = 1, yellow = 200, grey = 240, reagents = { { id = 2318, n = 1 } } }
+    local B = { id = 2, name = "B", out = 4239, qty = 1, yellow = 60, grey = 110, reagents = { { id = 2319, n = 1 } } }
+    ns.Recipes.List = function() return { A, B }, 100 end
+    assert.truthy(ns.Advisor.Resale(B) > ns.Advisor.Resale(A), "B bringt je Craft etwas mehr")
+    assert.truthy(ns.Advisor.Resale(A) > 100, "beide mit Gewinn")
+    assert.are.equal(1, ns.Advisor.Chance(A, 100))
+    assert.truthy(math.abs(ns.Advisor.Chance(B, 100) - 0.2) < 1e-9)
+    local plan = ns.Advisor.Plan("LEATHERWORKING", 1)
+    assert.are.equal("A", plan.steps[1].recipe.name)
+    assert.are.equal(1, plan.steps[1].crafts)
+  end)
+end)
+
+describe("P6 Preis-Tooltip und Neu-Einstellen", function()
+  it("nach einer Spielpause: Ø, Tief/Hoch und Trend nur aus den letzten 14 Tagen", function()
+    local ns, W = E.load({})
+    local h = {}
+    for i = 60, 72 do h[os.date("%Y-%m-%d", W.now - i * 86400)] = 5000 end
+    h[ns.Today()] = 1000
+    ns.db.priceHistory = { [2589] = h }
+    local st = ns.PriceString.Stats(2589)
+    assert.are.equal(1, st.days)
+    assert.are.equal(1000, st.mean)
+    assert.are.equal(1000, st.max)
+    assert.are.equal(1000, st.median)
+    assert.is_nil(ns.PriceString.Trend(2589))
+  end)
+  it("eigene Angebote decken die Nachfrage: klarer Hinweis statt 'Nur 0 einstellen'", function()
+    local ns, W = E.load({ prices = { [2318] = 300, [2304] = 2000 } })
+    W.bags = { [0] = { { itemID = 2304, stackCount = 10, quality = 2 } } }
+    ns.AH.Store().list = {
+      { auctionID = 1, id = 2304, qty = 10, unit = 2000, status = "expired" },
+      { auctionID = 2, id = 2304, qty = 10, unit = 2000, status = "active", expires = W.now + 36000 },
+    }
+    ns.Demand.Store().stats[2304] = { s = 1, h = 24, q = 3, t = W.now } -- Markt nicht voll, du hast schon 10 im AH
+    SlashCmdList.TIRYSZENTRALE("") ns.UI.Wizard.Finish()
+    local page = ns.UI.pages.auctions
+    local got
+    ns.UI.Show("auctions")
+    local orig = page.relist.SetEntries
+    page.relist.SetEntries = function(selfList, list, ...)
+      got = list
+      return orig(selfList, list, ...)
+    end
+    ns.UI.RefreshPage("auctions")
+    assert.truthy(got and got[1])
+    assert.falsy(got[1].note:find("Nur 0", 1, true))
+    assert.truthy(got[1].note:find("schon genug", 1, true))
+    assert.are.equal("–/10", got[1].cells.qty)
+    assert.are.same({}, W.errors)
+  end)
+end)
+
+describe("P7 Goldbarren: Bergbau-Verhütten statt Alchemie-Transmutation", function()
+  local mining = { { name = "Berufe", isHeader = true, isCollapsed = false },
+    { name = "Bergbau", skillID = 186, isHeader = false, rank = 160, maxRank = 225 } }
+  it("Index nimmt das Rezept deines Berufs bzw. das gelernte", function()
+    local ns = E.load({ skills = mining })
+    assert.are.equal(3308, ns.Recipes.ByOutput(3577).id) -- Gold verhütten
+    assert.are.equal(10098, ns.Recipes.ByOutput(6037).id) -- Echtsilber verhütten
+    assert.are.equal(11479, ns.Recipes.ByOutput(3577, "ALCHEMY").id)
+  end)
+  it("Berufsfenster Bergbau: gelerntes Verhütten wird nicht als Transmutation gemerkt", function()
+    local ns, W = E.load({ skills = mining })
+    ns.char.recipes = { ["Bergbau"] = { list = { { id = 999001, out = 3577, learned = true } } } }
+    W.fire("TRADE_SKILL_CLOSE") W.flush()
+    assert.is_true(ns.char.learned[3308])
+    assert.is_nil(ns.char.learned[11479])
+    -- Zauber-Nummer passt und Ergebnis passt: genau dieses Rezept
+    assert.are.equal(11479, ns.Recipes.Match(11479, 3577, "MINING").id)
+    assert.are.equal(3308, ns.Recipes.Match(424242, 3577, "MINING").id)
+  end)
+end)

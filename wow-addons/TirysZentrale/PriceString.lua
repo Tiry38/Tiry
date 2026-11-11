@@ -47,12 +47,23 @@ function PS.Record(itemID, price, age)
   end
 end
 
-function PS.Market(itemID)
+-- Preis-Tage der letzten 14 Kalendertage ({ [Tag] = Preis }) – ältere Tage (z. B. nach einer Spielpause) zählen nirgends mit
+local function recent(itemID)
   local t = ns.db and ns.db.priceHistory and ns.db.priceHistory[itemID]
   if not t then return nil end
-  local cutoff = date("%Y-%m-%d", time() - KEEP * 86400) -- nur die letzten 14 Kalendertage
+  local cutoff = date("%Y-%m-%d", time() - KEEP * 86400)
+  local out, any = {}, false
+  for d, p in pairs(t) do
+    if d >= cutoff then out[d], any = p, true end
+  end
+  return any and out or nil
+end
+
+function PS.Market(itemID)
+  local t = recent(itemID)
+  if not t then return nil end
   local v = {}
-  for d, p in pairs(t) do if d >= cutoff then v[#v + 1] = p end end
+  for _, p in pairs(t) do v[#v + 1] = p end
   if #v == 0 then return nil end
   table.sort(v)
   local n = #v
@@ -63,7 +74,7 @@ end
 -- Kennzahlen des eigenen Preisverlaufs (ein Wert je Scan-Tag = günstigstes Angebot, max. 14 Tage):
 -- { median, mean, min, max, days } oder nil
 function PS.Stats(itemID)
-  local t = ns.db and ns.db.priceHistory and ns.db.priceHistory[itemID]
+  local t = recent(itemID)
   if not t then return nil end
   local v, sum = {}, 0
   for _, p in pairs(t) do v[#v + 1] = p sum = sum + p end
@@ -75,7 +86,7 @@ end
 -- Preis-Trend: Median der letzten 3 Scan-Tage gegen den Median der Tage davor (mind. 2 ältere Tage).
 -- Rückgabe: Veränderung als Anteil (z. B. -0.35 = 35 % gefallen) und Anzahl Tage – oder nil
 function PS.Trend(itemID)
-  local t = ns.db and ns.db.priceHistory and ns.db.priceHistory[itemID]
+  local t = recent(itemID)
   if not t then return nil end
   local days = {}
   for d in pairs(t) do days[#days + 1] = d end
@@ -89,9 +100,9 @@ function PS.Trend(itemID)
     if n % 2 == 1 then return v[(n + 1) / 2] end
     return (v[n / 2] + v[n / 2 + 1]) / 2
   end
-  local recent, older = median(1, 3), median(4, #days)
+  local newer, older = median(1, 3), median(4, #days)
   if not older or older <= 0 then return nil end
-  return recent / older - 1, #days
+  return newer / older - 1, #days
 end
 
 -- Kurzer Rat aus dem Trend: "fällt" (verkaufen statt horten), "steigt" (halten lohnt), "stabil" – oder nil

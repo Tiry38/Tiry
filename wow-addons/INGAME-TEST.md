@@ -48,14 +48,19 @@ Zeigt dein Client keine Fehlerfenster: Tiry's Zentrale schreibt eigene Fehler ro
 ## Neu in 6.2
 **Sparziel (Startseite)**
 - [ ] Unter Stufe 40 steht „Reiten lernen – Vorschlag“ mit 100 Gold; Balken = Gold in der Tasche + Post + halber Auktionswert
+- [ ] **Ab Stufe 40 ohne Reiten** bleibt „Reiten lernen“ stehen; nach dem Lernen (und ab 60) wechselt der Vorschlag auf „Schnelles Reiten“ mit 1.200 Gold. Falls nicht: `/run print(C_SpellBook.IsSpellKnown(33388))` notieren: ______
+- [ ] Eigenes Ziel „1.200“ eintippen → Ziel 1.200 Gold (nicht 1 Gold); Unsinn eintippen → Hinweis nennt Gold-Beispiele
+- [ ] Liegt genug Gold in der Post: „Post abholen – dann geschafft!“; „alle Charaktere“ erscheint, sobald ein Twink Gold hat
 - [ ] „+“/„−“ ändern das Ziel in 10/25/100-Gold-Schritten, „Anderes Ziel“ schaltet durch, „×“ blendet es aus (Klick auf die Leiste holt es zurück)
 - [ ] „Schneller ans Ziel“: Klick auf eine Pille öffnet die richtige Seite; Beträge passen ungefähr zum Taschen-Check bzw. zur Craft-Liste
 - [ ] Nach 1–2 Spieltagen erscheint „ca. N Spieltage · Ø X/Tag“
 - [ ] Ziel klein einstellen (z. B. 1 Gold unter deinem Gold): Chat „Sparziel erreicht“ + Ton, nur einmal
-- [ ] **Am Reitlehrer den echten Preis notieren** (Guides sagen ca. 100 Gold): ______
+- [ ] **Am Reitlehrer den echten Preis notieren** (Guides: 100 g inkl. Reittier ab 40, 1.000 g + 200 g ab 60): ______
 
 **Unterwegs-Gold**
 - [ ] Startseite zeigt „Unterwegs-Gold: <dein Gebiet>“ mit deinen Sammel-Materialien und Preisen; „Hinführen“ setzt einen Kartenpunkt
+- [ ] Mit niedrigem Sammel-Skill: nur Kräuter/Erze, die du schon sammeln kannst; Tooltip „ab Skill X: …“ nennt das wertvollere. Stimmt die Grenze mit dem Spiel überein (Erz/Kraut wird rot)? ______
+- [ ] Gebiet wechseln bei offener Startseite: Karte springt auf das neue Gebiet; in einer Hauptstadt steht der Stadtname
 - [ ] Mit LevelPilot: „Als Nächstes auf deiner Route“ nennt die nächsten Gebiete deiner Route
 - [ ] Gebiet wechseln: einmal Chat-Hinweis „Unterwegs-Gold in …“ (nicht bei jedem Wechsel erneut); Einstellungen → „Unterwegs-Gold im Chat“ schaltet ihn ab
 - [ ] In Höhlen/Unterkarten zeigt die Karte das übergeordnete Gebiet
@@ -63,7 +68,10 @@ Zeigt dein Client keine Fehlerfenster: Tiry's Zentrale schreibt eigene Fehler ro
 **Rezepte, Stationen, Hotfixes**
 - [ ] Craft-Planer / „Was lernen?“: ein Leder-Rezept mit Gerbrahmen zeigt „braucht Gerbrahmen (Lager-Station am Lagerfeuer …)“
 - [ ] Seelengebundenes Rezept (z. B. Rezept: Schattenöl): „Rezept nur selbst holen – beim Händler“, Klick sucht NICHT im AH
-- [ ] Einstellungen → „Einstellgebühr je Angebot“ steht auf **1 Kupfer**
+- [ ] Einstellungen → „Einstellgebühr je Angebot“ steht auf **1 Kupfer** (auch nach „Zurücksetzen“)
+- [ ] Tooltip Eisengranate / Schwaches Arkanelixier / Milde Gewürze: Händlerpreis 1 s 25 c / 5 c / 1 c (Hotfix 10.11. bzw. 05.11.). Meldet das Spiel selbst schon den neuen Preis? ______
+- [ ] Suche: schnell tippen („kupfer“) – kein Ruckeln
+- [ ] Neu einstellen, wenn schon genug von dir im AH liegt: „Liegt schon genug von dir im AH …“ statt „Nur 0“
 - [ ] Bei offenem AH: Taschen-Item einstellen – Blizzards Anzahlung notieren (für die Schätzung ohne offenes AH): Item ______ Anzahlung ______
 - [ ] Händler mit Rezepten: kein Flip-Hinweis für seelengebundene Rezepte
 - [ ] `/tz KÜRSCHNER` (Großbuchstaben) öffnet die Kürschner-Seite

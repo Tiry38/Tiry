@@ -11,9 +11,9 @@ local GOLD = 10000
 -- den Preis, deshalb immer mit Hinweis "am Trainer prüfen" und frei änderbar.
 GZ.PRESETS = {
   { key = "ride40", name = "Reiten lernen", level = 40, amount = 100 * GOLD,
-    note = "Ab Stufe 40. Laut Guides ca. 100 Gold, mit Ruf „Wohlwollend“ weniger – am Trainer prüfen." },
-  { key = "ride60", name = "Schnelles Reiten", level = 60, amount = 1000 * GOLD,
-    note = "Ab Stufe 60. Laut Guides ca. 1.000 Gold – am Trainer prüfen." },
+    note = "Ab Stufe 40: 100 g inkl. erstem Reittier (laut Guides), Ruf „Wohlwollend“ -10 % – am Trainer prüfen." },
+  { key = "ride60", name = "Schnelles Reiten", level = 60, amount = 1200 * GOLD,
+    note = "Ab Stufe 60: 1.000 g Training + 200 g Reittier (laut Guides), „Wohlwollend“ -10 % – am Trainer prüfen." },
   { key = "skills", name = "Klassen-Fähigkeiten", level = 60, amount = 206 * GOLD,
     note = "Alle Fähigkeiten von 1 bis 60 zusammen etwa 206 Gold (Classic-Werte, in Forever nicht bestätigt)." },
   { key = "custom", name = "Eigenes Ziel", amount = 50 * GOLD, note = "Betrag frei wählbar." },
@@ -27,10 +27,31 @@ local function store()
   return ns.char
 end
 
--- Vorschlag nach Stufe: unter 40 Reiten, unter 60 schnelles Reiten (nur ein Vorschlag, bis du selbst wählst)
+-- Reiten schon gelernt? Zauber "Reiten (Lehrling/Geselle)" oder – Classic-Weg – Fertigkeit Reiten (SkillLine 762).
+-- Welcher Weg in Forever gilt, ist nur im Spiel prüfbar; beide sind abgesichert.
+local RIDING_SPELLS = { 33388, 33391 }
+function GZ.KnowsRiding()
+  if C_SpellBook and C_SpellBook.IsSpellKnown then
+    for _, id in ipairs(RIDING_SPELLS) do
+      local ok, known = pcall(C_SpellBook.IsSpellKnown, id)
+      if ok and known then return true end
+    end
+  end
+  if C_SkillInfo and C_SkillInfo.GetNumSkillLines then
+    local ok, n = pcall(C_SkillInfo.GetNumSkillLines)
+    for i = 1, (ok and tonumber(n)) or 0 do
+      local ok2, info = pcall(C_SkillInfo.GetSkillLineInfo, i)
+      if ok2 and type(info) == "table" and info.skillID == 762 then return true end
+    end
+  end
+  return false
+end
+
+-- Vorschlag (nur bis du selbst wählst): erst Reiten lernen – auch ab Stufe 40, solange du es noch nicht kannst –,
+-- danach schnelles Reiten. So springt der Vorschlag mit Stufe 40 nicht auf 1.200 Gold, wenn du gerade 100 brauchst.
 function GZ.Suggest(level)
   level = level or (ns.player and ns.player.level) or 1
-  if level < 40 then return BY_KEY.ride40 end
+  if level < 40 or not GZ.KnowsRiding() then return BY_KEY.ride40 end
   return BY_KEY.ride60
 end
 
@@ -80,11 +101,11 @@ function GZ.Clear()
   ns.Fire("GOAL_CHANGED")
 end
 
--- Betrag aus Eingabe: "250" = 250 Gold (beim Sparziel denkt man in Gold), sonst wie überall ("1g 20s", "80s")
+-- Betrag aus Eingabe: "250" = 250 Gold, "1.200" = 1.200 Gold (beim Sparziel denkt man in Gold), sonst wie überall ("1g 20s", "80s")
 function GZ.ParseAmount(text)
   text = tostring(text or "")
   if text:match("^%s*[%d%.,]+%s*$") then
-    local v = tonumber((text:gsub(",", "."):gsub("%s", "")))
+    local v = tonumber(ns.NormNumber((text:gsub("%s", "")))) -- "1.200" = 1.200 Gold, "1,5" = 1,5 Gold
     return v and math.floor(v * GOLD + 0.5) or nil
   end
   return ns.ParseMoney(text)
@@ -108,8 +129,8 @@ function GZ.Status(goal)
     end
   end
   local allChars
-  if ns.Inventory and ns.Inventory.Gold then
-    local ok, list, total = pcall(ns.Inventory.Gold)
+  if ns.Inv and ns.Inv.Gold then
+    local ok, list, total = pcall(ns.Inv.Gold)
     if ok and type(list) == "table" and #list > 1 then allChars = total end
   end
   local total = have + mail + auctions
@@ -150,13 +171,8 @@ end
 function GZ.Boosts()
   local out = {}
   local S = ns.Scanner
-  -- 1) Post abholen
-  local st = GZ.Status()
-  if st.mail > 0 then
-    out[#out + 1] = { key = "mail", title = "Post abholen", gold = st.mail,
-      text = "Gold aus Auktionsverkäufen liegt im Briefkasten bzw. ist unterwegs.", button = "Auktionen", page = "auctions" }
-  end
-  -- 2) Taschen: was ins AH gehört / was der Händler zahlt
+  -- (Post und laufende Auktionen stecken schon im Fortschritt – kein eigener Schritt, sonst doppelt gezählt)
+  -- 1) Taschen: was ins AH gehört / was der Händler zahlt
   if S and S.ScanBags then
     -- frischer Taschen-Check (höchstens alle 30 s neu, die Startseite wird oft aktualisiert)
     if time() - (S.bags.time or 0) > 30 then ns.Safe(S.ScanBags) end
@@ -181,7 +197,7 @@ function GZ.Boosts()
         text = "Grauer Schrott und Waren, die im AH weniger bringen.", button = "Taschen-Check", page = "scanner" }
     end
   end
-  -- 3) Craft-Liste: erwarteter Gewinn der geplanten Crafts
+  -- 2) Craft-Liste: erwarteter Gewinn der geplanten Crafts
   local queue = ns.char and ns.char.queue
   if queue and #queue > 0 and S and S.RecipeProfit then
     local profit = 0
@@ -198,7 +214,7 @@ function GZ.Boosts()
         button = "Craft-Planer", page = "recipes" }
     end
   end
-  -- 4) Beste eigene Farm-Runde (Gold pro Stunde)
+  -- 3) Beste eigene Farm-Runde (Gold pro Stunde)
   local Sess = ns.Session
   if Sess and Sess.Best then
     local ok, best = pcall(Sess.Best)

@@ -23,7 +23,7 @@ Notes on sources: most Forever gold guides come from gold-selling or boost sites
 | 11 | Classic Era precedent: vendor flips (vendor recipes/bags → AH), raid consumables at 60 | – | Small margins; raids open 2026-12-09 → Alchemy/Herbs | https://thelazygoldmaker.com/goldmaking-in-classic-some-ideas-when-just-starting-out , https://timesaver.gg/blog/wow-classic-era-auction-house-flipping-gold |
 
 **Brakes in launch week:**
-- A flat **1s deposit** per listing. Forum complaints from 2026-11-05/06; no blue response yet. This makes listing cheap goods unprofitable. https://us.forums.blizzard.com/en/wow/t/what-is-going-on-with-the-auction-house/2402031
+- (Outdated: since the 10.11. hotfix the minimum deposit is 1 copper again.) A flat **1s deposit** per listing. Forum complaints from 2026-11-05/06; no blue response yet. This makes listing cheap goods unprofitable. https://us.forums.blizzard.com/en/wow/t/what-is-going-on-with-the-auction-house/2402031
 - Vendor prices for crafted weapons, armor and bars were cut by about 20–75% (beta build Oct 15), e.g. Azerothium Bar 50s→30s. Crafted wands were cut to 1s10c/2s. Mild Spices sell for 1c. Vendor flips with crafted goods are therefore weak. https://conquestcapped.com/guides/wow-forever/wow-forever-gold-making/ , https://timesaver.gg/blog/wow-forever-gold-farming-guide
 - Skinning: a creature can only be skinned "once again" (beta Oct 1). Mage AoE was nerfed. The SM chest loop is dead (conquestcapped).
 - Spending targets: Apprentice Riding 100g at level 40 (90g at Honored), Journeyman 1,000g. Training 1–60 costs about 206g (conquestcapped / timesaver, beta prices).

@@ -161,9 +161,9 @@ ns.SPOTS = {
       { map = 1420, x = 83.4, y = 32.5, n = 82, names = { "Scharlachroter Späher", "Scharlachroter Magicus", "Scharlachroter Bewahrer" }, items = {  } },
     },
     special = {
-      { map = 1440, x = 49.0, y = 70.4, n = 33, names = { "Beschmutzter Wasserelementar" }, items = {  } },
-      { map = 1441, x = 35.6, y = 35.6, n = 15, names = { "Siedender Elementar", "Brühender Elementar" }, items = {  } },
-      { map = 1442, x = 32.9, y = 73.2, n = 7, names = { "Brennender Zerstörer" }, items = {  } },
+      { map = 1440, x = 49.0, y = 70.4, n = 33, names = { "Beschmutzter Wasserelementar" }, items = { 7070 } },
+      { map = 1441, x = 35.6, y = 35.6, n = 15, names = { "Siedender Elementar", "Brühender Elementar" }, items = { 7070 } },
+      { map = 1442, x = 32.9, y = 73.2, n = 7, names = { "Brennender Zerstörer" }, items = { 7068 } },
     },
   },
   ["30-40"] = {
@@ -192,10 +192,10 @@ ns.SPOTS = {
       { map = 1443, x = 55.1, y = 27.2, n = 74, names = { "Teufelsanbeter der Burning Blade", "Augur der Burning Blade", "Adept der Burning Blade" }, items = {  } },
     },
     special = {
-      { map = 1434, x = 20.9, y = 23.3, n = 24, names = { "Geringer Wasserelementar" }, items = {  } },
-      { map = 1418, x = 18.4, y = 42.3, n = 20, names = { "Kleiner Felselementar", "Felselementar" }, items = {  } },
-      { map = 1418, x = 41.4, y = 78.9, n = 18, names = { "Felselementar" }, items = {  } },
-      { map = 1417, x = 25.6, y = 30.4, n = 14, names = { "Brennender Verbannter" }, items = {  } },
+      { map = 1434, x = 20.9, y = 23.3, n = 24, names = { "Geringer Wasserelementar" }, items = { 7070 } },
+      { map = 1418, x = 18.4, y = 42.3, n = 20, names = { "Kleiner Felselementar", "Felselementar" }, items = { 7067 } },
+      { map = 1418, x = 41.4, y = 78.9, n = 18, names = { "Felselementar" }, items = { 7067 } },
+      { map = 1417, x = 25.6, y = 30.4, n = 14, names = { "Brennender Verbannter" }, items = { 7068 } },
     },
   },
   ["40-50"] = {
@@ -224,10 +224,10 @@ ns.SPOTS = {
       { map = 1425, x = 63.4, y = 69.6, n = 88, names = { "Schattenjäger der Vilebranch", "Berserker der Vilebranch", "Krieger der Vilebranch" }, items = {  } },
     },
     special = {
-      { map = 1444, x = 47.1, y = 53.4, n = 24, names = { "Meeresschauer", "Meereselementar" }, items = {  } },
-      { map = 1418, x = 41.4, y = 78.9, n = 18, names = { "Felselementar" }, items = {  } },
-      { map = 1418, x = 4.1, y = 79.8, n = 18, names = { "Großer Felselementar", "Rumpler" }, items = {  } },
-      { map = 1444, x = 38.0, y = 35.9, n = 18, names = { "Meereselementar", "Meeresschauer" }, items = {  } },
+      { map = 1444, x = 47.1, y = 53.4, n = 24, names = { "Meeresschauer", "Meereselementar" }, items = { 7070 } },
+      { map = 1418, x = 41.4, y = 78.9, n = 18, names = { "Felselementar" }, items = { 7067 } },
+      { map = 1418, x = 4.1, y = 79.8, n = 18, names = { "Großer Felselementar", "Rumpler" }, items = { 7067 } },
+      { map = 1444, x = 38.0, y = 35.9, n = 18, names = { "Meereselementar", "Meeresschauer" }, items = { 7070 } },
     },
   },
   ["50-60"] = {
@@ -256,8 +256,8 @@ ns.SPOTS = {
       { map = 1448, x = 37.2, y = 58.9, n = 67, names = { "Wächter von Jaedenar", "Kultist von Jaedenar", "Adept von Jaedenar" }, items = {  } },
     },
     special = {
-      { map = 1451, x = 23.1, y = 13.9, n = 25, names = { "Wüstenrumpler" }, items = {  } },
-      { map = 1449, x = 51.5, y = 45.9, n = 8, names = { "Versengender Elementar" }, items = {  } },
+      { map = 1451, x = 23.1, y = 13.9, n = 25, names = { "Wüstenrumpler" }, items = { 7067 } },
+      { map = 1449, x = 51.5, y = 45.9, n = 8, names = { "Versengender Elementar" }, items = { 7068, 7078 } },
     },
   },
 }

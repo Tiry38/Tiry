@@ -3,8 +3,10 @@ Lizenz: GNU General Public License v3.0 (siehe LICENSE-GPL-3.0.md)
 
 Enthaltene Daten und Quellen:
 - Data_Spots.lua: Farm-Stellen berechnet aus den Fundorten der QuestieDB (https://github.com/Questie/QuestieDB), GPL-3.0.
+  Beute der Spezial-Stellen (Elemente u. a.) aus den NPC-Beutelisten (npcDrops) der QuestieDB, GPL-3.0.
+- Data_Farm.lua (Sammel-Skill je Kraut/Erz): Spieldaten von WoW Forever 1.60.1.70888 (DB2-Tabelle Lock, wago.tools).
 - Data_AllItems.lua, Data_Recipes.lua, Data_RecipeItems.lua, Zonennamen: Spieldaten von WoW Forever 1.60.1.70862 (DB2), bezogen über wago.tools.
 - Data_RecipeExtra.lua: Stationen und Zufallsmengen aus den Spieldaten von WoW Forever 1.60.1.70888 (DB2, wago.tools);
   Herkunft der Rezept-Items (Händler/Beute/Quest) aus der QuestieDB (https://github.com/Questie/QuestieDB), GPL-3.0.
-- Data_Hotfix.lua: Werte aus Blizzards Hotfix-Liste (news.blizzard.com, „WoW: Forever Hotfixes“, 06.11. und 10.11.2026).
+- Data_Hotfix.lua: Werte aus Blizzards Hotfix-Liste (news.blizzard.com, „WoW: Forever Hotfixes“, 05.11. bis 10.11.2026).
 - Schrift Poppins: SIL Open Font License 1.1 (Media/Fonts/OFL.txt).

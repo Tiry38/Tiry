@@ -94,6 +94,17 @@ SPECIAL = {  # Item -> (Tiernamen, Mindestlevel der Tiere)
     8154: (re.compile(r"Scorpid", re.I), 35),
     4461: (re.compile(r"Raptor", re.I), 25),
 }
+# Besonderes (Elementare …): welche Items der Gruppe "special" (Data_Farm.lua) ein Gegner wirklich fallen lässt –
+# aus den Beute-Listen der QuestieDB (Item-Feld 2 = npcDrops). So zeigt jede Stelle ihr eigenes Element.
+farm_src = open(os.path.join(here, "..", "TirysZentrale", "Data_Farm.lua"), encoding="utf-8").read()
+SPECIAL_ITEMS = {int(i) for m in re.finditer(r"special = \{([\d,\s]+)\}", farm_src) for i in m.group(1).split(",") if i.strip()}
+drops = collections.defaultdict(set)  # NPC-ID -> Spezial-Items
+for line in open(os.path.join(qdb, "data/Forever/foreverItemDB.lua"), encoding="utf-8"):
+    m = re.match(r"\[(\d+)\] = \{'(?:[^'\\]|\\.)*',(\{[\d,]*\}|nil)", line)
+    if m and int(m.group(1)) in SPECIAL_ITEMS and m.group(2) != "nil":
+        for npc in re.findall(r"\d+", m.group(2)):
+            drops[int(npc)].add(int(m.group(1)))
+npc_by_de = collections.defaultdict(set)
 special = collections.defaultdict(list)
 nodes_at = collections.defaultdict(dict)  # (gruppe, band) -> {(zone, x, y): [items, namen]}
 zone_levels = collections.defaultdict(list)
@@ -128,6 +139,7 @@ for line in open(spawns_path, encoding="utf-8"):
                         if nm not in pool[1]:
                             pool[1].append(nm)
     else:
+        npc_by_de[de_npc.get(oid, name)].add(oid)
         if lo <= 0 or hi > 63:
             continue
         group = None
@@ -146,9 +158,14 @@ for line in open(spawns_path, encoding="utf-8"):
             group = "special"
         if not group:
             continue
+        loot = None
+        if group == "special":
+            loot = tuple(sorted(drops.get(oid, ())))
+            if not loot:
+                continue  # Elementar ohne Spezial-Beute: keine Stelle dafür
         for b in BANDS:
             if b[0] - 1 <= hi and lo <= b[1] + 1 and (lo + hi) / 2 >= b[0] - 1:
-                points[(group, b)].append((zone, x, y, de_npc.get(oid, name), None))
+                points[(group, b)].append((zone, x, y, de_npc.get(oid, name), loot))
 
 
 for key, pool in nodes_at.items():
@@ -240,6 +257,14 @@ for b in BANDS:
     for group in ("herb", "ore", "leather", "cloth", "special"):
         if KEEP_NPC and group not in NODES:
             kept = old_spot.get((key, group), [])
+            if group == "special":
+                fixed = []
+                for l in kept:
+                    nms = re.findall(r'"((?:[^"\\]|\\.)*)"', l.split("names =", 1)[1])
+                    its = sorted({i for nm in nms for oid in npc_by_de.get(nm, ()) for i in drops.get(oid, ())})
+                    if its:
+                        fixed.append(re.sub(r"items = \{[^}]*\}", "items = { " + ", ".join(map(str, its)) + " }", l))
+                kept = fixed
             if kept:
                 total += len(kept)
                 lines.append(f"    {group} = {{")

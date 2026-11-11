@@ -889,7 +889,7 @@ describe("Herstell-Buch: echter Gewinn, Menge, Neu einstellen, Wochenbilanz", fu
       assert.truthy(plan.net <= plan.total)
       assert.truthy(plan.steps[1].net)
     end
-    -- Verkauf netto nach AH-Gebühr minus Einstellgebühr-Risiko (1 Silber je 10er-Angebot, 1 Fehlversuch erwartet)
+    -- Verkauf netto nach AH-Gebühr minus Einstellgebühr-Risiko (Anzahlung je Angebot, 1 Fehlversuch erwartet)
     local r = ns.Recipes.Get(2152)
     local risk = ns.Market.DepositRisk(r.out)
     assert.truthy(risk > 0)
@@ -1431,7 +1431,10 @@ describe("Sparziel (Gold-Ziel)", function()
     assert.are.equal("ride40", g.key)
     assert.is_true(g.auto)
     assert.are.equal(100 * G, g.amount)
+    assert.are.equal("ride40", GZ.Suggest(45).key, "ab 40 erst Reiten lernen, solange es fehlt")
+    W.known[33388] = true
     assert.are.equal("ride60", GZ.Suggest(45).key)
+    W.known[33388] = nil
     -- zwei Spieltage (+10 g, +20 g), dazwischen ein Ruhetag: der Ruhetag zählt nicht
     ns.char.days = {}
     ns.char.days[day(W, 0)] = { start = 0, earned = 12 * G, spent = 2 * G }

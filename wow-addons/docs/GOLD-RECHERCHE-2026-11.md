@@ -56,7 +56,7 @@ Nicht erreichbar: Reddit (gesperrt, Mirrors 503/404), MMO-Champion „Gold Makin
 - **[B] 06.11.** Skill-Ups am Gerbgestell um weitere 15 Punkte gesenkt. **05.11.** Zephras-Händler mit Berufstaschen;
   Milde Gewürze beim Händler nur noch 1c. **02.11.** erhöhte Respawn-Raten zum Start (Rückkehr ohne Datum);
   Klassentraining 1–60 ≈ 206–207g.
-- **Deposit:** Rückkehr auf 1c bis 10.11. **nicht** live ([US-Forum](https://us.forums.blizzard.com/en/wow/t/ah-1-silver-deposit-%E2%80%94-when-is-the-fix-coming/2409414)).
+- **Deposit:** (überholt: seit Hotfix 10.11. wieder 1 Kupfer, [Blizzard](https://news.blizzard.com/en-us/article/24315281/wow-forever-hotfixes-november-10-2026)) Rückkehr auf 1c bis 10.11. **nicht** live ([US-Forum](https://us.forums.blizzard.com/en/wow/t/ah-1-silver-deposit-%E2%80%94-when-is-the-fix-coming/2409414)).
 - [S] Seit 06.11. scheitern Einzelkäufe mit „The item was not found“, Stapel gehen. Rollback 09.11. (Fähigkeiten, Punkte,
   Material weg, keine Erstattung laut GM) [€].
 - [S] Neue Forever-AH-Addons: Waylaid Auction Helper, Naowh Forever 1.2.20 (Ausrüstung zu ganzen Silbern), Gold Forever,

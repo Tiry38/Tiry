@@ -66,7 +66,7 @@ end
 -- Sparziel
 ----------------------------------------------------------------------------
 local BOOST_H, BOOST_GAP = 52, 10
-local BOOST_ICON = { mail = "receipt", bags = "bag", vendor = "coins", craft = "flask", farm = "compass" }
+local BOOST_ICON = { bags = "bag", vendor = "coins", craft = "flask", farm = "compass" }
 
 function HC.Goal(parent, width)
   local GZ = ns.Goal
@@ -88,7 +88,8 @@ function HC.Goal(parent, width)
   local function step(v) return v >= 1000 * 10000 and 100 * 10000 or (v >= 200 * 10000 and 25 * 10000 or 10 * 10000) end
   card.amount = UI.Stepper(card, "Ziel", 236, function() local g = GZ.Get() return g and g.amount or 0 end,
     function(v) GZ.SetAmount(v) end, step, 10000, 1000000 * 10000, function(v) return ns.Money(v) end, GZ.ParseAmount,
-    "Betrag eintippen: \"250\" = 250 Gold, auch \"1g 50s\". Enter übernimmt.")
+    "Betrag eintippen: \"250\" = 250 Gold, \"1.200\" = 1.200 Gold, auch \"1g 50s\". Enter übernimmt.")
+  card.amount.badInput = "Bitte einen Betrag eingeben, z. B. 250 (= 250 Gold), 1.200 oder 1g 50s."
   card.amount:SetPoint("TOPRIGHT", -PAD, -20)
   card.other = UI.Button(card, "Anderes Ziel", "soft", 150, 30, "refresh")
   card.other:SetPoint("TOPRIGHT", card.amount, "BOTTOMRIGHT", 0, -8)
@@ -169,7 +170,7 @@ function HC.Goal(parent, width)
     self.bar:Set(g.amount > 0 and st.have / g.amount or 0, st.pct)
     local parts = "In der Tasche " .. ns.Money(st.have)
     if st.mail > 0 then parts = parts .. "  ·  Post " .. ns.Money(st.mail) end
-    if st.auctions > 0 then parts = parts .. "  ·  im AH ca. " .. ns.Money(st.auctions) end
+    if st.auctions > 0 then parts = parts .. "  ·  Auktionen (halb gezählt) " .. ns.Money(st.auctions) end
     if st.missing > 0 then parts = parts .. "  ·  fehlt " .. ns.Money(st.missing) end
     if st.allChars and st.allChars > st.have then parts = parts .. "  ·  alle Charaktere " .. ns.Money(st.allChars) end
     UI.FitText(self.parts, parts, width - 2 * PAD - 260)
@@ -177,6 +178,9 @@ function HC.Goal(parent, width)
     local eta = GZ.Eta(st.missing, rate)
     if done then
       self.eta:SetText("Ab zum Trainer!")
+    elseif st.missing <= 0 then
+      -- rechnerisch da, aber noch nicht in der Tasche
+      self.eta:SetText(st.mail >= st.missingNow and "Post abholen – dann geschafft!" or "Rest kommt mit Post und AH-Verkäufen")
     elseif eta then
       self.eta:SetText(string.format("ca. %d %s  ·  Ø %s/Tag", eta, ns.Plural(eta, "Spieltag", "Spieltage"), ns.Money(rate)))
     elseif rate then
@@ -259,8 +263,12 @@ function HC.Zone(parent, width)
         GameTooltip:AddDoubleLine(ns.Item(it.id).name, ns.Money(it.value) .. (it.src == "vendor" and " |cff9aa8a2(Händler)|r" or ""),
           0.86, 0.92, 0.89, 1, 1, 1)
       end
+      if g.later then
+        GameTooltip:AddDoubleLine((g.later.skill and ("Ab Skill " .. g.later.skill .. ": ") or "Später: ") .. ns.Item(g.later.id).name,
+          ns.Money(g.later.value), 1, 0.71, 0.28, 1, 0.71, 0.28)
+      end
       GameTooltip:AddLine(" ")
-      GameTooltip:AddLine("Wert je Stück: AH nach Gebühr, sonst Händler. Klick = Wegpunkt zur besten Stelle.", 0.47, 1, 0.58, true)
+      GameTooltip:AddLine("Nur was du mit deinem Skill schon sammeln kannst. Wert je Stück: AH nach Gebühr, sonst Händler. Klick = Wegpunkt zur besten Stelle.", 0.47, 1, 0.58, true)
       GameTooltip:Show()
     end)
     card.groups[i] = b

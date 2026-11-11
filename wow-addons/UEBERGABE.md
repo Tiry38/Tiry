@@ -252,11 +252,22 @@ funktioniert, weitere sinnvolle gekoppelte Funktionen, komplett prüfen, was her
   LevelPilot schreibt Eschental/Düstermarschen/Hügelland (eigene Schreibweise) → `ZoneGold.ALIAS`.
 - Farm-Daten: `tools/export_spawns.lua` + `gen_spots.py --keep-npc` (Gegner-Stellen bleiben, weil die aktuelle
   QuestieDB viele Gegner mit Level 1 führt, z. B. Lavakrebs).
+- Prüfrunde 2: 2 weitere Prüfer (Code, Gold-Rechnung/Texte) + Blizzard-Hotfix-Artikel wörtlich nachgelesen. 20 Funde,
+  Tests P1–P7 in derselben Spec (Suche, ZoneGold, Sparziel, Hotfixes, Skill-Plan, Preis-Tooltip/Neu-Einstellen,
+  Goldbarren), alle vorher rot. Wichtig für spätere Arbeit:
+  - `ns.HOTFIX` (`Data_Hotfix.lua`: `recipes`, `sell`, `bind`) wirkt in `Database.build`, `ns.Item`, Snipe und
+    `Recipes.Load` – neue Hotfixes nur dort eintragen.
+  - `ns.NormNumber` (Shopping.lua): „1.200“ = 1200, „1,5“ = 1.5 – für jede Zahleneingabe benutzen.
+  - Suche über sortierten Index (`Database.lua`, `searchIndex`), einmalig ~1,5 MB.
+  - `ns.GATHER_SKILL` (Data_Farm.lua) + `ns.Skin` begrenzen Unterwegs-Gold auf den eigenen Skill.
+  - `gen_spots.py` liest `SPECIAL_ITEMS` aus Data_Farm und hängt je Spezial-Stelle die echte Beute (`loot`) an.
+  - Reitkosten: Guides (Method, timesaver) 100 g inkl. Reittier ab 40; Warcraft Tavern nennt 20 g extra fürs Reittier –
+    Tirys Wert am Trainer abwarten.
 
 ## Tiry's Zentrale 6.0 (10.11.)
 Wünsche: Logik neu durchdacht, Forever-Goldguides/Foren, „chicer als LevelPilot“, moderne leichte Menüs, Absatz sehen
 („Kleinvieh macht auch Mist“), viele Goldmacher-Funktionen, **ein Scan aktualisiert alle Reiter**.
-- Recherche: `docs/GOLD-RECHERCHE-2026-11.md` (Anzahlung 1 Silber live, Kupfer-Fehler bei Ausrüstung, Writs, Raid-Start 09.12.).
+- Recherche: `docs/GOLD-RECHERCHE-2026-11.md` (Anzahlung 1 Silber – überholt: seit Hotfix 10.11. wieder 1 Kupfer; Kupfer-Fehler bei Ausrüstung, Writs, Raid-Start 09.12.).
 - Menü: 5 Hauptpunkte im Dock (Start, Herstellen, Farmen, Handel, Mein Gold), Lernen (?) und Einstellungen oben rechts.
 - Nur im Spiel prüfbar: Atlas-Namen/Glow/Masken, ob `Auctionator.State.FullScanFrameRef` in Tirys Auctionator-Version
   existiert (sonst Schnell-Scan), Absatz-Werte nach echten Scans, Tooltip-Zeilen, exakte Anzahlung bei offenem AH.

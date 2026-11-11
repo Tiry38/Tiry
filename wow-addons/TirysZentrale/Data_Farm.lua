@@ -12,6 +12,20 @@ ns.FARM_GROUPS = {
   special = { label = "Elemente & Besonderes", how = "Kein Beruf nötig: Elementare, Untote und Drachkin in diesem Levelbereich looten." },
 }
 
+-- Nötiger Sammel-Skill je Kraut/Erz/Stein/Edelstein (Classic-Werte; die Forever-Spieldaten 1.60.1.70888, Tabelle Lock,
+-- enthalten genau diese Skill-Stufen für Kräuter und Erz). Fehlt ein Item, gilt es als ohne Grenze (z. B. neue Forever-Items).
+ns.GATHER_SKILL = {
+  -- Kräuter
+  [765] = 1, [2447] = 1, [2449] = 15, [785] = 50, [2452] = 50, [2450] = 70, [3820] = 85, [2453] = 100, [3355] = 115,
+  [3369] = 120, [3356] = 125, [3357] = 150, [3818] = 160, [3821] = 170, [3358] = 185, [3819] = 195, [4625] = 205,
+  [8831] = 210, [8836] = 220, [8838] = 230, [8839] = 235, [8845] = 245, [8846] = 250, [13464] = 260, [13463] = 270,
+  [13465] = 280, [13466] = 285, [13467] = 290, [13468] = 300,
+  -- Erze, Steine, Edelsteine (Mindest-Skill der Ader, aus der sie kommen)
+  [2770] = 1, [2835] = 1, [774] = 1, [818] = 1, [1210] = 1, [2771] = 65, [2836] = 65, [1206] = 65, [1705] = 65,
+  [2775] = 75, [2772] = 125, [2838] = 125, [3864] = 125, [2776] = 155, [3858] = 175, [7912] = 175,
+  [7911] = 230, [10620] = 245, [12365] = 245, [12361] = 245, [12799] = 245,
+}
+
 ns.FARM = {
   {
     key = "1-10", min = 1, max = 10,

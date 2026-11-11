@@ -228,6 +228,8 @@ function page.refresh(self)
       note = "|cffff9929Markt voll – nicht nachlegen, lieber halten|r"
     elseif e.wait then
       note = "|cffff9929AH-Preis liegt unter deinen Kosten – lieber warten oder zum Vorschlag einstellen|r"
+    elseif post <= 0 then
+      note = "Liegt schon genug von dir im AH – erst nachlegen, wenn davon etwas verkauft ist"
     elseif post < e.qty then
       note = "Nur " .. post .. " einstellen – so viele gehen in ca. 3 Tagen weg, der Rest später"
     else
@@ -238,12 +240,16 @@ function page.refresh(self)
         or "Vorschlag = günstigstes Angebot minus 1 Kupfer, nie unter \"Nicht unter\".",
       "\"Nicht unter\" = Materialkosten bzw. Händlerpreis pro Stück plus Anzahlungs-Risiko, nach AH-Gebühr.",
       "Einstellen: Auctionator > Verkaufen > Item anklicken." }
-    if post < e.qty then tip[#tip + 1] = "Menge: " .. post .. " von " .. e.qty .. " einstellen – nicht den Markt fluten." end
+    if post <= 0 then
+      tip[#tip + 1] = "Menge: jetzt nichts einstellen – deine laufenden Angebote decken die Nachfrage der nächsten Tage."
+    elseif post < e.qty then
+      tip[#tip + 1] = "Menge: " .. post .. " von " .. e.qty .. " einstellen – nicht den Markt fluten."
+    end
     re[#re + 1] = {
       id = e.id,
       note = note,
       chip = (e.stale and { "Ladenhüter", C.hi }) or (e.full and { "Markt voll", C.hi }) or nil,
-      cells = { qty = post < e.qty and (post .. "/" .. e.qty) or tostring(e.qty), where = WHY[e.where] or e.where,
+      cells = { qty = post <= 0 and ("–/" .. e.qty) or (post < e.qty and (post .. "/" .. e.qty)) or tostring(e.qty), where = WHY[e.where] or e.where,
         price = e.price and ns.Money(e.price) or "|cff8a9a94kein Preis|r", floor = e.floor and ns.Money(e.floor) or "–" },
       tip = tip,
       onClick = function()

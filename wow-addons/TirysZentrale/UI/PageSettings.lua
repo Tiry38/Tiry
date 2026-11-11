@@ -144,7 +144,7 @@ function page.build(self, content, width)
       function() return tonumber(s.ahCut) or 5 end, function(v) s.ahCut = v end, 1, 0, 30, "%d %%", 5),
     step("Einstellgebühr je Angebot", "Gilt, bis das AH den exakten Wert liefert. Kommt bei Verkauf zurück – Tiry's Zentrale rechnet nur das Risiko ein, dass es nicht verkauft wird.",
       function() return tonumber(s.ahDeposit) or 1 end, function(v) s.ahDeposit = v end, depositStep, 0, 10000,
-      function(v) return ns.Money(v) end, 100),
+      function(v) return ns.Money(v) end, 1),
     toggle("Experten-Modus", function() return s.expertMode == true end, function(v)
       s.expertMode = v
     end, "Zeigt im Craft-Planer die Preisformeln (Materialpreis, Verkaufswert, Mindestgewinn) zum Selbst-Einstellen. Für Einsteiger nicht nötig."),
