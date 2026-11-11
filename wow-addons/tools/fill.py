@@ -21,11 +21,8 @@ FILL = {
         ("complete", 5064, None),     # Notizen im Grimmtotem-Lager
         ("accept", 4904, "Begleitquest – Lakota zum Freiwindposten bringen"),
         ("complete", 4904, "Begleitquest – Lakota zum Freiwindposten bringen"),
-        ("accept", 5151, None),       # Hypercapacitor Gizmo – Weissreichposten
         ("accept", 4966, "Verteidigungs-Ereignis"),
         ("complete", 4966, "Verteidigungs-Ereignis"),
-        ("complete", 5151, None),
-        ("turnin", 5151, None),
         ("turnin", 4966, None),
         ("accept", 4770, "Begleitquest"),
         ("complete", 4770, "Begleitquest"),
@@ -71,6 +68,10 @@ def apply(key):
         new = []
         for t, q, note in blk["steps"]:
             if t != "grind" and q in main_q: continue
+            if t != "grind":   # nur Solo: keine Elite-Ziele (Tiry 11.11.)
+                import plan as PL
+                b = PL.bad_quest(q, curated=True)
+                if b and ("Elite" in b): raise SystemExit("Aufhol-Quest %d nicht solo: %s" % (q, b))
             if t == "grind":   # q = Gegner-ID; Ziel = Mitte seiner Spawns im Gebiet
                 import xpmodel as XM
                 NN = XM.D["N"]

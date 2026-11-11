@@ -157,6 +157,13 @@ Alles oben ist im Forever-Nachbau getestet, aber nicht im echten Client. Besonde
 
 ---
 
+# Ingame-Test – LevelPilot 5.1.7
+
+## Neu in 5.1.7 (nur Solo)
+- [ ] Steinkrallen: keine Arachnophobia (Besseleth) und keine Bloodfury Bloodline (Blutwut-Reißer) mehr im Plan – beide Elite.
+- [ ] Tausend Nadeln: kein Hypercapacitor Gizmo (Enraged Panther, Elite) mehr bei den Aufhol-Quests.
+- [ ] Während einer Begleitquest (z. B. Homeward Bound) Stufe aufsteigen: Pfeil bleibt beim Geleit, bis es fertig ist.
+
 # Ingame-Test – LevelPilot 5.1.6
 
 ## Neu in 5.1.6 (Extra-Quests aus dem Quest-Pool)

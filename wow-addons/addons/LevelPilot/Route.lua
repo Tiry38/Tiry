@@ -1204,6 +1204,13 @@ function R.Plan(route, lvl, skipped, plan, n, cur)
   plan.k = (p <= N) and R.StepKey(steps[p]) or "END"
   if info.jumped then info.jumped.to = p end
   hero = nextOpen(state, p, N)
+  -- Laufende Begleit-/Ereignisquest (angenommen, noch nicht fertig) zuerst zu Ende bringen – sonst schickt der
+  -- Pfeil dich mitten im Geleit weg und sie scheitert (Stufe 28 erreicht waehrend "Homeward Bound").
+  for i = 1, N do
+    local s = steps[i]
+    if s.t == "complete" and s.q and state[i] == "open" and s.note and (s.note:find("Begleit") or s.note:find("Ereignis"))
+      and inLog(s.q) and not ready(s.q) then hero = i; break end
+  end
   -- Aufhol-Quests gehen nie verloren: musst du am Zeiger auf eine Stufe warten (oder grinden), holt der Plan
   -- Aufhol-Schritte desselben Abschnitts zurueck, die der Zeiger schon hinter sich gelassen hat (Tiry 11.11.)
   local back = {}

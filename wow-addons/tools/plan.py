@@ -98,7 +98,7 @@ def bad_quest(q, curated=False):
     w, _, why = X.work(q, max(int(v[4] or 20), 20))
     if w > MAX_WORK: return "dauert zu lange (%d Min.)" % w
     if any(x.startswith("Drop") and int(x[5:-1]) < 15 for x in why): return "Dropchance unter 15 %"
-    if curated: return None
+    # Elite gilt auch fuer kuratierte Quests (Tiry 11.11.: nur Solo-Leveling, Speedrunner spielen oft in Gruppen)
     ob = v[9] if len(v) > 9 else None
     for c in (ob[0] if ob and ob[0] else []):
         if isinstance(c, list) and c and X.npc_rank(c[0]) in (1, 2, 3): return "Elite-Ziel"

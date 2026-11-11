@@ -85,6 +85,8 @@ Dateien/Sounds reicht `/reload` nicht). Version in allen 4 TOCs und in `VERSION`
    `poolBest` alle 20 s die Quest mit den meisten XP/Min (Weg per `LP_Fly.TripSec`, Quest/Gegner <= Stufe+1), wenn sie
    mindestens `R.QUEST_PREF` (0.65) x Grind-Tempo bringt → `plan.detour.pool`. UI zeigt sie als „EXTRA“.
    Neue Routendatei in alle 4 TOCs eintragen. `tests/route.lua` prüft Routenwahl + Dateien.
+**Nur Solo-Leveling** (Tiry 11.11.): keine Elite-/Gruppen-/Dungeonquests – `bad_quest` prueft Elite auch fuer kuratierte
+Quests, `fill.py` bricht bei Elite-Aufhol-Quests ab. Speedrun-Daten liefern nur die Gebietsreihenfolge, keine Tempo-/Grind-Werte.
 Quellen der Gebietsreihenfolge: Konsens freier Speedrun-Routen (Joana, Warcraft Tavern, Guidelime, WoW-Pro, Bustea),
 danach per Modell verglichen; Gebiete mit nur 1–3 Quests werden gestrichen.
 Die Reihenfolge **innerhalb** der Gebiete und die Wege berechnet der Planer – nicht von Speedrunnern übernommen;
