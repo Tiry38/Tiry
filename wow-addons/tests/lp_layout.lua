@@ -219,5 +219,21 @@ if LevelPilotDB then
   check("lp_quests", M)
   LevelPilotDB.mode = "route"
 end
+print("== Questlog-Check ohne passende Route (z. B. ab Stufe 40)")
+do
+  local saved, savedR = LevelPilot_Routes, LevelPilotDB and LevelPilotDB.route
+  LevelPilot_Routes = {}
+  if LevelPilotDB then LevelPilotDB.route = nil end
+  local ok4, err4 = pcall(function()
+    W.now = W.now + 2 W.fire("QUEST_LOG_UPDATE") tick()
+    if not (LevelPilotLog and LevelPilotLog:IsShown()) then SlashCmdList.LEVELPILOT("log") end
+    W.now = W.now + 2 W.fire("QUEST_LOG_UPDATE") tick()
+  end)
+  if not ok4 then bad("Lua-Fehler ohne Route: " .. tostring(err4)) end
+  if LevelPilotLog then check("lp_log_ohne_plan", LevelPilotLog) end
+  LevelPilot_Routes = saved
+  if LevelPilotDB then LevelPilotDB.route = savedR end
+  if LevelPilotLog then LevelPilotLog:Hide() end
+end
 print(fails == 0 and "LP LAYOUT OK" or ("FEHLER: " .. fails))
 if fails > 0 then os.exit(1) end

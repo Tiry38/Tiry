@@ -8,13 +8,46 @@ in Sitzungen auf **Tiry38/Tiry** weiter. Alle Dateien liegen in diesem Ordner, P
 | Add-on | Version | Zweck | Stand |
 |---|---|---|---|
 | **Tiry's Zentrale** | 6.1.0 | Gold- und Berufe-Addon (`TirysZentrale/`, Doku `ZENTRALE.md`): Neon-Glas-Design mit Dock, **ein AH-Scan für alle Reiter**, Verkäufe pro Tag, Gold pro Tag, Schnäppchen, Markt-Tiefe, Kaufen bis, Neu einstellen mit Menge, Anzahlung im Gewinn, **Tooltip als Preis-Liste (6.1)** | ausgeliefert, **Spieltest offen** (Checkliste `INGAME-TEST.md`) |
-| **LevelPilot** | 5.0.1 | Levelrouten Horde **22–30 und 30–40** als **fester Plan** (Einstieg erkennt deinen Stand, Sprung nur mit Beweis, `/lp zurueck`), **Questlog-Check** mit Löschen-Knopf, Plan-Band + Status-Pillen, echte Laufwege, Flug-Rat, Pfeil, Lichtstrahl, Auto-Quests, XP-Cockpit | ausgeliefert, **Spieltest offen** (Checkliste `INGAME-TEST.md`, Teil LevelPilot) |
+| **LevelPilot** | 5.0.2 | Levelrouten Horde **22–30 und 30–40** als **fester Plan** (Einstieg erkennt deinen Stand, Sprung nur mit Beweis, `/lp zurueck`), **Questlog-Check** mit Löschen-Knopf, Plan-Band + Status-Pillen, echte Laufwege, Flug-Rat, Pfeil, Lichtstrahl, Auto-Quests, XP-Cockpit | ausgeliefert, **Spieltest offen** (Checkliste `INGAME-TEST.md`, Teil LevelPilot) |
 | **ProcAlarm** | 2.1.0 | **für Tirys Kollegen (Hexer)**: Schattentrance (17941) über Blizzard-Aura-Slot, auch im Kampf; violetter Glow + Blinken, ohne Ton, ohne grünen Ring | ausgeliefert, **Kampftest offen** |
 | **Schlaghagel** | 1.0.0 | **Tirys Verstärker**: Schlaghagel-Buff (16257) über Blizzard-Aura-Slot, auch im Kampf; Ladungen groß, Restzeit, türkiser Glow + Blinken wie ProcAlarm, ohne Ton; `/hagel` | ausgeliefert, **Kampftest offen** |
 | **EnhanceHUD** | 1.2.0 | Verstärker-Schamanen-HUD (Frost/Feuer-Design) | ausgeliefert |
 | **Blitzschild** | 1.2.0 | Blitzschlagschild Ladungen/Zeit | im Kampf nicht möglich (secret values) → Cooldown-Manager „Verfolgte Leisten“ + WA nur außerhalb des Kampfes |
 | **MiniPost** | – | Post-Symbol unter der Uhr, andere Minimap-Knöpfe unsichtbar | ausgeliefert, Test offen |
 | **ChatHoch** | 1.4.0 | Chat höher, Reiter bündig (ClampRectInsets von ChatFrame1) | ausgeliefert; Tiry hatte noch 1.3.0 geladen |
+
+## LevelPilot 5.0.2 – Prüfrunde 2 (11.11.)
+Tirys Auftrag: nach Runde 1 „nochmal komplett alles prüfen“. Vorgehen: **Zufalls-Stresstest** der Plan-Engine
+(`tests/fuzz.lua`, 12 × 1500 chaotische Aktionen auf beiden Routen), **Design-Szenarien** im strengen Forever-Nachbau
+(Held-Karte „WARTET“, Questlog-Check ohne Route) und **zwei unabhängige Prüfer** nur auf die Änderungen von Runde 1
+(Fenster/Ereignisse; Plan-Engine + Wegenetz + Flug). Alle Funde nachgestellt; jeder Fix hat einen Test, der an 5.0.1
+scheitert und jetzt besteht (`plan.lua` G, neu `tests/regress.lua` mit 7 Fällen aus den echten Routen/dem echten Netz).
+
+| Fund (nachgestellt) | Schwere | Fix |
+|---|---|---|
+| **Wegenetz:** Liegt ein Splitter (Dach, Fels, Mulde) dem Spieler am nächsten, warf die Klippen-Regel aus 5.0.1 das ganze Hauptnetz weg → Pfeil wieder Luftlinie (Östl. Königreiche 178 / Kalimdor 150 von je ~1480 Stichproben, auch an 2 Flugmeistern) | hoch | Bezug ist der nächste Knoten des **größten** Teilnetzes in Reichweite → 0 Verluste, Klippen-Fälle bleiben gelöst |
+| **Kettenquests:** Lief der erste Plan-Durchlauf beim Login, bevor Questie geladen war, merkte sich der Titel-Abgleich den Namen ohne Doppelnamen-Prüfung → bei „Battle of Hillsbrad“ (527) galten die Folgeteile mit gleichem Titel als im Log, Erledigen/Abgeben von Teil 1 als erledigt | hoch | Titel erst merken, wenn die Doppelnamen-Prüfung lief (auch leere Titel nie merken) |
+| **Hub-Wiederbesuch:** Eine Quest vom 1. Besuch (Trollbane, Grom'gol) blockierte beim 2. Besuch jeden Sprung → Plan hing in Arathi fest | mittel | „Heim-Regel“ zählt nur Quests aus dem aktuellen Abschnitt |
+| **Quest per Gegenstand** (7 Schritte, z. B. Washte Pawne, Assassination Plot): Annehmen-Schritt ohne Koordinaten → Zeiger klebte für immer, wenn der Gegenstand nicht fällt | mittel | Bei Annehmen ohne Koordinaten zählen Beweise wieder (Erledigen ohne Koordinaten bleibt ohne Sprung) |
+| **Einstieg aus dem Log:** 3 alte Brachland-Reste überstimmten 2 aktuelle Eschental-Quests → Einstieg bei Schritt 16 statt 114 | mittel | Log-Einstieg nimmt wieder den spätesten Abschnitt; **neu:** einzelne Quests > 3 Stufen über dir zählen nicht (sonst Einstieg 174 statt 8 – Fall `einstieg_ausreisser`) |
+| **Pfeil-Hinweise** „über Großer Aufzug / Talondeep-Pfad“ fielen weg, weil die Pfeil-Glättung die Knoten vorher abschnitt (Donnerfels-Aufzug 0 von 5 Stellen) | mittel | Hinweise prüfen die ungekürzte Folge → 5/5; Orte 30 % → 78 %, Aufzüge 22 → 30 von 55 |
+| Abgabe blieb offen, wenn du das Erledigen selbst übersprungen hast, während der Questlog-Check zum Löschen riet (Stresstest: 127 Widersprüche in 5.0.0) | mittel | Abgabe folgt dem übersprungenen Erledigen → 0 |
+| Questlog-Check ohne passende Route (z. B. ab 40) gab Plan-Rat aus einem leeren Plan | niedrig | nur echte Platzzahl + „Kein Plan aktiv“ + welche Stufen die Routen abdecken; Farb-Legende aus |
+| Questfenster ohne Quest-ID: Hinweis „nicht in deinem Plan“ nur einmal je Sitzung (alle teilten Schlüssel 0) | niedrig | Hinweis je Titel |
+| Questlog-Check rechnete alle 2 s weiter, obwohl das Fenster ausgeblendet war | Tempo | nur, wenn Band oder Panel sichtbar sind; beim Einblenden sofort frisch |
+| Strahl: Refresh und Cache-Ablauf im selben Bild → Ziel-Infos 0,24 s veraltet | niedrig | nach jedem Refresh im nächsten Bild frisch |
+| Kurzweg-Speicher der Klippen-Prüfung ohne Deckel (bis 16 MB bei langer Sitzung) | Speicher | gedeckelt (1500 Knoten ≈ 2,5 MB, Neuberechnung < 1 ms) |
+| Held-Karte „WARTET“: Unterzeile lief über den Kartenrand (349 > 236 px) | Design | „Nebenbei“ entfällt beim Warten, Text gekürzt |
+| Absicherung | – | erzwungener Refresh am NPC per `pcall`; Symbol über dem Strahl nur bei Typwechsel neu gesetzt |
+
+**Zahlen (Nachbau, Lua 5.1 ohne JIT):** Durchlauf 22–30 / 30–40 / Hexer: Einstieg nach jedem Schritt weiter **100 %
+exakt** (180/180, 219/219, 175/175), **0 falsche Lösch-Tipps** in 598 Checks, R.Plan Ø 0,6–0,7 ms (max 1,6 ms), Stresstest
+18 000 Aktionen 0 Fehler, Wegenetz je Sekunde Ø 1,0 ms, Kaltstart 53 ms. Tests: `plan.lua` 76 Prüfungen, `regress.lua` 7;
+Suite **27/27** grün.
+**Bewusst nicht geändert:** Pfeil-Glättung (60 yd) und Vorausschau (30 yd) haben verschiedene Toleranzen – der Pfeil kann
+einen Knoten 30–60 yd neben der Linie auslassen (gewollt: weniger Zickzack). `otherRoute` kennt nur Routen mit Fraktion
+(beide Routen sind Horde). Taxi-Daten Östl. Königreiche: Knoten 24, 85–87 ohne Verbindung, 36 ohne Position – nicht auf
+den Routen. Höhen im Wegenetz weiter offen (s. 5.0.1).
 
 ## LevelPilot 5.0.1 – Komplett-Prüfung (11.11.)
 Tirys Auftrag: „alles fertig machen, dann komplett prüfen – Fehler, Korrektheit, Effizienz, Schnelligkeit, Design –
@@ -200,7 +233,7 @@ Amboss-/Schloss-Sound (max. 1–2 s)“.
 - ProcAlarm 2.1: ob Forever Blinken/Restzeit am Aura-Slot annimmt (`/proc diag` → „Teile“).
 
 ## Nächste Schritte
-1. Tirys Spieltest-Rückmeldung zu LevelPilot 5.0.1 abwarten (Einstieg-Schrittnummer, Sprung, Questlog-Check, Hexenmeister-Start) und gezielt nachbessern.
+1. Tirys Spieltest-Rückmeldung zu LevelPilot 5.0.2 abwarten (Einstieg-Schrittnummer, Sprung, Questlog-Check, Hexenmeister-Start) und gezielt nachbessern.
 2. **Routen 40–50, 50–60** mit derselben Kette (`make_route.py` neuen Schlüssel in `ROUTES` + Abschnitte).
 3. Sobald Questie die neuen Forever-Quests führt (IDs 9xxxx): Pool neu rechnen – könnte den Grind-Anteil deutlich senken.
 4. ProcAlarm nach `/proc diag`-Screenshot anpassen; ChatHoch 1.4.0 / MiniPost-Rückmeldung.

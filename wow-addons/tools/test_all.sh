@@ -69,6 +69,7 @@ if want levelpilot; then
   run "LevelPilot: plan (fester Plan, Einstieg, Sprung, Questlog-Check)" "$A/LevelPilot" "PLAN TESTS OK" lua5.1 "$T/plan.lua"
   run "LevelPilot: Durchlauf beider Routen (Plan, Einstieg, hinter Plan, Hexer)" "$A/LevelPilot" "PLAYTHROUGH OK" lua5.1 "$T/playthrough.lua"
   run "LevelPilot: Zufalls-Stresstest Plan-Engine (18.000 Aktionen)" "$A/LevelPilot" "FUZZ OK" lua5.1 "$T/fuzz.lua"
+  run "LevelPilot: Regressionen Prüfrunde 2 (7 Fälle aus echten Routen/Netz)" "$A/LevelPilot" "REGRESS OK" lua5.1 "$T/regress.lua"
   run "LevelPilot: Fenster-Layout (strenger Forever-Nachbau)" "$ROOT" "LP LAYOUT OK" lua5.1 tests/lp_layout.lua
 fi
 

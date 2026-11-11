@@ -110,7 +110,9 @@ local function graph(cont)
     end
   end
   g.comp = comp
-  g.nd = {}               -- [Knoten] = kurze Wege im Umkreis (Anbindungs-Pruefung, s. near)
+  g.csize = {}
+  for k = 1, n do g.csize[comp[k]] = (g.csize[comp[k]] or 0) + 1 end
+  g.nd, g.ndn = {}, 0     -- [Knoten] = kurze Wege im Umkreis (Anbindungs-Pruefung, s. near), gedeckelt
   g.n = n
   G[cont] = g
   return g
@@ -139,6 +141,7 @@ end
 
 -- Kurze Wege vom Knoten k0 aus (bis 'lim' Yards), einmal je Knoten gemerkt
 local LOCAL_LIM = SNAP_R * 2 * 1.3 + 80
+local ND_MAX = 1500
 local function localDist(g, k0)
   local D = g.nd[k0]
   if D then return D end
@@ -156,7 +159,8 @@ local function localDist(g, k0)
       if nd <= LOCAL_LIM and nd < (D[v] or huge) then D[v] = nd; open[v] = true end
     end
   end
-  g.nd[k0] = D
+  if g.ndn >= ND_MAX then g.nd, g.ndn = {}, 0 end   -- Deckel (~2,5 MB); neu rechnen kostet < 1 ms
+  g.nd[k0] = D; g.ndn = g.ndn + 1
   return D
 end
 
@@ -181,6 +185,13 @@ local function near(g, px, py)
   end
   if #out == 0 and best then out[1] = { best, bd * SNAP_F }; return out end
   if best and #out > 1 then
+    -- Bezug: naechster Knoten des groessten Teilnetzes in Reichweite (nicht ein Dach-/Fels-Splitter)
+    local cs, cb = g.csize, g.comp[best]
+    for _, c in ipairs(out) do
+      local k = c[1]
+      local ck = g.comp[k]
+      if cs[ck] > cs[cb] or (ck == cb and c[2] < dist(g.x[best], g.y[best], px, py) * SNAP_F) then best, cb = k, ck end
+    end
     local L = localDist(g, best)
     local bx0, by0 = g.x[best], g.y[best]
     local keep = {}
@@ -347,15 +358,19 @@ function W.Aim(p, q)
     u = st.prev[u]; guard = guard + 1
   end
   local px, py = p.x, p.y
-  -- bereits erreichte / ueberholte Knoten vorne weglassen
+  -- bereits erreichte / ueberholte Knoten vorne weglassen; vseq behaelt noch nicht erreichte (fuer Aufzug-/Orts-Hinweise)
+  local vseq
   while #seq >= 2 do
     local a, b = seq[1], seq[2]
     local da = dist(px, py, g.x[a], g.y[a])
     local pb, ab = dist(px, py, g.x[b], g.y[b]), dist(g.x[a], g.y[a], g.x[b], g.y[b])
-    if da < 25 or pb < ab or (da + ab < pb * 1.1 + 10 and segDist(g.x[a], g.y[a], px, py, g.x[b], g.y[b]) < CORR * 2) then
+    local passed = da < 25 or pb < ab
+    if passed or (da + ab < pb * 1.1 + 10 and segDist(g.x[a], g.y[a], px, py, g.x[b], g.y[b]) < CORR * 2) then
+      if not passed and not vseq then vseq = {} for i = 1, #seq do vseq[i] = seq[i] end end
       table.remove(seq, 1)
     else break end
   end
+  vseq = vseq or seq
   local rest = max(straight, total)
   -- vorausschauen: weitester Knoten, bis zu dem der Weg im Korridor der geraden Linie bleibt
   local pts = {}
@@ -376,11 +391,11 @@ function W.Aim(p, q)
   -- Tunnel/Aufzug/benannte Stelle in den naechsten ~700 Yards?
   local via
   run = 0; lx, ly = px, py
-  for k = 1, #seq do
-    local a = seq[k]
+  for k = 1, #vseq do
+    local a = vseq[k]
     run = run + dist(lx, ly, g.x[a], g.y[a]); lx, ly = g.x[a], g.y[a]
     if run > 700 then break end
-    local l = seq[k + 1] and g.link[a * 65536 + seq[k + 1]]
+    local l = vseq[k + 1] and g.link[a * 65536 + vseq[k + 1]]
     if l then via = { name = l.name, kind = l.kind, at = run }; break end
     if g.place[a] then via = { name = g.place[a], kind = "place", at = run }; break end
   end

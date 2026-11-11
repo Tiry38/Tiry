@@ -2,7 +2,7 @@
 ## Title: |cff39ff6bLevel|r|cffd8d8d8Pilot|r
 ## Notes: Levelrouten als fester Plan (Einstieg nach deinem Stand), Questlog-Check, Pfeil über echte Laufwege, Flug-Rat, Auto-Quests, XP-Cockpit.
 ## Author: Tiry
-## Version: 5.0.1
+## Version: 5.0.2
 ## OptionalDeps: Questie, QuestieDB
 ## SavedVariablesPerCharacter: LevelPilotDB
 

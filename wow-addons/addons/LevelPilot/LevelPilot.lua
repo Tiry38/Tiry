@@ -5,7 +5,7 @@
 -- Datenquellen: Routen-Plan, Questie (Geber/Ziele), Blizzards Questlog.
 ---------------------------------------------------------------------------
 local ADDON = ...
-local VERSION = "5.0.1"
+local VERSION = "5.0.2"
 local time = time or (os and os.time)   -- Spielzeit-Uhr (Sekunden seit 1970)
 local floor, max, min, abs, sqrt, atan2, pi, fmt = math.floor, math.max, math.min, math.abs, math.sqrt, math.atan2, math.pi, string.format
 local BT = BackdropTemplateMixin and "BackdropTemplate" or nil
@@ -1216,6 +1216,19 @@ local function LogRow(i)
   return r
 end
 
+-- ohne passende Route: welche Stufen decken die Plan-Routen deiner Fraktion ab?
+local function routeSpan()
+  local fac = UnitFactionGroup and UnitFactionGroup("player")
+  local lo, hi
+  for _, r in pairs(LevelPilot_Routes or {}) do
+    if not r.faction or r.faction == fac then
+      lo = min(lo or 99, r.min or 1); hi = max(hi or 0, r.max or 99)
+    end
+  end
+  if not lo then return "Für deine Fraktion ist keine Plan-Route geladen." end
+  return fmt("Plan-Routen gibt es für Stufe %d–%d.", lo, hi)
+end
+
 local function LogFill()
   if not (LOGP and LOGP:IsVisible()) then return end
   local a = LOGADV
@@ -1299,8 +1312,9 @@ local function LogFill()
     y = y - h - (compact and 1 or 4)
   end
   if #list == 0 then
-    LOGP.more:ClearAllPoints(); LOGP.more:SetPoint("TOPLEFT", 22, y - 4); LOGP.more:SetText((a and a.noRoute and used > 0) and fmt("%d Quests im Log – ohne Route keine Einordnung.", used) or "Keine Quests im Log."); LOGP.more:Show(); y = y - 22
+    LOGP.more:ClearAllPoints(); LOGP.more:SetPoint("TOPLEFT", 22, y - 4); LOGP.more:SetText((a and a.noRoute) and routeSpan() or "Keine Quests im Log."); LOGP.more:Show(); y = y - 22
   end
+  if LOGP.leg then LOGP.leg:SetShown(not (a and a.noRoute)) end
   LOGP:SetHeight(-y + 40)
 end
 
@@ -1327,6 +1341,7 @@ function OpenLog(force)
     LOGP.kh = UI(LOGP, 8.5, true); LOGP.kh:SetText("BEHALTEN  ·  GEHÖRT IN DEINEN PLAN"); LOGP.kh:SetTextColor(0.31, 0.82, 1)
     LOGP.more = UI(LOGP, 9.5); LOGP.more:SetTextColor(0.55, 0.6, 0.62)
     local ft = UI(LOGP, 9); ft:SetPoint("BOTTOM", 0, 14); ft:SetText("Rot = raus damit · Grün = abgeben · Blau = gehört in den Plan"); ft:SetTextColor(0.45, 0.5, 0.52)
+    LOGP.leg = ft
     LOGP.rows = {}
     if UISpecialFrames then tinsert(UISpecialFrames, "LevelPilotLog") end
   end

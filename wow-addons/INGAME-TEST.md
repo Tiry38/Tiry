@@ -116,12 +116,12 @@ Alles oben ist im Forever-Nachbau getestet, aber nicht im echten Client. Besonde
 
 ---
 
-# Ingame-Test – LevelPilot 5.0.1
+# Ingame-Test – LevelPilot 5.0.2
 Einbau: alten Ordner `LevelPilot` löschen, ZIP entpacken, **WoW komplett neu starten** (neue Grafiken
 `i_trash`, `i_flag`, `i_log`). Für Rückmeldungen hilft ein Screenshot vom Fenster **und** vom Questlog-Check.
 
 ## Start und Einstieg
-- [ ] Einloggen ohne Lua-Fehler, Chat meldet „v5.0.0 bereit“
+- [ ] Einloggen ohne Lua-Fehler, Chat meldet „v5.0.2 bereit“
 - [ ] Nach wenigen Sekunden (Questlog + Questie geladen): Meldung **„EINSTIEG“** oben und im Chat
   „Plan: Einstieg bei Schritt N von M (Gebiet · Hub) – erkannt an …“
 - [ ] Der Einstieg passt zu deinem Stand (Gebiet, in dem du gerade Quests hast) – **Schrittnummer notieren**
@@ -160,6 +160,16 @@ Einbau: alten Ordner `LevelPilot` löschen, ZIP entpacken, **WoW komplett neu st
 - [ ] Klick aufs Plan-Band, danach `/lp zurueck`: alter Schritt ist wieder da
 - [ ] Pfeil an Klippen/Schluchten (z. B. Arathi ↔ Sumpfland, Tausend Nadeln): zeigt den Weg außen herum, nicht über den Abhang
 
+## Neu in 5.0.2 (Prüfrunde 2)
+- [ ] Pfeil auf Dächern, Felsen, in Mulden oder direkt am Flugmeister: zeigt den Laufweg („über …“), nicht die Luftlinie
+- [ ] Donnerfels: auf dem Weg zum Aufzug steht „über Großer Aufzug“ schon von Weitem
+- [ ] Hügelland-Kette „Battle of Hillsbrad“ (527, im deutschen Client mit deutschem Titel): Teil 1 annehmen → Teil 2 wird **nicht** als „im Log“ abgehakt
+- [ ] Zweiter Besuch in einem Hub (Camp Taurajo, Hammerfall, Grom'gol) mit alten Quests vom 1. Besuch: Plan springt trotzdem mit
+- [ ] Quest, die ein Gegenstand startet (z. B. Washte Pawne), und der Gegenstand fällt nicht: Plan geht nach ~3 s weiter, sobald du woanders Plan-Quests annimmst
+- [ ] Einstieg am nächsten Tag mit alten Resten im Log: Plan startet im aktuellen Gebiet, nicht bei den Resten
+- [ ] Ab Stufe 40 (keine Route): `/lp log` zeigt „Kein Plan aktiv“ + echte Platzzahl, **keine** Lösch-Tipps
+- [ ] Fenster mit `/lp` ausblenden, eine Weile questen, wieder einblenden: Questlog-Check sofort aktuell
+
 ## Aus 4.2 weiter gültig
 - [ ] Pfeil und Entfernungen über echten Laufweg („über Talondeep-Pfad“, Aufzüge), Flug-Rat nur mit bekannten Flugpunkten
 - [ ] Erstes Öffnen: höchstens ein kurzer Ruckler (Wegenetz), danach kein Ruckeln durch LevelPilot
@@ -171,7 +181,7 @@ Einbau: alten Ordner `LevelPilot` löschen, ZIP entpacken, **WoW komplett neu st
 - [ ] nach 10 Minuten Questen: ______ KB (erwartet: grob 6–12 MB, nicht 30+ MB)
 
 ## Was nur im Spiel geprüft werden kann (ehrlich)
-Plan, Einstieg, Sprung und Questlog-Check sind im Lua-Nachbau getestet (`tests/plan.lua` 72 Prüfungen, kompletter Durchlauf beider Routen `tests/playthrough.lua`), das Fenster im
+Plan, Einstieg, Sprung und Questlog-Check sind im Lua-Nachbau getestet (`tests/plan.lua` 76 Prüfungen, kompletter Durchlauf beider Routen `tests/playthrough.lua`, Stresstest `tests/fuzz.lua`, Regressionen `tests/regress.lua`), das Fenster im
 strengen Forever-Nachbau gezeichnet (`tests/lp_layout.lua` → `previews/LevelPilot_5.0_*.png`) – aber nicht im Client.
 Unsicher: Einstieg mit **echten** Questie-Daten (Nachbau mit nachgestellten Questgebern), wie sich die Sprung-Schwellen
 (900/450 m, 3 s) anfühlen, ob Forever `QuestMapQuestOptions_AbandonQuest`, `C_QuestLog.GetMaxNumQuestsCanAccept` und

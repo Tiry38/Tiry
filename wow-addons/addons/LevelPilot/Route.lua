@@ -282,7 +282,8 @@ local function uniqueTitle(q)
   if d then titleC[q] = false; return nil end
   local t
   pcall(function() t = QL.GetTitleForQuestID(q) end)
-  if t then titleC[q] = t end   -- leer = Server hat den Titel noch nicht geliefert, spaeter nochmal fragen
+  -- erst merken, wenn auch die Doppelnamen-Pruefung lief (Questie geladen); leer = Titel noch nicht geliefert
+  if t and t ~= "" and dupC[q] ~= nil then titleC[q] = t end
   return t
 end
 
@@ -780,6 +781,14 @@ local function pickSeg(steps, list, lvl)
   for _, i in ipairs(list) do if (steps[i].seg or 0) == best then out[#out + 1] = i end end
   return out
 end
+-- Log-Einstieg: spaetester Abschnitt zaehlt (alte Reste ziehen nicht zurueck), aber ein einzelner Ausreisser
+-- weit ueber der Stufe (frueh mitgenommen) zieht nicht nach vorn
+local function nearLvl(steps, list, lvl)
+  if not lvl then return list end
+  local out = {}
+  for _, i in ipairs(list) do if (steps[i].l or lvl) <= lvl + 3 then out[#out + 1] = i end end
+  return #out > 0 and out or list
+end
 local function withSeg(steps, acc, tin)
   local top = acc[#acc]
   local out = {}
@@ -820,7 +829,7 @@ function R.Entry(route, state, lvl)
     end
     if bi then return bi, "frisch" end
   end
-  if #allA > 0 then return cluster(steps, pickSeg(steps, allA, lvl)), "log" end
+  if #allA > 0 then return cluster(steps, nearLvl(steps, allA, lvl)), "log" end
   if #allT > 0 then return segStart(steps, allT[1]), "log" end
   for i, s in ipairs(steps) do
     if (s.l or 0) >= lvl - 1 and state[i] ~= "done" and state[i] ~= "skip" then return i, "stufe" end
@@ -854,7 +863,7 @@ local function evidence(route, steps, state, p, plan)
               local o = steps[i]
               if state[i] == "open" and o.q and (o.t == "complete" or o.t == "turnin") and inLog(o.q) then
                 local a = qx[o.q] and qx[o.q].acc
-                local gt = a and R.StepTarget(steps[a])
+                local gt = a and steps[a].seg == steps[p].seg and R.StepTarget(steps[a])   -- nur Quests dieses Hub-Besuchs
                 if gt then pend[#pend + 1] = { i = i, t = gt } end
               end
             end
@@ -905,7 +914,8 @@ function R.Plan(route, lvl, skipped, plan, n, cur)
     local hd = ht and distTo(ht)
     local j
     -- Ziel ohne Koordinaten: "weit weg" ist nicht beurteilbar -> kein Sprung
-    if not hero or (ht and (not hd or hd > R.JUMP_FAR)) then j = evidence(route, steps, state, p, plan) end
+    -- Ausnahme: Annehmen ohne Koordinaten = Quest startet per Gegenstand (oft seltene Beute) -> Beweise zaehlen
+    if not hero or (not ht and steps[hero].t == "accept") or (ht and (not hd or hd > R.JUMP_FAR)) then j = evidence(route, steps, state, p, plan) end
     if j then
       local gt = GetTime()
       local jc = JC[plan]
