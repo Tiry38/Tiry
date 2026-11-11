@@ -387,7 +387,8 @@ function R.StepDone(s, lvl, cur)
   if s.t == "go" or s.t == "train" or s.t == "fly" then
     local tgt = R.StepTarget(s)
     local d = tgt and distTo(tgt)
-    if d and d < (s.r or 45) then return true end
+    -- Flugziel = Flugmeister am Ziel-Hub: wer im Hub steht (Questgeber daneben), ist angekommen
+    if d and d < (s.r or (s.t == "fly" and 120 or 45)) then return true end
     if s.t == "fly" and cur and STATE.landedAt > (cur.since or 0) and d and d < 400 then return true end
   end
   return false
@@ -655,6 +656,7 @@ local function computeState(steps, lvl, skipped, cur)
     if not state[i] then
       local d = R.StepDone(s, lvl, (cur and cur.i == i) and cur or nil)
       if d == true then state[i] = "done"
+      elseif d == "skip" then state[i] = "skip"   -- z. B. Klassenlehrer einer anderen Klasse
       else
         local need, been = false, false
         for j = i + 1, math.min(#steps, i + 60) do
@@ -1023,11 +1025,12 @@ function R.LogAdvice(route, routeKey, lvl, p, hero, opt)
           elseif how == "worth" then a.cat, a.why = "turnin", string.format("fertig – Umweg %d min lohnt sich", math.floor(mins + 0.5))
           else a.cat, a.why = "delete", how == "far" and string.format("fertig, aber Abgabe zu weit (%d min Umweg)", math.floor((mins or 0) + 0.5)) or "fertig, Abgabe nicht im Plan" end
         end
-      elseif R.Grey(e.level or (cmpI and steps[cmpI].ql) or (tinI and steps[tinI].ql), lvl) then
-        a.cat, a.why = "delete", "grau – bringt kaum noch XP"
       elseif cmpLive or (not cmpI and tinLive) then
+        -- der Plan entscheidet: auch eine graue Quest bleibt, wenn ihre Abgabe auf dem Weg liegt
         a.cat = "keep"; a.step = cmpLive and cmpI or tinI
         a.why = (a.step == hero) and "ist jetzt dran" or ("im Plan · Schritt " .. a.step)
+      elseif R.Grey(e.level or (cmpI and steps[cmpI].ql) or (tinI and steps[tinI].ql), lvl) then
+        a.cat, a.why = "delete", "grau – bringt kaum noch XP"
       else
         local ot = objectiveTarget(q)
         local d = ot and distTo(ot)
