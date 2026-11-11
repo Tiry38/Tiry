@@ -1,4 +1,4 @@
--- Regressionstests aus Prüfrunde 2 (5.0.2): jeder Fall lief in 5.0.1 falsch.
+-- Regressionstests aus Prüfrunde 2 (5.0.2) und Spielberichten: jeder Fall lief in einer älteren Version falsch.
 -- Aufruf: cd addons/LevelPilot && lua5.1 ../../tests/regress.lua   (meldet "REGRESS OK", Exit 0)
 -- Jeder Fall laeuft als eigener Prozess (eigene Attrappen), Ergebnis wird an der Ausgabe geprueft.
 local dir = "../../tests/regress/"
@@ -13,6 +13,9 @@ local cases = {
     function(o) return o:find("pointer 114", 1, true) ~= nil end },
   { "einstieg_ausreisser", "Route.lua", "Log-Einstieg: eine Quest weit über der Stufe zieht nicht nach vorn (Abschnitt 2)",
     function(o) local i = tonumber(o:match("pointer (%d+)")) return i ~= nil and i >= 4 and i <= 60 end },
+  { "aufhol_quests", "Route.lua", "Hinter dem Plan (Stufe 27, Tiry 11.11.): Aufhol-Quests statt Grinden; ab 28 weg; im Plan nie",
+    function(o) return o:find("behind: level 27 pointer accept:1105 hero accept:5064 fill=28", 1, true) ~= nil and o:find("fill steps done: 11", 1, true) ~= nil
+      and o:find("level 28: hero accept:1105 | in-log fill 4770 complete open=true", 1, true) ~= nil and o:find("on plan: fill seen=false", 1, true) ~= nil end },
   { "netz_anbindung", "Travel.lua", "Splitter (Dach/Fels) neben dem Spieler: Hauptnetz bleibt angebunden (0 Verluste)",
     function(o) return o:find("cont 0: 0 of", 1, true) ~= nil and o:find("cont 1: 0 of", 1, true) ~= nil end },
   { "aufzug_hinweis", "Travel.lua", "Donnerfels-Aufzug: Hinweis an allen 5 Stellen davor",

@@ -364,6 +364,11 @@ function R.StepDone(s, lvl, cur)
   if s.q and R.ban and R.ban[s.q] then return "skip" end
   if s.slow and R.speed and not (s.q and inLog(s.q)) then return "skip" end
   if s.q and chainDone(s) then return true end
+  -- Aufhol-Quest (fill = Stufe): nur fuer Spieler hinter dem Plan; ab dieser Stufe uebersprungen (ausser im Log)
+  if s.fill and lvl >= s.fill and not (s.q and inLog(s.q)) then
+    if s.q and flagged(s.q) then return true end
+    return "skip"
+  end
   if s.cls then
     local _, _, cid = UnitClass("player")
     if cid and bit and bit.band(s.cls, 2 ^ (cid - 1)) == 0 then return "skip" end

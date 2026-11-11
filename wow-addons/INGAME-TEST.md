@@ -157,7 +157,12 @@ Alles oben ist im Forever-Nachbau getestet, aber nicht im echten Client. Besonde
 
 ---
 
-# Ingame-Test – LevelPilot 5.1.0
+# Ingame-Test – LevelPilot 5.1.1
+
+## Neu in 5.1.1 (Aufhol-Quests)
+- [ ] Stufe 27 am Ende von Tausend Nadeln: statt „WARTET ab Stufe 28“ kommt **Grimmtotem-Spionage** (Freiwindposten), Hinweis „Aufhol-Quest“.
+- [ ] Mit Stufe 28 geht es mit Gehärtete Schalen / Salziges Gift weiter; angenommene Aufhol-Quests bleiben in der Liste.
+
 Einbau: alten Ordner `LevelPilot` löschen, ZIP entpacken, **WoW komplett neu starten** (neue Grafiken
 `i_trash`, `i_flag`, `i_log`). Für Rückmeldungen hilft ein Screenshot vom Fenster **und** vom Questlog-Check.
 

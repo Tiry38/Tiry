@@ -1,6 +1,6 @@
 -- AUTOMATISCH ERZEUGT (LevelPilot Routen-Werkzeug: make_route.py + build.py) · geprüft gegen Questies Forever-Datenbank
 LevelPilot_Routes = LevelPilot_Routes or {}
-LevelPilot_Routes["horde_22_30"] = { name = "Horde 22–30 · Speedrun", faction = "Horde", min = 20, max = 30, xpm = 325,
+LevelPilot_Routes["horde_22_30"] = { name = "Horde 22–30 · Speedrun", faction = "Horde", min = 20, max = 30, xpm = 329,
   segs = {{ z = "Orgrimmar", hub = "Orgrimmar", l0 = 22, l1 = 22 }, { z = "Brachland", hub = "Camp Taurajo", l0 = 22, l1 = 23 }, { z = "Steinkrallengebirge", hub = "Sonnenfels", l0 = 23, l1 = 25 }, { z = "Brachland", hub = "Camp Taurajo", l0 = 25, l1 = 25 }, { z = "Eschental", hub = "Splitterholzposten", l0 = 25, l1 = 26 }, { z = "Hügelland", hub = "Tarrens Mühle", l0 = 26, l1 = 27 }, { z = "Tausend Nadeln", hub = "Freiwindposten", l0 = 27, l1 = 30 } },
   steps = {
   { t = "train", l = 22, z = "Orgrimmar", seg = 1, npc = 3344, to = "Klassenlehrer Kardris Dreamseeker", note = "Klassenlehrer – neue Zauber", cls = 64 },
@@ -201,5 +201,20 @@ LevelPilot_Routes["horde_22_30"] = { name = "Horde 22–30 · Speedrun", faction
   { t = "complete", l = 28, z = "Tausend Nadeln", seg = 7, q = 1105, n = "Hardened Shells", rl = 28, ql = 30, nxt = {1107} },
   { t = "turnin", l = 28, z = "Tausend Nadeln", seg = 7, q = 1105, n = "Hardened Shells", rl = 28, ql = 30, nxt = {1107} },
   { t = "turnin", l = 28, z = "Tausend Nadeln", seg = 7, q = 1104, n = "Salt Flat Venom", rl = 28, ql = 30 },
+  { t = "accept", l = 27, z = "Tausend Nadeln", seg = 7, q = 5064, n = "Grimtotem Spying", pres = {4841}, rl = 24, ql = 28, fill = 28 },
+  { t = "complete", l = 27, z = "Tausend Nadeln", seg = 7, q = 5064, n = "Grimtotem Spying", rl = 24, ql = 28, fill = 28 },
+  { t = "accept", l = 27, z = "Tausend Nadeln", seg = 7, q = 4904, n = "Free at Last", note = "Begleitquest – Lakota zum Freiwindposten bringen", rl = 25, ql = 29, fill = 28 },
+  { t = "complete", l = 27, z = "Tausend Nadeln", seg = 7, q = 4904, n = "Free at Last", note = "Begleitquest – Lakota zum Freiwindposten bringen", rl = 25, ql = 29, fill = 28 },
+  { t = "accept", l = 27, z = "Tausend Nadeln", seg = 7, q = 5151, n = "Hypercapacitor Gizmo", rl = 24, ql = 30, fill = 28 },
+  { t = "accept", l = 27, z = "Tausend Nadeln", seg = 7, q = 4966, n = "Protect Kanati Greycloud", note = "Verteidigungs-Ereignis", pres = {4881}, rl = 23, ql = 28, fill = 28 },
+  { t = "complete", l = 27, z = "Tausend Nadeln", seg = 7, q = 4966, n = "Protect Kanati Greycloud", note = "Verteidigungs-Ereignis", rl = 23, ql = 28, fill = 28 },
+  { t = "complete", l = 27, z = "Tausend Nadeln", seg = 7, q = 5151, n = "Hypercapacitor Gizmo", rl = 24, ql = 30, fill = 28 },
+  { t = "turnin", l = 27, z = "Tausend Nadeln", seg = 7, q = 5151, n = "Hypercapacitor Gizmo", rl = 24, ql = 30, fill = 28 },
+  { t = "turnin", l = 27, z = "Tausend Nadeln", seg = 7, q = 4966, n = "Protect Kanati Greycloud", note = "Verteidigungs-Ereignis", rl = 23, ql = 28, fill = 28 },
+  { t = "accept", l = 27, z = "Tausend Nadeln", seg = 7, q = 4770, n = "Homeward Bound", note = "Begleitquest", rl = 25, ql = 29, fill = 28 },
+  { t = "complete", l = 27, z = "Tausend Nadeln", seg = 7, q = 4770, n = "Homeward Bound", note = "Begleitquest", rl = 25, ql = 29, fill = 28 },
+  { t = "turnin", l = 27, z = "Tausend Nadeln", seg = 7, q = 4770, n = "Homeward Bound", note = "optional – Begleitquest", rl = 25, ql = 29, fill = 28 },
+  { t = "turnin", l = 27, z = "Tausend Nadeln", seg = 7, q = 5064, n = "Grimtotem Spying", rl = 24, ql = 28, fill = 28 },
+  { t = "turnin", l = 27, z = "Tausend Nadeln", seg = 7, q = 4904, n = "Free at Last", note = "Begleitquest", rl = 25, ql = 29, fill = 28 },
   { t = "grind", l = 30, z = "Tausend Nadeln", seg = 7, to = 30, npc = 4147, n = "Grinden: Saltstone Basilisk", note = "Saltstone Basilisk (Stufe 30) grinden bis Stufe 30" },
 } }

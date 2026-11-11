@@ -76,7 +76,8 @@ Dateien/Sounds reicht `/reload` nicht). Version in allen 4 TOCs und in `VERSION`
 3. `plan.py` – Planer: Abschnitte (Gebiet, Hub, kuratierte Quests + Auto-Pool), Stufen-Simulation (Quest ≤ Stufe+2),
    gierig nach Nähe + Or-Opt, Grenzkosten-Filter gegen Grind-Tempo, Grind-/Kontroll-Schritte.
 4. `make_route.py [key]` – Routen in `ROUTES` (`horde_22_30`, `horde_30_40`), Einstiegsstufen per `tune()` →
-   `gen_steps_<key>.json`. Dann `build.py [key]` → prüft gegen Forever-DB, schreibt `addons/LevelPilot/Routes/`.
+   `gen_steps_<key>.json`; danach setzt `fill.py` Aufhol-Quests ein (Schritte mit `fill = Stufe`: nur fuer Spieler
+   hinter dem Plan, ab dieser Stufe uebersprungen; Grund: Planer-Grindtempo ~300 XP/Min ist optimistisch). Dann `build.py [key]` → prüft gegen Forever-DB, schreibt `addons/LevelPilot/Routes/`.
    Neue Routendatei in alle 4 TOCs eintragen. `tests/route.lua` prüft Routenwahl + Dateien.
 Quellen der Gebietsreihenfolge: Konsens freier Speedrun-Routen (Joana, Warcraft Tavern, Guidelime, WoW-Pro, Bustea),
 danach per Modell verglichen; Gebiete mit nur 1–3 Quests werden gestrichen.

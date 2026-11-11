@@ -122,6 +122,7 @@ def lua_step(s):
     if s.get("rl"): f.append(f'rl = {s["rl"]}')
     if s.get("ql"): f.append(f'ql = {s["ql"]}')
     if s.get("nxt"): f.append('nxt = {' + ', '.join(str(a) for a in s["nxt"]) + '}')
+    if s.get("fill"): f.append(f'fill = {int(s["fill"])}')
     if s["t"] == "train": f.append('cls = 64')
     return '  { ' + ', '.join(f) + ' },'
 

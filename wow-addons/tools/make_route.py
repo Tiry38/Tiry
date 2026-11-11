@@ -116,6 +116,7 @@ def run(key="horde_22_30", write=True, log=print, SEG_=None, do_tune=True):
         for q in sorted(removed): log("  %5d %-36s %s" % (q, Q[str(q)][0][:36], why.get(q)))
         json.dump(dict(key=key, name=R["name"], min=R["rmin"], max=R["rmax"], file=R["file"], L0=R["L0"], steps=steps),
                   open("gen_steps_%s.json" % key, "w"))
+        import fill; fill.apply(key)   # Aufhol-Quests fuer Spieler hinter dem Plan (fill.py)
         log("%d Schritte" % len(steps))
     return steps, X.evaluate(steps, R["L0"], 0, verbose=write)
 
