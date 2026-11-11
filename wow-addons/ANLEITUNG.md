@@ -21,6 +21,14 @@
 Oben in der Mitte die **fünf Hauptpunkte**: **Start · Herstellen · Farmen · Handel · Mein Gold**. Darunter die Reiter des Hauptpunkts.
 Oben rechts: **Lupe** (alles durchsuchen), **?** (AH-Schule und Glossar), **Zahnrad** (Einstellungen), **AH scannen**.
 
+## Am Berufsfenster (neu in 6.3)
+Öffnest du einen Beruf, hängt rechts daneben das **Zentrale-Craftfenster** – du musst die Zentrale dafür nicht aufmachen.
+Oben über dem Berufsfenster schaltest du um: **WoW** = nur Blizzards Fenster, **TZ** = mit Zentrale-Fenster.
+- **Rezept:** Klick links ein Rezept an → Gewinn, Material („hast X“), Absatz und Empfehlung. „Einplanen“ setzt die empfohlene Menge auf die Craft-Liste.
+- **Top-Rezepte:** was gerade Gold bringt. Klick = im Berufsfenster anwählen, **+** = einplanen, „Alle in die Liste“ = ganze Liste + Einkaufsfenster.
+- **Liste:** deine Craft-Liste mit −/+/×. **Optionen:** Mindestgewinn, Menge, Filter.
+- Unten: **Nächstes craften** und **Einkauf**.
+
 ## So machst du Gold (die Startseite führt dich)
 Auf der Startseite steht dein **Gold-Kreislauf**. Der orange Schritt ist immer dran:
 1. **Planen:** Klick auf **„Liste erstellen“**. Alle Rezepte deiner Berufe, die gerade Gold bringen, landen auf der Craft-Liste.
@@ -47,4 +55,4 @@ Was du als Nächstes lernen solltest, zeigt **Herstellen → „Was lernen?“**
 - Fachbegriffe erklärt **? → Glossar**.
 - Im **Kampf** kauft, verkauft und craftet das Addon nichts. Nach dem Kampf einfach nochmal klicken.
 - Tastenkürzel: Optionen → Tastaturbelegung → „Tiry's Zentrale“.
-- Befehle: `/tz` (Fenster), `/tz suche`, `/tz handel`, `/tz schnapp`, `/tz buch`, `/tz assistent`, `/tz wegpunkt` (Kartenpunkt löschen), `/tz leeren` (Craft-Liste leeren), `/tz reset` (Fenster in die Mitte), `/tz fehler` (gespeicherte Fehler anzeigen).
+- Befehle: `/tz` (Fenster), `/tz suche`, `/tz handel`, `/tz schnapp`, `/tz buch`, `/tz assistent`, `/tz wegpunkt` (Kartenpunkt löschen), `/tz leeren` (Craft-Liste leeren), `/tz cf` (Craftfenster am Berufsfenster an/aus), `/tz reset` (Fenster in die Mitte), `/tz fehler` (gespeicherte Fehler anzeigen).

@@ -1,5 +1,14 @@
 # Changelog – Tiry's Zentrale
 
+## 6.3.0 (11.11.2026)
+**Neu: Craftfenster direkt am Berufsfenster. Beruf öffnen – alles dort sehen und einstellen, ohne die Zentrale aufzumachen.**
+- **Umschalter „Ansicht: WoW | TZ“** oben rechts über dem Berufsfenster (ähnlich wie bei TSM). **TZ** = Blizzards Fenster mit dem Zentrale-Fenster rechts daneben, **WoW** = nur Blizzards Fenster. Die Wahl bleibt gespeichert. Zusätzlich `/tz craftfenster` (kurz `/tz cf`) und das × im Craftfenster.
+- **Reiter „Rezept“:** das Rezept, das du links im Berufsfenster anklickst. Gewinn pro Craft, Verkauf nach Gebühr, Materialkosten, Gold pro Tag, wie schnell es sich verkauft. Dazu jedes Material mit „hast X“ und Preis (und „selbst herstellen“, wenn das billiger ist). Die Empfehlung („Mach 2×“), dein echter Gewinn aus dem Verkaufsbuch, die Station und was schon geplant ist. Knöpfe: **Einplanen (empfohlene Menge)**, **+1**, **ausblenden**.
+- **Reiter „Top-Rezepte“:** was in diesem Beruf gerade Gold bringt, nach Gold pro Tag sortiert. Nicht gezeigte Rezepte werden mit Grund genannt. Klick auf eine Zeile wählt das Rezept im Berufsfenster an. **+** plant 1× ein. **„Alle in die Liste“** füllt die Craft-Liste dieses Berufs und öffnet das Einkaufsfenster.
+- **Reiter „Liste“:** die Craft-Liste mit −/+/× je Eintrag und „herstellbar: X“. Dazu, was an Material fehlt und was es kostet, sowie **Alles leeren / Rückgängig**. Der aktuelle Beruf steht oben, andere Berufe stehen abgeblendet darunter.
+- **Reiter „Optionen“:** Mindestgewinn (mit „Empfehlung für mein Level“), Menge je Rezept, die Filter „Nur bekannte Preise“, „Nur frische Preise“ und „Ladenhüter ausblenden“, außerdem Ausgeblendete zurückholen. Alles wirkt sofort und ist dieselbe Einstellung wie im Craft-Planer.
+- **Unten immer da:** **Nächstes craften**, **Einkauf** und der Knopf für die ganze Zentrale.
+
 ## 6.2.1 (11.11.2026)
 **Spieltest-Fix: Ruckeln am AH, Chat voller Schnäppchen-Meldungen, Auctionator-Suche hängt.**
 - **Komplett-Scan wird nur noch EINMAL ausgewertet.** Blizzard meldet „AH-Liste da“ immer wieder, solange Item-Daten nachladen. Die Zentrale hat bei jeder Meldung alle Angebote neu gelesen. Das kostete jedes Mal einen Hänger von 0,1 s und eine neue „Schnäppchen-Scan“-Zeile im Chat. Jetzt wird nur nach einem echten neuen Scan gelesen (egal, ob ihn die Zentrale, Auctionator oder du startest).

@@ -120,6 +120,16 @@ Zeigt dein Client keine Fehlerfenster: Tiry's Zentrale schreibt eigene Fehler ro
 ## Auctionator aus
 - [ ] Auctionator deaktivieren, `/reload` → Addon startet ohne Fehler, Status „Auctionator fehlt“, nächster Schritt „Auctionator installieren“
 
+## Craftfenster am Berufsfenster (neu in 6.3)
+- [ ] Beruf öffnen → rechts neben Blizzards Fenster (hinter den Berufs-Reitern) erscheint „Zentrale-Craft“; oben rechts über dem Berufsfenster „Ansicht WoW | TZ“. **Sitzt beides sauber, nichts überdeckt?**
+- [ ] Links ein Rezept anklicken → Reiter „Rezept“ zeigt sofort dieses Rezept (Gewinn, Material mit „hast X“, Empfehlung)
+- [ ] „Einplanen“ / „+1“ → Reiter „Liste“ und Craft-Planer zeigen die neue Menge
+- [ ] „Top-Rezepte“: Zeile anklicken → Rezept wird links im Berufsfenster angewählt; „Alle in die Liste“ → Einkaufsfenster geht auf
+- [ ] „Optionen“: Mindestgewinn ändern → Top-Rezepte und Craft-Planer ändern sich mit
+- [ ] Unten „Nächstes craften“ stellt das richtige Rezept her
+- [ ] „WoW“ anklicken → Craftfenster weg; Beruf zu und wieder auf → bleibt weg; „TZ“ → wieder da. `/tz cf` schaltet ebenso.
+- [ ] Verzauberkunst (Rezepte ohne Gegenstand): Reiter „Rezept“ sagt ehrlich „keine Daten“, kein Fehler
+
 ## Berufsfenster
 - [ ] Beruf öffnen (z. B. Lederverarbeitung) → Craft-Planer zeigt gelernte Rezepte. Auch mit Text im Suchfeld des Berufsfensters.
 - [ ] Craft-Liste erstellen → „Nächstes craften“ stellt **genau das Rezept aus der Liste** her

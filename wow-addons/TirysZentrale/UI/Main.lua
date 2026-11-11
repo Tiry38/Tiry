@@ -782,6 +782,13 @@ SlashCmdList.TIRYSZENTRALE = function(msg)
     UI.pages.recipes.ClearQueue()
     return
   end
+  if msg == "craftfenster" or msg == "cf" then
+    local cp = ns.CraftPanel
+    local m = ns.settings.craftPanel.mode == "tz" and "wow" or "tz"
+    if cp then cp.SetMode(m) else ns.settings.craftPanel.mode = m end
+    ns.Print("Craftfenster am Berufsfenster " .. (m == "tz" and "|cff39ff6ban|r (TZ)." or "|cffff9929aus|r (nur WoW)."))
+    return
+  end
   if msg == "craftcheck" then
     UI.pages.recipes.CraftCheck()
     return

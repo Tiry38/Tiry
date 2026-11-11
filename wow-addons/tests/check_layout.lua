@@ -128,5 +128,94 @@ W.call(TirysZentraleShopWindow.cast, "OnUpdate", 0.1)
 for _, p in ipairs(L.problems(TirysZentraleShopWindow)) do print("[shop+balken] " .. p) total = total + 1 end
 if OUT then L.dump(TirysZentraleShopWindow, OUT .. "/shop_cast.tsv") end
 W.casting = nil
+-- Craftfenster am Blizzard-Berufsfenster (lädt mit Blizzard_Professions) + Umschalter WoW | TZ
+do
+  local UIP = UIParent
+  UIP:SetSize(1920, 1080)
+  local PF = CreateFrame("Frame", "ProfessionsFrame", UIP)
+  PF:SetSize(673, 594) PF:SetPoint("TOPLEFT", UIP, "TOPLEFT", 60, -120) PF:Hide()
+  -- Platzhalter für Blizzards Fenster (nur für die Vorschau)
+  local bg = PF:CreateTexture(nil, "BACKGROUND") bg:SetAllPoints() bg:SetColorTexture(0.10, 0.09, 0.08, 1)
+  local lbl = PF:CreateFontString(nil, "OVERLAY") lbl:SetFont("Fonts\\FRIZQT__.TTF", 16, "") lbl:SetPoint("CENTER") lbl:SetText("Blizzard-Berufsfenster")
+  local selected = 2164
+  PF.CraftingPage = { SchematicForm = { GetRecipeInfo = function() return { recipeID = selected } end } }
+  local cbs = {}
+  _G.EventRegistry = { RegisterCallback = function(self, ev, fn, owner) assert(type(ev) == "string" and type(fn) == "function") cbs[ev] = { fn, owner } end }
+  W.recipes = {}
+  for _, id in ipairs({ 2164, 2158, 2152, 3816, 3817 }) do
+    local r = ns.Recipes.Get(id)
+    if r then
+      local re = {}
+      for _, x in ipairs(r.reagents) do re[#re + 1] = { x.id, x.n } end
+      W.recipes[id] = { name = r.name, out = r.out, reagents = re, diff = 1 }
+    end
+  end
+  C_TradeSkillUI.GetBaseProfessionInfo = function() return { professionName = "Lederverarbeitung", skillLevel = 110, maxSkillLevel = 150 } end
+  W.fire("ADDON_LOADED", "Blizzard_Professions")
+  local P = ns.CraftPanel
+  assert(TirysZentraleCraftPanel and TirysZentraleCraftSwitch, "Craftfenster an ProfessionsFrame gebaut")
+  assert(cbs["ProfessionsRecipeListMixin.Event.OnRecipeSelected"], "Rezept-Auswahl abonniert")
+  PF:Show() W.fire("TRADE_SKILL_SHOW") W.flush()
+  assert(TirysZentraleCraftPanel:IsShown(), "TZ-Modus: Fenster sichtbar")
+  assert(ns.Scanner.openProfKey() == "LEATHERWORKING", "Beruf erkannt: " .. tostring(ns.Scanner.openProfKey()))
+  local function check(name)
+    W.flush() P.Refresh()
+    local content = TirysZentraleCraftPanel.content
+    local need = (content.__h or 0) + 124 + 70 + 10
+    PF:SetHeight(math.max(594, need)) L.reset()
+    for _, p in ipairs(L.problems(PF)) do print("[craftfenster " .. name .. "] " .. p) total = total + 1 end
+    if OUT then L.dump(PF, OUT .. "/craft_" .. name .. ".tsv") end
+    PF:SetHeight(594) L.reset()
+  end
+  -- Rezept (aus SchematicForm, dann per Auswahl-Ereignis)
+  P.SetTab("recipe")
+  check("rezept")
+  local txt = W.strip and table.concat(W.lines(TirysZentraleCraftPanel), "\n") or ""
+  selected = 2158
+  cbs["ProfessionsRecipeListMixin.Event.OnRecipeSelected"][1](P, { recipeID = 2158 })
+  W.flush()
+  assert(P.recipeID == 2158, "Auswahl übernommen")
+  local before = #TirysZentraleCharDB.queue
+  local q2158 = 0
+  for _, e in ipairs(TirysZentraleCharDB.queue) do if e.recipe == 2158 then q2158 = e.n end end
+  W.call(TirysZentraleCraftPanel.pages.recipe.plus, "OnClick")
+  local after = 0
+  for _, e in ipairs(TirysZentraleCharDB.queue) do if e.recipe == 2158 then after = e.n end end
+  assert(after == q2158 + 1 and #TirysZentraleCharDB.queue == before, "+1 plant nach")
+  W.call(TirysZentraleCraftPanel.pages.recipe.plus, "OnClick", nil) -- zweimal ok
+  check("rezept2")
+  P.recipeID = nil selected = nil
+  check("leer")
+  selected = 2164
+  -- Top-Rezepte, Liste, Optionen
+  P.SetTab("top") check("top")
+  local tp = TirysZentraleCraftPanel.pages.top
+  if tp.rows[1] and tp.rows[1]:IsShown() then
+    W.call(tp.rows[1], "OnClick")
+    assert(ns.Settings == nil or true)
+    assert(ns.settings.craftPanel.tab == "recipe" and P.recipeID, "Klick in Top-Rezepten wählt Rezept an")
+    assert(W.opened, "Rezept im Berufsfenster geöffnet")
+  end
+  P.SetTab("queue") check("liste")
+  W.call(TirysZentraleCraftPanel.pages.queue.rows[1].plus, "OnClick")
+  P.SetTab("setup") check("optionen")
+  -- Umschalter: WoW blendet aus, TZ wieder ein, Wahl bleibt gespeichert
+  W.call(TirysZentraleCraftSwitch.seg.buttons[1], "OnClick")
+  assert(ns.settings.craftPanel.mode == "wow" and not TirysZentraleCraftPanel:IsShown(), "WoW-Modus blendet aus")
+  PF:Hide() PF:Show()
+  assert(not TirysZentraleCraftPanel:IsShown(), "WoW-Modus bleibt nach erneutem Öffnen")
+  if OUT then L.dump(PF, OUT .. "/craft_wow.tsv") end
+  W.call(TirysZentraleCraftSwitch.seg.buttons[2], "OnClick")
+  assert(ns.settings.craftPanel.mode == "tz" and TirysZentraleCraftPanel:IsShown(), "TZ-Modus zeigt wieder")
+  W.call(TirysZentraleCraftPanel.close, "OnClick")
+  assert(ns.settings.craftPanel.mode == "wow", "Schließen = WoW-Modus")
+  P.SetMode("tz")
+  SlashCmdList.TIRYSZENTRALE("craftfenster")
+  assert(ns.settings.craftPanel.mode == "wow" and not TirysZentraleCraftPanel:IsShown(), "/tz craftfenster schaltet aus")
+  SlashCmdList.TIRYSZENTRALE("cf")
+  assert(ns.settings.craftPanel.mode == "tz" and TirysZentraleCraftPanel:IsShown(), "/tz cf schaltet an")
+  P.SetTab("recipe")
+  for _, e in ipairs(W.errors) do print("[craftfenster fehler] " .. tostring(e)) total = total + 1 end
+end
 print(string.format("%d Layout-Probleme gefunden", total))
 os.exit(total == 0 and 0 or 1)

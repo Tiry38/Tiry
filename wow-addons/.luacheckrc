@@ -26,7 +26,7 @@ read_globals = {
   "GetMoney", "GetMoneyString", "GetProfessionInfo", "GetProfessions", "GetRealZoneText", "GetRealmName",
   "GetRepairAllCost", "GetTime", "HandleModifiedItemClick", "InCombatLockdown", "IsShiftKeyDown", "OpenWorldMap",
   "PlaySound", "RepairAllItems", "UnitCastingInfo", "HasNewMail", "GetLatestThreeSenders", "UnitClass", "UnitFactionGroup", "UnitLevel", "UnitName", "date", "geterrorhandler",
-  "strtrim", "time", "tinsert", "wipe", "seterrorhandler", "hooksecurefunc",
+  "strtrim", "time", "tinsert", "wipe", "seterrorhandler", "hooksecurefunc", "ProfessionsFrame", "EventRegistry",
   -- Rahmen, Tabellen, Konstanten
   "Auctionator", "ChatFrameUtil", "DEFAULT_CHAT_FRAME", "GameFontNormal", "GameTooltip", "ItemRefTooltip",
   "MerchantFrame", "Minimap", "UIParent", "UISpecialFrames", "SOUNDKIT", "STANDARD_TEXT_FONT",

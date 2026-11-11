@@ -66,6 +66,8 @@ local function addToQueue(r, delta)
   end
   if delta > 0 then q[#q + 1] = { recipe = r.id, prof = r.prof, n = delta } end
 end
+page.AddToQueue = addToQueue -- auch fürs Craftfenster am Berufsfenster (UI/CraftPanel.lua)
+page.Craftable = craftable
 
 -- Benötigtes Material der Warteschlange minus Taschen
 function ns.QueueMaterials()
