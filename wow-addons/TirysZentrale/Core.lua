@@ -337,9 +337,12 @@ function ns.Item(id)
   return c
 end
 
+-- Nur Items, die noch als Platzhalter (gespeicherter Name statt Spiel-Daten) angezeigt werden, lösen ein Neuzeichnen
+-- aus. Am AH lädt das Spiel ständig tausende Item-Daten nach (Scans, Auctionator-Listen) – bereits geladene Items
+-- ändern sich dadurch nicht.
 local function onItemData(_, itemID, success)
-  if itemID and itemCache[itemID] and success ~= false then
-    itemCache[itemID].loaded = nil
+  local c = itemID and itemCache[itemID]
+  if c and not c.loaded and success ~= false then
     ns.Debounce("items", 0.4, function() ns.Fire("ITEMS_UPDATED") end)
   end
 end

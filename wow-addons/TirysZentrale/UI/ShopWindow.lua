@@ -475,7 +475,10 @@ function Shop.Toggle()
 end
 
 for _, msg in ipairs({ "SHOP_CHANGED", "AH_STATE", "PRICES_UPDATED", "ITEMS_UPDATED", "RECIPES_SCANNED", "MERCHANT_SCANNED" }) do
-  ns.Listen(msg, function() ns.Debounce("shopwin", 0.2, Shop.Refresh) end)
+  ns.Listen(msg, function()
+    if not (win and win:IsShown()) and msg ~= "AH_STATE" then return end -- zu: nichts rechnen (Öffnen zeichnet neu)
+    ns.Debounce("shopwin", (M.ahOpen and 1) or 0.2, Shop.Refresh)
+  end)
 end
 
 -- Beim Öffnen des AH: Fenster zeigen, wenn noch etwas zu kaufen ist

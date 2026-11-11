@@ -429,6 +429,14 @@ function M.install(opts)
   local defaultHandler = function(err) table.insert(M.errors, debug.traceback(tostring(err), 2)) end
   M.errorHandler = defaultHandler
   G.geterrorhandler = function() return M.errorHandler end
+  -- hooksecurefunc([tabelle,] name, fn): fn läuft nach dem Original mit denselben Argumenten
+  G.hooksecurefunc = function(tbl, name, fn)
+    if type(tbl) == "string" then tbl, name, fn = G, tbl, name end
+    assert(type(tbl) == "table" and type(name) == "string" and type(fn) == "function", "Usage: hooksecurefunc([table,] name, func)")
+    local orig = tbl[name]
+    assert(type(orig) == "function", "hooksecurefunc(): " .. name .. " ist keine Funktion")
+    tbl[name] = function(...) local r = { orig(...) } fn(...) return unpack(r) end
+  end
   G.seterrorhandler = function(fn) assert(type(fn) == "function") M.errorHandler = fn end
   G.C_Timer = {
     After = function(sec, fn) assert(type(sec) == "number" and type(fn) == "function") table.insert(M.timers, fn) end,
@@ -452,6 +460,7 @@ function M.install(opts)
     end,
     GetItemIconByID = function(id) assert(type(id) == "number") return 134400 end,
     RequestLoadItemDataByID = function(id) assert(type(id) == "number") end,
+    IsItemDataCachedByID = function(id) assert(type(id) == "number") return M.itemInfo[id] ~= nil end,
     GetItemCount = function(id, bank) assert(id ~= nil) local n = 0 for _, b in pairs(M.bags or {}) do for _, it in pairs(b) do if it.itemID == id then n = n + (it.stackCount or 1) end end end return n end,
   }
   -- Zauberbuch, Karte, Wegpunkte
@@ -512,6 +521,7 @@ function M.install(opts)
     IsThrottledMessageSystemReady = function() return true end,
     GetItemKeyInfo = function(key) return { itemID = key.itemID, isCommodity = not (M.nonCommodity or {})[key.itemID] } end,
     MakeItemKey = function(id) return { itemID = id, itemLevel = 0, itemSuffix = 0, battlePetSpeciesID = 0 } end,
+    ReplicateItems = function() M.replicated = (M.replicated or 0) + 1 end,
   }
   G.AUCTION_EXPIRED_MAIL_SUBJECT = "Auktion abgelaufen: %s"
   G.GetRealmName = function() return "Forever-Testrealm" end
@@ -583,7 +593,8 @@ function M.install(opts)
       MultiSearchExact = function(c, terms) verify(c) assert(type(terms) == "table") M.searched = terms end,
       RegisterForDBUpdate = function(c, cb) verify(c) assert(type(cb) == "function") M.dbCallback = cb end,
     } },
-      State = { FullScanFrameRef = { InitiateScan = function() M.scanStarted = true end },
+      -- wie im Original: der Komplett-Scan ruft C_AuctionHouse.ReplicateItems() (inProgress setzt ein Test selbst)
+      State = { FullScanFrameRef = { InitiateScan = function() M.scanStarted = true G.C_AuctionHouse.ReplicateItems() end },
         IncrementalScanFrameRef = { InitiateScan = function() M.scanStarted = true end } },
       Config = { Options = { REPLICATE_SCAN = "replicate_scan" }, Get = function() return true end },
     }

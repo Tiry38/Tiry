@@ -45,6 +45,13 @@ Zeigt dein Client keine Fehlerfenster: Tiry's Zentrale schreibt eigene Fehler ro
 - [ ] Nach ein paar Scan-Tagen: Marktwert, Durchschnitt, Min · Max, Urteil günstig/normal/teuer
 - [ ] Werden Punkte oder Linien weiß statt farbig angezeigt: Screenshot schicken (dann färbt dein Client Inline-Grafiken nicht)
 
+## Neu in 6.2.1 (AH-Ruckeln, Chat-Spam, Suche)
+- [ ] AH öffnen, Zentrale offen auf Craft-Planer: **kein Ruckeln** (auch nicht während/nach „AH scannen“)
+- [ ] Nach einem Komplett-Scan steht „Schnäppchen-Scan: …“ **genau einmal** im Chat
+- [ ] „Rezepte suchen“ im Craft-Planer → Auctionator zeigt die Treffer (oder „keine Ergebnisse“) statt endlos „Rufe Daten ab …“
+- [ ] „Rezepte suchen“ direkt nach „AH scannen“: Chat „Auctionator scannt gerade – deine Suche startet automatisch …“, danach startet die Suche von selbst
+- [ ] Ruckelt es weiter: Einstellungen → „AH automatisch scannen“ aus und erneut testen (Auctionators eigenes Einlesen eines Komplett-Scans braucht selbst Rechenzeit). Ergebnis notieren: ______
+
 ## Neu in 6.2
 **Sparziel (Startseite)**
 - [ ] Unter Stufe 40 steht „Reiten lernen – Vorschlag“ mit 100 Gold; Balken = Gold in der Tasche + Post + halber Auktionswert

@@ -15,13 +15,25 @@ S.VENDOR_MIN = 100     -- Händler-Schnäppchen ab 1 Silber Gewinn je Angebot
 local cur          -- Sammeltabelle des laufenden Scans
 local me
 
+-- Händler-Verkaufspreis. Ein Komplett-Scan hat zehntausende Angebote: GetItemInfo nur für Items, die das Spiel
+-- schon geladen hat (sonst fordert jeder Aufruf Daten vom Server an -> Ruckeln, Auctionator-Suchen warten mit).
+-- Reihenfolge: Blizzard-Hotfix > Spiel-Cache > Spieldaten. Je Scan einmal je Item.
 local function vendorPrice(id)
-  local hot = ns.HOTFIX and ns.HOTFIX.sell[id] -- Blizzard-Hotfix vor Spiel-Cache und Spieldaten
-  if hot then return hot end
-  local sell = GetItemInfo and select(11, GetItemInfo(id))
-  if type(sell) == "number" then return sell end
-  local e = ns.DB and ns.DB.Get(id)
-  return e and e.sell or 0
+  local memo = cur and cur.sell
+  local v = memo and memo[id]
+  if v then return v end
+  v = ns.HOTFIX and ns.HOTFIX.sell[id]
+  local CI = C_Item
+  if not v and CI and CI.GetItemInfo and CI.IsItemDataCachedByID and CI.IsItemDataCachedByID(id) then
+    local sell = select(11, CI.GetItemInfo(id))
+    if type(sell) == "number" then v = sell end
+  end
+  if not v then
+    local e = ns.DB and ns.DB.Get(id)
+    v = e and e.sell or 0
+  end
+  if memo then memo[id] = v end
+  return v
 end
 
 local function marketRef(id)
@@ -42,7 +54,7 @@ function S.MarketMin()
 end
 
 function S.Begin()
-  cur = { vendor = {}, market = {}, refs = {} }
+  cur = { vendor = {}, market = {}, refs = {}, sell = {} }
   me = UnitName and UnitName("player") or nil
 end
 
@@ -80,14 +92,32 @@ function S.Finish()
   for _, e in pairs(cur.vendor) do e.unit = math.floor(e.unit) list[#list + 1] = e end
   local minMarket = S.MarketMin()
   local D, M = ns.Demand, ns.Market
-  for id, e in pairs(cur.market) do
-    if not (D and D.Class(id) == "slow") then
-      local resale = M and M.NetAfterDeposit(id, nil, e.ref) or math.floor(e.ref * 0.95)
+  -- Markt-Kandidaten: erst grob (Marktwert minus AH-Gebühr = Obergrenze des Erlöses), dann nur die besten genau
+  -- rechnen (Einstellgebühr-Risiko, Absatz). Spart bei großen Scans tausende Rechnungen im selben Bild.
+  local cand = {}
+  local cut = M and M.CutFactor and M.CutFactor() or 0.95
+  for _, e in pairs(cur.market) do
+    e.bound = math.floor(e.ref * cut) * e.count - e.cost
+    if e.bound >= minMarket then cand[#cand + 1] = e end
+  end
+  table.sort(cand, function(a, b) if a.bound ~= b.bound then return a.bound > b.bound end return a.id < b.id end)
+  local slots = math.max(0, 40 - #list)
+  local got = {}
+  for _, e in ipairs(cand) do
+    -- genug sichere Treffer und der Rest kann sie nicht mehr schlagen -> fertig
+    if #got >= slots and (slots == 0 or e.bound <= got[slots].profit) then break end
+    if not (D and D.Class(e.id) == "slow") then
+      local resale = M and M.NetAfterDeposit(e.id, nil, e.ref) or math.floor(e.ref * 0.95)
       e.profit = math.floor(resale * e.count - e.cost)
       e.unit = math.floor(e.unit)
-      if e.profit >= minMarket then list[#list + 1] = e end
+      if e.profit >= minMarket then
+        got[#got + 1] = e
+        table.sort(got, function(a, b) if a.profit ~= b.profit then return a.profit > b.profit end return a.id < b.id end)
+      end
     end
+    e.bound = nil
   end
+  for _, e in ipairs(got) do e.bound = nil list[#list + 1] = e end
   -- sichere Händler-Schnäppchen zuerst, dann nach Gewinn
   table.sort(list, function(a, b)
     if a.kind ~= b.kind then return a.kind == "haendler" end
@@ -104,7 +134,12 @@ function S.Finish()
     local parts = {}
     if v > 0 then parts[#parts + 1] = string.format("%d unter Händlerpreis (|cff61eb8f+%s sicher|r)", v, ns.Money(vp)) end
     if m > 0 then parts[#parts + 1] = string.format("%d unter Marktwert (+%s)", m, ns.Money(mp)) end
-    ns.Print("|cffff9929Schnäppchen-Scan:|r " .. table.concat(parts, ", ") .. ". Liste: /tz schnapp")
+    local text = "|cffff9929Schnäppchen-Scan:|r " .. table.concat(parts, ", ") .. ". Liste: /tz schnapp"
+    -- dieselbe Meldung nicht nochmal (Schutz gegen doppelte Scan-Meldungen von Blizzard)
+    if text ~= S.lastText or not S.lastPrint or time() - S.lastPrint >= 900 then
+      S.lastText, S.lastPrint = text, time()
+      ns.Print(text)
+    end
   end
   ns.Fire("SNIPES_CHANGED")
   return list

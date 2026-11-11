@@ -90,18 +90,30 @@ function M.ListSize(itemID, have)
 end
 
 -- Exakter Betrag von Blizzard (nur bei offenem AH). Ausrüstung braucht ein Item in der Tasche (ItemLocation).
+-- Je AH-Besuch einmal je Item/Laufzeit/Menge gefragt: Seiten rechnen das für hunderte Rezepte bei jedem Neuzeichnen.
+local exactMemo, exactFail = {}, {}
 local function exactDeposit(itemID, qty, loc, d)
   local AH = C_AuctionHouse
   if not (M.ahOpen and AH) then return nil end
+  local key = itemID .. ":" .. d .. ":" .. qty .. (loc and ":L" or "")
+  local memo = exactMemo[key]
+  if memo then return memo end
+  local failed = exactFail[key]
+  if failed and GetTime() - failed < 30 then return nil end -- Item-Daten fehlen noch: in 30 s nochmal fragen
   local ok, v
   if loc and AH.CalculateItemDeposit then
     ok, v = pcall(AH.CalculateItemDeposit, loc, d, qty)
   elseif AH.CalculateCommodityDeposit then
     ok, v = pcall(AH.CalculateCommodityDeposit, itemID, d, qty)
   end
-  if ok and type(v) == "number" and v >= 0 then return v end
+  if ok and type(v) == "number" and v >= 0 then
+    exactMemo[key], exactFail[key] = v, nil
+    return v
+  end
+  exactFail[key] = GetTime()
   return nil
 end
+function M.ResetDepositMemo() wipe(exactMemo) wipe(exactFail) end
 
 -- Schätzung, solange Blizzard noch nichts gesagt hat: Forever-Berichte nennen 5 / 20 / 60 % des Händlerpreises
 -- je Laufzeit (wowforever.be, 06.11.2026; Wowheads Beispiel passt zu 60 %) – nicht offiziell bestätigt.
@@ -116,8 +128,11 @@ function M.Deposit(itemID, qty, loc)
   if v then
     if cache then
       local c = type(cache[itemID]) == "table" and cache[itemID] or {}
-      c[d] = { v = v, q = qty, t = time() }
-      cache[itemID] = c
+      local old = c[d]
+      if not (type(old) == "table" and old.v == v and old.q == qty) then -- nur Neues speichern (kein Müll je Aufruf)
+        c[d] = { v = v, q = qty, t = time() }
+        cache[itemID] = c
+      end
     end
     return v, true
   end
@@ -251,7 +266,21 @@ function M.CreateShoppingList(listName, itemIDs)
   return true, #terms, missing
 end
 
+-- Scannt Auctionator gerade? (Komplett-Scan lädt die Daten tausender Items, der Schnell-Scan blättert alle
+-- Angebote durch – eine Suche dazwischen wartet mit bzw. bremst den Scan aus)
+function M.FullScanBusy()
+  local ok, busy = pcall(function()
+    local st = Auctionator.State
+    for _, f in ipairs({ st.FullScanFrameRef, st.IncrementalScanFrameRef }) do
+      if type(f) == "table" and (f.inProgress == true or f.doingFullScan == true) then return true end
+    end
+    return false
+  end)
+  return ok and busy == true
+end
+
 -- Sofortsuche im offenen Auktionshaus
+local waitingNames
 function M.SearchNow(itemIDs)
   local a = api()
   if not (a and a.MultiSearchExact) then return false, "Auctionator ist nicht geladen." end
@@ -265,6 +294,30 @@ function M.SearchNow(itemIDs)
     end
   end
   if #names == 0 then return false, "Item-Namen werden noch geladen." end
+  -- eigene Unterboten-Abfragen anhalten: deine Suche geht vor
+  if ns.AH and ns.AH.Pause then ns.AH.Pause() end
+  if M.FullScanBusy() then
+    -- Suche merken und starten, sobald Auctionators Scan fertig ist (höchstens 2 Minuten warten)
+    local first = not waitingNames
+    waitingNames = names
+    if first then
+      ns.Print("Auctionator scannt gerade – deine Suche startet automatisch, sobald der Scan fertig ist.")
+      local tries = 0
+      local function try()
+        tries = tries + 1
+        if not M.ahOpen then waitingNames = nil return end
+        if M.FullScanBusy() and tries < 120 then C_Timer.After(1, try) return end
+        local n = waitingNames
+        waitingNames = nil
+        if n then
+          local okS, errS = pcall(a.MultiSearchExact, ADDON, n)
+          if not okS then ns.Print("|cffff6b81Suche nicht möglich:|r " .. tostring(errS)) end
+        end
+      end
+      C_Timer.After(1, try)
+    end
+    return true
+  end
   local ok, err = pcall(a.MultiSearchExact, ADDON, names)
   if not ok then return false, tostring(err) end
   return true
@@ -309,6 +362,7 @@ end
 
 ns.On("AUCTION_HOUSE_SHOW", function()
   M.ahOpen = true
+  M.ResetDepositMemo()
   ns.Fire("AH_STATE")
   if C_Timer and C_Timer.After then
     C_Timer.After(1.5, function()
@@ -320,6 +374,7 @@ ns.On("AUCTION_HOUSE_SHOW", function()
 end)
 ns.On("AUCTION_HOUSE_CLOSED", function()
   M.ahOpen = false
+  M.ResetDepositMemo()
   ns.Fire("AH_STATE")
 end)
 

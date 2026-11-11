@@ -597,10 +597,14 @@ local function refreshVisible()
     UI.UpdateStatus()
   end
 end
+-- Am AH kommen neue Daten im Sekundentakt (Auctionator-Suchen, Scans, eigene Auktionen): dann höchstens einmal pro
+-- Sekunde neu rechnen. Klicks im Fenster zeichnen weiterhin sofort.
+local function refreshDelay() return (ns.Market and ns.Market.ahOpen) and 1 or 0.15 end
+UI.RefreshDelay = refreshDelay
 for _, msg in ipairs({ "PRICES_UPDATED", "ITEMS_UPDATED", "PROFESSIONS_CHANGED", "PLAYER_CHANGED",
   "MERCHANT_SCANNED", "RECIPES_SCANNED", "AH_STATE", "CRAFTBOOK_CHANGED", "AUCTIONS_CHANGED", "GOAL_CHANGED",
   "DEMAND_UPDATED", "SNIPES_CHANGED" }) do
-  ns.Listen(msg, function() ns.Debounce("refresh", 0.15, refreshVisible) end)
+  ns.Listen(msg, function() ns.Debounce("refresh", refreshDelay(), refreshVisible) end)
 end
 -- Taschen-Änderungen (jede Beute) nur für Ansichten, die Tascheninhalt zeigen
 local BAG_PAGES = { home = true, recipes = true, tracker = true, scanner = true, session = true }

@@ -218,7 +218,7 @@ end
 local LEDER = { [2318] = { name = "Leichtes Leder", sell = 10, stack = 20 } }
 
 local function scan(W)
-  W.fire("REPLICATE_ITEM_LIST_UPDATE") W.flush()
+  C_AuctionHouse.ReplicateItems() W.fire("REPLICATE_ITEM_LIST_UPDATE") W.flush()
 end
 
 describe("M1 Item fällt aus der Beobachtungsliste -> keine erfundenen Verkäufe", function()
@@ -795,5 +795,212 @@ describe("P7 Goldbarren: Bergbau-Verhütten statt Alchemie-Transmutation", funct
     -- Zauber-Nummer passt und Ergebnis passt: genau dieses Rezept
     assert.are.equal(11479, ns.Recipes.Match(11479, 3577, "MINING").id)
     assert.are.equal(3308, ns.Recipes.Match(424242, 3577, "MINING").id)
+  end)
+end)
+
+----------------------------------------------------------------------------
+-- Tirys Spieltest 6.2 (11.11.): Ruckeln am AH, Chat voller Schnäppchen-Meldungen, Auctionator-Suche hängt
+----------------------------------------------------------------------------
+describe("A1 Komplett-Scan wird genau einmal gelesen", function()
+  it("Blizzard meldet REPLICATE_ITEM_LIST_UPDATE immer wieder – gelesen wird nur nach einem neuen Scan", function()
+    local ns, W = E.load({ itemInfo = LEDER })
+    local rows = leatherMarket()
+    rows[#rows + 1] = { 2318, 20, 4, "Billig", 3 } -- 20 × 4 Kupfer, Händler zahlt 10: Händler-Schnäppchen
+    replicate(function() return rows end)
+    ns.Market.ahOpen = true
+    local reads = 0
+    local num = C_AuctionHouse.GetNumReplicateItems
+    C_AuctionHouse.GetNumReplicateItems = function() reads = reads + 1 return num() end
+    C_AuctionHouse.ReplicateItems() -- Auctionator startet den Komplett-Scan
+    for _ = 1, 5 do
+      W.fire("REPLICATE_ITEM_LIST_UPDATE") W.flush()
+      W.now = W.now + 3
+    end
+    assert.are.equal(1, reads)
+    local _, n = E.chat(W):gsub("Schnäppchen%-Scan", "")
+    assert.are.equal(1, n)
+    -- eine Stunde später, immer noch derselbe Scan: nichts
+    W.now = W.now + 3600
+    W.fire("REPLICATE_ITEM_LIST_UPDATE") W.flush()
+    assert.are.equal(1, reads)
+    -- neuer Komplett-Scan: wieder lesen
+    C_AuctionHouse.ReplicateItems() W.fire("REPLICATE_ITEM_LIST_UPDATE") W.flush()
+    assert.are.equal(2, reads)
+    -- AH zwischendurch zu: die Liste ist ungültig, kein Lesen
+    C_AuctionHouse.ReplicateItems()
+    W.fire("AUCTION_HOUSE_CLOSED") W.flush()
+    W.fire("AUCTION_HOUSE_SHOW") W.flush()
+    W.fire("REPLICATE_ITEM_LIST_UPDATE") W.flush()
+    assert.are.equal(2, reads)
+    assert.are.same({}, W.errors)
+  end)
+end)
+
+describe("A2 Schnäppchen-Auswertung ohne Server-Anfragen und ohne tausende Rechnungen", function()
+  it("Händlerpreis nur aus geladenen Items, sonst aus den Spieldaten", function()
+    local ns, W = E.load({ itemInfo = LEDER })
+    local rows = leatherMarket()
+    rows[#rows + 1] = { 2318, 20, 4, "Billig", 3 }
+    replicate(function() return rows end)
+    ns.Market.ahOpen = true
+    local asked = {}
+    local gii = C_Item.GetItemInfo
+    C_Item.GetItemInfo = function(id) asked[id] = (asked[id] or 0) + 1 return gii(id) end
+    C_AuctionHouse.ReplicateItems() W.fire("REPLICATE_ITEM_LIST_UPDATE") W.flush()
+    for id in pairs(asked) do assert.truthy(W.itemInfo[id], "Server-Anfrage für ungeladenes Item " .. id) end
+    assert.truthy(ns.Snipe.list[1] and ns.Snipe.list[1].kind == "haendler" and ns.Snipe.list[1].id == 2318)
+    assert.are.same({}, W.errors)
+  end)
+
+  it("Markt-Schnäppchen: dieselbe Liste wie die volle Rechnung, aber nur die Besten genau gerechnet", function()
+    local ns, W = E.load({ prices = {} })
+    local ids = {}
+    ns.DB.Each(function(e) if #ids < 200 and e.bind ~= 1 and (e.sell or 0) > 0 then ids[#ids + 1] = e.id end end)
+    ns.db.priceHistory = {}
+    local rows, refs = {}, {}
+    for i, id in ipairs(ids) do
+      local p = (ns.DB.Get(id).sell or 1) * 40 + 20000 + i * 137
+      W.prices[id] = p
+      ns.db.priceHistory[id] = { ["2026-11-08"] = p, ["2026-11-09"] = p, ["2026-11-10"] = p }
+      refs[id] = p
+      local q = (i % 4) + 1
+      rows[#rows + 1] = { id, q, math.floor(p * (0.2 + (i % 9) / 20)), "V" .. i, 3 }
+      rows[#rows + 1] = { id, 1, math.floor(p * 0.6), "W" .. i, 3 }
+    end
+    replicate(function() return rows end)
+    ns.Market.ahOpen = true
+    -- volle Rechnung (alter Weg) als Vergleich
+    local agg = {}
+    local S = ns.Snipe
+    for _, r in ipairs(rows) do
+      local ref = ns.PriceString.Market(r[1])
+      local unit = math.floor(r[3])
+      if ref and unit <= ref * S.MARKET_SHARE then
+        local e = agg[r[1]] or { id = r[1], count = 0, cost = 0, ref = ref }
+        agg[r[1]] = e
+        e.count, e.cost = e.count + r[2], e.cost + unit * r[2]
+      end
+    end
+    local want = {}
+    for id, e in pairs(agg) do
+      if ns.Demand.Class(id) ~= "slow" then
+        local p = math.floor(ns.Market.NetAfterDeposit(id, nil, e.ref) * e.count - e.cost)
+        if p >= S.MarketMin() then want[#want + 1] = { id = id, profit = p } end
+      end
+    end
+    table.sort(want, function(a, b) if a.profit ~= b.profit then return a.profit > b.profit end return a.id < b.id end)
+    while #want > 40 do table.remove(want) end
+    assert.truthy(#want == 40, "Testdaten zu klein: " .. #want)
+    local calls = 0
+    local nad = ns.Market.NetAfterDeposit
+    ns.Market.NetAfterDeposit = function(...) calls = calls + 1 return nad(...) end
+    C_AuctionHouse.ReplicateItems() W.fire("REPLICATE_ITEM_LIST_UPDATE") W.flush()
+    ns.Market.NetAfterDeposit = nad
+    local got = {}
+    for _, e in ipairs(S.list) do got[#got + 1] = { id = e.id, profit = e.profit } assert.are.equal("markt", e.kind) end
+    assert.are.same(want, got)
+    assert.truthy(calls < 120, "zu viele genaue Rechnungen: " .. calls)
+    assert.are.same({}, W.errors)
+  end)
+end)
+
+describe("A3 Einstellgebühr: Blizzard wird je AH-Besuch einmal gefragt", function()
+  it("hunderte Rechnungen pro Bildaufbau = eine Abfrage; gespeichert wird nur Neues", function()
+    local ns, W = E.load({ itemInfo = LEDER })
+    local asked = 0
+    C_AuctionHouse.CalculateCommodityDeposit = function(id, d, q) if id == 2318 and q == 20 then asked = asked + 1 end return 3 * q end
+    W.fire("AUCTION_HOUSE_SHOW") W.flush()
+    ns.Market.ResetDepositMemo() -- (beim Öffnen hat die Zentrale schon gerechnet)
+    asked = 0
+    for _ = 1, 50 do ns.Market.Deposit(2318, 20) end
+    assert.are.equal(1, asked)
+    local d = ns.Market.Duration()
+    local saved = ns.db.deposits[2318][d]
+    assert.are.equal(60, saved.v)
+    ns.Market.Deposit(2318, 20)
+    assert.is_true(rawequal(saved, ns.db.deposits[2318][d]))
+    -- neuer Besuch: neu fragen (Blizzard kann die Gebühr geändert haben)
+    asked = 0
+    W.fire("AUCTION_HOUSE_CLOSED") W.flush()
+    W.fire("AUCTION_HOUSE_SHOW") W.flush()
+    ns.Market.Deposit(2318, 20)
+    assert.are.equal(1, asked)
+    assert.are.same({}, W.errors)
+  end)
+end)
+
+describe("A4 Neuzeichnen am AH", function()
+  it("Item-Daten bereits geladener Items lösen kein Neuzeichnen aus, Platzhalter schon", function()
+    local ns, W = E.load({ itemInfo = LEDER })
+    local fired = 0
+    ns.Listen("ITEMS_UPDATED", function() fired = fired + 1 end)
+    ns.Item(2318)
+    for _ = 1, 20 do W.fire("GET_ITEM_INFO_RECEIVED", 2318, true) end
+    W.flush()
+    assert.are.equal(0, fired)
+    assert.truthy(ns.Item(777001).name:find("777001"))
+    W.itemInfo[777001] = { name = "Neues Item", sell = 5, stack = 1 }
+    W.fire("GET_ITEM_INFO_RECEIVED", 777001, true) W.flush()
+    assert.are.equal(1, fired)
+    assert.are.equal("Neues Item", ns.Item(777001).name)
+  end)
+  it("am offenen AH höchstens einmal pro Sekunde neu rechnen, sonst sofort", function()
+    local ns, W = E.load({})
+    assert.are.equal(0.15, ns.UI.RefreshDelay())
+    W.fire("AUCTION_HOUSE_SHOW") W.flush()
+    assert.are.equal(1, ns.UI.RefreshDelay())
+    W.fire("AUCTION_HOUSE_CLOSED") W.flush()
+    assert.are.equal(0.15, ns.UI.RefreshDelay())
+  end)
+  it("Tagespreise höchstens einmal pro Minute schreiben – die letzte Meldung kommt trotzdem an", function()
+    local ns, W = E.load({})
+    local n = 0
+    local rec = ns.PriceString.RecordAll
+    ns.PriceString.RecordAll = function(...) n = n + 1 return rec(...) end
+    W.now = W.now + 120
+    for _ = 1, 10 do ns.Fire("PRICES_UPDATED") W.now = W.now + 1 end
+    assert.are.equal(1, n)
+    W.flush() -- der nachgeholte Durchlauf
+    assert.are.equal(2, n)
+  end)
+end)
+
+describe("A5 Suche über Auctionator hat Vorrang", function()
+  local function owned(W)
+    W.owned = {
+      { auctionID = 1, itemKey = { itemID = 2318 }, status = 0, quantity = 5, timeLeftSeconds = 7200, buyoutAmount = 40 },
+      { auctionID = 2, itemKey = { itemID = 2319 }, status = 0, quantity = 5, timeLeftSeconds = 7200, buyoutAmount = 90 },
+      { auctionID = 3, itemKey = { itemID = 4234 }, status = 0, quantity = 5, timeLeftSeconds = 7200, buyoutAmount = 99 },
+    }
+  end
+  it("hält die eigene Unterboten-Prüfung an", function()
+    local ns, W = E.load({ itemInfo = LEDER })
+    owned(W)
+    W.fire("AUCTION_HOUSE_SHOW") W.flush()
+    W.fire("OWNED_AUCTIONS_UPDATED") W.flush()
+    assert.is_true(ns.AH.checking)
+    local sent = #W.searchedKeys
+    assert.is_true((ns.Market.SearchNow({ 2318 })))
+    assert.are.same({ "Leichtes Leder" }, W.searched)
+    assert.is_false(ns.AH.checking)
+    W.fire("COMMODITY_SEARCH_RESULTS_UPDATED", 2318) W.flush()
+    W.fire("COMMODITY_SEARCH_RESULTS_UPDATED", 2319) W.flush()
+    assert.are.equal(sent, #W.searchedKeys)
+    assert.is_nil(W.scanStarted) -- kein Scan hinterher, der die Suche ausbremst
+    assert.are.same({}, W.errors)
+  end)
+  it("wartet, bis Auctionators Scan fertig ist", function()
+    local ns, W = E.load({ itemInfo = LEDER })
+    ns.Market.ahOpen = true
+    Auctionator.State.FullScanFrameRef.inProgress = true
+    assert.is_true((ns.Market.SearchNow({ 2318 })))
+    assert.is_nil(W.searched)
+    assert.truthy(E.chat(W):find("startet automatisch", 1, true))
+    W.flush()
+    assert.is_nil(W.searched)
+    Auctionator.State.FullScanFrameRef.inProgress = false
+    W.flush()
+    assert.are.same({ "Leichtes Leder" }, W.searched)
+    assert.are.same({}, W.errors)
   end)
 end)

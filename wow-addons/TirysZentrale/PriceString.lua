@@ -142,7 +142,24 @@ function PS.RecordAll()
   for _, id in ipairs(ns.ITEM_ORDER or {}) do rec(id) end
   return n
 end
-ns.Listen("PRICES_UPDATED", function() ns.Safe(PS.RecordAll) end)
+-- Tagespreise merken: am AH melden Auctionator-Suchen im Sekundentakt neue Preise – höchstens einmal pro Minute
+-- schreiben, die letzte Meldung kommt spätestens nach einer Minute mit (Verlauf ist ohnehin je Tag).
+local recordAt, recordDue = nil, false
+function PS.RecordSoon()
+  local now = GetTime()
+  if not recordAt or now - recordAt >= 60 then
+    recordAt = now
+    ns.Safe(PS.RecordAll)
+    return
+  end
+  if recordDue then return end
+  recordDue = true
+  C_Timer.After(60 - (now - recordAt), function()
+    recordDue, recordAt = false, GetTime()
+    ns.Safe(PS.RecordAll)
+  end)
+end
+ns.Listen("PRICES_UPDATED", function() PS.RecordSoon() end)
 ns.Listen("LOGIN", function() C_Timer.After(8, function() ns.Safe(PS.RecordAll) end) end)
 
 ----------------------------------------------------------------------------

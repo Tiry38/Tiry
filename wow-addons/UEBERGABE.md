@@ -241,6 +241,22 @@ Amboss-/Schloss-Sound (max. 1–2 s)“.
    Reitkosten am Trainer, Anzahlung bei offenem AH). Danach evtl. Writs als Ware (AH-Preis vs. Kosten) und ein voller
    Gebiets-Index für Unterwegs-Gold (heute nur die Top-4-Stellen je Stufe aus `Data_Spots.lua`).
 
+## Tiry's Zentrale 6.2.1 (11.11., Spieltest-Fix)
+Tiry: „Rezepte suchen → Auctionator lädt nur“, „im AH laggt es brutal, egal ob er scannt oder nicht“, Chat voller
+„Schnäppchen-Scan“-Zeilen. Ursachen (belegt mit Auctionators FullScanFrame-Code und Messung im Nachbau, 30.000 Angebote):
+- `REPLICATE_ITEM_LIST_UPDATE` feuert wiederholt (Auctionator meldet sich deshalb nach der ersten Meldung ab). Die
+  Zentrale las bei jeder Meldung neu (`ns.Debounce` ist eine Drossel, kein Entprellen). Fix: `hooksecurefunc(C_AuctionHouse,
+  "ReplicateItems")` schaltet scharf, gelesen wird genau einmal (`D.WantsReplicate`), AH zu = unscharf.
+- Snipe.Finish rechnete jeden Markt-Kandidaten genau (Hänger 80 ms) → Obergrenze + nur Top-Kandidaten.
+- `exactDeposit` fragte Blizzard bei jedem Bildaufbau für hunderte Items und legte jedes Mal eine neue Tabelle an →
+  Merkzettel je AH-Besuch (`M.ResetDepositMemo`).
+- Neuzeichnen: `onItemData` nur noch für Platzhalter-Items, am AH höchstens 1×/s (`UI.RefreshDelay`), RecordAll ≤ 1×/min.
+- Suche: `M.SearchNow` hält die Unterboten-Abfragen an (`AW.Pause`) und wartet, solange Auctionator scannt (`M.FullScanBusy`).
+- Ob die hängende Auctionator-Suche damit weg ist, zeigt nur der Spieltest (Auctionators Such-Code war hier nicht
+  einsehbar; die Ursache – Rechenlast + Anfragen der Zentrale während der Suche – ist abgestellt).
+- Tests: `spec/zentrale_pruefung_spec.lua` A1–A5 (8 von 9 vorher rot); Nachbau kennt jetzt `hooksecurefunc`,
+  `C_AuctionHouse.ReplicateItems`, `C_Item.IsItemDataCachedByID` (alle in Forevers API-Doku belegt).
+
 ## Tiry's Zentrale 6.2 (11.11.)
 Wunsch: „dieselbe Anstrengung wie beim LevelPilot“ – kompletter Plan über die Zentrale: Effizienz, Design, alles
 funktioniert, weitere sinnvolle gekoppelte Funktionen, komplett prüfen, was hergestellt wird und was Gold bringt.

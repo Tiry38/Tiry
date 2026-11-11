@@ -140,6 +140,16 @@ function AW.CheckUndercuts(afterwards, force)
   AW.Next()
 end
 
+-- Deine eigene Suche (Auctionator) hat Vorrang: laufende Unterboten-Abfragen anhalten. Blizzard drosselt alle
+-- AH-Anfragen gemeinsam – sonst warten Auctionators Suchen hinter unseren Einzelabfragen.
+function AW.Pause()
+  if not AW.checking and not pending and #queue == 0 then return false end
+  wipe(queue)
+  pending, AW.checking, AW.afterCheck = nil, false, nil
+  ns.Fire("AUCTIONS_CHANGED")
+  return true
+end
+
 local function cheapestOther(n, getInfo, field)
   local best
   for i = 1, math.min(n or 0, 60) do

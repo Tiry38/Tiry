@@ -191,8 +191,16 @@ end
 
 ----------------------------------------------------------------------------
 -- Komplett-Scan mitlesen (Blizzard schickt REPLICATE_ITEM_LIST_UPDATE, wenn die Liste da ist)
+-- Die Meldung kommt nicht einmal, sondern immer wieder, solange Item-Daten der Liste nachladen (Auctionator meldet
+-- sich deshalb nach der ersten ab). Gelesen wird darum genau EINMAL je Komplett-Scan: Ein Aufruf von
+-- C_AuctionHouse.ReplicateItems() – egal, wer den Scan startet – schaltet das Mitlesen scharf.
 ----------------------------------------------------------------------------
-local reading
+local reading, lastRead
+D.armed = false
+local hooked = false
+if hooksecurefunc and C_AuctionHouse and C_AuctionHouse.ReplicateItems then
+  hooked = pcall(hooksecurefunc, C_AuctionHouse, "ReplicateItems", function() D.armed = true end)
+end
 function D.ReadReplicate()
   local AH = C_AuctionHouse
   -- "reading" = Startzeit; nach 60 s gilt ein hängengebliebener Lesevorgang (Fehler mitten drin) als beendet
@@ -200,7 +208,7 @@ function D.ReadReplicate()
   if ns.Market and not ns.Market.ahOpen then return false end
   local total = AH.GetNumReplicateItems() or 0
   if total <= 0 then return false end
-  reading = GetTime()
+  reading, lastRead, D.armed = GetTime(), time(), false
   local watch = D.Watchlist()
   local snipe = ns.Snipe
   if snipe then snipe.Begin() end
@@ -286,9 +294,20 @@ function D.Complete(total)
   return true
 end
 
+-- Soll diese Meldung gelesen werden? Nur nach einem neuen Komplett-Scan (ohne Haken: höchstens alle 10 Minuten –
+-- Blizzard erlaubt den Komplett-Scan ohnehin nur alle 15 Minuten).
+function D.WantsReplicate()
+  if hooked then return D.armed end
+  return not lastRead or time() - lastRead >= 600
+end
+
 ns.On("REPLICATE_ITEM_LIST_UPDATE", function()
+  if not D.WantsReplicate() then return end
   -- kurz warten, bis Blizzard die Liste fertig hat; doppelte Meldungen zusammenfassen
-  ns.Debounce("replicate", 2, function() ns.Safe(D.ReadReplicate) end)
+  ns.Debounce("replicate", 2, function() if D.WantsReplicate() then ns.Safe(D.ReadReplicate) end end)
+end)
+ns.Listen("AH_STATE", function()
+  if ns.Market and not ns.Market.ahOpen then D.armed = false end -- AH zu: die Liste ist ungültig
 end)
 
 ----------------------------------------------------------------------------

@@ -1,5 +1,13 @@
 # Changelog – Tiry's Zentrale
 
+## 6.2.1 (11.11.2026)
+**Spieltest-Fix: Ruckeln am AH, Chat voller Schnäppchen-Meldungen, Auctionator-Suche hängt.**
+- **Komplett-Scan wird nur noch EINMAL ausgewertet.** Blizzard meldet „AH-Liste da“ immer wieder, solange Item-Daten nachladen. Die Zentrale hat bei jeder Meldung alle Angebote neu gelesen. Das kostete jedes Mal einen Hänger von 0,1 s und eine neue „Schnäppchen-Scan“-Zeile im Chat. Jetzt wird nur nach einem echten neuen Scan gelesen (egal, ob ihn die Zentrale, Auctionator oder du startest).
+- **Schnäppchen-Auswertung 7× schneller:** Erst eine grobe Obergrenze, genau gerechnet werden nur die besten Kandidaten. Die Liste bleibt dieselbe (per Test gegen die volle Rechnung geprüft). Händlerpreise kommen aus den Spieldaten statt per Server-Anfrage. Dieselbe Meldung erscheint höchstens einmal.
+- **Einstellgebühr:** Blizzard wird je AH-Besuch einmal pro Item gefragt statt bei jedem Neuzeichnen (vorher 136–544 Abfragen pro Seite), gespeichert wird nur, was neu ist.
+- **Neuzeichnen am AH höchstens einmal pro Sekunde.** Geladene Items lösen kein Neuzeichnen mehr aus (am AH laden ständig tausende nach). Tagespreise werden höchstens einmal pro Minute geschrieben. Das Einkaufsfenster rechnet nur, wenn es offen ist.
+- **Suchen gehen vor:** Klickst du auf „Rezepte suchen“ (oder eine andere Suche), hält die Zentrale ihre eigene Unterboten-Prüfung an, damit Blizzards Anfrage-Bremse deine Suche nicht ausbremst. Scannt Auctionator gerade, startet die Suche automatisch, sobald der Scan fertig ist (mit Chat-Hinweis).
+
 ## 6.2.0 (11.11.2026)
 **Komplett-Überarbeitung: neue gekoppelte Funktionen, Gold-Rechnung geprüft, Forever-Hotfixes eingebaut.**
 

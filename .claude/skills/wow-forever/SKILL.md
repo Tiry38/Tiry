@@ -37,6 +37,9 @@ Unsicheres immer als unsicher benennen – vieles ist nur im Spiel prüfbar.
   `GetNumReplicateItems()`, `GetReplicateItemInfo(i)` (Index **ab 0**): Rückgabe 3 = Anzahl, 10 = Sofortkauf
   gesamt, 14 = Verkäufer, 17 = itemID, 18 = hasAllInfo. `GetReplicateItemTimeLeft(i)` = Band 0–3,
   Dauer per `GetTimeLeftBandInfo(band)` (Ersatz-Minima {0, 1800, 7200, 43200} s). Nur alle 15 Min. erlaubt.
+- **`REPLICATE_ITEM_LIST_UPDATE` feuert wiederholt** (solange Item-Daten nachladen; Auctionator meldet sich nach der
+  ersten ab). Nur einmal je Scan lesen: `hooksecurefunc(C_AuctionHouse, "ReplicateItems", …)` schaltet scharf.
+  Am AH nie pro Bildaufbau Blizzard-APIs für hunderte Items rufen (z. B. `CalculateCommodityDeposit`) – je Besuch merken.
 - **Einstellgebühr:** mind. **1 Kupfer** je Angebot (Blizzard-Hotfix 10.11.2026, vorher 1 Silber), bei Verkauf zurück,
   bei Ablauf weg. Quelle: news.blizzard.com/en-us/article/24315281/wow-forever-hotfixes-november-10-2026
   Exakt: `C_AuctionHouse.CalculateCommodityDeposit(itemID, duration, qty)` /

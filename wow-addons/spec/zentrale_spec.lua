@@ -1081,13 +1081,13 @@ describe("Absatz: Verkäufe pro Tag aus zwei AH-Scans", function()
       { id = 2318, q = 20, price = 40, owner = "Ana", band = 3 }, { id = 2318, q = 20, price = 42, owner = "Bo", band = 3 },
       { id = 4238, q = 1, price = 90000, owner = "Cy", band = 3 },
     }
-    W.fire("REPLICATE_ITEM_LIST_UPDATE") W.flush()
+    C_AuctionHouse.ReplicateItems() W.fire("REPLICATE_ITEM_LIST_UPDATE") W.flush()
     W.now = W.now + 2 * 3600
     auctions = {
       { id = 2318, q = 6, price = 40, owner = "Ana", band = 3 },  -- 14 + 20 (Bo komplett) verkauft
       { id = 4238, q = 1, price = 90000, owner = "Cy", band = 3 },
     }
-    W.fire("REPLICATE_ITEM_LIST_UPDATE") W.flush()
+    C_AuctionHouse.ReplicateItems() W.fire("REPLICATE_ITEM_LIST_UPDATE") W.flush()
     local perDay, src = D.PerDay(2318)
     assert.are.equal("markt", src)
     assert.are.equal(34 * 12, math.floor(perDay + 0.5))   -- 34 Stück in 2 Std.
@@ -1096,7 +1096,7 @@ describe("Absatz: Verkäufe pro Tag aus zwei AH-Scans", function()
     -- Tasche: über 12 Std. beobachtet, nichts verkauft -> Ladenhüter
     for _ = 1, 6 do
       W.now = W.now + 2 * 3600
-      W.fire("REPLICATE_ITEM_LIST_UPDATE") W.flush()
+      C_AuctionHouse.ReplicateItems() W.fire("REPLICATE_ITEM_LIST_UPDATE") W.flush()
     end
     assert.are.equal("slow", D.Class(4238))
     -- Handel > Preise: Spalte "Pro Tag" und Absatz im Tooltip
@@ -1251,7 +1251,7 @@ describe("Goldmacher-Werkzeuge", function()
     }
     replicate(W, function() return auctions end)
     ns.Market.ahOpen = true
-    W.fire("REPLICATE_ITEM_LIST_UPDATE") W.flush()
+    C_AuctionHouse.ReplicateItems() W.fire("REPLICATE_ITEM_LIST_UPDATE") W.flush()
     assert.is_true(s.list[1].undercut)
     assert.are.equal(45, s.list[1].competitor)
     assert.is_nil(s.list[2].undercut)
@@ -1263,7 +1263,7 @@ describe("Goldmacher-Werkzeuge", function()
     -- keine Konkurrenz mehr -> nicht mehr unterboten
     auctions = { { id = 2318, q = 20, price = 50, owner = "Tiry" } }
     W.now = W.now + 900
-    W.fire("REPLICATE_ITEM_LIST_UPDATE") W.flush()
+    C_AuctionHouse.ReplicateItems() W.fire("REPLICATE_ITEM_LIST_UPDATE") W.flush()
     assert.is_false(s.list[1].undercut)
     noErrors(W)
   end)
@@ -1275,7 +1275,7 @@ describe("Goldmacher-Werkzeuge", function()
     for i = 1, 300 do auctions[i] = { id = 2318, q = 1, price = 40, owner = "S" .. i } end
     replicate(W, function() return auctions end)
     ns.Market.ahOpen = true
-    W.fire("REPLICATE_ITEM_LIST_UPDATE") W.flush()
+    C_AuctionHouse.ReplicateItems() W.fire("REPLICATE_ITEM_LIST_UPDATE") W.flush()
     local st = ns.Demand.Store()
     assert.are.equal(1, st.scans)
     -- Blizzard drosselt: nur 50 von 300 Angeboten kommen an -> keine 250 "Verkäufe"
@@ -1283,13 +1283,13 @@ describe("Goldmacher-Werkzeuge", function()
     local short = {}
     for i = 1, 50 do short[i] = auctions[i] end
     auctions = short
-    W.fire("REPLICATE_ITEM_LIST_UPDATE") W.flush()
+    C_AuctionHouse.ReplicateItems() W.fire("REPLICATE_ITEM_LIST_UPDATE") W.flush()
     assert.are.equal(1, st.scans)
     assert.truthy(E.chat(W):find("unvollständig", 1, true))
     assert.is_nil(ns.Demand.PerDay(2318))
     -- zweimal hintereinander klein -> Markt ist wirklich geschrumpft, wird übernommen
     W.now = W.now + 3600
-    W.fire("REPLICATE_ITEM_LIST_UPDATE") W.flush()
+    C_AuctionHouse.ReplicateItems() W.fire("REPLICATE_ITEM_LIST_UPDATE") W.flush()
     assert.are.equal(2, st.scans)
     noErrors(W)
   end)
@@ -1306,7 +1306,7 @@ describe("Goldmacher-Werkzeuge", function()
     }
     replicate(W, function() return auctions end)
     ns.Market.ahOpen = true
-    W.fire("REPLICATE_ITEM_LIST_UPDATE") W.flush()
+    C_AuctionHouse.ReplicateItems() W.fire("REPLICATE_ITEM_LIST_UPDATE") W.flush()
     local list = ns.Snipe.list
     assert.are.equal(2, #list)
     assert.are.equal("haendler", list[1].kind)
