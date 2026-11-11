@@ -37,6 +37,7 @@ Befehle: `/tz` (oder `/zentrale`, `/gold`), `/tz suche`, `/tz assistent`, `/tz w
 - **Markt-Tiefe:** Angebot ÷ Absatz = Tage Vorrat; über 14 Tage = „Markt voll“.
 - **Schnäppchen-Scan:** jedes Angebot des Komplett-Scans; „unter Händlerpreis“ (sicherer Gewinn) oder ≤ 65 % des 14-Tage-Marktwerts (kein Ladenhüter, nach Gebühr und Anzahlungs-Risiko). Kaufen bleibt Spieler-Klick.
 - **Preis-Trend, beste Verkaufszeit, Rohstoff-Check** (verarbeiten oder roh verkaufen) im Taschen-Check und Tooltip.
+- **Item-Tooltip als Preis-Liste (6.1):** Marktwert, Durchschnitt, Min · Max, Preis-Schieber (günstig/normal/teuer), Trend, Verkauft pro Tag, Im Angebot, deine Verkäufe, Netto (Stück + Stapel), Nicht unter – zweispaltig mit Leuchtpunkten und Neon-Trennlinien. Vorschau ohne Spiel: `lua5.1 tests/tooltip_export.lua > rows.tsv && python3 -I tools/render_tooltip.py rows.tsv TirysZentrale/Media out.png`.
 - **„Kaufen bis“** je Material in der Einkaufsliste (auch über selbst hergestellte Zwischenprodukte).
 - **Neu einstellen mit Maß:** Menge = Verkäufe von ca. 3 Tagen; Preis = günstigstes Angebot minus 1 Kupfer, **Einzel-Items in ganzen Silbern** (Blizzard 09.11.: „Kupfer weglassen hilft“ gegen den „Internen Auktionsfehler“); nie unter „Nicht unter“.
 - **„Nicht unter“** = max(Materialkosten, Händlerpreis) pro Stück plus Anzahlungs-Risiko, geteilt durch (1 − AH-Anteil).

@@ -39,6 +39,12 @@ Zeigt dein Client keine Fehlerfenster: Tiry's Zentrale schreibt eigene Fehler ro
 - [ ] Item-Tooltip „Nicht unter“ = derselbe Wert wie im Craft-Planer (Schritt 4) und in Meine Auktionen
 - [ ] Einkaufsfenster: Tooltip eines Materials zeigt „Kaufen bis: …“
 
+## Item-Tooltip (neu in 6.1)
+- [ ] Maus über ein gescanntes Material (z. B. Makelloses Leder): Block „Tiry's Zentrale“ mit Logo, zweispaltig, Werte rechtsbündig
+- [ ] Leuchtpunkte farbig (grün/türkis/blau/orange), Trennlinien als Neon-Verlauf, Preis-Schieber mit farbigem Punkt
+- [ ] Nach ein paar Scan-Tagen: Marktwert, Durchschnitt, Min · Max, Urteil günstig/normal/teuer
+- [ ] Werden Punkte oder Linien weiß statt farbig angezeigt: Screenshot schicken (dann färbt dein Client Inline-Grafiken nicht)
+
 ## Fenster
 - [ ] Unten rechts am Griff ziehen → Fenster wird größer oder kleiner
 - [ ] Fenster nah an einen Bildschirmrand ziehen → rastet dort ein

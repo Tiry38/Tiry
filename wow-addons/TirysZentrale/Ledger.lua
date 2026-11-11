@@ -128,6 +128,18 @@ function L.SaleRate(itemID, days)
   return e.sold / (e.sold + e.expired), e.sold + e.expired
 end
 
+-- Dein Durchschnittserlös pro Stück (nach AH-Gebühr, aus den Verkaufsbriefen) und Anzahl verkaufter Stück
+function L.AvgSale(itemID, days)
+  if not ns.db or not ns.db.ledger then return nil, 0 end
+  local b, limit = book(), time() - (days or 30) * 86400
+  local money, n = 0, 0
+  for _, s in ipairs(b.sales) do
+    if s.id == itemID and s.t >= limit and (s.money or 0) > 0 then money, n = money + s.money, n + (s.n or 1) end
+  end
+  if n == 0 then return nil, 0 end
+  return math.floor(money / n + 0.5), n
+end
+
 -- Summen eines Zeitraums
 function L.Totals(days)
   local b, limit = book(), time() - (days or 30) * 86400

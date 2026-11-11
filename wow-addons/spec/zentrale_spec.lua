@@ -1171,6 +1171,46 @@ describe("Goldmacher-Werkzeuge", function()
     noErrors(W)
   end)
 
+  it("Item-Tooltip: Preis-Liste wie Auctionator (Marktwert, Ø, Tief/Hoch, Lage, Absatz, eigene Verkäufe)", function()
+    local ns, W = E.load({ prices = { [2318] = 30 }, itemInfo = { [2318] = { name = "Leichtes Leder", sell = 10, stack = 20 } } })
+    ns.db.priceHistory[2318] = { ["2026-11-01"] = 40, ["2026-11-02"] = 44, ["2026-11-03"] = 50, ["2026-11-04"] = 36, ["2026-11-05"] = 42, ["2026-11-06"] = 60 }
+    local st = ns.PriceString.Stats(2318)
+    assert.are.same({ median = 43, mean = 45, min = 36, max = 60, days = 6 }, st)
+    ns.Demand.Store().stats[2318] = { s = 70, h = 24, q = 2382 }       -- 70 Stück in 24 Std., 2382 im Angebot
+    ns.db.ledger = { sales = {}, buys = {}, expired = {}, seen = {} }
+    for i = 1, 4 do table.insert(ns.db.ledger.sales, { t = W.now - i * 86400, id = 2318, n = 20, money = 760 }) end
+    table.insert(ns.db.ledger.expired, { t = W.now - 86400, id = 2318, n = 20 })
+    local rows = ns.Extras.TooltipRows(2318)
+    assert.is_true(rows[1].head)
+    assert.truthy(rows[1].r:find("Schnelldreher", 1, true))
+    assert.is_true(rows[2].rule)
+    local txt = table.concat(ns.Extras.TooltipLines(2318), "\n")
+    assert.truthy(txt:find("Marktwert (6 T.) " .. ns.Money(43), 1, true), txt)
+    assert.truthy(txt:find("Durchschnitt " .. ns.Money(45), 1, true), txt)
+    assert.truthy(txt:find(ns.Money(36) .. "  ·  " .. ns.Money(60), 1, true), txt)
+    assert.truthy(txt:find("günstig", 1, true), txt)                    -- 30 statt 43 = -30 %
+    assert.truthy(txt:find("-30 %", 1, true), txt)
+    assert.truthy(txt:find("Verkauft pro Tag ~70", 1, true), txt)
+    assert.truthy(txt:find("2.382 Stück", 1, true), txt)
+    assert.truthy(txt:find("Markt voll", 1, true), txt)                 -- 2382 / 70 = 34 Tage
+    assert.truthy(txt:find("80 % von 5", 1, true), txt)
+    assert.truthy(txt:find("Ø " .. ns.Money(38), 1, true), txt)         -- 760 / 20 Stück
+    assert.truthy(txt:find("Nicht unter", 1, true), txt)
+    -- im Spiel: zweispaltig über AddDoubleLine, ohne Fehler
+    GameTooltip.lines = {}
+    W.tooltipHook(GameTooltip, { id = 2318 })
+    assert.truthy(#GameTooltip.lines >= 10)
+    noErrors(W)
+  end)
+
+  it("Item-Tooltip: ohne Preisverlauf kein Marktwert, Absatz \"misst ab 2 Scans\"", function()
+    local ns = E.load({ prices = { [2589] = 60 } })
+    ns.db.priceHistory = {}
+    local txt = table.concat(ns.Extras.TooltipLines(2589), "\n")
+    assert.is_nil(txt:find("Marktwert", 1, true))
+    assert.truthy(txt:find("misst ab 2 Scans", 1, true), txt)
+  end)
+
   it("Ein Scan für alle Reiter: Komplett-Scan zuerst, sonst Schnell-Scan", function()
     local ns, W = E.load()
     ns.Market.ahOpen = true

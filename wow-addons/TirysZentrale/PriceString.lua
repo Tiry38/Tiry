@@ -58,6 +58,18 @@ function PS.Market(itemID)
   return math.floor((v[n / 2] + v[n / 2 + 1]) / 2 + 0.5)
 end
 
+-- Kennzahlen des eigenen Preisverlaufs (ein Wert je Scan-Tag = günstigstes Angebot, max. 14 Tage):
+-- { median, mean, min, max, days } oder nil
+function PS.Stats(itemID)
+  local t = ns.db and ns.db.priceHistory and ns.db.priceHistory[itemID]
+  if not t then return nil end
+  local v, sum = {}, 0
+  for _, p in pairs(t) do v[#v + 1] = p sum = sum + p end
+  if #v == 0 then return nil end
+  table.sort(v)
+  return { median = PS.Market(itemID), mean = math.floor(sum / #v + 0.5), min = v[1], max = v[#v], days = #v }
+end
+
 -- Preis-Trend: Median der letzten 3 Scan-Tage gegen den Median der Tage davor (mind. 2 ältere Tage).
 -- Rückgabe: Veränderung als Anteil (z. B. -0.35 = 35 % gefallen) und Anzahl Tage – oder nil
 function PS.Trend(itemID)

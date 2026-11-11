@@ -1,5 +1,15 @@
 # Changelog – Tiry's Zentrale
 
+## 6.1.0 (11.11.2026)
+**Item-Tooltip als Preis-Liste – wie Auctionator, nur stylischer.**
+- Zweispaltig und sauber ausgerichtet: **Marktwert** (Median deiner Scan-Tage, max. 14), **Durchschnitt**, **Min · Max**.
+- **Preis-Schieber:** zeigt, wo der aktuelle AH-Preis zwischen Min und Max liegt – mit Urteil **günstig / normaler Preis / teuer** und Abstand zum Marktwert in %.
+- **Trend** (+/− % gegenüber den Vortagen), **Verkauft pro Tag**, **Im Angebot** (Stück + wie viele Tage das reicht, „Markt voll“ in Rot).
+- **Deine Verkäufe:** Verkaufsquote und dein Ø-Erlös pro Stück aus dem Verkaufsbuch.
+- **Netto nach Gebühr** pro Stück und für den vollen Stapel, **Nicht unter** (derselbe Wert wie im Craft-Planer).
+- Look: Logo + Absatz-Klasse im Kopf, farbige Leuchtpunkte je Gruppe (Preis grün, Absatz türkis, deine Verkäufe blau, Verkaufen orange), Trennlinien als Neon-Verlauf. Nur Zeilen mit Daten werden gezeigt.
+- Vorschau: `previews/Zentrale_Tooltip_6.1.png`.
+
 ## 6.0.0 (10.11.2026)
 **Neues Design „Neon-Glas“ – chicer als LevelPilot.**
 - **Dock-Navigation:** fünf runde Leuchtknöpfe oben (Start · Herstellen · Farmen · Handel · Mein Gold) mit Blizzard-Symbolen. Lernen (?) und Einstellungen (Zahnrad) sitzen als runde Knöpfe oben rechts neben Suche und „AH scannen“.
