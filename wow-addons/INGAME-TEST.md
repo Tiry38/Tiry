@@ -157,7 +157,13 @@ Alles oben ist im Forever-Nachbau getestet, aber nicht im echten Client. Besonde
 
 ---
 
-# Ingame-Test – LevelPilot 5.1.3
+# Ingame-Test – LevelPilot 5.1.4
+
+## Neu in 5.1.4 (Menü „Neu berechnen“, auch `/lp rechnen`)
+- [ ] Menü (•••) → **NEU BERECHNEN**: Meldung „NEU BERECHNET · <Quest> lohnt mehr“ oder „PLAN BLEIBT“, im Chat mit XP/Min beider Wege.
+- [ ] Gewählte Quest ist **nie schwerer** als dein Plan-Ziel (bzw. höchstens Stufe+1, wenn du wartest/grindest), keine Elite.
+- [ ] Held-Karte zeigt „Abstecher · lohnt mehr“; nach dem Abgeben geht der Plan normal weiter.
+- [ ] Werte prüfen: Rechnung = XP / (Weg Luftlinie × 1,25 bei 7 Yards/s + Arbeitszeit am Ziel). Wirkt eine Wahl unsinnig → Screenshot + Chatzeile.
 
 ## Neu in 5.1.3 (Aufhol-Quests gehen nicht mehr verloren)
 - [ ] Stufe 27, Zeiger schon bei Raketenwagenteile (ab 28): nicht erledigte Aufhol-Quests (Hypercapacitor Gizmo, Protect Kanati Greycloud, Homeward Bound …) kommen **zurück** ans Ziel.

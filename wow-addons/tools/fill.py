@@ -73,12 +73,16 @@ def apply(key):
     # XP je Annehmen-Schritt der Abschnitte mit Aufhol-Block (Quest-XP + Mob-XP der Ziele, Forever-Daten):
     # LevelPilot nimmt nur so viele Aufhol-Quests, wie dir XP bis zur Stufe fehlen.
     import xpmodel as X
-    segs = set(b["seg"] for b in FILL.get(key, []))
+    # Seit 5.1.4 fuer ALLE Annehmen-Schritte: xp, wm (Arbeitsminuten am Questziel), hard (Elite) -> "Neu berechnen"
     for s in steps:
-        if s.get("t") == "accept" and s.get("q") and s.get("seg") in segs:
+        if s.get("t") == "accept" and s.get("q"):
             L = int(s.get("l") or 27)
             qx = X.quest_xp(s["q"], L)[0] or 0
-            s["xp"] = int(round((qx + X.work(s["q"], L)[1]) / 50.0) * 50)
+            wt, mxp, why = X.work(s["q"], L)
+            s["xp"] = int(round((qx + mxp) / 50.0) * 50)
+            s["wm"] = round(wt, 1)
+            if "Elite" in why: s["hard"] = 1
+            else: s.pop("hard", None)
     d["steps"] = steps
     json.dump(d, open(path, "w"))
     return len(steps)

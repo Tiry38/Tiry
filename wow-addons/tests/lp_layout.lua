@@ -191,6 +191,14 @@ print("== Questlog-Check")
 local ok2, err2 = pcall(SlashCmdList.LEVELPILOT, "log")
 if not ok2 then bad("Lua-Fehler /lp log: " .. tostring(err2)) end
 if LevelPilotLog then check("lp_log", LevelPilotLog) else bad("Questlog-Panel fehlt") end
+print("== Menue (Einstellungen + Neu berechnen)")
+do
+  local okM, errM = pcall(function() SlashCmdList.LEVELPILOT("menu") tick() end)
+  if not okM then bad("Lua-Fehler Menue: " .. tostring(errM)) end
+  if LevelPilotSettings then check("lp_menu", LevelPilotSettings); LevelPilotSettings:Hide() else bad("Menue fehlt") end
+  local okR, errR = pcall(function() SlashCmdList.LEVELPILOT("rechnen") tick() end)
+  if not okR then bad("Lua-Fehler Neu berechnen: " .. tostring(errR)) end
+end
 print("== Ziel wartet auf Stufe (Held-Karte \"WARTET\")")
 if LevelPilotLog then LevelPilotLog:Hide() end
 do

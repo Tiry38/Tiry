@@ -1069,6 +1069,19 @@ function R.Plan(route, lvl, skipped, plan, n, cur)
       hero = p   -- ehrlich: "WARTET ab Stufe X · noch N XP" statt "Grinden bis 30"
     end
   end
+  -- Abstecher aus "Neu berechnen": bis die Quest abgegeben ist (hoechstens 1 Stunde)
+  local dt = plan.detour
+  if dt then
+    local e, idx = dt.q and qx[dt.q], nil
+    if e and not flagged(dt.q) and now() - (dt.t or 0) < 3600 then
+      if not inLog(dt.q) then
+        idx = e.acc
+        if idx and state[idx] ~= "open" and state[idx] ~= "missed" then idx = nil end
+      elseif ready(dt.q) then idx = e.tin
+      else idx = e.cmp or e.tin end
+    end
+    if idx then state[idx] = "open"; hero = idx; info.detour = dt.q else plan.detour = nil end
+  end
   info.ptr, info.hero, info.back = p, hero, back[1] and #back or nil
   -- 4. Liste: Ziel + naechste offene (oder wartende) Schritte in Plan-Reihenfolge.
   -- Erledigen/Abgeben einer Quest, die der Plan vorher noch annimmt, ist "geplant" (sichtbar, aber erst
@@ -1089,6 +1102,72 @@ function R.Plan(route, lvl, skipped, plan, n, cur)
   return hero, list, info
 end
 
+-- "Neu berechnen" (Tiry 11.11.): lohnt gerade eine andere Quest mehr? XP gegen Weg + Arbeit.
+-- Nie schwerer als der Plan: Questlevel hoechstens wie das Plan-Ziel (sonst Stufe+1, max. Stufe+2),
+-- keine Elite-/Gruppenquest, nur was du jetzt annehmen kannst (oder schon im Log hast).
+R.DETOUR_GAIN = 1.15   -- erst ab 15 % mehr XP/Min wird umgeplant (sonst bleibt der Plan)
+R.WALK_YPM = 7 * 60    -- Yards je Minute zu Fuss (Reittier erst ab 40)
+local function questRate(steps, ix, state, q)
+  local e = ix[q]; if not (e and e.acc) then return end
+  local a = steps[e.acc]
+  if not (a.xp and a.xp > 0) or a.hard or flagged(q) then return end
+  if a.note and (a.note:find("starker Gegner", 1, true) or a.note:find("Gruppe", 1, true)) then return end
+  local pts, first, wm = {}, nil, a.wm or 2
+  if not inLog(q) then
+    local st = state[e.acc]
+    if st ~= "open" and st ~= "missed" then return end   -- Stufe zu niedrig / passt nicht / gesperrt
+    first = e.acc; pts[#pts + 1] = R.StepTarget(a) or false
+  end
+  if ready(q) then wm = 0
+  elseif e.cmp then first = first or e.cmp; pts[#pts + 1] = R.StepTarget(steps[e.cmp]) or false end
+  if e.tin then first = first or e.tin; pts[#pts + 1] = R.StepTarget(steps[e.tin]) or false end
+  if not first then return end
+  local yd, prev = 0, nil
+  for _, pt in ipairs(pts) do
+    if not pt then return end
+    local d = prev and R.Between(prev, pt) or distTo(pt)
+    if not d then return end
+    yd, prev = yd + d, pt
+  end
+  local min = yd * 1.25 / R.WALK_YPM + wm + 0.3 * #pts   -- Luftlinie * 1.25 (Umwege), je Station 18 s Gespraech
+  return a.xp / min, first, a.ql, min, yd
+end
+function R.Rethink(route, lvl, plan, skipped)
+  local steps = route and route.steps
+  if not (steps and plan) then return end
+  plan.detour = nil
+  local hero = R.Plan(route, lvl, skipped, plan, 6, nil)
+  local state, ix = R.state or {}, questIndex(route)
+  local hs = hero and steps[hero]
+  local res = { hero = hero, grind = (lvl * 5 + 45) / 0.6 }
+  local refQl = lvl + 1
+  if hs and hs.q and state[hero] == "open" then
+    local r, _, ql = questRate(steps, ix, state, hs.q)
+    if r then res.heroRate = r end
+    local e = ix[hs.q]; ql = ql or (e and e.acc and steps[e.acc].ql)
+    if ql then refQl = math.max(lvl, ql) end
+  end
+  refQl = math.min(refQl, lvl + 2)
+  res.base = res.heroRate or res.grind
+  local seen, best = {}, nil
+  for _, s in ipairs(steps) do
+    local q = s.q
+    if q and s.t == "accept" and not seen[q] and not (hs and hs.q == q) then
+      seen[q] = true
+      local r, first, ql, min = questRate(steps, ix, state, q)
+      if r and (not ql or ql <= refQl) and (not best or r > best.rate) then
+        best = { q = q, rate = r, first = first, ql = ql, min = min, name = R.StepTitle(s) }
+      end
+    end
+  end
+  res.best, res.refQl = best, refQl
+  if best and best.rate > res.base * R.DETOUR_GAIN then
+    plan.detour = { q = best.q, t = now() }
+    res.switched = true
+  end
+  return res
+end
+
 -- Plan-Fortschritt: erledigte/uebersprungene Schritte bis zum Zeiger (fuer das Plan-Band)
 function R.Progress(route, p)
   local segs = {}
@@ -1106,6 +1185,7 @@ function R.Wants(route, qid, p)
   if not (route and qid) then return false end
   local state = R.state or {}
   p = p or 1
+  if R.info and R.info.detour == qid then return true end   -- Abstecher aus "Neu berechnen"
   for i, s in ipairs(route.steps) do
     if s.t == "accept" and (s.q == qid or (s.alt and (function() for _, a in ipairs(s.alt) do if a == qid then return true end end end)())) then
       local st = state[i]

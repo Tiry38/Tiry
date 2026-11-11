@@ -5,7 +5,7 @@
 -- Datenquellen: Routen-Plan, Questie (Geber/Ziele), Blizzards Questlog.
 ---------------------------------------------------------------------------
 local ADDON = ...
-local VERSION = "5.1.3"
+local VERSION = "5.1.4"
 local time = time or (os and os.time)   -- Spielzeit-Uhr (Sekunden seit 1970)
 local floor, max, min, abs, sqrt, atan2, pi, fmt = math.floor, math.max, math.min, math.abs, math.sqrt, math.atan2, math.pi, string.format
 local BT = BackdropTemplateMixin and "BackdropTemplate" or nil
@@ -1100,7 +1100,7 @@ do
     if not DB then return end
     if not SET then
       SET = CreateFrame("Frame", "LevelPilotSettings", M)
-      SET:SetFrameStrata("DIALOG"); SET:SetSize(276, 44 + #SETDEF * 27 + 100); SET:EnableMouse(true); SET:SetClampedToScreen(true); SET:Hide()
+      SET:SetFrameStrata("DIALOG"); SET:SetSize(276, 44 + #SETDEF * 27 + 138); SET:EnableMouse(true); SET:SetClampedToScreen(true); SET:Hide()
       Glass(SET, { aurora = true })
       local h = UI(SET, 13, true); h:SetPoint("TOPLEFT", 18, -17); h:SetText(GradText("EINSTELLUNGEN", NEON, TEAL, AQUA))
       -- Schliessen: X aus zwei gedrehten Linien auf einer Glasscheibe
@@ -1139,6 +1139,21 @@ do
         b:SetScript("OnClick", function() if (DB.ton or "amboss") ~= d[2] then SlashCmdList.LEVELPILOT("ton") end; SET:Sync() end)
         SET.ton[k] = b
       end
+      -- Neu berechnen (Neon-Kapsel): lohnt gerade eine andere, nicht schwerere Quest mehr?
+      local nb = CreateFrame("Button", nil, SET); nb:SetSize(240, 30); nb:SetPoint("BOTTOM", 0, 64)
+      Capsule(nb, "BACKGROUND", 0, 30, { 1, 1, 1, 1 }):SetGradient({ NEON[1], NEON[2], NEON[3], 1 }, { TEAL[1], TEAL[2], TEAL[3], 1 })
+      Capsule(nb, "HIGHLIGHT", 0, 30, { 1, 1, 1, 1 }, "ADD"):SetGradient({ 1, 1, 1, 0.22 }, { 1, 1, 1, 0.08 })
+      nb.t = UI(nb, 11, true); nb.t:SetPoint("CENTER", 0, 0); nb.t:SetText("NEU BERECHNEN"); nb.t:SetTextColor(0.03, 0.09, 0.06)
+      nb:SetScript("OnClick", function() RT.Rethink() end)
+      nb:SetScript("OnEnter", function(b)
+        TIP:Begin(b, SET)
+        TIP:Line("Neu berechnen", NEON[1], NEON[2], NEON[3], true)
+        TIP:Line("Prüft mit Entfernung + Arbeit, ob eine andere Quest gerade mehr XP pro Minute bringt.", 1, 1, 1)
+        TIP:Line("Nie schwerer als dein Plan-Ziel, keine Elite-/Gruppenquests. Erst ab 15 % mehr wird umgeplant.", 0.31, 0.82, 1)
+        TIP:Line("Danach geht der Plan normal weiter.", 0.55, 0.6, 0.62)
+        TIP:Open()
+      end)
+      nb:SetScript("OnLeave", TipLeave)
       -- Zuruecksetzen (Geister-Knopf, rot beim Ueberfahren)
       local rb = CreateFrame("Button", nil, SET); rb:SetSize(240, 26); rb:SetPoint("BOTTOM", 0, 30)
       Capsule(rb, "BACKGROUND", 0, 26, { 1, 1, 1, 1 }):SetGradient({ 1, 1, 1, 0.09 }, { 1, 1, 1, 0.04 })
@@ -1721,6 +1736,7 @@ function Refresh(rescan)
                 or "|cffff8a3dStufe fehlt|r – Mobs mitnehmen")
             end
           end
+          if RT.info and RT.info.detour and RT.info.detour == st.q then table.insert(sub, 1, "|cff39ff6bAbstecher|r · lohnt mehr") end
           r.kind:SetText(fmt("|cff%s%s|r  |cff8a9396·|r  |cffb8c2c6SCHRITT %d|r", later and "ff8a3d" or col, kindTxt, si))
           local ht = grind and (titles[1]:gsub("^Grinden:%s*", "")) or titles[1]
           -- Gruppe: erster Name gross, die anderen in der Zeile darunter (nichts wird abgeschnitten)
@@ -2528,6 +2544,27 @@ end
 ---------------------------------------------------------------------------
 SLASH_LEVELPILOT1 = "/lp"
 SLASH_LEVELPILOT2 = "/levelpilot"
+-- Menue "Neu berechnen": lohnt gerade eine andere (nicht schwerere) Quest mehr? (Route.lua R.Rethink)
+function RT.Rethink()
+  local route = RT.key and LevelPilot_Routes[RT.key]
+  if not (route and LP_Route and LP_Route.Rethink and DB) then P("Keine Route aktiv."); return end
+  local ok, r = pcall(LP_Route.Rethink, route, UnitLevel("player") or 1, DB.plan[RT.key], DB.skipK[RT.key])
+  RT.cur = nil
+  Refresh(true)
+  if not ok or not r then P("Neu berechnen ging gerade nicht (Questie-Daten noch nicht da?)."); return end
+  local function rate(x) return fmt("%d XP/Min", floor(x + 0.5)) end
+  local b = r.best
+  if r.switched then
+    Toast(fmt("|cff39ff6bNEU BERECHNET|r  ·  %s lohnt mehr", b.name), "go")
+    P(fmt("Neu berechnet: |cff39ff6b%s|r (Questlevel %s, ~%d min) bringt %s statt %s. Danach geht der Plan normal weiter.",
+      b.name, tostring(b.ql or "?"), floor(b.min + 0.5), rate(b.rate), rate(r.base)))
+  else
+    Toast("|cff4fd2ffPLAN BLEIBT|r  ·  nichts lohnt gerade mehr", "go")
+    P(fmt("Neu berechnet: Plan bleibt (%s). %s", rate(r.base), b and fmt("Beste Alternative: %s mit %s – zu wenig mehr.", b.name, rate(b.rate))
+      or fmt("Keine Quest in Reichweite, die nicht schwerer ist (bis Questlevel %d).", r.refQl or 0)))
+  end
+end
+
 SlashCmdList.LEVELPILOT = function(msg)
   if not DB then return end
   local c = (msg or ""):lower():match("^%s*(%S*)")
@@ -2634,6 +2671,7 @@ SlashCmdList.LEVELPILOT = function(msg)
     Refresh(true); P("zurückgesetzt.")
   elseif c == "menu" or c == "menü" or c == "einstellungen" or c == "optionen" then OpenSettings(true)
   elseif c == "xp" then XPS.start, XPS.gained = GetTime(), 0; P("XP/h neu gestartet.")
+  elseif c == "rechnen" or c == "neuberechnen" then RT.Rethink()
   elseif c == "weiter" then
     if RT.key and RT.idx then SkipStep(RT.idx); P("Schritt " .. RT.idx .. " übersprungen. Zurückholen: /lp zurueck") end; Refresh(true)
   elseif c == "zurueck" or c == "zurück" then
@@ -2692,6 +2730,6 @@ SlashCmdList.LEVELPILOT = function(msg)
     local R = LP_Route
     P("Route: " .. tostring(RT.key and LevelPilot_Routes[RT.key].name) .. " · Schritt " .. tostring(RT.idx) .. " · Questie-Daten: " .. ((R and R.HasQuestie()) and "|cff39ff6bja|r" or "|cffff5050nein|r"))
   else
-    P("/lp (an/aus) · /lp menu · /lp plan · /lp log · /lp weiter · /lp zurueck · /lp einstieg · /lp schritt <Nr> · /lp neu · /lp route · /lp punkt (neu|weg) · /lp export · /lp import · /lp wege · /lp speed · /lp strahl · /lp ton · /lp kampf · /lp flug · /lp entsperren · /lp sound · /lp gruen · /way x y · /lp auto · /lp pfeil · /lp marker · /lp lock · /lp unlock · /lp toast · /lp xp · /lp reset")
+    P("/lp (an/aus) · /lp menu · /lp plan · /lp log · /lp weiter · /lp zurueck · /lp einstieg · /lp schritt <Nr> · /lp rechnen · /lp neu · /lp route · /lp punkt (neu|weg) · /lp export · /lp import · /lp wege · /lp speed · /lp strahl · /lp ton · /lp kampf · /lp flug · /lp entsperren · /lp sound · /lp gruen · /way x y · /lp auto · /lp pfeil · /lp marker · /lp lock · /lp unlock · /lp toast · /lp xp · /lp reset")
   end
 end

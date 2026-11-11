@@ -124,6 +124,8 @@ def lua_step(s):
     if s.get("nxt"): f.append('nxt = {' + ', '.join(str(a) for a in s["nxt"]) + '}')
     if s.get("fill"): f.append(f'fill = {int(s["fill"])}')
     if s.get("xp"): f.append(f'xp = {int(s["xp"])}')
+    if s.get("wm"): f.append(f'wm = {s["wm"]:g}')
+    if s.get("hard"): f.append('hard = 1')
     if s["t"] == "train": f.append('cls = 64')
     return '  { ' + ', '.join(f) + ' },'
 
