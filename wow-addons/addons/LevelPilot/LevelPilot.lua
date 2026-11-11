@@ -5,7 +5,7 @@
 -- Datenquellen: Routen-Plan, Questie (Geber/Ziele), Blizzards Questlog.
 ---------------------------------------------------------------------------
 local ADDON = ...
-local VERSION = "5.0.2"
+local VERSION = "5.1.0"
 local time = time or (os and os.time)   -- Spielzeit-Uhr (Sekunden seit 1970)
 local floor, max, min, abs, sqrt, atan2, pi, fmt = math.floor, math.max, math.min, math.abs, math.sqrt, math.atan2, math.pi, string.format
 local BT = BackdropTemplateMixin and "BackdropTemplate" or nil
@@ -1823,9 +1823,17 @@ function Refresh(rescan)
 end
 
 local lastPin
+-- Questgebiet-Zustand (wird in RT.area.Tick weiter unten gepflegt; Hauptteil hat keine freien Locals mehr)
+RT.area = { key = nil, inside = false, t = -1, since = 0, pinned = nil }
 local function SetBlizzPin(tgt)
   if not (DB and DB.pin) or not tgt or not tgt.map or not tgt.x then return end
   if LP_ManualWay and LP_ManualWay() then return end
+  local AREA = RT.area
+  -- im Questgebiet bleibt der Pin stehen (je Ziel einmal gesetzt) - sonst huepft er von Gruppe zu Gruppe mit
+  if AREA.inside then
+    if AREA.pinned == AREA.key then return end
+    AREA.pinned = AREA.key
+  end
   local key = tgt.map .. ":" .. floor(tgt.x * 1000) .. ":" .. floor(tgt.y * 1000)
   if key == lastPin then return end
   lastPin = key
@@ -2255,6 +2263,55 @@ function LP_StepType()
 end
 function LP_ManualWay() return MANUALWAY ~= nil end
 
+-- Questgebiet (Tiry 11.11.): zwischen den Gegnergruppen springt der Zielpunkt staendig mit.
+-- Drin -> Strahl blendet aus, Kartenpin bleibt stehen; erst nach dem Verlassen wieder an.
+-- Gilt fuer "Erledigen" (auch Abgabe, deren Quest noch offen ist), Grind-Schritte und von Hand verfolgte Quests.
+do
+local AREA = RT.area
+local function areaSubject()
+  local qid
+  pcall(function()
+    local s = C_SuperTrack.GetSuperTrackedQuestID and C_SuperTrack.GetSuperTrackedQuestID()
+    if s and s > 0 and not (C_SuperTrack.IsSuperTrackingUserWaypoint and C_SuperTrack.IsSuperTrackingUserWaypoint()) then qid = s end
+  end)
+  if qid then
+    if readyForTurnIn(qid) then return end
+    return "q" .. qid, { q = qid }
+  end
+  if MANUALWAY then return end
+  local tgt = currentTarget()
+  if not tgt or tgt.fly then return end
+  local s = tgt.step
+  if s then
+    if s.q and (s.t == "complete" or (s.t == "turnin" and tgt.first)) then return "q" .. s.q, { q = s.q } end
+    if s.t == "grind" and s.npc then return "n" .. s.npc, { npc = s.npc } end
+    return
+  end
+  if tgt.id and not tgt.turnin then return "q" .. tgt.id, { q = tgt.id } end
+end
+function AREA.Tick(now)
+  local okS, key, spec = pcall(areaSubject)
+  if not okS then key, spec = nil, nil end
+  local was = AREA.inside
+  local changed = key ~= AREA.key
+  if not changed and now - AREA.t < 0.5 then return end
+  AREA.t = now
+  if changed then AREA.key, AREA.inside = key, false end
+  local inside = false
+  if spec and LP_Route and LP_Route.InArea then
+    local okA, r = pcall(LP_Route.InArea, spec, AREA.inside)
+    inside = (okA and r) and true or false
+  end
+  if inside and not AREA.inside then
+    -- schon vorher in einem Gebiet (Folgequest am selben Ort): sofort weg, kein Aufblitzen
+    AREA.since = (changed and was) and (now - 1) or now
+  elseif not inside and was then
+    B.born = now   -- Gebiet verlassen (oder Quest fertig): Strahl waechst weich wieder ein
+  end
+  AREA.inside = inside
+end
+end
+
 -- Ton-Regeln: nur bei einem wirklich NEUEN Ziel, nie im Kampf, nie im Flug, nicht direkt
 -- nach Kampfende/Landung/Ladebildschirm, jeder Ton je Ziel nur einmal, mindestens 4 s Abstand.
 local SND = { last = 0, played = {}, quietUntil = 0 }
@@ -2277,6 +2334,8 @@ local function ease(x) x = math.max(0, math.min(1, x)); return 1 - (1 - x) ^ 3 e
 local stfHidden = false
 local function HideBeamParts() B:Hide(); CX:Hide(); PP:Hide(); NV:Hide() end
 function UpdateBeam(now, el)
+  local AREA = RT.area
+  pcall(AREA.Tick, now)
   if not (DB and DB.beam) then
     HideBeamParts()
     if stfHidden and SuperTrackedFrame then pcall(SuperTrackedFrame.SetAlpha, SuperTrackedFrame, 1); stfHidden = false end
@@ -2304,6 +2363,13 @@ function UpdateBeam(now, el)
   if d and d < 8 and arrivedKey ~= key then
     arrivedKey = key; Sound("arrive", key)
     if MANUALWAY then MANUALWAY = nil end
+  end
+  -- im Questgebiet: einmal der Ankunfts-Ton, Strahl blendet in 0.3 s aus und bleibt weg
+  local areaK = 1
+  if AREA.inside then
+    if arrivedKey ~= key then arrivedKey = key; Sound("arrive", key) end
+    areaK = 1 - ease((now - AREA.since) / 0.3)
+    if areaK <= 0.01 or clamped then HideBeamParts(); return end
   end
   if cxIcon.lpTyp ~= (typ or "go") then
     cxIcon.lpTyp = typ or "go"
@@ -2334,7 +2400,7 @@ function UpdateBeam(now, el)
   local k = d and math.max(0, math.min(1, (1000 - d) / 970)) or 0.5
   k = k ^ 0.8
   local age = now - (B.born or 0)
-  local grow = ease(age / 0.4)
+  local grow = ease(age / 0.4) * areaK
   local near = d and d < 30
   local fadeNear = (d and d < 10) and math.max(0.35, d / 10) or 1
   local h = BEAM_H * (0.3 + 0.7 * k) * grow
@@ -2358,6 +2424,7 @@ function UpdateBeam(now, el)
   CX:Show()
 
   PP:SetShown(near and true or false)
+  PP:SetAlpha(areaK)
   if near then
     PP:ClearAllPoints(); PP:SetPoint("BOTTOM", CX, "TOP", 0, 22 + 4 * math.abs(math.sin(now * 2.5)))
     if ppIcon.lpTyp ~= (typ or "go") then ppIcon.lpTyp = typ or "go"; SetIcon(ppIcon, typ or "go") end

@@ -27,6 +27,8 @@ Aktueller Stand und offene Punkte: **[`UEBERGABE.md`](UEBERGABE.md)** – zuerst
   Fenster-Vorschau LevelPilot: `lua5.1 tests/lp_layout.lua <ordner>` (aus `wow-addons/`, strenger Forever-Nachbau,
   meldet „LP LAYOUT OK“) → `python3 -I tools/render_pages.py <ordner>` → PNGs ansehen. Nach UI-Änderungen Pflicht. ProcAlarm/Schlaghagel: `cd addons && lua5.1 ../tests/proc.lua` bzw. `PROC_CLASS=SHAMAN|WARLOCK lua5.1 ../tests/hagel.lua`.
   Spell-Daten der Live-Version: github.com/simulationcraft/simc-forever (`SpellDataDump/allspells.txt`). Vor jeder Auslieferung alle laufen lassen + `luac5.1 -p` auf alle .lua.
+- **`LevelPilot.lua` steht an der Lua-5.1-Grenze von 200 Locals im Hauptteil** – neuen Zustand in vorhandene Tabellen
+  (z. B. `RT.area`) oder in `do … end`-Blöcke legen, sonst bricht `luac` mit „more than 200 local variables“ ab.
 - `weakauras/` – WeakAura-Importtexte und Generatoren.
 - `previews/` – Vorschaubilder und Sound-Vorhördateien.
 - `qdb/` – **nicht im Repo** (.gitignore): `git clone https://github.com/Questie/QuestieDB.git qdb/QuestieDB`

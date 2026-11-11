@@ -514,6 +514,41 @@ local function objectiveTarget(q)
   return { map = best.map, x = sx / n, y = sy / n, spot = true, count = n }
 end
 
+-- Questgebiet = Spawnpunkte der noch offenen Questziele (Gegner, Objekte, Beute) bzw. der Grind-Gegner.
+-- Orte ("event") gehoeren nicht dazu: dort fuehrt der Strahl bis auf den Punkt.
+-- Drin ab AREA_IN Yards zum naechsten Punkt, wieder draussen erst ab AREA_OUT (Puffer: kein Flackern am Rand).
+R.AREA_IN, R.AREA_OUT = 60, 120
+local apCache = {}
+local function areaPoints(q)
+  local open = openTypes(q)
+  local sig = {}
+  for typ in pairs(open) do sig[#sig + 1] = typ end
+  table.sort(sig); sig = table.concat(sig, ",")
+  local c = apCache[q]
+  if c and c.sig == sig then return c.pts end
+  local G = objectiveGroups(q)
+  local pts = {}
+  for typ in pairs(open) do
+    if typ ~= "event" and G[typ] then addPts(pts, G[typ], 2400) end
+  end
+  -- Blizzard nennt keine passende Art (oder noch keine Ziele): alle Gegner/Objekte/Beute der Quest
+  if #pts == 0 and not open.event then
+    for typ, g in pairs(G) do if typ ~= "event" then addPts(pts, g, 2400) end end
+  end
+  if objCache[q] then apCache[q] = { sig = sig, pts = pts } end
+  return pts
+end
+-- a = { q = QuestID } oder { npc = NPC-ID }; wasIn = vorher drin? -> true/false (+ Yards) oder nil (kein Gebiet bekannt)
+function R.InArea(a, wasIn)
+  if not a then return nil end
+  local pts
+  if a.npc then pts = spawnsOf("npc", a.npc) elseif a.q then pts = areaPoints(a.q) end
+  if not pts or #pts == 0 then return nil end
+  local _, d = nearestFast(pts)
+  if not d then return nil end
+  return d <= (wasIn and R.AREA_OUT or R.AREA_IN), d
+end
+
 -- Zielpunkt eines Schritts (gepuffert: Questgeber 4 s, Questziele 1.5 s)
 local tcache = setmetatable({}, { __mode = "k" })
 function R.StepTarget(s)

@@ -157,12 +157,12 @@ Alles oben ist im Forever-Nachbau getestet, aber nicht im echten Client. Besonde
 
 ---
 
-# Ingame-Test – LevelPilot 5.0.2
+# Ingame-Test – LevelPilot 5.1.0
 Einbau: alten Ordner `LevelPilot` löschen, ZIP entpacken, **WoW komplett neu starten** (neue Grafiken
 `i_trash`, `i_flag`, `i_log`). Für Rückmeldungen hilft ein Screenshot vom Fenster **und** vom Questlog-Check.
 
 ## Start und Einstieg
-- [ ] Einloggen ohne Lua-Fehler, Chat meldet „v5.0.2 bereit“
+- [ ] Einloggen ohne Lua-Fehler, Chat meldet „v5.1.0 bereit“
 - [ ] Nach wenigen Sekunden (Questlog + Questie geladen): Meldung **„EINSTIEG“** oben und im Chat
   „Plan: Einstieg bei Schritt N von M (Gebiet · Hub) – erkannt an …“
 - [ ] Der Einstieg passt zu deinem Stand (Gebiet, in dem du gerade Quests hast) – **Schrittnummer notieren**
@@ -200,6 +200,17 @@ Einbau: alten Ordner `LevelPilot` löschen, ZIP entpacken, **WoW komplett neu st
 - [ ] `/lp aus`, dann `/lp log`: Fenster + Questlog-Check erscheinen
 - [ ] Klick aufs Plan-Band, danach `/lp zurueck`: alter Schritt ist wieder da
 - [ ] Pfeil an Klippen/Schluchten (z. B. Arathi ↔ Sumpfland, Tausend Nadeln): zeigt den Weg außen herum, nicht über den Abhang
+
+## Neu in 5.1.0 (Strahl ruht im Questgebiet)
+- [ ] Zu einem Erledigen-Ziel laufen: Strahl führt hin. **Etwa 60 m vor den ersten Gegnern** blendet er weich aus, einmal der Ankunfts-Ton
+- [ ] Im Gebiet questen, zwischen den Gruppen laufen: **kein Strahl, kein Springen**, Kartenpin (Karte/Minimap) bleibt stehen
+- [ ] Am Rand kurz rausziehen (Gegner verfolgen): Strahl kommt **nicht** gleich wieder (Puffer bis ~120 m)
+- [ ] Gebiet richtig verlassen: Strahl wächst wieder ein, **ohne** „Neues Ziel“-Ton
+- [ ] Quest fertig, während du noch im Gebiet stehst: Strahl zeigt sofort zur Abgabe
+- [ ] Grind-Schritt („Unter Stufe 23? Dann … grinden“): bei den Gegnern ebenfalls kein Strahl
+- [ ] Quest im Blizzard-Questlog angeklickt (verfolgt): gleiches Verhalten
+- [ ] Erkunden-Ziel (Ort finden): Strahl bleibt bis auf den Punkt
+- [ ] Melden: Fühlen sich 60 m (rein) / 120 m (raus) richtig an? Gibt es Gebiete, in denen der Strahl trotzdem kommt/fehlt? (Questname)
 
 ## Neu in 5.0.2 (Prüfrunde 2)
 - [ ] Pfeil auf Dächern, Felsen, in Mulden oder direkt am Flugmeister: zeigt den Laufweg („über …“), nicht die Luftlinie

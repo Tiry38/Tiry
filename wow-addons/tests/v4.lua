@@ -179,4 +179,61 @@ print("== I: Kampf blendet Fenster ab und wieder ein")
 E._OnEvent(E,"PLAYER_REGEN_DISABLED") E._OnEvent(E,"PLAYER_REGEN_ENABLED")
 check("kein Fehler", true)
 
+print("== J: Questgebiet (Strahl aus, Pin bleibt stehen, erst nach Verlassen wieder an)")
+-- Plan steht auf "complete:101": Gegner NPC 601 bei 40/40, 41/41, 42/40 (+ Einzelspawn 80/80); Karte 1700x1100 Yards
+local BEAM=_G.LevelPilotBeam
+local pins=0 C_Map.SetUserWaypoint=function() pins=pins+1 end
+local origGT=R.GoalTarget
+local jx=0.41   -- springender Zielpunkt (wie die Gruppen-Mitte beim Questen)
+R.GoalTarget=function(s) if s.q==101 and s.t=="complete" then return {map=1413,x=jx,y=0.403,spot=true,count=3} end return origGT(s) end
+local function at(x,y) PX,PY=x,y Tm=Tm+1 tick(25) end
+DIST=150
+at(0.30,0.30)
+check("draussen (200 m): Strahl sichtbar", BEAM:IsShown())
+at(0.34,0.40)
+check("100 m vor dem Gebiet: Strahl bleibt (Eintritt erst ab 60 m)", BEAM:IsShown())
+at(0.37,0.40)
+check("Questgebiet betreten (51 m): Strahl weg", not BEAM:IsShown())
+local p0, nBeam = pins, count("beam")
+jx=0.45 at(0.41,0.41) jx=0.38 at(0.42,0.40) jx=0.43 at(0.39,0.41)
+check("im Gebiet herumlaufen, Ziel springt: Strahl bleibt weg", not BEAM:IsShown())
+check("Kartenpin springt im Gebiet NICHT mit", pins==p0)
+check("kein Ton beim Herumlaufen", count("beam")==nBeam)
+at(0.34,0.40)
+check("Rand (100 m) nach dem Questen: noch drin (Puffer bis 120 m)", not BEAM:IsShown())
+at(0.32,0.40)
+check("Gebiet verlassen (136 m): Strahl wieder da", BEAM:IsShown())
+check("Kartenpin folgt wieder dem Ziel", pins>p0)
+check("Wiederkommen ist kein neues Ziel (kein Ton)", count("beam")==nBeam)
+at(0.37,0.40)
+check("wieder rein: Strahl wieder weg", not BEAM:IsShown())
+R.GoalTarget=origGT
+-- Grind-Gegner und unbekannte Quest
+PX,PY=0.40,0.40
+check("Grind: bei den Gegnern = drin", R.InArea({npc=601}, false)==true)
+PX,PY=0.10,0.10
+check("Grind: weit weg = draussen", R.InArea({npc=601}, false)==false)
+check("Quest ohne Gebietsdaten -> kein Gebiet (Strahl bleibt)", R.InArea({q=999}, false)==nil)
+-- Quest fertig: Abgabe-NPC bekommt den Strahl sofort zurueck, auch mitten im Gebiet
+at(0.40,0.40)
+check("vor der Abgabe noch im Gebiet: Strahl weg", not BEAM:IsShown())
+READY[101]=true OBJ[101]={{type="monster",finished=true,text="8/8"}} refresh() Tm=Tm+1 tick(25)
+check("Quest fertig -> Strahl zeigt zur Abgabe, obwohl du noch im Gebiet stehst", BEAM:IsShown())
+-- von Hand verfolgte Quest (Blizzard-Questverfolgung) verhaelt sich genauso
+READY[101]=nil OBJ[101]={{type="monster",finished=false,text="3/8"}} refresh()
+C_SuperTrack.GetSuperTrackedQuestID=function() return 101 end C_SuperTrack.IsSuperTrackingUserWaypoint=function() return false end
+at(0.30,0.30)
+check("verfolgte Quest, draussen: Strahl sichtbar", BEAM:IsShown())
+at(0.40,0.40)
+check("verfolgte Quest, im Gebiet: Strahl weg", not BEAM:IsShown())
+-- Strahl aus -> bleibt aus; wieder an mitten im Gebiet -> Gebietsregel greift sofort (kein Aufblitzen)
+LevelPilotDB.beam=false at(0.40,0.40)
+check("Strahl abgeschaltet: bleibt aus", not BEAM:IsShown())
+LevelPilotDB.beam=true at(0.40,0.40)
+check("Strahl wieder an, im Gebiet: bleibt trotzdem weg", not BEAM:IsShown())
+C_SuperTrack.GetSuperTrackedQuestID=function() return 0 end C_SuperTrack.IsSuperTrackingUserWaypoint=function() return NAV end
+-- Plan steht jetzt auf "Annehmen 103" (Questgeber, kein Gebiet): Strahl bleibt, auch zwischen den Gegnern von 101
+at(0.40,0.40)
+check("Questgeber-Ziel: Strahl bleibt sichtbar (kein Questgebiet)", LP_StepType()=="accept" and BEAM:IsShown())
+
 print(fails==0 and "ALLE TESTS OK" or ("FEHLER: "..fails))

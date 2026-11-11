@@ -7,14 +7,34 @@ in Sitzungen auf **Tiry38/Tiry** weiter. Alle Dateien liegen in diesem Ordner, P
 
 | Add-on | Version | Zweck | Stand |
 |---|---|---|---|
-| **Tiry's Zentrale** | 6.2.0 | Gold- und Berufe-Addon (`TirysZentrale/`, Doku `ZENTRALE.md`): Neon-Glas-Design mit Dock, **ein AH-Scan für alle Reiter**, Verkäufe pro Tag, Gold pro Tag, Schnäppchen, Kaufen bis, Neu einstellen mit Menge, Anzahlung im Gewinn (1 Kupfer seit 10.11.), Tooltip als Preis-Liste, **Sparziel, Unterwegs-Gold (mit LevelPilot-Route), Stationen/seelengebundene Rezepte (6.2)** | ausgeliefert, **Spieltest offen** (Checkliste `INGAME-TEST.md`) |
-| **LevelPilot** | 5.0.2 | Levelrouten Horde **22–30 und 30–40** als **fester Plan** (Einstieg erkennt deinen Stand, Sprung nur mit Beweis, `/lp zurueck`), **Questlog-Check** mit Löschen-Knopf, Plan-Band + Status-Pillen, echte Laufwege, Flug-Rat, Pfeil, Lichtstrahl, Auto-Quests, XP-Cockpit | ausgeliefert, **Spieltest offen** (Checkliste `INGAME-TEST.md`, Teil LevelPilot) |
+| **Tiry's Zentrale** | 6.2.1 | Gold- und Berufe-Addon (`TirysZentrale/`, Doku `ZENTRALE.md`): Neon-Glas-Design mit Dock, **ein AH-Scan für alle Reiter**, Verkäufe pro Tag, Gold pro Tag, Schnäppchen, Kaufen bis, Neu einstellen mit Menge, Anzahlung im Gewinn (1 Kupfer seit 10.11.), Tooltip als Preis-Liste, **Sparziel, Unterwegs-Gold (mit LevelPilot-Route), Stationen/seelengebundene Rezepte (6.2)** | ausgeliefert, **Spieltest offen** (Checkliste `INGAME-TEST.md`) |
+| **LevelPilot** | 5.1.0 | Levelrouten Horde **22–30 und 30–40** als **fester Plan** (Einstieg erkennt deinen Stand, Sprung nur mit Beweis, `/lp zurueck`), **Questlog-Check** mit Löschen-Knopf, Plan-Band + Status-Pillen, echte Laufwege, Flug-Rat, Pfeil, Lichtstrahl (**ruht im Questgebiet**, 5.1), Auto-Quests, XP-Cockpit | ausgeliefert, **Spieltest offen** (Checkliste `INGAME-TEST.md`, Teil LevelPilot) |
 | **ProcAlarm** | 2.1.0 | **für Tirys Kollegen (Hexer)**: Schattentrance (17941) über Blizzard-Aura-Slot, auch im Kampf; violetter Glow + Blinken, ohne Ton, ohne grünen Ring | ausgeliefert, **Kampftest offen** |
 | **Schlaghagel** | 1.0.0 | **Tirys Verstärker**: Schlaghagel-Buff (16257) über Blizzard-Aura-Slot, auch im Kampf; Ladungen groß, Restzeit, türkiser Glow + Blinken wie ProcAlarm, ohne Ton; `/hagel` | ausgeliefert, **Kampftest offen** |
 | **EnhanceHUD** | 1.2.0 | Verstärker-Schamanen-HUD (Frost/Feuer-Design) | ausgeliefert |
 | **Blitzschild** | 1.2.0 | Blitzschlagschild Ladungen/Zeit | im Kampf nicht möglich (secret values) → Cooldown-Manager „Verfolgte Leisten“ + WA nur außerhalb des Kampfes |
 | **MiniPost** | – | Post-Symbol unter der Uhr, andere Minimap-Knöpfe unsichtbar | ausgeliefert, Test offen |
 | **ChatHoch** | 1.4.0 | Chat höher, Reiter bündig (ClampRectInsets von ChatFrame1) | ausgeliefert; Tiry hatte noch 1.3.0 geladen |
+
+## LevelPilot 5.1.0 – Strahl ruht im Questgebiet (11.11., Tirys Wunsch)
+Tiry: „sobald ich das Questgebiet betreten habe, soll der Strahl weggehen und erst wiederkommen, wenn ich es verlassen
+habe – im Gebiet springt er dauernd hin und her.“ Ursache: Erledigen-Ziel = Mitte der nächsten Gegnergruppe
+(`objectiveTarget`, 55-m-Gruppe um den nächsten Spawn), alle 1,5 s neu → beim Laufen zwischen den Gruppen wandert die
+Mitte, `SetBlizzPin` versetzt den Wegpunkt, Strahl und Kartenpin springen mit.
+- **Questgebiet** (`R.InArea`, Route.lua) = Spawnpunkte der noch offenen Ziele (Gegner, Objekte, Beute-Quellen; Orte
+  „event“ ausgenommen – dort führt der Strahl bis auf den Punkt) bzw. bei Grind-Schritten die Spawns des Grind-Gegners.
+  **Drin ab 60 m** zum nächsten Spawn, **draußen erst ab 120 m** (`R.AREA_IN/AREA_OUT`, Puffer gegen Flackern am Rand).
+- Gilt für Erledigen, Abgabe mit noch offener Quest, Grind und von Hand verfolgte Quests (Blizzard-Questverfolgung),
+  im Questmodus für Quests ohne Abgabe-Status. Nicht für Questgeber/Abgabe-NPC, Flugmeister, `/way`-Punkte.
+- Drin: Strahl, Symbol, Pinpoint und Rand-Navigator blenden in 0,3 s aus; einmal der Ankunfts-Ton (statt zufällig an der
+  wandernden Mitte); **Kartenpin bleibt stehen** (je Ziel einmal gesetzt). Raus: Strahl wächst weich wieder ein, kein
+  „neues Ziel“-Ton. Folgequest am selben Ort: bleibt sofort weg (kein Aufblitzen). Quest fertig → Strahl zur Abgabe sofort da.
+- Pfeil bewusst unverändert (zeigt weiter zur nächsten Gruppe) – Tiry hat nur den Strahl genannt.
+- Prüfung mit echten Daten (`full.json`, beide Routen): 102 Erledigen-Schritte mit Spawn-Daten, 65 davon ein
+  zusammenhängendes Gebiet, 93 höchstens 3 Teilgebiete; Median-Abstand zwischen Nachbar-Spawns 62 m. Zwei Spawns
+  ≤ 240 m auseinander → der Weg dazwischen bleibt im Gebiet. Ohne Spawn-Daten (Quests 882, 1535) bleibt alles wie bisher.
+- Tests: `tests/v4.lua` Abschnitt J (21 Prüfungen; mit dem alten Code fallen die Kern-Prüfungen durch).
+- Technik: Hauptteil von `LevelPilot.lua` hatte genau 200 Locals (Lua-5.1-Grenze) → Zustand liegt in `RT.area`.
 
 ## LevelPilot 5.0.2 – Prüfrunde 2 (11.11.)
 Tirys Auftrag: nach Runde 1 „nochmal komplett alles prüfen“. Vorgehen: **Zufalls-Stresstest** der Plan-Engine
@@ -233,7 +253,7 @@ Amboss-/Schloss-Sound (max. 1–2 s)“.
 - ProcAlarm 2.1: ob Forever Blinken/Restzeit am Aura-Slot annimmt (`/proc diag` → „Teile“).
 
 ## Nächste Schritte
-1. Tirys Spieltest-Rückmeldung zu LevelPilot 5.0.2 abwarten (Einstieg-Schrittnummer, Sprung, Questlog-Check, Hexenmeister-Start) und gezielt nachbessern.
+1. Tirys Spieltest-Rückmeldung zu LevelPilot 5.1.0 abwarten (Einstieg-Schrittnummer, Sprung, Questlog-Check, Hexenmeister-Start, **Strahl im Questgebiet: Radien 60/120 m passend?**) und gezielt nachbessern.
 2. **Routen 40–50, 50–60** mit derselben Kette (`make_route.py` neuen Schlüssel in `ROUTES` + Abschnitte).
 3. Sobald Questie die neuen Forever-Quests führt (IDs 9xxxx): Pool neu rechnen – könnte den Grind-Anteil deutlich senken.
 4. ProcAlarm nach `/proc diag`-Screenshot anpassen; ChatHoch 1.4.0 / MiniPost-Rückmeldung.
