@@ -125,6 +125,8 @@ def _count(text, name, default):
 
 
 MOBLV = {}
+MOBSEL = {}
+MOBMAX = {}
 
 
 def mob_level(q):
@@ -142,6 +144,7 @@ def work(q, L):
     ob = v[9] if len(v) > 9 else None
     t, why = 0.0, []
     need = {}                                           # Gegnergruppe -> (Kills, Stufe, Elite)
+    alls = set()                                        # alle Gegner, die das Ziel liefern
 
     def kill(key, kills, lv, el):
         k0 = need.get(key)
@@ -159,6 +162,7 @@ def work(q, L):
         it = c[0]; nm = I.get(str(it), {}).get("name"); cnt = _count(text, nm, 6)
         info = I.get(str(it)) or {}
         nd = set(info.get("nd") or []); src_obj = bool(info.get("od"))
+        alls.update(nd)
         rates = {n: r for n, r in (DROPS.get(int(it)) or {}).items() if not nd or n in nd}
         if src_obj and (not rates or max(rates.values()) < 60):
             t += cnt * T_OBJ * 1.5                      # vom Boden/aus Objekten sammeln
@@ -178,6 +182,9 @@ def work(q, L):
     mxp = 0.0
     lvs = [lv for _, lv, _ in need.values() if lv]
     MOBLV[int(q)] = max(lvs) if lvs else None          # hoechste (mittlere) Gegnerstufe der Questziele
+    MOBSEL[int(q)] = set(need)                          # die Gegner, mit denen gerechnet wird (Pfeil fuehrt nur zu denen)
+    alt = [npc_level(n) for n in alls if npc_level(n)]
+    MOBMAX[int(q)] = max(alt) if alt else None          # staerkste Gegnersorte mit derselben Beute (zum Warnen)
     for kills, lv, el in need.values():
         t += kills * T_KILL * (3 if el else 1); mxp += kills * mob_xp(lv, L, el)
     if t == 0: t = 0.3

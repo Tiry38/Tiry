@@ -5,7 +5,7 @@
 -- Datenquellen: Routen-Plan, Questie (Geber/Ziele), Blizzards Questlog.
 ---------------------------------------------------------------------------
 local ADDON = ...
-local VERSION = "6.0.1"
+local VERSION = "6.0.2"
 local time = time or (os and os.time)   -- Spielzeit-Uhr (Sekunden seit 1970)
 local floor, max, min, abs, sqrt, atan2, pi, fmt = math.floor, math.max, math.min, math.abs, math.sqrt, math.atan2, math.pi, string.format
 local BT = BackdropTemplateMixin and "BackdropTemplate" or nil
@@ -1809,6 +1809,12 @@ function Refresh(rescan)
           end
           if st.pool then   -- Extra-Quest aus dem Pool (nicht im Plan): XP zeigen (Questlevel/Gegner im Tooltip)
             table.insert(sub, 1, fmt("|cffffd75e+%s XP|r", fmtNum(LP_Route.XPAt(st.pxp or 0, st.ql, UnitLevel("player") or 1))))
+            -- gleiche Beute auch bei staerkeren Gegnern (Tiry 11.11.: Stufe-32-Berglöwen statt der hungernden Stufe 23-24)
+            if st.mx and st.ml and st.t == "complete" then
+              table.insert(sub, 1, fmt("|cffff8a3dnur Gegner ~St. %d · St. %d meiden|r", floor(st.ml + 0.5), floor(st.mx + 0.5)))
+              table.insert(tip, 2, { fmt("Dieselbe Beute gibt es auch bei stärkeren Gegnern derselben Art (bis Stufe %d). Nimm nur die mit Stufe ~%d – der Pfeil führt zu ihnen. Stufe steht am Ziel-Rahmen.",
+                floor(st.mx + 0.5), floor(st.ml + 0.5)), 1, 0.54, 0.24 })
+            end
             local lv = RT.info and RT.info.live
             table.insert(tip, 2, { lv and fmt("Live-Gebiet %s: %d Quests nah beieinander (~%d XP/Min mit Weg). Questlevel %d%s – %s. Reihenfolge: Annehmen, Erledigen, Abgeben. Details: /lp warum",
               lv.zone or "", lv.n, floor(lv.rate + 0.5), st.ql or 0, st.ml and fmt(", Gegner ~Stufe %d", floor(st.ml + 0.5)) or "", RT.LvlTxt(st.ql))

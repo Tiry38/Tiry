@@ -157,7 +157,11 @@ Alles oben ist im Forever-Nachbau getestet, aber nicht im echten Client. Besonde
 
 ---
 
-# Ingame-Test – LevelPilot 6.0.1
+# Ingame-Test – LevelPilot 6.0.2
+
+## Neu in 6.0.2
+- [ ] Elixier der Schmerzen (Berglöwenblut) mit Stufe 28: Pfeil führt zu den **hungernden Berglöwen (Stufe 23–24)**, nicht zu Stufe-32-Löwen. Karte zeigt „nur Gegner ~St. 24 · St. 34 meiden“.
+- [ ] Andere Sammelquests: Pfeil zeigt nie auf Gegner über deiner Stufe +1, solange es schwächere mit derselben Beute gibt.
 
 ## Neu in 6.0.1
 - [ ] Tooltip einer Live-Quest: „du bist Stufe X: leicht, N Stufen drunter, volle Quest-XP“ – X = deine echte Stufe.

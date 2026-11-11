@@ -29,6 +29,8 @@ local cases = {
     function(o) return o:find("missed route quest: hero accept:6462 pool=true detour 6462", 1, true) ~= nil
       and o:find("grind travel: far accept:6621 detour=6621 | near grind:4124:27:Tausend Nadeln detour=nil", 1, true) ~= nil
       and o:find("crowd: 6621", 1, true) ~= nil end },
+  { "easy_mobs", "Route.lua", "Beute von mehreren Gegnersorten (Tiry 11.11.: Berglöwenblut, Stufe-32-Löwen bei Stufe 28): Pfeil nur zu Gegnern bis Stufe+1",
+    function(o) return select(2, o:gsub("ok true", "")) == 3 end },
   { "live", "Route.lua", "Live-Modus (Tiry 11.11.): Quest-Gebiet nach Ort + Questlog, nur einfache Quests, Reihenfolge Annehmen/Erledigen/Abgeben, kein Hin und Her",
     function(o) return o:find("live: true", 1, true) ~= nil and o:find("too hard 0", 1, true) ~= nil and o:find("order ok true", 1, true) ~= nil
       and o:find("wants area true wants other false", 1, true) ~= nil and o:find("after accept: same area true hero in area true", 1, true) ~= nil

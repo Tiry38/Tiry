@@ -442,8 +442,25 @@ local function addPts(dst, src, cap)
     dst[#dst + 1] = p
   end
 end
+-- Nur Gegner, die du schaffst (Tiry 11.11.: Berglöwenblut droppen hungernde Löwen Stufe 23-24 UND Berglöwen Stufe 32 –
+-- der Pfeil nahm den naechsten, egal welche Stufe). Von mehreren Quellen bleiben die bis Stufe+1; gibt es keine, die schwaechsten.
+local function easyNpcs(list)
+  local lim = ((UnitLevel and UnitLevel("player")) or 60) + (R.mobAbove or 1)
+  local ok, low, lowLv = {}, {}, nil
+  for _, n in ipairs(list) do
+    local lv = nQuery(n, "maxLevel") or nQuery(n, "minLevel")
+    if type(lv) ~= "number" or lv <= lim then ok[#ok + 1] = n end
+    if type(lv) == "number" then
+      if not lowLv or lv < lowLv then low, lowLv = { n }, lv elseif lv == lowLv then low[#low + 1] = n end
+    end
+  end
+  if #ok > 0 then return ok end
+  return #low > 0 and low or list
+end
+R.EasyNpcs = easyNpcs
 local function objectiveGroups(q)
-  if objCache[q] then return objCache[q] end
+  local lim = ((UnitLevel and UnitLevel("player")) or 60) + (R.mobAbove or 1)
+  if objCache[q] and objCache[q .. "L"] == lim then return objCache[q] end
   local G = { monster = {}, object = {}, item = {}, event = {} }
   local ob = qQuery(q, "objectives")
   if type(ob) == "table" then
@@ -456,13 +473,13 @@ local function objectiveGroups(q)
     for _, o in ipairs(type(ob[3]) == "table" and ob[3] or {}) do
       if type(o) == "table" and o[1] then
         local nd, od = iQuery(o[1], "npcDrops"), iQuery(o[1], "objectDrops")
-        for _, n in ipairs(type(nd) == "table" and nd or {}) do addPts(G.item, spawnsOf("npc", n), 600) end
+        for _, n in ipairs(easyNpcs(type(nd) == "table" and nd or {})) do addPts(G.item, spawnsOf("npc", n), 600) end
         for _, n in ipairs(type(od) == "table" and od or {}) do addPts(G.item, spawnsOf("obj", n), 600) end
       end
     end
     for _, o in ipairs(type(ob[5]) == "table" and ob[5] or {}) do
       if type(o) == "table" and type(o[1]) == "table" then
-        for _, n in ipairs(o[1]) do addPts(G.monster, spawnsOf("npc", n), 600) end
+        for _, n in ipairs(easyNpcs(o[1])) do addPts(G.monster, spawnsOf("npc", n), 600) end
       end
     end
   end
@@ -478,7 +495,7 @@ local function objectiveGroups(q)
     end
   end
   local any = #G.monster + #G.object + #G.item + #G.event > 0
-  if any then objCache[q] = G end
+  if any then objCache[q] = G; objCache[q .. "L"] = lim end
   return G
 end
 
@@ -530,7 +547,7 @@ local function areaPoints(q)
   local open = openTypes(q)
   local sig = {}
   for typ in pairs(open) do sig[#sig + 1] = typ end
-  table.sort(sig); sig = table.concat(sig, ",")
+  table.sort(sig); sig = table.concat(sig, ",") .. ":" .. tostring(UnitLevel and UnitLevel("player"))
   local c = apCache[q]
   if c and c.sig == sig then return c.pts end
   local G = objectiveGroups(q)
@@ -1047,7 +1064,7 @@ local function poolLoad()
   for k, e in ipairs(src) do
     local b = R.POOL0 + (k - 1) * 3
     for j, t in ipairs({ "accept", "complete", "turnin" }) do
-      POOL.steps[b + j] = { t = t, q = e.q, n = e.n, ql = e.ql, rl = e.rl, ml = e.ml, pool = true, pxp = e.xp,
+      POOL.steps[b + j] = { t = t, q = e.q, n = e.n, ql = e.ql, rl = e.rl, ml = e.ml, mx = e.mx, pool = true, pxp = e.xp,
         xp = (t == "accept") and e.xp or nil, wm = (t == "accept") and e.wm or nil,
         pre = (t == "accept") and e.pre or nil, pres = (t == "accept") and e.pres or nil,
         fb = (t == "accept" and e.a) or (t == "complete" and e.c) or (t == "turnin" and e.t) or nil }

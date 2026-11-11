@@ -68,6 +68,24 @@ def dense(pts):
     return pt(best)
 
 
+def easy_pts(q):
+    """Zielpunkte nur der Gegner, mit denen gerechnet wird (Tiry 11.11.: Blut droppen 4 Loewensorten,
+    der Pfeil fuehrte in die Mischung und Tiry landete bei Stufe-32-Loewen). Objekte/Boden-Gegenstaende bleiben."""
+    import gen_route as G
+    X.work(q, 30)
+    sel = X.MOBSEL.get(int(q)) or set()
+    v = P.Q[str(q)]; ob = v[9] if len(v) > 9 else None
+    if not sel or not ob: return P.objective_pts(q)
+    def lst(k): return ob[k] if len(ob) > k and ob[k] else []
+    out = list(G.trigger_pts(q))
+    for n in sel: out += G.spawns("n", n)
+    for c in lst(1):
+        if isinstance(c, list) and c: out += G.spawns("o", c[0])
+    for c in lst(2):
+        if isinstance(c, list) and c and not (X.I.get(str(c[0])) or {}).get("nd"): out += G.item_src(c[0])
+    return out or P.objective_pts(q)
+
+
 def pick():
     out, why = [], {}
     def no(r): why[r] = why.get(r, 0) + 1
@@ -108,9 +126,11 @@ def pick():
         if "Elite" in w2: no("Elite"); continue
         xp = int(round((qx + mxp) / 50.0) * 50)
         if xp < 200: no("unter 200 XP"); continue
-        out.append(dict(q=q, n=v[0], ql=ql, rl=rl, ml=X.mob_level(q), xp=xp, wm=round(wt, 1),
+        mx = X.MOBMAX.get(int(q)); ml = X.mob_level(q)
+        ez = [p for p in easy_pts(q) if p[0] in OPEN]
+        out.append(dict(q=q, n=v[0], ql=ql, rl=rl, ml=ml, mx=mx if (mx and ml and mx > ml + 2) else None, xp=xp, wm=round(wt, 1),
                         pre=v[11] or None, pres=v[12] or None,
-                        a=pt(g[0][0]), c=dense([p for p in pts if p[0] in OPEN]) if pts else None, t=pt(f[0])))
+                        a=pt(g[0][0]), c=dense(ez or [p for p in pts if p[0] in OPEN]) if pts else None, t=pt(f[0])))
     return out, why
 
 
@@ -123,6 +143,7 @@ def write(pool):
         f = ["q = %d" % e["q"], "n = %s" % lstr(e["n"]), "ql = %d" % e["ql"], "rl = %d" % e["rl"],
              "xp = %d" % e["xp"], "wm = %g" % e["wm"]]
         if e["ml"]: f.append("ml = %g" % round(e["ml"], 1))
+        if e.get("mx"): f.append("mx = %g" % round(e["mx"], 1))
         if e["pre"]: f.append("pre = {%s}" % ", ".join(str(a) for a in e["pre"]))
         if e["pres"]: f.append("pres = {%s}" % ", ".join(str(a) for a in e["pres"]))
         for k in ("a", "c", "t"):
