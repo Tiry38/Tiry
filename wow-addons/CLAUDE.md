@@ -83,7 +83,7 @@ Dateien/Sounds reicht `/reload` nicht). Version in allen 4 TOCs und in `VERSION`
    Start nicht per Gegenstand, Fundorte bekannt) mit ql/rl/ml/xp/wm/pre/pres. Live (`Route.lua`): Pool-Schritte haengen per
    Metatabelle ab Index `R.POOL0` an `route.steps` (`#steps`/`ipairs` sehen sie nicht); ist das Ziel Warten/Grinden, waehlt
    `poolBest` alle 20 s die Quest mit den meisten XP/Min (Weg per `LP_Fly.TripSec`, Quest/Gegner <= Stufe+1), wenn sie
-   mindestens `R.QUEST_PREF` (0.65) x Grind-Tempo bringt → `plan.detour.pool`. UI zeigt sie als „EXTRA“.
+   mindestens `R.QUEST_PREF` (0.5) x Grind-Tempo (Grind inkl. Weg zum Grind-Platz) bringt → `plan.detour.pool`. UI zeigt sie als „EXTRA“.
    Neue Routendatei in alle 4 TOCs eintragen. `tests/route.lua` prüft Routenwahl + Dateien.
 **Nur Solo-Leveling** (Tiry 11.11.): keine Elite-/Gruppen-/Dungeonquests – `bad_quest` prueft Elite auch fuer kuratierte
 Quests, `fill.py` bricht bei Elite-Aufhol-Quests ab. Speedrun-Daten liefern nur die Gebietsreihenfolge, keine Tempo-/Grind-Werte.

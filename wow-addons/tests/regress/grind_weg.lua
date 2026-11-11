@@ -57,3 +57,20 @@ for _, far in ipairs({ true, false }) do
   R.StepTarget = old
 end
 print("grind travel: " .. table.concat(res, " | "))
+-- 3. Verdraengung (Tiry 11.11., 5.1.8 am Freiwindposten): viele ferne Lieferquests (kaum Arbeit) duerfen eine gute
+-- Quest in der Naehe nicht aus der Rechnung werfen (frueher nur die ersten 12 nach XP/Arbeit)
+for _, e in ipairs(LevelPilot_Pool.Horde) do
+  for _, p in ipairs(e.pre or {}) do DONE[p] = true end
+  for _, p in ipairs(e.pres or {}) do DONE[p] = true end
+end
+for _, e in ipairs(LevelPilot_Pool.Horde) do if e.q ~= 6621 then DONE[e.q] = DONE[e.q] end end
+DONE[6621] = nil
+NEAR[6621] = { 0.505, 0.5, 0.51, 0.5, 0.5, 0.505 }
+R.mem = { acc = {}, done = {}, at = {} } R.ScanLog(true)
+local ahead = 0
+local b6621 = 3700 / (4.2 + 0.6)
+for _, e in ipairs(LevelPilot_Pool.Horde) do
+  if not DONE[e.q] and e.q ~= 6621 and e.rl <= 27 and e.ql <= 28 and (e.ml or 0) <= 28 and e.xp / ((e.wm or 2) + 0.6) > b6621 then ahead = ahead + 1 end
+end
+local pb = R.PoolBest(R.QuestIndex(route), 27, 28)
+print(string.format("crowd: %s ahead>12 %s", tostring(pb and pb.q), tostring(ahead > 12)))

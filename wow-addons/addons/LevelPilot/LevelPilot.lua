@@ -5,7 +5,7 @@
 -- Datenquellen: Routen-Plan, Questie (Geber/Ziele), Blizzards Questlog.
 ---------------------------------------------------------------------------
 local ADDON = ...
-local VERSION = "5.1.8"
+local VERSION = "5.1.9"
 local time = time or (os and os.time)   -- Spielzeit-Uhr (Sekunden seit 1970)
 local floor, max, min, abs, sqrt, atan2, pi, fmt = math.floor, math.max, math.min, math.abs, math.sqrt, math.atan2, math.pi, string.format
 local BT = BackdropTemplateMixin and "BackdropTemplate" or nil
@@ -1746,6 +1746,12 @@ function Refresh(rescan)
                 or "|cffff8a3dStufe fehlt|r – Mobs mitnehmen")
             end
           end
+          if grind and LP_Route.grindCmp then   -- warum Grinden: die Rechnung im Tooltip (Details: /lp warum)
+            local g = LP_Route.grindCmp
+            table.insert(tip, 2, { g.best and fmt("Grinden hier ~%d XP/Min. Beste Quest: %s – nur %d XP/Min mit Weg (Quest kommt ab %d). Details: /lp warum",
+              floor(g.gr + 0.5), g.best.name or "?", floor(g.best.rate + 0.5), floor(g.need + 0.5))
+              or fmt("Grinden hier ~%d XP/Min. Keine passende Quest (Quest/Gegner bis Stufe +1) erreichbar. Details: /lp warum", floor(g.gr + 0.5)), 1, 0.82, 0.4 })
+          end
           if st.pool then   -- Extra-Quest aus dem Pool (nicht im Plan): XP zeigen (Questlevel/Gegner im Tooltip)
             table.insert(sub, 1, fmt("|cffffd75e+%s XP|r", fmtNum(LP_Route.XPAt(st.pxp or 0, st.ql, UnitLevel("player") or 1))))
             table.insert(tip, 2, { fmt("Extra-Quest (nicht im Plan): Questlevel %d%s – passt zu deiner Stufe, bringt mehr XP/Min als Grinden. Danach geht der Plan weiter.",
@@ -2578,6 +2584,33 @@ function RT.Rethink()
     Toast("|cff4fd2ffPLAN BLEIBT|r  ·  nichts lohnt gerade mehr", "go")
     P(fmt("Neu berechnet: Plan bleibt (%s). %s", rate(r.base), b and fmt("Beste Alternative: %s mit %s – zu wenig mehr.", b.name, rate(b.rate))
       or fmt("Keine Quest in Reichweite, die nicht schwerer ist (bis Questlevel %d).", r.refQl or 0)))
+    if RT.Why then RT.Why() end
+  end
+end
+
+-- Warum Grinden statt Quest? Zeigt die Rechnung: Grind-Tempo (inkl. Weg zum Grind-Platz), Schwelle, beste Quests
+-- mit Weg und warum der Rest nicht passt (Tiry 11.11.: "noch immer genau dasselbe")
+function RT.Why()
+  local g, d = LP_Route and LP_Route.grindCmp, LP_Route and LP_Route.poolDiag
+  if not d then
+    local route = RT.key and LevelPilot_Routes[RT.key]
+    if route and LP_Route.PoolBest then pcall(LP_Route.PoolBest, LP_Route.QuestIndex(route), UnitLevel("player") or 1, (UnitLevel("player") or 1) + 1) end
+    d = LP_Route.poolDiag
+  end
+  if g then
+    P(fmt("Grinden hier: |cffffd166%d XP/Min|r (Weg zum Grind-Platz eingerechnet). Eine Quest kommt ab |cff39ff6b%d XP/Min|r.",
+      floor(g.gr + 0.5), floor(g.need + 0.5)))
+    if g.best then P(fmt("Beste Quest gerade: |cff39ff6b%s|r – %d XP/Min (~%d Min. mit Weg).", g.best.name or "?", floor(g.best.rate + 0.5), floor((g.best.min or 0) + 0.5))) end
+  end
+  if not d then P("Quest-Pool noch nicht berechnet (Position/Questie fehlt)."); return end
+  local parts = {}
+  for _, k in ipairs({ "erledigt", "Stufe", "Gegner", "Vorquest", "grau", "Route", "aus" }) do
+    if d.cnt[k] then parts[#parts + 1] = fmt("%s %d", k, d.cnt[k]) end
+  end
+  P(fmt("Quest-Pool Stufe %d: |cff39ff6b%d passen|r · nicht passend: %s", d.lvl or 0, d.cand or 0, table.concat(parts, ", ")))
+  for i, t in ipairs(d.top) do
+    P(fmt("  %d. %s – %d XP, %s", i, t.n or "?", floor(t.xp + 0.5),
+      t.min and fmt("~%d Min. = |cffffd166%d XP/Min|r", floor(t.min + 0.5), floor(t.xp / t.min + 0.5)) or "|cffff5050kein Weg/Ort bekannt|r"))
   end
 end
 
@@ -2734,6 +2767,7 @@ SlashCmdList.LEVELPILOT = function(msg)
     P(fmt("Plan %s: Schritt |cff39ff6b%s|r von %d%s · Ziel: %s%s", route.name or RT.key, tostring(RT.idx or "–"), #route.steps,
       sd and (" · " .. sd.z .. " · " .. sd.hub) or "", s and ((LP_Route.TYPE[s.t] or s.t) .. " " .. LP_Route.StepTitle(s)) or "–",
       missed > 0 and fmt(" · %d hinter dir übersprungen", missed) or ""))
+  elseif c == "warum" then RT.Why()
   elseif c == "neu" then
     if RT.key then
       local old = DB.plan[RT.key]
@@ -2746,6 +2780,6 @@ SlashCmdList.LEVELPILOT = function(msg)
     local R = LP_Route
     P("Route: " .. tostring(RT.key and LevelPilot_Routes[RT.key].name) .. " · Schritt " .. tostring(RT.idx) .. " · Questie-Daten: " .. ((R and R.HasQuestie()) and "|cff39ff6bja|r" or "|cffff5050nein|r"))
   else
-    P("/lp (an/aus) · /lp menu · /lp plan · /lp log · /lp weiter · /lp zurueck · /lp einstieg · /lp schritt <Nr> · /lp rechnen · /lp neu · /lp route · /lp punkt (neu|weg) · /lp export · /lp import · /lp wege · /lp speed · /lp strahl · /lp ton · /lp kampf · /lp flug · /lp entsperren · /lp sound · /lp gruen · /way x y · /lp auto · /lp pfeil · /lp marker · /lp lock · /lp unlock · /lp toast · /lp xp · /lp reset")
+    P("/lp (an/aus) · /lp menu · /lp plan · /lp log · /lp weiter · /lp zurueck · /lp einstieg · /lp schritt <Nr> · /lp rechnen · /lp warum · /lp neu · /lp route · /lp punkt (neu|weg) · /lp export · /lp import · /lp wege · /lp speed · /lp strahl · /lp ton · /lp kampf · /lp flug · /lp entsperren · /lp sound · /lp gruen · /way x y · /lp auto · /lp pfeil · /lp marker · /lp lock · /lp unlock · /lp toast · /lp xp · /lp reset")
   end
 end

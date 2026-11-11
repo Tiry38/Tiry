@@ -157,6 +157,13 @@ Alles oben ist im Forever-Nachbau getestet, aber nicht im echten Client. Besonde
 
 ---
 
+# Ingame-Test – LevelPilot 5.1.9
+
+## Neu in 5.1.9
+- [ ] Beim Grinden `/lp warum` eingeben: Grind-Tempo, Schwelle, beste Quests mit XP/Min und Gründe im Chat. **Screenshot davon an Claude.**
+- [ ] Maus über die Grind-Karte: Tooltip nennt die beste Quest und warum sie (noch) nicht kommt.
+- [ ] Kommt jetzt öfter eine Quest statt Grinden?
+
 # Ingame-Test – LevelPilot 5.1.8
 
 ## Neu in 5.1.8

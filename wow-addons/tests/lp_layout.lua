@@ -198,6 +198,17 @@ do
   if LevelPilotSettings then check("lp_menu", LevelPilotSettings); LevelPilotSettings:Hide() else bad("Menue fehlt") end
   local okR, errR = pcall(function() SlashCmdList.LEVELPILOT("rechnen") tick() end)
   if not okR then bad("Lua-Fehler Neu berechnen: " .. tostring(errR)) end
+  -- /lp warum: mit und ohne Rechnung (Grind-Vergleich), nie ein Lua-Fehler
+  LP_Route.grindCmp = { gr = 225, need = 112, best = { name = "Sacred Fire", rate = 90, min = 24 } }
+  LP_Route.poolDiag = { cnt = { erledigt = 3, Stufe = 400 }, top = { { n = "Sacred Fire", xp = 2200, min = 24 }, { n = "X", xp = 900 } }, lvl = 27, cand = 2 }
+  local okW, errW = pcall(function() SlashCmdList.LEVELPILOT("warum") end)
+  LP_Route.grindCmp, LP_Route.poolDiag = nil, nil
+  local okW2, errW2 = pcall(function() SlashCmdList.LEVELPILOT("warum") end)
+  local saw = false
+  for _, p in ipairs(W.prints) do if p:find("Grinden hier", 1, true) and p:find("225", 1, true) then saw = true end end
+  if not saw then bad("/lp warum: Grind-Rechnung fehlt im Chat") end
+  for _, p in ipairs(W.prints) do if p:find("Quest-Pool", 1, true) or p:find("Grinden hier", 1, true) or p:find("Sacred", 1, true) then print("  WARUM " .. (p:gsub("|c%x%x%x%x%x%x%x%x", ""):gsub("|r", ""))) end end
+  if not (okW and okW2) then bad("Lua-Fehler /lp warum: " .. tostring(errW or errW2)) end
 end
 print("== Ziel wartet auf Stufe (Held-Karte \"WARTET\")")
 if LevelPilotLog then LevelPilotLog:Hide() end

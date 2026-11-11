@@ -1033,9 +1033,9 @@ local function grindRate(lvl) return (lvl * 5 + 45) / R.GRIND_MIN end
 -- eingerechnet, Quest UND Gegner hoechstens deine Stufe +1, keine Elite. Pool-Schritte haengen ueber einen
 -- Index ab R.POOL0 an der Route (Metatabelle: #steps/ipairs sehen sie nicht).
 R.POOL0 = 100000
-R.QUEST_PREF = 0.65    -- Quest statt Grinden, solange Grinden nicht >1,5x schneller waere: Tiry will Quests, und das
+R.QUEST_PREF = 0.5     -- Quest statt Grinden, solange Grinden nicht >2x schneller waere (5.1.9; vorher 0.65): Tiry will Quests, und das
                        -- Grind-Tempo des Modells (0,8 Min./Gegner) ist eher optimistisch (volle Gebiete, Pausen)
-R.POOL_TOP = 12        -- so viele Kandidaten (nach bestmoeglicher Rate vorsortiert) bekommen eine echte Wegrechnung
+R.POOL_TOP = 60        -- hoechstens so viele Kandidaten bekommen eine echte Wegrechnung (Abbruch frueher, s. poolBest)
 local POOL = {}
 local function poolLoad()
   if POOL.ix then return POOL end
@@ -1083,6 +1083,8 @@ local function poolBest(mainIx, lvl, refQl, skipQ)
   if not px then return end
   local me = { map = pm, x = px, y = py }
   local cand = {}
+  local diag = { cnt = {}, top = {}, lvl = lvl }   -- fuer /lp warum und die Begruendung im Fenster
+  R.poolDiag = diag
   for _, e in ipairs(P.list) do
     local q = e.q
     local mi = mainIx and mainIx[q]
@@ -1090,21 +1092,28 @@ local function poolBest(mainIx, lvl, refQl, skipQ)
     -- Donnerfels, die der Zeiger hinter sich liess): dann ist sie eine Extra-Quest wie jede andere
     local rs = mi and mi.acc and R.state and R.state[mi.acc]
     if mi and (rs == "missed" or rs == "skip") and not (route0 and route0[mi.acc] and route0[mi.acc].fill) then mi = nil end
-    if q ~= skipQ and not mi and (e.ql or 0) <= refQl and (e.ml or 0) <= lvl + (R.mobAbove or 1)
-      and (e.rl or 0) <= lvl and not greyFor(e.ql, lvl) and not flagged(q) and not (R.ban and R.ban[q]) then
-      local x = P.ix[q]
-      local log = inLog(q)
-      if log or R.StepDone(P.steps[x.acc], lvl) == false then
-        local xp = xpAt(e.xp or 0, e.ql, lvl)
-        local wm = (log and ready(q)) and 0 or (e.wm or 2)
-        cand[#cand + 1] = { e = e, x = x, log = log, xp = xp, wm = wm, bound = xp / (wm + 0.6) }
-      end
+    local why = (q == skipQ or (R.ban and R.ban[q])) and "aus" or flagged(q) and "erledigt" or mi and "Route"
+      or ((e.ql or 0) > refQl or (e.rl or 0) > lvl) and "Stufe" or (e.ml or 0) > lvl + (R.mobAbove or 1) and "Gegner"
+      or greyFor(e.ql, lvl) and "grau" or nil
+    local x = not why and P.ix[q]
+    local log = x and inLog(q)
+    if x and not log and R.StepDone(P.steps[x.acc], lvl) ~= false then why = "Vorquest" end
+    if why then diag.cnt[why] = (diag.cnt[why] or 0) + 1 end
+    if not why then
+      local xp = xpAt(e.xp or 0, e.ql, lvl)
+      local wm = (log and ready(q)) and 0 or (e.wm or 2)
+      cand[#cand + 1] = { e = e, x = x, log = log, xp = xp, wm = wm, bound = xp / (wm + 0.6) }
     end
   end
   table.sort(cand, function(a, b) return a.bound > b.bound end)
+  diag.cand = #cand
   local best
+  -- bound = XP / reine Arbeit ist eine obere Grenze (Weg kostet immer >= 0): solange ein Kandidat die beste
+  -- echte Rate noch schlagen KOENNTE, wird er gerechnet. Frueher fest die ersten 12 – dann verdraengten ferne
+  -- Lieferquests (kaum Arbeit, langer Flug) die guten Quests in der Naehe (Tiry 11.11.: Grinden am Freiwindposten).
   for k = 1, math.min(#cand, R.POOL_TOP) do
     local c = cand[k]
+    if best and c.bound <= best.rate then break end
     local q = c.e.q
     local pts = {}
     if not c.log then pts[#pts + 1] = R.StepTarget(P.steps[c.x.acc]) or false end
@@ -1114,11 +1123,17 @@ local function poolBest(mainIx, lvl, refQl, skipQ)
     end
     pts[#pts + 1] = R.StepTarget(P.steps[c.x.tin]) or false
     local min, prev, ok = c.wm + 0.3 * #pts, me, true
-    for _, pt in ipairs(pts) do
+    if best then   -- billige Vorpruefung: Luftlinie mit Fluggeschwindigkeit (nie langsamer) – reicht das schon nicht, weg
+      local lb, pv = min, me
+      for _, pt in ipairs(pts) do local d = pt and R.Between(pv, pt); if d then lb = lb + d / 2400 end; pv = pt or pv end
+      if c.xp / lb <= best.rate then ok = false end
+    end
+    for _, pt in ipairs(ok and pts or {}) do
       local m = pt and tripMin(prev, pt)
       if not m then ok = false; break end
       min, prev = min + m, pt
     end
+    if #diag.top < 8 then diag.top[#diag.top + 1] = { n = R.StepTitle(P.steps[c.x.acc]), xp = c.xp, min = ok and min or nil } end
     if ok then
       local r = c.xp / min
       if not best or r > best.rate then
@@ -1255,6 +1270,7 @@ function R.Plan(route, lvl, skipped, plan, n, cur)
         local tt = px and R.StepTarget(steps[hero]) and tripMin({ map = pm, x = px, y = py }, R.StepTarget(steps[hero]))
         if need > 0 and tt and tt > 1 then gr = need / (need / gr + tt) end
       end
+      R.grindCmp = { gr = gr, need = gr * R.QUEST_PREF, best = b, t = t }
       if b and b.rate > gr * R.QUEST_PREF then plan.detour = { q = b.q, t = t, auto = true, pool = b.pool } end
     end
   end
