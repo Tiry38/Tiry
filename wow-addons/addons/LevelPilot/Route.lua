@@ -256,7 +256,10 @@ end
 
 -- Questnamen, die in der Route mehrfach vorkommen (Kettenteile), nie per Name abgleichen
 local dupName
+local titleC, dupC = {}, {}
 local function uniqueTitle(q)
+  local c = titleC[q]
+  if c ~= nil then return c or nil end
   if not dupName then
     dupName = {}
     local seen = {}
@@ -269,10 +272,17 @@ local function uniqueTitle(q)
       end
     end
   end
+  -- Doppelname? (Questie-Name aendert sich nie – einmal fragen, sobald Questie geladen ist)
+  local d = dupC[q]
+  if d == nil then
+    local en = qQuery(q, "name")
+    d = (en and dupName[en]) and true or false
+    if questie() then dupC[q] = d end
+  end
+  if d then titleC[q] = false; return nil end
   local t
   pcall(function() t = QL.GetTitleForQuestID(q) end)
-  local en = qQuery(q, "name")
-  if en and dupName[en] then return nil end
+  if t then titleC[q] = t end   -- leer = Server hat den Titel noch nicht geliefert, spaeter nochmal fragen
   return t
 end
 
@@ -359,9 +369,6 @@ function R.StepDone(s, lvl, cur)
   end
   if s.t == "accept" then
     if flagged(s.q) or inLog(s.q) then return true end
-    if greyFor(s.ql, lvl) then return "skip" end
-    if s.rl and lvl < s.rl then return "later" end
-    if s.ql and R.maxAbove and s.ql > lvl + R.maxAbove then return "later" end
     if s.alt then for _, a in ipairs(s.alt) do if flagged(a) or inLog(a) then return true end end end
     if s.pre then for _, p in ipairs(s.pre) do if not flagged(p) then return "skip" end end end
     if s.pres then
@@ -369,6 +376,9 @@ function R.StepDone(s, lvl, cur)
       for _, p in ipairs(s.pres) do if flagged(p) then any = true; break end end
       if not any then return "skip" end
     end
+    if greyFor(s.ql, lvl) then return "skip" end
+    if s.rl and lvl < s.rl then return "later" end
+    if s.ql and R.maxAbove and s.ql > lvl + R.maxAbove then return "later" end
     return false
   elseif s.t == "complete" then
     if flagged(s.q) or ready(s.q) then return true end
@@ -535,7 +545,10 @@ function R.GoalTarget(s)
   if s and s.t == "turnin" and s.q and inLog(s.q) and not ready(s.q) then
     local now = GetTime()
     local c = gcache[s]
-    if c and now - c.t < 1.5 then return c.v, true end
+    if c and now - c.t < 1.5 then
+      if c.v then return c.v, true end
+      return R.StepTarget(s)
+    end
     local v = objectiveTarget(s.q)
     if v then v = { map = v.map, x = v.x, y = v.y, spot = v.spot, count = v.count } end
     gcache[s] = { t = now, v = v }
@@ -755,6 +768,18 @@ local function segStart(steps, i)
   return j
 end
 R.SegStart = segStart
+local function pickSeg(steps, list, lvl)
+  local cnt, best, bc, bd = {}, nil, -1, nil
+  for _, i in ipairs(list) do local g = steps[i].seg or 0; cnt[g] = (cnt[g] or 0) + 1 end
+  for _, i in ipairs(list) do
+    local g = steps[i].seg or 0
+    local dl = math.abs((steps[i].l or lvl or 0) - (lvl or 0))
+    if cnt[g] > bc or (cnt[g] == bc and dl < bd) then best, bc, bd = g, cnt[g], dl end
+  end
+  local out = {}
+  for _, i in ipairs(list) do if (steps[i].seg or 0) == best then out[#out + 1] = i end end
+  return out
+end
 local function withSeg(steps, acc, tin)
   local top = acc[#acc]
   local out = {}
@@ -782,7 +807,7 @@ function R.Entry(route, state, lvl)
       end
     end
   end
-  if #nearA > 0 then return cluster(steps, withSeg(steps, nearA, nearT)), "hier" end
+  if #nearA > 0 then return cluster(steps, withSeg(steps, pickSeg(steps, nearA, lvl), nearT)), "hier" end
   if #nearT > 0 then return segStart(steps, nearT[1]), "hier" end
   local at = R.mem.at
   if at then
@@ -795,7 +820,7 @@ function R.Entry(route, state, lvl)
     end
     if bi then return bi, "frisch" end
   end
-  if #allA > 0 then return cluster(steps, allA), "log" end
+  if #allA > 0 then return cluster(steps, pickSeg(steps, allA, lvl)), "log" end
   if #allT > 0 then return segStart(steps, allT[1]), "log" end
   for i, s in ipairs(steps) do
     if (s.l or 0) >= lvl - 1 and state[i] ~= "done" and state[i] ~= "skip" then return i, "stufe" end
@@ -804,11 +829,15 @@ function R.Entry(route, state, lvl)
 end
 
 -- Beweis, dass du schon weiter bist (kleinster Index): Quest im Log, deren Geber bei dir steht,
--- oder eine frisch abgegebene Quest, deren Abgabe bei dir ist
-local function evidence(steps, state, p, plan, hd)
+-- oder eine frisch abgegebene Quest, deren Abgabe bei dir ist.
+-- Kein Beweis ist ein Ort, an dem du Quests angenommen hast, die der Plan VOR dem Beweis noch braucht:
+-- das ist dein aktueller Hub (Auto-Annehmen nimmt dort auch spaetere Hub-Quests mit).
+local function evidence(route, steps, state, p, plan)
   local N = #steps
   local at = R.mem.at or {}
   local t0 = math.max(plan.since or 0, now() - R.FRESH)
+  local qx = questIndex(route)
+  local pend
   for j = p + 1, math.min(N, p + R.JUMP_SPAN) do
     local s = steps[j]
     if s.q and state[j] == "done" and (s.t == "accept" or s.t == "turnin") then
@@ -818,7 +847,27 @@ local function evidence(steps, state, p, plan, hd)
       if ok then
         local t = R.StepTarget(s)
         local d = t and distTo(t)
-        if d and d <= R.JUMP_NEAR then return j end
+        if d and d <= R.JUMP_NEAR then
+          if not pend then
+            pend = {}
+            for i = p, math.min(N, p + R.JUMP_SPAN) do
+              local o = steps[i]
+              if state[i] == "open" and o.q and (o.t == "complete" or o.t == "turnin") and inLog(o.q) then
+                local a = qx[o.q] and qx[o.q].acc
+                local gt = a and R.StepTarget(steps[a])
+                if gt then pend[#pend + 1] = { i = i, t = gt } end
+              end
+            end
+          end
+          local home = false
+          for _, e in ipairs(pend) do
+            if e.i < j then
+              local b = R.Between(e.t, t)
+              if b and b <= R.JUMP_FAR then home = true; break end
+            end
+          end
+          if not home then return j end
+        end
       end
     end
   end
@@ -855,7 +904,8 @@ function R.Plan(route, lvl, skipped, plan, n, cur)
     local ht = hero and R.StepTarget(steps[hero])
     local hd = ht and distTo(ht)
     local j
-    if not hd or hd > R.JUMP_FAR then j = evidence(steps, state, p, plan, hd) end
+    -- Ziel ohne Koordinaten: "weit weg" ist nicht beurteilbar -> kein Sprung
+    if not hero or (ht and (not hd or hd > R.JUMP_FAR)) then j = evidence(route, steps, state, p, plan) end
     if j then
       local gt = GetTime()
       local jc = JC[plan]
@@ -874,21 +924,33 @@ function R.Plan(route, lvl, skipped, plan, n, cur)
     else
       JC[plan] = nil
     end
+  else
+    JC[plan] = nil   -- im Flug / waehrend der Haltezeit beginnt die Beweis-Wartezeit danach neu
+  end
+  -- 3. verpasst: Offenes vor dem Zeiger; Abgaben, deren Erledigen-Schritt verpasst wurde (und nicht fertig).
+  -- Steht der Zeiger danach auf etwas Verpasstem, laeuft er weiter (sonst klebt er dort fest).
+  local qx = questIndex(route)
+  local from = 1
+  for _ = 1, N do
+    for i = from, math.min(p - 1, N) do
+      if state[i] == "open" or state[i] == "later" then state[i] = "missed" end
+    end
+    for i = p, N do
+      local s = steps[i]
+      if s.t == "turnin" and state[i] == "open" and s.q and not ready(s.q) then
+        local c = qx[s.q] and qx[s.q].cmp
+        if c and c < p and state[c] == "missed" then state[i] = "missed" end
+      end
+    end
+    local q2 = p
+    while q2 <= N and state[q2] == "missed" do q2 = q2 + 1 end
+    q2 = advance(steps, state, q2)
+    if q2 == p then break end
+    from, p = p, q2
   end
   plan.i = p
   plan.k = (p <= N) and R.StepKey(steps[p]) or "END"
-  -- 3. verpasst: Offenes vor dem Zeiger; Abgaben, deren Erledigen-Schritt verpasst wurde (und nicht fertig)
-  for i = 1, math.min(p - 1, N) do
-    if state[i] == "open" or state[i] == "later" then state[i] = "missed" end
-  end
-  local qx = questIndex(route)
-  for i = p, N do
-    local s = steps[i]
-    if s.t == "turnin" and state[i] == "open" and s.q and not ready(s.q) then
-      local c = qx[s.q] and qx[s.q].cmp
-      if c and c < p and state[c] == "missed" then state[i] = "missed" end
-    end
-  end
+  if info.jumped then info.jumped.to = p end
   hero = nextOpen(state, p, N)
   info.ptr, info.hero = p, hero
   -- 4. Liste: Ziel + naechste offene (oder wartende) Schritte in Plan-Reihenfolge.
@@ -951,9 +1013,10 @@ local function classQuest(q, steps, ix)
   return type(rc) == "number" and rc > 0
 end
 
-local function otherRoute(q, curKey)
+local function otherRoute(q, curKey, cur)
+  local m0 = cur and cur.min or 0
   for key, r in pairs(LevelPilot_Routes or {}) do
-    if key ~= curKey then
+    if key ~= curKey and (r.min or 0) > m0 and (not cur or r.faction == cur.faction) then
       local e = questIndex(r)[q]
       if e then return key, r, (e.acc or e.cmp or e.tin) end
     end
@@ -1038,7 +1101,7 @@ function R.LogAdvice(route, routeKey, lvl, p, hero, opt)
         else a.cat, a.why = "delete", "übersprungener Teil des Plans" end
       end
     else
-      local okey, oroute, oi = otherRoute(q, routeKey)
+      local okey, oroute, oi = otherRoute(q, routeKey, route)
       if rdy then
         local how, _, mins = detour()
         if okey and oi then a.cat, a.why = "keep", "später im Plan (" .. (oroute.name or okey) .. ")"
@@ -1050,7 +1113,13 @@ function R.LogAdvice(route, routeKey, lvl, p, hero, opt)
         local minL = oroute.min or 0
         a.cat, a.why = "keep", "später im Plan (" .. (oroute.name or okey) .. (minL > lvl and (", ab St. " .. minL) or "") .. ")"
       elseif tag then a.cat, a.why = "check", tag .. " – nicht im Plan"
-      else a.cat, a.why = "delete", "nicht im Plan" end
+      else
+        local early = false
+        for key, r in pairs(LevelPilot_Routes or {}) do
+          if key ~= routeKey and questIndex(r)[q] then early = true; break end
+        end
+        a.cat, a.why = "delete", early and "aus der vorigen Route – nicht mehr im Plan" or "nicht im Plan"
+      end
     end
     if a.cat == "delete" then out.del = out.del + 1
     elseif a.cat == "turnin" then out.tin = out.tin + 1

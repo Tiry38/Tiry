@@ -5,7 +5,7 @@
 -- Datenquellen: Routen-Plan, Questie (Geber/Ziele), Blizzards Questlog.
 ---------------------------------------------------------------------------
 local ADDON = ...
-local VERSION = "5.0.0"
+local VERSION = "5.0.1"
 local time = time or (os and os.time)   -- Spielzeit-Uhr (Sekunden seit 1970)
 local floor, max, min, abs, sqrt, atan2, pi, fmt = math.floor, math.max, math.min, math.abs, math.sqrt, math.atan2, math.pi, string.format
 local BT = BackdropTemplateMixin and "BackdropTemplate" or nil
@@ -521,7 +521,7 @@ end
 
 -- Fliegen schneller als Laufen? Dann fuehrt der Pfeil zuerst zum Flugmeister.
 local FLYIGN, FLYADV = {}, nil
-local function currentTarget()
+local function computeTarget()
   local t = baseTarget()
   FLYADV = nil
   if LP_Fly then LP_Fly.want = nil end
@@ -534,6 +534,14 @@ local function currentTarget()
   LP_Fly.want = adv.to
   return { title = "Flugmeister " .. adv.from, map = adv.fmap, x = adv.fx, y = adv.fy,
     step = { t = "fly", note = "Flug nach " .. adv.to }, fly = adv }
+end
+-- hoechstens 4x pro Sekunde neu rechnen; Refresh macht den Cache sofort ungueltig
+local CTC = { t = -1 }
+local function currentTarget()
+  local now = GetTime()
+  if now - CTC.t < 0.25 then return CTC.v end
+  CTC.t = now; CTC.v = computeTarget()
+  return CTC.v
 end
 
 ---------------------------------------------------------------------------
@@ -1152,6 +1160,7 @@ do
     end
     if SET:IsShown() and not force then SET:Hide(); return end
     if LOGP and LOGP:IsShown() then LOGP:Hide() end
+    if not M:IsShown() then M:Show(); Refresh(true) end
     SET:ClearAllPoints()
     local l = M:GetLeft()
     if l and l > 300 then SET:SetPoint("TOPRIGHT", M, "TOPLEFT", -16, 0) else SET:SetPoint("TOPLEFT", M, "TOPRIGHT", 16, 0) end
@@ -1322,6 +1331,7 @@ function OpenLog(force)
   end
   if LOGP:IsShown() and not force then LOGP:Hide(); return end
   if SET and SET:IsShown() then SET:Hide() end
+  if not M:IsShown() then M:Show(); Refresh(true) end   -- Panel haengt am Hauptfenster
   LOGP:ClearAllPoints()
   local l = M:GetLeft()
   if l and l > LW + 30 then LOGP:SetPoint("TOPRIGHT", M, "TOPLEFT", -16, 0) else LOGP:SetPoint("TOPLEFT", M, "TOPRIGHT", 16, 0) end
@@ -1456,7 +1466,7 @@ local LOGT = 0
 local function UpdateLog(force)
   if not (LP_Route and LP_Route.LogAdvice) then return end
   local t = GetTime()
-  if not force and t - LOGT < 2 then return end
+  if t - LOGT < (force and 0.5 or 2) then return false end
   LOGT = t
   local route = RT.key and LevelPilot_Routes[RT.key]
   local x = M.xi
@@ -1464,6 +1474,7 @@ local function UpdateLog(force)
     { xpm = route and route.xpm, xph = x and x.xph, speed = (LP_Fly and LP_Fly.Speed and LP_Fly.Speed()) or 7 })
   if ok then LOGADV = a end
   pcall(LogFill)
+  return true
 end
 
 local function DrawBand(route)
@@ -1566,7 +1577,7 @@ end
 
 function Refresh(rescan)
   if not DB then return end
-  if rescan then scanTargets() end
+  RT.want, RT.lastR = false, GetTime()
   local collapsed = DB.collapsed
   pcall(bColIc.SetRotation, bColIc, collapsed and pi or 0)
   DK:SetShown(not collapsed); divider:SetShown(not collapsed)
@@ -1592,6 +1603,8 @@ function Refresh(rescan)
   M.xi = { lvl = lvl, cur = cur, mx = mx, rest = rest, xph = xph }
 
   if DB.mode == "route" then routeUpdate() end
+  CTC.t = -1
+  if rescan and not (DB.mode == "route" and RT.key) then scanTargets() end   -- Kartenliste nur fuer die Quest-Ansicht
   -- Kopf: im Routen-Modus mit Plan-Band (Lagebild)
   local band = DB.mode == "route" and RT.key ~= nil
   HEAD_H = band and HEAD_R or HEAD_Q
@@ -1599,7 +1612,7 @@ function Refresh(rescan)
   divider:Place(M, 14, -(HEAD_H - 1), W - 14, 0)
   empty:ClearAllPoints(); empty:SetPoint("TOPLEFT", 18, listTop - 8)
   BAND:SetShown(band)
-  if band then UpdateLog(RT.logDirty); RT.logDirty = false end
+  if (band or (LOGP and LOGP:IsShown())) and UpdateLog(RT.logDirty) then RT.logDirty = false end
   if DB.mode == "route" and RT.key then      -- ohne passende Route (z. B. ab 40): Quest-Ansicht
     local route = RT.key and LevelPilot_Routes[RT.key]
     DrawBand(route)
@@ -1642,6 +1655,8 @@ function Refresh(rescan)
         local label = (LP_Route.TYPE[st.t] or st.t)
         local grind = st.t == "grind"
         local later = LP_Route.state and LP_Route.state[si] == "later"
+        local planned = LP_Route.state and LP_Route.state[si] == "planned"
+        local needL = math.max(st.rl or 0, (st.ql or 0) - (LP_Route.maxAbove or 3))
         -- Laufweg ueber das Wegenetz (aktuelles Ziel bis 8 km, Listenzeilen bis 2,5 km; weiter: Luftlinie)
         local d
         if i == 1 and st.t == "turnin" and st.q and not LP_Route.Ready(st.q) then
@@ -1662,7 +1677,8 @@ function Refresh(rescan)
         if #sub > 0 then tip[#tip + 1] = { table.concat(sub, " · "), 1, 1, 1 } end
         if cnt > 1 then for _, gi in ipairs(it.steps) do tip[#tip + 1] = { "· " .. LP_Route.StepTitle(route.steps[gi]), 0.85, 0.9, 0.9 } end end
         if st.z then tip[#tip + 1] = { st.z, 0.55, 0.6, 0.62 } end
-        if later then tip[#tip + 1] = { "Freigeschaltet ab Stufe " .. math.max(st.rl or 0, (st.ql or 0) - 3), 1, 0.54, 0.24 } end
+        if later then tip[#tip + 1] = { "Freigeschaltet ab Stufe " .. needL, 1, 0.54, 0.24 } end
+        if planned then tip[#tip + 1] = { "Geplant: kommt dran, sobald du die Quest angenommen hast", 0.31, 0.82, 1 } end
         tip[#tip + 1] = { "Rechtsklick: " .. (st.q and ((cnt > 1) and "erste Quest sperren" or "Quest sperren (kommt nie wieder)") or "Schritt überspringen"), 0.5, 0.55, 0.58 }
         r.tip = tip
         if i == 1 then
@@ -1670,7 +1686,9 @@ function Refresh(rescan)
           r:SetWash(cr, cg, cb)
           r.orb:Tint({ cr, cg, cb }, lighten(cr, cg, cb)); r.orb:Icon(st.t or "note", cr, cg, cb)
           local notReady = st.t == "turnin" and st.q and not LP_Route.Ready(st.q)
-          local kindTxt = grind and ("GRINDEN  ·  BIS STUFE " .. (st.to or "?")) or (notReady and "ERST ERLEDIGEN, DANN ABGEBEN") or (cnt > 1 and (cnt .. " QUESTS " .. label:upper()) or label:upper())
+          local kindTxt = grind and ("GRINDEN  ·  BIS STUFE " .. (st.to or "?")) or (later and ("WARTET  ·  AB STUFE " .. needL))
+            or (notReady and "ERST ERLEDIGEN, DANN ABGEBEN") or (cnt > 1 and (cnt .. " QUESTS " .. label:upper()) or label:upper())
+          if later then table.insert(sub, 1, "|cffff8a3dStufe fehlt|r – Mobs auf dem Weg mitnehmen") end
           r.kind:SetText(fmt("|cff%s%s|r  |cff8a9396·|r  |cffb8c2c6SCHRITT %d|r", col, kindTxt, si))
           local ht = grind and (titles[1]:gsub("^Grinden:%s*", "")) or titles[1]
           -- Gruppe: erster Name gross, die anderen in der Zeile darunter (nichts wird abgeschnitten)
@@ -1719,10 +1737,11 @@ function Refresh(rescan)
           r.title:SetText(pre .. (later and "|cff7d8388" or "|cffd8dde0") .. title .. "|r")
           if later then
             r.orb:Tint({ 0.42, 0.45, 0.48 }); r.orb:Icon(st.t or "note", 0.55, 0.58, 0.6); r.orb.icon:SetDesaturated(true)
-            r.dist:SetText(""); r:SetTag("ab St. " .. math.max(st.rl or 0, (st.ql or 0) - 3), 1, 0.54, 0.24)
+            r.dist:SetText(""); r:SetTag("ab St. " .. needL, 1, 0.54, 0.24)
           else
             r.orb:Tint({ cr, cg, cb }, nil, 0.85); r.orb:Icon(st.t or "note", cr, cg, cb)
             if grind then r.dist:SetText(""); r:SetTag("bis St. " .. (st.to or "?"), 1, 0.54, 0.24)
+            elseif planned and not d then r.dist:SetText(""); r:SetTag("geplant", 0.31, 0.82, 1)
             else r.dist:SetText(d and ("|cff8a9396" .. fmtDist(d) .. "|r") or "") end
           end
           r:SetAlpha(max(0.5, 1 - (i - 2) * 0.09))
@@ -1921,15 +1940,17 @@ local function offerCheck(kind)
   if not (DB and DB.mode == "route" and RT.key and LP_Route and LP_Route.Givers and LP_Route.state) then return end
   local route = LevelPilot_Routes[RT.key]; if not route then return end
   local npc = npcIdOf("npc"); if not npc then return end
-  local offered, any, okRead = {}, false, false
+  local offered, any, okRead, pending = {}, false, false, false
   okRead = pcall(function()
     if kind == "gossip" then
+      for _, q in ipairs(C_GossipInfo.GetActiveQuests() or {}) do if q.isComplete then pending = true end end
       for _, q in ipairs(C_GossipInfo.GetAvailableQuests() or {}) do any = true; if q.questID then offered[q.questID] = true end end
     else
       any = (GetNumAvailableQuests() or 0) > 0
+      for i = 1, (GetNumActiveQuests() or 0) do local _, c = GetActiveTitle(i); if c then pending = true end end
     end
   end)
-  if not okRead then return end
+  if not okRead or pending then return end
   local names = {}
   -- nur die naechsten Schritte (nicht die ganze Route) - konservativ
   for _, i in ipairs(RT.list or {}) do
@@ -2055,7 +2076,7 @@ E:SetScript("OnEvent", function(_, ev, a1, ...)
   if ev == "PLAYER_CONTROL_LOST" then return end
   if ev == "PLAYER_ENTERING_WORLD" and Quiet then Quiet(6) end
   if ev == "UNIT_SPELLCAST_SUCCEEDED" then
-    local _, _, spell = ...
+    local _, spell = ...   -- a1 = Einheit, dann castGUID, spellID
     if a1 == "player" and (spell == 8690 or spell == 556) and LP_Route then LP_Route.OnHearth(); Refresh(true) end
     return
   end
@@ -2064,13 +2085,17 @@ E:SetScript("OnEvent", function(_, ev, a1, ...)
     if E.onTaxi and LP_Route then E.onTaxi = false; LP_Route.OnLanded(); Refresh(true) end
     return
   end
+  -- am NPC zaehlt der aktuelle Stand (z. B. Folgequest direkt nach der Abgabe)
+  if RT.want and (ev == "GOSSIP_SHOW" or ev == "QUEST_GREETING" or ev == "QUEST_DETAIL") then Refresh(true) end
   if ev == "GOSSIP_SHOW" then pcall(offerCheck, "gossip"); gossipAuto(); return end
   if ev == "QUEST_GREETING" then pcall(offerCheck, "greeting"); greetingAuto(); return end
   if ev == "QUEST_DETAIL" then
     if autoOK() then
       local okQ, qid = pcall(GetQuestID)
       qid = okQ and qid or nil
-      if not qid or qid == 0 or routeWants(qid) then pcall(AcceptQuest)
+      local want
+      if not qid or qid == 0 then want = routeWantsTitle(GetTitleText and GetTitleText() or nil) else want = routeWants(qid) end
+      if want then pcall(AcceptQuest)
       else hintNotWanted(qid, GetTitleText and GetTitleText() or nil) end
     end
     return
@@ -2089,10 +2114,13 @@ E:SetScript("OnEvent", function(_, ev, a1, ...)
     return
   end
   if ev == "PLAYER_XP_UPDATE" or ev == "PLAYER_LEVEL_UP" or ev == "UPDATE_EXHAUSTION" then
-    xpTrack(); Refresh(false); return
+    xpTrack(); RT.want = true; return
   end
-  if ev == "QUEST_LOG_UPDATE" then checkCompleted(false) end
-  Refresh(true)
+  if ev == "QUEST_LOG_UPDATE" then
+    -- erste Meldung nach dem Login nur merken (Log war beim Login evtl. noch leer → sonst Toast-Flut)
+    checkCompleted(not RT.logBase and GetTime() - (RT.loginT or 0) < 15); RT.logBase = true
+  end
+  RT.want = true   -- gebuendelt: Questlog-Ereignisse kommen beim Looten im Schwall
 end)
 
 local acc, accScan = 0, 0
@@ -2105,8 +2133,10 @@ E:SetScript("OnUpdate", function(_, el)
   if acc >= 0.05 then acc = 0; pcall(UpdateArrow, now) end
   pcall(UpdateBeam, now, el)
   if UnitOnTaxi("player") then E.onTaxi = true end
+  if RT.want and now - (RT.lastR or 0) >= 0.2 then pcall(Refresh, true) end
   if accScan >= 1 then
-    accScan = 0; pcall(Refresh, true) -- Entfernungen nachfuehren
+    accScan = 0
+    if now - (RT.lastR or 0) >= 0.9 then pcall(Refresh, true) end -- Entfernungen nachfuehren
     -- alter Kartenpin bleibt nie stehen, wenn das Ziel keine Koordinaten mehr hat
     pcall(function() local t = currentTarget(); if (not t or not t.map) then if lastPin then ClearBlizzPin() end else SetBlizzPin(t) end end)
   end
@@ -2192,6 +2222,14 @@ local function TargetInfo()
   end
   return title or "Kartenmarkierung", sub or "", key or "pin", typ
 end
+-- Strahl laeuft je Frame: Ziel-Infos hoechstens 4x pro Sekunde (und sofort nach jedem Refresh) neu lesen
+local TIC = { t = -1 }
+local function TargetInfoC(now)
+  if now - TIC.t < 0.25 and TIC.t >= (RT.lastR or 0) and TIC.w == MANUALWAY then return TIC[1], TIC[2], TIC[3], TIC[4] end
+  TIC.t, TIC.w = now, MANUALWAY
+  TIC[1], TIC[2], TIC[3], TIC[4] = TargetInfo()
+  return TIC[1], TIC[2], TIC[3], TIC[4]
+end
 
 local lastKey, arrivedKey = nil, nil
 function LP_StepType()
@@ -2238,7 +2276,7 @@ function UpdateBeam(now, el)
   local d, clamped
   pcall(function() d = C_Navigation.GetDistance and C_Navigation.GetDistance() end)
   pcall(function() clamped = C_Navigation.WasClampedToScreen and C_Navigation.WasClampedToScreen() end)
-  local title, sub, key, typ = TargetInfo()
+  local title, sub, key, typ = TargetInfoC(now)
 
   -- neues Ziel? (stabiler Schluessel: Wiedererscheinen nach Kampf/Flug ist KEIN neues Ziel)
   if key ~= lastKey then
@@ -2250,7 +2288,10 @@ function UpdateBeam(now, el)
     arrivedKey = key; Sound("arrive", key)
     if MANUALWAY then MANUALWAY = nil end
   end
-  local okI = SetIcon(cxIcon, typ or "go"); if not okI then cxIcon:SetVertexColor(NEON[1], NEON[2], NEON[3], 1) end
+  if cxIcon.lpTyp ~= (typ or "go") then
+    cxIcon.lpTyp = typ or "go"
+    local okI = SetIcon(cxIcon, typ or "go"); if not okI then cxIcon:SetVertexColor(NEON[1], NEON[2], NEON[3], 1) end
+  end
 
   if clamped then
     B:Hide(); CX:Hide(); PP:Hide()
@@ -2262,7 +2303,7 @@ function UpdateBeam(now, el)
       nvArrow:ClearAllPoints(); nvArrow:SetPoint("CENTER", NV, "CENTER", math.cos(r) * 27, math.sin(r) * 27)
       nvArrow:SetRotation(r - math.pi / 2)
     end
-    SetIcon(nvIcon, typ or "go")
+    if nvIcon.lpTyp ~= (typ or "go") then nvIcon.lpTyp = typ or "go"; SetIcon(nvIcon, typ or "go") end
     nvRing:SetAlpha(0.75 + 0.25 * math.sin(now * 3))
     nvD:SetText(d and ("|cffffffff" .. fmtDist(d) .. "|r") or "")
     NV:Show()
@@ -2478,6 +2519,8 @@ SlashCmdList.LEVELPILOT = function(msg)
     P("Fenster im Kampf abdunkeln: " .. (DB.fade and "|cff39ff6ban|r" or "|cffff5050aus|r"))
   elseif c == "reset" then
     for k, v in pairs(DEF) do DB[k] = copy(v) end
+    DB.maxDiffUser = nil
+    if LP_Route then LP_Route.speed = DB.speed; LP_Route.maxDiff = DB.maxDiff; LP_Route.ResetPath() end
     M:ClearAllPoints(); M:SetPoint(DB.point, UIParent, DB.point, DB.x, DB.y)
     A:ClearAllPoints(); A:SetPoint(DB.apoint, UIParent, DB.apoint, DB.ax, DB.ay)
     Refresh(true); P("zurückgesetzt.")
@@ -2502,8 +2545,12 @@ SlashCmdList.LEVELPILOT = function(msg)
     Refresh(true)
   elseif c == "einstieg" then
     local plan = RT.key and DB.plan[RT.key]
-    if plan then plan.k, plan.i, plan.hold = nil, nil, nil end
-    P("Suche deinen Einstieg neu (Questlog + Ort + Stufe) …"); Refresh(true)
+    if plan then
+      plan.hist = plan.hist or {}
+      if plan.k then table.insert(plan.hist, { k = plan.k, i = plan.i, t = time() }) end
+      plan.k, plan.i, plan.hold = nil, nil, nil
+    end
+    P("Suche deinen Einstieg neu (Questlog + Ort + Stufe) …  |cff8a8f93Rückgängig: /lp zurueck|r"); Refresh(true)
   elseif c == "schritt" then
     local n = tonumber((msg or ""):match("(%d+)"))
     local route = RT.key and LevelPilot_Routes[RT.key]
@@ -2526,7 +2573,12 @@ SlashCmdList.LEVELPILOT = function(msg)
       sd and (" · " .. sd.z .. " · " .. sd.hub) or "", s and ((LP_Route.TYPE[s.t] or s.t) .. " " .. LP_Route.StepTitle(s)) or "–",
       missed > 0 and fmt(" · %d hinter dir übersprungen", missed) or ""))
   elseif c == "neu" then
-    if RT.key then DB.skipK[RT.key] = {}; DB.plan[RT.key] = {} end; wipe(DB.skipLog)
+    if RT.key then
+      local old = DB.plan[RT.key]
+      DB.skipK[RT.key] = {}
+      DB.plan[RT.key] = { hist = (old and old.k) and { { k = old.k, i = old.i, t = time() } } or nil }
+      for j = #DB.skipLog, 1, -1 do if DB.skipLog[j].r == RT.key then table.remove(DB.skipLog, j) end end
+    end
     P("Übersprungene Schritte zurückgesetzt, Einstieg wird neu gesucht."); Refresh(true)
   elseif c == "route" then
     local R = LP_Route

@@ -89,11 +89,28 @@ local function graph(cont)
   end
   for _, l in ipairs(d.L or {}) do
     if l[1] and l[2] then
-      g.link[l[1]] = { to = l[2], name = l[3], kind = l[4] }
-      g.link[l[2]] = { to = l[1], name = l[3], kind = l[4] }
+      g.link[l[1] * 65536 + l[2]] = { name = l[3], kind = l[4] }
+      g.link[l[2] * 65536 + l[1]] = { name = l[3], kind = l[4] }
     end
   end
   for _, pl in ipairs(d.P or {}) do if pl[1] then g.place[pl[1]] = pl[2] end end
+  -- Teilnetze (Inseln, abgeschnittene Hoehlen): Suchen zwischen getrennten Teilen sofort abbrechen
+  local comp, nc, stack = {}, 0, {}
+  for k = 1, n do
+    if not comp[k] then
+      nc = nc + 1; comp[k] = nc; stack[1] = k
+      local top = 1
+      while top > 0 do
+        local u = stack[top]; stack[top] = nil; top = top - 1
+        for e = first[u], first[u + 1] - 1 do
+          local v = floor(ew[e] / 4096)
+          if not comp[v] then comp[v] = nc; top = top + 1; stack[top] = v end
+        end
+      end
+    end
+  end
+  g.comp = comp
+  g.nd = {}               -- [Knoten] = kurze Wege im Umkreis (Anbindungs-Pruefung, s. near)
   g.n = n
   G[cont] = g
   return g
@@ -120,7 +137,32 @@ function W.Player()
   return W.Point(map, x, y)
 end
 
+-- Kurze Wege vom Knoten k0 aus (bis 'lim' Yards), einmal je Knoten gemerkt
+local LOCAL_LIM = SNAP_R * 2 * 1.3 + 80
+local function localDist(g, k0)
+  local D = g.nd[k0]
+  if D then return D end
+  D = { [k0] = 0 }
+  local open = { [k0] = true }
+  local first, ew = g.first, g.ew
+  while true do
+    local u, du
+    for k in pairs(open) do if not du or D[k] < du then u, du = k, D[k] end end
+    if not u then break end
+    open[u] = nil
+    for e = first[u], first[u + 1] - 1 do
+      local v = floor(ew[e] / 4096)
+      local nd = du + (ew[e] - v * 4096)
+      if nd <= LOCAL_LIM and nd < (D[v] or huge) then D[v] = nd; open[v] = true end
+    end
+  end
+  g.nd[k0] = D
+  return D
+end
+
 -- Anbindung ans Netz: Liste { {Knoten, Kosten}, ... } (leer = kein Netz in Reichweite)
+-- Nur Knoten, die vom naechsten Knoten aus auf kurzem Bodenweg erreichbar sind (hoechstens 1,3 x Luftlinie):
+-- ohne Hoehen im Netz waere sonst der Knoten unten in der Schlucht "direkt" neben dem oben an der Klippe.
 local function near(g, px, py)
   local bx, by = floor(px / BK), floor(py / BK)
   local out, best, bd = {}, nil, nil
@@ -137,7 +179,18 @@ local function near(g, px, py)
       end
     end
   end
-  if #out == 0 and best then out[1] = { best, bd * SNAP_F } end
+  if #out == 0 and best then out[1] = { best, bd * SNAP_F }; return out end
+  if best and #out > 1 then
+    local L = localDist(g, best)
+    local bx0, by0 = g.x[best], g.y[best]
+    local keep = {}
+    for _, c in ipairs(out) do
+      local k = c[1]
+      local walk = L[k]
+      if k == best or (walk and walk <= dist(bx0, by0, g.x[k], g.y[k]) * 1.3 + 60) then keep[#keep + 1] = c end
+    end
+    out = keep
+  end
   return out
 end
 W.Near = function(p) local g = p and graph(p.c); if g then return near(g, p.x, p.y) end end
@@ -147,9 +200,10 @@ W.Near = function(p) local g = p and graph(p.c); if g then return near(g, p.x, p
 -- es wird nur so weit gerechnet, wie die Frage braucht (Kreis um den Punkt), und bei Bedarf erweitert.
 ---------------------------------------------------------------------------
 local function newSearch(g, px, py)
-  local st = { D = {}, prev = {}, hn = {}, hd = {}, size = 0, bound = 0, src = {}, t = now(), n = 0 }
+  local st = { D = {}, prev = {}, hn = {}, hd = {}, size = 0, bound = 0, src = {}, t = now(), n = 0, comps = {} }
   for _, c in ipairs(near(g, px, py)) do
     local k, d = c[1], c[2]
+    st.comps[g.comp[k]] = true
     if d < (st.D[k] or huge) then
       if not st.D[k] then st.n = st.n + 1 end
       st.D[k] = d; st.src[k] = true
@@ -230,8 +284,10 @@ W.Stats = function() local n = 0; for _, t in pairs(SP) do for _ in pairs(t) do 
 
 -- bester Anschluss von p an eine Suche: Yards, Knoten
 local function join(g, st, p, straight)
-  local cand = near(g, p.x, p.y)
-  if #cand == 0 then return end
+  local all = near(g, p.x, p.y)
+  local cand = {}
+  for _, c in ipairs(all) do if st.comps[g.comp[c[1]]] then cand[#cand + 1] = c end end
+  if #cand == 0 then return end         -- getrenntes Teilnetz: nicht das ganze Netz absuchen
   local bound = max(1500, straight * 1.6)
   while true do
     expand(g, st, bound)
@@ -295,7 +351,10 @@ function W.Aim(p, q)
   while #seq >= 2 do
     local a, b = seq[1], seq[2]
     local da = dist(px, py, g.x[a], g.y[a])
-    if da < 25 or dist(px, py, g.x[b], g.y[b]) < dist(g.x[a], g.y[a], g.x[b], g.y[b]) then table.remove(seq, 1) else break end
+    local pb, ab = dist(px, py, g.x[b], g.y[b]), dist(g.x[a], g.y[a], g.x[b], g.y[b])
+    if da < 25 or pb < ab or (da + ab < pb * 1.1 + 10 and segDist(g.x[a], g.y[a], px, py, g.x[b], g.y[b]) < CORR * 2) then
+      table.remove(seq, 1)
+    else break end
   end
   local rest = max(straight, total)
   -- vorausschauen: weitester Knoten, bis zu dem der Weg im Korridor der geraden Linie bleibt
@@ -321,8 +380,8 @@ function W.Aim(p, q)
     local a = seq[k]
     run = run + dist(lx, ly, g.x[a], g.y[a]); lx, ly = g.x[a], g.y[a]
     if run > 700 then break end
-    local l = g.link[a]
-    if l and seq[k + 1] == l.to then via = { name = l.name, kind = l.kind, at = run }; break end
+    local l = seq[k + 1] and g.link[a * 65536 + seq[k + 1]]
+    if l then via = { name = l.name, kind = l.kind, at = run }; break end
     if g.place[a] then via = { name = g.place[a], kind = "place", at = run }; break end
   end
   -- Gerade Linie ist (fast) genauso gut: dann kein Umweg-Pfeil
@@ -363,7 +422,7 @@ function W.FlightTime(cont, from, to, known, override)
     open[u] = nil
     if u == to then return du, H[u] end
     for _, e in ipairs(adj[u] or {}) do
-      local v, nd = e[1], du + e[2] + 5          -- ~5 s Zwischenlandung
+      local v, nd = e[1], du + e[2] + (u == from and 0 or 5)   -- ~5 s je Zwischenlandung
       if nd < (D[v] or huge) then D[v] = nd; H[v] = H[u] + 1; open[v] = true end
     end
   end

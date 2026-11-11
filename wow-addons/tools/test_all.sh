@@ -65,6 +65,7 @@ if want levelpilot; then
   run "LevelPilot: fly" "$A/LevelPilot" "HEARTHTEST OK" lua5.1 "$T/fly.lua"
   run "LevelPilot: route" "$A/LevelPilot" "ROUTE TESTS OK" lua5.1 "$T/route.lua"
   run "LevelPilot: travel (Wegenetz/Flug-Rat)" "$A/LevelPilot" "TRAVEL TESTS OK" lua5.1 "$T/travel.lua"
+  run "LevelPilot: travel2 (Klippen, Inseln, Aufzüge, Flug nur verbunden)" "$A/LevelPilot" "TRAVEL2 OK" lua5.1 "$T/travel2.lua"
   run "LevelPilot: plan (fester Plan, Einstieg, Sprung, Questlog-Check)" "$A/LevelPilot" "PLAN TESTS OK" lua5.1 "$T/plan.lua"
   run "LevelPilot: Durchlauf beider Routen (Plan, Einstieg, hinter Plan, Hexer)" "$A/LevelPilot" "PLAYTHROUGH OK" lua5.1 "$T/playthrough.lua"
   run "LevelPilot: Fenster-Layout (strenger Forever-Nachbau)" "$ROOT" "LP LAYOUT OK" lua5.1 tests/lp_layout.lua

@@ -129,6 +129,11 @@ local function hearthNode(list)
     local nm = (n.name or ""):lower()
     if nm:find(b, 1, true) then return n, bind end
   end
+  -- Ortsname vor dem Komma steckt im Gasthaus-Ort (z. B. Basislager von Grom'gol)
+  for _, n in ipairs(list) do
+    local short = ((n.name or ""):lower():match("^([^,]+)") or ""):gsub("%s+$", "")
+    if #short >= 4 and b:find(short, 1, true) then return n, bind end
+  end
 end
 
 -- Bodenweg in Yards (Wegenetz aus der Spielgeometrie, Travel.lua); ohne Netz Luftlinie x 1.25.
@@ -145,11 +150,13 @@ end
 -- gemessene Direktfluege aus der Spielgeometrie-Datenbank) > grobe Schaetzung ueber die Luftlinie.
 local function airTime(cont, a, b, knownSet, d)
   local m = d.ft[a.id .. ">" .. b.id]
-  if m then return m, 1, true end
   if LP_Walk and LP_Walk.FlightTime then
     local ok, t, hops = pcall(LP_Walk.FlightTime, cont, a.id, b.id, knownSet, d.ft)
+    if m then return m, (ok and hops) or 1, true end
     if ok and t then return t, hops, true end
-  end
+    local net = LevelPilot_Taxi and LevelPilot_Taxi[cont]
+    if net and net.t and net.t[a.id] and net.t[b.id] then return nil end   -- beide im Flugnetz, aber (noch) nicht verbunden
+  elseif m then return m, 1, true end
   return math.sqrt((a.wx - b.wx) ^ 2 + (a.wy - b.wy) ^ 2) * DETOUR_FLY / FLY + 10, 1, false
 end
 
@@ -201,8 +208,8 @@ function F.Advice(t, key)
     for b, wb in pairs(w2) do
       if a ~= b then
         local air, hops, sure = airTime(pc, a, b, knownSet, d)
-        local tot = wa / spd + air + OVERHEAD + wb / spd
-        if not best or tot < best.fly then
+        local tot = air and (wa / spd + air + OVERHEAD + wb / spd)
+        if tot and (not best or tot < best.fly) then
           best = { fly = tot, from = a, to = b, walk1 = wa, walk2 = wb, air = air, hops = hops, sure = sure }
         end
       end

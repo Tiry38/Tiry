@@ -19,7 +19,9 @@ Aktueller Stand und offene Punkte: **[`UEBERGABE.md`](UEBERGABE.md)** – zuerst
 - `tests/` – Lua-5.1-Simulationen der WoW-API (`lua5.1`). Aufruf aus dem Add-on-Ordner, z. B.
   `cd addons/LevelPilot && lua5.1 ../../tests/v4.lua` (muss „ALLE TESTS OK“ melden), außerdem `lp.lua`, `lp2.lua`,
   `nav.lua`, `fly.lua`, `route.lua`, `travel.lua` (Wegenetz, Flug-Rat, Rechenzeit; meldet „TRAVEL TESTS OK“),
-  `plan.lua` (fester Plan, Einstieg, Sprung, Questlog-Check; „PLAN TESTS OK“) (Exit-Code 0 = ok).
+  `plan.lua` (fester Plan, Einstieg, Sprung, Questlog-Check; „PLAN TESTS OK“), `playthrough.lua` (beide Routen
+  komplett durchgespielt, Einstieg + Questlog-Check nach jedem Schritt, hinter Plan, Hexer; „PLAYTHROUGH OK“),
+  `travel2.lua` (Klippen, Teilnetze, Aufzüge, Flug nur verbunden; „TRAVEL2 OK“) (Exit-Code 0 = ok).
   Fenster-Vorschau LevelPilot: `lua5.1 tests/lp_layout.lua <ordner>` (aus `wow-addons/`, strenger Forever-Nachbau,
   meldet „LP LAYOUT OK“) → `python3 -I tools/render_pages.py <ordner>` → PNGs ansehen. Nach UI-Änderungen Pflicht. ProcAlarm/Schlaghagel: `cd addons && lua5.1 ../tests/proc.lua` bzw. `PROC_CLASS=SHAMAN|WARLOCK lua5.1 ../tests/hagel.lua`.
   Spell-Daten der Live-Version: github.com/simulationcraft/simc-forever (`SpellDataDump/allspells.txt`). Vor jeder Auslieferung alle laufen lassen + `luac5.1 -p` auf alle .lua.

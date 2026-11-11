@@ -280,7 +280,7 @@ LevelPilotDB.route = "test"
 local function tick(n, dt) for i = 1, (n or 1) do Tm = Tm + (dt or 0.25) E._OnUpdate(E, dt or 0.25) end end
 tick(4)
 check("vor dem ersten Questlog-Lesen: kein Einstieg (wartet)", next(LevelPilotDB.plan.test or {}) == nil or LevelPilotDB.plan.test.k == nil)
-E._OnEvent(E, "QUEST_LOG_UPDATE")
+E._OnEvent(E, "QUEST_LOG_UPDATE") tick(1)   -- gebuendelt: Refresh folgt im naechsten Frame
 local function chatHas(p) for _, m in ipairs(chat) do if m:find(p) then return true end end return false end
 check("Einstieg erkannt und gemeldet", chatHas("Einstieg bei Schritt 21"))
 check("Plan gespeichert", LevelPilotDB.plan.test.k == "accept:401")
@@ -300,6 +300,114 @@ SlashCmdList.LEVELPILOT("plan")
 check("/lp plan meldet Schritt", chatHas("Schritt 21 von 28"))
 LevelPilotDB.mode = "quests" tick(5) LevelPilotDB.mode = "route" tick(5)
 check("Moduswechsel ohne Fehler", true)
+-- Prüfer-Funde 5.0.1 (Fenster/Ereignisse)
+SlashCmdList.LEVELPILOT("schritt 14") tick(1)
+SlashCmdList.LEVELPILOT("einstieg") tick(2)
+check("/lp einstieg (auch Klick aufs Band) neu erkannt", LevelPilotDB.plan.test.i == 21)
+SlashCmdList.LEVELPILOT("zurueck") tick(1)
+check("/lp einstieg ist umkehrbar: /lp zurueck holt Schritt 14", LevelPilotDB.plan.test.i == 14)
+SlashCmdList.LEVELPILOT("speed") SlashCmdList.LEVELPILOT("gruen 8")
+SlashCmdList.LEVELPILOT("reset") tick(1)
+check("/lp reset: Plan-Engine im Gleichschritt (Speed + Grau-Grenze)",
+  R.speed == LevelPilotDB.speed and R.maxDiff == LevelPilotDB.maxDiff and not LevelPilotDB.maxDiffUser)
+local hearthN, origH = 0, R.OnHearth
+R.OnHearth = function() hearthN = hearthN + 1 end
+E._OnEvent(E, "UNIT_SPELLCAST_SUCCEEDED", "player", "Cast-1-2-3", 8690)
+R.OnHearth = origH
+check("Ruhestein-Zauber wird erkannt (unit, castGUID, spellID)", hearthN == 1)
+LevelPilotDB.skipLog = { { r = "andere", k = "accept:1", t = 1 }, { r = "test", k = "accept:2", t = 2 } }
+SlashCmdList.LEVELPILOT("neu") tick(2)
+check("/lp neu: Rücknahme-Liste anderer Routen bleibt", #LevelPilotDB.skipLog == 1 and LevelPilotDB.skipLog[1].r == "andere")
+LevelPilotDB.mode = "quests" tick(2)
+if LevelPilotLog:IsShown() then SlashCmdList.LEVELPILOT("log") end
+SlashCmdList.LEVELPILOT("log") tick(12, 0.25)
+LOG[998] = true R.ScanLog(true) E._OnEvent(E, "QUEST_LOG_UPDATE") tick(12, 0.25)
+check("Questlog-Check im Quest-Modus aktualisiert sich (5 Quests)", (LevelPilotLog.num:GetText() or ""):find("ffffff5|r", 1, true) ~= nil)
+LOG[998] = nil R.ScanLog(true)
+LevelPilotDB.mode = "route" tick(2)
+-- Questlog-Ereignisse im Schwall: hoechstens ein Neuaufbau je 0,2 s
+local nPlan, origPlan = 0, R.Plan
+R.Plan = function(...) nPlan = nPlan + 1 return origPlan(...) end
+for _ = 1, 20 do E._OnEvent(E, "QUEST_LOG_UPDATE") end
+tick(1, 0.25)
+R.Plan = origPlan
+check("20 Questlog-Ereignisse am Stück -> 1 Neuaufbau (gebündelt, vorher 20)", nPlan == 1)
+
+print("== I: Prüfer-Funde 5.0.1 (Plan-Engine)")
+-- I1: im Hub spaetere Hub-Quest mit angenommen (Auto-Annehmen), Questziele weit weg -> KEIN Sprung
+GIVER[611], GIVER[612], GIVER[613] = 701, 701, 701
+QOBJ[611], QOBJ[612], QOBJ[613] = 710, 710, 711
+local hub = { name = "Hub", faction = "Horde", min = 1, max = 99, steps = {
+  S("accept", 611, 1), S("accept", 612, 1), S("complete", 611, 1), S("complete", 612, 1),
+  S("turnin", 611, 1), S("turnin", 612, 1), S("accept", 613, 1), S("complete", 613, 1), S("turnin", 613, 1) } }
+reset() PX, PY = 0.20, 0.20
+LOG = { [611] = true, [612] = true, [613] = true } R.ScanLog(true)
+local PH = { k = "complete:611", i = 3 }
+R.Plan(hub, 24, {}, PH, 6, nil) Tm = Tm + 4
+h, list, info = R.Plan(hub, 24, {}, PH, 6, nil)
+check("im Hub mit spaeterer Hub-Quest im Log: kein Sprung (Zeiger bleibt 3)", PH.i == 3 and not info.jumped and R.state[3] == "open")
+local adv = R.LogAdvice(hub, "hub", 24, PH.i, h, {})
+local delN = 0 for _, e in ipairs(adv.list) do if e.cat == "delete" then delN = delN + 1 end end
+check("Questlog-Check rät dort nichts zum Löschen", delN == 0)
+-- I1b: Plan-Ziel ohne Koordinaten -> kein Sprung (weit weg ist nicht beurteilbar); eigene Quests (kein Cache)
+GIVER[641], GIVER[642], GIVER[643] = 701, 701, 711
+QOBJ[641], QOBJ[642], QOBJ[643] = nil, 710, 711
+local hubB = { name = "HubB", faction = "Horde", min = 1, max = 99, steps = {
+  S("accept", 641, 1), S("accept", 642, 1), S("complete", 641, 1), S("complete", 642, 1),
+  S("turnin", 641, 1, 22, { npc = -1 }), S("turnin", 642, 1), S("accept", 643, 1), S("complete", 643, 1), S("turnin", 643, 1) } }
+reset() PX, PY = 0.50, 0.50
+LOG = { [641] = true, [642] = true, [643] = true } R.ScanLog(true)
+check("Testaufbau: Plan-Ziel (complete:641) hat keine Koordinaten", R.StepTarget(hubB.steps[3]) == nil)
+local PH2 = { k = "complete:641", i = 3 }
+R.Plan(hubB, 24, {}, PH2, 6, nil) Tm = Tm + 4
+h, list, info = R.Plan(hubB, 24, {}, PH2, 6, nil)
+check("Ziel ohne Koordinaten: kein Sprung", PH2.i == 3 and not info.jumped)
+-- I3: Abgabe ohne Questziel-Daten: Pfeilziel bleibt bei jedem Aufruf erhalten (Cache)
+GIVER[651] = 701
+local tin = S("turnin", 651, 1)
+LOG[651] = true R.ScanLog(true)
+local g1 = R.GoalTarget(tin) local g2 = R.GoalTarget(tin)
+check("GoalTarget liefert auch beim 2. Aufruf (Cache) ein Ziel", g1 ~= nil and g2 ~= nil)
+-- I2: Zeiger auf einer verpassten Abgabe klebt nicht fest
+GIVER[621], GIVER[622], GIVER[623] = 701, 701, 701
+QOBJ[621], QOBJ[622], QOBJ[623] = 801, 801, 801
+local r2 = { name = "R2", faction = "Horde", min = 1, max = 99, steps = {
+  S("accept", 621, 1), S("complete", 621, 1), S("accept", 622, 1), S("turnin", 621, 1), S("complete", 622, 1), S("turnin", 622, 1),
+  S("accept", 623, 1), S("complete", 623, 1), S("turnin", 623, 1) } }
+reset() PX, PY = 0.20, 0.20
+LOG = { [621] = true, [622] = true } R.ScanLog(true)
+local P2 = { k = "turnin:621", i = 4, hold = CLOCK + 1800 }
+h = R.Plan(r2, 24, {}, P2, 6, nil)
+check("verpasste Abgabe: Zeiger laeuft weiter auf 5 (complete:622)", P2.i == 5 and P2.k == "complete:622" and h == 5)
+-- I4: Einstieg im Hub beim 1. Besuch, eine Quest vom 2. Besuch (gleicher Hub) schon im Log
+GIVER[631], GIVER[632], GIVER[633], GIVER[635] = 701, 701, 702, 701
+local r4 = { name = "R4", faction = "Horde", min = 1, max = 99, steps = {
+  S("accept", 631, 1, 22), S("accept", 632, 1, 22), S("complete", 631, 1, 22), S("complete", 632, 1, 22), S("turnin", 631, 1, 22), S("turnin", 632, 1, 22),
+  S("accept", 633, 2, 24), S("complete", 633, 2, 24), S("turnin", 633, 2, 24),
+  S("accept", 635, 3, 28), S("complete", 635, 3, 28), S("turnin", 635, 3, 28) } }
+reset() PX, PY = 0.20, 0.20
+LOG = { [631] = true, [635] = true } R.ScanLog(true)
+local P4r = {}
+h, list, info = R.Plan(r4, 23, {}, P4r, 6, nil)
+check("Einstieg beim 1. Hub-Besuch (Schritt 2), nicht beim 2. (10)", P4r.i == 2 and R.state[2] == "open" and info.entry == "hier")
+-- I5: Quest aus einer FRUEHEREN Route ist nicht "spaeter im Plan"
+reset() LOG = { [201] = true } R.ScanLog(true)
+local cur = { name = "Spaeter", faction = "Horde", min = 30, max = 40, steps = { S("accept", 699, 1), S("turnin", 699, 1) } }
+adv = R.LogAdvice(cur, "spaeter", 24, 1, nil, {})
+check("fruehere Route: löschen mit Grund", adv.list[1] and adv.list[1].cat == "delete" and adv.list[1].why:find("vorigen Route"))
+-- I6: Beweis-Wartezeit startet nach Flug/Haltezeit neu
+reset() PX, PY = 0.10, 0.80
+DONE = { [201] = true, [202] = true, [204] = true }
+LOG = { [301] = true, [302] = true, [6462] = true, [216] = true } R.ScanLog(true)
+local P8 = { k = "complete:301", i = 14 }
+plan(P8) TAXI = true Tm = Tm + 120 plan(P8) TAXI = false
+h, list, info = plan(P8)
+check("erster Tick nach der Landung: noch kein Sprung", h == 14 and not info.jumped)
+Tm = Tm + 4 h, list, info = plan(P8)
+check("3 s nach der Landung: Sprung", h == 21 and info.jumped)
+-- I7: fehlende Vorquest -> "skip", nicht "wartet auf Stufe"
+local sp = S("accept", 874, 1, 22, { rl = 25, pre = { 913 } })
+check("Vorquest fehlt, Stufe auch: skip (nicht later)", R.StepDone(sp, 23) == "skip")
 
 print("== H: Rechenzeit auf der echten Route (199 Schritte)")
 dofile("Routes/Horde_22_30.lua")

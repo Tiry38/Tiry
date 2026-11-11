@@ -116,7 +116,7 @@ Alles oben ist im Forever-Nachbau getestet, aber nicht im echten Client. Besonde
 
 ---
 
-# Ingame-Test – LevelPilot 5.0.0
+# Ingame-Test – LevelPilot 5.0.1
 Einbau: alten Ordner `LevelPilot` löschen, ZIP entpacken, **WoW komplett neu starten** (neue Grafiken
 `i_trash`, `i_flag`, `i_log`). Für Rückmeldungen hilft ein Screenshot vom Fenster **und** vom Questlog-Check.
 
@@ -150,6 +150,16 @@ Einbau: alten Ordner `LevelPilot` löschen, ZIP entpacken, **WoW komplett neu st
 - [ ] **Blau = behalten** mit „Schritt N“, fertige Quests mit „fertig“
 - [ ] Warnung „Log wird voll“, bevor der Plan mehr Plätze braucht, als frei sind
 
+## Neu in 5.0.1 (Prüfrunde)
+- [ ] **Hexenmeister** auf Stufe 22 in Orgrimmar: Plan startet **nicht** beim Schamanen-Lehrer
+- [ ] Im Hub alle Quests annehmen (Auto-Annehmen nimmt auch spätere Hub-Quests mit): Plan bleibt beim aktuellen Schritt, **kein** „PLAN SPRINGT MIT“
+- [ ] Beim Looten (viele Questlog-Ereignisse) kein Ruckeln; Fenster aktualisiert trotzdem flüssig
+- [ ] Liste: Erledigen/Abgeben von Quests, die gleich erst angenommen werden, tragen die Pille „geplant“
+- [ ] Ruhestein benutzen: Ruhestein-Schritt/Flug-Rat reagiert (Zauber wird jetzt erkannt)
+- [ ] `/lp aus`, dann `/lp log`: Fenster + Questlog-Check erscheinen
+- [ ] Klick aufs Plan-Band, danach `/lp zurueck`: alter Schritt ist wieder da
+- [ ] Pfeil an Klippen/Schluchten (z. B. Arathi ↔ Sumpfland, Tausend Nadeln): zeigt den Weg außen herum, nicht über den Abhang
+
 ## Aus 4.2 weiter gültig
 - [ ] Pfeil und Entfernungen über echten Laufweg („über Talondeep-Pfad“, Aufzüge), Flug-Rat nur mit bekannten Flugpunkten
 - [ ] Erstes Öffnen: höchstens ein kurzer Ruckler (Wegenetz), danach kein Ruckeln durch LevelPilot
@@ -161,7 +171,7 @@ Einbau: alten Ordner `LevelPilot` löschen, ZIP entpacken, **WoW komplett neu st
 - [ ] nach 10 Minuten Questen: ______ KB (erwartet: grob 6–12 MB, nicht 30+ MB)
 
 ## Was nur im Spiel geprüft werden kann (ehrlich)
-Plan, Einstieg, Sprung und Questlog-Check sind im Lua-Nachbau getestet (`tests/plan.lua`, 54 Prüfungen), das Fenster im
+Plan, Einstieg, Sprung und Questlog-Check sind im Lua-Nachbau getestet (`tests/plan.lua` 72 Prüfungen, kompletter Durchlauf beider Routen `tests/playthrough.lua`), das Fenster im
 strengen Forever-Nachbau gezeichnet (`tests/lp_layout.lua` → `previews/LevelPilot_5.0_*.png`) – aber nicht im Client.
 Unsicher: Einstieg mit **echten** Questie-Daten (Nachbau mit nachgestellten Questgebern), wie sich die Sprung-Schwellen
 (900/450 m, 3 s) anfühlen, ob Forever `QuestMapQuestOptions_AbandonQuest`, `C_QuestLog.GetMaxNumQuestsCanAccept` und

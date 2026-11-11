@@ -8,13 +8,60 @@ in Sitzungen auf **Tiry38/Tiry** weiter. Alle Dateien liegen in diesem Ordner, P
 | Add-on | Version | Zweck | Stand |
 |---|---|---|---|
 | **Tiry's Zentrale** | 6.1.0 | Gold- und Berufe-Addon (`TirysZentrale/`, Doku `ZENTRALE.md`): Neon-Glas-Design mit Dock, **ein AH-Scan für alle Reiter**, Verkäufe pro Tag, Gold pro Tag, Schnäppchen, Markt-Tiefe, Kaufen bis, Neu einstellen mit Menge, Anzahlung im Gewinn, **Tooltip als Preis-Liste (6.1)** | ausgeliefert, **Spieltest offen** (Checkliste `INGAME-TEST.md`) |
-| **LevelPilot** | 5.0.0 | Levelrouten Horde **22–30 und 30–40** als **fester Plan** (Einstieg erkennt deinen Stand, Sprung nur mit Beweis, `/lp zurueck`), **Questlog-Check** mit Löschen-Knopf, Plan-Band + Status-Pillen, echte Laufwege, Flug-Rat, Pfeil, Lichtstrahl, Auto-Quests, XP-Cockpit | ausgeliefert, **Spieltest offen** (Checkliste `INGAME-TEST.md`, Teil LevelPilot) |
+| **LevelPilot** | 5.0.1 | Levelrouten Horde **22–30 und 30–40** als **fester Plan** (Einstieg erkennt deinen Stand, Sprung nur mit Beweis, `/lp zurueck`), **Questlog-Check** mit Löschen-Knopf, Plan-Band + Status-Pillen, echte Laufwege, Flug-Rat, Pfeil, Lichtstrahl, Auto-Quests, XP-Cockpit | ausgeliefert, **Spieltest offen** (Checkliste `INGAME-TEST.md`, Teil LevelPilot) |
 | **ProcAlarm** | 2.1.0 | **für Tirys Kollegen (Hexer)**: Schattentrance (17941) über Blizzard-Aura-Slot, auch im Kampf; violetter Glow + Blinken, ohne Ton, ohne grünen Ring | ausgeliefert, **Kampftest offen** |
 | **Schlaghagel** | 1.0.0 | **Tirys Verstärker**: Schlaghagel-Buff (16257) über Blizzard-Aura-Slot, auch im Kampf; Ladungen groß, Restzeit, türkiser Glow + Blinken wie ProcAlarm, ohne Ton; `/hagel` | ausgeliefert, **Kampftest offen** |
 | **EnhanceHUD** | 1.2.0 | Verstärker-Schamanen-HUD (Frost/Feuer-Design) | ausgeliefert |
 | **Blitzschild** | 1.2.0 | Blitzschlagschild Ladungen/Zeit | im Kampf nicht möglich (secret values) → Cooldown-Manager „Verfolgte Leisten“ + WA nur außerhalb des Kampfes |
 | **MiniPost** | – | Post-Symbol unter der Uhr, andere Minimap-Knöpfe unsichtbar | ausgeliefert, Test offen |
 | **ChatHoch** | 1.4.0 | Chat höher, Reiter bündig (ClampRectInsets von ChatFrame1) | ausgeliefert; Tiry hatte noch 1.3.0 geladen |
+
+## LevelPilot 5.0.1 – Komplett-Prüfung (11.11.)
+Tirys Auftrag: „alles fertig machen, dann komplett prüfen – Fehler, Korrektheit, Effizienz, Schnelligkeit, Design –
+verbessern, nochmal prüfen.“ Vorgehen: kompletter **Durchlauf beider Routen** (`tests/playthrough.lua`: jeder Schritt
+bis zum Ende, Einstiegs-Probe nach jedem Schritt, Questlog-Check nach jedem Schritt, 2 Stufen hinter Plan, Hexenmeister)
++ drei unabhängige Code-Prüfungen (Plan-Engine, Fenster/Ereignisse, Wegenetz/Flug). **Jeder Fund nachgestellt**, jeder
+Fix hat einen Test, der mit dem alten Code fehlschlägt und mit dem neuen besteht.
+
+| Fund (nachgestellt) | Schwere | Fix |
+|---|---|---|
+| Hexenmeister: Schritt 1 (Schamanen-Lehrer) blieb ewig offen → Plan hing | hoch | Klassenschritt einer anderen Klasse = „übersprungen“ |
+| Im Hub nimmt Auto-Annehmen eine spätere Hub-Quest mit → Plan sprang nach 3 s weg, eben angenommene Quests „verpasst“ + Lösch-Tipp | hoch | Kein Beweis an einem Ort, an dem du Quests angenommen hast, die der Plan vorher noch braucht; Ziel ohne Koordinaten = kein Sprung |
+| Laufweg „durch die Klippe“: Punkt oben hing am Knoten unten (Arathi 190 statt 888 yd, Tausend Nadeln 282 statt > 8000 yd) | hoch | Anbindung nur an Knoten, die vom nächsten Knoten aus auf ≤ 1,3 × Luftlinie erreichbar sind |
+| Flug-Rat über nicht verbundene Flugpunkte (Grom'gol → Hammerfall ohne Kargath) | hoch | Beide im Flugnetz, keine Verbindung → kein Flug |
+| Questlog-Check riet, eine graue Quest zu löschen, deren Abgabe der Plan noch braucht (5763) | mittel | Plan schlägt Grau |
+| Zeiger klebte auf einer verpassten Abgabe → Auto-Annehmen-Fenster, Band, Platzrechnung hingen fest | mittel | Zeiger läuft über Verpasstes weiter |
+| Einstieg im Hub beim 1. Besuch mit einer Quest vom 2. Besuch → ganze Abschnitte „verpasst“ | mittel | Mehrheit der Abschnitte zählt, bei Gleichstand der zur Stufe passende |
+| Spieler auf abgetrenntem Teilnetz → ~270 ms Rechnen je Sekunde | mittel | Teilnetze beim Laden markiert, Suche bricht sofort ab (jetzt ~2 ms) |
+| Pfeil-Ziel ging bei Abgaben ohne Questziel-Daten jedes 2. Mal verloren | mittel | Cache-Treffer ohne Ziel → Abgabe-NPC |
+| Plan + Questlog-Check jede Sekunde **und** bei jedem Questlog-Ereignis (Looten = Schwall) | mittel | Ereignisse gebündelt (≤ 1 Neuaufbau je 0,2 s, am NPC sofort), Questlog-Check ≤ 2/s, Kartenliste nur im Quest-Modus |
+| Ziel + Flug-Rat für Strahl/Pfeil jedes Frame neu, Symbol jedes Frame gesetzt | mittel | Ziel-Cache 0,25 s (Refresh leert ihn), Symbol nur bei Typwechsel |
+| Questlog-Check im Quest-Modus/ohne Route nie aktualisiert | mittel | aktualisiert, solange das Panel offen ist |
+| `/lp reset` ließ Speed/Grau-Grenze der Engine auf altem Stand | mittel | Engine wird mitgesetzt |
+| Klick aufs Plan-Band (`/lp einstieg`) nicht umkehrbar | mittel | Zeiger landet in der Rücknahme-Liste |
+| Ruhestein-Zauber nie erkannt (Ereignis-Parameter um 1 verschoben) | niedrig | `unit, castGUID, spellID` |
+| Toast-Flut beim ersten Login möglich | niedrig | erstes Questlog-Ereignis nach Login nur merken |
+| `/lp neu` löschte die Rücknahme-Liste aller Routen | niedrig | nur die eigene Route |
+| Questfenster ohne Quest-ID nahm im Routen-Modus alles an | niedrig | Abgleich über den Titel |
+| Folgequest am selben NPC als „NICHT MEHR DA“ übersprungen, bevor die Vorquest abgegeben war | niedrig | Angebots-Prüfung erst, wenn der NPC nichts mehr zum Abgeben hat |
+| `/lp log` bei ausgeblendetem Fenster unsichtbar | niedrig | Fenster wird mit eingeblendet |
+| Spätere Quest ohne Vorquest „wartet auf Stufe“ statt „passt nicht“ | niedrig | Vorquest-Prüfung vor der Stufe |
+| Quests der vorigen Route als „später im Plan“ behalten | niedrig | nur spätere Routen; sonst „aus der vorigen Route“ |
+| Beweis-Wartezeit lief im Flug weiter → Sprung im ersten Tick nach der Landung | niedrig | Wartezeit startet nach Flug/Haltezeit neu |
+| Aufzug mit zwei Anschlüssen (Unterstadt) kannte nur einen | niedrig | Verbindungen je Kante |
+| Pfeil zeigte im offenen Gelände öfter seitlich auf einen Netzknoten | niedrig | ersten Knoten weglassen, wenn der Umweg kaum etwas bringt (Brachland: > 45° von 31 auf 8 Fälle) |
+| Ruhestein-Rat in Grom'gol nie (Ortsname ≠ Flugmeister-Name) | niedrig | Ortsname vor dem Komma wird im Gasthaus-Ort gesucht |
+| Questnamen-Abgleich jede Sekunde neu (122 Abfragen) | Tempo | dauerhaft gemerkt |
+
+**Design:** wartende Schritte in der Held-Karte als „WARTET · AB STUFE n“ (statt wie ein normales Ziel), geplante
+Folge-Schritte in der Liste mit Pille **„geplant“**.
+**Zahlen (Nachbau, Lua 5.1 ohne JIT):** Durchlauf 22–30 / 30–40 / Hexer: Einstieg nach jedem Schritt **100 % exakt**
+(180/180, 219/219, 175/175), **0 falsche Lösch-Tipps** in 598 Questlog-Checks, R.Plan Ø 0,5–0,7 ms (max 1,4 ms),
+Questlog-Check max 0,2 ms, Wegenetz je Sekunde Ø 0,9 ms. Tests: `plan.lua` 72, `playthrough.lua` 17, `travel2.lua` 7
+Prüfungen; Suite 25/25 grün.
+**Offen (bewusst):** Das Wegenetz hat keine Höhen – die Klippen-Regel fängt die Fälle ab, die das Netz selbst kennt;
+ein Punkt genau zwischen zwei Ebenen kann weiter falsch angebunden werden. Echte Lösung: Höhe je Knoten aus
+`navmesh.py` + Spieler-Höhe (im Spiel prüfen, ob `UnitPosition` in Forever eine Höhe liefert).
 
 ## LevelPilot 5.0 – fester Plan, Einstieg, Questlog-Check (11.11.)
 Tirys Kritik an 4.2: „fehlt noch immer die Logik“, „rafft nicht, wie der aktuelle Stand von einem selber ist und was
@@ -153,7 +200,7 @@ Amboss-/Schloss-Sound (max. 1–2 s)“.
 - ProcAlarm 2.1: ob Forever Blinken/Restzeit am Aura-Slot annimmt (`/proc diag` → „Teile“).
 
 ## Nächste Schritte
-1. Tirys Spieltest-Rückmeldung zu LevelPilot 5.0 abwarten (Einstieg-Schrittnummer, Sprung, Questlog-Check) und gezielt nachbessern.
+1. Tirys Spieltest-Rückmeldung zu LevelPilot 5.0.1 abwarten (Einstieg-Schrittnummer, Sprung, Questlog-Check, Hexenmeister-Start) und gezielt nachbessern.
 2. **Routen 40–50, 50–60** mit derselben Kette (`make_route.py` neuen Schlüssel in `ROUTES` + Abschnitte).
 3. Sobald Questie die neuen Forever-Quests führt (IDs 9xxxx): Pool neu rechnen – könnte den Grind-Anteil deutlich senken.
 4. ProcAlarm nach `/proc diag`-Screenshot anpassen; ChatHoch 1.4.0 / MiniPost-Rückmeldung.
