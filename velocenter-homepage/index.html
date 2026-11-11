@@ -1,0 +1,1154 @@
+<title>Velocenter Hessert</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="description" content="Velocenter Hessert in Wörth am Rhein: E-Bikes, i:SY Experte, Bosch Service Center, Werkstatt, Leasing und Finanzierung. Familienbetrieb seit 1995.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=Sora:wght@300;400;500;600;700&display=swap">
+<style>
+/* Layout: schwebende Glas-Navi, Ansichten per #hash mit Farbwischer-Übergang, organische Bühnen statt Kachelraster */
+:root{
+  --bg:#07090D; --bg2:#0C0F18; --ink:#F5F7FC; --mut:#AEB6CA; --dim:#7D869C;
+  --red:#E2232D; --mag:#F472B6; --vio:#C084FC; --blu:#60A5FA; --cy:#22D3EE; --ok:#34D399; --warn:#FBBF24; --org:#FF7A1A;
+  --glass:rgba(24,20,44,.58); --glass2:rgba(255,255,255,.06); --edge:rgba(192,132,252,.22);
+  --grad:linear-gradient(105deg,#E2232D 0%,#F472B6 32%,#C084FC 62%,#60A5FA 100%);
+  --grad2:linear-gradient(135deg,#22D3EE,#60A5FA 40%,#C084FC 75%,#F472B6);
+  --display:"Outfit",ui-sans-serif,system-ui,"Segoe UI",sans-serif;
+  --body:"Sora",ui-sans-serif,system-ui,"Segoe UI",sans-serif;
+  --ease:cubic-bezier(.2,.8,.2,1); --spring:cubic-bezier(.34,1.56,.64,1);
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 16px/1.6 var(--body);overflow-x:hidden;font-variant-numeric:tabular-nums}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:60;background:var(--bg)}
+img{max-width:100%;height:auto;display:block}
+a{color:inherit}
+button{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--cy);outline-offset:3px;border-radius:12px}
+.wrap{width:100%;max-width:1240px;margin:0 auto;padding-left:max(20px,env(safe-area-inset-left,0px));padding-right:max(20px,env(safe-area-inset-right,0px))}
+
+/* ---------- Hintergrund wie KI-Zentrale/Planer ---------- */
+.sky{position:fixed;inset:-10%;z-index:-2;pointer-events:none;
+  background:
+   radial-gradient(42% 38% at 8% 6%,rgba(96,165,250,.30),transparent 70%),
+   radial-gradient(40% 36% at 96% 4%,rgba(226,35,45,.34),transparent 70%),
+   radial-gradient(44% 40% at 98% 96%,rgba(192,132,252,.28),transparent 70%),
+   radial-gradient(40% 36% at 2% 98%,rgba(34,211,238,.20),transparent 70%),
+   radial-gradient(34% 30% at 52% 104%,rgba(244,114,182,.22),transparent 70%),var(--bg);
+  animation:drift 26s ease-in-out infinite alternate}
+.smoke{position:fixed;inset:0;z-index:-1;pointer-events:none;background:url(img/rauch.webp) center/cover no-repeat;opacity:.5;mix-blend-mode:screen}
+.comb{position:fixed;inset:0;z-index:-1;pointer-events:none;opacity:.06;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='56' height='97' viewBox='0 0 56 97'%3E%3Cpath d='M28 0 56 16v32L28 64 0 48V16zM28 64v33' fill='none' stroke='%23C084FC' stroke-width='1'/%3E%3C/svg%3E");
+  -webkit-mask-image:radial-gradient(70% 60% at 50% 40%,#000,transparent);mask-image:radial-gradient(70% 60% at 50% 40%,#000,transparent)}
+@keyframes drift{to{transform:translate3d(2%,-2%,0) rotate(2deg) scale(1.04)}}
+
+/* ---------- Kopf + Navigation ---------- */
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:50;padding-top:14px;padding-bottom:6px}
+.bar{display:flex;align-items:center;gap:14px}
+.brand{display:flex;align-items:center;flex:none;border-radius:999px;padding:6px 14px 6px 8px;background:var(--glass);backdrop-filter:blur(16px) saturate(1.4);-webkit-backdrop-filter:blur(16px) saturate(1.4);border:1px solid var(--edge);text-decoration:none;box-shadow:0 10px 30px rgba(0,0,0,.35)}
+.brand img{height:42px;width:auto;filter:drop-shadow(0 2px 8px rgba(226,35,45,.35))}
+.nav{position:relative;display:flex;align-items:center;gap:2px;padding:6px;border-radius:999px;background:var(--glass);backdrop-filter:blur(16px) saturate(1.4);-webkit-backdrop-filter:blur(16px) saturate(1.4);border:1px solid var(--edge);box-shadow:0 10px 30px rgba(0,0,0,.35),inset 0 1px 0 rgba(255,255,255,.08)}
+.nav a{position:relative;z-index:1;display:block;padding:10px 15px;border-radius:999px;font:600 14.5px/1 var(--display);letter-spacing:.01em;color:var(--mut);text-decoration:none;white-space:nowrap;transition:color .3s var(--ease)}
+.nav a:hover{color:var(--ink)}
+.nav a.on{color:#fff}
+.nav .ind{position:absolute;z-index:0;top:6px;left:0;height:calc(100% - 12px);width:60px;border-radius:999px;background:var(--grad);background-size:200% 100%;box-shadow:0 6px 22px rgba(226,35,45,.45),0 0 0 1px rgba(255,255,255,.12) inset;transition:transform .55s var(--spring),width .55s var(--spring);animation:flow 6s linear infinite}
+.nav .ind::after{content:"";position:absolute;inset:0;border-radius:inherit;background:linear-gradient(180deg,rgba(255,255,255,.35),transparent 55%)}
+.nav .ghost{position:absolute;z-index:0;top:6px;left:0;height:calc(100% - 12px);border-radius:999px;background:rgba(255,255,255,.08);opacity:0;transition:transform .35s var(--ease),width .35s var(--ease),opacity .25s}
+@keyframes flow{to{background-position:200% 0}}
+.bar .sp{flex:1}
+.live{display:flex;align-items:center;gap:8px;flex:none;padding:9px 14px;border-radius:999px;background:var(--glass);border:1px solid var(--edge);font:600 13px/1.1 var(--display);color:var(--mut);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px)}
+.live i{width:9px;height:9px;border-radius:50%;background:var(--dim);flex:none}
+.live.open i{background:var(--ok);box-shadow:0 0 0 4px rgba(52,211,153,.18),0 0 14px var(--ok);animation:pulse 2s ease-in-out infinite}
+.live.open b{color:#6EE7B7}
+.live.closed b{color:#FDA4AF}
+@keyframes pulse{50%{box-shadow:0 0 0 7px rgba(52,211,153,0),0 0 6px var(--ok)}}
+.burger{display:none;flex:none;width:52px;height:52px;border-radius:50%;border:1px solid var(--edge);background:var(--glass);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);cursor:pointer;position:relative;z-index:70}
+.burger span{position:absolute;left:15px;right:15px;height:2.5px;border-radius:2px;background:var(--ink);transition:transform .45s var(--spring),opacity .2s,top .45s var(--spring)}
+.burger span:nth-child(1){top:18px}.burger span:nth-child(2){top:25px}.burger span:nth-child(3){top:32px}
+body.menu .burger span:nth-child(1){top:25px;transform:rotate(45deg)}
+body.menu .burger span:nth-child(2){opacity:0}
+body.menu .burger span:nth-child(3){top:25px;transform:rotate(-45deg)}
+
+/* Handy-Menü: kreisförmiges Aufziehen + gestaffelte Einträge */
+.mnu{position:fixed;inset:0;z-index:65;display:flex;flex-direction:column;justify-content:center;gap:6px;padding:90px max(28px,env(safe-area-inset-right,0px)) 40px max(28px,env(safe-area-inset-left,0px));
+  background:radial-gradient(120% 80% at 100% 0%,rgba(226,35,45,.35),transparent 60%),radial-gradient(100% 70% at 0% 100%,rgba(96,165,250,.3),transparent 60%),rgba(9,8,20,.96);
+  clip-path:circle(0 at calc(100% - 46px) 46px);transition:clip-path .7s cubic-bezier(.7,0,.2,1);visibility:hidden}
+body.menu .mnu{clip-path:circle(150% at calc(100% - 46px) 46px);visibility:visible}
+.mnu a{font:800 clamp(30px,9vw,46px)/1.15 var(--display);text-decoration:none;color:var(--ink);opacity:0;transform:translateX(40px);transition:opacity .4s,transform .6s var(--spring)}
+.mnu a.on{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+body.menu .mnu a{opacity:1;transform:none;transition-delay:calc(.12s + var(--i)*.05s)}
+.mnu .mfoot{margin-top:26px;display:flex;flex-wrap:wrap;gap:10px;opacity:0;transition:opacity .4s .5s}
+body.menu .mnu .mfoot{opacity:1}
+
+/* ---------- Übergang zwischen Ansichten ---------- */
+.wipe{position:fixed;inset:0;z-index:80;pointer-events:none;display:grid}
+.wipe i{grid-area:1/1;transform:translateX(-105%) skewX(-12deg);width:130%;margin-left:-15%}
+.wipe i:nth-child(1){background:#E2232D}
+.wipe i:nth-child(2){background:linear-gradient(90deg,#F472B6,#C084FC)}
+.wipe i:nth-child(3){background:linear-gradient(90deg,#60A5FA,#0C0F18 70%)}
+.wipe.go i{animation:sweep .95s cubic-bezier(.77,0,.18,1) both}
+.wipe.go i:nth-child(2){animation-delay:.06s}
+.wipe.go i:nth-child(3){animation-delay:.12s}
+@keyframes sweep{0%{transform:translateX(-105%) skewX(-12deg)}45%,55%{transform:translateX(0) skewX(-12deg)}100%{transform:translateX(105%) skewX(-12deg)}}
+.wipe .wl{grid-area:1/1;place-self:center;opacity:0;z-index:2;width:min(300px,60vw)}
+.wipe.go .wl{animation:wl .95s ease both .1s}
+@keyframes wl{0%,25%{opacity:0;transform:scale(.8)}45%,55%{opacity:1;transform:scale(1)}75%,100%{opacity:0;transform:scale(1.08)}}
+
+main{overflow-x:clip}
+.view{padding-bottom:40px}
+.view.enter .rv{animation:rise .8s var(--ease) both;animation-delay:calc(var(--i,0) * 75ms + 60ms)}
+@keyframes rise{from{opacity:0;transform:translateY(28px) scale(.985);filter:blur(4px)}to{opacity:1;transform:none;filter:none}}
+
+/* ---------- Typo + Knöpfe ---------- */
+h1,h2,h3{font-family:var(--display);margin:0;text-wrap:balance;letter-spacing:-.015em}
+h1{font-weight:900;font-size:clamp(40px,5.6vw,80px);line-height:.98}
+h2{font-weight:800;font-size:clamp(30px,4vw,52px);line-height:1.05}
+h3{font-weight:700;font-size:clamp(20px,2vw,24px);line-height:1.2}
+.gt{background:var(--grad);background-size:200% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:flow 8s linear infinite}
+.gt2{background:var(--grad2);-webkit-background-clip:text;background-clip:text;color:transparent}
+.kick{display:inline-flex;align-items:center;gap:10px;font:700 12.5px/1 var(--display);letter-spacing:.16em;text-transform:uppercase;color:var(--mut)}
+.kick::before{content:"";width:28px;height:3px;border-radius:3px;background:var(--grad)}
+.lead{font-size:clamp(16px,1.6vw,19px);color:var(--mut);max-width:60ch}
+p{margin:0}
+.btns{display:flex;flex-wrap:wrap;gap:12px}
+.btn{position:relative;display:inline-flex;align-items:center;justify-content:center;gap:10px;min-height:52px;padding:0 24px;border-radius:999px;border:0;cursor:pointer;text-decoration:none;font:700 15.5px/1 var(--display);letter-spacing:.01em;transition:transform .35s var(--spring),box-shadow .35s}
+.btn svg{width:20px;height:20px;flex:none}
+.btn.main{color:#fff;background:var(--grad);background-size:200% 100%;animation:flow 6s linear infinite;box-shadow:0 1px 0 rgba(255,255,255,.35) inset,0 -3px 0 rgba(0,0,0,.25) inset,0 12px 30px rgba(226,35,45,.4)}
+.btn.main:hover{transform:translateY(-3px) scale(1.02);box-shadow:0 1px 0 rgba(255,255,255,.35) inset,0 -3px 0 rgba(0,0,0,.25) inset,0 18px 40px rgba(192,132,252,.5)}
+.btn.glass{color:var(--ink);background:var(--glass2);border:1px solid rgba(255,255,255,.14);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
+.btn.glass:hover{transform:translateY(-3px);background:rgba(255,255,255,.1)}
+.btn.wa{color:#04210F;background:linear-gradient(135deg,#4ADE80,#22C55E);box-shadow:0 1px 0 rgba(255,255,255,.4) inset,0 -3px 0 rgba(0,0,0,.18) inset,0 12px 28px rgba(34,197,94,.35)}
+.btn.wa:hover{transform:translateY(-3px)}
+.chip{display:inline-flex;align-items:center;gap:8px;padding:8px 14px;border-radius:999px;background:var(--glass2);border:1px solid rgba(255,255,255,.1);font:600 13.5px/1.2 var(--display);color:var(--ink)}
+.sec{padding-top:clamp(56px,8vw,110px)}
+.shead{display:flex;flex-direction:column;gap:14px;margin-bottom:34px;max-width:780px}
+.ico{width:24px;height:24px;flex:none}
+
+/* Licht folgt der Maus */
+.lit{position:relative;isolation:isolate}
+.lit::before{content:"";position:absolute;inset:0;border-radius:inherit;z-index:-1;opacity:0;transition:opacity .4s;background:radial-gradient(420px circle at var(--mx,50%) var(--my,50%),rgba(192,132,252,.22),transparent 60%)}
+.lit:hover::before{opacity:1}
+
+/* ---------- START: Bühne ---------- */
+.hero{display:grid;grid-template-columns:1.02fr 1fr;align-items:center;gap:30px;padding-top:clamp(30px,5vw,64px)}
+.hero>div{min-width:0}
+.hero h1 .l2{display:block}
+.hero .lead{margin:22px 0 30px}
+.stage{position:relative;aspect-ratio:1/0.82;max-width:100%}
+.orb{position:absolute;inset:6% 4% 14% 4%;border-radius:50%;background:conic-gradient(from 0deg,#E2232D,#F472B6,#C084FC,#60A5FA,#22D3EE,#E2232D);filter:blur(60px);opacity:.55;animation:spin 18s linear infinite}
+.ring{position:absolute;inset:4% 8% 12% 8%;border-radius:50%;border:1.5px solid rgba(255,255,255,.12);box-shadow:inset 0 0 80px rgba(192,132,252,.18)}
+.ring::after{content:"";position:absolute;inset:-1.5px;border-radius:50%;padding:1.5px;background:conic-gradient(from var(--a,0deg),transparent 0 70%,#fff 80%,transparent 90%);-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;animation:spin 6s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.bikes{position:absolute;inset:0;display:grid;place-items:center}
+.bikes img{grid-area:1/1;width:96%;height:auto;filter:drop-shadow(0 30px 40px rgba(0,0,0,.55)) drop-shadow(0 0 30px rgba(192,132,252,.25));transition:opacity .7s var(--ease),transform .9s var(--spring)}
+.bikes img.off{opacity:0;transform:translateX(18%) scale(.9) rotate(3deg)}
+.floor{position:absolute;left:14%;right:14%;bottom:9%;height:26px;border-radius:50%;background:radial-gradient(closest-side,rgba(0,0,0,.65),transparent);filter:blur(6px)}
+.float{animation:float 6s ease-in-out infinite}
+@keyframes float{50%{transform:translateY(-12px)}}
+.stagebar{position:absolute;left:50%;bottom:0;transform:translateX(-50%);display:flex;gap:6px;padding:6px;border-radius:999px;background:var(--glass);border:1px solid var(--edge);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
+.stagebar button{border:0;background:none;padding:10px 16px;min-height:44px;border-radius:999px;font:700 14px/1 var(--display);color:var(--mut);cursor:pointer;transition:all .35s var(--ease)}
+.stagebar button.on{background:#fff;color:#0C0F18;box-shadow:0 6px 18px rgba(255,255,255,.2)}
+.tag{position:absolute;padding:10px 14px;border-radius:999px;background:var(--glass);border:1px solid var(--edge);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);font:700 13px/1.2 var(--display);display:flex;align-items:center;gap:8px;box-shadow:0 10px 26px rgba(0,0,0,.35)}
+.tag b{font-size:18px}
+.tag.t1{top:4%;left:-2%}.tag.t2{top:30%;right:-3%}.tag.t3{bottom:16%;left:0}
+
+/* Kennzahlen als Perlenkette */
+.pearls{display:flex;flex-wrap:wrap;gap:14px;margin-top:clamp(36px,5vw,60px)}
+.pearl{flex:1 1 170px;display:flex;flex-direction:column;gap:4px;padding:20px 24px;border-radius:40px;background:var(--glass);border:1px solid var(--edge);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
+.pearl:nth-child(even){transform:translateY(14px)}
+.pearl b{font:900 clamp(30px,3.4vw,42px)/1 var(--display)}
+.pearl span{color:var(--mut);font-size:14px;line-height:1.35}
+
+/* Winter-Aktion */
+.deal{position:relative;overflow:hidden;display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:28px;padding:30px clamp(24px,4vw,46px);border-radius:999px;background:linear-gradient(120deg,rgba(34,211,238,.18),rgba(96,165,250,.16) 35%,rgba(192,132,252,.2) 70%,rgba(244,114,182,.18));border:1px solid rgba(147,197,253,.35)}
+.deal::after{content:"";position:absolute;inset:0;background:linear-gradient(100deg,transparent 30%,rgba(255,255,255,.12) 50%,transparent 70%);transform:translateX(-100%);animation:shine 5s ease-in-out infinite}
+@keyframes shine{60%,100%{transform:translateX(100%)}}
+.flake{width:92px;height:92px;border-radius:50%;display:grid;place-items:center;background:radial-gradient(circle at 35% 30%,#E0F2FE,#60A5FA 55%,#4338CA);box-shadow:0 0 0 8px rgba(96,165,250,.15),0 0 40px rgba(96,165,250,.6)}
+.flake svg{width:48px;height:48px;animation:spin 14s linear infinite}
+.deal h3{font-size:clamp(22px,2.6vw,32px);font-weight:800}
+.deal p{color:#D6DEEE;margin-top:6px}
+.deal .cnt{text-align:center;font:900 44px/1 var(--display)}
+.deal .cnt small{display:block;font:600 12px/1.3 var(--display);letter-spacing:.12em;text-transform:uppercase;color:var(--mut);margin-top:6px}
+
+/* Leistungen: versetzte Blasen */
+.orbit{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:22px}
+.svc{display:flex;flex-direction:column;gap:12px;padding:30px 28px;border-radius:44px 44px 44px 14px;background:var(--glass);border:1px solid var(--edge);text-decoration:none;transition:transform .5s var(--spring),border-color .4s;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
+.svc:nth-child(3n+2){transform:translateY(34px)}
+.svc:hover{transform:translateY(-6px) rotate(-.6deg);border-color:rgba(244,114,182,.55)}
+.svc:nth-child(3n+2):hover{transform:translateY(26px) rotate(.6deg)}
+.svc .bub{width:60px;height:60px;border-radius:50%;display:grid;place-items:center;background:var(--c,var(--grad));box-shadow:0 10px 26px color-mix(in srgb,var(--cc,#E2232D) 45%,transparent),inset 0 2px 0 rgba(255,255,255,.35)}
+.svc .bub svg{width:28px;height:28px;color:#fff}
+.svc p{color:var(--mut);font-size:15px}
+.svc .more{margin-top:auto;font:700 14px/1 var(--display);color:var(--ink);display:flex;align-items:center;gap:8px}
+.svc .more svg{width:18px;height:18px;transition:transform .35s var(--spring)}
+.svc:hover .more svg{transform:translateX(6px)}
+
+/* Foto-Bühne mit Wellen-Maske */
+.photo{position:relative;border-radius:56px 56px 56px 18px;overflow:hidden;isolation:isolate;box-shadow:0 30px 60px rgba(0,0,0,.45)}
+.photo img{width:100%;height:100%;object-fit:cover;transition:transform 1.2s var(--ease)}
+.photo:hover img{transform:scale(1.04)}
+.photo::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,transparent 45%,rgba(7,9,13,.85));pointer-events:none}
+.photo .cap{position:absolute;z-index:1;left:26px;right:26px;bottom:22px;font:700 15px/1.35 var(--display)}
+.split{display:grid;grid-template-columns:1fr 1fr;gap:clamp(26px,4vw,60px);align-items:center}
+.split>*{min-width:0}
+
+/* Chef-Zitat */
+.quote{font:800 clamp(30px,4.6vw,62px)/1.04 var(--display);letter-spacing:-.02em}
+.sig{display:flex;align-items:center;gap:14px;margin-top:26px;color:var(--mut)}
+.sig svg{width:46px;height:46px;padding:10px;border-radius:50%;background:var(--grad);color:#fff}
+
+/* Marken-Laufband */
+.marquee{position:relative;overflow:hidden;padding:18px 0;-webkit-mask-image:linear-gradient(90deg,transparent,#000 10%,#000 90%,transparent);mask-image:linear-gradient(90deg,transparent,#000 10%,#000 90%,transparent)}
+.track{display:flex;gap:16px;width:max-content;animation:run 38s linear infinite}
+.marquee:hover .track{animation-play-state:paused}
+@keyframes run{to{transform:translateX(-50%)}}
+.mk{flex:none;display:flex;align-items:center;justify-content:center;height:78px;min-width:180px;padding:0 30px;border-radius:999px;background:#fff;box-shadow:0 10px 26px rgba(0,0,0,.35)}
+.mk img{height:38px;width:auto;max-width:170px;object-fit:contain}
+.mk span{font:800 22px/1 var(--display);color:#111}
+
+/* Bewertungen */
+.rv-wrap{display:grid;grid-template-columns:auto 1fr;gap:clamp(28px,5vw,70px);align-items:center}
+.score{width:220px;height:220px;border-radius:50%;display:grid;place-content:center;text-align:center;position:relative;background:radial-gradient(circle at 40% 30%,rgba(251,191,36,.25),transparent 60%),var(--glass);border:1px solid rgba(251,191,36,.4);box-shadow:0 0 60px rgba(251,191,36,.18)}
+.score b{font:900 74px/1 var(--display);background:linear-gradient(180deg,#FDE68A,#F59E0B);-webkit-background-clip:text;background-clip:text;color:transparent}
+.stars{display:flex;justify-content:center;gap:3px;margin:8px 0 6px;color:#FBBF24}
+.stars svg{width:20px;height:20px}
+.score span{color:var(--mut);font-size:13.5px}
+.bubbles{display:flex;flex-direction:column;gap:16px}
+.bubble{position:relative;max-width:560px;padding:20px 24px;border-radius:30px 30px 30px 8px;background:var(--glass);border:1px solid var(--edge);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
+.bubble:nth-child(2){margin-left:clamp(0px,6vw,90px);border-radius:30px 30px 8px 30px}
+.bubble:nth-child(3){margin-left:clamp(0px,3vw,40px)}
+.bubble p{font-size:16px}
+.bubble small{display:block;margin-top:8px;color:var(--dim);font:600 13px/1 var(--display)}
+
+/* Besuch */
+.visit{display:grid;grid-template-columns:1.1fr 1fr;gap:26px;align-items:stretch}
+.visit>*{min-width:0}
+.visit .photo img{position:absolute;inset:0}
+.hours{display:flex;flex-direction:column;gap:8px}
+.day{display:flex;justify-content:space-between;gap:14px;padding:12px 20px;border-radius:999px;background:rgba(255,255,255,.04);font:600 15px/1.3 var(--display)}
+.day span:last-child{color:var(--mut);text-align:right}
+.day.today{background:var(--grad);background-size:200% 100%;animation:flow 8s linear infinite;color:#fff;box-shadow:0 10px 24px rgba(226,35,45,.35)}
+.day.today span:last-child{color:#fff}
+.day.zu span:last-child{color:#FDA4AF}
+.day.today.zu span:last-child{color:#fff}
+.info-line{display:flex;gap:12px;align-items:flex-start;color:var(--mut);font-size:15px}
+.info-line svg{width:22px;height:22px;color:var(--cy);flex:none;margin-top:2px}
+.glassbox{padding:clamp(24px,3vw,36px);border-radius:44px;background:var(--glass);border:1px solid var(--edge);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);display:flex;flex-direction:column;gap:18px}
+
+/* ---------- SERVICE ---------- */
+.pagehead{padding-top:clamp(36px,6vw,80px);display:grid;grid-template-columns:1.2fr .8fr;gap:30px;align-items:end}
+.pagehead>*{min-width:0}
+.pagehead h1{font-size:clamp(40px,6vw,80px)}
+.pagehead .lead{margin-top:20px}
+.steps{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:18px;counter-reset:s}
+.step{position:relative;padding:28px 24px 26px;border-radius:999px 999px 40px 40px;background:var(--glass);border:1px solid var(--edge);text-align:center;display:flex;flex-direction:column;align-items:center;gap:10px}
+.step .n{width:54px;height:54px;border-radius:50%;display:grid;place-items:center;font:900 22px/1 var(--display);background:var(--grad);box-shadow:0 8px 20px rgba(226,35,45,.4)}
+.step p{color:var(--mut);font-size:14.5px}
+.step:not(:last-child)::after{content:"";position:absolute;top:54px;right:-18px;width:18px;height:3px;border-radius:3px;background:var(--grad)}
+.pills{display:flex;flex-wrap:wrap;gap:10px}
+.pill{padding:12px 20px;border-radius:999px;font:700 15px/1 var(--display);background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);transition:transform .35s var(--spring),background .3s}
+.pill:hover{transform:translateY(-3px) rotate(-1deg);background:rgba(255,255,255,.12)}
+.banner{position:relative;border-radius:999px;overflow:hidden;min-height:180px;display:flex;align-items:center;isolation:isolate}
+.banner img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:70% 50%;z-index:-2}
+.banner::before{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(90deg,rgba(7,9,13,.95) 25%,rgba(7,9,13,.4) 60%,transparent)}
+.banner .in{padding:30px clamp(26px,5vw,60px);max-width:640px;display:flex;flex-direction:column;gap:10px}
+.trio{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:22px}
+.trio>*{min-width:0}
+.blob{padding:32px 28px;border-radius:52px 18px 52px 52px;background:var(--glass);border:1px solid var(--edge);display:flex;flex-direction:column;gap:14px;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
+.blob:nth-child(2){border-radius:18px 52px 52px 52px}
+.blob:nth-child(3){border-radius:52px 52px 18px 52px}
+.blob p{color:var(--mut);font-size:15px}
+.big0{font:900 64px/1 var(--display)}
+.ul{display:flex;flex-direction:column;gap:10px;margin:0;padding:0;list-style:none}
+.ul li{display:flex;gap:10px;color:#D6DEEE;font-size:15px}
+.ul li::before{content:"";flex:none;width:9px;height:9px;margin-top:8px;border-radius:50%;background:var(--grad)}
+
+/* Formulare */
+.form{display:flex;flex-direction:column;gap:16px}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.fl{display:flex;flex-direction:column;gap:7px;min-width:0}
+.fl label,.flab{font:700 13px/1 var(--display);letter-spacing:.06em;text-transform:uppercase;color:var(--mut)}
+.inp{width:100%;min-height:52px;padding:14px 20px;border-radius:999px;border:1px solid rgba(255,255,255,.14);background:rgba(7,9,13,.55);color:var(--ink);font:500 16px/1.2 var(--body);transition:border-color .25s,box-shadow .25s}
+textarea.inp{border-radius:28px;min-height:110px;resize:vertical;line-height:1.5}
+.inp:focus{outline:none;border-color:var(--vio);box-shadow:0 0 0 4px rgba(192,132,252,.2)}
+.choice{display:flex;flex-wrap:wrap;gap:8px}
+.choice button{min-height:44px;padding:10px 18px;border-radius:999px;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.04);font:600 14.5px/1 var(--display);color:var(--mut);cursor:pointer;transition:all .3s var(--spring)}
+.choice button:hover{color:var(--ink);transform:translateY(-2px)}
+.choice button.on{background:#fff;color:#0C0F18;border-color:#fff;box-shadow:0 8px 20px rgba(255,255,255,.18)}
+.err{color:#FDA4AF;font:600 14px/1.3 var(--display);min-height:18px}
+.out{display:flex;flex-direction:column;gap:14px;padding:22px;border-radius:30px;background:rgba(52,211,153,.08);border:1px solid rgba(52,211,153,.35)}
+.out pre{margin:0;white-space:pre-wrap;font:500 14px/1.55 var(--body);color:#D1FAE5}
+.note{font-size:13px;color:var(--dim)}
+
+/* ---------- MARKEN ---------- */
+.brands{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:24px}
+.brand-c{position:relative;display:flex;flex-direction:column;gap:16px;padding:30px;border-radius:52px;background:var(--glass);border:1px solid var(--edge);overflow:hidden;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);transition:transform .5s var(--spring),border-color .4s}
+.brand-c:hover{transform:translateY(-6px);border-color:color-mix(in srgb,var(--bc,#C084FC) 70%,transparent)}
+.brand-c::after{content:"";position:absolute;right:-90px;top:-90px;width:260px;height:260px;border-radius:50%;background:radial-gradient(closest-side,color-mix(in srgb,var(--bc,#C084FC) 45%,transparent),transparent);pointer-events:none;transition:transform .8s var(--ease)}
+.brand-c:hover::after{transform:scale(1.25)}
+.blogo{align-self:flex-start;display:flex;align-items:center;height:64px;padding:0 26px;border-radius:999px;background:rgba(255,255,255,.95)}
+.blogo img{height:34px;width:auto;max-width:200px;object-fit:contain}
+.blogo span{font:900 24px/1 var(--display);color:#111}
+.brand-c .shot{height:210px;display:grid;place-items:center;margin:-4px 0}
+.brand-c .shot{overflow:visible}
+.brand-c .shot img{max-height:210px;max-width:100%;width:auto;object-fit:contain;filter:drop-shadow(0 24px 26px rgba(0,0,0,.55));transition:transform .8s var(--spring)}
+.brand-c:hover .shot img{transform:scale(1.05) rotate(-1.5deg)}
+.brand-c p{color:var(--mut);font-size:15px}
+.brand-c .acts{display:flex;flex-wrap:wrap;gap:10px;margin-top:auto}
+.brand-c .acts .btn{min-height:46px;padding:0 18px;font-size:14px}
+.acc{display:flex;flex-wrap:wrap;gap:12px;justify-content:center}
+.acc .mk{min-width:150px;height:66px}
+.acc .mk img{height:30px}
+
+/* Finder */
+.finder{position:relative;padding:clamp(26px,4vw,48px);border-radius:56px;background:linear-gradient(140deg,rgba(226,35,45,.16),rgba(192,132,252,.14) 50%,rgba(96,165,250,.16));border:1px solid rgba(244,114,182,.3);overflow:hidden}
+.fsteps{display:flex;gap:8px;margin-bottom:22px}
+.fsteps i{height:6px;flex:1;border-radius:6px;background:rgba(255,255,255,.12);overflow:hidden;position:relative}
+.fsteps i.on::after{content:"";position:absolute;inset:0;background:var(--grad);animation:grow .6s var(--ease) both}
+@keyframes grow{from{transform:scaleX(0);transform-origin:left}}
+.fq h3{font-size:clamp(24px,3vw,34px);margin-bottom:20px}
+.fopts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.fopt{display:flex;align-items:center;gap:16px;min-height:80px;padding:16px 22px;border-radius:999px;border:1px solid rgba(255,255,255,.14);background:rgba(7,9,13,.45);cursor:pointer;text-align:left;transition:transform .4s var(--spring),border-color .3s,background .3s}
+.fopt:hover{transform:translateY(-4px) scale(1.01);border-color:var(--mag);background:rgba(244,114,182,.1)}
+.fopt .fi{width:48px;height:48px;border-radius:50%;flex:none;display:grid;place-items:center;background:var(--grad2)}
+.fopt .fi svg{width:24px;height:24px;color:#fff}
+.fopt b{display:block;font:700 16.5px/1.25 var(--display)}
+.fopt small{display:block;color:var(--mut);font-size:13.5px;line-height:1.35;margin-top:2px}
+.fres{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px;margin:18px 0 22px}
+.fres .r{padding:22px 24px;border-radius:36px;background:rgba(7,9,13,.5);border:1px solid rgba(255,255,255,.12);display:flex;flex-direction:column;gap:8px;animation:pop .6s var(--spring) both;animation-delay:calc(var(--i)*.1s)}
+.fres .r:first-child{border-color:var(--mag);box-shadow:0 0 0 1px var(--mag),0 16px 40px rgba(244,114,182,.25)}
+.fres .r em{font-style:normal;font:700 12px/1 var(--display);letter-spacing:.12em;text-transform:uppercase;color:var(--mag)}
+.fres .r p{color:var(--mut);font-size:14.5px}
+@keyframes pop{from{opacity:0;transform:translateY(20px) scale(.95)}}
+.fback{background:none;border:0;color:var(--mut);cursor:pointer;font:600 14px/1 var(--display);padding:12px 0;min-height:44px}
+.fback:hover{color:var(--ink)}
+
+/* ---------- i:SY ---------- */
+.isy-hero{position:relative;border-radius:60px 60px 60px 20px;overflow:hidden;min-height:clamp(380px,46vw,560px);display:flex;align-items:flex-end;isolation:isolate;margin-top:clamp(30px,5vw,60px)}
+.isy-hero>img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:-2}
+.isy-hero::before{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(0deg,rgba(7,9,13,.95) 10%,rgba(7,9,13,.35) 55%,rgba(7,9,13,.1)),linear-gradient(90deg,rgba(255,122,26,.25),transparent 50%)}
+.isy-hero .in{padding:clamp(26px,4vw,50px);display:flex;flex-direction:column;gap:16px;max-width:760px}
+.org{color:#FFB27A}
+.badge-isy{width:clamp(150px,18vw,220px);border-radius:28px;box-shadow:0 18px 40px rgba(255,122,26,.35)}
+.bus{position:relative;padding:clamp(26px,4vw,46px);border-radius:56px;background:linear-gradient(120deg,rgba(255,122,26,.16),rgba(226,35,45,.14),rgba(7,9,13,.4));border:1px solid rgba(255,122,26,.35);overflow:hidden}
+.road{position:relative;height:clamp(140px,20vw,250px);margin-top:20px}
+.road::after{content:"";position:absolute;left:0;right:0;bottom:6px;height:4px;border-radius:4px;background:repeating-linear-gradient(90deg,rgba(255,255,255,.5) 0 40px,transparent 40px 70px);animation:lane 1.2s linear infinite}
+@keyframes lane{to{background-position:-70px 0}}
+.road img{position:absolute;bottom:4px;height:92%;width:auto;max-width:none;left:0;animation:drive 14s linear infinite;filter:drop-shadow(0 16px 18px rgba(0,0,0,.6))}
+@keyframes drive{from{transform:translateX(-105%)}to{transform:translateX(calc(min(1240px,100vw) + 5%))}}
+.road .stopped{animation:none;left:50%;transform:translateX(-50%)}
+
+/* ---------- Treffen ---------- */
+.rec{display:grid;grid-template-columns:auto 1fr;gap:clamp(24px,5vw,70px);align-items:center}
+.rec>*{min-width:0}
+.btn-rec{width:clamp(180px,24vw,300px);filter:drop-shadow(0 20px 40px rgba(226,35,45,.45));animation:float 6s ease-in-out infinite}
+.huge{font:900 clamp(90px,15vw,200px)/.85 var(--display);letter-spacing:-.04em}
+.tl{position:relative;display:flex;flex-direction:column;gap:22px;padding-left:44px}
+.tl::before{content:"";position:absolute;left:15px;top:8px;bottom:8px;width:3px;border-radius:3px;background:var(--grad)}
+.tli{position:relative;padding:22px 26px;border-radius:36px;background:var(--glass);border:1px solid var(--edge);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
+.tli::before{content:"";position:absolute;left:-37px;top:28px;width:19px;height:19px;border-radius:50%;background:var(--bg);border:4px solid var(--mag);box-shadow:0 0 14px var(--mag)}
+.tli .y{font:900 30px/1 var(--display)}
+.tli p{color:var(--mut);margin-top:8px;font-size:15px}
+.tli.big{border-color:rgba(244,114,182,.55);background:linear-gradient(120deg,rgba(226,35,45,.2),rgba(192,132,252,.15))}
+.gal{display:grid;grid-template-columns:1.3fr 1fr 1fr;gap:16px}
+.gal .photo{border-radius:40px;aspect-ratio:4/3}
+.gal .photo:first-child{grid-row:span 2;aspect-ratio:auto}
+.press{columns:2 320px;column-gap:40px;color:#D6DEEE;font-size:15.5px}
+.press p{margin-bottom:14px;break-inside:avoid}
+.press blockquote{margin:0 0 14px;padding:18px 22px;border-radius:28px 28px 28px 8px;background:rgba(244,114,182,.1);border:1px solid rgba(244,114,182,.3);font-weight:500;break-inside:avoid}
+.press blockquote cite{display:block;margin-top:8px;font:700 13px/1 var(--display);font-style:normal;color:var(--mag)}
+.urk{max-width:340px;border-radius:24px;transform:rotate(3deg);box-shadow:0 30px 60px rgba(0,0,0,.6);transition:transform .6s var(--spring)}
+.urk:hover{transform:rotate(0) scale(1.03)}
+
+/* ---------- Dreirad ---------- */
+.tri-stage{position:relative;display:grid;place-items:center;min-height:clamp(260px,34vw,420px)}
+.tri-stage .orb{inset:10%}
+.tri-stage img{position:relative;width:min(560px,92%);filter:drop-shadow(0 30px 40px rgba(0,0,0,.55))}
+.tri-stage .ph{position:relative;width:min(520px,92%);aspect-ratio:16/10;border-radius:50%;display:grid;place-items:center;text-align:center;color:var(--mut);font:600 15px/1.4 var(--display);border:2px dashed rgba(255,255,255,.18)}
+
+/* ---------- Kontakt ---------- */
+.ways{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px}
+.way{display:flex;flex-direction:column;align-items:flex-start;gap:12px;padding:28px;border-radius:44px;background:var(--glass);border:1px solid var(--edge);text-decoration:none;transition:transform .45s var(--spring),border-color .3s;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
+.way:hover{transform:translateY(-6px);border-color:var(--cc)}
+.way .bub{width:58px;height:58px;border-radius:50%;display:grid;place-items:center;background:var(--cc);box-shadow:0 10px 26px color-mix(in srgb,var(--cc) 50%,transparent)}
+.way .bub svg{width:27px;height:27px;color:#fff}
+.way b{font:800 22px/1.15 var(--display);word-break:break-word}
+.way span{color:var(--mut);font-size:14.5px}
+.copy{border:0;background:rgba(255,255,255,.08);color:var(--ink);border-radius:999px;padding:8px 14px;min-height:40px;font:600 13px/1 var(--display);cursor:pointer}
+.copy:hover{background:rgba(255,255,255,.16)}
+
+/* ---------- Impressum / Prototyp ---------- */
+.legal{max-width:820px;display:flex;flex-direction:column;gap:22px;color:#D6DEEE}
+.legal h3{color:var(--ink);margin-bottom:4px}
+.legal .dl{display:grid;grid-template-columns:auto 1fr;gap:6px 22px}
+.legal .dl dt{color:var(--mut)}
+.legal .dl dd{margin:0}
+.find{display:flex;flex-direction:column;gap:12px}
+.fnd{display:grid;grid-template-columns:auto 1fr;gap:16px;align-items:start;padding:18px 22px;border-radius:30px;background:rgba(226,35,45,.08);border:1px solid rgba(226,35,45,.3)}
+.fnd .k{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;background:var(--red);font:800 16px/1 var(--display)}
+.fnd p{color:#E5E9F3;font-size:15px}
+.fnd small{display:block;color:var(--dim);margin-top:4px;font-size:13px}
+.plus .fnd{background:rgba(52,211,153,.08);border-color:rgba(52,211,153,.3)}
+.plus .fnd .k{background:var(--ok);color:#052E1C}
+.open .fnd{background:rgba(251,191,36,.07);border-color:rgba(251,191,36,.3)}
+.open .fnd .k{background:var(--warn);color:#3A2A00}
+
+/* ---------- Fuß + schwebende Knöpfe ---------- */
+.foot{margin-top:clamp(70px,9vw,120px);padding-top:50px;padding-bottom:calc(30px + env(safe-area-inset-bottom,0px));border-top:1px solid rgba(255,255,255,.08);position:relative}
+.foot::before{content:"";position:absolute;left:0;right:0;top:-1px;height:2px;background:var(--grad);opacity:.8}
+.fgrid{display:grid;grid-template-columns:1.3fr 1fr 1fr 1fr;gap:30px}
+.fgrid>*{min-width:0}
+.fgrid h4{font:700 13px/1 var(--display);letter-spacing:.14em;text-transform:uppercase;color:var(--mut);margin:0 0 14px}
+.fgrid a{text-decoration:none;color:#D6DEEE}
+.fgrid a:hover{color:#fff}
+.fgrid .col{display:flex;flex-direction:column;gap:9px;font-size:15px}
+.soc{display:flex;gap:10px}
+.soc a{width:46px;height:46px;border-radius:50%;display:grid;place-items:center;background:rgba(255,255,255,.07);transition:transform .35s var(--spring),background .3s}
+.soc a:hover{transform:translateY(-4px) rotate(-6deg);background:var(--grad)}
+.soc svg{width:21px;height:21px}
+.legalbar{display:flex;flex-wrap:wrap;gap:8px 22px;justify-content:space-between;margin-top:40px;color:var(--dim);font-size:13.5px}
+.legalbar a{color:var(--mut)}
+.fab{position:fixed;z-index:40;right:calc(18px + env(safe-area-inset-right,0px));bottom:calc(18px + env(safe-area-inset-bottom,0px));width:62px;height:62px;border-radius:50%;display:grid;place-items:center;background:linear-gradient(135deg,#4ADE80,#16A34A);box-shadow:0 14px 30px rgba(34,197,94,.45),inset 0 2px 0 rgba(255,255,255,.35);transition:transform .4s var(--spring)}
+.fab:hover{transform:scale(1.1) rotate(-8deg)}
+.fab svg{width:32px;height:32px;color:#fff}
+.fab::after{content:"";position:absolute;inset:-6px;border-radius:50%;border:2px solid rgba(74,222,128,.6);animation:ping 2.4s ease-out infinite}
+@keyframes ping{from{transform:scale(.9);opacity:1}to{transform:scale(1.35);opacity:0}}
+.proto{position:fixed;z-index:40;left:calc(18px + env(safe-area-inset-left,0px));bottom:calc(18px + env(safe-area-inset-bottom,0px));display:flex;align-items:center;gap:8px;padding:11px 16px;border-radius:999px;background:rgba(251,191,36,.14);border:1px solid rgba(251,191,36,.5);color:#FDE68A;font:700 13px/1 var(--display);text-decoration:none;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
+.proto:hover{background:rgba(251,191,36,.25)}
+
+/* ---------- Responsive ---------- */
+@media (max-width:1180px){.live{display:none}.nav a{padding:10px 12px;font-size:14px}}
+@media (max-width:1020px){
+  .nav,.top .btn.main{display:none}
+  .burger{display:block}
+  .hero,.split,.visit,.pagehead,.rv-wrap,.rec{grid-template-columns:1fr}
+  .orbit,.trio,.ways{grid-template-columns:1fr 1fr}
+  .svc:nth-child(3n+2){transform:none}.svc:nth-child(3n+2):hover{transform:translateY(-6px)}
+  .svc:nth-child(even){transform:translateY(24px)}
+  .steps{grid-template-columns:1fr 1fr}.step::after{display:none}
+  .fgrid{grid-template-columns:1fr 1fr}
+  .deal{grid-template-columns:auto 1fr;border-radius:56px}
+  .deal .cnt{grid-column:1/-1;justify-self:start;text-align:left}
+  .score{margin:0 auto}
+}
+@media (max-width:680px){
+  .orbit,.trio,.ways,.brands,.fopts,.row2,.steps,.gal{grid-template-columns:1fr}
+  .svc:nth-child(even){transform:none}
+  .pearl:nth-child(even){transform:none}
+  .pearl{flex:1 1 140px;padding:16px 20px;border-radius:32px}
+  .gal .photo:first-child{grid-row:auto;aspect-ratio:4/3}
+  .deal{grid-template-columns:1fr;text-align:left;border-radius:44px}
+  .flake{width:70px;height:70px}
+  .tag{display:none}
+  .fgrid{grid-template-columns:1fr}
+  .banner{border-radius:44px}
+  .banner::before{background:linear-gradient(90deg,rgba(7,9,13,.95) 40%,rgba(7,9,13,.6))}
+  .brand-c .shot{height:170px}
+  .brand-c .shot img{max-height:170px}
+  .stagebar button{padding:10px 12px}
+  .proto span{display:none}
+  .score{width:190px;height:190px}.score b{font-size:62px}
+}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important}
+  .road img{animation:none;left:50%;transform:translateX(-50%)}
+}
+</style>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+ <defs>
+  <symbol id="i-wrench" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.5 2.5-2.4-.6-.6-2.4z"/></symbol>
+  <symbol id="i-bike" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="5.5" cy="17" r="3.5"/><circle cx="18.5" cy="17" r="3.5"/><path d="M15 6h2l1.5 11M5.5 17 9 9h7M9 9l3.5 8h6"/></symbol>
+  <symbol id="i-shield" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 4 6v6c0 5 3.4 8.3 8 9 4.6-.7 8-4 8-9V6z"/><path d="m9 12 2 2 4-4"/></symbol>
+  <symbol id="i-euro" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 7a7 7 0 1 0 0 10M4 10h10M4 14h10"/></symbol>
+  <symbol id="i-case" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="7" width="18" height="13" rx="3"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M3 13h18"/></symbol>
+  <symbol id="i-truck" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 6h11v10H2zM13 10h4l4 3v3h-8"/><circle cx="6" cy="18" r="2"/><circle cx="17" cy="18" r="2"/></symbol>
+  <symbol id="i-phone" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3h4l2 5-2.5 1.5a11 11 0 0 0 6 6L16 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 5a2 2 0 0 1 2-2"/></symbol>
+  <symbol id="i-mail" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="3"/><path d="m3 7 9 6 9-6"/></symbol>
+  <symbol id="i-pin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.2 7-12a7 7 0 0 0-14 0c0 5.8 7 12 7 12z"/><circle cx="12" cy="9" r="2.5"/></symbol>
+  <symbol id="i-clock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></symbol>
+  <symbol id="i-park" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="5"/><path d="M9 17V7h4a3 3 0 0 1 0 6H9"/></symbol>
+  <symbol id="i-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></symbol>
+  <symbol id="i-star" viewBox="0 0 24 24" fill="currentColor"><path d="m12 2.5 2.9 6 6.6.8-4.9 4.5 1.3 6.5L12 17l-5.9 3.3 1.3-6.5L2.5 9.3l6.6-.8z"/></symbol>
+  <symbol id="i-chat" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm5.3 14.1c-.2.6-1.3 1.2-1.8 1.3-.5.1-1 .1-3.3-.8-2.8-1.1-4.5-3.9-4.7-4.1-.1-.2-1.1-1.5-1.1-2.8s.7-2 1-2.3c.2-.3.5-.3.7-.3h.5c.2 0 .4 0 .6.5l.8 2c.1.2.1.4 0 .5l-.3.5-.4.5c-.1.1-.3.3-.1.6.2.3.8 1.3 1.7 2.1 1.2 1 2.1 1.4 2.4 1.5.3.1.5.1.6-.1l.9-1c.2-.3.4-.2.6-.1l1.9.9c.3.1.5.2.5.3.1.2.1.7-.1 1.3z"/></symbol>
+  <symbol id="i-ig" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="5.5"/><circle cx="12" cy="12" r="4.2"/><circle cx="17.3" cy="6.7" r="1.1" fill="currentColor" stroke="none"/></symbol>
+  <symbol id="i-fb" viewBox="0 0 24 24" fill="currentColor"><path d="M13.5 21v-7.3H16l.4-3h-2.9V8.9c0-.9.3-1.4 1.5-1.4h1.5V4.8c-.3 0-1.2-.1-2.2-.1-2.2 0-3.7 1.3-3.7 3.8v2.2H8v3h2.6V21z"/></symbol>
+  <symbol id="i-snow" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round"><path d="M12 2v20M3.3 7l17.4 10M3.3 17 20.7 7M9 4l3 2 3-2M9 20l3-2 3 2M4 10.5l3.4-.3 1.2-3M20 13.5l-3.4.3-1.2 3M4 13.5l3.4.3 1.2 3M20 10.5l-3.4-.3-1.2-3"/></symbol>
+  <symbol id="i-cal" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="4"/><path d="M8 3v4M16 3v4M3 10h18"/></symbol>
+  <symbol id="i-tri" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="5" cy="17" r="3"/><circle cx="19" cy="17" r="3"/><path d="M8 17h8M12 17V9h3l2 3M9 9h3"/></symbol>
+  <symbol id="i-car" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 15v-3l2-5h14l2 5v3H3zM3 15v3h3v-3M18 15v3h3v-3M6 12h12"/></symbol>
+  <symbol id="i-map" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6l6-2 6 2 6-2v14l-6 2-6-2-6 2z"/><path d="M9 4v14M15 6v14"/></symbol>
+  <symbol id="i-spark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v4M12 17v4M3 12h4M17 12h4M6 6l2.5 2.5M15.5 15.5 18 18M6 18l2.5-2.5M15.5 8.5 18 6"/></symbol>
+  <symbol id="i-tune" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></symbol>
+  <symbol id="i-box" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7l9-4 9 4v10l-9 4-9-4z"/><path d="M3 7l9 4 9-4M12 11v10"/></symbol>
+ </defs>
+</svg>
+
+<div class="sky"></div><div class="smoke"></div><div class="comb"></div>
+
+<header class="top">
+ <div class="wrap bar">
+  <a class="brand" href="#start" aria-label="Velocenter Hessert – Start"><img src="img/velocenter-logo.webp" alt="Velocenter Hessert" width="74" height="43"></a>
+  <nav class="nav" id="nav" aria-label="Hauptnavigation">
+   <span class="ghost" id="ghost"></span><span class="ind" id="ind"></span>
+   <a href="#start" data-r="start">Start</a>
+   <a href="#service" data-r="service">Service</a>
+   <a href="#marken" data-r="marken">Marken</a>
+   <a href="#isy" data-r="isy">i:SY Experte</a>
+   <a href="#treffen" data-r="treffen">i:SY Treffen</a>
+   <a href="#dreirad" data-r="dreirad">E-Dreiräder</a>
+   <a href="#kontakt" data-r="kontakt">Kontakt</a>
+  </nav>
+  <span class="sp"></span>
+  <div class="live" id="live"><i></i><span id="liveT">Öffnungszeiten</span></div>
+  <a class="btn main" href="#termin"><svg><use href="#i-cal"/></svg>Termin</a>
+  <button class="burger" id="burger" aria-label="Menü öffnen" aria-expanded="false"><span></span><span></span><span></span></button>
+ </div>
+</header>
+
+<nav class="mnu" id="mnu" aria-label="Menü">
+ <a href="#start" data-r="start" style="--i:0">Start</a>
+ <a href="#service" data-r="service" style="--i:1">Service</a>
+ <a href="#marken" data-r="marken" style="--i:2">Marken</a>
+ <a href="#isy" data-r="isy" style="--i:3">i:SY Experte</a>
+ <a href="#treffen" data-r="treffen" style="--i:4">i:SY Treffen</a>
+ <a href="#dreirad" data-r="dreirad" style="--i:5">E-Dreiräder</a>
+ <a href="#kontakt" data-r="kontakt" style="--i:6">Kontakt</a>
+ <div class="mfoot"><a class="btn main" href="#termin" style="font-size:15px"><svg><use href="#i-cal"/></svg>Werkstatt-Termin</a><a class="btn wa" href="https://wa.me/491635343133" target="_blank" rel="noopener" style="font-size:15px"><svg><use href="#i-chat"/></svg>WhatsApp</a></div>
+</nav>
+
+<div class="wipe" id="wipe" aria-hidden="true"><i></i><i></i><i></i><img class="wl" src="img/velocenter-logo.webp" alt=""></div>
+
+<main id="main">
+
+<!-- ================= START ================= -->
+<section class="view" data-v="start">
+ <div class="wrap">
+  <div class="hero">
+   <div>
+    <div class="kick rv">Familienbetrieb seit 1995 · Wörth am Rhein</div>
+    <h1 class="rv" style="margin-top:18px">Ihr E-Bike.<span class="l2 gt">Profi-Service.</span><span class="l2">Ehrlich beraten.</span></h1>
+    <p class="lead rv">Über 300 Räder, Bosch Service Center und ein Chef, der noch selbst schraubt. Bei uns finden Sie das E-Bike, das wirklich zu Ihnen passt, und eine Werkstatt, die es lange fit hält.</p>
+    <div class="btns rv">
+     <a class="btn main" href="#finder"><svg><use href="#i-spark"/></svg>Passendes E-Bike finden</a>
+     <a class="btn glass" href="#termin"><svg><use href="#i-wrench"/></svg>Werkstatt-Termin anfragen</a>
+    </div>
+   </div>
+   <div class="stage rv" id="stage">
+    <div class="orb"></div><div class="ring"></div><div class="floor"></div>
+    <div class="bikes float" id="bikes">
+     <img src="img/p-isy.webp" alt="i:SY E5 ZR F CX Century E-Kompaktrad in Grün" data-k="isy" width="1600" height="1104">
+     <img src="img/p-qio.webp" alt="QiO Compact P5 E-Kompaktrad" data-k="qio" class="off" width="1097" height="756" loading="lazy">
+     <img src="img/p-ktm.webp" alt="KTM Macina Style Tiefeinsteiger E-Bike" data-k="ktm" class="off" width="1600" height="1006" loading="lazy">
+     <img src="img/p-vanraam.webp" alt="Van Raam Easy Rider E-Dreirad" data-k="vanraam" class="off" width="1600" height="1193" loading="lazy">
+    </div>
+    <div class="tag t1"><b class="gt2">100+</b> i:SY auf Lager</div>
+    <div class="tag t2"><svg class="ico" style="color:#FBBF24"><use href="#i-star"/></svg><b>4,9</b> bei Google</div>
+    <div class="tag t3"><svg class="ico" style="color:#22D3EE"><use href="#i-shield"/></svg>Bosch Service Center</div>
+    <div class="stagebar" role="tablist" aria-label="Rad wechseln"><button class="on" data-k="isy" role="tab">i:SY</button><button data-k="qio" role="tab">QiO</button><button data-k="ktm" role="tab">KTM</button><button data-k="vanraam" role="tab">Dreirad</button></div>
+   </div>
+  </div>
+
+  <div class="pearls">
+   <div class="pearl rv lit"><b class="gt">1995</b><span>Familienbetrieb, seit über 30 Jahren in Wörth</span></div>
+   <div class="pearl rv lit"><b class="gt">300+</b><span>Räder vor Ort zum Anschauen und Probefahren</span></div>
+   <div class="pearl rv lit"><b class="gt">4,9 ★</b><span>aus 97 Google-Bewertungen</span></div>
+   <div class="pearl rv lit"><b class="gt">283</b><span>i:SY beim Weltrekord 2024 am Rhein</span></div>
+  </div>
+
+  <div class="sec">
+   <div class="deal rv" id="deal">
+    <div class="flake"><svg><use href="#i-snow"/></svg></div>
+    <div>
+     <div class="kick" style="color:#BFDBFE">Winter-Inspektion 2026/27</div>
+     <h3 style="margin-top:10px">20 € weniger auf jede Inspektion <span class="gt2">+ Satteldecke geschenkt</span></h3>
+     <p>Gültig vom 01.11.2026 bis 28.02.2027, auch für E-Dreiräder und Lastenräder. Jetzt ist die Werkstatt entspannt, im Frühling ist Ihr Rad startklar.</p>
+    </div>
+    <div class="cnt"><span id="dealDays">–</span><small>Tage noch</small><a class="btn main" href="#termin" style="margin-top:14px">Termin sichern</a></div>
+   </div>
+  </div>
+
+  <div class="sec">
+   <div class="shead rv"><div class="kick">Was wir für Sie tun</div><h2>Alles rund ums E-Bike. <span class="gt">Aus einer Hand.</span></h2></div>
+   <div class="orbit">
+    <a class="svc rv lit" href="#service" style="--c:linear-gradient(135deg,#E2232D,#F472B6);--cc:#E2232D"><span class="bub"><svg><use href="#i-bike"/></svg></span><h3>Beratung & Probefahrt</h3><p>Wir hören zu, zeigen eine passende Auswahl und begleiten Sie auf Wunsch bei der Probefahrt.</p><span class="more">Mehr erfahren<svg><use href="#i-arrow"/></svg></span></a>
+    <a class="svc rv lit" href="#termin" style="--c:linear-gradient(135deg,#22D3EE,#60A5FA);--cc:#22D3EE"><span class="bub"><svg><use href="#i-wrench"/></svg></span><h3>Inspektion & Reparatur</h3><p>Geschultes Bosch Service Center. Fachkundige Inspektionen und Reparaturen, auch nach dem Kauf.</p><span class="more">Termin anfragen<svg><use href="#i-arrow"/></svg></span></a>
+    <a class="svc rv lit" href="#service" style="--c:linear-gradient(135deg,#FBBF24,#FB923C);--cc:#FB923C"><span class="bub"><svg><use href="#i-truck"/></svg></span><h3>Hol- & Bringservice</h3><p>Wir holen Ihr Rad ab und bringen es zurück, gegen Gebühr.</p><span class="more">Mehr erfahren<svg><use href="#i-arrow"/></svg></span></a>
+    <a class="svc rv lit" href="#service" style="--c:linear-gradient(135deg,#E2232D,#C084FC);--cc:#E2232D"><span class="bub"><svg><use href="#i-euro"/></svg></span><h3>0 % Finanzierung</h3><p>0 % Zinsen und 0 € Anzahlung über die TARGOBANK.</p><span class="more">Mehr erfahren<svg><use href="#i-arrow"/></svg></span></a>
+    <a class="svc rv lit" href="#service" style="--c:linear-gradient(135deg,#34D399,#22D3EE);--cc:#34D399"><span class="bub"><svg><use href="#i-shield"/></svg></span><h3>ENRA Versicherung</h3><p>Schutz gegen Diebstahl, dazu Vollkasko mit Verschleiß und Pick-up-Service.</p><span class="more">Mehr erfahren<svg><use href="#i-arrow"/></svg></span></a>
+    <a class="svc rv lit" href="#service" style="--c:linear-gradient(135deg,#60A5FA,#C084FC);--cc:#60A5FA"><span class="bub"><svg><use href="#i-case"/></svg></span><h3>Dienstrad-Leasing</h3><p>Wir arbeiten mit fast allen Leasing-Firmen zusammen, z. B. JobRad, Bikeleasing, Company Bike.</p><span class="more">Mehr erfahren<svg><use href="#i-arrow"/></svg></span></a>
+   </div>
+  </div>
+
+  <div class="sec">
+   <div class="split">
+    <div class="photo rv" style="aspect-ratio:16/11"><img src="img/laden-innen.webp" alt="Blick in den Laden des Velocenter Hessert mit E-Bikes, Helmen und Taschen" loading="lazy" width="1280" height="722"><span class="cap">Hartmannstraße 25 · Wörth am Rhein</span></div>
+    <div>
+     <div class="kick rv">Unser Versprechen</div>
+     <p class="quote rv" style="margin-top:18px">Hier schraubt <span class="gt">der Chef</span> noch selbst.</p>
+     <p class="lead rv" style="margin-top:20px">Uns ist wichtig, dass Sie am Ende glücklich mit Ihrem E-Bike sind und sich ehrlich beraten fühlen. Deshalb bekommen Sie bei uns Kauf, Werkstatt und Service von denselben Leuten, die Ihr Rad kennen.</p>
+     <div class="sig rv"><svg><use href="#i-wrench"/></svg><span>Stefan Hessert, Inhaber</span></div>
+    </div>
+   </div>
+  </div>
+
+  <div class="sec">
+   <div class="shead rv"><div class="kick">Unsere Marken</div><h2>Starke Marken. <span class="gt">Ehrlich ausgewählt.</span></h2></div>
+  </div>
+ </div>
+ <div class="marquee rv"><div class="track" id="track"></div></div>
+ <div class="wrap">
+  <div class="btns rv" style="justify-content:center;margin-top:18px"><a class="btn glass" href="#marken">Alle Marken ansehen<svg><use href="#i-arrow"/></svg></a></div>
+
+  <div class="sec">
+   <div class="rv-wrap">
+    <div class="score rv"><b>4,9</b><div class="stars"><svg><use href="#i-star"/></svg><svg><use href="#i-star"/></svg><svg><use href="#i-star"/></svg><svg><use href="#i-star"/></svg><svg><use href="#i-star"/></svg></div><span>97 Bewertungen bei Google</span></div>
+    <div>
+     <div class="shead rv" style="margin-bottom:22px"><div class="kick">Das sagen unsere Kunden</div><h2>Service, <span class="gt">der ankommt.</span></h2></div>
+     <div class="bubbles">
+      <div class="bubble rv"><p>„Gesagt, getan: Zeitrahmen und Kostenprognose eingehalten. So ist das guter Kundenservice. Weiter so.“</p><small>Bernd M. · Google</small></div>
+      <div class="bubble rv"><p>„Super Service. Gestern gebracht, heute vormittag abgeholt. Wartung/Inspektion 👍“</p><small>Peter · Google</small></div>
+      <div class="bubble rv"><p>„Seit wir die Fahrräder haben, einfach einen guten Service.“</p><small>Jürgen K. · Google</small></div>
+     </div>
+     <div class="btns rv" style="margin-top:22px"><a class="btn glass" href="https://g.page/r/CYlWWOy1HBsvEBM/review" target="_blank" rel="noopener"><svg style="color:#FBBF24"><use href="#i-star"/></svg>Uns bei Google bewerten</a></div>
+    </div>
+   </div>
+  </div>
+
+  <div class="sec" id="besuch">
+   <div class="shead rv"><div class="kick">Besuchen Sie uns</div><h2>Kommen Sie vorbei. <span class="gt">Wir freuen uns.</span></h2></div>
+   <div class="visit">
+    <div class="glassbox rv">
+     <div class="hours" id="hours"></div>
+     <div class="info-line"><svg><use href="#i-clock"/></svg><span>Mittwoch und Sonntag geschlossen. An Feiertagen geschlossen.</span></div>
+    </div>
+    <div class="photo rv" style="min-height:320px"><img src="img/laden-eingang.webp" alt="Eingang des Velocenter Hessert mit i:SY-Fahne und E-Bikes" loading="lazy" width="1280" height="722"><span class="cap"><span style="display:flex;gap:10px;align-items:flex-start"><svg class="ico" style="color:#22D3EE"><use href="#i-park"/></svg><span>Zum Be- und Entladen dürfen Sie kurz vor dem Geschäft halten. Parkplätze ca. 100 m entfernt am Friedhof.</span></span></span></div>
+   </div>
+  </div>
+ </div>
+</section>
+
+<!-- ================= SERVICE ================= -->
+<section class="view" data-v="service" hidden>
+ <div class="wrap">
+  <div class="pagehead">
+   <div><div class="kick rv">Service</div><h1 class="rv" style="margin-top:16px">Wir überzeugen <span class="gt">mit Service.</span></h1><p class="lead rv">Wir wollen Ihnen nicht irgendein E-Bike verkaufen, sondern das Rad finden, das perfekt zu Ihnen und Ihren Ansprüchen passt. Und wir bleiben an Ihrer Seite, auch nach dem Kauf.</p></div>
+   <div class="btns rv"><a class="btn main" href="#termin"><svg><use href="#i-cal"/></svg>Werkstatt-Termin anfragen</a></div>
+  </div>
+
+  <div class="sec">
+   <div class="banner rv"><img src="img/bosch-motor.webp" alt="Bosch Performance Line CX Antrieb in Nahaufnahme" loading="lazy" width="1920" height="450"><div class="in"><div class="kick">Bosch Service Center</div><h2>Ausgewiesen und <span class="gt2">geschult.</span></h2><p class="lead">Inspektion, Reparatur, Fehlerspeicher und Software-Update für Ihren Bosch-Antrieb: bei uns in Wörth.</p></div></div>
+  </div>
+
+  <div class="sec">
+   <div class="trio">
+    <div class="blob rv lit"><span class="svc" style="all:unset"><span class="bub" style="width:60px;height:60px;border-radius:50%;display:grid;place-items:center;background:linear-gradient(135deg,#E2232D,#F472B6)"><svg style="width:28px;height:28px;color:#fff"><use href="#i-bike"/></svg></span></span><h3>Kaufberatung & Probefahrt</h3><p>Bei unserer fachmännischen Kaufberatung gehen wir genau auf Ihre Wünsche ein. Probefahren können Sie gern, auf Wunsch begleiten wir Sie. Ein i:SY dürfen Sie sogar übers Wochenende testen.</p><a class="btn glass" href="https://www.bosch-ebike.com/range-cockpit/?language=de&logo" target="_blank" rel="noopener" style="align-self:flex-start">Bosch Reichweiten-Rechner<svg><use href="#i-arrow"/></svg></a></div>
+    <div class="blob rv lit"><span class="bub" style="width:60px;height:60px;border-radius:50%;display:grid;place-items:center;background:linear-gradient(135deg,#22D3EE,#60A5FA)"><svg style="width:28px;height:28px;color:#fff"><use href="#i-wrench"/></svg></span><h3>Inspektion & Reparatur</h3><p>Auch nach dem Kauf stehen wir an Ihrer Seite: fachkundige Inspektionen und Reparaturservice für Ihr Fahrrad, E-Bike und E-Dreirad.</p><ul class="ul"><li>Bosch Service Center</li><li>E-Bike-Inspektion inkl. Software-Update</li><li>Hol- und Bringservice gegen Gebühr</li></ul></div>
+    <div class="blob rv lit"><span class="bub" style="width:60px;height:60px;border-radius:50%;display:grid;place-items:center;background:linear-gradient(135deg,#FBBF24,#FB923C)"><svg style="width:28px;height:28px;color:#fff"><use href="#i-truck"/></svg></span><h3>Hol- & Bringservice</h3><p>Keine Zeit oder kein Auto für den Transport? Wir holen Ihr Rad gegen Gebühr ab und bringen es nach der Werkstatt zurück. Fragen Sie einfach bei der Terminanfrage mit an.</p></div>
+   </div>
+  </div>
+
+  <div class="sec" id="termin-form">
+   <div class="split" style="align-items:start">
+    <div>
+     <div class="kick rv">Online-Terminanfrage</div>
+     <h2 class="rv" style="margin-top:16px">Werkstatt-Termin <span class="gt">in 30 Sekunden.</span></h2>
+     <p class="lead rv" style="margin-top:18px">Wunschtag wählen, kurz beschreiben, abschicken. Ihre Anfrage landet direkt bei uns, wir melden uns mit einem festen Termin.</p>
+     <div class="photo rv" style="margin-top:28px;aspect-ratio:4/3"><img src="img/isy-blumen.webp" alt="i:SY E-Bikes mit Blumenkörben vor einer Holzhütte" loading="lazy" width="800" height="600"></div>
+    </div>
+    <form class="glassbox form rv" id="tf" novalidate>
+     <div class="fl"><span class="flab">Was dürfen wir tun?</span><div class="choice" id="tArt"><button type="button" class="on" data-v="Inspektion">Inspektion</button><button type="button" data-v="Reparatur">Reparatur</button><button type="button" data-v="Bosch-Diagnose">Bosch-Diagnose</button><button type="button" data-v="Reifen/Schlauch">Reifen / Schlauch</button></div></div>
+     <div class="fl"><span class="flab">Ihr Rad</span><div class="choice" id="tRad"><button type="button" data-v="Fahrrad">Fahrrad</button><button type="button" class="on" data-v="E-Bike">E-Bike</button><button type="button" data-v="E-Dreirad">E-Dreirad</button><button type="button" data-v="Lastenrad">Lastenrad</button></div></div>
+     <div class="row2">
+      <div class="fl"><label for="tName">Name</label><input class="inp" id="tName" autocomplete="name" placeholder="Vor- und Nachname"></div>
+      <div class="fl"><label for="tTel">Telefon</label><input class="inp" id="tTel" type="tel" autocomplete="tel" placeholder="Für die Rückmeldung"></div>
+     </div>
+     <div class="row2">
+      <div class="fl"><label for="tTag">Wunschtag</label><input class="inp" id="tTag" type="date"></div>
+      <div class="fl"><span class="flab">Hol- & Bringservice</span><div class="choice" id="tHol"><button type="button" class="on" data-v="nein">Nein</button><button type="button" data-v="ja">Ja, bitte</button></div></div>
+     </div>
+     <div class="fl"><label for="tMsg">Was ist los? (optional)</label><textarea class="inp" id="tMsg" placeholder="z. B. Bremse quietscht, Akku lädt nicht, Modell …"></textarea></div>
+     <div class="err" id="tErr" role="alert"></div>
+     <button class="btn main" type="submit"><svg><use href="#i-arrow"/></svg>Anfrage erstellen</button>
+     <div class="out" id="tOut" hidden><b style="font-family:var(--display)">Ihre Anfrage ist fertig:</b><pre id="tTxt"></pre><div class="btns"><a class="btn wa" id="tWa" target="_blank" rel="noopener"><svg><use href="#i-chat"/></svg>Per WhatsApp senden</a><a class="btn glass" id="tMail"><svg><use href="#i-mail"/></svg>Per E-Mail senden</a><button type="button" class="copy" id="tCopy">Text kopieren</button></div><p class="note">Oder rufen Sie an: 07271 78033.</p></div>
+    </form>
+   </div>
+  </div>
+
+  <div class="sec">
+   <div class="shead rv"><div class="kick">Finanzierung · Versicherung · Leasing</div><h2>Ihr Traumrad. <span class="gt">Clever bezahlt.</span></h2></div>
+   <div class="trio">
+    <div class="blob rv lit" style="background:linear-gradient(140deg,rgba(226,35,45,.22),rgba(24,20,44,.6))"><div class="big0 gt">0 %</div><span class="blogo" style="height:52px;padding:0 20px"><img src="img/logo-targobank.svg" alt="TARGOBANK" style="height:22px" loading="lazy"></span><h3>Finanzierung</h3><p>0 % Zinsen und 0 € Anzahlung: Wir finanzieren Ihr Traumrad oder E-Bike über die TARGOBANK. Sprechen Sie uns im Laden an.</p></div>
+    <div class="blob rv lit"><span class="blogo" style="height:76px;padding:0 24px"><img src="img/logo-enra.svg" alt="ENRA – Die E-Bike-Versicherung" style="height:44px" loading="lazy"></span><h3>Bike-Versicherung</h3><p>Auch das beste Schloss schützt nicht vor Diebstahl. Eine Versicherung mit unserem Partner ENRA schon, zumindest finanziell. Dazu gibt es eine Vollkasko mit Verschleiß und Pick-up-Service.</p><a class="btn glass" href="https://www.enra.eu/?dealerid=10190" target="_blank" rel="noopener" style="align-self:flex-start">Zur ENRA-Versicherung<svg><use href="#i-arrow"/></svg></a></div>
+    <div class="blob rv lit"><div class="big0 gt">Dienstrad</div><h3>Leasing</h3><p>Machen Sie Ihr E-Bike zum Dienstrad. Wir arbeiten mit fast allen Leasing-Firmen zusammen, zum Beispiel:</p><div class="pills" style="gap:8px"><span class="pill" style="padding:9px 14px;font-size:13.5px">JobRad</span><span class="pill" style="padding:9px 14px;font-size:13.5px">Bikeleasing</span><span class="pill" style="padding:9px 14px;font-size:13.5px">Company Bike</span><span class="pill" style="padding:9px 14px;font-size:13.5px">Businessbike</span><span class="pill" style="padding:9px 14px;font-size:13.5px">Deutsche Dienstrad</span><span class="pill" style="padding:9px 14px;font-size:13.5px">Lease a Bike</span><span class="pill" style="padding:9px 14px;font-size:13.5px">Eurorad</span><span class="pill" style="padding:9px 14px;font-size:13.5px">Kazenmaier</span><span class="pill" style="padding:9px 14px;font-size:13.5px">RIDE</span></div></div>
+   </div>
+  </div>
+
+  <div class="sec">
+   <div class="shead rv"><div class="kick">So einfach geht's</div><h2>In 4 Schritten <span class="gt">zum Dienstrad.</span></h2></div>
+   <div class="steps">
+    <div class="step rv"><span class="n">1</span><h3>Rad aussuchen</h3><p>Beratung und Probefahrt bei uns im Laden.</p></div>
+    <div class="step rv"><span class="n">2</span><h3>Angebot</h3><p>Wir erstellen das Angebot für Ihren Leasing-Anbieter.</p></div>
+    <div class="step rv"><span class="n">3</span><h3>Freigabe</h3><p>Ihr Arbeitgeber genehmigt den Vertrag im Portal.</p></div>
+    <div class="step rv"><span class="n">4</span><h3>Losfahren</h3><p>Wir machen das Rad fertig, Sie holen es ab.</p></div>
+   </div>
+   <p class="note rv" style="margin-top:16px">Vereinfachter Ablauf. Die Einzelheiten hängen vom Leasing-Anbieter und Ihrem Arbeitgeber ab, wir erklären sie Ihnen gern.</p>
+  </div>
+ </div>
+</section>
+
+<!-- ================= MARKEN ================= -->
+<section class="view" data-v="marken" hidden>
+ <div class="wrap">
+  <div class="pagehead">
+   <div><div class="kick rv">Hersteller</div><h1 class="rv" style="margin-top:16px">Top-Marken. <span class="gt">Große Auswahl.</span></h1><p class="lead rv">Ob Kompaktrad, Tourer oder E-Dreirad: Neben traditionellen Marken wie KTM führen wir innovative Konzepte wie i:SY und QiO. Bei Velo de Ville stellen Sie Ihr Rad sogar selbst zusammen.</p></div>
+   <div class="btns rv"><a class="btn main" href="#finder"><svg><use href="#i-spark"/></svg>E-Bike-Finder starten</a></div>
+  </div>
+
+  <div class="sec" id="finder">
+   <div class="finder rv" id="fnd"></div>
+  </div>
+
+  <div class="sec">
+   <div class="shead rv"><div class="kick">Unsere Fahrrad-Marken</div><h2>Die Marken <span class="gt">bei uns im Laden.</span></h2></div>
+   <div class="brands" id="brands"></div>
+  </div>
+
+  <div class="sec">
+   <div class="shead rv"><div class="kick">Zubehör & Komponenten</div><h2>Gutes Zubehör <span class="gt">macht den Unterschied.</span></h2></div>
+   <div class="acc rv" id="acc"></div>
+  </div>
+ </div>
+</section>
+
+<!-- ================= i:SY ================= -->
+<section class="view" data-v="isy" hidden>
+ <div class="wrap">
+  <div class="isy-hero rv">
+   <img src="img/isy-ausstellung.webp" alt="i:SY E-Kompakträder in Rot, Blau, Grün und Weiß in der Ausstellung" width="1800" height="1350">
+   <div class="in">
+    <img class="badge-isy" src="img/isy-experte.webp" alt="i:SY Experte 2026" width="900" height="505">
+    <h1>i:SY Händler <span class="org">mit Leib und Seele.</span></h1>
+    <p class="lead" style="color:#E5E9F3">Seit über 10 Jahren sind wir i:SY Experte und stehen mit voller Überzeugung hinter diesem genialen Konzept.</p>
+   </div>
+  </div>
+
+  <div class="pearls">
+   <div class="pearl rv lit"><b style="color:#FFB27A">10+</b><span>Jahre i:SY Experte</span></div>
+   <div class="pearl rv lit"><b style="color:#FFB27A">100+</b><span>i:SY in vielen Modellen und Farben ständig vorrätig</span></div>
+   <div class="pearl rv lit"><b style="color:#FFB27A">2 Tage</b><span>Probefahrt übers Wochenende möglich</span></div>
+   <div class="pearl rv lit"><b style="color:#FFB27A">20"</b><span>Kompaktrad: wendig, handlich, für fast jede Körpergröße</span></div>
+  </div>
+
+  <div class="sec">
+   <div class="split">
+    <div>
+     <div class="kick rv">Ride it! Love it!</div>
+     <p class="quote rv" style="margin-top:18px">„Das 20-Zoll i:SY ist der <span class="org">Porsche</span> unter den E-Bikes.“</p>
+     <div class="sig rv"><svg><use href="#i-wrench"/></svg><span>Stefan Hessert</span></div>
+     <p class="lead rv" style="margin-top:22px">Das besondere Fahrgefühl eines i:SY muss man selbst erleben. Deshalb können Sie bei uns ein i:SY auch übers Wochenende Probe fahren.</p>
+     <div class="btns rv" style="margin-top:24px"><a class="btn main" href="#termin" data-pre="Probefahrt i:SY"><svg><use href="#i-bike"/></svg>Probefahrt anfragen</a><a class="btn glass" href="https://www.isy.de/de-de" target="_blank" rel="noopener">Alle Modelle bei i:SY<svg><use href="#i-arrow"/></svg></a></div>
+    </div>
+    <div class="stage rv" style="aspect-ratio:1/.8"><div class="orb" style="background:conic-gradient(#FF7A1A,#E2232D,#F472B6,#FF7A1A)"></div><div class="floor"></div><div class="bikes float"><img src="img/p-isy2.webp" alt="i:SY E5 ZR F Touring E-Kompaktrad" width="1600" height="1145" loading="lazy"></div></div>
+   </div>
+  </div>
+
+  <div class="sec">
+   <div class="bus rv">
+    <div class="kick" style="color:#FFB27A">Einmalig in Deutschland</div>
+    <h2 style="margin-top:14px">Der erste und einzige <span class="org">i:SY Werbe-Bus.</span></h2>
+    <div class="road"><img src="img/isy-bus.webp" alt="Linienbus mit i:SY- und Velocenter-Werbung" width="980" height="253"></div>
+   </div>
+  </div>
+ </div>
+</section>
+
+<!-- ================= TREFFEN ================= -->
+<section class="view" data-v="treffen" hidden>
+ <div class="wrap">
+  <div class="pagehead">
+   <div><div class="kick rv">i:SY Treffen</div><h1 class="rv" style="margin-top:16px">Wir haben den <span class="gt">Weltrekord.</span></h1><p class="lead rv">Am 09.06.2024 hat das Rekord-Institut für Deutschland (RID) auf dem Rheinradweg in Wörth den Weltrekord bestätigt: die längste statische Fahrrad-Schlange einer Marke.</p></div>
+  </div>
+  <div class="sec" style="padding-top:40px">
+   <div class="rec">
+    <img class="btn-rec rv" src="img/weltrekord-button.webp" alt="Button: i:SY Treffen 2024 – Weltrekord – Ich war dabei!" width="700" height="700">
+    <div>
+     <div class="huge gt rv" id="rekord">283</div>
+     <p class="lead rv" style="margin-top:12px">i:SY-Fahrerinnen und -Fahrer bildeten eine Schlange und fuhren danach gemeinsam 1,6 km. Nötig waren 250. Organisiert vom Velocenter Hessert und dem i:SY Flagship-Store by Velorep aus Karlsruhe.</p>
+    </div>
+   </div>
+  </div>
+
+  <div class="sec">
+   <div class="split" style="align-items:start">
+    <div>
+     <div class="shead rv"><div class="kick">Die Geschichte</div><h2>Vom Treffen <span class="gt">zum Rekord.</span></h2></div>
+     <div class="tl">
+      <div class="tli rv"><div class="y">2019</div><p>Das erste große i:SY-Treffen, gemeinsam mit Velorep: etwa 100 Teilnehmende.</p></div>
+      <div class="tli rv"><div class="y">2022</div><p>Nach zwei Jahren Corona-Pause über 200 Fahrer. Die Schlange war über 2 km lang, rund 40 km von Wörth nach Neupotz und zurück, mit i:SY Show-Truck zum Probefahren.</p></div>
+      <div class="tli rv"><div class="y">2023</div><p>Wieder gemeinsam mit Velorep auf dem Rheinradweg unterwegs.</p></div>
+      <div class="tli big rv"><div class="y gt">2024</div><p>Das fünfte Treffen wird zum Weltrekord: 283 Teilnehmende, offiziell vom RID bestätigt.</p></div>
+     </div>
+    </div>
+    <img class="urk rv" src="img/rid-urkunde.webp" alt="RID-Rekordurkunde: Längste Fahrrad-Schlange einer Marke" loading="lazy" width="900" height="1399" style="justify-self:center">
+   </div>
+  </div>
+
+  <div class="sec">
+   <div class="gal">
+    <div class="photo rv"><img src="img/treffen-luft.webp" alt="Luftaufnahme: i:SY-Schlange auf dem Weg am Rhein" loading="lazy" width="800" height="600"></div>
+    <div class="photo rv"><img src="img/treffen-hafen.webp" alt="Luftaufnahme: Radler-Schlange in der Hafenkurve" loading="lazy" width="900" height="506"></div>
+    <div class="photo rv"><img src="img/treffen-feld.webp" alt="Luftaufnahme: Radler zwischen Feldern" loading="lazy" width="800" height="600"></div>
+   </div>
+  </div>
+
+  <div class="sec">
+   <div class="shead rv"><div class="kick">Pressemitteilung, 12.06.2024</div><h2>i:SY-Treffen wieder <span class="gt">ein toller Erfolg.</span></h2></div>
+   <div class="press rv">
+    <p>Für den Weltrekord mussten mindestens 250 Personen mit i:SY-Fahrrädern eine Schlange bilden und anschließend eine 1,6 Kilometer lange Ausfahrt absolvieren. RID-Rekordrichterin Laura Kuchenbecker reiste aus Hamburg an, um die neue Bestleistung persönlich zu prüfen und zu zertifizieren.</p>
+    <blockquote>„Dass hier heute so viele Menschen zur Teilnahme begeistert werden konnten, ist ein starkes Zeichen pro nachhaltige Mobilität.“<cite>Laura Kuchenbecker, RID</cite></blockquote>
+    <p>Mit 283 Teilnehmenden sprengten die Veranstalter die Erwartungen. Der Rheinradweg in Wörth am Rhein wurde extra abgesperrt, um ein Verkehrschaos zu vermeiden.</p>
+    <blockquote>„Jetzt sind wir stolz und glücklich, dass wir diese Bestleistung mit der Marke i:SY realisieren konnten. Das zeigt den Zusammenhalt unserer Fahrradgemeinschaft vor Ort.“<cite>Martina Hessert, Velocenter Hessert</cite></blockquote>
+    <p>Die Idee einer gemeinsamen Fan-Radtour gibt es seit 2019. Beim fünften Zusammentreffen kam der Weltrekord dazu. Die persönliche RID-Urkunde können alle Teilnehmenden beim Rekord-Institut für Deutschland bestellen.</p>
+   </div>
+   <div class="btns rv" style="margin-top:26px"><a class="btn main" href="https://wa.me/491635343133?text=Hallo%20Velocenter%2C%20ich%20m%C3%B6chte%20beim%20n%C3%A4chsten%20i%3ASY-Treffen%20dabei%20sein.%20Bitte%20informiert%20mich." target="_blank" rel="noopener"><svg><use href="#i-chat"/></svg>Beim nächsten Treffen dabei sein</a></div>
+  </div>
+ </div>
+</section>
+
+<!-- ================= DREIRAD ================= -->
+<section class="view" data-v="dreirad" hidden>
+ <div class="wrap">
+  <div class="hero" style="padding-top:clamp(36px,6vw,80px)">
+   <div>
+    <div class="kick rv">Neu bei uns · Van Raam</div>
+    <h1 class="rv" style="margin-top:16px">E-Dreiräder: <span class="gt">sicher auf drei Rädern.</span></h1>
+    <p class="lead rv" style="margin-top:20px">E-Dreiräder vom Weltmarktführer Van Raam aus Holland. Mit dem Easy Rider sitzen Sie bequem, haben drei Räder unter sich und Motorunterstützung, wenn es bergauf geht.</p>
+    <div class="btns rv" style="margin-top:26px"><a class="btn main" href="#termin" data-pre="Probefahrt E-Dreirad"><svg><use href="#i-tri"/></svg>Jetzt Probe fahren</a><a class="btn glass" href="https://www.vanraam.com/" target="_blank" rel="noopener">Van Raam entdecken<svg><use href="#i-arrow"/></svg></a></div>
+   </div>
+   <div class="tri-stage rv" id="triStage"><div class="orb" style="background:conic-gradient(#22D3EE,#60A5FA,#C084FC,#F472B6,#22D3EE)"></div><img class="float" src="img/p-vanraam.webp" alt="Van Raam Easy Rider E-Dreirad" width="1600" height="1193" loading="lazy"></div>
+  </div>
+  <div class="sec">
+   <div class="trio">
+    <div class="blob rv lit"><span class="bub" style="width:60px;height:60px;border-radius:50%;display:grid;place-items:center;background:linear-gradient(135deg,#22D3EE,#60A5FA)"><svg style="width:28px;height:28px;color:#fff"><use href="#i-shield"/></svg></span><h3>Standsicher</h3><p>Drei Räder kippen beim Anhalten nicht. Das gibt vielen Menschen ihr Rad und ihre Freiheit zurück.</p></div>
+    <div class="blob rv lit"><span class="bub" style="width:60px;height:60px;border-radius:50%;display:grid;place-items:center;background:linear-gradient(135deg,#E2232D,#F472B6)"><svg style="width:28px;height:28px;color:#fff"><use href="#i-bike"/></svg></span><h3>Probefahrt vor Ort</h3><p>Ein Dreirad fährt sich anders als ein Zweirad. Kommen Sie vorbei und testen Sie in Ruhe, wir erklären alles.</p></div>
+    <div class="blob rv lit"><span class="bub" style="width:60px;height:60px;border-radius:50%;display:grid;place-items:center;background:linear-gradient(135deg,#FBBF24,#FB923C)"><svg style="width:28px;height:28px;color:#fff"><use href="#i-wrench"/></svg></span><h3>Service inklusive</h3><p>Inspektion und Reparatur für E-Dreiräder machen wir in unserer eigenen Werkstatt.</p></div>
+   </div>
+  </div>
+ </div>
+</section>
+
+<!-- ================= KONTAKT ================= -->
+<section class="view" data-v="kontakt" hidden>
+ <div class="wrap">
+  <div class="pagehead">
+   <div><div class="kick rv">Kontakt</div><h1 class="rv" style="margin-top:16px">Fragen? <span class="gt">Wir sind für Sie da.</span></h1><p class="lead rv">Ob Beratungstermin, Werkstatt oder kurze Frage: Rufen Sie an, schreiben Sie per WhatsApp oder kommen Sie einfach vorbei.</p></div>
+  </div>
+  <div class="sec" style="padding-top:44px">
+   <div class="ways">
+    <a class="way rv" href="tel:+49727178033" style="--cc:#E2232D"><span class="bub"><svg><use href="#i-phone"/></svg></span><span>Telefon</span><b>07271 78033</b><button type="button" class="copy" data-copy="07271 78033">Nummer kopieren</button></a>
+    <a class="way rv" href="https://wa.me/491635343133" target="_blank" rel="noopener" style="--cc:#22C55E"><span class="bub"><svg><use href="#i-chat"/></svg></span><span>WhatsApp</span><b>0163 5343133</b><button type="button" class="copy" data-copy="01635343133">Nummer kopieren</button></a>
+    <a class="way rv" href="mailto:info@velo-center.de" style="--cc:#60A5FA"><span class="bub"><svg><use href="#i-mail"/></svg></span><span>E-Mail</span><b>info@velo-center.de</b><button type="button" class="copy" data-copy="info@velo-center.de">Adresse kopieren</button></a>
+   </div>
+  </div>
+  <div class="sec">
+   <div class="visit">
+    <div class="glassbox rv">
+     <h3>Öffnungszeiten</h3>
+     <div class="hours" id="hours2"></div>
+    </div>
+    <div class="glassbox rv">
+     <h3>So finden Sie uns</h3>
+     <div class="info-line"><svg><use href="#i-pin"/></svg><span><b style="color:var(--ink)">Velocenter Hessert</b><br>Hartmannstraße 25 (Nähe TÜV)<br>76744 Wörth am Rhein</span></div>
+     <div class="info-line"><svg><use href="#i-park"/></svg><span>Zum Be- und Entladen dürfen Sie trotz eingeschränktem Halteverbot und Zickzack-Markierung kurz vor dem Geschäft halten. Parkplätze gibt es ca. 100 m entfernt am Friedhof.</span></div>
+     <div class="photo" style="aspect-ratio:16/9;border-radius:36px"><img src="img/fassade.webp" alt="Hauswand mit großem Velocenter-Hessert-Schriftzug" loading="lazy" width="800" height="600"></div>
+     <a class="btn main" href="https://www.google.com/maps/search/?api=1&query=Velocenter+Hessert+Hartmannstra%C3%9Fe+25+76744+W%C3%B6rth+am+Rhein" target="_blank" rel="noopener" style="align-self:flex-start"><svg><use href="#i-map"/></svg>Route planen</a>
+    </div>
+   </div>
+  </div>
+  <div class="sec">
+   <div class="split" style="align-items:start">
+    <div><div class="kick rv">Nachricht schreiben</div><h2 class="rv" style="margin-top:16px">Schreiben Sie uns <span class="gt">direkt.</span></h2><p class="lead rv" style="margin-top:18px">Wir antworten so schnell wie möglich, in der Regel am nächsten Öffnungstag.</p></div>
+    <form class="glassbox form rv" id="kf" novalidate>
+     <div class="row2"><div class="fl"><label for="kName">Name</label><input class="inp" id="kName" autocomplete="name"></div><div class="fl"><label for="kTel">Telefon oder E-Mail</label><input class="inp" id="kTel" autocomplete="email"></div></div>
+     <div class="fl"><label for="kMsg">Ihre Nachricht</label><textarea class="inp" id="kMsg"></textarea></div>
+     <div class="err" id="kErr" role="alert"></div>
+     <div class="btns"><button class="btn wa" type="submit" data-via="wa"><svg><use href="#i-chat"/></svg>Per WhatsApp</button><button class="btn glass" type="submit" data-via="mail"><svg><use href="#i-mail"/></svg>Per E-Mail</button></div>
+    </form>
+   </div>
+  </div>
+ </div>
+</section>
+
+<!-- ================= IMPRESSUM ================= -->
+<section class="view" data-v="impressum" hidden>
+ <div class="wrap">
+  <div class="pagehead"><div><div class="kick rv">Rechtliches</div><h1 class="rv" style="margin-top:16px">Impressum</h1></div></div>
+  <div class="sec legal rv" style="padding-top:40px">
+   <div><h3>Unternehmen</h3><dl class="dl"><dt>Bezeichnung</dt><dd>VELOCENTER Hessert, Stefan Hessert</dd><dt>Anschrift</dt><dd>Hartmannstraße 25, 76744 Wörth</dd><dt>Rechtsform</dt><dd>Einzelunternehmen</dd></dl></div>
+   <div><h3>Kontakt</h3><dl class="dl"><dt>Telefon</dt><dd>07271-78033</dd><dt>Fax</dt><dd>07271-78039</dd><dt>E-Mail</dt><dd>info@velo-center.de</dd></dl></div>
+   <div><h3>Umsatzsteuer-ID</h3><p>Umsatzsteuer-Identifikationsnummer gemäß § 27 a Umsatzsteuergesetz: DE171696150</p></div>
+   <div><h3>Redaktionell verantwortlich</h3><p>Stefan Hessert, Hartmannstraße 25, 76744 Wörth</p></div>
+   <div><h3>Verbraucherstreitbeilegung</h3><p>Wir nehmen an keinem Streitbeilegungsverfahren vor einer Verbraucherschlichtungsstelle teil.</p></div>
+   <div><h3>Barrierefreiheit</h3><p>Wir bemühen uns, unsere digitalen Inhalte barrierefrei anzubieten. Sollten Sie auf Barrieren stoßen, wenden Sie sich bitte an info@velo-center.de.</p></div>
+   <div><h3>Datenschutz</h3><p class="note" style="font-size:15px">Im Prototyp nicht enthalten. Für die echte Seite wird eine eigene Datenschutzerklärung erstellt.</p></div>
+  </div>
+ </div>
+</section>
+
+<!-- ================= PROTOTYP-INFOS ================= -->
+<section class="view" data-v="warum" hidden>
+ <div class="wrap">
+  <div class="pagehead"><div><div class="kick rv">Prototyp · für Stefan</div><h1 class="rv" style="margin-top:16px">Warum eine <span class="gt">eigene Homepage?</span></h1><p class="lead rv">Diese Seite ist ein Prototyp. Alle Inhalte stammen von der aktuellen velo-center.de, ergänzt um Funktionen, die Werkstatt und Verkauf direkt bringen. Geprüft am 11.11.2026.</p></div></div>
+
+  <div class="sec" style="padding-top:44px">
+   <div class="shead rv"><div class="kick" style="color:#FDA4AF">Gefunden auf der aktuellen Seite</div><h2>Das sehen unsere Kunden <span class="gt">heute.</span></h2></div>
+   <div class="find">
+    <div class="fnd rv"><span class="k">1</span><p>Neuester Beitrag ist das <b>Monatsangebot Juli 2026</b>, seit über 4 Monaten kommt nichts Neues. Die Blog-Seite selbst zeigt keinen einzigen Beitrag.</p></div>
+    <div class="fnd rv"><span class="k">2</span><p>Die Startseite zeigt noch eine <b>i:SY-Anzeige für September 2025</b>.</p></div>
+    <div class="fnd rv"><span class="k">3</span><p>Auf der Service-Seite steht die Telefonnummer <b>0 55 71 - 30 26 - 0</b>. Das ist nicht unsere Nummer, sie stammt aus dem eingefügten Bikeleasing-Text. Kunden rufen dort die falsche Firma an.</p></div>
+    <div class="fnd rv"><span class="k">4</span><p><b>24 Kästen „Youtube inaktiv“</b>: 12 auf i:SY Treffen, 10 auf i:SY Experte, je 1 auf Start und E-Dreiräder. Dazu <b>„Google Maps inaktiv“</b> auf der Kontaktseite. Wer die Cookies nicht annimmt, sieht nur graue Kästen.</p></div>
+    <div class="fnd rv"><span class="k">5</span><p>Auf der Service-Seite führt das <b>Van-Raam-Logo zum Velo-de-Ville-Konfigurator</b>.</p></div>
+    <div class="fnd rv"><span class="k">6</span><p><b>Gudereit und Victoria</b> fehlen in der Markenübersicht. Das Impressum nennt dafür Puky, Flyer, Conway und Hercules.</p></div>
+    <div class="fnd rv"><span class="k">7</span><p>Tippfehler: „profesionellen“ (Startseite), „eiuer“, „Globus-Mark“, „i;SY“ (i:SY Treffen). Überschrift „24er i:SY Treffen“.</p></div>
+    <div class="fnd rv"><span class="k">8</span><p>Jede Änderung läuft über eine <b>Anfrage bei der Agentur</b> (Coco / Schlütersche). Aktionen wie die Winter-Inspektion kommen deshalb nicht schnell genug auf die Seite.</p></div>
+   </div>
+  </div>
+
+  <div class="sec plus">
+   <div class="shead rv"><div class="kick" style="color:#6EE7B7">Was die eigene Seite bringt</div><h2>Mehr Werkstatt. <span class="gt">Mehr Verkauf.</span></h2></div>
+   <div class="find">
+    <div class="fnd rv"><span class="k">✓</span><p><b>Online-Terminanfrage für die Werkstatt</b> mit Wunschtag (Mi/So gesperrt) und Hol-/Bringservice, landet per WhatsApp oder E-Mail direkt bei uns.<small>Füllt die Werkstatt, gerade im Winter.</small></p></div>
+    <div class="fnd rv"><span class="k">✓</span><p><b>E-Bike-Finder</b>: 2 Fragen, dann passende Marken und der Knopf zur Probefahrt.<small>Bringt Kunden mit klarem Wunsch in den Laden.</small></p></div>
+    <div class="fnd rv"><span class="k">✓</span><p><b>Live „Jetzt geöffnet“</b> oben in der Navi und heutige Öffnungszeit hervorgehoben.</p></div>
+    <div class="fnd rv"><span class="k">✓</span><p><b>Aktionen sofort online</b>: Winter-Inspektion mit Tage-Zähler. Änderungen in Minuten, ohne Agentur.</p></div>
+    <div class="fnd rv"><span class="k">✓</span><p><b>WhatsApp-Knopf</b> auf jeder Seite, schnelle Wege zu Telefon, E-Mail und Route.</p></div>
+    <div class="fnd rv"><span class="k">✓</span><p><b>Gleicher Look</b> wie Newsletter, Social Media, KI-Zentrale und Planer. Keine grauen Cookie-Kästen, weil nichts von YouTube oder Google Maps eingebettet ist (nur verlinkt).</p></div>
+    <div class="fnd rv"><span class="k">✓</span><p><b>Hosting kostenlos möglich</b> über GitHub Pages, so wie der Planer heute schon läuft.</p></div>
+   </div>
+  </div>
+
+  <div class="sec open">
+   <div class="shead rv"><div class="kick" style="color:#FDE68A">Ehrlich offen</div><h2>Das muss vor dem Start <span class="gt">geklärt werden.</span></h2></div>
+   <div class="find">
+    <div class="fnd rv"><span class="k">!</span><p><b>Vertrag mit Coco / Schlütersche</b>: Laufzeit und Kündigungsfrist prüfen.</p></div>
+    <div class="fnd rv"><span class="k">!</span><p><b>Domain velo-center.de</b>: Wer verwaltet sie? Für den Umzug brauchen wir Zugriff oder den Auth-Code.</p></div>
+    <div class="fnd rv"><span class="k">!</span><p><b>Datenschutzerklärung</b> für die neue Seite erstellen. Impressum ist übernommen.</p></div>
+    <div class="fnd rv"><span class="k">!</span><p><b>Bilder</b>: Fotos stammen von der aktuellen Seite. Herstellerbilder und Logos vor dem Start über die Händlerportale der Marken freigeben lassen.</p></div>
+    <div class="fnd rv"><span class="k">!</span><p><b>Kontakt- und Terminformular</b> sendet im Prototyp per WhatsApp oder E-Mail-Programm. Für Versand direkt aus dem Formular brauchen wir einen Mail-Dienst (wie EmailJS im Planer).</p></div>
+    <div class="fnd rv"><span class="k">!</span><p><b>Google-Bewertungen</b> (4,9 aus 97) sind der Stand der alten Seite und von Hand eingetragen.</p></div>
+   </div>
+  </div>
+ </div>
+</section>
+
+</main>
+
+<footer class="foot">
+ <div class="wrap">
+  <div class="fgrid">
+   <div class="col"><img src="img/velocenter-logo.webp" alt="Velocenter Hessert" width="170" height="99" style="width:170px;height:auto"><p style="color:var(--mut);font-size:14.5px;margin-top:8px">Ihr E-Bike- und Kompaktrad-Spezialist in Wörth am Rhein. Familienbetrieb seit 1995.</p><div class="soc" style="margin-top:8px"><a href="https://www.instagram.com/velocenterhessert/" target="_blank" rel="noopener" aria-label="Instagram"><svg><use href="#i-ig"/></svg></a><a href="https://www.facebook.com/velocenterhessert" target="_blank" rel="noopener" aria-label="Facebook"><svg><use href="#i-fb"/></svg></a><a href="https://wa.me/491635343133" target="_blank" rel="noopener" aria-label="WhatsApp"><svg><use href="#i-chat"/></svg></a></div></div>
+   <div class="col"><h4>Besuch</h4><span>Hartmannstraße 25</span><span>76744 Wörth am Rhein</span><span style="color:var(--mut)">Nähe TÜV</span></div>
+   <div class="col"><h4>Kontakt</h4><a href="tel:+49727178033">07271 78033</a><a href="https://wa.me/491635343133" target="_blank" rel="noopener">WhatsApp 0163 5343133</a><a href="mailto:info@velo-center.de">info@velo-center.de</a></div>
+   <div class="col"><h4>Öffnungszeiten</h4><span>Mo, Di, Do, Fr<br>09:00–12:00 · 14:30–18:00</span><span>Sa 09:00–12:00</span><span style="color:#FDA4AF">Mi & So geschlossen</span></div>
+  </div>
+  <div class="legalbar"><span>© <span id="yr">2026</span> Velocenter Hessert</span><span style="display:flex;gap:18px;flex-wrap:wrap"><a href="#impressum">Impressum</a><a href="#impressum">Datenschutz</a><a href="#warum">Prototyp-Infos</a></span></div>
+ </div>
+</footer>
+
+<a class="fab" href="https://wa.me/491635343133" target="_blank" rel="noopener" aria-label="WhatsApp schreiben"><svg><use href="#i-chat"/></svg></a>
+<a class="proto" href="#warum"><svg class="ico" style="width:18px;height:18px"><use href="#i-spark"/></svg><span>Prototyp · Infos für Stefan</span></a>
+
+<script>
+(()=>{
+const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>[...r.querySelectorAll(s)];
+const RM=matchMedia('(prefers-reduced-motion: reduce)').matches;
+const ROUTES=['start','service','marken','isy','treffen','dreirad','kontakt','impressum','warum'];
+const ALIAS={termin:['service','termin-form'],finder:['marken','finder'],besuch:['start','besuch']};
+const WA='491635343133';
+
+/* ---------- Marken (Logos werden ergänzt, Text als Rückfall) ---------- */
+const BRANDS=[
+ {k:'isy',n:'i:SY',logo:'img/marke-isy.svg',shot:'img/p-isy2.webp',c:'#FF7A1A',t:'Das 20-Zoll-Kompaktrad. Seit über 10 Jahren sind wir i:SY Experte und haben ständig über 100 i:SY vorrätig.',a:[['Mehr zu i:SY','#isy'],['isy.de','https://www.isy.de/de-de']]},
+ {k:'qio',n:'QiO',logo:'img/marke-qio.svg',shot:'img/p-qio.webp',c:'#38BDF8',t:'Innovatives Kompaktrad-Konzept. Am besten selbst erleben: Probefahrt bei uns im Laden.',a:[['qio-bikes.com','https://www.qio-bikes.com/']]},
+ {k:'ktm',n:'KTM',logo:'img/marke-ktm.svg',shot:'img/p-ktm.webp',c:'#FF6A00',t:'Traditionsmarke mit großer E-Bike-Auswahl, vom bequemen Tiefeinsteiger bis zum Trekking-Rad.',a:[['ktm-bikes.at','https://www.ktm-bikes.at/']]},
+ {k:'vdv',n:'Velo de Ville',logo:'img/marke-vdv.svg',shot:'img/p-vdv.webp',c:'#F97316',t:'Rad nach Wunsch: Rahmen, Farbe und Ausstattung stellen Sie selbst zusammen.',a:[['Zum Konfigurator','https://konfigurator.velo-de-ville.com/de?h_ident=28181&direct=true']]},
+ {k:'vanraam',n:'Van Raam',logo:'img/marke-vanraam.svg',shot:'img/p-vanraam.webp',c:'#A855F7',t:'E-Dreiräder vom Weltmarktführer aus Holland. Bei uns: der Easy Rider.',a:[['Mehr zu E-Dreirädern','#dreirad'],['vanraam.com','https://www.vanraam.com/']]},
+ {k:'gudereit',n:'Gudereit',logo:'img/marke-gudereit.webp',shot:'img/p-gudereit.webp',c:'#22C55E',t:'Bei uns das EC-35 Evo.',a:[['gudereit.de','https://www.gudereit.de/']]},
+ {k:'victoria',n:'Victoria',logo:'img/marke-victoria.svg',shot:'img/p-victoria.webp',c:'#60A5FA',t:'Traditionsmarke mit alltagstauglichen E-Bikes.',a:[['victoria-fahrrad.de','https://www.victoria-fahrrad.de/']]}
+];
+const ACC=[['Bosch','bosch.svg'],['Shimano','shimano.webp'],['Schwalbe','schwalbe.webp'],['Ortlieb','ortlieb.webp'],['ABUS','abus.webp'],['Topeak','topeak.webp'],['KLICKfix','klickfix.webp'],['Haberland','haberland.webp'],['Ergon','ergon.webp'],['by.schulz','byschulz.webp'],['Contec','contec.webp']];
+const logoEl=(src,name)=>{const im=new Image();im.alt=name;im.loading='lazy';im.decoding='async';im.src=src;im.addEventListener('error',()=>{const s=document.createElement('span');s.textContent=name;im.replaceWith(s)});return im};
+function mk(src,name){const d=document.createElement('div');d.className='mk';d.append(logoEl(src,name));return d}
+const tr=$('#track');[...BRANDS.map(b=>[b.logo,b.n]),...ACC.map(([n,k])=>['img/zub-'+k,n])].forEach(([s,n])=>tr.append(mk(s,n)));
+[...tr.children].forEach(c=>{const x=c.cloneNode(true);x.setAttribute('aria-hidden','true');x.querySelector('img')?.addEventListener('error',e=>{const s=document.createElement('span');s.textContent=e.target.alt;e.target.replaceWith(s)});tr.append(x)});
+const acc=$('#acc');ACC.forEach(([n,k])=>acc.append(mk('img/zub-'+k,n)));
+const bw=$('#brands');
+BRANDS.forEach(b=>{
+ const c=document.createElement('article');c.className='brand-c rv lit';c.style.setProperty('--bc',b.c);c.id='m-'+b.k;
+ const lg=document.createElement('div');lg.className='blogo';lg.append(logoEl(b.logo,b.n));
+ const sh=document.createElement('div');sh.className='shot';const si=new Image();si.alt=b.n+' E-Bike';si.loading='lazy';si.src=b.shot;si.addEventListener('error',()=>sh.remove());sh.append(si);
+ const p=document.createElement('p');p.textContent=b.t;
+ const ac=document.createElement('div');ac.className='acts';
+ b.a.forEach(([t,h],i)=>{const a=document.createElement('a');a.className='btn '+(i?'glass':'main');a.href=h;a.textContent=t;if(h.startsWith('http')){a.target='_blank';a.rel='noopener'}ac.append(a)});
+ const pr=document.createElement('a');pr.className='btn glass';pr.href='#termin';pr.dataset.pre='Probefahrt '+b.n;pr.textContent='Probefahrt';ac.append(pr);
+ c.append(lg,sh,p,ac);bw.append(c);
+});
+
+/* ---------- Öffnungszeiten live (Europe/Berlin) ---------- */
+const H={1:[[540,720],[870,1080]],2:[[540,720],[870,1080]],3:[],4:[[540,720],[870,1080]],5:[[540,720],[870,1080]],6:[[540,720]],0:[]};
+const DN=['Sonntag','Montag','Dienstag','Mittwoch','Donnerstag','Freitag','Samstag'];
+const hm=m=>String(Math.floor(m/60)).padStart(2,'0')+':'+String(m%60).padStart(2,'0');
+function berlin(){const p=new Intl.DateTimeFormat('en-GB',{timeZone:'Europe/Berlin',weekday:'short',hour:'2-digit',minute:'2-digit',hourCycle:'h23'}).formatToParts(new Date());const g=t=>p.find(x=>x.type===t).value;return{d:['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].indexOf(g('weekday')),m:+g('hour')*60+ +g('minute')}}
+function live(){
+ const {d,m}=berlin(),L=$('#live'),T=$('#liveT');
+ const cur=H[d].find(([a,b])=>m>=a&&m<b);
+ if(cur){L.className='live open';T.innerHTML='<b>Jetzt geöffnet</b> · bis '+hm(cur[1])}
+ else{let nd=d,nm=m,txt='';for(let i=0;i<8;i++){const s=H[nd].find(([a])=>a>nm);if(s){txt=(i===0?'heute':i===1?'morgen':DN[nd])+' '+hm(s[0]);break}nd=(nd+1)%7;nm=-1}
+  L.className='live closed';T.innerHTML='<b>Geschlossen</b> · öffnet '+txt}
+ const rows=[[1,'Montag'],[2,'Dienstag'],[3,'Mittwoch'],[4,'Donnerstag'],[5,'Freitag'],[6,'Samstag'],[0,'Sonntag']];
+ ['#hours','#hours2'].forEach(id=>{const el=$(id);if(!el)return;el.innerHTML='';rows.forEach(([k,n])=>{const r=document.createElement('div');r.className='day'+(k===d?' today':'')+(H[k].length?'':' zu');r.innerHTML='<span>'+n+(k===d?' · heute':'')+'</span><span>'+(H[k].length?H[k].map(([a,b])=>hm(a)+'–'+hm(b)).join(' · '):'geschlossen')+'</span>';el.append(r)})});
+}
+live();setInterval(live,30000);
+const end=new Date('2027-02-28T23:59:59+01:00'),start=new Date('2026-11-01T00:00:00+01:00'),now=new Date();
+const dd=Math.ceil((end-now)/864e5);
+if(now<start||dd<0){$('#deal').closest('.sec').hidden=true}else $('#dealDays').textContent=dd;
+$('#yr').textContent=new Date().getFullYear();
+
+/* ---------- Navigation: Indikator, Router, Wischer ---------- */
+const nav=$('#nav'),ind=$('#ind'),ghost=$('#ghost');
+function place(el,box){if(!el)return;const r=el.getBoundingClientRect(),n=nav.getBoundingClientRect();box.style.width=r.width+'px';box.style.transform='translateX('+(r.left-n.left)+'px)'}
+$$('a',nav).forEach(a=>{a.addEventListener('mouseenter',()=>{place(a,ghost);ghost.style.opacity=a.classList.contains('on')?0:1})});
+nav.addEventListener('mouseleave',()=>ghost.style.opacity=0);
+let cur=null,busy=false;
+function target(){const h=decodeURIComponent(location.hash.slice(1));if(ALIAS[h])return ALIAS[h];return[ROUTES.includes(h)?h:'start',null]}
+function show(v,anchor,first){
+ $$('.view').forEach(s=>{const on=s.dataset.v===v;s.hidden=!on;s.classList.remove('enter')});
+ const sec=$('.view[data-v="'+v+'"]');
+ $$('.rv',sec).forEach((e,i)=>e.style.setProperty('--i',Math.min(i,10)));
+ void sec.offsetWidth;sec.classList.add('enter');
+ $$('[data-r]').forEach(a=>a.classList.toggle('on',a.dataset.r===v));
+ place($('a.on',nav),ind);
+ document.title=(v==='start'?'':($('a.on',nav)?.textContent||(v==='impressum'?'Impressum':'Prototyp-Infos'))+' · ')+'Velocenter Hessert';
+ if(anchor){const t=document.getElementById(anchor);requestAnimationFrame(()=>t&&t.scrollIntoView({behavior:first||RM?'auto':'smooth',block:'start'}))}
+ else if(!first)window.scrollTo(0,0);
+ if(v==='treffen')countUp();
+ cur=v;
+}
+function go(first){
+ const [v,anchor]=target();
+ document.body.classList.remove('menu');$('#burger').setAttribute('aria-expanded','false');
+ if(first||RM||v===cur){show(v,anchor,first);return}
+ if(busy)return;busy=true;
+ const w=$('#wipe');w.classList.remove('go');void w.offsetWidth;w.classList.add('go');
+ setTimeout(()=>show(v,anchor),470);
+ setTimeout(()=>{w.classList.remove('go');busy=false},1000);
+}
+addEventListener('hashchange',()=>go(false));
+addEventListener('resize',()=>place($('a.on',nav),ind));
+document.fonts?.ready.then(()=>place($('a.on',nav),ind));
+$('#burger').addEventListener('click',()=>{const o=document.body.classList.toggle('menu');$('#burger').setAttribute('aria-expanded',String(o))});
+addEventListener('keydown',e=>{if(e.key==='Escape')document.body.classList.remove('menu')});
+/* gleicher Hash nochmal geklickt: trotzdem hinspringen */
+document.addEventListener('click',e=>{const a=e.target.closest('a[href^="#"]');if(!a)return;if(a.dataset.pre)preset(a.dataset.pre);if(a.getAttribute('href')===location.hash){e.preventDefault();go(false);const[,an]=target();if(an)document.getElementById(an)?.scrollIntoView({behavior:RM?'auto':'smooth'});else window.scrollTo({top:0,behavior:RM?'auto':'smooth'})}});
+
+/* ---------- Licht folgt der Maus ---------- */
+document.addEventListener('pointermove',e=>{const c=e.target.closest?.('.lit');if(!c)return;const r=c.getBoundingClientRect();c.style.setProperty('--mx',(e.clientX-r.left)+'px');c.style.setProperty('--my',(e.clientY-r.top)+'px')},{passive:true});
+
+/* ---------- Bühne: i:SY / QiO ---------- */
+$$('.stagebar button').forEach(b=>b.addEventListener('click',()=>{$$('.stagebar button').forEach(x=>x.classList.toggle('on',x===b));$$('#bikes img').forEach(i=>i.classList.toggle('off',i.dataset.k!==b.dataset.k))}));
+let auto=setInterval(()=>{const o=$('#stage .stagebar button.on');(o.nextElementSibling||o.parentNode.firstElementChild).click()},4600);
+$('#stage').addEventListener('pointerenter',()=>clearInterval(auto),{once:true});
+if(!RM){const st=$('#stage');st.addEventListener('pointermove',e=>{const r=st.getBoundingClientRect(),x=(e.clientX-r.left)/r.width-.5,y=(e.clientY-r.top)/r.height-.5;$('#bikes').style.transform='translate('+x*16+'px,'+y*10+'px) rotate('+x*2+'deg)'});st.addEventListener('pointerleave',()=>$('#bikes').style.transform='')}
+
+/* ---------- Zähler Weltrekord ---------- */
+function countUp(){const el=$('#rekord');if(RM){el.textContent='283';return}const t0=performance.now();const f=t=>{const p=Math.min(1,(t-t0)/1400),e=1-Math.pow(1-p,3);el.textContent=Math.round(80+203*e);if(p<1)requestAnimationFrame(f)};requestAnimationFrame(f)}
+
+/* ---------- Auswahl-Knöpfe ---------- */
+$$('.choice').forEach(g=>g.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;$$('button',g).forEach(x=>x.classList.toggle('on',x===b))}));
+const val=id=>$('#'+id+' button.on')?.dataset.v||'';
+function preset(t){const m=$('#tMsg');if(m&&!m.value)m.value=t+': ';}
+
+/* ---------- Werkstatt-Termin ---------- */
+const tTag=$('#tTag');const iso=d=>d.toISOString().slice(0,10);const tm=new Date();tm.setDate(tm.getDate()+1);tTag.min=iso(tm);
+const fmt=s=>{const[y,m,d]=s.split('-');return d+'.'+m+'.'+y};
+$('#tf').addEventListener('submit',e=>{
+ e.preventDefault();const err=$('#tErr');err.textContent='';
+ const name=$('#tName').value.trim(),tel=$('#tTel').value.trim(),tag=tTag.value,msg=$('#tMsg').value.trim();
+ if(!name){err.textContent='Bitte geben Sie Ihren Namen ein.';$('#tName').focus();return}
+ if(!tel){err.textContent='Bitte geben Sie eine Telefonnummer für die Rückmeldung ein.';$('#tTel').focus();return}
+ if(tag){const wd=new Date(tag+'T12:00:00').getDay();if(wd===3||wd===0){err.textContent='Mittwoch und Sonntag haben wir geschlossen. Bitte wählen Sie einen anderen Tag.';tTag.focus();return}if(tag<tTag.min){err.textContent='Bitte wählen Sie einen Tag ab morgen.';tTag.focus();return}}
+ const txt='Hallo Velocenter,\nich möchte einen Werkstatt-Termin anfragen.\n\nLeistung: '+val('tArt')+'\nRad: '+val('tRad')+'\nWunschtag: '+(tag?DN[new Date(tag+'T12:00:00').getDay()]+', '+fmt(tag):'egal')+'\nHol- & Bringservice: '+(val('tHol')==='ja'?'ja, bitte':'nein')+(msg?'\nInfo: '+msg:'')+'\n\nName: '+name+'\nTelefon: '+tel;
+ $('#tTxt').textContent=txt;$('#tWa').href='https://wa.me/'+WA+'?text='+encodeURIComponent(txt);
+ $('#tMail').href='mailto:info@velo-center.de?subject='+encodeURIComponent('Werkstatt-Termin: '+val('tArt')+' ('+name+')')+'&body='+encodeURIComponent(txt);
+ const o=$('#tOut');o.hidden=false;o.scrollIntoView({behavior:RM?'auto':'smooth',block:'nearest'});
+});
+$('#tCopy').addEventListener('click',()=>copy($('#tTxt').textContent,$('#tCopy')));
+
+/* ---------- Kontaktformular ---------- */
+let via='wa';$$('#kf button[type=submit]').forEach(b=>b.addEventListener('click',()=>via=b.dataset.via));
+$('#kf').addEventListener('submit',e=>{e.preventDefault();const err=$('#kErr');err.textContent='';const n=$('#kName').value.trim(),c=$('#kTel').value.trim(),m=$('#kMsg').value.trim();
+ if(!n||!m){err.textContent='Bitte Name und Nachricht ausfüllen.';return}
+ const txt='Hallo Velocenter,\n'+m+'\n\n'+n+(c?'\n'+c:'');
+ const url=via==='wa'?'https://wa.me/'+WA+'?text='+encodeURIComponent(txt):'mailto:info@velo-center.de?subject='+encodeURIComponent('Anfrage von '+n)+'&body='+encodeURIComponent(txt);
+ const a=document.createElement('a');a.href=url;if(via==='wa'){a.target='_blank';a.rel='noopener'}document.body.append(a);a.click();a.remove();
+ err.style.color='#6EE7B7';err.textContent=via==='wa'?'WhatsApp wird geöffnet. Bitte dort auf Senden tippen.':'Ihr E-Mail-Programm wird geöffnet. Bitte dort auf Senden klicken.';setTimeout(()=>err.style.color='',6000)});
+
+/* ---------- Kopieren ---------- */
+function copy(t,b){const ok=()=>{const o=b.textContent;b.textContent='Kopiert ✓';setTimeout(()=>b.textContent=o,1600)};try{navigator.clipboard.writeText(t).then(ok,()=>{b.textContent=t})}catch(_){b.textContent=t}}
+$$('[data-copy]').forEach(b=>b.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();copy(b.dataset.copy,b)}));
+
+/* ---------- E-Bike-Finder ---------- */
+const Q=[
+ {q:'Wofür soll Ihr neues E-Bike sein?',o:[
+  ['alltag','Alltag & Einkauf','Kurze Wege, Brötchen holen, Besuche','i-bike'],
+  ['tour','Touren & Ausflüge','Längere Strecken, am Rhein entlang','i-map'],
+  ['mit','Platzsparend & mitnehmen','Wohnmobil, Auto, kleine Garage','i-car'],
+  ['sicher','Maximal sicher & stabil','Drei Räder, kein Kippen beim Anhalten','i-tri']]},
+ {q:'Was ist Ihnen besonders wichtig?',o:[
+  ['tief','Ganz bequemer Einstieg','Tief einsteigen, aufrecht sitzen','i-shield'],
+  ['wunsch','Rad nach meinen Wünschen','Farbe und Ausstattung selbst wählen','i-tune'],
+  ['lager','Schnell losfahren','Am liebsten direkt ab Lager','i-box'],
+  ['egal','Ich lasse mich beraten','Zeigt mir einfach, was passt','i-spark']]}
+];
+const R={
+ isy:['i:SY','20-Zoll-Kompaktrad: wendig, handlich und platzsparend. Über 100 i:SY bei uns vorrätig, Probefahrt auch übers Wochenende.'],
+ qio:['QiO','Innovatives Kompaktrad mit modernem Konzept. Am besten direkt im Laden ausprobieren.'],
+ ktm:['KTM','Große E-Bike-Auswahl einer Traditionsmarke, vom Tiefeinsteiger bis zum Trekking-Rad.'],
+ vdv:['Velo de Ville','Sie stellen Rahmen, Farbe und Ausstattung selbst zusammen. Wir beraten Sie dabei.'],
+ vanraam:['Van Raam Easy Rider','E-Dreirad vom Weltmarktführer aus Holland: bequem sitzen, drei Räder, Motorunterstützung.'],
+ gudereit:['Gudereit EC-35 Evo','Bei uns das EC-35 Evo von Gudereit.'],
+ victoria:['Victoria','Alltagstaugliche E-Bikes einer Traditionsmarke.']
+};
+const SC={alltag:{isy:2,qio:2,gudereit:2,victoria:2,ktm:1},tour:{ktm:3,vdv:2,gudereit:1,victoria:1},mit:{isy:3,qio:2},sicher:{vanraam:5},
+ tief:{gudereit:2,isy:1,qio:1,victoria:1,ktm:1,vanraam:1},wunsch:{vdv:3},lager:{isy:3,qio:1},egal:{isy:1,ktm:1}};
+let ans=[];
+function fRender(){
+ const f=$('#fnd');f.innerHTML='';
+ const bar=document.createElement('div');bar.className='fsteps';for(let i=0;i<3;i++){const b=document.createElement('i');if(i<=ans.length)b.className='on';bar.append(b)}f.append(bar);
+ if(ans.length<Q.length){
+  const q=Q[ans.length],w=document.createElement('div');w.className='fq';
+  w.innerHTML='<div class="kick" style="margin-bottom:12px">E-Bike-Finder · Frage '+(ans.length+1)+' von 2</div><h3></h3>';$('h3',w).textContent=q.q;
+  const g=document.createElement('div');g.className='fopts';
+  q.o.forEach(([k,t,s,ic],i)=>{const b=document.createElement('button');b.type='button';b.className='fopt';b.style.animation='pop .5s var(--spring) both '+(i*.07)+'s';b.innerHTML='<span class="fi"><svg><use href="#'+ic+'"/></svg></span><span><b></b><small></small></span>';$('b',b).textContent=t;$('small',b).textContent=s;b.addEventListener('click',()=>{ans.push(k);fRender()});g.append(b)});
+  w.append(g);if(ans.length){const bk=document.createElement('button');bk.className='fback';bk.type='button';bk.textContent='← Zurück';bk.addEventListener('click',()=>{ans.pop();fRender()});w.append(bk)}
+  f.append(w);
+ }else{
+  const s={};ans.forEach(a=>Object.entries(SC[a]).forEach(([k,v])=>s[k]=(s[k]||0)+v));
+  let top=Object.entries(s).sort((a,b)=>b[1]-a[1]);
+  if(ans[0]==='sicher')top=top.filter(([k])=>k==='vanraam');else top=top.filter(([k])=>k!=='vanraam');
+  top=top.slice(0,3);
+  const w=document.createElement('div');w.className='fq';w.innerHTML='<div class="kick" style="margin-bottom:12px">Ihr Ergebnis</div><h3>Das könnte zu Ihnen passen</h3>';
+  const g=document.createElement('div');g.className='fres';
+  top.forEach(([k],i)=>{const r=document.createElement('div');r.className='r';r.style.setProperty('--i',i);r.innerHTML=(i===0?'<em>Beste Wahl</em>':'')+'<h3></h3><p></p>';$('h3',r).textContent=R[k][0];$('p',r).textContent=R[k][1];const a=document.createElement('a');a.className='btn '+(i?'glass':'main');a.style.cssText='min-height:44px;font-size:14px;align-self:flex-start;margin-top:6px';a.href='#termin';a.dataset.pre='Probefahrt '+R[k][0];a.textContent='Probefahrt anfragen';r.append(a);g.append(r)});
+  w.append(g);
+  const n=document.createElement('p');n.className='note';n.textContent='Grobe Orientierung. Die echte Beratung mit Probefahrt bekommen Sie bei uns im Laden.';w.append(n);
+  const bk=document.createElement('button');bk.className='fback';bk.type='button';bk.textContent='↺ Nochmal starten';bk.addEventListener('click',()=>{ans=[];fRender()});w.append(bk);
+  f.append(w);
+ }
+}
+fRender();
+
+go(true);
+})();
+</script>
