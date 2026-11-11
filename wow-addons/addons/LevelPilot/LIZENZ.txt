@@ -1,0 +1,10 @@
+LevelPilot – Levelrouten, Pfeil und Flug-Rat für WoW Forever
+Lizenz: GNU General Public License v3.0 (siehe LICENSE-GPL-3.0.md)
+
+Enthaltene Daten und Quellen:
+- Walk.lua (Wegenetz + Flugnetz): abgeleitet aus Guidelime Pathfinder
+  (https://github.com/JagTheHero/guidelime-pathfinder, Stand ef46850, 10.11.2026), GPL-3.0.
+  Navmesh aus Gelände, Gebäuden und Objekten des Forever-Clients. Geändert: in 240-Yard-Blöcken
+  vergröbert, Horde-Aufzüge und benannte Wegstellen ergänzt. Erzeugt mit wow-addons/tools/navmesh.py.
+- Nav.lua (NPC-Laufwege) und Routes/*.lua (Quests, NPCs, Orte): berechnet aus der QuestieDB
+  (https://github.com/Questie/QuestieDB, Forever-Daten), GPL-3.0. Erzeugt mit wow-addons/tools/.

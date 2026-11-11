@@ -18,12 +18,15 @@ Aktueller Stand und offene Punkte: **[`UEBERGABE.md`](UEBERGABE.md)** – zuerst
 - `tools/` – Python-Werkzeuge (Routen, Grafiken, Sounds). Immer mit `python3 -I` starten.
 - `tests/` – Lua-5.1-Simulationen der WoW-API (`lua5.1`). Aufruf aus dem Add-on-Ordner, z. B.
   `cd addons/LevelPilot && lua5.1 ../../tests/v4.lua` (muss „ALLE TESTS OK“ melden), außerdem `lp.lua`, `lp2.lua`,
-  `nav.lua`, `fly.lua`, `route.lua` (Exit-Code 0 = ok). ProcAlarm/Schlaghagel: `cd addons && lua5.1 ../tests/proc.lua` bzw. `PROC_CLASS=SHAMAN|WARLOCK lua5.1 ../tests/hagel.lua`.
+  `nav.lua`, `fly.lua`, `route.lua`, `travel.lua` (Wegenetz, Flug-Rat, Rechenzeit; meldet „TRAVEL TESTS OK“) (Exit-Code 0 = ok). ProcAlarm/Schlaghagel: `cd addons && lua5.1 ../tests/proc.lua` bzw. `PROC_CLASS=SHAMAN|WARLOCK lua5.1 ../tests/hagel.lua`.
   Spell-Daten der Live-Version: github.com/simulationcraft/simc-forever (`SpellDataDump/allspells.txt`). Vor jeder Auslieferung alle laufen lassen + `luac5.1 -p` auf alle .lua.
 - `weakauras/` – WeakAura-Importtexte und Generatoren.
 - `previews/` – Vorschaubilder und Sound-Vorhördateien.
 - `qdb/` – **nicht im Repo** (.gitignore): `git clone https://github.com/Questie/QuestieDB.git qdb/QuestieDB`
-  (Questies Datenbank; Forever-Daten in `data/Forever/`). Wird nur für die Routen-Werkzeuge gebraucht.
+  (Questies Datenbank; Forever-Daten in `data/Forever/`) und
+  `git clone https://github.com/JagTheHero/guidelime-pathfinder.git qdb/guidelime-pathfinder` (Navmesh-Wegdaten).
+  Wird nur für die Routen-Werkzeuge gebraucht. Beide GPL-3.0 → LevelPilot und Tiry's Zentrale tragen `LIZENZ.txt` +
+  `LICENSE-GPL-3.0.md` (Repo ist öffentlich; neue Datenquellen dort eintragen).
 
 ## Claude-Skills (Plugin „wow-werkstatt“)
 `.claude/skills/` im Repo-Hauptordner: **`wow-tests`** (alle Tests: `bash wow-addons/tools/test_all.sh [ziel]`),
@@ -55,8 +58,12 @@ Dateien/Sounds reicht `/reload` nicht). Version in allen 4 TOCs und in `VERSION`
 ## Routen-Werkzeugkette (LevelPilot)
 1. `fulldb.py` → `full.json` (Quests/NPCs/Objekte/Items aus QuestieDB-Forever), `nav.py` → `nav.json`,
    `qdb.py` → `forever.json` (für `verify.py`/`build.py`). Alle drei .gitignored, bei Bedarf neu erzeugen.
+   `navmesh.py` (braucht `pip install numpy scipy`, ~25 s) → `addons/LevelPilot/Walk.lua` (Wegenetz + Flugnetz fürs
+   Add-on) und `navmesh.json` (.gitignored, für den Planer); druckt einen Prüfbericht Grobnetz gegen exakten Navmesh-Weg.
+   `zones.py` = Forever-Kartengrenzen je uiMap (Karte ↔ Welt-Yards), `tests/zones_mock.lua` ist daraus erzeugt.
 2. `xpmodel.py` – XP-/Zeitmodell: Quest-XP aus `QuestieDB/support/Forever/QuestXP`, Dropchancen aus
-   `support/Forever/DropTables`, Mob-XP-Formel Classic, Laufen 7 Yards/s (Reittier erst ab 40).
+   `support/Forever/DropTables`, Mob-XP-Formel Classic, Laufen 7 Yards/s (Reittier erst ab 40). Wege = echter
+   Bodenweg aus `navmesh.json` (sonst Luftlinie × Faktor), Flug über bekannte Flugpunkte, wenn schneller.
 3. `plan.py` – Planer: Abschnitte (Gebiet, Hub, kuratierte Quests + Auto-Pool), Stufen-Simulation (Quest ≤ Stufe+2),
    gierig nach Nähe + Or-Opt, Grenzkosten-Filter gegen Grind-Tempo, Grind-/Kontroll-Schritte.
 4. `make_route.py [key]` – Routen in `ROUTES` (`horde_22_30`, `horde_30_40`), Einstiegsstufen per `tune()` →
@@ -64,3 +71,5 @@ Dateien/Sounds reicht `/reload` nicht). Version in allen 4 TOCs und in `VERSION`
    Neue Routendatei in alle 4 TOCs eintragen. `tests/route.lua` prüft Routenwahl + Dateien.
 Quellen der Gebietsreihenfolge: Konsens freier Speedrun-Routen (Joana, Warcraft Tavern, Guidelime, WoW-Pro, Bustea),
 danach per Modell verglichen; Gebiete mit nur 1–3 Quests werden gestrichen.
+Die Reihenfolge **innerhalb** der Gebiete und die Wege berechnet der Planer – nicht von Speedrunnern übernommen;
+Tiry gegenüber genau so benennen. Live entscheidet `Route.lua`/`Fly.lua` per Laufweg (Walk.lua) und Flugnetz.

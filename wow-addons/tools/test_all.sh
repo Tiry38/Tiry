@@ -64,6 +64,7 @@ if want levelpilot; then
   run "LevelPilot: nav" "$A/LevelPilot" - lua5.1 "$T/nav.lua"
   run "LevelPilot: fly" "$A/LevelPilot" "HEARTHTEST OK" lua5.1 "$T/fly.lua"
   run "LevelPilot: route" "$A/LevelPilot" "ROUTE TESTS OK" lua5.1 "$T/route.lua"
+  run "LevelPilot: travel (Wegenetz/Flug-Rat)" "$A/LevelPilot" "TRAVEL TESTS OK" lua5.1 "$T/travel.lua"
 fi
 
 if want proc; then run "ProcAlarm" "$A" - lua5.1 "$T/proc.lua"; fi

@@ -5,7 +5,7 @@
 -- Datenquelle: Blizzards eigene Questmarkierungen (nur angenommene Quests).
 ---------------------------------------------------------------------------
 local ADDON = ...
-local VERSION = "4.1.0"
+local VERSION = "4.2.0"
 local floor, max, min, abs, sqrt, atan2, pi, fmt = math.floor, math.max, math.min, math.abs, math.sqrt, math.atan2, math.pi, string.format
 local BT = BackdropTemplateMixin and "BackdropTemplate" or nil
 local FONT = STANDARD_TEXT_FONT or "Fonts\\FRIZQT__.TTF"
@@ -879,7 +879,9 @@ do
     local a = FLYADV; if not a then return end
     TIP:Begin(self, M):Line("Fliegen oder laufen?", AQUA[1], AQUA[2], AQUA[3], true)
     TIP:Line(fmt("Laufen: ca. %s  ·  Fliegen: ca. %s (inkl. Weg zum Flugmeister)", fmtTime(a.run), fmtTime(a.fly)), 1, 1, 1)
-    TIP:Line("Flug: " .. a.from .. "  →  " .. a.to, 0.8, 0.85, 0.9)
+    if a.runYd then TIP:Line(fmt("Laufweg %s (echter Weg über Pässe/Tunnel, nicht Luftlinie)", fmtDist(a.runYd)), 0.8, 0.85, 0.9) end
+    TIP:Line("Flug: " .. a.from .. "  →  " .. a.to .. ((a.hops and a.hops > 1) and fmt("  (%d Zwischenlandung%s)", a.hops - 1, a.hops > 2 and "en" or "") or ""), 0.8, 0.85, 0.9)
+    if a.walk2 then TIP:Line(fmt("Nach der Landung noch %s zu Fuß", fmtDist(a.walk2)), 0.8, 0.85, 0.9) end
     if not a.sure then TIP:Line("Sprich einmal einen Flugmeister an – dann kenne ich deine entdeckten Flugpunkte genau.", 1, 0.82, 0.3) end
     if DB.auto then TIP:Line("Am Flugmeister wird der Flug automatisch gewählt (Umschalt halten = nicht).", 0.6, 0.9, 1) end
     TIP:Line("Klick: " .. (FLYIGN[a.key] and "doch fliegen" or "lieber laufen"), 0.5, 0.55, 0.58)
@@ -1266,7 +1268,8 @@ function Refresh(rescan)
         local label = (LP_Route.TYPE[st.t] or st.t)
         local grind = st.t == "grind"
         local later = LP_Route.state and LP_Route.state[si] == "later"
-        local d = LP_Route.StepDist(st)
+        -- Laufweg ueber das Wegenetz (aktuelles Ziel bis 8 km, Listenzeilen bis 2,5 km; weiter: Luftlinie)
+        local d = LP_Route.StepCost and LP_Route.StepCost(st, nil, i == 1 and 8000 or 2500) or LP_Route.StepDist(st)
         r.stepIdx, r.qid, r.group = si, st.q, it.steps
         local sub, gfrac = {}, nil
         if st.t == "complete" and st.q then
@@ -1310,7 +1313,7 @@ function Refresh(rescan)
           r.sub:SetText(#line > 0 and table.concat(line, " · ") or (st.z or " "))
           r.dist:SetText(d and ("|cffffffff" .. fmtDist(d) .. "|r") or "")
           local spd = (LP_Fly and LP_Fly.Speed and LP_Fly.Speed()) or 7
-          r.eta:SetText((d and d > 25) and ("ca. " .. fmtTime(d * 1.15 / spd)) or (d and "|cff39ff6bhier|r" or ""))
+          r.eta:SetText((d and d > 25) and ("ca. " .. fmtTime(d * 1.05 / spd)) or (d and "|cff39ff6bhier|r" or ""))
           local frac = grind and gfrac or ((st.t == "complete" and st.q) and questFrac(st.q) or nil)
           r:SetProgress(frac, cr, cg, cb)
         else
@@ -1415,12 +1418,15 @@ local function UpdateArrow(now)
     aTyp = typ
     local at = SetIcon(aIcon, typ, NEON[1], NEON[2], NEON[3]); aIcon:SetSize(at and 20 or 14, at and 20 or 14)
   end
-  local east, north, viaLen
+  local east, north, viaLen, walkLen, via
   SetBlizzPin(tgt)
   local aim = tgt
   if DB.wege and tgt.map and LP_Route then
-    local okR, wp, len = pcall(LP_Route.Route, tgt)
-    if okR and wp then aim, viaLen = wp, len end
+    local okR, wp, len, rest = pcall(LP_Route.Route, tgt)
+    if okR then
+      if wp then aim, viaLen, via = wp, len, wp.via end
+      walkLen = rest
+    end
   end
   if aim.map and LP_Route then east, north = LP_Route.Offset(aim) end
   if not east then
@@ -1443,14 +1449,19 @@ local function UpdateArrow(now)
   local pulse = 0.35 + 0.25 * math.sin(now * 3)
   ring:SetAlpha(here and (0.5 + 0.4 * math.sin(now * 8)) or pulse)
   rim:SetAlpha(0.6 + 0.35 * math.sin(now * 2.4))
-  if viaLen then
+  local e2, n2 = LP_Route.Offset(tgt)
+  local straight = e2 and sqrt(e2 * e2 + n2 * n2) or d
+  local walk = viaLen or walkLen
+  if walk and walk > straight * 1.15 + 30 then
+    -- echter Laufweg deutlich laenger als die Luftlinie (Berge, Schlucht, Tunnel): Weg anzeigen
+    aDist:SetText((tgt.turnin and "|cff39ff6b" or "|cffffffff") .. fmtDist(walk) .. "|r  |cff39ff6bWeg|r")
+  elseif viaLen then
     aDist:SetText((tgt.turnin and "|cff39ff6b" or "|cffffffff") .. fmtDist(viaLen) .. "|r  |cff39ff6bWeg|r")
   else
-    local e2, n2 = LP_Route.Offset(tgt)
-    local dd = e2 and sqrt(e2 * e2 + n2 * n2) or d
-    aDist:SetText((tgt.turnin and "|cff39ff6b" or "|cffffffff") .. fmtDist(dd) .. "|r  |cff6b7076Luftlinie|r")
+    aDist:SetText((tgt.turnin and "|cff39ff6b" or "|cffffffff") .. fmtDist(walk or straight) .. "|r  |cff6b7076" .. (walk and "direkt" or "Luftlinie") .. "|r")
   end
-  aName:SetText((tgt.turnin and "|cff39ff6bAbgeben: |r" or "") .. tgt.title)
+  local viaTxt = via and via.name and ("  |cff4fd2ffüber " .. via.name .. "|r") or ""
+  aName:SetText((tgt.turnin and "|cff39ff6bAbgeben: |r" or "") .. tgt.title .. viaTxt)
 end
 
 ---------------------------------------------------------------------------

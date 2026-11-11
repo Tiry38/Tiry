@@ -2,6 +2,7 @@ qdb/
 tools/full.json
 tools/forever.json
 tools/nav.json
+tools/navmesh.json
 tools/*.wav
 tools/__pycache__/
 sndtmp/

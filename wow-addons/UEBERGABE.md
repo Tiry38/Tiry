@@ -1,4 +1,4 @@
-# Übergabe – Stand 10.11.2026
+# Übergabe – Stand 11.11.2026
 
 Diese Arbeit lief bisher in einer Cloud-Sitzung, die am Repository Velocenter-Planer hing. Ab jetzt geht es
 in Sitzungen auf **Tiry38/Tiry** weiter. Alle Dateien liegen in diesem Ordner, Projektleitfaden: `CLAUDE.md`.
@@ -8,13 +8,47 @@ in Sitzungen auf **Tiry38/Tiry** weiter. Alle Dateien liegen in diesem Ordner, P
 | Add-on | Version | Zweck | Stand |
 |---|---|---|---|
 | **Tiry's Zentrale** | 6.1.0 | Gold- und Berufe-Addon (`TirysZentrale/`, Doku `ZENTRALE.md`): Neon-Glas-Design mit Dock, **ein AH-Scan für alle Reiter**, Verkäufe pro Tag, Gold pro Tag, Schnäppchen, Markt-Tiefe, Kaufen bis, Neu einstellen mit Menge, Anzahlung im Gewinn, **Tooltip als Preis-Liste (6.1)** | ausgeliefert, **Spieltest offen** (Checkliste `INGAME-TEST.md`) |
-| **LevelPilot** | 4.1.0 | Levelrouten Horde **22–30 und 30–40** (neu geplant nach XP/Zeit-Modell), Pfeil, Lichtstrahl, Auto-Quests, XP-Cockpit, Flug/Ruhestein-Rat, neues Design | ausgeliefert, **Spieltest offen** |
+| **LevelPilot** | 4.2.0 | Levelrouten Horde **22–30 und 30–40**, **echte Laufwege (Navmesh) statt Luftlinie** für Zielwahl, Pfeil, Entfernungen und Flug-Rat, Flugnetz mit Umsteigen, Pfeil, Lichtstrahl, Auto-Quests, XP-Cockpit | ausgeliefert, **Spieltest offen** (Checkliste `INGAME-TEST.md`, Teil LevelPilot) |
 | **ProcAlarm** | 2.1.0 | **für Tirys Kollegen (Hexer)**: Schattentrance (17941) über Blizzard-Aura-Slot, auch im Kampf; violetter Glow + Blinken, ohne Ton, ohne grünen Ring | ausgeliefert, **Kampftest offen** |
 | **Schlaghagel** | 1.0.0 | **Tirys Verstärker**: Schlaghagel-Buff (16257) über Blizzard-Aura-Slot, auch im Kampf; Ladungen groß, Restzeit, türkiser Glow + Blinken wie ProcAlarm, ohne Ton; `/hagel` | ausgeliefert, **Kampftest offen** |
 | **EnhanceHUD** | 1.2.0 | Verstärker-Schamanen-HUD (Frost/Feuer-Design) | ausgeliefert |
 | **Blitzschild** | 1.2.0 | Blitzschlagschild Ladungen/Zeit | im Kampf nicht möglich (secret values) → Cooldown-Manager „Verfolgte Leisten“ + WA nur außerhalb des Kampfes |
 | **MiniPost** | – | Post-Symbol unter der Uhr, andere Minimap-Knöpfe unsichtbar | ausgeliefert, Test offen |
 | **ChatHoch** | 1.4.0 | Chat höher, Reiter bündig (ClampRectInsets von ChatFrame1) | ausgeliefert; Tiry hatte noch 1.3.0 geladen |
+
+## LevelPilot 4.2 – echte Laufwege statt Luftlinie (11.11.)
+Tirys Kritik an 4.1 (Screenshot Zoram'gar-Flugpunkt): Quests am Flugpunkt angenommen, der Pfeil schickt ihn „den
+übelsten Weg“ Richtung Steinkrallengipfel, **kein Flug-Vorschlag**, „wurde das wirklich von einem Speedrunner so
+vorgeschlagen?“ Ursachen (alle geprüft) und Lösungen:
+
+| Ursache | Lösung |
+|---|---|
+| Schrittwahl, Pfeil, Entfernung je Zeile und Flug-Rat rechneten mit **Luftlinie**: Zoram'gar → Gipfel 844 yd Luftlinie, echter Weg **7063 yd** (Talondeep-Pfad; Navmesh exakt 6747) | **Wegenetz `Walk.lua`** aus dem Forever-Navmesh (Kalimdor 9705 Knoten/48443 Kanten, Östl. Königreiche 7758/36415), Dijkstra fortsetzbar und zwischengespeichert. Zielwahl (Branch-and-Bound), Zeilen-Entfernung, Pfeil (Wegpunkte, „über Talondeep-Pfad“) und Flug-Rat nutzen den Laufweg |
+| Flug-Rat kannte nur Direktflüge, Laufzeit = Luftlinie × 1,45 | **Flugnetz** mit allen Strecken und Zeiten (Umsteigen, +5 s je Zwischenlandung), nur bekannte Flugpunkte; Laufen zum/vom Flugmeister per Wegenetz. Zoram'gar → Sonnenfels 363 s (2 Flüge) |
+| Quests im Log am Standort wurden ignoriert, wenn die Route woanders weiterging | Schrittwahl nimmt spätere „Erledigen/Abgeben“-Schritte von Quests im Log mit (≤ 1800 yd, mit Aufschlag) |
+| Planer (`xpmodel.py`/`plan.py`) mit Luftlinie, Hügelland-/Mulgore-Größe falsch | Bodenweg aus `navmesh.json`, Flüge mit bekannten Flugpunkten, Gebietsgrößen aus `zones.py`; Routen neu gebaut (beide „0 Probleme“) |
+
+**Zahlen (Szenario-Test `tests/travel.lua`, Laufweg aus dem Netz):** Zoram'gar-Flugmeister → Steinkrallengipfel zu
+Fuß 1009 s (16,8 Min), per Flug über Sonnenfels 716 s (11,9 Min) → **Flug spart ~5 Min** (7 yd/s). Mit Geisterwolf
+(9,8 yd/s) 721 s gegen 622 s → spart ~1,5 Min, Rat kommt trotzdem. Reine Lauf-/Flugzeit ohne Gegner und Quests.
+
+**Speedrun-Wahrheit (ehrlich):** Die **Gebietsreihenfolge** ist Speedrun-Konsens. Die Reihenfolge **innerhalb** der
+Gebiete und die Wege dazwischen hat mein Planer berechnet – bis 4.1 mit Luftlinie, also **nicht** von einem
+Speedrunner. Speedrunner (RXP-Forever-Guide) laufen Steinkrallen → Talondeep-Pfad → Eschental/Zoram'gar (Flugpunkt
+holen) und Sonnenfels ↔ Gipfel zu Fuß über den Mirkfallonsee; **niemand läuft Zoram'gar → Gipfel**. In der 4.2-Route
+werden die Zoram'gar-Quests im Eschental erledigt; steht man mit Steinkrallen-Zielen am Zoram'gar-Flugmeister, rät
+LevelPilot jetzt zum Flug nach Sonnenfels.
+
+**Modell (neue Reisekosten):** 22–30: 872 Min (alte Reihenfolge im neuen Modell 885); 30–40: 1616 Min (alt 1615 –
+gleichauf, die alte Reihenfolge war dort schon passend).
+
+**Rechenzeit (Lua 5.1, gemessen):** Netz auspacken ~55 ms einmal je Kontinent (~4 MB), erste komplette Liste ~56 ms,
+danach **unter 1 ms pro Sekunde** im Mittel (Wegsuchen starten an Zielen/Flugmeistern und bleiben gespeichert; der
+Spieler wird nur angebunden). Speicher-Deckel für Wegsuchen: 40 Suchen bzw. 60 000 Knoten.
+
+**Lizenz:** `Walk.lua` ist aus Guidelime Pathfinder (GPL-3.0) abgeleitet, `Nav.lua`/Routen aus QuestieDB (GPL-3.0).
+LevelPilot hat deshalb jetzt wie Tiry's Zentrale `LIZENZ.txt` + `LICENSE-GPL-3.0.md` (das Repo ist öffentlich =
+Weitergabe). Generator `tools/navmesh.py` liegt im Repo.
 
 ## LevelPilot 4.1 – Routen neu geplant (10.11.)
 Tirys Kritik an 4.0: „Effizienz 0“, „schickt mich an den Arsch der Welt“, „Greif falsch“, „Quests, die ewig dauern“,
@@ -75,13 +109,16 @@ Amboss-/Schloss-Sound (max. 1–2 s)“.
 
 ### Bekannte Unsicherheiten (nur im Spiel prüfbar)
 - Ob Forever `C_TaxiMap.GetTaxiNodesForMap`, Item-Abklingzeit (Ruhestein 6948) und `GetBindLocation` freigibt.
-- Flug-/Ruhestein-Zeiten sind Schätzungen (Flug ~30 Yards/s, 20 s Nebenzeit).
+- Flugzeiten stammen aus den Pathfinder-Daten (Strecken + Sekunden) und werden im Spiel nachgemessen; Ruhestein-Zeit geschätzt.
+- 4.2: `C_Map.GetMapPosFromWorldPos` (Vector2D) im Forever-Client, TaxiMap-Knoten-IDs = Daten-IDs, Ebenen-Anbindung auf
+  Hochplateaus (Donnerfels; Aufzüge Großer Aufzug/Freiwindposten sind als Verbindung ergänzt), `GetUnitSpeed` in
+  Geisterwolf, spürbarer Ruckler beim ersten Auspacken des Netzes (~55 ms gemessen, hier ohne Spiel).
 - Questbewertung (`xpmodel.py`): XP aus Questies Forever-XP-Tabelle, Dropchancen aus Questies Droptabellen; Kill-/Laufzeiten sind Annahmen.
 - 30–40-Reisehinweise (Brackenwall, Schattenflucht) setzen voraus, dass Tiry die Flugpunkte erst zu Fuß holt.
 - ProcAlarm 2.1: ob Forever Blinken/Restzeit am Aura-Slot annimmt (`/proc diag` → „Teile“).
 
 ## Nächste Schritte
-1. Tirys Spieltest-Rückmeldung zu LevelPilot 4.0 abwarten und gezielt nachbessern.
+1. Tirys Spieltest-Rückmeldung zu LevelPilot 4.2 abwarten (Zoram'gar → Steinkrallen: Flug-Rat, Pfeil über Talondeep) und gezielt nachbessern.
 2. **Routen 40–50, 50–60** mit derselben Kette (`make_route.py` neuen Schlüssel in `ROUTES` + Abschnitte).
 3. Sobald Questie die neuen Forever-Quests führt (IDs 9xxxx): Pool neu rechnen – könnte den Grind-Anteil deutlich senken.
 4. ProcAlarm nach `/proc diag`-Screenshot anpassen; ChatHoch 1.4.0 / MiniPost-Rückmeldung.

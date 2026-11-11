@@ -1,14 +1,16 @@
 -- LevelPilot · Fly: Lohnt sich der Flug? (Laufzeit gegen Flugzeit zum aktuellen Ziel)
 -- Flugpunkte kommen live aus dem Spiel (C_TaxiMap), bekannte Punkte merkt sich das Addon,
--- sobald du einen Flugmeister ansprichst.
+-- sobald du einen Flugmeister ansprichst. Laufzeiten ueber das echte Wegenetz (Travel.lua),
+-- Flugzeiten ueber das Flugnetz mit Umsteigen (gemessene Direktfluege, eigene Messungen gehen vor).
 local F = {}
 LP_Fly = F
 
 local RUN, MOUNT = 7.0, 11.2          -- Yards/s zu Fuss / Reittier 60 % (Forever: Reittier erst ab 40)
 local FLY = 30.0                      -- Yards/s Greif/Windreiter (Naeherung)
 local DETOUR_RUN, DETOUR_FLY = 1.2, 1.45  -- Flugrouten laufen ueber Zwischenpunkte und Kurven
-local OVERHEAD = 30                   -- Ansprechen, Abheben, Landen, vom Flugmeister weg (s)
-local MIN_SAVE, MIN_RATIO = 60, 0.75  -- erst ab 1 Min. und 25 % Ersparnis anzeigen
+local OVERHEAD = 25                   -- Ansprechen, Abheben, Landen (s)
+local MIN_SAVE, MIN_RATIO = 60, 0.88  -- erst ab 1 Min. und 12 % Ersparnis anzeigen (Laufweg ist jetzt echt)
+local STICKY_RATIO = 0.94             -- einmal angezeigt: erst weg, wenn die Ersparnis fast verschwindet
 
 local function vec(x, y) if CreateVector2D then return CreateVector2D(x, y) end return { x = x, y = y } end
 local function xy(v) if not v then return end if v.GetXY then return v:GetXY() end return v.x, v.y end
@@ -129,6 +131,28 @@ local function hearthNode(list)
   end
 end
 
+-- Bodenweg in Yards (Wegenetz aus der Spielgeometrie, Travel.lua); ohne Netz Luftlinie x 1.25.
+-- q ist das stabile Ende (Spieler oder Ziel): eine Wegsuche reicht fuer alle Flugmeister.
+local function ground(p, q)
+  if LP_Walk and LP_Walk.Ground then
+    local ok, d = pcall(LP_Walk.Ground, p, q)
+    if ok and d then return d end
+  end
+  return math.sqrt((p.x - q.x) ^ 2 + (p.y - q.y) ^ 2) * DETOUR_RUN
+end
+
+-- Flugzeit a -> b in Sekunden: gemessen (eigener Flug) > Flugnetz mit Umsteigen (nur bekannte Punkte,
+-- gemessene Direktfluege aus der Spielgeometrie-Datenbank) > grobe Schaetzung ueber die Luftlinie.
+local function airTime(cont, a, b, knownSet, d)
+  local m = d.ft[a.id .. ">" .. b.id]
+  if m then return m, 1, true end
+  if LP_Walk and LP_Walk.FlightTime then
+    local ok, t, hops = pcall(LP_Walk.FlightTime, cont, a.id, b.id, knownSet, d.ft)
+    if ok and t then return t, hops, true end
+  end
+  return math.sqrt((a.wx - b.wx) ^ 2 + (a.wy - b.wy) ^ 2) * DETOUR_FLY / FLY + 10, 1, false
+end
+
 -- t = { map, x, y } Ziel; liefert Rat oder nil
 function F.Advice(t, key)
   if not (t and t.map and t.x) then return nil end
@@ -142,8 +166,9 @@ function F.Advice(t, key)
   local pc, pwx, pwy = world(pmap, px, py)
   local tc, twx, twy = world(t.map, t.x, t.y)
   if not pc or not tc or pc ~= tc then return nil end
+  local P, T = { c = pc, x = pwx, y = pwy }, { c = tc, x = twx, y = twy }
   local straight = math.sqrt((twx - pwx) ^ 2 + (twy - pwy) ^ 2)
-  if straight < 500 then return nil end
+  if straight < 400 then return nil end
   local cmap = continentMap(pmap)
   if not cmap then return nil end
   local list = nodes(cmap)
@@ -152,30 +177,33 @@ function F.Advice(t, key)
   -- Nur Flugpunkte, die du kennst. Ohne einmal einen Flugmeister angesprochen zu haben, kein Flug-Rat
   -- (sonst empfiehlt der Pilot Punkte, die du noch gar nicht entdeckt hast).
   if not d.fpSeen then return nil end
-  local known = {}
+  local known, knownSet = {}, {}
   for _, n in ipairs(list) do
-    if n.cont == pc and d.fp[n.id] then known[#known + 1] = n end
+    if n.cont == pc and d.fp[n.id] then known[#known + 1] = n; knownSet[n.id] = true end
   end
   if #known < 2 then return nil end
   local spd = groundSpeed()
-  local runT = straight * DETOUR_RUN / spd
+  local runYd = ground(P, T)                       -- echter Laufweg Spieler -> Ziel (Ziel = stabiles Ende)
+  local runT = runYd / spd
+  -- Kandidaten: die 4 naechsten bekannten Flugmeister am Spieler und am Ziel (nach Luftlinie vorsortiert,
+  -- dann echter Laufweg)
   local function dd(n, x, y) return math.sqrt((n.wx - x) ^ 2 + (n.wy - y) ^ 2) end
-  table.sort(known, function(a, b) return dd(a, pwx, pwy) < dd(b, pwx, pwy) end)
-  local starts = { known[1], known[2], known[3] }
-  local ends = {}
-  for i, n in ipairs(known) do ends[i] = n end
+  local starts, ends = {}, {}
+  for i, n in ipairs(known) do starts[i] = n; ends[i] = n end
+  table.sort(starts, function(a, b) return dd(a, pwx, pwy) < dd(b, pwx, pwy) end)
   table.sort(ends, function(a, b) return dd(a, twx, twy) < dd(b, twx, twy) end)
+  local w1, w2 = {}, {}
+  -- Flugmeister/Ziel sind die festen Enden: ihre Wegsuchen bleiben gespeichert, der Spieler wird nur angebunden
+  for i = 1, math.min(4, #starts) do local n = starts[i]; w1[n] = ground(P, { c = pc, x = n.wx, y = n.wy }) end
+  for i = 1, math.min(4, #ends) do local n = ends[i]; w2[n] = ground({ c = pc, x = n.wx, y = n.wy }, T) end
   local best
-  for _, a in ipairs(starts) do
-    for j = 1, math.min(3, #ends) do
-      local b = ends[j]
+  for a, wa in pairs(w1) do
+    for b, wb in pairs(w2) do
       if a ~= b then
-        local walk1 = dd(a, pwx, pwy) * DETOUR_RUN / spd
-        local air = d.ft[a.id .. ">" .. b.id] or (math.sqrt((a.wx - b.wx) ^ 2 + (a.wy - b.wy) ^ 2) * DETOUR_FLY / FLY)
-        local walk2 = dd(b, twx, twy) * DETOUR_RUN / spd
-        local tot = walk1 + air + OVERHEAD + walk2
+        local air, hops, sure = airTime(pc, a, b, knownSet, d)
+        local tot = wa / spd + air + OVERHEAD + wb / spd
         if not best or tot < best.fly then
-          best = { fly = tot, from = a, to = b, walk1 = dd(a, pwx, pwy) }
+          best = { fly = tot, from = a, to = b, walk1 = wa, walk2 = wb, air = air, hops = hops, sure = sure }
         end
       end
     end
@@ -185,17 +213,18 @@ function F.Advice(t, key)
   if hearthReady() then
     local hn, bindName = hearthNode(list)
     if hn and hn.cont == pc then
-      local tot = 20 + 20 + dd(hn, twx, twy) * DETOUR_RUN / spd
+      local tot = 20 + 20 + ground({ c = pc, x = hn.wx, y = hn.wy }, T) / spd
       hb = { t = tot, name = bindName }
     end
   end
-  if best and best.walk1 > straight * 0.6 then best = nil end   -- Flugmeister weiter weg als das Ziel: Unsinn
+  if best and best.walk1 >= runYd then best = nil end      -- zum Flugmeister weiter als zum Ziel: Unsinn
   if hb and (not best or hb.t < best.fly) then
     local save = runT - hb.t
     local sticky = (shownKey == key)
-    if save >= (sticky and MIN_SAVE * 0.5 or MIN_SAVE) and hb.t <= runT * (sticky and 0.88 or MIN_RATIO) then
+    if save >= (sticky and MIN_SAVE * 0.5 or MIN_SAVE) and hb.t <= runT * (sticky and STICKY_RATIO or MIN_RATIO) then
       shownKey = key
-      last = { kind = "hearth", run = runT, fly = hb.t, save = save, from = hb.name, to = hb.name, sure = true }
+      last = { kind = "hearth", run = runT, fly = hb.t, save = save, from = hb.name, to = hb.name, sure = true,
+        runYd = runYd }
       return last
     end
   end
@@ -203,14 +232,16 @@ function F.Advice(t, key)
   local save = runT - best.fly
   local sticky = (shownKey == key)
   local minS, minR = MIN_SAVE, MIN_RATIO
-  if sticky then minS, minR = MIN_SAVE * 0.5, 0.88 end
+  if sticky then minS, minR = MIN_SAVE * 0.5, STICKY_RATIO end
   if save < minS or best.fly > runT * minR then shownKey = nil; return nil end
   shownKey = key
   last = {
     kind = "fly", run = runT, fly = best.fly, save = save,
     from = short(best.from.name), to = short(best.to.name),
     fmap = best.from.map, fx = best.from.x, fy = best.from.y,
-    atFM = best.walk1 < 60, sure = true, measured = d.ft[best.from.id .. ">" .. best.to.id] and true or false,
+    atFM = best.walk1 < 60, sure = best.sure, hops = best.hops, air = best.air,
+    runYd = runYd, walk1 = best.walk1, walk2 = best.walk2,
+    measured = d.ft[best.from.id .. ">" .. best.to.id] and true or false,
   }
   return last
 end

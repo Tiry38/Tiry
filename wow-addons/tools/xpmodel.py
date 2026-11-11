@@ -17,14 +17,13 @@ XP_LEVEL = {1: 400, 2: 900, 3: 1400, 4: 2100, 5: 2800, 6: 3600, 7: 4500, 8: 5400
             27: 38900, 28: 41400, 29: 44300, 30: 47400, 31: 50800, 32: 54500, 33: 58600, 34: 62800,
             35: 67100, 36: 71600, 37: 76100, 38: 80800, 39: 85700, 40: 90700, 41: 95800, 42: 101000}
 
-# Zonengroessen in Yards (Breite, Hoehe) - fuer Prozent -> Yards
-ZONE_YD = {17: (10133.3, 6756.25), 406: (4883.3, 3256.25), 331: (5766.7, 3843.75), 400: (4400.0, 2933.3),
-           267: (4866.7, 3245.8), 36: (2800.0, 1866.7), 130: (4200.0, 2800.0), 1637: (1402.6, 935.4),
-           1638: (1043.7, 695.8), 14: (5287.5, 3525.0), 215: (5137.5, 3425.0), 405: (4495.8, 2997.9),
-           85: (4518.75, 3012.5), 1497: (959.4, 640.1), 45: (3600.0, 2400.0), 33: (6381.25, 4254.2),
-           15: (5250.0, 3500.0), 357: (6950.0, 4633.3), 16: (5070.8, 3381.25), 148: (6550.0, 4366.7),
-           11: (4135.4, 2756.25), 10: (2700.0, 1800.0), 440: (6900.0, 4600.0),
-           3: (2487.5, 1658.33), 8: (2293.75, 1529.17), 47: (3850.0, 2566.67), 51: (2231.25, 1487.5)}
+# Zonengroessen: aus den echten Forever-Kartengrenzen (zones.py). Die fruehere Handtabelle hatte
+# Hillsbrad (1,5-fach) und Mulgore (Forever-Karte geaendert) falsch.
+import zones
+try:
+    import navmesh as NM          # Laufwege aus der Spielgeometrie (navmesh.json, siehe navmesh.py)
+except Exception:                 # pragma: no cover
+    NM = None
 
 SPEED = 7.0           # Yards/s zu Fuss (Forever: Reittier erst ab Stufe 40)
 PATH = 1.2            # Umweg-Faktor Gelaende
@@ -174,26 +173,104 @@ def work(q, L):
 
 
 def yd(p, r):
-    """Abstand zweier Punkte (area, x%, y%) in Yards; None bei Zonenwechsel."""
+    """Abstand zweier Punkte (area, x%, y%) in Yards (Luftlinie); None bei Zonenwechsel."""
     if not p or not r or p[0] != r[0]: return None
-    w, h = ZONE_YD.get(p[0], (5000.0, 3333.0))
+    w, h = zones.size(p[0]) or (5000.0, 3333.0)
     return math.hypot((p[1] - r[1]) * w / 100.0, (p[2] - r[2]) * h / 100.0)
 
 
-KALIMDOR = {17, 406, 331, 400, 1637, 1638, 14, 215, 405, 15, 357, 16, 148, 440, 141, 1657}
 T_SHIP = 10.0         # Minuten Kontinentwechsel (Zeppelin warten + fahren + Flug zum Ziel) - grob
+FLY_OVER = 25.0       # Sekunden je Flug: Flugmeister ansprechen, abheben, landen
+# Horde-Flugmeister (Era-Client TaxiNodes, MountCreatureID_0 > 0; Ids wie C_TaxiMap)
+HORDE_FP = {1: {22, 23, 25, 29, 30, 38, 40, 42, 44, 48, 53, 55, 58, 61, 63, 69, 72, 77, 79, 80},
+            0: {10, 11, 13, 17, 18, 20, 21, 56, 68, 70, 75, 76, 85, 86, 87}}
+FP_START = {22, 23, 25, 77, 80}   # mit 22 sicher bekannt: Donnerfels, Orgrimmar, Wegekreuz, Camp Taurajo, Ratschet
+_nm_ok = None
 
 
-def travel_min(p, r):
-    d = yd(p, r)
-    if d is None:
-        if p and r and ((p[0] in KALIMDOR) != (r[0] in KALIMDOR)): return T_SHIP
-        return T_ZONE
-    return d * PATH / SPEED / 60.0
+def _nm():
+    global _nm_ok
+    if _nm_ok is None:
+        try:
+            NM._load(); _nm_ok = True
+        except Exception:
+            _nm_ok = False
+    return _nm_ok
 
 
-def evaluate(steps, L0=22, xp0=0, verbose=True):
-    """Spielt die Route durch: Stufe, XP, Zeit je Zonenblock."""
+def ground_yd(cont, A, B):
+    """Laufweg in Yards zwischen Weltpunkten (B = stabiles Ende); ohne Wegenetz Luftlinie x PATH."""
+    g = NM.ground_world(cont, A, B) if _nm() else None
+    return g if g is not None else math.dist(A, B) * PATH
+
+
+def flight_sec(cont, a, b, known):
+    """Kuerzeste Flugzeit a -> b (Sekunden) ueber bekannte Flugmeister, gemessene Direktfluege, +5 s je Umstieg."""
+    if a == b: return 0.0
+    taxi, flights = NM.taxi(cont)
+    adj = {}
+    for x, y, t in flights:
+        if x in known and y in known: adj.setdefault(x, []).append((y, t))
+    D = {a: 0.0}; pq = [(0.0, a)]
+    import heapq
+    while pq:
+        d, u = heapq.heappop(pq)
+        if u == b: return d
+        if d > D[u]: continue
+        for v, t in adj.get(u, ()):
+            nd = d + t + 5
+            if nd < D.get(v, 1e18): D[v] = nd; heapq.heappush(pq, (nd, v))
+    return None
+
+
+def fly_min(cont, A, B, known):
+    """Minuten fuer Laufen zum Flugmeister + Flug + Laufen zum Ziel (beste Kombination), None = kein Flug."""
+    if not _nm(): return None
+    taxi, _ = NM.taxi(cont)
+    fps = [i for i in taxi if i in HORDE_FP.get(cont, ()) and (known is None or i in known)]
+    if len(fps) < 2: return None
+    sa = sorted(fps, key=lambda i: math.dist(taxi[i], A))[:3]
+    sb = sorted(fps, key=lambda i: math.dist(taxi[i], B))[:3]
+    best = None
+    kn = set(fps)
+    for i in sa:
+        wi = ground_yd(cont, taxi[i], A)
+        for j in sb:
+            if i == j: continue
+            air = flight_sec(cont, i, j, kn)
+            if air is None: continue
+            t = (wi + ground_yd(cont, taxi[j], B)) / SPEED + air + FLY_OVER
+            if best is None or t < best: best = t
+    return best / 60.0 if best is not None else None
+
+
+def travel_min(p, r, known=None, fly=True):
+    """Reisezeit in Minuten zwischen (area, x%, y%): echter Laufweg (Wegenetz), mit fly=True auch Fliegen
+    ueber bekannte Flugmeister (known = Menge der Ids; None = alle Horde-Flugmeister)."""
+    if not p or not r: return 0.0
+    a, b = zones.world(*p), zones.world(*r)
+    if not a or not b: return T_ZONE
+    if a[0] != b[0]: return T_SHIP
+    cont = a[0]
+    walk = ground_yd(cont, a[1:], b[1:]) / SPEED / 60.0
+    if not fly or walk < 2.0: return walk
+    f = fly_min(cont, a[1:], b[1:], known)
+    return min(walk, f) if f is not None else walk
+
+
+def fp_near(p, r=150.0):
+    """Horde-Flugmeister im Umkreis r (Yards) um (area, x%, y%) – beim Vorbeikommen gelernt."""
+    if not _nm(): return set()
+    w = zones.world(*p)
+    if not w: return set()
+    taxi, _ = NM.taxi(w[0])
+    return {i for i, t in taxi.items() if i in HORDE_FP.get(w[0], ()) and math.dist(t, w[1:]) <= r}
+
+
+def evaluate(steps, L0=22, xp0=0, verbose=True, known=None):
+    """Spielt die Route durch: Stufe, XP, Zeit je Zonenblock. Reisen: Laufweg oder Flug ueber Flugmeister,
+    die bis dahin bekannt sind (Start: FP_START, dazu jeder Flugmeister, an dem die Route vorbeikommt)."""
+    known = set(FP_START if known is None else known)
     L, cur = L0, xp0
     blocks = []; pos = None; blk = None; seen_c = set(); per_q = {}
     for s in steps:
@@ -204,10 +281,11 @@ def evaluate(steps, L0=22, xp0=0, verbose=True):
         p = s.get("_p")
         if p:
             if pos is not None:
-                tm = travel_min(pos, p)
+                tm = travel_min(pos, p, known)
                 blk["travel"] += tm
                 if s.get("q"): per_q.setdefault(s["q"], dict(travel=0.0))["travel"] += tm
             pos = p
+            known |= fp_near(p)
         q = s.get("q")
         if s["t"] == "grind":
             need = 0

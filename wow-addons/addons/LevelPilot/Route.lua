@@ -317,6 +317,8 @@ function R.OnLanded() STATE.landedAt = GetTime() end
 -- Quest grau? Classic-Quest-XP: volle XP bis 5 Stufen unter dir, dann 80/60/40/20/10 %
 R.maxDiff = 5
 R.maxAbove = 3
+R.EXTRA_YD = 1800   -- Quest aus dem Log mitnehmen, wenn der echte Laufweg hoechstens so lang ist ...
+R.EXTRA_PEN = 120   -- ... mit diesem Aufschlag gegenueber der Routen-Reihenfolge (Yards)
 R.ahead = 2         -- Annehmen ueberspringen, wenn du 2+ Stufen ueber der Planung bist UND die Route dort schon weiter ist
 local function greyFor(ql, lvl)
   if not ql then return false end
@@ -520,6 +522,28 @@ function R.StepDist(s)
   return t and distTo(t), t
 end
 
+-- Weltpunkt eines Ziels { map, x, y } (Travel.lua) – nil ohne Wegenetz
+function R.WorldOf(t)
+  if t and t.map and t.x and LP_Walk and LP_Walk.Point then return LP_Walk.Point(t.map, t.x, t.y) end
+end
+
+-- Echter Laufweg Spieler -> Schritt in Yards (Wegenetz aus der Spielgeometrie), sonst Luftlinie.
+-- Der Spieler ist das stabile Ende: eine Wegsuche reicht fuer alle Schritte der Liste.
+-- cap: weiter (Luftlinie) als das -> nur Luftlinie (spart Rechenzeit bei fernen Listenzeilen).
+-- Rueckgabe: Yards, Ziel, Luftlinie
+function R.StepCost(s, pw, cap)
+  local d, t = R.StepDist(s)
+  if not d then return nil, t end
+  if d < 120 or not LP_Walk or (cap and d > cap) then return d, t, d end
+  pw = pw or LP_Walk.Player()
+  local tw = R.WorldOf(t)
+  if pw and tw then
+    local ok, g = pcall(LP_Walk.Ground, pw, tw)   -- Ziel = Quelle der Suche (bleibt gespeichert)
+    if ok and g then return math.max(d, g), t, d end
+  end
+  return d, t, d
+end
+
 -- NPC-IDs, die eine Quest vergeben (fuer die Pruefung direkt am NPC)
 function R.Givers(q)
   local set = {}
@@ -639,8 +663,14 @@ function R.Current(route, lvl, skipped, n, cur)
     end
   end
   -- Live-Auswahl: unter den naechsten offenen Schritten den sinnvollsten waehlen.
-  -- Entfernung + leichte Strafe je Position (Grundreihenfolge bleibt), Abgaben nur, wenn fertig.
+  -- Echter Laufweg (Wegenetz, nicht Luftlinie) + leichte Strafe je Position (Grundreihenfolge bleibt),
+  -- Abgaben nur, wenn fertig.
+  local pw = LP_Walk and LP_Walk.Player and LP_Walk.Player() or nil
   local best, bestScore, rank, scores = nil, nil, 0, {}
+  local inOut = {}
+  for _, i in ipairs(out) do inOut[i] = true end
+  -- 1. machbare Kandidaten mit Untergrenze (Luftlinie ist nie laenger als der Laufweg)
+  local cands = {}
   for _, i in ipairs(out) do
     if state[i] == "open" then
       local s = steps[i]
@@ -649,17 +679,54 @@ function R.Current(route, lvl, skipped, n, cur)
       if s.t == "complete" and s.q and not inLog(s.q) then ok = false end
       if s.t == "grind" and i ~= first then ok = false end     -- erst Quests, dann (falls noetig) grinden
       if ok then
-        local d
-        pcall(function() d = R.StepDist(s) end)
-        local score = (d or 1e6) + rank * 20
-        if s.t == "turnin" then score = score - 15 end          -- Abgabe raeumt das Log und schaltet Folgequests frei
-        scores[i] = score
-        if not bestScore or score < bestScore then best, bestScore = i, score end
+        local d0
+        pcall(function() d0 = R.StepDist(s) end)
+        local base = rank * 20 - ((s.t == "turnin") and 15 or 0)  -- Abgabe raeumt das Log, schaltet Folgequests frei
+        cands[#cands + 1] = { i = i, lb = (d0 or 1e6) + base, base = base, far = not d0 }
         rank = rank + 1                                        -- nur machbare Schritte zaehlen als "Position"
       end
       if rank >= 12 then break end
     end
   end
+  -- Mitnehmen: Quests, die schon im Log sind und deren Ziel/Abgabe ganz in der Naehe liegt, auch wenn die
+  -- Route sie erst spaeter vorsieht (z. B. am Flugpunkt angenommen). Nur echter Laufweg bis EXTRA_YD.
+  local extras = {}
+  if pw and first then
+    local n = 0
+    for i = first + 1, #steps do
+      local s = steps[i]
+      if not inOut[i] and state[i] == "open" and s.q and (s.t == "complete" or s.t == "turnin") and inLog(s.q)
+         and (s.t == "complete" or ready(s.q)) then
+        local d0
+        pcall(function() d0 = R.StepDist(s) end)
+        if d0 and d0 <= R.EXTRA_YD then
+          local base = 12 * 20 + R.EXTRA_PEN - ((s.t == "turnin") and 15 or 0)
+          cands[#cands + 1] = { i = i, lb = d0 + base, base = base, extra = true }
+        end
+        n = n + 1
+        if n >= 30 then break end
+      end
+    end
+  end
+  -- 2. echter Laufweg (Wegenetz) in Reihenfolge der Untergrenze; was schon schlechter ist als das Beste,
+  --    braucht keine Wegsuche (exakt dasselbe Ergebnis, viel weniger Rechnen)
+  table.sort(cands, function(a, b) return a.lb < b.lb end)
+  local curI = cur and cur.i
+  for _, c in ipairs(cands) do
+    local score = c.lb
+    if not c.far and (not bestScore or c.lb < bestScore or c.i == curI) then
+      local d
+      pcall(function() d = R.StepCost(steps[c.i], pw) end)
+      if d then score = d + c.base end
+    end
+    if c.extra then
+      if score - c.base <= R.EXTRA_YD then scores[c.i] = score; extras[#extras + 1] = c.i else score = nil end
+    else
+      scores[c.i] = score
+    end
+    if score and (not bestScore or score < bestScore) then best, bestScore = c.i, score end
+  end
+  R.extras = extras
   if not best then best = first end
   -- Hysterese: das aktuelle Ziel nur wechseln, wenn das neue klar besser ist (kein Hin-und-her)
   if cur and cur.i and scores[cur.i] and best ~= cur.i and bestScore then
@@ -669,6 +736,7 @@ function R.Current(route, lvl, skipped, n, cur)
   local ordered = {}
   if best then ordered[1] = best end
   for _, i in ipairs(out) do if i ~= best then ordered[#ordered + 1] = i end end
+  for _, i in ipairs(extras) do if i ~= best and #ordered < (n or 5) then ordered[#ordered + 1] = i end end
   while #ordered > (n or 5) do table.remove(ordered) end
   R.state = state
   return best, ordered
@@ -758,7 +826,7 @@ end
 
 local CITY = { [85] = true, [86] = true, [88] = true, [90] = true, [1454] = true, [1456] = true, [1458] = true }
 local pathCache = { key = nil, t = 0, pts = nil }
-function R.Route(tgt)
+local function cityRoute(tgt)
   if not tgt or not tgt.map then return end
   R.BuildNav()
   local pmap, px, py = R.PlayerMapPos()
@@ -858,4 +926,37 @@ function R.Route(tgt)
   if #seq == 0 then pathCache.pts = nil; return end
   return seq[1], bestCost
 end
-function R.ResetPath() pathCache.key = nil end
+
+-- Pfeil-Wegpunkt. In Staedten und mit eigenen Wegen das Stadtnetz (NPC-Laufwege), draussen das Wegenetz aus
+-- der Spielgeometrie (Travel.lua). Rueckgabe: Wegpunkt { map, x, y, via } oder nil (gerade drauf zu),
+-- Restweg (Yards, nur mit Wegpunkt), Laufweg gesamt (Yards, auch ohne Wegpunkt).
+local walkCache = { key = nil, t = 0 }
+function R.Route(tgt)
+  if not tgt or not tgt.map then return end
+  local pmap, px, py = R.PlayerMapPos()
+  if not (pmap and px) then return end
+  local own = R.UserNav and R.UserNav[pmap] and R.UserNav[pmap].n and #R.UserNav[pmap].n > 0
+  if CITY[pmap] or own or not (LP_Walk and LP_Walk.Aim) then
+    local wp, len = cityRoute(tgt)
+    return wp, len, len
+  end
+  local now = GetTime()
+  local key = pmap .. ":" .. math.floor(px * 600) .. ":" .. math.floor(py * 600) .. ">" .. tgt.map .. ":"
+    .. math.floor(tgt.x * 4000) .. ":" .. math.floor(tgt.y * 4000)
+  if walkCache.key == key and now - walkCache.t < 0.5 then return walkCache.wp, walkCache.len, walkCache.rest end
+  local wp, len, rest
+  pcall(function()
+    local p = LP_Walk.Point(pmap, px, py)
+    local q = LP_Walk.Point(tgt.map, tgt.x, tgt.y)
+    if not (p and q) then return end
+    local a, r = LP_Walk.Aim(p, q)
+    rest = r
+    if not a then return end
+    local _, pos = C_Map.GetMapPosFromWorldPos(p.c, vec(a.x, a.y), pmap)
+    local x, y = xy(pos)
+    if x then wp, len = { map = pmap, x = x, y = y, via = a.via }, a.rest end
+  end)
+  walkCache.key, walkCache.t, walkCache.wp, walkCache.len, walkCache.rest = key, now, wp, len, rest
+  return wp, len, rest
+end
+function R.ResetPath() pathCache.key = nil; walkCache.key = nil end

@@ -149,7 +149,7 @@ def path_min(st):
     for x in st:
         p = x.get("_p")
         if p is None: continue
-        if pos is not None: tot += X.travel_min(pos, p)
+        if pos is not None: tot += X.travel_min(pos, p, fly=False)
         pos = p
     return tot
 
@@ -173,7 +173,7 @@ def optimize(st, done0, route_set, acc0=(), comp0=()):
         pb = pos[b]
         if pa is None or pb is None: return 0.0
         k = (a, b)
-        if k not in cache: cache[k] = X.travel_min(pa, pb)
+        if k not in cache: cache[k] = X.travel_min(pa, pb, fly=False)
         return cache[k]
     order = list(range(n)); improved = True; rounds = 0
     while improved and rounds < 40:

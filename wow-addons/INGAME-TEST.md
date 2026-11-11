@@ -113,3 +113,45 @@ Alles oben ist im Forever-Nachbau getestet, aber nicht im echten Client. Besonde
 - Bankfächer-IDs
 - Berufe über `GetSkillLineInfoByID`
 - echte Speicherwerte
+
+---
+
+# Ingame-Test – LevelPilot 4.2.0
+Einbau: alten Ordner `LevelPilot` löschen, ZIP entpacken, **WoW komplett neu starten** (neue Dateien `Walk.lua`,
+`Travel.lua`). Zum Vergleich hilft ein Screenshot der Weltkarte mit Pfeil und LevelPilot-Fenster.
+
+## Start
+- [ ] Einloggen ohne Lua-Fehler, Chat meldet „v4.2.0 bereit“
+- [ ] Erstes Öffnen der Liste: höchstens ein kurzer Ruckler (Wegenetz wird einmal je Kontinent ausgepackt)
+- [ ] Danach beim Laufen kein Ruckeln durch LevelPilot (Gegenprobe: `/lp` ausblenden)
+
+## Der Fall Zoram'gar (dein Screenshot)
+- [ ] Mit Steinkrallen-Zielen am Flugmeister **Zoram'gar-Außenposten**: Flug-Kapsel rät **„Flug nach Sonnenfels“**
+  (Tooltip: Laufweg, Zwischenlandung(en), „Nach der Landung noch … zu Fuß“)
+- [ ] Gleiche Stelle mit Geisterwolf: Rat kommt trotzdem (spart laut Modell ~1,5 Min)
+- [ ] Ohne Flug: Pfeil zeigt nach **Osten zum Talondeep-Pfad**, nicht quer über die Berge; Zusatz „über Talondeep-Pfad“
+- [ ] Zoram'gar-Quests im Log, die im Eschental erledigt werden: Die Liste nimmt sie zuerst, statt dich 7 km wegzuschicken
+
+## Pfeil und Liste allgemein
+- [ ] Pfeil-Text „Weg“ statt „direkt/Luftlinie“, wenn der Weg um Hindernisse führt; Entfernung = Laufweg
+- [ ] Pfeil führt in Etappen (Wegpunkt springt weiter), steht am Ende auf dem Ziel
+- [ ] Entfernungen in der Liste wirken realistisch (Berge/Schluchten länger als Luftlinie)
+- [ ] Sonnenfels → Gipfel: Weg über den Mirkfallonsee
+- [ ] Freiwindposten/Großer Aufzug: Pfeil führt zum Aufzug (Zusatz „über Aufzug“ bzw. „über Großer Aufzug“ / „über Aufzug Freiwindposten“)
+
+## Flug-Rat
+- [ ] Rat nur mit Flugpunkten, die du kennst (einmal mit Flugmeister gesprochen)
+- [ ] Nahe Ziele (< 400 Yards): kein Flug-Rat
+- [ ] Nach einem Flug: gemessene Flugzeit fließt ein (zweiter Rat für dieselbe Strecke rechnet mit echter Zeit)
+
+## Speicher
+```
+/run UpdateAddOnMemoryUsage() print(GetAddOnMemoryUsage("LevelPilot"))
+```
+- [ ] nach 10 Minuten Questen: ______ KB (erwartet: grob 6–12 MB, nicht 30+ MB)
+
+## Was nur im Spiel geprüft werden kann (ehrlich)
+Alles oben ist im Lua-Nachbau mit echten Forever-Kartengrenzen getestet (`tests/travel.lua`), aber nicht im Client.
+Unsicher: `C_Map.GetMapPosFromWorldPos` im Forever-Client, ob die Flugmeister-IDs der Flugkarte zu den Daten passen,
+Anbindung auf Hochplateaus (Donnerfels), `GetUnitSpeed` in Geisterwolf, echte Ruckler-Dauer.
+
