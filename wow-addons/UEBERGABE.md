@@ -7,7 +7,7 @@ in Sitzungen auf **Tiry38/Tiry** weiter. Alle Dateien liegen in diesem Ordner, P
 
 | Add-on | Version | Zweck | Stand |
 |---|---|---|---|
-| **Tiry's Zentrale** | 6.3.0 | Gold- und Berufe-Addon (`TirysZentrale/`, Doku `ZENTRALE.md`): Neon-Glas-Design mit Dock, **ein AH-Scan für alle Reiter**, Verkäufe pro Tag, Gold pro Tag, Schnäppchen, Kaufen bis, Neu einstellen mit Menge, Anzahlung im Gewinn (1 Kupfer seit 10.11.), Tooltip als Preis-Liste, **Sparziel, Unterwegs-Gold (mit LevelPilot-Route), Stationen/seelengebundene Rezepte (6.2), Craftfenster am Berufsfenster mit WoW/TZ-Umschalter (6.3)** | ausgeliefert, **Spieltest offen** (Checkliste `INGAME-TEST.md`) |
+| **Tiry's Zentrale** | 6.4.0 | Gold- und Berufe-Addon (`TirysZentrale/`, Doku `ZENTRALE.md`): Neon-Glas-Design mit Dock, **ein AH-Scan für alle Reiter**, Verkäufe pro Tag, Gold pro Tag, Schnäppchen, Kaufen bis, Neu einstellen mit Menge, Anzahlung im Gewinn (1 Kupfer seit 10.11.), Tooltip als Preis-Liste, **Sparziel, Unterwegs-Gold (mit LevelPilot-Route), Stationen/seelengebundene Rezepte (6.2), eigenes Berufsfenster statt Blizzards mit WoW/TZ-Umschalter (6.4), AH-Scan aktualisiert alles (6.4)** | ausgeliefert, **Spieltest offen** (Checkliste `INGAME-TEST.md`) |
 | **LevelPilot** | 6.0.3 | **6.0.3:** gleichnamige Kettenquests werden nicht mehr verwechselt (Elixier der Schmerzen Teil 2 galt als angenommen), Gegner und neue Quests im Fenster Stufe −3 bis +1 (nicht zu schwer, nicht zu leicht; Pfeil zur passendsten Gegnersorte), Karte „Gegner ~St. X nehmen“. **6.0.2:** Pfeil führt bei Beute von mehreren Gegnersorten nur zu Gegnern bis Stufe +1 (Berglöwenblut: hungernde Löwen statt Stufe-32-Berglöwen), Warnung „nur Gegner ~St. X · St. Y meiden“. **6.0.1:** Tooltips nennen deine Stufe mit (Questlevel gegen deine Stufe in Worten). **6.0 Live-Modus (Standard):** wählt nach Ort, Questlog und Stufe ein **Quest-Gebiet** (Hub mit vielen passenden, einfachen Quests: Quest/Gegner ≤ Stufe +1, keine Elite/Gruppe/Dungeon), Pfeil führt Annehmen → Erledigen → Abgeben nach Nähe, Gebietswechsel nur wenn fertig oder ≥ 30 % besser, `/lp live` schaltet auf den festen Plan; darunter Levelrouten Horde **22–30 und 30–40** als **fester Plan** (Einstieg erkennt deinen Stand, Sprung nur mit Beweis, `/lp zurueck`), **Questlog-Check** mit Löschen-Knopf, Plan-Band + Status-Pillen, echte Laufwege, Flug-Rat, Pfeil, Lichtstrahl (**ruht im Questgebiet**, 5.1), **Aufhol-Quests statt Grinden, wenn du hinter dem Plan bist** (5.1.1: Tausend Nadeln; **5.1.2: Anzahl nach echter XP-Leiste**, Rest als „noch X XP · ~N Mobs“, zweiter Block 28→30; **5.1.3: verpasste Aufhol-Quests kommen zurück, Warten zeigt XP bis zur nächsten Stufe, Wegpunkt-Kontrolle**; **5.1.4: Menü „Neu berechnen“** – Abstecher zu einer nicht schwereren Quest mit mehr XP/Min; **5.1.5: alles auf deine Stufe** – Quests höchstens Stufe +1, Gegner höchstens Stufe +1 (Planer + live), langsameres Planer-Tempo, Auto-Vorschlag „Passt zu deiner Stufe“ statt Warten, Grind-Schritte mit XP/Mobs; **5.1.6: Quest-Pool** – 430 Solo-Quests aus der Forever-DB, statt Grinden kommt automatisch die beste machbare Extra-Quest nach XP/Min inkl. Flug; **5.1.7: nur Solo** – Elite-Quests auch aus den festen Routen raus (Arachnophobia, Bloodfury Bloodline, Hypercapacitor Gizmo), laufende Begleitquest wird zuerst zu Ende geführt; **5.1.8:** verpasste Route-Quests zählen als Extra-Quests, Weg zum Grind-Platz zählt beim Vergleich mit, dunkle Schrift auf Neon-Knöpfen ohne Kontur = lesbar; **5.1.9:** Quest schon ab halbem Grind-Tempo (`R.QUEST_PREF` 0.5), Pool-Suche rechnet jeden Kandidaten, der noch gewinnen kann (statt fest 12), `/lp warum` + Grind-Tooltip zeigen die Rechnung), Auto-Quests, XP-Cockpit | ausgeliefert, **Spieltest offen** (Checkliste `INGAME-TEST.md`, Teil LevelPilot) |
 | **TotemTakt** | 1.0.0 | **Tirys Verstärker**: alle Totems auf **einer Taste** (Makro „TotemTakt“, /castsequence). Jeder Druck = nächstes Totem, Druck in der Abklingzeit zählt nicht. Außerhalb des Kampfes **fehlende/auslaufende/zu weit weg zuerst** (Buff-Check), frisch gestellte hinten; im Kampf eingefroren (Neustart 8 s/15 s/nie). Fenster `/takt`: 4 Element-Kugeln, Klick = Totem wählen/aus, Ziehen = Reihenfolge | **Spieltest offen** (Checkliste `INGAME-TEST.md`, Teil TotemTakt) |
 | **RXPNeon** | 2.0.1 | **Zusatz für RestedXP Guides (RXPGuides v4.11.x, vom Kumpel)**: **eigenes Neon-Fenster im LevelPilot-Stil** (Stufen-Kugel, EP + Erholt, Guide-Fortschritt, JETZT-Karte mit farbiger Schritt-Art und Entfernung, Questlog-Abgleich für Haken, ERLEDIGT·WEITER, ALS NÄCHSTES), **Neon-Pfeil** (Glas-Scheibe, facettierter Pfeil, Entfernung + Ziel deutsch); RXP läuft unsichtbar darunter weiter. `/rxn fenster rxp` = RXP-Original mit Neon-Skin und **deutsche Schritt-Texte live** (Quest-Titel per Quest-ID, NPC/Item/Objekt/Ort-Namen aus QuestieDB + Spieldaten, ~400 Satzregeln; 77,7 % der 57.921 Forever-Guide-Zeilen ohne englische Füllwörter). Knopf „GUIDE FÜR STUFE X LADEN“, wenn kein passender Guide läuft. **2.0.1:** Abgeben-Schritt mit unfertiger Quest im Log → Hinweis „ABGEBEN GEHT NOCH NICHT“ mit offenem Ziel (Tirys Fall „Die heilige Flamme“ 1195: Phiole leer). `/rxn`. Kein RXP-/Zygor-Code im Repo | **Spieltest offen** (Checkliste `INGAME-TEST.md`, Teil RXPNeon) |
@@ -262,6 +262,34 @@ Amboss-/Schloss-Sound (max. 1–2 s)“.
 5. Tiry's Zentrale 6.2: Spieltest-Rückmeldung abwarten (Komplett-Scan, Absatz-Werte, Sparziel, Unterwegs-Gold, echte
    Reitkosten am Trainer, Anzahlung bei offenem AH). Danach evtl. Writs als Ware (AH-Preis vs. Kosten) und ein voller
    Gebiets-Index für Unterwegs-Gold (heute nur die Top-4-Stellen je Stufe aus `Data_Spots.lua`).
+
+## Tiry's Zentrale 6.4.0 (11.11., eigenes Berufsfenster + AH-Scan aktualisiert alles)
+Tiry (mit Screenshot von 6.3 im Spiel) wollte drei Dinge:
+- Bei „TZ“ soll Blizzards Fenster weg und ein eigenes kommen, statt beide nebeneinander.
+- Mehr Funktionen und Knöpfe, die in die Zentrale führen.
+- „Nach erneutem Aktualisieren waren in manchen Menüs wieder andere drin.“
+
+Umsetzung:
+- **Fenster-Technik:** siehe `ZENTRALE.md` („Neu in 6.4“).
+  - `ProfessionsFrame` nie verstecken (sein OnHide ruft `CloseTradeSkill`), nur Alpha 0 + Scale 0.001.
+  - Fenster-OnHide (× / ESC) → `HideUIPanel(ProfessionsFrame)`.
+- **Bug aus dem Screenshot:**
+  - Die Reiter-Leiste (364 px) brach mit der breiteren Spielschrift um, „Optionen“ lag dann über dem Inhalt.
+  - Jetzt ist sie 574 px breit, und der Inhalt hängt an der echten Leistenhöhe.
+  - Menü-Knöpfe je nach Platz: Text + Symbol → nur Text → nur Symbole.
+- **AH-Prüfung** (Agent + eigene Kontrolle): 7 Ursachen gefunden, Behebung siehe CHANGELOG 6.4.0. Specs in `spec/zentrale_pruefung_spec.lua` („AH-Scan aktualisiert wirklich alles“).
+- **Test `tests/check_layout.lua`:**
+  - Fensterbau, Blizzards Fenster unsichtbar + Hooks
+  - Liste, Kategorien, Favorit, Shift-Link
+  - Herstellen, Alle, Menge; Filter, Sortierung, Skill-Tipp, Menü-Links
+  - alle Reiter auf Layout (0 Probleme)
+  - WoW/TZ, Slash, ×, Verzaubern-Rückfall, verlinkter Beruf
+  - Vorschau: `previews/Zentrale_Berufsfenster_6.4.png`
+- **Nur im Spiel prüfbar:**
+  - ob Forever das Ausblenden per Alpha/Scale ohne Nebenwirkung schluckt (UIPanel-Layout anderer Fenster)
+  - `CraftRecipe` mit leerer Materialliste aus dem eigenen Knopf
+  - `hasAllInfo`-Verhalten beim Komplett-Scan
+  - Breite der Spielschrift
 
 ## Tiry's Zentrale 6.3.0 (11.11., Craftfenster am Berufsfenster)
 Tiry wollte ein Craftfenster mit allen Infos am Berufsfenster, umschaltbar oben wie bei TSM („WoW oder TZ“). Er möchte nicht alles in einem Menü haben, sondern den Beruf aufmachen und dort alles einstellen.

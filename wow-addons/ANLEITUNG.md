@@ -21,10 +21,13 @@
 Oben in der Mitte die **fünf Hauptpunkte**: **Start · Herstellen · Farmen · Handel · Mein Gold**. Darunter die Reiter des Hauptpunkts.
 Oben rechts: **Lupe** (alles durchsuchen), **?** (AH-Schule und Glossar), **Zahnrad** (Einstellungen), **AH scannen**.
 
-## Am Berufsfenster (neu in 6.3)
-Öffnest du einen Beruf, hängt rechts daneben das **Zentrale-Craftfenster** – du musst die Zentrale dafür nicht aufmachen.
-Oben über dem Berufsfenster schaltest du um: **WoW** = nur Blizzards Fenster, **TZ** = mit Zentrale-Fenster.
-- **Rezept:** Klick links ein Rezept an → Gewinn, Material („hast X“), Absatz und Empfehlung. „Einplanen“ setzt die empfohlene Menge auf die Craft-Liste.
+## Berufsfenster (neu in 6.4)
+Öffnest du einen Beruf, kommt statt Blizzards Fenster das **Berufsfenster der Zentrale**. Du musst die Zentrale dafür nicht aufmachen.
+Oben schaltest du um: **WoW** = Blizzards Fenster, **TZ** = Zentrale-Fenster. Die Wahl bleibt gespeichert.
+- **Links alle Rezepte:** Suche, Filter (Herstellbar, Skill-Up, Gewinn, Favoriten), Sortierung. Rechtsklick = Favorit, Shift-Klick = Link in den Chat.
+- **Oben:** Skill-Balken, **Skill-Tipp** (billigster nächster Skillpunkt), deine Berufe zum Umschalten und Knöpfe direkt in die Zentrale (Planer, Lernen?, Ergebnis, Preise, Verkäufe, Auktionen).
+- **Unten:** Menge, **Herstellen**, **Alle**, dazu **Nächstes craften** und **Einkauf**. Verzauberungen gehen über Blizzards Fenster (Knopf „Im WoW-Fenster verzaubern“).
+- **Rezept:** Gewinn, Material („hast X“), Absatz, Voraussetzungen und Empfehlung. „Einplanen“ setzt die empfohlene Menge auf die Craft-Liste.
 - **Top-Rezepte:** was gerade Gold bringt. Klick = im Berufsfenster anwählen, **+** = einplanen, „Alle in die Liste“ = ganze Liste + Einkaufsfenster.
 - **Liste:** deine Craft-Liste mit −/+/×. **Optionen:** Mindestgewinn, Menge, Filter.
 - Unten: **Nächstes craften** und **Einkauf**.
@@ -55,4 +58,4 @@ Was du als Nächstes lernen solltest, zeigt **Herstellen → „Was lernen?“**
 - Fachbegriffe erklärt **? → Glossar**.
 - Im **Kampf** kauft, verkauft und craftet das Addon nichts. Nach dem Kampf einfach nochmal klicken.
 - Tastenkürzel: Optionen → Tastaturbelegung → „Tiry's Zentrale“.
-- Befehle: `/tz` (Fenster), `/tz suche`, `/tz handel`, `/tz schnapp`, `/tz buch`, `/tz assistent`, `/tz wegpunkt` (Kartenpunkt löschen), `/tz leeren` (Craft-Liste leeren), `/tz cf` (Craftfenster am Berufsfenster an/aus), `/tz reset` (Fenster in die Mitte), `/tz fehler` (gespeicherte Fehler anzeigen).
+- Befehle: `/tz` (Fenster), `/tz suche`, `/tz handel`, `/tz schnapp`, `/tz buch`, `/tz assistent`, `/tz wegpunkt` (Kartenpunkt löschen), `/tz leeren` (Craft-Liste leeren), `/tz cf` (Berufsfenster TZ/WoW umschalten), `/tz reset` (Fenster in die Mitte), `/tz fehler` (gespeicherte Fehler anzeigen).

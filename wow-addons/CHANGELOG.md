@@ -1,5 +1,39 @@
 # Changelog – Tiry's Zentrale
 
+## 6.4.0 (11.11.2026)
+**Neu: eigenes Berufsfenster. Bei „TZ“ verschwindet Blizzards Fenster, und das Zentrale-Fenster kommt an seine Stelle statt daneben.**
+- **Links die Rezeptliste:**
+  - nach Kategorien sortiert (auf- und zuklappbar), in Blizzards Schwierigkeitsfarben
+  - mit [herstellbar], Gewinn je Craft und „2×“, wenn schon geplant
+  - Suche, Filter-Pillen **Herstellbar / Skill-Up / Gewinn / Favoriten**, Sortierung **Kategorie / Gewinn / Skill**
+  - Klick zeigt das Rezept, **Rechtsklick = Favorit** (wie bei Blizzard), **Shift-Klick = Link in den Chat**, Maus drüber zeigt den Item-Tooltip.
+- **Oben:**
+  - Berufs-Symbol, Name, **Skill-Balken**
+  - **Skill-Tipp**: das günstigste Rezept, das noch einen Punkt gibt (Klick zeigt es)
+  - Umschalter zwischen deinen Herstellungsberufen, **WoW | TZ**, Zentrale, Schließen
+- **Knöpfe direkt in die Zentrale:** Planer, Lernen?, Ergebnis, Preise, Verkäufe, Auktionen. Ein Klick öffnet die passende Seite.
+- **Rechts die vier Reiter** wie in 6.3 (Rezept, Top-Rezepte, Liste, Optionen), jetzt breiter. Im Reiter „Rezept“ stehen zusätzlich **„Erfordert: …“** (grün = da, rot = fehlt) und die Abklingzeit.
+- **Unten selbst herstellen:**
+  - Menge −/+ (bis „herstellbar“), **Herstellen**, **Alle (N)**, dazu wie bisher **Nächstes craften** und **Einkauf**.
+  - Verzauberungen brauchen Blizzards Gegenstands-Auswahl. Der Knopf heißt dann „Im WoW-Fenster verzaubern“ und schaltet nur für diesen Besuch auf Blizzards Fenster.
+- **× oder ESC** schließt den Beruf wie bei Blizzard. Fremde Berufs-Links, Gildenberufe und NPC-Crafting zeigen immer Blizzards Fenster.
+- **Behoben:** Der Reiter „Optionen“ rutschte im Spiel in eine zweite Zeile und überdeckte Text, weil die Spielschrift breiter ist als gedacht. Das Fenster ist jetzt breit genug. Knopfreihen weichen bei Platzmangel auf eine kürzere Form aus.
+
+**Behoben: „Nach erneutem Aktualisieren stehen andere Sachen drin“.** Jede Datenänderung nach dem Scan zeichnet jetzt neu.
+- **Preisverlauf:**
+  - Tagespreise werden höchstens einmal pro Minute geschrieben. Das spätere Schreiben hat bisher **nichts neu gezeichnet**.
+  - Der Marktwert (Median) kam deshalb erst beim nächsten Neuzeichnen in Gewinn, Mindestgewinn-Filter, Schnäppchen und Trends an.
+  - Jetzt meldet sich das Schreiben, und alle offenen Ansichten rechnen sofort neu.
+- **Komplett-Scan wird erst übernommen, wenn alles geladen ist:**
+  - Blizzard liefert Verkäufer- und Item-Daten nach. Fehlen sie noch, liest die Zentrale nach 4 s nochmal (höchstens 3×) und fordert die fehlenden Daten an.
+  - Vorher hing Absatz bzw. „Ladenhüter“ davon ab, was dein Spiel gerade zufällig im Speicher hatte. Deine eigenen Angebote konnten als Schnäppchen auftauchen.
+- **„Scan fertig!“ erst, wenn Auctionator wirklich fertig ist**, nicht schon bei der ersten Preis-Meldung einer Suche mitten im Scan.
+- **Der Schnell-Scan sagt ehrlich**, dass Absatz, Schnäppchen und Unterboten vom letzten Komplett-Scan bleiben. Der Komplett-Scan ist nur alle 15 Min. erlaubt.
+- **Exakte Einstellgebühr:** Sie kommt oft erst ein paar Sekunden nach der Schätzung. Dann wird jetzt einmal neu gerechnet.
+- **Sonstiges:**
+  - Das Einkaufsfenster rechnet bei neuem Absatz neu.
+  - Bei Gleichstand gilt eine feste Reihenfolge (Taschen-Check, Schnäppchen, Planen). Nichts springt mehr zufällig.
+
 ## 6.3.0 (11.11.2026)
 **Neu: Craftfenster direkt am Berufsfenster. Beruf öffnen – alles dort sehen und einstellen, ohne die Zentrale aufzumachen.**
 - **Umschalter „Ansicht: WoW | TZ“** oben rechts über dem Berufsfenster (ähnlich wie bei TSM). **TZ** = Blizzards Fenster mit dem Zentrale-Fenster rechts daneben, **WoW** = nur Blizzards Fenster. Die Wahl bleibt gespeichert. Zusätzlich `/tz craftfenster` (kurz `/tz cf`) und das × im Craftfenster.

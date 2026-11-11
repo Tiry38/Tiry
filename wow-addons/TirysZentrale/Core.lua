@@ -136,7 +136,7 @@ local DEFAULTS = {
   zoneTipMin = 2000,    -- ... nur wenn das Gebiet mindestens so viel je Stück bringt (Kupfer, Summe der besten Funde)
   -- Craft-Filter: Empfehlung wächst mit jedem Level; die Faktoren sind dein persönlicher Stil (1 = Empfehlung)
   craft = { marginFactor = 1, profitFactor = 1, onlySafe = true, onlySkill = false, perRecipe = 2, freshOnly = true, skipSlow = true },
-  craftPanel = { mode = "tz", tab = "recipe" }, -- Craftfenster am Berufsfenster: "tz" = an, "wow" = nur Blizzard
+  craftPanel = { mode = "tz", tab = "recipe", sort = "cat", filter = {}, collapsed = {} }, -- eigenes Berufsfenster: "tz" = TZ-Fenster, "wow" = Blizzard
   shopAutoOpen = true,  -- Einkaufsfenster beim Öffnen des AH zeigen, wenn noch etwas fehlt
   ahCut = 5,          -- Prozent, den das Auktionshaus beim Verkauf einbehält
   snipeAlert = true,  -- nach jedem Komplett-Scan Schnäppchen (unter Händler-/Marktwert) im Chat melden

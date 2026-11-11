@@ -74,7 +74,10 @@ end)
 function D.List()
   local list = {}
   for _, d in pairs(D.found) do list[#list + 1] = d end
-  table.sort(list, function(a, b) return a.save > b.save end)
+  table.sort(list, function(a, b)
+    if a.save ~= b.save then return a.save > b.save end
+    return (a.itemID or a.id or 0) < (b.itemID or b.id or 0)
+  end)
   return list
 end
 

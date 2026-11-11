@@ -474,7 +474,8 @@ function Shop.Toggle()
   if win and win:IsShown() then win:Hide() else Shop.Show() end
 end
 
-for _, msg in ipairs({ "SHOP_CHANGED", "AH_STATE", "PRICES_UPDATED", "ITEMS_UPDATED", "RECIPES_SCANNED", "MERCHANT_SCANNED" }) do
+for _, msg in ipairs({ "SHOP_CHANGED", "AH_STATE", "PRICES_UPDATED", "ITEMS_UPDATED", "RECIPES_SCANNED", "MERCHANT_SCANNED",
+  "DEMAND_UPDATED", "HISTORY_UPDATED", "DEPOSITS_LEARNED" }) do
   ns.Listen(msg, function()
     if not (win and win:IsShown()) and msg ~= "AH_STATE" then return end -- zu: nichts rechnen (Öffnen zeichnet neu)
     ns.Debounce("shopwin", (M.ahOpen and 1) or 0.2, Shop.Refresh)

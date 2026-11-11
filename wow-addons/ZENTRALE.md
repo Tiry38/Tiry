@@ -43,7 +43,26 @@ Befehle: `/tz` (oder `/zentrale`, `/gold`), `/tz suche`, `/tz assistent`, `/tz w
 - **„Nicht unter“** = max(Materialkosten, Händlerpreis) pro Stück plus Anzahlungs-Risiko, geteilt durch (1 − AH-Anteil).
 - **Anzahlung:** mindestens **1 Kupfer** je Angebot (Blizzard-Hotfix 10.11.2026, vorher 1 Silber – [Quelle](https://news.blizzard.com/en-us/article/24315281/wow-forever-hotfixes-november-10-2026)), bei teurer Ware mehr, bei Verkauf zurück, bei Ablauf weg. Bei offenem AH nimmt das Addon Blizzards exakten Betrag (`C_AuctionHouse.CalculateCommodityDeposit` / `CalculateItemDeposit`).
 
-## Neu in 6.3: Craftfenster am Berufsfenster
+## Neu in 6.4: eigenes Berufsfenster (TZ-Modus)
+- **Fenster:** `UI/CraftPanel.lua` baut `TirysZentraleCraftWindow` (960×640, Kind von UIParent, Strata HIGH, verschiebbar, Position in `settings.craftPanel.point`).
+- **Blizzards Fenster im TZ-Modus:**
+  - `ProfessionsFrame` wird **nicht geschlossen**, denn sein OnHide beendet den Beruf.
+  - Stattdessen macht `SetAlpha(0)` + `SetScale(0.001)` es unsichtbar. Hooks auf SetAlpha/SetScale halten diesen Zustand.
+  - WoW-Modus, Beruf zu oder ein verlinkter, Gilden- bzw. NPC-Beruf stellen Deckkraft und Größe wieder her.
+- **Daten aus `C_TradeSkillUI`:**
+  - Liste aus `GetAllRecipeIDs` (Ersatz: `GetFilteredRecipeIDs`)
+  - Kategorien aus `GetCategoryInfo`, außerdem `GetCraftableCount`, `GetRecipeRequirements`, `GetRecipeCooldown`
+  - Favoriten über `SetRecipeFavorite`
+  - Herstellen wie bisher mit `CraftRecipe(id, n, {}, nil, nil, false)`
+- **Verzaubern:** nur für diesen Besuch Blizzards Fenster (`P.tempWow`).
+- **Einstellungen:** `craftPanel = { mode, tab, sort, filter, collapsed, last, point }`.
+
+## AH-Scan: alles aktuell (6.4)
+- `HISTORY_UPDATED` (PriceString `RecordAndTell`) und `DEPOSITS_LEARNED` (Market `exactDeposit`) lassen Hauptfenster, Berufsfenster und Einkaufsfenster neu rechnen.
+- `Demand.ReadReplicate` liest Rückgabe 18 (`hasAllInfo`). Fehlen Daten, wird nichts übernommen. Stattdessen wird nach `D.RETRY_DELAY` (4 s) erneut gelesen, höchstens `D.MAX_RETRIES`-mal (3).
+- `M.scanRequested` endet erst, wenn `M.FullScanBusy()` falsch ist.
+
+## Neu in 6.3: Craftfenster am Berufsfenster (in 6.4 durch das eigene Fenster ersetzt)
 - `UI/CraftPanel.lua` dockt rechts an Blizzards `ProfessionsFrame` an (lädt mit `Blizzard_Professions` und wird über `ADDON_LOADED` bzw. `TRADE_SKILL_SHOW` angehängt). Es ist ein Kind des Berufsfensters, geht also mit ihm auf und zu. Es sitzt 48 px rechts versetzt, hinter Blizzards Berufs-Reitern.
 - Umschalter **WoW | TZ** über dem Fenster. Die Wahl steht in `settings.craftPanel.mode` (Standard „tz“), der zuletzt offene Reiter in `settings.craftPanel.tab`. Umschalten geht auch mit `/tz craftfenster` bzw. `/tz cf`.
 - Das gewählte Rezept kommt aus Blizzards Ereignis `ProfessionsRecipeListMixin.Event.OnRecipeSelected`. Ersatzweise wird `ProfessionsFrame.CraftingPage.SchematicForm:GetRecipeInfo()` gelesen. Alle Zahlen kommen aus denselben Funktionen wie im Craft-Planer (`S.RecipeProfit`, `S.MatCost`, `CraftBook.Suggest`, `Demand`, `page.Entries`, `FillQueue`, `CraftNext`). Es gibt also keine zweite Rechnung.

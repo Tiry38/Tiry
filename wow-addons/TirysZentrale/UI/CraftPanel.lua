@@ -1,7 +1,8 @@
--- Tiry's Zentrale – Craftfenster am Berufsfenster: Beruf öffnen, alles dort sehen und einstellen.
--- Oben am Berufsfenster schaltest du um: "WoW" = nur Blizzards Fenster, "TZ" = mit diesem Zentrale-Fenster daneben.
--- Reiter: Rezept (das links gewählte, mit Gewinn/Material/Absatz), Top-Rezepte (was Gold bringt), Liste
--- (Craft-Warteschlange), Optionen (Mindestgewinn, Filter, Menge). Alles nutzt dieselben Daten wie der Craft-Planer.
+-- Tiry's Zentrale – eigenes Berufsfenster (TZ-Modus): ersetzt Blizzards Berufsfenster, solange ein Beruf offen ist.
+-- Umschalter "WoW | TZ": WoW = Blizzards Fenster, TZ = dieses Fenster. Blizzards Fenster bleibt dabei offen, aber
+-- unsichtbar (Alpha 0, winzig) – sonst schließt das Spiel den Beruf. Links: Rezeptliste (Kategorien, Suche, Filter,
+-- Sortierung, Favoriten, Gewinn je Rezept), rechts: Rezept (Gewinn/Material/Absatz), Top-Rezepte, Liste, Optionen,
+-- unten Herstellen. Knöpfe springen direkt in die Menüs der Zentrale. Alle Zahlen wie im Craft-Planer.
 local _, ns = ...
 local UI = ns.UI
 local C = UI.C
@@ -12,8 +13,7 @@ local R = ns.Recipes
 local P = {}
 ns.CraftPanel = P
 
-local W, PAD, HEAD, FOOT = 400, 18, 124, 70
-local IW = W - 2 * PAD
+local PAD = 18
 local TABS = {
   { value = "recipe", label = "Rezept" },
   { value = "top", label = "Top-Rezepte" },
@@ -27,27 +27,21 @@ for k, l in pairs(ns.Demand.LABEL) do
 end
 local DIFF = { [0] = { "orange", { 1, 0.5, 0.25 } }, [1] = { "gelb", { 1, 0.9, 0.2 } }, [2] = { "grün", { 0.3, 0.85, 0.35 } }, [3] = { "grau", { 0.6, 0.6, 0.6 } } }
 
+-- Blizzard-Berufs-API abgesichert: fehlt eine Funktion im Client, fällt nur das Detail weg
+local TS = function(fn, ...)
+  local f = C_TradeSkillUI and C_TradeSkillUI[fn]
+  if not f then return nil end
+  local ok, a, b, c = pcall(f, ...)
+  if ok then return a, b, c end
+end
 local function cfg() return ns.settings.craftPanel end
 local function craftCfg() return ns.settings.craft end
 local function page() return UI.pages.recipes end
 local function queue() ns.char.queue = ns.char.queue or {} return ns.char.queue end
 local function hidden() ns.char.hiddenRecipes = ns.char.hiddenRecipes or {} return ns.char.hiddenRecipes end
 
--- Beruf des offenen Fensters (Schlüssel wie "LEATHERWORKING") + Anzeige
+-- Beruf des offenen Fensters (Schlüssel wie "LEATHERWORKING")
 local function profKey() return S.openProfKey and S.openProfKey() end
-local function profLine()
-  local info
-  if C_TradeSkillUI and C_TradeSkillUI.GetBaseProfessionInfo then
-    local ok, i = pcall(C_TradeSkillUI.GetBaseProfessionInfo)
-    if ok then info = i end
-  end
-  if not (info and info.professionName) then return "Berufsfenster" end
-  local s = info.professionName
-  if info.skillLevel and info.maxSkillLevel and info.maxSkillLevel > 0 then
-    s = s .. "  ·  Skill " .. info.skillLevel .. "/" .. info.maxSkillLevel
-  end
-  return s
-end
 
 -- Das im Berufsfenster gewählte Rezept -> unsere Rezeptdaten
 local function currentRecipe()
@@ -140,6 +134,10 @@ local function buildRecipe(t, cw)
   hero.sub:SetPoint("TOPLEFT", hero.name, "BOTTOMLEFT", 0, -5)
   hero.sub:SetWidth(cw - 90)
   hero.sub:SetWordWrap(false)
+  hero.req = UI.Text(hero, 12, "regular", C.muted)
+  hero.req:SetPoint("TOPLEFT", hero.sub, "BOTTOMLEFT", 0, -4)
+  hero.req:SetWidth(cw - 90)
+  hero.req:SetWordWrap(false)
   hero.profit = UI.Text(hero, 22, "bold", C.text)
   hero.profit:SetPoint("BOTTOMLEFT", 18, 16)
   hero.plabel = UI.Text(hero, 12, "semibold", C.dim)
@@ -212,7 +210,7 @@ local function fillRecipe(t, cw)
     t.empty:ClearAllPoints()
     t.empty:SetPoint("TOPLEFT", 10, -10)
     t.empty:SetText(liveID and "Für dieses Rezept hat die Zentrale keine Daten (z. B. Verzauberungen ohne Gegenstand)."
-      or "Wähle links im Berufsfenster ein Rezept – hier siehst du dann Gewinn, Material und Absatz.")
+      or "Wähle links ein Rezept – hier siehst du dann Gewinn, Material und Absatz.")
     return math.ceil(t.empty:GetStringHeight()) + 20
   end
   local profit, revenue, cost, unknown = S.RecipeProfit(r)
@@ -223,8 +221,10 @@ local function fillRecipe(t, cw)
   local q = UI.QUALITY[item.quality or 1] or UI.QUALITY[1]
   h.name:SetText(UI.Hex(q) .. r.name .. "|r")
   local pg = page()
-  local can = pg and pg.Craftable and pg.Craftable(r) or 0
-  local d = DIFF[R.Difficulty(r) or 3] or DIFF[3]
+  local can = liveID and TS("GetCraftableCount", liveID)
+  if type(can) ~= "number" then can = pg and pg.Craftable and pg.Craftable(r) or 0 end
+  local li = liveID and TS("GetRecipeInfo", liveID)
+  local d = DIFF[(li and li.relativeDifficulty) or R.Difficulty(r) or 3] or DIFF[3]
   h.sub:SetText(string.format("ergibt %s×  ·  herstellbar: %d  ·  %s%s|r", R.QtyText(r), can, UI.Hex(d[2]), d[1]))
   if profit then
     h.profit:SetText((profit >= 0 and (UI.NEON_HEX .. "+|r") or "") .. ns.Money(profit))
@@ -232,10 +232,14 @@ local function fillRecipe(t, cw)
     h.profit:SetText("|cff8a9a94kein AH-Preis|r")
   end
   h.plabel:SetShown(profit ~= nil)
+  local req = P.ReqText(liveID)
+  h.req:SetText(req or "")
+  local hh = req and 136 or 118
+  h:SetHeight(hh)
   local cls = ns.Demand.Class(r.out)
   local lab = ns.Demand.LABEL[cls] or ns.Demand.LABEL.unknown
   h.chip:Set(lab[1], DEMAND_COL[cls] or C.dim)
-  y = y + 118 + 12
+  y = y + hh + 12
 
   -- Kennzahlen als Glas-Pillen
   local perDay = ns.Demand.PerDay(r.out)
@@ -543,7 +547,7 @@ local function buildSetup(t, cw)
   t.unhide:SetScript("OnClick", function() ns.char.hiddenRecipes = {} refresh() end)
   t.h4 = section(t, "Ansicht")
   t.view = UI.Para(t, 12, C.muted, cw)
-  t.view:SetText("Oben am Berufsfenster umschalten: |cff39ff6bWoW|r = nur Blizzards Fenster, |cff39ff6bTZ|r = mit diesem Fenster. Die Wahl bleibt gespeichert.")
+  t.view:SetText("Oben am Berufsfenster umschalten: |cff39ff6bWoW|r = nur Blizzards Fenster, |cff39ff6bTZ|r = eigenes Fenster der Zentrale statt Blizzards. Die Wahl bleibt gespeichert.")
   t.open = UI.Button(t, "Ganze Zentrale öffnen", "soft", 220, 32, "home")
   t.open:SetScript("OnClick", function() UI.Show("recipes") end)
 end
@@ -593,88 +597,737 @@ local BUILD = { recipe = buildRecipe, top = buildTop, queue = buildQueue, setup 
 local FILL = { recipe = fillRecipe, top = fillTop, queue = fillQueue, setup = fillSetup }
 
 ----------------------------------------------------------------------------
+-- Daten aus dem offenen Beruf (alles abgesichert: fehlt eine Funktion im Client, fällt nur das Detail weg)
+----------------------------------------------------------------------------
+
+local function baseInfo() return TS("GetBaseProfessionInfo") end
+
+-- "Erfordert: Kochstelle" (grün = da, rot = fehlt) + Abklingzeit
+function P.ReqText(liveID)
+  if not liveID then return nil end
+  local parts = {}
+  local req = TS("GetRecipeRequirements", liveID)
+  if type(req) == "table" then
+    for _, q in ipairs(req) do
+      if q.name then parts[#parts + 1] = (q.met and "|cff61eb8f" or "|cffff6b81") .. q.name .. "|r" end
+    end
+  end
+  local s = #parts > 0 and ("Erfordert: " .. table.concat(parts, ", ")) or nil
+  local cd = TS("GetRecipeCooldown", liveID)
+  if type(cd) == "number" and cd > 0 then
+    local t = cd >= 3600 and string.format("%d Std.", math.floor(cd / 3600 + 0.5)) or string.format("%d Min.", math.ceil(cd / 60))
+    s = (s and (s .. "  ·  ") or "") .. "|cffffd24aAbklingzeit " .. t .. "|r"
+  end
+  return s
+end
+
+-- Rezeptliste des offenen Berufs: gelernt, mit Kategorie, Farbe, herstellbar, Gewinn
+local function liveIDs()
+  local ids = TS("GetAllRecipeIDs") or TS("GetFilteredRecipeIDs") or {}
+  return ids
+end
+
+local function readEntries()
+  local list, cats, catOrder = {}, {}, {}
+  for _, id in ipairs(liveIDs()) do
+    local info = TS("GetRecipeInfo", id)
+    if info and info.learned ~= false and not info.isRecraft and info.name then
+      local catID = info.categoryID or 0
+      local cat = cats[catID]
+      if not cat then
+        local ci = catID ~= 0 and TS("GetCategoryInfo", catID)
+        cat = { id = catID, name = (ci and ci.name) or "Rezepte", order = (ci and ci.uiOrder) or (#catOrder + 1000), first = #catOrder + 1 }
+        cats[catID] = cat
+        catOrder[#catOrder + 1] = cat
+      end
+      local r = R.FromLive and R.FromLive(id) or R.Get(id)
+      local profit = r and S.RecipeProfit(r)
+      local can = TS("GetCraftableCount", id)
+      if type(can) ~= "number" then
+        local pg = page()
+        can = (r and pg and pg.Craftable) and pg.Craftable(r) or (info.numAvailable or 0)
+      end
+      list[#list + 1] = {
+        id = id, name = info.name, icon = info.icon, diff = info.relativeDifficulty or 3, cat = cat,
+        skillUp = (info.relativeDifficulty or 3) <= 1 and info.canSkillUp ~= false,
+        fav = info.favorite or TS("IsRecipeFavorite", id) or false, enchant = info.isEnchantingRecipe and true or false,
+        r = r, profit = profit, can = can, pos = #list + 1,
+      }
+    end
+  end
+  table.sort(catOrder, function(a, b)
+    if a.order ~= b.order then return a.order < b.order end
+    return a.first < b.first
+  end)
+  return list, catOrder
+end
+
+-- Billigster Skill-Punkt: orange = sicher +1, gelb = meistens. Bevorzugt orange, dann geringste Nettokosten.
+local function skillTip(list)
+  local best, bestScore
+  for _, e in ipairs(list) do
+    if e.diff <= 1 and e.skillUp then
+      local net = e.profit and -e.profit or (e.r and select(3, S.RecipeProfit(e.r))) or 1e9
+      local score = (e.diff == 0 and 0 or 1e8) + net
+      if not bestScore or score < bestScore then best, bestScore = e, score end
+    end
+  end
+  return best
+end
+
+----------------------------------------------------------------------------
 -- Fenster
 ----------------------------------------------------------------------------
-local function build(PF)
-  local f = CreateFrame("Frame", "TirysZentraleCraftPanel", PF)
-  P.frame = f
-  f:SetWidth(W)
-  -- rechts neben dem Berufsfenster, hinter Blizzards Reitern (die ragen ~44 px heraus)
-  f:SetPoint("TOPLEFT", PF, "TOPRIGHT", 48, 0)
-  f:SetPoint("BOTTOMLEFT", PF, "BOTTOMRIGHT", 48, 0)
+local WW, WH = 960, 640
+local LW = 330                     -- linke Spalte (Rezeptliste)
+local RX = PAD + LW + 22           -- rechte Spalte
+local RW = WW - RX - PAD           -- Breite rechts
+local HEADH, FOOTH = 112, 66
+local ROWH, CATH = 32, 28
+local LINKS = {
+  { "recipes", "Craft-Planer", "flask", "Alle Berufe planen, Liste erstellen", "Planer" },
+  { "advisor", "Was lernen?", "star", "Welche Rezepte sich zu lernen lohnen", "Lernen?" },
+  { "results", "Ergebnis", "chart", "Was deine Crafts wirklich gebracht haben", "Ergebnis" },
+  { "market", "Preise", "coins", "Preise, Schnäppchen, Markt", "Preise" },
+  { "ledger", "Verkaufsbuch", "book", "Was du verkauft hast", "Verkäufe" },
+  { "auctions", "Meine Auktionen", "receipt", "Deine Auktionen im AH", "Auktionen" },
+}
+
+local function autoWidth(b, pad)
+  local w = math.ceil(b.text:GetStringWidth()) + (b.icon and 46 or 30) + (pad or 0)
+  b:SetWidth(w)
+  if b.glow then b.glow:SetWidth(w * 1.25) end
+  return w
+end
+
+local function special()
+  return TS("IsTradeSkillLinked") or TS("IsTradeSkillGuild") or TS("IsNPCCrafting")
+end
+
+-- Blizzards Fenster unsichtbar machen, ohne es zu schließen (Schließen beendet den Beruf)
+local hideBlizz, guard = false, false
+local function blizzVisible(show)
+  local PF = _G.ProfessionsFrame
+  if not PF then return end
+  if show == not hideBlizz then return end
+  hideBlizz = not show
+  guard = true
+  if show then
+    PF:SetAlpha(1)
+    PF:SetScale(P.pfScale or 1)
+  else
+    P.pfScale = PF:GetScale() or 1
+    PF:SetAlpha(0)
+    PF:SetScale(0.001)
+  end
+  guard = false
+end
+
+local list -- Rezeptliste-Zustand
+
+local function rowTip(row)
+  local e = row.e
+  if not e then return end
+  GameTooltip:SetOwner(row, "ANCHOR_RIGHT")
+  local out = e.r and e.r.out
+  if out and GameTooltip.SetItemByID then pcall(GameTooltip.SetItemByID, GameTooltip, out) else GameTooltip:AddLine(e.name) end
+  GameTooltip:AddLine(" ")
+  GameTooltip:AddLine("Klick: anzeigen  ·  Rechtsklick: Favorit  ·  Shift-Klick: in den Chat", 0.6, 0.67, 0.64, true)
+  GameTooltip:Show()
+end
+
+local function listRow(holder, i)
+  local row = list.rows[i]
+  if row then return row end
+  row = UI.SafeButton(holder)
+  row:SetSize(LW - 14, ROWH)
+  row:RegisterForClicks("LeftButtonUp", "RightButtonUp")
+  row.sel = UI.PillShape(row, ROWH, 0, false)
+  row.sel.edge:SetGradient(UI.GRAD_EDGE, 0.95)
+  row.sel.body:SetGradientV(UI.GLASS.pillHi[1], UI.GLASS.pillHi[2], 1)
+  row.hl = row:CreateTexture(nil, "BACKGROUND")
+  row.hl:SetTexture(UI.TEX.glow)
+  row.hl:SetAllPoints()
+  row.hl:SetBlendMode("ADD")
+  row.hl:SetVertexColor(C.teal[1], C.teal[2], C.teal[3], 0)
+  row.icon = UI.ItemIcon(row, 24)
+  row.icon:SetPoint("LEFT", 6, 0)
+  row.name = UI.Text(row, 12, "semibold", C.text)
+  row.name:SetPoint("LEFT", 38, 0)
+  row.name:SetWordWrap(false)
+  row.profit = UI.Text(row, 11, "semibold", C.muted)
+  row.profit:SetPoint("RIGHT", -10, 0)
+  row.profit:SetJustifyH("RIGHT")
+  row.star = row:CreateTexture(nil, "OVERLAY")
+  row.star:SetTexture(UI.Icon("star"))
+  row.star:SetSize(11, 11)
+  row.star:SetPoint("CENTER", row.icon, "TOPRIGHT", -1, -1)
+  row.star:SetVertexColor(1, 0.85, 0.3, 1)
+  row:SetScript("OnEnter", function(self) self.hl:SetAlpha(0.10) rowTip(self) end)
+  row:SetScript("OnLeave", function(self) self.hl:SetAlpha(0) GameTooltip:Hide() end)
+  row:SetScript("OnClick", function(self, button)
+    local e = self.e
+    if not e then return end
+    if button == "RightButton" then
+      if C_TradeSkillUI and C_TradeSkillUI.SetRecipeFavorite then pcall(C_TradeSkillUI.SetRecipeFavorite, e.id, not e.fav) end
+      e.fav = not e.fav
+      P.RefreshList()
+      return
+    end
+    if IsShiftKeyDown() then
+      local link = TS("GetRecipeLink", e.id) or (e.r and ns.Item(e.r.out).link)
+      if link and ChatEdit_InsertLink then ChatEdit_InsertLink(link) end
+      return
+    end
+    P.Select(e.id)
+  end)
+  list.rows[i] = row
+  return row
+end
+
+local function catRow(holder, i)
+  local c = list.cats[i]
+  if c then return c end
+  c = UI.SafeButton(holder)
+  c:SetSize(LW - 14, CATH)
+  c.text = UI.Text(c, 12, "bold", C.amber)
+  c.text:SetPoint("LEFT", 22, -2)
+  c.arrow = UI.Text(c, 13, "bold", C.teal)
+  c.arrow:SetPoint("LEFT", 6, -2)
+  c.count = UI.Text(c, 11, "regular", C.dim)
+  c.count:SetPoint("LEFT", c.text, "RIGHT", 8, 0)
+  c.line = UI.Hairline(c, C.teal, 0.28)
+  c.line:SetPoint("LEFT", c.count, "RIGHT", 10, 0)
+  c.line:SetPoint("RIGHT", c, "RIGHT", -6, -2)
+  c:SetScript("OnClick", function(self)
+    local col = cfg().collapsed
+    col[self.key] = not col[self.key] or nil
+    P.RefreshList()
+  end)
+  list.cats[i] = c
+  return c
+end
+
+local function matchesFilter(e, q)
+  local f = cfg().filter
+  if q ~= "" and not e.name:lower():find(q, 1, true) then return false end
+  if f.can and (e.can or 0) <= 0 then return false end
+  if f.skill and not e.skillUp then return false end
+  if f.profit and not (e.profit and e.profit > 0) then return false end
+  if f.fav and not e.fav then return false end
+  return true
+end
+
+-- für Tests: die gebauten Listenzeilen
+function P._rows() return list and list.rows or {} end
+function P._cats() return list and list.cats or {} end
+
+function P.RefreshList()
+  local win = P.win
+  if not (win and win:IsShown()) then return end
+  local q = (list.query or ""):lower()
+  local sort = cfg().sort or "cat"
+  local holder = win.listContent
+  local y, nr, nc = 0, 0, 0
+  local shown = {}
+  for _, e in ipairs(list.entries) do if matchesFilter(e, q) then shown[#shown + 1] = e end end
+  local function placeRow(e)
+    nr = nr + 1
+    local row = listRow(holder, nr)
+    row.e = e
+    row:ClearAllPoints() row:SetPoint("TOPLEFT", 0, -y) row:Show()
+    local d = DIFF[e.diff] or DIFF[3]
+    row.icon:SetItem(e.r and e.r.out or 0)
+    if e.icon and row.icon.icon then row.icon.icon:SetTexture(e.icon) end
+    local pl = e.r and plannedFor(e.r) or 0
+    local tail = ((e.can or 0) > 0 and ("  |cff9fb0aa[" .. e.can .. "]|r") or "") .. (pl > 0 and ("  " .. UI.NEON_HEX .. pl .. "×|r") or "")
+    local pw = 0
+    if e.profit then
+      row.profit:SetText((e.profit >= 0 and "|cff61eb8f+" or "|cffff6b81-") .. ns.Money(math.abs(e.profit)) .. "|r")
+      pw = math.ceil(row.profit:GetStringWidth()) + 14
+    else
+      row.profit:SetText("")
+    end
+    UI.FitText(row.name, UI.Hex(d[2]) .. e.name .. "|r" .. tail, LW - 14 - 38 - 10 - pw)
+    row.name:SetWidth(LW - 14 - 38 - 10 - pw)
+    row.star:SetShown(e.fav and true or false)
+    local sel = e.id == P.recipeID
+    row.sel.edge:SetShown(sel) row.sel.body:SetShown(sel)
+    y = y + ROWH + 2
+  end
+  if sort == "cat" and q == "" then
+    local byCat = {}
+    for _, e in ipairs(shown) do byCat[e.cat] = byCat[e.cat] or {} table.insert(byCat[e.cat], e) end
+    for _, cat in ipairs(list.catOrder) do
+      local es = byCat[cat]
+      if es then
+        nc = nc + 1
+        local c = catRow(holder, nc)
+        c.key = cat.name
+        local closed = cfg().collapsed[cat.name]
+        c.text:SetText(cat.name)
+        c.arrow:SetText(closed and "+" or "–")
+        c.count:SetText(#es)
+        c:ClearAllPoints() c:SetPoint("TOPLEFT", 0, -y) c:Show()
+        y = y + CATH + 2
+        if not closed then for _, e in ipairs(es) do placeRow(e) end end
+        y = y + 4
+      end
+    end
+  else
+    if sort == "profit" then
+      table.sort(shown, function(a, b)
+        local pa, pb = a.profit or -1e12, b.profit or -1e12
+        if pa ~= pb then return pa > pb end
+        return a.pos < b.pos
+      end)
+    elseif sort == "skill" then
+      table.sort(shown, function(a, b)
+        if a.diff ~= b.diff then return a.diff < b.diff end
+        return a.pos < b.pos
+      end)
+    end
+    for _, e in ipairs(shown) do placeRow(e) end
+  end
+  for i = nr + 1, #list.rows do list.rows[i]:Hide() end
+  for i = nc + 1, #list.cats do list.cats[i]:Hide() end
+  win.listEmpty:SetShown(#shown == 0)
+  if #shown == 0 then
+    win.listEmpty:SetText(#list.entries == 0 and "Beruf wird gelesen …" or "Kein Rezept passt zu Suche/Filter.")
+    y = 40
+  end
+  holder:SetHeight(y + 6)
+  if win.listScroll.UpdateBar then win.listScroll.UpdateBar() end
+  win.listInfo:SetText(string.format("%d Rezepte%s", #shown, #shown ~= #list.entries and (" von " .. #list.entries) or ""))
+end
+
+-- Kopf: Beruf, Skill-Balken, Skill-Tipp
+local function refreshHead()
+  local win = P.win
+  local info = baseInfo()
+  local name = info and info.professionName or "Beruf"
+  win.title:SetText(UI.GradText(name, C.amber, C.teal))
+  local tex = TS("GetTradeSkillTexture") or (info and info.icon)
+  if tex then win.picon.icon:SetTexture(tex) end
+  local lvl, max = info and info.skillLevel, info and info.maxSkillLevel
+  if lvl and max and max > 0 then
+    win.skill:SetText(string.format("Skill |cffffffff%d|r / %d", lvl, max))
+    win.bar.fill:SetWidth(math.max(2, win.bar:GetWidth() * math.min(lvl / max, 1)))
+    win.bar:Show()
+  else
+    win.skill:SetText("") win.bar:Hide()
+  end
+  local tip = skillTip(list.entries)
+  win.tip.e = tip
+  if tip then
+    local d = DIFF[tip.diff] or DIFF[1]
+    UI.FitText(win.tip.text, "Skill-Tipp: " .. UI.Hex(d[2]) .. tip.name .. "|r", 300)
+    win.tip:SetWidth(math.ceil(win.tip.text:GetStringWidth()) + 30)
+    win.tip:Show()
+  else
+    win.tip:Hide()
+  end
+  -- Berufe umschalten (nur, wenn du mehrere Herstellungsberufe hast)
+  local key = profKey()
+  if win.profSeg then win.profSeg:Select(key) end
+end
+
+-- Herstellen-Leiste unten rechts
+local function refreshCraft()
+  local win = P.win
+  local id = P.recipeID
+  local e
+  for _, x in ipairs(list.entries) do if x.id == id then e = x break end end
+  local can = e and e.can or 0
+  local cb = win.craftBar
+  cb.count = math.max(1, math.min(cb.count or 1, math.max(can, 1)))
+  cb.num:SetText(cb.count)
+  local enchant = e and e.enchant
+  cb.make:SetLabel(enchant and "Im WoW-Fenster verzaubern" or "Herstellen")
+  autoWidth(cb.make)
+  cb.make:SetEnabled(e ~= nil and (enchant or can > 0))
+  cb.all:SetLabel("Alle (" .. can .. ")")
+  autoWidth(cb.all)
+  cb.all:SetEnabled(e ~= nil and can > 0 and not enchant)
+  cb.all:SetShown(not enchant)
+  cb.minus:SetShown(not enchant) cb.plus:SetShown(not enchant) cb.num:SetShown(not enchant) cb.numBg:SetShown(not enchant)
+end
+
+function P.Craft(n)
+  if ns.CombatBlocked and ns.CombatBlocked() then return end
+  local id = P.recipeID
+  if not id then return end
+  local info = TS("GetRecipeInfo", id)
+  if info and info.isEnchantingRecipe then
+    -- Verzaubern braucht Blizzards Gegenstands-Auswahl: nur für diesen Besuch Blizzards Fenster (TZ bleibt gespeichert)
+    P.tempWow = true
+    P.Apply()
+    if C_TradeSkillUI.OpenRecipe then pcall(C_TradeSkillUI.OpenRecipe, id) end
+    ns.Print("Verzaubern geht im Blizzard-Fenster (Gegenstand wählen). Zurück mit |cff39ff6bTZ|r oben.")
+    return
+  end
+  if not (C_TradeSkillUI and C_TradeSkillUI.CraftRecipe) then return end
+  if C_TradeSkillUI.OpenRecipe then pcall(C_TradeSkillUI.OpenRecipe, id) end
+  -- wie Blizzards Herstellen-Knopf: Grundmaterial nimmt das Spiel selbst
+  C_TradeSkillUI.CraftRecipe(id, n, {}, nil, nil, false)
+  ns.Print(string.format("Stelle |cff39ff6b%d× %s|r her.", n, info and info.name or "?"))
+end
+
+function P.Select(id)
+  P.recipeID = id
+  cfg().last = id
+  if C_TradeSkillUI and C_TradeSkillUI.OpenRecipe then pcall(C_TradeSkillUI.OpenRecipe, id) end
+  if P.win then P.win.craftBar.count = 1 end
+  if cfg().tab ~= "recipe" then P.SetTab("recipe", true) end
+  P.RefreshList()
+  P.Refresh()
+end
+
+local function buildWindow()
+  local f = CreateFrame("Frame", "TirysZentraleCraftWindow", UIParent)
+  P.win = f
+  list = { rows = {}, cats = {}, entries = {}, catOrder = {}, query = "" }
+  f:SetSize(WW, WH)
+  f:SetFrameStrata("HIGH")
+  f:SetToplevel(true)
+  f:SetClampedToScreen(true)
   f:EnableMouse(true)
-  f.glass = UI.Glass(f, { radius = 26, edgeMode = "neon", edge = 0.72, halo = 0.22, haloPad = 24,
-    body = UI.GLASS.window, sheen = 0.05, sheenH = 70, line = 0.5 })
-  UI.Ornaments(f, { w = W, h = 900, pattern = 0.04, corners = 0.30, cornerSize = 44, inset = 4 })
-  local glow = UI.Glow(f, C.amber, 340, 0.13, "BORDER")
-  glow:SetHeight(150)
-  glow:SetPoint("TOP", f, "TOPLEFT", 130, 10)
-  UI.Drift(glow, 120, 0, 9, 0.35, 0.10)
-  local glow2 = UI.Glow(f, C.aqua, 300, 0.10, "BORDER")
-  glow2:SetHeight(140)
-  glow2:SetPoint("BOTTOM", f, "BOTTOMRIGHT", -110, -6)
+  f:SetMovable(true)
+  f:RegisterForDrag("LeftButton")
+  f:SetScript("OnDragStart", function(self) self:StartMoving() end)
+  f:SetScript("OnDragStop", function(self)
+    self:StopMovingOrSizing()
+    local p, _, rp, x, y = self:GetPoint()
+    cfg().point = { p, rp, x, y }
+  end)
+  local pt = cfg().point
+  if pt then f:SetPoint(pt[1], UIParent, pt[2], pt[3], pt[4]) else f:SetPoint("TOPLEFT", UIParent, "TOPLEFT", 20, -110) end
+  f:SetScale(ns.settings.scale or 1)
+  f:Hide()
+  if UISpecialFrames then tinsert(UISpecialFrames, "TirysZentraleCraftWindow") end
 
-  -- Kopf: Verlaufs-Kugel mit Kolben, Titel, Beruf + Skill
-  local orb = f:CreateTexture(nil, "ARTWORK")
-  orb:SetTexture(UI.TEX.circle)
-  orb:SetSize(36, 36)
-  orb:SetPoint("TOPLEFT", 18, -16)
-  UI.SetGradV(orb, C.amber, C.teal, 1)
-  local orbGlow = UI.Glow(f, C.amber, 72, 0.30, "BORDER")
-  orbGlow:SetPoint("CENTER", orb, "CENTER")
-  local gloss = f:CreateTexture(nil, "ARTWORK", nil, 2)
-  gloss:SetTexture(UI.TEX.gloss)
-  gloss:SetAllPoints(orb)
-  gloss:SetBlendMode("ADD")
-  gloss:SetVertexColor(1, 1, 1, 0.30)
-  local icon = f:CreateTexture(nil, "OVERLAY")
-  icon:SetTexture(UI.Icon("flask"))
-  icon:SetSize(19, 19)
-  icon:SetPoint("CENTER", orb, "CENTER")
-  icon:SetVertexColor(0.03, 0.07, 0.06, 1)
-  f.title = UI.Text(f, 17, "bold", C.text)
-  f.title:SetPoint("TOPLEFT", orb, "TOPRIGHT", 12, -1)
-  f.title:SetText(UI.GradText("Zentrale-Craft", C.amber, C.teal))
-  f.sub = UI.Text(f, 12, "regular", C.muted)
-  f.sub:SetPoint("TOPLEFT", f.title, "BOTTOMLEFT", 0, -3)
-  f.sub:SetWidth(W - 18 - 36 - 12 - 60)
-  f.sub:SetWordWrap(false)
-  f.close = UI.IconButton(f, "close", 30, "Zentrale hier ausblenden (oben auf TZ wieder an)")
-  f.close:SetPoint("TOPRIGHT", -16, -18)
-  f.close:SetScript("OnClick", function() P.SetMode("wow") end)
-  f.tabs = UI.Segments(f, TABS, function(v) P.SetTab(v) end, IW)
-  f.tabs:SetPoint("TOPLEFT", PAD, -76)
+  f.glass = UI.Glass(f, { radius = 28, edgeMode = "neon", edge = 0.72, halo = 0.22, haloPad = 26,
+    body = UI.GLASS.window, sheen = 0.05, sheenH = 90, line = 0.5 })
+  UI.Ornaments(f, { w = WW, h = WH, pattern = 0.03, corners = 0.30, cornerSize = 48, inset = 4 })
+  local g1 = UI.Glow(f, C.amber, 420, 0.12, "BORDER")
+  g1:SetHeight(170) g1:SetPoint("TOP", f, "TOPLEFT", 190, 16)
+  UI.Drift(g1, 140, 0, 10, 0.35, 0.10)
+  local g2 = UI.Glow(f, C.aqua, 420, 0.10, "BORDER")
+  g2:SetHeight(170) g2:SetPoint("BOTTOM", f, "BOTTOMRIGHT", -200, -8)
+  -- Trennlinie zwischen Liste und Details (weicher Verlauf, kein Kasten)
+  local sep = UI.Hairline(f, C.teal, 0.22)
+  sep:SetWidth(1)
+  sep:SetPoint("TOPLEFT", f, "TOPLEFT", RX - 12, -(HEADH + 6))
+  sep:SetPoint("BOTTOMLEFT", f, "BOTTOMLEFT", RX - 12, FOOTH + 6)
 
-  -- Inhalt (scrollbar)
+  -- Kopf: Berufs-Symbol in Glaskugel, Name als Verlauf, Skill-Balken, Skill-Tipp
+  f.picon = UI.ItemIcon(f, 50)
+  f.picon:SetPoint("TOPLEFT", 20, -16)
+  local pg = UI.Glow(f, C.amber, 96, 0.28, "BORDER")
+  pg:SetPoint("CENTER", f.picon, "CENTER")
+  f.title = UI.Text(f, 20, "bold", C.text)
+  f.title:SetPoint("TOPLEFT", f.picon, "TOPRIGHT", 14, -2)
+  f.skill = UI.Text(f, 12, "semibold", C.muted)
+  f.skill:SetPoint("TOPLEFT", f.title, "BOTTOMLEFT", 0, -6)
+  f.bar = CreateFrame("Frame", nil, f)
+  f.bar:SetSize(150, 8)
+  f.bar:SetPoint("LEFT", f.skill, "RIGHT", 12, 0)
+  local track = UI.PillShape(f.bar, 8, 0, false)
+  track.body:SetGradientV({ 0.03, 0.04, 0.045, 0.9 }, { 0.08, 0.09, 0.10, 0.9 })
+  track.edge:SetGradient(UI.GRAD_EDGE, 0.25)
+  f.bar.fill = f.bar:CreateTexture(nil, "ARTWORK")
+  f.bar.fill:SetTexture(UI.TEX.white)
+  f.bar.fill:SetPoint("TOPLEFT", 1, -1)
+  f.bar.fill:SetHeight(6)
+  if f.bar.fill.SetGradient and CreateColor then
+    pcall(f.bar.fill.SetGradient, f.bar.fill, "HORIZONTAL", CreateColor(C.amber[1], C.amber[2], C.amber[3], 1), CreateColor(C.aqua[1], C.aqua[2], C.aqua[3], 1))
+  end
+  f.tip = UI.SafeButton(f)
+  f.tip:SetHeight(24)
+  f.tip:SetPoint("LEFT", f.bar, "RIGHT", 14, 0)
+  local ts = UI.PillShape(f.tip, 24, 0, false)
+  ts.edge:SetGradient(UI.GRAD_EDGE, 0.4)
+  ts.body:SetGradientV(UI.GLASS.pill[1], UI.GLASS.pill[2], 0.9)
+  f.tip.text = UI.Text(f.tip, 11, "semibold", C.text)
+  f.tip.text:SetPoint("CENTER")
+  f.tip:SetScript("OnClick", function(self) if self.e then P.Select(self.e.id) end end)
+  UI.SetTooltip(f.tip, "Skill-Tipp", "Das günstigste Rezept, das dir noch einen Skillpunkt gibt (orange = sicher +1, gelb = meistens). Klick zeigt es.")
+
+  -- rechts oben: WoW | TZ, Zentrale, Schließen
+  f.close = UI.IconButton(f, "close", 32, "Beruf schließen")
+  f.close:SetPoint("TOPRIGHT", -18, -18)
+  f.close:SetScript("OnClick", function() f:Hide() end)
+  f.home = UI.IconButton(f, "home", 32, "Ganze Zentrale öffnen")
+  f.home:SetPoint("RIGHT", f.close, "LEFT", -8, 0)
+  f.home:SetScript("OnClick", function() UI.Show("recipes") end)
+  f.mode = UI.Segments(f, { { value = "wow", label = "WoW" }, { value = "tz", label = "TZ" } }, function(v) P.SetMode(v) end, 160)
+  local mw = f.mode.trackHolder and f.mode.trackHolder:GetWidth() or 110
+  f.mode:SetPoint("TOPRIGHT", f.home, "TOPLEFT", -14 - (160 - mw), 1)
+  UI.SetTooltip(f.mode.buttons[1], "WoW", "Blizzards Berufsfenster.")
+  UI.SetTooltip(f.mode.buttons[2], "TZ", "Dieses Fenster.")
+
+  -- Zeile 2: Berufe umschalten (links) + Sprung in die Zentrale (rechts)
+  local profs = {}
+  for _, key in ipairs(R.MyProfessions()) do profs[#profs + 1] = { value = key, label = ns.ProfName(ns.PROF[key]) } end
+  if #profs > 1 then
+    f.profSeg = UI.Segments(f, profs, function(key)
+      if key ~= profKey() and C_TradeSkillUI and C_TradeSkillUI.OpenTradeSkill then pcall(C_TradeSkillUI.OpenTradeSkill, ns.PROF[key]) end
+    end, LW + 40)
+    f.profSeg:SetPoint("TOPLEFT", PAD, -74)
+  end
+  local leftEnd = PAD + (f.profSeg and (f.profSeg.trackHolder and f.profSeg.trackHolder:GetWidth() or LW) or 0) + 18
+  local function tryRow(withIcon)
+    local btns, w = {}, 0
+    for i, l in ipairs(LINKS) do
+      local b = UI.Button(f, l[5], "ghost", 100, 30, withIcon and l[3] or nil)
+      btns[i] = b
+      w = w + autoWidth(b) + (i > 1 and 6 or 0)
+    end
+    return btns, w
+  end
+  local avail = WW - PAD - leftEnd
+  local btns, w = tryRow(true)
+  if w > avail then
+    for _, b in ipairs(btns) do b:Hide() end
+    btns, w = tryRow(false)
+  end
+  if w > avail then
+    for _, b in ipairs(btns) do b:Hide() end
+    btns = {}
+    for i, l in ipairs(LINKS) do btns[i] = UI.IconButton(f, l[3], 32) end
+  end
+  f.links = btns
+  local x = WW - PAD
+  for i = #LINKS, 1, -1 do
+    local l, b = LINKS[i], btns[i]
+    b:SetScript("OnClick", function() UI.PlayClick() UI.Show(l[1]) end)
+    UI.SetTooltip(b, l[2] .. " (Zentrale)", l[4])
+    b:ClearAllPoints()
+    b:SetPoint("TOPRIGHT", f, "TOPLEFT", x, -74)
+    x = x - b:GetWidth() - 6
+  end
+
+  -- linke Spalte: Suche, Filter, Sortierung, Liste
+  local y0 = HEADH + 6
+  f.search = UI.SearchBox(f, LW, "Rezept suchen …", function(t) list.query = t P.RefreshList() end)
+  f.search:SetPoint("TOPLEFT", PAD, -y0)
+  local fl = cfg().filter
+  local pills = {
+    UI.Pill(f, "Herstellbar", function() return fl.can end, function(v) fl.can = v end, P.RefreshList),
+    UI.Pill(f, "Skill-Up", function() return fl.skill end, function(v) fl.skill = v end, P.RefreshList),
+    UI.Pill(f, "Gewinn", function() return fl.profit end, function(v) fl.profit = v end, P.RefreshList),
+    UI.Pill(f, "Favoriten", function() return fl.fav end, function(v) fl.fav = v end, P.RefreshList),
+  }
+  f.pills = pills
+  local px, py = 0, y0 + 46
+  for _, p in ipairs(pills) do
+    p:Refresh()
+    local pw = p:GetWidth()
+    if px > 0 and px + pw > LW then px = 0 py = py + 36 end
+    p:ClearAllPoints() p:SetPoint("TOPLEFT", f, "TOPLEFT", PAD + px, -py)
+    px = px + pw + 6
+  end
+  UI.SetTooltip(pills[2], "Skill-Up", "Nur Rezepte, die dir noch Skillpunkte geben (orange/gelb).")
+  UI.SetTooltip(pills[3], "Gewinn", "Nur Rezepte mit Gewinn laut AH-Preis (nach Gebühr, minus Material).")
+  UI.SetTooltip(pills[4], "Favoriten", "Rechtsklick auf ein Rezept macht es zum Favoriten (wie bei Blizzard).")
+  py = py + 36
+  f.sort = UI.Segments(f, { { value = "cat", label = "Kategorie" }, { value = "profit", label = "Gewinn" }, { value = "skill", label = "Skill" } },
+    function(v) cfg().sort = v P.RefreshList() end, LW)
+  f.sort:SetPoint("TOPLEFT", PAD, -py)
+  f.sort:Select(cfg().sort or "cat")
+  f.listInfo = UI.Text(f, 11, "regular", C.dim)
+  f.listInfo:SetPoint("TOPRIGHT", f, "TOPLEFT", PAD + LW, -(py + 8))
+  f.listInfo:SetJustifyH("RIGHT")
+  py = py + 38
+  local lsf, lc = UI.Scroll(f)
+  lsf:SetPoint("TOPLEFT", PAD, -py)
+  lsf:SetPoint("BOTTOMLEFT", PAD, FOOTH + 8)
+  lsf:SetWidth(LW + 2)
+  lc:SetWidth(LW - 12)
+  f.listScroll, f.listContent = lsf, lc
+  f.listEmpty = UI.Para(lc, 12, C.muted, LW - 30)
+  f.listEmpty:SetPoint("TOPLEFT", 8, -8)
+
+  -- rechte Spalte: Reiter + Inhalt
+  f.tabs = UI.Segments(f, TABS, function(v) P.SetTab(v) end, RW)
+  f.tabs:SetPoint("TOPLEFT", RX, -y0)
+  local th = math.max(f.tabs:GetHeight() or 30, 30)
   local sf, content = UI.Scroll(f)
-  sf:SetPoint("TOPLEFT", PAD, -HEAD)
-  sf:SetPoint("BOTTOMRIGHT", -PAD + 12, FOOT)
+  sf:SetPoint("TOPLEFT", RX, -(y0 + th + 12))
+  sf:SetPoint("BOTTOMRIGHT", -PAD + 12, FOOTH + 8)
   f.scroll, f.content = sf, content
-  content:SetWidth(IW - 2)
+  content:SetWidth(RW - 2)
   f.pages = {}
   for _, tab in ipairs(TABS) do
     local t = CreateFrame("Frame", nil, content)
     t:SetPoint("TOPLEFT", 0, 0)
-    t:SetSize(IW - 2, 10)
-    BUILD[tab.value](t, IW - 2)
+    t:SetSize(RW - 2, 10)
+    BUILD[tab.value](t, RW - 2)
     t:Hide()
     f.pages[tab.value] = t
   end
 
-  -- Fuß: die drei Dinge, die man am Berufsfenster immer braucht
-  f.craft = UI.Button(f, "Nächstes craften", "primary", 176, 38, "bolt")
-  f.craft:SetPoint("BOTTOMLEFT", PAD, 18)
-  f.craft:SetScript("OnClick", function() local pg = page() if pg then pg.CraftNext(pg) end end)
-  UI.SetTooltip(f.craft, "Nächstes craften", "Stellt den ersten Eintrag der Craft-Liste her, für den dein Material reicht – erst Zwischenprodukte, dann den Rest.")
-  f.shop = UI.Button(f, "Einkauf", "cool", 126, 38, "cart")
-  f.shop:SetPoint("LEFT", f.craft, "RIGHT", 8, 0)
+  -- Fuß links: Nächstes craften + Einkauf
+  f.next = UI.Button(f, "Nächstes craften", "primary", 168, 38, "bolt")
+  f.next:SetPoint("BOTTOMLEFT", PAD, 16)
+  f.next:SetScript("OnClick", function() local pgx = page() if pgx then pgx.CraftNext(pgx) end end)
+  UI.SetTooltip(f.next, "Nächstes craften", "Stellt den ersten Eintrag der Craft-Liste her, für den dein Material reicht – erst Zwischenprodukte, dann den Rest.")
+  f.shop = UI.Button(f, "Einkauf", "cool", 120, 38, "cart")
+  f.shop:SetPoint("LEFT", f.next, "RIGHT", 8, 0)
   f.shop:SetScript("OnClick", function() ns.Shop.Toggle() end)
-  UI.SetTooltip(f.shop, "Einkaufsfenster", "Zeigt, was für die Craft-Liste noch fehlt – mit Kaufen beim Händler und Suche im AH.")
-  f.home = UI.IconButton(f, "home", 38, "Ganze Zentrale (Craft-Planer) öffnen")
-  f.home:SetPoint("BOTTOMRIGHT", -PAD, 18)
-  f.home:SetScript("OnClick", function() UI.Show("recipes") end)
+  UI.SetTooltip(f.shop, "Einkaufsfenster", "Was für die Craft-Liste noch fehlt – mit Händler-Kauf und AH-Suche.")
+  -- Fuß rechts: Menge + Herstellen + Alle
+  local cb = CreateFrame("Frame", nil, f)
+  f.craftBar = cb
+  cb:SetSize(RW, 38)
+  cb:SetPoint("BOTTOMLEFT", f, "BOTTOMLEFT", RX, 16)
+  cb.minus = UI.IconButton(cb, "minus", 32, "Einmal weniger")
+  cb.minus:SetPoint("LEFT", 0, 0)
+  cb.numBg = CreateFrame("Frame", nil, cb)
+  cb.numBg:SetSize(56, 32)
+  cb.numBg:SetPoint("LEFT", cb.minus, "RIGHT", 4, 0)
+  local nb = UI.PillShape(cb.numBg, 32, 0, false)
+  nb.body:SetGradientV({ 0.04, 0.05, 0.055, 0.95 }, { 0.09, 0.10, 0.11, 0.95 })
+  nb.edge:SetGradient(UI.GRAD_EDGE, 0.35)
+  cb.num = UI.Text(cb.numBg, 15, "bold", C.text)
+  cb.num:SetPoint("CENTER")
+  cb.plus = UI.IconButton(cb, "plus", 32, "Einmal mehr")
+  cb.plus:SetPoint("LEFT", cb.numBg, "RIGHT", 4, 0)
+  cb.minus:SetScript("OnClick", function() cb.count = math.max(1, (cb.count or 1) - 1) refreshCraft() end)
+  cb.plus:SetScript("OnClick", function() cb.count = (cb.count or 1) + 1 refreshCraft() end)
+  cb.numBg:EnableMouseWheel(true)
+  cb.numBg:SetScript("OnMouseWheel", function(_, d) cb.count = math.max(1, (cb.count or 1) + d) refreshCraft() end)
+  cb.make = UI.Button(cb, "Herstellen", "primary", 140, 38, "flask")
+  cb.make:SetPoint("LEFT", cb.plus, "RIGHT", 12, 0)
+  cb.make:SetScript("OnClick", function() P.Craft(cb.count or 1) end)
+  cb.all = UI.Button(cb, "Alle", "soft", 110, 38, "bolt")
+  cb.all:SetPoint("LEFT", cb.make, "RIGHT", 8, 0)
+  cb.all:SetScript("OnClick", function()
+    local id = P.recipeID
+    local n = id and TS("GetCraftableCount", id)
+    if type(n) ~= "number" then for _, e in ipairs(list.entries) do if e.id == id then n = e.can end end end
+    if (n or 0) > 0 then P.Craft(n) end
+  end)
+  UI.SetTooltip(cb.all, "Alle herstellen", "So viele, wie dein Material in den Taschen hergibt.")
 
-  -- Umschalter WoW | TZ oben am Berufsfenster (wie TSM)
+  f:SetScript("OnHide", function()
+    GameTooltip:Hide()
+    -- Fenster zu (× oder ESC) = Beruf schließen, wie bei Blizzard
+    if P.closing or not S.tradeOpen or cfg().mode ~= "tz" then return end
+    P.closing = true
+    local PF = _G.ProfessionsFrame
+    if PF and PF:IsShown() and HideUIPanel then HideUIPanel(PF) elseif C_TradeSkillUI and C_TradeSkillUI.CloseTradeSkill then pcall(C_TradeSkillUI.CloseTradeSkill) end
+    P.closing = false
+  end)
+  P.SetTab(cfg().tab or "recipe", true)
+end
+
+function P.SetTab(v, silent)
+  local f = P.win
+  if not f or not f.pages[v] then v = "recipe" end
+  cfg().tab = v
+  if not f then return end
+  f.tabs:Select(v)
+  for k, t in pairs(f.pages) do t:SetShown(k == v) end
+  if f.scroll.ScrollToTop then f.scroll:ScrollToTop() end
+  if not silent then P.Refresh() end
+end
+
+-- Liste neu lesen (Beruf gewechselt, Rezept gelernt, Taschen geändert, neue Preise)
+function P.Reload()
+  if not (P.win and P.win:IsShown()) then return end
+  list.entries, list.catOrder = readEntries()
+  local found
+  for _, e in ipairs(list.entries) do if e.id == P.recipeID then found = true break end end
+  if not found then
+    P.recipeID = nil
+    local want = cfg().last
+    for _, e in ipairs(list.entries) do if e.id == want then P.recipeID = want break end end
+    if not P.recipeID then
+      local best
+      for _, e in ipairs(list.entries) do
+        if (e.can or 0) > 0 and (not best or (e.profit or -1e12) > (best.profit or -1e12)) then best = e end
+      end
+      best = best or list.entries[1]
+      P.recipeID = best and best.id
+    end
+  end
+  P.RefreshList()
+  P.Refresh()
+end
+
+function P.Refresh()
+  local f = P.win
+  if not (f and f:IsShown()) then return end
+  refreshHead()
+  refreshCraft()
+  local v = cfg().tab or "recipe"
+  local t = f.pages[v]
+  local h = ns.Safe(FILL[v], t, RW - 2) or 10
+  t:SetHeight(h)
+  f.content:SetHeight(h + 4)
+  if f.scroll.UpdateBar then f.scroll.UpdateBar() end
+end
+
+function P.Dirty()
+  if P.win and P.win:IsShown() then ns.Debounce("craftwin", 0.2, P.Reload) end
+end
+
+-- Modus anwenden: TZ = eigenes Fenster statt Blizzards (nur bei eigenem, offenem Beruf)
+function P.Apply()
+  local want = cfg().mode == "tz" and not P.tempWow and S.tradeOpen and not special()
+  if want then
+    if not P.win then buildWindow() end
+    blizzVisible(false)
+    if not P.win:IsShown() then
+      P.win:SetScale(ns.settings.scale or 1)
+      P.win:Show()
+    end
+    P.win.mode:Select("tz")
+    P.Reload()
+  else
+    if P.win and P.win:IsShown() then P.closing = true P.win:Hide() P.closing = false end
+    blizzVisible(true)
+  end
+  if P.switch then P.switch.seg:Select(P.tempWow and "wow" or cfg().mode) end
+end
+
+function P.SetMode(m)
+  P.tempWow = nil
+  cfg().mode = (m == "wow") and "wow" or "tz"
+  P.Apply()
+end
+
+-- Alle gezeigten Top-Rezepte dieses Berufs in die Craft-Liste (wie "Liste erstellen" im Craft-Planer)
+function P.MakeList()
+  local pg = page()
+  local key = profKey()
+  local tl = P.topList or {}
+  if not (pg and key) or #tl == 0 then ns.Print("Gerade bringt kein Rezept genug Gold – Mindestgewinn senken oder im AH scannen.") return end
+  local q = queue()
+  for i = #q, 1, -1 do if q[i].prof == key then table.remove(q, i) end end
+  local added, skipped = pg.FillQueue(tl)
+  ns.Shop.ResetSkips()
+  ns.Print(pg.ListText(added, skipped, ""))
+  ns.Shop.Show()
+  UI.RefreshPage("recipes")
+  ns.Fire("SHOP_CHANGED")
+  P.SetTab("queue")
+end
+
+----------------------------------------------------------------------------
+-- An Blizzards Berufsfenster andocken (Blizzard_Professions lädt erst beim ersten Öffnen)
+----------------------------------------------------------------------------
+local function onRecipeSelected(_, info)
+  -- nur im WoW-Modus relevant (Auswahl in Blizzards Liste merken, damit TZ dort weitermacht)
+  if type(info) == "table" and info.recipeID and not (P.win and P.win:IsShown()) then P.recipeID = info.recipeID end
+end
+
+function P.Attach()
+  local PF = _G.ProfessionsFrame
+  if P.attached or not PF then return P.attached or false end
+  P.attached = true
+  -- Umschalter über Blizzards Fenster (sichtbar im WoW-Modus)
   local sw = CreateFrame("Frame", "TirysZentraleCraftSwitch", PF)
   P.switch = sw
   sw.label = UI.Text(sw, 12, "semibold", C.muted)
@@ -685,83 +1338,23 @@ local function build(PF)
   local segW = sw.seg.trackHolder and sw.seg.trackHolder:GetWidth() or 120
   sw:SetSize(math.ceil(sw.label:GetStringWidth()) + 10 + segW, 30)
   sw:SetPoint("BOTTOMRIGHT", PF, "TOPRIGHT", -8, 6)
-  UI.SetTooltip(sw.seg.buttons[1], "WoW", "Nur Blizzards Berufsfenster.")
-  UI.SetTooltip(sw.seg.buttons[2], "TZ – Tiry's Zentrale", "Berufsfenster mit Zentrale-Fenster daneben: Gewinn, Material, Absatz, Top-Rezepte, Craft-Liste und Optionen.")
-
-  P.SetTab(cfg().tab or "recipe", true)
-end
-
-function P.SetTab(v, silent)
-  local f = P.frame
-  if not f or not f.pages[v] then v = "recipe" end
-  cfg().tab = v
-  f.tabs:Select(v)
-  for k, t in pairs(f.pages) do t:SetShown(k == v) end
-  if f.scroll.ScrollToTop then f.scroll:ScrollToTop() end
-  if not silent then P.Refresh() end
-end
-
-function P.Refresh()
-  local f = P.frame
-  if not (f and f:IsShown()) then return end
-  f.sub:SetText(profLine())
-  local v = cfg().tab or "recipe"
-  local t = f.pages[v]
-  local h = ns.Safe(FILL[v], t, IW - 2) or 10
-  t:SetHeight(h)
-  f.content:SetHeight(h + 4)
-  if f.scroll.UpdateBar then f.scroll.UpdateBar() end
-end
-
-function P.Dirty()
-  if P.frame and P.frame:IsShown() then ns.Debounce("craftpanel", 0.15, P.Refresh) end
-end
-
-function P.SetMode(m)
-  cfg().mode = (m == "wow") and "wow" or "tz"
-  local PF = _G.ProfessionsFrame
-  if P.switch then P.switch.seg:Select(cfg().mode) end
-  if P.frame then
-    P.frame:SetShown(cfg().mode == "tz" and PF and PF:IsShown() or false)
-    P.Refresh()
-  end
-end
-
--- Alle gezeigten Top-Rezepte dieses Berufs in die Craft-Liste (wie "Liste erstellen" im Craft-Planer)
-function P.MakeList()
-  local pg = page()
-  local key = profKey()
-  local list = P.topList or {}
-  if not (pg and key) or #list == 0 then ns.Print("Gerade bringt kein Rezept genug Gold – Mindestgewinn senken oder im AH scannen.") return end
-  local q = queue()
-  for i = #q, 1, -1 do if q[i].prof == key then table.remove(q, i) end end
-  local added, skipped = pg.FillQueue(list)
-  ns.Shop.ResetSkips()
-  ns.Print(pg.ListText(added, skipped, ""))
-  ns.Shop.Show()
-  UI.RefreshPage("recipes")
-  ns.Fire("SHOP_CHANGED")
-  P.SetTab("queue")
-end
-
-----------------------------------------------------------------------------
--- An Blizzards Berufsfenster andocken (lädt erst beim ersten Öffnen: Blizzard_Professions)
-----------------------------------------------------------------------------
-local function onRecipeSelected(_, info)
-  P.recipeID = type(info) == "table" and info.recipeID or nil
-  P.Dirty()
-end
-
-function P.Attach()
-  local PF = _G.ProfessionsFrame
-  if P.frame or not PF then return P.frame ~= nil end
-  build(PF)
-  PF:HookScript("OnShow", function() P.SetMode(cfg().mode) end)
-  PF:HookScript("OnHide", function() P.recipeID = nil end)
+  UI.SetTooltip(sw.seg.buttons[1], "WoW", "Blizzards Berufsfenster.")
+  UI.SetTooltip(sw.seg.buttons[2], "TZ – Tiry's Zentrale", "Eigenes Berufsfenster der Zentrale: Rezepte mit Gewinn, Material, Absatz, Skill-Tipp, Craft-Liste und Knöpfe in die Zentrale.")
+  sw.seg:Select(cfg().mode)
+  -- Blizzard darf Größe/Deckkraft nicht zurücksetzen, solange TZ läuft
+  hooksecurefunc(PF, "SetScale", function(self, s)
+    if hideBlizz and not guard then
+      P.pfScale = s
+      guard = true self:SetScale(0.001) guard = false
+    end
+  end)
+  hooksecurefunc(PF, "SetAlpha", function(self)
+    if hideBlizz and not guard then guard = true self:SetAlpha(0) guard = false end
+  end)
+  PF:HookScript("OnShow", function() P.Apply() end)
   if EventRegistry and EventRegistry.RegisterCallback then
     pcall(EventRegistry.RegisterCallback, EventRegistry, "ProfessionsRecipeListMixin.Event.OnRecipeSelected", onRecipeSelected, P)
   end
-  P.SetMode(cfg().mode)
   return true
 end
 
@@ -769,12 +1362,18 @@ ns.On("ADDON_LOADED", function(_, name)
   if name == "Blizzard_Professions" then ns.Safe(P.Attach) end
 end)
 ns.On("TRADE_SKILL_SHOW", function()
-  if not P.Attach() then C_Timer.After(0, function() ns.Safe(P.Attach) end) end
-  P.Dirty()
+  if not P.Attach() then C_Timer.After(0, function() ns.Safe(P.Attach) ns.Safe(P.Apply) end) end
+  P.Apply()
+end)
+ns.On("TRADE_SKILL_CLOSE", function()
+  P.tempWow = nil
+  P.Apply()
 end)
 ns.On("TRADE_SKILL_LIST_UPDATE", function() P.Dirty() end)
+ns.On("TRADE_SKILL_DATA_SOURCE_CHANGED", function() P.Dirty() end)
 ns.On("BAG_UPDATE_DELAYED", function() P.Dirty() end)
-for _, msg in ipairs({ "RECIPES_SCANNED", "SHOP_CHANGED", "PRICES_UPDATED", "DEMAND_UPDATED", "CRAFTBOOK_CHANGED", "PROFESSIONS_CHANGED" }) do
+for _, msg in ipairs({ "RECIPES_SCANNED", "SHOP_CHANGED", "PRICES_UPDATED", "DEMAND_UPDATED", "CRAFTBOOK_CHANGED", "PROFESSIONS_CHANGED",
+  "HISTORY_UPDATED", "DEPOSITS_LEARNED", "SNIPES_CHANGED" }) do
   ns.Listen(msg, function() P.Dirty() end)
 end
 -- Craft-Planer ändert die Liste/Filter -> hier mitziehen

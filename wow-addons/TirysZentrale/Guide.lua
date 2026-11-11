@@ -206,15 +206,21 @@ function G.Profitable()
   if not (rp and rp.Entries) then return {}, 0 end
   local savedProf, savedView = rp.prof, rp.view
   local all, best = {}, 0
-  for _, key in ipairs(ns.Recipes.MyProfessions()) do
-    rp.prof, rp.view = key, "known"
-    for _, e in ipairs((rp.Entries(rp))) do
-      all[#all + 1] = e
-      best = math.max(best, e.profit or 0)
+  -- leiht sich kurz Beruf/Ansicht des Craft-Planers; bei einem Fehler mittendrin trotzdem zurücksetzen
+  pcall(function()
+    for _, key in ipairs(ns.Recipes.MyProfessions()) do
+      rp.prof, rp.view = key, "known"
+      for _, e in ipairs((rp.Entries(rp))) do
+        all[#all + 1] = e
+        best = math.max(best, e.profit or 0)
+      end
     end
-  end
+  end)
   rp.prof, rp.view = savedProf, savedView
-  table.sort(all, function(a, b) return a.profit > b.profit end)
+  table.sort(all, function(a, b)
+    if a.profit ~= b.profit then return a.profit > b.profit end
+    return (a.r and a.r.id or 0) < (b.r and b.r.id or 0)
+  end)
   return all, best
 end
 

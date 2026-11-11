@@ -1004,3 +1004,102 @@ describe("A5 Suche über Auctionator hat Vorrang", function()
     assert.are.same({}, W.errors)
   end)
 end)
+
+----------------------------------------------------------------------------
+-- 6.4: "Nach erneutem Aktualisieren stehen andere Sachen drin" – jede Datenänderung muss neu zeichnen
+----------------------------------------------------------------------------
+describe("AH-Scan aktualisiert wirklich alles", function()
+  local function heard(msg)
+    local n = { c = 0 }
+    return n, function() n.c = n.c + 1 end
+  end
+
+  it("Komplett-Scan mit noch nicht geladenen Verkäufern wird erst übernommen, wenn alles da ist", function()
+    local ns, W = E.load({ itemInfo = LEDER })
+    local rows = leatherMarket()
+    replicate(function() return rows end)
+    local reads, loadedAfter = 0, 2
+    local AH = C_AuctionHouse
+    local num = AH.GetNumReplicateItems
+    AH.GetNumReplicateItems = function() reads = reads + 1 return num() end
+    local info = AH.GetReplicateItemInfo
+    AH.GetReplicateItemInfo = function(i)
+      local r = { info(i) }
+      if reads < loadedAfter and i % 3 == 0 then r[14], r[15], r[18] = nil, nil, false end -- Verkäufer fehlt noch
+      return unpack(r, 1, 18)
+    end
+    local requested = 0
+    C_Item.RequestLoadItemDataByID = function(id) assert(type(id) == "number") requested = requested + 1 end
+    local d, fn = heard() ns.Listen("DEMAND_UPDATED", fn)
+    ns.Market.ahOpen = true
+    scan(W)
+    assert.are.equal(2, reads, "einmal nachgelesen")
+    assert.are.equal(1, d.c, "Absatz nur einmal gemeldet – mit vollständigen Daten")
+    assert.is_true(requested > 0, "fehlende Item-Daten angefordert")
+    assert.is_falsy(ns.Demand.Store().stats[2318] and ns.Demand.Store().stats[2318].anon, "kein 'Verkäufer unbekannt'")
+    -- bleiben Daten dauerhaft unvollständig: nach 3 Versuchen gilt der Stand (kein Endlos-Lesen)
+    reads, loadedAfter = 0, 99
+    W.now = W.now + 3600
+    scan(W)
+    assert.are.equal(1 + ns.Demand.MAX_RETRIES, reads)
+    assert.are.equal(2, d.c)
+    assert.are.same({}, W.errors)
+  end)
+
+  it("Preisverlauf, der bis zu 1 Min. später geschrieben wird, lässt alle Seiten neu rechnen", function()
+    local ns, W = E.load({ itemInfo = LEDER, prices = { [2318] = 40 } })
+    local h, fn = heard() ns.Listen("HISTORY_UPDATED", fn)
+    ns.Fire("PRICES_UPDATED")              -- sofort geschrieben
+    local first = h.c
+    W.now = W.now + 5
+    W.prices[2318] = 55
+    ns.Fire("PRICES_UPDATED")              -- innerhalb der Minute: später geschrieben
+    assert.are.equal(first, h.c)
+    W.flush()
+    assert.are.equal(first + 1, h.c, "verspätetes Schreiben meldet sich")
+    -- die offene Seite rechnet daraufhin neu (Hauptfenster plant ein Neuzeichnen ein)
+    ns.UI.Show("market")
+    W.flush()
+    assert.are.equal(0, #W.timers)
+    ns.Fire("HISTORY_UPDATED", 1)
+    assert.is_true(#W.timers > 0, "Neuzeichnen eingeplant")
+    W.flush()
+    assert.are.same({}, W.errors)
+  end)
+
+  it("'Scan fertig' erst, wenn Auctionator nicht mehr scannt", function()
+    local ns, W = E.load({ itemInfo = LEDER })
+    ns.Market.ahOpen = true
+    Auctionator.State.FullScanFrameRef.CanInitiate = function() return true end
+    assert.is_true(ns.Market.StartScan())
+    Auctionator.State.FullScanFrameRef.inProgress = true
+    W.dbCallback() W.flush()                -- Suche mitten im Scan
+    assert.is_falsy(E.chat(W):find("Scan fertig", 1, true))
+    assert.is_true(ns.Market.scanRequested)
+    Auctionator.State.FullScanFrameRef.inProgress = nil
+    W.dbCallback() W.flush()
+    assert.truthy(E.chat(W):find("Scan fertig", 1, true))
+    assert.is_nil(ns.Market.scanRequested)
+    assert.are.same({}, W.errors)
+  end)
+
+  it("exakte Einstellgebühr kommt nach der Schätzung: Seiten rechnen einmal neu", function()
+    local ns, W = E.load({ itemInfo = LEDER })
+    local M = ns.Market
+    local ready = false
+    C_AuctionHouse.CalculateCommodityDeposit = function(id, d, q) if ready then return 7 * q end return nil end
+    local h, fn = heard() ns.Listen("DEPOSITS_LEARNED", fn)
+    M.ahOpen = true
+    local v, exact = M.Deposit(2318, 20)
+    assert.is_false(exact)
+    ready = true
+    W.now = W.now + 31
+    v, exact = M.Deposit(2318, 20)
+    assert.is_true(exact) assert.are.equal(140, v)
+    W.flush()
+    assert.are.equal(1, h.c)
+    M.Deposit(2318, 20) W.flush()
+    assert.are.equal(1, h.c, "nur einmal")
+    assert.are.same({}, W.errors)
+  end)
+end)

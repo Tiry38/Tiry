@@ -218,7 +218,10 @@ function S.ScanBags()
       b.items[#b.items + 1] = e
     end
   end
-  table.sort(b.items, function(x, y) return (x.best or 0) > (y.best or 0) end)
+  table.sort(b.items, function(x, y)
+    if (x.best or 0) ~= (y.best or 0) then return (x.best or 0) > (y.best or 0) end
+    return x.id < y.id
+  end)
   b.time = time()
 end
 

@@ -197,9 +197,10 @@ end
 ----------------------------------------------------------------------------
 local reading, lastRead
 D.armed = false
+D.MAX_RETRIES, D.RETRY_DELAY = 3, 4
 local hooked = false
 if hooksecurefunc and C_AuctionHouse and C_AuctionHouse.ReplicateItems then
-  hooked = pcall(hooksecurefunc, C_AuctionHouse, "ReplicateItems", function() D.armed = true end)
+  hooked = pcall(hooksecurefunc, C_AuctionHouse, "ReplicateItems", function() D.armed, D.retries = true, 0 end)
 end
 function D.ReadReplicate()
   local AH = C_AuctionHouse
@@ -220,12 +221,18 @@ function D.ReadReplicate()
   local items, sellers = {}, {}
   local t = time()
   local index = 0
+  local missing, missingIDs = 0, {}
   local function step()
     if ns.Market and not ns.Market.ahOpen then reading = nil return end -- AH zu: Liste ungültig
     local last = math.min(index + BATCH, total)
     for i = index, last - 1 do
-      local ok, _, _, count, _, _, _, _, _, _, buyout, _, _, _, owner, _, _, itemID =
+      local ok, _, _, count, _, _, _, _, _, _, buyout, _, _, _, owner, _, _, itemID, hasAll =
         pcall(AH.GetReplicateItemInfo, i)
+      -- Blizzard lädt Verkäufer/Item-Daten nach: solche Zeilen zählen (siehe Ende)
+      if ok and hasAll == false then
+        missing = missing + 1
+        if itemID and #missingIDs < 200 then missingIDs[#missingIDs + 1] = itemID end
+      end
       if ok and snipe then snipe.Collect(itemID, count, buyout, owner) end
       if ok and itemID and mine[itemID] and count and count > 0 and buyout and buyout > 0 then
         local own = type(owner) == "string" and me and (owner == me or owner:match("^([^%-]+)") == me)
@@ -260,6 +267,20 @@ function D.ReadReplicate()
       C_Timer.After(0, function() ns.Safe(step) end)
     else
       reading = nil
+      -- Noch nicht alles geladen (Verkäufer fehlen): Ergebnis NICHT übernehmen, sonst hinge Absatz/Schnäppchen
+      -- davon ab, was dein Spiel gerade zufällig im Speicher hat. Daten anfordern und gleich nochmal lesen
+      -- (höchstens 3×, danach gilt der Stand).
+      if missing > 0 and (D.retries or 0) < D.MAX_RETRIES and not (ns.Market and not ns.Market.ahOpen) then
+        D.retries = (D.retries or 0) + 1
+        D.armed = true
+        D.lastMissing = missing
+        if C_Item and C_Item.RequestLoadItemDataByID then
+          for _, id in ipairs(missingIDs) do pcall(C_Item.RequestLoadItemDataByID, id) end
+        end
+        C_Timer.After(D.RETRY_DELAY, function() if D.armed then ns.Safe(D.ReadReplicate) end end)
+        return
+      end
+      D.retries, D.lastMissing = 0, missing
       local complete = D.Complete(total)
       if complete then
         local n = D.Ingest(items, t, watch)

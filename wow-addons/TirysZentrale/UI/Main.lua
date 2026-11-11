@@ -603,7 +603,7 @@ local function refreshDelay() return (ns.Market and ns.Market.ahOpen) and 1 or 0
 UI.RefreshDelay = refreshDelay
 for _, msg in ipairs({ "PRICES_UPDATED", "ITEMS_UPDATED", "PROFESSIONS_CHANGED", "PLAYER_CHANGED",
   "MERCHANT_SCANNED", "RECIPES_SCANNED", "AH_STATE", "CRAFTBOOK_CHANGED", "AUCTIONS_CHANGED", "GOAL_CHANGED",
-  "DEMAND_UPDATED", "SNIPES_CHANGED" }) do
+  "DEMAND_UPDATED", "SNIPES_CHANGED", "HISTORY_UPDATED", "DEPOSITS_LEARNED" }) do
   ns.Listen(msg, function() ns.Debounce("refresh", refreshDelay(), refreshVisible) end)
 end
 -- Taschen-Änderungen (jede Beute) nur für Ansichten, die Tascheninhalt zeigen
@@ -786,7 +786,7 @@ SlashCmdList.TIRYSZENTRALE = function(msg)
     local cp = ns.CraftPanel
     local m = ns.settings.craftPanel.mode == "tz" and "wow" or "tz"
     if cp then cp.SetMode(m) else ns.settings.craftPanel.mode = m end
-    ns.Print("Craftfenster am Berufsfenster " .. (m == "tz" and "|cff39ff6ban|r (TZ)." or "|cffff9929aus|r (nur WoW)."))
+    ns.Print("Berufsfenster: " .. (m == "tz" and "|cff39ff6bTZ|r (eigenes Fenster der Zentrale)." or "|cffff9929WoW|r (Blizzards Fenster)."))
     return
   end
   if msg == "craftcheck" then

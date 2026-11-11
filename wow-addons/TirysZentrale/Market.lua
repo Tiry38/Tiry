@@ -107,6 +107,8 @@ local function exactDeposit(itemID, qty, loc, d)
     ok, v = pcall(AH.CalculateCommodityDeposit, itemID, d, qty)
   end
   if ok and type(v) == "number" and v >= 0 then
+    -- vorher geschätzt (Item-Daten fehlten noch)? Dann zeigen die Seiten gerade den Schätzwert -> neu rechnen
+    if failed then ns.Debounce("deposits", 1, function() ns.Fire("DEPOSITS_LEARNED") end) end
     exactMemo[key], exactFail[key] = v, nil
     return v
   end
@@ -385,7 +387,8 @@ ns.Listen("LOGIN", function()
     pcall(a.RegisterForDBUpdate, ADDON, function()
       ns.Debounce("prices", 1, function()
         if ns.db then ns.db.lastScan = time() end -- jede Preis-Aktualisierung (auch Suchen im AH)
-        if M.scanRequested then
+        -- erste Preis-Meldung kann von einer Suche mitten im Scan stammen: erst fertig, wenn Auctionator nicht mehr scannt
+        if M.scanRequested and not M.FullScanBusy() then
           M.scanRequested = nil
           if ns.db then ns.db.lastFullScan = time() end
           ns.Print("|cffff9929Scan fertig!|r Alle Reiter rechnen jetzt mit den neuen Preisen.")
@@ -457,7 +460,8 @@ function M.StartScan(opts)
     elseif reason == "komplett" then
       ns.Print("Komplett-Scan läuft ... Preise, Absatz, Schnäppchen und Unterboten – für alle Reiter auf einmal.")
     else
-      ns.Print("Schnell-Scan läuft (Komplett-Scan erst in ein paar Minuten wieder erlaubt) – alle Preise werden aktualisiert.")
+      ns.Print("Schnell-Scan läuft (Komplett-Scan erst in ein paar Minuten wieder erlaubt) – alle Preise werden aktualisiert. "
+        .. "|cffffd24aAbsatz, Schnäppchen und Unterboten bleiben vom letzten Komplett-Scan.|r")
     end
     return true
   end

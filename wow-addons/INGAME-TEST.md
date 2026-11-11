@@ -120,7 +120,25 @@ Zeigt dein Client keine Fehlerfenster: Tiry's Zentrale schreibt eigene Fehler ro
 ## Auctionator aus
 - [ ] Auctionator deaktivieren, `/reload` → Addon startet ohne Fehler, Status „Auctionator fehlt“, nächster Schritt „Auctionator installieren“
 
-## Craftfenster am Berufsfenster (neu in 6.3)
+## Eigenes Berufsfenster (neu in 6.4)
+- [ ] Beruf öffnen → **nur noch das Zentrale-Fenster** ist zu sehen, Blizzards Fenster ist unsichtbar. Klappt Herstellen trotzdem? (Blizzards Fenster bleibt intern offen.)
+- [ ] Reiter oben rechts („Rezept / Top-Rezepte / Liste / Optionen“) in **einer** Zeile, nichts überdeckt? Menü-Knöpfe (Planer … Auktionen) mit Text oder als Symbole?
+- [ ] Liste: Kategorien, Farben wie bei Blizzard, [Anzahl], Gewinn. Rechtsklick = Favorit (auch bei Blizzard sichtbar?), Shift-Klick = Link im Chat
+- [ ] Filter Herstellbar/Skill-Up/Gewinn/Favoriten, Sortierung, Suche
+- [ ] **Herstellen** mit Menge und **Alle (N)** → stellt her, Craft-Liste zählt runter
+- [ ] Skill-Tipp passt (orange zuerst)? Skill-Balken stimmt?
+- [ ] Rezept mit Station: „Erfordert: …“ richtig grün/rot?
+- [ ] Zweiten Beruf oben anklicken → wechselt
+- [ ] Menü-Knöpfe öffnen die Zentrale auf der richtigen Seite
+- [ ] Verzauberkunst: „Im WoW-Fenster verzaubern“ → Blizzards Fenster mit dem Rezept. Beruf zu und wieder auf → wieder TZ
+- [ ] „WoW“ → Blizzards Fenster normal (Größe, Position!). „TZ“ → wieder das eigene. × und ESC schließen den Beruf
+- [ ] Fenster verschieben → Position bleibt nach /reload
+
+## AH-Scan aktualisiert alles (6.4)
+- [ ] Komplett-Scan, 1–2 Min. warten, Seiten durchschauen, dann „Aktualisieren“ (ohne neuen Scan) → **dieselben Einträge**
+- [ ] Chat nach dem Scan: „Scan fertig!“ erst nach dem Ende von Auctionators Scan
+
+## Craftfenster am Berufsfenster (6.3, durch 6.4 ersetzt)
 - [ ] Beruf öffnen → rechts neben Blizzards Fenster (hinter den Berufs-Reitern) erscheint „Zentrale-Craft“; oben rechts über dem Berufsfenster „Ansicht WoW | TZ“. **Sitzt beides sauber, nichts überdeckt?**
 - [ ] Links ein Rezept anklicken → Reiter „Rezept“ zeigt sofort dieses Rezept (Gewinn, Material mit „hast X“, Empfehlung)
 - [ ] „Einplanen“ / „+1“ → Reiter „Liste“ und Craft-Planer zeigen die neue Menge

@@ -149,18 +149,25 @@ function PS.RecordSoon()
   local now = GetTime()
   if not recordAt or now - recordAt >= 60 then
     recordAt = now
-    ns.Safe(PS.RecordAll)
+    PS.RecordAndTell()
     return
   end
   if recordDue then return end
   recordDue = true
   C_Timer.After(60 - (now - recordAt), function()
     recordDue, recordAt = false, GetTime()
-    ns.Safe(PS.RecordAll)
+    PS.RecordAndTell()
   end)
 end
+-- Verlauf schreiben und, wenn sich etwas geändert hat, alle Ansichten neu rechnen lassen ("Marktwert" = Median
+-- des Verlaufs fließt in Gewinn, Schnäppchen und Trends). Eigene Meldung, damit kein Kreis mit PRICES_UPDATED entsteht.
+function PS.RecordAndTell()
+  local n = ns.Safe(PS.RecordAll)
+  if type(n) == "number" and n > 0 then ns.Fire("HISTORY_UPDATED", n) end
+  return n
+end
 ns.Listen("PRICES_UPDATED", function() PS.RecordSoon() end)
-ns.Listen("LOGIN", function() C_Timer.After(8, function() ns.Safe(PS.RecordAll) end) end)
+ns.Listen("LOGIN", function() C_Timer.After(8, function() PS.RecordAndTell() end) end)
 
 ----------------------------------------------------------------------------
 -- Zerlegen und Auswerten
