@@ -43,7 +43,12 @@ RXP.SetStep/LoadGuide/SetupArrow) und Live-Übersetzung (Hook auf `RXP.ReplaceNp
 nur Schritte, nie Quest-Elemente). `Namen.lua` erzeugt `tools/rxn_names.py <RXPGuides-Pfad> [<CSV-Cache>]` (QuestieDB-l10n +
 AreaTable/TaxiNodes), Grafiken `tools/rxn_media.py`, Satzregeln von Hand in `Phrasen.lua` (CC BY-NC-SA, RXP-Texte).
 **Kein RXP- oder Zygor-Code/-Textur ins Repo.** Test: `cd addons/RXPNeon && lua5.1 ../../tests/rxn.lua [vorschau-ordner]`
-(„RXN TESTS OK“); Vorschau mit `L.dump(…, {levels = true})` = Zeichenreihenfolge nach Strata/Frame-Level wie im Spiel.
+(„RXN TESTS OK“); Vorschau mit `L.dump(…, {levels = true, noHover = true})` = Zeichenreihenfolge nach Strata/Frame-Level wie im
+Spiel, ohne HIGHLIGHT-Ebene. **2.0:** `Fenster.lua` = eigenes Fenster, liest RXP-Daten (`RXPFrame.CurrentStepFrame.framePool`
+mit `.step`/`.elements[j].button`, `RXP.GetGuideProgress`, `currentGuide.steps`); Haken = Klick auf RXPs CheckButton.
+**RXPFrame nie `Hide()`** (setzt `addon.isHidden` → RXP pausiert Automatik) – nur Alpha 0 + Scale 0.01, per Hook erzwungen.
+`Pfeil.lua` = Skin auf `RXP.arrowFrame` (Text-Hook „Ziel\n(Nyd)“, Rotation-Hook, Größe 44). `RXP.ReplaceNpcIds` ohne Element
+→ `N.ElementByText` sucht das Quest-Element der aktiven Schritte (sonst halbe Übersetzung).
 
 ## Claude-Skills (Plugin „wow-werkstatt“)
 `.claude/skills/` im Repo-Hauptordner: **`wow-tests`** (alle Tests: `bash wow-addons/tools/test_all.sh [ziel]`),

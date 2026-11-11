@@ -354,30 +354,51 @@ Aus 4.2 weiter offen: `C_Map.GetMapPosFromWorldPos`, Flugmeister-IDs, Hochplatea
 - Reichweite gibt es nur für Buff-Totems; Verbrennung/Magma/Erdbindung usw. gelten als „steht“, solange sie laufen.
 
 
-# Ingame-Test – RXPNeon 1.0.0
+# Ingame-Test – RXPNeon 2.0.0
 
 ## Start
 - [ ] `RXPGuides` und `RXPNeon` liegen in `Interface\AddOns`, WoW **komplett neu gestartet**, beide in der Add-on-Liste an.
 - [ ] Zygor aus (sonst zwei Pfeile gleichzeitig).
-- [ ] Nach dem Einloggen: RXP-Fenster mit Neon-Kopfkapsel, dunkler Glas-Fläche, grün-türkisem Rand; Fußzeile „RXP … v4.11.x“ lesbar.
-- [ ] Kein Guide geladen bzw. falsche Stufe → unten im Fenster Knopf **GUIDE FÜR STUFE X LADEN** mit deutschem Guide-Namen. Klick lädt ihn (nicht im Kampf).
-- [ ] `/rxn` zeigt Version, Befehle und den empfohlenen Guide.
+- [ ] Nach dem Einloggen: **Neon-Fenster** links (Glas, grün-türkiser Rand). Das alte RXP-Fenster ist **unsichtbar** (nicht weg: RXP arbeitet darunter weiter).
+- [ ] Kopf: Stufen-Kugel mit deiner Stufe, Gebiet als Verlaufsschrift, darunter „STUFE a–b · SPEEDRUN …“.
+- [ ] EP-Leiste: „x / y EP“, Prozent, blau „Erholt …%“ (nur mit Erholung); Leiste füllt sich beim Questen/Töten.
+- [ ] „SCHRITT n / gesamt“ mit dünner Fortschrittsleiste.
+- [ ] Kein passender Guide → im Fenster Knopf **GUIDE FÜR STUFE X LADEN**. Klick lädt ihn (nicht im Kampf).
+
+## JETZT-Karte (das Wichtigste)
+- [ ] Oben groß der aktuelle Schritt: farbiges Wort (**ANNEHMEN** gelb, **ABGEBEN** blau, **ERLEDIGEN** grün, **FLIEGEN** türkis …), „SCHRITT n“, Entfernung „N m“ zum Pfeil-Ziel.
+- [ ] Zeilen mit Kreis = abhakbar; Punkt = Hinweis („Sprich mit …“). Erledigte Zeilen grau mit Haken.
+- [ ] **Quest annehmen → Haken kommt sofort** (eigener Questlog-Abgleich). Genau der Fall vom Screenshot („Annehmen“ obwohl angenommen) prüfen.
+- [ ] Alles erledigt → „ALLES ERLEDIGT“ + Knopf **ERLEDIGT · WEITER ›**; RXP springt normalerweise selbst weiter, der Knopf ist die Notbremse.
+- [ ] Klick auf eine Zeile setzt/entfernt den Haken (wie bei RXP). Kleiner „›“-Knopf oben rechts = Schritt überspringen.
+- [ ] Weitere aktive Schritte darunter als kleine Karte „AUCH AKTIV · …“.
+
+## ALS NÄCHSTES + Fuß
+- [ ] 4 kommende Schritte als runde Zeilen mit Symbol und „#Nummer“; Maus drauf zeigt alle Zeilen des Schritts.
+- [ ] **GUIDE WÄHLEN** und „•••“ öffnen RXPs Guide-Menü. Pfeil-Knopf oben schaltet den Pfeil an/aus.
+- [ ] Schalter DEUTSCH: aus = englische Originaltexte, an = deutsch.
+- [ ] Fenster mit linker Maustaste verschieben, `/reload`: Position bleibt. `/rxn groesse 1.2`, `/rxn fest`, `/rxn reset`.
 
 ## Texte
-- [ ] Schritte deutsch: „Sprich mit …“, „Annehmen: <deutscher Quest-Titel>“, „Abgeben: …“, „Töte … Plündere sie für …“, „Flieg nach …“.
-- [ ] NPC- und Gegenstandsnamen in Farbe sind die deutschen Namen aus dem Spiel (mit Questlog/Tooltip vergleichen).
-- [ ] Quests werden trotz deutscher Titel **abgehakt** (RXP prüft über die Quest-ID; Annehmen/Abgeben einmal testen).
+- [ ] **Keine halben Übersetzungen mehr** („Annehmen The Sacred Flame“ war der Fehler): Quest-Titel deutsch, auch in RXPs Original-Fenster (`/rxn fenster rxp`).
+- [ ] NPC- und Gegenstandsnamen in Farbe sind die deutschen Namen aus dem Spiel.
 - [ ] Guide-Auswahlmenü: Guide-Namen deutsch („28-30 Tausend Nadeln“, „(Horde)“).
-- [ ] `/rxn englisch` → Originaltexte, `/rxn deutsch` → wieder deutsch.
 
-## Optik
-- [ ] Aktueller Schritt: Glas-Karte mit Neon-Balken links, Nummer als grün-türkise Pille; Liste darunter mit runden Zeilen, Maus-Über leuchtet.
-- [ ] Haken-Kreise grün/türkis, Pfeil mit grünem Glow, Text darunter lesbar.
-- [ ] `/rxn aus` → altes RXP-Theme zurück, Skin weg; `/rxn an` → Neon wieder da.
-- [ ] Fenster verschieben, Größe ändern, Guide wechseln, `/reload`: kein Lua-Fehler.
+## Pfeil
+- [ ] Größerer facettierter Neon-Pfeil auf ruhiger Glas-Scheibe mit Skala; Leuchten dreht mit.
+- [ ] Darunter Kapsel „245 m“ und das Ziel auf Deutsch; RXPs alter Text ist weg.
+- [ ] Pfeil-Größe über RXP-Optionen (Pfeil-Skalierung) wirkt weiter.
+
+## Umschalten
+- [ ] `/rxn fenster rxp` → RXPs Original-Fenster (mit Neon-Skin) zurück, Neon-Fenster weg; `/rxn fenster neon` → wieder Neon.
+- [ ] `/rxn aus` → komplett RXP-Standard (Theme, Fenster, Pfeil); `/rxn an` → Neon wieder da.
+- [ ] `/rxn abgleich aus` → Haken nur noch von RXP selbst.
+- [ ] Guide wechseln, `/reload`, Kampf, Flugpfad: kein Lua-Fehler.
 
 ## Nur im Spiel prüfbar (ehrlich)
-- Nur das klassische RXP-Fenster (v1) wird gestylt, nicht das Beta-Fenster (v2) aus den RXP-Einstellungen.
+- Nur mit dem klassischen RXP-Fenster (v1): ist in den RXP-Einstellungen das Beta-Fenster (v2) an, bleibt das Neon-Fenster leer.
+- Ob RXP das Abhaken selbst schafft, hängt von RXP ab; der Questlog-Abgleich fragt dasselbe Spiel (`C_QuestLog.IsOnQuest` / `IsQuestFlaggedCompleted`).
+- Spielsymbole (Atlas) in den Kugeln: in der Vorschau eigene Ersatz-Symbole, im Spiel Blizzards Symbole, falls vorhanden.
 - Freie Hinweissätze der Guides sind teils noch englisch (keine Vorlage für jeden Satz); Zaubernamen in [Klammern] bleiben englisch.
 - Quest-Titel, die in der Namenstabelle fehlen, holt RXPNeon live vom Spiel (`C_QuestLog.GetTitleForQuestID`) – klappt nur, wenn das Spiel die Quest kennt.
 - Klassen-Symbol im Kopf (rund) kommt aus Blizzards `UI-Classes-Circles` – in der Vorschau nicht darstellbar.

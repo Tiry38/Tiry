@@ -227,7 +227,8 @@ function L.dump(root, path, opts)
       return (a.__sub or 0) < (b.__sub or 0)
     end)
     for _, rgn in ipairs(regions) do
-      if rgn.__shown then
+      -- opts.noHover: HIGHLIGHT-Ebene (nur bei Mauszeiger sichtbar) nicht zeichnen
+      if rgn.__shown and not (opts and opts.noHover and rgn.__layer == "HIGHLIGHT") then
         local r = L.rect(rgn)
         if rgn.__kind == "Texture" then
           local c = rgn.__color or { 1, 1, 1, 1 }

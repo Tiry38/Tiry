@@ -33,6 +33,7 @@ end
 local ALLOWED = {
   Frame = allowed("SimpleFrameAPI"),
   Button = allowed("SimpleFrameAPI", "SimpleButtonAPI"),
+  CheckButton = allowed("SimpleFrameAPI", "SimpleButtonAPI", "SimpleCheckboxAPI"),
   ScrollFrame = allowed("SimpleFrameAPI", "SimpleScrollFrameAPI"),
   EditBox = allowed("SimpleFrameAPI", "SimpleEditBoxAPI"),
   Texture = allowed("SimpleRegionAPI", "SimpleTextureBaseAPI", "SimpleTextureAPI"),
@@ -132,7 +133,16 @@ function Obj.IsVisible(o)
 end
 function Obj.GetName(o) return o.__name end
 function Obj.GetParent(o) return o.__parent end
-function Obj.SetParent(o, p) o.__parent = p end
+function Obj.SetParent(o, p)
+  -- wie im Spiel: das Objekt wandert in die Kinder-Liste des neuen Eltern-Frames
+  local old = o.__parent
+  if old == p then return end
+  if old and old.__children then
+    for i, c in ipairs(old.__children) do if c == o then table.remove(old.__children, i) break end end
+  end
+  o.__parent = p
+  if p then p.__children = p.__children or {}; table.insert(p.__children, o) end
+end
 function Obj.GetObjectType(o) return o.__kind end
 function Obj.IsObjectType(o, t) return o.__kind == t end
 function Obj.IsForbidden() return false end
@@ -199,7 +209,15 @@ function Obj.SetEnabled(o, v) o.__enabled = v and true or false call(o, v and "O
 function Obj.Enable(o) Obj.SetEnabled(o, true) end
 function Obj.Disable(o) Obj.SetEnabled(o, false) end
 function Obj.IsEnabled(o) return o.__enabled end
-function Obj.Click(o, button) if o.__enabled then call(o, "OnClick", button or "LeftButton", false) end end
+function Obj.Click(o, button)
+  if not o.__enabled then return end
+  if o.__kind == "CheckButton" then o.__checked = not o.__checked end   -- wie im Spiel: Klick schaltet um
+  call(o, "PreClick", button or "LeftButton", false)
+  call(o, "OnClick", button or "LeftButton", false)
+  call(o, "PostClick", button or "LeftButton", false)
+end
+function Obj.SetChecked(o, v) o.__checked = v and true or false end
+function Obj.GetChecked(o) return o.__checked == true end
 
 function Obj.CreateTexture(o, name, layer, template, sub)
   if layer then assert(LAYERS[layer], "Ungültige Ebene: " .. tostring(layer)) end

@@ -1,7 +1,7 @@
--- RXPNeon 1.0.0 (Tiry): Neon-Glas-Optik und deutsche Schritt-Texte fuer RestedXP Guides (RXPGuides).
+-- RXPNeon 2.0.0 (Tiry): eigenes Neon-Guide-Fenster, Neon-Pfeil und deutsche Schritt-Texte fuer RestedXP Guides.
 -- Eigenes Zusatz-Add-on: aendert RXP nicht, sondern nutzt dessen Theme-Schnittstelle und haengt sich an
 -- oeffentliche Funktionen (hooksecurefunc / Wrapper). Ohne RXPGuides tut es nichts.
-local VERSION = "1.0.0"
+local VERSION = "2.0.0"
 local ADDON = ...
 RXPNeon = RXPNeon or {}
 local N = RXPNeon
@@ -12,7 +12,7 @@ local THEME_NAME = "Tiry Neon"
 local FONT = "Fonts\\ARIALN.TTF"
 local GREEN = { 0.224, 1.0, 0.420 }  -- #39FF6B
 local TEAL = { 0.176, 0.886, 0.902 } -- #2DE2E6
-local DEF = { skin = true, deutsch = true, tipp = true }
+local DEF = { skin = true, deutsch = true, tipp = true, fenster = "neon", abgleich = true, scale = 1, zeilen = 4 }
 local DB
 
 local function P(msg) print("|cff39ff6bRXP|r|cff2de2e6Neon|r: " .. tostring(msg)) end
@@ -202,18 +202,7 @@ function N.SkinSteps()
 end
 
 function N.SkinArrow()
-  local r = RXP(); local af = r and r.arrowFrame
-  if not (af and DB and DB.skin) then return end
-  if not af.rxnGlow then
-    af.rxnGlow = af:CreateTexture(nil, "BACKGROUND")
-    af.rxnGlow:SetTexture(MEDIA .. "glow"); af.rxnGlow:SetPoint("CENTER"); af.rxnGlow:SetSize(76, 76)
-    af.rxnGlow:SetVertexColor(GREEN[1], GREEN[2], GREEN[3], 0.30); af.rxnGlow:SetBlendMode("ADD")
-  end
-  af:SetSize(40, 40)
-  if af.text then
-    af.text:SetFont(FONT, 13, "OUTLINE")
-    af.text:SetTextColor(0.93, 0.96, 0.95)
-  end
+  if N.Pfeil then N.Pfeil.Apply() end
 end
 
 -- ---------------------------------------------------------------- Deutsch: Hooks
@@ -243,6 +232,23 @@ local function TranslateGuideNames()
 end
 N.TranslateGuideNames = TranslateGuideNames
 
+-- Element eines aktiven Schritts zu einem Anzeigetext (nur aktive Schritte: wenige, eindeutig genug)
+function N.ElementByText(text)
+  local r = RXP()
+  local g = r and r.currentGuide
+  if not (g and g.steps) then return end
+  local F = _G.RXPFrame
+  local pool = F and F.CurrentStepFrame and F.CurrentStepFrame.framePool
+  for _, sf in ipairs(pool or {}) do
+    local st = sf.step
+    if st and st.elements then
+      for _, el in ipairs(st.elements) do
+        if el.text == text and el.questId then return el end
+      end
+    end
+  end
+end
+
 local hooked = false
 local function InstallHooks()
   local r = RXP()
@@ -252,6 +258,9 @@ local function InstallHooks()
   if type(r.ReplaceNpcIds) == "function" then
     local orig = r.ReplaceNpcIds
     r.ReplaceNpcIds = function(text, element)
+      -- RXP ruft das fuer die aktiven Schritte OHNE Element auf -> Element ueber den Text finden,
+      -- sonst fehlt der Quest-Titel-Tausch ("Annehmen The Sacred Flame")
+      if element == nil and type(text) == "string" then element = N.ElementByText(text) end
       local out = orig(text, element)
       if DB and DB.deutsch and type(out) == "string" then
         local ok, t = pcall(N.T, out, element)
@@ -285,8 +294,11 @@ local function InstallHooks()
   end
   -- 4) Skin nach jedem Neuzeichnen
   if _G.RXPFrame and _G.RXPFrame.UpdateVisuals then hooksecurefunc(_G.RXPFrame, "UpdateVisuals", function() N.SkinMain() end) end
-  if type(r.SetStep) == "function" then hooksecurefunc(r, "SetStep", function() N.SkinSteps(); N.UpdateTipp() end) end
-  if type(r.LoadGuide) == "function" then hooksecurefunc(r, "LoadGuide", function() N.SkinSteps(); N.UpdateTipp() end) end
+  if type(r.SetStep) == "function" then hooksecurefunc(r, "SetStep", function() N.SkinSteps(); N.UpdateTipp(); N.Fenster.Dirty() end) end
+  if type(r.LoadGuide) == "function" then hooksecurefunc(r, "LoadGuide", function() N.SkinSteps(); N.UpdateTipp(); N.Fenster.Dirty() end) end
+  -- 5) Neon-Fenster: jedes Neuzeichnen der aktiven Schritte bei RXP -> eigenes Fenster neu
+  local C = _G.RXPFrame and _G.RXPFrame.CurrentStepFrame
+  if C and type(C.UpdateText) == "function" then hooksecurefunc(C, "UpdateText", function() N.Fenster.Dirty() end) end
   if type(r.SetupArrow) == "function" then hooksecurefunc(r, "SetupArrow", function() N.SkinArrow() end) end
 end
 N.InstallHooks = InstallHooks
@@ -308,7 +320,9 @@ function N.Apply()
     pcall(r.RenderFrame)            -- Theme laden, Fenster neu zeichnen, Guide-Menue neu (deutsche Namen)
     if r.SetupArrow then pcall(r.SetupArrow) end
   end
-  N.SkinMain(); N.SkinSteps(); N.SkinArrow(); N.UpdateTipp()
+  N.SkinMain(); N.SkinSteps(); N.SkinArrow()
+  N.Fenster.Apply()
+  N.UpdateTipp()
   return true
 end
 
@@ -365,6 +379,7 @@ function N.LoadRecommended()
 end
 
 local tipp
+function N.TippButton() return tipp end
 function N.UpdateTipp()
   local F = _G.RXPFrame
   if not (F and DB) then return end
@@ -390,6 +405,19 @@ function N.UpdateTipp()
   local cur = r and r.currentGuide
   local need = DB.tipp and not (cur and cur.steps and #cur.steps > 0 and GuideFits(cur, lvl))
   local g = need and N.Recommend(lvl)
+  -- im Neon-Fenster sitzt der Tipp dort (RXPs Fenster ist dann unsichtbar)
+  local host = N.Fenster.active and N.Fenster.Frame() or F.BottomFrame or F
+  if tipp:GetParent() ~= host then
+    tipp:SetParent(host)
+    tipp:ClearAllPoints()
+    if host == N.Fenster.Frame() then
+      tipp:SetSize(312, 54); tipp.name:SetWidth(290); tipp:SetFrameLevel(host:GetFrameLevel() + 6)
+    else
+      tipp:SetSize(236, 46); tipp.name:SetWidth(220); tipp:SetPoint("BOTTOM", host, "BOTTOM", 0, 14)
+      tipp:SetFrameLevel((F.GuideName and F.GuideName:GetFrameLevel() or 6) + 14)
+    end
+  end
+  local was = tipp:IsShown()
   if g and not (cur and cur.name == g.name) then
     tipp.top:SetText("GUIDE FÜR STUFE " .. lvl .. " LADEN")
     tipp.name:SetText(N.T(g.name))
@@ -397,6 +425,7 @@ function N.UpdateTipp()
   else
     tipp:Hide()
   end
+  if was ~= tipp:IsShown() then N.Fenster.Dirty() end
 end
 
 -- ---------------------------------------------------------------- Start
@@ -404,6 +433,9 @@ local ev = CreateFrame("Frame")
 ev:RegisterEvent("ADDON_LOADED")
 ev:RegisterEvent("PLAYER_LOGIN")
 ev:RegisterEvent("PLAYER_LEVEL_UP")
+for _, e in ipairs({ "PLAYER_XP_UPDATE", "UPDATE_EXHAUSTION", "QUEST_ACCEPTED", "QUEST_TURNED_IN", "QUEST_REMOVED", "QUEST_LOG_UPDATE" }) do
+  ev:RegisterEvent(e)
+end
 ev:SetScript("OnEvent", function(_, e, a1)
   if e == "ADDON_LOADED" and a1 == ADDON then
     RXPNeonDB = RXPNeonDB or {}
@@ -419,6 +451,9 @@ ev:SetScript("OnEvent", function(_, e, a1)
     if C_Timer and C_Timer.After then C_Timer.After(0.5, go) else go() end
   elseif e == "PLAYER_LEVEL_UP" then
     if C_Timer and C_Timer.After then C_Timer.After(1, N.UpdateTipp) else N.UpdateTipp() end
+    N.Fenster.Dirty()
+  elseif DB then
+    N.Fenster.Dirty()      -- EP, Erholung, Questlog: Fenster beim naechsten Tick neu
   end
 end)
 
@@ -427,10 +462,26 @@ SLASH_RXPNEON2 = "/rxpneon"
 SlashCmdList.RXPNEON = function(msg)
   msg = (msg or ""):lower():gsub("^%s+", ""):gsub("%s+$", "")
   if not DB then return end
+  local num = msg:match("^gr%S*%s+([%d%.,]+)$")
+  num = num and tonumber((num:gsub(",", ".")))
   if msg == "aus" or msg == "skin aus" then
     DB.skin = false; N.Apply(); P("Neon-Optik |cffff5555aus|r (RXP-Standard).")
   elseif msg == "an" or msg == "skin an" then
     DB.skin = true; N.Apply(); P("Neon-Optik |cff39ff6ban|r.")
+  elseif msg == "fenster rxp" or msg == "fenster alt" then
+    DB.fenster = "rxp"; N.Apply(); P("Fenster: RXP-Original (mit Neon-Optik).")
+  elseif msg == "fenster" or msg == "fenster neon" then
+    DB.fenster = "neon"; N.Apply(); P("Fenster: |cff39ff6bNeon-Fenster|r.")
+  elseif num then
+    DB.scale = math.max(0.6, math.min(1.6, num)); N.Apply(); P(("Fenster-Größe: %.2f"):format(DB.scale))
+  elseif msg == "reset" then
+    DB.scale = 1; N.Fenster.Reset(); N.Apply(); P("Fenster-Position und -Größe zurückgesetzt.")
+  elseif msg == "fest" then
+    DB.fest = not DB.fest; P(DB.fest and "Fenster fixiert." or "Fenster verschiebbar (linke Maustaste ziehen).")
+  elseif msg == "abgleich aus" then
+    DB.abgleich = false; P("Questlog-Abgleich |cffff5555aus|r: Haken setzt nur noch RXP.")
+  elseif msg == "abgleich" or msg == "abgleich an" then
+    DB.abgleich = true; N.Fenster.Dirty(); P("Questlog-Abgleich |cff39ff6ban|r: angenommene/abgegebene Quests werden abgehakt.")
   elseif msg == "deutsch aus" or msg == "englisch" then
     DB.deutsch = false; N.ClearCache(); N.Apply(); P("Schritt-Texte: |cffff5555Original (englisch)|r. /reload für alte Texte im Fenster.")
   elseif msg == "deutsch" or msg == "deutsch an" then
@@ -444,8 +495,10 @@ SlashCmdList.RXPNEON = function(msg)
   else
     local g = N.Recommend()
     P("Version " .. VERSION .. " – Befehle:")
-    print("  /rxn an | aus – Neon-Optik   ·   /rxn deutsch | englisch – Schritt-Texte")
+    print("  /rxn an | aus – Neon-Optik   ·   /rxn fenster neon | rxp – Neon-Fenster oder RXP-Original")
+    print("  /rxn groesse 1.2 – Fenster-Größe (0.6–1.6)   ·   /rxn fest – fixieren   ·   /rxn reset")
+    print("  /rxn deutsch | englisch – Schritt-Texte   ·   /rxn abgleich an | aus – Haken laut Questlog")
     print("  /rxn guide – passenden Guide laden" .. (g and (" (|cff39ff6b" .. N.T(g.name) .. "|r)") or ""))
-    print("  /rxn tipp an | aus – Guide-Tipp im Fenster   ·   Schriftgröße: RXP-Optionen")
+    print("  /rxn tipp an | aus – Guide-Tipp im Fenster")
   end
 end
