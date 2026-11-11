@@ -1,7 +1,7 @@
 -- RXPNeon 2.0.0 (Tiry): eigenes Neon-Guide-Fenster, Neon-Pfeil und deutsche Schritt-Texte fuer RestedXP Guides.
 -- Eigenes Zusatz-Add-on: aendert RXP nicht, sondern nutzt dessen Theme-Schnittstelle und haengt sich an
 -- oeffentliche Funktionen (hooksecurefunc / Wrapper). Ohne RXPGuides tut es nichts.
-local VERSION = "2.0.1"
+local VERSION = "2.1.0"
 local ADDON = ...
 RXPNeon = RXPNeon or {}
 local N = RXPNeon
@@ -12,7 +12,7 @@ local THEME_NAME = "Tiry Neon"
 local FONT = "Fonts\\ARIALN.TTF"
 local GREEN = { 0.224, 1.0, 0.420 }  -- #39FF6B
 local TEAL = { 0.176, 0.886, 0.902 } -- #2DE2E6
-local DEF = { skin = true, deutsch = true, tipp = true, fenster = "neon", abgleich = true, scale = 1, zeilen = 4 }
+local DEF = { skin = true, deutsch = true, tipp = true, fenster = "neon", abgleich = true, scale = 1, zeilen = 4, grind = false }
 local DB
 
 local function P(msg) print("|cff39ff6bRXP|r|cff2de2e6Neon|r: " .. tostring(msg)) end
@@ -478,6 +478,10 @@ SlashCmdList.RXPNEON = function(msg)
     DB.scale = 1; N.Fenster.Reset(); N.Apply(); P("Fenster-Position und -Größe zurückgesetzt.")
   elseif msg == "fest" then
     DB.fest = not DB.fest; P(DB.fest and "Fenster fixiert." or "Fenster verschiebbar (linke Maustaste ziehen).")
+  elseif msg == "grind an" or msg == "grinden an" then
+    DB.grind = true; N.Fenster.Dirty(); P("Grind-Schritte |cff39ff6bwerden angezeigt|r (RXP wartet dann, bis du die Stufe hast).")
+  elseif msg == "grind aus" or msg == "grinden aus" or msg == "grind" then
+    DB.grind = false; N.Fenster.Dirty(); P("Grind-Schritte |cffff9929aus|r: werden übersprungen, Haken setzt RXPNeon.")
   elseif msg == "abgleich aus" then
     DB.abgleich = false; P("Questlog-Abgleich |cffff5555aus|r: Haken setzt nur noch RXP.")
   elseif msg == "abgleich" or msg == "abgleich an" then
@@ -498,6 +502,7 @@ SlashCmdList.RXPNEON = function(msg)
     print("  /rxn an | aus – Neon-Optik   ·   /rxn fenster neon | rxp – Neon-Fenster oder RXP-Original")
     print("  /rxn groesse 1.2 – Fenster-Größe (0.6–1.6)   ·   /rxn fest – fixieren   ·   /rxn reset")
     print("  /rxn deutsch | englisch – Schritt-Texte   ·   /rxn abgleich an | aus – Haken laut Questlog")
+    print("  /rxn grind an | aus – Grind-Schritte zeigen (an) oder überspringen (aus, Standard)   ·   Größe: Ecke unten rechts ziehen")
     print("  /rxn guide – passenden Guide laden" .. (g and (" (|cff39ff6b" .. N.T(g.name) .. "|r)") or ""))
     print("  /rxn tipp an | aus – Guide-Tipp im Fenster")
   end

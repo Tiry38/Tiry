@@ -405,6 +405,103 @@ W.call(find(win, "GUIDE WÄHLEN"):GetParent(), "OnClick")
 eq(menuOpened, 1, "GUIDE WÄHLEN oeffnet RXP-Menue")
 RXP:LoadGuideTable("RestedXP Forever Guide (H)", "28-30 Thousand Needles"); RXP.SetStep(13); tick()
 
+-- ---------------------------------------------------------------- 2.1: Groesse per Ecke ziehen
+local grip = win.grip
+ok(grip and grip:IsVisible(), "Ecken-Griff sichtbar")
+local CX = 440
+G.GetCursorPosition = function() return CX, 300 end
+W.call(grip, "OnMouseDown", "LeftButton")
+CX = 100 + 340 * 1.25            -- Fenster links bei 100 (Nachbau), 340 breit -> rechte Kante auf 125 %
+W.call(grip, "OnUpdate", 0.02)
+eq(win:GetScale(), 1.25, "Ecke ziehen: groesser")
+local p1, rel, rp, px, py = win:GetPoint(1)
+ok(p1 == "TOPLEFT" and rp == "BOTTOMLEFT" and math.abs(px - 80) < 0.01 and math.abs(py - 560) < 0.01, "linke obere Ecke bleibt stehen")
+CX = 0
+W.call(grip, "OnUpdate", 0.02)
+eq(win:GetScale(), 0.6, "Ecke ziehen: Untergrenze 0.6")
+CX = 3000
+W.call(grip, "OnUpdate", 0.02)
+eq(win:GetScale(), 1.6, "Ecke ziehen: Obergrenze 1.6")
+CX = 100 + 340 * 0.9
+W.call(grip, "OnUpdate", 0.02)
+W.call(grip, "OnMouseUp", "LeftButton")
+eq(RXPNeonDB.scale, 0.9, "Groesse gespeichert")
+ok(RXPNeonDB.pos and RXPNeonDB.pos[1] == "TOPLEFT" and RXPNeonDB.pos[2] == "BOTTOMLEFT", "Position gespeichert")
+ok(grip:GetScript("OnUpdate") == nil, "nach Loslassen kein Ziehen mehr")
+W.call(grip, "OnClick", "RightButton")
+eq(win:GetScale(), 1, "Rechtsklick: normale Groesse")
+RXPNeonDB.fest = true
+W.call(grip, "OnMouseDown", "LeftButton")
+ok(grip:GetScript("OnUpdate") == nil, "fixiert (/rxn fest): keine Groessenaenderung")
+RXPNeonDB.fest = nil
+
+-- ---------------------------------------------------------------- 2.1: Grind-Schritte, Vorquest fehlt, Quest nicht im Log
+RXP.icons = { error = "|TInterface/RXP/error:0|t" }
+local GT = guide("RestedXP Forever Guide (H)", "28-30 Grind Test", { currentStep = 1, steps = {
+  { elements = { { text = ">>Grinding to level 29 here is important, due to the next 3 quests being quite hard", textOnly = true },
+                 { tag = "goto", textOnly = true },
+                 { tag = "xp", level = 29, text = "Grind to level 29" } } },
+  { elements = { { tag = "complete", questId = 4841, text = "Kill " .. C .. "Galak Scouts|r" },
+                 { tag = "xp", level = 29, text = "Grind to level 29" } } },
+  { elements = { { tag = "xp", level = 30, skipstep = 1, textOnly = true },
+                 { tag = "turnin", questId = 1146, text = "Turn in The Swarm Grows" } } },
+  { elements = { { tag = "accept", questId = 1197, text = "Accept The Sacred Flame",
+                   icon = RXP.icons.error, tooltip = "|cFFFFFF00Missing pre-requisites:|r\n|TInterface/turnin:0|tThe Sacred Flame (1196)" } } },
+  { elements = { { tag = "xp", level = 30, text = "Grind to level 30" } } },
+  { elements = { { tag = "fly", text = "Fly to Freewind Post" } } },
+} })
+RXP:LoadGuide(GT)
+local printsBefore = #W.prints
+N.Fenster.Dirty(); tick()
+local g1 = GT.steps[1].elements[3]
+ok(g1.skip == true and g1.rxnGrind, "reiner Grind-Schritt: Haken bei RXP gesetzt")
+tick()
+eq(RXP.GetGuideProgress(), 2, "reiner Grind-Schritt bleibt aktuell -> RXPNeon geht einen Schritt weiter")
+local said = false
+for i = printsBefore + 1, #W.prints do if W.prints[i]:find("Grind-Schritt (Stufe 29) übersprungen", 1, true) then said = true end end
+ok(said, "Chat sagt, dass ein Grind-Schritt uebersprungen wurde")
+N.Fenster.Dirty(); tick()
+t = vis(win)
+ok(GT.steps[2].elements[2].skip == true, "gemischter Schritt: Grind-Teil abgehakt")
+ok(has(t, "Galak"), "gemischter Schritt: Quest-Teil bleibt")
+ok(not has(t, "Stufe 29") and not has(t, "level 29") and not has(t, "EP SAMMELN"), "kein Grind-Befehl im Fenster")
+ok(not has(t, "#5") and has(t, "#3") and has(t, "#4") and has(t, "#6"), "Als naechstes: reiner Grind-Schritt fehlt")
+eq(GT.steps[2].elements[1].skip, nil, "Quest-Teil NICHT automatisch abgehakt")
+-- Abgeben, ohne die Quest zu haben: RXP haengt sonst still
+RXP.SetStep(3); N.Fenster.Dirty(); tick()
+t = vis(win)
+ok(has(t, "QUEST NICHT IM LOG") and has(t, "überspringen"), "Abgeben ohne Quest im Log: Hinweis")
+ok(not has(t, "Erst erledigen, dann hier abgeben"), "kein falscher Abgeben-Text")
+ok(not GT.steps[3].elements[1].rxnGrind, "Sprungmarke .xp <30,1 bleibt unberuehrt")
+QL[1146] = "on"; N.Fenster.Dirty(); tick()
+ok(not has(vis(win), "QUEST NICHT IM LOG"), "Quest im Log -> Hinweis weg")
+QL[1146] = nil
+local tin2 = GT.steps[3].elements[2]; tin2.skipIfMissing = true; N.Fenster.Dirty(); tick()
+ok(not has(vis(win), "QUEST NICHT IM LOG"), "RXP ueberspringt selbst (skipIfMissing) -> kein Hinweis")
+-- Annehmen mit fehlender Vorquest
+RXP.SetStep(4); N.Fenster.Dirty(); tick()
+t = vis(win)
+ok(has(t, "VORQUEST FEHLT") and has(t, "• Die heilige Flamme"), "Vorquest fehlt: deutscher Quest-Name")
+if OUT then L.dump(win, OUT .. "/rxn_vorquest.tsv", { levels = true, noHover = true }) end
+probs = L.problems(win)
+ok(#probs == 0, "Layout Vorquest: " .. tostring(probs[1]))
+-- Grind wieder einschalten: Schritt wird gezeigt, nichts abgehakt
+SlashCmdList.RXPNEON("grind an")
+RXP.SetStep(5); N.Fenster.Dirty(); tick(); tick()
+t = vis(win)
+ok(has(t, "EP SAMMELN") and not GT.steps[5].elements[1].skip and RXP.GetGuideProgress() == 5, "/rxn grind an: Grind-Schritt sichtbar, kein Haken")
+SlashCmdList.RXPNEON("grind aus")
+N.Fenster.Dirty(); tick(); tick()
+ok(GT.steps[5].elements[1].skip == true and RXP.GetGuideProgress() == 6, "/rxn grind aus: wieder uebersprungen")
+-- im Kampf: nichts anklicken
+GT.steps[5].elements[1].skip, GT.steps[5].elements[1].rxnGrind, GT.steps[5].rxnGrindJump = nil, nil, nil
+W.combat = true; RXP.SetStep(5); N.Fenster.Dirty(); tick()
+ok(not GT.steps[5].elements[1].skip, "im Kampf kein Haken")
+W.combat = false; N.Fenster.Dirty(); tick()
+ok(GT.steps[5].elements[1].skip == true, "nach dem Kampf abgehakt")
+eq(#W.errors, 0, "keine Fehler Grind/Hinweise: " .. tostring(W.errors[1]))
+RXP:LoadGuideTable("RestedXP Forever Guide (H)", "28-30 Thousand Needles"); RXP.SetStep(13); tick()
+
 -- ---------------------------------------------------------------- Befehle
 SlashCmdList.RXPNEON("fenster rxp")
 ok(not win:IsShown() and F:GetAlpha() == 1 and F:GetScale() == 1, "/rxn fenster rxp: RXP-Original zurueck")

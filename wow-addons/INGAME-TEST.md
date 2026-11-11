@@ -382,7 +382,20 @@ Aus 4.2 weiter offen: `C_Map.GetMapPosFromWorldPos`, Flugmeister-IDs, Hochplatea
 - Reichweite gibt es nur für Buff-Totems; Verbrennung/Magma/Erdbindung usw. gelten als „steht“, solange sie laufen.
 
 
-# Ingame-Test – RXPNeon 2.0.1
+# Ingame-Test – RXPNeon 2.1.0
+
+## Neu in 2.1: Größe, Grinden, Annahme/Abgabe
+- [ ] Unten rechts im Fenster sitzen **grün-türkise Punkte** (Griff). Maus drauf → Hinweis „Größe ändern“.
+- [ ] Griff mit linker Maustaste ziehen: Fenster wird **größer/kleiner**, die **linke obere Ecke bleibt stehen**. Grenzen: 60 % bis 160 %.
+- [ ] `/reload`: Größe und Position bleiben. **Rechtsklick** auf den Griff = wieder normale Größe. Bei `/rxn fest` lässt sich nichts ziehen.
+- [ ] **Grind-Schritte** („Grinde bis Stufe X“ / `.xp`) tauchen nicht mehr auf: Kommt einer, springt das Fenster weiter, im Chat steht „Grind-Schritt (Stufe X) übersprungen“. Steckt der Grind-Teil in einem Schritt mit Quests, bleiben die Quest-Zeilen stehen.
+- [ ] `/rxn grind an` → Grind-Schritte wieder sichtbar („EP SAMMELN“); `/rxn grind aus` → wieder überspringen.
+- [ ] Im Kampf wird nichts übersprungen, erst danach.
+- [ ] Annehmen-Schritt, dessen Vorquest fehlt (RXP zeigt dann ein rotes Fehler-Symbol): Kasten **VORQUEST FEHLT** mit dem Namen der fehlenden Quest.
+- [ ] Abgeben-Schritt für eine Quest, die du **nicht** im Log hast: Kasten **QUEST NICHT IM LOG** – annehmen oder mit „›“ überspringen.
+- [ ] Ohne Grinden kann man **unter dem Stufenbereich** des nächsten Guides landen – dann Stufe im Kopf mit „STUFE a–b“ vergleichen.
+
+## Aus 2.0.1
 
 ## Neu in 2.0.1: „Abgeben geht noch nicht“
 - [ ] Ein Abgeben-Schritt für eine Quest, die du hast, die aber noch nicht fertig ist (z. B. „Die heilige Flamme“ bei Zangen mit „Gefüllte geätzte Phiole 0/1“): Die Abgeben-Zeile ist orange. Darunter steht der Kasten **ABGEBEN GEHT NOCH NICHT** mit dem offenen Ziel, bei der heiligen Flamme auch mit dem Ort (Mondbrunnen Eschental).
@@ -409,7 +422,7 @@ Aus 4.2 weiter offen: `C_Map.GetMapPosFromWorldPos`, Flugmeister-IDs, Hochplatea
 - [ ] 4 kommende Schritte als runde Zeilen mit Symbol und „#Nummer“; Maus drauf zeigt alle Zeilen des Schritts.
 - [ ] **GUIDE WÄHLEN** und „•••“ öffnen RXPs Guide-Menü. Pfeil-Knopf oben schaltet den Pfeil an/aus.
 - [ ] Schalter DEUTSCH: aus = englische Originaltexte, an = deutsch.
-- [ ] Fenster mit linker Maustaste verschieben, `/reload`: Position bleibt. `/rxn groesse 1.2`, `/rxn fest`, `/rxn reset`.
+- [ ] Fenster mit linker Maustaste verschieben, `/reload`: Position bleibt. Größe: Ecke ziehen oder `/rxn groesse 1.2`, `/rxn fest`, `/rxn reset`.
 
 ## Texte
 - [ ] **Keine halben Übersetzungen mehr** („Annehmen The Sacred Flame“ war der Fehler): Quest-Titel deutsch, auch in RXPs Original-Fenster (`/rxn fenster rxp`).
@@ -434,3 +447,5 @@ Aus 4.2 weiter offen: `C_Map.GetMapPosFromWorldPos`, Flugmeister-IDs, Hochplatea
 - Freie Hinweissätze der Guides sind teils noch englisch (keine Vorlage für jeden Satz); Zaubernamen in [Klammern] bleiben englisch.
 - Quest-Titel, die in der Namenstabelle fehlen, holt RXPNeon live vom Spiel (`C_QuestLog.GetTitleForQuestID`) – klappt nur, wenn das Spiel die Quest kennt.
 - Klassen-Symbol im Kopf (rund) kommt aus Blizzards `UI-Classes-Circles` – in der Vorschau nicht darstellbar.
+- Grind überspringen: RXPNeon hakt RXPs Grind-Zeile ab (wie ein Klick von dir); reiner Grind-Schritt → zusätzlich `RXP.SetStep(+1)`. Ob RXP dabei nie zurückspringt, zeigt erst das Spiel.
+- „VORQUEST FEHLT“ liest RXPs eigene Prüfung (Fehler-Symbol + Liste im Tooltip) – nur so gut wie RXPs Daten.

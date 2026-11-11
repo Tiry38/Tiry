@@ -299,6 +299,38 @@ local function Missing(id)
 end
 N.Missing = Missing
 
+-- Grind-Befehl von RXP (".xp 16" = "Grinde bis Stufe 16"). NICHT gemeint: ".xp <16,1" / ".xp >16,1" – das sind
+-- Sprungmarken (Schritt ueberspringen je nach Stufe, ohne Text), die bleiben wie sie sind.
+local function IsGrind(el)
+  return el and el.tag == "xp" and not el.skipstep and not el.textOnly
+end
+N.IsGrind = IsGrind
+local function GrindOff() return not (N.DB and N.DB.grind) end
+
+-- Hinweis-Texte: RXPs Textur-/Farbcodes raus
+local function Plain(s)
+  return (tostring(s or ""):gsub("|T[^|]*|t", ""):gsub("|c%x%x%x%x%x%x%x%x", ""):gsub("|r", ""):gsub("^%s+", ""):gsub("%s+$", ""))
+end
+
+-- RXP markiert "Annehmen" mit Fehler-Symbol, wenn eine Vorquest fehlt (Tooltip: "Missing pre-requisites:" + Quests).
+-- Dann kann RXP nie weiter – sagen, welche Quest fehlt.
+local function PreReq(el)
+  local r = RXPr()
+  if not (r and r.icons and r.icons.error and el.icon == r.icons.error) or type(el.tooltip) ~= "string" then return nil end
+  local out = {}
+  local first = true
+  for line in el.tooltip:gmatch("[^\n]+") do
+    if first then first = false
+    else
+      local id = tonumber(line:match("%((%d+)%)%s*$"))
+      local name = (id and N.QuestTitle and N.QuestTitle(id)) or Plain(line:gsub("%s*%(%d+%)%s*$", ""))
+      if name and name ~= "" then out[#out + 1] = name end
+    end
+  end
+  return #out > 0 and out or nil
+end
+N.PreReq = PreReq
+
 local function Progress()
   local r = RXPr()
   local g = r and r.currentGuide
@@ -312,16 +344,24 @@ end
 -- Aktive Schritte: genau die, die RXP gerade oben anzeigt (mit seinen Haken-Knoepfen)
 local function ActiveSteps()
   local F = RXPF()
-  local out = {}
+  local out, grind = {}, {}
+  local hideGrind = GrindOff()
   local pool = F and F.CurrentStepFrame and F.CurrentStepFrame.framePool
   for _, sf in ipairs(pool or {}) do
     local st = sf.step
     if st and sf:IsShown() and sf:GetAlpha() > 0 and st.active ~= false then
       local lines, best, bestRank, open, total = {}, nil, -1, 0, 0
+      local g = { step = st, efs = {}, other = 0 }
       for j, el in ipairs(st.elements or {}) do
         local ef = sf.elements and sf.elements[j]
         local shown = ef and ef:IsShown() and ef:GetAlpha() > 0
         local txt = shown and ElText(el)
+        if hideGrind and IsGrind(el) then
+          if ef then g.efs[#g.efs + 1] = ef end
+          txt = nil
+        elseif shown and not el.textOnly and ef.button and ef.button:IsShown() then
+          g.other = g.other + 1
+        end
         if txt then
           local btn = ef.button
           local hasBox = btn and btn:IsShown() and not el.textOnly
@@ -329,14 +369,32 @@ local function ActiveSteps()
           local gameDone = GameDone(el)
           local done = hasBox and (rxpDone or gameDone) and true or false
           local typ = TypeOf(el)
-          local miss, hint
-          if el.tag == "turnin" and not done then miss, hint = Missing(tonumber(el.questId)) end
+          local miss, hint, head
+          local qid = tonumber(el.questId)
+          if el.tag == "turnin" and not done and qid then
+            miss, hint = Missing(qid)
+            if miss then head = "ABGEBEN GEHT NOCH NICHT"
+            elseif not OnQuest(qid) and not TurnedIn(qid) and not el.skipIfMissing then
+              -- RXP wartet aufs Abgeben einer Quest, die gar nicht im Log ist -> haengt fuer immer
+              head, miss = "QUEST NICHT IM LOG", { "Du hast diese Quest nicht (nie angenommen oder abgebrochen)." }
+              hint = "Annehmen, falls noch möglich – sonst mit › überspringen."
+            end
+          elseif el.tag == "accept" and not done then
+            local pre = PreReq(el)
+            if pre then head, miss, hint = "VORQUEST FEHLT", pre, "Erst diese Quest(s) abschließen – oder mit › überspringen." end
+          end
           lines[#lines + 1] = { text = txt, el = el, ef = ef, box = hasBox, done = done, typ = typ,
-            sync = gameDone and not rxpDone and hasBox, miss = miss, hint = hint }
+            sync = gameDone and not rxpDone and hasBox, miss = miss, hint = hint, head = head }
           if hasBox then total = total + 1; if not done then open = open + 1 end end
           local rk = typ and RANK[typ] or 0
           if not done and rk > bestRank then best, bestRank = typ, rk end
         end
+      end
+      if #g.efs > 0 then
+        -- reiner Grind-Schritt: Hinweis-Zeilen ("Grinde hier bis 16, die naechsten Quests sind schwer") gleich mit weg
+        g.pure = g.other == 0
+        grind[#grind + 1] = g
+        if g.pure then lines = {} end
       end
       if #lines > 0 then
         if not best then for _, l in ipairs(lines) do if l.typ and (RANK[l.typ] or 0) > bestRank then best, bestRank = l.typ, RANK[l.typ] end end end
@@ -345,7 +403,7 @@ local function ActiveSteps()
       end
     end
   end
-  return out
+  return out, grind
 end
 N.ActiveSteps = ActiveSteps
 
@@ -362,8 +420,12 @@ local function NextSteps(cur, n)
     if st and not st.active and not st.hidewindow and not st.optional and not st.completed
       and (tonumber(st.level) or 0) <= lvl then
       local first, typ, rk, all = nil, nil, -1, {}
+      local hasGrind, other = false, false
+      local hideGrind = GrindOff()
       for _, el in ipairs(st.elements or {}) do
         local t = ElText(el)
+        if hideGrind and IsGrind(el) then hasGrind, t = true, nil
+        elseif not el.textOnly then other = true end
         if t then
           all[#all + 1] = t
           local ty = TypeOf(el)
@@ -372,6 +434,7 @@ local function NextSteps(cur, n)
         end
       end
       first = first or all[1]
+      if hasGrind and not other then first = nil end
       if first then out[#out + 1] = { index = i, text = first, typ = typ or "note", all = all, step = st } end
     end
     i = i + 1
@@ -391,6 +454,72 @@ local function SavePos()
   if not win then return end
   local p, _, rp, x, y = win:GetPoint(1)
   DB().pos = { p or "TOPLEFT", rp or "TOPLEFT", x or 0, y or 0 }
+end
+
+-- Groesse: an der Ecke unten rechts ziehen. Die linke obere Ecke bleibt stehen, Skala 0.6 – 1.6.
+local SMIN, SMAX = 0.6, 1.6
+local function ScaleBy(cx, drag)
+  local ui = UIParent:GetEffectiveScale() or 1
+  local eff = (cx - drag.left + drag.grab) / W
+  local s = min(SMAX, max(SMIN, eff / ui))
+  s = floor(s * 100 + 0.5) / 100
+  local e = s * ui
+  win:SetScale(s)
+  win:ClearAllPoints()
+  win:SetPoint("TOPLEFT", UIParent, "BOTTOMLEFT", drag.left / e, drag.top / e)
+  DB().scale = s
+  return s
+end
+N.ScaleBy = ScaleBy
+
+local function MakeGrip()
+  local gp = CreateFrame("Button", nil, win)
+  gp:SetSize(26, 26)
+  gp:SetPoint("BOTTOMRIGHT", win, "BOTTOMRIGHT", -4, 4)
+  gp:SetFrameLevel(win:GetFrameLevel() + 20)
+  gp.halo = MT(gp, "BACKGROUND", 0, "dot", "ADD"); gp.halo:SetPoint("CENTER", 2, -2); gp.halo:SetSize(44, 44)
+  gp.halo:SetVertexColor(GREEN[1], GREEN[2], GREEN[3], 0.10)
+  -- drei Neon-Punkte entlang der Ecke (Verlauf Gruen -> Tuerkis)
+  gp.dots = {}
+  local spots = { { 18, 6, 4.5, GREEN }, { 12, 12, 4, { 0.20, 0.95, 0.66 } }, { 6, 18, 3.5, TEAL },
+    { 18, 12, 3.5, { 0.20, 0.95, 0.66 } }, { 12, 18, 3, TEAL }, { 18, 18, 3, TEAL } }
+  for i, d in ipairs(spots) do
+    local t = MT(gp, "ARTWORK", 1, "white_circle"); t:SetSize(d[3], d[3])
+    t:SetPoint("CENTER", gp, "TOPLEFT", d[1] + 1, -d[2] - 1)
+    t:SetVertexColor(d[4][1], d[4][2], d[4][3], 0.85)
+    gp.dots[i] = t
+  end
+  gp.hl = MT(gp, "HIGHLIGHT", 0, "dot", "ADD"); gp.hl:SetPoint("CENTER", 2, -2); gp.hl:SetSize(52, 52)
+  gp.hl:SetVertexColor(GREEN[1], GREEN[2], GREEN[3], 0.35)
+  gp:SetScript("OnEnter", function(self) Tip(self, { "Größe ändern", "Ziehen = Fenster größer oder kleiner. Rechtsklick = normale Größe." }) end)
+  gp:SetScript("OnLeave", TipHide)
+  gp:RegisterForClicks("RightButtonUp")
+  gp:SetScript("OnClick", function()
+    local e0 = win:GetEffectiveScale()
+    local drag = { left = (win:GetLeft() or 0) * e0, top = (win:GetTop() or 0) * e0, grab = 0 }
+    ScaleBy(drag.left + W * (UIParent:GetEffectiveScale() or 1), drag)
+    SavePos(); N.Fenster.Refresh()
+  end)
+  gp:SetScript("OnMouseDown", function(self, button)
+    if button ~= "LeftButton" or (DB() and DB().fest) then return end
+    local e0 = win:GetEffectiveScale()
+    local cx = GetCursorPosition()
+    local left, top = (win:GetLeft() or 0) * e0, (win:GetTop() or 0) * e0
+    self.drag = { left = left, top = top, grab = left + W * e0 - cx }
+    for _, t in ipairs(self.dots) do t:SetAlpha(1) end
+    self:SetScript("OnUpdate", function(me)
+      local x = GetCursorPosition()
+      if me.drag and x then ScaleBy(x, me.drag) end
+    end)
+  end)
+  gp:SetScript("OnMouseUp", function(self)
+    if not self.drag then return end
+    self:SetScript("OnUpdate", nil)
+    self.drag = nil
+    SavePos()
+    N.Fenster.Refresh()
+  end)
+  return gp
 end
 
 local function MenuRXP()
@@ -463,6 +592,7 @@ local function Build()
   win.guideBtn.txt:SetPoint("CENTER", 0, 0); win.guideBtn.txt:SetText("GUIDE WÄHLEN")
   win.guideBtn.txt:SetTextColor(0.02, 0.07, 0.05); win.guideBtn.txt:SetShadowOffset(0, 0)
   win.guideBtn:SetScript("OnClick", MenuRXP)
+  win.grip = MakeGrip()
   win.swDe = Switch(win, "DEUTSCH", function() return DB().deutsch end, function(v)
     DB().deutsch = v and true or false; N.ClearCache(); if N.Apply then N.Apply() end
   end, { "Deutsche Texte", "Schritt-Texte, Namen und Quest-Titel auf Deutsch." })
@@ -625,15 +755,18 @@ local function LayoutCard(c, a, hero, y)
   end
   for j = #a.lines + 1, #c.lines do c.lines[j]:Hide() end
   -- offene Quest-Ziele vor dem Abgeben: klar sagen, warum der Schritt wartet
-  local warn = {}
+  local warn, head, abgeben = {}, nil, false
   for _, ln in ipairs(a.lines) do
     if ln.miss then
+      head = head or ln.head
+      if ln.head == "ABGEBEN GEHT NOCH NICHT" then abgeben = true end
       for _, m in ipairs(ln.miss) do warn[#warn + 1] = "|cffffd27a• " .. m .. "|r" end
       if ln.hint then warn[#warn + 1] = ln.hint end
     end
   end
   if hero and #warn > 0 then
-    warn[#warn + 1] = "|cff9fb0aaErst erledigen, dann hier abgeben – RXP geht dann selbst weiter. Oder mit › überspringen.|r"
+    if abgeben then warn[#warn + 1] = "|cff9fb0aaErst erledigen, dann hier abgeben – RXP geht dann selbst weiter. Oder mit › überspringen.|r" end
+    c.warn.head:SetText(head or "ACHTUNG")
     c.warn.txt:SetWidth(tw - 16)
     c.warn.txt:SetText(table.concat(warn, "\n"))
     local wh = 7 + 12 + 4 + (c.warn.txt:GetStringHeight() or 14) + 9
@@ -679,6 +812,35 @@ end
 
 -- ---------------------------------------------------------------- Aufbau
 N.Fenster = {}
+
+-- Grind-Befehle ueberspringen (Tiry will nicht grinden): Haken bei RXP setzen wie ein Klick des Spielers.
+-- Reiner Grind-Schritt, der danach immer noch der aktuelle ist (z. B. optionaler Schritt): einen Schritt weiter.
+function N.Fenster.SkipGrind(list, cur)
+  local r = RXPr()
+  for _, g in ipairs(list or {}) do
+    local st = g.step
+    local first = false
+    for _, ef in ipairs(g.efs) do
+      local el, btn = ef.element, ef.button
+      if el and btn and btn.Click and not el.rxnGrind and not el.completed and not el.skip
+        and not (btn.GetChecked and btn:GetChecked()) then
+        el.rxnGrind = true
+        first = true
+        pcall(btn.Click, btn)
+      elseif el and el.rxnGrind and g.pure and st.active and st.index == cur and not st.rxnGrindJump
+        and r and r.SetStep then
+        st.rxnGrindJump = true
+        pcall(r.SetStep, cur + 1)
+      end
+    end
+    if first then
+      local lv = g.efs[1].element and g.efs[1].element.level
+      N.P((lv and ("Grind-Schritt (Stufe %d) übersprungen"):format(lv) or "Grind-Schritt übersprungen")
+        .. " – |cff8fa7a2/rxn grind an|r zeigt sie wieder.")
+    end
+  end
+end
+
 N.Fenster.Signature = N.Fenster_Signature
 function N.Fenster.Dirty() if win then win.dirty = true end end
 
@@ -768,7 +930,9 @@ function N.Fenster.Refresh()
   end
 
   -- JETZT: aktive Schritte (der aktuelle zuerst)
-  local act = g and ActiveSteps() or {}
+  local act, grind = {}, {}
+  if g then act, grind = ActiveSteps() end
+  if GrindOff() and not InCombatLockdown() then N.Fenster.SkipGrind(grind, cur) end
   table.sort(act, function(a, b)
     local ac, bc = a.step.index == cur, b.step.index == cur
     if ac ~= bc then return ac end
@@ -826,7 +990,7 @@ function N.Fenster.Refresh()
   -- Fuss
   y = y - 6
   win.guideBtn:ClearAllPoints(); win.guideBtn:SetPoint("TOPLEFT", win, "TOPLEFT", PAD, y)
-  win.swDe:ClearAllPoints(); win.swDe:SetPoint("TOPRIGHT", win, "TOPRIGHT", -PAD + 2, y)
+  win.swDe:ClearAllPoints(); win.swDe:SetPoint("TOPRIGHT", win, "TOPRIGHT", -PAD - 18, y) -- Platz fuer den Groessen-Griff
   win.swDe:Update()
   y = y - 30 - PAD
   win:SetHeight(-y)
