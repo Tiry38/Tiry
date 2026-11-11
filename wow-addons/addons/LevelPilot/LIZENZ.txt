@@ -8,3 +8,5 @@ Enthaltene Daten und Quellen:
   vergröbert, Horde-Aufzüge und benannte Wegstellen ergänzt. Erzeugt mit wow-addons/tools/navmesh.py.
 - Nav.lua (NPC-Laufwege) und Routes/*.lua (Quests, NPCs, Orte): berechnet aus der QuestieDB
   (https://github.com/Questie/QuestieDB, Forever-Daten), GPL-3.0. Erzeugt mit wow-addons/tools/.
+- RXP.lua (RXP-Modus): liest RestedXP-Guides (Add-on RXPGuides) nur zur Laufzeit aus dem Spiel.
+  Es sind keine RXP-Guides, RXP-Texte oder RXP-Code in LevelPilot enthalten.

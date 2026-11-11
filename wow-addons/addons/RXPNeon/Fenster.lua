@@ -1030,6 +1030,13 @@ end
 function N.Fenster.Apply()
   local db = DB()
   if not db then return end
+  if N.extern then
+    -- LevelPilot 7 zeigt den RXP-Guide in seinem Fenster: eigenes Fenster aus, RXPs Fenster bleibt
+    -- unsichtbar (regelt LevelPilot). Deutsche Texte von RXPNeon laufen weiter.
+    N.Fenster.active = false
+    if win then win:Hide() end
+    return
+  end
   local want = db.skin and db.fenster ~= "rxp" and RXPr() ~= nil
   if want then
     Build()

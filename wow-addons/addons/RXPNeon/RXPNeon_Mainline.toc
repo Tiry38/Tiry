@@ -2,7 +2,7 @@
 ## Title: |cff39ff6bRXP|r|cff2de2e6Neon|r
 ## Notes: Neon-Guide-Fenster, Neon-Pfeil und deutsche Schritt-Texte fuer RestedXP Guides (/rxn).
 ## Author: Tiry
-## Version: 2.1.0
+## Version: 2.2.0
 ## Dependencies: RXPGuides
 ## SavedVariables: RXPNeonDB
 

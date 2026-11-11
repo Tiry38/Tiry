@@ -1,7 +1,7 @@
--- RXPNeon 2.0.0 (Tiry): eigenes Neon-Guide-Fenster, Neon-Pfeil und deutsche Schritt-Texte fuer RestedXP Guides.
+-- RXPNeon 2.2.0 (Tiry): eigenes Neon-Guide-Fenster (aus, wenn LevelPilot 7 den Guide zeigt), Neon-Pfeil und deutsche Schritt-Texte fuer RestedXP Guides.
 -- Eigenes Zusatz-Add-on: aendert RXP nicht, sondern nutzt dessen Theme-Schnittstelle und haengt sich an
 -- oeffentliche Funktionen (hooksecurefunc / Wrapper). Ohne RXPGuides tut es nichts.
-local VERSION = "2.1.0"
+local VERSION = "2.2.0"
 local ADDON = ...
 RXPNeon = RXPNeon or {}
 local N = RXPNeon

@@ -1,9 +1,9 @@
 ## Interface: 16001
 ## Title: |cff39ff6bLevel|r|cffd8d8d8Pilot|r
-## Notes: Levelrouten als fester Plan (Einstieg nach deinem Stand), Questlog-Check, Pfeil über echte Laufwege, Flug-Rat, Auto-Quests, XP-Cockpit.
+## Notes: RestedXP-Guides (RXP) oder eigene Levelrouten als Plan (Einstieg nach deinem Stand), Questlog-Check, Pfeil über echte Laufwege, Flug-Rat, Auto-Quests, XP-Cockpit.
 ## Author: Tiry
-## Version: 6.0.3
-## OptionalDeps: Questie, QuestieDB
+## Version: 7.0.0
+## OptionalDeps: Questie, QuestieDB, RXPGuides, RXPNeon
 ## SavedVariablesPerCharacter: LevelPilotDB
 
 Route.lua
@@ -14,4 +14,5 @@ Fly.lua
 Routes\Horde_22_30.lua
 Routes\Horde_30_40.lua
 Routes\Pool_Horde.lua
+RXP.lua
 LevelPilot.lua

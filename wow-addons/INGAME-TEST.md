@@ -382,6 +382,36 @@ Aus 4.2 weiter offen: `C_Map.GetMapPosFromWorldPos`, Flugmeister-IDs, Hochplatea
 - Reichweite gibt es nur für Buff-Totems; Verbrennung/Magma/Erdbindung usw. gelten als „steht“, solange sie laufen.
 
 
+# Ingame-Test – LevelPilot 7.0 (RXP-Modus)
+
+## Einbau
+- [ ] `LevelPilot` (7.0.0) und `RXPNeon` (2.2.0) neu entpackt, `RXPGuides` liegt daneben, WoW **komplett neu gestartet**.
+- [ ] Nach dem Einloggen: nur **ein** Fenster – LevelPilot. RXPs eigenes Fenster und RXPs Pfeil sind unsichtbar, das Neon-Fenster von RXPNeon ist weg.
+- [ ] Kopf: „RXP · <Guide-Name> · ohne Grinden“. Band: „RXP <Guide> · St. a–b“, rechts „SCHRITT x/y“, Kapseln füllen sich mit dem Guide-Fortschritt.
+
+## Ablauf (genau das, was vorher „komisch“ war)
+- [ ] **Annehmen:** Quest beim NPC annehmen → die JETZT-Karte springt sofort weiter (Abgleich hakt bei RXP ab).
+- [ ] **Erledigen:** Karte zeigt Ziel-Fortschritt („3/8 …“) und RXPs Zusatz-Hinweis. Pfeil und Strahl führen zu RXPs Wegpunkt; bei mehreren Wegpunkten (Schleife) zum jeweils aktuellen.
+- [ ] **Abgeben:** Ist die Quest noch nicht fertig, steht orange **ABGEBEN GEHT NOCH NICHT** mit dem offenen Ziel.
+- [ ] Vorquest fehlt → **VORQUEST FEHLT** mit dem Namen. Quest nicht im Log → **QUEST NICHT IM LOG**.
+- [ ] **Grinden:** Kommt ein „Grinde bis Stufe X“-Schritt, springt LevelPilot weiter; Chat: „Grind-Schritt (Stufe X) übersprungen“. `/lp grind an` zeigt sie wieder.
+- [ ] Klick auf die JETZT-Karte = Haken bei RXP setzen/entfernen. **Rechtsklick** = Schritt überspringen. `/lp weiter` = RXP einen Schritt weiter. `/lp schritt 25` = RXP auf Schritt 25.
+- [ ] Im Kampf passiert nichts davon, erst danach.
+
+## Guide wählen
+- [ ] Kein Guide geladen → „Kein RXP-Guide geladen“. Klick aufs Band lädt den Guide für deine Stufe (kein Dungeon-Guide).
+- [ ] Guide passt → Klick aufs Band öffnet RXPs Guide-Menü. Stufen-Pille zeigt „UNTER GUIDE“, wenn du zu niedrig bist.
+
+## Größe + Umschalten
+- [ ] Unten rechts im LevelPilot-Fenster: grün-türkise Punkte. Ziehen = kleiner/größer (60–160 %), linke obere Ecke bleibt. Rechtsklick = normal. Nach `/reload` bleibt die Größe.
+- [ ] `/lp rxp` → LevelPilots eigene Route (fester Plan/Live), RXPs Fenster wieder sichtbar. Nochmal `/lp rxp` → RXP-Modus.
+- [ ] Questlog-Pille: Quests aus späteren Guides stehen auf „prüfen“, nicht auf „löschen“.
+
+## Nur im Spiel prüfbar (ehrlich)
+- Ob RXP nach unseren Haken-Klicks immer sauber weiterzählt (der Klick ist derselbe wie mit der Maus in RXPs Fenster).
+- Nur mit RXPs klassischem Fenster: Beta-Fenster (v2) hat keine Haken-Knöpfe → Anzeige ja, Abgleich/Grind-Sprung nein.
+- Ohne Grinden kannst du unter den Stufenbereich des nächsten Guides fallen (Pille „UNTER GUIDE“).
+
 # Ingame-Test – RXPNeon 2.1.0
 
 ## Neu in 2.1: Größe, Grinden, Annahme/Abgabe

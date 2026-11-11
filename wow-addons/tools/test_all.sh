@@ -71,6 +71,7 @@ if want levelpilot; then
   run "LevelPilot: Zufalls-Stresstest Plan-Engine (18.000 Aktionen)" "$A/LevelPilot" "FUZZ OK" lua5.1 "$T/fuzz.lua"
   run "LevelPilot: Regressionen Prüfrunde 2 (7 Fälle aus echten Routen/Netz)" "$A/LevelPilot" "REGRESS OK" lua5.1 "$T/regress.lua"
   run "LevelPilot: Fenster-Layout (strenger Forever-Nachbau)" "$ROOT" "LP LAYOUT OK" lua5.1 tests/lp_layout.lua
+  run "LevelPilot: RXP-Modus (Guide-Durchlauf, Abgleich, Grind, Warnungen, Größen-Griff)" "$ROOT" "LP RXP OK" lua5.1 tests/lp_rxp.lua
 fi
 
 if want proc; then run "ProcAlarm" "$A" - lua5.1 "$T/proc.lua"; fi

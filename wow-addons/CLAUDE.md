@@ -37,6 +37,16 @@ Aktueller Stand und offene Punkte: **[`UEBERGABE.md`](UEBERGABE.md)** – zuerst
   Wird nur für die Routen-Werkzeuge gebraucht. Beide GPL-3.0 → LevelPilot und Tiry's Zentrale tragen `LIZENZ.txt` +
   `LICENSE-GPL-3.0.md` (Repo ist öffentlich; neue Datenquellen dort eintragen).
 
+## LevelPilot 7.0 – RXP-Modus
+`addons/LevelPilot/RXP.lua` (`LP_RXP`, in den TOCs vor `LevelPilot.lua`): RestedXP-Guide → LevelPilot-Route `LevelPilot_Routes.rxp`
+(`faction = "RXP"`, `min = 999` → `R.Pick` nimmt sie nie; Schritte `rx`, `rs`, `el`, `map/x/y` aus erstem `.goto`). `LP_RXP.Plan(n)`
+liefert route, hero, list, info (`info.rxp` = cur/total/title/l0/l1/warn), state – gleiches Format wie `R.Plan`; `routeUpdate` nimmt
+den Zweig, wenn `RT.UseRXP()` (DB.rxp ~= false, Routen-Ansicht, RXPGuides geladen). Pfeil-Ziel `LP_RXP.Waypoint` (RXP-Wegpunkt).
+Abgleich/Grind/Haken = Klick auf RXPs CheckButton aus `RXPFrame.CurrentStepFrame.framePool` (nie im Kampf). RXP zählt Elemente mit
+`textOnly` nicht → LevelPilot setzt sie aktiv auf „done“. Band `RT.RxpBand`, Kürzen `RT.Fit`, Größen-Griff `RT.ScaleBy`/`DB.scale`.
+`R.LogAdvice`: bei `route.rxp` „prüfen“ statt „löschen“ (außer grau/gesperrt). RXPNeon ≥ 2.2 respektiert `RXPNeon.extern`.
+Test: `lua5.1 tests/lp_rxp.lua [ordner]` aus `wow-addons/` („LP RXP OK“), danach `render_pages.py`.
+
 ## RXPNeon (Zusatz für RestedXP Guides)
 `addons/RXPNeon/`: Theme „Tiry Neon“ über `RXP:RegisterTheme` + Skin per `hooksecurefunc` (RXPFrame:UpdateVisuals,
 RXP.SetStep/LoadGuide/SetupArrow) und Live-Übersetzung (Hook auf `RXP.ReplaceNpcIds` und `RXP.settings.ReplaceColors`,

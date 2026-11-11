@@ -1792,6 +1792,10 @@ function R.LogAdvice(route, routeKey, lvl, p, hero, opt)
         a.cat, a.why = "delete", early and "aus der vorigen Route – nicht mehr im Plan" or "nicht im Plan"
       end
     end
+    -- RXP-Guide als Plan: was nicht in diesem Guide steht, kommt evtl. in einem spaeteren -> pruefen statt loeschen
+    if route.rxp and a.cat == "delete" and not (R.ban and R.ban[q]) and not (a.why or ""):find("^grau") then
+      a.cat, a.why = "check", rdy and "fertig – nicht in diesem RXP-Guide" or "nicht in diesem RXP-Guide – evtl. später"
+    end
     if a.cat == "delete" then out.del = out.del + 1
     elseif a.cat == "turnin" then out.tin = out.tin + 1
     elseif a.cat == "check" then out.chk = out.chk + 1

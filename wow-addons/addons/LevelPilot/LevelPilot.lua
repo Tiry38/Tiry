@@ -1,11 +1,11 @@
 ---------------------------------------------------------------------------
--- LevelPilot 5 (Tiry) · Anthrazit & Neon-Gruen
+-- LevelPilot 7 (Tiry) · Anthrazit & Neon-Gruen
 -- Fester Plan mit Zeiger (Route.lua) · Einstieg erkennt deinen Stand · Questlog-Check
 -- Pfeil ueber echte Laufwege · Flug-Rat · Auto-Annehmen/-Abgeben · XP-Cockpit
 -- Datenquellen: Routen-Plan, Questie (Geber/Ziele), Blizzards Questlog.
 ---------------------------------------------------------------------------
 local ADDON = ...
-local VERSION = "6.0.3"
+local VERSION = "7.0.0"
 local time = time or (os and os.time)   -- Spielzeit-Uhr (Sekunden seit 1970)
 local floor, max, min, abs, sqrt, atan2, pi, fmt = math.floor, math.max, math.min, math.abs, math.sqrt, math.atan2, math.pi, string.format
 local BT = BackdropTemplateMixin and "BackdropTemplate" or nil
@@ -28,7 +28,7 @@ local DEF = {
   ax = 0, ay = 230, apoint = "CENTER",
   locked = false, collapsed = false, auto = true, arrow = true, rows = 6, toast = true,
   mode = "route", route = nil, pin = true, wege = true, speed = true, beam = true, maxDiff = 5, fly = true,
-  ton = "amboss", fade = true, live = true,
+  ton = "amboss", fade = true, live = true, rxp = true, grind = false, scale = 1,
 }
 -- Daten (bleiben bei /lp reset erhalten)
 local DATA = { skipK = {}, skipLog = {}, nav = {}, ban = {}, qmem = { acc = {}, done = {}, at = {} }, plan = {} }
@@ -463,6 +463,8 @@ end
 
 -- Routen-Zustand: Plan-Zeiger (gespeichert je Route in DB.plan), aktuelles Ziel, Liste
 local RT = { key = nil, idx = nil, list = {}, cur = nil, ptr = nil, info = nil, logReady = false, loginT = nil, wait = false }
+-- RXP-Modus: Schalter an + RXPGuides geladen + Routen-Ansicht
+function RT.UseRXP() return DB and DB.rxp ~= false and DB.mode == "route" and LP_RXP ~= nil and LP_RXP.Has() end
 -- Schrift auf Neon-Flaeche: dunkel OHNE schwarze Kontur/Schatten (sonst Matsch, Tiry-Screenshot 11.11.);
 -- auf Glas: hell mit Kontur. size = Schriftgroesse des Labels.
 function RT.Ink(f, dark, size)
@@ -470,10 +472,36 @@ function RT.Ink(f, dark, size)
   if dark then f:SetShadowOffset(0, 0); f:SetShadowColor(0, 0, 0, 0); f:SetTextColor(0.02, 0.07, 0.05)
   else f:SetShadowColor(0, 0, 0, 0.9); f:SetShadowOffset(1, -1); f:SetTextColor(0.6, 0.65, 0.68) end
 end
+-- Zeile zu lang? Am Zeichenende kuerzen (UTF-8 + Farbcodes heil) und "…" anhaengen; der volle Text steht im Tooltip
+function RT.Fit(fs, w)
+  w = w or fs:GetWidth() or 0
+  local t = fs:GetText() or ""
+  if w <= 0 or (fs:GetStringWidth() or 0) <= w then return end
+  for _ = 1, 400 do
+    t = t:gsub("[%z\1-\127\194-\244][\128-\191]*$", ""):gsub("|c%x*$", ""):gsub("|$", ""):gsub("%s+$", "")
+    fs:SetText(t .. "…|r")
+    if #t < 4 or (fs:GetStringWidth() or 0) <= w then return end
+  end
+end
 local announce -- weiter unten (Meldung bei Einstieg/Sprung)
 local function routeUpdate()
   if not (DB and LP_Route) then return end
   local R = LP_Route
+  -- RXP-Modus (7.0): RestedXP-Guide ist der Plan, RXP arbeitet unsichtbar darunter
+  if RT.UseRXP() then
+    LP_RXP.HideRXP(true); LP_RXP.Hook()
+    local route, idx, list, info, state = LP_RXP.Plan(DB.rows or 6)
+    RT.rxNoGuide = route == nil
+    route = route or { name = "RXP", rxp = true, faction = "RXP", min = 999, max = 0, steps = {}, segs = {} }
+    LevelPilot_Routes[LP_RXP.KEY] = route
+    RT.key, RT.wait = LP_RXP.KEY, false
+    R.state, R.info = state or {}, info
+    if idx ~= RT.idx then RT.cur = idx and { i = idx, since = GetTime() } or nil end
+    RT.idx, RT.list, RT.info, RT.ptr = idx, list or {}, info, info and info.ptr
+    return
+  end
+  if LP_RXP then LP_RXP.HideRXP(false); LevelPilot_Routes[LP_RXP.KEY] = nil end
+  RT.rxNoGuide = nil
   local faction = UnitFactionGroup("player")   -- englisches Kürzel ("Horde"/"Alliance"), nicht der übersetzte Name
   local lvl = UnitLevel("player")
   RT.key = R.Pick(faction, lvl, DB.route)
@@ -499,6 +527,11 @@ local function SkipStep(i)
   local route = RT.key and LevelPilot_Routes[RT.key]
   local s = route and i and route.steps[i]
   if not s then return end
+  if s.rx then   -- RXP-Schritt: bei RXP ueberspringen (wie RXPs eigener Knopf)
+    local ok, why = LP_RXP.Skip(s)
+    P(ok and ("RXP-Schritt " .. s.rs .. " übersprungen.") or ("Überspringen geht gerade nicht: " .. tostring(why or "?")))
+    return
+  end
   local k = LP_Route.StepKey(s)
   DB.skipK[RT.key] = DB.skipK[RT.key] or {}
   DB.skipK[RT.key][k] = true
@@ -510,7 +543,9 @@ local function routeTarget()
   local route = RT.key and LevelPilot_Routes[RT.key]
   local s = route and RT.idx and route.steps[RT.idx]
   if not s then return end
-  local t, first = LP_Route.GoalTarget(s)
+  local t, first
+  if s.rx then t = LP_RXP.Waypoint(s) end   -- RXP-Wegnetz: der Wegpunkt, den RXP gerade ansteuert
+  if not t then t, first = LP_Route.GoalTarget(s) end
   if not t then return { title = LP_Route.StepTitle(s), step = s } end
   t = { map = t.map, x = t.x, y = t.y, npc = t.npc, spot = t.spot, count = t.count }
   t.title = LP_Route.StepTitle(s); t.step = s; t.turnin = (s.t == "turnin") and not first; t.first = first
@@ -597,6 +632,62 @@ M:SetScript("OnDragStop", function(s)
   local p, _, _, x, y = s:GetPoint(); DB.point, DB.x, DB.y = p, x, y
 end)
 Glass(M, { aurora = true })
+
+-- Groesse: Griff unten rechts ziehen (linke obere Ecke bleibt stehen), Rechtsklick = normale Groesse
+do
+  local SMIN, SMAX = 0.6, 1.6
+  local gp = CreateFrame("Button", nil, M)
+  gp:SetSize(18, 18); gp:SetPoint("BOTTOMRIGHT", M, "BOTTOMRIGHT", -2, 2)
+  gp:SetFrameLevel(M:GetFrameLevel() + 30)
+  local halo = MT(gp, "BACKGROUND", 0, "dot", "ADD"); halo:SetPoint("CENTER", 3, -3); halo:SetSize(34, 34); halo:SetVertexColor(NEON[1], NEON[2], NEON[3], 0.10)
+  -- sechs Neon-Punkte als Dreieck in die Ecke (Verlauf Gruen -> Tuerkis -> Eisblau)
+  for _, d in ipairs({ { 15, 3, 4, NEON }, { 10, 8, 3.5, TEAL }, { 15, 8, 3.5, TEAL }, { 5, 13, 3, AQUA }, { 10, 13, 3, AQUA }, { 15, 13, 3, AQUA } }) do
+    local t = MT(gp, "ARTWORK", 1, "ctx_disc"); t:SetSize(d[3], d[3]); t:SetPoint("CENTER", gp, "TOPLEFT", d[1], -d[2])
+    t:SetVertexColor(d[4][1], d[4][2], d[4][3], 0.9)
+  end
+  local hl = MT(gp, "HIGHLIGHT", 0, "dot", "ADD"); hl:SetPoint("CENTER", 3, -3); hl:SetSize(30, 30); hl:SetVertexColor(NEON[1], NEON[2], NEON[3], 0.35)
+  local function place(sc, left, top)
+    local ue = UIParent:GetEffectiveScale()
+    M:SetScale(sc)
+    local e = M:GetEffectiveScale()
+    local x, y = left / e, (top - (UIParent:GetTop() or 0) * ue) / e
+    M:ClearAllPoints(); M:SetPoint("TOPLEFT", UIParent, "TOPLEFT", x, y)
+    if DB then DB.scale, DB.point, DB.x, DB.y = sc, "TOPLEFT", x, y end
+  end
+  function RT.ScaleBy(cx, drag)
+    local eff = (cx - drag.left + drag.grab) / M:GetWidth()
+    local sc = eff / UIParent:GetEffectiveScale()
+    sc = math.floor(math.max(SMIN, math.min(SMAX, sc)) * 100 + 0.5) / 100
+    if sc ~= M:GetScale() then place(sc, drag.left, drag.top) end
+    return sc
+  end
+  gp:RegisterForClicks("RightButtonUp")
+  gp:SetScript("OnClick", function()
+    if not DB or DB.locked then return end
+    local e = M:GetEffectiveScale()
+    place(1, (M:GetLeft() or 0) * e, (M:GetTop() or 0) * e)
+    P("Fenster wieder normale Größe.")
+  end)
+  gp:SetScript("OnMouseDown", function(self, btn)
+    if btn ~= "LeftButton" or not DB or DB.locked then return end
+    local e = M:GetEffectiveScale()
+    local cx = GetCursorPosition()
+    local left, top = (M:GetLeft() or 0) * e, (M:GetTop() or 0) * e
+    local drag = { left = left, top = top, grab = left + M:GetWidth() * e - cx }
+    self:SetScript("OnUpdate", function() RT.ScaleBy((GetCursorPosition()), drag) end)
+  end)
+  gp:SetScript("OnMouseUp", function(self) self:SetScript("OnUpdate", nil) end)
+  gp:SetScript("OnEnter", function(self)
+    if GameTooltip then
+      GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
+      GameTooltip:AddLine("Größe ändern", NEON[1], NEON[2], NEON[3])
+      GameTooltip:AddLine(fmt("Ziehen = kleiner/größer (jetzt %d %%) · Rechtsklick = normal", floor((M:GetScale() or 1) * 100 + 0.5)), 1, 1, 1)
+      GameTooltip:Show()
+    end
+  end)
+  gp:SetScript("OnLeave", function() if GameTooltip then GameTooltip:Hide() end end)
+  RT.grip = gp
+end
 
 local Refresh      -- vorab
 local OpenSettings -- vorab
@@ -767,7 +858,7 @@ do
   BAND.mkG = MT(mk, "BACKGROUND", 0, "dot", "ADD"); BAND.mkG:SetSize(34, 34); BAND.mkG:SetPoint("CENTER"); BAND.mkG:SetVertexColor(NEON[1], NEON[2], NEON[3], 0.9)
   BAND.mkR = MT(mk, "ARTWORK", 0, "ctx_ring", "ADD"); BAND.mkR:SetSize(15, 15); BAND.mkR:SetPoint("CENTER"); BAND.mkR:SetVertexColor(NEON[1], NEON[2], NEON[3], 1)
   BAND.mkD = MT(mk, "ARTWORK", 1, "ctx_disc"); BAND.mkD:SetSize(9, 9); BAND.mkD:SetPoint("CENTER"); BAND.mkD:SetVertexColor(1, 1, 1, 1)
-  B:SetScript("OnClick", function() SlashCmdList.LEVELPILOT((RT.info and RT.info.live) and "rechnen" or "einstieg") end)
+  B:SetScript("OnClick", function() SlashCmdList.LEVELPILOT((RT.info and RT.info.rxp) and "guide" or (RT.info and RT.info.live) and "rechnen" or "einstieg") end)
   B:SetScript("OnEnter", function(self) if BAND.tip then TIP:Begin(self, M); for _, l in ipairs(BAND.tip) do TIP:Line(l[1], l[2], l[3], l[4], l[5]) end; TIP:Open() end end)
   B:SetScript("OnLeave", TipLeave)
 
@@ -892,6 +983,13 @@ for i = 1, 10 do
   r:RegisterForClicks("LeftButtonUp", "RightButtonUp")
   r:SetScript("OnClick", function(self, btn)
     if DB.mode == "route" then
+      local rst = self.stepIdx and RT.key and LevelPilot_Routes[RT.key] and LevelPilot_Routes[RT.key].steps[self.stepIdx]
+      if rst and rst.rx then   -- RXP: links = Haken setzen/entfernen, rechts = Schritt ueberspringen
+        if btn == "RightButton" then SkipStep(self.stepIdx)
+        else local ok, why = LP_RXP.Toggle(rst); if not ok and why then P("Haken: " .. why) end end
+        RT.want = true
+        return
+      end
       if btn == "RightButton" and self.stepIdx and RT.key then
         local st = LevelPilot_Routes[RT.key].steps[self.stepIdx]
         if st and st.q then
@@ -1097,6 +1195,8 @@ do
     { "Blizzard-Wegpunkt", "marker", function() return DB.pin end },
     { "Flug-Tipp (Fliegen statt Laufen)", "flug", function() return DB.fly ~= false end },
     { "Wegenetz-Führung", "wege", function() return DB.wege end },
+    { "RestedXP-Guide als Plan (RXP)", "rxp", function() return DB.rxp ~= false end },
+    { "Grind-Schritte zeigen (RXP)", function() return DB.grind and "grind aus" or "grind an" end, function() return DB.grind end },
     { "Live-Modus (Quest-Gebiet)", "live", function() return DB.live ~= false end },
     { "Speed-Modus", "speed", function() return DB.speed end },
     { "Fertig-Meldung", "toast", function() return DB.toast end },
@@ -1567,8 +1667,66 @@ function RT.LiveBand(lv)
     { "Keine Elite-, Gruppen- oder Dungeon-Quests. Vorquests werden beachtet.", 0.75, 0.8, 0.82 } }
 end
 
+-- RXP-Modus: Band = Fortschritt im RXP-Guide (10 Kapseln), Stufen-Pille = passt der Guide zu dir?
+function RT.RxpBand(rx)
+  local cur, tot = rx.cur or 0, math.max(rx.total or 0, 1)
+  local has = rx.title ~= nil
+  BAND.lbl:SetText(has and fmt("|cff39ff6bRXP|r  |cffffffff%s|r%s", rx.title, rx.l0 and fmt(" |cff8a9396·|r |cffd8dde0St. %d–%d|r", rx.l0, rx.l1 or rx.l0) or "")
+    or "|cff39ff6bRXP|r  |cffd8dde0kein Guide geladen – Klick hier|r")
+  BAND.step:SetText(has and fmt("|cff8a9396SCHRITT|r |cffffffff%d|r|cff6b7076/%d|r", math.min(cur, tot), tot) or "")
+  local frac = has and math.min(1, math.max(0, (cur - 1) / tot)) or 0
+  local cnt, BW, GAP = 10, W - 28, 4
+  local w = (BW - GAP * (cnt - 1)) / cnt
+  local mkX
+  for k, g in ipairs(BAND.segs) do
+    if k <= cnt then
+      local f = math.min(1, math.max(0, frac * cnt - (k - 1)))
+      g:ClearAllPoints(); g:SetPoint("LEFT", BAND.track, "LEFT", (k - 1) * (w + GAP), 0); g:SetWidth(w)
+      g.bg:SetColor(1, 1, 1, f >= 1 and 0.07 or 0.12)
+      if f > 0 then
+        g.fill:SetWidth(math.max(6, w * f)); g.fill:Show()
+        local al = f >= 1 and 0.55 or 1
+        g.fg:SetGradient({ TEAL[1], TEAL[2], TEAL[3], al }, { NEON[1], NEON[2], NEON[3], al })
+      else g.fill:Hide() end
+      if not mkX and f < 1 then mkX = (k - 1) * (w + GAP) + w * f end
+      g:Show()
+    else g:Hide() end
+  end
+  BAND.mk:SetShown(has and mkX ~= nil)
+  if mkX then BAND.mk:ClearAllPoints(); BAND.mk:SetPoint("CENTER", BAND.track, "LEFT", math.max(5, math.min(BW - 5, mkX)), 0) end
+  BAND.ic:SetVertexColor(NEON[1], NEON[2], NEON[3], 1); BAND.icG:SetVertexColor(NEON[1], NEON[2], NEON[3], 0.35)
+  local tip = { { has and ("RestedXP-Guide  ·  " .. rx.title) or "RestedXP – kein Guide geladen", NEON[1], NEON[2], NEON[3], true } }
+  if has then
+    tip[#tip + 1] = { fmt("Schritt %d von %d (%d %%)", math.min(cur, tot), tot, floor(frac * 100 + 0.5)), 1, 1, 1 }
+    tip[#tip + 1] = { "Reihenfolge, Wegpunkte und Abhaken kommen von RXP – LevelPilot zeigt sie mit Pfeil, Strahl, echten Laufwegen und Flug-Rat.", 0.75, 0.8, 0.82 }
+    if rx.wait then tip[#tip + 1] = { "Alles im aktuellen Schritt erledigt – RXP springt gleich weiter.", 0.31, 0.82, 1 } end
+    tip[#tip + 1] = { "Grind-Schritte: " .. ((DB and DB.grind) and "werden gezeigt (/lp grind aus)" or "übersprungen (/lp grind an zeigt sie)"), 0.62, 0.68, 0.7 }
+  end
+  tip[#tip + 1] = { "Klick: " .. (has and "RXP-Guide-Menü  ·  passt der Guide nicht zu deiner Stufe, lädt der Klick den passenden" or ("Guide für Stufe " .. (UnitLevel("player") or 1) .. " laden")), 0.5, 0.55, 0.58 }
+  tip[#tip + 1] = { "/lp rxp schaltet auf LevelPilots eigene Route", 0.5, 0.55, 0.58 }
+  BAND.tip = tip
+  local lvl = UnitLevel("player") or 1
+  local l0, l1 = rx.l0, rx.l1 or rx.l0
+  if not has then
+    BAND.pLvl:Set("RXP  ·  KEIN GUIDE", { 1, 0.54, 0.24 }, "i_flag")
+    BAND.pLvl.tip = { { "Kein RXP-Guide", 1, 0.54, 0.24, true }, { "Klick aufs Band lädt den Guide für deine Stufe.", 1, 1, 1 } }
+  elseif l0 and lvl < l0 - 1 then
+    BAND.pLvl:Set(fmt("UNTER GUIDE  ·  ST. %d", l0), { 1, 0.54, 0.24 }, "i_xph")
+    BAND.pLvl.tip = { { "Stufe zu niedrig für den Guide", 1, 0.54, 0.24, true }, { fmt("Du: Stufe %d · Guide ab Stufe %d. Gegner sind stärker – ohne Grinden kann das passieren.", lvl, l0), 1, 1, 1 },
+      { "Klick aufs Band lädt den Guide für deine Stufe.", 0.75, 0.8, 0.82 } }
+  elseif l1 and lvl > l1 + 1 then
+    BAND.pLvl:Set(fmt("ÜBER GUIDE  ·  ST. %d", lvl), AQUA, "i_xph")
+    BAND.pLvl.tip = { { "Stufe über dem Guide", AQUA[1], AQUA[2], AQUA[3], true }, { fmt("Du: Stufe %d · Guide bis Stufe %d – Quests werden grau.", lvl, l1), 1, 1, 1 },
+      { "Klick aufs Band lädt den Guide für deine Stufe.", 0.75, 0.8, 0.82 } }
+  else
+    BAND.pLvl:Set(l0 and fmt("RXP  ·  ST. %d–%d", l0, l1) or "RXP", NEON, "i_flag")
+    BAND.pLvl.tip = { { "Guide passt zu deiner Stufe", NEON[1], NEON[2], NEON[3], true }, { fmt("Du: Stufe %d%s", lvl, l0 and fmt(" · Guide Stufe %d–%d", l0, l1) or ""), 1, 1, 1 } }
+  end
+end
+
 local function DrawBand(route)
-  if RT.info and RT.info.live then RT.LiveBand(RT.info.live) else
+  if RT.info and RT.info.rxp then RT.RxpBand(RT.info.rxp)
+  elseif RT.info and RT.info.live then RT.LiveBand(RT.info.live) else
     local p, N = RT.ptr or 1, #route.steps
     local hero = RT.idx and route.steps[RT.idx]
     local here = route.steps[math.min(p, N)]
@@ -1731,8 +1889,9 @@ function Refresh(rescan)
     RT.items = items
     local heroStep = route and RT.idx and route.steps[RT.idx]
     local lv = RT.info and RT.info.live
+    if route and route.rxp then subHead:SetText("|cff39ff6bRXP|r  ·  " .. (route.title and ("|cffd8dde0" .. route.title .. "|r") or "|cff8a9396kein Guide|r") .. ((DB.grind) and "" or "  ·  |cff8a9396ohne Grinden|r")) else
     subHead:SetText(lv and fmt("|cff39ff6bLIVE|r  ·  %s  ·  %d Quest%s  ·  |cffffd75e+%s XP|r", lv.zone or "Quest-Gebiet", lv.n, lv.n == 1 and "" or "s", fmtNum(lv.xp))
-      or route and ((DB.speed and "|cff39ff6bSPEED|r  ·  " or "") .. "|cffd8dde0FESTER PLAN|r  ·  " .. (route.name or ""):gsub("%s*·%s*Speedrun$", "")) or "keine Route")
+      or route and ((DB.speed and "|cff39ff6bSPEED|r  ·  " or "") .. "|cffd8dde0FESTER PLAN|r  ·  " .. (route.name or ""):gsub("%s*·%s*Speedrun$", "")) or "keine Route") end
     local n = collapsed and 0 or math.min(#items, DB.rows or 6)
     local bottom = LayoutRows(n, "route")
     local heroT = heroStep and LP_Route.StepTarget(heroStep)
@@ -1776,7 +1935,8 @@ function Refresh(rescan)
         if st.ml then tip[#tip + 1] = { fmt("Gegner ~Stufe %d · du bist Stufe %d · Grenze: Gegner höchstens Stufe %d", floor(st.ml + 0.5), UnitLevel("player") or 1, (UnitLevel("player") or 1) + 1), 0.55, 0.6, 0.62 } end
         if st.fill then tip[#tip + 1] = { "Aufhol-Quest: kommt, weil du hinter dem Plan bist. LevelPilot nimmt nur so viele, wie dir XP bis Stufe " .. st.fill .. " fehlen (Mobs = Rest).", 0.31, 0.82, 1 } end
         if planned then tip[#tip + 1] = { "Geplant: kommt dran, sobald du die Quest angenommen hast", 0.31, 0.82, 1 } end
-        tip[#tip + 1] = { "Rechtsklick: " .. (st.q and ((cnt > 1) and "erste Quest sperren" or "Quest sperren (kommt nie wieder)") or "Schritt überspringen"), 0.5, 0.55, 0.58 }
+        if st.rx then tip[#tip + 1] = { "RXP-Schritt " .. st.rs .. "  ·  Klick: Haken bei RXP  ·  Rechtsklick: überspringen", 0.5, 0.55, 0.58 } else
+        tip[#tip + 1] = { "Rechtsklick: " .. (st.q and ((cnt > 1) and "erste Quest sperren" or "Quest sperren (kommt nie wieder)") or "Schritt überspringen"), 0.5, 0.55, 0.58 } end
         r.tip = tip
         if i == 1 then
           -- Hero-Karte: Typ-Farbe als Lichtschleier, grosse Kugel, Fortschrittslinie
@@ -1785,6 +1945,15 @@ function Refresh(rescan)
           local notReady = st.t == "turnin" and st.q and not LP_Route.Ready(st.q)
           local kindTxt = grind and ("GRINDEN  ·  BIS STUFE " .. (st.to or "?")) or (later and ("WARTET  ·  AB STUFE " .. needL))
             or (notReady and "ERST ERLEDIGEN") or (cnt > 1 and (cnt .. " QUESTS " .. label:upper()) or label:upper())
+          do   -- RXP: warum haengt der Schritt? (Vorquest fehlt / nicht im Log / Ziele offen)
+            local rw = st.rx and RT.info and RT.info.rxp and RT.info.rxp.warn
+            if rw then
+              kindTxt = rw.head
+              table.insert(sub, 1, "|cffff8a3d" .. table.concat(rw.miss, " · ") .. "|r")
+              table.insert(tip, 2, { rw.head .. ": " .. table.concat(rw.miss, ", "), 1, 0.54, 0.24 })
+              if rw.hint then table.insert(tip, 3, { rw.hint, 0.75, 0.8, 0.82 }) end
+            end
+          end
           do   -- XP-Lage aus deiner echten Anzeige: was decken Quests, was bleibt (in Mobs)
             -- Warten: XP bis zur Stufe DIESES Schritts (nicht bis zum Ende des Aufhol-Blocks)
             local fi = (st.fill and not later and LP_Route.fillInfo) and LP_Route.fillInfo[st.fill] or nil
@@ -1826,7 +1995,7 @@ function Refresh(rescan)
           end
           if RT.info and RT.info.detour and RT.info.detour == st.q then table.insert(sub, 1, (RT.info.detourAuto or st.pool) and ("|cff39ff6bPasst zu deiner Stufe|r" .. (st.pool and "" or " · statt Warten")) or "|cff39ff6bAbstecher|r · lohnt mehr") end
           r.kind:SetText(st.pool and fmt("|cff%s%s|r  |cff8a9396·|r  |cff39ff6b%s|r", col, (notReady and "ERST ERLEDIGEN") or label:upper(), (RT.info and RT.info.live) and "LIVE" or "EXTRA")
-            or fmt("|cff%s%s|r  |cff8a9396·|r  |cffb8c2c6SCHRITT %d|r", later and "ff8a3d" or col, kindTxt, si))
+            or fmt("|cff%s%s|r  |cff8a9396·|r  |cffb8c2c6SCHRITT %d|r", (later or (st.rx and RT.info.rxp.warn)) and "ff8a3d" or col, kindTxt, st.rs or si))
           local ht = grind and (titles[1]:gsub("^Grinden:%s*", "")) or titles[1]
           -- Gruppe: erster Name gross, die anderen in der Zeile darunter (nichts wird abgeschnitten)
           r.title:SetText("|cffffffff" .. ht .. "|r" .. (cnt > 1 and ("  |cff8a9396+" .. (cnt - 1) .. "|r") or ""))
@@ -1866,6 +2035,7 @@ function Refresh(rescan)
           r.dist:SetText(d and ("|cffffffff" .. fmtDist(d) .. "|r") or "")
           local spd = (LP_Fly and LP_Fly.Speed and LP_Fly.Speed()) or 7
           r.eta:SetText((d and d > 25) and ("ca. " .. fmtTime(d * 1.05 / spd)) or (d and "|cff39ff6bhier|r" or ""))
+          RT.Fit(r.sub, (r.sub:GetWidth() or 0) - (((r.eta:GetText() or "") ~= "") and ((r.eta:GetStringWidth() or 0) + 12) or 0))
           local frac = grind and gfrac or ((st.t == "complete" and st.q) and questFrac(st.q) or nil)
           r:SetProgress(frac, cr, cg, cb)
         else
@@ -1892,6 +2062,9 @@ function Refresh(rescan)
       empty:SetText("Keine Route für deine Fraktion/Stufe gefunden.\nUnten auf QUESTS umschalten.")
     elseif RT.wait then
       empty:SetText("Lese Questlog und Questie-Daten …\nDann erkenne ich, wo du im Plan stehst.")
+    elseif route.rxp and n == 0 and not collapsed then
+      empty:SetText(RT.rxNoGuide and ("Kein RXP-Guide geladen.\nKlick aufs Band: Guide für Stufe " .. (UnitLevel("player") or 1) .. " laden.")
+        or "RXP-Guide fertig.\nKlick aufs Band: nächsten Guide laden.")
     elseif n == 0 and not collapsed then
       empty:SetText("Route " .. (route.name or "") .. " erledigt – nächster Abschnitt folgt.")
     end
@@ -2190,8 +2363,10 @@ E:SetScript("OnEvent", function(_, ev, a1, ...)
     -- alte Sprungliste war an Schritt-NUMMERN gebunden; seit dem Routen-Neubau zeigen die auf falsche Schritte
     local oldSkip = DB.skip ~= nil
     DB.skip = nil
+    M:SetScale(DB.scale or 1)
     M:ClearAllPoints(); M:SetPoint(DB.point, UIParent, DB.point, DB.x, DB.y)
     A:ClearAllPoints(); A:SetPoint(DB.apoint, UIParent, DB.apoint, DB.ax, DB.ay)
+    if LP_RXP then LP_RXP.say = P; LP_RXP.grind = DB.grind == true end
     for _, e in ipairs({ "QUEST_LOG_UPDATE", "QUEST_ACCEPTED", "QUEST_TURNED_IN", "QUEST_REMOVED",
       "ZONE_CHANGED", "ZONE_CHANGED_NEW_AREA", "ZONE_CHANGED_INDOORS", "PLAYER_ENTERING_WORLD",
       "PLAYER_XP_UPDATE", "PLAYER_LEVEL_UP", "UPDATE_EXHAUSTION",
@@ -2287,6 +2462,7 @@ E:SetScript("OnUpdate", function(_, el)
   if acc >= 0.05 then acc = 0; pcall(UpdateArrow, now) end
   pcall(UpdateBeam, now, el)
   if UnitOnTaxi("player") then E.onTaxi = true end
+  if LP_RXP and LP_RXP.dirty then LP_RXP.dirty = false; RT.want = true end
   if RT.want and now - (RT.lastR or 0) >= 0.2 then pcall(Refresh, true) end
   if accScan >= 1 then
     accScan = 0
@@ -2635,6 +2811,7 @@ SLASH_LEVELPILOT1 = "/lp"
 SLASH_LEVELPILOT2 = "/levelpilot"
 -- Menue "Neu berechnen": lohnt gerade eine andere (nicht schwerere) Quest mehr? (Route.lua R.Rethink)
 function RT.Rethink()
+  if RT.info and RT.info.rxp then P("Im RXP-Modus bestimmt der RXP-Guide die Reihenfolge. |cff8a9396/lp rxp|r schaltet auf LevelPilots eigene Route."); return end
   local route = RT.key and LevelPilot_Routes[RT.key]
   if not (route and LP_Route and LP_Route.Rethink and DB) then P("Keine Route aktiv."); return end
   if LP_Route.live and LP_Route.LiveReset then   -- Live: Gebiet frisch waehlen (Ort + Questlog + Stufe)
@@ -2812,14 +2989,40 @@ SlashCmdList.LEVELPILOT = function(msg)
     for k, v in pairs(DEF) do DB[k] = copy(v) end
     DB.maxDiffUser = nil
     if LP_Route then LP_Route.speed = DB.speed; LP_Route.maxDiff = DB.maxDiff; LP_Route.live = DB.live ~= false; LP_Route.ResetPath() end
+    M:SetScale(DB.scale or 1)
     M:ClearAllPoints(); M:SetPoint(DB.point, UIParent, DB.point, DB.x, DB.y)
     A:ClearAllPoints(); A:SetPoint(DB.apoint, UIParent, DB.apoint, DB.ax, DB.ay)
+    if LP_RXP then LP_RXP.grind = DB.grind == true; LP_RXP.Reset() end
     Refresh(true); P("zurückgesetzt.")
   elseif c == "menu" or c == "menü" or c == "einstellungen" or c == "optionen" then OpenSettings(true)
   elseif c == "xp" then XPS.start, XPS.gained = GetTime(), 0; P("XP/h neu gestartet.")
   elseif c == "rechnen" or c == "neuberechnen" then RT.Rethink()
   elseif c == "weiter" then
-    if RT.key and RT.idx then SkipStep(RT.idx); P("Schritt " .. RT.idx .. " übersprungen. Zurückholen: /lp zurueck") end; Refresh(true)
+    if RT.info and RT.info.rxp then
+      local ok, why = LP_RXP.Next(); P(ok and "RXP: ein Schritt weiter." or ("Weiter geht gerade nicht: " .. tostring(why or "kein Guide")))
+    elseif RT.key and RT.idx then SkipStep(RT.idx); P("Schritt " .. RT.idx .. " übersprungen. Zurückholen: /lp zurueck") end; Refresh(true)
+  elseif c == "rxp" then
+    DB.rxp = DB.rxp == false
+    if LP_RXP then LP_RXP.Reset(); if not DB.rxp then LP_RXP.HideRXP(false) end end
+    RT.idx, RT.cur = nil, nil
+    P("RestedXP-Guide als Plan: " .. (DB.rxp and "|cff39ff6ban|r" or "|cffff8a3daus|r – LevelPilots eigene Route")
+      .. ((DB.rxp and not (LP_RXP and LP_RXP.Has())) and " (RXPGuides ist nicht geladen)" or ""))
+    Refresh(true)
+  elseif c == "guide" then
+    if not RT.UseRXP() then P("RXP-Modus ist aus oder RXPGuides fehlt – |cff8a9396/lp rxp|r"); return end
+    local g = LP_RXP.Progress()
+    if g and LP_RXP.Fits(g, UnitLevel("player") or 1) then LP_RXP.Menu()
+    else
+      local ok, nm = LP_RXP.LoadRecommended()
+      P(ok and ("RXP-Guide geladen: |cff39ff6b" .. tostring(nm) .. "|r") or ("Kein Guide geladen: " .. tostring(nm)))
+    end
+    RT.want = true
+  elseif c == "grind" or c == "grinden" then
+    local arg = (msg or ""):lower():match("^%s*%S+%s+(%S+)")
+    DB.grind = arg == "an"
+    if LP_RXP then LP_RXP.grind = DB.grind; LP_RXP.Reset() end
+    P(DB.grind and "Grind-Schritte (RXP) werden gezeigt." or "Grind-Schritte (RXP) werden übersprungen (Standard).")
+    Refresh(true)
   elseif c == "zurueck" or c == "zurück" then
     -- das Letzte rueckgaengig: Sprung des Plans oder uebersprungener Schritt
     local plan = RT.key and DB.plan[RT.key]
@@ -2846,7 +3049,12 @@ SlashCmdList.LEVELPILOT = function(msg)
   elseif c == "schritt" then
     local n = tonumber((msg or ""):match("(%d+)"))
     local route = RT.key and LevelPilot_Routes[RT.key]
-    if route and n and route.steps[n] then
+    if route and route.rxp then   -- RXP-Modus: RXP-Schritt setzen (wie RXPs Schrittliste)
+      local _, _, tot = LP_RXP.Progress()
+      if n and tot and n >= 1 and n <= tot and not InCombatLockdown() then pcall(_G.RXP.SetStep, n); P("RXP auf Schritt " .. n .. " gesetzt.")
+      else P("RXP-Schritt 1–" .. tostring(tot or "?") .. " angeben, nicht im Kampf.") end
+      RT.want = true
+    elseif route and n and route.steps[n] then
       local plan = DB.plan[RT.key]
       plan.hist = plan.hist or {}
       if plan.k then table.insert(plan.hist, { k = plan.k, i = plan.i, t = time() }) end
@@ -2877,6 +3085,7 @@ SlashCmdList.LEVELPILOT = function(msg)
     local R = LP_Route
     P("Route: " .. tostring(RT.key and LevelPilot_Routes[RT.key].name) .. " · Schritt " .. tostring(RT.idx) .. " · Questie-Daten: " .. ((R and R.HasQuestie()) and "|cff39ff6bja|r" or "|cffff5050nein|r"))
   else
+    P("/lp rxp · /lp guide · /lp grind an|aus · Größe: Ecke unten rechts ziehen")
     P("/lp (an/aus) · /lp menu · /lp plan · /lp log · /lp weiter · /lp zurueck · /lp einstieg · /lp schritt <Nr> · /lp live · /lp rechnen · /lp warum · /lp neu · /lp route · /lp punkt (neu|weg) · /lp export · /lp import · /lp wege · /lp speed · /lp strahl · /lp ton · /lp kampf · /lp flug · /lp entsperren · /lp sound · /lp gruen · /way x y · /lp auto · /lp pfeil · /lp marker · /lp lock · /lp unlock · /lp toast · /lp xp · /lp reset")
   end
 end
