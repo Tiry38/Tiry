@@ -118,9 +118,27 @@ function D.IDByName(name)
   return nameIndex[name]
 end
 
+-- Such-Index (einmalig beim ersten Suchen, ~1,5 MB): alle Items nach Name sortiert, Platzhalter schon aussortiert,
+-- Namen schon klein geschrieben. Danach kostet eine Suche nur noch einfache Vergleiche – kein Ruckeln beim Tippen.
+local sIds, sLow
+local function searchIndex()
+  if sIds then return sIds, sLow end
+  local rows = {}
+  for id, name in source():gmatch("\n(%d+)\t([^\t\n]+)") do
+    if not isJunk(name) then
+      local low = D.Lower(name)
+      rows[#rows + 1] = { tonumber(id), low, sortKey(low) }
+    end
+  end
+  table.sort(rows, function(a, b) if a[3] ~= b[3] then return a[3] < b[3] end return a[1] < b[1] end)
+  sIds, sLow = {}, {}
+  for i = 1, #rows do sIds[i], sLow[i] = rows[i][1], rows[i][2] end
+  return sIds, sLow
+end
+
 -- Suche: alle Wörter müssen im Namen vorkommen (z. B. "rot tasche"); Filter und Sortierung optional.
 -- Nur Treffer werden zu Tabellen – nach der Suche gibt der Speicher alles wieder frei.
--- limit (nur ohne filter/sortBy): nur die ersten N nach Name fertig bauen – die Schnellsuche braucht 14 Zeilen
+-- Ergebnis ohne sortBy: nach Name (ä = a …). limit (ohne sortBy): hört nach N Treffern auf – die Schnellsuche braucht 14.
 function D.Search(text, filter, sortBy, limit)
   local words = {}
   for w in D.Lower(text or ""):gmatch("%S+") do words[#words + 1] = w end
@@ -131,48 +149,33 @@ function D.Search(text, filter, sortBy, limit)
     if e and (not filter or filter(e)) then out[1] = e end
     return out
   end
-  local src = source()
-  local light = limit and not filter and not sortBy
-  local hits = light and {} or nil
-  for id, pos in src:gmatch("\n(%d+)\t()") do
-    local name = src:match("^([^\t\n]+)", pos)
-    local ok = name and not isJunk(name)
-    if ok and #words > 0 then
-      local lname = D.Lower(name)
-      for w = 1, #words do
-        if not lname:find(words[w], 1, true) then ok = false break end
+  local ids, low = searchIndex()
+  local pos = buildIndex()
+  local nw, stop = #words, (not sortBy) and limit or nil
+  for i = 1, #ids do
+    local ok, lname = true, low[i]
+    for w = 1, nw do
+      if not lname:find(words[w], 1, true) then ok = false break end
+    end
+    if ok then
+      local id = ids[i]
+      local e = cache[id] or build(id, pos[id])
+      if e and (not filter or filter(e)) then
+        out[#out + 1] = e
+        if stop and #out >= stop then break end
       end
     end
-    if ok and light then
-      hits[#hits + 1] = { id = tonumber(id), pos = pos, key = sortKey(D.Lower(name)) }
-    elseif ok then
-      local e = cache[tonumber(id)] or build(tonumber(id), pos)
-      if e and (not filter or filter(e)) then out[#out + 1] = e end
-    end
   end
-  if light then
-    table.sort(hits, function(a, b) if a.key ~= b.key then return a.key < b.key end return a.id < b.id end)
-    for i = 1, #hits do
-      local h = hits[i]
-      local e = cache[h.id] or build(h.id, h.pos)
-      if e then out[#out + 1] = e end
-      if #out >= limit then break end
-    end
-    return out
-  end
+  if not sortBy or sortBy == "name" then return out end
   local M = ns.Market
   if sortBy == "ah" then
     local price = {}
     for _, e in ipairs(out) do price[e] = M.Price(e.id) or -1 end
-    table.sort(out, function(a, b) if price[a] ~= price[b] then return price[a] > price[b] end return a.name < b.name end)
+    table.sort(out, function(a, b) if price[a] ~= price[b] then return price[a] > price[b] end if a.name ~= b.name then return a.name < b.name end return a.id < b.id end)
   elseif sortBy == "sell" then
-    table.sort(out, function(a, b) if a.sell ~= b.sell then return a.sell > b.sell end return a.name < b.name end)
+    table.sort(out, function(a, b) if a.sell ~= b.sell then return a.sell > b.sell end if a.name ~= b.name then return a.name < b.name end return a.id < b.id end)
   elseif sortBy == "level" then
-    table.sort(out, function(a, b) if a.req ~= b.req then return a.req > b.req end if a.ilvl ~= b.ilvl then return a.ilvl > b.ilvl end return a.name < b.name end)
-  else
-    local key = {}
-    for _, e in ipairs(out) do key[e] = sortKey(D.Lower(e.name)) end
-    table.sort(out, function(a, b) if key[a] ~= key[b] then return key[a] < key[b] end return a.id < b.id end)
+    table.sort(out, function(a, b) if a.req ~= b.req then return a.req > b.req end if a.ilvl ~= b.ilvl then return a.ilvl > b.ilvl end if a.name ~= b.name then return a.name < b.name end return a.id < b.id end)
   end
   return out
 end

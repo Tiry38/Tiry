@@ -520,3 +520,35 @@ describe("D4 Erz-Fundorte: Spawn-Pool-Punkte zählen einmal, Erze passend zur St
     assert.truthy(#ns.SKIN_SPOTS[8167] >= 2)
   end)
 end)
+
+describe("P1 Suche ruckelfrei (sortierter Namens-Index)", function()
+  it("Ergebnis nach Name sortiert (ä = a), ohne Platzhalter, Limit = Anfang der vollen Liste", function()
+    local ns = E.load({})
+    local key = function(e) return (ns.DB.Lower(e.name):gsub("\195\164", "a"):gsub("\195\182", "o"):gsub("\195\188", "u"):gsub("\195\159", "ss")) end
+    local all = ns.DB.Search("trank")
+    assert.truthy(#all > 50)
+    for i = 2, #all do
+      local a, b = key(all[i - 1]), key(all[i])
+      assert.truthy(a < b or (a == b and all[i - 1].id < all[i].id), all[i - 1].name .. " / " .. all[i].name)
+      assert.is_false(ns.DB.IsJunk(all[i].name))
+    end
+    local few = ns.DB.Search("TRANK", nil, nil, 14)
+    for i = 1, 14 do assert.are.equal(all[i].id, few[i].id) end
+    assert.are.same(ns.DB.Search("trank", nil, "name"), all)
+  end)
+  it("50 Tipp-Suchen mit kurzem Wort brauchen zusammen unter 0,3 s", function()
+    local ns = E.load({})
+    ns.DB.Search("a", nil, nil, 1) -- Index einmal bauen
+    local t0 = os.clock()
+    for i = 1, 50 do ns.DB.Search(i % 2 == 0 and "er" or "e", nil, nil, 14) end
+    assert.truthy(os.clock() - t0 < 0.3, string.format("%.3f s", os.clock() - t0))
+  end)
+  it("gleiche Preise/Namen: feste Reihenfolge nach ID", function()
+    local ns = E.load({})
+    local r = ns.DB.Search("öl", nil, "sell")
+    for i = 2, #r do
+      local a, b = r[i - 1], r[i]
+      assert.truthy(a.sell > b.sell or (a.sell == b.sell and (a.name < b.name or (a.name == b.name and a.id < b.id))))
+    end
+  end)
+end)
