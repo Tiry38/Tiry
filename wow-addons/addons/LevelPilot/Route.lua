@@ -939,7 +939,8 @@ function R.Plan(route, lvl, skipped, plan, n, cur)
       local s = steps[i]
       if s.t == "turnin" and state[i] == "open" and s.q and not ready(s.q) then
         local c = qx[s.q] and qx[s.q].cmp
-        if c and c < p and state[c] == "missed" then state[i] = "missed" end
+        if c and c < p and state[c] == "missed" then state[i] = "missed"
+        elseif c and c < i and state[c] == "skip" then state[i] = "skip" end   -- Erledigen uebersprungen -> Abgabe auch
       end
     end
     local q2 = p
