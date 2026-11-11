@@ -5,7 +5,7 @@
 -- Datenquellen: Routen-Plan, Questie (Geber/Ziele), Blizzards Questlog.
 ---------------------------------------------------------------------------
 local ADDON = ...
-local VERSION = "6.0.0"
+local VERSION = "6.0.1"
 local time = time or (os and os.time)   -- Spielzeit-Uhr (Sekunden seit 1970)
 local floor, max, min, abs, sqrt, atan2, pi, fmt = math.floor, math.max, math.min, math.abs, math.sqrt, math.atan2, math.pi, string.format
 local BT = BackdropTemplateMixin and "BackdropTemplate" or nil
@@ -1517,6 +1517,15 @@ local function UpdateLog(force)
   return true
 end
 
+-- Questlevel gegen DEINE Stufe in Worten (Tiry 11.11.: "meine Stufe ist 28" – die Stufe immer mitnennen)
+function RT.LvlTxt(ql)
+  local lvl = UnitLevel("player") or 1
+  local d = lvl - (ql or lvl)
+  if d >= 6 then return fmt("du bist Stufe %d: sehr leicht, %d Stufen drunter, weniger XP", lvl, d)
+  elseif d >= 1 then return fmt("du bist Stufe %d: leicht, %d Stufe%s drunter, volle Quest-XP", lvl, d, d == 1 and "" or "n")
+  elseif d == 0 then return fmt("du bist Stufe %d: genau deine Stufe", lvl)
+  else return fmt("du bist Stufe %d: %d drüber (Grenze +1)", lvl, -d) end
+end
 -- Live-Modus: das Band zeigt das Quest-Gebiet – eine Kapsel je Quest (abgegeben, fertig, im Log, offen)
 function RT.LiveBand(lv)
   local tot = lv.n + (lv.done or 0)
@@ -1764,7 +1773,7 @@ function Refresh(rescan)
         if cnt > 1 then for _, gi in ipairs(it.steps) do tip[#tip + 1] = { "· " .. LP_Route.StepTitle(route.steps[gi]), 0.85, 0.9, 0.9 } end end
         if st.z then tip[#tip + 1] = { st.z, 0.55, 0.6, 0.62 } end
         if later then tip[#tip + 1] = { "Freigeschaltet ab Stufe " .. needL, 1, 0.54, 0.24 } end
-        if st.ml then tip[#tip + 1] = { fmt("Gegner ~Stufe %d (LevelPilot plant höchstens deine Stufe +1)", floor(st.ml + 0.5)), 0.55, 0.6, 0.62 } end
+        if st.ml then tip[#tip + 1] = { fmt("Gegner ~Stufe %d · du bist Stufe %d · Grenze: Gegner höchstens Stufe %d", floor(st.ml + 0.5), UnitLevel("player") or 1, (UnitLevel("player") or 1) + 1), 0.55, 0.6, 0.62 } end
         if st.fill then tip[#tip + 1] = { "Aufhol-Quest: kommt, weil du hinter dem Plan bist. LevelPilot nimmt nur so viele, wie dir XP bis Stufe " .. st.fill .. " fehlen (Mobs = Rest).", 0.31, 0.82, 1 } end
         if planned then tip[#tip + 1] = { "Geplant: kommt dran, sobald du die Quest angenommen hast", 0.31, 0.82, 1 } end
         tip[#tip + 1] = { "Rechtsklick: " .. (st.q and ((cnt > 1) and "erste Quest sperren" or "Quest sperren (kommt nie wieder)") or "Schritt überspringen"), 0.5, 0.55, 0.58 }
@@ -1801,8 +1810,8 @@ function Refresh(rescan)
           if st.pool then   -- Extra-Quest aus dem Pool (nicht im Plan): XP zeigen (Questlevel/Gegner im Tooltip)
             table.insert(sub, 1, fmt("|cffffd75e+%s XP|r", fmtNum(LP_Route.XPAt(st.pxp or 0, st.ql, UnitLevel("player") or 1))))
             local lv = RT.info and RT.info.live
-            table.insert(tip, 2, { lv and fmt("Live-Gebiet %s: %d Quests nah beieinander (~%d XP/Min mit Weg). Questlevel %d%s – passt zu deiner Stufe. Reihenfolge: Annehmen, Erledigen, Abgeben. Details: /lp warum",
-              lv.zone or "", lv.n, floor(lv.rate + 0.5), st.ql or 0, st.ml and fmt(", Gegner ~Stufe %d", floor(st.ml + 0.5)) or "")
+            table.insert(tip, 2, { lv and fmt("Live-Gebiet %s: %d Quests nah beieinander (~%d XP/Min mit Weg). Questlevel %d%s – %s. Reihenfolge: Annehmen, Erledigen, Abgeben. Details: /lp warum",
+              lv.zone or "", lv.n, floor(lv.rate + 0.5), st.ql or 0, st.ml and fmt(", Gegner ~Stufe %d", floor(st.ml + 0.5)) or "", RT.LvlTxt(st.ql))
               or fmt("Extra-Quest (nicht im Plan): Questlevel %d%s – passt zu deiner Stufe, bringt mehr XP/Min als Grinden. Danach geht der Plan weiter.",
               st.ql or 0, st.ml and fmt(", Gegner ~Stufe %d", floor(st.ml + 0.5)) or ""), 0.22, 1, 0.42 })
           end

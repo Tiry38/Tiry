@@ -157,7 +157,10 @@ Alles oben ist im Forever-Nachbau getestet, aber nicht im echten Client. Besonde
 
 ---
 
-# Ingame-Test – LevelPilot 6.0.0
+# Ingame-Test – LevelPilot 6.0.1
+
+## Neu in 6.0.1
+- [ ] Tooltip einer Live-Quest: „du bist Stufe X: leicht, N Stufen drunter, volle Quest-XP“ – X = deine echte Stufe.
 
 ## Neu in 6.0 (Live-Modus: Quest-Gebiet statt fester Plan)
 - [ ] Einloggen: Kopfzeile zeigt **LIVE · <Gebiet> · N Quests · +X XP**, das Band darunter eine Kapsel je Quest.
