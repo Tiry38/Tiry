@@ -157,9 +157,15 @@ Alles oben ist im Forever-Nachbau getestet, aber nicht im echten Client. Besonde
 
 ---
 
-# Ingame-Test – LevelPilot 5.1.1
+# Ingame-Test – LevelPilot 5.1.2
 
-## Neu in 5.1.1 (Aufhol-Quests)
+## Neu in 5.1.2 (Aufhol-Quests nach echter XP)
+- [ ] Stufe 27 mit wenig XP (z. B. 3 %): Aufhol-Karte zeigt **„Aufholen x/y XP · ~N Mobs“** – y = dir fehlende XP bis 28 (laut XP-Leiste), x = was die Quests bringen.
+- [ ] Bei viel XP (z. B. 90 %+) kommen **weniger** Aufhol-Quests (nur so viele, wie bis 28 fehlen).
+- [ ] Wartet ein Schritt trotzdem auf eine Stufe: Karte zeigt **„noch X XP · ~N Mobs“** statt nur „Stufe fehlt“.
+- [ ] Mit 28 am Ende von Tausend Nadeln: neue Aufhol-Quests bis 30 (**Rocket Car Parts**, **A Bump in the Road**, **Load Lightening** – Shimmering Flats), mit 30 fallen sie weg.
+
+## Aus 5.1.1 (Aufhol-Quests)
 - [ ] Stufe 27 am Ende von Tausend Nadeln: statt „WARTET ab Stufe 28“ kommt **Grimmtotem-Spionage** (Freiwindposten), Hinweis „Aufhol-Quest“.
 - [ ] Mit Stufe 28 geht es mit Gehärtete Schalen / Salziges Gift weiter; angenommene Aufhol-Quests bleiben in der Liste.
 

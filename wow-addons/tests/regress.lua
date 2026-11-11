@@ -15,7 +15,8 @@ local cases = {
     function(o) local i = tonumber(o:match("pointer (%d+)")) return i ~= nil and i >= 4 and i <= 60 end },
   { "aufhol_quests", "Route.lua", "Hinter dem Plan (Stufe 27, Tiry 11.11.): Aufhol-Quests statt Grinden; ab 28 weg; im Plan nie",
     function(o) return o:find("behind: level 27 pointer accept:1105 hero accept:5064 fill=28", 1, true) ~= nil and o:find("fill steps done: 11", 1, true) ~= nil
-      and o:find("level 28: hero accept:1105 | in-log fill 4770 complete open=true", 1, true) ~= nil and o:find("on plan: fill seen=false", 1, true) ~= nil end },
+      and o:find("level 28: hero accept:1105 | in-log fill 4770 complete open=true", 1, true) ~= nil and o:find("on plan: fill seen=false", 1, true) ~= nil
+      and o:find("xp 3%: need 37700 cover 12800 rest 24900 open 5", 1, true) ~= nil and o:find("xp 93%: need 2900 cover 4650 rest 0 open 2", 1, true) ~= nil end },
   { "netz_anbindung", "Travel.lua", "Splitter (Dach/Fels) neben dem Spieler: Hauptnetz bleibt angebunden (0 Verluste)",
     function(o) return o:find("cont 0: 0 of", 1, true) ~= nil and o:find("cont 1: 0 of", 1, true) ~= nil end },
   { "aufzug_hinweis", "Travel.lua", "Donnerfels-Aufzug: Hinweis an allen 5 Stellen davor",

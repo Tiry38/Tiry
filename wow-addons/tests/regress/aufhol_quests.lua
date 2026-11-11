@@ -50,7 +50,7 @@ local function play(cap, stopKey)
     local hero = R.Plan(route, lvl, {}, plan, 6, cur)
     if not hero then break end
     local s = steps[hero]
-    if s.fill then fillSeen = true end
+    if s.fill == 28 then fillSeen = true end   -- Block bis 28 (der Block bis 30 ersetzt den Schluss-Grind fuer alle)
     if plan.k == stopKey and steps[hero].fill then return lvl, plan, hero, fillSeen end
     if R.StepKey(s) == stopKey then return lvl, plan, hero, fillSeen end
     cur = { i = hero, since = GetTime() }
@@ -66,9 +66,19 @@ local function play(cap, stopKey)
   end
   return lvl, plan, nil, fillSeen
 end
+XPCUR, XPMAX = 1200, 38900   -- Tirys Anzeige: 3 % von Stufe 27
+function UnitXP() return XPCUR end
+function UnitXPMax() return XPMAX end
 -- 1. hinter dem Plan: nie ueber 27
 local lvl, plan, hero = play(27, "accept:1105")
 print(string.format("behind: level %d pointer %s hero %s fill=%s", lvl, tostring(plan.k), R.StepKey(steps[hero]), tostring(steps[hero].fill)))
+local function openFill(F) local n = 0 for i, s in ipairs(steps) do if s.fill == F and s.t == "accept" and R.state[i] == "open" then n = n + 1 end end return n end
+local fi = R.fillInfo[28]
+print(string.format("xp 3%%: need %d cover %d rest %d open %d", fi.need, fi.cover, fi.rest, openFill(28)))
+XPCUR = 36000 R.Plan(route, 27, {}, plan, 6, nil)
+fi = R.fillInfo[28]
+print(string.format("xp 93%%: need %d cover %d rest %d open %d", fi.need, fi.cover, fi.rest, openFill(28)))
+XPCUR = 1200 R.Plan(route, 27, {}, plan, 6, nil)
 -- alle Aufhol-Quests nacheinander abarbeiten
 local got = {}
 for _ = 1, 40 do
@@ -83,6 +93,7 @@ for _ = 1, 40 do
   R.ScanLog(true)
 end
 print("fill steps done: " .. #got)
+-- 1b. Budget nach echtem XP-Stand (vor dem Abarbeiten gemessen in 1.: alle 5; hier: fast voll -> nur 2)
 -- 2. Stufe 28 erreicht mitten im Block: Heimweg (4770) ist angenommen und bleibt im Plan
 local h28 = R.Plan(route, 28, {}, plan, 6, nil)
 local st = R.state or {}

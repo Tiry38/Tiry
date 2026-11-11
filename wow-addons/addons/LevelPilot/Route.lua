@@ -692,6 +692,54 @@ R.QuestIndex = questIndex
 local function now() if time then return time() end return os.time() end
 R.Now = now
 
+-- Aufhol-Quests nach echtem XP-Stand: nur so viele, wie dir bis zur Stufe des Blocks fehlen.
+-- Gedeckt wird mit: Quests des Abschnitts im Log + offene (annehmbare) Quests des Abschnitts + Aufhol-Quests
+-- in Reihenfolge. Was dann noch fehlt, steht in R.fillInfo[stufe].rest (Anzeige: "~N Mobs").
+-- XP je Stufe: Forever-Tabelle (QuestieDB support/Forever, wie tools/xpmodel.py)
+R.XP_LEVEL = { [20] = 23200, [21] = 25200, [22] = 27300, [23] = 29400, [24] = 31700, [25] = 34000, [26] = 36400, [27] = 38900,
+  [28] = 41400, [29] = 44300, [30] = 47400, [31] = 50800, [32] = 54500, [33] = 58600, [34] = 62800, [35] = 67100, [36] = 71600,
+  [37] = 76100, [38] = 80800, [39] = 85700, [40] = 90700 }
+R.fillInfo = {}
+function R.XPNeed(lvl, to)
+  if not (UnitXP and UnitXPMax) then return nil end
+  local ok, cur, mx = pcall(function() return UnitXP("player"), UnitXPMax("player") end)
+  if not ok or type(cur) ~= "number" or type(mx) ~= "number" or mx <= 0 then return nil end
+  local need = mx - cur
+  for l = lvl + 1, to - 1 do need = need + (R.XP_LEVEL[l] or mx) end
+  return math.max(0, need)
+end
+function R.FillBudget(steps, state, lvl)
+  local blocks = {}
+  for i, s in ipairs(steps) do
+    if s.fill and s.t == "accept" and lvl < s.fill then
+      local b = blocks[s.fill]
+      if not b then b = { seg = s.seg, list = {} }; blocks[s.fill] = b end
+      b.list[#b.list + 1] = i
+    end
+  end
+  R.fillInfo = {}
+  for F, b in pairs(blocks) do
+    local need = R.XPNeed(lvl, F)
+    local cover, total = 0, 0
+    for i, s in ipairs(steps) do
+      if s.t == "accept" and s.q and s.xp and s.seg == b.seg and not s.fill then
+        if inLog(s.q) or state[i] == "open" then cover = cover + s.xp end
+      elseif s.t == "accept" and s.q and s.xp and s.fill == F and inLog(s.q) then
+        cover = cover + s.xp
+      end
+    end
+    for _, i in ipairs(b.list) do
+      local s = steps[i]
+      if state[i] == "open" then
+        if need and cover >= need then state[i] = "skip" else cover = cover + (s.xp or 0) end
+      end
+      if state[i] ~= "skip" then total = total + 1 end
+    end
+    R.fillInfo[F] = { need = need, cover = cover, rest = need and math.max(0, need - cover) or nil, n = total,
+      mob = lvl * 5 + 45 }
+  end
+end
+
 -- Zustand aller Schritte: done / skip / later / open (Reise-Schritte nach "warst du schon da / brauchst du es noch")
 local function computeState(steps, lvl, skipped, cur)
   local state = {}
@@ -704,6 +752,7 @@ local function computeState(steps, lvl, skipped, cur)
       state[i] = (lvl >= (s.to or 0)) and "done" or "open"
     end
   end
+  R.FillBudget(steps, state, lvl)
   -- Reisen/Trainer: noetig, wenn im folgenden Abschnitt noch etwas offen ist; erledigt, sobald dort
   -- schon etwas angenommen/abgegeben wurde (du warst also schon da)
   for i, s in ipairs(steps) do

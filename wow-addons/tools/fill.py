@@ -32,6 +32,12 @@ FILL = {
         ("turnin", 4770, None),
         ("turnin", 5064, None),
         ("turnin", 4904, None),
+    ]),
+    # 28 -> 30: statt "Grinden bis 30" erst die Schimmernde-Ebene-Quests (Mobs dort zaehlen ohnehin)
+    dict(seg=6, fill=30, z="Tausend Nadeln", steps=[
+        ("accept", 1110, None), ("accept", 1175, None), ("accept", 1176, None),
+        ("complete", 1110, None), ("complete", 1176, None), ("complete", 1175, None),
+        ("turnin", 1176, None), ("turnin", 1175, None), ("turnin", 1110, None),
     ])],
 }
 
@@ -64,6 +70,15 @@ def apply(key):
             if note: s["note"] = note
             new.append(s)
         steps[at:at] = new
+    # XP je Annehmen-Schritt der Abschnitte mit Aufhol-Block (Quest-XP + Mob-XP der Ziele, Forever-Daten):
+    # LevelPilot nimmt nur so viele Aufhol-Quests, wie dir XP bis zur Stufe fehlen.
+    import xpmodel as X
+    segs = set(b["seg"] for b in FILL.get(key, []))
+    for s in steps:
+        if s.get("t") == "accept" and s.get("q") and s.get("seg") in segs:
+            L = int(s.get("l") or 27)
+            qx = X.quest_xp(s["q"], L)[0] or 0
+            s["xp"] = int(round((qx + X.work(s["q"], L)[1]) / 50.0) * 50)
     d["steps"] = steps
     json.dump(d, open(path, "w"))
     return len(steps)
