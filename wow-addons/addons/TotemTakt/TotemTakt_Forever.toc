@@ -1,0 +1,8 @@
+## Interface: 16001
+## Title: |cff39ff6bTotem|r|cff2de2e6Takt|r
+## Notes: Eine Taste fuer deine Totems: jeder Druck stellt das naechste in deiner Reihenfolge, fehlende zuerst (/takt).
+## Author: Tiry
+## Version: 1.0.0
+## SavedVariablesPerCharacter: TotemTaktDB
+
+TotemTakt.lua

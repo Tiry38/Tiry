@@ -49,10 +49,11 @@ def texture(name):
     if name in _tex:
         return _tex[name]
     img = None
-    if "TirysZentrale\\Media\\" in name or "LevelPilot\\Media\\" in name:
+    m = re.match(r"(?i)^Interface\\AddOns\\([^\\]+)\\Media\\", name)
+    if m:  # Media eines eigenen Add-ons (Zentrale liegt eigen, alle anderen unter addons/<Name>/)
         fn = name.split("Media\\")[-1]
         fn = fn if fn.lower().endswith((".tga", ".blp")) else fn + ".tga"
-        base = ADDON if "TirysZentrale" in name else os.path.join(HERE, "..", "addons", "LevelPilot")
+        base = ADDON if m.group(1) == "TirysZentrale" else os.path.join(HERE, "..", "addons", m.group(1))
         p = os.path.join(base, "Media", fn.replace("\\", os.sep))
         if os.path.exists(p):
             img = Image.open(p).convert("RGBA")

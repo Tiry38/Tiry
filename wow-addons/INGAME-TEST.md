@@ -239,3 +239,32 @@ Unsicher: Einstieg mit **echten** Questie-Daten (Nachbau mit nachgestellten Ques
 (900/450 m, 3 s) anfühlen, ob Forever `QuestMapQuestOptions_AbandonQuest`, `C_QuestLog.GetMaxNumQuestsCanAccept` und
 `C_QuestLog.GetQuestTagInfo` (Dungeon/Gruppe) liefert (Rückfälle sind eingebaut), Schriftbreiten im echten Client.
 Aus 4.2 weiter offen: `C_Map.GetMapPosFromWorldPos`, Flugmeister-IDs, Hochplateaus (Donnerfels), `GetUnitSpeed` im Geisterwolf.
+
+
+# Ingame-Test – TotemTakt 1.0.0
+
+## Start
+- [ ] Nach dem Einloggen mit dem Schamanen steht im Chat einmal: Makro „TotemTakt“ liegt in deinen Charakter-Makros.
+- [ ] `/takt` öffnet das Fenster: 4 Kugeln mit echten Totem-Symbolen, Zahl = Platz im Makro, Punkt grün/rot/gelb.
+- [ ] Knopf **AUF LEISTE ZIEHEN** → Makro hängt am Cursor → auf eine Leiste legen, Taste belegen.
+
+## Totems stellen (außerhalb des Kampfes)
+- [ ] Keine Totems: 4× drücken (normal schnell) → alle 4 stehen, in deiner Reihenfolge.
+- [ ] Wild drücken (auch in der Abklingzeit): es wird **kein Totem übersprungen**.
+- [ ] Ein Totem auslaufen lassen / weglaufen (> 30 m) → **dieses** kommt beim nächsten Druck zuerst.
+- [ ] Alles steht: 1× drücken → das älteste wird erneuert; Kugel-Zahlen und „Nächster Druck“ stimmen mit dem Symbol auf der Leiste.
+
+## Im Kampf
+- [ ] Kampf beginnen, Taste mehrfach drücken → Totems nacheinander, keine Fehlermeldung.
+- [ ] 8 s nicht drücken → nächster Druck beginnt wieder vorne.
+- [ ] Nach dem Kampf ordnet TotemTakt neu (fehlende zuerst).
+
+## Fenster
+- [ ] Kugel anklicken → Auswahl-Leiste mit deinen Totems des Elements + „aus“; Pfeile verschieben das Element.
+- [ ] Kugel ziehen → Reihenfolge ändert sich, Makro passt sich an.
+- [ ] Schalter „Fehlende zuerst“ und Neustart 8 s / 15 s / nie.
+
+## Nur im Spiel prüfbar (ehrlich)
+- /castsequence + Makro anlegen/ändern in Forever (Code folgt der Retail-API; WinduTotemMacro nutzt sie in Forever auch).
+- Totem-/Buff-Daten außerhalb des Kampfes lesbar (im Kampf sind sie gesperrt → Makro bleibt fest).
+- Reichweite gibt es nur für Buff-Totems; Verbrennung/Magma/Erdbindung usw. gelten als „steht“, solange sie laufen.

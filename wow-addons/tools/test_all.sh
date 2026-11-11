@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Alle Tests der WoW-Forever-Add-ons mit einem Befehl.
 # Aufruf (von überall):  bash wow-addons/tools/test_all.sh [ziel ...]
-#   Ziele: zentrale levelpilot proc hagel blitzschild chathoch minipost enhancehud syntax  (ohne Ziel = alle)
+#   Ziele: zentrale levelpilot totemtakt proc hagel blitzschild chathoch minipost enhancehud syntax  (ohne Ziel = alle)
 # Exit-Code 0 = alles grün. Am Ende steht eine Zusammenfassung.
 set -u
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
@@ -82,6 +82,7 @@ if want blitzschild; then
   run "Blitzschild: bs" "$A/Blitzschild" - lua5.1 "$T/bs.lua"
   run "Blitzschild: bs2" "$A/Blitzschild" - lua5.1 "$T/bs2.lua"
 fi
+if want totemtakt; then run "TotemTakt (Makro-Simulation + Layout)" "$A/TotemTakt" "TOTEM TESTS OK" lua5.1 "$T/totem.lua"; fi
 if want chathoch; then run "ChatHoch" "$A/ChatHoch" - lua5.1 "$T/ch.lua"; fi
 if want minipost; then run "MiniPost" "$A/MiniPost" - lua5.1 "$T/mp.lua"; fi
 if want enhancehud; then
