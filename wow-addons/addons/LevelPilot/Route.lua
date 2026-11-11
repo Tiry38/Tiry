@@ -335,7 +335,8 @@ function R.OnLanded() STATE.landedAt = GetTime() end
 
 -- Quest grau? Classic-Quest-XP: volle XP bis 5 Stufen unter dir, dann 80/60/40/20/10 %
 R.maxDiff = 5
-R.maxAbove = 3
+R.maxAbove = 2   -- Questlevel hoechstens Stufe+2 (5.1.5: vorher 3)
+R.mobAbove = 1   -- Gegner der Questziele (ml = Mittel ihres Stufenbereichs) hoechstens Stufe+1 (Tiry 11.11.)
 local function greyFor(ql, lvl)
   if not ql then return false end
   if R.maxDiff and (lvl - ql) > R.maxDiff then return true end
@@ -385,6 +386,7 @@ function R.StepDone(s, lvl, cur)
     if greyFor(s.ql, lvl) then return "skip" end
     if s.rl and lvl < s.rl then return "later" end
     if s.ql and R.maxAbove and s.ql > lvl + R.maxAbove then return "later" end
+    if s.ml and R.mobAbove and s.ml > lvl + R.mobAbove then return "later" end   -- Gegner zu stark
     return false
   elseif s.t == "complete" then
     if flagged(s.q) or ready(s.q) then return true end
@@ -975,6 +977,56 @@ end
 -- route, lvl, skipped (StepKey -> true), plan (gespeicherter Zeiger, wird fortgeschrieben),
 -- n (Listenlaenge), cur ({ i, since } = aktuelles Ziel seit)
 -- Rueckgabe: Ziel-Index, Liste der naechsten Schritte, info { ptr, hero, n, entry, jumped }
+-- "Neu berechnen" (Tiry 11.11.): lohnt gerade eine andere Quest mehr? XP gegen Weg + Arbeit.
+-- Nie schwerer als der Plan: Questlevel hoechstens wie das Plan-Ziel (sonst Stufe+1, max. Stufe+2),
+-- keine Elite-/Gruppenquest, nur was du jetzt annehmen kannst (oder schon im Log hast).
+R.DETOUR_GAIN = 1.15   -- erst ab 15 % mehr XP/Min wird umgeplant (sonst bleibt der Plan)
+R.WALK_YPM = 7 * 60    -- Yards je Minute zu Fuss (Reittier erst ab 40)
+local function questRate(steps, ix, state, q)
+  local e = ix[q]; if not (e and e.acc) then return end
+  local a = steps[e.acc]
+  if not (a.xp and a.xp > 0) or a.hard or flagged(q) then return end
+  if a.note and (a.note:find("starker Gegner", 1, true) or a.note:find("Gruppe", 1, true)) then return end
+  local pts, first, wm = {}, nil, a.wm or 2
+  if not inLog(q) then
+    local st = state[e.acc]
+    if st ~= "open" and st ~= "missed" then return end   -- Stufe zu niedrig / passt nicht / gesperrt
+    first = e.acc; pts[#pts + 1] = R.StepTarget(a) or false
+  end
+  if ready(q) then wm = 0
+  elseif e.cmp then first = first or e.cmp; pts[#pts + 1] = R.StepTarget(steps[e.cmp]) or false end
+  if e.tin then first = first or e.tin; pts[#pts + 1] = R.StepTarget(steps[e.tin]) or false end
+  if not first then return end
+  local yd, prev = 0, nil
+  for _, pt in ipairs(pts) do
+    if not pt then return end
+    local d = prev and R.Between(prev, pt) or distTo(pt)
+    if not d then return end
+    yd, prev = yd + d, pt
+  end
+  local min = yd * 1.25 / R.WALK_YPM + wm + 0.3 * #pts   -- Luftlinie * 1.25 (Umwege), je Station 18 s Gespraech
+  return a.xp / min, first, a.ql, min, yd
+end
+-- Beste machbare Alternative (Quest, die du jetzt annehmen kannst oder im Log hast; nie ueber refQl, keine Elite)
+local function bestAlt(steps, ix, state, refQl, skipQ, maxYd)
+  local seen, best = {}, nil
+  for _, s in ipairs(steps) do
+    local q = s.q
+    if q and s.t == "accept" and not seen[q] and q ~= skipQ then
+      seen[q] = true
+      local r, first, ql, min, yd = questRate(steps, ix, state, q)
+      if r and (not ql or ql <= refQl) and (not maxYd or yd <= maxYd) and (not best or r > best.rate) then
+        best = { q = q, rate = r, first = first, ql = ql, min = min, yd = yd, name = R.StepTitle(s) }
+      end
+    end
+  end
+  return best
+end
+R.GRIND_MIN = 0.8      -- Minuten je Gegner beim Grinden (wie tools/xpmodel.py T_GRIND)
+R.AUTO_EVERY = 20      -- Sekunden: so oft sucht der Plan beim Warten/Grinden nach einer machbaren Quest
+R.AUTO_YD = 2500       -- automatisch nur Quests in der Naehe (ganzer Weg hoechstens ~2,5 km); weiter weg nur per Knopf
+local function grindRate(lvl) return (lvl * 5 + 45) / R.GRIND_MIN end
+
 function R.Plan(route, lvl, skipped, plan, n, cur)
   memoReset()
   local steps = route and route.steps or {}
@@ -1061,12 +1113,25 @@ function R.Plan(route, lvl, skipped, plan, n, cur)
     for i = 1, math.min(p - 1, N) do
       local s = steps[i]
       if s.fill and lvl < s.fill and state[i] == "missed" and s.seg == ps.seg then
-        state[i] = "open"; back[#back + 1] = i
+        local d = R.StepDone(s, lvl)
+        if d == "later" then state[i] = "later"          -- Gegner/Questlevel noch zu hoch: bleibt sichtbar, kein Ziel
+        elseif d ~= true and d ~= "skip" then state[i] = "open"; back[#back + 1] = i end
       end
     end
     if back[1] then hero = back[1]
     elseif state[p] == "later" and (not hero or (steps[hero].t == "grind" and (steps[hero].to or 0) > (steps[p].rl or 0))) then
       hero = p   -- ehrlich: "WARTET ab Stufe X · noch N XP" statt "Grinden bis 30"
+    end
+  end
+  -- Immer passend zu DEINER Stufe (Tiry 11.11.): muesstest du warten oder grinden, sucht der Plan selbst die
+  -- schnellste machbare Quest (Weg + Arbeit, nie schwerer als Stufe+1, keine Elite). Nur wenn sie mehr XP/Min
+  -- bringt als Grinden; sonst bleibt "Grinden bis X" mit Mob-Zahl.
+  if not plan.detour and hero and (state[hero] == "later" or steps[hero].t == "grind") then
+    local t = now()
+    if t - (plan.autoT or 0) >= R.AUTO_EVERY then
+      plan.autoT = t
+      local b = bestAlt(steps, qx, state, lvl + 1, nil, R.AUTO_YD)
+      if b and b.rate > grindRate(lvl) then plan.detour = { q = b.q, t = t, auto = true } end
     end
   end
   -- Abstecher aus "Neu berechnen": bis die Quest abgegeben ist (hoechstens 1 Stunde)
@@ -1080,7 +1145,7 @@ function R.Plan(route, lvl, skipped, plan, n, cur)
       elseif ready(dt.q) then idx = e.tin
       else idx = e.cmp or e.tin end
     end
-    if idx then state[idx] = "open"; hero = idx; info.detour = dt.q else plan.detour = nil end
+    if idx then state[idx] = "open"; hero = idx; info.detour, info.detourAuto = dt.q, dt.auto else plan.detour = nil end
   end
   info.ptr, info.hero, info.back = p, hero, back[1] and #back or nil
   -- 4. Liste: Ziel + naechste offene (oder wartende) Schritte in Plan-Reihenfolge.
@@ -1102,36 +1167,6 @@ function R.Plan(route, lvl, skipped, plan, n, cur)
   return hero, list, info
 end
 
--- "Neu berechnen" (Tiry 11.11.): lohnt gerade eine andere Quest mehr? XP gegen Weg + Arbeit.
--- Nie schwerer als der Plan: Questlevel hoechstens wie das Plan-Ziel (sonst Stufe+1, max. Stufe+2),
--- keine Elite-/Gruppenquest, nur was du jetzt annehmen kannst (oder schon im Log hast).
-R.DETOUR_GAIN = 1.15   -- erst ab 15 % mehr XP/Min wird umgeplant (sonst bleibt der Plan)
-R.WALK_YPM = 7 * 60    -- Yards je Minute zu Fuss (Reittier erst ab 40)
-local function questRate(steps, ix, state, q)
-  local e = ix[q]; if not (e and e.acc) then return end
-  local a = steps[e.acc]
-  if not (a.xp and a.xp > 0) or a.hard or flagged(q) then return end
-  if a.note and (a.note:find("starker Gegner", 1, true) or a.note:find("Gruppe", 1, true)) then return end
-  local pts, first, wm = {}, nil, a.wm or 2
-  if not inLog(q) then
-    local st = state[e.acc]
-    if st ~= "open" and st ~= "missed" then return end   -- Stufe zu niedrig / passt nicht / gesperrt
-    first = e.acc; pts[#pts + 1] = R.StepTarget(a) or false
-  end
-  if ready(q) then wm = 0
-  elseif e.cmp then first = first or e.cmp; pts[#pts + 1] = R.StepTarget(steps[e.cmp]) or false end
-  if e.tin then first = first or e.tin; pts[#pts + 1] = R.StepTarget(steps[e.tin]) or false end
-  if not first then return end
-  local yd, prev = 0, nil
-  for _, pt in ipairs(pts) do
-    if not pt then return end
-    local d = prev and R.Between(prev, pt) or distTo(pt)
-    if not d then return end
-    yd, prev = yd + d, pt
-  end
-  local min = yd * 1.25 / R.WALK_YPM + wm + 0.3 * #pts   -- Luftlinie * 1.25 (Umwege), je Station 18 s Gespraech
-  return a.xp / min, first, a.ql, min, yd
-end
 function R.Rethink(route, lvl, plan, skipped)
   local steps = route and route.steps
   if not (steps and plan) then return end
@@ -1139,7 +1174,7 @@ function R.Rethink(route, lvl, plan, skipped)
   local hero = R.Plan(route, lvl, skipped, plan, 6, nil)
   local state, ix = R.state or {}, questIndex(route)
   local hs = hero and steps[hero]
-  local res = { hero = hero, grind = (lvl * 5 + 45) / 0.6 }
+  local res = { hero = hero, grind = grindRate(lvl) }
   local refQl = lvl + 1
   if hs and hs.q and state[hero] == "open" then
     local r, _, ql = questRate(steps, ix, state, hs.q)
@@ -1149,17 +1184,7 @@ function R.Rethink(route, lvl, plan, skipped)
   end
   refQl = math.min(refQl, lvl + 2)
   res.base = res.heroRate or res.grind
-  local seen, best = {}, nil
-  for _, s in ipairs(steps) do
-    local q = s.q
-    if q and s.t == "accept" and not seen[q] and not (hs and hs.q == q) then
-      seen[q] = true
-      local r, first, ql, min = questRate(steps, ix, state, q)
-      if r and (not ql or ql <= refQl) and (not best or r > best.rate) then
-        best = { q = q, rate = r, first = first, ql = ql, min = min, name = R.StepTitle(s) }
-      end
-    end
-  end
+  local best = bestAlt(steps, ix, state, refQl, hs and hs.q)
   res.best, res.refQl = best, refQl
   if best and best.rate > res.base * R.DETOUR_GAIN then
     plan.detour = { q = best.q, t = now() }

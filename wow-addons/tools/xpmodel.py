@@ -27,8 +27,9 @@ except Exception:                 # pragma: no cover
 
 SPEED = 7.0           # Yards/s zu Fuss (Forever: Reittier erst ab Stufe 40)
 PATH = 1.2            # Umweg-Faktor Gelaende
-T_KILL = 0.50         # Minuten je normalem Gegner inkl. Pause/Looten (Verstaerker, Stufe 22-30)
-T_GRIND = 0.60        # Minuten je Gegner beim freien Grinden (Suchen, Laufen, Pause, volle Gebiete)
+T_KILL = 0.70         # Minuten je normalem Gegner inkl. Pause/Looten (5.1.5: 0.50 war zu schnell – Tiry lag 1.8 Stufen
+                      # hinter dem Plan; gemessen bei ihm 5-24k XP/h)
+T_GRIND = 0.80        # Minuten je Gegner beim freien Grinden (Suchen, Laufen, Pause, volle Gebiete)
 T_OBJ = 0.25          # Minuten je Objekt (anklicken, kurze Wege)
 T_TALK = 0.15         # Minuten je Annehmen/Abgeben
 T_ZONE = 4.0          # Minuten je Zonenwechsel (Flug inkl. Warten) - grob
@@ -123,6 +124,15 @@ def _count(text, name, default):
     return default
 
 
+MOBLV = {}
+
+
+def mob_level(q):
+    """Hoechste mittlere Stufe der Gegner, die die Quest verlangt (toeten/Beute); None = keine Gegner."""
+    if int(q) not in MOBLV: work(q, 30)
+    return MOBLV.get(int(q))
+
+
 def work(q, L):
     """Arbeitszeit (Min.) und Mob-XP fuer die Ziele einer Quest auf Stufe L.
     Gegner, die mehrere Ziele zugleich liefern (toeten + Drops derselben Gegner), zaehlen nur einmal:
@@ -166,6 +176,8 @@ def work(q, L):
         cnt = _count(text, (N.get(str(ids[0]), {}) or {}).get("name") if ids else None, 8)
         if ids: kill(ids[0], cnt, npc_level(ids[0]), False)
     mxp = 0.0
+    lvs = [lv for _, lv, _ in need.values() if lv]
+    MOBLV[int(q)] = max(lvs) if lvs else None          # hoechste (mittlere) Gegnerstufe der Questziele
     for kills, lv, el in need.values():
         t += kills * T_KILL * (3 if el else 1); mxp += kills * mob_xp(lv, L, el)
     if t == 0: t = 0.3

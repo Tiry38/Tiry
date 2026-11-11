@@ -52,7 +52,8 @@ function UnitXPMax() return XPMAX end
 local function run(extra)
   for k in pairs(DONE) do DONE[k] = nil end
   for _, s in ipairs(steps) do for _, p in ipairs(s.pres or {}) do if not inRoute[p] then DONE[p] = true end end end
-  for i = 1, 199 do local s = steps[i] if s.q then DONE[s.q] = true end end
+  local f1 = 1 while steps[f1] and not steps[f1].fill do f1 = f1 + 1 end   -- erster Aufhol-Schritt
+  for i = 1, f1 - 1 do local s = steps[i] if s.q then DONE[s.q] = true end end
   DONE[4904] = true
   for _, q in ipairs(extra) do DONE[q] = true end
   R.mem = { acc = {}, done = {}, at = {} } R.ScanLog(true)
@@ -62,7 +63,7 @@ local function run(extra)
 end
 local h, plan = run({})
 print(string.format("past block: pointer %s hero %s back %s", plan.k, R.StepKey(steps[h]), tostring(R.info.back)))
-h, plan = run({ 5064, 5151, 4966, 4770 })
+h, plan = run({ 5151, 4966, 4770 })
 print(string.format("all done: pointer %s hero %s need28 %d", plan.k, R.StepKey(steps[h]), R.XPNeed(27, 28)))
 local _, l = R.Plan(route, 27, {}, plan, 6, nil)
 local ks = {} for k = 1, math.min(3, #l) do ks[#ks + 1] = R.StepKey(steps[l[k]]) .. "=" .. tostring(R.state[l[k]]) end

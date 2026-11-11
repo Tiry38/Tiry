@@ -6,20 +6,20 @@ local cases = {
   { "titel_cache", "Route.lua", "Questie lädt beim Login: Kettenteil mit gleichem Titel zählt NICHT als im Log",
     function(o) return o:find("state = open, turnin 527 %(step %d+%) state = open") ~= nil end },
   { "hub_wiederbesuch", "Route.lua", "Hub-Wiederbesuch (Grom'gol): alte Quest vom 1. Besuch blockiert den Sprung nicht",
-    function(o) return o:find("jump 203", 1, true) ~= nil end },
+    function(o) return o:find("into seg 8: true", 1, true) ~= nil end },
   { "item_quest", "Route.lua", "Annehmen per Gegenstand (ohne Koordinaten): Zeiger klebt nicht fest",
     function(o) return o:find("t=4 s: pointer 9", 1, true) ~= nil end },
-  { "einstieg_log", "Route.lua", "Log-Einstieg: alte Brachland-Reste ziehen nicht zurück (Schritt 114, nicht 16)",
-    function(o) return o:find("pointer 114", 1, true) ~= nil end },
+  { "einstieg_log", "Route.lua", "Log-Einstieg: alte Brachland-Reste ziehen nicht zurück (Zeiger bleibt im Eschental)",
+    function(o) return o:find(", seg 5), hero", 1, true) ~= nil end },
   { "einstieg_ausreisser", "Route.lua", "Log-Einstieg: eine Quest weit über der Stufe zieht nicht nach vorn (Abschnitt 2)",
     function(o) local i = tonumber(o:match("pointer (%d+)")) return i ~= nil and i >= 4 and i <= 60 end },
   { "aufhol_quests", "Route.lua", "Hinter dem Plan (Stufe 27, Tiry 11.11.): Aufhol-Quests statt Grinden; ab 28 weg; im Plan nie",
-    function(o) return o:find("behind: level 27 pointer accept:1105 hero accept:5064 fill=28", 1, true) ~= nil and o:find("fill steps done: 11", 1, true) ~= nil
-      and o:find("level 28: hero accept:1105 | in-log fill 4770 complete open=true", 1, true) ~= nil and o:find("on plan: fill seen=false", 1, true) ~= nil
-      and o:find("xp 3%: need 37700 cover 12800 rest 24900 open 5", 1, true) ~= nil and o:find("xp 93%: need 2900 cover 4650 rest 0 open 2", 1, true) ~= nil end },
-  { "aufhol_zurueck", "Route.lua", "Zeiger hinter dem Aufhol-Block (Tiry 11.11., 61.8 %): Aufhol-Quests kommen zurueck; alles erledigt -> WARTET ab 28 mit XP bis 28",
-    function(o) return o:find("past block: pointer accept:1110 hero accept:5151", 1, true) ~= nil
-      and o:find("all done: pointer accept:1110 hero accept:1110 need28 14900", 1, true) ~= nil end },
+    function(o) return o:find("behind: level 27 pointer accept:5147 hero accept:4904 fill=28", 1, true) ~= nil and o:find("fill steps done: 6", 1, true) ~= nil
+      and o:find("level 28: hero complete:4770 | in-log fill 4770 complete open=true", 1, true) ~= nil and o:find("on plan: fill seen=false", 1, true) ~= nil
+      and o:find("xp 3%: need 37700 cover 7000 rest 30700 open 3", 1, true) ~= nil and o:find("xp 93%: need 2900 cover 4650 rest 0 open 2", 1, true) ~= nil end },
+  { "aufhol_zurueck", "Route.lua", "Zeiger hinter dem Aufhol-Block (Tiry 11.11.): machbare Aufhol-Quests kommen zurueck (Gegner zu stark -> nicht); alles erledigt -> Grinden bis 28 mit XP bis 28",
+    function(o) return o:find("past block: pointer accept:1110 hero accept:4966", 1, true) ~= nil
+      and o:find("all done: pointer accept:1110 hero grind:4124:27:Tausend Nadeln need28 14900", 1, true) ~= nil end },
   { "neu_berechnen", "Route.lua", "Neu berechnen: nahe gleich schwere Quest als Abstecher, nie schwerere/Elite; danach Plan weiter",
     function(o) return o:find("rethink: switched=true best=102 refQl=26", 1, true) ~= nil
       and o:find("after: hero accept:102 detour 102 wants102 true", 1, true) ~= nil

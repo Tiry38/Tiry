@@ -32,12 +32,15 @@ FILL = {
         ("turnin", 4770, None),
         ("turnin", 5064, None),
         ("turnin", 4904, None),
+        # Reichen die Quests nicht (Tiry 11.11.: 27 mit 69 %, nichts mehr offen): Grinden bis 28 direkt am
+        # Freiwindposten – Needles Cougar (27-28, 41 Spawns), dazwischen Pesterhide Snarler (28-29), ohne Elite
+        ("grind", 4124, "Needles Cougar (Stufe 27–28) + Pesterhide Snarler westlich vom Freiwindposten"),
     ]),
     # 28 -> 30: statt "Grinden bis 30" erst die Schimmernde-Ebene-Quests (Mobs dort zaehlen ohnehin)
     dict(seg=6, fill=30, z="Tausend Nadeln", steps=[
-        ("accept", 1110, None), ("accept", 1175, None), ("accept", 1176, None),
-        ("complete", 1110, None), ("complete", 1176, None), ("complete", 1175, None),
-        ("turnin", 1176, None), ("turnin", 1175, None), ("turnin", 1110, None),
+        # nur Rocket Car Parts (Teile aufsammeln, keine Gegner). Raus seit 5.1.5: A Bump in the Road (Questlevel 33),
+        # Load Lightening (Gegner Stufe 31) – zu schwer fuer Stufe 28-29 (Tiry 11.11.)
+        ("accept", 1110, None), ("complete", 1110, None), ("turnin", 1110, None),
     ])],
 }
 
@@ -64,8 +67,19 @@ def apply(key):
         last = idx[-1]
         at = last if steps[last]["t"] == "grind" else last + 1   # vor den Schluss-Grind des Abschnitts
         area = steps[idx[0]].get("_p", [None])[0]
+        main_q = set(s.get("q") for s in steps if s.get("q"))   # schon im Hauptplan -> nicht doppelt
         new = []
         for t, q, note in blk["steps"]:
+            if t != "grind" and q in main_q: continue
+            if t == "grind":   # q = Gegner-ID; Ziel = Mitte seiner Spawns im Gebiet
+                import xpmodel as XM
+                NN = XM.D["N"]
+                sp = (NN.get(str(q), {}).get("sp") or {}).get(str(area)) or []
+                c = [area, sum(p[0] for p in sp) / len(sp), sum(p[1] for p in sp) / len(sp)] if sp else None
+                nm = NN.get(str(q), {}).get("name", "Gegner")
+                new.append(dict(l=blk["fill"] - 1, z=blk["z"], t="grind", q=None, to=blk["fill"], seg=seg, fill=blk["fill"],
+                                _p=c, gnpc=q, n="Grinden: " + nm, note=note))
+                continue
             s = dict(l=blk["fill"] - 1, z=blk["z"], t=t, q=q, seg=seg, fill=blk["fill"], _p=pos(t, q, area))
             if note: s["note"] = note
             new.append(s)
@@ -81,6 +95,9 @@ def apply(key):
             wt, mxp, why = X.work(s["q"], L)
             s["xp"] = int(round((qx + mxp) / 50.0) * 50)
             s["wm"] = round(wt, 1)
+            ml = X.mob_level(s["q"])
+            if ml: s["ml"] = round(ml, 1)
+            else: s.pop("ml", None)
             if "Elite" in why: s["hard"] = 1
             else: s.pop("hard", None)
     d["steps"] = steps

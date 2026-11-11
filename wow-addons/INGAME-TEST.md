@@ -157,7 +157,15 @@ Alles oben ist im Forever-Nachbau getestet, aber nicht im echten Client. Besonde
 
 ---
 
-# Ingame-Test – LevelPilot 5.1.4
+# Ingame-Test – LevelPilot 5.1.5
+
+## Neu in 5.1.5 (Quests passend zu deiner Stufe)
+- [ ] Keine geplante Quest hat Gegner über **deiner Stufe +1** (Tooltip der Quest: „Gegner ~Stufe N“). Liegt eine drüber, steht sie auf „ab St. N“ und wird übersprungen, bis du so weit bist.
+- [ ] Wartet der Plan, schlägt LevelPilot selbst eine nahe, machbare Quest vor: grüne Zeile **„Passt zu deiner Stufe · statt Warten“**.
+- [ ] Grind-Schritte zeigen **„noch X XP · ~N Mobs“** bis zur Zielstufe.
+- [ ] Stufe 27 in Tausend Nadeln: Schritt **„Grinden: Needles Cougar“** westlich vom Freiwindposten bis 28, danach weiter mit Rocket Car Parts.
+- [ ] Hero-Zeile nicht abgeschnitten („ERST ERLEDIGEN · SCHRITT n“).
+
 
 ## Neu in 5.1.4 (Menü „Neu berechnen“, auch `/lp rechnen`)
 - [ ] Menü (•••) → **NEU BERECHNEN**: Meldung „NEU BERECHNET · <Quest> lohnt mehr“ oder „PLAN BLEIBT“, im Chat mit XP/Min beider Wege.

@@ -130,14 +130,16 @@ local function fuzz(key, seed, N)
     -- zurueckgeholte Aufhol-Quest hinter dem Zeiger (offen, fill > Stufe)
     local waitOk = hero == p and R.state[hero] == "later"
     if hero and R.state[hero] ~= "open" and not waitOk then print("  Ziel nicht offen: " .. hero .. " " .. tostring(R.state[hero])) errs = errs + 1 end
-    if hero and hero < p and not (steps[hero].fill and R.state[hero] == "open") then print("  Ziel vor dem Zeiger") errs = errs + 1 end
+    -- erlaubt seit 5.1.5: Abstecher (Knopf oder automatisch beim Warten/Grinden) auf eine machbare Quest
+    local isDetour = function(i) return R.info and R.info.detour and steps[i].q == R.info.detour end
+    if hero and hero < p and not (steps[hero].fill and R.state[hero] == "open") and not isDetour(hero) then print("  Ziel vor dem Zeiger") errs = errs + 1 end
     local seen = {}
     for _, i in ipairs(list or {}) do
       if seen[i] then print("  doppelt in Liste " .. i) errs = errs + 1 end
       seen[i] = true
       local st = R.state[i]
       if st ~= "open" and st ~= "later" and st ~= "planned" then print("  Liste mit Zustand " .. tostring(st)) errs = errs + 1 end
-      if i < p then print("  Liste vor dem Zeiger " .. i .. " < " .. p) errs = errs + 1 end
+      if i < p and not isDetour(i) and not steps[i].fill then print("  Liste vor dem Zeiger " .. i .. " < " .. p) errs = errs + 1 end
     end
     syncLog()
     local okA, adv = pcall(R.LogAdvice, route, key, lvl, p, hero, { speed = 7, xpm = route.xpm })

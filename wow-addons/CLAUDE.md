@@ -73,11 +73,11 @@ Dateien/Sounds reicht `/reload` nicht). Version in allen 4 TOCs und in `VERSION`
 2. `xpmodel.py` – XP-/Zeitmodell: Quest-XP aus `QuestieDB/support/Forever/QuestXP`, Dropchancen aus
    `support/Forever/DropTables`, Mob-XP-Formel Classic, Laufen 7 Yards/s (Reittier erst ab 40). Wege = echter
    Bodenweg aus `navmesh.json` (sonst Luftlinie × Faktor), Flug über bekannte Flugpunkte, wenn schneller.
-3. `plan.py` – Planer: Abschnitte (Gebiet, Hub, kuratierte Quests + Auto-Pool), Stufen-Simulation (Quest ≤ Stufe+2),
+3. `plan.py` – Planer: Abschnitte (Gebiet, Hub, kuratierte Quests + Auto-Pool), Stufen-Simulation (Quest ≤ Stufe+1 `PLAN_ABOVE`, Gegner ≤ Stufe+1 `PLAN_MOB`, Tempo `T_KILL` 0.70 / `T_GRIND` 0.80 in `xpmodel.py`),
    gierig nach Nähe + Or-Opt, Grenzkosten-Filter gegen Grind-Tempo, Grind-/Kontroll-Schritte.
 4. `make_route.py [key]` – Routen in `ROUTES` (`horde_22_30`, `horde_30_40`), Einstiegsstufen per `tune()` →
    `gen_steps_<key>.json`; danach setzt `fill.py` Aufhol-Quests ein (Schritte mit `fill = Stufe`: nur fuer Spieler
-   hinter dem Plan, ab dieser Stufe uebersprungen; Grund: Planer-Grindtempo ~300 XP/Min ist optimistisch). Alle Annehmen-Schritte tragen `xp` (Quest + Mobs), `wm` (Arbeitsminuten) und ggf. `hard` (Elite) – Basis für `R.Rethink` (Menü „Neu berechnen“, `plan.detour`); `R.FillBudget` in
+   hinter dem Plan, ab dieser Stufe uebersprungen; Grund: Planer-Grindtempo ~300 XP/Min ist optimistisch). Alle Annehmen-Schritte tragen `xp` (Quest + Mobs), `wm` (Arbeitsminuten) `ml` (höchste mittlere Gegnerstufe, `xpmodel.mob_level`) und ggf. `hard` (Elite) – Basis für `R.Rethink` (Menü „Neu berechnen“, `plan.detour`); `R.FillBudget` in
    `Route.lua` nimmt nur so viele Aufhol-Quests, wie laut `UnitXP`/`UnitXPMax` bis zur Stufe fehlen (Rest = Mobs, `R.fillInfo`). Dann `build.py [key]` → prüft gegen Forever-DB, schreibt `addons/LevelPilot/Routes/`.
    Neue Routendatei in alle 4 TOCs eintragen. `tests/route.lua` prüft Routenwahl + Dateien.
 Quellen der Gebietsreihenfolge: Konsens freier Speedrun-Routen (Joana, Warcraft Tavern, Guidelime, WoW-Pro, Bustea),
@@ -86,4 +86,4 @@ Die Reihenfolge **innerhalb** der Gebiete und die Wege berechnet der Planer – 
 Tiry gegenüber genau so benennen. Live gilt seit 5.0 ein **fester Plan** (`Route.lua`, `R.Plan`): gespeicherter Zeiger
 je Route (`DB.plan`), nur vorwärts; Einstieg (`R.Entry`) aus angenommenen Quests am Ort, Sprung nur mit Beweis (umkehrbar
 `/lp zurueck`), Questlog-Check `R.LogAdvice`. Keine Umsortierung nach Entfernung – Tiry will eine nachvollziehbare
-Reihenfolge. Laufweg (Walk.lua) und Flugnetz (`Fly.lua`) liefern Entfernungen, Pfeil und Flug-Rat.
+Reihenfolge. Live: `R.maxAbove = 2`, `R.mobAbove = 1` (Schritt mit `ml` > Stufe+1 = „später“); wartet der Plan, setzt `R.Plan` alle 20 s einen Auto-Abstecher (`plan.detour.auto`, ≤ 2500 Yards, nur wenn besser als Grind-Tempo). Laufweg (Walk.lua) und Flugnetz (`Fly.lua`) liefern Entfernungen, Pfeil und Flug-Rat.

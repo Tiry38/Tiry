@@ -46,10 +46,12 @@ R.mem = { acc = {}, done = {}, at = {} } R.ScanLog(true)
 
 local function play(cap, stopKey)
   local lvl, plan, cur, fillSeen = 22, {}, nil, false
+  local SK = {}   -- wie Tiry: "Stufe X vor der Weiterreise" uebersprungen, mit zu niedriger Stufe weitergezogen
   for _ = 1, 600 do
-    local hero = R.Plan(route, lvl, {}, plan, 6, cur)
+    local hero = R.Plan(route, lvl, SK, plan, 6, cur)
     if not hero then break end
     local s = steps[hero]
+    if s.t == "grind" and s.check and (s.to or 0) > cap then SK[R.StepKey(s)] = true; hero = R.Plan(route, lvl, SK, plan, 6, cur); s = steps[hero] end
     if s.fill == 28 then fillSeen = true end   -- Block bis 28 (der Block bis 30 ersetzt den Schluss-Grind fuer alle)
     if plan.k == stopKey and steps[hero].fill then return lvl, plan, hero, fillSeen end
     if R.StepKey(s) == stopKey then return lvl, plan, hero, fillSeen end
@@ -70,7 +72,7 @@ XPCUR, XPMAX = 1200, 38900   -- Tirys Anzeige: 3 % von Stufe 27
 function UnitXP() return XPCUR end
 function UnitXPMax() return XPMAX end
 -- 1. hinter dem Plan: nie ueber 27
-local lvl, plan, hero = play(27, "accept:1105")
+local lvl, plan, hero = play(27, "accept:4904")
 print(string.format("behind: level %d pointer %s hero %s fill=%s", lvl, tostring(plan.k), R.StepKey(steps[hero]), tostring(steps[hero].fill)))
 local function openFill(F) local n = 0 for i, s in ipairs(steps) do if s.fill == F and s.t == "accept" and R.state[i] == "open" then n = n + 1 end end return n end
 local fi = R.fillInfo[28]

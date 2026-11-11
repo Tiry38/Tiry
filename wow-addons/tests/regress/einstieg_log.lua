@@ -26,9 +26,10 @@ local function hubPos(seg) local sd = route.segs[seg]; local key = sd.z .. "|" .
   if not HUB[key] then local n = 0 for _ in pairs(HUB) do n = n + 1 end HUB[key] = { x = 0.1 + (n % 8) * 0.1, y = 0.1 } end return HUB[key] end
 for s = 1, #route.segs do hubPos(s) end
 R.StepTarget = function(s) local h = hubPos(s.seg) if s.t == "complete" then return { map = 9999, x = h.x + 0.02, y = h.y + 0.02 } end return { map = 9999, x = h.x, y = h.y } end
--- everything the plan turns in before step 109 is done, except the 3 leftovers
+-- everything the plan turns in before Ashenvale (seg 5) is done, except the 3 leftovers
 local LEFT = { [891] = true, [865] = true, [893] = true }
-for i = 1, 108 do local s = steps[i] if s.q and s.t == "turnin" and not LEFT[s.q] then DONE[s.q] = true end end
+local first5 = 1 while steps[first5] and steps[first5].seg ~= 5 do first5 = first5 + 1 end
+for i = 1, first5 - 1 do local s = steps[i] if s.q and s.t == "turnin" and not LEFT[s.q] then DONE[s.q] = true end end
 for q in pairs(LEFT) do LOG[q] = true end
 LOG[6441], LOG[25] = true, true
 R.mem = { acc = {}, done = {}, at = {} } R.ScanLog(true)

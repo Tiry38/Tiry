@@ -44,10 +44,16 @@ for _, s in ipairs(steps) do if s.q then inRoute[s.q] = true end end
 for _, s in ipairs(steps) do for _, p in ipairs(s.pre or {}) do if not inRoute[p] then DONE[p] = true end end
   for _, p in ipairs(s.pres or {}) do if not inRoute[p] then DONE[p] = true end end end
 R.mem = { acc = {}, done = {}, at = {} } R.ScanLog(true)
+-- (5.1.5: Route neu geplant -> Schritte ueber Abschnitte gesucht statt fester Nummern)
+local f8 = 1 while steps[f8] and steps[f8].seg ~= 8 do f8 = f8 + 1 end
+local q4                                 -- eine Quest vom 1. Grom'gol-Besuch (Abschnitt 4), bleibt im Log
+for _, s in ipairs(steps) do if s.seg == 4 and s.t == "accept" and s.q then q4 = s.q break end end
+local q8                                 -- erste Quest, die man beim 2. Besuch annimmt
+for i = f8, #steps do if steps[i].t == "accept" and steps[i].q then q8 = steps[i].q break end end
 local lvl, plan, cur = 30, {}, nil
 for _ = 1, 400 do
   local hero = R.Plan(route, lvl, {}, plan, 6, cur)
-  if hero == 183 then break end
+  if not hero or steps[hero].seg >= 5 then break end
   cur = { i = hero, since = GetTime() }
   local s = steps[hero]; local t = target(s); PX, PY = t.x, t.y
   Tm, CLOCK = Tm + 90, CLOCK + 90
@@ -59,12 +65,12 @@ for _ = 1, 400 do
   if (s.l or 0) > lvl then lvl = s.l end
   R.ScanLog(true)
 end
-print(ROUTE .. (DROP1069 and "  (control: Trollbane 638 abandoned)" or "") .. ": pointer at", plan.i, plan.k, "| 638 Trollbane in log:", LOG[638] and true or false)
-if DROP1069 then for _, q in ipairs({ 638 }) do LOG[q] = nil R.ScanLog(true) R.OnRemoved(q) end end
+print(ROUTE .. (DROP1069 and "  (control: no old quest kept)" or "") .. ": pointer at", plan.i, plan.k, "| old quest " .. tostring(q4) .. " in log:", (not DROP1069) and true or false)
+if not DROP1069 then LOG[q4] = true R.ScanLog(true) end
 -- fly back to Camp Taurajo (seg 4) and accept 874 + 846 there
 local ct = hubPos(8); PX, PY = ct.x, ct.y; lvl = 39
 Tm, CLOCK = Tm + 600, CLOCK + 600
-for _, q in ipairs({ 584 }) do LOG[q] = true R.OnAccepted(q) end
+for _, q in ipairs({ q8 }) do LOG[q] = true R.OnAccepted(q) end
 R.ScanLog(true)
 local jumped
 for k = 1, 4 do
@@ -72,4 +78,5 @@ for k = 1, 4 do
   if info.jumped then jumped = info.jumped.to end
   Tm = Tm + 4
 end
-print(string.format("   after 12 s at Grom'gol (seg 8) with 584 accepted: pointer %d (%s), jump %s", plan.i, plan.k, tostring(jumped)))
+print(string.format("   after 12 s at Grom'gol (seg 8) with %d accepted: pointer %d (%s), jump %s, into seg 8: %s", q8, plan.i, plan.k, tostring(jumped),
+  tostring(jumped ~= nil and jumped >= f8)))

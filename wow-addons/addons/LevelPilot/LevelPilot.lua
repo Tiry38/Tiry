@@ -5,7 +5,7 @@
 -- Datenquellen: Routen-Plan, Questie (Geber/Ziele), Blizzards Questlog.
 ---------------------------------------------------------------------------
 local ADDON = ...
-local VERSION = "5.1.4"
+local VERSION = "5.1.5"
 local time = time or (os and os.time)   -- Spielzeit-Uhr (Sekunden seit 1970)
 local floor, max, min, abs, sqrt, atan2, pi, fmt = math.floor, math.max, math.min, math.abs, math.sqrt, math.atan2, math.pi, string.format
 local BT = BackdropTemplateMixin and "BackdropTemplate" or nil
@@ -1688,7 +1688,7 @@ function Refresh(rescan)
         local grind = st.t == "grind"
         local later = LP_Route.state and LP_Route.state[si] == "later"
         local planned = LP_Route.state and LP_Route.state[si] == "planned"
-        local needL = math.max(st.rl or 0, (st.ql or 0) - (LP_Route.maxAbove or 3))
+        local needL = math.max(st.rl or 0, (st.ql or 0) - (LP_Route.maxAbove or 2), math.ceil((st.ml or 0) - (LP_Route.mobAbove or 1)))
         -- Laufweg ueber das Wegenetz (aktuelles Ziel bis 8 km, Listenzeilen bis 2,5 km; weiter: Luftlinie)
         local d
         if i == 1 and st.t == "turnin" and st.q and not LP_Route.Ready(st.q) then
@@ -1710,6 +1710,7 @@ function Refresh(rescan)
         if cnt > 1 then for _, gi in ipairs(it.steps) do tip[#tip + 1] = { "· " .. LP_Route.StepTitle(route.steps[gi]), 0.85, 0.9, 0.9 } end end
         if st.z then tip[#tip + 1] = { st.z, 0.55, 0.6, 0.62 } end
         if later then tip[#tip + 1] = { "Freigeschaltet ab Stufe " .. needL, 1, 0.54, 0.24 } end
+        if st.ml then tip[#tip + 1] = { fmt("Gegner ~Stufe %d (LevelPilot plant höchstens deine Stufe +1)", floor(st.ml + 0.5)), 0.55, 0.6, 0.62 } end
         if st.fill then tip[#tip + 1] = { "Aufhol-Quest: kommt, weil du hinter dem Plan bist. LevelPilot nimmt nur so viele, wie dir XP bis Stufe " .. st.fill .. " fehlen (Mobs = Rest).", 0.31, 0.82, 1 } end
         if planned then tip[#tip + 1] = { "Geplant: kommt dran, sobald du die Quest angenommen hast", 0.31, 0.82, 1 } end
         tip[#tip + 1] = { "Rechtsklick: " .. (st.q and ((cnt > 1) and "erste Quest sperren" or "Quest sperren (kommt nie wieder)") or "Schritt überspringen"), 0.5, 0.55, 0.58 }
@@ -1720,23 +1721,24 @@ function Refresh(rescan)
           r.orb:Tint({ cr, cg, cb }, lighten(cr, cg, cb)); r.orb:Icon(st.t or "note", cr, cg, cb)
           local notReady = st.t == "turnin" and st.q and not LP_Route.Ready(st.q)
           local kindTxt = grind and ("GRINDEN  ·  BIS STUFE " .. (st.to or "?")) or (later and ("WARTET  ·  AB STUFE " .. needL))
-            or (notReady and "ERST ERLEDIGEN, DANN ABGEBEN") or (cnt > 1 and (cnt .. " QUESTS " .. label:upper()) or label:upper())
+            or (notReady and "ERST ERLEDIGEN") or (cnt > 1 and (cnt .. " QUESTS " .. label:upper()) or label:upper())
           do   -- XP-Lage aus deiner echten Anzeige: was decken Quests, was bleibt (in Mobs)
             -- Warten: XP bis zur Stufe DIESES Schritts (nicht bis zum Ende des Aufhol-Blocks)
             local fi = (st.fill and not later and LP_Route.fillInfo) and LP_Route.fillInfo[st.fill] or nil
-            local nd = (later and LP_Route.XPNeed) and LP_Route.XPNeed(UnitLevel("player") or 1, needL) or nil
+            local nd = LP_Route.XPNeed and ((later and LP_Route.XPNeed(UnitLevel("player") or 1, needL))
+              or (grind and st.to and LP_Route.XPNeed(UnitLevel("player") or 1, st.to))) or nil
             if fi and fi.need then
               table.insert(sub, 1, fmt("|cff4fd1ffAufholen|r %s/%s XP%s", fmtNum(min(fi.cover, fi.need)), fmtNum(fi.need),
                 fi.rest > 0 and fmt(" · ~%d Mobs", math.ceil(fi.rest / fi.mob)) or ""))
             elseif st.fill and not later then table.insert(sub, 1, "|cff4fd1ffAufhol-Quest|r – statt Grinden, bis Stufe " .. st.fill)
-            elseif later then
+            elseif later or (grind and nd) then
               local rest = nd
               local mob = (UnitLevel("player") or 1) * 5 + 45
               table.insert(sub, 1, rest and fmt("|cffff8a3dnoch %s XP|r · ~%d Mobs", fmtNum(rest), math.ceil(rest / mob))
                 or "|cffff8a3dStufe fehlt|r – Mobs mitnehmen")
             end
           end
-          if RT.info and RT.info.detour and RT.info.detour == st.q then table.insert(sub, 1, "|cff39ff6bAbstecher|r · lohnt mehr") end
+          if RT.info and RT.info.detour and RT.info.detour == st.q then table.insert(sub, 1, RT.info.detourAuto and "|cff39ff6bPasst zu deiner Stufe|r · statt Warten" or "|cff39ff6bAbstecher|r · lohnt mehr") end
           r.kind:SetText(fmt("|cff%s%s|r  |cff8a9396·|r  |cffb8c2c6SCHRITT %d|r", later and "ff8a3d" or col, kindTxt, si))
           local ht = grind and (titles[1]:gsub("^Grinden:%s*", "")) or titles[1]
           -- Gruppe: erster Name gross, die anderen in der Zeile darunter (nichts wird abgeschnitten)

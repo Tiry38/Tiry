@@ -2,7 +2,7 @@
 #  1. Abschnitte (Zone + Hub + Mindeststufe) kommen aus make_route.py (Speedrun-Konsens).
 #  2. Quest-Pool: Kuratierte Liste + automatisch alle Horde-Quests der Zone aus Questies Forever-DB.
 #  3. Je Abschnitt: gierig nach Naehe + Or-Opt, mit SIMULIERTER Stufe:
-#     Quest nur, wenn Mindeststufe erreicht und Questlevel <= Stufe + 2 (Live-Grenze ist +3).
+#     Quest nur, wenn Mindeststufe erreicht, Questlevel <= Stufe + 1 und Gegner <= Stufe + 1 (seit 5.1.5).
 #  4. Grenzkosten-Filter: Quest(-Kette) fliegt raus, wenn ihr XP pro Minute (Quest-XP mit Stufenabzug
 #     + Mob-XP) inkl. eingesparter Wege unter dem Grind-Tempo liegt. Danach neu bauen, bis stabil.
 #  5. Fehlt vor einem Abschnitt Stufe: Grind-Schritt (zaehlt mit Grind-Tempo in die Zeit).
@@ -17,7 +17,8 @@ def horde_ok(v):
 from qdb import load
 import xpmodel as X
 
-PLAN_ABOVE = 2        # Quest hoechstens 2 Stufen ueber der simulierten Stufe annehmen (Live-Grenze ist 3)
+PLAN_ABOVE = 1        # Quest hoechstens 1 Stufe ueber der simulierten Stufe (Tiry 11.11.: +2/+3 war zu schwer)
+PLAN_MOB = 1.0        # Gegner der Questziele hoechstens 1 Stufe ueber der simulierten Stufe (Mittel ihres Stufenbereichs)
 GRIND_FACTOR = 0.85   # Quest darf knapp unter Ideal-Grinden liegen: stundenlanges Grinden ist real langsamer (volle Gebiete)
 MAX_WORK = 35         # Minuten reine Questarbeit - noch laengere Quests sind getarntes Grinden (und nerven)
 RAW_Q = load("Quest")
@@ -282,6 +283,8 @@ def generate(segments, L0, xp0, extra_done=(), goal=None):
                 if not pre_ok_L(q, done, route_set, L0): continue
                 if (v[3] or 0) > S.L or (v[4] or 0) > S.L + PLAN_ABOVE: continue
                 if q in BAD or start_level(q) > S.L + PLAN_ABOVE: continue
+                ml = X.mob_level(q)
+                if ml and ml > S.L + PLAN_MOB: continue          # Gegner zu stark fuer diese Stufe
                 g = c_giver(q)
                 if not g: continue
                 if all(c[1][0] == "item" for c in g):
@@ -395,6 +398,14 @@ def plan(SEG, L0=22, xp0=0, protect=(), log=print, max_iter=80, goal=None):
         steps, done = generate(segs, L0, xp0, goal=goal)
         S, val = resim(steps, L0, xp0)
         route_set = set(s["q"] for s in steps if s.get("q"))
+        # Gegner nach der echten Stufen-Nachrechnung zu stark? -> raus (Auswahl und Nachrechnung koennen abweichen)
+        hard = [s["q"] for s in steps if s["t"] == "accept" and s.get("q") and s["q"] not in protect
+                and (X.mob_level(s["q"]) or 0) > s["l"] + PLAN_MOB]
+        if hard:
+            for q in hard:
+                removed.add(q); why_removed[q] = (Q[str(q)][0], "Gegner %.1f > Stufe %d+1" % (X.mob_level(q), next(x["l"] for x in steps if x.get("q") == q)), 0, 0)
+            log("Runde %d: zu starke Gegner raus: %s" % (it + 1, ", ".join(Q[str(q)][0] for q in hard)))
+            continue
         dep = depends(route_set)
         worst = []
         for q in route_set:

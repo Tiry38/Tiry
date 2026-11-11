@@ -105,6 +105,7 @@ def lua_step(s):
         if s.get("n"): f.append(f'n = {lstr(s["n"])}')
         if s.get("note"): f.append(f'note = {lstr(s["note"])}')
         if s.get("check"): f.append('check = true')
+        if s.get("fill"): f.append(f'fill = {int(s["fill"])}')
         return '  { ' + ', '.join(f) + ' },'
     if s.get("q"): f.append(f'q = {s["q"]}')
     if s.get("n"): f.append(f'n = {lstr(s["n"])}')
@@ -126,6 +127,7 @@ def lua_step(s):
     if s.get("xp"): f.append(f'xp = {int(s["xp"])}')
     if s.get("wm"): f.append(f'wm = {s["wm"]:g}')
     if s.get("hard"): f.append('hard = 1')
+    if s.get("ml"): f.append(f'ml = {s["ml"]:g}')
     if s["t"] == "train": f.append('cls = 64')
     return '  { ' + ', '.join(f) + ' },'
 
