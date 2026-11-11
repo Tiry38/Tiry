@@ -35,6 +35,11 @@ Was dir Herstellen wirklich gebracht hat, zeigt **Herstellen → „Ergebnis“*
 
 Was du als Nächstes lernen solltest, zeigt **Herstellen → „Was lernen?“**: Rezepte für deinen Skill, die sich lohnen. Shift-Klick legt sie direkt in die Auctionator-Suche.
 
+## Sparziel und Unterwegs-Gold (Startseite)
+- **Sparziel:** Die Zentrale schlägt vor, worauf du sparst: **Reiten lernen** ab Stufe 40 (laut Guides 100 Gold inkl. erstem Reittier), danach **Schnelles Reiten** ab 60 (1.000 Gold Training + 200 Gold Reittier). Mit Ruf „Wohlwollend“ wird es 10 % billiger. Die echten Preise siehst du am Reitlehrer.
+  Der Balken zählt Tasche, Post und die Hälfte deiner Auktionen. Mit **+ / −** änderst du das Ziel. Du kannst auch einen Betrag eintippen, z. B. „250“ oder „1.200“ (= 1.200 Gold). **„Schneller ans Ziel“** nennt bis zu 3 Schritte mit Goldbetrag, ein Klick öffnet die passende Seite.
+- **Unterwegs-Gold:** Zeigt, was Kräuter, Erze, Leder, Stoff und Elemente **in deinem Gebiet** pro Stück bringen. Es zeigt nur, was du mit deinem Beruf und Skill schon sammeln kannst. Wertvolleres steht im Tooltip als „ab Skill X“. **„Hinführen“** setzt einen Kartenpunkt. Mit LevelPilot siehst du zusätzlich die nächsten Gebiete deiner Route.
+
 ## Handeln wie ein Goldmacher
 - **Verkäufe pro Tag:** Steht in Tooltip, Craft-Planer und Preisen. Gemessen aus zwei Komplett-Scans (15 Min. bis 12 Std. Abstand).
 - **Menge:** Beim Neu-Einstellen empfiehlt die Zentrale so viele, wie in ca. 3 Tagen weggehen. **„Markt voll“** = über 2 Wochen Vorrat im AH – nicht nachlegen.
