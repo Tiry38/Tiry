@@ -191,6 +191,25 @@ print("== Questlog-Check")
 local ok2, err2 = pcall(SlashCmdList.LEVELPILOT, "log")
 if not ok2 then bad("Lua-Fehler /lp log: " .. tostring(err2)) end
 if LevelPilotLog then check("lp_log", LevelPilotLog) else bad("Questlog-Panel fehlt") end
+print("== Ziel wartet auf Stufe (Held-Karte \"WARTET\")")
+if LevelPilotLog then LevelPilotLog:Hide() end
+do
+  local R = LP_Route
+  local orig = R.Plan
+  R.Plan = function(...)
+    local h, l, info = orig(...)
+    if l and l[1] then
+      R.state[l[1]] = "later"
+      for k = 2, #l do if R.state[l[k]] == "open" then R.state[l[k]] = "later" end end
+    end
+    return nil, l, info
+  end
+  local okW, errW = pcall(function() W.now = W.now + 2 W.fire("PLAYER_XP_UPDATE") tick() end)
+  if not okW then bad("Lua-Fehler Wartet-Ansicht: " .. tostring(errW)) end
+  check("lp_wartet", M)
+  R.Plan = orig
+  W.now = W.now + 2 W.fire("PLAYER_XP_UPDATE") tick()
+end
 print("== Questmodus")
 LevelPilotLog:Hide()
 if LevelPilotDB then

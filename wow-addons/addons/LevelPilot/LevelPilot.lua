@@ -1688,15 +1688,15 @@ function Refresh(rescan)
           local notReady = st.t == "turnin" and st.q and not LP_Route.Ready(st.q)
           local kindTxt = grind and ("GRINDEN  ·  BIS STUFE " .. (st.to or "?")) or (later and ("WARTET  ·  AB STUFE " .. needL))
             or (notReady and "ERST ERLEDIGEN, DANN ABGEBEN") or (cnt > 1 and (cnt .. " QUESTS " .. label:upper()) or label:upper())
-          if later then table.insert(sub, 1, "|cffff8a3dStufe fehlt|r – Mobs auf dem Weg mitnehmen") end
-          r.kind:SetText(fmt("|cff%s%s|r  |cff8a9396·|r  |cffb8c2c6SCHRITT %d|r", col, kindTxt, si))
+          if later then table.insert(sub, 1, "|cffff8a3dStufe fehlt|r – Mobs mitnehmen") end
+          r.kind:SetText(fmt("|cff%s%s|r  |cff8a9396·|r  |cffb8c2c6SCHRITT %d|r", later and "ff8a3d" or col, kindTxt, si))
           local ht = grind and (titles[1]:gsub("^Grinden:%s*", "")) or titles[1]
           -- Gruppe: erster Name gross, die anderen in der Zeile darunter (nichts wird abgeschnitten)
           r.title:SetText("|cffffffff" .. ht .. "|r" .. (cnt > 1 and ("  |cff8a9396+" .. (cnt - 1) .. "|r") or ""))
           if cnt > 1 then table.insert(sub, 1, "|cffd8dde0auch:|r " .. table.concat(titles, ", ", 2)) end
           -- Was liegt direkt daneben? (andere offene Schritte im Umkreis von ~110 m)
           local near = {}
-          if heroT then
+          if heroT and not later then
             for k = 2, #items do
               local o = route.steps[items[k].steps[1]]
               if o and o.q and LP_Route.state[items[k].steps[1]] == "open" then
@@ -1707,7 +1707,7 @@ function Refresh(rescan)
               if #near >= 2 then break end
             end
           end
-          if #near < 2 and LP_Route.state then
+          if #near < 2 and LP_Route.state and not later then
             for k = (RT.ptr or 1), #route.steps do
               local o = route.steps[k]
               if k ~= si and o.t == "complete" and o.q and LP_Route.state[k] == "open" and LP_Route.InLog(o.q) then
