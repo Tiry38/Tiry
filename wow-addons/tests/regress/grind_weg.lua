@@ -19,6 +19,7 @@ C_QuestLog = { GetQuestsOnMap = function() return {} end, GetTitleForQuestID = f
   ReadyForTurnIn = function(id) return READY[id] or false end, IsQuestFlaggedCompleted = function(id) return DONE[id] or false end }
 dofile(ROUTE) dofile("Routes/Horde_22_30.lua") dofile("Routes/Pool_Horde.lua")
 local R = LP_Route
+R.live = false   -- prueft den festen Plan (Live-Modus hat eigenen Test: live.lua)
 local route = LevelPilot_Routes.horde_22_30
 local steps = route.steps
 -- Spieler am Freiwindposten (0.5/0.5). Nah: Sacred Fire (5062, Ql 27, Vorquest 4865 aus der Route),

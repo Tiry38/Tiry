@@ -85,6 +85,13 @@ Dateien/Sounds reicht `/reload` nicht). Version in allen 4 TOCs und in `VERSION`
    `poolBest` alle 20 s die Quest mit den meisten XP/Min (Weg per `LP_Fly.TripSec`, Quest/Gegner <= Stufe+1), wenn sie
    mindestens `R.QUEST_PREF` (0.5) x Grind-Tempo (Grind inkl. Weg zum Grind-Platz) bringt → `plan.detour.pool`. UI zeigt sie als „EXTRA“.
    Neue Routendatei in alle 4 TOCs eintragen. `tests/route.lua` prüft Routenwahl + Dateien.
+**Live-Modus (6.0, Standard, `R.live`/`DB.live`, `/lp live`):** am Ende von `R.Plan` waehlt `livePlan` aus Pool +
+Questlog ein Quest-Gebiet: Kandidaten (`liveCands`: einfach, Vorquest da, im Log/fertig zaehlt mit), Hubs = Questgeber
+innerhalb `R.LIVE_CORE` (350 yd, Single-Linkage), Mitglieder = Annehmen/Abgeben <= `R.LIVE_HUB` (700) und Ziel <=
+`R.LIVE_FIELD` (2500) vom Hub + Grenzkosten >= `QUEST_PREF` x Grind; Rate = XP / (Weg + Arbeit + Rundtour); gewaehlt
+wird das Gebiet mit den meisten XP unter denen >= `R.LIVE_BIG` (0.8) x beste Rate. Wechsel nur bei Ueberschneidung oder
+>= `R.LIVE_STICK` (1.3) x. Tour: naechster erlaubter Schritt nach Naehe. Unter `QUEST_PREF` x Grind → fester Plan.
+Test: `tests/regress/live.lua` (echte Karten/Pool). UI: Kopfzeile/Band/`/lp warum` zeigen das Gebiet.
 **Nur Solo-Leveling** (Tiry 11.11.): keine Elite-/Gruppen-/Dungeonquests – `bad_quest` prueft Elite auch fuer kuratierte
 Quests, `fill.py` bricht bei Elite-Aufhol-Quests ab. Speedrun-Daten liefern nur die Gebietsreihenfolge, keine Tempo-/Grind-Werte.
 Quellen der Gebietsreihenfolge: Konsens freier Speedrun-Routen (Joana, Warcraft Tavern, Guidelime, WoW-Pro, Bustea),

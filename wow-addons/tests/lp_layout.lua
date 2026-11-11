@@ -187,6 +187,18 @@ local function check(name, root)
 end
 print("== Hauptfenster (Route, Plan-Band, Lagebild)")
 check("lp_main", M)
+-- Live-Modus (6.0): Gebiet aktiv, /lp live schaltet auf festen Plan und zurueck, /lp warum nennt das Gebiet
+do
+  if not (LP_Route.info and LP_Route.info.live) then bad("Live-Modus: kein Quest-Gebiet gewaehlt") end
+  local okL = pcall(function() SlashCmdList.LEVELPILOT("live") tick(2) end)
+  if not okL or LevelPilotDB.live ~= false or (LP_Route.info and LP_Route.info.live) then bad("/lp live aus: fester Plan erwartet") end
+  okL = pcall(function() SlashCmdList.LEVELPILOT("live") tick(2) end)
+  if not okL or not (LP_Route.info and LP_Route.info.live) then bad("/lp live an: Gebiet erwartet") end
+  local okW = pcall(SlashCmdList.LEVELPILOT, "warum")
+  local saw = false
+  for _, p in ipairs(W.prints) do if p:find("Live-Gebiet", 1, true) then saw = true; print("  LIVE " .. (p:gsub("|c%x%x%x%x%x%x%x%x", ""):gsub("|r", ""))) end end
+  if not (okW and saw) then bad("/lp warum: Live-Gebiet fehlt") end
+end
 print("== Questlog-Check")
 local ok2, err2 = pcall(SlashCmdList.LEVELPILOT, "log")
 if not ok2 then bad("Lua-Fehler /lp log: " .. tostring(err2)) end

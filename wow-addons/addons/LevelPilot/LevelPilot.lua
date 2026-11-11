@@ -5,7 +5,7 @@
 -- Datenquellen: Routen-Plan, Questie (Geber/Ziele), Blizzards Questlog.
 ---------------------------------------------------------------------------
 local ADDON = ...
-local VERSION = "5.1.9"
+local VERSION = "6.0.0"
 local time = time or (os and os.time)   -- Spielzeit-Uhr (Sekunden seit 1970)
 local floor, max, min, abs, sqrt, atan2, pi, fmt = math.floor, math.max, math.min, math.abs, math.sqrt, math.atan2, math.pi, string.format
 local BT = BackdropTemplateMixin and "BackdropTemplate" or nil
@@ -28,7 +28,7 @@ local DEF = {
   ax = 0, ay = 230, apoint = "CENTER",
   locked = false, collapsed = false, auto = true, arrow = true, rows = 6, toast = true,
   mode = "route", route = nil, pin = true, wege = true, speed = true, beam = true, maxDiff = 5, fly = true,
-  ton = "amboss", fade = true,
+  ton = "amboss", fade = true, live = true,
 }
 -- Daten (bleiben bei /lp reset erhalten)
 local DATA = { skipK = {}, skipLog = {}, nav = {}, ban = {}, qmem = { acc = {}, done = {}, at = {} }, plan = {} }
@@ -767,7 +767,7 @@ do
   BAND.mkG = MT(mk, "BACKGROUND", 0, "dot", "ADD"); BAND.mkG:SetSize(34, 34); BAND.mkG:SetPoint("CENTER"); BAND.mkG:SetVertexColor(NEON[1], NEON[2], NEON[3], 0.9)
   BAND.mkR = MT(mk, "ARTWORK", 0, "ctx_ring", "ADD"); BAND.mkR:SetSize(15, 15); BAND.mkR:SetPoint("CENTER"); BAND.mkR:SetVertexColor(NEON[1], NEON[2], NEON[3], 1)
   BAND.mkD = MT(mk, "ARTWORK", 1, "ctx_disc"); BAND.mkD:SetSize(9, 9); BAND.mkD:SetPoint("CENTER"); BAND.mkD:SetVertexColor(1, 1, 1, 1)
-  B:SetScript("OnClick", function() SlashCmdList.LEVELPILOT("einstieg") end)
+  B:SetScript("OnClick", function() SlashCmdList.LEVELPILOT((RT.info and RT.info.live) and "rechnen" or "einstieg") end)
   B:SetScript("OnEnter", function(self) if BAND.tip then TIP:Begin(self, M); for _, l in ipairs(BAND.tip) do TIP:Line(l[1], l[2], l[3], l[4], l[5]) end; TIP:Open() end end)
   B:SetScript("OnLeave", TipLeave)
 
@@ -1097,6 +1097,7 @@ do
     { "Blizzard-Wegpunkt", "marker", function() return DB.pin end },
     { "Flug-Tipp (Fliegen statt Laufen)", "flug", function() return DB.fly ~= false end },
     { "Wegenetz-Führung", "wege", function() return DB.wege end },
+    { "Live-Modus (Quest-Gebiet)", "live", function() return DB.live ~= false end },
     { "Speed-Modus", "speed", function() return DB.speed end },
     { "Fertig-Meldung", "toast", function() return DB.toast end },
     { "Im Kampf abdunkeln", "kampf", function() return DB.fade end },
@@ -1516,83 +1517,126 @@ local function UpdateLog(force)
   return true
 end
 
-local function DrawBand(route)
-  local p, N = RT.ptr or 1, #route.steps
-  local hero = RT.idx and route.steps[RT.idx]
-  local here = route.steps[math.min(p, N)]
-  local segs = route.segs or {}
-  local si = (hero and hero.seg) or (here and here.seg) or 1
-  local sd = segs[si]
-  local nSeg = math.max(#segs, 1)
-  BAND.lbl:SetText(sd and fmt("|cff39ff6b%d/%d|r  |cffffffff%s|r |cff8a9396·|r |cffd8dde0%s|r", si, nSeg, sd.z, sd.hub) or (route.name or ""))
-  BAND.step:SetText(RT.wait and "|cff8a9396…|r" or fmt("|cff8a9396SCHRITT|r |cffffffff%d|r|cff6b7076/%d|r", math.min((RT.idx and RT.idx <= N) and RT.idx or p, N), N))
-  -- Kapseln: Breite nach Schrittzahl des Abschnitts
-  local prog = LP_Route.Progress(route, p)
-  local BW = W - 28
-  local GAP = 4
-  local cnt = 0
-  for k = 1, #BAND.segs do if prog[k] then cnt = k end end
-  local x, mkX = 0, nil
-  local usable = BW - GAP * math.max(0, cnt - 1)
-  -- Breite nach Schrittzahl, kleine Abschnitte mindestens 10 px – die Summe passt exakt in die Spur
-  local MINW, small, bigN = 10, 0, 0
-  for k = 1, cnt do local pg = prog[k]; if pg then if usable * pg.n / N < MINW then small = small + 1 else bigN = bigN + pg.n end end end
-  local rest = usable - small * MINW
+-- Live-Modus: das Band zeigt das Quest-Gebiet – eine Kapsel je Quest (abgegeben, fertig, im Log, offen)
+function RT.LiveBand(lv)
+  local tot = lv.n + (lv.done or 0)
+  BAND.lbl:SetText(fmt("|cff39ff6bLIVE|r  |cffffffff%s|r |cff8a9396·|r |cffd8dde0%d Quest%s offen|r", lv.zone or "Quest-Gebiet", lv.n, lv.n == 1 and "" or "s"))
+  BAND.step:SetText(fmt("|cffffd166~%d|r |cff8a9396XP/MIN|r", floor(lv.rate + 0.5)))
+  local cnt = math.min(tot, #BAND.segs)
+  local BW, GAP = W - 28, 4
+  local w = (BW - GAP * math.max(0, cnt - 1)) / math.max(cnt, 1)
+  local mkX
   for k, g in ipairs(BAND.segs) do
-    local pg = prog[k]
-    if pg and k <= cnt then
-      local w = (usable * pg.n / N < MINW) and MINW or rest * pg.n / math.max(bigN, 1)
-      g:ClearAllPoints(); g:SetPoint("LEFT", BAND.track, "LEFT", x, 0); g:SetWidth(w)
-      local frac = (pg.done or 0) / pg.n
-      local cur = k == si
-      g.bg:SetColor(1, 1, 1, cur and 0.16 or 0.07)
+    if k <= cnt then
+      local st = (k <= (lv.done or 0)) and 3 or (lv.ord[k - (lv.done or 0)] or 0)
+      local frac = (st == 3 and 1) or (st == 2 and 0.85) or (st == 1 and 0.45) or 0
+      g:ClearAllPoints(); g:SetPoint("LEFT", BAND.track, "LEFT", (k - 1) * (w + GAP), 0); g:SetWidth(w)
+      g.bg:SetColor(1, 1, 1, st == 3 and 0.07 or 0.12)
       if frac > 0 then
         g.fill:SetWidth(math.max(6, w * frac)); g.fill:Show()
-        if frac >= 1 then g.fg:SetGradient({ TEAL[1], TEAL[2], TEAL[3], 0.55 }, { NEON[1], NEON[2], NEON[3], 0.55 })
-        else g.fg:SetGradient({ TEAL[1], TEAL[2], TEAL[3], 1 }, { NEON[1], NEON[2], NEON[3], 1 }) end
+        local al = st == 3 and 0.5 or 1
+        g.fg:SetGradient({ TEAL[1], TEAL[2], TEAL[3], al }, { NEON[1], NEON[2], NEON[3], al })
       else g.fill:Hide() end
-      if cur then mkX = x + w * frac end
+      if not mkX and st < 3 then mkX = (k - 1) * (w + GAP) + w * frac end
       g:Show()
-      x = x + w + GAP
-    else
-      g:Hide()
-    end
+    else g:Hide() end
   end
-  BAND.mk:SetShown(mkX ~= nil and not RT.wait)
+  BAND.mk:SetShown(mkX ~= nil)
   if mkX then BAND.mk:ClearAllPoints(); BAND.mk:SetPoint("CENTER", BAND.track, "LEFT", math.max(5, math.min(BW - 5, mkX)), 0) end
-  BAND.ic:SetVertexColor(TEAL[1], TEAL[2], TEAL[3], 1); BAND.icG:SetVertexColor(TEAL[1], TEAL[2], TEAL[3], 0.35)
-  -- Tooltip des Bandes
-  local tip = { { "Dein Plan  ·  Schritt " .. math.min(RT.idx or p, N) .. " von " .. N, NEON[1], NEON[2], NEON[3], true } }
-  if sd then tip[#tip + 1] = { fmt("Abschnitt %d/%d: %s · %s (Stufe %d–%d)", si, nSeg, sd.z, sd.hub, sd.l0, sd.l1), 1, 1, 1 } end
-  local nx = segs[si + 1]
-  if nx then tip[#tip + 1] = { fmt("Danach: %s · %s", nx.z, nx.hub), 0.75, 0.8, 0.82 } end
-  local missed = 0
-  for _, st in pairs(LP_Route.state or {}) do if st == "missed" then missed = missed + 1 end end
-  if missed > 0 then tip[#tip + 1] = { missed .. " Schritte hinter dir übersprungen (werden nicht mehr angesteuert)", 1, 0.78, 0.3 } end
-  tip[#tip + 1] = { "Die Reihenfolge ist fest – erledigst du etwas früher, rückt der Plan von selbst weiter.", 0.62, 0.68, 0.7 }
-  tip[#tip + 1] = { "Klick: Einstieg neu suchen  ·  /lp schritt <Nr> setzt ihn von Hand", 0.5, 0.55, 0.58 }
-  BAND.tip = tip
-  -- Stufen-Pille: Stufe gegen Plan-Stufe des aktuellen Schritts (mit XP-Anteil)
-  local lvl, xi = UnitLevel("player"), M.xi
-  local exact = lvl + ((xi and xi.mx > 0) and xi.cur / xi.mx or 0)
-  local planL = hero and hero.l or (here and here.l) or lvl
-  local diff = exact - (planL + 0.5)
-  local ltip = { { "Stufe gegen Plan", AQUA[1], AQUA[2], AQUA[3], true },
-    { fmt("Du: Stufe %.1f  ·  Plan rechnet hier mit Stufe %d", exact, planL), 1, 1, 1 } }
-  if diff >= 0.9 then
-    BAND.pLvl:Set(fmt("VORAUS  +%.1f", diff), AQUA, "i_xph")
-    ltip[#ltip + 1] = { "Du bist schneller als geplant – Quests bleiben grün, alles gut.", 0.75, 0.8, 0.82 }
-    if diff >= 3 then ltip[#ltip + 1] = { "Weit voraus? Klick aufs Plan-Band sucht den passenden Einstieg neu.", 0.31, 0.82, 1 } end
-  elseif diff <= -0.9 then
-    BAND.pLvl:Set(fmt("HINTER PLAN  %.1f", diff), { 1, 0.54, 0.24 }, "i_xph")
-    ltip[#ltip + 1] = { "Etwas langsamer als geplant. Der Plan enthält Grind-Schritte, die das auffangen;", 0.75, 0.8, 0.82 }
-    ltip[#ltip + 1] = { "Quests mit fehlender Stufe warten im Plan (\"ab St. X\").", 0.75, 0.8, 0.82 }
-  else
-    BAND.pLvl:Set("IM PLAN  ·  ST. " .. planL, NEON, "i_flag")
-    ltip[#ltip + 1] = { "Stufe passt genau zum Plan.", 0.75, 0.8, 0.82 }
+  BAND.ic:SetVertexColor(NEON[1], NEON[2], NEON[3], 1); BAND.icG:SetVertexColor(NEON[1], NEON[2], NEON[3], 0.35)
+  BAND.tip = { { "Live-Gebiet  ·  " .. (lv.zone or "Quest-Gebiet"), NEON[1], NEON[2], NEON[3], true },
+    { fmt("%d Quests offen%s · +%s XP · ~%d XP/Min (Weg hin %d Min.)", lv.n, (lv.done or 0) > 0 and fmt(", %d erledigt", lv.done) or "",
+      fmtNum(lv.xp), floor(lv.rate + 0.5), floor((lv.trip or 0) + 0.5)), 1, 1, 1 },
+    { "Gewählt nach deinem Ort, Questlog und deiner Stufe: viele passende Quests nah beieinander.", 0.75, 0.8, 0.82 },
+    { "Pfeil: immer das Nächste in der Nähe – Annehmen, Erledigen, Abgeben.", 0.75, 0.8, 0.82 },
+    { "Ein neues Gebiet erst, wenn dieses fertig ist oder ein anderes klar mehr bringt.", 0.62, 0.68, 0.7 },
+    { "Klick: Gebiet neu wählen  ·  /lp warum zeigt die Rechnung  ·  /lp live schaltet aus", 0.5, 0.55, 0.58 } }
+  local lvl = UnitLevel("player") or 1
+  BAND.pLvl:Set(fmt("EINFACH  ·  BIS ST. %d", lvl + (LP_Route.mobAbove or 1)), NEON, "i_flag")
+  BAND.pLvl.tip = { { "Nur einfache Quests", NEON[1], NEON[2], NEON[3], true },
+    { fmt("Quest und Gegner höchstens Stufe %d (deine Stufe +1)", lvl + (LP_Route.mobAbove or 1)), 1, 1, 1 },
+    { "Keine Elite-, Gruppen- oder Dungeon-Quests. Vorquests werden beachtet.", 0.75, 0.8, 0.82 } }
+end
+
+local function DrawBand(route)
+  if RT.info and RT.info.live then RT.LiveBand(RT.info.live) else
+    local p, N = RT.ptr or 1, #route.steps
+    local hero = RT.idx and route.steps[RT.idx]
+    local here = route.steps[math.min(p, N)]
+    local segs = route.segs or {}
+    local si = (hero and hero.seg) or (here and here.seg) or 1
+    local sd = segs[si]
+    local nSeg = math.max(#segs, 1)
+    BAND.lbl:SetText(sd and fmt("|cff39ff6b%d/%d|r  |cffffffff%s|r |cff8a9396·|r |cffd8dde0%s|r", si, nSeg, sd.z, sd.hub) or (route.name or ""))
+    BAND.step:SetText(RT.wait and "|cff8a9396…|r" or fmt("|cff8a9396SCHRITT|r |cffffffff%d|r|cff6b7076/%d|r", math.min((RT.idx and RT.idx <= N) and RT.idx or p, N), N))
+    -- Kapseln: Breite nach Schrittzahl des Abschnitts
+    local prog = LP_Route.Progress(route, p)
+    local BW = W - 28
+    local GAP = 4
+    local cnt = 0
+    for k = 1, #BAND.segs do if prog[k] then cnt = k end end
+    local x, mkX = 0, nil
+    local usable = BW - GAP * math.max(0, cnt - 1)
+    -- Breite nach Schrittzahl, kleine Abschnitte mindestens 10 px – die Summe passt exakt in die Spur
+    local MINW, small, bigN = 10, 0, 0
+    for k = 1, cnt do local pg = prog[k]; if pg then if usable * pg.n / N < MINW then small = small + 1 else bigN = bigN + pg.n end end end
+    local rest = usable - small * MINW
+    for k, g in ipairs(BAND.segs) do
+      local pg = prog[k]
+      if pg and k <= cnt then
+        local w = (usable * pg.n / N < MINW) and MINW or rest * pg.n / math.max(bigN, 1)
+        g:ClearAllPoints(); g:SetPoint("LEFT", BAND.track, "LEFT", x, 0); g:SetWidth(w)
+        local frac = (pg.done or 0) / pg.n
+        local cur = k == si
+        g.bg:SetColor(1, 1, 1, cur and 0.16 or 0.07)
+        if frac > 0 then
+          g.fill:SetWidth(math.max(6, w * frac)); g.fill:Show()
+          if frac >= 1 then g.fg:SetGradient({ TEAL[1], TEAL[2], TEAL[3], 0.55 }, { NEON[1], NEON[2], NEON[3], 0.55 })
+          else g.fg:SetGradient({ TEAL[1], TEAL[2], TEAL[3], 1 }, { NEON[1], NEON[2], NEON[3], 1 }) end
+        else g.fill:Hide() end
+        if cur then mkX = x + w * frac end
+        g:Show()
+        x = x + w + GAP
+      else
+        g:Hide()
+      end
+    end
+    BAND.mk:SetShown(mkX ~= nil and not RT.wait)
+    if mkX then BAND.mk:ClearAllPoints(); BAND.mk:SetPoint("CENTER", BAND.track, "LEFT", math.max(5, math.min(BW - 5, mkX)), 0) end
+    BAND.ic:SetVertexColor(TEAL[1], TEAL[2], TEAL[3], 1); BAND.icG:SetVertexColor(TEAL[1], TEAL[2], TEAL[3], 0.35)
+    -- Tooltip des Bandes
+    local tip = { { "Dein Plan  ·  Schritt " .. math.min(RT.idx or p, N) .. " von " .. N, NEON[1], NEON[2], NEON[3], true } }
+    if sd then tip[#tip + 1] = { fmt("Abschnitt %d/%d: %s · %s (Stufe %d–%d)", si, nSeg, sd.z, sd.hub, sd.l0, sd.l1), 1, 1, 1 } end
+    local nx = segs[si + 1]
+    if nx then tip[#tip + 1] = { fmt("Danach: %s · %s", nx.z, nx.hub), 0.75, 0.8, 0.82 } end
+    local missed = 0
+    for _, st in pairs(LP_Route.state or {}) do if st == "missed" then missed = missed + 1 end end
+    if missed > 0 then tip[#tip + 1] = { missed .. " Schritte hinter dir übersprungen (werden nicht mehr angesteuert)", 1, 0.78, 0.3 } end
+    tip[#tip + 1] = { "Die Reihenfolge ist fest – erledigst du etwas früher, rückt der Plan von selbst weiter.", 0.62, 0.68, 0.7 }
+    tip[#tip + 1] = { "Klick: Einstieg neu suchen  ·  /lp schritt <Nr> setzt ihn von Hand", 0.5, 0.55, 0.58 }
+    BAND.tip = tip
+    -- Stufen-Pille: Stufe gegen Plan-Stufe des aktuellen Schritts (mit XP-Anteil)
+    local lvl, xi = UnitLevel("player"), M.xi
+    local exact = lvl + ((xi and xi.mx > 0) and xi.cur / xi.mx or 0)
+    local planL = hero and hero.l or (here and here.l) or lvl
+    local diff = exact - (planL + 0.5)
+    local ltip = { { "Stufe gegen Plan", AQUA[1], AQUA[2], AQUA[3], true },
+      { fmt("Du: Stufe %.1f  ·  Plan rechnet hier mit Stufe %d", exact, planL), 1, 1, 1 } }
+    if diff >= 0.9 then
+      BAND.pLvl:Set(fmt("VORAUS  +%.1f", diff), AQUA, "i_xph")
+      ltip[#ltip + 1] = { "Du bist schneller als geplant – Quests bleiben grün, alles gut.", 0.75, 0.8, 0.82 }
+      if diff >= 3 then ltip[#ltip + 1] = { "Weit voraus? Klick aufs Plan-Band sucht den passenden Einstieg neu.", 0.31, 0.82, 1 } end
+    elseif diff <= -0.9 then
+      BAND.pLvl:Set(fmt("HINTER PLAN  %.1f", diff), { 1, 0.54, 0.24 }, "i_xph")
+      ltip[#ltip + 1] = { "Etwas langsamer als geplant. Der Plan enthält Grind-Schritte, die das auffangen;", 0.75, 0.8, 0.82 }
+      ltip[#ltip + 1] = { "Quests mit fehlender Stufe warten im Plan (\"ab St. X\").", 0.75, 0.8, 0.82 }
+    else
+      BAND.pLvl:Set("IM PLAN  ·  ST. " .. planL, NEON, "i_flag")
+      ltip[#ltip + 1] = { "Stufe passt genau zum Plan.", 0.75, 0.8, 0.82 }
+    end
+    ltip[#ltip + 1] = { "Klick: Plan-Stand im Chat", 0.5, 0.55, 0.58 }
+    BAND.pLvl.tip = ltip
   end
-  ltip[#ltip + 1] = { "Klick: Plan-Stand im Chat", 0.5, 0.55, 0.58 }
-  BAND.pLvl.tip = ltip
   -- Log-Pille
   local a = LOGADV
   if a then
@@ -1677,7 +1721,9 @@ function Refresh(rescan)
     end
     RT.items = items
     local heroStep = route and RT.idx and route.steps[RT.idx]
-    subHead:SetText(route and ((DB.speed and "|cff39ff6bSPEED|r  ·  " or "") .. "|cffd8dde0FESTER PLAN|r  ·  " .. (route.name or ""):gsub("%s*·%s*Speedrun$", "")) or "keine Route")
+    local lv = RT.info and RT.info.live
+    subHead:SetText(lv and fmt("|cff39ff6bLIVE|r  ·  %s  ·  %d Quest%s  ·  |cffffd75e+%s XP|r", lv.zone or "Quest-Gebiet", lv.n, lv.n == 1 and "" or "s", fmtNum(lv.xp))
+      or route and ((DB.speed and "|cff39ff6bSPEED|r  ·  " or "") .. "|cffd8dde0FESTER PLAN|r  ·  " .. (route.name or ""):gsub("%s*·%s*Speedrun$", "")) or "keine Route")
     local n = collapsed and 0 or math.min(#items, DB.rows or 6)
     local bottom = LayoutRows(n, "route")
     local heroT = heroStep and LP_Route.StepTarget(heroStep)
@@ -1754,11 +1800,14 @@ function Refresh(rescan)
           end
           if st.pool then   -- Extra-Quest aus dem Pool (nicht im Plan): XP zeigen (Questlevel/Gegner im Tooltip)
             table.insert(sub, 1, fmt("|cffffd75e+%s XP|r", fmtNum(LP_Route.XPAt(st.pxp or 0, st.ql, UnitLevel("player") or 1))))
-            table.insert(tip, 2, { fmt("Extra-Quest (nicht im Plan): Questlevel %d%s – passt zu deiner Stufe, bringt mehr XP/Min als Grinden. Danach geht der Plan weiter.",
+            local lv = RT.info and RT.info.live
+            table.insert(tip, 2, { lv and fmt("Live-Gebiet %s: %d Quests nah beieinander (~%d XP/Min mit Weg). Questlevel %d%s – passt zu deiner Stufe. Reihenfolge: Annehmen, Erledigen, Abgeben. Details: /lp warum",
+              lv.zone or "", lv.n, floor(lv.rate + 0.5), st.ql or 0, st.ml and fmt(", Gegner ~Stufe %d", floor(st.ml + 0.5)) or "")
+              or fmt("Extra-Quest (nicht im Plan): Questlevel %d%s – passt zu deiner Stufe, bringt mehr XP/Min als Grinden. Danach geht der Plan weiter.",
               st.ql or 0, st.ml and fmt(", Gegner ~Stufe %d", floor(st.ml + 0.5)) or ""), 0.22, 1, 0.42 })
           end
           if RT.info and RT.info.detour and RT.info.detour == st.q then table.insert(sub, 1, (RT.info.detourAuto or st.pool) and ("|cff39ff6bPasst zu deiner Stufe|r" .. (st.pool and "" or " · statt Warten")) or "|cff39ff6bAbstecher|r · lohnt mehr") end
-          r.kind:SetText(st.pool and fmt("|cff%s%s|r  |cff8a9396·|r  |cff39ff6bEXTRA|r", col, (notReady and "ERST ERLEDIGEN") or label:upper())
+          r.kind:SetText(st.pool and fmt("|cff%s%s|r  |cff8a9396·|r  |cff39ff6b%s|r", col, (notReady and "ERST ERLEDIGEN") or label:upper(), (RT.info and RT.info.live) and "LIVE" or "EXTRA")
             or fmt("|cff%s%s|r  |cff8a9396·|r  |cffb8c2c6SCHRITT %d|r", later and "ff8a3d" or col, kindTxt, si))
           local ht = grind and (titles[1]:gsub("^Grinden:%s*", "")) or titles[1]
           -- Gruppe: erster Name gross, die anderen in der Zeile darunter (nichts wird abgeschnitten)
@@ -2136,7 +2185,7 @@ E:SetScript("OnEvent", function(_, ev, a1, ...)
     if not DB.maxDiffUser then DB.maxDiff = 5 end   -- Standard: 100 % XP
     DB.qmem.at = DB.qmem.at or {}
     RT.loginT = GetTime()
-    if LP_Route then LP_Route.mem = DB.qmem; LP_Route.PruneStamps(); LP_Route.ScanLog(false); LP_Route.ban = DB.ban; LP_Route.UserNav = DB.nav; LP_Route.speed = DB.speed; LP_Route.maxDiff = DB.maxDiff end
+    if LP_Route then LP_Route.mem = DB.qmem; LP_Route.PruneStamps(); LP_Route.ScanLog(false); LP_Route.ban = DB.ban; LP_Route.UserNav = DB.nav; LP_Route.speed = DB.speed; LP_Route.maxDiff = DB.maxDiff; LP_Route.live = DB.live ~= false end
     if Quiet then Quiet(8) end
     xpTrack(); checkCompleted(true); Refresh(true)
     P("v" .. VERSION .. " bereit – /lp für Befehle. Umschalt halten = Auto-Quest kurz aus.")
@@ -2570,6 +2619,14 @@ SLASH_LEVELPILOT2 = "/levelpilot"
 function RT.Rethink()
   local route = RT.key and LevelPilot_Routes[RT.key]
   if not (route and LP_Route and LP_Route.Rethink and DB) then P("Keine Route aktiv."); return end
+  if LP_Route.live and LP_Route.LiveReset then   -- Live: Gebiet frisch waehlen (Ort + Questlog + Stufe)
+    LP_Route.LiveReset(); RT.cur = nil; Refresh(true)
+    local lv = RT.info and RT.info.live
+    if lv then
+      Toast(fmt("|cff39ff6bLIVE|r  ·  %s · %d Quests", lv.zone or "Quest-Gebiet", lv.n), "go")
+      RT.Why(); return
+    end
+  end
   local ok, r = pcall(LP_Route.Rethink, route, UnitLevel("player") or 1, DB.plan[RT.key], DB.skipK[RT.key])
   RT.cur = nil
   Refresh(true)
@@ -2592,6 +2649,24 @@ end
 -- mit Weg und warum der Rest nicht passt (Tiry 11.11.: "noch immer genau dasselbe")
 function RT.Why()
   local g, d = LP_Route and LP_Route.grindCmp, LP_Route and LP_Route.poolDiag
+  local LS = LP_Route and LP_Route.LiveState and LP_Route.LiveState()
+  if LS and LP_Route.live then   -- Live-Modus: gewaehltes Gebiet + die naechstbesten
+    local a, lv = LS.area, RT.info and RT.info.live
+    if a and lv then
+      local ns = {}
+      for _, c in ipairs(a.m) do if lv.qs[c.q] then ns[#ns + 1] = fmt("%s (%d)", c.e.n or c.q, c.e.ql or 0) end end
+      P(fmt("Live-Gebiet |cff39ff6b%s|r: %d Quests · +%s XP · ~|cffffd166%d XP/Min|r (Weg hin %d Min.) – %s", lv.zone or "?", lv.n, fmtNum(lv.xp),
+        floor(lv.rate + 0.5), floor((lv.trip or 0) + 0.5), table.concat(ns, ", ")))
+    else P("Live: gerade kein lohnendes Quest-Gebiet (Quest/Gegner bis Stufe +1) – fester Plan/Grinden.") end
+    local alt = {}
+    for _, o in ipairs(LS.cmp or {}) do if not (a and o.m == a.m) then alt[#alt + 1] = o end end
+    table.sort(alt, function(x, y) return x.rate > y.rate end)
+    for i = 1, math.min(3, #alt) do
+      local o, z = alt[i], nil
+      pcall(function() local mi = C_Map.GetMapInfo(o.m[1].e.t[1]); z = mi and mi.name end)
+      P(fmt("  Alternative: %s · %d Quests · %d XP/Min (Weg %d Min.)", z or "?", #o.m, floor(o.rate + 0.5), floor(o.trip + 0.5)))
+    end
+  end
   if not d then
     local route = RT.key and LevelPilot_Routes[RT.key]
     if route and LP_Route.PoolBest then pcall(LP_Route.PoolBest, LP_Route.QuestIndex(route), UnitLevel("player") or 1, (UnitLevel("player") or 1) + 1) end
@@ -2673,6 +2748,10 @@ SlashCmdList.LEVELPILOT = function(msg)
       LP_Route.UserNav = DB.nav; LP_Route.BuildNav(true); LP_Route.ResetPath()
       P(okI and ("Import: " .. added .. " Punkte übernommen.") or "Import fehlgeschlagen – Text vollständig?")
     end)
+  elseif c == "live" then
+    DB.live = DB.live == false
+    LP_Route.live = DB.live; if LP_Route.LiveReset then LP_Route.LiveReset() end
+    P("Live-Modus (Quest-Gebiet nach Ort + Questlog): " .. (DB.live and "|cff39ff6ban|r" or "|cffff8a3daus|r – fester Plan")); Refresh(true)
   elseif c == "speed" then
     DB.speed = not DB.speed; LP_Route.speed = DB.speed
     P("Speed-Modus (Zeitfresser weglassen): " .. (DB.speed and "|cff39ff6ban|r" or "|cffff8a3daus|r")); Refresh(true)
@@ -2714,7 +2793,7 @@ SlashCmdList.LEVELPILOT = function(msg)
   elseif c == "reset" then
     for k, v in pairs(DEF) do DB[k] = copy(v) end
     DB.maxDiffUser = nil
-    if LP_Route then LP_Route.speed = DB.speed; LP_Route.maxDiff = DB.maxDiff; LP_Route.ResetPath() end
+    if LP_Route then LP_Route.speed = DB.speed; LP_Route.maxDiff = DB.maxDiff; LP_Route.live = DB.live ~= false; LP_Route.ResetPath() end
     M:ClearAllPoints(); M:SetPoint(DB.point, UIParent, DB.point, DB.x, DB.y)
     A:ClearAllPoints(); A:SetPoint(DB.apoint, UIParent, DB.apoint, DB.ax, DB.ay)
     Refresh(true); P("zurückgesetzt.")
@@ -2780,6 +2859,6 @@ SlashCmdList.LEVELPILOT = function(msg)
     local R = LP_Route
     P("Route: " .. tostring(RT.key and LevelPilot_Routes[RT.key].name) .. " · Schritt " .. tostring(RT.idx) .. " · Questie-Daten: " .. ((R and R.HasQuestie()) and "|cff39ff6bja|r" or "|cffff5050nein|r"))
   else
-    P("/lp (an/aus) · /lp menu · /lp plan · /lp log · /lp weiter · /lp zurueck · /lp einstieg · /lp schritt <Nr> · /lp rechnen · /lp warum · /lp neu · /lp route · /lp punkt (neu|weg) · /lp export · /lp import · /lp wege · /lp speed · /lp strahl · /lp ton · /lp kampf · /lp flug · /lp entsperren · /lp sound · /lp gruen · /way x y · /lp auto · /lp pfeil · /lp marker · /lp lock · /lp unlock · /lp toast · /lp xp · /lp reset")
+    P("/lp (an/aus) · /lp menu · /lp plan · /lp log · /lp weiter · /lp zurueck · /lp einstieg · /lp schritt <Nr> · /lp live · /lp rechnen · /lp warum · /lp neu · /lp route · /lp punkt (neu|weg) · /lp export · /lp import · /lp wege · /lp speed · /lp strahl · /lp ton · /lp kampf · /lp flug · /lp entsperren · /lp sound · /lp gruen · /way x y · /lp auto · /lp pfeil · /lp marker · /lp lock · /lp unlock · /lp toast · /lp xp · /lp reset")
   end
 end

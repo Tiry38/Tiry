@@ -46,6 +46,28 @@ def items_known(q):
     return True
 
 
+def pt(p):
+    """(areaId, x%, y%) -> (uiMap, x 0..1, y 0..1, Kontinent, WeltX, WeltY) fuer den Live-Modus (Gebiets-Wahl ohne Questie)."""
+    if not p: return None
+    a, x, y = p[0], p[1], p[2]
+    m = zones.AREA2MAP.get(int(a))
+    w = zones.world(a, x, y)
+    if not m or not w: return None
+    return (m, round(x / 100.0, 4), round(y / 100.0, 4), w[0], round(w[1], 1), round(w[2], 1))
+
+
+def dense(pts):
+    """Repraesentativer Zielpunkt: der Spawnpunkt mit den meisten Nachbarn im Umkreis von 250 Yards."""
+    W = [(p, zones.world(*p)) for p in pts]
+    W = [(p, w) for p, w in W if w]
+    if not W: return None
+    best, bn = None, -1
+    for p, w in W:
+        n = sum(1 for _, v in W if v[0] == w[0] and (v[1] - w[1]) ** 2 + (v[2] - w[2]) ** 2 <= 250 ** 2)
+        if n > bn: best, bn = p, n
+    return pt(best)
+
+
 def pick():
     out, why = [], {}
     def no(r): why[r] = why.get(r, 0) + 1
@@ -87,7 +109,8 @@ def pick():
         xp = int(round((qx + mxp) / 50.0) * 50)
         if xp < 200: no("unter 200 XP"); continue
         out.append(dict(q=q, n=v[0], ql=ql, rl=rl, ml=X.mob_level(q), xp=xp, wm=round(wt, 1),
-                        pre=v[11] or None, pres=v[12] or None))
+                        pre=v[11] or None, pres=v[12] or None,
+                        a=pt(g[0][0]), c=dense([p for p in pts if p[0] in OPEN]) if pts else None, t=pt(f[0])))
     return out, why
 
 
@@ -102,6 +125,8 @@ def write(pool):
         if e["ml"]: f.append("ml = %g" % round(e["ml"], 1))
         if e["pre"]: f.append("pre = {%s}" % ", ".join(str(a) for a in e["pre"]))
         if e["pres"]: f.append("pres = {%s}" % ", ".join(str(a) for a in e["pres"]))
+        for k in ("a", "c", "t"):
+            if e.get(k): f.append("%s = {%s}" % (k, ", ".join("%g" % v for v in e[k])))
         L.append("  { " + ", ".join(f) + " },")
     L.append("}")
     open(OUT, "w").write("\n".join(L) + "\n")

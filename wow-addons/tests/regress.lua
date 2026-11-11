@@ -29,6 +29,12 @@ local cases = {
     function(o) return o:find("missed route quest: hero accept:6462 pool=true detour 6462", 1, true) ~= nil
       and o:find("grind travel: far accept:6621 detour=6621 | near grind:4124:27:Tausend Nadeln detour=nil", 1, true) ~= nil
       and o:find("crowd: 6621", 1, true) ~= nil end },
+  { "live", "Route.lua", "Live-Modus (Tiry 11.11.): Quest-Gebiet nach Ort + Questlog, nur einfache Quests, Reihenfolge Annehmen/Erledigen/Abgeben, kein Hin und Her",
+    function(o) return o:find("live: true", 1, true) ~= nil and o:find("too hard 0", 1, true) ~= nil and o:find("order ok true", 1, true) ~= nil
+      and o:find("wants area true wants other false", 1, true) ~= nil and o:find("after accept: same area true hero in area true", 1, true) ~= nil
+      and o:find("ready: turnin in list at 1", 1, true) ~= nil and o:find("sticky true", 1, true) ~= nil
+      and o:find("turned in: hero accept:%d+ in area true gone true") ~= nil and o:find("live off: live false", 1, true) ~= nil
+      and o:find("B cluster>=3 true too hard 0", 1, true) ~= nil and select(2, o:gsub("too hard 0", "")) == 2 end },
   { "pool_extra", "Route.lua", "Stufe 27, Route sagt Grinden (Tiry 11.11.): passende Extra-Quest aus dem Pool (Vorquest da, Quest/Gegner <= Stufe+1), danach die naechste",
     function(o) return o:find("level 27: hero accept:5062 pool=true detour 5062 auto=true", 1, true) ~= nil
       and o:find("wants5062 true", 1, true) ~= nil

@@ -572,6 +572,7 @@ function R.StepTarget(s)
     elseif s.t == "turnin" then v = nearestFast(questPoints(s.q, "finishedBy"))
     elseif s.t == "complete" then v = objectiveTarget(s.q) end
   end
+  if not v and s.fb then v = { map = s.fb[1], x = s.fb[2], y = s.fb[3] } end   -- Quest-Pool: Punkt aus der Datenbank
   if v then v = { map = v.map, x = v.x, y = v.y, npc = v.npc, spot = v.spot, count = v.count } end
   tcache[s] = { t = now, pmap = pmap, v = v }
   return v
@@ -1048,7 +1049,8 @@ local function poolLoad()
     for j, t in ipairs({ "accept", "complete", "turnin" }) do
       POOL.steps[b + j] = { t = t, q = e.q, n = e.n, ql = e.ql, rl = e.rl, ml = e.ml, pool = true, pxp = e.xp,
         xp = (t == "accept") and e.xp or nil, wm = (t == "accept") and e.wm or nil,
-        pre = (t == "accept") and e.pre or nil, pres = (t == "accept") and e.pres or nil }
+        pre = (t == "accept") and e.pre or nil, pres = (t == "accept") and e.pres or nil,
+        fb = (t == "accept" and e.a) or (t == "complete" and e.c) or (t == "turnin" and e.t) or nil }
     end
     POOL.ix[e.q] = { acc = b + 1, cmp = b + 2, tin = b + 3 }
     POOL.list[#POOL.list + 1] = e
@@ -1145,6 +1147,232 @@ local function poolBest(mainIx, lvl, refQl, skipQ)
   return best
 end
 R.PoolBest = poolBest
+
+---------------------------------------------------------------------------
+-- LIVE-MODUS (6.0, Tiry 11.11.: "beim Start aktualisieren, wo ich bin, welche Quests ich habe, was am
+-- praktischsten waere – wo gleich auch andere Quests sind, nicht 1-2 Quests und wieder Gebietswechsel. Einfache Quests!")
+-- Statt eines festen Zeigers: aus dem Quest-Pool (alle Solo-Quests, feste Koordinaten aus tools/pool.py) und deinem
+-- Questlog werden Quest-GEBIETE gebildet (Geber, Ziel und Abgabe nah beieinander). Bewertet wird das ganze Gebiet:
+-- XP aller passenden Quests / (Weg dorthin inkl. Flug + Arbeit + Laufen im Gebiet). Einfach = Quest und Gegner
+-- hoechstens deine Stufe +1, keine Elite/Gruppe/Dungeon. Im Gebiet fuehrt der Pfeil immer zum naechsten sinnvollen
+-- Schritt (Annehmen vor Erledigen vor Abgeben). Ein neues Gebiet nur, wenn es klar besser ist (R.LIVE_STICK).
+---------------------------------------------------------------------------
+R.live = true
+R.LIVE_HUB = 700       -- Yards: Annehmen/Abgeben hoechstens so weit vom Hub (Gebietskern)
+R.LIVE_FIELD = 2500    -- Yards: Questziel hoechstens so weit vom Hub (Umland)
+R.LIVE_STICK = 1.3     -- neues Gebiet erst ab 30 % mehr XP/Min (kein Hin und Her)
+R.LIVE_EVERY = 30      -- Sekunden: so oft wird die Gebietswahl neu gerechnet (sofort bei Questlog-Aenderung)
+R.LIVE_SHIP = 30       -- Minuten zu einem anderen Kontinent (Zeppelin + Warten + Fluege)
+R.LIVE_TOP = 12        -- so viele Gebiete bekommen eine echte Wegrechnung (Flug), der Rest faellt per Obergrenze raus
+R.LIVE_CORE = 350      -- Yards: Questgeber so nah beieinander = derselbe Hub
+R.LIVE_BIG = 0.8       -- ein groesseres Gebiet gewinnt, solange es mind. 80 % so schnell ist wie das schnellste
+local LV = {}          -- Zwischenstand: Gebietswahl + Signatur des Questlogs
+local function wp(p) return p and p[4] and { c = p[4], x = p[5], y = p[6] } or nil end
+local function wd(a, b)
+  if not (a and b) or a.c ~= b.c then return nil end
+  return math.sqrt((a.x - b.x) ^ 2 + (a.y - b.y) ^ 2)
+end
+local function mp(p) return p and { map = p[1], x = p[2], y = p[3] } or nil end
+local function playerWorld()
+  local pm, px, py = R.PlayerMapPos()
+  if not px then return end
+  local ok, cont, w = pcall(C_Map.GetWorldPosFromMapPos, pm, vec(px, py))
+  if not ok or not cont or not w then return end
+  local wx, wy = xy(w)
+  if not wx then return end
+  return { c = cont, x = wx, y = wy }, { map = pm, x = px, y = py }
+end
+-- Passende Quests mit ihren noch offenen Punkten
+local function liveCands(P, lvl)
+  local out, sig = {}, {}
+  local mob = lvl + (R.mobAbove or 1)
+  for _, e in ipairs(P.list) do
+    local q = e.q
+    if not flagged(q) and not (R.ban and R.ban[q]) then
+      local log = inLog(q)
+      local rdy = log and ready(q)
+      local x = P.ix[q]
+      local ok
+      if rdy then ok = true
+      elseif log then ok = (e.ml or 0) <= mob and not greyFor(e.ql, lvl)
+      else
+        ok = (e.rl or 0) <= lvl and (e.ql or 0) <= lvl + 1 and (e.ml or 0) <= mob and not greyFor(e.ql, lvl)
+          and R.StepDone(P.steps[x.acc], lvl) == false
+      end
+      local A, C, T = wp(e.a), wp(e.c), wp(e.t)
+      if ok and T then
+        local pts, acts = {}, {}
+        if not log and A then pts[#pts + 1] = A; acts[#acts + 1] = { i = x.acc, w = A, k = 1, m = mp(e.a) } end
+        if not rdy and C then pts[#pts + 1] = C; acts[#acts + 1] = { i = x.cmp, w = C, k = 2, m = mp(e.c) } end
+        pts[#pts + 1] = T; acts[#acts + 1] = { i = x.tin, w = T, k = 3, m = mp(e.t) }
+        if log or A then
+          out[#out + 1] = { e = e, q = q, log = log, rdy = rdy, pts = pts, acts = acts,
+            xp = xpAt(e.xp or 0, e.ql, lvl), wm = rdy and 0 or (e.wm or 2), core = (not log and A) or T }
+          sig[#sig + 1] = q .. (rdy and "r" or log and "l" or "")
+        end
+      end
+    end
+  end
+  return out, table.concat(sig, ",")
+end
+-- Laenge einer Rundtour durch alle Punkte (naechster Nachbar, zurueck zum Start) in Yards
+local function tourYd(start, pts)
+  local left, cur, sum = {}, start, 0
+  for i, p in ipairs(pts) do left[i] = p end
+  while #left > 0 do
+    local bi, bd = 1, nil
+    for i, p in ipairs(left) do local d = wd(cur, p) or 1e9; if not bd or d < bd then bi, bd = i, d end end
+    sum = sum + math.min(bd, 5000); cur = left[bi]; table.remove(left, bi)
+  end
+  return sum + math.min(wd(cur, start) or 0, 5000)          -- und zurueck zum Hub (Abgabe)
+end
+-- Bestes Quest-Gebiet aus den Kandidaten C: { qs = {[q]=true}, m = {cand...}, xp, min, rate, core, seed, n }
+local function liveBest(C, meW, meM, lvl)
+  local thr = grindRate(lvl) * R.QUEST_PREF
+  -- 1. Hubs: Questgeber, die nah beieinander stehen (Wegekreuz, Lager, Dorf), bilden EIN Gebiet
+  local grp, G = {}, {}
+  for i, c in ipairs(C) do
+    if not grp[i] then
+      local g = { c.core }
+      grp[i] = g; G[#G + 1] = g
+      local k = 1
+      while k <= #g do
+        for j, o in ipairs(C) do
+          if not grp[j] then
+            local d = wd(g[k], o.core)
+            if d and d <= R.LIVE_CORE then grp[j] = g; g[#g + 1] = o.core end
+          end
+        end
+        k = k + 1
+      end
+    end
+  end
+  local function near(g, w)
+    local b
+    for _, p in ipairs(g) do local d = wd(p, w); if d and (not b or d < b) then b = d end end
+    return b
+  end
+  -- 2. Jedes Hub-Gebiet: alle Quests, deren Annehmen/Abgeben am Hub und deren Ziel im Umland liegt,
+  --    und die sich HIER lohnen (Grenzkosten inkl. Hin- und Rueckweg zum Ziel)
+  local areas = {}
+  for _, g in ipairs(G) do
+    local m, xp, wm, np, pts = {}, 0, 0, 0, {}
+    for _, c in ipairs(C) do
+      local inside, far = true, 0
+      for _, a in ipairs(c.acts) do
+        local d = near(g, a.w)
+        if not d or d > ((a.k == 2) and R.LIVE_FIELD or R.LIVE_HUB) then inside = false; break end
+        if a.k == 2 then far = d end
+      end
+      if inside and c.xp / (c.wm + 0.3 * #c.pts + 2 * far * 1.2 / R.WALK_YPM) < thr then inside = false end
+      if inside then
+        m[#m + 1] = c; xp = xp + c.xp; wm = wm + c.wm; np = np + #c.pts
+        for _, p in ipairs(c.pts) do pts[#pts + 1] = p end
+      end
+    end
+    if #m > 0 then
+      local inner = wm + 0.3 * np + tourYd(g[1], pts) * 1.2 / R.WALK_YPM
+      areas[#areas + 1] = { m = m, xp = xp, inner = inner, core = g[1], bound = xp / inner }
+    end
+  end
+  table.sort(areas, function(x, y) return x.bound > y.bound end)
+  -- 3. Weg dorthin (Flug, Schiff) fuer die besten; gewaehlt wird das Gebiet mit den meisten XP unter denen,
+  --    die fast so schnell sind wie das schnellste (R.LIVE_BIG) – viele Quests am Stueck statt 1-2 und weiter
+  local done, top = {}, 0
+  for k = 1, math.min(#areas, R.LIVE_TOP) do
+    local a = areas[k]
+    if a.bound <= top * R.LIVE_BIG then break end
+    local nr, nd
+    for _, c in ipairs(a.m) do
+      for _, act in ipairs(c.acts) do
+        local d = wd(meW, act.w) or 1e9
+        if not nd or d < nd then nr, nd = act, d end
+      end
+    end
+    local trip = 0
+    if nd and nd >= 1e8 then trip = R.LIVE_SHIP                 -- anderer Kontinent: Zeppelin/Schiff + Fluege
+    elseif nd and nd > 150 then trip = (nr and tripMin(meM, nr.m)) or nd * 1.25 / R.WALK_YPM end
+    if trip then
+      local min = trip + a.inner
+      local r = a.xp / min
+      done[#done + 1] = { m = a.m, xp = a.xp, min = min, rate = r, core = a.core, trip = trip }
+      if r > top then top = r end
+    end
+  end
+  LV.cmp = done                                              -- fuer /lp warum
+  local best
+  for _, a in ipairs(done) do
+    if a.rate >= top * R.LIVE_BIG and (not best or a.xp > best.xp) then best = a end
+  end
+  if best then
+    best.qs, best.n = {}, #best.m
+    for _, c in ipairs(best.m) do best.qs[c.q] = true end
+  end
+  return best
+end
+-- Reihenfolge im Gebiet: immer der naechste erlaubte Schritt (Annehmen -> Erledigen -> Abgeben), nach Naehe
+local function liveTour(m, meW, n)
+  local acts, last = {}, {}
+  for _, c in ipairs(m) do
+    local prev
+    for _, a in ipairs(c.acts) do acts[#acts + 1] = { i = a.i, w = a.w, k = a.k, q = c.q, prev = prev, rdy = c.rdy }; prev = a.k end
+  end
+  local out, cur = {}, meW
+  while #acts > 0 and #out < (n or 6) do
+    local bi, bd
+    for i, a in ipairs(acts) do
+      if a.prev == nil or last[a.q] == a.prev then
+        local d = wd(cur, a.w) or 1e9
+        if a.rdy then d = d * 0.8 end                     -- fertige Quest: Abgabe gern zuerst mitnehmen
+        if not bd or d < bd then bi, bd = i, d end
+      end
+    end
+    if not bi then break end
+    local a = table.remove(acts, bi)
+    out[#out + 1] = a.i; last[a.q] = a.k; cur = a.w
+  end
+  return out
+end
+-- Ergebnis fuer R.Plan: hero, list, info (nil = kein lohnendes Gebiet -> fester Plan/Grinden)
+local function livePlan(P, lvl, plan, n)
+  local meW, meM = playerWorld()
+  if not meW then return end
+  local t = GetTime and GetTime() or 0
+  local C, sig = liveCands(P, lvl)
+  local cur = LV.area
+  if cur then   -- altes Gebiet: noch Quests offen?
+    local still = false
+    for _, c in ipairs(C) do if cur.qs[c.q] then still = true; break end end
+    if not still then cur, LV.area = nil, nil end
+  end
+  if not cur or sig ~= LV.sig or LV.lvl ~= lvl or t - (LV.t or -1e9) >= R.LIVE_EVERY then
+    local best = liveBest(C, meW, meM, lvl)
+    LV.t, LV.sig, LV.lvl = t, sig, lvl
+    local overlap = false
+    if best and cur then for q in pairs(cur.qs) do if best.qs[q] then overlap = true; break end end end
+    -- Gebietswechsel nur, wenn das neue klar besser ist; gleiches Gebiet (Ueberschneidung) wird einfach aktualisiert
+    if best and (not cur or overlap or best.rate >= (cur.rate or 0) * R.LIVE_STICK) then LV.area = best end
+  end
+  local a = LV.area
+  if not a then return end
+  if a.rate < grindRate(lvl) * R.QUEST_PREF then return end   -- Grinden waere mehr als doppelt so schnell
+  local m, qs, xp, fit, ord = {}, {}, 0, {}, {}
+  for _, c in ipairs(C) do
+    if a.qs[c.q] then m[#m + 1] = c; qs[c.q] = true; xp = xp + c.xp; ord[#ord + 1] = (c.rdy and 2) or (c.log and 1) or 0 end
+    if c.log then fit[c.q] = true end   -- passt zur Stufe: im Questlog behalten, auch wenn sein Gebiet spaeter dran ist
+  end
+  if #m == 0 then return end
+  table.sort(ord, function(x, y) return x > y end)
+  local list = liveTour(m, meW, n or 5)
+  if not list[1] then return end
+  local zone
+  pcall(function() local mi = C_Map.GetMapInfo(m[1].e.t[1]); zone = mi and mi.name end)
+  return list[1], list, { qs = qs, n = #m, xp = xp, rate = a.rate, min = a.min, zone = zone, trip = a.trip, fit = fit, ord = ord,
+    done = math.max(0, (a.n or #m) - #m) }
+end
+R.LiveCands = function(lvl) local P = poolLoad() if P then return liveCands(P, lvl) end end
+R.LiveReset = function() LV.area, LV.t, LV.sig = nil, nil, nil end
+R.LiveState = function() return LV end
 
 function R.Plan(route, lvl, skipped, plan, n, cur)
   memoReset()
@@ -1306,6 +1534,17 @@ function R.Plan(route, lvl, skipped, plan, n, cur)
       if #list >= (n or 5) then break end
     end
   end
+  -- Live-Modus: das beste Quest-Gebiet ersetzt Ziel + Liste (der feste Plan laeuft im Hintergrund weiter mit)
+  if R.live and PL then
+    local ok, lh, ll, li = pcall(livePlan, PL, lvl, plan, n)
+    if ok and lh then
+      for _, i in ipairs(ll) do if not state[i] or state[i] == "skip" then state[i] = "open" end end
+      if plan.detour and plan.detour.auto then plan.detour = nil end
+      info.detour, info.detourAuto, info.detourPool = nil, nil, nil
+      info.live, info.hero = li, lh
+      return lh, ll, info
+    end
+  end
   return hero, list, info
 end
 
@@ -1355,6 +1594,7 @@ function R.Wants(route, qid, p)
   local state = R.state or {}
   p = p or 1
   if R.info and R.info.detour == qid then return true end   -- Abstecher aus "Neu berechnen"
+  if R.info and R.info.live and R.info.live.qs[qid] then return true end   -- Live-Modus: Quest im gewaehlten Gebiet
   for i, s in ipairs(route.steps) do
     if s.t == "accept" and (s.q == qid or (s.alt and (function() for _, a in ipairs(s.alt) do if a == qid then return true end end end)())) then
       local st = state[i]
@@ -1438,6 +1678,10 @@ function R.LogAdvice(route, routeKey, lvl, p, hero, opt)
     end
     if R.ban and R.ban[q] then
       a.cat, a.why = "delete", "von dir gesperrt"
+    elseif R.info and R.info.live and R.info.live.qs[q] then
+      a.cat, a.why = "keep", "im aktuellen Quest-Gebiet (Live) – passt zu deiner Stufe"
+    elseif R.info and R.info.live and R.info.live.fit[q] then
+      a.cat, a.why = "keep", rdy and "Abgabe später" or "passt · später dran"
     elseif R.info and R.info.detour == q then
       a.cat, a.why = "keep", R.info.detourPool and "Extra-Quest passend zu deiner Stufe – ist dran" or "Abstecher – ist dran"
     elseif classQuest(q, steps, ix) then

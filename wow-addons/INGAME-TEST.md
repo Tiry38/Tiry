@@ -157,6 +157,19 @@ Alles oben ist im Forever-Nachbau getestet, aber nicht im echten Client. Besonde
 
 ---
 
+# Ingame-Test – LevelPilot 6.0.0
+
+## Neu in 6.0 (Live-Modus: Quest-Gebiet statt fester Plan)
+- [ ] Einloggen: Kopfzeile zeigt **LIVE · <Gebiet> · N Quests · +X XP**, das Band darunter eine Kapsel je Quest.
+- [ ] Am Wegekreuz (Stufe ~24): mehrere Quests des Wegekreuzes zusammen (z. B. Serena Bloodfeather, Consumed by Hatred, Lost in Battle, Counterattack!) – nicht nur 1–2.
+- [ ] Alle Live-Quests einfach: Quest und Gegner höchstens deine Stufe +1 (Tooltip der Quest), keine Elite/Gruppe/Dungeon.
+- [ ] Pfeil: erst die Quests am Hub annehmen, dann die Ziele in der Nähe, dann abgeben – kein Hin und Her.
+- [ ] Gebiet bleibt, bis seine Quests erledigt sind (kein Springen zwischen Gebieten).
+- [ ] Questlog-Check: Quests, die zu deiner Stufe passen, stehen auf „passt · später dran“ statt löschen.
+- [ ] `/lp warum` nennt das Live-Gebiet mit Quests, XP/Min und Weg, dazu bis zu 3 Alternativen. **Screenshot an Claude.**
+- [ ] Klick aufs Band oder Menü → NEU BERECHNEN: Gebiet wird neu gewählt.
+- [ ] `/lp live` (oder Schalter im Menü) aus → alter fester Plan, wieder an → Live.
+
 # Ingame-Test – LevelPilot 5.1.9
 
 ## Neu in 5.1.9
