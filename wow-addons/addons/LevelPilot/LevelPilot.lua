@@ -5,7 +5,7 @@
 -- Datenquellen: Routen-Plan, Questie (Geber/Ziele), Blizzards Questlog.
 ---------------------------------------------------------------------------
 local ADDON = ...
-local VERSION = "5.1.2"
+local VERSION = "5.1.3"
 local time = time or (os and os.time)   -- Spielzeit-Uhr (Sekunden seit 1970)
 local floor, max, min, abs, sqrt, atan2, pi, fmt = math.floor, math.max, math.min, math.abs, math.sqrt, math.atan2, math.pi, string.format
 local BT = BackdropTemplateMixin and "BackdropTemplate" or nil
@@ -1707,14 +1707,15 @@ function Refresh(rescan)
           local kindTxt = grind and ("GRINDEN  ·  BIS STUFE " .. (st.to or "?")) or (later and ("WARTET  ·  AB STUFE " .. needL))
             or (notReady and "ERST ERLEDIGEN, DANN ABGEBEN") or (cnt > 1 and (cnt .. " QUESTS " .. label:upper()) or label:upper())
           do   -- XP-Lage aus deiner echten Anzeige: was decken Quests, was bleibt (in Mobs)
-            local fi = LP_Route.fillInfo and LP_Route.fillInfo[st.fill or needL or 0]
-            local nd = (not fi and later and LP_Route.XPNeed) and LP_Route.XPNeed(UnitLevel("player") or 1, needL) or nil
-            if st.fill and fi and fi.need then
+            -- Warten: XP bis zur Stufe DIESES Schritts (nicht bis zum Ende des Aufhol-Blocks)
+            local fi = (st.fill and not later and LP_Route.fillInfo) and LP_Route.fillInfo[st.fill] or nil
+            local nd = (later and LP_Route.XPNeed) and LP_Route.XPNeed(UnitLevel("player") or 1, needL) or nil
+            if fi and fi.need then
               table.insert(sub, 1, fmt("|cff4fd1ffAufholen|r %s/%s XP%s", fmtNum(min(fi.cover, fi.need)), fmtNum(fi.need),
                 fi.rest > 0 and fmt(" · ~%d Mobs", math.ceil(fi.rest / fi.mob)) or ""))
-            elseif st.fill then table.insert(sub, 1, "|cff4fd1ffAufhol-Quest|r – statt Grinden, bis Stufe " .. st.fill)
+            elseif st.fill and not later then table.insert(sub, 1, "|cff4fd1ffAufhol-Quest|r – statt Grinden, bis Stufe " .. st.fill)
             elseif later then
-              local rest = fi and fi.rest or nd
+              local rest = nd
               local mob = (UnitLevel("player") or 1) * 5 + 45
               table.insert(sub, 1, rest and fmt("|cffff8a3dnoch %s XP|r · ~%d Mobs", fmtNum(rest), math.ceil(rest / mob))
                 or "|cffff8a3dStufe fehlt|r – Mobs mitnehmen")
@@ -1849,7 +1850,16 @@ local function SetBlizzPin(tgt)
     AREA.pinned = AREA.key
   end
   local key = tgt.map .. ":" .. floor(tgt.x * 1000) .. ":" .. floor(tgt.y * 1000)
-  if key == lastPin then return end
+  if key == lastPin then
+    -- Kontrolle alle 2 s: steht Blizzards Wegpunkt noch auf unserem Ziel? (sonst haengt er an alter Stelle)
+    local now = GetTime()
+    if now - (AREA.pinChk or 0) < 2 or not C_Map.GetUserWaypoint then return end
+    AREA.pinChk = now
+    local ok, wp = pcall(C_Map.GetUserWaypoint)
+    if not ok then return end
+    local pos = wp and wp.position
+    if pos and wp.uiMapID == tgt.map and math.abs(pos.x - tgt.x) < 0.002 and math.abs(pos.y - tgt.y) < 0.002 then return end
+  end
   lastPin = key
   pcall(function()
     if C_Map.CanSetUserWaypointOnMap and not C_Map.CanSetUserWaypointOnMap(tgt.map) then return end

@@ -708,7 +708,7 @@ function R.XPNeed(lvl, to)
   for l = lvl + 1, to - 1 do need = need + (R.XP_LEVEL[l] or mx) end
   return math.max(0, need)
 end
-function R.FillBudget(steps, state, lvl)
+function R.FillBudget(steps, state, lvl, from)
   local blocks = {}
   for i, s in ipairs(steps) do
     if s.fill and s.t == "accept" and lvl < s.fill then
@@ -723,7 +723,8 @@ function R.FillBudget(steps, state, lvl)
     local cover, total = 0, 0
     for i, s in ipairs(steps) do
       if s.t == "accept" and s.q and s.xp and s.seg == b.seg and not s.fill then
-        if inLog(s.q) or state[i] == "open" then cover = cover + s.xp end
+        -- offene Quests hinter dem Plan-Zeiger zaehlen nicht (der Plan schickt dich nicht mehr hin)
+        if inLog(s.q) or (state[i] == "open" and (not from or i >= from)) then cover = cover + s.xp end
       elseif s.t == "accept" and s.q and s.xp and s.fill == F and inLog(s.q) then
         cover = cover + s.xp
       end
@@ -741,7 +742,7 @@ function R.FillBudget(steps, state, lvl)
 end
 
 -- Zustand aller Schritte: done / skip / later / open (Reise-Schritte nach "warst du schon da / brauchst du es noch")
-local function computeState(steps, lvl, skipped, cur)
+local function computeState(steps, lvl, skipped, cur, from)
   local state = {}
   for i, s in ipairs(steps) do
     if skipped and skipped[R.StepKey(s)] then state[i] = "skip"
@@ -752,7 +753,7 @@ local function computeState(steps, lvl, skipped, cur)
       state[i] = (lvl >= (s.to or 0)) and "done" or "open"
     end
   end
-  R.FillBudget(steps, state, lvl)
+  R.FillBudget(steps, state, lvl, from)
   -- Reisen/Trainer: noetig, wenn im folgenden Abschnitt noch etwas offen ist; erledigt, sobald dort
   -- schon etwas angenommen/abgegeben wurde (du warst also schon da)
   for i, s in ipairs(steps) do
@@ -980,7 +981,7 @@ function R.Plan(route, lvl, skipped, plan, n, cur)
   local N = #steps
   plan = plan or {}
   plan.hist = plan.hist or {}
-  local state = computeState(steps, lvl, skipped, cur)
+  local state = computeState(steps, lvl, skipped, cur, findKey(steps, plan.k, plan.i))
   R.state = state
   local info = { n = N }
   R.info = info
@@ -1052,12 +1053,29 @@ function R.Plan(route, lvl, skipped, plan, n, cur)
   plan.k = (p <= N) and R.StepKey(steps[p]) or "END"
   if info.jumped then info.jumped.to = p end
   hero = nextOpen(state, p, N)
-  info.ptr, info.hero = p, hero
+  -- Aufhol-Quests gehen nie verloren: musst du am Zeiger auf eine Stufe warten (oder grinden), holt der Plan
+  -- Aufhol-Schritte desselben Abschnitts zurueck, die der Zeiger schon hinter sich gelassen hat (Tiry 11.11.)
+  local back = {}
+  local ps = steps[math.min(p, N)]
+  if ps and (state[p] == "later" or not hero or steps[hero].t == "grind") then
+    for i = 1, math.min(p - 1, N) do
+      local s = steps[i]
+      if s.fill and lvl < s.fill and state[i] == "missed" and s.seg == ps.seg then
+        state[i] = "open"; back[#back + 1] = i
+      end
+    end
+    if back[1] then hero = back[1]
+    elseif state[p] == "later" and (not hero or (steps[hero].t == "grind" and (steps[hero].to or 0) > (steps[p].rl or 0))) then
+      hero = p   -- ehrlich: "WARTET ab Stufe X · noch N XP" statt "Grinden bis 30"
+    end
+  end
+  info.ptr, info.hero, info.back = p, hero, back[1] and #back or nil
   -- 4. Liste: Ziel + naechste offene (oder wartende) Schritte in Plan-Reihenfolge.
   -- Erledigen/Abgeben einer Quest, die der Plan vorher noch annimmt, ist "geplant" (sichtbar, aber erst
   -- nach der Annahme ansteuerbar) – so steht der ganze Ablauf in der Liste.
   local list = {}
   if hero then list[1] = hero end
+  for k = 2, #back do if #list < (n or 5) then list[#list + 1] = back[k] end end
   local accAhead = {}
   for i = p, N do
     local s, st = steps[i], state[i]

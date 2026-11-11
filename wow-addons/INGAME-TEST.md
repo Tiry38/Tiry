@@ -157,7 +157,12 @@ Alles oben ist im Forever-Nachbau getestet, aber nicht im echten Client. Besonde
 
 ---
 
-# Ingame-Test – LevelPilot 5.1.2
+# Ingame-Test – LevelPilot 5.1.3
+
+## Neu in 5.1.3 (Aufhol-Quests gehen nicht mehr verloren)
+- [ ] Stufe 27, Zeiger schon bei Raketenwagenteile (ab 28): nicht erledigte Aufhol-Quests (Hypercapacitor Gizmo, Protect Kanati Greycloud, Homeward Bound …) kommen **zurück** ans Ziel.
+- [ ] Alle Aufhol-Quests erledigt: Karte zeigt **„WARTET · AB STUFE 28 · noch X XP · ~N Mobs“** – X = XP bis 28 laut Leiste (nicht bis 30, nicht „Grinden bis 30“).
+- [ ] Kartenmarkierung (Blizzard-Wegpunkt) springt mit, sobald das Ziel wechselt – bleibt nicht an alter Stelle hängen.
 
 ## Neu in 5.1.2 (Aufhol-Quests nach echter XP)
 - [ ] Stufe 27 mit wenig XP (z. B. 3 %): Aufhol-Karte zeigt **„Aufholen x/y XP · ~N Mobs“** – y = dir fehlende XP bis 28 (laut XP-Leiste), x = was die Quests bringen.

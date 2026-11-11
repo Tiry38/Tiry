@@ -17,6 +17,9 @@ local cases = {
     function(o) return o:find("behind: level 27 pointer accept:1105 hero accept:5064 fill=28", 1, true) ~= nil and o:find("fill steps done: 11", 1, true) ~= nil
       and o:find("level 28: hero accept:1105 | in-log fill 4770 complete open=true", 1, true) ~= nil and o:find("on plan: fill seen=false", 1, true) ~= nil
       and o:find("xp 3%: need 37700 cover 12800 rest 24900 open 5", 1, true) ~= nil and o:find("xp 93%: need 2900 cover 4650 rest 0 open 2", 1, true) ~= nil end },
+  { "aufhol_zurueck", "Route.lua", "Zeiger hinter dem Aufhol-Block (Tiry 11.11., 61.8 %): Aufhol-Quests kommen zurueck; alles erledigt -> WARTET ab 28 mit XP bis 28",
+    function(o) return o:find("past block: pointer accept:1110 hero accept:5151", 1, true) ~= nil
+      and o:find("all done: pointer accept:1110 hero accept:1110 need28 14900", 1, true) ~= nil end },
   { "netz_anbindung", "Travel.lua", "Splitter (Dach/Fels) neben dem Spieler: Hauptnetz bleibt angebunden (0 Verluste)",
     function(o) return o:find("cont 0: 0 of", 1, true) ~= nil and o:find("cont 1: 0 of", 1, true) ~= nil end },
   { "aufzug_hinweis", "Travel.lua", "Donnerfels-Aufzug: Hinweis an allen 5 Stellen davor",

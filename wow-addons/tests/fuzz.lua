@@ -126,8 +126,11 @@ local function fuzz(key, seed, N)
     if not manual and plan.k ~= "END" and p < lastPtr then print(string.format("  Zeiger rueckwaerts %d -> %d (it %d)", lastPtr, p, it)) errs = errs + 1 end
     manual = false
     lastPtr = (plan.k == "END") and #steps + 1 or p
-    if hero and R.state[hero] ~= "open" then print("  Ziel nicht offen: " .. hero .. " " .. tostring(R.state[hero])) errs = errs + 1 end
-    if hero and hero < p then print("  Ziel vor dem Zeiger") errs = errs + 1 end
+    -- erlaubt seit 5.1.3: wartender Schritt genau am Zeiger ("WARTET ab X · noch N XP"),
+    -- zurueckgeholte Aufhol-Quest hinter dem Zeiger (offen, fill > Stufe)
+    local waitOk = hero == p and R.state[hero] == "later"
+    if hero and R.state[hero] ~= "open" and not waitOk then print("  Ziel nicht offen: " .. hero .. " " .. tostring(R.state[hero])) errs = errs + 1 end
+    if hero and hero < p and not (steps[hero].fill and R.state[hero] == "open") then print("  Ziel vor dem Zeiger") errs = errs + 1 end
     local seen = {}
     for _, i in ipairs(list or {}) do
       if seen[i] then print("  doppelt in Liste " .. i) errs = errs + 1 end
