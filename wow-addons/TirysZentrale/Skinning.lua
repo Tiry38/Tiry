@@ -25,8 +25,8 @@ K.SPECIAL = {
   { id = 8154, who = "Skorpide", lvl = 35 },
   { id = 15423, who = "Schimären", lvl = 45 },
   { id = 15419, who = "Bären im Teufelswald", lvl = 47 },
-  { id = 15422, who = "Frostsäbler", lvl = 50 },
-  { id = 15417, who = "Teufelssaurier (selten, sehr stark)", lvl = 50 },
+  { id = 15422, who = "Frostsäbler", lvl = 55 },
+  { id = 15417, who = "Teufelssaurier (selten, sehr stark)", lvl = 54 },
 }
 
 -- Häuten-Formel (Classic): bis Level 10 reicht Skill 1, Level 11–20 braucht (Level−10)×10, danach Level×5

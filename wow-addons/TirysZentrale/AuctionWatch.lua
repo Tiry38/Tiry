@@ -584,10 +584,13 @@ end
 
 function AW.Floor(id)
   local vfloor, risk = AW.VendorFloor(id)
-  local r = ns.Recipes.ByOutput(id)
-  if not r then return vfloor end
-  local unit = ns.CraftBook.UnitCost(id)
+  local unit = ns.CraftBook.UnitCost(id) -- wirklich selbst hergestellt (Herstell-Buch)
   if not unit then
+    -- Rezept-Kosten nur für EIGENE Rezepte und nie für Sammelware: gehäutetes Leder, Kräuter, Erz haben keine
+    -- Herstellkosten (gleiche Regel wie der Item-Tooltip)
+    local r = ns.Recipes.ByOutput(id)
+    local gathered = ns.Skin and ns.Skin.GATHER and ns.Skin.GATHER[id]
+    if not r or gathered or not ns.Recipes.IsKnown(r) then return vfloor end
     local _, _, cost, unknown = ns.Scanner.RecipeProfit(r)
     if not cost or unknown > 0 or (r.qty or 0) <= 0 then return vfloor end
     unit = cost / r.qty
@@ -649,9 +652,15 @@ function AW.RelistList()
   -- billiger einstellen oder zum Händler (vendor = Händlerpreis pro Stück, falls er etwas zahlt)
   local D = ns.Demand
   local idx = ns.Ledger and ns.Ledger.Index and ns.Ledger.Index(14) or {}
+  local listed = {}
+  for _, a in ipairs(s.list) do
+    if a.status == "active" and not a.undercut and not (a.expires and a.expires < time()) then
+      listed[a.id] = (listed[a.id] or 0) + (a.qty or 1)
+    end
+  end
   for _, e in ipairs(list) do
     local batch = D and D.MarketBatch(e.id)
-    e.post = (batch and e.where ~= "unterboten") and math.min(e.qty, batch) or e.qty
+    e.post = (batch and e.where ~= "unterboten") and math.max(0, math.min(e.qty, batch - (listed[e.id] or 0))) or e.qty
     e.full = D and D.Full(e.id) or nil
     local x = idx[e.id]
     if x and x.expired >= 2 and x.sold == 0 then

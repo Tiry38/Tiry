@@ -1,5 +1,5 @@
 -- Tiry's Zentrale – Startseite: dein Gold-Kreislauf (Planen, Einkaufen, Herstellen, Verkaufen)
--- Bewusst schlank: Begrüßung, (nur wenn wichtig) ein Hinweis, der Kreislauf, Forever-Chancen.
+-- Begrüßung, (nur wenn wichtig) ein Hinweis, Sparziel, der Kreislauf, Unterwegs-Gold, Forever-Chancen.
 local _, ns = ...
 local UI = ns.UI
 local C = UI.C
@@ -214,7 +214,19 @@ function page.build(self, content, width)
   end
   self.grid = grid
 
-  self.goal = UI.Para(content, 12, C.muted, width)
+  -- Sparziel und Unterwegs-Gold (UI/HomeCards.lua)
+  self.goalCard = UI.HomeCards.Goal(content, width)
+  self.zoneCard = UI.HomeCards.Zone(content, width)
+end
+
+-- Karte (oder ihr Ersatz) an Position y setzen; liefert das neue y
+local function place(content, card, y)
+  local h, shown = card:Fill()
+  if h <= 0 then return y end
+  shown:ClearAllPoints()
+  shown:SetPoint("TOPLEFT", content, "TOPLEFT", 0, -y)
+  shown:Show()
+  return y + h + 18
 end
 
 -- Nur Hinweise außerhalb des Kreislaufs kommen darüber (alles rund ums Craften zeigt der Kreislauf selbst)
@@ -283,6 +295,9 @@ function page.refresh(self)
     self.nextAction = nil
   end
 
+  -- Sparziel: wie weit, wann geschafft, was hilft
+  y = place(content, self.goalCard, y) + 6
+
   -- Kreislauf
   local loop = self.loop
   -- Wochenbilanz (echter Gewinn aus dem Herstell-Buch) statt Erklärtext, sobald es Daten gibt
@@ -329,6 +344,9 @@ function page.refresh(self)
   loop:SetPoint("TOPLEFT", content, "TOPLEFT", 0, -y)
   y = y + loop:GetHeight() + 24
 
+  -- Unterwegs-Gold: aktuelles Gebiet + nächste Gebiete der LevelPilot-Route
+  y = place(content, self.zoneCard, y) + 6
+
   -- Forever-Chancen
   self.chanceTitle:ClearAllPoints()
   self.chanceTitle:SetPoint("TOPLEFT", content, "TOPLEFT", 14, -y)
@@ -347,16 +365,7 @@ function page.refresh(self)
   end
   self.grid:ClearAllPoints()
   self.grid:SetPoint("TOPLEFT", content, "TOPLEFT", 0, -y)
-  y = y + 3 * 64 - 8 + 20
-
-  local goal
-  for _, g in ipairs(ns.GOALS) do
-    if p.level <= g.level then goal = g break end
-  end
-  self.goal:SetText(goal and ("|cff39ff6bSparziel:|r " .. goal.text) or "")
-  self.goal:ClearAllPoints()
-  self.goal:SetPoint("TOPLEFT", content, "TOPLEFT", 0, -y)
-  y = y + math.ceil(self.goal:GetStringHeight()) + 30
+  y = y + 3 * 64 - 8 + 30
   content:SetHeight(y)
 end
 

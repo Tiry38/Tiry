@@ -42,14 +42,20 @@ function S.ScanMerchant()
         ns.db.vendorBuy[itemID] = unit
       end
       local ahPrice = M.Price(itemID)
-      if ahPrice then
+      -- Flip nur auf frische Preise (max. 3 Tage) und nicht auf Ladenhüter – sonst kauft man auf einen alten Preis
+      local age = M.Age(itemID)
+      local fresh = (age and age <= 3) or (age == nil and not M.HasAgeAPI())
+      -- seelengebundene Ware (z. B. viele Rezepte in Forever) kann man nicht weiterverkaufen
+      local db = ns.DB and ns.DB.Get(itemID)
+      local bop = db and db.bind == 1
+      if ahPrice and fresh and not bop and not (ns.Demand and ns.Demand.Class(itemID) == "slow") then
         local net = M.NetAfterDeposit(itemID, nil, ahPrice)
         local profit = net - unit
         -- Mindestens 20 % und 50 Kupfer Gewinn pro Stück, sonst lohnt der Aufwand nicht
         if profit >= 50 and profit >= unit * 0.2 then
           m.flips[#m.flips + 1] = {
             id = itemID, name = name, unit = unit, ah = ahPrice, net = net, profit = profit,
-            available = available, stack = stack, age = M.Age(itemID),
+            available = available, stack = stack, age = age,
           }
         end
       end
@@ -189,6 +195,7 @@ function S.ScanBags()
     if e.quality ~= 0 and not e.bound then
       local rawUnit = math.max(ahNet or 0, vendorUnit)
       if needs[e.id] then
+        e.advice = "BEHALTEN" -- nicht ins AH/zum Händler schicken, was die Craft-Liste braucht
         e.tip = "Behalten: wird für deine Craft-Liste gebraucht"
       else
         local p = S.ProcessValue(e.id, idx)
@@ -366,7 +373,7 @@ function S.MatCost(id, depth, seen)
 end
 
 -- Gewinn eines gespeicherten Rezepts mit aktuellen Preisen.
--- Erlös = AH-Preis nach AH-Gebühr minus erwartetem Einstellgebühr-Verlust (Forever: mind. 1 Silber je Angebot,
+-- Erlös = AH-Preis nach AH-Gebühr minus erwartetem Einstellgebühr-Verlust (Forever: mind. 1 Kupfer je Angebot,
 -- weg bei Ablauf). 5. Rückgabe: Materialien, die du günstiger selbst herstellst { { id, saves = Ersparnis pro Craft } }
 -- 6. Rückgabe: davon Einstellgebühr-Risiko pro Craft (Kupfer)
 function S.RecipeProfit(r)

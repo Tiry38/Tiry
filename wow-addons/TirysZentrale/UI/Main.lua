@@ -501,6 +501,7 @@ function UI.Show(key)
     if def.frame then def.frame:SetShown(k == key) end
   end
   UI.current = key
+  ns.Scanner.bagsWanted = false -- nur die Scanner-Ansicht schaltet den Taschen-Scan wieder ein
   -- Reiter zeigen/verstecken; Titel + Satz darunter, Inhalt darunter
   local g = UI.GroupOf(key)
   local views = g and availableViews(g) or {}
@@ -597,9 +598,16 @@ local function refreshVisible()
   end
 end
 for _, msg in ipairs({ "PRICES_UPDATED", "ITEMS_UPDATED", "PROFESSIONS_CHANGED", "PLAYER_CHANGED",
-  "MERCHANT_SCANNED", "BAGS_SCANNED", "RECIPES_SCANNED", "AH_STATE", "LOOT_VALUED", "CRAFTBOOK_CHANGED", "AUCTIONS_CHANGED",
+  "MERCHANT_SCANNED", "RECIPES_SCANNED", "AH_STATE", "CRAFTBOOK_CHANGED", "AUCTIONS_CHANGED", "GOAL_CHANGED",
   "DEMAND_UPDATED", "SNIPES_CHANGED" }) do
   ns.Listen(msg, function() ns.Debounce("refresh", 0.15, refreshVisible) end)
+end
+-- Taschen-Änderungen (jede Beute) nur für Ansichten, die Tascheninhalt zeigen
+local BAG_PAGES = { home = true, recipes = true, tracker = true, scanner = true, session = true }
+for _, msg in ipairs({ "BAGS_SCANNED", "LOOT_VALUED" }) do
+  ns.Listen(msg, function()
+    if frame and frame:IsShown() and BAG_PAGES[UI.current] then ns.Debounce("refresh", 0.15, refreshVisible) end
+  end)
 end
 ns.Listen("WAYPOINT_CHANGED", function()
   if frame then frame.wpBtn:SetShown(ns.Maps.HasWaypoint()) end
@@ -712,7 +720,9 @@ SLASH_TIRYSZENTRALE1 = "/tz"
 SLASH_TIRYSZENTRALE2 = "/zentrale"
 SLASH_TIRYSZENTRALE3 = "/gold"
 SlashCmdList.TIRYSZENTRALE = function(msg)
-  msg = strtrim and strtrim((msg or ""):lower()) or (msg or ""):lower()
+  local lower = (ns.DB and ns.DB.Lower) or string.lower
+  msg = lower(msg or "")
+  msg = strtrim and strtrim(msg) or msg:match("^%s*(.-)%s*$")
   local map = {
     [""] = nil, start = "home", home = "home", wege = "methods", methoden = "methods", guide = "methods",
     markt = "market", preise = "market", db = "database", datenbank = "database", items = "database", scan = "scanner", scanner = "scanner", taschen = "scanner",

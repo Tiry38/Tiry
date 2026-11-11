@@ -35,8 +35,9 @@ function SR.Find(text)
   for _, g in ipairs(ns.GLOSSARY or {}) do
     if ns.DB.Lower(g[1]):find(q, 1, true) then out[#out + 1] = { kind = "term", label = g[1], term = g[1] } end
   end
-  local items = ns.DB.Search(text)
-  for i = 1, math.min(#items, MAX_ROWS - #out) do
+  local room = MAX_ROWS - #out
+  local items = room > 0 and ns.DB.Search(text, nil, nil, room) or {}
+  for i = 1, math.min(#items, room) do
     local e = items[i]
     local price = ns.Market.Price(e.id)
     out[#out + 1] = { kind = "item", label = e.name .. (price and ("  |cff93a39d· " .. ns.Money(price) .. "|r") or ""), id = e.id, name = e.name }

@@ -49,18 +49,20 @@ end
 function A.VendorCandidates()
   local list, total = {}, 0
   if not (C_Container and C_Container.GetContainerItemInfo) then return list, 0 end
+  local needs = (ns.Shop and ns.Shop.Needs and ns.Safe(ns.Shop.Needs)) or {} -- Craft-Liste: nie verkaufen
   for bag = 0, bagSlots() do
     for slot = 1, C_Container.GetContainerNumSlots(bag) or 0 do
       local info = C_Container.GetContainerItemInfo(bag, slot)
-      if info and info.itemID and not info.isLocked and not info.hasNoValue and (info.quality or 1) >= 1 then
+      if info and info.itemID and not info.isLocked and not info.hasNoValue and (info.quality or 1) >= 1 and not needs[info.itemID] then
         local db = ns.DB and ns.DB.Get(info.itemID)
         local vendor = M.VendorSell(info.itemID)
         local ah = M.Price(info.itemID)
         -- AH lohnt nur, wenn nach AH-Gebühr und Einstellgebühr-Risiko mehr übrig bleibt als beim Händler
         local ahNet = ah and M.NetAfterDeposit(info.itemID, M.ListSize(info.itemID, info.stackCount), ah)
         -- gekaufte Händler-Schnäppchen (Schnäppchen-Scanner) gehen immer mit, solange das AH nicht mehr bringt
-        local snipe = ns.Snipe and ns.Snipe.IsVendorSnipe(info.itemID) and vendor > 0 and (not ahNet or ahNet <= vendor)
-        if snipe or (db and SAFE_CLASSES[db.class] and vendor > 0 and ah and ahNet <= vendor) then
+        local snipe = not info.isBound and ns.Snipe and ns.Snipe.IsVendorSnipe(info.itemID) and vendor > 0 and (not ahNet or ahNet <= vendor)
+        local safe = db and SAFE_CLASSES[db.class] and not (db.class == 15 and db.sub == 1) -- keine Klassen-Reagenzien
+        if snipe or (safe and vendor > 0 and ah and ahNet <= vendor) then
           local value = vendor * (info.stackCount or 1)
           list[#list + 1] = { bag = bag, slot = slot, id = info.itemID, count = info.stackCount or 1, value = value }
           total = total + value
@@ -131,20 +133,23 @@ end
 -- Beute-Radar: vergleicht den Tascheninhalt und bewertet jede neue Beute
 ----------------------------------------------------------------------------
 A.session = { value = 0, items = 0, log = {} }
-local snapshot
+local snapshot, equipChanged
+ns.On("PLAYER_EQUIPMENT_CHANGED", function() equipChanged = true end) -- An-/Ablegen ist keine Beute
 local blocked = { merchant = false, mail = false, trade = false, bank = false, ah = false }
 
 local function readBags()
-  local counts = {}
+  local counts, bound = {}, {}
   if not (C_Container and C_Container.GetContainerItemInfo) then return counts end
   for bag = 0, bagSlots() do
     for slot = 1, C_Container.GetContainerNumSlots(bag) or 0 do
       local info = C_Container.GetContainerItemInfo(bag, slot)
       if info and info.itemID then
         counts[info.itemID] = (counts[info.itemID] or 0) + (info.stackCount or 1)
+        if info.isBound then bound[info.itemID] = true end
       end
     end
   end
+  counts.__bound = bound
   return counts
 end
 
@@ -155,7 +160,10 @@ end
 
 local function onBagsChanged()
   local now = readBags()
-  if not snapshot or isBlocked() then
+  local bound = now.__bound or {}
+  now.__bound = nil
+  if not snapshot or isBlocked() or equipChanged then
+    equipChanged = false
     snapshot = now
     return
   end
@@ -163,6 +171,7 @@ local function onBagsChanged()
     local gained = count - (snapshot[id] or 0)
     if gained > 0 then
       local channel, unit = M.BestSale(id)
+      if bound[id] then channel, unit = "HAENDLER", M.VendorSell(id) end -- gebunden: nie AH
       local value = (unit or 0) * gained
       ns.Fire("LOOT_GAINED", id, gained)
       -- Hergestellte Items sind keine Beute (nur die Craft-Warteschlange zählt sie)
@@ -192,13 +201,13 @@ end
 ns.On("BAG_UPDATE_DELAYED", function() ns.Debounce("radar", 0.3, onBagsChanged) end)
 ns.Listen("LOGIN", function()
   A.session.start = time()
-  C_Timer.After(3, function() snapshot = readBags() end)
+  C_Timer.After(3, function() snapshot = readBags() snapshot.__bound = nil end)
 end)
 
 local function block(key, value)
   return function()
     blocked[key] = value
-    if not value then snapshot = readBags() end -- Einkäufe/Post/Handel nicht als Beute zählen
+    if not value then snapshot = readBags() snapshot.__bound = nil end -- Einkäufe/Post/Handel nicht als Beute zählen
   end
 end
 ns.On("MERCHANT_SHOW", block("merchant", true))

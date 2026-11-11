@@ -85,13 +85,13 @@ ns.ZONE_FACTION = {
 ns.SPOTS = {
   ["1-10"] = {
     herb = {
-      { map = 1411, x = 42.6, y = 47.6, n = 37, names = { "Silberblatt", "Friedensblume", "Erdwurzel" }, items = { 765, 785, 2447, 2449 } },
       { map = 1412, x = 58.4, y = 62.5, n = 36, names = { "Silberblatt", "Friedensblume", "Erdwurzel" }, items = { 765, 2447, 2449 } },
+      { map = 1411, x = 42.4, y = 47.6, n = 36, names = { "Silberblatt", "Friedensblume", "Erdwurzel" }, items = { 765, 785, 2447, 2449 } },
       { map = 1426, x = 70.1, y = 54.1, n = 34, names = { "Erdwurzel", "Silberblatt", "Friedensblume" }, items = { 765, 2447, 2449 } },
-      { map = 1411, x = 44.5, y = 16.8, n = 33, names = { "Silberblatt", "Friedensblume", "Erdwurzel" }, items = { 765, 785, 2447, 2449 } },
+      { map = 1411, x = 54.1, y = 14.7, n = 32, names = { "Silberblatt", "Friedensblume", "Erdwurzel" }, items = { 765, 785, 2447, 2449 } },
     },
     ore = {
-      { map = 1411, x = 52.7, y = 21.8, n = 33, names = { "Kupfervorkommen" }, items = { 2770 } },
+      { map = 1411, x = 52.7, y = 22.0, n = 31, names = { "Kupfervorkommen" }, items = { 2770 } },
       { map = 1411, x = 40.2, y = 28.1, n = 29, names = { "Kupfervorkommen" }, items = { 2770 } },
       { map = 1429, x = 40.9, y = 79.0, n = 25, names = { "Kupfervorkommen" }, items = { 2770 } },
       { map = 1426, x = 70.9, y = 53.5, n = 23, names = { "Kupfervorkommen" }, items = { 2770 } },
@@ -111,16 +111,16 @@ ns.SPOTS = {
   },
   ["10-20"] = {
     herb = {
-      { map = 1413, x = 48.2, y = 38.4, n = 133, names = { "Maguskönigskraut", "Silberblatt", "Beulengras" }, items = { 765, 785, 2447, 2450, 2453, 3356 } },
-      { map = 1413, x = 63.9, y = 45.5, n = 105, names = { "Erdwurzel", "Würgetang", "Wilddornrose" }, items = { 2447, 2449, 2450, 2453, 3820 } },
-      { map = 1413, x = 44.8, y = 18.2, n = 105, names = { "Maguskönigskraut", "Erdwurzel", "Silberblatt" }, items = { 765, 785, 2447, 2449, 2450, 2453 } },
-      { map = 1413, x = 45.3, y = 73.1, n = 90, names = { "Beulengras", "Maguskönigskraut", "Königsblut" }, items = { 785, 2447, 2449, 2450, 2453, 3355, 3356, 3369 } },
+      { map = 1413, x = 46.1, y = 37.8, n = 124, names = { "Maguskönigskraut", "Silberblatt", "Beulengras" }, items = { 765, 785, 2447, 2449, 2450, 2453, 3356 } },
+      { map = 1413, x = 62.4, y = 45.3, n = 117, names = { "Erdwurzel", "Würgetang", "Wilddornrose" }, items = { 765, 785, 2447, 2449, 2450, 2453, 3355, 3356, 3820 } },
+      { map = 1413, x = 44.8, y = 18.2, n = 103, names = { "Maguskönigskraut", "Erdwurzel", "Wilddornrose" }, items = { 765, 785, 2447, 2449, 2450, 2453 } },
+      { map = 1413, x = 45.3, y = 73.0, n = 88, names = { "Beulengras", "Maguskönigskraut", "Königsblut" }, items = { 785, 2447, 2449, 2450, 2453, 3355, 3356, 3369 } },
     },
     ore = {
-      { map = 1436, x = 45.1, y = 20.5, n = 174, names = { "Kupfervorkommen", "Zinnvorkommen", "Silbervorkommen" }, items = { 2770, 2771, 2775 } },
-      { map = 1436, x = 41.8, y = 78.5, n = 99, names = { "Kupfervorkommen", "Zinnvorkommen", "Silbervorkommen" }, items = { 2770, 2771, 2775 } },
-      { map = 1436, x = 30.5, y = 46.7, n = 81, names = { "Kupfervorkommen", "Zinnvorkommen", "Silbervorkommen" }, items = { 2770, 2771, 2775 } },
-      { map = 1432, x = 36.5, y = 89.5, n = 70, names = { "Silbervorkommen", "Goldvorkommen", "Eisenvorkommen" }, items = { 2770, 2771, 2772, 2775, 2776, 3858, 7911 } },
+      { map = 1436, x = 45.1, y = 20.5, n = 58, names = { "Kupfervorkommen", "Zinnvorkommen", "Silbervorkommen" }, items = { 2770, 2771, 2775 } },
+      { map = 1436, x = 41.8, y = 78.5, n = 33, names = { "Kupfervorkommen", "Zinnvorkommen", "Silbervorkommen" }, items = { 2770, 2771, 2775 } },
+      { map = 1411, x = 52.7, y = 22.0, n = 31, names = { "Kupfervorkommen" }, items = { 2770 } },
+      { map = 1411, x = 40.2, y = 28.1, n = 29, names = { "Kupfervorkommen" }, items = { 2770 } },
     },
     leather = {
       { map = 1413, x = 50.2, y = 42.3, n = 83, names = { "Oasenschnappkiefer", "Fleischreißerhyäne", "Störrischer Ebenenschreiter" }, items = {  } },
@@ -137,16 +137,16 @@ ns.SPOTS = {
   },
   ["20-30"] = {
     herb = {
-      { map = 1437, x = 43.1, y = 28.7, n = 50, names = { "Lebenswurz", "Grabmoos", "Wilddornrose" }, items = { 785, 2450, 2453, 3356, 3357, 3369 } },
+      { map = 1437, x = 43.1, y = 28.9, n = 47, names = { "Lebenswurz", "Grabmoos", "Wilddornrose" }, items = { 785, 2450, 2453, 3356, 3357, 3369 } },
       { map = 1442, x = 78.8, y = 88.9, n = 44, names = { "Beulengras", "Wildstahlblume", "Maguskönigskraut" }, items = { 785, 2450, 2453, 3355, 3356 } },
       { map = 1440, x = 79.5, y = 49.2, n = 39, names = { "Würgetang", "Beulengras", "Wilddornrose" }, items = { 785, 2450, 2453, 3355, 3357, 3820, 8831 } },
       { map = 1440, x = 17.3, y = 30.4, n = 37, names = { "Maguskönigskraut", "Beulengras", "Würgetang" }, items = { 785, 2450, 2453, 3356, 3820, 8831 } },
     },
     ore = {
-      { map = 1437, x = 68.2, y = 32.5, n = 143, names = { "Silbervorkommen", "Goldvorkommen", "Eisenvorkommen" }, items = { 2770, 2771, 2772, 2775, 2776 } },
-      { map = 1431, x = 37.0, y = 78.6, n = 105, names = { "Kupfervorkommen", "Zinnvorkommen", "Silbervorkommen" }, items = { 2770, 2771, 2772, 2775, 2776 } },
-      { map = 1431, x = 72.0, y = 76.5, n = 90, names = { "Kupfervorkommen", "Zinnvorkommen", "Silbervorkommen" }, items = { 2770, 2771, 2772, 2775, 2776 } },
-      { map = 1424, x = 44.2, y = 28.8, n = 79, names = { "Goldvorkommen", "Eisenvorkommen", "Mithrilablagerung" }, items = { 2770, 2771, 2772, 2775, 2776, 3858, 7911 } },
+      { map = 1437, x = 49.2, y = 61.8, n = 32, names = { "Zinnvorkommen", "Silbervorkommen", "Kupfervorkommen" }, items = { 2770, 2771, 2772, 2775 } },
+      { map = 1437, x = 68.2, y = 32.4, n = 29, names = { "Silbervorkommen", "Eisenvorkommen", "Kupfervorkommen" }, items = { 2770, 2771, 2772, 2775 } },
+      { map = 1441, x = 28.5, y = 51.3, n = 26, names = { "Eisenvorkommen", "Kupfervorkommen", "Zinnvorkommen" }, items = { 2770, 2771, 2772 } },
+      { map = 1441, x = 44.6, y = 38.0, n = 26, names = { "Eisenvorkommen", "Zinnvorkommen", "Kupfervorkommen" }, items = { 2770, 2771, 2772, 2775 } },
     },
     leather = {
       { map = 1434, x = 37.9, y = 11.2, n = 59, names = { "Junger Panther", "Junger Schlingendorntiger", "Flusskrokilisk" }, items = {  } },
@@ -168,16 +168,16 @@ ns.SPOTS = {
   },
   ["30-40"] = {
     herb = {
-      { map = 1434, x = 43.4, y = 34.7, n = 125, names = { "Golddorn", "Khadgars Schnurrbart", "Königsblut" }, items = { 3356, 3357, 3358, 3821, 8831 } },
-      { map = 1434, x = 34.6, y = 17.9, n = 85, names = { "Khadgars Schnurrbart", "Golddorn", "Lebenswurz" }, items = { 3355, 3356, 3357, 3358, 3818, 3821, 8831 } },
-      { map = 1434, x = 30.4, y = 62.4, n = 71, names = { "Wildstahlblume", "Golddorn", "Blassblatt" }, items = { 3355, 3356, 3357, 3358, 3818, 3820, 3821, 8831 } },
+      { map = 1434, x = 43.5, y = 34.7, n = 121, names = { "Golddorn", "Khadgars Schnurrbart", "Königsblut" }, items = { 3356, 3357, 3358, 3821, 8831 } },
+      { map = 1434, x = 34.5, y = 18.0, n = 82, names = { "Khadgars Schnurrbart", "Golddorn", "Lebenswurz" }, items = { 3355, 3356, 3357, 3358, 3818, 3821, 8831 } },
+      { map = 1434, x = 30.5, y = 62.5, n = 69, names = { "Golddorn", "Wildstahlblume", "Blassblatt" }, items = { 3355, 3356, 3357, 3358, 3818, 3820, 3821, 8831 } },
       { map = 1417, x = 53.5, y = 34.5, n = 49, names = { "Khadgars Schnurrbart", "Wildstahlblume", "Golddorn" }, items = { 2453, 3355, 3356, 3358, 3821 } },
     },
     ore = {
-      { map = 1417, x = 68.0, y = 78.1, n = 228, names = { "Zinnvorkommen", "Silbervorkommen", "Goldvorkommen" }, items = { 2771, 2772, 2775, 2776, 3858, 7911 } },
-      { map = 1416, x = 50.8, y = 43.2, n = 220, names = { "Silbervorkommen", "Goldvorkommen", "Eisenvorkommen" }, items = { 2772, 2775, 2776, 3858, 7911 } },
-      { map = 1417, x = 82.8, y = 33.0, n = 182, names = { "Silbervorkommen", "Goldvorkommen", "Mithrilablagerung" }, items = { 2771, 2772, 2775, 2776, 3858, 7911 } },
-      { map = 1417, x = 33.4, y = 44.7, n = 168, names = { "Zinnvorkommen", "Silbervorkommen", "Goldvorkommen" }, items = { 2771, 2772, 2775, 2776, 3858, 7911 } },
+      { map = 1416, x = 51.5, y = 46.1, n = 41, names = { "Silbervorkommen", "Goldvorkommen", "Eisenvorkommen" }, items = { 2772, 2775, 2776, 3858 } },
+      { map = 1417, x = 83.3, y = 32.7, n = 40, names = { "Silbervorkommen", "Goldvorkommen", "Mithrilablagerung" }, items = { 2771, 2772, 2775, 2776, 3858 } },
+      { map = 1417, x = 68.0, y = 78.2, n = 37, names = { "Zinnvorkommen", "Silbervorkommen", "Goldvorkommen" }, items = { 2771, 2772, 2775, 2776, 3858 } },
+      { map = 1434, x = 42.1, y = 46.8, n = 31, names = { "Zinnvorkommen", "Silbervorkommen", "Goldvorkommen" }, items = { 2771, 2772, 2775, 2776, 3858 } },
     },
     leather = {
       { map = 1434, x = 37.9, y = 14.2, n = 91, names = { "Junger Panther", "Junger Schlingendorntiger", "Flusskrokilisk" }, items = {  } },
@@ -200,16 +200,16 @@ ns.SPOTS = {
   },
   ["40-50"] = {
     herb = {
-      { map = 1434, x = 43.4, y = 34.7, n = 125, names = { "Golddorn", "Khadgars Schnurrbart", "Königsblut" }, items = { 3356, 3357, 3358, 3821, 8831 } },
-      { map = 1434, x = 34.6, y = 17.9, n = 85, names = { "Khadgars Schnurrbart", "Golddorn", "Lebenswurz" }, items = { 3355, 3356, 3357, 3358, 3818, 3821, 8831 } },
-      { map = 1434, x = 30.4, y = 62.4, n = 71, names = { "Wildstahlblume", "Golddorn", "Blassblatt" }, items = { 3355, 3356, 3357, 3358, 3818, 3820, 3821, 8831 } },
+      { map = 1434, x = 43.5, y = 34.7, n = 121, names = { "Golddorn", "Khadgars Schnurrbart", "Königsblut" }, items = { 3356, 3357, 3358, 3821, 8831 } },
+      { map = 1434, x = 34.5, y = 18.0, n = 82, names = { "Khadgars Schnurrbart", "Golddorn", "Lebenswurz" }, items = { 3355, 3356, 3357, 3358, 3818, 3821, 8831 } },
+      { map = 1434, x = 30.5, y = 62.5, n = 69, names = { "Golddorn", "Wildstahlblume", "Blassblatt" }, items = { 3355, 3356, 3357, 3358, 3818, 3820, 3821, 8831 } },
       { map = 1447, x = 34.5, y = 50.1, n = 60, names = { "Lila Lotus", "Goldener Sansam", "Traumblatt" }, items = { 3358, 8831, 13463, 13464, 13465 } },
     },
     ore = {
-      { map = 1434, x = 42.1, y = 46.8, n = 155, names = { "Zinnvorkommen", "Silbervorkommen", "Goldvorkommen" }, items = { 2771, 2772, 2775, 2776, 3858 } },
-      { map = 1434, x = 49.8, y = 26.9, n = 130, names = { "Zinnvorkommen", "Silbervorkommen", "Goldvorkommen" }, items = { 2771, 2772, 2775, 2776, 3858 } },
-      { map = 1434, x = 30.3, y = 64.7, n = 120, names = { "Zinnvorkommen", "Silbervorkommen", "Goldvorkommen" }, items = { 2771, 2772, 2775, 2776, 3858 } },
-      { map = 1434, x = 46.6, y = 9.0, n = 120, names = { "Zinnvorkommen", "Silbervorkommen", "Goldvorkommen" }, items = { 2771, 2772, 2775, 2776, 3858 } },
+      { map = 1428, x = 80.2, y = 44.6, n = 45, names = { "Goldvorkommen", "Mithrilablagerung", "Kleines Thoriumvorkommen" }, items = { 2772, 2776, 3858, 7911, 10620 } },
+      { map = 1434, x = 42.1, y = 46.8, n = 31, names = { "Silbervorkommen", "Goldvorkommen", "Eisenvorkommen" }, items = { 2772, 2775, 2776, 3858 } },
+      { map = 1434, x = 49.8, y = 26.9, n = 26, names = { "Silbervorkommen", "Goldvorkommen", "Eisenvorkommen" }, items = { 2772, 2775, 2776, 3858 } },
+      { map = 1444, x = 52.5, y = 59.1, n = 25, names = { "Eisenvorkommen", "Mithrilablagerung", "Kleines Thoriumvorkommen" }, items = { 2772, 2776, 3858, 10620 } },
     },
     leather = {
       { map = 1446, x = 49.5, y = 38.1, n = 90, names = { "Skorpidschwanzpeitscher", "Glashautbasilisk", "Eiterpfotenhyäne" }, items = {  } },
@@ -238,10 +238,10 @@ ns.SPOTS = {
       { map = 1448, x = 53.7, y = 18.8, n = 42, names = { "Traumblatt", "Pestblüte", "Goldener Sansam" }, items = { 8836, 8838, 8846, 13463, 13464, 13466 } },
     },
     ore = {
-      { map = 1428, x = 79.9, y = 42.6, n = 228, names = { "Goldvorkommen", "Mithrilablagerung", "Kleines Thoriumvorkommen" }, items = { 2772, 2776, 3858, 7911, 10620 } },
-      { map = 1428, x = 43.7, y = 39.5, n = 99, names = { "Kleines Thoriumvorkommen", "Goldvorkommen", "Mithrilablagerung" }, items = { 2776, 3858, 7911, 10620 } },
-      { map = 1428, x = 66.5, y = 25.8, n = 80, names = { "Goldvorkommen", "Mithrilablagerung", "Echtsilberablagerung" }, items = { 2772, 2775, 2776, 3858, 7911, 10620 } },
-      { map = 1428, x = 38.5, y = 63.1, n = 80, names = { "Kleines Thoriumvorkommen", "Goldvorkommen", "Mithrilablagerung" }, items = { 2776, 3858, 7911, 10620 } },
+      { map = 1428, x = 80.2, y = 44.6, n = 45, names = { "Goldvorkommen", "Mithrilablagerung", "Kleines Thoriumvorkommen" }, items = { 2772, 2776, 3858, 7911, 10620 } },
+      { map = 1428, x = 43.7, y = 39.5, n = 20, names = { "Kleines Thoriumvorkommen", "Goldvorkommen", "Mithrilablagerung" }, items = { 2776, 3858, 7911, 10620 } },
+      { map = 1428, x = 66.6, y = 35.2, n = 18, names = { "Kleines Thoriumvorkommen", "Goldvorkommen", "Mithrilablagerung" }, items = { 2776, 3858, 7911, 10620 } },
+      { map = 1452, x = 54.0, y = 44.9, n = 18, names = { "Reiches Thoriumvorkommen", "Kleines Thoriumvorkommen", "Echtsilberablagerung" }, items = { 7911, 10620 } },
     },
     leather = {
       { map = 1452, x = 53.5, y = 14.5, n = 127, names = { "Frostsäblerpirscherin", "Frostsäblerjägerin", "Frostsäblerjunges" }, items = {  } },
@@ -375,6 +375,9 @@ ns.SKIN_SPOTS = {
     { map = 1452, x = 66.3, y = 28.6, n = 7, lo = 55, hi = 57, names = { "Eiswindschimäre" } },
   },
   [8167] = {
+    { map = 1445, x = 39.0, y = 42.0, n = 30, lo = 37, hi = 38, names = { "Staubsuhlerschnapper" } },
+    { map = 1441, x = 79.5, y = 56.2, n = 26, lo = 30, hi = 35, names = { "Spiegelpanzerschildkröte", "Spiegelpanzerschnapper" } },
+    { map = 1425, x = 78.0, y = 66.3, n = 23, lo = 49, hi = 50, names = { "Salzwasserschnappkiefer" } },
   },
   [8154] = {
     { map = 1446, x = 50.7, y = 38.0, n = 44, lo = 40, hi = 44, names = { "Skorpidschwanzpeitscher", "Skorpidjäger" } },

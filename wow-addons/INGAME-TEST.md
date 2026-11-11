@@ -1,4 +1,4 @@
-# Ingame-Test – Tiry's Zentrale 6.0.0
+# Ingame-Test – Tiry's Zentrale 6.2.0
 
 Zum Abhaken im Spiel. Vorher einmal eingeben:
 ```
@@ -44,6 +44,29 @@ Zeigt dein Client keine Fehlerfenster: Tiry's Zentrale schreibt eigene Fehler ro
 - [ ] Leuchtpunkte farbig (grün/türkis/blau/orange), Trennlinien als Neon-Verlauf, Preis-Schieber mit farbigem Punkt
 - [ ] Nach ein paar Scan-Tagen: Marktwert, Durchschnitt, Min · Max, Urteil günstig/normal/teuer
 - [ ] Werden Punkte oder Linien weiß statt farbig angezeigt: Screenshot schicken (dann färbt dein Client Inline-Grafiken nicht)
+
+## Neu in 6.2
+**Sparziel (Startseite)**
+- [ ] Unter Stufe 40 steht „Reiten lernen – Vorschlag“ mit 100 Gold; Balken = Gold in der Tasche + Post + halber Auktionswert
+- [ ] „+“/„−“ ändern das Ziel in 10/25/100-Gold-Schritten, „Anderes Ziel“ schaltet durch, „×“ blendet es aus (Klick auf die Leiste holt es zurück)
+- [ ] „Schneller ans Ziel“: Klick auf eine Pille öffnet die richtige Seite; Beträge passen ungefähr zum Taschen-Check bzw. zur Craft-Liste
+- [ ] Nach 1–2 Spieltagen erscheint „ca. N Spieltage · Ø X/Tag“
+- [ ] Ziel klein einstellen (z. B. 1 Gold unter deinem Gold): Chat „Sparziel erreicht“ + Ton, nur einmal
+- [ ] **Am Reitlehrer den echten Preis notieren** (Guides sagen ca. 100 Gold): ______
+
+**Unterwegs-Gold**
+- [ ] Startseite zeigt „Unterwegs-Gold: <dein Gebiet>“ mit deinen Sammel-Materialien und Preisen; „Hinführen“ setzt einen Kartenpunkt
+- [ ] Mit LevelPilot: „Als Nächstes auf deiner Route“ nennt die nächsten Gebiete deiner Route
+- [ ] Gebiet wechseln: einmal Chat-Hinweis „Unterwegs-Gold in …“ (nicht bei jedem Wechsel erneut); Einstellungen → „Unterwegs-Gold im Chat“ schaltet ihn ab
+- [ ] In Höhlen/Unterkarten zeigt die Karte das übergeordnete Gebiet
+
+**Rezepte, Stationen, Hotfixes**
+- [ ] Craft-Planer / „Was lernen?“: ein Leder-Rezept mit Gerbrahmen zeigt „braucht Gerbrahmen (Lager-Station am Lagerfeuer …)“
+- [ ] Seelengebundenes Rezept (z. B. Rezept: Schattenöl): „Rezept nur selbst holen – beim Händler“, Klick sucht NICHT im AH
+- [ ] Einstellungen → „Einstellgebühr je Angebot“ steht auf **1 Kupfer**
+- [ ] Bei offenem AH: Taschen-Item einstellen – Blizzards Anzahlung notieren (für die Schätzung ohne offenes AH): Item ______ Anzahlung ______
+- [ ] Händler mit Rezepten: kein Flip-Hinweis für seelengebundene Rezepte
+- [ ] `/tz KÜRSCHNER` (Großbuchstaben) öffnet die Kürschner-Seite
 
 ## Fenster
 - [ ] Unten rechts am Griff ziehen → Fenster wird größer oder kleiner
@@ -113,6 +136,9 @@ Alles oben ist im Forever-Nachbau getestet, aber nicht im echten Client. Besonde
 - Bankfächer-IDs
 - Berufe über `GetSkillLineInfoByID`
 - echte Speicherwerte
+- Reitkosten (Guide-Angaben, nicht von Blizzard bestätigt) und die Anzahlungs-Formel ohne offenes AH (5/20/60 % vom Händlerpreis, unbestätigt)
+- Ob die Stationen-Hinweise im Spiel genau den Fehlermeldungen des Berufsfensters entsprechen
+- `C_Map.GetBestMapForUnit` in Höhlen/Instanzen (Unterwegs-Gold)
 
 ---
 

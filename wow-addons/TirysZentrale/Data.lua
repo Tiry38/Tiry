@@ -22,7 +22,7 @@ ns.METHODS = {
       "Beim Händler auf den Müll-Knopf \"Schrott verkaufen\" klicken – alles Graue ist sofort weg.",
       "Öffne Tiry's Zentrale > Scanner > Taschen-Check: jedes Item bekommt einen Tipp \"Ins AH\" oder \"Händler\".",
       "Unbekannte neue Items (z. B. grüne Ausrüstung) vor dem Verkaufen im AH nachschauen.",
-      "Kleinkram, der nur ein paar Kupfer wert ist, NICHT ins AH: Die Mindestgebühr liegt aktuell bei 1 Silber pro Auktion.",
+      "Kleinkram, der nur ein paar Kupfer wert ist, bringt im AH kaum mehr als beim Händler: Die Anzahlung ist seit dem 10.11. zwar nur noch 1 Kupfer, aber 5 % AH-Gebühr und der Weg zum AH bleiben. Der Taschen-Check rechnet das für dich aus.",
     },
     tips = {
       "Taschen, die du verkaufen willst, nicht anlegen – sie werden nicht mehr automatisch ausgerüstet und bleiben so verkaufbar.",
@@ -38,14 +38,14 @@ ns.METHODS = {
     steps = {
       "Leinenstoff fällt bei niedrigen Humanoiden (etwa Level 5–15), Wollstoff etwa ab 15, Seidenstoff etwa ab 23.",
       "Beim Questen in Gebieten mit vielen Humanoiden jeden Gegner looten – nichts liegen lassen.",
-      "Volle 20er-Stapel ins AH stellen, nie einzelne Stücke (wegen der Mindestgebühr).",
+      "Volle 20er-Stapel ins AH stellen statt einzelner Stücke: Käufer suchen Stapel, und du hast weniger Klicks beim Einstellen.",
       "Liegt der AH-Preis unter dem Händlerpreis, verkauf ihn beim Händler – Tiry's Zentrale zeigt dir beides.",
     },
     where = {
       Alliance = "Beispiele: Defias in Westfall, Gnolle im Rotkammgebirge (Classic-Erfahrung).",
       Horde = "Beispiele: Stacheleber und Kentauren im Brachland (Classic-Erfahrung).",
     },
-    tips = { "Forever-Bonus: Die neuen \"Waylaid Crates\" verlangen u. a. 40 Leinenstoff bzw. Leinenstoffballen – das erhöht die Nachfrage." },
+    tips = { "Forever-Bonus: Die neuen \"Waylaid Crates\" verlangen u. a. 40 Leinenstoff oder 20 Leinenstoffballen – das erhöht die Nachfrage (Method.gg, 03.11.)." },
   },
   {
     key = "skinning", cat = "gather", farm = "leather", minLevel = 1, prof = P.SKINNING, effort = 1, source = "forever", icon = "pin",
@@ -61,7 +61,7 @@ ns.METHODS = {
     },
     tips = {
       "Perfektes Paar: Kürschnerei + Kräuterkunde oder Bergbau – zwei Sammelberufe = doppelte Beute.",
-      "Lederverarbeitung: Für \"Geschmeidiger schwerer Balg\" reicht seit dem Hotfix vom 06.11. Skill 125 (vorher 140). Ob sich das Gerben lohnt, zeigt die Rezepte-Seite – in der Startwoche war die Marge knapp bis negativ.",
+      "Lederverarbeitung: Den Gerbrahmen (Lager-Station am Lagerfeuer) kannst du seit dem Hotfix vom 06.11. schon mit Skill 125 herstellen (vorher 140). 48 Leder-Rezepte brauchen ihn – ob sich das Gerben lohnt, zeigt die Rezepte-Seite.",
       "Jäger und Druiden töten ohnehin viele Tiere – ideale Kürschner.",
     },
   },
@@ -74,7 +74,7 @@ ns.METHODS = {
       "Kräuterkunde lernen, dann \"Kräutersuche\" aktivieren: Kräuter erscheinen als gelbe Punkte auf der Minikarte.",
       "Friedensblume und Silberblatt gleich am Anfang, später Erdwurzel, Maguskönigskraut, Wilddornrose, Beulengras.",
       "Neu in Forever: Aus Kräutern von Erdwurzel bis Königsblut kann \"Gekräuselte Flechte\" fallen – selten und gefragt.",
-      "Kräuter im 20er-Stapel ins AH. Tipp: In Forever läuft die Kräutersuche gleichzeitig mit der Jäger-Fährtensuche.",
+      "Kräuter im 20er-Stapel ins AH. Tipp: In Forever läuft die Kräutersuche gleichzeitig mit der Jäger-Fährtensuche – aber nicht zusammen mit der Mineraliensuche.",
     },
     tips = {
       "Tauren pflücken dank \"Cultivation\" ein Kraut doppelt – starker Vorteil.",
@@ -171,7 +171,7 @@ ns.METHODS = {
   {
     key = "flips", cat = "trade", minLevel = 1, effort = 1, source = "forever", icon = "scan",
     title = "Händler-Flips – kaufen und teurer verkaufen",
-    summary = "Manche Händlerware (vor allem Rezepte mit begrenztem Vorrat) ist im AH viel mehr wert. Tiry's Zentrale findet sie automatisch.",
+    summary = "Manche Händlerware (z. B. Rezepte mit begrenztem Vorrat) ist im AH viel mehr wert. Viele Rezepte sind in Forever aber seelengebunden – Tiry's Zentrale zeigt nur handelbare Flips.",
     steps = {
       "Auctionator einmal im AH scannen lassen (Reiter \"Auctionator\" > \"Scannen\").",
       "Danach jeden Händler ansprechen, an dem du vorbeikommst – Tiry's Zentrale meldet Flip-Chancen im Chat.",
@@ -184,12 +184,12 @@ ns.METHODS = {
     key = "cooking", cat = "craft", minLevel = 5, prof = P.COOKING, effort = 2, source = "forever", icon = "flask",
     items = { 2672, 769, 2673, 3173, 1015, 2924 },
     title = "Kochen – Essen mit Erfahrungs-Bonus",
-    summary = "In Forever gibt jedes gekochte Essen mit Buff +5 % Erfahrung durch Kills. Levelnde Spieler wollen das.",
+    summary = "In Forever geben die meisten gekochten Essen mit Buff +5 % Erfahrung durch Kills. Levelnde Spieler wollen das.",
     steps = {
       "Kochkunst lernen (Nebenberuf – zählt nicht zu deinen zwei Hauptberufen).",
       "Fleisch beim Questen sammeln, am Lagerfeuer kochen.",
       "Prüf in \"Rezepte\" (nach einmal Berufsfenster öffnen), welches Essen über den Fleischkosten verkauft wird.",
-      "Bonus: Ab Kochen-Skill 20 schaltest du Camping-Features frei (Lagerfeuer-Buffs für die Gruppe).",
+      "Bonus: Schon ab Kochen-Skill 1 baust du ein \"Einfaches Lagerfeuer\" (1 Einfaches Holz) – Lager-Buffs für die Gruppe, und Stationen wie Gerbrahmen oder Spinnrad stellt man daneben auf.",
     },
     tips = { "Dass sich XP-Essen gut verkauft, ist eine Ableitung aus dem neuen Buff – die Live-Preise zeigen, ob es auf deinem Server stimmt." },
   },
@@ -223,7 +223,7 @@ ns.METHODS = {
     key = "firstaid", cat = "craft", minLevel = 5, prof = P.FIRST_AID, effort = 1, source = "forever", icon = "flask",
     items = { 1251, 3530, 118, 2678, 2447 },
     title = "Erste Hilfe – jetzt mit Heiltränken",
-    summary = "Neu in Forever: Heiltränke gehören jetzt zur Ersten Hilfe (nicht mehr Alchemie). Schwacher Heiltrank = Milde Gewürze + Friedensblume.",
+    summary = "Neu in Forever: Heiltränke gehören jetzt zur Ersten Hilfe (nicht mehr Alchemie). Schwacher Heiltrank = Leere Phiole + Milde Gewürze + Friedensblume.",
     steps = {
       "Erste Hilfe lernen (Nebenberuf).",
       "Milde Gewürze beim Händler kaufen, Friedensblumen sammeln oder kaufen.",
@@ -284,12 +284,6 @@ ns.METHODS = {
   },
 }
 
--- Sparziele (für Motivation auf der Startseite)
-ns.GOALS = {
-  { level = 40, text = "Reiten lernen ab Level 40: 100 Gold (inklusive erstem Reittier)." },
-  { level = 60, text = "Alle Klassen-Fähigkeiten von 1 bis 60 kosten zusammen etwa 206 Gold." },
-}
-
 -- AH-Schule (für Dummies)
 ns.BASICS = {
   {
@@ -314,7 +308,7 @@ ns.BASICS = {
     title = "3. Die goldenen Regeln",
     lines = {
       "Nie unter Händlerpreis verkaufen – dann lieber direkt zum Händler.",
-      "Anzahlung beachten: Jede Auktion kostet aktuell mindestens 1 Silber. Bei Verkauf kommt sie zurück, bei Ablauf oder Abbruch ist sie weg. Kleinkram lohnt sich darum kaum.",
+      "Anzahlung beachten: Jede Auktion kostet mindestens 1 Kupfer (seit 10.11.2026, vorher 1 Silber), teure Ware mehr. Bei Verkauf kommt sie zurück, bei Ablauf oder Abbruch ist sie weg.",
       "Das AH behält beim Verkauf einen Anteil ein. Tiry's Zentrale rechnet standardmäßig mit 5 % (Classic-Wert) – änderbar in den Einstellungen.",
       "Einzel-Items (Ausrüstung) zu ganzen Silberbeträgen einstellen: Krumme Kupferbeträge lösen oft den \"Internen Auktionsfehler\" aus.",
       "Nicht panisch unterbieten: Wer 50 % billiger anbietet, verschenkt Gold. Wenige Kupfer darunter reichen.",

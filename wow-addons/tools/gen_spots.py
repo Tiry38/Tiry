@@ -6,14 +6,20 @@ Quellen (nur als Daten gelesen, kein Code ausgeführt):
   data/Forever/foreverObjectDB.lua, foreverNpcDB.lua, l10n/*/deDE), Lizenz GPL-3.0
 - Kartennamen (deutsch): DB2 UiMap des Forever-Builds 1.60.1.70862 (wago.tools)
 
-Aufruf: python3 gen_spots.py <spawns.tsv> <UiMap.csv> <questiedb-ordner>
-spawns.tsv wird mit dem Parser aus parse.py erzeugt (siehe README).
+Aufruf: python3 gen_spots.py <spawns.tsv> <UiMap.csv> <questiedb-ordner> [--keep-npc]
+spawns.tsv: `lua5.1 tools/export_spawns.lua <QuestieDB>/data/Forever > spawns.tsv` (Spalten: N|O, ID, Name, minLevel,
+maxLevel, Zone, x, y).
+--keep-npc: Gegner-Stellen (Leder/Stoff/Besonderes, Häut-Stufen) aus der vorhandenen Data_Spots.lua übernehmen und nur
+Kräuter/Erz und Spezial-Leder neu berechnen (QuestieDB-Gegnerdaten ändern sich oft, Level teils als 1 eingetragen).
 Methode: Fundpunkte je Zone in ein 4er-Raster, Dichte über die 3x3-Nachbarschaft, die dichtesten
 nicht überlappenden Stellen werden Wegpunkte (Mittelpunkt der Fundpunkte in der Umgebung).
+Kräuter/Erz: Ein Kartenpunkt kann mehrere Vorkommen-Arten haben (Spawn-Pool: Kupfer ODER Zinn ODER Silber) –
+er zählt nur einmal. Erze nur, wenn der Bergbau-Skill zur Stufe passt (Skill ca. 5 × Level).
 """
 import collections, csv, os, re, sys
 
 spawns_path, uimap_path, qdb = sys.argv[1], sys.argv[2], sys.argv[3]
+KEEP_NPC = "--keep-npc" in sys.argv[4:]
 here = os.path.dirname(os.path.abspath(__file__))
 out_path = os.path.normpath(os.path.join(here, "..", "TirysZentrale", "Data_Spots.lua"))
 
@@ -35,10 +41,17 @@ NODES = {
     "ore": {"Copper Vein": 2770, "Tin Vein": 2771, "Silver Vein": 2775, "Iron Deposit": 2772, "Gold Vein": 2776,
             "Mithril Deposit": 3858, "Truesilver Deposit": 7911, "Small Thorium Vein": 10620, "Rich Thorium Vein": 10620},
 }
+# Nötiger Bergbau-Skill je Erz (Classic-Werte) – Erze über ca. 5 × Level der Stufe sind dort nicht abbaubar
+ORE_SKILL = {2770: 1, 2771: 65, 2775: 75, 2772: 125, 2776: 155, 3858: 175, 7911: 230, 10620: 245}
+
+
+def ore_ok(item, band):
+    skill = ORE_SKILL.get(item, 0)
+    return skill <= band[1] * 5 and skill >= band[0] * 5 - 125
 BEAST = re.compile(r"\b(Wolf|Worg|Boar|Bear|Panther|Tiger|Lion|Lynx|Leopard|Raptor|Crocolisk|Kodo|Plainstrider|Zhevra|"
                    r"Hyena|Coyote|Goretusk|Stag|Strider|Thunder Lizard|Basilisk|Gorilla|Yeti|Prowler|Nightsaber|Frostsaber|"
                    r"Thistle Boar|Thunderhead|Mottled|Bristle|Ravager|Felstalker|Saber|Bloodsnout|Chimaera|Devilsaur|Stegodon|"
-                   r"Pterrordax|Diemetradon|Scorpid|Turtle|Snapjaw|Hippogryph|Shardtooth|Ironfur|Cougar|Wildcat|"
+                   r"Pterrordax|Diemetradon|Scorpid|Turtle|Tortoise|Snapjaw|Snapper|Hippogryph|Shardtooth|Ironfur|Cougar|Wildcat|"
                    r"Mountain Lion|Shadowhorn|Elk|Wendigo|Owlbeast|Wildkin|Grizzly)\b", re.I)
 NOT_BEAST = re.compile(r"Silithid|Quilboar|Bristleback|Razormane|Gnoll|Spirit|Ghost|Elemental", re.I)
 HUMANOID = re.compile(r"\b(Defias|Kobold|Gnoll|Murloc|Trogg|Quilboar|Razormane|Bristleback|Kolkar|Galak|Magram|Gelkis|Centaur|"
@@ -77,11 +90,12 @@ SPECIAL = {  # Item -> (Tiernamen, Mindestlevel der Tiere)
     15419: (re.compile(r"Angerclaw|Warbear", re.I), 47),
     15417: (re.compile(r"Devilsaur", re.I), 50),
     15423: (re.compile(r"Chimaera", re.I), 45),
-    8167: (re.compile(r"^(?!.*Crocolisk).*(Turtle|Snapjaw|Shellhide)", re.I), 30),
+    8167: (re.compile(r"^(?!.*(Crocolisk|Scorpashi)).*(Turtle|Tortoise|Snapjaw|Snapper|Shellhide)", re.I), 30),
     8154: (re.compile(r"Scorpid", re.I), 35),
     4461: (re.compile(r"Raptor", re.I), 25),
 }
 special = collections.defaultdict(list)
+nodes_at = collections.defaultdict(dict)  # (gruppe, band) -> {(zone, x, y): [items, namen]}
 zone_levels = collections.defaultdict(list)
 for line in open(spawns_path, encoding="utf-8"):
     f = line.rstrip("\n").split("\t")
@@ -105,7 +119,14 @@ for line in open(spawns_path, encoding="utf-8"):
                 zl = zone_level.get(zone)
                 for b in BANDS:
                     if zl is not None and b[0] - 3 <= zl < b[1] + 3:
-                        points[(group, b)].append((zone, x, y, de_obj.get(oid, name), table[name]))
+                        if group == "ore" and not ore_ok(table[name], b):
+                            continue
+                        # Spawn-Pool: gleicher Punkt, mehrere Vorkommen-Arten -> ein Punkt mit allen Arten
+                        pool = nodes_at[(group, b)].setdefault((zone, x, y), [set(), []])
+                        pool[0].add(table[name])
+                        nm = de_obj.get(oid, name)
+                        if nm not in pool[1]:
+                            pool[1].append(nm)
     else:
         if lo <= 0 or hi > 63:
             continue
@@ -128,6 +149,11 @@ for line in open(spawns_path, encoding="utf-8"):
         for b in BANDS:
             if b[0] - 1 <= hi and lo <= b[1] + 1 and (lo + hi) / 2 >= b[0] - 1:
                 points[(group, b)].append((zone, x, y, de_npc.get(oid, name), None))
+
+
+for key, pool in nodes_at.items():
+    for (zone, x, y), (its, nms) in pool.items():
+        points[key].append((zone, x, y, tuple(nms), tuple(sorted(its))))
 
 
 def hotspots(pts, limit=4):
@@ -155,8 +181,8 @@ def hotspots(pts, limit=4):
     for n, z, gx, gy, near in chosen:
         x = sum(p[1] for p in near) / len(near)
         y = sum(p[2] for p in near) / len(near)
-        names = collections.Counter(p[3] for p in near).most_common(3)
-        items = sorted({p[4] for p in near if p[4]})
+        names = collections.Counter(nm for p in near for nm in (p[3] if isinstance(p[3], tuple) else (p[3],))).most_common(3)
+        items = sorted({i for p in near for i in (p[4] if isinstance(p[4], tuple) else ((p[4],) if p[4] else ()))})
         out.append((ZONES[z], z, round(x, 1), round(y, 1), n, [nm for nm, _ in names], items))
     return out
 
@@ -180,12 +206,46 @@ for a, u in sorted(ZONES.items(), key=lambda t: t[1]):
     fac = "Alliance" if a in ALLIANCE else ("Horde" if a in HORDE else "both")
     lines.append(f'  [{u}] = "{fac}",')
 lines.append("}")
+# --keep-npc: vorhandene Gegner-Stellen einlesen (Abschnitte je Band/Gruppe bzw. Häut-Stufe)
+old_spot, old_skin = {}, {}
+if KEEP_NPC and os.path.exists(out_path):
+    band_key = group_key = skin_key = None
+    in_skin = False
+    for l in open(out_path, encoding="utf-8"):
+        if l.startswith("ns.SKIN_SPOTS"):
+            in_skin = True
+            continue
+        if in_skin:
+            m = re.match(r"  \[(\d+)\] = \{", l)
+            if m:
+                skin_key = int(m.group(1)); old_skin[skin_key] = []
+            elif l.startswith("    {") and skin_key is not None:
+                old_skin[skin_key].append(l.rstrip("\n"))
+            continue
+        m = re.match(r'  \["(\d+-\d+)"\] = \{', l)
+        if m:
+            band_key = m.group(1); continue
+        m = re.match(r"    (\w+) = \{", l)
+        if m and band_key:
+            group_key = m.group(1); old_spot[(band_key, group_key)] = []; continue
+        if l.startswith("      {") and band_key and group_key:
+            old_spot[(band_key, group_key)].append(l.rstrip("\n"))
+    if not old_spot:
+        sys.exit("--keep-npc: keine vorhandenen Stellen gefunden")
 lines.append("ns.SPOTS = {")
 total = 0
 for b in BANDS:
     key = f"{b[0]}-{b[1]}"
     lines.append(f'  ["{key}"] = {{')
     for group in ("herb", "ore", "leather", "cloth", "special"):
+        if KEEP_NPC and group not in NODES:
+            kept = old_spot.get((key, group), [])
+            if kept:
+                total += len(kept)
+                lines.append(f"    {group} = {{")
+                lines.extend(kept)
+                lines.append("    },")
+            continue
         spots = hotspots(points.get((group, b), []))
         if not spots:
             continue
@@ -201,6 +261,12 @@ lines.append("ns.SKIN_SPOTS = {")
 keys = [(sb[0], skin.get(sb, [])) for sb in SKIN_BANDS] + [(item, special.get(item, [])) for item in SPECIAL]
 for key, raw in keys:
     sb = (key, 0)
+    if KEEP_NPC and key < 1000 and key in old_skin:
+        lines.append(f"  [{key}] = {{")
+        lines.extend(old_skin[key])
+        lines.append("  },")
+        total += len(old_skin[key])
+        continue
     pts = [(p[0], p[1], p[2], p[3], None, p[4], p[5]) for p in raw]
     grid = collections.defaultdict(list)
     for p_ in pts:

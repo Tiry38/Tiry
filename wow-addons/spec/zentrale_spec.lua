@@ -1007,16 +1007,17 @@ describe("Gold-Kreislauf (Startseite)", function()
   end)
 end)
 
-describe("Einstellgebühr (Forever: mind. 1 Silber, weg bei Ablauf)", function()
+describe("Einstellgebühr (Forever: mind. 1 Kupfer seit 10.11.2026, weg bei Ablauf)", function()
   it("schätzt ohne AH: Minimum je Angebot oder Anteil am Händlerpreis", function()
     local ns, W = E.load({ itemInfo = { [4238] = { name = "Leinentasche", sell = 200, stack = 1 },
-      [5000] = { name = "Teures Schwert", sell = 5000, stack = 1 } } })
+      [5000] = { name = "Teures Schwert", sell = 5000, stack = 1 }, [9999] = { name = "Feder", sell = 0, stack = 20 } } })
     local M = ns.Market
     assert.are.equal(2, M.Duration())
-    assert.are.equal(100, (M.Deposit(4238, 1)))         -- 20 % von 2s = 40c < 1 Silber Minimum
+    assert.are.equal(40, (M.Deposit(4238, 1)))          -- 20 % von 2s = 40c (Minimum 1 Kupfer)
     assert.are.equal(1000, (M.Deposit(5000, 1)))        -- 20 % von 50s
-    ns.settings.ahDeposit = 1                          -- wenn Blizzard auf 1 Kupfer senkt
-    assert.are.equal(40, (M.Deposit(4238, 1)))
+    assert.are.equal(1, (M.Deposit(9999, 1)))           -- ohne Händlerpreis: Minimum 1 Kupfer
+    ns.settings.ahDeposit = 100                        -- eigenes Minimum (z. B. alter Wert 1 Silber)
+    assert.are.equal(100, (M.Deposit(4238, 1)))
     noErrors(W)
   end)
 
@@ -1040,7 +1041,7 @@ describe("Einstellgebühr (Forever: mind. 1 Silber, weg bei Ablauf)", function()
     local ns, W = E.load({ itemInfo = { [4238] = { name = "Leinentasche", sell = 200, stack = 1 } } })
     local M = ns.Market
     assert.are.equal(1, M.ExpectedRelists(4238))        -- ohne Daten: jede 2. Auktion läuft ab
-    assert.are.equal(100, M.DepositRisk(4238))
+    assert.are.equal(40, M.DepositRisk(4238))
     ns.db.ledger = { sales = {}, buys = {}, expired = {} }
     for i = 1, 4 do table.insert(ns.db.ledger.sales, { id = 4238, t = W.now - i, money = 900, n = 1 }) end
     assert.are.equal(0, M.ExpectedRelists(4238))        -- verkauft sich immer -> Gebühr kommt immer zurück
@@ -1415,6 +1416,213 @@ describe("Goldmacher-Werkzeuge", function()
     assert.are.equal(math.min(10, ns.Demand.MarketBatch(2304)), l[1].post)
     assert.is_true(l[1].post < l[1].qty)
     assert.is_true(l[1].full)
+    noErrors(W)
+  end)
+end)
+
+describe("Sparziel (Gold-Ziel)", function()
+  local G = 10000
+  local function day(W, i) return os.date("%Y-%m-%d", W.now - i * 86400) end
+
+  it("schlägt nach Stufe vor, rechnet Stand, Tempo und Prognose aus dem Gold-Tagebuch", function()
+    local ns, W = E.load({ level = 25, money = 30 * G })
+    local GZ = ns.Goal
+    local g = GZ.Get()
+    assert.are.equal("ride40", g.key)
+    assert.is_true(g.auto)
+    assert.are.equal(100 * G, g.amount)
+    assert.are.equal("ride60", GZ.Suggest(45).key)
+    -- zwei Spieltage (+10 g, +20 g), dazwischen ein Ruhetag: der Ruhetag zählt nicht
+    ns.char.days = {}
+    ns.char.days[day(W, 0)] = { start = 0, earned = 12 * G, spent = 2 * G }
+    ns.char.days[day(W, 2)] = { start = 0, earned = 20 * G, spent = 0 }
+    local rate, n = GZ.Rate(7)
+    assert.are.equal(2, n)
+    assert.are.equal(15 * G, rate)
+    local st = GZ.Status()
+    assert.are.equal(30 * G, st.have)
+    assert.are.equal(70 * G, st.missing)
+    assert.are.equal(5, GZ.Eta(st.missing, rate)) -- 70 / 15 = 4,7 -> 5 Spieltage
+    assert.are.equal(0, GZ.Eta(0, rate))
+    assert.is_nil(GZ.Eta(10, nil))
+    assert.is_nil(GZ.Eta(10, -5))
+    -- eigene Auktionen zählen halb (nach AH-Gebühr): nicht alles verkauft sich
+    ns.AH.Store().list = { { auctionID = 1, id = 2318, qty = 2, unit = 10 * G, status = "active", expires = W.now + 3600 } }
+    st = GZ.Status()
+    assert.are.equal(math.floor(20 * G * 0.95 * 0.5), st.auctions)
+    assert.are.equal(st.have + st.mail + st.auctions, st.total)
+    noErrors(W)
+  end)
+
+  it("Betrag eintippen, anderes Ziel, ausblenden – und einmal melden, wenn erreicht", function()
+    local ns, W = E.load({ level = 25, money = 30 * G })
+    local GZ = ns.Goal
+    assert.are.equal(250 * G, GZ.ParseAmount("250"))
+    assert.are.equal(25000, GZ.ParseAmount("2,5"))
+    assert.are.equal(15000, GZ.ParseAmount("1g 50s"))
+    assert.is_nil(GZ.ParseAmount("abc"))
+    GZ.SetAmount(120 * G)
+    local g = GZ.Get()
+    assert.falsy(g.auto)
+    assert.are.equal("ride40", g.key)
+    assert.are.equal(120 * G, g.amount)
+    GZ.Cycle()
+    assert.are.equal("ride60", GZ.Get().key)
+    GZ.Clear()
+    assert.is_nil(GZ.Get())
+    GZ.Set("custom", 20 * G)
+    W.money = 25 * G
+    W.fire("PLAYER_MONEY") W.flush()
+    assert.truthy(E.chat(W):find("Sparziel erreicht", 1, true))
+    local n = #W.prints
+    W.fire("PLAYER_MONEY") W.flush()
+    assert.are.equal(n, #W.prints, "nur einmal melden")
+    noErrors(W)
+  end)
+
+  it("Schneller ans Ziel: Taschen ins AH, Craft-Liste und beste Farm-Runde mit Goldbetrag", function()
+    local ns, W = E.load({ level = 25, money = 5 * G, prices = { [2318] = 300, [2320] = 10, [4231] = 500, [2312] = 5000, [4234] = 4000 } })
+    local GZ = ns.Goal
+    W.bags = { [0] = { { itemID = 4234, stackCount = 10, quality = 1 } } }
+    ns.char.queue = { { recipe = 2164, prof = "LEATHERWORKING", n = 2 } }
+    ns.Session.Best = function() return { perHour = 40 * G, zone = "Brachland", elapsed = 900 } end
+    local boosts = GZ.Boosts()
+    local by = {}
+    for _, b in ipairs(boosts) do by[b.key] = b end
+    assert.truthy(by.bags, "Taschen ins AH")
+    assert.is_true(by.bags.gold > 0)
+    assert.truthy(by.craft, "Craft-Liste")
+    local profit = ns.Scanner.RecipeProfit(ns.Recipes.Get(2164))
+    assert.are.equal(profit * 2, by.craft.gold)
+    assert.truthy(by.farm)
+    assert.are.equal("farm", boosts[#boosts].key, "Gold pro Stunde steht hinten (andere Einheit)")
+    for i = 2, #boosts - 1 do assert.is_true(boosts[i - 1].gold >= boosts[i].gold) end
+    noErrors(W)
+  end)
+
+  it("Startseite zeigt Sparziel-Karte; Anderes Ziel und Ausblenden wirken", function()
+    local ns, W = E.load({ level = 25, money = 30 * G })
+    SlashCmdList.TIRYSZENTRALE("") ns.UI.Wizard.Finish()
+    ns.UI.Show("home")
+    local home = ns.UI.pages.home
+    assert.is_true(home.goalCard:IsShown())
+    assert.truthy(home.goalCard.title:GetText():find("Reiten", 1, true))
+    home.goalCard.other:Click()
+    W.flush()
+    ns.UI.RefreshPage("home")
+    assert.are.equal("ride60", ns.Goal.Get().key)
+    home.goalCard.hide:Click()
+    W.flush()
+    ns.UI.RefreshPage("home")
+    assert.is_false(home.goalCard:IsShown())
+    assert.is_true(home.goalCard.off:IsShown())
+    noErrors(W)
+  end)
+end)
+
+describe("Unterwegs-Gold (Gebiet + LevelPilot-Route)", function()
+  local function leveler()
+    _G.LevelPilot_Routes = { r1 = { name = "Horde 22–30", faction = "Horde", min = 20, max = 30,
+      segs = { { z = "Orgrimmar", l0 = 22 }, { z = "Brachland", l0 = 22 }, { z = "Steinkrallengebirge", l0 = 23 },
+        { z = "Brachland", l0 = 25 }, { z = "Eschental", l0 = 25 }, { z = "Hügelland", l0 = 26 } },
+      steps = { { seg = 1 }, { seg = 2 }, { seg = 3 }, { seg = 4 }, { seg = 5 }, { seg = 6 } } } }
+    _G.LP_Route = { Pick = function(faction, lvl, wanted) assert(faction == "Horde") return "r1" end }
+    _G.LevelPilotDB = { plan = { r1 = { i = 3 } } }
+  end
+  local function noLeveler() _G.LevelPilot_Routes, _G.LP_Route, _G.LevelPilotDB = nil, nil, nil end
+  after_each(noLeveler)
+
+  it("Gebietsnamen aus LevelPilot -> Karten-Nummer", function()
+    local ns = E.load({})
+    local Z = ns.ZoneGold
+    assert.are.equal(1424, Z.MapForName("Hügelland"))
+    assert.are.equal(1424, Z.MapForName("Vorgebirge des Hügellands"))
+    assert.are.equal(1413, Z.MapForName("Das Brachland"))
+    assert.are.equal(1440, Z.MapForName("Eschental"))
+    assert.are.equal(1445, Z.MapForName("Düstermarschen"))
+    assert.is_nil(Z.MapForName("Gibtsnicht"))
+  end)
+
+  it("bewertet das Gebiet nur mit deinen Berufen und zeigt, was ein fehlender Beruf brächte", function()
+    local ns, W = E.load({}) -- Kürschnerei + Lederverarbeitung
+    local Z = ns.ZoneGold
+    local info = Z.ForMap(1413)
+    local keys = {}
+    for _, g in ipairs(info.groups) do keys[g.key] = g end
+    assert.truthy(keys.leather, "Leder (Kürschnerei)")
+    assert.falsy(keys.herb, "Kräuter ohne Kräuterkunde nicht zählen")
+    assert.falsy(keys.ore, "Erz ohne Bergbau nicht zählen")
+    assert.truthy(info.missed and (info.missed.key == "herb" or info.missed.key == "ore"))
+    assert.truthy(info.missed.profName)
+    -- je Gruppe absteigend nach Wert, Score = Summe der besten Stückwerte
+    local sum = 0
+    for _, g in ipairs(info.groups) do
+      for i = 2, #g.items do assert.is_true(g.items[i - 1].value >= g.items[i].value) end
+      assert.are.equal(g.items[1].value, (Z.UnitValue(g.items[1].id)))
+      sum = sum + g.best
+    end
+    assert.are.equal(sum, info.score)
+    -- Leder im Brachland passt zu den Tierstufen dort (Leichtes/Mittleres Leder, kein Unverwüstliches)
+    assert.truthy(keys.leather.items[1])
+    for _, it in ipairs(keys.leather.items) do assert.are_not.equal(8170, it.id) end
+    -- mit Kräuterkunde kommt die Gruppe dazu
+    local ns2 = E.load({ skills = { { name = "Berufe", isHeader = true, isCollapsed = false },
+      { name = "Kräuterkunde", skillID = 182, isHeader = false, rank = 80, maxRank = 150 } } })
+    local herb
+    for _, g in ipairs(ns2.ZoneGold.ForMap(1413).groups) do if g.key == "herb" then herb = g end end
+    assert.truthy(herb)
+    noErrors(W)
+  end)
+
+  it("liest LevelPilots Plan-Zeiger: nächste Gebiete ab dem aktuellen Abschnitt, ohne Doppelte", function()
+    local ns, W = E.load({})
+    leveler()
+    local zones, name = ns.ZoneGold.RouteZones(3)
+    assert.are.equal("Horde 22–30", name)
+    local names, maps = {}, {}
+    for _, z in ipairs(zones) do names[#names + 1] = z.name maps[#maps + 1] = z.map end
+    assert.are.same({ "Steinkrallengebirge", "Brachland", "Eschental" }, names)
+    assert.are.same({ 1442, 1413, 1440 }, maps)
+    -- Übersicht: aktuelles Gebiet (Nachbau: Brachland) fällt aus "Als Nächstes" heraus
+    local ov = ns.ZoneGold.Overview()
+    assert.are.equal(1413, ov.hereMap)
+    assert.is_true(ov.hasRoute)
+    for _, z in ipairs(ov.next) do assert.are_not.equal(1413, z.map) end
+    assert.truthy(ov.next[1], "nächstes Gebiet mit Daten")
+    local order = { Steinkrallengebirge = 1, Eschental = 2, ["Hügelland"] = 3 }
+    for i = 2, #ov.next do assert.is_true(order[ov.next[i - 1].name] < order[ov.next[i].name], "Reihenfolge der Route") end
+    -- ohne Plan-Zeiger: erster Abschnitt passend zur Stufe; ohne LevelPilot: nil
+    _G.LevelPilotDB = nil
+    zones = ns.ZoneGold.RouteZones(2)
+    assert.are.equal("Orgrimmar", zones[1].name)
+    noLeveler()
+    assert.is_nil(ns.ZoneGold.RouteZones(2))
+    -- kaputte Daten legen nichts lahm
+    _G.LevelPilot_Routes, _G.LP_Route = { r1 = { segs = "x" } }, { Pick = function() return "r1" end }
+    assert.is_nil(ns.ZoneGold.RouteZones(2))
+    noErrors(W)
+  end)
+
+  it("Tipp beim Gebietswechsel: einmal pro Gebiet, abschaltbar; Startseiten-Karte mit Wegpunkt", function()
+    local ns, W = E.load({ prices = { [4232] = 3000, [2319] = 2000, [2592] = 900 } })
+    ns.settings.zoneTipMin = 100
+    W.fire("ZONE_CHANGED_NEW_AREA") W.flush()
+    assert.truthy(E.chat(W):find("Unterwegs-Gold in", 1, true))
+    local n = #W.prints
+    W.fire("ZONE_CHANGED_NEW_AREA") W.flush()
+    assert.are.equal(n, #W.prints)
+    ns.settings.zoneTip = false
+    assert.is_false(ns.ZoneGold.ZoneTip())
+    leveler()
+    SlashCmdList.TIRYSZENTRALE("") ns.UI.Wizard.Finish()
+    ns.UI.Show("home")
+    local card = ns.UI.pages.home.zoneCard
+    assert.is_true(card:IsShown())
+    assert.is_true(card.groups[1]:IsShown())
+    assert.is_true(card.routes[1]:IsShown())
+    card.go:Click()
+    assert.truthy(W.waypoint, "Wegpunkt gesetzt")
+    assert.are.equal(1413, W.waypoint.map)
     noErrors(W)
   end)
 end)

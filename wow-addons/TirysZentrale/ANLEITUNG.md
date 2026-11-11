@@ -40,7 +40,7 @@ Was du als Nächstes lernen solltest, zeigt **Herstellen → „Was lernen?“**
 - **Menge:** Beim Neu-Einstellen empfiehlt die Zentrale so viele, wie in ca. 3 Tagen weggehen. **„Markt voll“** = über 2 Wochen Vorrat im AH – nicht nachlegen.
 - **Schnäppchen:** **Handel → Preise → „Schnäppchen“** (oder `/tz schnapp`). „Unter Händlerpreis“ = sicherer Gewinn beim Händler. Kaufen bleibt immer dein Klick.
 - **Ausrüstung in ganzen Silbern** einstellen – krumme Kupferbeträge lösen oft den „Internen Auktionsfehler“ aus. Die Vorschläge machen das schon so.
-- **Anzahlung:** Jede Auktion kostet aktuell mindestens 1 Silber, bei Ablauf ist sie weg. Zweimal abgelaufen und nie verkauft? Billiger oder zum Händler.
+- **Anzahlung:** Jede Auktion kostet mindestens 1 Kupfer (seit 10.11.2026, vorher 1 Silber), teure Ware mehr; bei Ablauf ist sie weg. Zweimal abgelaufen und nie verkauft? Billiger oder zum Händler.
 
 ## Gut zu wissen
 - Alles lässt sich rückgängig machen: **×** neben Reglern, **Rückgängig** nach „Alles leeren“, ausgeblendete Rezepte per Klick zurückholen.

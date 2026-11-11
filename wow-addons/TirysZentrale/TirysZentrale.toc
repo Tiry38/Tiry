@@ -23,6 +23,8 @@ Data_Farm.lua
 Data_Spots.lua
 Data_Recipes.lua
 Data_RecipeItems.lua
+Data_RecipeExtra.lua
+Data_Hotfix.lua
 Database.lua
 Recipes.lua
 Maps.lua
@@ -46,9 +48,12 @@ Advisor.lua
 Guide.lua
 AuctionWatch.lua
 CraftBook.lua
+Goal.lua
+ZoneGold.lua
 UI\Widgets.lua
 UI\ItemList.lua
 UI\Main.lua
+UI\HomeCards.lua
 UI\PageHome.lua
 UI\PageMethods.lua
 UI\PageFarm.lua

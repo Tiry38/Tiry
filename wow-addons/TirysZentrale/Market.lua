@@ -32,6 +32,11 @@ function M.Age(itemID)
   return nil
 end
 
+function M.HasAgeAPI()
+  local a = api()
+  return a ~= nil and type(a.GetAuctionAgeByItemID) == "function"
+end
+
 -- Einkaufspreis beim Händler (nur unbegrenzte Händlerware), aus eigenem Speicher oder Auctionator
 function M.VendorBuy(itemID)
   local own = ns.db and ns.db.vendorBuy and ns.db.vendorBuy[itemID]
@@ -61,7 +66,8 @@ function M.Net(price)
 end
 
 ----------------------------------------------------------------------------
--- Einstellgebühr (Kaution): In Forever kostet jedes Angebot mindestens 1 Silber (Wowhead-News vom 05.11.2026).
+-- Einstellgebühr (Kaution): In Forever kostet jedes Angebot mindestens 1 Kupfer (Blizzard-Hotfix 10.11.2026,
+-- vorher 1 Silber), darüber hängt sie vom Händlerpreis und der Laufzeit ab.
 -- Sie kommt zurück, wenn das Item verkauft wird – verloren ist sie nur, wenn das Angebot abläuft oder du es
 -- abbrichst. Echte Kosten pro Verkauf = Gebühr × erwartete Fehlversuche (aus deiner eigenen Verkaufsquote).
 -- Den exakten Betrag rechnet Blizzard nur bei offenem AH aus -> er wird pro Item gemerkt.
@@ -74,10 +80,12 @@ function M.Duration()
   return math.floor(d)
 end
 
--- Typische Angebotsgröße: Ausrüstung einzeln, Stapelware als Menge (deine Menge, sonst bis 20 Stück)
+-- Typische Angebotsgröße: Ausrüstung einzeln, Stapelware als Menge (deine Menge, sonst bis 20 Stück, Munition ganzer Stapel)
 function M.ListSize(itemID, have)
   local stack = ns.Item(itemID).stack or 1
   if stack <= 1 then return 1 end
+  -- Munition & Co. (Stapel ab 100, ein Craft = 100–200 Stück): ganzen Stapel auf einmal einstellen
+  if not have and stack >= 100 then return stack end
   return math.max(1, math.floor(have or math.min(stack, 20)))
 end
 
@@ -113,7 +121,7 @@ function M.Deposit(itemID, qty, loc)
     end
     return v, true
   end
-  local floor = math.max(tonumber(ns.settings and ns.settings.ahDeposit) or 100, 0)
+  local floor = math.max(tonumber(ns.settings and ns.settings.ahDeposit) or 1, 0)
   local c = cache and itemID and type(cache[itemID]) == "table" and cache[itemID][d]
   if type(c) == "table" and tonumber(c.v) and tonumber(c.q) and c.q > 0 then
     -- gemerkten Betrag auf die Menge umrechnen; das Minimum je Angebot bleibt bestehen

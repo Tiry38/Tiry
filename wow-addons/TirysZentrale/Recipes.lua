@@ -5,11 +5,11 @@ local _, ns = ...
 local R = {}
 ns.Recipes = R
 
-local byProf, bySpell
+local byProf, bySpell, byOut
 
 function R.Load()
   if byProf then return byProf end
-  byProf, bySpell = {}, {}
+  byProf, bySpell, byOut = {}, {}, {}
   for prof, spell, name, out, qty, minSkill, yellow, grey, mats in
       (ns.RECIPES_RAW or ""):gmatch("(%u[%u_]*)\t(%d+)\t([^\t]+)\t(%d+)\t(%d+)\t(%d+)\t(%d+)\t(%d+)\t([^\n]+)") do
     local reagents = {}
@@ -20,9 +20,17 @@ function R.Load()
       id = tonumber(spell), name = name, out = tonumber(out), qty = tonumber(qty),
       minSkill = tonumber(minSkill), yellow = tonumber(yellow), grey = tonumber(grey), reagents = reagents, prof = prof,
     }
+    -- Blizzard-Hotfixes (serverseitig, nicht in den Spieldaten-Dateien) darüberlegen
+    local hf = ns.HOTFIX and ns.HOTFIX.recipes and ns.HOTFIX.recipes[r.id]
+    if hf then
+      r.yellow, r.grey, r.learn = hf.yellow or r.yellow, hf.grey or r.grey, hf.learn
+    end
+    local y = ns.RECIPE_YIELD and ns.RECIPE_YIELD[r.id]
+    if y then r.yieldLo, r.yieldHi = y[1], y[2] end
     byProf[prof] = byProf[prof] or {}
     table.insert(byProf[prof], r)
     bySpell[r.id] = r
+    if not byOut[r.out] then byOut[r.out] = r end
   end
   ns.RECIPES_RAW = nil
   return byProf
@@ -36,6 +44,7 @@ end
 -- Rezept über das Ergebnis-Item finden (Berufsfenster-Nummern können von den Zauber-Nummern abweichen)
 function R.ByOutput(itemID, profKey)
   R.Load()
+  if not profKey then return byOut[itemID] end -- Index statt Volllauf (Tooltip, Rezept-Scan)
   for key, list in pairs(byProf) do
     if not profKey or key == profKey then
       for _, r in ipairs(list) do
@@ -86,6 +95,7 @@ end
 -- Lehrer-Rezepte: nicht in den Spieldaten -> Schätzung "gelb minus 20" (Median bei den 1.495 kaufbaren Rezepten)
 R.TRAINER_GAP = 20
 function R.LearnSkill(r)
+  if r.learn then return r.learn, true end -- per Hotfix geändert
   local e = ns.RECIPE_ITEMS and ns.RECIPE_ITEMS[r.id]
   if e and e[2] and e[2] > 0 then return e[2], true end
   if r.yellow and r.yellow > 0 then return math.max(1, r.yellow - R.TRAINER_GAP), false end
@@ -108,9 +118,54 @@ function R.LearnState(r, rank)
   return nil
 end
 
+-- Rezept-Item: Herkunft und Bindung. src: "v" Händler, "d" Beute, "q" Quest (QuestieDB Forever), nil = unbekannt.
+-- bop = seelengebunden beim Aufheben -> gibt es nie im AH (in Forever 798 von 1.496 Rezept-Items)
+R.SRC_TEXT = { v = "beim Händler", d = "als Beute", q = "aus einer Quest" }
+function R.ItemInfo(r)
+  local item = R.RecipeItem(r)
+  if not item then return nil end
+  local db = ns.DB and ns.DB.Get and ns.DB.Get(item)
+  return { item = item, src = ns.RECIPE_ITEM_SRC and ns.RECIPE_ITEM_SRC[item], bop = (db and db.bind == 1) or false }
+end
+
+-- Kurztext für seelengebundene Rezept-Items ("nur selbst finden – beim Händler"), nil wenn handelbar
+function R.BopText(r)
+  local info = R.ItemInfo(r)
+  if not (info and info.bop) then return nil end
+  return "Rezept nur selbst holen" .. (info.src and (" – " .. R.SRC_TEXT[info.src]) or "") .. " (seelengebunden, nicht im AH)"
+end
+
+-- Station (Amboss, Gerbrahmen …): { id, name, kind = "town"|"camp"|"place", kit = Bausatz-Rezept, canBuild }
+function R.Station(r)
+  local id = r and ns.RECIPE_STATION and ns.RECIPE_STATION[r.id]
+  local s = id and ns.STATIONS and ns.STATIONS[id]
+  if not s then return nil end
+  local kit = s[3] and R.Get(s[3])
+  return { id = id, name = s[1], kind = s[2], kit = kit, canBuild = (kit and R.IsKnown(kit)) or false }
+end
+
+-- Kurztext für Listen (nil bei Amboss/Schmiede/Kochstelle – die stehen in jeder Stadt)
+function R.StationText(r)
+  local s = R.Station(r)
+  if not s or s.kind == "town" then return nil end
+  if s.kind == "camp" then
+    if s.canBuild then return "braucht " .. s.name .. " (stellst du selbst am Lagerfeuer auf)" end
+    return "|cffff9929braucht " .. s.name .. "|r (Lager-Station am Lagerfeuer" .. (s.kit and (", Bauplan „" .. s.kit.name .. "“") or "") .. ")"
+  end
+  return "|cffff9929nur an: " .. s.name .. "|r"
+end
+
+-- Menge als Text: "3" bzw. "1–3" bei Zufallsmengen (Rechnung nutzt den Mittelwert r.qty)
+function R.QtyText(r)
+  if r.yieldLo then return r.yieldLo .. "–" .. r.yieldHi end
+  return tostring(r.qty)
+end
+
 -- Lohnt sich das Rezept? Rückgabe: Rezept-Item, Preis im AH (oder nil), Crafts bis es bezahlt ist (oder nil)
 function R.Payback(r, profitPerCraft)
   local item = R.RecipeItem(r)
+  local info = item and R.ItemInfo(r)
+  if info and info.bop then return item, nil, nil end -- seelengebunden: kein AH-Preis möglich
   local price = item and ns.Market.Price(item)
   local crafts = (price and profitPerCraft and profitPerCraft > 0) and math.ceil(price / profitPerCraft) or nil
   return item, price, crafts

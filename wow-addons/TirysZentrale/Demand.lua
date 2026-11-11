@@ -34,8 +34,13 @@ end
 
 local function store()
   if not ns.db then return nil end
-  local key = (ns.Faction and ns.Faction()) or "Horde"
+  local faction = (ns.Faction and ns.Faction()) or "Horde"
+  local realm = GetRealmName and GetRealmName()
+  local key = realm and (realm .. "|" .. faction) or faction
   ns.db.demand = ns.db.demand or {}
+  if key ~= faction and ns.db.demand[key] == nil and type(ns.db.demand[faction]) == "table" then
+    ns.db.demand[key], ns.db.demand[faction] = ns.db.demand[faction], nil
+  end
   local s = ns.db.demand[key]
   if type(s) ~= "table" then
     s = { stats = {}, snap = nil }
@@ -128,7 +133,7 @@ local function addHourly(s, from, to, sold)
 end
 
 -- Neue Momentaufnahme verarbeiten (Zeit t). Gibt die Zahl der Items mit neuer Messung zurück.
-function D.Ingest(items, t)
+function D.Ingest(items, t, watch)
   local s = store()
   if not s then return 0 end
   local prev = s.snap
@@ -145,7 +150,7 @@ function D.Ingest(items, t)
     end
     st.t, st.q, st.n, st.k, st.p = t, now.q, now.n, now.k, now.p
     local old = usable and prev.items and prev.items[id]
-    if old then
+    if old and not old.anon and not now.anon then
       local sold, observable = D.Compare(old, now, gap)
       if observable then
         st.s = st.s + sold
@@ -158,7 +163,7 @@ function D.Ingest(items, t)
   -- Items, die diesmal komplett fehlen (alles weg): gelten als ausverkauft, sofern nichts ablaufen konnte
   if usable and prev.items then
     for id, old in pairs(prev.items) do
-      if not items[id] then
+      if not items[id] and (not watch or watch[id]) and not old.anon then
         local st = s.stats[id] or { s = 0, h = 0 }
         s.stats[id] = st
         if st.t and t > st.t then
@@ -190,11 +195,12 @@ end
 local reading
 function D.ReadReplicate()
   local AH = C_AuctionHouse
-  if reading or not (AH and AH.GetNumReplicateItems and AH.GetReplicateItemInfo) then return false end
+  -- "reading" = Startzeit; nach 60 s gilt ein hängengebliebener Lesevorgang (Fehler mitten drin) als beendet
+  if (reading and GetTime() - reading < 60) or not (AH and AH.GetNumReplicateItems and AH.GetReplicateItemInfo) then return false end
   if ns.Market and not ns.Market.ahOpen then return false end
   local total = AH.GetNumReplicateItems() or 0
   if total <= 0 then return false end
-  reading = true
+  reading = GetTime()
   local watch = D.Watchlist()
   local snipe = ns.Snipe
   if snipe then snipe.Begin() end
@@ -232,6 +238,7 @@ function D.ReadReplicate()
         e.q, e.n = e.q + count, e.n + 1
         if not e.p or unit < e.p then e.p = unit end
         local who = type(owner) == "string" and owner or ""
+        if who == "" then e.anon = true end
         if who ~= "" and not sellers[itemID][who] then sellers[itemID][who] = true e.k = e.k + 1 end
         local key = unit .. "|" .. who
         local bk = e.b[key]
@@ -245,12 +252,13 @@ function D.ReadReplicate()
       C_Timer.After(0, function() ns.Safe(step) end)
     else
       reading = nil
-      if D.Complete(total) then
-        local n = D.Ingest(items, t)
+      local complete = D.Complete(total)
+      if complete then
+        local n = D.Ingest(items, t, watch)
         ns.Fire("DEMAND_UPDATED", n)
       end
       if snipe then ns.Safe(snipe.Finish) end
-      if AW and AW.FromReplicate then ns.Safe(AW.FromReplicate, mine, cheapest) end
+      if complete and AW and AW.FromReplicate then ns.Safe(AW.FromReplicate, mine, cheapest) end
     end
   end
   ns.Safe(step)
@@ -264,7 +272,7 @@ function D.Complete(total)
   local s = store()
   if not s then return true end
   local last = s.lastTotal
-  if last and last >= 200 and total < last * 0.4 then
+  if last and last >= 200 and total < last * 0.75 then
     local low = s.lowTotal
     if low and total >= low * 0.8 and total <= low * 1.25 then
       s.lastTotal, s.lowTotal = total, nil

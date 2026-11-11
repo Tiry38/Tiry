@@ -1,5 +1,40 @@
 # Changelog – Tiry's Zentrale
 
+## 6.2.0 (11.11.2026)
+**Komplett-Überarbeitung: neue gekoppelte Funktionen, Gold-Rechnung geprüft, Forever-Hotfixes eingebaut.**
+
+**Neu: Sparziel auf der Startseite.**
+- Worauf sparst du? Vorschlag nach Stufe: **Reiten lernen** (ab 40, laut Guides ca. 100 Gold, mit Ruf weniger) bzw. **Schnelles Reiten** (ab 60, ca. 1.000 Gold), außerdem Klassen-Fähigkeiten oder ein eigener Betrag (Schritte 10/25/100 Gold oder eintippen, z. B. „250“).
+- Fortschrittsbalken aus **Tasche + Post + eigene Auktionen** (Auktionen nur zur Hälfte – nicht alles verkauft sich), dazu „fehlt noch“ und das Gold aller Charaktere.
+- **Prognose in Spieltagen** aus deinem Gold-Tagebuch (Ø Gewinn pro Tag, nur Tage mit Bewegung).
+- **„Schneller ans Ziel“**: bis zu 3 konkrete Schritte mit Goldbetrag – Post abholen, Taschen ins AH, Händler-Ware, Craft-Liste abarbeiten, beste Farm-Runde wiederholen. Ein Klick öffnet die passende Seite.
+- Ziel erreicht → einmal Chat-Meldung + Ton.
+
+**Neu: Unterwegs-Gold (gekoppelt mit LevelPilot).**
+- Karte auf der Startseite: Was Kräuter, Erze, Leder und Stoff im **aktuellen Gebiet** pro Stück bringen (AH nach Gebühr oder Händler, was mehr bringt) – nur für deine Berufe. „Hinführen“ setzt den Kartenpunkt.
+- „Mit Kräuterkunde hier zusätzlich …“: zeigt, was dir ohne den passenden Sammelberuf entgeht.
+- **Nächste Gebiete deiner LevelPilot-Route** mit ihrem besten Material (liest LevelPilots Route nur, ändert nichts).
+- Einmal pro Gebiet und Sitzung ein kurzer Chat-Hinweis (Einstellungen → Hinweise & Radar → „Unterwegs-Gold im Chat“).
+
+**Neu: Handwerks-Stationen und Rezept-Herkunft (aus den Forever-Spieldaten).**
+- 922 Rezepte brauchen eine Station, **303 davon eine Lager-Station am Lagerfeuer** (Gerbrahmen, Spinnrad, Nähmaschine, Webstuhl, Meisterschmiede, Eisenofen, Gärbehälter, Arkane Schmiede, Werkbank des Anarchisten, Geschmolzene Gießerei). Craft-Planer, „Was lernen?“ und Skill-Plan sagen jetzt „braucht Gerbrahmen“ – bzw. „stellst du selbst auf“, wenn du den Bauplan kennst.
+- **Seelengebundene Rezepte** (in Forever 798 von 1.496): keine AH-Suche mehr, kein erfundener AH-Preis, stattdessen „nur selbst holen – beim Händler / als Beute / aus einer Quest“.
+- **Zufallsmengen** als Spanne: Grobes Dynamit „1–3×“ (gerechnet wird mit dem Mittelwert).
+
+**Forever-Hotfixes (Blizzard, 06.11. und 10.11.2026).**
+- **Anzahlung jetzt mindestens 1 Kupfer** (vorher 1 Silber). Standard umgestellt, alte gemerkte Gebühren werden einmal gelöscht (beim nächsten AH-Besuch kommen die exakten). Texte zu „Kleinkram lohnt nicht“ angepasst.
+- Gerbrahmen ab Skill **125** (vorher 140), Grober Schleifstein gibt Skill bis **90** (vorher 75), Eisengranate Händlerpreis **1 Silber 25 Kupfer** (vorher 5 Silber).
+
+**Prüfrunde: 4 unabhängige Prüfer, jeder Fund mit Test (30 neue Prüftests).**
+- Gold-Rechnung: Craft-Liste und Einkaufsliste rechnen dieselben Materialien (auch selbst hergestellte Zwischenprodukte), „Nicht unter“ für gesammelte Ware ohne fremdes Rezept, „Kaufen bis“ passt zum Mindestgewinn, Berater und Planer nutzen denselben Mindestgewinn, Skill-Plan nimmt die richtige Skill-Chance und denselben Verkaufswert, Rezepte ohne Skill-Grenzen, Verkaufswert ohne AH-Preis, Munition (200er-Stapel) bei der Anzahlung.
+- Neu einstellen zählt deine **laufenden Auktionen** mit – kein Nachlegen, wenn schon genug im AH liegt.
+- Marktwert nur aus **frischen** Preisen der letzten 14 Tage (kein Schnäppchen auf Monate alte Werte).
+- Absatz-Messung: Realms getrennt, Teil-Scans werden erkannt (nichts gemessen), keine erfundenen Verkäufe bei Twinks/fehlenden Namen/aus der Liste gefallenen Items, abgebrochener Scan setzt „unterboten“ nicht zurück, ein Fehler sperrt keine weiteren Scans, gleiche Verkäufe in derselben Stunde zählen doppelt.
+- Händler: Flips nur auf **frische Preise** (max. 3 Tage), keine Ladenhüter, **keine seelengebundene Ware**. Händler-Verkauf lässt Material für deine Craft-Liste und Klassen-Reagenzien liegen; Taschen-Check sagt „Behalten“ für Craft-Material.
+- Schnellsuche baut nur die Treffer, die sie zeigt (spürbar schneller), `/tz KÜRSCHNER` mit Großbuchstaben geht, doppelter Punkt in „Stand: vor 10 Min.“ weg.
+- Farm-Daten: Erz-Fundorte zählen Spawn-Pool-Punkte nur noch einmal (Arathi: 37 echte Punkte statt 228) und zeigen nur Erze, die zur Stufe passen; Schildkrötenschuppe hat jetzt Fundorte; Frostsäbler ab 55, Teufelssaurier ab 54.
+- Texte: Schwacher Heiltrank braucht auch eine Leere Phiole, Kisten verlangen 40 Leinenstoff **oder** 20 Ballen, Lagerfeuer ab Kochen 1, „die meisten“ Essen geben +5 % EP, Kräutersuche nicht zusammen mit Mineraliensuche.
+
 ## 6.1.0 (11.11.2026)
 **Item-Tooltip als Preis-Liste – wie Auctionator, nur stylischer.**
 - Zweispaltig und sauber ausgerichtet: **Marktwert** (Median deiner Scan-Tage, max. 14), **Durchschnitt**, **Min · Max**.

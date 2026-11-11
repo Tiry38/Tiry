@@ -120,7 +120,8 @@ end
 
 -- Suche: alle Wörter müssen im Namen vorkommen (z. B. "rot tasche"); Filter und Sortierung optional.
 -- Nur Treffer werden zu Tabellen – nach der Suche gibt der Speicher alles wieder frei.
-function D.Search(text, filter, sortBy)
+-- limit (nur ohne filter/sortBy): nur die ersten N nach Name fertig bauen – die Schnellsuche braucht 14 Zeilen
+function D.Search(text, filter, sortBy, limit)
   local words = {}
   for w in D.Lower(text or ""):gmatch("%S+") do words[#words + 1] = w end
   local idQuery = tonumber(text or "")
@@ -131,6 +132,8 @@ function D.Search(text, filter, sortBy)
     return out
   end
   local src = source()
+  local light = limit and not filter and not sortBy
+  local hits = light and {} or nil
   for id, pos in src:gmatch("\n(%d+)\t()") do
     local name = src:match("^([^\t\n]+)", pos)
     local ok = name and not isJunk(name)
@@ -140,10 +143,22 @@ function D.Search(text, filter, sortBy)
         if not lname:find(words[w], 1, true) then ok = false break end
       end
     end
-    if ok then
+    if ok and light then
+      hits[#hits + 1] = { id = tonumber(id), pos = pos, key = sortKey(D.Lower(name)) }
+    elseif ok then
       local e = cache[tonumber(id)] or build(tonumber(id), pos)
       if e and (not filter or filter(e)) then out[#out + 1] = e end
     end
+  end
+  if light then
+    table.sort(hits, function(a, b) if a.key ~= b.key then return a.key < b.key end return a.id < b.id end)
+    for i = 1, #hits do
+      local h = hits[i]
+      local e = cache[h.id] or build(h.id, h.pos)
+      if e then out[#out + 1] = e end
+      if #out >= limit then break end
+    end
+    return out
   end
   local M = ns.Market
   if sortBy == "ah" then

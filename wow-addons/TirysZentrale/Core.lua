@@ -132,12 +132,15 @@ local DEFAULTS = {
   merchantPanel = true, -- Händler-Panel neben dem Händlerfenster
   autoRepair = true,    -- beim Händler automatisch reparieren
   tooltipInfo = true,   -- Zusatzinfos im Item-Tooltip
+  zoneTip = true,       -- Unterwegs-Gold: beim Betreten eines Gebiets einmal sagen, was es hier zu holen gibt
+  zoneTipMin = 2000,    -- ... nur wenn das Gebiet mindestens so viel je Stück bringt (Kupfer, Summe der besten Funde)
   -- Craft-Filter: Empfehlung wächst mit jedem Level; die Faktoren sind dein persönlicher Stil (1 = Empfehlung)
   craft = { marginFactor = 1, profitFactor = 1, onlySafe = true, onlySkill = false, perRecipe = 2, freshOnly = true, skipSlow = true },
   shopAutoOpen = true,  -- Einkaufsfenster beim Öffnen des AH zeigen, wenn noch etwas fehlt
   ahCut = 5,          -- Prozent, den das Auktionshaus beim Verkauf einbehält
   snipeAlert = true,  -- nach jedem Komplett-Scan Schnäppchen (unter Händler-/Marktwert) im Chat melden
-  ahDeposit = 100,    -- Einstellgebühr je Angebot in Kupfer, solange das AH noch keinen exakten Wert geliefert hat (Forever: mind. 1 Silber)
+  ahDeposit = 1,      -- Einstellgebühr-Minimum je Angebot in Kupfer, solange das AH noch keinen exakten Wert geliefert hat
+                      -- (Forever: 1 Kupfer seit Hotfix 10.11.2026, vorher 1 Silber)
   showOnlyMyLevel = false,
   expertMode = false,
   ahAutoScan = true,   -- beim Öffnen des AH automatisch scannen (über Auctionator)
@@ -178,6 +181,13 @@ ns.On("ADDON_LOADED", function(_, name)
   applyDefaults(TirysZentraleCharDB, { days = {}, sessions = {} })
   ns.db = TirysZentraleDB
   ns.settings = TirysZentraleDB.settings
+  -- Blizzard-Hotfix 10.11.2026: Mindest-Einstellgebühr 1 Kupfer statt 1 Silber. Alter Standard (100) wird umgestellt,
+  -- gemerkte Gebühren von vorher vergessen (beim nächsten AH-Besuch kommen die exakten neuen Beträge).
+  if not ns.db.dep1c then
+    if tonumber(ns.settings.ahDeposit) == 100 then ns.settings.ahDeposit = 1 end
+    ns.db.deposits = {}
+    ns.db.dep1c = true
+  end
   ns.char = TirysZentraleCharDB
   ns.Fire("DB_READY")
 end)
@@ -311,7 +321,7 @@ function ns.Item(id)
   else
     local static = ns.ITEMS and ns.ITEMS[id]
     local db = (not static) and ns.DB and ns.DB.Get(id)
-    if db then static = { de = db.name, q = db.q, sell = db.sell, stack = db.stack } end
+    if db then static = { de = db.name, q = db.q, sell = (ns.HOTFIX and ns.HOTFIX.sell[id]) or db.sell, stack = db.stack } end
     c.name = c.name or (static and static.de) or ("Item " .. id)
     c.icon = c.icon or (db and db.icon ~= 0 and db.icon) or (GetItemIconByID and GetItemIconByID(id)) or 134400 -- Fragezeichen-Symbol
     c.quality = c.quality or (static and static.q) or 1

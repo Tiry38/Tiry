@@ -15,8 +15,8 @@ local PS = {}
 ns.PriceString = PS
 
 PS.DEFAULTS = {
-  matPrice = "first(vendorbuy, ahprice, market)",
-  craftValue = "min(ahprice, 125% market)",
+  matPrice = "first(min(vendorbuy, ahprice), market)",
+  craftValue = "min(ahprice, 125% market, max(ahprice, market))",
   minProfit = "max(15% crafting, levelgold)",
 }
 
@@ -30,10 +30,11 @@ local function hist()
   return ns.db.priceHistory
 end
 
-function PS.Record(itemID, price)
+-- age = Tage seit Auctionator den Preis gesehen hat: Preis unter SEINEM Tag merken, nicht als "heute"
+function PS.Record(itemID, price, age)
   if not price or price <= 0 then return end
   local h = hist()
-  local day = ns.Today()
+  local day = (age and age > 0) and date("%Y-%m-%d", time() - age * 86400) or ns.Today()
   local t = h[itemID] or {}
   h[itemID] = t
   t[day] = price
@@ -49,8 +50,9 @@ end
 function PS.Market(itemID)
   local t = ns.db and ns.db.priceHistory and ns.db.priceHistory[itemID]
   if not t then return nil end
+  local cutoff = date("%Y-%m-%d", time() - KEEP * 86400) -- nur die letzten 14 Kalendertage
   local v = {}
-  for _, p in pairs(t) do v[#v + 1] = p end
+  for d, p in pairs(t) do if d >= cutoff then v[#v + 1] = p end end
   if #v == 0 then return nil end
   table.sort(v)
   local n = #v
@@ -105,12 +107,17 @@ end
 -- Nach jedem Scan: Preise aller Materialien und Ergebnisse deiner Rezepte + Markt-Items merken
 function PS.RecordAll()
   if not (ns.Market.HasAuctionator() and ns.db) then return 0 end
+  hist()
+  local hasAge = ns.Market.HasAgeAPI()
   local seen, n = {}, 0
   local function rec(id)
     if seen[id] then return end
     seen[id] = true
     local p = ns.Market.Price(id)
-    if p then PS.Record(id, p) n = n + 1 end
+    local age = ns.Market.Age(id)
+    -- Preis unter dem Tag merken, an dem Auctionator ihn gesehen hat (nie einen alten Preis als "heute").
+    -- age = nil: nie gesehen oder älter als 3 Wochen -> nicht merken (ohne Alters-API: wie bisher heute)
+    if p and (age or not hasAge) then PS.Record(id, p, age) n = n + 1 end
   end
   local R = ns.Recipes
   for _, key in ipairs(R.MyProfessions()) do

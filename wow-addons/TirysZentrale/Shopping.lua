@@ -130,8 +130,24 @@ local function maxPrice(id, makes, depth, seen)
     if r then
       local other, n = otherCost(r, id)
       if n > 0 and other then
-        local _, revenue, cost = ns.Scanner.RecipeProfit(r)
-        if revenue then take((revenue - other - minProfitFor(r, cost)) / n) end
+        local _, revenue = ns.Scanner.RecipeProfit(r)
+        if revenue then
+          -- höchster Preis p, bei dem der Planer das Rezept noch zeigt: Gewinn >= Mindestgewinn(crafting = Kosten bei p)
+          local function ok(p)
+            local c = math.floor(other + n * p + 0.5)
+            return revenue - c >= minProfitFor(r, c)
+          end
+          local lo, hi = 0, math.floor((revenue - other) / n)
+          if hi < 0 or not ok(0) then take(0)
+          elseif ok(hi) then take(hi)
+          else
+            while hi - lo > 1 do
+              local mid = math.floor((lo + hi) / 2)
+              if ok(mid) then lo = mid else hi = mid end
+            end
+            take(lo)
+          end
+        end
       end
     end
   end

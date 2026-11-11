@@ -77,8 +77,8 @@ function page.build(self, content, width)
   UI.SetTooltip(self.tipBtn, "Angebote zeigen", "Nur zum Kaufen – die Preise aktualisiert der Scan oben für alle Reiter. Sucht alle Rezepte dieser Liste im AH; ist das AH zu, wird eine Auctionator-Liste \"Zentrale: Rezepte\" angelegt.")
   self.tipBtn:SetScript("OnClick", function()
     local ids = {}
-    for _, t in ipairs(self.tips or {}) do if t.item then ids[#ids + 1] = t.item end end
-    if #ids == 0 then ns.Print("Diese Rezepte lernst du alle beim Lehrer.") return end
+    for _, t in ipairs(self.tips or {}) do if t.item and not t.bop then ids[#ids + 1] = t.item end end
+    if #ids == 0 then ns.Print("Keins dieser Rezepte gibt es im AH (Lehrer oder seelengebunden).") return end
     if ns.Market.ahOpen then
       local ok, err = ns.Market.SearchNow(ids)
       if not ok then ns.Print("|cffff6b81" .. tostring(err) .. "|r") end
@@ -165,7 +165,9 @@ function page.refresh(self)
       self.plan = plan
       for _, s in ipairs(plan.steps) do
         local back = s.net and (s.net <= 0 and ("|cff61eb8f+" .. ns.Money(-s.net) .. " Gewinn|r") or ("netto " .. ns.Money(s.net))) or ns.Money(s.cost)
-        lines[#lines + 1] = string.format("|cff39ff6bSkill %d bis %d:|r %d× %s  |cff93a39d(Material %s · %s)|r", s.from, s.to, s.crafts, s.recipe.name, ns.Money(s.cost), back)
+        local st = ns.Recipes.StationText(s.recipe)
+        lines[#lines + 1] = string.format("|cff39ff6bSkill %d bis %d:|r %d× %s  |cff93a39d(Material %s · %s)|r%s", s.from, s.to, s.crafts, s.recipe.name, ns.Money(s.cost), back,
+          st and ("  · " .. st) or "")
       end
       local mats = {}
       for id, n in pairs(plan.mats) do mats[#mats + 1] = n .. "× " .. ns.Item(id).name end
@@ -204,18 +206,21 @@ function page.refresh(self)
     if notes[1] == "" then table.remove(notes, 1) end
     if t.skillUp then notes[#notes + 1] = "|cff61eb8fgibt dir Skill|r" end
     if not t.item then notes[#notes + 1] = "|cffff9929beim Lehrer lernen|r" end
+    if t.bop then notes[#notes + 1] = "|cffff9929" .. t.bop .. "|r" end
+    if t.station then notes[#notes + 1] = t.station end
     entries[#entries + 1] = {
       id = t.item or r.out,
       name = t.item and ns.Item(t.item).name or (r.name .. " (Lehrer)"),
       note = table.concat(notes, " · "),
       cells = {
         profit = "|cff39ff6b+|r" .. ns.Money(t.profit),
-        price = t.item and (t.price and ns.Money(t.price) or "|cff8a9a94kein Angebot|r") or "|cff8a9a94Lehrer|r",
+        price = t.bop and "|cff8a9a94nicht im AH|r" or t.item and (t.price and ns.Money(t.price) or "|cff8a9a94kein Angebot|r") or "|cff8a9a94Lehrer|r",
         back = t.payback and (t.payback .. " Crafts") or "–",
       },
-      tip = { t.item and "Klick: Angebote im AH zeigen · Shift-Klick: in die Auctionator-Suche legen" or "Lernst du beim Lehrer deines Berufs." },
+      tip = { t.bop or (t.item and "Klick: Angebote im AH zeigen · Shift-Klick: in die Auctionator-Suche legen") or "Lernst du beim Lehrer deines Berufs." },
       onClick = function()
         if not t.item then ns.Print(r.name .. " lernst du beim Lehrer für " .. ns.ProfName(ns.PROF[t.prof]) .. ".") return end
+        if t.bop then ns.Print(r.name .. ": " .. t.bop .. ".") return end
         local ok, err = ns.Market.SearchNow({ t.item })
         if not ok then ns.Print("|cffff6b81" .. tostring(err) .. "|r Tipp: Shift-Klick legt das Rezept in die Auctionator-Suche.") end
       end,

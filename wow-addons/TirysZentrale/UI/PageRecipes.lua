@@ -69,22 +69,20 @@ end
 
 -- Benötigtes Material der Warteschlange minus Taschen
 function ns.QueueMaterials()
-  local need, profit, crafts = {}, 0, 0
+  local profit, crafts = 0, 0
   for _, e in ipairs(queue()) do
     local r = R.Get(e.recipe)
     if r then
       crafts = crafts + e.n
       profit = profit + (S.RecipeProfit(r) or 0) * e.n
-      for _, re in ipairs(r.reagents) do need[re.id] = (need[re.id] or 0) + re.n * e.n end
     end
   end
+  -- dieselbe Rechnung wie die Einkaufsliste (Zwischenprodukte selbst herstellen, × übersprungen)
   local list, cost = {}, 0
-  for id, n in pairs(need) do
-    local missing = math.max(0, n - ns.Shop.Have(id))
-    if missing > 0 then
-      local unit, where = M.BuyCost(id)
-      list[#list + 1] = { id = id, n = missing, unit = unit, where = where }
-      cost = cost + (unit or 0) * missing
+  for _, e in ipairs((ns.Shop.List())) do
+    if e.missing > 0 then
+      list[#list + 1] = { id = e.id, n = e.missing, unit = e.unit, where = e.where }
+      cost = cost + (e.unit or 0) * e.missing
     end
   end
   table.sort(list, function(a, b) return (a.unit or 0) * a.n > (b.unit or 0) * b.n end)
@@ -817,6 +815,7 @@ function page.refresh(self)
       local notes = {}
       local learn = self.view == "learnable"
       local ri, riPrice, payback
+      local bop = learn and R.BopText(r)
       if learn then
         ri, riPrice, payback = R.Payback(r, e.profit)
         local lt = R.LearnText(r, rank)
@@ -824,6 +823,8 @@ function page.refresh(self)
         notes[#notes + 1] = "macht " .. ns.Item(r.out).name
         if not ri then
           notes[#notes + 1] = "|cffff9929beim Lehrer lernen|r"
+        elseif bop then
+          notes[#notes + 1] = "|cffff9929" .. bop .. "|r"
         elseif riPrice then
           notes[#notes + 1] = "Rezept im AH: " .. ns.Money(riPrice) .. (payback and (" – nach " .. payback .. " Crafts bezahlt") or "")
         else
@@ -831,7 +832,7 @@ function page.refresh(self)
         end
         local d = R.Difficulty(r, rank)
         if d and d <= 1 then notes[#notes + 1] = "|cff61eb8fgibt dir Skill|r" end
-        if ri then learnIDs[#learnIDs + 1] = ri end
+        if ri and not bop then learnIDs[#learnIDs + 1] = ri end
       else
         local d = DIFF[R.Difficulty(r, rank) or 3]
         notes[#notes + 1] = UI.Hex(d[2]) .. d[1] .. "|r"
@@ -847,6 +848,8 @@ function page.refresh(self)
       if detail and e.demand ~= "unknown" then notes[#notes + 1] = detail end
       local rate = ns.Ledger.SaleRate(r.out)
       if rate then notes[#notes + 1] = "verkauft sich: " .. math.floor(rate * 100 + 0.5) .. " %" end
+      local stationNote = R.StationText(r)
+      if stationNote then notes[#notes + 1] = stationNote end
       for _, q in ipairs(queue()) do
         if q.recipe == r.id then notes[#notes + 1] = "|cff39ff6b" .. q.n .. "× geplant|r" end
       end
@@ -862,7 +865,7 @@ function page.refresh(self)
       end
       entries[#entries + 1] = {
         id = learn and (ri or r.out) or r.out,
-        name = learn and (ri and ns.Item(ri).name or (r.name .. " (Lehrer)")) or (r.name .. (r.qty > 1 and (" (" .. r.qty .. "×)") or "")),
+        name = learn and (ri and ns.Item(ri).name or (r.name .. " (Lehrer)")) or (r.name .. ((r.qty > 1 or r.yieldLo) and (" (" .. R.QtyText(r) .. "×)") or "")),
         note = table.concat(notes, " · "),
         chip = DEMAND_CHIP[e.demand or "unknown"],
         cells = {
@@ -874,7 +877,8 @@ function page.refresh(self)
         tip = { "Material: " .. (#mats > 0 and table.concat(mats, ", ") or "keins"),
           "Erlös (nach AH-Gebühr & Einstellgebühr-Risiko): " .. ns.Money(e.revenue) .. " · Gewinn " .. ns.Money(e.profit) .. " · nötig: " .. ns.Money(e.need),
           "Absatz: " .. dt .. (e.goldDay and (" · ~" .. ns.Money(e.goldDay) .. " Gold/Tag") or ""),
-          learn and (ri and "Linksklick: Rezept-Angebote im AH zeigen · Shift-Klick: Rezept in die Auctionator-Suche legen · Rechtsklick: ausblenden"
+          learn and (bop and (bop .. " · Rechtsklick: ausblenden")
+            or ri and "Linksklick: Rezept-Angebote im AH zeigen · Shift-Klick: Rezept in die Auctionator-Suche legen · Rechtsklick: ausblenden"
             or "Lernst du beim Lehrer deines Berufs · Rechtsklick: ausblenden")
             or "Linksklick: 1× in die Craft-Liste · × oder Rechtsklick: Rezept ausblenden" },
         action = function()
@@ -888,7 +892,9 @@ function page.refresh(self)
             hidden()[r.id] = true
             self.lastHidden = r.id
           elseif learn then
-            if ri then
+            if bop then
+              ns.Print(r.name .. ": " .. bop .. ".")
+            elseif ri then
               local ok, err = M.SearchNow({ ri })
               if not ok then ns.Print("|cffff6b81" .. tostring(err) .. "|r Tipp: Shift-Klick legt das Rezept in die Auctionator-Suche.") end
             else

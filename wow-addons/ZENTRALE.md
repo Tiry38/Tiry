@@ -17,7 +17,7 @@ Anleitung für Einsteiger: **`ANLEITUNG.md`** · Prüfbericht: **`AUDIT.md`** ·
 ## Was drin ist (5 Hauptpunkte im Dock + Lernen und Einstellungen oben rechts)
 | Menüpunkt | Reiter | Funktion |
 |---|---|---|
-| **Start** | Goldplan, Goldwege | Gold-Kreislauf (Planen/Einkaufen/Herstellen/Verkaufen, je ein Knopf), Gold-abholen-Hinweis, „Neu in Forever – deine Chancen“; 19 Goldwege als Anleitungen |
+| **Start** | Goldplan, Goldwege | **Sparziel** (Reiten u. a., Fortschritt, Prognose, „Schneller ans Ziel“), Gold-Kreislauf (Planen/Einkaufen/Herstellen/Verkaufen, je ein Knopf), **Unterwegs-Gold** (aktuelles Gebiet + nächste LevelPilot-Gebiete), Gold-abholen-Hinweis, „Neu in Forever – deine Chancen“; 19 Goldwege als Anleitungen |
 | **Herstellen** | Craft-Planer, Was lernen?, Ergebnis | Craft-Liste in 4 Schritten, sortiert nach **Gold pro Tag** (Gewinn × realistischer Absatz); Verkaufen mit „Nicht unter“; Berater für lohnende Rezepte und Skill-Plan; echter Gewinn aus Verkäufen |
 | **Farmen** | Farm-Guide, Kürschner, Farm-Session | Farm-Spots für dein Level mit Wegpunkt, Kürschner-Zentrale, Farm-Session (Gold pro Stunde live, Bestmarke, Verlauf) |
 | **Handel** | Meine Auktionen, Preise, Preisalarm, Taschen & Händler, Item-Suche | Eigene Auktionen (unterboten?, unterwegs, Briefkasten, **Neu einstellen mit Menge und Preis**), Live-Preise mit **Verkäufe pro Tag** und **Schnäppchen**, Wunschpreis-Alarm, Händler-Flips, Taschen-Check mit Trend und Rohstoff-Check, alle 18.416 Items auf Deutsch |
@@ -41,14 +41,20 @@ Befehle: `/tz` (oder `/zentrale`, `/gold`), `/tz suche`, `/tz assistent`, `/tz w
 - **„Kaufen bis“** je Material in der Einkaufsliste (auch über selbst hergestellte Zwischenprodukte).
 - **Neu einstellen mit Maß:** Menge = Verkäufe von ca. 3 Tagen; Preis = günstigstes Angebot minus 1 Kupfer, **Einzel-Items in ganzen Silbern** (Blizzard 09.11.: „Kupfer weglassen hilft“ gegen den „Internen Auktionsfehler“); nie unter „Nicht unter“.
 - **„Nicht unter“** = max(Materialkosten, Händlerpreis) pro Stück plus Anzahlungs-Risiko, geteilt durch (1 − AH-Anteil).
-- **Anzahlung:** mindestens 1 Silber je Angebot (Forever, seit Anfang 11/2026), bei Verkauf zurück, bei Ablauf weg. Bei offenem AH nimmt das Addon Blizzards exakten Betrag (`C_AuctionHouse.CalculateCommodityDeposit` / `CalculateItemDeposit`).
+- **Anzahlung:** mindestens **1 Kupfer** je Angebot (Blizzard-Hotfix 10.11.2026, vorher 1 Silber – [Quelle](https://news.blizzard.com/en-us/article/24315281/wow-forever-hotfixes-november-10-2026)), bei teurer Ware mehr, bei Verkauf zurück, bei Ablauf weg. Bei offenem AH nimmt das Addon Blizzards exakten Betrag (`C_AuctionHouse.CalculateCommodityDeposit` / `CalculateItemDeposit`).
+
+## Neu in 6.2: gekoppelte Funktionen
+- **Sparziel:** Vorschlag nach Stufe – Reiten lernen ab 40 (laut Guides ca. 100 Gold, mit Ruf „Wohlwollend“ weniger), schnelles Reiten ab 60 (ca. 1.000 Gold); Beträge sind Guide-Angaben und im Spiel am Trainer zu prüfen, deshalb frei änderbar. Quellen: [Warcraft Tavern – Riding](https://www.warcrafttavern.com/forever/guides/riding/), [Method – Mount](https://www.method.gg/wow-forever/how-to-get-a-mount-in-wow-forever-cost-requirement-and-mount-options), [timesaver.gg – Mount Cost](https://timesaver.gg/blog/wow-forever-mount-cost-gold-to-save). Stand = Tasche + Post + eigene Auktionen (zur Hälfte, nach AH-Gebühr); Prognose = fehlender Betrag ÷ Ø Tagesgewinn aus dem Gold-Tagebuch (nur Tage mit Bewegung). „Schneller ans Ziel“ nimmt echte Zahlen aus Post, Taschen-Check, Händler-Kandidaten, Craft-Liste und bester Farm-Session.
+- **Unterwegs-Gold:** je Gebiet die Materialgruppen aus den Farm-Daten (Kräuter/Erz/Leder/Stoff/Besonderes), bewertet mit deinen Live-Preisen (AH nach Gebühr oder Händler). Nur Gruppen, für die du den Beruf hast; der beste fehlende Beruf wird als Hinweis genannt. Mit LevelPilot: die nächsten Gebiete deiner Route (nur gelesen über `LevelPilot_Routes`, `LP_Route.Pick`, `LevelPilotDB.plan` – fehlt LevelPilot, entfällt der Teil).
+- **Stationen & Rezept-Herkunft:** `Data_RecipeExtra.lua` (erzeugt) – Station je Rezept aus `SpellCastingRequirements` + `SpellFocusObject` (deDE), Zufallsmengen aus `SpellEffect.Variance`, Herkunft der Rezept-Items aus QuestieDB Forever (Händler/Beute/Quest; für 646 von 1.496 bekannt). Seelengebunden = Bindung 1 in der Item-Datenbank.
+- **Hotfixes:** `Data_Hotfix.lua` (von Hand, je Eintrag mit Datum/Quelle) legt serverseitige Blizzard-Änderungen über die Spieldaten.
 
 ## Preisformeln (Experten-Modus)
-Im Craft-Planer unter „Mehr Optionen“, sobald der Experten-Modus an ist: Materialpreis `first(vendorbuy, ahprice, market)`, Verkaufswert `min(ahprice, 125% market)`, Mindestgewinn `max(15% crafting, levelgold)`. `market` = eigener Marktwert (Median der Tagespreise der letzten 14 Tage). Gängige Kurznamen (`dbmarket`, `dbminbuyout`) werden verstanden; Funktionen `min`, `max`, `first`, `avg`, Rechnen `+ - * /`, Zahlen wie `120% crafting`, `5g`, `1g50s`.
+Im Craft-Planer unter „Mehr Optionen“, sobald der Experten-Modus an ist: Materialpreis `first(min(vendorbuy, ahprice), market)`, Verkaufswert `min(ahprice, 125% market, max(ahprice, market))` (ohne aktuellen AH-Preis = Marktwert), Mindestgewinn `max(15% crafting, levelgold)`. `market` = eigener Marktwert (Median der Tagespreise der letzten 14 Tage). Gängige Kurznamen (`dbmarket`, `dbminbuyout`) werden verstanden; Funktionen `min`, `max`, `first`, `avg`, Rechnen `+ - * /`, Zahlen wie `120% crafting`, `5g`, `1g50s`.
 
 ## AH-Scan
 **Ein Scan für alle Reiter.** Knopf „AH scannen“ oben rechts (oder automatisch beim Öffnen des AH) startet am offenen AH bevorzugt den **Komplett-Scan** (Blizzard: alle 15 Min.). In einem Durchgang kommen Preise, Absatz, Markt-Tiefe, Schnäppchen und der Unterboten-Check deiner Stapelware. Ist der Komplett-Scan gesperrt, aktualisiert der Schnell-Scan von Auctionator trotzdem alle Preise. Die Knöpfe in den Reitern heißen „Angebote zeigen“ – sie sind nur zum Kaufen da.
-Schutz: Kommt ein Komplett-Scan nur teilweise an (unter 40 % des letzten), zählt das Fehlende nicht als verkauft. Abschaltbar: Einstellungen → „Komplett-Scan“. „Preise von vor X · gilt für alle Reiter“ steht unter dem Knopf.
+Schutz: Kommt ein Komplett-Scan nur teilweise an (unter 75 % des letzten), wird nichts gemessen und „unterboten“ bleibt stehen. Absatz-Daten sind je Realm und Fraktion getrennt. Abschaltbar: Einstellungen → „Komplett-Scan“. „Preise von vor X · gilt für alle Reiter“ steht unter dem Knopf.
 
 ## Technik & Prüfung
 - `busted` (im Ordner `wow-addons`) – Tests mit/ohne Auctionator, ohne Scandaten, ohne Berufe, fehlende API, Kampf-Sperre, Rechnungen, Tastenkürzel, Schrift-Glyphen.
@@ -61,7 +67,9 @@ Schutz: Kommt ein Komplett-Scan nur teilweise an (unter 40 % des letzten), zähl
 - `python3 tools/gen_alldb.py <csv-ordner>` – komplette Item-Datenbank aus den Forever-Spieldaten (DB2 ItemSparse/Item/ItemClass/ItemSubClass, Build 1.60.1.70862, über wago.tools). 908 interne Platzhalter ("Monster - …", "Deprecated", "OLD…") werden ausgelassen.
 - `python3 tools/gen_recipes.py <csv-ordner>` – Rezept-Datenbank (DB2 SkillLineAbility, SpellReagents, SpellEffect, SpellName).
 - `python3 tools/gen_recipe_items.py <csv-ordner>` – Rezept-Items (Muster/Pläne/Formel …) zu jedem Rezept (DB2 ItemXItemEffect, ItemEffect, ItemSparse).
-- `python3 tools/gen_spots.py <spawns.tsv> <UiMap.csv> <questiedb>` – Farm-Hotspots aus QuestieDB-Fundorten (Daten werden nur gelesen, nie ausgeführt).
+- `lua5.1 tools/export_spawns.lua <QuestieDB>/data/Forever > spawns.tsv` – Fundorte (Gegner/Objekte) als Tabelle.
+- `python3 tools/gen_spots.py <spawns.tsv> <UiMap.csv> <questiedb> [--keep-npc]` – Farm-Hotspots aus QuestieDB-Fundorten (Daten werden nur gelesen, nie ausgeführt). Spawn-Pool-Punkte zählen einmal, Erze nur passend zur Stufe; `--keep-npc` behält die Gegner-Stellen der vorhandenen Datei und rechnet nur Kräuter/Erz/Spezial-Leder neu.
+- `python3 tools/gen_recipe_extra.py <csv-ordner> <SpellFocusObject_deDE.csv> <foreverItemDB.lua>` – Stationen, Zufallsmengen, Rezept-Herkunft (Build 1.60.1.70888).
 - Lizenz: GPL-3.0 (wegen der QuestieDB-Daten), siehe `TirysZentrale/LIZENZ.txt`.
 - Schrift: Poppins (SIL Open Font License, siehe `TirysZentrale/Media/Fonts/OFL.txt`).
 

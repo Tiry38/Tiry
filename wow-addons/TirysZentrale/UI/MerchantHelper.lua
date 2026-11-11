@@ -38,7 +38,7 @@ local function create()
   p.info:SetPoint("TOPLEFT", 18, -64)
 
   p.sell = UI.Button(p, "Händler-Ware verkaufen", "primary", 258, 38, "coins")
-  p.sell:SetPoint("TOPLEFT", 16, -124)
+  p.sell:SetPoint("TOPLEFT", p.info, "BOTTOMLEFT", -2, -12) -- wächst mit dem Infotext
   p.sell:SetScript("OnClick", function()
     local n = A.SellVendorItems()
     ns.Print(n > 0 and (n .. " Items verkauft, die beim Händler mehr bringen als im AH.") or "Nichts zu verkaufen.")
@@ -54,7 +54,7 @@ local function create()
   end)
 
   p.buy = UI.Button(p, "Flip-Schnäppchen kaufen", "cool", 258, 38, "cart")
-  p.buy:SetPoint("TOPLEFT", 16, -170)
+  p.buy:SetPoint("TOPLEFT", p.sell, "BOTTOMLEFT", 0, -8)
   p.buy:SetScript("OnClick", function()
     local ok, res = A.BuyFlips()
     if ok then
@@ -74,7 +74,7 @@ local function create()
   end)
 
   p.mats = UI.Button(p, "Craft-Material kaufen", "primary", 258, 38, "bolt")
-  p.mats:SetPoint("TOPLEFT", 16, -216)
+  p.mats:SetPoint("TOPLEFT", p.buy, "BOTTOMLEFT", 0, -8)
   p.mats:SetScript("OnClick", function()
     local ok, res = ns.Shop.BuyFromVendor()
     ns.Print(ok and ("Gekauft: " .. res) or ("|cffff6b81" .. res .. "|r"))
@@ -88,7 +88,7 @@ local function create()
   end)
 
   p.more = UI.Button(p, "Details im Scanner", "soft", 258, 34, "scan")
-  p.more:SetPoint("TOPLEFT", 16, -264)
+  p.more:SetPoint("TOPLEFT", p.mats, "BOTTOMLEFT", 0, -10)
   p.more:SetScript("OnClick", function() UI.Show("scanner") end)
   p:Hide()
   return p
@@ -96,12 +96,11 @@ end
 
 function A.RefreshPanel()
   if not panel or not panel:IsShown() then return end
-  local _, vendorTotal = A.VendorCandidates()
-  local list = A.VendorCandidates()
+  local list, vendorTotal = A.VendorCandidates() -- einmal statt zweimal rechnen
   local plan, cost, profit = A.FlipBuyPlan()
   local flips = #ns.Scanner.merchant.flips
-  panel.info:SetText(string.format("Händler-Verkauf: |cff39ff6b%d Items, %s|r\nFlip-Chancen: |cff39ff6b%d|r%s\nSchrott: %s",
-    #list, ns.Money(vendorTotal), flips,
+  panel.info:SetText(string.format("Händler-Verkauf: |cff39ff6b%d %s, %s|r\nFlip-Chancen: |cff39ff6b%d|r%s\nSchrott: %s",
+    #list, ns.Plural(#list, "Item", "Items"), ns.Money(vendorTotal), flips,
     #plan > 0 and (" – kaufen für " .. ns.Money(cost) .. ", Gewinn " .. ns.Money(profit)) or "",
     ns.settings.autoJunk and "wird automatisch verkauft" or "Autopilot aus (Einstellungen)"))
   panel.sell:SetEnabled(#list > 0)
@@ -109,6 +108,7 @@ function A.RefreshPanel()
   local mats = ns.Shop.VendorPlan()
   panel.mats:SetLabel(#mats > 0 and ("Craft-Material kaufen (" .. #mats .. ")") or "Craft-Material kaufen")
   panel.mats:SetEnabled(#mats > 0)
+  panel:SetHeight(64 + math.ceil(panel.info:GetStringHeight()) + 12 + 3 * 46 + 44 + 16)
 end
 
 ns.Listen("MERCHANT_SCANNED", function()

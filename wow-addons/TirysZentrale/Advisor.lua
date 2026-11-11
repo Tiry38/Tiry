@@ -71,6 +71,7 @@ end
 
 -- Erfolgschance auf +1 Skill (Classic-Formel: orange 100 %, danach linear bis grau 0 %)
 function AD.Chance(r, skill)
+  if r.grey <= 0 and r.yellow <= 0 then return 0 end -- keine Skill-Grenzen in den Spieldaten: nicht einplanen
   if r.grey > 0 and skill >= r.grey then return 0 end
   if r.yellow <= 0 or skill < r.yellow then return 1 end
   local span = r.grey - r.yellow
@@ -94,8 +95,10 @@ local function resale(r)
   local e = ns.DB.Get(r.out)
   if e and (e.bind == 1 or e.bind == 4) then return 0 end
   local age = M.Age(r.out)
-  local price = M.Price(r.out)
-  if not price or not age or age > 3 then return 0 end
+  if not M.Price(r.out) or not age or age > 3 then return 0 end
+  -- derselbe Verkaufswert wie im Craft-Planer (Preis-String craftValue)
+  local price = ns.PriceString and ns.PriceString.Eval("craftValue", r.out) or M.Price(r.out)
+  if not price then return 0 end
   if ns.Demand.Class(r.out) == "slow" then return 0 end
   return math.max(0, math.floor(M.NetAfterDeposit(r.out, nil, price) * math.max(r.qty or 1, 1)))
 end
@@ -127,7 +130,8 @@ function AD.Plan(profKey, steps)
       local chance = AD.Chance(r, skill)
       if c and chance >= 0.2 then -- unter 20 % ist zu teuer/unsicher
         local crafts = 1 / chance
-        local per = c * crafts
+        -- Kosten wachsen mit jedem Fehlversuch; Gewinn NICHT (sonst gewinnt die schlechteste Chance = 5x so viele Crafts)
+        local per = c >= 0 and c * crafts or c
         if not best or per < bestPer then best, bestPer, bestCrafts = r, per, crafts end
       end
     end
@@ -174,20 +178,23 @@ function AD.RecipeTips(limit)
   for _, key in ipairs(R.MyProfessions()) do
     local list, rank = R.List(key, "learnable")
     for _, r in ipairs(list) do
-      local profit, revenue, _, unknown = ns.Scanner.RecipeProfit(r)
+      local profit, revenue, cost, unknown = ns.Scanner.RecipeProfit(r)
+      -- derselbe Mindestgewinn wie im Craft-Planer (Preis-String minProfit, Standard max(15 % crafting, levelgold))
+      local need = 1
+      if minProfit > 0 then need = math.max(ns.PriceString.Eval("minProfit", r.out, { crafting = cost }) or minProfit, 1) end
       local e = ns.DB.Get(r.out)
       local bound = e and (e.bind == 1 or e.bind == 4)
       local age = M.Age(r.out)
       local slow = ns.Demand.Class(r.out) == "slow"
       if profit and revenue and unknown == 0 and not bound and not slow and age and age <= 3
-          and profit >= math.max(minProfit, 1) then
+          and profit >= need then
         local item, price, payback = R.Payback(r, profit)
         if not payback or payback <= 30 then -- Rezept muss sich in höchstens 30 Crafts bezahlt machen
           local state, req, exact = R.LearnState(r, rank)
           local d = R.Difficulty(r, rank)
           out[#out + 1] = { r = r, id = r.out, qty = r.qty, profit = profit, item = item, price = price, payback = payback,
             skillUp = d ~= nil and d <= 1, prof = key, state = state or "now", req = req, exact = exact,
-            learnText = R.LearnText(r, rank) }
+            learnText = R.LearnText(r, rank), bop = R.BopText(r), station = R.StationText(r) }
         end
       end
     end

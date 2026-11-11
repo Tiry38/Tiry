@@ -48,6 +48,13 @@ function L.ScanInbox()
   local b = book()
   local added = 0
   local now = time()
+  local occ = {}
+  local function fresh(key)
+    occ[key] = (occ[key] or 0) + 1
+    local k = occ[key] == 1 and key or (key .. "#" .. occ[key])
+    if b.seen[k] then return nil end
+    return k
+  end
   for i = 1, GetInboxNumItems() or 0 do
     local _, _, _, subject, money, _, daysLeft, itemCount = GetInboxHeaderInfo(i)
     local arrived = math.floor((now - (MAIL_DAYS - (daysLeft or MAIL_DAYS)) * 86400) / 3600) -- auf die Stunde
@@ -57,8 +64,8 @@ function L.ScanInbox()
       invoiceType, itemName, player, bid, count = r[1], r[2], r[3], r[4], r[11]
     end
     if invoiceType == "seller" or invoiceType == "buyer" then
-      local key = invoiceType .. "|" .. tostring(itemName) .. "|" .. tostring(player) .. "|" .. tostring(bid) .. "|" .. arrived
-      if not b.seen[key] then
+      local key = fresh(invoiceType .. "|" .. tostring(itemName) .. "|" .. tostring(player) .. "|" .. tostring(bid) .. "|" .. arrived)
+      if key then
         b.seen[key] = now
         local entry = { t = arrived * 3600, id = L.IDByName(itemName), name = itemName, n = count or 1 }
         if invoiceType == "seller" then
@@ -73,8 +80,8 @@ function L.ScanInbox()
     else
       local name = expiredName(subject)
       if name then
-        local key = "expired|" .. name .. "|" .. tostring(itemCount) .. "|" .. arrived
-        if not b.seen[key] then
+        local key = fresh("expired|" .. name .. "|" .. tostring(itemCount) .. "|" .. arrived)
+        if key then
           b.seen[key] = now
           table.insert(b.expired, { t = arrived * 3600, id = L.IDByName(name), name = name, n = 1 })
           added = added + 1

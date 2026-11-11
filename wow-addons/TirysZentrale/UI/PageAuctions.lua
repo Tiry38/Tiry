@@ -166,7 +166,7 @@ function page.refresh(self)
     or "Beim nächsten Öffnen des Auktionshauses wird automatisch geprüft und gescannt."
   local stand = "Heute verkauft: " .. sum.soldToday
     .. ((sum.onWay or 0) > 0 and (" · |cff7fc8ffunterwegs zum Briefkasten: ca. " .. ns.Money(sum.onWay) .. "|r") or "")
-    .. " · Stand: " .. ago(sum.time) .. ". "
+    .. " · Stand: " .. ago(sum.time):gsub("%.$", "") .. ". "
   self.hint:SetText(stand .. (M.ahOpen and ("Auktionshaus offen: Deine Auktionen sind eingelesen. " .. auto)
     or "Verkäufe erkennt Tiry's Zentrale überall sofort – ob du unterboten wurdest, sieht man nur am Auktionshaus."))
   self.checkBtn:SetEnabled(M.ahOpen == true)

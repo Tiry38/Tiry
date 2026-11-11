@@ -50,10 +50,10 @@ local function stepper(parent, label, desc, getter, setter, step, min, max, fmt,
   return f
 end
 
--- Einstellgebühr: feine Schritte bei kleinen Beträgen, größere ab 10 Silber
+-- Einstellgebühr: feine Schritte bei kleinen Beträgen (Forever-Minimum 1 Kupfer), größere ab 10 Silber
 local function depositStep(v, dir)
   local x = dir > 0 and v or v - 1
-  if x < 100 then return 10 elseif x < 1000 then return 50 end
+  if x < 10 then return 1 elseif x < 100 then return 10 elseif x < 1000 then return 50 end
   return 250
 end
 
@@ -122,6 +122,9 @@ function page.build(self, content, width)
     toggle("Beute-Radar", function() return s.lootAlerts end, function(v)
       s.lootAlerts = v
     end, "Meldet im Chat, wenn du etwas Wertvolles lootest (ab 50 Silber AH-Wert oder seltene Forever-Materialien)."),
+    toggle("Unterwegs-Gold im Chat", function() return s.zoneTip ~= false end, function(v)
+      s.zoneTip = v
+    end, "Sagt beim Betreten eines Gebiets einmal pro Sitzung, welche Kräuter, Erze, Leder und Stoffe es dort gibt und was sie im AH bringen (nur für deine Berufe)."),
     toggle("AH-Hinweis", function() return s.ahHint end, function(v)
       s.ahHint = v
     end, "Sagt dir beim Öffnen des Auktionshauses, welche Items du einstellen solltest."),
@@ -140,7 +143,7 @@ function page.build(self, content, width)
     step("AH-Gebühr", "So viel Prozent behält das Auktionshaus vom Verkaufspreis ein. Standard: 5 %. Alle Gewinne werden damit berechnet.",
       function() return tonumber(s.ahCut) or 5 end, function(v) s.ahCut = v end, 1, 0, 30, "%d %%", 5),
     step("Einstellgebühr je Angebot", "Gilt, bis das AH den exakten Wert liefert. Kommt bei Verkauf zurück – Tiry's Zentrale rechnet nur das Risiko ein, dass es nicht verkauft wird.",
-      function() return tonumber(s.ahDeposit) or 100 end, function(v) s.ahDeposit = v end, depositStep, 0, 10000,
+      function() return tonumber(s.ahDeposit) or 1 end, function(v) s.ahDeposit = v end, depositStep, 0, 10000,
       function(v) return ns.Money(v) end, 100),
     toggle("Experten-Modus", function() return s.expertMode == true end, function(v)
       s.expertMode = v
