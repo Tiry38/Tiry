@@ -308,6 +308,38 @@ if OUT then L.dump(win, OUT .. "/rxn_fenster.tsv", { levels = true, noHover = tr
 local probs = L.problems(win)
 ok(#probs == 0, "Layout Fenster: " .. tostring(probs[1]))
 
+-- Tirys Fall (11.11.): Quest bei Zangen erst angenommen, Phiole noch leer -> RXP wartet beim Abgeben.
+-- Das Fenster sagt klar, warum, und was fehlt.
+local OBJ = {}
+G.C_QuestLog.GetQuestObjectives = function(id) return OBJ[id] end
+local tin = TN.steps[12].elements[2]
+tin.completed = nil
+QL[1195] = "on"
+OBJ[1195] = { { text = "Gefüllte geätzte Phiole: 0/1", finished = false, numFulfilled = 0, numRequired = 1 } }
+Render(); N.Fenster.Dirty(); tick()
+t = vis(win)
+ok(has(t, "ABGEBEN GEHT NOCH NICHT"), "Warnung: Abgeben geht noch nicht")
+ok(has(t, "• Gefüllte geätzte Phiole: 0/1"), "Warnung nennt das offene Ziel")
+ok(has(t, "Mondbrunnen in Eschental"), "Warnung nennt, wo die Phiole gefuellt wird")
+ok(has(t, "Oder mit › überspringen"), "Warnung nennt Ueberspringen")
+ok(not tin.skip, "kein automatischer Haken beim Abgeben")
+if OUT then L.dump(win, OUT .. "/rxn_offen.tsv", { levels = true, noHover = true }) end
+probs = L.problems(win)
+ok(#probs == 0, "Layout offene Quest: " .. tostring(probs[1]))
+eq(#W.errors, 0, "keine Fehler bei offener Quest")
+-- Phiole gefuellt -> Warnung weg (Abgeben bleibt offen, bis RXP/Spiel es meldet)
+OBJ[1195][1].finished = true; OBJ[1195][1].text = "Gefüllte geätzte Phiole: 1/1"
+W.fire("QUEST_LOG_UPDATE"); tick()
+t = vis(win)
+ok(not has(t, "ABGEBEN GEHT NOCH NICHT"), "Ziel erfuellt -> Warnung weg")
+-- ohne GetQuestObjectives (andere Client-Version): keine Warnung, kein Fehler
+G.C_QuestLog.GetQuestObjectives = nil
+OBJ[1195][1].finished = false
+N.Fenster.Dirty(); tick()
+ok(not has(vis(win), "ABGEBEN GEHT NOCH NICHT") and #W.errors == 0, "ohne Ziel-API: still")
+QL[1195] = nil; tin.completed = true
+Render(); N.Fenster.Dirty(); tick()
+
 -- Questlog-Abgleich: Spiel sagt "angenommen", RXP hat noch keinen Haken -> Haken bei RXP setzen
 local acc = TN.steps[12].elements[3]
 ok(not acc.skip and not sf12.elements[3].button:GetChecked(), "vorher: Annehmen offen")

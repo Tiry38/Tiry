@@ -273,6 +273,32 @@ local function GameDone(el)
 end
 N.GameDone = GameDone
 
+-- Abgeben geht nicht, solange die Quest im Log noch offene Ziele hat (RXP wartet dann einfach weiter).
+-- Liefert die offenen Ziele als Text ("Gefuellte geaetzte Phiole: 0/1"), sonst nil.
+local HINT = {
+  -- aus RXPs eigenem Classic-Guide (RestedXP Horde 20-30): Phiole am Mondbrunnen in Eschental fuellen
+  [1195] = "Leere Phiole am Mondbrunnen in Eschental benutzen (RXP-Guide: 60.2, 72.9).",
+}
+local function Missing(id)
+  if not id or not OnQuest(id) or TurnedIn(id) then return nil end
+  if not (C_QuestLog and C_QuestLog.GetQuestObjectives) then return nil end
+  local ok, objs = pcall(C_QuestLog.GetQuestObjectives, id)
+  if not ok or type(objs) ~= "table" then return nil end
+  local out = {}
+  for _, o in ipairs(objs) do
+    if type(o) == "table" and not o.finished then
+      local t = o.text
+      if type(t) ~= "string" or t == "" then
+        t = (o.numFulfilled and o.numRequired) and fmt("%d/%d", o.numFulfilled, o.numRequired) or nil
+      end
+      if t then out[#out + 1] = t end
+    end
+  end
+  if #out == 0 then return nil end
+  return out, HINT[id]
+end
+N.Missing = Missing
+
 local function Progress()
   local r = RXPr()
   local g = r and r.currentGuide
@@ -303,8 +329,10 @@ local function ActiveSteps()
           local gameDone = GameDone(el)
           local done = hasBox and (rxpDone or gameDone) and true or false
           local typ = TypeOf(el)
+          local miss, hint
+          if el.tag == "turnin" and not done then miss, hint = Missing(tonumber(el.questId)) end
           lines[#lines + 1] = { text = txt, el = el, ef = ef, box = hasBox, done = done, typ = typ,
-            sync = gameDone and not rxpDone and hasBox }
+            sync = gameDone and not rxpDone and hasBox, miss = miss, hint = hint }
           if hasBox then total = total + 1; if not done then open = open + 1 end end
           local rk = typ and RANK[typ] or 0
           if not done and rk > bestRank then best, bestRank = typ, rk end
@@ -484,6 +512,15 @@ local function GetCard(i)
   c.step = UI(c, 11); c.step:SetTextColor(0.62, 0.70, 0.70)
   c.dist = UI(c, 15, ""); c.dist:SetJustifyH("RIGHT")
   c.lines = {}
+  -- Warnung: Abgeben geht noch nicht (Quest-Ziele offen)
+  c.warn = CreateFrame("Frame", nil, c)
+  c.warn.bg = Card(c.warn, "ARTWORK", 0, true, 0); c.warn.bg:SetVertexColor(1.0, 0.55, 0.20, 0.13)
+  c.warn.bar = Tex(c.warn, "ARTWORK", 1); c.warn.bar:SetWidth(3)
+  c.warn.bar:SetPoint("TOPLEFT", 0, -6); c.warn.bar:SetPoint("BOTTOMLEFT", 0, 6); c.warn.bar:SetVertexColor(1.0, 0.62, 0.28, 0.9)
+  c.warn.head = UI(c.warn, 11, ""); c.warn.head:SetPoint("TOPLEFT", 12, -7); c.warn.head:SetTextColor(1.0, 0.68, 0.32)
+  c.warn.head:SetText("ABGEBEN GEHT NOCH NICHT")
+  c.warn.txt = UI(c.warn, 12); c.warn.txt:SetPoint("TOPLEFT", c.warn.head, "BOTTOMLEFT", 0, -4)
+  c.warn.txt:SetTextColor(0.94, 0.90, 0.84); c.warn.txt:SetSpacing(2)
   -- Knopf "weiter": Schritt ueberspringen (RXP "Gehe zu Schritt")
   c.skip = CreateFrame("Button", nil, c)
   c.skip:SetSize(26, 26)
@@ -575,7 +612,9 @@ local function LayoutCard(c, a, hero, y)
     l.txt:SetWidth(tw - 24)
     l.txt:SetFont(FONT, hero and 13 or 12, "")
     l.txt:SetText(ln.text)
-    if ln.done then l.txt:SetTextColor(0.52, 0.60, 0.58) else l.txt:SetTextColor(0.94, 0.97, 0.96) end
+    if ln.done then l.txt:SetTextColor(0.52, 0.60, 0.58)
+    elseif ln.miss then l.txt:SetTextColor(1.0, 0.74, 0.45)
+    else l.txt:SetTextColor(0.94, 0.97, 0.96) end
     l.ring:SetShown(ln.box); l.bullet:SetShown(not ln.box)
     l.ring:SetTexture(MEDIA .. (ln.done and "rxp-checked-32" or "rxp-btn-blank-32"))
     l.ring:SetVertexColor(1, 1, 1, ln.done and 0.75 or 1)
@@ -585,6 +624,24 @@ local function LayoutCard(c, a, hero, y)
     ly = ly - h - 6
   end
   for j = #a.lines + 1, #c.lines do c.lines[j]:Hide() end
+  -- offene Quest-Ziele vor dem Abgeben: klar sagen, warum der Schritt wartet
+  local warn = {}
+  for _, ln in ipairs(a.lines) do
+    if ln.miss then
+      for _, m in ipairs(ln.miss) do warn[#warn + 1] = "|cffffd27a• " .. m .. "|r" end
+      if ln.hint then warn[#warn + 1] = ln.hint end
+    end
+  end
+  if hero and #warn > 0 then
+    warn[#warn + 1] = "|cff9fb0aaErst erledigen, dann hier abgeben – RXP geht dann selbst weiter. Oder mit › überspringen.|r"
+    c.warn.txt:SetWidth(tw - 16)
+    c.warn.txt:SetText(table.concat(warn, "\n"))
+    local wh = 7 + 12 + 4 + (c.warn.txt:GetStringHeight() or 14) + 9
+    c.warn:ClearAllPoints(); c.warn:SetPoint("TOPLEFT", c, "TOPLEFT", ox, ly - 2); c.warn:SetSize(tw, wh); c.warn:Show()
+    ly = ly - wh - 8
+  else
+    c.warn:Hide()
+  end
   -- Fuss der Karte: alles erledigt -> grosser WEITER-Knopf, sonst kleiner Ueberspringen-Pfeil
   c.skip.stepIndex = idx
   if hero and allDone then

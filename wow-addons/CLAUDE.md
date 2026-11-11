@@ -47,7 +47,7 @@ AreaTable/TaxiNodes), Grafiken `tools/rxn_media.py`, Satzregeln von Hand in `Phr
 Spiel, ohne HIGHLIGHT-Ebene. **2.0:** `Fenster.lua` = eigenes Fenster, liest RXP-Daten (`RXPFrame.CurrentStepFrame.framePool`
 mit `.step`/`.elements[j].button`, `RXP.GetGuideProgress`, `currentGuide.steps`); Haken = Klick auf RXPs CheckButton.
 **RXPFrame nie `Hide()`** (setzt `addon.isHidden` → RXP pausiert Automatik) – nur Alpha 0 + Scale 0.01, per Hook erzwungen.
-`Pfeil.lua` = Skin auf `RXP.arrowFrame` (Text-Hook „Ziel\n(Nyd)“, Rotation-Hook, Größe 44). `RXP.ReplaceNpcIds` ohne Element
+**2.0.1:** RXPs `.turnin` (ohne negative ID) wartet, bis die Quest abgegeben ist – hat Tiry die Quest, aber offene Ziele, zeigt `Missing(id)` (`C_QuestLog.GetQuestObjectives`) einen Hinweis-Kasten statt still zu hängen (Fall 1195: Phiole am Mondbrunnen Eschental füllen, laut RXP-Classic-Guide). `Pfeil.lua` = Skin auf `RXP.arrowFrame` (Text-Hook „Ziel\n(Nyd)“, Rotation-Hook, Größe 44). `RXP.ReplaceNpcIds` ohne Element
 → `N.ElementByText` sucht das Quest-Element der aktiven Schritte (sonst halbe Übersetzung).
 
 ## Claude-Skills (Plugin „wow-werkstatt“)

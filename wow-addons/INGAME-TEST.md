@@ -364,7 +364,11 @@ Aus 4.2 weiter offen: `C_Map.GetMapPosFromWorldPos`, Flugmeister-IDs, Hochplatea
 - Reichweite gibt es nur für Buff-Totems; Verbrennung/Magma/Erdbindung usw. gelten als „steht“, solange sie laufen.
 
 
-# Ingame-Test – RXPNeon 2.0.0
+# Ingame-Test – RXPNeon 2.0.1
+
+## Neu in 2.0.1: „Abgeben geht noch nicht“
+- [ ] Ein Abgeben-Schritt für eine Quest, die du hast, die aber noch nicht fertig ist (z. B. „Die heilige Flamme“ bei Zangen mit „Gefüllte geätzte Phiole 0/1“): Die Abgeben-Zeile ist orange. Darunter steht der Kasten **ABGEBEN GEHT NOCH NICHT** mit dem offenen Ziel, bei der heiligen Flamme auch mit dem Ort (Mondbrunnen Eschental).
+- [ ] Ist das Ziel erfüllt, verschwindet der Kasten. Nach dem Abgeben geht RXP wie gewohnt weiter.
 
 ## Start
 - [ ] `RXPGuides` und `RXPNeon` liegen in `Interface\AddOns`, WoW **komplett neu gestartet**, beide in der Add-on-Liste an.
