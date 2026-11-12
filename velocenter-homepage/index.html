@@ -1166,6 +1166,11 @@ textarea.inp{border-radius:12px}
 .deals.on{background:linear-gradient(160deg,#FFFFFF,#F4EDE3) padding-box,linear-gradient(115deg,#1B1E25,#868282 60%,#E8C9A0) border-box;color:#1B1E25}
 .deals.on::before{opacity:.25}.deals.on .t b{background:none;color:#1B1E25}.deals.on .t small{color:#4A4F5A}.deals.on .t .k{color:#9A5B22}
 .deals.on .ar{border-color:rgba(27,30,37,.2);background:rgba(27,30,37,.05)}.deals.on .ar svg{transform:rotate(180deg)}.deals.on:hover .ar svg{transform:rotate(180deg) translateX(3px)}.deals.on:hover .ar{color:#fff}
+.dealw{position:absolute;top:0;right:max(24px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;align-items:stretch;gap:9px}
+.dealw .deals{position:relative;top:auto;right:auto}
+.dealn{margin:0;text-align:center;font:700 13px/1.3 var(--display);color:#9F1239}
+.deals[hidden]+.dealn{display:none}
+@media (max-width:980px){.dealw{position:static;margin-top:24px;max-width:440px}.dealw .deals{margin-top:0}}
 @media (prefers-reduced-motion:reduce){.deals::after{animation-duration:9s}}
 .lgc.deal{border-color:rgba(200,16,46,.45)}
 .lgpr b em{font-style:normal;font-size:.62em;font-weight:700;color:var(--dim);margin-right:2px}
@@ -2474,8 +2479,7 @@ m696 -454 c28 -13 46 -31 55 -51 22 -53 -50 -177 -173 -300 -187 -186 -647
    <h1 class="mega hello" style="--d:.08s;margin-top:18px">Sofort da.<br><span class="gt it">Sofort Probe fahren.</span></h1>
    <p class="lead hello" style="--d:.16s">Diese Räder stehen jetzt bei uns in Wörth. Rad antippen, in Ruhe ansehen und direkt anfragen: kaufen, reservieren oder Probe fahren.</p>
    <div class="lgnum hello" style="--d:.24s" id="lgNum" hidden></div>
-   <button type="button" class="deals hello" style="--d:.3s" id="lgDeals" aria-pressed="false"><span class="pct"><span>%</span></span><span class="t"><span class="k" id="lgDealsK">Nur solange vorrätig</span><b id="lgDealsT">Sonderangebote</b><span class="m"><small id="lgDealsN">reduzierte Räder</small><em id="lgDealsS" hidden></em></span></span><span class="ar" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></button>
-   <p class="anhint hello" style="--d:.33s">* Aktionspreise gelten nur bei Barkauf, nicht bei Leasing und Finanzierung.</p>
+   <div class="dealw"><button type="button" class="deals hello" style="--d:.3s" id="lgDeals" aria-pressed="false"><span class="pct"><span>%</span></span><span class="t"><span class="k" id="lgDealsK">Nur solange vorrätig</span><b id="lgDealsT">Sonderangebote</b><span class="m"><small id="lgDealsN">reduzierte Räder</small><em id="lgDealsS" hidden></em></span></span><span class="ar" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></button><p class="dealn hello" style="--d:.34s">Aktionspreise gelten nicht bei Leasing &amp; Finanzierung</p></div>
    <div class="row hello rfbtn" style="--d:.36s"><button type="button" class="ghost" data-rfopen><svg><use href="#i-spark"/></svg>Rad-Finder: Was passt zu mir?</button></div>
   </div>
  </div>
