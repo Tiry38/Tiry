@@ -1731,6 +1731,30 @@ body.fz2 main,body.fz2 .foot{zoom:1.25}
  linear-gradient(115deg,transparent 0 62%,rgba(38,40,47,.07) 62% 63.5%,transparent 63.5% 66%,rgba(200,16,46,.07) 66% 67%,transparent 67%),
  linear-gradient(115deg,transparent 0 18%,rgba(38,40,47,.06) 18% 19%,transparent 19%)}
 @media (prefers-reduced-motion:reduce){.blobs::after{animation:none}}
+/* ===== Service-Themen mit eigenen Sprungzielen (Tiry 12.11.2026) ===== */
+.tpc,#termin-form,#dienstrad{scroll-margin-top:96px}
+.tnav{display:flex;flex-wrap:wrap;gap:10px;margin-top:26px}
+.tnav a{display:inline-flex;align-items:center;gap:10px;min-height:46px;padding:0 20px 0 8px;border-radius:999px;background:rgba(255,255,255,.62);border:1px solid color-mix(in srgb,var(--c) 40%,transparent);color:var(--ink);font:700 15px/1 var(--display);text-decoration:none;box-shadow:0 8px 22px -14px var(--c);transition:transform .35s var(--spring),background .3s}
+.tnav a i{width:32px;height:32px;border-radius:50%;display:grid;place-items:center;background:var(--c);color:#fff}
+.tnav a i svg{width:17px;height:17px}
+.tnav a:hover{transform:translateY(-2px);background:#fff}
+.tpc{position:relative;padding:clamp(40px,5vw,72px) 0;border-top:1px solid var(--line)}
+.tpc::before{content:"";position:absolute;left:-6%;top:8%;width:clamp(220px,30vw,420px);aspect-ratio:1;border-radius:46% 54% 60% 40%/50% 42% 58% 50%;background:radial-gradient(circle at 35% 35%,color-mix(in srgb,var(--c) 30%,transparent),transparent 68%);filter:blur(8px);z-index:-1;pointer-events:none}
+.tph{display:flex;align-items:center;gap:18px;flex-wrap:wrap}
+.tph .ic{width:68px;height:68px;border-radius:50%;display:grid;place-items:center;flex:none;background:linear-gradient(135deg,var(--c),color-mix(in srgb,var(--c) 55%,#3B1A5A));color:#fff;box-shadow:0 14px 30px -12px var(--c)}
+.tph .ic svg{width:30px;height:30px}
+.tph h2{font:800 clamp(28px,3.6vw,46px)/1.05 var(--display);letter-spacing:-.02em}
+.tpc>.lead{margin-top:16px;max-width:70ch}
+.tfl{list-style:none;margin:26px 0 0;padding:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,330px),1fr));gap:12px 34px}
+.tfl li{position:relative;padding:6px 0 6px 40px;color:var(--mut);font-size:16px;line-height:1.5}
+.tfl li::before{content:"";position:absolute;left:0;top:7px;width:26px;height:26px;border-radius:50%;background:color-mix(in srgb,var(--c) 20%,#fff) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%231B1E25' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12.5l4.5 4.5L19 7.5'/%3E%3C/svg%3E") center/14px no-repeat;box-shadow:inset 0 0 0 1.5px var(--c)}
+.tfl li b{color:var(--ink)}
+.tsub{margin-top:30px;font:800 13px/1 var(--display);letter-spacing:.14em;text-transform:uppercase;color:var(--ink);display:flex;align-items:center;gap:12px}
+.tsub::after{content:"";flex:1;height:2px;border-radius:2px;background:linear-gradient(90deg,var(--c),transparent)}
+.tact{display:flex;flex-wrap:wrap;gap:12px;margin-top:28px}
+.tsrc{margin-top:18px;font-size:13px;color:var(--dim)}
+.tsrc a{color:inherit}
+@media (max-width:640px){.tnav a{font-size:14px;min-height:44px}.tph .ic{width:56px;height:56px}.tfl li{font-size:15px}}
 </style>
 
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
@@ -2196,11 +2220,11 @@ m696 -454 c28 -13 46 -31 55 -51 22 -53 -50 -177 -173 -300 -187 -186 -647
     <div class="blobimg"><img src="img/laden-innen.webp" alt="Blick in den Laden des Velocenter Hessert" loading="lazy" width="1280" height="722"></div>
    </div>
    <div class="rows">
-    <a class="srow pre" href="#service" style="--c:#F472B6"><span class="ic"><svg><use href="#i-bike"/></svg></span><span><h3>Beratung & Probefahrt</h3><p>Wir hören zu, zeigen eine passende Auswahl und begleiten dich auf Wunsch bei der Probefahrt.</p></span><span class="go"><svg><use href="#i-arrow"/></svg></span></a>
-    <a class="srow pre" href="#termin" style="--c:#22D3EE"><span class="ic"><svg><use href="#i-wrench"/></svg></span><span><h3>Inspektion & Reparatur</h3><p>Geschultes Bosch Service Center. Fachkundige Inspektionen und Reparaturen, auch nach dem Kauf.</p></span><span class="go"><svg><use href="#i-arrow"/></svg></span></a>
-    <a class="srow pre" href="#service" style="--c:#E2232D"><span class="ic"><svg><use href="#i-euro"/></svg></span><span><h3>0 % Finanzierung</h3><p>0 % Zinsen und 0 € Anzahlung über die TARGOBANK. Zum regulären Preis, nicht auf Aktionspreise.</p></span><span class="go"><svg><use href="#i-arrow"/></svg></span></a>
-    <a class="srow pre" href="#service" style="--c:#34D399"><span class="ic"><svg><use href="#i-shield"/></svg></span><span><h3>ENRA Versicherung</h3><p>Schutz gegen Diebstahl, dazu Vollkasko mit Verschleiß und Pick-up-Service.</p></span><span class="go"><svg><use href="#i-arrow"/></svg></span></a>
-    <a class="srow pre" href="#service" style="--c:#60A5FA"><span class="ic"><svg><use href="#i-case"/></svg></span><span><h3>Dienstrad-Leasing</h3><p>Wir arbeiten mit fast allen Leasing-Firmen zusammen, z. B. JobRad, Bikeleasing, Company Bike.</p></span><span class="go"><svg><use href="#i-arrow"/></svg></span></a>
+    <a class="srow pre" href="#beratung" style="--c:#F472B6"><span class="ic"><svg><use href="#i-bike"/></svg></span><span><h3>Beratung & Probefahrt</h3><p>Wir hören zu, zeigen eine passende Auswahl und begleiten dich auf Wunsch bei der Probefahrt.</p></span><span class="go"><svg><use href="#i-arrow"/></svg></span></a>
+    <a class="srow pre" href="#werkstatt" style="--c:#22D3EE"><span class="ic"><svg><use href="#i-wrench"/></svg></span><span><h3>Inspektion & Reparatur</h3><p>Geschultes Bosch Service Center. Fachkundige Inspektionen und Reparaturen, auch nach dem Kauf.</p></span><span class="go"><svg><use href="#i-arrow"/></svg></span></a>
+    <a class="srow pre" href="#finanzierung" style="--c:#E2232D"><span class="ic"><svg><use href="#i-euro"/></svg></span><span><h3>0 % Finanzierung</h3><p>0 % Zinsen und 0 € Anzahlung über die TARGOBANK. Zum regulären Preis, nicht auf Aktionspreise.</p></span><span class="go"><svg><use href="#i-arrow"/></svg></span></a>
+    <a class="srow pre" href="#versicherung" style="--c:#34D399"><span class="ic"><svg><use href="#i-shield"/></svg></span><span><h3>ENRA Versicherung</h3><p>Schutz gegen Diebstahl, dazu Vollkasko mit Verschleiß und Pick-up-Service.</p></span><span class="go"><svg><use href="#i-arrow"/></svg></span></a>
+    <a class="srow pre" href="#leasing" style="--c:#60A5FA"><span class="ic"><svg><use href="#i-case"/></svg></span><span><h3>Dienstrad-Leasing</h3><p>Wir arbeiten mit fast allen Leasing-Firmen zusammen, z. B. JobRad, Bikeleasing, Company Bike.</p></span><span class="go"><svg><use href="#i-arrow"/></svg></span></a>
    </div>
   </div>
  </div>
@@ -2683,7 +2707,7 @@ m696 -454 c28 -13 46 -31 55 -51 22 -53 -50 -177 -173 -300 -187 -186 -647
 const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>[...r.querySelectorAll(s)];
 const RM=matchMedia('(prefers-reduced-motion: reduce)').matches;
 const ROUTES=['start','service','marken','lager','isy','treffen','dreirad','kontakt','impressum','datenschutz','warum'];
-const ALIAS={deal:['start','deal'],termin:['service','termin-form'],dienstrad:['service','dienstrad'],finder:['marken','finder'],besuch:['start','besuch'],showroom:['start','showroom']};
+const ALIAS={deal:['start','deal'],termin:['service','termin-form'],dienstrad:['service','dienstrad'],beratung:['service','beratung-info'],werkstatt:['service','werkstatt-info'],finanzierung:['service','finanz-info'],versicherung:['service','enra-info'],leasing:['service','leasing-info'],finder:['marken','finder'],besuch:['start','besuch'],showroom:['start','showroom']};
 const WA='491635343133';
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 
