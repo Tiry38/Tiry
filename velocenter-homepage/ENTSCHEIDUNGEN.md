@@ -12,4 +12,4 @@
 - Winter-Aktion: –20 € auf jede Inspektion (nie Prozent) + Sattelüberzug (nie „Satteldecke“), 01.11.2026–28.02.2027, keine festen Inspektionspreise.
 - Bilder immer freigestellt und geschärft.
 
-- Terminformular „Worum geht es?“: Probefahrt, Inspektion, Reparatur, Zubehör, Verfügbarkeit (kein Reifen/Schlauch, keine Bosch-Diagnose); „Um welchen Artikel?“ (statt „Rad“): Fahrrad, E-Bike, E-Dreirad, Zubehör (kein Lastenrad) (12.11.2026).
+- Terminformular „Worum geht es?“: Probefahrt, Inspektion, Reparatur, Verfügbarkeit (kein Zubehör, kein Reifen/Schlauch, keine Bosch-Diagnose); „Um welchen Artikel?“ (statt „Rad“): Fahrrad, E-Bike, E-Dreirad, Zubehör (kein Lastenrad) (12.11.2026).
