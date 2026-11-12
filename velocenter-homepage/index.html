@@ -7,16 +7,16 @@
 <style>
 /* Layout: Logo als Bühne, große Typografie statt Kachelraster, Vollbreiten-Bänder mit Schrägen, Showroom zum Durchblättern */
 :root{
-  --bg:#07080D; --ink:#F6F7FB; --mut:#B2B9CB; --dim:#7E879C; --line:rgba(255,255,255,.1);
-  --red:#E2232D; --brand:#CF1A2C; --mag:#F472B6; --vio:#C084FC; --blu:#60A5FA; --cy:#22D3EE; --ok:#34D399; --warn:#FBBF24; --org:#FF7A1A;
-  --grad:linear-gradient(100deg,#E2232D 0%,#F472B6 34%,#C084FC 66%,#60A5FA 100%);
+  --bg:#FAF7F4; --ink:#1B1E25; --mut:#4A5161; --dim:#6B7282; --line:rgba(27,30,37,.1);
+  --red:#E2232D; --brand:#CF1A2C; --mag:#DB2777; --vio:#7C3AED; --blu:#2563EB; --cy:#0891B2; --ok:#34D399; --warn:#FBBF24; --org:#EA580C;
+  --grad:linear-gradient(100deg,#E2232D 0%,#DB2777 34%,#7C3AED 68%,#2563EB 100%);
   --btn:linear-gradient(115deg,#F2333D 0%,#D0142A 30%,#8E1420 58%,#3A2B30 80%,#2A2D34 100%);
   --ice:linear-gradient(120deg,#22D3EE,#60A5FA 45%,#C084FC);
   --display:"Outfit",ui-sans-serif,system-ui,"Segoe UI",sans-serif;
   --body:"Sora",ui-sans-serif,system-ui,"Segoe UI",sans-serif;
   --ease:cubic-bezier(.2,.8,.2,1); --spring:cubic-bezier(.34,1.5,.64,1); --io:cubic-bezier(.77,0,.18,1);
   --gut:max(20px,env(safe-area-inset-left,0px));
-  color-scheme:dark;
+  color-scheme:light;
 }
 *{box-sizing:border-box}
 html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
@@ -483,6 +483,100 @@ textarea.inp{border-radius:26px;min-height:110px;resize:vertical;line-height:1.5
 }
 @keyframes wfade{0%{transform:none;opacity:0}46%,56%{transform:none;opacity:1}100%{transform:none;opacity:0}}
 @keyframes wfadeL{0%,28%{opacity:0}46%,56%{opacity:1}80%,100%{opacity:0}}
+
+/* ================= Helles Design (Tiry 12.11.2026) ================= */
+.sky{background:
+ radial-gradient(42% 38% at 4% 2%,rgba(147,197,253,.5),transparent 70%),
+ radial-gradient(42% 38% at 98% 0%,rgba(252,165,165,.5),transparent 70%),
+ radial-gradient(46% 42% at 100% 100%,rgba(216,180,254,.45),transparent 70%),
+ radial-gradient(42% 38% at 0% 100%,rgba(153,246,228,.4),transparent 70%),
+ radial-gradient(30% 26% at 50% 55%,rgba(254,215,170,.25),transparent 70%),#FAF7F4}
+.smoke{opacity:.14;mix-blend-mode:multiply}
+.grain{opacity:.025}
+body.sc .hdr{background:rgba(250,247,244,.84);box-shadow:0 1px 0 rgba(27,30,37,.06),0 12px 30px rgba(27,30,37,.06)}
+.hdr .logo img{filter:drop-shadow(0 4px 12px rgba(207,26,44,.16))}
+.nav a:hover,.nav a.on{color:var(--ink)}
+.nav a.on::after{box-shadow:0 0 10px rgba(226,35,45,.45)}
+.ghost{color:var(--ink);background:rgba(255,255,255,.75);border-color:rgba(27,30,37,.16);box-shadow:0 6px 18px rgba(27,30,37,.06)}
+.ghost:hover{background:#fff;border-color:rgba(27,30,37,.32)}
+.burger{border-color:rgba(27,30,37,.14);background:rgba(255,255,255,.85)}
+.burger span{background:var(--ink)}
+.mnu{background:radial-gradient(120% 80% at 100% 0%,rgba(252,165,165,.55),transparent 60%),radial-gradient(100% 70% at 0% 100%,rgba(147,197,253,.5),transparent 60%),rgba(250,247,244,.98)}
+.mnu a.r{color:var(--ink)}
+.wipe i:nth-child(3){background:#FAF7F4}
+.halo{background:radial-gradient(closest-side,rgba(226,35,45,.16),rgba(192,132,252,.12) 55%,transparent 75%)}
+.biglogo{filter:drop-shadow(0 14px 30px rgba(27,30,37,.12))}
+.biglogo .lg-b{fill:#868282}
+.claim{color:var(--mut)}
+.live.open b{color:#059669}.live.closed b{color:#DC2626}
+.cue{border-color:rgba(27,30,37,.25)}.cue::after{background:var(--ink)}
+.outline{-webkit-text-stroke-color:rgba(27,30,37,.12)}
+.band.a{box-shadow:0 18px 40px rgba(226,35,45,.22)}
+.band.b{background:#24272E}
+.show .wm{-webkit-text-stroke-color:color-mix(in srgb,var(--ac) 50%,transparent)}
+.show .glow{background:radial-gradient(closest-side,color-mix(in srgb,var(--ac) 28%,transparent),transparent 72%)}
+.bikearea img.bk{filter:drop-shadow(0 26px 24px rgba(27,30,37,.22))}
+.bikearea .refl{opacity:.1}
+.arrow{border-color:rgba(27,30,37,.14);background:rgba(255,255,255,.9);color:var(--ink);box-shadow:0 8px 20px rgba(27,30,37,.08)}
+.arrow:hover{background:var(--ac);color:#fff}
+.blogo{box-shadow:0 10px 26px rgba(27,30,37,.1);border:1px solid rgba(27,30,37,.06)}
+.thumbs button img{filter:grayscale(1) opacity(.5)}
+.thumbs button.on{color:var(--ink)}
+.blobimg{box-shadow:0 30px 60px rgba(27,30,37,.18)}
+.srow .go{border-color:rgba(27,30,37,.18)}
+.srow:hover .go{background:var(--ink);color:#fff;border-color:var(--ink)}
+.ice{background:linear-gradient(120deg,#DBF1FF,#DDE4FF 45%,#ECDDFF 78%,#FFE1EE)}
+.ice::before{background:radial-gradient(50% 70% at 85% 30%,rgba(56,189,248,.28),transparent 70%),radial-gradient(40% 60% at 10% 80%,rgba(167,139,250,.25),transparent 70%)}
+.minus{background:linear-gradient(180deg,#0EA5E9 10%,#4F46E5 60%,#9333EA);-webkit-background-clip:text;background-clip:text;filter:drop-shadow(0 10px 26px rgba(79,70,229,.22))}
+.ice .lead{color:var(--mut)}
+.days span{color:#4338CA}
+.gift svg{background:#fff;color:#4F46E5;box-shadow:0 8px 20px rgba(79,70,229,.15)}
+.score b{background:linear-gradient(180deg,#F59E0B,#D97706 55%,#92400E);-webkit-background-clip:text;background-clip:text}
+.dots button::before{background:rgba(27,30,37,.15)}
+.visit::before{background:linear-gradient(90deg,rgba(250,247,244,.97) 0%,rgba(250,247,244,.9) 38%,rgba(250,247,244,.3) 75%,rgba(250,247,244,.05)),linear-gradient(0deg,var(--bg),transparent 22%,transparent 80%,var(--bg))}
+.day{color:var(--ink)}
+.day.zu span:last-child{color:#DC2626}
+.day.today span:last-child{color:#fff}
+.ph .wm{-webkit-text-stroke-color:rgba(27,30,37,.07)}
+.bandimg::before{background:linear-gradient(90deg,rgba(250,247,244,.97) 24%,rgba(250,247,244,.65) 55%,rgba(250,247,244,0))}
+.partners{color:var(--ink)}
+.fstep b{background:#fff}
+.panel{background:rgba(255,255,255,.78);border-color:rgba(27,30,37,.08);box-shadow:0 30px 60px rgba(27,30,37,.08)}
+.inp{background:#fff;border-color:rgba(27,30,37,.16);color:var(--ink)}
+.choice button{border-color:rgba(27,30,37,.15);background:#fff;color:var(--mut)}
+.choice button:hover{color:var(--ink)}
+.err{color:#DC2626}
+.out{background:#ECFDF5;border-color:#6EE7B7}.out pre{color:#065F46}
+.copy{background:rgba(27,30,37,.07);color:var(--ink)}.copy:hover{background:rgba(27,30,37,.13)}
+.finder{background:radial-gradient(80% 120% at 0% 0%,rgba(252,165,165,.35),transparent 60%),radial-gradient(80% 120% at 100% 100%,rgba(147,197,253,.35),transparent 60%),rgba(255,255,255,.6);border-color:rgba(27,30,37,.08)}
+.fbar i{background:rgba(27,30,37,.1)}
+.fopt{background:#fff;border-color:rgba(27,30,37,.1);box-shadow:0 6px 18px rgba(27,30,37,.05)}
+.fopt:hover{background:#FFF1F4;border-color:var(--red)}
+.fr img{filter:drop-shadow(0 10px 14px rgba(27,30,37,.2))}
+.logowall span{box-shadow:0 8px 22px rgba(27,30,37,.08);border:1px solid rgba(27,30,37,.06)}
+.isyhero{clip-path:polygon(0 0,100% 0,100% 94%,0 100%);padding-bottom:clamp(70px,9vw,130px)}
+.isyhero::before{background:linear-gradient(0deg,rgba(14,11,14,.92) 6%,rgba(14,11,14,.55) 45%,rgba(14,11,14,.2)),linear-gradient(90deg,rgba(255,122,26,.3),transparent 55%)}
+.isyhero .in{color:#fff}
+.isyhero .org{color:#FFB27A}
+.ped::before{opacity:.32}
+.ped img{filter:drop-shadow(0 26px 26px rgba(27,30,37,.22))}
+.road::after{background:repeating-linear-gradient(90deg,rgba(27,30,37,.3) 0 46px,transparent 46px 80px)}
+.road img{filter:drop-shadow(0 16px 16px rgba(27,30,37,.25))}
+.tli .y{color:rgba(27,30,37,.28)}
+.urk{box-shadow:0 30px 60px rgba(27,30,37,.22)}
+.press{color:var(--ink)}
+.fnd p{color:var(--ink)}
+.fnd .k{color:#fff}
+.legal{color:var(--ink)}
+.foot{background:linear-gradient(180deg,transparent,rgba(226,35,45,.06))}
+.foot .fl0 img{filter:drop-shadow(0 12px 30px rgba(207,26,44,.18))}
+.fgrid a{color:var(--ink)}.fgrid a:hover{color:var(--red)}
+.soc a{background:rgba(27,30,37,.06)}.soc a:hover{color:#fff}
+.proto{background:#FEF3C7;border-color:#F59E0B;color:#92400E}
+@media (max-width:640px){
+ .visit::before{background:linear-gradient(0deg,rgba(250,247,244,.97) 45%,rgba(250,247,244,.55)),linear-gradient(0deg,var(--bg),transparent 25%)}
+ .bandimg::before{background:linear-gradient(90deg,rgba(250,247,244,.96) 45%,rgba(250,247,244,.7))}
+}
 </style>
 
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
@@ -916,7 +1010,7 @@ m696 -454 c28 -13 46 -31 55 -51 22 -53 -50 -177 -173 -300 -187 -186 -647
   <canvas id="snow" aria-hidden="true"></canvas>
   <div class="wrap">
    <div class="pre">
-    <p class="eyebrow" style="color:#BFDBFE">Winter-Inspektion <b style="color:#A5F3FC">2026/27</b></p>
+    <p class="eyebrow" style="color:#4338CA">Winter-Inspektion <b style="color:#0284C7">2026/27</b></p>
     <div class="minus" style="margin-top:18px">–20 €</div>
     <h2 class="mid">auf jede Inspektion.</h2>
     <div class="gift"><svg><use href="#i-gift"/></svg><span>Dazu eine Satteldecke mit Velocenter-Logo geschenkt.</span></div>
@@ -1070,7 +1164,7 @@ m696 -454 c28 -13 46 -31 55 -51 22 -53 -50 -177 -173 -300 -187 -186 -647
  <div class="sec" style="padding-top:0">
   <div class="wrap duo">
    <div class="pre">
-    <p class="eyebrow">Ride it! <b style="color:#FFB27A">Love it!</b></p>
+    <p class="eyebrow">Ride it! <b style="color:#EA580C">Love it!</b></p>
     <p class="quote" style="margin-top:20px">„Das 20-Zoll i:SY ist der <span class="org">Porsche</span> unter den E-Bikes.“</p>
     <div class="sig" style="margin-top:24px"><svg><use href="#i-wrench"/></svg>Stefan Hessert</div>
     <p class="lead" style="margin-top:24px">Das besondere Fahrgefühl eines i:SY muss man selbst erleben. Deshalb können Sie bei uns ein i:SY auch übers Wochenende Probe fahren.</p>
@@ -1080,7 +1174,7 @@ m696 -454 c28 -13 46 -31 55 -51 22 -53 -50 -177 -173 -300 -187 -186 -647
   </div>
  </div>
  <div class="sec" style="padding-top:0">
-  <div class="wrap pre"><p class="eyebrow">Einmalig <b style="color:#FFB27A">in Deutschland</b></p><h2 class="big" style="margin-top:16px">Der erste und einzige<br><span class="org">i:SY Werbe-Bus.</span></h2></div>
+  <div class="wrap pre"><p class="eyebrow">Einmalig <b style="color:#EA580C">in Deutschland</b></p><h2 class="big" style="margin-top:16px">Der erste und einzige<br><span class="org">i:SY Werbe-Bus.</span></h2></div>
   <div class="road pre"><img src="img/isy-bus.webp" alt="Linienbus mit i:SY- und Velocenter-Werbung" width="980" height="253"></div>
  </div>
 </section>
@@ -1269,7 +1363,7 @@ m696 -454 c28 -13 46 -31 55 -51 22 -53 -50 -177 -173 -300 -187 -186 -647
   <div class="fgrid">
    <div class="col"><h4>Besuch</h4><span>Hartmannstraße 25</span><span>76744 Wörth am Rhein</span><span style="color:var(--mut)">Nähe TÜV</span></div>
    <div class="col"><h4>Kontakt</h4><a href="tel:+49727178033">07271 78033</a><a href="https://wa.me/491635343133" target="_blank" rel="noopener">WhatsApp 0163 5343133</a><a href="mailto:info@velo-center.de">info@velo-center.de</a></div>
-   <div class="col"><h4>Öffnungszeiten</h4><span>Mo, Di, Do, Fr<br>09:00–12:00 · 14:30–18:00</span><span>Sa 09:00–12:00</span><span style="color:#FDA4AF">Mi & So geschlossen</span></div>
+   <div class="col"><h4>Öffnungszeiten</h4><span>Mo, Di, Do, Fr<br>09:00–12:00 · 14:30–18:00</span><span>Sa 09:00–12:00</span><span style="color:#DC2626">Mi & So geschlossen</span></div>
    <div class="col"><h4>Folgen Sie uns</h4><div class="soc"><a href="https://www.instagram.com/velocenterhessert/" target="_blank" rel="noopener" aria-label="Instagram"><svg><use href="#i-ig"/></svg></a><a href="https://www.facebook.com/velocenterhessert" target="_blank" rel="noopener" aria-label="Facebook"><svg><use href="#i-fb"/></svg></a><a href="https://wa.me/491635343133" target="_blank" rel="noopener" aria-label="WhatsApp"><svg><use href="#i-chat"/></svg></a></div><span style="color:var(--mut);font-size:14px">Familienbetrieb seit 1995</span></div>
   </div>
   <div class="legalbar"><span>© <span id="yr">2026</span> Velocenter Hessert</span><span style="display:flex;gap:18px;flex-wrap:wrap"><a href="#impressum">Impressum</a><a href="#impressum">Datenschutz</a><a href="#warum">Prototyp-Infos</a></span></div>
@@ -1382,7 +1476,7 @@ addEventListener('keydown',e=>{if(e.key==='Escape')document.body.classList.remov
 document.addEventListener('click',e=>{const a=e.target.closest('a[href^="#"]');if(!a)return;if(a.dataset.pre)preset(a.dataset.pre);if(a.getAttribute('href')===location.hash){e.preventDefault();go(false)}});
 
 /* ---------- Tempo-Linien hinter dem Logo ---------- */
-(function(){const cv=$('#speed');if(!cv)return;const cx=cv.getContext('2d');let W,H2,L=[];const cols=['226,35,45','244,114,182','192,132,252','96,165,250','255,255,255'];
+(function(){const cv=$('#speed');if(!cv)return;const cx=cv.getContext('2d');let W,H2,L=[];const cols=['226,35,45','219,39,119','124,58,237','37,99,235','27,30,37'];
  function size(){const r=cv.getBoundingClientRect(),dpr=Math.min(2,devicePixelRatio||1);W=r.width;H2=r.height;cv.width=W*dpr;cv.height=H2*dpr;cx.setTransform(dpr,0,0,dpr,0,0);
   L=Array.from({length:Math.round(W/22)},()=>({x:Math.random()*W,y:H2*(.15+Math.random()*.7),l:60+Math.random()*260,v:2+Math.random()*7,w:Math.random()<.2?2:1,c:cols[Math.random()*cols.length|0],a:.08+Math.random()*.35}))}
  function draw(){cx.clearRect(0,0,W,H2);L.forEach(s=>{const g=cx.createLinearGradient(s.x,0,s.x+s.l,0);g.addColorStop(0,'rgba('+s.c+',0)');g.addColorStop(1,'rgba('+s.c+','+s.a+')');cx.strokeStyle=g;cx.lineWidth=s.w;cx.beginPath();cx.moveTo(s.x,s.y);cx.lineTo(s.x+s.l,s.y);cx.stroke();{s.x-=s.v;if(s.x+s.l<0){s.x=W+Math.random()*200;s.y=H2*(.15+Math.random()*.7)}}})}
@@ -1393,7 +1487,7 @@ document.addEventListener('click',e=>{const a=e.target.closest('a[href^="#"]');i
 (function(){const cv=$('#snow');if(!cv)return;const cx=cv.getContext('2d');let W,H2,F=[];
  function size(){const r=cv.getBoundingClientRect();W=r.width;H2=r.height;cv.width=W;cv.height=H2;F=Array.from({length:Math.round(W/14)},()=>({x:Math.random()*W,y:Math.random()*H2,r:.6+Math.random()*2.2,v:.3+Math.random()*1,s:Math.random()*6}))}
  size();addEventListener('resize',size);
- (function loop(t){const r=cv.getBoundingClientRect();if(cur==='start'&&r.bottom>0&&r.top<innerHeight){if(!W)size();cx.clearRect(0,0,W,H2);cx.fillStyle='rgba(255,255,255,.7)';F.forEach(f=>{f.y+=f.v;f.x+=Math.sin((t/1000)+f.s)*.3;if(f.y>H2){f.y=-4;f.x=Math.random()*W}cx.beginPath();cx.arc(f.x,f.y,f.r,0,7);cx.fill()})}requestAnimationFrame(loop)})(0);
+ (function loop(t){const r=cv.getBoundingClientRect();if(cur==='start'&&r.bottom>0&&r.top<innerHeight){if(!W)size();cx.clearRect(0,0,W,H2);cx.fillStyle='rgba(79,70,229,.35)';F.forEach(f=>{f.y+=f.v;f.x+=Math.sin((t/1000)+f.s)*.3;if(f.y>H2){f.y=-4;f.x=Math.random()*W}cx.beginPath();cx.arc(f.x,f.y,f.r,0,7);cx.fill()})}requestAnimationFrame(loop)})(0);
 })();
 
 /* ---------- Bewertungen wechseln ---------- */
@@ -1426,7 +1520,7 @@ $('#kf').addEventListener('submit',e=>{e.preventDefault();const err=$('#kErr');e
  if(!n||!m){err.textContent='Bitte Name und Nachricht ausfüllen.';return}
  const txt='Hallo Velocenter,\n'+m+'\n\n'+n+(c?'\n'+c:'');
  const a=document.createElement('a');a.href=via==='wa'?'https://wa.me/'+WA+'?text='+encodeURIComponent(txt):'mailto:info@velo-center.de?subject='+encodeURIComponent('Anfrage von '+n)+'&body='+encodeURIComponent(txt);if(via==='wa'){a.target='_blank';a.rel='noopener'}document.body.append(a);a.click();a.remove();
- err.style.color='#6EE7B7';err.textContent=via==='wa'?'WhatsApp wird geöffnet. Bitte dort auf Senden tippen.':'Ihr E-Mail-Programm wird geöffnet. Bitte dort auf Senden klicken.'});
+ err.style.color='#059669';err.textContent=via==='wa'?'WhatsApp wird geöffnet. Bitte dort auf Senden tippen.':'Ihr E-Mail-Programm wird geöffnet. Bitte dort auf Senden klicken.'});
 function copy(t,b){const ok=()=>{const o=b.textContent;b.textContent='Kopiert ✓';setTimeout(()=>b.textContent=o,1600)};try{navigator.clipboard.writeText(t).then(ok,()=>{b.textContent=t})}catch(_){b.textContent=t}}
 $$('[data-copy]').forEach(b=>b.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();copy(b.dataset.copy,b)}));
 
