@@ -1737,16 +1737,17 @@ body.fz2 main,body.fz2 .foot{zoom:1.25}
 .tsend .tor{font:700 12px/1 var(--display);letter-spacing:.14em;text-transform:uppercase;color:var(--dim)}
 .tsend .tsh{flex-basis:100%;color:var(--dim);font-size:13.5px}
 @container (max-width:540px){.tsend>.cta{width:100%;justify-content:center}.tsend .tor{width:100%;text-align:center}}
-/* Partner-Logos groß, scharf, verlinkt (Tiry 12.11.2026) */
-.tbig{margin-left:auto;display:grid;place-items:center;padding:18px 34px;border-radius:999px;background:rgba(255,255,255,.78);box-shadow:0 18px 40px -22px color-mix(in srgb,var(--c) 70%,#000),inset 0 0 0 1px color-mix(in srgb,var(--c) 30%,transparent);transition:transform .35s var(--spring),box-shadow .35s}
-.tbig img{display:block;width:auto;max-width:min(320px,62vw)}
-.tbig:hover{transform:translateY(-3px)}
-.tlg{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px;margin-top:22px}
-.tlg a{min-height:92px;display:grid;place-items:center;padding:16px 22px;border-radius:999px;background:rgba(255,255,255,.78);box-shadow:0 14px 30px -20px rgba(37,99,235,.6),inset 0 0 0 1px rgba(96,165,250,.3);transition:transform .35s var(--spring),box-shadow .35s,background .3s}
-.tlg a:hover{transform:translateY(-3px);background:#fff;box-shadow:0 20px 36px -18px rgba(37,99,235,.7),inset 0 0 0 1px rgba(96,165,250,.6)}
+/* Partner-Logos groß, scharf, freigestellt, verlinkt (Tiry 12.11.2026) */
+.tbig{margin-left:auto;display:block;padding:6px 0;transition:transform .35s var(--spring),filter .35s;filter:drop-shadow(0 10px 18px rgba(27,30,37,.16))}
+.tbig img{display:block;width:auto;max-width:min(440px,80vw)}
+.tbig:hover{transform:translateY(-3px);filter:drop-shadow(0 16px 24px rgba(27,30,37,.24))}
+.tlg{display:grid;grid-template-columns:repeat(3,1fr);gap:34px 40px;align-items:center;margin-top:34px}
+.tlg a{display:grid;place-items:center;min-height:96px;padding:6px;transition:transform .35s var(--spring),filter .35s;filter:drop-shadow(0 8px 14px rgba(27,30,37,.12))}
+.tlg a:hover{transform:translateY(-3px) scale(1.04);filter:drop-shadow(0 14px 22px rgba(27,30,37,.2))}
 .tlg img{display:block;width:auto;max-width:100%;object-fit:contain}
 @media (max-width:980px){.tbig{margin-left:0}}
-@media (max-width:520px){.tlg{grid-template-columns:1fr 1fr;gap:10px}.tlg a{min-height:76px;padding:12px 16px}.tlg a:last-child:nth-child(odd){grid-column:1/-1}.tlg img{max-height:32px}.tbig{padding:14px 24px}.tbig img{max-height:56px}}
+@media (max-width:820px){.tlg{grid-template-columns:1fr 1fr}.tlg a:last-child:nth-child(odd){grid-column:1/-1}}
+@media (max-width:520px){.tlg{grid-template-columns:1fr 1fr;gap:22px 18px}.tlg a{min-height:70px}.tlg img{max-height:46px}.tlg a:last-child:nth-child(odd){grid-column:1/-1}.tbig img{max-height:84px}}
 /* ===== Service-Themen mit eigenen Sprungzielen (Tiry 12.11.2026) ===== */
 .tpc,#termin-form,#dienstrad{scroll-margin-top:96px}
 .tnav{display:flex;flex-wrap:wrap;gap:10px;margin-top:26px}
@@ -2379,7 +2380,7 @@ m696 -454 c28 -13 46 -31 55 -51 22 -53 -50 -177 -173 -300 -187 -186 -647
    <p class="eyebrow pre">Finanzierung · Versicherung · <b>Leasing</b></p>
    <h2 class="big pre" style="margin:16px 0 30px">Dein Traumrad. <span class="gt">Clever bezahlt.</span></h2>
    <div class="tpc pre" id="finanz-info" style="--c:#E2232D">
-    <div class="tph"><span class="ic"><svg><use href="#i-euro"/></svg></span><h2>0 % Finanzierung über die TARGOBANK</h2><a class="tbig" href="https://www.targobank.de/" target="_blank" rel="noopener" title="TARGOBANK"><img src="img/logo-targobank.svg" alt="TARGOBANK" style="height:40px" loading="lazy"></a></div>
+    <div class="tph"><span class="ic"><svg><use href="#i-euro"/></svg></span><h2>0 % Finanzierung über die TARGOBANK</h2><a class="tbig" href="https://www.targobank.de/" target="_blank" rel="noopener" title="TARGOBANK"><img src="img/logo-targobank.svg" alt="TARGOBANK" style="height:62px" loading="lazy"></a></div>
     <p class="lead"><b>0 % Zinsen, bis zu 24 Monate, mit Anzahlung:</b> Wir finanzieren dein Traumrad oder E-Bike direkt bei uns im Laden.</p>
     <ul class="tfl">
      <li><b>Antrag im Laden:</b> Wir füllen ihn gemeinsam mit dir aus. Du unterschreibst persönlich bei uns.</li>
@@ -2395,7 +2396,7 @@ m696 -454 c28 -13 46 -31 55 -51 22 -53 -50 -177 -173 -300 -187 -186 -647
    </div>
 
    <div class="tpc pre" id="enra-info" style="--c:#34D399">
-    <div class="tph"><span class="ic"><svg><use href="#i-shield"/></svg></span><h2>Bike-Versicherung mit ENRA</h2><a class="tbig" href="https://www.enra.eu/?dealerid=10190" target="_blank" rel="noopener" title="ENRA – Die E-Bike-Versicherung"><img src="img/logo-enra.svg" alt="ENRA – Die E-Bike-Versicherung" style="height:76px" loading="lazy"></a></div>
+    <div class="tph"><span class="ic"><svg><use href="#i-shield"/></svg></span><h2>Bike-Versicherung mit ENRA</h2><a class="tbig" href="https://www.enra.eu/?dealerid=10190" target="_blank" rel="noopener" title="ENRA – Die E-Bike-Versicherung"><img src="img/logo-enra.svg" alt="ENRA – Die E-Bike-Versicherung" style="height:118px" loading="lazy"></a></div>
     <p class="lead">Auch das beste Schloss schützt nicht vor Diebstahl. Eine Versicherung mit unserem Partner ENRA schon, zumindest finanziell.</p>
     <p class="tsub">Zwei Tarife</p>
     <ul class="tfl">
@@ -2427,7 +2428,7 @@ m696 -454 c28 -13 46 -31 55 -51 22 -53 -50 -177 -173 -300 -187 -186 -647
    <div class="tpc pre" id="leasing-info" style="--c:#60A5FA">
     <div class="tph"><span class="ic"><svg><use href="#i-case"/></svg></span><h2>Dienstrad-Leasing mit fast allen Anbietern</h2></div>
     <p class="lead">Mach dein E-Bike zum Dienstrad. Die Rate läuft über deinen Arbeitgeber, wir kümmern uns um Angebot und Übergabe. Wir arbeiten unter anderem zusammen mit:</p>
-    <div class="tlg"><a href="https://www.jobrad.org/" target="_blank" rel="noopener" title="JobRad"><img src="img/lea-jr.svg" alt="JobRad" style="height:34px" loading="lazy"></a><a href="https://www.bikeleasing.de/" target="_blank" rel="noopener" title="Bikeleasing"><img src="img/lea-bl.svg" alt="Bikeleasing" style="height:24px" loading="lazy"></a><a href="https://company-bike.com/" target="_blank" rel="noopener" title="Company Bike"><img src="img/lea-cb.webp" alt="Company Bike" style="height:44px" loading="lazy"></a><a href="https://www.businessbike.de/" target="_blank" rel="noopener" title="Businessbike"><img src="img/lea-bb.svg" alt="Businessbike" style="height:40px" loading="lazy"></a><a href="https://www.deutsche-dienstrad.de/" target="_blank" rel="noopener" title="Deutsche Dienstrad"><img src="img/lea-dd.svg" alt="Deutsche Dienstrad" style="height:38px" loading="lazy"></a><a href="https://www.lease-a-bike.de/" target="_blank" rel="noopener" title="Lease a Bike"><img src="img/lea-lb.svg" alt="Lease a Bike" style="height:44px" loading="lazy"></a><a href="https://www.eurorad.de/" target="_blank" rel="noopener" title="Eurorad"><img src="img/lea-er.svg" alt="Eurorad" style="height:30px" loading="lazy"></a><a href="https://www.kazenmaier.de/" target="_blank" rel="noopener" title="Kazenmaier Leasing"><img src="img/lea-km.svg" alt="Kazenmaier Leasing" style="height:46px" loading="lazy"></a><a href="https://radimdienst.de/" target="_blank" rel="noopener" title="RIDE – Rad im Dienst"><img src="img/lea-rd.webp" alt="RIDE – Rad im Dienst" style="height:44px" loading="lazy"></a></div>
+    <div class="tlg"><a href="https://www.jobrad.org/" target="_blank" rel="noopener" title="JobRad"><img src="img/lea-jr.svg" alt="JobRad" style="height:52px" loading="lazy"></a><a href="https://www.bikeleasing.de/" target="_blank" rel="noopener" title="Bikeleasing"><img src="img/lea-bl.svg" alt="Bikeleasing" style="height:36px" loading="lazy"></a><a href="https://company-bike.com/" target="_blank" rel="noopener" title="Company Bike"><img src="img/lea-cb.webp" alt="Company Bike" style="height:70px" loading="lazy"></a><a href="https://www.businessbike.de/" target="_blank" rel="noopener" title="Businessbike"><img src="img/lea-bb.svg" alt="Businessbike" style="height:62px" loading="lazy"></a><a href="https://www.deutsche-dienstrad.de/" target="_blank" rel="noopener" title="Deutsche Dienstrad"><img src="img/lea-dd.svg" alt="Deutsche Dienstrad" style="height:58px" loading="lazy"></a><a href="https://www.lease-a-bike.de/" target="_blank" rel="noopener" title="Lease a Bike"><img src="img/lea-lb.svg" alt="Lease a Bike" style="height:72px" loading="lazy"></a><a href="https://www.eurorad.de/" target="_blank" rel="noopener" title="Eurorad"><img src="img/lea-er.svg" alt="Eurorad" style="height:46px" loading="lazy"></a><a href="https://www.kazenmaier.de/" target="_blank" rel="noopener" title="Kazenmaier Leasing"><img src="img/lea-km.svg" alt="Kazenmaier Leasing" style="height:74px" loading="lazy"></a><a href="https://radimdienst.de/" target="_blank" rel="noopener" title="RIDE – Rad im Dienst"><img src="img/lea-rd.webp" alt="RIDE – Rad im Dienst" style="height:70px" loading="lazy"></a></div>
     <p class="tsub">So funktioniert es</p>
     <ul class="tfl">
      <li><b>Dein Arbeitgeber wählt den Anbieter</b> und legt den Rahmen fest, zum Beispiel Preisgrenze und erlaubtes Zubehör.</li>
