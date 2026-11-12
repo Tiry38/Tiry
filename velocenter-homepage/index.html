@@ -1731,6 +1731,29 @@ body.fz2 main,body.fz2 .foot{zoom:1.25}
  linear-gradient(115deg,transparent 0 62%,rgba(38,40,47,.07) 62% 63.5%,transparent 63.5% 66%,rgba(200,16,46,.07) 66% 67%,transparent 67%),
  linear-gradient(115deg,transparent 0 18%,rgba(38,40,47,.06) 18% 19%,transparent 19%)}
 @media (prefers-reduced-motion:reduce){.blobs::after{animation:none}}
+/* Terminformular: Absenden oder direkt per WhatsApp (Tiry 12.11.2026) */
+#tf{container-type:inline-size}
+.tsend{display:grid;grid-template-columns:auto auto auto;justify-content:start;align-items:center;gap:14px;margin-top:6px}
+.twa span{white-space:nowrap}
+.tgo,.twa{position:relative;overflow:hidden;isolation:isolate;display:inline-flex;align-items:center;border:0;cursor:pointer;border-radius:999px;min-height:60px;font-family:var(--display);transition:transform .35s var(--spring),box-shadow .35s}
+.tgo{gap:14px;padding:0 8px 0 26px;color:#fff;font-weight:800;font-size:15px;letter-spacing:.02em;background:linear-gradient(120deg,#E2232D,#B0123F 55%,#6B2C5F);background-size:180% 100%;box-shadow:0 16px 30px -14px rgba(200,16,46,.75);animation:tgrad 7s ease-in-out infinite}
+.tgo i,.twa i{width:44px;height:44px;border-radius:50%;display:grid;place-items:center;flex:none}
+.tgo i{background:rgba(255,255,255,.18);box-shadow:inset 0 0 0 1px rgba(255,255,255,.35)}
+.tgo i svg{width:20px;height:20px;transition:transform .4s var(--spring)}
+.tgo:hover i svg{transform:translateX(3px)}
+.twa{gap:12px;padding:8px 22px 8px 8px;color:#fff;text-align:left;background:linear-gradient(120deg,#2BD66F,#1FA855 50%,#0E7A4D);background-size:180% 100%;box-shadow:0 16px 32px -14px rgba(31,168,85,.85);animation:tgrad 7s ease-in-out infinite reverse}
+.twa i{background:#fff;color:#1FA855;box-shadow:0 6px 14px -6px rgba(0,0,0,.35)}
+.twa i svg{width:24px;height:24px}
+.twa b{display:block;font-weight:800;font-size:15.5px;line-height:1.15}
+.twa small{display:block;font:600 12.5px/1.25 var(--body,inherit);opacity:.92;margin-top:2px}
+.tgo::after,.twa::after{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(105deg,transparent 35%,rgba(255,255,255,.28) 50%,transparent 65%);transform:translateX(-120%);transition:transform .8s var(--ease)}
+.tgo:hover,.twa:hover{transform:translateY(-2px)}
+.tgo:hover::after,.twa:hover::after{transform:translateX(120%)}
+.tgo:focus-visible,.twa:focus-visible{outline:3px solid var(--ink);outline-offset:3px}
+.tsend .tor{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;font:800 11px/1 var(--display);letter-spacing:.06em;text-transform:uppercase;color:var(--dim);background:rgba(255,255,255,.7);box-shadow:inset 0 0 0 1px var(--line)}
+@keyframes tgrad{0%,100%{background-position:0 0}50%{background-position:100% 0}}
+@media (prefers-reduced-motion:reduce){.tgo,.twa{animation:none}.tgo::after,.twa::after{display:none}}
+@container (max-width:540px){.tsend{grid-template-columns:1fr;justify-content:stretch}.tgo{justify-content:space-between}.tsend .tor{justify-self:center}}
 /* ===== Service-Themen mit eigenen Sprungzielen (Tiry 12.11.2026) ===== */
 .tpc,#termin-form,#dienstrad{scroll-margin-top:96px}
 .tnav{display:flex;flex-wrap:wrap;gap:10px;margin-top:26px}
@@ -2352,7 +2375,7 @@ m696 -454 c28 -13 46 -31 55 -51 22 -53 -50 -177 -173 -300 -187 -186 -647
     <div class="r2"><div class="fl"><label for="tTag">Wunschtag</label><input class="inp" id="tTag" type="date"></div><div class="fl"><span class="flab">Tageszeit</span><div class="choice" id="tZeit"><button type="button" data-v="Vormittag">Vormittag</button><button type="button" data-v="Nachmittag">Nachmittag</button><button type="button" class="on" data-v="egal">Egal</button></div></div></div>
     <div class="fl"><label for="tMsg">Deine Nachricht (optional)</label><textarea class="inp" id="tMsg" placeholder="z. B. Bremse quietscht, Akku lädt nicht, Modell …"></textarea></div>
     <div class="err" id="tErr" role="alert"></div>
-    <button class="cta" type="submit" style="align-self:flex-start"><svg><use href="#i-arrow"/></svg>Anfrage erstellen</button>
+    <div class="tsend"><button class="tgo" type="submit" data-via="out"><span>Anfrage erstellen</span><i><svg><use href="#i-arrow"/></svg></i></button><span class="tor" aria-hidden="true">oder</span><button class="twa" type="submit" data-via="wa"><i><svg><use href="#i-chat"/></svg></i><span><b>Per WhatsApp</b><small>Alles schon ausgefüllt</small></span></button></div>
     <div class="out" id="tOut" hidden><b style="font-family:var(--display)">Deine Anfrage ist fertig:</b><pre id="tTxt"></pre><div class="row"><a class="cta wa" id="tWa" target="_blank" rel="noopener"><svg><use href="#i-chat"/></svg>Per WhatsApp senden</a><a class="ghost" id="tMail"><svg><use href="#i-mail"/></svg>Per E-Mail</a><button type="button" class="copy" id="tCopy">Text kopieren</button></div><p class="note">Oder ruf an: 07271 78033.</p></div>
    </form>
   </div>
@@ -2950,12 +2973,14 @@ const val=id=>$('#'+id+' button.on')?.dataset.v||'';
 function preset(t){const m=$('#tMsg');if(/Inspektion/.test(t))$$('#tArt button').forEach(b=>b.classList.toggle('on',b.dataset.v==='Inspektion'));if(/^Probefahrt/.test(t)){$$('#tArt button').forEach(b=>b.classList.toggle('on',b.dataset.v==='Probefahrt'));const n=t.replace(/^Probefahrt\s*/,'');if(m&&!m.value&&n)m.value='Interesse: '+n;return}if(m&&!m.value)m.value=t+': '}
 const tTag=$('#tTag');const tm=new Date();tm.setDate(tm.getDate()+1);tTag.min=tm.toISOString().slice(0,10);
 const fmt=s=>{const[y,m,d]=s.split('-');return d+'.'+m+'.'+y};
-$('#tf').addEventListener('submit',e=>{e.preventDefault();const err=$('#tErr');err.textContent='';
+let tVia='out';$$('#tf button[type=submit]').forEach(b=>b.addEventListener('click',()=>tVia=b.dataset.via));
+$('#tf').addEventListener('submit',e=>{e.preventDefault();const err=$('#tErr');err.textContent='';const viaWa=tVia==='wa';tVia='out';
  const name=$('#tName').value.trim(),tel=$('#tTel').value.trim(),tag=tTag.value,msg=$('#tMsg').value.trim();
  if(!name){err.textContent='Bitte gib deinen Namen ein.';$('#tName').focus();return}
- if(!tel){err.textContent='Bitte gib eine Telefonnummer für die Rückmeldung ein.';$('#tTel').focus();return}
+ if(!tel&&!viaWa){err.textContent='Bitte gib eine Telefonnummer für die Rückmeldung ein.';$('#tTel').focus();return}
  if(tag){const wd=new Date(tag+'T12:00:00').getDay();if(wd===3||wd===0){err.textContent='Mittwoch und Sonntag haben wir geschlossen. Bitte wähle einen anderen Tag.';tTag.focus();return}if(tag<tTag.min){err.textContent='Bitte wähle einen Tag ab morgen.';tTag.focus();return}}
- const pf=val('tArt')==='Probefahrt';const txt='Hallo Velocenter,\n'+(pf?'ich möchte eine Probefahrt vereinbaren.':/Inspektion|Reparatur/.test(val('tArt'))?'ich möchte einen Werkstatt-Termin anfragen.':'ich habe eine Anfrage.')+'\n\nAnliegen: '+val('tArt')+'\nArtikel: '+val('tRad')+'\nWunschtag: '+(tag?DN[new Date(tag+'T12:00:00').getDay()]+', '+fmt(tag):'egal')+'\nTageszeit: '+val('tZeit')+(msg?'\nInfo: '+msg:'')+'\n\nName: '+name+'\nTelefon: '+tel;
+ const pf=val('tArt')==='Probefahrt';const txt='Hallo Velocenter,\n'+(pf?'ich möchte eine Probefahrt vereinbaren.':/Inspektion|Reparatur/.test(val('tArt'))?'ich möchte einen Werkstatt-Termin anfragen.':'ich habe eine Anfrage.')+'\n\nAnliegen: '+val('tArt')+'\nArtikel: '+val('tRad')+'\nWunschtag: '+(tag?DN[new Date(tag+'T12:00:00').getDay()]+', '+fmt(tag):'egal')+'\nTageszeit: '+val('tZeit')+(msg?'\nInfo: '+msg:'')+'\n\nName: '+name+(tel?'\nTelefon: '+tel:'');
+ if(viaWa){waOpen(txt);return}
  $('#tTxt').textContent=txt;$('#tWa').href='https://wa.me/'+WA+'?text='+encodeURIComponent(txt);
  $('#tMail').href='mailto:info@velo-center.de?subject='+encodeURIComponent('Terminanfrage: '+val('tArt')+' ('+name+')')+'&body='+encodeURIComponent(txt);
  const o=$('#tOut');o.hidden=false;o.scrollIntoView({behavior:RM?'auto':'smooth',block:'nearest'})});
