@@ -1115,16 +1115,35 @@ textarea.inp{border-radius:12px}
 
 /* Sonderangebote-Knopf + Varianten */
 .ph .wrap{position:relative}
-.deals{position:absolute;top:0;right:max(24px,env(safe-area-inset-right,0px));display:flex;align-items:center;gap:14px;padding:12px 18px 12px 12px;border-radius:10px;border:0;cursor:pointer;color:#fff;background:#C8102E;box-shadow:0 1px 2px rgba(27,30,37,.2),0 18px 36px -18px rgba(200,16,46,.75);text-align:left;transition:background .25s,transform .3s var(--ease)}
-.deals:hover{background:#A60D25;transform:translateY(-2px)}
-.deals .pct{position:relative;width:52px;height:52px;border-radius:8px;display:grid;place-items:center;background:#fff;color:#C8102E;font:900 28px/1 var(--display)}
-.deals .pct::after{content:"";position:absolute;inset:-4px;border-radius:10px;border:2px solid rgba(255,255,255,.7);animation:dealPing 2.2s ease-out infinite}
-@keyframes dealPing{from{transform:scale(.92);opacity:1}to{transform:scale(1.25);opacity:0}}
-.deals .t b{display:block;font:800 15px/1.1 var(--display);letter-spacing:.14em;text-transform:uppercase}
-.deals .t small{display:block;margin-top:5px;font:600 13px/1 var(--display);color:rgba(255,255,255,.85)}
-.deals .ar{font:600 20px/1 var(--display);transition:transform .3s var(--ease)}
-.deals:hover .ar{transform:translateX(4px)}
-.deals.on{background:#1B1E25}.deals.on .pct{color:#1B1E25}.deals.on .ar{transform:rotate(180deg)}
+.deals{position:absolute;top:0;right:max(24px,env(safe-area-inset-right,0px));isolation:isolate;overflow:hidden;display:flex;align-items:center;gap:16px;min-width:360px;padding:10px 10px 10px 10px;border-radius:14px;border:1.5px solid transparent;cursor:pointer;color:#fff;text-align:left;
+ background:linear-gradient(160deg,#2A2E37 0%,#1B1E25 55%,#121419 100%) padding-box,linear-gradient(115deg,#FF3A52 0%,#C8102E 30%,rgba(184,115,51,.55) 65%,#E8C9A0 100%) border-box;
+ box-shadow:0 1px 0 rgba(255,255,255,.08) inset,0 2px 4px rgba(18,20,25,.25),0 26px 48px -22px rgba(200,16,46,.65),0 14px 30px -18px rgba(18,20,25,.55);transition:transform .35s var(--ease),box-shadow .35s var(--ease)}
+.deals::before{content:"";position:absolute;inset:0;z-index:-1;background:radial-gradient(120% 140% at 0% 50%,rgba(200,16,46,.38),transparent 55%),radial-gradient(80% 120% at 100% 0%,rgba(184,115,51,.22),transparent 60%)}
+.deals::after{content:"";position:absolute;top:-20%;bottom:-20%;left:-40%;width:28%;z-index:1;pointer-events:none;background:linear-gradient(100deg,transparent,rgba(255,255,255,.16) 45%,rgba(255,255,255,.04) 60%,transparent);transform:skewX(-18deg);animation:dealShine 5.5s cubic-bezier(.6,0,.2,1) infinite 1.2s}
+@keyframes dealShine{0%{left:-40%}28%,100%{left:130%}}
+.deals:hover{transform:translateY(-3px);box-shadow:0 1px 0 rgba(255,255,255,.1) inset,0 4px 8px rgba(18,20,25,.25),0 34px 56px -22px rgba(200,16,46,.8),0 18px 34px -18px rgba(18,20,25,.6)}
+.deals:focus-visible{outline:3px solid #C8102E;outline-offset:4px}
+.deals .pct{position:relative;flex:none;width:60px;height:60px;border-radius:11px;display:grid;place-items:center;color:#fff;font:900 30px/1 var(--display);text-shadow:0 2px 6px rgba(90,0,15,.45);
+ background:linear-gradient(150deg,#FF4D63 0%,#E0162F 38%,#A50C24 75%,#6E0716 100%);box-shadow:inset 0 1px 0 rgba(255,255,255,.4),inset 0 -8px 16px rgba(80,0,12,.35),0 10px 22px -10px rgba(200,16,46,.9)}
+.deals .pct::before{content:"";position:absolute;inset:0;border-radius:inherit;background:linear-gradient(180deg,rgba(255,255,255,.28),transparent 48%);pointer-events:none}
+.deals .pct::after{content:"";position:absolute;inset:-5px;border-radius:14px;border:1.5px solid rgba(255,77,99,.75);animation:dealPing 2.4s ease-out infinite}
+@keyframes dealPing{from{transform:scale(.9);opacity:1}to{transform:scale(1.28);opacity:0}}
+.deals .pct span{display:inline-block;transition:transform .5s var(--ease)}
+.deals:hover .pct span{transform:rotate(-12deg) scale(1.1)}
+.deals .t{flex:1;min-width:0;display:flex;flex-direction:column;gap:4px}
+.deals .t .k{font:700 10.5px/1 var(--display);letter-spacing:.2em;text-transform:uppercase;color:#E8C9A0}
+.deals .t b{display:block;font:800 18px/1.05 var(--display);letter-spacing:.12em;text-transform:uppercase;background:linear-gradient(90deg,#fff 0%,#fff 60%,#FFD6DC 100%);-webkit-background-clip:text;background-clip:text;color:transparent}
+.deals .t .m{display:flex;flex-wrap:wrap;align-items:center;gap:6px 8px;margin-top:2px}
+.deals .t small{font:600 12.5px/1 var(--display);color:rgba(255,255,255,.78)}
+.deals .t em{font:800 11.5px/1 var(--display);font-style:normal;letter-spacing:.04em;padding:4px 7px;border-radius:5px;color:#fff;background:linear-gradient(90deg,#C8102E,#E0162F)}
+.deals .ar{flex:none;width:44px;height:44px;border-radius:9px;display:grid;place-items:center;border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.05);transition:background .3s,border-color .3s,transform .35s var(--ease)}
+.deals .ar svg{width:18px;height:18px;transition:transform .35s var(--ease)}
+.deals:hover .ar{background:#C8102E;border-color:#C8102E}
+.deals:hover .ar svg{transform:translateX(3px)}
+.deals.on{background:linear-gradient(160deg,#FFFFFF,#F4EDE3) padding-box,linear-gradient(115deg,#1B1E25,#868282 60%,#E8C9A0) border-box;color:#1B1E25}
+.deals.on::before{opacity:.25}.deals.on .t b{background:none;color:#1B1E25}.deals.on .t small{color:#4A4F5A}.deals.on .t .k{color:#9A5B22}
+.deals.on .ar{border-color:rgba(27,30,37,.2);background:rgba(27,30,37,.05)}.deals.on .ar svg{transform:rotate(180deg)}.deals.on:hover .ar svg{transform:rotate(180deg) translateX(3px)}.deals.on:hover .ar{color:#fff}
+@media (prefers-reduced-motion:reduce){.deals::after{animation-duration:9s}}
 .lgc.deal{border-color:rgba(200,16,46,.45)}
 .lgpr b em{font-style:normal;font-size:.62em;font-weight:700;color:var(--dim);margin-right:2px}
 .sp .fs i{margin-right:-3px}
@@ -1135,7 +1154,7 @@ textarea.inp{border-radius:12px}
 .lgvar .vs button small{font-size:11.5px;font-weight:700;padding:3px 6px;border-radius:5px}
 .lgvar .vs button small.ok{color:#047857;background:#D1FAE5}.lgvar .vs button small.z{color:#92400E;background:#FEF3C7}
 .lgvar .vs button.on{border-color:#1B1E25;box-shadow:inset 0 0 0 1px #1B1E25}
-@media (max-width:980px){.deals{position:static;margin-top:24px}}
+@media (max-width:980px){.deals{position:static;margin-top:24px;min-width:0;width:100%;max-width:440px}.deals .t b{font-size:15.5px;letter-spacing:.09em;white-space:nowrap}.deals .pct{width:52px;height:52px;font-size:26px}}
 
 /* Platzhalter, wenn kein passendes Foto vorhanden */
 .lgst .phl{display:flex;flex-direction:column;align-items:center;gap:10px;padding:18px 26px;border-radius:12px;background:rgba(255,255,255,.75);box-shadow:0 10px 24px -14px rgba(27,30,37,.3)}
@@ -1897,7 +1916,7 @@ m696 -454 c28 -13 46 -31 55 -51 22 -53 -50 -177 -173 -300 -187 -186 -647
    <h1 class="mega hello" style="--d:.08s;margin-top:18px">Sofort da.<br><span class="gt it">Sofort Probe fahren.</span></h1>
    <p class="lead hello" style="--d:.16s">Diese Räder stehen jetzt bei uns in Wörth. Rad antippen, in Ruhe ansehen und direkt anfragen: kaufen, reservieren oder Probe fahren.</p>
    <div class="lgnum hello" style="--d:.24s" id="lgNum"></div>
-   <button type="button" class="deals hello" style="--d:.3s" id="lgDeals" aria-pressed="false"><span class="pct">%</span><span class="t"><b id="lgDealsT">Sonderangebote</b><small id="lgDealsN">reduzierte Räder</small></span><span class="ar" aria-hidden="true">→</span></button>
+   <button type="button" class="deals hello" style="--d:.3s" id="lgDeals" aria-pressed="false"><span class="pct"><span>%</span></span><span class="t"><span class="k" id="lgDealsK">Nur solange vorrätig</span><b id="lgDealsT">Sonderangebote</b><span class="m"><small id="lgDealsN">reduzierte Räder</small><em id="lgDealsS" hidden></em></span></span><span class="ar" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></button>
   </div>
  </div>
  <div class="wrap">
@@ -2202,7 +2221,29 @@ const lgMkName=r=>(lgBrand(r.marke)||{n:r.marke}).n;
 const LG_FOTO={isy:['Kompaktrad',''],qio:['Kompaktrad',''],ktm:['Tiefeinsteiger'],vdv:['Tiefeinsteiger'],vanraam:['Dreirad',''],gudereit:['Kompaktrad',''],victoria:['Tiefeinsteiger']};
 function lgImg(r){const b=lgBrand(r.marke);if(!b)return '';const ok=LG_FOTO[b.k];if(ok&&!ok.includes(r.rahmen||''))return '';if(b.k==='isy'&&/touring/i.test(r.modell))return 'img/p-isy2.webp';return b.img}
 const FARB=[[/schwarz|black|anthrazit|graphit/i,'#23252B'],[/wei(ß|ss)|white|creme|cream/i,'#F4F1EA'],[/silber|silver|alu/i,'#B9BDC4'],[/grau|grey|gray/i,'#8C9097'],[/t(ü|ue)rkis|turquoise|aqua|mint/i,'#2CC5C0'],[/petrol/i,'#1F6F78'],[/blau|blue/i,'#3A6FD8'],[/oliv|olive/i,'#7A7F3A'],[/gr(ü|ue)n|green/i,'#2F7D4F'],[/ros(é|e)|rosa|pink/i,'#E6A3C8'],[/rot|red/i,'#C8102E'],[/orange/i,'#F07A1A'],[/gelb|yellow|gold/i,'#E8B923'],[/beige|sand|champagner/i,'#D9C3A0'],[/lila|violett|purple|lavendel/i,'#8E6CC9'],[/braun|brown/i,'#7A5236']];
-const lgFarbe=f=>{const x=FARB.find(([re])=>re.test(f||''));return x?x[1]:'#9AA0A8'};
+/* Farberkennung aus der KI-Zentrale (Veloport-/Herstellernamen, Klammer = Akzent, zuerst genannte Farbe gewinnt) */
+let FARB_C=new Map();
+const FARB_NAMEN=[['pepper black','#1b1b1d'],['diamond black','#16171a'],['night black','#141518'],['deep black','#101012'],['lazer black','#121214'],['stealth black','#151517'],['velvet black','#141416'],['phantom black','#121214'],['universe black','#121216'],['black gold','#1a1a1a'],['tiefschwarz','#0f0f10'],
+ ['emerald grey','#55655f'],['machine grey','#6f747a'],['maschine grey','#6f747a'],['stone basalt','#55595d'],['basalt','#55595d'],['lead metal','#575a5f'],['cloud grey','#a9afb5'],['arctic grey','#b8c0c6'],['marble grey','#9b9c9e'],['slate grey','#5d6770'],['meteor grey','#6e7378'],['granite grey','#676767'],['midnight grey','#3f4148'],['foggy grey','#b6bbbf'],['moss grey','#6b7466'],['moosgrau','#6b7466'],['eco grey','#7d8278'],['steel grey','#6c7378'],['urano grey','#7a7f86'],['iron glimmer','#4f5357'],['wet asphalt','#3e4247'],['wet-asphalt','#3e4247'],['lavagrau','#5a5c5e'],['bluegrey','#6b7f95'],['moon rock','#9b9b97'],['stardust','#9ea3b0'],['dark sea','#2e4a55'],['oyster grey','#9a9c9a'],
+ ['cosmos blue','#2b4a8b'],['night blue','#1e2a4a'],['nightblue','#1e2a4a'],['nachtblau','#1e2a4a'],['riviera blue','#2f7bb8'],['ice blue','#a9d6f5'],['ocean blue','#1f5f8b'],['ozeanblau','#1f5f8b'],['dusty blue','#7a9bb5'],['galactic blue','#2a3f8f'],['retro blue','#4a7fb5'],['urban blue','#3d5a80'],['vital blue','#2d6db5'],['vitalblue','#2d6db5'],['petrol blue','#1f5f6b'],['deep sea blue','#123c63'],['glacier blue','#9fc6e0'],['horizon blue','#5a9bd5'],['sky blue','#87ceeb'],['beryllblau','#3d7ba8'],['beryl blue','#3d7ba8'],['azurblau','#2f86d6'],['wasserblau','#64a8d8'],['dunkelblau','#1e2f5a'],['hellblau','#7fb6e8'],['lightblue','#7fb6e8'],['metallic blue','#2c5aa0'],['silver blue','#8fa7c4'],
+ ['opal green','#7fb8a4'],['chrome green','#3e6b48'],['british green','#1f4d36'],['britsh green','#1f4d36'],['brith green','#1f4d36'],['britischgrün','#1f4d36'],['froggy green','#6dbe45'],['sage green','#9caf88'],['racing green','#0f5132'],['forest green','#228b22'],['emerald green','#1f7a4d'],['emmerald green','#1f7a4d'],['oxygen green','#5fb37d'],['darkmore green','#2f4f3a'],['dark olive','#4b5320'],['light olive','#8a9a5b'],['olive pearl','#6b7350'],['olive green','#708238'],['jungle green','#29ab87'],['venom green','#6cbf3a'],['lime green','#a4d93b'],['mint green','#98e2c6'],['ice green','#a8dcc4'],['eucalyptus green','#5f8575'],['deep green','#1e4d2b'],['soft mint','#a8e6cf'],['faded mint','#b4dccb'],['fadet mint','#b4dccb'],['fedded mint','#b4dccb'],['feded mint','#b4dccb'],['diamantgrün','#1f7a4d'],['dormantgrün','#4e6b45'],['kiwi','#8ee53f'],['hellgrün','#8fd46b'],['lightgreen','#8fd46b'],['neon green','#4dff4d'],['neon-grün','#4dff4d'],['lemon grün','#c8e64a'],['bright teal','#00a3a3'],['dark cyan','#008b8b'],['shiny petrol','#1f7a85'],
+ ['berry red','#8e1b3a'],['poppy red','#e03c31'],['imola red','#c8102e'],['imola rot','#c8102e'],['scarlet red','#d7263d'],['scarlett red','#d7263d'],['shining red','#e3242b'],['racing red','#d3212c'],['ruby red','#9b111e'],['wine red','#722f37'],['weinrot','#722f37'],['bordeaux','#6d1a2a'],['wild cherry','#8b1e3f'],['deep red','#8b0000'],['hot pepper red','#c1121f'],['mercury red','#b3122e'],['ferrarirot','#d40000'],['ferrarierot','#d40000'],['ferrari red','#d40000'],['planetrot','#b8202f'],['night red','#6e1423'],
+ ['happy orange','#ff8a1e'],['juicy orange','#ff8c1a'],['burnt orange','#cc5500'],['fire orange','#ff5a1f'],['fresh orange','#ff9a2e'],['reinorange','#ff7a00'],['gelborange','#ffa500'],
+ ['sunny yellow','#f7c82b'],['melon yellow','#f5d547'],['melonengelb','#f5d547'],['sonnengelb','#f7c82b'],['bitter lemon','#e5e34a'],['lemon','#f2e14c'],['neon yellow','#e8ff3a'],['neon-gelb','#e8ff3a'],
+ ['pop art white','#f2f2ee'],['pure white','#f7f7f5'],['seashell white','#f4ede4'],['seashellwhite','#f4ede4'],['crystal white','#f7f7f7'],['chrystalwhite','#f7f7f7'],['lunar white','#ecece8'],['metallic white','#eceef0'],['carrara white','#f3f3f0'],['cararra white','#f3f3f0'],['misty white','#eef0f2'],['pearlwhite','#f2efe8'],['aluweiß','#e6e6e2'],['aluweis','#e6e6e2'],['weißalu','#e6e6e2'],['aluminiumweiß','#e6e6e2'],['aluminiumweiss','#e6e6e2'],['weissaluminium','#e6e6e2'],['hellelfenbein','#f3ebd3'],['elfenbein','#f0e6c8'],['creamy beige','#e8dcc2'],
+ ['sweet lavender','#b9a7e0'],['french lavender','#a98bd6'],['velvet purple','#5b2a86'],['speed violet','#6a3fb5'],['deep violet','#4b2a7a'],['dark violett','#4b2a7a'],['pink punch','#ff4f9a'],['flash pink','#ff3e9a'],['chrome pink','#e05aa0'],['fandango','#b53389'],['fuchsia','#c21e8c'],['rose','#e8a0b4'],
+ ['platin bronze','#8c7356'],['mocca brown','#6b4a3a'],['sahara brown','#a97b50'],['copper brown','#8a5a3b'],['oak','#8b6a43'],['muddy','#6b5a45'],['cape town','#b39b7a'],['dusty road','#b49a78'],['python','#8a7f5a'],['champagne','#e8d9b5'],['champagner','#e8d9b5'],['sunset','#e0a96d'],
+ ['royal teal','#0e7c86'],['teal','#008080'],['turquoise','#2ec4b6'],['darkslategrey','#2f4f4f'],['dessert','#c9b18a'],['desert','#c9b18a'],['elderberry','#4a2c3a'],['enzianblau','#1f4fa0'],['ferarrirot','#d40000'],['verkehrsrot','#bb1e10'],['kirschrot','#9b1b30'],['kristallrot','#c41e3a'],['goldgelb','#e8b10f'],['hellbraun','#a9744f'],['dunkelgrau','#4a4d52'],['hellgrau','#b8bcc0'],['lightgrey','#b8bcc0'],['crystalgrey','#a9adb2'],['seidengrau','#b5b8b1'],['taubenblau','#6f8fa8'],['lotusgrün','#6aa36f'],['frozen moss','#7a8f6a'],['curry','#d6a12a'],['lavender','#b9a7e0'],['reinweiß','#f7f7f5'],['reinweiss','#f7f7f5'],['antrazit','#3b3f44'],['antrazhit','#3b3f44'],['ud carbon','#2b2b2b'],['carbon','#2b2b2b'],['graphit','#474a4f'],['anthrazite','#3b3f44'],['anthracite','#3b3f44'],['anthrazit','#3b3f44'],['electric silver','#c7ccd1'],['vogue silver','#bfc3c8'],['cast silver','#b9bec4'],['silbergrau','#a3a8ae'],['silvergrey','#a3a8ae'],['silver grey','#a3a8ae'],['titan','#8d8f92'],
+ ['schwarz','#16171a'],['black','#16171a'],['weiß','#f5f5f3'],['weiss','#f5f5f3'],['weis','#f5f5f3'],['white','#f5f5f3'],['creme','#f0e6cc'],['grau','#8a8f95'],['grey','#8a8f95'],['gray','#8a8f95'],['silber','#c0c4c8'],['silver','#c0c4c8'],['alu','#cfd2d5'],['petrol','#1f6f78'],['türkis','#2ec4b6'],['tuerkis','#2ec4b6'],['pastelltürkis','#8fd8cf'],['mint','#98e2c6'],['navy','#1e2f5a'],['blau','#2e6fd8'],['blue','#2e6fd8'],['oliv','#708238'],['olive','#708238'],['lime','#a4d93b'],['grün','#3fa34d'],['gruen','#3fa34d'],['green','#3fa34d'],['gelb','#f2c318'],['yellow','#f2c318'],['orange','#ff7a1a'],['rot','#d7263d'],['red','#d7263d'],['lila','#8a4fd1'],['violett','#8a4fd1'],['violet','#8a4fd1'],['purple','#8a4fd1'],['pink','#f05aa0'],['rosa','#f29bbf'],['magenta','#d4268a'],['braun','#7b4b2a'],['brown','#7b4b2a'],['kupfer','#b87333'],['copper','#b87333'],['beige','#e5d3b3'],['sand','#d9c49a'],['gold','#d4af37'],['bronze','#a97142']];
+function farbeInfo(t){const k=String(t||'').trim().toLowerCase();if(FARB_C.has(k))return FARB_C.get(k);
+ const s=k.replace(/\([^)]*\)?/g,' ').replace(/^m>\s*/,'');let best=null;
+ for(const [n,c] of FARB_NAMEN){const i=s.search(new RegExp('(^|[^a-zäöüß])'+n.replace(/[-]/g,'\\-')+'(?![a-zäöüß])'));if(i<0)continue;if(!best||i<best.i||(i===best.i&&n.length>best.n.length))best={i,n,c}}
+ /* zusammengeschriebene Namen (Emeraldgreen, Neongrün, Hellgrau, Kirschrot, stonebasalt …): ohne Wortgrenzen, Leer-/Bindestriche ignoriert */
+ if(!best){const s2=s.replace(/[\s\-_]/g,'');for(const [n,c] of FARB_NAMEN){const n2=n.replace(/[\s\-]/g,'');if(n2.length<3)continue;const i=s2.indexOf(n2);if(i<0)continue;if(!best||i<best.i||(i===best.i&&n2.length>best.n.length))best={i,n:n2,c}}}
+ let r=null;if(best){const h=best.c,R=parseInt(h.slice(1,3),16),G=parseInt(h.slice(3,5),16),B=parseInt(h.slice(5,7),16),L=(0.2126*R+0.7152*G+0.0722*B)/255;
+  const mix=(x,a)=>Math.round(x+(255-x)*a);const a=L<0.22?0.62:L<0.35?0.4:0;r={c:h,t:a?'#'+[R,G,B].map(x=>mix(x,a).toString(16).padStart(2,'0')).join(''):h,dunkel:L<0.22,hell:L>0.85}}
+ if(FARB_C.size>3000)FARB_C.clear();FARB_C.set(k,r);return r}
+const lgFarbe=f=>{const r=farbeInfo(f);if(r)return r.c;const x=FARB.find(([re])=>re.test(String(f||'').replace(/\([^)]*\)?/g,' ')));return x?x[1]:'#9AA0A8'};
 const eur=n=>n==null?'':n.toLocaleString('de-DE')+' €';
 const vP=v=>v.angebot||v.preis||0;
 function lgNorm(d){let R=d.raeder;
@@ -2217,13 +2258,14 @@ function lgLoad(){if(LG.load)return LG.load;LG.load=fetch('data/bestand.json',{c
  const nL=LG.M.filter(m=>m.lager).length,nB=LG.M.length-nL,nD=LG.M.filter(m=>m.deal).length,nMk=new Set(LG.M.map(lgMkName)).size;
  $('#lgNum').innerHTML='<span><b>'+nL+'</b> Räder sofort verfügbar</span>'+(nB?'<span><b>'+nB+'</b> Lieferung ausstehend</span>':'')+'<span><b>'+nMk+'</b> Marken</span>';
  $('#lgDealsN').textContent=nD?nD+(nD===1?' Rad reduziert':' Räder reduziert'):'Aktuell keine';$('#lgDeals').hidden=!nD;
+ const mx=Math.max(0,...LG.M.flatMap(m=>m.v||[]).filter(x=>x.angebot&&x.preis>x.angebot).map(x=>x.preis-x.angebot));const se=$('#lgDealsS');se.hidden=!mx;if(mx)se.textContent='bis zu '+eur(mx)+' sparen';
  const q=$('#qkLager');if(q)q.textContent='Jetzt im Laden ansehen';
  lgChips()}).catch(()=>{$('#lgGrid').innerHTML='<p class="lgempty">Der Bestand konnte gerade nicht geladen werden. Rufen Sie uns gern an: 07271 78033.</p>'});return LG.load}
 function lgChips(){const mk=[...new Set(LG.M.map(lgMkName))].sort((a,b)=>a.localeCompare(b,'de'));
  $('#lgMk').innerHTML='<button type="button" data-mk="" class="'+(LG.f.mk?'':'on')+'">Alle Marken</button>'+mk.map(n=>{const b=BR.find(x=>x.n===n);return '<button type="button" data-mk="'+esc(n)+'" title="'+esc(n)+'" class="'+(LG.f.mk===n?'on':'')+(b?' lgo':'')+'">'+(b?'<img src="'+b.logo+'" alt="'+esc(n)+'">':'<span>'+esc(n)+'</span>')+'</button>'}).join('');
  const rf=[...new Set(LG.M.map(m=>m.rahmen).filter(Boolean))];
  $('#lgRf').innerHTML=rf.length>1?'<button type="button" data-rf="" class="'+(LG.f.rf?'':'on')+'">Alle Rahmen</button>'+rf.map(x=>'<button type="button" data-rf="'+esc(x)+'" class="'+(LG.f.rf===x?'on':'')+'">'+esc(x)+'</button>').join(''):'';
- const d=$('#lgDeals');d.classList.toggle('on',LG.f.deal);d.setAttribute('aria-pressed',String(LG.f.deal));$('#lgDealsT').textContent=LG.f.deal?'Alle Räder zeigen':'Sonderangebote';}
+ const d=$('#lgDeals');d.classList.toggle('on',LG.f.deal);d.setAttribute('aria-pressed',String(LG.f.deal));$('#lgDealsT').textContent=LG.f.deal?'Alle Räder zeigen':'Sonderangebote';$('#lgDealsK').textContent=LG.f.deal?'Sonderangebote aktiv':'Nur solange vorrätig';}
 function lgFilter(){const f=LG.f,q=f.q.toLowerCase().trim().split(/\s+/).filter(Boolean);
  let L=LG.M.filter(m=>(!f.mk||lgMkName(m)===f.mk)&&(!f.rf||m.rahmen===f.rf)&&(!f.nur||m.lager)&&(!f.deal||m.deal)&&q.every(w=>[m.marke,m.modell,m.rahmen,m.jahr,...m.grs,...m.fs].join(' ').toLowerCase().includes(w)));
  if(f.sort==='pa')L.sort((a,b)=>(a.minP||9e9)-(b.minP||9e9));else if(f.sort==='pd')L.sort((a,b)=>(b.minP||0)-(a.minP||0));else if(f.sort==='mk')L.sort((a,b)=>(a.marke+a.modell).localeCompare(b.marke+b.modell,'de'));
