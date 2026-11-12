@@ -382,6 +382,14 @@ Aus 4.2 weiter offen: `C_Map.GetMapPosFromWorldPos`, Flugmeister-IDs, Hochplatea
 - Reichweite gibt es nur für Buff-Totems; Verbrennung/Magma/Erdbindung usw. gelten als „steht“, solange sie laufen.
 
 
+# Ingame-Test – WindBaem 1.0.0 (Windzorn-Ton)
+- [ ] Ordner `WindBaem` entpackt, WoW **komplett neu gestartet**. Chat beim Einloggen: „WindBaem: 1.0.0 bereit (7 Windzorn-Auren)“.
+- [ ] `/wb test` → „Bääääm“. `/wb ton braam` → tiefes Horn, `/wb ton baem` zurück.
+- [ ] **Im Kampf** mit Waffe des Windzorns: bei jedem Proc (zwei Extra-Schläge) kommt der Ton. Zur Kontrolle Kampflog/Schadenszahlen.
+- [ ] Mit Totem des Windzorns (ohne Waffen-Windzorn auf der Haupthand) dasselbe.
+- [ ] Kein Ton → `/wb diag` abfotografieren. „eingetragen: 7 von 7“ + kein Ton = Forever spielt Aura-Töne für unsichtbare Auren nicht → dann melde dich.
+- [ ] Zu oft? `/wb pause 2` (höchstens alle 2 s).
+
 # Ingame-Test – LevelPilot 7.0 (RXP-Modus)
 
 ## Einbau

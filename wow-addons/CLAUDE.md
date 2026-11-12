@@ -37,6 +37,13 @@ Aktueller Stand und offene Punkte: **[`UEBERGABE.md`](UEBERGABE.md)** – zuerst
   Wird nur für die Routen-Werkzeuge gebraucht. Beide GPL-3.0 → LevelPilot und Tiry's Zentrale tragen `LIZENZ.txt` +
   `LICENSE-GPL-3.0.md` (Repo ist öffentlich; neue Datenquellen dort eintragen).
 
+## WindBaem (Windzorn-Ton)
+`addons/WindBaem/`: meldet per `C_UnitAuras.AddAuraSound(Added, {unitToken="player", spellID, soundFileName, outputChannel,
+throttleSeconds})` die 7 Windzorn-Proc-Auren an (Effekt „Extra Attacks“ in `allspells.txt`; Aura mit „No Aura Icon“). Nur außerhalb
+von Kampf/Bosssperre, sonst `pending` bis `PLAYER_REGEN_ENABLED`/`ENCOUNTER_END`; vor jedem Neu-Eintragen `RemoveAuraSound`.
+Sounds `tools/snd_wf.py` (Synthese, `Media/baem.ogg`, `braam.ogg`, Vorhören `previews/Sound_WindBaem_*.mp3`).
+Test: `cd addons/WindBaem && lua5.1 ../../tests/wb.lua` („WB TESTS OK“).
+
 ## LevelPilot 7.0 – RXP-Modus
 `addons/LevelPilot/RXP.lua` (`LP_RXP`, in den TOCs vor `LevelPilot.lua`): RestedXP-Guide → LevelPilot-Route `LevelPilot_Routes.rxp`
 (`faction = "RXP"`, `min = 999` → `R.Pick` nimmt sie nie; Schritte `rx`, `rs`, `el`, `map/x/y` aus erstem `.goto`). `LP_RXP.Plan(n)`
