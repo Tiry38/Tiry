@@ -2319,29 +2319,41 @@ function farbeInfo(t){const k=String(t||'').trim().toLowerCase();if(FARB_C.has(k
 const lgFarbe=f=>{const r=farbeInfo(f);if(r)return r.c;const x=FARB.find(([re])=>re.test(String(f||'').replace(/\([^)]*\)?/g,' ')));return x?x[1]:'#9AA0A8'};
 const eur=n=>n==null?'':n.toLocaleString('de-DE')+' €';
 const vP=v=>v.angebot||v.preis||0;
-function lgNorm(d){let R=d.raeder;
+function lgNorm1(d){let R=d.raeder;
  if(!R&&d.modelle){R=[];d.modelle.forEach(m=>(m.varianten||[]).forEach(v=>R.push(Object.assign({},m,v,{varianten:undefined}))))}
  return (R||[]).map((r,i)=>{const base=Object.assign({},r,{farben:undefined});const v=r.farben?r.farben.map(f=>Object.assign({},base,f)):[r];
   const lager=v.some(x=>x.status!=='bestellt');const ps=v.map(vP).filter(Boolean);const js=[...new Set(v.map(x=>x.jahr).filter(Boolean))].sort();
   const abs=v.filter(x=>x.status==='bestellt'&&x.ab).map(x=>x.ab).sort();
   return Object.assign({},base,v[0],{_i:i,v,lager,deal:v.some(x=>x.angebot),minP:ps.length?Math.min(...ps):null,multiP:new Set(ps).size>1,ab:lager?'':(abs[0]||''),
    jahr:js.length>1?js[0]+'–'+js[js.length-1]:(js[0]||''),grs:r.gr?[r.gr]:[],fs:[...new Map(v.filter(x=>x.farbe).map(x=>[x.farbe.toLowerCase(),x.farbe])).values()]})})}
+/* Ein Modell = eine Karte: alle Größen, Rahmenformen und Farben als Auswahl im Detail (gebraucht/Vorführrad bleiben eigene Karten) */
+const lgGrN=g=>{const n=parseFloat(String(g||'').replace(',','.').replace(/^[^\d]*/,''));return isFinite(n)?n:999};
+const lgSz=x=>[x.gr,x.rahmen].filter(Boolean).join(' · ');
+function lgNorm(d){const C=lgNorm1(d),G=new Map(),n=t=>String(t||'').toLowerCase().replace(/[^a-z0-9+]/g,'');
+ C.forEach(c=>{const k=[n(c.marke),n(c.modell),c.gebraucht?'g':'',c.vorfuehr?'v':''].join('|');const g=G.get(k);if(g)g.push(c);else G.set(k,[c])});
+ return [...G.values()].map((cs,i)=>{const v0=cs.flatMap(c=>c.v),spec=[...new Set(v0.map(x=>x.rahmen).filter(r=>r&&r!=='Unisex'))];
+  if(spec.length===1)v0.forEach(x=>{if(!x.rahmen||x.rahmen==='Unisex')x.rahmen=spec[0]});/* fehlende/allgemeine Rahmenform = die einzige konkrete */
+  const v=v0.sort((a,b)=>lgGrN(a.gr)-lgGrN(b.gr)||String(a.rahmen||'').localeCompare(String(b.rahmen||''))||(a.status==='bestellt')-(b.status==='bestellt'));
+  const lager=v.some(x=>x.status!=='bestellt'),ps=v.map(vP).filter(Boolean),js=[...new Set(v.map(x=>x.jahr).filter(Boolean))].sort(),abs=v.filter(x=>x.status==='bestellt'&&x.ab).map(x=>x.ab).sort();
+  const grs=[...new Set(v.map(x=>x.gr).filter(Boolean))],rfs=[...new Set(v.map(x=>x.rahmen).filter(Boolean))];
+  return Object.assign({},cs[0],{_i:Math.min(...cs.map(c=>c._i)),v,lager,deal:v.some(x=>x.angebot),minP:ps.length?Math.min(...ps):null,multiP:new Set(ps).size>1,ab:lager?'':(abs[0]||''),
+   jahr:js.length>1?js[0]+'–'+js[js.length-1]:(js[0]||''),grs,rfs,rahmen:rfs.join(' / '),sz:[...new Set(v.map(lgSz))],fs:[...new Map(v.filter(x=>x.farbe).map(x=>[x.farbe.toLowerCase(),x.farbe])).values()]})}).sort((a,b)=>a._i-b._i).map((m,i)=>Object.assign(m,{_i:i}))}
 function lgLoad(){if(LG.load)return LG.load;LG.load=fetch('data/bestand.json',{cache:'no-store'}).then(r=>{if(!r.ok)throw 0;return r.json()}).then(d=>{LG.D=d;lgApply()}).catch(()=>{$('#lgGrid').innerHTML='<p class="lgempty">Der Bestand konnte gerade nicht geladen werden. Rufen Sie uns gern an: 07271 78033.</p>'});return LG.load}
 function lgApply(){const d=admMerge(LG.D);LG.M=lgNorm(d);LG.ok=true;
  $('#lgStand').textContent=/^\d/.test(d.stand||'')?'Stand '+d.stand:(d.stand||'aktuell');const hw=d.hinweis||(d.quelle==='Beispieldaten'?'Sobald der Veloport-Export eingespielt ist, steht hier euer echter Bestand.':'');$('#lgDemo').hidden=!hw;$('#lgDemoT').innerHTML='<b>'+(d.quelle==='Beispieldaten'?'Beispieldaten.':'Hinweis:')+'</b> '+esc(hw);
  const nL=LG.M.filter(m=>m.lager).length,nB=LG.M.length-nL,nD=LG.M.filter(m=>m.deal).length,nMk=new Set(LG.M.map(lgMkName)).size;
- $('#lgNum').innerHTML='<span><b>'+nL+'</b> Räder sofort verfügbar</span>'+(nB?'<span><b>'+nB+'</b> Lieferung ausstehend</span>':'')+'<span><b>'+nMk+'</b> Marken</span>';
+ $('#lgNum').innerHTML='<span><b>'+nL+'</b> Modelle sofort verfügbar</span>'+(nB?'<span><b>'+nB+'</b> Lieferung ausstehend</span>':'')+'<span><b>'+nMk+'</b> Marken</span>';
  $('#lgDealsN').textContent=nD?nD+(nD===1?' Rad reduziert':' Räder reduziert'):'Aktuell keine';$('#lgDeals').hidden=!nD;
  const mx=Math.max(0,...LG.M.flatMap(m=>m.v||[]).filter(x=>x.angebot&&x.preis>x.angebot).map(x=>x.preis-x.angebot));const se=$('#lgDealsS');se.hidden=!mx;if(mx)se.textContent='bis zu '+eur(mx)+' sparen';
  const q=$('#qkLager');if(q)q.textContent='Jetzt im Laden ansehen';
  lgChips()}
 function lgChips(){const mk=[...new Set(LG.M.map(lgMkName))].sort((a,b)=>a.localeCompare(b,'de'));
  $('#lgMk').innerHTML='<button type="button" data-mk="" class="'+(LG.f.mk?'':'on')+'">Alle Marken</button>'+mk.map(n=>{const b=BR.find(x=>x.n===n);return '<button type="button" data-mk="'+esc(n)+'" title="'+esc(n)+'" class="'+(LG.f.mk===n?'on':'')+((b||LG_LOGO[n])?' lgo':'')+'">'+((b||LG_LOGO[n])?'<img src="'+(b?b.logo:LG_LOGO[n])+'" alt="'+esc(n)+'">':'<span>'+esc(n)+'</span>')+'</button>'}).join('');
- const rf=[...new Set(LG.M.map(m=>m.rahmen).filter(Boolean))];
+ const rf=[...new Set(LG.M.flatMap(m=>m.rfs||[]))];
  $('#lgRf').innerHTML=rf.length>1?'<button type="button" data-rf="" class="'+(LG.f.rf?'':'on')+'">Alle Rahmen</button>'+rf.map(x=>'<button type="button" data-rf="'+esc(x)+'" class="'+(LG.f.rf===x?'on':'')+'">'+esc(x)+'</button>').join(''):'';
  const d=$('#lgDeals');d.classList.toggle('on',LG.f.deal);d.setAttribute('aria-pressed',String(LG.f.deal));$('#lgDealsT').textContent=LG.f.deal?'Alle Räder zeigen':'Sonderangebote';$('#lgDealsK').textContent=LG.f.deal?'Sonderangebote aktiv':'Nur solange vorrätig';}
 function lgFilter(){const f=LG.f,q=f.q.toLowerCase().trim().split(/\s+/).filter(Boolean);
- let L=LG.M.filter(m=>(!f.mk||lgMkName(m)===f.mk)&&(!f.rf||m.rahmen===f.rf)&&(!f.nur||m.lager)&&(!f.deal||m.deal)&&q.every(w=>[m.marke,m.modell,m.rahmen,m.jahr,...m.grs,...m.fs].join(' ').toLowerCase().includes(w)));
+ let L=LG.M.filter(m=>(!f.mk||lgMkName(m)===f.mk)&&(!f.rf||(m.rfs||[]).includes(f.rf))&&(!f.nur||m.lager)&&(!f.deal||m.deal)&&q.every(w=>[m.marke,m.modell,m.rahmen,m.jahr,...m.grs,...m.fs].join(' ').toLowerCase().includes(w)));
  if(f.sort==='pa')L.sort((a,b)=>(a.minP||9e9)-(b.minP||9e9));else if(f.sort==='pd')L.sort((a,b)=>(b.minP||0)-(a.minP||0));else if(f.sort==='mk')L.sort((a,b)=>(a.marke+a.modell).localeCompare(b.marke+b.modell,'de'));
  else L.sort((a,b)=>(!b.lager-!a.lager)*-1||(b.deal-a.deal)||a._i-b._i);
  return L}
@@ -2354,16 +2366,18 @@ function lgRender(){if(!LG.ok)return;const L=LG.list=lgFilter();const g=$('#lgGr
  if(!L.length){g.innerHTML='<p class="lgempty">'+(LG.f.deal?'Aktuell gibt es dazu keine Sonderangebote.':'Kein Rad passt zu diesen Filtern.')+' <button type="button" class="ghost" id="lgReset">Filter zurücksetzen</button></p>';return}
  g.innerHTML=L.map((m,k)=>{const b=lgBrand(m.marke),im=lgImg(m);return '<article class="lgc'+(m.deal?' deal':'')+'" role="button" tabindex="0" data-k="'+k+'" style="--ac:'+(b?b.c:'#8C9097')+';--d:'+Math.min(k,12)*0.04+'s" aria-label="'+esc(m.marke+' '+m.modell)+' ansehen">'+
   '<div class="lgst">'+(b?'<img class="wl" src="'+b.logo+'" alt="">':'')+(im?'<img class="bk" src="'+im+'" alt="" loading="lazy">':'<span class="phl">'+(b?'<img src="'+b.logo+'" alt="">':'<b>'+esc(m.marke)+'</b>')+'<small>Foto folgt</small></span>')+'<div class="bds">'+lgBadgesM(m)+'</div></div>'+
-  '<div class="lgin"><span class="mk">'+esc(m.marke)+(m.jahr?' · '+esc(m.jahr):'')+'</span><h3>'+esc(m.modell)+'</h3><div class="sp">'+(m.grs.length?'<span>'+esc(m.grs.join(' · '))+'</span>':'')+(m.fs.length?'<span class="fs">'+m.fs.slice(0,8).map(f=>'<i title="'+esc(f)+'" style="background:'+lgFarbe(f)+'"></i>').join('')+(m.fs.length===1?esc(m.fs[0]):m.fs.length+' Farben')+'</span>':'')+(m.rahmen?'<span>'+esc(m.rahmen)+'</span>':'')+'</div>'+
+  '<div class="lgin"><span class="mk">'+esc(m.marke)+(m.jahr?' · '+esc(m.jahr):'')+'</span><h3>'+esc(m.modell)+'</h3><div class="sp">'+(m.grs.length?'<span>'+esc(m.grs.length>1?m.grs.length+' Größen: '+m.grs.join(' · '):m.grs[0])+'</span>':'')+(m.fs.length?'<span class="fs">'+m.fs.slice(0,8).map(f=>'<i title="'+esc(f)+'" style="background:'+lgFarbe(f)+'"></i>').join('')+(m.fs.length===1?esc(m.fs[0]):m.fs.length+' Farben')+'</span>':'')+(m.rahmen?'<span>'+esc(m.rahmen)+'</span>':'')+'</div>'+
   '<div class="ft">'+lgPriceM(m)+'<span class="go">Ansehen</span></div></div></article>'}).join('')}
 function lgOpen(){lgLoad().then(()=>{lgChips();lgRender()})}
 /* Detailansicht im Showroom-Stil */
 function lgInfo(){const m=LG.list[LG.i],v=m.v[LG.vi]||m.v[0];const row=(l,x,h)=>x?'<div><dt>'+l+'</dt><dd>'+(h||esc(x))+'</dd></div>':'';
- const farben=m.v.length>1?'<div class="lgvar"><span class="flab">Farbe wählen</span><div class="vs">'+m.v.map((x,j)=>'<button type="button" data-vi="'+j+'" class="'+(j===LG.vi?'on':'')+'">'+(x.farbe?'<i style="background:'+lgFarbe(x.farbe)+'"></i>':'')+'<span>'+esc(x.farbe||'Ausführung '+(j+1))+(m.v.filter(y=>(y.farbe||'').toLowerCase()===(x.farbe||'').toLowerCase()).length>1&&x.jahr?' · '+esc(x.jahr):'')+'</span><small class="'+(x.status==='bestellt'?'z':'ok')+'">'+(x.status==='bestellt'?'Lieferung ausstehend':'verfügbar')+'</small></button>').join('')+'</div></div>':'';
- const sis=LG.list.map((x,j)=>[x,j]).filter(([x,j])=>j!==LG.i&&x.marke===m.marke&&x.modell===m.modell);
- const auch=sis.length?'<div class="lgvar"><span class="flab">Dieses Modell auch in</span><div class="vs">'+sis.map(([x,j])=>'<button type="button" data-goto="'+j+'"><span>'+esc([x.gr,x.rahmen!==m.rahmen?x.rahmen:''].filter(Boolean).join(' · ')||'weitere Ausführung')+'</span><small class="'+(x.lager?'ok':'z')+'">'+(x.lager?'verfügbar':'Lieferung ausstehend')+'</small></button>').join('')+'</div></div>':'';
+ const sz=lgSz(v),inSz=m.v.map((x,j)=>[x,j]).filter(([x])=>lgSz(x)===sz);
+ const groessen=m.sz.length>1?'<div class="lgvar"><span class="flab">Größe wählen</span><div class="vs">'+m.sz.map(z=>{const xs=m.v.map((x,j)=>[x,j]).filter(([x])=>lgSz(x)===z),ok=xs.some(([x])=>x.status!=='bestellt'),j0=(xs.find(([x])=>x.farbe===v.farbe)||xs.find(([x])=>x.status!=='bestellt')||xs[0])[1];
+   return '<button type="button" data-vi="'+j0+'" class="'+(z===sz?'on':'')+'"><span>'+esc(z||'Standard')+'</span><small class="'+(ok?'ok':'z')+'">'+(ok?'verfügbar':'Lieferung ausstehend')+'</small></button>'}).join('')+'</div></div>':'';
+ const farben=inSz.length>1?'<div class="lgvar"><span class="flab">Farbe wählen'+(m.sz.length>1?' · '+esc(sz):'')+'</span><div class="vs">'+inSz.map(([x,j])=>'<button type="button" data-vi="'+j+'" class="'+(j===LG.vi?'on':'')+'">'+(x.farbe?'<i style="background:'+lgFarbe(x.farbe)+'"></i>':'')+'<span>'+esc(x.farbe||'Ausführung')+(inSz.filter(([y])=>(y.farbe||'').toLowerCase()===(x.farbe||'').toLowerCase()).length>1&&x.jahr?' · '+esc(x.jahr):'')+'</span><small class="'+(x.status==='bestellt'?'z':'ok')+'">'+(x.status==='bestellt'?'Lieferung ausstehend':'verfügbar')+'</small></button>').join('')+'</div></div>':'';
+ const auch='';
  $('#lgmInfo').innerHTML='<p class="eyebrow">'+esc(m.marke)+(v.jahr?' · <b>Modelljahr '+esc(v.jahr)+'</b>':'')+'</p><h2 id="lgmT">'+esc(m.modell)+'</h2><div class="bds">'+lgStat(v.status!=='bestellt',v.ab)+(v.angebot?'<span class="bd an">Sonderangebot</span>':'')+(v.vorfuehr?'<span class="bd vf">Vorführrad</span>':'')+(v.gebraucht?'<span class="bd gb">Gebraucht</span>':'')+'</div>'+
-  '<div class="lgm-price">'+(v.preis?'<span class="lgpr">'+(v.angebot?'<s>'+eur(v.preis)+'</s><b class="an">'+eur(v.angebot)+'</b>':'<b>'+eur(v.preis)+'</b>')+'</span>':'<span class="lgpr"><b>Preis auf Anfrage</b></span>')+(v.angebot?'<span class="sv">Sie sparen '+eur(v.preis-v.angebot)+'</span>':'')+'</div>'+farben+auch+
+  '<div class="lgm-price">'+(v.preis?'<span class="lgpr">'+(v.angebot?'<s>'+eur(v.preis)+'</s><b class="an">'+eur(v.angebot)+'</b>':'<b>'+eur(v.preis)+'</b>')+'</span>':'<span class="lgpr"><b>Preis auf Anfrage</b></span>')+(v.angebot?'<span class="sv">Sie sparen '+eur(v.preis-v.angebot)+'</span>':'')+'</div>'+groessen+farben+auch+
   '<dl class="lgm-spec">'+row('Rahmenhöhe',v.gr)+row('Farbe',v.farbe,'<i style="background:'+lgFarbe(v.farbe)+'"></i>'+esc(v.farbe||''))+row('Rahmenform',v.rahmen)+row('Art',v.typ)+row('Motor',v.motor)+row('Akku',v.akku)+row('Display',v.display)+row('Schaltung',v.schaltung)+row('Reifen',v.reifen)+row('Gewicht',v.gewicht)+row('Zul. Gesamtgewicht',v.zgg)+row('Kilometerstand',v.km)+row('Verfügbarkeit',1,v.status==='bestellt'?'Lieferung ausstehend'+(v.ab?', voraussichtlich '+esc(v.ab):''):'Sofort, steht bei uns in Wörth')+'</dl>'+
   '<div class="row lgm-act"><button type="button" class="cta" data-ask="Kaufen">Dieses Rad anfragen</button><button type="button" class="ghost" data-ask="Probefahrt">Probefahrt</button></div>'+
   '<form class="lgm-form" id="lgmF" hidden novalidate><div class="fl"><span class="flab">Ihr Wunsch</span><div class="choice" id="lgW"><button type="button" class="on" data-v="Kaufen">Kaufen</button><button type="button" data-v="Reservieren">Reservieren</button><button type="button" data-v="Probefahrt">Probefahrt</button><button type="button" data-v="Andere Größe/Farbe bestellen">Andere Größe/Farbe</button></div></div>'+
