@@ -1260,6 +1260,61 @@ body.sc .hdr{backdrop-filter:none!important;-webkit-backdrop-filter:none!importa
 .urkf .urkh{margin:0 0 14px;font:900 clamp(24px,2.6vw,34px)/1.02 var(--display);letter-spacing:-.02em;text-transform:uppercase;color:#1B1E25;text-align:center}
 .urkf .urkh b{display:block;color:#D6142C;font-weight:900}
 .urkf img{display:block;width:100%;height:auto;border-radius:4px;box-shadow:0 2px 0 rgba(255,255,255,.6) inset,0 30px 60px rgba(27,30,37,.25),0 6px 14px rgba(27,30,37,.15)}
+/* i:SY Treffen: Bilder & Videos */
+.tgsec{padding:clamp(30px,5vw,70px) 0 clamp(40px,6vw,90px)}
+.tgpano{margin:clamp(24px,3vw,40px) 0 clamp(26px,3vw,40px);overflow:hidden;-webkit-mask-image:linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent);mask-image:linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent)}
+.tgpt{display:flex;gap:14px;width:max-content;animation:tgrun 90s linear infinite}
+.tgpano:hover .tgpt{animation-play-state:paused}
+.tgpt img{height:clamp(110px,13vw,170px);width:auto;border-radius:16px;box-shadow:0 18px 34px -20px rgba(27,30,37,.5)}
+@keyframes tgrun{to{transform:translateX(-50%)}}
+.tgy{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:28px}
+.tgy button{display:inline-flex;align-items:center;gap:8px;min-height:46px;padding:0 18px;border-radius:999px;border:1px solid rgba(27,30,37,.14);background:rgba(255,255,255,.75);font:700 15px/1 var(--display);color:var(--ink);cursor:pointer;transition:background .25s,color .25s,border-color .25s,transform .25s}
+.tgy button small{font:700 11.5px/1 var(--display);padding:4px 7px;border-radius:999px;background:rgba(27,30,37,.07);color:var(--dim)}
+.tgy button:hover{transform:translateY(-2px);border-color:rgba(27,30,37,.35)}
+.tgy button.on{background:#FF6200;border-color:#FF6200;color:#fff}.tgy button.on small{background:rgba(255,255,255,.22);color:#fff}
+.tgvh{display:flex;align-items:baseline;justify-content:space-between;gap:14px;flex-wrap:wrap;margin:6px 0 14px}
+.tgvh h3,.tgyh h3{margin:0;font:900 clamp(26px,3vw,40px)/1 var(--display);letter-spacing:-.02em}
+.tgvh p{margin:0;font-size:13.5px;color:var(--dim)}
+.tgv{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin-bottom:clamp(40px,5vw,64px)}
+.tgv .vc:first-child{grid-column:span 2;grid-row:span 2}
+.vc{position:relative;display:block;overflow:hidden;border-radius:18px;aspect-ratio:16/9;background:#14161B;border:0;padding:0;cursor:pointer;text-align:left;color:#fff;box-shadow:0 22px 40px -26px rgba(18,20,25,.8);isolation:isolate}
+.vc img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:-2;transform:scale(1.04);transition:transform 1.2s cubic-bezier(.2,.7,.2,1),filter .5s;filter:brightness(.85)}
+.vc::before{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(180deg,transparent 35%,rgba(10,11,15,.85))}
+.vc:hover img{transform:scale(1.12);filter:brightness(1)}
+.vc .pl{position:absolute;left:50%;top:46%;width:58px;height:58px;margin:-29px 0 0 -29px;border-radius:50%;display:grid;place-items:center;background:#FF6200;box-shadow:0 0 0 0 rgba(255,98,0,.55),0 14px 26px -8px rgba(255,98,0,.9);transition:transform .45s var(--spring),box-shadow .45s}
+.vc .pl::after{content:"";margin-left:4px;border-style:solid;border-width:10px 0 10px 16px;border-color:transparent transparent transparent #fff}
+.vc:hover .pl{transform:scale(1.12);box-shadow:0 0 0 12px rgba(255,98,0,.18),0 14px 26px -8px rgba(255,98,0,.9)}
+.tgv .vc:first-child .pl{width:78px;height:78px;margin:-39px 0 0 -39px}.tgv .vc:first-child .pl::after{border-width:13px 0 13px 21px}
+.vc .vt{position:absolute;left:14px;right:14px;bottom:12px;display:flex;flex-direction:column;gap:4px}
+.vc .vt i{font:700 10.5px/1 var(--display);font-style:normal;letter-spacing:.18em;text-transform:uppercase;color:#FFB27A}
+.vc .vt b{font:800 14.5px/1.2 var(--display);text-shadow:0 2px 10px rgba(0,0,0,.5)}
+.tgv .vc:first-child .vt b{font-size:clamp(18px,1.8vw,24px)}
+.tgyh{display:flex;align-items:flex-end;gap:16px;margin:clamp(30px,4vw,54px) 0 16px}
+.tgyh .yy{font:900 clamp(56px,7vw,104px)/.8 var(--display);letter-spacing:-.05em;background:linear-gradient(120deg,#FF6200,#FF9A3C 45%,#C8102E);-webkit-background-clip:text;background-clip:text;color:transparent}
+.tgyh p{margin:0 0 6px;font:600 14px/1.4 var(--display);color:var(--dim)}
+.tgg{columns:3 280px;column-gap:14px}
+.tgg button{display:block;width:100%;margin:0 0 14px;padding:0;border:0;border-radius:16px;overflow:hidden;background:#E9E0D5;cursor:zoom-in;break-inside:avoid;position:relative;box-shadow:0 18px 34px -24px rgba(27,30,37,.6)}
+.tgg img{display:block;width:100%;height:auto;transition:transform .9s cubic-bezier(.2,.7,.2,1)}
+.tgg button::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,transparent 60%,rgba(255,98,0,.35));opacity:0;transition:opacity .4s}
+.tgg button:hover img{transform:scale(1.06)}.tgg button:hover::after{opacity:1}
+.tgg button:focus-visible,.vc:focus-visible,.tgy button:focus-visible{outline:3px solid #FF6200;outline-offset:3px}
+/* Leuchtkasten */
+.tglb{position:fixed;inset:0;z-index:250;display:grid;place-items:center;background:rgba(12,13,17,.94);opacity:0;transition:opacity .3s}
+.tglb.on{opacity:1}
+.tgst{width:min(1400px,92vw);height:min(86vh,900px);display:grid;place-items:center}
+.tgst img{max-width:100%;max-height:100%;border-radius:10px;box-shadow:0 30px 80px rgba(0,0,0,.6);animation:tgin .45s var(--ease)}
+.tgst .tgvf{width:min(1280px,92vw);aspect-ratio:16/9;max-height:80vh;border-radius:14px;overflow:hidden;background:#000;box-shadow:0 30px 80px rgba(0,0,0,.6)}
+.tgst iframe{width:100%;height:100%;border:0;display:block}
+@keyframes tgin{from{opacity:0;transform:scale(.97)}to{opacity:1;transform:none}}
+.tgx{position:absolute;top:16px;right:16px;width:48px;height:48px;border-radius:14px;border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.08);color:#fff;font:400 28px/1 var(--display);cursor:pointer}
+.tgnav{position:absolute;top:50%;width:54px;height:54px;margin-top:-27px;border-radius:50%;border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.08);color:#fff;display:grid;place-items:center;cursor:pointer;transition:background .25s}
+.tgnav svg{width:24px;height:24px}.tgnav.p{left:16px}.tgnav.n{right:16px}
+.tgx:hover,.tgnav:hover{background:#FF6200;border-color:#FF6200}
+.tgcap{position:absolute;left:0;right:0;bottom:16px;text-align:center;font:600 14px/1.4 var(--display);color:rgba(255,255,255,.8)}
+.tgcap a{color:#FFB27A;margin-left:12px}
+@media (max-width:900px){.tgv{grid-template-columns:1fr 1fr}.tgv .vc:first-child{grid-column:span 2;grid-row:auto}}
+@media (max-width:760px){.tgg{columns:2;column-gap:10px}.tgg button{margin-bottom:10px;border-radius:12px}.tgnav{width:44px;height:44px;margin-top:-22px}.tgnav.p{left:8px}.tgnav.n{right:8px}.vc .vt b{font-size:13px}.vc .pl{width:46px;height:46px;margin:-23px 0 0 -23px}}
+@media (prefers-reduced-motion:reduce){.tgpt{animation-duration:400s}}
 /* ===== Admin-Bereich ===== */
 .adm{position:fixed;inset:0;z-index:300;opacity:0;transition:opacity .25s;background:#0F1115}
 .adm.on{opacity:1}
@@ -2050,7 +2105,8 @@ m696 -454 c28 -13 46 -31 55 -51 22 -53 -50 -177 -173 -300 -187 -186 -647
    <div>
     <h2 class="big pre" style="margin-bottom:30px">Vom Treffen <span class="gt">zum Rekord.</span></h2>
     <div class="tl pre">
-     <div class="tli"><div class="y">2019</div><p>Das erste große i:SY-Treffen, gemeinsam mit Velorep: etwa 100 Teilnehmende.</p></div>
+     <div class="tli"><div class="y">2017</div><p>Das erste i:SY-Treffen in Wörth am Rhein.</p></div>
+     <div class="tli"><div class="y">2019</div><p>Großes i:SY-Treffen gemeinsam mit Velorep: etwa 100 Teilnehmende.</p></div>
      <div class="tli"><div class="y">2022</div><p>Nach zwei Jahren Corona-Pause über 200 Fahrer. Die Schlange war über 2 km lang, rund 40 km von Wörth nach Neupotz und zurück, mit i:SY Show-Truck zum Probefahren.</p></div>
      <div class="tli"><div class="y">2023</div><p>Wieder gemeinsam mit Velorep auf dem Rheinradweg unterwegs.</p></div>
      <div class="tli big"><div class="y gt">2024</div><p>Das fünfte Treffen wird zum Weltrekord: 283 Teilnehmende, offiziell vom RID bestätigt.</p></div>
@@ -2059,11 +2115,15 @@ m696 -454 c28 -13 46 -31 55 -51 22 -53 -50 -177 -173 -300 -187 -186 -647
    <figure class="urkf pre"><p class="urkh">Wir haben den <b>Weltrekord!</b></p><img src="img/rid-urkunde-zert.webp" alt="RID-Rekordurkunde: Längste Fahrrad-Schlange einer Marke, 283 Fahrräder, 9. Juni 2024" loading="lazy" width="900" height="1188"></figure>
   </div>
  </div>
- <div class="sec" style="padding-top:0">
-  <div class="wrap gal pre">
-   <div class="ph2"><img src="img/treffen-luft.webp" alt="Luftaufnahme: i:SY-Schlange auf dem Weg am Rhein" loading="lazy" width="800" height="600"></div>
-   <div class="ph2"><img src="img/treffen-hafen.webp" alt="Luftaufnahme: Radler-Schlange in der Hafenkurve" loading="lazy" width="900" height="506"></div>
-   <div class="ph2"><img src="img/treffen-feld.webp" alt="Luftaufnahme: Radler zwischen Feldern" loading="lazy" width="800" height="600"></div>
+ <div class="tgsec" id="tgSec">
+  <div class="wrap"><p class="eyebrow pre">Bilder &amp; Videos</p><h2 class="big pre" style="margin:16px 0 10px">Fünf Treffen. <span class="gt">Unzählige Momente.</span></h2>
+   <p class="lead pre" style="max-width:720px">Von 2017 bis zum Weltrekord 2024: Ausfahrten am Rhein, Drohnenflüge über die Schlange und ganz viel i:SY-Liebe. Bild antippen zum Vergrößern.</p></div>
+  <div class="tgpano pre" aria-hidden="true"><div class="tgpt"><img src="img/treffen/isy-header2022.webp" alt="" loading="lazy" width="1400" height="328"><img src="img/treffen/isy-header2022-2.webp" alt="" loading="lazy" width="1400" height="328"><img src="img/treffen/isy-header2022-3.webp" alt="" loading="lazy" width="1400" height="328"><img src="img/treffen/isy-header2022-4.webp" alt="" loading="lazy" width="1400" height="328"><img src="img/treffen/isy-header2022-5.webp" alt="" loading="lazy" width="1400" height="328"><img src="img/treffen/isy-header2022.webp" alt="" loading="lazy" width="1400" height="328"><img src="img/treffen/isy-header2022-2.webp" alt="" loading="lazy" width="1400" height="328"><img src="img/treffen/isy-header2022-3.webp" alt="" loading="lazy" width="1400" height="328"><img src="img/treffen/isy-header2022-4.webp" alt="" loading="lazy" width="1400" height="328"><img src="img/treffen/isy-header2022-5.webp" alt="" loading="lazy" width="1400" height="328"></div></div>
+  <div class="wrap">
+   <div class="tgy pre" id="tgY" role="group" aria-label="Jahr wählen"></div>
+   <div class="tgvh" id="tgVh"><h3>Videos</h3><p>Beim Antippen wird das Video von YouTube geladen.</p></div>
+   <div class="tgv" id="tgV"></div>
+   <div id="tgG"></div>
   </div>
  </div>
  <div class="sec" style="padding-top:0">
@@ -2253,6 +2313,13 @@ m696 -454 c28 -13 46 -31 55 -51 22 -53 -50 -177 -173 -300 -187 -186 -647
 </footer>
 
 
+<div class="tglb" id="tgLb" hidden role="dialog" aria-modal="true" aria-label="Bild ansehen">
+ <button type="button" class="tgx" data-tgx aria-label="Schließen">×</button>
+ <button type="button" class="tgnav p" data-tgn="-1" aria-label="Vorheriges"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg></button>
+ <div class="tgst" id="tgSt"></div>
+ <button type="button" class="tgnav n" data-tgn="1" aria-label="Nächstes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></button>
+ <div class="tgcap" id="tgCap"></div>
+</div>
 <div class="adm" id="adm" hidden>
  <div class="adm-app" role="dialog" aria-modal="true" aria-label="Velocenter Admin">
   <aside class="adm-side"><div class="as-brand"><img src="img/velocenter-logo.svg" alt="Velocenter"><b>Admin</b></div>
@@ -2867,6 +2934,29 @@ function admHash(){if(location.hash==='#admin')admOpen()}addEventListener('hashc
  ['click','change'].forEach(t=>bar.addEventListener(t,()=>setTimeout(cnt,0)));})();
 /* Endlos-Animationen (Hintergrund, Glanz, Schweben) 25 % ruhiger – einmalige Effekte bleiben unverändert */
 (function calm(){try{document.getAnimations().forEach(a=>{const t=a.effect&&a.effect.getTiming&&a.effect.getTiming();if(t&&t.iterations===Infinity&&!a._calm){a.playbackRate=.75;a._calm=1}})}catch(e){}setTimeout(calm,2500)})();
+/* ---------- i:SY Treffen: Bilder & Videos ---------- */
+(function(){const D={"F":[["2024","img/treffen-luft.webp",800,600],["2024","img/treffen-hafen.webp",900,506],["2024","img/treffen-feld.webp",800,600],["2023","img/treffen/bild1-msi-jpg.webp",900,600],["2023","img/treffen/bild2-msi-jpg.webp",900,600],["2023","img/treffen/bild3-msi-jpg.webp",600,900],["2023","img/treffen/bild4-msi-jpg.webp",600,900],["2023","img/treffen/bild5-msi-jpg.webp",600,900],["2023","img/treffen/bild6-msi-jpg.webp",900,600],["2023","img/treffen/bild7-msi-jpg.webp",900,506],["2023","img/treffen/bild8-msi-jpg.webp",900,506],["2023","img/treffen/bild9-msi-jpg.webp",900,600],["2023","img/treffen/bild10-msi-jpg.webp",900,600],["2022","img/treffen/isytreffen22.webp",600,800],["2022","img/treffen/isytreffen22-2.webp",600,800],["2022","img/treffen/isytreffen22-3.webp",600,800],["2022","img/treffen/isytreffen22-4.webp",800,600],["2022","img/treffen/isytreffen22-5.webp",800,600],["2022","img/treffen/isytreffen22-6.webp",800,600],["2022","img/treffen/isytreffen22-7.webp",800,600],["2022","img/treffen/isytreffen22-8.webp",800,600],["2022","img/treffen/isytreffen22-9.webp",800,600],["2022","img/treffen/isytreffen22-10.webp",800,600],["2022","img/treffen/isytreffen22-11.webp",800,600],["2022","img/treffen/isytreffen22-12.webp",800,600],["2022","img/treffen/isytreffen22-13.webp",800,600],["2022","img/treffen/isytreffen22-14.webp",800,600],["2022","img/treffen/isytreffen22-15.webp",800,600],["2022","img/treffen/isytreffen22-16.webp",800,600],["2022","img/treffen/isytreffen22-17.webp",800,600],["2022","img/treffen/isytreffen22-18.webp",800,600],["2019","img/treffen/dji-0256.webp",800,600],["2019","img/treffen/dsc01156.webp",800,600],["2019","img/treffen/dsc01203.webp",800,600],["2019","img/treffen/dsc01121.webp",800,600],["2019","img/treffen/dsc01092.webp",800,600],["2019","img/treffen/dsc01253.webp",800,600],["2019","img/treffen/dsc01233.webp",800,600],["2019","img/treffen/dsc07380.webp",800,600],["2019","img/treffen/dsc07372.webp",800,600],["2019","img/treffen/dsc07356.webp",800,600],["2019","img/treffen/dsc07388.webp",800,600],["2019","img/treffen/dji-0286.webp",800,600],["2019","img/treffen/dji-0280.webp",800,600],["2019","img/treffen/dji-0276-2.webp",800,600],["2019","img/treffen/dsc01405.webp",800,600],["2019","img/treffen/dsc01391.webp",800,600],["2019","img/treffen/dsc01346.webp",800,600],["2019","img/treffen/dsc00493.webp",800,600],["2019","img/treffen/dsc00507.webp",800,600],["2019","img/treffen/dsc07445.webp",800,600],["2017","img/treffen/isytreffen2017-1.webp",800,600],["2017","img/treffen/isytreffen2017-3.webp",600,800],["2017","img/treffen/isytreffen2017-4.webp",800,600],["2017","img/treffen/isytreffen2017-5.webp",800,600],["2017","img/treffen/isytreffen2017-6.webp",800,600],["2017","img/treffen/isytreffen2017-7.webp",800,600],["2017","img/treffen/isytreffen2017-8.webp",800,600],["2017","img/treffen/isytreffen2017-9.webp",800,600],["2017","img/treffen/isytreffen2017-10.webp",800,600],["2017","img/treffen/isytreffen2017-11.webp",800,600],["2017","img/treffen/isytreffen2017-12.webp",800,600],["2017","img/treffen/isytreffen2017-13.webp",800,600],["2017","img/treffen/isytreffen2017-14.webp",800,600],["2017","img/treffen/isytreffen2017-15.webp",800,600]],"V":[["2024","3n_MimDOJBg","Weltrekord-Treffen 2024 · Teil 1"],["2024","6xEMwZU5ZA4","Weltrekord-Treffen 2024 · Teil 2"],["2024","PP0u439sgIo","Weltrekord-Treffen 2024 · Teil 3"],["","PXjrkMdoUCA","Laola-Welle beim i:SY-Treffen"],["2023","qLEz1Aw5_pc","Impressionen i:SY-Treffen 2023"],["2023","erCg5RpyckM","2023 von oben · Drohnenflug 1"],["2023","t7cUib1dZsY","2023 von oben · Drohnenflug 2"],["2023","wvUUzUj-Y-Q","Mittendrin 2023"],["2022","2OLN6HsOyDc","i:SY-Treffen 2022 mit Velorep"],["2022","XHKmjqfqnIc","i:SY-Treffen 2022 · Teil 2"],["2022","QmvngbETM_Y","i:SY-Treffen 2022 · Teil 3"],["2022","eggJxIOqZvw","i:SY-Treffen 2022 · Teil 4"]],"P":["isy-header2022","isy-header2022-2","isy-header2022-3","isy-header2022-4","isy-header2022-5"]},G=$('#tgG');if(!G)return;
+ const YS=['2024','2023','2022','2019','2017'],TX={2024:'Weltrekord: 283 i:SY in einer Schlange',2023:'Wieder mit Velorep auf dem Rheinradweg',2022:'Über 200 Fahrer nach der Corona-Pause',2019:'Großes Treffen mit Velorep, auch von oben',2017:'Das erste i:SY-Treffen in Wörth'};
+ let Y='',L=[],K=0;
+ function draw(){const F=D.F.filter(f=>!Y||f[0]===Y),V=D.V.filter(v=>!Y||v[0]===Y);
+  $('#tgY').innerHTML='<button type="button" data-y="" class="'+(Y?'':'on')+'">Alle<small>'+(D.F.length+D.V.length)+'</small></button>'+YS.map(y=>{const n=D.F.filter(f=>f[0]===y).length+D.V.filter(v=>v[0]===y).length;return n?'<button type="button" data-y="'+y+'" class="'+(Y===y?'on':'')+'">'+y+'<small>'+n+'</small></button>':''}).join('');
+  $('#tgVh').hidden=$('#tgV').hidden=!V.length;
+  $('#tgV').innerHTML=V.map(v=>'<button type="button" class="vc" data-yt="'+v[1]+'" data-t="'+esc(v[2])+'"><img src="img/treffen/yt-'+v[1]+'.webp" alt="" loading="lazy"><span class="pl" aria-hidden="true"></span><span class="vt">'+(v[0]?'<i>'+v[0]+'</i>':'<i>Video</i>')+'<b>'+esc(v[2])+'</b></span></button>').join('');
+  L=F;G.innerHTML=(Y?[Y]:YS).map(y=>{const fs=F.map((f,i)=>[f,i]).filter(([f])=>f[0]===y);if(!fs.length)return '';
+   return '<div class="tgyh"><span class="yy">'+y+'</span><div><h3>i:SY-Treffen</h3><p>'+TX[y]+' · '+fs.length+' Fotos</p></div></div><div class="tgg">'+fs.map(([f,i])=>'<button type="button" data-i="'+i+'" aria-label="Foto '+(i+1)+' vergrößern"><img src="'+f[1]+'" alt="i:SY-Treffen '+y+'" loading="lazy" width="'+f[2]+'" height="'+f[3]+'"></button>').join('')+'</div>'}).join('')}
+ const lb=$('#tgLb'),st=$('#tgSt'),cap=$('#tgCap');
+ function open(){lb.hidden=false;document.body.style.overflow='hidden';requestAnimationFrame(()=>lb.classList.add('on'))}
+ function close(){lb.classList.remove('on');st.innerHTML='';document.body.style.overflow='';setTimeout(()=>{lb.hidden=true},300)}
+ function show(i){K=(i+L.length)%L.length;const f=L[K];st.innerHTML='<img src="'+f[1]+'" alt="i:SY-Treffen '+f[0]+'">';cap.textContent='i:SY-Treffen '+f[0]+' · '+(K+1)+' / '+L.length;lb.querySelectorAll('.tgnav').forEach(b=>b.hidden=L.length<2)}
+ function vid(id,t){st.innerHTML='<div class="tgvf"><iframe src="https://www.youtube-nocookie.com/embed/'+id+'?autoplay=1&rel=0" title="'+esc(t)+'" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen></iframe></div>';
+  cap.innerHTML=esc(t)+'<a href="https://www.youtube.com/watch?v='+id+'" target="_blank" rel="noopener">Auf YouTube öffnen ↗</a>';lb.querySelectorAll('.tgnav').forEach(b=>b.hidden=true)}
+ $('#tgY').addEventListener('click',e=>{const b=e.target.closest('[data-y]');if(!b)return;Y=b.dataset.y;draw()});
+ G.addEventListener('click',e=>{const b=e.target.closest('[data-i]');if(!b)return;show(+b.dataset.i);open()});
+ $('#tgV').addEventListener('click',e=>{const b=e.target.closest('[data-yt]');if(!b)return;vid(b.dataset.yt,b.dataset.t);open()});
+ lb.addEventListener('click',e=>{if(e.target.closest('[data-tgx]')||e.target===lb||e.target===st){close();return}const n=e.target.closest('[data-tgn]');if(n)show(K+ +n.dataset.tgn)});
+ addEventListener('keydown',e=>{if(lb.hidden)return;if(e.key==='Escape')close();else if(e.key==='ArrowRight'&&!st.querySelector('iframe'))show(K+1);else if(e.key==='ArrowLeft'&&!st.querySelector('iframe'))show(K-1)});
+ let sx=null;lb.addEventListener('touchstart',e=>{sx=e.touches[0].clientX},{passive:true});lb.addEventListener('touchend',e=>{if(sx==null||st.querySelector('iframe'))return;const d=e.changedTouches[0].clientX-sx;if(Math.abs(d)>50)show(K+(d<0?1:-1));sx=null});
+ draw()})();
 go(true);
 })();
 
