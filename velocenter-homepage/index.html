@@ -918,6 +918,13 @@ textarea.inp{border-radius:12px}
 @keyframes rib1{from{transform:rotate(-14deg) translateX(-7%)}to{transform:rotate(-14deg) translateX(7%)}}
 @keyframes rib2{from{transform:rotate(-14deg) translateX(6%)}to{transform:rotate(-14deg) translateX(-6%)}}
 @media (max-width:640px){.ribbons i{filter:blur(20px)}}
+
+/* ================= Rot sparsam und echt rot: scharfe Linien statt rosa Nebel (Tiry 12.11.2026) ================= */
+.blobs i:nth-child(1){background:#3A3D44;opacity:.2}
+.blobs i:nth-child(4){background:#B87333;opacity:.24}
+.ribbons i:nth-child(1){top:20%;height:30px;filter:none;background:repeating-linear-gradient(180deg,rgba(176,18,31,.8) 0 2px,transparent 2px 10px);-webkit-mask-image:linear-gradient(90deg,transparent 12%,#000 38%,#000 58%,transparent 86%);mask-image:linear-gradient(90deg,transparent 12%,#000 38%,#000 58%,transparent 86%);opacity:.75}
+.ribbons i:nth-child(4){top:74%;height:22px;filter:none;background:repeating-linear-gradient(180deg,rgba(176,18,31,.75) 0 2px,transparent 2px 10px);-webkit-mask-image:linear-gradient(90deg,transparent 20%,#000 45%,#000 60%,transparent 85%);mask-image:linear-gradient(90deg,transparent 20%,#000 45%,#000 60%,transparent 85%);opacity:.6}
+.ribbons i:nth-child(3){background:linear-gradient(90deg,transparent 6%,rgba(80,84,92,.3) 30%,rgba(100,104,112,.4) 55%,rgba(80,84,92,.16) 80%,transparent 95%)}
 </style>
 
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
@@ -1748,7 +1755,7 @@ const BR=[
  {k:'isy',n:'i:SY',m:'i:SY E5 ZR F CX Century',img:'img/p-isy.webp',logo:'img/marke-isy.svg',o:.3,c:'#FF7A1A',t:'Das 20-Zoll-Kompaktrad. Seit über 10 Jahren sind wir i:SY Experte und haben ständig über 100 i:SY vorrätig.',a:[['Mehr zu i:SY','#isy']]},
  {k:'ktm',n:'KTM',m:'KTM Macina Style 830',img:'img/p-ktm.webp',logo:'img/marke-ktm.svg',o:.13,c:'#FF6A00',t:'Traditionsmarke mit großer E-Bike-Auswahl, vom bequemen Tiefeinsteiger bis zum Trekking-Rad.',a:[['ktm-bikes.at','https://www.ktm-bikes.at/']]},
  {k:'qio',n:'QiO',m:'QiO Compact P5',img:'img/p-qio.webp',logo:'img/marke-qio.svg',o:.12,c:'#38BDF8',t:'Innovatives Kompaktrad-Konzept. Am besten selbst erleben: Probefahrt bei uns im Laden.',a:[['qio-bikes.com','https://www.qio-bikes.com/']]},
- {k:'vdv',n:'Velo de Ville',m:'Velo de Ville KEB Classic',img:'img/p-vdv.webp',logo:'img/marke-vdv.svg',o:.16,c:'#F97316',t:'Rad nach Wunsch: Rahmen, Farbe und Ausstattung stellen Sie selbst zusammen.',a:[['Zum Konfigurator','https://konfigurator.velo-de-ville.com/de?h_ident=28181&direct=true']]},
+ {k:'vdv',n:'Velo de Ville',m:'Velo de Ville AEB Pro',img:'img/p-vdv.webp',logo:'img/marke-vdv.svg',o:.16,c:'#F97316',t:'Rad nach Wunsch: Rahmen, Farbe und Ausstattung stellen Sie selbst zusammen.',a:[['Zum Konfigurator','https://konfigurator.velo-de-ville.com/de?h_ident=28181&direct=true']]},
  {k:'vanraam',n:'Van Raam',m:'Van Raam Easy Rider',img:'img/p-vanraam.webp',logo:'img/marke-vanraam.svg',o:.26,c:'#A855F7',t:'E-Dreiräder vom Weltmarktführer aus Holland. Bei uns: der Easy Rider.',a:[['Mehr zu E-Dreirädern','#dreirad']]},
  {k:'gudereit',n:'Gudereit',m:'Gudereit EC-35 Evo',img:'img/p-gudereit.webp',logo:'img/marke-gudereit.svg',o:.22,c:'#E2232D',t:'Bei uns das EC-35 Evo von Gudereit.',a:[['gudereit.de','https://www.gudereit.de/']]},
  {k:'victoria',n:'Victoria',m:'Victoria eManufaktur 11.9 Wave',img:'img/p-victoria.webp',logo:'img/marke-victoria.svg',o:.24,c:'#22D3EE',t:'Traditionsmarke mit alltagstauglichen E-Bikes.',a:[['victoria-bikes.com','https://www.victoria-bikes.com/']]}
