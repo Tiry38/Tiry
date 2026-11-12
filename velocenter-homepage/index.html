@@ -1096,6 +1096,46 @@ textarea.inp{border-radius:12px}
 }
 @media (min-width:981px) and (max-width:1340px){.nav a{font-size:14.5px;padding:12px 11px}}
 @media (min-width:981px) and (max-width:1180px){.nav a{font-size:13.5px;padding:10px 8px}}
+
+/* ================= Knöpfe – Premium/Automotive-Stil (Tiry 12.11.2026) ================= */
+.cta,.ghost{min-height:52px;padding:0 24px 0 26px;border-radius:6px;gap:14px;font:700 13.5px/1 var(--display);letter-spacing:.12em;text-transform:uppercase;transform:none;backdrop-filter:none;-webkit-backdrop-filter:none}
+.cta:not(:has(svg)),.ghost:not(:has(svg)){padding:0 24px 0 26px}
+.cta::after,.ghost::after{width:18px;height:18px}
+.cta{color:#fff;border:1px solid #B30E28;background:#C8102E;box-shadow:0 1px 2px rgba(27,30,37,.18)}
+.cta::before{display:none}
+.cta:hover{background:#A60D25;border-color:#A60D25;transform:none;box-shadow:0 1px 2px rgba(27,30,37,.22)}
+.ghost{color:#1B1E25;background:transparent;border:1.5px solid #1B1E25;box-shadow:none}
+.ghost:hover{color:#fff;background:#1B1E25;border-color:#1B1E25;transform:none;box-shadow:none}
+.cta.wa{border-color:#178A45;background:#1FA855;box-shadow:0 1px 2px rgba(27,30,37,.18)}
+.cta.wa:hover{border-color:#137A3D;background:#178A45;box-shadow:0 1px 2px rgba(27,30,37,.22)}
+.cta:active,.ghost:active{transform:translateY(1px)}
+.hdr .cta{min-height:42px;padding:0 16px 0 18px;border-radius:6px;font-size:12.5px;letter-spacing:.1em}
+.showinfo .cta,.showinfo .ghost,.fr .cta,.fr .ghost,.chap .ghost,.finder .ghost,.lgm-act .cta,.lgm-act .ghost{min-height:46px;padding:0 18px 0 20px;font-size:12.5px}
+@media (max-width:640px){.cta,.ghost{min-height:50px;padding:0 20px 0 22px;font-size:13px}}
+
+/* Sonderangebote-Knopf + Varianten */
+.ph .wrap{position:relative}
+.deals{position:absolute;top:0;right:max(24px,env(safe-area-inset-right,0px));display:flex;align-items:center;gap:14px;padding:12px 18px 12px 12px;border-radius:10px;border:0;cursor:pointer;color:#fff;background:#C8102E;box-shadow:0 1px 2px rgba(27,30,37,.2),0 18px 36px -18px rgba(200,16,46,.75);text-align:left;transition:background .25s,transform .3s var(--ease)}
+.deals:hover{background:#A60D25;transform:translateY(-2px)}
+.deals .pct{position:relative;width:52px;height:52px;border-radius:8px;display:grid;place-items:center;background:#fff;color:#C8102E;font:900 28px/1 var(--display)}
+.deals .pct::after{content:"";position:absolute;inset:-4px;border-radius:10px;border:2px solid rgba(255,255,255,.7);animation:dealPing 2.2s ease-out infinite}
+@keyframes dealPing{from{transform:scale(.92);opacity:1}to{transform:scale(1.25);opacity:0}}
+.deals .t b{display:block;font:800 15px/1.1 var(--display);letter-spacing:.14em;text-transform:uppercase}
+.deals .t small{display:block;margin-top:5px;font:600 13px/1 var(--display);color:rgba(255,255,255,.85)}
+.deals .ar{font:600 20px/1 var(--display);transition:transform .3s var(--ease)}
+.deals:hover .ar{transform:translateX(4px)}
+.deals.on{background:#1B1E25}.deals.on .pct{color:#1B1E25}.deals.on .ar{transform:rotate(180deg)}
+.lgc.deal{border-color:rgba(200,16,46,.45)}
+.lgpr b em{font-style:normal;font-size:.62em;font-weight:700;color:var(--dim);margin-right:2px}
+.sp .fs i{margin-right:-3px}
+.lgvar{display:flex;flex-direction:column;gap:8px}
+.lgvar .vs{display:flex;flex-wrap:wrap;gap:8px}
+.lgvar .vs button{display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:6px 12px;border-radius:8px;border:1px solid rgba(27,30,37,.15);background:#fff;font:600 13.5px/1.2 var(--display);color:var(--ink);cursor:pointer}
+.lgvar .vs button i{width:12px;height:12px;border-radius:50%;box-shadow:inset 0 0 0 1px rgba(0,0,0,.15)}
+.lgvar .vs button small{font-size:11.5px;font-weight:700;padding:3px 6px;border-radius:5px}
+.lgvar .vs button small.ok{color:#047857;background:#D1FAE5}.lgvar .vs button small.z{color:#92400E;background:#FEF3C7}
+.lgvar .vs button.on{border-color:#1B1E25;box-shadow:inset 0 0 0 1px #1B1E25}
+@media (max-width:980px){.deals{position:static;margin-top:24px}}
 </style>
 
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
@@ -1843,6 +1883,7 @@ m696 -454 c28 -13 46 -31 55 -51 22 -53 -50 -177 -173 -300 -187 -186 -647
    <h1 class="mega hello" style="--d:.08s;margin-top:18px">Sofort da.<br><span class="gt it">Sofort Probe fahren.</span></h1>
    <p class="lead hello" style="--d:.16s">Diese Räder stehen jetzt bei uns in Wörth. Rad antippen, in Ruhe ansehen und direkt anfragen: kaufen, reservieren oder Probe fahren.</p>
    <div class="lgnum hello" style="--d:.24s" id="lgNum"></div>
+   <button type="button" class="deals hello" style="--d:.3s" id="lgDeals" aria-pressed="false"><span class="pct">%</span><span class="t"><b id="lgDealsT">Sonderangebote</b><small id="lgDealsN">reduzierte Räder</small></span><span class="ar" aria-hidden="true">→</span></button>
   </div>
  </div>
  <div class="wrap">
@@ -1903,7 +1944,7 @@ m696 -454 c28 -13 46 -31 55 -51 22 -53 -50 -177 -173 -300 -187 -186 -647
    <div class="find">
     <div class="fnd pre"><span class="k">✓</span><p><b>Online-Terminanfrage für Probefahrt und Werkstatt</b> mit Wunschtag (Mi/So gesperrt) und Tageszeit, geht per WhatsApp oder E-Mail direkt an uns.<small>Füllt die Werkstatt und bringt Probefahrten in den Laden.</small></p></div>
     <div class="fnd pre"><span class="k">✓</span><p><b>E-Bike-Finder</b>: 2 Fragen, dann passende Marken mit Bild und der Knopf zur Probefahrt.<small>Bringt Kunden mit klarem Wunsch in den Laden.</small></p></div>
-    <div class="fnd pre"><span class="k">✓</span><p><b>Live-Lagerbestand „Auf Lager“</b>: alle Räder aus dem Veloport-Export mit Filter, Detailansicht im Showroom-Stil und Anfrage (kaufen, reservieren, Probefahrt). Einkaufspreise, Rahmennummern und interne Notizen werden nie übernommen.<small>Kunden sehen vorher, was da ist, und kommen gezielt.</small></p></div>
+    <div class="fnd pre"><span class="k">✓</span><p><b>Live-Lagerbestand „Auf Lager“</b>: alle Räder aus dem Veloport-Export, gleiche Modelle zusammengefasst (Größen/Farben als Auswahl, keine Stückzahlen), Knopf „Sonderangebote“, „Lieferung ausstehend“ mit voraussichtlichem Termin, Detailansicht im Showroom-Stil und Anfrage (kaufen, reservieren, Probefahrt). Verkaufte und reservierte Räder, Einkaufspreise, Rahmennummern und interne Notizen kommen nie auf die Seite.<small>Kunden sehen vorher, was da ist, und kommen gezielt.</small></p></div>
     <div class="fnd pre"><span class="k">✓</span><p><b>Showroom</b> mit allen 7 Marken zum Durchblättern, freigestellte Herstellerbilder in hoher Auflösung.</p></div>
     <div class="fnd pre"><span class="k">✓</span><p><b>Live „Jetzt geöffnet“</b> und die heutige Öffnungszeit hervorgehoben.</p></div>
     <div class="fnd pre"><span class="k">✓</span><p><b>Aktionen sofort online</b>: Winter-Inspektion mit Tage-Zähler. Änderungen in Minuten, ohne Agentur.</p></div>
@@ -2138,79 +2179,91 @@ fRender();
  setInterval(()=>{if(cur!=='start'||scrollY>innerHeight)return;bs[k].classList.add('off');k=(k+1)%bs.length;bs[k].classList.remove('off');lg.classList.add('swap');setTimeout(()=>{lg.src=bs[k].dataset.l;lg.classList.remove('swap')},350)},4800);
  const {d,m}=berlin(),q=$('#qkHours');if(q){const op=H[d].some(([a,b])=>m>=a&&m<b);q.innerHTML='<i class="qd'+(op?' on':'')+'"></i>'+(op?'Jetzt geöffnet':'Heute: '+(H[d].length?H[d].map(([a,b])=>hm(a)+'–'+hm(b)).join(' · '):'geschlossen'))}})();
 
-/* ================= AUF LAGER ================= */
-const LG={all:[],list:[],ok:false,load:null,f:{q:'',mk:'',rf:'',nur:false,sort:'neu'},i:-1};
+/* ================= AUF LAGER (Modelle mit Varianten, ohne Stückzahlen) ================= */
+const LG={M:[],list:[],ok:false,load:null,f:{q:'',mk:'',rf:'',nur:false,deal:false,sort:'neu'},i:-1,vi:0};
 const BRK=[[/i:?\s?sy/i,'isy'],[/ktm/i,'ktm'],[/qio/i,'qio'],[/velo\s*de\s*ville|vdv/i,'vdv'],[/van\s*raam/i,'vanraam'],[/gudereit/i,'gudereit'],[/victoria/i,'victoria']];
 const lgBrand=m=>{const x=BRK.find(([re])=>re.test(m||''));return x?BR.find(b=>b.k===x[1]):null};
+const lgMkName=r=>(lgBrand(r.marke)||{n:r.marke}).n;
 function lgImg(r){const b=lgBrand(r.marke);if(!b)return '';if(b.k==='isy'&&/touring/i.test(r.modell))return 'img/p-isy2.webp';return b.img}
 const FARB=[[/schwarz|black|anthrazit|graphit/i,'#23252B'],[/wei(ß|ss)|white|creme|cream/i,'#F4F1EA'],[/silber|silver|alu/i,'#B9BDC4'],[/grau|grey|gray/i,'#8C9097'],[/t(ü|ue)rkis|turquoise|aqua|mint/i,'#2CC5C0'],[/petrol/i,'#1F6F78'],[/blau|blue/i,'#3A6FD8'],[/oliv|olive/i,'#7A7F3A'],[/gr(ü|ue)n|green/i,'#2F7D4F'],[/ros(é|e)|rosa|pink/i,'#E6A3C8'],[/rot|red/i,'#C8102E'],[/orange/i,'#F07A1A'],[/gelb|yellow|gold/i,'#E8B923'],[/beige|sand|champagner/i,'#D9C3A0'],[/lila|violett|purple|lavendel/i,'#8E6CC9'],[/braun|brown/i,'#7A5236']];
 const lgFarbe=f=>{const x=FARB.find(([re])=>re.test(f||''));return x?x[1]:'#9AA0A8'};
 const eur=n=>n==null?'':n.toLocaleString('de-DE')+' €';
-function lgLoad(){if(LG.load)return LG.load;LG.load=fetch('data/bestand.json',{cache:'no-store'}).then(r=>{if(!r.ok)throw 0;return r.json()}).then(d=>{LG.all=(d.raeder||[]).map((r,i)=>Object.assign({_i:i},r));LG.ok=true;
+const vP=v=>v.angebot||v.preis||0;
+function lgNorm(d){let M=d.modelle;
+ if(!M&&d.raeder){const g={};d.raeder.forEach(r=>{const k=[r.marke,r.modell,r.jahr].join('|').toLowerCase();(g[k]=g[k]||Object.assign({},r,{varianten:[]})).varianten.push(Object.assign({},r,{status:r.status==='zulauf'?'bestellt':r.status}))});M=Object.values(g)}
+ return (M||[]).map((m,i)=>{const v=m.varianten||[];const lager=v.some(x=>x.status!=='bestellt');const deals=v.filter(x=>x.angebot);const ps=v.map(vP).filter(Boolean);
+  const abs=v.filter(x=>x.status==='bestellt'&&x.ab).map(x=>x.ab).sort();
+  return Object.assign({},m,{_i:i,v,lager,deal:deals.length>0,minP:ps.length?Math.min(...ps):null,multiP:new Set(ps).size>1,ab:lager?'':(abs[0]||''),
+   grs:[...new Set(v.map(x=>x.gr).filter(Boolean))],fs:[...new Map(v.filter(x=>x.farbe).map(x=>[x.farbe.toLowerCase(),x.farbe])).values()]})})}
+function lgLoad(){if(LG.load)return LG.load;LG.load=fetch('data/bestand.json',{cache:'no-store'}).then(r=>{if(!r.ok)throw 0;return r.json()}).then(d=>{LG.M=lgNorm(d);LG.ok=true;
  $('#lgStand').textContent='Stand '+(d.stand||'');$('#lgDemo').hidden=d.quelle!=='Beispieldaten';
- const n=LG.all.filter(r=>r.status!=='zulauf').length,z=LG.all.length-n;
- $('#lgNum').innerHTML='<span><b>'+n+'</b> sofort verfügbar</span>'+(z?'<span><b>'+z+'</b> im Zulauf</span>':'')+'<span><b>'+new Set(LG.all.map(r=>(lgBrand(r.marke)||{n:r.marke}).n)).size+'</b> Marken</span>';
- const q=$('#qkLager');if(q)q.textContent=n+' Räder sofort verfügbar';
+ const nL=LG.M.filter(m=>m.lager).length,nB=LG.M.length-nL,nD=LG.M.filter(m=>m.deal).length,nMk=new Set(LG.M.map(lgMkName)).size;
+ $('#lgNum').innerHTML='<span><b>'+nL+'</b> Modelle sofort verfügbar</span>'+(nB?'<span><b>'+nB+'</b> Modelle bestellt</span>':'')+'<span><b>'+nMk+'</b> Marken</span>';
+ $('#lgDealsN').textContent=nD?nD+(nD===1?' Modell reduziert':' Modelle reduziert'):'Aktuell keine';$('#lgDeals').hidden=!nD;
+ const q=$('#qkLager');if(q)q.textContent='Jetzt im Laden ansehen';
  lgChips()}).catch(()=>{$('#lgGrid').innerHTML='<p class="lgempty">Der Bestand konnte gerade nicht geladen werden. Rufen Sie uns gern an: 07271 78033.</p>'});return LG.load}
-function lgChips(){
- const mk={};LG.all.forEach(r=>{const n=(lgBrand(r.marke)||{n:r.marke}).n;mk[n]=(mk[n]||0)+1});
- $('#lgMk').innerHTML='<button type="button" data-mk="" class="'+(LG.f.mk?'':'on')+'">Alle Marken <i>'+LG.all.length+'</i></button>'+Object.keys(mk).sort((a,b)=>a.localeCompare(b,'de')).map(n=>{const b=BR.find(x=>x.n===n);return '<button type="button" data-mk="'+esc(n)+'" class="'+(LG.f.mk===n?'on':'')+'">'+(b?'<img src="'+b.logo+'" alt="">':'')+'<span>'+esc(n)+'</span><i>'+mk[n]+'</i></button>'}).join('');
- const rf=[...new Set(LG.all.map(r=>r.rahmen).filter(Boolean))];
- $('#lgRf').innerHTML=rf.length>1?'<button type="button" data-rf="" class="'+(LG.f.rf?'':'on')+'">Alle Rahmen</button>'+rf.map(x=>'<button type="button" data-rf="'+esc(x)+'" class="'+(LG.f.rf===x?'on':'')+'">'+esc(x)+'</button>').join(''):'';}
+function lgChips(){const mk=[...new Set(LG.M.map(lgMkName))].sort((a,b)=>a.localeCompare(b,'de'));
+ $('#lgMk').innerHTML='<button type="button" data-mk="" class="'+(LG.f.mk?'':'on')+'">Alle Marken</button>'+mk.map(n=>{const b=BR.find(x=>x.n===n);return '<button type="button" data-mk="'+esc(n)+'" class="'+(LG.f.mk===n?'on':'')+'">'+(b?'<img src="'+b.logo+'" alt="">':'')+'<span>'+esc(n)+'</span></button>'}).join('');
+ const rf=[...new Set(LG.M.map(m=>m.rahmen).filter(Boolean))];
+ $('#lgRf').innerHTML=rf.length>1?'<button type="button" data-rf="" class="'+(LG.f.rf?'':'on')+'">Alle Rahmen</button>'+rf.map(x=>'<button type="button" data-rf="'+esc(x)+'" class="'+(LG.f.rf===x?'on':'')+'">'+esc(x)+'</button>').join(''):'';
+ const d=$('#lgDeals');d.classList.toggle('on',LG.f.deal);d.setAttribute('aria-pressed',String(LG.f.deal));$('#lgDealsT').textContent=LG.f.deal?'Alle Räder zeigen':'Sonderangebote';}
 function lgFilter(){const f=LG.f,q=f.q.toLowerCase().trim().split(/\s+/).filter(Boolean);
- let L=LG.all.filter(r=>(!f.mk||(lgBrand(r.marke)||{n:r.marke}).n===f.mk)&&(!f.rf||r.rahmen===f.rf)&&(!f.nur||r.status!=='zulauf')&&q.every(w=>[r.marke,r.modell,r.farbe,r.gr,r.rahmen,r.jahr].join(' ').toLowerCase().includes(w)));
- const pr=r=>r.angebot||r.preis||0;
- if(f.sort==='pa')L.sort((a,b)=>pr(a)-pr(b));else if(f.sort==='pd')L.sort((a,b)=>pr(b)-pr(a));else if(f.sort==='mk')L.sort((a,b)=>(a.marke+a.modell).localeCompare(b.marke+b.modell,'de'));
- else L.sort((a,b)=>(a.status==='zulauf')-(b.status==='zulauf')||(!!b.angebot-!!a.angebot)||a._i-b._i);
+ let L=LG.M.filter(m=>(!f.mk||lgMkName(m)===f.mk)&&(!f.rf||m.rahmen===f.rf)&&(!f.nur||m.lager)&&(!f.deal||m.deal)&&q.every(w=>[m.marke,m.modell,m.rahmen,m.jahr,...m.grs,...m.fs].join(' ').toLowerCase().includes(w)));
+ if(f.sort==='pa')L.sort((a,b)=>(a.minP||9e9)-(b.minP||9e9));else if(f.sort==='pd')L.sort((a,b)=>(b.minP||0)-(a.minP||0));else if(f.sort==='mk')L.sort((a,b)=>(a.marke+a.modell).localeCompare(b.marke+b.modell,'de'));
+ else L.sort((a,b)=>(!b.lager-!a.lager)*-1||(b.deal-a.deal)||a._i-b._i);
  return L}
-function lgBadges(r){return (r.status==='zulauf'?'<span class="bd z">Im Zulauf'+(r.ab?' · ab '+esc(r.ab):'')+'</span>':'<span class="bd ok">Sofort verfügbar</span>')+(r.angebot?'<span class="bd an">Angebot</span>':'')+(r.vorfuehr?'<span class="bd vf">Vorführrad</span>':'')+(r.gebraucht?'<span class="bd gb">Gebraucht</span>':'')}
-function lgPrice(r){if(!r.preis)return '<span class="lgpr"><b>Preis auf Anfrage</b></span>';return '<span class="lgpr">'+(r.angebot?'<s>'+eur(r.preis)+'</s><b class="an">'+eur(r.angebot)+'</b>':'<b>'+eur(r.preis)+'</b>')+'</span>'}
+function lgStat(lager,ab){return lager?'<span class="bd ok">Sofort verfügbar</span>':'<span class="bd z">Lieferung ausstehend'+(ab?' · voraussichtl. '+esc(ab):'')+'</span>'}
+function lgBadgesM(m){return lgStat(m.lager,m.ab)+(m.deal?'<span class="bd an">Sonderangebot</span>':'')+(m.v.some(x=>x.vorfuehr)?'<span class="bd vf">Vorführrad</span>':'')+(m.v.some(x=>x.gebraucht)?'<span class="bd gb">Gebraucht</span>':'')}
+function lgPriceM(m){const d=m.v.filter(x=>x.angebot).sort((a,b)=>a.angebot-b.angebot)[0];
+ if(d)return '<span class="lgpr"><s>'+eur(d.preis)+'</s><b class="an">'+(m.multiP?'<em>ab</em> ':'')+eur(d.angebot)+'</b></span>';
+ return m.minP?'<span class="lgpr"><b>'+(m.multiP?'<em>ab</em> ':'')+eur(m.minP)+'</b></span>':'<span class="lgpr"><b>Preis auf Anfrage</b></span>'}
 function lgRender(){if(!LG.ok)return;const L=LG.list=lgFilter();const g=$('#lgGrid');
- if(!L.length){g.innerHTML='<p class="lgempty">Kein Rad passt zu diesen Filtern. <button type="button" class="ghost" id="lgReset">Filter zurücksetzen</button></p>';return}
- g.innerHTML=L.map((r,k)=>{const b=lgBrand(r.marke),im=lgImg(r);return '<article class="lgc" role="button" tabindex="0" data-k="'+k+'" style="--ac:'+(b?b.c:'#8C9097')+';--d:'+Math.min(k,12)*0.04+'s" aria-label="'+esc(r.marke+' '+r.modell)+' ansehen">'+
-  '<div class="lgst">'+(b?'<img class="wl" src="'+b.logo+'" alt="">':'')+(im?'<img class="bk" src="'+im+'" alt="" loading="lazy">':'<svg class="ph"><use href="#i-bike"/></svg>')+'<div class="bds">'+lgBadges(r)+'</div></div>'+
-  '<div class="lgin"><span class="mk">'+esc(r.marke)+(r.jahr?' · '+esc(r.jahr):'')+'</span><h3>'+esc(r.modell)+'</h3><div class="sp">'+(r.gr?'<span>'+esc(r.gr)+'</span>':'')+(r.farbe?'<span><i style="background:'+lgFarbe(r.farbe)+'"></i>'+esc(r.farbe)+'</span>':'')+(r.rahmen?'<span>'+esc(r.rahmen)+'</span>':'')+'</div>'+
-  '<div class="ft">'+lgPrice(r)+'<span class="go">Ansehen</span></div></div></article>'}).join('')}
+ if(!L.length){g.innerHTML='<p class="lgempty">'+(LG.f.deal?'Aktuell gibt es dazu keine Sonderangebote.':'Kein Rad passt zu diesen Filtern.')+' <button type="button" class="ghost" id="lgReset">Filter zurücksetzen</button></p>';return}
+ g.innerHTML=L.map((m,k)=>{const b=lgBrand(m.marke),im=lgImg(m);return '<article class="lgc'+(m.deal?' deal':'')+'" role="button" tabindex="0" data-k="'+k+'" style="--ac:'+(b?b.c:'#8C9097')+';--d:'+Math.min(k,12)*0.04+'s" aria-label="'+esc(m.marke+' '+m.modell)+' ansehen">'+
+  '<div class="lgst">'+(b?'<img class="wl" src="'+b.logo+'" alt="">':'')+(im?'<img class="bk" src="'+im+'" alt="" loading="lazy">':'<svg class="ph"><use href="#i-bike"/></svg>')+'<div class="bds">'+lgBadgesM(m)+'</div></div>'+
+  '<div class="lgin"><span class="mk">'+esc(m.marke)+(m.jahr?' · '+esc(m.jahr):'')+'</span><h3>'+esc(m.modell)+'</h3><div class="sp">'+(m.grs.length?'<span>'+esc(m.grs.join(' · '))+'</span>':'')+(m.fs.length?'<span class="fs">'+m.fs.slice(0,5).map(f=>'<i title="'+esc(f)+'" style="background:'+lgFarbe(f)+'"></i>').join('')+(m.fs.length===1?esc(m.fs[0]):m.fs.length+' Farben')+'</span>':'')+(m.rahmen?'<span>'+esc(m.rahmen)+'</span>':'')+'</div>'+
+  '<div class="ft">'+lgPriceM(m)+'<span class="go">Ansehen</span></div></div></article>'}).join('')}
 function lgOpen(){lgLoad().then(()=>{lgChips();lgRender()})}
 /* Detailansicht im Showroom-Stil */
-function lgShow(k,dir){const L=LG.list;if(!L.length)return;LG.i=(k+L.length)%L.length;const r=L[LG.i],b=lgBrand(r.marke),im=lgImg(r),m=$('#lgm'),st=$('#lgmStage');
- m.style.setProperty('--ac',b?b.c:'#8C9097');
- const bk=$('#lgmBk'),rf=$('#lgmRf'),wl=$('#lgmWl');
- const put=()=>{bk.src=im||'';rf.src=im||'';bk.alt=r.marke+' '+r.modell;wl.src=b?b.logo:'';wl.hidden=!b;bk.hidden=rf.hidden=!im;st.classList.remove('go-l','go-r');void st.offsetWidth;st.classList.add(dir<0?'go-r':'go-l')};
- put();
- const row=(l,v,h)=>v?'<div><dt>'+l+'</dt><dd>'+(h||esc(v))+'</dd></div>':'';
- $('#lgmInfo').innerHTML='<p class="eyebrow">'+esc(r.marke)+(r.jahr?' · <b>Modelljahr '+esc(r.jahr)+'</b>':'')+'</p><h2 id="lgmT">'+esc(r.modell)+'</h2><div class="bds">'+lgBadges(r)+'</div>'+
-  '<div class="lgm-price">'+lgPrice(r)+(r.angebot?'<span class="sv">Sie sparen '+eur(r.preis-r.angebot)+'</span>':'')+'</div>'+
-  '<dl class="lgm-spec">'+row('Rahmenhöhe',r.gr)+row('Farbe',r.farbe,'<i style="background:'+lgFarbe(r.farbe)+'"></i>'+esc(r.farbe||''))+row('Rahmenform',r.rahmen)+row('Motor',r.motor)+row('Akku',r.akku)+row('Schaltung',r.schaltung)+row('Verfügbarkeit',1,r.status==='zulauf'?'Im Zulauf'+(r.ab?', voraussichtlich '+esc(r.ab):''):'Sofort, steht bei uns in Wörth')+row('Bestands-Nr.',r.id)+'</dl>'+
+function lgInfo(){const m=LG.list[LG.i],v=m.v[LG.vi]||m.v[0];const row=(l,x,h)=>x?'<div><dt>'+l+'</dt><dd>'+(h||esc(x))+'</dd></div>':'';
+ const varis=m.v.length>1?'<div class="lgvar"><span class="flab">Verfügbare Ausführungen</span><div class="vs">'+m.v.map((x,j)=>'<button type="button" data-vi="'+j+'" class="'+(j===LG.vi?'on':'')+'">'+(x.farbe?'<i style="background:'+lgFarbe(x.farbe)+'"></i>':'')+'<span>'+esc([x.gr,x.farbe].filter(Boolean).join(' · ')||'Ausführung '+(j+1))+'</span><small class="'+(x.status==='bestellt'?'z':'ok')+'">'+(x.status==='bestellt'?'Lieferung ausstehend':'verfügbar')+'</small></button>').join('')+'</div></div>':'';
+ $('#lgmInfo').innerHTML='<p class="eyebrow">'+esc(m.marke)+(m.jahr?' · <b>Modelljahr '+esc(m.jahr)+'</b>':'')+'</p><h2 id="lgmT">'+esc(m.modell)+'</h2><div class="bds">'+lgStat(v.status!=='bestellt',v.ab)+(v.angebot?'<span class="bd an">Sonderangebot</span>':'')+(v.vorfuehr?'<span class="bd vf">Vorführrad</span>':'')+(v.gebraucht?'<span class="bd gb">Gebraucht</span>':'')+'</div>'+
+  '<div class="lgm-price">'+(v.preis?'<span class="lgpr">'+(v.angebot?'<s>'+eur(v.preis)+'</s><b class="an">'+eur(v.angebot)+'</b>':'<b>'+eur(v.preis)+'</b>')+'</span>':'<span class="lgpr"><b>Preis auf Anfrage</b></span>')+(v.angebot?'<span class="sv">Sie sparen '+eur(v.preis-v.angebot)+'</span>':'')+'</div>'+varis+
+  '<dl class="lgm-spec">'+row('Rahmenhöhe',v.gr)+row('Farbe',v.farbe,'<i style="background:'+lgFarbe(v.farbe)+'"></i>'+esc(v.farbe||''))+row('Rahmenform',m.rahmen)+row('Motor',m.motor)+row('Akku',m.akku)+row('Schaltung',m.schaltung)+row('Verfügbarkeit',1,v.status==='bestellt'?'Lieferung ausstehend'+(v.ab?', voraussichtlich '+esc(v.ab):''):'Sofort, steht bei uns in Wörth')+'</dl>'+
   '<div class="row lgm-act"><button type="button" class="cta" data-ask="Kaufen">Dieses Rad anfragen</button><button type="button" class="ghost" data-ask="Probefahrt">Probefahrt</button></div>'+
   '<form class="lgm-form" id="lgmF" hidden novalidate><div class="fl"><span class="flab">Ihr Wunsch</span><div class="choice" id="lgW"><button type="button" class="on" data-v="Kaufen">Kaufen</button><button type="button" data-v="Reservieren">Reservieren</button><button type="button" data-v="Probefahrt">Probefahrt</button><button type="button" data-v="Andere Größe/Farbe bestellen">Andere Größe/Farbe</button></div></div>'+
   '<div class="r2"><div class="fl"><label for="lgN">Name</label><input class="inp" id="lgN" autocomplete="name"></div><div class="fl"><label for="lgT">Telefon</label><input class="inp" id="lgT" type="tel" autocomplete="tel"></div></div>'+
   '<div class="fl"><label for="lgMsg">Nachricht (optional)</label><textarea class="inp" id="lgMsg" placeholder="z. B. Körpergröße, Wunschtermin …"></textarea></div><div class="err" id="lgE" role="alert"></div>'+
-  '<div class="row"><button type="submit" class="cta wa" data-via="wa"><svg><use href="#i-chat"/></svg>Per WhatsApp senden</button><button type="submit" class="ghost" data-via="mail">Per E-Mail</button></div><p class="note">Oder anrufen: 07271 78033</p></form>';
- if(m.hidden){m.hidden=false;document.body.style.overflow='hidden';requestAnimationFrame(()=>m.classList.add('on'));$('.lgm-x',m).focus()}}
+  '<div class="row"><button type="submit" class="cta wa" data-via="wa"><svg><use href="#i-chat"/></svg>Per WhatsApp senden</button><button type="submit" class="ghost" data-via="mail">Per E-Mail</button></div><p class="note">Oder anrufen: 07271 78033</p></form>'}
+function lgShow(k,dir){const L=LG.list;if(!L.length)return;LG.i=(k+L.length)%L.length;const m=L[LG.i];LG.vi=Math.max(0,m.v.findIndex(x=>LG.f.deal?x.angebot:x.status!=='bestellt'));
+ const b=lgBrand(m.marke),im=lgImg(m),M=$('#lgm'),st=$('#lgmStage');M.style.setProperty('--ac',b?b.c:'#8C9097');
+ const bk=$('#lgmBk'),rf=$('#lgmRf'),wl=$('#lgmWl');bk.src=im||'';rf.src=im||'';bk.alt=m.marke+' '+m.modell;wl.src=b?b.logo:'';wl.hidden=!b;bk.hidden=rf.hidden=!im;
+ st.classList.remove('go-l','go-r');void st.offsetWidth;st.classList.add(dir<0?'go-r':'go-l');
+ lgInfo();
+ if(M.hidden){M.hidden=false;document.body.style.overflow='hidden';requestAnimationFrame(()=>M.classList.add('on'));$('.lgm-x',M).focus()}}
 function lgClose(){const m=$('#lgm');m.classList.remove('on');document.body.style.overflow='';setTimeout(()=>{m.hidden=true},320)}
-$('#lgGrid').addEventListener('click',e=>{if(e.target.closest('#lgReset')){LG.f={q:'',mk:'',rf:'',nur:false,sort:LG.f.sort};$('#lgQ').value='';$('#lgNur').checked=false;lgChips();lgRender();return}const c=e.target.closest('.lgc');if(c)lgShow(+c.dataset.k,1)});
+$('#lgGrid').addEventListener('click',e=>{if(e.target.closest('#lgReset')){LG.f={q:'',mk:'',rf:'',nur:false,deal:false,sort:LG.f.sort};$('#lgQ').value='';$('#lgNur').checked=false;lgChips();lgRender();return}const c=e.target.closest('.lgc');if(c)lgShow(+c.dataset.k,1)});
 $('#lgGrid').addEventListener('keydown',e=>{const c=e.target.closest('.lgc');if(c&&(e.key==='Enter'||e.key===' ')){e.preventDefault();lgShow(+c.dataset.k,1)}});
 $('#lgMk').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;LG.f.mk=b.dataset.mk;lgChips();lgRender()});
 $('#lgRf').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;LG.f.rf=b.dataset.rf;lgChips();lgRender()});
+$('#lgDeals').addEventListener('click',()=>{LG.f.deal=!LG.f.deal;lgChips();lgRender();$('#lgBar').scrollIntoView({behavior:'smooth',block:'start'})});
 $('#lgQ').addEventListener('input',e=>{LG.f.q=e.target.value;lgRender()});
 $('#lgNur').addEventListener('change',e=>{LG.f.nur=e.target.checked;lgRender()});
 $('#lgSort').addEventListener('change',e=>{LG.f.sort=e.target.value;lgRender()});
 $('#lgm').addEventListener('click',e=>{if(e.target.closest('[data-close]')){lgClose();return}
+ const vb=e.target.closest('[data-vi]');if(vb){LG.vi=+vb.dataset.vi;lgInfo();return}
  const a=e.target.closest('[data-ask]');if(a){const f=$('#lgmF');f.hidden=false;$$('#lgW button').forEach(x=>x.classList.toggle('on',x.dataset.v===a.dataset.ask));$('.lgm-act').hidden=true;f.scrollIntoView({behavior:'smooth',block:'nearest'});$('#lgN').focus();return}
  const w=e.target.closest('#lgW button');if(w){$$('#lgW button').forEach(x=>x.classList.toggle('on',x===w))}});
 $('#lgmP').addEventListener('click',()=>lgShow(LG.i-1,-1));$('#lgmN').addEventListener('click',()=>lgShow(LG.i+1,1));
 addEventListener('keydown',e=>{if($('#lgm').hidden)return;if(e.key==='Escape')lgClose();if(e.target.closest&&e.target.closest('input,textarea'))return;if(e.key==='ArrowRight')lgShow(LG.i+1,1);if(e.key==='ArrowLeft')lgShow(LG.i-1,-1)});
 let lgVia='wa';$('#lgm').addEventListener('click',e=>{const b=e.target.closest('#lgmF button[type=submit]');if(b)lgVia=b.dataset.via});
-$('#lgm').addEventListener('submit',e=>{e.preventDefault();const r=LG.list[LG.i],E=$('#lgE');E.textContent='';const n=$('#lgN').value.trim(),t=$('#lgT').value.trim(),msg=$('#lgMsg').value.trim(),w=$('#lgW .on').dataset.v;
+$('#lgm').addEventListener('submit',e=>{e.preventDefault();const m=LG.list[LG.i],v=m.v[LG.vi]||m.v[0],E=$('#lgE');E.textContent='';const n=$('#lgN').value.trim(),t=$('#lgT').value.trim(),msg=$('#lgMsg').value.trim(),w=$('#lgW .on').dataset.v;
  if(!n||!t){E.textContent='Bitte Name und Telefon angeben, damit wir Sie erreichen.';return}
- const txt='Hallo Velocenter,\nich interessiere mich für dieses Rad aus Ihrem Bestand:\n\n'+r.marke+' '+r.modell+(r.jahr?' ('+r.jahr+')':'')+'\n'+[r.gr&&'Größe: '+r.gr,r.farbe&&'Farbe: '+r.farbe].filter(Boolean).join(' · ')+'\nBestands-Nr.: '+r.id+'\n\nMein Wunsch: '+w+(msg?'\n'+msg:'')+'\n\nName: '+n+'\nTelefon: '+t;
- const a=document.createElement('a');a.href=lgVia==='wa'?'https://wa.me/'+WA+'?text='+encodeURIComponent(txt):'mailto:info@velo-center.de?subject='+encodeURIComponent(w+': '+r.marke+' '+r.modell+' ('+r.id+')')+'&body='+encodeURIComponent(txt);if(lgVia==='wa'){a.target='_blank';a.rel='noopener'}document.body.append(a);a.click();a.remove();
+ const txt='Hallo Velocenter,\nich interessiere mich für dieses Rad aus Ihrem Bestand:\n\n'+m.marke+' '+m.modell+(m.jahr?' ('+m.jahr+')':'')+'\n'+[v.gr&&'Größe: '+v.gr,v.farbe&&'Farbe: '+v.farbe].filter(Boolean).join(' · ')+(v.id?'\nBestands-Nr.: '+v.id:'')+'\n\nMein Wunsch: '+w+(msg?'\n'+msg:'')+'\n\nName: '+n+'\nTelefon: '+t;
+ const a=document.createElement('a');a.href=lgVia==='wa'?'https://wa.me/'+WA+'?text='+encodeURIComponent(txt):'mailto:info@velo-center.de?subject='+encodeURIComponent(w+': '+m.marke+' '+m.modell)+'&body='+encodeURIComponent(txt);if(lgVia==='wa'){a.target='_blank';a.rel='noopener'}document.body.append(a);a.click();a.remove();
  E.style.color='#059669';E.textContent=lgVia==='wa'?'WhatsApp wird geöffnet. Bitte dort auf Senden tippen.':'Ihr E-Mail-Programm wird geöffnet. Bitte dort auf Senden klicken.'});
-/* Wischen in der Detailansicht */
 (()=>{let sx=0;const st=$('#lgmStage');st.addEventListener('pointerdown',e=>sx=e.clientX);st.addEventListener('pointerup',e=>{const d=e.clientX-sx;if(Math.abs(d)>50)lgShow(LG.i+(d<0?1:-1),d<0?1:-1)})})();
-/* Showroom „Auf Lager“ -> Bestand der Marke */
-document.addEventListener('click',e=>{const a=e.target.closest('[data-brand]');if(a){LG.f.mk=a.dataset.brand;LG.f.rf='';LG.f.q='';}},true);
+document.addEventListener('click',e=>{const a=e.target.closest('[data-brand]');if(a){LG.f.mk=a.dataset.brand;LG.f.rf='';LG.f.q='';LG.f.deal=false}},true);
 lgLoad();
 go(true);
 })();

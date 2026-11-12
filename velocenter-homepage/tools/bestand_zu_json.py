@@ -5,7 +5,9 @@ Aufruf:  python3 tools/bestand_zu_json.py <Veloport-Export.csv> [data/bestand.js
 
 Spaltenerkennung wie in der KI-Zentrale (fzbMap/fzbMapX). Auf die Homepage kommen nur
 kundentaugliche Felder. Einkaufspreis, Rahmennummer, Lagerort, Besitzer, Bemerkung,
-Akku-/Schluesselnummern werden nie uebernommen.
+Akku-/Schluesselnummern werden nie uebernommen. Verkaufte (Verkaufsdatum/Besitzer),
+reservierte Raeder und Serviceraeder fallen raus. Gleiche Modelle werden zusammengefasst:
+je Modell nur die vorhandenen Varianten (Groesse/Farbe/Status), KEINE Stueckzahlen.
 """
 import csv, io, json, re, sys, datetime
 
@@ -45,6 +47,7 @@ def karte(kopf):
         id=f(r'^(fahrzeug)?-?\s?id$|^lfd|^fz-?nr'), ort=f(r'lagerort|standort|lagerplatz|^platz'),
         ang=f(r'angeliefert'), lt=f(r'liefertermin'), bd=f(r'bestelldatum'),
         res=f(r'^reserviert$'), test=f(r'^testfahrzeug$'), zu=f(r'^name$'),
+        vd=f(r'verkaufsdatum'), bes=f(r'besitzer|eigent'),
         aus=f(r'ausstatt'), akku=f(r'akku-?\s?leistung'), motor=f(r'^motor|antrieb'),
         schalt=f(r'schaltung|gangschaltung'),
     )
@@ -79,11 +82,12 @@ def main():
     m = karte(kopf)
     if m['marke'] < 0 or m['modell'] < 0:
         sys.exit('Spalten Marke/Hersteller und Modell nicht gefunden – ist das der Fahrzeugbestand?')
-    raeder, n_service, n_res = [], 0, 0
+    raeder, n_service, n_res, n_verk = [], 0, 0, 0
     for nr, r in enumerate(rows, 1):
         art = wert(r, m['zu'])
         if re.search(r'service', art, re.I): n_service += 1; continue
         if m['res'] >= 0 and ja(wert(r, m['res'])): n_res += 1; continue
+        if wert(r, m['vd']) or wert(r, m['bes']): n_verk += 1; continue
         marke, modell = wert(r, m['marke']), wert(r, m['modell'])
         if not marke or not modell: continue
         zulauf = m['ang'] >= 0 and not wert(r, m['ang']) and (
@@ -94,13 +98,40 @@ def main():
             gr=wert(r, m['gr']), farbe=wert(r, m['farbe']),
             rahmen=rahmenform(wert(r, m['rf']), wert(r, m['dh']), modell),
             preis=vk, angebot=ap if ap and vk and ap < vk else None,
-            status='zulauf' if zulauf else 'lager', ab=wert(r, m['lt']) if zulauf else '',
+            status='bestellt' if zulauf else 'lager', ab=wert(r, m['lt']) if zulauf else '',
             gebraucht=bool(re.search(r'gebraucht', art, re.I)), vorfuehr=m['test'] >= 0 and ja(wert(r, m['test'])),
             motor=wert(r, m['motor']), akku=wert(r, m['akku']), schaltung=wert(r, m['schalt']),
         ).items() if v not in ('', None, False)})
-    daten = dict(stand=datetime.date.today().strftime('%d.%m.%Y'), quelle='Veloport-Export', raeder=raeder)
+    modelle = gruppieren(raeder)
+    daten = dict(stand=datetime.date.today().strftime('%d.%m.%Y'), quelle='Veloport-Export', modelle=modelle)
     json.dump(daten, open(ziel, 'w', encoding='utf-8'), ensure_ascii=False, indent=1)
-    print(f'{len(raeder)} Räder -> {ziel} (ausgelassen: {n_service} Servicerad, {n_res} reserviert)')
+    print(f'{len(raeder)} Räder -> {len(modelle)} Modelle -> {ziel} '
+          f'(ausgelassen: {n_verk} verkauft, {n_res} reserviert, {n_service} Servicerad)')
+
+MODELL_FELDER = ('marke', 'modell', 'jahr', 'rahmen', 'motor', 'akku', 'schaltung')
+VARIANTE_FELDER = ('gr', 'farbe', 'status', 'ab', 'preis', 'angebot', 'vorfuehr', 'gebraucht', 'id')
+
+def gruppieren(raeder):
+    """Gleiches Modell -> eine Karte; doppelte Varianten nur einmal (keine Stueckzahlen)."""
+    modelle = {}
+    for r in raeder:
+        key = (r['marke'].lower(), r['modell'].lower(), r.get('jahr', ''))
+        m = modelle.setdefault(key, {k: r[k] for k in MODELL_FELDER if k in r} | {'varianten': {}})
+        for k in ('rahmen', 'motor', 'akku', 'schaltung'):
+            if k in r and k not in m: m[k] = r[k]
+        vkey = (r.get('gr', ''), r.get('farbe', '').lower(), r['status'], bool(r.get('gebraucht')))
+        alt = m['varianten'].get(vkey)
+        neu = {k: r[k] for k in VARIANTE_FELDER if k in r}
+        if alt is None:
+            m['varianten'][vkey] = neu
+        else:  # gleiche Variante mehrfach: guenstigsten Preis / fruehesten Termin behalten, nicht zaehlen
+            if neu.get('angebot') and (not alt.get('angebot') or neu['angebot'] < alt['angebot']): alt['angebot'] = neu['angebot']
+            if neu.get('ab') and (not alt.get('ab') or neu['ab'] < alt['ab']): alt['ab'] = neu['ab']
+    out = []
+    for m in modelle.values():
+        m['varianten'] = sorted(m['varianten'].values(), key=lambda v: (v['status'] != 'lager', v.get('gr', ''), v.get('farbe', '')))
+        out.append(m)
+    return out
 
 if __name__ == '__main__':
     main()
