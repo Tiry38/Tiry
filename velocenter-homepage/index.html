@@ -1789,6 +1789,16 @@ body.fz2 main,body.fz2 .foot{zoom:1.25}
 /* 4,8 nicht abschneiden (Tiry 12.11.2026) */
 .gt{padding-left:.1em;padding-right:.12em;margin-left:-.1em;margin-right:-.12em;-webkit-box-decoration-break:clone;box-decoration-break:clone}
 .score b{padding:.04em .1em .06em .1em;margin:0 -.1em 0 -.1em;width:max-content;max-width:calc(100% + .2em)}
+/* Winter-Aktion: helleres Dunkelgrau, weißer Schnee (Tiry 12.11.2026) */
+.ice{background:linear-gradient(120deg,#4A4F5A,#3D424C 45%,#454150 80%,#4E4552)!important}
+.ice::before{background:radial-gradient(50% 70% at 85% 30%,rgba(255,255,255,.1),transparent 70%),radial-gradient(40% 60% at 10% 80%,rgba(200,16,46,.16),transparent 70%)!important}
+.ice .minus{background:linear-gradient(180deg,#FFFFFF 10%,#DCE6F2 55%,#FF8A9B);-webkit-background-clip:text;background-clip:text;filter:drop-shadow(0 10px 24px rgba(0,0,0,.3))}
+.ice .eyebrow{color:#E6E9EF!important}.ice .eyebrow b{color:#FF8A9B!important}
+.ice .eyebrow::before{background:#E6E9EF!important}
+.ice h2,.ice .mid{color:#fff}
+.ice .lead,.ice .days span{color:#E6E9EF!important}
+.ice .cdn>div:not(:first-child){background:linear-gradient(180deg,#2A2D34,#1B1E25)}
+.ice .sutx b{color:#fff!important}.ice .sutx small{color:#D3D7DF!important}.ice .suk{color:#BEF264!important}
 /* ===== Service-Themen mit eigenen Sprungzielen (Tiry 12.11.2026) ===== */
 .tpc,#termin-form,#dienstrad{scroll-margin-top:96px}
 .tnav{display:flex;flex-wrap:wrap;gap:10px;margin-top:26px}
@@ -2238,7 +2248,7 @@ m696 -454 c28 -13 46 -31 55 -51 22 -53 -50 -177 -173 -300 -187 -186 -647
   <canvas id="snow" aria-hidden="true"></canvas>
   <div class="wrap">
    <div class="pre">
-    <p class="eyebrow" style="color:#4338CA">Winter-Inspektion <b style="color:#0284C7">2026/27</b></p>
+    <p class="eyebrow">Winter-Inspektion <b>2026/27</b></p>
     <div class="minus" style="margin-top:18px">–20 €</div>
     <h2 class="mid">auf jede Inspektion.</h2>
     <div class="sux"><div class="suimg"><span class="sug" aria-hidden="true"></span><img src="img/sattelueberzug.webp" alt="Sattelüberzug in Neongelb mit Velocenter-Logo" width="894" height="900" loading="lazy"><b class="sust">Gratis</b></div><div class="sutx"><span class="suk">+ Geschenkt dazu</span><b>Sattelüberzug mit Velocenter-Logo</b><small>Zu jeder Winter-Inspektion</small></div></div>
@@ -2981,7 +2991,7 @@ document.addEventListener('click',e=>{const a=e.target.closest('a[href^="#"]');i
 (function(){const cv=$('#snow');if(!cv)return;const cx=cv.getContext('2d');let W,H2,F=[];
  function size(){const r=cv.getBoundingClientRect();W=r.width;H2=r.height;cv.width=W;cv.height=H2;F=Array.from({length:Math.round(W/14)},()=>({x:Math.random()*W,y:Math.random()*H2,r:.6+Math.random()*2.2,v:.3+Math.random()*1,s:Math.random()*6}))}
  size();addEventListener('resize',size);
- let t0=0;(function loop(t){const dt=t0?Math.min(3,(t-t0)/16.67)*.7:1;t0=t;const r=cv.getBoundingClientRect();if(cur==='start'&&r.bottom>0&&r.top<innerHeight){if(!W)size();cx.clearRect(0,0,W,H2);cx.fillStyle='rgba(79,70,229,.35)';F.forEach(f=>{f.y+=f.v*dt;f.x+=Math.sin((t/1000)+f.s)*.3;if(f.y>H2){f.y=-4;f.x=Math.random()*W}cx.beginPath();cx.arc(f.x,f.y,f.r,0,7);cx.fill()})}requestAnimationFrame(loop)})(0);
+ let t0=0;(function loop(t){const dt=t0?Math.min(3,(t-t0)/16.67)*.7:1;t0=t;const r=cv.getBoundingClientRect();if(cur==='start'&&r.bottom>0&&r.top<innerHeight){if(!W)size();cx.clearRect(0,0,W,H2);cx.fillStyle='rgba(255,255,255,.85)';F.forEach(f=>{f.y+=f.v*dt;f.x+=Math.sin((t/1000)+f.s)*.3;if(f.y>H2){f.y=-4;f.x=Math.random()*W}cx.beginPath();cx.arc(f.x,f.y,f.r,0,7);cx.fill()})}requestAnimationFrame(loop)})(0);
 })();
 
 /* ---------- Bewertungen wechseln ---------- */
