@@ -1054,6 +1054,13 @@ textarea.inp{border-radius:12px}
 .lgpr s{font:500 13px var(--display);color:var(--dim)}
 .lgpr b{font:900 22px/1.1 var(--display);letter-spacing:-.02em}
 .lgpr b.an{color:#C8102E}
+.anl{display:block;font:600 11.5px/1.25 var(--display);color:#9F1239;letter-spacing:0}
+.anbox{flex-basis:100%;display:flex;gap:9px;align-items:flex-start;margin:4px 0 0;padding:10px 13px;border-radius:12px;background:#FFF1F2;border:1px solid rgba(200,16,46,.25);font:600 13.5px/1.4 var(--display);color:#881337}
+.anbox b{color:#C8102E}
+.anhint{margin-top:12px;font:600 13.5px/1.4 var(--display);color:#9F1239}
+.anhint.dk{color:#FECDD3}
+.fnote{margin:26px 0 0;font:500 13px/1.5 var(--display);color:var(--mut)}
+.lgdr small{display:block;font-weight:600;font-size:12px;color:#9F1239;margin-top:3px}
 .ft .go{display:inline-flex;align-items:center;gap:6px;font:700 13.5px/1 var(--display);color:var(--ink)}
 .ft .go::after{content:"→";transition:transform .3s var(--ease)}
 .lgc:hover .ft .go::after{transform:translateX(4px)}
@@ -2136,7 +2143,7 @@ m696 -454 c28 -13 46 -31 55 -51 22 -53 -50 -177 -173 -300 -187 -186 -647
    <div class="rows">
     <a class="srow pre" href="#service" style="--c:#F472B6"><span class="ic"><svg><use href="#i-bike"/></svg></span><span><h3>Beratung & Probefahrt</h3><p>Wir hören zu, zeigen eine passende Auswahl und begleiten Sie auf Wunsch bei der Probefahrt.</p></span><span class="go"><svg><use href="#i-arrow"/></svg></span></a>
     <a class="srow pre" href="#termin" style="--c:#22D3EE"><span class="ic"><svg><use href="#i-wrench"/></svg></span><span><h3>Inspektion & Reparatur</h3><p>Geschultes Bosch Service Center. Fachkundige Inspektionen und Reparaturen, auch nach dem Kauf.</p></span><span class="go"><svg><use href="#i-arrow"/></svg></span></a>
-    <a class="srow pre" href="#service" style="--c:#E2232D"><span class="ic"><svg><use href="#i-euro"/></svg></span><span><h3>0 % Finanzierung</h3><p>0 % Zinsen und 0 € Anzahlung über die TARGOBANK.</p></span><span class="go"><svg><use href="#i-arrow"/></svg></span></a>
+    <a class="srow pre" href="#service" style="--c:#E2232D"><span class="ic"><svg><use href="#i-euro"/></svg></span><span><h3>0 % Finanzierung</h3><p>0 % Zinsen und 0 € Anzahlung über die TARGOBANK. Zum regulären Preis, nicht auf Aktionspreise.</p></span><span class="go"><svg><use href="#i-arrow"/></svg></span></a>
     <a class="srow pre" href="#service" style="--c:#34D399"><span class="ic"><svg><use href="#i-shield"/></svg></span><span><h3>ENRA Versicherung</h3><p>Schutz gegen Diebstahl, dazu Vollkasko mit Verschleiß und Pick-up-Service.</p></span><span class="go"><svg><use href="#i-arrow"/></svg></span></a>
     <a class="srow pre" href="#service" style="--c:#60A5FA"><span class="ic"><svg><use href="#i-case"/></svg></span><span><h3>Dienstrad-Leasing</h3><p>Wir arbeiten mit fast allen Leasing-Firmen zusammen, z. B. JobRad, Bikeleasing, Company Bike.</p></span><span class="go"><svg><use href="#i-arrow"/></svg></span></a>
    </div>
@@ -2231,9 +2238,9 @@ m696 -454 c28 -13 46 -31 55 -51 22 -53 -50 -177 -173 -300 -187 -186 -647
   <div class="wrap">
    <p class="eyebrow pre">Finanzierung · Versicherung · <b>Leasing</b></p>
    <h2 class="big pre" style="margin:16px 0 30px">Ihr Traumrad. <span class="gt">Clever bezahlt.</span></h2>
-   <div class="chap pre"><div class="fig gt">0 %</div><div class="txt"><h3 class="mid">Finanzierung über die TARGOBANK</h3><p>0 % Zinsen und 0 € Anzahlung: Wir finanzieren Ihr Traumrad oder E-Bike. Sprechen Sie uns im Laden an.</p><span class="blogo" style="height:60px;min-width:0;align-self:flex-start"><img src="img/logo-targobank.svg" alt="TARGOBANK" style="height:24px" loading="lazy"></span></div></div>
+   <div class="chap pre"><div class="fig gt">0 %</div><div class="txt"><h3 class="mid">Finanzierung über die TARGOBANK</h3><p>0 % Zinsen und 0 € Anzahlung: Wir finanzieren Ihr Traumrad oder E-Bike. Sprechen Sie uns im Laden an.</p><p class="anhint">* Finanzierung zum regulären Preis. Aktions- und Angebotspreise gelten nicht.</p><span class="blogo" style="height:60px;min-width:0;align-self:flex-start"><img src="img/logo-targobank.svg" alt="TARGOBANK" style="height:24px" loading="lazy"></span></div></div>
    <div class="chap pre"><div><span class="blogo" style="height:110px;padding:0 36px"><img src="img/logo-enra.svg" alt="ENRA – Die E-Bike-Versicherung" style="height:60px;max-width:260px" loading="lazy"></span></div><div class="txt"><h3 class="mid">Bike-Versicherung mit ENRA</h3><p>Auch das beste Schloss schützt nicht vor Diebstahl. Eine Versicherung mit unserem Partner ENRA schon, zumindest finanziell. Dazu gibt es eine Vollkasko mit Verschleiß und Pick-up-Service.</p><a class="ghost" href="https://www.enra.eu/?dealerid=10190" target="_blank" rel="noopener" style="align-self:flex-start">Zur ENRA-Versicherung<svg><use href="#i-arrow"/></svg></a></div></div>
-   <div class="chap pre"><div class="fig sm gt">Dienstrad</div><div class="txt"><h3 class="mid">Leasing mit fast allen Anbietern</h3><p>Machen Sie Ihr E-Bike zum Dienstrad. Wir arbeiten unter anderem zusammen mit:</p><p class="partners">JobRad<i>/</i>Bikeleasing<i>/</i>Company Bike<i>/</i>Businessbike<i>/</i>Deutsche Dienstrad<i>/</i>Lease a Bike<i>/</i>Eurorad<i>/</i>Kazenmaier<i>/</i>RIDE</p></div></div>
+   <div class="chap pre"><div class="fig sm gt">Dienstrad</div><div class="txt"><h3 class="mid">Leasing mit fast allen Anbietern</h3><p>Machen Sie Ihr E-Bike zum Dienstrad. Wir arbeiten unter anderem zusammen mit:</p><p class="partners">JobRad<i>/</i>Bikeleasing<i>/</i>Company Bike<i>/</i>Businessbike<i>/</i>Deutsche Dienstrad<i>/</i>Lease a Bike<i>/</i>Eurorad<i>/</i>Kazenmaier<i>/</i>RIDE</p><p class="anhint">* Leasing zum regulären Preis. Aktions- und Angebotspreise gelten nicht.</p></div></div>
   </div>
  </div>
 
@@ -2255,6 +2262,7 @@ m696 -454 c28 -13 46 -31 55 -51 22 -53 -50 -177 -173 -300 -187 -186 -647
    <p class="eyebrow pre">Dienstrad-<b>Rechner</b></p>
    <h2 class="big pre" style="margin-top:16px">Was kostet Ihr E-Bike <span class="gt">als Dienstrad?</span></h2>
    <p class="lead pre" style="margin-top:18px;max-width:760px">Kaufpreis und Gehalt eingeben: Der Rechner zeigt, was Sie nach Steuer- und Abgabenersparnis ungefähr im Monat zahlen.</p>
+   <p class="anhint pre">* Grundlage ist immer der reguläre Preis (UVP). Aktions- und Angebotspreise gelten nicht für Leasing und Finanzierung.</p>
    <div class="drc pre">
     <form class="drin" id="drF" novalidate>
      <div class="drf"><span class="lb">Kaufpreis des Rads (Listenpreis)<output name="po"></output></span><input type="range" name="pr" min="1000" max="12000" step="50" aria-label="Kaufpreis"><input class="inp" name="p" type="number" min="500" max="20000" step="1" inputmode="numeric" aria-label="Kaufpreis in Euro"></div>
@@ -2454,6 +2462,7 @@ m696 -454 c28 -13 46 -31 55 -51 22 -53 -50 -177 -173 -300 -187 -186 -647
    <p class="lead hello" style="--d:.16s">Diese Räder stehen jetzt bei uns in Wörth. Rad antippen, in Ruhe ansehen und direkt anfragen: kaufen, reservieren oder Probe fahren.</p>
    <div class="lgnum hello" style="--d:.24s" id="lgNum" hidden></div>
    <button type="button" class="deals hello" style="--d:.3s" id="lgDeals" aria-pressed="false"><span class="pct"><span>%</span></span><span class="t"><span class="k" id="lgDealsK">Nur solange vorrätig</span><b id="lgDealsT">Sonderangebote</b><span class="m"><small id="lgDealsN">reduzierte Räder</small><em id="lgDealsS" hidden></em></span></span><span class="ar" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></button>
+   <p class="anhint hello" style="--d:.33s">* Aktionspreise gelten nur bei Barkauf, nicht bei Leasing und Finanzierung.</p>
    <div class="row hello rfbtn" style="--d:.36s"><button type="button" class="ghost" data-rfopen><svg><use href="#i-spark"/></svg>Rad-Finder: Was passt zu mir?</button></div>
   </div>
  </div>
@@ -2471,7 +2480,7 @@ m696 -454 c28 -13 46 -31 55 -51 22 -53 -50 -177 -173 -300 -187 -186 -647
    </div>
   </div>
   <div class="lggrid" id="lgGrid" aria-live="polite"></div>
-  <p class="note" style="margin-top:22px">Abbildungen ähnlich, Farbe und Ausstattung können abweichen. Alle Preise inkl. MwSt. Zwischenverkauf vorbehalten.</p>
+  <p class="note" style="margin-top:22px">Abbildungen ähnlich, Farbe und Ausstattung können abweichen. Alle Preise inkl. MwSt. Zwischenverkauf vorbehalten. Aktions- und Angebotspreise gelten nur bei Barkauf, nicht bei Leasing (Dienstrad) und Finanzierung; dafür gilt der reguläre Preis.</p>
  </div>
 </section>
 
@@ -2569,6 +2578,7 @@ m696 -454 c28 -13 46 -31 55 -51 22 -53 -50 -177 -173 -300 -187 -186 -647
    <div class="col"><h4>Öffnungszeiten</h4><span>Mo, Di, Do, Fr<br>09:00–12:00 · 14:30–18:00</span><span>Sa 09:00–12:00</span><span style="color:#DC2626">Mi & So geschlossen</span></div>
    <div class="col"><h4>Folgen Sie uns</h4><div class="soc"><a href="https://www.instagram.com/velocenterhessert/" target="_blank" rel="noopener" aria-label="Instagram"><svg><use href="#i-ig"/></svg></a><a href="https://www.facebook.com/velocenterhessert" target="_blank" rel="noopener" aria-label="Facebook"><svg><use href="#i-fb"/></svg></a><a href="https://wa.me/491635343133" target="_blank" rel="noopener" aria-label="WhatsApp"><svg><use href="#i-chat"/></svg></a></div><span style="color:var(--mut);font-size:14px">Familienbetrieb seit 1995</span></div>
   </div>
+  <p class="fnote">* Aktions- und Angebotspreise gelten nur bei Barkauf. Bei Leasing (Dienstrad) und Finanzierung gilt der reguläre Preis. Alle Preise inkl. MwSt.</p>
   <div class="legalbar"><span>© <span id="yr">2026</span> Velocenter Hessert</span><span style="display:flex;gap:18px;flex-wrap:wrap"><a href="#impressum">Impressum</a><a href="#datenschutz">Datenschutz</a><a href="#warum">Prototyp-Infos</a></span></div>
  </div>
 </footer>
@@ -2870,7 +2880,7 @@ function lgFilter(){const f=LG.f,q=f.q.toLowerCase().trim().split(/\s+/).filter(
 function lgStat(lager,ab){return lager?'<span class="bd ok">Sofort verfügbar</span>':'<span class="bd z">Lieferung ausstehend'+(ab?' · voraussichtl. '+esc(ab):'')+'</span>'}
 function lgBadgesM(m){const vl=m.v.filter(x=>x.status!=='bestellt');return lgStat(m.lager,m.ab)+(vl.length&&vl.every(x=>x.res)?'<span class="bd rs">Reserviert</span>':'')+(m.deal?'<span class="bd an">Sonderangebot</span>':'')+(m.v.some(x=>x.vorfuehr)?'<span class="bd vf">Vorführrad</span>':'')+(m.v.some(x=>x.gebraucht)?'<span class="bd gb">Gebraucht</span>':'')}
 function lgPriceM(m){const d=m.v.filter(x=>x.angebot).sort((a,b)=>a.angebot-b.angebot)[0];
- if(d)return '<span class="lgpr"><s>'+eur(d.preis)+'</s><b class="an">'+(m.multiP?'<em>ab</em> ':'')+eur(d.angebot)+'</b></span>';
+ if(d)return '<span class="lgpr"><s>'+eur(d.preis)+'</s><b class="an">'+(m.multiP?'<em>ab</em> ':'')+eur(d.angebot)+'</b><small class="anl">* nicht bei Leasing & Finanzierung</small></span>';
  return m.minP?'<span class="lgpr"><b>'+(m.multiP?'<em>ab</em> ':'')+eur(m.minP)+'</b></span>':'<span class="lgpr"><b>Preis auf Anfrage</b></span>'}
 function lgRender(){if(!LG.ok)return;const L=LG.list=lgFilter();const g=$('#lgGrid');
  if(!L.length){g.innerHTML='<p class="lgempty">'+(LG.f.deal?'Aktuell gibt es dazu keine Sonderangebote.':'Kein Rad passt zu diesen Filtern.')+' <button type="button" class="ghost" id="lgReset">Filter zurücksetzen</button></p>';return}
@@ -2887,7 +2897,7 @@ function lgInfo(){const m=LG.list[LG.i],v=m.v[LG.vi]||m.v[0];const row=(l,x,h)=>
  const farben=inSz.length>1?'<div class="lgvar"><span class="flab">Farbe wählen'+(m.sz.length>1?' · '+esc(sz):'')+'</span><div class="vs">'+inSz.map(([x,j])=>'<button type="button" data-vi="'+j+'" class="'+(j===LG.vi?'on':'')+'">'+(x.farbe?'<i style="background:'+lgFarbe(x.farbe)+'"></i>':'')+'<span>'+esc(x.farbe||'Ausführung')+'</span><small class="'+(x.res||x.status==='bestellt'?'z':'ok')+'">'+(x.res?'reserviert':x.status==='bestellt'?'Lieferung ausstehend':'verfügbar')+'</small></button>').join('')+'</div></div>':'';
  const auch='';
  $('#lgmInfo').innerHTML='<p class="eyebrow">'+esc(m.marke)+'</p><h2 id="lgmT">'+esc(m.modell)+'</h2><div class="bds">'+lgStat(v.status!=='bestellt',v.ab)+(v.res?'<span class="bd rs">Reserviert</span>':'')+(v.angebot?'<span class="bd an">Sonderangebot</span>':'')+(v.vorfuehr?'<span class="bd vf">Vorführrad</span>':'')+(v.gebraucht?'<span class="bd gb">Gebraucht</span>':'')+'</div>'+
-  '<div class="lgm-price">'+(v.preis?'<span class="lgpr">'+(v.angebot?'<s>'+eur(v.preis)+'</s><b class="an">'+eur(v.angebot)+'</b>':'<b>'+eur(v.preis)+'</b>')+'</span>':'<span class="lgpr"><b>Preis auf Anfrage</b></span>')+(v.angebot?'<span class="sv">Sie sparen '+eur(v.preis-v.angebot)+'</span>':'')+'</div>'+groessen+farben+auch+
+  '<div class="lgm-price">'+(v.preis?'<span class="lgpr">'+(v.angebot?'<s>'+eur(v.preis)+'</s><b class="an">'+eur(v.angebot)+'</b>':'<b>'+eur(v.preis)+'</b>')+'</span>':'<span class="lgpr"><b>Preis auf Anfrage</b></span>')+(v.angebot?'<span class="sv">Sie sparen '+eur(v.preis-v.angebot)+'</span><p class="anbox"><span aria-hidden="true">ⓘ</span><span>Aktionspreis gilt nur bei Barkauf. <b>Bei Leasing und Finanzierung gilt der reguläre Preis von '+eur(v.preis)+'.</b></span></p>':'')+'</div>'+groessen+farben+auch+
   '<dl class="lgm-spec">'+row('Rahmenhöhe',v.gr)+row('Farbe',v.farbe,'<i style="background:'+lgFarbe(v.farbe)+'"></i>'+esc(v.farbe||''))+row('Rahmenform',v.rahmen)+row('Art',v.typ)+row('Motor',v.motor)+row('Akku',v.akku)+row('Display',v.display)+row('Schaltung',v.schaltung)+row('Reifen',v.reifen)+row('Gewicht',v.gewicht)+row('Zul. Gesamtgewicht',v.zgg)+row('Kilometerstand',v.km)+row('Verfügbarkeit',1,v.res?'Reserviert – fragen Sie gern nach einem gleichen Rad':v.status==='bestellt'?'Lieferung ausstehend'+(v.ab?', voraussichtlich '+esc(v.ab):''):'Sofort, steht bei uns in Wörth')+'</dl>'+
   lgActHtml(m,v)+
   '<form class="lgm-form" id="lgmF" hidden novalidate><div class="fl"><span class="flab">Ihr Wunsch</span><div class="choice" id="lgW"><button type="button" class="on" data-v="Kaufen">Kaufen</button><button type="button" data-v="Reservieren">Reservieren</button><button type="button" data-v="Probefahrt">Probefahrt</button><button type="button" data-v="Andere Größe/Farbe bestellen">Andere Größe/Farbe</button></div></div>'+
@@ -3031,7 +3041,7 @@ function admFotos(b){const A=admAll().filter(x=>!x.o.hidden),mks=[...new Set(A.m
 function admDealsV(b){const q=ADM.aq.toLowerCase().split(/\s+/).filter(Boolean),A=admAll().filter(x=>!x.o.hidden);
  const L=A.flatMap(x=>admEff(x).filter(f=>!f._hid).map(f=>({x,f}))).filter(({x,f})=>(!ADM.anur||f.angebot)&&(!q.length||q.every(w=>(x.r.marke+' '+x.r.modell+' '+f.farbe+' '+(x.r.gr||'')).toLowerCase().includes(w))));
  b.innerHTML='<div class="atool"><input class="inp" id="admAq" type="search" placeholder="Rad suchen, um ein Angebot zu setzen …" value="'+esc(ADM.aq)+'"><label class="ack"><input type="checkbox" id="admAnur"'+(ADM.anur?' checked':'')+'> nur Räder mit Angebot</label></div>'+
-  '<p class="admnote">Angebotspreis eintragen und Enter – gilt sofort. Leer = kein Angebot.</p><p class="acount">'+L.length+' Ausführungen</p>'+
+  '<p class="admnote">Angebotspreis eintragen und Enter – gilt sofort. Leer = kein Angebot. Auf der Seite steht bei jedem Angebot automatisch: gilt nicht bei Leasing & Finanzierung.</p><p class="acount">'+L.length+' Ausführungen</p>'+
   '<div class="atbl adl"><div class="atr ath"><span>Marke</span><span>Modell</span><span>Farbe · Größe</span><span>Preis</span><span>Angebot</span><span>Ersparnis</span></div>'+
   L.slice(0,300).map(({x,f})=>'<div class="atr"><span>'+admMkTag(x.r.marke)+'</span><span class="mo"><b>'+esc(x.r.modell)+'</b></span><span><i class="dot" style="background:'+lgFarbe(f.farbe)+'"></i>'+esc(f.farbe||'–')+(x.r.gr?' · '+esc(x.r.gr):'')+'</span>'+
    '<span><input class="inp sm" inputmode="numeric" data-dp="'+esc(x.id)+'|'+esc(f.id)+'|preis" value="'+(f.preis||'')+'"></span><span><input class="inp sm" inputmode="numeric" data-dp="'+esc(x.id)+'|'+esc(f.id)+'|angebot" value="'+(f.angebot||'')+'" placeholder="–"></span><span class="sv">'+(f.angebot&&f.preis>f.angebot?'− '+admPrice(f.preis-f.angebot)+' <small>('+Math.round((1-f.angebot/f.preis)*100)+' %)</small>':'')+'</span></div>').join('')+'</div>'}
@@ -3276,7 +3286,7 @@ function cmpDraw(){const L=cmpModels(),ok=L.filter(x=>x.m);
  $('#cmpS').textContent=L.length?(L.length===1?'1 Rad gemerkt. Merken Sie sich ein zweites, um zu vergleichen.':L.length+' Räder nebeneinander. Gelb markiert = Unterschied.'):'';
  if(!L.length){$('#cmpB').innerHTML='<div class="cmp-empty"><p>Noch nichts gemerkt.</p><p style="margin-top:8px">Tippen Sie bei einem Rad auf das Herz '+HEART.replace('<svg','<svg style="width:18px;height:18px;vertical-align:-3px;fill:none;stroke:#C8102E;stroke-width:2"')+', dann erscheint es hier.</p></div>';$('#cmpF').innerHTML='<a class="cta" href="#lager" data-cmpx>Zum Lager</a>';return}
  const uniq=a=>[...new Set(a.filter(Boolean))];
- const R=[['Preis',m=>{const d=m.v.filter(x=>x.angebot).sort((a,b)=>a.angebot-b.angebot)[0];return d?'<s style="color:var(--dim)">'+eur(d.preis)+'</s> <b style="color:#C8102E">'+(m.multiP?'ab ':'')+eur(d.angebot)+'</b>':m.minP?'<b>'+(m.multiP?'ab ':'')+eur(m.minP)+'</b>':'auf Anfrage'}],
+ const R=[['Preis',m=>{const d=m.v.filter(x=>x.angebot).sort((a,b)=>a.angebot-b.angebot)[0];return d?'<s style="color:var(--dim)">'+eur(d.preis)+'</s> <b style="color:#C8102E">'+(m.multiP?'ab ':'')+eur(d.angebot)+'</b><small class="anl">* nicht bei Leasing & Finanzierung</small>':m.minP?'<b>'+(m.multiP?'ab ':'')+eur(m.minP)+'</b>':'auf Anfrage'}],
   ['Verfügbar',m=>m.lager?'<span class="ok">Sofort, steht in Wörth</span>':'<span class="z">Lieferung ausstehend'+(m.ab?' · '+esc(m.ab):'')+'</span>'],
   ['Größen',m=>esc(m.grs.join(' · ')||'–')],['Rahmen',m=>esc(m.rahmen||'–')],
   ['Farben',m=>m.fs.map(f=>'<span class="sw" style="background:'+lgFarbe(f)+'"></span>'+esc(f)).join('<br>')||'–'],
@@ -3300,7 +3310,7 @@ $('#lgm').addEventListener('click',e=>{const p=e.target.closest('[data-pf]');if(
  const d=e.target.closest('[data-dr]');if(d){const pr=+d.dataset.dr;lgClose();DR.p=pr;drSync();setTimeout(()=>{location.hash='dienstrad'},250)}});
 function lgActHtml(m,v){const k=mKey(m),on=merkHas(k),pr=v.preis||v.angebot||0;
  return '<div class="row lgm-act"><button type="button" class="cta" data-ask="Kaufen">Dieses Rad anfragen</button><button type="button" class="cta wa" data-pf><svg><use href="#i-chat"/></svg>Probefahrt per WhatsApp</button><button type="button" class="ghost hrtb'+(on?' on':'')+'" data-merk="'+esc(k)+'" aria-pressed="'+on+'">'+HEART+'<span>'+(on?'Gemerkt':'Merken')+'</span></button></div>'+
-  (pr>=500?'<button type="button" class="lgdr" data-dr="'+pr+'"><span>Als <b>Dienstrad</b> leasen: Was kostet es Sie im Monat?</span><span aria-hidden="true">Rechner →</span></button>':'')}
+  (pr>=500?'<button type="button" class="lgdr" data-dr="'+pr+'"><span>Als <b>Dienstrad</b> leasen: Was kostet es Sie im Monat?'+(v.angebot&&v.preis?'<small>Leasing zum regulären Preis '+eur(v.preis)+', nicht zum Aktionspreis</small>':'')+'</span><span aria-hidden="true">Rechner →</span></button>':'')}
 
 /* ---------- Rad-Finder ---------- */
 const RFI={alltag:'<path d="M5 8h14l-1.5 11h-11z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/>',tour:'<path d="M3 20l6-12 4 7 3-4 5 9z"/><circle cx="17" cy="6" r="2"/>',sport:'<path d="M13 4l-4 8h6l-4 8"/>',drei:'<circle cx="5" cy="17" r="3"/><circle cx="19" cy="17" r="3"/><path d="M8 17h8M12 17V9h3l2 3M9 9h3"/>',
@@ -3310,7 +3320,7 @@ const rfIc=k=>'<span class="ri"><svg viewBox="0 0 24 24" fill="none" stroke="cur
 const RFQ=[{id:'e',q:'Wofür möchten Sie Ihr Rad nutzen?',h:'Wählen Sie, was am besten passt.',o:[['alltag','Alltag & Einkaufen','Wege in der Stadt, Arzt, Bäcker, Besuche','#E2232D'],['tour','Ausflüge & Touren','Rheinradweg, Pfalz, längere Strecken','#2563EB'],['sport','Sport & Gelände','Waldwege, Berge, sportlich unterwegs','#059669'],['drei','Sicher auf drei Rädern','Kein Gleichgewicht halten, viel Stauraum','#7C3AED']]},
  {id:'s',q:'Wie möchten Sie aufsteigen?',h:'Der Rahmen entscheidet, wie bequem Sie auf- und absteigen.',o:[['tief','Ganz tief und bequem','Tiefeinsteiger oder Kompaktrad, kein Bein schwingen','#E2232D'],['egal','Ist mir egal','Zeigen Sie mir alles, was passt','#6B7282'],['sp','Sportlich, mit Oberrohr','Klassischer Herren- oder Sportrahmen','#2563EB']],skip:a=>a.e==='drei'},
  {id:'g',q:'Wie groß sind Sie?',h:'Daraus berechnen wir die passende Rahmenhöhe.',size:1,skip:a=>a.e==='drei'},
- {id:'b',q:'Wie viel möchten Sie ausgeben?',h:'Leasing und 0 % Finanzierung sind auch möglich.',o:[['3','bis 3.000 €','','#059669'],['4','3.000 – 4.000 €','','#0891B2'],['5','4.000 – 5.000 €','','#2563EB'],['9','über 5.000 €','','#7C3AED'],['0','Egal – Hauptsache passend','','#6B7282']],ic:'b2'},
+ {id:'b',q:'Wie viel möchten Sie ausgeben?',h:'Leasing und 0 % Finanzierung sind auch möglich (zum regulären Preis, Aktionspreise gelten dafür nicht).',o:[['3','bis 3.000 €','','#059669'],['4','3.000 – 4.000 €','','#0891B2'],['5','4.000 – 5.000 €','','#2563EB'],['9','über 5.000 €','','#7C3AED'],['0','Egal – Hauptsache passend','','#6B7282']],ic:'b2'},
  {id:'w',q:'Was ist Ihnen noch wichtig?',h:'Mehrfachauswahl möglich – oder einfach weiter.',multi:1,o:[['sofort','Sofort verfügbar','Steht schon bei uns in Wörth','#059669'],['deal','Sonderangebot','Reduzierte Räder bevorzugen','#C8102E'],['akku','Großer Akku','Ab 625 Wh für lange Strecken','#2563EB']]}];
 const RF={a:{w:[]},i:0,h:172,sl:''};
 const rfSteps=()=>RFQ.filter(q=>!(q.skip&&q.skip(RF.a)));
@@ -3352,7 +3362,7 @@ function rfResult(){const R=(LG.M||[]).map(m=>{const b=rfScore(m);return b?{m,b,
   (R.length?'<div class="rf-res">'+R.map((x,i)=>{const m=x.m,v=m.v[x.b.vi]||m.v[0],b=lgBrand(m.marke),im=lgImg(m,x.b.vi)||lgImg(m),k=mKey(m),on=merkHas(k);
    return '<div class="rfc" role="button" tabindex="0" data-rfshow="'+i+'" style="--ac:'+(b?b.c:'#8C9097')+'"><div class="im">'+(im?'<img src="'+im+'" alt="" loading="lazy">':'<span class="nf">Foto folgt</span>')+'</div><span class="pc">'+x.p+' % passend</span><button type="button" class="hrt'+(on?' on':'')+'" data-merk="'+esc(k)+'" aria-pressed="'+on+'" aria-label="Merken">'+HEART+'</button>'+
     '<div class="bd2"><span class="mk">'+esc(m.marke)+'</span><h4>'+esc(m.modell)+'</h4><div class="why">'+x.b.why.slice(0,4).map(w=>'<span>'+esc(w)+'</span>').join('')+x.b.warn.map(w=>'<span class="w">'+esc(w)+'</span>').join('')+'</div>'+
-    '<div class="pr"><span>'+(vP(v)?eur(vP(v)):'Preis auf Anfrage')+'</span><i>'+(v.status!=='bestellt'?'Sofort da':'Lieferung ausstehend')+'</i></div></div></div>'}).join('')+'</div>':'<div class="rf-none"><a class="cta wa" href="https://wa.me/'+WA+'?text='+encodeURIComponent('Hallo Velocenter, ich suche ein Rad. Können Sie mich beraten?')+'" target="_blank" rel="noopener"><svg><use href="#i-chat"/></svg>Beratung per WhatsApp</a></div>')+
+    '<div class="pr"><span>'+(vP(v)?eur(vP(v)):'Preis auf Anfrage')+(v.angebot?'<small class="anl">* nicht bei Leasing & Finanzierung</small>':'')+'</span><i>'+(v.status!=='bestellt'?'Sofort da':'Lieferung ausstehend')+'</i></div></div></div>'}).join('')+'</div>':'<div class="rf-none"><a class="cta wa" href="https://wa.me/'+WA+'?text='+encodeURIComponent('Hallo Velocenter, ich suche ein Rad. Können Sie mich beraten?')+'" target="_blank" rel="noopener"><svg><use href="#i-chat"/></svg>Beratung per WhatsApp</a></div>')+
   '<div class="rf-nav"><button type="button" class="lk" data-rfre>Nochmal von vorn</button><div class="row" style="gap:10px"><a class="ghost" href="#termin" data-pre="Probefahrt" data-rfx>Beratungstermin</a><a class="cta" href="#lager" data-rfx>Ganzes Lager ansehen</a></div></div>';B.scrollTop=0}
 $('#rf').addEventListener('click',e=>{const t=e.target;if(t.closest('[data-rfx]')){rfClose();return}
  const S=rfSteps(),q=S[RF.i];
