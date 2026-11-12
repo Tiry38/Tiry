@@ -925,6 +925,48 @@ textarea.inp{border-radius:12px}
 .ribbons i:nth-child(1){top:20%;height:30px;filter:none;background:repeating-linear-gradient(180deg,rgba(176,18,31,.8) 0 2px,transparent 2px 10px);-webkit-mask-image:linear-gradient(90deg,transparent 12%,#000 38%,#000 58%,transparent 86%);mask-image:linear-gradient(90deg,transparent 12%,#000 38%,#000 58%,transparent 86%);opacity:.75}
 .ribbons i:nth-child(4){top:74%;height:22px;filter:none;background:repeating-linear-gradient(180deg,rgba(176,18,31,.75) 0 2px,transparent 2px 10px);-webkit-mask-image:linear-gradient(90deg,transparent 20%,#000 45%,#000 60%,transparent 85%);mask-image:linear-gradient(90deg,transparent 20%,#000 45%,#000 60%,transparent 85%);opacity:.6}
 .ribbons i:nth-child(3){background:linear-gradient(90deg,transparent 6%,rgba(80,84,92,.3) 30%,rgba(100,104,112,.4) 55%,rgba(80,84,92,.16) 80%,transparent 95%)}
+
+/* ================= Moderne Knöpfe 2.0 + Anthrazit-Dock (Tiry 12.11.2026) ================= */
+.cta,.ghost{position:relative;isolation:isolate;overflow:hidden;display:inline-flex;align-items:center;gap:14px;min-height:56px;padding:0 6px 0 24px;border-radius:16px;font:700 15.5px/1 var(--display);letter-spacing:.005em;transition:transform .35s var(--ease),box-shadow .35s,background .35s,color .3s}
+.cta svg,.ghost svg{order:2;flex:none;width:44px;height:44px;padding:12px;border-radius:12px;transition:transform .5s var(--spring),background .3s}
+.cta:hover svg,.ghost:hover svg{transform:rotate(-10deg) scale(1.06)}
+.cta:not(:has(svg)),.ghost:not(:has(svg)){padding-right:24px}
+.cta{color:#fff;border:0;background:linear-gradient(120deg,#F4404D 0%,#D3142F 42%,#9E0F22 100%);box-shadow:0 16px 32px -14px rgba(200,16,46,.75),inset 0 1px 0 rgba(255,255,255,.25)}
+.cta svg{background:#fff;color:#C8102E}
+.cta::before{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(105deg,transparent 30%,rgba(255,255,255,.38) 50%,transparent 70%);transform:translateX(-120%);transition:transform .9s var(--ease)}
+.cta:hover::before{transform:translateX(120%)}
+.cta:hover{background:linear-gradient(120deg,#F4404D 0%,#D3142F 42%,#9E0F22 100%);transform:translateY(-2px);box-shadow:0 22px 40px -16px rgba(200,16,46,.85),inset 0 1px 0 rgba(255,255,255,.25)}
+.ghost{color:#1B1E25;border:1px solid rgba(255,255,255,.75);background:rgba(255,255,255,.55);backdrop-filter:blur(14px) saturate(1.4);-webkit-backdrop-filter:blur(14px) saturate(1.4);box-shadow:0 12px 28px -16px rgba(27,30,37,.45)}
+.ghost svg{background:#2A2D34;color:#fff}
+.ghost:hover{background:rgba(255,255,255,.88);color:#1B1E25;border-color:#fff;transform:translateY(-2px)}
+.cta.wa{background:linear-gradient(120deg,#34D27A,#1FA855 55%,#137A3D);box-shadow:0 16px 32px -14px rgba(31,168,85,.7)}
+.cta.wa svg{color:#1FA855}
+.hdr .cta{min-height:46px;padding:0 5px 0 18px;border-radius:14px;font-size:14.5px;gap:10px}
+.hdr .cta svg{width:36px;height:36px;padding:9px;border-radius:10px}
+.showinfo .cta,.showinfo .ghost,.fr .cta,.fr .ghost,.chap .ghost,.finder .ghost{min-height:48px;font-size:14.5px;padding-left:18px}
+.showinfo .cta svg,.showinfo .ghost svg,.chap .ghost svg{width:38px;height:38px;padding:10px}
+/* Schnellzugriff als Anthrazit-Dock */
+.quick{gap:6px;padding:8px;border-radius:24px;overflow:visible;background:linear-gradient(180deg,#30333B,#1E2026);border:1px solid rgba(255,255,255,.08);backdrop-filter:none;-webkit-backdrop-filter:none;box-shadow:0 34px 60px -24px rgba(20,22,28,.6),inset 0 1px 0 rgba(255,255,255,.09)}
+.qk{border:0!important;border-radius:18px;padding:14px 52px 14px 14px;background:transparent;align-items:center;transition:background .3s}
+.qk:hover{background:rgba(255,255,255,.07)}
+.qk::before{display:none}
+.qk .ic{width:46px;height:46px;border-radius:13px;background:linear-gradient(135deg,#F4404D,#D3142F 50%,#9E0F22);box-shadow:0 10px 20px -8px rgba(200,16,46,.8),inset 0 1px 0 rgba(255,255,255,.25);transition:transform .5s var(--spring)}
+.qk:hover .ic{transform:rotate(-8deg)}
+.qk .ic svg{color:#fff;width:21px;height:21px}
+.qk b{color:#fff}
+.qk small{color:#A9AEBA}
+.qk::after{content:"→";right:12px;width:32px;height:32px;border-radius:10px;display:grid;place-items:center;background:rgba(255,255,255,.08);color:#fff;font-size:15px;opacity:0;transform:translate(-6px,-50%)}
+.qk:hover::after{opacity:1;transform:translate(0,-50%)}
+.qd{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:7px;vertical-align:1px;background:#EF4444;box-shadow:0 0 8px rgba(239,68,68,.8)}
+.qd.on{background:#34D399;box-shadow:0 0 8px rgba(52,211,153,.9)}
+@media (max-width:980px){.qk:nth-child(n+3){border-top:0}}
+@media (max-width:640px){
+ .quick{gap:4px;padding:6px;border-radius:20px}
+ .qk{padding:14px;align-items:flex-start}
+ .qk::after{display:none}
+ .cta,.ghost{min-height:52px;padding-left:20px}
+ .cta svg,.ghost svg{width:40px;height:40px;padding:11px}
+}
 </style>
 
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
@@ -1309,7 +1351,7 @@ m696 -454 c28 -13 46 -31 55 -51 22 -53 -50 -177 -173 -300 -187 -186 -647
      <p class="eyebrow hello" style="--d:.9s">Familienbetrieb seit 1995 · <b>Wörth am Rhein</b></p>
      <h1 class="hh1 hello" style="--d:1s">Ihr E-Bike-Spezialist<br><span class="gt it">mit eigener Werkstatt.</span></h1>
      <p class="lead hello" style="--d:1.1s">Über 300 Räder zum Probefahren, ehrliche Beratung und ein Bosch Service Center, in dem der Chef noch selbst schraubt.</p>
-     <div class="row hello" style="--d:1.2s"><a class="cta" href="#finder"><svg><use href="#i-spark"/></svg>Mein E-Bike finden</a><a class="ghost" href="#termin"><svg><use href="#i-wrench"/></svg>Werkstatt-Termin</a></div>
+     <div class="row hello" style="--d:1.2s"><a class="cta" href="#finder"><svg><use href="#i-spark"/></svg>Mein E-Bike finden</a><a class="ghost" href="#termin"><svg><use href="#i-cal"/></svg>Termin anfragen</a></div>
      <div class="trust hello" style="--d:1.3s"><span><svg style="color:#D97706"><use href="#i-star"/></svg><b>4,8</b> bei Google</span><span><svg><use href="#i-shield"/></svg>Bosch Service Center</span><span><svg><use href="#i-bike"/></svg>i:SY Experte</span><span><svg><use href="#i-clock"/></svg><em class="live" id="live"><i></i><span id="liveT">Öffnungszeiten</span></em></span></div>
     </div>
     <div class="hvis hello" style="--d:.5s" id="hvis">
@@ -1320,11 +1362,11 @@ m696 -454 c28 -13 46 -31 55 -51 22 -53 -50 -177 -173 -300 -187 -186 -647
      <img class="hb off" src="img/p-vanraam.webp" alt="Van Raam Easy Rider E-Dreirad" data-l="img/marke-vanraam.svg" width="1600" height="1193" loading="lazy">
      <div class="hfloor"></div>
      <span class="hchip c1"><b>300+</b> Räder vor Ort</span>
-     <span class="hchip c2"><svg><use href="#i-wrench"/></svg>Hol- &amp; Bringservice</span>
+     <span class="hchip c2"><svg><use href="#i-bike"/></svg>Probefahrt vor Ort</span>
     </div>
    </div>
    <nav class="quick hello" style="--d:1.45s" aria-label="Schnellzugriff">
-    <a class="qk" href="#termin"><span class="ic"><svg><use href="#i-cal"/></svg></span><span><b>Werkstatt-Termin</b><small>Online anfragen in 30 Sekunden</small></span></a>
+    <a class="qk" href="#termin"><span class="ic"><svg><use href="#i-cal"/></svg></span><span><b>Termin anfragen</b><small>Werkstatt oder Probefahrt</small></span></a>
     <a class="qk" href="#finder"><span class="ic"><svg><use href="#i-spark"/></svg></span><span><b>E-Bike-Finder</b><small>2 Fragen, passende Marken</small></span></a>
     <a class="qk" href="#deal"><span class="ic"><svg><use href="#i-gift"/></svg></span><span><b>Winter-Aktion</b><small>–20 € auf jede Inspektion</small></span></a>
     <a class="qk" href="#besuch"><span class="ic"><svg><use href="#i-clock"/></svg></span><span><b>Öffnungszeiten</b><small id="qkHours">Mo, Di, Do, Fr · Sa vormittags</small></span></a>
@@ -1333,7 +1375,7 @@ m696 -454 c28 -13 46 -31 55 -51 22 -53 -50 -177 -173 -300 -187 -186 -647
  </div>
 
  <div class="bands" aria-hidden="true">
-  <div class="band b"><div class="tk" data-t="Wörth am Rhein|Hartmannstraße 25|Familienbetrieb|Probefahrt|Hol- & Bringservice|0 % Finanzierung"></div></div>
+  <div class="band b"><div class="tk" data-t="Wörth am Rhein|Hartmannstraße 25|Familienbetrieb|Probefahrt|Ehrliche Beratung|0 % Finanzierung"></div></div>
   <div class="band a"><div class="tk" data-t="Seit 1995|300+ Räder|4,8 ★ bei Google|Bosch Service Center|i:SY Experte|Weltrekord 283"></div></div>
  </div>
 
@@ -1366,7 +1408,6 @@ m696 -454 c28 -13 46 -31 55 -51 22 -53 -50 -177 -173 -300 -187 -186 -647
    <div class="rows">
     <a class="srow pre" href="#service" style="--c:#F472B6"><span class="ic"><svg><use href="#i-bike"/></svg></span><span><h3>Beratung & Probefahrt</h3><p>Wir hören zu, zeigen eine passende Auswahl und begleiten Sie auf Wunsch bei der Probefahrt.</p></span><span class="go"><svg><use href="#i-arrow"/></svg></span></a>
     <a class="srow pre" href="#termin" style="--c:#22D3EE"><span class="ic"><svg><use href="#i-wrench"/></svg></span><span><h3>Inspektion & Reparatur</h3><p>Geschultes Bosch Service Center. Fachkundige Inspektionen und Reparaturen, auch nach dem Kauf.</p></span><span class="go"><svg><use href="#i-arrow"/></svg></span></a>
-    <a class="srow pre" href="#termin" style="--c:#FB923C"><span class="ic"><svg><use href="#i-truck"/></svg></span><span><h3>Hol- & Bringservice</h3><p>Wir holen Ihr Rad ab und bringen es zurück, gegen Gebühr.</p></span><span class="go"><svg><use href="#i-arrow"/></svg></span></a>
     <a class="srow pre" href="#service" style="--c:#E2232D"><span class="ic"><svg><use href="#i-euro"/></svg></span><span><h3>0 % Finanzierung</h3><p>0 % Zinsen und 0 € Anzahlung über die TARGOBANK.</p></span><span class="go"><svg><use href="#i-arrow"/></svg></span></a>
     <a class="srow pre" href="#service" style="--c:#34D399"><span class="ic"><svg><use href="#i-shield"/></svg></span><span><h3>ENRA Versicherung</h3><p>Schutz gegen Diebstahl, dazu Vollkasko mit Verschleiß und Pick-up-Service.</p></span><span class="go"><svg><use href="#i-arrow"/></svg></span></a>
     <a class="srow pre" href="#service" style="--c:#60A5FA"><span class="ic"><svg><use href="#i-case"/></svg></span><span><h3>Dienstrad-Leasing</h3><p>Wir arbeiten mit fast allen Leasing-Firmen zusammen, z. B. JobRad, Bikeleasing, Company Bike.</p></span><span class="go"><svg><use href="#i-arrow"/></svg></span></a>
@@ -1428,7 +1469,7 @@ m696 -454 c28 -13 46 -31 55 -51 22 -53 -50 -177 -173 -300 -187 -186 -647
    <p class="eyebrow hello">Service</p>
    <h1 class="mega hello" style="--d:.08s;margin-top:18px">Wir überzeugen<br><span class="gt it">mit Service.</span></h1>
    <p class="lead hello" style="--d:.16s">Wir wollen Ihnen nicht irgendein E-Bike verkaufen, sondern das Rad finden, das perfekt zu Ihnen passt. Und wir bleiben an Ihrer Seite, auch nach dem Kauf.</p>
-   <div class="row hello" style="--d:.24s"><a class="cta" href="#termin"><svg><use href="#i-cal"/></svg>Werkstatt-Termin anfragen</a></div>
+   <div class="row hello" style="--d:.24s"><a class="cta" href="#termin"><svg><use href="#i-cal"/></svg>Termin anfragen</a></div>
   </div>
  </div>
 
@@ -1441,7 +1482,6 @@ m696 -454 c28 -13 46 -31 55 -51 22 -53 -50 -177 -173 -300 -187 -186 -647
   <div class="wrap rows">
    <div class="srow pre" style="--c:#F472B6"><span class="ic"><svg><use href="#i-bike"/></svg></span><span><h3>Kaufberatung & Probefahrt</h3><p>Bei unserer fachmännischen Kaufberatung gehen wir genau auf Ihre Wünsche ein. Probefahren können Sie gern, auf Wunsch begleiten wir Sie. Ein i:SY dürfen Sie sogar übers Wochenende testen. Vorab hilft der <a href="https://www.bosch-ebike.com/range-cockpit/?language=de&logo" target="_blank" rel="noopener" style="color:var(--mag)">Bosch Reichweiten-Rechner</a>.</p></span></div>
    <div class="srow pre" style="--c:#22D3EE"><span class="ic"><svg><use href="#i-wrench"/></svg></span><span><h3>Inspektion & Reparatur</h3><p>Auch nach dem Kauf stehen wir an Ihrer Seite: fachkundige Inspektionen und Reparaturen für Fahrrad, E-Bike und E-Dreirad. E-Bike-Inspektion inklusive Software-Update.</p></span></div>
-   <div class="srow pre" style="--c:#FB923C"><span class="ic"><svg><use href="#i-truck"/></svg></span><span><h3>Hol- & Bringservice</h3><p>Keine Zeit oder kein Auto für den Transport? Wir holen Ihr Rad gegen Gebühr ab und bringen es nach der Werkstatt zurück.</p></span></div>
   </div>
  </div>
 
@@ -1449,15 +1489,15 @@ m696 -454 c28 -13 46 -31 55 -51 22 -53 -50 -177 -173 -300 -187 -186 -647
   <div class="wrap formwrap">
    <div class="pre">
     <p class="eyebrow">Online-<b>Terminanfrage</b></p>
-    <h2 class="big" style="margin-top:16px">Werkstatt-Termin <span class="gt">in 30 Sekunden.</span></h2>
-    <p class="lead" style="margin-top:20px">Wunschtag wählen, kurz beschreiben, abschicken. Ihre Anfrage geht direkt an uns, wir melden uns mit einem festen Termin.</p>
+    <h2 class="big" style="margin-top:16px">Termin anfragen <span class="gt">in 30 Sekunden.</span></h2>
+    <p class="lead" style="margin-top:20px">Probefahrt oder Werkstatt: Wunschtag wählen, kurz beschreiben, abschicken. Ihre Anfrage geht direkt an uns, wir melden uns mit einem festen Termin.</p>
     <div class="blobimg" style="margin-top:34px;max-width:460px"><img src="img/isy-blumen.webp" alt="i:SY E-Bikes mit Blumenkörben vor einer Holzhütte" loading="lazy" width="800" height="600"></div>
    </div>
    <form class="panel form pre" id="tf" novalidate style="--d:.1s">
-    <div class="fl"><span class="flab">Was dürfen wir tun?</span><div class="choice" id="tArt"><button type="button" class="on" data-v="Inspektion">Inspektion</button><button type="button" data-v="Reparatur">Reparatur</button><button type="button" data-v="Bosch-Diagnose">Bosch-Diagnose</button><button type="button" data-v="Reifen/Schlauch">Reifen / Schlauch</button></div></div>
-    <div class="fl"><span class="flab">Ihr Rad</span><div class="choice" id="tRad"><button type="button" data-v="Fahrrad">Fahrrad</button><button type="button" class="on" data-v="E-Bike">E-Bike</button><button type="button" data-v="E-Dreirad">E-Dreirad</button><button type="button" data-v="Lastenrad">Lastenrad</button></div></div>
+    <div class="fl"><span class="flab">Worum geht es?</span><div class="choice" id="tArt"><button type="button" data-v="Probefahrt">Probefahrt</button><button type="button" class="on" data-v="Inspektion">Inspektion</button><button type="button" data-v="Reparatur">Reparatur</button><button type="button" data-v="Bosch-Diagnose">Bosch-Diagnose</button><button type="button" data-v="Reifen/Schlauch">Reifen / Schlauch</button></div></div>
+    <div class="fl"><span class="flab">Rad</span><div class="choice" id="tRad"><button type="button" data-v="Fahrrad">Fahrrad</button><button type="button" class="on" data-v="E-Bike">E-Bike</button><button type="button" data-v="E-Dreirad">E-Dreirad</button><button type="button" data-v="Lastenrad">Lastenrad</button></div></div>
     <div class="r2"><div class="fl"><label for="tName">Name</label><input class="inp" id="tName" autocomplete="name" placeholder="Vor- und Nachname"></div><div class="fl"><label for="tTel">Telefon</label><input class="inp" id="tTel" type="tel" autocomplete="tel" placeholder="Für die Rückmeldung"></div></div>
-    <div class="r2"><div class="fl"><label for="tTag">Wunschtag</label><input class="inp" id="tTag" type="date"></div><div class="fl"><span class="flab">Hol- & Bringservice</span><div class="choice" id="tHol"><button type="button" class="on" data-v="nein">Nein</button><button type="button" data-v="ja">Ja, bitte</button></div></div></div>
+    <div class="r2"><div class="fl"><label for="tTag">Wunschtag</label><input class="inp" id="tTag" type="date"></div><div class="fl"><span class="flab">Tageszeit</span><div class="choice" id="tZeit"><button type="button" data-v="Vormittag">Vormittag</button><button type="button" data-v="Nachmittag">Nachmittag</button><button type="button" class="on" data-v="egal">Egal</button></div></div></div>
     <div class="fl"><label for="tMsg">Was ist los? (optional)</label><textarea class="inp" id="tMsg" placeholder="z. B. Bremse quietscht, Akku lädt nicht, Modell …"></textarea></div>
     <div class="err" id="tErr" role="alert"></div>
     <button class="cta" type="submit" style="align-self:flex-start"><svg><use href="#i-arrow"/></svg>Anfrage erstellen</button>
@@ -1700,7 +1740,7 @@ m696 -454 c28 -13 46 -31 55 -51 22 -53 -50 -177 -173 -300 -187 -186 -647
   <div class="sec plus" style="padding-top:0">
    <h2 class="big pre" style="margin-bottom:26px">Mehr Werkstatt. <span class="gt">Mehr Verkauf.</span></h2>
    <div class="find">
-    <div class="fnd pre"><span class="k">✓</span><p><b>Online-Terminanfrage für die Werkstatt</b> mit Wunschtag (Mi/So gesperrt) und Hol-/Bringservice, geht per WhatsApp oder E-Mail direkt an uns.<small>Füllt die Werkstatt, gerade im Winter.</small></p></div>
+    <div class="fnd pre"><span class="k">✓</span><p><b>Online-Terminanfrage für Probefahrt und Werkstatt</b> mit Wunschtag (Mi/So gesperrt) und Tageszeit, geht per WhatsApp oder E-Mail direkt an uns.<small>Füllt die Werkstatt und bringt Probefahrten in den Laden.</small></p></div>
     <div class="fnd pre"><span class="k">✓</span><p><b>E-Bike-Finder</b>: 2 Fragen, dann passende Marken mit Bild und der Knopf zur Probefahrt.<small>Bringt Kunden mit klarem Wunsch in den Laden.</small></p></div>
     <div class="fnd pre"><span class="k">✓</span><p><b>Showroom</b> mit allen 7 Marken zum Durchblättern, freigestellte Herstellerbilder in hoher Auflösung.</p></div>
     <div class="fnd pre"><span class="k">✓</span><p><b>Live „Jetzt geöffnet“</b> und die heutige Öffnungszeit hervorgehoben.</p></div>
@@ -1755,7 +1795,7 @@ const BR=[
  {k:'isy',n:'i:SY',m:'i:SY E5 ZR F CX Century',img:'img/p-isy.webp',logo:'img/marke-isy.svg',o:.3,c:'#FF7A1A',t:'Das 20-Zoll-Kompaktrad. Seit über 10 Jahren sind wir i:SY Experte und haben ständig über 100 i:SY vorrätig.',a:[['Mehr zu i:SY','#isy']]},
  {k:'ktm',n:'KTM',m:'KTM Macina Style 830',img:'img/p-ktm.webp',logo:'img/marke-ktm.svg',o:.13,c:'#FF6A00',t:'Traditionsmarke mit großer E-Bike-Auswahl, vom bequemen Tiefeinsteiger bis zum Trekking-Rad.',a:[['ktm-bikes.at','https://www.ktm-bikes.at/']]},
  {k:'qio',n:'QiO',m:'QiO Compact P5',img:'img/p-qio.webp',logo:'img/marke-qio.svg',o:.12,c:'#38BDF8',t:'Innovatives Kompaktrad-Konzept. Am besten selbst erleben: Probefahrt bei uns im Laden.',a:[['qio-bikes.com','https://www.qio-bikes.com/']]},
- {k:'vdv',n:'Velo de Ville',m:'Velo de Ville AEB Pro',img:'img/p-vdv.webp',logo:'img/marke-vdv.svg',o:.16,c:'#F97316',t:'Rad nach Wunsch: Rahmen, Farbe und Ausstattung stellen Sie selbst zusammen.',a:[['Zum Konfigurator','https://konfigurator.velo-de-ville.com/de?h_ident=28181&direct=true']]},
+ {k:'vdv',n:'Velo de Ville',m:'Velo de Ville SEB Classic',img:'img/p-vdv.webp',logo:'img/marke-vdv.svg',o:.16,c:'#F97316',t:'Rad nach Wunsch: Rahmen, Farbe und Ausstattung stellen Sie selbst zusammen.',a:[['Zum Konfigurator','https://konfigurator.velo-de-ville.com/de?h_ident=28181&direct=true']]},
  {k:'vanraam',n:'Van Raam',m:'Van Raam Easy Rider',img:'img/p-vanraam.webp',logo:'img/marke-vanraam.svg',o:.26,c:'#A855F7',t:'E-Dreiräder vom Weltmarktführer aus Holland. Bei uns: der Easy Rider.',a:[['Mehr zu E-Dreirädern','#dreirad']]},
  {k:'gudereit',n:'Gudereit',m:'Gudereit EC-35 Evo',img:'img/p-gudereit.webp',logo:'img/marke-gudereit.svg',o:.22,c:'#E2232D',t:'Bei uns das EC-35 Evo von Gudereit.',a:[['gudereit.de','https://www.gudereit.de/']]},
  {k:'victoria',n:'Victoria',m:'Victoria eManufaktur 11.9 Wave',img:'img/p-victoria.webp',logo:'img/marke-victoria.svg',o:.24,c:'#22D3EE',t:'Traditionsmarke mit alltagstauglichen E-Bikes.',a:[['victoria-bikes.com','https://www.victoria-bikes.com/']]}
@@ -1871,7 +1911,7 @@ function countUp(){const el=$('#rekord');const t0=performance.now();const f=t=>{
 /* ---------- Auswahl, Termin, Kontakt ---------- */
 $$('.choice').forEach(g=>g.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;$$('button',g).forEach(x=>x.classList.toggle('on',x===b))}));
 const val=id=>$('#'+id+' button.on')?.dataset.v||'';
-function preset(t){const m=$('#tMsg');if(m&&!m.value)m.value=t+': '}
+function preset(t){const m=$('#tMsg');if(/^Probefahrt/.test(t)){$$('#tArt button').forEach(b=>b.classList.toggle('on',b.dataset.v==='Probefahrt'));const n=t.replace(/^Probefahrt\s*/,'');if(m&&!m.value&&n)m.value='Interesse: '+n;return}if(m&&!m.value)m.value=t+': '}
 const tTag=$('#tTag');const tm=new Date();tm.setDate(tm.getDate()+1);tTag.min=tm.toISOString().slice(0,10);
 const fmt=s=>{const[y,m,d]=s.split('-');return d+'.'+m+'.'+y};
 $('#tf').addEventListener('submit',e=>{e.preventDefault();const err=$('#tErr');err.textContent='';
@@ -1879,9 +1919,9 @@ $('#tf').addEventListener('submit',e=>{e.preventDefault();const err=$('#tErr');e
  if(!name){err.textContent='Bitte geben Sie Ihren Namen ein.';$('#tName').focus();return}
  if(!tel){err.textContent='Bitte geben Sie eine Telefonnummer für die Rückmeldung ein.';$('#tTel').focus();return}
  if(tag){const wd=new Date(tag+'T12:00:00').getDay();if(wd===3||wd===0){err.textContent='Mittwoch und Sonntag haben wir geschlossen. Bitte wählen Sie einen anderen Tag.';tTag.focus();return}if(tag<tTag.min){err.textContent='Bitte wählen Sie einen Tag ab morgen.';tTag.focus();return}}
- const txt='Hallo Velocenter,\nich möchte einen Werkstatt-Termin anfragen.\n\nLeistung: '+val('tArt')+'\nRad: '+val('tRad')+'\nWunschtag: '+(tag?DN[new Date(tag+'T12:00:00').getDay()]+', '+fmt(tag):'egal')+'\nHol- & Bringservice: '+(val('tHol')==='ja'?'ja, bitte':'nein')+(msg?'\nInfo: '+msg:'')+'\n\nName: '+name+'\nTelefon: '+tel;
+ const pf=val('tArt')==='Probefahrt';const txt='Hallo Velocenter,\n'+(pf?'ich möchte eine Probefahrt vereinbaren.':'ich möchte einen Werkstatt-Termin anfragen.')+'\n\nAnliegen: '+val('tArt')+'\nRad: '+val('tRad')+'\nWunschtag: '+(tag?DN[new Date(tag+'T12:00:00').getDay()]+', '+fmt(tag):'egal')+'\nTageszeit: '+val('tZeit')+(msg?'\nInfo: '+msg:'')+'\n\nName: '+name+'\nTelefon: '+tel;
  $('#tTxt').textContent=txt;$('#tWa').href='https://wa.me/'+WA+'?text='+encodeURIComponent(txt);
- $('#tMail').href='mailto:info@velo-center.de?subject='+encodeURIComponent('Werkstatt-Termin: '+val('tArt')+' ('+name+')')+'&body='+encodeURIComponent(txt);
+ $('#tMail').href='mailto:info@velo-center.de?subject='+encodeURIComponent('Terminanfrage: '+val('tArt')+' ('+name+')')+'&body='+encodeURIComponent(txt);
  const o=$('#tOut');o.hidden=false;o.scrollIntoView({behavior:RM?'auto':'smooth',block:'nearest'})});
 $('#tCopy').addEventListener('click',()=>copy($('#tTxt').textContent,$('#tCopy')));
 let via='wa';$$('#kf button[type=submit]').forEach(b=>b.addEventListener('click',()=>via=b.dataset.via));
@@ -1915,7 +1955,7 @@ fRender();
 /* ---------- Kopf: Rad-Wechsel + heutige Öffnungszeit ---------- */
 (function(){const hv=$('#hvis');if(!hv)return;const bs=$$('.hb',hv),lg=$('#hlg');let k=0;
  setInterval(()=>{if(cur!=='start'||scrollY>innerHeight)return;bs[k].classList.add('off');k=(k+1)%bs.length;bs[k].classList.remove('off');lg.classList.add('swap');setTimeout(()=>{lg.src=bs[k].dataset.l;lg.classList.remove('swap')},350)},4800);
- const {d}=berlin(),q=$('#qkHours');if(q)q.textContent='Heute: '+(H[d].length?H[d].map(([a,b])=>hm(a)+'–'+hm(b)).join(' · '):'geschlossen');})();
+ const {d,m}=berlin(),q=$('#qkHours');if(q){const op=H[d].some(([a,b])=>m>=a&&m<b);q.innerHTML='<i class="qd'+(op?' on':'')+'"></i>'+(op?'Jetzt geöffnet':'Heute: '+(H[d].length?H[d].map(([a,b])=>hm(a)+'–'+hm(b)).join(' · '):'geschlossen'))}})();
 go(true);
 })();
 </script>
