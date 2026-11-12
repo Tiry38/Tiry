@@ -838,6 +838,86 @@ body.sc .hdr::after{background:linear-gradient(90deg,transparent,#B87333 20%,#F0
  .quick{margin-top:18px}
 }
 @media (max-width:980px){.hvis{height:min(80vw,480px)}}
+
+/* ================= Moderne Knöpfe & Kästchen (Tiry 12.11.2026): flach, klare Ecken, feine Bewegung ================= */
+.cta,.ghost{border-radius:12px;min-height:52px;padding:0 22px;font:650 15px/1 var(--display);letter-spacing:.01em;gap:10px;transition:background .3s,color .3s,border-color .3s,transform .3s var(--ease),box-shadow .3s}
+.cta svg,.ghost svg{width:18px;height:18px;transition:transform .35s var(--ease)}
+.cta:hover svg,.ghost:hover svg{transform:translateX(3px)}
+.cta{background:#C8102E;background-size:auto;border:1px solid #C8102E;box-shadow:0 10px 24px -8px rgba(200,16,46,.55);color:#fff}
+.cta:hover{background:#A50D25;border-color:#A50D25;transform:translateY(-1px);box-shadow:0 14px 28px -10px rgba(165,13,37,.6)}
+.cta:active{transform:translateY(0)}
+.ghost{background:transparent;border:1.5px solid #2A2D34;color:#1B1E25;box-shadow:none}
+.ghost:hover{background:#2A2D34;color:#fff;border-color:#2A2D34;transform:translateY(-1px)}
+.cta.wa,.wa{background:#1FA855;border-color:#1FA855;color:#fff;box-shadow:0 10px 24px -8px rgba(31,168,85,.5)}
+.cta.wa:hover{background:#178A45;border-color:#178A45}
+.hdr .cta{min-height:44px;padding:0 18px;border-radius:10px;font-size:14.5px}
+.burger{border-radius:12px}
+.copy{border-radius:10px}
+@media (min-width:981px){
+ .nav{border-radius:14px;padding:5px}
+ .nav a{border-radius:10px}
+}
+.choice button{border-radius:10px;min-height:44px}
+.choice button.on{background:#2A2D34;border-color:#2A2D34;color:#fff;box-shadow:none}
+.inp{border-radius:12px}
+textarea.inp{border-radius:12px}
+.panel{border-radius:22px}
+.finder{border-radius:26px}
+.fopt{border-radius:16px;min-height:78px}
+.fopt .fi{border-radius:12px;background:rgba(184,115,51,.12);box-shadow:inset 0 0 0 1px rgba(184,115,51,.35)}
+.fopt .fi svg{color:#9A5A2A}
+.fopt:hover{transform:translateY(-2px);background:#fff;border-color:#2A2D34}
+.blogo,.logowall span{border-radius:14px}
+.arrow{border-radius:14px}
+.hchip{border-radius:12px}
+.live,.trust .live{border-radius:10px}
+.day.today{border-radius:10px}
+.out{border-radius:16px}
+.fr .cta,.fr .ghost{min-height:44px}
+/* Symbole: abgerundete Quadrate statt Kugeln */
+.srow .ic{border-radius:16px;box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--c) 35%,transparent)}
+.srow:hover .ic{transform:none}
+.cl .ic{border-radius:18px}
+.sig svg{border-radius:12px;background:#2A2D34}
+.gift svg{border-radius:14px}
+.srow .go{border-radius:12px}
+/* Schnellzugriffe: eine durchgehende Glasleiste */
+.quick{gap:0;border-radius:18px;overflow:hidden;background:rgba(255,252,246,.62);backdrop-filter:blur(16px) saturate(1.3);-webkit-backdrop-filter:blur(16px) saturate(1.3);border:1px solid rgba(184,115,51,.38);box-shadow:0 24px 48px -16px rgba(27,30,37,.22)}
+.qk{position:relative;border:0;border-radius:0;background:transparent;box-shadow:none;padding:20px 52px 20px 22px;align-items:flex-start;gap:14px;transition:background .3s}
+.qk+.qk{border-left:1px solid rgba(184,115,51,.28)}
+.qk:hover{transform:none;background:rgba(255,255,255,.7);box-shadow:none}
+.qk .ic{width:40px;height:40px;border-radius:12px;background:rgba(184,115,51,.12);box-shadow:inset 0 0 0 1px rgba(184,115,51,.38)}
+.qk .ic svg{width:20px;height:20px;color:#9A5A2A}
+.qk b{font:750 15.5px/1.25 var(--display)}
+.qk small{font-size:13px;margin-top:4px}
+.qk::after{content:"→";position:absolute;right:20px;top:50%;transform:translateY(-50%);font:600 18px/1 var(--display);color:#9A5A2A;opacity:.55;transition:transform .35s var(--ease),opacity .3s}
+.qk:hover::after{opacity:1;transform:translate(4px,-50%)}
+.qk::before{content:"";position:absolute;left:0;right:0;bottom:0;height:2px;background:linear-gradient(90deg,#9A5A2A,#E0B080,#9A5A2A);transform:scaleX(0);transform-origin:left;transition:transform .45s var(--ease)}
+.qk:hover::before{transform:scaleX(1)}
+@media (max-width:980px){
+ .qk:nth-child(3){border-left:0}
+ .qk:nth-child(n+3){border-top:1px solid rgba(184,115,51,.28)}
+}
+@media (max-width:640px){
+ .qk{padding:16px 34px 16px 14px;flex-direction:column;gap:10px}
+ .qk::after{right:12px;top:22px;transform:none}
+ .qk:hover::after{transform:translateX(3px)}
+}
+
+/* ================= Hausfarben-Akzente Rot · Grau · Weiß (Tiry 12.11.2026) ================= */
+.blobs i:nth-child(1){background:#C8102E;opacity:.28}
+.blobs i:nth-child(3){background:#8B9099;opacity:.34}
+.blobs i:nth-child(4){background:#E2232D;opacity:.24}
+.blobs i:nth-child(6){background:#FFFFFF;opacity:.75}
+.ribbons{position:fixed;inset:0;z-index:-2;pointer-events:none;overflow:hidden}
+.ribbons i{position:absolute;left:-25%;width:150%;transform:rotate(-14deg);will-change:transform}
+.ribbons i:nth-child(1){top:14%;height:20vh;filter:blur(30px);background:linear-gradient(90deg,transparent 4%,rgba(200,16,46,.12) 20%,rgba(200,16,46,.45) 46%,rgba(226,35,45,.55) 58%,rgba(200,16,46,.18) 80%,transparent 96%);animation:rib1 26s ease-in-out infinite alternate}
+.ribbons i:nth-child(2){top:30%;height:5vh;filter:blur(14px);background:linear-gradient(90deg,transparent 10%,rgba(255,255,255,.85) 45%,rgba(255,255,255,.95) 55%,transparent 85%);animation:rib2 20s ease-in-out infinite alternate}
+.ribbons i:nth-child(3){top:56%;height:15vh;filter:blur(28px);background:linear-gradient(90deg,transparent 6%,rgba(95,100,110,.3) 30%,rgba(120,125,135,.42) 55%,rgba(95,100,110,.18) 80%,transparent 95%);animation:rib2 30s ease-in-out infinite alternate-reverse}
+.ribbons i:nth-child(4){top:76%;height:9vh;filter:blur(24px);background:linear-gradient(90deg,transparent 8%,rgba(200,16,46,.28) 40%,rgba(226,35,45,.38) 60%,transparent 90%);animation:rib1 24s ease-in-out infinite alternate-reverse}
+@keyframes rib1{from{transform:rotate(-14deg) translateX(-7%)}to{transform:rotate(-14deg) translateX(7%)}}
+@keyframes rib2{from{transform:rotate(-14deg) translateX(6%)}to{transform:rotate(-14deg) translateX(-6%)}}
+@media (max-width:640px){.ribbons i{filter:blur(20px)}}
 </style>
 
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
@@ -869,7 +949,7 @@ body.sc .hdr::after{background:linear-gradient(90deg,transparent,#B87333 20%,#F0
  </defs>
 </svg>
 
-<div class="sky"></div><div class="blobs" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></div><div class="smoke"></div><div class="grain"></div>
+<div class="sky"></div><div class="blobs" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></div><div class="ribbons" aria-hidden="true"><i></i><i></i><i></i><i></i></div><div class="smoke"></div><div class="grain"></div>
 
 <header class="hdr">
  <div class="wrap">
@@ -1223,7 +1303,7 @@ m696 -454 c28 -13 46 -31 55 -51 22 -53 -50 -177 -173 -300 -187 -186 -647
      <h1 class="hh1 hello" style="--d:1s">Ihr E-Bike-Spezialist<br><span class="gt it">mit eigener Werkstatt.</span></h1>
      <p class="lead hello" style="--d:1.1s">Über 300 Räder zum Probefahren, ehrliche Beratung und ein Bosch Service Center, in dem der Chef noch selbst schraubt.</p>
      <div class="row hello" style="--d:1.2s"><a class="cta" href="#finder"><svg><use href="#i-spark"/></svg>Mein E-Bike finden</a><a class="ghost" href="#termin"><svg><use href="#i-wrench"/></svg>Werkstatt-Termin</a></div>
-     <div class="trust hello" style="--d:1.3s"><span><svg style="color:#D97706"><use href="#i-star"/></svg><b>4,9</b> bei Google</span><span><svg><use href="#i-shield"/></svg>Bosch Service Center</span><span><svg><use href="#i-bike"/></svg>i:SY Experte</span><span><svg><use href="#i-clock"/></svg><em class="live" id="live"><i></i><span id="liveT">Öffnungszeiten</span></em></span></div>
+     <div class="trust hello" style="--d:1.3s"><span><svg style="color:#D97706"><use href="#i-star"/></svg><b>4,8</b> bei Google</span><span><svg><use href="#i-shield"/></svg>Bosch Service Center</span><span><svg><use href="#i-bike"/></svg>i:SY Experte</span><span><svg><use href="#i-clock"/></svg><em class="live" id="live"><i></i><span id="liveT">Öffnungszeiten</span></em></span></div>
     </div>
     <div class="hvis hello" style="--d:.5s" id="hvis">
      <div class="hring"></div>
@@ -1247,7 +1327,7 @@ m696 -454 c28 -13 46 -31 55 -51 22 -53 -50 -177 -173 -300 -187 -186 -647
 
  <div class="bands" aria-hidden="true">
   <div class="band b"><div class="tk" data-t="Wörth am Rhein|Hartmannstraße 25|Familienbetrieb|Probefahrt|Hol- & Bringservice|0 % Finanzierung"></div></div>
-  <div class="band a"><div class="tk" data-t="Seit 1995|300+ Räder|4,9 ★ bei Google|Bosch Service Center|i:SY Experte|Weltrekord 283"></div></div>
+  <div class="band a"><div class="tk" data-t="Seit 1995|300+ Räder|4,8 ★ bei Google|Bosch Service Center|i:SY Experte|Weltrekord 283"></div></div>
  </div>
 
  <div class="sec show" id="showroom">
@@ -1306,7 +1386,7 @@ m696 -454 c28 -13 46 -31 55 -51 22 -53 -50 -177 -173 -300 -187 -186 -647
 
  <div class="sec zone z-lilac">
   <div class="wrap voices">
-   <div class="score pre"><b>4,9</b><div class="stars"><svg><use href="#i-star"/></svg><svg><use href="#i-star"/></svg><svg><use href="#i-star"/></svg><svg><use href="#i-star"/></svg><svg><use href="#i-star"/></svg></div><span>97 Bewertungen bei Google</span></div>
+   <div class="score pre"><b>4,8</b><div class="stars"><svg><use href="#i-star"/></svg><svg><use href="#i-star"/></svg><svg><use href="#i-star"/></svg><svg><use href="#i-star"/></svg><svg><use href="#i-star"/></svg></div><span>Bewertung bei Google</span></div>
    <div class="pre" style="--d:.1s">
     <p class="eyebrow">Das sagen <b>unsere Kunden</b></p>
     <div class="qwrap" id="qs" style="margin-top:22px">
@@ -1630,7 +1710,7 @@ m696 -454 c28 -13 46 -31 55 -51 22 -53 -50 -177 -173 -300 -187 -186 -647
     <div class="fnd pre"><span class="k">!</span><p><b>Datenschutzerklärung</b> für die neue Seite erstellen. Impressum ist übernommen.</p></div>
     <div class="fnd pre"><span class="k">!</span><p><b>Bilder</b>: Ladenfotos stammen von der aktuellen Seite. Herstellerbilder und Logos vor dem Start über die Händlerportale der Marken freigeben lassen.</p></div>
     <div class="fnd pre"><span class="k">!</span><p><b>Kontakt- und Terminformular</b> senden im Prototyp per WhatsApp oder E-Mail-Programm. Für Versand direkt aus dem Formular brauchen wir einen Mail-Dienst (wie EmailJS im Planer).</p></div>
-    <div class="fnd pre"><span class="k">!</span><p><b>Google-Bewertungen</b> (4,9 aus 97) sind der Stand der alten Seite und von Hand eingetragen.</p></div>
+    <div class="fnd pre"><span class="k">!</span><p><b>Google-Bewertung</b> (4,8) ist von Hand eingetragen. Die aktuelle Anzahl der Bewertungen fehlt noch und muss bei jeder Änderung nachgetragen werden (oder automatisch über Google eingebunden werden).</p></div>
    </div>
   </div>
  </div>
