@@ -1,0 +1,13 @@
+# Homepage-Prototyp – feste Entscheidungen von Tiry
+
+- Noch nichts online stellen. Nur die Vorschau (Artifact) wird aktualisiert.
+- Ganze Seite per „du“.
+- Nie auf der Seite: interne Daten (EK, Rahmennummer, Lagerort, Bemerkung, Akku-/Schlüsselnummern, Kundendaten), Lagerbestände, Provisionen, „Barkauf“.
+- **Kein Hol- und Bringservice** auf der Seite (12.11.2026).
+- Keine Standgebühr auf der Seite (12.11.2026).
+- Aktionspreise gelten nicht bei Leasing & Finanzierung – überall vermerken.
+- Finanzierung TARGOBANK: 0 % Zinsen, bis zu 24 Monate, **mit Anzahlung** (nie „0 € Anzahlung“).
+- Erste Inspektion: Empfehlung 500–1.000 km.
+- ENRA: E-Bikes bis 10.000 € (Stand enra.eu 12.11.2026).
+- Winter-Aktion: –20 € auf jede Inspektion (nie Prozent) + Sattelüberzug (nie „Satteldecke“), 01.11.2026–28.02.2027, keine festen Inspektionspreise.
+- Bilder immer freigestellt und geschärft.
