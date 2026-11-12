@@ -1169,6 +1169,68 @@ textarea.inp{border-radius:12px}
 .lgchips button.lgo{padding:0 16px;min-width:76px;justify-content:center}
 .lgchips button.lgo img{height:22px;width:auto;max-width:104px;object-fit:contain}
 .lgchips button.lgo img[alt="Velo de Ville"]{height:26px;max-width:150px}
+/* Spiegelbild/Deko im Showroom nie klickbar (lag über der Markenleiste) */
+.refl,.wml{pointer-events:none}
+.thumbs{position:relative;z-index:3}
+/* ===== Admin-Bereich ===== */
+.adm{position:fixed;inset:0;z-index:300;display:grid;place-items:center;padding:clamp(0px,3vw,32px);opacity:0;transition:opacity .3s}
+.adm.on{opacity:1}
+.adm-bg{position:absolute;inset:0;background:rgba(18,20,25,.62);backdrop-filter:blur(6px)}
+.adm-p{position:relative;width:min(1100px,100%);height:min(900px,100%);display:flex;flex-direction:column;border-radius:16px;overflow:hidden;background:linear-gradient(170deg,#FFFDF9,#F4EDE3);box-shadow:0 40px 90px -30px rgba(18,20,25,.6);transform:translateY(14px);transition:transform .35s var(--ease)}
+.adm.on .adm-p{transform:none}
+.adm-h{display:flex;align-items:center;gap:16px;padding:14px 18px;color:#fff;background:linear-gradient(120deg,#1B1E25,#2A2E37 60%,#3A2A24);border-bottom:2px solid #C8102E}
+.adm-h b{font:800 15px/1 var(--display);letter-spacing:.16em;text-transform:uppercase}
+.adm-h b small{display:block;margin-top:5px;font:600 11.5px/1 var(--display);letter-spacing:.04em;text-transform:none;color:#E8C9A0}
+.adm-h nav{display:flex;gap:6px;margin-left:auto;flex-wrap:wrap}
+.adm-h nav button,.adm-x{min-height:40px;padding:0 14px;border-radius:8px;border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.06);color:#fff;font:700 13px/1 var(--display);cursor:pointer}
+.adm-h nav button.on{background:#C8102E;border-color:#C8102E}
+.adm-x{width:40px;padding:0;font-size:20px;margin-left:6px}
+#admTabs[hidden]+.adm-x{margin-left:auto}
+.adm-b{flex:1;overflow:auto;padding:22px clamp(14px,3vw,30px) 40px;color:var(--ink)}
+.admlogin{max-width:380px;margin:12vh auto 0;text-align:center}
+.admlogin .lk{width:72px;height:72px;margin:0 auto 18px;border-radius:14px;display:grid;place-items:center;color:#fff;background:linear-gradient(150deg,#FF4D63,#C8102E 45%,#6E0716);box-shadow:0 18px 30px -14px rgba(200,16,46,.8)}
+.admlogin .lk svg{width:32px;height:32px}
+.admlogin h3{font:800 24px/1.1 var(--display);margin:0 0 10px}
+.admlogin p{color:var(--mut);line-height:1.6}.admlogin .cta{margin-top:18px}
+.admtool{display:flex;flex-wrap:wrap;align-items:center;gap:10px 16px;margin-bottom:16px}
+.admtool .inp{flex:1;min-width:220px}.admtool span{font:600 13px/1 var(--display);color:var(--dim)}
+.admlist{display:flex;flex-direction:column;gap:8px}
+.admit{display:grid;grid-template-columns:1fr auto auto;align-items:center;gap:12px;padding:12px 14px;border-radius:10px;background:#fff;border:1px solid rgba(27,30,37,.08);border-left:3px solid #C8102E}
+.admit.off{opacity:.55;border-left-color:#868282}
+.admit .ai b{display:block;font:700 15px/1.25 var(--display)}.admit .ai small{display:block;margin-top:4px;color:var(--dim);font-size:13px}
+.admit .tg{display:flex;gap:6px;flex-wrap:wrap}
+.admit .tg i{font:700 11px/1 var(--display);font-style:normal;padding:5px 7px;border-radius:5px;background:#EEE9E2;color:#4A4F5A}
+.admit .tg i.e{background:#1B1E25;color:#fff}.admit .tg i.c{background:#FEF3C7;color:#92400E}.admit .tg i.h{background:#FDE2E6;color:#9F1239}
+.admit .ab,.admv .vb{display:flex;gap:6px;flex-wrap:wrap}
+.admit .ab button,.admv button,.admhd .bk{min-height:40px;padding:0 12px;border-radius:7px;border:1px solid rgba(27,30,37,.18);background:#fff;font:700 12.5px/1 var(--display);color:var(--ink);cursor:pointer}
+.admit .ab button:hover,.admv button:hover{border-color:#1B1E25}
+.admit .ab .del,.admv .del{color:#B00D29;border-color:rgba(200,16,46,.35)}
+.admf{display:flex;flex-direction:column;gap:14px;max-width:980px}
+.admf h3{font:800 22px/1.1 var(--display);margin:0}.admf h4{font:800 13px/1 var(--display);letter-spacing:.14em;text-transform:uppercase;color:#9A5B22;margin:10px 0 0}
+.admf label{display:flex;flex-direction:column;gap:6px;font:700 12.5px/1.2 var(--display);color:var(--mut)}
+.admf input:not([type=checkbox]):not([type=file]),.admf select,.admf textarea{min-height:44px;padding:9px 11px;border-radius:8px;border:1px solid rgba(27,30,37,.18);background:#fff;font:500 15px/1.3 var(--body,inherit);color:var(--ink)}
+.admf input:disabled,.admf select:disabled{background:#F1ECE5;color:#555B68}
+.admf input:focus,.admf select:focus,.admf textarea:focus{outline:2px solid #C8102E;outline-offset:1px}
+.admf label.ck{flex-direction:row;align-items:center;gap:10px;min-height:44px;font-size:14px;color:var(--ink)}
+.admf label.ck input{width:20px;height:20px;accent-color:#C8102E}
+.admf .g3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.admhd{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.admrow{display:flex;gap:10px;flex-wrap:wrap;margin-top:6px}
+.admnote{margin:0;font-size:13.5px;line-height:1.55;color:var(--dim)}
+.admf .err{color:#B00D29;font-weight:700;min-height:1em;margin:0}
+.admv{display:grid;grid-template-columns:200px 1fr;align-items:start;gap:16px;padding:14px;border-radius:12px;background:#fff;border:1px solid rgba(27,30,37,.08)}
+.admv.off{opacity:.6}
+.admv .aph{display:flex;flex-direction:column;gap:8px}
+.admv .aph img,.admv .aph span{width:100%;aspect-ratio:3/2;object-fit:contain;border-radius:8px;background:#F6F2EC}
+.admv .aph span{display:grid;place-items:center;font:600 13px/1 var(--display);color:var(--dim)}
+.admv .up{position:relative;align-items:center;justify-content:center;min-height:40px;border-radius:7px;background:#1B1E25;color:#fff!important;cursor:pointer}
+.admv .up input{position:absolute;inset:0;opacity:0;cursor:pointer}
+.admv .vf{display:grid;align-content:start;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.admv .vb{grid-column:1/-1}
+.admtoast{position:fixed;left:50%;bottom:24px;z-index:320;transform:translate(-50%,20px);opacity:0;pointer-events:none;padding:12px 18px;border-radius:9px;background:#1B1E25;color:#fff;font:600 14px/1.3 var(--display);box-shadow:0 18px 40px -16px rgba(0,0,0,.6);transition:.3s var(--ease)}
+.admtoast.on{opacity:1;transform:translate(-50%,0)}
+@media (max-width:760px){.adm{padding:0}.adm-p{border-radius:0;height:100%}.adm-h{flex-wrap:wrap}.adm-h nav{order:3;width:100%;margin:0}.adm-h nav button{flex:1}
+ .admit{grid-template-columns:1fr}.admf .g3,.admv .vf{grid-template-columns:1fr 1fr}.admv{grid-template-columns:1fr}}
 </style>
 
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
@@ -2016,6 +2078,16 @@ m696 -454 c28 -13 46 -31 55 -51 22 -53 -50 -177 -173 -300 -187 -186 -647
 </footer>
 
 
+<div class="adm" id="adm" hidden>
+ <div class="adm-bg" data-aclose></div>
+ <div class="adm-p" role="dialog" aria-modal="true" aria-label="Admin-Bereich">
+  <div class="adm-h"><b>Velocenter Admin<small>Bestand &amp; Seite verwalten</small></b>
+   <nav id="admTabs" hidden><button type="button" data-t="raeder">Räder</button><button type="button" data-t="neu">+ Rad hinzufügen</button><button type="button" data-t="seite">Seite</button></nav>
+   <button type="button" class="adm-x" data-aclose aria-label="Schließen">×</button></div>
+  <div class="adm-b" id="admBody"></div>
+ </div>
+</div>
+<div class="admtoast" id="admToast" role="status" aria-live="polite"></div>
 <div class="lgm" id="lgm" hidden>
  <div class="lgm-bg" data-close></div>
  <div class="lgm-p" role="dialog" aria-modal="true" aria-labelledby="lgmT">
@@ -2254,14 +2326,15 @@ function lgNorm(d){let R=d.raeder;
   const abs=v.filter(x=>x.status==='bestellt'&&x.ab).map(x=>x.ab).sort();
   return Object.assign({},base,v[0],{_i:i,v,lager,deal:v.some(x=>x.angebot),minP:ps.length?Math.min(...ps):null,multiP:new Set(ps).size>1,ab:lager?'':(abs[0]||''),
    jahr:js.length>1?js[0]+'–'+js[js.length-1]:(js[0]||''),grs:r.gr?[r.gr]:[],fs:[...new Map(v.filter(x=>x.farbe).map(x=>[x.farbe.toLowerCase(),x.farbe])).values()]})})}
-function lgLoad(){if(LG.load)return LG.load;LG.load=fetch('data/bestand.json',{cache:'no-store'}).then(r=>{if(!r.ok)throw 0;return r.json()}).then(d=>{LG.M=lgNorm(d);LG.ok=true;
+function lgLoad(){if(LG.load)return LG.load;LG.load=fetch('data/bestand.json',{cache:'no-store'}).then(r=>{if(!r.ok)throw 0;return r.json()}).then(d=>{LG.D=d;lgApply()}).catch(()=>{$('#lgGrid').innerHTML='<p class="lgempty">Der Bestand konnte gerade nicht geladen werden. Rufen Sie uns gern an: 07271 78033.</p>'});return LG.load}
+function lgApply(){const d=admMerge(LG.D);LG.M=lgNorm(d);LG.ok=true;
  $('#lgStand').textContent=/^\d/.test(d.stand||'')?'Stand '+d.stand:(d.stand||'aktuell');const hw=d.hinweis||(d.quelle==='Beispieldaten'?'Sobald der Veloport-Export eingespielt ist, steht hier euer echter Bestand.':'');$('#lgDemo').hidden=!hw;$('#lgDemoT').innerHTML='<b>'+(d.quelle==='Beispieldaten'?'Beispieldaten.':'Hinweis:')+'</b> '+esc(hw);
  const nL=LG.M.filter(m=>m.lager).length,nB=LG.M.length-nL,nD=LG.M.filter(m=>m.deal).length,nMk=new Set(LG.M.map(lgMkName)).size;
  $('#lgNum').innerHTML='<span><b>'+nL+'</b> Räder sofort verfügbar</span>'+(nB?'<span><b>'+nB+'</b> Lieferung ausstehend</span>':'')+'<span><b>'+nMk+'</b> Marken</span>';
  $('#lgDealsN').textContent=nD?nD+(nD===1?' Rad reduziert':' Räder reduziert'):'Aktuell keine';$('#lgDeals').hidden=!nD;
  const mx=Math.max(0,...LG.M.flatMap(m=>m.v||[]).filter(x=>x.angebot&&x.preis>x.angebot).map(x=>x.preis-x.angebot));const se=$('#lgDealsS');se.hidden=!mx;if(mx)se.textContent='bis zu '+eur(mx)+' sparen';
  const q=$('#qkLager');if(q)q.textContent='Jetzt im Laden ansehen';
- lgChips()}).catch(()=>{$('#lgGrid').innerHTML='<p class="lgempty">Der Bestand konnte gerade nicht geladen werden. Rufen Sie uns gern an: 07271 78033.</p>'});return LG.load}
+ lgChips()}
 function lgChips(){const mk=[...new Set(LG.M.map(lgMkName))].sort((a,b)=>a.localeCompare(b,'de'));
  $('#lgMk').innerHTML='<button type="button" data-mk="" class="'+(LG.f.mk?'':'on')+'">Alle Marken</button>'+mk.map(n=>{const b=BR.find(x=>x.n===n);return '<button type="button" data-mk="'+esc(n)+'" title="'+esc(n)+'" class="'+(LG.f.mk===n?'on':'')+((b||LG_LOGO[n])?' lgo':'')+'">'+((b||LG_LOGO[n])?'<img src="'+(b?b.logo:LG_LOGO[n])+'" alt="'+esc(n)+'">':'<span>'+esc(n)+'</span>')+'</button>'}).join('');
  const rf=[...new Set(LG.M.map(m=>m.rahmen).filter(Boolean))];
@@ -2331,6 +2404,138 @@ $('#lgm').addEventListener('submit',e=>{e.preventDefault();const m=LG.list[LG.i]
 (()=>{let sx=0;const st=$('#lgmStage');st.addEventListener('pointerdown',e=>sx=e.clientX);st.addEventListener('pointerup',e=>{const d=e.clientX-sx;if(Math.abs(d)>50)lgShow(LG.i+(d<0?1:-1),d<0?1:-1)})})();
 document.addEventListener('click',e=>{const a=e.target.closest('[data-brand]');if(a){LG.f.mk=a.dataset.brand;LG.f.rf='';LG.f.q='';LG.f.deal=false}},true);
 lgLoad();
+/* ===== Versteckter Admin-Bereich =====
+   Öffnen: #admin an die Adresse hängen oder 5× schnell auf „© … Velocenter Hessert“ tippen.
+   Zugang: nur Besitzer/Bearbeiter des Artefakts (Plattform-Anmeldung, user.canEdit()) – kein Passwort im Code.
+   Daten: db „lager/*“ (eigene Räder + Änderungen an importierten), „site/einstellungen“; Fotos über assets. */
+const ADM={db:null,user:null,assets:null,ok:false,rows:{},set:{},tab:'raeder',q:'',edit:null};
+const admSlug=t=>String(t||'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'').slice(0,120)||'x';
+const admKey=r=>admSlug([r.marke,r.modell,r.gr,r.rahmen,r.gebraucht?'g':'',r.vorfuehr?'v':''].join(' '));
+const ADM_RF=['Tiefeinsteiger','Trapez','Diamant','Kompaktrad','Dreirad','MTB','Unisex'];
+const ADM_MK=['i:SY','KTM','QiO','Velo de Ville','Victoria','Gudereit','Van Raam','Stevens'];
+/* Bestand + Admin-Änderungen zusammenführen (läuft auch ohne Datenbank = reiner Export) */
+function admMerge(d){d=d||{};const R=[],rows=ADM.rows,st=ADM.set;
+ (d.raeder||[]).forEach(r=>{const o=rows['ov-'+admKey(r)];if(o&&o.hidden)return;
+  const k=Object.assign({},r,{farben:(r.farben||[]).map(f=>{const x=o&&o.v&&o.v[f.id];if(!x)return f;if(x.hidden)return null;const y=Object.assign({},f);
+   ['preis','angebot','status','ab','bild'].forEach(n=>{if(x[n]!==undefined){if(x[n]===null||x[n]==='')delete y[n];else y[n]=x[n]}});return y}).filter(Boolean)});
+  if(k.farben.length)R.push(k)});
+ Object.keys(rows).filter(i=>i.startsWith('neu-')).sort().forEach(i=>{const n=rows[i];if(n&&n.rad&&!n.hidden&&(n.rad.farben||[]).length)R.push(Object.assign({},n.rad,{eigen:true}))});
+ return Object.assign({},d,{raeder:R},st.hinweis!=null&&st.hinweis!==''?{hinweis:st.hinweis}:{},st.hinweisAus?{hinweis:''}:{},st.stand?{stand:st.stand}:{})}
+function admRefresh(){if(!LG.D)return;lgApply();admDeals();if(LG.ok)lgRender();if(!$('#adm').hidden&&ADM.ok&&ADM.tab==='raeder'&&!ADM.edit)admRender()}
+/* Datenbank still im Hintergrund verbinden: Änderungen erscheinen bei allen angemeldeten Besuchern live */
+(async()=>{try{const db=await claude.use('db');if(!db)return;ADM.db=db;
+ db.collection('lager').onSnapshot(q=>{const r={};q.docs.forEach(x=>{r[x.id]=x.data()});ADM.rows=r;admRefresh()},()=>{});
+ db.doc('site/einstellungen').onSnapshot(x=>{ADM.set=x.exists?x.data():{};admRefresh();admDeals()},()=>{})}catch(e){}})();
+function admDeals(){const b=$('#lgDeals');if(b&&ADM.set.dealsAus)b.hidden=true}
+/* Einstieg */
+async function admOpen(){const M=$('#adm');M.hidden=false;document.body.style.overflow='hidden';requestAnimationFrame(()=>M.classList.add('on'));
+ if(ADM.ok){admRender();return}
+ $('#admBody').innerHTML='<div class="admlogin"><div class="lk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg></div><h3>Admin-Login</h3><p id="admLs">Zugang wird geprüft …</p></div>';
+ let u=null;try{u=await claude.use('user')}catch(e){}ADM.user=u;
+ let ok=false;try{ok=!!(u&&await u.canEdit())}catch(e){}
+ try{ADM.assets=await claude.use('assets')}catch(e){}
+ const ls=$('#admLs');if(!ls)return;
+ if(!ok||!ADM.db){ls.innerHTML=!ADM.db?'Bitte bei claude.ai anmelden, dann die Seite neu öffnen.':'Kein Zugang. Dieser Bereich ist nur für das Velocenter-Team.';return}
+ ls.innerHTML='Angemeldet und freigeschaltet.<br><button type="button" class="cta" id="admGo">Admin öffnen</button>';$('#admGo').focus()}
+function admClose(){const M=$('#adm');M.classList.remove('on');document.body.style.overflow='';setTimeout(()=>{M.hidden=true},300);if(location.hash==='#admin')location.hash='lager'}
+/* Übersicht */
+function admAll(){const out=[];(LG.D&&LG.D.raeder||[]).forEach(r=>{const k='ov-'+admKey(r),o=ADM.rows[k]||{};out.push({id:k,r,o,imp:true})});
+ Object.keys(ADM.rows).filter(i=>i.startsWith('neu-')).sort().reverse().forEach(i=>out.push({id:i,r:ADM.rows[i].rad||{farben:[]},o:ADM.rows[i],imp:false}));return out}
+function admRender(){const b=$('#admBody');if(!ADM.ok){return}
+ $$('#admTabs button').forEach(x=>x.classList.toggle('on',x.dataset.t===ADM.tab));
+ if(ADM.tab==='seite'){const s=ADM.set;b.innerHTML='<form class="admf" id="admSet"><h3>Seite &amp; Bestand</h3>'+
+  '<label>Hinweis über dem Bestand<textarea name="hinweis" rows="3" placeholder="leer = Hinweis aus dem Export">'+esc(s.hinweis||'')+'</textarea></label>'+
+  '<label class="ck"><input type="checkbox" name="hinweisAus"'+(s.hinweisAus?' checked':'')+'> Hinweis komplett ausblenden</label>'+
+  '<label>Stand-Angabe<input name="stand" value="'+esc(s.stand||'')+'" placeholder="z. B. 12.11.2026 – leer = Datum des Exports"></label>'+
+  '<label class="ck"><input type="checkbox" name="dealsAus"'+(s.dealsAus?' checked':'')+'> Knopf „Sonderangebote“ ausblenden</label>'+
+  '<div class="admrow"><button class="cta" type="submit">Speichern</button></div><p class="admnote">Gilt sofort für alle Besucher. Neuer Veloport-Export: Datei mit tools/bestand_zu_json.py umwandeln – eigene Räder und Änderungen hier bleiben erhalten.</p></form>';return}
+ if(ADM.tab==='neu'){admForm(null);return}
+ const q=ADM.q.toLowerCase().split(/\s+/).filter(Boolean);
+ const L=admAll().filter(x=>!q.length||q.every(w=>(x.r.marke+' '+x.r.modell+' '+(x.r.gr||'')+' '+(x.r.farben||[]).map(f=>f.farbe+' '+f.jahr).join(' ')).toLowerCase().includes(w)));
+ const nEig=L.filter(x=>!x.imp).length,nAus=L.filter(x=>x.o.hidden).length;
+ b.innerHTML='<div class="admtool"><input class="inp" id="admQ" type="search" placeholder="Suchen: Marke, Modell, Farbe …" value="'+esc(ADM.q)+'"><span>'+L.length+' Karten · '+nEig+' eigene · '+nAus+' ausgeblendet</span></div><div class="admlist">'+
+  L.map(x=>{const r=x.r,F=r.farben||[],ch=x.imp&&x.o.v?Object.keys(x.o.v).length:0,ph=F.filter(f=>{const o=x.o.v&&x.o.v[f.id];return (o&&o.bild!==undefined?o.bild:f.bild)}).length;
+   return '<div class="admit'+(x.o.hidden?' off':'')+'"><div class="ai"><b>'+esc(r.marke||'')+' '+esc(r.modell||'')+'</b><small>'+[r.gr,r.rahmen,F.length+(F.length===1?' Farbe':' Farben'),ph+'/'+F.length+' Fotos'].filter(Boolean).map(esc).join(' · ')+'</small></div>'+
+   '<div class="tg">'+(x.imp?'<i>Veloport</i>':'<i class="e">Eigenes Rad</i>')+(ch?'<i class="c">geändert</i>':'')+(x.o.hidden?'<i class="h">ausgeblendet</i>':'')+'</div>'+
+   '<div class="ab"><button type="button" data-ae="'+x.id+'">Bearbeiten</button><button type="button" data-ah="'+x.id+'">'+(x.o.hidden?'Einblenden':'Ausblenden')+'</button>'+(x.imp?'':'<button type="button" class="del" data-ad="'+x.id+'">Löschen</button>')+'</div></div>'}).join('')+'</div>'}
+/* Formular: eigenes Rad (alles) oder importiertes Rad (Preis, Angebot, Status, KW, Foto, Farbe ausblenden) */
+function admForm(id){const b=$('#admBody'),x=id?admAll().find(y=>y.id===id):null,imp=!!(x&&x.imp);
+ const r=x?x.r:{marke:'',modell:'',gr:'',rahmen:'',typ:'Pedelec',farben:[{jahr:String(new Date().getFullYear()),farbe:'',status:'lager'}]};
+ const ov=(imp&&x.o.v)||{};ADM.edit={id,imp,r,ov:JSON.parse(JSON.stringify(ov))};
+ const fld=(n,l,v,t)=>'<label>'+l+'<input name="'+n+'" value="'+esc(v||'')+'"'+(t?' '+t:'')+(imp?' disabled':'')+'></label>';
+ b.innerHTML='<form class="admf" id="admF"><div class="admhd"><button type="button" class="bk" data-aback>← Zurück</button><h3>'+(x?(imp?'Rad aus Veloport anpassen':'Eigenes Rad bearbeiten'):'Neues Rad hinzufügen')+'</h3></div>'+
+  (imp?'<p class="admnote">Modell, Größe und Ausstattung kommen aus Veloport und werden beim nächsten Export aktualisiert. Hier änderst du Preis, Angebot, Verfügbarkeit und Foto.</p>':'')+
+  '<div class="g3"><label>Marke<input name="marke" list="admMkL" value="'+esc(r.marke||'')+'" required'+(imp?' disabled':'')+'></label>'+fld('modell','Modell',r.modell,'required')+fld('gr','Rahmenhöhe',r.gr,'placeholder="z. B. 47 cm"')+
+  '<label>Rahmenform<select name="rahmen"'+(imp?' disabled':'')+'><option value="">–</option>'+ADM_RF.map(f=>'<option'+(r.rahmen===f?' selected':'')+'>'+f+'</option>').join('')+'</select></label>'+fld('typ','Art',r.typ,'placeholder="Pedelec"')+
+  '<label class="ck"><input type="checkbox" name="gebraucht"'+(r.gebraucht?' checked':'')+(imp?' disabled':'')+'> Gebraucht</label><label class="ck"><input type="checkbox" name="vorfuehr"'+(r.vorfuehr?' checked':'')+(imp?' disabled':'')+'> Vorführrad</label></div>'+
+  '<datalist id="admMkL">'+ADM_MK.map(m=>'<option value="'+esc(m)+'">').join('')+'</datalist>'+
+  '<h4>Farben &amp; Ausführungen</h4><div id="admV">'+(r.farben||[]).map((f,i)=>admVar(f,i,imp)).join('')+'</div>'+
+  (imp?'':'<button type="button" class="ghost" id="admAddV">+ Weitere Farbe</button>')+
+  '<div class="admrow"><button class="cta" type="submit">Speichern</button>'+(imp&&Object.keys(ov).length?'<button type="button" class="ghost" id="admReset">Alle Änderungen zurücksetzen</button>':'')+'</div><p class="err" id="admE" role="alert"></p></form>'}
+function admVar(f,i,imp){const o=(imp&&ADM.edit&&ADM.edit.ov[f.id])||{},g=n=>o[n]!==undefined?o[n]:f[n];const im=g('bild');
+ const ro=n=>imp?' disabled':'';
+ return '<div class="admv'+(o.hidden?' off':'')+'" data-i="'+i+'"><div class="aph">'+(im?'<img src="'+esc(im)+'" alt="">':'<span>Kein Foto</span>')+'<label class="up">Foto wählen<input type="file" accept="image/*" data-up="'+i+'"></label>'+(im?'<button type="button" data-rmb="'+i+'">Foto entfernen</button>':'')+'</div>'+
+  '<div class="vf"><label>Modelljahr<input name="jahr" value="'+esc(f.jahr||'')+'"'+ro()+'></label><label>Farbe<input name="farbe" value="'+esc(f.farbe||'')+'"'+ro()+' required></label>'+
+  '<label>Preis (€)<input name="preis" inputmode="numeric" value="'+esc(g('preis')||'')+'"></label><label>Angebotspreis (€)<input name="angebot" inputmode="numeric" value="'+esc(g('angebot')||'')+'" placeholder="leer = kein Angebot"></label>'+
+  '<label>Verfügbarkeit<select name="status"><option value="lager"'+(g('status')!=='bestellt'?' selected':'')+'>Sofort verfügbar</option><option value="bestellt"'+(g('status')==='bestellt'?' selected':'')+'>Lieferung ausstehend</option></select></label><label>Voraussichtlich<input name="ab" value="'+esc(g('ab')||'')+'" placeholder="z. B. KW 48"></label>'+
+  (imp?'':'<label>Motor<input name="motor" value="'+esc(f.motor||'')+'"></label><label>Akku<input name="akku" value="'+esc(f.akku||'')+'" placeholder="625 Wh"></label><label>Schaltung<input name="schaltung" value="'+esc(f.schaltung||'')+'"></label>')+
+  '</div><div class="vb">'+(imp?'<label class="ck"><input type="checkbox" name="vhid"'+(o.hidden?' checked':'')+'> Diese Farbe ausblenden</label>':'<button type="button" class="del" data-rmv="'+i+'">Farbe entfernen</button>')+'</div></div>'}
+const admNum=v=>{v=String(v||'').replace(/[^\d,]/g,'').replace(',','.');const n=Math.round(parseFloat(v));return isFinite(n)&&n>0?n:null};
+function admRead(){const F=$('#admF'),E=ADM.edit,r=E.r;const vs=$$('.admv',F).map(el=>{const q=n=>{const i=$('[name='+n+']',el);return i?i.value.trim():''};const i=+el.dataset.i,f=r.farben[i]||{};
+  return {i,f,jahr:q('jahr'),farbe:q('farbe'),preis:admNum(q('preis')),angebot:admNum(q('angebot')),status:q('status'),ab:q('ab'),motor:q('motor'),akku:q('akku'),schaltung:q('schaltung'),hid:!!($('[name=vhid]',el)||{}).checked}});
+ return vs}
+async function admSave(){const E=ADM.edit,F=$('#admF'),err=$('#admE');err.textContent='';const vs=admRead();
+ if(vs.some(v=>v.angebot&&v.preis&&v.angebot>=v.preis)){err.textContent='Der Angebotspreis muss unter dem Preis liegen.';return}
+ try{if(E.imp){const ov={};vs.forEach(v=>{const f=v.f,o=Object.assign({},E.ov[f.id]||{});
+    const set=(n,val)=>{const base=f[n]===undefined?null:f[n];if((val||null)===(base||null))delete o[n];else o[n]=val===null||val===''?null:val};
+    set('preis',v.preis);set('angebot',v.angebot);set('status',v.status);set('ab',v.status==='bestellt'?v.ab:'');if(v.hid)o.hidden=true;else delete o.hidden;
+    if(o.bild===(f.bild||null)||o.bild===undefined)delete o.bild;
+    if(Object.keys(o).length)ov[f.id]=o});
+   const cur=ADM.rows[E.id]||{};await ADM.db.doc('lager/'+E.id).set({hidden:!!cur.hidden,key:E.id,v:ov,ts:Date.now()})}
+  else{const val=n=>{const i=$('[name='+n+']',F);return i.type==='checkbox'?i.checked:i.value.trim()};
+   const rad={marke:val('marke'),modell:val('modell'),gr:val('gr'),rahmen:val('rahmen'),typ:val('typ')||'Pedelec'};if(val('gebraucht'))rad.gebraucht=true;if(val('vorfuehr'))rad.vorfuehr=true;
+   if(!rad.marke||!rad.modell){err.textContent='Bitte Marke und Modell eintragen.';return}
+   const id=E.id||('neu-'+Date.now());
+   rad.farben=vs.map((v,k)=>{const f=E.r.farben[v.i]||{};const o={id:f.id||('e'+Date.now().toString(36)+k),jahr:v.jahr,farbe:v.farbe,status:v.status||'lager'};
+    ['preis','angebot','motor','akku','schaltung'].forEach(n=>{if(v[n])o[n]=v[n]});if(v.status==='bestellt'&&v.ab)o.ab=v.ab;if(f.bild)o.bild=f.bild;return o});
+   if(!rad.farben.length||rad.farben.some(f=>!f.farbe)){err.textContent='Jede Ausführung braucht eine Farbe.';return}
+   const cur=ADM.rows[id]||{};await ADM.db.doc('lager/'+id).set({rad,hidden:!!cur.hidden,ts:Date.now()})}
+  admToast('Gespeichert – gilt sofort auf der Seite.');ADM.tab='raeder';ADM.edit=null;admRender()}
+ catch(e){err.textContent='Speichern fehlgeschlagen'+(e&&e.code==='quota_exceeded'?' (Speicher voll)':'')+'. Bitte nochmal versuchen.'}}
+/* Foto: im Browser auf max. 1600 px verkleinern, als WebP hochladen */
+async function admPhoto(i,file){const E=ADM.edit;if(!ADM.assets){admToast('Foto-Upload ist hier nicht freigeschaltet.');return}
+ admToast('Foto wird hochgeladen …');
+ try{const bmp=await createImageBitmap(file);const sc=Math.min(1,1600/bmp.width);const c=document.createElement('canvas');c.width=Math.round(bmp.width*sc);c.height=Math.round(bmp.height*sc);c.getContext('2d').drawImage(bmp,0,0,c.width,c.height);
+  const blob=await new Promise(r=>c.toBlob(r,'image/webp',.88));const a=await ADM.assets.upload(blob||file);
+  admKeep();const f=E.r.farben[i];if(E.imp){E.ov[f.id]=Object.assign({},E.ov[f.id],{bild:a.url})}else{f.bild=a.url}
+  admRedrawVars();admToast('Foto übernommen – noch „Speichern“ drücken.')}catch(e){admToast('Foto konnte nicht hochgeladen werden.')}}
+/* Eingaben behalten, wenn die Farbliste neu gezeichnet wird */
+function admKeep(){const E=ADM.edit;admRead().forEach(v=>{const f=E.r.farben[v.i];if(!f)return;if(E.imp){const o=E.ov[f.id]=Object.assign({},E.ov[f.id]);['preis','angebot','status','ab'].forEach(n=>{o[n]=v[n]});if(v.hid)o.hidden=true;else delete o.hidden}
+ else Object.assign(f,{jahr:v.jahr,farbe:v.farbe,preis:v.preis,angebot:v.angebot,status:v.status,ab:v.ab,motor:v.motor,akku:v.akku,schaltung:v.schaltung})})}
+function admRedrawVars(){const E=ADM.edit;$('#admV').innerHTML=E.r.farben.map((f,i)=>admVar(f,i,E.imp)).join('')}
+let admT;function admToast(t){const el=$('#admToast');el.textContent=t;el.classList.add('on');clearTimeout(admT);admT=setTimeout(()=>el.classList.remove('on'),3200)}
+/* Ereignisse */
+$('#adm').addEventListener('click',async e=>{const t=e.target;
+ if(t.closest('[data-aclose]')){admClose();return}
+ if(t.closest('#admGo')){ADM.ok=true;$('#admTabs').hidden=false;admRender();return}
+ const tb=t.closest('#admTabs button');if(tb){ADM.tab=tb.dataset.t;ADM.edit=null;admRender();return}
+ if(t.closest('[data-aback]')){ADM.edit=null;ADM.tab='raeder';admRender();return}
+ const ed=t.closest('[data-ae]');if(ed){admForm(ed.dataset.ae);$('#admBody').scrollTop=0;return}
+ const hd=t.closest('[data-ah]');if(hd){const id=hd.dataset.ah,cur=ADM.rows[id];try{if(cur)await ADM.db.doc('lager/'+id).update({hidden:!cur.hidden});else await ADM.db.doc('lager/'+id).set({key:id,hidden:true,v:{},ts:Date.now()});admToast(cur&&cur.hidden?'Wieder sichtbar.':'Ausgeblendet – auf der Seite nicht mehr sichtbar.')}catch(_){admToast('Ging nicht – bitte nochmal.')}return}
+ const dl=t.closest('[data-ad]');if(dl){if(dl.dataset.sure!=='1'){dl.dataset.sure='1';dl.textContent='Wirklich löschen?';return}try{await ADM.db.doc('lager/'+dl.dataset.ad).delete();admToast('Gelöscht.')}catch(_){admToast('Ging nicht – bitte nochmal.')}return}
+ if(t.closest('#admAddV')){admKeep();const E=ADM.edit,l=E.r.farben[E.r.farben.length-1]||{};E.r.farben.push({jahr:l.jahr||'',farbe:'',status:'lager',preis:l.preis,motor:l.motor,akku:l.akku,schaltung:l.schaltung});admRedrawVars();return}
+ const rv=t.closest('[data-rmv]');if(rv){admKeep();const E=ADM.edit;if(E.r.farben.length<2){admToast('Mindestens eine Farbe muss bleiben.');return}E.r.farben.splice(+rv.dataset.rmv,1);admRedrawVars();return}
+ const rb=t.closest('[data-rmb]');if(rb){admKeep();const E=ADM.edit,f=E.r.farben[+rb.dataset.rmb];if(E.imp)E.ov[f.id]=Object.assign({},E.ov[f.id],{bild:null});else delete f.bild;admRedrawVars();return}
+ if(t.closest('#admReset')){{const b=t.closest('#admReset');if(b.dataset.sure!=='1'){b.dataset.sure='1';b.textContent='Wirklich zurücksetzen?';return}}const E=ADM.edit;try{await ADM.db.doc('lager/'+E.id).set({key:E.id,hidden:false,v:{},ts:Date.now()});admToast('Zurückgesetzt.');ADM.edit=null;admRender()}catch(_){}}});
+$('#adm').addEventListener('change',e=>{const u=e.target.closest('[data-up]');if(u&&u.files[0])admPhoto(+u.dataset.up,u.files[0])});
+$('#adm').addEventListener('input',e=>{if(e.target.id==='admQ'){ADM.q=e.target.value;const p=e.target.selectionStart;admRender();const q=$('#admQ');q.focus();q.setSelectionRange(p,p)}});
+$('#adm').addEventListener('submit',async e=>{e.preventDefault();if(e.target.id==='admF'){admSave();return}
+ if(e.target.id==='admSet'){const f=e.target,v={hinweis:f.hinweis.value.trim(),hinweisAus:f.hinweisAus.checked,stand:f.stand.value.trim(),dealsAus:f.dealsAus.checked,ts:Date.now()};
+  try{await ADM.db.doc('site/einstellungen').set(v);admToast('Gespeichert – gilt sofort.')}catch(_){admToast('Speichern fehlgeschlagen.')}}});
+addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('#adm').hidden)admClose()});
+(()=>{let n=0,t0=0;const c=$('.legalbar span');if(c)c.addEventListener('click',()=>{const t=Date.now();n=t-t0<600?n+1:1;t0=t;if(n>=5){n=0;admOpen()}})})();
+function admHash(){if(location.hash==='#admin')admOpen()}addEventListener('hashchange',admHash);admHash();
 go(true);
 })();
+
 </script>
