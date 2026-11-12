@@ -1944,7 +1944,7 @@ m696 -454 c28 -13 46 -31 55 -51 22 -53 -50 -177 -173 -300 -187 -186 -647
    <div class="find">
     <div class="fnd pre"><span class="k">✓</span><p><b>Online-Terminanfrage für Probefahrt und Werkstatt</b> mit Wunschtag (Mi/So gesperrt) und Tageszeit, geht per WhatsApp oder E-Mail direkt an uns.<small>Füllt die Werkstatt und bringt Probefahrten in den Laden.</small></p></div>
     <div class="fnd pre"><span class="k">✓</span><p><b>E-Bike-Finder</b>: 2 Fragen, dann passende Marken mit Bild und der Knopf zur Probefahrt.<small>Bringt Kunden mit klarem Wunsch in den Laden.</small></p></div>
-    <div class="fnd pre"><span class="k">✓</span><p><b>Live-Lagerbestand „Auf Lager“</b>: alle Räder aus dem Veloport-Export, gleiche Modelle zusammengefasst (Größen/Farben als Auswahl, keine Stückzahlen), Knopf „Sonderangebote“, „Lieferung ausstehend“ mit voraussichtlichem Termin, Detailansicht im Showroom-Stil und Anfrage (kaufen, reservieren, Probefahrt). Verkaufte und reservierte Räder, Einkaufspreise, Rahmennummern und interne Notizen kommen nie auf die Seite.<small>Kunden sehen vorher, was da ist, und kommen gezielt.</small></p></div>
+    <div class="fnd pre"><span class="k">✓</span><p><b>Live-Lagerbestand „Auf Lager“</b>: alle Räder aus dem Veloport-Export; exakt gleiche Räder erscheinen nur einmal (keine Stückzahlen), andere Größe/Rahmenform/Farbe als eigenes Rad mit Querverweis, Knopf „Sonderangebote“, „Lieferung ausstehend“ mit voraussichtlichem Termin, Detailansicht im Showroom-Stil und Anfrage (kaufen, reservieren, Probefahrt). Verkaufte und reservierte Räder, Einkaufspreise, Rahmennummern und interne Notizen kommen nie auf die Seite.<small>Kunden sehen vorher, was da ist, und kommen gezielt.</small></p></div>
     <div class="fnd pre"><span class="k">✓</span><p><b>Showroom</b> mit allen 7 Marken zum Durchblättern, freigestellte Herstellerbilder in hoher Auflösung.</p></div>
     <div class="fnd pre"><span class="k">✓</span><p><b>Live „Jetzt geöffnet“</b> und die heutige Öffnungszeit hervorgehoben.</p></div>
     <div class="fnd pre"><span class="k">✓</span><p><b>Aktionen sofort online</b>: Winter-Inspektion mit Tage-Zähler. Änderungen in Minuten, ohne Agentur.</p></div>
@@ -2189,17 +2189,15 @@ const FARB=[[/schwarz|black|anthrazit|graphit/i,'#23252B'],[/wei(ß|ss)|white|cr
 const lgFarbe=f=>{const x=FARB.find(([re])=>re.test(f||''));return x?x[1]:'#9AA0A8'};
 const eur=n=>n==null?'':n.toLocaleString('de-DE')+' €';
 const vP=v=>v.angebot||v.preis||0;
-function lgNorm(d){let M=d.modelle;
- if(!M&&d.raeder){const g={};d.raeder.forEach(r=>{const k=[r.marke,r.modell,r.jahr].join('|').toLowerCase();(g[k]=g[k]||Object.assign({},r,{varianten:[]})).varianten.push(Object.assign({},r,{status:r.status==='zulauf'?'bestellt':r.status}))});M=Object.values(g)}
- return (M||[]).map((m,i)=>{const v=m.varianten||[];const lager=v.some(x=>x.status!=='bestellt');const deals=v.filter(x=>x.angebot);const ps=v.map(vP).filter(Boolean);
-  const abs=v.filter(x=>x.status==='bestellt'&&x.ab).map(x=>x.ab).sort();
-  return Object.assign({},m,{_i:i,v,lager,deal:deals.length>0,minP:ps.length?Math.min(...ps):null,multiP:new Set(ps).size>1,ab:lager?'':(abs[0]||''),
-   grs:[...new Set(v.map(x=>x.gr).filter(Boolean))],fs:[...new Map(v.filter(x=>x.farbe).map(x=>[x.farbe.toLowerCase(),x.farbe])).values()]})})}
+function lgNorm(d){let R=d.raeder;
+ if(!R&&d.modelle){R=[];d.modelle.forEach(m=>(m.varianten||[]).forEach(v=>R.push(Object.assign({},m,v,{varianten:undefined}))))}
+ return (R||[]).map((r,i)=>{const v=[r];const lager=r.status!=='bestellt';const p=vP(r);
+  return Object.assign({},r,{_i:i,v,lager,deal:!!r.angebot,minP:p||null,multiP:false,ab:lager?'':(r.ab||''),grs:r.gr?[r.gr]:[],fs:r.farbe?[r.farbe]:[]})})}
 function lgLoad(){if(LG.load)return LG.load;LG.load=fetch('data/bestand.json',{cache:'no-store'}).then(r=>{if(!r.ok)throw 0;return r.json()}).then(d=>{LG.M=lgNorm(d);LG.ok=true;
  $('#lgStand').textContent='Stand '+(d.stand||'');$('#lgDemo').hidden=d.quelle!=='Beispieldaten';
  const nL=LG.M.filter(m=>m.lager).length,nB=LG.M.length-nL,nD=LG.M.filter(m=>m.deal).length,nMk=new Set(LG.M.map(lgMkName)).size;
- $('#lgNum').innerHTML='<span><b>'+nL+'</b> Modelle sofort verfügbar</span>'+(nB?'<span><b>'+nB+'</b> Modelle bestellt</span>':'')+'<span><b>'+nMk+'</b> Marken</span>';
- $('#lgDealsN').textContent=nD?nD+(nD===1?' Modell reduziert':' Modelle reduziert'):'Aktuell keine';$('#lgDeals').hidden=!nD;
+ $('#lgNum').innerHTML='<span><b>'+nL+'</b> Räder sofort verfügbar</span>'+(nB?'<span><b>'+nB+'</b> Lieferung ausstehend</span>':'')+'<span><b>'+nMk+'</b> Marken</span>';
+ $('#lgDealsN').textContent=nD?nD+(nD===1?' Rad reduziert':' Räder reduziert'):'Aktuell keine';$('#lgDeals').hidden=!nD;
  const q=$('#qkLager');if(q)q.textContent='Jetzt im Laden ansehen';
  lgChips()}).catch(()=>{$('#lgGrid').innerHTML='<p class="lgempty">Der Bestand konnte gerade nicht geladen werden. Rufen Sie uns gern an: 07271 78033.</p>'});return LG.load}
 function lgChips(){const mk=[...new Set(LG.M.map(lgMkName))].sort((a,b)=>a.localeCompare(b,'de'));
@@ -2226,7 +2224,8 @@ function lgRender(){if(!LG.ok)return;const L=LG.list=lgFilter();const g=$('#lgGr
 function lgOpen(){lgLoad().then(()=>{lgChips();lgRender()})}
 /* Detailansicht im Showroom-Stil */
 function lgInfo(){const m=LG.list[LG.i],v=m.v[LG.vi]||m.v[0];const row=(l,x,h)=>x?'<div><dt>'+l+'</dt><dd>'+(h||esc(x))+'</dd></div>':'';
- const varis=m.v.length>1?'<div class="lgvar"><span class="flab">Verfügbare Ausführungen</span><div class="vs">'+m.v.map((x,j)=>'<button type="button" data-vi="'+j+'" class="'+(j===LG.vi?'on':'')+'">'+(x.farbe?'<i style="background:'+lgFarbe(x.farbe)+'"></i>':'')+'<span>'+esc([x.gr,x.farbe].filter(Boolean).join(' · ')||'Ausführung '+(j+1))+'</span><small class="'+(x.status==='bestellt'?'z':'ok')+'">'+(x.status==='bestellt'?'Lieferung ausstehend':'verfügbar')+'</small></button>').join('')+'</div></div>':'';
+ const sis=LG.list.map((x,j)=>[x,j]).filter(([x,j])=>j!==LG.i&&x.marke===m.marke&&x.modell===m.modell);
+ const varis=sis.length?'<div class="lgvar"><span class="flab">Dieses Modell auch in</span><div class="vs">'+sis.map(([x,j])=>'<button type="button" data-goto="'+j+'">'+(x.farbe?'<i style="background:'+lgFarbe(x.farbe)+'"></i>':'')+'<span>'+esc([x.gr,x.rahmen!==m.rahmen?x.rahmen:'',x.farbe].filter(Boolean).join(' · '))+'</span><small class="'+(x.lager?'ok':'z')+'">'+(x.lager?'verfügbar':'Lieferung ausstehend')+'</small></button>').join('')+'</div></div>':'';
  $('#lgmInfo').innerHTML='<p class="eyebrow">'+esc(m.marke)+(m.jahr?' · <b>Modelljahr '+esc(m.jahr)+'</b>':'')+'</p><h2 id="lgmT">'+esc(m.modell)+'</h2><div class="bds">'+lgStat(v.status!=='bestellt',v.ab)+(v.angebot?'<span class="bd an">Sonderangebot</span>':'')+(v.vorfuehr?'<span class="bd vf">Vorführrad</span>':'')+(v.gebraucht?'<span class="bd gb">Gebraucht</span>':'')+'</div>'+
   '<div class="lgm-price">'+(v.preis?'<span class="lgpr">'+(v.angebot?'<s>'+eur(v.preis)+'</s><b class="an">'+eur(v.angebot)+'</b>':'<b>'+eur(v.preis)+'</b>')+'</span>':'<span class="lgpr"><b>Preis auf Anfrage</b></span>')+(v.angebot?'<span class="sv">Sie sparen '+eur(v.preis-v.angebot)+'</span>':'')+'</div>'+varis+
   '<dl class="lgm-spec">'+row('Rahmenhöhe',v.gr)+row('Farbe',v.farbe,'<i style="background:'+lgFarbe(v.farbe)+'"></i>'+esc(v.farbe||''))+row('Rahmenform',m.rahmen)+row('Motor',m.motor)+row('Akku',m.akku)+row('Schaltung',m.schaltung)+row('Verfügbarkeit',1,v.status==='bestellt'?'Lieferung ausstehend'+(v.ab?', voraussichtlich '+esc(v.ab):''):'Sofort, steht bei uns in Wörth')+'</dl>'+
@@ -2251,7 +2250,7 @@ $('#lgQ').addEventListener('input',e=>{LG.f.q=e.target.value;lgRender()});
 $('#lgNur').addEventListener('change',e=>{LG.f.nur=e.target.checked;lgRender()});
 $('#lgSort').addEventListener('change',e=>{LG.f.sort=e.target.value;lgRender()});
 $('#lgm').addEventListener('click',e=>{if(e.target.closest('[data-close]')){lgClose();return}
- const vb=e.target.closest('[data-vi]');if(vb){LG.vi=+vb.dataset.vi;lgInfo();return}
+ const g=e.target.closest('[data-goto]');if(g){lgShow(+g.dataset.goto,1);return}
  const a=e.target.closest('[data-ask]');if(a){const f=$('#lgmF');f.hidden=false;$$('#lgW button').forEach(x=>x.classList.toggle('on',x.dataset.v===a.dataset.ask));$('.lgm-act').hidden=true;f.scrollIntoView({behavior:'smooth',block:'nearest'});$('#lgN').focus();return}
  const w=e.target.closest('#lgW button');if(w){$$('#lgW button').forEach(x=>x.classList.toggle('on',x===w))}});
 $('#lgmP').addEventListener('click',()=>lgShow(LG.i-1,-1));$('#lgmN').addEventListener('click',()=>lgShow(LG.i+1,1));

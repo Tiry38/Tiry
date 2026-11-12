@@ -1,178 +1,160 @@
 {
  "stand": "12.11.2026",
  "quelle": "Beispieldaten",
- "modelle": [
+ "raeder": [
+  {
+   "marke": "Gudereit",
+   "modell": "EC-35 Evo",
+   "jahr": "2026",
+   "gr": "Einheitsgröße",
+   "farbe": "Rot",
+   "rahmen": "Tiefeinsteiger",
+   "status": "lager",
+   "preis": 3799,
+   "id": "B-601"
+  },
   {
    "marke": "i:SY",
    "modell": "E5 ZR F CX Century",
    "jahr": "2026",
+   "gr": "47 cm",
+   "farbe": "Racing Green",
    "rahmen": "Tiefeinsteiger",
    "motor": "Bosch Performance CX",
    "akku": "545 Wh",
    "schaltung": "Shimano Nexus 5-Gang",
-   "varianten": [
-    {
-     "gr": "47 cm",
-     "farbe": "Racing Green",
-     "status": "lager",
-     "preis": 4999,
-     "angebot": 3999,
-     "id": "B-101"
-    },
-    {
-     "gr": "47 cm",
-     "farbe": "Riviera Blue",
-     "status": "bestellt",
-     "ab": "KW 49",
-     "preis": 4999,
-     "id": "B-103"
-    }
-   ]
+   "status": "lager",
+   "preis": 4999,
+   "angebot": 3999,
+   "id": "B-101"
   },
   {
    "marke": "i:SY",
    "modell": "E5 ZR F Touring",
    "jahr": "2026",
+   "gr": "47 cm",
+   "farbe": "Olive",
    "rahmen": "Tiefeinsteiger",
    "motor": "Bosch Performance",
    "akku": "545 Wh",
-   "varianten": [
-    {
-     "gr": "47 cm",
-     "farbe": "Olive",
-     "status": "lager",
-     "preis": 4599,
-     "id": "B-102"
-    }
-   ]
+   "status": "lager",
+   "preis": 4599,
+   "id": "B-102"
   },
   {
    "marke": "KTM",
    "modell": "Macina Style 830 Di2",
    "jahr": "2026",
+   "gr": "46 cm",
+   "farbe": "Grün",
    "rahmen": "Tiefeinsteiger",
    "motor": "Bosch Performance CX",
    "akku": "800 Wh",
    "schaltung": "Shimano Di2",
-   "varianten": [
-    {
-     "gr": "46 cm",
-     "farbe": "Grün",
-     "status": "lager",
-     "preis": 5499,
-     "id": "B-201"
-    },
-    {
-     "gr": "51 cm",
-     "farbe": "Grün",
-     "status": "bestellt",
-     "ab": "KW 50",
-     "preis": 5499,
-     "id": "B-203"
-    }
-   ]
+   "status": "lager",
+   "preis": 5499,
+   "id": "B-201"
   },
   {
    "marke": "KTM",
    "modell": "Macina Tour P720",
    "jahr": "2026",
+   "gr": "51 cm",
+   "farbe": "Schwarz",
    "rahmen": "Tiefeinsteiger",
    "akku": "720 Wh",
-   "varianten": [
-    {
-     "gr": "51 cm",
-     "farbe": "Schwarz",
-     "status": "lager",
-     "preis": 4299,
-     "id": "B-202"
-    }
-   ]
+   "status": "lager",
+   "preis": 4299,
+   "id": "B-202"
   },
   {
    "marke": "QiO",
    "modell": "Compact P5",
    "jahr": "2026",
+   "gr": "Einheitsgröße",
+   "farbe": "Grau",
    "rahmen": "Tiefeinsteiger",
-   "varianten": [
-    {
-     "gr": "Einheitsgröße",
-     "farbe": "Grau",
-     "status": "lager",
-     "preis": 3999,
-     "id": "B-301"
-    }
-   ]
-  },
-  {
-   "marke": "Velo de Ville",
-   "modell": "SEB Pro Wave",
-   "jahr": "2027",
-   "rahmen": "Tiefeinsteiger",
-   "motor": "Bosch Performance CX",
-   "varianten": [
-    {
-     "gr": "50 cm",
-     "farbe": "Rosé",
-     "status": "lager",
-     "preis": 5899,
-     "id": "B-401"
-    }
-   ]
+   "status": "lager",
+   "preis": 3999,
+   "id": "B-301"
   },
   {
    "marke": "Van Raam",
    "modell": "Easy Rider",
    "jahr": "2026",
+   "gr": "Einheitsgröße",
+   "farbe": "Hellblau",
    "rahmen": "Tiefeinsteiger",
-   "varianten": [
-    {
-     "gr": "Einheitsgröße",
-     "farbe": "Hellblau",
-     "status": "lager",
-     "preis": 6990,
-     "vorfuehr": true,
-     "id": "B-501"
-    }
-   ]
+   "status": "lager",
+   "preis": 6990,
+   "vorfuehr": true,
+   "id": "B-501"
   },
   {
-   "marke": "Gudereit",
-   "modell": "EC-35 Evo",
-   "jahr": "2026",
+   "marke": "Velo de Ville",
+   "modell": "SEB Pro Wave",
+   "jahr": "2027",
+   "gr": "50 cm",
+   "farbe": "Rosé",
    "rahmen": "Tiefeinsteiger",
-   "varianten": [
-    {
-     "gr": "Einheitsgröße",
-     "farbe": "Rot",
-     "status": "lager",
-     "preis": 3799,
-     "id": "B-601"
-    }
-   ]
+   "motor": "Bosch Performance CX",
+   "status": "lager",
+   "preis": 5899,
+   "id": "B-401"
   },
   {
    "marke": "Victoria",
    "modell": "eManufaktur 11.9 Wave",
    "jahr": "2026",
+   "gr": "46 cm",
+   "farbe": "Türkis",
    "rahmen": "Tiefeinsteiger",
-   "varianten": [
-    {
-     "gr": "46 cm",
-     "farbe": "Türkis",
-     "status": "lager",
-     "preis": 4499,
-     "angebot": 3999,
-     "id": "B-701"
-    },
-    {
-     "gr": "51 cm",
-     "farbe": "Türkis",
-     "status": "bestellt",
-     "ab": "KW 2/27",
-     "preis": 4499,
-     "id": "B-702"
-    }
-   ]
+   "status": "lager",
+   "preis": 4499,
+   "angebot": 3999,
+   "id": "B-701"
+  },
+  {
+   "marke": "i:SY",
+   "modell": "E5 ZR F CX Century",
+   "jahr": "2026",
+   "gr": "47 cm",
+   "farbe": "Riviera Blue",
+   "rahmen": "Tiefeinsteiger",
+   "motor": "Bosch Performance CX",
+   "akku": "545 Wh",
+   "schaltung": "Shimano Nexus 5-Gang",
+   "status": "bestellt",
+   "ab": "KW 49",
+   "preis": 4999,
+   "id": "B-103"
+  },
+  {
+   "marke": "KTM",
+   "modell": "Macina Style 830 Di2",
+   "jahr": "2026",
+   "gr": "51 cm",
+   "farbe": "Grün",
+   "rahmen": "Tiefeinsteiger",
+   "motor": "Bosch Performance CX",
+   "akku": "800 Wh",
+   "schaltung": "Shimano Di2",
+   "status": "bestellt",
+   "ab": "KW 50",
+   "preis": 5499,
+   "id": "B-203"
+  },
+  {
+   "marke": "Victoria",
+   "modell": "eManufaktur 11.9 Wave",
+   "jahr": "2026",
+   "gr": "51 cm",
+   "farbe": "Türkis",
+   "rahmen": "Tiefeinsteiger",
+   "status": "bestellt",
+   "ab": "KW 2/27",
+   "preis": 4499,
+   "id": "B-702"
   }
  ]
 }
