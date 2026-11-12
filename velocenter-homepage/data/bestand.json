@@ -147,7 +147,8 @@
      "status": "lager",
      "preis": 3999,
      "angebot": 3499,
-     "id": "5085"
+     "id": "5085",
+     "bild": "img/bestand/b2-isy-1.webp"
     }
    ]
   },
@@ -474,7 +475,8 @@
      "status": "lager",
      "preis": 4599,
      "angebot": 3899,
-     "id": "5028"
+     "id": "5028",
+     "bild": "img/bestand/b2-isy-0.webp"
     }
    ]
   },
@@ -658,7 +660,8 @@
      "status": "lager",
      "res": true,
      "preis": 6199,
-     "id": "6951"
+     "id": "6951",
+     "bild": "img/bestand/b2-isy-10.webp"
     }
    ]
   },
@@ -844,7 +847,8 @@
      "status": "lager",
      "preis": 4399,
      "angebot": 3799,
-     "id": "5530"
+     "id": "5530",
+     "bild": "img/bestand/b2-ktm-5.webp"
     }
    ]
   },
@@ -907,7 +911,8 @@
      "status": "lager",
      "preis": 4099,
      "angebot": 3599,
-     "id": "5522"
+     "id": "5522",
+     "bild": "img/bestand/b2-ktm-4.webp"
     }
    ]
   },
@@ -930,7 +935,8 @@
      "status": "lager",
      "preis": 3799,
      "angebot": 2799,
-     "id": "4490"
+     "id": "4490",
+     "bild": "img/bestand/b2-ktm-0.webp"
     }
    ]
   },
@@ -1048,7 +1054,8 @@
      "gewicht": "28,9 kg",
      "status": "lager",
      "preis": 3799,
-     "id": "6637"
+     "id": "6637",
+     "bild": "img/bestand/b2-ktm-11.webp"
     }
    ]
   },
@@ -1071,7 +1078,8 @@
      "gewicht": "28,9 kg",
      "status": "lager",
      "preis": 3799,
-     "id": "6633"
+     "id": "6633",
+     "bild": "img/bestand/b2-ktm-11.webp"
     }
    ]
   },
@@ -1144,7 +1152,8 @@
      "status": "lager",
      "preis": 4299,
      "angebot": 3499,
-     "id": "6731"
+     "id": "6731",
+     "bild": "img/bestand/b2-ktm-13.webp"
     }
    ]
   },
@@ -1191,7 +1200,8 @@
      "zgg": "147,0 kg",
      "status": "lager",
      "preis": 4199,
-     "id": "6439"
+     "id": "6439",
+     "bild": "img/bestand/b2-ktm-10.webp"
     }
    ]
   },
@@ -1213,7 +1223,8 @@
      "gewicht": "28,7 kg",
      "status": "lager",
      "preis": 3999,
-     "id": "6671"
+     "id": "6671",
+     "bild": "img/bestand/b2-ktm-12.webp"
     }
    ]
   },
@@ -1235,7 +1246,8 @@
      "status": "lager",
      "preis": 4799,
      "angebot": 3999,
-     "id": "5597"
+     "id": "5597",
+     "bild": "img/bestand/b2-ktm-7.webp"
     }
    ]
   },
@@ -1258,7 +1270,8 @@
      "status": "lager",
      "preis": 4799,
      "angebot": 3999,
-     "id": "4847"
+     "id": "4847",
+     "bild": "img/bestand/b2-ktm-2.webp"
     }
    ]
   },
@@ -1280,7 +1293,8 @@
      "status": "lager",
      "preis": 3799,
      "angebot": 2999,
-     "id": "5613"
+     "id": "5613",
+     "bild": "img/bestand/b2-ktm-8.webp"
     }
    ]
   },
@@ -1329,7 +1343,8 @@
      "status": "lager",
      "preis": 3999,
      "angebot": 3499,
-     "id": "5833"
+     "id": "5833",
+     "bild": "img/bestand/b2-ktm-9.webp"
     }
    ]
   },
@@ -1376,7 +1391,8 @@
      "status": "lager",
      "preis": 4799,
      "angebot": 3899,
-     "id": "5575"
+     "id": "5575",
+     "bild": "img/bestand/b2-ktm-6.webp"
     },
     {
      "jahr": "2022",
@@ -1390,7 +1406,8 @@
      "status": "lager",
      "preis": 4599,
      "angebot": 3799,
-     "id": "5474"
+     "id": "5474",
+     "bild": "img/bestand/b2-ktm-3.webp"
     }
    ]
   },
@@ -1413,7 +1430,8 @@
      "status": "lager",
      "preis": 4599,
      "angebot": 3899,
-     "id": "5236"
+     "id": "5236",
+     "bild": "img/bestand/b2-ktm-3.webp"
     }
    ]
   },
@@ -1751,7 +1769,8 @@
      "status": "lager",
      "preis": 2999,
      "angebot": 2699,
-     "id": "6441"
+     "id": "6441",
+     "bild": "img/bestand/b2-qio-6.webp"
     }
    ]
   },
@@ -1775,7 +1794,8 @@
      "status": "lager",
      "preis": 3799,
      "angebot": 3299,
-     "id": "6058"
+     "id": "6058",
+     "bild": "img/bestand/b2-qio-0.webp"
     }
    ]
   },
@@ -1799,7 +1819,8 @@
      "status": "lager",
      "preis": 3799,
      "angebot": 3299,
-     "id": "6089"
+     "id": "6089",
+     "bild": "img/bestand/b2-qio-3.webp"
     },
     {
      "jahr": "2024",
@@ -1813,7 +1834,8 @@
      "status": "lager",
      "preis": 3799,
      "angebot": 3299,
-     "id": "6060"
+     "id": "6060",
+     "bild": "img/bestand/b2-qio-1.webp"
     }
    ]
   },
@@ -1988,7 +2010,8 @@
      "status": "lager",
      "preis": 4499,
      "angebot": 3999,
-     "id": "6308"
+     "id": "6308",
+     "bild": "img/bestand/b2-qio-4.webp"
     },
     {
      "jahr": "2025",
@@ -2001,7 +2024,8 @@
      "status": "lager",
      "preis": 4599,
      "angebot": 4099,
-     "id": "6310"
+     "id": "6310",
+     "bild": "img/bestand/b2-qio-5.webp"
     },
     {
      "jahr": "2024",
@@ -2016,7 +2040,8 @@
      "status": "lager",
      "preis": 4499,
      "angebot": 3999,
-     "id": "6071"
+     "id": "6071",
+     "bild": "img/bestand/b2-qio-2.webp"
     }
    ]
   },
@@ -2190,7 +2215,8 @@
      "status": "lager",
      "res": true,
      "preis": 749,
-     "id": "6586"
+     "id": "6586",
+     "bild": "img/bestand/b2-rest-12.webp"
     }
    ]
   },
@@ -2208,7 +2234,8 @@
      "status": "lager",
      "res": true,
      "preis": 599,
-     "id": "3165"
+     "id": "3165",
+     "bild": "img/bestand/b2-rest-11.webp"
     }
    ]
   },
@@ -2267,7 +2294,8 @@
      "schaltung": "8-Gang Leerlauf",
      "status": "lager",
      "preis": 8875,
-     "id": "6740"
+     "id": "6740",
+     "bild": "img/bestand/b2-rest-8.webp"
     }
    ]
   },
@@ -2894,7 +2922,8 @@
      "zgg": "140,0 kg",
      "status": "lager",
      "preis": 4299,
-     "id": "6955"
+     "id": "6955",
+     "bild": "img/bestand/b2-rest-1.webp"
     }
    ]
   },
@@ -3155,7 +3184,8 @@
      "res": true,
      "ab": "KW 3/27",
      "preis": 4199,
-     "id": "6898"
+     "id": "6898",
+     "bild": "img/bestand/b2-ktm-15.webp"
     }
    ]
   },
@@ -3178,7 +3208,8 @@
      "res": true,
      "ab": "KW 3/27",
      "preis": 4199,
-     "id": "6897"
+     "id": "6897",
+     "bild": "img/bestand/b2-ktm-15.webp"
     }
    ]
   },
@@ -3203,7 +3234,8 @@
      "res": true,
      "ab": "KW 6/27",
      "preis": 3999,
-     "id": "6949"
+     "id": "6949",
+     "bild": "img/bestand/b2-ktm-16.webp"
     }
    ]
   },
@@ -3305,7 +3337,8 @@
      "res": true,
      "ab": "KW 50",
      "preis": 4699,
-     "id": "6952"
+     "id": "6952",
+     "bild": "img/bestand/b2-ktm-17.webp"
     }
    ]
   },
@@ -3330,7 +3363,8 @@
      "res": true,
      "ab": "KW 47",
      "preis": 3999,
-     "id": "6852"
+     "id": "6852",
+     "bild": "img/bestand/b2-ktm-14.webp"
     }
    ]
   },
@@ -3862,7 +3896,8 @@
      "status": "bestellt",
      "ab": "KW 9/27",
      "preis": 3999,
-     "id": "6954"
+     "id": "6954",
+     "bild": "img/bestand/b2-rest-0.webp"
     }
    ]
   },
@@ -3887,7 +3922,8 @@
      "status": "bestellt",
      "ab": "KW 53",
      "preis": 4499,
-     "id": "6956"
+     "id": "6956",
+     "bild": "img/bestand/b2-rest-2.webp"
     }
    ]
   },
@@ -3909,7 +3945,8 @@
      "status": "bestellt",
      "ab": "KW 9/27",
      "preis": 1999,
-     "id": "6960"
+     "id": "6960",
+     "bild": "img/bestand/b2-rest-5.webp"
     },
     {
      "jahr": "2027",
@@ -3922,7 +3959,8 @@
      "status": "bestellt",
      "ab": "KW 9/27",
      "preis": 1999,
-     "id": "6957"
+     "id": "6957",
+     "bild": "img/bestand/b2-rest-3.webp"
     },
     {
      "jahr": "2027",
@@ -3935,7 +3973,8 @@
      "status": "bestellt",
      "ab": "KW 9/27",
      "preis": 1999,
-     "id": "6959"
+     "id": "6959",
+     "bild": "img/bestand/b2-rest-4.webp"
     }
    ]
   },
@@ -3957,7 +3996,8 @@
      "status": "bestellt",
      "ab": "KW 9/27",
      "preis": 1999,
-     "id": "6961"
+     "id": "6961",
+     "bild": "img/bestand/b2-rest-5.webp"
     },
     {
      "jahr": "2027",
@@ -3970,7 +4010,8 @@
      "status": "bestellt",
      "ab": "KW 9/27",
      "preis": 1999,
-     "id": "6958"
+     "id": "6958",
+     "bild": "img/bestand/b2-rest-3.webp"
     }
    ]
   }

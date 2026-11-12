@@ -1204,6 +1204,8 @@ body.sc .hdr{backdrop-filter:none!important;-webkit-backdrop-filter:none!importa
 .lgbar.mini.open{flex-wrap:wrap}
 .lgbar.mini.open .lgrow2{display:flex;flex:1 0 100%}
 @media (max-width:760px){.lgbar.mini{flex-wrap:wrap;gap:8px}.lgbar.mini .lgq{flex:1 1 0;min-width:0}.lgbar.mini .lgfbtn{padding:0 12px}.lgbar.mini #lgMk{order:3;flex:1 0 100%}.lgbar.mini.open .lgrow2{order:4}}
+/* Detailfenster: feste Höhe, Rad bleibt oben im Bild, rechte Seite scrollt */
+@media (min-width:981px){.lgm-p{height:min(760px,100%);grid-template-rows:minmax(0,1fr)}.lgm-stage{min-height:0}.lgm-info{min-height:0;overscroll-behavior:contain}}
 /* ===== Admin-Bereich ===== */
 .adm{position:fixed;inset:0;z-index:300;display:grid;place-items:center;padding:clamp(0px,3vw,32px);opacity:0;transition:opacity .3s}
 .adm.on{opacity:1}
@@ -2131,7 +2133,7 @@ m696 -454 c28 -13 46 -31 55 -51 22 -53 -50 -177 -173 -300 -187 -186 -647
    <div class="fl"></div>
    <img class="rf" id="lgmRf" alt="" aria-hidden="true">
    <img class="bk" id="lgmBk" alt="">
-   <span class="abb">Abbildung ähnlich</span>
+
    <button class="lgm-nav p" id="lgmP" aria-label="Vorheriges Rad"><svg><use href="#i-arrow"/></svg></button>
    <button class="lgm-nav n" id="lgmN" aria-label="Nächstes Rad"><svg><use href="#i-arrow"/></svg></button>
   </div>
