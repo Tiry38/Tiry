@@ -827,7 +827,7 @@ body.sc .hdr::after{background:linear-gradient(90deg,transparent,#B87333 20%,#F0
 .hvis{position:relative;aspect-ratio:1/.86}
 .hring{position:absolute;inset:4% 6% 10%;border-radius:50%;background:radial-gradient(closest-side,rgba(255,250,242,.85),rgba(240,200,160,.35) 62%,transparent 74%);box-shadow:inset 0 0 0 1px rgba(184,115,51,.45)}
 .hring::after{content:"";position:absolute;inset:-1px;border-radius:50%;padding:2px;background:conic-gradient(from 0deg,transparent 0 62%,#B87333 74%,#F0C8A0 80%,#B87333 86%,transparent 96%);-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;animation:spin 9s linear infinite}
-.hlg{position:absolute;left:50%;top:30%;transform:translate(-50%,-50%);width:70%;max-height:30%;object-fit:contain;opacity:.16;mix-blend-mode:multiply;transition:opacity .35s,transform .6s var(--ease)}
+.hlg{position:absolute;left:50%;top:30%;transform:translate(-50%,-50%);width:70%;max-height:30%;object-fit:contain;opacity:.3;mix-blend-mode:multiply;transition:opacity .35s,transform .6s var(--ease)}
 .hlg.swap{opacity:0;transform:translate(-46%,-50%)}
 .hb{position:absolute;left:50%;top:54%;width:94%;height:auto;max-height:76%;object-fit:contain;transform:translate(-50%,-50%);filter:drop-shadow(0 26px 24px rgba(27,30,37,.25));transition:opacity .9s,transform 1.1s var(--ease)}
 .hb.off{opacity:0;transform:translate(-36%,-50%)}
@@ -2875,13 +2875,13 @@ const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',
 
 /* ---------- Marken ---------- */
 const BR=[
- {k:'isy',n:'i:SY',m:'i:SY E5 ZR F CX Century',img:'img/p-isy.webp',logo:'img/marke-isy.svg',o:.3,c:'#FF7A1A',t:'Das 20-Zoll-Kompaktrad. Seit über 10 Jahren sind wir i:SY Experte und haben ständig über 100 i:SY vorrätig.',a:[['Mehr zu i:SY','#isy']]},
- {k:'ktm',n:'KTM',m:'KTM Macina Style 830',img:'img/p-ktm.webp',logo:'img/marke-ktm.svg',o:.13,c:'#FF6A00',t:'Traditionsmarke mit großer E-Bike-Auswahl, vom bequemen Tiefeinsteiger bis zum Trekking-Rad.',a:[['ktm-bikes.at','https://www.ktm-bikes.at/']]},
- {k:'qio',n:'QiO',m:'QiO EINS P-E Fine Line',img:'img/p-qio-eins-fineline.webp',logo:'img/marke-qio.svg',o:.12,c:'#38BDF8',t:'Innovatives Kompaktrad-Konzept. Am besten selbst erleben: Probefahrt bei uns im Laden.',a:[['qio-bikes.com','https://www.qio-bikes.com/']]},
- {k:'vdv',n:'Velo de Ville',m:'Velo de Ville AEB PRO',img:'img/p-vdv-aebpro.webp',logo:'img/marke-vdv.svg',o:.16,c:'#F97316',t:'Rad nach Wunsch: Rahmen, Farbe und Ausstattung stellst du selbst zusammen.',a:[['Zum Konfigurator','https://konfigurator.velo-de-ville.com/de?h_ident=28181&direct=true']]},
- {k:'vanraam',n:'Van Raam',m:'Van Raam Easy Rider',img:'img/p-vanraam.webp',logo:'img/marke-vanraam.svg',o:.26,c:'#A855F7',t:'E-Dreiräder vom Weltmarktführer aus Holland. Bei uns: der Easy Rider.',a:[['Mehr zu E-Dreirädern','#dreirad']]},
- {k:'gudereit',n:'Gudereit',m:'Gudereit EC-35 Evo',img:'img/p-gudereit.webp',logo:'img/marke-gudereit.svg',o:.22,c:'#E2232D',t:'Bei uns das EC-35 Evo von Gudereit.',a:[['gudereit.de','https://www.gudereit.de/']]},
- {k:'victoria',n:'Victoria',m:'Victoria Veloa 7',img:'img/p-victoria-veloa7.webp',logo:'img/marke-victoria.svg',o:.24,c:'#22D3EE',t:'Traditionsmarke mit alltagstauglichen E-Bikes.',a:[['victoria-bikes.com','https://www.victoria-bikes.com/']]}
+ {k:'isy',n:'i:SY',m:'i:SY E5 ZR F CX Century',img:'img/p-isy.webp',logo:'img/marke-isy.svg',o:.5,c:'#FF7A1A',t:'Das 20-Zoll-Kompaktrad. Seit über 10 Jahren sind wir i:SY Experte und haben ständig über 100 i:SY vorrätig.',a:[['Mehr zu i:SY','#isy']]},
+ {k:'ktm',n:'KTM',m:'KTM Macina Style 830',img:'img/p-ktm.webp',logo:'img/marke-ktm.svg',o:.23,c:'#FF6A00',t:'Traditionsmarke mit großer E-Bike-Auswahl, vom bequemen Tiefeinsteiger bis zum Trekking-Rad.',a:[['ktm-bikes.at','https://www.ktm-bikes.at/']]},
+ {k:'qio',n:'QiO',m:'QiO EINS P-E Fine Line',img:'img/p-qio-eins-fineline.webp',logo:'img/marke-qio.svg',o:.22,c:'#38BDF8',t:'Innovatives Kompaktrad-Konzept. Am besten selbst erleben: Probefahrt bei uns im Laden.',a:[['qio-bikes.com','https://www.qio-bikes.com/']]},
+ {k:'vdv',n:'Velo de Ville',m:'Velo de Ville AEB PRO',img:'img/p-vdv-aebpro.webp',logo:'img/marke-vdv.svg',o:.29,c:'#F97316',t:'Rad nach Wunsch: Rahmen, Farbe und Ausstattung stellst du selbst zusammen.',a:[['Zum Konfigurator','https://konfigurator.velo-de-ville.com/de?h_ident=28181&direct=true']]},
+ {k:'vanraam',n:'Van Raam',m:'Van Raam Easy Rider',img:'img/p-vanraam.webp',logo:'img/marke-vanraam.svg',o:.47,c:'#A855F7',t:'E-Dreiräder vom Weltmarktführer aus Holland. Bei uns: der Easy Rider.',a:[['Mehr zu E-Dreirädern','#dreirad']]},
+ {k:'gudereit',n:'Gudereit',m:'Gudereit EC-35 Evo',img:'img/p-gudereit.webp',logo:'img/marke-gudereit.svg',o:.4,c:'#E2232D',t:'Bei uns das EC-35 Evo von Gudereit.',a:[['gudereit.de','https://www.gudereit.de/']]},
+ {k:'victoria',n:'Victoria',m:'Victoria Veloa 7',img:'img/p-victoria-veloa7.webp',logo:'img/marke-victoria.svg',o:.43,c:'#22D3EE',t:'Traditionsmarke mit alltagstauglichen E-Bikes.',a:[['victoria-bikes.com','https://www.victoria-bikes.com/']]}
 ];
 const ACC=[['Bosch','bosch.svg'],['Shimano','shimano.webp'],['Schwalbe','schwalbe.webp'],['Ortlieb','ortlieb.webp'],['ABUS','abus.webp'],['Topeak','topeak.webp'],['KLICKfix','klickfix.webp'],['Haberland','haberland.webp'],['Ergon','ergon.webp'],['by.schulz','byschulz.webp'],['Contec','contec.webp']];
 $('#acc').innerHTML=ACC.map(([n,f])=>'<span><img src="img/zub-'+f+'" alt="'+esc(n)+'" loading="lazy"></span>').join('');
