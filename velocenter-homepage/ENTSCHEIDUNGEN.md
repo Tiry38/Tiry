@@ -14,3 +14,4 @@
 
 - Terminformular „Worum geht es?“: Probefahrt, Inspektion, Reparatur, Verfügbarkeit (kein Zubehör, kein Reifen/Schlauch, keine Bosch-Diagnose); „Um welchen Artikel?“ (statt „Rad“): Fahrrad, E-Bike, E-Dreirad, Zubehör (kein Lastenrad) (12.11.2026).
 - Kein Hinweis auf ein nächstes i:SY-Treffen (es gibt keins mehr, 12.11.2026).
+- Showroom: Van Raam (jeder 5. Wechsel), Velo de Ville AEB PRO (ca. jeder 7.), Victoria Veloa 7 (ca. jeder 9.) mit festem Bild; alle anderen Wechsel zufällig aus dem Bestand (nur Räder mit Foto, wechselnde Farben, Bilder in img/show/ freigestellt + geschärft) (12.11.2026).

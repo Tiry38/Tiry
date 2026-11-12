@@ -2906,20 +2906,48 @@ $('#acc').innerHTML=ACC.map(([n,f])=>'<span><img src="img/zub-'+f+'" alt="'+esc(
 $$('.band .tk').forEach(t=>{const items=t.dataset.t.split('|').map(x=>'<span>'+esc(x)+'<em>✦</em></span>').join('');t.innerHTML=items+items+items+items});
 
 /* ---------- Showroom (Start + Marken) ---------- */
+/* Showroom-Pool: zufällige Räder aus dem Bestand (nur mit Foto, freigestellt + geschärft in img/show/), jeder 5. Wechsel = Van Raam Dreirad */
+const SHOWOK=new Set(["b2-isy-0.webp","b2-isy-1.webp","b2-isy-10.webp","b2-ktm-0.webp","b2-ktm-10.webp","b2-ktm-11.webp","b2-ktm-12.webp","b2-ktm-13.webp","b2-ktm-14.webp","b2-ktm-15.webp","b2-ktm-16.webp","b2-ktm-17.webp","b2-ktm-2.webp","b2-ktm-3.webp","b2-ktm-4.webp","b2-ktm-5.webp","b2-ktm-6.webp","b2-ktm-7.webp","b2-ktm-8.webp","b2-ktm-9.webp","b2-qio-0.webp","b2-qio-1.webp","b2-qio-2.webp","b2-qio-3.webp","b2-qio-4.webp","b2-qio-5.webp","b2-qio-6.webp","isy-01.webp","isy-02.webp","isy-03.webp","isy-04.webp","isy-05.webp","isy-06.webp","isy-07.webp","isy-08.webp","isy-11.webp","isy-12.webp","isy-13.webp","isy-14.webp","isy-15.webp","isy-16.webp","isy-17.webp","isy-18.webp","isy-19.webp","isy-20.webp","isy-21.webp","isy-22.webp","isy-23.webp","isy-24.webp","isy-25.webp","isy-26.webp","isy-27.webp","isy-28.webp","isy-29.webp","isy-30.webp","isy-31.webp","isy-32.webp","isy-33.webp","isy-34.webp","isy-36.webp","isy-37.webp","isy-45.webp","ktm-13.webp","ktm-15.webp","ktm-16.webp","ktm-17.webp","ktm-18.webp","ktm-19.webp","ktm-20.webp","ktm-21.webp","ktm-22.webp","ktm-23.webp","ktm-24.webp","ktm-25.webp","ktm-26.webp","ktm-27.webp","ktm-28.webp","ktm-29.webp","ktm-30.webp","ktm-31.webp","ktm-32.webp","ktm-33.webp","ktm-34.webp","qio-0.webp","qio-1.webp","qio-11.webp","qio-13.webp","qio-14.webp","qio-15.webp","qio-16.webp","qio-17.webp","qio-18.webp","qio-19.webp","qio-2.webp","qio-20.webp","qio-21.webp","qio-22.webp","qio-23.webp","qio-24.webp","qio-25.webp","qio-3.webp","qio-6.webp","qio-7.webp","rest-01.webp"]);
+const SRFIX=['vanraam','vdv','victoria'];/* feste Plätze: jeder 5. / ca. 7. / ca. 9. Wechsel */
+const SR={pool:null,last:[],lastF:'',n:0,vr:0,subs:[]};
+const srBase=b=>({k:b.k,m:b.m,f:'',img:b.img,st:'',cur:1});
+function srBuild(){const P={};BR.forEach(b=>P[b.k]=[srBase(b)]);
+ (LG.M||[]).forEach(m=>{if(m.hidden||m.gebraucht||m.vorfuehr)return;const br=lgBrand(m.marke+' '+m.modell);if(!br)return;
+  const seen=new Set();m.v.forEach(x=>{if(x._hid||!x.bild)return;const fn=x.bild.split('/').pop();if(!SHOWOK.has(fn)||seen.has(fn))return;seen.add(fn);
+   P[br.k].push({k:br.k,m:(m.marke+' '+m.modell).replace(/\s+/g,' ').trim(),f:x.farbe||'',img:'img/show/'+fn,st:x.status==='bestellt'?'bestellt':'lager'})})});
+ Object.keys(P).forEach(k=>{P[k]=SRFIX.includes(k)?P[k].filter(x=>x.cur):(P[k].length>1?P[k].filter(x=>!x.cur):P[k])});/* feste Plätze = festes Bild, Rest nur aus dem Bestand */
+ SR.pool=P;SR.subs.forEach(f=>f())}
+const srNorm=t=>String(t||'').toLowerCase().replace(/\(.*?\)/g,'').replace(/matt|glanz|glossy|glänzend/g,'').replace(/[^a-zäöü]/g,'');
+function srPick(k){const L=k==='*'?(SR.pool?Object.keys(SR.pool).filter(j=>!SRFIX.includes(j)).flatMap(j=>SR.pool[j]):BR.filter(b=>!SRFIX.includes(b.k)).map(srBase)):((SR.pool&&SR.pool[k])||[srBase(BR.find(b=>b.k===k))]);
+ let c=L.filter(x=>!SR.last.includes(x.img)&&(!SR.lastF||srNorm(x.f)!==SR.lastF));if(!c.length)c=L.filter(x=>x.img!==SR.last[0]);if(!c.length)c=L;
+ const x=c[Math.floor(Math.random()*c.length)];if(L.length>1){SR.last.unshift(x.img);SR.last.length=Math.min(SR.last.length,12)}SR.lastF=srNorm(x.f);return x}
 function showroom(root,prefix){
  const s=root.closest('.show')||root;
- let i=0,bk=$('#'+prefix+'bk'),rf=$('#'+prefix+'brefl'),wm=$('#'+prefix+'swm'),info=$('#'+prefix+'sinfo'),th=$('#'+prefix+'thumbs');
+ let i=0,cur=null,bk=$('#'+prefix+'bk'),rf=$('#'+prefix+'brefl'),wm=$('#'+prefix+'swm'),info=$('#'+prefix+'sinfo'),th=$('#'+prefix+'thumbs'),busy=0,cnt=0,pend=0,hold=0;
  th.innerHTML=BR.map((b,j)=>'<button role="tab" data-j="'+j+'"'+(j?'':' class="on"')+'><img src="'+b.img+'" alt="" loading="lazy">'+esc(b.n)+'</button>').join('');
- function paint(){const b=BR[i];s.style.setProperty('--ac',b.c);wm.style.setProperty('--wo',b.o);
-  info.innerHTML='<span class="blogo"><img src="'+b.logo+'" alt="'+esc(b.n)+'"></span><div><p class="mdl">Beispielmodell · '+esc(b.m)+'</p><h3>'+esc(b.n)+'</h3><p>'+esc(b.t)+'</p></div><div class="row">'+b.a.map(([t,h],x)=>'<a class="'+(x?'ghost':'ghost')+'" href="'+h+'"'+(h.startsWith('http')?' target="_blank" rel="noopener"':'')+'>'+esc(t)+'<svg><use href="#i-arrow"/></svg></a>').join('')+'<a class="ghost" href="#lager" data-brand="'+esc(b.n)+'">Auf Lager</a><a class="cta" href="#termin" data-pre="Probefahrt '+esc(b.n)+'"><svg><use href="#i-bike"/></svg>Probefahrt</a></div>';
-  $$('button',th).forEach((x,j)=>x.classList.toggle('on',j===i));}
- function to(n){if(n===i)return;const dir=n>i||(i===BR.length-1&&n===0);i=(n+BR.length)%BR.length;const b=BR[i];
+ function paint(){const b=BR[i],x=cur||srBase(b);s.style.setProperty('--ac',b.c);wm.style.setProperty('--wo',b.o);
+  const tag=x.cur?'Beispielmodell':(x.st==='bestellt'?'Bald bei uns':'Bei uns im Laden');
+  info.innerHTML='<span class="blogo"><img src="'+b.logo+'" alt="'+esc(b.n)+'"></span><div><p class="mdl">'+tag+' · '+esc(x.m)+(x.f?' · <span class="srf">'+esc(x.f)+'</span>':'')+'</p><h3>'+esc(b.n)+'</h3><p>'+esc(b.t)+'</p></div><div class="row">'+b.a.map(([t,h])=>'<a class="ghost" href="'+h+'"'+(h.startsWith('http')?' target="_blank" rel="noopener"':'')+'>'+esc(t)+'<svg><use href="#i-arrow"/></svg></a>').join('')+'<a class="ghost" href="#lager" data-brand="'+esc(b.n)+'">Auf Lager</a><a class="cta" href="#termin" data-pre="Probefahrt '+esc(b.n)+'"><svg><use href="#i-bike"/></svg>Probefahrt</a></div>';
+  $$('button',th).forEach((y,j)=>y.classList.toggle('on',j===i));}
+ const FX=[[5,BR.findIndex(b=>b.k==='vanraam')],[7,BR.findIndex(b=>b.k==='vdv')],[9,BR.findIndex(b=>b.k==='victoria')]],FXI=FX.map(f=>f[1]);let q=[];
+ /* how: 'tab' = Marke gewählt (bleibt bei der Marke), sonst Pfeil/Wischen/automatisch */
+ function to(n,how){if(busy)return;cnt++;n=(n+BR.length)%BR.length;
+  FX.forEach(([e,j])=>{if(cnt%e===0&&!q.includes(j))q.push(j)});
+  let x;if(how!=='tab'){if(q.length){n=q.shift();x=srPick(BR[n].k)}else{x=srPick('*');n=BR.findIndex(b=>b.k===x.k)}}
+  else{q=q.filter(j=>j!==n);x=srPick(BR[n].k)}if(n===i&&cur&&x.img===cur.img)return;i=n;cur=x;const b=BR[i];busy=1;
   bk.classList.add('out-l');wm.classList.add('swap');rf.style.opacity=0;
-  setTimeout(()=>{const pre=new Image();pre.src=b.img;const go=()=>{bk.classList.add('in-r');bk.classList.remove('out-l');bk.src=b.img;bk.alt=b.m;rf.src=b.img;wm.src=b.logo;paint();void bk.offsetWidth;bk.classList.remove('in-r');wm.classList.remove('swap');rf.style.opacity=''};pre.decode?pre.decode().then(go,go):go()},420);}
- th.addEventListener('click',e=>{const b=e.target.closest('button');if(b)to(+b.dataset.j)});
- $('#'+prefix+'sp').addEventListener('click',()=>to((i-1+BR.length)%BR.length));
- $('#'+prefix+'sn').addEventListener('click',()=>to((i+1)%BR.length));
- let sx=0;const area=$('#'+prefix+'bikearea');area.addEventListener('pointerdown',e=>sx=e.clientX);area.addEventListener('pointerup',e=>{const d=e.clientX-sx;if(Math.abs(d)>50)to((i+(d<0?1:-1)+BR.length)%BR.length)});
+  setTimeout(()=>{const pre=new Image();pre.src=x.img;const go=()=>{bk.classList.add('in-r');bk.classList.remove('out-l');bk.src=x.img;bk.alt=x.m+(x.f?' in '+x.f:'');rf.src=x.img;wm.src=b.logo;paint();void bk.offsetWidth;bk.classList.remove('in-r');wm.classList.remove('swap');rf.style.opacity='';busy=0};pre.decode?pre.decode().then(go,go):go()},420);}
+ const user=()=>{hold=Date.now()+20000};
+ th.addEventListener('click',e=>{const b=e.target.closest('button');if(b){user();to(+b.dataset.j,'tab')}});
+ $('#'+prefix+'sp').addEventListener('click',()=>{user();to(i-1,'prev')});
+ $('#'+prefix+'sn').addEventListener('click',()=>{user();to(i+1,'next')});
+ let sx=0;const area=$('#'+prefix+'bikearea');area.addEventListener('pointerdown',e=>sx=e.clientX);area.addEventListener('pointerup',e=>{const d=e.clientX-sx;if(Math.abs(d)>50){user();to(i+(d<0?1:-1),d<0?'next':'prev')}});
+ /* automatisch weiter, nur wenn sichtbar, Tab aktiv und niemand gerade klickt/zeigt */
+ let vis=false,over=false;new IntersectionObserver(e=>vis=e[0].isIntersecting,{threshold:.35}).observe(area);
+ s.addEventListener('pointerenter',()=>over=true);s.addEventListener('pointerleave',()=>over=false);
+ setInterval(()=>{if(vis&&!over&&!document.hidden&&Date.now()>hold&&SR.pool)to(i+1,'next')},7000);
+ /* Start: zufälliges Bestandsrad der ersten Marke, sobald der Bestand geladen ist */
+ SR.subs.push(()=>{const x=srPick(BR[i].k);if(x.cur)return;cur=x;const pre=new Image();pre.src=x.img;const go=()=>{bk.src=x.img;rf.src=x.img;bk.alt=x.m;paint()};pre.decode?pre.decode().then(go,go):go()});
  paint();return{to};
 }
 /* zweiter Showroom auf der Markenseite: Kopie des ersten mit eigenen IDs */
@@ -2929,6 +2957,7 @@ c.querySelectorAll('[id]').forEach(e=>e.id='m-'+e.id);c.querySelectorAll('.pre')
 $('#showroom2').replaceWith(c);c.id='showroom2';c.style.paddingTop='0';
 $('.showtop h2',c).innerHTML='Die Marken<br><span class="gt">bei uns im Laden.</span>';
 showroom(s1,'');showroom(c,'m-');
+setTimeout(()=>lgLoad().then(()=>{if(LG.ok)srBuild()}),1200);
 
 /* ---------- Öffnungszeiten live ---------- */
 const H={1:[[540,720],[870,1080]],2:[[540,720],[870,1080]],3:[],4:[[540,720],[870,1080]],5:[[540,720],[870,1080]],6:[[540,720]],0:[]};
