@@ -1190,7 +1190,7 @@ body.sc .hdr{backdrop-filter:none!important;-webkit-backdrop-filter:none!importa
 .hchip,.live{background:rgba(255,252,246,.94)!important}
 /* Filterleiste: beim Scrollen kompakt in EINER Zeile, „Filter“ klappt Rahmen/Sortierung auf */
 .lgfbtn{display:none}
-.lgbar{transition:padding .3s var(--ease),border-radius .3s}
+.lgbar{--mb:26px}
 .lgbar.mini{flex-direction:row;align-items:center;gap:10px;padding:8px 10px}
 .lgbar.mini .lgq{flex:0 1 230px;min-width:120px}
 .lgbar.mini .lgq input{min-height:40px;font-size:14px}
@@ -2587,10 +2587,15 @@ $('#adm').addEventListener('submit',async e=>{e.preventDefault();if(e.target.id=
 addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('#adm').hidden)admClose()});
 (()=>{let n=0,t0=0;const c=$('.legalbar span');if(c)c.addEventListener('click',()=>{const t=Date.now();n=t-t0<600?n+1:1;t0=t;if(n>=5){n=0;admOpen()}})})();
 function admHash(){if(location.hash==='#admin')admOpen()}addEventListener('hashchange',admHash);admHash();
-/* Filterleiste kompakt, sobald sie oben klebt */
-(function(){const bar=$('#lgBar'),sn=$('#lgSent'),fb=$('#lgFbtn');if(!bar||!sn)return;
- new IntersectionObserver(([e])=>{const m=!e.isIntersecting&&e.boundingClientRect.top<0;bar.classList.toggle('mini',m);if(!m){bar.classList.remove('open');fb.setAttribute('aria-expanded','false')}},{rootMargin:'-90px 0px 0px 0px'}).observe(sn);
- fb.addEventListener('click',()=>{const o=!bar.classList.contains('open');bar.classList.toggle('open',o);fb.setAttribute('aria-expanded',String(o))});
+/* Filterleiste kompakt, sobald sie oben klebt – Höhe wird ausgeglichen (kein Springen), Umschalten mit Puffer (kein Flackern) */
+(function(){const bar=$('#lgBar'),sn=$('#lgSent'),fb=$('#lgFbtn');if(!bar||!sn)return;let mini=false,hFull=0,tk=0;
+ const set=m=>{if(m===mini)return;if(m){hFull=bar.offsetHeight}mini=m;bar.classList.toggle('mini',m);
+  if(!m){bar.classList.remove('open');fb.setAttribute('aria-expanded','false');bar.style.marginBottom=''}else fit()};
+ const fit=()=>{if(!mini)return;const base=parseFloat(getComputedStyle(bar).getPropertyValue('--mb'))||26;bar.style.marginBottom=(base+Math.max(0,hFull-bar.offsetHeight))+'px'};
+ const chk=()=>{tk=0;if(cur!=='lager')return;const y=sn.getBoundingClientRect().top,top=parseFloat(getComputedStyle(bar).top)||84;
+  if(!mini&&y<top-40)set(true);else if(mini&&y>top+40)set(false)};
+ addEventListener('scroll',()=>{if(!tk)tk=requestAnimationFrame(chk)},{passive:true});addEventListener('resize',()=>{if(mini){set(false);chk()}});
+ fb.addEventListener('click',()=>{const o=!bar.classList.contains('open');bar.classList.toggle('open',o);fb.setAttribute('aria-expanded',String(o));fit()});
  const cnt=()=>{const n=(LG.f.rf?1:0)+(LG.f.nur?1:0)+(LG.f.sort&&LG.f.sort!=='neu'?1:0),b=$('#lgFn');b.hidden=!n;b.textContent=n};
  ['click','change'].forEach(t=>bar.addEventListener(t,()=>setTimeout(cnt,0)));})();
 /* Endlos-Animationen (Hintergrund, Glanz, Schweben) 25 % ruhiger – einmalige Effekte bleiben unverändert */
