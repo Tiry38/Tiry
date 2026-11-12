@@ -1716,6 +1716,21 @@ body.fz2 main,body.fz2 .foot{zoom:1.25}
 }
 @media (prefers-reduced-motion:reduce){.rf-p,.cmp-p,.mkbar{transition:none}.hrt.pop{animation:none}}
 
+
+/* ===== Mehr Farbe + Anthrazit-Struktur im Hintergrund (Tiry 12.11.2026) ===== */
+.sky{background:linear-gradient(160deg,#F7E6DE 0%,#EED6D6 26%,#E3D3E4 52%,#D3DCEA 78%,#E6DCCB 100%)!important}
+.blobs i:nth-child(1){--c:#C8102E;opacity:.34!important}
+.blobs i:nth-child(2){--c:#E0A458;opacity:.5!important}
+.blobs i:nth-child(3){--c:#5B3FA0;opacity:.3!important}
+.blobs i:nth-child(4){--c:#0E8A93;opacity:.26!important}
+.blobs i:nth-child(5){--c:#B0256B;opacity:.28!important}
+.blobs i:nth-child(6){--c:#3A3D44;opacity:.22!important}
+.sky::after{content:"";position:absolute;inset:0;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='56' height='97' viewBox='0 0 56 97'%3E%3Cpath d='M28 0l28 16.2v32.3L28 64.7 0 48.5V16.2zM28 64.7v32.3' fill='none' stroke='%232A2D35' stroke-width='1.3'/%3E%3C/svg%3E");background-size:56px 97px;opacity:.18;
+ -webkit-mask-image:radial-gradient(120% 90% at 50% 45%,transparent 30%,#000 78%);mask-image:radial-gradient(120% 90% at 50% 45%,transparent 30%,#000 78%)}
+.sky::before{content:"";position:absolute;inset:0;background:
+ linear-gradient(115deg,transparent 0 62%,rgba(38,40,47,.07) 62% 63.5%,transparent 63.5% 66%,rgba(200,16,46,.07) 66% 67%,transparent 67%),
+ linear-gradient(115deg,transparent 0 18%,rgba(38,40,47,.06) 18% 19%,transparent 19%)}
+@media (prefers-reduced-motion:reduce){.blobs::after{animation:none}}
 </style>
 
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
