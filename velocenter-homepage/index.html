@@ -989,6 +989,113 @@ textarea.inp{border-radius:12px}
 .showinfo .cta,.showinfo .ghost,.fr .cta,.fr .ghost,.chap .ghost,.finder .ghost{min-height:46px;padding:0 16px 0 20px;font-size:14.5px}
 .mnu .mf .cta{min-height:50px}
 @media (max-width:640px){.cta,.ghost{min-height:50px;padding:0 18px 0 20px;font-size:15px}}
+
+[hidden]{display:none!important}
+.cta.wa:hover{color:#fff;border-color:#137A3D;background:linear-gradient(180deg,#1FA855 0%,#137A3D 100%);box-shadow:inset 0 1px 0 rgba(255,255,255,.18),0 14px 26px -12px rgba(31,168,85,.75)}
+/* ================= Auf Lager ================= */
+.lgnum{display:flex;flex-wrap:wrap;gap:10px 28px;margin-top:26px;font:600 15px/1.2 var(--display);color:var(--mut)}
+.lgnum b{font:900 34px/1 var(--display);color:var(--ink);margin-right:8px;letter-spacing:-.02em}
+.lgnum span:first-child b{color:#059669}
+.lgdemo{display:flex;gap:12px;align-items:center;margin:0 0 18px;padding:12px 16px;border-radius:12px;background:#FEF3C7;border:1px solid #F59E0B;color:#78350F;font-size:14.5px}
+.lgdemo svg{width:20px;height:20px;flex:none}
+.lgbar{position:sticky;top:calc(env(safe-area-inset-top,0px) + 84px);z-index:20;display:flex;flex-direction:column;gap:12px;padding:14px;margin-bottom:26px;border-radius:18px;background:rgba(255,252,246,.86);backdrop-filter:blur(16px) saturate(1.3);-webkit-backdrop-filter:blur(16px) saturate(1.3);border:1px solid rgba(184,115,51,.3);box-shadow:0 16px 34px -20px rgba(27,30,37,.35)}
+.lgq{display:flex;align-items:center;gap:10px;padding:0 16px;height:48px;border-radius:12px;background:#fff;border:1px solid rgba(27,30,37,.12)}
+.lgq svg{width:18px;height:18px;color:#9A5A2A;flex:none}
+.lgq input{flex:1;min-width:0;border:0;outline:0;background:none;font:500 16px var(--body);color:var(--ink)}
+.lgchips{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;padding-bottom:2px}
+.lgchips::-webkit-scrollbar{display:none}
+.lgchips button{flex:none;display:inline-flex;align-items:center;gap:8px;min-height:42px;padding:0 14px;border-radius:10px;border:1px solid rgba(27,30,37,.12);background:#fff;font:600 14px/1 var(--display);color:var(--ink);cursor:pointer;transition:all .25s}
+.lgchips button img{height:16px;width:auto;max-width:60px}
+.lgchips button i{font-style:normal;font-size:12px;color:var(--dim);background:rgba(27,30,37,.06);padding:3px 7px;border-radius:6px}
+.lgchips button:hover{border-color:rgba(27,30,37,.35)}
+.lgchips button.on{background:#2A2D34;border-color:#2A2D34;color:#fff}
+.lgchips button.on img{filter:brightness(0) invert(1)}
+.lgchips button.on i{background:rgba(255,255,255,.15);color:#fff}
+.lgrow2{display:flex;flex-wrap:wrap;align-items:center;gap:10px 18px}
+.lgrow2 .lgchips{flex:1 1 auto}
+.lgtog{display:inline-flex;align-items:center;gap:10px;font:600 14px/1 var(--display);cursor:pointer;min-height:44px}
+.lgtog input{position:absolute;opacity:0;pointer-events:none}
+.lgtog span{width:42px;height:24px;border-radius:12px;background:rgba(27,30,37,.18);position:relative;transition:background .25s}
+.lgtog span::after{content:"";position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.25);transition:transform .3s var(--ease)}
+.lgtog input:checked+span{background:#059669}
+.lgtog input:checked+span::after{transform:translateX(18px)}
+.lgtog input:focus-visible+span{outline:2px solid #1B1E25;outline-offset:2px}
+.lgsort{display:inline-flex;align-items:center;gap:8px;font:600 14px/1 var(--display);color:var(--mut)}
+.lgsort select{height:42px;padding:0 12px;border-radius:10px;border:1px solid rgba(27,30,37,.14);background:#fff;font:600 14px var(--display);color:var(--ink)}
+.lggrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:18px}
+.lgc{position:relative;display:flex;flex-direction:column;border-radius:20px;overflow:hidden;cursor:pointer;background:rgba(255,252,246,.78);border:1px solid rgba(184,115,51,.25);box-shadow:0 16px 34px -24px rgba(27,30,37,.5);transition:transform .45s var(--ease),box-shadow .45s;animation:hello .6s var(--ease) both;animation-delay:var(--d)}
+.lgc:hover,.lgc:focus-visible{transform:translateY(-6px);box-shadow:0 28px 50px -26px rgba(27,30,37,.55);outline:none}
+.lgc:focus-visible{box-shadow:0 0 0 2px #1B1E25,0 28px 50px -26px rgba(27,30,37,.55)}
+.lgst{position:relative;height:210px;display:grid;place-items:center;isolation:isolate;background:radial-gradient(60% 70% at 50% 62%,color-mix(in srgb,var(--ac) 32%,transparent),transparent 72%),linear-gradient(180deg,rgba(255,255,255,.65),rgba(255,255,255,.15))}
+.lgst::after{content:"";position:absolute;left:14%;right:14%;bottom:20px;height:2px;border-radius:2px;background:linear-gradient(90deg,transparent,#B87333,#F0C8A0,#B87333,transparent);opacity:.8}
+.lgst .wl{position:absolute;z-index:-1;width:76%;max-height:44%;object-fit:contain;top:30%;left:50%;transform:translate(-50%,-50%);opacity:.14;mix-blend-mode:multiply}
+.lgst .bk{max-width:88%;max-height:170px;width:auto;margin-top:6px;filter:drop-shadow(0 16px 14px rgba(27,30,37,.25));transition:transform .7s var(--ease)}
+.lgc:hover .lgst .bk{transform:translateX(8px) scale(1.04)}
+.lgst .ph{width:80px;height:80px;color:rgba(27,30,37,.25)}
+.bds{display:flex;flex-wrap:wrap;gap:6px}
+.lgst .bds{position:absolute;top:12px;left:12px;right:12px}
+.bd{display:inline-flex;align-items:center;gap:6px;height:26px;padding:0 10px;border-radius:8px;font:700 12px/1 var(--display);letter-spacing:.02em;background:#fff;color:var(--ink);box-shadow:0 2px 8px rgba(27,30,37,.08)}
+.bd.ok{color:#047857}.bd.ok::before{content:"";width:7px;height:7px;border-radius:50%;background:#10B981;box-shadow:0 0 6px #10B981}
+.bd.z{color:#92400E}.bd.z::before{content:"";width:7px;height:7px;border-radius:50%;background:#F59E0B}
+.bd.an{background:linear-gradient(180deg,#DC1E38,#B5102A);color:#fff}
+.bd.vf,.bd.gb{background:#2A2D34;color:#fff}
+.lgin{display:flex;flex-direction:column;gap:8px;padding:16px 18px 18px;flex:1}
+.lgin .mk{font:700 12px/1 var(--display);letter-spacing:.14em;text-transform:uppercase;color:#9A5A2A}
+.lgin h3{font:800 20px/1.2 var(--display);letter-spacing:-.01em}
+.sp{display:flex;flex-wrap:wrap;gap:6px}
+.sp span{display:inline-flex;align-items:center;gap:6px;padding:5px 9px;border-radius:7px;background:rgba(27,30,37,.05);font:600 12.5px/1 var(--display);color:var(--mut)}
+.sp i,.lgm-spec i{display:inline-block;width:11px;height:11px;border-radius:50%;box-shadow:inset 0 0 0 1px rgba(0,0,0,.15)}
+.ft{display:flex;align-items:flex-end;justify-content:space-between;gap:10px;margin-top:auto;padding-top:10px;border-top:1px solid rgba(184,115,51,.22)}
+.lgpr{display:flex;flex-direction:column;gap:2px}
+.lgpr s{font:500 13px var(--display);color:var(--dim)}
+.lgpr b{font:900 22px/1.1 var(--display);letter-spacing:-.02em}
+.lgpr b.an{color:#C8102E}
+.ft .go{display:inline-flex;align-items:center;gap:6px;font:700 13.5px/1 var(--display);color:var(--ink)}
+.ft .go::after{content:"→";transition:transform .3s var(--ease)}
+.lgc:hover .ft .go::after{transform:translateX(4px)}
+.lgempty{grid-column:1/-1;display:flex;flex-direction:column;align-items:center;gap:14px;padding:40px;text-align:center;color:var(--mut)}
+/* Detailansicht */
+.lgm{position:fixed;inset:0;z-index:90;display:grid;place-items:center;padding:calc(16px + env(safe-area-inset-top,0px)) 16px calc(16px + env(safe-area-inset-bottom,0px))}
+.lgm-bg{position:absolute;inset:0;background:rgba(20,22,28,.55);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);opacity:0;transition:opacity .3s}
+.lgm.on .lgm-bg{opacity:1}
+.lgm-p{position:relative;display:grid;grid-template-columns:1.15fr .85fr;width:min(1180px,100%);max-height:min(760px,100%);border-radius:26px;overflow:hidden;background:linear-gradient(160deg,#F6EDDF,#EADBC6 60%,#DCD6CF);box-shadow:0 40px 100px -30px rgba(10,10,14,.6);transform:translateY(24px) scale(.97);opacity:0;transition:transform .45s var(--ease),opacity .35s}
+.lgm.on .lgm-p{transform:none;opacity:1}
+.lgm-x{position:absolute;top:14px;right:14px;z-index:5;width:44px;height:44px;border-radius:12px;border:1px solid rgba(27,30,37,.12);background:#fff;font:400 26px/1 var(--display);cursor:pointer;color:var(--ink)}
+.lgm-x:hover{background:#2A2D34;color:#fff}
+.lgm-stage{position:relative;min-height:420px;isolation:isolate;overflow:hidden;background:radial-gradient(60% 60% at 50% 58%,color-mix(in srgb,var(--ac) 38%,transparent),transparent 72%)}
+.lgm-stage .wl{position:absolute;z-index:-1;left:50%;top:34%;width:82%;max-height:38%;object-fit:contain;transform:translate(-50%,-50%);opacity:.16;mix-blend-mode:multiply}
+.lgm-stage .bk,.lgm-stage .rf{position:absolute;left:50%;bottom:22%;width:auto;max-width:88%;max-height:60%;transform:translateX(-50%)}
+.lgm-stage .bk{filter:drop-shadow(0 26px 24px rgba(27,30,37,.3))}
+.lgm-stage .rf{transform:translateX(-50%) scaleY(-1);transform-origin:bottom;opacity:.12;-webkit-mask:linear-gradient(to top,rgba(0,0,0,.9),transparent 40%);mask:linear-gradient(to top,rgba(0,0,0,.9),transparent 40%)}
+.lgm-stage .fl{position:absolute;left:10%;right:10%;bottom:21%;height:3px;border-radius:3px;background:linear-gradient(90deg,transparent,#B87333,#F0C8A0,#B87333,transparent);box-shadow:0 0 22px rgba(184,115,51,.55)}
+.lgm-stage.go-l .bk,.lgm-stage.go-l .rf{animation:lgInL .7s var(--ease) both}
+.lgm-stage.go-r .bk,.lgm-stage.go-r .rf{animation:lgInR .7s var(--ease) both}
+@keyframes lgInL{from{opacity:0;translate:60px 0}}
+@keyframes lgInR{from{opacity:0;translate:-60px 0}}
+.lgm-stage .abb{position:absolute;left:18px;bottom:16px;font:600 12px var(--display);color:var(--dim)}
+.lgm-nav{position:absolute;top:46%;z-index:3;width:46px;height:46px;border-radius:12px;border:1px solid rgba(27,30,37,.12);background:rgba(255,255,255,.9);display:grid;place-items:center;cursor:pointer;color:var(--ink);transition:background .25s}
+.lgm-nav:hover{background:#2A2D34;color:#fff}
+.lgm-nav svg{width:20px;height:20px}.lgm-nav.p{left:16px}.lgm-nav.p svg{transform:rotate(180deg)}.lgm-nav.n{right:16px}
+.lgm-info{display:flex;flex-direction:column;gap:16px;padding:34px 30px 30px;overflow-y:auto;background:rgba(255,252,246,.6)}
+.lgm-info h2{font:900 clamp(28px,3vw,40px)/1.05 var(--display);letter-spacing:-.025em;padding-right:40px}
+.lgm-price{display:flex;align-items:flex-end;gap:14px;flex-wrap:wrap}
+.lgm-price .lgpr b{font-size:34px}
+.lgm-price .sv{font:700 13px/1 var(--display);color:#047857;background:#D1FAE5;padding:7px 10px;border-radius:8px;margin-bottom:6px}
+.lgm-spec{display:flex;flex-direction:column;margin:0}
+.lgm-spec>div{display:flex;justify-content:space-between;gap:16px;padding:10px 0;border-bottom:1px solid rgba(184,115,51,.22);font-size:15px}
+.lgm-spec dt{color:var(--mut)}.lgm-spec dd{margin:0;font-weight:600;text-align:right;display:inline-flex;align-items:center;gap:8px}
+.lgm-act{margin-top:4px}
+.lgm-form{display:flex;flex-direction:column;gap:14px}
+@media (max-width:980px){.lgm-p{grid-template-columns:1fr;overflow-y:auto}.lgm-stage{min-height:300px}.lgm-info{overflow:visible}}
+@media (max-width:640px){
+ .lgbar{top:calc(env(safe-area-inset-top,0px) + 72px);padding:10px;border-radius:14px}
+ .lggrid{grid-template-columns:1fr}
+ .lgm{padding:0}.lgm-p{border-radius:0;max-height:100%;height:100%}
+ .lgm-stage{min-height:260px}.lgm-info{padding:22px 18px 30px}
+ .lgnum b{font-size:28px}
+}
+@media (min-width:981px) and (max-width:1340px){.nav a{font-size:14.5px;padding:12px 11px}}
+@media (min-width:981px) and (max-width:1180px){.nav a{font-size:13.5px;padding:10px 8px}}
 </style>
 
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
@@ -1029,6 +1136,7 @@ textarea.inp{border-radius:12px}
    <a href="#start" data-r="start">Start</a>
    <a href="#service" data-r="service">Service</a>
    <a href="#marken" data-r="marken">Marken</a>
+   <a href="#lager" data-r="lager">Auf Lager</a>
    <a href="#isy" data-r="isy">i:SY Experte</a>
    <a href="#treffen" data-r="treffen">i:SY Treffen</a>
    <a href="#dreirad" data-r="dreirad">E-Dreiräder</a>
@@ -1044,6 +1152,7 @@ textarea.inp{border-radius:12px}
  <a class="r" href="#start" data-r="start" style="--i:0">Start</a>
  <a class="r" href="#service" data-r="service" style="--i:1">Service</a>
  <a class="r" href="#marken" data-r="marken" style="--i:2">Marken</a>
+ <a class="r" href="#lager" data-r="lager" style="--i:2">Auf Lager</a>
  <a class="r" href="#isy" data-r="isy" style="--i:3">i:SY Experte</a>
  <a class="r" href="#treffen" data-r="treffen" style="--i:4">i:SY Treffen</a>
  <a class="r" href="#dreirad" data-r="dreirad" style="--i:5">E-Dreiräder</a>
@@ -1393,7 +1502,7 @@ m696 -454 c28 -13 46 -31 55 -51 22 -53 -50 -177 -173 -300 -187 -186 -647
    </div>
    <nav class="quick hello" style="--d:1.45s" aria-label="Schnellzugriff">
     <a class="qk" href="#termin"><span class="ic"><svg><use href="#i-cal"/></svg></span><span><b>Termin anfragen</b><small>Werkstatt oder Probefahrt</small></span></a>
-    <a class="qk" href="#finder"><span class="ic"><svg><use href="#i-spark"/></svg></span><span><b>E-Bike-Finder</b><small>2 Fragen, passende Marken</small></span></a>
+    <a class="qk" href="#lager"><span class="ic"><svg><use href="#i-bike"/></svg></span><span><b>Auf Lager</b><small id="qkLager">Räder sofort verfügbar</small></span></a>
     <a class="qk" href="#deal"><span class="ic"><svg><use href="#i-gift"/></svg></span><span><b>Winter-Aktion</b><small>–20 € auf jede Inspektion</small></span></a>
     <a class="qk" href="#besuch"><span class="ic"><svg><use href="#i-clock"/></svg></span><span><b>Öffnungszeiten</b><small id="qkHours">Mo, Di, Do, Fr · Sa vormittags</small></span></a>
    </nav>
@@ -1726,6 +1835,32 @@ m696 -454 c28 -13 46 -31 55 -51 22 -53 -50 -177 -173 -300 -187 -186 -647
  </div>
 </section>
 
+<!-- ================= AUF LAGER ================= -->
+<section class="view" data-v="lager" hidden>
+ <div class="ph"><div class="wm" aria-hidden="true">Lager</div>
+  <div class="wrap">
+   <p class="eyebrow hello">Unser Bestand · <b id="lgStand">aktuell</b></p>
+   <h1 class="mega hello" style="--d:.08s;margin-top:18px">Sofort da.<br><span class="gt it">Sofort Probe fahren.</span></h1>
+   <p class="lead hello" style="--d:.16s">Diese Räder stehen jetzt bei uns in Wörth. Rad antippen, in Ruhe ansehen und direkt anfragen: kaufen, reservieren oder Probe fahren.</p>
+   <div class="lgnum hello" style="--d:.24s" id="lgNum"></div>
+  </div>
+ </div>
+ <div class="wrap">
+  <p class="lgdemo" id="lgDemo" hidden><svg><use href="#i-spark"/></svg><span><b>Beispieldaten.</b> Sobald der Veloport-Export eingespielt ist, steht hier euer echter Bestand.</span></p>
+  <div class="lgbar" id="lgBar">
+   <label class="lgq"><svg><use href="#i-spark"/></svg><input id="lgQ" type="search" placeholder="Marke, Modell, Farbe …" aria-label="Bestand durchsuchen"></label>
+   <div class="lgchips" id="lgMk" role="group" aria-label="Marke"></div>
+   <div class="lgrow2">
+    <div class="lgchips" id="lgRf" role="group" aria-label="Rahmenform"></div>
+    <label class="lgtog"><input type="checkbox" id="lgNur"><span></span>Nur sofort verfügbar</label>
+    <label class="lgsort">Sortieren <select id="lgSort"><option value="neu">Empfohlen</option><option value="pa">Preis aufsteigend</option><option value="pd">Preis absteigend</option><option value="mk">Marke A–Z</option></select></label>
+   </div>
+  </div>
+  <div class="lggrid" id="lgGrid" aria-live="polite"></div>
+  <p class="note" style="margin-top:22px">Abbildungen ähnlich, Farbe und Ausstattung können abweichen. Alle Preise inkl. MwSt. Zwischenverkauf vorbehalten.</p>
+ </div>
+</section>
+
 <!-- ================= IMPRESSUM ================= -->
 <section class="view" data-v="impressum" hidden>
  <div class="ph"><div class="wrap"><p class="eyebrow hello">Rechtliches</p><h1 class="mega hello" style="--d:.08s;margin-top:18px">Impressum</h1></div></div>
@@ -1768,6 +1903,7 @@ m696 -454 c28 -13 46 -31 55 -51 22 -53 -50 -177 -173 -300 -187 -186 -647
    <div class="find">
     <div class="fnd pre"><span class="k">✓</span><p><b>Online-Terminanfrage für Probefahrt und Werkstatt</b> mit Wunschtag (Mi/So gesperrt) und Tageszeit, geht per WhatsApp oder E-Mail direkt an uns.<small>Füllt die Werkstatt und bringt Probefahrten in den Laden.</small></p></div>
     <div class="fnd pre"><span class="k">✓</span><p><b>E-Bike-Finder</b>: 2 Fragen, dann passende Marken mit Bild und der Knopf zur Probefahrt.<small>Bringt Kunden mit klarem Wunsch in den Laden.</small></p></div>
+    <div class="fnd pre"><span class="k">✓</span><p><b>Live-Lagerbestand „Auf Lager“</b>: alle Räder aus dem Veloport-Export mit Filter, Detailansicht im Showroom-Stil und Anfrage (kaufen, reservieren, Probefahrt). Einkaufspreise, Rahmennummern und interne Notizen werden nie übernommen.<small>Kunden sehen vorher, was da ist, und kommen gezielt.</small></p></div>
     <div class="fnd pre"><span class="k">✓</span><p><b>Showroom</b> mit allen 7 Marken zum Durchblättern, freigestellte Herstellerbilder in hoher Auflösung.</p></div>
     <div class="fnd pre"><span class="k">✓</span><p><b>Live „Jetzt geöffnet“</b> und die heutige Öffnungszeit hervorgehoben.</p></div>
     <div class="fnd pre"><span class="k">✓</span><p><b>Aktionen sofort online</b>: Winter-Inspektion mit Tage-Zähler. Änderungen in Minuten, ohne Agentur.</p></div>
@@ -1783,6 +1919,7 @@ m696 -454 c28 -13 46 -31 55 -51 22 -53 -50 -177 -173 -300 -187 -186 -647
     <div class="fnd pre"><span class="k">!</span><p><b>Datenschutzerklärung</b> für die neue Seite erstellen. Impressum ist übernommen.</p></div>
     <div class="fnd pre"><span class="k">!</span><p><b>Bilder</b>: Ladenfotos stammen von der aktuellen Seite. Herstellerbilder und Logos vor dem Start über die Händlerportale der Marken freigeben lassen.</p></div>
     <div class="fnd pre"><span class="k">!</span><p><b>Kontakt- und Terminformular</b> senden im Prototyp per WhatsApp oder E-Mail-Programm. Für Versand direkt aus dem Formular brauchen wir einen Mail-Dienst (wie EmailJS im Planer).</p></div>
+    <div class="fnd pre"><span class="k">!</span><p><b>Lagerbestand aktuell halten</b>: Veloport-Export als CSV, Umwandler <code>tools/bestand_zu_json.py</code> erzeugt <code>data/bestand.json</code>. Ziel: die KI-Zentrale lädt den Bestand automatisch hoch (sie liest den Export schon ein).</p></div>
     <div class="fnd pre"><span class="k">!</span><p><b>Google-Bewertung</b> (4,8) ist von Hand eingetragen. Die aktuelle Anzahl der Bewertungen fehlt noch und muss bei jeder Änderung nachgetragen werden (oder automatisch über Google eingebunden werden).</p></div>
    </div>
   </div>
@@ -1804,6 +1941,23 @@ m696 -454 c28 -13 46 -31 55 -51 22 -53 -50 -177 -173 -300 -187 -186 -647
  </div>
 </footer>
 
+
+<div class="lgm" id="lgm" hidden>
+ <div class="lgm-bg" data-close></div>
+ <div class="lgm-p" role="dialog" aria-modal="true" aria-labelledby="lgmT">
+  <button class="lgm-x" data-close aria-label="Schließen">×</button>
+  <div class="lgm-stage" id="lgmStage">
+   <img class="wl" id="lgmWl" alt="" aria-hidden="true">
+   <div class="fl"></div>
+   <img class="rf" id="lgmRf" alt="" aria-hidden="true">
+   <img class="bk" id="lgmBk" alt="">
+   <span class="abb">Abbildung ähnlich</span>
+   <button class="lgm-nav p" id="lgmP" aria-label="Vorheriges Rad"><svg><use href="#i-arrow"/></svg></button>
+   <button class="lgm-nav n" id="lgmN" aria-label="Nächstes Rad"><svg><use href="#i-arrow"/></svg></button>
+  </div>
+  <div class="lgm-info" id="lgmInfo"></div>
+ </div>
+</div>
 <a class="fab" href="https://wa.me/491635343133" target="_blank" rel="noopener" aria-label="WhatsApp schreiben"><svg><use href="#i-chat"/></svg></a>
 <a class="proto" href="#warum"><svg><use href="#i-spark"/></svg><span>Prototyp · Infos für Stefan</span></a>
 
@@ -1811,7 +1965,7 @@ m696 -454 c28 -13 46 -31 55 -51 22 -53 -50 -177 -173 -300 -187 -186 -647
 (()=>{
 const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>[...r.querySelectorAll(s)];
 const RM=matchMedia('(prefers-reduced-motion: reduce)').matches;
-const ROUTES=['start','service','marken','isy','treffen','dreirad','kontakt','impressum','warum'];
+const ROUTES=['start','service','marken','lager','isy','treffen','dreirad','kontakt','impressum','warum'];
 const ALIAS={deal:['start','deal'],termin:['service','termin-form'],finder:['marken','finder'],besuch:['start','besuch'],showroom:['start','showroom']};
 const WA='491635343133';
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
@@ -1838,7 +1992,7 @@ function showroom(root,prefix){
  let i=0,bk=$('#'+prefix+'bk'),rf=$('#'+prefix+'brefl'),wm=$('#'+prefix+'swm'),info=$('#'+prefix+'sinfo'),th=$('#'+prefix+'thumbs');
  th.innerHTML=BR.map((b,j)=>'<button role="tab" data-j="'+j+'"'+(j?'':' class="on"')+'><img src="'+b.img+'" alt="" loading="lazy">'+esc(b.n)+'</button>').join('');
  function paint(){const b=BR[i];s.style.setProperty('--ac',b.c);wm.style.setProperty('--wo',b.o);
-  info.innerHTML='<span class="blogo"><img src="'+b.logo+'" alt="'+esc(b.n)+'"></span><div><p class="mdl">Beispielmodell · '+esc(b.m)+'</p><h3>'+esc(b.n)+'</h3><p>'+esc(b.t)+'</p></div><div class="row">'+b.a.map(([t,h],x)=>'<a class="'+(x?'ghost':'ghost')+'" href="'+h+'"'+(h.startsWith('http')?' target="_blank" rel="noopener"':'')+'>'+esc(t)+'<svg><use href="#i-arrow"/></svg></a>').join('')+'<a class="cta" href="#termin" data-pre="Probefahrt '+esc(b.n)+'"><svg><use href="#i-bike"/></svg>Probefahrt</a></div>';
+  info.innerHTML='<span class="blogo"><img src="'+b.logo+'" alt="'+esc(b.n)+'"></span><div><p class="mdl">Beispielmodell · '+esc(b.m)+'</p><h3>'+esc(b.n)+'</h3><p>'+esc(b.t)+'</p></div><div class="row">'+b.a.map(([t,h],x)=>'<a class="'+(x?'ghost':'ghost')+'" href="'+h+'"'+(h.startsWith('http')?' target="_blank" rel="noopener"':'')+'>'+esc(t)+'<svg><use href="#i-arrow"/></svg></a>').join('')+'<a class="ghost" href="#lager" data-brand="'+esc(b.n)+'">Auf Lager</a><a class="cta" href="#termin" data-pre="Probefahrt '+esc(b.n)+'"><svg><use href="#i-bike"/></svg>Probefahrt</a></div>';
   $$('button',th).forEach((x,j)=>x.classList.toggle('on',j===i));}
  function to(n){if(n===i)return;const dir=n>i||(i===BR.length-1&&n===0);i=(n+BR.length)%BR.length;const b=BR[i];
   bk.classList.add('out-l');wm.classList.add('swap');rf.style.opacity=0;
@@ -1897,6 +2051,7 @@ function show(v,anchor,first){
  if(anchor){const t=document.getElementById(anchor);t&&t.scrollIntoView({behavior:'auto',block:'start'})}else window.scrollTo(0,0);
  arm(sec);onScroll();
  if(v==='treffen')countUp();
+ if(v==='lager')lgOpen();
 }
 function go(first){
  const [v,anchor]=target();document.body.classList.remove('menu');$('#burger').setAttribute('aria-expanded','false');
@@ -1982,6 +2137,81 @@ fRender();
 (function(){const hv=$('#hvis');if(!hv)return;const bs=$$('.hb',hv),lg=$('#hlg');let k=0;
  setInterval(()=>{if(cur!=='start'||scrollY>innerHeight)return;bs[k].classList.add('off');k=(k+1)%bs.length;bs[k].classList.remove('off');lg.classList.add('swap');setTimeout(()=>{lg.src=bs[k].dataset.l;lg.classList.remove('swap')},350)},4800);
  const {d,m}=berlin(),q=$('#qkHours');if(q){const op=H[d].some(([a,b])=>m>=a&&m<b);q.innerHTML='<i class="qd'+(op?' on':'')+'"></i>'+(op?'Jetzt geöffnet':'Heute: '+(H[d].length?H[d].map(([a,b])=>hm(a)+'–'+hm(b)).join(' · '):'geschlossen'))}})();
+
+/* ================= AUF LAGER ================= */
+const LG={all:[],list:[],ok:false,load:null,f:{q:'',mk:'',rf:'',nur:false,sort:'neu'},i:-1};
+const BRK=[[/i:?\s?sy/i,'isy'],[/ktm/i,'ktm'],[/qio/i,'qio'],[/velo\s*de\s*ville|vdv/i,'vdv'],[/van\s*raam/i,'vanraam'],[/gudereit/i,'gudereit'],[/victoria/i,'victoria']];
+const lgBrand=m=>{const x=BRK.find(([re])=>re.test(m||''));return x?BR.find(b=>b.k===x[1]):null};
+function lgImg(r){const b=lgBrand(r.marke);if(!b)return '';if(b.k==='isy'&&/touring/i.test(r.modell))return 'img/p-isy2.webp';return b.img}
+const FARB=[[/schwarz|black|anthrazit|graphit/i,'#23252B'],[/wei(ß|ss)|white|creme|cream/i,'#F4F1EA'],[/silber|silver|alu/i,'#B9BDC4'],[/grau|grey|gray/i,'#8C9097'],[/t(ü|ue)rkis|turquoise|aqua|mint/i,'#2CC5C0'],[/petrol/i,'#1F6F78'],[/blau|blue/i,'#3A6FD8'],[/oliv|olive/i,'#7A7F3A'],[/gr(ü|ue)n|green/i,'#2F7D4F'],[/ros(é|e)|rosa|pink/i,'#E6A3C8'],[/rot|red/i,'#C8102E'],[/orange/i,'#F07A1A'],[/gelb|yellow|gold/i,'#E8B923'],[/beige|sand|champagner/i,'#D9C3A0'],[/lila|violett|purple|lavendel/i,'#8E6CC9'],[/braun|brown/i,'#7A5236']];
+const lgFarbe=f=>{const x=FARB.find(([re])=>re.test(f||''));return x?x[1]:'#9AA0A8'};
+const eur=n=>n==null?'':n.toLocaleString('de-DE')+' €';
+function lgLoad(){if(LG.load)return LG.load;LG.load=fetch('data/bestand.json',{cache:'no-store'}).then(r=>{if(!r.ok)throw 0;return r.json()}).then(d=>{LG.all=(d.raeder||[]).map((r,i)=>Object.assign({_i:i},r));LG.ok=true;
+ $('#lgStand').textContent='Stand '+(d.stand||'');$('#lgDemo').hidden=d.quelle!=='Beispieldaten';
+ const n=LG.all.filter(r=>r.status!=='zulauf').length,z=LG.all.length-n;
+ $('#lgNum').innerHTML='<span><b>'+n+'</b> sofort verfügbar</span>'+(z?'<span><b>'+z+'</b> im Zulauf</span>':'')+'<span><b>'+new Set(LG.all.map(r=>(lgBrand(r.marke)||{n:r.marke}).n)).size+'</b> Marken</span>';
+ const q=$('#qkLager');if(q)q.textContent=n+' Räder sofort verfügbar';
+ lgChips()}).catch(()=>{$('#lgGrid').innerHTML='<p class="lgempty">Der Bestand konnte gerade nicht geladen werden. Rufen Sie uns gern an: 07271 78033.</p>'});return LG.load}
+function lgChips(){
+ const mk={};LG.all.forEach(r=>{const n=(lgBrand(r.marke)||{n:r.marke}).n;mk[n]=(mk[n]||0)+1});
+ $('#lgMk').innerHTML='<button type="button" data-mk="" class="'+(LG.f.mk?'':'on')+'">Alle Marken <i>'+LG.all.length+'</i></button>'+Object.keys(mk).sort((a,b)=>a.localeCompare(b,'de')).map(n=>{const b=BR.find(x=>x.n===n);return '<button type="button" data-mk="'+esc(n)+'" class="'+(LG.f.mk===n?'on':'')+'">'+(b?'<img src="'+b.logo+'" alt="">':'')+'<span>'+esc(n)+'</span><i>'+mk[n]+'</i></button>'}).join('');
+ const rf=[...new Set(LG.all.map(r=>r.rahmen).filter(Boolean))];
+ $('#lgRf').innerHTML=rf.length>1?'<button type="button" data-rf="" class="'+(LG.f.rf?'':'on')+'">Alle Rahmen</button>'+rf.map(x=>'<button type="button" data-rf="'+esc(x)+'" class="'+(LG.f.rf===x?'on':'')+'">'+esc(x)+'</button>').join(''):'';}
+function lgFilter(){const f=LG.f,q=f.q.toLowerCase().trim().split(/\s+/).filter(Boolean);
+ let L=LG.all.filter(r=>(!f.mk||(lgBrand(r.marke)||{n:r.marke}).n===f.mk)&&(!f.rf||r.rahmen===f.rf)&&(!f.nur||r.status!=='zulauf')&&q.every(w=>[r.marke,r.modell,r.farbe,r.gr,r.rahmen,r.jahr].join(' ').toLowerCase().includes(w)));
+ const pr=r=>r.angebot||r.preis||0;
+ if(f.sort==='pa')L.sort((a,b)=>pr(a)-pr(b));else if(f.sort==='pd')L.sort((a,b)=>pr(b)-pr(a));else if(f.sort==='mk')L.sort((a,b)=>(a.marke+a.modell).localeCompare(b.marke+b.modell,'de'));
+ else L.sort((a,b)=>(a.status==='zulauf')-(b.status==='zulauf')||(!!b.angebot-!!a.angebot)||a._i-b._i);
+ return L}
+function lgBadges(r){return (r.status==='zulauf'?'<span class="bd z">Im Zulauf'+(r.ab?' · ab '+esc(r.ab):'')+'</span>':'<span class="bd ok">Sofort verfügbar</span>')+(r.angebot?'<span class="bd an">Angebot</span>':'')+(r.vorfuehr?'<span class="bd vf">Vorführrad</span>':'')+(r.gebraucht?'<span class="bd gb">Gebraucht</span>':'')}
+function lgPrice(r){if(!r.preis)return '<span class="lgpr"><b>Preis auf Anfrage</b></span>';return '<span class="lgpr">'+(r.angebot?'<s>'+eur(r.preis)+'</s><b class="an">'+eur(r.angebot)+'</b>':'<b>'+eur(r.preis)+'</b>')+'</span>'}
+function lgRender(){if(!LG.ok)return;const L=LG.list=lgFilter();const g=$('#lgGrid');
+ if(!L.length){g.innerHTML='<p class="lgempty">Kein Rad passt zu diesen Filtern. <button type="button" class="ghost" id="lgReset">Filter zurücksetzen</button></p>';return}
+ g.innerHTML=L.map((r,k)=>{const b=lgBrand(r.marke),im=lgImg(r);return '<article class="lgc" role="button" tabindex="0" data-k="'+k+'" style="--ac:'+(b?b.c:'#8C9097')+';--d:'+Math.min(k,12)*0.04+'s" aria-label="'+esc(r.marke+' '+r.modell)+' ansehen">'+
+  '<div class="lgst">'+(b?'<img class="wl" src="'+b.logo+'" alt="">':'')+(im?'<img class="bk" src="'+im+'" alt="" loading="lazy">':'<svg class="ph"><use href="#i-bike"/></svg>')+'<div class="bds">'+lgBadges(r)+'</div></div>'+
+  '<div class="lgin"><span class="mk">'+esc(r.marke)+(r.jahr?' · '+esc(r.jahr):'')+'</span><h3>'+esc(r.modell)+'</h3><div class="sp">'+(r.gr?'<span>'+esc(r.gr)+'</span>':'')+(r.farbe?'<span><i style="background:'+lgFarbe(r.farbe)+'"></i>'+esc(r.farbe)+'</span>':'')+(r.rahmen?'<span>'+esc(r.rahmen)+'</span>':'')+'</div>'+
+  '<div class="ft">'+lgPrice(r)+'<span class="go">Ansehen</span></div></div></article>'}).join('')}
+function lgOpen(){lgLoad().then(()=>{lgChips();lgRender()})}
+/* Detailansicht im Showroom-Stil */
+function lgShow(k,dir){const L=LG.list;if(!L.length)return;LG.i=(k+L.length)%L.length;const r=L[LG.i],b=lgBrand(r.marke),im=lgImg(r),m=$('#lgm'),st=$('#lgmStage');
+ m.style.setProperty('--ac',b?b.c:'#8C9097');
+ const bk=$('#lgmBk'),rf=$('#lgmRf'),wl=$('#lgmWl');
+ const put=()=>{bk.src=im||'';rf.src=im||'';bk.alt=r.marke+' '+r.modell;wl.src=b?b.logo:'';wl.hidden=!b;bk.hidden=rf.hidden=!im;st.classList.remove('go-l','go-r');void st.offsetWidth;st.classList.add(dir<0?'go-r':'go-l')};
+ put();
+ const row=(l,v,h)=>v?'<div><dt>'+l+'</dt><dd>'+(h||esc(v))+'</dd></div>':'';
+ $('#lgmInfo').innerHTML='<p class="eyebrow">'+esc(r.marke)+(r.jahr?' · <b>Modelljahr '+esc(r.jahr)+'</b>':'')+'</p><h2 id="lgmT">'+esc(r.modell)+'</h2><div class="bds">'+lgBadges(r)+'</div>'+
+  '<div class="lgm-price">'+lgPrice(r)+(r.angebot?'<span class="sv">Sie sparen '+eur(r.preis-r.angebot)+'</span>':'')+'</div>'+
+  '<dl class="lgm-spec">'+row('Rahmenhöhe',r.gr)+row('Farbe',r.farbe,'<i style="background:'+lgFarbe(r.farbe)+'"></i>'+esc(r.farbe||''))+row('Rahmenform',r.rahmen)+row('Motor',r.motor)+row('Akku',r.akku)+row('Schaltung',r.schaltung)+row('Verfügbarkeit',1,r.status==='zulauf'?'Im Zulauf'+(r.ab?', voraussichtlich '+esc(r.ab):''):'Sofort, steht bei uns in Wörth')+row('Bestands-Nr.',r.id)+'</dl>'+
+  '<div class="row lgm-act"><button type="button" class="cta" data-ask="Kaufen">Dieses Rad anfragen</button><button type="button" class="ghost" data-ask="Probefahrt">Probefahrt</button></div>'+
+  '<form class="lgm-form" id="lgmF" hidden novalidate><div class="fl"><span class="flab">Ihr Wunsch</span><div class="choice" id="lgW"><button type="button" class="on" data-v="Kaufen">Kaufen</button><button type="button" data-v="Reservieren">Reservieren</button><button type="button" data-v="Probefahrt">Probefahrt</button><button type="button" data-v="Andere Größe/Farbe bestellen">Andere Größe/Farbe</button></div></div>'+
+  '<div class="r2"><div class="fl"><label for="lgN">Name</label><input class="inp" id="lgN" autocomplete="name"></div><div class="fl"><label for="lgT">Telefon</label><input class="inp" id="lgT" type="tel" autocomplete="tel"></div></div>'+
+  '<div class="fl"><label for="lgMsg">Nachricht (optional)</label><textarea class="inp" id="lgMsg" placeholder="z. B. Körpergröße, Wunschtermin …"></textarea></div><div class="err" id="lgE" role="alert"></div>'+
+  '<div class="row"><button type="submit" class="cta wa" data-via="wa"><svg><use href="#i-chat"/></svg>Per WhatsApp senden</button><button type="submit" class="ghost" data-via="mail">Per E-Mail</button></div><p class="note">Oder anrufen: 07271 78033</p></form>';
+ if(m.hidden){m.hidden=false;document.body.style.overflow='hidden';requestAnimationFrame(()=>m.classList.add('on'));$('.lgm-x',m).focus()}}
+function lgClose(){const m=$('#lgm');m.classList.remove('on');document.body.style.overflow='';setTimeout(()=>{m.hidden=true},320)}
+$('#lgGrid').addEventListener('click',e=>{if(e.target.closest('#lgReset')){LG.f={q:'',mk:'',rf:'',nur:false,sort:LG.f.sort};$('#lgQ').value='';$('#lgNur').checked=false;lgChips();lgRender();return}const c=e.target.closest('.lgc');if(c)lgShow(+c.dataset.k,1)});
+$('#lgGrid').addEventListener('keydown',e=>{const c=e.target.closest('.lgc');if(c&&(e.key==='Enter'||e.key===' ')){e.preventDefault();lgShow(+c.dataset.k,1)}});
+$('#lgMk').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;LG.f.mk=b.dataset.mk;lgChips();lgRender()});
+$('#lgRf').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;LG.f.rf=b.dataset.rf;lgChips();lgRender()});
+$('#lgQ').addEventListener('input',e=>{LG.f.q=e.target.value;lgRender()});
+$('#lgNur').addEventListener('change',e=>{LG.f.nur=e.target.checked;lgRender()});
+$('#lgSort').addEventListener('change',e=>{LG.f.sort=e.target.value;lgRender()});
+$('#lgm').addEventListener('click',e=>{if(e.target.closest('[data-close]')){lgClose();return}
+ const a=e.target.closest('[data-ask]');if(a){const f=$('#lgmF');f.hidden=false;$$('#lgW button').forEach(x=>x.classList.toggle('on',x.dataset.v===a.dataset.ask));$('.lgm-act').hidden=true;f.scrollIntoView({behavior:'smooth',block:'nearest'});$('#lgN').focus();return}
+ const w=e.target.closest('#lgW button');if(w){$$('#lgW button').forEach(x=>x.classList.toggle('on',x===w))}});
+$('#lgmP').addEventListener('click',()=>lgShow(LG.i-1,-1));$('#lgmN').addEventListener('click',()=>lgShow(LG.i+1,1));
+addEventListener('keydown',e=>{if($('#lgm').hidden)return;if(e.key==='Escape')lgClose();if(e.target.closest&&e.target.closest('input,textarea'))return;if(e.key==='ArrowRight')lgShow(LG.i+1,1);if(e.key==='ArrowLeft')lgShow(LG.i-1,-1)});
+let lgVia='wa';$('#lgm').addEventListener('click',e=>{const b=e.target.closest('#lgmF button[type=submit]');if(b)lgVia=b.dataset.via});
+$('#lgm').addEventListener('submit',e=>{e.preventDefault();const r=LG.list[LG.i],E=$('#lgE');E.textContent='';const n=$('#lgN').value.trim(),t=$('#lgT').value.trim(),msg=$('#lgMsg').value.trim(),w=$('#lgW .on').dataset.v;
+ if(!n||!t){E.textContent='Bitte Name und Telefon angeben, damit wir Sie erreichen.';return}
+ const txt='Hallo Velocenter,\nich interessiere mich für dieses Rad aus Ihrem Bestand:\n\n'+r.marke+' '+r.modell+(r.jahr?' ('+r.jahr+')':'')+'\n'+[r.gr&&'Größe: '+r.gr,r.farbe&&'Farbe: '+r.farbe].filter(Boolean).join(' · ')+'\nBestands-Nr.: '+r.id+'\n\nMein Wunsch: '+w+(msg?'\n'+msg:'')+'\n\nName: '+n+'\nTelefon: '+t;
+ const a=document.createElement('a');a.href=lgVia==='wa'?'https://wa.me/'+WA+'?text='+encodeURIComponent(txt):'mailto:info@velo-center.de?subject='+encodeURIComponent(w+': '+r.marke+' '+r.modell+' ('+r.id+')')+'&body='+encodeURIComponent(txt);if(lgVia==='wa'){a.target='_blank';a.rel='noopener'}document.body.append(a);a.click();a.remove();
+ E.style.color='#059669';E.textContent=lgVia==='wa'?'WhatsApp wird geöffnet. Bitte dort auf Senden tippen.':'Ihr E-Mail-Programm wird geöffnet. Bitte dort auf Senden klicken.'});
+/* Wischen in der Detailansicht */
+(()=>{let sx=0;const st=$('#lgmStage');st.addEventListener('pointerdown',e=>sx=e.clientX);st.addEventListener('pointerup',e=>{const d=e.clientX-sx;if(Math.abs(d)>50)lgShow(LG.i+(d<0?1:-1),d<0?1:-1)})})();
+/* Showroom „Auf Lager“ -> Bestand der Marke */
+document.addEventListener('click',e=>{const a=e.target.closest('[data-brand]');if(a){LG.f.mk=a.dataset.brand;LG.f.rf='';LG.f.q='';}},true);
+lgLoad();
 go(true);
 })();
 </script>
