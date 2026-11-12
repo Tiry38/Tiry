@@ -54,6 +54,18 @@ body.sc .hdr{background:rgba(7,8,13,.78);backdrop-filter:blur(18px) saturate(1.4
 body.sc .hdr::after{content:"";position:absolute;left:0;right:0;bottom:-1px;height:1px;background:var(--grad);opacity:.6}
 body.sc .hdr .wrap{height:90px}
 body.sc .hdr .logo img{height:68px}
+.hdr .wrap{position:relative}
+.hsoc{position:absolute;left:max(24px,env(safe-area-inset-left,0px));top:50%;transform:translateY(-50%);display:flex;gap:10px;align-items:center;opacity:0;pointer-events:none;transition:opacity .4s,transform .5s var(--ease)}
+body.herotop .hsoc{opacity:1;pointer-events:auto}
+.hsoc a{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-width:46px;height:46px;padding:0 12px;border-radius:999px;color:#fff;text-decoration:none;font:700 13px var(--display);box-shadow:0 8px 22px -8px rgba(0,0,0,.45),inset 0 1px 0 rgba(255,255,255,.35);transition:transform .25s var(--ease),box-shadow .25s}
+.hsoc a:hover{transform:translateY(-2px) scale(1.06)}
+.hsoc svg{width:21px;height:21px}
+.hsoc .ig{background:radial-gradient(circle at 30% 107%,#FDF497 0%,#FD5949 45%,#D6249F 60%,#285AEB 90%)}
+.hsoc .fb{background:linear-gradient(135deg,#1877F2,#0B5FD1)}
+.hsoc .wk{background:linear-gradient(135deg,#25D366,#128C7E)}
+.hsoc .wk span{display:none}
+@media (max-width:760px){.hsoc{gap:7px}.hsoc a{min-width:44px;height:44px;padding:0 10px}.hsoc svg{width:19px;height:19px}}
+@media (prefers-reduced-motion:reduce){.hsoc a{transition:none}}
 body.herotop .hdr .logo{opacity:0;transform:translateY(-12px) scale(.9);pointer-events:none}
 .nav{display:flex;align-items:center;gap:4px;margin-left:auto}
 .nav a{position:relative;padding:12px 14px;font:600 15px/1 var(--display);letter-spacing:.01em;color:var(--mut);text-decoration:none;transition:color .3s}
@@ -1714,6 +1726,7 @@ body.fz2 main,body.fz2 .foot{zoom:1.25}
 <header class="hdr">
  <div class="wrap">
   <a class="logo" href="#start" aria-label="Velocenter Hessert – Startseite"><img src="img/velocenter-logo.svg" alt="Velocenter Hessert" width="160" height="84"></a>
+  <div class="hsoc" aria-label="Velocenter in den sozialen Medien"><a class="ig" href="https://www.instagram.com/velocenterhessert/" target="_blank" rel="noopener" aria-label="Instagram" title="Instagram"><svg><use href="#i-ig"/></svg></a><a class="fb" href="https://www.facebook.com/velocenterhessert" target="_blank" rel="noopener" aria-label="Facebook" title="Facebook"><svg><use href="#i-fb"/></svg></a><a class="wk" href="https://whatsapp.com/channel/0029VaIekua60eBc6k2bMD0q" target="_blank" rel="noopener" aria-label="WhatsApp-Kanal" title="WhatsApp-Kanal"><svg><use href="#i-chat"/></svg><span>Kanal</span></a></div>
   <nav class="nav" id="nav" aria-label="Hauptnavigation">
    <a href="#start" data-r="start">Start</a>
    <a href="#service" data-r="service">Service</a>
