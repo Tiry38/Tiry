@@ -11,3 +11,5 @@
 - ENRA: E-Bikes bis 10.000 € (Stand enra.eu 12.11.2026).
 - Winter-Aktion: –20 € auf jede Inspektion (nie Prozent) + Sattelüberzug (nie „Satteldecke“), 01.11.2026–28.02.2027, keine festen Inspektionspreise.
 - Bilder immer freigestellt und geschärft.
+
+- Terminformular „Worum geht es?“: Probefahrt, Inspektion, Reparatur, Zubehör (kein Reifen/Schlauch, keine Bosch-Diagnose); „Rad“: Fahrrad, E-Bike, E-Dreirad (kein Lastenrad) (12.11.2026).
