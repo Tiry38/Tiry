@@ -149,15 +149,16 @@ def main():
     eindeutig = gruppieren(raeder)
     daten = dict(stand=datetime.date.today().strftime('%d.%m.%Y'), quelle='Veloport-Export', raeder=eindeutig, **({'hinweis': hinweis} if hinweis else {}))
     json.dump(daten, open(ziel, 'w', encoding='utf-8'), ensure_ascii=False, indent=1)
-    print(f'{len(raeder)} Räder -> {len(eindeutig)} verschiedene Räder -> {ziel} '
+    print(f'{len(raeder)} Räder -> {len(eindeutig)} Karten ({sum(len(k["farben"]) for k in eindeutig)} Farb-Ausführungen) -> {ziel} '
           f'(ausgelassen: {n_verk} verkauft, {n_res} reserviert, {n_service} Servicerad)')
 
 FELDER = ('marke', 'modell', 'jahr', 'gr', 'farbe', 'rahmen', 'typ', 'motor', 'akku', 'schaltung', 'display', 'reifen', 'gewicht', 'zgg', 'km',
           'status', 'ab', 'preis', 'angebot', 'vorfuehr', 'gebraucht', 'id')
 
 def gruppieren(raeder):
-    """Nur EXAKT gleiche Raeder (Marke, Modell, Jahr, Groesse, Rahmenform, Farbe, Zustand) werden
-    zu einem Eintrag – ohne Stueckzahl. Andere Groesse/Rahmenform/Farbe = eigenes Rad."""
+    """1) EXAKT gleiche Raeder (Marke, Modell, Jahr, Groesse, Rahmenform, Farbe, Zustand) -> ein Eintrag, ohne Stueckzahl.
+    2) Gleiches Modell in gleicher Groesse und Rahmenform -> eine Karte mit den Farben als Auswahl.
+       Andere Groesse oder Rahmenform = eigene Karte."""
     gleich = {}
     for r in raeder:
         key = tuple(str(r.get(k, '')).strip().lower() for k in ('marke', 'modell', 'jahr', 'gr', 'rahmen', 'farbe')) + (
@@ -173,7 +174,18 @@ def gruppieren(raeder):
         if neu.get('angebot') and (not alt.get('angebot') or neu['angebot'] < alt['angebot']): alt['angebot'] = neu['angebot']
         for k in ('motor', 'akku', 'schaltung', 'display', 'reifen', 'gewicht', 'zgg', 'typ'):
             if k in neu and k not in alt: alt[k] = neu[k]
-    return sorted(gleich.values(), key=lambda r: (r['status'] != 'lager', r['marke'].lower(), r['modell'].lower(), r.get('gr', '')))
+    # Schritt 2: gleiches Modell + gleiche Groesse + gleiche Rahmenform -> EINE Karte, Farben als Auswahl
+    karten = {}
+    for r in gleich.values():
+        key = tuple(str(r.get(k, '')).strip().lower() for k in ('marke', 'modell', 'gr', 'rahmen')) + (
+            bool(r.get('gebraucht')), bool(r.get('vorfuehr')))
+        k = karten.setdefault(key, {f: r[f] for f in ('marke', 'modell', 'gr', 'rahmen', 'typ', 'gebraucht', 'vorfuehr') if f in r} | {'farben': []})
+        k['farben'].append({f: r[f] for f in FELDER if f in r and f not in ('marke', 'modell', 'gr', 'rahmen', 'gebraucht', 'vorfuehr')})
+    out = []
+    for k in karten.values():
+        k['farben'].sort(key=lambda v: (v['status'] != 'lager', -(int(v.get('jahr') or 0)), v.get('farbe', '').lower()))
+        out.append(k)
+    return sorted(out, key=lambda k: (all(v['status'] != 'lager' for v in k['farben']), k['marke'].lower(), k['modell'].lower(), k.get('gr', '')))
 
 if __name__ == '__main__':
     main()
