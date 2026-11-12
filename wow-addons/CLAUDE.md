@@ -41,7 +41,8 @@ Aktueller Stand und offene Punkte: **[`UEBERGABE.md`](UEBERGABE.md)** – zuerst
 `addons/WindBaem/`: meldet per `C_UnitAuras.AddAuraSound(Added, {unitToken="player", spellID, soundFileName, outputChannel,
 throttleSeconds})` die 7 Windzorn-Proc-Auren an (Effekt „Extra Attacks“ in `allspells.txt`; Aura mit „No Aura Icon“). Nur außerhalb
 von Kampf/Bosssperre, sonst `pending` bis `PLAYER_REGEN_ENABLED`/`ENCOUNTER_END`; vor jedem Neu-Eintragen `RemoveAuraSound`.
-Sounds `tools/snd_wf.py` (Synthese, `Media/baem.ogg`, `braam.ogg`, Vorhören `previews/Sound_WindBaem_*.mp3`).
+Sounds `tools/snd_wf.py` (Formant-Synthese Kampfschrei, `Media/baem.ogg`, `hoch.ogg`, ≈ -21 dBFS RMS, Spitze ≤ -6; Vorhören
+`previews/Sound_WindBaem_*.mp3`). Kanal Standard `SFX` (Effekte-Regler), `DB.ver` 110 stellt 1.0-Einstellungen um.
 Test: `cd addons/WindBaem && lua5.1 ../../tests/wb.lua` („WB TESTS OK“).
 
 ## LevelPilot 7.0 – RXP-Modus

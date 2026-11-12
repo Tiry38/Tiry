@@ -55,7 +55,7 @@ local function cmd(s) SlashCmdList.WINDBAEM(s) end
 local function ids() local t = {} for _, s in pairs(reg) do t[s.spellID] = s end return t end
 
 -- Dateien vorhanden
-for _, n in ipairs({ "baem", "braam" }) do
+for _, n in ipairs({ "baem", "hoch" }) do
   local f = io.open("Media/" .. n .. ".ogg", "rb"); check(f ~= nil, "Media/" .. n .. ".ogg fehlt"); if f then f:close() end
 end
 -- Spell-IDs: genau die 7 Proc-Auren (Waffe R1-4, Totem R1-3)
@@ -69,20 +69,25 @@ fire("PLAYER_LOGIN")
 check(count() == 7, "7 Toene angemeldet: " .. count())
 local t = ids()
 for _, id in ipairs({ 8233, 8236, 10484, 16361, 8516, 10608, 10610 }) do check(t[id] ~= nil, "ID " .. id .. " angemeldet") end
-check(t[8233].soundFileName:find("baem.ogg", 1, true) and t[8233].outputChannel == "Master", "baem.ogg auf Master")
+check(t[8233].soundFileName:find("baem.ogg", 1, true) and t[8233].outputChannel == "SFX", "baem.ogg auf SFX (Effekte-Regler)")
 check(said("bereit"), "Login-Meldung bereit")
 
 -- Klang wechseln: keine Doppel-Eintraege, neue Datei, Test-Ton
-cmd("ton braam")
+cmd("ton hoch")
 check(count() == 7, "nach Klangwechsel weiter 7 (keine Doppelten)")
-check(ids()[16361].soundFileName:find("braam.ogg", 1, true), "braam.ogg aktiv")
-check(played[#played]:find("braam.ogg|Master", 1, true), "Klangwechsel spielt Probe")
-cmd("ton quatsch"); check(WindBaemDB.ton == "braam", "unbekannter Klang ignoriert")
+check(ids()[16361].soundFileName:find("hoch.ogg", 1, true), "hoch.ogg aktiv")
+check(played[#played]:find("hoch.ogg|SFX", 1, true), "Klangwechsel spielt Probe")
+cmd("ton quatsch"); check(WindBaemDB.ton == "hoch", "unbekannter Klang ignoriert")
 
 -- Totem aus / Waffe aus
 cmd("totem"); check(count() == 4 and not ids()[8516], "Totem aus -> 4")
 cmd("waffe"); check(count() == 0, "beides aus -> 0")
 cmd("waffe"); cmd("totem"); check(count() == 7, "beides wieder an -> 7")
+
+-- Kanal
+cmd("kanal master"); check(ids()[8233].outputChannel == "Master" and played[#played]:find("|Master", 1, true), "Kanal Master")
+cmd("kanal quatsch"); check(WindBaemDB.kanal == "Master", "unbekannter Kanal ignoriert")
+cmd("kanal sfx"); check(ids()[8233].outputChannel == "SFX", "Kanal SFX")
 
 -- Pause
 cmd("pause 2"); check(ids()[8233].throttleSeconds == 2, "Pause 2 s")
@@ -96,7 +101,7 @@ cmd("an"); check(count() == 7, "an -> 7")
 -- Kampf: nichts anfassen, danach eintragen
 incombat = true
 cmd("ton baem")
-check(count() == 7 and ids()[8233].soundFileName:find("braam.ogg", 1, true), "im Kampf bleibt alles wie es war")
+check(count() == 7 and ids()[8233].soundFileName:find("hoch.ogg", 1, true), "im Kampf bleibt alles wie es war")
 check(W.Live().pending, "im Kampf: vorgemerkt")
 incombat = false; fire("PLAYER_REGEN_ENABLED")
 check(count() == 7 and ids()[8233].soundFileName:find("baem.ogg", 1, true), "nach dem Kampf neu eingetragen (baem)")
@@ -112,6 +117,14 @@ check(count() == 7, "nach ENCOUNTER_END eingetragen")
 local n0 = #played; cmd("test"); check(#played == n0 + 1 and played[#played]:find("baem.ogg", 1, true), "/wb test spielt")
 out = {}; cmd("diag"); check(said("eingetragen: 7 von 7"), "diag")
 out = {}; cmd(""); check(said("/wb ton baem"), "Hilfe")
+
+-- Umstieg von 1.0: braam + Master -> baem + SFX
+WindBaemDB = { on = true, ton = "braam", kanal = "Master", waffe = true, totem = true, pause = 0 }
+fire("ADDON_LOADED", "WindBaem")
+check(WindBaemDB.ton == "baem" and WindBaemDB.kanal == "SFX" and WindBaemDB.ver == 110, "1.0-Einstellungen umgestellt")
+WindBaemDB.kanal = "Master"; fire("ADDON_LOADED", "WindBaem")
+check(WindBaemDB.kanal == "Master", "eigene Kanalwahl nach 1.1 bleibt")
+for k in pairs(reg) do reg[k] = nil end; W.Off(); W.Apply()
 
 -- Client ohne AddAuraSound
 local keep = C_UnitAuras.AddAuraSound; C_UnitAuras.AddAuraSound = nil

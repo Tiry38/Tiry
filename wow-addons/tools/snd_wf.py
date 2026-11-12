@@ -1,147 +1,123 @@
-# WindBaem-Sounds: "baem" (geschrienes BAEAEM + Einschlag) und "braam" (tiefes Kino-Horn mit Einschlag)
-# Reine Synthese mit numpy (Formant-Stimme, Saegezahn-Blech, Sub-Boom). Keine fremden Aufnahmen.
+# WindBaem-Sounds v2: kurzer, heller Kampfschrei "Baem!" (Kampfkunst-Stil), kein Bass-Einschlag.
+# Eigene Formant-Synthese (Stimmlippen-Impulse -> Vokaltrakt-Resonanzen), keine Aufnahmen, keine echte Stimme nachgemacht.
+#   baem  : schnell, ~0,3 s, Ruf faellt von oben (Standard)
+#   hoch  : noch kuerzer und hoeher, scharfer Ansatz
+# Lautheit: RMS des hoerbaren Teils -21 dBFS (LevelPilots Ankunft: -20), Spitze <= -6 dBFS.
+# (LUFS geht nicht: ebur128 misst Klaenge unter 0,4 s nicht.)
 # Aufruf: python3 -I tools/snd_wf.py   (aus wow-addons/)
-import numpy as np, wave, subprocess, os
+import numpy as np, wave, subprocess, os, re
+from scipy.signal import lfilter
+
 SR = 44100
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
 MEDIA = os.path.join(ROOT, "addons", "WindBaem", "Media")
 PREV = os.path.join(ROOT, "previews")
-rng = np.random.default_rng(1990)
-
-
-def band(x, lo, hi):
-    N = len(x); X = np.fft.rfft(x); f = np.fft.rfftfreq(N, 1 / SR)
-    m = np.ones_like(f)
-    if lo: m *= 1 / (1 + (lo / np.maximum(f, 1e-3)) ** 4)
-    if hi: m *= 1 / (1 + (f / hi) ** 4)
-    return np.fft.irfft(X * m, N)
-
-
-def reverb(x, seed, length=1.0, tau=0.25):
-    r = np.random.default_rng(seed); L = int(SR * length); tt = np.arange(L) / SR
-    ir = band(r.standard_normal(L) * np.exp(-tt / tau), 150, 6000)
-    ir[: int(0.015 * SR)] = 0
-    ir /= np.sqrt(np.sum(ir ** 2))
-    n = len(x)
-    return np.fft.irfft(np.fft.rfft(x, n + L) * np.fft.rfft(ir, n + L))[:n]
+TARGET_RMS = -24.0   # gemessen nach Vorbis-Mono-Mix = ca. -21
 
 
 def env(t, pts):
-    """lineare Huellkurve aus (Zeit, Wert)-Punkten"""
     xs, ys = zip(*pts)
     return np.interp(t, xs, ys)
 
 
-def formant_gain(f, formants):
-    g = np.zeros_like(f)
-    for fc, bw, a in formants:
-        g += a / (1 + ((f - fc) / (bw / 2)) ** 2)
-    return g
+def glottal(f0, rng, open_q=0.45, close_q=0.12):
+    """Rosenberg-Impulsfolge mit gleitender Tonhoehe, leichtem Jitter; abgeleitet (Lippenabstrahlung)."""
+    jit = 1 + 0.006 * rng.standard_normal(len(f0))
+    ph = np.cumsum(f0 * jit) / SR
+    p = ph - np.floor(ph)
+    g = np.where(p < open_q, 0.5 * (1 - np.cos(np.pi * p / open_q)),
+                 np.where(p < open_q + close_q, np.cos(np.pi * (p - open_q) / (2 * close_q)), 0.0))
+    return np.diff(g, prepend=0.0), p
 
 
-def voice(t, f0, vowel_mix, seed):
-    """Additive Stimme: Harmonische von f0(t), gewichtet mit Formanten von AE (offen) -> M (nasal)."""
-    AE = [(620, 110, 1.0), (1780, 160, 0.55), (2550, 220, 0.30), (3500, 300, 0.12)]
-    M = [(260, 70, 1.0), (1050, 200, 0.10), (2300, 300, 0.04)]
-    phase = 2 * np.pi * np.cumsum(f0) / SR
-    out = np.zeros_like(t)
-    r = np.random.default_rng(seed)
-    for k in range(1, 46):
-        fk = k * f0
-        live = fk < 7000
-        ga = formant_gain(fk, AE); gm = formant_gain(fk, M)
-        g = (1 - vowel_mix) * ga + vowel_mix * gm
-        out += live * g * (1.0 / k ** 0.6) * np.sin(k * phase + r.uniform(0, 2 * np.pi))
-    return out
+def resonators(x, formants):
+    """Kaskade aus 2-Pol-Resonatoren (Vokaltrakt)."""
+    y = x
+    for f, bw in formants:
+        r = np.exp(-np.pi * bw / SR); th = 2 * np.pi * f / SR
+        a = [1, -2 * r * np.cos(th), r * r]
+        y = lfilter([1 - r], a, y)
+    return y
 
 
-def sweep_lp(x, cut):
-    """zeitvariabler Tiefpass (2 x 1-Pol), keine Bloecke -> keine Klicks"""
-    a = 1 - np.exp(-2 * np.pi * cut / SR)
-    y1 = 0.0; y2 = 0.0; out = np.empty_like(x)
-    for i in range(len(x)):
-        y1 += a[i] * (x[i] - y1); y2 += a[i] * (y1 - y2); out[i] = y2
-    return out
+def hp(x, fc):
+    r = np.exp(-2 * np.pi * fc / SR)
+    return lfilter([(1 + r) / 2, -(1 + r) / 2], [1, -r], x)
 
 
-def soft(x, drive):
-    return np.tanh(drive * x) / np.tanh(drive)
+def shout(T, f0pts, voice_on, m_start, seed, bright=1.0):
+    rng = np.random.default_rng(seed)
+    n = int(SR * T); t = np.arange(n) / SR
+    f0 = env(t, f0pts)
+    src, ph = glottal(f0, rng)
+    # Hauch (Kampfschrei = gepresst + Luft): Rauschen, im Takt der Stimmlippen moduliert
+    asp = rng.standard_normal(n) * (0.35 + 0.65 * (ph < 0.5)) * 0.05 * bright
+    exc = src + asp
+    # Vokal AE (offen, gerufen: F1 hoch) und M (Lippen zu, nasal)
+    AE = [(780, 90), (1720, 110), (2650, 150), (3600, 220), (4500, 300)]
+    M = [(270, 60), (1150, 250), (2300, 350)]
+    ae = resonators(exc, AE)
+    m = resonators(exc, M) * 0.55
+    ae /= np.max(np.abs(ae)); m /= np.max(np.abs(m))
+    mix = np.clip((t - m_start) / 0.025, 0, 1)                  # schneller Lippenschluss -> M
+    v = (1 - mix) * ae + mix * m
+    amp = env(t, [(0, 0), (voice_on, 0), (voice_on + 0.012, 1.0), (m_start, 0.8), (m_start + 0.03, 0.45), (T - 0.03, 0.12), (T, 0)])
+    v *= amp
+    # B: kurzer Stimmton hinter geschlossenen Lippen + Verschluss-Loesung (Knack, hell)
+    bar = resonators(src, [(180, 60)]) * env(t, [(0, 0), (0.004, 0.10), (voice_on, 0.10), (voice_on + 0.005, 0)])
+    burst = hp(rng.standard_normal(n), 400) * np.exp(-np.maximum(t - voice_on, 0) / 0.004) * (t >= voice_on) * 0.25
+    y = v + bar / (np.max(np.abs(bar)) + 1e-9) * 0.08 + burst
+    y = np.tanh(1.6 * y) / np.tanh(1.6)                          # gepresst, ohne Matsch
+    y = hp(y, 140)                                                # nichts Dumpfes
+    # kleiner, kurzer Raum (keine Halle)
+    L = int(0.18 * SR); tt = np.arange(L) / SR
+    ir = rng.standard_normal(L) * np.exp(-tt / 0.045); ir[: int(0.008 * SR)] = 0; ir = hp(ir, 600)
+    ir /= np.sqrt(np.sum(ir ** 2))
+    wet = np.convolve(y, ir)[:n]
+    Lc = y + 0.10 * wet
+    Rc = y + 0.10 * np.roll(wet, 23)
+    k = int(0.02 * SR); fade = np.ones(n); fade[-k:] = np.cos(np.linspace(0, np.pi / 2, k)) ** 2
+    st = np.stack([Lc * fade, Rc * fade], 1)
+    return st / np.max(np.abs(st)) * 0.5
 
 
-def finish(L, R, fade_s, peak_db=-0.8):
-    n = len(L); fade = np.ones(n); k = int(fade_s * SR)
-    fade[-k:] = np.cos(np.linspace(0, np.pi / 2, k)) ** 2
-    st = np.stack([L * fade, R * fade], 1)
-    st /= np.max(np.abs(st)); st *= 10 ** (peak_db / 20)
-    return st
+def active_rms(x):
+    """RMS (dBFS) der 10-ms-Fenster, die hoechstens 20 dB unter dem lautesten liegen."""
+    m = x.mean(1) if x.ndim == 2 else x
+    w = 441; n = len(m) // w
+    r = np.sqrt((m[: n * w].reshape(n, w) ** 2).mean(1))
+    a = r[r > r.max() * 0.1]
+    return 20 * np.log10(np.sqrt((a ** 2).mean()))
+
+
+def decode(path):
+    raw = subprocess.run(["ffmpeg", "-loglevel", "error", "-i", path, "-f", "f32le", "-ac", "1", "-ar", str(SR), "-"],
+                         capture_output=True, check=True).stdout
+    return np.frombuffer(raw, np.float32)
 
 
 def write(name, st):
     os.makedirs(MEDIA, exist_ok=True)
     wav = os.path.join(MEDIA, name + ".wav")
-    with wave.open(wav, "wb") as w:
-        w.setnchannels(2); w.setsampwidth(2); w.setframerate(SR)
-        w.writeframes((np.clip(st, -1, 1) * 32767).astype(np.int16).tobytes())
-    subprocess.run(["ffmpeg", "-y", "-loglevel", "error", "-i", wav, "-c:a", "libvorbis", "-q:a", "6",
-                    os.path.join(MEDIA, name + ".ogg")], check=True)
+
+    def dump(x):
+        with wave.open(wav, "wb") as w:
+            w.setnchannels(2); w.setsampwidth(2); w.setframerate(SR)
+            w.writeframes((np.clip(x, -1, 1) * 32767).astype(np.int16).tobytes())
+    gain = 10 ** ((TARGET_RMS - active_rms(st)) / 20)
+    gain = min(gain, 10 ** (-6.0 / 20) / np.max(np.abs(st)))   # Spitze nie ueber -6 dBFS
+    dump(st * gain)
+    ogg = os.path.join(MEDIA, name + ".ogg")
+    subprocess.run(["ffmpeg", "-y", "-loglevel", "error", "-i", wav, "-c:a", "libvorbis", "-q:a", "6", ogg], check=True)
     subprocess.run(["ffmpeg", "-y", "-loglevel", "error", "-i", wav, "-c:a", "libmp3lame", "-q:a", "2",
                     os.path.join(PREV, "Sound_WindBaem_" + name + ".mp3")], check=True)
     os.remove(wav)
-
-
-def impact(t):
-    """B-Plosiv + Einschlag: tiefer Schlag mit fallender Tonhoehe und kurzer Knall"""
-    f = 38 + 70 * np.exp(-t / 0.06)
-    sub = np.sin(2 * np.pi * np.cumsum(f) / SR) * np.exp(-t / 0.42)
-    crack = band(rng.standard_normal(len(t)), 900, 7000) * np.exp(-t / 0.012)
-    thump = band(rng.standard_normal(len(t)), 40, 300) * np.exp(-t / 0.035)
-    return 1.0 * sub + 0.35 * crack + 0.5 * thump
-
-
-def baem():
-    T = 1.45; n = int(SR * T); t = np.arange(n) / SR
-    # Stimme: setzt nach 18 ms ein (B-Verschluss), BAEAEAE bis ~0.85 s, dann M
-    f0 = 158 - 30 * np.clip(t / 1.1, 0, 1) + 2.5 * np.sin(2 * np.pi * 5.2 * t) * np.clip((t - 0.25) / 0.3, 0, 1)
-    mix = np.clip((t - 0.80) / 0.14, 0, 1)                    # AE -> M
-    a = env(t, [(0, 0), (0.018, 0), (0.05, 1.0), (0.80, 0.85), (0.95, 0.55), (1.25, 0.25), (T, 0)])
-    vL = voice(t, f0, mix, 1) + 0.6 * voice(t, f0 * 1.007, mix, 2)     # zwei Stimmen = kraeftiger Ruf
-    vR = voice(t, f0, mix, 3) + 0.6 * voice(t, f0 * 0.993, mix, 4)
-    vL = soft(vL / np.max(np.abs(vL)) * a, 2.2); vR = soft(vR / np.max(np.abs(vR)) * a, 2.2)
-    # Blech-Unterlage (Oktave tiefer), oeffnet mit dem Ruf
-    b0 = f0 / 2
-    ph = 2 * np.pi * np.cumsum(b0) / SR
-    brass = sum(np.sin(k * ph) / k for k in range(1, 30))
-    brass = soft(band(brass, 30, 1400) * env(t, [(0, 0), (0.03, 0.9), (0.8, 0.7), (1.3, 0.1), (T, 0)]), 1.6)
-    hit = impact(t)
-    hit = band(hit, 38, None)
-    L = 1.0 * vL + 0.40 * brass + 0.60 * hit
-    R = 1.0 * vR + 0.40 * brass + 0.60 * hit
-    L = L + 0.22 * reverb(L, 11); R = R + 0.22 * reverb(R, 12)
-    return finish(L, R, 0.18)
-
-
-def braam():
-    T = 1.6; n = int(SR * T); t = np.arange(n) / SR
-    f0 = 55 * (1 - 0.03 * np.clip(t / T, 0, 1))
-    out = []
-    for det, seed in ((1.0, 5), (1.006, 6), (0.994, 7)):
-        ph = 2 * np.pi * np.cumsum(f0 * det) / SR
-        saw = sum(np.sin(k * ph + seed) / k for k in range(1, 60))
-        out.append(saw)
-    body = out[0] + 0.7 * out[1] + 0.7 * out[2]
-    # Filter oeffnet schnell (BRAA) und schliesst langsam (AAM): gleitender 2-Pol-Tiefpass, Probe fuer Probe
-    cut = env(t, [(0, 250), (0.06, 2600), (0.5, 1500), (1.2, 350), (T, 200)])
-    y = sweep_lp(body, cut)
-    y = soft(y / np.max(np.abs(y)) * env(t, [(0, 0), (0.012, 1), (0.9, 0.8), (1.4, 0.15), (T, 0)]), 2.6)
-    hit = band(impact(t), 38, None)
-    y = band(y, 38, None)
-    L = 0.9 * y + 0.85 * hit; R = 0.9 * np.roll(y, 90) + 0.85 * hit
-    L = L + 0.25 * reverb(L, 21); R = R + 0.25 * reverb(R, 22)
-    return finish(L, R, 0.2)
+    y = decode(ogg)
+    print(name, "RMS %.1f dBFS  Spitze %.1f dBFS  %.2f s" % (active_rms(y), 20 * np.log10(np.max(np.abs(y))), len(y) / SR))
 
 
 if __name__ == "__main__":
-    write("baem", baem())
-    write("braam", braam())
-    print("ok:", os.listdir(MEDIA))
+    # Ruf setzt nach 15 ms ein, Tonhoehe springt hoch und faellt (Kampfschrei), M ab 0,21 s
+    write("baem", shout(0.32, [(0, 250), (0.015, 300), (0.05, 330), (0.20, 270), (0.32, 230)], 0.015, 0.21, 7))
+    write("hoch", shout(0.26, [(0, 320), (0.010, 380), (0.04, 410), (0.16, 340), (0.26, 300)], 0.010, 0.165, 9, bright=1.3))

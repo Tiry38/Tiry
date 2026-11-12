@@ -1,4 +1,4 @@
--- WindBaem 1.0.0 (Tiry): "Baeaeaem!" bei jedem Windzorn-Proc - auch im Kampf.
+-- WindBaem 1.1.0 (Tiry): kurzer Kampfschrei "Baem!" bei jedem Windzorn-Proc - auch im Kampf.
 --
 -- Warum keine WeakAura: WoW Forever sperrt im Kampf Aura-Daten und den Kampflog fuer Add-ons
 -- ("secret values"), WeakAuras-Forever fuehrt keinen eigenen Code aus. Eine WeakAura wuerde
@@ -13,7 +13,7 @@
 --   Waffe des Windzorns  Rang 1-4: 8233, 8236, 10484, 16361
 --   Totem des Windzorns  Rang 1-3: 8516, 10608, 10610
 
-local VERSION = "1.0.0"
+local VERSION = "1.1.0"
 local MEDIA = "Interface\\AddOns\\WindBaem\\Media\\"
 
 WindBaem = WindBaem or {}
@@ -21,9 +21,11 @@ local W = WindBaem
 
 W.WEAPON = { 8233, 8236, 10484, 16361 }
 W.TOTEM = { 8516, 10608, 10610 }
-W.SOUNDS = { baem = "BAEAEM (Ruf + Einschlag)", braam = "BRAAAM (tiefes Horn + Einschlag)" }
+W.SOUNDS = { baem = "Bäm! (schneller Kampfschrei)", hoch = "Bäm! (höher, noch kürzer)" }
+W.KANAL = { sfx = "SFX", master = "Master", dialog = "Dialog" }
 
-local DEF = { on = true, ton = "baem", waffe = true, totem = true, pause = 0, kanal = "Master" }
+-- Kanal SFX = folgt dem Regler "Effekte" in den Spiel-Toneinstellungen
+local DEF = { on = true, ton = "baem", waffe = true, totem = true, pause = 0, kanal = "SFX" }
 local DB
 local live = { ids = {}, pending = false, why = nil }
 
@@ -104,7 +106,8 @@ E:SetScript("OnEvent", function(_, ev, a1)
     WindBaemDB = WindBaemDB or {}
     DB = WindBaemDB
     for k, v in pairs(DEF) do if DB[k] == nil then DB[k] = v end end
-    if not W.SOUNDS[DB.ton] then DB.ton = "baem" end
+    if not W.SOUNDS[DB.ton] then DB.ton = "baem" end      -- 1.0: "braam" gibt es nicht mehr
+    if (DB.ver or 0) < 110 then DB.kanal = "SFX"; DB.ver = 110 end   -- 1.0 lief auf Master (zu laut)
   elseif ev == "PLAYER_LOGIN" then
     W.Apply()
     local st = (W.Count() > 0) and ("|cff39ff6bbereit|r (" .. W.Count() .. " Windzorn-Auren)") or ("|cffff5555" .. tostring(live.why) .. "|r")
@@ -118,7 +121,8 @@ end)
 local HELP = {
   "|cffffffff/wb test|r – Ton jetzt abspielen",
   "|cffffffff/wb an|r / |cffffffffaus|r – Ton ein/aus",
-  "|cffffffff/wb ton baem|r oder |cffffffffbraam|r – Klang wählen",
+  "|cffffffff/wb ton baem|r oder |cffffffffhoch|r – Klang wählen",
+  "|cffffffff/wb kanal sfx|r / |cffffffffmaster|r / |cffffffffdialog|r – welcher Lautstärke-Regler gilt (Standard: Effekte)",
   "|cffffffff/wb waffe|r / |cfffffffftotem|r – Waffen- bzw. Totem-Windzorn an/aus",
   "|cffffffff/wb pause 0-5|r – Mindestabstand in Sekunden (0 = jeder Proc)",
   "|cffffffff/wb diag|r – Status",
@@ -143,7 +147,13 @@ SlashCmdList.WINDBAEM = function(arg)
     if W.SOUNDS[val] then
       set(function() DB.ton = val end); W.Test(); msg("Klang: " .. W.SOUNDS[val])
     else
-      msg("/wb ton baem  oder  /wb ton braam")
+      msg("/wb ton baem  oder  /wb ton hoch")
+    end
+  elseif cmd == "kanal" then
+    if W.KANAL[val] then
+      set(function() DB.kanal = W.KANAL[val] end); W.Test(); msg("Lautstärke-Regler: " .. DB.kanal)
+    else
+      msg("/wb kanal sfx | master | dialog")
     end
   elseif cmd == "waffe" or cmd == "totem" then
     set(function() DB[cmd] = not DB[cmd] end)
@@ -153,7 +163,7 @@ SlashCmdList.WINDBAEM = function(arg)
     if n and n >= 0 and n <= 5 then set(function() DB.pause = n end); msg("Mindestabstand " .. n .. " s")
     else msg("/wb pause 0-5") end
   elseif cmd == "diag" then
-    msg(VERSION .. " · " .. (DB.on and "an" or "aus") .. " · Klang " .. DB.ton .. " · Pause " .. DB.pause .. " s")
+    msg(VERSION .. " · " .. (DB.on and "an" or "aus") .. " · Klang " .. DB.ton .. " · Pause " .. DB.pause .. " s · Regler " .. DB.kanal)
     msg("eingetragen: " .. W.Count() .. " von " .. #W.IDs() .. (live.why and (" · " .. live.why) or ""))
   else
     msg(VERSION .. " – Ton bei Windzorn-Proc, auch im Kampf:")

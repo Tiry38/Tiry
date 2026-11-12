@@ -2,7 +2,7 @@
 ## Title: |cff39ff6bWind|r|cff2de2e6Baem|r
 ## Notes: Spielt "Baeaeaem!" bei jedem Windzorn-Proc (Waffe + Totem), auch im Kampf - ueber Blizzards Aura-Ton.
 ## Author: Tiry
-## Version: 1.0.0
+## Version: 1.1.0
 ## SavedVariables: WindBaemDB
 
 WindBaem.lua
