@@ -577,6 +577,45 @@ body.sc .hdr{background:rgba(250,247,244,.84);box-shadow:0 1px 0 rgba(27,30,37,.
  .visit::before{background:linear-gradient(0deg,rgba(250,247,244,.97) 45%,rgba(250,247,244,.55)),linear-gradient(0deg,var(--bg),transparent 25%)}
  .bandimg::before{background:linear-gradient(90deg,rgba(250,247,244,.96) 45%,rgba(250,247,244,.7))}
 }
+
+/* ================= Mehr Farbe, aber hell (Tiry 12.11.2026) ================= */
+:root{--bg:#FDEFF2}
+.sky{background:
+ radial-gradient(38% 34% at 2% 0%,rgba(96,165,250,.55),transparent 70%),
+ radial-gradient(40% 36% at 100% 0%,rgba(251,113,133,.6),transparent 70%),
+ radial-gradient(44% 40% at 100% 100%,rgba(167,139,250,.55),transparent 70%),
+ radial-gradient(40% 36% at 0% 100%,rgba(45,212,191,.42),transparent 70%),
+ radial-gradient(34% 30% at 50% 50%,rgba(251,191,36,.22),transparent 70%),
+ linear-gradient(160deg,#FFE4E8 0%,#FCE7F6 28%,#EEE6FF 52%,#DFEDFF 76%,#DDF8F1 100%)}
+.smoke{opacity:.22}
+body.sc .hdr{background:rgba(255,236,242,.82)}
+.hdr .wrap{position:relative}
+.halo{background:radial-gradient(closest-side,rgba(226,35,45,.24),rgba(219,39,119,.16) 45%,rgba(124,58,237,.12) 65%,transparent 78%)}
+.stage0::after{content:"";position:absolute;z-index:-2;inset:0;background:radial-gradient(60% 50% at 20% 30%,rgba(255,255,255,.55),transparent 70%)}
+/* Farbzonen */
+.zone{position:relative;isolation:isolate}
+.zone::before{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none}
+.show{transition:background-color .8s}
+.show::after{content:"";position:absolute;inset:0;z-index:-2;pointer-events:none;background:
+ radial-gradient(60% 55% at 50% 52%,color-mix(in srgb,var(--ac) 34%,transparent),transparent 72%),
+ linear-gradient(180deg,transparent,color-mix(in srgb,var(--ac) 16%,transparent) 22%,color-mix(in srgb,var(--ac) 20%,transparent) 78%,transparent);transition:background .8s}
+.z-peach::before{background:linear-gradient(180deg,transparent,rgba(254,215,170,.55) 14%,rgba(253,186,170,.5) 60%,transparent)}
+.z-lilac::before{background:linear-gradient(180deg,transparent,rgba(221,214,254,.75) 18%,rgba(251,207,232,.6) 80%,transparent)}
+.z-sky::before{background:linear-gradient(180deg,transparent,rgba(186,230,253,.65) 16%,rgba(199,210,254,.6) 84%,transparent)}
+.z-mint::before{background:linear-gradient(180deg,transparent,rgba(167,243,208,.5) 16%,rgba(186,230,253,.5) 84%,transparent)}
+.ph::before{content:"";position:absolute;z-index:-2;inset:0;background:radial-gradient(50% 70% at 85% 30%,rgba(251,113,133,.35),transparent 70%),radial-gradient(45% 60% at 10% 80%,rgba(129,140,248,.3),transparent 70%)}
+.ice{background:linear-gradient(120deg,#BAE6FD,#C7D2FE 42%,#DDD6FE 72%,#FBCFE8)}
+.ice::before{background:radial-gradient(50% 70% at 85% 30%,rgba(14,165,233,.35),transparent 70%),radial-gradient(40% 60% at 10% 80%,rgba(139,92,246,.32),transparent 70%)}
+.visit::before{background:linear-gradient(90deg,rgba(255,228,236,.96) 0%,rgba(252,231,246,.9) 38%,rgba(238,230,255,.35) 75%,rgba(238,230,255,.05)),linear-gradient(0deg,var(--bg),transparent 20%,transparent 82%,var(--bg))}
+.bandimg::before{background:linear-gradient(90deg,rgba(224,242,254,.96) 24%,rgba(224,231,255,.7) 55%,rgba(224,231,255,0))}
+.finder{background:radial-gradient(80% 120% at 0% 0%,rgba(251,113,133,.35),transparent 60%),radial-gradient(80% 120% at 100% 100%,rgba(96,165,250,.38),transparent 60%),rgba(255,255,255,.55)}
+.foot{background:linear-gradient(180deg,transparent,rgba(251,113,133,.28) 40%,rgba(226,35,45,.32))}
+.band.b{background:linear-gradient(90deg,#2A2D34,#3B2430 50%,#2A2D34)}
+.panel{background:rgba(255,255,255,.72)}
+@media (max-width:640px){
+ .visit::before{background:linear-gradient(0deg,rgba(255,228,236,.97) 45%,rgba(252,231,246,.6)),linear-gradient(0deg,var(--bg),transparent 25%)}
+ .bandimg::before{background:linear-gradient(90deg,rgba(224,242,254,.96) 45%,rgba(224,231,255,.75))}
+}
 </style>
 
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
@@ -986,7 +1025,7 @@ m696 -454 c28 -13 46 -31 55 -51 22 -53 -50 -177 -173 -300 -187 -186 -647
   </div>
  </div>
 
- <div class="sec" style="padding-top:0">
+ <div class="sec zone z-peach">
   <div class="wrap atelier">
    <div class="side pre">
     <p class="eyebrow">Unser <b>Versprechen</b></p>
@@ -1023,7 +1062,7 @@ m696 -454 c28 -13 46 -31 55 -51 22 -53 -50 -177 -173 -300 -187 -186 -647
   </div>
  </div>
 
- <div class="sec">
+ <div class="sec zone z-lilac">
   <div class="wrap voices">
    <div class="score pre"><b>4,9</b><div class="stars"><svg><use href="#i-star"/></svg><svg><use href="#i-star"/></svg><svg><use href="#i-star"/></svg><svg><use href="#i-star"/></svg><svg><use href="#i-star"/></svg></div><span>97 Bewertungen bei Google</span></div>
    <div class="pre" style="--d:.1s">
@@ -1077,7 +1116,7 @@ m696 -454 c28 -13 46 -31 55 -51 22 -53 -50 -177 -173 -300 -187 -186 -647
   </div>
  </div>
 
- <div class="sec" id="termin-form" style="padding-top:0">
+ <div class="sec zone z-sky" id="termin-form">
   <div class="wrap formwrap">
    <div class="pre">
     <p class="eyebrow">Online-<b>Terminanfrage</b></p>
@@ -1244,7 +1283,7 @@ m696 -454 c28 -13 46 -31 55 -51 22 -53 -50 -177 -173 -300 -187 -186 -647
    <div class="ped hello" style="--d:.2s;--a1:#22D3EE;--a2:#60A5FA;--a3:#C084FC"><img src="img/p-vanraam.webp" alt="Van Raam Easy Rider E-Dreirad" width="1600" height="1193"></div>
   </div>
  </div>
- <div class="sec">
+ <div class="sec zone z-mint">
   <div class="wrap rows">
    <div class="srow pre" style="--c:#22D3EE"><span class="ic"><svg><use href="#i-shield"/></svg></span><span><h3>Standsicher</h3><p>Drei Räder kippen beim Anhalten nicht. Das gibt vielen Menschen ihr Rad und ihre Freiheit zurück.</p></span></div>
    <div class="srow pre" style="--c:#F472B6"><span class="ic"><svg><use href="#i-bike"/></svg></span><span><h3>Probefahrt vor Ort</h3><p>Ein Dreirad fährt sich anders als ein Zweirad. Kommen Sie vorbei und testen Sie in Ruhe, wir erklären alles.</p></span></div>
