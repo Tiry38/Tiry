@@ -1213,6 +1213,27 @@ body.sc .hdr{backdrop-filter:none!important;-webkit-backdrop-filter:none!importa
 .ribbons i:nth-child(1),.ribbons i:nth-child(4){filter:none!important;-webkit-mask-image:none!important;mask-image:none!important;border-radius:50%}
 .ribbons i:nth-child(1){top:4%!important;left:-10%!important;width:85%!important;height:46vh!important;background:radial-gradient(closest-side,rgba(200,16,46,.20),rgba(200,16,46,.09) 45%,rgba(200,16,46,.03) 72%,transparent)!important}
 .ribbons i:nth-child(4){top:58%!important;left:35%!important;width:80%!important;height:42vh!important;background:radial-gradient(closest-side,rgba(176,18,31,.17),rgba(176,18,31,.07) 48%,rgba(176,18,31,.02) 74%,transparent)!important}
+/* Schnellzugriff-Leiste: Premium (Anthrazit-Glas, Kupfer-Rot-Kante, Licht beim Drüberfahren) */
+.quick{position:relative;isolation:isolate;padding:7px!important;gap:0!important;border-radius:24px!important;background:linear-gradient(180deg,#2E3139 0%,#1C1E24 100%) padding-box,linear-gradient(110deg,rgba(255,77,99,.55),rgba(184,115,51,.45) 35%,rgba(255,255,255,.08) 60%,rgba(232,201,160,.35)) border-box!important;border:1px solid transparent!important;box-shadow:0 1px 0 rgba(255,255,255,.07) inset,0 40px 70px -34px rgba(18,20,25,.75),0 16px 30px -22px rgba(200,16,46,.45)!important}
+.quick::before{content:"";position:absolute;left:24px;right:24px;top:-1px;height:2px;border-radius:2px;background:linear-gradient(90deg,transparent,#FF4D63 30%,#E8C9A0 60%,transparent);opacity:.85;z-index:1}
+.quick::after{content:"";position:absolute;inset:0;border-radius:inherit;z-index:-1;background:radial-gradient(60% 140% at 0% 0%,rgba(200,16,46,.16),transparent 60%),radial-gradient(50% 140% at 100% 100%,rgba(184,115,51,.14),transparent 60%);pointer-events:none}
+.qk{position:relative;overflow:hidden;border-radius:18px!important;padding:16px 58px 16px 16px!important;gap:15px!important;transition:background .35s var(--ease)}
+.quick .qk:not(:first-child){box-shadow:-1px 0 0 0 rgba(255,255,255,.07)}
+.qk::before{display:block!important;content:"";position:absolute;inset:0;border-radius:inherit;background:radial-gradient(120% 160% at 0% 50%,rgba(255,77,99,.20),transparent 55%);opacity:0;transition:opacity .4s;transform:none!important;height:auto!important}
+.qk:hover{background:rgba(255,255,255,.045)!important}
+.qk:hover::before{opacity:1}
+.qk .ic{position:relative;width:50px!important;height:50px!important;border-radius:15px!important;background:linear-gradient(150deg,#FF5468 0%,#E0162F 42%,#9E0F22 100%)!important;box-shadow:0 12px 22px -10px rgba(200,16,46,.95),inset 0 1px 0 rgba(255,255,255,.35),inset 0 -6px 12px rgba(80,0,12,.35)!important;transition:transform .5s var(--spring)!important}
+.qk .ic::after{content:"";position:absolute;inset:-4px;border-radius:18px;border:1px solid rgba(255,84,104,.35);opacity:0;transform:scale(.9);transition:opacity .35s,transform .45s var(--ease)}
+.qk:hover .ic{transform:translateY(-2px) rotate(-6deg)!important}
+.qk:hover .ic::after{opacity:1;transform:scale(1)}
+.qk .ic svg{width:22px!important;height:22px!important;filter:drop-shadow(0 1px 1px rgba(80,0,12,.4))}
+.qk b{color:#fff!important;font:800 16px/1.2 var(--display)!important;letter-spacing:-.005em}
+.qk small{color:#AEB3BE!important;font:500 13.5px/1.35 var(--display)!important;margin-top:4px!important}
+.qk:hover small{color:#D9DCE3!important}
+@media (min-width:761px){
+ .qk::after{content:"→"!important;display:grid!important;place-items:center;position:absolute;right:14px;top:50%;width:34px!important;height:34px!important;border-radius:11px!important;background:rgba(255,255,255,.06)!important;border:1px solid rgba(255,255,255,.1);color:#E8E9EE!important;font:600 15px/1 var(--display)!important;opacity:.55!important;transform:translateY(-50%)!important;transition:background .3s,border-color .3s,opacity .3s,transform .35s var(--ease)!important}
+ .qk:hover::after{opacity:1!important;background:#C8102E!important;border-color:#C8102E;transform:translate(3px,-50%)!important}}
+@media (max-width:760px){.qk{padding:14px!important}.qk::after{display:none!important}.quick .qk:nth-child(n+3){box-shadow:0 -1px 0 0 rgba(255,255,255,.07)}.quick .qk:nth-child(3){box-shadow:0 -1px 0 0 rgba(255,255,255,.07)}}
 /* ===== Admin-Bereich ===== */
 .adm{position:fixed;inset:0;z-index:300;opacity:0;transition:opacity .25s;background:#0F1115}
 .adm.on{opacity:1}
