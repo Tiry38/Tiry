@@ -1188,6 +1188,22 @@ body.sc .hdr{backdrop-filter:none!important;-webkit-backdrop-filter:none!importa
 .lgbar,.hchip,.live,.qk,.proto,.panel,.ghost,.arrow,.burger{backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
 .lgbar{background:rgba(255,252,246,.97)!important}
 .hchip,.live{background:rgba(255,252,246,.94)!important}
+/* Filterleiste: beim Scrollen kompakt in EINER Zeile, „Filter“ klappt Rahmen/Sortierung auf */
+.lgfbtn{display:none}
+.lgbar{transition:padding .3s var(--ease),border-radius .3s}
+.lgbar.mini{flex-direction:row;align-items:center;gap:10px;padding:8px 10px}
+.lgbar.mini .lgq{flex:0 1 230px;min-width:120px}
+.lgbar.mini .lgq input{min-height:40px;font-size:14px}
+.lgbar.mini #lgMk{flex:1 1 auto;min-width:0}
+.lgbar.mini #lgMk button{min-height:40px;padding:0 11px}
+.lgbar.mini .lgfbtn{display:inline-flex;flex:none;align-items:center;gap:8px;min-height:40px;padding:0 14px;border-radius:10px;border:1px solid rgba(27,30,37,.18);background:#fff;color:var(--ink);font:700 13.5px/1 var(--display);cursor:pointer}
+.lgbar.mini .lgfbtn svg{width:16px;height:16px}
+.lgbar.mini .lgfbtn b{min-width:20px;height:20px;padding:0 6px;border-radius:10px;display:grid;place-items:center;background:#C8102E;color:#fff;font-size:11.5px}
+.lgbar.mini .lgfbtn[aria-expanded=true]{background:#2A2D34;border-color:#2A2D34;color:#fff}
+.lgbar.mini .lgrow2{display:none}
+.lgbar.mini.open{flex-wrap:wrap}
+.lgbar.mini.open .lgrow2{display:flex;flex:1 0 100%}
+@media (max-width:760px){.lgbar.mini{flex-wrap:wrap;gap:8px}.lgbar.mini .lgq{flex:1 1 0;min-width:0}.lgbar.mini .lgfbtn{padding:0 12px}.lgbar.mini #lgMk{order:3;flex:1 0 100%}.lgbar.mini.open .lgrow2{order:4}}
 /* ===== Admin-Bereich ===== */
 .adm{position:fixed;inset:0;z-index:300;display:grid;place-items:center;padding:clamp(0px,3vw,32px);opacity:0;transition:opacity .3s}
 .adm.on{opacity:1}
@@ -1999,9 +2015,11 @@ m696 -454 c28 -13 46 -31 55 -51 22 -53 -50 -177 -173 -300 -187 -186 -647
  </div>
  <div class="wrap">
   <p class="lgdemo" id="lgDemo" hidden><svg><use href="#i-spark"/></svg><span id="lgDemoT"></span></p>
+  <div id="lgSent" aria-hidden="true" style="height:1px;margin-bottom:-1px"></div>
   <div class="lgbar" id="lgBar">
    <label class="lgq"><svg><use href="#i-spark"/></svg><input id="lgQ" type="search" placeholder="Marke, Modell, Farbe …" aria-label="Bestand durchsuchen"></label>
    <div class="lgchips" id="lgMk" role="group" aria-label="Marke"></div>
+   <button type="button" class="lgfbtn" id="lgFbtn" aria-expanded="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M4 6h16M7 12h10M10 18h4"/></svg><span>Filter</span><b id="lgFn" hidden></b></button>
    <div class="lgrow2">
     <div class="lgchips" id="lgRf" role="group" aria-label="Rahmenform"></div>
     <label class="lgtog"><input type="checkbox" id="lgNur"><span></span>Nur sofort verfügbar</label>
@@ -2569,6 +2587,12 @@ $('#adm').addEventListener('submit',async e=>{e.preventDefault();if(e.target.id=
 addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('#adm').hidden)admClose()});
 (()=>{let n=0,t0=0;const c=$('.legalbar span');if(c)c.addEventListener('click',()=>{const t=Date.now();n=t-t0<600?n+1:1;t0=t;if(n>=5){n=0;admOpen()}})})();
 function admHash(){if(location.hash==='#admin')admOpen()}addEventListener('hashchange',admHash);admHash();
+/* Filterleiste kompakt, sobald sie oben klebt */
+(function(){const bar=$('#lgBar'),sn=$('#lgSent'),fb=$('#lgFbtn');if(!bar||!sn)return;
+ new IntersectionObserver(([e])=>{const m=!e.isIntersecting&&e.boundingClientRect.top<0;bar.classList.toggle('mini',m);if(!m){bar.classList.remove('open');fb.setAttribute('aria-expanded','false')}},{rootMargin:'-90px 0px 0px 0px'}).observe(sn);
+ fb.addEventListener('click',()=>{const o=!bar.classList.contains('open');bar.classList.toggle('open',o);fb.setAttribute('aria-expanded',String(o))});
+ const cnt=()=>{const n=(LG.f.rf?1:0)+(LG.f.nur?1:0)+(LG.f.sort&&LG.f.sort!=='neu'?1:0),b=$('#lgFn');b.hidden=!n;b.textContent=n};
+ ['click','change'].forEach(t=>bar.addEventListener(t,()=>setTimeout(cnt,0)));})();
 /* Endlos-Animationen (Hintergrund, Glanz, Schweben) 25 % ruhiger – einmalige Effekte bleiben unverändert */
 (function calm(){try{document.getAnimations().forEach(a=>{const t=a.effect&&a.effect.getTiming&&a.effect.getTiming();if(t&&t.iterations===Infinity&&!a._calm){a.playbackRate=.75;a._calm=1}})}catch(e){}setTimeout(calm,2500)})();
 go(true);
