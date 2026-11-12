@@ -9,7 +9,7 @@ Akku-/Schluesselnummern werden nie uebernommen. Verkaufte (Verkaufsdatum/Besitze
 reservierte Raeder und Serviceraeder fallen raus. Nur exakt gleiche Raeder werden zu einem
 Eintrag zusammengefasst (KEINE Stueckzahlen); andere Groesse/Rahmenform/Farbe bleibt eigenes Rad.
 """
-import csv, io, json, re, sys, datetime
+import os, csv, io, json, re, sys, datetime
 
 def lesen(pfad):
     roh = open(pfad, 'rb').read()
@@ -147,6 +147,7 @@ def main():
             km=(wert(r, m['km']) + ' km') if re.search(r'gebraucht', art, re.I) and wert(r, m['km']) else '',
         ).items() if v not in ('', None, False)})
     eindeutig = gruppieren(raeder)
+    bilder_zuordnen(eindeutig, os.path.join(os.path.dirname(os.path.abspath(ziel)), 'bilder.json'))
     daten = dict(stand=datetime.date.today().strftime('%d.%m.%Y'), quelle='Veloport-Export', raeder=eindeutig, **({'hinweis': hinweis} if hinweis else {}))
     json.dump(daten, open(ziel, 'w', encoding='utf-8'), ensure_ascii=False, indent=1)
     print(f'{len(raeder)} Räder -> {len(eindeutig)} Karten ({sum(len(k["farben"]) for k in eindeutig)} Farb-Ausführungen) -> {ziel} '
@@ -154,6 +155,24 @@ def main():
 
 FELDER = ('marke', 'modell', 'jahr', 'gr', 'farbe', 'rahmen', 'typ', 'motor', 'akku', 'schaltung', 'display', 'reifen', 'gewicht', 'zgg', 'km',
           'status', 'ab', 'preis', 'angebot', 'vorfuehr', 'gebraucht', 'id')
+
+def bild_key(marke, modell, jahr, farbe):
+    """Schlüssel für das exakte Herstellerfoto: Marke + Modell + Modelljahr + Farbe."""
+    n = lambda t: re.sub(r'[^a-z0-9]+', '', str(t or '').lower())
+    return '|'.join((n(marke), n(modell), n(jahr), n(farbe)))
+
+
+def bilder_zuordnen(karten, pfad):
+    """Hängt jedem Farb-Eintrag sein exaktes Foto an (nur bei genauem Treffer aus data/bilder.json)."""
+    if not os.path.exists(pfad):
+        return
+    zu = json.load(open(pfad, encoding='utf-8'))
+    for k in karten:
+        for v in k['farben']:
+            b = zu.get(bild_key(k['marke'], k['modell'], v.get('jahr'), v.get('farbe')))
+            if b:
+                v['bild'] = b
+
 
 def gruppieren(raeder):
     """1) EXAKT gleiche Raeder (Marke, Modell, Jahr, Groesse, Rahmenform, Farbe, Zustand) -> ein Eintrag, ohne Stueckzahl.

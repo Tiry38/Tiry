@@ -2218,8 +2218,9 @@ const BRK=[[/i:?\s?sy/i,'isy'],[/ktm/i,'ktm'],[/qio/i,'qio'],[/velo\s*de\s*ville
 const lgBrand=m=>{const x=BRK.find(([re])=>re.test(m||''));return x?BR.find(b=>b.k===x[1]):null};
 const lgMkName=r=>(lgBrand(r.marke)||{n:r.marke}).n;
 /* Bild nur, wenn Marke UND Rahmenform zum vorhandenen Foto passen – sonst Platzhalter mit Logo */
-const LG_FOTO={isy:['Kompaktrad',''],qio:['Kompaktrad',''],ktm:['Tiefeinsteiger'],vdv:['Tiefeinsteiger'],vanraam:['Dreirad',''],gudereit:['Kompaktrad',''],victoria:['Tiefeinsteiger']};
-function lgImg(r){const b=lgBrand(r.marke);if(!b)return '';const ok=LG_FOTO[b.k];if(ok&&!ok.includes(r.rahmen||''))return '';if(b.k==='isy'&&/touring/i.test(r.modell))return 'img/p-isy2.webp';return b.img}
+/* Nur das exakte Herstellerfoto (Modell + Modelljahr + Farbe, Feld bild) – sonst Platzhalter, nie ein ähnliches Rad */
+const LG_LOGO={Stevens:'img/marke-stevens.svg',Flyer:'img/marke-flyer.webp',Hercules:'img/marke-hercules.svg'};
+function lgImg(m,vi){const v=m.v||[];if(vi!=null)return (v[vi]&&v[vi].bild)||'';const x=v.find(y=>y.bild);return x?x.bild:''}
 const FARB=[[/schwarz|black|anthrazit|graphit/i,'#23252B'],[/wei(ß|ss)|white|creme|cream/i,'#F4F1EA'],[/silber|silver|alu/i,'#B9BDC4'],[/grau|grey|gray/i,'#8C9097'],[/t(ü|ue)rkis|turquoise|aqua|mint/i,'#2CC5C0'],[/petrol/i,'#1F6F78'],[/blau|blue/i,'#3A6FD8'],[/oliv|olive/i,'#7A7F3A'],[/gr(ü|ue)n|green/i,'#2F7D4F'],[/ros(é|e)|rosa|pink/i,'#E6A3C8'],[/rot|red/i,'#C8102E'],[/orange/i,'#F07A1A'],[/gelb|yellow|gold/i,'#E8B923'],[/beige|sand|champagner/i,'#D9C3A0'],[/lila|violett|purple|lavendel/i,'#8E6CC9'],[/braun|brown/i,'#7A5236']];
 /* Farberkennung aus der KI-Zentrale (Veloport-/Herstellernamen, Klammer = Akzent, zuerst genannte Farbe gewinnt) */
 let FARB_C=new Map();
@@ -2262,7 +2263,7 @@ function lgLoad(){if(LG.load)return LG.load;LG.load=fetch('data/bestand.json',{c
  const q=$('#qkLager');if(q)q.textContent='Jetzt im Laden ansehen';
  lgChips()}).catch(()=>{$('#lgGrid').innerHTML='<p class="lgempty">Der Bestand konnte gerade nicht geladen werden. Rufen Sie uns gern an: 07271 78033.</p>'});return LG.load}
 function lgChips(){const mk=[...new Set(LG.M.map(lgMkName))].sort((a,b)=>a.localeCompare(b,'de'));
- $('#lgMk').innerHTML='<button type="button" data-mk="" class="'+(LG.f.mk?'':'on')+'">Alle Marken</button>'+mk.map(n=>{const b=BR.find(x=>x.n===n);return '<button type="button" data-mk="'+esc(n)+'" title="'+esc(n)+'" class="'+(LG.f.mk===n?'on':'')+(b?' lgo':'')+'">'+(b?'<img src="'+b.logo+'" alt="'+esc(n)+'">':'<span>'+esc(n)+'</span>')+'</button>'}).join('');
+ $('#lgMk').innerHTML='<button type="button" data-mk="" class="'+(LG.f.mk?'':'on')+'">Alle Marken</button>'+mk.map(n=>{const b=BR.find(x=>x.n===n);return '<button type="button" data-mk="'+esc(n)+'" title="'+esc(n)+'" class="'+(LG.f.mk===n?'on':'')+((b||LG_LOGO[n])?' lgo':'')+'">'+((b||LG_LOGO[n])?'<img src="'+(b?b.logo:LG_LOGO[n])+'" alt="'+esc(n)+'">':'<span>'+esc(n)+'</span>')+'</button>'}).join('');
  const rf=[...new Set(LG.M.map(m=>m.rahmen).filter(Boolean))];
  $('#lgRf').innerHTML=rf.length>1?'<button type="button" data-rf="" class="'+(LG.f.rf?'':'on')+'">Alle Rahmen</button>'+rf.map(x=>'<button type="button" data-rf="'+esc(x)+'" class="'+(LG.f.rf===x?'on':'')+'">'+esc(x)+'</button>').join(''):'';
  const d=$('#lgDeals');d.classList.toggle('on',LG.f.deal);d.setAttribute('aria-pressed',String(LG.f.deal));$('#lgDealsT').textContent=LG.f.deal?'Alle Räder zeigen':'Sonderangebote';$('#lgDealsK').textContent=LG.f.deal?'Sonderangebote aktiv':'Nur solange vorrätig';}
@@ -2297,12 +2298,14 @@ function lgInfo(){const m=LG.list[LG.i],v=m.v[LG.vi]||m.v[0];const row=(l,x,h)=>
   '<div class="fl"><label for="lgMsg">Nachricht (optional)</label><textarea class="inp" id="lgMsg" placeholder="z. B. Körpergröße, Wunschtermin …"></textarea></div><div class="err" id="lgE" role="alert"></div>'+
   '<div class="row"><button type="submit" class="cta wa" data-via="wa"><svg><use href="#i-chat"/></svg>Per WhatsApp senden</button><button type="submit" class="ghost" data-via="mail">Per E-Mail</button></div><p class="note">Oder anrufen: 07271 78033</p></form>'}
 function lgShow(k,dir){const L=LG.list;if(!L.length)return;LG.i=(k+L.length)%L.length;const m=L[LG.i];LG.vi=Math.max(0,m.v.findIndex(x=>LG.f.deal?x.angebot:x.status!=='bestellt'));
- const b=lgBrand(m.marke),im=lgImg(m),M=$('#lgm'),st=$('#lgmStage');M.style.setProperty('--ac',b?b.c:'#8C9097');
- const bk=$('#lgmBk'),rf=$('#lgmRf'),wl=$('#lgmWl');bk.src=im||'';rf.src=im||'';bk.alt=m.marke+' '+m.modell;wl.src=b?b.logo:'';wl.hidden=!b;bk.hidden=rf.hidden=!im;
- let ph=$('.phm',st);if(!im){if(!ph){ph=document.createElement('div');ph.className='phm';st.append(ph)}ph.innerHTML=(b?'<img src="'+b.logo+'" alt="">':'<b>'+esc(m.marke)+'</b>')+'<small>Foto folgt</small>';ph.hidden=false;wl.hidden=true}else if(ph)ph.hidden=true;
+ const b=lgBrand(m.marke),M=$('#lgm'),st=$('#lgmStage');M.style.setProperty('--ac',b?b.c:'#8C9097');
+ lgStage();
  st.classList.remove('go-l','go-r');void st.offsetWidth;st.classList.add(dir<0?'go-r':'go-l');
  lgInfo();
  if(M.hidden){M.hidden=false;document.body.style.overflow='hidden';requestAnimationFrame(()=>M.classList.add('on'));$('.lgm-x',M).focus()}}
+function lgStage(){const m=LG.list[LG.i],b=lgBrand(m.marke),im=lgImg(m,LG.vi),st=$('#lgmStage');
+ const bk=$('#lgmBk'),rf=$('#lgmRf'),wl=$('#lgmWl');bk.src=im||'';rf.src=im||'';bk.alt=m.marke+' '+m.modell;wl.src=b?b.logo:'';wl.hidden=!b;bk.hidden=rf.hidden=!im;
+ let ph=$('.phm',st);if(!im){if(!ph){ph=document.createElement('div');ph.className='phm';st.append(ph)}ph.innerHTML=(b?'<img src="'+b.logo+'" alt="">':'<b>'+esc(m.marke)+'</b>')+'<small>Foto folgt</small>';ph.hidden=false;wl.hidden=true}else if(ph)ph.hidden=true}
 function lgClose(){const m=$('#lgm');m.classList.remove('on');document.body.style.overflow='';setTimeout(()=>{m.hidden=true},320)}
 $('#lgGrid').addEventListener('click',e=>{if(e.target.closest('#lgReset')){LG.f={q:'',mk:'',rf:'',nur:false,deal:false,sort:LG.f.sort};$('#lgQ').value='';$('#lgNur').checked=false;lgChips();lgRender();return}const c=e.target.closest('.lgc');if(c)lgShow(+c.dataset.k,1)});
 $('#lgGrid').addEventListener('keydown',e=>{const c=e.target.closest('.lgc');if(c&&(e.key==='Enter'||e.key===' ')){e.preventDefault();lgShow(+c.dataset.k,1)}});
@@ -2314,7 +2317,7 @@ $('#lgNur').addEventListener('change',e=>{LG.f.nur=e.target.checked;lgRender()})
 $('#lgSort').addEventListener('change',e=>{LG.f.sort=e.target.value;lgRender()});
 $('#lgm').addEventListener('click',e=>{if(e.target.closest('[data-close]')){lgClose();return}
  const g=e.target.closest('[data-goto]');if(g){lgShow(+g.dataset.goto,1);return}
- const vb=e.target.closest('[data-vi]');if(vb){LG.vi=+vb.dataset.vi;lgInfo();return}
+ const vb=e.target.closest('[data-vi]');if(vb){LG.vi=+vb.dataset.vi;lgStage();lgInfo();return}
  const a=e.target.closest('[data-ask]');if(a){const f=$('#lgmF');f.hidden=false;$$('#lgW button').forEach(x=>x.classList.toggle('on',x.dataset.v===a.dataset.ask));$('.lgm-act').hidden=true;f.scrollIntoView({behavior:'smooth',block:'nearest'});$('#lgN').focus();return}
  const w=e.target.closest('#lgW button');if(w){$$('#lgW button').forEach(x=>x.classList.toggle('on',x===w))}});
 $('#lgmP').addEventListener('click',()=>lgShow(LG.i-1,-1));$('#lgmN').addEventListener('click',()=>lgShow(LG.i+1,1));
