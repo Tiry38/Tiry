@@ -1775,6 +1775,15 @@ body.fz2 main,body.fz2 .foot{zoom:1.25}
 .fopt:hover .fi.fx{transform:rotate(-6deg) scale(1.06);border-radius:54% 46% 48% 52%/46% 54% 46% 54%;background-position:100% 100%}
 .fopt:hover .fi.fx svg{transform:scale(1.08)}
 @media (prefers-reduced-motion:reduce){.fopt .fi.fx,.fopt .fi.fx svg{transition:none}.fopt:hover .fi.fx,.fopt:hover .fi.fx svg{transform:none}}
+/* i:SY Treffen: Urkunde allein, Videos je Jahrgang (Tiry 12.11.2026) */
+.urkw{display:flex;justify-content:center}.urkw .urkf{max-width:560px;width:100%}
+#tgG .tgv{margin:0 0 14px}
+#tgG .tgv[data-n="1"]{grid-template-columns:minmax(0,1fr);max-width:820px}#tgG .tgv[data-n="1"] .vc:first-child{grid-column:auto;grid-row:auto}
+#tgG .tgv[data-n="2"]{grid-template-columns:repeat(2,minmax(0,1fr))}#tgG .tgv[data-n="2"] .vc:first-child{grid-column:auto;grid-row:auto}
+#tgG .tgv[data-n="3"]{grid-template-columns:repeat(3,minmax(0,1fr))}
+#tgG .tgv[data-n="4"] .vc:first-child{grid-column:auto;grid-row:auto}
+@media (max-width:900px){#tgG .tgv[data-n="3"],#tgG .tgv[data-n="4"]{grid-template-columns:1fr 1fr}#tgG .tgv[data-n="3"] .vc:first-child{grid-column:span 2;grid-row:auto}}
+.tgnote{margin:22px 0 0;font-size:13px;color:var(--mut)}
 /* ===== Service-Themen mit eigenen Sprungzielen (Tiry 12.11.2026) ===== */
 .tpc,#termin-form,#dienstrad{scroll-margin-top:96px}
 .tnav{display:flex;flex-wrap:wrap;gap:10px;margin-top:26px}
@@ -2591,17 +2600,7 @@ m696 -454 c28 -13 46 -31 55 -51 22 -53 -50 -177 -173 -300 -187 -186 -647
   </div>
  </div>
  <div class="sec" style="padding-top:0">
-  <div class="wrap duo" style="align-items:start">
-   <div>
-    <h2 class="big pre" style="margin-bottom:30px">Vom Treffen <span class="gt">zum Rekord.</span></h2>
-    <div class="tl pre">
-     <div class="tli"><div class="y">2017</div><p>Das erste i:SY-Treffen in Wörth am Rhein.</p></div>
-     <div class="tli"><div class="y">2019</div><p>Großes i:SY-Treffen gemeinsam mit Velorep: etwa 100 Teilnehmende.</p></div>
-     <div class="tli"><div class="y">2022</div><p>Nach zwei Jahren Corona-Pause über 200 Fahrer. Die Schlange war über 2 km lang, rund 40 km von Wörth nach Neupotz und zurück, mit i:SY Show-Truck zum Probefahren.</p></div>
-     <div class="tli"><div class="y">2023</div><p>Wieder gemeinsam mit Velorep auf dem Rheinradweg unterwegs.</p></div>
-     <div class="tli big"><div class="y gt">2024</div><p>Das fünfte Treffen wird zum Weltrekord: 283 Teilnehmende, offiziell vom RID bestätigt.</p></div>
-    </div>
-   </div>
+  <div class="wrap urkw">
    <figure class="urkf pre"><p class="urkh">Wir haben den <b>Weltrekord!</b></p><img src="img/rid-urkunde-zert.webp" alt="RID-Rekordurkunde: Längste Fahrrad-Schlange einer Marke, 283 Fahrräder, 9. Juni 2024" loading="lazy" width="900" height="1188"></figure>
   </div>
  </div>
@@ -2611,8 +2610,6 @@ m696 -454 c28 -13 46 -31 55 -51 22 -53 -50 -177 -173 -300 -187 -186 -647
   <div class="tgpano pre" aria-hidden="true"><div class="tgpt"><img src="img/treffen/isy-header2022.webp" alt="" loading="lazy" width="1400" height="328"><img src="img/treffen/isy-header2022-2.webp" alt="" loading="lazy" width="1400" height="328"><img src="img/treffen/isy-header2022-3.webp" alt="" loading="lazy" width="1400" height="328"><img src="img/treffen/isy-header2022-4.webp" alt="" loading="lazy" width="1400" height="328"><img src="img/treffen/isy-header2022-5.webp" alt="" loading="lazy" width="1400" height="328"><img src="img/treffen/isy-header2022.webp" alt="" loading="lazy" width="1400" height="328"><img src="img/treffen/isy-header2022-2.webp" alt="" loading="lazy" width="1400" height="328"><img src="img/treffen/isy-header2022-3.webp" alt="" loading="lazy" width="1400" height="328"><img src="img/treffen/isy-header2022-4.webp" alt="" loading="lazy" width="1400" height="328"><img src="img/treffen/isy-header2022-5.webp" alt="" loading="lazy" width="1400" height="328"></div></div>
   <div class="wrap">
    <div class="tgy pre" id="tgY" role="group" aria-label="Jahr wählen"></div>
-   <div class="tgvh" id="tgVh"><h3>Videos</h3><p>Beim Antippen wird das Video von YouTube geladen.</p></div>
-   <div class="tgv" id="tgV"></div>
    <div id="tgG"></div>
   </div>
  </div>
@@ -3457,10 +3454,12 @@ function admHash(){if(location.hash==='#admin')admOpen()}addEventListener('hashc
  let Y='',L=[],K=0;
  function draw(){const F=D.F.filter(f=>!Y||f[0]===Y),V=D.V.filter(v=>!Y||v[0]===Y);
   $('#tgY').innerHTML='<button type="button" data-y="" class="'+(Y?'':'on')+'">Alle<small>'+(D.F.length+D.V.length)+'</small></button>'+YS.map(y=>{const n=D.F.filter(f=>f[0]===y).length+D.V.filter(v=>v[0]===y).length;return n?'<button type="button" data-y="'+y+'" class="'+(Y===y?'on':'')+'">'+y+'<small>'+n+'</small></button>':''}).join('');
-  $('#tgVh').hidden=$('#tgV').hidden=!V.length;
-  $('#tgV').innerHTML=V.map(v=>'<button type="button" class="vc" data-yt="'+v[1]+'" data-t="'+esc(v[2])+'"><img src="img/treffen/yt-'+v[1]+'.webp" alt="" loading="lazy"><span class="pl" aria-hidden="true"></span><span class="vt">'+(v[0]?'<i>'+v[0]+'</i>':'<i>Video</i>')+'<b>'+esc(v[2])+'</b></span></button>').join('');
-  L=F;G.innerHTML=(Y?[Y]:YS).map(y=>{const fs=F.map((f,i)=>[f,i]).filter(([f])=>f[0]===y);if(!fs.length)return '';
-   return '<div class="tgyh"><span class="yy">'+y+'</span><div><h3>i:SY-Treffen</h3><p>'+TX[y]+' · '+fs.length+' Fotos</p></div></div><div class="tgg">'+fs.map(([f,i])=>'<button type="button" data-i="'+i+'" aria-label="Foto '+(i+1)+' vergrößern"><img src="'+f[1]+'" alt="i:SY-Treffen '+y+'" loading="lazy" width="'+f[2]+'" height="'+f[3]+'"></button>').join('')+'</div>'}).join('')}
+  const vc=v=>'<button type="button" class="vc" data-yt="'+v[1]+'" data-t="'+esc(v[2])+'"><img src="img/treffen/yt-'+v[1]+'.webp" alt="" loading="lazy"><span class="pl" aria-hidden="true"></span><span class="vt">'+(v[0]?'<i>'+v[0]+'</i>':'<i>Video</i>')+'<b>'+esc(v[2])+'</b></span></button>';
+  const nz=(n,a,b)=>n?n+' '+(n===1?a:b):'';
+  L=F;G.innerHTML=(Y?[Y]:YS).map(y=>{const fs=F.map((f,i)=>[f,i]).filter(([f])=>f[0]===y),vs=V.filter(v=>v[0]===y);if(!fs.length&&!vs.length)return '';
+   return '<div class="tgyh"><span class="yy">'+y+'</span><div><h3>i:SY-Treffen</h3><p>'+[TX[y],nz(fs.length,'Foto','Fotos'),nz(vs.length,'Video','Videos')].filter(Boolean).join(' · ')+'</p></div></div>'+(vs.length?'<div class="tgv" data-n="'+Math.min(vs.length,5)+'">'+vs.map(vc).join('')+'</div>':'')+(fs.length?'<div class="tgg">'+fs.map(([f,i])=>'<button type="button" data-i="'+i+'" aria-label="Foto '+(i+1)+' vergrößern"><img src="'+f[1]+'" alt="i:SY-Treffen '+y+'" loading="lazy" width="'+f[2]+'" height="'+f[3]+'"></button>').join('')+'</div>':'')}).join('')
+   +(()=>{const vs=Y?[]:V.filter(v=>!v[0]);return vs.length?'<div class="tgyh"><span class="yy">+</span><div><h3>Weitere Videos</h3><p>'+nz(vs.length,'Video','Videos')+'</p></div></div><div class="tgv" data-n="'+Math.min(vs.length,5)+'">'+vs.map(vc).join('')+'</div>':''})()
+   +'<p class="tgnote">Videos werden erst beim Antippen von YouTube geladen.</p>'}
  const lb=$('#tgLb'),st=$('#tgSt'),cap=$('#tgCap');
  function open(){lb.hidden=false;document.body.style.overflow='hidden';requestAnimationFrame(()=>lb.classList.add('on'))}
  function close(){lb.classList.remove('on');st.innerHTML='';document.body.style.overflow='';setTimeout(()=>{lb.hidden=true},300)}
@@ -3468,8 +3467,8 @@ function admHash(){if(location.hash==='#admin')admOpen()}addEventListener('hashc
  function vid(id,t,ok){if(!ok&&!ytOk()){st.innerHTML=ytConsent(id,t);cap.textContent=t;lb.querySelectorAll('.tgnav').forEach(b=>b.hidden=true);return}st.innerHTML='<div class="tgvf"><iframe src="https://www.youtube-nocookie.com/embed/'+id+'?autoplay=1&rel=0" title="'+esc(t)+'" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen></iframe></div>';
   cap.innerHTML=esc(t)+'<a href="https://www.youtube.com/watch?v='+id+'" target="_blank" rel="noopener">Auf YouTube öffnen ↗</a>';lb.querySelectorAll('.tgnav').forEach(b=>b.hidden=true)}
  $('#tgY').addEventListener('click',e=>{const b=e.target.closest('[data-y]');if(!b)return;Y=b.dataset.y;draw()});
- G.addEventListener('click',e=>{const b=e.target.closest('[data-i]');if(!b)return;show(+b.dataset.i);open()});
- $('#tgV').addEventListener('click',e=>{const b=e.target.closest('[data-yt]');if(!b)return;vid(b.dataset.yt,b.dataset.t);open()});
+ G.addEventListener('click',e=>{const yv=e.target.closest('[data-yt]');if(yv){vid(yv.dataset.yt,yv.dataset.t);open();return}const b=e.target.closest('[data-i]');if(!b)return;show(+b.dataset.i);open()});
+ 
  lb.addEventListener('click',e=>{const yg=e.target.closest('[data-ytgo]');if(yg){if($('#ytRem')&&$('#ytRem').checked)LS.set('vc_yt',1);vid(yg.dataset.ytgo,yg.dataset.t,1);return}if(e.target.closest('[data-tgx]')||e.target===lb||e.target===st){close();return}const n=e.target.closest('[data-tgn]');if(n)show(K+ +n.dataset.tgn)});
  addEventListener('keydown',e=>{if(lb.hidden)return;if(e.key==='Escape')close();else if(e.key==='ArrowRight'&&!st.querySelector('iframe'))show(K+1);else if(e.key==='ArrowLeft'&&!st.querySelector('iframe'))show(K-1)});
  let sx=null;lb.addEventListener('touchstart',e=>{sx=e.touches[0].clientX},{passive:true});lb.addEventListener('touchend',e=>{if(sx==null||st.querySelector('iframe'))return;const d=e.changedTouches[0].clientX-sx;if(Math.abs(d)>50)show(K+(d<0?1:-1));sx=null});
