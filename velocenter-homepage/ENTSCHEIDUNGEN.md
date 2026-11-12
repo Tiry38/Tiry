@@ -13,3 +13,4 @@
 - Bilder immer freigestellt und geschärft.
 
 - Terminformular „Worum geht es?“: Probefahrt, Inspektion, Reparatur, Verfügbarkeit (kein Zubehör, kein Reifen/Schlauch, keine Bosch-Diagnose); „Um welchen Artikel?“ (statt „Rad“): Fahrrad, E-Bike, E-Dreirad, Zubehör (kein Lastenrad) (12.11.2026).
+- Kein Hinweis auf ein nächstes i:SY-Treffen (es gibt keins mehr, 12.11.2026).
