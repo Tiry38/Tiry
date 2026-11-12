@@ -1206,6 +1206,9 @@ body.sc .hdr{backdrop-filter:none!important;-webkit-backdrop-filter:none!importa
 @media (max-width:760px){.lgbar.mini{flex-wrap:wrap;gap:8px}.lgbar.mini .lgq{flex:1 1 0;min-width:0}.lgbar.mini .lgfbtn{padding:0 12px}.lgbar.mini #lgMk{order:3;flex:1 0 100%}.lgbar.mini.open .lgrow2{order:4}}
 /* Detailfenster: feste Höhe, Rad bleibt oben im Bild, rechte Seite scrollt */
 @media (min-width:981px){.lgm-p{height:min(760px,100%);grid-template-rows:minmax(0,1fr)}.lgm-stage{min-height:0}.lgm-info{min-height:0;overscroll-behavior:contain}}
+.lgchips button.dealx{background:#C8102E!important;border-color:#C8102E!important;color:#fff!important;font-weight:800}
+.lgchips button.dealx span{margin-left:4px;opacity:.85}
+.lgchips button.dealx:hover{background:#A60D25!important}
 /* ===== Admin-Bereich ===== */
 .adm{position:fixed;inset:0;z-index:300;display:grid;place-items:center;padding:clamp(0px,3vw,32px);opacity:0;transition:opacity .3s}
 .adm.on{opacity:1}
@@ -2388,7 +2391,7 @@ function lgApply(){const d=admMerge(LG.D);LG.M=lgNorm(d);LG.ok=true;
  const q=$('#qkLager');if(q)q.textContent='Jetzt im Laden ansehen';
  lgChips()}
 function lgChips(){const mk=[...new Set(LG.M.map(lgMkName))].sort((a,b)=>a.localeCompare(b,'de'));
- $('#lgMk').innerHTML='<button type="button" data-mk="" class="'+(LG.f.mk?'':'on')+'">Alle Marken</button>'+mk.map(n=>{const b=BR.find(x=>x.n===n);return '<button type="button" data-mk="'+esc(n)+'" title="'+esc(n)+'" class="'+(LG.f.mk===n?'on':'')+((b||LG_LOGO[n])?' lgo':'')+'">'+((b||LG_LOGO[n])?'<img src="'+(b?b.logo:LG_LOGO[n])+'" alt="'+esc(n)+'">':'<span>'+esc(n)+'</span>')+'</button>'}).join('');
+ $('#lgMk').innerHTML=(LG.f.deal?'<button type="button" class="dealx" data-dealx title="Sonderangebote-Filter ausschalten">% Nur Angebote <span aria-hidden="true">✕</span></button>':'')+'<button type="button" data-mk="" class="'+(LG.f.mk?'':'on')+'">Alle Marken</button>'+mk.map(n=>{const b=BR.find(x=>x.n===n);return '<button type="button" data-mk="'+esc(n)+'" title="'+esc(n)+'" class="'+(LG.f.mk===n?'on':'')+((b||LG_LOGO[n])?' lgo':'')+'">'+((b||LG_LOGO[n])?'<img src="'+(b?b.logo:LG_LOGO[n])+'" alt="'+esc(n)+'">':'<span>'+esc(n)+'</span>')+'</button>'}).join('');
  const rf=[...new Set(LG.M.flatMap(m=>m.rfs||[]))];
  $('#lgRf').innerHTML=rf.length>1?'<button type="button" data-rf="" class="'+(LG.f.rf?'':'on')+'">Alle Rahmen</button>'+rf.map(x=>'<button type="button" data-rf="'+esc(x)+'" class="'+(LG.f.rf===x?'on':'')+'">'+esc(x)+'</button>').join(''):'';
  const d=$('#lgDeals');d.classList.toggle('on',LG.f.deal);d.setAttribute('aria-pressed',String(LG.f.deal));$('#lgDealsT').textContent=LG.f.deal?'Alle Räder zeigen':'Sonderangebote';$('#lgDealsK').textContent=LG.f.deal?'Sonderangebote aktiv':'Nur solange vorrätig';}
@@ -2436,7 +2439,7 @@ function lgStage(){const m=LG.list[LG.i],b=lgBrand(m.marke),im=lgImg(m,LG.vi),st
 function lgClose(){const m=$('#lgm');m.classList.remove('on');document.body.style.overflow='';setTimeout(()=>{m.hidden=true},320)}
 $('#lgGrid').addEventListener('click',e=>{if(e.target.closest('#lgReset')){LG.f={q:'',mk:'',rf:'',nur:false,deal:false,sort:LG.f.sort};$('#lgQ').value='';$('#lgNur').checked=false;lgChips();lgRender();return}const c=e.target.closest('.lgc');if(c)lgShow(+c.dataset.k,1)});
 $('#lgGrid').addEventListener('keydown',e=>{const c=e.target.closest('.lgc');if(c&&(e.key==='Enter'||e.key===' ')){e.preventDefault();lgShow(+c.dataset.k,1)}});
-$('#lgMk').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;LG.f.mk=b.dataset.mk;lgChips();lgRender()});
+$('#lgMk').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;if(b.hasAttribute('data-dealx')){LG.f.deal=false;lgChips();lgRender();return}LG.f.mk=b.dataset.mk;lgChips();lgRender()});
 $('#lgRf').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;LG.f.rf=b.dataset.rf;lgChips();lgRender()});
 $('#lgDeals').addEventListener('click',()=>{LG.f.deal=!LG.f.deal;lgChips();lgRender();$('#lgBar').scrollIntoView({behavior:'smooth',block:'start'})});
 $('#lgQ').addEventListener('input',e=>{LG.f.q=e.target.value;lgRender()});
