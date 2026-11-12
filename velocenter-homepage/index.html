@@ -1786,6 +1786,9 @@ body.fz2 main,body.fz2 .foot{zoom:1.25}
 .tgnote{margin:22px 0 0;font-size:13px;color:var(--mut)}
 /* Start-Rad: Spiegelung im Boden wie im Showroom (Tiry 12.11.2026) */
 .hb{-webkit-box-reflect:below 2px linear-gradient(transparent 68%,rgba(0,0,0,.17))}
+/* 4,8 nicht abschneiden (Tiry 12.11.2026) */
+.gt{padding-left:.1em;padding-right:.12em;margin-left:-.1em;margin-right:-.12em;-webkit-box-decoration-break:clone;box-decoration-break:clone}
+.score b{padding:.04em .1em .06em .1em;margin:0 -.1em 0 -.1em;width:max-content;max-width:calc(100% + .2em)}
 /* ===== Service-Themen mit eigenen Sprungzielen (Tiry 12.11.2026) ===== */
 .tpc,#termin-form,#dienstrad{scroll-margin-top:96px}
 .tnav{display:flex;flex-wrap:wrap;gap:10px;margin-top:26px}
