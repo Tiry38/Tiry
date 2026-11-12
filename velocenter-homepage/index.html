@@ -616,6 +616,58 @@ body.sc .hdr{background:rgba(255,236,242,.82)}
  .visit::before{background:linear-gradient(0deg,rgba(255,228,236,.97) 45%,rgba(252,231,246,.6)),linear-gradient(0deg,var(--bg),transparent 25%)}
  .bandimg::before{background:linear-gradient(90deg,rgba(224,242,254,.96) 45%,rgba(224,231,255,.75))}
 }
+
+/* ================= Farbiger Hintergrund mit Farbwolken (Tiry 12.11.2026) ================= */
+:root{--mut:#2F3546;--dim:#454C5E;--line:rgba(27,30,37,.15);--mag:#9D174D;
+ --grad:linear-gradient(100deg,#B91C1C 0%,#9D174D 34%,#5B21B6 68%,#1E3A8A 100%)}
+.sky{animation:none;background:linear-gradient(135deg,#FFB199 0%,#FF7EB3 24%,#C79BFF 50%,#86C5FF 75%,#6EE7D2 100%)}
+.blobs{position:fixed;inset:0;z-index:-3;overflow:hidden;pointer-events:none}
+.blobs i{position:absolute;width:56vmax;height:56vmax;border-radius:50%;filter:blur(70px);opacity:.7;will-change:transform}
+.blobs i:nth-child(1){background:#FF5E62;top:-22vmax;left:-14vmax;animation:b1 26s ease-in-out infinite alternate}
+.blobs i:nth-child(2){background:#FFB347;top:28%;left:52%;width:40vmax;height:40vmax;opacity:.55;animation:b2 30s ease-in-out infinite alternate}
+.blobs i:nth-child(3){background:#8E7CFF;bottom:-26vmax;right:-16vmax;animation:b3 28s ease-in-out infinite alternate}
+.blobs i:nth-child(4){background:#3FC5FF;top:-18vmax;right:-22vmax;animation:b4 32s ease-in-out infinite alternate}
+.blobs i:nth-child(5){background:#2EE6C5;bottom:-22vmax;left:-18vmax;opacity:.6;animation:b2 34s ease-in-out infinite alternate-reverse}
+.blobs i:nth-child(6){background:#FF6FD8;top:34%;left:-6vmax;width:38vmax;height:38vmax;opacity:.55;animation:b1 24s ease-in-out infinite alternate-reverse}
+@keyframes b1{to{transform:translate(18vmax,12vmax) scale(1.15)}}
+@keyframes b2{to{transform:translate(-16vmax,-10vmax) scale(.9)}}
+@keyframes b3{to{transform:translate(-14vmax,-16vmax) scale(1.1)}}
+@keyframes b4{to{transform:translate(-12vmax,14vmax) scale(1.2)}}
+.smoke{opacity:.18}
+body.sc .hdr{background:rgba(255,255,255,.55);backdrop-filter:blur(20px) saturate(1.6);-webkit-backdrop-filter:blur(20px) saturate(1.6)}
+.nav a{color:#2F3546}
+.halo{background:radial-gradient(closest-side,rgba(255,255,255,.75),rgba(255,255,255,.35) 55%,transparent 78%);filter:blur(24px)}
+.stage0::after{display:none}
+.biglogo{filter:drop-shadow(0 0 2px #fff) drop-shadow(0 0 22px rgba(255,255,255,.75)) drop-shadow(0 14px 30px rgba(27,30,37,.18))}
+.biglogo .lg-b{fill:#7A7575}
+.claim{color:#1B1E25}
+.band.a{box-shadow:0 18px 40px rgba(91,33,182,.3)}
+.show::after{background:radial-gradient(60% 55% at 50% 52%,color-mix(in srgb,var(--ac) 45%,transparent),transparent 72%)}
+.z-peach::before{background:linear-gradient(180deg,transparent,rgba(255,170,90,.42) 15%,rgba(255,110,120,.38) 85%,transparent)}
+.z-lilac::before{background:linear-gradient(180deg,transparent,rgba(167,139,250,.45) 15%,rgba(244,114,182,.4) 85%,transparent)}
+.z-sky::before{background:linear-gradient(180deg,transparent,rgba(56,189,248,.38) 15%,rgba(129,140,248,.4) 85%,transparent)}
+.z-mint::before{background:linear-gradient(180deg,transparent,rgba(45,212,191,.4) 15%,rgba(56,189,248,.35) 85%,transparent)}
+.ph::before{background:radial-gradient(50% 70% at 85% 30%,rgba(255,94,98,.45),transparent 70%),radial-gradient(45% 60% at 10% 80%,rgba(99,102,241,.4),transparent 70%)}
+.ice{background:linear-gradient(120deg,#38BDF8,#818CF8 45%,#C084FC 75%,#F472B6)}
+.ice::before{background:radial-gradient(50% 70% at 85% 30%,rgba(255,255,255,.3),transparent 70%),radial-gradient(40% 60% at 10% 80%,rgba(14,165,233,.35),transparent 70%)}
+.minus{background:linear-gradient(180deg,#fff 30%,#E0F2FE);-webkit-background-clip:text;background-clip:text;filter:drop-shadow(0 8px 24px rgba(49,46,129,.45))}
+.ice .eyebrow{color:#1E1B4B!important}.ice .eyebrow b{color:#fff!important}
+.ice .lead{color:#1E1B4B}.days span{color:#1E1B4B}
+.score b{background:linear-gradient(180deg,#D97706,#B45309 55%,#78350F);-webkit-background-clip:text;background-clip:text}
+.visit::before{background:linear-gradient(90deg,rgba(255,126,179,.94) 0%,rgba(199,155,255,.86) 42%,rgba(199,155,255,.22) 76%,transparent)}
+.bandimg::before{background:linear-gradient(90deg,rgba(134,197,255,.95) 24%,rgba(199,155,255,.7) 56%,transparent)}
+.thumbs button img{filter:grayscale(1) opacity(.6)}
+.panel{background:rgba(255,255,255,.8)}
+.finder{background:radial-gradient(80% 120% at 0% 0%,rgba(255,94,98,.35),transparent 60%),radial-gradient(80% 120% at 100% 100%,rgba(63,197,255,.4),transparent 60%),rgba(255,255,255,.5)}
+.foot{background:linear-gradient(180deg,transparent,rgba(255,94,98,.4) 45%,rgba(226,35,45,.5))}
+.tli .y{color:rgba(27,30,37,.35)}
+.proto{background:#FEF3C7}
+.live{padding:9px 18px;border-radius:999px;background:rgba(255,255,255,.7);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);box-shadow:0 8px 20px rgba(27,30,37,.08);color:#2F3546}
+@media (max-width:640px){
+ .visit::before{background:linear-gradient(0deg,rgba(255,126,179,.95) 45%,rgba(199,155,255,.6))}
+ .bandimg::before{background:linear-gradient(90deg,rgba(134,197,255,.95) 45%,rgba(199,155,255,.75))}
+ .blobs i{filter:blur(50px)}
+}
 </style>
 
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
@@ -647,7 +699,7 @@ body.sc .hdr{background:rgba(255,236,242,.82)}
  </defs>
 </svg>
 
-<div class="sky"></div><div class="smoke"></div><div class="grain"></div>
+<div class="sky"></div><div class="blobs" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></div><div class="smoke"></div><div class="grain"></div>
 
 <header class="hdr">
  <div class="wrap">
