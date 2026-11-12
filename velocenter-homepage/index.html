@@ -1209,6 +1209,10 @@ body.sc .hdr{backdrop-filter:none!important;-webkit-backdrop-filter:none!importa
 .lgchips button.dealx{background:#C8102E!important;border-color:#C8102E!important;color:#fff!important;font-weight:800}
 .lgchips button.dealx span{margin-left:4px;opacity:.85}
 .lgchips button.dealx:hover{background:#A60D25!important}
+/* Hintergrund: rote Verschleierungen statt roter Striche (weiche Schleier, kein Echtzeit-Weichzeichner) */
+.ribbons i:nth-child(1),.ribbons i:nth-child(4){filter:none!important;-webkit-mask-image:none!important;mask-image:none!important;border-radius:50%}
+.ribbons i:nth-child(1){top:4%!important;left:-10%!important;width:85%!important;height:46vh!important;background:radial-gradient(closest-side,rgba(200,16,46,.20),rgba(200,16,46,.09) 45%,rgba(200,16,46,.03) 72%,transparent)!important}
+.ribbons i:nth-child(4){top:58%!important;left:35%!important;width:80%!important;height:42vh!important;background:radial-gradient(closest-side,rgba(176,18,31,.17),rgba(176,18,31,.07) 48%,rgba(176,18,31,.02) 74%,transparent)!important}
 /* ===== Admin-Bereich ===== */
 .adm{position:fixed;inset:0;z-index:300;opacity:0;transition:opacity .25s;background:#0F1115}
 .adm.on{opacity:1}
@@ -2100,7 +2104,7 @@ m696 -454 c28 -13 46 -31 55 -51 22 -53 -50 -177 -173 -300 -187 -186 -647
    <p class="eyebrow hello">Unser Bestand · <b id="lgStand">aktuell</b></p>
    <h1 class="mega hello" style="--d:.08s;margin-top:18px">Sofort da.<br><span class="gt it">Sofort Probe fahren.</span></h1>
    <p class="lead hello" style="--d:.16s">Diese Räder stehen jetzt bei uns in Wörth. Rad antippen, in Ruhe ansehen und direkt anfragen: kaufen, reservieren oder Probe fahren.</p>
-   <div class="lgnum hello" style="--d:.24s" id="lgNum"></div>
+   <div class="lgnum hello" style="--d:.24s" id="lgNum" hidden></div>
    <button type="button" class="deals hello" style="--d:.3s" id="lgDeals" aria-pressed="false"><span class="pct"><span>%</span></span><span class="t"><span class="k" id="lgDealsK">Nur solange vorrätig</span><b id="lgDealsT">Sonderangebote</b><span class="m"><small id="lgDealsN">reduzierte Räder</small><em id="lgDealsS" hidden></em></span></span><span class="ar" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></button>
   </div>
  </div>
@@ -2473,7 +2477,7 @@ function lgApply(){const d=admMerge(admBase());LG.M=lgNorm(d);LG.ok=true;
  $('#lgStand').textContent=/^\d/.test(d.stand||'')?'Stand '+d.stand:(d.stand||'aktuell');const hw=d.hinweis||(d.quelle==='Beispieldaten'?'Sobald der Veloport-Export eingespielt ist, steht hier euer echter Bestand.':'');$('#lgDemo').hidden=!hw;$('#lgDemoT').innerHTML='<b>'+(d.quelle==='Beispieldaten'?'Beispieldaten.':'Hinweis:')+'</b> '+esc(hw);
  const nL=LG.M.filter(m=>m.lager).length,nB=LG.M.length-nL,nD=LG.M.filter(m=>m.deal).length,nMk=new Set(LG.M.map(lgMkName)).size;
  const A=(admBase()||{}).anzahl;$('#lgNum').innerHTML=(A?'<span><b>'+A.lager+'</b> Räder im Laden</span>'+(A.bestellt?'<span><b>'+A.bestellt+'</b> Räder bestellt</span>':''):'<span><b>'+nL+'</b> Modelle sofort verfügbar</span>'+(nB?'<span><b>'+nB+'</b> Lieferung ausstehend</span>':''))+'<span><b>'+nMk+'</b> Marken</span>';
- $('#lgDealsN').textContent=nD?nD+(nD===1?' Rad reduziert':' Räder reduziert'):'Aktuell keine';$('#lgDeals').hidden=!nD;
+ $('#lgDealsN').textContent=nD?'Reduzierte Räder':'Aktuell keine';$('#lgDeals').hidden=!nD;
  const mx=Math.max(0,...LG.M.flatMap(m=>m.v||[]).filter(x=>x.angebot&&x.preis>x.angebot).map(x=>x.preis-x.angebot));const se=$('#lgDealsS');se.hidden=!mx;if(mx)se.textContent='bis zu '+eur(mx)+' sparen';
  const q=$('#qkLager');if(q)q.textContent='Jetzt im Laden ansehen';
  lgChips()}
