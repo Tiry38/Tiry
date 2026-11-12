@@ -1254,6 +1254,12 @@ body.sc .hdr{backdrop-filter:none!important;-webkit-backdrop-filter:none!importa
 .bands.top .band.b{transform:translateY(-50%) rotate(1.3deg)}
 .bands.top .band span{font-size:clamp(20px,2.6vw,38px)}
 .bands.top+.stage0{padding-top:clamp(18px,2.5vw,34px)}
+/* Rekordurkunde: sauber zugeschnitten, Überschrift als echter Text */
+.urkf{justify-self:center;margin:0;max-width:380px;transform:rotate(3deg);transition:transform .7s var(--spring)}
+.urkf:hover{transform:rotate(0) scale(1.03)}
+.urkf .urkh{margin:0 0 14px;font:900 clamp(24px,2.6vw,34px)/1.02 var(--display);letter-spacing:-.02em;text-transform:uppercase;color:#1B1E25;text-align:center}
+.urkf .urkh b{display:block;color:#D6142C;font-weight:900}
+.urkf img{display:block;width:100%;height:auto;border-radius:4px;box-shadow:0 2px 0 rgba(255,255,255,.6) inset,0 30px 60px rgba(27,30,37,.25),0 6px 14px rgba(27,30,37,.15)}
 /* ===== Admin-Bereich ===== */
 .adm{position:fixed;inset:0;z-index:300;opacity:0;transition:opacity .25s;background:#0F1115}
 .adm.on{opacity:1}
@@ -2050,7 +2056,7 @@ m696 -454 c28 -13 46 -31 55 -51 22 -53 -50 -177 -173 -300 -187 -186 -647
      <div class="tli big"><div class="y gt">2024</div><p>Das fünfte Treffen wird zum Weltrekord: 283 Teilnehmende, offiziell vom RID bestätigt.</p></div>
     </div>
    </div>
-   <img class="urk pre" src="img/rid-urkunde.webp" alt="RID-Rekordurkunde: Längste Fahrrad-Schlange einer Marke" loading="lazy" width="900" height="1399" style="justify-self:center">
+   <figure class="urkf pre"><p class="urkh">Wir haben den <b>Weltrekord!</b></p><img src="img/rid-urkunde-zert.webp" alt="RID-Rekordurkunde: Längste Fahrrad-Schlange einer Marke, 283 Fahrräder, 9. Juni 2024" loading="lazy" width="900" height="1188"></figure>
   </div>
  </div>
  <div class="sec" style="padding-top:0">
