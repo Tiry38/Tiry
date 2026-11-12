@@ -1213,24 +1213,40 @@ body.sc .hdr{backdrop-filter:none!important;-webkit-backdrop-filter:none!importa
 .ribbons i:nth-child(1),.ribbons i:nth-child(4){filter:none!important;-webkit-mask-image:none!important;mask-image:none!important;border-radius:50%}
 .ribbons i:nth-child(1){top:4%!important;left:-10%!important;width:85%!important;height:46vh!important;background:radial-gradient(closest-side,rgba(200,16,46,.20),rgba(200,16,46,.09) 45%,rgba(200,16,46,.03) 72%,transparent)!important}
 .ribbons i:nth-child(4){top:58%!important;left:35%!important;width:80%!important;height:42vh!important;background:radial-gradient(closest-side,rgba(176,18,31,.17),rgba(176,18,31,.07) 48%,rgba(176,18,31,.02) 74%,transparent)!important}
-/* Schnellzugriff: edel, hell, typografisch – Haarlinien statt Kästen, rote Linie wächst beim Drüberfahren */
-.qbar{position:relative;z-index:3;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));margin-top:clamp(30px,4vw,48px);border-top:1px solid rgba(27,30,37,.14);border-bottom:1px solid rgba(27,30,37,.14);background:linear-gradient(180deg,rgba(255,253,249,.55),rgba(255,253,249,.25))}
-.qb{position:relative;display:grid;grid-template-columns:auto 1fr;grid-template-rows:auto auto auto;column-gap:14px;align-items:center;padding:22px 26px 24px;color:var(--ink);text-decoration:none;transition:background .4s var(--ease)}
-.qb+.qb::before{content:"";position:absolute;left:0;top:18px;bottom:18px;width:1px;background:linear-gradient(180deg,transparent,rgba(184,115,51,.55),transparent)}
-.qb>i{grid-column:1/-1;font:700 11px/1 var(--display);font-style:normal;letter-spacing:.24em;color:#B87333;margin-bottom:14px}
-.qb .ic{grid-row:2/4;width:30px;height:30px;display:grid;place-items:center;color:#C8102E;transition:transform .5s var(--spring)}
-.qb .ic svg{width:28px;height:28px;stroke-width:1.6}
-.qb b{font:800 17px/1.2 var(--display);letter-spacing:-.01em}
-.qb small{margin-top:3px;font:500 13.5px/1.35 var(--display);color:var(--mut)}
-.qb em{position:absolute;left:26px;right:26px;bottom:-1px;height:2px;background:#C8102E;transform:scaleX(0);transform-origin:left;transition:transform .55s var(--ease)}
-.qb::after{content:"";position:absolute;right:26px;top:24px;width:18px;height:10px;background:currentColor;opacity:.35;-webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 18 10'%3E%3Cpath d='M0 5h16M12 1l4 4-4 4' fill='none' stroke='%23000' stroke-width='1.6'/%3E%3C/svg%3E") center/contain no-repeat;mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 18 10'%3E%3Cpath d='M0 5h16M12 1l4 4-4 4' fill='none' stroke='%23000' stroke-width='1.6'/%3E%3C/svg%3E") center/contain no-repeat;transition:transform .45s var(--ease),opacity .3s,color .3s}
-.qb:hover{background:rgba(255,255,255,.7)}
-.qb:hover em{transform:scaleX(1)}
-.qb:hover .ic{transform:translateY(-3px)}
-.qb:hover::after{opacity:1;color:#C8102E;transform:translateX(5px)}
-.qb:focus-visible{outline:2px solid #C8102E;outline-offset:-2px}
-.qb small .qd{display:inline-block;width:7px;height:7px;border-radius:50%;margin:0 7px 0 0;vertical-align:1px}
-@media (max-width:760px){.qbar{grid-template-columns:1fr 1fr;margin-top:22px}.qb{padding:18px 16px 20px}.qb:nth-child(3)::before{display:none}.qb:nth-child(n+3){border-top:1px solid rgba(27,30,37,.1)}.qb::after{right:16px;top:20px}.qb em{left:16px;right:16px}.qb b{font-size:15.5px}}
+/* Schnellzugriff: Foto-Kacheln als Akkordeon – Kachel unter der Maus wird breit, Foto zoomt langsam */
+.qacc{position:relative;z-index:3;display:flex;gap:10px;height:clamp(170px,14vw,200px);margin-top:clamp(28px,4vw,46px)}
+.qa{position:relative;flex:1 1 0;min-width:0;overflow:hidden;isolation:isolate;border-radius:22px;color:#fff;text-decoration:none;background:#1B1E25;box-shadow:0 24px 44px -26px rgba(18,20,25,.7);transition:flex-grow .7s cubic-bezier(.6,.05,.2,1),box-shadow .4s}
+.qa.on{flex-grow:2.4}
+.qacc:hover .qa.on{flex-grow:1}
+.qacc .qa:hover,.qacc .qa:focus-visible{flex-grow:2.4}
+.qa .bg{position:absolute;inset:0;z-index:-2;background:var(--img) var(--pos)/cover no-repeat;transform:scale(1.12);transition:transform 1.6s cubic-bezier(.2,.7,.2,1),filter .6s;filter:saturate(.85) brightness(.9)}
+.qa:hover .bg,.qa.on .bg{transform:scale(1.02);filter:saturate(1.05) brightness(1)}
+.qacc:hover .qa.on:not(:hover) .bg{transform:scale(1.12);filter:saturate(.85) brightness(.9)}
+.qa::before{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(180deg,rgba(15,17,21,.05) 0%,rgba(15,17,21,.35) 45%,rgba(15,17,21,.88) 100%),radial-gradient(90% 80% at 0% 100%,rgba(200,16,46,.55),transparent 60%);transition:opacity .5s}
+.qa.qice::before{background:linear-gradient(180deg,rgba(15,17,21,.05) 0%,rgba(15,17,21,.35) 45%,rgba(15,17,21,.88) 100%),radial-gradient(90% 80% at 0% 100%,rgba(56,129,214,.6),transparent 60%)}
+.qa::after{content:"";position:absolute;inset:0;border-radius:inherit;box-shadow:inset 0 0 0 1px rgba(255,255,255,.12);pointer-events:none}
+.qa .ic{position:absolute;top:16px;left:16px;width:42px;height:42px;border-radius:14px;display:grid;place-items:center;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.25);transition:background .4s,border-color .4s,transform .5s var(--spring)}
+.qa .ic svg{width:20px;height:20px;color:#fff}
+.qa:hover .ic,.qa.on .ic{background:#C8102E;border-color:#C8102E;transform:rotate(-6deg)}
+.qa.qice:hover .ic,.qa.qice.on .ic{background:#2563EB;border-color:#2563EB}
+.qacc:hover .qa.on:not(:hover) .ic{background:rgba(255,255,255,.14);border-color:rgba(255,255,255,.25);transform:none}
+.qa .tx{position:absolute;left:18px;right:18px;bottom:16px;display:flex;flex-direction:column;gap:4px}
+.qa .tx i{font:700 10.5px/1 var(--display);font-style:normal;letter-spacing:.2em;text-transform:uppercase;color:#E8C9A0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.qa .tx b{font:800 clamp(16px,1.35vw,20px)/1.15 var(--display);letter-spacing:-.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-shadow:0 2px 12px rgba(0,0,0,.4)}
+.qa .tx small,.qa .tx em{max-height:0;opacity:0;overflow:hidden;white-space:nowrap;transition:max-height .5s var(--ease),opacity .4s .1s}
+.qa .tx small{font:500 14px/1.35 var(--display);color:rgba(255,255,255,.85)}
+.qa .tx em{font:700 12px/1 var(--display);font-style:normal;letter-spacing:.14em;text-transform:uppercase;display:inline-flex;align-items:center;gap:8px;margin-top:6px}
+.qa .tx em::after{content:"";width:22px;height:2px;background:#C8102E;transition:width .5s var(--ease)}
+.qa.qice .tx em::after{background:#60A5FA}
+.qa:hover .tx small,.qa:hover .tx em,.qa.on .tx small,.qa.on .tx em{max-height:24px;opacity:1}
+.qacc:hover .qa.on:not(:hover) .tx small,.qacc:hover .qa.on:not(:hover) .tx em{max-height:0;opacity:0}
+.qa:hover .tx em::after{width:40px}
+.qa .tx small .qd{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:7px;vertical-align:1px}
+.qa:focus-visible{outline:3px solid #C8102E;outline-offset:3px}
+@media (max-width:760px){.qacc{display:grid;grid-template-columns:1fr 1fr;height:auto;gap:8px;margin-top:22px}
+ .qa{height:150px;border-radius:18px}.qa .bg{transform:scale(1.02)}.qa .tx{left:14px;right:12px;bottom:12px}.qa .tx b{font-size:15.5px;white-space:normal}.qa .tx small{max-height:none!important;opacity:1!important;white-space:normal!important;font-size:12.5px}.qa .tx em,.qa .tx i{display:none}
+ .qa .ic{top:12px;left:12px;width:36px;height:36px;border-radius:12px;background:#C8102E;border-color:#C8102E}.qa.qice .ic{background:#2563EB;border-color:#2563EB}}
+@media (prefers-reduced-motion:reduce){.qa,.qa .bg{transition-duration:.01s}}
 /* ===== Admin-Bereich ===== */
 .adm{position:fixed;inset:0;z-index:300;opacity:0;transition:opacity .25s;background:#0F1115}
 .adm.on{opacity:1}
@@ -1780,11 +1796,11 @@ m696 -454 c28 -13 46 -31 55 -51 22 -53 -50 -177 -173 -300 -187 -186 -647
      <span class="hchip c2"><svg><use href="#i-bike"/></svg>Probefahrt vor Ort</span>
     </div>
    </div>
-   <nav class="qbar hello" style="--d:1.45s" aria-label="Schnellzugriff">
-    <a class="qb" href="#termin"><i>01</i><span class="ic"><svg><use href="#i-cal"/></svg></span><b>Termin anfragen</b><small>Werkstatt oder Probefahrt</small><em aria-hidden="true"></em></a>
-    <a class="qb" href="#lager"><i>02</i><span class="ic"><svg><use href="#i-bike"/></svg></span><b>Auf Lager</b><small id="qkLager">Räder sofort verfügbar</small><em aria-hidden="true"></em></a>
-    <a class="qb" href="#deal"><i>03</i><span class="ic"><svg><use href="#i-gift"/></svg></span><b>Winter-Aktion</b><small>–20 € auf jede Inspektion</small><em aria-hidden="true"></em></a>
-    <a class="qb" href="#besuch"><i>04</i><span class="ic"><svg><use href="#i-clock"/></svg></span><b>Öffnungszeiten</b><small id="qkHours">Mo, Di, Do, Fr · Sa vormittags</small><em aria-hidden="true"></em></a>
+   <nav class="qacc hello" style="--d:1.45s" aria-label="Schnellzugriff">
+    <a class="qa on" href="#termin" style="--img:url(img/bosch-motor.webp);--pos:86% 40%"><span class="bg"></span><span class="ic"><svg><use href="#i-cal"/></svg></span><span class="tx"><i>01 · Werkstatt</i><b>Termin anfragen</b><small>Werkstatt oder Probefahrt</small><em>Jetzt anfragen</em></span></a>
+    <a class="qa" href="#lager" style="--img:url(img/laden-innen.webp);--pos:50% 55%"><span class="bg"></span><span class="ic"><svg><use href="#i-bike"/></svg></span><span class="tx"><i>02 · Ausstellung</i><b>Auf Lager</b><small id="qkLager">Räder sofort verfügbar</small><em>Räder ansehen</em></span></a>
+    <a class="qa qice" href="#deal" style="--img:url(img/laden-eingang.webp);--pos:50% 45%"><span class="bg"></span><span class="ic"><svg><use href="#i-gift"/></svg></span><span class="tx"><i>03 · Bis 28.02.</i><b>Winter-Aktion</b><small>–20 € auf jede Inspektion</small><em>Zur Aktion</em></span></a>
+    <a class="qa" href="#besuch" style="--img:url(img/fassade.webp);--pos:50% 50%"><span class="bg"></span><span class="ic"><svg><use href="#i-clock"/></svg></span><span class="tx"><i>04 · Wörth am Rhein</i><b>Öffnungszeiten</b><small id="qkHours">Mo, Di, Do, Fr · Sa vormittags</small><em>Besuch planen</em></span></a>
    </nav>
   </div>
  </div>
