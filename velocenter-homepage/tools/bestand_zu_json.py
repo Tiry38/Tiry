@@ -89,6 +89,9 @@ def kw(datum):
     w, j = d.isocalendar()[1], d.isocalendar()[0]
     return f'KW {w}' if j == heute.year else f'KW {w}/{str(j)[2:]}'
 
+# Nicht auf der Homepage: Flyer (Restposten, wird nicht nachbestellt), Hercules (Leihräder, nicht zu verkaufen)
+AUSGESCHLOSSEN = r'^(flyer|hercules)\b'
+
 MARKEN = [(r'^i\s?:?\s?sy$', 'i:SY'), (r'^qio$', 'QiO'), (r'^ktm$', 'KTM'), (r'^velo\s*de\s*ville$', 'Velo de Ville'),
           (r'^van\s*raam$', 'Van Raam'), (r'^gudereit$', 'Gudereit'), (r'^victoria$', 'Victoria'), (r'^stevens$', 'Stevens'),
           (r'^flyer$', 'Flyer'), (r'^hercules$', 'Hercules')]
@@ -122,7 +125,7 @@ def main():
     m = karte(kopf)
     if m['marke'] < 0 or m['modell'] < 0:
         sys.exit('Spalten Marke/Hersteller und Modell nicht gefunden – ist das der Fahrzeugbestand?')
-    raeder, n_service, n_res, n_verk = [], 0, 0, 0
+    raeder, n_service, n_res, n_verk, n_marke = [], 0, 0, 0, 0
     for nr, r in enumerate(rows, 1):
         art = wert(r, m['zu'])
         if re.search(r'service', art, re.I): n_service += 1; continue
@@ -130,6 +133,7 @@ def main():
         if wert(r, m['vd']) or wert(r, m['bes']) or wert(r, m['ausg']): n_verk += 1; continue
         marke, modell = marke_norm(wert(r, m['marke'])), wert(r, m['modell'])
         if not marke or not modell: continue
+        if re.match(AUSGESCHLOSSEN, marke, re.I): n_marke += 1; continue
         zulauf = m['ang'] >= 0 and not wert(r, m['ang']) and (
             (m['lt'] < 0 and m['bd'] < 0) or bool(wert(r, m['lt'])) or bool(wert(r, m['bd'])))
         vk, ap = preis(wert(r, m['vk'])), preis(wert(r, m['ap']))
@@ -151,7 +155,7 @@ def main():
     daten = dict(stand=datetime.date.today().strftime('%d.%m.%Y'), quelle='Veloport-Export', raeder=eindeutig, **({'hinweis': hinweis} if hinweis else {}))
     json.dump(daten, open(ziel, 'w', encoding='utf-8'), ensure_ascii=False, indent=1)
     print(f'{len(raeder)} Räder -> {len(eindeutig)} Karten ({sum(len(k["farben"]) for k in eindeutig)} Farb-Ausführungen) -> {ziel} '
-          f'(ausgelassen: {n_verk} verkauft, {n_res} reserviert, {n_service} Servicerad)')
+          f'(ausgelassen: {n_verk} verkauft, {n_res} reserviert, {n_service} Servicerad, {n_marke} Flyer/Hercules)')
 
 FELDER = ('marke', 'modell', 'jahr', 'gr', 'farbe', 'rahmen', 'typ', 'motor', 'akku', 'schaltung', 'display', 'reifen', 'gewicht', 'zgg', 'km',
           'status', 'ab', 'preis', 'angebot', 'vorfuehr', 'gebraucht', 'id')

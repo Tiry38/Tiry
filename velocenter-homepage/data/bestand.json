@@ -3,27 +3,6 @@
  "quelle": "Veloport-Export",
  "raeder": [
   {
-   "marke": "Flyer",
-   "modell": "Gotour6 5.41R",
-   "gr": "S",
-   "rahmen": "Tiefeinsteiger",
-   "typ": "Pedelec",
-   "farben": [
-    {
-     "jahr": "2021",
-     "farbe": "silber",
-     "typ": "Pedelec",
-     "motor": "Bosch Performance Line 4.0",
-     "akku": "625 Wh",
-     "schaltung": "Shimano 5-Gang",
-     "status": "lager",
-     "preis": 3999,
-     "angebot": 2999,
-     "id": "3884"
-    }
-   ]
-  },
-  {
    "marke": "Gudereit",
    "modell": "EC-35 Evo",
    "gr": "46 cm",
@@ -52,26 +31,6 @@
      "status": "bestellt",
      "preis": 3999,
      "id": "6620"
-    }
-   ]
-  },
-  {
-   "marke": "Hercules",
-   "modell": "E-IMPERIAL 180 S9 XL 500Wh",
-   "gr": "60 cm",
-   "rahmen": "Diamant",
-   "typ": "Kettenschaltung",
-   "farben": [
-    {
-     "jahr": "2018",
-     "farbe": "schwarz",
-     "typ": "Kettenschaltung",
-     "akku": "400 Wh",
-     "display": "Intuvia",
-     "status": "lager",
-     "preis": 3199,
-     "angebot": 2000,
-     "id": "1277"
     }
    ]
   },

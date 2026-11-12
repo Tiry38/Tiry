@@ -2219,7 +2219,7 @@ const lgBrand=m=>{const x=BRK.find(([re])=>re.test(m||''));return x?BR.find(b=>b
 const lgMkName=r=>(lgBrand(r.marke)||{n:r.marke}).n;
 /* Bild nur, wenn Marke UND Rahmenform zum vorhandenen Foto passen – sonst Platzhalter mit Logo */
 /* Nur das exakte Herstellerfoto (Modell + Modelljahr + Farbe, Feld bild) – sonst Platzhalter, nie ein ähnliches Rad */
-const LG_LOGO={Stevens:'img/marke-stevens.svg',Flyer:'img/marke-flyer.webp',Hercules:'img/marke-hercules.svg'};
+const LG_LOGO={Stevens:'img/marke-stevens.svg'};
 function lgImg(m,vi){const v=m.v||[];if(vi!=null)return (v[vi]&&v[vi].bild)||'';const x=v.find(y=>y.bild);return x?x.bild:''}
 const FARB=[[/schwarz|black|anthrazit|graphit/i,'#23252B'],[/wei(ß|ss)|white|creme|cream/i,'#F4F1EA'],[/silber|silver|alu/i,'#B9BDC4'],[/grau|grey|gray/i,'#8C9097'],[/t(ü|ue)rkis|turquoise|aqua|mint/i,'#2CC5C0'],[/petrol/i,'#1F6F78'],[/blau|blue/i,'#3A6FD8'],[/oliv|olive/i,'#7A7F3A'],[/gr(ü|ue)n|green/i,'#2F7D4F'],[/ros(é|e)|rosa|pink/i,'#E6A3C8'],[/rot|red/i,'#C8102E'],[/orange/i,'#F07A1A'],[/gelb|yellow|gold/i,'#E8B923'],[/beige|sand|champagner/i,'#D9C3A0'],[/lila|violett|purple|lavendel/i,'#8E6CC9'],[/braun|brown/i,'#7A5236']];
 /* Farberkennung aus der KI-Zentrale (Veloport-/Herstellernamen, Klammer = Akzent, zuerst genannte Farbe gewinnt) */
