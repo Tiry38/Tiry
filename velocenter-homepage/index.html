@@ -1247,6 +1247,13 @@ body.sc .hdr{backdrop-filter:none!important;-webkit-backdrop-filter:none!importa
  .qa{height:150px;border-radius:18px}.qa .bg{transform:scale(1.02)}.qa .tx{left:14px;right:12px;bottom:12px}.qa .tx b{font-size:15.5px;white-space:normal}.qa .tx small{max-height:none!important;opacity:1!important;white-space:normal!important;font-size:12.5px}.qa .tx em,.qa .tx i{display:none}
  .qa .ic{top:12px;left:12px;width:36px;height:36px;border-radius:12px;background:#C8102E;border-color:#C8102E}.qa.qice .ic{background:#2563EB;border-color:#2563EB}}
 @media (prefers-reduced-motion:reduce){.qa,.qa .bg{transition-duration:.01s}}
+/* Laufband direkt unter der Navigation (Test, Tiry) */
+.bands.top{height:clamp(96px,10vw,140px);margin:clamp(92px,8vw,108px) 0 0}
+.bands.top .band{left:-4vw;right:-4vw;padding:clamp(7px,.9vw,12px) 0}
+.bands.top .band.a{transform:translateY(-50%) rotate(-1.6deg)}
+.bands.top .band.b{transform:translateY(-50%) rotate(1.3deg)}
+.bands.top .band span{font-size:clamp(20px,2.6vw,38px)}
+.bands.top+.stage0{padding-top:clamp(18px,2.5vw,34px)}
 /* ===== Admin-Bereich ===== */
 .adm{position:fixed;inset:0;z-index:300;opacity:0;transition:opacity .25s;background:#0F1115}
 .adm.on{opacity:1}
@@ -1462,6 +1469,10 @@ button.akpi{cursor:pointer;transition:transform .2s,box-shadow .2s}button.akpi:h
 
 <!-- ================= START ================= -->
 <section class="view" data-v="start">
+ <div class="bands top" aria-hidden="true">
+  <div class="band b"><div class="tk" data-t="Wörth am Rhein|Hartmannstraße 25|Familienbetrieb|Probefahrt|Ehrliche Beratung|0 % Finanzierung"></div></div>
+  <div class="band a"><div class="tk" data-t="Seit 1995|200+ Räder|4,8 ★ bei Google|Bosch Service Center|i:SY Experte|Weltrekord 283"></div></div>
+ </div>
  <div class="stage0" id="hero">
   <canvas id="speed" aria-hidden="true"></canvas>
   <div class="halo"></div>
@@ -1805,10 +1816,6 @@ m696 -454 c28 -13 46 -31 55 -51 22 -53 -50 -177 -173 -300 -187 -186 -647
   </div>
  </div>
 
- <div class="bands" aria-hidden="true">
-  <div class="band b"><div class="tk" data-t="Wörth am Rhein|Hartmannstraße 25|Familienbetrieb|Probefahrt|Ehrliche Beratung|0 % Finanzierung"></div></div>
-  <div class="band a"><div class="tk" data-t="Seit 1995|200+ Räder|4,8 ★ bei Google|Bosch Service Center|i:SY Experte|Weltrekord 283"></div></div>
- </div>
 
  <div class="sec show" id="showroom">
   <div class="glow"></div>
