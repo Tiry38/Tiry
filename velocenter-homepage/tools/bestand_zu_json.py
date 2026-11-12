@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Veloport-Fahrzeugbestand (CSV) -> data/bestand.json fuer die Homepage.
 
-Aufruf:  python3 tools/bestand_zu_json.py <Veloport-Export.csv> [data/bestand.json]
+Aufruf:  python3 tools/bestand_zu_json.py <Veloport-Export.csv> [data/bestand.json] ["Hinweistext"]
 
 Spaltenerkennung wie in der KI-Zentrale (fzbMap/fzbMapX). Auf die Homepage kommen nur
 kundentaugliche Felder. Einkaufspreis, Rahmennummer, Lagerort, Besitzer, Bemerkung,
@@ -19,7 +19,7 @@ def lesen(pfad):
         except UnicodeDecodeError:
             continue
     zeilen = [z for z in txt.splitlines() if z.strip()][:6]
-    trenner = max([';', ',', '\t'], key=lambda d: (len({z.count(d) for z in zeilen}) == 1, zeilen[0].count(d)))
+    trenner = max([';', ',', '\t'], key=lambda d: (zeilen[0].count(d) > 0, len({z.count(d) for z in zeilen[1:]}) <= 1, zeilen[0].count(d)))
     rows = list(csv.reader(io.StringIO(txt), delimiter=trenner))
     kopf = rows[0]
     while len(kopf) > 1 and not kopf[-1].strip():
@@ -47,7 +47,8 @@ def karte(kopf):
         id=f(r'^(fahrzeug)?-?\s?id$|^lfd|^fz-?nr'), ort=f(r'lagerort|standort|lagerplatz|^platz'),
         ang=f(r'angeliefert'), lt=f(r'liefertermin'), bd=f(r'bestelldatum'),
         res=f(r'^reserviert$'), test=f(r'^testfahrzeug$'), zu=f(r'^name$'),
-        vd=f(r'verkaufsdatum'), bes=f(r'besitzer|eigent'),
+        vd=f(r'verkaufsdatum'), bes=f(r'besitzer|eigent'), ausg=f(r'ausgeliefert'),
+        display=f(r'^display'), reifen=f(r'reifengr'), gewicht=f(r'^gewicht'), zgg=f(r'gesamtgewicht'), km=f(r'km-?\s?stand'),
         aus=f(r'ausstatt'), akku=f(r'akku-?\s?leistung'), motor=f(r'^motor|antrieb'),
         schalt=f(r'schaltung|gangschaltung'),
     )
@@ -67,7 +68,45 @@ def preis(v):
     except ValueError:
         return None
 
+RF_VELOPORT = {'us': 'Tiefeinsteiger', 'us hardtail': 'Tiefeinsteiger', 'kompakt': 'Kompaktrad', 'herren': 'Diamant',
+               'trapez': 'Trapez', 'mtb hardtail': 'MTB', 'dreirad': 'Dreirad', 'unisex': 'Unisex'}
+
+def groesse(g):
+    g = g.strip().replace("''", '"')
+    if re.fullmatch(r'\d{2}', g): return g + ' cm'
+    return re.sub(r'(\d)\s?cm', r'\1 cm', g)
+
+def kw(datum):
+    """Liefertermin TT.MM.JJ -> 'KW 48' (bzw. 'KW 2/27'); vergangene Termine -> ''."""
+    for fmt in ('%d.%m.%y', '%d.%m.%Y'):
+        try:
+            d = datetime.datetime.strptime(datum.strip(), fmt).date(); break
+        except ValueError:
+            d = None
+    if d is None: return datum.strip() if re.search(r'kw', datum, re.I) else ''
+    heute = datetime.date.today()
+    if d < heute: return ''
+    w, j = d.isocalendar()[1], d.isocalendar()[0]
+    return f'KW {w}' if j == heute.year else f'KW {w}/{str(j)[2:]}'
+
+MARKEN = [(r'^i\s?:?\s?sy$', 'i:SY'), (r'^qio$', 'QiO'), (r'^ktm$', 'KTM'), (r'^velo\s*de\s*ville$', 'Velo de Ville'),
+          (r'^van\s*raam$', 'Van Raam'), (r'^gudereit$', 'Gudereit'), (r'^victoria$', 'Victoria'), (r'^stevens$', 'Stevens'),
+          (r'^flyer$', 'Flyer'), (r'^hercules$', 'Hercules')]
+
+def marke_norm(v):
+    for muster, name in MARKEN:
+        if re.match(muster, v.strip(), re.I): return name
+    return v.strip()
+
+def motor(v):
+    return re.sub(r'\s*(\d+\s?V|\d+\s?W|\d+\s?km/?h)\b', '', v).strip(' ,')
+
+def einheit(v, e):
+    v = v.strip().replace('.', ',') if v.strip() else ''
+    return f'{v} {e}' if v and re.fullmatch(r'[\d,]+', v) else v
+
 def rahmenform(rf, dh, modell):
+    if rf.strip().lower() in RF_VELOPORT: return RF_VELOPORT[rf.strip().lower()]
     t = f'{rf} {dh} {modell}'.lower()
     if re.search(r'wave|tief|damen|easy ?entry|low ?step|\bus\b|unisex', t): return 'Tiefeinsteiger'
     if re.search(r'trapez|mixte|\btz\b', t): return 'Trapez'
@@ -78,6 +117,7 @@ def main():
     if len(sys.argv) < 2:
         print(__doc__); sys.exit(1)
     ziel = sys.argv[2] if len(sys.argv) > 2 else 'data/bestand.json'
+    hinweis = sys.argv[3] if len(sys.argv) > 3 else ''
     kopf, rows = lesen(sys.argv[1])
     m = karte(kopf)
     if m['marke'] < 0 or m['modell'] < 0:
@@ -87,28 +127,32 @@ def main():
         art = wert(r, m['zu'])
         if re.search(r'service', art, re.I): n_service += 1; continue
         if m['res'] >= 0 and ja(wert(r, m['res'])): n_res += 1; continue
-        if wert(r, m['vd']) or wert(r, m['bes']): n_verk += 1; continue
-        marke, modell = wert(r, m['marke']), wert(r, m['modell'])
+        if wert(r, m['vd']) or wert(r, m['bes']) or wert(r, m['ausg']): n_verk += 1; continue
+        marke, modell = marke_norm(wert(r, m['marke'])), wert(r, m['modell'])
         if not marke or not modell: continue
         zulauf = m['ang'] >= 0 and not wert(r, m['ang']) and (
             (m['lt'] < 0 and m['bd'] < 0) or bool(wert(r, m['lt'])) or bool(wert(r, m['bd'])))
         vk, ap = preis(wert(r, m['vk'])), preis(wert(r, m['ap']))
         raeder.append({k: v for k, v in dict(
             id=wert(r, m['id']) or str(nr), marke=marke, modell=modell, jahr=wert(r, m['jahr']),
-            gr=wert(r, m['gr']), farbe=wert(r, m['farbe']),
+            gr=groesse(wert(r, m['gr'])), farbe=wert(r, m['farbe']), typ=re.sub(r'(?i)bitte w.hlen', '', wert(r, m['typ'])),
             rahmen=rahmenform(wert(r, m['rf']), wert(r, m['dh']), modell),
             preis=vk, angebot=ap if ap and vk and ap < vk else None,
-            status='bestellt' if zulauf else 'lager', ab=wert(r, m['lt']) if zulauf else '',
+            status='bestellt' if zulauf else 'lager', ab=kw(wert(r, m['lt'])) if zulauf else '',
             gebraucht=bool(re.search(r'gebraucht', art, re.I)), vorfuehr=m['test'] >= 0 and ja(wert(r, m['test'])),
-            motor=wert(r, m['motor']), akku=wert(r, m['akku']), schaltung=wert(r, m['schalt']),
+            motor=motor(wert(r, m['motor'])), akku=einheit(wert(r, m['akku']), 'Wh'),
+            schaltung=wert(r, m['schalt']) or wert(r, m['aus']).split('|')[0].strip(),
+            display=wert(r, m['display']), reifen=wert(r, m['reifen']).replace("''", '"'),
+            gewicht=einheit(wert(r, m['gewicht']), 'kg'), zgg=einheit(wert(r, m['zgg']), 'kg'),
+            km=(wert(r, m['km']) + ' km') if re.search(r'gebraucht', art, re.I) and wert(r, m['km']) else '',
         ).items() if v not in ('', None, False)})
     eindeutig = gruppieren(raeder)
-    daten = dict(stand=datetime.date.today().strftime('%d.%m.%Y'), quelle='Veloport-Export', raeder=eindeutig)
+    daten = dict(stand=datetime.date.today().strftime('%d.%m.%Y'), quelle='Veloport-Export', raeder=eindeutig, **({'hinweis': hinweis} if hinweis else {}))
     json.dump(daten, open(ziel, 'w', encoding='utf-8'), ensure_ascii=False, indent=1)
     print(f'{len(raeder)} Räder -> {len(eindeutig)} verschiedene Räder -> {ziel} '
           f'(ausgelassen: {n_verk} verkauft, {n_res} reserviert, {n_service} Servicerad)')
 
-FELDER = ('marke', 'modell', 'jahr', 'gr', 'farbe', 'rahmen', 'motor', 'akku', 'schaltung',
+FELDER = ('marke', 'modell', 'jahr', 'gr', 'farbe', 'rahmen', 'typ', 'motor', 'akku', 'schaltung', 'display', 'reifen', 'gewicht', 'zgg', 'km',
           'status', 'ab', 'preis', 'angebot', 'vorfuehr', 'gebraucht', 'id')
 
 def gruppieren(raeder):
@@ -127,7 +171,7 @@ def gruppieren(raeder):
         elif alt['status'] == 'bestellt' and neu.get('ab') and (not alt.get('ab') or neu['ab'] < alt['ab']):
             alt['ab'] = neu['ab']
         if neu.get('angebot') and (not alt.get('angebot') or neu['angebot'] < alt['angebot']): alt['angebot'] = neu['angebot']
-        for k in ('motor', 'akku', 'schaltung'):
+        for k in ('motor', 'akku', 'schaltung', 'display', 'reifen', 'gewicht', 'zgg', 'typ'):
             if k in neu and k not in alt: alt[k] = neu[k]
     return sorted(gleich.values(), key=lambda r: (r['status'] != 'lager', r['marke'].lower(), r['modell'].lower(), r.get('gr', '')))
 

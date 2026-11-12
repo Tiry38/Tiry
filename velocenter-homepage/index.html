@@ -1136,6 +1136,15 @@ textarea.inp{border-radius:12px}
 .lgvar .vs button small.ok{color:#047857;background:#D1FAE5}.lgvar .vs button small.z{color:#92400E;background:#FEF3C7}
 .lgvar .vs button.on{border-color:#1B1E25;box-shadow:inset 0 0 0 1px #1B1E25}
 @media (max-width:980px){.deals{position:static;margin-top:24px}}
+
+/* Platzhalter, wenn kein passendes Foto vorhanden */
+.lgst .phl{display:flex;flex-direction:column;align-items:center;gap:10px;padding:18px 26px;border-radius:12px;background:rgba(255,255,255,.75);box-shadow:0 10px 24px -14px rgba(27,30,37,.3)}
+.lgst .phl img{height:34px;width:auto;max-width:160px;object-fit:contain}
+.lgst .phl b{font:800 20px var(--display)}
+.lgst .phl small{font:600 11.5px/1 var(--display);letter-spacing:.14em;text-transform:uppercase;color:var(--dim)}
+.lgm-stage .phm{position:absolute;left:50%;top:48%;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;gap:12px;padding:26px 36px;border-radius:14px;background:rgba(255,255,255,.8)}
+.lgm-stage .phm img{height:48px;width:auto;max-width:240px}
+.lgm-stage .phm small{font:600 12px var(--display);letter-spacing:.14em;text-transform:uppercase;color:var(--dim)}
 </style>
 
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
@@ -1887,7 +1896,7 @@ m696 -454 c28 -13 46 -31 55 -51 22 -53 -50 -177 -173 -300 -187 -186 -647
   </div>
  </div>
  <div class="wrap">
-  <p class="lgdemo" id="lgDemo" hidden><svg><use href="#i-spark"/></svg><span><b>Beispieldaten.</b> Sobald der Veloport-Export eingespielt ist, steht hier euer echter Bestand.</span></p>
+  <p class="lgdemo" id="lgDemo" hidden><svg><use href="#i-spark"/></svg><span id="lgDemoT"></span></p>
   <div class="lgbar" id="lgBar">
    <label class="lgq"><svg><use href="#i-spark"/></svg><input id="lgQ" type="search" placeholder="Marke, Modell, Farbe …" aria-label="Bestand durchsuchen"></label>
    <div class="lgchips" id="lgMk" role="group" aria-label="Marke"></div>
@@ -2184,7 +2193,9 @@ const LG={M:[],list:[],ok:false,load:null,f:{q:'',mk:'',rf:'',nur:false,deal:fal
 const BRK=[[/i:?\s?sy/i,'isy'],[/ktm/i,'ktm'],[/qio/i,'qio'],[/velo\s*de\s*ville|vdv/i,'vdv'],[/van\s*raam/i,'vanraam'],[/gudereit/i,'gudereit'],[/victoria/i,'victoria']];
 const lgBrand=m=>{const x=BRK.find(([re])=>re.test(m||''));return x?BR.find(b=>b.k===x[1]):null};
 const lgMkName=r=>(lgBrand(r.marke)||{n:r.marke}).n;
-function lgImg(r){const b=lgBrand(r.marke);if(!b)return '';if(b.k==='isy'&&/touring/i.test(r.modell))return 'img/p-isy2.webp';return b.img}
+/* Bild nur, wenn Marke UND Rahmenform zum vorhandenen Foto passen – sonst Platzhalter mit Logo */
+const LG_FOTO={isy:['Kompaktrad',''],qio:['Kompaktrad',''],ktm:['Tiefeinsteiger'],vdv:['Tiefeinsteiger'],vanraam:['Dreirad',''],gudereit:['Kompaktrad',''],victoria:['Tiefeinsteiger']};
+function lgImg(r){const b=lgBrand(r.marke);if(!b)return '';const ok=LG_FOTO[b.k];if(ok&&!ok.includes(r.rahmen||''))return '';if(b.k==='isy'&&/touring/i.test(r.modell))return 'img/p-isy2.webp';return b.img}
 const FARB=[[/schwarz|black|anthrazit|graphit/i,'#23252B'],[/wei(ß|ss)|white|creme|cream/i,'#F4F1EA'],[/silber|silver|alu/i,'#B9BDC4'],[/grau|grey|gray/i,'#8C9097'],[/t(ü|ue)rkis|turquoise|aqua|mint/i,'#2CC5C0'],[/petrol/i,'#1F6F78'],[/blau|blue/i,'#3A6FD8'],[/oliv|olive/i,'#7A7F3A'],[/gr(ü|ue)n|green/i,'#2F7D4F'],[/ros(é|e)|rosa|pink/i,'#E6A3C8'],[/rot|red/i,'#C8102E'],[/orange/i,'#F07A1A'],[/gelb|yellow|gold/i,'#E8B923'],[/beige|sand|champagner/i,'#D9C3A0'],[/lila|violett|purple|lavendel/i,'#8E6CC9'],[/braun|brown/i,'#7A5236']];
 const lgFarbe=f=>{const x=FARB.find(([re])=>re.test(f||''));return x?x[1]:'#9AA0A8'};
 const eur=n=>n==null?'':n.toLocaleString('de-DE')+' €';
@@ -2194,7 +2205,7 @@ function lgNorm(d){let R=d.raeder;
  return (R||[]).map((r,i)=>{const v=[r];const lager=r.status!=='bestellt';const p=vP(r);
   return Object.assign({},r,{_i:i,v,lager,deal:!!r.angebot,minP:p||null,multiP:false,ab:lager?'':(r.ab||''),grs:r.gr?[r.gr]:[],fs:r.farbe?[r.farbe]:[]})})}
 function lgLoad(){if(LG.load)return LG.load;LG.load=fetch('data/bestand.json',{cache:'no-store'}).then(r=>{if(!r.ok)throw 0;return r.json()}).then(d=>{LG.M=lgNorm(d);LG.ok=true;
- $('#lgStand').textContent='Stand '+(d.stand||'');$('#lgDemo').hidden=d.quelle!=='Beispieldaten';
+ $('#lgStand').textContent=/^\d/.test(d.stand||'')?'Stand '+d.stand:(d.stand||'aktuell');const hw=d.hinweis||(d.quelle==='Beispieldaten'?'Sobald der Veloport-Export eingespielt ist, steht hier euer echter Bestand.':'');$('#lgDemo').hidden=!hw;$('#lgDemoT').innerHTML='<b>'+(d.quelle==='Beispieldaten'?'Beispieldaten.':'Hinweis:')+'</b> '+esc(hw);
  const nL=LG.M.filter(m=>m.lager).length,nB=LG.M.length-nL,nD=LG.M.filter(m=>m.deal).length,nMk=new Set(LG.M.map(lgMkName)).size;
  $('#lgNum').innerHTML='<span><b>'+nL+'</b> Räder sofort verfügbar</span>'+(nB?'<span><b>'+nB+'</b> Lieferung ausstehend</span>':'')+'<span><b>'+nMk+'</b> Marken</span>';
  $('#lgDealsN').textContent=nD?nD+(nD===1?' Rad reduziert':' Räder reduziert'):'Aktuell keine';$('#lgDeals').hidden=!nD;
@@ -2218,7 +2229,7 @@ function lgPriceM(m){const d=m.v.filter(x=>x.angebot).sort((a,b)=>a.angebot-b.an
 function lgRender(){if(!LG.ok)return;const L=LG.list=lgFilter();const g=$('#lgGrid');
  if(!L.length){g.innerHTML='<p class="lgempty">'+(LG.f.deal?'Aktuell gibt es dazu keine Sonderangebote.':'Kein Rad passt zu diesen Filtern.')+' <button type="button" class="ghost" id="lgReset">Filter zurücksetzen</button></p>';return}
  g.innerHTML=L.map((m,k)=>{const b=lgBrand(m.marke),im=lgImg(m);return '<article class="lgc'+(m.deal?' deal':'')+'" role="button" tabindex="0" data-k="'+k+'" style="--ac:'+(b?b.c:'#8C9097')+';--d:'+Math.min(k,12)*0.04+'s" aria-label="'+esc(m.marke+' '+m.modell)+' ansehen">'+
-  '<div class="lgst">'+(b?'<img class="wl" src="'+b.logo+'" alt="">':'')+(im?'<img class="bk" src="'+im+'" alt="" loading="lazy">':'<svg class="ph"><use href="#i-bike"/></svg>')+'<div class="bds">'+lgBadgesM(m)+'</div></div>'+
+  '<div class="lgst">'+(b?'<img class="wl" src="'+b.logo+'" alt="">':'')+(im?'<img class="bk" src="'+im+'" alt="" loading="lazy">':'<span class="phl">'+(b?'<img src="'+b.logo+'" alt="">':'<b>'+esc(m.marke)+'</b>')+'<small>Foto folgt</small></span>')+'<div class="bds">'+lgBadgesM(m)+'</div></div>'+
   '<div class="lgin"><span class="mk">'+esc(m.marke)+(m.jahr?' · '+esc(m.jahr):'')+'</span><h3>'+esc(m.modell)+'</h3><div class="sp">'+(m.grs.length?'<span>'+esc(m.grs.join(' · '))+'</span>':'')+(m.fs.length?'<span class="fs">'+m.fs.slice(0,5).map(f=>'<i title="'+esc(f)+'" style="background:'+lgFarbe(f)+'"></i>').join('')+(m.fs.length===1?esc(m.fs[0]):m.fs.length+' Farben')+'</span>':'')+(m.rahmen?'<span>'+esc(m.rahmen)+'</span>':'')+'</div>'+
   '<div class="ft">'+lgPriceM(m)+'<span class="go">Ansehen</span></div></div></article>'}).join('')}
 function lgOpen(){lgLoad().then(()=>{lgChips();lgRender()})}
@@ -2228,7 +2239,7 @@ function lgInfo(){const m=LG.list[LG.i],v=m.v[LG.vi]||m.v[0];const row=(l,x,h)=>
  const varis=sis.length?'<div class="lgvar"><span class="flab">Dieses Modell auch in</span><div class="vs">'+sis.map(([x,j])=>'<button type="button" data-goto="'+j+'">'+(x.farbe?'<i style="background:'+lgFarbe(x.farbe)+'"></i>':'')+'<span>'+esc([x.gr,x.rahmen!==m.rahmen?x.rahmen:'',x.farbe].filter(Boolean).join(' · '))+'</span><small class="'+(x.lager?'ok':'z')+'">'+(x.lager?'verfügbar':'Lieferung ausstehend')+'</small></button>').join('')+'</div></div>':'';
  $('#lgmInfo').innerHTML='<p class="eyebrow">'+esc(m.marke)+(m.jahr?' · <b>Modelljahr '+esc(m.jahr)+'</b>':'')+'</p><h2 id="lgmT">'+esc(m.modell)+'</h2><div class="bds">'+lgStat(v.status!=='bestellt',v.ab)+(v.angebot?'<span class="bd an">Sonderangebot</span>':'')+(v.vorfuehr?'<span class="bd vf">Vorführrad</span>':'')+(v.gebraucht?'<span class="bd gb">Gebraucht</span>':'')+'</div>'+
   '<div class="lgm-price">'+(v.preis?'<span class="lgpr">'+(v.angebot?'<s>'+eur(v.preis)+'</s><b class="an">'+eur(v.angebot)+'</b>':'<b>'+eur(v.preis)+'</b>')+'</span>':'<span class="lgpr"><b>Preis auf Anfrage</b></span>')+(v.angebot?'<span class="sv">Sie sparen '+eur(v.preis-v.angebot)+'</span>':'')+'</div>'+varis+
-  '<dl class="lgm-spec">'+row('Rahmenhöhe',v.gr)+row('Farbe',v.farbe,'<i style="background:'+lgFarbe(v.farbe)+'"></i>'+esc(v.farbe||''))+row('Rahmenform',m.rahmen)+row('Motor',m.motor)+row('Akku',m.akku)+row('Schaltung',m.schaltung)+row('Verfügbarkeit',1,v.status==='bestellt'?'Lieferung ausstehend'+(v.ab?', voraussichtlich '+esc(v.ab):''):'Sofort, steht bei uns in Wörth')+'</dl>'+
+  '<dl class="lgm-spec">'+row('Rahmenhöhe',v.gr)+row('Farbe',v.farbe,'<i style="background:'+lgFarbe(v.farbe)+'"></i>'+esc(v.farbe||''))+row('Rahmenform',m.rahmen)+row('Art',m.typ)+row('Motor',m.motor)+row('Akku',m.akku)+row('Display',m.display)+row('Schaltung',m.schaltung)+row('Reifen',m.reifen)+row('Gewicht',m.gewicht)+row('Zul. Gesamtgewicht',m.zgg)+row('Kilometerstand',m.km)+row('Verfügbarkeit',1,v.status==='bestellt'?'Lieferung ausstehend'+(v.ab?', voraussichtlich '+esc(v.ab):''):'Sofort, steht bei uns in Wörth')+'</dl>'+
   '<div class="row lgm-act"><button type="button" class="cta" data-ask="Kaufen">Dieses Rad anfragen</button><button type="button" class="ghost" data-ask="Probefahrt">Probefahrt</button></div>'+
   '<form class="lgm-form" id="lgmF" hidden novalidate><div class="fl"><span class="flab">Ihr Wunsch</span><div class="choice" id="lgW"><button type="button" class="on" data-v="Kaufen">Kaufen</button><button type="button" data-v="Reservieren">Reservieren</button><button type="button" data-v="Probefahrt">Probefahrt</button><button type="button" data-v="Andere Größe/Farbe bestellen">Andere Größe/Farbe</button></div></div>'+
   '<div class="r2"><div class="fl"><label for="lgN">Name</label><input class="inp" id="lgN" autocomplete="name"></div><div class="fl"><label for="lgT">Telefon</label><input class="inp" id="lgT" type="tel" autocomplete="tel"></div></div>'+
@@ -2237,6 +2248,7 @@ function lgInfo(){const m=LG.list[LG.i],v=m.v[LG.vi]||m.v[0];const row=(l,x,h)=>
 function lgShow(k,dir){const L=LG.list;if(!L.length)return;LG.i=(k+L.length)%L.length;const m=L[LG.i];LG.vi=Math.max(0,m.v.findIndex(x=>LG.f.deal?x.angebot:x.status!=='bestellt'));
  const b=lgBrand(m.marke),im=lgImg(m),M=$('#lgm'),st=$('#lgmStage');M.style.setProperty('--ac',b?b.c:'#8C9097');
  const bk=$('#lgmBk'),rf=$('#lgmRf'),wl=$('#lgmWl');bk.src=im||'';rf.src=im||'';bk.alt=m.marke+' '+m.modell;wl.src=b?b.logo:'';wl.hidden=!b;bk.hidden=rf.hidden=!im;
+ let ph=$('.phm',st);if(!im){if(!ph){ph=document.createElement('div');ph.className='phm';st.append(ph)}ph.innerHTML=(b?'<img src="'+b.logo+'" alt="">':'<b>'+esc(m.marke)+'</b>')+'<small>Foto folgt</small>';ph.hidden=false;wl.hidden=true}else if(ph)ph.hidden=true;
  st.classList.remove('go-l','go-r');void st.offsetWidth;st.classList.add(dir<0?'go-r':'go-l');
  lgInfo();
  if(M.hidden){M.hidden=false;document.body.style.overflow='hidden';requestAnimationFrame(()=>M.classList.add('on'));$('.lgm-x',M).focus()}}
