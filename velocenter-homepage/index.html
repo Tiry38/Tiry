@@ -1172,6 +1172,7 @@ textarea.inp{border-radius:12px}
 /* Spiegelbild/Deko im Showroom nie klickbar (lag über der Markenleiste) */
 .refl,.wml{pointer-events:none}
 .thumbs{position:relative;z-index:3}
+.bd.rs{background:#FEF3C7;color:#92400E}
 /* ===== Admin-Bereich ===== */
 .adm{position:fixed;inset:0;z-index:300;display:grid;place-items:center;padding:clamp(0px,3vw,32px);opacity:0;transition:opacity .3s}
 .adm.on{opacity:1}
@@ -2342,7 +2343,7 @@ function lgLoad(){if(LG.load)return LG.load;LG.load=fetch('data/bestand.json',{c
 function lgApply(){const d=admMerge(LG.D);LG.M=lgNorm(d);LG.ok=true;
  $('#lgStand').textContent=/^\d/.test(d.stand||'')?'Stand '+d.stand:(d.stand||'aktuell');const hw=d.hinweis||(d.quelle==='Beispieldaten'?'Sobald der Veloport-Export eingespielt ist, steht hier euer echter Bestand.':'');$('#lgDemo').hidden=!hw;$('#lgDemoT').innerHTML='<b>'+(d.quelle==='Beispieldaten'?'Beispieldaten.':'Hinweis:')+'</b> '+esc(hw);
  const nL=LG.M.filter(m=>m.lager).length,nB=LG.M.length-nL,nD=LG.M.filter(m=>m.deal).length,nMk=new Set(LG.M.map(lgMkName)).size;
- $('#lgNum').innerHTML='<span><b>'+nL+'</b> Modelle sofort verfügbar</span>'+(nB?'<span><b>'+nB+'</b> Lieferung ausstehend</span>':'')+'<span><b>'+nMk+'</b> Marken</span>';
+ const A=LG.D&&LG.D.anzahl;$('#lgNum').innerHTML=(A?'<span><b>'+A.lager+'</b> Räder im Laden</span>'+(A.bestellt?'<span><b>'+A.bestellt+'</b> Räder bestellt</span>':''):'<span><b>'+nL+'</b> Modelle sofort verfügbar</span>'+(nB?'<span><b>'+nB+'</b> Lieferung ausstehend</span>':''))+'<span><b>'+nMk+'</b> Marken</span>';
  $('#lgDealsN').textContent=nD?nD+(nD===1?' Rad reduziert':' Räder reduziert'):'Aktuell keine';$('#lgDeals').hidden=!nD;
  const mx=Math.max(0,...LG.M.flatMap(m=>m.v||[]).filter(x=>x.angebot&&x.preis>x.angebot).map(x=>x.preis-x.angebot));const se=$('#lgDealsS');se.hidden=!mx;if(mx)se.textContent='bis zu '+eur(mx)+' sparen';
  const q=$('#qkLager');if(q)q.textContent='Jetzt im Laden ansehen';
@@ -2358,7 +2359,7 @@ function lgFilter(){const f=LG.f,q=f.q.toLowerCase().trim().split(/\s+/).filter(
  else L.sort((a,b)=>(!b.lager-!a.lager)*-1||(b.deal-a.deal)||a._i-b._i);
  return L}
 function lgStat(lager,ab){return lager?'<span class="bd ok">Sofort verfügbar</span>':'<span class="bd z">Lieferung ausstehend'+(ab?' · voraussichtl. '+esc(ab):'')+'</span>'}
-function lgBadgesM(m){return lgStat(m.lager,m.ab)+(m.deal?'<span class="bd an">Sonderangebot</span>':'')+(m.v.some(x=>x.vorfuehr)?'<span class="bd vf">Vorführrad</span>':'')+(m.v.some(x=>x.gebraucht)?'<span class="bd gb">Gebraucht</span>':'')}
+function lgBadgesM(m){const vl=m.v.filter(x=>x.status!=='bestellt');return lgStat(m.lager,m.ab)+(vl.length&&vl.every(x=>x.res)?'<span class="bd rs">Reserviert</span>':'')+(m.deal?'<span class="bd an">Sonderangebot</span>':'')+(m.v.some(x=>x.vorfuehr)?'<span class="bd vf">Vorführrad</span>':'')+(m.v.some(x=>x.gebraucht)?'<span class="bd gb">Gebraucht</span>':'')}
 function lgPriceM(m){const d=m.v.filter(x=>x.angebot).sort((a,b)=>a.angebot-b.angebot)[0];
  if(d)return '<span class="lgpr"><s>'+eur(d.preis)+'</s><b class="an">'+(m.multiP?'<em>ab</em> ':'')+eur(d.angebot)+'</b></span>';
  return m.minP?'<span class="lgpr"><b>'+(m.multiP?'<em>ab</em> ':'')+eur(m.minP)+'</b></span>':'<span class="lgpr"><b>Preis auf Anfrage</b></span>'}
@@ -2372,13 +2373,13 @@ function lgOpen(){lgLoad().then(()=>{lgChips();lgRender()})}
 /* Detailansicht im Showroom-Stil */
 function lgInfo(){const m=LG.list[LG.i],v=m.v[LG.vi]||m.v[0];const row=(l,x,h)=>x?'<div><dt>'+l+'</dt><dd>'+(h||esc(x))+'</dd></div>':'';
  const sz=lgSz(v),inSz=m.v.map((x,j)=>[x,j]).filter(([x])=>lgSz(x)===sz);
- const groessen=m.sz.length>1?'<div class="lgvar"><span class="flab">Größe wählen</span><div class="vs">'+m.sz.map(z=>{const xs=m.v.map((x,j)=>[x,j]).filter(([x])=>lgSz(x)===z),ok=xs.some(([x])=>x.status!=='bestellt'),j0=(xs.find(([x])=>x.farbe===v.farbe)||xs.find(([x])=>x.status!=='bestellt')||xs[0])[1];
+ const groessen=m.sz.length>1?'<div class="lgvar"><span class="flab">Größe wählen</span><div class="vs">'+m.sz.map(z=>{const xs=m.v.map((x,j)=>[x,j]).filter(([x])=>lgSz(x)===z),ok=xs.some(([x])=>x.status!=='bestellt'&&!x.res),j0=(xs.find(([x])=>x.farbe===v.farbe)||xs.find(([x])=>x.status!=='bestellt')||xs[0])[1];
    return '<button type="button" data-vi="'+j0+'" class="'+(z===sz?'on':'')+'"><span>'+esc(z||'Standard')+'</span><small class="'+(ok?'ok':'z')+'">'+(ok?'verfügbar':'Lieferung ausstehend')+'</small></button>'}).join('')+'</div></div>':'';
- const farben=inSz.length>1?'<div class="lgvar"><span class="flab">Farbe wählen'+(m.sz.length>1?' · '+esc(sz):'')+'</span><div class="vs">'+inSz.map(([x,j])=>'<button type="button" data-vi="'+j+'" class="'+(j===LG.vi?'on':'')+'">'+(x.farbe?'<i style="background:'+lgFarbe(x.farbe)+'"></i>':'')+'<span>'+esc(x.farbe||'Ausführung')+'</span><small class="'+(x.status==='bestellt'?'z':'ok')+'">'+(x.status==='bestellt'?'Lieferung ausstehend':'verfügbar')+'</small></button>').join('')+'</div></div>':'';
+ const farben=inSz.length>1?'<div class="lgvar"><span class="flab">Farbe wählen'+(m.sz.length>1?' · '+esc(sz):'')+'</span><div class="vs">'+inSz.map(([x,j])=>'<button type="button" data-vi="'+j+'" class="'+(j===LG.vi?'on':'')+'">'+(x.farbe?'<i style="background:'+lgFarbe(x.farbe)+'"></i>':'')+'<span>'+esc(x.farbe||'Ausführung')+'</span><small class="'+(x.res||x.status==='bestellt'?'z':'ok')+'">'+(x.res?'reserviert':x.status==='bestellt'?'Lieferung ausstehend':'verfügbar')+'</small></button>').join('')+'</div></div>':'';
  const auch='';
- $('#lgmInfo').innerHTML='<p class="eyebrow">'+esc(m.marke)+'</p><h2 id="lgmT">'+esc(m.modell)+'</h2><div class="bds">'+lgStat(v.status!=='bestellt',v.ab)+(v.angebot?'<span class="bd an">Sonderangebot</span>':'')+(v.vorfuehr?'<span class="bd vf">Vorführrad</span>':'')+(v.gebraucht?'<span class="bd gb">Gebraucht</span>':'')+'</div>'+
+ $('#lgmInfo').innerHTML='<p class="eyebrow">'+esc(m.marke)+'</p><h2 id="lgmT">'+esc(m.modell)+'</h2><div class="bds">'+lgStat(v.status!=='bestellt',v.ab)+(v.res?'<span class="bd rs">Reserviert</span>':'')+(v.angebot?'<span class="bd an">Sonderangebot</span>':'')+(v.vorfuehr?'<span class="bd vf">Vorführrad</span>':'')+(v.gebraucht?'<span class="bd gb">Gebraucht</span>':'')+'</div>'+
   '<div class="lgm-price">'+(v.preis?'<span class="lgpr">'+(v.angebot?'<s>'+eur(v.preis)+'</s><b class="an">'+eur(v.angebot)+'</b>':'<b>'+eur(v.preis)+'</b>')+'</span>':'<span class="lgpr"><b>Preis auf Anfrage</b></span>')+(v.angebot?'<span class="sv">Sie sparen '+eur(v.preis-v.angebot)+'</span>':'')+'</div>'+groessen+farben+auch+
-  '<dl class="lgm-spec">'+row('Rahmenhöhe',v.gr)+row('Farbe',v.farbe,'<i style="background:'+lgFarbe(v.farbe)+'"></i>'+esc(v.farbe||''))+row('Rahmenform',v.rahmen)+row('Art',v.typ)+row('Motor',v.motor)+row('Akku',v.akku)+row('Display',v.display)+row('Schaltung',v.schaltung)+row('Reifen',v.reifen)+row('Gewicht',v.gewicht)+row('Zul. Gesamtgewicht',v.zgg)+row('Kilometerstand',v.km)+row('Verfügbarkeit',1,v.status==='bestellt'?'Lieferung ausstehend'+(v.ab?', voraussichtlich '+esc(v.ab):''):'Sofort, steht bei uns in Wörth')+'</dl>'+
+  '<dl class="lgm-spec">'+row('Rahmenhöhe',v.gr)+row('Farbe',v.farbe,'<i style="background:'+lgFarbe(v.farbe)+'"></i>'+esc(v.farbe||''))+row('Rahmenform',v.rahmen)+row('Art',v.typ)+row('Motor',v.motor)+row('Akku',v.akku)+row('Display',v.display)+row('Schaltung',v.schaltung)+row('Reifen',v.reifen)+row('Gewicht',v.gewicht)+row('Zul. Gesamtgewicht',v.zgg)+row('Kilometerstand',v.km)+row('Verfügbarkeit',1,v.res?'Reserviert – fragen Sie gern nach einem gleichen Rad':v.status==='bestellt'?'Lieferung ausstehend'+(v.ab?', voraussichtlich '+esc(v.ab):''):'Sofort, steht bei uns in Wörth')+'</dl>'+
   '<div class="row lgm-act"><button type="button" class="cta" data-ask="Kaufen">Dieses Rad anfragen</button><button type="button" class="ghost" data-ask="Probefahrt">Probefahrt</button></div>'+
   '<form class="lgm-form" id="lgmF" hidden novalidate><div class="fl"><span class="flab">Ihr Wunsch</span><div class="choice" id="lgW"><button type="button" class="on" data-v="Kaufen">Kaufen</button><button type="button" data-v="Reservieren">Reservieren</button><button type="button" data-v="Probefahrt">Probefahrt</button><button type="button" data-v="Andere Größe/Farbe bestellen">Andere Größe/Farbe</button></div></div>'+
   '<div class="r2"><div class="fl"><label for="lgN">Name</label><input class="inp" id="lgN" autocomplete="name"></div><div class="fl"><label for="lgT">Telefon</label><input class="inp" id="lgT" type="tel" autocomplete="tel"></div></div>'+

@@ -1,6 +1,10 @@
 {
- "stand": "Testexport",
+ "stand": "12.11.2026",
  "quelle": "Veloport-Export",
+ "anzahl": {
+  "lager": 178,
+  "bestellt": 84
+ },
  "raeder": [
   {
    "marke": "Gudereit",
@@ -21,6 +25,20 @@
      "preis": 3999,
      "id": "6790",
      "bild": "img/bestand/rest-01.webp"
+    },
+    {
+     "jahr": "2026",
+     "farbe": "Dunkelblau-Matt",
+     "typ": "Pedelec",
+     "motor": "Bosch Performance Line Smart System",
+     "akku": "625 Wh",
+     "schaltung": "Shimano 5-Gang RT",
+     "display": "Purion 200",
+     "reifen": "55-406",
+     "status": "bestellt",
+     "res": true,
+     "preis": 4099,
+     "id": "6845"
     },
     {
      "jahr": "2026",
@@ -617,6 +635,30 @@
      "preis": 5999,
      "id": "6015",
      "bild": "img/bestand/isy-24.webp"
+    }
+   ]
+  },
+  {
+   "marke": "i:SY",
+   "modell": "P12 ZR Adventure",
+   "gr": "47 cm",
+   "rahmen": "Kompaktrad",
+   "typ": "Pedelec",
+   "farben": [
+    {
+     "jahr": "2025",
+     "farbe": "cloud grey",
+     "typ": "Pedelec",
+     "motor": "Pinion MGU E1.12",
+     "akku": "800 Wh",
+     "schaltung": "Pinion MGU E1.12 integriertes 12-Gang Getriebe",
+     "reifen": "20\"",
+     "gewicht": "25,7 kg",
+     "zgg": "150,0 kg",
+     "status": "lager",
+     "res": true,
+     "preis": 6199,
+     "id": "6951"
     }
    ]
   },
@@ -1261,6 +1303,7 @@
      "gewicht": "28,5 kg",
      "zgg": "147,0 kg",
      "status": "lager",
+     "res": true,
      "preis": 3199,
      "id": "6854",
      "bild": "img/bestand/ktm-17.webp"
@@ -1959,6 +2002,21 @@
      "preis": 4599,
      "angebot": 4099,
      "id": "6310"
+    },
+    {
+     "jahr": "2024",
+     "farbe": "night black matt",
+     "typ": "Pedelec",
+     "motor": "Bosch Performance Cruise",
+     "akku": "545 Wh",
+     "schaltung": "Enviolo Stufenlos",
+     "display": "Kiox 300",
+     "reifen": "20\"",
+     "zgg": "180,0 kg",
+     "status": "lager",
+     "preis": 4499,
+     "angebot": 3999,
+     "id": "6071"
     }
    ]
   },
@@ -2068,7 +2126,7 @@
      "reifen": "65-622",
      "status": "lager",
      "preis": 4399,
-     "angebot": 2999,
+     "angebot": 2799,
      "id": "5938",
      "bild": "img/bestand/rest-05.webp"
     }
@@ -2091,7 +2149,7 @@
      "display": "Kiox 300",
      "status": "lager",
      "preis": 4399,
-     "angebot": 2999,
+     "angebot": 2799,
      "id": "5498",
      "bild": "img/bestand/rest-05.webp"
     }
@@ -2113,6 +2171,44 @@
      "preis": 629,
      "id": "6585",
      "bild": "img/bestand/rest-06.webp"
+    }
+   ]
+  },
+  {
+   "marke": "Stevens",
+   "modell": "Tonga",
+   "gr": "18\"",
+   "rahmen": "MTB",
+   "typ": "Cross MTB BMX",
+   "farben": [
+    {
+     "jahr": "2025",
+     "farbe": "Bitter Lemon",
+     "typ": "Cross MTB BMX",
+     "schaltung": "Shimano CUES U4000",
+     "reifen": "29\"",
+     "status": "lager",
+     "res": true,
+     "preis": 749,
+     "id": "6586"
+    }
+   ]
+  },
+  {
+   "marke": "Stevens",
+   "modell": "Tonga 29''",
+   "gr": "18\"",
+   "rahmen": "MTB",
+   "typ": "Cross MTB BMX",
+   "farben": [
+    {
+     "jahr": "2021",
+     "farbe": "Pink Punch",
+     "typ": "Cross MTB BMX",
+     "status": "lager",
+     "res": true,
+     "preis": 599,
+     "id": "3165"
     }
    ]
   },
@@ -2275,20 +2371,6 @@
    "typ": "Pedelec",
    "farben": [
     {
-     "jahr": "2023",
-     "farbe": "Night Blue Matt",
-     "typ": "Pedelec",
-     "motor": "Bosch Active Line Plus",
-     "akku": "630 Wh",
-     "schaltung": "Shimano 8-Gang",
-     "display": "Intuvia",
-     "reifen": "28\"",
-     "status": "lager",
-     "preis": 3595,
-     "angebot": 2999,
-     "id": "4809"
-    },
-    {
      "jahr": "2021",
      "farbe": "stone basalt matt",
      "typ": "Pedelec",
@@ -2359,8 +2441,10 @@
      "jahr": "2021",
      "farbe": "stone basalt matt",
      "typ": "Pedelec",
-     "akku": "625 Wh",
+     "motor": "Bosch Performance Line (BDU346Y)",
+     "akku": "500 Wh",
      "schaltung": "Shimano 9-Gang",
+     "display": "Purion",
      "status": "lager",
      "preis": 3034,
      "angebot": 2399,
@@ -3054,6 +3138,77 @@
   },
   {
    "marke": "KTM",
+   "modell": "MACINA CITY PX 810 BELT Di2 US",
+   "gr": "43 cm",
+   "rahmen": "Tiefeinsteiger",
+   "farben": [
+    {
+     "jahr": "2027",
+     "farbe": "BLUEGREY MATT",
+     "motor": "Bosch Performance Line PX (BDU347Y)",
+     "akku": "800 Wh",
+     "schaltung": "5-Gang DI 2",
+     "display": "Kiox 500",
+     "gewicht": "28,9 kg",
+     "zgg": "147,0 kg",
+     "status": "bestellt",
+     "res": true,
+     "ab": "KW 3/27",
+     "preis": 4199,
+     "id": "6898"
+    }
+   ]
+  },
+  {
+   "marke": "KTM",
+   "modell": "MACINA CITY PX 810 BELT Di2 US",
+   "gr": "46 cm",
+   "rahmen": "Tiefeinsteiger",
+   "farben": [
+    {
+     "jahr": "2027",
+     "farbe": "BLUEGREY MATT",
+     "motor": "Bosch Performance Line PX (BDU347Y)",
+     "akku": "800 Wh",
+     "schaltung": "5-Gang DI 2",
+     "display": "Kiox 500",
+     "gewicht": "28,9 kg",
+     "zgg": "147,0 kg",
+     "status": "bestellt",
+     "res": true,
+     "ab": "KW 3/27",
+     "preis": 4199,
+     "id": "6897"
+    }
+   ]
+  },
+  {
+   "marke": "KTM",
+   "modell": "MACINA GRAVELATOR SX ELITE",
+   "gr": "55 cm",
+   "rahmen": "Diamant",
+   "typ": "Pedelec",
+   "farben": [
+    {
+     "jahr": "2027",
+     "farbe": "KIWI MATT",
+     "typ": "Pedelec",
+     "motor": "Bosch Performance Line SX Smart System",
+     "akku": "400 Wh",
+     "schaltung": "Shimano GRX RX822-12 SGS shadow+",
+     "display": "KEINS",
+     "gewicht": "14,9 kg",
+     "zgg": "115,0 kg",
+     "status": "bestellt",
+     "res": true,
+     "ab": "KW 6/27",
+     "preis": 3999,
+     "id": "6949"
+    }
+   ]
+  },
+  {
+   "marke": "KTM",
    "modell": "Macina Race SX 10",
    "gr": "48 cm",
    "rahmen": "MTB",
@@ -3127,6 +3282,55 @@
      "preis": 3299,
      "id": "6884",
      "bild": "img/bestand/ktm-28.webp"
+    }
+   ]
+  },
+  {
+   "marke": "KTM",
+   "modell": "MACINA SPORT SX MASTER Di2 H",
+   "gr": "56 cm",
+   "rahmen": "Diamant",
+   "typ": "Pedelec",
+   "farben": [
+    {
+     "jahr": "2027",
+     "farbe": "LAZER BLACK MATT",
+     "typ": "Pedelec",
+     "motor": "Bosch Performance Line SX Smart System",
+     "akku": "400 Wh",
+     "schaltung": "Deore DI 2",
+     "gewicht": "18,8 kg",
+     "zgg": "129,0 kg",
+     "status": "bestellt",
+     "res": true,
+     "ab": "KW 50",
+     "preis": 4699,
+     "id": "6952"
+    }
+   ]
+  },
+  {
+   "marke": "KTM",
+   "modell": "MACINA STYLE 830 Di2",
+   "gr": "51 cm",
+   "rahmen": "Tiefeinsteiger",
+   "typ": "Pedelec",
+   "farben": [
+    {
+     "jahr": "2027",
+     "farbe": "dark sea matt (silver+burnt orange)",
+     "typ": "Pedelec",
+     "motor": "Bosch Performance Line CX Smart System (BDU384Y)",
+     "akku": "800 Wh",
+     "schaltung": "Shimano CUES DI2, 11-Gang elektronische Schaltung",
+     "display": "Kiox 300",
+     "reifen": "28\"",
+     "zgg": "146,0 kg",
+     "status": "bestellt",
+     "res": true,
+     "ab": "KW 47",
+     "preis": 3999,
+     "id": "6852"
     }
    ]
   },
@@ -3398,6 +3602,58 @@
    ]
   },
   {
+   "marke": "KTM",
+   "modell": "MACINA TOUR PX 720-2",
+   "gr": "56 cm",
+   "rahmen": "Trapez",
+   "typ": "Pedelec",
+   "farben": [
+    {
+     "jahr": "2027",
+     "farbe": "EMERALD GREY",
+     "typ": "Pedelec",
+     "motor": "Bosch Performance Line PX (BDU347Y)",
+     "akku": "720 Wh",
+     "schaltung": "Shimano CUES, 10-Gang Kettenschaltung",
+     "display": "Purion 200",
+     "gewicht": "26,9 kg",
+     "zgg": "145,0 kg",
+     "status": "bestellt",
+     "res": true,
+     "ab": "KW 9/27",
+     "preis": 2999,
+     "id": "6965",
+     "bild": "img/bestand/ktm-32.webp"
+    }
+   ]
+  },
+  {
+   "marke": "KTM",
+   "modell": "MACINA TOUR PX 720-2",
+   "gr": "60 cm",
+   "rahmen": "Diamant",
+   "typ": "Pedelec",
+   "farben": [
+    {
+     "jahr": "2027",
+     "farbe": "EMERALD GREY",
+     "typ": "Pedelec",
+     "motor": "Bosch Performance Line PX (BDU347Y)",
+     "akku": "720 Wh",
+     "schaltung": "Shimano CUES, 10-Gang Kettenschaltung",
+     "display": "Purion 200",
+     "gewicht": "27,2 kg",
+     "zgg": "145,0 kg",
+     "status": "bestellt",
+     "res": true,
+     "ab": "KW 11/27",
+     "preis": 2999,
+     "id": "6977",
+     "bild": "img/bestand/ktm-32.webp"
+    }
+   ]
+  },
+  {
    "marke": "Velo de Ville",
    "modell": "AEB 400 CLASSIC XS RT",
    "gr": "42 cm",
@@ -3492,8 +3748,55 @@
      "schaltung": "Shimano 9-Gang CUES U4000",
      "display": "Intuvia 200",
      "status": "bestellt",
+     "ab": "KW 49",
      "preis": 2847,
      "id": "6908"
+    }
+   ]
+  },
+  {
+   "marke": "Velo de Ville",
+   "modell": "HUBe",
+   "gr": "48 cm",
+   "rahmen": "Tiefeinsteiger",
+   "typ": "Pedelec",
+   "farben": [
+    {
+     "jahr": "2027",
+     "farbe": "Night Blue Matt",
+     "typ": "Pedelec",
+     "motor": "Bosch Hub Line (BDU306Y)",
+     "akku": "360 Wh",
+     "schaltung": "Shimano 9-Gang CUES U4000",
+     "display": "keins",
+     "status": "bestellt",
+     "res": true,
+     "ab": "KW 49",
+     "preis": 2897,
+     "id": "6906"
+    }
+   ]
+  },
+  {
+   "marke": "Velo de Ville",
+   "modell": "HUBe XS",
+   "gr": "43 cm",
+   "rahmen": "Tiefeinsteiger",
+   "typ": "Pedelec",
+   "farben": [
+    {
+     "jahr": "2027",
+     "farbe": "Ice Blue Matt",
+     "typ": "Pedelec",
+     "motor": "Bosch Hub Line (BDU306Y)",
+     "akku": "360 Wh",
+     "schaltung": "Shimano 9-Gang Cues U400",
+     "display": "Intuvia 200",
+     "status": "bestellt",
+     "res": true,
+     "ab": "KW 49",
+     "preis": 2856,
+     "id": "6907"
     }
    ]
   },
@@ -3671,6 +3974,5 @@
     }
    ]
   }
- ],
- "hinweis": "Testlauf mit einem Veloport-Export von vor ca. 2–3 Wochen. Einzelne Räder können inzwischen verkauft sein."
+ ]
 }

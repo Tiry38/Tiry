@@ -48,6 +48,7 @@ def karte(kopf):
         ang=f(r'angeliefert'), lt=f(r'liefertermin'), bd=f(r'bestelldatum'),
         res=f(r'^reserviert$'), test=f(r'^testfahrzeug$'), zu=f(r'^name$'),
         vd=f(r'verkaufsdatum'), bes=f(r'besitzer|eigent'), ausg=f(r'ausgeliefert'),
+        lo=f(r'^lagerort$'), rech=f(r'^rechnung$'),
         display=f(r'^display'), reifen=f(r'reifengr'), gewicht=f(r'^gewicht'), zgg=f(r'gesamtgewicht'), km=f(r'km-?\s?stand'),
         aus=f(r'ausstatt'), akku=f(r'akku-?\s?leistung'), motor=f(r'^motor|antrieb'),
         schalt=f(r'schaltung|gangschaltung'),
@@ -129,20 +130,23 @@ def main():
     for nr, r in enumerate(rows, 1):
         art = wert(r, m['zu'])
         if re.search(r'service', art, re.I): n_service += 1; continue
-        if m['res'] >= 0 and ja(wert(r, m['res'])): n_res += 1; continue
-        if wert(r, m['vd']) or wert(r, m['bes']) or wert(r, m['ausg']): n_verk += 1; continue
+        # verkauft = Verkaufsdatum/Besitzer; „ausgeliefert“ allein zählt nicht (Ausstellungsräder, Veloport-Zählung)
+        if wert(r, m['vd']) or wert(r, m['bes']): n_verk += 1; continue
+        reserviert = m['res'] >= 0 and ja(wert(r, m['res']))
+        if reserviert: n_res += 1
         marke, modell = marke_norm(wert(r, m['marke'])), wert(r, m['modell'])
         if not marke or not modell: continue
         if re.match(AUSGESCHLOSSEN, marke, re.I): n_marke += 1; continue
-        zulauf = m['ang'] >= 0 and not wert(r, m['ang']) and (
-            (m['lt'] < 0 and m['bd'] < 0) or bool(wert(r, m['lt'])) or bool(wert(r, m['bd'])))
+        # im Laden = angeliefert ODER hat einen Lagerort ODER Lieferantenrechnung liegt vor
+        da = bool(wert(r, m['ang'])) or (m['lo'] >= 0 and bool(wert(r, m['lo']))) or (m['rech'] >= 0 and bool(wert(r, m['rech'])))
+        zulauf = m['ang'] >= 0 and not da
         vk, ap = preis(wert(r, m['vk'])), preis(wert(r, m['ap']))
         raeder.append({k: v for k, v in dict(
             id=wert(r, m['id']) or str(nr), marke=marke, modell=modell, jahr=wert(r, m['jahr']),
             gr=groesse(wert(r, m['gr'])), farbe=wert(r, m['farbe']), typ=re.sub(r'(?i)bitte w.hlen', '', wert(r, m['typ'])),
             rahmen=rahmenform(wert(r, m['rf']), wert(r, m['dh']), modell),
             preis=vk, angebot=ap if ap and vk and ap < vk else None,
-            status='bestellt' if zulauf else 'lager', ab=kw(wert(r, m['lt'])) if zulauf else '',
+            status='bestellt' if zulauf else 'lager', res=reserviert, ab=kw(wert(r, m['lt'])) if zulauf else '',
             gebraucht=bool(re.search(r'gebraucht', art, re.I)), vorfuehr=m['test'] >= 0 and ja(wert(r, m['test'])),
             motor=motor(wert(r, m['motor'])), akku=einheit(wert(r, m['akku']), 'Wh'),
             schaltung=wert(r, m['schalt']) or wert(r, m['aus']).split('|')[0].strip(),
@@ -152,13 +156,14 @@ def main():
         ).items() if v not in ('', None, False)})
     eindeutig = gruppieren(raeder)
     bilder_zuordnen(eindeutig, os.path.join(os.path.dirname(os.path.abspath(ziel)), 'bilder.json'))
-    daten = dict(stand=datetime.date.today().strftime('%d.%m.%Y'), quelle='Veloport-Export', raeder=eindeutig, **({'hinweis': hinweis} if hinweis else {}))
+    anzahl = dict(lager=sum(r['status'] == 'lager' for r in raeder), bestellt=sum(r['status'] == 'bestellt' for r in raeder))
+    daten = dict(stand=datetime.date.today().strftime('%d.%m.%Y'), quelle='Veloport-Export', anzahl=anzahl, raeder=eindeutig, **({'hinweis': hinweis} if hinweis else {}))
     json.dump(daten, open(ziel, 'w', encoding='utf-8'), ensure_ascii=False, indent=1)
     print(f'{len(raeder)} Räder -> {len(eindeutig)} Karten ({sum(len(k["farben"]) for k in eindeutig)} Farb-Ausführungen) -> {ziel} '
-          f'(ausgelassen: {n_verk} verkauft, {n_res} reserviert, {n_service} Servicerad, {n_marke} Flyer/Hercules)')
+          f'[{anzahl['lager']} im Laden, {anzahl['bestellt']} bestellt, davon {n_res} reserviert] (ausgelassen: {n_verk} verkauft, {n_service} Servicerad, {n_marke} Flyer/Hercules)')
 
 FELDER = ('marke', 'modell', 'jahr', 'gr', 'farbe', 'rahmen', 'typ', 'motor', 'akku', 'schaltung', 'display', 'reifen', 'gewicht', 'zgg', 'km',
-          'status', 'ab', 'preis', 'angebot', 'vorfuehr', 'gebraucht', 'id')
+          'status', 'res', 'ab', 'preis', 'angebot', 'vorfuehr', 'gebraucht', 'id')
 
 def bild_key(marke, modell, jahr, farbe):
     """Schlüssel für das exakte Herstellerfoto: Marke + Modell + Modelljahr + Farbe."""
@@ -190,8 +195,12 @@ def gruppieren(raeder):
         alt = gleich.get(key)
         if alt is None:
             gleich[key] = neu; continue
-        if neu['status'] == 'lager' and alt['status'] != 'lager':  # eins da, eins bestellt -> "da"
-            alt.update(status='lager', id=neu.get('id', alt.get('id'))); alt.pop('ab', None)
+        rang = lambda x: (x['status'] == 'lager') * 2 + (not x.get('res'))  # da + frei schlaegt bestellt/reserviert
+        if rang(neu) > rang(alt):
+            alt.update(status=neu['status'], id=neu.get('id', alt.get('id')))
+            if neu['status'] == 'lager': alt.pop('ab', None)
+            if neu.get('res'): alt['res'] = True
+            else: alt.pop('res', None)
         elif alt['status'] == 'bestellt' and neu.get('ab') and (not alt.get('ab') or neu['ab'] < alt['ab']):
             alt['ab'] = neu['ab']
         if neu.get('angebot') and (not alt.get('angebot') or neu['angebot'] < alt['angebot']): alt['angebot'] = neu['angebot']
