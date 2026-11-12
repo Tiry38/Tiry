@@ -8,7 +8,7 @@
 - Aktionspreise gelten nicht bei Leasing & Finanzierung – überall vermerken.
 - Finanzierung TARGOBANK: 0 % Zinsen, bis zu 24 Monate, **mit Anzahlung** (nie „0 € Anzahlung“).
 - Erste Inspektion: Empfehlung 500–1.000 km.
-- ENRA: E-Bikes bis 10.000 € (Stand enra.eu 12.11.2026).
+- ENRA: E-Bikes bis 10.000 € (Stand enra.eu 12.11.2026). Tarife als Vergleichstabelle; Kosten laut Tiry: Rundumschutz Plus ab ca. 120 €/Jahr, Rundumschutz ab ca. 70 €/Jahr, je nach Fahrzeugwert.
 - Winter-Aktion: –20 € auf jede Inspektion (nie Prozent) + Sattelüberzug (nie „Satteldecke“), 01.11.2026–28.02.2027, keine festen Inspektionspreise.
 - Bilder immer freigestellt und geschärft.
 
