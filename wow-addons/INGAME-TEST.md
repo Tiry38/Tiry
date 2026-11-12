@@ -382,9 +382,9 @@ Aus 4.2 weiter offen: `C_Map.GetMapPosFromWorldPos`, Flugmeister-IDs, Hochplatea
 - Reichweite gibt es nur für Buff-Totems; Verbrennung/Magma/Erdbindung usw. gelten als „steht“, solange sie laufen.
 
 
-# Ingame-Test – WindBaem 1.1.0 (Windzorn-Ton)
-- [ ] Ordner `WindBaem` entpackt, WoW **komplett neu gestartet**. Chat beim Einloggen: „WindBaem: 1.1.0 bereit (7 Windzorn-Auren)“.
-- [ ] `/wb test` → kurzes „Bäm!“. `/wb ton hoch` → höher/kürzer, `/wb ton baem` zurück.
+# Ingame-Test – WindBaem 1.2.0 (Windzorn-Ton)
+- [ ] Ordner `WindBaem` entpackt, WoW **komplett neu gestartet**. Chat beim Einloggen: „WindBaem: 1.2.0 bereit (7 Windzorn-Auren)“.
+- [ ] `/wb test` → kurzer, leiser Pling. Alternativen: `/wb ton tick` (unauffälligster), `/wb ton wusch` (Windhauch).
 - [ ] Lautstärke folgt dem Regler **Effekte**. Immer noch zu laut/leise → Regler oder `/wb kanal dialog` (eigener Regler „Dialog“).
 - [ ] **Im Kampf** mit Waffe des Windzorns: bei jedem Proc (zwei Extra-Schläge) kommt der Ton. Zur Kontrolle Kampflog/Schadenszahlen.
 - [ ] Mit Totem des Windzorns (ohne Waffen-Windzorn auf der Haupthand) dasselbe.
