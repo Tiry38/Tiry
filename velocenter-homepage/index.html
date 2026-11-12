@@ -158,8 +158,6 @@ h1,h2,h3{font-family:var(--display);margin:0;text-wrap:balance;letter-spacing:-.
 
 /* Showroom */
 .show{position:relative;isolation:isolate;--ac:#FF7A1A}
-.show .wm{position:absolute;z-index:-1;left:50%;top:38%;transform:translate(-50%,-50%);font:900 clamp(120px,24vw,380px)/.8 var(--display);letter-spacing:-.05em;white-space:nowrap;color:transparent;-webkit-text-stroke:2px color-mix(in srgb,var(--ac) 35%,transparent);transition:opacity .5s,transform .7s var(--ease);pointer-events:none}
-.show .wm.swap{opacity:0;transform:translate(-44%,-50%)}
 .show .glow{position:absolute;z-index:-1;left:50%;top:44%;width:min(900px,90vw);aspect-ratio:2.2/1;transform:translate(-50%,-50%);border-radius:50%;background:radial-gradient(closest-side,color-mix(in srgb,var(--ac) 40%,transparent),transparent 72%);filter:blur(20px);transition:background .8s}
 .showtop{display:flex;justify-content:space-between;align-items:flex-end;gap:24px;flex-wrap:wrap}
 .bikearea{position:relative;height:clamp(280px,40vw,560px);margin-top:20px}
@@ -513,7 +511,6 @@ body.sc .hdr{background:rgba(250,247,244,.84);box-shadow:0 1px 0 rgba(27,30,37,.
 .outline{-webkit-text-stroke-color:rgba(27,30,37,.12)}
 .band.a{box-shadow:0 18px 40px rgba(226,35,45,.22)}
 .band.b{background:#24272E}
-.show .wm{-webkit-text-stroke-color:color-mix(in srgb,var(--ac) 50%,transparent)}
 .show .glow{background:radial-gradient(closest-side,color-mix(in srgb,var(--ac) 28%,transparent),transparent 72%)}
 .bikearea img.bk{filter:drop-shadow(0 26px 24px rgba(27,30,37,.22))}
 .bikearea .refl{opacity:.1}
@@ -668,6 +665,12 @@ body.sc .hdr{background:rgba(255,255,255,.55);backdrop-filter:blur(20px) saturat
  .bandimg::before{background:linear-gradient(90deg,rgba(134,197,255,.95) 45%,rgba(199,155,255,.75))}
  .blobs i{filter:blur(50px)}
 }
+
+/* Showroom: echtes Herstellerlogo groß und dezent hinter dem Rad */
+.bikearea .wml{position:absolute;z-index:0;left:50%;top:44%;transform:translate(-50%,-50%);width:min(1040px,100%);height:auto;max-height:70%;object-fit:contain;opacity:var(--wo,.22);mix-blend-mode:multiply;filter:drop-shadow(0 22px 26px rgba(27,30,37,.3));transition:opacity .55s,transform .8s var(--ease);pointer-events:none}
+.bikearea .wml.swap{opacity:0;transform:translate(-42%,-50%) scale(.96)}
+.bikearea img.bk,.bikearea .refl{z-index:1}.bikearea .arrow{z-index:3}
+@media (max-width:640px){.bikearea .wml{top:40%;max-height:60%}}
 </style>
 
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
@@ -1061,11 +1064,11 @@ m696 -454 c28 -13 46 -31 55 -51 22 -53 -50 -177 -173 -300 -187 -186 -647
  </div>
 
  <div class="sec show" id="showroom">
-  <div class="wm" id="swm" aria-hidden="true">i:SY</div>
   <div class="glow"></div>
   <div class="wrap">
    <div class="showtop pre"><div><p class="eyebrow">Unser <b>Showroom</b></p><h2 class="big" style="margin-top:14px">Sieben Marken.<br><span class="gt">Ein Laden.</span></h2></div><p class="lead" style="max-width:40ch">Klicken Sie sich durch. Im Laden warten über 300 Räder zum Anfassen und Probefahren.</p></div>
    <div class="bikearea pre" id="bikearea">
+    <img class="wml" id="swm" src="img/marke-isy.svg" alt="" aria-hidden="true">
     <div class="floor"></div>
     <img class="refl" id="brefl" src="img/p-isy.webp" alt="" aria-hidden="true">
     <img class="bk" id="bk" src="img/p-isy.webp" alt="i:SY E5 ZR F CX Century" width="1600" height="1104">
@@ -1475,13 +1478,13 @@ const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',
 
 /* ---------- Marken ---------- */
 const BR=[
- {k:'isy',n:'i:SY',m:'i:SY E5 ZR F CX Century',img:'img/p-isy.webp',logo:'img/marke-isy.svg',c:'#FF7A1A',t:'Das 20-Zoll-Kompaktrad. Seit über 10 Jahren sind wir i:SY Experte und haben ständig über 100 i:SY vorrätig.',a:[['Mehr zu i:SY','#isy']]},
- {k:'ktm',n:'KTM',m:'KTM Macina Style 830',img:'img/p-ktm.webp',logo:'img/marke-ktm.svg',c:'#FF6A00',t:'Traditionsmarke mit großer E-Bike-Auswahl, vom bequemen Tiefeinsteiger bis zum Trekking-Rad.',a:[['ktm-bikes.at','https://www.ktm-bikes.at/']]},
- {k:'qio',n:'QiO',m:'QiO Compact P5',img:'img/p-qio.webp',logo:'img/marke-qio.svg',c:'#38BDF8',t:'Innovatives Kompaktrad-Konzept. Am besten selbst erleben: Probefahrt bei uns im Laden.',a:[['qio-bikes.com','https://www.qio-bikes.com/']]},
- {k:'vdv',n:'Velo de Ville',m:'Velo de Ville KEB Classic',img:'img/p-vdv.webp',logo:'img/marke-vdv.svg',c:'#F97316',t:'Rad nach Wunsch: Rahmen, Farbe und Ausstattung stellen Sie selbst zusammen.',a:[['Zum Konfigurator','https://konfigurator.velo-de-ville.com/de?h_ident=28181&direct=true']]},
- {k:'vanraam',n:'Van Raam',m:'Van Raam Easy Rider',img:'img/p-vanraam.webp',logo:'img/marke-vanraam.svg',c:'#A855F7',t:'E-Dreiräder vom Weltmarktführer aus Holland. Bei uns: der Easy Rider.',a:[['Mehr zu E-Dreirädern','#dreirad']]},
- {k:'gudereit',n:'Gudereit',m:'Gudereit EC-35 Evo',img:'img/p-gudereit.webp',logo:'img/marke-gudereit.webp',c:'#E2232D',t:'Bei uns das EC-35 Evo von Gudereit.',a:[['gudereit.de','https://www.gudereit.de/']]},
- {k:'victoria',n:'Victoria',m:'Victoria eManufaktur 11.9 Wave',img:'img/p-victoria.webp',logo:'img/marke-victoria.svg',c:'#22D3EE',t:'Traditionsmarke mit alltagstauglichen E-Bikes.',a:[['victoria-bikes.com','https://www.victoria-bikes.com/']]}
+ {k:'isy',n:'i:SY',m:'i:SY E5 ZR F CX Century',img:'img/p-isy.webp',logo:'img/marke-isy.svg',o:.3,c:'#FF7A1A',t:'Das 20-Zoll-Kompaktrad. Seit über 10 Jahren sind wir i:SY Experte und haben ständig über 100 i:SY vorrätig.',a:[['Mehr zu i:SY','#isy']]},
+ {k:'ktm',n:'KTM',m:'KTM Macina Style 830',img:'img/p-ktm.webp',logo:'img/marke-ktm.svg',o:.13,c:'#FF6A00',t:'Traditionsmarke mit großer E-Bike-Auswahl, vom bequemen Tiefeinsteiger bis zum Trekking-Rad.',a:[['ktm-bikes.at','https://www.ktm-bikes.at/']]},
+ {k:'qio',n:'QiO',m:'QiO Compact P5',img:'img/p-qio.webp',logo:'img/marke-qio.svg',o:.12,c:'#38BDF8',t:'Innovatives Kompaktrad-Konzept. Am besten selbst erleben: Probefahrt bei uns im Laden.',a:[['qio-bikes.com','https://www.qio-bikes.com/']]},
+ {k:'vdv',n:'Velo de Ville',m:'Velo de Ville KEB Classic',img:'img/p-vdv.webp',logo:'img/marke-vdv.svg',o:.16,c:'#F97316',t:'Rad nach Wunsch: Rahmen, Farbe und Ausstattung stellen Sie selbst zusammen.',a:[['Zum Konfigurator','https://konfigurator.velo-de-ville.com/de?h_ident=28181&direct=true']]},
+ {k:'vanraam',n:'Van Raam',m:'Van Raam Easy Rider',img:'img/p-vanraam.webp',logo:'img/marke-vanraam.svg',o:.26,c:'#A855F7',t:'E-Dreiräder vom Weltmarktführer aus Holland. Bei uns: der Easy Rider.',a:[['Mehr zu E-Dreirädern','#dreirad']]},
+ {k:'gudereit',n:'Gudereit',m:'Gudereit EC-35 Evo',img:'img/p-gudereit.webp',logo:'img/marke-gudereit.svg',o:.22,c:'#E2232D',t:'Bei uns das EC-35 Evo von Gudereit.',a:[['gudereit.de','https://www.gudereit.de/']]},
+ {k:'victoria',n:'Victoria',m:'Victoria eManufaktur 11.9 Wave',img:'img/p-victoria.webp',logo:'img/marke-victoria.svg',o:.24,c:'#22D3EE',t:'Traditionsmarke mit alltagstauglichen E-Bikes.',a:[['victoria-bikes.com','https://www.victoria-bikes.com/']]}
 ];
 const ACC=[['Bosch','bosch.svg'],['Shimano','shimano.webp'],['Schwalbe','schwalbe.webp'],['Ortlieb','ortlieb.webp'],['ABUS','abus.webp'],['Topeak','topeak.webp'],['KLICKfix','klickfix.webp'],['Haberland','haberland.webp'],['Ergon','ergon.webp'],['by.schulz','byschulz.webp'],['Contec','contec.webp']];
 $('#acc').innerHTML=ACC.map(([n,f])=>'<span><img src="img/zub-'+f+'" alt="'+esc(n)+'" loading="lazy"></span>').join('');
@@ -1494,12 +1497,12 @@ function showroom(root,prefix){
  const s=root.closest('.show')||root;
  let i=0,bk=$('#'+prefix+'bk'),rf=$('#'+prefix+'brefl'),wm=$('#'+prefix+'swm'),info=$('#'+prefix+'sinfo'),th=$('#'+prefix+'thumbs');
  th.innerHTML=BR.map((b,j)=>'<button role="tab" data-j="'+j+'"'+(j?'':' class="on"')+'><img src="'+b.img+'" alt="" loading="lazy">'+esc(b.n)+'</button>').join('');
- function paint(){const b=BR[i];s.style.setProperty('--ac',b.c);
+ function paint(){const b=BR[i];s.style.setProperty('--ac',b.c);wm.style.setProperty('--wo',b.o);
   info.innerHTML='<span class="blogo"><img src="'+b.logo+'" alt="'+esc(b.n)+'"></span><div><p class="mdl">Beispielmodell · '+esc(b.m)+'</p><h3>'+esc(b.n)+'</h3><p>'+esc(b.t)+'</p></div><div class="row">'+b.a.map(([t,h],x)=>'<a class="'+(x?'ghost':'ghost')+'" href="'+h+'"'+(h.startsWith('http')?' target="_blank" rel="noopener"':'')+'>'+esc(t)+'<svg><use href="#i-arrow"/></svg></a>').join('')+'<a class="cta" href="#termin" data-pre="Probefahrt '+esc(b.n)+'"><svg><use href="#i-bike"/></svg>Probefahrt</a></div>';
   $$('button',th).forEach((x,j)=>x.classList.toggle('on',j===i));}
  function to(n){if(n===i)return;const dir=n>i||(i===BR.length-1&&n===0);i=(n+BR.length)%BR.length;const b=BR[i];
   bk.classList.add('out-l');wm.classList.add('swap');rf.style.opacity=0;
-  setTimeout(()=>{const pre=new Image();pre.src=b.img;const go=()=>{bk.classList.add('in-r');bk.classList.remove('out-l');bk.src=b.img;bk.alt=b.m;rf.src=b.img;wm.textContent=b.n;paint();void bk.offsetWidth;bk.classList.remove('in-r');wm.classList.remove('swap');rf.style.opacity=''};pre.decode?pre.decode().then(go,go):go()},420);}
+  setTimeout(()=>{const pre=new Image();pre.src=b.img;const go=()=>{bk.classList.add('in-r');bk.classList.remove('out-l');bk.src=b.img;bk.alt=b.m;rf.src=b.img;wm.src=b.logo;paint();void bk.offsetWidth;bk.classList.remove('in-r');wm.classList.remove('swap');rf.style.opacity=''};pre.decode?pre.decode().then(go,go):go()},420);}
  th.addEventListener('click',e=>{const b=e.target.closest('button');if(b)to(+b.dataset.j)});
  $('#'+prefix+'sp').addEventListener('click',()=>to((i-1+BR.length)%BR.length));
  $('#'+prefix+'sn').addEventListener('click',()=>to((i+1)%BR.length));
@@ -1507,6 +1510,7 @@ function showroom(root,prefix){
  paint();return{to};
 }
 /* zweiter Showroom auf der Markenseite: Kopie des ersten mit eigenen IDs */
+BR.forEach(b=>{const i=new Image();i.src=b.logo});
 const s1=$('#showroom');const c=s1.cloneNode(true);
 c.querySelectorAll('[id]').forEach(e=>e.id='m-'+e.id);c.querySelectorAll('.pre').forEach(e=>e.classList.remove('in'));
 $('#showroom2').replaceWith(c);c.id='showroom2';c.style.paddingTop='0';
