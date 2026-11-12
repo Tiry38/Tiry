@@ -2497,7 +2497,7 @@ m696 -454 c28 -13 46 -31 55 -51 22 -53 -50 -177 -173 -300 -187 -186 -647
    </div>
   </div>
   <div class="lggrid" id="lgGrid" aria-live="polite"></div>
-  <p class="note" style="margin-top:22px">Abbildungen ähnlich, Farbe und Ausstattung können abweichen. Alle Preise inkl. MwSt. Zwischenverkauf vorbehalten. Aktions- und Angebotspreise gelten nur bei Barkauf, nicht bei Leasing (Dienstrad) und Finanzierung; dafür gilt der reguläre Preis.</p>
+  <p class="note" style="margin-top:22px">Abbildungen ähnlich, Farbe und Ausstattung können abweichen. Alle Preise inkl. MwSt. Zwischenverkauf vorbehalten. Aktionspreise gelten nicht bei Leasing &amp; Finanzierung; dafür gilt der reguläre Preis.</p>
  </div>
 </section>
 
@@ -2595,7 +2595,7 @@ m696 -454 c28 -13 46 -31 55 -51 22 -53 -50 -177 -173 -300 -187 -186 -647
    <div class="col"><h4>Öffnungszeiten</h4><span>Mo, Di, Do, Fr<br>09:00–12:00 · 14:30–18:00</span><span>Sa 09:00–12:00</span><span style="color:#DC2626">Mi & So geschlossen</span></div>
    <div class="col"><h4>Folgen Sie uns</h4><div class="soc"><a href="https://www.instagram.com/velocenterhessert/" target="_blank" rel="noopener" aria-label="Instagram"><svg><use href="#i-ig"/></svg></a><a href="https://www.facebook.com/velocenterhessert" target="_blank" rel="noopener" aria-label="Facebook"><svg><use href="#i-fb"/></svg></a><a href="https://wa.me/491635343133" target="_blank" rel="noopener" aria-label="WhatsApp"><svg><use href="#i-chat"/></svg></a></div><span style="color:var(--mut);font-size:14px">Familienbetrieb seit 1995</span></div>
   </div>
-  <p class="fnote">* Aktions- und Angebotspreise gelten nur bei Barkauf. Bei Leasing (Dienstrad) und Finanzierung gilt der reguläre Preis. Alle Preise inkl. MwSt.</p>
+  <p class="fnote">* Aktionspreise gelten nicht bei Leasing &amp; Finanzierung; dafür gilt der reguläre Preis. Alle Preise inkl. MwSt.</p>
   <div class="legalbar"><span>© <span id="yr">2026</span> Velocenter Hessert</span><span style="display:flex;gap:18px;flex-wrap:wrap"><a href="#impressum">Impressum</a><a href="#datenschutz">Datenschutz</a><a href="#warum">Prototyp-Infos</a></span></div>
  </div>
 </footer>
@@ -2914,7 +2914,7 @@ function lgInfo(){const m=LG.list[LG.i],v=m.v[LG.vi]||m.v[0];const row=(l,x,h)=>
  const farben=inSz.length>1?'<div class="lgvar"><span class="flab">Farbe wählen'+(m.sz.length>1?' · '+esc(sz):'')+'</span><div class="vs">'+inSz.map(([x,j])=>'<button type="button" data-vi="'+j+'" class="'+(j===LG.vi?'on':'')+'">'+(x.farbe?'<i style="background:'+lgFarbe(x.farbe)+'"></i>':'')+'<span>'+esc(x.farbe||'Ausführung')+'</span><small class="'+(x.res||x.status==='bestellt'?'z':'ok')+'">'+(x.res?'reserviert':x.status==='bestellt'?'Lieferung ausstehend':'verfügbar')+'</small></button>').join('')+'</div></div>':'';
  const auch='';
  $('#lgmInfo').innerHTML='<p class="eyebrow">'+esc(m.marke)+'</p><h2 id="lgmT">'+esc(m.modell)+'</h2><div class="bds">'+lgStat(v.status!=='bestellt',v.ab)+(v.res?'<span class="bd rs">Reserviert</span>':'')+(v.angebot?'<span class="bd an">Sonderangebot</span>':'')+(v.vorfuehr?'<span class="bd vf">Vorführrad</span>':'')+(v.gebraucht?'<span class="bd gb">Gebraucht</span>':'')+'</div>'+
-  '<div class="lgm-price">'+(v.preis?'<span class="lgpr">'+(v.angebot?'<s>'+eur(v.preis)+'</s><b class="an">'+eur(v.angebot)+'</b>':'<b>'+eur(v.preis)+'</b>')+'</span>':'<span class="lgpr"><b>Preis auf Anfrage</b></span>')+(v.angebot?'<span class="sv">Sie sparen '+eur(v.preis-v.angebot)+'</span><p class="anbox"><span aria-hidden="true">ⓘ</span><span>Aktionspreis gilt nur bei Barkauf. <b>Bei Leasing und Finanzierung gilt der reguläre Preis von '+eur(v.preis)+'.</b></span></p>':'')+'</div>'+groessen+farben+auch+
+  '<div class="lgm-price">'+(v.preis?'<span class="lgpr">'+(v.angebot?'<s>'+eur(v.preis)+'</s><b class="an">'+eur(v.angebot)+'</b>':'<b>'+eur(v.preis)+'</b>')+'</span>':'<span class="lgpr"><b>Preis auf Anfrage</b></span>')+(v.angebot?'<span class="sv">Sie sparen '+eur(v.preis-v.angebot)+'</span><p class="anbox"><span aria-hidden="true">ⓘ</span><span><b>Aktionspreis gilt nicht bei Leasing &amp; Finanzierung.</b> Dafür gilt der reguläre Preis von '+eur(v.preis)+'.</span></p>':'')+'</div>'+groessen+farben+auch+
   '<dl class="lgm-spec">'+row('Rahmenhöhe',v.gr)+row('Farbe',v.farbe,'<i style="background:'+lgFarbe(v.farbe)+'"></i>'+esc(v.farbe||''))+row('Rahmenform',v.rahmen)+row('Art',v.typ)+row('Motor',v.motor)+row('Akku',v.akku)+row('Display',v.display)+row('Schaltung',v.schaltung)+row('Reifen',v.reifen)+row('Gewicht',v.gewicht)+row('Zul. Gesamtgewicht',v.zgg)+row('Kilometerstand',v.km)+row('Verfügbarkeit',1,v.res?'Reserviert – fragen Sie gern nach einem gleichen Rad':v.status==='bestellt'?'Lieferung ausstehend'+(v.ab?', voraussichtlich '+esc(v.ab):''):'Sofort, steht bei uns in Wörth')+'</dl>'+
   lgActHtml(m,v)+
   '<form class="lgm-form" id="lgmF" hidden novalidate><div class="fl"><span class="flab">Ihr Wunsch</span><div class="choice" id="lgW"><button type="button" class="on" data-v="Kaufen">Kaufen</button><button type="button" data-v="Reservieren">Reservieren</button><button type="button" data-v="Probefahrt">Probefahrt</button><button type="button" data-v="Andere Größe/Farbe bestellen">Andere Größe/Farbe</button></div></div>'+
