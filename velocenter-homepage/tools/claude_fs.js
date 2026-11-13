@@ -12,7 +12,9 @@ const MAIL = process.env.FB_MAIL || 'claude@admin.velo-center.de', PW = process.
 const BASE = (process.env.FS_TEST || 'https://firestore.googleapis.com') + `/v1/projects/${CFG.projectId}/databases/(default)/documents`;
 let TOK = '';
 
+const TOKF = path.join(process.env.RUNNER_TEMP || require('os').tmpdir(), 'fb-claude-tok.json');
 async function login() {
+  try { const c = JSON.parse(fs.readFileSync(TOKF, 'utf8')); if (c.t && Date.now() - c.at < 50 * 60e3) { TOK = c.t; return; } } catch (_) {}
   if (!PW) throw new Error('GitHub-Secret FB_CLAUDE_PW fehlt.');
   const r = await fetch((process.env.FS_TEST || 'https://identitytoolkit.googleapis.com') + '/v1/accounts:signInWithPassword?key=' + CFG.apiKey, {
     method: 'POST', headers: { 'content-type': 'application/json' },
@@ -20,6 +22,7 @@ async function login() {
   const j = await r.json();
   if (!r.ok) throw new Error('Anmeldung Bot-Konto fehlgeschlagen: ' + (j.error && j.error.message));
   TOK = j.idToken;
+  try { fs.writeFileSync(TOKF, JSON.stringify({ t: TOK, at: Date.now() }), { mode: 0o600 }); } catch (_) {}
 }
 function dec(v) {
   if (!v) return null;
@@ -60,9 +63,30 @@ function ausgabe(k, v) {
 const zeit = t => new Date(t).toLocaleString('de-DE', { timeZone: 'Europe/Berlin', dateStyle: 'short', timeStyle: 'short' });
 const runUrl = () => process.env.GITHUB_RUN_ID ? `${process.env.GITHUB_SERVER_URL}/${process.env.GITHUB_REPOSITORY}/actions/runs/${process.env.GITHUB_RUN_ID}` : '';
 
+function taetigkeit(h) {
+  const t = h.tool_name || '', i = h.tool_input || {}, f = x => path.basename(String(x || ''));
+  const kurz = (x, n) => { x = String(x || '').replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim(); return x.length > n ? x.slice(0, n - 1) + '…' : x; };
+  if (t === 'Read') return 'Liest ' + f(i.file_path) + (i.offset ? ' ab Zeile ' + i.offset : '');
+  if (t === 'Grep') return 'Sucht „' + kurz(i.pattern, 50) + '“';
+  if (t === 'Glob') return 'Sucht Dateien „' + kurz(i.pattern, 40) + '“';
+  if (t === 'Edit' || t === 'MultiEdit') { const n = kurz(i.new_string, 60); return 'Ändert ' + f(i.file_path) + (n ? ': „' + n + '“' : ''); }
+  if (t === 'Write') return f(i.file_path) === '.antwort.md' ? 'Schreibt die Antwort an dich' : 'Schreibt ' + f(i.file_path);
+  if (t === 'TodoWrite') return 'Plant die Arbeitsschritte';
+  return 'Arbeitet';
+}
+async function hook(id) {
+  let raw = ''; for await (const c of process.stdin) raw += c;
+  let h = {}; try { h = JSON.parse(raw); } catch (_) {}
+  const lastF = path.join(process.env.RUNNER_TEMP || require('os').tmpdir(), 'fb-claude-hook.txt');
+  let last = 0; try { last = +fs.readFileSync(lastF, 'utf8') || 0; } catch (_) {}
+  if (Date.now() - last < 1200) return;
+  fs.writeFileSync(lastF, String(Date.now()));
+  await login(); await setze(id, { schritt: ('Claude: ' + taetigkeit(h)).slice(0, 120) });
+}
 async function main() {
   const [cmd, id, a, b] = process.argv.slice(2);
   if (!/^[A-Za-z0-9_-]{6,40}$/.test(id || '')) throw new Error('Ungültige Auftrags-ID.');
+  if (cmd === 'hook') { await hook(id).catch(() => {}); return; }
   await login();
   if (cmd === 'start') {
     const d = await hole(id);

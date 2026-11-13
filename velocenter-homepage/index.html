@@ -1744,7 +1744,7 @@ body.txon img[data-ik]{cursor:copy;outline:2px dashed rgba(37,99,235,.6);outline
 .clrun{display:flex;align-items:center;gap:8px;font-weight:600;color:#4C1D95}
 .clrun i{flex:none;width:16px;height:16px;border-radius:50%;border:2.5px solid rgba(124,58,237,.25);border-top-color:#7C3AED;animation:clspin .8s linear infinite}
 @keyframes clspin{to{transform:rotate(360deg)}}
-.clrun time{margin-left:auto;font:700 12.5px var(--display);opacity:.8}
+.clrun span{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.clrun time{flex:none;margin-left:auto;font:700 12.5px var(--display);opacity:.8}
 .clw{color:#9B1430;font-weight:600}
 .cla{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
 .cla .apill{display:inline-flex;align-items:center;min-height:44px;text-decoration:none}
@@ -4886,7 +4886,7 @@ function clWatch(){if(!ADM.db)return;
 const clZeit=t=>{const d=new Date(t),k=d.toLocaleDateString('sv-SE',{timeZone:'Europe/Berlin'}),h=heuteK(),u=d.toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit',timeZone:'Europe/Berlin'});return (k===h?'heute':k===dPlus(h,-1)?'gestern':d.toLocaleDateString('de-DE',{day:'2-digit',month:'2-digit',timeZone:'Europe/Berlin'}))+', '+u+' Uhr'};
 const clDauer=ms=>{const s=Math.max(0,Math.round(ms/1000));return Math.floor(s/60)+':'+String(s%60).padStart(2,'0')};
 const clTxt=s=>esc(String(s||'')).replace(/\*\*([^*]+)\*\*/g,'<b>$1</b>').replace(/\n/g,'<br>');
-function clStufe(x){if(x.status==='fertig'||x.status==='nichts')return 4;if(x.status!=='arbeitet')return 0;const s=x.schritt||'';return /live/i.test(s)?3:/geprüft|gebaut/i.test(s)?2:1}
+function clStufe(x){if(x.status==='fertig'||x.status==='nichts')return 4;if(x.status!=='arbeitet')return 0;const s=x.schritt||'';return s.startsWith('Wird live')?3:s.startsWith('Seite wird geprüft')?2:1}
 function clMsg(x){const me=admWho(),ich=x.von===me,zur=x.typ==='zurueck';
  let h='<div class="clm du'+(ich?' ich':'')+'"><div class="clb"><header><b>'+esc(x.von||'Admin')+'</b><time>'+clZeit(x.ts)+'</time></header><p>'+(zur?'<span class="clr">↩ Rückgängig</span> ':'')+clTxt(x.txt)+'</p></div><span class="av" style="'+avCol(x.von||'A')+'">'+esc(String(x.von||'A').charAt(0))+'</span></div>';
  const st=x.status||'neu',run=st==='neu'||st==='gestartet'||st==='arbeitet',alt=Date.now()-(x.start||x.ts);
