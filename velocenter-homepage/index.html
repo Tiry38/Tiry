@@ -1899,6 +1899,29 @@ html.scr .sky,html.scr .blobs i,html.scr .blobs::after,html.scr .ribbons i{anima
 .tsrc{margin-top:18px;font-size:13px;color:var(--dim)}
 .tsrc a{color:inherit}
 @media (max-width:640px){.tnav a{font-size:14px;min-height:44px}.tph .ic{width:56px;height:56px}.tfl li{font-size:15px}}
+
+/* ---------- Statusleiste Öffnungszeiten (immer oben, fixiert) ---------- */
+:root{--sb:36px}
+body{padding-top:var(--sb)}
+.hdr{top:calc(env(safe-area-inset-top,0px) + var(--sb))}
+.atelier .side{top:calc(120px + var(--sb))}.drout{top:calc(110px + var(--sb))}
+.sbar{position:fixed;z-index:61;top:0;left:0;right:0;height:calc(var(--sb) + env(safe-area-inset-top,0px));padding:env(safe-area-inset-top,0px) max(16px,env(safe-area-inset-right,0px)) 0 max(16px,env(safe-area-inset-left,0px));box-sizing:border-box;display:flex;align-items:center;justify-content:center;gap:14px;overflow:hidden;
+ background:radial-gradient(60% 220% at 15% 50%,rgba(var(--sbc),.20),transparent 60%),radial-gradient(50% 220% at 85% 50%,rgba(124,58,237,.18),transparent 60%),linear-gradient(90deg,#0A0C13,#151020 50%,#0A0C13);color:#EEF0F6;font:600 13.5px/1 var(--display);letter-spacing:.01em;--sbc:52,211,153}
+.sbar::before{content:"";position:absolute;inset:auto 0 0 0;height:2px;background:linear-gradient(90deg,rgba(var(--sbc),.0),rgba(var(--sbc),.35),rgba(167,139,250,.35),rgba(var(--sbc),0));}
+.sbar .sbp{position:absolute;left:0;bottom:0;height:2px;width:var(--p,0%);background:linear-gradient(90deg,#22D3EE,rgb(var(--sbc)),#A78BFA,#22D3EE);background-size:200% 100%;animation:flow 6s linear infinite;box-shadow:0 0 10px rgba(var(--sbc),.8);border-radius:0 2px 2px 0;transition:width 1s var(--ease)}
+.sbar a{color:inherit;text-decoration:none}
+.sbst{display:inline-flex;align-items:center;gap:10px;min-height:var(--sb);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+.sbst i{position:relative;flex:none;width:9px;height:9px;border-radius:50%;background:rgb(var(--sbc));box-shadow:0 0 12px rgb(var(--sbc))}
+.sbst i::after{content:"";position:absolute;inset:-5px;border-radius:50%;border:2px solid rgb(var(--sbc));animation:ping 1.8s ease-out infinite}
+.sbst b{font-weight:800;color:rgb(var(--sbc));letter-spacing:.02em}
+.sbst span{color:#C9CDD8}.sbst em{font-style:normal;padding:4px 9px;border-radius:999px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.10);color:#fff;font-weight:700;font-size:12.5px}
+.sbst:hover span{color:#fff}
+.sbtel{position:absolute;right:max(16px,env(safe-area-inset-right,0px));top:calc(env(safe-area-inset-top,0px));height:var(--sb);display:inline-flex;align-items:center;gap:7px;color:#C9CDD8!important;font-weight:700}
+.sbtel svg{width:15px;height:15px}.sbtel:hover{color:#fff!important}
+.sbar.soon{--sbc:251,191,36}.sbar.closed{--sbc:251,113,133}.sbar.closed .sbst i::after,.sbar.soon .sbst i::after{animation:none;opacity:0}
+@media (max-width:980px){.sbtel span{display:none}}
+@media (max-width:640px){:root{--sb:34px}.sbar{font-size:12.5px;justify-content:flex-start;padding-right:52px}.sbst em{display:none}}
+@media (prefers-reduced-motion:reduce){.sbar .sbp,.sbst i::after{animation:none}}
 </style>
 
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
@@ -1932,6 +1955,7 @@ html.scr .sky,html.scr .blobs i,html.scr .blobs::after,html.scr .ribbons i{anima
 
 <div class="sky"></div><div class="blobs" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></div><div class="ribbons" aria-hidden="true"><i></i><i></i><i></i><i></i></div><div class="smoke"></div><div class="grain"></div>
 
+<div class="sbar" id="sbar" role="status" aria-live="polite"><a class="sbst" href="#kontakt" data-r="kontakt" id="sbst" title="Öffnungszeiten ansehen"><i></i><b>Öffnungszeiten</b></a><a class="sbtel" href="tel:+49727178033" aria-label="Anrufen: 07271 78033"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 1.9.7 2.8a2 2 0 0 1-.5 2.1L8 9.9a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.8.7a2 2 0 0 1 1.7 2z"/></svg><span>07271 78033</span></a><span class="sbp" id="sbp"></span></div>
 <header class="hdr">
  <div class="wrap">
 <div class="hlft"><div class="hsoc" aria-label="Velocenter in den sozialen Medien"><a class="ig" href="https://www.instagram.com/velocenterhessert/" target="_blank" rel="noopener" aria-label="Instagram" title="Instagram"><svg><use href="#i-ig"/></svg></a><a class="fb" href="https://www.facebook.com/velocenterhessert" target="_blank" rel="noopener" aria-label="Facebook" title="Facebook"><svg><use href="#i-fb"/></svg></a><a class="wk" href="https://whatsapp.com/channel/0029VaIekua60eBc6k2bMD0q" target="_blank" rel="noopener" aria-label="WhatsApp-Kanal" title="WhatsApp-Kanal"><svg><use href="#i-chat"/></svg><span>Kanal</span></a></div>  <a class="logo" href="#start" aria-label="Velocenter Hessert – Startseite"><img src="img/velocenter-logo.svg" alt="Velocenter Hessert" width="160" height="84"></a></div>
@@ -3224,11 +3248,29 @@ setTimeout(()=>{const t=setTimeout(()=>{if(!SR.pool)srBuild()},6000);lgLoad().th
 const H={1:[[540,720],[870,1080]],2:[[540,720],[870,1080]],3:[],4:[[540,720],[870,1080]],5:[[540,720],[870,1080]],6:[[540,720]],0:[]};
 const DN=['Sonntag','Montag','Dienstag','Mittwoch','Donnerstag','Freitag','Samstag'];
 const hm=m=>String(Math.floor(m/60)).padStart(2,'0')+':'+String(m%60).padStart(2,'0');
-function berlin(){const p=new Intl.DateTimeFormat('en-GB',{timeZone:'Europe/Berlin',weekday:'short',hour:'2-digit',minute:'2-digit',hourCycle:'h23'}).formatToParts(new Date());const g=t=>p.find(x=>x.type===t).value;return{d:['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].indexOf(g('weekday')),m:+g('hour')*60+ +g('minute')}}
+/* Feiertage Rheinland-Pfalz (Laden zu) */
+function osterSo(y){const a=y%19,b=Math.floor(y/100),c=y%100,d=Math.floor(b/4),e=b%4,f=Math.floor((b+8)/25),g=Math.floor((b-f+1)/3),h=(19*a+b-d-g+15)%30,i=Math.floor(c/4),k=c%4,l=(32+2*e+2*i-h-k)%7,m=Math.floor((a+11*h+22*l)/451),mo=Math.floor((h+l-7*m+114)/31),dd=((h+l-7*m+114)%31)+1;return Date.UTC(y,mo-1,dd)}
+const FT={};function feiertag(y,mo,d){if(!FT[y]){const o=osterSo(y),t=n=>{const x=new Date(o+n*864e5);return (x.getUTCMonth()+1)+'-'+x.getUTCDate()};
+ FT[y]={'1-1':'Neujahr','5-1':'Tag der Arbeit','10-3':'Tag der Deutschen Einheit','11-1':'Allerheiligen','12-25':'1. Weihnachtsfeiertag','12-26':'2. Weihnachtsfeiertag'};
+ [[-2,'Karfreitag'],[1,'Ostermontag'],[39,'Christi Himmelfahrt'],[50,'Pfingstmontag'],[60,'Fronleichnam']].forEach(([n,v])=>FT[y][t(n)]=v)}return FT[y][mo+'-'+d]||''}
+function slotsAt(y,mo,d,wd){return feiertag(y,mo,d)?[]:H[wd]}
+/* aktueller Öffnungs-Status (für Statusleiste und Startseite) */
+function oeffStatus(){const b=berlin(),{d,m}=b,ft=feiertag(b.y,b.mo,b.dd),S=slotsAt(b.y,b.mo,b.dd,d),cur=S.find(([a,e])=>m>=a&&m<e);
+ if(cur)return{open:true,bis:cur[1],rest:cur[1]-m,p:(m-cur[0])/(cur[1]-cur[0])};
+ const base=Date.UTC(b.y,b.mo-1,b.dd);for(let k=0;k<14;k++){const x=new Date(base+k*864e5),wd=x.getUTCDay(),T=slotsAt(x.getUTCFullYear(),x.getUTCMonth()+1,x.getUTCDate(),wd),s=T.find(([a])=>k>0||a>m);
+  if(s)return{open:false,k,wd,ab:s[0],in:k===0?s[0]-m:(k===1?(1440-m)+s[0]:null),pause:k===0&&S.some(([,e])=>e<=m),ft}}
+ return{open:false,k:99,ft}}
+const dauer=n=>n<60?n+' Min.':Math.floor(n/60)+' Std.'+(n%60?' '+(n%60)+' Min.':'');
+function sbar(){const B=$('#sbar'),A=$('#sbst');if(!B||!A)return;const o=oeffStatus();let cls,t;
+ if(o.open){cls=o.rest<=30?'soon':'open';t=o.rest<=30?'<b>Schließt gleich</b><span>noch '+dauer(o.rest)+' · bis '+hm(o.bis)+' Uhr</span>':'<b>Jetzt geöffnet</b><span>bis '+hm(o.bis)+' Uhr</span><em>noch '+dauer(o.rest)+'</em>';B.style.setProperty('--p',(o.p*100).toFixed(1)+'%')}
+ else{cls='closed';B.style.setProperty('--p','0%');const wann=o.k===0?'heute':o.k===1?'morgen':DN[o.wd];
+  t=(o.pause?'<b>Mittagspause</b><span>ab '+hm(o.ab)+' Uhr wieder für dich da</span>':'<b>'+(o.ft?'Heute Feiertag':'Gerade geschlossen')+'</b><span>'+(o.k<99?'wir öffnen '+wann+' um '+hm(o.ab)+' Uhr':'')+'</span>')+(o.in!=null&&o.in<=180?'<em>in '+dauer(o.in)+'</em>':'')}
+ B.className='sbar '+cls;A.innerHTML='<i></i>'+t;A.setAttribute('aria-label',A.textContent)}
+function berlin(){const p=new Intl.DateTimeFormat('en-GB',{timeZone:'Europe/Berlin',weekday:'short',hour:'2-digit',minute:'2-digit',hourCycle:'h23'}).formatToParts(new Date());const g=t=>p.find(x=>x.type===t).value;const q=new Intl.DateTimeFormat('en-CA',{timeZone:'Europe/Berlin',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date()).split('-').map(Number);return{d:['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].indexOf(g('weekday')),m:+g('hour')*60+ +g('minute'),y:q[0],mo:q[1],dd:q[2]}}
 function live(){
- const {d,m}=berlin(),L=$('#live'),T=$('#liveT');const cur=H[d].find(([a,b])=>m>=a&&m<b);
- if(cur){L.className='live open';T.innerHTML='<b>Jetzt geöffnet</b> · bis '+hm(cur[1])+' Uhr'}
- else{let nd=d,nm=m,txt='';for(let k=0;k<8;k++){const s=H[nd].find(([a])=>a>nm);if(s){txt=(k===0?'heute':k===1?'morgen':DN[nd])+' um '+hm(s[0])+' Uhr';break}nd=(nd+1)%7;nm=-1}L.className='live closed';T.innerHTML='<b>Gerade geschlossen</b> · wir öffnen '+txt}
+ const {d}=berlin(),L=$('#live'),T=$('#liveT'),o=oeffStatus();sbar();
+ if(L&&T){if(o.open){L.className='live open';T.innerHTML='<b>Jetzt geöffnet</b> · bis '+hm(o.bis)+' Uhr'}
+ else{L.className='live closed';T.innerHTML='<b>'+(o.pause?'Mittagspause':o.ft?'Heute Feiertag':'Gerade geschlossen')+'</b>'+(o.k<99?' · wir öffnen '+(o.k===0?'heute':o.k===1?'morgen':DN[o.wd])+' um '+hm(o.ab)+' Uhr':'')}}
  const rows=[1,2,3,4,5,6,0];
  ['#hours','#hours2'].forEach(id=>{const el=$(id);if(!el)return;el.innerHTML=rows.map(k=>'<div class="day'+(k===d?' today':'')+(H[k].length?'':' zu')+'"><span>'+DN[k]+(k===d?' · heute':'')+'</span><span>'+(H[k].length?H[k].map(([a,b])=>hm(a)+'–'+hm(b)).join(' · '):'geschlossen')+'</span></div>').join('')});
 }
