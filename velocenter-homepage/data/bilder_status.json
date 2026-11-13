@@ -3,7 +3,8 @@
   "geprueft": "2026-11-13",
   "gesucht": "2026-11-13",
   "grund": "vom Admin freigegeben",
-  "notiz": "Art.-Nr. 3105681 vermutlich dunkelblau matt, 3105682 enzianblau, 3105683 hellblau.",
+  "notiz": "Qualität: leichter dunkler Saum an den Reifen, keine bessere Fassung gefunden (bikes-opt CDN nur 1330 px JPG, gudereit.de zeigt nur rot glanz).",
+  "qcheck": "2026-11-13",
   "quelle": "https://bikes-opt.b-cdn.net/gudereit/2026/3105681_01.jpg",
   "seite": "https://www.gudereit.de/faltrad/item/ec-35-evo-compact.html",
   "versuche": 0,
@@ -14,8 +15,9 @@
   "geprueft": "2026-11-13",
   "gesucht": "2026-11-13",
   "grund": "Gudereit-Studiofoto aus derselben Serie wie das offizielle rotglanz-Bild auf gudereit.de (identische Pose, 20\"-Kompakt, Riemen, Frontträger), Art.-Nr. 3105688 ist laut Händler graphit-matt und das Rad ist sichtbar matt-graphit.",
-  "notiz": "Art.-Nr. 3105688; gudereit.de zeigt nur rotglanz. dhash-Warnung kommt nur daher, dass es dieselbe Aufnahme in anderer Farbe ist.",
+  "notiz": "Qualität: leichter dunkler Saum an den Reifen, keine bessere Fassung gefunden (bikes-opt CDN nur 1330 px JPG, gudereit.de zeigt nur rot glanz).",
   "pinned": true,
+  "qcheck": "2026-11-13",
   "quelle": "https://bikes-opt.b-cdn.net/gudereit/2026/3105688_01.jpg",
   "seite": "https://www.bikes.de/shop/e-bikes/marke.gudereit/gudereit-ec-35-evo-625-2026/",
   "versuche": 0,
@@ -23,6 +25,9 @@
  },
  "gudereit|ec35evo|2026|rotglanz": {
   "geprueft": "2026-11-13",
+  "notiz": "Qualität: leichter dunkler Saum an den Reifen, keine bessere Fassung gefunden (gudereit.de-Original 2000x1333 neu freigestellt ergibt dasselbe Ergebnis).",
+  "qcheck": "2026-11-13",
+  "quelle": "https://www.gudereit.de/fileadmin/user_upload/EC-35_evo_rotglanz.jpg",
   "zuletzt": "2026-11-13"
  },
  "isy|e5zrf20jahre|2027|dunkelblauorangegabel": {
@@ -35,65 +40,102 @@
  "isy|e5zrfadventure|2026|cloudgreyglanz": {
   "geprueft": "2026-11-13",
   "notiz": "i:SY führt online nur die E5 ZR F CX Adventure 2025 – gleiche Aufnahme; bei neuer 2026-Seite ggf. neu prüfen.",
+  "qcheck": "2026-11-13",
   "zuletzt": "2026-11-13"
  },
  "isy|e5zrfadventure|2026|cosmosbluematt": {
   "geprueft": "2026-11-13",
   "notiz": "i:SY führt online nur die E5 ZR F CX Adventure 2025 – gleiche Aufnahme; bei neuer 2026-Seite ggf. neu prüfen.",
+  "qcheck": "2026-11-13",
   "zuletzt": "2026-11-13"
  },
  "isy|e5zrfadventure|2026|dustybluematt": {
   "geprueft": "2026-11-13",
   "notiz": "i:SY führt online nur die E5 ZR F CX Adventure 2025 – gleiche Aufnahme; bei neuer 2026-Seite ggf. neu prüfen.",
+  "qcheck": "2026-11-13",
   "zuletzt": "2026-11-13"
  },
  "isy|e5zrfadventure|2026|opalgreenglanz": {
   "geprueft": "2026-11-13",
   "notiz": "i:SY führt online nur die E5 ZR F CX Adventure 2025 – gleiche Aufnahme; bei neuer 2026-Seite ggf. neu prüfen.",
+  "qcheck": "2026-11-13",
   "zuletzt": "2026-11-13"
  },
  "isy|e5zrfadventure|2026|pepperblackmatt": {
   "geprueft": "2026-11-13",
   "notiz": "i:SY führt online nur die E5 ZR F CX Adventure 2025 – gleiche Aufnahme; bei neuer 2026-Seite ggf. neu prüfen.",
+  "qcheck": "2026-11-13",
   "zuletzt": "2026-11-13"
  },
  "isy|e5zrfcxcentury|2024|racinggreen": {
   "geprueft": "2026-11-13",
+  "qcheck": "2026-11-13",
   "zuletzt": "2026-11-13"
  },
  "isy|e5zrfcxcentury|2024|rivierablue": {
   "geprueft": "2026-11-13",
+  "qcheck": "2026-11-13",
   "zuletzt": "2026-11-13"
  },
  "isy|e5zrfcx|2023|opalgreen": {
   "geprueft": "2026-11-13",
+  "qcheck": "2026-11-13",
   "zuletzt": "2026-11-13"
  },
  "isy|e5zrfcx|2024|pepperblack": {
   "geprueft": "2026-11-13",
+  "qcheck": "2026-11-13",
   "zuletzt": "2026-11-13"
  },
  "isy|e5zrf|2023|opalgreen": {
   "geprueft": "2026-11-13",
-  "notiz": "Bild ist eher klein (783x528); offizielle Datei liegt nur hochskaliert vor.",
+  "gesucht": "2026-11-13",
+  "grund": "Qualität: bisheriges Foto nur 783x528 px; jetzt das i:SY-Studiofoto der 2023er E5-ZR-F-Serie (gleiche Aufnahme wie 102360 pepper black / 102366 sunny yellow, Freilauf mit Scheibenbremse hinten) in opal green, 1330 px.",
+  "notiz": "Art.-Nr. 102367 (bei bikes.de nicht mehr gelistet, Nachbarnummern 102360-102366 = E5 ZR F 2023).",
+  "qcheck": "2026-11-13",
+  "quelle": "https://bikes-opt.b-cdn.net/isy/2023/102367_01.jpg",
+  "seite": "https://www.bikes.de/shop/e-bikes/marke.i-sy/i-sy-e5-zr-f-2023/",
+  "versuche": 0,
   "zuletzt": "2026-11-13"
  },
  "isy|e5zrf|2023|pepperblack": {
+  "geprueft": "2026-11-13",
+  "quelle": "https://bikes-opt.b-cdn.net/isy/2023/102360_01.jpg",
   "zuletzt": "2026-11-13"
  },
  "isy|e5zrf|2023|sunnyyellow": {
+  "geprueft": "2026-11-13",
+  "quelle": "https://bikes-opt.b-cdn.net/isy/2023/102366_01.jpg",
   "zuletzt": "2026-11-13"
  },
  "isy|e5zrf|2024|berryred": {
+  "geprueft": "2026-11-13",
+  "gesucht": "2026-11-13",
+  "grund": "Bisher dasselbe Foto wie 2025 berry red (mit Federsattelstütze); jetzt das offizielle i:SY-Foto E5 ZR F 2024 berry red (Art.-Nr. 3000908).",
+  "notiz": "Art.-Nr. 3000908",
+  "quelle": "https://bikes-opt.b-cdn.net/isy/2024/3000908_1.webp",
+  "seite": "https://www.bikes.de/shop/e-bikes/marke.i-sy/isy-e5-zr-f-2024/?sku=3000908",
+  "versuche": 0,
   "zuletzt": "2026-11-13"
  },
  "isy|e5zrf|2024|pepperblack": {
+  "geprueft": "2026-11-13",
+  "gesucht": "2026-11-13",
+  "grund": "Bisher war das 2023er-Foto (gleich wie 2023 pepper black) drin; jetzt das offizielle i:SY-Foto E5 ZR F 2024 pepper black (Art.-Nr. 3000913), Modell und Farbe stimmen.",
+  "notiz": "Art.-Nr. 3000913",
+  "quelle": "https://bikes-opt.b-cdn.net/isy/2024/3000913_1.webp",
+  "seite": "https://www.bikes.de/shop/e-bikes/marke.i-sy/isy-e5-zr-f-2024/?sku=3000913",
+  "versuche": 0,
   "zuletzt": "2026-11-13"
  },
  "isy|e5zrf|2025|berryred": {
+  "geprueft": "2026-11-13",
+  "notiz": "2025er Art.-Nr. bei bikes.de nicht gefunden (3046741 = cloud grey, 3046742-45 sind CX Adventure).",
   "zuletzt": "2026-11-13"
  },
  "isy|e5zrrtclassic|2024|pepperblack": {
+  "geprueft": "2026-11-13",
+  "notiz": "E5 ZR RT 2024 pepper black = Art.-Nr. 3000931 (Foto ohne Federsattelstütze).",
   "zuletzt": "2026-11-13"
  },
  "isy|e5zrrttouring|2027|creamybeige": {
@@ -111,6 +153,8 @@
   "zuletzt": "2026-11-13"
  },
  "isy|e5zrrt|2024|seashellwhite": {
+  "geprueft": "2026-11-13",
+  "quelle": "https://bikes-opt.b-cdn.net/isy/2024/3000932_1.webp",
   "zuletzt": "2026-11-13"
  },
  "isy|e5zrrt|2027|creamybeige": {
@@ -135,60 +179,82 @@
   "zuletzt": "2026-11-13"
  },
  "isy|n38zrb|2023|urbanblue": {
+  "geprueft": "2026-11-13",
+  "quelle": "https://bikes-opt.b-cdn.net/isy/2023/102406_01.jpg",
   "zuletzt": "2026-11-13"
  },
  "isy|n38zrcxautocomfort|2025|pepperblack": {
+  "geprueft": "2026-11-13",
+  "quelle": "https://bikes-opt.b-cdn.net/isy/2025/3046756_01.jpg",
   "zuletzt": "2026-11-13"
  },
  "isy|n38zrcxcomfort|2024|berryred": {
+  "geprueft": "2026-11-13",
+  "quelle": "https://bikes-opt.b-cdn.net/isy/2024/3000941_1.webp",
   "zuletzt": "2026-11-13"
  },
  "isy|n38zrcxcomfort|2024|cosmosblue": {
+  "qcheck": "2026-11-13",
   "zuletzt": "2026-11-13"
  },
  "isy|n38zrcxcomfort|2024|opalgreen": {
+  "qcheck": "2026-11-13",
   "zuletzt": "2026-11-13"
  },
  "isy|n38zrcxcomfort|2024|pepperblack": {
+  "qcheck": "2026-11-13",
   "zuletzt": "2026-11-13"
  },
  "isy|n38zr|2023|froggygreen": {
+  "qcheck": "2026-11-13",
   "zuletzt": "2026-11-13"
  },
  "isy|n38zr|2023|opalgreen": {
+  "qcheck": "2026-11-13",
   "zuletzt": "2026-11-13"
  },
  "isy|n38zr|2023|poppyred": {
+  "qcheck": "2026-11-13",
   "zuletzt": "2026-11-13"
  },
  "isy|n38zr|2023|sunnyyellow": {
+  "qcheck": "2026-11-13",
   "zuletzt": "2026-11-13"
  },
  "isy|n38zr|2025|berryred": {
+  "qcheck": "2026-11-13",
   "zuletzt": "2026-11-13"
  },
  "isy|p12zr|2024|pepperblack": {
+  "qcheck": "2026-11-13",
   "zuletzt": "2026-11-13"
  },
  "isy|poparte5zrf|2023|popartwhite": {
+  "qcheck": "2026-11-13",
   "zuletzt": "2026-11-13"
  },
  "isy|s8zrfb|2024|seashellwhite": {
+  "qcheck": "2026-11-13",
   "zuletzt": "2026-11-13"
  },
  "isy|s8zrf|2024|berryred": {
+  "qcheck": "2026-11-13",
   "zuletzt": "2026-11-13"
  },
  "isy|s8zrf|2024|opalgreen": {
+  "qcheck": "2026-11-13",
   "zuletzt": "2026-11-13"
  },
  "isy|s8zrf|2024|pepperblack": {
+  "qcheck": "2026-11-13",
   "zuletzt": "2026-11-13"
  },
  "isy|skyflye5zrfcx|2025|stardust": {
+  "qcheck": "2026-11-13",
   "zuletzt": "2026-11-13"
  },
  "isy|skyflye5zrfcx|2025|udcarbon": {
+  "qcheck": "2026-11-13",
   "zuletzt": "2026-11-13"
  },
  "isy|skyflye5zrrtpx|2027|juicyorangematt": {
@@ -206,24 +272,31 @@
   "zuletzt": "2026-11-13"
  },
  "isy|xxle5zrfcxadventurefedergabelair|2027|galacticblue": {
+  "qcheck": "2026-11-13",
   "zuletzt": "2026-11-13"
  },
  "isy|xxle5zrfcx|2023|cosmosblue": {
+  "qcheck": "2026-11-13",
   "zuletzt": "2026-11-13"
  },
  "ktm|macinaaera671lfc|2023|vitalbluemattblackorange": {
+  "qcheck": "2026-11-13",
   "zuletzt": "2026-11-13"
  },
  "ktm|macinaaera872lfc|2027|platinbronzemattblackorange": {
+  "qcheck": "2026-11-13",
   "zuletzt": "2026-11-13"
  },
  "ktm|macinaaera872lfc|2027|sagegreenmattblackwhite": {
+  "qcheck": "2026-11-13",
   "zuletzt": "2026-11-13"
  },
  "ktm|macinaaera892lfc|2027|platinbronzemattblackorange": {
+  "qcheck": "2026-11-13",
   "zuletzt": "2026-11-13"
  },
  "ktm|macinacityp610rt|2022|oakblackorange": {
+  "qcheck": "2026-11-13",
   "zuletzt": "2026-11-13"
  },
  "ktm|macinacityp610rt|2023|oakmattchampagneorange": {
