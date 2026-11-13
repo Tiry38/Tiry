@@ -135,7 +135,14 @@ def html_bauen():
             sys.exit('Markierung ' + mark + ' in der Datenschutzerklärung fehlt')
     if firebase_config():
         s = s.replace('<!--FB_KURZ-->', ' und Google Firebase für aktuelle Angebote und Bewertungen')
-        s = s.replace('<!--FB_STAND-->', ', Google Firebase')
+        s = s.replace('<!--FB_STAND-->', ', Google Firebase, anonyme Besucherstatistik')
+        # Kurzfassung passend zur anonymen Besucherstatistik (sonst Widerspruch „keine Analyse“)
+        s = ersetze(s, 'Keine Cookies, keine Analyse- oder Werbe-Tools, kein Tracking.',
+                    'Keine Cookies, keine Werbe-Tools, kein Tracking – nur eine anonyme Besucherzählung ohne Personenbezug.')
+        s = ersetze(s, 'Eine Analyse Ihres Nutzerverhaltens findet nicht statt.',
+                    'Eine Analyse Ihres persönlichen Nutzerverhaltens findet nicht statt; Besuche zählen wir nur anonym als Tagessummen (siehe „Anonyme Besucherstatistik“).')
+        s = ersetze(s, 'Wir setzen keine Analyse- oder Tracking-Programme ein.',
+                    'Wir setzen keine Tracking-Programme und keine Analyse-Dienste von Drittanbietern ein; unsere eigene anonyme Besucherstatistik ist unten beschrieben.')
         s = s.replace('<!--FIREBASE-->',
             '<h4>Google Firebase (Cloud Firestore)</h4>'
             '<p>Unsere aktuellen Angebote, Lagerräder und Bewertungen lädt die Seite aus Google Firebase (Cloud Firestore). '
