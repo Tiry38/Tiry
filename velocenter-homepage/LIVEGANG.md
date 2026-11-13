@@ -23,6 +23,12 @@ Der Prototyp bleibt unverändert, Änderungen immer dort machen und neu bauen.
 5. **Freigabe** für ein neues öffentliches GitHub-Repo nur für die Webseite (z. B. `Tiry38/velo-center-web`).
    GitHub Pages ist bei privaten Repos nur im Bezahl-Tarif möglich.
 
+## Stand der Antworten (13.11.2026)
+- Coco: laut Tiry vermutlich jederzeit kündbar – im Vertrag bestätigen. Fotorechte klären (wer hat fotografiert?).
+- IONOS: Zugang hat Stefan. Umstellung macht Tiry im Laden mit Stefans Daten zusammen mit Claude (Claude sieht keine Passwörter).
+- Datenschutz: Prüfung mit eRecht24.
+- Web-Repo: Tiry hat zugestimmt. Anlegen muss Tiry selbst (GitHub → New repository → `velo-center-web`, Public, leer), dann pusht Claude.
+
 ## Ablauf am Umzugstag
 1. Claude baut die Live-Fassung und legt sie ins neue Repo, GitHub Pages an (Branch `main`, Wurzel).
 2. Testadresse prüfen: `https://tiry38.github.io/<repo>/` (ohne eigene Domain). Stefan schaut drüber.
