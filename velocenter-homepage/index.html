@@ -1849,6 +1849,7 @@ html.scr .sky,html.scr .blobs i,html.scr .blobs::after,html.scr .ribbons i{anima
 .drp{font-size:15px;line-height:1.5;color:#3A404C;margin:0 0 12px}.drp b{white-space:normal!important;display:inline!important;position:static;background:none!important;-webkit-text-fill-color:#1B1E25;color:#1B1E25!important;font:inherit;font-weight:800;padding:0;margin:0}
 @media (max-width:900px){.drhero{grid-template-columns:1fr}.drsw button{flex:1 1 100%}}
 @media (max-width:900px){.drduo,.drcfg{grid-template-columns:1fr}.drk span{border-radius:30px}}
+.show:not(.srok) #bk,.show:not(.srok) #brefl,.show:not(.srok) #m-bk,.show:not(.srok) #m-brefl,.show:not(.srok) #swm,.show:not(.srok) #m-swm{opacity:0!important}
 /* ===== Service-Themen mit eigenen Sprungzielen (Tiry 12.11.2026) ===== */
 .tpc,#termin-form,#dienstrad{scroll-margin-top:96px}
 .tnav{display:flex;flex-wrap:wrap;gap:10px;margin-top:26px}
@@ -2304,7 +2305,7 @@ m696 -454 c28 -13 46 -31 55 -51 22 -53 -50 -177 -173 -300 -187 -186 -647
     <div class="sux"><div class="suimg"><span class="sug" aria-hidden="true"></span><img src="img/sattelueberzug.webp" alt="Sattelüberzug in Neongelb mit Velocenter-Logo" width="894" height="900" loading="lazy"><b class="sust">Gratis</b></div><div class="sutx"><span class="suk">+ Geschenkt dazu</span><b>Sattelüberzug mit Velocenter-Logo</b><small>Zu jeder Winter-Inspektion</small></div></div>
    </div>
    <div class="pre" style="--d:.15s">
-    <p class="lead">Gültig vom 01.11.2026 bis 28.02.2027, auch für E-Dreiräder und Lastenräder. Jetzt ist die Werkstatt entspannt, im Frühling ist dein Rad startklar.</p>
+    <p class="lead">Gültig vom 01.11.2026 bis 28.02.2027, <b>nur solange Termine verfügbar sind</b>, auch für E-Dreiräder und Lastenräder. Jetzt ist die Werkstatt entspannt, im Frühling ist dein Rad startklar.</p>
     <div class="cdn" role="timer" aria-label="Aktion gilt bis 28.02.2027"><div><b id="dealDays">–</b><span>Tage</span></div><div><b id="cdH">–</b><span>Std</span></div><div><b id="cdM">–</b><span>Min</span></div><div><b id="cdS">–</b><span>Sek</span></div></div>
     <a class="cta" href="#termin" data-pre="Winter-Inspektion"><svg><use href="#i-cal"/></svg>Winter-Termin sichern</a>
    </div>
@@ -2440,7 +2441,7 @@ m696 -454 c28 -13 46 -31 55 -51 22 -53 -50 -177 -173 -300 -187 -186 -647
      <li><b>Akku-Test:</b> Mit dem Bosch CapacityTester messen wir, wie viel Kapazität dein Akku noch hat.</li>
      <li><b>Erste Inspektion:</b> Wir empfehlen sie nach 500 bis 1.000 km, danach regelmäßige Service-Checks.</li>
      <li><b>Leasing- und Versicherungsräder:</b> Wir rechnen direkt mit deinem Anbieter ab. Teile und Arbeiten außerhalb deines Pakets zahlst du selbst, das klären wir vorher mit dir.</li>
-     <li><b>Winter-Aktion:</b> –20 € auf jede Inspektion plus Sattelüberzug geschenkt, bis 28.02.2027.</li>
+     <li><b>Winter-Aktion:</b> –20 € auf jede Inspektion plus Sattelüberzug geschenkt, bis 28.02.2027, nur solange Termine verfügbar sind.</li>
     </ul>
     <p class="tsub">Akku-Tipps von Bosch für den Winter</p>
     <ul class="tfl">
@@ -2460,7 +2461,7 @@ m696 -454 c28 -13 46 -31 55 -51 22 -53 -50 -177 -173 -300 -187 -186 -647
     <p class="eyebrow">Online-<b>Terminanfrage</b></p>
     <h2 class="big" style="margin-top:16px">Termin anfragen <span class="gt">in 30 Sekunden.</span></h2>
     <p class="lead" style="margin-top:20px">Probefahrt oder Werkstatt: Wunschtag wählen, kurz beschreiben, abschicken. Deine Anfrage geht direkt an uns, wir melden uns mit einem festen Termin.</p>
-    <a class="wstrip" href="#deal"><i aria-hidden="true">❄</i><span>Winter-Aktion: <b>–20 € auf jede Inspektion</b> + Sattelüberzug geschenkt · noch <b class="wsd">–</b> Tage</span></a>
+    <a class="wstrip" href="#deal"><i aria-hidden="true">❄</i><span>Winter-Aktion: <b>–20 € auf jede Inspektion</b> + Sattelüberzug geschenkt · nur solange Termine frei · noch <b class="wsd">–</b> Tage</span></a>
     <div class="blobimg" style="margin-top:34px;max-width:460px"><img src="img/isy-blumen.webp" alt="i:SY E-Bikes mit Blumenkörben vor einer Holzhütte" loading="lazy" width="800" height="600"></div>
    </div>
    <form class="panel form pre" id="tf" novalidate style="--d:.1s">
@@ -3116,9 +3117,10 @@ const SHOWOK=new Set(["b2-isy-0.webp","b2-isy-1.webp","b2-isy-10.webp","b2-ktm-0
 const SRFIX=['vanraam','vdv','victoria','stevens'];/* feste Plätze: jeder 5. / ca. 7. / ca. 9. / ca. 10. Wechsel */
 const SR={lb:{},pool:null,last:[],lastF:'',n:0,vr:0,subs:[]};
 const srBase=b=>({k:b.k,m:b.m,f:'',img:b.img,st:'',cur:1});
-function srBuild(){const P={};BR.forEach(b=>P[b.k]=[srBase(b)]);
+const SRDUP=new Set(['isy-34.webp','isy-36.webp','qio-19.webp']);/* bildgleiche Dubletten */
+function srBuild(){const P={},G=new Set();BR.forEach(b=>P[b.k]=[srBase(b)]);
  (LG.M||[]).forEach(m=>{if(m.hidden||m.gebraucht||m.vorfuehr)return;const br=lgBrand(m.marke+' '+m.modell);if(!br)return;
-  const seen=new Set();m.v.forEach(x=>{if(x._hid||!x.bild)return;const fn=x.bild.split('/').pop();if(!SHOWOK.has(fn)||seen.has(fn))return;seen.add(fn);
+  const seen=new Set();m.v.forEach(x=>{if(x._hid||!x.bild)return;const fn=x.bild.split('/').pop();const gk=srNorm(m.modell)+'|'+srNorm(x.farbe);if(!SHOWOK.has(fn)||SRDUP.has(fn)||seen.has(fn)||G.has(gk))return;seen.add(fn);G.add(gk);
    P[br.k].push({k:br.k,m:(m.marke+' '+m.modell).replace(/\s+/g,' ').trim(),f:x.farbe||'',img:'img/show/'+fn,st:x.status==='bestellt'?'bestellt':'lager'})})});
  Object.keys(P).forEach(k=>{P[k]=SRFIX.includes(k)?P[k].filter(x=>x.cur||(k==='vanraam'&&/compact\s*plus/i.test(x.m))):(P[k].length>1?P[k].filter(x=>!x.cur):P[k])});/* feste Plätze = festes Bild, Rest nur aus dem Bestand */
  SR.pool=P;SR.th={};Object.keys(P).forEach(k=>{const L=P[k];SR.th[k]=L[Math.floor(Math.random()*L.length)].img});SR.subs.forEach(f=>f())}
@@ -3154,7 +3156,7 @@ function showroom(root,prefix){
  setInterval(()=>{if(vis&&!over&&!document.hidden&&Date.now()>hold&&SR.pool)to(i+1,'next')},7000);
  /* Start: zufälliges Bestandsrad der ersten Marke, sobald der Bestand geladen ist */
  SR.subs.push(()=>{BR.forEach((b,j)=>{const t=SR.th&&SR.th[b.k];if(t)thSet(j,t)});
-  const x=srPick('*');const n=BR.findIndex(b=>b.k===x.k);if(n<0)return;i=n;cur=x;thSet(i,x.img);const pre=new Image();pre.src=x.img;const go=()=>{bk.src=x.img;rf.src=x.img;bk.alt=x.m+(x.f?' in '+x.f:'');wm.src=BR[i].logo;paint()};pre.decode?pre.decode().then(go,go):go()});
+  const x=srPick('*');const n=BR.findIndex(b=>b.k===x.k);if(n<0)return;i=n;cur=x;thSet(i,x.img);const pre=new Image();pre.src=x.img;const go=()=>{bk.src=x.img;rf.src=x.img;bk.alt=x.m+(x.f?' in '+x.f:'');wm.src=BR[i].logo;paint();s.classList.add('srok')};pre.decode?pre.decode().then(go,go):go()});
  paint();return{to};
 }
 /* zweiter Showroom auf der Markenseite: Kopie des ersten mit eigenen IDs */
