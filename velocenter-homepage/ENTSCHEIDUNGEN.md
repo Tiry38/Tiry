@@ -17,3 +17,4 @@
 - Showroom: Van Raam (jeder 5. Wechsel, abwechselnd Easy Rider und Easy Rider Compact Plus), Velo de Ville AEB PRO (ca. jeder 7.), Victoria Veloa 7 (ca. jeder 9.), Stevens E-Juke (ca. jeder 10.) mit festem Bild; alle anderen Wechsel zufällig aus dem Bestand (nur Räder mit Foto, wechselnde Farben, Bilder in img/show/ freigestellt + geschärft) (12.11.2026).
 - E-Dreiräder: Easy Rider Compact Plus (zuerst, genauso wichtig) und Easy Rider 3 mit Umschalter; nur Herstellerangaben von vanraam.com, nur offizielle Van-Raam-Videos (keine Videos anderer Händler) (13.11.2026).
 - E-Dreiräder: Easy Rider 3 und Compact Plus gleichwertig untereinander (kein Verstecken per Umschalter), Vergleichstabelle oben; „Weltmarktführer“ darf stehen (13.11.2026). Korb-Aktion von Van Raam auf Wunsch von Tiry wieder entfernt (läuft nur bis 15.11.2026).
+- Nie ein Dreirad ohne Motor auf der Seite anbieten; kein Grundmodell ohne Motor erwähnen (13.11.2026).
