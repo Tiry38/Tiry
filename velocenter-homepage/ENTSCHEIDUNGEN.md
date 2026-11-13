@@ -92,3 +92,6 @@
 - Abruf über Places API (New) per GitHub-Lauf alle 3 Tage → `google.json` im Web-Repo; Homepage aktualisiert Chip, Bewertungsbereich, Laufband und Admin-Hinweis (`data-g`). Ohne Key/bei Fehler bleiben die Hand-Werte, die Seite zeigt nie einen Fehler; ein fehlgeschlagener Lauf meldet GitHub per Mail.
 - Ort wird einmal per Textsuche gefunden (nur Treffer mit „Hartmannstr“ + 76744), danach fest per Place-ID.
 - Einrichtung (Google Cloud, Key als GitHub-Secret) siehe LIVEGANG.md.
+
+## 13.11.2026 – Google-Chip verlinkt (Tiry)
+- Chip „★ 4,8 bei Google“ auf der Startseite ist ein Link (neuer Tab) zum Google-Unternehmensprofil: Maps-URL mit `query_place_id` (Place-ID aus `google.json`), Hover hebt leicht an.
