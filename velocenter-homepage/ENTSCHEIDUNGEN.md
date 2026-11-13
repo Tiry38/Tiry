@@ -31,3 +31,5 @@
 - Hero-Überschrift (13.11.2026, Tiry): „Dein E-Bike & E-Dreirad-Spezialist mit eigener Werkstatt.“ (ohne Bindestrich vor „&“, „&“ rot im Verlauf).
 - Bestand-Zahl (13.11.2026, Tiry): überall „300+ E-Bikes“ statt „200+ Räder“ (Laufband, Hero-Text, Hero-Chip, Showroom, Vorteile).
 - Hero-Schilder (13.11.2026, Tiry): klickbare Glas-Kapseln mit Verlaufsrand, roter Plakette und Pfeil, KOMPAKT (ca. 38 px hoch, eine Zeile – Tiry: größere Fassung „viel zu groß“). „300+ E-Bikes vor Ort“ → Lager, „Probefahrt vor Ort“ → Terminformular mit „Probefahrt“ vorgewählt.
+- Leasing-Hinweis (13.11.2026, Tiry): unter den Leasing-Logos Kapsel „Dein Leasing-Anbieter ist nicht dabei? Frag einfach nach – wir arbeiten noch mit weiteren Anbietern zusammen“ mit Knopf „Nachfragen“ → Kontakt.
+- Winter-Hinweis im Terminbereich (13.11.2026, Tiry: „schicker“): Kapsel mit Eis-Verlaufsrand, drehender Schneeflocke, Glanz, Tage-Zähler als dunkle Plakette, Pfeil → Aktion. Text bleibt: –20 € je Inspektion + Sattelüberzug, nur solange Termine frei.

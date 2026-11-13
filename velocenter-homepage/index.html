@@ -1532,10 +1532,29 @@ body.fz2 main,body.fz2 .foot{zoom:1.25}
 .cdn span{display:block;margin-top:7px;font:700 11px/1 var(--display);letter-spacing:.18em;text-transform:uppercase;color:#C9CDD6}
 .cdn>div:first-child{background:linear-gradient(160deg,#E2232D,#8E1420)}
 .cdn>div:first-child span{color:#FECACA}
-.wstrip{display:inline-flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:26px;padding:12px 18px;border-radius:14px;text-decoration:none;color:#0B2A4A;background:linear-gradient(110deg,#E0F7FF,#EDE9FE);border:1px solid rgba(37,99,235,.22);font:600 14.5px/1.35 var(--display)}
-.wstrip i{font-style:normal;display:grid;place-items:center;width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,#22D3EE,#7C3AED);color:#fff;font-size:15px}
-.wstrip b{color:#1E3A8A}
-.wstrip:hover{border-color:#2563EB}
+.wstrip{position:relative;display:flex;align-items:center;gap:14px;max-width:620px;margin-top:26px;padding:10px 10px 10px 10px;border-radius:999px;text-decoration:none;color:#0B1B3A;isolation:isolate;overflow:hidden;
+ border:1.5px solid transparent;background:linear-gradient(120deg,rgba(240,250,255,.97),rgba(243,240,255,.95) 60%,rgba(255,240,247,.95)) padding-box,linear-gradient(110deg,#22D3EE,#818CF8,#F472B6,#22D3EE) border-box;background-size:100% 100%,300% 100%;animation:hcflow 11s linear infinite;
+ box-shadow:0 18px 36px -20px rgba(37,60,140,.55),inset 0 1px 0 #fff;transition:transform .35s var(--spring),box-shadow .35s}
+.wstrip[hidden]{display:none!important}
+.wstrip::after{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(105deg,transparent 30%,rgba(255,255,255,.75) 46%,transparent 60%);transform:translateX(-120%);animation:wshine 6s ease-in-out infinite 1s}
+@keyframes wshine{0%,60%{transform:translateX(-120%)}100%{transform:translateX(120%)}}
+.wstrip:hover{transform:translateY(-2px);box-shadow:0 24px 44px -20px rgba(37,60,140,.65),0 0 0 5px rgba(129,140,248,.14),inset 0 1px 0 #fff}
+.wstrip>i{flex:none;display:grid;place-items:center;width:46px;height:46px;border-radius:50%;color:#fff;background:linear-gradient(150deg,#67E8F9,#3B82F6 50%,#7C3AED);box-shadow:inset 0 1px 0 rgba(255,255,255,.5),0 10px 18px -8px rgba(59,130,246,.9)}
+.wstrip>i svg{width:24px;height:24px;animation:wspin 18s linear infinite}
+@keyframes wspin{to{transform:rotate(360deg)}}
+.wstrip .wt{flex:1;min-width:0;display:flex;flex-direction:column;gap:4px}
+.wstrip .wt small{font:800 11px/1 var(--display);letter-spacing:.12em;text-transform:uppercase;color:#4F46E5}
+.wstrip .wt strong{font:800 16.5px/1.25 var(--display);letter-spacing:-.01em;color:#0B1B3A}
+.wstrip .wt em{font-style:normal;white-space:nowrap;font-weight:600;color:#334155}
+.wstrip .wd{flex:none;display:flex;flex-direction:column;align-items:center;justify-content:center;min-width:58px;height:50px;padding:0 10px;border-radius:999px;background:#0B1B3A;color:#fff;box-shadow:inset 0 1px 0 rgba(255,255,255,.18)}
+.wstrip .wd b{font:900 19px/1 var(--display);background:linear-gradient(90deg,#67E8F9,#C4B5FD);-webkit-background-clip:text;background-clip:text;color:transparent}
+.wstrip .wd small{font:700 10px/1 var(--display);letter-spacing:.1em;text-transform:uppercase;opacity:.75;margin-top:3px}
+.wstrip .wa{flex:none;display:grid;place-items:center;width:36px;height:36px;border-radius:50%;background:#fff;color:#0B1B3A;box-shadow:0 4px 10px -4px rgba(11,27,58,.3);transition:background .3s,color .3s,transform .35s var(--spring)}
+.wstrip .wa svg{width:15px;height:15px}
+.wstrip:hover .wa{background:#C8102E;color:#fff;transform:translateX(3px)}
+.wstrip:focus-visible{outline:3px solid #4F46E5;outline-offset:3px}
+@media (max-width:640px){.wstrip{border-radius:24px;gap:11px;padding:12px}.wstrip>i{width:40px;height:40px}.wstrip .wt strong{font-size:14.5px}.wstrip .wa{display:none}.wstrip .wd{min-width:52px;height:46px}}
+@media (prefers-reduced-motion:reduce){.wstrip,.wstrip::after,.wstrip>i svg{animation:none}}
 /* Rad-Finder Teaser */
 .rft{display:grid;grid-template-columns:1.05fr .95fr;gap:clamp(30px,6vw,90px);align-items:center;padding:clamp(28px,5vw,64px);border-radius:28px;background:radial-gradient(70% 90% at 0% 0%,rgba(226,35,45,.12),transparent 62%),radial-gradient(70% 90% at 100% 100%,rgba(124,58,237,.12),transparent 62%),rgba(255,255,255,.7);border:1px solid rgba(27,30,37,.08);box-shadow:0 30px 60px -40px rgba(27,30,37,.45)}
 .rft>*{min-width:0}
@@ -1907,6 +1926,21 @@ html.scr .sky,html.scr .blobs i,html.scr .blobs::after,html.scr .ribbons i{anima
  box-shadow:0 14px 30px -14px rgba(var(--og),.75),0 3px 10px rgba(27,30,37,.07);backdrop-filter:blur(14px) saturate(1.4);-webkit-backdrop-filter:blur(14px) saturate(1.4);transition:transform .35s var(--spring),box-shadow .35s}
 @keyframes oflow{to{background-position:0 0,300% 0}}
 .hh1 .amp{display:inline-block;font-weight:800;padding:0 .04em;background:linear-gradient(135deg,#FF4D63,#C8102E 55%,#8E0B20);-webkit-background-clip:text;background-clip:text;color:transparent}
+.tlnote{display:flex;align-items:center;gap:16px;margin-top:30px;padding:12px 12px 12px 14px;border-radius:999px;text-decoration:none;color:var(--ink);
+ border:1.5px solid transparent;background:linear-gradient(135deg,rgba(255,255,255,.96),rgba(255,255,255,.86)) padding-box,linear-gradient(110deg,#60A5FA,#A78BFA,#F472B6,#60A5FA) border-box;background-size:100% 100%,300% 100%;animation:hcflow 12s linear infinite;
+ box-shadow:0 14px 30px -18px rgba(27,30,37,.35);transition:transform .35s var(--spring),box-shadow .35s}
+.tlnote:hover{transform:translateY(-2px);box-shadow:0 20px 36px -18px rgba(27,30,37,.45),0 0 0 5px rgba(96,165,250,.14)}
+.tlnote .ic{flex:none;display:grid;place-items:center;width:44px;height:44px;border-radius:50%;color:#fff;background:linear-gradient(150deg,#60A5FA,#3B6FE0 55%,#5B3FD0);box-shadow:inset 0 1px 0 rgba(255,255,255,.4),0 8px 16px -8px rgba(59,111,224,.9)}
+.tlnote .ic svg{width:21px;height:21px}
+.tlnote .tx{flex:1;display:flex;flex-direction:column;gap:3px;min-width:0}
+.tlnote strong{font:800 16px/1.2 var(--display)}
+.tlnote small{font:500 14px/1.4 var(--body,inherit);color:#4B4F58}
+.tlnote .ar{flex:none;display:inline-flex;align-items:center;gap:8px;padding:11px 18px;border-radius:999px;background:#1B1E25;color:#fff;font:700 14px/1 var(--display);transition:background .3s}
+.tlnote .ar svg{width:14px;height:14px;transition:transform .3s var(--spring)}
+.tlnote:hover .ar{background:#C8102E}.tlnote:hover .ar svg{transform:translateX(3px)}
+.tlnote:focus-visible{outline:3px solid #3B6FE0;outline-offset:3px}
+@media (max-width:640px){.tlnote{flex-wrap:wrap;border-radius:22px;padding:14px;gap:12px}.tlnote .ar{width:100%;justify-content:center}}
+@media (prefers-reduced-motion:reduce){.tlnote{animation:none}}
 /* Hero-Schilder (13.11.2026): klickbare Glas-Kapseln, kompakt */
 a.hchip.hc{--hg:linear-gradient(110deg,#E2232D,#F472B6,#A78BFA,#38BDF8,#E2232D);display:inline-flex;align-items:center;gap:8px;padding:4px 5px 4px 4px!important;border-radius:999px!important;text-decoration:none;color:#1B1E25;
  border:1.5px solid transparent;background:linear-gradient(135deg,rgba(255,255,255,.97),rgba(255,255,255,.88)) padding-box,var(--hg) border-box!important;background-size:100% 100%,300% 100%!important;
@@ -2562,7 +2596,7 @@ m696 -454 c28 -13 46 -31 55 -51 22 -53 -50 -177 -173 -300 -187 -186 -647
     <p class="eyebrow">Online-<b>Terminanfrage</b></p>
     <h2 class="big" style="margin-top:16px">Termin anfragen <span class="gt">in 30 Sekunden.</span></h2>
     <p class="lead" style="margin-top:20px">Probefahrt oder Werkstatt: Wunschtag wählen, kurz beschreiben, abschicken. Deine Anfrage geht direkt an uns, wir melden uns mit einem festen Termin.</p>
-    <a class="wstrip" href="#deal"><i aria-hidden="true">❄</i><span>Winter-Aktion: <b>–20 € auf jede Inspektion</b> + Sattelüberzug geschenkt · nur solange Termine frei · noch <b class="wsd">–</b> Tage</span></a>
+    <a class="wstrip" href="#deal" aria-label="Winter-Aktion: –20 € auf jede Inspektion plus Sattelüberzug geschenkt, nur solange Termine frei"><i aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 2v20M3.3 7l17.4 10M3.3 17L20.7 7M9 4l3 3 3-3M9 20l3-3 3 3M3.8 10.2l4.1-1.1-1.1-4.1M20.2 13.8l-4.1 1.1 1.1 4.1M6.8 19.2l1.1-4.1-4.1-1.1M17.2 4.8l-1.1 4.1 4.1 1.1"/></svg></i><span class="wt"><small>Winter-Aktion · nur solange Termine frei</small><strong>–20 € auf jede Inspektion <em>+ Sattelüberzug geschenkt</em></strong></span><span class="wd"><b class="wsd">–</b><small>Tage</small></span><span class="wa"><svg><use href="#i-arrow"/></svg></span></a>
     <div class="blobimg" style="margin-top:34px;max-width:460px"><img src="img/isy-blumen.webp" alt="i:SY E-Bikes mit Blumenkörben vor einer Holzhütte" loading="lazy" width="800" height="600"></div>
    </div>
    <form class="panel form pre" id="tf" novalidate style="--d:.1s">
@@ -2636,6 +2670,7 @@ m696 -454 c28 -13 46 -31 55 -51 22 -53 -50 -177 -173 -300 -187 -186 -647
     <div class="tph"><span class="ic"><svg><use href="#i-case"/></svg></span><h2>Dienstrad-Leasing mit fast allen Anbietern</h2></div>
     <p class="lead">Mach dein E-Bike zum Dienstrad. Die Rate läuft über deinen Arbeitgeber, wir kümmern uns um Angebot und Übergabe. Wir arbeiten unter anderem zusammen mit:</p>
     <div class="tlg"><a href="https://www.jobrad.org/" target="_blank" rel="noopener" title="JobRad"><img src="img/lea-jr.svg" alt="JobRad" style="height:52px" loading="lazy"></a><a href="https://www.bikeleasing.de/" target="_blank" rel="noopener" title="Bikeleasing"><img src="img/lea-bl.svg" alt="Bikeleasing" style="height:36px" loading="lazy"></a><a href="https://company-bike.com/" target="_blank" rel="noopener" title="Company Bike"><img src="img/lea-cb.webp" alt="Company Bike" style="height:70px" loading="lazy"></a><a href="https://www.businessbike.de/" target="_blank" rel="noopener" title="Businessbike"><img src="img/lea-bb.svg" alt="Businessbike" style="height:62px" loading="lazy"></a><a href="https://www.deutsche-dienstrad.de/" target="_blank" rel="noopener" title="Deutsche Dienstrad"><img src="img/lea-dd.svg" alt="Deutsche Dienstrad" style="height:58px" loading="lazy"></a><a href="https://www.lease-a-bike.de/" target="_blank" rel="noopener" title="Lease a Bike"><img src="img/lea-lb.svg" alt="Lease a Bike" style="height:72px" loading="lazy"></a><a href="https://www.eurorad.de/" target="_blank" rel="noopener" title="Eurorad"><img src="img/lea-er.svg" alt="Eurorad" style="height:46px" loading="lazy"></a><a href="https://www.kazenmaier.de/" target="_blank" rel="noopener" title="Kazenmaier Leasing"><img src="img/lea-km.svg" alt="Kazenmaier Leasing" style="height:74px" loading="lazy"></a><a href="https://radimdienst.de/" target="_blank" rel="noopener" title="RIDE – Rad im Dienst"><img src="img/lea-rd.webp" alt="RIDE – Rad im Dienst" style="height:70px" loading="lazy"></a></div>
+    <a class="tlnote" href="#kontakt"><span class="ic"><svg><use href="#i-chat"/></svg></span><span class="tx"><strong>Dein Leasing-Anbieter ist nicht dabei?</strong><small>Frag einfach nach. Wir arbeiten noch mit weiteren Anbietern zusammen, als hier aufgelistet sind.</small></span><span class="ar">Nachfragen<svg><use href="#i-arrow"/></svg></span></a>
     <p class="tsub">So funktioniert es</p>
     <ul class="tfl">
      <li><b>Dein Arbeitgeber wählt den Anbieter</b> und legt den Rahmen fest, zum Beispiel Preisgrenze und erlaubtes Zubehör.</li>
