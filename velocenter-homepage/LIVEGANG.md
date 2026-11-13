@@ -77,3 +77,14 @@ Datenschutzerklärung: Absatz zu Google Firebase setzt das Bau-Skript automatisc
 
 ## Bestand aktualisieren (nach dem Livegang)
 `python3 tools/bestand_zu_json.py <Veloport-Export.csv>` → `python3 tools/live_bauen.py` → ins Web-Repo.
+
+## Google-Bewertung automatisch (seit 13.11.2026)
+- GitHub-Lauf **„Google-Bewertung“** im Web-Repo (`.github/workflows/google-bewertung.yml`, Skript `.github/google_bewertung.js`, beides kommt aus `tools/` über `live_bauen.py`) holt alle 3 Tage Sterne + Anzahl über die **Places API (New)** und schreibt `google.json` ins Web-Repo. Die Homepage liest die Datei; fehlt sie oder ist sie kaputt, bleiben die eingetragenen Werte (4,8 / 221).
+- **Beim Einspielen der Live-Fassung `google.json` im Web-Repo nie löschen** (Aufräum-Befehl mit `! -name google.json`).
+- **Einrichten (macht Tiry, Key nie an Claude):**
+  1. https://console.cloud.google.com → Projekt anlegen (z. B. `velo-center-web`) → Abrechnung verknüpfen (Karte; ohne geht die Places API nicht).
+  2. „APIs & Dienste“ → Bibliothek → **Places API (New)** aktivieren.
+  3. „APIs & Dienste“ → Anmeldedaten → „Anmeldedaten erstellen“ → **API-Schlüssel** → Schlüssel einschränken: API-Einschränkung nur „Places API (New)“.
+  4. Kostenbremse: „APIs & Dienste“ → Places API (New) → Kontingente → Anfragen pro Tag auf **10** setzen.
+  5. GitHub → `Tiry38/velo-center-web` → Settings → Secrets and variables → Actions → New repository secret: Name `GOOGLE_PLACES_KEY`, Wert = Schlüssel.
+  6. Actions → „Google-Bewertung“ → „Run workflow“ → grüner Haken = fertig.

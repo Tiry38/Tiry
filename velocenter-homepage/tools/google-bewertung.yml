@@ -1,0 +1,32 @@
+name: Google-Bewertung
+# Holt alle 3 Tage Sterne + Anzahl der Google-Rezensionen und legt sie in google.json ab.
+# Secret GOOGLE_PLACES_KEY (Repo → Settings → Secrets and variables → Actions) trägt Tiry selbst ein.
+on:
+  schedule:
+    - cron: '23 4 */3 * *'
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: google-bewertung
+jobs:
+  abruf:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Bewertung abrufen
+        env:
+          GOOGLE_PLACES_KEY: ${{ secrets.GOOGLE_PLACES_KEY }}
+        run: node .github/google_bewertung.js google.json
+      - name: Speichern
+        run: |
+          if [ -f google.json ] && [ -n "$(git status --porcelain google.json)" ]; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add google.json
+            git commit -m "Google-Bewertung aktualisiert"
+            git pull --rebase origin main && git push origin HEAD:main
+          else
+            echo "Keine Änderung."
+          fi

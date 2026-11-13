@@ -87,3 +87,8 @@
 - Keine besseren Originalbilder für SKYFLY, XXL und das runde Experten-Logo vorhanden – bleiben wie sie sind.
 - Chronik-Texte 2017 und 2023 bleiben vorerst so.
 - Google-Bewertung automatisch abrufen: angefragt, Weg wird mit Tiry geklärt (Places API per GitHub-Lauf oder über die KI-Zentrale).
+
+## 13.11.2026 – Google-Bewertung automatisch (Tiry: „Weg 1“)
+- Abruf über Places API (New) per GitHub-Lauf alle 3 Tage → `google.json` im Web-Repo; Homepage aktualisiert Chip, Bewertungsbereich, Laufband und Admin-Hinweis (`data-g`). Ohne Key/bei Fehler bleiben die Hand-Werte, die Seite zeigt nie einen Fehler; ein fehlgeschlagener Lauf meldet GitHub per Mail.
+- Ort wird einmal per Textsuche gefunden (nur Treffer mit „Hartmannstr“ + 76744), danach fest per Place-ID.
+- Einrichtung (Google Cloud, Key als GitHub-Secret) siehe LIVEGANG.md.
