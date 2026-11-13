@@ -28,6 +28,10 @@ on:
         description: 'Wie viele vorhandene Fotos nachprüfen'
         required: false
         default: '10'
+      qual:
+        description: 'Qualitäts-Runde: wie viele Lager-Fotos auf Schärfe/Freistellung prüfen'
+        required: false
+        default: '36'
 
 permissions:
   contents: write
@@ -45,6 +49,7 @@ env:
   KEY: ${{ inputs.key }}
   NEU: ${{ inputs.neu || '30' }}
   PRUEF: ${{ inputs.pruef || '10' }}
+  QUAL: ${{ inputs.qual || '36' }}
 
 jobs:
   bilder:
@@ -60,7 +65,7 @@ jobs:
         id: v
         run: |
           [[ "$AKTION" =~ ^(suchen|uebernehmen|ablehnen|richtig)$ ]] || { echo "Unbekannte Aktion"; exit 1; }
-          [[ "$NEU" =~ ^[0-9]{1,2}$ && "$PRUEF" =~ ^[0-9]{1,2}$ ]] || { echo "Zahlen ungültig"; exit 1; }
+          [[ "$NEU" =~ ^[0-9]{1,2}$ && "$PRUEF" =~ ^[0-9]{1,2}$ && "$QUAL" =~ ^[0-9]{1,3}$ ]] || { echo "Zahlen ungültig"; exit 1; }
           if [ "$AKTION" != suchen ]; then [[ "$KEY" =~ ^[a-z0-9|]{3,200}$ ]] || { echo "Schlüssel ungültig"; exit 1; }; fi
           echo "BILDER_TMP=$GITHUB_WORKSPACE/.bilder-tmp" >> "$GITHUB_ENV"
 
@@ -81,7 +86,7 @@ jobs:
         id: l
         run: |
           cd velocenter-homepage
-          python3 tools/bilder_agent.py liste neu=$NEU pruef=$PRUEF | tee "$RUNNER_TEMP/liste.txt"
+          python3 tools/bilder_agent.py liste neu=$NEU pruef=$PRUEF qual=$QUAL | tee "$RUNNER_TEMP/liste.txt"
           python3 -c "import rembg; s=rembg.new_session('isnet-general-use')"
           {
             echo 'prompt<<ENDE_PROMPT_9f3'
@@ -94,7 +99,7 @@ jobs:
             echo "- Stand: $(cat "$RUNNER_TEMP/liste.txt")"
             echo 'ENDE_PROMPT_9f3'
           } >> "$GITHUB_OUTPUT"
-          grep -q 'suchen=0 pruefen=0' "$RUNNER_TEMP/liste.txt" && echo "leer=1" >> "$GITHUB_OUTPUT" || true
+          grep -q 'suchen=0 pruefen=0 qualitaet=0' "$RUNNER_TEMP/liste.txt" && echo "leer=1" >> "$GITHUB_OUTPUT" || true
 
       - name: Claude sucht und prüft Bilder
         if: env.AKTION == 'suchen' && steps.l.outputs.leer != '1'
@@ -104,7 +109,7 @@ jobs:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           github_token: ${{ secrets.GITHUB_TOKEN }}
           prompt: ${{ steps.l.outputs.prompt }}
-          claude_args: '--model opus --effort medium --allowedTools "Read,Write,Glob,Grep,WebSearch,WebFetch,Bash(python3 velocenter-homepage/tools/bilder_agent.py holen:*)" --max-turns 500'
+          claude_args: '--model opus --effort medium --allowedTools "Read,Write,Glob,Grep,WebSearch,WebFetch,Bash(python3 velocenter-homepage/tools/bilder_agent.py holen:*)" --max-turns 700'
 
       - name: Ergebnis übernehmen
         id: e
