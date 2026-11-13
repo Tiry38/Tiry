@@ -17,7 +17,7 @@ in Sitzungen auf **Tiry38/Tiry** weiter. Alle Dateien liegen in diesem Ordner, P
 | **EnhanceHUD** | 1.2.0 | Verstärker-Schamanen-HUD (Frost/Feuer-Design) | ausgeliefert |
 | **Blitzschild** | 1.2.0 | Blitzschlagschild Ladungen/Zeit | im Kampf nicht möglich (secret values) → Cooldown-Manager „Verfolgte Leisten“ + WA nur außerhalb des Kampfes |
 | **MiniPost** | – | Post-Symbol unter der Uhr, andere Minimap-Knöpfe unsichtbar | ausgeliefert, Test offen |
-| **ChatHoch** | 1.4.0 | Chat höher, Reiter bündig (ClampRectInsets von ChatFrame1) | ausgeliefert; Tiry hatte noch 1.3.0 geladen |
+| **ChatHoch** | 1.5.0 | Chat höher, Reiter bündig (ClampRectInsets von ChatFrame1); **1.5:** Geselligkeits-Knopf (`QuickJoinToastButton`, Freunde-Symbol mit Online-Zahl) standardmäßig ausgeblendet (Hide + `OnShow`-Hook), `/chathoch gesellig` holt ihn zurück | ausgeliefert; Tiry hatte noch 1.3.0 geladen |
 
 ## LevelPilot 7.0 – RXP-Guides als Plan (11.11., Tirys Wunsch)
 Tiry: „baue die komplette Logik [von RXPNeon/RXP] in LevelPilot ein, belasse aber die Struktur in LevelPilot … die ganzen

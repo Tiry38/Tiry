@@ -86,7 +86,7 @@ fi
 if want totemtakt; then run "TotemTakt (Makro-Simulation + Layout)" "$A/TotemTakt" "TOTEM TESTS OK" lua5.1 "$T/totem.lua"; fi
 if want windbaem; then run "WindBaem (Windzorn-Ton, Kampf-/Bosssperre)" "$A/WindBaem" "WB TESTS OK" lua5.1 "$T/wb.lua"; fi
 if want rxn; then run "RXPNeon (Skin + Deutsch + Tipp + Layout)" "$A/RXPNeon" "RXN TESTS OK" lua5.1 "$T/rxn.lua"; fi
-if want chathoch; then run "ChatHoch" "$A/ChatHoch" - lua5.1 "$T/ch.lua"; fi
+if want chathoch; then run "ChatHoch (Höhe, Geselligkeits-Knopf)" "$A/ChatHoch" "CH TESTS OK" lua5.1 "$T/ch.lua"; fi
 if want minipost; then run "MiniPost" "$A/MiniPost" - lua5.1 "$T/mp.lua"; fi
 if want enhancehud; then
   run "EnhanceHUD" "$A" - lua5.1 "$T/run.lua"

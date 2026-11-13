@@ -382,6 +382,11 @@ Aus 4.2 weiter offen: `C_Map.GetMapPosFromWorldPos`, Flugmeister-IDs, Hochplatea
 - Reichweite gibt es nur für Buff-Totems; Verbrennung/Magma/Erdbindung usw. gelten als „steht“, solange sie laufen.
 
 
+# Ingame-Test – ChatHoch 1.5.0
+- [ ] Ordner `ChatHoch` ersetzt, `/reload`. Das Freunde-Symbol mit der Zahl (Geselligkeits-Knopf) über dem Chat ist weg – auch nach Zonenwechsel/Ladebildschirm.
+- [ ] `/chathoch gesellig` → Symbol wieder da, nochmal → weg. `/chathoch info` zeigt „ausgeblendet (sichtbar: false …)“.
+- [ ] Freundesliste weiter mit **O** (Kontakte).
+
 # Ingame-Test – WindBaem 1.2.0 (Windzorn-Ton)
 - [ ] Ordner `WindBaem` entpackt, WoW **komplett neu gestartet**. Chat beim Einloggen: „WindBaem: 1.2.0 bereit (7 Windzorn-Auren)“.
 - [ ] `/wb test` → kurzer, leiser Pling. Alternativen: `/wb ton tick` (unauffälligster), `/wb ton wusch` (Windhauch).

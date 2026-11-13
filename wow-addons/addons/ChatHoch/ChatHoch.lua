@@ -1,7 +1,9 @@
 ---------------------------------------------------------------------------
--- ChatHoch 1.4.0 (Tiry): Chat dauerhaft hoeher + alle angedockten Reiter
+-- ChatHoch 1.5.0 (Tiry): Chat dauerhaft hoeher + alle angedockten Reiter
 -- (Gilde usw.) exakt auf das Hauptfenster legen. Setzt sich nach jedem
 -- Laden/Bearbeitungsmodus neu, damit nichts zurueckspringt.
+-- 1.5: Geselligkeits-Knopf (QuickJoinToastButton: Freunde-Symbol mit Online-Zahl)
+-- standardmaessig ausgeblendet (/chathoch gesellig = wieder zeigen).
 ---------------------------------------------------------------------------
 local function P(m) DEFAULT_CHAT_FRAME:AddMessage("|cff4dd9ffChat|r|cffff6a14Hoch|r " .. m) end
 local busy = false
@@ -64,7 +66,17 @@ local function apply()
       end
     end
   end
-  if ChatHochDB.knopf ~= "aus" and QuickJoinToastButton and ChatFrame1Background then
+  local hideQ = ChatHochDB.gesellig ~= "an"
+  if hideQ and QuickJoinToastButton then
+    local q = QuickJoinToastButton
+    if not q.__tiryHide then
+      q.__tiryHide = true
+      -- Blizzard zeigt ihn per Show/SetShown wieder (Login, Vollbild, Spielregeln) -> sofort wieder weg
+      pcall(function() q:HookScript("OnShow", function(x) if ChatHochDB and ChatHochDB.gesellig ~= "an" then x:Hide() end end) end)
+    end
+    try("gesellig_weg", function() q:Hide() end)
+  end
+  if not hideQ and ChatHochDB.knopf ~= "aus" and QuickJoinToastButton and ChatFrame1Background then
     local q = QuickJoinToastButton
     try("gesellig", function()
       q:ClearAllPoints()
@@ -112,7 +124,8 @@ E:SetScript("OnEvent", function(_, ev)
     for _, fn in ipairs({ "FCF_DockFrame", "FCF_Tab_OnClick", "FCFDock_SelectWindow", "FCFDock_UpdateTabs", "FCF_UpdateButtonSide" }) do
       pcall(function() hooksecurefunc(fn, function() if not busy then C_Timer.After(0, apply) end end) end)
     end
-    P("aktiv – Höhe " .. (ChatHochDB.h or 0) .. " · ändern mit /chathoch 380")
+    P("aktiv – Höhe " .. (ChatHochDB.h or 0) .. " · ändern mit /chathoch 380"
+      .. (ChatHochDB.gesellig ~= "an" and " · Geselligkeits-Knopf aus (/chathoch gesellig)" or ""))
   end
   apply(); later()
 end)
@@ -128,7 +141,9 @@ SlashCmdList.CHATHOCH = function(msg)
     apply()
     local q = QuickJoinToastButton
     local okQ, ql = pcall(function() return q and q:GetLeft() end)
-    P("Version 1.4.0 · Geselligkeit-Knopf bei " .. ((okQ and ql) and math.floor(ql + 0.5) or "?"))
+    local okV, qv = pcall(function() return q and q:IsShown() end)
+    P("Version 1.5.0 · Geselligkeits-Knopf " .. (ChatHochDB.gesellig ~= "an" and "ausgeblendet" or "an")
+      .. " (sichtbar: " .. tostring(okV and qv) .. ", bei " .. ((okQ and ql) and math.floor(ql + 0.5) or "?") .. ")")
     for k, e in pairs(ERR) do P("|cffff5050Fehler " .. k .. ":|r " .. e) end
     local function L(n) local f = _G[n]; if not f then return "–" end
       local okL, l = pcall(f.GetLeft, f); local okS, sh = pcall(f.IsShown, f)
@@ -141,6 +156,11 @@ SlashCmdList.CHATHOCH = function(msg)
           .. " · Clamp " .. (function() local f = _G["ChatFrame" .. i]; local ok, a = pcall(f.GetClampRectInsets, f); return ok and tostring(math.floor((a or 0) + 0.5)) or "?" end)() .. " · angedockt " .. tostring(_G["ChatFrame" .. i] and _G["ChatFrame" .. i].isDocked))
       end
     end
+  elseif (msg or ""):lower():find("gesellig") then
+    ChatHochDB.gesellig = (ChatHochDB.gesellig == "an") and "weg" or "an"
+    if ChatHochDB.gesellig == "an" and QuickJoinToastButton then pcall(QuickJoinToastButton.Show, QuickJoinToastButton) end
+    P("Geselligkeits-Knopf: " .. (ChatHochDB.gesellig == "an" and "wieder da" or "ausgeblendet"))
+    apply()
   elseif (msg or ""):lower():find("knopf") then
     ChatHochDB.knopf = (ChatHochDB.knopf == "aus") and "rechts" or "aus"
     P("Geselligkeits-Knopfleiste: " .. (ChatHochDB.knopf == "aus" and "nicht mehr verschieben (/reload)" or "rechts am Chat"))
@@ -148,6 +168,6 @@ SlashCmdList.CHATHOCH = function(msg)
   elseif (msg or ""):lower():find("aus") then
     ChatHochDB.h = 0; P("Höhe wird nicht mehr gesetzt (Reiter bleiben bündig). /reload")
   else
-    P("Höhe: " .. (ChatHochDB.h or 0) .. " · /chathoch 380 · /chathoch aus · /chathoch knopf · /chathoch info")
+    P("Höhe: " .. (ChatHochDB.h or 0) .. " · /chathoch 380 · /chathoch aus · /chathoch gesellig · /chathoch knopf · /chathoch info")
   end
 end
