@@ -1,0 +1,155 @@
+name: Homepage – Bilder-Agent (Auf Lager)
+
+# Jede Nacht automatisch + per Knopf im Admin (Reiter „Fotos“ → Bilder-Agent):
+#   suchen      – Claude sucht fehlende Fotos (Hersteller, Artikelnummern, Händler-Seiten zum Finden), prüft vorhandene, stellt frei
+#   uebernehmen – unsicheren Vorschlag übernehmen (Admin)
+#   ablehnen    – unsicheren Vorschlag ablehnen (Admin), wird nie wieder vorgeschlagen
+# Ergebnis: Fotos in velocenter-homepage/img/bestand, Zuordnung + Bericht in index.html, danach live nach velo-center-web.
+# Secrets wie beim Admin-Chat: CLAUDE_CODE_OAUTH_TOKEN, WEB_TOKEN.
+on:
+  schedule:
+    - cron: '23 1 * * *'
+  workflow_dispatch:
+    inputs:
+      aktion:
+        description: 'suchen | uebernehmen | ablehnen'
+        required: true
+        default: 'suchen'
+      key:
+        description: 'Schlüssel (nur bei uebernehmen/ablehnen)'
+        required: false
+        default: ''
+      neu:
+        description: 'Wie viele Farben ohne Foto suchen'
+        required: false
+        default: '15'
+      pruef:
+        description: 'Wie viele vorhandene Fotos nachprüfen'
+        required: false
+        default: '6'
+
+permissions:
+  contents: write
+  id-token: write
+  actions: read
+
+concurrency:
+  group: homepage-claude
+  cancel-in-progress: false
+
+env:
+  QUELL_ZWEIG: ccr-3eb19331-x85sok
+  WEB_REPO: Tiry38/velo-center-web
+  AKTION: ${{ inputs.aktion || 'suchen' }}
+  KEY: ${{ inputs.key }}
+  NEU: ${{ inputs.neu || '15' }}
+  PRUEF: ${{ inputs.pruef || '6' }}
+
+jobs:
+  bilder:
+    runs-on: ubuntu-latest
+    timeout-minutes: 150
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.QUELL_ZWEIG }}
+          fetch-depth: 50
+
+      - name: Vorbereiten
+        id: v
+        run: |
+          [[ "$AKTION" =~ ^(suchen|uebernehmen|ablehnen)$ ]] || { echo "Unbekannte Aktion"; exit 1; }
+          [[ "$NEU" =~ ^[0-9]{1,2}$ && "$PRUEF" =~ ^[0-9]{1,2}$ ]] || { echo "Zahlen ungültig"; exit 1; }
+          if [ "$AKTION" != suchen ]; then [[ "$KEY" =~ ^[a-z0-9|]{3,200}$ ]] || { echo "Schlüssel ungültig"; exit 1; }; fi
+          echo "BILDER_TMP=$GITHUB_WORKSPACE/.bilder-tmp" >> "$GITHUB_ENV"
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Werkzeuge (Freistellen)
+        run: pip install -q "rembg==2.0.87" "onnxruntime==1.29.0" "pillow==12.3.0" "numpy==2.5.3"
+
+      - uses: actions/cache@v4
+        with:
+          path: ~/.rembg
+          key: rembg-isnet-v1
+
+      - name: Arbeitsliste
+        if: env.AKTION == 'suchen'
+        id: l
+        run: |
+          cd velocenter-homepage
+          python3 tools/bilder_agent.py liste neu=$NEU pruef=$PRUEF | tee "$RUNNER_TEMP/liste.txt"
+          python3 -c "import rembg; s=rembg.new_session('isnet-general-use')"
+          {
+            echo 'prompt<<ENDE_PROMPT_9f3'
+            cat tools/bilder_regeln.md
+            echo
+            echo '## Dieser Lauf'
+            echo "- Arbeitsliste: $BILDER_TMP/auftrag.json"
+            echo "- Entscheidungen schreiben nach: $BILDER_TMP/entscheid.json"
+            echo "- Werkzeug: python3 velocenter-homepage/tools/bilder_agent.py holen \"<key>\" \"<url>\""
+            echo "- Stand: $(cat "$RUNNER_TEMP/liste.txt")"
+            echo 'ENDE_PROMPT_9f3'
+          } >> "$GITHUB_OUTPUT"
+          grep -q 'suchen=0 pruefen=0' "$RUNNER_TEMP/liste.txt" && echo "leer=1" >> "$GITHUB_OUTPUT" || true
+
+      - name: Claude sucht und prüft Bilder
+        if: env.AKTION == 'suchen' && steps.l.outputs.leer != '1'
+        continue-on-error: true
+        uses: anthropics/claude-code-action@v1
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          prompt: ${{ steps.l.outputs.prompt }}
+          claude_args: '--model opus --effort medium --allowedTools "Read,Write,Glob,Grep,WebSearch,WebFetch,Bash(python3 velocenter-homepage/tools/bilder_agent.py holen:*)" --max-turns 260'
+
+      - name: Ergebnis übernehmen
+        id: e
+        run: |
+          cd velocenter-homepage
+          if [ "$AKTION" = suchen ]; then
+            if [ -s "$BILDER_TMP/entscheid.json" ]; then
+              python3 tools/bilder_agent.py anwenden "$BILDER_TMP/entscheid.json" "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+            else
+              echo "Claude hat keine Entscheidungen geschrieben – nichts übernommen."
+            fi
+            python3 tools/bilder_agent.py aufraeumen
+          else
+            python3 tools/bilder_agent.py "$AKTION" "$KEY"
+          fi
+          cd ..
+          git add -A velocenter-homepage
+          CH=$(git diff --cached --name-only)
+          if [ -z "$CH" ]; then echo "Keine Änderung."; exit 0; fi
+          BAD=$(echo "$CH" | grep -vE '^velocenter-homepage/(index\.html|data/bilder_status\.json|img/(bestand|kandidat)/[A-Za-z0-9._-]+\.webp)$' || true)
+          if [ -n "$BAD" ]; then echo "Unerlaubte Dateien:"; echo "$BAD"; exit 1; fi
+          MSG="$(cat "$BILDER_TMP/zusammenfassung.txt" 2>/dev/null || echo 'Bilder-Agent: Aufräumen')"
+          git config user.name "Homepage-Bilder-Agent"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -q -m "$MSG"
+          git pull -q --rebase origin "$QUELL_ZWEIG"
+          python3 velocenter-homepage/tools/live_bauen.py "$RUNNER_TEMP/live"
+          for f in "$RUNNER_TEMP"/live/index.html "$RUNNER_TEMP"/live/*/index.html; do node velocenter-homepage/tools/js_pruefen.js "$f"; done
+          for i in 1 2 3 4; do git push -q origin "HEAD:$QUELL_ZWEIG" && break; sleep $((3*i)); git pull -q --rebase origin "$QUELL_ZWEIG"; done
+          echo "live=1" >> "$GITHUB_OUTPUT"
+
+      - name: Live stellen
+        if: steps.e.outputs.live == '1'
+        env:
+          WEB_TOKEN: ${{ secrets.WEB_TOKEN }}
+          MSG: Bilder-Agent
+        run: |
+          [ -n "$WEB_TOKEN" ] || { echo "GitHub-Secret WEB_TOKEN fehlt – gespeichert, aber nicht live."; exit 1; }
+          git clone -q --depth 1 "https://x-access-token:${WEB_TOKEN}@github.com/${WEB_REPO}.git" "$RUNNER_TEMP/web"
+          cd "$RUNNER_TEMP/web"
+          find . -mindepth 1 -maxdepth 1 ! -name .git ! -name README.md -exec rm -rf {} +
+          cp -a "$RUNNER_TEMP/live/." . && rm -f CNAME
+          git config user.name "Homepage-Bilder-Agent"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          if ! git diff --cached --quiet; then
+            git commit -q -m "$(cat "$BILDER_TMP/zusammenfassung.txt" 2>/dev/null || echo "$MSG")"
+            for i in 1 2 3 4; do git push -q origin main && break; sleep $((3*i)); done
+          fi
