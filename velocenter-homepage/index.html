@@ -2008,6 +2008,26 @@ a.hchip.hc:hover .ha{background:#1B1E25;color:#fff;transform:translateX(2px)}
 @media (max-width:400px){body.sc .hdr .logo img{height:46px}}
 @media (max-width:560px){.hdr .hdact~.burger{margin-left:-8px!important;width:50px;height:50px}}
 @media (prefers-reduced-motion:reduce){.ostat,.orng i::after{animation:none}}
+/* Öffnungs-Status Neu-Design (13.11.2026, Tiry: „passend zum Design“): Graphit-Kapsel wie die dunklen Knöpfe, Statusfarbe nur als Licht */
+.ostat{--ol:52,211,153;height:48px;padding:5px 18px 5px 5px;gap:11px;color:#fff;border:0;animation:none;
+ background:radial-gradient(120% 160% at 0% 50%,rgba(var(--ol),.22),transparent 55%),radial-gradient(90% 140% at 100% 0%,rgba(200,16,46,.28),transparent 60%),linear-gradient(180deg,#262A33,#14161D);
+ box-shadow:inset 0 1px 0 rgba(255,255,255,.14),inset 0 0 0 1px rgba(255,255,255,.06),0 12px 26px -14px rgba(20,22,29,.85),0 6px 18px -10px rgba(var(--ol),.55);backdrop-filter:none;-webkit-backdrop-filter:none}
+.ostat::before{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;background:linear-gradient(105deg,transparent 35%,rgba(255,255,255,.10) 48%,transparent 60%);background-size:250% 100%;animation:osheen 7s ease-in-out infinite}
+@keyframes osheen{0%,55%{background-position:120% 0}100%{background-position:-120% 0}}
+.ostat.soon{--ol:251,191,36}.ostat.closed{--ol:251,113,133}
+.ostat:hover,.owrap:focus-within .ostat{transform:translateY(-1px);box-shadow:inset 0 1px 0 rgba(255,255,255,.16),inset 0 0 0 1px rgba(255,255,255,.08),0 18px 32px -14px rgba(20,22,29,.9),0 0 0 4px rgba(var(--ol),.16)}
+.orng{width:38px;height:38px;background:radial-gradient(circle,rgba(var(--ol),.24),rgba(var(--ol),.06) 68%)}
+.orng .tr{stroke:rgba(255,255,255,.12)}
+.orng .pg{stroke:rgb(var(--ol));filter:drop-shadow(0 0 4px rgba(var(--ol),.9))}
+.orng i{background:rgb(var(--ol));box-shadow:0 0 0 3px #1B1E25,0 0 14px rgb(var(--ol))}
+.orng i::after{border-color:rgb(var(--ol))}
+.otx{gap:5px}
+.otx small{background:none;-webkit-background-clip:border-box;background-clip:border-box;color:rgb(var(--ol));font-size:9.5px;letter-spacing:.18em}
+.otx strong{color:#fff;font-size:15px}
+.osh{color:#fff}.osh b{color:rgb(var(--ol))}
+@media (max-width:980px){.ostat{height:46px;padding:4px 14px 4px 4px}}
+@media (max-width:560px){.ostat{padding-right:12px}}
+@media (prefers-reduced-motion:reduce){.ostat::before{animation:none;display:none}}
 </style>
 
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
