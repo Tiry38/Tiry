@@ -1832,11 +1832,17 @@ html.scr .sky,html.scr .blobs i,html.scr .blobs::after,html.scr .ribbons i{anima
 .drst .tgvf{position:relative;aspect-ratio:16/9;border-radius:18px;overflow:hidden;background:#000}
 .drst iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
 .drx{position:absolute;right:0;top:-56px;width:46px;height:46px;border-radius:50%;border:0;background:#fff;color:#1B1E25;font-size:18px;cursor:pointer}
+.drakt{display:flex;align-items:center;gap:14px;margin-top:22px;padding:14px 22px 14px 14px;border-radius:999px;background:linear-gradient(120deg,rgba(234,179,8,.22),rgba(249,115,22,.18) 50%,rgba(244,114,182,.18));border:1px solid rgba(249,115,22,.4);box-shadow:0 16px 30px -22px #F97316;max-width:640px}
+.drak{flex:none;width:48px;height:48px;border-radius:50%;display:grid;place-items:center;font-size:24px;background:linear-gradient(135deg,#FDE68A,#FB923C);box-shadow:0 0 0 4px rgba(251,146,60,.2)}
+.drakt b{display:block;font:900 16px/1.2 var(--display);color:#1B1E25}.drakt small{display:block;margin-top:3px;font:600 12.5px/1.35 var(--display);color:#5A4A3A}
+.drcmp{margin-top:28px}
+#drCP,#drER{scroll-margin-top:90px}
+@media (max-width:600px){.drakt{border-radius:28px}}
 .drsw{display:flex;flex-wrap:wrap;gap:12px;justify-content:center;margin-top:clamp(36px,4vw,60px)}
 .drsw button{display:flex;flex-direction:column;align-items:flex-start;gap:4px;min-height:64px;padding:12px 26px;border-radius:999px;border:1px solid rgba(27,30,37,.14);background:rgba(255,255,255,.8);cursor:pointer;color:#1B1E25;text-align:left;transition:transform .3s,box-shadow .3s}
 .drsw button b{font:900 17px/1.1 var(--display)}.drsw button small{font:600 12.5px/1.2 var(--display);color:#5A6170}
 .drsw button:hover{transform:translateY(-2px)}
-.drsw button.on{background:linear-gradient(120deg,#22D3EE,#60A5FA 50%,#C084FC);border-color:transparent;color:#fff;box-shadow:0 18px 34px -18px #60A5FA}.drsw button.on small{color:rgba(255,255,255,.9)}
+.drsw button{color:#fff!important;border-color:transparent!important}.drsw button small{color:rgba(255,255,255,.92)!important}.drsw button:nth-child(1){background:linear-gradient(120deg,#B87333,#F97316 50%,#F472B6);box-shadow:0 18px 34px -18px #F97316}.drsw button:nth-child(2){background:linear-gradient(120deg,#22D3EE,#60A5FA 50%,#C084FC);box-shadow:0 18px 34px -18px #60A5FA}
 .drhero{display:grid;grid-template-columns:1fr 1.05fr;gap:clamp(20px,4vw,60px);align-items:center;margin-bottom:10px}
 .drimg{position:relative;margin-bottom:40px}.drimg::before{content:"";position:absolute;inset:8% 6% 4%;border-radius:50%;background:radial-gradient(circle,rgba(184,115,51,.35),rgba(96,165,250,.18) 55%,transparent 70%);filter:blur(10px)}
 .drimg img{position:relative;width:100%;height:auto;filter:drop-shadow(0 26px 30px rgba(0,0,0,.35));-webkit-box-reflect:below 2px linear-gradient(transparent 70%,rgba(0,0,0,.16))}
@@ -2695,6 +2701,7 @@ m696 -454 c28 -13 46 -31 55 -51 22 -53 -50 -177 -173 -300 -187 -186 -647
     <p class="eyebrow hello">Neu bei uns · <b>Van Raam</b></p>
     <h1 class="mega hello" style="--d:.08s;margin-top:18px">Sicher auf<br><span class="gt it">drei Rädern.</span></h1>
     <p class="lead hello" style="--d:.16s">E-Dreiräder vom Weltmarktführer Van Raam aus Holland. Bei uns: der Easy Rider Compact Plus und der Easy Rider 3. Du sitzt bequem wie im Sessel und hast drei Räder unter dir.</p>
+    <div class="drakt hello" style="--d:.2s" data-bis="2026-11-15"><span class="drak" aria-hidden="true">🧺</span><span><b>Aktion von Van Raam: Gratis-Korb im Wert von 250 €</b><small>beim Kauf eines Easy Rider Compact oder Compact Plus · für Bestellungen bis einschließlich 15.11.2026 · solange der Vorrat reicht</small></span></div>
     <div class="row hello" style="--d:.24s;margin-top:32px"><a class="cta" href="#termin" data-pre="Probefahrt E-Dreirad"><svg><use href="#i-tri"/></svg>Jetzt Probe fahren</a><a class="ghost" href="https://www.vanraam.com/" target="_blank" rel="noopener">Van Raam entdecken<svg><use href="#i-arrow"/></svg></a></div>
    </div>
    <div class="ped hello" style="--d:.2s;--a1:#22D3EE;--a2:#60A5FA;--a3:#C084FC"><img src="img/p-vanraam.webp" alt="Van Raam Easy Rider E-Dreirad" width="1600" height="1193"></div>
@@ -2708,13 +2715,33 @@ m696 -454 c28 -13 46 -31 55 -51 22 -53 -50 -177 -173 -300 -187 -186 -647
   </div>
  </div>
 
- <div class="wrap drsw pre" role="tablist" aria-label="Modell wählen"><button type="button" role="tab" class="on" data-drm="cp" aria-selected="true"><b>Easy Rider Compact Plus</b><small>kompakt · Motor serienmäßig</small></button><button type="button" role="tab" data-drm="er" aria-selected="false"><b>Easy Rider 3</b><small>der Klassiker · bis 140 kg</small></button></div>
- <div class="drpan" data-drp="cp">
+ <div class="sec drsec" style="padding-bottom:0">
+  <div class="wrap">
+   <div class="pre"><p class="eyebrow">Zwei Modelle · <b>bei uns im Laden</b></p><h2 class="big" style="margin-top:14px">Welcher Easy Rider<br><span class="gt">passt zu dir?</span></h2>
+   <p class="lead" style="margin-top:18px;max-width:760px">Beide sind Sesseldreiräder vom Weltmarktführer Van Raam: bequem sitzen, tief einsteigen, drei Räder unter dir. Der Unterschied liegt in Größe, Belastbarkeit und Ausstattung.</p></div>
+   <div class="etw drcmp pre"><table class="etab">
+    <thead><tr><th scope="col"><span class="sr">Merkmal</span></th><th scope="col" class="ep"><b>Easy Rider Compact Plus</b><small>kompakt · Motor serienmäßig</small></th><th scope="col"><b>Easy Rider 3</b><small>der Klassiker · bis 140 kg</small></th></tr></thead>
+    <tbody>
+     <tr><th scope="row">Einstiegshöhe</th><td class="ep">32 cm</td><td>35 cm</td></tr>
+     <tr><th scope="row">Länge</th><td class="ep">173 cm</td><td>225 cm</td></tr>
+     <tr><th scope="row">Innenbeinlänge</th><td class="ep">63–81 cm</td><td>65–108 cm (Rahmen M und L)</td></tr>
+     <tr><th scope="row">Räder vorne / hinten</th><td class="ep">16″ / 20″</td><td>20″ / 20″</td></tr>
+     <tr><th scope="row">Max. Fahrergewicht</th><td class="ep">100 kg</td><td>140 kg, verstärkt 180 kg</td></tr>
+     <tr><th scope="row">Elektrische Tretunterstützung</th><td class="ep">serienmäßig</td><td>auf Wunsch</td></tr>
+     <tr><th scope="row">Rückwärts fahren</th><td class="ep">serienmäßig</td><td>mit Tretunterstützung</td></tr>
+     <tr><th scope="row">Reichweite (Standard-Akku)</th><td class="ep">Ø 50 km</td><td>Ø 50 km</td></tr>
+     <tr><th scope="row">Gepäck max.</th><td class="ep">10 kg</td><td>20 kg</td></tr>
+     <tr><th scope="row">Teilbarer Rahmen möglich</th><td class="ep"><span class="en" aria-label="nein">–</span></td><td><span class="ey" aria-label="ja">✓</span></td></tr>
+    </tbody></table></div>
+  </div>
+ </div>
+ <div class="wrap drsw pre" aria-label="Zum Modell springen"><button type="button" data-drj="drCP"><b>Easy Rider Compact Plus</b><small>alles zum Compact Plus ↓</small></button><button type="button" data-drj="drER"><b>Easy Rider 3</b><small>alles zum Easy Rider ↓</small></button></div>
+ <div class="drpan" data-drp="cp" id="drCP">
  <div class="sec drsec">
   <div class="wrap drhero pre">
    <div>
     <p class="eyebrow">Van Raam <b>Easy Rider Compact Plus</b></p><h2 class="big" style="margin-top:14px">Kompakt, komfortabel,<br><span class="gt">voll ausgestattet.</span></h2>
-    <p class="lead" style="margin-top:18px">Das Sesseldreirad in kürzer: 52 cm kürzer als der Easy Rider und mit tiefem Einstieg. Laut Van Raam ist die Compact-Ausführung für kleinere Erwachsene gemacht. Beim Compact Plus ist die elektrische Tretunterstützung schon serienmäßig dabei.</p>
+    <p class="lead" style="margin-top:18px">Das Sesseldreirad in kürzer: 52 cm kürzer als der Easy Rider und mit tiefem Einstieg. Laut Van Raam ist die Compact-Ausführung für kleinere Erwachsene gemacht. Beim Compact Plus ist die elektrische Tretunterstützung schon serienmäßig dabei.</p><div class="drakt" data-bis="2026-11-15"><span class="drak" aria-hidden="true">🧺</span><span><b>Aktion von Van Raam: Gratis-Korb im Wert von 250 €</b><small>beim Kauf eines Easy Rider Compact oder Compact Plus · für Bestellungen bis einschließlich 15.11.2026 · solange der Vorrat reicht</small></span></div>
    </div>
    <div class="drimg"><img src="img/show/b2-rest-8.webp" alt="Van Raam Easy Rider Compact Plus in Copper Brown" loading="lazy" width="1800" height="1392"></div>
   </div>
@@ -2780,11 +2807,12 @@ m696 -454 c28 -13 46 -31 55 -51 22 -53 -50 -177 -173 -300 -187 -186 -647
   </div>
  </div>
  </div>
- <div class="drpan" data-drp="er" hidden>
+ <div class="drpan" data-drp="er" id="drER">
  <div class="sec drsec">
   <div class="wrap">
-   <div class="pre"><p class="eyebrow">Van Raam <b>Easy Rider 3</b></p><h2 class="big" style="margin-top:14px">Das Sessel&shy;dreirad<br><span class="gt">auf einen Blick.</span></h2>
-   <p class="lead" style="margin-top:18px;max-width:720px">Du sitzt wie in einem bequemen Sessel, steigst tief ein und hast die Füße sicher vorne auf den Pedalen. Das sind die Eckdaten laut Hersteller:</p></div>
+   <div class="drhero pre"><div><p class="eyebrow">Van Raam <b>Easy Rider 3</b></p><h2 class="big" style="margin-top:14px">Der Klassiker.<br><span class="gt">Bequem wie ein Sessel.</span></h2>
+   <p class="lead" style="margin-top:18px">Du sitzt wie in einem bequemen Sessel, steigst tief ein und hast die Füße sicher vorne auf den Pedalen. Zwei Rahmengrößen, bis 140 kg belastbar und auf Wunsch mit Motor.</p></div>
+   <div class="drimg"><img src="img/p-vanraam.webp" alt="Van Raam Easy Rider 3" loading="lazy" width="1600" height="1193"></div></div>
    <div class="drk pre">
     <span style="--c:#22D3EE"><b>35 cm</b><small>Einstiegshöhe</small></span>
     <span style="--c:#A855F7"><b>140 kg</b><small>max. Fahrergewicht · verstärkt 180 kg</small></span>
@@ -3890,7 +3918,9 @@ function ytConsent(id,t){return '<div class="ytc"><b>Video von YouTube</b><p>Bei
  const play=(id,t)=>{st.innerHTML='<div class="tgvf"><iframe src="https://www.youtube-nocookie.com/embed/'+id+'?autoplay=1&rel=0" title="'+esc(t)+'" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen></iframe></div>'};
  const close=()=>{lb.hidden=true;st.innerHTML='';document.body.style.overflow=''};
  $$('.drv').forEach(V=>V.addEventListener('click',e=>{const b=e.target.closest('[data-dryt]');if(!b)return;lb.hidden=false;document.body.style.overflow='hidden';if(ytOk())play(b.dataset.dryt,b.dataset.t);else st.innerHTML=ytConsent(b.dataset.dryt,b.dataset.t)}));
- $$('.drsw button').forEach(b=>b.addEventListener('click',()=>{$$('.drsw button').forEach(x=>{const on=x===b;x.classList.toggle('on',on);x.setAttribute('aria-selected',on)});$$('.drpan').forEach(p=>{p.hidden=p.dataset.drp!==b.dataset.drm;if(!p.hidden)p.querySelectorAll('.pre').forEach(e=>e.classList.add('in'))})}));
+ $$('.drsw button').forEach(b=>b.addEventListener('click',()=>{const t=$('#'+b.dataset.drj);if(t)scrollTo({top:t.getBoundingClientRect().top+scrollY-90,behavior:'smooth'})}));
+ /* Aktionen nach Ablauf ausblenden */
+ $$('[data-bis]').forEach(e=>{if(new Date()>new Date(e.dataset.bis+'T23:59:59+01:00'))e.remove()});
  lb.addEventListener('click',e=>{const g=e.target.closest('[data-ytgo]');if(g){if($('#ytRem',lb)&&$('#ytRem',lb).checked)LS.set('vc_yt',1);play(g.dataset.ytgo,g.dataset.t);return}
   if(e.target.closest('[data-tgx]')){close();return}if(e.target===lb||e.target.closest('.drx'))close()});
  addEventListener('keydown',e=>{if(e.key==='Escape'&&!lb.hidden)close()})})();
