@@ -8,7 +8,7 @@ Befehle (alle aus dem Ordner velocenter-homepage/):
   liste [neu=20] [pruef=8]          Arbeitsliste für Claude -> $RUNNER_TEMP/bilder/auftrag.json (+ Text für den Prompt)
   holen <key> <url>                 Bild laden, prüfen, freistellen, schärfen -> Kandidat + Vorschau (für Claude zum Ansehen)
   anwenden <entscheid.json> [lauf]  Claudes Entscheidungen übernehmen (neu / ersetzen / entfernen / unsicher / nicht_gefunden / ok)
-  uebernehmen <key> | ablehnen <key>   Admin-Knopf für „unsichere“ Vorschläge
+  ablehnen <key>                    Admin-Knopf „✕ Falsch“: Foto raus, Quelle gesperrt, neu suchen (uebernehmen nur für alte Vorschläge)
   aufraeumen                        nicht mehr benutzte Bilder löschen, lange ausverkaufte Zuordnungen entfernen
 Admin-Fotos (Firebase, „fs:…“) und Farben, bei denen ein Admin das Foto selbst gesetzt/entfernt hat, fasst der Agent nie an.
 """
@@ -283,20 +283,14 @@ def cmd_anwenden(args):
             except Exception: pass
             if meta.get('key') != k: print('übersprungen (Kandidat gehört zu anderem Rad):', k); continue
             quelle = quelle or meta.get('url', '')
-            if akt == 'unsicher':
-                ziel = 'img/kandidat/%s.webp' % hashlib.sha1((k + quelle).encode()).hexdigest()[:12]
-                os.makedirs(os.path.join(BASIS, 'img', 'kandidat'), exist_ok=True)
-                shutil.copyfile(kp, os.path.join(BASIS, ziel))
-                unsicher = [u for u in unsicher if u['key'] != k]
-                unsicher.append(dict(key=k, label=label(info), bild=ziel, quelle=quelle, seite=seite, grund=grund, datum=HEUTE,
-                                     jetzt=bm.get(k) or ''))
-                z['unsicher'].append(k); x['gesucht'] = HEUTE; continue
+            ub = akt == 'unsicher'  # Tiry 13.11.2026: auch unsichere Funde sofort übernehmen, nur markieren
             ziel = datei_ziel(info.get('marke'), kp)
             shutil.copyfile(kp, os.path.join(BASIS, ziel))
             war = bm.get(k) or ''
             bm[k] = ziel; s = bestand_patchen(s, k, ziel)
             x.update(quelle=quelle, seite=seite, geprueft=HEUTE, gesucht=HEUTE, versuche=0, grund=grund)
-            (z['ersetzt'] if war else z['neu']).append(dict(key=k, label=label(info), bild=ziel, quelle=quelle, grund=grund))
+            (z['ersetzt'] if war else z['neu']).append(dict(key=k, label=label(info), bild=ziel, quelle=quelle, grund=grund, ub=ub))
+            if ub: z['unsicher'].append(k)
             unsicher = [u for u in unsicher if u['key'] != k]
         elif akt == 'entfernen':
             if not bm.get(k): continue
@@ -319,7 +313,7 @@ def cmd_anwenden(args):
     verlauf.append(dict(ts=int(time.time() * 1000), neu=len(z['neu']), ersetzt=len(z['ersetzt']), entfernt=len(z['entfernt']),
                         unsicher=len(z['unsicher']), ok=z['ok'], nicht=z['nicht'], lauf=lauf))
     ber = dict(ts=int(time.time() * 1000), lauf=lauf, neu=z['neu'], ersetzt=z['ersetzt'], entfernt=z['entfernt'],
-               unsicher=unsicher[-40:], gesamt=auftrag.get('gesamt', {}), verlauf=verlauf,
+               unsicher=[], gesamt=auftrag.get('gesamt', {}), verlauf=verlauf,
                gesucht=len(auftrag['suchen']), geprueft=len(auftrag['pruefen']))
     neu_ohne = auftrag['gesamt'].get('ohne_bild', 0) - len(z['neu']) + len([1 for e in z['entfernt']])
     ber['gesamt'] = dict(auftrag['gesamt'], ohne_bild=max(0, neu_ohne))
@@ -328,14 +322,30 @@ def cmd_anwenden(args):
     print('neu=%d ersetzt=%d entfernt=%d unsicher=%d ok=%d nicht_gefunden=%d' % (
         len(z['neu']), len(z['ersetzt']), len(z['entfernt']), len(z['unsicher']), z['ok'], z['nicht']))
     zus = os.path.join(TMP, 'zusammenfassung.txt')
-    open(zus, 'w', encoding='utf-8').write('Bilder-Agent: %d neu, %d ersetzt, %d entfernt, %d zur Freigabe' % (
-        len(z['neu']), len(z['ersetzt']), len(z['entfernt']), len(z['unsicher'])))
+    open(zus, 'w', encoding='utf-8').write('Bilder-Agent: %d neu, %d ersetzt, %d entfernt' % (
+        len(z['neu']), len(z['ersetzt']), len(z['entfernt'])))
 
 # ---------- Admin-Knöpfe ----------
 def cmd_entscheid(args, ja):
     k = args[0] if args else ''
     s = html_lesen(); ber = json_aus(s, 'bilderBericht'); bm = json_aus(s, 'bilderData'); st = status_lesen()
     u = next((u for u in ber.get('unsicher', []) if u['key'] == k), None)
+    if not u and not ja:  # Admin: „✕ Falsch“ an einem übernommenen Foto -> raus, Quelle sperren, beim nächsten Lauf neu suchen
+        x = st.setdefault(k, {}); alt = next((v for v in ber.get('neu', []) + ber.get('ersetzt', []) if v['key'] == k), {})
+        if not bm.get(k): raise SystemExit('Kein Foto vom Agenten zu ' + k)
+        q = alt.get('quelle') or x.get('quelle', '')
+        ab = x.setdefault('abgelehnt', [])
+        if q and q not in ab: ab.append(q)
+        bm[k] = ''; s = bestand_patchen(s, k, '')
+        x.update(versuche=0, grund='vom Admin als falsch markiert'); x.pop('geprueft', None); x.pop('gesucht', None); x.pop('quelle', None)
+        for f in ('neu', 'ersetzt'): ber[f] = [v for v in ber.get(f, []) if v['key'] != k]
+        lab = alt.get('label') or k
+        ber.setdefault('entfernt', []).append(dict(key=k, label=lab, grund='vom Admin als falsch markiert'))
+        s = json_setzen(s, 'bilderData', bm, sort=True); s = json_setzen(s, 'bilderBericht', ber)
+        open(HTML, 'w', encoding='utf-8').write(s); status_schreiben(st)
+        os.makedirs(TMP, exist_ok=True)
+        open(os.path.join(TMP, 'zusammenfassung.txt'), 'w', encoding='utf-8').write('Bilder-Agent: Foto als falsch markiert – ' + lab)
+        print('ok entfernt', lab); return
     if not u: raise SystemExit('Vorschlag nicht (mehr) vorhanden: ' + k)
     src = os.path.join(BASIS, u['bild']); x = st.setdefault(k, {})
     if ja:
@@ -343,7 +353,7 @@ def cmd_entscheid(args, ja):
         ziel = datei_ziel(k.split('|')[0], src); shutil.copyfile(src, os.path.join(BASIS, ziel))
         bm[k] = ziel; s = bestand_patchen(s, k, ziel)
         x.update(quelle=u.get('quelle', ''), seite=u.get('seite', ''), geprueft=HEUTE, versuche=0, grund='vom Admin freigegeben')
-        ber.setdefault('neu', []).append(dict(key=k, label=u['label'], bild=ziel, quelle=u.get('quelle', ''), grund='vom Admin freigegeben'))
+        ber.setdefault('neu', []).append(dict(key=k, label=u['label'], bild=ziel, quelle=u.get('quelle', ''), grund=u.get('grund', ''), ub=True))
     else:
         ab = x.setdefault('abgelehnt', [])
         if u.get('quelle') and u['quelle'] not in ab: ab.append(u['quelle'])
@@ -352,6 +362,7 @@ def cmd_entscheid(args, ja):
     if os.path.exists(src): os.remove(src)
     s = json_setzen(s, 'bilderData', bm, sort=True); s = json_setzen(s, 'bilderBericht', ber)
     open(HTML, 'w', encoding='utf-8').write(s); status_schreiben(st)
+    os.makedirs(TMP, exist_ok=True)
     open(os.path.join(TMP, 'zusammenfassung.txt'), 'w', encoding='utf-8').write(
         'Bilder-Agent: Vorschlag %s – %s' % ('übernommen' if ja else 'abgelehnt', u['label']))
     print('ok', 'übernommen' if ja else 'abgelehnt', u['label'])

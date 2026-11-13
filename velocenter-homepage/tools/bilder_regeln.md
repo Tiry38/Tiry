@@ -11,7 +11,7 @@ Die Arbeitsliste steht in `$RUNNER_TEMP/bilder/auftrag.json` (lies sie mit Read,
   streng gegen Modell, Modelljahr und Farbe. Ist es falsch → besseres suchen (`ersetzen`) oder `entfernen`.
   Ist es richtig, aber es gibt eine klar bessere Fassung (höhere Auflösung, echte Seitenansicht, sauberer Hintergrund) → `ersetzen`. Sonst `ok`.
 - `geschwister`: andere Farben desselben Modells und ihre Bilder – nie dasselbe Bild für zwei verschiedene Farben.
-- `abgelehnt`: Bild-Adressen, die der Admin abgelehnt hat – **nie wieder vorschlagen.**
+- `abgelehnt`: Bild-Adressen, die der Admin als falsch markiert hat – **nie wieder verwenden.**
 
 ## Wo suchen (so viel wie möglich, in dieser Reihenfolge)
 1. **Offizielle Herstellerseite** (Produktseite des Modells, Farbauswahl, Modelljahr): i:SY isy.de · KTM ktm-bikes.at · QiO qio-bikes.com ·
@@ -41,7 +41,8 @@ Klappt das Freistellen schlecht → andere Fassung desselben Bildes suchen (z. B
 
 ## Entscheidung
 - `neu` / `ersetzen`: **nur, wenn Modell UND Farbe eindeutig stimmen** und die Quelle offiziell ist (sicher ≥ 95 %).
-- `unsicher`: gutes Bild gefunden, aber Farbe/Modell nicht 100 % belegt (z. B. Farbname weicht ab, nur Händler-Shop als Beleg) → Admin entscheidet.
+- `unsicher`: richtiges Modell, Farbe sehr wahrscheinlich richtig, aber nicht 100 % schriftlich belegt (z. B. Farbname weicht ab, nur Händler-Shop als Beleg).
+  **Wird ebenfalls sofort übernommen** (Tiry will keine Freigabe), nur im Admin markiert. Passt die Farbe sichtbar nicht → nicht nehmen, weitersuchen.
 - `entfernen`: jetziges Bild ist nachweislich falsch und es gibt keinen sicheren Ersatz.
 - `ok`: jetziges Bild geprüft und richtig.
 - `nicht_gefunden`: nach gründlicher Suche nichts Passendes (Grund kurz nennen: was gesucht, wo).
