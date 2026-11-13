@@ -26,3 +26,4 @@
 - Livegang: Live-Fassung nur über tools/live_bauen.py aus index.html bauen; Ablauf und offene Punkte in LIVEGANG.md (13.11.2026).
 - Admin (13.11.2026): Live-Seite nur über `/admin` mit Benutzer + Passwort (Firebase Authentication, Rechte über Firestore-Regeln, Spark-Tarif). Kein versteckter 5-Klick auf der Live-Seite. Kein Passwort und kein Passwort-Prüfwert im Code. Prototyp bleibt hinter der claude.ai-Anmeldung.
 - Logo Startseite (13.11.2026): kein Reinfliegen der roten Teile, Logo steht sofort da, Schimmer läuft regelmäßig weiter (alle 7 s).
+- Admin Bestand (13.11.2026): Knopf „Bearbeiten“ je Rad; je Farbe Verfügbarkeit Angeliefert/Bestellt + Häkchen „Reserviert“ (überschreibt Veloport, bleibt nach Import).

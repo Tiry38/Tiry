@@ -1368,7 +1368,7 @@ body.sc .hdr{backdrop-filter:none!important;-webkit-backdrop-filter:none!importa
 /* ===== Admin-Bereich ===== */
 .adm{position:fixed;inset:0;z-index:300;opacity:0;transition:opacity .25s;background:#0F1115}
 .adm.on{opacity:1}
-.adm-app{position:absolute;inset:0;display:grid;grid-template-columns:248px minmax(0,1fr);font-family:var(--display);color:#1B1E25}
+.adm-app{position:absolute;inset:0;display:grid;grid-template-columns:248px minmax(0,1fr);grid-template-rows:minmax(0,1fr);font-family:var(--display);color:#1B1E25}
 .adm-side{display:flex;flex-direction:column;gap:6px;padding:18px 14px;background:linear-gradient(180deg,#1B1E25 0%,#15171C 100%);border-right:1px solid rgba(255,255,255,.06);color:#E9E6E1;overflow-y:auto}
 .as-brand{display:flex;align-items:center;gap:10px;padding:6px 8px 18px;border-bottom:1px solid rgba(255,255,255,.08);margin-bottom:10px}
 .as-brand img{height:34px;width:auto;filter:brightness(0) invert(1);opacity:.92}
@@ -1385,7 +1385,7 @@ body.sc .hdr{backdrop-filter:none!important;-webkit-backdrop-filter:none!importa
 .as-foot{margin-top:auto;padding-top:14px;border-top:1px solid rgba(255,255,255,.08)}
 .as-foot button{width:100%;min-height:42px;border-radius:9px;border:1px solid rgba(255,255,255,.14);background:none;color:#D9D4CC;font:600 13.5px/1 var(--display);cursor:pointer}
 .as-foot button:hover{background:rgba(255,255,255,.06);color:#fff}
-.adm-main{display:flex;flex-direction:column;min-width:0;background:linear-gradient(170deg,#FBF8F3,#F2EBE1)}
+.adm-main{display:flex;flex-direction:column;min-width:0;min-height:0;overflow:hidden;background:linear-gradient(170deg,#FBF8F3,#F2EBE1)}
 .adm-top{display:flex;align-items:center;gap:16px;padding:18px clamp(16px,3vw,34px);border-bottom:1px solid rgba(27,30,37,.08);background:rgba(255,255,255,.7)}
 .adm-top h2{margin:0;font:800 22px/1.1 var(--display);letter-spacing:-.01em}
 .adm-top .sub{font:500 13.5px/1.3 var(--display);color:var(--dim)}
@@ -1434,7 +1434,7 @@ button.akpi{cursor:pointer;transition:transform .2s,box-shadow .2s}button.akpi:h
 .ack{display:inline-flex;align-items:center;gap:8px;min-height:44px;font:600 14px/1 var(--display)}.ack input{width:18px;height:18px;accent-color:#C8102E}
 .acount{margin:0 0 10px;font:600 13px/1 var(--display);color:var(--dim)}
 .atbl{display:flex;flex-direction:column;border-radius:12px;overflow:hidden;border:1px solid rgba(27,30,37,.08);background:#fff}
-.atr{display:grid;grid-template-columns:76px 110px minmax(160px,1.6fr) minmax(110px,1fr) 120px minmax(120px,1fr) 110px 200px;align-items:center;gap:12px;padding:8px 14px;border-bottom:1px solid rgba(27,30,37,.06);font-size:14px;cursor:pointer;transition:background .15s}
+.atr{display:grid;grid-template-columns:76px 110px minmax(160px,1.6fr) minmax(110px,1fr) 120px minmax(120px,1fr) 110px 290px;align-items:center;gap:12px;padding:8px 14px;border-bottom:1px solid rgba(27,30,37,.06);font-size:14px;cursor:pointer;transition:background .15s}
 .atr:hover{background:#FBF6EF}.atr.off{opacity:.5}
 .ath{position:sticky;top:0;z-index:1;background:#F6F1EA;cursor:default;font:700 11px/1 var(--display);letter-spacing:.1em;text-transform:uppercase;color:var(--dim);padding:12px 14px}
 .ath:hover{background:#F6F1EA}
@@ -1448,7 +1448,7 @@ button.akpi{cursor:pointer;transition:transform .2s,box-shadow .2s}button.akpi:h
 .atr .pr{font:700 14.5px/1.2 var(--display);display:flex;flex-direction:column;align-items:flex-start;gap:4px}.atr .pr em{font-style:normal;font-size:11px;color:var(--dim)}.atr .pr i.dl{background:#C8102E;color:#fff}
 .atr .ac{display:flex;gap:6px;justify-content:flex-end}
 .atr .ac button{min-height:36px;padding:0 11px;border-radius:7px;border:1px solid rgba(27,30,37,.16);background:#fff;font:700 12px/1 var(--display);color:#1B1E25;cursor:pointer}
-.atr .ac button:hover{border-color:#1B1E25}.atr .ac .del{color:#B00D29;border-color:rgba(200,16,46,.35)}
+.atr .ac button:hover{border-color:#1B1E25}.atr .ac .ed{background:#C8102E;border-color:#C8102E;color:#fff}.atr .ac .ed:hover{background:#A50D26;border-color:#A50D26}.atr .ac .del{color:#B00D29;border-color:rgba(200,16,46,.35)}
 .adl .atr{grid-template-columns:110px minmax(160px,1.4fr) minmax(160px,1.2fr) 120px 120px minmax(120px,1fr);cursor:default}
 .inp.sm{min-height:38px;width:100%;padding:0 10px;border-radius:8px;border:1px solid rgba(27,30,37,.16);background:#fff;font:600 14px/1 var(--display)}
 .inp.sm:focus{outline:2px solid #C8102E;outline-offset:1px}
@@ -3504,7 +3504,7 @@ const admBase=()=>LG.DB||LG.D;
 function admMerge(d){d=d||{};const R=[],rows=ADM.rows,st=ADM.set;
  (d.raeder||[]).forEach(r=>{const o=rows['ov-'+admKey(r)];if(o&&o.hidden)return;
   const k=Object.assign({},r,{farben:(r.farben||[]).map(f=>{const x=o&&o.v&&o.v[f.id];if(!x)return f;if(x.hidden)return null;const y=Object.assign({},f);
-   ['preis','angebot','status','ab','bild'].forEach(n=>{if(x[n]!==undefined){if(x[n]===null||x[n]==='')delete y[n];else y[n]=x[n]}});return y}).filter(Boolean)});
+   ['preis','angebot','status','ab','bild','res'].forEach(n=>{if(x[n]!==undefined){if(x[n]===null||x[n]===''||x[n]===false)delete y[n];else y[n]=x[n]}});return y}).filter(Boolean)});
   if(k.farben.length)R.push(k)});
  Object.keys(rows).filter(i=>i.startsWith('neu-')).sort().forEach(i=>{const n=rows[i];if(n&&n.rad&&!n.hidden&&(n.rad.farben||[]).length)R.push(Object.assign({},n.rad,{eigen:true}))});
  R.forEach(r=>{r.farben=(r.farben||[]).map(f=>typeof f.bild==='string'&&f.bild.startsWith('fs:')?Object.assign({},f,{bild:fotoSrc(f.bild)}):f)});
@@ -3578,7 +3578,7 @@ function admAll(){const out=[];((admBase()||{}).raeder||[]).forEach(r=>{const k=
  Object.keys(ADM.rows).filter(i=>i.startsWith('neu-')).sort().reverse().forEach(i=>out.push({id:i,r:ADM.rows[i].rad||{farben:[]},o:ADM.rows[i],imp:false}));return out}
 /* wirksame Farb-Ausführungen eines Eintrags (mit Änderungen, inkl. ausgeblendeter Farben) */
 function admEff(x){return (x.r.farben||[]).map(f=>{const o=x.imp&&x.o.v&&x.o.v[f.id];if(!o)return Object.assign({},f);const y=Object.assign({},f,{_hid:!!o.hidden});
- ['preis','angebot','status','ab','bild'].forEach(n=>{if(o[n]!==undefined){if(o[n]===null||o[n]==='')delete y[n];else y[n]=o[n]}});return y})}
+ ['preis','angebot','status','ab','bild','res'].forEach(n=>{if(o[n]!==undefined){if(o[n]===null||o[n]===''||o[n]===false)delete y[n];else y[n]=o[n]}});return y})}
 const admPrice=n=>n?n.toLocaleString('de-DE')+' €':'–';
 /* eine Farb-Ausführung direkt ändern (Fotos, Angebote) */
 async function admPatch(x,fid,patch){if(x.imp){const cur=ADM.rows[x.id]||{},v=JSON.parse(JSON.stringify(cur.v||{})),f=(x.r.farben||[]).find(y=>y.id===fid)||{};
@@ -3628,7 +3628,7 @@ function admList(b){const q=ADM.q.toLowerCase().split(/\s+/).filter(Boolean),A=a
     '<span>'+esc([x.r.gr,x.r.rahmen].filter(Boolean).join(' · ')||'–')+'</span><span class="fd">'+vis.slice(0,6).map(f=>'<i title="'+esc(f.farbe||'')+'" style="background:'+lgFarbe(f.farbe)+'"></i>').join('')+(vis.length>1?'<small>'+vis.length+'</small>':'')+'</span>'+
     '<span class="av">'+(x.o.hidden?'<i class="h">ausgeblendet</i>':(lag?'<i class="ok">'+lag+' im Laden</i>':'')+(bes?'<i class="z">'+bes+' bestellt</i>':'')+(vis.some(f=>f.res)?'<i class="rs">reserviert</i>':''))+'</span>'+
     '<span class="pr">'+(ps.length?(new Set(ps).size>1?'<em>ab</em> ':'')+admPrice(Math.min(...ps)):'–')+(dl?'<i class="dl">Angebot</i>':'')+'</span>'+
-    '<span class="ac"><button type="button" data-ah="'+x.id+'" title="'+(x.o.hidden?'Wieder auf der Seite zeigen':'Auf der Seite ausblenden')+'">'+(x.o.hidden?'Einblenden':'Ausblenden')+'</button>'+(x.imp?'':'<button type="button" class="del" data-ad="'+x.id+'">Löschen</button>')+'</span></div>'}).join('')+'</div>'}
+    '<span class="ac"><button type="button" class="ed" data-edit2="'+esc(x.id)+'">Bearbeiten</button><button type="button" data-ah="'+x.id+'" title="'+(x.o.hidden?'Wieder auf der Seite zeigen':'Auf der Seite ausblenden')+'">'+(x.o.hidden?'Einblenden':'Ausblenden')+'</button>'+(x.imp?'':'<button type="button" class="del" data-ad="'+x.id+'">Löschen</button>')+'</span></div>'}).join('')+'</div>'}
 function admFotos(b){const A=admAll().filter(x=>!x.o.hidden),mks=[...new Set(A.map(x=>x.r.marke))].sort();
  const L=A.flatMap(x=>admEff(x).filter(f=>!f._hid&&!f.bild&&(!ADM.fmk||x.r.marke===ADM.fmk)).map(f=>({x,f})));
  b.innerHTML='<div class="atool"><select class="inp" id="admFmk"><option value="">Alle Marken</option>'+mks.map(m=>'<option'+(m===ADM.fmk?' selected':'')+'>'+esc(m)+'</option>').join('')+'</select><p class="admnote">Foto antippen und Bild wählen – es wird verkleinert, hochgeladen und sofort beim richtigen Rad und der richtigen Farbe gezeigt. Am besten: Seitenansicht, ruhiger Hintergrund, keine Personen.</p></div>'+
@@ -3719,17 +3719,17 @@ function admVar(f,i,imp){const o=(imp&&ADM.edit&&ADM.edit.ov[f.id])||{},g=n=>o[n
  return '<div class="admv'+(o.hidden?' off':'')+'" data-i="'+i+'"><div class="aph">'+(im?'<img src="'+esc(im)+'" alt="">':'<span>Kein Foto</span>')+'<label class="up">'+(im?'Foto ersetzen':'Foto wählen')+'<input type="file" accept="image/*" data-up="'+i+'"></label>'+(im?'<button type="button" data-rmb="'+i+'">Foto entfernen</button>':'')+'</div>'+
   '<div class="vf"><label>Modelljahr<input name="jahr" value="'+esc(f.jahr||'')+'"'+ro()+'></label><label>Farbe<input name="farbe" value="'+esc(f.farbe||'')+'"'+ro()+' required></label>'+
   '<label>Preis (€)<input name="preis" inputmode="numeric" value="'+esc(g('preis')||'')+'"></label><label>Angebotspreis (€)<input name="angebot" inputmode="numeric" value="'+esc(g('angebot')||'')+'" placeholder="leer = kein Angebot"></label>'+
-  '<label>Verfügbarkeit<select name="status"><option value="lager"'+(g('status')!=='bestellt'?' selected':'')+'>Sofort verfügbar</option><option value="bestellt"'+(g('status')==='bestellt'?' selected':'')+'>Lieferung ausstehend</option></select></label><label>Voraussichtlich<input name="ab" value="'+esc(g('ab')||'')+'" placeholder="z. B. KW 48"></label>'+
+  '<label>Verfügbarkeit<select name="status"><option value="lager"'+(g('status')!=='bestellt'?' selected':'')+'>Angeliefert</option><option value="bestellt"'+(g('status')==='bestellt'?' selected':'')+'>Bestellt</option></select></label><label>Voraussichtlich<input name="ab" value="'+esc(g('ab')||'')+'" placeholder="z. B. KW 48"></label>'+
   (imp?'':'<label>Motor<input name="motor" value="'+esc(f.motor||'')+'"></label><label>Akku<input name="akku" value="'+esc(f.akku||'')+'" placeholder="625 Wh"></label><label>Schaltung<input name="schaltung" value="'+esc(f.schaltung||'')+'"></label>')+
-  '</div><div class="vb">'+(imp?'<label class="ck"><input type="checkbox" name="vhid"'+(o.hidden?' checked':'')+'> Diese Farbe ausblenden</label>':'<button type="button" class="del" data-rmv="'+i+'">Farbe entfernen</button>')+'</div></div>'}
+  '</div><div class="vb"><label class="ck"><input type="checkbox" name="vres"'+(g('res')?' checked':'')+'> Reserviert</label>'+(imp?'<label class="ck"><input type="checkbox" name="vhid"'+(o.hidden?' checked':'')+'> Diese Farbe ausblenden</label>':'<button type="button" class="del" data-rmv="'+i+'">Farbe entfernen</button>')+'</div></div>'}
 const admNum=v=>{v=String(v||'').replace(/[^\d,]/g,'').replace(',','.');const n=Math.round(parseFloat(v));return isFinite(n)&&n>0?n:null};
 function admRead(){const F=$('#admF'),E=ADM.edit,r=E.r;return $$('.admv',F).map(el=>{const q=n=>{const i=$('[name='+n+']',el);return i?i.value.trim():''};const i=+el.dataset.i,f=r.farben[i]||{};
-  return {i,f,jahr:q('jahr'),farbe:q('farbe'),preis:admNum(q('preis')),angebot:admNum(q('angebot')),status:q('status'),ab:q('ab'),motor:q('motor'),akku:q('akku'),schaltung:q('schaltung'),hid:!!($('[name=vhid]',el)||{}).checked}})}
+  return {i,f,jahr:q('jahr'),farbe:q('farbe'),preis:admNum(q('preis')),angebot:admNum(q('angebot')),status:q('status'),ab:q('ab'),motor:q('motor'),akku:q('akku'),schaltung:q('schaltung'),hid:!!($('[name=vhid]',el)||{}).checked,res:!!($('[name=vres]',el)||{}).checked}})}
 async function admSave(){const E=ADM.edit,F=$('#admF'),err=$('#admE');err.textContent='';const vs=admRead();
  if(vs.some(v=>v.angebot&&v.preis&&v.angebot>=v.preis)){err.textContent='Der Angebotspreis muss unter dem Preis liegen.';return}
  try{if(E.imp){const ov={};vs.forEach(v=>{const f=v.f,o=Object.assign({},E.ov[f.id]||{});
     const set=(n,val)=>{const base=f[n]===undefined?null:f[n];if((val||null)===(base||null))delete o[n];else o[n]=val===null||val===''?null:val};
-    set('preis',v.preis);set('angebot',v.angebot);set('status',v.status);set('ab',v.status==='bestellt'?v.ab:'');if(v.hid)o.hidden=true;else delete o.hidden;
+    set('preis',v.preis);set('angebot',v.angebot);set('status',v.status);set('ab',v.status==='bestellt'?v.ab:'');{const br=!!f.res;if(v.res===br)delete o.res;else o.res=v.res}if(v.hid)o.hidden=true;else delete o.hidden;
     if(o.bild===(f.bild||null)||o.bild===undefined)delete o.bild;
     if(Object.keys(o).length)ov[f.id]=o});
    const cur=ADM.rows[E.id]||{};await ADM.db.doc('lager/'+E.id).set({hidden:!!cur.hidden,key:E.id,v:ov,ts:Date.now()})}
@@ -3738,7 +3738,7 @@ async function admSave(){const E=ADM.edit,F=$('#admF'),err=$('#admE');err.textCo
    if(!rad.marke||!rad.modell){err.textContent='Bitte Marke und Modell eintragen.';return}
    const id=E.id||('neu-'+Date.now());
    rad.farben=vs.map((v,k)=>{const f=E.r.farben[v.i]||{};const o={id:f.id||('e'+Date.now().toString(36)+k),jahr:v.jahr,farbe:v.farbe,status:v.status||'lager'};
-    ['preis','angebot','motor','akku','schaltung'].forEach(n=>{if(v[n])o[n]=v[n]});if(v.status==='bestellt'&&v.ab)o.ab=v.ab;if(f.bild)o.bild=f.bild;return o});
+    ['preis','angebot','motor','akku','schaltung'].forEach(n=>{if(v[n])o[n]=v[n]});if(v.status==='bestellt'&&v.ab)o.ab=v.ab;if(v.res)o.res=true;if(f.bild)o.bild=f.bild;return o});
    if(!rad.farben.length||rad.farben.some(f=>!f.farbe)){err.textContent='Jede Ausführung braucht eine Farbe.';return}
    const cur=ADM.rows[id]||{};await ADM.db.doc('lager/'+id).set({rad,hidden:!!cur.hidden,ts:Date.now()})}
   admToast('Gespeichert – gilt sofort auf der Seite.');admDrClose();if(ADM.tab==='neu')ADM.tab='raeder';setTimeout(admRender,260)}
@@ -3746,8 +3746,8 @@ async function admSave(){const E=ADM.edit,F=$('#admF'),err=$('#admE');err.textCo
 async function admPhoto(i,file){const E=ADM.edit;admToast('Foto wird hochgeladen …');
  try{const url=await admUpload(file);admKeep();const f=E.r.farben[i];if(E.imp){E.ov[f.id]=Object.assign({},E.ov[f.id],{bild:url})}else{f.bild=url}
   admRedrawVars();admToast('Foto übernommen – noch „Speichern“ drücken.')}catch(e){admToast(ADM.assets||FBC?'Foto konnte nicht hochgeladen werden.':'Foto-Upload ist hier nicht freigeschaltet.')}}
-function admKeep(){const E=ADM.edit;admRead().forEach(v=>{const f=E.r.farben[v.i];if(!f)return;if(E.imp){const o=E.ov[f.id]=Object.assign({},E.ov[f.id]);['preis','angebot','status','ab'].forEach(n=>{o[n]=v[n]});if(v.hid)o.hidden=true;else delete o.hidden}
- else Object.assign(f,{jahr:v.jahr,farbe:v.farbe,preis:v.preis,angebot:v.angebot,status:v.status,ab:v.ab,motor:v.motor,akku:v.akku,schaltung:v.schaltung})})}
+function admKeep(){const E=ADM.edit;admRead().forEach(v=>{const f=E.r.farben[v.i];if(!f)return;if(E.imp){const o=E.ov[f.id]=Object.assign({},E.ov[f.id]);['preis','angebot','status','ab'].forEach(n=>{o[n]=v[n]});if(v.res===!!f.res)delete o.res;else o.res=v.res;if(v.hid)o.hidden=true;else delete o.hidden}
+ else Object.assign(f,{res:v.res||undefined,jahr:v.jahr,farbe:v.farbe,preis:v.preis,angebot:v.angebot,status:v.status,ab:v.ab,motor:v.motor,akku:v.akku,schaltung:v.schaltung})})}
 function admRedrawVars(){const E=ADM.edit;$('#admV').innerHTML=E.r.farben.map((f,i)=>admVar(f,i,E.imp)).join('')}
 let admT;function admToast(t){const el=$('#admToast');el.textContent=t;el.classList.add('on');clearTimeout(admT);admT=setTimeout(()=>el.classList.remove('on'),3200)}
 /* ---------- Ereignisse ---------- */
@@ -3762,6 +3762,7 @@ $('#adm').addEventListener('click',async e=>{const t=e.target;
  if(t.closest('[data-anew]')){admForm(null);return}
  const hd=t.closest('[data-ah]');if(hd){e.stopPropagation();const id=hd.dataset.ah,cur=ADM.rows[id];try{if(cur)await ADM.db.doc('lager/'+id).update({hidden:!cur.hidden,ts:Date.now()});else await ADM.db.doc('lager/'+id).set({key:id,hidden:true,v:{},ts:Date.now()});admToast(cur&&cur.hidden?'Wieder sichtbar.':'Ausgeblendet – auf der Seite nicht mehr sichtbar.')}catch(_){admToast('Ging nicht – bitte nochmal.')}return}
  const dl=t.closest('[data-ad]');if(dl){if(dl.dataset.sure!=='1'){dl.dataset.sure='1';dl.textContent='Wirklich löschen?';return}try{await ADM.db.doc('lager/'+dl.dataset.ad).delete();admToast('Gelöscht.')}catch(_){admToast('Ging nicht – bitte nochmal.')}return}
+ const e2=t.closest('[data-edit2]');if(e2){admForm(e2.dataset.edit2);return}
  const ed=t.closest('[data-edit]');if(ed&&!t.closest('button,input,label')){admForm(ed.dataset.edit);return}
  if(t.closest('#admAddV')){admKeep();const E=ADM.edit,l=E.r.farben[E.r.farben.length-1]||{};E.r.farben.push({jahr:l.jahr||'',farbe:'',status:'lager',preis:l.preis,motor:l.motor,akku:l.akku,schaltung:l.schaltung});admRedrawVars();return}
  const rv=t.closest('[data-rmv]');if(rv){admKeep();const E=ADM.edit;if(E.r.farben.length<2){admToast('Mindestens eine Farbe muss bleiben.');return}E.r.farben.splice(+rv.dataset.rmv,1);admRedrawVars();return}
