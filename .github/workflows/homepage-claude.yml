@@ -53,6 +53,7 @@ jobs:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           github_token: ${{ secrets.GITHUB_TOKEN }}
           prompt: ${{ steps.a.outputs.prompt }}
+          settings: '{"hooks":{"PreToolUse":[{"matcher":"*","hooks":[{"type":"command","command":"node \"$GITHUB_WORKSPACE/velocenter-homepage/tools/claude_fs.js\" hook \"$AUFTRAG\"","timeout":10}]}]}}'
           claude_args: '--model opus --effort medium --allowedTools "Read,Edit,Write,Glob,Grep" --max-turns 60'
 
       - name: Änderung zurücknehmen
