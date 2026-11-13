@@ -90,12 +90,13 @@ def varianten(aktiv, rows):
             e = out.setdefault(k, dict(key=k, marke=r.get('marke'), modell=r.get('modell'), jahr=f.get('jahr') or '',
                                        farbe=f.get('farbe') or '', typ=f.get('typ') or r.get('typ') or '',
                                        rahmen=set(), groessen=set(), motor=f.get('motor') or '', akku=f.get('akku') or '',
-                                       schaltung=f.get('schaltung') or '', admin=False))
+                                       schaltung=f.get('schaltung') or '', veloids=set(), admin=False))
             if r.get('rahmen'): e['rahmen'].add(r['rahmen'])
             if r.get('gr'): e['groessen'].add(r['gr'])
+            if f.get('veloid'): e['veloids'].add(str(f['veloid']))
             if 'bild' in o: e['admin'] = True  # Admin hat Foto selbst gesetzt oder entfernt
     for e in out.values():
-        e['rahmen'] = sorted(e['rahmen']); e['groessen'] = sorted(e['groessen'])
+        e['rahmen'] = sorted(e['rahmen']); e['groessen'] = sorted(e['groessen']); e['veloids'] = sorted(e['veloids'])[:3]
     return out
 
 def tage_seit(d):

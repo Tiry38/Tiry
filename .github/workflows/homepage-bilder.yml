@@ -81,6 +81,18 @@ jobs:
           path: ~/.rembg
           key: rembg-isnet-v1
 
+      - uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: pw-chromium-1.63.0
+
+      - name: Browser (Konfiguratoren, Velo-ID)
+        if: env.AKTION == 'suchen'
+        run: |
+          npm i -q --no-save --prefix "$RUNNER_TEMP/pw" playwright@1.63.0
+          "$RUNNER_TEMP/pw/node_modules/.bin/playwright" install --with-deps chromium
+          echo "NODE_PATH=$RUNNER_TEMP/pw/node_modules" >> "$GITHUB_ENV"
+
       - name: Arbeitsliste
         if: env.AKTION == 'suchen'
         id: l
@@ -96,6 +108,7 @@ jobs:
             echo "- Arbeitsliste: $BILDER_TMP/auftrag.json"
             echo "- Entscheidungen schreiben nach: $BILDER_TMP/entscheid.json"
             echo "- Werkzeug: python3 velocenter-homepage/tools/bilder_agent.py holen \"<key>\" \"<url>\""
+            echo "- Browser: node velocenter-homepage/tools/seite.js \"<url>\" bzw. --velo \"<Velo-ID>\""
             echo "- Stand: $(cat "$RUNNER_TEMP/liste.txt")"
             echo 'ENDE_PROMPT_9f3'
           } >> "$GITHUB_OUTPUT"
@@ -109,7 +122,7 @@ jobs:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           github_token: ${{ secrets.GITHUB_TOKEN }}
           prompt: ${{ steps.l.outputs.prompt }}
-          claude_args: '--model opus --effort medium --allowedTools "Read,Write,Glob,Grep,WebSearch,WebFetch,Bash(python3 velocenter-homepage/tools/bilder_agent.py holen:*)" --max-turns 700'
+          claude_args: '--model opus --effort medium --allowedTools "Read,Write,Glob,Grep,WebSearch,WebFetch,Bash(python3 velocenter-homepage/tools/bilder_agent.py holen:*),Bash(node velocenter-homepage/tools/seite.js:*)" --max-turns 700'
 
       - name: Ergebnis übernehmen
         id: e

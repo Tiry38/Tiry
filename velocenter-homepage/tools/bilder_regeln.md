@@ -35,6 +35,13 @@ dann nur eine bessere Fassung **genau dieses Bildes** (gleiche Aufnahme) nehmen,
 4. **Andere Seiten** (Fachhändler-Shops, Preisvergleiche, Zweirad-Großhändler) **nur zum Finden**: Farbnamen, Artikelnummern, Bild-Adressen.
    Übernehmen darfst du von dort nur das **offizielle Studio-Produktfoto des Herstellers** (identisch mit dem Herstellerbild, oft liegt es ohnehin auf
    dem CDN des Herstellers). **Nie** eigene Fotos eines Händlers (Laden, Werkstatt, Wasserzeichen, Personen, Preisschilder).
+5. **Browser-Werkzeug** für Seiten, die erst per JavaScript laden (Konfiguratoren, Farbauswahl):
+   `node velocenter-homepage/tools/seite.js "<https-URL>"` (optional `--klick "<Farbname/Text>"`) → große Bilder (Adresse + Pixelgröße),
+   Netz-Bilder, Seitentext und ein Screenshot (mit Read ansehen). Die gefundene Bild-Adresse dann mit `holen` laden.
+6. **Velo de Ville mit `veloids`** (Velo-ID aus Veloport, z. B. „V27-ID-00336548“): **zuerst**
+   `node velocenter-homepage/tools/seite.js --velo "<Velo-ID>"` – öffnet genau dieses konfigurierte Rad im Velo-de-Ville-Konfigurator
+   (Farbe, Ausstattung, Rahmen). Das dort gezeigte Radbild ist das exakt richtige Foto → `holen` → `neu` (sicher, Quelle offiziell).
+   Antwortet das Werkzeug „Velo-ID nicht gefunden“ (ältere Kollektion), normal weitersuchen.
 Farbnamen in Veloport weichen oft ab (z. B. „Stone Basalt Matt“ = „stone basalt matt“, „Dunkelblau-Matt“ = „dark blue matt“, Doppel-Farben
 „(grey+night red)“). Vergleiche sorgfältig, auch Englisch/Deutsch. Rahmenform (Tiefeinsteiger/Trapez/Diamant/Kompakt) soll passen, wenn der Hersteller
 sie unterscheidet; Größe ist egal.

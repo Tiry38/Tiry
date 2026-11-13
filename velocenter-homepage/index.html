@@ -4215,7 +4215,7 @@ function bzConvert(txt,bilder){const {kopf,rows}=bzCsv(txt),f=re=>kopf.findIndex
  let mo=f(/^modell(bezeichnung)?$/i);if(mo<0)mo=f(/modell/i);if(mo<0)mo=f(/^(bezeichnung|artikel|typ)$/i);let vk=f(/^vk|verkaufspreis|^preis/i);if(vk<0)vk=f(/^kaufpreis$/i);
  const m={marke:f(/hersteller|^marke$|brand/i),modell:mo,gr:f(/^(rahmen)?gr(ö|oe)(ß|ss)e|rahmenh(ö|oe)he|^rh$|^gr\.?$/i),farbe:f(/farbe/i),vk,ap:f(/angebot/i),jahr:f(/modelljahr|^jahr$/i),rf:f(/rahmenform/i),dh:f(/damen|herren|geschlecht/i),
   typ:f(/^(fahrzeug)?(art|typ|kategorie)$|warengruppe/i),id:f(/^(fahrzeug)?-?\s?id$|^lfd|^fz-?nr/i),ang:f(/angeliefert/i),lt:f(/liefertermin/i),res:f(/^reserviert$/i),test:f(/^testfahrzeug$/i),zu:f(/^name$/i),
-  vd:f(/verkaufsdatum/i),bes:f(/besitzer|eigent/i),lo:f(/^lagerort$/i),rech:f(/^rechnung$/i),display:f(/^display/i),reifen:f(/reifengr/i),gewicht:f(/^gewicht/i),zgg:f(/gesamtgewicht/i),km:f(/km-?\s?stand/i),aus:f(/ausstatt/i),akku:f(/akku-?\s?leistung/i),motor:f(/^motor|antrieb/i),schalt:f(/schaltung|gangschaltung/i)};
+  vd:f(/verkaufsdatum/i),bes:f(/besitzer|eigent/i),lo:f(/^lagerort$/i),rech:f(/^rechnung$/i),display:f(/^display/i),reifen:f(/reifengr/i),gewicht:f(/^gewicht/i),zgg:f(/gesamtgewicht/i),km:f(/km-?\s?stand/i),aus:f(/ausstatt/i),akku:f(/akku-?\s?leistung/i),motor:f(/^motor|antrieb/i),schalt:f(/schaltung|gangschaltung/i),veloid:f(/^velo-?\s?id$/i)};
  if(m.marke<0||m.modell<0)throw new Error('Spalten Marke und Modell nicht gefunden – ist das der Fahrzeugbestand aus Veloport?');
  const w=(r,i)=>i>=0&&i<r.length?String(r[i]).trim():'',ja=v=>/^(j|ja|1|x|true|y|yes)$/i.test(String(v).trim());
  const preis=v=>{v=v.replace(/€|\s/g,'');if(!v)return null;if(v.includes(','))v=v.replace(/\./g,'').replace(',','.');const p=parseFloat(v);return isFinite(p)&&p>=300?Math.round(p):null};
@@ -4232,12 +4232,12 @@ function bzConvert(txt,bilder){const {kopf,rows}=bzCsv(txt),f=re=>kopf.findIndex
   const da=!!w(r,m.ang)||(m.lo>=0&&!!w(r,m.lo))||(m.rech>=0&&!!w(r,m.rech)),zul=m.ang>=0&&!da,vkp=preis(w(r,m.vk)),ap=preis(w(r,m.ap)),geb=/gebraucht/i.test(art);
   const o={id:w(r,m.id)||String(nr+1),marke,modell,jahr:w(r,m.jahr),gr:grs(w(r,m.gr)),farbe:w(r,m.farbe),typ:w(r,m.typ).replace(/bitte w.hlen/i,''),rahmen:rform(w(r,m.rf),w(r,m.dh),modell),preis:vkp,angebot:ap&&vkp&&ap<vkp?ap:null,
    status:zul?'bestellt':'lager',res,ab:zul?kwf(w(r,m.lt)):'',gebraucht:geb,vorfuehr:m.test>=0&&ja(w(r,m.test)),motor:motor(w(r,m.motor)),akku:ein(w(r,m.akku),'Wh'),schaltung:w(r,m.schalt)||w(r,m.aus).split('|')[0].trim(),
-   display:w(r,m.display),reifen:w(r,m.reifen).replace(/''/g,'"'),gewicht:ein(w(r,m.gewicht),'kg'),zgg:ein(w(r,m.zgg),'kg'),km:geb&&w(r,m.km)?w(r,m.km)+' km':''};
+   display:w(r,m.display),reifen:w(r,m.reifen).replace(/''/g,'"'),gewicht:ein(w(r,m.gewicht),'kg'),zgg:ein(w(r,m.zgg),'kg'),km:geb&&w(r,m.km)?w(r,m.km)+' km':'',veloid:/velo\s*de\s*ville/i.test(marke)?w(r,m.veloid):''};
   Object.keys(o).forEach(k=>{if(o[k]===''||o[k]==null||o[k]===false)delete o[k]});R.push(o)});
- const FL=['jahr','farbe','typ','motor','akku','schaltung','display','reifen','gewicht','zgg','km','status','res','ab','preis','angebot','id'],G={},rang=x=>(x.status==='lager'?2:0)+(x.res?0:1);
+ const FL=['jahr','farbe','typ','motor','akku','schaltung','display','reifen','gewicht','zgg','km','status','res','ab','preis','angebot','id','veloid'],G={},rang=x=>(x.status==='lager'?2:0)+(x.res?0:1);
  R.forEach(r=>{const k=['marke','modell','jahr','gr','rahmen','farbe'].map(n=>String(r[n]||'').trim().toLowerCase()).join('|')+'|'+!!r.gebraucht+'|'+!!r.vorfuehr,a=G[k];if(!a){G[k]=Object.assign({},r);return}
   if(rang(r)>rang(a)){a.status=r.status;a.id=r.id;if(r.status==='lager')delete a.ab;if(r.res)a.res=true;else delete a.res}else if(a.status==='bestellt'&&r.ab&&(!a.ab||r.ab<a.ab))a.ab=r.ab;
-  if(r.angebot&&(!a.angebot||r.angebot<a.angebot))a.angebot=r.angebot;['motor','akku','schaltung','display','reifen','gewicht','zgg','typ'].forEach(n=>{if(r[n]&&!a[n])a[n]=r[n]})});
+  if(r.angebot&&(!a.angebot||r.angebot<a.angebot))a.angebot=r.angebot;['motor','akku','schaltung','display','reifen','gewicht','zgg','typ','veloid'].forEach(n=>{if(r[n]&&!a[n])a[n]=r[n]})});
  const K={},bk=(mk,mo,j,fa)=>[mk,mo,j,fa].map(t=>String(t||'').toLowerCase().replace(/[^a-z0-9]+/g,'')).join('|');
  Object.values(G).forEach(r=>{const k=['marke','modell','gr','rahmen'].map(n=>String(r[n]||'').trim().toLowerCase()).join('|')+'|'+!!r.gebraucht+'|'+!!r.vorfuehr;
   const c=K[k]||(K[k]=Object.assign({farben:[]},...['marke','modell','gr','rahmen','typ','gebraucht','vorfuehr'].filter(n=>r[n]!=null).map(n=>({[n]:r[n]}))));const v={};FL.forEach(n=>{if(r[n]!=null)v[n]=r[n]});

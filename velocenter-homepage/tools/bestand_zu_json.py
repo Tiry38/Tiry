@@ -52,7 +52,7 @@ def karte(kopf):
         lo=f(r'^lagerort$'), rech=f(r'^rechnung$'),
         display=f(r'^display'), reifen=f(r'reifengr'), gewicht=f(r'^gewicht'), zgg=f(r'gesamtgewicht'), km=f(r'km-?\s?stand'),
         aus=f(r'ausstatt'), akku=f(r'akku-?\s?leistung'), motor=f(r'^motor|antrieb'),
-        schalt=f(r'schaltung|gangschaltung'),
+        schalt=f(r'schaltung|gangschaltung'), veloid=f(r'^velo-?\s?id$'),
     )
 
 def wert(r, i):
@@ -155,6 +155,7 @@ def main():
             schaltung=wert(r, m['schalt']) or wert(r, m['aus']).split('|')[0].strip(),
             display=wert(r, m['display']), reifen=wert(r, m['reifen']).replace("''", '"'),
             gewicht=einheit(wert(r, m['gewicht']), 'kg'), zgg=einheit(wert(r, m['zgg']), 'kg'),
+            veloid=wert(r, m['veloid']) if re.search(r'velo\s*de\s*ville', marke, re.I) else '',
             km=(wert(r, m['km']) + ' km') if re.search(r'gebraucht', art, re.I) and wert(r, m['km']) else '',
         ).items() if v not in ('', None, False)})
     eindeutig = gruppieren(raeder)
@@ -177,7 +178,7 @@ def in_html_schreiben(ziel, daten):
 
 
 FELDER = ('marke', 'modell', 'jahr', 'gr', 'farbe', 'rahmen', 'typ', 'motor', 'akku', 'schaltung', 'display', 'reifen', 'gewicht', 'zgg', 'km',
-          'status', 'res', 'ab', 'preis', 'angebot', 'vorfuehr', 'gebraucht', 'id')
+          'status', 'res', 'ab', 'preis', 'angebot', 'vorfuehr', 'gebraucht', 'id', 'veloid')
 
 def bild_key(marke, modell, jahr, farbe):
     """Schlüssel für das exakte Herstellerfoto: Marke + Modell + Modelljahr + Farbe."""
@@ -220,7 +221,7 @@ def gruppieren(raeder):
         elif alt['status'] == 'bestellt' and neu.get('ab') and (not alt.get('ab') or neu['ab'] < alt['ab']):
             alt['ab'] = neu['ab']
         if neu.get('angebot') and (not alt.get('angebot') or neu['angebot'] < alt['angebot']): alt['angebot'] = neu['angebot']
-        for k in ('motor', 'akku', 'schaltung', 'display', 'reifen', 'gewicht', 'zgg', 'typ'):
+        for k in ('motor', 'akku', 'schaltung', 'display', 'reifen', 'gewicht', 'zgg', 'typ', 'veloid'):
             if k in neu and k not in alt: alt[k] = neu[k]
     # Schritt 2: gleiches Modell + gleiche Groesse + gleiche Rahmenform -> EINE Karte, Farben als Auswahl
     karten = {}
