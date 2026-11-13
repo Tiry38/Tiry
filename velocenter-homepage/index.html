@@ -1637,6 +1637,16 @@ button.akpi{cursor:pointer;transition:transform .2s,box-shadow .2s}button.akpi:h
 .anfun>div:first-child{clip-path:polygon(0 0,calc(100% - 18px) 0,100% 50%,calc(100% - 18px) 100%,0 100%);border-radius:999px 0 0 999px}
 .anfun b{display:block;font:800 24px/1 var(--display)}.anfun small{display:block;margin-top:6px;font:600 12px/1.2 var(--display);color:var(--mut)}
 .anfun>div:nth-child(2){background:linear-gradient(160deg,#FFEFE0,#FBDCC0)}.anfun>div:nth-child(3){background:linear-gradient(160deg,#E7F8EF,#CDEFDD)}
+.anb{grid-template-columns:minmax(120px,1.4fr) 1.6fr 64px}
+.antd{display:inline-block;margin-left:4px;font-style:normal;font-weight:800;color:#4A4F5A}.antd.up{color:#047857}.antd.dn{color:#B00D29}
+.anins{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px 18px}
+.anins li{display:flex;align-items:flex-start;gap:10px;padding:12px 16px;border-radius:999px 22px 22px 999px;background:linear-gradient(110deg,#FFF8F3,#FBF1F4);font-size:14px;line-height:1.4;color:#2A2E37}
+.anins li i{flex:none;width:12px;height:12px;margin-top:4px;border-radius:50%;background:var(--c);box-shadow:0 0 0 4px color-mix(in srgb,var(--c) 22%,transparent)}
+.antb{display:flex;flex-direction:column;gap:4px}
+.antr{display:grid;grid-template-columns:minmax(96px,1.3fr) repeat(4,minmax(0,1fr));gap:8px;align-items:center;padding:8px 14px;border-radius:999px;font-size:13.5px}
+.antr:nth-child(even){background:#FBF7F2}.antr.z{color:var(--dim)}.antr>span:not(:first-child){text-align:right}
+.anth{font:700 11px/1 var(--display);letter-spacing:.1em;text-transform:uppercase;color:var(--dim);background:none!important}
+@media (max-width:520px){.antr{grid-template-columns:minmax(80px,1.3fr) repeat(3,minmax(0,1fr));gap:6px;padding:8px 10px}.antr>span:nth-child(3){display:none}.anth{font-size:9.5px;letter-spacing:.03em}.anb{grid-template-columns:1fr 64px;gap:4px 10px}.anb span{grid-column:1/-1;white-space:normal}}
 /* Übersicht: Homepage jetzt */
 .anow{display:grid;grid-template-columns:1.3fr 1fr;gap:16px;margin-bottom:16px}
 .anowc{position:relative;padding:22px 24px;border-radius:28px;color:#fff;overflow:hidden;background:radial-gradient(80% 120% at 100% 0%,rgba(184,115,51,.5),transparent 60%),linear-gradient(130deg,#16181E,#2A1016 55%,#8E0B20)}
@@ -4762,8 +4772,15 @@ async function anLoad(n){const c=AN.c[n];if(c&&Date.now()-c.t<60000)return c.d;i
 const ANS={start:'Startseite',lager:'Lager / Räder',service:'Werkstatt & Service',marken:'Marken',isy:'i:SY Experte',treffen:'i:SY-Treffen',dreirad:'E-Dreiräder',kontakt:'Kontakt',impressum:'Impressum',datenschutz:'Datenschutz',warum:'Infos'};
 const ANC={wa:'WhatsApp geöffnet',tel:'Anruf angetippt',mail:'E-Mail angetippt',anfrage:'Termin-Formular abgeschickt',termin:'„Termin anfragen“ angetippt',probefahrt:'Probefahrt per WhatsApp',anfragerad:'Rad angefragt',route:'Route / Karte',finder:'E-Bike-Finder geöffnet',finderok:'Finder bis zum Ergebnis',merk:'Rad gemerkt',share:'Rad geteilt',rechner:'Dienstrad-Rechner',bewertung:'Google-Bewertung',social:'Instagram / Facebook'};
 const ANR={direkt:'Direkt / Lesezeichen',google:'Google',bing:'Bing',suche:'Andere Suchmaschine',facebook:'Facebook',instagram:'Instagram',altseite:'Alte Homepage',andere:'Andere Webseiten'};
-async function admAnalyse(b){const n=AN.n;b.innerHTML='<div class="anbar">'+[7,30,90,365].map(d=>'<button type="button" class="apill'+(d===n?' on':'')+'" data-anr="'+d+'">'+(d===365?'1 Jahr':d+' Tage')+'</button>').join('')+'<span class="sp"></span><button type="button" class="apill" data-anre>↻ Aktualisieren</button></div><div id="anBody"><p class="admnote">Wird geladen …</p></div>';
- const D=await anLoad(n),B=$('#anBody');if(!B||AN.n!==n)return;
+const ANSH={wa:'WhatsApp',mail:'E-Mail',sms:'SMS',fb:'Facebook',tg:'Telegram',x:'X',link:'Link kopiert',mehr:'Weitere Apps'};
+const MN=['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
+const anTr=(a,c)=>{if(!c)return a?' <em class="antd up" title="vorher 0">neu</em>':'';const p=Math.round((a-c)/c*100);return ' <em class="antd '+(p>0?'up':p<0?'dn':'')+'" title="vorher '+c+'">'+(p>0?'▲':p<0?'▼':'±')+'</em>'};
+function anCsv(){const L=AN.last;if(!L){admToast('Noch keine Zahlen zum Speichern.');return}const F=['bs','pv','c_wa','c_tel','c_mail','c_anfrage','c_probefahrt','c_anfragerad','c_route','c_finder','c_merk','c_share','dv_handy','dv_tablet','dv_pc'];
+ const H=['Tag','Besuche','Seitenaufrufe','WhatsApp','Anrufe','E-Mail','Termin-Formular','Probefahrt','Rad angefragt','Route','E-Bike-Finder','Gemerkt','Geteilt','Handy','Tablet','PC'];
+ const csv='\ufeff'+[H.join(';')].concat(L.cur.map(k=>[k.slice(8,10)+'.'+k.slice(5,7)+'.'+k.slice(0,4)].concat(F.map(f=>(L.D[k]||{})[f]||0)).join(';'))).join('\r\n');
+ const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));a.download='homepage-besucher-'+heuteK()+'.csv';document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},500)}
+async function admAnalyse(b){const n=AN.n;b.innerHTML='<div class="anbar">'+[1,7,30,90,365].map(d=>'<button type="button" class="apill'+(d===n?' on':'')+'" data-anr="'+d+'">'+(d===1?'Heute':d===365?'1 Jahr':d+' Tage')+'</button>').join('')+'<span class="sp"></span><button type="button" class="apill" data-ancsv>⤓ Als Tabelle speichern</button><button type="button" class="apill" data-anre>↻ Aktualisieren</button></div><div id="anBody"><p class="admnote">Wird geladen …</p></div>';
+ const D=await anLoad(n),B=$('#anBody');if(!B||AN.n!==n)return;AN.last=null;
  if(!D){B.innerHTML='<section class="acard"><div class="anempty"><span class="ic">'+admI('analyse')+'</span><b>Noch keine Besucher-Daten</b><p>Die Zählung läuft auf der echten Homepage (nicht im Prototyp). Die ersten Zahlen erscheinen nach den ersten Besuchen.<br>Gezählt wird ohne Cookies, ohne IP-Adresse und ohne Profile – Admins werden nicht mitgezählt.</p></div></section>'+anGeraet();return}
  const h=heuteK(),cur=Array.from({length:n},(_,i)=>dPlus(h,-(n-1-i))),prv=cur.map(k=>dPlus(k,-n)),sum=(ks,f)=>ks.reduce((s,k)=>s+((D[k]||{})[f]||0),0);
  const agg=(ks,pre)=>{const o={};ks.forEach(k=>{const x=D[k]||{};for(const f in x)if(f.startsWith(pre)&&typeof x[f]==='number')o[f.slice(pre.length)]=(o[f.slice(pre.length)]||0)+x[f]});return o};
@@ -4772,19 +4789,42 @@ async function admAnalyse(b){const n=AN.n;b.innerHTML='<div class="anbar">'+[7,3
  const tr=(a,c)=>{if(!hatV)return '<em>kein Vergleich</em>';if(!c)return a?'<em class="up">neu</em>':'<em>±0</em>';const p=Math.round((a-c)/c*100);return '<em class="'+(p>0?'up':p<0?'dn':'')+'">'+(p>0?'▲ +':p<0?'▼ ':'± ')+p+' %</em>'};
  const kp=(l,v,t,c1,c2)=>'<div class="ank" style="--c1:'+c1+';--c2:'+c2+'"><small>'+l+'</small><b>'+v+'</b>'+t+'</div>';
  const pct=(a,c)=>c?(a/c*100).toLocaleString('de-DE',{maximumFractionDigits:1})+' %':'–';
- const bars=(o,lab,lim,c1,c2)=>{const E=Object.entries(o).filter(e=>e[1]>0).sort((a,c)=>c[1]-a[1]).slice(0,lim||10);if(!E.length)return '<p class="admnote">Noch keine Daten.</p>';const mx=E[0][1],tot=Object.values(o).reduce((s,v)=>s+v,0);
-  return '<div class="anbl">'+E.map(([k,v])=>'<div class="anb"><span title="'+esc(lab(k))+'">'+esc(lab(k))+'</span><i style="--c1:'+c1+';--c2:'+c2+'"><s style="--w:'+(v/mx*100).toFixed(1)+'%"></s></i><b>'+v.toLocaleString('de-DE')+'<small>'+Math.round(v/tot*100)+' %</small></b></div>').join('')+'</div>'};
+ const bars=(o,lab,lim,c1,c2,po)=>{const E=Object.entries(o).filter(e=>e[1]>0).sort((a,c)=>c[1]-a[1]).slice(0,lim||10);if(!E.length)return '<p class="admnote">Noch keine Daten.</p>';const mx=E[0][1],tot=Object.values(o).reduce((s,v)=>s+v,0);
+  return '<div class="anbl">'+E.map(([k,v])=>'<div class="anb"><span title="'+esc(lab(k))+'">'+esc(lab(k))+'</span><i style="--c1:'+c1+';--c2:'+c2+'"><s style="--w:'+(v/mx*100).toFixed(1)+'%"></s></i><b>'+v.toLocaleString('de-DE')+'<small>'+Math.round(v/tot*100)+' %'+(po&&hatV?anTr(v,po[k]||0):'')+'</small></b></div>').join('')+'</div>'};
  const bikeLab=k=>{const m=(LG.M||[]).find(x=>rk(x).replace(/[^a-z0-9_]/g,'_')===k);return m?m.marke+' '+m.modell:k.replace(/_/g,' ')};
  const dv=agg(cur,'dv_'),hr=agg(cur,'h_'),hmx=Math.max(1,...Object.values(hr));
  const wd=[0,0,0,0,0,0,0];cur.forEach(k=>{wd[new Date(k+'T12:00:00Z').getUTCDay()]+=((D[k]||{}).bs||0)});
+ const anf=ks=>sum(ks,'c_anfrage')+sum(ks,'c_probefahrt')+sum(ks,'c_anfragerad'),bsA=cur.map(k=>(D[k]||{}).bs||0);
+ let best=null;bsA.forEach((v,i)=>{if(v&&(!best||v>=bsA[best[0]]))best=[i,cur[i]]});
+ const mon={};cur.forEach(k=>{const m=k.slice(0,7);mon[m]=(mon[m]||0)+((D[k]||{}).bs||0)});
+ const top=o=>{const e=Object.entries(o).filter(x=>x[1]>0).sort((a,c)=>c[1]-a[1])[0];return e||null},tot=o=>Object.values(o).reduce((s,v)=>s+v,0);
+ const I=[],hT=top(hr),wT=top(Object.fromEntries(wd.map((v,i)=>[i,v]))),rO=agg(cur,'r_'),rT=top(rO),bT=top(agg(cur,'b_')),sO=agg(cur,'s_'),sT=top(Object.fromEntries(Object.entries(sO).filter(x=>x[0]!=='start')));
+ if(hatV&&bs0)I.push(['#34D399','Besuche '+(bs>=bs0?'<b>gestiegen</b>':'<b>gesunken</b>')+': '+bs.toLocaleString('de-DE')+' statt '+bs0.toLocaleString('de-DE')+(n===1?' gestern.':' im Zeitraum davor.')]);
+ if(hT)I.push(['#FF5A6E','Die meisten Besuche kommen <b>zwischen '+(+hT[0])+' und '+(+hT[0]+1)+' Uhr</b>.']);
+ if(wT&&n>=7)I.push(['#A78BFA','Stärkster Wochentag: <b>'+DN[wT[0]]+'</b>.']);
+ if(rT)I.push(['#22D3EE','Wichtigste Herkunft: <b>'+esc(ANR[rT[0]]||rT[0])+'</b> ('+Math.round(rT[1]/tot(rO)*100)+' % der Besuche).']);
+ if(tot(dv))I.push(['#C8102E','<b>'+Math.round((dv.handy||0)/tot(dv)*100)+' %</b> der Besucher sind mit dem Handy unterwegs.']);
+ if(sT)I.push(['#F5B83D','Beliebtester Bereich nach der Startseite: <b>'+esc(ANS[sT[0]]||sT[0])+'</b>.']);
+ if(bT)I.push(['#B87333','Meistangesehenes Rad: <b>'+esc(bikeLab(bT[0]))+'</b> ('+bT[1]+'×).']);
+ if(bs)I.push(['#0D9488','Jeder <b>'+(k1+anf(cur)?Math.max(1,Math.round(bs/(k1+anf(cur)))):'–')+'.</b> Besuch führt zu einem Kontakt oder einer Anfrage.']);
+ const ins=I.length?'<ul class="anins">'+I.map(([c,t])=>'<li style="--c:'+c+'"><i></i><span>'+t+'</span></li>').join('')+'</ul>':'<p class="admnote">Noch zu wenige Daten.</p>';
+ AN.last={cur,D,n};
  B.innerHTML='<div class="ankpis">'+kp('Besuche',bs.toLocaleString('de-DE'),tr(bs,bs0),'#FF5A6E','#C8102E')+kp('Seitenaufrufe',pv.toLocaleString('de-DE'),tr(pv,pv0),'#F5B83D','#B87333')+kp('Seiten pro Besuch',bs?(pv/bs).toLocaleString('de-DE',{maximumFractionDigits:1}):'–','<em>Ø im Zeitraum</em>','#A78BFA','#DB2777')+
-  kp('Kontakt-Klicks',k1.toLocaleString('de-DE'),tr(k1,k0),'#34D399','#0D9488')+kp('Kontakt-Quote',pct(k1,bs),'<em>Kontakt-Klicks je Besuch</em>','#22D3EE','#2563EB')+'</div>'+
+  kp('Kontakt-Klicks',k1.toLocaleString('de-DE'),tr(k1,k0),'#34D399','#0D9488')+kp('Kontakt-Quote',pct(k1,bs),'<em>Kontakt-Klicks je Besuch</em>','#22D3EE','#2563EB')+
+  kp('Anfragen',anf(cur).toLocaleString('de-DE'),tr(anf(cur),anf(prv)),'#FB923C','#C8102E')+kp('Ø Besuche pro Tag',(bs/n).toLocaleString('de-DE',{maximumFractionDigits:1}),'<em>'+(hatV?'vorher Ø '+(bs0/n).toLocaleString('de-DE',{maximumFractionDigits:1}):'im Zeitraum')+'</em>','#F472B6','#7C3AED')+
+  kp('Bester Tag',best?bsA[best[0]].toLocaleString('de-DE'):'–',best?'<em>'+dKurz(best[1])+'</em>':'<em>noch keiner</em>','#FACC15','#EA580C')+'</div>'+
+  '<section class="acard" style="margin-bottom:16px"><h4>Auf einen Blick</h4>'+ins+'</section>'+
   '<section class="acard"><h4>Besucher im Verlauf</h4><div class="anlg"><span style="--c:#C8102E"><i></i>Besuche</span><span style="--c:#B87333"><i></i>Seitenaufrufe</span></div>'+anChart(cur,D)+'</section>'+
   '<section class="acard" style="margin-top:16px"><h4>Vom Besuch zur Anfrage</h4><div class="anfun"><div><b>'+bs.toLocaleString('de-DE')+'</b><small>Besuche</small></div><div><b>'+sum(cur,'s_lager').toLocaleString('de-DE')+'</b><small>Lager angesehen</small></div><div><b>'+(k1+sum(cur,'c_anfrage')).toLocaleString('de-DE')+'</b><small>Kontakt & Anfragen</small></div></div></section>'+
-  '<div class="agrid2" style="margin-top:16px"><section class="acard"><h4>Beliebteste Bereiche</h4>'+bars(agg(cur,'s_'),k=>ANS[k]||k,10,'#FF5A6E','#C8102E')+'</section><section class="acard"><h4>Was wurde angeklickt</h4>'+bars(agg(cur,'c_'),k=>ANC[k]||k,12,'#34D399','#0D9488')+'</section>'+
-  '<section class="acard"><h4>Meistangesehene Räder</h4>'+bars(agg(cur,'b_'),bikeLab,10,'#F5B83D','#B87333')+'</section><section class="acard"><h4>Woher kommen die Besucher</h4>'+bars(agg(cur,'r_'),k=>ANR[k]||k,8,'#22D3EE','#2563EB')+'</section>'+
+  '<div class="agrid2" style="margin-top:16px"><section class="acard"><h4>Beliebteste Bereiche</h4>'+bars(agg(cur,'s_'),k=>ANS[k]||k,10,'#FF5A6E','#C8102E',agg(prv,'s_'))+'</section><section class="acard"><h4>Was wurde angeklickt</h4>'+bars(agg(cur,'c_'),k=>ANC[k]||k,15,'#34D399','#0D9488',agg(prv,'c_'))+'</section>'+
+  '<section class="acard"><h4>Meistangesehene Räder</h4>'+bars(agg(cur,'b_'),bikeLab,15,'#F5B83D','#B87333',agg(prv,'b_'))+'</section><section class="acard"><h4>Woher kommen die Besucher</h4>'+bars(agg(cur,'r_'),k=>ANR[k]||k,8,'#22D3EE','#2563EB',agg(prv,'r_'))+'</section>'+
   '<section class="acard"><h4>Geräte</h4>'+anDonut(dv)+'</section><section class="acard"><h4>Uhrzeit der Besuche</h4><div class="anhr">'+Array.from({length:24},(_,i)=>{const v=hr[p2(i)]||0;return '<i class="'+(v?'':'z')+'" style="--h:'+(v/hmx*100).toFixed(1)+'%" title="'+i+' Uhr: '+v+' Besuche"></i>'}).join('')+'</div><div class="anhx">'+Array.from({length:24},(_,i)=>'<span>'+(i%3?'':i)+'</span>').join('')+'</div>'+
-  '<h4>Wochentage</h4>'+bars(Object.fromEntries([1,2,3,4,5,6,0].map(d=>[d,wd[d]])),k=>DN[k],7,'#A78BFA','#DB2777')+'</section></div>'+anGeraet()}
+  '<h4>Wochentage</h4>'+bars(Object.fromEntries([1,2,3,4,5,6,0].map(d=>[d,wd[d]])),k=>DN[k],7,'#A78BFA','#DB2777')+'</section>'+
+  '<section class="acard"><h4>Räder geteilt über</h4>'+bars(agg(cur,'sh_'),k=>ANSH[k]||k,8,'#60A5FA','#7C3AED',agg(prv,'sh_'))+'</section>'+
+  '<section class="acard"><h4>Kontaktwege im Vergleich</h4>'+bars({wa:sum(cur,'c_wa'),tel:sum(cur,'c_tel'),mail:sum(cur,'c_mail'),anfrage:sum(cur,'c_anfrage'),probefahrt:sum(cur,'c_probefahrt'),anfragerad:sum(cur,'c_anfragerad')},k=>ANC[k]||k,6,'#34D399','#2563EB',{wa:sum(prv,'c_wa'),tel:sum(prv,'c_tel'),mail:sum(prv,'c_mail'),anfrage:sum(prv,'c_anfrage'),probefahrt:sum(prv,'c_probefahrt'),anfragerad:sum(prv,'c_anfragerad')})+'</section></div>'+
+  (n>=90?'<section class="acard" style="margin-top:16px"><h4>Besuche je Monat</h4>'+bars(mon,k=>MN[+k.slice(5,7)-1]+' '+k.slice(0,4),13,'#FF5A6E','#B87333')+'</section>':'')+
+  '<section class="acard" style="margin-top:16px"><h4>Tag für Tag'+(n>31?' <small class="admnote">(letzte 31 Tage)</small>':'')+'</h4><div class="antb"><div class="antr anth"><span>Tag</span><span>Besuche</span><span>Seiten</span><span>Kontakt</span><span>Anfragen</span></div>'+
+  cur.slice(-31).reverse().map(k=>{const x=D[k]||{};return '<div class="antr'+(x.bs?'':' z')+'"><span>'+dKurz(k)+'</span><span><b>'+(x.bs||0)+'</b></span><span>'+(x.pv||0)+'</span><span>'+kon([k])+'</span><span>'+anf([k])+'</span></div>'}).join('')+'</div></section>'+anGeraet()}
 function anChart(ks,D){const W=900,Hh=220,pl=34,pb=26,n=ks.length,bsA=ks.map(k=>(D[k]||{}).bs||0),pvA=ks.map(k=>(D[k]||{}).pv||0),mx=Math.max(4,...pvA,...bsA);
  const st=Math.pow(10,Math.floor(Math.log10(mx))),top=Math.ceil(mx/st)*st,x=i=>pl+(n<2?0:i*(W-pl-8)/(n-1)),y=v=>Hh-pb-v/top*(Hh-pb-10);
  const line=A=>A.map((v,i)=>(i?'L':'M')+x(i).toFixed(1)+' '+y(v).toFixed(1)).join(' ');
@@ -4807,6 +4847,7 @@ $('#adm').addEventListener('click',async e=>{const t=e.target;
  if(t.closest('[data-txstart]')){txStart();return}
  const r=t.closest('[data-anr]');if(r){AN.n=+r.dataset.anr;LS.set('vc_an',AN.n);admRender();return}
  if(t.closest('[data-anre]')){AN.c={};admRender();return}
+ if(t.closest('[data-ancsv]')){anCsv();return}
  const pf=t.closest('[data-pf]');if(pf&&t.closest('#adm .aplf')){ADM.pf=pf.dataset.pf;admRender();return}
  if(t.closest('[data-zreset]')){try{const v=Object.assign({},ADM.set);delete v.zeiten;v.ts=Date.now();await ADM.db.doc('site/einstellungen').set(v);ADM.set=SITE=v;siteApply();admLog('Öffnungszeiten auf Standard zurückgesetzt');admToast('Standard-Zeiten gelten wieder.');admRender()}catch(_){admToast('Ging nicht – bitte nochmal.')}return}
  const ap=t.closest('[data-aup]');if(ap){const F=$('#admAusF'),[tx,md]=ap.dataset.aup.split('|');F.txt.value=tx;if(md){const y=+heuteK().slice(0,4),k=y+'-'+md;F.von.value=k<heuteK()?(y+1)+'-'+md:k;F.bis.value=''}F.von.focus();return}
