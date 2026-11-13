@@ -1398,6 +1398,7 @@ body.sc .hdr{backdrop-filter:none!important;-webkit-backdrop-filter:none!importa
 .adm-b{flex:1;overflow:auto;padding:24px clamp(16px,3vw,34px) 60px}
 .admlogin{max-width:380px;margin:10vh auto 0;text-align:center}
 .admlogin .lk{width:72px;height:72px;margin:0 auto 18px;border-radius:14px;display:grid;place-items:center;color:#fff;background:linear-gradient(150deg,#FF4D63,#C8102E 45%,#6E0716);box-shadow:0 18px 30px -14px rgba(200,16,46,.8)}
+.admpw{display:block;width:100%;margin:16px 0 0;padding:14px 20px;border-radius:999px;border:1px solid rgba(0,0,0,.15);font:600 16px/1.2 var(--display);background:#fff;color:#111;text-align:center}.admpw:focus{outline:2px solid #C8102E;outline-offset:2px}.admpwe{display:block;min-height:1.4em;margin-top:10px;color:#C8102E;font-weight:700}
 .admlogin .lk svg{width:32px;height:32px}.admlogin h3{font:800 24px/1.1 var(--display);margin:0 0 10px}.admlogin p{color:var(--mut);line-height:1.6}.admlogin .cta{margin-top:18px}
 /* Übersicht */
 .akpis{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px;margin-bottom:18px}
@@ -3509,7 +3510,9 @@ async function admOpen(){const M=$('#adm');M.hidden=false;document.body.style.ov
  try{ADM.assets=await claude.use('assets')}catch(e){}
  const ls=$('#admLs');if(!ls)return;
  if(!ok||!ADM.db){ls.innerHTML=!ADM.db?'Bitte bei claude.ai anmelden, dann die Seite neu öffnen.':'Kein Zugang. Dieser Bereich ist nur für das Velocenter-Team.';return}
- ls.innerHTML='Angemeldet und freigeschaltet.<br><button type="button" class="cta" id="admGo">Admin öffnen</button>';$('#admGo').focus()}
+ ls.innerHTML='Angemeldet. Bitte Admin-Passwort eingeben.<form id="admPwF" autocomplete="off"><input type="password" id="admPw" class="admpw" aria-label="Admin-Passwort" placeholder="Passwort" autocomplete="current-password"><button type="submit" class="cta" id="admGo">Admin öffnen</button><span id="admPwE" class="admpwe" role="alert"></span></form>';$('#admPw').focus()}
+const ADMPW={s:'ybRVYmo7/Yag6Yc8GWiObQ==',h:'V5LqVJGGmcLBkm+q+bkaHOygClR+xDGpIxdGlQkQA2o=',n:310000};
+async function admPwOk(pw){try{const b=x=>Uint8Array.from(atob(x),c=>c.charCodeAt(0));const k=await crypto.subtle.importKey('raw',new TextEncoder().encode(pw),'PBKDF2',false,['deriveBits']);const d=new Uint8Array(await crypto.subtle.deriveBits({name:'PBKDF2',hash:'SHA-256',salt:b(ADMPW.s),iterations:ADMPW.n},k,256));const h=b(ADMPW.h);let r=d.length^h.length;for(let i=0;i<h.length;i++)r|=d[i]^h[i];return r===0}catch(e){return false}}
 function admClose(){admDrClose();const M=$('#adm');M.classList.remove('on');document.body.style.overflow='';setTimeout(()=>{M.hidden=true},300);if(location.hash==='#admin')location.hash='lager'}
 /* ---------- Daten-Helfer ---------- */
 function admAll(){const out=[];((admBase()||{}).raeder||[]).forEach(r=>{const k='ov-'+admKey(r),o=ADM.rows[k]||{};out.push({id:k,r,o,imp:true})});
@@ -3689,7 +3692,7 @@ let admT;function admToast(t){const el=$('#admToast');el.textContent=t;el.classL
 $('#adm').addEventListener('click',async e=>{const t=e.target;
  if(t.closest('[data-aclose]')){admClose();return}
  if(t.closest('[data-drclose]')){admDrClose();if(ADM.tab==='neu'){ADM.tab='raeder';admRender()}return}
- if(t.closest('#admGo')){ADM.ok=true;$('#admTabs').hidden=false;admRender();return}
+ 
  const tb=t.closest('#admTabs button');if(tb){admDrClose();ADM.tab=tb.dataset.t;admRender();$('#admBody').scrollTop=0;return}
  const go=t.closest('[data-go]');if(go){ADM.tab=go.dataset.go;admRender();return}
  if(t.closest('[data-anew]')){admForm(null);return}
@@ -3722,6 +3725,7 @@ $('#adm').addEventListener('submit',async e=>{e.preventDefault();if(e.target.id=
   try{await ADM.db.doc('site/einstellungen').set(v);admToast('Gespeichert – gilt sofort.')}catch(_){admToast('Speichern fehlgeschlagen.')}}});
 ['dragover','dragleave','drop'].forEach(ev=>$('#adm').addEventListener(ev,e=>{const d=e.target.closest&&e.target.closest('#admDrop');if(!d)return;e.preventDefault();d.classList.toggle('hov',ev==='dragover');if(ev==='drop'&&e.dataTransfer.files[0])admCsvLoad(e.dataTransfer.files[0])}));
 addEventListener('keydown',e=>{if(e.key!=='Escape'||$('#adm').hidden)return;if(!$('#admDr').hidden){admDrClose();if(ADM.tab==='neu'){ADM.tab='raeder';admRender()}}else admClose()});
+document.addEventListener('submit',async e=>{if(e.target.id!=='admPwF')return;e.preventDefault();const i=$('#admPw'),g=$('#admGo'),er=$('#admPwE');if(!i||g.disabled)return;g.disabled=true;er.textContent='';const ok=await admPwOk(i.value);if(ok){ADM.ok=true;$('#admTabs').hidden=false;admRender();return}await new Promise(r=>setTimeout(r,900));g.disabled=false;i.value='';i.focus();er.textContent='Passwort falsch.'});
 (()=>{let n=0,t0=0;const c=$('.legalbar span');if(c)c.addEventListener('click',()=>{const t=Date.now();n=t-t0<600?n+1:1;t0=t;if(n>=5){n=0;admOpen()}})})();
 function admHash(){if(location.hash==='#admin')admOpen()}addEventListener('hashchange',admHash);admHash();
 /* Filterleiste kompakt, sobald sie oben klebt – Höhe wird ausgeglichen (kein Springen), Umschalten mit Puffer (kein Flackern) */

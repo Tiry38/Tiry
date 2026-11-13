@@ -80,6 +80,7 @@ def html_bauen():
     s = ersetze(s, ",'datenschutz','warum'];", ",'datenschutz'];")
     # Admin nur im Prototyp (braucht claude.ai)
     s = ersetze(s, "function admHash(){if(location.hash==='#admin')admOpen()}", 'function admHash(){}')
+    s = ersetze(s, "if(n>=5){n=0;admOpen()}", "if(n>=5){n=0}")
     # Datenschutz: Entwurfs-Hinweis raus, Hosting eintragen
     s = re.sub(r'<p[^>]*>\s*Entwurf für den Prototyp\.[^<]*(?:<[^/][^>]*>[^<]*</[^>]+>[^<]*)*</p>\s*', '', s, count=1)
     m = re.search(r'\[Wird beim Livegang ergänzt:[^\]]*\]', s)
