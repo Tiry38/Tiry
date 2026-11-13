@@ -23,6 +23,16 @@ service cloud.firestore {
         && request.resource.data.size() <= 700
         && request.resource.data.diff(resource == null ? {} : resource.data).affectedKeys().size() <= 40;
     }
+    // Admin-Chat „Claude“: Aufträge schreiben die Admins, der GitHub-Lauf meldet sich mit dem Bot-Konto und trägt nur Status + Antwort ein.
+    function bot() { return request.auth != null && request.auth.token.email == 'claude@admin.velo-center.de'; }
+    match /claude/{d} {
+      allow read: if admin() || bot();
+      allow create, delete: if admin();
+      allow update: if admin() || (bot() && request.resource.data.diff(resource.data).affectedKeys()
+        .hasOnly(['status', 'schritt', 'antwort', 'commit', 'run', 'start', 'fertig']));
+    }
+    // Zugang zum Start-Knopf (GitHub-Token nur mit „Actions: write“) – nur Admins.
+    match /geheim/{d}  { allow read, write: if admin(); }
     match /{other=**}  { allow read, write: if false; }
   }
 }

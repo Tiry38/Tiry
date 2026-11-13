@@ -1694,6 +1694,63 @@ body.txon img[data-ik]{cursor:copy;outline:2px dashed rgba(37,99,235,.6);outline
 @media (max-width:560px){.shs{place-items:end center;padding:0}.shs-p{width:100%;border-radius:28px 28px 0 0;padding-bottom:calc(22px + env(safe-area-inset-bottom,0px));transform:translateY(40px)}}
 @media (prefers-reduced-motion:reduce){.adm-side::before{animation:none}.hnote{animation:none}}
 
+/* Claude (KI) im Admin */
+.clhero{position:relative;display:flex;align-items:center;gap:20px;padding:22px 26px;border-radius:28px;color:#fff;margin-bottom:18px;overflow:hidden;background:radial-gradient(80% 140% at 100% 0%,rgba(219,39,119,.55),transparent 55%),radial-gradient(70% 120% at 0% 100%,rgba(34,211,238,.35),transparent 60%),linear-gradient(125deg,#1E1B4B,#4C1D95 45%,#7C3AED 75%,#C8102E);background-size:160% 160%;animation:clbg 14s ease-in-out infinite alternate;box-shadow:0 26px 50px -30px rgba(76,29,149,.9)}
+@keyframes clbg{to{background-position:100% 100%}}
+.clhero .hi{flex:none;width:64px;height:64px;border-radius:50%;display:grid;place-items:center;background:rgba(255,255,255,.14);box-shadow:inset 0 0 0 1px rgba(255,255,255,.28),0 0 30px rgba(167,139,250,.6)}
+.clhero .hi svg{width:30px;height:30px}
+.clhero h3{margin:0 0 6px;font:800 22px/1.15 var(--display)}
+.clhero p{margin:0;color:rgba(255,255,255,.9);line-height:1.55;font-size:14.5px}
+.clcog{position:absolute;top:12px;right:12px;width:44px;height:44px;border-radius:50%;border:0;background:rgba(255,255,255,.14);color:#fff;font-size:20px;cursor:pointer}
+.clcog:hover{background:rgba(255,255,255,.26)}
+.clset{margin-bottom:16px}.clset h4{margin:0 0 10px}
+.clsteps{margin:0 0 14px;padding-left:22px;display:grid;gap:8px;font-size:14px;line-height:1.5;color:#3B3F48}
+.clsteps code{font-size:12.5px;padding:1px 6px;border-radius:6px;background:#F1ECF9;color:#4C1D95;word-break:break-all}
+#clGhF input{min-height:44px;padding:0 16px;border-radius:999px;border:1px solid rgba(27,30,37,.18);font:600 14px var(--display);background:#fff}
+.clchat{padding:18px 18px 12px;background:linear-gradient(#fff,#fff) padding-box,linear-gradient(130deg,#A78BFA,#DB2777 45%,#22D3EE) border-box;border:1.5px solid transparent}
+.cll{display:flex;flex-direction:column;gap:12px;min-height:180px}
+.clm{display:flex;align-items:flex-end;gap:10px;max-width:min(640px,92%)}
+.clm.du{align-self:flex-end}
+.clm .av{flex:none;width:34px;height:34px;border-radius:50%;display:grid;place-items:center;color:#fff;font:800 14px var(--display);background:linear-gradient(135deg,var(--a1,#FF5A6E),var(--a2,#B87333))}
+.clm .av.ai{background:linear-gradient(135deg,#A78BFA,#DB2777 55%,#F59E0B);box-shadow:0 0 18px rgba(167,139,250,.55)}
+.clm .av.ai svg{width:18px;height:18px}
+.clb{min-width:0;padding:11px 15px 12px;border-radius:20px;line-height:1.5;font-size:14.5px;overflow-wrap:anywhere}
+.clb header{display:flex;align-items:center;gap:8px;margin-bottom:3px;font-size:12px}
+.clb header b{font:800 12.5px var(--display)}
+.clb time{color:inherit;opacity:.7;font-weight:600}
+.clb p{margin:0}
+.clm.du .clb{border-bottom-right-radius:6px;color:#fff;background:linear-gradient(130deg,#FF4D63,#C8102E 55%,#9B1430);box-shadow:0 12px 24px -16px rgba(200,16,46,.9)}
+.clm.du:not(.ich) .clb{background:linear-gradient(130deg,#3B82F6,#2563EB 55%,#1E3A8A)}
+.clm.ai .clb{border-bottom-left-radius:6px;background:#F6F3FC;border:1px solid rgba(124,58,237,.14);color:#1B1E25}
+.clm.ai.st-fehler .clb{background:#FFF4F4;border-color:rgba(200,16,46,.2)}
+.clr{display:inline-block;padding:1px 8px;margin-right:2px;border-radius:999px;background:rgba(255,255,255,.22);font:800 11.5px/1.6 var(--display)}
+.clst{padding:2px 9px;border-radius:999px;font:800 10.5px/1.5 var(--display);letter-spacing:.04em;text-transform:uppercase;background:#EDE9FE;color:#5B21B6}
+.clst.ok{background:#DCFCE7;color:#166534}.clst.no{background:#FEE2E2;color:#991B1B}
+.clp{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0 8px;padding:0;list-style:none}
+.clp li{display:flex;align-items:center;gap:6px;padding:4px 10px 4px 8px;border-radius:999px;font:700 11.5px var(--display);background:#fff;color:#8A8F99;border:1px solid rgba(27,30,37,.08)}
+.clp li::before{content:"";width:8px;height:8px;border-radius:50%;background:#D4D0DC}
+.clp li.ok{color:#166534}.clp li.ok::before{background:#22C55E}
+.clp li.on{color:#5B21B6;border-color:rgba(124,58,237,.35);box-shadow:0 0 0 3px rgba(167,139,250,.18)}.clp li.on::before{background:#7C3AED;animation:txp 1.2s ease-in-out infinite}
+.clrun{display:flex;align-items:center;gap:8px;font-weight:600;color:#4C1D95}
+.clrun i{flex:none;width:16px;height:16px;border-radius:50%;border:2.5px solid rgba(124,58,237,.25);border-top-color:#7C3AED;animation:clspin .8s linear infinite}
+@keyframes clspin{to{transform:rotate(360deg)}}
+.clrun time{margin-left:auto;font:700 12.5px var(--display);opacity:.8}
+.clw{color:#9B1430;font-weight:600}
+.cla{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.cla .apill{display:inline-flex;align-items:center;min-height:44px;text-decoration:none}
+.cldone{display:inline-flex;align-items:center;min-height:36px;padding:0 12px;border-radius:999px;background:#EEE;color:#555;font:700 12px var(--display)}
+.clm2{display:block;margin-top:6px;color:#7A7F8A;font-size:12px}
+.clempty{padding:18px 6px;text-align:center}.clempty b{font:800 18px var(--display)}.clempty p{margin:6px auto 14px;max-width:460px;color:var(--dim);line-height:1.55}
+.clx{display:flex;flex-wrap:wrap;justify-content:center;gap:8px}.clx .apill{min-height:44px;text-align:left;line-height:1.3;padding:8px 14px}
+.clf{position:sticky;bottom:8px;display:flex;align-items:flex-end;gap:10px;margin-top:16px;padding:8px;border-radius:26px;background:#fff;box-shadow:0 -10px 30px -18px rgba(27,30,37,.35),inset 0 0 0 1.5px rgba(124,58,237,.25)}
+.clf textarea{flex:1;min-width:0;min-height:44px;max-height:220px;padding:11px 14px;border:0;outline:0;resize:vertical;background:transparent;font:500 15px/1.45 var(--body,inherit);color:#1B1E25}
+.clf:focus-within{box-shadow:0 -10px 30px -18px rgba(27,30,37,.35),inset 0 0 0 2px #7C3AED,0 0 0 4px rgba(167,139,250,.2)}
+.clsend{flex:none;display:inline-flex;align-items:center;gap:8px;min-height:46px;padding:0 20px;border:0;border-radius:999px;color:#fff;font:800 14px var(--display);cursor:pointer;background:linear-gradient(120deg,#7C3AED,#DB2777 55%,#F59E0B);background-size:150% 100%;box-shadow:0 10px 22px -12px rgba(124,58,237,.9);transition:background-position .4s}
+.clsend:hover{background-position:100% 0}.clsend svg{width:18px;height:18px}
+.clsend:disabled,.clf textarea:disabled{opacity:.5;cursor:not-allowed}
+.clhint{margin:10px 4px 0;font-size:12px;color:#7A7F8A;text-align:center}
+@media (max-width:760px){.clhero{flex-direction:column;align-items:flex-start;padding:20px}.clhero h3{font-size:19px;padding-right:44px}.clm{max-width:100%}.clsend span{display:none}.clf textarea{min-height:76px}.clsend{padding:0 14px}.clchat{padding:12px 10px 10px}}
+@media (prefers-reduced-motion:reduce){.clhero,.clrun i,.clp li.on::before{animation:none}}
 @media (max-width:1100px){.atr{grid-template-columns:64px 90px minmax(140px,1fr) 100px 90px 120px}.atr>span:nth-child(5),.atr>span:nth-child(8){display:none}.agrid2{grid-template-columns:1fr}}
 @media (max-width:760px){.adm-app{grid-template-columns:1fr;grid-template-rows:auto minmax(0,1fr)}
  #admTabs .agp{display:contents}#admTabs .agl{display:none}#admTabs button .ai{width:34px;height:34px}#admTabs button{min-height:46px;padding:0 6px}#admTabs button.on{box-shadow:none}.as-me{display:none!important}.as-foot{display:flex;gap:6px}.as-foot button svg{display:none}.adm-side::before,.adm-side::after{display:none}.alive{display:none!important}
@@ -4774,6 +4831,77 @@ $('#adm').addEventListener('submit',async e=>{const F=e.target;
  if(F.id==='admAktF'){e.preventDefault();const A={winterAus:!F.winterAus.checked,gutAus:!F.gutAus.checked,fjAus:!F.fjAus.checked,gutTxt:F.gutTxt.value.trim()};
   const nm={winterAus:'Winter-Aktion',gutAus:'Gutscheine',fjAus:'Frühjahrs-Check'},o=SITE.aktion||{},ch=Object.keys(nm).filter(k=>!!o[k]!==A[k]).map(k=>nm[k]+(A[k]?' aus':' an'));
   try{await admSetSave({aktion:A},'Aktionen: '+(ch.join(', ')||'Text geändert'));admRender()}catch(_){admToast('Speichern fehlgeschlagen.')}}});
+
+/* ===================== Claude (KI) im Admin (13.11.2026): Wunsch schreiben → Claude ändert die Homepage → live ===================== */
+const CL={L:null,gh:undefined,un:null,err:'',set:false,iv:0,busy:false};
+const CL_REPO='Tiry38/Tiry',CL_WF='homepage-claude.yml',CL_MAIL='claude@admin.velo-center.de';
+AI.claude='<path d="M12 3.5l1.8 4.9 4.9 1.8-4.9 1.8L12 16.9l-1.8-4.9-4.9-1.8 4.9-1.8z"/><path d="M18.5 14.5l.8 2.1 2.2.9-2.2.8-.8 2.2-.8-2.2-2.2-.8 2.2-.9z"/>';ADM_ICO.claude=AI.claude;
+ADM_TAB.claude=['Claude (KI)','Schreib einfach, was sich auf der Homepage ändern soll'];
+ADM_GRP[2][1].unshift('claude');
+HILFE.splice(1,0,['claude','Größere Änderungen mit Claude','#A78BFA','#2563EB',['Links „Claude (KI)“ öffnen.','Schreiben, was sich ändern soll – wie in einer Nachricht an Tiry.','„Senden“: Claude legt sofort los, nach 2–5 Minuten ist es live.','Gefällt es nicht: „Rückgängig“ an der Antwort tippen.']]);
+function clWatch(){if(!ADM.db)return;
+ if(!CL.un){try{CL.un=ADM.db.collection('claude').orderBy('ts','desc').limit(40).onSnapshot(q=>{CL.L=q.docs.map(d=>Object.assign({id:d.id},d.data())).reverse();CL.err='';clList()},e=>{CL.err=String((e&&e.code)||e);CL.L=[];clList()})}catch(e){CL.err=String(e);CL.L=[]}}
+ if(CL.gh===undefined){CL.gh=null;ADM.db.doc('geheim/github').get().then(x=>{CL.gh=x.exists?x.data():null;if(ADM.tab==='claude')admRender()}).catch(()=>{CL.gh=null})}}
+const clZeit=t=>{const d=new Date(t),k=d.toLocaleDateString('sv-SE',{timeZone:'Europe/Berlin'}),h=heuteK(),u=d.toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit',timeZone:'Europe/Berlin'});return (k===h?'heute':k===dPlus(h,-1)?'gestern':d.toLocaleDateString('de-DE',{day:'2-digit',month:'2-digit',timeZone:'Europe/Berlin'}))+', '+u+' Uhr'};
+const clDauer=ms=>{const s=Math.max(0,Math.round(ms/1000));return Math.floor(s/60)+':'+String(s%60).padStart(2,'0')};
+const clTxt=s=>esc(String(s||'')).replace(/\*\*([^*]+)\*\*/g,'<b>$1</b>').replace(/\n/g,'<br>');
+function clStufe(x){if(x.status==='fertig'||x.status==='nichts')return 4;if(x.status!=='arbeitet')return 0;const s=x.schritt||'';return /live/i.test(s)?3:/geprüft|gebaut/i.test(s)?2:1}
+function clMsg(x){const me=admWho(),ich=x.von===me,zur=x.typ==='zurueck';
+ let h='<div class="clm du'+(ich?' ich':'')+'"><div class="clb"><header><b>'+esc(x.von||'Admin')+'</b><time>'+clZeit(x.ts)+'</time></header><p>'+(zur?'<span class="clr">↩ Rückgängig</span> ':'')+clTxt(x.txt)+'</p></div><span class="av" style="'+avCol(x.von||'A')+'">'+esc(String(x.von||'A').charAt(0))+'</span></div>';
+ const st=x.status||'neu',run=st==='neu'||st==='gestartet'||st==='arbeitet',alt=Date.now()-(x.start||x.ts);
+ const zurueck=(CL.L||[]).some(y=>y.typ==='zurueck'&&y.ziel===x.id&&y.status!=='fehler');
+ let b='';
+ if(run){const S=['Gestartet','Claude ändert','Prüfen & bauen','Live stellen'],n=clStufe(x);
+  const hangt=st!=='arbeitet'&&Date.now()-x.ts>8*60e3;
+  b=hangt?'<p class="clw">Der Start kam nicht an. Meist fehlt noch etwas in der Einrichtung – bitte Tiry Bescheid geben.</p><div class="cla"><button type="button" class="apill" data-clretry="'+x.id+'">Nochmal senden</button></div>'
+   :'<ol class="clp">'+S.map((l,i)=>'<li class="'+(i<n?'ok':i===n?'on':'')+'">'+l+'</li>').join('')+'</ol><p class="clrun"><i></i><span>'+esc(st==='arbeitet'?(x.schritt||'Claude arbeitet'):'Claude wird gestartet')+' …</span><time class="clt" data-t0="'+(x.start||x.ts)+'">'+clDauer(alt)+'</time></p>'}
+ else if(st==='fertig')b='<p>'+clTxt(x.antwort)+'</p><div class="cla">'+(zur?'':'<a class="apill" href="#start" data-aclose>Homepage ansehen →</a>')+(x.commit&&!zur?(zurueck?'<span class="cldone">zurückgenommen</span>':'<button type="button" class="apill" data-clundo="'+x.id+'">↩ Rückgängig</button>'):'')+'</div>'+(x.fertig&&x.start?'<small class="clm2">Fertig nach '+clDauer(x.fertig-x.start)+' Min.</small>':'');
+ else if(st==='nichts')b='<p>'+clTxt(x.antwort)+'</p>';
+ else b='<p class="clw">'+clTxt(x.antwort||'Das hat nicht geklappt. Die Homepage ist unverändert.')+'</p>'+(zur?'':'<div class="cla"><button type="button" class="apill" data-clretry="'+x.id+'">Nochmal senden</button></div>');
+ return h+'<div class="clm ai st-'+st+'"><span class="av ai">'+admI('claude')+'</span><div class="clb"><header><b>Claude</b>'+(run?'<span class="clst">arbeitet</span>':st==='fertig'?'<span class="clst ok">live</span>':st==='fehler'?'<span class="clst no">nicht geklappt</span>':'')+'</header>'+b+'</div></div>'}
+function clList(){if(ADM.tab!=='claude')return;const el=$('#clList');if(!el)return;const L=CL.L;
+ if(CL.err)el.innerHTML='<div class="anempty"><span class="ic">'+admI('claude')+'</span><b>Chat noch nicht freigeschaltet</b><p>Die Firebase-Regeln für den Claude-Chat sind noch nicht veröffentlicht. Das macht Tiry einmalig in der Firebase-Konsole.</p></div>';
+ else if(!L)el.innerHTML='<p class="admnote">Lädt …</p>';
+ else if(!L.length)el.innerHTML='<div class="clempty"><b>Was soll sich auf der Homepage ändern?</b><p>Schreib es einfach auf, als würdest du es Tiry erzählen. Claude baut es ein, prüft die Seite und stellt sie live.</p><div class="clx">'+['Schreib bei „Service“ dazu, dass wir auch Lastenräder warten.','Mach die Überschrift bei „Service“ etwas größer.','Der Text bei „Über uns“ soll persönlicher klingen.'].map(t=>'<button type="button" class="apill" data-clex>'+esc(t)+'</button>').join('')+'</div></div>';
+ else{const nah=el.scrollHeight-el.scrollTop-el.clientHeight<80;el.innerHTML=L.map(clMsg).join('');const sc=el.closest('.adm-b')||el;if(nah||!CL.seen){CL.seen=1;requestAnimationFrame(()=>{sc.scrollTop=sc.scrollHeight})}}
+ clearInterval(CL.iv);if((L||[]).some(x=>['neu','gestartet','arbeitet'].includes(x.status)))CL.iv=setInterval(()=>{if(ADM.tab!=='claude'||$('#adm').hidden){clearInterval(CL.iv);return}document.querySelectorAll('#clList .clt').forEach(t=>{t.textContent=clDauer(Date.now()- +t.dataset.t0)})},1000)}
+function clEinr(){const ok=!!(CL.gh&&CL.gh.token);
+ return '<section class="acard clset"><h4>'+(ok?'✓ Claude ist eingerichtet':'Einrichtung (einmalig, macht Tiry)')+'</h4>'+
+  '<ol class="clsteps"><li><b>Firebase-Regeln</b> aus <code>firebase/firestore.rules</code> in der Firebase-Konsole veröffentlichen.</li>'+
+  '<li>Firebase → Authentication → Nutzer hinzufügen: <code>'+CL_MAIL+'</code> mit eigenem Passwort.</li>'+
+  '<li>GitHub → <code>'+CL_REPO+'</code> → Settings → Secrets → Actions: <code>CLAUDE_CODE_OAUTH_TOKEN</code> (im Terminal <code>claude setup-token</code>), <code>FB_CLAUDE_PW</code> (Passwort aus Schritt 2), <code>WEB_TOKEN</code> (Fine-grained Token nur für <code>velo-center-web</code>, „Contents: Read and write“).</li>'+
+  '<li>Fine-grained Token nur für <code>'+CL_REPO+'</code> mit „Actions: Read and write“ erstellen und hier eintragen:</li></ol>'+
+  '<form id="clGhF" class="admrow" autocomplete="off"><input type="password" name="tok" placeholder="'+(ok?'neuen Token eintragen (alter bleibt sonst)':'github_pat_…')+'" autocomplete="new-password" spellcheck="false" style="flex:1 1 260px"><button class="cta" type="submit">Speichern</button>'+(ok?'<button type="button" class="apill" data-cltest>Verbindung testen</button>':'')+'</form><p class="admnote" id="clGhE"></p></section>'}
+function admClaude(b){clWatch();const ok=!!(CL.gh&&CL.gh.token);
+ b.innerHTML='<div class="clhero"><span class="hi">'+admI('claude')+'</span><div><h3>Sag Claude, was sich ändern soll.</h3><p>Claude baut es ein, prüft die Seite und stellt sie live – meist nach <b>2–5 Minuten</b>. Jede Änderung lässt sich mit einem Tipp zurücknehmen. Kleine Texte und Fotos gehen <b>sofort</b> über „Seite direkt bearbeiten“.</p></div>'+
+  (ok?'<button type="button" class="clcog" data-clset title="Einrichtung" aria-label="Einrichtung">⚙</button>':'')+'</div>'+
+  (!ok||CL.set?clEinr():'')+
+  '<section class="acard clchat"><div id="clList" class="cll" aria-live="polite"></div>'+
+  '<form id="clF" class="clf"><textarea name="t" rows="2" maxlength="6000" placeholder="'+(ok?'z. B. „Schreib bei Service dazu, dass wir auch Lastenräder warten.“':'Erst einrichten (oben) – dann hier schreiben.')+'"'+(ok?'':' disabled')+'></textarea><button class="clsend" type="submit" aria-label="Senden"'+(ok?'':' disabled')+'>'+admI('claude')+'<span>Senden</span></button></form>'+
+  '<p class="clhint">Strg + Enter sendet · Rechtstexte und Preise prüft Claude besonders streng · alles steht im Protokoll</p></section>';
+ clList()}
+async function clDispatch(id){let r;try{r=await fetch('https://api.github.com/repos/'+CL_REPO+'/actions/workflows/'+CL_WF+'/dispatches',{method:'POST',headers:{Authorization:'Bearer '+CL.gh.token,Accept:'application/vnd.github+json','X-GitHub-Api-Version':'2022-11-28','Content-Type':'application/json'},body:JSON.stringify({ref:'main',inputs:{id}})})}catch(_){const e=new Error('netz');e.status=0;throw e}
+ if(r.status!==204){const e=new Error('gh');e.status=r.status;throw e}}
+const clErr=e=>({0:'Keine Verbindung zu GitHub – Internet prüfen und nochmal senden.',401:'Der GitHub-Zugang ist abgelaufen oder falsch. Tiry muss ihn unter ⚙ Einrichtung neu eintragen.',403:'Der GitHub-Zugang darf das nicht (Recht „Actions: Read and write“ fehlt). Bitte Tiry Bescheid geben.',404:'Claude-Ablauf nicht gefunden – die Einrichtung ist noch nicht fertig. Bitte Tiry Bescheid geben.',422:'GitHub hat den Start abgelehnt. Bitte Tiry Bescheid geben.'})[e&&e.status]||'Start fehlgeschlagen (GitHub '+(e&&e.status)+'). Bitte nochmal senden.';
+async function clSend(txt,extra){txt=String(txt||'').trim();if(!txt||CL.busy)return false;if(!(CL.gh&&CL.gh.token)){admToast('Claude ist noch nicht eingerichtet.');return false}
+ CL.busy=true;try{const ref=ADM.db.collection('claude').doc(),d=Object.assign({txt:txt.slice(0,6000),von:admWho(),ts:Date.now(),typ:'auftrag',status:'neu'},extra||{});
+  await ref.set(d);admLog((d.typ==='zurueck'?'Claude, rückgängig: ':'Claude-Auftrag: ')+'„'+(txt.length>70?txt.slice(0,68)+' …':txt)+'“');
+  try{await clDispatch(ref.id)}catch(e){await ref.update({status:'fehler',antwort:clErr(e)}).catch(()=>{})}return true}
+ catch(_){admToast('Konnte nicht senden – bitte nochmal.');return false}finally{CL.busy=false}}
+{const r2=admRender;admRender=function(){if(ADM.ok&&ADM.tab==='claude'){admNav();const t=ADM_TAB.claude;$('#admTitle').textContent=t[0];$('#admSub').textContent=t[1];admClaude($('#admBody'));return}r2()}}
+$('#adm').addEventListener('click',async e=>{const t=e.target;
+ if(t.closest('[data-clset]')){CL.set=!CL.set;admRender();return}
+ const ex=t.closest('[data-clex]');if(ex){const a=$('#clF textarea');if(a&&!a.disabled){a.value=ex.textContent;a.focus()}return}
+ if(t.closest('[data-cltest]')){const E=$('#clGhE');E.textContent='Teste …';try{const r=await fetch('https://api.github.com/repos/'+CL_REPO+'/actions/workflows/'+CL_WF,{headers:{Authorization:'Bearer '+CL.gh.token,Accept:'application/vnd.github+json'}});
+  E.textContent=r.ok?'✓ Verbindung klappt – der Claude-Ablauf ist erreichbar.':r.status===404?'✕ Ablauf nicht gefunden: Datei noch nicht auf „main“ oder Token ohne Zugriff auf '+CL_REPO+'.':r.status===401?'✕ Token ungültig oder abgelaufen.':'✕ GitHub antwortet '+r.status+'.'}catch(_){E.textContent='✕ Keine Verbindung zu GitHub.'}return}
+ const u=t.closest('[data-clundo]');if(u){const x=(CL.L||[]).find(y=>y.id===u.dataset.clundo);if(!x)return;if(u.dataset.sure!=='1'){u.dataset.sure='1';u.textContent='Wirklich zurücknehmen?';return}
+  u.disabled=true;await clSend('„'+String(x.txt).slice(0,80)+(String(x.txt).length>80?' …':'')+'“',{typ:'zurueck',ziel:x.id});return}
+ const rt=t.closest('[data-clretry]');if(rt){const x=(CL.L||[]).find(y=>y.id===rt.dataset.clretry);if(x){rt.disabled=true;await clSend(x.txt)}return}});
+$('#adm').addEventListener('keydown',e=>{if(e.key==='Enter'&&(e.ctrlKey||e.metaKey)&&e.target.closest('#clF')){e.preventDefault();$('#clF').requestSubmit()}});
+$('#adm').addEventListener('submit',async e=>{const F=e.target;
+ if(F.id==='clF'){e.preventDefault();const v=F.t.value;if(!v.trim())return;const btn=F.querySelector('.clsend');btn.disabled=true;if(await clSend(v))F.t.value='';btn.disabled=false;F.t.focus();return}
+ if(F.id==='clGhF'){e.preventDefault();const tok=F.tok.value.trim(),E=$('#clGhE');if(!/^(github_pat_|ghp_)[A-Za-z0-9_]{20,}$/.test(tok)){E.textContent='Das sieht nicht wie ein GitHub-Token aus (beginnt mit github_pat_).';return}
+  try{const v={token:tok,ts:Date.now(),von:admWho()};await ADM.db.doc('geheim/github').set(v);CL.gh=v;CL.set=false;F.tok.value='';admLog('Claude-Zugang (GitHub) eingetragen');admToast('Gespeichert – Claude ist startklar.');admRender()}catch(_){E.textContent='Speichern ging nicht – sind die Firebase-Regeln veröffentlicht?'}}});
 
 /* ---------- Rad teilen: Auswahl wie bei Apps ---------- */
 const SHI={wa:'<path d="M20.5 3.5A11 11 0 0 0 3.2 16.8L2 22l5.3-1.4A11 11 0 1 0 20.5 3.5zM12 20a8.9 8.9 0 0 1-4.6-1.3l-.3-.2-3.1.8.8-3-.2-.3A9 9 0 1 1 12 20zm4.9-6.7c-.3-.1-1.6-.8-1.8-.9-.3-.1-.4-.1-.6.1l-.8 1c-.2.2-.3.2-.6.1a7.3 7.3 0 0 1-3.6-3.2c-.3-.5.3-.4.8-1.4.1-.2 0-.3 0-.5l-.8-2c-.2-.5-.4-.4-.6-.4h-.5a1 1 0 0 0-.7.3 3 3 0 0 0-.9 2.2 5.2 5.2 0 0 0 1.1 2.7 11.8 11.8 0 0 0 4.5 4c1.7.7 2.3.8 3.2.6a2.7 2.7 0 0 0 1.8-1.3 2.2 2.2 0 0 0 .1-1.2c0-.1-.2-.2-.6-.3z" fill="currentColor" stroke="none"/>',
