@@ -97,21 +97,29 @@ def html_bauen():
     else:
         print('Hinweis: live/firebase.json fehlt – Live-Seite ohne Admin-Bereich.')
         s = ersetze(s, "function admHash(){if(location.hash==='#admin')admOpen()}", 'function admHash(){}')
-    # Datenschutz: Entwurfs-Hinweis raus, Hosting eintragen
-    s = re.sub(r'<p[^>]*>\s*Entwurf für den Prototyp\.[^<]*(?:<[^/][^>]*>[^<]*</[^>]+>[^<]*)*</p>\s*', '', s, count=1)
-    m = re.search(r'\[Wird beim Livegang ergänzt:[^\]]*\]', s)
-    if not m:
-        sys.exit('Hosting-Platzhalter in der Datenschutzerklärung nicht gefunden')
-    s = s[:m.start()] + (
-        'Diese Seite liegt bei GitHub Pages, einem Dienst der GitHub, Inc., 88 Colin P. Kelly Jr. Street, San Francisco, CA 94107, USA. '
-        'Beim Aufruf verarbeitet GitHub technisch notwendige Daten wie deine IP-Adresse, Datum und Uhrzeit, die aufgerufene Seite und Angaben zum Browser, '
-        'um die Seite auszuliefern und vor Angriffen zu schützen. Eine Übermittlung in die USA ist möglich; GitHub ist nach dem EU-US Data Privacy Framework zertifiziert. '
-        'Wir selbst bekommen diese Protokolle nicht und werten nichts aus.'
-        + (' Unsere aktuellen Angebote und Bewertungen lädt die Seite aus Google Firebase (Cloud Firestore), einem Dienst der Google Ireland Limited, '
-           'Gordon House, Barrow Street, Dublin 4, Irland. Dabei wird deine IP-Adresse an Google übermittelt; eine Übermittlung in die USA ist möglich, '
-           'Google ist nach dem EU-US Data Privacy Framework zertifiziert. Es werden dabei keine Cookies gesetzt und keine Nutzerprofile gebildet.' if firebase_config() else '')
-        ) + s[m.end():]
-    s = s.replace('Stand: Entwurf, November 2026.', 'Stand: ' + datetime.date.today().strftime('%m/%Y').replace('/', '.') + '.')
+    # Datenschutz (eRecht24 + Ergänzungen steht im Prototyp): Firebase-Absatz nur, wenn Firebase genutzt wird
+    for mark in ('<!--FIREBASE-->', '<!--FB_KURZ-->', '<!--FB_STAND-->'):
+        if mark not in s:
+            sys.exit('Markierung ' + mark + ' in der Datenschutzerklärung fehlt')
+    if firebase_config():
+        s = s.replace('<!--FB_KURZ-->', ' und Google Firebase für aktuelle Angebote und Bewertungen')
+        s = s.replace('<!--FB_STAND-->', ', Google Firebase')
+        s = s.replace('<!--FIREBASE-->',
+            '<h4>Google Firebase (Cloud Firestore)</h4>'
+            '<p>Unsere aktuellen Angebote, Lagerräder und Bewertungen lädt die Seite aus Google Firebase (Cloud Firestore). '
+            'Anbieter ist die Google Ireland Limited, Gordon House, Barrow Street, Dublin 4, Irland. Die Datenbank liegt in Frankfurt am Main (Region europe-west3).</p>'
+            '<p>Beim Laden wird Ihre IP-Adresse an Google übermittelt, technisch notwendig für die Auslieferung der Daten. '
+            'Es werden dabei keine Cookies gesetzt, keine Daten von Ihnen gespeichert und keine Nutzerprofile gebildet. '
+            'Eine Übermittlung in die USA kann nicht ausgeschlossen werden; Google ist nach dem EU-US Data Privacy Framework zertifiziert '
+            '(<a href="https://www.dataprivacyframework.gov/participant/5780" target="_blank" rel="noopener">dataprivacyframework.gov/participant/5780</a>).</p>'
+            '<p>Der Anmeldebereich unter /admin ist nur für unsere Mitarbeiter. Die Anmeldung prüft Firebase Authentication; '
+            'gespeichert werden dabei nur die Zugangsdaten unserer Mitarbeiter, keine Daten von Besuchern.</p>'
+            '<p>Die Verarbeitung erfolgt auf Grundlage von Art. 6 Abs. 1 lit. f DSGVO. Wir haben ein berechtigtes Interesse daran, aktuelle Angebote '
+            'schnell und zuverlässig anzuzeigen. Weitere Informationen: '
+            '<a href="https://firebase.google.com/support/privacy" target="_blank" rel="noopener">firebase.google.com/support/privacy</a>.</p>')
+    else:
+        for mark in ('<!--FIREBASE-->', '<!--FB_KURZ-->', '<!--FB_STAND-->'):
+            s = s.replace(mark, '')
     if 'Entwurf' in s[s.find('data-v="datenschutz"'):s.find('data-v="datenschutz"') + 20000]:
         print('Hinweis: im Datenschutz steht noch „Entwurf“.')
     for rest in ('Prototyp', 'noindex', 'claude:'):
