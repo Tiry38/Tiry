@@ -14,4 +14,5 @@
 
 - Terminformular „Worum geht es?“: Probefahrt, Inspektion, Reparatur, Verfügbarkeit (kein Zubehör, kein Reifen/Schlauch, keine Bosch-Diagnose); „Um welchen Artikel?“ (statt „Rad“): Fahrrad, E-Bike, E-Dreirad, Zubehör (kein Lastenrad) (12.11.2026).
 - Kein Hinweis auf ein nächstes i:SY-Treffen (es gibt keins mehr, 12.11.2026).
-- Showroom: Van Raam (jeder 5. Wechsel), Velo de Ville AEB PRO (ca. jeder 7.), Victoria Veloa 7 (ca. jeder 9.) mit festem Bild; alle anderen Wechsel zufällig aus dem Bestand (nur Räder mit Foto, wechselnde Farben, Bilder in img/show/ freigestellt + geschärft) (12.11.2026).
+- Showroom: Van Raam (jeder 5. Wechsel, abwechselnd Easy Rider und Easy Rider Compact Plus), Velo de Ville AEB PRO (ca. jeder 7.), Victoria Veloa 7 (ca. jeder 9.), Stevens E-Juke (ca. jeder 10.) mit festem Bild; alle anderen Wechsel zufällig aus dem Bestand (nur Räder mit Foto, wechselnde Farben, Bilder in img/show/ freigestellt + geschärft) (12.11.2026).
+- E-Dreiräder: Easy Rider Compact Plus (zuerst, genauso wichtig) und Easy Rider 3 mit Umschalter; nur Herstellerangaben von vanraam.com, nur offizielle Van-Raam-Videos (keine Videos anderer Händler) (13.11.2026).
