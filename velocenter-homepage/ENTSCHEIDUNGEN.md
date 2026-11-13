@@ -99,3 +99,4 @@
 ## 14.11.2026 – Start entschlackt (Tiry)
 - Startseite: Bereich „Unser Showroom“ (Marken-Karussell) und Rad-Finder-Teaser entfernt – beides gibt es schon oben, unter Marken bzw. Auf Lager. Rad-Finder bleibt über die Knöpfe auf Lager/Marken erreichbar.
 - Showroom steht jetzt fest im Marken-Reiter (`#showroom2`, IDs `m-…`, kein Klonen mehr per JS) mit der Überschrift „Acht Marken. Ein Laden.“
+- Start-Chip „i:SY Experte“ ist ein Link zum Reiter i:SY Experte (`#isy`), gleicher Hover wie der Google-Chip (Tiry 14.11.2026).
