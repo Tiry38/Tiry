@@ -22,16 +22,16 @@ BASIS = 'https://' + DOMAIN + '/'
 # alte Adressen der Coco-Seite -> neue Bereiche
 ALT = {
     'velocenter': 'start', 'blog': 'start', 'legal/imprint': 'impressum', 'legal/privacy': 'datenschutz',
-    'legal/accessibility': 'impressum',
+    'legal/accessibility': 'impressum', 'lager': 'lager',
 }
 
 
 # Echte Unterseiten (eigene Adresse, Titel, Beschreibung für Google). Die alten Coco-Adressen bleiben so erhalten.
 SEITEN = {
-    'service': 'service', 'hersteller': 'marken', 'lager': 'lager', 'isy-experte': 'isy', 'isy-treffen': 'treffen',
+    'service': 'service', 'hersteller': 'marken', 'im-laden': 'lager', 'isy-experte': 'isy', 'isy-treffen': 'treffen',
     'e-dreiraeder': 'dreirad', 'kontakt': 'kontakt', 'impressum': 'impressum', 'datenschutz': 'datenschutz',
 }
-IN_SITEMAP = ('service', 'hersteller', 'lager', 'isy-experte', 'isy-treffen', 'e-dreiraeder', 'kontakt')
+IN_SITEMAP = ('service', 'hersteller', 'im-laden', 'isy-experte', 'isy-treffen', 'e-dreiraeder', 'kontakt')
 
 
 def seo_tabelle(s):

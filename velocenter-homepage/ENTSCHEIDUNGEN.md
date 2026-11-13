@@ -100,3 +100,8 @@
 - Startseite: Bereich „Unser Showroom“ (Marken-Karussell) und Rad-Finder-Teaser entfernt – beides gibt es schon oben, unter Marken bzw. Auf Lager. Rad-Finder bleibt über die Knöpfe auf Lager/Marken erreichbar.
 - Showroom steht jetzt fest im Marken-Reiter (`#showroom2`, IDs `m-…`, kein Klonen mehr per JS) mit der Überschrift „Acht Marken. Ein Laden.“
 - Start-Chip „i:SY Experte“ ist ein Link zum Reiter i:SY Experte (`#isy`), gleicher Hover wie der Google-Chip (Tiry 14.11.2026).
+
+## 14.11.2026 – „Auf Lager“ heißt jetzt „Im Laden“ (Tiry)
+- Menü (oben + Handy), Start-Kachel, alle Knöpfe („Räder im Laden“, „i:SY im Laden ansehen“, Marken-Knopf „Im Laden“, Vergleich/Rad-Finder „Alle Räder im Laden …“), Rad-Finder-Antwort „direkt aus dem Laden“, Wasserzeichen „Laden“, Google-Titel „E-Bikes im Laden · sofort verfügbar · …“, Admin-Texte.
+- Adresse neu `/im-laden/` (Sitemap), alte `/lager/` leitet weiter. Interne Route/Hash bleibt `#lager`, Firestore/Daten unverändert.
+- „Ersatzteile fast alle auf Lager“ (i:SY) bleibt – meint Teile, nicht den Reiter.
