@@ -22,4 +22,4 @@
 - Showroom: keine Wiederholung desselben Rads (gleiches Modell + Farbe nur einmal im Pool, bildgleiche Dubletten raus); Startbild erst sichtbar, wenn das Zufallsrad steht (13.11.2026).
 - Winter-Aktion: Zusatz „nur solange Termine verfügbar sind“ (13.11.2026).
 - Showroom-Zufall über crypto (nicht Math.random), zuletzt gezeigte 24 Räder werden im Browser gemerkt (vc_srl) – jeder Besuch eine andere Reihenfolge (13.11.2026).
-- Bestand liegt zusätzlich eingebettet in index.html (#bestandData) als Rückfall, falls data/bestand.json nicht lädt; bei Bestands-Update beides erneuern (13.11.2026).
+- Fahrzeugbestand steht nur an einer Stelle: eingebettet in index.html (#bestandData). Update: `python3 tools/bestand_zu_json.py <Veloport-Export.csv>` schreibt direkt dort hinein; data/bestand.json gibt es nicht mehr (13.11.2026).

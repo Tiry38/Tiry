@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
-"""Veloport-Fahrzeugbestand (CSV) -> data/bestand.json fuer die Homepage.
+"""Veloport-Fahrzeugbestand (CSV) -> direkt in index.html (Block #bestandData) fuer die Homepage.
 
-Aufruf:  python3 tools/bestand_zu_json.py <Veloport-Export.csv> [data/bestand.json] ["Hinweistext"]
+Aufruf:  python3 tools/bestand_zu_json.py <Veloport-Export.csv> [index.html] ["Hinweistext"]
+Der Bestand steht NUR in index.html (eine Stelle). Fotos-Zuordnung kommt aus data/bilder.json.
 
 Spaltenerkennung wie in der KI-Zentrale (fzbMap/fzbMapX). Auf die Homepage kommen nur
 kundentaugliche Felder. Einkaufspreis, Rahmennummer, Lagerort, Besitzer, Bemerkung,
@@ -120,7 +121,7 @@ def rahmenform(rf, dh, modell):
 def main():
     if len(sys.argv) < 2:
         print(__doc__); sys.exit(1)
-    ziel = sys.argv[2] if len(sys.argv) > 2 else 'data/bestand.json'
+    ziel = sys.argv[2] if len(sys.argv) > 2 else 'index.html'
     hinweis = sys.argv[3] if len(sys.argv) > 3 else ''
     kopf, rows = lesen(sys.argv[1])
     m = karte(kopf)
@@ -155,12 +156,23 @@ def main():
             km=(wert(r, m['km']) + ' km') if re.search(r'gebraucht', art, re.I) and wert(r, m['km']) else '',
         ).items() if v not in ('', None, False)})
     eindeutig = gruppieren(raeder)
-    bilder_zuordnen(eindeutig, os.path.join(os.path.dirname(os.path.abspath(ziel)), 'bilder.json'))
+    bilder_zuordnen(eindeutig, os.path.join(os.path.dirname(os.path.abspath(ziel)), 'data', 'bilder.json'))
     anzahl = dict(lager=sum(r['status'] == 'lager' for r in raeder), bestellt=sum(r['status'] == 'bestellt' for r in raeder))
     daten = dict(stand=datetime.date.today().strftime('%d.%m.%Y'), quelle='Veloport-Export', anzahl=anzahl, raeder=eindeutig, **({'hinweis': hinweis} if hinweis else {}))
-    json.dump(daten, open(ziel, 'w', encoding='utf-8'), ensure_ascii=False, indent=1)
+    in_html_schreiben(ziel, daten)
     print(f'{len(raeder)} Räder -> {len(eindeutig)} Karten ({sum(len(k["farben"]) for k in eindeutig)} Farb-Ausführungen) -> {ziel} '
           f'[{anzahl['lager']} im Laden, {anzahl['bestellt']} bestellt, davon {n_res} reserviert] (ausgelassen: {n_verk} verkauft, {n_service} Servicerad, {n_marke} Flyer/Hercules)')
+
+def in_html_schreiben(ziel, daten):
+    """Ersetzt den Inhalt von <script type="application/json" id="bestandData"> in index.html."""
+    html = open(ziel, encoding='utf-8').read()
+    js = json.dumps(daten, ensure_ascii=False, separators=(',', ':')).replace('</', '<\\/')
+    neu, n = re.subn(r'(<script type="application/json" id="bestandData">).*?(</script>)',
+                     lambda m: m.group(1) + js + m.group(2), html, count=1, flags=re.S)
+    if n != 1:
+        sys.exit('Block #bestandData nicht in ' + ziel + ' gefunden')
+    open(ziel, 'w', encoding='utf-8').write(neu)
+
 
 FELDER = ('marke', 'modell', 'jahr', 'gr', 'farbe', 'rahmen', 'typ', 'motor', 'akku', 'schaltung', 'display', 'reifen', 'gewicht', 'zgg', 'km',
           'status', 'res', 'ab', 'preis', 'angebot', 'vorfuehr', 'gebraucht', 'id')
