@@ -148,7 +148,14 @@ def html_bauen():
             'gespeichert werden dabei nur die Zugangsdaten unserer Mitarbeiter, keine Daten von Besuchern.</p>'
             '<p>Die Verarbeitung erfolgt auf Grundlage von Art. 6 Abs. 1 lit. f DSGVO. Wir haben ein berechtigtes Interesse daran, aktuelle Angebote '
             'schnell und zuverlässig anzuzeigen. Weitere Informationen: '
-            '<a href="https://firebase.google.com/support/privacy" target="_blank" rel="noopener">firebase.google.com/support/privacy</a>.</p>')
+            '<a href="https://firebase.google.com/support/privacy" target="_blank" rel="noopener">firebase.google.com/support/privacy</a>.</p>'
+            '<h4>Anonyme Besucherstatistik</h4>'
+            '<p>Damit wir sehen, welche Bereiche unserer Seite genutzt werden, zählen wir Seitenaufrufe anonym: pro Tag nur Summen '
+            '(z. B. Anzahl der Besuche, aufgerufene Bereiche, angeklickte Kontakt-Knöpfe, Herkunft als grobe Kategorie wie „Google“ oder „direkt“, '
+            'Gerätetyp Handy/Tablet/PC und Uhrzeit als volle Stunde). Dafür setzen wir keine Cookies, speichern nichts auf Ihrem Gerät, '
+            'speichern keine IP-Adresse und bilden keine Nutzerprofile; ein Rückschluss auf einzelne Personen ist nicht möglich. '
+            'Die Summen liegen in Google Firebase (Frankfurt am Main, siehe oben). Wenn Ihr Browser „Do Not Track“ oder „Global Privacy Control“ sendet, '
+            'zählen wir Ihren Besuch nicht. Rechtsgrundlage ist Art. 6 Abs. 1 lit. f DSGVO; unser berechtigtes Interesse ist die Verbesserung unseres Angebots.</p>')
     else:
         for mark in ('<!--FIREBASE-->', '<!--FB_KURZ-->', '<!--FB_STAND-->'):
             s = s.replace(mark, '')

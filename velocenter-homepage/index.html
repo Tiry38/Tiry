@@ -1501,8 +1501,188 @@ button.akpi{cursor:pointer;transition:transform .2s,box-shadow .2s}button.akpi:h
 .admv .vb{grid-column:1/-1}
 .admtoast{position:fixed;left:50%;bottom:24px;z-index:320;transform:translate(-50%,20px);opacity:0;pointer-events:none;padding:12px 18px;border-radius:9px;background:#1B1E25;color:#fff;font:600 14px/1.3 var(--display);box-shadow:0 18px 40px -16px rgba(0,0,0,.6);transition:.3s var(--ease)}
 .admtoast.on{opacity:1;transform:translate(-50%,0)}
+/* ===== Admin 2.0 (13.11.2026): Seitenleiste neu, Öffnungszeiten, Hinweise, Analyse, Protokoll, Hilfe ===== */
+.adm-side{position:relative;isolation:isolate;gap:4px;padding:20px 14px 16px;background:radial-gradient(120% 60% at 0% 0%,rgba(200,16,46,.28),transparent 60%),radial-gradient(90% 50% at 100% 100%,rgba(184,115,51,.22),transparent 60%),linear-gradient(180deg,#191B22 0%,#121318 100%);border-right:1px solid rgba(255,255,255,.07)}
+.adm-side::before{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(115deg,transparent 30%,rgba(255,255,255,.035) 45%,transparent 60%);background-size:300% 100%;animation:asSheen 9s linear infinite;pointer-events:none}
+@keyframes asSheen{to{background-position:-300% 0}}
+.as-brand{padding:4px 8px 18px;border-bottom:0;margin-bottom:4px;position:relative}
+.as-brand::after{content:"";position:absolute;left:8px;right:8px;bottom:0;height:1px;background:linear-gradient(90deg,rgba(255,77,99,.6),rgba(232,201,160,.35),transparent)}
+.as-brand b{border:0;color:#fff;background:linear-gradient(120deg,#FF4D63,#C8102E 50%,#B87333);padding:6px 9px;border-radius:999px;box-shadow:0 6px 16px -6px rgba(200,16,46,.8)}
+#admTabs{gap:9px;margin-top:4px}
+#admTabs .agp{display:flex;flex-direction:column;gap:2px}
+#admTabs .agl{margin:0 0 4px;padding:0 12px;font:800 10.5px/1 var(--display);letter-spacing:.18em;text-transform:uppercase;color:rgba(232,201,160,.55)}
+#admTabs button{gap:11px;min-height:39px;padding:0 10px 0 6px;border-radius:999px;color:#C5C0B9;font-size:14px}
+#admTabs button .ai{flex:none;display:grid;place-items:center;width:32px;height:32px;border-radius:50%;background:rgba(255,255,255,.06);box-shadow:inset 0 0 0 1px rgba(255,255,255,.07);transition:background .25s,box-shadow .25s,transform .25s}
+#admTabs button .ai svg{width:17px;height:17px}
+#admTabs button:hover{background:rgba(255,255,255,.05)}#admTabs button:hover .ai{transform:scale(1.06);background:rgba(255,255,255,.1)}
+#admTabs button.on{color:#fff;background:linear-gradient(100deg,rgba(255,77,99,.32),rgba(200,16,46,.2) 45%,rgba(184,115,51,.14));box-shadow:inset 0 0 0 1px rgba(255,120,130,.28),0 10px 24px -14px rgba(200,16,46,.9)}
+#admTabs button.on::before{display:none}
+#admTabs button.on .ai{background:linear-gradient(140deg,#FF5A6E,#C8102E 55%,#8E0B20);box-shadow:0 0 0 3px rgba(255,77,99,.18),0 6px 14px -4px rgba(200,16,46,.9);color:#fff}
+#admTabs button i{border-radius:999px;padding:4px 8px}
+.as-foot{display:flex;flex-direction:column;gap:8px;border-top:0;padding-top:16px}
+.as-foot button{display:inline-flex;align-items:center;justify-content:center;gap:6px;border-radius:999px}.as-foot button svg{width:16px;height:16px}
+.as-me{display:flex;align-items:center;gap:10px;padding:10px;border-radius:20px;background:rgba(255,255,255,.05);box-shadow:inset 0 0 0 1px rgba(255,255,255,.08)}
+.as-me .av{flex:none;width:40px;height:40px;border-radius:50%;display:grid;place-items:center;font:800 17px/1 var(--display);color:#fff;background:linear-gradient(140deg,var(--a1,#FF5A6E),var(--a2,#B87333));box-shadow:0 6px 16px -6px rgba(0,0,0,.6)}
+.as-me b{display:block;font:700 14.5px/1.2 var(--display);color:#fff}.as-me small{display:flex;align-items:center;gap:6px;font:600 11.5px/1.2 var(--display);color:#9FA3AD}
+.as-me small::before{content:"";width:7px;height:7px;border-radius:50%;background:#34D399;box-shadow:0 0 8px #34D399}
+.as-me button{margin-left:auto;width:38px!important;min-height:38px!important;padding:0!important;border-radius:50%!important}
+.adm-top{background:rgba(255,255,255,.62);backdrop-filter:blur(10px)}
+.adm-top .att{display:flex;flex-direction:column;gap:3px;min-width:0}
+.alive{display:inline-flex;align-items:center;gap:8px;margin-left:auto;padding:8px 14px;border-radius:999px;background:#fff;box-shadow:inset 0 0 0 1px rgba(27,30,37,.08);font:700 12.5px/1 var(--display);color:#1B1E25;white-space:nowrap}
+.alive i{width:8px;height:8px;border-radius:50%;background:#10B981;box-shadow:0 0 0 4px rgba(16,185,129,.18)}.alive.zu i{background:#F43F5E;box-shadow:0 0 0 4px rgba(244,63,94,.16)}
+.alive+.adm-x{margin-left:0}
+.adm-main{background:radial-gradient(70% 50% at 100% 0%,rgba(200,16,46,.07),transparent 60%),radial-gradient(60% 40% at 0% 100%,rgba(184,115,51,.08),transparent 60%),linear-gradient(170deg,#FBF8F3,#F2EBE1)}
+.acard{border-radius:22px;box-shadow:0 18px 40px -34px rgba(27,30,37,.55)}
+.akpi{border-radius:20px}
+/* Schalter */
+.asw{display:inline-flex!important;flex-direction:row!important;align-items:center;gap:10px!important;cursor:pointer;font:700 13.5px/1 var(--display)!important;color:var(--ink)!important;min-height:36px}
+.asw input{position:absolute;opacity:0;width:1px;height:1px}
+.asw i{position:relative;flex:none;width:46px;height:26px;border-radius:999px;background:#D9D2C8;transition:background .25s}
+.asw i::after{content:"";position:absolute;left:3px;top:3px;width:20px;height:20px;border-radius:50%;background:#fff;box-shadow:0 2px 6px rgba(0,0,0,.25);transition:transform .25s var(--ease)}
+.asw input:checked+i{background:linear-gradient(120deg,#10B981,#059669)}.asw input:checked+i::after{transform:translateX(20px)}
+.asw input:focus-visible+i{outline:2px solid #C8102E;outline-offset:2px}
+/* Öffnungszeiten */
+.azw{display:flex;flex-direction:column;gap:8px}
+.azg{display:flex;flex-direction:column;gap:16px;margin-top:16px}
+.azr{display:grid;grid-template-columns:110px 160px auto auto 1fr;align-items:center;gap:14px;padding:10px 14px;border-radius:999px;background:#FBF8F3;box-shadow:inset 0 0 0 1px rgba(27,30,37,.06)}
+.azr>b{font:800 15px/1 var(--display)}
+.azr.off{background:#F6F1EA}.azr.off .azt{opacity:.35;pointer-events:none}
+.azt{display:flex;align-items:center;gap:6px;flex-wrap:nowrap}.azt em{font-style:normal;color:var(--dim)}
+.azt input[type=time]{min-height:38px!important;padding:4px 10px!important;border-radius:999px!important;font:700 14px/1 var(--display)!important;width:auto}
+.azt2 .ack2{display:inline-flex!important;flex-direction:row!important;align-items:center;gap:6px!important;font:600 12.5px/1 var(--display)!important;color:var(--mut)!important;margin-right:4px}
+.azt2 .ack2 input{width:17px;height:17px;accent-color:#C8102E}
+.azt2.no input[type=time],.azt2.no em{opacity:.35}
+.adays{display:flex;gap:8px;overflow-x:auto;padding:4px 2px 10px;scrollbar-width:thin}
+.adays>span{flex:none;display:flex;flex-direction:column;align-items:center;gap:5px;min-width:86px;padding:12px 10px;border-radius:22px;background:#FBF8F3;box-shadow:inset 0 0 0 1px rgba(27,30,37,.07);text-align:center}
+.adays b{font:800 13px/1 var(--display)}.adays small{font:600 11.5px/1.3 var(--display);color:var(--mut)}
+.adays .zu{background:#FDF0F2}.adays .zu small{color:#B00D29}
+.adays .ax{background:linear-gradient(160deg,#FFF6E8,#FDE7C8);box-shadow:inset 0 0 0 1.5px #E3A75A}.adays .ax em{font:700 10.5px/1.2 var(--display);font-style:normal;color:#9A5B22}
+.adays .hd{box-shadow:inset 0 0 0 2px #C8102E}
+.aausl{display:flex;flex-direction:column;gap:8px;margin:0 0 6px}
+.aaus{display:flex;align-items:center;gap:14px;padding:12px 12px 12px 16px;border-radius:999px;background:#FBF8F3;box-shadow:inset 0 0 0 1px rgba(27,30,37,.07)}
+.aaus .ad{flex:none;display:grid;place-items:center;width:46px;height:46px;border-radius:50%;background:linear-gradient(140deg,#FF5A6E,#C8102E);color:#fff;font:800 14px/1 var(--display)}
+.aaus.zeit .ad{background:linear-gradient(140deg,#F5B83D,#B87333)}
+.aaus .at{flex:1;min-width:0}.aaus .at b{display:block;font:800 14.5px/1.25 var(--display)}.aaus .at small{display:block;margin-top:3px;font-size:12.5px;color:var(--mut)}
+.aaus .st{font:700 11px/1 var(--display);padding:6px 10px;border-radius:999px;background:#E8F7F0;color:#047857;white-space:nowrap}.aaus .st.w{background:#FEF3C7;color:#92400E}.aaus .st.old{background:#EEE8E0;color:#6B7280}
+.aaus button{flex:none;min-height:38px;padding:0 14px;border-radius:999px;border:1px solid rgba(200,16,46,.35);background:#fff;color:#B00D29;font:700 12px/1 var(--display);cursor:pointer}
+.apre{display:flex;flex-wrap:wrap;gap:6px}
+.apre button,.apill{min-height:36px;padding:0 14px;border-radius:999px;border:1px solid rgba(27,30,37,.14);background:#fff;font:700 12.5px/1 var(--display);color:#1B1E25;cursor:pointer}
+.apre button:hover,.apill:hover{border-color:#C8102E;color:#C8102E}.apill.on{background:#1B1E25;border-color:#1B1E25;color:#fff}
+.ag2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.ag4{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+/* Hinweis-Vorschau + Aktionen */
+.anprev{padding:26px 18px;border-radius:22px;background:radial-gradient(80% 120% at 0% 0%,rgba(200,16,46,.12),transparent 60%),linear-gradient(160deg,#FFFDF9,#F4ECE1);text-align:left}
+.atyp{display:flex;gap:8px;flex-wrap:wrap}
+.atyp label{position:relative;cursor:pointer}.atyp input{position:absolute;opacity:0}
+.atyp span{display:inline-flex;align-items:center;gap:8px;min-height:40px;padding:0 16px;border-radius:999px;background:#fff;box-shadow:inset 0 0 0 1px rgba(27,30,37,.14);font:700 13px/1 var(--display);color:#1B1E25}
+.atyp span::before{content:"";width:10px;height:10px;border-radius:50%;background:var(--c)}
+.atyp input:checked+span{box-shadow:inset 0 0 0 2px var(--c),0 6px 16px -10px var(--c)}
+.aakt{display:flex;flex-direction:column;gap:10px}
+.aak{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:14px;padding:14px 18px;border-radius:24px;background:#FBF8F3;box-shadow:inset 0 0 0 1px rgba(27,30,37,.07)}
+.aak .ic{width:44px;height:44px;border-radius:50%;display:grid;place-items:center;color:#fff;background:linear-gradient(140deg,var(--c1),var(--c2))}.aak .ic svg{width:21px;height:21px}
+.aak b{display:block;font:800 15px/1.2 var(--display)}.aak small{display:block;margin-top:3px;font-size:12.5px;color:var(--mut);line-height:1.4}
+.aak .ex{grid-column:2/-1}
+.abadge{display:inline-flex;align-items:center;gap:6px;padding:5px 10px;border-radius:999px;font:700 11px/1 var(--display);background:#E8F7F0;color:#047857}.abadge.off{background:#EEE8E0;color:#6B7280}
+.abadge::before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor}
+/* Protokoll */
+.aplf{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px}
+.apday{margin:18px 0 8px;font:800 11.5px/1 var(--display);letter-spacing:.14em;text-transform:uppercase;color:#9A5B22}
+.apl{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
+.apl li{display:grid;grid-template-columns:38px 1fr auto;align-items:center;gap:12px;padding:10px 16px 10px 10px;border-radius:999px;background:#fff;box-shadow:inset 0 0 0 1px rgba(27,30,37,.06);font-size:14px}
+.apl .av{width:38px;height:38px;border-radius:50%;display:grid;place-items:center;font:800 15px/1 var(--display);color:#fff;background:linear-gradient(140deg,var(--a1),var(--a2))}
+.apl b{font-weight:800}.apl time{font:600 12.5px/1 var(--display);color:var(--dim)}
+/* Hilfe */
+.ahero{display:flex;align-items:center;gap:20px;padding:24px 26px;border-radius:28px;color:#fff;background:radial-gradient(90% 140% at 100% 0%,rgba(184,115,51,.55),transparent 55%),linear-gradient(130deg,#2A0A12,#8E0B20 45%,#C8102E);box-shadow:0 26px 50px -30px rgba(142,11,32,.9);margin-bottom:18px}
+.ahero .hi{flex:none;width:64px;height:64px;border-radius:50%;display:grid;place-items:center;background:rgba(255,255,255,.14);box-shadow:inset 0 0 0 1px rgba(255,255,255,.25)}.ahero .hi svg{width:30px;height:30px}
+.ahero h3{margin:0 0 6px;font:800 22px/1.15 var(--display)}.ahero p{margin:0;color:rgba(255,255,255,.85);line-height:1.55}
+.ahelp{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px}
+.ahc{position:relative;display:flex;flex-direction:column;gap:12px;padding:20px;border-radius:26px;background:#fff;box-shadow:inset 0 0 0 1px rgba(27,30,37,.07),0 18px 40px -34px rgba(27,30,37,.55);overflow:hidden}
+.ahc::before{content:"";position:absolute;right:-40px;top:-40px;width:140px;height:140px;border-radius:50%;background:radial-gradient(circle,var(--g,rgba(200,16,46,.14)),transparent 70%)}
+.ahc header{display:flex;align-items:center;gap:12px}
+.ahc header .ic{flex:none;width:44px;height:44px;border-radius:50%;display:grid;place-items:center;color:#fff;background:linear-gradient(140deg,var(--c1,#FF5A6E),var(--c2,#C8102E))}.ahc header .ic svg{width:20px;height:20px}
+.ahc h4{margin:0;font:800 16px/1.2 var(--display);letter-spacing:0;text-transform:none;color:#1B1E25}
+.ahc ol{margin:0;padding:0;list-style:none;counter-reset:s;display:flex;flex-direction:column;gap:8px}
+.ahc li{counter-increment:s;display:grid;grid-template-columns:26px 1fr;gap:10px;align-items:start;font-size:14px;line-height:1.45;color:#3A3F4A}
+.ahc li::before{content:counter(s);width:26px;height:26px;border-radius:50%;display:grid;place-items:center;font:800 12px/1 var(--display);color:#9A5B22;background:#FBF1E4}
+.ahc .cta{align-self:flex-start;margin-top:auto;min-height:42px;padding:0 18px;font-size:12px;letter-spacing:.06em}.ahc .cta::after{display:none}
+/* Analyse */
+.anbar{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-bottom:16px}
+.anbar .sp{flex:1}
+.ankpis{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px;margin-bottom:16px}
+.ank{position:relative;padding:18px 18px 16px;border-radius:24px;background:#fff;box-shadow:inset 0 0 0 1px rgba(27,30,37,.07),0 18px 40px -34px rgba(27,30,37,.55);overflow:hidden}
+.ank::after{content:"";position:absolute;left:18px;right:18px;bottom:0;height:3px;border-radius:3px;background:linear-gradient(90deg,var(--c1,#FF5A6E),var(--c2,#B87333))}
+.ank small{display:block;font:700 11px/1 var(--display);letter-spacing:.12em;text-transform:uppercase;color:var(--dim)}
+.ank b{display:block;margin:10px 0 8px;font:800 34px/1 var(--display);letter-spacing:-.02em;color:#1B1E25}
+.ank em{display:inline-flex;align-items:center;gap:4px;padding:4px 9px;border-radius:999px;font:700 11.5px/1 var(--display);font-style:normal;background:#EEE8E0;color:#4A4F5A}
+.ank em.up{background:#E1F6EC;color:#047857}.ank em.dn{background:#FDE8EB;color:#B00D29}
+.anch{width:100%;height:auto;display:block}
+.anch .gl{stroke:rgba(27,30,37,.07)}.anch text{font:600 10.5px var(--display);fill:#7A7F8A}
+.anlg{display:flex;gap:16px;margin:0 0 8px;font:700 12.5px/1 var(--display);color:#4A4F5A}.anlg span{display:inline-flex;align-items:center;gap:7px}.anlg i{width:12px;height:12px;border-radius:50%;background:var(--c)}
+.anbl{display:flex;flex-direction:column;gap:9px}
+.anb{display:grid;grid-template-columns:minmax(150px,1.4fr) 1.6fr 54px;align-items:center;gap:12px;font-size:13.5px}
+.anb span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600}
+.anb i{height:12px;border-radius:999px;background:#F1ECE5;overflow:hidden}.anb i s{display:block;height:100%;width:var(--w);border-radius:999px;background:linear-gradient(90deg,var(--c1,#FF5A6E),var(--c2,#C8102E))}
+.anb b{font:800 13.5px/1 var(--display);text-align:right}.anb b small{display:block;margin-top:2px;font:600 10.5px/1 var(--display);color:var(--dim)}
+.anhr{display:grid;grid-template-columns:repeat(24,1fr);align-items:end;gap:3px;height:120px}
+.anhr i{display:block;border-radius:999px 999px 4px 4px;background:linear-gradient(180deg,#FF5A6E,#C8102E);min-height:3px;height:var(--h)}
+.anhr i.z{background:#E7E0D6}
+.anhx{display:grid;grid-template-columns:repeat(24,1fr);gap:3px;margin-top:6px;font:600 9.5px/1 var(--display);color:var(--dim);text-align:center}
+.andn{display:flex;align-items:center;gap:22px;flex-wrap:wrap}
+.andn svg{width:150px;height:150px;flex:none}
+.andn ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px}.andn li{display:flex;align-items:center;gap:10px;font:600 14px/1 var(--display)}.andn li i{width:12px;height:12px;border-radius:50%;background:var(--c)}.andn li b{margin-left:6px}
+.anempty{display:flex;flex-direction:column;align-items:center;gap:10px;padding:40px 20px;text-align:center;color:var(--mut)}
+.anempty .ic{width:70px;height:70px;border-radius:50%;display:grid;place-items:center;color:#fff;background:linear-gradient(140deg,#FF5A6E,#C8102E 55%,#B87333)}.anempty .ic svg{width:32px;height:32px}
+.anempty b{font:800 18px/1.2 var(--display);color:#1B1E25}
+.anfun{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+.anfun>div{flex:1 1 140px;position:relative;padding:16px 18px;text-align:center;background:linear-gradient(160deg,#FFF5F6,#FBE6E9);clip-path:polygon(0 0,calc(100% - 18px) 0,100% 50%,calc(100% - 18px) 100%,0 100%,18px 50%)}
+.anfun>div:first-child{clip-path:polygon(0 0,calc(100% - 18px) 0,100% 50%,calc(100% - 18px) 100%,0 100%);border-radius:999px 0 0 999px}
+.anfun b{display:block;font:800 24px/1 var(--display)}.anfun small{display:block;margin-top:6px;font:600 12px/1.2 var(--display);color:var(--mut)}
+.anfun>div:nth-child(2){background:linear-gradient(160deg,#FFEFE0,#FBDCC0)}.anfun>div:nth-child(3){background:linear-gradient(160deg,#E7F8EF,#CDEFDD)}
+/* Übersicht: Homepage jetzt */
+.anow{display:grid;grid-template-columns:1.3fr 1fr;gap:16px;margin-bottom:16px}
+.anowc{position:relative;padding:22px 24px;border-radius:28px;color:#fff;overflow:hidden;background:radial-gradient(80% 120% at 100% 0%,rgba(184,115,51,.5),transparent 60%),linear-gradient(130deg,#16181E,#2A1016 55%,#8E0B20)}
+.anowc h3{margin:0;font:800 24px/1.15 var(--display)}.anowc p{margin:6px 0 0;color:rgba(255,255,255,.78);line-height:1.5}
+.anowc .row2{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px}
+.anowc .row2 button{display:inline-flex;align-items:center;gap:7px;min-height:40px;padding:0 15px;border-radius:999px;border:1px solid rgba(255,255,255,.22);background:rgba(255,255,255,.08);color:#fff;font:700 12.5px/1 var(--display);cursor:pointer}
+.anowc .row2 button:hover{background:rgba(255,255,255,.18)}.anowc .row2 svg{width:15px;height:15px}
+.anowc .stl{display:inline-flex;align-items:center;gap:8px;padding:6px 12px;border-radius:999px;background:rgba(255,255,255,.1);font:700 12px/1 var(--display);margin-bottom:12px}
+.anowc .stl i{width:8px;height:8px;border-radius:50%;background:#34D399;box-shadow:0 0 10px #34D399}.anowc .stl.zu i{background:#FB7185;box-shadow:0 0 10px #FB7185}
+.anows{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media (max-width:1100px){.anow{grid-template-columns:1fr}.ag4{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:760px){.ankpis{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.ank{padding:14px}.ank b{font-size:26px}.anows{grid-template-columns:1fr 1fr}.azr{grid-template-columns:1fr auto;border-radius:22px;row-gap:10px}.azr .azt{grid-column:1/-1;flex-wrap:wrap}.ag2,.ag4{grid-template-columns:1fr}.aaus{border-radius:22px;flex-wrap:wrap}.anb{grid-template-columns:minmax(90px,1fr) 1.4fr 48px}.ahero{flex-direction:column;align-items:flex-start}.apl li{border-radius:20px}.anfun>div{clip-path:none!important;border-radius:16px!important;margin:3px}}
+/* Startseite: Hinweis-Pille */
+.hnote{display:inline-flex;align-items:center;gap:10px;max-width:100%;margin:0 0 4px;padding:8px 16px 8px 9px;border-radius:999px;text-decoration:none;color:#fff;font:700 14px/1.3 var(--display);background:linear-gradient(120deg,rgba(var(--n1),.95),rgba(var(--n2),.92));box-shadow:0 12px 26px -14px rgba(var(--n1),.95),inset 0 0 0 1px rgba(255,255,255,.22);--n1:14,116,144;--n2:37,99,235;animation:hello .9s var(--ease) both;animation-delay:.8s}
+.hnote.warn{--n1:200,16,46;--n2:184,115,51}.hnote.gut{--n1:5,150,105;--n2:13,148,136}
+.hnote .nd{flex:none;width:26px;height:26px;border-radius:50%;display:grid;place-items:center;background:rgba(255,255,255,.2)}.hnote .nd svg{width:15px;height:15px}
+.hnote .na{flex:none;width:16px;height:16px;opacity:.85}
+a.hnote[href]:hover{filter:brightness(1.08)}
+#ocard .ocx,.axh{margin:12px 0 6px;font:800 11px/1 var(--display);letter-spacing:.14em;text-transform:uppercase;color:#B87333}
+.ocxl{list-style:none;margin:0;padding:0}
+.ocxl li,.day.ax{display:flex;justify-content:space-between;gap:10px}
+.ocxl li i,.day.ax i{display:block;font-style:normal;font-size:.85em;opacity:.75}
+/* Teilen-Fenster */
+.shs{position:fixed;inset:0;z-index:420;display:grid;place-items:center;padding:16px}
+.shs-bg{position:absolute;inset:0;background:rgba(10,11,14,.55);backdrop-filter:blur(4px);opacity:0;transition:opacity .25s}
+.shs-p{position:relative;width:min(460px,100%);padding:22px;border-radius:30px;background:linear-gradient(170deg,#FFFDF9,#F4ECE1);box-shadow:0 40px 80px -30px rgba(0,0,0,.6);transform:translateY(16px) scale(.97);opacity:0;transition:transform .3s var(--ease),opacity .25s}
+.shs.on .shs-bg{opacity:1}.shs.on .shs-p{transform:none;opacity:1}
+.shs-x{position:absolute;right:14px;top:14px;width:40px;height:40px;border-radius:50%;border:0;background:rgba(27,30,37,.07);font:400 24px/1 var(--display);color:#1B1E25;cursor:pointer}
+.shs-h{display:flex;align-items:center;gap:14px;padding-right:40px}
+.shs-h img{flex:none;width:86px;height:62px;object-fit:contain;border-radius:16px;background:#fff;box-shadow:inset 0 0 0 1px rgba(27,30,37,.06)}
+.shs-h small{display:block;font:800 11px/1 var(--display);letter-spacing:.14em;text-transform:uppercase;color:#B87333}.shs-h b{display:block;margin-top:5px;font:800 17px/1.25 var(--display);color:#1B1E25}
+.shs-g{display:grid;grid-template-columns:repeat(4,1fr);gap:12px 8px;margin:20px 0 16px}
+.shs-g a,.shs-g button{display:flex;flex-direction:column;align-items:center;gap:7px;padding:0;border:0;background:none;text-decoration:none;color:#1B1E25;font:700 12px/1.2 var(--display);cursor:pointer}
+.shs-g .si{width:56px;height:56px;border-radius:50%;display:grid;place-items:center;color:#fff;background:var(--c);box-shadow:0 10px 20px -10px var(--c);transition:transform .2s var(--ease)}
+.shs-g a:hover .si,.shs-g button:hover .si{transform:translateY(-3px) scale(1.05)}
+.shs-g .si svg{width:25px;height:25px}
+.shs-l{display:flex;gap:6px;padding:6px;border-radius:999px;background:#fff;box-shadow:inset 0 0 0 1px rgba(27,30,37,.1)}
+.shs-l input{flex:1;min-width:0;border:0;background:none;padding:0 12px;font:600 13px/1 var(--display);color:#4A4F5A}
+.shs-l button{flex:none;min-height:40px;padding:0 16px;border-radius:999px;border:0;background:#1B1E25;color:#fff;font:700 12.5px/1 var(--display);cursor:pointer}
+.shs-l button.ok{background:#059669}
+@media (max-width:560px){.shs{place-items:end center;padding:0}.shs-p{width:100%;border-radius:28px 28px 0 0;padding-bottom:calc(22px + env(safe-area-inset-bottom,0px));transform:translateY(40px)}}
+@media (prefers-reduced-motion:reduce){.adm-side::before{animation:none}.hnote{animation:none}}
+
 @media (max-width:1100px){.atr{grid-template-columns:64px 90px minmax(140px,1fr) 100px 90px 120px}.atr>span:nth-child(5),.atr>span:nth-child(8){display:none}.agrid2{grid-template-columns:1fr}}
 @media (max-width:760px){.adm-app{grid-template-columns:1fr;grid-template-rows:auto minmax(0,1fr)}
+ #admTabs .agp{display:contents}#admTabs .agl{display:none}#admTabs button .ai{width:34px;height:34px}#admTabs button{min-height:46px;padding:0 6px}#admTabs button.on{box-shadow:none}.as-me{display:none!important}.as-foot{display:flex;gap:6px}.as-foot button svg{display:none}.adm-side::before,.adm-side::after{display:none}.alive{display:none!important}
  .adm-side{flex-direction:row;align-items:center;padding:8px;gap:8px;overflow-x:auto;overflow-y:hidden;border-right:0;border-bottom:1px solid rgba(255,255,255,.08)}
  .as-brand{border:0;margin:0;padding:0 6px}.as-brand img{height:26px}.as-brand b{display:none}
  #admTabs{flex-direction:row;gap:4px}#admTabs button{min-height:42px;padding:0 10px;white-space:nowrap}#admTabs button span{display:none}#admTabs button.on::before{display:none}
@@ -2446,7 +2626,7 @@ m696 -454 c28 -13 46 -31 55 -51 22 -53 -50 -177 -173 -300 -187 -186 -647
 332 -38 410 -34 35 -276 181 -332 201 -55 19 -168 16 -211 -7z"/>
 </g>
 </svg><span class="shine" aria-hidden="true"></span></div>
-     <p class="eyebrow hello" style="--d:.9s">Familienbetrieb seit 1995 · <b>Wörth am Rhein</b></p>
+     <a class="hnote" id="hnote" hidden></a><p class="eyebrow hello" style="--d:.9s">Familienbetrieb seit 1995 · <b>Wörth am Rhein</b></p>
      <h1 class="hh1 hello" style="--d:1s">Dein E-Bike <span class="amp">&amp;</span> <span style="white-space:nowrap">E-Dreirad-Spezialist</span><br><span class="gt it">mit eigener Werkstatt.</span></h1>
      <p class="lead hello" style="--d:1.1s">Über 300 E-Bikes zum Probefahren, ehrliche Beratung und ein Bosch Service Center, in dem der Chef noch selbst schraubt.</p>
      <div class="row hello" style="--d:1.2s"><a class="cta" href="#finder"><svg><use href="#i-spark"/></svg>Mein E-Bike finden</a><a class="ghost" href="#termin"><svg><use href="#i-cal"/></svg>Termin anfragen</a></div>
@@ -3253,7 +3433,7 @@ m696 -454 c28 -13 46 -31 55 -51 22 -53 -50 -177 -173 -300 -187 -186 -647
   <div class="fgrid">
    <div class="col"><h4>Besuch</h4><span>Hartmannstraße 25</span><span>76744 Wörth am Rhein</span><span style="color:var(--mut)">Nähe TÜV</span></div>
    <div class="col"><h4>Kontakt</h4><a href="tel:+49727178033">07271 78033</a><a href="https://wa.me/491635343133" target="_blank" rel="noopener">WhatsApp 0163 5343133</a><a href="mailto:info@velo-center.de">info@velo-center.de</a></div>
-   <div class="col"><h4>Öffnungszeiten</h4><span>Mo, Di, Do, Fr<br>09:00–12:00 · 14:30–18:00</span><span>Sa 09:00–12:00</span><span style="color:#DC2626">Mi & So geschlossen</span></div>
+   <div class="col" id="ftHours"><h4>Öffnungszeiten</h4><span>Mo, Di, Do, Fr<br>09:00–12:00 · 14:30–18:00</span><span>Sa 09:00–12:00</span><span style="color:#DC2626">Mi & So geschlossen</span></div>
    <div class="col"><h4>Folge uns</h4><div class="soc"><a href="https://www.instagram.com/velocenterhessert/" target="_blank" rel="noopener" aria-label="Instagram"><svg><use href="#i-ig"/></svg></a><a href="https://www.facebook.com/velocenterhessert" target="_blank" rel="noopener" aria-label="Facebook"><svg><use href="#i-fb"/></svg></a><a href="https://wa.me/491635343133" target="_blank" rel="noopener" aria-label="WhatsApp"><svg><use href="#i-chat"/></svg></a></div><span style="color:var(--mut);font-size:14px">Familienbetrieb seit 1995</span></div>
   </div>
   <p class="fnote">* Aktionspreise gelten nicht bei Leasing &amp; Finanzierung; dafür gilt der reguläre Preis. Alle Preise inkl. MwSt.</p>
@@ -3273,8 +3453,8 @@ m696 -454 c28 -13 46 -31 55 -51 22 -53 -50 -177 -173 -300 -187 -186 -647
  <div class="adm-app" role="dialog" aria-modal="true" aria-label="Velocenter Admin">
   <aside class="adm-side"><div class="as-brand"><img src="img/velocenter-logo.svg" alt="Velocenter"><b>Admin</b></div>
    <nav id="admTabs" hidden></nav>
-   <div class="as-foot"><button type="button" id="admOut" data-alogout hidden>Abmelden</button><button type="button" data-aclose>← Zur Homepage</button></div></aside>
-  <main class="adm-main"><header class="adm-top"><h2 id="admTitle">Velocenter Admin</h2><span class="sub" id="admSub"></span><button type="button" class="adm-x" data-aclose aria-label="Admin schließen">×</button></header>
+   <div class="as-foot"><div class="as-me" id="admMe" hidden></div><button type="button" id="admOut" data-alogout hidden>Abmelden</button><button type="button" data-aclose><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>Zur Homepage</button></div></aside>
+  <main class="adm-main"><header class="adm-top"><div class="att"><h2 id="admTitle">Velocenter Admin</h2><span class="sub" id="admSub"></span></div><span class="alive" id="admLive" hidden></span><button type="button" class="adm-x" data-aclose aria-label="Admin schließen">×</button></header>
    <div class="adm-b" id="admBody"></div></main>
   <div class="adm-dr" id="admDr" hidden><div class="adm-drbg" data-drclose></div><div class="adm-drp" id="admDrB" role="dialog" aria-modal="true" aria-label="Rad bearbeiten"></div></div>
  </div>
@@ -3399,25 +3579,38 @@ function osterSo(y){const a=y%19,b=Math.floor(y/100),c=y%100,d=Math.floor(b/4),e
 const FT={};function feiertag(y,mo,d){if(!FT[y]){const o=osterSo(y),t=n=>{const x=new Date(o+n*864e5);return (x.getUTCMonth()+1)+'-'+x.getUTCDate()};
  FT[y]={'1-1':'Neujahr','5-1':'Tag der Arbeit','10-3':'Tag der Deutschen Einheit','11-1':'Allerheiligen','12-25':'1. Weihnachtsfeiertag','12-26':'2. Weihnachtsfeiertag'};
  [[-2,'Karfreitag'],[1,'Ostermontag'],[39,'Christi Himmelfahrt'],[50,'Pfingstmontag'],[60,'Fronleichnam']].forEach(([n,v])=>FT[y][t(n)]=v)}return FT[y][mo+'-'+d]||''}
-function slotsAt(y,mo,d,wd){return feiertag(y,mo,d)?[]:H[wd]}
+let SITE={};const H0=JSON.parse(JSON.stringify(H));const p2=n=>String(n).padStart(2,'0');
+function zParse(s){return String(s||'').split(',').map(p=>p.trim().match(/^(\d{1,2}):(\d{2})\s*[-–]\s*(\d{1,2}):(\d{2})$/)).filter(Boolean).map(m=>[m[1]*60+ +m[2],m[3]*60+ +m[4]]).filter(([a,b])=>b>a&&b<=1440)}
+const zFmt=a=>a.map(([x,y])=>hm(x)+'-'+hm(y)).join(',');const dkey=(y,mo,d)=>y+'-'+p2(mo)+'-'+p2(d);
+function ausAt(y,mo,d){const k=dkey(y,mo,d);return (SITE.ausnahmen||[]).find(a=>a&&a.von&&k>=a.von&&k<=(a.bis||a.von))||null}
+function slotsAt(y,mo,d,wd){const a=ausAt(y,mo,d);if(a)return zParse(a.zeiten);return feiertag(y,mo,d)?[]:H[wd]}
+function zApply(){const z=SITE.zeiten;for(let d=0;d<7;d++)H[d]=z&&typeof z[d]==='string'?zParse(z[d]):H0[d].slice()}
+const heuteK=()=>{const b=berlin();return dkey(b.y,b.mo,b.dd)};
+const dPlus=(k,n)=>new Date(Date.parse(k+'T12:00:00Z')+n*864e5).toISOString().slice(0,10);
+const dKurz=k=>{const x=new Date(k+'T12:00:00Z');return ['So','Mo','Di','Mi','Do','Fr','Sa'][x.getUTCDay()]+'., '+p2(x.getUTCDate())+'.'+p2(x.getUTCMonth()+1)+'.'};
+const dSpan=a=>a.bis&&a.bis!==a.von?dKurz(a.von)+' – '+dKurz(a.bis):dKurz(a.von);
+/* anstehende Ausnahmen (Betriebsferien, Sonderzeiten) innerhalb ihres Ankündigungs-Zeitraums */
+function ausKommend(alle){const h=heuteK();return (SITE.ausnahmen||[]).filter(a=>a&&a.von&&(a.bis||a.von)>=h&&(alle||a.von<=dPlus(h,a.ank==null?14:+a.ank))).sort((a,b)=>a.von<b.von?-1:1)}
+function ausZeit(a){const T=zParse(a.zeiten);return T.length?T.map(([x,y])=>hm(x)+'–'+hm(y)).join(' · ')+' Uhr':'geschlossen'}
+function ausHtml(tag){const L=ausKommend();if(!L.length)return '';return L.map(a=>'<'+tag+' class="'+(tag==='div'?'day ':'')+'ax"><span>'+esc(dSpan(a))+(a.txt?'<i>'+esc(a.txt)+'</i>':'')+'</span><span>'+ausZeit(a)+'</span></'+tag+'>').join('')}
 /* aktueller Öffnungs-Status (für Statusleiste und Startseite) */
-function oeffStatus(){const b=berlin(),{d,m}=b,ft=feiertag(b.y,b.mo,b.dd),S=slotsAt(b.y,b.mo,b.dd,d),cur=S.find(([a,e])=>m>=a&&m<e);
+function oeffStatus(){const b=berlin(),{d,m}=b,au=ausAt(b.y,b.mo,b.dd),ft=au?'':feiertag(b.y,b.mo,b.dd),S=slotsAt(b.y,b.mo,b.dd,d),ax=au&&!S.length?(au.txt||'Heute geschlossen'):'',cur=S.find(([a,e])=>m>=a&&m<e);
  if(cur)return{open:true,bis:cur[1],rest:cur[1]-m,p:(m-cur[0])/(cur[1]-cur[0])};
  const base=Date.UTC(b.y,b.mo-1,b.dd);for(let k=0;k<14;k++){const x=new Date(base+k*864e5),wd=x.getUTCDay(),T=slotsAt(x.getUTCFullYear(),x.getUTCMonth()+1,x.getUTCDate(),wd),s=T.find(([a])=>k>0||a>m);
-  if(s)return{open:false,k,wd,ab:s[0],in:k===0?s[0]-m:(k===1?(1440-m)+s[0]:null),pause:k===0&&S.some(([,e])=>e<=m),ft}}
- return{open:false,k:99,ft}}
+  if(s)return{open:false,k,wd,ab:s[0],in:k===0?s[0]-m:(k===1?(1440-m)+s[0]:null),pause:k===0&&S.some(([,e])=>e<=m),ft,aus:ax}}
+ return{open:false,k:99,ft,aus:ax}}
 const dauer=n=>n<60?n+' Min.':Math.floor(n/60)+' Std.'+(n%60?' '+(n%60)+' Min.':'');
 function sbar(){const A=$('#ostat'),C=$('#ocard');if(!A)return;const o=oeffStatus();let cls,lab,det,mob,sh,head,sub,p=0,lm;
  if(o.open){const so=o.rest<=30;cls=so?'soon':'open';p=o.p;lab=so?'Schließt gleich':'Jetzt geöffnet';det=so?'noch '+dauer(o.rest):'bis '+hm(o.bis)+' Uhr';mob=so?'noch '+o.rest+' Min.':'bis '+hk(o.bis);lm=so?'Gleich zu':'Geöffnet';sh='<b>'+(so?'Gleich zu':'Offen')+'</b> · '+(so?o.rest+' Min.':'bis '+hk(o.bis));
   head='<b>'+lab+'</b>';sub='Noch '+dauer(o.rest)+' · bis '+hm(o.bis)+' Uhr'}
- else{cls='closed';const wann=o.k===0?'':o.k===1?'morgen ':(DN[o.wd].slice(0,2)+'. ');lab=o.pause?'Mittagspause':o.ft?'Heute Feiertag':'Geschlossen';
+ else{cls='closed';const wann=o.k===0?'':o.k===1?'morgen ':(DN[o.wd].slice(0,2)+'. ');lab=o.pause?'Mittagspause':o.aus?o.aus:o.ft?'Heute Feiertag':'Geschlossen';
   det=o.k<99?'ab '+wann+hm(o.ab)+' Uhr':'';lm=o.pause?'Pause':o.ft?'Feiertag':'Zu';mob=o.k<99?'ab '+(o.k?DN[o.wd].slice(0,2)+' ':'')+hk(o.ab):'';sh='<b>'+(o.pause?'Pause':'Zu')+'</b> · '+(o.k<99?'ab '+(o.k?DN[o.wd].slice(0,2)+' ':'')+hk(o.ab):'');
   head='<b>'+lab+'</b>';sub=o.k<99?'Wir öffnen '+(o.k===0?'heute':o.k===1?'morgen':DN[o.wd])+' um '+hm(o.ab)+' Uhr'+(o.in!=null?' · in '+dauer(o.in):''):''}
  const f=['f1','f2','f3'].filter(c=>A.classList.contains(c)).join(' ');A.className='ostat '+cls+(f?' '+f:'');
  A.innerHTML='<span class="orng"><svg viewBox="0 0 36 36" aria-hidden="true"><circle class="tr" cx="18" cy="18" r="15"/><circle class="pg" cx="18" cy="18" r="15" style="stroke-dashoffset:'+(94.25*(1-p)).toFixed(2)+'"/></svg><i></i></span><span class="otx"><small class="ld">'+lab+'</small><small class="lm">'+lm+'</small><strong class="t">'+det+'</strong><strong class="tm">'+mob+'</strong></span><span class="osh">'+sh+'</span>';
  A.setAttribute('aria-label',lab+(sub?', '+sub:'')+'. Öffnungszeiten ansehen');
  if(C){const b=berlin(),rows=[1,2,3,4,5,6,0];
-  C.innerHTML='<div class="'+A.className.replace('ostat','')+'" style="--p:'+(p*100).toFixed(1)+'%"><h5>'+head+'</h5><p class="ocs">'+sub+'</p>'+(o.open?'<div class="ocb"><s></s></div>':'')+'<ul>'+rows.map(k=>'<li class="'+(k===b.d?'hd':'')+(H[k].length?'':' zu')+'"><span>'+DN[k]+(k===b.d?'<i>heute</i>':'')+'</span><span>'+(H[k].length?H[k].map(([x,y])=>hk(x)+'–'+hk(y)).join(' · '):'geschlossen')+'</span></li>').join('')+'</ul>'+(o.ft?'<p class="ocs" style="margin:10px 0 0">Heute ist '+feiertag(b.y,b.mo,b.dd)+' – der Laden bleibt zu.</p>':'')+'<a class="oct" href="tel:+49727178033">07271 78033 anrufen</a></div>'}
+  C.innerHTML='<div class="'+A.className.replace('ostat','')+'" style="--p:'+(p*100).toFixed(1)+'%"><h5>'+head+'</h5><p class="ocs">'+sub+'</p>'+(o.open?'<div class="ocb"><s></s></div>':'')+'<ul>'+rows.map(k=>'<li class="'+(k===b.d?'hd':'')+(H[k].length?'':' zu')+'"><span>'+DN[k]+(k===b.d?'<i>heute</i>':'')+'</span><span>'+(H[k].length?H[k].map(([x,y])=>hk(x)+'–'+hk(y)).join(' · '):'geschlossen')+'</span></li>').join('')+'</ul>'+(o.ft?'<p class="ocs" style="margin:10px 0 0">Heute ist '+feiertag(b.y,b.mo,b.dd)+' – der Laden bleibt zu.</p>':'')+(ausKommend().length?'<p class="ocx">Abweichende Zeiten</p><ul class="ocxl">'+ausHtml('li')+'</ul>':'')+'<a class="oct" href="tel:+49727178033">07271 78033 anrufen</a></div>'}
  hdrFit()}
 const hk=m=>Math.floor(m/60)+':'+String(m%60).padStart(2,'0');
 /* Kopf: Pille schrumpft, bis das Menü ganz hineinpasst */
@@ -3435,9 +3628,9 @@ function berlin(){const p=new Intl.DateTimeFormat('en-GB',{timeZone:'Europe/Berl
 function live(){
  const {d}=berlin(),L=$('#live'),T=$('#liveT'),o=oeffStatus();sbar();
  if(L&&T){if(o.open){L.className='live open';T.innerHTML='<b>Jetzt geöffnet</b> · bis '+hm(o.bis)+' Uhr'}
- else{L.className='live closed';T.innerHTML='<b>'+(o.pause?'Mittagspause':o.ft?'Heute Feiertag':'Gerade geschlossen')+'</b>'+(o.k<99?' · wir öffnen '+(o.k===0?'heute':o.k===1?'morgen':DN[o.wd])+' um '+hm(o.ab)+' Uhr':'')}}
+ else{L.className='live closed';T.innerHTML='<b>'+(o.pause?'Mittagspause':o.aus?esc(o.aus):o.ft?'Heute Feiertag':'Gerade geschlossen')+'</b>'+(o.k<99?' · wir öffnen '+(o.k===0?'heute':o.k===1?'morgen':DN[o.wd])+' um '+hm(o.ab)+' Uhr':'')}}
  const rows=[1,2,3,4,5,6,0];
- ['#hours','#hours2'].forEach(id=>{const el=$(id);if(!el)return;el.innerHTML=rows.map(k=>'<div class="day'+(k===d?' today':'')+(H[k].length?'':' zu')+'"><span>'+DN[k]+(k===d?' · heute':'')+'</span><span>'+(H[k].length?H[k].map(([a,b])=>hm(a)+'–'+hm(b)).join(' · '):'geschlossen')+'</span></div>').join('')});
+ ['#hours','#hours2'].forEach(id=>{const el=$(id);if(!el)return;el.innerHTML=rows.map(k=>'<div class="day'+(k===d?' today':'')+(H[k].length?'':' zu')+'"><span>'+DN[k]+(k===d?' · heute':'')+'</span><span>'+(H[k].length?H[k].map(([a,b])=>hm(a)+'–'+hm(b)).join(' · '):'geschlossen')+'</span></div>').join('')+(ausKommend().length?'<div class="axh">Abweichende Zeiten</div>'+ausHtml('div'):'')});ftHours();
 }
 live();setInterval(live,30000);
 const end=new Date('2027-02-28T23:59:59+01:00'),start=new Date('2026-11-01T00:00:00+01:00'),now=new Date(),dd=Math.ceil((end-now)/864e5);
@@ -3558,7 +3751,7 @@ fRender();
 /* ---------- Kopf: Rad-Wechsel + heutige Öffnungszeit ---------- */
 (function(){const hv=$('#hvis');if(!hv)return;const bs=$$('.hb',hv),lg=$('#hlg');let k=0;
  setInterval(()=>{if(cur!=='start'||scrollY>innerHeight)return;bs[k].classList.add('off');k=(k+1)%bs.length;bs[k].classList.remove('off');lg.classList.add('swap');setTimeout(()=>{lg.src=bs[k].dataset.l;lg.classList.remove('swap')},350)},4800);
- const {d,m}=berlin(),q=$('#qkHours');if(q){const op=H[d].some(([a,b])=>m>=a&&m<b);q.innerHTML='<i class="qd'+(op?' on':'')+'"></i>'+(op?'Jetzt geöffnet':'Heute: '+(H[d].length?H[d].map(([a,b])=>hm(a)+'–'+hm(b)).join(' · '):'geschlossen'))}})();
+ const bq=berlin(),{d,m}=bq,q=$('#qkHours'),TD=slotsAt(bq.y,bq.mo,bq.dd,d);if(q){const op=TD.some(([a,b])=>m>=a&&m<b);q.innerHTML='<i class="qd'+(op?' on':'')+'"></i>'+(op?'Jetzt geöffnet':'Heute: '+(TD.length?TD.map(([a,b])=>hm(a)+'–'+hm(b)).join(' · '):'geschlossen'))}})();
 
 /* ================= AUF LAGER (Modelle mit Varianten, ohne Stückzahlen) ================= */
 const LG={M:[],list:[],ok:false,load:null,f:{q:'',mk:'',rf:'',nur:false,deal:false,sort:'neu'},i:-1,vi:0};
@@ -3737,7 +3930,7 @@ function fbSdk(){if(FB.p)return FB.p;const v='10.14.1',L=n=>new Promise((ok,no)=
  FB.p.catch(()=>{FB.p=null});return FB.p}
 /* Besucher: nur 4 Lesezugriffe pro Besuch, ohne Firebase-Programm */
 async function fbPublic(){if(!FBC||!FBC.projectId)return;const g=p=>fsGet(p).catch(()=>null);const[l,st,b,w]=await Promise.all(['pub/lager','site/einstellungen','bestand/aktuell','site/bewertungen'].map(g));
- if(ADM.ok)return;ADM.rows=(l&&l.rows)||{};ADM.set=st||{};LG.DB=b&&Array.isArray(b.raeder)&&b.raeder.length?b:null;if(LG.DB&&!LG.D)LG.ok=true;
+ if(ADM.ok)return;ADM.rows=(l&&l.rows)||{};ADM.set=st||{};SITE=ADM.set;siteApply();LG.DB=b&&Array.isArray(b.raeder)&&b.raeder.length?b:null;if(LG.DB&&!LG.D)LG.ok=true;
  if(w&&Array.isArray(w.items)){ADM.bew=w;bewRender(w)}if(LG.DB||LG.D)admRefresh();admDeals()}
 /* Eigene Fotos (Firebase): in „fotos/<id>“, im Rad steht „fs:<id>“ */
 const FOTO={};
@@ -3747,7 +3940,7 @@ const fotoSrc=v=>typeof v==='string'&&v.startsWith('fs:')?(fotoLoad(v.slice(3)),
 function fotoFix(){document.querySelectorAll('img[src^="fs:"]').forEach(i=>{const u=fotoSrc(i.getAttribute('src'));if(u)i.src=u})}
 function admWire(db){ADM.db=db;
  db.collection('lager').onSnapshot(q=>{const r={};q.docs.forEach(x=>{r[x.id]=x.data()});ADM.rows=r;admRefresh();if(FBC&&ADM.ok&&!(q.metadata&&q.metadata.fromCache))fbPubLater()},()=>{});
- db.doc('site/einstellungen').onSnapshot(x=>{ADM.set=x.exists?x.data():{};admRefresh();admDeals()},()=>{});
+ db.doc('site/einstellungen').onSnapshot(x=>{ADM.set=x.exists?x.data():{};SITE=ADM.set;siteApply();admRefresh();admDeals();if(ADM.ok&&!$('#adm').hidden&&['zeiten','meldung','dash'].includes(ADM.tab)&&!ADM.dirty)admRender()},()=>{});
  db.doc('bestand/aktuell').onSnapshot(x=>{const d=x.exists?x.data():null;LG.DB=d&&Array.isArray(d.raeder)&&d.raeder.length?d:null;if(LG.DB&&!LG.D)LG.ok=true;if(LG.DB||LG.D)admRefresh()},()=>{})}
 /* Besucher lesen bei Firebase nur „pub/lager“: nach jeder Änderung schreibt der Admin eine Kopie */
 function fbPubLater(){clearTimeout(FB.pubT);FB.pubT=setTimeout(()=>{const j=JSON.stringify(ADM.rows);if(j===FB.pub)return;
@@ -3807,7 +4000,10 @@ const admMkTag=m=>{const l=admLogo(m);return l?'<img class="amk" src="'+l+'" alt
 function admNav(){const A=admAll(),E=A.map(x=>({x,F:admEff(x)}));
  const nF=E.reduce((s,e)=>s+(e.x.o.hidden?0:e.F.filter(f=>!f._hid&&!f.bild).length),0),nA=E.reduce((s,e)=>s+(e.x.o.hidden?0:e.F.filter(f=>!f._hid&&f.angebot).length),0);
  const c={raeder:A.length,fotos:nF,angebote:nA};
- $('#admTabs').innerHTML=Object.keys(ADM_TAB).map(k=>'<button type="button" data-t="'+k+'" class="'+(ADM.tab===k?'on':'')+'">'+admSvg(k)+'<span>'+ADM_TAB[k][0]+'</span>'+(c[k]!=null?'<i'+(k==='fotos'&&c[k]?' class="w"':'')+'>'+c[k]+'</i>':'')+'</button>').join('')}
+ c.protokoll=null;const btn=k=>'<button type="button" data-t="'+k+'" class="'+(ADM.tab===k?'on':'')+'" title="'+ADM_TAB[k][0]+'"><b class="ai">'+admSvg(k)+'</b><span>'+ADM_TAB[k][0]+'</span>'+(c[k]!=null?'<i'+(k==='fotos'&&c[k]?' class="w"':'')+'>'+c[k]+'</i>':'')+'</button>';
+ const G=typeof ADM_GRP!=='undefined'?ADM_GRP:[['',Object.keys(ADM_TAB)]],used=new Set(G.flatMap(g=>g[1]));
+ $('#admTabs').innerHTML=G.map(([t,ks])=>'<div class="agp">'+(t?'<p class="agl">'+t+'</p>':'')+ks.filter(k=>ADM_TAB[k]).map(btn).join('')+'</div>').join('')+Object.keys(ADM_TAB).filter(k=>!used.has(k)).map(btn).join('');
+ if(typeof admMe==='function')admMe()}
 function admRender(){if(!ADM.ok)return;admNav();const t=ADM_TAB[ADM.tab]||ADM_TAB.dash;$('#admTitle').textContent=t[0];$('#admSub').textContent=t[1];
  const b=$('#admBody');({dash:admDash,raeder:admList,fotos:admFotos,angebote:admDealsV,neu:()=>{b.innerHTML='<div class="admempty"><p>Das Formular ist rechts geöffnet.</p><button type="button" class="cta" data-anew>Neues Rad anlegen</button></div>';admForm(null)},import:admImport,seite:admSeite,bewertungen:admBew,livegang:admLive}[ADM.tab]||admDash)(b)}
 function admDash(b){const D=admBase()||{},A=admAll(),M=LG.M||[],n=D.anzahl||{};
@@ -3951,7 +4147,7 @@ async function admSave(){const E=ADM.edit,F=$('#admF'),err=$('#admE');err.textCo
     ['preis','angebot','motor','akku','schaltung'].forEach(n=>{if(v[n])o[n]=v[n]});if(v.status==='bestellt'&&v.ab)o.ab=v.ab;if(v.res)o.res=true;if(f.bild)o.bild=f.bild;return o});
    if(!rad.farben.length||rad.farben.some(f=>!f.farbe)){err.textContent='Jede Ausführung braucht eine Farbe.';return}
    const cur=ADM.rows[id]||{};await ADM.db.doc('lager/'+id).set({rad,hidden:!!cur.hidden,ts:Date.now()})}
-  admToast('Gespeichert – gilt sofort auf der Seite.');admDrClose();if(ADM.tab==='neu')ADM.tab='raeder';setTimeout(admRender,260)}
+  admLog((E.imp?'Rad geändert':E.id?'Eigenes Rad geändert':'Eigenes Rad angelegt')+' · '+([$('[name=marke]',F),$('[name=modell]',F)].map(i=>i&&i.value||'').join(' ').trim()||(E.r.marke+' '+E.r.modell)));admToast('Gespeichert – gilt sofort auf der Seite.');admDrClose();if(ADM.tab==='neu')ADM.tab='raeder';setTimeout(admRender,260)}
  catch(e){err.textContent='Speichern fehlgeschlagen'+(e&&e.code==='quota_exceeded'?' (Speicher voll)':'')+'. Bitte nochmal versuchen.'}}
 async function admPhoto(i,file){const E=ADM.edit;admToast('Foto wird hochgeladen …');
  try{const url=await admUpload(file);admKeep();const f=E.r.farben[i];if(E.imp){E.ov[f.id]=Object.assign({},E.ov[f.id],{bild:url})}else{f.bild=url}
@@ -3967,22 +4163,22 @@ $('#adm').addEventListener('click',async e=>{const t=e.target;
  if(t.closest('[data-alogout]')){try{await FB.auth.signOut()}catch(_){}ADM.ok=false;location.hash='';location.reload();return}
  if(t.closest('[data-drclose]')){admDrClose();if(ADM.tab==='neu'){ADM.tab='raeder';admRender()}return}
  
- const tb=t.closest('#admTabs button');if(tb){admDrClose();ADM.tab=tb.dataset.t;admRender();$('#admBody').scrollTop=0;return}
+ const tb=t.closest('#admTabs button');if(tb){admDrClose();ADM.dirty=0;ADM.tab=tb.dataset.t;admRender();$('#admBody').scrollTop=0;return}
  const go=t.closest('[data-go]');if(go){ADM.tab=go.dataset.go;admRender();return}
  if(t.closest('[data-anew]')){admForm(null);return}
- const hd=t.closest('[data-ah]');if(hd){e.stopPropagation();const id=hd.dataset.ah,cur=ADM.rows[id];try{if(cur)await ADM.db.doc('lager/'+id).update({hidden:!cur.hidden,ts:Date.now()});else await ADM.db.doc('lager/'+id).set({key:id,hidden:true,v:{},ts:Date.now()});admToast(cur&&cur.hidden?'Wieder sichtbar.':'Ausgeblendet – auf der Seite nicht mehr sichtbar.')}catch(_){admToast('Ging nicht – bitte nochmal.')}return}
- const dl=t.closest('[data-ad]');if(dl){if(dl.dataset.sure!=='1'){dl.dataset.sure='1';dl.textContent='Wirklich löschen?';return}try{await ADM.db.doc('lager/'+dl.dataset.ad).delete();admToast('Gelöscht.')}catch(_){admToast('Ging nicht – bitte nochmal.')}return}
+ const hd=t.closest('[data-ah]');if(hd){e.stopPropagation();const id=hd.dataset.ah,cur=ADM.rows[id];try{if(cur)await ADM.db.doc('lager/'+id).update({hidden:!cur.hidden,ts:Date.now()});else await ADM.db.doc('lager/'+id).set({key:id,hidden:true,v:{},ts:Date.now()});admToast(cur&&cur.hidden?'Wieder sichtbar.':'Ausgeblendet – auf der Seite nicht mehr sichtbar.');admLog((cur&&cur.hidden?'Rad eingeblendet':'Rad ausgeblendet')+' · '+admNm(id))}catch(_){admToast('Ging nicht – bitte nochmal.')}return}
+ const dl=t.closest('[data-ad]');if(dl){if(dl.dataset.sure!=='1'){dl.dataset.sure='1';dl.textContent='Wirklich löschen?';return}const nm=admNm(dl.dataset.ad);try{await ADM.db.doc('lager/'+dl.dataset.ad).delete();admToast('Gelöscht.');admLog('Eigenes Rad gelöscht · '+nm)}catch(_){admToast('Ging nicht – bitte nochmal.')}return}
  const e2=t.closest('[data-edit2]');if(e2){admForm(e2.dataset.edit2);return}
  const ed=t.closest('[data-edit]');if(ed&&!t.closest('button,input,label')){admForm(ed.dataset.edit);return}
  if(t.closest('#admAddV')){admKeep();const E=ADM.edit,l=E.r.farben[E.r.farben.length-1]||{};E.r.farben.push({jahr:l.jahr||'',farbe:'',status:'lager',preis:l.preis,motor:l.motor,akku:l.akku,schaltung:l.schaltung});admRedrawVars();return}
  const rv=t.closest('[data-rmv]');if(rv){admKeep();const E=ADM.edit;if(E.r.farben.length<2){admToast('Mindestens eine Farbe muss bleiben.');return}E.r.farben.splice(+rv.dataset.rmv,1);admRedrawVars();return}
  const rb=t.closest('[data-rmb]');if(rb){admKeep();const E=ADM.edit,f=E.r.farben[+rb.dataset.rmb];if(E.imp)E.ov[f.id]=Object.assign({},E.ov[f.id],{bild:null});else delete f.bild;admRedrawVars();return}
- if(t.closest('#admReset')){const b=t.closest('#admReset');if(b.dataset.sure!=='1'){b.dataset.sure='1';b.textContent='Wirklich zurücksetzen?';return}const E=ADM.edit;try{await ADM.db.doc('lager/'+E.id).set({key:E.id,hidden:!!(ADM.rows[E.id]||{}).hidden,v:{},ts:Date.now()});admToast('Zurückgesetzt.');admDrClose();setTimeout(admRender,260)}catch(_){}return}
+ if(t.closest('#admReset')){const b=t.closest('#admReset');if(b.dataset.sure!=='1'){b.dataset.sure='1';b.textContent='Wirklich zurücksetzen?';return}const E=ADM.edit;try{await ADM.db.doc('lager/'+E.id).set({key:E.id,hidden:!!(ADM.rows[E.id]||{}).hidden,v:{},ts:Date.now()});admToast('Zurückgesetzt.');admLog('Änderungen zurückgesetzt · '+admNm(E.id));admDrClose();setTimeout(admRender,260)}catch(_){}return}
  if(t.closest('#admBzX')){ADM.imp=null;admRender();return}
  if(t.closest('#admBzGo')){const P=ADM.imp,b=t.closest('#admBzGo');b.disabled=true;b.textContent='Wird übernommen …';
-  try{const d={stand:P.stand,quelle:P.quelle,anzahl:P.anzahl,raeder:P.raeder,ts:Date.now()};if(JSON.stringify(d).length>250000)throw {code:'zu_gross'};await ADM.db.doc('bestand/aktuell').set(d);ADM.imp=null;admToast('Neuer Bestand ist online.');ADM.tab='dash';admRender()}
+  try{const d={stand:P.stand,quelle:P.quelle,anzahl:P.anzahl,raeder:P.raeder,ts:Date.now()};if(JSON.stringify(d).length>250000)throw {code:'zu_gross'};await ADM.db.doc('bestand/aktuell').set(d);ADM.imp=null;admToast('Neuer Bestand ist online.');admLog('Neuer Veloport-Bestand eingespielt ('+P.raeder.length+' Modelle)');ADM.tab='dash';admRender()}
   catch(err){b.disabled=false;b.textContent='Bestand übernehmen';admToast(err&&err.code==='zu_gross'?'Bestand zu groß für einen Speicherplatz – bitte melden.':'Übernehmen fehlgeschlagen – bitte nochmal.')}return}
- if(t.closest('#admBzReset')){const b=t.closest('#admBzReset');if(b.dataset.sure!=='1'){b.dataset.sure='1';b.textContent='Wirklich auf Datei-Bestand zurück?';return}try{await ADM.db.doc('bestand/aktuell').delete();LG.DB=null;admRefresh();admToast('Datei-Bestand ist wieder aktiv.');admRender()}catch(_){admToast('Ging nicht – bitte nochmal.')}return}});
+ if(t.closest('#admBzReset')){const b=t.closest('#admBzReset');if(b.dataset.sure!=='1'){b.dataset.sure='1';b.textContent='Wirklich auf Datei-Bestand zurück?';return}try{await ADM.db.doc('bestand/aktuell').delete();LG.DB=null;admRefresh();admToast('Datei-Bestand ist wieder aktiv.');admLog('Bestand auf Datei-Stand zurückgesetzt');admRender()}catch(_){admToast('Ging nicht – bitte nochmal.')}return}});
 $('#adm').addEventListener('change',async e=>{const t=e.target;
  const u=t.closest('[data-up]');if(u&&u.files[0]){admPhoto(+u.dataset.up,u.files[0]);return}
  const fu=t.closest('[data-fup]');if(fu&&fu.files[0]){const [id,fid]=fu.dataset.fup.split('|'),x=admAll().find(y=>y.id===id);if(!x)return;fu.closest('.afc').classList.add('busy');admToast('Foto wird hochgeladen …');
@@ -3997,7 +4193,7 @@ $('#adm').addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target.matches('[
 $('#adm').addEventListener('input',e=>{const t=e.target;if(t.id==='admQ'||t.id==='admAq'){if(t.id==='admQ')ADM.q=t.value;else ADM.aq=t.value;const p=t.selectionStart,id=t.id;admRender();const q=$('#'+id);q.focus();q.setSelectionRange(p,p)}});
 $('#adm').addEventListener('submit',async e=>{e.preventDefault();if(e.target.id==='admF'){admSave();return}
  if(e.target.id==='admSet'){const f=e.target,v={hinweis:f.hinweis.value.trim(),hinweisAus:f.hinweisAus.checked,stand:f.stand.value.trim(),dealsAus:f.dealsAus.checked,ts:Date.now()};
-  try{await ADM.db.doc('site/einstellungen').set(v);admToast('Gespeichert – gilt sofort.')}catch(_){admToast('Speichern fehlgeschlagen.')}}});
+  try{await admSetSave(v,'Lager-Texte geändert')}catch(_){admToast('Speichern fehlgeschlagen.')}}});
 ['dragover','dragleave','drop'].forEach(ev=>$('#adm').addEventListener(ev,e=>{const d=e.target.closest&&e.target.closest('#admDrop');if(!d)return;e.preventDefault();d.classList.toggle('hov',ev==='dragover');if(ev==='drop'&&e.dataTransfer.files[0])admCsvLoad(e.dataTransfer.files[0])}));
 addEventListener('keydown',e=>{if(e.key!=='Escape'||$('#adm').hidden)return;if(!$('#admDr').hidden){admDrClose();if(ADM.tab==='neu'){ADM.tab='raeder';admRender()}}else admClose()});
 document.addEventListener('submit',async e=>{if(e.target.id!=='admPwF')return;e.preventDefault();const u=$('#admU'),i=$('#admPw'),g=$('#admGo'),er=$('#admPwE');if(!i||g.disabled)return;
@@ -4077,20 +4273,24 @@ function seoSet(v){const s=SEO[v]||SEO.start;document.title=s[0];const m=(n,a,c)
 /* ---------- Winter-Countdown (Sekunden) ---------- */
 (function(){const end=new Date('2027-02-28T23:59:59+01:00'),start=new Date('2026-11-01T00:00:00+01:00');const D=$('#dealDays'),H=$('#cdH'),M=$('#cdM'),S=$('#cdS');
  const p=n=>String(n).padStart(2,'0');
- function t(){const now=new Date(),ms=end-now;const on=now>=start&&ms>0;$$('.wstrip:not(.spring)').forEach(w=>w.hidden=!on);if(!on)return;
+ function t(){const now=new Date(),ms=end-now;const on=now>=start&&ms>0&&!(SITE.aktion||{}).winterAus;$$('.wstrip:not(.spring)').forEach(w=>w.hidden=!on);if(!on)return;
   const d=Math.floor(ms/864e5),h=Math.floor(ms/36e5)%24,m=Math.floor(ms/6e4)%60,s=Math.floor(ms/1e3)%60;
   if(D)D.textContent=d;if(H)H.textContent=p(h);if(M)M.textContent=p(m);if(S)S.textContent=p(s);$$('.wsd').forEach(x=>x.textContent=d)}
  t();setInterval(()=>{if(cur==='start'||cur==='service')t()},1000)})();
 
 /* ---------- Saison: Gutschein (10.11.–24.12.), Frühjahrs-Check (März/April nach der Winter-Aktion) ---------- */
-(function(){const P=new Intl.DateTimeFormat('en-CA',{timeZone:'Europe/Berlin',month:'numeric',day:'numeric'}).formatToParts(new Date()),mo=+P.find(x=>x.type==='month').value,dy=+P.find(x=>x.type==='day').value;
- const now=new Date(),winter=now>=new Date('2026-11-01T00:00:00+01:00')&&now<=new Date('2027-02-28T23:59:59+01:00');
- const spring=!winter&&(mo===3||mo===4),gift=(mo===11&&dy>=10)||(mo===12&&dy<=24);
- const g=$('#gutschein');if(g)g.hidden=!gift;
+function saison(){const P=new Intl.DateTimeFormat('en-CA',{timeZone:'Europe/Berlin',month:'numeric',day:'numeric'}).formatToParts(new Date()),mo=+P.find(x=>x.type==='month').value,dy=+P.find(x=>x.type==='day').value;
+ const now=new Date(),wz=now>=new Date('2026-11-01T00:00:00+01:00')&&now<=new Date('2027-02-28T23:59:59+01:00'),A=SITE.aktion||{},winter=wz&&!A.winterAus;
+ const spring=!wz&&(mo===3||mo===4)&&!A.fjAus,gift=((mo===11&&dy>=10)||(mo===12&&dy<=24))&&!A.gutAus;
+ return{wz,winter,spring,gift,giftZeit:(mo===11&&dy>=10)||(mo===12&&dy<=24),springZeit:!wz&&(mo===3||mo===4)}}
+function seasonApply(){const {winter,spring,gift}=saison(),A=SITE.aktion||{};
+ const g=$('#gutschein');if(g){g.hidden=!gift;const gs=$('.gtx>span',g);if(gs){if(!gs.dataset.o)gs.dataset.o=gs.textContent;gs.textContent=A.gutTxt||gs.dataset.o}}
+ const dl=$('#deal');if(dl&&!winter)dl.hidden=true;$$('.wstrip:not(.spring)').forEach(w=>{if(!winter)w.hidden=true});
  $$('.wonly').forEach(x=>x.hidden=!winter);$$('.wstrip.spring').forEach(x=>x.hidden=!spring);
  const q=$('#qkSeason');if(q&&!winter){q.classList.remove('qice');q.href='#termin';q.dataset.pre=spring?'Frühjahrs-Check (Inspektion)':'Inspektion';
   const u=q.querySelector('.ic use');if(u)u.setAttribute('href','#i-wrench');
-  q.querySelector('.tx').innerHTML=spring?'<i>03 · Saisonstart</i><b>Frühjahrs-Check</b><small>Rad fit für die Saison</small><em>Termin sichern</em>':'<i>03 · Werkstatt</i><b>Inspektion</b><small>Sicher durch die Saison</small><em>Termin sichern</em>'}})();
+  q.querySelector('.tx').innerHTML=spring?'<i>03 · Saisonstart</i><b>Frühjahrs-Check</b><small>Rad fit für die Saison</small><em>Termin sichern</em>':'<i>03 · Werkstatt</i><b>Inspektion</b><small>Sicher durch die Saison</small><em>Termin sichern</em>'}}
+seasonApply();
 
 /* ---------- Merkliste ---------- */
 const mKey=m=>[m.marke,m.modell,m.gebraucht?'g':'',m.vorfuehr?'v':''].join('|').toLowerCase();
@@ -4131,9 +4331,7 @@ $('#mkBar').addEventListener('click',cmpOpen);
 
 /* ---------- Probefahrt per WhatsApp + Dienstrad-Link im Detail ---------- */
 $('#lgm').addEventListener('click',e=>{const sh=e.target.closest('[data-share]');if(sh){const m=LG.list[LG.i],url=location.origin+location.pathname+'#rad='+rk(m),t=m.marke+' '+m.modell+' beim Velocenter Hessert in Wörth am Rhein';
-  if(navigator.share&&matchMedia('(pointer:coarse)').matches){navigator.share({title:t,text:t,url}).catch(()=>{});return}
-  const sp=sh.querySelector('span');if(navigator.clipboard)navigator.clipboard.writeText(url).then(()=>{sp.textContent='Link kopiert ✓';setTimeout(()=>{sp.textContent='Teilen'},2400)},()=>{});
-  const a=document.createElement('a');a.href='https://wa.me/?text='+encodeURIComponent(t+'\n'+url);a.target='_blank';a.rel='noopener';document.body.append(a);a.click();a.remove();return}
+  shOpen(m,url,t);return}
  const p=e.target.closest('[data-pf]');if(p){const m=LG.list[LG.i],v=m.v[LG.vi]||m.v[0];
   waOpen('Hallo Velocenter,\nich möchte gern dieses Rad Probe fahren'+(v.status==='bestellt'?' (sobald es da ist)':'')+':\n\n'+m.marke+' '+m.modell+'\n'+[v.gr&&'Größe: '+v.gr,v.farbe&&'Farbe: '+v.farbe].filter(Boolean).join(' · ')+(v.id?'\nBestands-Nr.: '+v.id:'')+'\n\nWann passt es euch?');return}
  const d=e.target.closest('[data-dr]');if(d){const pr=+d.dataset.dr;lgClose();DR.p=pr;drSync();setTimeout(()=>{location.hash='dienstrad'},250)}});
@@ -4279,17 +4477,272 @@ function admLive(b){const L=ADM.live.done||{};const n=LIVE.filter(([k,,a])=>a||L
   LIVE.map(([k,t,a])=>'<label class="ck" style="display:flex;gap:12px;align-items:flex-start;padding:10px 0;border-top:1px solid rgba(255,255,255,.08)"><input type="checkbox" data-live="'+k+'"'+(a||L[k]?' checked':'')+(a?' disabled':'')+'><span>'+esc(t)+(a?' <b style="color:#34D399">· erledigt im Prototyp</b>':'')+'</span></label>').join('')+'</div>'}
 $('#adm').addEventListener('input',e=>{const t=e.target.closest('[data-bw]');if(!t||!ADM.bewEd)return;const [k,i]=t.dataset.bw.split('|');ADM.bewEd.items[+i][k]=k==='aus'?t.checked:t.value});
 $('#adm').addEventListener('change',async e=>{const t=e.target;if(t.matches('[data-bw^="aus|"]')){ADM.bewEd.items[+t.dataset.bw.split('|')[1]].aus=t.checked;return}
- const l=t.closest('[data-live]');if(l){const done=Object.assign({},ADM.live.done||{});if(l.checked)done[l.dataset.live]=true;else delete done[l.dataset.live];try{await ADM.db.doc('site/livegang').set({done,ts:Date.now()});admToast('Gespeichert.')}catch(_){admToast('Speichern fehlgeschlagen.')}}});
+ const l=t.closest('[data-live]');if(l){const done=Object.assign({},ADM.live.done||{});if(l.checked)done[l.dataset.live]=true;else delete done[l.dataset.live];try{await ADM.db.doc('site/livegang').set({done,ts:Date.now()});admToast('Gespeichert.');admLog('Livegang-Liste: '+(l.checked?'erledigt':'offen')+' · '+((LIVE.find(x=>x[0]===l.dataset.live)||[])[1]||'').slice(0,60))}catch(_){admToast('Speichern fehlgeschlagen.')}}});
 $('#adm').addEventListener('click',e=>{const t=e.target;if(!ADM.bewEd)return;
  if(t.closest('[data-bwadd]')){ADM.bewEd.items.push({t:'',n:''});admRender();return}
  const d=t.closest('[data-bwdel]');if(d){ADM.bewEd.items.splice(+d.dataset.bwdel,1);admRender();return}
  const u=t.closest('[data-bwup]');if(u){const i=+u.dataset.bwup,a=ADM.bewEd.items;if(i>0){[a[i-1],a[i]]=[a[i],a[i-1]];admRender()}}});
 $('#adm').addEventListener('submit',async e=>{if(e.target.id!=='admBewF')return;e.preventDefault();const E=ADM.bewEd;E.score=e.target.score.value.trim();
  const items=E.items.map(x=>({t:String(x.t||'').trim(),n:String(x.n||'').trim(),aus:!!x.aus})).filter(x=>x.t);
- try{await ADM.db.doc('site/bewertungen').set({score:E.score,items,ts:Date.now()});admToast('Bewertungen sind online.')}catch(_){admToast('Speichern fehlgeschlagen.')}});
+ try{await ADM.db.doc('site/bewertungen').set({score:E.score,items,ts:Date.now()});admToast('Bewertungen sind online.');admLog('Bewertungen gespeichert ('+items.length+')')}catch(_){admToast('Speichern fehlgeschlagen.')}});
+/* ===================== Admin 2.0 (13.11.2026): Öffnungszeiten, Hinweise & Aktionen, Analyse, Protokoll, Hilfe ===================== */
+const AI={zeiten:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',meldung:'<path d="M3 11v2a2 2 0 0 0 2 2h2l5 4V5L7 9H5a2 2 0 0 0-2 2zM16 8.5a5 5 0 0 1 0 7M19 6a8.5 8.5 0 0 1 0 12"/>',
+ analyse:'<path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/>',protokoll:'<path d="M12 8v4l3 2"/><path d="M3.05 11a9 9 0 1 1 .5 4M3 4v5h5"/>',hilfe:'<circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .9-1 1.6V14M12 17.5v.01"/>',
+ out:'<path d="M15 4h4a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1h-4M10 17l5-5-5-5M15 12H3"/>',share:'<circle cx="18" cy="5" r="2.6"/><circle cx="6" cy="12" r="2.6"/><circle cx="18" cy="19" r="2.6"/><path d="M8.3 10.8l7.4-4.4M8.3 13.2l7.4 4.4"/>',
+ snow:'<path d="M12 2v20M3.3 7l17.4 10M3.3 17L20.7 7M9 4l3 2 3-2M9 20l3-2 3 2"/>',gift:'<rect x="3" y="8" width="18" height="13" rx="2"/><path d="M12 8v13M3 12h18M12 8S10 3 7.5 4.5 9 8 12 8zM12 8s2-5 4.5-3.5S15 8 12 8z"/>',
+ flower:'<circle cx="12" cy="12" r="3"/><path d="M12 9a3 3 0 1 1 3-3M15 12a3 3 0 1 1 3 3M12 15a3 3 0 1 1-3 3M9 12a3 3 0 1 1-3-3"/>',cal:'<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/>'};
+Object.assign(ADM_ICO,AI);
+ADM_TAB.seite=['Lager-Texte','Hinweis und Stand über dem Bestand'];
+Object.assign(ADM_TAB,{analyse:['Analyse','Besucher, Klicks und Anfragen der Homepage'],zeiten:['Öffnungszeiten','Zeiten, Betriebsferien und Sonderzeiten'],meldung:['Hinweise & Aktionen','Hinweis auf der Startseite und Saison-Aktionen'],
+ protokoll:['Protokoll','Wer hat wann was geändert'],hilfe:['Hilfe','So änderst du selbst etwas – Schritt für Schritt']});
+const ADM_GRP=[['Überblick',['dash','analyse']],['Räder',['raeder','fotos','angebote','neu','import']],['Homepage',['zeiten','meldung','seite','bewertungen']],['Hilfe & Verlauf',['hilfe','protokoll','livegang']]];
+const admI=k=>'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+(ADM_ICO[k]||AI[k]||'')+'</svg>';
+ADM.prot={items:[]};
+/* Wer ist angemeldet? (Firebase: Name vor dem @) */
+function admWho(){let e='';try{e=(FB.auth&&FB.auth.currentUser&&FB.auth.currentUser.email)||''}catch(_){}if(e){const n=e.split('@')[0];return n.charAt(0).toUpperCase()+n.slice(1)}
+ const u=ADM.user;return (u&&(u.name||u.displayName))||'Team'}
+const AVC=[['#FF5A6E','#B87333'],['#22D3EE','#2563EB'],['#A78BFA','#DB2777'],['#34D399','#0D9488'],['#F5B83D','#EA580C']];
+const avCol=n=>{let h=0;for(const ch of String(n))h=(h*31+ch.charCodeAt(0))>>>0;const c=AVC[h%AVC.length];return '--a1:'+c[0]+';--a2:'+c[1]};
+function admMe(){const el=$('#admMe');if(!el)return;if(!ADM.ok){el.hidden=true;return}const n=admWho(),h=+berlin().m;
+ el.hidden=false;el.innerHTML='<span class="av" style="'+avCol(n)+'">'+esc(n.charAt(0))+'</span><span><b>'+(h<660?'Moin':h<1080?'Hallo':'Guten Abend')+', '+esc(n)+'</b><small>angemeldet</small></span>'+(FBC?'<button type="button" data-alogout title="Abmelden" aria-label="Abmelden">'+admI('out')+'</button>':'');
+ const lo=$('#admOut');if(lo)lo.hidden=true;
+ const lv=$('#admLive');if(lv){const o=oeffStatus();lv.hidden=false;lv.className='alive'+(o.open?'':' zu');lv.innerHTML='<i></i>Laden '+(o.open?'geöffnet':'geschlossen')}}
+/* Protokoll: jede Änderung mit Name + Uhrzeit (die letzten 300) */
+function admLog(w){if(!ADM.db)return;const it={t:Date.now(),u:admWho(),w:String(w).slice(0,160)};const items=[it,...((ADM.prot&&ADM.prot.items)||[])].slice(0,300);ADM.prot={items};
+ Promise.resolve().then(()=>ADM.db.doc('site/protokoll').set({items,ts:Date.now()})).catch(()=>{})}
+/* Einstellungen speichern: vorhandene Felder bleiben erhalten */
+async function admSetSave(patch,log){const v=Object.assign({},ADM.set,patch,{ts:Date.now()});await ADM.db.doc('site/einstellungen').set(v);ADM.set=SITE=v;ADM.dirty=0;siteApply();if(log)admLog(log);admToast('Gespeichert – gilt sofort auf der Homepage.')}
+const admNm=id=>{const x=admAll().find(y=>y.id===id);return x?(x.r.marke+' '+x.r.modell+(x.r.gr?' · '+x.r.gr:'')):id};
+{const p0=admPatch;admPatch=async function(x,fid,patch){await p0(x,fid,patch);const f=(x.r.farben||[]).find(y=>y.id===fid)||{};
+ admLog(Object.keys(patch).map(k=>({bild:'Foto',preis:'Preis',angebot:'Angebot'}[k]||k)).join(', ')+' geändert · '+x.r.marke+' '+x.r.modell+(f.farbe?' ('+f.farbe+')':''))}}
+
+/* ---------- Startseite: alles anwenden ---------- */
+function siteApply(){zApply();try{live()}catch(_){}try{seasonApply()}catch(_){}noteApply();if(ADM.ok)admMe()}
+function ftHours(){const el=$('#ftHours');if(!el)return;const ord=[1,2,3,4,5,6,0],sh=['So','Mo','Di','Mi','Do','Fr','Sa'],G=[];
+ ord.forEach(d=>{const k=H[d].map(([a,b])=>hm(a)+'–'+hm(b)).join(' · ');const g=G.find(x=>x.k===k);if(g)g.d.push(d);else G.push({k,d:[d]})});
+ const lst=a=>a.length>1?a.slice(0,-1).map(d=>sh[d]).join(', ')+' & '+sh[a[a.length-1]]:sh[a[0]];
+ el.innerHTML='<h4>Öffnungszeiten</h4>'+G.filter(g=>g.k).map(g=>'<span>'+(g.d.length>2?g.d.map(d=>sh[d]).join(', ')+'<br>':lst(g.d)+' ')+g.k+'</span>').join('')+G.filter(g=>!g.k).map(g=>'<span style="color:#DC2626">'+lst(g.d)+' geschlossen</span>').join('')+
+  ausKommend().slice(0,2).map(a=>'<span style="color:#B87333">'+esc(dSpan(a))+': '+(a.txt?esc(a.txt)+', ':'')+ausZeit(a)+'</span>').join('')}
+const NLINK={'':'',termin:'#termin',lager:'#lager',kontakt:'#kontakt',besuch:'#besuch',deal:'#deal',service:'#service'};
+function noteAktiv(n){if(!n||!n.on||!String(n.txt||'').trim())return false;const h=heuteK();return (!n.von||n.von<=h)&&(!n.bis||n.bis>=h)}
+function noteHtml(n){const ic=n.typ==='warn'?'<path d="M12 9v4M12 17v.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/>':n.typ==='gut'?'<path d="M20 6 9 17l-5-5"/>':'<circle cx="12" cy="12" r="9"/><path d="M12 8v.01M12 11v5"/>';
+ return '<span class="nd"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">'+ic+'</svg></span><span>'+esc(n.txt)+'</span>'+(NLINK[n.link]?'<svg class="na" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>':'')}
+function noteApply(){const el=$('#hnote');if(!el)return;let n=SITE.meldung;
+ if(!noteAktiv(n)){const a=ausKommend()[0];n=a?{on:1,typ:'warn',link:'besuch',txt:(a.txt?a.txt+': ':'')+dSpan(a)+' '+(zParse(a.zeiten).length?ausZeit(a):'geschlossen')}:null}
+ if(!n){el.hidden=true;return}el.className='hnote'+(n.typ&&n.typ!=='info'?' '+n.typ:'');el.innerHTML=noteHtml(n);
+ if(NLINK[n.link]){el.setAttribute('href',NLINK[n.link]);el.removeAttribute('aria-disabled')}else el.removeAttribute('href');el.hidden=false}
+
+/* ---------- Ansicht: Öffnungszeiten ---------- */
+function admZeiten(b){const z=SITE.zeiten||{},h=heuteK();
+ const row=d=>{const T=typeof z[d]==='string'?zParse(z[d]):H0[d],on=T.length>0,a=T[0]||[540,720],c=T[1];
+  return '<div class="azr'+(on?'':' off')+'" data-zd="'+d+'"><b>'+DN[d]+'</b><label class="asw"><input type="checkbox" data-zon'+(on?' checked':'')+'><i></i><span>'+(on?'geöffnet':'geschlossen')+'</span></label>'+
+   '<span class="azt"><input type="time" step="900" data-z="a1" value="'+hm(a[0])+'" aria-label="'+DN[d]+' öffnet"><em>–</em><input type="time" step="900" data-z="a2" value="'+hm(a[1])+'" aria-label="'+DN[d]+' schließt"></span>'+
+   '<span class="azt azt2'+(c?'':' no')+'"><label class="ack2"><input type="checkbox" data-z2'+(c?' checked':'')+'>Pause, dann</label><input type="time" step="900" data-z="b1" value="'+(c?hm(c[0]):'14:30')+'" aria-label="'+DN[d]+' öffnet nach der Pause"><em>–</em><input type="time" step="900" data-z="b2" value="'+(c?hm(c[1]):'18:00')+'" aria-label="'+DN[d]+' schließt nach der Pause"></span></div>'};
+ const L=(SITE.ausnahmen||[]).slice().sort((x,y)=>x.von<y.von?-1:1);
+ const days=Array.from({length:21},(_,i)=>{const k=dPlus(h,i),x=new Date(k+'T12:00:00Z'),T=slotsAt(x.getUTCFullYear(),x.getUTCMonth()+1,x.getUTCDate(),x.getUTCDay()),a=ausAt(x.getUTCFullYear(),x.getUTCMonth()+1,x.getUTCDate()),ft=feiertag(x.getUTCFullYear(),x.getUTCMonth()+1,x.getUTCDate());
+  return '<span class="'+(a?'ax ':'')+(T.length?'':'zu ')+(i?'':'hd')+'"><b>'+(i?dKurz(k):'Heute')+'</b><small>'+(T.length?T.map(([p,q])=>hk(p)+'–'+hk(q)).join('<br>'):'geschlossen')+'</small>'+(a&&a.txt?'<em>'+esc(a.txt)+'</em>':!a&&ft?'<em>'+esc(ft)+'</em>':'')+'</span>'}).join('');
+ b.innerHTML='<section class="acard"><h4>So sieht es die nächsten 3 Wochen aus</h4><div class="adays">'+days+'</div><p class="admnote">Genau so rechnet die Homepage: Wochenzeiten, Feiertage in Rheinland-Pfalz (automatisch) und deine Ausnahmen.</p></section>'+
+  '<div class="azg"><section class="acard"><h4>Normale Öffnungszeiten</h4><form id="admZF" class="azw">'+[1,2,3,4,5,6,0].map(row).join('')+
+  '<div class="admrow"><button class="cta" type="submit">Zeiten speichern</button><button class="ghost" type="button" data-zreset>Auf Standard zurück</button></div><p class="admnote">Gilt überall: Statusanzeige oben, Öffnungszeiten-Liste, Fußzeile und Startseite. Feiertage schließt die Seite automatisch.</p></form></section>'+
+  '<section class="acard"><h4>Betriebsferien & Sonderzeiten</h4>'+(L.length?'<div class="aausl">'+L.map((a,i)=>{const T=zParse(a.zeiten),vorbei=(a.bis||a.von)<h,jetzt=a.von<=h&&!vorbei,ab=dPlus(a.von,-(a.ank==null?14:+a.ank));
+   return '<div class="aaus'+(T.length?' zeit':'')+'"><span class="ad">'+esc(a.von.slice(8,10)+'.'+a.von.slice(5,7))+'</span><span class="at"><b>'+esc(a.txt||(T.length?'Sonderzeiten':'Geschlossen'))+'</b><small>'+esc(dSpan(a))+' · '+ausZeit(a)+'</small></span><span class="st'+(vorbei?' old':jetzt?' w':'')+'">'+(vorbei?'vorbei':jetzt?'läuft gerade':+a.ank===0?'nicht angekündigt':ab<=h?'wird angekündigt':'Hinweis ab '+dKurz(ab))+'</span><button type="button" data-ausdel="'+i+'">Löschen</button></div>'}).join('')+'</div>':'<p class="admnote" style="margin-bottom:12px">Noch keine Ausnahmen eingetragen.</p>')+
+  '<form id="admAusF" class="admf" style="margin-top:12px"><h4>Neue Ausnahme</h4><div class="apre"><button type="button" data-aup="Betriebsferien">Betriebsferien</button><button type="button" data-aup="Heiligabend|12-24">Heiligabend</button><button type="button" data-aup="Silvester|12-31">Silvester</button><button type="button" data-aup="Inventur">Inventur</button><button type="button" data-aup="Brückentag">Brückentag</button></div>'+
+  '<div class="ag2"><label>Von<input type="date" name="von" required min="'+h+'"></label><label>Bis (leer = nur ein Tag)<input type="date" name="bis" min="'+h+'"></label></div>'+
+  '<label>Grund (steht so auf der Homepage)<input name="txt" maxlength="26" placeholder="z. B. Betriebsferien"></label>'+
+  '<div class="atyp"><label><input type="radio" name="art" value="zu" checked><span style="--c:#C8102E">Geschlossen</span></label><label><input type="radio" name="art" value="zeit"><span style="--c:#D97706">Andere Zeiten</span></label></div>'+
+  '<div class="azt" id="admAusZ" hidden><input type="time" step="900" name="a1" value="09:00"><em>–</em><input type="time" step="900" name="a2" value="12:00"><label class="ack2" style="display:inline-flex;gap:6px;align-items:center;font:600 12.5px var(--display);color:var(--mut)"><input type="checkbox" name="z2"> und</label><input type="time" step="900" name="b1" value="14:30"><em>–</em><input type="time" step="900" name="b2" value="18:00"></div>'+
+  '<label>Auf der Startseite ankündigen<select name="ank"><option value="7">7 Tage vorher</option><option value="14" selected>14 Tage vorher</option><option value="21">3 Wochen vorher</option><option value="30">4 Wochen vorher</option><option value="0">nicht ankündigen</option></select></label>'+
+  '<p class="err" id="admAusE"></p><div class="admrow"><button class="cta" type="submit">Ausnahme speichern</button></div></form></section></div>'}
+async function admZSave(F){const z={};let bad='';
+ F.querySelectorAll('[data-zd]').forEach(r=>{const d=r.dataset.zd,g=n=>{const v=r.querySelector('[data-z='+n+']').value;const [x,y]=v.split(':');return +x*60+ +y};
+  if(!r.querySelector('[data-zon]').checked){z[d]='';return}const T=[[g('a1'),g('a2')]];if(r.querySelector('[data-z2]').checked)T.push([g('b1'),g('b2')]);
+  if(T.some(([a,c])=>!(c>a))||(T[1]&&T[1][0]<T[0][1]))bad=DN[d];z[d]=zFmt(T)});
+ if(bad){admToast('Bitte Zeiten am '+bad+' prüfen (Ende nach Anfang).');return}
+ try{await admSetSave({zeiten:z},'Öffnungszeiten geändert')}catch(_){admToast('Speichern fehlgeschlagen.')}}
+
+/* ---------- Ansicht: Hinweise & Aktionen ---------- */
+function admMeldung(b){const n=Object.assign({on:false,txt:'',typ:'info',link:'',von:'',bis:''},SITE.meldung||{}),A=SITE.aktion||{},S=saison(),h=heuteK();
+ const lk=[['','ohne Link'],['termin','Termin-Formular'],['lager','Lager / Räder'],['besuch','Öffnungszeiten & Anfahrt'],['kontakt','Kontakt'],['service','Werkstatt & Service'],['deal','Winter-Aktion']];
+ const ak=(k,ti,sub,ic,c1,c2,zeit,ex)=>'<div class="aak"><span class="ic" style="--c1:'+c1+';--c2:'+c2+'">'+admI(ic)+'</span><span><b>'+ti+' '+(zeit?(A[k]?'<span class="abadge off">ausgeschaltet</span>':'<span class="abadge">gerade sichtbar</span>'):'<span class="abadge off">nicht in der Saison</span>')+'</b><small>'+sub+'</small></span><label class="asw"><input type="checkbox" name="'+k+'"'+(A[k]?'':' checked')+'><i></i><span class="sr">zeigen</span></label>'+(ex?'<div class="ex">'+ex+'</div>':'')+'</div>';
+ b.innerHTML='<div class="agrid2" style="grid-template-columns:minmax(0,1.1fr) minmax(0,1fr)"><section class="acard"><h4>Hinweis auf der Startseite</h4><form id="admMelF" class="admf">'+
+  '<label class="asw"><input type="checkbox" name="on"'+(n.on?' checked':'')+'><i></i><span>Hinweis anzeigen</span></label>'+
+  '<label>Text (kurz, max. 90 Zeichen)<input name="txt" maxlength="90" value="'+esc(n.txt)+'" placeholder="z. B. Am Samstag, 22.11. ab 11 Uhr geöffnet"></label>'+
+  '<div class="atyp">'+[['info','Info','#2563EB'],['warn','Wichtig','#C8102E'],['gut','Gute Nachricht','#059669']].map(([v,l,c])=>'<label><input type="radio" name="typ" value="'+v+'"'+(n.typ===v?' checked':'')+'><span style="--c:'+c+'">'+l+'</span></label>').join('')+'</div>'+
+  '<label>Antippen führt zu<select name="link">'+lk.map(([v,l])=>'<option value="'+v+'"'+(n.link===v?' selected':'')+'>'+l+'</option>').join('')+'</select></label>'+
+  '<div class="ag2"><label>Zeigen ab (leer = sofort)<input type="date" name="von" value="'+esc(n.von)+'"></label><label>Zeigen bis (leer = bis ausgeschaltet)<input type="date" name="bis" value="'+esc(n.bis)+'" min="'+h+'"></label></div>'+
+  '<div class="anprev"><p class="admnote" style="margin:0 0 10px">Vorschau</p><a class="hnote" id="admNPrev" style="animation:none"></a></div>'+
+  '<div class="admrow"><button class="cta" type="submit">Hinweis speichern</button></div><p class="admnote">Steht oben auf der Startseite über der Überschrift. Ohne eigenen Hinweis kündigt die Seite dort automatisch deine nächsten Betriebsferien an.</p></form></section>'+
+  '<section class="acard"><h4>Aktionen & Saison</h4><form id="admAktF" class="aakt">'+
+  ak('winterAus','Winter-Aktion','Automatisch 01.11.2026 – 28.02.2027: Banner, Countdown und Hinweise.','snow','#38BDF8','#2563EB',S.wz)+
+  ak('gutAus','Gutscheine zu Weihnachten','Automatisch 10.11. – 24.12. auf der Startseite.','gift','#FF5A6E','#C8102E',S.giftZeit,'<label style="display:flex;flex-direction:column;gap:6px;font:700 12.5px var(--display);color:var(--mut)">Eigener Text (leer = Standard)<input class="inp sm" name="gutTxt" maxlength="90" value="'+esc(A.gutTxt||'')+'" placeholder="Für alle, die gern Rad fahren. Bei uns im Laden erhältlich."></label>')+
+  ak('fjAus','Frühjahrs-Check','Automatisch März und April nach der Winter-Aktion.','flower','#34D399','#0D9488',S.springZeit)+
+  '<div class="admrow"><button class="cta" type="submit">Aktionen speichern</button></div><p class="admnote">Schalter aus = auf der Homepage weg, auch in der Saison. Zeiträume ändern sich nur im Code (Tiry).</p></form></section></div>';
+ admNPrev()}
+function admNPrev(){const F=$('#admMelF'),p=$('#admNPrev');if(!F||!p)return;const n={txt:F.txt.value||'Dein Text erscheint hier',typ:F.typ.value,link:F.link.value};p.className='hnote'+(n.typ!=='info'?' '+n.typ:'');p.innerHTML=noteHtml(n)}
+
+/* ---------- Ansicht: Protokoll ---------- */
+function admProtokoll(b){const it=(ADM.prot&&ADM.prot.items)||[],us=[...new Set(it.map(x=>x.u))],f=ADM.pf||'';const L=it.filter(x=>!f||x.u===f);
+ const tag=t=>{const k=new Date(t).toLocaleDateString('sv-SE',{timeZone:'Europe/Berlin'}),h=heuteK();return k===h?'Heute':k===dPlus(h,-1)?'Gestern':new Date(t).toLocaleDateString('de-DE',{weekday:'long',day:'2-digit',month:'2-digit',year:'numeric',timeZone:'Europe/Berlin'})};
+ let last='',h='';L.forEach(x=>{const d=tag(x.t);if(d!==last){if(last)h+='</ul>';h+='<p class="apday">'+d+'</p><ul class="apl">';last=d}
+  h+='<li><span class="av" style="'+avCol(x.u)+'">'+esc(String(x.u).charAt(0))+'</span><span><b>'+esc(x.u)+'</b> · '+esc(x.w)+'</span><time>'+new Date(x.t).toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit',timeZone:'Europe/Berlin'})+' Uhr</time></li>'});if(last)h+='</ul>';
+ b.innerHTML='<section class="acard">'+(us.length>1?'<div class="aplf"><button type="button" class="apill'+(f?'':' on')+'" data-pf="">Alle</button>'+us.map(u=>'<button type="button" class="apill'+(f===u?' on':'')+'" data-pf="'+esc(u)+'">'+esc(u)+'</button>').join('')+'</div>':'')+
+  (h||'<div class="anempty"><span class="ic">'+admI('protokoll')+'</span><b>Noch keine Änderungen</b><p>Ab jetzt steht hier jede Änderung im Admin – mit Name, Datum und Uhrzeit.</p></div>')+'</section>'}
+
+/* ---------- Ansicht: Hilfe ---------- */
+const HILFE=[['zeiten','Öffnungszeiten ändern','#FF5A6E','#C8102E',['Links auf „Öffnungszeiten“ tippen.','Bei jedem Tag Schalter „geöffnet“ an oder aus, Uhrzeiten wählen.','„Pause, dann“ anhaken, wenn mittags zu ist.','„Zeiten speichern“ – fertig, gilt sofort überall.']],
+ ['zeiten','Betriebsferien oder Heiligabend eintragen','#F5B83D','#B87333',['„Öffnungszeiten“ öffnen, rechts „Neue Ausnahme“.','Von- und Bis-Datum wählen, Grund eintragen (z. B. Betriebsferien).','„Geschlossen“ oder „Andere Zeiten“ wählen.','Speichern. Die Startseite kündigt es automatisch vorher an.']],
+ ['meldung','Hinweis auf die Startseite setzen','#22D3EE','#2563EB',['„Hinweise & Aktionen“ öffnen.','Schalter „Hinweis anzeigen“ an, kurzen Text schreiben.','Farbe und Ziel wählen, unten siehst du die Vorschau.','Speichern. Wieder weg: Schalter aus und speichern.']],
+ ['angebote','Sonderangebot setzen','#FF5A6E','#B87333',['„Sonderangebote“ öffnen.','Rad suchen (Modell, Farbe, Größe).','Angebotspreis eintragen, Enter drücken.','Leer machen = Angebot wieder weg.']],
+ ['raeder','Verkauftes Rad ausblenden','#A78BFA','#DB2777',['„Bestand“ öffnen und Rad suchen.','Auf „Ausblenden“ tippen.','Das Rad ist sofort nicht mehr auf der Homepage.','Rückgängig: „Einblenden“.']],
+ ['fotos','Foto hochladen','#34D399','#0D9488',['„Fotos“ öffnen – dort stehen alle Räder ohne Bild.','Kachel antippen und Foto wählen.','Das Bild wird verkleinert und ist sofort online.','Tipp: Seitenansicht, ruhiger Hintergrund, keine Personen.']],
+ ['import','Neuen Bestand aus Veloport einspielen','#38BDF8','#2563EB',['In Veloport den Fahrzeugbestand als CSV exportieren.','„Veloport-Import“ öffnen und die Datei hineinziehen.','Vorschau prüfen, dann „Bestand übernehmen“.','Interne Daten (EK, Rahmennummer) kommen nie auf die Seite.']],
+ ['analyse','Besucher-Zahlen lesen','#F5B83D','#C8102E',['„Analyse“ öffnen, Zeitraum oben wählen.','Oben: Besuche und Anfragen mit Vergleich zum Zeitraum davor.','Darunter: welche Seiten, Räder und Knöpfe genutzt werden.','Ohne Cookies – Admins werden nicht mitgezählt.']]];
+function admHilfe(b){b.innerHTML='<div class="ahero"><span class="hi">'+admI('hilfe')+'</span><div><h3>Alles, was du hier änderst, ist sofort auf der Homepage.</h3><p>Keine Programmierkenntnisse nötig. Jede Änderung steht im <b>Protokoll</b> mit Name und Uhrzeit – so lässt sich alles nachvollziehen. Bei Fragen hilft Tiry.</p></div></div>'+
+ '<div class="ahelp">'+HILFE.map(([go,t,c1,c2,st])=>'<article class="ahc" style="--g:'+c1+'33"><header><span class="ic" style="--c1:'+c1+';--c2:'+c2+'">'+admI(go)+'</span><h4>'+t+'</h4></header><ol>'+st.map(x=>'<li>'+x+'</li>').join('')+'</ol><button type="button" class="cta" data-go="'+go+'">Jetzt öffnen →</button></article>').join('')+
+ '<article class="ahc" style="--g:#22D3EE33"><header><span class="ic" style="--c1:#64748B;--c2:#1B1E25">'+admI('out')+'</span><h4>So kommst du in den Admin</h4></header><ol><li>Adresse der Homepage öffnen und <b>/admin</b> anhängen.</li><li>Benutzer = dein Vorname, dann dein Passwort.</li><li>Fertig. Abmelden unten links.</li></ol><a class="cta" href="#start" data-aclose>Homepage ansehen →</a></article></div>'}
+
+/* ---------- Übersicht: Homepage jetzt ---------- */
+{const d0=admDash;admDash=function(b){d0(b);const o=oeffStatus(),n=SITE.meldung,a=ausKommend(true)[0];
+ const lab=o.open?'Laden geöffnet · bis '+hm(o.bis)+' Uhr':(o.aus||o.ft||'Laden geschlossen')+(o.k<99?' · öffnet '+(o.k===0?'heute':o.k===1?'morgen':DN[o.wd])+' '+hm(o.ab):'');
+ const qb=(go,ic,t)=>'<button type="button" data-go="'+go+'">'+admI(ic)+t+'</button>';
+ b.firstChild.insertAdjacentHTML('afterbegin','<div class="anow"><div class="anowc"><span class="stl'+(o.open?'':' zu')+'"><i></i>'+esc(lab)+'</span><h3>Die Homepage gerade</h3><p>'+(noteAktiv(n)?'Hinweis aktiv: „'+esc(n.txt)+'“':'Kein eigener Hinweis aktiv.')+'<br>'+(a?'Nächste Ausnahme: '+esc(dSpan(a))+(a.txt?' · '+esc(a.txt):'')+' · '+ausZeit(a):'Keine Betriebsferien eingetragen.')+'</p>'+
+  '<div class="row2">'+qb('zeiten','cal','Betriebsferien eintragen')+qb('meldung','meldung','Hinweis setzen')+qb('analyse','analyse','Analyse ansehen')+qb('hilfe','hilfe','Hilfe')+'</div></div>'+
+  '<div class="anows"><div class="ank" style="--c1:#FF5A6E;--c2:#C8102E"><small>Besuche heute</small><b id="anT1">–</b><em id="anT1e">wird geladen</em></div><div class="ank" style="--c1:#F5B83D;--c2:#B87333"><small>Besuche 7 Tage</small><b id="anT7">–</b><em id="anT7e">&nbsp;</em></div>'+
+  '<div class="ank" style="--c1:#34D399;--c2:#0D9488"><small>Kontakt-Klicks 7 Tage</small><b id="anK7">–</b><em>WhatsApp · Anruf · E-Mail</em></div><div class="ank" style="--c1:#22D3EE;--c2:#2563EB"><small>Letzte Änderung</small><b style="font-size:17px;line-height:1.25" id="anLc">–</b><em id="anLce">noch nichts geändert</em></div></div></div>');
+ const pi=(ADM.prot.items||[])[0];if(pi){$('#anLc').textContent=pi.w.length>42?pi.w.slice(0,40)+' …':pi.w;$('#anLce').textContent=pi.u+' · '+new Date(pi.t).toLocaleString('de-DE',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})}
+ anLoad(7).then(D=>{const e=$('#anT1');if(!e)return;if(!D){$('#anT1e').textContent='noch keine Daten';return}const h=heuteK(),ks=Array.from({length:7},(_,i)=>dPlus(h,-i)),v=k=>(D[k]||{});
+  e.textContent=v(h).bs||0;$('#anT1e').textContent=(v(h).pv||0)+' Seitenaufrufe';$('#anT7').textContent=ks.reduce((s,k)=>s+(v(k).bs||0),0);$('#anT7e').textContent=ks.reduce((s,k)=>s+(v(k).pv||0),0)+' Seitenaufrufe';
+  $('#anK7').textContent=ks.reduce((s,k)=>s+(v(k).c_wa||0)+(v(k).c_tel||0)+(v(k).c_mail||0),0)})}}
+
+/* ---------- Analyse: zählen (ohne Cookies, ohne Speicher im Browser, ohne IP) ---------- */
+const AN={q:{},t:0,on:false,c:{},n:+LS.get('vc_an',30)||30};
+try{AN.on=!!(FBC&&FBC.projectId)&&!navigator.webdriver&&navigator.doNotTrack!=='1'&&!navigator.globalPrivacyControl&&!LS.get('vc_noan',0)&&!/[?&]noan\b/.test(location.search)}catch(_){AN.on=false}
+function anHit(k,n){if(!AN.on)return;k=String(k).toLowerCase().replace(/[^a-z0-9_]/g,'_').slice(0,60);AN.q[k]=(AN.q[k]||0)+(n||1);clearTimeout(AN.t);AN.t=setTimeout(()=>anFlush(false),6000)}
+function anFlush(ka){clearTimeout(AN.t);const ks=Object.keys(AN.q);if(!ks.length||!AN.on)return;const now=ks.slice(0,36),q=AN.q;AN.q={};ks.slice(36).forEach(k=>AN.q[k]=q[k]);
+ const P='projects/'+FBC.projectId+'/databases/(default)/documents',body=JSON.stringify({writes:[{update:{name:P+'/stats/'+heuteK(),fields:{}},updateMask:{fieldPaths:[]},updateTransforms:now.map(k=>({fieldPath:k,increment:{integerValue:String(q[k])}}))}]});
+ try{fetch('https://firestore.googleapis.com/v1/'+P+':commit?key='+encodeURIComponent(FBC.apiKey),{method:'POST',body,keepalive:!!ka,headers:{'Content-Type':'application/json'}}).catch(()=>{})}catch(_){}
+ if(Object.keys(AN.q).length)AN.t=setTimeout(()=>anFlush(false),1500)}
+addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden')anFlush(true)});addEventListener('pagehide',()=>anFlush(true));
+if(AN.on){let r='direkt';try{const u=document.referrer?new URL(document.referrer):null;if(u&&u.host!==location.host){const hh=u.hostname.replace(/^www\./,'');
+  r=/(^|\.)google\./.test(hh)?'google':/bing\./.test(hh)?'bing':/(facebook|fb)\./.test(hh)?'facebook':/instagram\./.test(hh)?'instagram':/(duckduckgo|ecosia|yahoo|qwant)\./.test(hh)?'suche':/velo-center\.de$/.test(hh)?'altseite':'andere'}
+  else if(u)r=null}catch(_){}
+ if(r){anHit('bs');anHit('r_'+r);anHit('dv_'+(innerWidth<=760?'handy':innerWidth<=1100?'tablet':'pc'));anHit('h_'+p2(Math.floor(berlin().m/60)))}}
+{const s0=show;show=function(v,a,f){s0(v,a,f);anHit('pv');anHit('s_'+v)}}
+{const l0=lgShow;lgShow=function(k,d){l0(k,d);try{const m=LG.list[LG.i];if(m)anHit('b_'+rk(m))}catch(_){}}}
+document.addEventListener('click',e=>{if(!AN.on)return;const t=e.target.closest&&e.target.closest('a,button');if(!t||t.closest('#adm'))return;const h=t.getAttribute('href')||'';let k='';
+ if(h.startsWith('tel:'))k='tel';else if(h.includes('wa.me/'+WA))k='wa';else if(h.startsWith('mailto:'))k='mail';else if(/google\.[a-z.]+\/maps|maps\.app|maps\.google/.test(h))k='route';
+ else if(/g\.page|search\.google.*review/.test(h))k='bewertung';else if(/instagram\.com|facebook\.com\/velo/.test(h))k='social';else if(t.matches('[data-pf]'))k='probefahrt';else if(t.matches('[data-ask]'))k='anfragerad';
+ else if(t.matches('[data-merk]'))k='merk';else if(h==='#finder')k='finder';else if(h==='#dienstrad')k='rechner';else if(t.matches('[data-pre]')||h==='#termin')k='termin';
+ if(k)anHit('c_'+k)},true);
+{const f=$('#tf');if(f)f.addEventListener('submit',()=>{if(!$('#tErr').textContent)setTimeout(()=>{if(!$('#tErr').textContent)anHit('c_anfrage')},0)})}
+{const r0=rfResult;rfResult=function(){r0();anHit('c_finderok')}}
+/* ---------- Analyse: auswerten ---------- */
+async function anLoad(n){const c=AN.c[n];if(c&&Date.now()-c.t<60000)return c.d;if(!ADM.db)return null;const from=dPlus(heuteK(),-(2*n-1));let docs=null;
+ try{const q=ADM.db.collection('stats');let s;try{s=await q.where(firebase.firestore.FieldPath.documentId(),'>=',from).get()}catch(_){s=await q.get()}docs=s.docs}catch(_){docs=null}
+ if(!docs)return null;const D={};docs.forEach(x=>{if(x.id>=from)D[x.id]=x.data()});const d=Object.keys(D).length?D:null;AN.c[n]={t:Date.now(),d};return d}
+const ANS={start:'Startseite',lager:'Lager / Räder',service:'Werkstatt & Service',marken:'Marken',isy:'i:SY Experte',treffen:'i:SY-Treffen',dreirad:'E-Dreiräder',kontakt:'Kontakt',impressum:'Impressum',datenschutz:'Datenschutz',warum:'Infos'};
+const ANC={wa:'WhatsApp geöffnet',tel:'Anruf angetippt',mail:'E-Mail angetippt',anfrage:'Termin-Formular abgeschickt',termin:'„Termin anfragen“ angetippt',probefahrt:'Probefahrt per WhatsApp',anfragerad:'Rad angefragt',route:'Route / Karte',finder:'E-Bike-Finder geöffnet',finderok:'Finder bis zum Ergebnis',merk:'Rad gemerkt',share:'Rad geteilt',rechner:'Dienstrad-Rechner',bewertung:'Google-Bewertung',social:'Instagram / Facebook'};
+const ANR={direkt:'Direkt / Lesezeichen',google:'Google',bing:'Bing',suche:'Andere Suchmaschine',facebook:'Facebook',instagram:'Instagram',altseite:'Alte Homepage',andere:'Andere Webseiten'};
+async function admAnalyse(b){const n=AN.n;b.innerHTML='<div class="anbar">'+[7,30,90,365].map(d=>'<button type="button" class="apill'+(d===n?' on':'')+'" data-anr="'+d+'">'+(d===365?'1 Jahr':d+' Tage')+'</button>').join('')+'<span class="sp"></span><button type="button" class="apill" data-anre>↻ Aktualisieren</button></div><div id="anBody"><p class="admnote">Wird geladen …</p></div>';
+ const D=await anLoad(n),B=$('#anBody');if(!B||AN.n!==n)return;
+ if(!D){B.innerHTML='<section class="acard"><div class="anempty"><span class="ic">'+admI('analyse')+'</span><b>Noch keine Besucher-Daten</b><p>Die Zählung läuft auf der echten Homepage (nicht im Prototyp). Die ersten Zahlen erscheinen nach den ersten Besuchen.<br>Gezählt wird ohne Cookies, ohne IP-Adresse und ohne Profile – Admins werden nicht mitgezählt.</p></div></section>'+anGeraet();return}
+ const h=heuteK(),cur=Array.from({length:n},(_,i)=>dPlus(h,-(n-1-i))),prv=cur.map(k=>dPlus(k,-n)),sum=(ks,f)=>ks.reduce((s,k)=>s+((D[k]||{})[f]||0),0);
+ const agg=(ks,pre)=>{const o={};ks.forEach(k=>{const x=D[k]||{};for(const f in x)if(f.startsWith(pre)&&typeof x[f]==='number')o[f.slice(pre.length)]=(o[f.slice(pre.length)]||0)+x[f]});return o};
+ const kon=ks=>sum(ks,'c_wa')+sum(ks,'c_tel')+sum(ks,'c_mail');
+ const bs=sum(cur,'bs'),pv=sum(cur,'pv'),bs0=sum(prv,'bs'),pv0=sum(prv,'pv'),k1=kon(cur),k0=kon(prv),hatV=prv.some(k=>D[k]);
+ const tr=(a,c)=>{if(!hatV)return '<em>kein Vergleich</em>';if(!c)return a?'<em class="up">neu</em>':'<em>±0</em>';const p=Math.round((a-c)/c*100);return '<em class="'+(p>0?'up':p<0?'dn':'')+'">'+(p>0?'▲ +':p<0?'▼ ':'± ')+p+' %</em>'};
+ const kp=(l,v,t,c1,c2)=>'<div class="ank" style="--c1:'+c1+';--c2:'+c2+'"><small>'+l+'</small><b>'+v+'</b>'+t+'</div>';
+ const pct=(a,c)=>c?(a/c*100).toLocaleString('de-DE',{maximumFractionDigits:1})+' %':'–';
+ const bars=(o,lab,lim,c1,c2)=>{const E=Object.entries(o).filter(e=>e[1]>0).sort((a,c)=>c[1]-a[1]).slice(0,lim||10);if(!E.length)return '<p class="admnote">Noch keine Daten.</p>';const mx=E[0][1],tot=Object.values(o).reduce((s,v)=>s+v,0);
+  return '<div class="anbl">'+E.map(([k,v])=>'<div class="anb"><span title="'+esc(lab(k))+'">'+esc(lab(k))+'</span><i style="--c1:'+c1+';--c2:'+c2+'"><s style="--w:'+(v/mx*100).toFixed(1)+'%"></s></i><b>'+v.toLocaleString('de-DE')+'<small>'+Math.round(v/tot*100)+' %</small></b></div>').join('')+'</div>'};
+ const bikeLab=k=>{const m=(LG.M||[]).find(x=>rk(x).replace(/[^a-z0-9_]/g,'_')===k);return m?m.marke+' '+m.modell:k.replace(/_/g,' ')};
+ const dv=agg(cur,'dv_'),hr=agg(cur,'h_'),hmx=Math.max(1,...Object.values(hr));
+ const wd=[0,0,0,0,0,0,0];cur.forEach(k=>{wd[new Date(k+'T12:00:00Z').getUTCDay()]+=((D[k]||{}).bs||0)});
+ B.innerHTML='<div class="ankpis">'+kp('Besuche',bs.toLocaleString('de-DE'),tr(bs,bs0),'#FF5A6E','#C8102E')+kp('Seitenaufrufe',pv.toLocaleString('de-DE'),tr(pv,pv0),'#F5B83D','#B87333')+kp('Seiten pro Besuch',bs?(pv/bs).toLocaleString('de-DE',{maximumFractionDigits:1}):'–','<em>Ø im Zeitraum</em>','#A78BFA','#DB2777')+
+  kp('Kontakt-Klicks',k1.toLocaleString('de-DE'),tr(k1,k0),'#34D399','#0D9488')+kp('Kontakt-Quote',pct(k1,bs),'<em>Kontakt-Klicks je Besuch</em>','#22D3EE','#2563EB')+'</div>'+
+  '<section class="acard"><h4>Besucher im Verlauf</h4><div class="anlg"><span style="--c:#C8102E"><i></i>Besuche</span><span style="--c:#B87333"><i></i>Seitenaufrufe</span></div>'+anChart(cur,D)+'</section>'+
+  '<section class="acard" style="margin-top:16px"><h4>Vom Besuch zur Anfrage</h4><div class="anfun"><div><b>'+bs.toLocaleString('de-DE')+'</b><small>Besuche</small></div><div><b>'+sum(cur,'s_lager').toLocaleString('de-DE')+'</b><small>Lager angesehen</small></div><div><b>'+(k1+sum(cur,'c_anfrage')).toLocaleString('de-DE')+'</b><small>Kontakt & Anfragen</small></div></div></section>'+
+  '<div class="agrid2" style="margin-top:16px"><section class="acard"><h4>Beliebteste Bereiche</h4>'+bars(agg(cur,'s_'),k=>ANS[k]||k,10,'#FF5A6E','#C8102E')+'</section><section class="acard"><h4>Was wurde angeklickt</h4>'+bars(agg(cur,'c_'),k=>ANC[k]||k,12,'#34D399','#0D9488')+'</section>'+
+  '<section class="acard"><h4>Meistangesehene Räder</h4>'+bars(agg(cur,'b_'),bikeLab,10,'#F5B83D','#B87333')+'</section><section class="acard"><h4>Woher kommen die Besucher</h4>'+bars(agg(cur,'r_'),k=>ANR[k]||k,8,'#22D3EE','#2563EB')+'</section>'+
+  '<section class="acard"><h4>Geräte</h4>'+anDonut(dv)+'</section><section class="acard"><h4>Uhrzeit der Besuche</h4><div class="anhr">'+Array.from({length:24},(_,i)=>{const v=hr[p2(i)]||0;return '<i class="'+(v?'':'z')+'" style="--h:'+(v/hmx*100).toFixed(1)+'%" title="'+i+' Uhr: '+v+' Besuche"></i>'}).join('')+'</div><div class="anhx">'+Array.from({length:24},(_,i)=>'<span>'+(i%3?'':i)+'</span>').join('')+'</div>'+
+  '<h4>Wochentage</h4>'+bars(Object.fromEntries([1,2,3,4,5,6,0].map(d=>[d,wd[d]])),k=>DN[k],7,'#A78BFA','#DB2777')+'</section></div>'+anGeraet()}
+function anChart(ks,D){const W=900,Hh=220,pl=34,pb=26,n=ks.length,bsA=ks.map(k=>(D[k]||{}).bs||0),pvA=ks.map(k=>(D[k]||{}).pv||0),mx=Math.max(4,...pvA,...bsA);
+ const st=Math.pow(10,Math.floor(Math.log10(mx))),top=Math.ceil(mx/st)*st,x=i=>pl+(n<2?0:i*(W-pl-8)/(n-1)),y=v=>Hh-pb-v/top*(Hh-pb-10);
+ const line=A=>A.map((v,i)=>(i?'L':'M')+x(i).toFixed(1)+' '+y(v).toFixed(1)).join(' ');
+ const g=[0,.25,.5,.75,1].map(f=>'<line class="gl" x1="'+pl+'" x2="'+W+'" y1="'+y(top*f)+'" y2="'+y(top*f)+'"/><text x="'+(pl-6)+'" y="'+(y(top*f)+4)+'" text-anchor="end">'+Math.round(top*f)+'</text>').join('');
+ const ev=Math.max(1,Math.ceil(n/8)),lb=ks.map((k,i)=>i%ev&&i!==n-1?'':'<text x="'+x(i)+'" y="'+(Hh-6)+'" text-anchor="middle">'+k.slice(8,10)+'.'+k.slice(5,7)+'.</text>').join('');
+ const hv=ks.map((k,i)=>'<rect x="'+(x(i)-(W-pl)/n/2)+'" y="0" width="'+((W-pl)/n)+'" height="'+(Hh-pb)+'" fill="transparent"><tit'+'le>'+dKurz(k)+': '+bsA[i]+' Besuche, '+pvA[i]+' Seitenaufrufe</tit'+'le></rect>').join('');
+ return '<svg class="anch" viewBox="0 0 '+W+' '+Hh+'" role="img" aria-label="Besuche und Seitenaufrufe je Tag"><defs><linearGradient id="anG" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#C8102E" stop-opacity=".28"/><stop offset="1" stop-color="#C8102E" stop-opacity="0"/></linearGradient></defs>'+g+
+  '<path d="'+line(bsA)+' L'+x(n-1)+' '+y(0)+' L'+x(0)+' '+y(0)+'Z" fill="url(#anG)"/><path d="'+line(pvA)+'" fill="none" stroke="#B87333" stroke-width="2" stroke-dasharray="5 4" stroke-linejoin="round"/><path d="'+line(bsA)+'" fill="none" stroke="#C8102E" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>'+
+  (n<=40?bsA.map((v,i)=>'<circle cx="'+x(i)+'" cy="'+y(v)+'" r="3.5" fill="#fff" stroke="#C8102E" stroke-width="2"/>').join(''):'')+lb+hv+'</svg>'}
+function anDonut(o){const L=[['handy','Handy','#C8102E'],['tablet','Tablet','#F5B83D'],['pc','PC / Laptop','#2563EB']],tot=L.reduce((s,[k])=>s+(o[k]||0),0);if(!tot)return '<p class="admnote">Noch keine Daten.</p>';
+ let a=0;const arcs=L.map(([k,,c])=>{const v=(o[k]||0)/tot,s=a;a+=v;if(!v)return '';const r=60,C=2*Math.PI*r;return '<circle cx="75" cy="75" r="'+r+'" fill="none" stroke="'+c+'" stroke-width="22" stroke-dasharray="'+(v*C-2).toFixed(1)+' '+C.toFixed(1)+'" stroke-dashoffset="'+(-s*C).toFixed(1)+'" transform="rotate(-90 75 75)"/>'}).join('');
+ return '<div class="andn"><svg viewBox="0 0 150 150" role="img" aria-label="Geräte-Anteile">'+arcs+'<text x="75" y="72" text-anchor="middle" style="font:800 22px var(--display);fill:#1B1E25">'+tot+'</text><text x="75" y="92" text-anchor="middle" style="font:600 11px var(--display);fill:#7A7F8A">Besuche</text></svg><ul>'+L.map(([k,l,c])=>'<li style="--c:'+c+'"><i></i>'+l+'<b>'+Math.round((o[k]||0)/tot*100)+' %</b></li>').join('')+'</ul></div>'}
+function anGeraet(){const no=!!LS.get('vc_noan',0);return '<section class="acard" style="margin-top:16px"><h4>Datenschutz & dieses Gerät</h4><p class="admnote">Gezählt wird anonym: keine Cookies, nichts im Browser der Besucher gespeichert, keine IP-Adresse, keine Profile. Besucher mit „Do Not Track“ werden nicht gezählt. Ein Besuch = ein Aufruf der Homepage von außen.</p><div class="admrow"><label class="asw"><input type="checkbox" data-noan'+(no?'':' checked')+'><i></i><span>Dieses Gerät mitzählen'+(no?' (aus – gut für Laden-PCs)':'')+'</span></label></div></section>'}
+
+/* ---------- Ansichten anmelden + Ereignisse ---------- */
+{const r0=admRender;admRender=function(){if(!ADM.ok)return;const V={analyse:admAnalyse,zeiten:admZeiten,meldung:admMeldung,protokoll:admProtokoll,hilfe:admHilfe}[ADM.tab];
+ if(!V)return r0();admNav();const t=ADM_TAB[ADM.tab];$('#admTitle').textContent=t[0];$('#admSub').textContent=t[1];V($('#admBody'))}}
+{const i0=admIn;admIn=function(){try{if(FBC)LS.set('vc_noan',1)}catch(_){}AN.on=false;i0()}}
+$('#adm').addEventListener('click',async e=>{const t=e.target;
+ const r=t.closest('[data-anr]');if(r){AN.n=+r.dataset.anr;LS.set('vc_an',AN.n);admRender();return}
+ if(t.closest('[data-anre]')){AN.c={};admRender();return}
+ const pf=t.closest('[data-pf]');if(pf&&t.closest('#adm .aplf')){ADM.pf=pf.dataset.pf;admRender();return}
+ if(t.closest('[data-zreset]')){try{const v=Object.assign({},ADM.set);delete v.zeiten;v.ts=Date.now();await ADM.db.doc('site/einstellungen').set(v);ADM.set=SITE=v;siteApply();admLog('Öffnungszeiten auf Standard zurückgesetzt');admToast('Standard-Zeiten gelten wieder.');admRender()}catch(_){admToast('Ging nicht – bitte nochmal.')}return}
+ const ap=t.closest('[data-aup]');if(ap){const F=$('#admAusF'),[tx,md]=ap.dataset.aup.split('|');F.txt.value=tx;if(md){const y=+heuteK().slice(0,4),k=y+'-'+md;F.von.value=k<heuteK()?(y+1)+'-'+md:k;F.bis.value=''}F.von.focus();return}
+ const ad=t.closest('[data-ausdel]');if(ad){if(ad.dataset.sure!=='1'){ad.dataset.sure='1';ad.textContent='Wirklich?';return}
+  const L=(SITE.ausnahmen||[]).slice().sort((x,y)=>x.von<y.von?-1:1),a=L[+ad.dataset.ausdel];const rest=L.filter(x=>x!==a);
+  try{await admSetSave({ausnahmen:rest},'Ausnahme gelöscht: '+(a.txt||'')+' '+dSpan(a));admRender()}catch(_){admToast('Ging nicht – bitte nochmal.')}return}});
+$('#adm').addEventListener('change',e=>{const t=e.target;
+ if(t.matches('[data-noan]')){LS.set('vc_noan',t.checked?null:1);admToast(t.checked?'Dieses Gerät wird mitgezählt (ab dem nächsten Laden).':'Dieses Gerät wird nicht mitgezählt.');admRender();return}
+ const zr=t.closest('[data-zd]');if(zr){ADM.dirty=1;if(t.matches('[data-zon]')){zr.classList.toggle('off',!t.checked);zr.querySelector('.asw span').textContent=t.checked?'geöffnet':'geschlossen'}if(t.matches('[data-z2]'))t.closest('.azt2').classList.toggle('no',!t.checked);return}
+ if(t.name==='art'&&t.closest('#admAusF')){$('#admAusZ').hidden=t.value!=='zeit';return}
+ if(t.closest('#admMelF')||t.closest('#admAktF'))ADM.dirty=1;if(t.closest('#admMelF'))admNPrev()});
+$('#adm').addEventListener('input',e=>{if(e.target.closest('#admMelF')){ADM.dirty=1;admNPrev()}});
+$('#adm').addEventListener('submit',async e=>{const F=e.target;
+ if(F.id==='admZF'){e.preventDefault();admZSave(F);return}
+ if(F.id==='admAusF'){e.preventDefault();const er=$('#admAusE'),von=F.von.value,bis=F.bis.value||'';er.textContent='';if(!von){er.textContent='Bitte ein Von-Datum wählen.';return}if(bis&&bis<von){er.textContent='Bis-Datum liegt vor dem Von-Datum.';return}
+  let z='';if(F.art.value==='zeit'){const g=n=>{const [x,y]=F[n].value.split(':');return +x*60+ +y},T=[[g('a1'),g('a2')]];if(F.z2.checked)T.push([g('b1'),g('b2')]);if(T.some(([a,c])=>!(c>a))){er.textContent='Bitte Uhrzeiten prüfen.';return}z=zFmt(T)}
+  const a={von,bis:bis&&bis!==von?bis:'',zeiten:z,txt:F.txt.value.trim(),ank:+F.ank.value};const h=heuteK();
+  const L=(SITE.ausnahmen||[]).filter(x=>(x.bis||x.von)>=dPlus(h,-30));L.push(a);
+  try{await admSetSave({ausnahmen:L},'Ausnahme eingetragen: '+(a.txt?a.txt+' ':'')+dSpan(a)+' · '+ausZeit(a));admRender()}catch(_){admToast('Speichern fehlgeschlagen.')}return}
+ if(F.id==='admMelF'){e.preventDefault();const m={on:F.on.checked,txt:F.txt.value.trim(),typ:F.typ.value,link:F.link.value,von:F.von.value,bis:F.bis.value};
+  try{await admSetSave({meldung:m},m.on?'Hinweis gesetzt: „'+m.txt+'“':'Hinweis ausgeschaltet');admRender()}catch(_){admToast('Speichern fehlgeschlagen.')}return}
+ if(F.id==='admAktF'){e.preventDefault();const A={winterAus:!F.winterAus.checked,gutAus:!F.gutAus.checked,fjAus:!F.fjAus.checked,gutTxt:F.gutTxt.value.trim()};
+  const nm={winterAus:'Winter-Aktion',gutAus:'Gutscheine',fjAus:'Frühjahrs-Check'},o=SITE.aktion||{},ch=Object.keys(nm).filter(k=>!!o[k]!==A[k]).map(k=>nm[k]+(A[k]?' aus':' an'));
+  try{await admSetSave({aktion:A},'Aktionen: '+(ch.join(', ')||'Text geändert'));admRender()}catch(_){admToast('Speichern fehlgeschlagen.')}}});
+
+/* ---------- Rad teilen: Auswahl wie bei Apps ---------- */
+const SHI={wa:'<path d="M20.5 3.5A11 11 0 0 0 3.2 16.8L2 22l5.3-1.4A11 11 0 1 0 20.5 3.5zM12 20a8.9 8.9 0 0 1-4.6-1.3l-.3-.2-3.1.8.8-3-.2-.3A9 9 0 1 1 12 20zm4.9-6.7c-.3-.1-1.6-.8-1.8-.9-.3-.1-.4-.1-.6.1l-.8 1c-.2.2-.3.2-.6.1a7.3 7.3 0 0 1-3.6-3.2c-.3-.5.3-.4.8-1.4.1-.2 0-.3 0-.5l-.8-2c-.2-.5-.4-.4-.6-.4h-.5a1 1 0 0 0-.7.3 3 3 0 0 0-.9 2.2 5.2 5.2 0 0 0 1.1 2.7 11.8 11.8 0 0 0 4.5 4c1.7.7 2.3.8 3.2.6a2.7 2.7 0 0 0 1.8-1.3 2.2 2.2 0 0 0 .1-1.2c0-.1-.2-.2-.6-.3z" fill="currentColor" stroke="none"/>',
+ mail:'<rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/>',sms:'<path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.4A8 8 0 1 1 21 12z"/><path d="M8 11h.01M12 11h.01M16 11h.01"/>',
+ fb:'<path d="M14 8h3V4h-3a4 4 0 0 0-4 4v3H7v4h3v7h4v-7h3l1-4h-4V8.5a.5.5 0 0 1 .5-.5z" fill="currentColor" stroke="none"/>',tg:'<path d="M21.5 4.2 2.9 11.4c-.9.4-.9 1.4 0 1.7l4.6 1.5 1.8 5.6c.2.7 1.1.9 1.6.4l2.6-2.4 4.8 3.5c.6.4 1.4.1 1.6-.6L22.9 5.6c.2-1-.6-1.8-1.4-1.4zM9.6 14.2l8.6-7.1-6.9 8.4-.4 3z" fill="currentColor" stroke="none"/>',
+ link:'<path d="M10 14a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-1 1M14 10a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l1-1"/>',more:'<circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/>',
+ x:'<path d="M4 4l16 16M20 4 4 20"/>'};
+function shOpen(m,url,t){let el=$('#shs');if(!el){el=document.createElement('div');el.id='shs';el.className='shs';el.hidden=true;document.body.append(el)}
+ const v=m.v[LG.vi]||m.v[0]||{},img=fotoSrc(v.bild||'')||'',txt=t+(v.angebot?' – jetzt im Angebot':'')+'\n'+url,E=encodeURIComponent;
+ const o=(k,l,c,href,attr)=>'<a href="'+href+'" '+(attr||'target="_blank" rel="noopener"')+' data-shk="'+k+'"><span class="si" style="--c:'+c+'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">'+SHI[k]+'</svg></span>'+l+'</a>';
+ el.innerHTML='<div class="shs-bg" data-shx></div><div class="shs-p" role="dialog" aria-modal="true" aria-labelledby="shsT"><button type="button" class="shs-x" data-shx aria-label="Schließen">×</button>'+
+  '<div class="shs-h">'+(img?'<img src="'+esc(img)+'" alt="">':'')+'<div><small>Rad teilen</small><b id="shsT">'+esc(m.marke+' '+m.modell)+'</b></div></div><div class="shs-g">'+
+  o('wa','WhatsApp','#25D366','https://wa.me/?text='+E(txt))+o('mail','E-Mail','#2563EB','mailto:?subject='+E(m.marke+' '+m.modell+' – Velocenter Hessert')+'&body='+E('Schau mal, dieses Rad gibt es beim Velocenter Hessert in Wörth am Rhein:\n\n'+txt),' ')+
+  o('sms','SMS','#10B981','sms:?&body='+E(txt),' ')+o('fb','Facebook','#1877F2','https://www.facebook.com/sharer/sharer.php?u='+E(url))+o('tg','Telegram','#229ED9','https://t.me/share/url?url='+E(url)+'&text='+E(t))+
+  o('x','X','#111111','https://twitter.com/intent/tweet?text='+E(t)+'&url='+E(url))+'<button type="button" data-shk="link" data-shc><span class="si" style="--c:#1B1E25"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">'+SHI.link+'</svg></span>Link kopieren</button>'+
+  (navigator.share?'<button type="button" data-shk="mehr" data-shm><span class="si" style="--c:#B87333"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round">'+SHI.more+'</svg></span>Weitere Apps</button>':'')+
+  '</div><div class="shs-l"><input readonly value="'+esc(url)+'" aria-label="Link zum Rad"><button type="button" data-shc>Kopieren</button></div></div>';
+ el._d={t,url};el.hidden=false;requestAnimationFrame(()=>el.classList.add('on'));setTimeout(()=>{const x=$('.shs-x',el);if(x)x.focus()},50)}
+function shClose(){const el=$('#shs');if(!el||el.hidden)return;el.classList.remove('on');setTimeout(()=>{el.hidden=true},280);const b=$('#lgm [data-share]');if(b)b.focus()}
+document.addEventListener('click',async e=>{const el=$('#shs');if(!el||el.hidden||!el.contains(e.target))return;const t=e.target;
+ if(t.closest('[data-shx]')){shClose();return}
+ const k=t.closest('[data-shk]');if(k)anHit('c_share'),anHit('sh_'+k.dataset.shk);
+ if(t.closest('[data-shm]')){try{await navigator.share({title:el._d.t,text:el._d.t,url:el._d.url})}catch(_){}return}
+ const c=t.closest('[data-shc]');if(c){let ok=false;try{await navigator.clipboard.writeText(el._d.url);ok=true}catch(_){const i=$('.shs-l input',el);i.select();try{ok=document.execCommand('copy')}catch(__){}}
+  const bt=$('.shs-l button',el);bt.textContent=ok?'Kopiert ✓':'Bitte markieren';bt.classList.toggle('ok',ok);setTimeout(()=>{bt.textContent='Kopieren';bt.classList.remove('ok')},2200);return}
+ if(k)setTimeout(shClose,300)});
+addEventListener('keydown',e=>{const el=$('#shs');if(e.key==='Escape'&&el&&!el.hidden){e.stopImmediatePropagation();shClose()}},true);
+
 function admHook(n){if(!ADM.db){if(n<60&&!FBC)setTimeout(()=>admHook(n+1),500);return}
  ADM.db.doc('site/bewertungen').onSnapshot(x=>{ADM.bew=x.exists?x.data():null;bewRender(ADM.bew)},()=>{});
- ADM.db.doc('site/livegang').onSnapshot(x=>{ADM.live=x.exists?x.data():{};if(!$('#adm').hidden&&ADM.tab==='livegang')admRender()},()=>{})}
+ ADM.db.doc('site/livegang').onSnapshot(x=>{ADM.live=x.exists?x.data():{};if(!$('#adm').hidden&&ADM.tab==='livegang')admRender()},()=>{});
+ ADM.db.doc('site/protokoll').onSnapshot(x=>{ADM.prot=x.exists?x.data():{items:[]};if(!$('#adm').hidden&&ADM.tab==='protokoll')admRender()},()=>{})}
 admHook(0);
 merkUI();
 

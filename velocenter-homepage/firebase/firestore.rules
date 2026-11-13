@@ -16,6 +16,13 @@ service cloud.firestore {
     match /fotos/{d}   { allow read: if true; allow write: if admin(); }
     match /site/{d}    { allow read: if d in ['einstellungen', 'bewertungen'] || admin(); allow write: if admin(); }
     match /lager/{d}   { allow read, write: if admin(); }
+    // Besucher-Statistik (anonym, ohne Cookies): je Tag ein Dokument mit Zählern. Besucher dürfen nur hochzählen, lesen nur Admins.
+    match /stats/{d} {
+      allow read, delete: if admin();
+      allow create, update: if d.matches('^20[0-9]{2}-[0-9]{2}-[0-9]{2}$')
+        && request.resource.data.size() <= 700
+        && request.resource.data.diff(resource == null ? {} : resource.data).affectedKeys().size() <= 40;
+    }
     match /{other=**}  { allow read, write: if false; }
   }
 }
