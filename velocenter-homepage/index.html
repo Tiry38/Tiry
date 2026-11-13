@@ -2056,12 +2056,12 @@ body.fz2 main,body.fz2 .foot{zoom:1.25}
 .drout .big2 b{font:900 clamp(54px,7vw,84px)/.9 var(--display);letter-spacing:-.04em;background:linear-gradient(180deg,#fff,#FECACA);-webkit-background-clip:text;background-clip:text;color:transparent}
 .drout .big2 span{font:700 16px/1.2 var(--display);color:#E5E7EB}
 .drout .sub{color:#D1D5DB;font-size:14.5px}
-.drl{margin:22px 0 0;padding:0;list-style:none;display:flex;flex-direction:column}
-.drl li{display:flex;justify-content:space-between;gap:12px;padding:10px 0;border-top:1px solid rgba(255,255,255,.12);font-size:14.5px;color:#E5E7EB}
-.drl li b{font:800 15.5px/1.2 var(--display);color:#fff;white-space:nowrap}
-.drl li.g b{color:#6EE7B7}
-.drl li.t{border-top:1px solid rgba(255,255,255,.35)}
-.drl li.t b{font-size:18px}
+.drcl{margin:22px 0 0;padding:0;list-style:none;display:flex;flex-direction:column}
+.drcl li{display:flex;justify-content:space-between;gap:12px;padding:10px 0;border-top:1px solid rgba(255,255,255,.12);font-size:14.5px;color:#E5E7EB}
+.drcl li b{font:800 15.5px/1.2 var(--display);color:#fff;white-space:nowrap}
+.drcl li.g b{color:#6EE7B7}
+.drcl li.t{border-top:1px solid rgba(255,255,255,.35)}
+.drcl li.t b{font-size:18px}
 .drvs{margin-top:22px;display:flex;flex-direction:column;gap:10px}
 .drvs div{display:grid;grid-template-columns:120px 1fr auto;gap:12px;align-items:center;font:600 13.5px/1.2 var(--display);color:#E5E7EB}
 .drvs i{display:block;height:12px;border-radius:6px;background:rgba(255,255,255,.18)}
@@ -3169,7 +3169,7 @@ m696 -454 c28 -13 46 -31 55 -51 22 -53 -50 -177 -173 -300 -187 -186 -647
     <form class="drin" id="drF" novalidate>
      <div class="drf"><span class="lb">Kaufpreis des Rads (Listenpreis)<output name="po"></output></span><input type="range" name="pr" min="1000" max="12000" step="50" aria-label="Kaufpreis"><input class="inp" name="p" type="number" min="500" max="20000" step="1" inputmode="numeric" aria-label="Kaufpreis in Euro"></div>
      <div class="drf"><span class="lb">Dein Bruttogehalt im Monat<output name="bo"></output></span><input type="range" name="br" min="2100" max="9000" step="50" aria-label="Bruttogehalt"><input class="inp" name="b" type="number" min="1000" max="20000" step="1" inputmode="numeric" aria-label="Bruttogehalt in Euro"></div>
-     <div class="drrow"><div class="drf"><span class="lb">Steuerklasse</span><div class="choice"><button type="button" class="on" data-drk="k|1">I, II, IV</button><button type="button" data-drk="k|3">III</button></div></div>
+     <div class="drrow"><div class="drf"><span class="lb">Steuerklasse</span><div class="choice"><button type="button" class="on" data-drk="k|1">1</button><button type="button" data-drk="k|2">2</button><button type="button" data-drk="k|3">3</button><button type="button" data-drk="k|4">4</button></div></div>
       <div class="drf"><span class="lb">Kirchensteuer</span><div class="choice"><button type="button" class="on" data-drk="ki|0">Nein</button><button type="button" data-drk="ki|1">Ja</button></div></div></div>
      <div class="drrow"><div class="drf"><span class="lb">Kinder</span><div class="choice"><button type="button" class="on" data-drk="kd|1">Ja</button><button type="button" data-drk="kd|0">Nein</button></div><small>wegen Pflegeversicherung</small></div>
       <div class="drf"><span class="lb">Zuschuss Arbeitgeber / Monat</span><input class="inp" name="z" type="number" min="0" step="1" inputmode="numeric" placeholder="0 €"></div></div>
@@ -4696,7 +4696,7 @@ document.addEventListener('click',e=>{const b=e.target.closest('[data-rfopen]');
 /* ---------- Dienstrad-Rechner (Gehaltsumwandlung, 0,25-%-Regel; Tarif 2026, vereinfacht) ---------- */
 const DR={p:4000,b:3800,k:'1',ki:0,kd:1,z:0,f:3,r:''};
 function est26(x){x=Math.floor(Math.max(0,x));if(x<=12348)return 0;if(x<=17799){const y=(x-12348)/1e4;return Math.floor((914.51*y+1400)*y)}if(x<=69878){const z=(x-17799)/1e4;return Math.floor((173.10*z+2397)*z+1034.87)}if(x<=277825)return Math.floor(.42*x-11135.63);return Math.floor(.45*x-19470.38)}
-function steuer(gJahr,kl,ki){const vor=.093*Math.min(gJahr,101400)+(.0875+.018)*Math.min(gJahr,69750);const zve=Math.max(0,gJahr-1230-36-vor);const sp=kl==='3';
+function steuer(gJahr,kl,ki){const vor=.093*Math.min(gJahr,101400)+(.0875+.018)*Math.min(gJahr,69750);const zve=Math.max(0,gJahr-1230-36-vor-(kl==='2'?4260:0));const sp=kl==='3';
  const est=sp?2*est26(zve/2):est26(zve);const fg=sp?40700:20350;const soli=est<=fg?0:Math.min(.055*est,.119*(est-fg));return est+soli+(ki?est*.09:0)}
 function sozial(b,kd){return .093*Math.min(b,8450)+.013*Math.min(b,8450)+.0875*Math.min(b,5812.5)+(kd?.018:.024)*Math.min(b,5812.5)}
 function drCalc(){const P=DR.p,B=DR.b,R=DR.r!==''&&+DR.r>0?+DR.r:Math.round(P*DR.f)/100,U=Math.max(0,R-DR.z),GV=.0025*Math.floor(P/100)*100,B1=B-U+GV;
@@ -4707,12 +4707,12 @@ function drDraw(){const o=$('#drO');if(!o)return;const c=drCalc(),f=$('#drF');f.
  f.querySelector('#drRh').textContent=DR.r!==''&&+DR.r>0?'eigene Rate':'geschätzt: '+e2(c.R)+' (Richtwert '+String(DR.f).replace('.',',')+' % vom Kaufpreis)';
  const mx=Math.max(c.P,c.tot)||1,sp=c.R?Math.round((1-c.net/c.R)*100):0;
  o.innerHTML='<span class="k">Dein Rad kostet dich als Dienstrad</span><div class="big2"><b>'+e0(c.net)+'</b><span>pro Monat<br>netto, ca.</span></div><p class="sub">statt '+e2(c.R)+' Leasingrate – du sparst rund '+sp+' % über Steuern und Sozialabgaben.</p>'+
-  '<ul class="drl"><li><span>Leasingrate (brutto)</span><b>'+e2(c.R)+'</b></li>'+(DR.z?'<li class="g"><span>Zuschuss Arbeitgeber</span><b>– '+e2(Math.min(DR.z,c.R))+'</b></li>':'')+
+  '<ul class="drcl"><li><span>Leasingrate (brutto)</span><b>'+e2(c.R)+'</b></li>'+(DR.z?'<li class="g"><span>Zuschuss Arbeitgeber</span><b>– '+e2(Math.min(DR.z,c.R))+'</b></li>':'')+
   '<li class="g"><span>Ersparnis Lohnsteuer'+(DR.ki?' & Kirchensteuer':'')+'</span><b>– '+e2(c.st)+'</b></li><li class="g"><span>Ersparnis Sozialabgaben</span><b>– '+e2(c.sv)+'</b></li>'+
   '<li><span>darin enthalten: Versteuerung 0,25 % vom Listenpreis ('+e2(c.GV)+' geldwerter Vorteil)</span><b></b></li><li class="t"><span>Du zahlst netto</span><b>'+e2(c.net)+'</b></li></ul>'+
   '<div class="drvs"><div><span>Kaufpreis</span><i style="width:'+(c.P/mx*100)+'%"></i><b>'+e0(c.P)+'</b></div><div><span>36 Monate Dienstrad</span><i class="a" style="width:'+(c.tot/mx*100)+'%"></i><b>'+e0(c.tot)+'</b></div></div>'+
   '<a class="cta" href="#termin" data-pre="Dienstrad-Beratung">Dienstrad-Beratung anfragen</a>'+
-  '<p class="fine">Unverbindliche Beispielrechnung, keine Steuerberatung. Annahmen: Gehaltsumwandlung, 36 Monate, Pedelec bis 25 km/h, Lohnsteuertarif 2026 vereinfacht, Sozialabgaben 2026 mit durchschnittlichem Zusatzbeitrag. Nach 36 Monaten gibst du das Rad zurück oder übernimmst es je nach Anbieter zum Restwert – der ist hier nicht enthalten. Die genaue Rate steht im Angebot deines Leasing-Anbieters.</p>'}
+  '<p class="fine">Unverbindliche Beispielrechnung, keine Steuerberatung. Annahmen: Gehaltsumwandlung, 36 Monate, Pedelec bis 25 km/h, Lohnsteuertarif 2026 vereinfacht (Steuerklasse 2 mit Entlastungsbetrag für Alleinerziehende, Steuerklasse 4 ohne Faktor), Sozialabgaben 2026 mit durchschnittlichem Zusatzbeitrag. Nach 36 Monaten gibst du das Rad zurück oder übernimmst es je nach Anbieter zum Restwert – der ist hier nicht enthalten. Die genaue Rate steht im Angebot deines Leasing-Anbieters.</p>'}
 (function(){const f=$('#drF');if(!f)return;
  f.addEventListener('input',e=>{const t=e.target,n=t.name;const cl=(v,a,b)=>Math.min(b,Math.max(a,v));
   if(n==='pr'){DR.p=+t.value;f.p.value=DR.p}if(n==='p'){const v=+t.value;if(v>0){DR.p=cl(v,500,20000);f.pr.value=DR.p}}
