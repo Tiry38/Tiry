@@ -90,3 +90,5 @@ Datenschutzerklärung: Absatz zu Google Firebase setzt das Bau-Skript automatisc
   6. Actions → „Google-Bewertung“ → „Run workflow“ → grüner Haken = fertig.
 - **Eingerichtet 13.11.2026:** Google-Cloud-Projekt `velo-center-web` (getrennt vom Projekt „Velocenter KI-Zentrale“), Places API (New) aktiv, Secret `GOOGLE_PLACES_KEY` in GitHub. Erster Abruf OK: 4,8 / 221, Place-ID steht in `google.json`.
 - **Testzeitraum endet 13.02.2027** → vorher in der Google Cloud auf „Pay as you go“ umstellen (Upgrade), sonst schlägt der Abruf fehl (Seite zeigt dann die letzten Werte).
+- Schlüssel am 13.11.2026 auf „Places API (New)“ eingeschränkt, Abruf danach weiter OK.
+- **Kostenbremse geht erst nach dem Upgrade** (im Testzeitraum sind Kontingent-Änderungen gesperrt): direkt nach „Pay as you go“ unter https://console.cloud.google.com/apis/api/places.googleapis.com/quotas → ⋮ → „Kontingent bearbeiten“: **GetPlaceRequest per day = 10**, **SearchTextRequest per day = 5**.
