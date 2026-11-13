@@ -403,11 +403,30 @@ a.tflk{font-weight:700;color:#C2410C;text-underline-offset:3px}
 @media (prefers-reduced-motion:reduce){.isyj li{transition:none}}
 @media (max-width:600px){.isyj p b{font-size:22px}.isyj li b{right:-4px;bottom:-5px;padding:2px 6px}}
 @media (max-width:600px){.isyaus{gap:14px}.isyaus p b{font-size:21px}}
-.tchr{list-style:none;margin:30px 0 0;padding:0;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px}.tchr li{position:relative;padding:22px 20px 22px;border-radius:28px;background:rgba(255,255,255,.7);border:1px solid var(--line)}.tchr b{display:block;font:900 30px/1 var(--display);letter-spacing:-.03em}.tchr span{display:block;margin-top:10px;font-size:14px;line-height:1.45;color:#3B3F48}.tchr li.on{background:linear-gradient(140deg,#7C3AED,#C026D3,#E11D48);border-color:transparent;box-shadow:0 14px 34px rgba(192,38,211,.3)}.tchr li.on b,.tchr li.on span{color:#fff}
+.sec.tsq{padding-block:clamp(28px,3.5vw,56px) clamp(20px,2.5vw,40px)}.sec.tsq2{padding-block:clamp(20px,2.5vw,40px) clamp(50px,6vw,90px)}.tchw{position:relative;margin-top:30px}
+.tcl{position:absolute;left:0;top:0;width:100%;height:230px;overflow:visible;pointer-events:none}.tcl path{fill:none;stroke:url(#tclg);stroke-width:5;stroke-linecap:round;vector-effect:non-scaling-stroke;opacity:.85}
+.tcl .tcd{stroke:#fff;stroke-width:3;stroke-dasharray:2 22;opacity:.9;animation:tcd 2.4s linear infinite}@keyframes tcd{to{stroke-dashoffset:-24}}
+.tchr{position:relative;list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:18px;text-align:center}
+.tchr li{position:relative}.tchr li:nth-child(even){margin-top:70px}
+.tcf{position:relative;display:block;width:160px;max-width:100%;aspect-ratio:1;margin:0 auto;border-radius:50%;padding:5px;background:linear-gradient(140deg,#F59E0B,#F43F5E,#C026D3);box-shadow:0 16px 36px rgba(244,63,94,.28);transition:transform .5s var(--ease)}
+.tcf img{display:block;width:100%;height:100%;object-fit:cover;border-radius:50%;border:4px solid #fff}
+.tchr li:hover .tcf{transform:translateY(-6px) scale(1.04)}
+.tchr b{display:block;margin-top:16px;font:900 40px/1 var(--display);letter-spacing:-.03em;background:linear-gradient(100deg,#F59E0B,#E11D48 55%,#9333EA);-webkit-background-clip:text;background-clip:text;color:transparent}
+.tchr strong{display:block;margin-top:6px;font:800 17px/1.25 var(--display);color:#1B1E25}
+.tct{display:block;margin:6px auto 0;max-width:230px;font-size:14px;line-height:1.5;color:#3B3F48}
+.tchr li.on .tcf{background:linear-gradient(140deg,#7C3AED,#C026D3,#E11D48,#F59E0B);background-size:300% 300%;animation:tcg 6s ease-in-out infinite alternate;box-shadow:0 0 0 8px rgba(192,38,211,.14),0 20px 50px rgba(192,38,211,.45)}@keyframes tcg{to{background-position:100% 100%}}
+.tchr li.on .tcf i{position:absolute;right:-8px;top:-6px;display:grid;place-items:center;width:62px;height:62px;border-radius:50%;background:linear-gradient(140deg,#E11D48,#9333EA);color:#fff;font:900 20px/1 var(--display);font-style:normal;border:3px solid #fff;box-shadow:0 10px 24px rgba(147,51,234,.45);transform:rotate(-10deg)}
+.tchr li.on .tcf i::after{content:"Rekord";position:absolute;bottom:11px;font-size:9px;letter-spacing:.06em;text-transform:uppercase}
+.tchr li.on .tcf i{padding-bottom:10px}
+.tchr li.on b{font-size:48px}
+@media (prefers-reduced-motion:reduce){.tcl .tcd,.tchr li.on .tcf{animation:none}.tcf{transition:none}}
 .tvoi{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:22px}.tvoi blockquote{margin:0;padding:28px 30px;border-radius:32px;background:linear-gradient(140deg,rgba(124,58,237,.08),rgba(225,29,72,.06));border:1px solid var(--line);font:700 20px/1.45 var(--display)}.tvoi cite{display:block;margin-top:14px;font:600 14px var(--sans,inherit);font-style:normal;color:#3B3F48}.tvoi small{display:block;margin-top:2px;color:var(--mut);font-weight:500}
 .tpress{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-top:24px}.tpress p{margin:0 6px 0 0;font-weight:700}.tpress a{padding:10px 18px;border-radius:999px;background:rgba(255,255,255,.8);border:1px solid var(--line);font-weight:700;font-size:14px;text-decoration:none;color:inherit;min-height:44px;display:inline-flex;align-items:center}.tpress a:hover{border-color:#C026D3}
 .woerth{display:flex;flex-wrap:wrap;gap:8px;margin:22px 0 4px}.woerth p{flex-basis:100%;margin:0 0 2px;font-weight:800}.woerth span{padding:8px 14px;border-radius:999px;background:rgba(255,255,255,.7);border:1px solid var(--line);font-size:13.5px}
-@media (max-width:1000px){.tchr{grid-template-columns:1fr 1fr}.tchr li.on{grid-column:1/-1}.tvoi{grid-template-columns:1fr}}
+@media (max-width:1000px){.tvoi{grid-template-columns:1fr}.tcl{display:none}.tchw::before{content:"";position:absolute;left:47px;top:20px;bottom:20px;width:5px;border-radius:5px;background:linear-gradient(180deg,#F59E0B,#F43F5E,#C026D3,#7C3AED)}
+.tchr{grid-template-columns:1fr;gap:26px;text-align:left}.tchr li,.tchr li:nth-child(even){margin-top:0;display:grid;grid-template-columns:100px 1fr;column-gap:18px;align-items:center}
+.tcf{width:100px;grid-row:1/4;margin:0;padding:4px}.tcf img{border-width:3px}.tchr b{margin-top:0;font-size:32px}.tchr li.on b{font-size:36px}.tct{margin:4px 0 0;max-width:none}
+.tchr li.on .tcf i{width:46px;height:46px;font-size:15px;right:-10px;top:-8px}.tchr li.on .tcf i::after{font-size:7px;bottom:8px}}
 .figs{display:grid;grid-template-columns:repeat(4,minmax(0,1fr))}
 .figs>div{padding:10px clamp(14px,2vw,30px);border-left:1px solid var(--line)}
 .figs>div:first-child{border-left:0;padding-left:0}
@@ -3241,24 +3260,18 @@ m696 -454 c28 -13 46 -31 55 -51 22 -53 -50 -177 -173 -300 -187 -186 -647
    <div class="hello" style="--d:.28s"><div class="huge gt" id="rekord">283</div><p class="lead" style="margin-top:16px">i:SY-Fahrerinnen und -Fahrer bildeten eine Schlange und fuhren danach gemeinsam 1,6 km. Nötig waren 250. Organisiert vom Velocenter Hessert und dem i:SY Flagship-Store by Velorep aus Karlsruhe.</p></div>
   </div>
  </div>
- <div class="sec" style="padding-top:0">
+ <div class="sec" style="padding-top:0;padding-bottom:clamp(20px,3vw,44px)">
   <div class="wrap urkw">
    <figure class="urkf pre"><p class="urkh">Wir haben den <b>Weltrekord!</b></p><img src="img/rid-urkunde-zert.webp" alt="RID-Rekordurkunde: Längste Fahrrad-Schlange einer Marke, 283 Fahrräder, 9. Juni 2024" loading="lazy" width="900" height="1188"></figure>
   </div>
  </div>
- <div class="sec zone z-sky">
+ <div class="sec zone z-sky tsq">
   <div class="wrap">
    <div class="pre"><p class="eyebrow">Chronik</p><h2 class="big" style="margin-top:14px">Von 100 Fans <span class="gt">zum Weltrekord.</span></h2></div>
-   <ol class="tchr pre">
-    <li><b>2017</b><span>Die ersten Impressionen in der Galerie.</span></li>
-    <li><b>2019</b><span>16.06.: rund 100 i:SY-Fans beim ersten großen Treffen.</span></li>
-    <li><b>2022</b><span>07.08.: über 200 Teilnehmer, eine Schlange über zwei Kilometer, Tour von Maximiliansau über Neupotz nach Wörth, rund 40 km.</span></li>
-    <li><b>2023</b><span>Das nächste Treffen, Bilder in der Galerie.</span></li>
-    <li class="on"><b>2024</b><span>09.06.: 283 i:SY in einer Schlange, Weltrekord, bestätigt vom Rekord-Institut für Deutschland.</span></li>
-   </ol>
+   <div class="tchw pre"><svg class="tcl" viewBox="0 0 1000 230" preserveAspectRatio="none" aria-hidden="true"><defs><linearGradient id="tclg" x1="0" x2="1"><stop offset="0" stop-color="#F59E0B"/><stop offset=".35" stop-color="#F43F5E"/><stop offset=".7" stop-color="#C026D3"/><stop offset="1" stop-color="#7C3AED"/></linearGradient></defs><path d="M0 80 C50 80 50 80 100 80 S200 150 300 150 S400 80 500 80 S600 150 700 150 S800 80 900 80 S960 80 1000 80"/><path class="tcd" d="M0 80 C50 80 50 80 100 80 S200 150 300 150 S400 80 500 80 S600 150 700 150 S800 80 900 80 S960 80 1000 80"/></svg><ol class="tchr"><li><span class="tcf"><img src="img/chr-2017.webp" alt="i:SY-Treffen 2017: Stände vor dem Laden" width="360" height="360" loading="lazy"></span><b>2017</b><strong>Der Anfang</strong><span class="tct">Die ersten i:SY-Fans treffen sich bei uns in Wörth.</span></li><li><span class="tcf"><img src="img/chr-2019.webp" alt="i:SY-Treffen 2019 von oben" width="360" height="360" loading="lazy"></span><b>2019</b><strong>Rund 100 Fans</strong><span class="tct">16.06.: das erste große i:SY-Treffen.</span></li><li><span class="tcf"><img src="img/chr-2022.webp" alt="i:SY-Bus beim Treffen 2022" width="360" height="360" loading="lazy"></span><b>2022</b><strong>Über 200 Teilnehmer</strong><span class="tct">07.08.: Schlange über zwei Kilometer, rund 40 km von Maximiliansau über Neupotz nach Wörth.</span></li><li><span class="tcf"><img src="img/chr-2023.webp" alt="i:SY-Trinkflaschen beim Treffen 2023" width="360" height="360" loading="lazy"></span><b>2023</b><strong>Das nächste Treffen</strong><span class="tct">Wieder volle Straßen, Bilder in der Galerie.</span></li><li class=on><span class="tcf"><img src="img/chr-2024.webp" alt="Weltrekord-Schlange 2024 von oben" width="360" height="360" loading="lazy"><i>283</i></span><b>2024</b><strong>Weltrekord</strong><span class="tct">09.06.: 283 i:SY in einer Schlange, bestätigt vom Rekord-Institut für Deutschland.</span></li></ol></div>
   </div>
  </div>
- <div class="sec">
+ <div class="sec tsq2">
   <div class="wrap">
    <div class="pre"><p class="eyebrow">Stimmen <b>zum Weltrekord</b></p></div>
    <div class="tvoi pre">
