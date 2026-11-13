@@ -102,10 +102,36 @@ def tage_seit(d):
     try: return (datetime.date.today() - datetime.date.fromisoformat(d)).days
     except Exception: return 9999
 
+# ---------- Prüfbögen (Qualität: Schärfe, Klarheit, Freistellung) ----------
+def boegen_bauen(eintraege):
+    """Legt je 6 Fotos auf Kontrast-Hintergrund (Grün + Dunkel geteilt), nummeriert -> $TMP/boegen/bogen-NN.png.
+    Helle/dunkle Säume, Hintergrundreste, gezackte Kanten und Unschärfe fallen so sofort auf."""
+    from PIL import Image, ImageDraw, ImageFont
+    d = os.path.join(TMP, 'boegen'); shutil.rmtree(d, ignore_errors=True); os.makedirs(d, exist_ok=True)
+    try: fnt = ImageFont.truetype('DejaVuSans-Bold.ttf', 34)
+    except Exception: fnt = ImageFont.load_default()
+    TW, TH = 760, 520; pfade = []
+    for b in range(0, len(eintraege), 6):
+        bogen = Image.new('RGB', (TW * 2, TH * 3), (255, 255, 255))
+        for i, e in enumerate(eintraege[b:b + 6]):
+            x0, y0 = (i % 2) * TW, (i // 2) * TH
+            kachel = Image.new('RGBA', (TW, TH), (46, 160, 90, 255))
+            ImageDraw.Draw(kachel).rectangle((0, TH // 2, TW, TH), fill=(32, 30, 48, 255))
+            try:
+                im = Image.open(os.path.join(BASIS, e['bild_jetzt'])).convert('RGBA')
+                im.thumbnail((TW - 30, TH - 60), Image.LANCZOS)
+                kachel.alpha_composite(im, ((TW - im.width) // 2, 50 + (TH - 60 - im.height) // 2))
+            except Exception: pass
+            dr = ImageDraw.Draw(kachel); dr.rectangle((0, 0, TW, 44), fill=(255, 255, 255, 235))
+            dr.text((12, 4), '%d  %s' % (e['nr'], e['label'])[:44], fill=(20, 20, 30), font=fnt)
+            bogen.paste(kachel.convert('RGB'), (x0, y0))
+        f = os.path.join(d, 'bogen-%02d.png' % (b // 6 + 1)); bogen.save(f); pfade.append(f)
+    return pfade
+
 # ---------- liste ----------
 def cmd_liste(args):
     opt = dict(a.split('=', 1) for a in args if '=' in a)
-    n_neu, n_pruef = int(opt.get('neu', 20)), int(opt.get('pruef', 8))
+    n_neu, n_pruef, n_qual = int(opt.get('neu', 20)), int(opt.get('pruef', 8)), int(opt.get('qual', 0))
     s = html_lesen(); bm = json_aus(s, 'bilderData'); st = status_lesen()
     aktiv, _, _, rows = bestand_alle(s)
     V = varianten(aktiv, rows)
@@ -129,6 +155,9 @@ def cmd_liste(args):
     offen_unsicher = {u['key'] for u in bericht.get('unsicher', [])}
     sel_neu = [k for _, _, k in fehlt if k not in offen_unsicher][:n_neu]
     sel_pruef = [k for _, k in pruef][:n_pruef]
+    # Qualitäts-Runde: alle Fotos reihum (am längsten nicht angesehen zuerst), auch vom Admin bestätigte
+    qual = sorted((st.get(k, {}).get('qcheck') or '0000', k) for k, e in V.items() if bm.get(k) and not e['admin'] and k not in sel_pruef)
+    sel_qual = [k for _, k in qual][:n_qual]
     def info(k, art):
         e = dict(V[k]); e.pop('admin', None); x = st.get(k, {})
         e.update(art=art, bild_jetzt=bm.get(k) or '', quelle_jetzt=x.get('quelle', ''),
@@ -136,11 +165,15 @@ def cmd_liste(args):
                  geschwister=sorted({vk.split('|')[3] + ' -> ' + (bm.get(vk) or '–') for vk in V if vk.rsplit('|', 2)[0] == k.rsplit('|', 2)[0] and vk != k})[:20])
         return e
     auftrag = dict(datum=HEUTE, suchen=[info(k, 'suchen') for k in sel_neu], pruefen=[info(k, 'pruefen') for k in sel_pruef],
+                   qualitaet=[dict(info(k, 'qualitaet'), nr=i + 1, label=label(V[k]), bestaetigt=bool(st.get(k, {}).get('pinned'))) for i, k in enumerate(sel_qual)],
                    gesamt=dict(varianten=len(V), mit_bild=sum(1 for k in V if bm.get(k) or V[k]['admin']),
                                ohne_bild=sum(1 for k in V if not bm.get(k) and not V[k]['admin'])))
     os.makedirs(KAND, exist_ok=True)
+    auftrag['boegen'] = boegen_bauen(auftrag['qualitaet']) if sel_qual else []
+    for k in sel_qual: st.setdefault(k, {})['qcheck'] = HEUTE
+    status_schreiben(st)
     json.dump(auftrag, open(os.path.join(TMP, 'auftrag.json'), 'w', encoding='utf-8'), ensure_ascii=False, indent=1)
-    print('suchen=%d pruefen=%d ohne_bild=%d' % (len(sel_neu), len(sel_pruef), auftrag['gesamt']['ohne_bild']))
+    print('suchen=%d pruefen=%d qualitaet=%d (%d Bögen) ohne_bild=%d' % (len(sel_neu), len(sel_pruef), len(sel_qual), len(auftrag['boegen']), auftrag['gesamt']['ohne_bild']))
 
 # ---------- holen ----------
 _SESS = None
@@ -261,7 +294,7 @@ def datei_ziel(marke, quelle):
 def cmd_anwenden(args):
     pfad = args[0]; lauf = args[1] if len(args) > 1 else ''
     auftrag = json.load(open(os.path.join(TMP, 'auftrag.json'), encoding='utf-8'))
-    A = {e['key']: e for e in auftrag['suchen'] + auftrag['pruefen']}
+    A = {e['key']: e for e in auftrag['suchen'] + auftrag['pruefen'] + auftrag.get('qualitaet', [])}
     try: E = json.load(open(pfad, encoding='utf-8'))
     except Exception as e: raise SystemExit('Entscheidungen nicht lesbar: %s' % e)
     if isinstance(E, dict): E = E.get('entscheidungen', [])

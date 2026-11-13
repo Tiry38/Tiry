@@ -52,3 +52,5 @@
 - **13.11.2026 – Serviceräder (Tiry):** Im Veloport-Export als Servicerad markierte Räder sind Leih-/Testräder und kommen nie auf die Seite. Einzige Ausnahme: Van-Raam-Vorführrad.
 - **13.11.2026 – Gutschein-Band (Tiry):** statt Pillen-Leiste eine gezeichnete Gutscheinkarte (Rot-Violett-Verlauf, Goldschleife, Velocenter-Logo) mit Text, Schlagwörtern und Knopf. Ohne Betrag (keine Angaben erfunden).
 - **13.11.2026 – Freistellung:** VdV AEB PRO French Lavender – schwarzer Block unter dem Gepäckträger entfernt; QiO Compact PE Lunar White im Showroom neu aus dem sauberen Lager-Foto (vorher gezackte helle Kanten).
+- **13.11.2026 – Vertrauens-Zeile (Tiry):** Google-G + „Google“ in Google-Farben, Bosch-Anker + „Bosch“ in Bosch-Rot, i:SY-Weltrekord-Button (klein, `img/isy-weltrekord-sm.webp`) + „i:SY“ in Orange.
+- **13.11.2026 – Bilder-Agent Qualitäts-Runde (Tiry):** nach Suchen/Prüfen jede Nacht 36 Lager-Fotos reihum auf Schärfe, Klarheit und Freistellung (Prüfbögen auf Kontrast-Hintergrund, 6 Fotos je Blick). Mängel → bessere Fassung derselben Farbe suchen. Feste Anzahl statt „1 Stunde“, damit die Abo-Nutzung planbar bleibt; alle Fotos sind in ca. 4 Nächten durch.
