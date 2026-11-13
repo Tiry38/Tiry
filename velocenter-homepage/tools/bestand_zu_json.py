@@ -52,7 +52,7 @@ def karte(kopf):
         lo=f(r'^lagerort$'), rech=f(r'^rechnung$'),
         display=f(r'^display'), reifen=f(r'reifengr'), gewicht=f(r'^gewicht'), zgg=f(r'gesamtgewicht'), km=f(r'km-?\s?stand'),
         aus=f(r'ausstatt'), akku=f(r'akku-?\s?leistung'), motor=f(r'^motor|antrieb'),
-        schalt=f(r'schaltung|gangschaltung'), veloid=f(r'^velo-?\s?id$'),
+        schalt=f(r'schaltung|gangschaltung'), veloid=f(r'^(velo-?\s?id|konfigurations-?\s?id)$'),
     )
 
 def wert(r, i):

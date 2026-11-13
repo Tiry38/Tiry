@@ -38,10 +38,12 @@ dann nur eine bessere Fassung **genau dieses Bildes** (gleiche Aufnahme) nehmen,
 5. **Browser-Werkzeug** für Seiten, die erst per JavaScript laden (Konfiguratoren, Farbauswahl):
    `node velocenter-homepage/tools/seite.js "<https-URL>"` (optional `--klick "<Farbname/Text>"`) → große Bilder (Adresse + Pixelgröße),
    Netz-Bilder, Seitentext und ein Screenshot (mit Read ansehen). Die gefundene Bild-Adresse dann mit `holen` laden.
-6. **Velo de Ville mit `veloids`** (Velo-ID aus Veloport, z. B. „V27-ID-00336548“): **zuerst**
-   `node velocenter-homepage/tools/seite.js --velo "<Velo-ID>"` – öffnet genau dieses konfigurierte Rad im Velo-de-Ville-Konfigurator
-   (Farbe, Ausstattung, Rahmen). Das dort gezeigte Radbild ist das exakt richtige Foto → `holen` → `neu` (sicher, Quelle offiziell).
-   Antwortet das Werkzeug „Velo-ID nicht gefunden“ (ältere Kollektion), normal weitersuchen.
+6. **Velo de Ville mit `veloids`** (Konfigurations-ID aus Veloport, z. B. „V27-ID-01247834“): **zuerst**
+   `node velocenter-homepage/tools/seite.js --velo "<ID>"` – lädt genau dieses konfigurierte Rad im Velo-de-Ville-Konfigurator
+   (Rahmenfarbe, Rahmenform, Ausstattung). Liefert das Werkzeug `bild_datei`, ist das **das exakte Originalbild, schon freigestellt**:
+   Screenshot ansehen (Farbe/Modell stimmen?), dann `holen "<key>" "<bild_datei>"` (lokaler Pfad erlaubt) → `neu`/`ersetzen`, Quelle
+   `konfigurator.velo-de-ville.com`, sicher (`ub` nicht setzen). Ein Bild aus der Velo-ID hat Vorrang vor jedem anderen Fund.
+   „Velo-ID nicht gefunden“ = ältere Kollektion (z. B. V25/V26, der Konfigurator kennt nur die aktuelle) → normal weitersuchen.
 Farbnamen in Veloport weichen oft ab (z. B. „Stone Basalt Matt“ = „stone basalt matt“, „Dunkelblau-Matt“ = „dark blue matt“, Doppel-Farben
 „(grey+night red)“). Vergleiche sorgfältig, auch Englisch/Deutsch. Rahmenform (Tiefeinsteiger/Trapez/Diamant/Kompakt) soll passen, wenn der Hersteller
 sie unterscheidet; Größe ist egal.

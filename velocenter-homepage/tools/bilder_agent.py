@@ -227,15 +227,24 @@ def cmd_holen(args):
     if len(args) < 2: raise SystemExit('Aufruf: holen <key> <url>')
     key, url = args[0], args[1]
     auftrag = json.load(open(os.path.join(TMP, 'auftrag.json'), encoding='utf-8'))
-    keys = {e['key'] for e in auftrag['suchen'] + auftrag['pruefen']}
+    keys = {e['key'] for e in auftrag['suchen'] + auftrag['pruefen'] + auftrag.get('qualitaet', [])}
     if key not in keys: raise SystemExit('FEHLER: Schlüssel steht nicht in der Arbeitsliste.')
-    if not re.match(r'^https://[^\s/]+\.[a-z]{2,}/', url, re.I): raise SystemExit('FEHLER: nur https-Adressen.')
+    seiten = os.path.realpath(os.path.join(TMP, 'seiten'))
+    lokal = os.path.realpath(url) if not url.lower().startswith('https://') else ''
+    if lokal and not (lokal.startswith(seiten + os.sep) and os.path.isfile(lokal)):
+        raise SystemExit('FEHLER: lokale Dateien nur aus dem Browser-Werkzeug (bild_datei).')
+    if not lokal and not re.match(r'^https://[^\s/]+\.[a-z]{2,}/', url, re.I): raise SystemExit('FEHLER: nur https-Adressen.')
     nr = len(glob.glob(os.path.join(KAND, '*.webp'))) + 1
     if nr > 400: raise SystemExit('FEHLER: zu viele Kandidaten in diesem Lauf.')
     try:
+        if lokal:
+            roh = open(lokal, 'rb').read(30 * 1024 * 1024 + 1)
+            raise StopIteration
         req = urllib.request.Request(url, headers={'User-Agent': UA, 'Accept': 'image/avif,image/webp,image/png,image/jpeg,*/*;q=0.8'})
         with urllib.request.urlopen(req, timeout=40) as r:
             roh = r.read(30 * 1024 * 1024 + 1)
+    except StopIteration:
+        pass
     except urllib.error.HTTPError as e:
         raise SystemExit('FEHLER: Download %s (HTTP %s)' % (url, e.code))
     except Exception as e:
