@@ -50,3 +50,5 @@
 - **13.11.2026 – Bilder-Agent ohne Freigabe (Tiry):** Alles, was der Agent findet, geht sofort live – auch „unsichere“ Funde (Farbe nicht 100 % schriftlich belegt); diese sind im Admin nur markiert. Notbremse: „✕ Falsch“ am Foto → Foto fliegt raus, Quelle wird gesperrt, nächster Lauf sucht neu.
 - **13.11.2026 – Bilder-Agent „✓ Richtig“ (Tiry):** Neben „✕ Falsch“ gibt es „✓ Richtig“: Foto verschwindet aus „Zuletzt neu“ und wird vom Agenten nie mehr ersetzt (`pinned`). Fotos unter „Zuletzt neu“ lassen sich groß ansehen.
 - **13.11.2026 – Serviceräder (Tiry):** Im Veloport-Export als Servicerad markierte Räder sind Leih-/Testräder und kommen nie auf die Seite. Einzige Ausnahme: Van-Raam-Vorführrad.
+- **13.11.2026 – Gutschein-Band (Tiry):** statt Pillen-Leiste eine gezeichnete Gutscheinkarte (Rot-Violett-Verlauf, Goldschleife, Velocenter-Logo) mit Text, Schlagwörtern und Knopf. Ohne Betrag (keine Angaben erfunden).
+- **13.11.2026 – Freistellung:** VdV AEB PRO French Lavender – schwarzer Block unter dem Gepäckträger entfernt; QiO Compact PE Lunar White im Showroom neu aus dem sauberen Lager-Foto (vorher gezackte helle Kanten).

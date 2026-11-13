@@ -2223,28 +2223,49 @@ html.scr .sky,html.scr .blobs i,html.scr .blobs::after,html.scr .ribbons i{anima
 .wstrip.spring{background:linear-gradient(120deg,rgba(247,255,240,.97),rgba(255,251,235,.96) 60%,rgba(255,241,242,.95)) padding-box,linear-gradient(110deg,#84CC16,#FACC15,#FB7185,#84CC16) border-box;background-size:100% 100%,300% 100%}
 .wstrip.spring>i{background:linear-gradient(150deg,#FDE047,#F59E0B 50%,#EA580C);box-shadow:inset 0 1px 0 rgba(255,255,255,.5),0 10px 18px -8px rgba(234,88,12,.8)}
 .wstrip.spring .wt small{color:#4D7C0F}
-.gift{padding:clamp(26px,4vw,46px) 0}
-.gcard{position:relative;isolation:isolate;overflow:hidden;display:flex;align-items:center;gap:20px;padding:18px 18px 18px 20px;border-radius:999px;text-decoration:none;color:#fff;
- background:radial-gradient(90% 180% at 0% 50%,rgba(200,16,46,.55),transparent 60%),radial-gradient(70% 160% at 100% 0%,rgba(245,184,61,.32),transparent 60%),linear-gradient(180deg,#2A1E24,#14161D);
- box-shadow:inset 0 1px 0 rgba(255,255,255,.14),inset 0 0 0 1px rgba(245,184,61,.28),0 26px 50px -26px rgba(110,8,22,.8);transition:transform .35s var(--spring),box-shadow .35s}
-.gcard:hover{transform:translateY(-3px);box-shadow:inset 0 1px 0 rgba(255,255,255,.16),inset 0 0 0 1px rgba(245,184,61,.45),0 32px 56px -24px rgba(110,8,22,.9)}
-.gcard::after{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(105deg,transparent 35%,rgba(255,226,160,.16) 48%,transparent 60%);background-size:250% 100%;animation:osheen 8s ease-in-out infinite}
-.gic{flex:none;display:grid;place-items:center;width:62px;height:62px;border-radius:50%;color:#3B1A05;background:linear-gradient(150deg,#FDE68A,#F5B83D 50%,#B7791F);box-shadow:inset 0 1px 0 rgba(255,255,255,.6),0 12px 24px -10px rgba(245,184,61,.9)}
+.gift{padding:clamp(30px,5vw,60px) 0}
+.gcard{position:relative;isolation:isolate;overflow:hidden;display:grid;grid-template-columns:minmax(260px,420px) 1fr;align-items:center;gap:clamp(22px,4vw,56px);padding:clamp(26px,4vw,46px) clamp(22px,4vw,56px);border-radius:48px;text-decoration:none;color:#fff;
+ background:radial-gradient(60% 120% at 0% 100%,rgba(200,16,46,.6),transparent 60%),radial-gradient(50% 90% at 100% 0%,rgba(245,184,61,.3),transparent 62%),radial-gradient(40% 70% at 60% 110%,rgba(168,85,247,.28),transparent 60%),linear-gradient(160deg,#2A1A22,#121219 70%);
+ box-shadow:inset 0 1px 0 rgba(255,255,255,.14),inset 0 0 0 1px rgba(245,184,61,.26),0 40px 80px -36px rgba(110,8,22,.85);transition:box-shadow .4s}
+.gcard:hover{box-shadow:inset 0 1px 0 rgba(255,255,255,.16),inset 0 0 0 1px rgba(245,184,61,.42),0 46px 90px -34px rgba(110,8,22,.95)}
 .gcard svg{display:block!important;padding:0!important;margin:0!important;background:none!important;border-radius:0!important;box-shadow:none!important;fill:none;stroke:currentColor;position:static!important;transform:none}
-.gic svg{width:30px!important;height:30px!important}
-.gtx{flex:1;min-width:0;display:flex;flex-direction:column;gap:5px}
-.gtx small{font:800 11px/1 var(--display);letter-spacing:.16em;text-transform:uppercase;color:#F5C76B}
-.gtx strong{font:900 clamp(20px,2.2vw,26px)/1.1 var(--display);letter-spacing:-.02em}
-.gtx>span{font:500 15px/1.4 var(--display);color:rgba(255,255,255,.78)}
-.gcta{flex:none;color:#fff;display:inline-flex;align-items:center;gap:9px;padding:14px 22px;border-radius:999px;background:linear-gradient(180deg,#DC1E38,#B5102A);font:800 14px/1 var(--display);box-shadow:inset 0 1px 0 rgba(255,255,255,.22),0 10px 22px -10px rgba(200,16,46,.9)}
-.gcta svg{color:#fff!important;width:15px!important;height:15px!important;transition:transform .3s var(--spring)}.gcard:hover .gcta svg{transform:translateX(3px)!important}
+.gstage{position:relative;perspective:1100px;padding:18px 6px}
+.gstage::before{content:"";position:absolute;left:8%;right:8%;bottom:-6px;height:34px;border-radius:50%;background:radial-gradient(closest-side,rgba(0,0,0,.55),transparent);filter:blur(6px)}
+.gv{position:relative;display:block;aspect-ratio:1.586;border-radius:26px;overflow:hidden;transform:rotateY(-14deg) rotateX(8deg) rotate(-4deg);transform-style:preserve-3d;transition:transform .7s var(--spring);
+ background:radial-gradient(70% 90% at 15% 10%,rgba(255,255,255,.28),transparent 55%),linear-gradient(135deg,#E11D48 0%,#B5102A 38%,#7E1D6B 72%,#4C1D95 100%);background-size:100% 100%,220% 220%;animation:gvf 12s ease-in-out infinite;
+ box-shadow:inset 0 1px 0 rgba(255,255,255,.45),inset 0 0 0 1px rgba(255,255,255,.14),0 30px 50px -18px rgba(0,0,0,.7),0 0 60px -10px rgba(225,29,72,.55)}
+.gcard:hover .gv,.gcard:focus-visible .gv{transform:rotateY(-4deg) rotateX(3deg) rotate(-1deg) translateY(-6px)}
+@keyframes gvf{0%,100%{background-position:0 0,0% 50%}50%{background-position:0 0,100% 50%}}
+.gv::before{content:"";position:absolute;inset:0;background:repeating-radial-gradient(circle at 120% 120%,rgba(255,255,255,.07) 0 2px,transparent 2px 14px)}
+.gv::after{content:"";position:absolute;inset:-20%;background:linear-gradient(105deg,transparent 38%,rgba(255,240,200,.45) 50%,transparent 62%);background-size:260% 100%;animation:osheen 6s ease-in-out infinite;mix-blend-mode:overlay}
+.gvr{position:absolute;top:0;bottom:0;left:64%;width:16%;background:linear-gradient(90deg,#B7791F,#FDE68A 30%,#F5B83D 55%,#B7791F);box-shadow:0 0 18px rgba(0,0,0,.25)}
+.gvr2{position:absolute;left:0;right:0;top:58%;height:13%;background:linear-gradient(180deg,#B7791F,#FDE68A 35%,#F5B83D 60%,#B7791F);box-shadow:0 0 18px rgba(0,0,0,.25)}
+.gvb{position:absolute;left:72%;top:64.5%;width:30%;aspect-ratio:1;transform:translate(-50%,-50%);filter:drop-shadow(0 6px 10px rgba(0,0,0,.35))}
+.gvb i{position:absolute;top:50%;width:50%;height:58%;border-radius:60% 40% 50% 50%;background:radial-gradient(circle at 40% 35%,#FEF3C7,#F5B83D 45%,#B7791F);transform-origin:100% 0}
+.gvb i:nth-child(1){right:50%;transform:translateY(-62%) rotate(18deg);border-radius:70% 30% 40% 60%}
+.gvb i:nth-child(2){left:50%;transform-origin:0 0;transform:translateY(-62%) rotate(-18deg);border-radius:30% 70% 60% 40%}
+.gvb b{position:absolute;left:50%;top:50%;width:26%;height:30%;transform:translate(-50%,-50%);border-radius:50%;background:radial-gradient(circle at 40% 35%,#FEF3C7,#D69E2E)}
+.gvl{position:absolute;left:7%;top:10%;width:34%;filter:brightness(0) invert(1) drop-shadow(0 2px 6px rgba(0,0,0,.3))}
+.gvt{position:absolute;left:7%;bottom:12%;display:flex;flex-direction:column;gap:2px;text-shadow:0 2px 10px rgba(0,0,0,.35)}
+.gvt small{font:800 clamp(9px,1vw,11px)/1 var(--display);letter-spacing:.24em;text-transform:uppercase;color:#FDE68A}
+.gvt strong{font:900 clamp(24px,3vw,38px)/1 var(--display);letter-spacing:.02em;text-transform:uppercase;background:linear-gradient(180deg,#fff,#FDE68A);-webkit-background-clip:text;background-clip:text;color:transparent}
+.gvc{position:absolute;right:6%;top:9%;width:13%;aspect-ratio:1.3;border-radius:8px;background:linear-gradient(135deg,#FEF3C7,#D69E2E);box-shadow:inset 0 0 0 1px rgba(120,70,0,.35)}
+.gtx{min-width:0;display:flex;flex-direction:column;gap:10px;align-items:flex-start}
+.gtx small{display:inline-flex;align-items:center;gap:8px;font:800 12px/1 var(--display);letter-spacing:.16em;text-transform:uppercase;color:#F5C76B}
+.gtx small::before{content:"";width:8px;height:8px;border-radius:50%;background:#F5B83D;box-shadow:0 0 12px 2px rgba(245,184,61,.8)}
+.gtx strong{font:900 clamp(28px,3.6vw,46px)/1.04 var(--display);letter-spacing:-.025em;background:linear-gradient(100deg,#fff 30%,#FDE68A 65%,#F5B83D);-webkit-background-clip:text;background-clip:text;color:transparent}
+.gtx>span:not(.gtags):not(.gcta){font:500 clamp(15px,1.4vw,17px)/1.5 var(--display);color:rgba(255,255,255,.82);max-width:46ch}
+.gtags{display:flex;flex-wrap:wrap;gap:8px;margin-top:2px}
+.gtags i{font:700 13px/1 var(--display);font-style:normal;padding:9px 14px;border-radius:999px;color:#FDE68A;background:rgba(245,184,61,.12);box-shadow:inset 0 0 0 1px rgba(245,184,61,.3)}
+.gcta{margin-top:8px;color:#fff;display:inline-flex;align-items:center;gap:10px;min-height:48px;padding:0 24px;border-radius:999px;background:linear-gradient(180deg,#DC1E38,#B5102A);font:800 15px/1 var(--display);box-shadow:inset 0 1px 0 rgba(255,255,255,.22),0 12px 26px -10px rgba(200,16,46,.95)}
+.gcta svg{color:#fff!important;width:16px!important;height:16px!important;transition:transform .3s var(--spring)}.gcard:hover .gcta svg{transform:translateX(3px)!important}
 .gsp{position:absolute;inset:0;z-index:-1;pointer-events:none}
 .gsp i{position:absolute;width:5px;height:5px;border-radius:50%;background:#FDE68A;box-shadow:0 0 10px 2px rgba(253,230,138,.8);opacity:0;animation:gtw 3.6s ease-in-out infinite}
-.gsp i:nth-child(1){left:12%;top:22%}.gsp i:nth-child(2){left:38%;top:74%;animation-delay:.8s}.gsp i:nth-child(3){left:58%;top:18%;animation-delay:1.6s}.gsp i:nth-child(4){left:74%;top:70%;animation-delay:2.3s}.gsp i:nth-child(5){left:88%;top:30%;animation-delay:2.9s}
+.gsp i:nth-child(1){left:6%;top:14%}.gsp i:nth-child(2){left:40%;top:86%;animation-delay:.8s}.gsp i:nth-child(3){left:52%;top:10%;animation-delay:1.6s}.gsp i:nth-child(4){left:80%;top:78%;animation-delay:2.3s}.gsp i:nth-child(5){left:93%;top:22%;animation-delay:2.9s}
 @keyframes gtw{0%,100%{opacity:0;transform:scale(.4)}45%{opacity:1;transform:scale(1)}}
 .gcard:focus-visible{outline:3px solid #F5B83D;outline-offset:4px}
-@media (max-width:700px){.gcard{flex-wrap:wrap;border-radius:28px;gap:14px;padding:18px}.gic{width:52px;height:52px}.gic svg{width:26px;height:26px}.gtx{flex-basis:calc(100% - 70px)}.gcta{width:100%;justify-content:center}}
-@media (prefers-reduced-motion:reduce){.gcard::after,.gsp i{animation:none}}
+@media (max-width:760px){.gcard{grid-template-columns:1fr;border-radius:36px;text-align:left}.gstage{max-width:360px;width:100%;margin:0 auto}.gcta{width:100%;justify-content:center}}
+@media (prefers-reduced-motion:reduce){.gv,.gv::after,.gsp i{animation:none}.gv{transition:none}}
 /* Hero-Schilder (13.11.2026): klickbare Glas-Kapseln, kompakt */
 a.hchip.hc{--hg:linear-gradient(110deg,#E2232D,#F472B6,#A78BFA,#38BDF8,#E2232D);display:inline-flex;align-items:center;gap:8px;padding:4px 5px 4px 4px!important;border-radius:999px!important;text-decoration:none;color:#1B1E25;
  border:1.5px solid transparent;background:linear-gradient(135deg,rgba(255,255,255,.97),rgba(255,255,255,.88)) padding-box,var(--hg) border-box!important;background-size:100% 100%,300% 100%!important;
@@ -2775,9 +2796,10 @@ m696 -454 c28 -13 46 -31 55 -51 22 -53 -50 -177 -173 -300 -187 -186 -647
   <div class="wrap">
    <a class="gcard pre" href="#besuch" aria-label="Gutscheine vom Velocenter – im Laden erhältlich, Öffnungszeiten ansehen">
     <span class="gsp" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span>
-    <span class="gic"><svg><use href="#i-gift"/></svg></span>
-    <span class="gtx"><small>Geschenk-Idee zu Weihnachten</small><strong>Gutscheine vom Velocenter</strong><span>Für alle, die gern Rad fahren. Bei uns im Laden erhältlich.</span></span>
-    <span class="gcta">Öffnungszeiten<svg><use href="#i-arrow"/></svg></span>
+    <span class="gstage" aria-hidden="true"><span class="gv"><span class="gvr"></span><span class="gvr2"></span><img class="gvl" src="img/velocenter-logo.svg" alt="" width="160" height="84"><span class="gvc"></span><span class="gvb"><i></i><i></i><b></b></span><span class="gvt"><small>Velocenter Hessert</small><strong>Gutschein</strong></span></span></span>
+    <span class="gtx"><small>Geschenk-Idee zu Weihnachten</small><strong>Gutscheine vom Velocenter</strong><span>Für alle, die gern Rad fahren. Bei uns im Laden erhältlich.</span>
+     <span class="gtags"><i>🎁 Unterm Baum</i><i>🚲 Für Radfahrer</i><i>📍 Im Laden</i></span>
+     <span class="gcta">Öffnungszeiten<svg><use href="#i-arrow"/></svg></span></span>
    </a>
   </div>
  </div>
