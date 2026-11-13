@@ -1900,28 +1900,29 @@ html.scr .sky,html.scr .blobs i,html.scr .blobs::after,html.scr .ribbons i{anima
 .tsrc a{color:inherit}
 @media (max-width:640px){.tnav a{font-size:14px;min-height:44px}.tph .ic{width:56px;height:56px}.tfl li{font-size:15px}}
 
-/* ---------- Statusleiste Öffnungszeiten (immer oben, fixiert) ---------- */
-:root{--sb:36px}
-body{padding-top:var(--sb)}
-.hdr{top:calc(env(safe-area-inset-top,0px) + var(--sb))}
-.atelier .side{top:calc(120px + var(--sb))}.drout{top:calc(110px + var(--sb))}
-.sbar{position:fixed;z-index:61;top:0;left:0;right:0;height:calc(var(--sb) + env(safe-area-inset-top,0px));padding:env(safe-area-inset-top,0px) max(16px,env(safe-area-inset-right,0px)) 0 max(16px,env(safe-area-inset-left,0px));box-sizing:border-box;display:flex;align-items:center;justify-content:center;gap:14px;overflow:hidden;
- background:radial-gradient(60% 220% at 15% 50%,rgba(var(--sbc),.20),transparent 60%),radial-gradient(50% 220% at 85% 50%,rgba(124,58,237,.18),transparent 60%),linear-gradient(90deg,#0A0C13,#151020 50%,#0A0C13);color:#EEF0F6;font:600 13.5px/1 var(--display);letter-spacing:.01em;--sbc:52,211,153}
-.sbar::before{content:"";position:absolute;inset:auto 0 0 0;height:2px;background:linear-gradient(90deg,rgba(var(--sbc),.0),rgba(var(--sbc),.35),rgba(167,139,250,.35),rgba(var(--sbc),0));}
-.sbar .sbp{position:absolute;left:0;bottom:0;height:2px;width:var(--p,0%);background:linear-gradient(90deg,#22D3EE,rgb(var(--sbc)),#A78BFA,#22D3EE);background-size:200% 100%;animation:flow 6s linear infinite;box-shadow:0 0 10px rgba(var(--sbc),.8);border-radius:0 2px 2px 0;transition:width 1s var(--ease)}
-.sbar a{color:inherit;text-decoration:none}
-.sbst{display:inline-flex;align-items:center;gap:10px;min-height:var(--sb);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
-.sbst i{position:relative;flex:none;width:9px;height:9px;border-radius:50%;background:rgb(var(--sbc));box-shadow:0 0 12px rgb(var(--sbc))}
-.sbst i::after{content:"";position:absolute;inset:-5px;border-radius:50%;border:2px solid rgb(var(--sbc));animation:ping 1.8s ease-out infinite}
-.sbst b{font-weight:800;color:rgb(var(--sbc));letter-spacing:.02em}
-.sbst span{color:#C9CDD8}.sbst em{font-style:normal;padding:4px 9px;border-radius:999px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.10);color:#fff;font-weight:700;font-size:12.5px}
-.sbst:hover span{color:#fff}
-.sbtel{position:absolute;right:max(16px,env(safe-area-inset-right,0px));top:calc(env(safe-area-inset-top,0px));height:var(--sb);display:inline-flex;align-items:center;gap:7px;color:#C9CDD8!important;font-weight:700}
-.sbtel svg{width:15px;height:15px}.sbtel:hover{color:#fff!important}
-.sbar.soon{--sbc:251,191,36}.sbar.closed{--sbc:251,113,133}.sbar.closed .sbst i::after,.sbar.soon .sbst i::after{animation:none;opacity:0}
-@media (max-width:980px){.sbtel span{display:none}}
-@media (max-width:640px){:root{--sb:34px}.sbar{font-size:12.5px;justify-content:flex-start;padding-right:52px}.sbst em{display:none}}
-@media (prefers-reduced-motion:reduce){.sbar .sbp,.sbst i::after{animation:none}}
+/* ---------- Öffnungs-Status im Kopf (Pille neben A+) ---------- */
+.ostat{position:relative;flex:none;display:inline-flex;align-items:center;gap:9px;height:42px;padding:0 15px 0 13px;border-radius:999px;overflow:hidden;text-decoration:none;white-space:nowrap;
+ background:rgba(255,255,255,.88);border:1px solid rgba(27,30,37,.12);box-shadow:0 6px 18px rgba(27,30,37,.08);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);color:#2F3546;font:600 13.5px/1 var(--display);--oc:5,150,105;--og:52,211,153;transition:border-color .25s,box-shadow .25s}
+.ostat:hover{border-color:rgba(var(--oc),.55);box-shadow:0 8px 22px rgba(var(--oc),.18)}
+.ostat i{position:relative;flex:none;width:9px;height:9px;border-radius:50%;background:rgb(var(--og));box-shadow:0 0 10px rgb(var(--og))}
+.ostat i::after{content:"";position:absolute;inset:-5px;border-radius:50%;border:2px solid rgb(var(--og));animation:ping 1.8s ease-out infinite}
+.ostat b{font-weight:800;color:rgb(var(--oc))}.ostat .sh{display:none}
+.ostat span{color:#4A5163}
+.ostat .op{position:absolute;left:0;bottom:0;height:3px;width:var(--p,0%);background:linear-gradient(90deg,#22D3EE,rgb(var(--og)),#A78BFA,#22D3EE);background-size:200% 100%;animation:flow 6s linear infinite;border-radius:0 3px 3px 0;transition:width 1s var(--ease)}
+.ostat.soon{--oc:180,83,9;--og:251,191,36}.ostat.closed{--oc:220,38,38;--og:248,113,113}.ostat.closed i::after,.ostat.soon i::after{animation:none;opacity:0}
+/* Platz automatisch (hdrFit): f1 = kurz, f2 = nur Punkt; Menü notfalls enger */
+.ostat .tm{display:none}
+.ostat.f1 .lg{display:none}.ostat.f1 .sh{display:inline}
+.ostat.f2{width:42px;padding:0;justify-content:center}.ostat.f2 b,.ostat.f2 span{display:none!important}.ostat.f2 i{width:11px;height:11px}
+@media (min-width:981px){.nav.tight a{padding-left:10px!important;padding-right:10px!important}.nav.tight2 a{padding-left:8px!important;padding-right:8px!important;font-size:14.5px!important}}
+@media (max-width:980px){.ostat{height:44px;padding:0 13px 0 12px;font-size:13px;gap:8px}.ostat .lg{display:none}.ostat .sh{display:inline}}
+@media (max-width:560px){.hdact{gap:7px}.hsoc a{width:40px;height:40px}.ostat{flex-direction:column;align-items:flex-start;justify-content:center;gap:4px;height:44px;padding:0 11px 0 24px;font-size:12px;line-height:1}
+ .ostat i{position:absolute;left:10px;top:50%;margin-top:-4.5px}.ostat .t{display:none}.ostat .tm{display:inline;font-size:11px;font-weight:700}}
+.ostat.f3{display:none!important}
+@media (max-width:560px){.hdr .hsoc a.wk{display:none}.ostat{padding:0 9px 0 22px}.ostat i{left:9px}.ostat.f2{width:40px;padding:0}.ostat.f2 i{left:auto;top:auto;position:relative;margin:0}}
+@media (max-width:400px){body.sc .hdr .logo img{height:46px}}
+@media (min-width:981px){.hdr.nosoc .hsoc{display:none}.nav.tight3 a{padding-left:6px!important;padding-right:6px!important;font-size:13.5px!important}}
+@media (prefers-reduced-motion:reduce){.ostat .op,.ostat i::after{animation:none}}
 </style>
 
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
@@ -1955,7 +1956,6 @@ body{padding-top:var(--sb)}
 
 <div class="sky"></div><div class="blobs" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></div><div class="ribbons" aria-hidden="true"><i></i><i></i><i></i><i></i></div><div class="smoke"></div><div class="grain"></div>
 
-<div class="sbar" id="sbar" role="status" aria-live="polite"><a class="sbst" href="#kontakt" data-r="kontakt" id="sbst" title="Öffnungszeiten ansehen"><i></i><b>Öffnungszeiten</b></a><a class="sbtel" href="tel:+49727178033" aria-label="Anrufen: 07271 78033"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 1.9.7 2.8a2 2 0 0 1-.5 2.1L8 9.9a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.8.7a2 2 0 0 1 1.7 2z"/></svg><span>07271 78033</span></a><span class="sbp" id="sbp"></span></div>
 <header class="hdr">
  <div class="wrap">
 <div class="hlft"><div class="hsoc" aria-label="Velocenter in den sozialen Medien"><a class="ig" href="https://www.instagram.com/velocenterhessert/" target="_blank" rel="noopener" aria-label="Instagram" title="Instagram"><svg><use href="#i-ig"/></svg></a><a class="fb" href="https://www.facebook.com/velocenterhessert" target="_blank" rel="noopener" aria-label="Facebook" title="Facebook"><svg><use href="#i-fb"/></svg></a><a class="wk" href="https://whatsapp.com/channel/0029VaIekua60eBc6k2bMD0q" target="_blank" rel="noopener" aria-label="WhatsApp-Kanal" title="WhatsApp-Kanal"><svg><use href="#i-chat"/></svg><span>Kanal</span></a></div>  <a class="logo" href="#start" aria-label="Velocenter Hessert – Startseite"><img src="img/velocenter-logo.svg" alt="Velocenter Hessert" width="160" height="84"></a></div>
@@ -1970,7 +1970,7 @@ body{padding-top:var(--sb)}
    <a href="#dreirad" data-r="dreirad">E-Dreiräder</a>
    <a href="#kontakt" data-r="kontakt">Kontakt</a>
   </nav>
-  <div class="hdact"><button type="button" class="fzb" id="fzB" aria-pressed="false" aria-label="Schrift größer stellen" title="Schrift größer">A<span>+</span></button>
+  <div class="hdact"><a class="ostat" id="ostat" href="#kontakt" data-r="kontakt" role="status" aria-live="polite" title="Öffnungszeiten ansehen"><i></i><b class="lg">Öffnungszeiten</b></a><button type="button" class="fzb" id="fzB" aria-pressed="false" aria-label="Schrift größer stellen" title="Schrift größer">A<span>+</span></button>
   <a class="cta" href="#termin"><svg><use href="#i-cal"/></svg>Termin</a></div>
   <button class="burger" id="burger" aria-label="Menü öffnen" aria-expanded="false"><span></span><span></span><span></span></button>
  </div>
@@ -3261,11 +3261,25 @@ function oeffStatus(){const b=berlin(),{d,m}=b,ft=feiertag(b.y,b.mo,b.dd),S=slot
   if(s)return{open:false,k,wd,ab:s[0],in:k===0?s[0]-m:(k===1?(1440-m)+s[0]:null),pause:k===0&&S.some(([,e])=>e<=m),ft}}
  return{open:false,k:99,ft}}
 const dauer=n=>n<60?n+' Min.':Math.floor(n/60)+' Std.'+(n%60?' '+(n%60)+' Min.':'');
-function sbar(){const B=$('#sbar'),A=$('#sbst');if(!B||!A)return;const o=oeffStatus();let cls,t;
- if(o.open){cls=o.rest<=30?'soon':'open';t=o.rest<=30?'<b>Schließt gleich</b><span>noch '+dauer(o.rest)+' · bis '+hm(o.bis)+' Uhr</span>':'<b>Jetzt geöffnet</b><span>bis '+hm(o.bis)+' Uhr</span><em>noch '+dauer(o.rest)+'</em>';B.style.setProperty('--p',(o.p*100).toFixed(1)+'%')}
- else{cls='closed';B.style.setProperty('--p','0%');const wann=o.k===0?'heute':o.k===1?'morgen':DN[o.wd];
-  t=(o.pause?'<b>Mittagspause</b><span>ab '+hm(o.ab)+' Uhr wieder für dich da</span>':'<b>'+(o.ft?'Heute Feiertag':'Gerade geschlossen')+'</b><span>'+(o.k<99?'wir öffnen '+wann+' um '+hm(o.ab)+' Uhr':'')+'</span>')+(o.in!=null&&o.in<=180?'<em>in '+dauer(o.in)+'</em>':'')}
- B.className='sbar '+cls;A.innerHTML='<i></i>'+t;A.setAttribute('aria-label',A.textContent)}
+function sbar(){const A=$('#ostat');if(!A)return;const o=oeffStatus();let cls,t;
+ if(o.open){const so=o.rest<=30;cls=so?'soon':'open';t='<b class="lg">'+(so?'Schließt gleich':'Jetzt geöffnet')+'</b><b class="sh">'+(so?'Gleich zu':'Offen')+'</b><span class="t">'+(so?'noch '+dauer(o.rest):'bis '+hm(o.bis)+' Uhr')+'</span><span class="tm">'+(so?'noch '+o.rest+' Min.':'bis '+hk(o.bis))+'</span>';A.style.setProperty('--p',(o.p*100).toFixed(1)+'%');
+  A.title=(so?'Schließt gleich – ':'Jetzt geöffnet – ')+'bis '+hm(o.bis)+' Uhr, noch '+dauer(o.rest)}
+ else{cls='closed';A.style.setProperty('--p','0%');const wann=o.k===0?'':o.k===1?'morgen ':(DN[o.wd].slice(0,2)+'. ');
+  t='<b class="lg">'+(o.pause?'Mittagspause':o.ft?'Feiertag':'Geschlossen')+'</b><b class="sh">'+(o.pause?'Pause':'Zu')+'</b><span class="t">'+(o.k<99?'ab '+wann+hm(o.ab)+' Uhr':'')+'</span><span class="tm">'+(o.k<99?'ab '+(o.k?DN[o.wd].slice(0,2)+' ':'')+hk(o.ab):'')+'</span>';
+  A.title=(o.pause?'Mittagspause':o.ft?'Heute Feiertag':'Gerade geschlossen')+(o.k<99?' – wir öffnen '+(o.k===0?'heute':o.k===1?'morgen':DN[o.wd])+' um '+hm(o.ab)+' Uhr'+(o.in!=null?' (in '+dauer(o.in)+')':''):'')}
+ const f=A.classList.contains('f2')?' f2':A.classList.contains('f1')?' f1':'';A.className='ostat '+cls+f;A.innerHTML='<i></i>'+t+'<s class="op"></s>';A.setAttribute('aria-label',A.title+'. Öffnungszeiten ansehen');hdrFit()}
+const hk=m=>Math.floor(m/60)+':'+String(m%60).padStart(2,'0');
+/* Kopf: Pille schrumpft, bis das Menü ganz hineinpasst */
+let hfT=0;function hdrFit(){const n=$('#nav'),o=$('#ostat'),h=$('.hdr');if(!n||!o||!h)return;o.classList.remove('f1','f2','f3');n.classList.remove('tight','tight2','tight3');h.classList.remove('nosoc');
+ const mob=innerWidth<=980,sicht=e=>{const c=getComputedStyle(e);return e.offsetWidth>0&&c.display!=='none'&&+c.opacity>.05};
+ const links=()=>Math.max(0,...[...document.querySelectorAll('.hdr .hsoc a,.hdr .logo')].filter(sicht).map(e=>e.getBoundingClientRect().right));
+ const ov=()=>(!mob&&n.scrollWidth>n.clientWidth+1)||(sicht(o)&&links()+6>o.getBoundingClientRect().left);
+ const add=(e,c)=>()=>e.classList.add(c);
+ const S=mob?[add(o,'f2'),add(o,'f3')]:[add(o,'f1'),add(o,'f2'),add(n,'tight'),add(n,'tight2'),add(h,'nosoc'),add(n,'tight3')];
+ for(const st of S){if(!ov())break;st()}}
+const hdrFitL=()=>{cancelAnimationFrame(hfT);hfT=requestAnimationFrame(hdrFit)};addEventListener('resize',hdrFitL);if(document.fonts&&document.fonts.ready)document.fonts.ready.then(hdrFitL);
+{let k0=null;const B=document.body.classList;new MutationObserver(()=>{const k=B.contains('sc')+'|'+B.contains('herotop')+'|'+B.contains('fz1')+B.contains('fz2');if(k!==k0){k0=k;setTimeout(hdrFitL,480)}}).observe(document.body,{attributes:true,attributeFilter:['class']});addEventListener('load',()=>setTimeout(hdrFitL,300))}
+{const z=$('#fzB');if(z)z.addEventListener('click',()=>setTimeout(hdrFitL,60))}
 function berlin(){const p=new Intl.DateTimeFormat('en-GB',{timeZone:'Europe/Berlin',weekday:'short',hour:'2-digit',minute:'2-digit',hourCycle:'h23'}).formatToParts(new Date());const g=t=>p.find(x=>x.type===t).value;const q=new Intl.DateTimeFormat('en-CA',{timeZone:'Europe/Berlin',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date()).split('-').map(Number);return{d:['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].indexOf(g('weekday')),m:+g('hour')*60+ +g('minute'),y:q[0],mo:q[1],dd:q[2]}}
 function live(){
  const {d}=berlin(),L=$('#live'),T=$('#liveT'),o=oeffStatus();sbar();
