@@ -374,6 +374,11 @@ textarea.inp{border-radius:26px;min-height:110px;resize:vertical;line-height:1.5
 .isyhero .in{display:flex;flex-direction:column;gap:22px;max-width:880px}
 .isyhero .badge{width:clamp(150px,16vw,210px);border-radius:24px;box-shadow:0 20px 50px rgba(255,122,26,.4)}
 .org{color:#FF6200}
+.tchr{list-style:none;margin:30px 0 0;padding:0;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px}.tchr li{position:relative;padding:22px 20px 22px;border-radius:28px;background:rgba(255,255,255,.7);border:1px solid var(--line)}.tchr b{display:block;font:900 30px/1 var(--display);letter-spacing:-.03em}.tchr span{display:block;margin-top:10px;font-size:14px;line-height:1.45;color:#3B3F48}.tchr li.on{background:linear-gradient(140deg,#7C3AED,#C026D3,#E11D48);border-color:transparent;box-shadow:0 14px 34px rgba(192,38,211,.3)}.tchr li.on b,.tchr li.on span{color:#fff}
+.tvoi{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:22px}.tvoi blockquote{margin:0;padding:28px 30px;border-radius:32px;background:linear-gradient(140deg,rgba(124,58,237,.08),rgba(225,29,72,.06));border:1px solid var(--line);font:700 20px/1.45 var(--display)}.tvoi cite{display:block;margin-top:14px;font:600 14px var(--sans,inherit);font-style:normal;color:#3B3F48}.tvoi small{display:block;margin-top:2px;color:var(--mut);font-weight:500}
+.tpress{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-top:24px}.tpress p{margin:0 6px 0 0;font-weight:700}.tpress a{padding:10px 18px;border-radius:999px;background:rgba(255,255,255,.8);border:1px solid var(--line);font-weight:700;font-size:14px;text-decoration:none;color:inherit;min-height:44px;display:inline-flex;align-items:center}.tpress a:hover{border-color:#C026D3}
+.woerth{display:flex;flex-wrap:wrap;gap:8px;margin:22px 0 4px}.woerth p{flex-basis:100%;margin:0 0 2px;font-weight:800}.woerth span{padding:8px 14px;border-radius:999px;background:rgba(255,255,255,.7);border:1px solid var(--line);font-size:13.5px}
+@media (max-width:1000px){.tchr{grid-template-columns:1fr 1fr}.tchr li.on{grid-column:1/-1}.tvoi{grid-template-columns:1fr}}
 .figs{display:grid;grid-template-columns:repeat(4,minmax(0,1fr))}
 .figs>div{padding:10px clamp(14px,2vw,30px);border-left:1px solid var(--line)}
 .figs>div:first-child{border-left:0;padding-left:0}
@@ -2441,7 +2446,7 @@ a.hchip.hc:hover .ha{background:#1B1E25;color:#fff;transform:translateX(2px)}
 <section class="view" data-v="start">
  <div class="bands top" aria-hidden="true">
   <div class="band b"><div class="tk" data-t="Wörth am Rhein|Hartmannstraße 25|Familienbetrieb|Probefahrt|Ehrliche Beratung|0 % Finanzierung"></div></div>
-  <div class="band a"><div class="tk" data-t="Seit 1995|300+ E-Bikes|4,8 ★ bei Google|Bosch Service Center|i:SY Experte|Weltrekord 283"></div></div>
+  <div class="band a"><div class="tk" data-t="Seit 1995|300+ E-Bikes|4,8 ★ · 221 Google-Rezensionen|Bosch Service Center|i:SY Experte|Weltrekord 283"></div></div>
  </div>
  <div class="stage0" id="hero">
   <canvas id="speed" aria-hidden="true"></canvas>
@@ -2760,7 +2765,7 @@ m696 -454 c28 -13 46 -31 55 -51 22 -53 -50 -177 -173 -300 -187 -186 -647
      <h1 class="hh1 hello" style="--d:1s">Dein E-Bike <span class="amp">&amp;</span> <span style="white-space:nowrap">E-Dreirad-Spezialist</span><br><span class="gt it">mit eigener Werkstatt.</span></h1>
      <p class="lead hello" style="--d:1.1s">Über 300 E-Bikes zum Probefahren, ehrliche Beratung und ein Bosch Service Center, in dem der Chef noch selbst schraubt.</p>
      <div class="row hello" style="--d:1.2s"><a class="cta" href="#finder"><svg><use href="#i-spark"/></svg>Mein E-Bike finden</a><a class="ghost" href="#termin"><svg><use href="#i-cal"/></svg>Termin anfragen</a></div>
-     <div class="trust hello" style="--d:1.3s"><span class="tb"><i class="tic"><svg class="tg" viewBox="0 0 48 48" aria-hidden="true"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg></i><svg class="tst" aria-hidden="true"><use href="#i-star"/></svg><b>4,8</b> bei <b class="ggl" aria-label="Google"><i>G</i><i>o</i><i>o</i><i>g</i><i>l</i><i>e</i></b></span><span class="tb"><i class="tic tbo" aria-hidden="true"></i><b class="bsh">Bosch</b> Service Center</span><span class="tb"><i class="tic tis" aria-hidden="true"><img src="img/isy-weltrekord-sm.webp" alt="" width="32" height="32"></i><b class="isyo">i:SY</b> Experte</span><span><svg><use href="#i-clock"/></svg><em class="live" id="live"><i></i><span id="liveT">Öffnungszeiten</span></em></span></div>
+     <div class="trust hello" style="--d:1.3s"><span class="tb"><i class="tic"><svg class="tg" viewBox="0 0 48 48" aria-hidden="true"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg></i><svg class="tst" aria-hidden="true"><use href="#i-star"/></svg><b>4,8</b> · 221 Rezensionen bei <b class="ggl" aria-label="Google"><i>G</i><i>o</i><i>o</i><i>g</i><i>l</i><i>e</i></b></span><span class="tb"><i class="tic tbo" aria-hidden="true"></i><b class="bsh">Bosch</b> Service Center</span><span class="tb"><i class="tic tis" aria-hidden="true"><img src="img/isy-weltrekord-sm.webp" alt="" width="32" height="32"></i><b class="isyo">i:SY</b> Experte</span><span><svg><use href="#i-clock"/></svg><em class="live" id="live"><i></i><span id="liveT">Öffnungszeiten</span></em></span></div>
     </div>
     <div class="hvis hello" style="--d:.5s" id="hvis">
      <div class="hring"></div>
@@ -2840,6 +2845,7 @@ m696 -454 c28 -13 46 -31 55 -51 22 -53 -50 -177 -173 -300 -187 -186 -647
     <h2 class="big">Hier schraubt <span class="gt">der Chef</span> noch selbst.</h2>
     <p class="lead">Uns ist wichtig, dass du am Ende glücklich mit deinem E-Bike bist und dich ehrlich beraten fühlst. Kauf, Werkstatt und Service bekommst du bei uns von denselben Leuten.</p>
     <div class="sig"><svg><use href="#i-wrench"/></svg>Stefan Hessert, Inhaber</div>
+    <div class="woerth pre"><p>Aus Wörth <b>für Wörth</b></p><span>🎭 Kinderrad für die Tombola beim Kinderfasching 2020</span><span>🚲 Gutschein für die Stadtradeln-Rallye 2021</span><span>🎄 Verkaufsstelle des Lions-Adventskalenders Wörth-Kandel 2025</span><span>🚴 Fördermitglied im ADFC</span></div>
     <div class="blobimg"><img src="img/laden-innen.webp" alt="Blick in den Laden des Velocenter Hessert" loading="lazy" width="1280" height="722"></div>
    </div>
    <div class="rows">
@@ -2863,7 +2869,7 @@ m696 -454 c28 -13 46 -31 55 -51 22 -53 -50 -177 -173 -300 -187 -186 -647
 
  <div class="sec zone z-lilac">
   <div class="wrap voices">
-   <div class="score pre"><b>4,8</b><div class="stars"><svg><use href="#i-star"/></svg><svg><use href="#i-star"/></svg><svg><use href="#i-star"/></svg><svg><use href="#i-star"/></svg><svg><use href="#i-star"/></svg></div><span>Bewertung bei Google</span></div>
+   <div class="score pre"><b>4,8</b><div class="stars"><svg><use href="#i-star"/></svg><svg><use href="#i-star"/></svg><svg><use href="#i-star"/></svg><svg><use href="#i-star"/></svg><svg><use href="#i-star"/></svg></div><span>221 Rezensionen bei Google</span></div>
    <div class="pre" style="--d:.1s">
     <p class="eyebrow">Das sagen <b>unsere Kunden</b></p>
     <div class="qwrap" id="qs" style="margin-top:22px">
@@ -3150,7 +3156,23 @@ m696 -454 c28 -13 46 -31 55 -51 22 -53 -50 -177 -173 -300 -187 -186 -647
    <div class="ped pre"><img src="img/p-isy2.webp" alt="i:SY E5 ZR F Touring E-Kompaktrad" width="1600" height="1145" loading="lazy"></div>
   </div>
  </div>
- <div class="sec" style="padding-top:0">
+
+ <div class="sec zone z-peach">
+  <div class="wrap">
+   <div class="pre"><p class="eyebrow">Offizieller <b>i:SY Experte</b></p><h2 class="big" style="margin-top:14px">Warum zu uns<br><span class="org">für dein i:SY?</span></h2>
+   <p class="lead" style="margin-top:18px;max-width:780px">Das zeichnet uns als i:SY Experte aus.</p></div>
+   <div class="rows" style="margin-top:22px">
+    <div class="srow pre" style="--c:#EA580C"><span class="ic"><svg><use href="#i-box"/></svg></span><span><h3>Große Modellauswahl</h3><p>Über 100 i:SY in vielen Modellen und Farben stehen bei uns, zum Anschauen, Vergleichen und gleich Mitnehmen.</p></span></div>
+    <div class="srow pre" style="--c:#F472B6"><span class="ic"><svg><use href="#i-bike"/></svg></span><span><h3>Probefahrt mit Testrädern</h3><p>Fahr Probe vor dem Laden oder nimm ein i:SY übers Wochenende mit nach Hause.</p></span></div>
+    <div class="srow pre" style="--c:#60A5FA"><span class="ic"><svg><use href="#i-chat"/></svg></span><span><h3>Beratung zu Modellen und Zubehör</h3><p>Welche Schaltung, welcher Akku, welcher Korb oder Kindersitz? Wir zeigen es dir direkt am Rad.</p></span></div>
+    <div class="srow pre" style="--c:#22D3EE"><span class="ic"><svg><use href="#i-wrench"/></svg></span><span><h3>Wartung nach i:SY-Standard</h3><p>Geschultes Team, eigene Werkstatt und Bosch Service Center. Inspektion und Reparatur machen wir selbst.</p></span></div>
+    <div class="srow pre" style="--c:#E2232D"><span class="ic"><svg><use href="#i-star"/></svg></span><span><h3>Seit über 10 Jahren dabei</h3><p>Wir haben i:SY auf einer Messe entdeckt und sind seitdem mit voller Überzeugung dabei. Die regionale Presse zählte uns 2022 zu den i:SY-Premium-Händlern in Deutschland und den Benelux-Staaten.</p></span></div>
+   </div>
+   <div class="row pre" style="margin-top:30px"><a class="cta" href="#lager"><svg><use href="#i-bike"/></svg>i:SY auf Lager ansehen</a><a class="ghost" href="#termin" data-pre="Probefahrt i:SY">Probefahrt anfragen<svg><use href="#i-arrow"/></svg></a></div>
+  </div>
+ </div>
+
+ <div class="sec">
   <div class="wrap pre"><p class="eyebrow">Einmalig <b style="color:#EA580C">in Deutschland</b></p><h2 class="big" style="margin-top:16px">Der erste und einzige<br><span class="org">i:SY Werbe-Bus.</span></h2></div>
   <div class="road pre"><img src="img/isy-bus.webp" alt="Linienbus mit i:SY- und Velocenter-Werbung" width="980" height="253"></div>
  </div>
@@ -3174,6 +3196,35 @@ m696 -454 c28 -13 46 -31 55 -51 22 -53 -50 -177 -173 -300 -187 -186 -647
  <div class="sec" style="padding-top:0">
   <div class="wrap urkw">
    <figure class="urkf pre"><p class="urkh">Wir haben den <b>Weltrekord!</b></p><img src="img/rid-urkunde-zert.webp" alt="RID-Rekordurkunde: Längste Fahrrad-Schlange einer Marke, 283 Fahrräder, 9. Juni 2024" loading="lazy" width="900" height="1188"></figure>
+  </div>
+ </div>
+ <div class="sec zone z-sky">
+  <div class="wrap">
+   <div class="pre"><p class="eyebrow">Chronik</p><h2 class="big" style="margin-top:14px">Von 100 Fans <span class="gt">zum Weltrekord.</span></h2></div>
+   <ol class="tchr pre">
+    <li><b>2017</b><span>Die ersten Impressionen in der Galerie.</span></li>
+    <li><b>2019</b><span>16.06.: rund 100 i:SY-Fans beim ersten großen Treffen.</span></li>
+    <li><b>2022</b><span>07.08.: über 200 Teilnehmer, eine Schlange über zwei Kilometer, Tour von Maximiliansau über Neupotz nach Wörth, rund 40 km.</span></li>
+    <li><b>2023</b><span>Das nächste Treffen, Bilder in der Galerie.</span></li>
+    <li class="on"><b>2024</b><span>09.06.: 283 i:SY in einer Schlange, Weltrekord, bestätigt vom Rekord-Institut für Deutschland.</span></li>
+   </ol>
+  </div>
+ </div>
+ <div class="sec">
+  <div class="wrap">
+   <div class="pre"><p class="eyebrow">Stimmen <b>zum Weltrekord</b></p></div>
+   <div class="tvoi pre">
+    <blockquote>„Ich muss aus Respekt vor der Leistung dieser beiden Unternehmen meinen Hut ziehen.“<cite>Martin Kuhlmeier, Erfinder von i:SY<small>Pfalz-Express, 16.06.2024</small></cite></blockquote>
+    <blockquote>Sie sprach vom <b>„ersten i:SY Weltrekord“</b>.<cite>Jessica Schumacher, Geschäftsführerin i:SY<small>velobiz.de, 12.06.2024</small></cite></blockquote>
+   </div>
+   <div class="tpress pre"><p>Darüber berichtet:</p>
+    <a href="https://www.presseportal.de/pm/113451/5799315" target="_blank" rel="noopener">Rekord-Institut (RID)</a>
+    <a href="https://www.rheinpfalz.de/lokal/kreis-germersheim_artikel,-neuen-radler-weltrekord-aufgestellt-_arid,5659136.html" target="_blank" rel="noopener">Die Rheinpfalz</a>
+    <a href="https://www.pfalz-express.de/woerth-isy-biker-weltrekord-ist-geschafft-rekordinstitut-abgenommen-worden-erfinder-persoenlich-dabei/" target="_blank" rel="noopener">Pfalz-Express</a>
+    <a href="https://www.isy.de/de-de/News-Blog/News-iSY-Treffen-24" target="_blank" rel="noopener">i:SY</a>
+    <a href="https://www.velobiz.de/news/isy-holt-den-weltrekord-veloQXJ0aWNsZS8zMTAwMAbiz" target="_blank" rel="noopener">velobiz</a>
+    <a href="https://radmarkt.de/isy-treffen-mit-weltrekord/" target="_blank" rel="noopener">RadMarkt</a>
+   </div>
   </div>
  </div>
  <div class="tgsec" id="tgSec">
@@ -3565,7 +3616,7 @@ m696 -454 c28 -13 46 -31 55 -51 22 -53 -50 -177 -173 -300 -187 -186 -647
     <div class="fnd pre"><span class="k">!</span><p><b>Bilder</b>: Ladenfotos stammen von der aktuellen Seite. Herstellerbilder und Logos vor dem Start über die Händlerportale der Marken freigeben lassen.</p></div>
     <div class="fnd pre"><span class="k">!</span><p><b>Kontakt- und Terminformular</b> senden im Prototyp per WhatsApp oder E-Mail-Programm. Für Versand direkt aus dem Formular brauchen wir einen Mail-Dienst (wie EmailJS im Planer).</p></div>
     <div class="fnd pre"><span class="k">!</span><p><b>Lagerbestand aktuell halten</b>: Veloport-Export als CSV, Umwandler <code>tools/bestand_zu_json.py</code> schreibt den Bestand direkt in die Seite (nur eine Stelle). Ziel: die KI-Zentrale lädt den Bestand automatisch hoch (sie liest den Export schon ein).</p></div>
-    <div class="fnd pre"><span class="k">!</span><p><b>Google-Bewertung</b> (4,8) ist von Hand eingetragen. Die aktuelle Anzahl der Bewertungen fehlt noch und muss bei jeder Änderung nachgetragen werden (oder automatisch über Google eingebunden werden).</p></div>
+    <div class="fnd pre"><span class="k">!</span><p><b>Google-Bewertung</b> (4,8 bei 221 Rezensionen, Stand 13.11.2026) ist von Hand eingetragen und muss bei Änderungen nachgetragen werden (oder automatisch über Google eingebunden werden).</p></div>
    </div>
   </div>
  </div>
