@@ -1,0 +1,125 @@
+name: Homepage – Claude (Admin-Chat)
+
+# Start: Admin-Bereich der Homepage → Reiter „Claude“ → Senden (GitHub-API workflow_dispatch mit der Auftrags-ID).
+# Ablauf: Auftrag aus Firestore holen → Claude ändert velocenter-homepage/ → prüfen + bauen → Quelle committen →
+#         Live-Fassung nach velo-center-web → Antwort zurück in den Admin-Chat.
+# Secrets (legt Tiry selbst an): CLAUDE_CODE_OAUTH_TOKEN (claude setup-token), FB_CLAUDE_PW (Bot-Konto in Firebase),
+#                               WEB_TOKEN (Fine-grained, nur velo-center-web, Contents: Read and write).
+on:
+  workflow_dispatch:
+    inputs:
+      id:
+        description: 'Auftrags-ID aus dem Admin-Chat'
+        required: true
+
+permissions:
+  contents: write
+  id-token: write
+  actions: read
+
+concurrency:
+  group: homepage-claude
+  cancel-in-progress: false
+
+env:
+  QUELL_ZWEIG: ccr-3eb19331-x85sok
+  WEB_REPO: Tiry38/velo-center-web
+  AUFTRAG: ${{ inputs.id }}
+  FB_PW: ${{ secrets.FB_CLAUDE_PW }}
+
+jobs:
+  arbeit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.QUELL_ZWEIG }}
+          fetch-depth: 50
+
+      - name: Auftrag holen
+        id: a
+        run: |
+          [[ "$AUFTRAG" =~ ^[A-Za-z0-9_-]{6,40}$ ]] || { echo "Ungültige Auftrags-ID"; exit 1; }
+          node velocenter-homepage/tools/claude_fs.js start "$AUFTRAG"
+          [ -n "$OAUTH" ] || { echo "Claude ist noch nicht verbunden (GitHub-Secret CLAUDE_CODE_OAUTH_TOKEN fehlt). Bitte Tiry Bescheid geben." > "$RUNNER_TEMP/fehler.md"; exit 1; }
+        env:
+          OAUTH: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+
+      - name: Claude arbeitet
+        if: steps.a.outputs.typ == 'auftrag'
+        uses: anthropics/claude-code-action@v1
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          prompt: ${{ steps.a.outputs.prompt }}
+          claude_args: '--allowedTools "Read,Edit,Write,Glob,Grep" --max-turns 60'
+
+      - name: Änderung zurücknehmen
+        if: steps.a.outputs.typ == 'zurueck'
+        env:
+          ZIEL: ${{ steps.a.outputs.ziel }}
+        run: |
+          [[ "$ZIEL" =~ ^[0-9a-f]{7,40}$ ]] || exit 1
+          git revert --no-commit "$ZIEL" || { echo "Die Änderung lässt sich nicht mehr automatisch zurücknehmen (danach wurde an derselben Stelle weitergearbeitet). Bitte Tiry Bescheid geben." > "$RUNNER_TEMP/fehler.md"; exit 1; }
+          echo "Erledigt – die Änderung ist zurückgenommen. In etwa einer Minute sieht die Homepage wieder aus wie vorher." > velocenter-homepage/.antwort.md
+
+      - name: Prüfen, bauen, speichern
+        id: b
+        if: steps.a.outputs.typ == 'auftrag' || steps.a.outputs.typ == 'zurueck'
+        run: |
+          H=velocenter-homepage
+          mv "$H/.antwort.md" "$RUNNER_TEMP/antwort.md" 2>/dev/null || true
+          git add -A
+          CH=$(git diff --cached --name-only)
+          if [ -z "$CH" ]; then echo "leer=1" >> "$GITHUB_OUTPUT"; exit 0; fi
+          node $H/tools/claude_fs.js schritt "$AUFTRAG" "Seite wird geprüft und gebaut"
+          BAD=$(echo "$CH" | grep -vE '^velocenter-homepage/(index\.html|ENTSCHEIDUNGEN\.md|img/[^/]+)$' || true)
+          if [ -n "$BAD" ]; then printf 'Claude wollte Dateien ändern, die tabu sind. Nichts wurde veröffentlicht.\n' > "$RUNNER_TEMP/fehler.md"; echo "$BAD"; exit 1; fi
+          if git diff --cached -U0 -- $H/index.html | grep '^+' | grep -iE 'standgeb|hol-? ?(und|&) ?bring|holservice|bringservice|barkauf'; then
+            printf 'Die Änderung enthielt etwas, das nicht auf die Homepage darf (z. B. Standgebühr oder Hol-/Bringservice). Nichts wurde veröffentlicht.\n' > "$RUNNER_TEMP/fehler.md"; exit 1; fi
+          git config user.name "Homepage-Claude"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -q -F "$RUNNER_TEMP/msg.txt"
+          git pull -q --rebase origin "$QUELL_ZWEIG" || { echo "Gleichzeitig wurde an der Homepage gearbeitet – bitte gleich nochmal senden." > "$RUNNER_TEMP/fehler.md"; exit 1; }
+          python3 $H/tools/live_bauen.py "$RUNNER_TEMP/live" || { echo "Die Seite ließ sich nicht bauen. Nichts wurde veröffentlicht." > "$RUNNER_TEMP/fehler.md"; exit 1; }
+          for f in "$RUNNER_TEMP"/live/index.html "$RUNNER_TEMP"/live/*/index.html; do
+            node $H/tools/js_pruefen.js "$f" || { echo "Die Prüfung hat einen Fehler in der Seite gefunden. Nichts wurde veröffentlicht." > "$RUNNER_TEMP/fehler.md"; exit 1; }
+          done
+          for i in 1 2 3 4; do git push -q origin "HEAD:$QUELL_ZWEIG" && break; sleep $((3*i)); git pull -q --rebase origin "$QUELL_ZWEIG"; done
+          echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+
+      - name: Live stellen
+        if: steps.b.outputs.sha != ''
+        env:
+          WEB_TOKEN: ${{ secrets.WEB_TOKEN }}
+        run: |
+          node velocenter-homepage/tools/claude_fs.js schritt "$AUFTRAG" "Wird live gestellt"
+          [ -n "$WEB_TOKEN" ] || { echo "GitHub-Secret WEB_TOKEN fehlt – Änderung ist gespeichert, aber nicht live. Bitte Tiry Bescheid geben." > "$RUNNER_TEMP/fehler.md"; exit 1; }
+          git clone -q --depth 1 "https://x-access-token:${WEB_TOKEN}@github.com/${WEB_REPO}.git" "$RUNNER_TEMP/web"
+          cd "$RUNNER_TEMP/web"
+          find . -mindepth 1 -maxdepth 1 ! -name .git ! -name README.md -exec rm -rf {} +
+          cp -a "$RUNNER_TEMP/live/." . && rm -f CNAME
+          git config user.name "Homepage-Claude"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          if ! git diff --cached --quiet; then
+            git commit -q -F "$RUNNER_TEMP/msg.txt"
+            for i in 1 2 3 4; do git push -q origin main && break; sleep $((3*i)); done
+          fi
+
+      - name: Antwort an den Admin-Chat
+        if: success() && steps.a.outputs.typ != 'schon'
+        env:
+          SHA: ${{ steps.b.outputs.sha }}
+          LEER: ${{ steps.b.outputs.leer }}
+        run: |
+          if [ -n "$LEER" ]; then node velocenter-homepage/tools/claude_fs.js ende "$AUFTRAG" nichts "$RUNNER_TEMP/antwort.md"
+          else node velocenter-homepage/tools/claude_fs.js ende "$AUFTRAG" fertig "$RUNNER_TEMP/antwort.md" "$SHA"; fi
+
+      - name: Fehler melden
+        if: failure()
+        run: |
+          F="$RUNNER_TEMP/fehler.md"
+          [ -s "$F" ] || echo "Das hat nicht geklappt – die Homepage ist unverändert. Bitte nochmal versuchen; wenn es wieder scheitert, Tiry Bescheid geben." > "$F"
+          node velocenter-homepage/tools/claude_fs.js ende "$AUFTRAG" fehler "$F" || true
