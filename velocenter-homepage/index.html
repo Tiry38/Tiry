@@ -3022,7 +3022,7 @@ m696 -454 c28 -13 46 -31 55 -51 22 -53 -50 -177 -173 -300 -187 -186 -647
     <div class="fnd pre"><span class="k">!</span><p><b>Datenschutzerklärung</b> für die neue Seite erstellen. Impressum ist übernommen.</p></div>
     <div class="fnd pre"><span class="k">!</span><p><b>Bilder</b>: Ladenfotos stammen von der aktuellen Seite. Herstellerbilder und Logos vor dem Start über die Händlerportale der Marken freigeben lassen.</p></div>
     <div class="fnd pre"><span class="k">!</span><p><b>Kontakt- und Terminformular</b> senden im Prototyp per WhatsApp oder E-Mail-Programm. Für Versand direkt aus dem Formular brauchen wir einen Mail-Dienst (wie EmailJS im Planer).</p></div>
-    <div class="fnd pre"><span class="k">!</span><p><b>Lagerbestand aktuell halten</b>: Veloport-Export als CSV, Umwandler <code>tools/bestand_zu_json.py</code> erzeugt <code>data/bestand.json</code>. Ziel: die KI-Zentrale lädt den Bestand automatisch hoch (sie liest den Export schon ein).</p></div>
+    <div class="fnd pre"><span class="k">!</span><p><b>Lagerbestand aktuell halten</b>: Veloport-Export als CSV, Umwandler <code>tools/bestand_zu_json.py</code> schreibt den Bestand direkt in die Seite (nur eine Stelle). Ziel: die KI-Zentrale lädt den Bestand automatisch hoch (sie liest den Export schon ein).</p></div>
     <div class="fnd pre"><span class="k">!</span><p><b>Google-Bewertung</b> (4,8) ist von Hand eingetragen. Die aktuelle Anzahl der Bewertungen fehlt noch und muss bei jeder Änderung nachgetragen werden (oder automatisch über Google eingebunden werden).</p></div>
    </div>
   </div>
