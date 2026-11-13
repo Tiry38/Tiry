@@ -2905,23 +2905,6 @@ m696 -454 c28 -13 46 -31 55 -51 22 -53 -50 -177 -173 -300 -187 -186 -647
   </div>
  </div>
 
- <div class="sec show" id="showroom">
-  <div class="glow"></div>
-  <div class="wrap">
-   <div class="showtop pre"><div><p class="eyebrow">Unser <b>Showroom</b></p><h2 class="big" style="margin-top:14px">Acht Marken.<br><span class="gt">Ein Laden.</span></h2></div><p class="lead" style="max-width:40ch">Klick dich durch. Im Laden warten über 300 E-Bikes zum Anfassen und Probefahren.</p></div>
-   <div class="bikearea pre" id="bikearea">
-    <img class="wml" id="swm" src="img/marke-isy.svg" alt="" aria-hidden="true">
-    <div class="floor"></div>
-    <img class="refl" id="brefl" src="img/p-isy.webp" alt="" aria-hidden="true">
-    <img class="bk" id="bk" src="img/p-isy.webp" alt="i:SY E5 ZR F CX Century" width="1600" height="1104">
-    <button class="arrow p" id="sp" aria-label="Vorherige Marke"><svg><use href="#i-arrow"/></svg></button>
-    <button class="arrow n" id="sn" aria-label="Nächste Marke"><svg><use href="#i-arrow"/></svg></button>
-   </div>
-   <div class="showinfo pre" id="sinfo"></div>
-   <div class="thumbs pre" id="thumbs" role="tablist" aria-label="Marke wählen"></div>
-  </div>
- </div>
-
  <div class="sec zone z-peach">
   <div class="wrap atelier">
    <div class="side pre">
@@ -2940,15 +2923,6 @@ m696 -454 c28 -13 46 -31 55 -51 22 -53 -50 -177 -173 -300 -187 -186 -647
     <a class="srow pre" href="#leasing" style="--c:#60A5FA"><span class="ic"><svg><use href="#i-case"/></svg></span><span><h3>Dienstrad-Leasing</h3><p>Wir arbeiten mit fast allen Leasing-Firmen zusammen, z. B. JobRad, Bikeleasing, Company Bike.</p></span><span class="go"><svg><use href="#i-arrow"/></svg></span></a>
    </div>
   </div>
- </div>
-
- <div class="sec">
-  <div class="wrap"><div class="rft pre">
-   <div><p class="eyebrow">Rad-<b>Finder</b></p><h2 class="big" style="margin-top:16px">Welches E-Bike<br><span class="gt">passt zu dir?</span></h2>
-    <p class="lead">5 kurze Fragen, dann zeigen wir dir passende Räder aus unserem Lager. Mit der richtigen Rahmenhöhe für deine Körpergröße.</p>
-    <button type="button" class="cta" data-rfopen><svg><use href="#i-spark"/></svg>Rad-Finder starten</button></div>
-   <div class="rfpath" aria-hidden="true"><div style="--n:0"><b style="--c:#E2232D">1</b><span>Einsatz<small>Alltag, Touren, Gelände</small></span></div><div style="--n:1"><b style="--c:#DB2777">2</b><span>Einstieg<small>tief oder sportlich</small></span></div><div style="--n:2"><b style="--c:#A21CAF">3</b><span>Körpergröße<small>passende Rahmenhöhe</small></span></div><div style="--n:1"><b style="--c:#7C3AED">4</b><span>Budget<small>auch als Dienstrad</small></span></div><div style="--n:0"><b style="--c:#2563EB">5</b><span>Wünsche<small>sofort da, Angebot, Akku</small></span></div></div>
-  </div></div>
  </div>
 
  <div class="sec zone z-lilac">
@@ -3204,7 +3178,23 @@ m696 -454 c28 -13 46 -31 55 -51 22 -53 -50 -177 -173 -300 -187 -186 -647
  <div class="sec" id="finder" style="padding-top:20px">
   <div class="wrap"><div class="finder pre" id="fnd"></div></div>
  </div>
- <div class="sec show" style="padding-top:0" id="showroom2"></div>
+ <div class="sec show" id="showroom2" style="padding-top:0">
+  <div class="glow"></div>
+  <div class="wrap">
+   <div class="showtop pre"><div><p class="eyebrow">Unser <b>Showroom</b></p><h2 class="big" style="margin-top:14px">Acht Marken.<br><span class="gt">Ein Laden.</span></h2></div><p class="lead" style="max-width:40ch">Klick dich durch. Im Laden warten über 300 E-Bikes zum Anfassen und Probefahren.</p></div>
+   <div class="bikearea pre" id="m-bikearea">
+    <img class="wml" id="m-swm" src="img/marke-isy.svg" alt="" aria-hidden="true">
+    <div class="floor"></div>
+    <img class="refl" id="m-brefl" src="img/p-isy.webp" alt="" aria-hidden="true">
+    <img class="bk" id="m-bk" src="img/p-isy.webp" alt="i:SY E5 ZR F CX Century" width="1600" height="1104">
+    <button class="arrow p" id="m-sp" aria-label="Vorherige Marke"><svg><use href="#i-arrow"/></svg></button>
+    <button class="arrow n" id="m-sn" aria-label="Nächste Marke"><svg><use href="#i-arrow"/></svg></button>
+   </div>
+   <div class="showinfo pre" id="m-sinfo"></div>
+   <div class="thumbs pre" id="m-thumbs" role="tablist" aria-label="Marke wählen"></div>
+  </div>
+ </div>
+
  <div class="sec" style="padding-top:0">
   <div class="wrap">
    <h2 class="big pre" style="text-align:center;margin-bottom:36px">Gutes Zubehör <span class="gt">macht den Unterschied.</span></h2>
@@ -3865,13 +3855,9 @@ function showroom(root,prefix){
   const x=srPick('*');const n=BR.findIndex(b=>b.k===x.k);if(n<0)return;i=n;cur=x;thSet(i,x.img);const pre=new Image();pre.src=x.img;const go=()=>{bk.src=x.img;rf.src=x.img;bk.alt=x.m+(x.f?' in '+x.f:'');wm.src=BR[i].logo;paint();s.classList.add('srok')};pre.decode?pre.decode().then(go,go):go()});
  paint();return{to};
 }
-/* zweiter Showroom auf der Markenseite: Kopie des ersten mit eigenen IDs */
+/* Showroom nur noch auf der Markenseite (Start-Showroom entfernt, Tiry 14.11.2026) */
 BR.forEach(b=>{const i=new Image();i.src=b.logo});
-const s1=$('#showroom');const c=s1.cloneNode(true);
-c.querySelectorAll('[id]').forEach(e=>e.id='m-'+e.id);c.querySelectorAll('.pre').forEach(e=>e.classList.remove('in'));
-$('#showroom2').replaceWith(c);c.id='showroom2';c.style.paddingTop='0';
-$('.showtop h2',c).innerHTML='Die Marken<br><span class="gt">bei uns im Laden.</span>';
-showroom(s1,'');showroom(c,'m-');
+showroom($('#showroom2'),'m-');
 setTimeout(()=>{const t=setTimeout(()=>{if(!SR.pool)srBuild()},6000);lgLoad().then(()=>{clearTimeout(t);srBuild()},()=>srBuild())},0);
 
 /* ---------- Öffnungszeiten live ---------- */
