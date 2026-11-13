@@ -1907,33 +1907,29 @@ html.scr .sky,html.scr .blobs i,html.scr .blobs::after,html.scr .ribbons i{anima
  box-shadow:0 14px 30px -14px rgba(var(--og),.75),0 3px 10px rgba(27,30,37,.07);backdrop-filter:blur(14px) saturate(1.4);-webkit-backdrop-filter:blur(14px) saturate(1.4);transition:transform .35s var(--spring),box-shadow .35s}
 @keyframes oflow{to{background-position:0 0,300% 0}}
 .hh1 .amp{display:inline-block;font-weight:800;padding:0 .04em;background:linear-gradient(135deg,#FF4D63,#C8102E 55%,#8E0B20);-webkit-background-clip:text;background-clip:text;color:transparent}
-/* Hero-Schilder (13.11.2026): klickbare Glas-Kapseln */
-a.hchip.hc{--hg:linear-gradient(110deg,#E2232D,#F472B6,#A78BFA,#38BDF8,#E2232D);display:inline-flex;align-items:center;gap:12px;padding:8px 8px 8px 8px!important;border-radius:999px!important;text-decoration:none;color:#1B1E25;
- border:1.5px solid transparent;background:linear-gradient(135deg,rgba(255,255,255,.97),rgba(255,255,255,.86)) padding-box,var(--hg) border-box!important;background-size:100% 100%,300% 100%!important;
- box-shadow:0 1px 0 rgba(255,255,255,.9) inset,0 18px 38px -16px rgba(27,30,37,.35),0 8px 22px -14px rgba(200,16,46,.45);cursor:pointer;
- animation:float 7s ease-in-out infinite,hcflow 10s linear infinite;transition:box-shadow .35s var(--ease),scale .35s var(--spring)}
+/* Hero-Schilder (13.11.2026): klickbare Glas-Kapseln, kompakt */
+a.hchip.hc{--hg:linear-gradient(110deg,#E2232D,#F472B6,#A78BFA,#38BDF8,#E2232D);display:inline-flex;align-items:center;gap:8px;padding:4px 5px 4px 4px!important;border-radius:999px!important;text-decoration:none;color:#1B1E25;
+ border:1.5px solid transparent;background:linear-gradient(135deg,rgba(255,255,255,.97),rgba(255,255,255,.88)) padding-box,var(--hg) border-box!important;background-size:100% 100%,300% 100%!important;
+ box-shadow:0 10px 24px -12px rgba(27,30,37,.35),0 6px 16px -12px rgba(200,16,46,.45);cursor:pointer;
+ animation:float 7s ease-in-out infinite,hcflow 10s linear infinite;transition:box-shadow .3s var(--ease),scale .3s var(--spring)}
 a.hchip.hc.c2{animation-delay:-3s,-5s}
 @keyframes hcflow{to{background-position:0 0,300% 0}}
-a.hchip.hc:hover{scale:1.04;box-shadow:0 1px 0 rgba(255,255,255,.9) inset,0 24px 46px -16px rgba(27,30,37,.4),0 0 0 6px rgba(226,35,45,.1),0 12px 30px -10px rgba(200,16,46,.55)}
-a.hchip.hc:focus-visible{outline:3px solid #C8102E;outline-offset:4px}
-.hc .hn,.hc .hi{flex:none;display:grid;place-items:center;height:46px;border-radius:999px;color:#fff;background:linear-gradient(150deg,#FF4D63,#E0162F 45%,#8E0B20);box-shadow:inset 0 1px 0 rgba(255,255,255,.45),inset 0 -6px 12px rgba(80,0,12,.3),0 8px 16px -8px rgba(200,16,46,.9)}
-.hc .hn{padding:0 14px;font:900 21px/1 var(--display);letter-spacing:-.03em;display:flex;align-items:center}
-.hc .hn i{font-style:normal;font-size:.8em;margin-left:1px;color:#FFD2D8}
-.hc .hi{width:46px}
-.hc .hi svg{width:24px;height:24px;color:#fff}
-.hc .hl{display:flex;flex-direction:column;gap:3px;line-height:1.05}
-.hc .hl strong{font:800 15.5px/1.1 var(--display);letter-spacing:-.01em;white-space:nowrap}
-.hc .hl small{font:600 12px/1.1 var(--display);color:#6B6F78;white-space:nowrap;transition:color .3s}
-.hc .ha{flex:none;display:grid;place-items:center;width:34px;height:34px;margin-left:2px;border-radius:50%;background:#F3EEE8;color:#1B1E25;transition:background .3s,color .3s,transform .35s var(--spring)}
-.hc .ha svg{width:15px;height:15px}
-a.hchip.hc:hover .ha{background:#1B1E25;color:#fff;transform:translateX(3px)}
-a.hchip.hc:hover small{color:#C8102E}
+a.hchip.hc:hover{scale:1.04;box-shadow:0 14px 28px -12px rgba(27,30,37,.4),0 0 0 4px rgba(226,35,45,.1)}
+a.hchip.hc:focus-visible{outline:3px solid #C8102E;outline-offset:3px}
+.hc .hn,.hc .hi{flex:none;display:grid;place-items:center;height:28px;border-radius:999px;color:#fff;background:linear-gradient(150deg,#FF4D63,#E0162F 45%,#8E0B20);box-shadow:inset 0 1px 0 rgba(255,255,255,.4),0 4px 10px -5px rgba(200,16,46,.9)}
+.hc .hn{padding:0 9px;font:900 13.5px/1 var(--display);letter-spacing:-.02em;display:flex;align-items:center}
+.hc .hn i{font-style:normal;margin-left:1px;color:#FFD2D8}
+.hc .hi{width:28px}
+.hc .hi svg{width:16px;height:16px;color:#fff}
+.hc .hl strong{font:700 13.5px/1 var(--display);white-space:nowrap}
+.hc .ha{flex:none;display:grid;place-items:center;width:22px;height:22px;border-radius:50%;background:#F3EEE8;color:#1B1E25;transition:background .3s,color .3s,transform .3s var(--spring)}
+.hc .ha svg{width:11px;height:11px}
+a.hchip.hc:hover .ha{background:#1B1E25;color:#fff;transform:translateX(2px)}
 @media (max-width:640px){
- a.hchip.hc{gap:9px;padding:6px!important}
- .hc .hn,.hc .hi{height:38px}.hc .hi{width:38px}.hc .hi svg{width:20px;height:20px}
- .hc .hn{padding:0 11px;font-size:17px}
- .hc .hl strong{font-size:13px}.hc .hl small{font-size:11px}
- .hc .ha{width:28px;height:28px}.hc .ha svg{width:13px;height:13px}
+ a.hchip.hc{gap:6px}
+ .hc .hn,.hc .hi{height:24px}.hc .hi{width:24px}.hc .hi svg{width:14px;height:14px}
+ .hc .hn{padding:0 7px;font-size:12px}.hc .hl strong{font-size:12px}
+ .hc .ha{width:20px;height:20px}
 }
 @media (prefers-reduced-motion:reduce){a.hchip.hc{animation:none}}
 
@@ -2386,8 +2382,8 @@ m696 -454 c28 -13 46 -31 55 -51 22 -53 -50 -177 -173 -300 -187 -186 -647
      <img class="hb off" src="img/p-gudereit.webp" alt="Gudereit EC-35 Evo E-Bike" data-l="img/marke-gudereit.svg" width="1600" height="1128" loading="lazy">
      <img class="hb off" src="img/p-victoria-veloa7.webp" alt="Victoria Veloa 7 E-Bike" data-l="img/marke-victoria.svg" width="2770" height="1732" loading="lazy">
      <div class="hfloor"></div>
-     <a class="hchip hc c1" href="#lager" aria-label="300+ E-Bikes vor Ort – zum Lager"><span class="hn">300<i>+</i></span><span class="hl"><strong>E-Bikes vor Ort</strong><small>Lager ansehen</small></span><span class="ha"><svg><use href="#i-arrow"/></svg></span></a>
-     <a class="hchip hc c2" href="#termin" data-pre="Probefahrt" aria-label="Probefahrt vor Ort – Termin anfragen"><span class="hi"><svg><use href="#i-bike"/></svg></span><span class="hl"><strong>Probefahrt vor Ort</strong><small>Termin anfragen</small></span><span class="ha"><svg><use href="#i-arrow"/></svg></span></a>
+     <a class="hchip hc c1" href="#lager" aria-label="300+ E-Bikes vor Ort – zum Lager"><span class="hn">300<i>+</i></span><span class="hl"><strong>E-Bikes vor Ort</strong></span><span class="ha"><svg><use href="#i-arrow"/></svg></span></a>
+     <a class="hchip hc c2" href="#termin" data-pre="Probefahrt" aria-label="Probefahrt vor Ort – Termin anfragen"><span class="hi"><svg><use href="#i-bike"/></svg></span><span class="hl"><strong>Probefahrt vor Ort</strong></span><span class="ha"><svg><use href="#i-arrow"/></svg></span></a>
     </div>
    </div>
    <nav class="qacc hello" style="--d:1.45s" aria-label="Schnellzugriff">
