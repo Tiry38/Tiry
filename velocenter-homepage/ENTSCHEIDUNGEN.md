@@ -80,3 +80,10 @@
 ## 13.11.2026 – Winterkarte im Termin-Bereich wie Start-Aktion, Google-Chip kürzer (Tiry)
 - Winterkarte (`.wstrip.wcard`) im Stil von `#deal`, nur kompakt: Anthrazit-Verlauf mit Schnee, rot/violetter Schimmer, kursives „–20 €“ (weiß → rosa), Sattelüberzug mit „Gratis“-Schild, Countdown Tage (rot) / Std / Min / Sek (`.wsd/.wsh/.wsm/.wss`, gleicher Zähler wie Start), roter Knopf „Winter-Termin sichern“. Ring entfernt.
 - Start-Chip Google: nur noch „★ 4,8 bei Google“ (ohne Anzahl Rezensionen). Laufband und Bewertungsbereich unverändert.
+
+## 13.11.2026 – Antworten Tiry zu offenen Punkten
+- Eckiges Logo „i:SY Experte 2026“ bleibt neben den fünf Kreisen.
+- Experte-Jahre 2022–2026 bestätigt.
+- Keine besseren Originalbilder für SKYFLY, XXL und das runde Experten-Logo vorhanden – bleiben wie sie sind.
+- Chronik-Texte 2017 und 2023 bleiben vorerst so.
+- Google-Bewertung automatisch abrufen: angefragt, Weg wird mit Tiry geklärt (Places API per GitHub-Lauf oder über die KI-Zentrale).
