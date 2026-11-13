@@ -56,3 +56,5 @@
 - **13.11.2026 – Bilder-Agent Qualitäts-Runde (Tiry):** nach Suchen/Prüfen jede Nacht 36 Lager-Fotos reihum auf Schärfe, Klarheit und Freistellung (Prüfbögen auf Kontrast-Hintergrund, 6 Fotos je Blick). Mängel → bessere Fassung derselben Farbe suchen. Feste Anzahl statt „1 Stunde“, damit die Abo-Nutzung planbar bleibt; alle Fotos sind in ca. 4 Nächten durch.
 
 - **13.11.2026 – Konfigurations-ID (Velo de Ville):** Veloport-Spalte „Konfigurations-ID“ (bzw. „Velo-ID“) wird gelesen. Der Bilder-Agent lädt die ID im Velo-de-Ville-Konfigurator und übernimmt das exakte, schon freigestellte Radbild (Vorrang vor anderen Funden). Der öffentliche Konfigurator kennt nur die aktuelle Kollektion (V27); V25/V26 → normale Suche.
+
+- **13.11.2026 – Bilder-Agent Laufanzeige:** Nach „Jetzt suchen“ sofort „Startet gerade …“ (bis GitHub den Lauf meldet, max. 4 Min., prüft alle 6 s), danach „Sucht gerade · seit …“ als Pille neben der Überschrift + gesperrter Knopf, bis der Lauf fertig ist (prüft alle 20 s).
