@@ -1877,33 +1877,39 @@ body.fz2 main,body.fz2 .foot{zoom:1.25}
 .wstrip{position:relative;display:flex;align-items:center;gap:14px;max-width:620px;margin-top:26px;padding:10px 10px 10px 10px;border-radius:999px;text-decoration:none;color:#0B1B3A;isolation:isolate;overflow:hidden;
  border:1.5px solid transparent;background:linear-gradient(120deg,rgba(240,250,255,.97),rgba(243,240,255,.95) 60%,rgba(255,240,247,.95)) padding-box,linear-gradient(110deg,#22D3EE,#818CF8,#F472B6,#22D3EE) border-box;background-size:100% 100%,300% 100%;animation:hcflow 11s linear infinite;
  box-shadow:0 18px 36px -20px rgba(37,60,140,.55),inset 0 1px 0 #fff;transition:transform .35s var(--spring),box-shadow .35s}
-.wstrip.wcard{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:22px;max-width:640px;margin-top:30px;padding:22px 24px 22px 28px;border-radius:36px;border:0;color:#fff;
- background:radial-gradient(120% 140% at 0% 0%,#1E3A8A 0,transparent 55%),radial-gradient(90% 120% at 100% 100%,#9D174D 0,transparent 60%),linear-gradient(125deg,#0B1B3A,#312E81 55%,#5B21B6);background-size:auto;animation:none;
- box-shadow:0 30px 60px -28px rgba(49,46,129,.85),0 0 0 1px rgba(165,180,252,.25) inset,0 1px 0 rgba(255,255,255,.25) inset}
-.wstrip.wcard::after{background:linear-gradient(105deg,transparent 35%,rgba(255,255,255,.14) 48%,transparent 60%)}
-.wstrip.wcard:hover{transform:translateY(-3px);box-shadow:0 36px 70px -26px rgba(91,33,182,.9),0 0 0 1px rgba(196,181,253,.45) inset}
-.wcard .wsn{position:absolute;inset:0;z-index:-1;pointer-events:none;opacity:.9;background-image:radial-gradient(2px 2px at 20px 30px,#fff,transparent),radial-gradient(1.5px 1.5px at 80px 70px,#E0F2FE,transparent),radial-gradient(2.5px 2.5px at 140px 20px,#fff,transparent),radial-gradient(1.5px 1.5px at 200px 90px,#fff,transparent),radial-gradient(2px 2px at 260px 50px,#C7D2FE,transparent),radial-gradient(1px 1px at 50px 110px,#fff,transparent);background-size:300px 130px;animation:wsnow 14s linear infinite}
+.wstrip.wcard{display:grid;grid-template-columns:1fr auto;grid-template-areas:"p u" "c g" "n n";align-items:center;gap:16px 22px;max-width:660px;margin-top:30px;padding:24px 26px 18px;border-radius:34px;border:0;color:#fff;
+ background:radial-gradient(60% 80% at 88% 20%,rgba(255,255,255,.1),transparent 70%),radial-gradient(55% 75% at 6% 92%,rgba(200,16,46,.28),transparent 70%),radial-gradient(45% 60% at 70% 110%,rgba(124,58,237,.22),transparent 70%),linear-gradient(120deg,#4A4F5A,#3D424C 45%,#454150 80%,#4E4552);background-size:auto;animation:none;
+ box-shadow:0 30px 60px -28px rgba(27,30,37,.85),0 0 0 1px rgba(255,255,255,.1) inset,0 1px 0 rgba(255,255,255,.2) inset}
+.wstrip.wcard::after{background:linear-gradient(105deg,transparent 35%,rgba(255,255,255,.1) 48%,transparent 60%)}
+.wstrip.wcard:hover{transform:translateY(-3px);box-shadow:0 36px 70px -26px rgba(27,30,37,.95),0 0 0 1px rgba(255,138,155,.35) inset}
+.wcard .wsn{position:absolute;inset:0;z-index:-1;pointer-events:none;opacity:.85;background-image:radial-gradient(2px 2px at 20px 30px,#fff,transparent),radial-gradient(1.5px 1.5px at 80px 70px,#fff,transparent),radial-gradient(2.5px 2.5px at 140px 20px,#fff,transparent),radial-gradient(1.5px 1.5px at 200px 90px,#fff,transparent),radial-gradient(2px 2px at 260px 50px,#fff,transparent),radial-gradient(1px 1px at 50px 110px,#fff,transparent);background-size:300px 130px;animation:wsnow 14s linear infinite}
 @keyframes wsnow{from{background-position:0 0}to{background-position:60px 260px}}
-.wcp{display:flex;flex-direction:column;align-items:flex-start;line-height:1}
-.wcp small{font:800 11px/1 var(--display);letter-spacing:.16em;text-transform:uppercase;color:#A5F3FC}
-.wcp b{display:flex;align-items:flex-start;margin-top:6px;font:900 clamp(54px,6vw,72px)/.9 var(--display);letter-spacing:-.05em;background:linear-gradient(180deg,#fff 30%,#A5F3FC 70%,#C4B5FD);-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 6px 18px rgba(103,232,249,.35))}
-.wcp b span{font-size:.45em;margin:.18em 0 0 .08em}
-.wcp em{margin-top:6px;font:700 14px/1.2 var(--display);font-style:normal;color:#E0E7FF}
-.wcm{display:flex;flex-direction:column;align-items:flex-start;gap:9px;min-width:0}
-.wgift{display:inline-flex;align-items:center;gap:8px;padding:8px 14px 8px 8px;border-radius:999px;background:linear-gradient(110deg,#F43F5E,#C026D3);font:800 14.5px/1.15 var(--display);color:#fff;box-shadow:0 10px 22px -10px rgba(244,63,94,.9)}
-.wgift i{display:grid;place-items:center;width:28px;height:28px;border-radius:50%;background:rgba(255,255,255,.22);font-style:normal;font-size:15px}
-.wnote{font-size:12.5px;line-height:1.35;color:#C7D2FE}
-.wgo{display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:0 18px;border-radius:999px;background:#fff;color:#0B1B3A;font:800 13.5px/1 var(--display);letter-spacing:.02em;box-shadow:0 10px 22px -12px rgba(0,0,0,.6);transition:background .3s,color .3s}
+.wcp{grid-area:p;display:flex;flex-direction:column;align-items:flex-start;line-height:1;min-width:0}
+.wcp small{display:flex;align-items:center;gap:8px;font:800 11px/1 var(--display);letter-spacing:.16em;text-transform:uppercase;color:#E6E9EF}
+.wcp small::before{content:"";width:18px;height:2px;border-radius:2px;background:#E6E9EF}
+.wcp small b{color:#FF8A9B}
+.wcp>b{margin-top:10px;padding:0 .12em .06em 0;font:900 clamp(58px,7vw,84px)/.86 var(--display);letter-spacing:-.06em;background:linear-gradient(180deg,#FFFFFF 10%,#DCE6F2 55%,#FF8A9B);-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 8px 18px rgba(0,0,0,.3));transform:skewX(-8deg);transform-origin:left bottom}
+.wcp em{margin-top:8px;font:800 clamp(17px,1.8vw,21px)/1.1 var(--display);font-style:normal;color:#fff}
+.wsu{grid-area:u;display:flex;align-items:center;gap:10px;max-width:250px}
+.wsi{position:relative;flex:none;width:96px;aspect-ratio:1;display:grid;place-items:center}
+.wsi .sug{inset:6%}
+.wsi img{position:relative;z-index:1;width:100%;height:auto;transform:rotate(-9deg);filter:drop-shadow(0 10px 14px rgba(60,80,0,.3));animation:suf 5s ease-in-out infinite}
+.wsi>b{position:absolute;z-index:2;top:-2%;right:-10%;padding:5px 9px;border-radius:999px;background:linear-gradient(135deg,#E2232D,#C026D3 60%,#7C3AED);color:#fff;font:800 10px/1 var(--display);letter-spacing:.12em;text-transform:uppercase;box-shadow:0 6px 14px -5px rgba(192,38,211,.6);transform:rotate(8deg)}
+.wst{display:flex;flex-direction:column;gap:4px}
+.wst small{font:800 10.5px/1 var(--display);letter-spacing:.16em;text-transform:uppercase;color:#BEF264}
+.wst b{font:800 15px/1.18 var(--display);color:#fff}
+.wcd{grid-area:c;display:flex;gap:7px}
+.wcd>span{min-width:54px;padding:9px 6px 8px;border-radius:12px;text-align:center;background:linear-gradient(180deg,#2A2D34,#1B1E25);box-shadow:inset 0 1px 0 rgba(255,255,255,.12),0 10px 20px -12px rgba(27,30,37,.7)}
+.wcd>span:first-child{background:linear-gradient(160deg,#E2232D,#8E1420)}
+.wcd b{display:block;font:900 24px/1 var(--display);letter-spacing:-.02em;color:#fff;font-variant-numeric:tabular-nums}
+.wcd i{display:block;margin-top:5px;font:700 9px/1 var(--display);font-style:normal;letter-spacing:.16em;text-transform:uppercase;color:#C9CDD6}
+.wcd>span:first-child i{color:#FECACA}
+.wgo{grid-area:g;justify-self:end;display:inline-flex;align-items:center;gap:8px;min-height:48px;padding:0 20px;border-radius:999px;background:linear-gradient(135deg,#E2232D,#B3121F);color:#fff;font:800 14px/1 var(--display);letter-spacing:.02em;box-shadow:0 14px 26px -12px rgba(226,35,45,.8);transition:filter .3s}
 .wgo svg{width:15px;height:15px;transition:transform .35s var(--spring)}
-.wstrip.wcard:hover .wgo{background:#C8102E;color:#fff}.wstrip.wcard:hover .wgo svg{transform:translateX(4px)}
-.wring{position:relative;display:grid;place-items:center;align-content:center;width:96px;height:96px;border-radius:50%;text-align:center;background:radial-gradient(circle,#0B1B3A 58%,transparent 59%),conic-gradient(#67E8F9,#818CF8,#F472B6,#67E8F9);animation:wspin2 10s linear infinite}
-.wring b{font:900 30px/1 var(--display);color:#fff;animation:wspin2 10s linear infinite reverse}
-.wring small{margin-top:3px;font:800 9.5px/1.15 var(--display);letter-spacing:.12em;text-transform:uppercase;color:#A5B4FC;animation:wspin2 10s linear infinite reverse}
-@keyframes wspin2{to{transform:rotate(360deg)}}
-.wring{animation:none}.wring b,.wring small{animation:none}
-.wring::before{content:"";position:absolute;inset:-6px;border-radius:50%;background:conic-gradient(from 0deg,transparent,rgba(165,243,252,.55),transparent 30%);animation:wspin2 4s linear infinite;-webkit-mask:radial-gradient(circle,transparent 62%,#000 63%);mask:radial-gradient(circle,transparent 62%,#000 63%)}
-@media (max-width:640px){.wstrip.wcard{grid-template-columns:1fr auto;gap:16px;padding:20px;border-radius:30px}.wcm{grid-column:1/-1;grid-row:2}.wgo{width:100%;justify-content:center}.wring{grid-column:2;grid-row:1;width:84px;height:84px}.wring b{font-size:26px}}
-@media (prefers-reduced-motion:reduce){.wcard .wsn,.wring::before{animation:none}}
+.wstrip.wcard:hover .wgo{filter:brightness(1.12)}.wstrip.wcard:hover .wgo svg{transform:translateX(4px)}
+.wnote{grid-area:n;font-size:12px;line-height:1.35;color:#D3D7DF}
+@media (max-width:640px){.wstrip.wcard{grid-template-columns:1fr;grid-template-areas:"p" "u" "c" "g" "n";gap:14px;padding:22px 20px 16px;border-radius:28px}.wsu{max-width:none}.wgo{justify-self:stretch;justify-content:center}.wcd>span{flex:1;min-width:0}}
+@media (prefers-reduced-motion:reduce){.wcard .wsn,.wsi img{animation:none}}
 .wstrip[hidden]{display:none!important}
 .wstrip::after{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(105deg,transparent 30%,rgba(255,255,255,.75) 46%,transparent 60%);transform:translateX(-120%);animation:wshine 6s ease-in-out infinite 1s}
 @keyframes wshine{0%,60%{transform:translateX(-120%)}100%{transform:translateX(120%)}}
@@ -2840,7 +2846,7 @@ m696 -454 c28 -13 46 -31 55 -51 22 -53 -50 -177 -173 -300 -187 -186 -647
      <h1 class="hh1 hello" style="--d:1s">Dein E-Bike <span class="amp">&amp;</span> <span style="white-space:nowrap">E-Dreirad-Spezialist</span><br><span class="gt it">mit eigener Werkstatt.</span></h1>
      <p class="lead hello" style="--d:1.1s">Über 300 E-Bikes zum Probefahren, ehrliche Beratung und ein Bosch Service Center, in dem der Chef noch selbst schraubt.</p>
      <div class="row hello" style="--d:1.2s"><a class="cta" href="#finder"><svg><use href="#i-spark"/></svg>Mein E-Bike finden</a><a class="ghost" href="#termin"><svg><use href="#i-cal"/></svg>Termin anfragen</a></div>
-     <div class="trust hello" style="--d:1.3s"><span class="tb"><i class="tic"><svg class="tg" viewBox="0 0 48 48" aria-hidden="true"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg></i><svg class="tst" aria-hidden="true"><use href="#i-star"/></svg><b>4,8</b> · 221 Rezensionen bei <b class="ggl" aria-label="Google"><i>G</i><i>o</i><i>o</i><i>g</i><i>l</i><i>e</i></b></span><span class="tb"><i class="tic tbo" aria-hidden="true"></i><b class="bsh">Bosch</b> Service Center</span><span class="tb"><i class="tic tis" aria-hidden="true"><img src="img/isy-weltrekord-sm.webp" alt="" width="32" height="32"></i><b class="isyo">i:SY</b> Experte</span><span><svg><use href="#i-clock"/></svg><em class="live" id="live"><i></i><span id="liveT">Öffnungszeiten</span></em></span></div>
+     <div class="trust hello" style="--d:1.3s"><span class="tb"><i class="tic"><svg class="tg" viewBox="0 0 48 48" aria-hidden="true"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg></i><svg class="tst" aria-hidden="true"><use href="#i-star"/></svg><b>4,8</b> bei <b class="ggl" aria-label="Google"><i>G</i><i>o</i><i>o</i><i>g</i><i>l</i><i>e</i></b></span><span class="tb"><i class="tic tbo" aria-hidden="true"></i><b class="bsh">Bosch</b> Service Center</span><span class="tb"><i class="tic tis" aria-hidden="true"><img src="img/isy-weltrekord-sm.webp" alt="" width="32" height="32"></i><b class="isyo">i:SY</b> Experte</span><span><svg><use href="#i-clock"/></svg><em class="live" id="live"><i></i><span id="liveT">Öffnungszeiten</span></em></span></div>
     </div>
     <div class="hvis hello" style="--d:.5s" id="hvis">
      <div class="hring"></div>
@@ -3046,7 +3052,7 @@ m696 -454 c28 -13 46 -31 55 -51 22 -53 -50 -177 -173 -300 -187 -186 -647
     <p class="eyebrow">Online-<b>Terminanfrage</b></p>
     <h2 class="big" style="margin-top:16px">Termin anfragen <span class="gt">in 30 Sekunden.</span></h2>
     <p class="lead" style="margin-top:20px">Probefahrt oder Werkstatt: Wunschtag wählen, kurz beschreiben, abschicken. Deine Anfrage geht direkt an uns, wir melden uns mit einem festen Termin.</p>
-    <a class="wstrip wcard" href="#deal" aria-label="Winter-Aktion: –20 € auf jede Inspektion plus Sattelüberzug geschenkt, bis 28.02.2027, nur solange Termine frei"><span class="wsn" aria-hidden="true"></span><span class="wcp"><small>Winter-Aktion</small><b>–20<span>€</span></b><em>auf jede Inspektion</em></span><span class="wcm"><span class="wgift"><i aria-hidden="true">🎁</i>+ Sattelüberzug geschenkt</span><span class="wnote">Bis 28.02.2027 · nur solange Termine frei</span><span class="wgo">Jetzt Termin sichern<svg><use href="#i-arrow"/></svg></span></span><span class="wring"><b class="wsd">–</b><small>Tage<br>noch</small></span></a>
+    <a class="wstrip wcard" href="#deal" aria-label="Winter-Aktion: –20 € auf jede Inspektion plus Sattelüberzug geschenkt, bis 28.02.2027, nur solange Termine verfügbar sind"><span class="wsn" aria-hidden="true"></span><span class="wcp"><small>Winter-Inspektion <b>2026/27</b></small><b>–20 €</b><em>auf jede Inspektion.</em></span><span class="wsu"><span class="wsi"><span class="sug"></span><img src="img/sattelueberzug.webp" width="894" height="900" alt="" loading="lazy" decoding="async"><b>Gratis</b></span><span class="wst"><small>+ Geschenkt dazu</small><b>Sattelüberzug mit Velocenter-Logo</b></span></span><span class="wcd" aria-hidden="true"><span><b class="wsd">–</b><i>Tage</i></span><span><b class="wsh">–</b><i>Std</i></span><span><b class="wsm">–</b><i>Min</i></span><span><b class="wss">–</b><i>Sek</i></span></span><span class="wgo">Winter-Termin sichern<svg><use href="#i-arrow"/></svg></span><span class="wnote">Bis 28.02.2027 · nur solange Termine verfügbar sind</span></a>
     <a class="wstrip spring" href="#termin" data-pre="Frühjahrs-Check (Inspektion)" hidden aria-label="Frühjahrs-Check: Rad fit für die Saison, jetzt Termin sichern"><i aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2.6M12 18.9v2.6M2.5 12h2.6M18.9 12h2.6M5.3 5.3l1.8 1.8M16.9 16.9l1.8 1.8M5.3 18.7l1.8-1.8M16.9 7.1l1.8-1.8"/></svg></i><span class="wt"><small>Saisonstart · Frühjahrs-Check</small><strong>Rad fit für die Saison <em>– jetzt Termin sichern</em></strong></span><span class="wa"><svg><use href="#i-arrow"/></svg></span></a>
     <div class="blobimg" style="margin-top:34px;max-width:460px"><img src="img/isy-blumen.webp" alt="i:SY E-Bikes mit Blumenkörben vor einer Holzhütte" loading="lazy" width="800" height="600"></div>
    </div>
@@ -4569,7 +4575,7 @@ function seoSet(v){const s=SEO[v]||SEO.start;document.title=s[0];const m=(n,a,c)
  const p=n=>String(n).padStart(2,'0');
  function t(){const now=new Date(),ms=end-now;const on=now>=start&&ms>0&&!(SITE.aktion||{}).winterAus;$$('.wstrip:not(.spring)').forEach(w=>w.hidden=!on);if(!on)return;
   const d=Math.floor(ms/864e5),h=Math.floor(ms/36e5)%24,m=Math.floor(ms/6e4)%60,s=Math.floor(ms/1e3)%60;
-  if(D)D.textContent=d;if(H)H.textContent=p(h);if(M)M.textContent=p(m);if(S)S.textContent=p(s);$$('.wsd').forEach(x=>x.textContent=d)}
+  if(D)D.textContent=d;if(H)H.textContent=p(h);if(M)M.textContent=p(m);if(S)S.textContent=p(s);$$('.wsd').forEach(x=>x.textContent=d);$$('.wsh').forEach(x=>x.textContent=p(h));$$('.wsm').forEach(x=>x.textContent=p(m));$$('.wss').forEach(x=>x.textContent=p(s))}
  t();setInterval(()=>{if(cur==='start'||cur==='service')t()},1000)})();
 
 /* ---------- Saison: Gutschein (10.11.–24.12.), Frühjahrs-Check (März/April nach der Winter-Aktion) ---------- */
