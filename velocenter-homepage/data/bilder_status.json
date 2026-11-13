@@ -1,14 +1,28 @@
 {
  "gudereit|ec35evo|2026|dunkelblaumatt": {
+  "gesucht": "2026-11-13",
+  "notiz": "Art.-Nr. 3105681 vermutlich dunkelblau matt, 3105682 enzianblau, 3105683 hellblau.",
   "zuletzt": "2026-11-13"
  },
  "gudereit|ec35evo|2026|graphitmatt": {
+  "geprueft": "2026-11-13",
+  "gesucht": "2026-11-13",
+  "grund": "Gudereit-Studiofoto aus derselben Serie wie das offizielle rotglanz-Bild auf gudereit.de (identische Pose, 20\"-Kompakt, Riemen, Frontträger), Art.-Nr. 3105688 ist laut Händler graphit-matt und das Rad ist sichtbar matt-graphit.",
+  "notiz": "Art.-Nr. 3105688; gudereit.de zeigt nur rotglanz. dhash-Warnung kommt nur daher, dass es dieselbe Aufnahme in anderer Farbe ist.",
+  "quelle": "https://bikes-opt.b-cdn.net/gudereit/2026/3105688_01.jpg",
+  "seite": "https://www.bikes.de/shop/e-bikes/marke.gudereit/gudereit-ec-35-evo-625-2026/",
+  "versuche": 0,
   "zuletzt": "2026-11-13"
  },
  "gudereit|ec35evo|2026|rotglanz": {
+  "geprueft": "2026-11-13",
   "zuletzt": "2026-11-13"
  },
  "isy|e5zrf20jahre|2027|dunkelblauorangegabel": {
+  "gesucht": "2026-11-13",
+  "grund": "Jubiläumsmodell (blau-orange, CX, 540 Wh, ZEG-Messe 2026) nur als Messe-/Pressefoto auf nimms-rad.de belegt; auf isy.de (Kompakt/E5, Design-Editions, News) und bei Händlern (bikes.de, Stadler, radwelt) kein Studio-Produktfoto gefunden.",
+  "notiz": "Nach Marktstart erneut auf isy.de/E-Bike-Kategorien/iSY-Kompakt/E5-Modelle und bikes.de (i:SY 2027) suchen; Presseartikel: nimms-rad.de/news/?p=58713",
+  "versuche": 1,
   "zuletzt": "2026-11-13"
  },
  "isy|e5zrfadventure|2026|cloudgreyglanz": {
