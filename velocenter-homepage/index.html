@@ -4878,7 +4878,7 @@ function admClaude(b){clWatch();const ok=!!(CL.gh&&CL.gh.token);
   (!ok||CL.set?clEinr():'')+
   '<section class="acard clchat"><div id="clList" class="cll" aria-live="polite"></div>'+
   '<form id="clF" class="clf"><textarea name="t" rows="2" maxlength="6000" placeholder="'+(ok?'z. B. „Schreib bei Service dazu, dass wir auch Lastenräder warten.“':'Erst einrichten (oben) – dann hier schreiben.')+'"'+(ok?'':' disabled')+'></textarea><button class="clsend" type="submit" aria-label="Senden"'+(ok?'':' disabled')+'>'+admI('claude')+'<span>Senden</span></button></form>'+
-  '<p class="clhint">Strg + Enter sendet · Rechtstexte und Preise prüft Claude besonders streng · alles steht im Protokoll</p></section>';
+  '<p class="clhint">Enter sendet · Umschalt + Enter = neue Zeile · Rechtstexte und Preise prüft Claude besonders streng · alles steht im Protokoll</p></section>';
  clList()}
 async function clDispatch(id){let r;try{r=await fetch('https://api.github.com/repos/'+CL_REPO+'/actions/workflows/'+CL_WF+'/dispatches',{method:'POST',headers:{Authorization:'Bearer '+CL.gh.token,Accept:'application/vnd.github+json','X-GitHub-Api-Version':'2022-11-28','Content-Type':'application/json'},body:JSON.stringify({ref:'main',inputs:{id}})})}catch(_){const e=new Error('netz');e.status=0;throw e}
  if(r.status!==204){const e=new Error('gh');e.status=r.status;throw e}}
@@ -4897,7 +4897,7 @@ $('#adm').addEventListener('click',async e=>{const t=e.target;
  const u=t.closest('[data-clundo]');if(u){const x=(CL.L||[]).find(y=>y.id===u.dataset.clundo);if(!x)return;if(u.dataset.sure!=='1'){u.dataset.sure='1';u.textContent='Wirklich zurücknehmen?';return}
   u.disabled=true;await clSend('„'+String(x.txt).slice(0,80)+(String(x.txt).length>80?' …':'')+'“',{typ:'zurueck',ziel:x.id});return}
  const rt=t.closest('[data-clretry]');if(rt){const x=(CL.L||[]).find(y=>y.id===rt.dataset.clretry);if(x){rt.disabled=true;await clSend(x.txt)}return}});
-$('#adm').addEventListener('keydown',e=>{if(e.key==='Enter'&&(e.ctrlKey||e.metaKey)&&e.target.closest('#clF')){e.preventDefault();$('#clF').requestSubmit()}});
+$('#adm').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey&&!e.isComposing&&e.target.closest('#clF')){e.preventDefault();$('#clF').requestSubmit()}});
 $('#adm').addEventListener('submit',async e=>{const F=e.target;
  if(F.id==='clF'){e.preventDefault();const v=F.t.value;if(!v.trim())return;const btn=F.querySelector('.clsend');btn.disabled=true;if(await clSend(v))F.t.value='';btn.disabled=false;F.t.focus();return}
  if(F.id==='clGhF'){e.preventDefault();const tok=F.tok.value.trim(),E=$('#clGhE');if(!/^(github_pat_|ghp_)[A-Za-z0-9_]{20,}$/.test(tok)){E.textContent='Das sieht nicht wie ein GitHub-Token aus (beginnt mit github_pat_).';return}
