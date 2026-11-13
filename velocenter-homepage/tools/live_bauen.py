@@ -61,6 +61,17 @@ def section_raus(s, kopf):
     return s[:i] + s[k:]
 
 
+def firebase_config():
+    """Öffentliche Web-Konfiguration aus der Firebase-Konsole (kein Geheimnis). Ohne Datei: kein Admin-Bereich."""
+    q = os.path.join(QUELLE, 'live', 'firebase.json')
+    if not os.path.isfile(q):
+        return None
+    d = json.load(open(q, encoding='utf-8'))
+    if not d.get('projectId') or not d.get('apiKey'):
+        return None
+    return {k: d[k] for k in ('apiKey', 'authDomain', 'projectId', 'appId') if d.get(k)}
+
+
 def html_bauen():
     s = open(os.path.join(QUELLE, 'index.html'), encoding='utf-8').read()
     # Prototyp-Kopf
@@ -78,9 +89,14 @@ def html_bauen():
     s = ersetze(s, '<a href="#warum">Prototyp-Infos</a>', '')
     s = section_raus(s, '<section class="view" data-v="warum"')
     s = ersetze(s, ",'datenschutz','warum'];", ",'datenschutz'];")
-    # Admin nur im Prototyp (braucht claude.ai)
-    s = ersetze(s, "function admHash(){if(location.hash==='#admin')admOpen()}", 'function admHash(){}')
+    # Admin: kein versteckter 5-Klick; Zugang nur über /admin mit Firebase-Anmeldung
     s = ersetze(s, "if(n>=5){n=0;admOpen()}", "if(n>=5){n=0}")
+    fb = firebase_config()
+    if fb:
+        s = ersetze(s, 'const FBC=null;/*FBCFG*/', 'const FBC=' + json.dumps(fb, separators=(',', ':')) + ';')
+    else:
+        print('Hinweis: live/firebase.json fehlt – Live-Seite ohne Admin-Bereich.')
+        s = ersetze(s, "function admHash(){if(location.hash==='#admin')admOpen()}", 'function admHash(){}')
     # Datenschutz: Entwurfs-Hinweis raus, Hosting eintragen
     s = re.sub(r'<p[^>]*>\s*Entwurf für den Prototyp\.[^<]*(?:<[^/][^>]*>[^<]*</[^>]+>[^<]*)*</p>\s*', '', s, count=1)
     m = re.search(r'\[Wird beim Livegang ergänzt:[^\]]*\]', s)
@@ -90,7 +106,11 @@ def html_bauen():
         'Diese Seite liegt bei GitHub Pages, einem Dienst der GitHub, Inc., 88 Colin P. Kelly Jr. Street, San Francisco, CA 94107, USA. '
         'Beim Aufruf verarbeitet GitHub technisch notwendige Daten wie deine IP-Adresse, Datum und Uhrzeit, die aufgerufene Seite und Angaben zum Browser, '
         'um die Seite auszuliefern und vor Angriffen zu schützen. Eine Übermittlung in die USA ist möglich; GitHub ist nach dem EU-US Data Privacy Framework zertifiziert. '
-        'Wir selbst bekommen diese Protokolle nicht und werten nichts aus.') + s[m.end():]
+        'Wir selbst bekommen diese Protokolle nicht und werten nichts aus.'
+        + (' Unsere aktuellen Angebote und Bewertungen lädt die Seite aus Google Firebase (Cloud Firestore), einem Dienst der Google Ireland Limited, '
+           'Gordon House, Barrow Street, Dublin 4, Irland. Dabei wird deine IP-Adresse an Google übermittelt; eine Übermittlung in die USA ist möglich, '
+           'Google ist nach dem EU-US Data Privacy Framework zertifiziert. Es werden dabei keine Cookies gesetzt und keine Nutzerprofile gebildet.' if firebase_config() else '')
+        ) + s[m.end():]
     s = s.replace('Stand: Entwurf, November 2026.', 'Stand: ' + datetime.date.today().strftime('%m/%Y').replace('/', '.') + '.')
     if 'Entwurf' in s[s.find('data-v="datenschutz"'):s.find('data-v="datenschutz"') + 20000]:
         print('Hinweis: im Datenschutz steht noch „Entwurf“.')
@@ -122,12 +142,13 @@ def bilder(s):
     return sorted(x for x in n if os.path.isfile(os.path.join(QUELLE, x)))
 
 
-def weiterleitung(ziel_hash):
+def weiterleitung(ziel_hash, tiefe=1):
     url = BASIS + ('#' + ziel_hash if ziel_hash != 'start' else '')
+    rel = '../' * tiefe + ('#' + ziel_hash if ziel_hash != 'start' else '')
     return ('<!doctype html><html lang="de"><head><meta charset="utf-8"><title>Velocenter Hessert</title>'
             f'<link rel="canonical" href="{url}"><meta name="robots" content="noindex">'
-            f'<meta http-equiv="refresh" content="0;url={url}"></head>'
-            f'<body><a href="{url}">Weiter zu Velocenter Hessert</a></body></html>\n')
+            f'<meta http-equiv="refresh" content="0;url={rel}"></head>'
+            f'<body><a href="{rel}">Weiter zu Velocenter Hessert</a></body></html>\n')
 
 
 def main():
@@ -148,14 +169,17 @@ def main():
             print('Hinweis: live/' + f + ' fehlt')
     open(os.path.join(ZIEL, 'CNAME'), 'w').write(DOMAIN + '\n')
     open(os.path.join(ZIEL, '.nojekyll'), 'w').write('')
-    open(os.path.join(ZIEL, 'robots.txt'), 'w').write(f'User-agent: *\nAllow: /\nSitemap: {BASIS}sitemap.xml\n')
+    open(os.path.join(ZIEL, 'robots.txt'), 'w').write(f'User-agent: *\nAllow: /\nDisallow: /admin/\nSitemap: {BASIS}sitemap.xml\n')
     heute = datetime.date.today().isoformat()
     open(os.path.join(ZIEL, 'sitemap.xml'), 'w').write(
         '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
         f'<url><loc>{BASIS}</loc><lastmod>{heute}</lastmod></url>\n</urlset>\n')
     for alt, neu in ALT.items():
         os.makedirs(os.path.join(ZIEL, alt), exist_ok=True)
-        open(os.path.join(ZIEL, alt, 'index.html'), 'w', encoding='utf-8').write(weiterleitung(neu))
+        open(os.path.join(ZIEL, alt, 'index.html'), 'w', encoding='utf-8').write(weiterleitung(neu, alt.count('/') + 1))
+    if firebase_config():
+        os.makedirs(os.path.join(ZIEL, 'admin'), exist_ok=True)
+        open(os.path.join(ZIEL, 'admin', 'index.html'), 'w', encoding='utf-8').write(weiterleitung('admin'))
     open(os.path.join(ZIEL, '404.html'), 'w', encoding='utf-8').write(
         '<!doctype html><html lang="de"><head><meta charset="utf-8"><title>Velocenter Hessert</title><meta name="robots" content="noindex">'
         f'<meta http-equiv="refresh" content="0;url={BASIS}"></head><body><a href="{BASIS}">Weiter zu Velocenter Hessert</a></body></html>\n')

@@ -48,5 +48,28 @@ Der Prototyp bleibt unverändert, Änderungen immer dort machen und neu bauen.
 7. Google-Unternehmensprofil: Website-Link prüfen.
 8. Erst dann Coco kündigen.
 
+## Admin-Bereich (sicher, über Google Firebase)
+Adresse: `www.velo-center.de/admin` → Anmeldung mit **Benutzer + Passwort**. Geprüft wird auf dem Server von Google
+(Firebase Authentication), die Rechte prüfen die Datenbank-Regeln `firebase/firestore.rules`. Ohne Anmeldung kann niemand
+etwas ändern, auch nicht mit Programmierkenntnissen. Zu viele Fehlversuche sperrt Firebase automatisch.
+Benutzer „kevin“ = intern `kevin@admin.velo-center.de` (keine echte Mail-Adresse nötig).
+
+**Einrichten (einmalig, ca. 10 Minuten, Tiry mit eigenem Google-Konto – Claude hat keinen Zugang):**
+1. https://console.firebase.google.com → „Projekt hinzufügen“ → Name `velo-center-web`, Google Analytics **aus**.
+2. **Authentication** → Jetzt starten → Anbieter **E-Mail/Passwort** aktivieren (nur den ersten Schalter).
+3. Authentication → **Nutzer → Nutzer hinzufügen**: E-Mail `kevin@admin.velo-center.de`, Passwort selbst wählen.
+   (Stefan/Martina genauso, falls gewünscht.)
+4. Authentication → **Einstellungen → Nutzeraktionen**: „Registrierung/Erstellen zulassen“ **aus** (niemand legt sich selbst ein Konto an).
+5. **Firestore Database** → Datenbank erstellen → Standort **europe-west3 (Frankfurt)** → Produktionsmodus.
+6. Firestore → **Regeln**: Inhalt von `firebase/firestore.rules` einfügen → Veröffentlichen.
+7. Projekteinstellungen (Zahnrad) → „Meine Apps“ → **Web-App** hinzufügen (`</>`), Name `homepage`, kein Hosting.
+   Den angezeigten `firebaseConfig`-Block (apiKey, authDomain, projectId, appId) **an Claude schicken** –
+   das ist kein Geheimnis, er steht später ohnehin in der Seite. **Nie das Passwort schicken.**
+8. Claude legt die Werte in `live/firebase.json` ab, baut neu und liefert aus. Danach `…/admin` öffnen und anmelden.
+
+Kosten: Spark-Tarif (gratis). Besucher lesen pro Besuch 4 Dokumente (Grenze 50.000 Lesungen/Tag ≈ 12.000 Besuche/Tag).
+Fotos aus dem Admin liegen komprimiert in der Datenbank (Firebase Storage bräuchte den Bezahl-Tarif).
+Datenschutzerklärung: Absatz zu Google Firebase setzt das Bau-Skript automatisch ein – bei eRecht24 mit angeben.
+
 ## Bestand aktualisieren (nach dem Livegang)
 `python3 tools/bestand_zu_json.py <Veloport-Export.csv>` → `python3 tools/live_bauen.py` → ins Web-Repo.

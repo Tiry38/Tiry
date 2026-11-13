@@ -1,0 +1,21 @@
+rules_version = '2';
+// Velocenter Homepage – Regeln für Cloud Firestore (in der Firebase-Konsole unter Firestore → Regeln einfügen → Veröffentlichen).
+// Besucher dürfen nur lesen, was auf der Homepage steht. Schreiben nur die freigeschalteten Admin-Konten.
+// Neues Admin-Konto: in Authentication anlegen (Benutzer@admin.velo-center.de) UND hier in die Liste eintragen.
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function admin() {
+      return request.auth != null && request.auth.token.email in [
+        'kevin@admin.velo-center.de',
+        'stefan@admin.velo-center.de',
+        'martina@admin.velo-center.de'
+      ];
+    }
+    match /pub/{d}     { allow read: if true; allow write: if admin(); }
+    match /bestand/{d} { allow read: if true; allow write: if admin(); }
+    match /fotos/{d}   { allow read: if true; allow write: if admin(); }
+    match /site/{d}    { allow read: if d in ['einstellungen', 'bewertungen'] || admin(); allow write: if admin(); }
+    match /lager/{d}   { allow read, write: if admin(); }
+    match /{other=**}  { allow read, write: if false; }
+  }
+}

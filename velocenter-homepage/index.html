@@ -3082,7 +3082,7 @@ m696 -454 c28 -13 46 -31 55 -51 22 -53 -50 -177 -173 -300 -187 -186 -647
  <div class="adm-app" role="dialog" aria-modal="true" aria-label="Velocenter Admin">
   <aside class="adm-side"><div class="as-brand"><img src="img/velocenter-logo.svg" alt="Velocenter"><b>Admin</b></div>
    <nav id="admTabs" hidden></nav>
-   <div class="as-foot"><button type="button" data-aclose>← Zur Homepage</button></div></aside>
+   <div class="as-foot"><button type="button" id="admOut" data-alogout hidden>Abmelden</button><button type="button" data-aclose>← Zur Homepage</button></div></aside>
   <main class="adm-main"><header class="adm-top"><h2 id="admTitle">Velocenter Admin</h2><span class="sub" id="admSub"></span><button type="button" class="adm-x" data-aclose aria-label="Admin schließen">×</button></header>
    <div class="adm-b" id="admBody"></div></main>
   <div class="adm-dr" id="admDr" hidden><div class="adm-drbg" data-drclose></div><div class="adm-drp" id="admDrB" role="dialog" aria-modal="true" aria-label="Rad bearbeiten"></div></div>
@@ -3486,13 +3486,44 @@ function admMerge(d){d=d||{};const R=[],rows=ADM.rows,st=ADM.set;
    ['preis','angebot','status','ab','bild'].forEach(n=>{if(x[n]!==undefined){if(x[n]===null||x[n]==='')delete y[n];else y[n]=x[n]}});return y}).filter(Boolean)});
   if(k.farben.length)R.push(k)});
  Object.keys(rows).filter(i=>i.startsWith('neu-')).sort().forEach(i=>{const n=rows[i];if(n&&n.rad&&!n.hidden&&(n.rad.farben||[]).length)R.push(Object.assign({},n.rad,{eigen:true}))});
+ R.forEach(r=>{r.farben=(r.farben||[]).map(f=>typeof f.bild==='string'&&f.bild.startsWith('fs:')?Object.assign({},f,{bild:fotoSrc(f.bild)}):f)});
  return Object.assign({},d,{raeder:R},st.hinweis!=null&&st.hinweis!==''?{hinweis:st.hinweis}:{},st.hinweisAus?{hinweis:''}:{},st.stand?{stand:st.stand}:{})}
 function admRefresh(){if(!admBase())return;lgApply();admDeals();if(LG.ok)lgRender();if(!$('#adm').hidden&&ADM.ok&&$('#admDr').hidden&&!ADM.imp)admRender()}
 /* Datenbank still im Hintergrund verbinden: Änderungen erscheinen bei allen angemeldeten Besuchern live */
-(async()=>{try{const db=await claude.use('db');if(!db)return;ADM.db=db;
- db.collection('lager').onSnapshot(q=>{const r={};q.docs.forEach(x=>{r[x.id]=x.data()});ADM.rows=r;admRefresh()},()=>{});
+/* Live-Seite: Google Firebase (Anmeldung + Datenbank, Rechte prüft der Server). Prototyp: claude.ai. FBC setzt tools/live_bauen.py. */
+const FBC=null;/*FBCFG*/
+const FB={p:null,auth:null,db:null,pubT:0,pub:''};
+const ADM_DOM='admin.velo-center.de';
+const admMail=u=>{u=String(u||'').trim().toLowerCase();return u.includes('@')?u:u.replace(/[^a-z0-9._-]/g,'')+'@'+ADM_DOM};
+function fsVal(v){if(!v)return null;if('stringValue'in v)return v.stringValue;if('integerValue'in v)return Number(v.integerValue);if('doubleValue'in v)return v.doubleValue;if('booleanValue'in v)return v.booleanValue;
+ if('timestampValue'in v)return v.timestampValue;if('mapValue'in v)return fsObj(v.mapValue.fields);if('arrayValue'in v)return(v.arrayValue.values||[]).map(fsVal);return null}
+function fsObj(f){const o={};for(const k in f||{})o[k]=fsVal(f[k]);return o}
+async function fsGet(p){const r=await fetch('https://firestore.googleapis.com/v1/projects/'+encodeURIComponent(FBC.projectId)+'/databases/(default)/documents/'+p+'?key='+encodeURIComponent(FBC.apiKey),{cache:'no-store'});
+ if(r.status===404)return null;if(!r.ok)throw new Error('fs '+r.status);return fsObj((await r.json()).fields)}
+function fbSdk(){if(FB.p)return FB.p;const v='10.14.1',L=n=>new Promise((ok,no)=>{const e=document.createElement('script');e.src='https://www.gstatic.com/firebasejs/'+v+'/firebase-'+n+'-compat.js';e.onload=ok;e.onerror=no;document.head.appendChild(e)});
+ FB.p=(window.firebase&&window.firebase.firestore?Promise.resolve():L('app').then(()=>Promise.all([L('auth'),L('firestore')]))).then(()=>{if(!firebase.apps.length)firebase.initializeApp(FBC);
+  FB.auth=firebase.auth();FB.db=firebase.firestore();try{FB.db.settings({ignoreUndefinedProperties:true,merge:true})}catch(e){}return FB});
+ FB.p.catch(()=>{FB.p=null});return FB.p}
+/* Besucher: nur 4 Lesezugriffe pro Besuch, ohne Firebase-Programm */
+async function fbPublic(){if(!FBC||!FBC.projectId)return;const g=p=>fsGet(p).catch(()=>null);const[l,st,b,w]=await Promise.all(['pub/lager','site/einstellungen','bestand/aktuell','site/bewertungen'].map(g));
+ if(ADM.ok)return;ADM.rows=(l&&l.rows)||{};ADM.set=st||{};LG.DB=b&&Array.isArray(b.raeder)&&b.raeder.length?b:null;if(LG.DB&&!LG.D)LG.ok=true;
+ if(w&&Array.isArray(w.items)){ADM.bew=w;bewRender(w)}if(LG.DB||LG.D)admRefresh();admDeals()}
+/* Eigene Fotos (Firebase): in „fotos/<id>“, im Rad steht „fs:<id>“ */
+const FOTO={};
+function fotoLoad(id){if(id in FOTO)return;FOTO[id]=null;const q=FBC?fsGet('fotos/'+id):ADM.db?ADM.db.doc('fotos/'+id).get().then(x=>x.exists?x.data():null):Promise.resolve(null);
+ q.then(d=>{if(d&&d.d){FOTO[id]=d.d;admRefresh();fotoFix()}}).catch(()=>{})}
+const fotoSrc=v=>typeof v==='string'&&v.startsWith('fs:')?(fotoLoad(v.slice(3)),FOTO[v.slice(3)]||''):v;
+function fotoFix(){document.querySelectorAll('img[src^="fs:"]').forEach(i=>{const u=fotoSrc(i.getAttribute('src'));if(u)i.src=u})}
+function admWire(db){ADM.db=db;
+ db.collection('lager').onSnapshot(q=>{const r={};q.docs.forEach(x=>{r[x.id]=x.data()});ADM.rows=r;admRefresh();if(FBC&&ADM.ok&&!(q.metadata&&q.metadata.fromCache))fbPubLater()},()=>{});
  db.doc('site/einstellungen').onSnapshot(x=>{ADM.set=x.exists?x.data():{};admRefresh();admDeals()},()=>{});
- db.doc('bestand/aktuell').onSnapshot(x=>{const d=x.exists?x.data():null;LG.DB=d&&Array.isArray(d.raeder)&&d.raeder.length?d:null;if(LG.DB&&!LG.D)LG.ok=true;if(LG.DB||LG.D)admRefresh()},()=>{})}catch(e){}})();
+ db.doc('bestand/aktuell').onSnapshot(x=>{const d=x.exists?x.data():null;LG.DB=d&&Array.isArray(d.raeder)&&d.raeder.length?d:null;if(LG.DB&&!LG.D)LG.ok=true;if(LG.DB||LG.D)admRefresh()},()=>{})}
+/* Besucher lesen bei Firebase nur „pub/lager“: nach jeder Änderung schreibt der Admin eine Kopie */
+function fbPubLater(){clearTimeout(FB.pubT);FB.pubT=setTimeout(()=>{const j=JSON.stringify(ADM.rows);if(j===FB.pub)return;
+ if(j.length>900000){admToast('Achtung: zu viele Daten für die Homepage.');return}
+ ADM.db.doc('pub/lager').set({rows:ADM.rows,ts:Date.now()}).then(()=>{FB.pub=j}).catch(()=>admToast('Homepage-Kopie nicht gespeichert – bitte nochmal speichern.'))},1200)}
+if(FBC)fbPublic();else(async()=>{try{const db=await claude.use('db');if(db)admWire(db)}catch(e){}})();
+new MutationObserver(fotoFix).observe($('#adm'),{childList:true,subtree:true});
 function admDeals(){const b=$('#lgDeals');if(b&&ADM.set.dealsAus)b.hidden=true}
 /* ---------- Einstieg ---------- */
 const ADM_ICO={dash:'<path d="M4 13h6V4H4zM14 20h6v-9h-6zM4 20h6v-4H4zM14 4v4h6V4z"/>',raeder:'<circle cx="6" cy="16" r="4"/><circle cx="18" cy="16" r="4"/><path d="M6 16l4-8h5l3 8M10 8l2 8h-2M14 6h3"/>',
@@ -3505,14 +3536,21 @@ async function admOpen(){const M=$('#adm');M.hidden=false;document.body.style.ov
  if(ADM.ok){admRender();return}
  $('#admBody').innerHTML='<div class="admlogin"><div class="lk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg></div><h3>Admin-Login</h3><p id="admLs">Zugang wird geprüft …</p></div>';
  $('#admTitle').textContent='Velocenter Admin';$('#admSub').textContent='';
+ if(FBC){let f;try{f=await fbSdk()}catch(e){const l=$('#admLs');if(l)l.textContent='Keine Verbindung zum Anmelde-Server. Bitte Internet prüfen und neu laden.';return}
+  const u=await new Promise(r=>{const un=f.auth.onAuthStateChanged(x=>{un();r(x)})});
+  if(u&&await admFbOk()){admIn();return}
+  const l=$('#admLs');if(!l)return;
+  l.innerHTML='Nur für das Velocenter-Team.<form id="admPwF" autocomplete="on"><input type="text" id="admU" class="admpw" aria-label="Benutzer" placeholder="Benutzer" autocomplete="username" autocapitalize="none" spellcheck="false"><input type="password" id="admPw" class="admpw" aria-label="Passwort" placeholder="Passwort" autocomplete="current-password"><button type="submit" class="cta" id="admGo">Anmelden</button><span id="admPwE" class="admpwe" role="alert"></span></form>';
+  $('#admU').focus();return}
  let u=null;try{u=await claude.use('user')}catch(e){}ADM.user=u;
  let ok=false;try{ok=!!(u&&await u.canEdit())}catch(e){}
  try{ADM.assets=await claude.use('assets')}catch(e){}
  const ls=$('#admLs');if(!ls)return;
  if(!ok||!ADM.db){ls.innerHTML=!ADM.db?'Bitte bei claude.ai anmelden, dann die Seite neu öffnen.':'Kein Zugang. Dieser Bereich ist nur für das Velocenter-Team.';return}
- ls.innerHTML='Angemeldet. Bitte Admin-Passwort eingeben.<form id="admPwF" autocomplete="off"><input type="password" id="admPw" class="admpw" aria-label="Admin-Passwort" placeholder="Passwort" autocomplete="current-password"><button type="submit" class="cta" id="admGo">Admin öffnen</button><span id="admPwE" class="admpwe" role="alert"></span></form>';$('#admPw').focus()}
-const ADMPW={s:'ybRVYmo7/Yag6Yc8GWiObQ==',h:'V5LqVJGGmcLBkm+q+bkaHOygClR+xDGpIxdGlQkQA2o=',n:310000};
-async function admPwOk(pw){try{const b=x=>Uint8Array.from(atob(x),c=>c.charCodeAt(0));const k=await crypto.subtle.importKey('raw',new TextEncoder().encode(pw),'PBKDF2',false,['deriveBits']);const d=new Uint8Array(await crypto.subtle.deriveBits({name:'PBKDF2',hash:'SHA-256',salt:b(ADMPW.s),iterations:ADMPW.n},k,256));const h=b(ADMPW.h);let r=d.length^h.length;for(let i=0;i<h.length;i++)r|=d[i]^h[i];return r===0}catch(e){return false}}
+ ls.innerHTML='Angemeldet und freigeschaltet.<br><button type="button" class="cta" id="admGoC">Admin öffnen</button>';$('#admGoC').focus()}
+/* Admin-Rechte prüft Firebase selbst (Regeln): nur freigeschaltete Konten dürfen „site/livegang“ lesen */
+async function admFbOk(){try{await FB.db.doc('site/livegang').get();return true}catch(e){return false}}
+function admIn(){ADM.ok=true;$('#admTabs').hidden=false;const lo=$('#admOut');if(lo)lo.hidden=!FBC;if(FBC&&ADM.db!==FB.db){admWire(FB.db);admHook(0)}admRender()}
 function admClose(){admDrClose();const M=$('#adm');M.classList.remove('on');document.body.style.overflow='';setTimeout(()=>{M.hidden=true},300);if(location.hash==='#admin')location.hash='lager'}
 /* ---------- Daten-Helfer ---------- */
 function admAll(){const out=[];((admBase()||{}).raeder||[]).forEach(r=>{const k='ov-'+admKey(r),o=ADM.rows[k]||{};out.push({id:k,r,o,imp:true})});
@@ -3527,7 +3565,10 @@ async function admPatch(x,fid,patch){if(x.imp){const cur=ADM.rows[x.id]||{},v=JS
   if(Object.keys(o).length)v[fid]=o;else delete v[fid];await ADM.db.doc('lager/'+x.id).set({hidden:!!cur.hidden,key:x.id,v,ts:Date.now()})}
  else{const cur=ADM.rows[x.id]||{},rad=JSON.parse(JSON.stringify(cur.rad||x.r)),f=(rad.farben||[]).find(y=>y.id===fid);if(!f)return;
   Object.keys(patch).forEach(n=>{if(patch[n]===null||patch[n]==='')delete f[n];else f[n]=patch[n]});await ADM.db.doc('lager/'+x.id).set({rad,hidden:!!cur.hidden,ts:Date.now()})}}
-async function admUpload(file){if(!ADM.assets)throw new Error('kein Upload');const bmp=await createImageBitmap(file);const sc=Math.min(1,1600/bmp.width);const c=document.createElement('canvas');c.width=Math.round(bmp.width*sc);c.height=Math.round(bmp.height*sc);c.getContext('2d').drawImage(bmp,0,0,c.width,c.height);
+async function admUpload(file){if(!ADM.assets&&!FBC)throw new Error('kein Upload');const bmp=await createImageBitmap(file);
+ if(FBC){let w=Math.min(1400,bmp.width),q=.85,u='';for(let k=0;k<10;k++){const c=document.createElement('canvas');c.width=w;c.height=Math.round(bmp.height*w/bmp.width);c.getContext('2d').drawImage(bmp,0,0,c.width,c.height);
+   u=c.toDataURL('image/webp',q);if(u.length<700000)break;if(q>.62)q-=.1;else w=Math.round(w*.8)}
+  if(u.length>=700000)throw new Error('zu gross');const id=Date.now().toString(36)+Math.random().toString(36).slice(2,8);await ADM.db.doc('fotos/'+id).set({d:u,ts:Date.now()});FOTO[id]=u;return 'fs:'+id}const sc=Math.min(1,1600/bmp.width);const c=document.createElement('canvas');c.width=Math.round(bmp.width*sc);c.height=Math.round(bmp.height*sc);c.getContext('2d').drawImage(bmp,0,0,c.width,c.height);
  const blob=await new Promise(r=>c.toBlob(r,'image/webp',.88));const a=await ADM.assets.upload(blob||file);return a.url}
 const admLogo=m=>{const b=lgBrand(m);return b?b.logo:(LG_LOGO[m]||'')};
 const admMkTag=m=>{const l=admLogo(m);return l?'<img class="amk" src="'+l+'" alt="'+esc(m)+'" title="'+esc(m)+'">':'<b class="amkt">'+esc(m)+'</b>'};
@@ -3683,7 +3724,7 @@ async function admSave(){const E=ADM.edit,F=$('#admF'),err=$('#admE');err.textCo
  catch(e){err.textContent='Speichern fehlgeschlagen'+(e&&e.code==='quota_exceeded'?' (Speicher voll)':'')+'. Bitte nochmal versuchen.'}}
 async function admPhoto(i,file){const E=ADM.edit;admToast('Foto wird hochgeladen …');
  try{const url=await admUpload(file);admKeep();const f=E.r.farben[i];if(E.imp){E.ov[f.id]=Object.assign({},E.ov[f.id],{bild:url})}else{f.bild=url}
-  admRedrawVars();admToast('Foto übernommen – noch „Speichern“ drücken.')}catch(e){admToast(ADM.assets?'Foto konnte nicht hochgeladen werden.':'Foto-Upload ist hier nicht freigeschaltet.')}}
+  admRedrawVars();admToast('Foto übernommen – noch „Speichern“ drücken.')}catch(e){admToast(ADM.assets||FBC?'Foto konnte nicht hochgeladen werden.':'Foto-Upload ist hier nicht freigeschaltet.')}}
 function admKeep(){const E=ADM.edit;admRead().forEach(v=>{const f=E.r.farben[v.i];if(!f)return;if(E.imp){const o=E.ov[f.id]=Object.assign({},E.ov[f.id]);['preis','angebot','status','ab'].forEach(n=>{o[n]=v[n]});if(v.hid)o.hidden=true;else delete o.hidden}
  else Object.assign(f,{jahr:v.jahr,farbe:v.farbe,preis:v.preis,angebot:v.angebot,status:v.status,ab:v.ab,motor:v.motor,akku:v.akku,schaltung:v.schaltung})})}
 function admRedrawVars(){const E=ADM.edit;$('#admV').innerHTML=E.r.farben.map((f,i)=>admVar(f,i,E.imp)).join('')}
@@ -3691,6 +3732,8 @@ let admT;function admToast(t){const el=$('#admToast');el.textContent=t;el.classL
 /* ---------- Ereignisse ---------- */
 $('#adm').addEventListener('click',async e=>{const t=e.target;
  if(t.closest('[data-aclose]')){admClose();return}
+ if(t.closest('#admGoC')){admIn();return}
+ if(t.closest('[data-alogout]')){try{await FB.auth.signOut()}catch(_){}ADM.ok=false;location.hash='';location.reload();return}
  if(t.closest('[data-drclose]')){admDrClose();if(ADM.tab==='neu'){ADM.tab='raeder';admRender()}return}
  
  const tb=t.closest('#admTabs button');if(tb){admDrClose();ADM.tab=tb.dataset.t;admRender();$('#admBody').scrollTop=0;return}
@@ -3711,7 +3754,7 @@ $('#adm').addEventListener('click',async e=>{const t=e.target;
 $('#adm').addEventListener('change',async e=>{const t=e.target;
  const u=t.closest('[data-up]');if(u&&u.files[0]){admPhoto(+u.dataset.up,u.files[0]);return}
  const fu=t.closest('[data-fup]');if(fu&&fu.files[0]){const [id,fid]=fu.dataset.fup.split('|'),x=admAll().find(y=>y.id===id);if(!x)return;fu.closest('.afc').classList.add('busy');admToast('Foto wird hochgeladen …');
-  try{const url=await admUpload(fu.files[0]);await admPatch(x,fid,{bild:url});admToast('Foto ist online.')}catch(_){fu.closest('.afc').classList.remove('busy');admToast(ADM.assets?'Foto konnte nicht hochgeladen werden.':'Foto-Upload ist hier nicht freigeschaltet.')}return}
+  try{const url=await admUpload(fu.files[0]);await admPatch(x,fid,{bild:url});admToast('Foto ist online.')}catch(_){fu.closest('.afc').classList.remove('busy');admToast(ADM.assets||FBC?'Foto konnte nicht hochgeladen werden.':'Foto-Upload ist hier nicht freigeschaltet.')}return}
  if(t.id==='admCsv'&&t.files[0]){admCsvLoad(t.files[0]);return}
  if(t.id==='admMk'){ADM.mk=t.value;admRender();return}if(t.id==='admSt'){ADM.st=t.value;admRender();return}if(t.id==='admSo'){ADM.sort=t.value;admRender();return}
  if(t.id==='admFmk'){ADM.fmk=t.value;admRender();return}if(t.id==='admAnur'){ADM.anur=t.checked;admRender();return}
@@ -3725,7 +3768,11 @@ $('#adm').addEventListener('submit',async e=>{e.preventDefault();if(e.target.id=
   try{await ADM.db.doc('site/einstellungen').set(v);admToast('Gespeichert – gilt sofort.')}catch(_){admToast('Speichern fehlgeschlagen.')}}});
 ['dragover','dragleave','drop'].forEach(ev=>$('#adm').addEventListener(ev,e=>{const d=e.target.closest&&e.target.closest('#admDrop');if(!d)return;e.preventDefault();d.classList.toggle('hov',ev==='dragover');if(ev==='drop'&&e.dataTransfer.files[0])admCsvLoad(e.dataTransfer.files[0])}));
 addEventListener('keydown',e=>{if(e.key!=='Escape'||$('#adm').hidden)return;if(!$('#admDr').hidden){admDrClose();if(ADM.tab==='neu'){ADM.tab='raeder';admRender()}}else admClose()});
-document.addEventListener('submit',async e=>{if(e.target.id!=='admPwF')return;e.preventDefault();const i=$('#admPw'),g=$('#admGo'),er=$('#admPwE');if(!i||g.disabled)return;g.disabled=true;er.textContent='';const ok=await admPwOk(i.value);if(ok){ADM.ok=true;$('#admTabs').hidden=false;admRender();return}await new Promise(r=>setTimeout(r,900));g.disabled=false;i.value='';i.focus();er.textContent='Passwort falsch.'});
+document.addEventListener('submit',async e=>{if(e.target.id!=='admPwF')return;e.preventDefault();const u=$('#admU'),i=$('#admPw'),g=$('#admGo'),er=$('#admPwE');if(!i||g.disabled)return;
+ if(!u.value.trim()||!i.value){er.textContent='Bitte Benutzer und Passwort eingeben.';return}g.disabled=true;er.textContent='';
+ try{await FB.auth.signInWithEmailAndPassword(admMail(u.value),i.value);if(await admFbOk()){admIn();return}await FB.auth.signOut();er.textContent='Dieses Konto hat keinen Admin-Zugang.'}
+ catch(x){const c=(x&&x.code)||'';er.textContent=c==='auth/too-many-requests'?'Zu viele Versuche. Bitte in einigen Minuten nochmal.':c==='auth/network-request-failed'?'Keine Verbindung. Bitte Internet prüfen.':'Benutzer oder Passwort falsch.'}
+ g.disabled=false;i.value='';i.focus()});
 (()=>{let n=0,t0=0;const c=$('.legalbar span');if(c)c.addEventListener('click',()=>{const t=Date.now();n=t-t0<600?n+1:1;t0=t;if(n>=5){n=0;admOpen()}})})();
 function admHash(){if(location.hash==='#admin')admOpen()}addEventListener('hashchange',admHash);admHash();
 /* Filterleiste kompakt, sobald sie oben klebt – Höhe wird ausgeglichen (kein Springen), Umschalten mit Puffer (kein Flackern) */
@@ -3994,9 +4041,10 @@ $('#adm').addEventListener('click',e=>{const t=e.target;if(!ADM.bewEd)return;
 $('#adm').addEventListener('submit',async e=>{if(e.target.id!=='admBewF')return;e.preventDefault();const E=ADM.bewEd;E.score=e.target.score.value.trim();
  const items=E.items.map(x=>({t:String(x.t||'').trim(),n:String(x.n||'').trim(),aus:!!x.aus})).filter(x=>x.t);
  try{await ADM.db.doc('site/bewertungen').set({score:E.score,items,ts:Date.now()});admToast('Bewertungen sind online.')}catch(_){admToast('Speichern fehlgeschlagen.')}});
-(function hook(n){if(!ADM.db){if(n<60)setTimeout(()=>hook(n+1),500);return}
+function admHook(n){if(!ADM.db){if(n<60&&!FBC)setTimeout(()=>admHook(n+1),500);return}
  ADM.db.doc('site/bewertungen').onSnapshot(x=>{ADM.bew=x.exists?x.data():null;bewRender(ADM.bew)},()=>{});
- ADM.db.doc('site/livegang').onSnapshot(x=>{ADM.live=x.exists?x.data():{};if(!$('#adm').hidden&&ADM.tab==='livegang')admRender()},()=>{})})(0);
+ ADM.db.doc('site/livegang').onSnapshot(x=>{ADM.live=x.exists?x.data():{};if(!$('#adm').hidden&&ADM.tab==='livegang')admRender()},()=>{})}
+admHook(0);
 merkUI();
 
 go(true);
