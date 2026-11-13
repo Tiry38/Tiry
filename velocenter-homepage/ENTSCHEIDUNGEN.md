@@ -64,3 +64,5 @@
 - **13.11.2026 – i:SY Experte, Fakten von Tiry:** Experte seit 2015, über 1.000 i:SY verkauft (Stand 1.003), Testräder SKYFLY CX/SX, N3.8 ZR F, E5 ZR RT, E5 ZR RT Pop Art, XXL N3.8 (2021), Ersatzteile fast alle auf Lager, Kunden u. a. aus Berlin und Hamburg. Dazu Zitat isy.de („die i:SY Experten von Velocenter Hessert“), Stefan in der Rheinpfalz-Themenwelt 2024 (Fokus Kompakträder, 95 % E-Bikes), Leitsatz vom Bus „Ihr Kompaktrad-Spezialist in Wörth am Rhein“.
 
 - **13.11.2026 – i:SY-Experte-Logo + Auszeichnungen (Tiry):** Offizielles Logo „i:SY Experte 2026“ (von velo-center.de, neu gerechnet scharf: `img/isy-experte-2026.webp`) unter den vier Werten (2015 · 100+ · 2 Tage · 1.000+) im Reiter i:SY Experte, nicht im Kopfbild (Tiry) – darf gezeigt werden (offizieller Experte, hängt im Laden). Dazu „5 Jahre in Folge als i:SY Experte ausgezeichnet“ (2022–2026, Tiry). Ab 2027: neues Logo einsetzen und Jahres-Pille ergänzen.
+
+- **13.11.2026 – i:SY Experte, Bild neben Porsche-Zitat (Tiry):** statt olivem E5 jetzt i:SY N3.8 ZR CX Auto Comfort in **Happy Orange** (`img/p-isy-orange.webp`, Original-Herstellerbild ZEG-CDN, freigestellt). `p-isy2.webp` bleibt im Ordner.
