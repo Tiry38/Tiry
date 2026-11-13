@@ -2,7 +2,7 @@
 """Veloport-Fahrzeugbestand (CSV) -> direkt in index.html (Block #bestandData) fuer die Homepage.
 
 Aufruf:  python3 tools/bestand_zu_json.py <Veloport-Export.csv> [index.html] ["Hinweistext"]
-Der Bestand steht NUR in index.html (eine Stelle). Fotos-Zuordnung kommt aus data/bilder.json.
+Der Bestand steht NUR in index.html (eine Stelle). Fotos-Zuordnung steht ebenfalls in index.html (Block #bilderData, pflegt der Bilder-Agent).
 
 Spaltenerkennung wie in der KI-Zentrale (fzbMap/fzbMapX). Auf die Homepage kommen nur
 kundentaugliche Felder. Einkaufspreis, Rahmennummer, Lagerort, Besitzer, Bemerkung,
@@ -156,7 +156,7 @@ def main():
             km=(wert(r, m['km']) + ' km') if re.search(r'gebraucht', art, re.I) and wert(r, m['km']) else '',
         ).items() if v not in ('', None, False)})
     eindeutig = gruppieren(raeder)
-    bilder_zuordnen(eindeutig, os.path.join(os.path.dirname(os.path.abspath(ziel)), 'data', 'bilder.json'))
+    bilder_zuordnen(eindeutig, ziel)
     anzahl = dict(lager=sum(r['status'] == 'lager' for r in raeder), bestellt=sum(r['status'] == 'bestellt' for r in raeder))
     daten = dict(stand=datetime.date.today().strftime('%d.%m.%Y'), quelle='Veloport-Export', anzahl=anzahl, raeder=eindeutig, **({'hinweis': hinweis} if hinweis else {}))
     in_html_schreiben(ziel, daten)
@@ -183,11 +183,13 @@ def bild_key(marke, modell, jahr, farbe):
     return '|'.join((n(marke), n(modell), n(jahr), n(farbe)))
 
 
-def bilder_zuordnen(karten, pfad):
-    """Hängt jedem Farb-Eintrag sein exaktes Foto an (nur bei genauem Treffer aus data/bilder.json)."""
-    if not os.path.exists(pfad):
+def bilder_zuordnen(karten, html):
+    """Hängt jedem Farb-Eintrag sein exaktes Foto an (nur genauer Treffer aus index.html #bilderData; "" = bewusst ohne Bild)."""
+    s = open(html, encoding='utf-8').read()
+    m = re.search(r'<script type="application/json" id="bilderData">(.*?)</script>', s, re.S)
+    if not m:
         return
-    zu = json.load(open(pfad, encoding='utf-8'))
+    zu = json.loads(m.group(1))
     for k in karten:
         for v in k['farben']:
             b = zu.get(bild_key(k['marke'], k['modell'], v.get('jahr'), v.get('farbe')))
