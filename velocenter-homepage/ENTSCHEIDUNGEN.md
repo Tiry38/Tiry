@@ -25,4 +25,4 @@
 - Fahrzeugbestand steht nur an einer Stelle: eingebettet in index.html (#bestandData). Update: `python3 tools/bestand_zu_json.py <Veloport-Export.csv>` schreibt direkt dort hinein; data/bestand.json gibt es nicht mehr (13.11.2026).
 - Livegang: Live-Fassung nur über tools/live_bauen.py aus index.html bauen; Ablauf und offene Punkte in LIVEGANG.md (13.11.2026).
 - Admin (13.11.2026): Live-Seite nur über `/admin` mit Benutzer + Passwort (Firebase Authentication, Rechte über Firestore-Regeln, Spark-Tarif). Kein versteckter 5-Klick auf der Live-Seite. Kein Passwort und kein Passwort-Prüfwert im Code. Prototyp bleibt hinter der claude.ai-Anmeldung.
-- Logo Startseite (13.11.2026): kein Reinfliegen der roten Teile, Logo steht sofort da, schimmert beim Aufruf genau 1x.
+- Logo Startseite (13.11.2026): kein Reinfliegen der roten Teile, Logo steht sofort da, Schimmer läuft regelmäßig weiter (alle 7 s).

@@ -151,8 +151,8 @@ h1,h2,h3{font-family:var(--display);margin:0;text-wrap:balance;letter-spacing:-.
 .logobox{position:relative;width:min(1040px,92vw);margin:0 auto}
 .biglogo{width:100%;height:auto;display:block;overflow:visible;filter:drop-shadow(0 18px 40px rgba(0,0,0,.6)) drop-shadow(0 0 60px rgba(207,26,44,.25))}
 .biglogo .lg-b{fill:#9A9595}
-/* Logo steht sofort da (Tiry 13.11.2026: kein Reinfliegen), nur 1x Schimmer */
-.shine{position:absolute;inset:0;pointer-events:none;-webkit-mask:url(img/velocenter-logo.svg) center/100% 100% no-repeat;mask:url(img/velocenter-logo.svg) center/100% 100% no-repeat;background:linear-gradient(105deg,transparent 40%,rgba(255,255,255,.75) 50%,transparent 60%);background-size:250% 100%;background-position:150% 0;animation:shine 5s ease-in-out .6s 1 both;mix-blend-mode:overlay}
+/* Logo steht sofort da (Tiry 13.11.2026: kein Reinfliegen), Schimmer regelmäßig */
+.shine{position:absolute;inset:0;pointer-events:none;-webkit-mask:url(img/velocenter-logo.svg) center/100% 100% no-repeat;mask:url(img/velocenter-logo.svg) center/100% 100% no-repeat;background:linear-gradient(105deg,transparent 40%,rgba(255,255,255,.75) 50%,transparent 60%);background-size:250% 100%;background-position:150% 0;animation:shine 7s ease-in-out infinite .6s;mix-blend-mode:overlay}
 @keyframes shine{0%{background-position:150% 0}30%,100%{background-position:-60% 0}}
 .claim{display:flex;flex-wrap:wrap;justify-content:center;gap:.4em 0;margin-top:clamp(18px,3vw,34px);font:600 clamp(13px,1.4vw,17px)/1.4 var(--display);letter-spacing:.34em;text-transform:uppercase;color:#D9DEEA}
 .claim span{white-space:nowrap}
