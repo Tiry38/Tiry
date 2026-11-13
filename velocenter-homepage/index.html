@@ -374,6 +374,21 @@ textarea.inp{border-radius:26px;min-height:110px;resize:vertical;line-height:1.5
 .isyhero .in{display:flex;flex-direction:column;gap:22px;max-width:880px}
 .isyhero .badge{width:clamp(150px,16vw,210px);border-radius:24px;box-shadow:0 20px 50px rgba(255,122,26,.4)}
 .org{color:#FF6200}
+.tflot{list-style:none;margin:40px 0 0;padding:0;display:grid;grid-template-columns:repeat(5,1fr);gap:18px;align-items:start}
+.tfr{position:relative;text-align:center;padding:0 4px}.tfr:nth-child(even){margin-top:56px}
+.tfb{position:relative;display:grid;place-items:center;aspect-ratio:1/1;isolation:isolate}
+.tfb::before{content:"";position:absolute;inset:6% 2%;z-index:-1;border-radius:58% 42% 55% 45%/48% 58% 42% 52%;background:radial-gradient(circle at 30% 30%,#fff 0,color-mix(in srgb,var(--c) 35%,#fff) 45%,color-mix(in srgb,var(--c) 70%,#fff) 100%);box-shadow:0 24px 50px color-mix(in srgb,var(--c) 35%,transparent),inset 0 0 0 1px rgba(255,255,255,.7);animation:tfm 14s ease-in-out infinite alternate}
+.tfr:nth-child(2) .tfb::before{animation-delay:-3s}.tfr:nth-child(3) .tfb::before{animation-delay:-6s}.tfr:nth-child(4) .tfb::before{animation-delay:-9s}.tfr:nth-child(5) .tfb::before{animation-delay:-12s}
+@keyframes tfm{0%{border-radius:58% 42% 55% 45%/48% 58% 42% 52%}50%{border-radius:44% 56% 40% 60%/58% 44% 56% 42%}100%{border-radius:52% 48% 62% 38%/42% 52% 48% 58%}}
+.tfb img{width:108%;max-width:none;height:auto;filter:drop-shadow(0 14px 14px rgba(27,30,37,.22));transition:transform .5s var(--ease)}
+.tfr:hover .tfb img{transform:translateY(-6px) rotate(-2deg) scale(1.04)}
+.tfn{position:absolute;top:0;left:6px;z-index:2;display:grid;place-items:center;width:44px;height:44px;border-radius:50%;background:#1B1E25;color:#fff;font-weight:800;font-size:14px;box-shadow:0 8px 18px rgba(27,30,37,.25)}
+.tfr h3{margin:14px 0 0;font-size:20px;line-height:1.2}.tfr h3 em{display:block;font-style:normal;font-size:15px;color:color-mix(in srgb,var(--c) 60%,#1B1E25)}
+.tfr p{margin:6px 0 0;font-size:14px;color:var(--dim);line-height:1.45}
+a.tflk{font-weight:700;color:#C2410C;text-underline-offset:3px}
+@media (max-width:1100px){.tflot{grid-template-columns:repeat(3,1fr)}.tfr:nth-child(even){margin-top:0}.tfr:nth-child(2),.tfr:nth-child(5){margin-top:40px}}
+@media (max-width:720px){.tflot{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;gap:14px;margin:30px -16px 0;padding:0 16px 10px;scrollbar-width:none}.tflot::-webkit-scrollbar{display:none}.tfr{flex:0 0 72%;scroll-snap-align:center}.tfr:nth-child(n){margin-top:0}}
+@media (prefers-reduced-motion:reduce){.tfb::before{animation:none}.tfb img{transition:none}}
 .isyt{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}.isyt i{font-style:normal;padding:6px 12px;border-radius:999px;background:rgba(255,255,255,.75);border:1px solid rgba(244,114,182,.35);font-size:13px;font-weight:700}
 .isyq{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:30px}.isyq blockquote{margin:0;padding:26px 30px;border-radius:32px;background:linear-gradient(140deg,rgba(234,88,12,.1),rgba(244,114,182,.08),rgba(167,139,250,.1));border:1px solid rgba(234,88,12,.2)}.isyq p{margin:0;font:800 21px/1.4 var(--display)}.isyq cite{display:block;margin-top:12px;font-style:normal;font-size:13.5px;color:#3B3F48}.isyq a{color:#C2410C}
 @media (max-width:800px){.isyq{grid-template-columns:1fr}.isyq p{font-size:18.5px}}
@@ -3166,13 +3181,22 @@ m696 -454 c28 -13 46 -31 55 -51 22 -53 -50 -177 -173 -300 -187 -186 -647
   </div>
  </div>
 
+ <div class="sec tfsec" id="tflot">
+  <div class="wrap">
+   <div class="pre"><p class="eyebrow">Probefahrt <b style="color:#EA580C">vor Ort oder übers Wochenende</b></p><h2 class="big" style="margin-top:14px">Unsere i:SY<br><span class="org">Testflotte.</span></h2>
+   <p class="lead" style="margin-top:18px;max-width:720px">Fünf Testräder, fünf Fahrgefühle. Such dir eins aus, wir machen es für dich startklar.</p></div>
+   <ol class="tflot"><li class="tfr pre" style="--c:#38BDF8"><span class="tfn">01</span><span class="tfb"><img src="img/isy-test-sky.webp" alt="i:SY SKYFLY mit CX- und SX-Motor Testrad" width="800" height="560" loading="lazy"></span><h3>i:SY SKYFLY <em>mit CX- und SX-Motor</em></h3><p>Carbon-Leichtgewicht · Bosch CX oder SX</p></li><li class="tfr pre" style="--c:#2DD4BF"><span class="tfn">02</span><span class="tfb"><img src="img/isy-test-n38.webp" alt="i:SY N3.8 ZR F Testrad" width="800" height="560" loading="lazy"></span><h3>i:SY N3.8 ZR F</h3><p>Stufenlose Enviolo-Nabe · Zahnriemen</p></li><li class="tfr pre" style="--c:#F43F5E"><span class="tfn">03</span><span class="tfb"><img src="img/isy-test-e5rt.webp" alt="i:SY E5 ZR RT Testrad" width="800" height="560" loading="lazy"></span><h3>i:SY E5 ZR RT</h3><p>5-Gang-Nabe mit Rücktritt · Zahnriemen</p></li><li class="tfr pre" style="--c:#A78BFA"><span class="tfn">04</span><span class="tfb"><img src="img/isy-test-popart.webp" alt="i:SY E5 ZR RT Pop Art Testrad" width="800" height="560" loading="lazy"></span><h3>i:SY E5 ZR RT <em>Pop Art</em></h3><p>Design Edition · 5-Gang mit Rücktritt</p></li><li class="tfr pre" style="--c:#60A5FA"><span class="tfn">05</span><span class="tfb"><img src="img/isy-test-xxl.webp" alt="i:SY XXL N3.8 Testrad" width="800" height="560" loading="lazy"></span><h3>i:SY XXL N3.8</h3><p>Für große Fahrer · stufenlos schalten</p></li></ol>
+   <div class="row pre" style="margin-top:34px"><a class="cta" href="#termin" data-pre="Probefahrt i:SY"><svg><use href="#i-bike"/></svg>Testrad anfragen</a></div>
+  </div>
+ </div>
+
  <div class="sec zone z-peach">
   <div class="wrap">
    <div class="pre"><p class="eyebrow">Offizieller <b>i:SY Experte</b></p><h2 class="big" style="margin-top:14px">Warum zu uns<br><span class="org">für dein i:SY?</span></h2>
    <p class="lead" style="margin-top:18px;max-width:780px">Das zeichnet uns als i:SY Experte aus.</p></div>
    <div class="rows" style="margin-top:22px">
     <div class="srow pre" style="--c:#EA580C"><span class="ic"><svg><use href="#i-box"/></svg></span><span><h3>Große Modellauswahl</h3><p>Über 100 i:SY in vielen Modellen und Farben stehen bei uns, zum Anschauen, Vergleichen und gleich Mitnehmen.</p></span></div>
-    <div class="srow pre" style="--c:#F472B6"><span class="ic"><svg><use href="#i-bike"/></svg></span><span><h3>Probefahrt mit Testrädern</h3><p>Fahr Probe vor dem Laden oder nimm ein i:SY übers Wochenende mit nach Hause. Unsere Testräder:</p><span class="isyt"><i>SKYFLY mit CX- und SX-Motor</i><i>N3.8 ZR F</i><i>E5 ZR RT</i><i>E5 ZR RT Pop Art</i><i>XXL N3.8</i></span></span></div>
+    <div class="srow pre" style="--c:#F472B6"><span class="ic"><svg><use href="#i-bike"/></svg></span><span><h3>Probefahrt mit Testrädern</h3><p>Fahr Probe vor dem Laden oder nimm ein i:SY übers Wochenende mit nach Hause. Fünf Testräder stehen dafür bereit, <a class="tflk" href="#tflot">Testflotte ansehen</a>.</p></span></div>
     <div class="srow pre" style="--c:#60A5FA"><span class="ic"><svg><use href="#i-chat"/></svg></span><span><h3>Beratung zu Modellen und Zubehör</h3><p>Welche Schaltung, welcher Akku, welcher Korb oder Kindersitz? Wir zeigen es dir direkt am Rad.</p></span></div>
     <div class="srow pre" style="--c:#22D3EE"><span class="ic"><svg><use href="#i-wrench"/></svg></span><span><h3>Wartung nach i:SY-Standard</h3><p>Geschultes Team, eigene Werkstatt und Bosch Service Center. Inspektion und Reparatur machen wir selbst.</p></span></div>
     <div class="srow pre" style="--c:#FBBF24"><span class="ic"><svg><use href="#i-box"/></svg></span><span><h3>Ersatzteile fast alle auf Lager</h3><p>Für i:SY haben wir fast alle Ersatzteile vorrätig. Das heißt: kein langes Warten, dein Rad ist schnell wieder unterwegs.</p></span></div>
@@ -3703,7 +3727,7 @@ m696 -454 c28 -13 46 -31 55 -51 22 -53 -50 -177 -173 -300 -187 -186 -647
 const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>[...r.querySelectorAll(s)];
 const RM=matchMedia('(prefers-reduced-motion: reduce)').matches;
 const ROUTES=['start','service','marken','lager','isy','treffen','dreirad','kontakt','impressum','datenschutz','warum'];
-const ALIAS={deal:['start','deal'],termin:['service','termin-form'],dienstrad:['service','dienstrad'],beratung:['service','beratung-info'],werkstatt:['service','werkstatt-info'],finanzierung:['service','finanz-info'],versicherung:['service','enra-info'],leasing:['service','leasing-info'],finder:['marken','finder'],besuch:['start','besuch'],showroom:['start','showroom']};
+const ALIAS={tflot:['isy','tflot'],deal:['start','deal'],termin:['service','termin-form'],dienstrad:['service','dienstrad'],beratung:['service','beratung-info'],werkstatt:['service','werkstatt-info'],finanzierung:['service','finanz-info'],versicherung:['service','enra-info'],leasing:['service','leasing-info'],finder:['marken','finder'],besuch:['start','besuch'],showroom:['start','showroom']};
 const WA='491635343133';
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 
