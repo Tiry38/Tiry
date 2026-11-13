@@ -1659,6 +1659,20 @@ a.hnote[href]:hover{filter:brightness(1.08)}
 .ocxl{list-style:none;margin:0;padding:0}
 .ocxl li,.day.ax{display:flex;justify-content:space-between;gap:10px}
 .ocxl li i,.day.ax i{display:block;font-style:normal;font-size:.85em;opacity:.75}
+/* Bearbeiten-Modus */
+body.txon [contenteditable=true]{outline:2px dashed rgba(200,16,46,.5);outline-offset:4px;border-radius:6px;cursor:text;transition:outline-color .2s,background .2s}
+body.txon [contenteditable=true]:hover{outline-color:#C8102E;background:rgba(200,16,46,.06)}
+body.txon [contenteditable=true]:focus{outline:2px solid #C8102E;background:rgba(200,16,46,.08)}
+body.txon img[data-ik]{cursor:copy;outline:2px dashed rgba(37,99,235,.6);outline-offset:-3px}
+.txbar{position:fixed;left:50%;bottom:calc(16px + env(safe-area-inset-bottom,0px));z-index:430;transform:translateX(-50%);display:flex;align-items:center;gap:8px;max-width:calc(100% - 24px);padding:8px 8px 8px 16px;border-radius:999px;background:rgba(18,19,24,.92);backdrop-filter:blur(12px);box-shadow:0 20px 50px -18px rgba(0,0,0,.7),inset 0 0 0 1px rgba(255,255,255,.1);color:#fff;font-family:var(--display)}
+.txbar .txl{display:flex;align-items:center;gap:10px;min-width:0;margin-right:6px}.txbar .txl i{flex:none;width:10px;height:10px;border-radius:50%;background:#FF4D63;box-shadow:0 0 0 4px rgba(255,77,99,.25);animation:txp 1.6s ease-in-out infinite}
+@keyframes txp{50%{box-shadow:0 0 0 7px rgba(255,77,99,.08)}}
+.txbar .txl b{font:800 13.5px/1.1 var(--display);white-space:nowrap}.txbar .txl small{font:600 12px/1.2 var(--display);color:#B9B4AD;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.txbar button{flex:none;min-height:40px;padding:0 15px;border-radius:999px;border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.06);color:#fff;font:700 12.5px/1 var(--display);cursor:pointer}
+.txbar button:hover{background:rgba(255,255,255,.14)}.txbar button.pri{border:0;background:linear-gradient(120deg,#FF4D63,#C8102E 55%,#B87333);box-shadow:0 8px 18px -8px rgba(200,16,46,.9)}
+.as-foot .astx{border:0!important;color:#fff!important;background:linear-gradient(120deg,#FF4D63,#C8102E 55%,#B87333)!important;box-shadow:0 10px 22px -12px rgba(200,16,46,.9)}
+@media (max-width:640px){.txbar{flex-wrap:wrap;justify-content:center;border-radius:22px;padding:9px;left:10px;right:10px;transform:none;max-width:none;gap:6px}.txbar button{flex:1 1 0;min-width:0;padding:0 8px;font-size:12px}.txbar .txl{width:100%;justify-content:center;margin:0}.txbar .txl small{display:none}}
+@media (prefers-reduced-motion:reduce){.txbar .txl i{animation:none}}
 /* Teilen-Fenster */
 .shs{position:fixed;inset:0;z-index:420;display:grid;place-items:center;padding:16px}
 .shs-bg{position:absolute;inset:0;background:rgba(10,11,14,.55);backdrop-filter:blur(4px);opacity:0;transition:opacity .25s}
@@ -3453,7 +3467,7 @@ m696 -454 c28 -13 46 -31 55 -51 22 -53 -50 -177 -173 -300 -187 -186 -647
  <div class="adm-app" role="dialog" aria-modal="true" aria-label="Velocenter Admin">
   <aside class="adm-side"><div class="as-brand"><img src="img/velocenter-logo.svg" alt="Velocenter"><b>Admin</b></div>
    <nav id="admTabs" hidden></nav>
-   <div class="as-foot"><div class="as-me" id="admMe" hidden></div><button type="button" id="admOut" data-alogout hidden>Abmelden</button><button type="button" data-aclose><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>Zur Homepage</button></div></aside>
+   <div class="as-foot"><button type="button" class="astx" data-txstart><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>Seite direkt bearbeiten</button><div class="as-me" id="admMe" hidden></div><button type="button" id="admOut" data-alogout hidden>Abmelden</button><button type="button" data-aclose><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>Zur Homepage</button></div></aside>
   <main class="adm-main"><header class="adm-top"><div class="att"><h2 id="admTitle">Velocenter Admin</h2><span class="sub" id="admSub"></span></div><span class="alive" id="admLive" hidden></span><button type="button" class="adm-x" data-aclose aria-label="Admin schließen">×</button></header>
    <div class="adm-b" id="admBody"></div></main>
   <div class="adm-dr" id="admDr" hidden><div class="adm-drbg" data-drclose></div><div class="adm-drp" id="admDrB" role="dialog" aria-modal="true" aria-label="Rad bearbeiten"></div></div>
@@ -3929,8 +3943,8 @@ function fbSdk(){if(FB.p)return FB.p;const v='10.14.1',L=n=>new Promise((ok,no)=
   FB.auth=firebase.auth();FB.db=firebase.firestore();try{FB.db.settings({ignoreUndefinedProperties:true,merge:true})}catch(e){}return FB});
  FB.p.catch(()=>{FB.p=null});return FB.p}
 /* Besucher: nur 4 Lesezugriffe pro Besuch, ohne Firebase-Programm */
-async function fbPublic(){if(!FBC||!FBC.projectId)return;const g=p=>fsGet(p).catch(()=>null);const[l,st,b,w]=await Promise.all(['pub/lager','site/einstellungen','bestand/aktuell','site/bewertungen'].map(g));
- if(ADM.ok)return;ADM.rows=(l&&l.rows)||{};ADM.set=st||{};SITE=ADM.set;siteApply();LG.DB=b&&Array.isArray(b.raeder)&&b.raeder.length?b:null;if(LG.DB&&!LG.D)LG.ok=true;
+async function fbPublic(){if(!FBC||!FBC.projectId)return;const g=p=>fsGet(p).catch(()=>null);const[l,st,b,w,tx]=await Promise.all(['pub/lager','site/einstellungen','bestand/aktuell','site/bewertungen','site/texte'].map(g));
+ if(tx&&!TX.on)txLoad(tx);if(ADM.ok)return;ADM.rows=(l&&l.rows)||{};ADM.set=st||{};SITE=ADM.set;siteApply();LG.DB=b&&Array.isArray(b.raeder)&&b.raeder.length?b:null;if(LG.DB&&!LG.D)LG.ok=true;
  if(w&&Array.isArray(w.items)){ADM.bew=w;bewRender(w)}if(LG.DB||LG.D)admRefresh();admDeals()}
 /* Eigene Fotos (Firebase): in „fotos/<id>“, im Rad steht „fs:<id>“ */
 const FOTO={};
@@ -3941,6 +3955,7 @@ function fotoFix(){document.querySelectorAll('img[src^="fs:"]').forEach(i=>{cons
 function admWire(db){ADM.db=db;
  db.collection('lager').onSnapshot(q=>{const r={};q.docs.forEach(x=>{r[x.id]=x.data()});ADM.rows=r;admRefresh();if(FBC&&ADM.ok&&!(q.metadata&&q.metadata.fromCache))fbPubLater()},()=>{});
  db.doc('site/einstellungen').onSnapshot(x=>{ADM.set=x.exists?x.data():{};SITE=ADM.set;siteApply();admRefresh();admDeals();if(ADM.ok&&!$('#adm').hidden&&['zeiten','meldung','dash'].includes(ADM.tab)&&!ADM.dirty)admRender()},()=>{});
+ db.doc('site/texte').onSnapshot(x=>{if(!TX.on)txLoad(x.exists?x.data():null)},()=>{});
  db.doc('bestand/aktuell').onSnapshot(x=>{const d=x.exists?x.data():null;LG.DB=d&&Array.isArray(d.raeder)&&d.raeder.length?d:null;if(LG.DB&&!LG.D)LG.ok=true;if(LG.DB||LG.D)admRefresh()},()=>{})}
 /* Besucher lesen bei Firebase nur „pub/lager“: nach jeder Änderung schreibt der Admin eine Kopie */
 function fbPubLater(){clearTimeout(FB.pubT);FB.pubT=setTimeout(()=>{const j=JSON.stringify(ADM.rows);if(j===FB.pub)return;
@@ -4485,8 +4500,55 @@ $('#adm').addEventListener('click',e=>{const t=e.target;if(!ADM.bewEd)return;
 $('#adm').addEventListener('submit',async e=>{if(e.target.id!=='admBewF')return;e.preventDefault();const E=ADM.bewEd;E.score=e.target.score.value.trim();
  const items=E.items.map(x=>({t:String(x.t||'').trim(),n:String(x.n||'').trim(),aus:!!x.aus})).filter(x=>x.t);
  try{await ADM.db.doc('site/bewertungen').set({score:E.score,items,ts:Date.now()});admToast('Bewertungen sind online.');admLog('Bewertungen gespeichert ('+items.length+')')}catch(_){admToast('Speichern fehlgeschlagen.')}});
+/* ===================== Bearbeiten-Modus (13.11.2026): Texte + Bilder direkt auf der Homepage ändern ===================== */
+const TX={ov:{},img:{},on:false,d:{},di:{},cur:null};const TXO=new Map(),TXI=new Map();
+const TXTAG='h1,h2,h3,h4,h5,p,li,dt,dd,figcaption,blockquote';
+const TXSEL='.view h1,.view h2,.view h3,.view h4,.view h5,.view p,.view li,.view dt,.view dd,.view figcaption,.view blockquote,footer h4,footer p';
+const TXNO='#adm,#lgm,#rf,#cmp,#tgLb,#shs,form,a,button,label,select,[id^=lg],#hours,#hours2,#ocard,#ftHours,#tgG,#tgY,#qs,[data-noedit],#hnote,.ostat,.legalbar,[contenteditable=false]';
+const txHash=s=>{let h=2166136261;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619)>>>0}return 't'+h.toString(36)};
+const txNorm=s=>s.replace(/\s+/g,' ').trim();
+function txEls(){return [...document.querySelectorAll(TXSEL)].filter(e=>!e.id&&!e.closest(TXNO)&&!e.querySelector(TXTAG)&&!e.querySelector('[id],a,button,input,svg,img')&&txNorm(e.textContent).length>1)}
+function txKey(e){if(!e.dataset.tk){TXO.set(e,e.innerHTML);e.dataset.tk=txHash(e.tagName+'|'+txNorm(e.innerHTML))}return e.dataset.tk}
+function txImgs(){return [...document.querySelectorAll('.view img,.foot img')].filter(i=>!i.closest('#adm,#lgm,[id^=lg],#rf,#cmp,#tgG,#tgLb,#shs,[data-noedit]')&&i.getAttribute('src')&&!i.getAttribute('src').startsWith('data:'))}
+function txIKey(i){if(!i.dataset.ik){TXI.set(i,i.getAttribute('src'));i.dataset.ik=txHash('img|'+i.getAttribute('src'))}return i.dataset.ik}
+function txClean(h){const d=document.createElement('div');d.innerHTML=String(h||'');const ok=['b','strong','i','em','br','span','u','small','sup','sub'];
+ for(let k=0;k<4;k++)d.querySelectorAll('*').forEach(c=>{const t=c.tagName.toLowerCase();if(!ok.includes(t)){c.replaceWith(...c.childNodes);return}[...c.attributes].forEach(a=>{if(!(t==='span'&&a.name==='class'))c.removeAttribute(a.name)})});
+ return d.innerHTML.slice(0,5000)}
+function txApply(){txEls().forEach(e=>{const k=txKey(e);if(TX.on&&e===document.activeElement)return;const v=k in TX.d?TX.d[k]:TX.ov[k];const want=v!=null?txClean(v):TXO.get(e);if(want!=null&&e.innerHTML!==want)e.innerHTML=want});
+ txImgs().forEach(i=>{const k=txIKey(i),v=k in TX.di?TX.di[k]:TX.img[k];const want=v?fotoSrc(v)||TXI.get(i):TXI.get(i);if(want&&i.getAttribute('src')!==want){i.setAttribute('src',want);i.removeAttribute('srcset')}})}
+function txLoad(d){TX.ov=(d&&d.ov)||{};TX.img=(d&&d.img)||{};txApply()}
+/* Schlüssel der Originaltexte sofort beim Laden merken (bevor etwas überschrieben wird) */
+txEls().forEach(txKey);txImgs().forEach(txIKey);
+new MutationObserver(()=>{if(!TX.on&&(Object.keys(TX.ov).length||Object.keys(TX.img).length)){clearTimeout(TX.mt);TX.mt=setTimeout(txApply,120)}}).observe(document.querySelector('main')||document.body,{childList:true,subtree:true});
+function txCount(){return Object.keys(TX.d).length+Object.keys(TX.di).length}
+function txBar(){let b=$('#txBar');if(!b){b=document.createElement('div');b.id='txBar';b.className='txbar';b.setAttribute('data-noedit','');document.body.append(b)}
+ const n=txCount(),f=TX.cur&&TX.cur.dataset.tk,hasOv=f&&(TX.ov[f]!=null||TX.d[f]!=null);
+ b.innerHTML='<span class="txl"><i></i><b>Bearbeiten-Modus</b><small>'+(n?n+' ungespeicherte Änderung'+(n>1?'en':''):'Text antippen und tippen · Bild antippen = austauschen')+'</small></span>'+
+  (hasOv?'<button type="button" data-txorig>↺ Original</button>':'')+(n?'<button type="button" data-txundo>Verwerfen</button><button type="button" class="pri" data-txsave>Speichern</button>':'')+'<button type="button" data-txend>Fertig</button>';b.hidden=false}
+function txStart(){if(!ADM.ok||!ADM.db)return;TX.on=true;TX.d={};TX.di={};admClose();document.body.classList.add('txon');
+ txEls().forEach(e=>{txKey(e);e.setAttribute('contenteditable','true');e.setAttribute('spellcheck','true')});txImgs().forEach(txIKey);txBar();admToast('Bearbeiten-Modus an: Text antippen und ändern.')}
+function txEnd(force){if(txCount()&&!force){if(!confirm('Es gibt ungespeicherte Änderungen. Wirklich verwerfen?'))return}TX.on=false;TX.d={};TX.di={};TX.cur=null;document.body.classList.remove('txon');
+ document.querySelectorAll('[contenteditable=true]').forEach(e=>e.removeAttribute('contenteditable'));txApply();const b=$('#txBar');if(b)b.hidden=true}
+async function txSave(){const ov=Object.assign({},TX.ov),img=Object.assign({},TX.img),L=[];
+ txEls().forEach(e=>{const k=txKey(e);if(!(k in TX.d))return;const v=txClean(TX.d[k]),o=TXO.get(e);if(txNorm(v)===txNorm(o||''))delete ov[k];else ov[k]=v;
+  const a=txNorm(e.textContent);L.push('„'+(a.length>60?a.slice(0,58)+' …':a)+'“')});
+ Object.keys(TX.di).forEach(k=>{if(TX.di[k])img[k]=TX.di[k];else delete img[k];L.push('Bild ausgetauscht')});
+ try{await ADM.db.doc('site/texte').set({ov,img,ts:Date.now()});TX.ov=ov;TX.img=img;const n=txCount();TX.d={};TX.di={};admLog('Homepage bearbeitet ('+n+'): '+L.slice(0,3).join(', ')+(L.length>3?' …':''));admToast('Gespeichert – ist jetzt live.');txBar()}
+ catch(_){admToast('Speichern fehlgeschlagen – bitte nochmal.')}}
+document.addEventListener('input',e=>{if(!TX.on)return;const el=e.target.closest&&e.target.closest('[data-tk][contenteditable=true]');if(!el)return;TX.d[el.dataset.tk]=el.innerHTML;txBar()});
+document.addEventListener('focusin',e=>{if(!TX.on)return;const el=e.target.closest&&e.target.closest('[data-tk][contenteditable=true]');if(el){TX.cur=el;txBar()}});
+document.addEventListener('paste',e=>{if(!TX.on||!e.target.closest||!e.target.closest('[contenteditable=true]'))return;e.preventDefault();document.execCommand('insertText',false,(e.clipboardData||window.clipboardData).getData('text/plain'))});
+document.addEventListener('keydown',e=>{if(!TX.on)return;const el=e.target.closest&&e.target.closest('[contenteditable=true]');if(el&&e.key==='Enter'&&!e.shiftKey&&/^H|^LI|^DT/.test(el.tagName)){e.preventDefault();el.blur()}if(e.key==='Escape'&&el){e.preventDefault();e.stopImmediatePropagation();el.blur()}},true);
+document.addEventListener('click',async e=>{if(!TX.on)return;const t=e.target;
+ if(t.closest('#txBar')){if(t.closest('[data-txsave]'))txSave();else if(t.closest('[data-txundo]')){TX.d={};TX.di={};TX.cur=null;txApply();txBar()}else if(t.closest('[data-txend]'))txEnd();
+  else if(t.closest('[data-txorig]')&&TX.cur){const k=TX.cur.dataset.tk;TX.d[k]=TXO.get(TX.cur)||'';TX.cur.innerHTML=TX.d[k];txBar()}return}
+ if(t.closest('[contenteditable=true]')){e.preventDefault();e.stopPropagation();return}
+ const im=t.closest('img[data-ik]');if(im&&!im.closest('#adm,#lgm,[id^=lg],#shs')){e.preventDefault();e.stopPropagation();const f=document.createElement('input');f.type='file';f.accept='image/*';
+  f.onchange=async()=>{if(!f.files[0])return;admToast('Bild wird hochgeladen …');try{const u=await admUpload(f.files[0]);TX.di[im.dataset.ik]=u;im.setAttribute('src',fotoSrc(u)||u);im.removeAttribute('srcset');txBar();admToast('Bild getauscht – noch „Speichern“ drücken.')}catch(_){admToast('Bild konnte nicht hochgeladen werden.')}};f.click()}},true);
+addEventListener('beforeunload',e=>{if(TX.on&&txCount()){e.preventDefault();e.returnValue=''}});
+
 /* ===================== Admin 2.0 (13.11.2026): Öffnungszeiten, Hinweise & Aktionen, Analyse, Protokoll, Hilfe ===================== */
-const AI={zeiten:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',meldung:'<path d="M3 11v2a2 2 0 0 0 2 2h2l5 4V5L7 9H5a2 2 0 0 0-2 2zM16 8.5a5 5 0 0 1 0 7M19 6a8.5 8.5 0 0 1 0 12"/>',
+const AI={edit:'<path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/>',tx:'<path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/>',zeiten:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',meldung:'<path d="M3 11v2a2 2 0 0 0 2 2h2l5 4V5L7 9H5a2 2 0 0 0-2 2zM16 8.5a5 5 0 0 1 0 7M19 6a8.5 8.5 0 0 1 0 12"/>',
  analyse:'<path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/>',protokoll:'<path d="M12 8v4l3 2"/><path d="M3.05 11a9 9 0 1 1 .5 4M3 4v5h5"/>',hilfe:'<circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .9-1 1.6V14M12 17.5v.01"/>',
  out:'<path d="M15 4h4a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1h-4M10 17l5-5-5-5M15 12H3"/>',share:'<circle cx="18" cy="5" r="2.6"/><circle cx="6" cy="12" r="2.6"/><circle cx="18" cy="19" r="2.6"/><path d="M8.3 10.8l7.4-4.4M8.3 13.2l7.4 4.4"/>',
  snow:'<path d="M12 2v20M3.3 7l17.4 10M3.3 17L20.7 7M9 4l3 2 3-2M9 20l3-2 3 2"/>',gift:'<rect x="3" y="8" width="18" height="13" rx="2"/><path d="M12 8v13M3 12h18M12 8S10 3 7.5 4.5 9 8 12 8zM12 8s2-5 4.5-3.5S15 8 12 8z"/>',
@@ -4589,7 +4651,7 @@ function admProtokoll(b){const it=(ADM.prot&&ADM.prot.items)||[],us=[...new Set(
   (h||'<div class="anempty"><span class="ic">'+admI('protokoll')+'</span><b>Noch keine Änderungen</b><p>Ab jetzt steht hier jede Änderung im Admin – mit Name, Datum und Uhrzeit.</p></div>')+'</section>'}
 
 /* ---------- Ansicht: Hilfe ---------- */
-const HILFE=[['zeiten','Öffnungszeiten ändern','#FF5A6E','#C8102E',['Links auf „Öffnungszeiten“ tippen.','Bei jedem Tag Schalter „geöffnet“ an oder aus, Uhrzeiten wählen.','„Pause, dann“ anhaken, wenn mittags zu ist.','„Zeiten speichern“ – fertig, gilt sofort überall.']],
+const HILFE=[['tx','Texte & Bilder der Homepage ändern','#FF5A6E','#B87333',['Unten links „Seite direkt bearbeiten“ tippen.','Auf der Homepage jeden Text antippen und einfach tippen.','Bild antippen = neues Foto wählen.','Unten „Speichern“ – sofort live. „↺ Original“ holt den alten Text zurück.']],['zeiten','Öffnungszeiten ändern','#FF5A6E','#C8102E',['Links auf „Öffnungszeiten“ tippen.','Bei jedem Tag Schalter „geöffnet“ an oder aus, Uhrzeiten wählen.','„Pause, dann“ anhaken, wenn mittags zu ist.','„Zeiten speichern“ – fertig, gilt sofort überall.']],
  ['zeiten','Betriebsferien oder Heiligabend eintragen','#F5B83D','#B87333',['„Öffnungszeiten“ öffnen, rechts „Neue Ausnahme“.','Von- und Bis-Datum wählen, Grund eintragen (z. B. Betriebsferien).','„Geschlossen“ oder „Andere Zeiten“ wählen.','Speichern. Die Startseite kündigt es automatisch vorher an.']],
  ['meldung','Hinweis auf die Startseite setzen','#22D3EE','#2563EB',['„Hinweise & Aktionen“ öffnen.','Schalter „Hinweis anzeigen“ an, kurzen Text schreiben.','Farbe und Ziel wählen, unten siehst du die Vorschau.','Speichern. Wieder weg: Schalter aus und speichern.']],
  ['angebote','Sonderangebot setzen','#FF5A6E','#B87333',['„Sonderangebote“ öffnen.','Rad suchen (Modell, Farbe, Größe).','Angebotspreis eintragen, Enter drücken.','Leer machen = Angebot wieder weg.']],
@@ -4598,15 +4660,15 @@ const HILFE=[['zeiten','Öffnungszeiten ändern','#FF5A6E','#C8102E',['Links auf
  ['import','Neuen Bestand aus Veloport einspielen','#38BDF8','#2563EB',['In Veloport den Fahrzeugbestand als CSV exportieren.','„Veloport-Import“ öffnen und die Datei hineinziehen.','Vorschau prüfen, dann „Bestand übernehmen“.','Interne Daten (EK, Rahmennummer) kommen nie auf die Seite.']],
  ['analyse','Besucher-Zahlen lesen','#F5B83D','#C8102E',['„Analyse“ öffnen, Zeitraum oben wählen.','Oben: Besuche und Anfragen mit Vergleich zum Zeitraum davor.','Darunter: welche Seiten, Räder und Knöpfe genutzt werden.','Ohne Cookies – Admins werden nicht mitgezählt.']]];
 function admHilfe(b){b.innerHTML='<div class="ahero"><span class="hi">'+admI('hilfe')+'</span><div><h3>Alles, was du hier änderst, ist sofort auf der Homepage.</h3><p>Keine Programmierkenntnisse nötig. Jede Änderung steht im <b>Protokoll</b> mit Name und Uhrzeit – so lässt sich alles nachvollziehen. Bei Fragen hilft Tiry.</p></div></div>'+
- '<div class="ahelp">'+HILFE.map(([go,t,c1,c2,st])=>'<article class="ahc" style="--g:'+c1+'33"><header><span class="ic" style="--c1:'+c1+';--c2:'+c2+'">'+admI(go)+'</span><h4>'+t+'</h4></header><ol>'+st.map(x=>'<li>'+x+'</li>').join('')+'</ol><button type="button" class="cta" data-go="'+go+'">Jetzt öffnen →</button></article>').join('')+
+ '<div class="ahelp">'+HILFE.map(([go,t,c1,c2,st])=>'<article class="ahc" style="--g:'+c1+'33"><header><span class="ic" style="--c1:'+c1+';--c2:'+c2+'">'+admI(go)+'</span><h4>'+t+'</h4></header><ol>'+st.map(x=>'<li>'+x+'</li>').join('')+'</ol><button type="button" class="cta" '+(go==='tx'?'data-txstart':'data-go="'+go+'"')+'>Jetzt öffnen →</button></article>').join('')+
  '<article class="ahc" style="--g:#22D3EE33"><header><span class="ic" style="--c1:#64748B;--c2:#1B1E25">'+admI('out')+'</span><h4>So kommst du in den Admin</h4></header><ol><li>Adresse der Homepage öffnen und <b>/admin</b> anhängen.</li><li>Benutzer = dein Vorname, dann dein Passwort.</li><li>Fertig. Abmelden unten links.</li></ol><a class="cta" href="#start" data-aclose>Homepage ansehen →</a></article></div>'}
 
 /* ---------- Übersicht: Homepage jetzt ---------- */
 {const d0=admDash;admDash=function(b){d0(b);const o=oeffStatus(),n=SITE.meldung,a=ausKommend(true)[0];
  const lab=o.open?'Laden geöffnet · bis '+hm(o.bis)+' Uhr':(o.aus||o.ft||'Laden geschlossen')+(o.k<99?' · öffnet '+(o.k===0?'heute':o.k===1?'morgen':DN[o.wd])+' '+hm(o.ab):'');
- const qb=(go,ic,t)=>'<button type="button" data-go="'+go+'">'+admI(ic)+t+'</button>';
+ const qb=(go,ic,t)=>'<button type="button" '+(go==='tx'?'data-txstart':'data-go="'+go+'"')+'>'+admI(ic)+t+'</button>';
  b.firstChild.insertAdjacentHTML('afterbegin','<div class="anow"><div class="anowc"><span class="stl'+(o.open?'':' zu')+'"><i></i>'+esc(lab)+'</span><h3>Die Homepage gerade</h3><p>'+(noteAktiv(n)?'Hinweis aktiv: „'+esc(n.txt)+'“':'Kein eigener Hinweis aktiv.')+'<br>'+(a?'Nächste Ausnahme: '+esc(dSpan(a))+(a.txt?' · '+esc(a.txt):'')+' · '+ausZeit(a):'Keine Betriebsferien eingetragen.')+'</p>'+
-  '<div class="row2">'+qb('zeiten','cal','Betriebsferien eintragen')+qb('meldung','meldung','Hinweis setzen')+qb('analyse','analyse','Analyse ansehen')+qb('hilfe','hilfe','Hilfe')+'</div></div>'+
+  '<div class="row2">'+qb('tx','edit','Seite direkt bearbeiten')+qb('zeiten','cal','Betriebsferien eintragen')+qb('meldung','meldung','Hinweis setzen')+qb('analyse','analyse','Analyse ansehen')+qb('hilfe','hilfe','Hilfe')+'</div></div>'+
   '<div class="anows"><div class="ank" style="--c1:#FF5A6E;--c2:#C8102E"><small>Besuche heute</small><b id="anT1">–</b><em id="anT1e">wird geladen</em></div><div class="ank" style="--c1:#F5B83D;--c2:#B87333"><small>Besuche 7 Tage</small><b id="anT7">–</b><em id="anT7e">&nbsp;</em></div>'+
   '<div class="ank" style="--c1:#34D399;--c2:#0D9488"><small>Kontakt-Klicks 7 Tage</small><b id="anK7">–</b><em>WhatsApp · Anruf · E-Mail</em></div><div class="ank" style="--c1:#22D3EE;--c2:#2563EB"><small>Letzte Änderung</small><b style="font-size:17px;line-height:1.25" id="anLc">–</b><em id="anLce">noch nichts geändert</em></div></div></div>');
  const pi=(ADM.prot.items||[])[0];if(pi){$('#anLc').textContent=pi.w.length>42?pi.w.slice(0,40)+' …':pi.w;$('#anLce').textContent=pi.u+' · '+new Date(pi.t).toLocaleString('de-DE',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})}
@@ -4685,6 +4747,7 @@ function anGeraet(){const no=!!LS.get('vc_noan',0);return '<section class="acard
  if(!V)return r0();admNav();const t=ADM_TAB[ADM.tab];$('#admTitle').textContent=t[0];$('#admSub').textContent=t[1];V($('#admBody'))}}
 {const i0=admIn;admIn=function(){try{if(FBC)LS.set('vc_noan',1)}catch(_){}AN.on=false;i0()}}
 $('#adm').addEventListener('click',async e=>{const t=e.target;
+ if(t.closest('[data-txstart]')){txStart();return}
  const r=t.closest('[data-anr]');if(r){AN.n=+r.dataset.anr;LS.set('vc_an',AN.n);admRender();return}
  if(t.closest('[data-anre]')){AN.c={};admRender();return}
  const pf=t.closest('[data-pf]');if(pf&&t.closest('#adm .aplf')){ADM.pf=pf.dataset.pf;admRender();return}

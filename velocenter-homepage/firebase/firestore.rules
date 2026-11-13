@@ -14,7 +14,7 @@ service cloud.firestore {
     match /pub/{d}     { allow read: if true; allow write: if admin(); }
     match /bestand/{d} { allow read: if true; allow write: if admin(); }
     match /fotos/{d}   { allow read: if true; allow write: if admin(); }
-    match /site/{d}    { allow read: if d in ['einstellungen', 'bewertungen'] || admin(); allow write: if admin(); }
+    match /site/{d}    { allow read: if d in ['einstellungen', 'bewertungen', 'texte'] || admin(); allow write: if admin(); }
     match /lager/{d}   { allow read, write: if admin(); }
     // Besucher-Statistik (anonym, ohne Cookies): je Tag ein Dokument mit Zählern. Besucher dürfen nur hochzählen, lesen nur Admins.
     match /stats/{d} {
