@@ -9,7 +9,8 @@ Der Prototyp bleibt unverändert. Die Live-Fassung:
 - wird von Google gefunden (kein noindex mehr),
 - hat keinen Prototyp-Knopf, keine Seite „Prototyp-Infos“ und keinen Admin-Zugang (#admin braucht claude.ai),
 - enthält nur die Bilder, die die Seite wirklich benutzt,
-- bringt CNAME, robots.txt, sitemap.xml, 404.html und Weiterleitungen der alten Coco-Adressen mit.
+- hat echte Unterseiten (SEITEN) mit eigenem Titel/Beschreibung/canonical für Google,
+- bringt CNAME, robots.txt, sitemap.xml, 404.html und Weiterleitungen der restlichen alten Coco-Adressen mit.
 """
 import json, os, re, shutil, sys, datetime
 
@@ -20,11 +21,42 @@ BASIS = 'https://' + DOMAIN + '/'
 
 # alte Adressen der Coco-Seite -> neue Bereiche
 ALT = {
-    'service': 'service', 'hersteller': 'marken', 'isy-experte': 'isy', 'isy-treffen': 'treffen',
-    'e-dreiraeder': 'dreirad', 'kontakt': 'kontakt', 'impressum': 'impressum', 'datenschutz': 'datenschutz',
     'velocenter': 'start', 'blog': 'start', 'legal/imprint': 'impressum', 'legal/privacy': 'datenschutz',
     'legal/accessibility': 'impressum',
 }
+
+
+# Echte Unterseiten (eigene Adresse, Titel, Beschreibung für Google). Die alten Coco-Adressen bleiben so erhalten.
+SEITEN = {
+    'service': 'service', 'hersteller': 'marken', 'lager': 'lager', 'isy-experte': 'isy', 'isy-treffen': 'treffen',
+    'e-dreiraeder': 'dreirad', 'kontakt': 'kontakt', 'impressum': 'impressum', 'datenschutz': 'datenschutz',
+}
+IN_SITEMAP = ('service', 'hersteller', 'lager', 'isy-experte', 'isy-treffen', 'e-dreiraeder', 'kontakt')
+
+
+def seo_tabelle(s):
+    m = re.search(r'const SEO=\{(.*?)\};', s, re.S)
+    return {k: (t, d) for k, t, d in re.findall(r"(\w+):\['([^']*)','([^']*)'\]", m.group(1))}
+
+
+def html_attr(t):
+    return t.replace('&', '&amp;').replace('"', '&quot;')
+
+
+def seite(s, pfad, view, seo):
+    """Gleiche Seite, aber mit eigenem Kopf. Ein Skript ganz oben stellt die Adresse vor dem Laden auf die Startseite
+    um (#bereich) und entfernt danach <base> wieder (sonst gehen die SVG-Symbole #i-… kaputt)."""
+    t, d = seo.get(view, seo['start'])
+    url = BASIS + (pfad + '/' if pfad else '')
+    if pfad:
+        s = ersetze(s, '<meta charset="utf-8">\n', '<meta charset="utf-8">\n<base href="../">\n<script>history.replaceState(null,"",location.pathname.replace(/[^\\/]+\\/(index\\.html)?$/,"")+location.search+(location.hash||"#' + view + '"));document.currentScript.previousElementSibling.remove()</script>\n')
+    s = re.sub(r'<title>[^<]*</title>', '<title>' + t.replace('&', '&amp;') + '</title>', s, count=1)
+    s = re.sub(r'<meta name="description" content="[^"]*">', '<meta name="description" content="' + html_attr(d) + '">', s, count=1)
+    s = re.sub(r'<meta property="og:title" content="[^"]*">', '<meta property="og:title" content="' + html_attr(t) + '">', s, count=1)
+    s = re.sub(r'<meta property="og:description" content="[^"]*">', '<meta property="og:description" content="' + html_attr(d) + '">', s, count=1)
+    s = ersetze(s, '<link rel="canonical" href="' + BASIS + '">', '<link rel="canonical" href="' + url + '">')
+    s = ersetze(s, '<meta property="og:url" content="' + BASIS + '">', '<meta property="og:url" content="' + url + '">')
+    return s
 
 
 def ersetze(s, alt, neu, anzahl=1):
@@ -164,7 +196,11 @@ def main():
     if os.path.isdir(ZIEL):
         shutil.rmtree(ZIEL)
     os.makedirs(ZIEL)
-    open(os.path.join(ZIEL, 'index.html'), 'w', encoding='utf-8').write(s)
+    seo = seo_tabelle(s)
+    open(os.path.join(ZIEL, 'index.html'), 'w', encoding='utf-8').write(seite(s, '', 'start', seo))
+    for pfad, view in SEITEN.items():
+        os.makedirs(os.path.join(ZIEL, pfad), exist_ok=True)
+        open(os.path.join(ZIEL, pfad, 'index.html'), 'w', encoding='utf-8').write(seite(s, pfad, view, seo))
     dateien = bilder(s)
     for f in dateien:
         os.makedirs(os.path.dirname(os.path.join(ZIEL, f)), exist_ok=True)
@@ -181,7 +217,9 @@ def main():
     heute = datetime.date.today().isoformat()
     open(os.path.join(ZIEL, 'sitemap.xml'), 'w').write(
         '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
-        f'<url><loc>{BASIS}</loc><lastmod>{heute}</lastmod></url>\n</urlset>\n')
+        f'<url><loc>{BASIS}</loc><lastmod>{heute}</lastmod></url>\n'
+        + ''.join(f'<url><loc>{BASIS}{p}/</loc><lastmod>{heute}</lastmod></url>\n' for p in IN_SITEMAP)
+        + '</urlset>\n')
     for alt, neu in ALT.items():
         os.makedirs(os.path.join(ZIEL, alt), exist_ok=True)
         open(os.path.join(ZIEL, alt, 'index.html'), 'w', encoding='utf-8').write(weiterleitung(neu, alt.count('/') + 1))

@@ -1941,6 +1941,33 @@ html.scr .sky,html.scr .blobs i,html.scr .blobs::after,html.scr .ribbons i{anima
 .tlnote:focus-visible{outline:3px solid #3B6FE0;outline-offset:3px}
 @media (max-width:640px){.tlnote{flex-wrap:wrap;border-radius:22px;padding:14px;gap:12px}.tlnote .ar{width:100%;justify-content:center}}
 @media (prefers-reduced-motion:reduce){.tlnote{animation:none}}
+.lgm-act .shb svg{display:block!important;order:0!important;width:17px!important;height:17px!important;padding:0!important;background:none!important}
+.lgm-act .shb{gap:9px}.lgm-act .shb::after{display:none}
+.wstrip.spring{background:linear-gradient(120deg,rgba(247,255,240,.97),rgba(255,251,235,.96) 60%,rgba(255,241,242,.95)) padding-box,linear-gradient(110deg,#84CC16,#FACC15,#FB7185,#84CC16) border-box;background-size:100% 100%,300% 100%}
+.wstrip.spring>i{background:linear-gradient(150deg,#FDE047,#F59E0B 50%,#EA580C);box-shadow:inset 0 1px 0 rgba(255,255,255,.5),0 10px 18px -8px rgba(234,88,12,.8)}
+.wstrip.spring .wt small{color:#4D7C0F}
+.gift{padding:clamp(26px,4vw,46px) 0}
+.gcard{position:relative;isolation:isolate;overflow:hidden;display:flex;align-items:center;gap:20px;padding:18px 18px 18px 20px;border-radius:999px;text-decoration:none;color:#fff;
+ background:radial-gradient(90% 180% at 0% 50%,rgba(200,16,46,.55),transparent 60%),radial-gradient(70% 160% at 100% 0%,rgba(245,184,61,.32),transparent 60%),linear-gradient(180deg,#2A1E24,#14161D);
+ box-shadow:inset 0 1px 0 rgba(255,255,255,.14),inset 0 0 0 1px rgba(245,184,61,.28),0 26px 50px -26px rgba(110,8,22,.8);transition:transform .35s var(--spring),box-shadow .35s}
+.gcard:hover{transform:translateY(-3px);box-shadow:inset 0 1px 0 rgba(255,255,255,.16),inset 0 0 0 1px rgba(245,184,61,.45),0 32px 56px -24px rgba(110,8,22,.9)}
+.gcard::after{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(105deg,transparent 35%,rgba(255,226,160,.16) 48%,transparent 60%);background-size:250% 100%;animation:osheen 8s ease-in-out infinite}
+.gic{flex:none;display:grid;place-items:center;width:62px;height:62px;border-radius:50%;color:#3B1A05;background:linear-gradient(150deg,#FDE68A,#F5B83D 50%,#B7791F);box-shadow:inset 0 1px 0 rgba(255,255,255,.6),0 12px 24px -10px rgba(245,184,61,.9)}
+.gcard svg{display:block!important;padding:0!important;margin:0!important;background:none!important;border-radius:0!important;box-shadow:none!important;fill:none;stroke:currentColor;position:static!important;transform:none}
+.gic svg{width:30px!important;height:30px!important}
+.gtx{flex:1;min-width:0;display:flex;flex-direction:column;gap:5px}
+.gtx small{font:800 11px/1 var(--display);letter-spacing:.16em;text-transform:uppercase;color:#F5C76B}
+.gtx strong{font:900 clamp(20px,2.2vw,26px)/1.1 var(--display);letter-spacing:-.02em}
+.gtx>span{font:500 15px/1.4 var(--display);color:rgba(255,255,255,.78)}
+.gcta{flex:none;color:#fff;display:inline-flex;align-items:center;gap:9px;padding:14px 22px;border-radius:999px;background:linear-gradient(180deg,#DC1E38,#B5102A);font:800 14px/1 var(--display);box-shadow:inset 0 1px 0 rgba(255,255,255,.22),0 10px 22px -10px rgba(200,16,46,.9)}
+.gcta svg{color:#fff!important;width:15px!important;height:15px!important;transition:transform .3s var(--spring)}.gcard:hover .gcta svg{transform:translateX(3px)!important}
+.gsp{position:absolute;inset:0;z-index:-1;pointer-events:none}
+.gsp i{position:absolute;width:5px;height:5px;border-radius:50%;background:#FDE68A;box-shadow:0 0 10px 2px rgba(253,230,138,.8);opacity:0;animation:gtw 3.6s ease-in-out infinite}
+.gsp i:nth-child(1){left:12%;top:22%}.gsp i:nth-child(2){left:38%;top:74%;animation-delay:.8s}.gsp i:nth-child(3){left:58%;top:18%;animation-delay:1.6s}.gsp i:nth-child(4){left:74%;top:70%;animation-delay:2.3s}.gsp i:nth-child(5){left:88%;top:30%;animation-delay:2.9s}
+@keyframes gtw{0%,100%{opacity:0;transform:scale(.4)}45%{opacity:1;transform:scale(1)}}
+.gcard:focus-visible{outline:3px solid #F5B83D;outline-offset:4px}
+@media (max-width:700px){.gcard{flex-wrap:wrap;border-radius:28px;gap:14px;padding:18px}.gic{width:52px;height:52px}.gic svg{width:26px;height:26px}.gtx{flex-basis:calc(100% - 70px)}.gcta{width:100%;justify-content:center}}
+@media (prefers-reduced-motion:reduce){.gcard::after,.gsp i{animation:none}}
 /* Hero-Schilder (13.11.2026): klickbare Glas-Kapseln, kompakt */
 a.hchip.hc{--hg:linear-gradient(110deg,#E2232D,#F472B6,#A78BFA,#38BDF8,#E2232D);display:inline-flex;align-items:center;gap:8px;padding:4px 5px 4px 4px!important;border-radius:999px!important;text-decoration:none;color:#1B1E25;
  border:1.5px solid transparent;background:linear-gradient(135deg,rgba(255,255,255,.97),rgba(255,255,255,.88)) padding-box,var(--hg) border-box!important;background-size:100% 100%,300% 100%!important;
@@ -2443,7 +2470,7 @@ m696 -454 c28 -13 46 -31 55 -51 22 -53 -50 -177 -173 -300 -187 -186 -647
    <nav class="qacc hello" style="--d:1.45s" aria-label="Schnellzugriff">
     <a class="qa on" href="#termin" style="--img:url(img/bosch-motor.webp);--pos:86% 40%"><span class="bg"></span><span class="ic"><svg><use href="#i-cal"/></svg></span><span class="tx"><i>01 · Werkstatt</i><b>Termin anfragen</b><small>Werkstatt oder Probefahrt</small><em>Jetzt anfragen</em></span></a>
     <a class="qa" href="#lager" style="--img:url(img/laden-innen.webp);--pos:50% 55%"><span class="bg"></span><span class="ic"><svg><use href="#i-bike"/></svg></span><span class="tx"><i>02 · Ausstellung</i><b>Auf Lager</b><small id="qkLager">Räder sofort verfügbar</small><em>Räder ansehen</em></span></a>
-    <a class="qa qice" href="#deal" style="--img:url(img/laden-eingang.webp);--pos:50% 45%"><span class="bg"></span><span class="ic"><svg><use href="#i-gift"/></svg></span><span class="tx"><i>03 · Bis 28.02.</i><b>Winter-Aktion</b><small>–20 € auf jede Inspektion</small><em>Zur Aktion</em></span></a>
+    <a class="qa qice" id="qkSeason" href="#deal" style="--img:url(img/laden-eingang.webp);--pos:50% 45%"><span class="bg"></span><span class="ic"><svg><use href="#i-gift"/></svg></span><span class="tx"><i>03 · Bis 28.02.</i><b>Winter-Aktion</b><small>–20 € auf jede Inspektion</small><em>Zur Aktion</em></span></a>
     <a class="qa" href="#besuch" style="--img:url(img/fassade.webp);--pos:50% 50%"><span class="bg"></span><span class="ic"><svg><use href="#i-clock"/></svg></span><span class="tx"><i>04 · Wörth am Rhein</i><b>Öffnungszeiten</b><small id="qkHours">Mo, Di, Do, Fr · Sa vormittags</small><em>Besuch planen</em></span></a>
    </nav>
   </div>
@@ -2464,6 +2491,17 @@ m696 -454 c28 -13 46 -31 55 -51 22 -53 -50 -177 -173 -300 -187 -186 -647
     <div class="cdn" role="timer" aria-label="Aktion gilt bis 28.02.2027"><div><b id="dealDays">–</b><span>Tage</span></div><div><b id="cdH">–</b><span>Std</span></div><div><b id="cdM">–</b><span>Min</span></div><div><b id="cdS">–</b><span>Sek</span></div></div>
     <a class="cta" href="#termin" data-pre="Winter-Inspektion"><svg><use href="#i-cal"/></svg>Winter-Termin sichern</a>
    </div>
+  </div>
+ </div>
+
+ <div class="gift" id="gutschein" hidden>
+  <div class="wrap">
+   <a class="gcard pre" href="#besuch" aria-label="Gutscheine vom Velocenter – im Laden erhältlich, Öffnungszeiten ansehen">
+    <span class="gsp" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span>
+    <span class="gic"><svg><use href="#i-gift"/></svg></span>
+    <span class="gtx"><small>Geschenk-Idee zu Weihnachten</small><strong>Gutscheine vom Velocenter</strong><span>Für alle, die gern Rad fahren. Bei uns im Laden erhältlich.</span></span>
+    <span class="gcta">Öffnungszeiten<svg><use href="#i-arrow"/></svg></span>
+   </a>
   </div>
  </div>
 
@@ -2604,7 +2642,7 @@ m696 -454 c28 -13 46 -31 55 -51 22 -53 -50 -177 -173 -300 -187 -186 -647
      <li><b>Laden</b> bei 0–40 °C, am besten bei Zimmertemperatur und ohne direkte Sonne.</li>
      <li><b>Bei Frost</b> den Akku vor der Fahrt drinnen aufwärmen lassen.</li>
     </ul>
-    <div class="tact"><a class="cta" href="#termin" data-pre="Inspektion"><svg><use href="#i-cal"/></svg>Werkstatt-Termin anfragen</a><a class="ghost" href="#deal">Zur Winter-Aktion<svg><use href="#i-arrow"/></svg></a></div>
+    <div class="tact"><a class="cta" href="#termin" data-pre="Inspektion"><svg><use href="#i-cal"/></svg>Werkstatt-Termin anfragen</a><a class="ghost wonly" href="#deal">Zur Winter-Aktion<svg><use href="#i-arrow"/></svg></a></div>
     <p class="tsrc">Quellen Bosch: <a href="https://www.bosch-ebike.com/de/service/haendlerservice" target="_blank" rel="noopener">Händler-Service</a> · <a href="https://www.bosch-ebike.com/de/news/12-fragen-rund-um-den-ebike-akku" target="_blank" rel="noopener">12 Fragen zum eBike-Akku</a></p>
    </div>
   </div>
@@ -2617,6 +2655,7 @@ m696 -454 c28 -13 46 -31 55 -51 22 -53 -50 -177 -173 -300 -187 -186 -647
     <h2 class="big" style="margin-top:16px">Termin anfragen <span class="gt">in 30 Sekunden.</span></h2>
     <p class="lead" style="margin-top:20px">Probefahrt oder Werkstatt: Wunschtag wählen, kurz beschreiben, abschicken. Deine Anfrage geht direkt an uns, wir melden uns mit einem festen Termin.</p>
     <a class="wstrip" href="#deal" aria-label="Winter-Aktion: –20 € auf jede Inspektion plus Sattelüberzug geschenkt, nur solange Termine frei"><i aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 2v20M3.3 7l17.4 10M3.3 17L20.7 7M9 4l3 3 3-3M9 20l3-3 3 3M3.8 10.2l4.1-1.1-1.1-4.1M20.2 13.8l-4.1 1.1 1.1 4.1M6.8 19.2l1.1-4.1-4.1-1.1M17.2 4.8l-1.1 4.1 4.1 1.1"/></svg></i><span class="wt"><small>Winter-Aktion · nur solange Termine frei</small><strong>–20 € auf jede Inspektion <em>+ Sattelüberzug geschenkt</em></strong></span><span class="wd"><b class="wsd">–</b><small>Tage</small></span><span class="wa"><svg><use href="#i-arrow"/></svg></span></a>
+    <a class="wstrip spring" href="#termin" data-pre="Frühjahrs-Check (Inspektion)" hidden aria-label="Frühjahrs-Check: Rad fit für die Saison, jetzt Termin sichern"><i aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2.6M12 18.9v2.6M2.5 12h2.6M18.9 12h2.6M5.3 5.3l1.8 1.8M16.9 16.9l1.8 1.8M5.3 18.7l1.8-1.8M16.9 7.1l1.8-1.8"/></svg></i><span class="wt"><small>Saisonstart · Frühjahrs-Check</small><strong>Rad fit für die Saison <em>– jetzt Termin sichern</em></strong></span><span class="wa"><svg><use href="#i-arrow"/></svg></span></a>
     <div class="blobimg" style="margin-top:34px;max-width:460px"><img src="img/isy-blumen.webp" alt="i:SY E-Bikes mit Blumenkörben vor einer Holzhütte" loading="lazy" width="800" height="600"></div>
    </div>
    <form class="panel form pre" id="tf" novalidate style="--d:.1s">
@@ -3419,7 +3458,8 @@ function arm(sec){$$('.pre',sec).forEach(el=>{el.classList.remove('in');if(!io){
 let cur=null,busy=false;
 /* Sprungziel nachführen, falls Bilder/Animationen darüber die Höhe noch ändern */
 function anchFix(t,d=0){let n=0;const k=()=>{if(++n>6)return;const y=t.getBoundingClientRect().top;if(Math.abs(y-96)>24)t.scrollIntoView({behavior:'auto',block:'start'});setTimeout(k,350)};setTimeout(k,d+250);['wheel','touchstart','keydown'].forEach(e=>addEventListener(e,()=>{n=99},{once:true,passive:true}))}
-function target(){const h=decodeURIComponent(location.hash.slice(1));if(ALIAS[h])return ALIAS[h];return[ROUTES.includes(h)?h:'start',null]}
+let RADK=null;
+function target(){const h=decodeURIComponent(location.hash.slice(1));if(h.startsWith('rad=')){RADK=h.slice(4);return['lager',null]}if(ALIAS[h])return ALIAS[h];return[ROUTES.includes(h)?h:'start',null]}
 function show(v,anchor,first){
  $$('.view').forEach(s=>{s.hidden=s.dataset.v!==v;s.classList.remove('enter')});
  const sec=$('.view[data-v="'+v+'"]');void sec.offsetWidth;sec.classList.add('enter');
@@ -3434,6 +3474,7 @@ function show(v,anchor,first){
 function go(first){
  const [v,anchor]=target();document.body.classList.remove('menu');$('#burger').setAttribute('aria-expanded','false');
  if(first){show(v,anchor,first);return}
+ if(v===cur&&RADK&&v==='lager'){lgOpen();return}
  if(v===cur){if(anchor){const t=document.getElementById(anchor);if(t){t.scrollIntoView({behavior:'smooth',block:'start'});anchFix(t,900)}}else scrollTo({top:0,behavior:'smooth'});return}
  if(busy)return;busy=true;const w=$('#wipe');w.classList.remove('go');void w.offsetWidth;w.classList.add('go');
  setTimeout(()=>show(v,anchor),480);setTimeout(()=>{w.classList.remove('go');busy=false},1050);
@@ -3608,7 +3649,8 @@ function lgRender(){if(!LG.ok)return;const L=LG.list=lgFilter();const g=$('#lgGr
   '<div class="lgst">'+'<button type="button" class="hrt'+(merkHas(mKey(m))?' on':'')+'" data-merk="'+esc(mKey(m))+'" aria-pressed="'+merkHas(mKey(m))+'" aria-label="'+esc(m.marke+' '+m.modell)+' merken">'+HEART+'</button>'+(b?'<img class="wl" src="'+b.logo+'" alt="">':'')+(im?'<img class="bk" src="'+im+'" alt="" loading="lazy">':'<span class="phl">'+(b?'<img src="'+b.logo+'" alt="">':'<b>'+esc(m.marke)+'</b>')+'<small>Foto folgt</small></span>')+'<div class="bds">'+lgBadgesM(m)+'</div></div>'+
   '<div class="lgin"><span class="mk">'+esc(m.marke)+'</span><h3>'+esc(m.modell)+'</h3><div class="sp">'+(m.grs.length?'<span>'+esc(m.grs.length>1?m.grs.length+' Größen: '+m.grs.join(' · '):m.grs[0])+'</span>':'')+(m.fs.length?'<span class="fs">'+m.fs.slice(0,8).map(f=>'<i title="'+esc(f)+'" style="background:'+lgFarbe(f)+'"></i>').join('')+(m.fs.length===1?esc(m.fs[0]):m.fs.length+' Farben')+'</span>':'')+(m.rahmen?'<span>'+esc(m.rahmen)+'</span>':'')+'</div>'+
   '<div class="ft">'+lgPriceM(m)+'<span class="go">Ansehen</span></div></div></article>'}).join('')}
-function lgOpen(){lgLoad().then(()=>{lgChips();lgRender()})}
+function lgOpen(){lgLoad().then(()=>{lgChips();lgRender();if(RADK&&Array.isArray(LG.M)){const i=LG.M.findIndex(m=>rk(m)===RADK);RADK=null;if(i>=0)lgOpenList(LG.M,i)}})}
+const rk=m=>admSlug(mKey(m).replace(/\|/g,' '));
 /* Detailansicht im Showroom-Stil */
 function lgInfo(){const m=LG.list[LG.i],v=m.v[LG.vi]||m.v[0];const row=(l,x,h)=>x?'<div><dt>'+l+'</dt><dd>'+(h||esc(x))+'</dd></div>':'';
  const sz=lgSz(v),inSz=m.v.map((x,j)=>[x,j]).filter(([x])=>lgSz(x)===sz);
@@ -3633,7 +3675,7 @@ function lgShow(k,dir){const L=LG.list;if(!L.length)return;LG.i=(k+L.length)%L.l
 function lgStage(){const m=LG.list[LG.i],b=lgBrand(m.marke),im=lgImg(m,LG.vi),st=$('#lgmStage');
  const bk=$('#lgmBk'),rf=$('#lgmRf'),wl=$('#lgmWl');bk.src=im||'';rf.src=im||'';bk.alt=m.marke+' '+m.modell;wl.src=b?b.logo:'';wl.hidden=!b;bk.hidden=rf.hidden=!im;
  let ph=$('.phm',st);if(!im){if(!ph){ph=document.createElement('div');ph.className='phm';st.append(ph)}ph.innerHTML=(b?'<img src="'+b.logo+'" alt="">':'<b>'+esc(m.marke)+'</b>')+'<small>Foto folgt</small>';ph.hidden=false;wl.hidden=true}else if(ph)ph.hidden=true}
-function lgClose(){const m=$('#lgm');m.classList.remove('on');document.body.style.overflow='';setTimeout(()=>{m.hidden=true},320)}
+function lgClose(){if(location.hash.startsWith('#rad='))history.replaceState(null,'',location.pathname+location.search+'#lager');const m=$('#lgm');m.classList.remove('on');document.body.style.overflow='';setTimeout(()=>{m.hidden=true},320)}
 $('#lgGrid').addEventListener('click',e=>{if(e.target.closest('#lgReset')){LG.f={q:'',mk:'',rf:'',nur:false,deal:false,sort:LG.f.sort};$('#lgQ').value='';$('#lgNur').checked=false;lgChips();lgRender();return}const c=e.target.closest('.lgc');if(c)lgShow(+c.dataset.k,1)});
 $('#lgGrid').addEventListener('keydown',e=>{const c=e.target.closest('.lgc');if(c&&(e.key==='Enter'||e.key===' ')){e.preventDefault();lgShow(+c.dataset.k,1)}});
 $('#lgMk').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;if(b.hasAttribute('data-dealx')){LG.f.deal=false;lgChips();lgRender();return}LG.f.mk=b.dataset.mk;lgChips();lgRender()});
@@ -4035,10 +4077,20 @@ function seoSet(v){const s=SEO[v]||SEO.start;document.title=s[0];const m=(n,a,c)
 /* ---------- Winter-Countdown (Sekunden) ---------- */
 (function(){const end=new Date('2027-02-28T23:59:59+01:00'),start=new Date('2026-11-01T00:00:00+01:00');const D=$('#dealDays'),H=$('#cdH'),M=$('#cdM'),S=$('#cdS');
  const p=n=>String(n).padStart(2,'0');
- function t(){const now=new Date(),ms=end-now;const on=now>=start&&ms>0;$$('.wstrip').forEach(w=>w.hidden=!on);if(!on)return;
+ function t(){const now=new Date(),ms=end-now;const on=now>=start&&ms>0;$$('.wstrip:not(.spring)').forEach(w=>w.hidden=!on);if(!on)return;
   const d=Math.floor(ms/864e5),h=Math.floor(ms/36e5)%24,m=Math.floor(ms/6e4)%60,s=Math.floor(ms/1e3)%60;
   if(D)D.textContent=d;if(H)H.textContent=p(h);if(M)M.textContent=p(m);if(S)S.textContent=p(s);$$('.wsd').forEach(x=>x.textContent=d)}
  t();setInterval(()=>{if(cur==='start'||cur==='service')t()},1000)})();
+
+/* ---------- Saison: Gutschein (10.11.–24.12.), Frühjahrs-Check (März/April nach der Winter-Aktion) ---------- */
+(function(){const P=new Intl.DateTimeFormat('en-CA',{timeZone:'Europe/Berlin',month:'numeric',day:'numeric'}).formatToParts(new Date()),mo=+P.find(x=>x.type==='month').value,dy=+P.find(x=>x.type==='day').value;
+ const now=new Date(),winter=now>=new Date('2026-11-01T00:00:00+01:00')&&now<=new Date('2027-02-28T23:59:59+01:00');
+ const spring=!winter&&(mo===3||mo===4),gift=(mo===11&&dy>=10)||(mo===12&&dy<=24);
+ const g=$('#gutschein');if(g)g.hidden=!gift;
+ $$('.wonly').forEach(x=>x.hidden=!winter);$$('.wstrip.spring').forEach(x=>x.hidden=!spring);
+ const q=$('#qkSeason');if(q&&!winter){q.classList.remove('qice');q.href='#termin';q.dataset.pre=spring?'Frühjahrs-Check (Inspektion)':'Inspektion';
+  const u=q.querySelector('.ic use');if(u)u.setAttribute('href','#i-wrench');
+  q.querySelector('.tx').innerHTML=spring?'<i>03 · Saisonstart</i><b>Frühjahrs-Check</b><small>Rad fit für die Saison</small><em>Termin sichern</em>':'<i>03 · Werkstatt</i><b>Inspektion</b><small>Sicher durch die Saison</small><em>Termin sichern</em>'}})();
 
 /* ---------- Merkliste ---------- */
 const mKey=m=>[m.marke,m.modell,m.gebraucht?'g':'',m.vorfuehr?'v':''].join('|').toLowerCase();
@@ -4078,11 +4130,15 @@ $('#cmp').addEventListener('click',e=>{if(e.target.closest('[data-cmpx]')){cmpCl
 $('#mkBar').addEventListener('click',cmpOpen);
 
 /* ---------- Probefahrt per WhatsApp + Dienstrad-Link im Detail ---------- */
-$('#lgm').addEventListener('click',e=>{const p=e.target.closest('[data-pf]');if(p){const m=LG.list[LG.i],v=m.v[LG.vi]||m.v[0];
+$('#lgm').addEventListener('click',e=>{const sh=e.target.closest('[data-share]');if(sh){const m=LG.list[LG.i],url=location.origin+location.pathname+'#rad='+rk(m),t=m.marke+' '+m.modell+' beim Velocenter Hessert in Wörth am Rhein';
+  if(navigator.share&&matchMedia('(pointer:coarse)').matches){navigator.share({title:t,text:t,url}).catch(()=>{});return}
+  const sp=sh.querySelector('span');if(navigator.clipboard)navigator.clipboard.writeText(url).then(()=>{sp.textContent='Link kopiert ✓';setTimeout(()=>{sp.textContent='Teilen'},2400)},()=>{});
+  const a=document.createElement('a');a.href='https://wa.me/?text='+encodeURIComponent(t+'\n'+url);a.target='_blank';a.rel='noopener';document.body.append(a);a.click();a.remove();return}
+ const p=e.target.closest('[data-pf]');if(p){const m=LG.list[LG.i],v=m.v[LG.vi]||m.v[0];
   waOpen('Hallo Velocenter,\nich möchte gern dieses Rad Probe fahren'+(v.status==='bestellt'?' (sobald es da ist)':'')+':\n\n'+m.marke+' '+m.modell+'\n'+[v.gr&&'Größe: '+v.gr,v.farbe&&'Farbe: '+v.farbe].filter(Boolean).join(' · ')+(v.id?'\nBestands-Nr.: '+v.id:'')+'\n\nWann passt es euch?');return}
  const d=e.target.closest('[data-dr]');if(d){const pr=+d.dataset.dr;lgClose();DR.p=pr;drSync();setTimeout(()=>{location.hash='dienstrad'},250)}});
 function lgActHtml(m,v){const k=mKey(m),on=merkHas(k),pr=v.preis||v.angebot||0;
- return '<div class="row lgm-act"><button type="button" class="cta" data-ask="Kaufen">Dieses Rad anfragen</button><button type="button" class="cta wa" data-pf><svg><use href="#i-chat"/></svg>Probefahrt per WhatsApp</button><button type="button" class="ghost hrtb'+(on?' on':'')+'" data-merk="'+esc(k)+'" aria-pressed="'+on+'">'+HEART+'<span>'+(on?'Gemerkt':'Merken')+'</span></button></div>'+
+ return '<div class="row lgm-act"><button type="button" class="cta" data-ask="Kaufen">Dieses Rad anfragen</button><button type="button" class="cta wa" data-pf><svg><use href="#i-chat"/></svg>Probefahrt per WhatsApp</button><button type="button" class="ghost hrtb'+(on?' on':'')+'" data-merk="'+esc(k)+'" aria-pressed="'+on+'">'+HEART+'<span>'+(on?'Gemerkt':'Merken')+'</span></button><button type="button" class="ghost shb" data-share><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="2.6"/><circle cx="6" cy="12" r="2.6"/><circle cx="18" cy="19" r="2.6"/><path d="M8.3 10.8l7.4-4.4M8.3 13.2l7.4 4.4"/></svg><span>Teilen</span></button></div>'+
   (pr>=500?'<button type="button" class="lgdr" data-dr="'+pr+'"><span>Als <b>Dienstrad</b> leasen: Was kostet es dich im Monat?'+(v.angebot&&v.preis?'<small>Leasing zum regulären Preis '+eur(v.preis)+', nicht zum Aktionspreis</small>':'')+'</span><span aria-hidden="true">Rechner →</span></button>':'')}
 
 /* ---------- Rad-Finder ---------- */

@@ -34,3 +34,8 @@
 - Leasing-Hinweis (13.11.2026, Tiry): unter den Leasing-Logos Kapsel „Dein Leasing-Anbieter ist nicht dabei? Frag einfach nach – wir arbeiten noch mit weiteren Anbietern zusammen“ mit Knopf „Nachfragen“ → Kontakt.
 - Winter-Hinweis im Terminbereich (13.11.2026, Tiry: „schicker“): Kapsel mit Eis-Verlaufsrand, drehender Schneeflocke, Glanz, Tage-Zähler als dunkle Plakette, Pfeil → Aktion. Text bleibt: –20 € je Inspektion + Sattelüberzug, nur solange Termine frei.
 - Foto Laden-Eingang (13.11.2026, Tiry): Kartons rechts neben dem Eingang wegretuschiert (Wand, Gras, Pflaster rekonstruiert).
+- Rad teilen (13.11.2026, Tiry): Knopf „Teilen“ im Rad-Fenster (Handy: Teilen-Menü, PC: WhatsApp + Link kopiert). Link `#rad=<marke-modell>` öffnet genau dieses Rad im Lager.
+- Saison-Schalter (13.11.2026, Tiry): ab 01.03. nach der Winter-Aktion automatisch „Frühjahrs-Check“ (März/April, Kachel 03 + Streifen beim Termin, ohne Preis – Preis/Inhalt legen Stefan/Tiry fest). Außerhalb Winter/Frühjahr Kachel 03 = Inspektion. Winter-Link „Zur Winter-Aktion“ nur im Winter.
+- Gutscheine (13.11.2026, Tiry): Band „Gutscheine vom Velocenter – bei uns im Laden erhältlich“ jedes Jahr 10.11.–24.12. auf der Startseite, Klick → Öffnungszeiten. Keine Beträge/Inhalte genannt.
+- Unterseiten für Google (13.11.2026, Tiry): Live-Fassung hat echte Seiten /service/, /hersteller/, /lager/, /isy-experte/, /isy-treffen/, /e-dreiraeder/, /kontakt/, /impressum/, /datenschutz/ mit eigenem Titel/Beschreibung/canonical (alte Coco-Adressen bleiben gültig), Sitemap mit allen. Besucher landen danach im gewohnten #-Bereich.
+- Umstellung www.velo-center.de (13.11.2026, Tiry): dauert noch, Stefan braucht mehr Zeit – bis dahin nur Testadresse, kein Druck.
