@@ -21,3 +21,4 @@
 - Showroom startet bei jedem Aufruf mit einem zufälligen Bestandsrad (nicht immer i:SY); Markenleiste zeigt je Marke ein zufälliges Bestandsrad (13.11.2026).
 - Showroom: keine Wiederholung desselben Rads (gleiches Modell + Farbe nur einmal im Pool, bildgleiche Dubletten raus); Startbild erst sichtbar, wenn das Zufallsrad steht (13.11.2026).
 - Winter-Aktion: Zusatz „nur solange Termine verfügbar sind“ (13.11.2026).
+- Showroom-Zufall über crypto (nicht Math.random), zuletzt gezeigte 24 Räder werden im Browser gemerkt (vc_srl) – jeder Besuch eine andere Reihenfolge (13.11.2026).

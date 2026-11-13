@@ -3115,7 +3115,10 @@ $$('.band .tk').forEach(t=>{const items=t.dataset.t.split('|').map(x=>'<span>'+e
 /* Showroom-Pool: zufällige Räder aus dem Bestand (nur mit Foto, freigestellt + geschärft in img/show/), jeder 5. Wechsel = Van Raam Dreirad */
 const SHOWOK=new Set(["b2-isy-0.webp","b2-isy-1.webp","b2-isy-10.webp","b2-ktm-0.webp","b2-ktm-10.webp","b2-ktm-11.webp","b2-ktm-12.webp","b2-ktm-13.webp","b2-ktm-14.webp","b2-ktm-15.webp","b2-ktm-16.webp","b2-ktm-17.webp","b2-ktm-2.webp","b2-ktm-3.webp","b2-ktm-4.webp","b2-ktm-5.webp","b2-ktm-6.webp","b2-ktm-7.webp","b2-ktm-8.webp","b2-ktm-9.webp","b2-qio-0.webp","b2-qio-1.webp","b2-qio-2.webp","b2-qio-3.webp","b2-qio-4.webp","b2-qio-5.webp","b2-qio-6.webp","b2-rest-8.webp","isy-01.webp","isy-02.webp","isy-03.webp","isy-04.webp","isy-05.webp","isy-06.webp","isy-07.webp","isy-08.webp","isy-11.webp","isy-12.webp","isy-13.webp","isy-14.webp","isy-15.webp","isy-16.webp","isy-17.webp","isy-18.webp","isy-19.webp","isy-20.webp","isy-21.webp","isy-22.webp","isy-23.webp","isy-24.webp","isy-25.webp","isy-26.webp","isy-27.webp","isy-28.webp","isy-29.webp","isy-30.webp","isy-31.webp","isy-32.webp","isy-33.webp","isy-34.webp","isy-36.webp","isy-37.webp","isy-45.webp","ktm-13.webp","ktm-15.webp","ktm-16.webp","ktm-17.webp","ktm-18.webp","ktm-19.webp","ktm-20.webp","ktm-21.webp","ktm-22.webp","ktm-23.webp","ktm-24.webp","ktm-25.webp","ktm-26.webp","ktm-27.webp","ktm-28.webp","ktm-29.webp","ktm-30.webp","ktm-31.webp","ktm-32.webp","ktm-33.webp","ktm-34.webp","qio-0.webp","qio-1.webp","qio-11.webp","qio-13.webp","qio-14.webp","qio-15.webp","qio-16.webp","qio-17.webp","qio-18.webp","qio-19.webp","qio-2.webp","qio-20.webp","qio-21.webp","qio-22.webp","qio-23.webp","qio-24.webp","qio-25.webp","qio-3.webp","qio-6.webp","qio-7.webp","rest-01.webp","rest-05.webp"]);
 const SRFIX=['vanraam','vdv','victoria','stevens'];/* feste Plätze: jeder 5. / ca. 7. / ca. 9. / ca. 10. Wechsel */
-const SR={lb:{},pool:null,last:[],lastF:'',n:0,vr:0,subs:[]};
+/* echter Zufall (crypto) + Merken der zuletzt gezeigten Räder über Besuche hinweg */
+const srRnd=n=>{try{const a=new Uint32Array(1);crypto.getRandomValues(a);return ((a[0]^(Date.now()*2654435761>>>0)^((performance.now()*1e3)|0))>>>0)%n}catch(e){return Math.floor(Math.random()*n)}};
+const srLS=v=>{try{if(v===undefined)return JSON.parse(localStorage.getItem('vc_srl')||'[]');localStorage.setItem('vc_srl',JSON.stringify(v))}catch(e){return []}};
+const SR={lb:{},pool:null,last:srLS().slice(0,24),lastF:'',n:0,vr:0,subs:[]};
 const srBase=b=>({k:b.k,m:b.m,f:'',img:b.img,st:'',cur:1});
 const SRDUP=new Set(['isy-34.webp','isy-36.webp','qio-19.webp']);/* bildgleiche Dubletten */
 function srBuild(){const P={},G=new Set();BR.forEach(b=>P[b.k]=[srBase(b)]);
@@ -3123,11 +3126,11 @@ function srBuild(){const P={},G=new Set();BR.forEach(b=>P[b.k]=[srBase(b)]);
   const seen=new Set();m.v.forEach(x=>{if(x._hid||!x.bild)return;const fn=x.bild.split('/').pop();const gk=srNorm(m.modell)+'|'+srNorm(x.farbe);if(!SHOWOK.has(fn)||SRDUP.has(fn)||seen.has(fn)||G.has(gk))return;seen.add(fn);G.add(gk);
    P[br.k].push({k:br.k,m:(m.marke+' '+m.modell).replace(/\s+/g,' ').trim(),f:x.farbe||'',img:'img/show/'+fn,st:x.status==='bestellt'?'bestellt':'lager'})})});
  Object.keys(P).forEach(k=>{P[k]=SRFIX.includes(k)?P[k].filter(x=>x.cur||(k==='vanraam'&&/compact\s*plus/i.test(x.m))):(P[k].length>1?P[k].filter(x=>!x.cur):P[k])});/* feste Plätze = festes Bild, Rest nur aus dem Bestand */
- SR.pool=P;SR.th={};Object.keys(P).forEach(k=>{const L=P[k];SR.th[k]=L[Math.floor(Math.random()*L.length)].img});SR.subs.forEach(f=>f())}
+ SR.pool=P;SR.th={};Object.keys(P).forEach(k=>{const L=P[k];SR.th[k]=L[srRnd(L.length)].img});SR.subs.forEach(f=>f())}
 const srNorm=t=>String(t||'').toLowerCase().replace(/\(.*?\)/g,'').replace(/matt|glanz|glossy|glänzend/g,'').replace(/[^a-zäöü]/g,'');
 function srPick(k){const L=k==='*'?(SR.pool?Object.keys(SR.pool).filter(j=>!SRFIX.includes(j)).flatMap(j=>SR.pool[j]):BR.filter(b=>!SRFIX.includes(b.k)).map(srBase)):((SR.pool&&SR.pool[k])||[srBase(BR.find(b=>b.k===k))]);
  let c=L.filter(x=>!SR.last.includes(x.img)&&(!SR.lastF||srNorm(x.f)!==SR.lastF));if(!c.length)c=L.filter(x=>x.img!==SR.lb[k]&&x.img!==SR.last[0]);if(!c.length)c=L.filter(x=>x.img!==SR.lb[k]);if(!c.length)c=L;
- const x=c[Math.floor(Math.random()*c.length)];SR.lb[k]=x.img;if(L.length>1){SR.last.unshift(x.img);SR.last.length=Math.min(SR.last.length,12)}SR.lastF=srNorm(x.f);return x}
+const x=c[srRnd(c.length)];SR.lb[k]=x.img;if(L.length>1){SR.last.unshift(x.img);SR.last.length=Math.min(SR.last.length,24);srLS(SR.last)}SR.lastF=srNorm(x.f);return x}
 function showroom(root,prefix){
  const s=root.closest('.show')||root;
  let i=0,cur=null,bk=$('#'+prefix+'bk'),rf=$('#'+prefix+'brefl'),wm=$('#'+prefix+'swm'),info=$('#'+prefix+'sinfo'),th=$('#'+prefix+'thumbs'),busy=0,cnt=0,pend=0,hold=0;
