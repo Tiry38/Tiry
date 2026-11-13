@@ -39,6 +39,7 @@ local ALLOWED = {
   Texture = allowed("SimpleRegionAPI", "SimpleTextureBaseAPI", "SimpleTextureAPI"),
   MaskTexture = allowed("SimpleRegionAPI", "SimpleTextureBaseAPI", "SimpleMaskTextureAPI"),
   FontString = allowed("SimpleRegionAPI", "SimpleFontStringAPI"),
+  Cooldown = allowed("SimpleFrameAPI", "SimpleCooldownAPI"),
   AnimationGroup = union("SimpleObjectAPI", "SimpleFrameScriptObjectAPI", "SimpleAnimGroupAPI"),
   Alpha = union("SimpleObjectAPI", "SimpleFrameScriptObjectAPI", "SimpleAnimAPI", "SimpleAnimAlphaAPI"),
   Translation = union("SimpleObjectAPI", "SimpleFrameScriptObjectAPI", "SimpleAnimAPI", "SimpleAnimTranslationAPI"),
@@ -121,7 +122,7 @@ end
 function Obj.Hide(o)
   if o.__shown then o.__shown = false call(o, "OnHide") end
 end
-function Obj.SetShown(o, v) if v then Obj.Show(o) else Obj.Hide(o) end end
+function Obj.SetShown(o, v) assert(not (_G.issecretvalue and _G.issecretvalue(v)), "SetShown nimmt keine geheimen Werte") if v then Obj.Show(o) else Obj.Hide(o) end end
 function Obj.IsShown(o) return o.__shown end
 function Obj.IsVisible(o)
   local p = o
@@ -246,7 +247,27 @@ function Obj.CreateAnimationGroup(o)
 end
 
 -- Texturen
+-- geheime Werte (Kampf): nur Methoden mit SecretArguments = AllowedWhenTainted nehmen sie an
+local function secret(v) return _G.issecretvalue ~= nil and _G.issecretvalue(v) == true end
+M.secretSeen = {}
+function Obj.SetAlphaFromBoolean(o, v, aT, aF)
+  if secret(v) then o.__alpha = "secret" M.secretSeen.alpha = true return end
+  assert(type(v) == "boolean", "SetAlphaFromBoolean braucht bool")
+  o.__alpha = v and (aT or 1) or (aF or 0)
+end
+function Obj.SetCooldownFromDurationObject(o, d, clear)
+  assert(type(d) == "table" and d.__duration, "SetCooldownFromDurationObject braucht LuaDurationObject")
+  assert(not secret(d), "Dauer-Objekt darf nicht selbst geheim sein")
+  o.__durobj = d
+end
+function Obj.SetCooldown(o, start, dur)
+  assert(not secret(start) and not secret(dur), "SetCooldown nimmt keine geheimen Werte (AllowedWhenUntainted)")
+  assert(type(start) == "number" and type(dur) == "number", "SetCooldown braucht Zahlen")
+  o.__cd = { start, dur }
+end
+function Obj.Clear(o) o.__cd, o.__durobj = nil, nil end
 function Obj.SetTexture(o, file, wrapH, wrapV)
+  if secret(file) then o.__file = "secret" M.secretSeen.texture = true return end
   if type(file) == "string" then checkAddonFile(file, { "tga", "blp" }) end
   o.__file = file
 end
@@ -286,10 +307,16 @@ function Obj.SetFont(o, file, size, flags)
 end
 function Obj.SetText(o, t)
   assert(o.__font, "Font not set – SetText vor SetFont")
+  if secret(t) then o.__text = "secret" M.secretSeen.text = true return end
   if t ~= nil then assert(type(t) == "string" or type(t) == "number", "SetText braucht Text") end
   o.__text = t and tostring(t) or ""
 end
-function Obj.SetFormattedText(o, fmt, ...) Obj.SetText(o, string.format(fmt, ...)) end
+function Obj.SetFormattedText(o, fmt, ...)
+  for i = 1, select("#", ...) do
+    if secret((select(i, ...))) then assert(o.__font, "Font not set") o.__text = "secret" M.secretSeen.text = true return end
+  end
+  Obj.SetText(o, string.format(fmt, ...))
+end
 function Obj.GetText(o) return o.__text end
 function Obj.SetTextColor(o, r, g, b, a) assert(type(r) == "number" and type(g) == "number" and type(b) == "number", "SetTextColor braucht Zahlen") o.__tc = { r, g, b, a or 1 } end
 

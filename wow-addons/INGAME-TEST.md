@@ -353,7 +353,18 @@ Unsicher: Einstieg mit **echten** Questie-Daten (Nachbau mit nachgestellten Ques
 Aus 4.2 weiter offen: `C_Map.GetMapPosFromWorldPos`, Flugmeister-IDs, Hochplateaus (Donnerfels), `GetUnitSpeed` im Geisterwolf.
 
 
-# Ingame-Test – TotemTakt 1.0.0
+# Ingame-Test – TotemTakt 1.1.0
+
+## Totem-Uhr (neu in 1.1)
+- [ ] Nach dem Einloggen liegt unter der Bildmitte eine Glas-Leiste mit 4 blassen Element-Ringen (Erde, Luft, Wasser, Feuer – deine Reihenfolge).
+- [ ] Totem stellen → Ring leuchtet, echtes Totem-Symbol, dunkler Ablauf-Ring, Restzeit **m:ss**, letzte 10 s **rot** + pulsierender Ring.
+- [ ] Totem läuft ab / wird ersetzt → Symbol verschwindet bzw. wechselt sofort.
+- [ ] **Im Kampf (wichtigster Test):** Symbole, Ablauf-Ring und Zahl laufen weiter. Zeigt die Zahl im Kampf nur Sekunden (z. B. „287“), sind die Totem-Daten geheim – das ist so gewollt. Bitte melden: Zahl da? Ring da? Lua-Fehler?
+- [ ] Ziehen verschiebt die Leiste, **Mausrad** und **Ecke unten rechts** ändern die Größe (0,5–2,5), Rechtsklick auf die Ecke = normal.
+- [ ] `/takt uhr fest` → Leiste klickt durch, Ecke weg; `/takt uhr frei` → wieder verschiebbar.
+- [ ] `/takt uhr senkrecht`, `/takt uhr leer`, `/takt uhr glas`, `/takt uhr reset`, `/takt uhr` (aus/an). Nach `/reload` bleibt alles so.
+- [ ] Maus über ein Totem → Spiel-Tooltip des Totems.
+
 
 ## Start
 - [ ] Nach dem Einloggen mit dem Schamanen steht im Chat einmal: Makro „TotemTakt“ liegt in deinen Charakter-Makros.
@@ -379,6 +390,7 @@ Aus 4.2 weiter offen: `C_Map.GetMapPosFromWorldPos`, Flugmeister-IDs, Hochplatea
 ## Nur im Spiel prüfbar (ehrlich)
 - /castsequence + Makro anlegen/ändern in Forever (Code folgt der Retail-API; WinduTotemMacro nutzt sie in Forever auch).
 - Totem-/Buff-Daten außerhalb des Kampfes lesbar (im Kampf sind sie gesperrt → Makro bleibt fest).
+- Uhr im Kampf: ob Forever die Totem-Plätze dort geheim macht und ob `SetCooldownFromDurationObject`/`SetFormattedText` die geheimen Werte so annehmen wie in der API-Doku beschrieben.
 - Reichweite gibt es nur für Buff-Totems; Verbrennung/Magma/Erdbindung usw. gelten als „steht“, solange sie laufen.
 
 

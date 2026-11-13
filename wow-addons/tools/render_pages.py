@@ -194,6 +194,8 @@ def render(path):
                 c1 = [float(v) for v in r[11].split(",")]
                 c2 = [float(v) for v in r[12].split(",")]
                 piece = gradient(w, h, orient, c1, c2)
+                if col[3] < 1:  # Region-/Frame-Transparenz wirkt auch auf Verlaeufe
+                    piece.putalpha(piece.split()[3].point(lambda v: int(v * max(0.0, col[3]))))
             else:
                 piece = None
             if name.startswith("ATLAS:"):  # Spiel-Atlas gibt es offline nicht -> weglassen

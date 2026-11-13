@@ -215,8 +215,18 @@ function L.dump(root, path, opts)
   walk(root, function(o)
     if o.__kind == "MaskTexture" and type(o.__allPoints) == "table" and o.__file then masks[o.__allPoints] = o.__file end
   end)
+  -- Frame-Transparenz (SetAlpha/SetAlphaFromBoolean) vererbt sich wie im Spiel auf alles darin
+  local function frameAlpha(o)
+    local a, p = 1, o
+    while p and p ~= root.__parent do
+      if type(p.__alpha) == "number" then a = a * p.__alpha end
+      p = p.__parent
+    end
+    return a
+  end
   local function emit(o)
     if not isShown(o) then return end
+    local fa = frameAlpha(o)
     local regions = {}
     for _, c in ipairs(o.__children or {}) do
       if c.__kind == "Texture" or c.__kind == "FontString" then regions[#regions + 1] = c end
@@ -234,13 +244,13 @@ function L.dump(root, path, opts)
           local c = rgn.__color or { 1, 1, 1, 1 }
           local g = rgn.__grad
           local coord = rgn.__coord and table.concat(rgn.__coord, ",") or ""
-          f:write(table.concat({ "T", r.l, r.b, r.r, r.t, tostring(rgn.__file), c[1], c[2], c[3], (c[4] or 1) * (rgn.__alpha or 1),
+          f:write(table.concat({ "T", r.l, r.b, r.r, r.t, tostring(rgn.__file), c[1], c[2], c[3], (g and 1 or (c[4] or 1)) * (type(rgn.__alpha) == "number" and rgn.__alpha or 1) * fa,
             g and g[1] or "", g and table.concat(g[2], ",") or "", g and table.concat(g[3], ",") or "", coord, rgn.__blend or "",
             masks[rgn] and tostring(masks[rgn]) or "", rgn.__slice and table.concat(rgn.__slice, ",") or "", rgn.__rot or "" }, "\t"), "\n")
         else
           local tc = rgn.__tc
           local lines = colorLines(rgn)
-          f:write(table.concat({ "F", r.l, r.b, r.r, r.t, rgn.__weight or "regular", rgn.__size or 12, tc[1], tc[2], tc[3], tc[4] or 1,
+          f:write(table.concat({ "F", r.l, r.b, r.r, r.t, rgn.__weight or "regular", rgn.__size or 12, tc[1], tc[2], tc[3], (tc[4] or 1) * fa,
             rgn.__justH or "CENTER", rgn.__justV or "MIDDLE", rgn.__spacing or 0, table.concat(lines, "\31"), rgn.__outline and "OUTLINE" or "" }, "\t"), "\n")
         end
       end

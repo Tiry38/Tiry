@@ -83,7 +83,10 @@ if want blitzschild; then
   run "Blitzschild: bs" "$A/Blitzschild" - lua5.1 "$T/bs.lua"
   run "Blitzschild: bs2" "$A/Blitzschild" - lua5.1 "$T/bs2.lua"
 fi
-if want totemtakt; then run "TotemTakt (Makro-Simulation + Layout)" "$A/TotemTakt" "TOTEM TESTS OK" lua5.1 "$T/totem.lua"; fi
+if want totemtakt; then
+  run "TotemTakt (Makro-Simulation + Layout)" "$A/TotemTakt" "TOTEM TESTS OK" lua5.1 "$T/totem.lua"
+  run "TotemTakt-Uhr (Restzeit, Kampf-Geheimwerte, Groesse)" "$A/TotemTakt" "UHR TESTS OK" lua5.1 "$T/totem_uhr.lua"
+fi
 if want windbaem; then run "WindBaem (Windzorn-Ton, Kampf-/Bosssperre)" "$A/WindBaem" "WB TESTS OK" lua5.1 "$T/wb.lua"; fi
 if want rxn; then run "RXPNeon (Skin + Deutsch + Tipp + Layout)" "$A/RXPNeon" "RXN TESTS OK" lua5.1 "$T/rxn.lua"; fi
 if want chathoch; then run "ChatHoch (Höhe, Geselligkeits-Knopf)" "$A/ChatHoch" "CH TESTS OK" lua5.1 "$T/ch.lua"; fi

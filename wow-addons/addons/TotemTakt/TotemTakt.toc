@@ -1,8 +1,9 @@
 ## Interface: 16001
 ## Title: |cff39ff6bTotem|r|cff2de2e6Takt|r
-## Notes: Eine Taste fuer deine Totems: jeder Druck stellt das naechste in deiner Reihenfolge, fehlende zuerst (/takt).
+## Notes: Eine Taste fuer deine Totems (jeder Druck = naechstes, fehlende zuerst) plus Totem-Uhr mit Restzeit, auch im Kampf (/takt, /takt uhr).
 ## Author: Tiry
-## Version: 1.0.0
+## Version: 1.1.0
 ## SavedVariablesPerCharacter: TotemTaktDB
 
 TotemTakt.lua
+Uhr.lua

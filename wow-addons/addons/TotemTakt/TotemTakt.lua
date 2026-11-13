@@ -1,4 +1,4 @@
--- TotemTakt 1.0.0 (Tiry): deine Totems in deiner Reihenfolge auf EINER Taste.
+-- TotemTakt 1.1.0 (Tiry): deine Totems in deiner Reihenfolge auf EINER Taste.
 --
 -- Blizzard erlaubt pro Tastendruck genau einen Zauber. Eine Taste, die alle vier Totems von selbst
 -- nacheinander stellt, kann deshalb kein Add-on bauen. TotemTakt pflegt dafuer ein /castsequence-Makro
@@ -13,7 +13,7 @@
 -- Daten: Forever-Spieldaten 1.60.1 (simc-forever SpellDataDump/allspells.txt): alle Raenge je Totem,
 -- Buff-Zauber je Rang (Apply Aura Raid/Party), Totems 1 s GCD, Buff-Totems 300 s.
 
-local VERSION = "1.0.0"
+local VERSION = "1.1.0"
 local MACRO, QMARK = "TotemTakt", 134400          -- 134400 = Fragezeichen -> Symbol des naechsten Totems
 local MEDIA = "Interface\\AddOns\\TotemTakt\\Media\\"
 local CIRCLE = "Interface\\CharacterFrame\\TempPortraitAlphaMask"
@@ -78,7 +78,9 @@ for _, l in pairs(LIST) do table.sort(l, function(a, b) if a.lvl ~= b.lvl then r
 local DB
 local DEF = { order = { "earth", "air", "water", "fire" }, pick = {}, smart = true, reset = 8, made = false, intro = false }
 local TT = {}
-_G.TotemTakt = TT   -- fuer Tests und /dump
+_G.TotemTakt = TT   -- fuer Tests, /dump und die Totem-Uhr (Uhr.lua)
+TT.EL, TT.ELS, TT.MEDIA = EL, ELS, MEDIA
+TT.GetDB = function() return DB end
 
 local function P(msg) print("|cff39ff6bTotem|r|cff2de2e6Takt|r: " .. msg) end
 
@@ -889,6 +891,8 @@ SlashCmdList.TOTEMTAKT = function(msg)
   if not DB then return end
   if not isShaman then P("nur für Schamanen."); return end
   if msg == "" then TT.Toggle()
+  elseif msg == "uhr" or msg:sub(1, 4) == "uhr " then
+    if TT.UhrCmd then TT.UhrCmd(msg:sub(5)) end
   elseif msg == "makro" then
     if inCombat() then P("Im Kampf gesperrt – nach dem Kampf noch einmal."); return end
     if TT.Write(true) then P("Makro „TotemTakt“ ist aktuell – auf eine Leiste ziehen (oder /takt).")
@@ -903,6 +907,6 @@ SlashCmdList.TOTEMTAKT = function(msg)
     DB.smart = (msg == "smart"); queue(false)
     P(DB.smart and "Fehlende zuerst: an" or "Fehlende zuerst: aus (feste Reihenfolge)")
   else
-    P("v" .. VERSION .. " · /takt (Fenster) · /takt makro (Makro anlegen/aktualisieren) · /takt status · /takt smart | fest")
+    P("v" .. VERSION .. " · /takt (Fenster) · /takt makro (Makro anlegen/aktualisieren) · /takt status · /takt smart | fest · /takt uhr (Totem-Restzeit) · /takt uhr hilfe")
   end
 end

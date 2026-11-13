@@ -90,6 +90,13 @@ Dateien/Sounds reicht `/reload` nicht). Version in allen 4 TOCs und in `VERSION`
   `SetDurationText`, `SetApplicationCount`, `AddAuraShownAnimation` übergeben. Nur außerhalb des Kampfes aufbauen.
   Ton: `C_UnitAuras.AddAuraSound(Enum.UnitAuraSoundTrigger.Added, {unitToken, spellID, soundFileName, …})`.
   Blizzards Forever-UI-Code zum Nachlesen: github.com/reckhou/WoWBlzCode (Ordner `Forever/`).
+- **Geheime Werte anzeigen statt rechnen (TotemTakt-Uhr 1.1):** Laut Forever-API-Doku nehmen nur Funktionen mit
+  `SecretArguments = "AllowedWhenTainted"` geheime Werte von Add-ons an: `Texture:SetTexture`, `FontString:SetText`/
+  `SetFormattedText`/`SetTextColor`, `Region`/`Frame:SetAlphaFromBoolean(bool, aTrue, aFalse)`. Gesperrt
+  („AllowedWhenUntainted“): `SetShown`, `Cooldown:SetCooldown`. Ablauf-Ring über ein Dauer-Objekt:
+  `cooldown:SetCooldownFromDurationObject(GetTotemDuration(slot), true)` (so macht es `Blizzard_CustomAuraButton`).
+  Vor jedem Vergleich `issecretvalue(v)` prüfen (auch `v == nil` vermeiden). Test-Nachbau: `wow_mock` kennt
+  `Cooldown` und meldet in `M.secretSeen`, welche erlaubten Funktionen geheime Werte bekamen (`tests/totem_uhr.lua`).
 - WeakAuras-Forever führt **keinen eigenen Custom-Code** aus → für Logik ein eigenes Add-on bauen.
 - **Reittier erst ab Stufe 40** (Forever) – Routen bis 40 sind Fußwege; ausgeruhte XP verdoppeln Mob-XP.
 - Add-ons zeichnen **nur flach über die 3D-Welt** – keine Verdeckung durch Gegenstände möglich.
