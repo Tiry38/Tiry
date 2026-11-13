@@ -19,7 +19,10 @@ Der Prototyp bleibt unverändert, Änderungen immer dort machen und neu bauen.
 1. **Coco-Vertrag (Schlütersche):** Laufzeit und Kündigungsfrist. Erst nach dem Umzug kündigen.
    Klären, wem die Ladenfotos gehören.
 2. **IONOS-Zugang:** Wer kann sich bei IONOS anmelden (Domain velo-center.de)? Passwörter nie an Claude.
-3. **Datenschutzerklärung:** eRecht24 erledigt. Offen: AV-Vertrag GitHub prüfen; etwa jährlich neu erzeugen. Claude ist kein Rechtsberater.
+3. **Datenschutzerklärung:** eRecht24 erledigt; etwa jährlich neu erzeugen. Claude ist kein Rechtsberater.
+   GitHub (13.11.2026 geprüft): DPF-zertifiziert (Liste: aktiv, Teilnehmer 6174). **Einen AV-Vertrag (DPA) gibt es nur für
+   Bezahl-/Firmenkunden** (Team, Enterprise), nicht für GitHub Free. Restrisiko bleibt; Alternative: Hosting bei IONOS mit AV-Vertrag.
+   Firebase: Data Processing and Security Terms sind Teil der Firebase-Bedingungen (mit dem Projekt angenommen).
 4. **Herstellerbilder/Logos** über die Händlerportale freigeben lassen.
 5. **Freigabe** für ein neues öffentliches GitHub-Repo nur für die Webseite (z. B. `Tiry38/velo-center-web`).
    GitHub Pages ist bei privaten Repos nur im Bezahl-Tarif möglich.
