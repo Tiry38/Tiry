@@ -289,7 +289,7 @@ def cmd_anwenden(args):
             war = bm.get(k) or ''
             bm[k] = ziel; s = bestand_patchen(s, k, ziel)
             x.update(quelle=quelle, seite=seite, geprueft=HEUTE, gesucht=HEUTE, versuche=0, grund=grund)
-            (z['ersetzt'] if war else z['neu']).append(dict(key=k, label=label(info), bild=ziel, quelle=quelle, grund=grund, ub=ub))
+            (z['ersetzt'] if war else z['neu']).append(dict(key=k, label=label(info), bild=ziel, quelle=quelle, seite=seite, grund=grund, ub=ub))
             if ub: z['unsicher'].append(k)
             unsicher = [u for u in unsicher if u['key'] != k]
         elif akt == 'entfernen':
@@ -353,7 +353,7 @@ def cmd_entscheid(args, ja):
         ziel = datei_ziel(k.split('|')[0], src); shutil.copyfile(src, os.path.join(BASIS, ziel))
         bm[k] = ziel; s = bestand_patchen(s, k, ziel)
         x.update(quelle=u.get('quelle', ''), seite=u.get('seite', ''), geprueft=HEUTE, versuche=0, grund='vom Admin freigegeben')
-        ber.setdefault('neu', []).append(dict(key=k, label=u['label'], bild=ziel, quelle=u.get('quelle', ''), grund=u.get('grund', ''), ub=True))
+        ber.setdefault('neu', []).append(dict(key=k, label=u['label'], bild=ziel, quelle=u.get('quelle', ''), seite=u.get('seite', ''), grund=u.get('grund', ''), ub=True))
     else:
         ab = x.setdefault('abgelehnt', [])
         if u.get('quelle') and u['quelle'] not in ab: ab.append(u['quelle'])

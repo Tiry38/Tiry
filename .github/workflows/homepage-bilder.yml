@@ -22,11 +22,11 @@ on:
       neu:
         description: 'Wie viele Farben ohne Foto suchen'
         required: false
-        default: '15'
+        default: '30'
       pruef:
         description: 'Wie viele vorhandene Fotos nachprüfen'
         required: false
-        default: '6'
+        default: '10'
 
 permissions:
   contents: write
@@ -42,13 +42,13 @@ env:
   WEB_REPO: Tiry38/velo-center-web
   AKTION: ${{ inputs.aktion || 'suchen' }}
   KEY: ${{ inputs.key }}
-  NEU: ${{ inputs.neu || '15' }}
-  PRUEF: ${{ inputs.pruef || '6' }}
+  NEU: ${{ inputs.neu || '30' }}
+  PRUEF: ${{ inputs.pruef || '10' }}
 
 jobs:
   bilder:
     runs-on: ubuntu-latest
-    timeout-minutes: 150
+    timeout-minutes: 240
     steps:
       - uses: actions/checkout@v4
         with:
@@ -103,7 +103,7 @@ jobs:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           github_token: ${{ secrets.GITHUB_TOKEN }}
           prompt: ${{ steps.l.outputs.prompt }}
-          claude_args: '--model opus --effort medium --allowedTools "Read,Write,Glob,Grep,WebSearch,WebFetch,Bash(python3 velocenter-homepage/tools/bilder_agent.py holen:*)" --max-turns 260'
+          claude_args: '--model opus --effort medium --allowedTools "Read,Write,Glob,Grep,WebSearch,WebFetch,Bash(python3 velocenter-homepage/tools/bilder_agent.py holen:*)" --max-turns 500'
 
       - name: Ergebnis übernehmen
         id: e
