@@ -2047,7 +2047,7 @@ body.fz2 main,body.fz2 .foot{zoom:1.25}
 .drf .lb output{font:900 22px/1 var(--display);color:#1B1E25}
 .drf input[type=range]{width:100%;accent-color:#C8102E;height:30px}
 .drf .inp{min-height:48px}
-.drf small{color:var(--dim);font-size:13px}
+.drf small{color:var(--dim);font-size:13px;line-height:1.4}.drf .lb .drop{font-style:normal;font-weight:700;font-size:11px;letter-spacing:.06em;text-transform:uppercase;padding:3px 9px;border-radius:999px;background:rgba(27,30,37,.07);color:var(--dim)}
 .drrow{display:grid;grid-template-columns:1fr 1fr;gap:16px}
 .drrow>*{min-width:0}
 .drout{position:sticky;top:110px;padding:clamp(22px,3vw,36px);border-radius:24px;color:#fff;background:radial-gradient(80% 80% at 100% 0%,rgba(124,58,237,.55),transparent 60%),radial-gradient(70% 70% at 0% 100%,rgba(226,35,45,.5),transparent 62%),#1B1E25;box-shadow:0 34px 70px -34px rgba(27,30,37,.8)}
@@ -3173,7 +3173,9 @@ m696 -454 c28 -13 46 -31 55 -51 22 -53 -50 -177 -173 -300 -187 -186 -647
       <div class="drf"><span class="lb">Kirchensteuer</span><div class="choice"><button type="button" class="on" data-drk="ki|0">Nein</button><button type="button" data-drk="ki|1">Ja</button></div></div></div>
      <div class="drrow"><div class="drf"><span class="lb">Kinder</span><div class="choice"><button type="button" class="on" data-drk="kd|1">Ja</button><button type="button" data-drk="kd|0">Nein</button></div><small>wegen Pflegeversicherung</small></div>
       <div class="drf"><span class="lb">Zuschuss Arbeitgeber / Monat</span><input class="inp" name="z" type="number" min="0" step="1" inputmode="numeric" placeholder="0 €"></div></div>
-     <div class="drf"><span class="lb">Leasingrate inkl. Versicherung</span><input class="inp" name="r" inputmode="decimal" placeholder="leer lassen = schätzen"><small id="drRh"></small></div>
+     <div class="drf"><span class="lb">Versicherung fürs Rad</span><div class="choice"><button type="button" class="on" data-drk="vz|0">Schon in der Rate</button><button type="button" data-drk="vz|1">Kommt extra dazu</button></div><small id="drVh"></small></div>
+     <div class="drf"><span class="lb">Service-Paket</span><div class="choice"><button type="button" class="on" data-drk="sp|0">Keins</button><button type="button" data-drk="sp|1">Inspektion</button><button type="button" data-drk="sp|2">+ Verschleiß</button><button type="button" data-drk="sp|3">Rundum</button></div><small id="drSh"></small></div>
+     <div class="drf"><span class="lb">Monatsrate aus deinem Angebot<em class="drop">optional</em></span><input class="inp" name="r" inputmode="decimal" placeholder="Noch kein Angebot? Einfach leer lassen"><small id="drRh"></small></div>
     </form>
     <div class="drout" id="drO" aria-live="polite"></div>
    </div>
@@ -4694,26 +4696,28 @@ $('#rf').addEventListener('input',e=>{if(e.target.id==='rfH'){RF.h=+e.target.val
 document.addEventListener('click',e=>{const b=e.target.closest('[data-rfopen]');if(b){e.preventDefault();rfOpen()}});
 
 /* ---------- Dienstrad-Rechner (Gehaltsumwandlung, 0,25-%-Regel; Tarif 2026, vereinfacht) ---------- */
-const DR={p:4000,b:3800,k:'1',ki:0,kd:1,z:0,f:3,r:''};
+const DR={p:4000,b:3800,k:'1',ki:0,kd:1,z:0,f:3,r:'',vz:0,sp:0},DRSP=[0,7.9,12.9,19.9],DRSPT=['','1 Inspektion pro Jahr','Inspektion + Budget für Verschleiß','Inspektion + Verschleiß unbegrenzt'];
 function est26(x){x=Math.floor(Math.max(0,x));if(x<=12348)return 0;if(x<=17799){const y=(x-12348)/1e4;return Math.floor((914.51*y+1400)*y)}if(x<=69878){const z=(x-17799)/1e4;return Math.floor((173.10*z+2397)*z+1034.87)}if(x<=277825)return Math.floor(.42*x-11135.63);return Math.floor(.45*x-19470.38)}
 function est5(x){x=Math.floor(Math.max(0,x));const f=y=>Math.max(2*(est26(1.25*y)-est26(.75*y)),Math.floor(.14*y)),W1=14071,W3=222260;if(x<=W1)return f(x);if(x<=W3)return Math.floor(f(W1)+.42*(x-W1));return Math.floor(f(W1)+.42*(W3-W1)+.45*(x-W3))}
 function steuer(gJahr,kl,ki){const vor=.093*Math.min(gJahr,101400)+(.0875+.018)*Math.min(gJahr,69750);const zve=Math.max(0,gJahr-1230-36-vor-(kl==='2'?4260:0));const sp=kl==='3';
  const est=sp?2*est26(zve/2):kl==='5'?est5(zve):est26(zve);const fg=sp?40700:20350;const soli=est<=fg?0:Math.min(.055*est,.119*(est-fg));return est+soli+(ki?est*.09:0)}
 function sozial(b,kd){return .093*Math.min(b,8450)+.013*Math.min(b,8450)+.0875*Math.min(b,5812.5)+(kd?.018:.024)*Math.min(b,5812.5)}
-function drCalc(){const P=DR.p,B=DR.b,R=DR.r!==''&&+DR.r>0?+DR.r:Math.round(P*DR.f)/100,U=Math.max(0,R-DR.z),GV=.0025*Math.floor(P/100)*100,B1=B-U+GV;
- const st=(steuer(12*B,DR.k,DR.ki)-steuer(12*B1,DR.k,DR.ki))/12,sv=sozial(B,DR.kd)-sozial(B1,DR.kd),net=Math.max(0,U-st-sv);return{R,U,GV,st,sv,net,tot:net*36,P}}
+function drCalc(){const P=DR.p,B=DR.b,R0=DR.r!==''&&+DR.r>0?+DR.r:Math.round(P*DR.f)/100,V=DR.vz?Math.max(2.38,Math.round(P*.3)/100):0,SPm=Math.round(DRSP[DR.sp]*119)/100,R=R0+V+SPm,U=Math.max(0,R-DR.z),GV=.0025*Math.floor(P/100)*100,B1=B-U+GV;
+ const st=(steuer(12*B,DR.k,DR.ki)-steuer(12*B1,DR.k,DR.ki))/12,sv=sozial(B,DR.kd)-sozial(B1,DR.kd),net=Math.max(0,U-st-sv);return{R,R0,V,SPm,U,GV,st,sv,net,tot:net*36,P}}
 const e2=n=>(Math.round(n*100)/100).toLocaleString('de-DE',{minimumFractionDigits:2,maximumFractionDigits:2})+' €',e0=n=>Math.round(n).toLocaleString('de-DE')+' €';
 function drSync(){const f=$('#drF');if(!f)return;f.p.value=DR.p;f.pr.value=DR.p;f.b.value=DR.b;f.br.value=DR.b;drDraw()}
 function drDraw(){const o=$('#drO');if(!o)return;const c=drCalc(),f=$('#drF');f.querySelector('[name=po]').textContent=e0(DR.p);f.querySelector('[name=bo]').textContent=e0(DR.b);
- f.querySelector('#drRh').textContent=DR.r!==''&&+DR.r>0?'eigene Rate':'geschätzt: '+e2(c.R)+' (Richtwert '+String(DR.f).replace('.',',')+' % vom Kaufpreis)';
+ f.querySelector('#drRh').textContent=DR.r!==''&&+DR.r>0?'Wir rechnen mit deiner Rate. Versicherung und Paket oben nur wählen, wenn sie nicht schon darin stecken.':'Ohne Angebot rechnen wir mit ca. '+e0(c.R0)+' im Monat (Richtwert: '+String(DR.f).replace('.',',')+' % vom Kaufpreis).';
+ f.querySelector('#drVh').textContent=DR.vz?'Grob gerechnet mit ca. '+e2(c.V)+' im Monat (Richtwert: 0,3 % vom Kaufpreis).':'Bei den meisten Anbietern wie JobRad, Bikeleasing oder BusinessBike ist sie dabei.';
+ f.querySelector('#drSh').textContent=DR.sp?DRSPT[DR.sp]+': grob ca. '+e2(c.SPm)+' im Monat (Richtwert, je Anbieter unterschiedlich).':'Inspektion und Verschleiß zahlst du dann selbst bei uns in der Werkstatt.';
  const mx=Math.max(c.P,c.tot)||1,sp=c.R?Math.round((1-c.net/c.R)*100):0;
  o.innerHTML='<span class="k">Dein Rad kostet dich als Dienstrad</span><div class="big2"><b>'+e0(c.net)+'</b><span>pro Monat<br>netto, ca.</span></div><p class="sub">statt '+e2(c.R)+' Leasingrate – du sparst rund '+sp+' % über Steuern und Sozialabgaben.</p>'+
-  '<ul class="drcl"><li><span>Leasingrate (brutto)</span><b>'+e2(c.R)+'</b></li>'+(DR.z?'<li class="g"><span>Zuschuss Arbeitgeber</span><b>– '+e2(Math.min(DR.z,c.R))+'</b></li>':'')+
+  '<ul class="drcl"><li><span>Leasingrate Rad'+(DR.r!==''&&+DR.r>0?'':' (geschätzt)')+'</span><b>'+e2(c.R0)+'</b></li>'+(c.V?'<li><span>+ Versicherung (grob)</span><b>'+e2(c.V)+'</b></li>':'')+(c.SPm?'<li><span>+ Service-Paket „'+['','Inspektion','Verschleiß','Rundum'][DR.sp]+'“ (grob)</span><b>'+e2(c.SPm)+'</b></li>':'')+((c.V||c.SPm)?'<li class="t"><span>Monatsrate gesamt (brutto)</span><b>'+e2(c.R)+'</b></li>':'')+(DR.z?'<li class="g"><span>Zuschuss Arbeitgeber</span><b>– '+e2(Math.min(DR.z,c.R))+'</b></li>':'')+
   '<li class="g"><span>Ersparnis Lohnsteuer'+(DR.ki?' & Kirchensteuer':'')+'</span><b>– '+e2(c.st)+'</b></li><li class="g"><span>Ersparnis Sozialabgaben</span><b>– '+e2(c.sv)+'</b></li>'+
   '<li><span>darin enthalten: Versteuerung 0,25 % vom Listenpreis ('+e2(c.GV)+' geldwerter Vorteil)</span><b></b></li><li class="t"><span>Du zahlst netto</span><b>'+e2(c.net)+'</b></li></ul>'+
   '<div class="drvs"><div><span>Kaufpreis</span><i style="width:'+(c.P/mx*100)+'%"></i><b>'+e0(c.P)+'</b></div><div><span>36 Monate Dienstrad</span><i class="a" style="width:'+(c.tot/mx*100)+'%"></i><b>'+e0(c.tot)+'</b></div></div>'+
   '<a class="cta" href="#termin" data-pre="Dienstrad-Beratung">Dienstrad-Beratung anfragen</a>'+
-  '<p class="fine">Unverbindliche Beispielrechnung, keine Steuerberatung. Annahmen: Gehaltsumwandlung, 36 Monate, Pedelec bis 25 km/h, Lohnsteuertarif 2026 vereinfacht (Steuerklasse 2 mit Entlastungsbetrag für Alleinerziehende, Steuerklasse 4 ohne Faktor, Steuerklasse 5 nur grobe Schätzung), Sozialabgaben 2026 mit durchschnittlichem Zusatzbeitrag. Nach 36 Monaten gibst du das Rad zurück oder übernimmst es je nach Anbieter zum Restwert – der ist hier nicht enthalten. Die genaue Rate steht im Angebot deines Leasing-Anbieters.</p>'}
+  '<p class="fine">Unverbindliche Beispielrechnung, keine Steuerberatung. Annahmen: Gehaltsumwandlung, 36 Monate, Pedelec bis 25 km/h, Lohnsteuertarif 2026 vereinfacht (Steuerklasse 2 mit Entlastungsbetrag für Alleinerziehende, Steuerklasse 4 ohne Faktor, Steuerklasse 5 nur grobe Schätzung), Sozialabgaben 2026 mit durchschnittlichem Zusatzbeitrag. Nach 36 Monaten gibst du das Rad zurück oder übernimmst es je nach Anbieter zum Restwert – der ist hier nicht enthalten. Versicherung und Service-Pakete sind grobe Richtwerte (Versicherung 0,3 % vom Kaufpreis, Pakete nach den E-Bike-Paketen von JobRad inkl. MwSt.). Die genaue Rate steht im Angebot deines Leasing-Anbieters.</p>'}
 (function(){const f=$('#drF');if(!f)return;
  f.addEventListener('input',e=>{const t=e.target,n=t.name;const cl=(v,a,b)=>Math.min(b,Math.max(a,v));
   if(n==='pr'){DR.p=+t.value;f.p.value=DR.p}if(n==='p'){const v=+t.value;if(v>0){DR.p=cl(v,500,20000);f.pr.value=DR.p}}
