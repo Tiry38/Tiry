@@ -10,10 +10,12 @@
   "zuletzt": "2026-11-13"
  },
  "gudereit|ec35evo|2026|graphitmatt": {
+  "bestaetigt": "2026-11-13",
   "geprueft": "2026-11-13",
   "gesucht": "2026-11-13",
   "grund": "Gudereit-Studiofoto aus derselben Serie wie das offizielle rotglanz-Bild auf gudereit.de (identische Pose, 20\"-Kompakt, Riemen, Frontträger), Art.-Nr. 3105688 ist laut Händler graphit-matt und das Rad ist sichtbar matt-graphit.",
   "notiz": "Art.-Nr. 3105688; gudereit.de zeigt nur rotglanz. dhash-Warnung kommt nur daher, dass es dieselbe Aufnahme in anderer Farbe ist.",
+  "pinned": true,
   "quelle": "https://bikes-opt.b-cdn.net/gudereit/2026/3105688_01.jpg",
   "seite": "https://www.bikes.de/shop/e-bikes/marke.gudereit/gudereit-ec-35-evo-625-2026/",
   "versuche": 0,
