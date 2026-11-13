@@ -367,6 +367,20 @@ def cmd_entscheid(args, ja):
         'Bilder-Agent: Vorschlag %s – %s' % ('übernommen' if ja else 'abgelehnt', u['label']))
     print('ok', 'übernommen' if ja else 'abgelehnt', u['label'])
 
+def cmd_richtig(args):
+    """Admin: „✓ Richtig“ – Foto bleibt, verschwindet aus „Zuletzt neu“, wird nie mehr vom Agenten ersetzt."""
+    k = args[0] if args else ''
+    s = html_lesen(); ber = json_aus(s, 'bilderBericht'); bm = json_aus(s, 'bilderData'); st = status_lesen()
+    if not bm.get(k): raise SystemExit('Kein Foto zu ' + k)
+    alt = next((v for v in ber.get('neu', []) + ber.get('ersetzt', []) if v['key'] == k), {})
+    st.setdefault(k, {}).update(pinned=True, bestaetigt=HEUTE, geprueft=HEUTE)
+    for f in ('neu', 'ersetzt'): ber[f] = [v for v in ber.get(f, []) if v['key'] != k]
+    s = json_setzen(s, 'bilderBericht', ber)
+    open(HTML, 'w', encoding='utf-8').write(s); status_schreiben(st)
+    os.makedirs(TMP, exist_ok=True)
+    open(os.path.join(TMP, 'zusammenfassung.txt'), 'w', encoding='utf-8').write('Bilder-Agent: Foto bestätigt – ' + (alt.get('label') or k))
+    print('ok bestätigt', k)
+
 # ---------- aufräumen ----------
 def cmd_aufraeumen(args):
     s = html_lesen(); bm = json_aus(s, 'bilderData'); st = status_lesen(); ber = json_aus(s, 'bilderBericht')
@@ -390,5 +404,5 @@ def cmd_aufraeumen(args):
 if __name__ == '__main__':
     c, a = (sys.argv[1] if len(sys.argv) > 1 else ''), sys.argv[2:]
     {'liste': cmd_liste, 'holen': cmd_holen, 'anwenden': cmd_anwenden, 'aufraeumen': cmd_aufraeumen,
-     'uebernehmen': lambda x: cmd_entscheid(x, True), 'ablehnen': lambda x: cmd_entscheid(x, False)}.get(
+     'uebernehmen': lambda x: cmd_entscheid(x, True), 'ablehnen': lambda x: cmd_entscheid(x, False), 'richtig': cmd_richtig}.get(
         c, lambda x: print(__doc__))(a)

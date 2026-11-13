@@ -130,7 +130,9 @@ def main():
     raeder, n_service, n_res, n_verk, n_marke = [], 0, 0, 0, 0
     for nr, r in enumerate(rows, 1):
         art = wert(r, m['zu'])
-        if re.search(r'service', art, re.I): n_service += 1; continue
+        # Servicerad = Leih-/Testrad, nicht zu verkaufen. Ausnahme (Tiry 13.11.2026): Van-Raam-Vorführrad bleibt drin.
+        if re.search(r'service', art, re.I) and not (re.search(r'van\s*raam', wert(r, m['marke']), re.I)
+                and m['test'] >= 0 and ja(wert(r, m['test']))): n_service += 1; continue
         # verkauft = Verkaufsdatum/Besitzer; „ausgeliefert“ allein zählt nicht (Ausstellungsräder, Veloport-Zählung)
         if wert(r, m['vd']) or wert(r, m['bes']): n_verk += 1; continue
         reserviert = m['res'] >= 0 and ja(wert(r, m['res']))
