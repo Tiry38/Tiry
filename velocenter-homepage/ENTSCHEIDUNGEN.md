@@ -114,3 +114,4 @@
 - Hinweis: „Live“ = Stand des zuletzt eingespielten Veloport-Exports, nicht sekundengenau.
 - Start oben: Chip „Probefahrt vor Ort“ ersetzt durch „LIVE · Unser Live-Bestand · Jetzt ansehen“ (`#hLive`, Link `#lager`), roter Pfeil darunter zeigt automatisch auf die Kachel „Im Laden“ (Winkel per JS). Alter Hinweis über den Kacheln entfernt (14.11.2026).
 - Showroom ganz oben (Start): die 7 festen Bilder laufen genau 1× durch, danach nur noch zufällige Bestandsräder mit eigenem Foto (img/show/, nie Katalogbild), zufällige Farben, gleiche Farbe nie zweimal hintereinander; Markenlogo wechselt mit (14.11.2026).
+- Kachel „Im Laden“: kein weißes Aufblitzen mehr beim Radwechsel (Bildklassen hießen `in`/`out` und erbten den grünen Hinweis-Kasten `.out` → jetzt `qin`/`qout`). Pfeil am Live-Chip modern: schlanke Leuchtlinie mit wanderndem Licht + runder roter Pfeil-Knopf, zeigt automatisch auf die Kachel (14.11.2026).

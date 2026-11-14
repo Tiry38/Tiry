@@ -2205,8 +2205,8 @@ body.fz2 main,body.fz2 .foot{zoom:1.25}
 .qbk{position:absolute;z-index:-1;left:50%;top:6px;width:min(86%,280px);height:66%;transform:translateX(-42%);pointer-events:none}
 .qbk::before{content:"";position:absolute;inset:0 4% -4%;border-radius:50%;background:radial-gradient(closest-side,rgba(255,255,255,.8),rgba(255,236,242,.35) 55%,rgba(255,255,255,0))}
 .qbk img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;filter:drop-shadow(0 10px 14px rgba(0,0,0,.45));opacity:0;transform:translateX(26px) scale(.96);transition:opacity .6s ease,transform .8s var(--spring)}
-.qbk img.in{opacity:1;transform:none}
-.qbk img.out{opacity:0;transform:translateX(-26px) scale(.96)}
+.qbk img.qin{opacity:1;transform:none}
+.qbk img.qout{opacity:0;transform:translateX(-26px) scale(.96)}
 .qld{position:relative;width:9px;height:9px;border-radius:50%;background:#22C55E}
 .qld::after{content:"";position:absolute;inset:-5px;border-radius:50%;border:2px solid #22C55E;animation:qldp 1.8s ease-out infinite}
 @keyframes qldp{from{transform:scale(.4);opacity:1}to{transform:scale(1.5);opacity:0}}
@@ -2223,11 +2223,15 @@ a.hchip.hc.hlive::after{content:"";position:absolute;inset:-6px;border-radius:99
 .hgo{display:inline-flex;align-items:center;gap:6px;height:28px;padding:0 11px;border-radius:999px;background:linear-gradient(135deg,#E2232D,#B3121F);color:#fff;font:800 11px/1 var(--display);letter-spacing:.06em;text-transform:uppercase;box-shadow:0 6px 14px -6px rgba(226,35,45,.8)}
 a.hchip.hc.hlive .hgo svg{width:12px;height:12px;transition:transform .3s var(--spring)}
 a.hchip.hc.hlive:hover .hgo svg{transform:translateX(3px)}
-a.hchip.hc.hlive svg.hla{position:absolute;left:50%;top:calc(100% + 2px);width:40px;height:66px;margin-left:-20px;transform-origin:50% 0;transform:rotate(var(--ang,0deg));fill:none;stroke:#E2232D;stroke-width:4;stroke-linecap:round;stroke-linejoin:round;filter:drop-shadow(0 2px 3px rgba(255,255,255,.8));pointer-events:none;overflow:visible}
-.hla path{animation:hlbob 1.6s ease-in-out infinite}
-@keyframes hlbob{50%{transform:translateY(5px)}}
-@media (max-width:640px){.hlv,.hgo{height:24px;font-size:10px;padding:0 8px}a.hchip.hc.hlive svg.hla{width:24px;height:40px;margin-left:-12px}}
-@media (prefers-reduced-motion:reduce){a.hchip.hc.hlive::after,.hla path{animation:none}}
+a.hchip.hc.hlive .hla{position:absolute;left:50%;top:calc(100% + 2px);width:30px;height:78px;margin-left:-15px;transform-origin:50% 0;transform:rotate(var(--ang,0deg));pointer-events:none}
+.hla i{position:absolute;left:50%;top:4px;bottom:30px;width:2px;margin-left:-1px;border-radius:2px;background:linear-gradient(180deg,rgba(226,35,45,0),rgba(226,35,45,.55) 40%,#E2232D);overflow:hidden}
+.hla i::after{content:"";position:absolute;left:0;width:2px;height:18px;top:-18px;border-radius:2px;background:linear-gradient(180deg,transparent,#fff 60%,transparent);animation:hlflow 1.8s cubic-bezier(.5,0,.6,1) infinite}
+@keyframes hlflow{to{top:100%}}
+.hla b{position:absolute;left:50%;bottom:0;width:30px;height:30px;margin-left:-15px;border-radius:50%;display:grid;place-items:center;background:linear-gradient(135deg,#FF4A55,#E2232D 55%,#9F1239);box-shadow:0 8px 16px -6px rgba(226,35,45,.8),0 0 0 4px rgba(226,35,45,.14),inset 0 1px 0 rgba(255,255,255,.35);animation:hlbob 1.8s ease-in-out infinite}
+a.hchip.hc.hlive .hla b svg{width:16px;height:16px;fill:none;stroke:#fff;stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round;color:#fff}
+@keyframes hlbob{50%{transform:translateY(3px)}}
+@media (max-width:640px){.hlv,.hgo{height:24px;font-size:10px;padding:0 8px}a.hchip.hc.hlive .hla{height:58px}.hla b{width:26px;height:26px;margin-left:-13px}.hla i{bottom:26px}}
+@media (prefers-reduced-motion:reduce){a.hchip.hc.hlive::after,.hla b,.hla i::after{animation:none}}
 /* Tempo (Tiry 12.11.2026): unsichtbare Animationen pausieren, Hintergrund-Ebenen eigene GPU-Ebene */
 .apz,.apz *,.apz *::before,.apz *::after{animation-play-state:paused!important}
 html.scr .sky,html.scr .blobs i,html.scr .blobs::after,html.scr .ribbons i{animation-play-state:paused!important}
@@ -2893,7 +2897,7 @@ m696 -454 c28 -13 46 -31 55 -51 22 -53 -50 -177 -173 -300 -187 -186 -647
      <img class="hb off" src="img/p-victoria-veloa7.webp" alt="Victoria Veloa 7 E-Bike" data-l="img/marke-victoria.svg" width="2770" height="1732" loading="lazy">
      <div class="hfloor"></div>
      <a class="hchip hc c1" href="#lager" aria-label="300+ E-Bikes vor Ort – Räder im Laden ansehen"><span class="hn">300<i>+</i></span><span class="hl"><strong>E-Bikes vor Ort</strong></span><span class="ha"><svg><use href="#i-arrow"/></svg></span></a>
-     <a class="hchip hc c2 hlive" id="hLive" href="#lager" aria-label="Unser Live-Bestand: jetzt im Laden ansehen"><span class="hlv"><i class="qld" aria-hidden="true"></i>Live</span><span class="hl"><strong>Unser Live-Bestand</strong></span><span class="hgo">Jetzt ansehen<svg><use href="#i-arrow"/></svg></span><svg class="hla" viewBox="0 0 40 64" aria-hidden="true"><path d="M20 2c-9 14 9 30 0 54"/><path d="M11 47l9 11 9-11"/></svg></a>
+     <a class="hchip hc c2 hlive" id="hLive" href="#lager" aria-label="Unser Live-Bestand: jetzt im Laden ansehen"><span class="hlv"><i class="qld" aria-hidden="true"></i>Live</span><span class="hl"><strong>Unser Live-Bestand</strong></span><span class="hgo">Jetzt ansehen<svg><use href="#i-arrow"/></svg></span><span class="hla" aria-hidden="true"><i></i><b><svg viewBox="0 0 24 24"><path d="M12 4.5v14M6.5 13l5.5 5.5 5.5-5.5"/></svg></b></span></a>
     </div>
    </div>
    <nav class="qacc hello" style="--d:1.45s" aria-label="Schnellzugriff">
@@ -4152,7 +4156,7 @@ function qlFill(){const box=$('#qBk');if(!box||!LG.M)return;const S=new Set();
  QL.p=P;QL.i=0;if(!P.length)return;qlNext();clearInterval(QL.t);QL.t=setInterval(()=>{if(cur==='start'&&!document.hidden)qlNext()},2800)}
 function qlNext(){const box=$('#qBk');if(!box||!QL.p.length)return;if(QL.i>=QL.p.length){QL.i=0;const P=QL.p;for(let i=P.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[P[i],P[j]]=[P[j],P[i]]}}
  const src=QL.p[QL.i++],im=new Image();im.alt='';im.decoding='async';
- im.onload=()=>{[...box.querySelectorAll('img')].forEach(o=>{o.classList.remove('in');o.classList.add('out');setTimeout(()=>o.remove(),900)});box.appendChild(im);requestAnimationFrame(()=>requestAnimationFrame(()=>im.classList.add('in')))};
+ im.onload=()=>{[...box.querySelectorAll('img')].forEach(o=>{o.classList.remove('qin');o.classList.add('qout');setTimeout(()=>o.remove(),900)});box.appendChild(im);requestAnimationFrame(()=>requestAnimationFrame(()=>im.classList.add('qin')))};
  im.onerror=()=>{QL.p.splice(QL.i-1,1);QL.i--};im.src=src;
  const nx=QL.p[QL.i];if(nx){const pre=new Image();pre.src=nx}}
 (function(){const t=$('#qaLg'),c=$('#hLive'),a=c&&$('.hla',c);if(!t||!a)return;
