@@ -5,7 +5,7 @@
 //                 wandern übers Netz, nie Spielzustände. Prüfsummen erkennen Abweichungen (Desync).
 import { Sim, DT } from '../sim/sim.js';
 
-export const PROTOCOL_VERSION = 1;
+export const PROTOCOL_VERSION = 2;
 export const HASH_EVERY = 20; // Ticks
 
 export class LocalSession {
@@ -49,10 +49,22 @@ export class NetSession {
     this.online = true;
     this.acc = 0;
     this.desync = null;
-    transport.onMessage((m) => {
+    transport.onMessage((m) => this.receive(m));
+    this.token = start.token;
+  }
+  /** Netzwerk-Nachricht verarbeiten (auch für vorab gepufferte Nachrichten) */
+  receive(m) {
+    {
       if (m.t === 'turn') this.turns.set(m.tick, m.cmds);
-      else if (m.t === 'desync') this.desync = m;
-    });
+      else if (m.t === 'history') {
+        // Wiederverbinden: kompletten Befehlsverlauf übernehmen und schnell nachrechnen
+        const map = new Map(m.turns);
+        for (let t = this.sim.tick; t < m.upTo; t++) if (!this.turns.has(t)) this.turns.set(t, map.get(t) || []);
+      } else if (m.t === 'desync') this.desync = m;
+      else if (m.t === 'paused') this.netPaused = m;
+      else if (m.t === 'resumed') this.netPaused = null;
+      if (this.onNet) this.onNet(m);
+    }
   }
   submit(cmd) { this.transport.send({ t: 'cmd', cmd }); }
   update(realDt) {
@@ -61,7 +73,8 @@ export class NetSession {
     // Aufholen, falls Turns vorliegen; nie über den letzten Turn hinaus
     let n = 0;
     const behind = this.turns.size > 6;
-    while ((this.acc >= DT || behind) && n < (behind ? 30 : 8)) {
+    const far = this.turns.size > 200; // nach Wiederverbinden: im Zeitraffer aufholen
+    while ((this.acc >= DT || behind) && n < (far ? 600 : behind ? 30 : 8)) {
       const cmds = this.turns.get(this.sim.tick);
       if (!cmds) break;
       this.turns.delete(this.sim.tick);
