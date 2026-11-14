@@ -3840,7 +3840,7 @@ fetch('google.json',{cache:'no-store'}).then(r=>r.ok?r.json():null).then(g=>{if(
 
 /* ---------- Showroom (Start + Marken) ---------- */
 /* Showroom-Pool: zufällige Räder aus dem Bestand (nur mit Foto, freigestellt + geschärft in img/show/), jeder 5. Wechsel = Van Raam Dreirad */
-const SHOWOK=new Set(["b2-isy-0.webp","b2-isy-1.webp","b2-isy-10.webp","b2-ktm-0.webp","b2-ktm-10.webp","b2-ktm-11.webp","b2-ktm-12.webp","b2-ktm-13.webp","b2-ktm-14.webp","b2-ktm-15.webp","b2-ktm-16.webp","b2-ktm-17.webp","b2-ktm-2.webp","b2-ktm-3.webp","b2-ktm-4.webp","b2-ktm-5.webp","b2-ktm-6.webp","b2-ktm-7.webp","b2-ktm-8.webp","b2-ktm-9.webp","b2-qio-0.webp","b2-qio-1.webp","b2-qio-2.webp","b2-qio-3.webp","b2-qio-4.webp","b2-qio-5.webp","b2-qio-6.webp","b2-rest-8.webp","isy-01.webp","isy-02.webp","isy-03.webp","isy-04.webp","isy-05.webp","isy-06.webp","isy-07.webp","isy-08.webp","isy-11.webp","isy-12.webp","isy-13.webp","isy-14.webp","isy-15.webp","isy-16.webp","isy-17.webp","isy-18.webp","isy-19.webp","isy-20.webp","isy-21.webp","isy-22.webp","isy-23.webp","isy-24.webp","isy-25.webp","isy-26.webp","isy-27.webp","isy-28.webp","isy-29.webp","isy-30.webp","isy-31.webp","isy-32.webp","isy-33.webp","isy-34.webp","isy-36.webp","isy-37.webp","isy-45.webp","ktm-13.webp","ktm-15.webp","ktm-16.webp","ktm-17.webp","ktm-18.webp","ktm-19.webp","ktm-20.webp","ktm-21.webp","ktm-22.webp","ktm-23.webp","ktm-24.webp","ktm-25.webp","ktm-26.webp","ktm-27.webp","ktm-28.webp","ktm-29.webp","ktm-30.webp","ktm-31.webp","ktm-32.webp","ktm-33.webp","ktm-34.webp","qio-0.webp","qio-1.webp","qio-11.webp","qio-13.webp","qio-14.webp","qio-15.webp","qio-16.webp","qio-17.webp","qio-18.webp","qio-19.webp","qio-2.webp","qio-20.webp","qio-21.webp","qio-22.webp","qio-23.webp","qio-24.webp","qio-25.webp","qio-3.webp","qio-6.webp","qio-7.webp","rest-01.webp","rest-05.webp"]);
+const SHOWOK=new Set(["b2-isy-0.webp","b2-isy-1.webp","b2-isy-10.webp","b2-ktm-0.webp","b2-ktm-10.webp","b2-ktm-11.webp","b2-ktm-12.webp","b2-ktm-13.webp","b2-ktm-14.webp","b2-ktm-15.webp","b2-ktm-16.webp","b2-ktm-17.webp","b2-ktm-2.webp","b2-ktm-3.webp","b2-ktm-4.webp","b2-ktm-5.webp","b2-ktm-6.webp","b2-ktm-7.webp","b2-ktm-8.webp","b2-ktm-9.webp","b2-qio-0.webp","b2-qio-1.webp","b2-qio-2.webp","b2-qio-3.webp","b2-qio-4.webp","b2-qio-5.webp","b2-qio-6.webp","b2-rest-0.webp","b2-rest-1.webp","b2-rest-2.webp","b2-rest-3.webp","b2-rest-4.webp","b2-rest-5.webp","b2-rest-8.webp","isy-01.webp","isy-02.webp","isy-03.webp","isy-04.webp","isy-05.webp","isy-06.webp","isy-07.webp","isy-08.webp","isy-11.webp","isy-12.webp","isy-13.webp","isy-14.webp","isy-15.webp","isy-16.webp","isy-17.webp","isy-18.webp","isy-19.webp","isy-20.webp","isy-21.webp","isy-22.webp","isy-23.webp","isy-24.webp","isy-25.webp","isy-26.webp","isy-27.webp","isy-28.webp","isy-29.webp","isy-30.webp","isy-31.webp","isy-32.webp","isy-33.webp","isy-34.webp","isy-36.webp","isy-37.webp","isy-45.webp","ktm-13.webp","ktm-15.webp","ktm-16.webp","ktm-17.webp","ktm-18.webp","ktm-19.webp","ktm-20.webp","ktm-21.webp","ktm-22.webp","ktm-23.webp","ktm-24.webp","ktm-25.webp","ktm-26.webp","ktm-27.webp","ktm-28.webp","ktm-29.webp","ktm-30.webp","ktm-31.webp","ktm-32.webp","ktm-33.webp","ktm-34.webp","qio-0.webp","qio-1.webp","qio-11.webp","qio-13.webp","qio-14.webp","qio-15.webp","qio-16.webp","qio-17.webp","qio-18.webp","qio-19.webp","qio-2.webp","qio-20.webp","qio-21.webp","qio-22.webp","qio-23.webp","qio-24.webp","qio-25.webp","qio-3.webp","qio-6.webp","qio-7.webp","rest-01.webp","rest-05.webp"]);
 const SRFIX=['vanraam','vdv','victoria','stevens'];/* feste Plätze: jeder 5. / ca. 7. / ca. 9. / ca. 10. Wechsel */
 /* echter Zufall (crypto) + Merken der zuletzt gezeigten Räder über Besuche hinweg */
 const srRnd=n=>{try{const a=new Uint32Array(1);crypto.getRandomValues(a);return ((a[0]^(Date.now()*2654435761>>>0)^((performance.now()*1e3)|0))>>>0)%n}catch(e){return Math.floor(Math.random()*n)}};
@@ -3852,8 +3852,11 @@ function srBuild(){const P={},G=new Set();BR.forEach(b=>P[b.k]=[srBase(b)]);
  (LG.M||[]).forEach(m=>{if(m.hidden||m.gebraucht||m.vorfuehr)return;const br=lgBrand(m.marke+' '+m.modell);if(!br)return;
   const seen=new Set();m.v.forEach(x=>{if(x._hid||!x.bild)return;const fn=x.bild.split('/').pop();const gk=srNorm(m.modell)+'|'+srNorm(x.farbe);if(!SHOWOK.has(fn)||SRDUP.has(fn)||seen.has(fn)||G.has(gk))return;seen.add(fn);G.add(gk);
    P[br.k].push({k:br.k,m:(m.marke+' '+m.modell).replace(/\s+/g,' ').trim(),f:x.farbe||'',img:'img/show/'+fn,st:x.status==='bestellt'?'bestellt':'lager'})})});
+ SR.all={};Object.keys(P).forEach(k=>SR.all[k]=P[k].filter(x=>!x.cur));/* alle echten Bestandsfotos je Marke (Start-Showroom) */
  Object.keys(P).forEach(k=>{P[k]=SRFIX.includes(k)?P[k].filter(x=>x.cur||(k==='vanraam'&&/compact\s*plus/i.test(x.m))):(P[k].length>1?P[k].filter(x=>!x.cur):P[k])});/* feste Plätze = festes Bild, Rest nur aus dem Bestand */
  SR.pool=P;SR.th={};Object.keys(P).forEach(k=>{const L=P[k];SR.th[k]=L[srRnd(L.length)].img});SR.subs.forEach(f=>f())}
+/* Marken-Runde (Tiry 14.11.2026): jede Marke mit Foto 1× pro Runde, zufällige Reihenfolge, nie dieselbe Marke direkt hintereinander */
+function bagNext(B,keys){if(!B.q||!B.q.length){const q=keys.slice();for(let i=q.length-1;i>0;i--){const j=srRnd(i+1);[q[i],q[j]]=[q[j],q[i]]}if(q.length>1&&q[0]===B.l){const j=1+srRnd(q.length-1);[q[0],q[j]]=[q[j],q[0]]}B.q=q}B.l=B.q.shift();return B.l}
 const srNorm=t=>String(t||'').toLowerCase().replace(/\(.*?\)/g,'').replace(/matt|glanz|glossy|glänzend/g,'').replace(/[^a-zäöü]/g,'');
 function srPick(k){const L=k==='*'?(SR.pool?Object.keys(SR.pool).filter(j=>!SRFIX.includes(j)).flatMap(j=>SR.pool[j]):BR.filter(b=>!SRFIX.includes(b.k)).map(srBase)):((SR.pool&&SR.pool[k])||[srBase(BR.find(b=>b.k===k))]);
  let c=L.filter(x=>!SR.last.includes(x.img)&&(!SR.lastF||srNorm(x.f)!==SR.lastF));if(!c.length)c=L.filter(x=>x.img!==SR.lb[k]&&x.img!==SR.last[0]);if(!c.length)c=L.filter(x=>x.img!==SR.lb[k]);if(!c.length)c=L;
@@ -4073,20 +4076,21 @@ fRender();
 
 
 /* ---------- Kopf: Rad-Wechsel + heutige Öffnungszeit ---------- */
-(function(){const hv=$('#hvis');if(!hv)return;const bs=$$('.hb',hv),lg=$('#hlg'),fl=$('.hfloor',hv);let k=0,on=bs[0],fx=true,D=[],dk=0,busy=0;
+(function(){const hv=$('#hvis');if(!hv)return;const bs=$$('.hb',hv),lg=$('#hlg'),fl=$('.hfloor',hv);let k=0,on=bs[0],fx=true,D=[],dk=0,busy=0;const HB={};
  /* Tiry 14.11.2026: die festen Bilder genau 1× durch, danach nur noch zufällige Räder aus dem Bestand (srPick) */
  const swap=(el,logo)=>{on.classList.add('off');el.classList.remove('off');on=el;lg.classList.add('swap');setTimeout(()=>{lg.src=logo;lg.classList.remove('swap')},350)};
  setInterval(()=>{if(cur!=='start'||scrollY>innerHeight||document.hidden||busy)return;
   if(fx&&(k<bs.length-1||!SR.pool)){k=(k+1)%bs.length;swap(bs[k],bs[k].dataset.l);return}
   fx=false;if(!D.length)for(let j=0;j<2;j++){const im=document.createElement('img');im.className='hb off';im.decoding='async';hv.insertBefore(im,fl);D.push(im)}
-  let x=null;for(let t=0;t<12&&(!x||x.cur);t++)x=srPick('*');/* nur echte Bestandsräder mit eigenem Foto, nie Katalogbild */
-  const br=x&&!x.cur&&BR.find(y=>y.k===x.k);if(!br)return;dk^=1;const el=D[dk];busy=1;
+  const ks=Object.keys(SR.all||{}).filter(j=>SR.all[j].length);if(!ks.length)return;/* nur echte Bestandsräder mit eigenem Foto, nie Katalogbild */
+  const bk=bagNext(HB,ks),L=SR.all[bk];let c=L.filter(y=>!SR.last.includes(y.img)&&(!SR.lastF||srNorm(y.f)!==SR.lastF));if(!c.length)c=L.filter(y=>y.img!==SR.lb['h'+bk]);if(!c.length)c=L;
+  const x=c[srRnd(c.length)];SR.lb['h'+bk]=x.img;SR.last.unshift(x.img);SR.last.length=Math.min(SR.last.length,24);srLS(SR.last);SR.lastF=srNorm(x.f);const br=BR.find(y=>y.k===x.k);if(!br)return;dk^=1;const el=D[dk];busy=1;
   const pre=new Image();pre.src=x.img;const go=()=>{el.src=x.img;el.alt=x.m+(x.f?' in '+x.f:'');busy=0;requestAnimationFrame(()=>swap(el,br.logo))};pre.decode?pre.decode().then(go,go):(pre.onload=go)},4800);
  const bq=berlin(),{d,m}=bq,q=$('#qkHours'),TD=slotsAt(bq.y,bq.mo,bq.dd,d);if(q){const op=TD.some(([a,b])=>m>=a&&m<b);q.innerHTML='<i class="qd'+(op?' on':'')+'"></i>'+(op?'Jetzt geöffnet':'Heute: '+(TD.length?TD.map(([a,b])=>hm(a)+'–'+hm(b)).join(' · '):'geschlossen'))}})();
 
 /* ================= AUF LAGER (Modelle mit Varianten, ohne Stückzahlen) ================= */
 const LG={M:[],list:[],ok:false,load:null,f:{q:'',mk:'',rf:'',nur:false,deal:false,sort:'neu'},i:-1,vi:0};
-const BRK=[[/i:?\s?sy/i,'isy'],[/ktm/i,'ktm'],[/qio/i,'qio'],[/velo\s*de\s*ville|vdv/i,'vdv'],[/van\s*raam/i,'vanraam'],[/gudereit/i,'gudereit'],[/victoria/i,'victoria']];
+const BRK=[[/i:?\s?sy/i,'isy'],[/ktm/i,'ktm'],[/qio/i,'qio'],[/velo\s*de\s*ville|vdv/i,'vdv'],[/van\s*raam/i,'vanraam'],[/gudereit/i,'gudereit'],[/victoria/i,'victoria'],[/stevens/i,'stevens']];
 const lgBrand=m=>{const x=BRK.find(([re])=>re.test(m||''));return x?BR.find(b=>b.k===x[1]):null};
 const lgMkName=r=>(lgBrand(r.marke)||{n:r.marke}).n;
 /* Bild nur, wenn Marke UND Rahmenform zum vorhandenen Foto passen – sonst Platzhalter mit Logo */
@@ -4150,15 +4154,13 @@ function bmApply(d){(d&&d.raeder||[]).forEach(r=>(r.farben||[]).forEach(v=>{cons
 function lgLoad(){if(LG.load)return LG.load;LG.load=Promise.resolve().then(()=>{const d=lgInline();if(!d||!Array.isArray(d.raeder))throw 0;LG.D=bmApply(d);lgApply()}).catch(()=>{$('#lgGrid').innerHTML='<p class="lgempty">Der Bestand konnte gerade nicht geladen werden. Ruf uns gern an: 07271 78033.</p>'});return LG.load}
 /* Kachel „Im Laden“: echte Räder aus dem Bestand (mit Bild, im Laden) in zufälliger Reihenfolge; Schild folgt der Kachel */
 const QL={p:[],i:0,t:0};
-function qlFill(){const box=$('#qBk');if(!box||!LG.M)return;const S=new Set();
- LG.M.forEach(m=>(m.v||[]).forEach(x=>{if(x.bild&&x.status!=='bestellt')S.add(x.bild)}));const P=[...S];
- for(let i=P.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[P[i],P[j]]=[P[j],P[i]]}
- QL.p=P;QL.i=0;if(!P.length)return;qlNext();clearInterval(QL.t);QL.t=setInterval(()=>{if(cur==='start'&&!document.hidden)qlNext()},2800)}
-function qlNext(){const box=$('#qBk');if(!box||!QL.p.length)return;if(QL.i>=QL.p.length){QL.i=0;const P=QL.p;for(let i=P.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[P[i],P[j]]=[P[j],P[i]]}}
- const src=QL.p[QL.i++],im=new Image();im.alt='';im.decoding='async';
+function qlFill(){const box=$('#qBk');if(!box||!LG.M)return;const G={},S=new Set();
+ LG.M.forEach(m=>{const k=(lgBrand(m.marke+' '+m.modell)||{k:String(m.marke||'').toLowerCase()}).k;(m.v||[]).forEach(x=>{if(x.bild&&x.status!=='bestellt'&&!S.has(x.bild)){S.add(x.bild);(G[k]=G[k]||[]).push(x.bild)}})});
+ QL.g=G;QL.b={};QL.lb={};QL.p=Object.keys(G);if(!QL.p.length)return;qlNext();clearInterval(QL.t);QL.t=setInterval(()=>{if(cur==='start'&&!document.hidden)qlNext()},2800)}
+function qlNext(){const box=$('#qBk');if(!box||!QL.p.length)return;
+ const k=bagNext(QL.b,QL.p),L=QL.g[k];let c=L.filter(y=>y!==QL.lb[k]);if(!c.length)c=L;const src=c[srRnd(c.length)];QL.lb[k]=src;const im=new Image();im.alt='';im.decoding='async';
  im.onload=()=>{[...box.querySelectorAll('img')].forEach(o=>{o.classList.remove('qin');o.classList.add('qout');setTimeout(()=>o.remove(),900)});box.appendChild(im);requestAnimationFrame(()=>requestAnimationFrame(()=>im.classList.add('qin')))};
- im.onerror=()=>{QL.p.splice(QL.i-1,1);QL.i--};im.src=src;
- const nx=QL.p[QL.i];if(nx){const pre=new Image();pre.src=nx}}
+ im.onerror=()=>{const i=L.indexOf(src);if(i>=0)L.splice(i,1);if(!L.length){delete QL.g[k];QL.p=QL.p.filter(j=>j!==k);QL.b.q=null}};im.src=src}
 (function(){const t=$('#qaLg'),c=$('#hLive'),a=c&&$('.hla',c);if(!t||!a)return;
  const pos=()=>{const A=a.getBoundingClientRect(),T=t.getBoundingClientRect();if(!A.width||!T.width)return;const x0=A.left+A.width/2,y0=A.top,x1=T.left+T.width/2,y1=T.top;
   const ang=-Math.atan2(x1-x0,y1-y0)*180/Math.PI;a.style.setProperty('--ang',Math.max(-75,Math.min(75,ang))+'deg')};
