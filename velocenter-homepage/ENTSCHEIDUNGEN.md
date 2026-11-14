@@ -157,3 +157,6 @@
 
 ## 14.11.2026 – Ticker: „4,8 ★ bei Google“ (Tiry: Wort „Sterne“ raus)
 - Text und Aktualisierung aus google.json (Regex) angepasst.
+
+## 14.11.2026 – Ticker „Weltrekord 283 i:SY's“ (Tiry)
+- „i:SY's“ in kräftigem Orange (#FF7A00, Leuchten), Markenschreibweise ohne Großbuchstaben (Klasse `tko` in tkIt).
