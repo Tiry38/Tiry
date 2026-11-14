@@ -8,6 +8,7 @@ import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPa
 import { GTAOPass } from 'three/examples/jsm/postprocessing/GTAOPass.js';
 import { FullScreenQuad } from 'three/examples/jsm/postprocessing/Pass.js';
 import { detectQuality, createAutoTuner } from './quality.js';
+import { setForgeLod } from './forge/loader.js';
 
 const VS = /* glsl */`varying vec2 vUv; void main(){ vUv = uv; gl_Position = vec4(position.xy, 0.0, 1.0); }`;
 
@@ -161,6 +162,8 @@ export const QUALITY = {
   medium: { pixel: 1, shadows: true, bloom: true, ao: false, aoScale: 0.5, msaa: 2, particles: 0.7, rays: true, sharpen: 0.5 },
   high: { pixel: 1.25, shadows: true, bloom: true, ao: true, aoScale: 0.5, msaa: 4, particles: 1, rays: true, sharpen: 0.55 },
   ultra: { pixel: 2, shadows: true, bloom: true, ao: true, aoScale: 1, msaa: 4, particles: 1.3, rays: true, sharpen: 0.55 },
+  // Kino: über Ultra – Supersampling (×1.5 zusätzlich zur Bildschirmdichte), 8× MSAA, dichteres GTAO, höchste Modell-Stufe
+  kino: { pixel: 2, ss: 1.5, shadows: true, bloom: true, ao: true, aoScale: 1, aoSamples: 24, msaa: 8, particles: 1.5, rays: true, sharpen: 0.4 },
 };
 
 const rt = (w, h, opts = {}) => new THREE.WebGLRenderTarget(w, h, { type: THREE.HalfFloatType, depthBuffer: false, ...opts });
@@ -206,6 +209,7 @@ export class Engine {
     this.rayBlurMat = new THREE.ShaderMaterial({ ...RayBlurShader, uniforms: THREE.UniformsUtils.clone(RayBlurShader.uniforms), depthTest: false, depthWrite: false });
     this.black = new THREE.DataTexture(new Uint8Array([0, 0, 0, 255]), 1, 1);
     this.black.needsUpdate = true;
+    setForgeLod(settings.get('quality'));
     this.buildComposer();
     this.resize();
     window.addEventListener('resize', () => this.resize());
@@ -256,6 +260,7 @@ export class Engine {
 
   applySettings() {
     const q = this.q;
+    setForgeLod(this.settings.get('quality'));
     this.renderer.shadowMap.enabled = q.shadows && this.settings.get('shadows');
     this.scene.traverse((o) => { if (o.material) (Array.isArray(o.material) ? o.material : [o.material]).forEach((m) => { m.needsUpdate = true; }); });
     this.buildComposer();
@@ -264,7 +269,7 @@ export class Engine {
 
   resize() {
     const w = window.innerWidth, h = window.innerHeight;
-    const pr = Math.min(window.devicePixelRatio || 1, this.q.pixel) * (this.settings.get('renderScale') || 1);
+    const pr = Math.min(window.devicePixelRatio || 1, this.q.pixel) * (this.settings.get('renderScale') || 1) * (this.q.ss || 1);
     this.renderer.setPixelRatio(pr);
     this.renderer.setSize(w, h, false);
     this.camera.aspect = w / h;
@@ -302,8 +307,9 @@ export class Engine {
 
   render(dt) {
     const r = this.renderer, L = this.look, q = this.q;
+    dt = Number.isFinite(dt) ? Math.max(0, dt) : 0;
     this.time += dt;
-    this.flash = Math.max(0, this.flash - dt * 1.4);
+    this.flash = Math.min(1, Math.max(0, this.flash - dt * 1.4));
     // Laufzeit-Benchmark (nur Automatik): Bildzeit messen, bei Bedarf Stufe wechseln
     const now = performance.now();
     if (this.autoTuner && this._lastFrame && !document.hidden) {
@@ -318,20 +324,22 @@ export class Engine {
         if (this.autoTuner && this.autoTuner.done) this.autoTuner = null;
       }
     }
-    // Bildtakt bei extrem langsamen Bildern (Software-Rendering ohne Grafiktreiber, > ~0,35 s pro Bild):
-    // nach jedem teuren Bild eine Pause einlegen, damit GPU-Prozess, Compositor und Oberfläche (Menüs,
-    // Klicks, Bildschirmfotos) bedienbar bleiben, statt dauerhaft hinter dem 3D-Bild zu warten.
-    if (this._lastFrame) {
-      const ft = now - this._lastFrame;
-      if (!this._skipped) this.frameMs = this.frameMs ? this.frameMs * 0.7 + ft * 0.3 : ft;
-    }
-    if (this.frameMs > 350) {
-      // gerade ein teures Bild fertig geworden → Pause beginnen
-      if (!this._skipped && this._lastFrame) this._nextRenderAt = now + Math.min(4000, this.frameMs * 0.75);
-      if (now < (this._nextRenderAt || 0)) { this._lastFrame = now; this._skipped = true; return; }
+    // Bildtakt bei extrem langsamen Bildern (Software-Rendering ohne Grafiktreiber): Die GPU-Zeit wird über
+    // einen Fence gemessen. Ist sie sehr hoch (> 0,25 s), wird kein neues Bild eingereiht, solange das alte noch
+    // rechnet, und danach eine kurze Pause eingelegt – so bleiben Compositor, Menüs, Klicks und Bildschirmfotos
+    // bedienbar, statt dauerhaft hinter dem 3D-Bild zu warten. Auf echten GPUs greift das nie.
+    const gl = r.getContext();
+    if (this._fence) {
+      const st = gl.getSyncParameter(this._fence, gl.SYNC_STATUS);
+      if (st === gl.SIGNALED) {
+        gl.deleteSync(this._fence); this._fence = null;
+        const g = now - this._fenceT;
+        this.gpuMs = this.gpuMs ? this.gpuMs * 0.6 + g * 0.4 : g;
+        if (this.gpuMs > 250) this._nextRenderAt = now + Math.min(3000, this.gpuMs * 0.5);
+      } else if (this.gpuMs > 250) { this._lastFrame = now; return; }
     }
     this._lastFrame = now;
-    this._skipped = false;
+    if (this.gpuMs > 250 && now < (this._nextRenderAt || 0)) return;
     r.info.reset();
     const pre = this.scene.userData.aethPreRender;
     if (pre) pre(this.camera, this);
@@ -350,7 +358,7 @@ export class Engine {
       this.ao.blendIntensity = L.aoIntensity;
       if (this._aoRadius !== L.aoRadius) {
         this._aoRadius = L.aoRadius;
-        this.ao.updateGtaoMaterial({ radius: L.aoRadius, distanceExponent: 1.4, thickness: 2.5, scale: 1.7, samples: 12 });
+        this.ao.updateGtaoMaterial({ radius: L.aoRadius, distanceExponent: 1.4, thickness: 2.5, scale: 1.7, samples: this.q.aoSamples || 12 });
       }
       const dst = next();
       this.ao.render(r, dst, src);
@@ -421,6 +429,7 @@ export class Engine {
     if (L.highTint) u.uHighTint.value.set(L.highTint[0], L.highTint[1], L.highTint[2]);
     if (L.vignette != null) u.uVignette.value = L.vignette;
     this.pass(this.compositeMat, null);
+    if (!this._fence && gl.fenceSync) { this._fence = gl.fenceSync(gl.SYNC_GPU_COMMANDS_COMPLETE, 0); this._fenceT = performance.now(); gl.flush(); }
     this.stats.calls = r.info.render.calls;
     this.stats.triangles = r.info.render.triangles;
   }

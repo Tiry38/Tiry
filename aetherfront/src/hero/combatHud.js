@@ -129,7 +129,7 @@ export class CombatHud {
   feedback(kind, data) {
     if (kind === 'target') this.setTarget(data);
     else if (kind === 'auto') this.setTarget(data);
-    else if (kind === 'cast' && this.slots[data]) { const el = this.slots[data].el; el.classList.remove('press'); void el.offsetWidth; el.classList.add('press'); }
+    else if (kind === 'cast' && this.slots[data]) { const el = this.slots[data].el; el.classList.remove('pressed'); void el.offsetWidth; el.classList.add('pressed'); }
     else if (kind === 'placing') this.slots.forEach((s, i) => s.el.classList.toggle('placing', i === data));
   }
 
@@ -227,7 +227,7 @@ export class CombatHud {
       sl.gcdEl.style.setProperty('--cd', st.gcd.toFixed(3));
       const txt = st.cd > 0 ? sec(st.cd) : '';
       if (sl.st.txt !== txt) { sl.cdt.textContent = txt; sl.st.txt = txt; }
-      const cls = `ab${st.cd > 0 ? ' oncd' : ''}${st.nores ? ' nores' : ''}${st.oor ? ' oor' : ''}${st.ult ? ' ult' : ''}${st.queued ? ' queued' : ''}${st.casting ? ' casting' : ''}${sl.el.classList.contains('placing') ? ' placing' : ''}${sl.el.classList.contains('press') ? ' press' : ''}${st.dead ? ' dead' : ''}`;
+      const cls = `ab${st.cd > 0 ? ' oncd' : ''}${st.nores ? ' nores' : ''}${st.oor ? ' oor' : ''}${st.ult ? ' ult' : ''}${st.queued ? ' queued' : ''}${st.casting ? ' casting' : ''}${sl.el.classList.contains('placing') ? ' placing' : ''}${sl.el.classList.contains('pressed') ? ' pressed' : ''}${st.dead ? ' dead' : ''}`;
       if (sl.st.cls !== cls) { sl.el.className = cls; sl.st.cls = cls; }
       // Abklingzeit vorbei → Aufblitzen
       if (sl.st.wasCd && !(st.cd > 0)) { sl.el.classList.remove('flash'); void sl.el.offsetWidth; sl.el.classList.add('flash'); sl.st.cls = null; }
@@ -279,7 +279,7 @@ export class CombatHud {
       if (cast.channel) { const n = raw.ticks || 1; for (let k = 1; k < n; k++) { const t = document.createElement('i'); t.style.left = `${(k / n) * 100}%`; ticks.appendChild(t); } }
     }
     c.style.setProperty('--p', (cast.channel ? 1 - p : p).toFixed(4));
-    c.querySelector('.ct').textContent = `${Math.max(0, cast.total - cast.t).toFixed(1).replace('.', ',')} s`;
+    c.querySelector('.ctime').textContent = `${Math.max(0, cast.total - cast.t).toFixed(1).replace('.', ',')} s`;
   }
 
   updateFrames(h, sim) {

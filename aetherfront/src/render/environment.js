@@ -21,6 +21,7 @@ const QUALITY = {
   medium: { shadow: 2048, grass: 0.5, flowers: 0.6, particles: 0.5, cloudSteps: 16, grassFar: 120 },
   high: { shadow: 2048, grass: 0.6, flowers: 0.7, particles: 0.8, cloudSteps: 20, grassFar: 150 },
   ultra: { shadow: 4096, grass: 1.0, flowers: 1.0, particles: 1.0, cloudSteps: 30, grassFar: 260 },
+  kino: { shadow: 8192, grass: 1.0, flowers: 1.0, particles: 1.0, cloudSteps: 40, grassFar: 300 }, // Aether-Forge: Kino-Stufe
 };
 
 // ---------- Biome (Licht, Himmel, Nebel, Grading, Vegetations-Tönung) ----------

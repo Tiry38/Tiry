@@ -481,6 +481,7 @@ export class Sculpt {
     this.stack = [];
     this.mirror = false;
     this.defaults = {};
+    this.minTh = o.minTh || 0; this.minThFine = o.minThFine || 0;   // dünne Schalen vermeiden (≥ 2 Zellen, sonst nicht-mannigfaltig)
   }
   _root(tier = 0) {
     const key = `${this.layerName}@${tier | 0}`;
@@ -568,7 +569,8 @@ export class Sculpt {
   }
   /** Schale (Panzer, Stoffschicht) um die Form der Kinder: Abstand off, Dicke th, optionaler Schnitt clip(x,y,z)→d (≤0 = behalten) */
   shell(o, fn) {
-    const off = o.off ?? 0, th = o.th ?? 0.006;
+    const off = o.off ?? 0, minTh = this.layerName.endsWith(':fine') ? this.minThFine : this.minTh;
+    const th = Math.max(o.th ?? 0.006, minTh || 0);
     const clip = o.clip || null, ck = o.ck ?? th * 0.6;
     const mirror = this.mirror;
     const mod = (d, x, y, z) => {

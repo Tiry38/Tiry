@@ -332,7 +332,7 @@ export class Menus {
     const pct = (v) => `${Math.round(v * 100)}%`;
     const gfx = () => this.onApplyGraphics();
     if (this.settingsTab === 'grafik') {
-      row('Grafikqualität', 'Voreinstellung für Auflösung, Schatten, Umgebungsverdeckung und Effekte', segc('quality', [['low', 'Niedrig'], ['medium', 'Mittel'], ['high', 'Hoch'], ['ultra', 'Ultra']], gfx));
+      row('Grafikqualität', 'Voreinstellung für Auflösung, Schatten, Umgebungsverdeckung und Effekte', segc('quality', [['low', 'Niedrig'], ['medium', 'Mittel'], ['high', 'Hoch'], ['ultra', 'Ultra'], ['kino', 'Kino']], gfx));
       row('Render-Auflösung', 'Unter 100 % = schneller, über 100 % = schärfer', slider('renderScale', 0.5, 1.5, 0.05, pct, () => { clearTimeout(this.rsT); this.rsT = setTimeout(gfx, 250); }));
       row('Bloom / Leuchten', 'Magisches Glühen von Effekten und Kristallen', toggle('bloom', gfx));
       row('Schatten', 'Weiche Echtzeitschatten', toggle('shadows', gfx));

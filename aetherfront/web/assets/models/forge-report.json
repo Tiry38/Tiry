@@ -2,27 +2,145 @@
  "cell": 0.007,
  "report": [
   {
-   "id": "hero_kael",
-   "hiTris": 759066,
+   "id": "unit_automaton",
+   "hiTris": 99764,
    "lods": [
-    40464,
-    27054,
-    26898
+    4998,
+    1518
    ],
    "verts": [
-    16411,
-    9682,
-    9601
+    2506,
+    766
    ],
    "ms": {
-    "sculpt": 13,
-    "mesh": 15894,
-    "decimate": 28562,
-    "bake": 10141,
-    "total": 56764
+    "sculpt": 18,
+    "mesh": 452,
+    "decimate": 4834,
+    "bake": 596,
+    "total": 5986
    },
-   "bytes": 1930280
+   "bytes": 223076
+  },
+  {
+   "id": "unit_brute",
+   "hiTris": 232208,
+   "lods": [
+    5200,
+    1600
+   ],
+   "verts": [
+    2515,
+    715
+   ],
+   "ms": {
+    "sculpt": 15,
+    "mesh": 3210,
+    "decimate": 10546,
+    "bake": 722,
+    "total": 14938
+   },
+   "bytes": 221128
+  },
+  {
+   "id": "unit_golem",
+   "hiTris": 205380,
+   "lods": [
+    4198,
+    1424
+   ],
+   "verts": [
+    2075,
+    713
+   ],
+   "ms": {
+    "sculpt": 2,
+    "mesh": 1863,
+    "decimate": 6802,
+    "bake": 266,
+    "total": 9050
+   },
+   "bytes": 192592
+  },
+  {
+   "id": "unit_treant",
+   "hiTris": 365636,
+   "lods": [
+    5634,
+    1738
+   ],
+   "verts": [
+    2817,
+    870
+   ],
+   "ms": {
+    "sculpt": 2,
+    "mesh": 4646,
+    "decimate": 25682,
+    "bake": 488,
+    "total": 31143
+   },
+   "bytes": 251080
+  },
+  {
+   "id": "unit_raptor",
+   "hiTris": 98192,
+   "lods": [
+    4200,
+    1300
+   ],
+   "verts": [
+    2091,
+    641
+   ],
+   "ms": {
+    "sculpt": 1,
+    "mesh": 763,
+    "decimate": 3124,
+    "bake": 270,
+    "total": 4220
+   },
+   "bytes": 185496
+  },
+  {
+   "id": "unit_crawler",
+   "hiTris": 162936,
+   "lods": [
+    4228,
+    1336
+   ],
+   "verts": [
+    2055,
+    609
+   ],
+   "ms": {
+    "sculpt": 2,
+    "mesh": 468,
+    "decimate": 5387,
+    "bake": 166,
+    "total": 6109
+   },
+   "bytes": 183304
+  },
+  {
+   "id": "unit_serpent",
+   "hiTris": 142974,
+   "lods": [
+    4999,
+    1499
+   ],
+   "verts": [
+    2450,
+    699
+   ],
+   "ms": {
+    "sculpt": 3,
+    "mesh": 1941,
+    "decimate": 6162,
+    "bake": 668,
+    "total": 8904
+   },
+   "bytes": 215160
   }
  ],
- "totalBytes": 1930713
+ "totalBytes": 11303735
 }

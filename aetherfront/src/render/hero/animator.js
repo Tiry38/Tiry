@@ -447,6 +447,7 @@ export class HeroAnimator {
     if (this.rig.lights) for (const L of this.rig.lights) L.intensity = L.userData.base * (0.9 + 0.08 * Math.sin(t * 7.3) + 0.05 * Math.sin(t * 17.1)) * (1 + this.castGlow * 1.2) * (dead ? 0.3 : 1);
     for (const m of this.rig.glowMaterials) m.color.setScalar(gk * (m.userData.pulse ?? 1) * (m.userData.base ?? 1));
     for (const m of this.rig.bodyMaterials) if (m.userData.uniforms) m.userData.uniforms.uFlash.value = ha < 0.18 ? (1 - ha / 0.18) * 0.9 : 0;
+    if (this.rig.postAnimate) this.rig.postAnimate(dt, gk, s); // Aether-Forge: Waffenschweif, Aura
   }
 
   /** Mocap-Laufzeit bei Bedarf anlegen; false → rein prozedural (Clips fehlen/abgeschaltet) */

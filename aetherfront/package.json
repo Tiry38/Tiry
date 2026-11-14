@@ -16,7 +16,8 @@
     "balance": "node scripts/balance.mjs",
     "smoke": "node scripts/build.mjs && node scripts/smoke.mjs",
     "server": "node server/relay-server.js",
-    "dist": "node scripts/build.mjs && electron-builder --win --x64"
+    "dist": "node scripts/build.mjs && electron-builder --win --x64",
+    "forge": "node scripts/forge-models.mjs"
   },
   "dependencies": {
     "ws": "^8.23.0"

@@ -197,9 +197,9 @@ export function head(S, B, o = {}) {
     for (const sx of [1, -1]) S.ellipsoid(at(sx * 0.0075, -0.0465, 0.1015), [0.0042 * s, 0.0026 * s, 0.005 * s], { ...skin, op: 'sub', k: 0.002 * s });
     // Philtrum / Mund
     const lips = { mat: 'lips', col: o.lips || '#b0645a', region: 'head', vary: 0.03 };
-    S.ellipsoid(at(0, -0.0635, 0.0955), [0.022 * s, 0.0058 * s, 0.009 * s], { ...lips, k: 0.006 * s });
-    S.ellipsoid(at(0, -0.0735, 0.093), [0.0195 * s, 0.0068 * s, 0.0095 * s], { ...lips, k: 0.006 * s });
-    S.capsule(at(-0.019, -0.0685, 0.1), at(0.019, -0.0685, 0.1), 0.0018 * s, { ...skin, op: 'sub', k: 0.003 * s, paint: true, col: '#5a2a26', mat: 'lips' });
+    S.ellipsoid(at(0, -0.0635, 0.0925), [0.021 * s, 0.0052 * s, 0.0075 * s], { ...lips, k: 0.006 * s });
+    S.ellipsoid(at(0, -0.0735, 0.0905), [0.019 * s, 0.006 * s, 0.0078 * s], { ...lips, k: 0.006 * s });
+    S.capsule(at(-0.019, -0.0685, 0.098), at(0.019, -0.0685, 0.098), 0.0014 * s, { ...skin, op: 'sub', k: 0.003 * s, paint: true, col: '#5a2a26', mat: 'lips' });
     // Ohren
     if (o.ears !== false) for (const sx of [1, -1]) {
       const ear = { ...skin, rot: [0, sx * 0.35, sx * 0.12] };
@@ -215,8 +215,8 @@ export function head(S, B, o = {}) {
     S.sphere(add(ec, [sx * 0.0005 * s, 0, 0.0085 * s]), 0.0062 * s, { mat: 'eye', col: o.eye || '#3a6a8a', region: 'head', vary: 0.02, k: 0.001 * s });
     S.sphere(add(ec, [sx * 0.0005 * s, 0, 0.0112 * s]), 0.0027 * s, { mat: 'eye', col: '#08090b', region: 'head', vary: 0 });
     // Oberlid (umschließt das Auge oben)
-    S.ellipsoid(add(ec, [0, 0.0055 * s, 0.002 * s]), [0.0145 * s, 0.0085 * s, 0.0128 * s], { ...skin, k: 0.002 * s });
-    S.ellipsoid(add(ec, [0, -0.0075 * s, 0.001 * s]), [0.0138 * s, 0.006 * s, 0.0122 * s], { ...skin, k: 0.002 * s });
+    S.ellipsoid(add(ec, [0, 0.0098 * s, 0.0015 * s]), [0.0148 * s, 0.0062 * s, 0.0128 * s], { ...skin, k: 0.002 * s, rot: [0.25, 0, 0] });
+    S.ellipsoid(add(ec, [0, -0.0112 * s, 0.0005 * s]), [0.0138 * s, 0.0042 * s, 0.0118 * s], { ...skin, k: 0.002 * s });
   }
   // Augenbrauen (Haar)
   if (o.brow !== false) for (const sx of [1, -1]) {
@@ -438,3 +438,64 @@ export function hairStrands(S, H, o = {}) {
 }
 
 export { cos, sin, abs, max, min, sqrt, atan2, hypot };
+
+/** Waffenrahmen wie weaponJoint im alten Rig: Ursprung = Waffengelenk, y = Hand vorn, x = −Unterarmrichtung */
+export function weaponFrame(B, side, jointName) {
+  const F = handFrame(B, side);
+  const o = B.J[jointName] ? P(B.J[jointName].pos) : F.grip;
+  return frame(o, F.f, scl(F.d, -1));
+}
+/** Glühende Runenlinie (Glüh-Ebene) entlang Punkten; kehrt zur vorherigen Ebene zurück */
+export function runeLine(S, pts, r, col, o = {}) {
+  const prev = S.layerName;
+  S.layer('glow');
+  S.tube(pts, r, { mat: 'glow', col, glow: o.k ?? 2.4, ...o });
+  S.layer(prev);
+}
+/** Ganzer Körper (Unterkleidung) mit Materialien je Bereich */
+export function bodyBase(S, B, o = {}) {
+  const t = o.torso || {}, a = o.arms || t, l = o.legs || t;
+  S.group({ k: 0 }, () => {
+    torsoShape(S, B, { female: o.female, bulk: o.bulk ?? 1, chest: o.chest, waist: o.waist, o: { region: 'torso', ...t } });
+    S.sym(() => deltoidShape(S, B, { bulk: o.armBulk ?? 1, o: { region: 'shoulderL', ...a } }));
+    S.sym(() => upperArmShape(S, B, { bulk: o.armBulk ?? 1, o: { region: 'armL', ...a } }));
+    S.sym(() => foreArmShape(S, B, { bulk: o.armBulk ?? 1, o: { region: 'armL', ...(o.fore || a) } }));
+    S.sym(() => thighShape(S, B, { bulk: o.legBulk ?? 1, o: { region: 'legL', ...l } }));
+    S.sym(() => shinShape(S, B, { bulk: o.legBulk ?? 1, o: { region: 'legL', ...(o.shin || l) } }));
+    if (o.neck !== false) neckShape(S, B, { r: o.neckR ?? 0.056, o: { region: 'neck', ...(o.neckO || t) } });
+  });
+}
+/** Stiefel (links, in sym) mit Schaft, Sohle, Umschlag */
+export function boot(S, B, o = {}) {
+  const j = joints(B), s = B.skel.s, an = j('footL'), kn = j('shinL');
+  const A = { mat: o.mat || 'leather', col: o.col || '#3a2618', region: 'legL' };
+  footShape(S, B, { w: o.w ?? 1.08, o: A });
+  const top = an[1] + (o.h ?? 0.26) * s;
+  S.shell({ off: 0.004 * s, th: 0.013 * s, ...A, clip: (x, y, z) => max(y - top, -y + 0.01 * s) }, () => shinShape(S, B, { bulk: 1.0, muscle: false }));
+  if (o.cuff) S.torus([an[0], top - 0.005 * s, an[2] - 0.004 * s], 0.058 * s, 0.009 * s, { mat: o.cuffMat || A.mat, col: o.cuff, region: 'legL', k: 0.004 * s });
+  S.box([an[0], 0.012 * s, an[2] + 0.04 * s], [0.045 * s, 0.012 * s, 0.11 * s], { mat: 'leather', col: '#1e140e', region: 'legL', r: 0.008 * s, k: 0.004 * s });
+  void kn;
+}
+/** Gewichte entlang einer Knochenkette (Haar, Schal, Schärpe): Projektion auf den Gelenkpfad */
+export function chainBind(B, bones, root = null, rootLen = 0.05) {
+  const pts = bones.filter((n) => B.J[n]).map((n) => P(B.J[n].pos));
+  const names = bones.filter((n) => B.J[n]);
+  const s = B.skel.s;
+  return (p) => {
+    let best = Infinity, bi = 0, bt = 0;
+    const segs = Math.max(1, pts.length - 1);
+    for (let i = 0; i < segs; i++) {
+      const a = pts[i], b = pts[Math.min(i + 1, pts.length - 1)];
+      const d = sub(b, a), l2 = dot(d, d) || 1e-9;
+      let t = dot(sub(p, a), d) / l2; const tc = clamp(t, 0, 1);
+      const q = add(a, scl(d, tc)); const dd = len(sub(p, q));
+      if (dd < best) { best = dd; bi = i; bt = i === segs - 1 ? clamp(t, 0, 1) : tc; if (i === 0 && t < 0) bt = t; }
+    }
+    if (pts.length === 1) return root ? [[names[0], 1]] : [[names[0], 1]];
+    const out = [];
+    if (bt < 0 && root) { const k = clamp(-bt * len(sub(pts[1], pts[0])) / (rootLen * s), 0, 1); out.push([root, k], [names[0], 1 - k]); return out; }
+    bt = clamp(bt, 0, 1);
+    out.push([names[bi], 1 - bt], [names[bi + 1] || names[bi], bt]);
+    return out;
+  };
+}

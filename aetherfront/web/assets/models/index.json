@@ -1,7 +1,32 @@
 {
  "heroes": [
-  "hero_kael"
+  "hero_kael",
+  "hero_mira",
+  "hero_lyra",
+  "hero_selene",
+  "hero_brann",
+  "hero_varo"
  ],
- "units": [],
- "built": "2026-11-14T20:24:08.042Z"
+ "units": [
+  "unit_knight",
+  "unit_paladin_heavy",
+  "unit_archer",
+  "unit_priest",
+  "unit_knightfallen",
+  "unit_automaton",
+  "unit_brute",
+  "unit_golem",
+  "unit_shade",
+  "unit_treant",
+  "unit_wolf",
+  "unit_hound",
+  "unit_raptor",
+  "unit_crawler",
+  "unit_serpent",
+  "unit_boss_titan",
+  "unit_boss_lord",
+  "unit_king",
+  "unit_boss_drake"
+ ],
+ "built": "2026-11-14T20:52:15.349Z"
 }

@@ -194,7 +194,7 @@ export function createForgeMaterial(o = {}) {
 		float ndv = clamp( dot( normal, rimV ), 0.0, 1.0 );
 		float rimF = pow( 1.0 - ndv, 3.5 );
 		// filmischer Kantenschein (Himmel) – auf Metall schwächer, in Hohlräumen aus
-		totalEmissiveRadiance += rimF * uRim * ( diffuseColor.rgb * 0.6 + uRimCol * 0.25 ) * ( 1.0 - 0.6 * metalnessFactor ) * ( 1.0 - vBake.x );
+		totalEmissiveRadiance += rimF * uRim * ( diffuseColor.rgb * 0.3 + uRimCol * 0.55 ) * ( 1.0 - 0.4 * metalnessFactor ) * ( 1.0 - 0.8 * vBake.x );
 		totalEmissiveRadiance += diffuseColor.rgb * afGlowIn * ( 0.35 + 1.2 * rimF + 0.6 * afThin );
 		totalEmissiveRadiance += uFlashCol * uFlash * ( 0.35 + 0.65 * rimF );
 	}`)

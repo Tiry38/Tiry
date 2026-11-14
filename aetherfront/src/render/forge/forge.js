@@ -16,7 +16,8 @@ const now = () => (typeof performance !== 'undefined' ? performance.now() : Date
  */
 export function forgeAsset(def, log = () => {}) {
   const t0 = now();
-  const S = new Sculpt({ palette: def.palette });
+  const cell0 = def.cell || 0.008;
+  const S = new Sculpt({ palette: def.palette, minTh: cell0 * 2.2, minThFine: cell0 * (def.fineK || 0.5) * 2.2 });
   const info = def.build(S, def.ctx || {}) || {};
   const roots = S.finish();
   const keys = Object.keys(roots).filter((k) => roots[k].children.length);
@@ -76,7 +77,10 @@ export function forgeAsset(def, log = () => {}) {
     for (let li = 0; li < budgets.length; li++) {
       const target = Math.max(layer === 'body' ? 120 : 40, Math.round(budgets[li] * share));
       if (cur.indices.length / 3 > target * 1.02) {
-        const d = decimate(cur.positions, cur.indices, target, { mat: cur.mat });
+        let d = decimate(cur.positions, cur.indices, target, { mat: cur.mat });
+        if (!process.env.FORGE_STRICT && d.indices.length / 3 > target * 1.25) d = decimate(cur.positions, cur.indices, target, { mat: cur.mat, relaxed: true, minQuality: 0.03, minDot: 0.2 });
+        if (!process.env.FORGE_STRICT && d.indices.length / 3 > target * 1.25) d = decimate(cur.positions, cur.indices, target, { relaxed: true, minQuality: 0.02, minDot: 0.1 });
+        log(`    ${k} LOD${li}: ${cur.indices.length / 3} → ${d.indices.length / 3} (Ziel ${target})`);
         const n2 = d.positions.length / 3, nm = new Int32Array(n2), src = new Int32Array(n2);
         for (let i = 0; i < d.map.length; i++) if (d.map[i] >= 0) { nm[d.map[i]] = cur.mat[i]; src[d.map[i]] = cur.src ? cur.src[i] : i; }
         cur = { positions: d.positions, indices: d.indices, mat: nm, src };

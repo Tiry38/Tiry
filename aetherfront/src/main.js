@@ -660,6 +660,7 @@ class App {
         const P = pose || (h ? { x: h.x, y: h.y || 0, z: h.z } : null);
         if (P) this.hcam.update(dt, P.x, P.y, P.z, sim.laneX(s.localPid), this.time);
       } else this.cam.update(dt, this.time);
+      this.engine.camera.updateMatrixWorld(); // Projektion der Plaketten mit der Kamera dieses Bildes
       this.heroes.update(sim, dt, { localPid: this.attract ? -1 : s.localPid, local: pose, plates: this.mode === 'game', camera: this.engine.camera, heroMode: this.vmode === 'hero' || this.vmode === 'swoopIn' });
       if (this.mode === 'game') this.combat.update(dt, { camera: this.engine.camera, camYaw: this.vmode === 'hero' ? this.hcam.yaw : null });
       this.fx.update(sim, dt);

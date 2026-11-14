@@ -974,7 +974,7 @@ body.hero-view #vignette { opacity: .8; }
 .uf-cast.show { display: flex; animation: breathe 1.2s infinite; }
 
 /* ---------- Wellenfortschritt ---------- */
-.cwave { position: absolute; top: 16px; left: 50%; transform: translateX(-50%); width: 420px; display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 10px 26px 12px;
+.cwave { position: absolute; top: 272px; right: 14px; width: 244px; display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 10px 26px 12px;
   background: radial-gradient(ellipse 70% 100% at 50% 0%, rgba(255, 80, 100, .16), transparent 70%), linear-gradient(180deg, rgba(24, 14, 22, .86), rgba(8, 6, 12, .9));
   clip-path: polygon(18px 0, calc(100% - 18px) 0, 100% 50%, calc(100% - 18px) 100%, 18px 100%, 0 50%); backdrop-filter: blur(12px);
   box-shadow: inset 0 0 0 1px rgba(255, 170, 170, .35); }
@@ -1020,7 +1020,7 @@ body.hero-view #vignette { opacity: .8; }
 .ab .cost { position: absolute; bottom: 2px; left: 7px; font: 600 10.5px var(--f-cond); color: color-mix(in srgb, var(--res1) 60%, #fff); text-shadow: 0 0 2px #000, 0 0 4px #000; }
 .ab-shine { position: absolute; inset: 0; background: linear-gradient(115deg, transparent 35%, rgba(255, 255, 255, .55) 50%, transparent 65%) -160% 0 / 60% 100% no-repeat; pointer-events: none; }
 .ab:hover { transform: translateY(-3px); filter: brightness(1.15) drop-shadow(0 0 10px var(--hglow)); }
-.ab.press { animation: abPress .22s var(--ease); }
+.ab.pressed { animation: abPress .22s var(--ease); }
 @keyframes abPress { 40% { transform: scale(.9); filter: brightness(1.6); } }
 .ab.flash .ab-shine { animation: abFlash .7s var(--ease); }
 @keyframes abFlash { from { background-position: -160% 0; } to { background-position: 260% 0; } }
@@ -1051,7 +1051,7 @@ body.hero-view #vignette { opacity: .8; }
 .castbar.channel .cf { background: linear-gradient(180deg, #e8fbff, var(--hglow) 50%, color-mix(in srgb, var(--hglow) 50%, #000)); box-shadow: 0 0 14px var(--hglow); }
 .cbar .ticks i { position: absolute; top: 2px; bottom: 2px; width: 2px; background: rgba(0, 0, 0, .7); box-shadow: 1px 0 0 rgba(255, 255, 255, .25); }
 .cbar .cn { position: absolute; left: 16px; top: 50%; transform: translateY(-50%); font: 600 12.5px var(--f-cond); letter-spacing: .12em; text-transform: uppercase; text-shadow: 0 1px 2px #000, 0 0 4px #000; }
-.cbar .ct { position: absolute; right: 16px; top: 50%; transform: translateY(-50%); font: 600 12px var(--f-cond); font-variant-numeric: tabular-nums; text-shadow: 0 1px 2px #000; }
+.cbar .ctime { position: absolute; right: 16px; top: 50%; transform: translateY(-50%); font: 600 12px var(--f-cond); font-variant-numeric: tabular-nums; text-shadow: 0 1px 2px #000; }
 .castbar.done .cf { width: 100%; background: linear-gradient(180deg, #ffffff, #b8ffd4 50%, #2fbf6a); box-shadow: 0 0 22px #74f0a6; }
 .castbar.fail .cf { width: 100%; background: linear-gradient(180deg, #ffb0b8, #e0384c 50%, #7a1020); }
 .castbar.done, .castbar.fail { transition: opacity .5s .2s; }
@@ -1082,13 +1082,13 @@ body.hero-view #vignette { opacity: .8; }
 #ctext { z-index: 3; }
 .np { position: absolute; left: 0; top: 0; display: flex; flex-direction: column; align-items: center; gap: 2px; will-change: transform; transform-origin: 50% 100%; }
 .np .nm { font: 600 12px var(--f-cond); letter-spacing: .06em; color: #ffd9d9; text-shadow: 0 0 2px #000, 0 1px 3px #000; white-space: nowrap; }
-.np .bar { display: block; flex: none; position: relative; overflow: hidden; width: 74px; height: 8px; background: rgba(0, 0, 0, .75); box-shadow: 0 0 0 1px rgba(0, 0, 0, .9); clip-path: polygon(3px 0, 100% 0, 100% calc(100% - 3px), calc(100% - 3px) 100%, 0 100%, 0 3px); }
+.np .bar { display: block; flex: none; position: relative; overflow: hidden; width: 58px; height: 6px; background: rgba(0, 0, 0, .75); box-shadow: 0 0 0 1px rgba(0, 0, 0, .9); clip-path: polygon(3px 0, 100% 0, 100% calc(100% - 3px), calc(100% - 3px) 100%, 0 100%, 0 3px); }
 .np .bar i { position: absolute; inset: 0 auto 0 0; }
 .np .bar .f { background: linear-gradient(180deg, #ff8a8a, #d42a3a 60%, #8a1020); }
 .np .bar .g { background: #ffd27a; opacity: .8; }
-.np.elite .bar { width: 104px; height: 10px; box-shadow: 0 0 0 1px #ffc83a, 0 0 8px rgba(255, 200, 60, .6); }
+.np.elite .bar { width: 84px; height: 8px; box-shadow: 0 0 0 1px #ffc83a, 0 0 8px rgba(255, 200, 60, .6); }
 .np.elite .nm { color: #ffe2a0; }
-.np.boss .bar { width: 150px; height: 12px; box-shadow: 0 0 0 1px #ff5a4a, 0 0 12px rgba(255, 60, 60, .7); }
+.np.boss .bar { width: 130px; height: 10px; box-shadow: 0 0 0 1px #ff5a4a, 0 0 12px rgba(255, 60, 60, .7); }
 .np.boss .nm { color: #ffb0a0; font-size: 14px; }
 .np.send .bar .f { background: linear-gradient(180deg, #ff9ad8, #d42a8a 60%, #7a1050); }
 .np.tgt .bar { box-shadow: 0 0 0 2px #fff3cf, 0 0 14px rgba(255, 220, 140, .9); }
@@ -1181,3 +1181,8 @@ body.hero-view #vignette { opacity: .8; }
 .bind-key.empty { color: var(--ink-3); }
 .bind-key.listen { color: var(--ink-dark); background: var(--fill-gold); animation: breathe 1s infinite; }
 .bind-foot { display: flex; justify-content: space-between; align-items: center; gap: 20px; padding: 14px 18px 6px; font-size: 12.5px; }
+/* Menüs über dem Kampf: Kampf-Oberfläche und Weltplaketten ausblenden */
+body:not([data-screen="hud"]) .combat, body:not([data-screen="hud"]) #nameplates, body:not([data-screen="hud"]) #ctext, body:not([data-screen="hud"]) #heroplates { opacity: 0 !important; visibility: hidden !important; }
+.cw-title { white-space: nowrap; }
+.cw-title b { font-size: 18px; }
+.cw-title span { overflow: hidden; text-overflow: ellipsis; max-width: 120px; }

@@ -54,5 +54,23 @@ function create() {
 }
 ipcMain.on('quit', () => app.quit());
 ipcMain.on('fullscreen', (_e, on) => { if (win) win.setFullScreen(!!on); });
-app.whenReady().then(() => { serveWeb(); create(); });
+// Einmalige Übernahme alter Spielstände: Bis v0.1 lief das Spiel unter file://, dessen localStorage
+// (Einstellungen, Kampagnen-Fortschritt) unter app:// nicht sichtbar ist. Ein unsichtbares Fenster liest die
+// alten Werte, der Preload-Skript schreibt fehlende Schlüssel vor dem Spielstart in den neuen Speicher.
+let migrated = {};
+async function readLegacyStorage() {
+  const marker = path.join(app.getPath('userData'), 'storage-migrated-v1');
+  if (fs.existsSync(marker)) return;
+  const w = new BrowserWindow({ show: false, webPreferences: { sandbox: true, contextIsolation: true, nodeIntegration: false } });
+  try {
+    await w.loadFile(path.join(__dirname, 'storage-bridge.html'));
+    const json = await w.webContents.executeJavaScript('JSON.stringify(Object.assign({}, window.localStorage))');
+    const data = JSON.parse(json || '{}');
+    for (const [k, v] of Object.entries(data)) if (k.startsWith('aetherfront')) migrated[k] = v;
+    fs.mkdirSync(path.dirname(marker), { recursive: true });
+    fs.writeFileSync(marker, new Date().toISOString());
+  } catch (e) { console.warn('[speicher] Übernahme übersprungen:', e.message); } finally { w.destroy(); }
+}
+ipcMain.on('legacy-storage', (e) => { e.returnValue = migrated; migrated = {}; });
+app.whenReady().then(async () => { serveWeb(); await readLegacyStorage(); create(); });
 app.on('window-all-closed', () => app.quit());

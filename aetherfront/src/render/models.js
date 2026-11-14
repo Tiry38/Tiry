@@ -7,6 +7,8 @@ import * as THREE from 'three';
 import { mergeGeometries, mergeVertices, toCreasedNormals } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import { RoundedBoxGeometry } from 'three/examples/jsm/geometries/RoundedBoxGeometry.js';
 import { addUnitRig, injectUnitAnim, setInstanceAnim, createUnitDepthMaterial, rigType } from './hero/unitRig.js';
+import { buildForgedUnit, createForgeMaterial, createForgeGlowMaterial, preloadForge } from './forge/loader.js';
+preloadForge();
 
 export { setInstanceAnim, createUnitDepthMaterial, rigType };
 
@@ -2358,7 +2360,7 @@ const BUILDERS = {
 };
 
 // Standardfarben je Archetyp (opts überschreiben)
-const DEFAULTS = {
+export const DEFAULTS = {
   knight: { primary: '#2f63d8', secondary: '#e8c766', metal: '#9ea8b6', glow: '#6fd3ff' },
   paladin_heavy: { primary: '#f2efe6', secondary: '#2a56c6', metal: '#c9b48a', glow: '#ffd36b' },
   archer: { primary: '#2f7a46', secondary: '#c9a25e', metal: '#8f98a3', glow: '#9dff8a' },
@@ -2402,6 +2404,8 @@ export const ARCHETYPES = Object.keys(BUILDERS);
 export function buildModel(archetype, opts = {}) {
   const fn = BUILDERS[archetype] || BUILDERS.knight;
   const def = DEFAULTS[archetype] || BASE_DEFAULT;
+  // Aether-Forge: vorgebackene Skulptur, falls vorhanden (gleiche Schnittstelle, gleiche Vertex-Animation)
+  if (opts.forge !== false) { const f = buildForgedUnit(archetype, opts, def); if (f) return f; }
   const o = {
     primary: opts.primary || def.primary, secondary: opts.secondary || def.secondary,
     metal: opts.metal || def.metal, glow: opts.glow || def.glow,
@@ -2422,6 +2426,10 @@ export function buildModel(archetype, opts = {}) {
 // Materialien
 // ---------------------------------------------------------------------------------------------
 export function createBodyMaterial() {
+  // Aether-Forge-Über-Material (versteht alte und geschmiedete Geometrie; Materialklasse 0 = alter Look)
+  return createForgeMaterial({ physical: false, unitAnim: injectUnitAnim, rim: 0.2, env: 1.15 });
+}
+export function createBodyMaterialLegacy() {
   // PBR je Vertex (Attribut 'pbr' = Rauheit/Metall-Faktor), prozedurales Mikro-Relief (Objektraum, mit Abstand
   // ausgeblendet), Fresnel-Kantenlicht (kühler Himmel + warmer Sonnensaum) und leichte Selbstabschattung in Kuhlen.
   // Instanzfarbe multipliziert wie gehabt (Werte > 1 = weißes Treffer-Aufblitzen).
@@ -2475,6 +2483,9 @@ float roughnessFactor = clamp(roughness * vPbr.x * (0.88 + 0.24 * microN), 0.06,
 }
 
 export function createGlowMaterial() {
+  return createForgeGlowMaterial(1, { unitAnim: injectUnitAnim });
+}
+export function createGlowMaterialLegacy() {
   const m = new THREE.MeshBasicMaterial({ vertexColors: true, toneMapped: false });
   m.onBeforeCompile = (sh) => injectUnitAnim(sh);
   m.customProgramCacheKey = () => 'aetherfront-glow-anim-v1';

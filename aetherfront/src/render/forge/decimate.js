@@ -139,7 +139,7 @@ export function decimate(positions, indices, target, o = {}) {
     // Verbindungsbedingung (Link): gemeinsame Nachbarn von u und v müssen genau die 2 Gegenecken sein
     const nu = neighbors(u), nvv = neighbors(v);
     let common = 0; for (const w of nu) if (nvv.has(w)) common++;
-    if (common > 2) return false;
+    if (common > 2 && !o.relaxed) return false;
     return true;
   };
   const evaluate = (u) => {

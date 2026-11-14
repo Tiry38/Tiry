@@ -4,6 +4,7 @@
 import * as THREE from 'three';
 import { decodeAFM } from './format.js';
 import { createForgeMaterial, createForgeGlowMaterial, createForgeGlassMaterial } from './materials.js';
+import { attachHeroFx } from './fx.js';
 
 const BASE = 'assets/models/';
 const cache = new Map();      // id → { header, arrays }
@@ -119,8 +120,8 @@ export function buildForgedHero(modelId, { level = 1, lod } = {}) {
   const bones = sk.names.map((n) => joints[n]);
   const skeleton = new THREE.Skeleton(bones);
   const L = Math.min(header.meshes[0].lods.length - 1, lod ?? lodBias);
-  const body = createForgeMaterial({ physical: true });
-  const glowBase = Math.max(1, ...header.meshes.filter((m) => m.layer === 'glow').map((m) => m.lods[L].cmax));
+  const body = createForgeMaterial({ physical: true, rim: 0.34 });
+  if (header.palette && header.palette.glow) body.userData.uniforms.uRimCol.value.set(header.palette.glow);
   const glow = createForgeGlowMaterial(1);
   const glass = createForgeGlassMaterial();
   const mats = { body, glow, glass };
@@ -131,7 +132,6 @@ export function buildForgedHero(modelId, { level = 1, lod } = {}) {
     glowMaterials: [glow], bodyMaterials: [body], chains: [], floaters: (info.floaters || []).map((f) => ({ ...f })),
     bowRest: V3(info.bowRest), bowNock: V3(info.bowNock), height: 1.8, radius: info.radius || 0.5, tier: -1, meshes, modelId, forged: true, lod: L,
   };
-  void glowBase;
   const has = (n) => !!joints[n];
   if (has('cape')) rig.chains.push({ bones: ['cape', 'cape1', 'cape2', 'cape3'].filter(has), gain: 1, legPush: 0.3, omega: 10, zeta: 0.4, min: info.capeMin ?? 0.05 });
   if (has('plume')) rig.chains.push({ bones: ['plume', 'plume1', 'plume2'].filter(has), gain: 0.4, legPush: 0, gravity: 0.3, omega: 13, zeta: 0.3, breeze: 0.6, flutter: 0.6, deadX: 0 });
@@ -186,7 +186,9 @@ export function buildForgedHero(modelId, { level = 1, lod } = {}) {
     rig.triangles = tris;
   };
   rig.setLevel(rig.level);
+  try { attachHeroFx(rig, { glow: header.palette && header.palette.glow, cores: info.cores, trails: info.trails }, rest); } catch (e) { console.warn('[Forge] Effekte:', e); }
   rig.dispose = () => {
+    if (rig.fx) for (const o of rig.fx.objs) { o.removeFromParent(); o.geometry && o.geometry.dispose(); o.material && o.material.dispose(); }
     for (const m of Object.values(meshes)) { m.geometry.dispose(); m.removeFromParent(); }
     for (const p of parts) p.geo.dispose();
     for (const m of Object.values(mats)) m.dispose();
@@ -226,7 +228,7 @@ export function buildForgedUnit(arch, opts = {}, defaults = {}) {
   const L = Math.min(header.meshes[0].lods.length - 1, lodBias);
   const out = {};
   for (const layer of ['body', 'glow']) {
-    const list = header.meshes.filter((m) => m.layer === layer && m.tier <= (tier - 1) * 3);
+    const list = header.meshes.filter((m) => (m.layer === layer || (layer === 'body' && m.layer === 'glass')) && m.tier <= (tier - 1) * 3);
     if (!list.length) { out[layer] = null; continue; }
     const geos = list.map((m) => {
       const lod = m.lods[Math.min(L, m.lods.length - 1)];

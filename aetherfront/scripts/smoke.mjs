@@ -24,7 +24,7 @@ const wait = (ms) => page.waitForTimeout(ms);
 // Über den lokalen Webserver laden (unter file:// blockiert Chromium Texturen/HDRIs aus web/assets/)
 const server = await startServer(0);
 await page.goto(server.url + 'index.html');
-await page.waitForFunction(() => window.__app && window.__app.mode === 'splash', null, { timeout: 120000 });
+await page.waitForFunction(() => window.__app && window.__app.mode === 'splash', null, { timeout: 360000 }); // Software-WebGL: Assets + Shader brauchen Zeit
 await wait(1500); await shot('01-splash');
 await page.keyboard.press('Space');
 await wait(4000); await shot('02-menu');
@@ -35,6 +35,8 @@ await page.click('#screen-multi [data-go="menu"]'); await wait(300);
 await page.click('#screen-menu [data-go="codex"]'); await wait(1500); await shot('03c-codex');
 await page.click('#screen-codex [data-back]'); await wait(300);
 await page.click('[data-go="setup"]'); await wait(1500);
+// Neuer Einrichtungs-Ablauf: Reiter 1 = Held wählen, Reiter 2 = Gefecht & Fraktion
+if (await page.$('#setup-tabs [data-tab="game"]')) { await shot('03-setup-hero'); await page.click('#setup-tabs [data-tab="game"]'); await wait(800); }
 await page.click('#seg-pick button:nth-child(3)'); await page.click('#seg-cc button:nth-child(2)'); await wait(300);
 await shot('03-setup');
 await page.click('#btn-start'); await wait(3500); await shot('04-game-start');

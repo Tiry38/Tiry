@@ -13,6 +13,7 @@ export function build(S, B, P) {
   const steel = 'primary', blue = 'secondary', gold = 'metal';
   const mailC = '#5a606b', gambeson = '#1d2c55', leather = '#3a2618';
   const hips = j('hips'), chest = j('chest'), neck = j('neck');
+  const info = { radius: 0.55 * s, style: 'knight', cores: [], trails: [] };
 
   // ======================= Grundkörper (Unterkleidung) =======================
   S.layer('body');
@@ -80,7 +81,15 @@ export function build(S, B, P) {
 
   // ======================= Arme =======================
   S.sym(() => {
-    pauldron(S, B, { r: 0.125, layers: 3, col: steel, col2: 'primary*0.9', trim: gold, tilt: 0.5, th: 0.013 });
+    const pd = pauldron(S, B, { r: 0.158, layers: 3, col: steel, col2: 'primary*0.9', trim: gold, tilt: 0.55, th: 0.014, dx: 0.03, dy: 0.045 });
+    // Zierflansch (hochgezogener Kragen-Flügel) + Runenlinie
+    S.prim(add(pd.c, [-0.02 * s, 0.07 * s, 0]), {
+      f: (x, y, z) => { const r = hypot(x, y * 1.4); return max(max(r - 0.11 * s, abs(z) - 0.007 * s), -y - 0.01 * s); },
+      box: [-0.12 * s, -0.05 * s, -0.008 * s, 0.12 * s, 0.1 * s, 0.008 * s],
+    }, { mat: 'steel', col: steel, bind: pd.bind, rot: [0, PI / 2, 0.45], k: 0.01 * s });
+    S.layer('glow');
+    S.torus(pd.c, 0.158 * s * 1.03, 0.0032 * s, { rot: [0, 0, -0.55], arc: 2.4, mat: 'glow', col: P.glow, glow: 2.4, bind: pd.bind });
+    S.layer('body');
     // Oberarmröhre
     bracer(S, add(ua, [0.006 * s, -0.09 * s, 0]), add(j('foreArmL'), [0, 0.04 * s, 0]), 0.056 * s, 0.05 * s, { s, col: steel, region: 'armL', rimMat: 'gold', rimCol: gold });
     // Ellbogenkachel
@@ -100,7 +109,7 @@ export function build(S, B, P) {
     // Oberschenkel-Platte (vorne)
     S.shell({ off: 0.012 * s, th: 0.013 * s, mat: 'steel', col: steel, region: 'legL', clip: (x, y, z) => max(max(kn[1] + 0.06 * s - y, y - (th[1] - 0.06 * s)), -(z - kn[2]) - 0.01 * s), ck: 0.004 * s }, () => thighShape(S, B, { bulk: 1.06, muscle: false }));
     // Kniekachel + Flügel
-    S.shell({ off: 0.005 * s, th: 0.013 * s, mat: 'steel', col: steel, bind: (p) => [['thighL', 0.5], ['shinL', 0.5]], clip: (x, y, z) => kn[2] - 0.0 * s - z }, () => S.ellipsoid(add(kn, [0, 0.01 * s, 0.022 * s]), [0.06 * s, 0.07 * s, 0.05 * s], {}));
+    S.ellipsoid(add(kn, [0, 0.01 * s, 0.03 * s]), [0.062 * s, 0.07 * s, 0.05 * s], { mat: 'steel', col: steel, bind: (p) => [['thighL', 0.5], ['shinL', 0.5]], k: 0.01 * s });
     S.prim(add(kn, [0.062 * s, 0.0, 0.0]), {
       f: (x, y, z) => { const r = hypot(x, y); return max(max(r - 0.05 * s, abs(z) - 0.004 * s), 0); },
       box: [-0.05 * s, -0.05 * s, -0.005 * s, 0.05 * s, 0.05 * s, 0.005 * s],
@@ -138,7 +147,7 @@ export function build(S, B, P) {
     const lx = x - hc[0], ly = y - hc[1], lz = z - hc[2];
     let c = -(ly + 0.135 * s);                            // unten offen
     // Gesichtsöffnung: vorne, unterhalb der Stirn
-    const face = max(max(abs(lx) - (ly > -0.02 * s ? 0.058 * s : 0.04 * s), ly - 0.03 * s), -lz + 0.02 * s);
+    const face = max(max(abs(lx) - (ly > -0.012 * s ? 0.056 * s : 0.024 * s + 0.15 * max(0, -ly - 0.05 * s)), ly - 0.026 * s), -lz + 0.02 * s);
     c = max(c, -face);
     return c;
   };
@@ -149,7 +158,7 @@ export function build(S, B, P) {
       S.ellipsoid(add(hc, [0, -0.05 * s, -0.06 * s]), [0.095 * s, 0.11 * s, 0.08 * s], { k: 0.05 * s });
     });
     // Kamm (Grat von der Stirn zum Nacken)
-    S.torus(add(hc, [0, 0.0, -0.008 * s]), 0.124 * s, 0.009 * s, { rot: { x: [0, 0, 1], y: [1, 0, 0], z: [0, 1, 0] }, arc: 3.4, mat: 'gold', col: gold, region: 'head', k: 0.01 * s });
+    S.torus(add(hc, [0, 0.0, -0.008 * s]), 0.124 * s, 0.009 * s, { rot: { x: [0, 0, 1], y: [1, 0, 0], z: [0, 1, 0] }, arc: 2.5, mat: 'gold', col: gold, region: 'head', k: 0.01 * s });
   });
   // Stirnband + Nieten
   S.shell({ off: 0.007 * s, th: 0.004 * s, mat: 'gold', col: gold, region: 'head', clip: (x, y, z) => max(abs(y - hc[1] - 0.045 * s) - 0.011 * s, helmClip(x, y, z)), ck: 0.002 * s }, () => {
@@ -168,10 +177,10 @@ export function build(S, B, P) {
     const i = Math.min(1, Math.floor(t)), f = t - i;
     return [[plumeBones[i], 1 - f], [plumeBones[i + 1], f]];
   };
-  for (let k = 0; k < 11; k++) {
-    const a = (k - 5) * 0.08, L = 1 - abs(k - 5) * 0.05;
+  for (let k = 0; k < 21; k++) {
+    const a = (k - 10) * 0.045, L = 1 - abs(k - 10) * 0.025;
     const pts = [add(ptop, [a * 0.06 * s, 0.0, 0.01 * s]), add(ptop, [a * 0.22 * s, 0.07 * s * L, -0.07 * s]), add(ptop, [a * 0.36 * s, 0.05 * s * L, -0.2 * s * L]), add(ptop, [a * 0.46 * s, -0.06 * s * L, -0.32 * s * L]), add(ptop, [a * 0.5 * s, -0.19 * s * L, -0.37 * s * L])];
-    S.tube(pts, (t) => (0.016 * sin(min(1, t * 1.25) * PI * 0.88 + 0.3) + 0.003) * s, { mat: 'feather', col: k % 3 === 1 ? '#e8ecf4' : blue, bind: plumeBind, k: 0.01 * s, vary: 0.12, grad: { axis: 'y', from: ptop[1], to: ptop[1] - 0.2 * s, k: 0.6 }, disp: Detail.fur({ amp: 0.003 * s, freq: 90 }) });
+    S.tube(pts, (t) => (0.013 * sin(min(1, t * 1.25) * PI * 0.88 + 0.3) + 0.003) * s, { mat: 'feather', col: k % 4 === 1 ? '#e8ecf4' : blue, bind: plumeBind, k: 0.01 * s, vary: 0.12, grad: { axis: 'y', from: ptop[1], to: ptop[1] - 0.2 * s, k: 0.6 }, disp: Detail.fur({ amp: 0.003 * s, freq: 90 }) });
   }
   void pr;
 
@@ -192,7 +201,9 @@ export function build(S, B, P) {
   {
     const F = handFrame(B, 'R');
     const fr = frame(P0(B.J.weaponR.pos), F.f, scl(F.d, -1));
-    longsword(S, fr, { s, glow: P.glow, bone: 'weaponR' });
+    longsword(S, fr, { s, glow: P.glow, bone: 'weaponR', glowTier: 0 });
+    info.trails.push({ joint: 'weaponR', a: fr.at(0, 0.15 * s, 0), b: fr.at(0, 0.93 * s, 0) });
+    info.cores.push({ joint: 'weaponR', p: fr.at(0, 0.058 * s, 0), size: 0.09 }, { joint: 'weaponR', p: fr.at(0, -0.205 * s, 0), size: 0.08 });
   }
   // Turmschild (linker Unterarm)
   {
@@ -201,16 +212,17 @@ export function build(S, B, P) {
     const faDir = norm(sub(ha, fa));
     const sc = add(lerp3(fa, ha, 0.5), [0.085 * s, 0, 0]);
     const fr = frame(sc, [0, 0, 1], scl(faDir, -1));
-    towerShield(S, fr, { s: s * 0.86, bone: 'weaponL', glow: P.glow, face: 'secondary', rim: 'primary', gold: 'metal' });
+    info.cores.push({ joint: 'weaponL', p: fr.at(0, 0, 0.04 * s), size: 0.16 });
+    towerShield(S, fr, { s: s * 0.92, bone: 'weaponL', glow: P.glow, face: 'secondary', rim: 'primary', gold: 'metal' });
   }
 
   // ======================= Glühen (Stufen) =======================
   S.layer('glow');
-  S.sphere([0, chest[1] + 0.085 * s, 0.178 * s], 0.011 * s, { mat: 'glow', col: P.glow, glow: 3.2, region: 'torso', tier: 3 });
+  S.sphere([0, chest[1] + 0.085 * s, 0.178 * s], 0.013 * s, { mat: 'glow', col: P.glow, glow: 3.2, region: 'torso' });
   S.sym(() => S.sphere(add(j('shinL'), [0, 0.012 * s, 0.083 * s]), 0.012 * s, { mat: 'glow', col: P.glow, glow: 3, bind: (p) => [['shinL', 1]], tier: 6 }));
   S.layer('body');
 
-  return { radius: 0.55 * s, style: 'knight' };
+  return info;
 }
 
 const P0 = (v) => [v.x, v.y, v.z];

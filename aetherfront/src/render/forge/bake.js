@@ -7,8 +7,8 @@ import { gradient, fbm, BIG } from './sdf.js';
 // Shader-IDs: 0 allgemein, 1 Stahl/Eisen, 2 Edelmetall (Gold/Kupfer/Bronze), 3 Leder, 4 Stoff, 5 Haut, 6 Haar/Fell,
 //             7 Holz/Rinde, 8 Stein/Knochen, 9 Kristall, 10 Blatt, 11 Auge, 12 Lack/Emaille
 export const MATS = {
-  steel: [0.36, 1, 1], metal: [0.38, 1, 1], silver: [0.3, 1, 1], iron: [0.5, 0.95, 1], dmetal: [0.46, 0.92, 1], mail: [0.42, 1, 1],
-  gold: [0.26, 1, 2], copper: [0.33, 1, 2], bronze: [0.38, 1, 2], brass: [0.3, 1, 2],
+  steel: [0.42, 1, 1], metal: [0.44, 1, 1], silver: [0.36, 1, 1], iron: [0.5, 0.95, 1], dmetal: [0.46, 0.92, 1], mail: [0.42, 1, 1],
+  gold: [0.3, 1, 2], copper: [0.36, 1, 2], bronze: [0.38, 1, 2], brass: [0.3, 1, 2],
   leather: [0.58, 0, 3], dleather: [0.66, 0, 3],
   cloth: [0.86, 0, 4], silk: [0.48, 0, 4], velvet: [0.92, 0, 4], linen: [0.8, 0, 4],
   skin: [0.5, 0, 5], lips: [0.38, 0, 5],
@@ -125,10 +125,11 @@ export function bakeVertices(verts, self, occ, palette, o = {}) {
       const nv = fbm(x * 9 + 3.1, y * 9, z * 9, 2) * 0.7 + fbm(x * 31, y * 31 + 7, z * 31, 2) * 0.3;
       lum *= 1 + vary * 1.6 * nv;
     }
+    { const Mx = MATS[A.mat]; if (Mx && Mx[1] > 0.9) lum *= Mx[2] === 2 ? 0.88 : 0.78; }
     color[i * 3] = r * lum; color[i * 3 + 1] = gg * lum; color[i * 3 + 2] = b * lum;
     slot[i] = ca.slot; slotK[i] = ca.slot ? ca.k * lum : 0;
     const M = MATS[A.mat] || MATS.cloth;
-    pbr[i * 4] = M[0]; pbr[i * 4 + 1] = M[1]; pbr[i * 4 + 2] = M[2] / 15; pbr[i * 4 + 3] = Math.min(1, Math.max(0, A.wear ?? 1));
+    pbr[i * 4] = M[0]; pbr[i * 4 + 1] = M[1]; pbr[i * 4 + 2] = M[2] / 15; pbr[i * 4 + 3] = Math.min(1, Math.max(0, A.wear ?? (A.mat === 'scale' || A.mat === 'chitin' ? 0.12 : A.mat === 'paint' || A.mat === 'lacquer' ? 0.45 : 1)));
     if (q.a2 && q.w2 > 0.25) {
       const M2 = MATS[q.a2.mat] || MATS.cloth;
       const t = (q.w2 - 0.25) * 0.8;

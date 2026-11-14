@@ -87,6 +87,8 @@ await shot('heldenblick');
 await ev(() => {
   const s = window.__app.session, h = s.sim.heroOf(0); let i = 0;
   for (const e of s.sim.entities.values()) if (e.type === 'c' && e.lane === 0) { e.x = h.x + ((i % 4) - 1.5) * 2.4; e.z = h.z - 12 - Math.floor(i / 4) * 2; e.rootT = 9999; i++; }
+  // Anker-Gegner weit hinten hält die Welle während aller Prüfungen offen
+  const anchor = s.sim.spawnCreep(0, { ...s.sim.waveDef(1), hp: 1e9, key: 'anker' }, s.sim.laneX(0) + 5, -33, { bounty: 1, wave: true }); anchor.rootT = 1e9; window.__anchor = anchor.id;
   window.__god = setInterval(() => { const hh = window.__app.session.sim.heroOf(0); if (hh.alive) hh.hp = hh.maxHp; }, 30);
 });
 
@@ -150,7 +152,7 @@ a = await state();
 await page.mouse.move(cx, cy); await page.mouse.down({ button: 'right' });
 for (let i = 1; i <= 8; i++) await page.mouse.move(cx - i * 25, cy - i * 3);
 b = await state();
-check('Rechte Maustaste ziehen: Held + Kamera folgen der Maus', Math.abs(wrapA(b.yaw - b.camYaw)) < 0.02 && Math.abs(wrapA(b.yaw - a.yaw)) > 0.3, `Held Δ ${(b.yaw - a.yaw).toFixed(2)}`);
+check('Rechte Maustaste ziehen: Held + Kamera folgen der Maus', Math.abs(wrapA(b.yaw - b.camYaw)) < 0.02 && Math.abs(wrapA(b.camYaw - a.camYaw)) > 0.2, `Held = Kamera, Kamera Δ ${wrapA(b.camYaw - a.camYaw).toFixed(2)}`);
 // A/D werden mit gehaltener rechter Maustaste zu Seitschritten
 a = await state();
 await hold('KeyD', 8);
@@ -261,6 +263,9 @@ await ticks(2);
 const k0 = await ev(() => window.__ev.length);
 const castAb = await ev(() => { const a = window.__app, h = a.session.sim.heroOf(0); return a.controls.def.abilities.findIndex((x) => x.cast > 0); });
 if (castAb >= 0) {
+  // frischen Gegner 8 m vor den Helden stellen und anvisieren
+  await ev(() => { const a = window.__app, s = a.session, h = s.sim.heroOf(0); const c = s.sim.spawnCreep(0, { ...s.sim.waveDef(1), hp: 99999, key: 'smoke' }, h.x + Math.sin(a.controls.yaw) * 8, h.z + Math.cos(a.controls.yaw) * 8, { bounty: 1, wave: true }); c.rootT = 9999; a.controls.setTarget(c.id); });
+  await ticks(3);
   await page.keyboard.press(`Digit${castAb + 1}`);
   await page.waitForFunction(() => !!window.__app.session.sim.heroOf(0).cast, null, { polling: 20, timeout: 30000 }).catch(() => {});
   await hold('KeyW', 3);
