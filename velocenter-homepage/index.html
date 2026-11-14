@@ -1107,7 +1107,7 @@ textarea.inp{border-radius:12px}
 
 [hidden]{display:none!important}
 .cta.wa:hover{color:#fff;border-color:#137A3D;background:linear-gradient(180deg,#1FA855 0%,#137A3D 100%);box-shadow:inset 0 1px 0 rgba(255,255,255,.18),0 14px 26px -12px rgba(31,168,85,.75)}
-/* ================= Im Laden (Bestand, Route lager) ================= */
+/* ================= Auf Lager ================= */
 .lgnum{display:flex;flex-wrap:wrap;gap:10px 28px;margin-top:26px;font:600 15px/1.2 var(--display);color:var(--mut)}
 .lgnum b{font:900 34px/1 var(--display);color:var(--ink);margin-right:8px;letter-spacing:-.02em}
 .lgnum span:first-child b{color:#059669}
@@ -2208,7 +2208,7 @@ body.fz2 main,body.fz2 .foot{zoom:1.25}
 .ice .lead,.ice .days span{color:#E6E9EF!important}
 .ice .cdn>div:not(:first-child){background:linear-gradient(180deg,#2A2D34,#1B1E25)}
 .ice .sutx b{color:#fff!important}.ice .sutx small{color:#D3D7DF!important}.ice .suk{color:#BEF264!important}
-/* Start: Kachel „Im Laden“ mit echten Rädern + Schild „Unser Live-Bestand“ (Tiry 14.11.2026) */
+/* Start: Kachel „Auf Lager“ mit echten Rädern + Schild „Unser Live-Bestand“ (Tiry 14.11.2026) */
 .qa.qlg::before{background:linear-gradient(180deg,rgba(15,17,21,.35) 0%,rgba(15,17,21,.45) 45%,rgba(15,17,21,.9) 100%),radial-gradient(90% 80% at 0% 100%,rgba(200,16,46,.55),transparent 60%)}
 .qa.qlg .bg,.qacc:hover .qa.qlg:not(:hover) .bg{filter:saturate(.7) brightness(.42) blur(1.5px)}
 .qa.qlg:hover .bg{filter:saturate(.85) brightness(.5) blur(1px)}
@@ -2242,6 +2242,8 @@ a.hchip.hc.hlive .hla b svg{width:16px;height:16px;fill:none;stroke:#fff;stroke-
 @keyframes hlbob{50%{transform:translateY(3px)}}
 @media (max-width:640px){.hlv,.hgo{height:24px;font-size:10px;padding:0 8px}a.hchip.hc.hlive .hla{height:58px}.hla b{width:26px;height:26px;margin-left:-13px}.hla i{bottom:26px}}
 @media (prefers-reduced-motion:reduce){a.hchip.hc.hlive::after,.hla b,.hla i::after{animation:none}}
+.bikearea a.hchip.srlive{top:2%;left:0;right:0;margin:0 auto;width:max-content;z-index:5}
+@media (max-width:640px){.bikearea a.hchip.srlive{top:-4px}.bikearea a.hchip.srlive .hl strong{font-size:12.5px}}
 /* Tempo (Tiry 12.11.2026): unsichtbare Animationen pausieren, Hintergrund-Ebenen eigene GPU-Ebene */
 .apz,.apz *,.apz *::before,.apz *::after{animation-play-state:paused!important}
 html.scr .sky,html.scr .blobs i,html.scr .blobs::after,html.scr .ribbons i{animation-play-state:paused!important}
@@ -2540,7 +2542,7 @@ a.hchip.hc:hover .ha{background:#1B1E25;color:#fff;transform:translateX(2px)}
    <a href="#start" data-r="start">Start</a>
    <a href="#service" data-r="service">Service</a>
    <a href="#marken" data-r="marken">Marken</a>
-   <a href="#lager" data-r="lager">Im Laden<i class="nlive" aria-hidden="true">Live</i></a>
+   <a href="#lager" data-r="lager">Auf Lager<i class="nlive" aria-hidden="true">Live</i></a>
    <a href="#isy" data-r="isy">i:SY Experte</a>
    <a href="#treffen" data-r="treffen">i:SY Treffen</a>
    <a href="#dreirad" data-r="dreirad">E-Dreiräder</a>
@@ -2557,7 +2559,7 @@ a.hchip.hc:hover .ha{background:#1B1E25;color:#fff;transform:translateX(2px)}
  <a class="r" href="#start" data-r="start" style="--i:0">Start</a>
  <a class="r" href="#service" data-r="service" style="--i:1">Service</a>
  <a class="r" href="#marken" data-r="marken" style="--i:2">Marken</a>
- <a class="r" href="#lager" data-r="lager" style="--i:2">Im Laden<i class="nlive" aria-hidden="true">Live</i></a>
+ <a class="r" href="#lager" data-r="lager" style="--i:2">Auf Lager<i class="nlive" aria-hidden="true">Live</i></a>
  <a class="r" href="#isy" data-r="isy" style="--i:3">i:SY Experte</a>
  <a class="r" href="#treffen" data-r="treffen" style="--i:4">i:SY Treffen</a>
  <a class="r" href="#dreirad" data-r="dreirad" style="--i:5">E-Dreiräder</a>
@@ -2906,13 +2908,13 @@ m696 -454 c28 -13 46 -31 55 -51 22 -53 -50 -177 -173 -300 -187 -186 -647
      <img class="hb off" src="img/p-gudereit.webp" alt="Gudereit EC-35 Evo E-Bike" data-l="img/marke-gudereit.svg" width="1600" height="1128" loading="lazy">
      <img class="hb off" src="img/p-victoria-veloa7.webp" alt="Victoria Veloa 7 E-Bike" data-l="img/marke-victoria.svg" width="2770" height="1732" loading="lazy">
      <div class="hfloor"></div>
-     <a class="hchip hc c1" href="#lager" aria-label="300+ E-Bikes vor Ort – Räder im Laden ansehen"><span class="hn">300<i>+</i></span><span class="hl"><strong>E-Bikes vor Ort</strong></span><span class="ha"><svg><use href="#i-arrow"/></svg></span></a>
-     <a class="hchip hc c2 hlive" id="hLive" href="#lager" aria-label="Unser Live-Bestand: jetzt im Laden ansehen"><span class="hlv"><i class="qld" aria-hidden="true"></i>Live</span><span class="hl"><strong>Unser Live-Bestand</strong></span><span class="hgo">Jetzt ansehen<svg><use href="#i-arrow"/></svg></span></a>
+     <a class="hchip hc c1" href="#lager" aria-label="300+ E-Bikes vor Ort – zum Lager"><span class="hn">300<i>+</i></span><span class="hl"><strong>E-Bikes vor Ort</strong></span><span class="ha"><svg><use href="#i-arrow"/></svg></span></a>
+     <a class="hchip hc c2 hlive" id="hLive" href="#lager" aria-label="Unser Live-Bestand: Räder auf Lager ansehen"><span class="hlv"><i class="qld" aria-hidden="true"></i>Live</span><span class="hl"><strong>Unser Live-Bestand</strong></span><span class="hgo">Jetzt ansehen<svg><use href="#i-arrow"/></svg></span></a>
     </div>
    </div>
    <nav class="qacc hello" style="--d:1.45s" aria-label="Schnellzugriff">
     <a class="qa on" href="#termin" style="--img:url(img/bosch-motor.webp);--pos:86% 40%"><span class="bg"></span><span class="ic"><svg><use href="#i-cal"/></svg></span><span class="tx"><i>01 · Werkstatt</i><b>Termin anfragen</b><small>Werkstatt oder Probefahrt</small><em>Jetzt anfragen</em></span></a>
-    <a class="qa qlg" id="qaLg" href="#lager" style="--img:url(img/laden-innen.webp);--pos:50% 55%"><span class="bg"></span><span class="qbk" id="qBk" aria-hidden="true"></span><span class="ic"><svg><use href="#i-bike"/></svg></span><span class="tx"><i>02 · Ausstellung</i><b>Im Laden</b><small id="qkLager">Räder sofort verfügbar</small><em>Räder ansehen</em></span></a>
+    <a class="qa qlg" id="qaLg" href="#lager" style="--img:url(img/laden-innen.webp);--pos:50% 55%"><span class="bg"></span><span class="qbk" id="qBk" aria-hidden="true"></span><span class="ic"><svg><use href="#i-bike"/></svg></span><span class="tx"><i>02 · Ausstellung</i><b>Auf Lager</b><small id="qkLager">Räder sofort verfügbar</small><em>Räder ansehen</em></span></a>
     <a class="qa qice" id="qkSeason" href="#deal" style="--img:url(img/laden-eingang.webp);--pos:50% 45%"><span class="bg"></span><span class="ic"><svg><use href="#i-gift"/></svg></span><span class="tx"><i>03 · Bis 28.02.</i><b>Winter-Aktion</b><small>–20 € auf jede Inspektion</small><em>Zur Aktion</em></span></a>
     <a class="qa" href="#besuch" style="--img:url(img/fassade.webp);--pos:50% 50%"><span class="bg"></span><span class="ic"><svg><use href="#i-clock"/></svg></span><span class="tx"><i>04 · Wörth am Rhein</i><b>Öffnungszeiten</b><small id="qkHours">Mo, Di, Do, Fr · Sa vormittags</small><em>Besuch planen</em></span></a>
    </nav>
@@ -3039,7 +3041,7 @@ m696 -454 c28 -13 46 -31 55 -51 22 -53 -50 -177 -173 -300 -187 -186 -647
      <li><b>Reichweite vorab prüfen</b> mit dem <a href="https://www.bosch-ebike.com/range-cockpit/?language=de&amp;logo" target="_blank" rel="noopener" style="color:var(--mag)">Bosch Reichweiten-Rechner</a>.</li>
      <li><b>Tipp:</b> Frag vorher einen Termin an, dann nehmen wir uns Zeit nur für dich. Mittwoch und Sonntag ist geschlossen.</li>
     </ul>
-    <div class="tact"><a class="cta" href="#termin" data-pre="Probefahrt"><svg><use href="#i-cal"/></svg>Probefahrt anfragen</a><a class="ghost" href="#finder">E-Bike-Finder<svg><use href="#i-arrow"/></svg></a><a class="ghost" href="#lager">Räder im Laden<svg><use href="#i-arrow"/></svg></a></div>
+    <div class="tact"><a class="cta" href="#termin" data-pre="Probefahrt"><svg><use href="#i-cal"/></svg>Probefahrt anfragen</a><a class="ghost" href="#finder">E-Bike-Finder<svg><use href="#i-arrow"/></svg></a><a class="ghost" href="#lager">Räder auf Lager<svg><use href="#i-arrow"/></svg></a></div>
    </div>
 
    <div class="tpc pre" id="werkstatt-info" style="--c:#22D3EE">
@@ -3106,7 +3108,7 @@ m696 -454 c28 -13 46 -31 55 -51 22 -53 -50 -177 -173 -300 -187 -186 -647
      <li><b>Laufzeit bis zu 24 Monate, mit Anzahlung.</b> Anzahlung und Rate rechnen wir dir im Laden aus.</li>
     </ul>
     <p class="anhint">* Finanzierung zum regulären Preis. Aktions- und Angebotspreise gelten nicht. Bonität vorausgesetzt. Darlehensgeber: TARGOBANK AG, Kasernenstraße 10, 40213 Düsseldorf.</p>
-    <div class="tact"><a class="ghost" href="#lager">Räder im Laden<svg><use href="#i-arrow"/></svg></a></div>
+    <div class="tact"><a class="ghost" href="#lager">Räder auf Lager<svg><use href="#i-arrow"/></svg></a></div>
    </div>
 
    <div class="tpc pre" id="enra-info" style="--c:#34D399">
@@ -3230,6 +3232,7 @@ m696 -454 c28 -13 46 -31 55 -51 22 -53 -50 -177 -173 -300 -187 -186 -647
     <div class="floor"></div>
     <img class="refl" id="m-brefl" src="img/p-isy.webp" alt="" aria-hidden="true">
     <img class="bk" id="m-bk" src="img/p-isy.webp" alt="i:SY E5 ZR F CX Century" width="1600" height="1104">
+    <a class="hchip hc hlive srlive" href="#lager" aria-label="Unser Live-Bestand: Räder auf Lager ansehen"><span class="hlv"><i class="qld" aria-hidden="true"></i>Live</span><span class="hl"><strong>Unser Live-Bestand</strong></span><span class="hgo">Jetzt ansehen<svg><use href="#i-arrow"/></svg></span></a>
     <button class="arrow p" id="m-sp" aria-label="Vorherige Marke"><svg><use href="#i-arrow"/></svg></button>
     <button class="arrow n" id="m-sn" aria-label="Nächste Marke"><svg><use href="#i-arrow"/></svg></button>
    </div>
@@ -3306,7 +3309,7 @@ m696 -454 c28 -13 46 -31 55 -51 22 -53 -50 -177 -173 -300 -187 -186 -647
     <blockquote><p>„die i:SY Experten von Velocenter Hessert“</p><cite>i:SY auf <a href="https://www.isy.de/de-de/News-Blog/News-iSY-Treffen-24" target="_blank" rel="noopener">isy.de</a></cite></blockquote>
     <blockquote><p>„Der Fokus liegt in unserem Betrieb eindeutig auf Kompakträder mit E-Antrieb.“</p><cite>Stefan Hessert in der Rheinpfalz-Themenwelt 2024 · 95 % unserer verkauften Räder sind E-Bikes</cite></blockquote>
    </div>
-   <div class="row pre" style="margin-top:30px"><a class="cta" href="#lager"><svg><use href="#i-bike"/></svg>i:SY im Laden ansehen</a><a class="ghost" href="#termin" data-pre="Probefahrt i:SY">Probefahrt anfragen<svg><use href="#i-arrow"/></svg></a></div>
+   <div class="row pre" style="margin-top:30px"><a class="cta" href="#lager"><svg><use href="#i-bike"/></svg>i:SY auf Lager ansehen</a><a class="ghost" href="#termin" data-pre="Probefahrt i:SY">Probefahrt anfragen<svg><use href="#i-arrow"/></svg></a></div>
   </div>
  </div>
 
@@ -3604,7 +3607,7 @@ m696 -454 c28 -13 46 -31 55 -51 22 -53 -50 -177 -173 -300 -187 -186 -647
 
 <!-- ================= AUF LAGER ================= -->
 <section class="view" data-v="lager" hidden>
- <div class="ph"><div class="wm" aria-hidden="true">Laden</div>
+ <div class="ph"><div class="wm" aria-hidden="true">Lager</div>
   <div class="wrap">
    <p class="eyebrow hello">Unser Bestand · <b id="lgStand">aktuell</b></p>
    <h1 class="mega hello" style="--d:.08s;margin-top:18px">Sofort da.<br><span class="gt it">Sofort Probe fahren.</span></h1>
@@ -3731,7 +3734,7 @@ m696 -454 c28 -13 46 -31 55 -51 22 -53 -50 -177 -173 -300 -187 -186 -647
    <div class="find">
     <div class="fnd pre"><span class="k">✓</span><p><b>Online-Terminanfrage für Probefahrt und Werkstatt</b> mit Wunschtag (Mi/So gesperrt) und Tageszeit, geht per WhatsApp oder E-Mail direkt an uns.<small>Füllt die Werkstatt und bringt Probefahrten in den Laden.</small></p></div>
     <div class="fnd pre"><span class="k">✓</span><p><b>E-Bike-Finder</b>: 2 Fragen, dann passende Marken mit Bild und der Knopf zur Probefahrt.<small>Bringt Kunden mit klarem Wunsch in den Laden.</small></p></div>
-    <div class="fnd pre"><span class="k">✓</span><p><b>Live-Bestand „Im Laden“</b>: alle Räder aus dem Veloport-Export; exakt gleiche Räder erscheinen nur einmal (keine Stückzahlen), andere Größe/Rahmenform/Farbe als eigenes Rad mit Querverweis, Knopf „Sonderangebote“, „Lieferung ausstehend“ mit voraussichtlichem Termin, Detailansicht im Showroom-Stil und Anfrage (kaufen, reservieren, Probefahrt). Verkaufte und reservierte Räder, Einkaufspreise, Rahmennummern und interne Notizen kommen nie auf die Seite.<small>Kunden sehen vorher, was da ist, und kommen gezielt.</small></p></div>
+    <div class="fnd pre"><span class="k">✓</span><p><b>Live-Lagerbestand „Auf Lager“</b>: alle Räder aus dem Veloport-Export; exakt gleiche Räder erscheinen nur einmal (keine Stückzahlen), andere Größe/Rahmenform/Farbe als eigenes Rad mit Querverweis, Knopf „Sonderangebote“, „Lieferung ausstehend“ mit voraussichtlichem Termin, Detailansicht im Showroom-Stil und Anfrage (kaufen, reservieren, Probefahrt). Verkaufte und reservierte Räder, Einkaufspreise, Rahmennummern und interne Notizen kommen nie auf die Seite.<small>Kunden sehen vorher, was da ist, und kommen gezielt.</small></p></div>
     <div class="fnd pre"><span class="k">✓</span><p><b>Showroom</b> mit allen 7 Marken zum Durchblättern, freigestellte Herstellerbilder in hoher Auflösung.</p></div>
     <div class="fnd pre"><span class="k">✓</span><p><b>Live „Jetzt geöffnet“</b> und die heutige Öffnungszeit hervorgehoben.</p></div>
     <div class="fnd pre"><span class="k">✓</span><p><b>Aktionen sofort online</b>: Winter-Inspektion mit Tage-Zähler. Änderungen in Minuten, ohne Agentur.</p></div>
@@ -3877,7 +3880,7 @@ function showroom(root,prefix){
  const thSet=(j,src)=>{const im=$$('button',th)[j]?.querySelector('img');if(im&&im.getAttribute('src')!==src)im.src=src};
  function paint(){const b=BR[i],x=cur||srBase(b);s.style.setProperty('--ac',b.c);wm.style.setProperty('--wo',b.o);
   const tag=x.cur?'Beispielmodell':(x.st==='bestellt'?'Bald bei uns':'Bei uns im Laden');
-  info.innerHTML='<span class="blogo"><img src="'+b.logo+'" alt="'+esc(b.n)+'"></span><div><p class="mdl">'+tag+' · '+esc(x.m)+(x.f?' · <span class="srf">'+esc(x.f)+'</span>':'')+'</p><h3>'+esc(b.n)+'</h3><p>'+esc(b.t)+'</p></div><div class="row">'+b.a.map(([t,h])=>'<a class="ghost" href="'+h+'"'+(h.startsWith('http')?' target="_blank" rel="noopener"':'')+'>'+esc(t)+'<svg><use href="#i-arrow"/></svg></a>').join('')+'<a class="ghost" href="#lager" data-brand="'+esc(b.n)+'">Im Laden</a><a class="cta" href="#termin" data-pre="Probefahrt '+esc(b.n)+'"><svg><use href="#i-bike"/></svg>Probefahrt</a></div>';
+  info.innerHTML='<span class="blogo"><img src="'+b.logo+'" alt="'+esc(b.n)+'"></span><div><p class="mdl">'+tag+' · '+esc(x.m)+(x.f?' · <span class="srf">'+esc(x.f)+'</span>':'')+'</p><h3>'+esc(b.n)+'</h3><p>'+esc(b.t)+'</p></div><div class="row">'+b.a.map(([t,h])=>'<a class="ghost" href="'+h+'"'+(h.startsWith('http')?' target="_blank" rel="noopener"':'')+'>'+esc(t)+'<svg><use href="#i-arrow"/></svg></a>').join('')+'<a class="ghost" href="#lager" data-brand="'+esc(b.n)+'">Auf Lager</a><a class="cta" href="#termin" data-pre="Probefahrt '+esc(b.n)+'"><svg><use href="#i-bike"/></svg>Probefahrt</a></div>';
   $$('button',th).forEach((y,j)=>y.classList.toggle('on',j===i));}
  const FX=[[5,BR.findIndex(b=>b.k==='vanraam')],[7,BR.findIndex(b=>b.k==='vdv')],[9,BR.findIndex(b=>b.k==='victoria')],[10,BR.findIndex(b=>b.k==='stevens')]],FXI=FX.map(f=>f[1]);let q=[];
  /* how: 'tab' = Marke gewählt (bleibt bei der Marke), sonst Pfeil/Wischen/automatisch */
@@ -4067,7 +4070,7 @@ $$('[data-copy]').forEach(b=>b.addEventListener('click',e=>{e.preventDefault();e
 /* ---------- E-Bike-Finder ---------- */
 const Q=[
  {q:'Wofür soll dein neues E-Bike sein?',o:[['alltag','Alltag & Einkauf','Kurze Wege, Brötchen holen, Besuche','i-bike'],['tour','Touren & Ausflüge','Längere Strecken, am Rhein entlang','i-map'],['mit','Platzsparend & mitnehmen','Wohnmobil, Auto, kleine Garage','i-car'],['sicher','Maximal sicher & stabil','Drei Räder, kein Kippen beim Anhalten','i-tri']]},
- {q:'Was ist dir besonders wichtig?',o:[['tief','Ganz bequemer Einstieg','Tief einsteigen, aufrecht sitzen','i-shield'],['wunsch','Rad nach meinen Wünschen','Farbe und Ausstattung selbst wählen','i-tune'],['lager','Schnell losfahren','Am liebsten direkt aus dem Laden','i-box'],['egal','Ich lasse mich beraten','Zeigt mir einfach, was passt','i-spark']]}
+ {q:'Was ist dir besonders wichtig?',o:[['tief','Ganz bequemer Einstieg','Tief einsteigen, aufrecht sitzen','i-shield'],['wunsch','Rad nach meinen Wünschen','Farbe und Ausstattung selbst wählen','i-tune'],['lager','Schnell losfahren','Am liebsten direkt ab Lager','i-box'],['egal','Ich lasse mich beraten','Zeigt mir einfach, was passt','i-spark']]}
 ];
 const RT={isy:'20-Zoll-Kompaktrad: wendig, handlich und platzsparend. Über 100 i:SY bei uns vorrätig, Probefahrt auch übers Wochenende.',qio:'Innovatives Kompaktrad mit modernem Konzept. Am besten direkt im Laden ausprobieren.',ktm:'Große E-Bike-Auswahl einer Traditionsmarke, vom Tiefeinsteiger bis zum Trekking-Rad.',vdv:'Du stellst Rahmen, Farbe und Ausstattung selbst zusammen. Wir beraten dich dabei.',vanraam:'E-Dreirad vom Weltmarktführer aus Holland: bequem sitzen, drei Räder, Motorunterstützung.',gudereit:'Bei uns das EC-35 Evo von Gudereit.',victoria:'Alltagstaugliche E-Bikes einer Traditionsmarke.'};
 const SC={alltag:{isy:2,qio:2,gudereit:2,victoria:2,ktm:1},tour:{ktm:3,vdv:2,gudereit:1,victoria:1},mit:{isy:3,qio:2},sicher:{vanraam:5},tief:{gudereit:2,isy:1,qio:1,victoria:1,ktm:1,vanraam:1},wunsch:{vdv:3},lager:{isy:3,qio:1},egal:{isy:1,ktm:1}};
@@ -4161,7 +4164,7 @@ const BMAP=(()=>{try{return JSON.parse(document.getElementById('bilderData').tex
 function bmKey(m,mo,j,f){const n=t=>String(t==null?'':t).toLowerCase().replace(/[^a-z0-9]+/g,'');return [m,mo,j,f].map(n).join('|')}
 function bmApply(d){(d&&d.raeder||[]).forEach(r=>(r.farben||[]).forEach(v=>{const k=bmKey(r.marke,r.modell,v.jahr,v.farbe);if(!(k in BMAP))return;if(v.bild&&!/^img\/bestand\//.test(v.bild))return;if(BMAP[k])v.bild=BMAP[k];else delete v.bild}));return d}
 function lgLoad(){if(LG.load)return LG.load;LG.load=Promise.resolve().then(()=>{const d=lgInline();if(!d||!Array.isArray(d.raeder))throw 0;LG.D=bmApply(d);lgApply()}).catch(()=>{$('#lgGrid').innerHTML='<p class="lgempty">Der Bestand konnte gerade nicht geladen werden. Ruf uns gern an: 07271 78033.</p>'});return LG.load}
-/* Kachel „Im Laden“: echte Räder aus dem Bestand (mit Bild, im Laden) in zufälliger Reihenfolge; Schild folgt der Kachel */
+/* Kachel „Auf Lager“: echte Räder aus dem Bestand (mit Bild, im Laden) in zufälliger Reihenfolge; Schild folgt der Kachel */
 const QL={p:[],i:0,t:0};
 function qlFill(){const box=$('#qBk');if(!box||!LG.M)return;const G={},S=new Set();
  LG.M.forEach(m=>{const k=(lgBrand(m.marke+' '+m.modell)||{k:String(m.marke||'').toLowerCase()}).k;(m.v||[]).forEach(x=>{if(x.bild&&x.status!=='bestellt'&&!S.has(x.bild)){S.add(x.bild);(G[k]=G[k]||[]).push(x.bild)}})});
@@ -4176,7 +4179,7 @@ function lgApply(){const d=admMerge(admBase());LG.M=lgNorm(d);LG.ok=true;
  const A=(admBase()||{}).anzahl;$('#lgNum').innerHTML=(A?'<span><b>'+A.lager+'</b> Räder im Laden</span>'+(A.bestellt?'<span><b>'+A.bestellt+'</b> Räder bestellt</span>':''):'<span><b>'+nL+'</b> Modelle sofort verfügbar</span>'+(nB?'<span><b>'+nB+'</b> Lieferung ausstehend</span>':''))+'<span><b>'+nMk+'</b> Marken</span>';
  $('#lgDealsN').textContent=nD?'Reduzierte Räder':'Aktuell keine';$('#lgDeals').hidden=!nD;
  const mx=Math.max(0,...LG.M.flatMap(m=>m.v||[]).filter(x=>x.angebot&&x.preis>x.angebot).map(x=>x.preis-x.angebot));const se=$('#lgDealsS');se.hidden=!mx;if(mx)se.textContent='bis zu '+eur(mx)+' sparen';
- const q=$('#qkLager');if(q)q.textContent='Jetzt im Laden ansehen';
+ const q=$('#qkLager');if(q)q.textContent='Jetzt auf Lager ansehen';
  if(!QL.p.length)qlFill();
  lgChips()}
 function lgChips(){const mk=[...new Set(LG.M.map(lgMkName))].sort((a,b)=>a.localeCompare(b,'de'));
@@ -4613,8 +4616,8 @@ const lgClose0=lgClose;lgClose=function(){lgClose0();if(LG.ext){LG.ext=0;if(LG.o
 const SEO={start:['Velocenter Hessert · E-Bikes & Werkstatt in Wörth am Rhein','E-Bikes, Bosch Service Center und Meisterwerkstatt in Wörth am Rhein. i:SY Experte, KTM, QiO, Velo de Ville, Victoria. Leasing, 0 % Finanzierung. Familienbetrieb seit 1995.'],
  service:['Werkstatt, Inspektion & Dienstrad-Leasing · Velocenter Hessert Wörth','Inspektion, Reparatur und Bosch-Diagnose für Fahrrad, E-Bike und E-Dreirad in Wörth am Rhein. Termin online anfragen, Dienstrad-Rechner, Leasing mit fast allen Anbietern.'],
  marken:['E-Bike-Marken: KTM, i:SY, QiO, Velo de Ville, Victoria · Velocenter Hessert','Unsere Marken in Wörth am Rhein: KTM, i:SY, QiO, Velo de Ville, Victoria, Stevens, Gudereit und Van Raam. Beratung und Probefahrt vor Ort.'],
- lager:['E-Bikes im Laden · sofort verfügbar · Velocenter Hessert Wörth am Rhein','E-Bikes, die jetzt bei uns in Wörth stehen: ansehen, merken, vergleichen und direkt Probefahrt anfragen. Mit Sonderangeboten.'],
- isy:['i:SY Experte in Wörth am Rhein · Velocenter Hessert','i:SY Experte seit 2015, über 1.000 i:SY verkauft: über 100 i:SY im Laden, Probefahrt übers Wochenende, Ersatzteile vorrätig in Wörth am Rhein.'],
+ lager:['E-Bikes sofort verfügbar · Lager Velocenter Hessert Wörth am Rhein','E-Bikes, die jetzt bei uns in Wörth stehen: ansehen, merken, vergleichen und direkt Probefahrt anfragen. Mit Sonderangeboten.'],
+ isy:['i:SY Experte in Wörth am Rhein · Velocenter Hessert','i:SY Experte seit 2015, über 1.000 i:SY verkauft: über 100 i:SY auf Lager, Probefahrt übers Wochenende, Ersatzteile vorrätig in Wörth am Rhein.'],
  treffen:['i:SY-Treffen Wörth · Weltrekord 2024 · Velocenter Hessert','Fotos und Videos der i:SY-Treffen 2017 bis 2024 in Wörth am Rhein, inklusive Weltrekord mit 283 i:SY.'],
  dreirad:['E-Dreiräder für Erwachsene · Velocenter Hessert Wörth','E-Dreiräder sicher und bequem: Beratung, Probefahrt und Service in Wörth am Rhein.'],
  kontakt:['Kontakt & Anfahrt · Velocenter Hessert, Hartmannstraße 25, Wörth','Telefon 07271 78033, WhatsApp 0163 5343133, info@velo-center.de. Hartmannstraße 25, 76744 Wörth am Rhein. Mi und So geschlossen.'],
@@ -4668,7 +4671,7 @@ function cmpOpen(){lgLoad().then(()=>{const c=$('#cmp');cmpDraw();c.hidden=false
 function cmpClose(){const c=$('#cmp');c.classList.remove('on');document.body.style.overflow='';setTimeout(()=>{c.hidden=true},320)}
 function cmpDraw(){const L=cmpModels(),ok=L.filter(x=>x.m);
  $('#cmpS').textContent=L.length?(L.length===1?'1 Rad gemerkt. Merk dir ein zweites, um zu vergleichen.':L.length+' Räder nebeneinander. Gelb markiert = Unterschied.'):'';
- if(!L.length){$('#cmpB').innerHTML='<div class="cmp-empty"><p>Noch nichts gemerkt.</p><p style="margin-top:8px">Tipp bei einem Rad auf das Herz '+HEART.replace('<svg','<svg style="width:18px;height:18px;vertical-align:-3px;fill:none;stroke:#C8102E;stroke-width:2"')+', dann erscheint es hier.</p></div>';$('#cmpF').innerHTML='<a class="cta" href="#lager" data-cmpx>Alle Räder im Laden</a>';return}
+ if(!L.length){$('#cmpB').innerHTML='<div class="cmp-empty"><p>Noch nichts gemerkt.</p><p style="margin-top:8px">Tipp bei einem Rad auf das Herz '+HEART.replace('<svg','<svg style="width:18px;height:18px;vertical-align:-3px;fill:none;stroke:#C8102E;stroke-width:2"')+', dann erscheint es hier.</p></div>';$('#cmpF').innerHTML='<a class="cta" href="#lager" data-cmpx>Zum Lager</a>';return}
  const uniq=a=>[...new Set(a.filter(Boolean))];
  const R=[['Preis',m=>{const d=m.v.filter(x=>x.angebot).sort((a,b)=>a.angebot-b.angebot)[0];return d?'<s style="color:var(--dim)">'+eur(d.preis)+'</s> <b style="color:#C8102E">'+(m.multiP?'ab ':'')+eur(d.angebot)+'</b><small class="anl">* nicht bei Leasing & Finanzierung</small>':m.minP?'<b>'+(m.multiP?'ab ':'')+eur(m.minP)+'</b>':'auf Anfrage'}],
   ['Verfügbar',m=>m.lager?'<span class="ok">Sofort, steht in Wörth</span>':'<span class="z">Lieferung ausstehend'+(m.ab?' · '+esc(m.ab):'')+'</span>'],
@@ -4744,12 +4747,12 @@ function rfScore(m){const A=RF.a,T=rfTarget();let best=null;
  return best}
 function rfResult(){const R=(LG.M||[]).map(m=>{const b=rfScore(m);return b?{m,b,p:Math.max(0,Math.min(99,Math.round(b.s/b.mx*100)))}:null}).filter(x=>x&&x.p>=45).sort((a,b)=>b.p-a.p||(b.m.lager-a.m.lager)).slice(0,9);
  RF.res=R;const B=$('#rfB');
- B.innerHTML='<h2 class="rf-q" id="rfT">'+(R.length?'Diese Räder passen zu dir.':'Gerade nichts Passendes im Laden.')+'</h2><p class="rf-h">'+(R.length?'Sortiert nach Übereinstimmung. Antippen für Fotos, Farben und Größen.':'Kein Problem: Wir bestellen dir das passende Rad. Schreib uns kurz, was du suchst.')+'</p>'+
+ B.innerHTML='<h2 class="rf-q" id="rfT">'+(R.length?'Diese Räder passen zu dir.':'Gerade nichts Passendes im Lager.')+'</h2><p class="rf-h">'+(R.length?'Sortiert nach Übereinstimmung. Antippen für Fotos, Farben und Größen.':'Kein Problem: Wir bestellen dir das passende Rad. Schreib uns kurz, was du suchst.')+'</p>'+
   (R.length?'<div class="rf-res">'+R.map((x,i)=>{const m=x.m,v=m.v[x.b.vi]||m.v[0],b=lgBrand(m.marke),im=lgImg(m,x.b.vi)||lgImg(m),k=mKey(m),on=merkHas(k);
    return '<div class="rfc" role="button" tabindex="0" data-rfshow="'+i+'" style="--ac:'+(b?b.c:'#8C9097')+'"><div class="im">'+(im?'<img src="'+im+'" alt="" loading="lazy">':'<span class="nf">Foto folgt</span>')+'</div><span class="pc">'+x.p+' % passend</span><button type="button" class="hrt'+(on?' on':'')+'" data-merk="'+esc(k)+'" aria-pressed="'+on+'" aria-label="Merken">'+HEART+'</button>'+
     '<div class="bd2"><span class="mk">'+esc(m.marke)+'</span><h4>'+esc(m.modell)+'</h4><div class="why">'+x.b.why.slice(0,4).map(w=>'<span>'+esc(w)+'</span>').join('')+x.b.warn.map(w=>'<span class="w">'+esc(w)+'</span>').join('')+'</div>'+
     '<div class="pr"><span>'+(vP(v)?eur(vP(v)):'Preis auf Anfrage')+(v.angebot?'<small class="anl">* nicht bei Leasing & Finanzierung</small>':'')+'</span><i>'+(v.status!=='bestellt'?'Sofort da':'Lieferung ausstehend')+'</i></div></div></div>'}).join('')+'</div>':'<div class="rf-none"><a class="cta wa" href="https://wa.me/'+WA+'?text='+encodeURIComponent('Hallo Velocenter, ich suche ein Rad. Könnt ihr mich beraten?')+'" target="_blank" rel="noopener"><svg><use href="#i-chat"/></svg>Beratung per WhatsApp</a></div>')+
-  '<div class="rf-nav"><button type="button" class="lk" data-rfre>Nochmal von vorn</button><div class="row" style="gap:10px"><a class="ghost" href="#termin" data-pre="Probefahrt" data-rfx>Beratungstermin</a><a class="cta" href="#lager" data-rfx>Alle Räder im Laden ansehen</a></div></div>';B.scrollTop=0}
+  '<div class="rf-nav"><button type="button" class="lk" data-rfre>Nochmal von vorn</button><div class="row" style="gap:10px"><a class="ghost" href="#termin" data-pre="Probefahrt" data-rfx>Beratungstermin</a><a class="cta" href="#lager" data-rfx>Ganzes Lager ansehen</a></div></div>';B.scrollTop=0}
 $('#rf').addEventListener('click',e=>{const t=e.target;if(t.closest('[data-rfx]')){rfClose();return}
  const S=rfSteps(),q=S[RF.i];
  const o=t.closest('[data-rfv]');if(o&&q){const v=o.dataset.rfv;if(q.multi){const i=RF.a.w.indexOf(v);if(i>=0)RF.a.w.splice(i,1);else RF.a.w.push(v);rfDraw()}else{RF.a[q.id]=v;rfDraw();setTimeout(()=>{RF.i=Math.min(RF.i+1,rfSteps().length);rfDraw()},220)}return}
@@ -4971,7 +4974,7 @@ async function admZSave(F){const z={};let bad='';
 
 /* ---------- Ansicht: Hinweise & Aktionen ---------- */
 function admMeldung(b){const n=Object.assign({on:false,txt:'',typ:'info',link:'',von:'',bis:''},SITE.meldung||{}),A=SITE.aktion||{},S=saison(),h=heuteK();
- const lk=[['','ohne Link'],['termin','Termin-Formular'],['lager','Im Laden / Räder'],['besuch','Öffnungszeiten & Anfahrt'],['kontakt','Kontakt'],['service','Werkstatt & Service'],['deal','Winter-Aktion']];
+ const lk=[['','ohne Link'],['termin','Termin-Formular'],['lager','Lager / Räder'],['besuch','Öffnungszeiten & Anfahrt'],['kontakt','Kontakt'],['service','Werkstatt & Service'],['deal','Winter-Aktion']];
  const ak=(k,ti,sub,ic,c1,c2,zeit,ex)=>'<div class="aak"><span class="ic" style="--c1:'+c1+';--c2:'+c2+'">'+admI(ic)+'</span><span><b>'+ti+' '+(zeit?(A[k]?'<span class="abadge off">ausgeschaltet</span>':'<span class="abadge">gerade sichtbar</span>'):'<span class="abadge off">nicht in der Saison</span>')+'</b><small>'+sub+'</small></span><label class="asw"><input type="checkbox" name="'+k+'"'+(A[k]?'':' checked')+'><i></i><span class="sr">zeigen</span></label>'+(ex?'<div class="ex">'+ex+'</div>':'')+'</div>';
  b.innerHTML='<div class="agrid2" style="grid-template-columns:minmax(0,1.1fr) minmax(0,1fr)"><section class="acard"><h4>Hinweis auf der Startseite</h4><form id="admMelF" class="admf">'+
   '<label class="asw"><input type="checkbox" name="on"'+(n.on?' checked':'')+'><i></i><span>Hinweis anzeigen</span></label>'+
@@ -5095,7 +5098,7 @@ async function admAnalyse(b){const n=AN.n;b.innerHTML='<div class="anbar">'+[1,7
   kp('Bester Tag',best?bsA[best[0]].toLocaleString('de-DE'):'–',best?'<em>'+dKurz(best[1])+'</em>':'<em>noch keiner</em>','#FACC15','#EA580C')+'</div>'+
   '<section class="acard" style="margin-bottom:16px"><h4>Auf einen Blick</h4>'+ins+'</section>'+
   '<section class="acard"><h4>Besucher im Verlauf</h4><div class="anlg"><span style="--c:#C8102E"><i></i>Besuche</span><span style="--c:#B87333"><i></i>Seitenaufrufe</span></div>'+anChart(cur,D)+'</section>'+
-  '<section class="acard" style="margin-top:16px"><h4>Vom Besuch zur Anfrage</h4><div class="anfun"><div><b>'+bs.toLocaleString('de-DE')+'</b><small>Besuche</small></div><div><b>'+sum(cur,'s_lager').toLocaleString('de-DE')+'</b><small>„Im Laden“ angesehen</small></div><div><b>'+(k1+sum(cur,'c_anfrage')).toLocaleString('de-DE')+'</b><small>Kontakt & Anfragen</small></div></div></section>'+
+  '<section class="acard" style="margin-top:16px"><h4>Vom Besuch zur Anfrage</h4><div class="anfun"><div><b>'+bs.toLocaleString('de-DE')+'</b><small>Besuche</small></div><div><b>'+sum(cur,'s_lager').toLocaleString('de-DE')+'</b><small>Lager angesehen</small></div><div><b>'+(k1+sum(cur,'c_anfrage')).toLocaleString('de-DE')+'</b><small>Kontakt & Anfragen</small></div></div></section>'+
   '<div class="agrid2" style="margin-top:16px"><section class="acard"><h4>Beliebteste Bereiche</h4>'+bars(agg(cur,'s_'),k=>ANS[k]||k,10,'#FF5A6E','#C8102E',agg(prv,'s_'))+'</section><section class="acard"><h4>Was wurde angeklickt</h4>'+bars(agg(cur,'c_'),k=>ANC[k]||k,15,'#34D399','#0D9488',agg(prv,'c_'))+'</section>'+
   '<section class="acard"><h4>Meistangesehene Räder</h4>'+bars(agg(cur,'b_'),bikeLab,15,'#F5B83D','#B87333',agg(prv,'b_'))+'</section><section class="acard"><h4>Woher kommen die Besucher</h4>'+bars(agg(cur,'r_'),k=>ANR[k]||k,8,'#22D3EE','#2563EB',agg(prv,'r_'))+'</section>'+
   '<section class="acard"><h4>Geräte</h4>'+anDonut(dv)+'</section><section class="acard"><h4>Uhrzeit der Besuche</h4><div class="anhr">'+Array.from({length:24},(_,i)=>{const v=hr[p2(i)]||0;return '<i class="'+(v?'':'z')+'" style="--h:'+(v/hmx*100).toFixed(1)+'%" title="'+i+' Uhr: '+v+' Besuche"></i>'}).join('')+'</div><div class="anhx">'+Array.from({length:24},(_,i)=>'<span>'+(i%3?'':i)+'</span>').join('')+'</div>'+
