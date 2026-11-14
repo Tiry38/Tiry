@@ -13,6 +13,7 @@ import { botThink } from './ai.js';
 import { FACTION_LINES } from './data.js';
 import { HEROES, HERO_IDS } from './heroes.js';
 import { leaderDef, bossKit, updateLeader, leaderAura } from './leader.js';
+import { createMission, missionHook } from './missions.js';
 import { createHero, heroCommand, updateHero, heroWaveStart, heroWaveEnd, heroTakeDamage, heroDied, heroGainXp, heroBotThink, heroArmor, heroArmorType, HERO_RADIUS } from './hero.js';
 
 // Regeln einer Partie (Standard = Versus wie im Original; Kampagne/Modi überschreiben einzelne Werte)
@@ -66,7 +67,7 @@ export class Sim {
     // Mit Helden sind die Bahnen stärker → Wellen entsprechend kräftiger (gemessen per Bot-Simulation)
     const heroHp = R.heroes ? HERO_WAVE_HP : 1, heroDmg = R.heroes ? HERO_WAVE_DMG : 1;
     this.waves = WAVES.map((w) => {
-      const d = { ...w, key: `w${w.n}`, hp: Math.round(w.hp * R.waveHpMul * heroHp * (w.boss && R.champions ? 1.25 : 1)), dmg: w.dmg * R.waveDmgMul * heroDmg, armor: w.armor + R.waveArmorAdd, bounty: Math.max(1, Math.round(w.bounty * R.bountyMul)) };
+      const d = { ...w, key: `w${w.n}`, hp: Math.round(w.hp * R.waveHpMul * heroHp * (w.boss && R.champions ? 1.25 : 1)), dmg: w.dmg * R.waveDmgMul * heroDmg, speed: w.speed * (R.creepSpeedMul || 1), armor: w.armor + R.waveArmorAdd, bounty: Math.max(1, Math.round(w.bounty * R.bountyMul)) };
       d.champ = w.boss ? null : { ...d, key: `w${w.n}c`, champion: true, name: `Champion: ${w.name}`, hp: d.hp * 3, dmg: d.dmg * 1.6, armor: d.armor + 2, bounty: d.bounty * 3, size: 1.3 };
       d.hunter = ['raptor', 'hound', 'imp'].includes(w.model);
       if (R.leaders) {
@@ -143,6 +144,8 @@ export class Sim {
       };
     });
     this.initHeroes();
+    this.mission = R.mission ? createMission(R.mission) : null;
+    missionHook(this, 'init');
   }
 
   initHeroes() {
@@ -205,6 +208,8 @@ export class Sim {
   applyCommand(pid, cmd) {
     const p = this.players[pid];
     if (!p || this.phase === 'over' || !cmd) return false;
+    const allowed = missionHook(this, 'allow', p, cmd);
+    if (typeof allowed === 'string') return this.fail(p, allowed);
     switch (cmd.type) {
       case 'build': return this.cmdBuild(p, cmd);
       case 'upgrade': return this.cmdUpgrade(p, cmd);
@@ -227,7 +232,7 @@ export class Sim {
     const def = UNITS[unit];
     if (this.phase !== 'build') return this.fail(p, 'Bauen nur in der Bauphase');
     if (!def || !p.lines.includes(def.id)) return this.fail(p, 'Unbekannte Einheit');
-    if (row >= this.rules.gridRows) return this.fail(p, 'Dieses Feld ist gesperrt');
+    if (row >= this.rules.gridRows || (this.blockedRows && this.blockedRows.has(row))) return this.fail(p, 'Dieses Feld ist gesperrt');
     if (!(col >= 0 && col < GRID_COLS && row >= 0 && row < GRID_ROWS) || (col | 0) !== col || (row | 0) !== row) return this.fail(p, 'Ungültiges Feld');
     if (!this.cellFree(p.id, col, row)) return this.fail(p, 'Feld belegt');
     if (p.gold < def.cost) return this.fail(p, 'Nicht genug Gold');
@@ -390,6 +395,7 @@ export class Sim {
       this.updateBattle();
     }
     this.updateKings();
+    if (this.mission && this.phase !== 'over') missionHook(this, 'tick');
     this.time += DT;
     this.tick++;
     return this.events;
@@ -456,6 +462,7 @@ export class Sim {
       this.emit({ e: 'siege', count: this.siegeQueue.length });
       this.siegeQueue = [];
     }
+    missionHook(this, 'waveStart');
     this.emit({ e: 'waveStart', wave: this.wave, name: w.name, boss: w.boss });
   }
 
@@ -495,10 +502,14 @@ export class Sim {
       this.emit({ e: 'income', pid: p.id, amount: p.income });
     }
     this.emit({ e: 'waveEnd', wave: this.wave, leaks });
+    missionHook(this, 'waveEnd');
+    if (this.phase === 'over') return;
     if (this.wave === this.rules.maxWaves && this.rules.endless && !this.campaign) {
       this.emit({ e: 'endwaves', wave: this.wave + 1 });
     }
     if (this.wave >= this.rules.maxWaves && !(this.rules.endless && !this.campaign)) {
+      const mf = missionHook(this, 'final');
+      if (mf) { this.finish(mf.winner, mf.reason); return; }
       if (this.campaign) {
         if (this.campaign.goal === 'siege') this.finish(1, 'Die Rissfeste steht noch – der Riss hat sich geschlossen');
         else this.finish(0, 'Alle Wellen überstanden');
@@ -527,6 +538,7 @@ export class Sim {
     for (const p of this.players) { lanesF.set(p.id, []); lanesC.set(p.id, []); lanesH.set(p.id, []); }
     for (const e of this.entities.values()) {
       if (e.type === 'p') { projectiles.push(e); continue; }
+      if (e.type === 'o') continue; // Missions-Objekte
       if (e.type === 'h') { lanesH.get(e.lane).push(e); continue; }
       if (!e.alive) continue;
       if (e.type === 'f') lanesF.get(e.lane).push(e);
@@ -642,12 +654,27 @@ export class Sim {
       }
     }
 
+    if (f.npc) return; // Pilger kämpfen nicht
+    if (f.converted > 0) {
+      // Verderbt: greift für kurze Zeit die eigenen Vasallen an
+      f.converted -= DT;
+      let foe = null, fd = Infinity;
+      for (const o of fs) { if (o === f || !o.alive || o.converted > 0 || o.npc) continue; const d = (o.x - f.x) ** 2 + (o.z - f.z) ** 2; if (d < fd) { fd = d; foe = o; } }
+      if (foe) {
+        if (Math.sqrt(fd) > def.range + 1) this.moveToward(f, foe.x, foe.z, def.speed);
+        else if (f.cd <= 0) { f.cd = def.cd; f.atkT = this.time; this.emit({ e: 'attack', id: f.id, tgt: foe.id, melee: !def.ranged, atk: def.atk }); this.applyHit(f, foe, def.dmg * 0.6, def.atk, false); }
+      }
+      return;
+    }
     // Ziel wählen
     let tgt = f.target && this.entities.get(f.target);
+    const visible = this.mission && this.mission.m.canTarget;
+    if (tgt && visible && !missionHook(this, 'canTarget', f, tgt)) tgt = null;
     if (!tgt || !tgt.alive || tgt.stage !== 'lane') {
       tgt = null; let bd = Infinity;
       for (const c of cs) {
         if (!c.alive) continue;
+        if (visible && !missionHook(this, 'canTarget', f, c)) continue;
         const d = (c.x - f.x) ** 2 + (c.z - f.z) ** 2;
         if (d < bd) { bd = d; tgt = c; }
       }
@@ -676,10 +703,12 @@ export class Sim {
             .sort((a, b) => ((a.x - f.x) ** 2 + (a.z - f.z) ** 2) - ((b.x - f.x) ** 2 + (b.z - f.z) ** 2) || a.id - b.id);
           targets.push(...extra.slice(0, ab.multishot.targets - 1));
         }
-        for (const t of targets) this.fireProjectile(f, t, def, (f.powerMul || 1) * (f.swarmMul || 1));
+        const um = this.mission ? (missionHook(this, 'unitMul', f) || 1) : 1;
+        for (const t of targets) this.fireProjectile(f, t, def, (f.powerMul || 1) * (f.swarmMul || 1) * um);
       } else {
         this.emit({ e: 'attack', id: f.id, tgt: tgt.id, melee: true, atk: def.atk });
-        this.damage(f, tgt, def.dmg * (f.powerMul || 1) * (f.swarmMul || 1), def.atk, ab, cs, true);
+        const um = this.mission ? (missionHook(this, 'unitMul', f) || 1) : 1;
+        this.damage(f, tgt, def.dmg * (f.powerMul || 1) * (f.swarmMul || 1) * um, def.atk, ab, cs, true);
       }
     }
   }
@@ -760,7 +789,7 @@ export class Sim {
       tgt = null; let bd = AGGRO * AGGRO, taunt = false;
       const huntR = (def.hunter || def.leader ? 11 : AGGRO) ** 2;
       for (const f of fs) {
-        if (!f.alive) continue;
+        if (!f.alive || f.converted > 0) continue;
         const d = (f.x - c.x) ** 2 + (f.z - c.z) ** 2;
         if (f.type === 'h' && (def.hunter || def.leader) && d <= huntR) { tgt = f; taunt = true; bd = -1; break; }
         const isT = f.type === 'h' ? f.tauntT > 0 : !!UNITS[f.def].abil.taunt;
@@ -794,7 +823,7 @@ export class Sim {
     if (!this.tickStatus(c)) return;
     const k = this.teams[c.team].king;
     const dist = Math.hypot(k.x - c.x, k.z - c.z);
-    const reach = c.def.range + KING_RADIUS + 0.4;
+    const reach = Math.min(c.def.range, 4) + KING_RADIUS + 0.4; // auch Fernkämpfer rücken in Reichweite des Königs
     c.face = Math.atan2(k.x - c.x, k.z - c.z);
     if (dist > reach) { this.moveToward(c, k.x, k.z, c.def.speed * 1.6 * (1 - c.slowPct)); return; }
     // Kampagne: Söldner rammen die Rissfeste beim Eintreffen (Wucht abhängig vom Söldnerwert)
@@ -819,7 +848,7 @@ export class Sim {
     if (k.hp <= 0) {
       k.hp = 0; k.alive = false;
       this.emit({ e: 'kingDeath', team });
-      this.finish(1 - team, k.citadel ? 'Die Rissfeste ist gefallen' : 'Der gegnerische König ist gefallen');
+      this.finish(1 - team, k.citadel ? 'Die Rissfeste ist gefallen' : this.campaign ? 'Dein König ist gefallen' : `Der König von Team ${team === 0 ? 'West' : 'Ost'} ist gefallen`);
     }
   }
 
@@ -913,6 +942,7 @@ export class Sim {
     else { armorType = tgt.def.armorType; armor = tgt.def.armor + (tgt.moraleArmor || 0); }
     const mult = DAMAGE_TABLE[atk][armorType] ?? 1;
     let final = Math.max(1, dmg * mult * (1 - armorReduction(armor || 0)) * (1 + (tgt.cursePct || 0)));
+    if (this.mission && this.mission.m.dmgMul) final *= missionHook(this, 'dmgMul', src, tgt, atk) || 1;
     if (tgt.type === 'h') final = heroTakeDamage(this, tgt, final);
     else {
       if (tgt.shield > 0) { const a = Math.min(tgt.shield, final); tgt.shield -= a; final -= a; }
@@ -928,6 +958,7 @@ export class Sim {
 
   kill(e, src) {
     e.alive = false; e.hp = 0;
+    if (this.mission) missionHook(this, 'onKill', e, src);
     if (e.type === 'c') {
       this.entities.delete(e.id);
       if (e.siege) { /* von der Rissfeste vernichtet – kein Gold */ }

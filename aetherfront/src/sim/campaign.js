@@ -27,78 +27,97 @@ const M = (o) => {
   return { ...o, rules: { buildTimeFirst: o.startWave > 1 ? 70 : 45, ...e, ...(o.rules || {}), startWave: o.startWave, maxWaves: o.endWave } };
 };
 
+// goal: 'survive' (alle Wellen halten) · 'siege' (Rissfeste zerstören) · Missions-Mechanik kann eigene Ziele setzen.
+// biome: Lichtstimmung des Akts (environment.setBiome). hero: Held der Geschichte (frei wählbar, empfohlen).
+const K = (o) => M({ citadel: { hp: 999999, regen: 0, dmg: 0.6 }, ...o });
+
 export const MISSIONS = [
-  // ---------- Akt I ----------
-  M({ id: 1, act: 1, title: 'Der erste Riss', goal: 'survive', startWave: 1, endWave: 6, faction: 'orden',
-    story: 'Über den Himmelsinseln reißt der Äther auf. Die Bastion hat nur dich: Stelle eine Verteidigung auf und halte die ersten Wellen.',
-    tips: ['Setze Nahkämpfer nach vorn (obere Reihen), Fernkämpfer dahinter.', 'Nach jeder Welle stehen alle Kämpfer wieder geheilt auf ihrem Platz.'],
-    citadel: { hp: 8000, regen: 0, dmg: 0.8 }, star3: { type: 'leaks', max: 0 } }),
-  M({ id: 2, act: 1, title: 'Funken im Wind', goal: 'siege', startWave: 1, endWave: 10, faction: 'orden',
-    story: 'Die Rissfeste des Fürsten Vael’Thar schwebt jenseits der Brücke. Wirb Äther-Funken an und schick Söldner hinüber – jeder Angriff stärkt auch deine Kriegskasse.',
-    tips: ['Funken (B) sammeln Äther. Söldner (1–7) kosten Äther und erhöhen dein Einkommen.', 'Söldner marschieren mit der nächsten Welle gegen die Rissfeste.'],
-    citadel: { hp: 5200, regen: 2, dmg: 0.8 }, star3: { type: 'byWave', wave: 8 } }),
-  M({ id: 3, act: 1, title: 'Die Steinerne Wacht', goal: 'survive', startWave: 5, endWave: 10, faction: 'orden',
-    story: 'Aus dem Riss steigt ein Titan aus lebendem Fels. Er darf die Bastion nicht erreichen.',
-    tips: ['Welle 10 ist ein Boss. Belagerung und Wucht wirken gut gegen schwere Panzerung.'],
-    citadel: { hp: 26000, regen: 4, dmg: 1 }, star3: { type: 'leaks', max: 2 } }),
-  M({ id: 4, act: 1, title: 'Brücke der Klingen', goal: 'siege', startWave: 6, endWave: 13, faction: 'orden',
-    story: 'Vael’Thar schickt seine eigenen Söldner über die Brücke. Halte stand – und schlag zurück.',
-    tips: ['Der Rissfürst sendet in Welle 8, 10 und 12 zusätzliche Gegner in deine Bahn.'],
-    citadel: { hp: 14500, regen: 5, dmg: 1 },
-    enemySends: [{ wave: 8, send: 's_hound', count: 3 }, { wave: 10, send: 's_beetle', count: 2 }, { wave: 12, send: 's_imp', count: 2 }],
-    star3: { type: 'kingHp', pct: 0.8 } }),
-  // ---------- Akt II ----------
-  M({ id: 5, act: 2, title: 'Dornenpfad', goal: 'survive', startWave: 8, endWave: 14, faction: 'wild',
-    story: 'Die Wälder von Ysmir erwachen. Doch die Rissbrut trägt jetzt Eisenhaut.',
-    mods: ['Eisenhaut: Alle Wellen +2 Rüstung und +10 % Leben'], rules: { waveArmorAdd: 2, waveHpMul: 1.1 },
-    citadel: { hp: 32000, regen: 6, dmg: 1 }, star3: { type: 'leaks', max: 3 } }),
-  M({ id: 6, act: 2, title: 'Mondjagd', goal: 'siege', startWave: 9, endWave: 16, faction: 'wild',
-    story: 'In Vollmondnächten führen Champions die Horden an. Jag sie – und brich die Feste.',
-    mods: ['Champions: Jeder vierte Gegner ist ein Champion (3× Leben, 3× Kopfgeld)'], rules: { champions: true },
-    citadel: { hp: 20000, regen: 8, dmg: 1.1 }, star3: { type: 'noHeal' } }),
-  M({ id: 7, act: 2, title: 'Glutsümpfe', goal: 'survive', startWave: 11, endWave: 17, faction: 'wild',
-    story: 'Im Sumpf verbrennt die Beute, bevor du sie einsammeln kannst. Nur dein Einkommen trägt dich.',
-    mods: ['Magere Beute: Kopfgeld −40 %', 'Dafür +25 Grundeinkommen'], rules: { bountyMul: 0.6, startIncomeAdd: 25, waveHpMul: 1.1 },
-    citadel: { hp: 40000, regen: 8, dmg: 1.1 }, star3: { type: 'kingHp', pct: 0.7 } }),
-  M({ id: 8, act: 2, title: 'Der Aschendrache', goal: 'survive', startWave: 15, endWave: 20, faction: 'wild',
-    story: 'Ein Drache aus Asche und Glut kreist über dem Riss. Wenn er landet, muss deine Front stehen.',
-    mods: ['Champions', 'Bosswelle 20'], rules: { champions: true },
-    citadel: { hp: 30000, regen: 10, dmg: 1.2 }, star3: { type: 'leaks', max: 3 } }),
-  // ---------- Akt III ----------
-  M({ id: 9, act: 3, title: 'Die Schmiede erwacht', goal: 'siege', startWave: 12, endWave: 19, faction: 'schmiede',
-    story: 'In der Schlucht von Karrak stehen die alten Äthermaschinen. Platz ist knapp – jeder Kämpfer zählt.',
-    mods: ['Enge Schlucht: nur 6 von 8 Baureihen'], rules: { gridRows: 6 },
-    citadel: { hp: 21000, regen: 10, dmg: 1.2 }, star3: { type: 'byWave', wave: 18 } }),
-  M({ id: 10, act: 3, title: 'Kein Weg zurück', goal: 'survive', startWave: 14, endWave: 21, faction: 'schmiede',
-    story: 'Die Meisterschmiede ist zerstört. Ohne sie gibt es keine Aufwertung auf die höchste Stufe.',
-    mods: ['Nur Stufe II: keine Aufwertung auf Stufe III'], rules: { maxTier: 2 },
-    citadel: { hp: 34000, regen: 12, dmg: 1.2 }, star3: { type: 'leaks', max: 4 } }),
-  M({ id: 11, act: 3, title: 'Sturm über Karrak', goal: 'siege', startWave: 16, endWave: 23, faction: 'schmiede',
-    story: 'Vael’Thar wirft alles, was er hat, über die Brücke. Überlebe den Sturm und antworte mit Stahl.',
-    citadel: { hp: 29000, regen: 14, dmg: 1.3 },
-    enemySends: [{ wave: 17, send: 's_ogre', count: 2 }, { wave: 19, send: 's_golem', count: 2 }, { wave: 21, send: 's_knight', count: 1 }, { wave: 22, send: 's_ogre', count: 3 }],
-    star3: { type: 'kingHp', pct: 0.6 } }),
-  M({ id: 12, act: 3, title: 'Vor den Toren', goal: 'siege', startWave: 18, endWave: 25, faction: 'schmiede',
-    story: 'Die Rissfeste liegt in Reichweite. Ihre Mauern heilen sich – du brauchst eine Flut aus Söldnern.',
-    mods: ['Söldner −15 % Äther'], rules: { sendCostMul: 0.85 },
-    citadel: { hp: 36000, regen: 30, dmg: 1.3 }, star3: { type: 'noHeal' } }),
-  // ---------- Akt IV ----------
-  M({ id: 13, act: 4, title: 'Schatten im Licht', goal: 'survive', startWave: 20, endWave: 26, faction: 'abgrund',
-    story: 'Du nutzt nun die Waffen des Feindes. Doch der Abgrund verlangt Eile.',
-    mods: ['Champions', 'Hast: nur 24 Sekunden Bauzeit', 'Wellen +20 % Leben'], rules: { champions: true, buildTime: 24, waveHpMul: 1.2 },
-    citadel: { hp: 60000, regen: 20, dmg: 1.4 }, star3: { type: 'leaks', max: 4 } }),
-  M({ id: 14, act: 4, title: 'Tanz der Leere', goal: 'siege', startWave: 22, endWave: 28, faction: 'abgrund',
-    story: 'Die Leere tanzt um die Feste. Wer jetzt zögert, wird verschlungen.',
-    mods: ['Champions', 'Söldner −20 % Äther'], rules: { champions: true, sendCostMul: 0.8 },
-    citadel: { hp: 40000, regen: 30, dmg: 1.5 },
-    enemySends: [{ wave: 24, send: 's_golem', count: 2 }, { wave: 26, send: 's_knight', count: 1 }],
-    star3: { type: 'kingHp', pct: 0.5 } }),
-  M({ id: 15, act: 4, title: 'Vael’Thar, der Rissfürst', goal: 'siege', startWave: 24, endWave: 30, faction: 'abgrund',
-    story: 'Das Finale. Der Rissfürst selbst stellt sich dir – in Welle 30 tritt er aus dem Riss. Brich seine Feste, bevor der Riss sich für immer schließt.',
-    mods: ['Champions', 'Der Rissfürst sendet unaufhörlich'], rules: { champions: true },
-    citadel: { hp: 32000, regen: 20, dmg: 1.6 },
-    enemySends: [{ wave: 25, send: 's_ogre', count: 2 }, { wave: 27, send: 's_golem', count: 2 }, { wave: 28, send: 's_knight', count: 1 }, { wave: 29, send: 's_knight', count: 2 }],
-    star3: { type: 'leaks', max: 6 } }),
+  // ---------- Akt I – Das Erwachen (Himmelsinseln) ----------
+  K({ id: 1, act: 1, biome: 'sky', title: 'Der erste Riss', goal: 'survive', startWave: 1, endWave: 5, faction: 'orden', hero: 'kael', mechanic: 'tutorial',
+    rules: { waveHpMul: 0.7, buildTimeFirst: 60 },
+    story: 'Über den Himmelsinseln reißt der Äther auf. Hauptmann Kael ist allein auf der Bastion – bis die ersten Vasallen seinem Ruf folgen.',
+    tips: ['Die Mission erklärt dir Schritt für Schritt Bauen, Wellen und die Heldensteuerung.'], star3: { type: 'leaks', max: 0 } }),
+  K({ id: 2, act: 1, biome: 'sky', title: 'Funken im Wind', goal: 'survive', startWave: 2, endWave: 8, faction: 'orden', hero: 'mira', mechanic: 'shards', mechanicCfg: { need: 8 },
+    story: 'Der Riss verstreut Splitter des Ätherkristalls. Mira spürt sie – wer sie sammelt, stärkt die Bastion.',
+    tips: ['In jeder Kampfphase liegen leuchtende Funken auf der Bahn. Lauf mit dem Helden darüber.'], star3: { type: 'kingHp', pct: 0.9 } }),
+  K({ id: 3, act: 1, biome: 'sky', title: 'Die bröckelnde Brücke', goal: 'survive', startWave: 4, endWave: 11, faction: 'orden', hero: 'kael', mechanic: 'collapse', mechanicCfg: { at: [2, 4, 6] },
+    rules: { waveHpMul: 1.1 },
+    story: 'Die Sturmbrücke hält dem Riss nicht stand. Reihe um Reihe stürzt in die Wolken.',
+    tips: ['Nach den Wellen 2, 4 und 6 bricht die vorderste Baureihe weg – Vasallen dort werden voll erstattet.'], star3: { type: 'leaks', max: 2 } }),
+  K({ id: 4, act: 1, biome: 'dusk', title: 'Leuchtfeuer', goal: 'survive', startWave: 6, endWave: 13, faction: 'orden', hero: 'mira', mechanic: 'night',
+    rules: { waveHpMul: 1.1 },
+    story: 'Die Nacht kommt, und mit ihr die Rissbrut. Nur Licht hält sie fern.',
+    tips: ['Vasallen sehen Gegner nur in der Nähe von Leuchtfeuern oder deines Helden.', 'Stell dich 1,5 s neben ein Leuchtfeuer, um es zu entzünden.'], star3: { type: 'leaks', max: 3 } }),
+  K({ id: 5, act: 1, biome: 'sky', title: 'Die Pilgerkarawane', goal: 'survive', startWave: 7, endWave: 13, faction: 'orden', hero: 'kael', mechanic: 'escort', mechanicCfg: { waves: [2, 3, 4, 5, 6], maxLost: 2 },
+    rules: { waveHpMul: 1.05 },
+    story: 'Pilger fliehen von den äußeren Inseln zur Bastion – mitten durch deine Bahn.',
+    tips: ['Pilger laufen die Bahn hinunter. Gegner greifen sie an – schütze sie mit Held und Vasallen.'], star3: { type: 'leaks', max: 3 } }),
+  K({ id: 6, act: 1, biome: 'sky', title: 'Der Steintitan', goal: 'survive', startWave: 4, endWave: 10, faction: 'orden', hero: 'kael', mechanic: 'boss', mechanicCfg: { name: 'Der Steintitan' },
+    story: 'Ein Wächter des Kristalls, verdorben vom Riss. Er steigt aus der Tiefe – und er erkennt Kael.',
+    tips: ['Welle 10 ist der Titan. Weiche seinen Bodenwarnungen aus und unterbrich ihn mit Betäubungen.'], star3: { type: 'kingHp', pct: 0.75 } }),
+  // ---------- Akt II – Der grüne Zorn (Wildwald) ----------
+  K({ id: 7, act: 2, biome: 'forest', title: 'Wurzelnetz', goal: 'survive', startWave: 9, endWave: 16, faction: 'wild', hero: 'lyra', mechanic: 'nodes',
+    story: 'Der Himmelswald brennt. Doch unter der Asche pulsiert noch das Wurzelnetz.',
+    tips: ['Leuchtende Kraftknoten geben Vasallen +50 % Schaden – sie wechseln jede Welle die Position.'], star3: { type: 'leaks', max: 3 } }),
+  K({ id: 8, act: 2, biome: 'forest', title: 'Sporenregen', goal: 'survive', startWave: 10, endWave: 17, faction: 'wild', hero: 'lyra', mechanic: 'weather',
+    story: 'Der verderbte Wald atmet. Jede Welle bringt anderes Wetter.',
+    tips: ['Sporenregen stärkt Arkan, Sturmböen schwächen Durchbohren, Glutwind stärkt Chaos.'], star3: { type: 'kingHp', pct: 0.7 } }),
+  K({ id: 9, act: 2, biome: 'forest', title: 'Verderbte Wächter', goal: 'survive', startWave: 11, endWave: 18, faction: 'wild', hero: 'lyra', mechanic: 'corrupt',
+    rules: { waveHpMul: 0.9 },
+    story: 'Schamanen des Risses flüstern deinen Vasallen zu – und manche hören hin.',
+    tips: ['Verderber wirken „Verderben“ (2,5 s). Unterbrich mit einer Betäubung oder töte sie zuerst.'], star3: { type: 'leaks', max: 3 } }),
+  K({ id: 10, act: 2, biome: 'forest', title: 'Die Gefangenen', goal: 'survive', startWave: 12, endWave: 18, faction: 'wild', hero: 'lyra', mechanic: 'rescue', mechanicCfg: { need: 8 },
+    story: 'Lyras Sippe hängt in Käfigen über dem Riss. Wenn die Ketten reißen, stürzen sie in die Tiefe.',
+    tips: ['Pro Welle erscheinen 2 Käfige an der Bahnspitze. Der Held muss sie innerhalb von 30 s erreichen.'], star3: { type: 'noHeal' } }),
+  K({ id: 11, act: 2, biome: 'forest', title: 'Jagd auf den Dornenfürsten', goal: 'survive', startWave: 13, endWave: 19, faction: 'wild', hero: 'lyra', mechanic: 'chase', mechanicCfg: { need: 4 },
+    rules: { waveHpMul: 0.9 },
+    story: 'Der Dornenfürst hat den Wald verraten. Er flieht – jedes Mal, wenn er dich sieht.',
+    tips: ['Der Dornenfürst erscheint mitten in deiner Bahn und rennt zum Portal. Stelle ihn mit Held, Wurzeln und Verlangsamung.'], star3: { type: 'leaks', max: 4 } }),
+  K({ id: 12, act: 2, biome: 'ember', title: 'Die Aschendrachin', goal: 'survive', startWave: 14, endWave: 20, faction: 'wild', hero: 'lyra', mechanic: 'boss', mechanicCfg: { name: 'Die Aschendrachin' },
+    story: 'Über dem brennenden Hain kreist sie. In ihrem Hort liegen Pläne – und ein Name aus der Ätherschmiede.',
+    rules: { waveHpMul: 0.88, champions: true }, mods: ['Champions'], tips: ['Welle 20: die Aschendrachin. Ihre Diener-Champions halten deine Vasallen beschäftigt.'], star3: { type: 'kingHp', pct: 0.6 } }),
+  // ---------- Akt III – Eisen und Äther (Wüstenschmiede) ----------
+  K({ id: 13, act: 3, biome: 'desert', title: 'Sandsturm', goal: 'survive', startWave: 15, endWave: 22, faction: 'schmiede', hero: 'brann', mechanic: 'sandstorm', rules: { creepSpeedMul: 1.2 },
+    story: 'Der Weg nach Karrak führt durch den Glasstaub-Sturm. Pfeile verwehen, Klingen nicht.',
+    tips: ['Fernkämpfer treffen 40 % schwächer – setze auf Nahkampf, Belagerung und deinen Helden.'], star3: { type: 'leaks', max: 4 } }),
+  K({ id: 14, act: 3, biome: 'ember', title: 'Die Schmiede brennt', goal: 'survive', startWave: 16, endWave: 23, faction: 'schmiede', hero: 'brann', mechanic: 'lava',
+    story: 'Jemand hat die Lavaschächte geöffnet. Die große Schmiede von Karrak brennt.',
+    tips: ['Lavaschlote brechen nach einer Bodenwarnung aus und treffen ALLE im Kreis – auch deine Vasallen.'], star3: { type: 'kingHp', pct: 0.6 } }),
+  K({ id: 15, act: 3, biome: 'desert', title: 'Verrat am Tor', goal: 'survive', startWave: 17, endWave: 24, faction: 'schmiede', hero: 'brann', mechanic: 'betrayal', mechanicCfg: { waves: [2, 4, 6, 8] },
+    story: 'Meister Orrik öffnet dem Feind die Tore. Und er nimmt Branns Vasallen mit.',
+    tips: ['In den Wellen 2, 4, 6 und 8 laufen zwei deiner Vasallen über. Nach der Welle kehren sie zurück.'], star3: { type: 'leaks', max: 4 } }),
+  K({ id: 16, act: 3, biome: 'desert', title: 'Kristallpfeiler', goal: 'survive', startWave: 18, endWave: 25, faction: 'schmiede', hero: 'selene', mechanic: 'pylons',
+    story: 'Selene erweckt die alten Kristallpfeiler der Schmiede – doch nur ihre Nähe lädt sie.',
+    tips: ['Stelle deinen Helden 2 s an einen Pfeiler. Geladene Pfeiler beschleunigen Vasallen in der Nähe um 40 %.'], star3: { type: 'noHeal' } }),
+  M({ id: 17, act: 3, biome: 'desert', title: 'Belagerung von Karrak', goal: 'siege', startWave: 18, endWave: 25, faction: 'schmiede', hero: 'brann',
+    story: 'Orrik hat sich in der Feste verschanzt. Es gibt nur einen Weg hinein: durch die Mauer.',
+    mods: ['Söldner −15 % Äther'], rules: { waveHpMul: 0.92, sendCostMul: 0.85 }, tips: ['Jeder Söldner (1–7) rammt die Feste und erhöht dein Einkommen.'],
+    citadel: { hp: 36000, regen: 30, dmg: 1.3 }, star3: { type: 'byWave', wave: 24 } }),
+  K({ id: 18, act: 3, biome: 'ember', title: 'Orrik, der Verräter', goal: 'survive', startWave: 14, endWave: 20, faction: 'schmiede', hero: 'brann', mechanic: 'boss', mechanicCfg: { name: 'Orrik in seinem Kolosspanzer' },
+    story: 'Brann stellt seinen Lehrer. Orrik hat sich in den größten Koloss der Schmiede gesetzt.',
+    rules: { champions: true }, mods: ['Champions'], tips: ['Welle 20: Orriks Koloss. Er ruft Diener und rammt dich.'], star3: { type: 'kingHp', pct: 0.6 } }),
+  // ---------- Akt IV – Herz des Abgrunds (Schattenwelt) ----------
+  K({ id: 19, act: 4, biome: 'void', title: 'Schatten im Licht', goal: 'survive', startWave: 20, endWave: 26, faction: 'abgrund', hero: 'selene', mechanic: 'shadows',
+    story: 'Jenseits des Risses gibt es kein Licht – nur das, das Selenes Herz verströmt.',
+    tips: ['Gegner sind nur nahe deinem Helden sichtbar. Markierte oder verfluchte Gegner bleiben sichtbar.'], star3: { type: 'leaks', max: 4 } }),
+  K({ id: 20, act: 4, biome: 'void', title: 'Spiegelwelt', goal: 'survive', startWave: 21, endWave: 27, faction: 'abgrund', hero: 'mira', mechanic: 'mirror',
+    rules: { waveHpMul: 0.9 },
+    story: 'Der Abgrund zeigt dir dein eigenes Heer – mit deinen Schwächen.',
+    tips: ['Die Gegner übernehmen Angriffs- und Rüstungsart deiner Vasallen. Mische deine Armee!'], star3: { type: 'kingHp', pct: 0.6 } }),
+  K({ id: 21, act: 4, biome: 'void', title: 'Zerfallende Zeit', goal: 'survive', startWave: 22, endWave: 28, faction: 'abgrund', hero: 'selene', mechanic: 'timedecay',
+    rules: { waveHpMul: 0.92 },
+    story: 'Hier zerfällt die Zeit. Jeder Atemzug ist kürzer als der letzte.',
+    tips: ['Die Bauzeit schrumpft jede Welle, dafür bekommst du doppeltes Einkommen.'], star3: { type: 'leaks', max: 4 } }),
+  K({ id: 22, act: 4, biome: 'void', title: 'Letzte Bastion', goal: 'survive', startWave: 23, endWave: 29, faction: 'abgrund', hero: 'kael', mechanic: 'lastbastion',
+    rules: { waveHpMul: 0.86 },
+    story: 'Die Helden sind abgeschnitten. Kein Nachschub, keine Verstärkung. Nur die Mauer.',
+    tips: ['Keine König-Verbesserungen und nur 2 Heilungen – jeder Durchbruch zählt.'], star3: { type: 'noHeal' } }),
+  K({ id: 23, act: 4, biome: 'void', title: 'Varos Wahl', goal: 'survive', startWave: 24, endWave: 30, faction: 'abgrund', hero: 'varo', mechanic: 'duel',
+    story: 'Varo stellt sich ihnen in den Weg. Im Duell fällt die Maske – er ist Vael’Thars Sohn.',
+    rules: { waveHpMul: 0.72, champions: true }, mods: ['Champions'], tips: ['Welle 30: Varo führt die Welle als Anführer mit Heldenfähigkeiten.'], star3: { type: 'kingHp', pct: 0.5 } }),
+  K({ id: 24, act: 4, biome: 'void', title: 'Vael’Thar', goal: 'survive', startWave: 25, endWave: 30, faction: 'abgrund', hero: 'selene', mechanic: 'boss', mechanicCfg: { name: 'Vael’Thar, der Rissfürst' },
+    story: 'Das Herz des Abgrunds. Vael’Thar wartet am erlöschenden Kristall. Selene muss einen Teil ihres Herzens geben.',
+    rules: { waveHpMul: 0.72, champions: true }, mods: ['Champions', 'Lavaschlote im Finale'], tips: ['Vael’Thar hat vier Phasen. Bleib in Bewegung, unterbrich, heile.'], star3: { type: 'leaks', max: 6 } }),
 ];
 
 // Talente: werden mit gesammelten Sternen freigeschaltet und gelten in allen Kampagnen-Missionen
@@ -121,10 +140,10 @@ export function talentBonus(totalStars) {
 
 /** Fraktionen, die nach dem Fortschritt freigeschaltet sind */
 export function unlockedFactions(progress) {
-  const f = ['orden'];
-  if (progress[4]) f.push('wild');
-  if (progress[8]) f.push('schmiede');
-  if (progress[12]) f.push('abgrund');
+  const f = ['orden', 'schwarm'];
+  if (progress[6]) f.push('wild', 'glut');
+  if (progress[12]) f.push('schmiede');
+  if (progress[18]) f.push('abgrund');
   return f;
 }
 export function missionUnlocked(id, progress) { return id === 1 || !!progress[id - 1]; }
@@ -136,7 +155,7 @@ export const CAMPAIGN_DIFFICULTY = {
   hard: { label: 'Heldenhaft', wave: 1.18, citadel: 1.25 },
 };
 
-export function missionSetup(m, { name = 'Tiry', faction, seed, totalStars = 0, difficulty = 'normal' } = {}) {
+export function missionSetup(m, { name = 'Tiry', faction, hero, seed, totalStars = 0, difficulty = 'normal' } = {}) {
   const b = talentBonus(totalStars);
   const d = CAMPAIGN_DIFFICULTY[difficulty] || CAMPAIGN_DIFFICULTY.normal;
   const rules = { ...m.rules };
@@ -144,13 +163,16 @@ export function missionSetup(m, { name = 'Tiry', faction, seed, totalStars = 0, 
   const incomeAdd = rules.startIncomeAdd || 0;
   delete rules.startIncomeAdd;
   rules.sendCostMul = (rules.sendCostMul || 1) * b.sendMul;
+  if (m.mechanic) rules.mission = { mechanic: m.mechanic, ...(m.mechanicCfg || {}) };
+  // Solo-König: In späten Missionen fehlt die Aufbauzeit der früheren Wellen → der König startet entsprechend stärker
+  rules.kingHpMul = (rules.kingHpMul || 1) * (1 + 0.16 * Math.max(0, m.startWave - 1));
   rules.campaign = { goal: m.goal, citadelHp: Math.round(m.citadel.hp * d.citadel), citadelRegen: m.citadel.regen, citadelDmg: m.citadel.dmg, siegeMul: 3, enemySends: m.enemySends || [] };
   return {
     seed: seed ?? ((Math.random() * 1e9) | 0),
     rules,
     kingBonus: [b.king, 0],
     extraHeals: [b.heals, 0],
-    players: [{ name, team: 0, faction: faction || m.faction, bot: false, bonusGold: b.gold, bonusWorkers: b.workers, bonusIncome: b.income + incomeAdd }],
+    players: [{ name, team: 0, faction: faction || m.faction, hero: hero || m.hero, bot: false, bonusGold: b.gold, bonusWorkers: b.workers, bonusIncome: b.income + incomeAdd }],
     mission: m.id,
   };
 }
@@ -180,5 +202,5 @@ export function star3Text(c) {
 }
 export const GOAL_TEXT = {
   siege: 'Belagerung: Zerstöre die Rissfeste, bevor die letzte Welle vorüber ist.',
-  survive: 'Halten: Überstehe alle Wellen. (Fällt die Rissfeste früher, gewinnst du sofort.)',
+  survive: 'Halten: Überstehe alle Wellen – und erfülle das Missionsziel.',
 };

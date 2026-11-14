@@ -2,7 +2,7 @@
 // (ein Draw-Call je Modelltyp), mit weicher Interpolation, Lauf-/Angriffs-Animation,
 // Treffer-Aufblitzen, Teamringen und Lebensbalken.
 import * as THREE from 'three';
-import { buildModel, createBodyMaterial, createGlowMaterial } from './models.js';
+import { buildModel, createBodyMaterial, createGlowMaterial, setInstanceAnim, createUnitDepthMaterial } from './models.js';
 import { UNITS, FACTIONS } from '../sim/data.js';
 import { kingPos, laneCenterX, LANE_END_Z } from '../sim/layout.js';
 
@@ -13,6 +13,9 @@ export const KING_PALETTES = [
   { primary: '#2b2530', secondary: '#d0283c', metal: '#c99a52', glow: '#ff7a3a' },
 ];
 
+const NO_ANIM = [0, 0, 0, 0];
+let UNIT_DEPTH = null;
+const _anim = [0, 0, 0, 0];
 const _m = new THREE.Matrix4(), _p = new THREE.Vector3(), _q = new THREE.Quaternion(), _s = new THREE.Vector3(), _e = new THREE.Euler(), _c = new THREE.Color();
 
 class Pool {
@@ -29,6 +32,7 @@ class Pool {
     this.body.castShadow = true; this.body.receiveShadow = true; this.body.frustumCulled = false;
     this.body.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
     this.body.setColorAt(0, _c.set(1, 1, 1));
+    this.body.customDepthMaterial = UNIT_DEPTH || (UNIT_DEPTH = createUnitDepthMaterial());
     this.root.add(this.body);
     if (this.model.glow) {
       this.glow = new THREE.InstancedMesh(this.model.glow, this.glowMat, cap);
@@ -38,11 +42,14 @@ class Pool {
     } else this.glow = null;
   }
   begin() { this.n = 0; }
-  push(m, color) {
+  /** anim: [Laufphase rad, Laufstärke 0..1, Angriff 0..1 (Treffer ≈0.45), Treffer-Zucken 0..1] (optional) */
+  push(m, color, anim) {
     if (this.n >= this.cap) { this.alloc(this.cap * 2); }
     this.body.setMatrixAt(this.n, m);
     this.body.setColorAt(this.n, color);
-    if (this.glow) { this.glow.setMatrixAt(this.n, m); this.glow.setColorAt(this.n, color); }
+    const A = anim || NO_ANIM;
+    setInstanceAnim(this.body, this.n, A[0], A[1], A[2], A[3]);
+    if (this.glow) { this.glow.setMatrixAt(this.n, m); this.glow.setColorAt(this.n, color); setInstanceAnim(this.glow, this.n, A[0], A[1], A[2], A[3]); }
     this.n++;
   }
   end() {
@@ -161,7 +168,7 @@ export class UnitsView {
     else if (e.e === 'stun') { const d = this.disp.get(e.id); if (d) d.stunT = this.time; }
     else if (e.e === 'death') {
       const d = this.disp.get(e.id);
-      if (d && d.key) this.dying.push({ ...d, t: 0, boss: e.boss });
+      if (d && d.key) this.dying.push({ ...d, t: -(e.delay || 0), boss: e.boss }); // delay: Treffer-Moment der Heldenanimation abwarten
       if (e.type === 'c') this.disp.delete(e.id);
     } else if (e.e === 'kingHit') this.kingFx[e.team].hitT = this.time;
     else if (e.e === 'kingAttack') { this.kingFx[e.team].atkT = this.time; this.kingFx[e.team].face = Math.atan2(e.x - kingPos(e.team).x, e.z - kingPos(e.team).z); }
@@ -185,8 +192,8 @@ export class UnitsView {
     const seen = new Set();
 
     for (const e of sim.entities.values()) {
-      if (e.type === 'p') continue;
-      if (e.type === 'f' && !e.alive) continue;
+      if (e.type !== 'f' && e.type !== 'c') continue; // Helden, Geschosse, Missions-Objekte zeichnen eigene Module
+      if (!e.alive) continue;
       const isF = e.type === 'f';
       const def = isF ? UNITS[e.def] : e.def;
       const kk = isF ? this.fighterKey(def) : this.creepKey(def);
@@ -216,6 +223,16 @@ export class UnitsView {
       } else {
         sq = 1 + Math.sin(t * 2 + d.phase) * 0.015;
       }
+      // Vertex-Animation: Laufphase, Laufstärke, Angriffs-Fortschritt (Ausholen vor dem nächsten Schlag), Treffer
+      d.walkW = (d.walkW || 0) + ((moving ? 1 : 0) - (d.walkW || 0)) * (1 - Math.exp(-dt * 8));
+      d.gait = (d.gait || d.phase) + dt * (moving ? 9 : 2.2);
+      const atA = sim.time - e.atkT, cdA = def.cd || 1.2;
+      let atkP = 0;
+      if (atA >= 0 && atA < 0.45) atkP = 0.45 + (atA / 0.45) * 0.55;          // Schlag ist erfolgt → Nachschwung
+      else if (atA >= 0 && atA < cdA * 1.6 && cdA - atA < 0.32 && cdA - atA > 0) atkP = 0.45 * (1 - (cdA - atA) / 0.32); // Ausholen vor dem nächsten Schlag
+      if (def.ranged) atkP *= 0.7;
+      const htA = t - d.hitT;
+      _anim[0] = d.gait; _anim[1] = d.walkW; _anim[2] = atkP; _anim[3] = htA >= 0 && htA < 0.3 ? 1 - htA / 0.3 : 0;
       const at = sim.time - e.atkT;
       if (at >= 0 && at < 0.35) {
         const a = Math.sin((at / 0.35) * Math.PI);
@@ -238,7 +255,7 @@ export class UnitsView {
       if (t - d.stunT < 0.8) _c.setRGB(0.7, 0.85, 1.6);
       if (e.slowPct > 0) _c.multiply(new THREE.Color(0.75, 0.9, 1.25));
       if (e.cursePct > 0) _c.multiply(new THREE.Color(1.2, 0.7, 1.3));
-      pool.push(_m, _c);
+      pool.push(_m, _c, _anim);
 
       // Ring
       const ringCol = isF ? teamCol[e.team] : def.champion ? champRing : e.isSend ? sendRing : creepRing;
@@ -250,7 +267,7 @@ export class UnitsView {
 
       // Lebensbalken
       const ratio = e.hp / e.maxHp;
-      if ((battle && (ratio < 0.999 || sel)) || sel || hov) {
+      if (((battle && (ratio < 0.999 || sel)) || sel || hov) && !(ctx.hideCreepBars && !isF)) {
         if (nb < 1024) {
           const w = (def.boss ? 3.2 : 1.1) * Math.min(1.6, scaleBase);
           _m.compose(_p.set(d.x, y + pool.model.height * s + 0.55, d.z), _q.identity(), _s.set(w, 1, 1));
@@ -271,11 +288,12 @@ export class UnitsView {
       if (dd.t > dur) { this.dying.splice(i, 1); continue; }
       const pool = this.pools.get(dd.key);
       if (!pool) continue;
-      const a = dd.t / dur;
+      const a = Math.max(0, dd.t / dur);
       _e.set(0.6 * a, dd.face, 0.3 * a, 'YXZ');
       _q.setFromEuler(_e);
       _m.compose(_p.set(dd.x, -a * a * (dd.height || 2) * 0.9, dd.z), _q, _s.setScalar(1 - 0.4 * a));
-      pool.push(_m, _c.setRGB(1 + 1.5 * (1 - a), 0.7, 0.7));
+      _anim[0] = dd.gait || 0; _anim[1] = 0; _anim[2] = 0; _anim[3] = dd.t < 0 ? 0 : 0.95 * (1 - a);
+      pool.push(_m, dd.t < 0 ? _c.setRGB(1, 1, 1) : _c.setRGB(1 + 1.5 * (1 - a), 0.7, 0.7), _anim);
     }
 
     // Könige

@@ -506,6 +506,24 @@ export function heroBotThink(sim, h) {
   const p = sim.players[h.owner];
   if (!h.alive || sim.phase !== 'battle' || sim.freeze > 0) { p.hin = { f: 0, s: 0, yaw: Math.round(h.face * 1000), jump: 0 }; return; }
   const def = heroDef(h);
+  // Missionsziele (Funken, Käfige, Leuchtfeuer, Pfeiler) ansteuern, wenn kein Gegner direkt bedroht
+  if (sim.mission) {
+    let goal = null, gd = Infinity;
+    for (const o of sim.entities.values()) {
+      if (o.type !== 'o' || o.lane !== h.lane || (o.lit && (o.kind === 'beacon' || o.kind === 'pylon')) || o.kind === 'node') continue;
+      const d = (o.x - h.x) ** 2 + (o.z - h.z) ** 2 - (o.kind === 'cage' ? 400 : 0);
+      if (d < gd) { gd = d; goal = o; }
+    }
+    if (goal) {
+      let threat = false;
+      for (const e of sim.entities.values()) if (e.type === 'c' && e.alive && e.lane === h.lane && (e.x - h.x) ** 2 + (e.z - h.z) ** 2 < 9) { threat = true; break; }
+      const dd = Math.hypot(goal.x - h.x, goal.z - h.z);
+      if (!threat || goal.kind === 'cage') {
+        p.hin = { f: dd > 1.2 ? 1 : 0, s: 0, yaw: Math.round(Math.atan2(goal.x - h.x, goal.z - h.z) * 1000), jump: 0 };
+        return;
+      }
+    }
+  }
   // Bot-Helden kämpfen bei ihren Vasallen (vor dem Bauraster), statt allein zum Portal zu laufen
   const lx0 = sim.laneX(h.lane);
   let best = null, bd = Infinity;

@@ -46,7 +46,9 @@ test('HP: Hybrid-Baumeister hat 5 Linien aus verschiedenen Fraktionen und kann s
   assert.ok(sim.wave > 3);
 });
 
-test('Kampagne: jede Mission startet und läuft; Söldner belagern die Rissfeste', () => {
+test('Kampagne: 24 Missionen mit eigener Mechanik starten und laufen; Söldner belagern die Rissfeste', () => {
+  assert.equal(MISSIONS.length, 24);
+  assert.equal(new Set(MISSIONS.filter((x) => x.mechanic && x.mechanic !== 'boss').map((x) => x.mechanic)).size, 19);
   for (const m of MISSIONS) {
     const s = missionSetup(m, { seed: 1, totalStars: 45 });
     s.players[0].bot = true; s.players[0].difficulty = 'hard';
@@ -55,13 +57,15 @@ test('Kampagne: jede Mission startet und läuft; Söldner belagern die Rissfeste
     assert.ok(sim.teams[1].king.citadel);
     for (let i = 0; i < 20 * 120 && sim.phase !== 'over'; i++) sim.step();
   }
-  const m = MISSIONS[1];
+  const m = MISSIONS.find((x) => x.goal === 'siege');
   const sim = new Sim(missionSetup(m, { seed: 3 }));
   sim.players[0].aether = 500;
   const hp0 = sim.teams[1].king.hp;
   assert.ok(sim.applyCommand(0, { type: 'send', send: 's_rat' }));
-  for (let i = 0; i < 20 * 120 && sim.wave === 1; i++) sim.step();
-  assert.ok(sim.teams[1].king.hp < hp0, 'Rissfeste hat Schaden genommen');
+  const w0 = sim.wave;
+  let minHp = hp0;
+  for (let i = 0; i < 20 * 150 && sim.wave === w0; i++) { sim.step(); minHp = Math.min(minHp, sim.teams[1].king.hp); }
+  assert.ok(minHp < hp0, 'Rissfeste hat Schaden genommen');
 });
 
 test('Kampagne: Sterne und Talente', () => {
