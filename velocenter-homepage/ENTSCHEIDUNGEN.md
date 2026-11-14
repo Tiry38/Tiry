@@ -176,3 +176,7 @@
 
 ## 14.11.2026 – Ticker-Trenner: Funkelstern zurück, in Türkis (Tiry)
 - Doppelstrich verworfen; ✦ wieder da, Farbe #5EEAD4 mit Leuchten (nicht rot/gelb/orange, Tiry).
+
+## 14.11.2026 – Ticker: gleiche Schriftlinie, Sterne mittig (Tiry)
+- „300+“ (1,14-fach) drückte die Zeile 4 px tiefer → `line-height:0` am `tkn`; gemessen: alle Begriffe Grundlinie identisch.
+- Stern war links 12 px / rechts 48 px vom Text entfernt → Span-Innenabstand 0, Stern `padding:0 .72em` → beidseitig gleich.

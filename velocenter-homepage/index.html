@@ -178,7 +178,7 @@ h1,h2,h3{font-family:var(--display);margin:0;text-wrap:balance;letter-spacing:-.
 .band span b.tkb{position:relative;z-index:0;display:inline-block;font:inherit;color:#ED0007;-webkit-text-stroke:0;text-shadow:none;padding:0 .4em 0 1.1em;margin:0 .1em 0 .06em;line-height:1;vertical-align:baseline}
 .band span b.tkb::after{content:"";position:absolute;z-index:-1;left:0;right:0;top:var(--pt,.02em);bottom:var(--pb,.1em);background:#fff;border-radius:999px;box-shadow:0 6px 16px -8px rgba(0,0,0,.5)}
 .band span b.tkb::before{content:"";position:absolute;left:.2em;top:calc((var(--pt,.02em) + 1em - var(--pb,.1em))/2);width:.8em;height:.8em;margin-top:-.4em;background:url(img/zub-bosch.svg) 0 50%/auto .8em no-repeat}
-.band span b.tkn{font:inherit;font-size:1.14em;color:#FFC83D;-webkit-text-stroke:0;text-shadow:0 0 18px rgba(255,200,61,.6);letter-spacing:-.02em}
+.band span b.tkn{font:inherit;font-size:1.14em;line-height:0;color:#FFC83D;-webkit-text-stroke:0;text-shadow:0 0 18px rgba(255,200,61,.6);letter-spacing:-.02em}
 .band span b.tko{font:inherit;text-transform:none;color:#FF7A00;-webkit-text-stroke:0;text-shadow:0 0 16px rgba(255,122,0,.55)}
 .band span b.tks{font:inherit;color:#FFC83D;-webkit-text-stroke:0;text-shadow:0 0 18px rgba(255,200,61,.55)}
 .band span em{font-style:normal;padding:0 .35em;opacity:.75}
@@ -2304,7 +2304,8 @@ a.hchip.hc.hlive .hla b svg{width:16px;height:16px;fill:none;stroke:#fff;stroke-
 @keyframes puff{0%{opacity:0;transform:translate(0,0) scale(.4)}10%{opacity:1}55%{opacity:.7}100%{opacity:0;transform:translate(240%,-85%) scale(3)}}
 @media (prefers-reduced-motion:reduce){.road .bus,.road .bus .whl{animation:none!important}.road .bus .puff{display:none}}
 /* Ticker-Trenner: Funkelstern in Türkis (Tiry 14.11.2026) */
-.band span em{opacity:1!important;color:#5EEAD4;-webkit-text-stroke:0;text-shadow:0 0 14px rgba(94,234,212,.65)}
+.band span{padding:0!important}
+.band span em{padding:0 .72em!important;opacity:1!important;color:#5EEAD4;-webkit-text-stroke:0;text-shadow:0 0 14px rgba(94,234,212,.65)}
 /* Tempo (Tiry 12.11.2026): unsichtbare Animationen pausieren, Hintergrund-Ebenen eigene GPU-Ebene */
 .apz,.apz *,.apz *::before,.apz *::after{animation-play-state:paused!important}
 html.scr .sky,html.scr .blobs i,html.scr .blobs::after,html.scr .ribbons i{animation-play-state:paused!important}
