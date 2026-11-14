@@ -160,3 +160,6 @@
 
 ## 14.11.2026 – Ticker „Weltrekord 283 i:SY's“ (Tiry)
 - „i:SY's“ in kräftigem Orange (#FF7A00, Leuchten), Markenschreibweise ohne Großbuchstaben (Klasse `tko` in tkIt).
+
+## 14.11.2026 – Ticker: Bosch-Pille + i:SY orange (Tiry)
+- „Bosch“ im Laufband wie der Chip im Hero: weiße Pille mit kleinem Bosch-Logo (zub-bosch.svg) und roter Schrift #ED0007 (Klasse `tkb`); „i:SY“ in „i:SY Experte“ kräftig orange (`tko`).
