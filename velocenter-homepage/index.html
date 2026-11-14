@@ -2198,6 +2198,38 @@ body.fz2 main,body.fz2 .foot{zoom:1.25}
 .ice .lead,.ice .days span{color:#E6E9EF!important}
 .ice .cdn>div:not(:first-child){background:linear-gradient(180deg,#2A2D34,#1B1E25)}
 .ice .sutx b{color:#fff!important}.ice .sutx small{color:#D3D7DF!important}.ice .suk{color:#BEF264!important}
+/* Start: Kachel „Im Laden“ mit echten Rädern + Schild „Unser Live-Bestand“ (Tiry 14.11.2026) */
+.qa.qlg::before{background:linear-gradient(180deg,rgba(15,17,21,.35) 0%,rgba(15,17,21,.45) 45%,rgba(15,17,21,.9) 100%),radial-gradient(90% 80% at 0% 100%,rgba(200,16,46,.55),transparent 60%)}
+.qa.qlg .bg,.qacc:hover .qa.qlg:not(:hover) .bg{filter:saturate(.7) brightness(.42) blur(1.5px)}
+.qa.qlg:hover .bg{filter:saturate(.85) brightness(.5) blur(1px)}
+.qbk{position:absolute;z-index:-1;left:50%;top:6px;width:min(86%,280px);height:66%;transform:translateX(-42%);pointer-events:none}
+.qbk::before{content:"";position:absolute;inset:0 4% -4%;border-radius:50%;background:radial-gradient(closest-side,rgba(255,255,255,.8),rgba(255,236,242,.35) 55%,rgba(255,255,255,0))}
+.qbk img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;filter:drop-shadow(0 10px 14px rgba(0,0,0,.45));opacity:0;transform:translateX(26px) scale(.96);transition:opacity .6s ease,transform .8s var(--spring)}
+.qbk img.in{opacity:1;transform:none}
+.qbk img.out{opacity:0;transform:translateX(-26px) scale(.96)}
+.qlive{position:absolute;z-index:4;bottom:calc(100% + 4px);left:var(--qx,37%);transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;text-decoration:none;color:var(--ink);transition:transform .35s var(--spring)}
+.qlive:hover{transform:translateX(-50%) translateY(-3px)}
+.qlp{position:relative;display:inline-flex;align-items:center;gap:9px;padding:8px 8px 8px 13px;border-radius:999px;white-space:nowrap;border:2px solid transparent;background:linear-gradient(#fff,#fff) padding-box,linear-gradient(110deg,#E2232D,#C026D3,#2563EB,#22D3EE,#E2232D) border-box;background-size:100% 100%,300% 100%;animation:hcflow 6s linear infinite;box-shadow:0 14px 30px -12px rgba(226,35,45,.55)}
+.qlp::after{content:"";position:absolute;inset:-6px;border-radius:999px;border:2px solid rgba(226,35,45,.45);animation:qlring 2.4s ease-out infinite;pointer-events:none}
+@keyframes qlring{from{transform:scale(.96);opacity:.9}to{transform:scale(1.12,1.35);opacity:0}}
+.qla{animation:qlbob 1.6s ease-in-out infinite}
+@keyframes qlbob{50%{transform:translateY(4px)}}
+.qlp b{font:800 13px/1 var(--display);letter-spacing:.01em}
+.qlp em{display:inline-flex;align-items:center;gap:6px;padding:7px 11px;border-radius:999px;background:linear-gradient(135deg,#E2232D,#B3121F);color:#fff;font:800 11.5px/1 var(--display);font-style:normal;letter-spacing:.06em;text-transform:uppercase}
+.qlp em svg{width:13px;height:13px;transition:transform .35s var(--spring)}
+.qlive:hover .qlp em svg{transform:translateX(3px)}
+.qld{position:relative;width:9px;height:9px;border-radius:50%;background:#22C55E}
+.qld::after{content:"";position:absolute;inset:-5px;border-radius:50%;border:2px solid #22C55E;animation:qldp 1.8s ease-out infinite}
+@keyframes qldp{from{transform:scale(.4);opacity:1}to{transform:scale(1.5);opacity:0}}
+.qla{width:42px;height:32px;margin:-2px 0 -12px 40px;translate:var(--qa,0) 0;fill:none;stroke:#E2232D;stroke-width:3.2;stroke-linecap:round;stroke-linejoin:round;filter:drop-shadow(0 2px 3px rgba(255,255,255,.7))}
+@media (max-width:760px){.qacc{margin-top:66px}.qbk{top:4px;height:52%;width:78%;transform:translateX(-36%)}.qlp{padding:6px 6px 6px 10px;gap:7px}.qlp b{font-size:12px}.qlp em{padding:6px 9px;font-size:10.5px}.qla{width:30px;height:24px;margin:-2px 0 -10px 30px}}
+.qacc{margin-top:clamp(56px,5vw,70px)}
+@media (max-width:760px){.qacc{margin-top:66px}}
+@media (prefers-reduced-motion:reduce){.qlp,.qlp::after,.qla{animation:none}.qld::after{animation:none}.qbk img{transition:opacity .3s}}
+.nlive{display:inline-flex;align-items:center;gap:4px;margin-left:6px;padding:3px 6px 3px 5px;border-radius:999px;vertical-align:2px;background:linear-gradient(135deg,#E2232D,#C026D3);color:#fff;font:800 9px/1 var(--display);font-style:normal;letter-spacing:.1em;text-transform:uppercase;box-shadow:0 4px 10px -4px rgba(226,35,45,.7)}
+.nlive::before{content:"";width:5px;height:5px;border-radius:50%;background:#fff;animation:nlv 1.6s ease-in-out infinite}
+@keyframes nlv{50%{opacity:.25}}
+@media (prefers-reduced-motion:reduce){.nlive::before{animation:none}}
 /* Tempo (Tiry 12.11.2026): unsichtbare Animationen pausieren, Hintergrund-Ebenen eigene GPU-Ebene */
 .apz,.apz *,.apz *::before,.apz *::after{animation-play-state:paused!important}
 html.scr .sky,html.scr .blobs i,html.scr .blobs::after,html.scr .ribbons i{animation-play-state:paused!important}
@@ -2496,7 +2528,7 @@ a.hchip.hc:hover .ha{background:#1B1E25;color:#fff;transform:translateX(2px)}
    <a href="#start" data-r="start">Start</a>
    <a href="#service" data-r="service">Service</a>
    <a href="#marken" data-r="marken">Marken</a>
-   <a href="#lager" data-r="lager">Im Laden</a>
+   <a href="#lager" data-r="lager">Im Laden<i class="nlive" aria-hidden="true">Live</i></a>
    <a href="#isy" data-r="isy">i:SY Experte</a>
    <a href="#treffen" data-r="treffen">i:SY Treffen</a>
    <a href="#dreirad" data-r="dreirad">E-Dreiräder</a>
@@ -2513,7 +2545,7 @@ a.hchip.hc:hover .ha{background:#1B1E25;color:#fff;transform:translateX(2px)}
  <a class="r" href="#start" data-r="start" style="--i:0">Start</a>
  <a class="r" href="#service" data-r="service" style="--i:1">Service</a>
  <a class="r" href="#marken" data-r="marken" style="--i:2">Marken</a>
- <a class="r" href="#lager" data-r="lager" style="--i:2">Im Laden</a>
+ <a class="r" href="#lager" data-r="lager" style="--i:2">Im Laden<i class="nlive" aria-hidden="true">Live</i></a>
  <a class="r" href="#isy" data-r="isy" style="--i:3">i:SY Experte</a>
  <a class="r" href="#treffen" data-r="treffen" style="--i:4">i:SY Treffen</a>
  <a class="r" href="#dreirad" data-r="dreirad" style="--i:5">E-Dreiräder</a>
@@ -2868,9 +2900,10 @@ m696 -454 c28 -13 46 -31 55 -51 22 -53 -50 -177 -173 -300 -187 -186 -647
    </div>
    <nav class="qacc hello" style="--d:1.45s" aria-label="Schnellzugriff">
     <a class="qa on" href="#termin" style="--img:url(img/bosch-motor.webp);--pos:86% 40%"><span class="bg"></span><span class="ic"><svg><use href="#i-cal"/></svg></span><span class="tx"><i>01 · Werkstatt</i><b>Termin anfragen</b><small>Werkstatt oder Probefahrt</small><em>Jetzt anfragen</em></span></a>
-    <a class="qa" href="#lager" style="--img:url(img/laden-innen.webp);--pos:50% 55%"><span class="bg"></span><span class="ic"><svg><use href="#i-bike"/></svg></span><span class="tx"><i>02 · Ausstellung</i><b>Im Laden</b><small id="qkLager">Räder sofort verfügbar</small><em>Räder ansehen</em></span></a>
+    <a class="qa qlg" id="qaLg" href="#lager" style="--img:url(img/laden-innen.webp);--pos:50% 55%"><span class="bg"></span><span class="qbk" id="qBk" aria-hidden="true"></span><span class="ic"><svg><use href="#i-bike"/></svg></span><span class="tx"><i>02 · Ausstellung</i><b>Im Laden</b><small id="qkLager">Räder sofort verfügbar</small><em>Räder ansehen</em></span></a>
     <a class="qa qice" id="qkSeason" href="#deal" style="--img:url(img/laden-eingang.webp);--pos:50% 45%"><span class="bg"></span><span class="ic"><svg><use href="#i-gift"/></svg></span><span class="tx"><i>03 · Bis 28.02.</i><b>Winter-Aktion</b><small>–20 € auf jede Inspektion</small><em>Zur Aktion</em></span></a>
     <a class="qa" href="#besuch" style="--img:url(img/fassade.webp);--pos:50% 50%"><span class="bg"></span><span class="ic"><svg><use href="#i-clock"/></svg></span><span class="tx"><i>04 · Wörth am Rhein</i><b>Öffnungszeiten</b><small id="qkHours">Mo, Di, Do, Fr · Sa vormittags</small><em>Besuch planen</em></span></a>
+    <a class="qlive" id="qLive" href="#lager" aria-label="Unser Live-Bestand: jetzt ansehen"><span class="qlp"><i class="qld" aria-hidden="true"></i><b>Unser Live-Bestand</b><em>jetzt ansehen<svg><use href="#i-arrow"/></svg></em></span><svg class="qla" viewBox="0 0 60 46" aria-hidden="true"><path d="M8 4c18 2 34 10 38 32"/><path d="M38 30l8 8 7-10"/></svg></a>
    </nav>
   </div>
  </div>
@@ -4107,6 +4140,19 @@ const BMAP=(()=>{try{return JSON.parse(document.getElementById('bilderData').tex
 function bmKey(m,mo,j,f){const n=t=>String(t==null?'':t).toLowerCase().replace(/[^a-z0-9]+/g,'');return [m,mo,j,f].map(n).join('|')}
 function bmApply(d){(d&&d.raeder||[]).forEach(r=>(r.farben||[]).forEach(v=>{const k=bmKey(r.marke,r.modell,v.jahr,v.farbe);if(!(k in BMAP))return;if(v.bild&&!/^img\/bestand\//.test(v.bild))return;if(BMAP[k])v.bild=BMAP[k];else delete v.bild}));return d}
 function lgLoad(){if(LG.load)return LG.load;LG.load=Promise.resolve().then(()=>{const d=lgInline();if(!d||!Array.isArray(d.raeder))throw 0;LG.D=bmApply(d);lgApply()}).catch(()=>{$('#lgGrid').innerHTML='<p class="lgempty">Der Bestand konnte gerade nicht geladen werden. Ruf uns gern an: 07271 78033.</p>'});return LG.load}
+/* Kachel „Im Laden“: echte Räder aus dem Bestand (mit Bild, im Laden) in zufälliger Reihenfolge; Schild folgt der Kachel */
+const QL={p:[],i:0,t:0};
+function qlFill(){const box=$('#qBk');if(!box||!LG.M)return;const S=new Set();
+ LG.M.forEach(m=>(m.v||[]).forEach(x=>{if(x.bild&&x.status!=='bestellt')S.add(x.bild)}));const P=[...S];
+ for(let i=P.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[P[i],P[j]]=[P[j],P[i]]}
+ QL.p=P;QL.i=0;if(!P.length)return;qlNext();clearInterval(QL.t);QL.t=setInterval(()=>{if(cur==='start'&&!document.hidden)qlNext()},2800)}
+function qlNext(){const box=$('#qBk');if(!box||!QL.p.length)return;if(QL.i>=QL.p.length){QL.i=0;const P=QL.p;for(let i=P.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[P[i],P[j]]=[P[j],P[i]]}}
+ const src=QL.p[QL.i++],im=new Image();im.alt='';im.decoding='async';
+ im.onload=()=>{[...box.querySelectorAll('img')].forEach(o=>{o.classList.remove('in');o.classList.add('out');setTimeout(()=>o.remove(),900)});box.appendChild(im);requestAnimationFrame(()=>requestAnimationFrame(()=>im.classList.add('in')))};
+ im.onerror=()=>{QL.p.splice(QL.i-1,1);QL.i--};im.src=src;
+ const nx=QL.p[QL.i];if(nx){const pre=new Image();pre.src=nx}}
+(function(){const t=$('#qaLg'),l=$('#qLive');if(!t||!l)return;const pos=()=>{const W=t.parentNode.clientWidth,w=l.offsetWidth,c=t.offsetLeft+t.offsetWidth/2,x=Math.max(w/2,Math.min(W-w/2,c));l.style.setProperty('--qx',x+'px');l.style.setProperty('--qa',(c-x)+'px')};pos();setTimeout(pos,1500);
+ if(window.ResizeObserver)new ResizeObserver(pos).observe(t);addEventListener('resize',pos)})();
 function lgApply(){const d=admMerge(admBase());LG.M=lgNorm(d);LG.ok=true;
  $('#lgStand').textContent=/^\d/.test(d.stand||'')?'Stand '+d.stand:(d.stand||'aktuell');const hw=d.hinweis||(d.quelle==='Beispieldaten'?'Sobald der Veloport-Export eingespielt ist, steht hier euer echter Bestand.':'');$('#lgDemo').hidden=!hw;$('#lgDemoT').innerHTML='<b>'+(d.quelle==='Beispieldaten'?'Beispieldaten.':'Hinweis:')+'</b> '+esc(hw);
  const nL=LG.M.filter(m=>m.lager).length,nB=LG.M.length-nL,nD=LG.M.filter(m=>m.deal).length,nMk=new Set(LG.M.map(lgMkName)).size;
@@ -4114,6 +4160,7 @@ function lgApply(){const d=admMerge(admBase());LG.M=lgNorm(d);LG.ok=true;
  $('#lgDealsN').textContent=nD?'Reduzierte Räder':'Aktuell keine';$('#lgDeals').hidden=!nD;
  const mx=Math.max(0,...LG.M.flatMap(m=>m.v||[]).filter(x=>x.angebot&&x.preis>x.angebot).map(x=>x.preis-x.angebot));const se=$('#lgDealsS');se.hidden=!mx;if(mx)se.textContent='bis zu '+eur(mx)+' sparen';
  const q=$('#qkLager');if(q)q.textContent='Jetzt im Laden ansehen';
+ if(!QL.p.length)qlFill();
  lgChips()}
 function lgChips(){const mk=[...new Set(LG.M.map(lgMkName))].sort((a,b)=>a.localeCompare(b,'de'));
  $('#lgMk').innerHTML=(LG.f.deal?'<button type="button" class="dealx" data-dealx title="Sonderangebote-Filter ausschalten">% Nur Angebote <span aria-hidden="true">✕</span></button>':'')+'<button type="button" data-mk="" class="'+(LG.f.mk?'':'on')+'">Alle Marken</button>'+mk.map(n=>{const b=BR.find(x=>x.n===n);return '<button type="button" data-mk="'+esc(n)+'" title="'+esc(n)+'" class="'+(LG.f.mk===n?'on':'')+((b||LG_LOGO[n])?' lgo':'')+'">'+((b||LG_LOGO[n])?'<img src="'+(b?b.logo:LG_LOGO[n])+'" alt="'+esc(n)+'">':'<span>'+esc(n)+'</span>')+'</button>'}).join('');

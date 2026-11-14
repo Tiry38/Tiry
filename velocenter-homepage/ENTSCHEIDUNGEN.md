@@ -105,3 +105,10 @@
 - Menü (oben + Handy), Start-Kachel, alle Knöpfe („Räder im Laden“, „i:SY im Laden ansehen“, Marken-Knopf „Im Laden“, Vergleich/Rad-Finder „Alle Räder im Laden …“), Rad-Finder-Antwort „direkt aus dem Laden“, Wasserzeichen „Laden“, Google-Titel „E-Bikes im Laden · sofort verfügbar · …“, Admin-Texte.
 - Adresse neu `/im-laden/` (Sitemap), alte `/lager/` leitet weiter. Interne Route/Hash bleibt `#lager`, Firestore/Daten unverändert.
 - „Ersatzteile fast alle auf Lager“ (i:SY) bleibt – meint Teile, nicht den Reiter.
+
+## 14.11.2026 – Live-Bestand auf der Startseite sichtbar (Tiry)
+- Start-Optik bleibt. Zusatz: Schild „● Unser Live-Bestand · Jetzt ansehen →“ mit wanderndem Farbrand, Puls-Ring und wippendem Pfeil auf die Kachel „Im Laden“ (folgt der Kachel per ResizeObserver, am Handy im Bild gehalten). Link `#lager`.
+- Kachel „Im Laden“: echte Räder aus dem Bestand (nur im Laden, mit Bild) laufen alle 2,8 s in zufälliger Reihenfolge durch (`qlFill`/`qlNext`, nur wenn Start sichtbar), Ladenfoto dahinter abgedunkelt.
+- Menü: kleines „● LIVE“-Schild an „Im Laden“ (oben + Handy-Menü).
+- Großer Start-Banner „Schau in unseren Laden“ verworfen (Tiry).
+- Hinweis: „Live“ = Stand des zuletzt eingespielten Veloport-Exports, nicht sekundengenau.
