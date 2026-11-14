@@ -47,12 +47,12 @@ export function botThink(sim, p) {
   const wantUpgrade = used >= 6 && rng.next() < sk.upg;
 
   if (wantUpgrade) {
-    const cands = mine.filter((f) => UNITS[f.def].upgradeTo).map((f) => ({ f, next: UNITS[UNITS[f.def].upgradeTo] }))
+    const cands = mine.filter((f) => UNITS[f.def].upgrades.length).map((f) => { const ups = UNITS[f.def].upgrades; return { f, next: UNITS[ups[(f.id + p.id) % ups.length]] }; })
       .filter((c) => c.next.cost <= budget && c.next.tier <= sim.rules.maxTier)
       .sort((a, b) => a.next.tier - b.next.tier || a.next.cost - b.next.cost || a.f.id - b.f.id);
     if (cands.length) {
       const c = cands[Math.min(cands.length - 1, rng.int(Math.min(3, cands.length)))];
-      sim.applyCommand(p.id, { type: 'upgrade', id: c.f.id });
+      sim.applyCommand(p.id, { type: 'upgrade', id: c.f.id, to: c.next.id });
       return;
     }
   }

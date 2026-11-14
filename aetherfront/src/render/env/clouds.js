@@ -1,7 +1,7 @@
 // Wolkenmeer: Höhenfeld-Raymarching in einer Wolkenschicht unter den Inseln (Relief, Selbstschatten,
 // Silberränder, leuchtende Täler) + Dunst zum Horizont. Folgt der Kamera (unendliches Meer).
 import * as THREE from 'three';
-import { GLSL_SKY, GLSL_NOISE } from './shaders.js';
+import { GLSL_SKY, GLSL_NOISE, skyU } from './shaders.js';
 
 export const CLOUD_TOP = -50;
 export const CLOUD_BOTTOM = -96;
@@ -35,7 +35,7 @@ export function createCloudSea(U, noiseTex, steps = 20) {
   const mat = new THREE.ShaderMaterial({
     defines: { STEPS: steps },
     uniforms: {
-      uTime: U.uTime, uSunDir: U.uSunDir, uNoise: { value: noiseTex },
+      uTime: U.uTime, ...skyU(U), uNoise: { value: noiseTex },
       uTop: { value: CLOUD_TOP }, uBottom: { value: CLOUD_BOTTOM }, uLightDir: U.uLightDir,
       uIsles: { value: [
         new THREE.Vector4(-70, -5.5, 50, 39), new THREE.Vector4(70, -5.5, 50, 39),
@@ -136,8 +136,8 @@ export function createCloudSea(U, noiseTex, steps = 20) {
         float sunAmt = max(dot(rd, uSunDir), 0.0);
         vec2 dxz = normalize(rd.xz + vec2(1e-5));
         float warm = dot(dxz, sdir) * 0.5 + 0.5;
-        vec3 lit = mix(vec3(1.15, 1.12, 1.08), vec3(1.8, 1.32, 0.88), warm);
-        vec3 shade = mix(vec3(0.12, 0.20, 0.36), vec3(0.27, 0.29, 0.34), warm);
+        vec3 lit = mix(uCloudLit, uCloudLit * vec3(1.55, 1.18, 0.82), warm);
+        vec3 shade = mix(uCloudShade, uCloudShade * vec3(2.2, 1.45, 0.95), warm);
         float isl = isleShadow(p);
         float lt = ndl * shadow * (1.0 - isl * 0.85);
         vec3 col = mix(shade, lit, smoothstep(0.0, 1.0, lt));

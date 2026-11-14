@@ -247,12 +247,13 @@ export class Sim {
     this.entities.set(f.id, f);
     return f;
   }
-  cmdUpgrade(p, { id }) {
+  cmdUpgrade(p, { id, to }) {
     const f = this.entities.get(id);
     if (this.phase !== 'build') return this.fail(p, 'Aufwerten nur in der Bauphase');
-    if (!f || f.type !== 'f' || f.owner !== p.id) return this.fail(p, 'Keine eigene Einheit');
+    if (!f || f.type !== 'f' || f.owner !== p.id || f.summon) return this.fail(p, 'Keine eigene Einheit');
     const cur = UNITS[f.def];
-    const next = cur.upgradeTo && UNITS[cur.upgradeTo];
+    const pick = to && cur.upgrades.includes(to) ? to : cur.upgrades[0];
+    const next = pick && UNITS[pick];
     if (!next || next.tier > this.rules.maxTier) return this.fail(p, 'Höchste Stufe erreicht');
     if (p.gold < next.cost) return this.fail(p, 'Nicht genug Gold');
     p.gold -= next.cost;
@@ -263,7 +264,7 @@ export class Sim {
   cmdSell(p, { id }) {
     const f = this.entities.get(id);
     if (this.phase !== 'build') return this.fail(p, 'Verkaufen nur in der Bauphase');
-    if (!f || f.type !== 'f' || f.owner !== p.id) return this.fail(p, 'Keine eigene Einheit');
+    if (!f || f.type !== 'f' || f.owner !== p.id || f.summon) return this.fail(p, 'Keine eigene Einheit');
     const def = UNITS[f.def];
     const refund = f.fresh ? def.value : Math.floor(def.value * ECON.sellRefund);
     p.gold += refund;
@@ -553,6 +554,15 @@ export class Sim {
   }
 
   computeAuras(fs) {
+    // Schwarm: jede nahe Schwarm-Einheit stärkt die anderen (max. +50 %)
+    for (const f of fs) {
+      const sw = UNITS[f.def].abil.swarm;
+      f.swarmMul = 1;
+      if (!sw) continue;
+      let n = 0;
+      for (const o of fs) if (o !== f && UNITS[o.def].abil.swarm && (o.x - f.x) ** 2 + (o.z - f.z) ** 2 < 16) n++;
+      f.swarmMul = 1 + Math.min(0.5, n * sw);
+    }
     for (const f of fs) {
       // Helden-Buffs (Banner, Überladung, Hain) zählen wie Auren
       if (f.hbT > 0) { f.hbT -= DT; f.auraArmor = f.hbArmor || 0; f.auraSpeed = f.hbHaste || 0; if (f.hbRegen && f.hp < f.maxHp) f.hp = Math.min(f.maxHp, f.hp + f.hbRegen * DT); }
@@ -603,6 +613,20 @@ export class Sim {
     if (ab.regen && f.hp < f.maxHp) f.hp = Math.min(f.maxHp, f.hp + ab.regen * DT);
     if (!this.tickStatus(f)) return;
     if (f.healCd > 0) f.healCd -= DT;
+    // Beschwörung: ruft regelmäßig Diener (bis Wellenende)
+    if (ab.summon && !f.summon) {
+      f.sumT = (f.sumT || 0) + DT;
+      if (f.sumT >= ab.summon.every) {
+        f.sumT = 0;
+        let n = 0; for (const e of this.entities.values()) if (e.type === 'f' && e.summonOf === f.id && e.alive) n++;
+        if (n < ab.summon.max && UNITS[ab.summon.unit]) {
+          const ang = (this.tick * 0.7 + f.id) % 6.28;
+          const m = this.spawnFighter(this.players[f.owner], UNITS[ab.summon.unit], -1, -1, f.x + Math.sin(ang) * 1.4, f.z - Math.abs(Math.cos(ang)) * 1.4);
+          m.summon = true; m.summonOf = f.id; m.powerMul = 0.8;
+          this.emit({ e: 'build', pid: f.owner, id: m.id, x: m.x, z: m.z, unit: m.def, summon: true });
+        }
+      }
+    }
 
     // Heilen
     if (ab.heal && f.healCd <= 0) {
@@ -652,10 +676,10 @@ export class Sim {
             .sort((a, b) => ((a.x - f.x) ** 2 + (a.z - f.z) ** 2) - ((b.x - f.x) ** 2 + (b.z - f.z) ** 2) || a.id - b.id);
           targets.push(...extra.slice(0, ab.multishot.targets - 1));
         }
-        for (const t of targets) this.fireProjectile(f, t, def, f.powerMul);
+        for (const t of targets) this.fireProjectile(f, t, def, (f.powerMul || 1) * (f.swarmMul || 1));
       } else {
         this.emit({ e: 'attack', id: f.id, tgt: tgt.id, melee: true, atk: def.atk });
-        this.damage(f, tgt, def.dmg * (f.powerMul || 1), def.atk, ab, cs, true);
+        this.damage(f, tgt, def.dmg * (f.powerMul || 1) * (f.swarmMul || 1), def.atk, ab, cs, true);
       }
     }
   }
@@ -835,6 +859,14 @@ export class Sim {
     if (ab.lifesteal && src.alive && src.type === 'f') src.hp = Math.min(src.maxHp, src.hp + dealt * ab.lifesteal);
     if (ab.slow && tgt.alive) { tgt.slowPct = Math.max(tgt.slowPct, ab.slow.pct); tgt.slowT = ab.slow.dur; }
     if (ab.curse && tgt.alive) { tgt.cursePct = Math.max(tgt.cursePct, ab.curse.pct); tgt.curseT = ab.curse.dur; }
+    if (ab.poison && tgt.alive && tgt.type === 'c') {
+      // Gift/Brand: Schaden über Zeit, je Quelle nur eine Ladung (wird erneuert)
+      tgt.dots = tgt.dots || [];
+      const per = base * ab.poison.dps;
+      const ex = tgt.dots.find((d) => d.src === src.id && d.poison);
+      if (ex) { ex.left = ab.poison.dur; ex.dmg = Math.max(ex.dmg, per); }
+      else if (tgt.dots.length < 6) tgt.dots.push({ dmg: per, left: ab.poison.dur, every: 1, next: 1, src: src.id, poison: true });
+    }
     if (ab.stun && tgt.alive && !(tgt.def && tgt.def.boss) && this.rng.next() < ab.stun.chance) {
       tgt.stun = ab.stun.dur;
       this.emit({ e: 'stun', id: tgt.id });

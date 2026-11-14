@@ -32,7 +32,7 @@ export function superellipse(a, b, n = 4) {
 export function buildIsland(opts) {
   const {
     cx = 0, cz = 0, topY = 0, radius, depth = 30, seed = 1, segs = 128, rings = 18, sideRings = 30,
-    height = null, grass = null, rimDrop = 1.6, edgeNoise = 0.07, taper = 0.62, lobes = 0.35,
+    height = null, grass = null, rimDrop = 1.6, edgeNoise = 0.07, taper = 0.62, lobes = 0.35, rough = 1,
   } = opts;
   const R = rng(seed);
   const pos = [], col = [];
@@ -95,9 +95,9 @@ export function buildIsland(opts) {
       let r = edgeR[i] * f;
       // gemeißelte Felsstruktur (3D-Rauschen, Kanten & Rinnen)
       const px0 = cx + ca * r, pz0 = cz + sa * r;
-      const chisel = fbm3(px0 * 0.11, y * 0.09, pz0 * 0.11, 3, seed + 21);
-      const crack = Math.abs(noise3(px0 * 0.05, y * 0.02, pz0 * 0.05, seed + 33) * 2 - 1);
-      r += (chisel * 2.2 - smoothstep(0.0, 0.12, 0.12 - crack) * 1.2) * smoothstep(0.03, 0.2, s) * Math.min(1, edgeR[i] / 25);
+      const chisel = fbm3(px0 * 0.11 / rough, y * 0.09 / rough, pz0 * 0.11 / rough, 3, seed + 21);
+      const crack = Math.abs(noise3(px0 * 0.05 / rough, y * 0.02 / rough, pz0 * 0.05 / rough, seed + 33) * 2 - 1);
+      r += (chisel * 2.2 - smoothstep(0.0, 0.12, 0.12 - crack) * 1.2) * smoothstep(0.03, 0.2, s) * Math.min(1, edgeR[i] / 25) * rough;
       const x = cx + ca * r, z = cz + sa * r;
       pos.push(x, y, z);
       minY = Math.min(minY, y);

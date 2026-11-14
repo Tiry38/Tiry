@@ -95,6 +95,19 @@ export class Fx {
     }
   }
 
+  /** Einzelnes Partikel mit vorgegebener Geschwindigkeit (für gerichtete/sogartige Effekte der Helden) */
+  emitVel(x, y, z, vx, vy, vz, { color = '#ffffff', life = 0.6, size = 0.35, grav = 0, drag = 0, intensity = 2.5 } = {}) {
+    if (this.pN >= this.pCap) return;
+    const j = this.pN++;
+    _c.set(color);
+    this.pPos[j * 3] = x; this.pPos[j * 3 + 1] = y; this.pPos[j * 3 + 2] = z;
+    this.pVel[j * 3] = vx; this.pVel[j * 3 + 1] = vy; this.pVel[j * 3 + 2] = vz;
+    this.pBase[j * 3] = _c.r * intensity; this.pBase[j * 3 + 1] = _c.g * intensity; this.pBase[j * 3 + 2] = _c.b * intensity;
+    this.pMax[j] = this.pLife[j] = life;
+    this.pSize0[j] = size;
+    this.pGrav[j] = grav; this.pDrag[j] = drag;
+  }
+
   updateParticles(dt) {
     let n = this.pN;
     for (let i = 0; i < n; i++) {

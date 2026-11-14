@@ -4,6 +4,7 @@ const require = createRequire(import.meta.url);
 const { chromium } = require('playwright');
 import path from 'node:path';
 import fs from 'node:fs';
+import { startServer } from './serve.mjs';
 const out = process.env.SMOKE_OUT || path.resolve('smoke-out');
 fs.mkdirSync(out, { recursive: true });
 const W = +process.env.W || 1600, H = +process.env.H || 900;
@@ -11,7 +12,7 @@ const browser = await chromium.launch({ args: ['--use-gl=angle', '--use-angle=sw
 const page = await browser.newPage({ viewport: { width: W, height: H } });
 page.setDefaultTimeout(180000);
 const Q = process.env.QUALITY || 'low';
-await page.addInitScript((q) => { try { const k = 'aetherfront.settings.v1'; const v = JSON.parse(localStorage.getItem(k) || '{}'); v.quality = q; v.showFps = true; localStorage.setItem(k, JSON.stringify(v)); } catch {} }, Q);
+await page.addInitScript((q) => { try { const k = 'aetherfront.settings.v1'; const v = JSON.parse(localStorage.getItem(k) || '{}'); v.quality = q; v.qualityAuto = false; v.showFps = true; localStorage.setItem(k, JSON.stringify(v)); } catch {} }, Q);
 const errors = [];
 page.on('console', (m) => { if (m.type() === 'error' || m.type() === 'warning') errors.push(`${m.type()}: ${m.text()}`); });
 page.on('pageerror', (e) => errors.push(`pageerror: ${e.message}`));
@@ -20,7 +21,9 @@ page.on('pageerror', (e) => errors.push(`pageerror: ${e.message}`));
 const settle = () => page.waitForFunction(() => document.getAnimations().every((a) => !(a instanceof CSSAnimation) || a.playState !== 'running' || a.effect.getComputedTiming().iterations === Infinity || a.animationName === 'banner'), null, { timeout: 30000, polling: 200 }).catch(() => {});
 const shot = async (n) => { await settle(); await page.screenshot({ path: path.join(out, `${n}.png`) }); console.log('📸', n); };
 const wait = (ms) => page.waitForTimeout(ms);
-await page.goto('file://' + path.resolve('web/index.html'));
+// Über den lokalen Webserver laden (unter file:// blockiert Chromium Texturen/HDRIs aus web/assets/)
+const server = await startServer(0);
+await page.goto(server.url + 'index.html');
 await page.waitForFunction(() => window.__app && window.__app.mode === 'splash', null, { timeout: 120000 });
 await wait(1500); await shot('01-splash');
 await page.keyboard.press('Space');
@@ -66,4 +69,5 @@ const info = await page.evaluate(() => ({ calls: window.__app.engine.renderer.in
 console.log('info', JSON.stringify(info));
 console.log('Fehler/Warnungen:', errors.length ? '\n' + [...new Set(errors)].slice(0, 30).join('\n') : 'keine');
 await browser.close();
+await server.close();
 

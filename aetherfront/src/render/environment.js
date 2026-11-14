@@ -1,91 +1,214 @@
-// Aetherfront – 3D-Welt: Schwebeinseln am späten Nachmittag über einem sonnenbeschienenen Wolkenmeer.
-// Alles prozedural (keine externen Dateien). API:
-//   createEnvironment({ scene, renderer, quality }) -> { update(dt, t), sun, setQuality(q), dispose() }
+// Aetherfront – 3D-Welt: Schwebeinseln über einem sonnenbeschienenen Wolkenmeer.
+// Echte CC0-Assets (PBR-Texturen + HDRI, siehe asset-catalog.js) mit prozeduralem Rückfall. API:
+//   createEnvironment({ scene, renderer, quality, assets, look, settings })
+//     -> { update(dt, t), sun, setQuality(q), setBiome(id), biome, dispose() }
+//   loadEnvironmentAssets(renderer) (re-exportiert) lädt die Assets vorab (async).
+// Biome (Art Bible, docs/ART-BIBLE.md): 'sky' (Akt 1 Himmelsinseln), 'wild' (Akt 2 Wildwald),
+//   'forge' (Akt 3 Eisen-/Wüstenschmiede), 'abyss' (Akt 4 Abgrund/Schattenwelt).
 // Hinweis: Kamera-far sollte ≥ 2000 sein (Hintergrund-Inseln/Wolkenmeer werden sonst an der far-Ebene geklemmt).
 import * as THREE from 'three';
 import { createSharedUniforms } from './env/shaders.js';
-import { createSky } from './env/sky.js';
+import { createSky, createSkyUniforms } from './env/sky.js';
 import { createCloudSea } from './env/clouds.js';
 import { createCloudNoise } from './env/textures.js';
-import { buildWorld, MAX_GRASS, MAX_FLOWERS } from './env/world.js';
+import { buildWorld } from './env/world.js';
+import { loadEnvironmentAssets, disposeAssets } from './assets.js';
+
+export { loadEnvironmentAssets };
 
 const QUALITY = {
-  low: { shadow: 1024, grass: 0.22, flowers: 0.3, particles: 0.25, cloudSteps: 10 },
-  medium: { shadow: 2048, grass: 0.5, flowers: 0.6, particles: 0.5, cloudSteps: 16 },
-  high: { shadow: 4096, grass: 0.85, flowers: 1.0, particles: 0.8, cloudSteps: 22 },
-  ultra: { shadow: 4096, grass: 1.0, flowers: 1.0, particles: 1.0, cloudSteps: 30 },
+  low: { shadow: 1024, grass: 0.3, flowers: 0.3, particles: 0.25, cloudSteps: 10, grassFar: 85 },
+  medium: { shadow: 2048, grass: 0.5, flowers: 0.6, particles: 0.5, cloudSteps: 16, grassFar: 120 },
+  high: { shadow: 2048, grass: 0.7, flowers: 0.8, particles: 0.8, cloudSteps: 20, grassFar: 150 },
+  ultra: { shadow: 4096, grass: 1.0, flowers: 1.0, particles: 1.0, cloudSteps: 30, grassFar: 260 },
+};
+
+// ---------- Biome (Licht, Himmel, Nebel, Grading, Vegetations-Tönung) ----------
+// Farben linear. look-Werte gehen 1:1 in engine.look (Grading-Pass).
+export const BIOMES = {
+  sky: {
+    name: 'Himmelsinseln', act: 1, hdri: 'sky_day', azimuth: [0.72, -0.69], sunElev: 10, lightElev: 40,
+    sunColor: [1.0, 0.87, 0.70], sunIntensity: 3.5, skyTarget: 0.46, hdriTint: [1.0, 1.0, 1.02], hdriSat: 1.05, warmHorizon: 1.0,
+    fog: 0.00125, heightFog: 1.0, haze: [1.0, 1.0, 1.0],
+    cloudLit: [1.12, 1.10, 1.08], cloudShade: [0.16, 0.24, 0.40],
+    foliage: [1.0, 1.0, 1.0], ground: [1.0, 1.0, 1.0], rock: [1.0, 1.0, 1.0],
+    hemiSky: [0.50, 0.66, 1.0], hemiGround: [0.30, 0.25, 0.17], hemi: 0.26, rim: 0.26, envIntensity: 0.6,
+    proc: { zen: [0.030, 0.095, 0.34], mid: [0.070, 0.200, 0.56], horA: [0.30, 0.46, 0.74], horS: [0.95, 0.72, 0.50], glow: [1.0, 0.72, 0.42] },
+    look: { exposure: 1.0, temperature: 0.1, tint: 0.0, saturation: 1.1, contrast: 1.1, bloom: 0.3, bloomThreshold: 2.4, rays: 0.5,
+      shadowTint: [-0.012, 0.0, 0.02], highTint: [0.018, 0.006, -0.016], vignette: 0.2 },
+  },
+  wild: {
+    name: 'Wildwald', act: 2, hdri: 'sky_golden', azimuth: [0.62, -0.78], sunElev: 6, lightElev: 30,
+    sunColor: [1.0, 0.72, 0.46], sunIntensity: 3.3, skyTarget: 0.42, hdriTint: [1.02, 0.98, 0.94], hdriSat: 1.1, warmHorizon: 1.15,
+    fog: 0.0016, heightFog: 1.25, haze: [0.92, 1.0, 0.95],
+    cloudLit: [1.2, 1.0, 0.82], cloudShade: [0.14, 0.2, 0.26],
+    foliage: [0.82, 1.08, 0.86], ground: [0.85, 1.02, 0.85], rock: [0.92, 0.98, 0.92],
+    hemiSky: [0.46, 0.62, 0.78], hemiGround: [0.22, 0.26, 0.14], hemi: 0.3, rim: 0.3, envIntensity: 0.55,
+    proc: { zen: [0.03, 0.08, 0.26], mid: [0.08, 0.18, 0.42], horA: [0.32, 0.42, 0.56], horS: [1.1, 0.7, 0.4], glow: [1.0, 0.62, 0.32] },
+    look: { exposure: 0.98, temperature: 0.22, tint: -0.05, saturation: 1.16, contrast: 1.12, bloom: 0.34, bloomThreshold: 2.2, rays: 0.65,
+      shadowTint: [-0.02, 0.004, 0.012], highTint: [0.022, 0.01, -0.02], vignette: 0.24 },
+  },
+  forge: {
+    name: 'Eisen- & Wüstenschmiede', act: 3, hdri: 'sky_haze', azimuth: [0.8, -0.6], sunElev: 14, lightElev: 34,
+    sunColor: [1.0, 0.66, 0.40], sunIntensity: 3.8, skyTarget: 0.5, hdriTint: [1.18, 0.86, 0.6], hdriSat: 0.9, warmHorizon: 1.35,
+    fog: 0.0019, heightFog: 1.1, haze: [1.12, 0.92, 0.74],
+    cloudLit: [1.3, 0.98, 0.72], cloudShade: [0.26, 0.17, 0.14],
+    foliage: [1.25, 0.92, 0.55], ground: [1.25, 0.98, 0.7], rock: [1.12, 0.9, 0.76],
+    hemiSky: [0.8, 0.6, 0.45], hemiGround: [0.35, 0.22, 0.12], hemi: 0.3, rim: 0.22, envIntensity: 0.55,
+    proc: { zen: [0.06, 0.07, 0.16], mid: [0.18, 0.16, 0.22], horA: [0.62, 0.46, 0.34], horS: [1.25, 0.72, 0.36], glow: [1.0, 0.55, 0.25] },
+    look: { exposure: 1.02, temperature: 0.42, tint: 0.04, saturation: 0.98, contrast: 1.16, bloom: 0.38, bloomThreshold: 2.0, rays: 0.7,
+      shadowTint: [-0.006, -0.004, 0.02], highTint: [0.03, 0.01, -0.03], vignette: 0.26 },
+  },
+  abyss: {
+    name: 'Abgrund / Schattenwelt', act: 4, hdri: 'sky_haze', azimuth: [-0.3, -0.95], sunElev: 8, lightElev: 32,
+    sunColor: [0.72, 0.62, 1.0], sunIntensity: 2.6, skyTarget: 0.22, hdriTint: [0.62, 0.42, 1.0], hdriSat: 0.55, warmHorizon: 0.6,
+    fog: 0.0021, heightFog: 1.5, haze: [0.7, 0.55, 1.05],
+    cloudLit: [0.6, 0.48, 0.85], cloudShade: [0.06, 0.04, 0.12],
+    foliage: [0.62, 0.66, 0.95], ground: [0.66, 0.62, 0.85], rock: [0.78, 0.72, 0.95],
+    hemiSky: [0.45, 0.36, 0.85], hemiGround: [0.12, 0.08, 0.16], hemi: 0.34, rim: 0.4, envIntensity: 0.5,
+    proc: { zen: [0.01, 0.008, 0.04], mid: [0.04, 0.025, 0.1], horA: [0.18, 0.12, 0.32], horS: [0.42, 0.24, 0.55], glow: [0.7, 0.4, 1.0] },
+    look: { exposure: 0.95, temperature: -0.3, tint: 0.28, saturation: 0.92, contrast: 1.2, bloom: 0.48, bloomThreshold: 1.8, rays: 0.55,
+      shadowTint: [0.0, -0.01, 0.03], highTint: [0.012, -0.004, 0.02], vignette: 0.3 },
+  },
 };
 
 // Spielfläche, die der Sonnenschatten abdecken muss (inkl. Höhe der Requisiten)
 const SHADOW_BOX = new THREE.Box3(new THREE.Vector3(-135, -8, -50), new THREE.Vector3(135, 42, 74));
 
-export function createEnvironment({ scene, renderer, quality = 'high' } = {}) {
+export function createEnvironment({ scene, renderer, quality = 'high', assets = null, look = null, settings = null } = {}) {
   const U = createSharedUniforms();
+  const S = createSkyUniforms();
   const disposables = [];
   const prev = { background: scene.background, fog: scene.fog, environment: scene.environment, envInt: scene.environmentIntensity };
 
-  // Richtung: sichtbare Sonne tief im Nordosten, Licht etwas steiler (lesbare Schatten auf den Bahnen)
-  const az = new THREE.Vector2(0.72, -0.69).normalize();
-  const sunElev = THREE.MathUtils.degToRad(10);
-  const lightElev = THREE.MathUtils.degToRad(37);
-  U.uSunDir.value.set(az.x * Math.cos(sunElev), Math.sin(sunElev), az.y * Math.cos(sunElev)).normalize();
-  U.uLightDir.value.set(az.x * Math.cos(lightElev), Math.sin(lightElev), az.y * Math.cos(lightElev)).normalize();
-
-  // ---------- Himmel, Nebel, Umgebungslicht ----------
+  // ---------- Himmel, Nebel ----------
   scene.background = new THREE.Color(0x3a5a8c);
   scene.fog = new THREE.FogExp2(0x7d95b8, U.uFogDensity.value);
-  const sky = createSky(U);
+  const sky = createSky(U, S);
   scene.add(sky);
-
-  const pmrem = new THREE.PMREMGenerator(renderer);
-  const envScene = new THREE.Scene();
-  const envSky = createSky(U, { forEnv: true });
-  envScene.add(envSky);
-  const envRT = pmrem.fromScene(envScene, 0, 0.1, 1000);
-  scene.environment = envRT.texture;
-  if ('environmentIntensity' in scene) scene.environmentIntensity = 0.5;
-  envSky.geometry.dispose(); envSky.material.dispose();
-  pmrem.dispose();
   scene.userData.aethSunDir = U.uSunDir.value;
 
   // ---------- Licht ----------
-  // Warmes Schlüssellicht (späte Nachmittagssonne), kühles Himmelslicht als Füllung.
-  const sun = new THREE.DirectionalLight(U.uSunColor.value.clone(), 3.7);
+  const sun = new THREE.DirectionalLight(U.uSunColor.value.clone(), 3.6);
   sun.name = 'aeth-sun';
   const target = new THREE.Vector3(0, 0, 12);
-  sun.position.copy(target).addScaledVector(U.uLightDir.value, 260);
   sun.target.position.copy(target);
   sun.castShadow = true;
   sun.shadow.bias = -0.00025;
   sun.shadow.normalBias = 0.035;
   sun.shadow.radius = 2;
-  fitShadowCamera(sun, SHADOW_BOX);
   scene.add(sun, sun.target);
-
-  const hemi = new THREE.HemisphereLight(new THREE.Color(0.48, 0.64, 1.0), new THREE.Color(0.30, 0.25, 0.17), 0.36);
+  const hemi = new THREE.HemisphereLight(new THREE.Color(0.48, 0.64, 1.0), new THREE.Color(0.30, 0.25, 0.17), 0.3);
   hemi.name = 'aeth-hemi';
   scene.add(hemi);
-  // kühles Gegenlicht (Himmel gegenüber der Sonne) für die Schattenseiten
   const rim = new THREE.DirectionalLight(new THREE.Color(0.50, 0.62, 1.0), 0.28);
-  rim.position.set(-az.x * 100, 70, -az.y * 100);
   rim.name = 'aeth-rim';
   scene.add(rim);
 
   // Schattenkamera pro Bild an den sichtbaren Ausschnitt anpassen (scharfe Schatten in der Nähe)
-  let shadowSize = 4096;
-  const fitter = createShadowFitter(sun, SHADOW_BOX);
-  scene.userData.aethPreRender = (camera) => fitter(camera, shadowSize);
+  let shadowSize = 2048;
+  let fitter = null;
+  scene.userData.aethPreRender = (camera) => fitter && fitter(camera, shadowSize);
 
   // ---------- Wolkenmeer ----------
   const cloudNoise = createCloudNoise(256);
   disposables.push(cloudNoise);
-  const clouds = createCloudSea(U, cloudNoise, QUALITY[quality]?.cloudSteps ?? 22);
+  const clouds = createCloudSea(U, cloudNoise, QUALITY[quality]?.cloudSteps ?? 20);
   scene.add(clouds);
 
   // ---------- Welt ----------
   const maxAniso = renderer.capabilities?.getMaxAnisotropy?.() ?? 8;
-  const world = buildWorld(U, { anisotropy: Math.min(8, maxAniso) });
+  const world = buildWorld(U, { anisotropy: Math.min(8, maxAniso), assets });
   scene.add(world.root);
+
+  // ---------- Umgebungslicht (PMREM aus dem Himmel inkl. HDRI) ----------
+  const pmrem = new THREE.PMREMGenerator(renderer);
+  const envScene = new THREE.Scene();
+  const envSky = createSky(U, S, { forEnv: true });
+  envScene.add(envSky);
+  let envRT = null;
+  const captureEnv = () => {
+    const rt = pmrem.fromScene(envScene, 0, 0.1, 1000);
+    if (envRT) envRT.dispose();
+    envRT = rt;
+    scene.environment = envRT.texture;
+  };
+
+  // ---------- Biom ----------
+  let biome = null;
+  const tmpC = new THREE.Color();
+  function setBiome(id) {
+    const B = BIOMES[id] || BIOMES.sky;
+    biome = BIOMES[id] ? id : 'sky';
+    const H = assets?.hdri?.[B.hdri] || assets?.hdri?.sky_day || null;
+    const az = new THREE.Vector2(B.azimuth[0], B.azimuth[1]).normalize();
+    const sunElev = THREE.MathUtils.degToRad(H ? Math.max(3, THREE.MathUtils.radToDeg(Math.asin(H.sunDir.y))) : B.sunElev);
+    const lightElev = THREE.MathUtils.degToRad(B.lightElev);
+    U.uSunDir.value.set(az.x * Math.cos(sunElev), Math.sin(sunElev), az.y * Math.cos(sunElev)).normalize();
+    U.uLightDir.value.set(az.x * Math.cos(lightElev), Math.sin(lightElev), az.y * Math.cos(lightElev)).normalize();
+    U.uSunColor.value.setRGB(...B.sunColor);
+    U.uFogDensity.value = B.fog;
+    U.uHeightFog.value = B.heightFog;
+    U.uHazeTint.value.setRGB(...B.haze);
+    U.uCloudLit.value.setRGB(...B.cloudLit);
+    U.uCloudShade.value.setRGB(...B.cloudShade);
+    U.uFoliageTint.value.setRGB(...B.foliage);
+    U.uGroundTint.value.setRGB(...B.ground);
+    U.uRockTint.value.setRGB(...B.rock);
+    U.uSunGlow.value.setRGB(...B.proc.glow);
+    if (H) {
+      // Himmelsfarben aus dem HDRI messen und auf die Biom-Helligkeit normieren
+      const st = H.stats;
+      const lum = (c) => c.r * 0.2126 + c.g * 0.7152 + c.b * 0.0722;
+      const scale = B.skyTarget / Math.max(1e-3, lum(st.horizonAway));
+      const tint = new THREE.Color(...B.hdriTint);
+      const grade = (src, dst, extra = 1) => {
+        tmpC.copy(src).multiplyScalar(scale * extra).multiply(tint);
+        const l = lum(tmpC);
+        dst.setRGB(l + (tmpC.r - l) * B.hdriSat, l + (tmpC.g - l) * B.hdriSat, l + (tmpC.b - l) * B.hdriSat);
+      };
+      grade(st.zenith, U.uSkyZen.value);
+      grade(st.mid, U.uSkyMid.value);
+      grade(st.horizonAway, U.uSkyHorA.value);
+      grade(st.horizonSun, U.uSkyHorS.value, B.warmHorizon);
+      S.uHdri.value = H.texture;
+      S.uHasHdri.value = 1;
+      S.uHdriScale.value = scale;
+      S.uHdriTint.value.copy(tint);
+      S.uHdriSat.value = B.hdriSat;
+      S.uHdriRot.value = H.sunAz - Math.atan2(U.uSunDir.value.z, U.uSunDir.value.x);
+      S.uSunDisc.value = 1;
+    } else {
+      U.uSkyZen.value.setRGB(...B.proc.zen);
+      U.uSkyMid.value.setRGB(...B.proc.mid);
+      U.uSkyHorA.value.setRGB(...B.proc.horA);
+      U.uSkyHorS.value.setRGB(...B.proc.horS);
+      S.uHdri.value = null;
+      S.uHasHdri.value = 0;
+    }
+    // Lichter
+    sun.color.copy(U.uSunColor.value);
+    sun.intensity = B.sunIntensity;
+    sun.position.copy(target).addScaledVector(U.uLightDir.value, 260);
+    sun.updateMatrixWorld();
+    fitShadowCamera(sun, SHADOW_BOX);
+    fitter = createShadowFitter(sun, SHADOW_BOX);
+    hemi.color.setRGB(...B.hemiSky);
+    hemi.groundColor.setRGB(...B.hemiGround);
+    hemi.intensity = B.hemi;
+    rim.intensity = B.rim;
+    rim.color.copy(U.uSkyHorA.value).multiplyScalar(1 / Math.max(0.05, Math.max(U.uSkyHorA.value.r, U.uSkyHorA.value.g, U.uSkyHorA.value.b)));
+    rim.position.set(-az.x * 100, 70, -az.y * 100);
+    scene.fog.color.copy(U.uSkyHorA.value).multiply(U.uHazeTint.value).multiplyScalar(0.8);
+    scene.fog.density = B.fog;
+    scene.background.copy(U.uSkyHorA.value);
+    if ('environmentIntensity' in scene) scene.environmentIntensity = B.envIntensity;
+    captureEnv();
+    if (look) {
+      for (const [k, v] of Object.entries(B.look)) look[k] = Array.isArray(v) ? v.slice() : v;
+    }
+    return biome;
+  }
 
   let current = null;
   function setQuality(q) {
@@ -96,16 +219,20 @@ export function createEnvironment({ scene, renderer, quality = 'high' } = {}) {
       sun.shadow.mapSize.set(Q.shadow, Q.shadow);
       if (sun.shadow.map) { sun.shadow.map.dispose(); sun.shadow.map = null; }
     }
-    world.grass.count = Math.floor(Math.min(world.grass.instanceMatrix.count, MAX_GRASS) * Q.grass);
-    world.flowers.count = Math.floor(Math.min(world.flowers.instanceMatrix.count, MAX_FLOWERS) * Q.flowers);
+    world.grass.setFraction(Q.grass);
+    world.flowers.setFraction(Q.flowers);
     world.particles.setFraction(Q.particles);
+    U.uGrassFar.value = Q.grassFar;
     if (clouds.material.defines.STEPS !== Q.cloudSteps) {
       clouds.material.defines.STEPS = Q.cloudSteps;
       clouds.material.needsUpdate = true;
     }
   }
+  setBiome('sky');
   setQuality(quality);
   renderer.shadowMap.enabled = true;
+  const onSetting = (k, v) => { if (k === 'quality') setQuality(v); };
+  if (settings && settings.onChange) settings.onChange(onSetting);
 
   // ---------- Animation ----------
   const m = new THREE.Matrix4(), q = new THREE.Quaternion(), e = new THREE.Euler(), v = new THREE.Vector3(), s = new THREE.Vector3();
@@ -149,11 +276,13 @@ export function createEnvironment({ scene, renderer, quality = 'high' } = {}) {
       obj.removeFromParent();
     }
     for (const tx of textures) tx.dispose();
+    disposeAssets(assets);
     scene.remove(sun, sun.target, hemi, rim);
     sun.shadow.map?.dispose();
     sun.dispose?.(); hemi.dispose?.(); rim.dispose?.();
-    envRT.dispose();
-    if (scene.environment === envRT.texture) scene.environment = prev.environment ?? null;
+    envSky.geometry.dispose(); envSky.material.dispose();
+    pmrem.dispose();
+    if (envRT) { if (scene.environment === envRT.texture) scene.environment = prev.environment ?? null; envRT.dispose(); }
     if (scene.userData.aethPreRender) delete scene.userData.aethPreRender;
     delete scene.userData.aethSunDir;
     scene.background = prev.background ?? null;
@@ -161,7 +290,10 @@ export function createEnvironment({ scene, renderer, quality = 'high' } = {}) {
     if ('environmentIntensity' in scene) scene.environmentIntensity = prev.envInt ?? 1;
   }
 
-  return { update, sun, setQuality, dispose, get quality() { return current; } };
+  return {
+    update, sun, setQuality, setBiome, dispose, uniforms: U,
+    get quality() { return current; }, get biome() { return biome; }, get usesAssets() { return !!(assets && assets.count); },
+  };
 }
 
 function fitShadowCamera(light, box) {
@@ -196,14 +328,12 @@ function createShadowFitter(light, box) {
   }
   const ndc = [[-1, -1], [1, -1], [-1, 1], [1, 1], [0, 0], [0, -1], [0, 1], [-1, 0], [1, 0]];
   const o = new THREE.Vector3(), dir = new THREE.Vector3(), p = new THREE.Vector3(), lp = new THREE.Vector3();
-  const pts = [];
   let last = '';
   return (camera, mapSize) => {
     camera.updateMatrixWorld();
     o.copy(camera.position);
     let minX = Infinity, maxX = -Infinity, minZ = Infinity, maxZ = -Infinity;
     const reach = 260;
-    pts.length = 0;
     for (const [x, y] of ndc) {
       dir.set(x, y, 0.5).unproject(camera).sub(o).normalize();
       let t = dir.y < -1e-3 ? (0 - o.y) / dir.y : reach;
@@ -225,7 +355,7 @@ function createShadowFitter(light, box) {
     w = Math.ceil(w / 4) * 4; h = Math.ceil(h / 4) * 4;
     const tx = w / mapSize, ty = h / mapSize;
     const cx = Math.round((lb.min.x + lb.max.x) / 2 / tx) * tx, cy = Math.round((lb.min.y + lb.max.y) / 2 / ty) * ty;
-    const key = `${cx}|${cy}|${w}|${h}`;
+    const key = `${cx}|${cy}|${w}|${h}|${mapSize}`;
     if (key === last) return;
     last = key;
     cam.left = cx - w / 2; cam.right = cx + w / 2; cam.bottom = cy - h / 2; cam.top = cy + h / 2;

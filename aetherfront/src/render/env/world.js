@@ -29,7 +29,7 @@ const BRIDGE_HW = 3.6;
 const TEAM_ISLE = { cz: -5.5, a: 48, b: 37.5, n: 10 };
 const KING_ISLE = { dz: 3, rx: 18, rz: 16 };
 const HERO = { x: 0, z: 6, y: -3.0 };
-export const MAX_GRASS = 26000;
+export const MAX_GRASS = 30000;
 export const MAX_FLOWERS = 2600;
 
 function segDist(px, pz, ax, az, bx, bz) {
@@ -38,7 +38,8 @@ function segDist(px, pz, ax, az, bx, bz) {
   return Math.hypot(px - (ax + vx * t), pz - (az + vz * t));
 }
 
-export function buildWorld(U, { anisotropy = 8 } = {}) {
+export function buildWorld(U, { anisotropy = 8, assets = null } = {}) {
+  const A = assets?.textures || {};
   const root = new THREE.Group();
   root.name = 'aetherfront-environment';
   const animated = { rings: [], spire: null, satellites: null, floatRocks: null };
@@ -151,9 +152,17 @@ export function buildWorld(U, { anisotropy = 8 } = {}) {
     nearIsles.push(isl.geometry);
     islandDescs.push({ kind: 'hero', cx: HERO.x, cz: HERO.z, topY: HERO.y, height, edgeAt: isl.edgeAt, rimDrop: 1.3 });
   }
-  const groundTex = createGroundTextures(512), rockTex = createRockTextures(512);
-  for (const t of [groundTex.map, groundTex.normalMap, rockTex.map, rockTex.normalMap]) t.anisotropy = anisotropy;
-  const terrainMaps = { ground: groundTex.map, groundN: groundTex.normalMap, rock: rockTex.map, rockN: rockTex.normalMap };
+  // Gelände-Material: echte PBR-Sätze (Waldboden, Erde, Felswand, Moos) oder prozeduraler Rückfall
+  const pbrTerrain = !!(A.ground && A.cliff && A.ground.normal && A.cliff.normal);
+  let terrainMaps, stoneTri, rockTri;
+  if (pbrTerrain) {
+    terrainMaps = { pbr: true, ground: A.ground, soil: A.soil, cliff: A.cliff, moss: A.moss };
+  } else {
+    const groundTex = createGroundTextures(512), rockTex = createRockTextures(512);
+    for (const t of [groundTex.map, groundTex.normalMap, rockTex.map, rockTex.normalMap]) t.anisotropy = anisotropy;
+    terrainMaps = { ground: groundTex.map, groundN: groundTex.normalMap, rock: rockTex.map, rockN: rockTex.normalMap };
+  }
+  const farTerrain = terrainMaps;
   const islandMat = patchMaterial(new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.93, metalness: 0 }), U, { terrain: terrainMaps });
   const islandMesh = new THREE.Mesh(merge(nearIsles.map((g) => { const n = g.toNonIndexed(); return n; })), islandMat);
   islandMesh.castShadow = true;
@@ -186,8 +195,12 @@ export function buildWorld(U, { anisotropy = 8 } = {}) {
   };
 
   // ---------- Böden (Bahnen, Brücken, Plateau) ----------
-  const tex = createFlagstoneTextures(1024);
-  tex.map.anisotropy = anisotropy; tex.normalMap.anisotropy = anisotropy; tex.ormMap.anisotropy = anisotropy;
+  // Bahnboden: Poly-Haven-Steinplatten (Albedo/Normal/ARM) oder prozedurale Platten
+  const FM = A.floor && A.floor.normal ? A.floor.meters : 8;
+  const tex = A.floor && A.floor.normal
+    ? { map: A.floor.albedo, normalMap: A.floor.normal, ormMap: A.floor.arm || null }
+    : createFlagstoneTextures(1024);
+  for (const t of [tex.map, tex.normalMap, tex.ormMap]) if (t) t.anisotropy = anisotropy;
   const fpos = [], fuv = [], fcol = [], fidx = [];
   const addQuadGrid = (pts, nu, nv, colorFn, uvFn) => {
     // pts(u,v) -> [x,y,z]
@@ -206,7 +219,7 @@ export function buildWorld(U, { anisotropy = 8 } = {}) {
       fidx.push(a, b, a + 1, a + 1, b, b + 1);
     }
   };
-  const worldUV = (x, z) => [x / 8, z / 8];
+  const worldUV = (x, z) => [x / FM, z / FM];
   for (const tm of teams) {
     for (const lx of tm.lanes) {
       const ao = (x) => 0.66 + 0.34 * smoothstep(0, 1.6, HALF - Math.abs(x - lx));
@@ -230,10 +243,10 @@ export function buildWorld(U, { anisotropy = 8 } = {}) {
       // Schürze (Seitenflächen) bis unter die Grasnarbe
       for (const sx of [-1, 1]) {
         const x = lx + sx * HALF;
-        addQuadGrid((u, v) => [x, -v * 0.7, lerp(LANE_Z0, LANE_Z1, u)], 16, 1, () => [0.45, 0.4, 0.4], (x2, z, u, v) => [z / 8, v * 0.1]);
+        addQuadGrid((u, v) => [x, -v * 0.7, lerp(LANE_Z0, LANE_Z1, u)], 16, 1, () => [0.45, 0.4, 0.4], (x2, z, u, v) => [z / FM, v * 0.7 / FM]);
       }
       for (const z of [LANE_Z0, LANE_Z1]) {
-        addQuadGrid((u, v) => [lerp(lx - HALF, lx + HALF, u), -v * 0.7, z], 6, 1, () => [0.45, 0.4, 0.4], (x, z2, u, v) => [x / 8, v * 0.1]);
+        addQuadGrid((u, v) => [lerp(lx - HALF, lx + HALF, u), -v * 0.7, z], 6, 1, () => [0.45, 0.4, 0.4], (x, z2, u, v) => [x / FM, v * 0.7 / FM]);
       }
     }
     // Brücken (leicht versetzt in der Höhe gegen Z-Fighting)
@@ -247,19 +260,19 @@ export function buildWorld(U, { anisotropy = 8 } = {}) {
       }, 10, Math.round(len / 2), (x, z, u) => {
         const a = 0.7 + 0.3 * smoothstep(0, 0.22, 0.5 - Math.abs(u - 0.5));
         return [1.0 * a, 0.95 * a, 0.88 * a];
-      }, (x, z, u, v) => [(u * 2 - 1) * BRIDGE_HW / 8, v * len / 8]);
+      }, (x, z, u, v) => [(u * 2 - 1) * BRIDGE_HW / FM, v * len / FM]);
     });
     // Königsplateau (Scheibe)
     {
       const base = fpos.length / 3;
       const rings = 12, segs = 72;
-      fpos.push(tm.cx, 0, KING_Z); fuv.push(tm.cx / 8, KING_Z / 8); fcol.push(1.05, 0.98, 0.88);
+      fpos.push(tm.cx, 0, KING_Z); fuv.push(tm.cx / FM, KING_Z / FM); fcol.push(1.05, 0.98, 0.88);
       for (let r = 1; r <= rings; r++) {
         const rr = (r / rings) * PLATEAU_R;
         for (let s = 0; s < segs; s++) {
           const a = (s / segs) * Math.PI * 2;
           const x = tm.cx + Math.cos(a) * rr, z = KING_Z + Math.sin(a) * rr;
-          fpos.push(x, 0, z); fuv.push(x / 8, z / 8);
+          fpos.push(x, 0, z); fuv.push(x / FM, z / FM);
           const ao = 0.7 + 0.3 * smoothstep(0, 1.5, PLATEAU_R - rr);
           const ring = Math.abs(rr - 6.2) < 0.5 ? 0.9 : 1.0;
           fcol.push(1.05 * ao * ring, 0.97 * ao * ring, 0.86 * ao * ring);
@@ -277,7 +290,7 @@ export function buildWorld(U, { anisotropy = 8 } = {}) {
       addQuadGrid((u, v) => {
         const a = u * Math.PI * 2;
         return [tm.cx + Math.cos(a) * PLATEAU_R, -v * 0.8, KING_Z + Math.sin(a) * PLATEAU_R];
-      }, 72, 1, () => [0.5, 0.44, 0.42], (x, z, u, v) => [u * 8, v * 0.1]);
+      }, 72, 1, () => [0.5, 0.44, 0.42], (x, z, u, v) => [u * PLATEAU_R * Math.PI * 2 / FM, v * 0.8 / FM]);
     }
   }
   const floorGeo = new THREE.BufferGeometry();
@@ -287,8 +300,9 @@ export function buildWorld(U, { anisotropy = 8 } = {}) {
   floorGeo.setIndex(fidx);
   floorGeo.computeVertexNormals();
   const floorMat = patchMaterial(new THREE.MeshStandardMaterial({
-    map: tex.map, normalMap: tex.normalMap, normalScale: new THREE.Vector2(0.9, 0.9), aoMap: tex.ormMap, aoMapIntensity: 0.8,
+    map: tex.map, normalMap: tex.normalMap, normalScale: new THREE.Vector2(1.0, 1.0), aoMap: tex.ormMap, aoMapIntensity: 0.9,
     roughnessMap: tex.ormMap, roughness: 1.0, vertexColors: true, metalness: 0, side: THREE.DoubleSide,
+    color: A.floor ? new THREE.Color(1.12, 1.08, 1.02) : new THREE.Color(1, 1, 1),
   }), U, { floor: true });
   const floor = new THREE.Mesh(floorGeo, floorMat);
   floor.receiveShadow = true;
@@ -568,9 +582,14 @@ export function buildWorld(U, { anisotropy = 8 } = {}) {
     }
   }
 
-  const stoneTri = { rock: terrainMaps.rock, rockN: terrainMaps.rockN, scale: 4.5 };
+  if (!(A.stone && A.stone.normal)) {
+    const rt = terrainMaps.rock ? { map: terrainMaps.rock, normalMap: terrainMaps.rockN } : createRockTextures(512);
+    stoneTri = { rock: rt.map, rockN: rt.normalMap, scale: 4.5 };
+  }
+  const stonePbr = A.stone && A.stone.normal ? { set: A.stone, moss: A.moss || null, meters: A.stone.meters, mossAmount: 0.55 } : null;
+  rockTri = A.moss && A.moss.normal ? { set: A.moss, moss: null, meters: A.moss.meters } : null;
   const stoneMat = patchMaterial(new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.84, metalness: 0 }), U, {
-    emissiveAttr: true, metalAttr: true, terrain: stoneTri,
+    emissiveAttr: true, metalAttr: true, ...(stonePbr ? { stone: stonePbr } : { terrain: stoneTri }),
   });
 
   // ---------- Heldenwahrzeichen: Kristallturm + Ringe ----------
@@ -734,12 +753,33 @@ export function buildWorld(U, { anisotropy = 8 } = {}) {
     ];
     ring.forEach(([x, z, r, y], i) => {
       const seed = 700 + i;
+      // Unregelmäßige Silhouette: gelappter Umriss, zerklüftete Flanken, hängende Felszapfen, Trabanten-Brocken
+      const ph = FR() * 6.28, ph2 = FR() * 6.28;
+      const radius = (th) => r * (1 + 0.24 * fbm2(Math.cos(th) * 2 + i, Math.sin(th) * 2, 3, seed)
+        + 0.09 * Math.sin(th * 3 + ph) + 0.05 * Math.sin(th * 5 + ph2));
       const isl = buildIsland({
-        cx: x, cz: z, topY: y, radius: (th) => r * (1 + 0.15 * fbm2(Math.cos(th) * 2 + i, Math.sin(th) * 2, 3, seed)),
-        depth: r * (1.3 + FR() * 0.8), seed, segs: 52, rings: 6, sideRings: 18, rimDrop: r * 0.05,
-        height: (px, pz, t) => (1 - t * t) * r * 0.12 * (0.5 + fbm2(px * 0.02, pz * 0.02, 3, seed) + 0.5),
-        grass: lushGrass(seed), edgeNoise: 0.05, taper: 0.55, lobes: 0.6,
+        cx: x, cz: z, topY: y, radius, depth: r * (1.1 + FR() * 0.9), seed, segs: 76, rings: 8, sideRings: 26, rimDrop: r * 0.05,
+        height: (px, pz, t) => (1 - t * t) * r * 0.12 * (0.5 + fbm2(px * 0.02, pz * 0.02, 3, seed) + 0.5)
+          + Math.max(0, fbm2(px * 0.05, pz * 0.05, 3, seed + 9)) * r * 0.06 * (1 - t),
+        grass: lushGrass(seed), edgeNoise: 0.14, taper: 0.42 + FR() * 0.35, lobes: 1.1, rough: Math.max(1, r / 22),
       });
+      const nStal = r > 30 ? 2 + Math.floor(FR() * 4) : 1 + Math.floor(FR() * 2);
+      for (let k = 0; k < nStal; k++) {
+        const a = FR() * Math.PI * 2, rr = Math.sqrt(FR()) * 0.5;
+        const sr = r * (0.16 + FR() * 0.16);
+        farGeos.push(buildStalactite({ x: x + Math.cos(a) * r * rr, y: y - r * 0.15, z: z + Math.sin(a) * r * rr, r: sr, len: r * (0.7 + FR() * 0.8), seed: seed * 7 + k, segs: 16 }).toNonIndexed());
+      }
+      if (r > 25) {
+        for (let k = 0; k < 2; k++) {
+          const a = FR() * Math.PI * 2, d = r * (1.25 + FR() * 0.4), sr = r * (0.12 + FR() * 0.1);
+          const sat = buildIsland({
+            cx: x + Math.cos(a) * d, cz: z + Math.sin(a) * d, topY: y - r * (0.05 + FR() * 0.25), radius: (th) => sr * (1 + 0.3 * fbm2(Math.cos(th) * 2, Math.sin(th) * 2, 3, seed + k)),
+            depth: sr * 2.4, seed: seed * 3 + k, segs: 20, rings: 3, sideRings: 10, rimDrop: sr * 0.2, edgeNoise: 0.25, taper: 0.7, lobes: 0.8,
+            grass: lushGrass(seed), rough: Math.max(1, sr / 22),
+          });
+          farGeos.push(sat.geometry.toNonIndexed());
+        }
+      }
       farGeos.push(isl.geometry.toNonIndexed());
       farDefs.push({ x, z, r, y });
       // Bäume
@@ -769,7 +809,7 @@ export function buildWorld(U, { anisotropy = 8 } = {}) {
     crystalSpots.push({ x: 40, y: 34 + 120 * 0.1, z: -560, s: 9, rot: 0, c: TEAL_C, tilt: 0 });
     crystalSpots.push({ x: 330, y: 20 + 80 * 0.1, z: -380, s: 6, rot: 1, c: PINK_C, tilt: 0.2 });
   }
-  const farMat = patchMaterial(new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.95 }), U, { clampFar: true, terrain: terrainMaps });
+  const farMat = patchMaterial(new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.95 }), U, { clampFar: true, terrain: farTerrain, far: true });
   const farMesh = new THREE.Mesh(merge(farGeos.map((g) => {
     for (const k of Object.keys(g.attributes)) if (!['position', 'normal', 'color'].includes(k)) g.deleteAttribute(k);
     return g;
@@ -779,8 +819,8 @@ export function buildWorld(U, { anisotropy = 8 } = {}) {
   root.add(farMesh);
 
   // ---------- Bäume (instanziert) ----------
-  const trunkMat = patchMaterial(new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.92 }), U, { wind: 2, bark: true });
-  const leafAtlas = createLeafAtlas();
+  const trunkMat = patchMaterial(new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.92 }), U, { wind: 2, bark: A.bark && A.bark.normal ? A.bark : true });
+  const leafAtlas = createLeafAtlas(A.leaves?.sprites || null);
   leafAtlas.anisotropy = anisotropy;
   const canopyMat = patchMaterial(new THREE.MeshStandardMaterial({
     vertexColors: true, map: leafAtlas, alphaTest: 0.5, side: THREE.DoubleSide, roughness: 0.6, metalness: 0,
@@ -799,7 +839,7 @@ export function buildWorld(U, { anisotropy = 8 } = {}) {
     const list = allTrees[slot];
     if (!list.length) continue;
     const trunk = new THREE.InstancedMesh(treeTrunkGeometry(kind), trunkMat, list.length);
-    const canopy = new THREE.InstancedMesh(treeFoliageGeometry(kind, 3 + kind + slot), canopyMat, list.length);
+    const canopy = new THREE.InstancedMesh(treeFoliageGeometry(kind, 3 + kind + slot, far ? 0.55 : 1), canopyMat, list.length);
     const m = new THREE.Matrix4(), q = new THREE.Quaternion(), e = new THREE.Euler();
     const R2 = rng(31 + slot);
     list.forEach((t, i) => {
@@ -823,7 +863,7 @@ export function buildWorld(U, { anisotropy = 8 } = {}) {
   }
 
   // ---------- Felsen ----------
-  const rockMat = patchMaterial(new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.88 }), U, { detail: 2.4, bump: 1.6 });
+  const rockMat = patchMaterial(new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.88 }), U, rockTri ? { stone: rockTri } : { detail: 2.4, bump: 1.6 });
   {
     const rocks = new THREE.InstancedMesh(rockGeometry(3), rockMat, rockSpots.length);
     const m = new THREE.Matrix4(), q = new THREE.Quaternion();
@@ -907,7 +947,7 @@ export function buildWorld(U, { anisotropy = 8 } = {}) {
       });
     }
     const geo = new RoundedBoxGeometry(0.72, 0.62, 1, 1, 0.14);
-    const mat = patchMaterial(new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.86 }), U, { terrain: stoneTri });
+    const mat = patchMaterial(new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.86 }), U, stonePbr ? { stone: { ...stonePbr, mossAmount: 0.75 } } : { terrain: stoneTri });
     const im = new THREE.InstancedMesh(geo, mat, curbs.length);
     const m = new THREE.Matrix4(), q = new THREE.Quaternion();
     const RC = rng(12);
@@ -923,14 +963,14 @@ export function buildWorld(U, { anisotropy = 8 } = {}) {
     root.add(im);
   }
 
-  // ---------- Gras & Blumen ----------
+  // ---------- Gras & Blumen (räumlich gekachelt → Frustum-Culling je Kachel; feine Halme, Distanz-Ausblendung) ----------
   let grass, flowers;
   {
     const spots = [];
     const fl = [];
     for (const d of islandDescs) {
       const tm = d.tm;
-      const n = d.kind === 'team' ? 10500 : d.kind === 'king' ? 2000 : 900;
+      const n = d.kind === 'team' ? 12500 : d.kind === 'king' ? 2400 : 1000;
       const pts = scatterOn(d, n, (x, z, y, r) => {
         if (tm && flatMask(tm, x, z) > 0.02) return false;
         if (d.kind === 'hero' && Math.hypot(x - HERO.x, z - HERO.z) < 8.2) return false;
@@ -942,47 +982,32 @@ export function buildWorld(U, { anisotropy = 8 } = {}) {
       const fpts = scatterOn(d, Math.round(n * 0.1), (x, z) => !(tm && flatMask(tm, x, z) > 0.02) && !(d.kind === 'hero' && Math.hypot(x - HERO.x, z - HERO.z) < 8.2), 2000 + islandDescs.indexOf(d), 0.93);
       fl.push(...fpts);
     }
-    // mischen, damit eine reduzierte Anzahl gleichmäßig verteilt bleibt
     const RS = rng(4);
-    for (let i = spots.length - 1; i > 0; i--) { const j = Math.floor(RS() * (i + 1)); [spots[i], spots[j]] = [spots[j], spots[i]]; }
-    const count = Math.min(MAX_GRASS, spots.length);
-    const gmat = patchMaterial(new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.7, side: THREE.DoubleSide }), U, { wind: 1, grass: true });
-    grass = new THREE.InstancedMesh(grassClumpGeometry(5, 8), gmat, count);
+    const gmat = patchMaterial(new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.62, side: THREE.DoubleSide }), U, { wind: 1, grass: true });
+    const gGeos = [grassClumpGeometry(5, 11), grassClumpGeometry(8, 9), grassClumpGeometry(13, 12)];
     const m = new THREE.Matrix4(), q = new THREE.Quaternion();
     const col = new THREE.Color();
-    for (let i = 0; i < count; i++) {
-      const p = spots[i];
-      q.setFromEuler(new THREE.Euler(0, RS() * Math.PI * 2, 0));
-      const s = 0.8 + RS() * 0.7;
-      m.compose(new THREE.Vector3(p.x, p.y - 0.06, p.z), q, new THREE.Vector3(s, s * (0.8 + RS() * 0.5), s));
-      grass.setMatrixAt(i, m);
+    grass = chunkedInstances(spots.slice(0, MAX_GRASS), 30, (k) => gGeos[k % gGeos.length], gmat, (p, mm, c) => {
+      q.setFromEuler(new THREE.Euler((RS() - 0.5) * 0.25, RS() * Math.PI * 2, (RS() - 0.5) * 0.25));
+      const s = 0.7 + RS() * 0.75;
+      mm.compose(new THREE.Vector3(p.x, p.y - 0.06, p.z), q, new THREE.Vector3(s, s * (0.65 + RS() * 0.75), s));
       const n = fbm2(p.x * 0.045, p.z * 0.045, 3, 11) * 0.5 + 0.5;
       const dry = smoothstep(0.62, 0.8, fbm2(p.x * 0.18, p.z * 0.18, 2, 18) * 0.5 + 0.5);
-      col.setRGB(lerp(0.062, 0.135, n) + dry * 0.12, lerp(0.140, 0.240, n) + dry * 0.05, lerp(0.026, 0.036, n));
-      grass.setColorAt(i, col);
-    }
-    grass.receiveShadow = true;
-    grass.name = 'aeth-grass';
-    grass.computeBoundingSphere();
-    grass.frustumCulled = false;
-    root.add(grass);
+      const v = 0.85 + RS() * 0.3;
+      c.setRGB((lerp(0.058, 0.13, n) + dry * 0.12) * v, (lerp(0.135, 0.235, n) + dry * 0.05) * v, lerp(0.026, 0.038, n) * v);
+    }, 'aeth-grass', RS);
+    grass.meshes.forEach((im) => { im.receiveShadow = true; root.add(im); });
 
-    const fcount = Math.min(MAX_FLOWERS, fl.length);
-    flowers = new THREE.InstancedMesh(flowerGeometry(), gmat, fcount);
+    const fgeo = flowerGeometry();
     const palette = [[0.75, 0.22, 0.38], [0.8, 0.78, 0.72], [0.36, 0.2, 0.62], [0.85, 0.6, 0.08], [0.22, 0.38, 0.85], [0.8, 0.78, 0.72]];
-    for (let i = 0; i < fcount; i++) {
-      const p = fl[i];
+    flowers = chunkedInstances(fl.slice(0, MAX_FLOWERS), 40, () => fgeo, gmat, (p, mm, c) => {
       q.setFromEuler(new THREE.Euler(0, RS() * 6, 0));
-      const s = 0.8 + RS() * 0.8;
-      m.compose(new THREE.Vector3(p.x, p.y - 0.05, p.z), q, new THREE.Vector3(s, s, s));
-      flowers.setMatrixAt(i, m);
-      const c = palette[Math.floor(RS() * palette.length)];
-      flowers.setColorAt(i, col.setRGB(c[0], c[1], c[2]));
-    }
-    flowers.receiveShadow = true;
-    flowers.name = 'aeth-flowers';
-    flowers.frustumCulled = false;
-    root.add(flowers);
+      const s = 0.6 + RS() * 0.7;
+      mm.compose(new THREE.Vector3(p.x, p.y - 0.05, p.z), q, new THREE.Vector3(s, s, s));
+      const cc = palette[Math.floor(RS() * palette.length)];
+      c.setRGB(cc[0], cc[1], cc[2]);
+    }, 'aeth-flowers', RS);
+    flowers.meshes.forEach((im) => { im.receiveShadow = true; root.add(im); });
   }
 
   // ---------- Schwebende Felsbrocken ----------
@@ -1079,4 +1104,34 @@ export function buildWorld(U, { anisotropy = 8 } = {}) {
   root.add(particles.points);
 
   return { root, grass, flowers, particles, animated, islandMesh, teams };
+}
+
+/**
+ * Verteilt Instanzen auf ein Raster (cell Meter) → je Kachel ein InstancedMesh mit eigener Hülle (Frustum-Culling).
+ * Innerhalb jeder Kachel gemischt, damit setFraction(f) gleichmäßig ausdünnt.
+ */
+function chunkedInstances(points, cell, geoFor, material, setter, name, R) {
+  const cells = new Map();
+  for (const p of points) {
+    const k = `${Math.floor(p.x / cell)},${Math.floor(p.z / cell)}`;
+    if (!cells.has(k)) cells.set(k, []);
+    cells.get(k).push(p);
+  }
+  const meshes = [];
+  const m = new THREE.Matrix4(), c = new THREE.Color();
+  let idx = 0;
+  for (const list of cells.values()) {
+    for (let i = list.length - 1; i > 0; i--) { const j = Math.floor(R() * (i + 1)); [list[i], list[j]] = [list[j], list[i]]; }
+    const im = new THREE.InstancedMesh(geoFor(idx++), material, list.length);
+    list.forEach((p, i) => { setter(p, m, c); im.setMatrixAt(i, m); im.setColorAt(i, c); });
+    im.name = name;
+    im.computeBoundingSphere();
+    im.userData.max = list.length;
+    meshes.push(im);
+  }
+  return {
+    meshes,
+    setFraction(f) { for (const im of meshes) im.count = Math.max(0, Math.floor(im.userData.max * f)); },
+    get count() { return meshes.reduce((a, im) => a + im.count, 0); },
+  };
 }

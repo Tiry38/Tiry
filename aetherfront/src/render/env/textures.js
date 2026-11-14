@@ -263,15 +263,26 @@ export function createRockTextures(size = 512) {
  * Neutral-helle Blätter (Farbton kommt aus der Instanzfarbe), Farbe in transparente Pixel ausgeweitet
  * (keine dunklen Säume beim Mipmapping).
  */
-export function createLeafAtlas() {
+export function createLeafAtlas(photo = null) {
   const W = 1024, H = 512;
   const cv = typeof OffscreenCanvas !== 'undefined' ? new OffscreenCanvas(W, H) : Object.assign(document.createElement('canvas'), { width: W, height: H });
-  const g = cv.getContext('2d');
+  const g = cv.getContext('2d', { willReadFrequently: true });
   const R = rng(1234);
   g.clearRect(0, 0, W, H);
   const leaf = (x, y, ang, len, wid, l) => {
     g.save();
     g.translate(x, y); g.rotate(ang);
+    if (photo) {
+      // Fotoblatt (ambientCG, CC0): Stiel zeigt zum Zweig, Helligkeit variiert
+      const sp = photo[Math.floor(R() * photo.length)];
+      g.rotate(Math.PI / 2);
+      g.filter = `brightness(${(0.62 + l * 0.42).toFixed(2)})`;
+      const h = len * 1.18, w = h * (sp.width / sp.height) * (wid / (len * 0.4));
+      g.drawImage(sp, -w / 2, -h, w, h);
+      g.filter = 'none';
+      g.restore();
+      return;
+    }
     const grd = g.createLinearGradient(0, 0, len, 0);
     const c0 = Math.round(l * 120), c1 = Math.round(Math.min(255, l * 200));
     grd.addColorStop(0, `rgb(${c0 * 0.94 | 0},${c0},${c0 * 0.84 | 0})`);
@@ -296,12 +307,13 @@ export function createLeafAtlas() {
     twigs.push({ x0, y0, a, len });
     g.lineWidth = 5; g.beginPath(); g.moveTo(x0, y0); g.lineTo(x0 + Math.cos(a) * len, y0 + Math.sin(a) * len); g.stroke();
   }
-  for (let k = 0; k < 150; k++) {
+  const nLeaves = photo ? 120 : 150;
+  for (let k = 0; k < nLeaves; k++) {
     const tw = twigs[k % twigs.length];
     const t = 0.25 + R() * 0.8;
     const x = tw.x0 + Math.cos(tw.a) * tw.len * t, y = tw.y0 + Math.sin(tw.a) * tw.len * t;
     const ang = tw.a + (R() < 0.5 ? -1 : 1) * (0.5 + R() * 0.9);
-    const len = 46 + R() * 34;
+    const len = (photo ? 52 : 46) + R() * 34;
     if (Math.hypot(x - 256, y - 270) > 230) continue;
     leaf(x, y, ang, len, len * (0.36 + R() * 0.1), 0.72 + R() * 0.38);
   }

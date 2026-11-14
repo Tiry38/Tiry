@@ -7,6 +7,7 @@ import * as THREE from 'three';
 import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass.js';
 import { GTAOPass } from 'three/examples/jsm/postprocessing/GTAOPass.js';
 import { FullScreenQuad } from 'three/examples/jsm/postprocessing/Pass.js';
+import { detectQuality, createAutoTuner } from './quality.js';
 
 const VS = /* glsl */`varying vec2 vUv; void main(){ vUv = uv; gl_Position = vec4(position.xy, 0.0, 1.0); }`;
 
@@ -175,6 +176,15 @@ export class Engine {
     r.shadowMap.enabled = true;
     r.shadowMap.type = THREE.PCFShadowMap;
     r.info.autoReset = false;
+    // Grafikstufe automatisch wählen, solange der Spieler sie nie selbst gesetzt hat
+    this.autoTuner = null;
+    if (settings.get('qualityAuto')) {
+      const det = detectQuality(r);
+      this.detected = det;
+      if (settings.setAuto) settings.setAuto('quality', det.quality); else settings.set('quality', det.quality);
+      this.autoTuner = createAutoTuner(det.quality);
+      console.info(`[Aetherfront] Grafikstufe automatisch: ${det.quality} (${det.reason}; GPU: ${det.gpu || 'unbekannt'})`);
+    }
     this.scene = new THREE.Scene();
     this.camera = new THREE.PerspectiveCamera(42, 1, 0.5, 2500);
     this.camera.position.set(0, 120, 160);
@@ -184,7 +194,10 @@ export class Engine {
     this.dof = { enabled: false, focus: -1 };
     this.stats = { sceneCalls: 0, calls: 0, triangles: 0 };
     // Look-Parameter (zur Laufzeit justierbar: window.__app.engine.look)
-    this.look = { exposure: 1.0, temperature: 0.12, tint: 0.0, saturation: 1.12, contrast: 1.1, bloom: 0.3, bloomRadius: 0.3, bloomThreshold: 2.4, rays: 0.5, aoIntensity: 1.0, aoRadius: 2.0 };
+    this.look = {
+      exposure: 1.0, temperature: 0.12, tint: 0.0, saturation: 1.12, contrast: 1.1, bloom: 0.3, bloomRadius: 0.3, bloomThreshold: 2.4, rays: 0.5,
+      aoIntensity: 1.0, aoRadius: 2.0, shadowTint: [-0.012, 0.0, 0.02], highTint: [0.018, 0.006, -0.016], vignette: 0.2,
+    };
     this.quad = new FullScreenQuad(null);
     this.compositeMat = new THREE.ShaderMaterial({ ...CompositeShader, uniforms: THREE.UniformsUtils.clone(CompositeShader.uniforms), depthTest: false, depthWrite: false });
     this.dofMat = new THREE.ShaderMaterial({ ...DofShader, uniforms: THREE.UniformsUtils.clone(DofShader.uniforms), depthTest: false, depthWrite: false });
@@ -282,6 +295,21 @@ export class Engine {
   render(dt) {
     const r = this.renderer, L = this.look, q = this.q;
     this.time += dt;
+    // Laufzeit-Benchmark (nur Automatik): Bildzeit messen, bei Bedarf Stufe wechseln
+    const now = performance.now();
+    if (this.autoTuner && this._lastFrame && !document.hidden) {
+      if (!this.settings.get('qualityAuto')) this.autoTuner = null;
+      else {
+        const nq = this.autoTuner.frame(now - this._lastFrame);
+        if (nq) {
+          console.info(`[Aetherfront] Grafikstufe angepasst: ${nq}`);
+          this.settings.setAuto ? this.settings.setAuto('quality', nq) : this.settings.set('quality', nq);
+          this.applySettings();
+        }
+        if (this.autoTuner && this.autoTuner.done) this.autoTuner = null;
+      }
+    }
+    this._lastFrame = now;
     this.flash = Math.max(0, this.flash - dt * 1.4);
     r.info.reset();
     const pre = this.scene.userData.aethPreRender;
@@ -368,6 +396,9 @@ export class Engine {
     u.uSharpen.value = q.sharpen;
     // Weißabgleich: Temperatur (+ wärmer / − kühler), Tönung (+ magenta / − grün)
     u.uWB.value.set(1 + L.temperature * 0.1, 1 - L.tint * 0.05, 1 - L.temperature * 0.1);
+    if (L.shadowTint) u.uShadowTint.value.set(L.shadowTint[0], L.shadowTint[1], L.shadowTint[2]);
+    if (L.highTint) u.uHighTint.value.set(L.highTint[0], L.highTint[1], L.highTint[2]);
+    if (L.vignette != null) u.uVignette.value = L.vignette;
     this.pass(this.compositeMat, null);
     this.stats.calls = r.info.render.calls;
     this.stats.triangles = r.info.render.triangles;

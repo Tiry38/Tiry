@@ -170,7 +170,7 @@ export function treeCanopyGeometry(kind = 0, seed = 3) {
  * Attribute: position, normal (kugelförmig vom Kronenzentrum → weiche Beleuchtung), uv (Atlas; innen uv = -1),
  * color (Verdeckung: innen/unten dunkler). kind 0 = Laubbaum, 1 = Nadelbaum.
  */
-export function treeFoliageGeometry(kind = 0, seed = 3) {
+export function treeFoliageGeometry(kind = 0, seed = 3, density = 1) {
   const R = rng(seed * 7 + 1);
   const pos = [], nor = [], uv = [], col = [];
   const center = new THREE.Vector3(0, kind === 0 ? 4.5 : 4.6, 0);
@@ -225,13 +225,15 @@ export function treeFoliageGeometry(kind = 0, seed = 3) {
     ];
     for (const [x, y, z, r] of clusters) {
       const c = new THREE.Vector3(x, y, z);
-      if (y >= 4.4) blob(c, r * 0.3);
-      const n = Math.round(r * r * 7.5);
+      blob(c, r * (y >= 4.4 ? 0.42 : 0.32));
+      // äußere Hülle (Silhouette, Licht) + innere Schicht (Tiefe, Selbstverschattung)
+      const n = Math.round(r * r * 10.5 * density);
       for (let i = 0; i < n; i++) {
         const dir = new THREE.Vector3(R() * 2 - 1, R() * 1.6 - 0.5, R() * 2 - 1).normalize();
-        const cc = c.clone().addScaledVector(dir, r * (0.45 + 0.5 * Math.sqrt(R())));
+        const inner = i % 4 === 3;
+        const cc = c.clone().addScaledVector(dir, r * (inner ? 0.2 + 0.3 * R() : 0.5 + 0.48 * Math.sqrt(R())));
         const nn = dir.clone().add(new THREE.Vector3(R() - 0.5, R() - 0.5, R() - 0.5).multiplyScalar(1.4));
-        card(cc, nn, 1.05 + R() * 0.6, R() * Math.PI * 2, 0.0, 0.5);
+        card(cc, nn, (inner ? 1.15 : 0.9) + R() * 0.55, R() * Math.PI * 2, 0.0, 0.5);
       }
     }
   } else {
@@ -328,45 +330,45 @@ export function rockGeometry(seed = 1) {
 }
 
 // ---------- Gras & Blumen ----------
-export function grassClumpGeometry(seed = 5, blades = 9) {
+export function grassClumpGeometry(seed = 5, blades = 10) {
+  // Feine, unterschiedlich hohe Halme (2 Segmente + Spitze), leicht gebogen, Farbe: dunkler Ansatz → helle Spitze,
+  // einzelne trockene/gelbliche Halme. Normale nach oben (weiche, gleichmäßige Beleuchtung wie bei echtem Rasen).
   const R = rng(seed);
   const pos = [], col = [], nor = [], idx = [];
   for (let b = 0; b < blades; b++) {
     const a = R() * Math.PI * 2;
-    const off = Math.sqrt(R()) * 0.45;
+    const off = Math.sqrt(R()) * 0.5;
     const bx = Math.cos(a) * off, bz = Math.sin(a) * off;
-    const h = 0.5 + R() * 0.55;
-    const w = 0.07 + R() * 0.05;
+    const tall = R() < 0.18;
+    const h = tall ? 0.75 + R() * 0.45 : 0.28 + R() * 0.42;
+    const w = 0.022 + R() * 0.026;
     const face = R() * Math.PI;
-    const lean = 0.15 + R() * 0.35;
+    const lean = 0.12 + R() * 0.32 * h;
     const la = a + (R() - 0.5);
     const fx = Math.cos(face), fz = Math.sin(face);
+    const dryB = R() < 0.14 ? 1 : 0;
+    const tint = [1 + dryB * 0.55 + (R() - 0.5) * 0.12, 1 + dryB * 0.18 + (R() - 0.5) * 0.1, 1 - dryB * 0.1];
     const base = pos.length / 3;
-    const levels = 3;
+    const levels = 2;
     for (let l = 0; l <= levels; l++) {
       const t = l / levels;
       const y = h * t;
       const bend = lean * t * t;
       const cxp = bx + Math.cos(la) * bend, czp = bz + Math.sin(la) * bend;
-      const ww = w * (1 - t * 0.92);
+      const ww = w * (1 - t * 0.75);
+      const k = lerp(0.3, 1.05, Math.pow(t, 0.8));
+      const warm = lerp(1, 1.1, t);
       if (l < levels) {
         pos.push(cxp - fx * ww, y, czp - fz * ww, cxp + fx * ww, y, czp + fz * ww);
-        const k = lerp(0.32, 1.0, Math.pow(t, 0.8));
-        const warm = lerp(1, 1.12, t);
-        col.push(k, k * warm * 0.98, k * 0.9, k, k * warm * 0.98, k * 0.9);
+        for (let e = 0; e < 2; e++) col.push(k * tint[0], k * warm * 0.98 * tint[1], k * 0.9 * tint[2]);
         nor.push(0, 1, 0, 0, 1, 0);
       } else {
         pos.push(cxp, y, czp);
-        col.push(1.1, 1.08, 0.85);
+        col.push(1.12 * tint[0], 1.08 * tint[1], 0.85 * tint[2]);
         nor.push(0, 1, 0);
       }
     }
-    for (let l = 0; l < levels - 1; l++) {
-      const i0 = base + l * 2;
-      idx.push(i0, i0 + 1, i0 + 2, i0 + 1, i0 + 3, i0 + 2);
-    }
-    const lt = base + (levels - 1) * 2;
-    idx.push(lt, lt + 1, lt + 2);
+    idx.push(base, base + 1, base + 2, base + 1, base + 3, base + 2, base + 2, base + 3, base + 4);
   }
   const g = new THREE.BufferGeometry();
   g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
@@ -377,21 +379,31 @@ export function grassClumpGeometry(seed = 5, blades = 9) {
 }
 
 export function flowerGeometry() {
-  const parts = [];
-  const stem = new THREE.CylinderGeometry(0.015, 0.02, 0.6, 3);
-  stem.translate(0, 0.3, 0);
-  parts.push(prep(stem, [0.18, 0.35, 0.12]));
-  const head = new THREE.IcosahedronGeometry(0.11, 0);
-  head.scale(1, 0.55, 1);
-  head.translate(0, 0.62, 0);
-  parts.push(prep(head, [1, 1, 1]));
-  const core = new THREE.IcosahedronGeometry(0.045, 0);
-  core.translate(0, 0.67, 0);
-  parts.push(prep(core, [1.4, 1.1, 0.4]));
-  const g = merge(parts);
-  g.deleteAttribute('emit'); g.deleteAttribute('metal');
-  const n = g.attributes.normal;
-  for (let i = 0; i < n.count; i++) n.setXYZ(i, 0, 1, 0);
+  // Wildblume: dünner Stiel (2 gekreuzte Streifen), Blütenkopf als flacher Stern, gelbe Mitte
+  const pos = [], col = [];
+  const tri = (a, b, c, k) => { pos.push(...a, ...b, ...c); col.push(...k, ...k, ...k); };
+  const G = [0.18, 0.35, 0.12];
+  for (const [dx, dz] of [[0.012, 0], [0, 0.012]]) {
+    tri([-dx, 0, -dz], [dx, 0, dz], [dx * 0.5, 0.55, dz * 0.5], G);
+    tri([-dx, 0, -dz], [dx * 0.5, 0.55, dz * 0.5], [-dx * 0.5, 0.55, -dz * 0.5], G);
+  }
+  const y = 0.56, n = 5;
+  for (let i = 0; i < n; i++) {
+    const a0 = (i / n) * Math.PI * 2, a1 = a0 + Math.PI / n, a2 = a0 + (2 * Math.PI) / n;
+    const r = 0.12, ri = 0.04;
+    tri([0, y + 0.02, 0], [Math.cos(a0) * r, y, Math.sin(a0) * r], [Math.cos(a1) * ri, y + 0.01, Math.sin(a1) * ri], [1, 1, 1]);
+    tri([0, y + 0.02, 0], [Math.cos(a1) * ri, y + 0.01, Math.sin(a1) * ri], [Math.cos(a2) * r, y, Math.sin(a2) * r], [1, 1, 1]);
+  }
+  for (let i = 0; i < 3; i++) {
+    const a0 = (i / 3) * Math.PI * 2, a1 = a0 + (2 * Math.PI) / 3;
+    tri([0, y + 0.05, 0], [Math.cos(a0) * 0.035, y + 0.025, Math.sin(a0) * 0.035], [Math.cos(a1) * 0.035, y + 0.025, Math.sin(a1) * 0.035], [1.4, 1.1, 0.4]);
+  }
+  const g = new THREE.BufferGeometry();
+  g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+  g.setAttribute('color', new THREE.Float32BufferAttribute(col, 3));
+  const nn = new Float32Array(pos.length);
+  for (let i = 0; i < nn.length; i += 3) nn[i + 1] = 1;
+  g.setAttribute('normal', new THREE.BufferAttribute(nn, 3));
   return g;
 }
 

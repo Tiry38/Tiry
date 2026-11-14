@@ -74,6 +74,18 @@ export const FACTIONS = {
     grad: ['#c06bff', '#ff4fa3', '#4a3bff'],
   },
 };
+FACTIONS.schwarm = {
+  id: 'schwarm', name: 'Schwarmbrut', motto: 'Wir sind viele.',
+  desc: 'Billige Massen, die sich gegenseitig stärken. Füllt das Feld schnell, gewinnt durch Überzahl.',
+  palette: { primary: '#4a5a2a', secondary: '#c8a03a', metal: '#7a6a4a', glow: '#d8ff4a' },
+  grad: ['#d8ff4a', '#8ac83a', '#e88a2a'],
+};
+FACTIONS.glut = {
+  id: 'glut', name: 'Glutgeborene', motto: 'Aus Asche steigen wir.',
+  desc: 'Feuergeister und Beschwörer. Brennschaden über Zeit, Diener aus Flammen, explosive Elite.',
+  palette: { primary: '#3a2422', secondary: '#ff6a2a', metal: '#8a5a3a', glow: '#ffaa3a' },
+  grad: ['#ffd23a', '#ff6a2a', '#d02a4a'],
+};
 export const FACTION_IDS = Object.keys(FACTIONS);
 
 // Rollen-Vorlagen: Werte je eingesetztem Gold (Wert der Einheit)
@@ -92,84 +104,218 @@ const ROLES = {
 const LINES = {
   orden: [
     { key: 'squire', names: ['Knappe', 'Ritter', 'Lichtpaladin'], models: ['knight', 'knight', 'paladin_heavy'], role: 'melee', atk: 'klinge', armorType: 'schwer', armor: [2, 3, 4], cost: [45, 75, 160],
+      branch: { names: ['Klingenbruder', 'Sonnenklinge'], models: ['knight', 'knight'], role: 'assassin', armor: [2, 3], cost: [70, 150], abil: [{ crit: { chance: 0.2, mult: 2 } }, { crit: { chance: 0.28, mult: 2.4 }, lifesteal: 0.1 }] },
       abil: [{}, {}, { aura_armor: { armor: 3, radius: 5 } }] },
     { key: 'archer', names: ['Bogenschützin', 'Falkenauge', 'Sonnenschützin'], models: ['archer', 'archer', 'archer'], role: 'ranged', atk: 'stich', armorType: 'mittel', armor: [0, 1, 1], cost: [55, 90, 190],
+      branch: { names: ['Brandschützin', 'Phönixschützin'], models: ['archer', 'archer'], atk: 'arkan', armor: [1, 1], cost: [95, 200], abil: [{ splash: { radius: 1.8, pct: 0.4 } }, { splash: { radius: 2.4, pct: 0.55 }, poison: { dps: 0.12, dur: 4 } }] },
       abil: [{}, { crit: { chance: 0.2, mult: 2 } }, { crit: { chance: 0.25, mult: 2.2 }, multishot: { targets: 3 } }] },
     { key: 'priest', names: ['Novizin', 'Priesterin', 'Hohepriesterin'], models: ['priest', 'priest', 'priest'], role: 'healer', atk: 'arkan', armorType: 'leicht', armor: [0, 0, 1], cost: [70, 100, 210],
+      branch: { names: ['Kampfpriesterin', 'Zornige Heilige'], models: ['priest', 'priest'], role: 'support', armor: [1, 2], cost: [95, 200], abil: [{ heal: { amount: 40, cd: 2.4 }, aura_speed: { pct: 0.12, radius: 5 } }, { heal: { amount: 100, cd: 2.2 }, aura_speed: { pct: 0.22, radius: 6 } }] },
       abil: [{ heal: { amount: 26, cd: 2.2 } }, { heal: { amount: 60, cd: 2.0 } }, { heal: { amount: 150, cd: 1.8 }, aura_armor: { armor: 2, radius: 5 } }] },
     { key: 'guard', names: ['Schildwache', 'Bollwerk', 'Bastion des Lichts'], models: ['paladin_heavy', 'paladin_heavy', 'paladin_heavy'], role: 'tank', atk: 'klinge', armorType: 'festung', armor: [3, 5, 7], cost: [80, 120, 240],
+      branch: { names: ['Spiegelwacht', 'Lichtspiegel'], models: ['paladin_heavy', 'paladin_heavy'], armor: [4, 6], cost: [115, 230], abil: [{ thorns: 0.25, taunt: true }, { thorns: 0.45, taunt: true }] },
       abil: [{}, { taunt: true }, { taunt: true, aura_armor: { armor: 2, radius: 6 } }] },
     { key: 'griffin', names: ['Junggreif', 'Sturmgreif', 'Himmelsgreif'], models: ['griffin', 'griffin', 'griffin'], role: 'melee', atk: 'klinge', armorType: 'mittel', armor: [1, 2, 3], cost: [95, 140, 280],
+      branch: { names: ['Donnergreif', 'Sturmkönig'], models: ['griffin', 'griffin'], role: 'caster', atk: 'arkan', armor: [1, 2], cost: [135, 270], abil: [{ chain: { jumps: 2, falloff: 0.7 } }, { chain: { jumps: 4, falloff: 0.8 }, stun: { chance: 0.1, dur: 0.6 } }] },
       abil: [{ stun: { chance: 0.12, dur: 0.8 } }, { stun: { chance: 0.18, dur: 1.0 } }, { stun: { chance: 0.22, dur: 1.2 }, splash: { radius: 2.2, pct: 0.4 } }], atkT3: 'chaos' },
   ],
   wild: [
     { key: 'treant', names: ['Dornling', 'Eichenwächter', 'Urwaldhüter'], models: ['treant', 'treant', 'treant'], role: 'tank', atk: 'wucht', armorType: 'schwer', armor: [3, 4, 5], cost: [50, 85, 180],
+      branch: { names: ['Dornenhüter', 'Stachelurahn'], models: ['treant', 'treant'], armor: [3, 4], cost: [80, 170], abil: [{ thorns: 0.3, regen: 6 }, { thorns: 0.5, regen: 14, taunt: true }] },
       abil: [{ regen: 4 }, { regen: 10, taunt: true }, { regen: 26, taunt: true, thorns: 0.25 }] },
     { key: 'wolf', names: ['Wolf', 'Rudelwolf', 'Mondalpha'], models: ['wolf', 'wolf', 'wolf'], role: 'assassin', atk: 'klinge', armorType: 'mittel', armor: [0, 1, 2], cost: [40, 70, 150],
+      branch: { names: ['Schattenwolf', 'Nachtjäger'], models: ['wolf', 'wolf'], atk: 'chaos', armor: [1, 1], cost: [65, 140], abil: [{ crit: { chance: 0.2, mult: 2 } }, { crit: { chance: 0.3, mult: 2.6 }, slow: { pct: 0.25, dur: 1.5 } }] },
       abil: [{}, { lifesteal: 0.15 }, { lifesteal: 0.2, aura_speed: { pct: 0.15, radius: 5 } }] },
     { key: 'druid', names: ['Druidin', 'Sturmdruidin', 'Himmelsdruidin'], models: ['druid', 'druid', 'druid'], role: 'caster', atk: 'arkan', armorType: 'leicht', armor: [0, 0, 1], cost: [65, 105, 220],
+      branch: { names: ['Mondsichel-Druidin', 'Sternenweberin'], models: ['druid', 'druid'], role: 'healer', armor: [0, 1], cost: [100, 210], abil: [{ heal: { amount: 50, cd: 2.0 }, chain: { jumps: 1, falloff: 0.7 } }, { heal: { amount: 120, cd: 1.8 }, chain: { jumps: 2, falloff: 0.75 } }] },
       abil: [{}, { chain: { jumps: 2, falloff: 0.75 } }, { chain: { jumps: 4, falloff: 0.8 } }] },
     { key: 'shroom', names: ['Sporling', 'Pilzschamane', 'Sporenkönig'], models: ['mushroom', 'mushroom', 'mushroom'], role: 'healer', atk: 'arkan', armorType: 'leicht', armor: [0, 1, 1], cost: [60, 95, 200],
+      branch: { names: ['Giftpilz', 'Faulfürst'], models: ['mushroom', 'mushroom'], role: 'caster', armor: [1, 1], cost: [90, 190], abil: [{ poison: { dps: 0.2, dur: 4 }, splash: { radius: 2, pct: 0.4 } }, { poison: { dps: 0.3, dur: 5 }, splash: { radius: 2.8, pct: 0.55 } }] },
       abil: [{ heal: { amount: 22, cd: 2.2 } }, { heal: { amount: 55, cd: 2.0 }, slow: { pct: 0.25, dur: 1.5 } }, { heal: { amount: 130, cd: 1.8 }, slow: { pct: 0.35, dur: 2 }, splash: { radius: 2.5, pct: 0.5 } }] },
     { key: 'bear', names: ['Bärenjunges', 'Kriegsbär', 'Urbär'], models: ['bear', 'bear', 'bear'], role: 'tank', atk: 'wucht', armorType: 'schwer', armor: [2, 4, 5], cost: [90, 140, 270],
+      branch: { names: ['Höhlenbär', 'Steinpranke'], models: ['bear', 'bear'], role: 'melee', armor: [3, 4], cost: [130, 260], abil: [{ lifesteal: 0.2 }, { lifesteal: 0.3, stun: { chance: 0.15, dur: 1 } }] },
       abil: [{}, { splash: { radius: 2, pct: 0.35 } }, { splash: { radius: 2.6, pct: 0.5 }, stun: { chance: 0.1, dur: 1 } }] },
   ],
   schmiede: [
     { key: 'auto', names: ['Schrotter', 'Kriegsautomat', 'Titanautomat'], models: ['automaton', 'automaton', 'automaton'], role: 'melee', atk: 'klinge', armorType: 'schwer', armor: [2, 3, 4], cost: [50, 85, 175],
+      branch: { names: ['Wachautomat', 'Bollwerk-Koloss'], models: ['automaton', 'automaton'], role: 'tank', armorType: 'festung', armor: [4, 6], cost: [85, 180], abil: [{ taunt: true }, { taunt: true, thorns: 0.25 }] },
       abil: [{}, { crit: { chance: 0.15, mult: 2 } }, { crit: { chance: 0.22, mult: 2.5 }, thorns: 0.15 }] },
     { key: 'walker', names: ['Bolzenläufer', 'Repetierläufer', 'Ballistenläufer'], models: ['walker', 'walker', 'walker'], role: 'ranged', atk: 'stich', armorType: 'mittel', armor: [1, 1, 2], cost: [60, 95, 200],
+      branch: { names: ['Funkenläufer', 'Gewitterläufer'], models: ['walker', 'walker'], atk: 'arkan', armor: [1, 2], cost: [90, 190], abil: [{ chain: { jumps: 1, falloff: 0.7 } }, { chain: { jumps: 3, falloff: 0.75 } }] },
       abil: [{}, { multishot: { targets: 2 } }, { multishot: { targets: 3 }, crit: { chance: 0.15, mult: 2 } }] },
     { key: 'mortar', names: ['Mörserkarren', 'Mörserkoloss', 'Donnermörser'], models: ['mortar', 'mortar', 'mortar'], role: 'siege', atk: 'wucht', armorType: 'mittel', armor: [1, 2, 2], cost: [75, 115, 240],
+      branch: { names: ['Brandmörser', 'Napalmwerfer'], models: ['mortar', 'mortar'], armor: [1, 2], cost: [110, 230], abil: [{ splash: { radius: 2.4, pct: 0.5 }, poison: { dps: 0.15, dur: 4 } }, { splash: { radius: 3, pct: 0.6 }, poison: { dps: 0.25, dur: 5 } }] },
       abil: [{ splash: { radius: 2.2, pct: 0.6 } }, { splash: { radius: 2.8, pct: 0.7 } }, { splash: { radius: 3.4, pct: 0.8 }, stun: { chance: 0.15, dur: 0.7 } }] },
     { key: 'core', names: ['Ätherkern', 'Prismakern', 'Sonnenkern'], models: ['core', 'core', 'core'], role: 'support', atk: 'arkan', armorType: 'festung', armor: [2, 3, 4], cost: [85, 125, 250],
+      branch: { names: ['Schildkern', 'Ägiskern'], models: ['core', 'core'], role: 'support', armor: [3, 4], cost: [120, 240], abil: [{ aura_armor: { armor: 3, radius: 6 } }, { aura_armor: { armor: 5, radius: 7 }, aura_speed: { pct: 0.1, radius: 7 } }] },
       abil: [{ aura_speed: { pct: 0.12, radius: 5 } }, { aura_speed: { pct: 0.2, radius: 6 } }, { aura_speed: { pct: 0.3, radius: 7 }, chain: { jumps: 2, falloff: 0.7 } }] },
     { key: 'spider', names: ['Teslaspinne', 'Sturmspinne', 'Blitzmatriarchin'], models: ['spider', 'spider', 'spider'], role: 'caster', atk: 'arkan', armorType: 'mittel', armor: [1, 1, 2], cost: [70, 110, 230],
+      branch: { names: ['Netzspinne', 'Fangmatriarchin'], models: ['spider', 'spider'], role: 'support', armor: [1, 2], cost: [100, 210], abil: [{ slow: { pct: 0.35, dur: 2 }, multishot: { targets: 2 } }, { slow: { pct: 0.45, dur: 2.5 }, multishot: { targets: 3 }, stun: { chance: 0.08, dur: 0.6 } }] },
       abil: [{ chain: { jumps: 1, falloff: 0.7 } }, { chain: { jumps: 3, falloff: 0.75 } }, { chain: { jumps: 5, falloff: 0.8 }, stun: { chance: 0.1, dur: 0.6 } }] },
   ],
   abgrund: [
     { key: 'shade', names: ['Schemen', 'Nachtklinge', 'Seelenschnitter'], models: ['shade', 'shade', 'shade'], role: 'assassin', atk: 'klinge', armorType: 'mittel', armor: [1, 2, 3], cost: [45, 80, 170],
+      branch: { names: ['Giftklinge', 'Pestschnitter'], models: ['shade', 'shade'], armor: [1, 2], cost: [75, 160], abil: [{ poison: { dps: 0.25, dur: 4 } }, { poison: { dps: 0.35, dur: 5 }, crit: { chance: 0.2, mult: 2 } }] },
       abil: [{ crit: { chance: 0.15, mult: 2 } }, { crit: { chance: 0.22, mult: 2.4 } }, { crit: { chance: 0.3, mult: 3 }, lifesteal: 0.15 }], atkT3: 'chaos' },
     { key: 'bone', names: ['Knochenwerfer', 'Gruftschleuder', 'Totenballiste'], models: ['bonethrower', 'bonethrower', 'bonethrower'], role: 'siege', atk: 'wucht', armorType: 'mittel', armor: [1, 1, 2], cost: [60, 100, 210],
+      branch: { names: ['Seuchenschleuder', 'Pestkatapult'], models: ['bonethrower', 'bonethrower'], armor: [1, 2], cost: [95, 200], abil: [{ splash: { radius: 2.2, pct: 0.5 }, poison: { dps: 0.15, dur: 4 } }, { splash: { radius: 2.8, pct: 0.6 }, poison: { dps: 0.25, dur: 5 } }] },
       abil: [{ splash: { radius: 2, pct: 0.5 } }, { splash: { radius: 2.6, pct: 0.6 } }, { splash: { radius: 3.2, pct: 0.75 }, curse: { pct: 0.15, dur: 3 } }] },
     { key: 'void', names: ['Leerenadept', 'Leerenmagier', 'Leerenfürst'], models: ['voidmage', 'voidmage', 'voidmage'], role: 'caster', atk: 'arkan', armorType: 'leicht', armor: [0, 0, 1], cost: [65, 105, 225],
+      branch: { names: ['Seelenbinder', 'Nekromant'], models: ['voidmage', 'voidmage'], role: 'support', armor: [0, 1], cost: [100, 215], abil: [{ summon: { unit: 'abgrund_shade_1', every: 9, max: 2 } }, { summon: { unit: 'abgrund_shade_2', every: 8, max: 3 }, curse: { pct: 0.15, dur: 3 } }] },
       abil: [{}, { splash: { radius: 1.8, pct: 0.4 } }, { splash: { radius: 2.4, pct: 0.6 }, curse: { pct: 0.2, dur: 3 } }], atkT3: 'chaos' },
     { key: 'golem', names: ['Gruftkoloss', 'Knochenkoloss', 'Seelenfresser'], models: ['cryptgolem', 'cryptgolem', 'cryptgolem'], role: 'tank', atk: 'klinge', armorType: 'schwer', armor: [3, 4, 5], cost: [75, 120, 240],
+      branch: { names: ['Leichenwall', 'Gruftbastion'], models: ['cryptgolem', 'cryptgolem'], armorType: 'festung', armor: [4, 6], cost: [125, 250], abil: [{ taunt: true, regen: 8 }, { taunt: true, regen: 18, thorns: 0.2 }] },
       abil: [{ lifesteal: 0.1 }, { lifesteal: 0.2, taunt: true }, { lifesteal: 0.3, taunt: true, splash: { radius: 2, pct: 0.35 } }] },
     { key: 'witch', names: ['Bannhexe', 'Fluchhexe', 'Totenbraut'], models: ['witch', 'witch', 'witch'], role: 'support', atk: 'arkan', armorType: 'mittel', armor: [0, 1, 1], cost: [55, 90, 190],
+      branch: { names: ['Seuchenhexe', 'Pestmutter'], models: ['witch', 'witch'], role: 'caster', armor: [1, 1], cost: [85, 180], abil: [{ poison: { dps: 0.22, dur: 4 }, chain: { jumps: 1, falloff: 0.7 } }, { poison: { dps: 0.32, dur: 5 }, chain: { jumps: 3, falloff: 0.75 } }] },
       abil: [{ slow: { pct: 0.25, dur: 2 } }, { slow: { pct: 0.3, dur: 2.5 }, curse: { pct: 0.15, dur: 3 } }, { slow: { pct: 0.4, dur: 3 }, curse: { pct: 0.25, dur: 3.5 }, multishot: { targets: 2 } }] },
   ],
 };
 
-const HOTKEYS = ['Q', 'W', 'E', 'R', 'T'];
+
+// ---- Zusätzliche Linien (6–8) der Grundvölker ----
+LINES.orden.push(
+  { key: 'lancer', names: ['Lanzenreiter', 'Sonnenlanze', 'Morgenrot-Ritter'], models: ['knight', 'knight', 'paladin_heavy'], role: 'melee', atk: 'stich', armorType: 'schwer', armor: [2, 3, 4], cost: [65, 105, 220],
+    branch: { names: ['Wachreiter', 'Bannerritter'], models: ['knight', 'paladin_heavy'], role: 'support', armor: [3, 4], cost: [100, 210], abil: [{ aura_speed: { pct: 0.12, radius: 5 } }, { aura_speed: { pct: 0.22, radius: 6 }, aura_armor: { armor: 2, radius: 6 } }] },
+    abil: [{}, { stun: { chance: 0.1, dur: 0.7 } }, { stun: { chance: 0.15, dur: 0.9 }, splash: { radius: 1.8, pct: 0.35 } }] },
+  { key: 'monk', names: ['Lichtmönch', 'Faustmönch', 'Großmeister der Faust'], models: ['priest', 'priest', 'priest'], role: 'assassin', atk: 'arkan', armorType: 'mittel', armor: [1, 2, 3], cost: [55, 90, 190],
+    branch: { names: ['Stillemönch', 'Hüter der Stille'], models: ['priest', 'priest'], role: 'healer', armor: [1, 2], cost: [90, 190], abil: [{ heal: { amount: 45, cd: 2.2 } }, { heal: { amount: 110, cd: 2.0 }, aura_armor: { armor: 2, radius: 5 } }] },
+    abil: [{}, { crit: { chance: 0.18, mult: 2 } }, { crit: { chance: 0.25, mult: 2.5 }, multishot: { targets: 2 } }] },
+  { key: 'ballista', names: ['Ballista', 'Sonnenballista', 'Himmelsbrecher'], models: ['walker', 'walker', 'mortar'], role: 'siege', atk: 'stich', armorType: 'festung', armor: [2, 3, 4], cost: [80, 125, 250],
+    branch: { names: ['Feuerballista', 'Sonnenfeuer-Geschütz'], models: ['walker', 'mortar'], atk: 'wucht', armor: [2, 3], cost: [125, 250], abil: [{ splash: { radius: 2.4, pct: 0.55 } }, { splash: { radius: 3.2, pct: 0.7 }, poison: { dps: 0.12, dur: 3 } }] },
+    abil: [{ multishot: { targets: 2 } }, { multishot: { targets: 3 } }, { multishot: { targets: 4 }, crit: { chance: 0.15, mult: 2 } }] },
+);
+LINES.wild.push(
+  { key: 'owl', names: ['Eulenfürst', 'Sturmeule', 'Großer Uhu'], models: ['griffin', 'griffin', 'griffin'], role: 'ranged', atk: 'stich', armorType: 'leicht', armor: [0, 1, 1], cost: [55, 90, 190],
+    branch: { names: ['Mondeule', 'Seherin der Nacht'], models: ['griffin', 'griffin'], role: 'support', atk: 'arkan', armor: [1, 1], cost: [90, 190], abil: [{ curse: { pct: 0.15, dur: 3 } }, { curse: { pct: 0.25, dur: 3.5 }, slow: { pct: 0.3, dur: 2 } }] },
+    abil: [{}, { crit: { chance: 0.15, mult: 2 } }, { crit: { chance: 0.2, mult: 2.3 }, multishot: { targets: 2 } }] },
+  { key: 'stag', names: ['Hirschwächter', 'Silberhirsch', 'Hainkönig'], models: ['wolf', 'wolf', 'treant'], role: 'melee', atk: 'klinge', armorType: 'mittel', armor: [1, 2, 3], cost: [60, 100, 210],
+    branch: { names: ['Weißhirsch', 'Lichthirsch'], models: ['wolf', 'wolf'], role: 'healer', atk: 'arkan', armor: [1, 2], cost: [95, 200], abil: [{ heal: { amount: 45, cd: 2.2 } }, { heal: { amount: 110, cd: 2.0 }, regen: 10 }] },
+    abil: [{ regen: 3 }, { regen: 8, stun: { chance: 0.1, dur: 0.7 } }, { regen: 18, stun: { chance: 0.15, dur: 1 }, splash: { radius: 2, pct: 0.35 } }] },
+  { key: 'ent', names: ['Rankenseele', 'Wurzelhüter', 'Weltenbaum-Spross'], models: ['treant', 'treant', 'treant'], role: 'support', atk: 'wucht', armorType: 'festung', armor: [3, 4, 5], cost: [85, 130, 260],
+    branch: { names: ['Wildwuchs', 'Grüne Flut'], models: ['treant', 'treant'], role: 'caster', atk: 'arkan', armor: [2, 3], cost: [125, 250], abil: [{ summon: { unit: 'wild_wolf_1', every: 10, max: 2 } }, { summon: { unit: 'wild_wolf_2', every: 9, max: 3 }, slow: { pct: 0.25, dur: 2 } }] },
+    abil: [{ aura_armor: { armor: 2, radius: 5 }, regen: 4 }, { aura_armor: { armor: 3, radius: 6 }, regen: 10 }, { aura_armor: { armor: 5, radius: 7 }, regen: 22, taunt: true }] },
+);
+LINES.schmiede.push(
+  { key: 'drone', names: ['Funkendrohne', 'Kampfdrohne', 'Schwarmkern'], models: ['core', 'core', 'core'], role: 'ranged', atk: 'stich', armorType: 'leicht', armor: [0, 1, 1], cost: [45, 75, 160],
+    branch: { names: ['Reparaturdrohne', 'Werkstattkern'], models: ['core', 'core'], role: 'healer', atk: 'arkan', armor: [1, 2], cost: [75, 160], abil: [{ heal: { amount: 35, cd: 2.2 } }, { heal: { amount: 90, cd: 2.0 }, aura_armor: { armor: 2, radius: 5 } }] },
+    abil: [{}, { multishot: { targets: 2 } }, { multishot: { targets: 3 }, crit: { chance: 0.15, mult: 2 } }] },
+  { key: 'tank', names: ['Dampfpanzer', 'Belagerungspanzer', 'Äther-Titan'], models: ['mortar', 'mortar', 'mortar'], role: 'tank', atk: 'wucht', armorType: 'festung', armor: [4, 5, 7], cost: [95, 145, 290],
+    branch: { names: ['Flammenpanzer', 'Höllenkessel'], models: ['mortar', 'mortar'], role: 'melee', atk: 'chaos', armor: [4, 5], cost: [140, 280], abil: [{ splash: { radius: 2.2, pct: 0.5 }, poison: { dps: 0.12, dur: 3 } }, { splash: { radius: 2.8, pct: 0.6 }, poison: { dps: 0.2, dur: 4 } }] },
+    abil: [{ taunt: true }, { taunt: true, splash: { radius: 2, pct: 0.3 } }, { taunt: true, splash: { radius: 2.6, pct: 0.45 }, thorns: 0.2 }] },
+  { key: 'arc', names: ['Bogenlicht-Turm', 'Leuchtturmläufer', 'Sonnenlinse'], models: ['walker', 'walker', 'core'], role: 'caster', atk: 'arkan', armorType: 'mittel', armor: [1, 2, 2], cost: [75, 115, 240],
+    branch: { names: ['Frostlinse', 'Kryokern'], models: ['walker', 'core'], role: 'support', armor: [2, 2], cost: [115, 240], abil: [{ slow: { pct: 0.35, dur: 2 }, splash: { radius: 1.8, pct: 0.4 } }, { slow: { pct: 0.5, dur: 2.5 }, splash: { radius: 2.4, pct: 0.55 }, stun: { chance: 0.08, dur: 0.6 } }] },
+    abil: [{ splash: { radius: 1.6, pct: 0.35 } }, { splash: { radius: 2.2, pct: 0.5 } }, { splash: { radius: 3, pct: 0.65 }, curse: { pct: 0.15, dur: 3 } }] },
+);
+LINES.abgrund.push(
+  { key: 'ghoul', names: ['Ghul', 'Fresser', 'Leichenkönig'], models: ['cryptgolem', 'cryptgolem', 'cryptgolem'], role: 'melee', atk: 'klinge', armorType: 'mittel', armor: [1, 2, 3], cost: [45, 75, 160],
+    branch: { names: ['Pestghul', 'Seuchenträger'], models: ['cryptgolem', 'cryptgolem'], atk: 'chaos', armor: [1, 2], cost: [75, 160], abil: [{ poison: { dps: 0.2, dur: 4 } }, { poison: { dps: 0.3, dur: 5 }, lifesteal: 0.15 }] },
+    abil: [{ lifesteal: 0.1 }, { lifesteal: 0.2 }, { lifesteal: 0.3, crit: { chance: 0.15, mult: 2 } }] },
+  { key: 'banshee', names: ['Klageseele', 'Banshee', 'Königin der Klage'], models: ['shade', 'shade', 'witch'], role: 'caster', atk: 'chaos', armorType: 'leicht', armor: [0, 1, 1], cost: [60, 100, 210],
+    branch: { names: ['Furchtseele', 'Herrin des Grauens'], models: ['shade', 'witch'], role: 'support', armor: [1, 1], cost: [95, 200], abil: [{ curse: { pct: 0.2, dur: 3 }, slow: { pct: 0.25, dur: 2 } }, { curse: { pct: 0.3, dur: 3.5 }, slow: { pct: 0.35, dur: 2.5 } }] },
+    abil: [{}, { chain: { jumps: 2, falloff: 0.7 } }, { chain: { jumps: 4, falloff: 0.8 }, curse: { pct: 0.15, dur: 3 } }] },
+  { key: 'gargoyle', names: ['Wasserspeier', 'Steinwächter', 'Obsidianwächter'], models: ['griffin', 'griffin', 'griffin'], role: 'tank', atk: 'wucht', armorType: 'festung', armor: [3, 5, 6], cost: [80, 125, 250],
+    branch: { names: ['Nachtflügel', 'Schreckensschwinge'], models: ['griffin', 'griffin'], role: 'assassin', atk: 'chaos', armor: [2, 3], cost: [120, 245], abil: [{ crit: { chance: 0.2, mult: 2.2 } }, { crit: { chance: 0.3, mult: 2.8 }, lifesteal: 0.15 }] },
+    abil: [{ taunt: true }, { taunt: true, regen: 8 }, { taunt: true, regen: 18, stun: { chance: 0.1, dur: 0.8 } }] },
+);
+// ---- Neues Volk: Schwarmbrut (Masse) ----
+LINES.schwarm = [
+  { key: 'crawler', names: ['Brutling', 'Schwarmkrieger', 'Brutfürst'], models: ['crawler', 'crawler', 'beetle'], role: 'melee', atk: 'klinge', armorType: 'leicht', armor: [0, 1, 2], cost: [25, 45, 110],
+    branch: { names: ['Säurebrutling', 'Ätzbrut'], models: ['crawler', 'crawler'], atk: 'chaos', armor: [0, 1], cost: [45, 110], abil: [{ poison: { dps: 0.2, dur: 3 } }, { poison: { dps: 0.3, dur: 4 }, swarm: 0.05 }] },
+    abil: [{ swarm: 0.04 }, { swarm: 0.06 }, { swarm: 0.08, lifesteal: 0.1 }] },
+  { key: 'spitter', names: ['Spucker', 'Giftspeier', 'Säurekönigin'], models: ['beetle', 'beetle', 'beetle'], role: 'ranged', atk: 'stich', armorType: 'leicht', armor: [0, 0, 1], cost: [30, 50, 120],
+    branch: { names: ['Stachelspucker', 'Dornenschleuder'], models: ['beetle', 'beetle'], armor: [0, 1], cost: [50, 120], abil: [{ multishot: { targets: 2 }, swarm: 0.04 }, { multishot: { targets: 3 }, swarm: 0.06 }] },
+    abil: [{ swarm: 0.03 }, { poison: { dps: 0.15, dur: 3 }, swarm: 0.04 }, { poison: { dps: 0.25, dur: 4 }, swarm: 0.06, splash: { radius: 1.6, pct: 0.35 } }] },
+  { key: 'carapace', names: ['Panzerling', 'Chitinwall', 'Schwarmbollwerk'], models: ['beetle', 'beetle', 'beetle'], role: 'tank', atk: 'wucht', armorType: 'schwer', armor: [2, 3, 5], cost: [40, 70, 160],
+    branch: { names: ['Stachelpanzer', 'Dornenburg'], models: ['beetle', 'beetle'], armorType: 'festung', armor: [3, 5], cost: [70, 160], abil: [{ thorns: 0.25, taunt: true }, { thorns: 0.45, taunt: true }] },
+    abil: [{ swarm: 0.03 }, { taunt: true, swarm: 0.04 }, { taunt: true, swarm: 0.06, regen: 10 }] },
+  { key: 'hunter', names: ['Lauerer', 'Rudeljäger', 'Alphajäger'], models: ['raptor', 'raptor', 'raptor'], role: 'assassin', atk: 'klinge', armorType: 'mittel', armor: [0, 1, 2], cost: [35, 60, 140],
+    branch: { names: ['Sprungjäger', 'Himmelsräuber'], models: ['raptor', 'raptor'], atk: 'stich', armor: [1, 1], cost: [60, 140], abil: [{ crit: { chance: 0.2, mult: 2 } }, { crit: { chance: 0.3, mult: 2.5 }, swarm: 0.05 }] },
+    abil: [{ swarm: 0.03 }, { swarm: 0.05, lifesteal: 0.1 }, { swarm: 0.07, lifesteal: 0.18 }] },
+  { key: 'queen', names: ['Brutpflegerin', 'Brutmutter', 'Schwarmkönigin'], models: ['beetle', 'beetle', 'beetle'], role: 'support', atk: 'arkan', armorType: 'mittel', armor: [1, 2, 3], cost: [60, 100, 220],
+    branch: { names: ['Brutnest', 'Lebendes Nest'], models: ['beetle', 'beetle'], role: 'caster', armor: [2, 3], cost: [100, 220], abil: [{ summon: { unit: 'schwarm_crawler_1', every: 8, max: 3 } }, { summon: { unit: 'schwarm_crawler_2', every: 7, max: 4 } }] },
+    abil: [{ heal: { amount: 20, cd: 2.4 } }, { heal: { amount: 45, cd: 2.2 }, aura_speed: { pct: 0.12, radius: 5 } }, { heal: { amount: 100, cd: 2.0 }, aura_speed: { pct: 0.22, radius: 6 } }] },
+  { key: 'locust', names: ['Heuschrecke', 'Plagenschwarm', 'Verheerer'], models: ['imp', 'imp', 'imp'], role: 'ranged', atk: 'chaos', armorType: 'leicht', armor: [0, 0, 1], cost: [35, 60, 135],
+    branch: { names: ['Fresswolke', 'Hungerplage'], models: ['imp', 'imp'], role: 'caster', armor: [0, 1], cost: [60, 135], abil: [{ chain: { jumps: 2, falloff: 0.7 } }, { chain: { jumps: 4, falloff: 0.75 }, poison: { dps: 0.15, dur: 3 } }] },
+    abil: [{ swarm: 0.03 }, { swarm: 0.05, slow: { pct: 0.2, dur: 1.5 } }, { swarm: 0.07, slow: { pct: 0.3, dur: 2 }, multishot: { targets: 2 } }] },
+  { key: 'mantis', names: ['Gottesanbeter', 'Sichelkrieger', 'Klingenkönigin'], models: ['raptor', 'raptor', 'raptor'], role: 'melee', atk: 'klinge', armorType: 'mittel', armor: [1, 2, 3], cost: [55, 90, 190],
+    branch: { names: ['Schattenmantis', 'Lautlose Sichel'], models: ['raptor', 'raptor'], role: 'assassin', atk: 'chaos', armor: [1, 2], cost: [90, 190], abil: [{ crit: { chance: 0.25, mult: 2.2 } }, { crit: { chance: 0.35, mult: 2.8 } }] },
+    abil: [{ splash: { radius: 1.6, pct: 0.3 } }, { splash: { radius: 2, pct: 0.4 }, swarm: 0.04 }, { splash: { radius: 2.4, pct: 0.55 }, swarm: 0.06 }] },
+  { key: 'colossus', names: ['Brutkoloss', 'Schwarmtitan', 'Weltenfresser'], models: ['brute', 'brute', 'brute'], role: 'tank', atk: 'wucht', armorType: 'schwer', armor: [3, 4, 6], cost: [90, 140, 280],
+    branch: { names: ['Brutträger', 'Wandelnder Hort'], models: ['brute', 'brute'], role: 'support', armor: [3, 4], cost: [140, 280], abil: [{ summon: { unit: 'schwarm_hunter_1', every: 9, max: 2 }, taunt: true }, { summon: { unit: 'schwarm_hunter_2', every: 8, max: 3 }, taunt: true }] },
+    abil: [{ swarm: 0.03 }, { splash: { radius: 2, pct: 0.35 }, swarm: 0.04 }, { splash: { radius: 2.6, pct: 0.5 }, swarm: 0.06, stun: { chance: 0.1, dur: 1 } }] },
+];
+// ---- Neues Volk: Glutgeborene (Beschwörung, Brennschaden) ----
+LINES.glut = [
+  { key: 'ember', names: ['Glutling', 'Flammenwicht', 'Inferno-Geist'], models: ['elemental', 'elemental', 'elemental'], role: 'melee', atk: 'chaos', armorType: 'mittel', armor: [1, 2, 3], cost: [45, 75, 165],
+    branch: { names: ['Aschenwächter', 'Schlackenkoloss'], models: ['elemental', 'golem'], role: 'tank', armorType: 'festung', armor: [3, 5], cost: [75, 165], abil: [{ taunt: true, thorns: 0.2 }, { taunt: true, thorns: 0.35, regen: 12 }] },
+    abil: [{ poison: { dps: 0.15, dur: 3 } }, { poison: { dps: 0.22, dur: 4 } }, { poison: { dps: 0.3, dur: 5 }, splash: { radius: 2, pct: 0.35 } }] },
+  { key: 'pyromancer', names: ['Feuerruferin', 'Pyromantin', 'Herrin der Flammen'], models: ['voidmage', 'voidmage', 'voidmage'], role: 'caster', atk: 'arkan', armorType: 'leicht', armor: [0, 0, 1], cost: [60, 100, 215],
+    branch: { names: ['Flammenbinderin', 'Phönixbeschwörerin'], models: ['witch', 'witch'], role: 'support', armor: [1, 1], cost: [100, 215], abil: [{ summon: { unit: 'glut_ember_1', every: 9, max: 2 } }, { summon: { unit: 'glut_ember_2', every: 8, max: 3 } }] },
+    abil: [{ splash: { radius: 1.8, pct: 0.4 } }, { splash: { radius: 2.4, pct: 0.55 }, poison: { dps: 0.12, dur: 3 } }, { splash: { radius: 3, pct: 0.7 }, poison: { dps: 0.2, dur: 4 } }] },
+  { key: 'salamander', names: ['Salamander', 'Glutechse', 'Lavadrache'], models: ['raptor', 'raptor', 'raptor'], role: 'assassin', atk: 'chaos', armorType: 'mittel', armor: [1, 1, 2], cost: [50, 85, 180],
+    branch: { names: ['Feuerspucker', 'Flammenwurm'], models: ['raptor', 'raptor'], role: 'ranged', atk: 'arkan', armor: [1, 1], cost: [85, 180], abil: [{ splash: { radius: 1.6, pct: 0.35 }, poison: { dps: 0.1, dur: 3 } }, { splash: { radius: 2.2, pct: 0.5 }, poison: { dps: 0.18, dur: 4 } }] },
+    abil: [{ crit: { chance: 0.15, mult: 2 } }, { crit: { chance: 0.22, mult: 2.3 }, poison: { dps: 0.1, dur: 3 } }, { crit: { chance: 0.3, mult: 2.6 }, poison: { dps: 0.18, dur: 4 } }] },
+  { key: 'imp', names: ['Funkenkobold', 'Glutkobold', 'Kobold-Kriegsherr'], models: ['imp', 'imp', 'imp'], role: 'ranged', atk: 'stich', armorType: 'leicht', armor: [0, 0, 1], cost: [40, 65, 140],
+    branch: { names: ['Sprengkobold', 'Feuerwerker'], models: ['imp', 'imp'], role: 'siege', atk: 'wucht', armor: [0, 1], cost: [65, 140], abil: [{ splash: { radius: 2.2, pct: 0.5 } }, { splash: { radius: 3, pct: 0.65 }, stun: { chance: 0.1, dur: 0.6 } }] },
+    abil: [{}, { multishot: { targets: 2 } }, { multishot: { targets: 3 }, poison: { dps: 0.12, dur: 3 } }] },
+  { key: 'hound', names: ['Glutwelpe', 'Höllenhund', 'Zerberus'], models: ['hound', 'hound', 'hound'], role: 'melee', atk: 'klinge', armorType: 'mittel', armor: [1, 2, 3], cost: [50, 85, 180],
+    branch: { names: ['Aschenhund', 'Rudel der Asche'], models: ['hound', 'hound'], role: 'support', armor: [2, 2], cost: [85, 180], abil: [{ summon: { unit: 'glut_hound_1', every: 10, max: 1 }, aura_speed: { pct: 0.1, radius: 5 } }, { summon: { unit: 'glut_hound_2', every: 9, max: 2 }, aura_speed: { pct: 0.18, radius: 6 } }] },
+    abil: [{ lifesteal: 0.08 }, { lifesteal: 0.15, poison: { dps: 0.1, dur: 3 } }, { lifesteal: 0.22, poison: { dps: 0.18, dur: 4 }, splash: { radius: 2, pct: 0.3 } }] },
+  { key: 'golem', names: ['Magmagolem', 'Basaltkoloss', 'Vulkanherz'], models: ['golem', 'golem', 'boss_titan'], role: 'tank', atk: 'wucht', armorType: 'schwer', armor: [3, 4, 6], cost: [85, 135, 270],
+    branch: { names: ['Lavawoge', 'Glutflut'], models: ['golem', 'golem'], role: 'melee', atk: 'chaos', armor: [3, 4], cost: [135, 270], abil: [{ splash: { radius: 2.4, pct: 0.5 }, poison: { dps: 0.15, dur: 3 } }, { splash: { radius: 3, pct: 0.65 }, poison: { dps: 0.25, dur: 4 } }] },
+    abil: [{ taunt: true }, { taunt: true, thorns: 0.2 }, { taunt: true, thorns: 0.35, regen: 16 }] },
+  { key: 'priestess', names: ['Aschenpriesterin', 'Flammenheilerin', 'Phönixmutter'], models: ['priest', 'priest', 'priest'], role: 'healer', atk: 'arkan', armorType: 'leicht', armor: [0, 1, 1], cost: [65, 100, 210],
+    branch: { names: ['Wiedergeburtsruferin', 'Hüterin der Asche'], models: ['priest', 'priest'], role: 'support', armor: [1, 2], cost: [100, 210], abil: [{ heal: { amount: 40, cd: 2.4 }, aura_armor: { armor: 2, radius: 5 } }, { heal: { amount: 100, cd: 2.2 }, aura_armor: { armor: 4, radius: 6 } }] },
+    abil: [{ heal: { amount: 24, cd: 2.2 } }, { heal: { amount: 58, cd: 2.0 } }, { heal: { amount: 140, cd: 1.8 }, aura_speed: { pct: 0.15, radius: 5 } }] },
+  { key: 'phoenix', names: ['Feuervogel', 'Glutphönix', 'Sonnenphönix'], models: ['griffin', 'griffin', 'boss_drake'], role: 'ranged', atk: 'arkan', armorType: 'mittel', armor: [1, 2, 3], cost: [90, 140, 290],
+    branch: { names: ['Sturmphönix', 'Himmelsbrand'], models: ['griffin', 'griffin'], role: 'caster', armor: [1, 2], cost: [140, 290], abil: [{ chain: { jumps: 2, falloff: 0.75 }, poison: { dps: 0.1, dur: 3 } }, { chain: { jumps: 4, falloff: 0.8 }, poison: { dps: 0.18, dur: 4 } }] },
+    abil: [{ splash: { radius: 1.8, pct: 0.4 } }, { splash: { radius: 2.4, pct: 0.55 }, poison: { dps: 0.12, dur: 3 } }, { splash: { radius: 3.2, pct: 0.7 }, poison: { dps: 0.22, dur: 4 } }] },
+];
+
+export const BUILD_KEYS = ['Q', 'W', 'E', 'R', 'A', 'S', 'D', 'F'];
+const HOTKEYS = BUILD_KEYS;
 
 function buildUnits() {
   const units = {};
+  const make = (fid, line, li, t, idSuffix, spec, value) => {
+    const role = spec.role || line.role;
+    const r = ROLES[role];
+    const eff = 1 + 0.12 * t; // Aufwertungen sind effizienter (Platz ist begrenzt)
+    const id = `${fid}_${line.key}_${idSuffix}`;
+    units[id] = {
+      id, faction: fid, line: line.key, lineIndex: li, hotkey: HOTKEYS[li], branch: spec.branch || 'a',
+      name: spec.name, model: spec.model, tier: t + 1, role, roleLabel: r.label,
+      cost: spec.cost, value,
+      hp: Math.round(r.hp * value * eff),
+      dmg: Math.round(r.dps * value * eff * r.cd * 10) / 10,
+      cd: r.cd, range: r.range, speed: r.speed,
+      atk: spec.atk || line.atk,
+      armorType: spec.armorType || line.armorType, armor: spec.armor,
+      abil: spec.abil || {},
+      ranged: r.range > 2.5,
+      upgrades: [], upgradeTo: null,
+      size: role === 'tank' ? 1.15 : 1,
+    };
+    return units[id];
+  };
   for (const [fid, lines] of Object.entries(LINES)) {
     lines.forEach((line, li) => {
-      let value = 0;
-      for (let t = 0; t < 3; t++) {
-        const r = ROLES[line.role];
-        value += line.cost[t];
-        const eff = 1 + 0.12 * t; // Aufwertungen sind effizienter (Platz ist begrenzt)
-        const cd = r.cd;
-        const id = `${fid}_${line.key}_${t + 1}`;
-        units[id] = {
-          id, faction: fid, line: line.key, lineIndex: li, hotkey: HOTKEYS[li],
-          name: line.names[t], model: line.models[t], tier: t + 1, role: line.role, roleLabel: r.label,
-          cost: line.cost[t], value,
-          hp: Math.round(r.hp * value * eff),
-          dmg: Math.round(r.dps * value * eff * cd * 10) / 10,
-          cd, range: r.range, speed: r.speed,
-          atk: t === 2 && line.atkT3 ? line.atkT3 : line.atk,
-          armorType: line.armorType, armor: line.armor[t],
-          abil: line.abil[t] || {},
-          ranged: r.range > 2.5,
-          upgradeTo: t < 2 ? `${fid}_${line.key}_${t + 2}` : null,
-          size: line.role === 'tank' ? 1.15 : 1,
-        };
+      // Stufe 1 → Pfad A (2a, 3a) und Pfad B (2b, 3b)
+      const t1 = make(fid, line, li, 0, '1', { name: line.names[0], model: line.models[0], cost: line.cost[0], armor: line.armor[0], abil: line.abil[0] }, line.cost[0]);
+      const a2 = make(fid, line, li, 1, '2', { name: line.names[1], model: line.models[1], cost: line.cost[1], armor: line.armor[1], abil: line.abil[1] }, line.cost[0] + line.cost[1]);
+      const a3 = make(fid, line, li, 2, '3', { name: line.names[2], model: line.models[2], cost: line.cost[2], armor: line.armor[2], abil: line.abil[2], atk: line.atkT3 }, line.cost[0] + line.cost[1] + line.cost[2]);
+      t1.upgrades.push(a2.id); a2.upgrades.push(a3.id);
+      const B = line.branch;
+      if (B) {
+        const bs = { role: B.role, atk: B.atk, armorType: B.armorType, branch: 'b' };
+        const b2 = make(fid, line, li, 1, '2b', { ...bs, name: B.names[0], model: B.models[0], cost: B.cost[0], armor: B.armor[0], abil: B.abil[0] }, line.cost[0] + B.cost[0]);
+        const b3 = make(fid, line, li, 2, '3b', { ...bs, name: B.names[1], model: B.models[1], cost: B.cost[1], armor: B.armor[1], abil: B.abil[1] }, line.cost[0] + B.cost[0] + B.cost[1]);
+        t1.upgrades.push(b2.id); b2.upgrades.push(b3.id);
       }
     });
   }
+  for (const u of Object.values(units)) u.upgradeTo = u.upgrades[0] || null;
   return units;
 }
 export const UNITS = buildUnits();

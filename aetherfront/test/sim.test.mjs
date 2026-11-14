@@ -10,9 +10,11 @@ const setup = (seed = 5, n = 2) => {
 };
 const run = (sim, ticks, cmdsAt = {}) => { for (let i = 0; i < ticks && sim.phase !== 'over'; i++) sim.step(cmdsAt[sim.tick] || []); };
 
-test('Daten: 4 Fraktionen × 5 Linien × 3 Stufen, 30 Wellen, Bosse auf 10/20/30', () => {
-  assert.equal(Object.keys(UNITS).length, 60);
-  for (const f of FACTION_IDS) assert.equal(factionUnits(f).length, 5);
+test('Daten: 6 Völker × 8 Linien × 5 Vasallen (2 Pfade), 30 Wellen, Bosse auf 10/20/30', () => {
+  assert.equal(Object.keys(UNITS).length, 240);
+  assert.equal(FACTION_IDS.length, 6);
+  for (const f of FACTION_IDS) assert.equal(factionUnits(f).length, 8);
+  for (const u of Object.values(UNITS)) if (u.tier === 1) assert.equal(u.upgrades.length, 2, u.id);
   assert.equal(WAVES.length, 30);
   assert.deepEqual(WAVES.filter((w) => w.boss).map((w) => w.n), [10, 20, 30]);
   for (const u of Object.values(UNITS)) { assert.ok(u.hp > 0 && u.dmg > 0 && u.cost > 0, u.id); }
@@ -27,11 +29,12 @@ test('Bauen, Aufwerten, Verkaufen (voller Erstattungswert in derselben Bauphase)
   assert.equal(p.gold, ECON.startGold - unit.cost);
   assert.equal(sim.applyCommand(0, { type: 'build', unit: unit.id, col: 2, row: 1 }), false, 'Feld belegt');
   const f = sim.fightersOf(0)[0];
-  assert.ok(sim.applyCommand(0, { type: 'upgrade', id: f.id }));
-  assert.equal(f.def, unit.upgradeTo);
+  assert.ok(sim.applyCommand(0, { type: 'upgrade', id: f.id, to: unit.upgrades[1] }));
+  assert.equal(f.def, unit.upgrades[1]);
+  assert.equal(UNITS[f.def].branch, 'b');
   const before = p.gold;
   assert.ok(sim.applyCommand(0, { type: 'sell', id: f.id }));
-  assert.equal(p.gold, before + UNITS[unit.upgradeTo].value);
+  assert.equal(p.gold, before + UNITS[unit.upgrades[1]].value);
   assert.equal(sim.applyCommand(0, { type: 'build', unit: 'wild_wolf_1', col: 0, row: 0 }), false, 'fremde Fraktion');
 });
 

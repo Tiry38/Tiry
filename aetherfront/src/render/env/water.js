@@ -1,6 +1,6 @@
 // Wasserfälle (fließende Bänder, die ins Wolkenmeer stürzen) und Nebelschwaden (Billboards).
 import * as THREE from 'three';
-import { GLSL_SKY, GLSL_NOISE, GLSL_FOG } from './shaders.js';
+import { GLSL_SKY, GLSL_NOISE, GLSL_FOG, skyU } from './shaders.js';
 import { CLOUD_TOP } from './clouds.js';
 
 /**
@@ -50,7 +50,7 @@ export function createWaterfalls(U, falls) {
   g.setAttribute('fall', new THREE.Float32BufferAttribute(fall, 1));
   g.setIndex(idx);
   const mat = new THREE.ShaderMaterial({
-    uniforms: { uTime: U.uTime, uSunDir: U.uSunDir, uFogDensity: U.uFogDensity, uHeightFog: U.uHeightFog },
+    uniforms: { uTime: U.uTime, ...skyU(U), uFogDensity: U.uFogDensity, uHeightFog: U.uHeightFog },
     vertexShader: /* glsl */ `
       attribute float fall;
       varying vec2 vUv; varying float vFall; varying vec3 vW;
@@ -94,7 +94,7 @@ export function createWaterfalls(U, falls) {
 export function createWisps(U, tex, items) {
   const quad = new THREE.PlaneGeometry(1, 1);
   const mat = new THREE.ShaderMaterial({
-    uniforms: { uTime: U.uTime, uSunDir: U.uSunDir, uTex: { value: tex }, uFogDensity: U.uFogDensity, uHeightFog: U.uHeightFog },
+    uniforms: { uTime: U.uTime, ...skyU(U), uTex: { value: tex }, uFogDensity: U.uFogDensity, uHeightFog: U.uHeightFog },
     vertexShader: /* glsl */ `
       uniform float uTime;
       attribute vec4 wisp; // alpha, kind, seed, stretch
@@ -131,8 +131,11 @@ export function createWisps(U, tex, items) {
         if (a < 0.003) discard;
         vec3 d = normalize(vW - cameraPosition);
         float sunAmt = max(dot(d, uSunDir), 0.0);
-        vec3 lit = mix(vec3(0.66, 0.74, 0.86), vec3(1.15, 0.95, 0.74), pow(sunAmt, 2.0));
-        vec3 spray = vec3(0.85, 0.95, 1.0);
+        // Wolkenbänke: Luftperspektive (bläulicher Dunst) unten, sonnenbeschienene Oberkante oben
+        vec3 hz = hazeColor(d);
+        vec3 lit = mix(mix(hz * 1.05, uCloudLit * 0.92, 0.35), uCloudLit * vec3(1.05, 0.92, 0.75), pow(sunAmt, 2.0));
+        lit = mix(lit, hz, 0.25 * (1.0 - vUv.y));
+        vec3 spray = vec3(0.85, 0.95, 1.0) * mix(vec3(1.0), uCloudLit, 0.3);
         vec3 col = mix(lit, spray, vWisp.y) * (0.75 + 0.25 * vUv.y);
         col = applyHaze(col, vW);
         gl_FragColor = vec4(col, a);

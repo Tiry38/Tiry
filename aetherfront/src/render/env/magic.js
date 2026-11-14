@@ -1,13 +1,13 @@
 // Magische Materialien: Kristalle, Portal-Wirbel, Runenbänder, Siegel, Lichtsäule.
 import * as THREE from 'three';
-import { GLSL_SKY, GLSL_NOISE, GLSL_FOG } from './shaders.js';
+import { GLSL_SKY, GLSL_NOISE, GLSL_FOG, skyU } from './shaders.js';
 
 /** Facettierter Kristall mit innerem Leuchten (HDR-Spitzen → Bloom). floating: wippt und dreht sich. */
 export function createCrystalMaterial(U, { floating = false, intensity = 1.0, spire = false } = {}) {
   return new THREE.ShaderMaterial({
     defines: { FLOATING: floating ? 1 : 0, SPIRE: spire ? 1 : 0 },
     uniforms: {
-      uTime: U.uTime, uSunDir: U.uSunDir, uLightDir: U.uLightDir, uFogDensity: U.uFogDensity, uHeightFog: U.uHeightFog,
+      uTime: U.uTime, ...skyU(U), uLightDir: U.uLightDir, uFogDensity: U.uFogDensity, uHeightFog: U.uHeightFog,
       uIntensity: { value: intensity }, uColor: { value: new THREE.Color(0.25, 0.9, 1.0) },
     },
     vertexShader: /* glsl */ `

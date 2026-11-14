@@ -1,7 +1,7 @@
 // Aetherfront – Einstieg: verbindet Simulation, Grafik, Audio und Oberfläche.
 import { Engine } from './render/engine.js';
 import { RtsCamera } from './render/camera.js';
-import { createEnvironment } from './render/environment.js';
+import { createEnvironment, loadEnvironmentAssets } from './render/environment.js';
 import { UnitsView } from './render/units.js';
 import { Fx } from './render/fx.js';
 import { Overlay } from './render/overlay.js';
@@ -54,7 +54,12 @@ class App {
   async init() {
     $('loading').classList.add('show');
     await frame();
-    this.env = createEnvironment({ scene: this.engine.scene, renderer: this.engine.renderer, quality: this.settings.get('quality') });
+    // M1 Grafik: echte CC0-Assets (PBR/HDRI) vorab laden; fehlen sie, nutzt die Welt prozedurale Texturen
+    const envAssets = await loadEnvironmentAssets(this.engine.renderer);
+    this.env = createEnvironment({
+      scene: this.engine.scene, renderer: this.engine.renderer, quality: this.settings.get('quality'),
+      assets: envAssets, look: this.engine.look, settings: this.settings,
+    });
     this.view = new UnitsView(this.engine.scene);
     this.fx = new Fx(this.engine.scene, this.engine.camera, this.settings);
     this.overlay = new Overlay(this.engine.scene, this.engine.camera);
