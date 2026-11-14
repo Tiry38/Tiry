@@ -133,3 +133,6 @@
 - ADFC: eigenes Herz-Symbol `i-heart` statt Platzhalter. „Besuch uns“: Zeiten auf heller Glas-Karte.
 - Kopf: Menü als Glas-Pille mit Verlaufsrand, aktiver Reiter dunkle Pille; Kopf-Raster `auto 1fr auto`, unsichtbares Logo fällt im Startbereich zusammen → Öffnungsstatus zeigt auf dem Desktop (ab 1400 px) wieder Text.
 - Punkt 6 (neue einheitliche Fotos) kommt nach dem Laden-Umbau – nur vorgemerkt.
+
+## 14.11.2026 – Marken-Showroom schneller (Tiry: „dauert ewig“)
+- Automatischer Wechsel alle 4 s statt 7 s; Pause bei Maus über dem Showroom entfernt (am PC lag die Maus fast immer drauf → kein Wechsel). Nach Klick/Wischen weiter 20 s Ruhe.

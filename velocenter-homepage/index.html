@@ -3944,7 +3944,7 @@ function showroom(root,prefix){
  /* automatisch weiter, nur wenn sichtbar, Tab aktiv und niemand gerade klickt/zeigt */
  let vis=false,over=false;new IntersectionObserver(e=>vis=e[0].isIntersecting,{threshold:.35}).observe(area);
  s.addEventListener('pointerenter',e=>{if(e.pointerType==='mouse')over=true});s.addEventListener('pointerleave',()=>over=false);
- setInterval(()=>{if(vis&&!over&&!document.hidden&&Date.now()>hold&&SR.pool)to(i+1,'next')},7000);
+ setInterval(()=>{if(vis&&!document.hidden&&Date.now()>hold&&SR.pool)to(i+1,'next')},4000);
  /* Start: zufälliges Bestandsrad der ersten Marke, sobald der Bestand geladen ist */
  SR.subs.push(()=>{BR.forEach((b,j)=>{const t=SR.th&&SR.th[b.k];if(t)thSet(j,t)});
   const x=srPick('*');const n=BR.findIndex(b=>b.k===x.k);if(n<0)return;i=n;cur=x;thSet(i,x.img);const pre=new Image();pre.src=x.img;const go=()=>{bk.src=x.img;rf.src=x.img;bk.alt=x.m+(x.f?' in '+x.f:'');wm.src=BR[i].logo;paint();s.classList.add('srok')};pre.decode?pre.decode().then(go,go):go()});
