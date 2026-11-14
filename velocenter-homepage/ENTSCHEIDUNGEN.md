@@ -188,3 +188,5 @@
 - 14.11.2026: Ausgeblendete Räder/Farben (Bestand-Verwaltung) laufen in keinem Showroom mehr. Ursache: Showroom-Liste wurde nur beim ersten Laden gebaut, spätere Ausblendungen aus der Datenbank kamen nicht an. Jetzt bei jeder Bestandsänderung neu (admRefresh → srBuild).
 
 - 14.11.2026: Kennzahlen E-Dreiräder (Compact Plus + Easy Rider 3) neu: Glas-Leiste mit sanft wanderndem Farbschimmer statt weißer Pillen im Rahmen, neue Linien-Symbole im Stil der Seite (Einstieg, Maßpfeile Länge/Innenbein, Speichenrad, Gewicht, Tacho, Akku), Farbstrich je Wert. Desktop 4 bzw. 3 Spalten, Tablet/Handy 2.
+
+- 14.11.2026: Handy: Beim Radwechsel in der Kachel „Auf Lager“ blinkten die unteren Kacheln mit. Ursache: je Wechsel neues Bild-Element (neue Grafik-Ebene, Nachbarkacheln wurden neu gezeichnet). Jetzt zwei feste Bilder im Wechsel + feste Ebenen je Kachel (translateZ, contain:paint, will-change).

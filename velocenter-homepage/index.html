@@ -2221,6 +2221,7 @@ body.fz2 main,body.fz2 .foot{zoom:1.25}
 .qbk{position:absolute;z-index:-1;left:50%;top:6px;width:min(86%,280px);height:66%;transform:translateX(-42%);pointer-events:none}
 .qbk::before{content:"";position:absolute;inset:0 4% -4%;border-radius:50%;background:radial-gradient(closest-side,rgba(255,255,255,.8),rgba(255,236,242,.35) 55%,rgba(255,255,255,0))}
 .qbk img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;filter:drop-shadow(0 10px 14px rgba(0,0,0,.45));opacity:0;transform:translateX(26px) scale(.96);transition:opacity .6s ease,transform .8s var(--spring)}
+.qa{transform:translateZ(0);contain:paint}.qa .bg{will-change:transform;backface-visibility:hidden}.qbk{contain:layout paint}.qbk img{will-change:opacity,transform;backface-visibility:hidden}.qbk img.qout{transition:opacity .6s ease,transform .8s var(--spring)}/* feste Ebenen: kein Flackern am Handy (Tiry 14.11.2026) */
 .qbk img.qin{opacity:1;transform:none}
 .qbk img.qout{opacity:0;transform:translateX(-26px) scale(.96)}
 .qld{position:relative;width:9px;height:9px;border-radius:50%;background:#22C55E}
@@ -4241,9 +4242,12 @@ function qlFill(){const box=$('#qBk');if(!box||!LG.M)return;const G={},S=new Set
  LG.M.forEach(m=>{const k=(lgBrand(m.marke+' '+m.modell)||{k:String(m.marke||'').toLowerCase()}).k;(m.v||[]).forEach(x=>{if(x.bild&&x.status!=='bestellt'&&!S.has(x.bild)){S.add(x.bild);(G[k]=G[k]||[]).push(x.bild)}})});
  QL.g=G;QL.b={};QL.lb={};QL.p=Object.keys(G);if(!QL.p.length)return;qlNext();clearInterval(QL.t);QL.t=setInterval(()=>{if(cur==='start'&&!document.hidden)qlNext()},2800)}
 function qlNext(){const box=$('#qBk');if(!box||!QL.p.length)return;
- const k=bagNext(QL.b,QL.p),L=QL.g[k];let c=L.filter(y=>y!==QL.lb[k]);if(!c.length)c=L;const src=c[srRnd(c.length)];QL.lb[k]=src;const im=new Image();im.alt='';im.decoding='async';
- im.onload=()=>{[...box.querySelectorAll('img')].forEach(o=>{o.classList.remove('qin');o.classList.add('qout');setTimeout(()=>o.remove(),900)});box.appendChild(im);requestAnimationFrame(()=>requestAnimationFrame(()=>im.classList.add('qin')))};
- im.onerror=()=>{const i=L.indexOf(src);if(i>=0)L.splice(i,1);if(!L.length){delete QL.g[k];QL.p=QL.p.filter(j=>j!==k);QL.b.q=null}};im.src=src}
+ const k=bagNext(QL.b,QL.p),L=QL.g[k];let c=L.filter(y=>y!==QL.lb[k]);if(!c.length)c=L;const src=c[srRnd(c.length)];QL.lb[k]=src;
+ /* Tiry 14.11.2026: zwei feste Bilder im Wechsel statt neue Elemente – sonst flackern am Handy die Nachbarkacheln */
+ if(!QL.im){QL.im=[0,1].map(()=>{const e=document.createElement('img');e.alt='';e.decoding='async';box.appendChild(e);return e});QL.n=0}
+ const pre=new Image();pre.decoding='async';
+ pre.onload=()=>{const go=()=>{const o=QL.im[QL.n],im=QL.im[QL.n^1];QL.n^=1;im.classList.remove('qout','qin');im.src=src;o.classList.remove('qin');o.classList.add('qout');requestAnimationFrame(()=>requestAnimationFrame(()=>im.classList.add('qin')))};pre.decode?pre.decode().then(go,go):go()};
+ pre.onerror=()=>{const i=L.indexOf(src);if(i>=0)L.splice(i,1);if(!L.length){delete QL.g[k];QL.p=QL.p.filter(j=>j!==k);QL.b.q=null}};pre.src=src}
 function lgApply(){const d=admMerge(admBase());LG.M=lgNorm(d);LG.ok=true;
  $('#lgStand').textContent=/^\d/.test(d.stand||'')?'Stand '+d.stand:(d.stand||'aktuell');const hw=d.hinweis||(d.quelle==='Beispieldaten'?'Sobald der Veloport-Export eingespielt ist, steht hier euer echter Bestand.':'');$('#lgDemo').hidden=!hw;$('#lgDemoT').innerHTML='<b>'+(d.quelle==='Beispieldaten'?'Beispieldaten.':'Hinweis:')+'</b> '+esc(hw);
  const nL=LG.M.filter(m=>m.lager).length,nB=LG.M.length-nL,nD=LG.M.filter(m=>m.deal).length,nMk=new Set(LG.M.map(lgMkName)).size;
