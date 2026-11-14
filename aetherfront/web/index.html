@@ -11,6 +11,10 @@
   <canvas id="scene"></canvas>
   <div id="vignette"></div>
   <div id="floaters"></div>
+  <div id="heroplates"></div>
+  <div id="nameplates"></div>
+  <div id="ctext"></div>
+  <div id="xfade"></div>
   <div id="ui">
     <!-- Startbildschirm -->
     <section id="screen-splash" class="screen active">
@@ -49,7 +53,9 @@
           <div class="ttl"><small>Einzelspieler</small><h2>Gefecht einrichten</h2></div>
           <button class="btn ghost back" data-go="menu"><span class="bi back"></span>Zurück</button>
         </header>
-        <div class="setup-grid">
+        <div class="seg tabs-rail setup-tabs" id="setup-tabs"><button data-tab="hero" class="on"><b>1</b>Held wählen</button><button data-tab="game"><b>2</b>Gefecht &amp; Fraktion</button></div>
+        <div class="hero-pick" id="hero-pick"></div>
+        <div class="setup-grid" id="setup-grid" hidden>
           <div class="setup-col">
             <div class="fg"><h3>Teams</h3><div class="seg" id="seg-mode"></div></div>
             <div class="fg"><h3>Spielmodus <span class="code-badge" id="mode-code">AP</span></h3><div class="seg" id="seg-pick"></div>
@@ -172,6 +178,21 @@
       <div class="tooltip" id="tooltip"></div>
       <div class="fps" id="fps"></div>
     </section>
+
+    <!-- Kampf-Oberfläche (Heldenblick) -->
+    <div id="combat" class="combat">
+      <div class="uf player" id="cf-player"></div>
+      <div class="uf target" id="cf-target"></div>
+      <div class="cwave" id="cf-wave"><div class="cw-title" id="cw-title"></div><div class="cw-bar" id="cw-bar"><i></i></div><div class="cw-meta"><span id="cw-count"></span><span id="cw-time"></span></div></div>
+      <div class="minimap" id="minimap"><canvas id="mm-canvas" width="220" height="220"></canvas><span class="mm-n">N</span><div class="mm-king" id="mm-king"><span class="mm-crown"></span><i></i><b id="mm-kingt"></b></div></div>
+      <div class="actionbar" id="cb">
+        <div class="castbar" id="cb-cast"><span class="ci"></span><div class="cbar"><i class="cf"></i><div class="ticks"></div><span class="cn"></span><span class="ct"></span></div></div>
+        <div class="ab-row" id="cb-bar"></div>
+        <div class="xpbar" id="cb-xp"><i></i><span id="cb-xpt"></span></div>
+      </div>
+      <div class="ab-tip" id="cb-tip"></div>
+    </div>
+    <div id="herr" class="herr"></div>
 
     <!-- Pause -->
     <section id="screen-pause" class="screen overlay">

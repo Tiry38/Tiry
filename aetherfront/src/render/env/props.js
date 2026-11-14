@@ -206,7 +206,7 @@ export function treeFoliageGeometry(kind = 0, seed = 3, density = 1) {
     }
   };
   const blob = (c, r, sx = 1, sy = 0.85) => {
-    const g = new THREE.IcosahedronGeometry(r, 1).toNonIndexed();
+    const g0 = new THREE.IcosahedronGeometry(r, 1); const g = g0.index ? g0.toNonIndexed() : g0;
     const p = g.attributes.position;
     for (let i = 0; i < p.count; i++) {
       const v = new THREE.Vector3(p.getX(i) * sx, p.getY(i) * sy, p.getZ(i) * sx).add(c);
@@ -341,7 +341,7 @@ export function grassClumpGeometry(seed = 5, blades = 10) {
     const bx = Math.cos(a) * off, bz = Math.sin(a) * off;
     const tall = R() < 0.18;
     const h = tall ? 0.75 + R() * 0.45 : 0.28 + R() * 0.42;
-    const w = 0.022 + R() * 0.026;
+    const w = 0.03 + R() * 0.032;
     const face = R() * Math.PI;
     const lean = 0.12 + R() * 0.32 * h;
     const la = a + (R() - 0.5);

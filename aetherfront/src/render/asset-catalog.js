@@ -5,7 +5,7 @@
 // Felder: slot = Ordnername unter web/assets/textures/, id = Asset-Kennung beim Anbieter,
 //   maps = { Laufzeitname: [Anbieter-Map, Auflösung] }, meters = Kantenlänge einer Kachel in Metern (Welt-Tiling).
 export const TEXTURE_SETS = [
-  { slot: 'floor', source: 'polyhaven', id: 'rock_tile_floor', meters: 2.6, use: 'Bahnen, Brücken, Königsplateau',
+  { slot: 'floor', source: 'polyhaven', id: 'rock_tile_floor', meters: 3.6, use: 'Bahnen, Brücken, Königsplateau',
     maps: { albedo: ['Diffuse', '2k'], normal: ['nor_gl', '2k'], arm: ['arm', '1k'] } },
   { slot: 'ground', source: 'polyhaven', id: 'leafy_grass', meters: 3.2, use: 'Inselboden unter dem Gras',
     maps: { albedo: ['Diffuse', '1k'], normal: ['nor_gl', '1k'], arm: ['arm', '1k'] } },

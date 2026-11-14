@@ -8,6 +8,7 @@ export const DEFAULTS = {
   gameSpeed: 1, playerName: 'Tiry', faction: 'random', teamSize: 4, difficulty: 'normal', allyDifficulty: 'normal',
   pickMode: 'ap', champions: false, waves: 30, campDifficulty: 'normal', campFaction: 'orden', campMission: 1,
   serverUrl: 'ws://localhost:7710', fullscreen: false,
+  hero: 'kael', keybinds: {}, mouseSens: 1, invertY: false, heroCamDist: 9, swoop: 'normal',
 };
 
 export class Settings {

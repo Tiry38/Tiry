@@ -34,16 +34,17 @@ const DEATH = {
 function castClip(o = {}) {
   const g = o.glow ?? 1;
   const up = o.up ?? 0;
-  const pose1 = both({ upperArmL: [-0.95 - up, -0.55, 0.38], foreArmL: [-1.1, 0, 0], handL: [-0.35, 0, 0.25] });
-  const pose2 = both({ upperArmL: [-1.25 - up, -0.65, 0.28], foreArmL: [-0.85, 0, 0], handL: [-0.6, 0, 0.3] });
-  const pose3 = both({ upperArmL: [-1.45 - up * 0.5, -0.35, 0.16], foreArmL: [-0.25, 0, 0], handL: [-0.75, 0, 0.1] });
+  const pose1 = both({ upperArmL: [-0.95 - up, -0.55, 0.38], foreArmL: [-1.15, 0, 0], handL: [-0.35, 0, 0.25] });
+  const pose2 = both({ upperArmL: [-1.2 - up, -0.7, 0.26], foreArmL: [-0.95, 0, 0], handL: [-0.6, 0, 0.3] });
+  const pose3 = both({ upperArmL: [-1.48 - up * 0.5, -0.3, 0.14], foreArmL: [-0.15, 0, 0], handL: [-0.8, 0, 0.1] });
   return {
     keys: [
       [0, {}],
-      [0.22, { ...pose1, ...(o.R || {}), chest: [-0.06, 0, 0], spine: [-0.02, 0, 0], head: [-0.08, 0, 0], glowL: 0.5 * g, glowR: 0.5 * g, ...(o.extra1 || {}) }],
-      [0.8, { ...pose2, ...(o.R || {}), chest: [-0.1, 0, 0], spine: [-0.03, 0, 0], head: [-0.12, 0, 0], glowL: 1 * g, glowR: 1 * g, crouch: 0.02, ...(o.extra2 || {}) }],
-      [0.94, { ...pose3, ...(o.R || {}), chest: [0.12, 0, 0], spine: [0.06, 0, 0], head: [0.02, 0, 0], glowL: 1.3 * g, glowR: 1.3 * g, ...(o.extra3 || {}) }],
-      [1, { ...pose3, ...(o.R || {}), chest: [0.12, 0, 0], spine: [0.06, 0, 0], glowL: 1.2 * g, glowR: 1.2 * g, ...(o.extra3 || {}) }],
+      [0.16, { ...pose1, ...(o.R || {}), chest: [-0.06, 0.15, 0], spine: [-0.02, 0.05, 0], head: [-0.08, -0.1, 0], glowL: 0.5 * g, glowR: 0.5 * g, ...(o.extra1 || {}) }],
+      [0.36, { ...pose2, ...(o.R || {}), chest: [-0.12, 0.22, 0], spine: [-0.04, 0.08, 0], head: [-0.12, -0.15, 0], glowL: 1 * g, glowR: 1 * g, crouch: 0.03, ...(o.extra2 || {}) }],
+      [0.46, { ...pose3, ...(o.R || {}), chest: [0.16, -0.12, 0], spine: [0.08, -0.04, 0], head: [0.04, 0.05, 0], glowL: 1.5 * g, glowR: 1.5 * g, wglow: 1, hipsZ: 0.03, ...(o.extra3 || {}) }],
+      [0.62, { ...pose3, ...(o.R || {}), chest: [0.12, -0.1, 0], spine: [0.06, -0.03, 0], glowL: 0.7 * g, glowR: 0.7 * g, ...(o.extra3 || {}) }],
+      [1, {}],
     ],
   };
 }
@@ -55,11 +56,11 @@ function channelClip(o = {}) {
   };
 }
 function healClip(o = {}) {
-  const up = both({ upperArmL: [-2.35, -0.2, 0.55], foreArmL: [-0.35, 0, 0], handL: [0.4, 0, -0.2] });
+  const up = both({ upperArmL: [-2.35, -0.2, 0.6], foreArmL: [-0.35, 0, 0], handL: [0.4, 0, -0.2] });
   return {
-    keys: [[0, {}], [0.25, { ...both({ upperArmL: [-0.6, -0.5, 0.35], foreArmL: [-1.4, 0, 0] }), ...(o.R1 || {}), chest: [0.1, 0, 0], head: [0.15, 0, 0], crouch: 0.05, glowL: 0.6, glowR: 0.6 }],
-      [0.6, { ...up, ...(o.R2 || {}), chest: [-0.2, 0, 0], spine: [-0.08, 0, 0], head: [-0.35, 0, 0], glowL: 1.3, glowR: 1.3, hipsY: 0.02 }],
-      [0.8, { ...up, ...(o.R2 || {}), chest: [-0.18, 0, 0], spine: [-0.06, 0, 0], head: [-0.3, 0, 0], glowL: 1.1, glowR: 1.1 }], [1, {}]],
+    keys: [[0, {}], [0.22, { ...both({ upperArmL: [-0.55, -0.6, 0.3], foreArmL: [-1.5, 0, 0], handL: [0.3, 0, 0] }), ...(o.R1 || {}), chest: [0.12, 0, 0], head: [0.2, 0, 0], crouch: 0.06, glowL: 0.6, glowR: 0.6 }],
+      [0.46, { ...up, ...(o.R2 || {}), chest: [-0.22, 0, 0], spine: [-0.08, 0, 0], head: [-0.38, 0, 0], glowL: 1.5, glowR: 1.5, wglow: 1, hipsY: 0.025 }],
+      [0.75, { ...up, ...(o.R2 || {}), chest: [-0.16, 0, 0], spine: [-0.05, 0, 0], head: [-0.28, 0, 0], glowL: 0.8, glowR: 0.8 }], [1, {}]],
   };
 }
 function summonClip(o = {}) {
@@ -118,7 +119,7 @@ const FEET = (lx, lz, ly, rx, rz, ry) => ({ L: [lx, lz, ly], R: [rx, rz, ry] });
 const knight = {
   feet: FEET(0.14, 0.1, 0.12, -0.13, -0.11, -0.4), crouch: 0.04, swing: { L: 0.15, R: 0.55 }, bounce: 0.75, leanK: 0.8, liftK: 0.9, stride: 1.0,
   idle: { spine: [0.04, -0.08, 0], chest: [0.03, -0.12, 0], head: [-0.02, 0.2, 0], neck: [0, 0, 0],
-    upperArmL: [-0.32, -0.95, 0.22], foreArmL: [-1.4, 0, 0], handL: [0, 0, 0],
+    upperArmL: [-0.22, -0.55, 0.3], foreArmL: [-1.35, 0, 0], handL: [0, 0, 0],
     upperArmR: [-0.18, 0.18, -0.24], foreArmR: [-0.75, 0, 0], handR: [0.35, 0, 0] },
   run: { upperArmL: [-0.12, -0.25, 0.26], foreArmL: [-1.5, 0, 0], upperArmR: [-0.05, 0.2, -0.2], foreArmR: [-0.85, 0, 0], handR: [0.5, 0, 0] },
   melee: [
@@ -262,8 +263,8 @@ const hammer = {
   feet: FEET(0.15, 0.08, 0.2, -0.15, -0.08, -0.35), crouch: 0.045, swing: { L: 0.75, R: 0.1 }, bounce: 0.7, leanK: 1.0, liftK: 0.8, stride: 0.82, twist: 0.8, jumpLead: 'R',
   idle: { spine: [0.05, 0.05, 0], chest: [0.03, 0.08, 0], head: [0, -0.08, 0],
     upperArmL: [-0.05, -0.2, 0.22], foreArmL: [-0.6, 0, 0], handL: [0.15, 0, 0],
-    upperArmR: [-0.45, 0.35, -0.42], foreArmR: [-2.05, 0, 0], handR: [0.0, 0, 0.1] },
-  run: { upperArmL: [0.0, -0.2, 0.25], foreArmL: [-1.3, 0, 0], upperArmR: [-0.4, 0.35, -0.45], foreArmR: [-2.1, 0, 0] },
+    upperArmR: [-0.4, 0.2, -0.55], foreArmR: [-2.0, 0, 0], handR: [0.1, 0, -0.45] },
+  run: { upperArmL: [0.0, -0.2, 0.25], foreArmL: [-1.3, 0, 0], upperArmR: [-0.38, 0.2, -0.55], foreArmR: [-2.05, 0, 0], handR: [0.1, 0, -0.45] },
   melee: [
     { keys: [[0, {}], [0.32, { upperArmR: [-2.9, 0.3, -0.25], foreArmR: [-1.4, 0, 0], handR: [-0.3, 0, 0], upperArmL: [-2.4, -0.4, 0.2], foreArmL: [-1.2, 0, 0], chest: [-0.3, 0, 0], spine: [-0.12, 0, 0], head: [-0.1, 0, 0], hipsY: 0.02 }],
       [0.48, { upperArmR: [-1.1, 0.5, -0.15], foreArmR: [-0.2, 0, 0], handR: [0.6, 0, 0], upperArmL: [-1.0, -0.6, 0.1], foreArmL: [-0.5, 0, 0], chest: [0.45, 0, 0], spine: [0.3, 0, 0], head: [-0.25, 0, 0], crouch: 0.15 }],
@@ -285,49 +286,129 @@ hammer.leap = leapClip({ arms1: { upperArmR: [-2.6, 0.3, -0.3], foreArmR: [-1.0,
 hammer.heal = { keys: [[0, {}], [0.3, { upperArmL: [-1.4, -0.2, 0.3], foreArmL: [-0.8, 0, 0], handL: [-0.6, 0, 0], chest: [0.1, 0.2, 0], glowL: 1 }], [0.8, { upperArmL: [-1.5, -0.2, 0.25], foreArmL: [-0.6, 0, 0], handL: [-0.7, 0, 0], chest: [0.1, 0.2, 0], glowL: 1.2 }], [1, {}]] };
 hammer.summon = { keys: [[0, {}], [0.3, { upperArmL: [-0.4, -0.3, 0.5], foreArmL: [-1.6, 0, 0], chest: [0.05, 0.4, 0], crouch: 0.04 }], [0.55, { upperArmL: [-0.9, -0.3, 0.3], foreArmL: [-0.4, 0, 0], handL: [-0.4, 0, 0], chest: [0.2, -0.1, 0], spine: [0.1, 0, 0], crouch: 0.12 }], [0.75, { upperArmL: [-0.85, -0.3, 0.3], foreArmL: [-0.45, 0, 0], chest: [0.15, -0.1, 0], crouch: 0.1 }], [1, {}]] };
 
-const druid = {
-  ...casterBase, feet: FEET(0.12, 0.07, 0.2, -0.11, -0.06, -0.2), swing: { L: 0.25, R: 0.7 },
-  idle: { spine: [0.02, 0, 0], chest: [0.0, -0.05, 0], head: [0.0, 0.05, 0],
-    upperArmL: [-0.12, -0.3, 0.24], foreArmL: [-1.45, 0, 0], handL: [0.0, 0, 0],
-    upperArmR: [-0.25, 0.4, -0.28], foreArmR: [-1.0, 0, 0], handR: [0.1, -0.5, 0.35] },
-  run: { upperArmL: [-0.08, -0.3, 0.26], foreArmL: [-1.5, 0, 0], upperArmR: [0.0, 0.2, -0.25], foreArmR: [-1.2, 0, 0] },
-  castHands: 1,
-};
-druid.cast = castClip({ glow: 1, R: { upperArmL: [-0.5, -0.3, 0.35], foreArmL: [-1.7, 0, 0], handL: [0, 0, 0] } });
-druid.shoot = handShoot('R');
-druid.channel = channelClip({ pose: { upperArmL: [-0.5, -0.3, 0.35], foreArmL: [-1.7, 0, 0], handL: [0, 0, 0] } });
-druid.summon = summonClip({ R1: { upperArmL: [-2.6, -0.2, 0.25], foreArmL: [-0.8, 0, 0] }, R2: { upperArmL: [-0.8, -0.4, 0.3], foreArmL: [-1.2, 0, 0] } });
-druid.heal = healClip({});
-druid.melee = staffStrike('L');
-druid.spin = spinClip({});
-druid.slam = slamClip({ raise: both({ upperArmL: [-2.7, -0.3, 0.25], foreArmL: [-0.9, 0, 0] }), hit: { upperArmL: [-0.8, -0.4, 0.25], foreArmL: [-1.5, 0, 0], upperArmR: [-0.9, 0.3, -0.3], foreArmR: [-0.3, 0, 0], handR: [-0.5, 0, 0] } });
-druid.leap = leapClip({});
-druid.victory = { loop: true, rate: 0.4, keys: [[0, { upperArmL: [-2.7, -0.2, 0.25], foreArmL: [-1.0, 0, 0], upperArmR: [-2.0, 0.3, -0.8], foreArmR: [-0.3, 0, 0], handR: [0.3, -0.5, 0], chest: [-0.15, 0, 0], head: [-0.3, 0, 0], glowR: 1 }],
-  [0.5, { upperArmL: [-2.8, -0.2, 0.22], foreArmL: [-0.9, 0, 0], upperArmR: [-2.1, 0.3, -0.85], foreArmR: [-0.25, 0, 0], handR: [0.3, -0.5, 0], chest: [-0.2, 0, 0], head: [-0.35, 0, 0], glowR: 1.3, hipsY: 0.02 }],
-  [1, { upperArmL: [-2.7, -0.2, 0.25], foreArmL: [-1.0, 0, 0], upperArmR: [-2.0, 0.3, -0.8], foreArmR: [-0.3, 0, 0], handR: [0.3, -0.5, 0], chest: [-0.15, 0, 0], head: [-0.3, 0, 0], glowR: 1 }]] };
 
-const warlock = {
-  ...casterBase, feet: FEET(0.11, 0.04, 0.15, -0.11, -0.05, -0.18), swing: { L: 0.4, R: 0.4 }, leanK: 0.7, bounce: 0.75,
-  idle: { spine: [0.06, 0, 0], chest: [0.06, 0, 0], head: [0.08, 0, 0],
-    upperArmL: [-0.4, -0.5, 0.3], foreArmL: [-1.25, 0, 0], handL: [-0.45, 0.3, 0.3],
-    upperArmR: [-0.4, 0.5, -0.3], foreArmR: [-1.25, 0, 0], handR: [-0.45, -0.3, -0.3] },
-  run: { upperArmL: [-0.15, -0.3, 0.3], foreArmL: [-1.3, 0, 0], upperArmR: [-0.15, 0.3, -0.3], foreArmR: [-1.3, 0, 0] },
-  castHands: 1,
-};
-warlock.cast = castClip({ glow: 1.1, up: 0.1 });
-warlock.shoot = handShoot('R');
-warlock.channel = channelClip({ pose: both({ upperArmL: [-1.4, -0.3, 0.25], foreArmL: [-0.3, 0, 0], handL: [-0.9, 0, 0.3] }), pulse: { upperArmL: [0.04, 0, 0.02], upperArmR: [0.04, 0, -0.02], handL: [0.1, 0, 0], handR: [0.1, 0, 0] } });
-warlock.melee = [handShoot('L'), handShoot('R')];
-warlock.summon = summonClip({});
-warlock.heal = healClip({});
-warlock.spin = spinClip({});
-warlock.slam = slamClip({});
-warlock.leap = leapClip({});
-warlock.victory = { loop: true, rate: 0.35, keys: [[0, { ...both({ upperArmL: [-1.6, -0.4, 1.1], foreArmL: [-0.4, 0, 0], handL: [0.4, 0.6, 0] }), chest: [-0.2, 0, 0], head: [-0.4, 0, 0], glowL: 1, glowR: 1 }],
-  [0.5, { ...both({ upperArmL: [-1.8, -0.4, 1.2], foreArmL: [-0.3, 0, 0], handL: [0.4, 0.6, 0] }), chest: [-0.25, 0, 0], head: [-0.5, 0, 0], glowL: 1.4, glowR: 1.4, hipsY: 0.02 }],
-  [1, { ...both({ upperArmL: [-1.6, -0.4, 1.1], foreArmL: [-0.4, 0, 0], handL: [0.4, 0.6, 0] }), chest: [-0.2, 0, 0], head: [-0.4, 0, 0], glowL: 1, glowR: 1 }]] };
+// ---------------------------------------------------------------------------------------------
+// Fähigkeits-Clips (anim-Namen aus sim/heroes.js). Treffer-Moment ≈ t 0.45, Glühen (wglow) synchron.
+// ---------------------------------------------------------------------------------------------
+const hold = (pose, t0, t1, extra = {}) => [[t0, { ...pose, ...extra }], [t1, { ...pose }]];
+function roarClip(R = {}) {
+  const peak = { spine: [-0.15, 0, 0], chest: [-0.32, 0, 0], neck: [-0.1, 0, 0], head: [-0.42, 0, 0], ...both({ upperArmL: [-0.45, 0.35, 1.15], foreArmL: [-0.95, 0, 0], handL: [0, 0, 0] }), ...R, crouch: 0.04 };
+  return { keys: [[0, {}], [0.25, { spine: [0.28, 0, 0], chest: [0.2, 0, 0], head: [0.2, 0, 0], ...both({ upperArmL: [-0.3, -0.7, 0.18], foreArmL: [-1.9, 0, 0], handL: [0.3, 0, 0] }), ...R, crouch: 0.09 }],
+    [0.45, { ...peak, glowL: 1, glowR: 1, wglow: 1 }], [0.78, { ...peak, glowL: 0.6, glowR: 0.6, wglow: 0.4 }], [1, {}]], pulse: { chest: [0.025, 0, 0.015], head: [0.03, 0, 0] }, pulseRate: 22 };
+}
+function bowCycle(keys, t0, tRel, pose = bowPose, gk = 0.6) {
+  keys.push([t0, { ...pose(0.25), draw: 0.25, arrow: 1 }], [tRel - 0.06, { ...pose(1), draw: 1, arrow: 1, glowR: gk }], [tRel - 0.01, { ...pose(1), draw: 1, arrow: 1, glowR: gk }], [tRel + 0.02, { ...pose(0, true), draw: 0, arrow: 0, wglow: 1 }]);
+}
+const upBow = (d, rel) => ({ ...bowPose(d, rel), chest: [-0.4, -1.1, 0], spine: [-0.16, -0.3, 0], head: [-0.45, 0.95, 0.05], upperArmL: [-0.08, 1.45, 2.15] });
 
-export const STYLES = { knight, ranger, dual, mage, priest, hammer, druid, warlock };
+// Ritter
+knight.bash = knight.melee[2];
+knight.bash = { keys: [[0, {}], [0.3, { chest: [0, 0.35, 0], spine: [0.05, 0.1, 0], upperArmL: [-0.15, -0.95, 0.35], foreArmL: [-1.65, 0, 0], crouch: 0.07, hipsZ: -0.03 }],
+  [0.45, { chest: [0.24, -0.4, 0], spine: [0.12, -0.12, 0], upperArmL: [-1.2, -1.05, 0.08], foreArmL: [-1.2, 0, 0], hipsZ: 0.12, crouch: 0.06, wglow: 1, glowL: 1 }],
+  [0.62, { chest: [0.2, -0.35, 0], spine: [0.1, -0.1, 0], upperArmL: [-1.15, -1.05, 0.1], foreArmL: [-1.25, 0, 0], hipsZ: 0.1, crouch: 0.05 }], [1, {}]] };
+knight.melee = [knight.melee[0], knight.melee[1]];
+knight.roar = roarClip({ upperArmR: [-2.5, 0.3, -0.45], foreArmR: [-0.7, 0, 0], handR: [0, 0, 0] });
+knight.charge = { keys: [[0, {}], [0.15, { spine: [0.42, 0, 0], chest: [0.18, -0.25, 0], head: [-0.42, 0.25, 0], upperArmL: [-0.85, -1.1, 0.18], foreArmL: [-1.35, 0, 0], upperArmR: [0.35, 0.2, -0.3], foreArmR: [-0.7, 0, 0], handR: [0.6, 0, 0], crouch: 0.07 }],
+  [0.45, { spine: [0.4, 0, 0], chest: [0.25, -0.38, 0], head: [-0.42, 0.3, 0], upperArmL: [-1.25, -1.05, 0.06], foreArmL: [-1.15, 0, 0], upperArmR: [0.35, 0.2, -0.3], foreArmR: [-0.7, 0, 0], handR: [0.6, 0, 0], crouch: 0.06, hipsZ: 0.1, wglow: 1, glowL: 1 }],
+  [0.8, { spine: [0.3, 0, 0], chest: [0.2, -0.3, 0], head: [-0.32, 0.25, 0], upperArmL: [-1.1, -1.05, 0.1], foreArmL: [-1.25, 0, 0], crouch: 0.05 }], [1, {}]] };
+knight.guard = { keys: [[0, {}], [0.22, { upperArmL: [-0.85, -1.15, 0.1], foreArmL: [-1.5, 0, 0], chest: [0.12, -0.3, 0], spine: [0.08, -0.1, 0], head: [0.05, 0.3, 0], upperArmR: [0.15, 0.25, -0.35], foreArmR: [-1.1, 0, 0], handR: [0.4, 0, 0], crouch: 0.11, glowL: 0.6 }],
+  [0.45, { upperArmL: [-0.95, -1.15, 0.08], foreArmL: [-1.45, 0, 0], chest: [0.14, -0.32, 0], spine: [0.08, -0.1, 0], head: [0.05, 0.3, 0], upperArmR: [0.15, 0.25, -0.35], foreArmR: [-1.1, 0, 0], handR: [0.4, 0, 0], crouch: 0.13, glowL: 1.3, wglow: 1 }],
+  [0.85, { upperArmL: [-0.9, -1.15, 0.1], foreArmL: [-1.5, 0, 0], chest: [0.12, -0.3, 0], spine: [0.08, -0.1, 0], head: [0.05, 0.3, 0], upperArmR: [0.15, 0.25, -0.35], foreArmR: [-1.1, 0, 0], handR: [0.4, 0, 0], crouch: 0.11, glowL: 0.8 }], [1, {}]] };
+knight.shoot = knight.bash;
+
+// Waldläuferin
+ranger.shoot = { keys: [[0, {}]] }; bowCycle(ranger.shoot.keys, 0.14, 0.45, bowPose, 0.3); ranger.shoot.keys.push([0.66, { ...bowPose(0, true) }], [1, {}]);
+ranger.draw = { keys: [[0, {}]] }; bowCycle(ranger.draw.keys, 0.12, 0.45, bowPose, 1.2); ranger.draw.keys.push([0.7, { ...bowPose(0, true) }], [1, {}]);
+ranger.cast = ranger.draw;
+ranger.volley = { keys: [[0, {}], [0.12, { ...bowPose(0.2), draw: 0.2, arrow: 1 }], [0.36, { ...bowPose(1), chest: [0, -1.45, 0], draw: 1, arrow: 1, glowR: 0.8 }],
+  [0.45, { ...bowPose(0, true), chest: [0, -0.75, 0], draw: 0, arrow: 0, wglow: 1 }], [0.56, { ...bowPose(0, true), chest: [0, -0.6, 0] }], [1, {}]] };
+ranger.skyshot = { keys: [[0, {}]] }; bowCycle(ranger.skyshot.keys, 0.1, 0.45, upBow, 0.8); bowCycle(ranger.skyshot.keys, 0.52, 0.7, upBow, 0.8); bowCycle(ranger.skyshot.keys, 0.76, 0.93, upBow, 0.8); ranger.skyshot.keys.push([1, {}]);
+ranger.channel = ranger.skyshot;
+ranger.flip = { keys: [[0, {}], [0.14, { crouch: 0.16, spine: [0.32, 0, 0], ...both({ upperArmL: [0.45, 0, 0.2], foreArmL: [-0.6, 0, 0] }) }],
+  [0.26, { hipsY: 0.35, pitch: -1.2, legFK: 1, thighL: [-1.2, 0, 0.1], shinL: [1.8, 0, 0], thighR: [-1.0, 0, -0.1], shinR: [1.7, 0, 0], spine: [0.25, 0, 0], ...both({ upperArmL: [-1.2, 0, 0.5], foreArmL: [-0.8, 0, 0] }) }],
+  [0.45, { hipsY: 0.6, pitch: -3.3, legFK: 1, thighL: [-1.5, 0, 0.1], shinL: [2.1, 0, 0], thighR: [-1.4, 0, -0.1], shinR: [2.0, 0, 0], spine: [0.35, 0, 0], chest: [0.2, 0, 0], ...both({ upperArmL: [-0.9, 0, 0.4], foreArmL: [-1.2, 0, 0] }), wglow: 1 }],
+  [0.66, { hipsY: 0.3, pitch: -5.4, legFK: 1, thighL: [-0.9, 0, 0.1], shinL: [1.2, 0, 0], thighR: [-0.7, 0, -0.1], shinR: [1.0, 0, 0], spine: [0.2, 0, 0] }],
+  [0.8, { crouch: 0.18, pitch: -6.283, spine: [0.32, 0, 0], ...both({ upperArmL: [-0.5, 0, 0.6], foreArmL: [-0.4, 0, 0] }) }], [1, { pitch: -6.283 }]] };
+ranger.leap = ranger.flip;
+ranger.bandage = { keys: [[0, {}], [0.22, { crouch: 0.16, spine: [0.3, 0, 0], chest: [0.22, 0.15, 0], head: [0.45, -0.1, 0], upperArmL: [-0.9, -0.7, 0.18], foreArmL: [-1.65, 0, 0], upperArmR: [-0.75, 0.6, -0.1], foreArmR: [-1.75, 0, 0], glowR: 0.5 }],
+  [0.45, { crouch: 0.16, spine: [0.3, 0, 0], chest: [0.22, 0.15, 0], head: [0.45, -0.1, 0], upperArmL: [-0.9, -0.7, 0.18], foreArmL: [-1.65, 0, 0], upperArmR: [-0.85, 0.75, -0.05], foreArmR: [-1.6, 0, 0], glowR: 1.2, glowL: 0.8, wglow: 1 }],
+  [0.85, { crouch: 0.14, spine: [0.28, 0, 0], chest: [0.2, 0.15, 0], head: [0.4, -0.1, 0], upperArmL: [-0.9, -0.7, 0.18], foreArmL: [-1.65, 0, 0], upperArmR: [-0.75, 0.6, -0.1], foreArmR: [-1.75, 0, 0], glowR: 0.6 }], [1, {}]],
+  pulse: { upperArmR: [0.12, 0.15, 0.06], foreArmR: [0.15, 0, 0] }, pulseRate: 9 };
+ranger.roar = roarClip({}); ranger.guard = ranger.bandage; ranger.breath = ranger.bandage;
+
+// Schurke
+const dstab = { keys: [[0, {}], [0.28, { ...both({ upperArmL: [-0.3, -0.45, 0.38], foreArmL: [-2.05, 0, 0], handL: [0.7, 0, 0] }), chest: [-0.05, 0, 0], crouch: 0.07, hipsZ: -0.05 }],
+  [0.45, { ...both({ upperArmL: [-1.4, -0.25, 0.1], foreArmL: [-0.15, 0, 0], handL: [1.35, 0, 0] }), chest: [0.32, 0, 0], spine: [0.22, 0, 0], head: [-0.25, 0, 0], crouch: 0.15, hipsZ: 0.16, wglow: 1, glowL: 1, glowR: 1 }],
+  [0.62, { ...both({ upperArmL: [-1.3, -0.25, 0.12], foreArmL: [-0.25, 0, 0], handL: [1.25, 0, 0] }), chest: [0.28, 0, 0], spine: [0.18, 0, 0], head: [-0.2, 0, 0], crouch: 0.13, hipsZ: 0.13 }], [1, {}]] };
+dual.stab = dstab;
+dual.slash = { keys: [[0, {}], [0.25, { chest: [0.05, -0.55, 0], spine: [0.1, -0.2, 0], upperArmR: [-2.0, 0.4, -0.75], foreArmR: [-1.2, 0, 0], handR: [-0.3, 0, 0], upperArmL: [-0.3, -0.5, 0.5], foreArmL: [-1.5, 0, 0], crouch: 0.05 }],
+  [0.4, { chest: [0.22, 0.5, 0], spine: [0.15, 0.2, 0], upperArmR: [-0.9, 1.2, -0.15], foreArmR: [-0.35, 0, 0], handR: [0.65, 0, 0], upperArmL: [-1.6, -0.3, 0.7], foreArmL: [-1.2, 0, 0], crouch: 0.1, hipsZ: 0.05, wglow: 1, glowR: 1 }],
+  [0.55, { chest: [0.22, -0.55, 0], spine: [0.15, -0.2, 0], upperArmL: [-0.9, -1.2, 0.15], foreArmL: [-0.35, 0, 0], handL: [0.65, 0, 0], upperArmR: [-0.7, 1.3, -0.1], foreArmR: [-0.6, 0, 0], crouch: 0.12, hipsZ: 0.08, wglow: 1, glowL: 1 }],
+  [0.72, { chest: [0.18, -0.6, 0], spine: [0.12, -0.2, 0], upperArmL: [-0.7, -1.3, 0.1], foreArmL: [-0.5, 0, 0], handL: [0.7, 0, 0], crouch: 0.1 }], [1, {}]] };
+{
+  const keys = [[0, {}]];
+  for (let i = 0; i < 6; i++) {
+    const t = 0.12 + i * 0.13, R = i % 2 === 0, S = (p) => (R ? p : mir(p));
+    keys.push([t, { ...S({ upperArmR: [-1.9, 0.5, -0.7], foreArmR: [-1.3, 0, 0], handR: [-0.2, 0, 0], chest: [0.1, -0.4, 0], spine: [0.1, -0.15, 0] }), crouch: 0.1 }]);
+    keys.push([t + 0.065, { ...S({ upperArmR: [-0.85, 1.25, -0.12], foreArmR: [-0.3, 0, 0], handR: [0.7, 0, 0], chest: [0.22, 0.45, 0], spine: [0.15, 0.15, 0] }), crouch: 0.13, hipsZ: 0.04, wglow: 1, glowR: R ? 1 : 0, glowL: R ? 0 : 1 }]);
+  }
+  keys.push([1, {}]);
+  dual.flurry = { keys };
+}
+dual.breath = { keys: [[0, {}], [0.25, { chest: [-0.16, 0, 0], spine: [-0.06, 0, 0], head: [-0.2, 0, 0], ...both({ upperArmL: [-0.45, -0.95, 0.12], foreArmL: [-1.75, 0, 0], handL: [0.3, 0, 0] }), glowL: 0.5, glowR: 0.5 }],
+  [0.45, { chest: [-0.2, 0, 0], spine: [-0.08, 0, 0], head: [-0.25, 0, 0], ...both({ upperArmL: [-0.5, -1.0, 0.1], foreArmL: [-1.8, 0, 0], handL: [0.3, 0, 0] }), glowL: 1.1, glowR: 1.1, wglow: 0.8 }],
+  [0.85, { chest: [-0.16, 0, 0], spine: [-0.06, 0, 0], head: [-0.2, 0, 0], ...both({ upperArmL: [-0.45, -0.95, 0.12], foreArmL: [-1.75, 0, 0], handL: [0.3, 0, 0] }), glowL: 0.6, glowR: 0.6 }], [1, {}]],
+  pulse: { chest: [0.07, 0, 0], spine: [0.03, 0, 0], head: [0.04, 0, 0] }, pulseRate: 2.6 };
+const blinkClip = (o = {}) => ({ keys: [[0, {}], [0.25, { ...both({ upperArmL: [-0.35, -0.85, 0.12], foreArmL: [-1.95, 0, 0], handL: [0.2, 0, 0] }), crouch: 0.14, spine: [0.38, 0, 0], chest: [0.2, 0, 0], head: [-0.2, 0, 0], glowL: 0.8, glowR: 0.8 }],
+  [0.45, { ...both({ upperArmL: [-0.55, 0.0, 0.95], foreArmL: [-0.3, 0, 0], handL: o.hand || [-0.6, 0, 0] }), chest: [-0.12, 0, 0], spine: [-0.04, 0, 0], head: [-0.1, 0, 0], hipsY: 0.03, glowL: 1.4, glowR: 1.4, wglow: 1 }],
+  [0.7, { ...both({ upperArmL: [-0.45, -0.1, 0.75], foreArmL: [-0.5, 0, 0] }), chest: [-0.05, 0, 0], glowL: 0.5, glowR: 0.5 }], [1, {}]] });
+dual.blink = blinkClip({ hand: [0.6, 0, 0] });
+dual.melee = [dual.melee[0], dual.melee[1], dual.melee[2]];
+dual.shoot = { keys: [[0, {}], [0.3, { upperArmR: [-2.2, 0.3, -0.6], foreArmR: [-1.6, 0, 0], handR: [-0.4, 0, 0], chest: [-0.05, -0.55, 0], spine: [0, -0.2, 0], crouch: 0.05 }],
+  [0.45, { upperArmR: [-1.35, 0.4, -0.15], foreArmR: [-0.1, 0, 0], handR: [0.9, 0, 0], chest: [0.25, 0.45, 0], spine: [0.12, 0.15, 0], crouch: 0.08, wglow: 1, glowR: 1 }], [0.62, { upperArmR: [-1.1, 0.5, -0.1], foreArmR: [-0.3, 0, 0], handR: [0.9, 0, 0], chest: [0.2, 0.5, 0] }], [1, {}]] };
+dual.roar = roarClip({}); dual.guard = dual.breath; dual.spin = spinClip({ arms: both({ upperArmL: [-0.2, -0.6, 1.35], foreArmL: [-0.2, 0, 0], handL: [0.6, 0, 0] }) });
+
+// Magierin
+mage.nova = { keys: [[0, {}], [0.28, { ...both({ upperArmL: [-1.65, -0.85, 0.15], foreArmL: [-1.85, 0, 0], handL: [0, 0, 0] }), chest: [-0.12, 0, 0], head: [-0.15, 0, 0], hipsY: 0.03, glowL: 0.8, glowR: 0.8 }],
+  [0.45, { ...both({ upperArmL: [-0.35, -0.2, 0.8], foreArmL: [-0.2, 0, 0], handL: [-0.9, 0, 0] }), crouch: 0.17, chest: [0.32, 0, 0], spine: [0.2, 0, 0], head: [0.02, 0, 0], glowL: 1.5, glowR: 1.5, wglow: 1 }],
+  [0.72, { ...both({ upperArmL: [-0.3, -0.2, 0.75], foreArmL: [-0.25, 0, 0], handL: [-0.8, 0, 0] }), crouch: 0.14, chest: [0.26, 0, 0], spine: [0.16, 0, 0], glowL: 0.6, glowR: 0.6 }], [1, {}]] };
+mage.blink = blinkClip({});
+mage.guard = { keys: [[0, {}], [0.28, { ...both({ upperArmL: [-1.2, -1.1, 0.08], foreArmL: [-1.65, 0, 0], handL: [0, 0, 0] }), crouch: 0.06, chest: [0.16, 0, 0], head: [0.12, 0, 0], glowL: 0.6, glowR: 0.6 }],
+  [0.45, { ...both({ upperArmL: [-0.6, -0.3, 0.95], foreArmL: [-0.4, 0, 0], handL: [-0.5, 0, 0] }), chest: [-0.16, 0, 0], head: [-0.18, 0, 0], hipsY: 0.02, glowL: 1.5, glowR: 1.5, wglow: 1 }],
+  [0.8, { ...both({ upperArmL: [-0.5, -0.3, 0.8], foreArmL: [-0.5, 0, 0], handL: [-0.4, 0, 0] }), chest: [-0.1, 0, 0], glowL: 0.8, glowR: 0.8 }], [1, {}]] };
+const skyClip = (R1, R2, o = {}) => ({ keys: [[0, {}], [0.3, { upperArmL: [-2.95, -0.2, 0.25], foreArmL: [-0.2, 0, 0], handL: [0.3, 0, 0], chest: [-0.28, 0.12, 0], spine: [-0.1, 0.05, 0], head: [-0.55, 0, 0], ...R1, glowL: 1, glowR: 1, hipsY: 0.02 }],
+  [0.45, { upperArmL: [-1.35, -0.25, 0.3], foreArmL: [-0.1, 0, 0], handL: [-0.6, 0, 0], chest: [0.18, -0.12, 0], spine: [0.08, -0.04, 0], head: [0.05, 0, 0], ...R2, glowL: 1.6, glowR: 1.2, wglow: 1, crouch: 0.06 }],
+  [0.78, { upperArmL: [-1.3, -0.25, 0.3], foreArmL: [-0.15, 0, 0], handL: [-0.5, 0, 0], chest: [0.14, -0.1, 0], ...R2, glowL: 0.7, glowR: 0.5, crouch: 0.04 }], [1, {}]] });
+mage.skycast = skyClip({ upperArmR: [-2.5, 0.3, -0.35], foreArmR: [-0.6, 0, 0] }, { upperArmR: [-0.6, 0.3, -0.45], foreArmR: [-1.5, 0, 0] });
+mage.roar = roarClip({}); mage.heal = healClip({});
+
+// Priesterin
+priest.heal = healClip({ R2: { upperArmR: [-2.95, 0.3, -0.12], foreArmR: [-0.55, 0, 0] } });
+priest.guard = mage.guard; priest.blink = blinkClip({}); priest.nova = mage.nova;
+priest.skycast = skyClip({ upperArmR: [-2.9, 0.3, -0.15], foreArmR: [-0.5, 0, 0] }, { upperArmR: [-0.5, 0.3, -0.3], foreArmR: [-1.6, 0, 0] });
+priest.roar = roarClip({});
+
+// Krieger mit Hammer
+hammer.overhead = hammer.melee[0];
+hammer.roar = roarClip({ upperArmR: [-2.6, 0.2, -0.55], foreArmR: [-0.7, 0, 0], handR: [0, 0, 0] });
+hammer.spin = { keys: [[0, {}], [0.2, { upperArmR: [-1.3, -0.4, -1.35], foreArmR: [-0.2, 0, 0], handR: [0.3, 0, 0], upperArmL: [-0.8, -0.6, 0.6], foreArmL: [-1.0, 0, 0], chest: [0.1, 0.7, 0], spine: [0.08, 0.3, 0], crouch: 0.1, yaw: -0.5 }],
+  [0.45, { upperArmR: [-1.4, 0.2, -1.35], foreArmR: [-0.05, 0, 0], handR: [0.7, 0, 0], upperArmL: [-0.6, -0.4, 0.9], foreArmL: [-0.5, 0, 0], chest: [0.1, -0.2, 0], spine: [0.06, -0.1, 0], crouch: 0.12, yaw: PI, wglow: 1 }],
+  [0.75, { upperArmR: [-1.4, 0.2, -1.3], foreArmR: [-0.1, 0, 0], handR: [0.7, 0, 0], upperArmL: [-0.6, -0.4, 0.9], foreArmL: [-0.5, 0, 0], chest: [0.1, -0.4, 0], crouch: 0.1, yaw: PI * 2 }], [1, { yaw: PI * 2 }]] };
+hammer.leap = { keys: [[0, {}], [0.12, { crouch: 0.2, spine: [0.38, 0, 0], upperArmR: [-0.3, 0.3, -0.6], foreArmR: [-1.8, 0, 0], ...mir({ upperArmR: [0.4, 0, -0.3], foreArmR: [-0.6, 0, 0] }) }],
+  [0.27, { hipsY: 0.28, legFK: 1, thighL: [-1.1, 0, 0.12], shinL: [1.6, 0, 0], footL: [0.4, 0, 0], thighR: [-0.5, 0, -0.1], shinR: [1.4, 0, 0], footR: [0.5, 0, 0], spine: [-0.15, 0, 0], chest: [-0.25, 0, 0], upperArmR: [-3.0, 0.3, -0.2], foreArmR: [-1.3, 0, 0], handR: [-0.2, 0, 0], upperArmL: [-2.6, -0.3, 0.3], foreArmL: [-0.8, 0, 0] }],
+  [0.45, { crouch: 0.26, spine: [0.48, 0, 0], chest: [0.3, 0, 0], head: [-0.25, 0, 0], upperArmR: [-1.0, 0.5, -0.12], foreArmR: [-0.1, 0, 0], handR: [0.75, 0, 0], upperArmL: [-0.9, -0.5, 0.2], foreArmL: [-0.4, 0, 0], wglow: 1 }],
+  [0.7, { crouch: 0.22, spine: [0.42, 0, 0], chest: [0.26, 0, 0], head: [-0.2, 0, 0], upperArmR: [-0.95, 0.5, -0.12], foreArmR: [-0.15, 0, 0], handR: [0.75, 0, 0], upperArmL: [-0.85, -0.5, 0.2], foreArmL: [-0.45, 0, 0] }], [1, {}]] };
+hammer.skycast = { keys: [[0, {}], [0.32, { upperArmR: [-3.05, 0.3, -0.1], foreArmR: [-0.25, 0, 0], handR: [0, 0, 0], upperArmL: [-0.4, -0.3, 0.6], foreArmL: [-1.2, 0, 0], chest: [-0.3, 0, 0], spine: [-0.12, 0, 0], head: [-0.55, 0, 0], hipsY: 0.02, wglow: 0.8 }],
+  [0.45, { upperArmR: [-1.5, 0.4, -0.15], foreArmR: [0.0, 0, 0], handR: [0.55, 0, 0], upperArmL: [-0.6, -0.5, 0.4], foreArmL: [-1.3, 0, 0], chest: [0.25, 0.1, 0], spine: [0.12, 0, 0], head: [0, 0, 0], crouch: 0.1, wglow: 1.2 }],
+  [0.8, { upperArmR: [-1.45, 0.4, -0.15], foreArmR: [-0.05, 0, 0], handR: [0.55, 0, 0], chest: [0.2, 0.1, 0], crouch: 0.08, wglow: 0.6 }], [1, {}]] };
+hammer.melee = [hammer.melee[1], hammer.melee[0]];
+hammer.shoot = hammer.melee[0];
+hammer.guard = hammer.roar;
+
+// Fehlende Namen auf sinnvolle Clips abbilden
+const ALIAS = { bash: 'melee', roar: 'cast', charge: 'leap', guard: 'cast', draw: 'shoot', volley: 'shoot', flip: 'leap', bandage: 'heal', skyshot: 'channel', nova: 'slam', blink: 'cast', skycast: 'cast', overhead: 'melee', stab: 'melee', slash: 'melee', breath: 'heal', flurry: 'melee' };
+
+export const STYLES = { knight, ranger, dual, mage, priest, hammer };
 for (const st of Object.values(STYLES)) {
   st.death = st.death || DEATH;
   st.cast = st.cast || castClip({});
@@ -339,4 +420,5 @@ for (const st of Object.values(STYLES)) {
   st.leap = st.leap || leapClip({});
   st.shoot = st.shoot || handShoot('R');
   st.melee = st.melee || staffStrike('R');
+  for (const [k, v] of Object.entries(ALIAS)) if (!st[k]) st[k] = st[v];
 }

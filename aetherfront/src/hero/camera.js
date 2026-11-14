@@ -8,7 +8,7 @@ import { LANE_WIDTH } from '../sim/layout.js';
 export const HERO_FOV = 56;
 export const ZOOM_MIN = 2, ZOOM_MAX = 28;
 export const PITCH_MIN = -0.55, PITCH_MAX = 1.42;
-const HEAD = 1.75;            // Blickpunkt über dem Boden (Kopfhöhe)
+const HEAD = 2.05;            // Blickpunkt über dem Boden (knapp über Kopfhöhe des Helden, 1,25 × Modell)
 const LANE_Z0 = -38.5, LANE_Z1 = 28.5;
 const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
 const _v = new THREE.Vector3();

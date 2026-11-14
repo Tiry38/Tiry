@@ -4,12 +4,19 @@ import { escapeHtml } from './hud.js';
 import { I } from './icons.js';
 import { PICK_MODES, MODIFIERS, modeCode } from '../sim/modes.js';
 import { ACTS, MISSIONS, TALENTS, GOAL_TEXT, CAMPAIGN_DIFFICULTY, unlockedFactions, missionUnlocked, star3Text } from '../sim/campaign.js';
+import { HEROES, HERO_IDS, abilityText } from '../sim/heroes.js';
+import { AI, CI } from './icons.js';
+import { HERO_ACTIONS, resolveBinds, setBind, resetBinds, comboFromEvent, comboLabel, isModifierCode } from '../hero/keybinds.js';
+
+/** Klassenname groß in der Heldenauswahl */
+export function heroClassName(def) { return def.role === 'tank' ? 'Tank' : def.role === 'healer' ? 'Heilerin' : def.cls || def.roleLabel; }
+const RES_LABEL = { wut: 'Wut', fokus: 'Fokus', energie: 'Energie', mana: 'Mana', dampf: 'Dampf', seelen: 'Seelenkraft' };
 
 const $ = (id) => document.getElementById(id);
 
 export class Menus {
-  constructor({ settings, audio, portraits, progress, onStart, onStartMission, onResume, onSurrender, onRematch, onToMenu, onQuit, onApplyGraphics, onMultiplayerStart }) {
-    Object.assign(this, { settings, audio, portraits, progress, onStart, onStartMission, onResume, onSurrender, onRematch, onToMenu, onQuit, onApplyGraphics, onMultiplayerStart });
+  constructor({ settings, audio, portraits, progress, heroPreview, onStart, onStartMission, onResume, onSurrender, onRematch, onToMenu, onQuit, onApplyGraphics, onMultiplayerStart }) {
+    Object.assign(this, { settings, audio, portraits, progress, heroPreview, onStart, onStartMission, onResume, onSurrender, onRematch, onToMenu, onQuit, onApplyGraphics, onMultiplayerStart });
     this.stack = [];
     this.current = 'splash';
     document.querySelectorAll('[data-go]').forEach((b) => {
@@ -45,7 +52,9 @@ export class Menus {
   /** push=true merkt sich den vorherigen Bildschirm für „Zurück“ */
   go(id, push = false) {
     if (push) this.stack.push(this.current);
-    if (id === 'setup') this.refreshSetup();
+    if (id === 'setup') { this.refreshSetup(); this.refreshHeroPick(); }
+    if (id === 'setup' && this.setupTab === 'hero') this.heroPreview?.start(); else this.heroPreview?.stop();
+    if (this.rebinding && id !== 'settings') this.stopRebind();
     if (id === 'campaign') this.refreshCampaign();
     if (id === 'menu') { this.stack = []; this.refreshMenuCard(); }
     // Im Spiel bleibt das HUD sichtbar unter den Overlays
@@ -83,6 +92,15 @@ export class Menus {
     this.seg($('seg-cc'), [[false, 'Ohne Champions'], [true, 'CC – Champions']], 'champions', () => this.refreshSummary());
     this.seg($('seg-waves'), [[20, '20 Wellen'], [30, '30 Wellen']], 'waves', () => this.refreshSummary());
     this.seg($('seg-speed'), [[1, '1×'], [1.5, '1,5×'], [2, '2×']], 'gameSpeed', () => this.refreshSummary());
+    this.setupTab = 'hero';
+    document.querySelectorAll('#setup-tabs button').forEach((b) => b.addEventListener('click', () => {
+      this.audio.ui('click');
+      this.setupTab = b.dataset.tab;
+      document.querySelectorAll('#setup-tabs button').forEach((x) => x.classList.toggle('on', x === b));
+      $('hero-pick').hidden = this.setupTab !== 'hero';
+      $('setup-grid').hidden = this.setupTab !== 'game';
+      if (this.setupTab === 'hero') this.heroPreview?.start(); else this.heroPreview?.stop();
+    }));
     const nm = $('inp-name');
     nm.value = this.settings.get('playerName');
     nm.addEventListener('input', () => this.settings.set('playerName', nm.value.trim() || 'Tiry'));
@@ -121,6 +139,42 @@ export class Menus {
     }
     this.refreshSummary();
   }
+  // ---------- Heldenauswahl ----------
+  refreshHeroPick() {
+    const box = $('hero-pick');
+    if (!this.heroBuilt) {
+      this.heroBuilt = true;
+      box.innerHTML = `<div class="hp-list" id="hp-list"></div><div class="hp-stage" id="hp-stage"><div class="hp-class" id="hp-class"></div><div class="hp-foot" id="hp-foot"></div></div><div class="hp-info" id="hp-info"></div>`;
+      this.heroPreview?.mount($('hp-stage'));
+      const list = $('hp-list');
+      for (const id of HERO_IDS) {
+        const d = HEROES[id];
+        const b = document.createElement('button');
+        b.className = 'hp-card';
+        b.dataset.hero = id;
+        b.style.setProperty('--hc', d.palette.glow);
+        const por = this.heroPreview ? this.heroPreview.portrait(id, 128) : '';
+        b.innerHTML = `<span class="por">${por ? `<img src="${por}" alt=""/>` : ''}</span><span class="cl"><b>${heroClassName(d)}</b><small>${d.name}</small></span><span class="ci">${CI[d.role] || ''}</span>`;
+        b.addEventListener('click', () => { this.audio.ui('confirm'); this.settings.set('hero', id); this.refreshHeroPick(); this.refreshSummary(); });
+        b.addEventListener('mouseenter', () => this.audio.ui('hover'));
+        list.appendChild(b);
+      }
+    }
+    const id = HEROES[this.settings.get('hero')] ? this.settings.get('hero') : HERO_IDS[0];
+    const d = HEROES[id];
+    box.style.setProperty('--hc', d.palette.glow);
+    box.querySelectorAll('.hp-card').forEach((c) => c.classList.toggle('on', c.dataset.hero === id));
+    this.heroPreview?.show(id);
+    $('hp-class').innerHTML = `<b>${heroClassName(d)}</b><small>${d.cls && d.cls !== heroClassName(d) ? `${d.cls} · ` : ''}${d.roleLabel}</small>`;
+    $('hp-foot').innerHTML = `<span>Schwierigkeit <span class="stars">${'★'.repeat(d.difficulty)}<i>${'★'.repeat(3 - d.difficulty)}</i></span></span><span>${d.resName || RES_LABEL[d.resource]}</span><span>${d.range > 4 ? `Fernkampf ${d.range} m` : 'Nahkampf'}</span>`;
+    const syn = (d.synergy || []).map((f) => FACTIONS[f] ? `<span class="syn">${FACTIONS[f].name}</span>` : '').join('');
+    $('hp-info').innerHTML = `<h4>${d.name}</h4><div class="ttl2">${d.title}</div><div class="lore">${d.lore}</div>
+      <div class="hp-chips"><span>${heroClassName(d)}</span><span>${d.hp} Leben</span><span>Rüstung ${d.armor}</span><span>${d.resName}</span></div>
+      ${syn ? `<div class="hp-chips"><span>Stark mit</span>${syn}</div>` : ''}
+      <div class="hp-abs">${d.abilities.map((ab, i) => `<div class="hp-ab" data-anim="${ab.anim || ''}"><span class="ic">${AI[ab.icon] || ''}<b>${i + 1}</b></span><span class="tx"><b>${ab.name}${i === 4 && ab.ult ? '<em>Ultimate ab Stufe 6</em>' : ''}</b><p>${abilityText(ab, 1, i)}</p></span></div>`).join('')}</div>`;
+    $('hp-info').querySelectorAll('.hp-ab').forEach((el) => el.addEventListener('mouseenter', () => this.heroPreview?.play(el.dataset.anim)));
+  }
+
   refreshSummary() {
     const S = this.settings;
     const n = S.get('teamSize');
@@ -130,11 +184,12 @@ export class Menus {
     $('mode-code').textContent = code;
     $('mode-desc').textContent = `${PICK_MODES[pick].name}: ${PICK_MODES[pick].desc}${S.get('champions') ? ` · ${MODIFIERS.cc.desc}` : ''}`;
     const D = { easy: 'Leicht', normal: 'Normal', hard: 'Schwer' };
-    $('setup-summary').innerHTML = `<b>${code}</b> · ${n} gegen ${n} · ${pick === 'ap' ? (f ? f.name : 'Zufallsfraktion') : PICK_MODES[pick].name}<br>Verbündete ${D[S.get('allyDifficulty')]} · Gegner ${D[S.get('difficulty')]} · ${S.get('waves')} Wellen · Tempo ${String(S.get('gameSpeed')).replace('.', ',')}×`;
+    const hd = HEROES[S.get('hero')] || HEROES[HERO_IDS[0]];
+    $('setup-summary').innerHTML = `<b>${heroClassName(hd)}</b> ${hd.name} · <b>${code}</b> · ${n} gegen ${n} · ${pick === 'ap' ? (f ? f.name : 'Zufallsfraktion') : PICK_MODES[pick].name}<br>Verbündete ${D[S.get('allyDifficulty')]} · Gegner ${D[S.get('difficulty')]} · ${S.get('waves')} Wellen · Tempo ${String(S.get('gameSpeed')).replace('.', ',')}×`;
   }
   setupConfig() {
     const S = this.settings;
-    return { teamSize: S.get('teamSize'), faction: S.get('faction'), difficulty: S.get('difficulty'), allyDifficulty: S.get('allyDifficulty'), name: S.get('playerName') || 'Tiry',
+    return { hero: HEROES[S.get('hero')] ? S.get('hero') : HERO_IDS[0], teamSize: S.get('teamSize'), faction: S.get('faction'), difficulty: S.get('difficulty'), allyDifficulty: S.get('allyDifficulty'), name: S.get('playerName') || 'Tiry',
       rules: { pickMode: S.get('pickMode'), champions: !!S.get('champions'), maxWaves: S.get('waves') } };
   }
 
@@ -295,6 +350,15 @@ export class Menus {
       row('Oberfläche', 'Klicks und Menütöne', slider('volUi', 0, 1, 0.01, pct, vol));
       row('Stumm', '', toggle('muted', vol));
     } else if (this.settingsTab === 'steuerung') {
+      const sub = (t) => { const h = document.createElement('h3'); h.className = 'set-sub'; h.textContent = t; body.appendChild(h); };
+      sub('Heldenblick (Kampf)');
+      row('Mausempfindlichkeit', 'Kamera drehen mit gehaltener Maustaste', slider('mouseSens', 0.3, 3, 0.05, (v) => `${v.toFixed(2).replace('.', ',')}×`));
+      row('Maus-Y umkehren', 'Maus nach oben = Kamera nach unten', toggle('invertY'));
+      row('Kameraabstand', 'Startabstand hinter dem Helden (Mausrad zoomt im Spiel 2–28 m)', slider('heroCamDist', 2, 28, 0.5, (v) => `${String(v).replace('.', ',')} m`));
+      row('Windzug-Schwenk', 'Kamerafahrt zwischen Vogelperspektive und Heldenblick', segc('swoop', [['normal', 'Normal'], ['short', 'Kurz'], ['off', 'Aus (Überblenden)']]));
+      sub('Tastenbelegung Held');
+      this.renderBinds(body);
+      sub('Bauphase (Vogelperspektive)');
       row('Kamera-Tempo', '', slider('camSpeed', 0.4, 2.5, 0.1, (v) => `${v.toFixed(1)}×`));
       row('Randscrollen', 'Kamera bewegt sich, wenn die Maus den Bildschirmrand berührt', toggle('edgeScroll'));
       const keys = document.createElement('div');
@@ -313,6 +377,63 @@ export class Menus {
     }
   }
 
+  // ---------- Tastenbelegung ----------
+  renderBinds(body) {
+    const S = this.settings;
+    const binds = resolveBinds(S);
+    const wrap = document.createElement('div');
+    wrap.className = 'binds';
+    let group = '';
+    for (const a of HERO_ACTIONS) {
+      if (a.group !== group) { group = a.group; const g = document.createElement('div'); g.className = 'bind-group'; g.textContent = group; wrap.appendChild(g); }
+      const r = document.createElement('div');
+      r.className = 'bind-row';
+      r.innerHTML = `<span class="bl">${a.label}</span>`;
+      for (let i = 0; i < 2; i++) {
+        const b = document.createElement('button');
+        b.className = `bind-key${binds[a.id][i] ? '' : ' empty'}`;
+        b.dataset.action = a.id; b.dataset.slot = i;
+        b.textContent = binds[a.id][i] ? comboLabel(binds[a.id][i]) : '–';
+        b.addEventListener('click', () => this.startRebind(b));
+        r.appendChild(b);
+      }
+      wrap.appendChild(r);
+    }
+    body.appendChild(wrap);
+    const foot = document.createElement('div');
+    foot.className = 'bind-foot';
+    foot.innerHTML = '<span class="muted">Klicken, dann Taste drücken · Esc bricht ab · Entf/⌫ leert die Belegung · Maus: rechte Taste lenkt, linke dreht die Kamera, beide laufen vorwärts</span>';
+    const rb = document.createElement('button');
+    rb.className = 'btn ghost small';
+    rb.textContent = 'Standardbelegung';
+    rb.addEventListener('click', () => { this.audio.ui('click'); resetBinds(S); this.renderSettings(); });
+    foot.appendChild(rb);
+    body.appendChild(foot);
+  }
+  startRebind(btn) {
+    this.stopRebind();
+    this.audio.ui('click');
+    btn.classList.add('listen');
+    btn.textContent = 'Taste drücken …';
+    const onKey = (e) => {
+      e.preventDefault(); e.stopPropagation();
+      if (isModifierCode(e.code)) return;
+      if (e.code === 'Escape') { this.stopRebind(); this.renderSettings(); return; }
+      const combo = (e.code === 'Delete' || e.code === 'Backspace') ? '' : comboFromEvent(e);
+      setBind(this.settings, btn.dataset.action, +btn.dataset.slot, combo);
+      this.audio.ui('confirm');
+      this.stopRebind();
+      this.renderSettings();
+    };
+    window.addEventListener('keydown', onKey, true);
+    this.rebinding = { btn, onKey };
+  }
+  stopRebind() {
+    if (!this.rebinding) return;
+    window.removeEventListener('keydown', this.rebinding.onKey, true);
+    this.rebinding = null;
+  }
+
   // ---------- Kodex ----------
   buildCodex() {
     const atk = Object.keys(ATTACK_TYPES), arm = Object.keys(ARMOR_TYPES);
@@ -326,7 +447,8 @@ export class Menus {
       <section><h4>Der König</h4>Start: ${KING.hp} Leben, starker Flächenangriff. Verbesserungen: Lebenskraft, Königsmacht, Erneuerung. Dein Team hat <b>${KING.heals} Heilungen</b> (je ${Math.round(KING.healPct * 100)} %).</section>
       <section><h4>Angriff gegen Rüstung</h4>Jeder Kämpfer und Gegner hat eine Angriffs- und eine Rüstungsart. Wähle Kämpfer passend zur nächsten Welle (Wellenname und Typ siehst du oben).<br><br>${table}</section>
       <section><h4>Fraktionen</h4>${FACTION_IDS.map((f) => `<b>${FACTIONS[f].name}</b> – ${FACTIONS[f].desc}`).join('<br>')}<br><br>Zufällige Fraktion: <b>+${ECON.randomBonusGold} Gold</b> zum Start.</section>
-      <section><h4>Steuerung</h4><div class="keys">${KEYS.map(([k, d]) => `<span>${k.split(' ').map((x) => `<span class="key">${x}</span>`).join(' ')}</span><span>${d}</span>`).join('')}</div></section>`;
+      <section><h4>Helden</h4>Zu jeder Welle schwenkt die Kamera im <b>Windzug-Schwenk</b> zu deinem Helden. Du steuerst ihn wie in einem Online-Rollenspiel und kämpfst zwischen deinen Vasallen. Fällt dein Held, kehrt er erst zur nächsten Bauphase zurück – deine Vasallen kämpfen allein weiter.<br><br><div class="keys">${HERO_KEYS.map(([k, d]) => `<span>${k.split(' ').map((x) => `<span class="key">${x}</span>`).join(' ')}</span><span>${d}</span>`).join('')}</div></section>
+      <section><h4>Steuerung (Bauphase)</h4><div class="keys">${KEYS.map(([k, d]) => `<span>${k.split(' ').map((x) => `<span class="key">${x}</span>`).join(' ')}</span><span>${d}</span>`).join('')}</div></section>`;
   }
 
   // ---------- Mehrspieler (Vorschau) ----------
@@ -420,4 +542,19 @@ export const KEYS = [
   ['Mittlere Maustaste', 'Kamera drehen (mit Shift: verschieben)'],
   ['Tab', 'Punktetafel (gedrückt halten)'],
   ['Esc', 'Pause / Abbrechen'],
+];
+
+export const HERO_KEYS = [
+  ['W S', 'Vorwärts / rückwärts'],
+  ['A D', 'Drehen (mit rechter Maustaste: seitwärts)'],
+  ['Q E', 'Seitwärts gehen'],
+  ['Leertaste', 'Springen'],
+  ['Num', 'Automatisch laufen'],
+  ['1 – 5', 'Fähigkeiten'],
+  ['Tab', 'Nächsten Gegner anvisieren'],
+  ['Esc', 'Ziel aufheben / Menü'],
+  ['Rechte Maustaste', 'Held und Kamera lenken · Klick: angreifen'],
+  ['Linke Maustaste', 'Kamera drehen · Klick: anvisieren'],
+  ['Beide Maustasten', 'Vorwärts laufen'],
+  ['Mausrad', 'Zoomen'],
 ];

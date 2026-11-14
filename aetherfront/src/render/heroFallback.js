@@ -380,7 +380,8 @@ export class HeroAnimator {
     const J = this.J;
     this.t += dt;
     const k = (x) => 1 - Math.exp(-dt * x);
-    const fwd = clamp(s.fwd || 0, -1, 1), str = clamp(s.strafe || 0, -1, 1);
+    // Eingänge wie beim großen Animator: Geschwindigkeiten in m/s
+    const fwd = clamp((s.fwd || 0) / 7, -1, 1), str = clamp((s.strafe || 0) / 7, -1, 1);
     this.fwdS += (fwd - this.fwdS) * k(12);
     this.strS += (str - this.strS) * k(12);
     this.turnS += ((s.turn || 0) - this.turnS) * k(8);
@@ -389,9 +390,7 @@ export class HeroAnimator {
     this.air += ((s.airborne ? 1 : 0) - this.air) * k(14);
     const back = this.fwdS < -0.1 ? 1 : 0;
     this.phase += dt * (back ? 7.5 : 9.8) * Math.max(0.35, spd) * (back ? -1 : 1);
-    if (s.hitAt != null && s.hitAt > this.lastHit) this.hitT = 0;
-    this.lastHit = s.hitAt ?? this.lastHit ?? 0;
-    this.hitT += dt;
+    this.hitT = s.hitAt ?? 9; // Sekunden seit dem letzten Treffer (wie beim großen Animator)
 
     // Ausgangslage
     for (const n of Object.keys(this.rest)) this.r(n);
@@ -461,9 +460,11 @@ export class HeroAnimator {
 
     // Aktion (Angriff / Zauber / Fähigkeit)
     const act = s.action;
-    if (act && act.t < 1.6) {
-      const t = act.t;
-      const kind = act.kind || 'attack';
+    if (act && act.t <= 1) {
+      // Animationsnamen → Grundbewegungen des Ersatz-Rigs (t normiert 0..1 → Sekunden)
+      const MAP = { cast: 'cast', heal: 'cast', skycast: 'cast', nova: 'aoe_self', guard: 'cast', bandage: 'cast', breath: 'cast', channel: 'cast', skyshot: 'shoot', draw: 'shoot', shoot: 'shoot', volley: 'shoot', spin: 'spin', slam: 'aoe_self', roar: 'taunt', flurry: 'dual', stab: 'dual', slash: 'attack', bash: 'attack', overhead: 'attack', melee: 'attack', charge: 'attack', leap: 'aoe_self', flip: 'cast', blink: 'cast' };
+      const kind = MAP[act.kind] || 'attack';
+      const t = act.t * (kind === 'cast' ? 1.2 : kind === 'shoot' ? 0.75 : 0.6);
       if (kind === 'cast' || kind === 'channel') {
         const e = Math.min(1, t / 0.25);
         const w = Math.sin(this.t * 6) * 0.05;
@@ -484,7 +485,7 @@ export class HeroAnimator {
         if (kind !== 'spin') { J.chest.rotation.x = -0.25 * e; J.head.rotation.x = -0.35 * e; J.hips.position.y -= 0.12 * e; J.thighL.rotation.x = -0.5 * e; J.thighR.rotation.x = -0.5 * e; J.shinL.rotation.x = 0.9 * e; J.shinR.rotation.x = 0.9 * e; }
       } else {
         // Nahkampfhieb: ausholen → durchziehen → zurück (hits > 1: schnelle Folge)
-        const dur = 0.42;
+        const dur = act.kind === 'flurry' ? 0.18 : 0.6;
         const tt = (t % dur) / dur;
         const wind = tt < 0.35 ? tt / 0.35 : 1 - (tt - 0.35) / 0.65;
         const strike = tt < 0.35 ? 0 : Math.sin(((tt - 0.35) / 0.65) * Math.PI);

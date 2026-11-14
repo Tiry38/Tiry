@@ -226,7 +226,7 @@ export function buildWorld(U, { anisotropy = 8, assets = null } = {}) {
       const tint = (x, z, zone) => {
         const a = ao(x);
         const rift = 1 - smoothstep(LANE_Z0, -27, z);
-        let c = zone ? [0.84, 0.90, 1.02] : [1.0, 0.98, 0.95];
+        let c = zone ? (A.floor ? [0.93, 0.96, 1.02] : [0.84, 0.90, 1.02]) : [1.0, 0.98, 0.95];
         c = [lerp(c[0], 0.88, rift), lerp(c[1], 0.84, rift), lerp(c[2], 0.96, rift)];
         return [c[0] * a, c[1] * a, c[2] * a];
       };
@@ -302,7 +302,7 @@ export function buildWorld(U, { anisotropy = 8, assets = null } = {}) {
   const floorMat = patchMaterial(new THREE.MeshStandardMaterial({
     map: tex.map, normalMap: tex.normalMap, normalScale: new THREE.Vector2(1.0, 1.0), aoMap: tex.ormMap, aoMapIntensity: 0.9,
     roughnessMap: tex.ormMap, roughness: 1.0, vertexColors: true, metalness: 0, side: THREE.DoubleSide,
-    color: A.floor ? new THREE.Color(1.12, 1.08, 1.02) : new THREE.Color(1, 1, 1),
+    color: A.floor ? new THREE.Color(0.80, 0.74, 0.66) : new THREE.Color(1, 1, 1),
   }), U, { floor: true });
   const floor = new THREE.Mesh(floorGeo, floorMat);
   floor.receiveShadow = true;

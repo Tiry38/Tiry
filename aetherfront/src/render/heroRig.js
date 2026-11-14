@@ -1,8 +1,7 @@
 // Helden-Rig-Anbieter: nutzt das große Modell-Modul (render/heroModels.js), fällt bei Fehlern
 // auf das Ersatz-Rig (render/heroFallback.js) mit identischer Schnittstelle zurück.
 import * as Fallback from './heroFallback.js';
-
-const Real = null;
+import * as Real from './heroModels.js';
 
 export function buildHeroRig(modelId, opts) {
   if (Real && Real.buildHero) {

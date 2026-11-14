@@ -9,7 +9,7 @@ const STRATA = [
 ];
 
 export function strataColor(y, x, z, seed = 0) {
-  const n = fbm3(x * 0.03, y * 0.05, z * 0.03, seed) * 2.2;
+  const n = fbm3(x * 0.03, y * 0.05, z * 0.03, 3, seed) * 2.2;
   const b = (y + n) / 2.6;
   const i = Math.floor(b), f = b - i;
   const c0 = STRATA[((i % 8) + 8) % 8], c1 = STRATA[(((i + 1) % 8) + 8) % 8];

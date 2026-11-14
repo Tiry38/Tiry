@@ -398,10 +398,12 @@ ${GLSL_TRI}
     g *= 0.75 + 0.5 * lum3(gm) / max(lum3(g) + 0.05, 0.1) * 0.5;
     vec3 sl = texture2D(uSA, tuv * uSS).rgb;
     float soilV = smoothstep(0.75, 1.25, vc.r / max(vc.g, 1e-3));
-    float soilN = smoothstep(0.62, 0.8, fbm(tuv * 0.07 + 11.0));
+    float soilN = smoothstep(0.7, 0.86, fbm(tuv * 0.07 + 11.0));
     float soilM = hblend(clamp(max(soilV, soilN * 0.8), 0.0, 1.0), lum3(g), lum3(sl), 3.5);
     vec3 grassVar = clamp(vc / vec3(0.062, 0.118, 0.025), vec3(0.65), vec3(1.45));
-    vec3 top = mix(g * grassVar * 1.05 * uGroundTint, sl * vec3(1.0, 0.95, 0.9), soilM);
+    // Waldboden zur Grasfarbe ziehen (Halme + Boden verschmelzen, auch wo das Gras ausgeblendet ist)
+    vec3 gg = mix(g, vec3(lum3(g)) * vec3(0.62, 1.0, 0.36) * 1.15, 0.55);
+    vec3 top = mix(gg * grassVar * uGroundTint, sl * vec3(0.95, 0.9, 0.85), soilM);
     // --- Übergang Oberseite/Wand mit Höhenmischung
     aethUp = clamp((wn.y - 0.62) * 5.0 + (lum3(top) - hC) * 1.2, 0.0, 1.0);
     diffuseColor.rgb = mix(rockCol, top, aethUp);
@@ -510,13 +512,8 @@ ${GLSL_TRI}
     tx = vec3(tx.xy + on.zy, abs(tx.z) * on.x);
     tz = vec3(tz.xy + on.xy, abs(tz.z) * on.z);
     vec3 oN = normalize(tx.zyx * aethBarkW.x + tz.xyz * aethBarkW.z + on * 0.25);
-    // Objekt- → Sichtraum (Instanz- und Modellmatrix)
-    mat3 im = mat3(modelViewMatrix);
-    #ifdef USE_INSTANCING
-    normal = normalize(im * mat3(vInstM0, vInstM1, vInstM2) * oN);
-    #else
-    normal = normalize(im * oN);
-    #endif
+    // Objekt- → Sichtraum (Basis aus dem Vertex-Shader: modelView × Instanzmatrix)
+    normal = normalize(mat3(vInstM0, vInstM1, vInstM2) * oN);
   }`;
     }
     if (bump || (bark && !barkTex)) {
@@ -531,11 +528,13 @@ ${GLSL_TRI}
       // Instanz-Rotation an den Fragment-Shader weitergeben (für objekt-triplanare Normalen)
       vs = vs.replace('#include <common>', '#include <common>\nvarying vec3 vInstM0, vInstM1, vInstM2;');
       vs = vs.replace('#include <begin_vertex>', `#include <begin_vertex>
-  #ifdef USE_INSTANCING
-  vInstM0 = instanceMatrix[0].xyz; vInstM1 = instanceMatrix[1].xyz; vInstM2 = instanceMatrix[2].xyz;
-  #else
-  vInstM0 = vec3(1.0, 0.0, 0.0); vInstM1 = vec3(0.0, 1.0, 0.0); vInstM2 = vec3(0.0, 0.0, 1.0);
-  #endif`);
+  {
+    mat3 bm = mat3(modelViewMatrix);
+    #ifdef USE_INSTANCING
+    bm = bm * mat3(instanceMatrix);
+    #endif
+    vInstM0 = bm[0]; vInstM1 = bm[1]; vInstM2 = bm[2];
+  }`);
       fs = fs.replace('#include <common>', '#include <common>\nvarying vec3 vInstM0, vInstM1, vInstM2;');
     }
     if (emissiveAttr) {

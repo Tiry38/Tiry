@@ -6,6 +6,9 @@
 import * as THREE from 'three';
 import { mergeGeometries, mergeVertices, toCreasedNormals } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import { RoundedBoxGeometry } from 'three/examples/jsm/geometries/RoundedBoxGeometry.js';
+import { addUnitRig, injectUnitAnim, setInstanceAnim, createUnitDepthMaterial, rigType } from './hero/unitRig.js';
+
+export { setInstanceAnim, createUnitDepthMaterial, rigType };
 
 const TAU = Math.PI * 2;
 const PI = Math.PI;
@@ -2407,7 +2410,12 @@ export function buildModel(archetype, opts = {}) {
   const K = new Kit(o);
   const [baseScale, radius, ao] = fn(K);
   const scale = baseScale * [1, 1.12, 1.25][o.tier - 1];
-  return K.finish(scale, radius, ao ?? 1);
+  const bodyCounts = K.body.map((g) => g.attributes.position.count), glowCounts = K.glows.map((g) => g.attributes.position.count);
+  const res = K.finish(scale, radius, ao ?? 1);
+  // Vertex-Animation (Laufen/Angriff/Treffer) – siehe hero/unitRig.js, gesteuert per setInstanceAnim()
+  addUnitRig(archetype, res.body, res.body, bodyCounts);
+  if (res.glow) addUnitRig(archetype, res.glow, res.body, glowCounts);
+  return res;
 }
 
 // ---------------------------------------------------------------------------------------------
@@ -2460,10 +2468,15 @@ float roughnessFactor = clamp(roughness * vPbr.x * (0.88 + 0.24 * microN), 0.06,
 		totalEmissiveRadiance += diffuseColor.rgb * 0.035;
 	}`);
   };
-  m.customProgramCacheKey = () => 'aetherfront-body-pbr-v3';
+  const prev = m.onBeforeCompile;
+  m.onBeforeCompile = (sh, r) => { prev(sh, r); injectUnitAnim(sh); };
+  m.customProgramCacheKey = () => 'aetherfront-body-pbr-v4-anim';
   return m;
 }
 
 export function createGlowMaterial() {
-  return new THREE.MeshBasicMaterial({ vertexColors: true, toneMapped: false });
+  const m = new THREE.MeshBasicMaterial({ vertexColors: true, toneMapped: false });
+  m.onBeforeCompile = (sh) => injectUnitAnim(sh);
+  m.customProgramCacheKey = () => 'aetherfront-glow-anim-v1';
+  return m;
 }

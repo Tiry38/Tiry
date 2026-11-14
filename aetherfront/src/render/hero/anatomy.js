@@ -134,7 +134,7 @@ export function torso(B, o = {}) {
     const rr = S.r(u, a, off + (o.offFn ? o.offFn(u, a) : 0));
     if (o.ridge) { const k = o.ridge * Math.exp(-Math.pow(Math.sin(a) / 0.1, 2)) * Math.max(0, Math.cos(a)); rr[0] += k * B.skel.s; }
     return rr;
-  }, { sides: o.sides || 32, segs: o.segs || 26, caps: o.caps ?? true });
+  }, { sides: o.sides || 24, segs: o.segs || 16, caps: o.caps ?? true });
   const bind = o.bind || torsoWeights(B);
   if (o.layer === 'cloth') B.cloth(g, o.col, o.mat, bind, { tier: o.tier, grad: o.grad });
   else B.add(g, o.col, o.mat || M.cloth, bind, { tier: o.tier, grad: o.grad });
@@ -150,7 +150,7 @@ export function torsoRing(B, u, off, r, col, mat, o = {}) {
     const p = S.pt(u + (o.du ? o.du(a) : 0), a, off);
     pts.push(p);
   }
-  const g = tube(pts, () => r * B.skel.s, { sides: 8, segs: n * 2, caps: (o.arc ?? TAU) < TAU, hint: [0, 1, 0] });
+  const g = tube(pts, () => r * B.skel.s, { sides: 6, segs: n, caps: (o.arc ?? TAU) < TAU, hint: [0, 1, 0] });
   B.add(g, col, mat || M.gold, o.bind || torsoWeights(B), { tier: o.tier });
   return g;
 }
@@ -165,9 +165,9 @@ export function arms(B, o = {}) {
     const ca = Math.cos(a);
     const r = interp([[0, 0.058], [0.15, 0.056], [0.45, 0.05], [0.8, 0.043], [1, 0.04]], t);
     return (r + 0.008 * Math.exp(-Math.pow((t - 0.45) / 0.2, 2)) * Math.max(0, ca)) * s * bulk;
-  }, { sides: 16, segs: 10 });
+  }, { sides: 12, segs: 7 });
   B.sym(ua, o.upperCol || o.col, o.upperMat || o.mat || M.cloth, upperArmWeights(B), { tier: o.tier });
-  const fa = tube([el.clone().add(V(0, 0.02, 0)), ha.clone().add(V(0, 0.01, 0))], (t) => interp([[0, 0.043], [0.25, 0.045], [0.7, 0.036], [1, 0.03]], t) * s * bulk, { sides: 16, segs: 10 });
+  const fa = tube([el.clone().add(V(0, 0.02, 0)), ha.clone().add(V(0, 0.01, 0))], (t) => interp([[0, 0.043], [0.25, 0.045], [0.7, 0.036], [1, 0.03]], t) * s * bulk, { sides: 12, segs: 7 });
   B.sym(fa, o.foreCol || o.col, o.foreMat || o.mat || M.cloth, foreArmWeights(B), { tier: o.tier });
   if (o.deltoid !== false) {
     const d = smoothSphere(1, 16, 12); d.scale(0.066 * s * bulk, 0.072 * s * bulk, 0.066 * s * bulk); T(d, sh.clone().add(V(0.006, -0.005, 0)));
@@ -221,11 +221,11 @@ export function hand(B, o = {}) {
         pts.push(p);
       }
       const r0 = (k === 3 ? 0.0095 : 0.0115) * s;
-      parts.push([tube(pts, (t) => r0 * (1 - 0.25 * t), { sides: 8, segs: 9 }), col, mat]);
+      parts.push([tube(pts, (t) => r0 * (1 - 0.25 * t), { sides: 7, segs: 6 }), col, mat]);
     }
     // Daumen
     const thumb = [F.at(0.03, 0.03, 0.012), F.at(0.06, 0.05, 0.022 + 0.012 * curl), F.at(0.085, 0.045 - 0.02 * curl, 0.03 + 0.022 * curl), F.at(0.1, 0.03 - 0.03 * curl, 0.035 + 0.025 * curl)];
-    parts.push([tube(thumb, (t) => 0.0125 * s * (1 - 0.25 * t), { sides: 8, segs: 9 }), col, mat]);
+    parts.push([tube(thumb, (t) => 0.0125 * s * (1 - 0.25 * t), { sides: 7, segs: 6 }), col, mat]);
     if (o.armored) {
       const plate = ext(shape([[-0.024, 0], [0.024, 0], [0.026, 0.05], [0, 0.058], [-0.026, 0.05]], true), 0.008, 0.004, 1);
       bend(plate, 6);
@@ -260,13 +260,13 @@ export function legs(B, o = {}) {
     const ca = Math.cos(a), sa = Math.sin(a);
     const r = interp([[0, 0.088], [0.2, 0.084], [0.6, 0.068], [1, 0.054]], t);
     return (r + 0.008 * Math.max(0, ca) * Math.exp(-Math.pow((t - 0.55) / 0.25, 2)) + 0.006 * Math.max(0, -sa) * (1 - t)) * s * bulk;
-  }, { sides: 18, segs: 12 });
+  }, { sides: 14, segs: 8 });
   B.sym(thigh, o.thighCol || o.col, o.thighMat || o.mat || M.cloth, legWeights(B), { tier: o.tier });
   const shin = tube([kn.clone().add(V(0, 0.03, 0)), an.clone().add(V(0, 0.02, 0))], (t, a) => {
     const ca = Math.cos(a);
     const r = interp([[0, 0.052], [0.3, 0.054], [0.7, 0.04], [1, 0.034]], t);
     return (r + 0.016 * Math.max(0, -ca) * Math.exp(-Math.pow((t - 0.3) / 0.18, 2))) * s * bulk;
-  }, { sides: 18, segs: 12 });
+  }, { sides: 14, segs: 8 });
   B.sym(shin, o.shinCol || o.col, o.shinMat || o.mat || M.cloth, legWeights(B), { tier: o.tier });
   if (o.knee !== false) {
     const k = smoothSphere(1, 12, 10); k.scale(0.05 * s * bulk, 0.055 * s * bulk, 0.048 * s * bulk); T(k, kn.clone().add(V(0, 0.005, 0.012)));
@@ -279,7 +279,7 @@ export function boots(B, o = {}) {
   const shoe = tube([V(an.x, 0.045 * s, an.z - 0.075 * s), V(an.x, 0.05 * s, an.z + 0.03 * s), V(an.x, 0.04 * s, an.z + 0.12 * s), V(an.x, 0.03 * s, an.z + (0.175 + (o.toe || 0)) * s)], (t, a) => {
     const r = interp([[0, 0.045], [0.25, 0.052], [0.6, 0.048], [0.9, 0.034], [1, 0.02]], t) * s;
     return [r * 0.95, r * 1.05 * w];
-  }, { sides: 16, segs: 14, hint: [0, 1, 0] });
+  }, { sides: 12, segs: 10, hint: [0, 1, 0] });
   warp(shoe, (p) => { if (p.y < 0.012 * s) p.y = 0.012 * s; });
   B.sym(shoe, o.col, o.mat || M.leather, 'footL', { tier: o.tier });
   // Sohle
@@ -294,7 +294,7 @@ export function boots(B, o = {}) {
     const shaft = tube([V(an.x, 0.03 * s, an.z - 0.01 * s), V(an.x, top, J.shinL.pos.z * 0.5)], (t, a) => {
       const r = interp([[0, 0.054], [0.25, 0.048], [0.7, 0.05], [1, 0.058 + (o.flare || 0)]], t) * s;
       return r * (1 + 0.08 * Math.max(0, -Math.cos(a)) * (1 - t));
-    }, { sides: 18, segs: 10, caps: false });
+    }, { sides: 14, segs: 6, caps: false });
     B.sym(shaft, o.col, o.mat || M.leather, legWeights(B), { tier: o.tier });
     if (o.cuff) {
       const c = tor(0.06 * s, 0.012 * s, 8, 20); c.rotateX(PI / 2); c.scale(1 + (o.flare || 0) * 12, 1, 1 + (o.flare || 0) * 12); T(c, V(an.x, top, J.shinL.pos.z * 0.5));
@@ -323,7 +323,7 @@ export function headInfo(B, o = {}) {
  */
 export function head(B, o = {}) {
   const H = headInfo(B, o), s = H.s, c = H.c, f = !!o.female;
-  const g = smoothSphere(1, 30, 22);
+  const g = smoothSphere(1, 24, 18);
   const jaw = o.jaw ?? (f ? 0.82 : 1);
   warp(g, (p) => {
     let { x, y, z } = p;
@@ -353,33 +353,49 @@ export function head(B, o = {}) {
   const headBind = 'head';
   if (!o.noSkull) B.add(g, skin, M.skin, headBind, { tier: o.tier });
   if (o.noFace) return H;
-  const fz = c.z + H.rz * 0.6;
+  // Oberflächen-Abtastung: vordere z-Koordinate des Gesichts bei (x, y)
+  const P = g.attributes.position;
+  const surf = (x, y) => {
+    let best = [], k;
+    for (let i = 0; i < P.count; i++) {
+      const pz = P.getZ(i); if (pz < c.z) continue;
+      const dx = P.getX(i) - x, dy = P.getY(i) - y, d = dx * dx + dy * dy;
+      best.push([d, pz]);
+    }
+    best.sort((u, v) => u[0] - v[0]); best = best.slice(0, 4);
+    let sw = 0, sz = 0; for (const [d, z] of best) { const w = 1 / (Math.sqrt(d) + 1e-4); sw += w; sz += z * w; }
+    return sz / sw;
+  };
+  const F = (x, y, dz = 0) => V(x, y, surf(x, y) + dz);
   // Nase
-  const nose = tube([V(0, c.y + 0.02 * s, fz + 0.022 * s), V(0, c.y - 0.012 * s, fz + 0.036 * s), V(0, c.y - 0.03 * s, fz + 0.046 * s)], (t) => (0.0085 + 0.007 * t) * s * (f ? 0.85 : 1), { sides: 10, segs: 8 });
+  const ny0 = c.y + 0.012 * s, ny1 = c.y - 0.03 * s;
+  const nose = tube([F(0, ny0, -0.002 * s), F(0, (ny0 + ny1) / 2, 0.01 * s), F(0, ny1, 0.016 * s)], (t) => (0.0075 + 0.0065 * t) * s * (f ? 0.85 : 1), { sides: 10, segs: 8 });
   B.add(nose, skin, M.skin, headBind);
-  const nos = ell(0.014 * s, 0.009 * s, 0.01 * s, 10, 8); T(nos, V(0, c.y - 0.033 * s, fz + 0.04 * s));
+  const nos = ell(0.0125 * s * (f ? 0.9 : 1), 0.008 * s, 0.009 * s, 10, 8); T(nos, F(0, c.y - 0.033 * s, 0.008 * s));
   B.add(nos, skin, M.skin, headBind);
-  // Augen: Lid-Mandel, Iris
-  const eyeY = c.y + 0.006 * s, eyeX = 0.032 * s, eyeZ = fz + 0.005 * s;
-  const white = ell(0.0145 * s, 0.0085 * s, 0.008 * s, 14, 10); T(white, V(eyeX, eyeY, eyeZ));
-  B.sym(white, '#e8e2da', M.eye, headBind);
-  const iris = ell(0.0068 * s, 0.0068 * s, 0.003 * s, 12, 8); T(iris, V(eyeX, eyeY, eyeZ + 0.0062 * s));
+  // Augen: Mandel, Iris, Lid – auf der Gesichtsoberfläche
+  const eyeY = c.y + 0.006 * s, eyeX = 0.033 * s, eyeZ = surf(eyeX, eyeY) - 0.002 * s;
+  const ew = (o.eyeSize ?? 1) * (f ? 1.08 : 1);
+  const white = ell(0.0155 * s * ew, 0.0092 * s * ew, 0.008 * s, 14, 10); R(white, 0, 0.22, 0); T(white, V(eyeX, eyeY, eyeZ));
+  B.sym(white, '#e6ded4', M.eye, headBind);
+  const iris = ell(0.0074 * s * ew, 0.0074 * s * ew, 0.003 * s, 12, 8); T(iris, V(eyeX - 0.001 * s, eyeY, eyeZ + 0.0066 * s));
   if (o.eyeGlow) B.glowSym(iris, o.eye || '#6ad0ff', o.eyeGlow, headBind);
   else {
     B.sym(iris, o.eye || '#3b6a8a', M.eye, headBind);
-    const pup = ell(0.003 * s, 0.003 * s, 0.002 * s, 8, 6); T(pup, V(eyeX, eyeY, eyeZ + 0.0085 * s)); B.sym(pup, '#0b0b10', M.eye, headBind);
+    const pup = ell(0.0032 * s, 0.0032 * s, 0.002 * s, 8, 6); T(pup, V(eyeX - 0.001 * s, eyeY, eyeZ + 0.0089 * s)); B.sym(pup, '#0b0b10', M.eye, headBind);
   }
-  // Oberlid (dunkle Linie) + Wimpernschwung
-  const lid = sweep([V(eyeX - 0.016 * s, eyeY - 0.001 * s, eyeZ + 0.002 * s), V(eyeX, eyeY + 0.0085 * s, eyeZ + 0.007 * s), V(eyeX + 0.017 * s, eyeY + 0.003 * s, eyeZ - 0.001 * s), V(eyeX + 0.022 * s, eyeY + (f ? 0.007 : 0.004) * s, eyeZ - 0.004 * s)], [0.0026 * s, 0.0012 * s], 6, 10);
+  const lid = sweep([V(eyeX - 0.017 * s * ew, eyeY - 0.002 * s, eyeZ + 0.002 * s), V(eyeX - 0.002 * s, eyeY + 0.0095 * s * ew, eyeZ + 0.0065 * s), V(eyeX + 0.016 * s * ew, eyeY + 0.004 * s, eyeZ + 0.0005 * s), V(eyeX + 0.022 * s, eyeY + (f ? 0.008 : 0.004) * s, eyeZ - 0.003 * s)], [0.0028 * s, 0.0012 * s], 6, 10);
   B.sym(lid, o.lash || '#1a1214', M.hair, headBind);
   // Brauen
-  const by = c.y + 0.03 * s;
-  const brow = sweep([V(0.012 * s, by - 0.002 * s, fz + 0.017 * s), V(0.032 * s, by + (f ? 0.006 : 0.004) * s, fz + 0.016 * s), V(0.052 * s, by + 0.002 * s, fz + 0.004 * s)], (t) => (f ? 0.0032 : 0.0048) * s * (1 - 0.5 * t), 6, 10);
+  const by = c.y + 0.032 * s;
+  const brow = sweep([F(0.012 * s, by - 0.002 * s, 0.002 * s), F(0.032 * s, by + (f ? 0.006 : 0.004) * s, 0.002 * s), F(0.054 * s, by + 0.001 * s, 0.001 * s)], (t) => (f ? 0.0034 : 0.005) * s * (1 - 0.5 * t), 6, 10);
   B.sym(brow, o.brow || '#3a2418', M.hair, headBind);
-  // Mund
-  const my = c.y - 0.058 * s;
-  const lip = sweep([V(-0.02 * s, my + 0.002 * s, fz + 0.016 * s), V(0, my, fz + 0.026 * s), V(0.02 * s, my + 0.002 * s, fz + 0.016 * s)], (t) => (0.0045 + 0.003 * Math.sin(t * PI)) * s, 8, 10);
-  B.add(lip, o.lips || shade(skin, 0.78).lerp(new THREE.Color('#a04a4a'), f ? 0.35 : 0.1), M.skin, headBind);
+  // Mund (Ober-/Unterlippe)
+  const my = c.y - 0.056 * s;
+  const lipCol = o.lips || shade(skin, 0.8).lerp(new THREE.Color('#a04a4a'), f ? 0.38 : 0.12);
+  B.add(sweep([F(-0.019 * s, my + 0.003 * s, -0.001 * s), F(0, my + 0.002 * s, 0.004 * s), F(0.019 * s, my + 0.003 * s, -0.001 * s)], (t) => (0.003 + 0.0026 * Math.sin(t * PI)) * s, 8, 10), lipCol, M.skin, headBind);
+  B.add(sweep([F(-0.015 * s, my - 0.003 * s, -0.001 * s), F(0, my - 0.006 * s, 0.003 * s), F(0.015 * s, my - 0.003 * s, -0.001 * s)], (t) => (0.003 + 0.003 * Math.sin(t * PI)) * s, 8, 10), lipCol, M.skin, headBind);
+  H.surf = surf;
   // Ohren
   if (o.ears !== false) {
     const ear = smoothSphere(1, 10, 8); ear.scale(0.012 * s, 0.026 * s, 0.018 * s); R(ear, 0, 0.3, 0); T(ear, V(H.rx * 0.98, c.y - 0.005 * s, c.z - 0.008 * s));
@@ -390,7 +406,7 @@ export function head(B, o = {}) {
 
 /** Haar-Kappe: Kopfform leicht vergrößert, Gesicht nach innen geklappt (Haaransatz). o: { col, vol, front (Haaransatz y), sideburn } */
 export function hairCap(B, H, o = {}) {
-  const g = smoothSphere(1, 28, 20), vol = o.vol ?? 1.1;
+  const g = smoothSphere(1, 22, 16), vol = o.vol ?? 1.1;
   const hl = o.front ?? 0.38;
   warp(g, (p) => {
     let { x, y, z } = p;

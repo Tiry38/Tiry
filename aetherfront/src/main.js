@@ -16,10 +16,19 @@ import { laneCenterX, kingPos } from './sim/layout.js';
 import { MISSIONS, missionSetup, missionStars } from './sim/campaign.js';
 import { modeCode } from './sim/modes.js';
 import { Progress } from './ui/progress.js';
+import * as THREE from 'three';
+import { HeroesView } from './render/heroesView.js';
+import { HeroPreview } from './render/heroPreview.js';
+import { HeroCamera, HERO_FOV } from './hero/camera.js';
+import { HeroControls } from './hero/controls.js';
+import { Swoop, rtsPose, SWOOP_DUR } from './hero/transition.js';
+import { CombatHud } from './hero/combatHud.js';
 
 const $ = (id) => document.getElementById(id);
 const BOT_NAMES = ['Aldric', 'Mira', 'Thorne', 'Kaela', 'Vex', 'Sorin', 'Lyra', 'Doran', 'Isolde', 'Ravik', 'Selka', 'Bram', 'Nyx', 'Corvin'];
 const VERSION = '0.1.0';
+const _sv = new THREE.Vector3();
+const HERO_SFX = { strike: 'sword', aoe_self: 'explosion', taunt: 'boss', cone: 'arrow', bolt: 'magic', heal_area: 'heal', revive: 'upgrade', heal_self: 'heal', dash: 'blunt', leap: 'explosion', leap_back: 'jump', blink: 'magic', mark: 'magic', dot: 'sword', root_target: 'magic', shield: 'heal', aoe_ground: 'magic', pull: 'lightning', summon: 'build', turret: 'build', buff_self: 'upgrade', aura_vassals: 'upgrade', drain: 'magic' };
 
 class App {
   constructor() {
@@ -31,6 +40,10 @@ class App {
     this.audio.applySettings = () => this.applyAudio();
     this.applyAudio();
     this.portraits = new Portraits(160);
+    this.heroPreview = new HeroPreview();
+    this.vmode = 'rts';          // rts | swoopIn | hero | swoopOut – Kamera-/Steuerungsmodus
+    this.deferred = [];          // Ereignisse, deren Darstellung auf den Treffer-Moment wartet
+    this.rtsFov = this.engine.camera.fov;
     this.progress = new Progress();
     this.mode = 'boot';
     this.session = null;
@@ -63,6 +76,14 @@ class App {
     this.view = new UnitsView(this.engine.scene);
     this.fx = new Fx(this.engine.scene, this.engine.camera, this.settings);
     this.overlay = new Overlay(this.engine.scene, this.engine.camera);
+    this.heroes = new HeroesView(this.engine.scene, this.fx, this.settings);
+    this.hcam = new HeroCamera(this.engine.camera, this.settings);
+    this.swoop = new Swoop({ camera: this.engine.camera, scene: this.engine.scene, engine: this.engine, audio: this.audio });
+    this.heroes.abilityFx.shake = (a, x, z) => {
+      const c = this.engine.camera.position;
+      const k = Math.max(0, 1 - Math.hypot(x - c.x, z - c.z) / 60);
+      if (this.vmode === 'hero') this.hcam.addShake(a * k); else if (!this.attract) this.cam.addShake(a * 0.5 * k);
+    };
     // Alle Modelle vorab erzeugen (kein Ruckeln beim ersten Auftauchen)
     this.view.warmup([...Object.values(UNITS), ...WAVES, ...SENDS]);
     this.engine.applySettings();
@@ -77,8 +98,21 @@ class App {
       onFocusKing: (t) => { const k = kingPos(t); this.cam.focus(k.x, k.z - 6, 55); },
       onPause: () => this.pause(),
     });
+    this.combat = new CombatHud({
+      settings: this.settings, audio: this.audio, portraits: this.portraits, heroPreview: this.heroPreview,
+      getSession: () => this.session, heroes: this.heroes, view: this.view,
+    });
+    this.controls = new HeroControls({
+      canvas: this.canvas, settings: this.settings, camera: this.engine.camera, hcam: this.hcam, heroes: this.heroes, view: this.view, audio: this.audio,
+      getSession: () => this.session,
+      onError: (m) => this.combat.error(m),
+      onMenu: () => this.pause(),
+      onFeedback: (k, d) => this.combat.feedback(k, d),
+    });
+    this.combat.controls = this.controls;
+    this.settings.onChange((k) => { if (k === 'keybinds') this.combat.refreshKeys(); });
     this.menus = new Menus({
-      settings: this.settings, audio: this.audio, portraits: this.portraits, progress: this.progress,
+      settings: this.settings, audio: this.audio, portraits: this.portraits, progress: this.progress, heroPreview: this.heroPreview,
       onStart: (cfg) => this.startGame(cfg),
       onStartMission: (m, opts) => this.startMission(m, opts),
       onResume: () => this.resume(),
@@ -141,6 +175,10 @@ class App {
     this.session = s;
     this.view.clear();
     this.fx.clear();
+    this.heroes.clear();
+    this.combat.clear();
+    this.exitHeroMode(true);
+    this.deferred.length = 0;
     this.selected = null; this.placing = null; this.hover = null;
     this.gameOverAt = null;
   }
@@ -148,7 +186,7 @@ class App {
   buildSetup(cfg) {
     const n = cfg.teamSize;
     const names = BOT_NAMES.slice().sort(() => Math.random() - 0.5);
-    const players = [{ name: cfg.name, team: 0, faction: cfg.faction, bot: false }];
+    const players = [{ name: cfg.name, team: 0, faction: cfg.faction, bot: false, hero: cfg.hero || this.settings.get('hero') }];
     for (let i = 1; i < n * 2; i++) players.push({ name: names[i % names.length], team: i % 2, faction: 'random', bot: true, difficulty: i % 2 === 0 ? (cfg.allyDifficulty || 'normal') : cfg.difficulty });
     return { seed: (Math.random() * 1e9) | 0, players, rules: cfg.rules || {} };
   }
@@ -157,6 +195,7 @@ class App {
     this.mission = m;
     this.missionOpts = opts;
     const setup = missionSetup(m, { name: this.settings.get('playerName') || 'Tiry', faction: opts.faction, difficulty: opts.difficulty, totalStars: this.progress.total });
+    setup.players[0].hero = this.settings.get('hero');
     const s = new LocalSession(setup, 0);
     s.speed = this.settings.get('gameSpeed') || 1;
     this.enterGame(s);
@@ -190,6 +229,7 @@ class App {
     this.overlay.setLane(me.team, me.slot);
     if (sim.rules.champions) this.view.warmup(sim.waves.map((w) => w.champ).filter(Boolean));
     this.hud.build(session);
+    this.combat.build(session);
     this.menus.inGame = true;
     this.mode = 'game';
     this.menus.go('hud');
@@ -219,6 +259,7 @@ class App {
   pause() {
     if (this.mode !== 'game' || this.gameOverAt) return;
     if (!this.session.online) this.session.paused = true;
+    if (document.pointerLockElement) document.exitPointerLock?.();
     this.menus.go('pause');
     this.audio.ui('open');
   }
@@ -250,9 +291,9 @@ class App {
   bindInput() {
     const c = this.canvas;
     c.addEventListener('mousemove', (e) => { this.mouse.x = e.clientX; this.mouse.y = e.clientY; });
-    c.addEventListener('contextmenu', (e) => { e.preventDefault(); if (this.mode !== 'game') return; if (this.placing) this.stopPlacing(); else this.select(null); });
+    c.addEventListener('contextmenu', (e) => { e.preventDefault(); if (this.mode !== 'game' || this.vmode !== 'rts') return; if (this.placing) this.stopPlacing(); else this.select(null); });
     c.addEventListener('mousedown', (e) => {
-      if (this.mode !== 'game' || e.button !== 0) return;
+      if (this.mode !== 'game' || e.button !== 0 || this.vmode !== 'rts') return;
       const sim = this.session.sim;
       if (this.placing) {
         const cell = this.overlay.cellAt(this.mouse.ground);
@@ -268,6 +309,9 @@ class App {
     window.addEventListener('keydown', (e) => {
       if (this.mode !== 'game') return;
       if (e.target.closest && e.target.closest('input')) return;
+      // Heldenblick: WoW-Steuerung hat Vorrang (Esc ohne Ziel öffnet das Menü)
+      if (this.vmode === 'hero' && this.menus.current === 'hud' && this.controls.onKeyDown(e)) return;
+      if (this.vmode !== 'rts' && this.menus.current === 'hud' && e.key !== 'Escape') { if (['Tab', ' '].includes(e.key)) e.preventDefault(); return; }
       const k = e.key.length === 1 ? e.key.toUpperCase() : e.key;
       const sim = this.session.sim;
       const me = this.me;
@@ -293,7 +337,7 @@ class App {
       else if (k === ' ') { e.preventDefault(); this.focusLane(me.id); }
       else if (k === 'Home') { const kp = kingPos(me.team); this.cam.focus(kp.x, kp.z - 6, 55); }
     });
-    window.addEventListener('keyup', (e) => { if (e.key === 'Tab') { e.preventDefault(); this.hud.showScoreboard(false); } });
+    window.addEventListener('keyup', (e) => { if (e.key === 'Tab') { e.preventDefault(); if (this.vmode === 'rts') this.hud.showScoreboard(false); } });
   }
 
   select(ent) {
@@ -318,28 +362,79 @@ class App {
 
   // ---------- Ereignisse → Ton ----------
   sfxAt(name, x, z, vol = 1, pitch) {
-    const c = this.cam.cur;
-    const d = Math.hypot(x - c.x, z - c.z);
-    const range = 30 + c.dist * 0.9;
+    // Hörer = Kamera (RTS: Blickpunkt am Boden, Heldenblick: Held), Panorama aus dem Kameraraum
+    let lx, lz, range;
+    if (this.vmode === 'rts') { const c = this.cam.cur; lx = c.x; lz = c.z; range = 30 + c.dist * 0.9; } else { const p = this.hcam.pose.look; lx = p.x; lz = p.z; range = 46; }
+    const d = Math.hypot(x - lx, z - lz);
     if (d > range) return;
     const v = vol * (1 - d / range) * (this.attract ? 0.35 : 1);
     if (v < 0.03) return;
-    this.audio.sfx(name, { volume: v, pan: Math.max(-1, Math.min(1, (x - c.x) / 45)), pitch });
+    _sv.set(x, 1, z).applyMatrix4(this.engine.camera.matrixWorldInverse);
+    this.audio.sfx(name, { volume: v, pan: Math.max(-1, Math.min(1, _sv.x / 22)), pitch });
   }
+  entPos(id) { return this.view.pos(id) || this.heroes.posOf(id); }
 
   handleEvents(events) {
     const sim = this.session.sim;
+    for (const e of events) {
+      // Animationen sofort (Ausholen beginnt), Treffer-Darstellung ggf. im Einschlag-Moment
+      this.heroes.onEvent(e, sim);
+      this.controls.onEvent(e);
+      const d = this.heroes.presentDelay(e, sim);
+      if (d > 0.01) {
+        if (e.e === 'death') this.view.onEvent({ ...e, delay: d }, sim);
+        this.deferred.push({ t: d, e, skipView: e.e === 'death' });
+      } else this.present(e);
+      this.onSimEvent(e);
+    }
+    this.heroes.endBatch();
+  }
+
+  /** Verzögerte Ereignisse fällig? */
+  flushDeferred(dt) {
+    for (let i = this.deferred.length - 1; i >= 0; i--) {
+      const it = this.deferred[i];
+      it.t -= dt;
+      if (it.t <= 0) { this.deferred.splice(i, 1); this.present(it.e, it.skipView); }
+    }
+  }
+
+  /** Steuerungs-relevante Ereignisse (sofort): Modus-Wechsel Held ↔ Vogelperspektive */
+  onSimEvent(e) {
+    if (this.mode !== 'game') return;
+    const local = this.session.localPid;
+    switch (e.e) {
+      case 'waveStart': this.startSwoopIn(); break;
+      case 'waveEnd': if (this.vmode !== 'rts') this.startSwoopOut(); break;
+      case 'heroDeath': if (e.pid === local) this.onLocalHeroDeath(e); break;
+      case 'heroError': if (e.pid === local && this.vmode === 'hero') this.combat.error(e.reason); break;
+      case 'heroJump': { const h = this.session.sim.entities.get(e.id); if (h && h.owner === local) this.audio.sfx('jump', { volume: 0.5 }); break; }
+      default: break;
+    }
+  }
+
+  present(e, skipView = false) {
+    const sim = this.session.sim;
     const local = this.session.localPid;
     const inGame = this.mode === 'game';
-    for (const e of events) {
-      this.view.onEvent(e, sim);
+    {
+      if (!skipView) this.view.onEvent(e, sim);
       this.fx.onEvent(e, sim, this.view, local);
-      if (inGame) this.hud.onEvent(e);
+      this.heroes.abilityFx.onEvent(e, sim, (id) => this.entPos(id));
+      if (inGame) { this.hud.onEvent(e); this.combat.onEvent(e); }
       switch (e.e) {
+        case 'heroAbility': {
+          const p = this.entPos(e.id) || e;
+          const name = HERO_SFX[e.type] || 'magic';
+          this.sfxAt(name, e.tx ?? p.x, e.tz ?? p.z, e.pid === local ? 1 : 0.6, e.ult ? 0.8 : 1);
+          if (['strike', 'aoe_self', 'leap', 'dash'].includes(e.type)) this.sfxAt('swing', p.x, p.z, 0.6);
+          break;
+        }
         case 'attack': {
           const ent = sim.entities.get(e.id);
-          const d = ent && this.view.pos(e.id);
+          const d = ent && this.entPos(e.id);
           if (!d) break;
+          if (ent.type === 'h' && e.melee) this.sfxAt('swing', d.x, d.z, 0.5);
           if (e.melee) this.sfxAt(e.atk === 'wucht' ? 'blunt' : 'sword', d.x, d.z, 0.55, 0.9 + Math.random() * 0.2);
           else this.sfxAt(e.kind === 'arrow' ? 'arrow' : e.kind === 'shell' || e.kind === 'bone' ? 'fire' : 'magic', d.x, d.z, 0.45, 0.9 + Math.random() * 0.2);
           break;
@@ -368,7 +463,7 @@ class App {
           if (inGame) {
             this.audio.sfx(e.boss ? 'boss' : 'wave_start');
             this.audio.playMusic(e.boss ? 'boss' : 'battle');
-            this.cam.addShake(0.4);
+            if (this.vmode === 'rts') this.cam.addShake(0.4);
           }
           break;
         case 'waveEnd': if (inGame) { this.audio.sfx('wave_clear'); this.audio.playMusic('build'); } break;
@@ -380,6 +475,7 @@ class App {
 
   onGameOver(e) {
     const me = this.me;
+    if (this.vmode !== 'rts') this.exitHeroMode(false, true);
     const win = e.winner === me.team, draw = e.winner === -1;
     this.gameOverAt = performance.now();
     this.audio.playMusic(win ? 'victory' : 'defeat');
@@ -409,6 +505,96 @@ class App {
     }, 2800);
   }
 
+  // ---------- Heldenblick ↔ Vogelperspektive ----------
+  swoopMode() {
+    const reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const m = this.settings.get('swoop') || 'normal';
+    return reduce ? 'off' : SWOOP_DUR[m] != null ? m : 'normal';
+  }
+  /** Überblenden statt Kamerafahrt: Bild abdunkeln, schneiden, aufhellen */
+  crossfade(cut, done) {
+    const x = $('xfade');
+    x.classList.add('on');
+    setTimeout(() => { cut(); requestAnimationFrame(() => { x.classList.remove('on'); done && done(); }); }, 300);
+  }
+  startSwoopIn() {
+    const s = this.session, sim = s.sim;
+    const h = sim.heroOf(s.localPid);
+    if (!h || !h.alive || !sim.rules.heroes || this.vmode === 'hero' || this.vmode === 'swoopIn') return;
+    this.stopPlacing(); this.select(null); this.hud.showScoreboard(false); this.hud.toggleKingPanel(false);
+    this.swoop.cancel();
+    this.vmode = 'swoopIn';
+    this.cam.enabled = false;
+    this.hcam.reset(h.face);
+    this.hcam.stopSpectate();
+    this.combat.build(s);
+    document.body.classList.add('hero-view');
+    const lx = sim.laneX(s.localPid);
+    const cam = this.engine.camera;
+    const to = () => { const p = this.hcam.targetPose(h.x, h.y || 0, h.z, lx, h.face); return { pos: p.pos, look: p.look, fov: HERO_FOV }; };
+    const finish = () => { this.vmode = 'hero'; this.controls.enable(); this.combat.show(true); this.hcam.fov = HERO_FOV; };
+    const mode = this.swoopMode();
+    if (mode === 'off') {
+      this.crossfade(() => { const e = to(); cam.position.copy(e.pos); cam.lookAt(e.look); cam.fov = HERO_FOV; cam.updateProjectionMatrix(); finish(); });
+      return;
+    }
+    const dur = Math.min(SWOOP_DUR[mode], Math.max(0.6, sim.freeze / (s.speed || 1)));
+    const look = new THREE.Vector3(this.cam.cur.x, 0, this.cam.cur.z - 2);
+    this.swoop.start({ kind: 'in', from: { pos: cam.position.clone(), look, fov: cam.fov }, to, dur,
+      onProgress: (x) => { if (x > 0.55 && !this.combat.visible) this.combat.show(true); },
+      onDone: finish });
+  }
+  /** Zurück in die Vogelperspektive (Wellenende oder Heldentod) */
+  startSwoopOut() {
+    const s = this.session, me = this.me;
+    if (!s || this.vmode === 'rts' || this.vmode === 'swoopOut') return;
+    this.controls.disable();
+    this.combat.show(false);
+    this.hcam.stopSpectate();
+    this.swoop.cancel();
+    this.vmode = 'swoopOut';
+    const lx = laneCenterX(me.team, me.slot);
+    this.cam.focus(lx, 4, 58, { instant: true, yaw: 0, pitch: 0.98 });
+    const end = rtsPose(this.cam.cur);
+    const cam = this.engine.camera;
+    const finish = () => { this.vmode = 'rts'; this.cam.enabled = true; document.body.classList.remove('hero-view'); cam.fov = this.rtsFov; cam.updateProjectionMatrix(); };
+    const mode = this.swoopMode();
+    if (mode === 'off') { this.crossfade(finish); return; }
+    const look = this.hcam.pose.look.clone();
+    this.swoop.start({ kind: 'out', from: { pos: cam.position.clone(), look, fov: cam.fov }, to: () => ({ pos: end.pos, look: end.look, fov: this.rtsFov }), dur: SWOOP_DUR[mode] * (mode === 'normal' ? 0.9 : 1),
+      onProgress: (x) => { if (x > 0.45) document.body.classList.remove('hero-view'); },
+      onDone: finish });
+  }
+  /** Eigener Held gefallen: kurzer Zuschauerblick, dann Schwenk in die Vogelperspektive (Vasallen kämpfen weiter) */
+  onLocalHeroDeath(e) {
+    if (this.vmode !== 'hero') return;
+    this.controls.disable();
+    this.combat.show(false);
+    this.vmode = 'dead';
+    this.hcam.startSpectate(e.x, e.z);
+    this.audio.sfx('defeat', { volume: 0.35 });
+    this.hud.banner('DEIN HELD IST GEFALLEN', 'Deine Vasallen kämpfen allein weiter', true);
+    this.hud.feed('Dein Held ist gefallen – deine Vasallen kämpfen allein weiter. Er kehrt zur nächsten Bauphase zurück.', 'bad');
+    clearTimeout(this.deathT);
+    this.deathT = setTimeout(() => { if (this.vmode === 'dead') this.startSwoopOut(); }, 1700);
+  }
+  /** Heldenmodus sofort beenden (Sitzungswechsel / Spielende) */
+  exitHeroMode(instant, fade = false) {
+    clearTimeout(this.deathT);
+    this.swoop?.cancel();
+    this.controls?.disable();
+    this.combat?.show(false);
+    this.hcam?.stopSpectate();
+    document.body.classList.remove('hero-view');
+    const was = this.vmode;
+    this.vmode = 'rts';
+    if (this.cam) this.cam.enabled = !this.attract;
+    const cam = this.engine.camera;
+    if (cam.fov !== this.rtsFov) { cam.fov = this.rtsFov; cam.updateProjectionMatrix(); }
+    cam.up.set(0, 1, 0);
+    if (fade && was !== 'rts' && !instant) this.crossfade(() => {});
+  }
+
   // ---------- Hauptschleife ----------
   loop(now) {
     const dt = Math.min(0.1, (now - this.last) / 1000);
@@ -419,8 +605,20 @@ class App {
       if (this.mode === 'game' && !s.online) s.speed = this.settings.get('gameSpeed') || 1;
       const events = s.update(dt);
       this.handleEvents(events);
+      this.flushDeferred(dt);
       const sim = s.sim;
-      if (this.mode === 'game') {
+      let pose = null;
+      if (this.mode === 'game' && this.vmode !== 'rts') {
+        if (this.vmode === 'hero') pose = this.controls.update(dt);
+        this.overlay.update(dt, { showGrid: false });
+        if (this.placing) this.stopPlacing();
+        if (sim.phase === 'battle') {
+          let n = 0; for (const e of sim.entities.values()) if (e.type === 'c' && (e.lane === this.me.id || e.stage === 'king')) n++;
+          const k = sim.teams[this.me.team].king;
+          this.audio.setIntensity(Math.min(1, n / 14 + (1 - k.hp / k.maxHp) * 0.6));
+        }
+        this.hud.update(dt);
+      } else if (this.mode === 'game') {
         this.pickHover();
         if (this.placing && sim.phase !== 'build') this.stopPlacing();
         const occupied = new Set();
@@ -454,11 +652,19 @@ class App {
           this.restartTimer = setTimeout(() => { this.restartTimer = null; if (this.attract) this.startAttract(); }, 6000);
         }
       }
-      this.view.update(sim, dt, { selectedId: this.selected?.id, hoverId: this.hover, localPid: s.localPid });
+      this.view.update(sim, dt, { selectedId: this.selected?.id, hoverId: this.hover, localPid: s.localPid, hideCreepBars: this.vmode === 'hero' });
+      // Kamera: Vogelperspektive, Windzug-Schwenk oder Heldenblick
+      if (this.swoop.running) this.swoop.update(dt);
+      else if (this.vmode === 'hero' || this.vmode === 'dead') {
+        const h = sim.heroOf(s.localPid);
+        const P = pose || (h ? { x: h.x, y: h.y || 0, z: h.z } : null);
+        if (P) this.hcam.update(dt, P.x, P.y, P.z, sim.laneX(s.localPid), this.time);
+      } else this.cam.update(dt, this.time);
+      this.heroes.update(sim, dt, { localPid: this.attract ? -1 : s.localPid, local: pose, plates: this.mode === 'game', camera: this.engine.camera, heroMode: this.vmode === 'hero' || this.vmode === 'swoopIn' });
+      if (this.mode === 'game') this.combat.update(dt, { camera: this.engine.camera, camYaw: this.vmode === 'hero' ? this.hcam.yaw : null });
       this.fx.update(sim, dt);
-    }
+    } else this.cam.update(dt, this.time);
     this.env.update(dt, this.time);
-    this.cam.update(dt, this.time);
     this.engine.render(dt);
     this.fpsCount(dt);
     requestAnimationFrame((t) => this.loop(t));

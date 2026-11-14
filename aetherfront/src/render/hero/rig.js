@@ -6,7 +6,7 @@ import { V, v3, C, smooth, clamp } from './geo.js';
 // Materialklassen: [Rauheit, Metall]
 export const M = {
   cloth: [0.86, 0], silk: [0.55, 0], leather: [0.62, 0], dleather: [0.7, 0], skin: [0.5, 0], hair: [0.45, 0],
-  metal: [0.3, 1], steel: [0.24, 1], dmetal: [0.42, 0.9], gold: [0.26, 1], copper: [0.32, 1], bronze: [0.36, 1],
+  metal: [0.38, 1], steel: [0.34, 1], dmetal: [0.5, 0.9], gold: [0.32, 1], copper: [0.38, 1], bronze: [0.42, 1],
   wood: [0.72, 0], bark: [0.9, 0], leaf: [0.6, 0], bone: [0.55, 0], gem: [0.08, 0.2], crystal: [0.05, 0.1],
   fur: [0.95, 0], feather: [0.7, 0], rubber: [0.8, 0], paint: [0.42, 0.3], eye: [0.12, 0], lacquer: [0.3, 0.2],
 };
@@ -117,19 +117,19 @@ float hNoise(vec3 p) {
 	#ifdef DOUBLE_SIDED
 		if ( !gl_FrontFacing ) diffuseColor.rgb *= 0.55;
 	#endif`)
-      .replace('#include <roughnessmap_fragment>', `float microN = hNoise(vObjP * 34.0) * 0.6 + hNoise(vObjP * 95.0) * 0.4;
-float roughnessFactor = clamp(roughness * vPbr.x * (0.86 + 0.28 * microN), 0.04, 1.0);`)
+      .replace('#include <roughnessmap_fragment>', `float microN = hNoise(vObjP * 26.0) * 0.65 + hNoise(vObjP * 71.0) * 0.35;
+float roughnessFactor = clamp(roughness * vPbr.x * (0.9 + 0.2 * microN) + 0.06 * vPbr.y * microN, 0.08, 1.0);`)
       .replace('#include <metalnessmap_fragment>', 'float metalnessFactor = clamp(metalness * vPbr.y, 0.0, 1.0);')
       .replace('#include <normal_fragment_maps>', `#include <normal_fragment_maps>
 	{
-		float h = microN * (0.6 + 0.8 * (1.0 - vPbr.y));
+		float h = microN * (0.25 + 0.75 * (1.0 - vPbr.y));
 		vec3 dpdx = dFdx( - vViewPosition ), dpdy = dFdy( - vViewPosition );
 		float dhx = dFdx( h ), dhy = dFdy( h );
 		vec3 r1 = cross( dpdy, normal ), r2 = cross( normal, dpdx );
 		float det = dot( dpdx, r1 );
 		vec3 grad = sign( det ) * ( dhx * r1 + dhy * r2 );
 		float fade = 1.0 - smoothstep( 12.0, 50.0, length( vViewPosition ) );
-		normal = normalize( abs( det ) * normal - grad * 0.009 * fade );
+		normal = normalize( abs( det ) * normal - grad * 0.0035 * fade );
 	}`)
       .replace('#include <emissivemap_fragment>', `#include <emissivemap_fragment>
 	{
@@ -209,6 +209,11 @@ export class HeroBuilder {
       for (let k = 0; k < 4; k++) {
         if (k < ws.length) { part.si[i * 4 + k] = idxOf(ws[k][0]); part.sw[i * 4 + k] = ws[k][1] / sum; }
       }
+    }
+    // sehr helle Albedo weich begrenzen (verhindert Ausbrennen/Bloom auf weißen Stoffen)
+    if (layer !== 'glow') for (let i = 0; i < n; i++) {
+      const r = part.col[i * 3], g = part.col[i * 3 + 1], b = part.col[i * 3 + 2], lum = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+      if (lum > 0.36) { const f = (0.36 + (lum - 0.36) * 0.35) / lum; part.col[i * 3] *= f; part.col[i * 3 + 1] *= f; part.col[i * 3 + 2] *= f; }
     }
     part.boneNames = names;
     if (mirror) {

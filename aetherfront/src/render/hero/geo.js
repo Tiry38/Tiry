@@ -140,12 +140,15 @@ export function flipFaces(g) {
 export function shape(pts, smoothPts = false) {
   const s = new THREE.Shape();
   s.moveTo(pts[0][0], pts[0][1]);
-  if (smoothPts) s.splineThru(pts.slice(1).concat([pts[0]]).map((p) => new THREE.Vector2(p[0], p[1])));
-  else for (let i = 1; i < pts.length; i++) s.lineTo(pts[i][0], pts[i][1]);
+  if (smoothPts) {
+    const c = new THREE.CatmullRomCurve3(pts.map((p) => new THREE.Vector3(p[0], p[1], 0)), true, 'centripetal');
+    const n = pts.length * (typeof smoothPts === 'number' ? smoothPts : 3);
+    for (let i = 1; i < n; i++) { const q = c.getPoint(i / n); s.lineTo(q.x, q.y); }
+  } else for (let i = 1; i < pts.length; i++) s.lineTo(pts[i][0], pts[i][1]);
   s.closePath();
   return s;
 }
-export function ext(shp, depth, bev = 0.01, bs = 2, cs = 10) {
+export function ext(shp, depth, bev = 0.01, bs = 1, cs = 5) {
   const g = new THREE.ExtrudeGeometry(shp, {
     depth, bevelEnabled: bev > 0, bevelThickness: bev, bevelSize: bev * 0.85, bevelSegments: bs, curveSegments: cs, steps: 1,
   });

@@ -230,7 +230,7 @@ export class UnitsView {
       let atkP = 0;
       if (atA >= 0 && atA < 0.45) atkP = 0.45 + (atA / 0.45) * 0.55;          // Schlag ist erfolgt → Nachschwung
       else if (atA >= 0 && atA < cdA * 1.6 && cdA - atA < 0.32 && cdA - atA > 0) atkP = 0.45 * (1 - (cdA - atA) / 0.32); // Ausholen vor dem nächsten Schlag
-      if (def.ranged) atkP *= 0.7;
+      if (def.ranged) atkP = -atkP; // Fernkampf: Spannen/Werfen statt Hieb
       const htA = t - d.hitT;
       _anim[0] = d.gait; _anim[1] = d.walkW; _anim[2] = atkP; _anim[3] = htA >= 0 && htA < 0.3 ? 1 - htA / 0.3 : 0;
       const at = sim.time - e.atkT;

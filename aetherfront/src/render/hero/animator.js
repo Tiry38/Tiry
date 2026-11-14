@@ -16,7 +16,7 @@ const vnoise = (t, s = 0) => Math.sin(t * 1.0 + s) * 0.5 + Math.sin(t * 2.31 + s
 
 const ARM_ORDER = 'XZY';
 const AXIAL_ORDER = 'YXZ';
-const SCALARS = ['hipsX', 'hipsY', 'hipsZ', 'crouch', 'yaw', 'legFK', 'draw', 'arrow', 'glowL', 'glowR', 'pitch', 'roll', 'lift'];
+const SCALARS = ['hipsX', 'hipsY', 'hipsZ', 'crouch', 'yaw', 'legFK', 'draw', 'arrow', 'glowL', 'glowR', 'pitch', 'roll', 'lift', 'wglow', 'fall'];
 
 const _q = new THREE.Quaternion(), _q2 = new THREE.Quaternion(), _q3 = new THREE.Quaternion();
 const _e = new THREE.Euler();
@@ -69,7 +69,7 @@ export class HeroAnimator {
     this.rig = rig;
     this.j = rig.joints;
     this.st = STYLES[rig.style] || STYLES.knight;
-    for (const k of Object.keys(this.st)) { const c = this.st[k]; if (c && c.keys) compileClip(c); if (Array.isArray(c)) c.forEach((x) => x && x.keys && compileClip(x)); }
+    for (const k of Object.keys(this.st)) { const c = this.st[k]; if (Array.isArray(c)) c.forEach((x) => x && Array.isArray(x.keys) && compileClip(x)); else if (c && Array.isArray(c.keys)) compileClip(c); }
     this.rest = rig.rest;
     this.s = rig.scale || 1;
     this.names = Object.keys(this.j);
@@ -271,6 +271,7 @@ export class HeroAnimator {
       if (this.actW < 0.002) this.actClip = null;
       this.lastT = 0;
     }
+    this.wglow = 0;
     let yawAct = 0, drawAmt = 0, arrowVis = 0, glowHands = [0, 0];
     if (this.actClip && this.actW > 0.001) {
       const clip = this.actClip;
@@ -281,7 +282,8 @@ export class HeroAnimator {
       const w = this.actW * (clip.upperOnly && mw > 0.5 ? 1 : 1);
       for (const j of Object.keys(P)) { const e = E[j]; if (!e) continue; const o = P[j]; e[0] += (o[0] - e[0]) * w; e[1] += (o[1] - e[1]) * w; e[2] += (o[2] - e[2]) * w; }
       crouch += (scal.crouch || 0) * sc * w; hipsY += (scal.hipsY || 0) * sc * w; hipsZ += (scal.hipsZ || 0) * sc * w; hipsX += (scal.hipsX || 0) * sc * w;
-      pitchH += (scal.pitch || 0) * w; rollH += (scal.roll || 0) * w;
+      pitchH += wrapPi(scal.pitch || 0) * w; rollH += (scal.roll || 0) * w;
+      this.wglow = clamp(scal.wglow || 0, 0, 1.5) * w;
       yawAct = wrapPi(scal.yaw || 0) * w;
       drawAmt = clamp(scal.draw || 0, 0, 1) * w; arrowVis = clamp(scal.arrow || 0, 0, 1) * w;
       glowHands = [clamp(scal.glowL || 0, 0, 1.5) * w, clamp(scal.glowR || 0, 0, 1.5) * w];
@@ -337,7 +339,7 @@ export class HeroAnimator {
       sampleClip(clip, Math.max(0, this.deathT < 0 ? 2 : this.deathT), this._baseGet, DP, ds);
       const w = this.deathW;
       for (const j of Object.keys(DP)) { const e = E[j]; if (!e) continue; const o = DP[j]; e[0] += (o[0] - e[0]) * w; e[1] += (o[1] - e[1]) * w; e[2] += (o[2] - e[2]) * w; }
-      crouch = lerp(crouch, (ds.crouch || 0) * sc, w); hipsY = lerp(hipsY, (ds.hipsY || 0) * sc, w); hipsZ = lerp(hipsZ, (ds.hipsZ || 0) * sc, w); hipsX = lerp(hipsX, 0, w);
+      crouch = lerp(crouch, (ds.crouch || 0) * sc, w); hipsY = lerp(hipsY, (ds.hipsY || 0) * sc, w); this.fall = clamp(ds.fall || 0, 0, 1.2) * w; hipsZ = lerp(hipsZ, (ds.hipsZ || 0) * sc, w); hipsX = lerp(hipsX, 0, w);
       pitchH = lerp(pitchH, ds.pitch || 0, w); rollH = lerp(rollH, ds.roll || 0, w); yawH = lerp(yawH, ds.yaw || 0, w); yawAct *= 1 - w;
       const fw = clamp(ds.legFK || 0, 0, 1) * w;
       if (fw > 0) {
@@ -358,7 +360,8 @@ export class HeroAnimator {
       maxY = Math.min(maxY, y);
     }
     let hy = Math.min(this.hipsY - crouch, maxY + 0.004) + hipsY;
-    if (this.deathW > 0.001) hy = lerp(hy, this.hipsY + hipsY, this.deathW);
+    if (this.deathW > 0.001) { hy = lerp(hy, this.hipsY + hipsY, this.deathW); hy = lerp(hy, 0.15 * sc + hipsY, clamp(this.fall || 0, 0, 1)); }
+    else this.fall = 0;
     hips.position.set(hipsX, hy, hipsZ);
     const yawTot = yawH + yawAct;
     _e.set(pitchH + E.hips[0], yawTot + E.hips[1], rollH + E.hips[2], AXIAL_ORDER);
@@ -367,7 +370,7 @@ export class HeroAnimator {
 
     // ---------- Oberkörper/Arme/Kopf anwenden ----------
     for (const n of this.names) {
-      if (n === 'hips' || /^(thigh|shin|foot)[LR]$/.test(n)) continue;
+      if (n === 'hips' || n === 'arrow' || n === 'bowString' || /^(thigh|shin|foot)[LR]$/.test(n)) continue;
       if (this.springs.some((sp) => sp.bones.includes(n))) continue;
       if (this.floaters.some((f) => f.joint === n)) continue;
       const e = E[n], jn = this.j[n];
@@ -412,6 +415,12 @@ export class HeroAnimator {
         bs.position.copy(rest).lerp(_v, drawAmt);
       } else bs.position.copy(rest);
       bs.updateMatrixWorld(true);
+      const ar = this.j.arrow;
+      if (ar && ar.parent === bs.parent) {
+        ar.position.copy(bs.position);
+        _v2.copy(rest).negate().normalize(); _v3.copy(bs.position).negate().normalize();
+        ar.quaternion.setFromUnitVectors(_v2, _v3);
+      }
     }
     if (this.j.arrow) { const k = arrowVis > 0.05 ? arrowVis : 0.0001; this.j.arrow.scale.setScalar(k); this.j.arrow.updateMatrixWorld(true); }
     this.castGlow += (clamp(s.castGlow || 0, 0, 1) - this.castGlow) * damp(10, dt);
@@ -426,7 +435,8 @@ export class HeroAnimator {
     }
     const lv = this.rig.level || 1;
     const chanPulse = this.act === 'channel' ? 0.25 * Math.sin(t * 8) : 0;
-    const gk = (1 + 0.05 * (lv - 1)) * (1 + 1.4 * this.castGlow + chanPulse) * (1 - 0.7 * smooth(0.6, 2.5, this.deathT < 0 ? 0 : this.deathT));
+    const gk = (1 + 0.05 * (lv - 1)) * (1 + 1.4 * this.castGlow + chanPulse + 1.6 * (this.wglow || 0)) * (1 - 0.7 * smooth(0.6, 2.5, this.deathT < 0 ? 0 : this.deathT));
+    if (this.rig.lights) for (const L of this.rig.lights) L.intensity = L.userData.base * (0.9 + 0.08 * Math.sin(t * 7.3) + 0.05 * Math.sin(t * 17.1)) * (1 + this.castGlow * 1.2) * (dead ? 0.3 : 1);
     for (const m of this.rig.glowMaterials) m.color.setScalar(gk * (m.userData.pulse ?? 1) * (m.userData.base ?? 1));
     for (const m of this.rig.bodyMaterials) if (m.userData.uniforms) m.userData.uniforms.uFlash.value = ha < 0.18 ? (1 - ha / 0.18) * 0.9 : 0;
   }
@@ -516,6 +526,9 @@ export class HeroAnimator {
       } else if (f.type === 'bob') {
         jn.position.set(base.x, base.y + Math.sin(t * (f.rate ?? 1.6) + (f.phase || 0)) * (f.amp ?? 0.025) * this.s, base.z);
         if (f.spin) jn.rotation.set(0, t * f.spin, 0);
+      } else if (f.type === 'spinZ') {
+        jn.rotation.set(0, 0, t * (f.rate ?? 0.5) * (1 + cg * 2.5));
+        jn.position.set(base.x, base.y + Math.sin(t * 1.4) * 0.01 * this.s, base.z);
       } else if (f.type === 'spin') {
         jn.rotation.set(f.tilt || 0, t * (f.rate ?? 0.6) * (1 + cg * 2), 0);
       } else if (f.type === 'staff') {

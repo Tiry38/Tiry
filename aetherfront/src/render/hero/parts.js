@@ -86,7 +86,7 @@ export function shellTube(a, b, r0, r1, o = {}) {
 }
 
 /** Ziernaht (Torus-Kante) als Ring um eine Achse */
-export function rimRing(center, axis, rx, rz, r, seg = 32, arc = TAU, a0 = 0) {
+export function rimRing(center, axis, rx, rz, r, seg = 24, arc = TAU, a0 = 0) {
   const pts = [];
   const ax = v3(axis).normalize();
   const n = Math.abs(ax.y) < 0.9 ? V(0, 1, 0) : V(0, 0, 1);
@@ -95,7 +95,7 @@ export function rimRing(center, axis, rx, rz, r, seg = 32, arc = TAU, a0 = 0) {
     const a = a0 + (i / seg) * arc;
     pts.push(v3(center).addScaledVector(w, Math.cos(a) * rz).addScaledVector(u, Math.sin(a) * rx));
   }
-  return tube(pts, () => r, { sides: 6, segs: seg * 2, caps: arc < TAU - 1e-3, hint: ax });
+  return tube(pts, () => r, { sides: 5, segs: seg, caps: arc < TAU - 1e-3, hint: ax });
 }
 
 /** Schulterplatte: mehrere gestaffelte Kuppeln. Baut links; B.sym spiegelt. */
@@ -107,13 +107,13 @@ export function pauldron(B, o) {
   for (let i = 0; i < layers; i++) {
     const rr = r * (1 - i * 0.1);
     const h = rr * (0.85 - i * 0.12);
-    const g = lathe([[0, h], [rr * 0.45, h * 0.94], [rr * 0.8, h * 0.66], [rr * 0.98, h * 0.25], [rr * 1.06, 0.0], [rr * 1.02, -rr * 0.06], [rr * 0.9, -rr * 0.02], [rr * 0.6, h * 0.3], [0, h * 0.4]], 28);
+    const g = lathe([[0, h], [rr * 0.45, h * 0.94], [rr * 0.8, h * 0.66], [rr * 0.98, h * 0.25], [rr * 1.06, 0.0], [rr * 1.02, -rr * 0.06], [rr * 0.9, -rr * 0.02], [rr * 0.6, h * 0.3], [0, h * 0.4]], 22);
     g.scale(1, 1, o.zs ?? 0.92);
     R(g, 0, 0, -(o.tilt ?? 0.62) - i * 0.3);
     T(g, c.clone().add(V(i * r * 0.2, -i * r * 0.5, 0)));
     B.sym(g, i === 0 ? o.col : (o.col2 || o.col), o.mat || M.steel, bind, { tier: o.tier });
     if (o.trim) {
-      const t = tor(rr * 1.05, rr * 0.055, 8, 36);
+      const t = tor(rr * 1.05, rr * 0.055, 5, 22);
       t.rotateX(PI / 2); t.scale(1, 1, o.zs ?? 0.92); t.translate(0, 0.002, 0);
       R(t, 0, 0, -(o.tilt ?? 0.62) - i * 0.3);
       T(t, c.clone().add(V(i * r * 0.2, -i * r * 0.5, 0)));
@@ -139,7 +139,7 @@ export function belt(B, o) {
 
 /** Gebogene Plattenform (Tasset, Brustplatte): Shape-Punkte, Dicke, Krümmung, Ausrichtung */
 export function plate(pts, th, curv = 4, smoothPts = true, bev = 0.004) {
-  const g = ext(shape(pts, smoothPts), th, bev, 2, 12);
+  const g = ext(shape(pts, smoothPts), th, bev, 1, 4);
   return bend(g, curv, 0);
 }
 
@@ -161,8 +161,8 @@ export function swordParts(o = {}) {
   L.push([edge, shade(steel, 1.12), M.steel]);
   // Rune in der Hohlkehle
   if (o.rune !== false) {
-    const r1 = ext(bladeShape(len * 0.62, w * 0.16, 0.1, 1), 0.019, 0.002, 1); r1.translate(0, 0.14, 0);
-    L.push([r1, glow, null, 'glow', o.runeK ?? 2.6]);
+    const r1 = ext(bladeShape(len * 0.6, w * 0.1, 0.1, 1), 0.0205, 0.001, 1); r1.translate(0, 0.14, 0);
+    L.push([r1, glow, null, 'glow', o.runeK ?? 1.7]);
   }
   // Parierstange mit Flügeln
   const guard = tube([V(-(o.guard ?? 0.15), 0.035, 0), V(-0.05, 0.06, 0), V(0, 0.055, 0), V(0.05, 0.06, 0), V(o.guard ?? 0.15, 0.035, 0)], (t) => 0.014 + 0.012 * Math.sin(t * PI), { sides: 10, segs: 24 });
@@ -223,7 +223,7 @@ export function bowParts(o = {}) {
     leaf.rotateY(PI / 2); if (sy < 0) leaf.rotateX(PI); leaf.translate(0, sy * h * 0.82, 0.02);
     L.push([leaf, trim, M.gold]);
     const vein = sweep([V(0, sy * h * 0.15, 0.104), V(0, sy * h * 0.45, 0.075), V(0, sy * h * 0.7, 0.03)], [0.004, 0.002], 6, 16);
-    L.push([vein, glow, null, 'glow', 2.4]);
+    L.push([vein, glow, null, 'glow', 1.6]);
   }
   const tipTop = V(0, h * 0.98, -0.05), tipBot = V(0, -h * 0.98, -0.05);
   return { list: L, tipTop, tipBot };

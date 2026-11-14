@@ -171,6 +171,9 @@ const LIMITS = {
   'sfx:victory': [1, 1, 0, 0.75],
   'sfx:defeat': [1, 1, 0, 0.6],
   'sfx:countdown': [1, 0.2, 0, 1],
+  'sfx:swoop': [1, 0.3, 0, 1.3],
+  'sfx:swing': [4, 0.04, 0.1, 0.9],
+  'sfx:jump': [2, 0.08, 0.05, 0.7],
   'ui:hover': [2, 0.035, 0.04, 2.5],
   'ui:click': [3, 0.03, 0.02, 2.0],
   'ui:open': [2, 0.08, 0, 2.5],
@@ -872,6 +875,48 @@ const SFX = {
     this._nz(v, o, t, { type: 'bandpass', f: 3200, q: 3, atk: 0.001, dec: 0.015, peak: 0.25 });
     return { d: 0.12, r: 0.08 };
   },
+  /** Windzug: anschwellendes Rauschen mit wandernden Bandpässen + tiefem Sog (Dauer = this._windDur) */
+  swoop(v, o, t, p) {
+    const c = this.ctx;
+    const dur = Math.max(0.4, this._windDur || 2);
+    const up = !!this._windUp;
+    const ns = this._noiseSrc(v, t, t + dur + 0.6, 1);
+    const bus = v.n(c.createGain());
+    bus.gain.value = 0;
+    bus.gain.setValueAtTime(0.0001, t);
+    bus.gain.exponentialRampToValueAtTime(0.9, t + dur * 0.45);
+    bus.gain.exponentialRampToValueAtTime(0.35, t + dur * 0.8);
+    bus.gain.exponentialRampToValueAtTime(0.0001, t + dur + 0.5);
+    bus.connect(o);
+    const pl = this._pan(v, bus, -0.6), pr = this._pan(v, bus, 0.6);
+    for (const [k, out] of [[1, pl], [1.27, pr]]) {
+      const bp = v.n(c.createBiquadFilter());
+      bp.type = 'bandpass'; bp.Q.value = 2.2;
+      const f0 = (up ? 900 : 420) * k * p, f1 = (up ? 380 : 1500) * k * p;
+      bp.frequency.setValueAtTime(f0, t);
+      bp.frequency.exponentialRampToValueAtTime(f1, t + dur * 0.55);
+      bp.frequency.exponentialRampToValueAtTime(f0 * 0.8, t + dur + 0.4);
+      ns.connect(bp); bp.connect(out);
+    }
+    const lp = v.n(c.createBiquadFilter());
+    lp.type = 'lowpass'; lp.frequency.value = 260; lp.Q.value = 0.9;
+    const lg = v.n(c.createGain()); lg.gain.value = 1.4;
+    ns.connect(lp); lp.connect(lg); lg.connect(bus);
+    // Sog-Ton
+    this._tone(v, o, 'sine', t + dur * 0.15, (up ? 70 : 140) * p, (up ? 150 : 55) * p, dur * 0.7, dur * 0.3, dur * 0.6, 0.22);
+    return { d: dur + 0.7, r: 0.3 };
+  },
+  /** Waffenschwung (Luftzug) */
+  swing(v, o, t, p) {
+    this._nz(v, o, t, { type: 'bandpass', f: 600 * p, f1: 2600 * p, glide: 0.12, q: 1.6, atk: 0.04, dec: 0.16, peak: 0.5 });
+    this._nz(v, o, t + 0.02, { type: 'lowpass', f: 900, q: 0.7, atk: 0.03, dec: 0.12, peak: 0.25 });
+    return { d: 0.3, r: 0.08 };
+  },
+  jump(v, o, t, p) {
+    this._nz(v, o, t, { type: 'lowpass', f: 500 * p, f1: 160, q: 0.8, atk: 0.005, dec: 0.12, peak: 0.45 });
+    this._tone(v, o, 'sine', t, 90 * p, 60 * p, 0.1, 0.004, 0.1, 0.3);
+    return { d: 0.25, r: 0.05 };
+  },
 };
 
 const UI = {
@@ -1018,6 +1063,13 @@ export class AudioEngine {
     if (cur) this._stopTrack(cur, name && TRACKS[name].once ? 1.0 : 2.0);
     this._track = name ? this._startTrack(name, !!cur) : null;
     this._tick();
+  }
+
+  /** Windzug-Rauschen für den Kameraschwenk (dur Sekunden; up = Aufstieg in die Vogelperspektive) */
+  wind(dur = 2, opts = {}) {
+    this._windDur = dur;
+    this._windUp = !!opts.up;
+    return this._fx('sfx', 'swoop', { volume: opts.volume ?? 0.9 });
   }
 
   setIntensity(x) {

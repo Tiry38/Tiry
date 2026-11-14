@@ -15,7 +15,7 @@ export function assetsSupported() {
  * Liefert { textures: { slot: { albedo, normal, arm, opacity, meters } | null }, hdri: { slot: info | null }, count, failed }.
  * hdri-Info: { texture (HalfFloat, equirektangular), sunDir (Vector3, Bildkoordinaten), stats: {zenith, mid, horizonSun, horizonAway} }
  */
-export async function loadEnvironmentAssets(renderer, { timeoutMs = 45000 } = {}) {
+export async function loadEnvironmentAssets(renderer, { timeoutMs = 90000 } = {}) {
   const out = { textures: {}, hdri: {}, count: 0, failed: 0 };
   for (const s of TEXTURE_SETS) out.textures[s.slot] = null;
   for (const h of HDRIS) out.hdri[h.slot] = null;
@@ -62,6 +62,12 @@ export async function loadEnvironmentAssets(renderer, { timeoutMs = 45000 } = {}
 function analyzeHdri(tex) {
   const { data, width: W, height: H } = tex.image;
   const half = THREE.DataUtils.fromHalfFloat;
+  // Sonnenpixel überschreiten den Halbfloat-Bereich (> 65504 → ∞). ∞ ergibt beim Filtern NaN, das über
+  // PMREM und Bloom ganze Bildbereiche zerstört → auf einen endlichen Wert begrenzen.
+  if (data instanceof Uint16Array) {
+    const cap = THREE.DataUtils.toHalfFloat(4000);
+    for (let i = 0; i < data.length; i++) if ((data[i] & 0x7c00) === 0x7c00 || (data[i] < 0x8000 && data[i] > cap)) data[i] = cap;
+  }
   const stride = data.length / (W * H); // 4 (RGBA)
   const px = (x, y) => {
     const i = (y * W + x) * stride;
