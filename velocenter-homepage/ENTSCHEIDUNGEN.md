@@ -145,3 +145,7 @@
 - Reifen sauber rund freigestellt (alte flach abgeschnittene Reifenkanten unterhalb der Schwelle entfernt).
 - Fenster: Innenraum/Transporter im Hintergrund ersetzt durch dunkel getöntes Glas mit Spiegelstreifen; Fensterrahmen an den im Foto gemessenen Positionen nachgezeichnet, QNV bleibt.
 - Original: `img/quelle/isy-bus-original.webp`, Werkzeug: `python3 tools/bus_bearbeiten.py img/quelle/isy-bus-original.webp img`.
+
+## 14.11.2026 – Bus-Fenster professionell neu (Tiry: „sehen schrecklich aus“)
+- Flache Kästen mit Streifenmuster verworfen. Neu: Original-Glas aus dem Foto stark weichgezeichnet und dunkel getönt (Licht bleibt echt, Transporter/Innenraum unsichtbar), dunkles Siebdruck-Band über den Scheiben wie beim Original, sanfte Himmelsspiegelung von oben, zwei breite weiche Lichtreflexe, Rahmenstege mit weicher Kante + Innenschatten.
+- Regel: Bildbearbeitung erst nach Nahansicht (3-fach Zoom) ausliefern.
