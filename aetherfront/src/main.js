@@ -70,6 +70,7 @@ class App {
       onSelect: (e) => { this.selected = e; },
       onFocusLane: (pid) => this.focusLane(pid),
       onFocusKing: (t) => { const k = kingPos(t); this.cam.focus(k.x, k.z - 6, 55); },
+      onPause: () => this.pause(),
     });
     this.menus = new Menus({
       settings: this.settings, audio: this.audio, portraits: this.portraits, progress: this.progress,
@@ -394,10 +395,10 @@ class App {
       $('btn-rematch').textContent = m ? 'Erneut versuchen' : 'Revanche';
       const next = m && win && MISSIONS.find((x) => x.id === m.id + 1);
       let nb = $('btn-next');
-      if (!nb) { nb = document.createElement('button'); nb.id = 'btn-next'; nb.className = 'pill big primary'; $('btn-rematch').before(nb); nb.addEventListener('click', () => { this.audio.ui('confirm'); const n = MISSIONS.find((x) => x.id === this.mission.id + 1); this.settings.set('campMission', n.id); this.startMission(n, this.missionOpts); }); }
+      if (!nb) { nb = document.createElement('button'); nb.id = 'btn-next'; nb.className = 'btn big primary'; $('btn-rematch').before(nb); nb.addEventListener('click', () => { this.audio.ui('confirm'); const n = MISSIONS.find((x) => x.id === this.mission.id + 1); this.settings.set('campMission', n.id); this.startMission(n, this.missionOpts); }); }
       nb.style.display = next ? '' : 'none';
       if (next) nb.textContent = `Weiter: ${next.title}`;
-      $('btn-rematch').className = next ? 'pill big' : 'pill big primary';
+      $('btn-rematch').className = next ? 'btn big' : 'btn big primary';
       $('btn-tomenu').textContent = m ? 'Zur Kampagne' : 'Hauptmenü';
       this.menus.go('end');
     }, 2800);

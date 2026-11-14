@@ -25,33 +25,33 @@ export function createSky(U, { forEnv = false } = {}) {
         vec3 d = normalize(vDir);
         vec3 col = skyColor(d);
         float sd = dot(d, uSunDir);
-        float up = max(d.y, 0.0);
-        vec2 dxz = normalize(d.xz + vec2(1e-5));
-        float away = 1.0 - (dot(dxz, normalize(uSunDir.xz)) * 0.5 + 0.5);
-        // Nebel-Schleier (violett/türkis) im hohen Himmel abseits der Sonne
-        vec3 sp = d * 3.0;
-        float neb = fbm3(sp * 1.3 + vec3(0.0, 0.0, uTime * 0.004));
-        float neb2 = fbm3(sp * 2.7 - 11.0);
-        float nebMask = smoothstep(0.12, 0.55, up) * (0.35 + 0.65 * away);
-        vec3 nebCol = mix(vec3(0.35, 0.10, 0.45), vec3(0.06, 0.32, 0.45), neb2);
-        col += nebCol * pow(smoothstep(0.42, 0.85, neb), 1.6) * 0.22 * nebMask;
-        // Sterne
-        if (uEnv < 0.5) {
-          vec3 sc = d * 260.0;
-          vec3 cell = floor(sc);
-          float h = hash13(cell);
-          vec3 fp = fract(sc) - 0.5 - (vec3(hash13(cell + 7.1), hash13(cell + 3.3), hash13(cell + 1.7)) - 0.5) * 0.6;
-          float star = smoothstep(0.11, 0.0, length(fp)) * step(0.965, h);
-          float tw = 0.6 + 0.4 * sin(uTime * (1.5 + h * 3.0) + h * 40.0);
-          float starMask = smoothstep(0.18, 0.6, up) * (0.25 + 0.75 * away);
-          col += vec3(0.85, 0.9, 1.0) * star * tw * starMask * (0.6 + 2.2 * pow(h, 30.0));
+        vec2 sdir = normalize(uSunDir.xz);
+        // Zirren: hohe, gestreckte Schleier
+        vec2 cp = d.xz / (d.y + 0.12) * 0.9;
+        float cir = fbm(cp * vec2(0.7, 2.6) + vec2(uTime * 0.006, 0.0));
+        cir = smoothstep(0.55, 0.9, cir) * smoothstep(0.03, 0.2, d.y) * smoothstep(0.95, 0.35, d.y);
+        vec3 cirCol = mix(vec3(0.62, 0.70, 0.86), vec3(1.7, 1.25, 0.85), pow(max(sd, 0.0), 4.0));
+        col = mix(col, cirCol, cir * 0.45);
+        // Haufenwolken in Horizontnähe (projiziert auf eine Wolkenschicht, Licht von der Sonnenseite)
+        if (d.y > -0.02) {
+          vec2 q = d.xz / (d.y + 0.035) * 0.55 + vec2(uTime * 0.004, 0.0);
+          vec2 wq = q + vec2(fbm(q * 0.6 + 3.0), fbm(q * 0.6 - 7.0)) * 1.2;
+          float dens = fbm(wq * 0.9) * 0.75 + fbm(wq * 2.7) * 0.25;
+          float band = smoothstep(-0.01, 0.03, d.y) * smoothstep(0.32, 0.05, d.y);
+          float cov = smoothstep(0.50, 0.72, dens) * band;
+          // Selbstschatten: Dichte in Richtung Sonne
+          float ds = fbm((wq + sdir * 0.35) * 0.9) * 0.75 + fbm((wq + sdir * 0.35) * 2.7) * 0.25;
+          float lit = clamp(0.5 + (dens - ds) * 6.0, 0.0, 1.0);
+          float toward = pow(max(dot(normalize(d.xz + 1e-5), sdir), 0.0), 3.0);
+          vec3 cLit = mix(vec3(1.05, 1.0, 0.96), vec3(1.9, 1.35, 0.85), toward) * 1.1;
+          vec3 cSh = mix(vec3(0.34, 0.42, 0.58), vec3(0.62, 0.48, 0.42), toward);
+          vec3 cc = mix(cSh, cLit, lit);
+          // Silberrand im Gegenlicht
+          cc += vec3(1.6, 1.2, 0.8) * pow(max(sd, 0.0), 24.0) * (1.0 - smoothstep(0.5, 0.8, dens)) * 3.0;
+          // Ferne Wolken verschwimmen mit dem Horizont
+          cc = mix(cc, col, smoothstep(0.08, 0.0, d.y) * 0.55);
+          col = mix(col, cc, cov * 0.92);
         }
-        // Zirren: lange, sonnenbeschienene Wolkenbänder
-        vec2 cp = d.xz / (d.y + 0.18) * 1.2;
-        float cir = fbm(cp * vec2(0.9, 3.2) + vec2(uTime * 0.01, 0.0));
-        cir = smoothstep(0.52, 0.85, cir) * smoothstep(0.02, 0.18, d.y) * smoothstep(0.9, 0.3, d.y);
-        vec3 cirCol = mix(vec3(0.38, 0.18, 0.40), vec3(1.15, 0.55, 0.32), pow(max(sd, 0.0), 3.0)) ;
-        col = mix(col, cirCol, cir * 0.55);
         // Sonnenscheibe (HDR -> Bloom)
         float disc = smoothstep(0.99935, 0.99972, sd);
         col += vec3(16.0, 10.0, 5.0) * disc * (uEnv > 0.5 ? 0.15 : 1.0);

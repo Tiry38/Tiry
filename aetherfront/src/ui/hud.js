@@ -1,17 +1,14 @@
-// Spiel-Oberfläche (HUD): Ressourcen, Phase/Timer, Könige, Bau-Leiste, Söldner, Wirtschaft,
-// Auswahlkarte, König-Verbesserungen, Punktetafel, Meldungen, Banner, Tooltips.
-import { UNITS, SENDS, KING, ECON, FACTIONS, ATTACK_TYPES, ARMOR_TYPES, WAVES, factionUnits, kingUpgradeCost } from '../sim/data.js';
-import { TEAM_COLORS } from '../render/units.js';
+// Spiel-Oberfläche (HUD): Ressourcen, Phase/Timer, Könige, Kommando-Konsole (Kämpfer, Söldner, Wirtschaft),
+// Auswahlkarte, Königshalle, Punktetafel, Meldungen, Banner, Tooltips.
+import { UNITS, SENDS, KING, ECON, FACTIONS, ATTACK_TYPES, ARMOR_TYPES, kingUpgradeCost } from '../sim/data.js';
+import { I, stat } from './icons.js';
 
 const $ = (id) => document.getElementById(id);
 const h = (tag, cls, html) => { const e = document.createElement(tag); if (cls) e.className = cls; if (html != null) e.innerHTML = html; return e; };
 const fmt = (n) => Math.floor(n).toLocaleString('de-DE');
-const ICON = {
-  gold: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="7" fill="none" stroke="#5a3200" stroke-width="2"/><path d="M12 8v8M9.5 10h4a1.5 1.5 0 010 3h-3a1.5 1.5 0 000 3h4" stroke="#5a3200" stroke-width="1.6" fill="none"/></svg>',
-  aether: '<svg viewBox="0 0 24 24"><path d="M12 3l5 9-5 9-5-9z" fill="none" stroke="#06305a" stroke-width="2"/><path d="M12 7l2.6 5L12 17l-2.6-5z" fill="#06305a"/></svg>',
-  income: '<svg viewBox="0 0 24 24"><path d="M4 17l5-5 4 3 7-8" fill="none" stroke="#063a1a" stroke-width="2.4" stroke-linecap="round"/><path d="M15 7h5v5" fill="none" stroke="#063a1a" stroke-width="2.4" stroke-linecap="round"/></svg>',
-  value: '<svg viewBox="0 0 24 24"><path d="M12 3l3 6 6 1-4.5 4 1 6-5.5-3-5.5 3 1-6L3 10l6-1z" fill="none" stroke="#2a0a4a" stroke-width="2"/></svg>',
-};
+const mmss = (s) => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, '0')}`;
+const LANES_KEY = 'aetherfront.ui.lanesCollapsed';
+const KUP_ICON = { hp: 'heart', dmg: 'sword', regen: 'heal' };
 
 export function abilityText(ab) {
   const out = [];
@@ -32,20 +29,22 @@ export function abilityText(ab) {
   return out;
 }
 
-function ringSvg(ratio, color, size = 52, stroke = 5) {
-  const r = (size - stroke) / 2, c = 2 * Math.PI * r;
-  return `<svg width="${size}" height="${size}"><circle cx="${size / 2}" cy="${size / 2}" r="${r}" stroke="rgba(255,255,255,0.12)" stroke-width="${stroke}" fill="none"/>` +
-    `<circle cx="${size / 2}" cy="${size / 2}" r="${r}" stroke="${color}" stroke-width="${stroke}" fill="none" stroke-linecap="round" stroke-dasharray="${c}" stroke-dashoffset="${c * (1 - Math.max(0, Math.min(1, ratio)))}" style="filter:drop-shadow(0 0 6px ${color})"/></svg>`;
+/** Wertegitter für Einheiten-Tooltips und Auswahlkarte */
+function statGrid(def, hpHtml) {
+  return `<div class="stats">${stat('heart', hpHtml ?? `<b>${fmt(def.hp)}</b> Leben`, 'hp')}${stat('sword', `<b>${def.dmg}</b> / ${def.cd}s`, 'atk')}` +
+    `${stat('type', `${ATTACK_TYPES[def.atk].name}`, 'atk')}${stat('shield', `${ARMOR_TYPES[def.armorType].name} ${def.armor ?? ''}`, 'arm')}` +
+    `${def.range != null ? stat('range', `Reichweite ${def.range}`, 'rng') : ''}</div>`;
 }
 
 export class Hud {
-  constructor({ portraits, submit, onPlace, onSelect, onFocusLane, onFocusKing, audio, settings }) {
+  constructor({ portraits, submit, onPlace, onSelect, onFocusLane, onFocusKing, onPause, audio, settings }) {
     this.portraits = portraits;
     this.submit = submit;
     this.onPlace = onPlace;
     this.onSelect = onSelect;
     this.onFocusLane = onFocusLane;
     this.onFocusKing = onFocusKing;
+    this.onPause = onPause || (() => {});
     this.audio = audio;
     this.settings = settings;
     this.acc = 0;
@@ -58,34 +57,74 @@ export class Hud {
   unitPortrait(def) { return this.portraits.get(`f|${def.id}`, def.model, FACTIONS[def.faction].palette, def.tier); }
   sendPortrait(s) { return this.portraits.get(`c|${s.id}`, s.model, s.palette, 2); }
 
+  /** Hover-Tooltip + Klang an ein Element binden */
+  hover(el, html, sound = true) {
+    el.addEventListener('mouseenter', () => { if (sound) this.audio.ui('hover'); this.tip(el, typeof html === 'function' ? html() : html); });
+    el.addEventListener('mouseleave', () => this.tip(null));
+  }
+
   build(session) {
     this.session = session;
     const sim = session.sim;
     const me = sim.players[session.localPid];
     this.me = me;
-    const fac = FACTIONS[me.faction] || { grad: ['#ff8a3a', '#ff4fa3', '#7a5cff'] };
     this.camp = sim.campaign;
+    this.last = {};
+    this.phaseKey = null;
     // Ressourcen
     const rr = $('res-row');
     rr.innerHTML = '';
-    for (const [k, label] of [['gold', 'Gold'], ['aether', 'Äther'], ['income', 'Einkommen'], ['value', 'Armeewert']]) {
-      const el = h('div', `res ${k} pe`, `<div class="ic">${ICON[k]}</div><div><div class="v" id="r-${k}">0</div><div class="s" id="r-${k}-s">${label}</div></div>`);
-      el.addEventListener('mouseenter', () => this.tip(el, this.resTip(k)));
-      el.addEventListener('mouseleave', () => this.tip(null));
+    for (const [k, label] of [['gold', 'Gold'], ['aether', 'Äther'], ['value', 'Armeewert']]) {
+      const el = h('div', `res ${k}`, `<div class="ic">${I[k]}</div><div class="rv"><div class="v" id="r-${k}">0</div><div class="s" id="r-${k}-s">${label}</div></div>`);
+      this.hover(el, () => this.resTip(k), false);
       rr.appendChild(el);
     }
     // Könige
-    const ks = $('kings');
-    ks.innerHTML = '';
+    this.healMax = [KING.heals, KING.heals];
     for (const t of [0, 1]) {
+      const el = $(`king-${t}`);
       const label = t === me.team ? 'Dein König' : sim.teams[t].king.citadel ? 'Rissfeste' : 'Feindkönig';
-      const el = h('div', 'king', `<div class="ring" id="k-ring-${t}"></div><div class="meta"><b>${label}</b><small id="k-meta-${t}"></small></div>`);
-      el.addEventListener('click', () => this.onFocusKing(t));
-      ks.appendChild(el);
+      el.innerHTML = `<div class="kb-crest">${sim.teams[t].king.citadel ? I.siege : I.crown}</div><div class="kb-body">
+        <div class="kb-top"><b>${label}</b><span class="kb-pct" id="k-pct-${t}">100%</span></div>
+        <div class="kb-bar"><i class="kb-ghost" id="k-ghost-${t}"></i><i class="kb-fill" id="k-fill-${t}"></i></div>
+        <div class="kb-meta"><small id="k-meta-${t}"></small><span class="kb-heals" id="k-heals-${t}"></span></div></div>`;
+      el.onclick = () => { this.audio.ui('click'); this.onFocusKing(t); };
+      el.onmouseenter = () => this.tip(el, `<h5>${label} <span class="muted">Team ${t === 0 ? 'West' : 'Ost'}</span></h5>Fällt dieser König, verliert das Team.<div class="tt-foot">Klicken: Kamera zum König · <span class="key">Pos1</span> eigener König</div>`);
+      el.onmouseleave = () => this.tip(null);
     }
-    // Bau-Leiste
+    this.buildPhase();
+    this.buildActions();
     this.buildBuildDock();
     this.buildRest(session);
+  }
+
+  buildPhase() {
+    const ph = $('phase');
+    ph.innerHTML = `<div class="ph-time"><b id="ph-time">0:00</b><small id="ph-tag">Bauphase</small></div><div class="ph-sep"></div>
+      <div class="ph-main"><div class="ph-wave" id="ph-wave"></div><div class="ph-meta" id="ph-meta"></div></div>
+      <div class="ph-bar"><i id="ph-fill"></i></div>
+      <div class="ph-btns"><button class="btn small" id="btn-reroll" hidden>${I.dice} Neu würfeln</button><button class="btn small primary ready" id="btn-ready" hidden>Bereit <span class="key">↵</span></button></div>`;
+    const rr = $('btn-reroll');
+    rr.addEventListener('click', () => { this.audio.ui('confirm'); this.submit({ type: 'reroll' }); });
+    this.hover(rr, '<h5>Neu würfeln <span class="muted">PR-Modus</span></h5>Einmal pro Partie in der ersten Bauphase: du bekommst eine andere zufällige Fraktion. Vorher alle Kämpfer verkaufen.');
+    const rb = $('btn-ready');
+    rb.addEventListener('click', () => { this.audio.ui('confirm'); this.submit({ type: 'ready' }); });
+    this.hover(rb, '<h5>Bereit</h5>Startet die nächste Welle früher, sobald alle Spieler bereit sind.<div class="tt-foot">Taste <span class="key">↵</span></div>');
+  }
+
+  buildActions() {
+    const box = $('hud-actions');
+    box.innerHTML = '';
+    const mk = (icon, kk, tip, fn) => {
+      const b = h('button', 'icon-btn', `${I[icon]}<span class="kk">${kk}</span>`);
+      b.setAttribute('aria-label', tip.replace(/<[^>]+>/g, ''));
+      b.addEventListener('click', () => { this.audio.ui('click'); fn(); });
+      this.hover(b, tip);
+      box.appendChild(b);
+      return b;
+    };
+    mk('board', 'Tab', '<h5>Punktetafel</h5>Alle Spieler, Armeewerte und Durchbrüche.<div class="tt-foot">Taste <span class="key">Tab</span> gedrückt halten</div>', () => this.showScoreboard(!$('scoreboard').classList.contains('show')));
+    mk('menu', 'Esc', '<h5>Menü</h5>Pause, Einstellungen, Kodex.<div class="tt-foot">Taste <span class="key">Esc</span></div>', () => { this.tip(null); this.onPause(); });
   }
 
   buildBuildDock() {
@@ -96,11 +135,10 @@ export class Hud {
       const u = UNITS[id];
       const g = FACTIONS[u.faction].grad;
       const hk = ['Q', 'W', 'E', 'R', 'T'][i];
-      const c = h('div', 'card', `<span class="hk">${hk}</span><img src="${this.unitPortrait(u)}" alt=""/><span class="cost g">${u.cost}</span>`);
-      c.style.setProperty('--cbg', `radial-gradient(circle at 50% 30%, ${g[0]}55, ${g[2]}33 70%)`);
+      const c = h('div', 'slot build', `<img src="${this.unitPortrait(u)}" alt=""/><span class="need"></span><span class="shine"></span><span class="hk">${hk}</span><span class="cost g">${I.gold}<b>${u.cost}</b></span>`);
+      c.style.setProperty('--sc', `${g[0]}66`);
       c.addEventListener('click', () => { this.audio.ui('click'); this.onPlace(u); });
-      c.addEventListener('mouseenter', () => { this.audio.ui('hover'); this.tip(c, this.unitTip(u)); });
-      c.addEventListener('mouseleave', () => this.tip(null));
+      this.hover(c, () => this.unitTip(u, hk));
       bd.appendChild(c);
       return { u, el: c, hk };
     });
@@ -113,40 +151,51 @@ export class Hud {
     const sd = $('send-dock');
     sd.innerHTML = '';
     this.sendCards = SENDS.map((s) => {
-      const c = h('div', 'card sm', `<span class="hk">${s.hotkey}</span><img src="${this.sendPortrait(s)}" alt=""/><span class="cost a">${s.cost}</span><div class="lock" style="display:none"></div>`);
-      c.style.setProperty('--cbg', 'radial-gradient(circle at 50% 30%, rgba(255,58,138,0.35), rgba(60,10,40,0.6) 70%)');
+      const c = h('div', 'slot sm merc', `<img src="${this.sendPortrait(s)}" alt=""/><span class="need"></span><span class="shine"></span><span class="hk">${s.hotkey}</span><span class="cost a">${I.aether}<b>${s.cost}</b></span><div class="lock" style="display:none"></div>`);
       c.addEventListener('click', () => { this.audio.ui('click'); this.submit({ type: 'send', send: s.id }); });
-      c.addEventListener('mouseenter', () => { this.audio.ui('hover'); this.tip(c, this.sendTip(s)); });
-      c.addEventListener('mouseleave', () => this.tip(null));
+      this.hover(c, () => this.sendTip(s));
       sd.appendChild(c);
-      return { s, el: c };
+      return { s, el: c, cost: c.querySelector('.cost b'), lock: c.querySelector('.lock') };
     });
     // Wirtschaft & König
     const ed = $('eco-dock');
     ed.innerHTML = '';
-    const mk = (ico, hk, costCls, onClick, tipFn) => {
-      const c = h('div', 'card sm action', `<span class="hk">${hk}</span><span class="ico">${ico}</span><span class="cost ${costCls}"></span>`);
+    const mk = (cls, ico, hk, costHtml, onClick, tipFn) => {
+      const c = h('div', `slot sm action ${cls}`, `<span class="ico">${I[ico]}</span><span class="cd"></span><span class="shine"></span><span class="hk">${hk}</span><span class="cost">${costHtml}</span>`);
       c.addEventListener('click', () => { this.audio.ui('click'); onClick(); });
-      c.addEventListener('mouseenter', () => { this.audio.ui('hover'); this.tip(c, tipFn()); });
-      c.addEventListener('mouseleave', () => this.tip(null));
+      this.hover(c, tipFn);
       ed.appendChild(c);
       return c;
     };
-    this.workerCard = mk('✦', 'B', 'g', () => this.submit({ type: 'worker' }), () => `<h5>Äther-Funke anwerben</h5>Ein Arbeiter sammelt ${ECON.workerRate} Äther pro Sekunde. Äther brauchst du für Söldner und den König.<br><span class="muted">Aktuell: ${this.me.workers} Funken</span>`);
-    this.kingCard = mk('♛', 'K', 'a', () => this.toggleKingPanel(), () => '<h5>Königshalle</h5>Verbessere deinen König mit Äther: Leben, Angriffskraft, Erneuerung. Die Verbesserungen gelten für das ganze Team.');
-    this.healCard = mk('✚', 'H', 'a', () => this.submit({ type: 'heal' }), () => `<h5>König heilen</h5>Stellt sofort ${Math.round(KING.healPct * 100)} % Leben wieder her. Das Team hat nur ${KING.heals} Heilungen pro Partie (Abklingzeit ${KING.healCd}s).`);
-    this.kingCard.querySelector('.cost').textContent = 'Halle';
+    this.workerCard = mk('worker', 'worker', 'B', `${I.gold}<b></b>`, () => this.submit({ type: 'worker' }), () => `<h5>Äther-Funke <span class="muted">Arbeiter</span></h5>Ein Funke sammelt dauerhaft ${ECON.workerRate} Äther pro Sekunde. Äther brauchst du für Söldner und die Königshalle.<div class="tt-cost">${stat('gold', `<b class="g">${sim.workerCost(this.me)}</b> Gold`)}${stat('worker', `<b>${this.me.workers}</b> / ${ECON.maxWorkers} Funken`)}</div>`);
+    this.workerCard.querySelector('.cost').classList.add('g');
+    this.workerCard.appendChild(h('span', 'cnt'));
+    this.kingCard = mk('hall', 'hall', 'K', '<b>Halle</b>', () => this.toggleKingPanel(), () => '<h5>Königshalle</h5>Verbessere deinen König mit Äther: Lebenskraft, Königsmacht und Erneuerung. Die Verbesserungen gelten für das ganze Team.<div class="tt-foot">Taste <span class="key">K</span></div>');
+    this.healCard = mk('heal', 'heal', 'H', '<b></b>', () => this.submit({ type: 'heal' }), () => `<h5>König heilen</h5>Stellt sofort ${Math.round(KING.healPct * 100)} % Leben wieder her. Das Team hat nur ${KING.heals} Heilungen pro Partie (Abklingzeit ${KING.healCd}s).`);
+    this.healCard.querySelector('.cost').classList.add('ok');
     // König-Panel
     this.buildKingPanel();
     // Bahnen
     const ln = $('lanes');
     ln.innerHTML = '';
+    let collapsed = false;
+    try { collapsed = localStorage.getItem(LANES_KEY) === '1'; } catch { /* egal */ }
+    ln.classList.toggle('collapsed', collapsed);
+    const head = h('div', 'lanes-head', `<span>Fronten</span>${I.chevron}`);
+    head.addEventListener('click', () => {
+      this.audio.ui('click');
+      const c = !ln.classList.contains('collapsed');
+      ln.classList.toggle('collapsed', c);
+      try { localStorage.setItem(LANES_KEY, c ? '1' : '0'); } catch { /* egal */ }
+    });
+    ln.appendChild(head);
+    let team = -1;
     this.laneRows = sim.players.slice().sort((a, b) => a.team - b.team || a.slot - b.slot).map((p) => {
+      if (p.team !== team) { team = p.team; ln.appendChild(h('div', `lane-team t${team}`, team === 0 ? 'Team West' : 'Team Ost')); }
       const t1 = UNITS[p.lines[0]];
-      const el = h('div', `lane-btn${p.id === me.id ? ' me' : ''}`, `<div class="dot" style="background-image:url(${this.unitPortrait(t1)});box-shadow:0 0 0 2px ${TEAM_COLORS[p.team]}"></div><span class="nm">${escapeHtml(p.name)}</span><span class="lk"></span>`);
+      const el = h('div', `lane-btn t${p.team}${p.id === me.id ? ' me' : ''}`, `<span class="dot" style="background-image:url(${this.unitPortrait(t1)})"></span><span class="nm">${escapeHtml(p.name)}</span><span class="lk"></span>`);
       el.addEventListener('click', () => { this.audio.ui('click'); this.onFocusLane(p.id); });
-      el.addEventListener('mouseenter', () => this.tip(el, `<h5>${escapeHtml(p.name)}</h5>${facName(p)}${p.randomed ? ' (Zufall)' : ''} · Team ${p.team === 0 ? 'West' : 'Ost'}<br><span class="muted">Klicken: Kamera zur Bahn</span>`));
-      el.addEventListener('mouseleave', () => this.tip(null));
+      this.hover(el, () => `<h5>${escapeHtml(p.name)} <span class="muted">${facName(p)}${p.randomed ? ' · Zufall' : ''}</span></h5>Team ${p.team === 0 ? 'West' : 'Ost'} · Bahn ${p.slot + 1}<div class="tt-cost">${stat('value', `<b>${fmt(sim.armyValue(p.id))}</b> Armeewert`)}${stat('leak', `<b>${p.stats.leaks}</b> Durchbrüche`)}</div><div class="tt-foot">Klicken: Kamera zur Bahn</div>`, false);
       ln.appendChild(el);
       return { p, el, lk: el.querySelector('.lk') };
     });
@@ -159,41 +208,43 @@ export class Hud {
 
   buildKingPanel() {
     const kp = $('king-panel');
-    kp.innerHTML = '<h4>Königshalle</h4>';
+    kp.innerHTML = `<h4>${I.crown} Königshalle <small>Äther-Verbesserungen</small></h4>`;
     this.kups = Object.entries(KING.upgrades).map(([k, u]) => {
-      const el = h('div', 'kup', `<div class="t"><b>${u.name}</b><small>${u.desc}</small></div><span class="lv"></span><span class="c"></span>`);
+      const el = h('div', 'kup', `<span class="kic">${I[KUP_ICON[k]] || I.up}</span><div class="t"><b>${u.name}</b><small>${u.desc}</small><div class="lvbar" style="--seg:${100 / u.max}%"><i></i></div><span class="lv"></span></div><span class="c"></span>`);
       el.addEventListener('click', () => { this.audio.ui('click'); this.submit({ type: 'king', up: k }); });
       kp.appendChild(el);
-      return { k, u, el };
+      return { k, u, el, lv: el.querySelector('.lv'), c: el.querySelector('.c'), bar: el.querySelector('.lvbar') };
     });
   }
   toggleKingPanel(force) {
     const kp = $('king-panel');
     const show = force ?? !kp.classList.contains('show');
     kp.classList.toggle('show', show);
+    if (this.kingCard) this.kingCard.classList.toggle('open', show);
     this.audio.ui(show ? 'open' : 'close');
   }
 
   resTip(k) {
     const p = this.me;
-    if (k === 'gold') return `<h5>Gold</h5>Für Kämpfer, Aufwertungen und Arbeiter. Du erhältst Kopfgeld für jeden besiegten Gegner und nach jeder Welle dein Einkommen (+${p.income}).`;
-    if (k === 'aether') return `<h5>Äther</h5>Sammeln deine Funken (${p.workers} × ${ECON.workerRate}/s). Damit schickst du Söldner zum Gegner und verbesserst den König.`;
+    if (k === 'gold') return `<h5>Gold</h5>Für Kämpfer, Aufwertungen und Funken. Du erhältst Kopfgeld für jeden besiegten Gegner und nach jeder Welle dein Einkommen. Jeder gesendete Söldner erhöht das Einkommen dauerhaft.<div class="tt-cost">${stat('income', `<b class="ok">+${p.income}</b> Einkommen pro Welle`)}</div>`;
+    if (k === 'aether') return `<h5>Äther</h5>Sammeln deine Funken. Damit schickst du Söldner zum Gegner und verbesserst den König.<div class="tt-cost">${stat('worker', `<b>${p.workers}</b> × ${ECON.workerRate}/s`)}</div>`;
     if (k === 'income') return '<h5>Einkommen</h5>Gold, das du nach jeder Welle bekommst. Jeder gesendete Söldner erhöht es dauerhaft.';
-    return '<h5>Armeewert</h5>Gesamtwert deiner Kämpfer (inkl. Aufwertungen).';
+    return '<h5>Armeewert</h5>Gesamtwert deiner Kämpfer inklusive Aufwertungen.';
   }
-  unitTip(u) {
+  unitTip(u, hk) {
     const chain = [u];
     while (chain[chain.length - 1].upgradeTo) chain.push(UNITS[chain[chain.length - 1].upgradeTo]);
-    return `<h5>${u.name} <span class="muted">· ${u.roleLabel}</span></h5>` +
-      `<div class="stats"><span class="chip">❤ <b>${u.hp}</b></span><span class="chip">⚔ <b>${u.dmg}</b> / ${u.cd}s</span><span class="chip">${ATTACK_TYPES[u.atk].name}</span><span class="chip">🛡 ${ARMOR_TYPES[u.armorType].name} ${u.armor}</span><span class="chip">↔ ${u.range}</span></div>` +
-      `${abilityText(u.abil).map((a) => `<div class="abil">◆ ${a}</div>`).join('')}` +
-      `<div class="muted" style="margin-top:6px">Aufwertung: ${chain.map((c) => c.name).join(' → ')}</div>`;
+    return `<h5>${u.name} <span class="muted">${u.roleLabel}</span></h5>` + statGrid(u) +
+      `${abilityText(u.abil).map((a) => `<div class="abil">${a}</div>`).join('')}` +
+      `<div class="tt-cost">${stat('gold', `<b class="g">${u.cost}</b> Gold`)}${hk ? `<span class="stat"><span class="key">${hk}</span> bauen</span>` : ''}</div>` +
+      `<div class="tt-foot">Aufwertung: <b>${chain.map((c) => c.name).join(' → ')}</b></div>`;
   }
   sendTip(s) {
-    return `<h5>${s.name} <span class="muted">· Söldner</span></h5>${this.camp ? `Marschiert mit der nächsten Welle gegen die Rissfeste und rammt sie (${s.cost * (this.camp.impactMul || 14)} Wucht).` : 'Läuft mit der nächsten Welle in die Bahn deines Gegners.'}<br>` +
-      `<div class="stats"><span class="chip">❤ <b>${s.hp}</b></span><span class="chip">⚔ <b>${s.dmg}</b></span><span class="chip">${ATTACK_TYPES[s.atk].name}</span><span class="chip">🛡 ${ARMOR_TYPES[s.armorType].name}</span></div>` +
-      `<div style="margin-top:6px">Kosten <b style="color:var(--aether)">${this.session.sim.sendCost(s)} Äther</b> · Einkommen <b style="color:var(--good)">+${s.income}</b></div>` +
-      (this.session.sim.wave < s.unlock ? `<div class="muted">Verfügbar ab Welle ${s.unlock}</div>` : '');
+    const sim = this.session.sim;
+    return `<h5>${s.name} <span class="muted">Söldner</span></h5>${this.camp ? `Marschiert mit der nächsten Welle gegen die Rissfeste und rammt sie (${s.cost * (this.camp.impactMul || 14)} Wucht).` : 'Läuft mit der nächsten Welle in die Bahn deines Gegners.'}` +
+      `<div class="stats" style="margin-top:8px">${stat('heart', `<b>${fmt(s.hp)}</b> Leben`, 'hp')}${stat('sword', `<b>${s.dmg}</b> / ${s.cd}s`, 'atk')}${stat('type', ATTACK_TYPES[s.atk].name, 'atk')}${stat('shield', ARMOR_TYPES[s.armorType].name, 'arm')}</div>` +
+      `<div class="tt-cost">${stat('aether', `<b class="a">${sim.sendCost(s)}</b> Äther`)}${stat('income', `<b class="ok">+${s.income}</b> Einkommen`)}</div>` +
+      (sim.wave < s.unlock ? `<div class="tt-foot">Verfügbar ab <b>Welle ${s.unlock}</b></div>` : `<div class="tt-foot">Taste <span class="key">${s.hotkey}</span></div>`);
   }
 
   tip(anchor, html) {
@@ -202,11 +253,15 @@ export class Hud {
     t.innerHTML = html;
     t.classList.add('show');
     const z = window.__uiZoom || 1;
-    const r = anchor.getBoundingClientRect();
+    // Slots der Konsole: Tooltip über der ganzen Konsole, damit nichts verdeckt wird
+    const dock = anchor.closest && anchor.closest('.console');
+    const ar = anchor.getBoundingClientRect();
+    const r = dock ? { left: ar.left, width: ar.width, top: Math.min(ar.top, dock.getBoundingClientRect().top), bottom: ar.bottom } : ar;
     const tw = t.offsetWidth * z, th = t.offsetHeight * z;
-    let x = r.left + r.width / 2 - tw / 2, y = r.top - th - 14;
-    if (y < 8) y = r.bottom + 14;
+    let x = r.left + r.width / 2 - tw / 2, y = r.top - th - 12 * z;
+    if (y < 8) y = r.bottom + 12 * z;
     x = Math.max(8, Math.min(window.innerWidth - tw - 8, x));
+    y = Math.max(8, Math.min(window.innerHeight - th - 8, y));
     t.style.left = `${x / z}px`; t.style.top = `${y / z}px`;
     this.tipFor = anchor;
   }
@@ -235,27 +290,35 @@ export class Hud {
     if (!force && key === this.lastSelKey) return;
     this.lastSelKey = key;
     const own = isF && e.owner === this.me.id;
+    const ally = isF && sim.players[e.owner].team === this.me.team;
     const por = isF ? this.unitPortrait(def) : this.portraits.get(`c|${def.key || def.id}`, def.model, def.palette, def.boss || def.champion ? 3 : 2);
     const next = isF && def.upgradeTo ? UNITS[def.upgradeTo] : null;
     const refund = isF ? (e.fresh ? def.value : Math.floor(def.value * ECON.sellRefund)) : 0;
     const build = sim.phase === 'build';
-    card.innerHTML = `<div class="por"><img src="${por}" alt=""/></div><div class="info">
+    const grad = isF ? FACTIONS[def.faction].grad : ['#ff5d70', '#ff5d70', '#ff5d70'];
+    const hpPct = Math.max(0, Math.min(100, (e.hp / e.maxHp) * 100));
+    card.innerHTML = `<div class="por" style="--pc:${grad[0]}88"><img src="${por}" alt=""/></div><div class="info">
       <div class="nm">${def.name} ${isF ? `<span class="stars">${'★'.repeat(def.tier)}</span>` : ''}</div>
       <div class="sub">${isF ? `${FACTIONS[def.faction].name} · ${def.roleLabel} · Wert ${def.value}` : (e.isSend ? 'Söldner' : `${def.champion ? 'Champion · ' : ''}Welle ${def.n}`)}${isF && !own ? ` · ${escapeHtml(sim.players[e.owner].name)}` : ''}</div>
-      <div class="stats"><span class="chip">❤ <b>${fmt(e.hp)}</b>/${fmt(e.maxHp)}</span><span class="chip">⚔ <b>${def.dmg}</b> / ${def.cd}s</span><span class="chip">${ATTACK_TYPES[def.atk].name}</span><span class="chip">🛡 ${ARMOR_TYPES[def.armorType].name} ${def.armor}</span></div>
-      ${isF ? abilityText(def.abil).map((a) => `<div class="abil">◆ ${a}</div>`).join('') : ''}
+      <div class="hpbar${ally ? '' : ' enemy'}" style="--p:${hpPct}%"><i></i><span>${fmt(e.hp)} / ${fmt(e.maxHp)}</span></div>
+      ${statGrid(def, `<b>${fmt(e.maxHp)}</b> Leben`)}
+      ${isF ? abilityText(def.abil).map((a) => `<div class="abil">${a}</div>`).join('') : ''}
       ${own ? `<div class="sel-actions">
-        ${next ? `<button class="pill primary" id="sel-up" ${!build || this.me.gold < next.cost ? 'disabled' : ''}>Aufwerten → ${next.name} · ${next.cost} <span class="key">U</span></button>` : '<span class="chip">Höchste Stufe</span>'}
-        <button class="pill" id="sel-sell" ${!build ? 'disabled' : ''}>Verkaufen +${refund} <span class="key">X</span></button></div>` : ''}
+        ${next ? `<button class="btn small primary" id="sel-up" ${!build || this.me.gold < next.cost ? 'disabled' : ''}>${I.up} Aufwerten ${next.cost} <span class="key">U</span></button>` : `<span class="maxed">${I.star} Höchste Stufe</span>`}
+        <button class="btn small" id="sel-sell" ${!build ? 'disabled' : ''}>Verkaufen +${refund} <span class="key">X</span></button></div>` : ''}
     </div>`;
     const up = card.querySelector('#sel-up');
     if (up) {
       up.addEventListener('click', () => { this.audio.ui('click'); this.submit({ type: 'upgrade', id: e.id }); });
-      up.addEventListener('mouseenter', () => this.tip(up, this.unitTip(next)));
+      up.addEventListener('mouseenter', () => this.tip(up, `<h5>Aufwerten → ${next.name}</h5>` + statGrid(next) + abilityText(next.abil).map((a) => `<div class="abil">${a}</div>`).join('') + `<div class="tt-cost">${stat('gold', `<b class="g">${next.cost}</b> Gold`)}<span class="stat"><span class="key">U</span></span></div>`));
       up.addEventListener('mouseleave', () => this.tip(null));
     }
     const sell = card.querySelector('#sel-sell');
-    if (sell) sell.addEventListener('click', () => { this.audio.ui('click'); this.submit({ type: 'sell', id: e.id }); });
+    if (sell) {
+      sell.addEventListener('click', () => { this.audio.ui('click'); this.submit({ type: 'sell', id: e.id }); });
+      sell.addEventListener('mouseenter', () => this.tip(sell, `<h5>Verkaufen</h5>Erstattet <b class="g">${refund} Gold</b>${e.fresh ? ' (volle Erstattung – in dieser Bauphase gebaut)' : ` (${Math.round(ECON.sellRefund * 100)} %)`}.<div class="tt-foot">Taste <span class="key">X</span> oder <span class="key">Entf</span></div>`));
+      sell.addEventListener('mouseleave', () => this.tip(null));
+    }
   }
 
   toast(msg) {
@@ -263,11 +326,12 @@ export class Hud {
     t.textContent = msg;
     t.classList.add('show');
     clearTimeout(this.toastT);
-    this.toastT = setTimeout(() => t.classList.remove('show'), 1600);
+    this.toastT = setTimeout(() => t.classList.remove('show'), 1700);
   }
   feed(msg, cls = '') {
     const f = $('feed');
-    const m = h('div', `msg ${cls}`, msg);
+    const icon = cls === 'bad' ? I.leak : cls === 'good' ? I.check : cls === 'send' ? I.swords : I.diamond;
+    const m = h('div', `msg ${cls}`, `${icon}<span>${msg}</span>`);
     f.appendChild(m);
     while (f.children.length > 6) f.firstChild.remove();
     setTimeout(() => { m.classList.add('out'); setTimeout(() => m.remove(), 500); }, 6500);
@@ -275,7 +339,7 @@ export class Hud {
   banner(title, sub, boss = false) {
     const b = $('banner');
     b.className = 'banner';
-    b.innerHTML = `<div class="t">${title}</div><div class="s">${sub}</div>`;
+    b.innerHTML = `<div class="bl"></div><div class="t">${title}</div><div class="s">${sub}</div>`;
     void b.offsetWidth;
     b.className = `banner show${boss ? ' boss' : ''}`;
   }
@@ -307,7 +371,7 @@ export class Hud {
       }
       case 'king': if (sim.players[e.pid].team === me.team) this.feed(`${escapeHtml(sim.players[e.pid].name)}: ${KING.upgrades[e.up].name} Stufe ${e.level}`, 'good'); break;
       case 'kingHeal': if (e.team === me.team) this.feed(`König geheilt (+${fmt(e.amount)})`, 'good'); break;
-      case 'kingHit': if (e.team === me.team) { const k = $('kings').children[e.team]; if (k && !k.classList.contains('hurt')) { k.classList.add('hurt'); setTimeout(() => k.classList.remove('hurt'), 400); } } break;
+      case 'kingHit': if (e.team === me.team) { const k = $(`king-${e.team}`); if (k && !k.classList.contains('hurt')) { k.classList.add('hurt'); setTimeout(() => k.classList.remove('hurt'), 450); } } break;
       case 'rage': this.feed('Die Gegner geraten in Raserei und stürmen zum König!', 'bad'); break;
       case 'sell': case 'upgrade': if (this.selected && this.selected.id === e.id) { const ent = sim.entities.get(e.id); this.setSelected(ent || null); this.onSelect(ent || null); } break;
       default: break;
@@ -329,6 +393,11 @@ export class Hud {
       el.textContent = s;
     }
   }
+  setHtml(el, key, html) {
+    if (this.last[key] === html) return;
+    this.last[key] = html;
+    el.innerHTML = html;
+  }
 
   update(dt) {
     this.acc += dt;
@@ -342,9 +411,9 @@ export class Hud {
     const me = this.me;
     const build = sim.phase === 'build';
     this.setValue('r-gold', me.gold);
-    this.setValue('r-gold-s', `Gold · +${me.income}/Welle`);
+    this.setValue('r-gold-s', `+${me.income} / Welle`);
     this.setValue('r-aether', me.aether);
-    this.setValue('r-aether-s', `Äther · ${me.workers} Funken`);
+    this.setValue('r-aether-s', `${me.workers} Funken`);
     this.setValue('r-income', me.income);
     this.setValue('r-value', sim.armyValue(me.id));
     this.ready = true;
@@ -355,58 +424,74 @@ export class Hud {
     const tleft = Math.max(0, Math.ceil(sim.phaseTime));
     const total = sim.wave === sim.rules.startWave ? sim.rules.buildTimeFirst : sim.rules.buildTime;
     const canReroll = build && me.rerolls > 0 && sim.wave === sim.rules.startWave;
-    const key = `${sim.wave}|${sim.phase}|${build ? tleft : Math.floor(sim.battleTime)}|${me.ready}|${canReroll}`;
-    if (key !== this.phaseKey) {
-      this.phaseKey = key;
-      ph.innerHTML = `<div class="wave"><b>Welle ${sim.wave} / ${sim.rules.maxWaves}</b><small>${w ? w.name : ''}${w && w.boss ? ' · BOSS' : ''}${w ? ` · ${w.count}× · 🛡 ${ARMOR_TYPES[w.armorType].name} · ⚔ ${ATTACK_TYPES[w.atk].name}${w.ranged ? ' (Fernkampf)' : ''}` : ''}</small></div>
-        <span class="tag ${build ? 'build' : 'battle'}">${build ? 'Bauphase' : sim.phase === 'over' ? 'Ende' : 'Kampf'}</span>
-        <div class="timer">${build ? ringSvg(tleft / total, '#7ae8ff', 54, 4) : ringSvg(1, '#ff5a6a', 54, 4)}<span>${build ? tleft : '⚔'}</span></div>
-        ${canReroll ? '<button class="pill ready" id="btn-reroll">Neu würfeln</button>' : ''}
-        ${build && !me.ready ? '<button class="pill primary ready" id="btn-ready">Bereit <span class="key">↵</span></button>' : ''}`;
-      const rr = ph.querySelector('#btn-reroll');
-      if (rr) {
-        rr.addEventListener('click', () => { this.audio.ui('confirm'); this.submit({ type: 'reroll' }); });
-        rr.addEventListener('mouseenter', () => this.tip(rr, '<h5>Neu würfeln (PR-Modus)</h5>Einmal pro Partie in der ersten Bauphase: du bekommst eine andere zufällige Fraktion. Vorher alle Kämpfer verkaufen.'));
-        rr.addEventListener('mouseleave', () => this.tip(null));
-      }
-      const rb = ph.querySelector('#btn-ready');
-      if (rb) rb.addEventListener('click', () => { this.audio.ui('confirm'); this.submit({ type: 'ready' }); });
+    const over = sim.phase === 'over';
+    ph.classList.toggle('battle', !build && !over);
+    ph.classList.toggle('urgent', build && tleft <= 5);
+    this.setValue('ph-time', build ? mmss(tleft) : mmss(sim.battleTime || 0));
+    this.setValue('ph-tag', build ? 'Bauphase' : over ? 'Ende' : sim.rage ? 'Raserei' : 'Kampf');
+    $('ph-fill').style.transform = `scaleX(${build ? Math.max(0, Math.min(1, sim.phaseTime / total)) : Math.min(1, (sim.battleTime || 0) / ECON.battleRageTime)})`;
+    const waveKey = `${sim.wave}|${sim.rules.maxWaves}|${w ? w.name : ''}`;
+    if (waveKey !== this.phaseKey) {
+      this.phaseKey = waveKey;
+      $('ph-wave').innerHTML = `<small>Welle</small><b>${sim.wave}</b><span>/ ${sim.rules.maxWaves}</span>${w && w.boss ? `<span class="boss">${I.skull} Boss</span>` : ''}${w ? `<span class="nm">${w.name}</span>` : ''}`;
+      $('ph-meta').innerHTML = w ? `${stat('count', `${w.count}×`, 'cnt')}${stat('shield', ARMOR_TYPES[w.armorType].name, 'arm')}${stat('sword', `${ATTACK_TYPES[w.atk].name}${w.ranged ? ' · Fern' : ''}`, 'atk')}` : '';
     }
+    $('btn-reroll').hidden = !canReroll;
+    $('btn-ready').hidden = !(build && !me.ready);
 
     // Könige
     for (const t of [0, 1]) {
       const k = sim.teams[t].king;
-      const ratio = k.hp / k.maxHp;
-      const kk = `${Math.round(ratio * 100)}|${k.heals}`;
+      const ratio = Math.max(0, k.hp / k.maxHp);
+      this.healMax[t] = Math.max(this.healMax[t], k.heals);
+      const kk = `${Math.round(ratio * 1000)}|${k.heals}|${Math.round(k.hp)}`;
       if (this.last[`king${t}`] !== kk) {
         this.last[`king${t}`] = kk;
-        $(`k-ring-${t}`).innerHTML = `${ringSvg(ratio, TEAM_COLORS[t])}<span>${Math.round(ratio * 100)}%</span>`;
-        $(`k-meta-${t}`).textContent = `${fmt(k.hp)} Leben · ${k.heals} Heilungen`;
+        $(`k-fill-${t}`).style.transform = `scaleX(${ratio})`;
+        $(`k-ghost-${t}`).style.transform = `scaleX(${ratio})`;
+        $(`k-pct-${t}`).textContent = `${Math.ceil(ratio * 100)}%`;
+        $(`k-meta-${t}`).textContent = `${fmt(k.hp)} / ${fmt(k.maxHp)}`;
+        $(`k-heals-${t}`).innerHTML = Array.from({ length: this.healMax[t] }, (_, i) => `<i class="${i < k.heals ? '' : 'used'}"></i>`).join('');
+        $(`king-${t}`).classList.toggle('low', ratio < 0.3);
       }
     }
 
-    // Karten
-    for (const c of this.buildCards) c.el.classList.toggle('off', !build || me.gold < c.u.cost);
+    // Kämpfer-Slots
+    for (const c of this.buildCards) {
+      const poor = me.gold < c.u.cost;
+      c.el.classList.toggle('off', !build);
+      c.el.classList.toggle('poor', build && poor);
+      c.el.style.setProperty('--need', build && poor ? (1 - me.gold / c.u.cost).toFixed(3) : 0);
+    }
     for (const c of this.sendCards) {
       const locked = sim.wave < c.s.unlock;
-      c.el.classList.toggle('off', locked || me.aether < sim.sendCost(c.s));
-      c.el.querySelector('.cost').textContent = sim.sendCost(c.s);
-      const l = c.el.querySelector('.lock');
-      l.style.display = locked ? 'grid' : 'none';
-      if (locked) l.textContent = `ab W${c.s.unlock}`;
+      const cost = sim.sendCost(c.s);
+      c.el.classList.toggle('off', locked);
+      c.el.classList.toggle('poor', !locked && me.aether < cost);
+      c.el.style.setProperty('--need', !locked && me.aether < cost ? (1 - me.aether / cost).toFixed(3) : 0);
+      if (c.cost.textContent !== String(cost)) c.cost.textContent = cost;
+      if (locked) this.setHtml(c.lock, `lock${c.s.id}`, `${I.lock}<span>W${c.s.unlock}</span>`);
+      c.lock.style.display = locked ? 'grid' : 'none';
     }
     const wc = sim.workerCost(me);
-    this.workerCard.querySelector('.cost').textContent = `${wc} · ${me.workers}`;
-    this.workerCard.classList.toggle('off', me.gold < wc || me.workers >= ECON.maxWorkers);
+    this.workerCard.querySelector('.cost b').textContent = wc;
+    this.workerCard.querySelector('.cnt').textContent = `${me.workers}`;
+    this.workerCard.classList.toggle('poor', me.gold < wc);
+    this.workerCard.classList.toggle('off', me.workers >= ECON.maxWorkers);
     const k = sim.teams[me.team].king;
-    this.healCard.querySelector('.cost').textContent = k.healCd > 0 ? `${Math.ceil(k.healCd)}s` : `${k.heals}×`;
-    this.healCard.classList.toggle('off', k.heals <= 0 || k.healCd > 0 || k.hp >= k.maxHp);
+    this.healCard.querySelector('.cost b').textContent = k.healCd > 0 ? `${Math.ceil(k.healCd)}s` : `${k.heals}×`;
+    this.healCard.style.setProperty('--cd', k.healCd > 0 ? (k.healCd / KING.healCd).toFixed(3) : 0);
+    this.healCard.classList.toggle('off', k.heals <= 0 || k.hp >= k.maxHp);
+    this.healCard.classList.toggle('poor', k.healCd > 0);
     for (const ku of this.kups) {
       const lv = k.levels[ku.k];
       const cost = kingUpgradeCost(ku.k, lv);
-      ku.el.querySelector('.lv').textContent = `Stufe ${lv}/${ku.u.max}`;
-      ku.el.querySelector('.c').textContent = lv >= ku.u.max ? 'max' : `${cost} Ä`;
-      ku.el.classList.toggle('off', lv >= ku.u.max || me.aether < cost);
+      const max = lv >= ku.u.max;
+      const lvTxt = `Stufe ${lv} / ${ku.u.max}`;
+      if (ku.lv.textContent !== lvTxt) { ku.lv.textContent = lvTxt; ku.bar.style.setProperty('--p', `${(lv / ku.u.max) * 100}%`); }
+      this.setHtml(ku.c, `kup${ku.k}`, max ? 'Max' : `${I.aether}${cost}`);
+      ku.el.classList.toggle('max', max);
+      ku.el.classList.toggle('off', !max && me.aether < cost);
     }
 
     // Kampagnenziel
@@ -414,15 +499,16 @@ export class Hud {
       const c = sim.teams[1].king;
       const left = sim.rules.maxWaves - sim.wave + (sim.phase === 'build' ? 1 : 0);
       const txt = this.camp.goal === 'siege'
-        ? `Ziel: Rissfeste zerstören · <b>${fmt(c.hp)}</b> Leben übrig · noch ${left} Welle${left === 1 ? '' : 'n'}`
-        : `Ziel: bis Welle ${sim.rules.maxWaves} halten · noch ${left} Welle${left === 1 ? '' : 'n'} · Rissfeste ${Math.round((c.hp / c.maxHp) * 100)} %`;
-      if (txt !== this.last.obj) { this.last.obj = txt; $('objective').innerHTML = txt; }
+        ? `${I.siege}<span>Ziel: Rissfeste zerstören · <b>${fmt(c.hp)}</b> Leben übrig · noch ${left} Welle${left === 1 ? '' : 'n'}</span>`
+        : `${I.hold}<span>Ziel: bis Welle ${sim.rules.maxWaves} halten · noch <b>${left}</b> Welle${left === 1 ? '' : 'n'} · Rissfeste ${Math.round((c.hp / c.maxHp) * 100)} %</span>`;
+      this.setHtml($('objective'), 'obj', txt);
     }
     // Bahnen
     for (const r of this.laneRows) {
       const v = sim.armyValue(r.p.id);
-      r.lk.textContent = `${fmt(v)} · ${r.p.stats.leaks} ⇣`;
-      r.lk.classList.toggle('bad', (r.p.stats.leaksThisWave || 0) > 0);
+      const bad = (r.p.stats.leaksThisWave || 0) > 0;
+      this.setHtml(r.lk, `lane${r.p.id}`, `<span>${fmt(v)}</span><span class="lkv">${I.leak}${r.p.stats.leaks}</span>`);
+      r.lk.classList.toggle('bad', bad);
     }
 
     // Auswahl aktuell halten
@@ -436,11 +522,16 @@ export class Hud {
 
   renderScoreboard() {
     const sim = this.session.sim;
-    const rows = sim.players.slice().sort((a, b) => a.team - b.team || a.slot - b.slot).map((p) =>
-      `<tr class="t${p.team}${p.id === this.me.id ? ' me' : ''}"><td>${escapeHtml(p.name)}${p.bot ? ' <span class="muted">(Bot)</span>' : ''}</td><td>${facName(p)}</td><td>${fmt(sim.armyValue(p.id))}</td><td>${p.income}</td><td>${p.workers}</td><td>${p.stats.sent}</td><td>${p.stats.kills}</td><td>${p.stats.leaks}</td></tr>`).join('');
-    $('scoreboard').innerHTML = `<table><tr><th>Spieler</th><th>Fraktion</th><th>Armeewert</th><th>Einkommen</th><th>Funken</th><th>Gesendet</th><th>Besiegt</th><th>Durchbrüche</th></tr>${rows}</table>`;
+    let team = -1;
+    const rows = sim.players.slice().sort((a, b) => a.team - b.team || a.slot - b.slot).map((p) => {
+      let sep = '';
+      if (p.team !== team) { team = p.team; sep = `<tr class="sep t${team}"><td colspan="8">Team ${team === 0 ? 'West' : 'Ost'}</td></tr>`; }
+      return `${sep}<tr class="t${p.team}${p.id === this.me.id ? ' me' : ''}"><td>${escapeHtml(p.name)}${p.bot ? ' <span class="muted">· Bot</span>' : ''}</td><td>${facName(p)}</td><td>${fmt(sim.armyValue(p.id))}</td><td>${p.income}</td><td>${p.workers}</td><td>${p.stats.sent}</td><td>${p.stats.kills}</td><td>${p.stats.leaks}</td></tr>`;
+    }).join('');
+    const html = `<h4>Punktetafel <small>Welle ${sim.wave} / ${sim.rules.maxWaves}</small></h4><table><tr><th>Spieler</th><th>Fraktion</th><th>Armeewert</th><th>Einkommen</th><th>Funken</th><th>Gesendet</th><th>Besiegt</th><th>Durchbrüche</th></tr>${rows}</table>`;
+    this.setHtml($('scoreboard'), 'board', html);
   }
-  showScoreboard(show) { $('scoreboard').classList.toggle('show', show); if (show) this.renderScoreboard(); }
+  showScoreboard(show) { $('scoreboard').classList.toggle('show', show); this.last.board = null; if (show) this.renderScoreboard(); }
 }
 
 function facName(p) { return p.faction === 'hybrid' ? 'Hybrid' : FACTIONS[p.faction].name; }

@@ -1,6 +1,7 @@
 // Menüs: Bildschirmwechsel, Gefecht einrichten, Einstellungen, Kodex, Mehrspieler-Lobby.
 import { FACTIONS, FACTION_IDS, factionUnits, DAMAGE_TABLE, ATTACK_TYPES, ARMOR_TYPES, ECON, KING } from '../sim/data.js';
 import { escapeHtml } from './hud.js';
+import { I } from './icons.js';
 import { PICK_MODES, MODIFIERS, modeCode } from '../sim/modes.js';
 import { ACTS, MISSIONS, TALENTS, GOAL_TEXT, CAMPAIGN_DIFFICULTY, unlockedFactions, missionUnlocked, star3Text } from '../sim/campaign.js';
 
@@ -15,8 +16,14 @@ export class Menus {
       b.addEventListener('click', () => { this.audio.ui('click'); this.go(b.dataset.go, true); });
     });
     document.querySelectorAll('[data-back]').forEach((b) => b.addEventListener('click', () => { this.audio.ui('close'); this.back(); }));
-    document.querySelectorAll('.pill').forEach((b) => b.addEventListener('mouseenter', () => this.audio.ui('hover')));
-    document.querySelectorAll('.menu-nav .pill').forEach((b) => b.addEventListener('mouseenter', () => { $('menu-hint').textContent = b.dataset.hint || ''; }));
+    document.querySelectorAll('.btn, .mnav').forEach((b) => b.addEventListener('mouseenter', () => this.audio.ui('hover')));
+    document.querySelectorAll('.menu-nav .mnav').forEach((b) => {
+      const hint = () => { $('menu-hint').textContent = b.dataset.hint || ''; };
+      b.addEventListener('mouseenter', hint);
+      b.addEventListener('focus', hint);
+    });
+    document.querySelectorAll('.bi.back').forEach((e) => { e.innerHTML = I.back; });
+    document.body.dataset.screen = 'splash';
     $('btn-quit').addEventListener('click', () => this.onQuit());
     $('btn-start').addEventListener('click', () => { this.audio.ui('confirm'); this.onStart(this.setupConfig()); });
     $('btn-resume').addEventListener('click', () => { this.audio.ui('close'); this.onResume(); });
@@ -33,13 +40,14 @@ export class Menus {
   show(id) {
     document.querySelectorAll('#ui > .screen').forEach((s) => s.classList.toggle('active', s.id === `screen-${id}` || (id === 'hud' && s.id === 'hud')));
     this.current = id;
+    document.body.dataset.screen = id;
   }
   /** push=true merkt sich den vorherigen Bildschirm für „Zurück“ */
   go(id, push = false) {
     if (push) this.stack.push(this.current);
     if (id === 'setup') this.refreshSetup();
     if (id === 'campaign') this.refreshCampaign();
-    if (id === 'menu') this.stack = [];
+    if (id === 'menu') { this.stack = []; this.refreshMenuCard(); }
     // Im Spiel bleibt das HUD sichtbar unter den Overlays
     const inGame = this.inGame;
     document.querySelectorAll('#ui > .screen').forEach((s) => {
@@ -47,6 +55,7 @@ export class Menus {
       s.classList.toggle('active', on);
     });
     this.current = id;
+    document.body.dataset.screen = id;
   }
   back() { this.go(this.stack.pop() || (this.inGame ? 'pause' : 'menu')); }
 
@@ -92,7 +101,7 @@ export class Menus {
       el.style.setProperty('--fglow', `${grad[1]}66`);
       let img = '';
       if (f) { const u = factionUnits(id)[0]; img = this.portraits.get(`f|${u.id}`, u.model, f.palette, 1); }
-      el.innerHTML = `<div class="orb">${img ? `<img src="${img}" alt=""/>` : '<span style="font-size:58px">?</span>'}</div>
+      el.innerHTML = `<span class="check">${I.check}</span><div class="orb">${img ? `<img src="${img}" alt=""/>` : '<span>?</span>'}</div>
         <div class="name">${f ? f.name : 'Zufall'}</div><div class="motto">${f ? f.motto : `+${ECON.randomBonusGold} Gold Startbonus`}</div>
         <div class="desc">${f ? f.desc : 'Das Schicksal wählt deine Fraktion – dafür gibt es extra Gold.'}</div>`;
       el.classList.toggle('on', pick === 'ap' ? this.settings.get('faction') === id : id === 'random');
@@ -121,12 +130,30 @@ export class Menus {
     $('mode-code').textContent = code;
     $('mode-desc').textContent = `${PICK_MODES[pick].name}: ${PICK_MODES[pick].desc}${S.get('champions') ? ` · ${MODIFIERS.cc.desc}` : ''}`;
     const D = { easy: 'Leicht', normal: 'Normal', hard: 'Schwer' };
-    $('setup-summary').textContent = `${code} · ${n} gegen ${n} · ${pick === 'ap' ? (f ? f.name : 'Zufallsfraktion') : PICK_MODES[pick].name} · Verbündete ${D[S.get('allyDifficulty')]} · Gegner ${D[S.get('difficulty')]} · ${S.get('waves')} Wellen`;
+    $('setup-summary').innerHTML = `<b>${code}</b> · ${n} gegen ${n} · ${pick === 'ap' ? (f ? f.name : 'Zufallsfraktion') : PICK_MODES[pick].name}<br>Verbündete ${D[S.get('allyDifficulty')]} · Gegner ${D[S.get('difficulty')]} · ${S.get('waves')} Wellen · Tempo ${String(S.get('gameSpeed')).replace('.', ',')}×`;
   }
   setupConfig() {
     const S = this.settings;
     return { teamSize: S.get('teamSize'), faction: S.get('faction'), difficulty: S.get('difficulty'), allyDifficulty: S.get('allyDifficulty'), name: S.get('playerName') || 'Tiry',
       rules: { pickMode: S.get('pickMode'), champions: !!S.get('champions'), maxWaves: S.get('waves') } };
+  }
+
+  // ---------- Hauptmenü: Fortschrittskarte ----------
+  refreshMenuCard() {
+    const box = $('menu-card');
+    if (!box) return;
+    const P = this.progress;
+    const max = MISSIONS.length * 3;
+    const next = MISSIONS.find((m) => missionUnlocked(m.id, P.stars) && !P.stars[m.id]) || MISSIONS.find((m) => m.id === this.settings.get('campMission')) || MISSIONS[0];
+    const act = ACTS[next.act - 1];
+    box.innerHTML = `<div class="eyebrow">Kampagne · ${act.name}</div>
+      <div class="mc-title">${next.title}</div>
+      <div class="mc-sub">Mission ${next.id} von ${MISSIONS.length} · ${next.goal === 'siege' ? 'Belagerung' : 'Halten'} · Wellen ${next.startWave}–${next.endWave}</div>
+      <div class="mc-prog">${I.star}<span>${P.total} / ${max}</span><div class="bar" style="--p:${(P.total / max) * 100}%"><i></i></div></div>
+      <button class="btn small primary" id="btn-menu-continue">${I.play} ${P.total ? 'Weiterspielen' : 'Kampagne beginnen'}</button>`;
+    const b = $('btn-menu-continue');
+    b.addEventListener('mouseenter', () => this.audio.ui('hover'));
+    b.addEventListener('click', () => { this.audio.ui('click'); this.settings.set('campMission', next.id); this.campAct = next.act; this.go('campaign', true); });
   }
 
   // ---------- Kampagne ----------
@@ -135,7 +162,7 @@ export class Menus {
     const sel = MISSIONS.find((m) => m.id === S.get('campMission')) || MISSIONS[0];
     const act = this.campAct || sel.act;
     this.campAct = act;
-    $('star-total').textContent = `★ ${P.total} / ${MISSIONS.length * 3}`;
+    $('star-total').innerHTML = `${I.star} ${P.total} / ${MISSIONS.length * 3}`;
     const tabs = $('act-tabs');
     tabs.innerHTML = '';
     for (const a of ACTS) {
@@ -172,18 +199,18 @@ export class Menus {
     const det = $('camp-detail');
     det.innerHTML = `<h3>Mission ${m.id} · Wellen ${m.startWave}–${m.endWave}</h3><div class="title">${m.title}</div>
       <div class="story">„${m.story}“</div>
-      <div class="goal">${GOAL_TEXT[m.goal]}</div>
+      <div class="goal">${m.goal === 'siege' ? I.siege : I.hold}<span>${GOAL_TEXT[m.goal]}</span></div>
       ${m.mods ? `<div class="mods">${m.mods.map((x) => `<span class="chip">${x}</span>`).join('')}</div>` : ''}
       <div class="stars-list"><b>★</b> Mission gewinnen · <b>★★</b> König mit mind. 50 % Leben · <b>★★★</b> ${star3Text(m.star3)}</div>
-      ${m.tips ? `<div class="tips">${m.tips.map((t) => `◆ ${t}`).join('<br>')}</div>` : ''}
-      <h3>Fraktion</h3><div class="seg" id="camp-fac"></div>
-      <h3>Schwierigkeit</h3><div class="seg" id="camp-diff"></div>
-      <div class="row" style="margin-top:8px"><button class="pill big primary" id="btn-mission" ${open ? '' : 'disabled'}>Mission starten</button></div>`;
+      ${m.tips ? `<div class="tips">${m.tips.map((t) => `<b>◆</b>${t}`).join('<br>')}</div>` : ''}
+      <h3 class="sp">Fraktion</h3><div class="seg" id="camp-fac"></div>
+      <h3 class="sp">Schwierigkeit</h3><div class="seg" id="camp-diff"></div>
+      <div class="row" style="margin-top:10px"><button class="btn big primary" id="btn-mission" ${open ? '' : 'disabled'}>${open ? 'Mission starten' : `${I.lock} Gesperrt`}</button></div>`;
     const facSeg = $('camp-fac');
     for (const f of FACTION_IDS) {
       const b = document.createElement('button');
       const ok = unlocked.includes(f);
-      b.textContent = ok ? FACTIONS[f].name : `🔒 ${FACTIONS[f].name}`;
+      b.innerHTML = ok ? FACTIONS[f].name : `${I.lock}${FACTIONS[f].name}`;
       b.disabled = !ok;
       b.classList.toggle('on', S.get('campFaction') === f);
       b.title = ok ? FACTIONS[f].desc : `Wird mit ${ACTS.find((a) => a.unlock === f)?.name || 'der Kampagne'} freigeschaltet`;
@@ -192,7 +219,7 @@ export class Menus {
     }
     this.seg($('camp-diff'), Object.entries(CAMPAIGN_DIFFICULTY).map(([k, v]) => [k, v.label]), 'campDifficulty');
     $('btn-mission').addEventListener('click', () => { this.audio.ui('confirm'); this.onStartMission(m, { faction: S.get('campFaction'), difficulty: S.get('campDifficulty') }); });
-    $('talents').innerHTML = TALENTS.map((t) => `<span class="talent${P.total >= t.stars ? ' on' : ''}"><b>${t.stars}★</b> ${t.name}: ${t.desc}</span>`).join('');
+    $('talents').innerHTML = TALENTS.map((t) => `<span class="talent${P.total >= t.stars ? ' on' : ''}" title="${t.desc}"><b>${t.stars}★</b> ${t.name} · ${t.desc}</span>`).join('');
   }
 
   // ---------- Einstellungen ----------
@@ -225,6 +252,10 @@ export class Menus {
     const toggle = (key, after) => {
       const t = document.createElement('div');
       t.className = `toggle${S.get(key) ? ' on' : ''}`;
+      t.innerHTML = '<i></i>';
+      t.setAttribute('role', 'switch');
+      t.tabIndex = 0;
+      t.addEventListener('keydown', (e) => { if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); t.click(); } });
       t.addEventListener('click', () => { this.audio.ui('click'); S.set(key, !S.get(key)); t.classList.toggle('on', S.get(key)); after && after(); });
       return t;
     };
@@ -275,7 +306,7 @@ export class Menus {
       row('Schadenszahlen', 'Zeigt jeden Treffer als Zahl (kritische Treffer immer)', toggle('damageNumbers'));
       row('Spieltempo (Einzelspieler)', '', segc('gameSpeed', [[1, '1×'], [1.5, '1,5×'], [2, '2×']]));
       const r = document.createElement('button');
-      r.className = 'pill ghost';
+      r.className = 'btn ghost small';
       r.textContent = 'Alles zurücksetzen';
       r.addEventListener('click', () => { S.reset(); this.renderSettings(); gfx(); this.audio.applySettings && this.audio.applySettings(); });
       row('Standardwerte', '', r);

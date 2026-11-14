@@ -136,23 +136,22 @@ export function createCloudSea(U, noiseTex, steps = 20) {
         float sunAmt = max(dot(rd, uSunDir), 0.0);
         vec2 dxz = normalize(rd.xz + vec2(1e-5));
         float warm = dot(dxz, sdir) * 0.5 + 0.5;
-        vec3 lit = mix(vec3(0.92, 0.74, 0.98), vec3(1.55, 0.86, 0.42), warm);
-        vec3 shade = mix(vec3(0.08, 0.10, 0.34), vec3(0.26, 0.12, 0.34), warm);
+        vec3 lit = mix(vec3(1.15, 1.12, 1.08), vec3(1.8, 1.32, 0.88), warm);
+        vec3 shade = mix(vec3(0.13, 0.20, 0.36), vec3(0.30, 0.28, 0.36), warm);
         float isl = isleShadow(p);
-        float lt = ndl * shadow * (1.0 - isl * 0.8);
+        float lt = ndl * shadow * (1.0 - isl * 0.85);
         vec3 col = mix(shade, lit, smoothstep(0.0, 1.0, lt));
-        // Höhe: Täler violett-tief, Kuppen hell
-        col *= mix(0.30, 1.0, smoothstep(0.0, 0.85, h));
-        // leuchtende Täler (gestreutes Licht)
-        col += vec3(0.55, 0.18, 0.50) * pow(1.0 - h, 3.0) * 0.18;
-        col += vec3(0.10, 0.35, 0.45) * pow(1.0 - h, 6.0) * 0.12;
+        // Höhe: Täler tiefer und kühler, Kuppen hell
+        col *= mix(0.35, 1.0, smoothstep(0.0, 0.8, h));
+        // Streulicht in den Tälern (bläulich)
+        col += vec3(0.08, 0.14, 0.24) * pow(1.0 - h, 3.0) * 0.3;
         // Silberrand im Gegenlicht
         float rim = pow(1.0 - clamp(dot(n, -rd), 0.0, 1.0), 4.0);
-        col += vec3(1.3, 0.75, 0.45) * rim * pow(sunAmt, 4.0) * shadow * 0.9;
+        col += vec3(1.4, 1.0, 0.65) * rim * pow(sunAmt, 4.0) * shadow * 0.8;
         // Sonnenglitzern auf Kuppen
-        col += vec3(1.0, 0.6, 0.35) * pow(sunAmt, 24.0) * smoothstep(0.6, 1.0, h) * 0.5;
-        col *= 0.6;
-        col *= mix(1.0, 0.75, isl);
+        col += vec3(1.0, 0.75, 0.45) * pow(sunAmt, 24.0) * smoothstep(0.6, 1.0, h) * 0.45;
+        col *= 0.78;
+        col *= mix(1.0, 0.7, isl);
         // Dunst zum Horizont
         float dist = length(p - ro);
         float f = 1.0 - exp(-pow(dist * 0.00095, 1.6));

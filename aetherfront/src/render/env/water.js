@@ -68,8 +68,8 @@ export function createWaterfalls(U, falls) {
         float streak2 = vnoise(vec2(q.x * 5.0, q.y * 3.0 - uTime * 0.7));
         float foam = smoothstep(0.45, 0.8, streak * 0.75 + streak2 * 0.4);
         float sideFade = smoothstep(0.0, 0.22, vUv.x - floor(vUv.x)) * smoothstep(1.0, 0.78, vUv.x - floor(vUv.x));
-        vec3 deep = vec3(0.10, 0.42, 0.55);
-        vec3 bright = vec3(0.95, 1.0, 1.05);
+        vec3 deep = vec3(0.16, 0.34, 0.40);
+        vec3 bright = vec3(1.05, 1.08, 1.1);
         vec3 col = mix(deep, bright, foam);
         // Sonnenlicht von oben/hinten, Lippe leuchtet
         float sunAmt = clamp(dot(normalize(vW - cameraPosition), uSunDir), 0.0, 1.0);
@@ -98,7 +98,7 @@ export function createWisps(U, tex, items) {
     vertexShader: /* glsl */ `
       uniform float uTime;
       attribute vec4 wisp; // alpha, kind, seed, stretch
-      varying vec2 vUv; varying vec4 vWisp; varying vec3 vW;
+      varying vec2 vUv; varying vec4 vWisp; varying vec3 vW; varying float vSteep;
       void main() {
         vUv = uv; vWisp = wisp;
         vec3 c = instanceMatrix[3].xyz;
@@ -107,6 +107,8 @@ export function createWisps(U, tex, items) {
         c.x += sin(uTime * 0.05 + seed * 6.28) * 6.0 * (1.0 - wisp.y);
         c.z += cos(uTime * 0.04 + seed * 3.1) * 3.0 * (1.0 - wisp.y);
         vW = c;
+        // Wolkenbänke nur flach über dem Horizont sichtbar (kein Schleier über den Inseln von oben)
+        vSteep = clamp(-normalize(c - cameraPosition).y, 0.0, 1.0);
         float rot = seed * 6.28 + uTime * 0.02 * (seed - 0.5);
         vec2 p = position.xy * vec2(wisp.w, 1.0);
         p = mat2(cos(rot), -sin(rot), sin(rot), cos(rot)) * p;
@@ -120,15 +122,16 @@ export function createWisps(U, tex, items) {
     fragmentShader: /* glsl */ `
       uniform sampler2D uTex;
       uniform float uTime;
-      varying vec2 vUv; varying vec4 vWisp; varying vec3 vW;
+      varying vec2 vUv; varying vec4 vWisp; varying vec3 vW; varying float vSteep;
       ${GLSL_SKY}
       ${GLSL_FOG}
       void main() {
         float a = texture2D(uTex, vUv).a * vWisp.x;
+        a *= mix(1.0 - smoothstep(0.18, 0.5, vSteep) * 0.85, 1.0, vWisp.y);
         if (a < 0.003) discard;
         vec3 d = normalize(vW - cameraPosition);
         float sunAmt = max(dot(d, uSunDir), 0.0);
-        vec3 lit = mix(vec3(0.62, 0.42, 0.62), vec3(1.05, 0.66, 0.48), pow(sunAmt, 2.0));
+        vec3 lit = mix(vec3(0.66, 0.74, 0.86), vec3(1.15, 0.95, 0.74), pow(sunAmt, 2.0));
         vec3 spray = vec3(0.85, 0.95, 1.0);
         vec3 col = mix(lit, spray, vWisp.y) * (0.75 + 0.25 * vUv.y);
         col = applyHaze(col, vW);

@@ -8,11 +8,11 @@ import { rng, fbm2, noise2, smoothstep, lerp, clamp } from './noise.js';
 import { patchMaterial } from './shaders.js';
 import { buildIsland, buildStalactite, buildFloatingRock, superellipse } from './islands.js';
 import {
-  StoneKit, merge, prep, treeTrunkGeometry, treeCanopyGeometry, rockGeometry, grassClumpGeometry, flowerGeometry,
+  StoneKit, merge, prep, treeTrunkGeometry, treeFoliageGeometry, rockGeometry, grassClumpGeometry, flowerGeometry,
   crystalClusterGeometry, crystalShardGeometry, COLORS,
 } from './props.js';
 import { createCrystalMaterial, createPortalMaterial, createRuneMaterial, createSealMaterial, createBeamMaterial, createLightShafts } from './magic.js';
-import { createFlagstoneTextures, createRuneStrip, createSealTexture, createWispTexture } from './textures.js';
+import { createFlagstoneTextures, createGroundTextures, createRockTextures, createLeafAtlas, createRuneStrip, createSealTexture, createWispTexture } from './textures.js';
 import { createWaterfalls, createWisps } from './water.js';
 import { createParticles } from './particles.js';
 import { CLOUD_TOP } from './clouds.js';
@@ -74,9 +74,9 @@ export function buildWorld(U, { anisotropy = 8 } = {}) {
     const n = fbm2(x * 0.045, z * 0.045, 3, seed) * 0.5 + 0.5;
     const n2 = fbm2(x * 0.18, z * 0.18, 2, seed + 7) * 0.5 + 0.5;
     const dry = smoothstep(0.62, 0.8, n2) * 0.6;
-    const r = lerp(0.085, 0.20, n) + dry * 0.12;
-    const g = lerp(0.20, 0.34, n) + dry * 0.05;
-    const b = lerp(0.075, 0.05, n);
+    const r = lerp(0.040, 0.085, n) + dry * 0.07;
+    const g = lerp(0.090, 0.150, n) + dry * 0.035;
+    const b = lerp(0.022, 0.028, n);
     return [r, g, b];
   };
 
@@ -151,7 +151,10 @@ export function buildWorld(U, { anisotropy = 8 } = {}) {
     nearIsles.push(isl.geometry);
     islandDescs.push({ kind: 'hero', cx: HERO.x, cz: HERO.z, topY: HERO.y, height, edgeAt: isl.edgeAt, rimDrop: 1.3 });
   }
-  const islandMat = patchMaterial(new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.93, metalness: 0 }), U, { detail: 1 });
+  const groundTex = createGroundTextures(512), rockTex = createRockTextures(512);
+  for (const t of [groundTex.map, groundTex.normalMap, rockTex.map, rockTex.normalMap]) t.anisotropy = anisotropy;
+  const terrainMaps = { ground: groundTex.map, groundN: groundTex.normalMap, rock: rockTex.map, rockN: rockTex.normalMap };
+  const islandMat = patchMaterial(new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.93, metalness: 0 }), U, { terrain: terrainMaps });
   const islandMesh = new THREE.Mesh(merge(nearIsles.map((g) => { const n = g.toNonIndexed(); return n; })), islandMat);
   islandMesh.castShadow = true;
   islandMesh.receiveShadow = true;
@@ -183,8 +186,8 @@ export function buildWorld(U, { anisotropy = 8 } = {}) {
   };
 
   // ---------- Böden (Bahnen, Brücken, Plateau) ----------
-  const tex = createFlagstoneTextures(512);
-  tex.map.anisotropy = anisotropy; tex.normalMap.anisotropy = anisotropy;
+  const tex = createFlagstoneTextures(1024);
+  tex.map.anisotropy = anisotropy; tex.normalMap.anisotropy = anisotropy; tex.ormMap.anisotropy = anisotropy;
   const fpos = [], fuv = [], fcol = [], fidx = [];
   const addQuadGrid = (pts, nu, nv, colorFn, uvFn) => {
     // pts(u,v) -> [x,y,z]
@@ -210,8 +213,8 @@ export function buildWorld(U, { anisotropy = 8 } = {}) {
       const tint = (x, z, zone) => {
         const a = ao(x);
         const rift = 1 - smoothstep(LANE_Z0, -27, z);
-        let c = zone ? [0.66, 0.77, 1.0] : [1.0, 0.97, 0.93];
-        c = [lerp(c[0], 0.78, rift), lerp(c[1], 0.66, rift), lerp(c[2], 0.98, rift)];
+        let c = zone ? [0.84, 0.90, 1.02] : [1.0, 0.98, 0.95];
+        c = [lerp(c[0], 0.88, rift), lerp(c[1], 0.84, rift), lerp(c[2], 0.96, rift)];
         return [c[0] * a, c[1] * a, c[2] * a];
       };
       const gx0 = lx - (GRID_COLS * CELL) / 2, gx1 = lx + (GRID_COLS * CELL) / 2;
@@ -284,8 +287,9 @@ export function buildWorld(U, { anisotropy = 8 } = {}) {
   floorGeo.setIndex(fidx);
   floorGeo.computeVertexNormals();
   const floorMat = patchMaterial(new THREE.MeshStandardMaterial({
-    map: tex.map, normalMap: tex.normalMap, normalScale: new THREE.Vector2(1.1, 1.1), vertexColors: true, roughness: 0.9, metalness: 0, side: THREE.DoubleSide,
-  }), U);
+    map: tex.map, normalMap: tex.normalMap, normalScale: new THREE.Vector2(1.0, 1.0), aoMap: tex.ormMap, aoMapIntensity: 1.0,
+    roughnessMap: tex.ormMap, roughness: 1.0, vertexColors: true, metalness: 0, side: THREE.DoubleSide,
+  }), U, { floor: true });
   const floor = new THREE.Mesh(floorGeo, floorMat);
   floor.receiveShadow = true;
   floor.name = 'aeth-floors';
@@ -564,8 +568,8 @@ export function buildWorld(U, { anisotropy = 8 } = {}) {
     }
   }
 
-  const stoneMat = patchMaterial(new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.82, metalness: 0 }), U, {
-    emissiveAttr: true, metalAttr: true, detail: 2,
+  const stoneMat = patchMaterial(new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.84, metalness: 0 }), U, {
+    emissiveAttr: true, metalAttr: true, detail: 2, bump: 1.4,
   });
 
   // ---------- Heldenwahrzeichen: Kristallturm + Ringe ----------
@@ -764,7 +768,7 @@ export function buildWorld(U, { anisotropy = 8 } = {}) {
     crystalSpots.push({ x: 40, y: 34 + 120 * 0.1, z: -560, s: 9, rot: 0, c: TEAL_C, tilt: 0 });
     crystalSpots.push({ x: 330, y: 20 + 80 * 0.1, z: -380, s: 6, rot: 1, c: PINK_C, tilt: 0.2 });
   }
-  const farMat = patchMaterial(new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.95 }), U, { clampFar: true, detail: 0.25 });
+  const farMat = patchMaterial(new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.95 }), U, { clampFar: true, terrain: terrainMaps });
   const farMesh = new THREE.Mesh(merge(farGeos.map((g) => {
     for (const k of Object.keys(g.attributes)) if (!['position', 'normal', 'color'].includes(k)) g.deleteAttribute(k);
     return g;
@@ -774,21 +778,17 @@ export function buildWorld(U, { anisotropy = 8 } = {}) {
   root.add(farMesh);
 
   // ---------- Bäume (instanziert) ----------
-  const trunkMat = patchMaterial(new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.9 }), U, { wind: 2 });
-  const canopyMat = patchMaterial(new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.8 }), U, {
-    wind: 2,
-    // weiches Durchscheinen der Krone im Gegenlicht
-    extraFragment: `
-      {
-        vec3 vd = normalize(vHazeWorld - cameraPosition);
-        float back = pow(max(dot(vd, normalize(uSunDir + vec3(0.0, 0.3, 0.0))), 0.0), 3.0);
-        gl_FragColor.rgb += diffuseColor.rgb * back * 0.22;
-      }`,
-  });
+  const trunkMat = patchMaterial(new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.92 }), U, { wind: 2, bark: true });
+  const leafAtlas = createLeafAtlas();
+  leafAtlas.anisotropy = anisotropy;
+  const canopyMat = patchMaterial(new THREE.MeshStandardMaterial({
+    vertexColors: true, map: leafAtlas, alphaTest: 0.5, side: THREE.DoubleSide, roughness: 0.6, metalness: 0,
+  }), U, { wind: 2, foliage: true });
+  canopyMat.shadowSide = THREE.DoubleSide;
   const treeColor = (c, R2) => {
-    if (c === 'blossom') return new THREE.Color().setHSL(0.9 + R2() * 0.06, 0.6, 0.62);
-    if (c === 'gold') return new THREE.Color().setHSL(0.1 + R2() * 0.03, 0.75, 0.5);
-    return new THREE.Color().setHSL(0.24 + R2() * 0.08, 0.55 + R2() * 0.15, 0.30 + R2() * 0.08);
+    if (c === 'blossom') return new THREE.Color().setHSL(0.94 + R2() * 0.03, 0.6, 0.58 + R2() * 0.1);
+    if (c === 'gold') return new THREE.Color().setHSL(0.08 + R2() * 0.03, 0.8, 0.36);
+    return new THREE.Color().setHSL(0.21 + R2() * 0.07, 0.5 + R2() * 0.2, 0.17 + R2() * 0.07);
   };
   const allTrees = [treeSpots[0], treeSpots[1], farTrees.filter((t, i) => i % 3), farTrees.filter((t, i) => !(i % 3))];
   const treeMeshes = [];
@@ -798,7 +798,7 @@ export function buildWorld(U, { anisotropy = 8 } = {}) {
     const list = allTrees[slot];
     if (!list.length) continue;
     const trunk = new THREE.InstancedMesh(treeTrunkGeometry(kind), trunkMat, list.length);
-    const canopy = new THREE.InstancedMesh(treeCanopyGeometry(kind, 3 + kind), canopyMat, list.length);
+    const canopy = new THREE.InstancedMesh(treeFoliageGeometry(kind, 3 + kind + slot), canopyMat, list.length);
     const m = new THREE.Matrix4(), q = new THREE.Quaternion(), e = new THREE.Euler();
     const R2 = rng(31 + slot);
     list.forEach((t, i) => {
@@ -809,7 +809,7 @@ export function buildWorld(U, { anisotropy = 8 } = {}) {
       trunk.setMatrixAt(i, m);
       canopy.setMatrixAt(i, m);
       let col = treeColor(kind === 1 && t.c === 'blossom' ? 'green' : t.c, R2);
-      if (kind === 1) col.offsetHSL(0.06, -0.1, -0.06);
+      if (kind === 1) col.offsetHSL(0.07, -0.15, -0.05);
       canopy.setColorAt(i, col);
     });
     trunk.name = `aeth-trunks-${slot}`; canopy.name = `aeth-canopies-${slot}`;
@@ -822,7 +822,7 @@ export function buildWorld(U, { anisotropy = 8 } = {}) {
   }
 
   // ---------- Felsen ----------
-  const rockMat = patchMaterial(new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.9, flatShading: true }), U, { detail: 2 });
+  const rockMat = patchMaterial(new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.88 }), U, { detail: 2.4, bump: 1.6 });
   {
     const rocks = new THREE.InstancedMesh(rockGeometry(3), rockMat, rockSpots.length);
     const m = new THREE.Matrix4(), q = new THREE.Quaternion();
@@ -830,7 +830,7 @@ export function buildWorld(U, { anisotropy = 8 } = {}) {
       q.setFromEuler(new THREE.Euler(0, r.rot, 0));
       m.compose(new THREE.Vector3(r.x, r.y, r.z), q, new THREE.Vector3(r.s * 1.2, r.s, r.s));
       rocks.setMatrixAt(i, m);
-      rocks.setColorAt(i, new THREE.Color().setHSL(0.75 + (i % 5) * 0.02, 0.08, 0.55 + (i % 3) * 0.06));
+      rocks.setColorAt(i, new THREE.Color().setHSL(0.07 + (i % 5) * 0.01, 0.1, 0.62 + (i % 3) * 0.08));
     });
     rocks.castShadow = true; rocks.receiveShadow = true;
     rocks.computeBoundingSphere();
@@ -906,7 +906,7 @@ export function buildWorld(U, { anisotropy = 8 } = {}) {
       });
     }
     const geo = new RoundedBoxGeometry(0.72, 0.62, 1, 1, 0.14);
-    const mat = patchMaterial(new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.85 }), U, { detail: 2.5 });
+    const mat = patchMaterial(new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.86 }), U, { detail: 2.5, bump: 1.4 });
     const im = new THREE.InstancedMesh(geo, mat, curbs.length);
     const m = new THREE.Matrix4(), q = new THREE.Quaternion();
     const RC = rng(12);
@@ -915,7 +915,7 @@ export function buildWorld(U, { anisotropy = 8 } = {}) {
       m.compose(new THREE.Vector3(c.x, (c.y ?? 0) + 0.2 + RC() * 0.04, c.z), q, new THREE.Vector3(1, 0.9 + RC() * 0.2, c.len));
       im.setMatrixAt(i, m);
       const k = 0.85 + RC() * 0.2;
-      im.setColorAt(i, new THREE.Color(0.55 * k, 0.49 * k, 0.47 * k));
+      im.setColorAt(i, new THREE.Color(0.44 * k, 0.41 * k, 0.38 * k));
     });
     im.castShadow = true; im.receiveShadow = true;
     im.computeBoundingSphere();
@@ -945,7 +945,7 @@ export function buildWorld(U, { anisotropy = 8 } = {}) {
     const RS = rng(4);
     for (let i = spots.length - 1; i > 0; i--) { const j = Math.floor(RS() * (i + 1)); [spots[i], spots[j]] = [spots[j], spots[i]]; }
     const count = Math.min(MAX_GRASS, spots.length);
-    const gmat = patchMaterial(new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.85, side: THREE.DoubleSide }), U, { wind: 1 });
+    const gmat = patchMaterial(new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.7, side: THREE.DoubleSide }), U, { wind: 1, grass: true });
     grass = new THREE.InstancedMesh(grassClumpGeometry(5, 8), gmat, count);
     const m = new THREE.Matrix4(), q = new THREE.Quaternion();
     const col = new THREE.Color();
@@ -957,7 +957,7 @@ export function buildWorld(U, { anisotropy = 8 } = {}) {
       grass.setMatrixAt(i, m);
       const n = fbm2(p.x * 0.045, p.z * 0.045, 3, 11) * 0.5 + 0.5;
       const dry = smoothstep(0.62, 0.8, fbm2(p.x * 0.18, p.z * 0.18, 2, 18) * 0.5 + 0.5);
-      col.setRGB(lerp(0.13, 0.30, n) + dry * 0.18, lerp(0.30, 0.46, n) + dry * 0.05, lerp(0.10, 0.07, n));
+      col.setRGB(lerp(0.050, 0.110, n) + dry * 0.11, lerp(0.115, 0.200, n) + dry * 0.045, lerp(0.022, 0.032, n));
       grass.setColorAt(i, col);
     }
     grass.receiveShadow = true;
@@ -968,7 +968,7 @@ export function buildWorld(U, { anisotropy = 8 } = {}) {
 
     const fcount = Math.min(MAX_FLOWERS, fl.length);
     flowers = new THREE.InstancedMesh(flowerGeometry(), gmat, fcount);
-    const palette = [[1.0, 0.45, 0.7], [1.0, 0.95, 0.85], [0.75, 0.5, 1.0], [1.0, 0.8, 0.3], [0.45, 0.75, 1.0]];
+    const palette = [[0.75, 0.22, 0.38], [0.8, 0.78, 0.72], [0.36, 0.2, 0.62], [0.85, 0.6, 0.08], [0.22, 0.38, 0.85], [0.8, 0.78, 0.72]];
     for (let i = 0; i < fcount; i++) {
       const p = fl[i];
       q.setFromEuler(new THREE.Euler(0, RS() * 6, 0));
@@ -996,7 +996,7 @@ export function buildWorld(U, { anisotropy = 8 } = {}) {
       for (let i = 0; i < 5; i++) add(sx * (70 + (FR() - 0.5) * 70), -8 - FR() * 20, -52 - FR() * 20, 0.6 + FR() * 1.4);
       for (let i = 0; i < 5; i++) add(sx * (70 + (FR() - 0.5) * 60), -6 - FR() * 18, 36 + FR() * 6 + (FR() > 0.5 ? 0 : 30), 0.4 + FR() * 0.8);
     }
-    const mat = patchMaterial(new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.92 }), U, { detail: 1.5 });
+    const mat = patchMaterial(new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.92 }), U, { terrain: terrainMaps });
     const im = new THREE.InstancedMesh(geo, mat, list.length);
     im.castShadow = true; im.receiveShadow = true;
     im.frustumCulled = false;

@@ -215,7 +215,7 @@ export function createLightShafts(U, items, strength = 0.07) {
     uniforms: { uTime: U.uTime, uLightDir: U.uLightDir, uStrength: { value: strength } },
     vertexShader: /* glsl */ `
       uniform vec3 uLightDir;
-      varying vec2 vUv; varying float vSeed; varying float vFace;
+      varying vec2 vUv; varying float vSeed; varying float vFace; varying float vY;
       void main() {
         vec3 c = instanceMatrix[3].xyz;
         float w = length(instanceMatrix[0].xyz), len = length(instanceMatrix[1].xyz);
@@ -226,18 +226,19 @@ export function createLightShafts(U, items, strength = 0.07) {
         vSeed = fract(c.x * 0.137 + c.z * 0.071);
         vFace = (1.0 - abs(dot(A, toCam))) * smoothstep(40.0, 140.0, length(cameraPosition - c));
         vUv = uv;
+        vY = wp.y;
         gl_Position = projectionMatrix * viewMatrix * vec4(wp, 1.0);
       }`,
     fragmentShader: /* glsl */ `
       uniform float uTime; uniform float uStrength;
-      varying vec2 vUv; varying float vSeed; varying float vFace;
+      varying vec2 vUv; varying float vSeed; varying float vFace; varying float vY;
       ${GLSL_NOISE}
       void main() {
         float across = sin(vUv.x * 3.14159); across *= across;
         float along = smoothstep(0.0, 0.3, vUv.y) * smoothstep(1.0, 0.55, vUv.y);
         float n = vnoise(vec2(vUv.x * 4.0 + vSeed * 17.0, vUv.y * 1.5 - uTime * 0.04));
         float flick = 0.75 + 0.25 * sin(uTime * 0.25 + vSeed * 40.0);
-        vec3 col = vec3(1.0, 0.70, 0.42) * across * along * (0.45 + 0.9 * n) * flick * uStrength * vFace;
+        vec3 col = vec3(1.0, 0.80, 0.55) * across * along * (0.45 + 0.9 * n) * flick * uStrength * vFace * smoothstep(-4.0, -22.0, vY);
         gl_FragColor = vec4(col, 1.0);
       }`,
     transparent: true,

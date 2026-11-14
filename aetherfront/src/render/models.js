@@ -2414,23 +2414,51 @@ export function buildModel(archetype, opts = {}) {
 // Materialien
 // ---------------------------------------------------------------------------------------------
 export function createBodyMaterial() {
-  const m = new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 1, metalness: 1, envMapIntensity: 1 });
+  // PBR je Vertex (Attribut 'pbr' = Rauheit/Metall-Faktor), prozedurales Mikro-Relief (Objektraum, mit Abstand
+  // ausgeblendet), Fresnel-Kantenlicht (kühler Himmel + warmer Sonnensaum) und leichte Selbstabschattung in Kuhlen.
+  // Instanzfarbe multipliziert wie gehabt (Werte > 1 = weißes Treffer-Aufblitzen).
+  const m = new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 1, metalness: 1, envMapIntensity: 1.25 });
   m.onBeforeCompile = (sh) => {
     sh.vertexShader = sh.vertexShader
-      .replace('#include <common>', '#include <common>\nattribute vec2 pbr;\nvarying vec2 vPbr;')
-      .replace('#include <begin_vertex>', '#include <begin_vertex>\n\tvPbr = pbr;');
+      .replace('#include <common>', '#include <common>\nattribute vec2 pbr;\nvarying vec2 vPbr;\nvarying vec3 vObjP;')
+      .replace('#include <begin_vertex>', '#include <begin_vertex>\n\tvPbr = pbr;\n\tvObjP = position;');
     sh.fragmentShader = sh.fragmentShader
-      .replace('#include <common>', '#include <common>\nvarying vec2 vPbr;')
-      .replace('#include <roughnessmap_fragment>', 'float roughnessFactor = clamp(roughness * vPbr.x, 0.04, 1.0);')
+      .replace('#include <common>', `#include <common>
+varying vec2 vPbr;
+varying vec3 vObjP;
+float bHash(vec3 p) { p = fract(p * 0.1031); p += dot(p, p.zyx + 31.32); return fract((p.x + p.y) * p.z); }
+float bNoise(vec3 p) {
+  vec3 i = floor(p), f = fract(p); vec3 u = f * f * (3.0 - 2.0 * f);
+  return mix(mix(mix(bHash(i), bHash(i + vec3(1,0,0)), u.x), mix(bHash(i + vec3(0,1,0)), bHash(i + vec3(1,1,0)), u.x), u.y),
+             mix(mix(bHash(i + vec3(0,0,1)), bHash(i + vec3(1,0,1)), u.x), mix(bHash(i + vec3(0,1,1)), bHash(i + vec3(1,1,1)), u.x), u.y), u.z);
+}`)
+      .replace('#include <roughnessmap_fragment>', `float microN = bNoise(vObjP * 22.0) * 0.6 + bNoise(vObjP * 61.0) * 0.4;
+float roughnessFactor = clamp(roughness * vPbr.x * (0.88 + 0.24 * microN), 0.06, 1.0);`)
       .replace('#include <metalnessmap_fragment>', 'float metalnessFactor = clamp(metalness * vPbr.y, 0.0, 1.0);')
+      .replace('#include <normal_fragment_maps>', `#include <normal_fragment_maps>
+	{
+		// Mikro-Relief (Gussstruktur, Stoff, Leder) über Ableitungen – nur aus der Nähe
+		float h = microN;
+		vec3 dpdx = dFdx( - vViewPosition ), dpdy = dFdy( - vViewPosition );
+		float dhx = dFdx( h ), dhy = dFdy( h );
+		vec3 r1 = cross( dpdy, normal ), r2 = cross( normal, dpdx );
+		float det = dot( dpdx, r1 );
+		vec3 grad = sign( det ) * ( dhx * r1 + dhy * r2 );
+		float fade = 1.0 - smoothstep( 25.0, 70.0, length( vViewPosition ) );
+		normal = normalize( abs( det ) * normal - grad * 0.012 * fade );
+	}`)
       .replace('#include <emissivemap_fragment>', `#include <emissivemap_fragment>
 	{
 		vec3 rimV = normalize( vViewPosition );
-		float rimF = pow( 1.0 - clamp( dot( normal, rimV ), 0.0, 1.0 ), 3.0 );
-		totalEmissiveRadiance += rimF * ( diffuseColor.rgb * 0.32 + vec3( 0.04, 0.055, 0.09 ) ) * ( 1.0 - 0.6 * metalnessFactor );
+		float ndv = clamp( dot( normal, -rimV ), 0.0, 1.0 );
+		float rimF = pow( 1.0 - ndv, 3.0 );
+		// kühler Himmelssaum + Farbsaum aus der Albedo (Einheiten lösen sich vom Boden)
+		totalEmissiveRadiance += rimF * ( diffuseColor.rgb * 0.38 + vec3( 0.05, 0.075, 0.13 ) ) * ( 1.0 - 0.5 * metalnessFactor );
+		// leichte Grundaufhellung, damit Einheiten im Schatten lesbar bleiben
+		totalEmissiveRadiance += diffuseColor.rgb * 0.035;
 	}`);
   };
-  m.customProgramCacheKey = () => 'aetherfront-body-pbr-v1';
+  m.customProgramCacheKey = () => 'aetherfront-body-pbr-v2';
   return m;
 }
 

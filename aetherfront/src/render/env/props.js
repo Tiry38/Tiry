@@ -165,23 +165,158 @@ export function treeCanopyGeometry(kind = 0, seed = 3) {
   return merged;
 }
 
+/**
+ * Laubkrone aus Blattkarten (Alpha-getestet, doppelseitig) + dunkle innere Volumen-Kugeln.
+ * Attribute: position, normal (kugelförmig vom Kronenzentrum → weiche Beleuchtung), uv (Atlas; innen uv = -1),
+ * color (Verdeckung: innen/unten dunkler). kind 0 = Laubbaum, 1 = Nadelbaum.
+ */
+export function treeFoliageGeometry(kind = 0, seed = 3) {
+  const R = rng(seed * 7 + 1);
+  const pos = [], nor = [], uv = [], col = [];
+  const center = new THREE.Vector3(0, kind === 0 ? 4.5 : 4.6, 0);
+  const tmp = new THREE.Vector3(), nrm = new THREE.Vector3(), t1 = new THREE.Vector3(), t2 = new THREE.Vector3();
+  const ao = (p) => {
+    const rel = tmp.copy(p).sub(center);
+    const out = kind === 0 ? rel.length() / 2.6 : Math.hypot(rel.x, rel.z) / 2.0;
+    const up = (p.y - (kind === 0 ? 2.6 : 1.6)) / (kind === 0 ? 4.0 : 6.5);
+    return lerp(0.35, 1.08, smoothstep(0.1, 1.0, out * 0.6 + up * 0.55));
+  };
+  const card = (c, normal, size, roll, u0, u1, stretch = 1, droop = 0) => {
+    nrm.copy(normal).normalize();
+    t1.set(0, 1, 0);
+    if (Math.abs(nrm.y) > 0.95) t1.set(1, 0, 0);
+    t2.crossVectors(t1, nrm).normalize();
+    t1.crossVectors(nrm, t2).normalize();
+    const cr = Math.cos(roll), sr = Math.sin(roll);
+    const ax = t2.clone().multiplyScalar(cr).addScaledVector(t1, sr);
+    const ay = t1.clone().multiplyScalar(cr).addScaledVector(t2, -sr);
+    const hw = size * 0.5 * stretch, hh = size * 0.5;
+    const corners = [[-1, -1, 0, 0], [1, -1, 1, 0], [1, 1, 1, 1], [-1, -1, 0, 0], [1, 1, 1, 1], [-1, 1, 0, 1]];
+    for (const [a, b, cu, cv] of corners) {
+      const p = c.clone().addScaledVector(ax, a * hw).addScaledVector(ay, b * hh);
+      if (droop) p.y -= droop * (a * 0.5 + 0.5) * (a * 0.5 + 0.5);
+      pos.push(p.x, p.y, p.z);
+      const sn = tmp.copy(p).sub(center);
+      if (kind === 1) sn.y = sn.y * 0.35 + Math.hypot(sn.x, sn.z) * 0.45 + 0.3;
+      sn.normalize().lerp(nrm, 0.25).normalize();
+      nor.push(sn.x, sn.y, sn.z);
+      uv.push(lerp(u0, u1, cu), cv);
+      const k = ao(p);
+      col.push(k, k, k);
+    }
+  };
+  const blob = (c, r, sx = 1, sy = 0.85) => {
+    const g = new THREE.IcosahedronGeometry(r, 1).toNonIndexed();
+    const p = g.attributes.position;
+    for (let i = 0; i < p.count; i++) {
+      const v = new THREE.Vector3(p.getX(i) * sx, p.getY(i) * sy, p.getZ(i) * sx).add(c);
+      pos.push(v.x, v.y, v.z);
+      const sn = tmp.copy(v).sub(center).normalize();
+      nor.push(sn.x, sn.y, sn.z);
+      uv.push(-1, -1);
+      const k = ao(v) * 0.5;
+      col.push(k, k, k);
+    }
+  };
+  if (kind === 0) {
+    const clusters = [
+      [0, 4.5, 0, 2.2], [1.45, 3.9, 0.55, 1.6], [-1.3, 4.0, -0.45, 1.65], [0.25, 3.8, -1.45, 1.5],
+      [-0.35, 3.9, 1.4, 1.5], [0.4, 5.8, 0.1, 1.5], [-0.95, 5.2, 0.65, 1.2], [1.0, 5.1, -0.8, 1.15],
+    ];
+    for (const [x, y, z, r] of clusters) {
+      const c = new THREE.Vector3(x, y, z);
+      blob(c, r * 0.42);
+      const n = Math.round(r * r * 4.2);
+      for (let i = 0; i < n; i++) {
+        const dir = new THREE.Vector3(R() * 2 - 1, R() * 1.6 - 0.5, R() * 2 - 1).normalize();
+        const cc = c.clone().addScaledVector(dir, r * (0.45 + 0.5 * Math.sqrt(R())));
+        const nn = dir.clone().add(new THREE.Vector3(R() - 0.5, R() - 0.5, R() - 0.5).multiplyScalar(1.4));
+        card(cc, nn, 1.45 + R() * 0.8, R() * Math.PI * 2, 0.0, 0.5);
+      }
+    }
+  } else {
+    const layers = 8;
+    for (let l = 0; l < layers; l++) {
+      const t = l / (layers - 1);
+      const y = 1.9 + t * 6.6;
+      const rad = lerp(2.3, 0.45, Math.pow(t, 0.9));
+      blob(new THREE.Vector3(0, y - 0.2, 0), rad * 0.5, 1, 0.55);
+      const n = Math.max(4, Math.round(9 - t * 4));
+      for (let i = 0; i < n; i++) {
+        const a = (i / n) * Math.PI * 2 + l * 0.7 + R() * 0.4;
+        const len = rad * (1.05 + R() * 0.2);
+        const dir = new THREE.Vector3(Math.cos(a), 0, Math.sin(a));
+        const c = new THREE.Vector3(Math.cos(a) * len * 0.5, y, Math.sin(a) * len * 0.5);
+        // flacher, nach außen hängender Zweig (Karte waagerecht, Länge entlang dir)
+        const nn = new THREE.Vector3(0, 1, 0).addScaledVector(dir, 0.35 + R() * 0.2);
+        const roll = 0;
+        // Karte so ausrichten, dass ihre x-Achse entlang dir zeigt
+        nrm.copy(nn).normalize();
+        const ax = dir.clone().addScaledVector(nrm, -dir.dot(nrm)).normalize();
+        const ay = new THREE.Vector3().crossVectors(nrm, ax).normalize();
+        const hw = len * 0.55, hh = len * 0.32;
+        const corners = [[-1, -1, 0, 0], [1, -1, 1, 0], [1, 1, 1, 1], [-1, -1, 0, 0], [1, 1, 1, 1], [-1, 1, 0, 1]];
+        for (const [aa, bb, cu, cv] of corners) {
+          const p = c.clone().addScaledVector(ax, aa * hw).addScaledVector(ay, bb * hh);
+          p.y -= 0.45 * len * Math.pow(aa * 0.5 + 0.5, 2);
+          pos.push(p.x, p.y, p.z);
+          const sn = new THREE.Vector3(p.x, 0, p.z).normalize().multiplyScalar(0.8).add(new THREE.Vector3(0, 0.6, 0)).normalize();
+          nor.push(sn.x, sn.y, sn.z);
+          uv.push(lerp(0.5, 1.0, cu), cv);
+          const k = ao(p);
+          col.push(k, k, k);
+        }
+        // zweite, schräg stehende Karte für Volumen von der Seite
+        if (i % 2 === 0) card(c.clone().add(new THREE.Vector3(0, -0.15, 0)), new THREE.Vector3(-dir.z, 0.25, dir.x), len * 0.85, roll, 0.5, 1.0, 1.4, 0.35 * len);
+      }
+    }
+    // Spitze
+    card(new THREE.Vector3(0, 8.9, 0), new THREE.Vector3(1, 0.1, 0), 1.6, Math.PI / 2, 0.5, 1.0);
+    card(new THREE.Vector3(0, 8.9, 0), new THREE.Vector3(0, 0.1, 1), 1.6, Math.PI / 2, 0.5, 1.0);
+  }
+  const g = new THREE.BufferGeometry();
+  g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+  g.setAttribute('normal', new THREE.Float32BufferAttribute(nor, 3));
+  g.setAttribute('uv', new THREE.Float32BufferAttribute(uv, 2));
+  g.setAttribute('color', new THREE.Float32BufferAttribute(col, 3));
+  g.computeBoundingSphere();
+  return g;
+}
+
 // ---------- Felsen ----------
 export function rockGeometry(seed = 1) {
-  const g = new THREE.IcosahedronGeometry(1, 2);
-  displace(g, 0.35, 1.1, seed);
-  g.scale(1, 0.72, 1);
-  const ng = g.toNonIndexed();
+  // Findling: Rauschen + einige Schnittebenen (gebrochene Facetten), flache Unterseite
+  const R = rng(seed * 13 + 5);
+  const g = new THREE.IcosahedronGeometry(1, 3);
+  const planes = [];
+  for (let k = 0; k < 7; k++) {
+    const n = new THREE.Vector3(R() * 2 - 1, R() * 1.4 - 0.4, R() * 2 - 1).normalize();
+    planes.push({ n, d: 0.72 + R() * 0.2 });
+  }
+  const p = g.attributes.position;
+  const v = new THREE.Vector3();
+  for (let i = 0; i < p.count; i++) {
+    v.fromBufferAttribute(p, i).normalize();
+    let r = 1 + fbm3(v.x * 1.4 + seed, v.y * 1.4, v.z * 1.4 - seed, 3, seed) * 0.32 + Math.abs(noise3(v.x * 4, v.y * 4, v.z * 4, seed + 3) - 0.5) * 0.12;
+    for (const pl of planes) { const dd = v.dot(pl.n); if (dd > 0.05) r = Math.min(r, pl.d / dd); }
+    v.multiplyScalar(r);
+    v.y *= 0.72;
+    if (v.y < -0.3) v.y = -0.3 + (v.y + 0.3) * 0.15;
+    p.setXYZ(i, v.x, v.y, v.z);
+  }
+  const ng = g.index ? g.toNonIndexed() : g;
   ng.deleteAttribute('uv');
   ng.computeVertexNormals();
-  const p = ng.attributes.position, nr = ng.attributes.normal;
-  const c = new Float32Array(p.count * 3);
-  for (let i = 0; i < p.count; i += 3) {
+  const pp = ng.attributes.position, nr = ng.attributes.normal;
+  const c = new Float32Array(pp.count * 3);
+  for (let i = 0; i < pp.count; i += 3) {
     const ny = (nr.getY(i) + nr.getY(i + 1) + nr.getY(i + 2)) / 3;
-    const y = (p.getY(i) + p.getY(i + 1) + p.getY(i + 2)) / 3;
-    const moss = smoothstep(0.45, 0.8, ny) * smoothstep(-0.2, 0.3, y);
-    const band = 0.9 + 0.1 * Math.sin(y * 9 + seed);
-    const stone = [0.40 * band, 0.35 * band, 0.38 * band];
-    const mc = [0.16, 0.30, 0.10];
+    const y = (pp.getY(i) + pp.getY(i + 1) + pp.getY(i + 2)) / 3;
+    const moss = smoothstep(0.5, 0.85, ny) * smoothstep(-0.1, 0.35, y);
+    const band = 0.92 + 0.08 * Math.sin(y * 9 + seed);
+    const dark = lerp(0.6, 1.0, smoothstep(-0.3, 0.2, y));
+    const stone = [0.42 * band * dark, 0.40 * band * dark, 0.37 * band * dark];
+    const mc = [0.07, 0.12, 0.035];
     for (let k = 0; k < 3; k++) {
       c[(i + k) * 3] = lerp(stone[0], mc[0], moss);
       c[(i + k) * 3 + 1] = lerp(stone[1], mc[1], moss);
@@ -311,8 +446,8 @@ export function crystalShardGeometry() {
 }
 
 // ---------- Steinbaukasten (Ruinen, Brücken, Ringe) ----------
-const STONE = [0.62, 0.56, 0.52];
-const STONE_DARK = [0.42, 0.37, 0.38];
+const STONE = [0.50, 0.47, 0.43];
+const STONE_DARK = [0.31, 0.29, 0.28];
 const GOLD = [1.0, 0.72, 0.36];
 
 export class StoneKit {
@@ -332,7 +467,7 @@ export class StoneKit {
       const n = noise3(x * 1.3 + seed, y * 1.3, z * 1.3, 17);
       const k = 0.85 + 0.25 * n;
       const moss = smoothstep(0.62, 0.9, noise3(x * 0.5, y * 0.8 + 3, z * 0.5, 23)) * 0.6;
-      return [lerp(base[0] * k, 0.2, moss), lerp(base[1] * k, 0.33, moss), lerp(base[2] * k, 0.14, moss)];
+      return [lerp(base[0] * k, 0.07, moss), lerp(base[1] * k, 0.12, moss), lerp(base[2] * k, 0.035, moss)];
     };
   }
   /** Kannelierte Säule; broken = abgebrochene Oberkante */

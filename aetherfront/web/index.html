@@ -9,67 +9,72 @@
 </head>
 <body>
   <canvas id="scene"></canvas>
+  <div id="vignette"></div>
   <div id="floaters"></div>
   <div id="ui">
     <!-- Startbildschirm -->
     <section id="screen-splash" class="screen active">
       <div class="splash-inner">
-        <div class="logo"><span>AETHER</span><span>FRONT</span></div>
-        <div class="tagline">Lane-Defense · Teamkrieg · 4 Fraktionen</div>
-        <div class="press">Klicken oder beliebige Taste drücken</div>
+        <div class="logo">
+          <span class="l1">AETHER</span>
+          <span class="l2"><i></i>FRONT<i></i></span>
+        </div>
+        <div class="tagline">Lane-Defense <b>◆</b> Teamkrieg <b>◆</b> 4 Fraktionen</div>
+        <div class="press"><span class="press-line"></span><span>Klicken oder beliebige Taste drücken</span><span class="press-line"></span></div>
       </div>
     </section>
 
     <!-- Hauptmenü -->
     <section id="screen-menu" class="screen">
       <div class="menu-left">
-        <div class="logo small"><span>AETHER</span><span>FRONT</span></div>
+        <div class="logo small"><span class="l1">AETHER</span><span class="l2"><i></i>FRONT<i></i></span></div>
         <nav class="menu-nav">
-          <button class="pill big primary" data-go="campaign" data-hint="Solo: 15 Missionen gegen den Rissfürsten">Kampagne</button>
-          <button class="pill big" data-go="setup" data-hint="Gegen Bots – 1 gegen 1 bis 4 gegen 4, alle Spielmodi">Gefecht</button>
-          <button class="pill big" data-go="multi" data-hint="Online mit Freunden – Host wählt den Modus">Mehrspieler</button>
-          <button class="pill big" data-go="codex" data-hint="So funktioniert das Spiel">Kodex &amp; Anleitung</button>
-          <button class="pill big" data-go="settings" data-hint="Grafik, Audio, Steuerung">Einstellungen</button>
-          <button class="pill big ghost" id="btn-quit" data-hint="Spiel beenden">Beenden</button>
+          <button class="mnav primary" data-go="campaign" data-hint="Solo: 15 Missionen gegen den Rissfürsten"><span class="ix">01</span><span class="lb">Kampagne</span><span class="arrow"></span></button>
+          <button class="mnav" data-go="setup" data-hint="Gegen Bots – 1 gegen 1 bis 4 gegen 4, alle Spielmodi"><span class="ix">02</span><span class="lb">Gefecht</span><span class="arrow"></span></button>
+          <button class="mnav" data-go="multi" data-hint="Online mit Freunden – Host wählt den Modus"><span class="ix">03</span><span class="lb">Mehrspieler</span><span class="arrow"></span></button>
+          <button class="mnav" data-go="codex" data-hint="So funktioniert das Spiel"><span class="ix">04</span><span class="lb">Kodex &amp; Anleitung</span><span class="arrow"></span></button>
+          <button class="mnav" data-go="settings" data-hint="Grafik, Audio, Steuerung"><span class="ix">05</span><span class="lb">Einstellungen</span><span class="arrow"></span></button>
+          <button class="mnav quiet" id="btn-quit" data-hint="Spiel beenden"><span class="ix">06</span><span class="lb">Beenden</span><span class="arrow"></span></button>
         </nav>
         <div class="menu-hint" id="menu-hint">&nbsp;</div>
       </div>
-      <div class="menu-foot"><span id="version">v0.1</span> · Hintergrund: Live-Gefecht zwischen Bots</div>
+      <aside class="menu-card" id="menu-card"></aside>
+      <div class="menu-foot"><span id="version">v0.1</span><b>◆</b>Hintergrund: Live-Gefecht zwischen Bots</div>
     </section>
 
     <!-- Spiel einrichten -->
     <section id="screen-setup" class="screen panel-screen">
-      <div class="glass panel wide">
-        <header class="panel-head"><h2>Gefecht einrichten</h2><button class="pill ghost" data-go="menu">Zurück</button></header>
+      <div class="panel wide frame">
+        <header class="panel-head">
+          <div class="ttl"><small>Einzelspieler</small><h2>Gefecht einrichten</h2></div>
+          <button class="btn ghost back" data-go="menu"><span class="bi back"></span>Zurück</button>
+        </header>
         <div class="setup-grid">
           <div class="setup-col">
-            <h3>Teams</h3>
-            <div class="seg" id="seg-mode"></div>
-            <h3>Spielmodus <span class="code-badge" id="mode-code">AP</span></h3>
-            <div class="seg" id="seg-pick"></div>
-            <div class="mode-desc" id="mode-desc"></div>
-            <div class="row"><div class="seg" id="seg-cc"></div><div class="seg" id="seg-waves"></div></div>
-            <h3>Verbündete Bots</h3>
-            <div class="seg" id="seg-ally"></div>
-            <h3>Gegnerische Bots</h3>
-            <div class="seg" id="seg-diff"></div>
-            <h3>Dein Name · Spieltempo</h3>
-            <div class="row"><input id="inp-name" class="field" maxlength="16" style="width:200px" /><div class="seg" id="seg-speed"></div></div>
+            <div class="fg"><h3>Teams</h3><div class="seg" id="seg-mode"></div></div>
+            <div class="fg"><h3>Spielmodus <span class="code-badge" id="mode-code">AP</span></h3><div class="seg" id="seg-pick"></div>
+              <div class="mode-desc" id="mode-desc"></div></div>
+            <div class="fg two"><div><h3>Champions</h3><div class="seg" id="seg-cc"></div></div><div><h3>Länge</h3><div class="seg" id="seg-waves"></div></div></div>
+            <div class="fg two"><div><h3>Verbündete Bots</h3><div class="seg" id="seg-ally"></div></div><div><h3>Gegnerische Bots</h3><div class="seg" id="seg-diff"></div></div></div>
+            <div class="fg two"><div><h3>Dein Name</h3><input id="inp-name" class="field" maxlength="16" /></div><div><h3>Spieltempo</h3><div class="seg" id="seg-speed"></div></div></div>
           </div>
           <div class="setup-col grow">
             <h3>Fraktion</h3>
             <div class="factions" id="factions"></div>
           </div>
         </div>
-        <footer class="panel-foot"><div class="setup-summary" id="setup-summary"></div><button class="pill big primary" id="btn-start">Schlacht beginnen</button></footer>
+        <footer class="panel-foot"><div class="setup-summary" id="setup-summary"></div><button class="btn big primary" id="btn-start">Schlacht beginnen</button></footer>
       </div>
     </section>
 
     <!-- Kampagne -->
     <section id="screen-campaign" class="screen panel-screen">
-      <div class="glass panel wide camp-panel">
-        <header class="panel-head"><h2>Chronik des Risses</h2><div class="row"><span class="star-total" id="star-total"></span><button class="pill ghost" data-go="menu">Zurück</button></div></header>
-        <div class="seg" id="act-tabs"></div>
+      <div class="panel wide frame camp-panel">
+        <header class="panel-head">
+          <div class="ttl"><small>Kampagne</small><h2>Chronik des Risses</h2></div>
+          <div class="row"><span class="star-total" id="star-total"></span><button class="btn ghost back" data-go="menu"><span class="bi back"></span>Zurück</button></div>
+        </header>
+        <div class="seg tabs-rail" id="act-tabs"></div>
         <div class="camp-body">
           <div class="camp-map" id="camp-map"></div>
           <div class="camp-detail" id="camp-detail"></div>
@@ -80,21 +85,28 @@
 
     <!-- Mehrspieler -->
     <section id="screen-multi" class="screen panel-screen">
-      <div class="glass panel wide scroll">
-        <header class="panel-head"><h2>Mehrspieler <span class="badge">Vorschau</span></h2><button class="pill ghost" data-go="menu">Zurück</button></header>
-        <p class="lead">Das Spiel ist bereits auf Online-Partien ausgelegt: Alle Aktionen laufen als Befehle über eine
-          deterministische Simulation (Lockstep). Ein kleiner Relay-Server verteilt nur die Befehle – das spart Bandbreite
-          und hält alle Spieler synchron. Leere Plätze übernehmen Bots.</p>
+      <div class="panel wide frame scroll">
+        <header class="panel-head">
+          <div class="ttl"><small>Online</small><h2>Mehrspieler <span class="badge">Vorschau</span></h2></div>
+          <button class="btn ghost back" data-go="menu"><span class="bi back"></span>Zurück</button>
+        </header>
         <div class="multi-grid">
-          <label>Server-Adresse<input id="inp-server" class="field" /></label>
-          <div class="row">
-            <button class="pill" id="btn-mp-create">Raum erstellen</button>
-            <input id="inp-room" class="field short" placeholder="Code" maxlength="5" />
-            <button class="pill" id="btn-mp-join">Beitreten</button>
+          <p class="lead">Das Spiel ist bereits auf Online-Partien ausgelegt: Alle Aktionen laufen als Befehle über eine
+            deterministische Simulation (Lockstep). Ein kleiner Relay-Server verteilt nur die Befehle – das spart Bandbreite
+            und hält alle Spieler synchron. Leere Plätze übernehmen Bots.</p>
+          <div class="mp-connect">
+            <label class="fg"><h3>Server-Adresse</h3><input id="inp-server" class="field" /></label>
+            <div class="fg"><h3>Raum</h3>
+              <div class="row">
+                <button class="btn" id="btn-mp-create">Raum erstellen</button>
+                <input id="inp-room" class="field short" placeholder="CODE" maxlength="5" />
+                <button class="btn" id="btn-mp-join">Beitreten</button>
+              </div>
+            </div>
           </div>
           <div id="mp-lobby" class="mp-lobby"></div>
           <div id="mp-host" class="mp-host"></div>
-          <div class="row"><button class="pill" id="btn-mp-team">Team wechseln</button><button class="pill primary" id="btn-mp-start" disabled>Starten (Host)</button></div>
+          <div class="row mp-actions"><button class="btn" id="btn-mp-team">Team wechseln</button><button class="btn primary" id="btn-mp-start" disabled>Starten (Host)</button></div>
           <p class="fine">Hinweis: Online-Partien sind experimentell. Server lokal starten mit <code>npm run server</code>
             (Port 7710). Für Freunde über das Internet muss der Port weitergeleitet oder ein Server gemietet werden.</p>
         </div>
@@ -103,16 +115,22 @@
 
     <!-- Kodex -->
     <section id="screen-codex" class="screen panel-screen">
-      <div class="glass panel wide scroll">
-        <header class="panel-head"><h2>Kodex</h2><button class="pill ghost" data-back>Zurück</button></header>
+      <div class="panel wide frame scroll">
+        <header class="panel-head">
+          <div class="ttl"><small>Anleitung</small><h2>Kodex</h2></div>
+          <button class="btn ghost back" data-back><span class="bi back"></span>Zurück</button>
+        </header>
         <div id="codex-body" class="codex"></div>
       </div>
     </section>
 
     <!-- Einstellungen -->
     <section id="screen-settings" class="screen panel-screen">
-      <div class="glass panel wide scroll">
-        <header class="panel-head"><h2>Einstellungen</h2><button class="pill ghost" data-back>Zurück</button></header>
+      <div class="panel wide frame scroll settings-panel">
+        <header class="panel-head">
+          <div class="ttl"><small>Optionen</small><h2>Einstellungen</h2></div>
+          <button class="btn ghost back" data-back><span class="bi back"></span>Zurück</button>
+        </header>
         <div class="tabs" id="settings-tabs"></div>
         <div id="settings-body" class="settings"></div>
       </div>
@@ -122,53 +140,67 @@
     <section id="hud" class="screen">
       <div class="hud-top">
         <div class="res-row" id="res-row"></div>
-        <div class="phase glass" id="phase"></div>
-        <div class="kings" id="kings"></div>
+        <div class="battle-head">
+          <div class="kingbar west" id="king-0"></div>
+          <div class="phase" id="phase"></div>
+          <div class="kingbar east" id="king-1"></div>
+        </div>
+        <div class="hud-actions" id="hud-actions"></div>
       </div>
-      <div class="objective" id="objective"></div>
-      <div class="feed" id="feed"></div>
-      <div class="lanes glass" id="lanes"></div>
-      <div class="hud-bottom">
-        <div class="select-card glass" id="select-card"></div>
-        <div class="dock glass" id="build-dock"></div>
-        <div class="side-docks">
-          <div class="dock glass small" id="send-dock"></div>
-          <div class="dock glass small" id="eco-dock"></div>
+      <div class="hud-left">
+        <div class="objective" id="objective"></div>
+        <div class="feed" id="feed"></div>
+      </div>
+      <div class="lanes" id="lanes"></div>
+      <div class="select-card" id="select-card"></div>
+      <div class="console" id="console">
+        <div class="console-wing left">
+          <div class="dock-label"><span>Wirtschaft</span></div>
+          <div class="dock" id="eco-dock"></div>
+          <div class="king-panel" id="king-panel"></div>
+        </div>
+        <div class="console-core">
+          <div class="dock-label core"><span>Kämpfer</span></div>
+          <div class="dock" id="build-dock"></div>
+        </div>
+        <div class="console-wing right">
+          <div class="dock-label"><span>Söldner</span></div>
+          <div class="dock" id="send-dock"></div>
         </div>
       </div>
-      <div class="king-panel glass" id="king-panel"></div>
-      <div class="scoreboard glass" id="scoreboard"></div>
-      <div class="tooltip glass" id="tooltip"></div>
+      <div class="scoreboard" id="scoreboard"></div>
+      <div class="tooltip" id="tooltip"></div>
       <div class="fps" id="fps"></div>
     </section>
 
     <!-- Pause -->
     <section id="screen-pause" class="screen overlay">
-      <div class="glass panel small center">
-        <h2>Pause</h2>
-        <button class="pill big primary" id="btn-resume">Fortsetzen</button>
-        <button class="pill big" data-go="settings">Einstellungen</button>
-        <button class="pill big" data-go="codex">Kodex</button>
-        <button class="pill big ghost" id="btn-surrender">Aufgeben &amp; Hauptmenü</button>
+      <div class="panel small center frame pause-panel">
+        <div class="ttl center"><small>Partie angehalten</small><h2>Pause</h2></div>
+        <button class="btn big primary" id="btn-resume">Fortsetzen</button>
+        <button class="btn big" data-go="settings">Einstellungen</button>
+        <button class="btn big" data-go="codex">Kodex</button>
+        <button class="btn big danger" id="btn-surrender">Aufgeben &amp; Hauptmenü</button>
       </div>
     </section>
 
     <!-- Spielende -->
     <section id="screen-end" class="screen overlay">
-      <div class="glass panel center wide">
+      <div class="end-wrap">
+        <div class="end-rays"></div>
         <div class="end-title" id="end-title"></div>
         <div class="end-sub" id="end-sub"></div>
         <div class="end-stats" id="end-stats"></div>
-        <div class="row center">
-          <button class="pill big primary" id="btn-rematch">Revanche</button>
-          <button class="pill big" id="btn-tomenu">Hauptmenü</button>
+        <div class="row center end-btns">
+          <button class="btn big primary" id="btn-rematch">Revanche</button>
+          <button class="btn big" id="btn-tomenu">Hauptmenü</button>
         </div>
       </div>
     </section>
 
     <div id="banner" class="banner"></div>
     <div id="toast" class="toast"></div>
-    <div id="loading" class="loading"><div class="spinner"></div><div>Welt wird erschaffen …</div></div>
+    <div id="loading" class="loading"><div class="spinner"><i></i><i></i></div><div>Welt wird erschaffen …</div></div>
   </div>
   <script src="game.js"></script>
 </body>

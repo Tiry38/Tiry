@@ -4,8 +4,8 @@ import { rng, fbm2, fbm3, noise2, noise3, smoothstep, lerp, clamp } from './nois
 
 // Gesteinsschichten (linear, warm → violett)
 const STRATA = [
-  [0.46, 0.30, 0.22], [0.58, 0.40, 0.27], [0.36, 0.23, 0.22], [0.50, 0.36, 0.30],
-  [0.30, 0.22, 0.27], [0.62, 0.46, 0.33], [0.40, 0.27, 0.26], [0.27, 0.20, 0.26],
+  [0.36, 0.31, 0.26], [0.45, 0.39, 0.31], [0.29, 0.26, 0.23], [0.40, 0.36, 0.31],
+  [0.27, 0.25, 0.24], [0.49, 0.43, 0.34], [0.33, 0.30, 0.27], [0.25, 0.23, 0.22],
 ];
 
 export function strataColor(y, x, z, seed = 0) {
@@ -71,7 +71,7 @@ export function buildIsland(opts) {
       const g = grassFn(x, z, t);
       // Erdkante
       const soil = smoothstep(0.93, 1.0, t);
-      const sc = [0.30, 0.20, 0.14];
+      const sc = [0.16, 0.11, 0.075];
       col.push(lerp(g[0], sc[0], soil), lerp(g[1], sc[1], soil), lerp(g[2], sc[2], soil));
     }
   }
@@ -104,7 +104,7 @@ export function buildIsland(opts) {
       let c = strataColor(y, x, z, seed);
       // oben noch Erde/Wurzeln, ganz oben Grasüberhang
       const soil = 1 - smoothstep(0.0, 0.1, s);
-      c = [lerp(c[0], 0.26, soil * 0.7), lerp(c[1], 0.17, soil * 0.7), lerp(c[2], 0.12, soil * 0.7)];
+      c = [lerp(c[0], 0.17, soil * 0.7), lerp(c[1], 0.12, soil * 0.7), lerp(c[2], 0.08, soil * 0.7)];
       // Unterseite dunkler (Umgebungsverdeckung)
       const ao = lerp(1.0, 0.55, smoothstep(0.1, 0.9, s));
       col.push(c[0] * ao, c[1] * ao, c[2] * ao);
