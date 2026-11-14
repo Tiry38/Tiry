@@ -33,6 +33,28 @@ Fertige Installer baut GitHub Actions bei jeder Änderung (`.github/workflows/ae
 - **Angriff vs. Rüstung**: 5 Angriffsarten × 5 Rüstungsarten (Tabelle im Kodex im Spiel).
 - **4 Fraktionen** mit je 5 Kämpferlinien × 3 Stufen (60 Kämpfer), 7 Söldner, 30 Wellen mit eigenen Gegnertypen.
 
+## Spielmodi (Gefecht & Online – der Host wählt)
+
+| Kürzel | Modus | Regel |
+| --- | --- | --- |
+| AP | Alle wählen | Jeder wählt seine Fraktion (Zufall = Bonusgold) |
+| AR | Alle zufällig | Zufällige Fraktion für alle, mit Bonusgold |
+| PR | Zufall mit Neu-Würfeln | Zufällige Fraktion + Bonusgold, in der ersten Bauphase einmal neu würfeln |
+| HP | Hybrid | 5 zufällige Kämpferlinien aus allen Fraktionen gemischt |
+| +CC | Champions | Jeder 4. Gegner ist ein Champion (3× Leben, 3× Kopfgeld), Bosse +25 % |
+
+Kombinierbar, z. B. **PRCC** oder **HPCC**. Dazu: Teamgröße 1v1–4v4, 10/20/30 Wellen, Bots für leere Plätze,
+Bot-Stärke getrennt für Verbündete und Gegner.
+
+## Solo-Kampagne „Chronik des Risses“
+
+15 Missionen in 4 Akten. Du hältst deine Bahn wie gewohnt – aber deine **Söldner** schicken sich nicht zu einem
+Mitspieler, sondern stürmen über die Brücke die **Rissfeste** des Rissfürsten Vael’Thar (Rammstoß + Angriff) und
+erhöhen dabei dein Einkommen. Missionsziele: **Belagerung** (Feste zerstören, bevor die letzte Welle vorbei ist)
+oder **Halten** (alle Wellen überstehen). Der Rissfürst schickt eigene Söldner, Missionen haben Modifikatoren
+(Eisenhaut, Champions, enge Schlucht, nur Stufe II, Zeitdruck …). Bis zu 3 Sterne je Mission, Sterne schalten
+8 Talente frei, jeder Akt schaltet eine neue Fraktion frei. 3 Schwierigkeitsgrade.
+
 ## Technik
 
 - `src/sim/` – deterministische Simulation (20 Ticks/s, eigener Zufallsgenerator, Prüfsumme). Bots laufen in der Simulation.
