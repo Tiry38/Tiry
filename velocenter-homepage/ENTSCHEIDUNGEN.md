@@ -186,3 +186,5 @@
 - 14.11.2026: Showroom-Beleuchtung wieder komplett entfernt (Tiry: „mach die beleuchtung wieder weg“). Showrooms wie vorher.
 
 - 14.11.2026: Ausgeblendete Räder/Farben (Bestand-Verwaltung) laufen in keinem Showroom mehr. Ursache: Showroom-Liste wurde nur beim ersten Laden gebaut, spätere Ausblendungen aus der Datenbank kamen nicht an. Jetzt bei jeder Bestandsänderung neu (admRefresh → srBuild).
+
+- 14.11.2026: Kennzahlen E-Dreiräder (Compact Plus + Easy Rider 3) neu: Glas-Leiste mit sanft wanderndem Farbschimmer statt weißer Pillen im Rahmen, neue Linien-Symbole im Stil der Seite (Einstieg, Maßpfeile Länge/Innenbein, Speichenrad, Gewicht, Tacho, Akku), Farbstrich je Wert. Desktop 4 bzw. 3 Spalten, Tablet/Handy 2.
