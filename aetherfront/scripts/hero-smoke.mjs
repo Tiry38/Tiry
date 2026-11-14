@@ -70,10 +70,14 @@ await shot('bauphase-rts');
 // ---------- Windzug-Schwenk ----------
 await ev(() => { window.__app.session.sim.phaseTime = 0.3; });
 await page.waitForFunction(() => window.__app.vmode === 'swoopIn', null, { polling: 30 });
+// Fahrt an festen Punkten anhalten (Software-WebGL ist zu langsam für Echtzeit-Aufnahmen)
 for (const p of [0.2, 0.45, 0.7, 0.9]) {
-  await page.waitForFunction((q) => { const s = window.__app.swoop.active; return !s || s.t / s.dur >= q; }, p, { polling: 20 });
+  await ev((q) => { window.__app.swoop.hold = q; }, p);
+  await page.waitForFunction((q) => { const s = window.__app.swoop.active; return !s || s.t / s.dur >= q - 1e-6; }, p, { polling: 20 });
+  await wait(400);
   await shot(`schwenk-hinein-${Math.round(p * 100)}`);
 }
+await ev(() => { window.__app.swoop.hold = null; });
 await page.waitForFunction(() => window.__app.vmode === 'hero');
 check('Schwenk endet im Heldenblick, Steuerung aktiv', (await ev(() => window.__app.controls.enabled)));
 await page.waitForFunction(() => window.__app.session.sim.freeze <= 0);
@@ -265,9 +269,12 @@ await ev(() => { const s = window.__app.session, h = s.sim.heroOf(0); s.sim.appl
 await page.waitForFunction(() => window.__app.vmode === 'dead' || window.__app.vmode === 'swoopOut', null, { polling: 30 });
 await wait(800);
 await shot('held-gefallen');
+await ev(() => { window.__app.swoop.hold = 0.5; });
 await page.waitForFunction(() => window.__app.vmode === 'swoopOut', null, { polling: 30 });
-await page.waitForFunction(() => { const s = window.__app.swoop.active; return !s || s.t / s.dur > 0.5; }, null, { polling: 20 });
+await page.waitForFunction(() => { const s = window.__app.swoop.active; return !s || s.t / s.dur >= 0.5 - 1e-6; }, null, { polling: 20 });
+await wait(400);
 await shot('schwenk-hinaus-50');
+await ev(() => { window.__app.swoop.hold = null; });
 await page.waitForFunction(() => window.__app.vmode === 'rts');
 await wait(800);
 await shot('vogelperspektive-nach-tod');

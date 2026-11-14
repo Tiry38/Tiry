@@ -381,16 +381,20 @@ ${GLSL_TRI}
     vec3 wp = vHazeWorld; vec3 wn = normalize(vTerrN);
     vec3 vc = vColor.rgb;
     aethW = triW(wn);
-    // --- Felswand (triplanar) mit Gesteinsbändern aus den Vertexfarben
-    vec3 cliff = triTex(uCA, wp, aethW, uCS);
-    float hC = lum3(cliff);
-    vec3 strata = clamp(vc / vec3(0.30, 0.25, 0.19), vec3(0.35), vec3(1.5));
-    vec3 rockCol = cliff * mix(vec3(1.0), strata, 0.55) * uRockTint;
-    // Moos auf Absätzen und in dunklen Spalten der Felswand
-    float mossMask = smoothstep(0.15, 0.7, wn.y) * 0.8 + (0.3 - hC) * 1.2 + (fbm(wp.xz * 0.05 + wp.y * 0.03) - 0.5) * 0.8;
-    ${far ? 'vec3 mossA = vec3(0.3, 0.42, 0.16);' : 'vec3 mossA = texture2D(uMA, wp.xz * uMS + wp.y * 0.07).rgb;'}
-    float mB = hblend(clamp(mossMask, 0.0, 1.0), hC, lum3(mossA), 3.0) * smoothstep(-60.0, -6.0, wp.y);
-    rockCol = mix(rockCol, mossA * vec3(0.55, 0.75, 0.5) * uFoliageTint * min(1.0, vc.g * 4.5 + 0.35), mB * 0.85);
+    // --- Felswand (triplanar) mit Gesteinsbändern aus den Vertexfarben (auf flachen Oberseiten übersprungen)
+    vec3 rockCol = vec3(0.0);
+    float hC = 0.3;
+    if (wn.y < 0.93) {
+      vec3 cliff = triTex(uCA, wp, aethW, uCS);
+      hC = lum3(cliff);
+      vec3 strata = clamp(vc / vec3(0.30, 0.25, 0.19), vec3(0.35), vec3(1.5));
+      rockCol = cliff * mix(vec3(1.0), strata, 0.55) * uRockTint;
+      // Moos auf Absätzen und in dunklen Spalten der Felswand
+      float mossMask = smoothstep(0.15, 0.7, wn.y) * 0.8 + (0.3 - hC) * 1.2 + (fbm(wp.xz * 0.05 + wp.y * 0.03) - 0.5) * 0.8;
+      ${far ? 'vec3 mossA = vec3(0.3, 0.42, 0.16);' : 'vec3 mossA = texture2D(uMA, wp.xz * uMS + wp.y * 0.07).rgb;'}
+      float mB = hblend(clamp(mossMask, 0.0, 1.0), hC, lum3(mossA), 3.0) * smoothstep(-60.0, -6.0, wp.y);
+      rockCol = mix(rockCol, mossA * vec3(0.55, 0.75, 0.5) * uFoliageTint * min(1.0, vc.g * 4.5 + 0.35), mB * 0.85);
+    }
     // --- Oberseite: Waldboden + Erde (Erde an Kanten/Rändern, aus Vertexfarbe + Rauschen)
     vec2 tuv = wp.xz;
     vec3 g = texture2D(uGA, tuv * uGS).rgb;
@@ -486,9 +490,9 @@ ${GLSL_TRI}
   {
     vec3 wp = vHazeWorld; vec3 wn = normalize(vTerrN);
     float nf = 1.0 - smoothstep(${far ? '200.0, 700.0' : '60.0, 260.0'}, length(vViewPosition));
-    vec3 nC = triNrm(uCN, wp, wn, aethW, uCS, 1.3 * nf);
     vec3 nT = ${far ? 'wn' : 'topNrm(uGN, wp.xz * uGS, wn, 1.0 * nf)'};
-    vec3 wN = normalize(mix(nC, nT, aethUp));
+    vec3 wN = nT;
+    if (aethUp < 0.995) wN = normalize(mix(triNrm(uCN, wp, wn, aethW, uCS, 1.3 * nf), nT, aethUp));
     normal = normalize((viewMatrix * vec4(wN, 0.0)).xyz);
   }`;
     }

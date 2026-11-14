@@ -138,7 +138,7 @@ export class HeroesView {
         const busy = s.action && s.action.kind !== 'melee' && s.action.kind !== 'shoot' && this.time - s.action.start < s.action.dur;
         if (busy) break;
         // Fernkampf: Pfeil fliegt sofort → Animation kurz vor dem Loslassen einsetzen
-        this.play(s, kind, { offset: kind === 'shoot' ? ANIM_TIME.shoot.dur * 0.6 : 0 });
+        this.play(s, kind, { offset: kind === 'shoot' ? ANIM_TIME.shoot.dur * 0.4 : 0 });
         break;
       }
       case 'heroCast': {

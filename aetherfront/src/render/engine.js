@@ -53,7 +53,7 @@ const CompositeShader = {
       c = c * (1.0 - uLift) + uLift;
       return toSRGB(clamp(c, 0.0, 1.0));
     }
-    vec3 hdrAt(vec2 uv) { return texture2D(tHDR, uv).rgb + texture2D(tRays, uv).rgb * uRayColor * uRays; }
+    vec3 hdrAt(vec2 uv) { vec3 c = texture2D(tHDR, uv).rgb + texture2D(tRays, uv).rgb * uRayColor * uRays; return (any(isnan(c)) || any(isinf(c))) ? vec3(0.0) : c; }
     float hash(vec2 p) { vec3 p3 = fract(vec3(p.xyx) * 0.1031); p3 += dot(p3, p3.yzx + 33.33); return fract((p3.x + p3.y) * p3.z); }
 
     void main() {
@@ -62,6 +62,7 @@ const CompositeShader = {
       // leichte chromatische Aberration nur zum Rand hin
       vec2 off = d * uAberration * r2 * 4.0;
       vec3 hc = vec3(texture2D(tHDR, vUv + off).r, texture2D(tHDR, vUv).g, texture2D(tHDR, vUv - off).b) + texture2D(tRays, vUv).rgb * uRayColor * uRays;
+      if (any(isnan(hc)) || any(isinf(hc))) hc = vec3(0.0);
       // Kontrast-adaptive Schärfung (AMD-CAS-Prinzip) auf HDR, Gewichte aus wahrnehmungsnaher Luminanz
       if (uSharpen > 0.0) {
         vec3 a = hdrAt(vUv + vec2(0.0, -uTexel.y));
@@ -242,6 +243,13 @@ export class Engine {
       this.ao.updatePdMaterial({ lumaPhi: 10, depthPhi: 2, normalPhi: 3, radius: 6, rings: 2, samples: 12 });
     }
     this.bloom = new UnrealBloomPass(new THREE.Vector2(w / 2, h / 2), this.look.bloom, this.look.bloomRadius, this.look.bloomThreshold);
+    // NaN/∞-Schutz: einzelne defekte Pixel (z. B. aus fehlerhaften Shadern) würden sonst vom Bloom zu riesigen Flecken verschmiert
+    {
+      const hp = this.bloom.materialHighPassFilter;
+      hp.fragmentShader = hp.fragmentShader.replace('vec4 texel = texture2D( tDiffuse, vUv );',
+        'vec4 texel = texture2D( tDiffuse, vUv ); if (any(isnan(texel)) || any(isinf(texel))) texel = vec4(0.0); texel = min(texel, vec4(256.0));');
+      hp.needsUpdate = true;
+    }
     this.bloom.enabled = this.settings.get('bloom') && q.bloom;
     this.size = { w, h };
   }

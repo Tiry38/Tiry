@@ -15,6 +15,7 @@ Eigene Welt, eigene Fraktionen und Figuren – alle Grafiken, Modelle, Musik und
 | Windows-Installer bauen | `npm run dist` → `dist/Aetherfront-Setup-*.exe` |
 | Tests (Regeln, Determinismus, Online-Sync) | `npm test` |
 | Rauchtest mit Screenshots | `npm run smoke` (Playwright) |
+| Echte CC0-Texturen/HDRIs laden | `node scripts/fetch-assets.mjs` → `web/assets/` (Lizenzen: `web/assets/LICENSES.md`, Art Bible: `docs/ART-BIBLE.md`) |
 | Mehrspieler-Server (Vorschau) | `npm run server` (Port 7710) |
 
 Fertige Installer baut GitHub Actions bei jeder Änderung (`.github/workflows/aetherfront-windows.yml`, Artefakt

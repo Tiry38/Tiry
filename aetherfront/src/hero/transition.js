@@ -154,6 +154,8 @@ export class Swoop {
     const A = this.active;
     if (!A) return false;
     A.t += dt;
+    // Testhilfe (Rauchtest): Fahrt an einem Punkt anhalten, um einzelne Momente aufzunehmen
+    if (this.hold != null) A.t = Math.min(A.t, this.hold * A.dur);
     const x = Math.min(1, A.t / A.dur);
     const u = A.kind === 'in' ? easeDive(x) : easeRip(x);
     const end = A.to();
