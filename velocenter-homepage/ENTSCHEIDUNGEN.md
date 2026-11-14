@@ -167,3 +167,6 @@
 ## 14.11.2026 – Ticker: Bosch auf einer Linie, 300+ hervorgehoben (Tiry)
 - Bosch-Pille saß tiefer: Grundlinie kam vom leeren Logo-Element. Jetzt Pille inline-block auf Text-Grundlinie, Logo als ::before (auf den Ring zugeschnitten).
 - „300+“ goldgelb #FFC83D, 1,14-fach, Leuchten (Klasse `tkn`).
+
+## 14.11.2026 – Ticker: Bosch-Pille umschließt nur die Großbuchstaben
+- Pille als ::after mit top .02em / bottom .1em (ohne Unterlängen-Raum), Text bleibt auf der Grundlinie → keine optische Verschiebung nach unten mehr.
