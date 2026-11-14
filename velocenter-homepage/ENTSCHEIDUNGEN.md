@@ -170,3 +170,6 @@
 
 ## 14.11.2026 – Ticker: Bosch-Pille umschließt nur die Großbuchstaben
 - Pille als ::after mit top .02em / bottom .1em (ohne Unterlängen-Raum), Text bleibt auf der Grundlinie → keine optische Verschiebung nach unten mehr.
+
+## 14.11.2026 – Ticker-Trenner neu (Tiry: ✦ wirkt wie KI-Wasserzeichen)
+- ✦ ersetzt durch schrägen Doppel-Leuchtstrich (Verlauf Weiß → Gold → Orange, zweiter Strich halbtransparent, leichtes Leuchten), reines CSS am leeren `em`.
