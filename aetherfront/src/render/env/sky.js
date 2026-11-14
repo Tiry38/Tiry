@@ -54,8 +54,8 @@ export function createSky(U, { forEnv = false } = {}) {
         col = mix(col, cirCol, cir * 0.55);
         // Sonnenscheibe (HDR -> Bloom)
         float disc = smoothstep(0.99935, 0.99972, sd);
-        col += vec3(28.0, 17.0, 9.0) * disc * (uEnv > 0.5 ? 0.12 : 1.0);
-        col += vec3(1.0, 0.6, 0.3) * pow(max(sd, 0.0), 900.0) * 3.0;
+        col += vec3(16.0, 10.0, 5.0) * disc * (uEnv > 0.5 ? 0.15 : 1.0);
+        col += vec3(1.0, 0.6, 0.3) * pow(max(sd, 0.0), 1200.0) * 1.6;
         // leichter Dither gegen Banding
         col += (hash12(gl_FragCoord.xy + fract(uTime) * 61.0) - 0.5) / 255.0;
         gl_FragColor = vec4(col, 1.0);

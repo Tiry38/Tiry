@@ -42,13 +42,17 @@ test('Online-Lockstep: zwei Clients über den Relay-Server bleiben synchron', as
   a.send({ t: 'slot', team: 0, faction: 'orden' });
   b.send({ t: 'slot', team: 1, faction: 'abgrund' });
   await new Promise((r) => setTimeout(r, 100));
+  a.send({ t: 'config', config: { pickMode: 'pr', champions: true, waves: 20, bots: true, botDifficulty: 'hard' } });
+  b.send({ t: 'config', config: { pickMode: 'ar' } }); // kein Host → ignoriert
+  await a.wait((m) => m.t === 'lobby' && m.config.pickMode === 'pr');
   a.send({ t: 'start' });
   const [sa, sb] = await Promise.all([a.wait((m) => m.t === 'start'), b.wait((m) => m.t === 'start')]);
   assert.equal(sa.setup.seed, sb.setup.seed);
   assert.notEqual(sa.you, sb.you);
+  assert.deepEqual(sa.setup.rules, { pickMode: 'pr', champions: true, maxWaves: 20 });
   const na = new NetSession(a, sa), nb = new NetSession(b, sb);
-  na.submit({ type: 'build', unit: 'orden_squire_1', col: 2, row: 1 });
-  nb.submit({ type: 'build', unit: 'abgrund_shade_1', col: 3, row: 1 });
+  na.submit({ type: 'build', unit: na.sim.players[sa.you].lines[0], col: 2, row: 1 });
+  nb.submit({ type: 'build', unit: nb.sim.players[sb.you].lines[1], col: 3, row: 1 });
   const t0 = Date.now();
   while (Date.now() - t0 < 1500) {
     na.update(0.05); nb.update(0.05);
@@ -61,8 +65,8 @@ test('Online-Lockstep: zwei Clients über den Relay-Server bleiben synchron', as
   for (let i = 0; i < 40 && na.sim.tick !== nb.sim.tick; i++) { ahead.update(0.05); await new Promise((r) => setTimeout(r, 30)); }
   assert.equal(na.sim.tick, nb.sim.tick);
   assert.equal(na.sim.hash(), nb.sim.hash());
-  assert.equal(na.sim.fightersOf(0).length, 1);
-  assert.equal(nb.sim.fightersOf(1).length, 1);
+  assert.equal(na.sim.fightersOf(sa.you).length, 1);
+  assert.equal(nb.sim.fightersOf(sb.you).length, 1);
   assert.equal(na.desync, null);
   a.close(); b.close(); srv.close();
 });

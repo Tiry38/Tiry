@@ -18,7 +18,7 @@ function createRelayServer({ port = 7710, log = console.log } = {}) {
   const code = () => { let s; do { s = Math.random().toString(36).slice(2, 7).toUpperCase(); } while (rooms.has(s)); return s; };
 
   function lobbyState(room) {
-    return { t: 'lobby', room: room.code, host: room.host, mode: room.mode, started: room.started,
+    return { t: 'lobby', room: room.code, host: room.host, mode: room.mode, started: room.started, config: room.config,
       players: room.clients.map((c) => ({ id: c.id, name: c.name, team: c.team, faction: c.faction })) };
   }
 
@@ -31,14 +31,16 @@ function createRelayServer({ port = 7710, log = console.log } = {}) {
       for (const t of [0, 1]) {
         const c = byTeam[t][i];
         if (c) { c.pid = players.length; players.push({ name: c.name, team: t, faction: c.faction, bot: false }); }
-        else players.push({ name: `Bot ${players.length + 1}`, team: t, faction: 'random', bot: true, difficulty: 'normal' });
+        else if (room.config.bots) players.push({ name: `Bot ${players.length + 1}`, team: t, faction: 'random', bot: true, difficulty: room.config.botDifficulty || 'normal' });
       }
     }
     room.started = true;
     room.tick = 0;
     room.pending = new Map();
     room.hashes = new Map();
-    const setup = { seed: (Math.random() * 2 ** 31) | 0, players };
+    const c = room.config;
+    const rules = { pickMode: c.pickMode || 'ap', champions: !!c.champions, maxWaves: c.waves || 30 };
+    const setup = { seed: (Math.random() * 2 ** 31) | 0, players, rules };
     for (const c of room.clients) send(c.ws, { t: 'start', setup, you: c.pid ?? -1, version: PROTOCOL_VERSION });
     room.timer = setInterval(() => {
       const cmds = room.pending.get(room.tick) || [];
@@ -72,7 +74,8 @@ function createRelayServer({ port = 7710, log = console.log } = {}) {
       switch (m.t) {
         case 'hello': client.name = String(m.name || 'Spieler').slice(0, 20); break;
         case 'create': {
-          const r = { code: code(), host: client.id, clients: [client], mode: Math.min(4, Math.max(1, m.mode | 0 || 2)), started: false };
+          const r = { code: code(), host: client.id, clients: [client], mode: Math.min(4, Math.max(1, m.mode | 0 || 2)), started: false,
+            config: { pickMode: 'ap', champions: false, waves: 30, bots: true, botDifficulty: 'normal' } };
           rooms.set(r.code, r); client.room = r; send(ws, lobbyState(r)); break;
         }
         case 'join': {
@@ -82,7 +85,27 @@ function createRelayServer({ port = 7710, log = console.log } = {}) {
           r.clients.push(client); broadcast(r, lobbyState(r)); break;
         }
         case 'slot': if (room && !room.started) { client.team = m.team === 1 ? 1 : 0; client.faction = String(m.faction || 'random'); broadcast(room, lobbyState(room)); } break;
-        case 'start': if (room && !room.started && room.host === client.id) startRoom(room); break;
+        case 'config': {
+          // Nur der Host bestimmt Modus, Teamgröße, Wellen und Bots
+          if (!room || room.started || room.host !== client.id) break;
+          const c = m.config || {};
+          if (['ap', 'ar', 'pr', 'hp'].includes(c.pickMode)) room.config.pickMode = c.pickMode;
+          if (typeof c.champions === 'boolean') room.config.champions = c.champions;
+          if ([10, 20, 30].includes(c.waves)) room.config.waves = c.waves;
+          if (typeof c.bots === 'boolean') room.config.bots = c.bots;
+          if (['easy', 'normal', 'hard'].includes(c.botDifficulty)) room.config.botDifficulty = c.botDifficulty;
+          if (c.mode >= 1 && c.mode <= 4 && room.clients.length <= c.mode * 2) room.mode = c.mode;
+          broadcast(room, lobbyState(room));
+          break;
+        }
+        case 'start': {
+          if (!room || room.started || room.host !== client.id) break;
+          const teams = [0, 1].map((t) => room.clients.filter((c) => c.team === t).length);
+          if (!room.config.bots && (teams[0] === 0 || teams[1] === 0)) { send(ws, { t: 'error', reason: 'Ohne Bots braucht jedes Team mindestens einen Spieler' }); break; }
+          if (teams[0] > room.mode || teams[1] > room.mode) { send(ws, { t: 'error', reason: 'Ein Team hat zu viele Spieler' }); break; }
+          startRoom(room);
+          break;
+        }
         case 'cmd': {
           if (!room || !room.started || client.pid == null || !m.cmd || typeof m.cmd.type !== 'string') break;
           const t = room.tick + INPUT_DELAY;

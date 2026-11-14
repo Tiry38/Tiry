@@ -10,6 +10,19 @@ import {
   GRID_COLS, GRID_ROWS, LANE_WIDTH, LANE_SPAWN_Z, LANE_END_Z, laneCenterX, kingPos, cellCenter, slotsForTeamSize,
 } from './layout.js';
 import { botThink } from './ai.js';
+import { FACTION_LINES } from './data.js';
+
+// Regeln einer Partie (Standard = Versus wie im Original; Kampagne/Modi überschreiben einzelne Werte)
+export const DEFAULT_RULES = {
+  pickMode: 'ap',          // ap = Alle wählen, ar = Alle zufällig, pr = Zufall mit einmal Neu-Würfeln, hp = Hybrid
+  champions: false,        // CC: Champions in jeder Welle
+  startWave: 1, maxWaves: ECON.maxWaves,
+  startGold: ECON.startGold, startAether: ECON.startAether, startIncome: ECON.startIncome, startWorkers: ECON.startWorkers,
+  buildTimeFirst: ECON.buildTimeFirst, buildTime: ECON.buildTime,
+  waveHpMul: 1, waveDmgMul: 1, waveArmorAdd: 0, bountyMul: 1, sendCostMul: 1,
+  gridRows: 8, maxTier: 3, kingHpMul: 1,
+  campaign: null,          // { goal: 'siege'|'survive', citadelHp, citadelRegen, citadelDmg, siegeMul, enemySends: [{wave, send, count}] }
+};
 
 export const TICK_RATE = 20;
 export const DT = 1 / TICK_RATE;
@@ -24,12 +37,21 @@ export class Sim {
    */
   constructor(setup) {
     this.setup = JSON.parse(JSON.stringify(setup));
+    const R = (this.rules = { ...DEFAULT_RULES, ...(setup.rules || {}) });
     this.rng = new Rng(setup.seed || 1);
     this.tick = 0;
     this.time = 0;
     this.phase = 'build';
-    this.wave = 1;
-    this.phaseTime = ECON.buildTimeFirst;
+    this.wave = R.startWave;
+    this.phaseTime = R.buildTimeFirst;
+    this.campaign = R.campaign;
+    this.siegeQueue = [];
+    // Wellen mit Modifikatoren & Champions vorbereiten
+    this.waves = WAVES.map((w) => {
+      const d = { ...w, key: `w${w.n}`, hp: Math.round(w.hp * R.waveHpMul * (w.boss && R.champions ? 1.25 : 1)), dmg: w.dmg * R.waveDmgMul, armor: w.armor + R.waveArmorAdd, bounty: Math.max(1, Math.round(w.bounty * R.bountyMul)) };
+      d.champ = w.boss ? null : { ...d, key: `w${w.n}c`, champion: true, name: `Champion: ${w.name}`, hp: d.hp * 3, dmg: d.dmg * 1.6, armor: d.armor + 2, bounty: d.bounty * 3, size: 1.3 };
+      return d;
+    });
     this.battleTime = 0;
     this.rage = false;
     this.winner = -1;
@@ -45,15 +67,25 @@ export class Sim {
     this.players = setup.players.map((ps, id) => {
       const slots = slotsForTeamSize(teamCounts[ps.team]);
       let faction = ps.faction;
+      if (R.pickMode === 'ar' || R.pickMode === 'pr') faction = 'random';
+      if (R.pickMode === 'hp') faction = 'hybrid';
       let bonus = 0;
-      if (!faction || faction === 'random' || !FACTIONS[faction]) {
-        faction = FACTION_IDS[this.rng.int(FACTION_IDS.length)];
+      let lines;
+      if (faction === 'hybrid') {
+        lines = this.rollHybrid();
         bonus = ECON.randomBonusGold;
+      } else {
+        if (!faction || faction === 'random' || !FACTIONS[faction]) {
+          faction = FACTION_IDS[this.rng.int(FACTION_IDS.length)];
+          bonus = ECON.randomBonusGold;
+        }
+        lines = FACTION_LINES[faction].slice();
       }
       return {
         id, name: ps.name || `Spieler ${id + 1}`, team: ps.team, slot: slots[slotIdx[ps.team]++],
-        faction, bot: !!ps.bot, difficulty: ps.difficulty || 'normal', randomed: bonus > 0,
-        gold: ECON.startGold + bonus, aether: ECON.startAether, income: ECON.startIncome, workers: ECON.startWorkers,
+        faction, lines, bot: !!ps.bot, difficulty: ps.difficulty || 'normal', randomed: bonus > 0,
+        rerolls: R.pickMode === 'pr' ? 1 : 0,
+        gold: R.startGold + bonus + (ps.bonusGold || 0), aether: R.startAether, income: R.startIncome + (ps.bonusIncome || 0), workers: R.startWorkers + (ps.bonusWorkers || 0),
         ready: false, sendQueue: [], botTimer: 0.6 + id * 0.17,
         stats: { leaks: 0, kills: 0, sent: 0, sentValue: 0, leaked: 0 },
         connected: true,
@@ -65,15 +97,29 @@ export class Sim {
     }
     this.teams = [0, 1].map((t) => {
       const k = kingPos(t);
+      const camp = this.campaign && t === 1;
+      const hp = camp ? this.campaign.citadelHp : Math.round(KING.hp * R.kingHpMul * (1 + (setup.kingBonus?.[t] || 0)));
       return {
         id: t,
         king: {
-          x: k.x, z: k.z, hp: KING.hp, maxHp: KING.hp, regen: KING.regen, dmgMul: 1, armor: KING.armor,
-          levels: { hp: 0, dmg: 0, regen: 0 }, heals: KING.heals, healCd: 0, atkCd: 0, alive: true,
+          x: k.x, z: k.z, hp, maxHp: hp, regen: camp ? (this.campaign.citadelRegen || 0) : KING.regen, dmgMul: camp ? (this.campaign.citadelDmg || 1) : 1, armor: KING.armor,
+          levels: { hp: 0, dmg: 0, regen: 0 }, heals: camp ? 0 : KING.heals + (setup.extraHeals?.[t] || 0), maxHeals: camp ? 0 : KING.heals + (setup.extraHeals?.[t] || 0), healCd: 0, atkCd: 0, alive: true, citadel: camp,
         },
       };
     });
   }
+
+  /** Hybrid-Baumeister: 5 zufällige Kämpferlinien aus allen Fraktionen, mind. 2 Frontkämpfer */
+  rollHybrid() {
+    const all = FACTION_IDS.flatMap((f) => FACTION_LINES[f]);
+    const front = all.filter((id) => ['tank', 'melee', 'assassin'].includes(UNITS[id].role));
+    const pick = [];
+    while (pick.length < 2) { const u = front[this.rng.int(front.length)]; if (!pick.includes(u)) pick.push(u); }
+    while (pick.length < 5) { const u = all[this.rng.int(all.length)]; if (!pick.includes(u)) pick.push(u); }
+    return pick;
+  }
+  waveDef(n = this.wave) { return this.waves[Math.min(this.waves.length, Math.max(1, n)) - 1]; }
+  sendCost(s) { return Math.round(s.cost * this.rules.sendCostMul); }
 
   // ---------- Hilfen ----------
   emit(e) { this.events.push(e); }
@@ -88,7 +134,7 @@ export class Sim {
     for (const e of this.entities.values()) if (e.type === 'f' && e.owner === pid && e.col === col && e.row === row) return false;
     return true;
   }
-  workerCost(p) { return ECON.workerCost + ECON.workerCostStep * Math.max(0, p.workers - ECON.startWorkers); }
+  workerCost(p) { return ECON.workerCost + ECON.workerCostStep * Math.max(0, p.workers - this.rules.startWorkers); }
   sendAvailable(s) { return this.wave >= s.unlock; }
   armyValue(pid) { let v = 0; for (const f of this.fightersOf(pid)) v += UNITS[f.def].value; return v; }
 
@@ -105,6 +151,7 @@ export class Sim {
       case 'king': return this.cmdKing(p, cmd);
       case 'heal': return this.cmdHeal(p);
       case 'ready': p.ready = true; this.checkReady(); return true;
+      case 'reroll': return this.cmdReroll(p);
       case 'leave': p.connected = false; p.bot = true; return true; // Bot übernimmt (Online)
       default: return false;
     }
@@ -114,7 +161,8 @@ export class Sim {
   cmdBuild(p, { unit, col, row }) {
     const def = UNITS[unit];
     if (this.phase !== 'build') return this.fail(p, 'Bauen nur in der Bauphase');
-    if (!def || def.faction !== p.faction || def.tier !== 1) return this.fail(p, 'Unbekannte Einheit');
+    if (!def || !p.lines.includes(def.id)) return this.fail(p, 'Unbekannte Einheit');
+    if (row >= this.rules.gridRows) return this.fail(p, 'Dieses Feld ist gesperrt');
     if (!(col >= 0 && col < GRID_COLS && row >= 0 && row < GRID_ROWS) || (col | 0) !== col || (row | 0) !== row) return this.fail(p, 'Ungültiges Feld');
     if (!this.cellFree(p.id, col, row)) return this.fail(p, 'Feld belegt');
     if (p.gold < def.cost) return this.fail(p, 'Nicht genug Gold');
@@ -140,7 +188,7 @@ export class Sim {
     if (!f || f.type !== 'f' || f.owner !== p.id) return this.fail(p, 'Keine eigene Einheit');
     const cur = UNITS[f.def];
     const next = cur.upgradeTo && UNITS[cur.upgradeTo];
-    if (!next) return this.fail(p, 'Höchste Stufe erreicht');
+    if (!next || next.tier > this.rules.maxTier) return this.fail(p, 'Höchste Stufe erreicht');
     if (p.gold < next.cost) return this.fail(p, 'Nicht genug Gold');
     p.gold -= next.cost;
     f.def = next.id; f.hp = next.hp; f.maxHp = next.hp;
@@ -162,10 +210,17 @@ export class Sim {
     const s = SEND_BY_ID[send];
     if (!s) return this.fail(p, 'Unbekannter Söldner');
     if (!this.sendAvailable(s)) return this.fail(p, `Ab Welle ${s.unlock}`);
-    if (p.aether < s.cost) return this.fail(p, 'Nicht genug Äther');
-    p.aether -= s.cost;
+    const cost = this.sendCost(s);
+    if (p.aether < cost) return this.fail(p, 'Nicht genug Äther');
+    p.aether -= cost;
     p.income += s.income;
-    p.stats.sent++; p.stats.sentValue += s.cost;
+    p.stats.sent++; p.stats.sentValue += cost;
+    if (this.campaign) {
+      // Solo: Söldner stürmen die Rissfeste des Gegners
+      this.siegeQueue.push({ send: s.id, from: p.id });
+      this.emit({ e: 'send', pid: p.id, to: -1, send: s.id, income: s.income });
+      return true;
+    }
     const target = this.players[p.opponent];
     target.sendQueue.push({ send: s.id, from: p.id });
     this.emit({ e: 'send', pid: p.id, to: target.id, send: s.id, income: s.income });
@@ -203,6 +258,17 @@ export class Sim {
     const amt = Math.round(k.maxHp * KING.healPct);
     k.hp = Math.min(k.maxHp, k.hp + amt);
     this.emit({ e: 'kingHeal', team: p.team, pid: p.id, amount: amt });
+    return true;
+  }
+  cmdReroll(p) {
+    if (p.rerolls <= 0) return this.fail(p, 'Kein Neu-Würfeln verfügbar');
+    if (this.wave !== this.rules.startWave || this.phase !== 'build') return this.fail(p, 'Nur in der ersten Bauphase');
+    if (this.fightersOf(p.id).length) return this.fail(p, 'Erst alle Kämpfer verkaufen');
+    p.rerolls--;
+    const others = FACTION_IDS.filter((f) => f !== p.faction);
+    p.faction = others[this.rng.int(others.length)];
+    p.lines = FACTION_LINES[p.faction].slice();
+    this.emit({ e: 'reroll', pid: p.id, faction: p.faction });
     return true;
   }
   checkReady() {
@@ -249,8 +315,16 @@ export class Sim {
   }
 
   startWave() {
-    const w = WAVES[this.wave - 1];
+    const w = this.waveDef();
     this.phase = 'battle';
+    // Kampagne: der Rissfürst schickt eigene Söldner
+    if (this.campaign) {
+      for (const es of this.campaign.enemySends || []) {
+        if (es.wave !== this.wave) continue;
+        for (const p of this.players) for (let i = 0; i < (es.count || 1); i++) p.sendQueue.push({ send: es.send, from: -1 });
+        this.emit({ e: 'enemySend', wave: this.wave, send: es.send, count: es.count || 1 });
+      }
+    }
     this.battleTime = 0;
     this.rage = false;
     for (const p of this.players) p.ready = false;
@@ -264,7 +338,8 @@ export class Sim {
         const n = Math.min(perRow, w.count - r * perRow);
         const x = lx + (c - (n - 1) / 2) * 2.2 + this.rng.range(-0.3, 0.3);
         const z = LANE_SPAWN_Z + 1 - r * 1.8;
-        this.spawnCreep(p.id, w, x, z, { bounty: w.bounty, wave: true });
+        const def = this.rules.champions && w.champ && i % 4 === 3 ? w.champ : w;
+        this.spawnCreep(p.id, def, x, z, { bounty: def.bounty, wave: true });
       }
       // Söldner der Gegner
       p.sendQueue.forEach((q, i) => {
@@ -275,13 +350,27 @@ export class Sim {
       });
       p.sendQueue = [];
     }
+    // Kampagne: eigene Söldner marschieren vom Brückenkopf zur Rissfeste
+    if (this.campaign && this.siegeQueue.length) {
+      const k = this.teams[1].king;
+      const siegeMul = this.campaign.siegeMul || 3;
+      this.siegeQueue.forEach((q, i) => {
+        const s = SEND_BY_ID[q.send];
+        const def = { ...s, key: s.id, dmg: s.dmg * siegeMul };
+        const x = k.x + ((i % 6) - 2.5) * 2.2, z = k.z - 30 - Math.floor(i / 6) * 2.2;
+        const c = this.spawnCreep(this.players[0].id, def, x, z, { bounty: 0, from: q.from, wave: false });
+        c.team = 1; c.stage = 'king'; c.siege = true;
+      });
+      this.emit({ e: 'siege', count: this.siegeQueue.length });
+      this.siegeQueue = [];
+    }
     this.emit({ e: 'waveStart', wave: this.wave, name: w.name, boss: w.boss });
   }
 
   spawnCreep(lanePid, def, x, z, { bounty, from = -1, wave }) {
     const lp = this.players[lanePid];
     const c = {
-      id: this.nextId++, type: 'c', lane: lanePid, team: lp.team, def, defId: def.id || `w${def.n}`, isSend: !wave, from,
+      id: this.nextId++, type: 'c', lane: lanePid, team: lp.team, def, defId: def.key || def.id, isSend: !wave, from,
       x, z, hp: def.hp, maxHp: def.hp, alive: true, cd: this.rng.range(0, 0.4), target: 0, stage: 'lane', bounty,
       stun: 0, slowPct: 0, slowT: 0, cursePct: 0, curseT: 0, face: 0, atkT: -9,
     };
@@ -310,14 +399,19 @@ export class Sim {
       this.emit({ e: 'income', pid: p.id, amount: p.income });
     }
     this.emit({ e: 'waveEnd', wave: this.wave, leaks });
-    if (this.wave >= ECON.maxWaves) {
+    if (this.wave >= this.rules.maxWaves) {
+      if (this.campaign) {
+        if (this.campaign.goal === 'siege') this.finish(1, 'Die Rissfeste steht noch – der Riss hat sich geschlossen');
+        else this.finish(0, 'Alle Wellen überstanden');
+        return;
+      }
       const r = this.teams.map((t) => t.king.hp / t.king.maxHp);
       this.finish(r[0] === r[1] ? -1 : r[0] > r[1] ? 0 : 1, 'Entscheidung nach der letzten Welle');
       return;
     }
     this.wave++;
     this.phase = 'build';
-    this.phaseTime = ECON.buildTime;
+    this.phaseTime = this.rules.buildTime;
   }
 
   finish(winner, reason) {
@@ -535,17 +629,29 @@ export class Sim {
     const reach = c.def.range + KING_RADIUS + 0.4;
     c.face = Math.atan2(k.x - c.x, k.z - c.z);
     if (dist > reach) { this.moveToward(c, k.x, k.z, c.def.speed * 1.6 * (1 - c.slowPct)); return; }
+    // Kampagne: Söldner rammen die Rissfeste beim Eintreffen (Wucht abhängig vom Söldnerwert)
+    if (c.siege && !c.impacted) {
+      c.impacted = true;
+      const imp = c.def.cost * (this.campaign.impactMul || 14);
+      this.emit({ e: 'siegeImpact', x: c.x, z: c.z, dmg: Math.round(imp) });
+      this.hurtKing(c.team, imp, c.id);
+    }
     if (c.cd <= 0 && k.alive) {
       c.cd = c.def.cd; c.atkT = this.time;
       const mult = DAMAGE_TABLE[c.def.atk].festung;
-      const dmg = c.def.dmg * mult * (1 - armorReduction(k.armor));
-      k.hp -= dmg;
-      this.emit({ e: 'kingHit', team: c.team, dmg, id: c.id });
-      if (k.hp <= 0 && k.alive) {
-        k.hp = 0; k.alive = false;
-        this.emit({ e: 'kingDeath', team: c.team });
-        this.finish(1 - c.team, 'Der gegnerische König ist gefallen');
-      }
+      this.hurtKing(c.team, c.def.dmg * mult * (1 - armorReduction(k.armor)), c.id);
+    }
+  }
+
+  hurtKing(team, dmg, srcId) {
+    const k = this.teams[team].king;
+    if (!k.alive || this.phase === 'over') return;
+    k.hp -= dmg;
+    this.emit({ e: 'kingHit', team, dmg, id: srcId });
+    if (k.hp <= 0) {
+      k.hp = 0; k.alive = false;
+      this.emit({ e: 'kingDeath', team });
+      this.finish(1 - team, k.citadel ? 'Die Rissfeste ist gefallen' : 'Der gegnerische König ist gefallen');
     }
   }
 
@@ -637,7 +743,8 @@ export class Sim {
     e.alive = false; e.hp = 0;
     if (e.type === 'c') {
       this.entities.delete(e.id);
-      if (e.stage === 'king' || (src && src.type === 'k')) {
+      if (e.siege) { /* von der Rissfeste vernichtet – kein Gold */ }
+      else if (e.stage === 'king' || (src && src.type === 'k')) {
         const team = this.players.filter((p) => p.team === e.team);
         const share = Math.max(1, Math.floor((e.bounty * ECON.kingShare) / Math.max(1, team.length)));
         for (const p of team) { p.gold += share; this.emit({ e: 'gold', pid: p.id, amount: share, x: e.x, z: e.z }); }
@@ -646,7 +753,7 @@ export class Sim {
         p.gold += e.bounty; p.stats.kills++;
         this.emit({ e: 'gold', pid: p.id, amount: e.bounty, x: e.x, z: e.z });
       }
-      this.emit({ e: 'death', id: e.id, x: e.x, z: e.z, type: 'c', model: e.def.model, boss: !!e.def.boss });
+      this.emit({ e: 'death', id: e.id, x: e.x, z: e.z, type: 'c', model: e.def.model, boss: !!e.def.boss, champion: !!e.def.champion });
     } else {
       this.emit({ e: 'death', id: e.id, x: e.x, z: e.z, type: 'f', model: UNITS[e.def].model });
     }

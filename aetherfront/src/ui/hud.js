@@ -63,7 +63,8 @@ export class Hud {
     const sim = session.sim;
     const me = sim.players[session.localPid];
     this.me = me;
-    const fac = FACTIONS[me.faction];
+    const fac = FACTIONS[me.faction] || { grad: ['#ff8a3a', '#ff4fa3', '#7a5cff'] };
+    this.camp = sim.campaign;
     // Ressourcen
     const rr = $('res-row');
     rr.innerHTML = '';
@@ -77,22 +78,37 @@ export class Hud {
     const ks = $('kings');
     ks.innerHTML = '';
     for (const t of [0, 1]) {
-      const el = h('div', 'king', `<div class="ring" id="k-ring-${t}"></div><div class="meta"><b>${t === me.team ? 'Dein König' : 'Feindkönig'}</b><small id="k-meta-${t}"></small></div>`);
+      const label = t === me.team ? 'Dein König' : sim.teams[t].king.citadel ? 'Rissfeste' : 'Feindkönig';
+      const el = h('div', 'king', `<div class="ring" id="k-ring-${t}"></div><div class="meta"><b>${label}</b><small id="k-meta-${t}"></small></div>`);
       el.addEventListener('click', () => this.onFocusKing(t));
       ks.appendChild(el);
     }
     // Bau-Leiste
+    this.buildBuildDock();
+    this.buildRest(session);
+  }
+
+  buildBuildDock() {
+    const me = this.me;
     const bd = $('build-dock');
     bd.innerHTML = '';
-    this.buildCards = factionUnits(me.faction).map((u) => {
-      const c = h('div', 'card', `<span class="hk">${u.hotkey}</span><img src="${this.unitPortrait(u)}" alt=""/><span class="cost g">${u.cost}</span>`);
-      c.style.setProperty('--cbg', `radial-gradient(circle at 50% 30%, ${fac.grad[0]}55, ${fac.grad[2]}33 70%)`);
+    this.buildCards = me.lines.map((id, i) => {
+      const u = UNITS[id];
+      const g = FACTIONS[u.faction].grad;
+      const hk = ['Q', 'W', 'E', 'R', 'T'][i];
+      const c = h('div', 'card', `<span class="hk">${hk}</span><img src="${this.unitPortrait(u)}" alt=""/><span class="cost g">${u.cost}</span>`);
+      c.style.setProperty('--cbg', `radial-gradient(circle at 50% 30%, ${g[0]}55, ${g[2]}33 70%)`);
       c.addEventListener('click', () => { this.audio.ui('click'); this.onPlace(u); });
       c.addEventListener('mouseenter', () => { this.audio.ui('hover'); this.tip(c, this.unitTip(u)); });
       c.addEventListener('mouseleave', () => this.tip(null));
       bd.appendChild(c);
-      return { u, el: c };
+      return { u, el: c, hk };
     });
+  }
+
+  buildRest(session) {
+    const sim = session.sim;
+    const me = this.me;
     // Söldner
     const sd = $('send-dock');
     sd.innerHTML = '';
@@ -126,15 +142,17 @@ export class Hud {
     const ln = $('lanes');
     ln.innerHTML = '';
     this.laneRows = sim.players.slice().sort((a, b) => a.team - b.team || a.slot - b.slot).map((p) => {
-      const t1 = factionUnits(p.faction)[0];
+      const t1 = UNITS[p.lines[0]];
       const el = h('div', `lane-btn${p.id === me.id ? ' me' : ''}`, `<div class="dot" style="background-image:url(${this.unitPortrait(t1)});box-shadow:0 0 0 2px ${TEAM_COLORS[p.team]}"></div><span class="nm">${escapeHtml(p.name)}</span><span class="lk"></span>`);
       el.addEventListener('click', () => { this.audio.ui('click'); this.onFocusLane(p.id); });
-      el.addEventListener('mouseenter', () => this.tip(el, `<h5>${escapeHtml(p.name)}</h5>${FACTIONS[p.faction].name}${p.randomed ? ' (Zufall)' : ''} · Team ${p.team === 0 ? 'West' : 'Ost'}<br><span class="muted">Klicken: Kamera zur Bahn</span>`));
+      el.addEventListener('mouseenter', () => this.tip(el, `<h5>${escapeHtml(p.name)}</h5>${facName(p)}${p.randomed ? ' (Zufall)' : ''} · Team ${p.team === 0 ? 'West' : 'Ost'}<br><span class="muted">Klicken: Kamera zur Bahn</span>`));
       el.addEventListener('mouseleave', () => this.tip(null));
       ln.appendChild(el);
       return { p, el, lk: el.querySelector('.lk') };
     });
     $('feed').innerHTML = '';
+    const ob = $('objective');
+    ob.classList.toggle('show', !!this.camp);
     this.setSelected(null);
     this.refresh(true);
   }
@@ -172,9 +190,9 @@ export class Hud {
       `<div class="muted" style="margin-top:6px">Aufwertung: ${chain.map((c) => c.name).join(' → ')}</div>`;
   }
   sendTip(s) {
-    return `<h5>${s.name} <span class="muted">· Söldner</span></h5>Läuft mit der nächsten Welle in die Bahn deines Gegners.<br>` +
+    return `<h5>${s.name} <span class="muted">· Söldner</span></h5>${this.camp ? `Marschiert mit der nächsten Welle gegen die Rissfeste und rammt sie (${s.cost * (this.camp.impactMul || 14)} Wucht).` : 'Läuft mit der nächsten Welle in die Bahn deines Gegners.'}<br>` +
       `<div class="stats"><span class="chip">❤ <b>${s.hp}</b></span><span class="chip">⚔ <b>${s.dmg}</b></span><span class="chip">${ATTACK_TYPES[s.atk].name}</span><span class="chip">🛡 ${ARMOR_TYPES[s.armorType].name}</span></div>` +
-      `<div style="margin-top:6px">Kosten <b style="color:var(--aether)">${s.cost} Äther</b> · Einkommen <b style="color:var(--good)">+${s.income}</b></div>` +
+      `<div style="margin-top:6px">Kosten <b style="color:var(--aether)">${this.session.sim.sendCost(s)} Äther</b> · Einkommen <b style="color:var(--good)">+${s.income}</b></div>` +
       (this.session.sim.wave < s.unlock ? `<div class="muted">Verfügbar ab Welle ${s.unlock}</div>` : '');
   }
 
@@ -183,12 +201,13 @@ export class Hud {
     if (!anchor) { t.classList.remove('show'); this.tipFor = null; return; }
     t.innerHTML = html;
     t.classList.add('show');
+    const z = window.__uiZoom || 1;
     const r = anchor.getBoundingClientRect();
-    const tw = t.offsetWidth, th = t.offsetHeight;
+    const tw = t.offsetWidth * z, th = t.offsetHeight * z;
     let x = r.left + r.width / 2 - tw / 2, y = r.top - th - 14;
     if (y < 8) y = r.bottom + 14;
     x = Math.max(8, Math.min(window.innerWidth - tw - 8, x));
-    t.style.left = `${x}px`; t.style.top = `${y}px`;
+    t.style.left = `${x / z}px`; t.style.top = `${y / z}px`;
     this.tipFor = anchor;
   }
 
@@ -216,13 +235,13 @@ export class Hud {
     if (!force && key === this.lastSelKey) return;
     this.lastSelKey = key;
     const own = isF && e.owner === this.me.id;
-    const por = isF ? this.unitPortrait(def) : this.portraits.get(`c|${def.id || `w${def.n}`}`, def.model, def.palette, def.boss ? 3 : 2);
+    const por = isF ? this.unitPortrait(def) : this.portraits.get(`c|${def.key || def.id}`, def.model, def.palette, def.boss || def.champion ? 3 : 2);
     const next = isF && def.upgradeTo ? UNITS[def.upgradeTo] : null;
     const refund = isF ? (e.fresh ? def.value : Math.floor(def.value * ECON.sellRefund)) : 0;
     const build = sim.phase === 'build';
     card.innerHTML = `<div class="por"><img src="${por}" alt=""/></div><div class="info">
       <div class="nm">${def.name} ${isF ? `<span class="stars">${'★'.repeat(def.tier)}</span>` : ''}</div>
-      <div class="sub">${isF ? `${FACTIONS[def.faction].name} · ${def.roleLabel} · Wert ${def.value}` : (e.isSend ? 'Söldner' : `Welle ${def.n}`)}${isF && !own ? ` · ${escapeHtml(sim.players[e.owner].name)}` : ''}</div>
+      <div class="sub">${isF ? `${FACTIONS[def.faction].name} · ${def.roleLabel} · Wert ${def.value}` : (e.isSend ? 'Söldner' : `${def.champion ? 'Champion · ' : ''}Welle ${def.n}`)}${isF && !own ? ` · ${escapeHtml(sim.players[e.owner].name)}` : ''}</div>
       <div class="stats"><span class="chip">❤ <b>${fmt(e.hp)}</b>/${fmt(e.maxHp)}</span><span class="chip">⚔ <b>${def.dmg}</b> / ${def.cd}s</span><span class="chip">${ATTACK_TYPES[def.atk].name}</span><span class="chip">🛡 ${ARMOR_TYPES[def.armorType].name} ${def.armor}</span></div>
       ${isF ? abilityText(def.abil).map((a) => `<div class="abil">◆ ${a}</div>`).join('') : ''}
       ${own ? `<div class="sel-actions">
@@ -266,8 +285,11 @@ export class Hud {
     const me = this.me;
     switch (e.e) {
       case 'error': if (e.pid === me.id) { this.toast(e.reason); this.audio.ui('error'); } break;
+      case 'reroll': if (e.pid === me.id) { this.buildBuildDock(); this.feed(`Neu gewürfelt: ${FACTIONS[e.faction].name}`, 'good'); this.phaseKey = null; } break;
+      case 'enemySend': this.feed(`Der Rissfürst schickt dir ${e.count}× ${SENDS.find((x) => x.id === e.send).name}!`, 'send'); break;
+      case 'siege': this.feed(`${e.count} Söldner stürmen die Rissfeste`, 'good'); break;
       case 'waveStart': {
-        const w = WAVES[e.wave - 1];
+        const w = sim.waveDef(e.wave);
         this.banner(e.boss ? w.name.toUpperCase() : `WELLE ${e.wave}`, e.boss ? `Bosswelle ${e.wave}` : w.name, e.boss);
         break;
       }
@@ -280,7 +302,7 @@ export class Hud {
       case 'send': {
         const s = SENDS.find((x) => x.id === e.send);
         if (e.to === me.id) this.feed(`${escapeHtml(sim.players[e.pid].name)} schickt dir: ${s.name}`, 'send');
-        else if (e.pid === me.id) this.feed(`${s.name} geschickt · Einkommen +${s.income}`, 'good');
+        else if (e.pid === me.id) this.feed(`${s.name} ${e.to < 0 ? 'rückt gegen die Rissfeste aus' : 'geschickt'} · Einkommen +${s.income}`, 'good');
         break;
       }
       case 'king': if (sim.players[e.pid].team === me.team) this.feed(`${escapeHtml(sim.players[e.pid].name)}: ${KING.upgrades[e.up].name} Stufe ${e.level}`, 'good'); break;
@@ -328,17 +350,25 @@ export class Hud {
     this.ready = true;
 
     // Phase
-    const w = WAVES[sim.wave - 1];
+    const w = sim.waveDef();
     const ph = $('phase');
     const tleft = Math.max(0, Math.ceil(sim.phaseTime));
-    const total = sim.wave === 1 ? ECON.buildTimeFirst : ECON.buildTime;
-    const key = `${sim.wave}|${sim.phase}|${build ? tleft : Math.floor(sim.battleTime)}|${me.ready}`;
+    const total = sim.wave === sim.rules.startWave ? sim.rules.buildTimeFirst : sim.rules.buildTime;
+    const canReroll = build && me.rerolls > 0 && sim.wave === sim.rules.startWave;
+    const key = `${sim.wave}|${sim.phase}|${build ? tleft : Math.floor(sim.battleTime)}|${me.ready}|${canReroll}`;
     if (key !== this.phaseKey) {
       this.phaseKey = key;
-      ph.innerHTML = `<div class="wave"><b>Welle ${sim.wave} / ${ECON.maxWaves}</b><small>${w ? w.name : ''}${w && w.boss ? ' · BOSS' : ''}${w ? ` · ${w.count}× · 🛡 ${ARMOR_TYPES[w.armorType].name} · ⚔ ${ATTACK_TYPES[w.atk].name}${w.ranged ? ' (Fernkampf)' : ''}` : ''}</small></div>
+      ph.innerHTML = `<div class="wave"><b>Welle ${sim.wave} / ${sim.rules.maxWaves}</b><small>${w ? w.name : ''}${w && w.boss ? ' · BOSS' : ''}${w ? ` · ${w.count}× · 🛡 ${ARMOR_TYPES[w.armorType].name} · ⚔ ${ATTACK_TYPES[w.atk].name}${w.ranged ? ' (Fernkampf)' : ''}` : ''}</small></div>
         <span class="tag ${build ? 'build' : 'battle'}">${build ? 'Bauphase' : sim.phase === 'over' ? 'Ende' : 'Kampf'}</span>
         <div class="timer">${build ? ringSvg(tleft / total, '#7ae8ff', 54, 4) : ringSvg(1, '#ff5a6a', 54, 4)}<span>${build ? tleft : '⚔'}</span></div>
+        ${canReroll ? '<button class="pill ready" id="btn-reroll">Neu würfeln</button>' : ''}
         ${build && !me.ready ? '<button class="pill primary ready" id="btn-ready">Bereit <span class="key">↵</span></button>' : ''}`;
+      const rr = ph.querySelector('#btn-reroll');
+      if (rr) {
+        rr.addEventListener('click', () => { this.audio.ui('confirm'); this.submit({ type: 'reroll' }); });
+        rr.addEventListener('mouseenter', () => this.tip(rr, '<h5>Neu würfeln (PR-Modus)</h5>Einmal pro Partie in der ersten Bauphase: du bekommst eine andere zufällige Fraktion. Vorher alle Kämpfer verkaufen.'));
+        rr.addEventListener('mouseleave', () => this.tip(null));
+      }
       const rb = ph.querySelector('#btn-ready');
       if (rb) rb.addEventListener('click', () => { this.audio.ui('confirm'); this.submit({ type: 'ready' }); });
     }
@@ -359,7 +389,8 @@ export class Hud {
     for (const c of this.buildCards) c.el.classList.toggle('off', !build || me.gold < c.u.cost);
     for (const c of this.sendCards) {
       const locked = sim.wave < c.s.unlock;
-      c.el.classList.toggle('off', locked || me.aether < c.s.cost);
+      c.el.classList.toggle('off', locked || me.aether < sim.sendCost(c.s));
+      c.el.querySelector('.cost').textContent = sim.sendCost(c.s);
       const l = c.el.querySelector('.lock');
       l.style.display = locked ? 'grid' : 'none';
       if (locked) l.textContent = `ab W${c.s.unlock}`;
@@ -378,6 +409,15 @@ export class Hud {
       ku.el.classList.toggle('off', lv >= ku.u.max || me.aether < cost);
     }
 
+    // Kampagnenziel
+    if (this.camp) {
+      const c = sim.teams[1].king;
+      const left = sim.rules.maxWaves - sim.wave + (sim.phase === 'build' ? 1 : 0);
+      const txt = this.camp.goal === 'siege'
+        ? `Ziel: Rissfeste zerstören · <b>${fmt(c.hp)}</b> Leben übrig · noch ${left} Welle${left === 1 ? '' : 'n'}`
+        : `Ziel: bis Welle ${sim.rules.maxWaves} halten · noch ${left} Welle${left === 1 ? '' : 'n'} · Rissfeste ${Math.round((c.hp / c.maxHp) * 100)} %`;
+      if (txt !== this.last.obj) { this.last.obj = txt; $('objective').innerHTML = txt; }
+    }
     // Bahnen
     for (const r of this.laneRows) {
       const v = sim.armyValue(r.p.id);
@@ -397,10 +437,12 @@ export class Hud {
   renderScoreboard() {
     const sim = this.session.sim;
     const rows = sim.players.slice().sort((a, b) => a.team - b.team || a.slot - b.slot).map((p) =>
-      `<tr class="t${p.team}${p.id === this.me.id ? ' me' : ''}"><td>${escapeHtml(p.name)}${p.bot ? ' <span class="muted">(Bot)</span>' : ''}</td><td>${FACTIONS[p.faction].name}</td><td>${fmt(sim.armyValue(p.id))}</td><td>${p.income}</td><td>${p.workers}</td><td>${p.stats.sent}</td><td>${p.stats.kills}</td><td>${p.stats.leaks}</td></tr>`).join('');
+      `<tr class="t${p.team}${p.id === this.me.id ? ' me' : ''}"><td>${escapeHtml(p.name)}${p.bot ? ' <span class="muted">(Bot)</span>' : ''}</td><td>${facName(p)}</td><td>${fmt(sim.armyValue(p.id))}</td><td>${p.income}</td><td>${p.workers}</td><td>${p.stats.sent}</td><td>${p.stats.kills}</td><td>${p.stats.leaks}</td></tr>`).join('');
     $('scoreboard').innerHTML = `<table><tr><th>Spieler</th><th>Fraktion</th><th>Armeewert</th><th>Einkommen</th><th>Funken</th><th>Gesendet</th><th>Besiegt</th><th>Durchbrüche</th></tr>${rows}</table>`;
   }
   showScoreboard(show) { $('scoreboard').classList.toggle('show', show); if (show) this.renderScoreboard(); }
 }
+
+function facName(p) { return p.faction === 'hybrid' ? 'Hybrid' : FACTIONS[p.faction].name; }
 
 export function escapeHtml(s) { return String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }

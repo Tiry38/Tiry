@@ -171,6 +171,7 @@ function buildUnits() {
   return units;
 }
 export const UNITS = buildUnits();
+export const FACTION_LINES = Object.fromEntries(Object.keys(LINES).map((f) => [f, LINES[f].map((l) => `${f}_${l.key}_1`)]));
 export function factionUnits(fid) {
   return Object.values(UNITS).filter((u) => u.faction === fid && u.tier === 1).sort((a, b) => a.lineIndex - b.lineIndex);
 }

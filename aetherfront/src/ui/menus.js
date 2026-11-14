@@ -1,12 +1,14 @@
 // Menüs: Bildschirmwechsel, Gefecht einrichten, Einstellungen, Kodex, Mehrspieler-Lobby.
 import { FACTIONS, FACTION_IDS, factionUnits, DAMAGE_TABLE, ATTACK_TYPES, ARMOR_TYPES, ECON, KING } from '../sim/data.js';
 import { escapeHtml } from './hud.js';
+import { PICK_MODES, MODIFIERS, modeCode } from '../sim/modes.js';
+import { ACTS, MISSIONS, TALENTS, GOAL_TEXT, CAMPAIGN_DIFFICULTY, unlockedFactions, missionUnlocked, star3Text } from '../sim/campaign.js';
 
 const $ = (id) => document.getElementById(id);
 
 export class Menus {
-  constructor({ settings, audio, portraits, onStart, onResume, onSurrender, onRematch, onToMenu, onQuit, onApplyGraphics, onMultiplayerStart }) {
-    Object.assign(this, { settings, audio, portraits, onStart, onResume, onSurrender, onRematch, onToMenu, onQuit, onApplyGraphics, onMultiplayerStart });
+  constructor({ settings, audio, portraits, progress, onStart, onStartMission, onResume, onSurrender, onRematch, onToMenu, onQuit, onApplyGraphics, onMultiplayerStart }) {
+    Object.assign(this, { settings, audio, portraits, progress, onStart, onStartMission, onResume, onSurrender, onRematch, onToMenu, onQuit, onApplyGraphics, onMultiplayerStart });
     this.stack = [];
     this.current = 'splash';
     document.querySelectorAll('[data-go]').forEach((b) => {
@@ -36,6 +38,7 @@ export class Menus {
   go(id, push = false) {
     if (push) this.stack.push(this.current);
     if (id === 'setup') this.refreshSetup();
+    if (id === 'campaign') this.refreshCampaign();
     if (id === 'menu') this.stack = [];
     // Im Spiel bleibt das HUD sichtbar unter den Overlays
     const inGame = this.inGame;
@@ -66,6 +69,10 @@ export class Menus {
   buildSetup() {
     this.seg($('seg-mode'), [[1, '1 gegen 1'], [2, '2 gegen 2'], [3, '3 gegen 3'], [4, '4 gegen 4']], 'teamSize', () => this.refreshSummary());
     this.seg($('seg-diff'), [['easy', 'Leicht'], ['normal', 'Normal'], ['hard', 'Schwer']], 'difficulty', () => this.refreshSummary());
+    this.seg($('seg-ally'), [['easy', 'Leicht'], ['normal', 'Normal'], ['hard', 'Schwer']], 'allyDifficulty', () => this.refreshSummary());
+    this.seg($('seg-pick'), Object.entries(PICK_MODES).map(([k, m]) => [k, m.code]), 'pickMode', () => this.refreshSetup());
+    this.seg($('seg-cc'), [[false, 'Ohne Champions'], [true, 'CC – Champions']], 'champions', () => this.refreshSummary());
+    this.seg($('seg-waves'), [[20, '20 Wellen'], [30, '30 Wellen']], 'waves', () => this.refreshSummary());
     this.seg($('seg-speed'), [[1, '1×'], [1.5, '1,5×'], [2, '2×']], 'gameSpeed', () => this.refreshSummary());
     const nm = $('inp-name');
     nm.value = this.settings.get('playerName');
@@ -75,6 +82,7 @@ export class Menus {
     const box = $('factions');
     box.innerHTML = '';
     const list = [...FACTION_IDS, 'random'];
+    const pick = this.settings.get('pickMode');
     for (const id of list) {
       const f = FACTIONS[id];
       const el = document.createElement('div');
@@ -87,7 +95,12 @@ export class Menus {
       el.innerHTML = `<div class="orb">${img ? `<img src="${img}" alt=""/>` : '<span style="font-size:58px">?</span>'}</div>
         <div class="name">${f ? f.name : 'Zufall'}</div><div class="motto">${f ? f.motto : `+${ECON.randomBonusGold} Gold Startbonus`}</div>
         <div class="desc">${f ? f.desc : 'Das Schicksal wählt deine Fraktion – dafür gibt es extra Gold.'}</div>`;
-      el.classList.toggle('on', this.settings.get('faction') === id);
+      el.classList.toggle('on', pick === 'ap' ? this.settings.get('faction') === id : id === 'random');
+      if (pick !== 'ap' && id !== 'random') el.classList.add('locked');
+      if (pick !== 'ap' && id === 'random') {
+        el.querySelector('.name').textContent = pick === 'hp' ? 'Hybrid' : 'Zufall';
+        el.querySelector('.desc').textContent = PICK_MODES[pick].desc;
+      }
       el.addEventListener('click', () => {
         this.audio.ui('confirm');
         this.settings.set('faction', id);
@@ -100,12 +113,86 @@ export class Menus {
     this.refreshSummary();
   }
   refreshSummary() {
-    const n = this.settings.get('teamSize');
-    const f = FACTIONS[this.settings.get('faction')];
-    $('setup-summary').textContent = `${n} gegen ${n} · ${f ? f.name : 'Zufallsfraktion'} · Bots: ${{ easy: 'Leicht', normal: 'Normal', hard: 'Schwer' }[this.settings.get('difficulty')]} · ${ECON.maxWaves} Wellen`;
+    const S = this.settings;
+    const n = S.get('teamSize');
+    const pick = S.get('pickMode');
+    const f = FACTIONS[S.get('faction')];
+    const code = modeCode({ pickMode: pick, champions: S.get('champions') });
+    $('mode-code').textContent = code;
+    $('mode-desc').textContent = `${PICK_MODES[pick].name}: ${PICK_MODES[pick].desc}${S.get('champions') ? ` · ${MODIFIERS.cc.desc}` : ''}`;
+    const D = { easy: 'Leicht', normal: 'Normal', hard: 'Schwer' };
+    $('setup-summary').textContent = `${code} · ${n} gegen ${n} · ${pick === 'ap' ? (f ? f.name : 'Zufallsfraktion') : PICK_MODES[pick].name} · Verbündete ${D[S.get('allyDifficulty')]} · Gegner ${D[S.get('difficulty')]} · ${S.get('waves')} Wellen`;
   }
   setupConfig() {
-    return { teamSize: this.settings.get('teamSize'), faction: this.settings.get('faction'), difficulty: this.settings.get('difficulty'), name: this.settings.get('playerName') || 'Tiry' };
+    const S = this.settings;
+    return { teamSize: S.get('teamSize'), faction: S.get('faction'), difficulty: S.get('difficulty'), allyDifficulty: S.get('allyDifficulty'), name: S.get('playerName') || 'Tiry',
+      rules: { pickMode: S.get('pickMode'), champions: !!S.get('champions'), maxWaves: S.get('waves') } };
+  }
+
+  // ---------- Kampagne ----------
+  refreshCampaign() {
+    const S = this.settings, P = this.progress;
+    const sel = MISSIONS.find((m) => m.id === S.get('campMission')) || MISSIONS[0];
+    const act = this.campAct || sel.act;
+    this.campAct = act;
+    $('star-total').textContent = `★ ${P.total} / ${MISSIONS.length * 3}`;
+    const tabs = $('act-tabs');
+    tabs.innerHTML = '';
+    for (const a of ACTS) {
+      const b = document.createElement('button');
+      b.textContent = a.short;
+      b.classList.toggle('on', a.id === act);
+      b.addEventListener('click', () => { this.audio.ui('click'); this.campAct = a.id; const first = MISSIONS.find((m) => m.act === a.id); S.set('campMission', first.id); this.refreshCampaign(); });
+      tabs.appendChild(b);
+    }
+    const A = ACTS[act - 1];
+    const map = $('camp-map');
+    map.style.setProperty('--a1', `${A.grad[0]}55`); map.style.setProperty('--a2', A.grad[1]); map.style.setProperty('--a3', `${A.grad[2]}55`);
+    const ms = MISSIONS.filter((m) => m.act === act);
+    const pos = ms.map((_, i) => [14 + (i * 72) / Math.max(1, ms.length - 1), i % 2 ? 66 : 34]);
+    let d = `M ${pos[0][0]} ${pos[0][1]}`;
+    for (let i = 1; i < pos.length; i++) { const [x0, y0] = pos[i - 1], [x1, y1] = pos[i]; d += ` C ${(x0 + x1) / 2} ${y0}, ${(x0 + x1) / 2} ${y1}, ${x1} ${y1}`; }
+    map.innerHTML = `<svg class="path" viewBox="0 0 100 100" preserveAspectRatio="none"><defs><linearGradient id="pg" x1="0" x2="1"><stop offset="0" stop-color="${A.grad[0]}"/><stop offset=".5" stop-color="${A.grad[1]}"/><stop offset="1" stop-color="${A.grad[2]}"/></linearGradient></defs><path d="${d}" stroke="url(#pg)" stroke-width="0.8" fill="none" stroke-dasharray="2 1.6" opacity="0.7"/></svg>`;
+    ms.forEach((m, i) => {
+      const n = document.createElement('div');
+      const stars = P.stars[m.id] || 0;
+      const open = missionUnlocked(m.id, P.stars);
+      n.className = `node-wrap${stars ? ' done' : ''}${open ? '' : ' locked'}${m.id === sel.id ? ' sel' : ''}`;
+      n.style.left = `${pos[i][0]}%`; n.style.top = `${pos[i][1]}%`;
+      n.innerHTML = `<div class="node-ring"></div><div class="node"><span class="num">${m.id}</span></div><span class="gl">${m.goal === 'siege' ? 'BELAGERUNG' : 'HALTEN'}</span><span class="st">${'★'.repeat(stars)}<i>${'★'.repeat(3 - stars)}</i></span>`;
+      n.addEventListener('click', () => { if (!open) { this.audio.ui('error'); return; } this.audio.ui('click'); S.set('campMission', m.id); this.refreshCampaign(); });
+      n.addEventListener('mouseenter', () => this.audio.ui('hover'));
+      map.appendChild(n);
+    });
+    // Details
+    const m = sel.act === act ? sel : ms[0];
+    const unlocked = unlockedFactions(P.stars);
+    if (!unlocked.includes(S.get('campFaction'))) S.set('campFaction', unlocked.includes(m.faction) ? m.faction : unlocked[0]);
+    const open = missionUnlocked(m.id, P.stars);
+    const det = $('camp-detail');
+    det.innerHTML = `<h3>Mission ${m.id} · Wellen ${m.startWave}–${m.endWave}</h3><div class="title">${m.title}</div>
+      <div class="story">„${m.story}“</div>
+      <div class="goal">${GOAL_TEXT[m.goal]}</div>
+      ${m.mods ? `<div class="mods">${m.mods.map((x) => `<span class="chip">${x}</span>`).join('')}</div>` : ''}
+      <div class="stars-list"><b>★</b> Mission gewinnen · <b>★★</b> König mit mind. 50 % Leben · <b>★★★</b> ${star3Text(m.star3)}</div>
+      ${m.tips ? `<div class="tips">${m.tips.map((t) => `◆ ${t}`).join('<br>')}</div>` : ''}
+      <h3>Fraktion</h3><div class="seg" id="camp-fac"></div>
+      <h3>Schwierigkeit</h3><div class="seg" id="camp-diff"></div>
+      <div class="row" style="margin-top:8px"><button class="pill big primary" id="btn-mission" ${open ? '' : 'disabled'}>Mission starten</button></div>`;
+    const facSeg = $('camp-fac');
+    for (const f of FACTION_IDS) {
+      const b = document.createElement('button');
+      const ok = unlocked.includes(f);
+      b.textContent = ok ? FACTIONS[f].name : `🔒 ${FACTIONS[f].name}`;
+      b.disabled = !ok;
+      b.classList.toggle('on', S.get('campFaction') === f);
+      b.title = ok ? FACTIONS[f].desc : `Wird mit ${ACTS.find((a) => a.unlock === f)?.name || 'der Kampagne'} freigeschaltet`;
+      b.addEventListener('click', () => { this.audio.ui('click'); S.set('campFaction', f); facSeg.querySelectorAll('button').forEach((x) => x.classList.toggle('on', x === b)); });
+      facSeg.appendChild(b);
+    }
+    this.seg($('camp-diff'), Object.entries(CAMPAIGN_DIFFICULTY).map(([k, v]) => [k, v.label]), 'campDifficulty');
+    $('btn-mission').addEventListener('click', () => { this.audio.ui('confirm'); this.onStartMission(m, { faction: S.get('campFaction'), difficulty: S.get('campDifficulty') }); });
+    $('talents').innerHTML = TALENTS.map((t) => `<span class="talent${P.total >= t.stars ? ' on' : ''}"><b>${t.stars}★</b> ${t.name}: ${t.desc}</span>`).join('');
   }
 
   // ---------- Einstellungen ----------
@@ -230,8 +317,12 @@ export class Menus {
         if (m.t === 'welcome') mp.myId = m.id;
         if (m.t === 'lobby') {
           mp.lobby = m;
-          lobby.innerHTML = `Raum <b>${m.room}</b> · ${m.mode} gegen ${m.mode}<br>` + m.players.map((p) => `${p.id === m.host ? '♛ ' : ''}${escapeHtml(p.name)} – Team ${p.team === 0 ? 'West' : 'Ost'}`).join('<br>');
+          const c = m.config || {};
+          const team = (t) => m.players.filter((p) => p.team === t).map((p) => `${p.id === m.host ? '♛ ' : ''}${escapeHtml(p.name)}${p.id === mp.myId ? ' (du)' : ''}`).join('<br>') || '<span class="muted">– frei –</span>';
+          lobby.innerHTML = `Raum-Code <b style="letter-spacing:.2em">${m.room}</b> · Modus <span class="code-badge">${modeCode(c)}</span> · ${m.mode} gegen ${m.mode} · ${c.waves} Wellen · ${c.bots ? `Bots füllen auf (${{ easy: 'Leicht', normal: 'Normal', hard: 'Schwer' }[c.botDifficulty]})` : 'ohne Bots'}
+            <div class="mp-team" style="margin-top:10px"><div><h5 style="color:var(--west)">Team West</h5>${team(0)}</div><div><h5 style="color:var(--east)">Team Ost</h5>${team(1)}</div></div>`;
           $('btn-mp-start').disabled = m.host !== mp.myId;
+          this.renderHostControls(mp, m);
         }
         if (m.t === 'error') lobby.textContent = m.reason;
         if (m.t === 'start') this.onMultiplayerStart(mp, m);
@@ -244,8 +335,40 @@ export class Menus {
     $('btn-mp-create').addEventListener('click', () => { const mp = connect(); sendWhenOpen(mp, { t: 'create', mode: S.get('teamSize') }); sendWhenOpen(mp, { t: 'slot', team: 0, faction: S.get('faction') }); });
     $('btn-mp-join').addEventListener('click', () => { const mp = connect(); sendWhenOpen(mp, { t: 'join', room: $('inp-room').value.trim() }); setTimeout(() => sendWhenOpen(mp, { t: 'slot', team: 1, faction: S.get('faction') }), 300); });
     $('btn-mp-start').addEventListener('click', () => { if (this.mp) sendWhenOpen(this.mp, { t: 'start' }); });
+    $('btn-mp-team').addEventListener('click', () => {
+      if (!this.mp || !this.mp.lobby) return;
+      const me = this.mp.lobby.players.find((p) => p.id === this.mp.myId);
+      sendWhenOpen(this.mp, { t: 'slot', team: me && me.team === 0 ? 1 : 0, faction: S.get('faction') });
+    });
+    this.sendWhenOpen = sendWhenOpen;
   }
 }
+
+Menus.prototype.renderHostControls = function renderHostControls(mp, lobby) {
+  const box = $('mp-host');
+  const isHost = lobby.host === mp.myId;
+  if (!isHost) { box.innerHTML = '<p class="fine">Der Host legt Modus, Teamgröße, Wellen und Bots fest.</p>'; return; }
+  const c = lobby.config;
+  const send = (patch) => this.sendWhenOpen(mp, { t: 'config', config: { ...patch } });
+  box.innerHTML = '';
+  const mk = (label, opts, cur, key) => {
+    const r = document.createElement('div'); r.className = 'row';
+    const l = document.createElement('span'); l.textContent = label; r.appendChild(l);
+    const sg = document.createElement('div'); sg.className = 'seg';
+    for (const [v, t] of opts) {
+      const b = document.createElement('button'); b.textContent = t; b.classList.toggle('on', cur === v);
+      b.addEventListener('click', () => { this.audio.ui('click'); send({ [key]: v }); });
+      sg.appendChild(b);
+    }
+    r.appendChild(sg); box.appendChild(r);
+  };
+  mk('Spielmodus', Object.entries(PICK_MODES).map(([k, m]) => [k, `${m.code} · ${m.name}`]), c.pickMode, 'pickMode');
+  mk('Champions', [[false, 'Aus'], [true, 'CC an']], c.champions, 'champions');
+  mk('Teams', [[1, '1v1'], [2, '2v2'], [3, '3v3'], [4, '4v4']], lobby.mode, 'mode');
+  mk('Wellen', [[10, '10'], [20, '20'], [30, '30']], c.waves, 'waves');
+  mk('Bots', [[true, 'Leere Plätze mit Bots füllen'], [false, 'Keine Bots']], c.bots, 'bots');
+  mk('Bot-Stärke', [['easy', 'Leicht'], ['normal', 'Normal'], ['hard', 'Schwer']], c.botDifficulty, 'botDifficulty');
+};
 
 export const KEYS = [
   ['Q W E R T', 'Kämpfer zum Bauen auswählen'],

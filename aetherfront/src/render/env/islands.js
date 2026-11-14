@@ -1,6 +1,6 @@
 // Schwebeinseln: organische Oberseite (Gras/Erde) + hängender Felskörper mit Gesteinsschichten.
 import * as THREE from 'three';
-import { rng, fbm2, fbm3, noise2, smoothstep, lerp, clamp } from './noise.js';
+import { rng, fbm2, fbm3, noise2, noise3, smoothstep, lerp, clamp } from './noise.js';
 
 // Gesteinsschichten (linear, warm → violett)
 const STRATA = [
@@ -92,7 +92,12 @@ export function buildIsland(opts) {
       const band = (y + fbm2(ca * 2, sa * 2, 2, seed) * 2) / 2.6;
       const step = smoothstep(0.6, 0.95, band - Math.floor(band));
       f *= 1 + 0.13 * ridge * smoothstep(0.0, 0.15, s) - 0.035 * step * (1 - s);
-      const r = edgeR[i] * f;
+      let r = edgeR[i] * f;
+      // gemeißelte Felsstruktur (3D-Rauschen, Kanten & Rinnen)
+      const px0 = cx + ca * r, pz0 = cz + sa * r;
+      const chisel = fbm3(px0 * 0.11, y * 0.09, pz0 * 0.11, 3, seed + 21);
+      const crack = Math.abs(noise3(px0 * 0.05, y * 0.02, pz0 * 0.05, seed + 33) * 2 - 1);
+      r += (chisel * 2.2 - smoothstep(0.0, 0.12, 0.12 - crack) * 1.2) * smoothstep(0.03, 0.2, s) * Math.min(1, edgeR[i] / 25);
       const x = cx + ca * r, z = cz + sa * r;
       pos.push(x, y, z);
       minY = Math.min(minY, y);

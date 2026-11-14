@@ -23,7 +23,7 @@ vec3 skyColor(vec3 d) {
   float warm = az * az;
   float yy = max(y, 0.0);
   vec3 zenith = mix(vec3(0.016, 0.022, 0.085), vec3(0.045, 0.040, 0.140), warm);
-  vec3 high   = mix(vec3(0.070, 0.060, 0.205), vec3(0.230, 0.105, 0.270), warm);
+  vec3 high   = mix(vec3(0.060, 0.060, 0.215), vec3(0.300, 0.150, 0.220), warm);
   vec3 hor    = mix(vec3(0.230, 0.180, 0.400), vec3(0.980, 0.470, 0.230), warm);
   vec3 c = mix(hor, high, smoothstep(0.0, 0.30, yy));
   c = mix(c, zenith, smoothstep(0.22, 0.95, yy));
@@ -31,7 +31,7 @@ vec3 skyColor(vec3 d) {
   vec3 below = mix(vec3(0.140, 0.120, 0.290), vec3(0.700, 0.380, 0.240), warm);
   c = mix(c, below, smoothstep(0.0, -0.10, y));
   float g = max(sd, 0.0);
-  c += vec3(1.0, 0.52, 0.24) * (pow(g, 5.0) * 0.26 + pow(g, 40.0) * 0.6);
+  c += vec3(1.0, 0.55, 0.20) * (pow(g, 5.0) * 0.22 + pow(g, 40.0) * 0.45);
   return c;
 }
 // Dunstfarbe für Luftperspektive (Richtung zur Sonne wärmer, ohne grelle Sonnenkorona)
@@ -72,8 +72,8 @@ vec3 applyHaze(vec3 col, vec3 worldPos) {
   float dist = length(v);
   vec3 d = v / max(dist, 1e-4);
   float f = 1.0 - exp(-uFogDensity * uFogDensity * dist * dist);
-  float hf = smoothstep(-6.0, -58.0, worldPos.y) * uHeightFog;
-  f = clamp(max(f, hf * 0.85), 0.0, 1.0);
+  float hf = smoothstep(-14.0, -66.0, worldPos.y) * uHeightFog;
+  f = clamp(max(f, hf * 0.55), 0.0, 1.0);
   vec3 hc = hazeColor(d);
   vec3 low = mix(hc, vec3(0.30, 0.17, 0.36), 0.45);
   return mix(col, mix(hc, low, hf), f);

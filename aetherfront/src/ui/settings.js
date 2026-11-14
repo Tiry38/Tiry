@@ -5,7 +5,8 @@ export const DEFAULTS = {
   showFps: false, damageNumbers: false,
   volMaster: 0.8, volMusic: 0.55, volSfx: 0.8, volUi: 0.7, muted: false,
   camSpeed: 1, edgeScroll: true,
-  gameSpeed: 1, playerName: 'Tiry', faction: 'random', teamSize: 4, difficulty: 'normal',
+  gameSpeed: 1, playerName: 'Tiry', faction: 'random', teamSize: 4, difficulty: 'normal', allyDifficulty: 'normal',
+  pickMode: 'ap', champions: false, waves: 30, campDifficulty: 'normal', campFaction: 'orden', campMission: 1,
   serverUrl: 'ws://localhost:7710', fullscreen: false,
 };
 

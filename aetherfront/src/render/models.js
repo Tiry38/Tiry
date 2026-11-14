@@ -15,7 +15,7 @@ const PI = Math.PI;
 // ---------------------------------------------------------------------------------------------
 const MAT = {
   cloth: [0.85, 0], leather: [0.7, 0], skin: [0.6, 0], bark: [0.9, 0], wood: [0.75, 0],
-  metal: [0.35, 0.9], dmetal: [0.45, 0.85], gold: [0.3, 1], bone: [0.6, 0], crystal: [0.15, 0.1],
+  metal: [0.4, 0.9], dmetal: [0.48, 0.85], gold: [0.34, 1], bone: [0.6, 0], crystal: [0.15, 0.1],
   fur: [0.92, 0], rock: [0.88, 0], chitin: [0.38, 0.2], gem: [0.12, 0.25], scale: [0.5, 0.15],
   paint: [0.5, 0.35], leaf: [0.7, 0], rubber: [0.8, 0],
 };
@@ -62,8 +62,20 @@ function box(w, h, d) { return new THREE.BoxGeometry(w, h, d); }
 function rbox(w, h, d, r = 0.03, s = 1) {
   return new RoundedBoxGeometry(w, h, d, s, Math.max(1e-3, Math.min(r, w / 2 - 1e-3, h / 2 - 1e-3, d / 2 - 1e-3)));
 }
+// Drehkörper. Die Profil-Richtung wird automatisch so gedreht, dass die Flächen nach außen zeigen
+// (gegen den Uhrzeigersinn in der (r,y)-Ebene; offene Profile: von unten nach oben).
 function lathe(pts, seg = 12, ps = 0, pl = TAU) {
-  return new THREE.LatheGeometry(pts.map((p) => new THREE.Vector2(Math.max(0, p[0]), p[1])), seg, ps, pl);
+  let area = 0, span = 0;
+  for (let i = 0; i < pts.length; i++) {
+    const a = pts[i], b = pts[(i + 1) % pts.length];
+    area += a[0] * b[1] - b[0] * a[1];
+    span = Math.max(span, Math.abs(a[1] - pts[0][1]), Math.abs(a[0] - pts[0][0]));
+  }
+  const f0 = pts[0], f1 = pts[pts.length - 1];
+  const closed = (f0[0] < 1e-4 && f1[0] < 1e-4) || (Math.abs(f0[0] - f1[0]) + Math.abs(f0[1] - f1[1]) < 1e-4) || pts.length > 4 && Math.abs(area) > 0.05 * span * span;
+  const flip = closed ? area < 0 : f0[1] > f1[1];
+  const P = flip ? pts.slice().reverse() : pts;
+  return new THREE.LatheGeometry(P.map((p) => new THREE.Vector2(Math.max(0, p[0]), p[1])), seg, ps, pl);
 }
 function R(g, x = 0, y = 0, z = 0, order = 'XYZ') {
   return g.applyMatrix4(new THREE.Matrix4().makeRotationFromEuler(new THREE.Euler(x, y, z, order)));
@@ -252,12 +264,8 @@ class Kit {
     g.setAttribute('pbr', new THREE.BufferAttribute(pa, 2));
     return g;
   }
-  add(g, col, mat = MAT.cloth) { g = this._paint(g, col, mat); this.body.push(g); this._dbg(g); return g; }
-  _dbg(g) {
-    if (!globalThis.__MODEL_DEBUG) return;
-    const line = (new Error().stack.split('\n').find((l, i) => i > 2 && !/Kit\./.test(l)) || '').replace(/.*models\.js:/, '').replace(/\)$/, '');
-    (globalThis.__MODEL_DEBUG[line] = (globalThis.__MODEL_DEBUG[line] || 0) + g.attributes.position.count / 3);
-  }
+  add(g, col, mat = MAT.cloth) { g = this._paint(g, col, mat); this.body.push(g); return g; }
+
   // rechts + gespiegelt links
   sym(g, col, mat = MAT.cloth) { g = this.add(g, col, mat); this.body.push(mirrorX(g)); return g; }
   // dünne Fläche mit Innenseite (inCol)
@@ -323,7 +331,7 @@ function pauldron(K, pos, r, col, trim, o = {}) {
   const layers = o.layers || 2, tilt = o.tilt ?? 0.75, mat = o.mat || MAT.metal;
   for (let i = 0; i < layers; i++) {
     const rr = r * (1 - i * 0.16);
-    const g = dome(rr, rr * (0.75 - i * 0.1), 9, 0.12);
+    const g = dome(rr, rr * (0.75 - i * 0.1), 8, 0.12);
     g.scale(1, 1, o.zs || 0.95);
     R(g, 0, 0, -tilt - i * 0.28);
     T(g, [pos[0] + i * r * 0.18, pos[1] - i * r * 0.42, pos[2]]);
@@ -478,8 +486,8 @@ function legPair(K, o) {
   [1, -1].forEach((s, i) => {
     const z = stance[i];
     const hip = V(hipX * s, hipY, 0), ankle = V((hipX + spread) * s, 0.13, z), knee = V((hipX + spread * 0.7) * s, kneeY, z * 0.5 + 0.05);
-    K.add(seg(hip, knee, thigh[0], thigh[1]), o.thighCol, o.thighMat || MAT.cloth);
-    K.add(seg(knee, ankle, shin[0], shin[1]), o.shinCol, o.shinMat || MAT.metal);
+    K.add(seg(hip, knee, thigh[0], thigh[1], 6, 1), o.thighCol, o.thighMat || MAT.cloth);
+    K.add(seg(knee, ankle, shin[0], shin[1], 6, 1), o.shinCol, o.shinMat || MAT.metal);
     if (o.kneeCol) {
       const kp = ell(0.075, 0.07, 0.05, 6, 4); kp.translate(knee.x, knee.y, knee.z + 0.04);
       K.add(kp, o.kneeCol, MAT.metal);
@@ -493,8 +501,8 @@ function legPair(K, o) {
 
 // Arm: Schulter → Ellbogen → Hand
 function arm(K, sh, el, ha, o) {
-  K.add(seg(sh, el, o.r1 || 0.075, o.r2 || 0.065), o.upperCol, o.upperMat || MAT.cloth);
-  K.add(seg(el, ha, o.r3 || 0.07, o.r4 || 0.058), o.foreCol, o.foreMat || MAT.metal);
+  K.add(seg(sh, el, o.r1 || 0.075, o.r2 || 0.065, 6, 1), o.upperCol, o.upperMat || MAT.cloth);
+  K.add(seg(el, ha, o.r3 || 0.07, o.r4 || 0.058, 6, 1), o.foreCol, o.foreMat || MAT.metal);
   if (o.cuff) {
     const d = v3(ha).sub(v3(el)).normalize();
     const c = cyl(0.085, 0.07, 0.1, 8, true); aim(c, v3(el).lerp(v3(ha), 0.62), d);
@@ -589,7 +597,7 @@ function featherWing(K, root, o) {
   for (let i = 0; i < n; i++) {
     const t = 0.06 + 0.94 * (i / (n - 1));
     const p = crv.getPointAt(t);
-    const len = span * (0.34 + 0.36 * t), w = span * (0.13 - 0.03 * t);
+    const len = span * (0.36 + 0.38 * t), w = span * (0.17 - 0.04 * t);
     const d = V(0.12 + 1.0 * t * t, -1 + 0.75 * t, -0.18 - 0.1 * t).normalize();
     const f = ext(featherShape(len, w), 0.02, 0);
     aim(f, p.clone().add(V(0, 0, -0.01 * i)), d, 0.15);
@@ -608,8 +616,8 @@ function leafShape(len, w) { return shape([[0, 0], [w * 0.42, len * 0.18], [w * 
 // Gliederbein: 4 Punkte (Hüfte, Knie hoch, Gelenk, Spitze), verdickte Segmente
 function bugLeg(K, pts, r, col, mat, jointCol, tipCol) {
   const [a, b, c, d] = pts.map(v3);
-  K.add(shaft(a, b, [[0, 0], [r * 0.8, 0.06], [r, 0.4], [r * 0.75, 0.94], [0, 1]], 6), col, mat);
-  K.add(shaft(b, c, [[0, 0], [r * 0.7, 0.06], [r * 0.85, 0.3], [r * 0.55, 0.94], [0, 1]], 6), col, mat);
+  K.add(shaft(a, b, [[0, 0], [r * 0.8, 0.06], [r, 0.4], [r * 0.75, 0.94], [0, 1]], 5), col, mat);
+  K.add(shaft(b, c, [[0, 0], [r * 0.7, 0.06], [r * 0.85, 0.3], [r * 0.55, 0.94], [0, 1]], 5), col, mat);
   K.add(shaft(c, d, [[0, 0], [r * 0.5, 0.08], [r * 0.4, 0.35], [r * 0.08, 1]], 5), tipCol || col, mat);
   if (jointCol) for (const j of [b, c]) { const g = sph(r * 0.72, 5, 4); T(g, j); K.add(g, jointCol, MAT.gold); }
 }
@@ -630,7 +638,7 @@ function beastLeg(K, top, mid, low, paw, r, col, mat, o = {}) {
 function runeRing(K, center, R0, n, col, k = 3, tilt = [PI / 2, 0, 0], size = 0.04) {
   for (let i = 0; i < n; i++) {
     const a = (i / n) * TAU;
-    const g = rbox(size * (i % 3 === 0 ? 1.8 : 1), size * 0.5, size * 0.5, size * 0.2);
+    const g = box(size * (i % 3 === 0 ? 1.8 : 1), size * 0.5, size * 0.5);
     g.rotateZ(a + PI / 2); g.translate(Math.cos(a) * R0, Math.sin(a) * R0, 0);
     R(g, tilt[0], tilt[1], tilt[2]);
     K.glow(T(g, center), col, k);
@@ -719,7 +727,7 @@ function plateBody(K, o) {
     const em = ext(starShape(0.06, 0.025, 4), 0.012, 0.005, 1); em.translate(0, 0.82, 0.275 * w); K.add(em, trim, MAT.gold);
   }
   // Brustpanzer
-  torso(K, [[0, 0.95], [0.2, 0.97], [0.23, 1.05], [0.215, 1.14], [0.25, 1.25], [0.31, 1.38], [0.32, 1.47], [0.26, 1.54], [0.12, 1.58], [0, 1.6]], met, mm, 0.74 * w, 12, { xs: w });
+  torso(K, [[0, 0.95], [0.2, 0.97], [0.23, 1.05], [0.215, 1.14], [0.25, 1.25], [0.31, 1.38], [0.32, 1.47], [0.26, 1.54], [0.12, 1.58], [0, 1.6]], met, mm, 0.74 * w, 10, { xs: w });
   const ridge = tor(0.27, 0.018, 3, 8, PI * 0.5); ridge.rotateZ(PI * 0.25); ridge.rotateY(PI / 2); ridge.scale(1, 1.1, w); ridge.translate(0, 1.15, -0.02);
   K.add(ridge, trim, MAT.gold);
   const plate = ext(shape([[-0.17, 0.0], [0.17, 0.0], [0.2, 0.16], [0, 0.21], [-0.2, 0.16]]), 0.02, 0.01, 1); bend(plate, 2.2 / w);
@@ -727,7 +735,7 @@ function plateBody(K, o) {
   belt(K, 1.02, 0.235 * w, 0.19 * w, P.dleather, trim);
   const ce = ext(o.chestShape || starShape(0.055, 0.022, 4), 0.014, 0.006, 1); ce.translate(0, 1.37, 0.25 * w); K.add(ce, trim, MAT.gold);
   if (t >= 2 || o.chestGem) { const gm = sph(0.028, 8, 6); gm.translate(0, 1.37, 0.275 * w); K.glow(gm, P.glw, 3); }
-  if (o.cape) cape(K, Object.assign({ top: 1.55, bot: 0.3, rTop: 0.24 * w, rBot: 0.5 * w, arc: 2.5, col: cloth, inCol: shade(cloth, 0.45), z: -0.04, lean: -0.08 }, o.cape));
+  if (o.cape) cape(K, Object.assign({ top: 1.55, bot: 0.3, rTop: 0.24 * w, rBot: 0.5 * w, arc: 2.5, col: cloth, inCol: shade(cloth, 0.45), z: -0.04, lean: -0.08, seg: 10, hseg: 4 }, o.cape));
   pauldron(K, [0.33 * w, 1.5, 0], o.pr || 0.17 * w, met, trim, { layers: o.layers || (t >= 2 ? 3 : 2), spikes: o.spikes || 0, gem: t >= 3 ? P.glw : null, spikeCol: o.spikeCol, mat: mm });
   for (const [sh, el, ha] of o.arms) arm(K, sh, el, ha, { upperCol: mail, upperMat: MAT.dmetal, foreCol: met, foreMat: mm, handCol: met, handMat: mm, cuff: met, cuffMat: mm, r1: 0.078 * w, r2: 0.068 * w, r3: 0.072 * w, r4: 0.06 * w });
   // Hals + Helm
@@ -767,7 +775,7 @@ function helm(K, type, o) {
     const jaw = cone(0.09, 0.16, 6); jaw.rotateX(PI / 2 + 0.6); jaw.scale(1.3, 1, 0.8); jaw.translate(0, 1.66, 0.13); K.add(jaw, met, mm);
     K.add(box(0.21, 0.025, 0.05).translate(0, 1.75, 0.16), P.dark, MAT.dmetal);
     eyes(K, [0, 1.75, 0.18], 0.05, 0.02, P.glw, 4, 0.4);
-    horn(K, [0.13, 1.82, 0], [[0.24, 1.9, 0.03], [0.3, 2.05, 0.08], [0.27, 2.2, 0.16]], 0.045, o.hornCol || P.bone, MAT.bone);
+    K.sym(sweep([[0.13, 1.82, 0], [0.24, 1.9, 0.03], [0.3, 2.05, 0.08], [0.27, 2.2, 0.16]], (u) => 0.045 * (1 - u * 0.92), 5, 8), o.hornCol || P.bone, MAT.bone);
     for (let i = 0; i < 3; i++) { const sp = cone(0.025, 0.12 - i * 0.02, 5); sp.rotateX(-0.5 - i * 0.35); sp.translate(0, 1.95 - i * 0.07, -0.05 - i * 0.07); K.add(sp, met, mm); }
   }
 }
@@ -867,8 +875,8 @@ function archer(K) {
   const qa = V(0.12, 1.0, -0.2), qb = V(-0.16, 1.62, -0.24);
   K.add(seg(qa, qb, 0.075, 0.085, 8, 1), P.dleather, MAT.leather);
   const qr = tor(0.085, 0.015, 4, 10); qr.rotateX(PI / 2); aim(qr, qb.clone().lerp(qa, 0.1), qb.clone().sub(qa)); K.add(qr, P.gold, MAT.gold);
-  for (let i = 0; i < 4; i++) {
-    const base = qb.clone().add(V((i - 1.5) * 0.03, 0.02, (i % 2) * 0.03));
+  for (let i = 0; i < 3; i++) {
+    const base = qb.clone().add(V((i - 1) * 0.035, 0.02, (i % 2) * 0.03));
     const tipP = base.clone().add(qb.clone().sub(qa).normalize().multiplyScalar(0.2));
     K.add(seg(base, tipP, 0.008, 0.008, 4, 1), P.wood, MAT.wood);
     const f = ext(shape([[0, 0], [0.03, 0.03], [0.03, 0.11], [0, 0.08]]), 0.004, 0.003, 1); R(f, 0, i * 0.8, 0);
@@ -911,7 +919,7 @@ function priest(K) {
   for (const k of [0.45, 0.62]) { const r = tor(0.035, 0.012, 4, 10); r.rotateX(PI / 2); T(r, sb.clone().lerp(stp, k)); K.add(r, P.white, MAT.cloth); }
   const cr = tor(0.13, 0.022, 5, 16, PI * 1.5); cr.rotateZ(-PI * 0.25); cr.rotateY(PI / 2 - 0.3); cr.translate(stp.x, stp.y + 0.12, stp.z); K.add(cr, P.gold, MAT.gold);
   const orb = sph(0.09 + t * 0.012, 12, 10); orb.translate(stp.x, stp.y + 0.12, stp.z); K.glow(orb, P.glw, 3.2);
-  for (const s of [1, -1]) { const wg = ext(shape([[0, 0], [0.12, 0.05], [0.18, 0.14], [0.08, 0.11], [0.02, 0.06]], true), 0.01, 0.005, 1, 3); wg.scale(s, 1, 1); wg.rotateY(PI / 2 - 0.3); wg.translate(stp.x, stp.y - 0.04, stp.z); K.add(wg, P.gold, MAT.gold); }
+  for (const s of [1, -1]) { const wg = ext(shape([[0, 0], [0.12, 0.05], [0.18, 0.14], [0.08, 0.11], [0.02, 0.06]]), 0.01, 0.005, 1); if (s < 0) R(wg, 0, PI, 0); wg.rotateY(PI / 2 - 0.3); wg.translate(stp.x, stp.y - 0.04, stp.z); K.add(wg, P.gold, MAT.gold); }
   if (t >= 3) runeRing(K, [0, 0.35, 0], 0.55, 14, P.glw, 2.6);
   return [1, 0.55];
 }
@@ -1199,7 +1207,7 @@ function tufts(K, pts, col, len = 0.18, r = 0.06, dir = V(0, 0.4, -1)) {
 
 // ---- Wolf -----------------------------------------------------------------------------------------
 function wolf(K) {
-  const P = K.P, t = K.tier, fur = P.pri, belly = mix(P.pri, P.white, 0.45);
+  const P = K.P, t = K.tier, fur = mix('#5d646e', P.sec, 0.15), belly = mix(fur, P.white, 0.45);
   const ch = blob(0.3, 1, 0.07); ch.scale(0.85, 1, 1.1); ch.translate(0, 0.76, 0.22); K.add(ch, fur, MAT.fur);
   const bl = blob(0.24, 2, 0.06); bl.scale(0.9, 0.95, 1.4); bl.translate(0, 0.72, -0.14); K.add(bl, fur, MAT.fur);
   const hp = blob(0.23, 3, 0.07); hp.scale(0.95, 1, 1.05); hp.translate(0, 0.74, -0.46); K.add(hp, fur, MAT.fur);
@@ -1229,15 +1237,19 @@ function wolf(K) {
   const col = tor(0.17, 0.03, 4, 14); col.rotateX(PI / 2 - 0.7); col.translate(0, 0.94, 0.48); K.add(col, P.dleather, MAT.leather);
   for (let i = 0; i < 6; i++) { const a = (i / 6) * TAU; const c = cone(0.02, 0.08, 4); c.translate(0, 0.19, 0); c.rotateZ(a); c.rotateX(PI / 2 - 0.7); c.translate(0, 0.94, 0.48); K.add(c, P.met, MAT.metal); }
   const cloth = ext(shape([[-0.26, 0.2], [0.26, 0.2], [0.24, -0.2], [0, -0.26], [-0.24, -0.2]]), 0.014, 0.006, 1);
-  cloth.rotateX(-PI / 2); bend(cloth, 0); warp(cloth, (p) => { p.y -= 1.6 * p.x * p.x; }); cloth.translate(0, 1.0, -0.2); K.add(cloth, P.sec, MAT.cloth);
-  if (t >= 2) { const rn = ext(starShape(0.05, 0.02, 4), 0.01, 0.004, 1); rn.rotateX(-PI / 2); rn.translate(0, 1.02, -0.2); K.glow(rn, P.glw, 3); }
+  cloth.rotateX(-PI / 2); bend(cloth, 0); warp(cloth, (p) => { p.y -= 1.6 * p.x * p.x; }); cloth.translate(0, 1.0, -0.2); K.add(cloth, P.pri, MAT.cloth);
+  if (t >= 2) {
+    const rn = ext(starShape(0.05, 0.02, 4), 0.01, 0.004, 1); rn.rotateX(-PI / 2); rn.translate(0, 1.02, -0.2); K.glow(rn, P.glw, 3);
+    const hm = dome(0.12, 0.06, 8, 0.1); hm.scale(1, 1, 1.6); R(hm, 0.25, 0, 0); hm.translate(0, 1.17, 0.74); K.add(hm, P.met, MAT.metal);
+    const hs = cone(0.025, 0.12, 5); R(hs, -0.5, 0, 0); hs.translate(0, 1.24, 0.68); K.add(hs, P.gold, MAT.gold);
+  }
   if (t >= 3) { for (const s of [1, -1]) { const b = cone(0.03, 0.18, 5); R(b, -0.6, 0, -s * 0.4); b.translate(0.12 * s, 1.08, 0.12); K.add(b, P.met, MAT.metal); } runeRing(K, [0, 0.05, -0.1], 0.6, 12, P.glw, 2.4); }
   return [1.12, 0.7];
 }
 
 // ---- Bär ------------------------------------------------------------------------------------------
 function bear(K) {
-  const P = K.P, t = K.tier, fur = P.pri;
+  const P = K.P, t = K.tier, fur = mix('#6b4a32', P.sec, 0.2);
   const ch = blob(0.46, 4, 0.06); ch.scale(1, 0.95, 1); ch.translate(0, 1.05, 0.2); K.add(ch, fur, MAT.fur);
   const hump = blob(0.36, 5, 0.08); hump.translate(0, 1.28, 0.02); K.add(hump, fur, MAT.fur);
   const hp = blob(0.4, 6, 0.06); hp.scale(1, 0.95, 1.05); hp.translate(0, 0.98, -0.42); K.add(hp, fur, MAT.fur);
@@ -1272,7 +1284,7 @@ function bear(K) {
   }
   pauldron(K, [0.36, 1.3, 0.3], 0.2, P.met, P.gold, { layers: 2, tilt: 1.0, spikes: t >= 2 ? 3 : 2 });
   const sad = ext(shape([[-0.3, 0.3], [0.3, 0.3], [0.32, -0.3], [-0.32, -0.3]]), 0.02, 0.008, 1);
-  sad.rotateX(-PI / 2); warp(sad, (p) => { p.y -= 1.4 * p.x * p.x; }); sad.translate(0, 1.36, -0.26); K.add(sad, P.sec, MAT.cloth);
+  sad.rotateX(-PI / 2); warp(sad, (p) => { p.y -= 1.4 * p.x * p.x; }); sad.translate(0, 1.36, -0.26); K.add(sad, P.pri, MAT.cloth);
   const em = ext(starShape(0.08, 0.03, 4), 0.01, 0.004, 1); em.rotateY(PI / 2); em.translate(0.42, 1.1, -0.26); K.sym(em, P.gold, MAT.gold);
   if (t >= 2) { const rn = sph(0.04, 8, 6); rn.translate(hc.x, hc.y + 0.17, hc.z + 0.18); K.glow(rn, P.glw, 3.2); }
   if (t >= 3) { for (let i = 0; i < 3; i++) { const sp = cone(0.05, 0.28, 5); R(sp, -0.5, 0, 0); sp.translate(0, 1.6 - i * 0.12, -0.06 - i * 0.22); K.add(sp, P.met, MAT.metal); } runeRing(K, [0, 0.04, -0.05], 0.85, 14, P.glw, 2.4); }
@@ -1281,11 +1293,11 @@ function bear(K) {
 
 // ---- Greif ----------------------------------------------------------------------------------------
 function griffin(K) {
-  const P = K.P, t = K.tier, fur = P.pri, fea = P.sec, lift = 0.4;
+  const P = K.P, t = K.tier, fur = mix('#a8702e', P.pri, 0.2), fea = mix('#e2d6bc', P.pri, 0.3), lift = 0.4;
   const y0 = 0.62 + lift;
   // Löwenkörper hinten, Adlerbrust vorne
   const hp = blob(0.26, 8, 0.06); hp.scale(0.95, 0.95, 1.15); hp.translate(0, y0, -0.4); K.add(hp, fur, MAT.fur);
-  const bl = ell(0.24, 0.24, 0.34, 12, 8); bl.translate(0, y0 + 0.04, -0.08); K.add(bl, fur, MAT.fur);
+  const bl = ell(0.24, 0.24, 0.34, 10, 6); bl.translate(0, y0 + 0.04, -0.08); K.add(bl, fur, MAT.fur);
   const ch = blob(0.28, 9, 0.05); ch.scale(0.92, 1.05, 1); ch.translate(0, y0 + 0.12, 0.22); K.add(ch, fea, MAT.cloth);
   // Brustfedern (Schuppenreihen)
   for (let r = 0; r < 3; r++) for (let i = 0; i < 5 - r; i++) {
@@ -1295,7 +1307,7 @@ function griffin(K) {
   // Hals + Adlerkopf
   K.add(seg([0, y0 + 0.2, 0.3], [0, y0 + 0.5, 0.48], 0.17, 0.13, 8, 2), fea, MAT.cloth);
   const hc = V(0, y0 + 0.6, 0.52);
-  const hd = ell(0.14, 0.14, 0.17, 10, 8); T(hd, hc); K.add(hd, fea, MAT.cloth);
+  const hd = ell(0.14, 0.14, 0.17, 9, 6); T(hd, hc); K.add(hd, fea, MAT.cloth);
   K.add(sweep([hc.clone().add(V(0, 0.0, 0.1)), hc.clone().add(V(0, 0.0, 0.22)), hc.clone().add(V(0, -0.06, 0.3)), hc.clone().add(V(0, -0.14, 0.31))], (u) => 0.065 * (1 - u * 0.85), 7, 10, { fx: 1.0, fy: 0.8 }), P.gold, MAT.gold);
   eyes(K, [0, hc.y + 0.04, hc.z + 0.11], 0.075, 0.02, P.glw, 3.6, 0.45);
   for (let i = 0; i < 4; i++) { const c = ext(featherShape(0.2 - i * 0.02, 0.06), 0.014, 0); R(c, -1.2 - i * 0.15, 0, 0); c.translate(0, hc.y + 0.08 - i * 0.02, hc.z - 0.08 - i * 0.03); c.rotateY((i - 1.5) * 0); K.add(c, i % 2 ? fur : P.pri, MAT.cloth); }
@@ -1305,79 +1317,93 @@ function griffin(K) {
   for (const s of [1, -1]) {
     const a = V(0.15 * s, y0 + 0.02, 0.28), b = V(0.17 * s, y0 - 0.2, 0.42), c = V(0.15 * s, y0 - 0.38, 0.36);
     K.add(seg(a, b, 0.08, 0.06, 7, 2), fea, MAT.cloth); K.add(seg(b, c, 0.045, 0.04, 6, 2), P.gold, MAT.scale);
-    for (let i = -1; i <= 1; i++) K.add(sweep([c, c.clone().add(V(i * 0.04, -0.03, 0.06)), c.clone().add(V(i * 0.06, -0.1, 0.07))], (u) => 0.022 * (1 - u * 0.8), 4, 3), P.dark, MAT.bone);
+    for (let i = -1; i <= 1; i++) { const cl = cone(0.02, 0.1, 4); aim(cl, c.clone().add(V(i * 0.035, -0.02, 0.04)), V(i * 0.4, -0.7, 0.6)); K.add(cl, P.dark, MAT.bone); }
   }
   // Hinterbeine (Löwe), nach hinten hängend
   for (const s of [1, -1]) {
-    K.add(seg([0.16 * s, y0, -0.45], [0.18 * s, y0 - 0.22, -0.32], 0.12, 0.08, 8, 2), fur, MAT.fur);
-    K.add(seg([0.18 * s, y0 - 0.22, -0.32], [0.17 * s, y0 - 0.38, -0.56], 0.07, 0.055, 7, 2), fur, MAT.fur);
+    K.add(seg([0.16 * s, y0, -0.45], [0.18 * s, y0 - 0.22, -0.32], 0.12, 0.08, 6, 2), fur, MAT.fur);
+    K.add(seg([0.18 * s, y0 - 0.22, -0.32], [0.17 * s, y0 - 0.38, -0.56], 0.07, 0.055, 6, 2), fur, MAT.fur);
     const pw = ell(0.07, 0.05, 0.09, 8, 5); pw.translate(0.17 * s, y0 - 0.42, -0.6); K.add(pw, shade(fur, 0.8), MAT.fur);
   }
   // Schwanz mit Quaste
-  K.add(sweep([[0, y0 + 0.05, -0.62], [0, y0 + 0.0, -0.85], [0, y0 + 0.15, -1.05], [0, y0 + 0.3, -1.1]], (u) => 0.04 * (1 - u * 0.4), 6, 12), fur, MAT.fur);
+  K.add(sweep([[0, y0 + 0.05, -0.62], [0, y0 + 0.0, -0.85], [0, y0 + 0.15, -1.05], [0, y0 + 0.3, -1.1]], (u) => 0.04 * (1 - u * 0.4), 5, 9), fur, MAT.fur);
   const tuft = cone(0.08, 0.22, 6); R(tuft, -0.3, 0, 0); tuft.translate(0, y0 + 0.36, -1.12); K.add(tuft, shade(fur, 0.6), MAT.fur);
   // Flügel
-  featherWing(K, [0.16, y0 + 0.28, 0.08], { span: 1.12 + (t - 1) * 0.08, col: fea, tip: P.pri, up: 1.15, n: 10 });
+  featherWing(K, [0.16, y0 + 0.28, 0.08], { span: 0.98 + (t - 1) * 0.06, col: fea, tip: P.sec, up: 1.2, n: 12 });
   // Sattel/Rüstung
   const sad = ext(shape([[-0.22, 0.18], [0.22, 0.18], [0.24, -0.18], [0, -0.24], [-0.24, -0.18]]), 0.015, 0.006, 1); sad.rotateX(-PI / 2); warp(sad, (p) => { p.y -= 2.2 * p.x * p.x; }); sad.translate(0, y0 + 0.27, -0.12); K.add(sad, P.met, MAT.metal);
   const st = tor(0.24, 0.012, 3, 14); st.rotateX(PI / 2); st.scale(1, 1, 0.85); st.translate(0, y0 + 0.24, -0.12); K.add(st, P.gold, MAT.gold);
   if (t >= 2) { const g = sph(0.035, 8, 6); g.translate(hc.x, hc.y + 0.15, hc.z + 0.1); K.glow(g, P.glw, 3); }
   if (t >= 3) { const h = tor(0.18, 0.012, 4, 24); h.rotateX(PI / 2 - 0.3); h.translate(hc.x, hc.y + 0.32, hc.z - 0.05); K.glow(h, P.glw, 2.6); }
-  return [1.2, 0.8];
+  return [1.3, 0.8];
 }
 
 // ---- Baumhirte (Treant) --------------------------------------------------------------------------
 function treant(K) {
-  const P = K.P, t = K.tier, bark = P.pri, leaf = P.sec;
-  // Stamm mit Rindenrillen
-  const trunk = lathe([[0, 0.85], [0.3, 0.85], [0.34, 1.0], [0.3, 1.3], [0.36, 1.6], [0.42, 1.9], [0.38, 2.1], [0.24, 2.22], [0, 2.25]], 18);
-  warp(trunk, (p) => { const a = Math.atan2(p.x, p.z), k = 1 + 0.09 * Math.sin(a * 9 + p.y * 2.2) + 0.04 * Math.sin(a * 23); p.x *= k; p.z *= k * 0.85; });
-  Rp(trunk, [0, 0.9, 0], 0.12, 0, 0);
+  const P = K.P, t = K.tier, bark = mix(FIX.bark, P.sec, 0.35), leaf = mix(FIX.leaf, P.pri, 0.55), dbark = shade(bark, 0.62);
+  // Stamm: breite Schultern, tiefe gedrehte Rindenrillen
+  const trunk = lathe([[0, 0.82], [0.32, 0.84], [0.36, 1.0], [0.32, 1.25], [0.38, 1.55], [0.5, 1.85], [0.52, 2.02], [0.36, 2.16], [0.16, 2.24], [0, 2.26]], 16);
+  warp(trunk, (p) => { const a = Math.atan2(p.x, p.z), k = 1 + 0.1 * Math.sin(a * 8 + p.y * 3.2) + 0.035 * Math.sin(a * 21 - p.y * 5); p.x *= k; p.z *= k * 0.8; });
+  Rp(trunk, [0, 0.9, 0], 0.14, 0, 0);
   K.add(trunk, bark, MAT.bark);
-  // Gesicht: Brauenwulst, Augenhöhlen, Mund-Riss
-  const brow = sweep([[-0.22, 1.86, 0.38], [0, 1.8, 0.47], [0.22, 1.86, 0.38]], [0.06, 0.06], 6, 10); K.add(brow, shade(bark, 0.85), MAT.bark);
-  for (const s of [1, -1]) { const e = sph(0.06, 8, 6); e.scale(1.3, 0.7, 0.5); e.translate(0.11 * s, 1.75, 0.45); K.add(e, P.dark, MAT.bark); }
-  eyes(K, [0, 1.75, 0.48], 0.11, 0.035, P.glw, 3.6, 0.6);
-  const mouth = ext(shape([[-0.12, 0], [-0.04, -0.03], [0, 0.01], [0.05, -0.04], [0.12, 0.0], [0.04, -0.07], [-0.05, -0.06]]), 0.02, 0.006, 1); mouth.translate(0, 1.56, 0.46); R(mouth, 0, 0, 0); K.glow(mouth, P.glw, 1.8);
-  // Herz-Kristall in Brust-Riss
-  const heart = crystal(0.06, 0.18, 6); heart.translate(0.12, 1.3, 0.38); K.glow(heart, P.glw, 2.6);
-  // Wurzelbeine
+  // dunkle Rindenstreifen
+  for (let i = 0; i < 7; i++) {
+    const a = -1.2 + i * 0.4, pts = [];
+    for (let k = 0; k <= 3; k++) { const y = 0.9 + k * 0.38, r = [0.36, 0.33, 0.4, 0.5][k] * 0.98; const aa = a + k * 0.25; pts.push(V(Math.sin(aa) * r, y, Math.cos(aa) * r * 0.8)); }
+    const g = sweep(pts, (u) => 0.03 * Math.sin(PI * (0.1 + 0.8 * u)), 3, 6); Rp(g, [0, 0.9, 0], 0.14, 0, 0); K.add(g, dbark, MAT.bark);
+  }
+  // Gesicht
+  const fz = 0.52;
+  const brow = sweep([[-0.26, 1.9, fz - 0.1], [0, 1.82, fz], [0.26, 1.9, fz - 0.1]], (u) => 0.05 + 0.03 * Math.sin(u * PI), 6, 10); K.add(brow, shade(bark, 0.85), MAT.bark);
+  for (const s of [1, -1]) { const e = sph(0.07, 8, 6); e.scale(1.3, 0.75, 0.5); e.translate(0.12 * s, 1.74, fz - 0.03); K.add(e, P.dark, MAT.bark); }
+  eyes(K, [0, 1.74, fz], 0.12, 0.038, P.glw, 3.6, 0.6);
+  const nose = sweep([[0, 1.78, fz - 0.02], [0, 1.68, fz + 0.06], [0, 1.6, fz + 0.04]], (u) => 0.05 * (1 - u * 0.5), 5, 6); K.add(nose, bark, MAT.bark);
+  const mouth = ext(shape([[-0.14, 0], [-0.05, -0.035], [0, 0.0], [0.06, -0.045], [0.14, 0.0], [0.05, -0.08], [-0.06, -0.07]]), 0.03, 0); mouth.translate(0, 1.52, fz - 0.03); K.glow(mouth, P.glw, 1.8);
+  const beard = [[-0.12, 1.47], [0, 1.44], [0.12, 1.47]];
+  for (const [x, y] of beard) { const m = sweep([V(x, y, fz - 0.06), V(x * 1.2, y - 0.15, fz), V(x * 1.1, y - 0.32, fz - 0.04)], (u) => 0.04 * (1 - u * 0.7), 4, 5); K.add(m, P.moss, MAT.leaf); }
+  const heart = crystal(0.07, 0.2, 6); heart.translate(0.16, 1.22, 0.42); K.glow(heart, P.glw, 2.6);
+  // Wurzelbeine (kräftig)
   for (const s of [1, -1]) {
     const f = s > 0 ? 0.12 : -0.08;
-    const hip = V(0.2 * s, 1.0, 0), knee = V(0.34 * s, 0.55, 0.08 + f), foot = V(0.36 * s, 0.1, f);
-    K.add(sweep([hip, knee, foot], (u) => 0.17 - u * 0.05, 9, 10), bark, MAT.bark);
+    const hip = V(0.22 * s, 1.0, 0), knee = V(0.36 * s, 0.56, 0.1 + f), foot = V(0.38 * s, 0.12, f);
+    K.add(sweep([hip, knee, foot], (u) => 0.2 - u * 0.05, 8, 8), bark, MAT.bark);
+    const kn = blob(0.14, 3 + s, 0.25, 7, 5); T(kn, knee.clone().add(V(0, 0, 0.05))); K.add(kn, shade(bark, 0.9), MAT.bark);
     for (let i = -1; i <= 1; i++) {
-      const a = i * 0.7 + (s > 0 ? 0.2 : -0.2);
-      K.add(sweep([foot, foot.clone().add(V(Math.sin(a) * 0.15, -0.07, Math.cos(a) * 0.15)), foot.clone().add(V(Math.sin(a) * 0.32, -0.1, Math.cos(a) * 0.3))], (u) => 0.08 * (1 - u * 0.85), 6, 7), bark, MAT.bark);
+      const a = i * 0.75 + (s > 0 ? 0.25 : -0.25);
+      K.add(sweep([foot, foot.clone().add(V(Math.sin(a) * 0.16, -0.08, Math.cos(a) * 0.16)), foot.clone().add(V(Math.sin(a) * 0.34, -0.12, Math.cos(a) * 0.32))], (u) => 0.09 * (1 - u * 0.85), 5, 4), bark, MAT.bark);
     }
   }
-  // Ast-Arme mit Zweigfingern
+  // Ast-Arme: dick, knorrig, mit Krallenzweigen
   for (const s of [1, -1]) {
-    const sh = V(0.36 * s, 1.95, 0.16), el = V(0.68 * s, 1.55, 0.25), ha = V(0.7 * s, 0.98, 0.42);
-    K.add(sweep([sh, el, ha], (u) => 0.15 - u * 0.07, 8, 12), bark, MAT.bark);
-    for (let i = 0; i < 3; i++) {
-      const a = (i - 1) * 0.5;
-      K.add(sweep([ha, ha.clone().add(V(Math.sin(a) * 0.08 * s, -0.12, 0.06 + Math.cos(a) * 0.04)), ha.clone().add(V(Math.sin(a) * 0.12 * s, -0.3, 0.14))], (u) => 0.055 * (1 - u * 0.85), 5, 7), bark, MAT.bark);
+    const sh = V(0.5 * s, 1.98, 0.12), el = V(0.78 * s, 1.62, 0.22), ha = V(0.72 * s, 1.18, 0.42);
+    K.add(sweep([sh, el, ha], (u) => 0.19 - u * 0.08, 7, 9), bark, MAT.bark);
+    const sb = blob(0.22, 5 + s, 0.2, 9, 7); sb.scale(1.1, 0.8, 1); T(sb, sh.clone().add(V(0.02 * s, 0.04, 0))); K.add(sb, shade(bark, 1.05), MAT.bark);
+    const kn = blob(0.15, 7 + s, 0.25, 8, 6); T(kn, ha); K.add(kn, shade(bark, 0.95), MAT.bark);
+    for (let i = 0; i < 4; i++) {
+      const a = (i - 1.5) * 0.45;
+      K.add(sweep([ha, ha.clone().add(V(Math.sin(a) * 0.1 * s, -0.12, 0.08 + Math.cos(a) * 0.04)), ha.clone().add(V(Math.sin(a) * 0.15 * s, -0.32, 0.16))], (u) => 0.055 * (1 - u * 0.85), 4, 4), bark, MAT.bark);
     }
-    // Zweig nach oben mit Blättern
-    const tw = el.clone().add(V(0.05 * s, 0.05, 0));
-    K.add(sweep([tw, tw.clone().add(V(0.12 * s, 0.25, -0.05)), tw.clone().add(V(0.18 * s, 0.45, 0.0))], (u) => 0.05 * (1 - u * 0.8), 5, 7), bark, MAT.bark);
-    const lb = blob(0.16, 11 + s, 0.25, 9, 7); lb.translate(tw.x + 0.2 * s, tw.y + 0.48, tw.z); K.add(lb, leaf, MAT.leaf);
+    const tw = el.clone().add(V(0.02 * s, 0.08, -0.02));
+    K.add(sweep([tw, tw.clone().add(V(0.12 * s, 0.22, -0.04)), tw.clone().add(V(0.16 * s, 0.4, 0.0))], (u) => 0.055 * (1 - u * 0.8), 5, 6), bark, MAT.bark);
+    const lb = blob(0.17, 11 + s, 0.25, 9, 7); lb.translate(tw.x + 0.17 * s, tw.y + 0.44, tw.z); K.add(lb, shade(leaf, 0.9), MAT.leaf);
+    const m = blob(0.14, 5 + s, 0.3, 8, 6); m.scale(1.4, 0.45, 1.1); m.translate(0.46 * s, 2.12, 0.1); K.add(m, P.moss, MAT.leaf);
   }
+  // Abgebrochene Äste (Hörner) unter der Krone
+  for (const s of [1, -1]) K.add(sweep([V(0.22 * s, 2.12, 0.0), V(0.4 * s, 2.32, -0.02), V(0.48 * s, 2.5, 0.05)], (u) => 0.06 * (1 - u * 0.8), 5, 6), bark, MAT.bark);
   // Laubkrone
-  const crown = [[0, 2.42, -0.05, 0.42], [0.35, 2.28, 0.0, 0.3], [-0.35, 2.3, -0.05, 0.32], [0.15, 2.3, 0.28, 0.24], [-0.18, 2.25, 0.25, 0.22], [0.0, 2.25, -0.38, 0.3], [0.32, 2.12, -0.25, 0.22], [-0.3, 2.1, -0.28, 0.22]];
-  crown.forEach(([x, y, z, r], i) => { const b = blob(r, i * 2 + 1, 0.22, 10, 8); b.translate(x, y, z); K.add(b, i % 3 === 0 ? shade(leaf, 1.15) : (i % 3 === 1 ? leaf : shade(leaf, 0.82)), MAT.leaf); });
-  // Moos, Pilze
-  for (const s of [1, -1]) { const m = blob(0.12, 5 + s, 0.3, 8, 6); m.scale(1.3, 0.5, 1); m.translate(0.32 * s, 1.98, 0.12); K.add(m, P.moss, MAT.leaf); }
-  for (let i = 0; i < 3; i++) { const cap = dome(0.06 - i * 0.012, 0.04, 8, 0.05); cap.translate(-0.33, 1.42 - i * 0.12, 0.22 + i * 0.02); K.add(cap, mix(P.ember, P.white, 0.3), MAT.cloth); }
-  if (t >= 2) { for (let i = 0; i < 5 + t * 2; i++) { const a = i * 2.1; const f = sph(0.028, 6, 4); f.translate(Math.cos(a) * 0.55, 2.0 + Math.sin(i * 1.3) * 0.35, Math.sin(a) * 0.45); K.glow(f, P.glw, 3); } }
-  if (t >= 3) { const bl = [[0.2, 2.6, 0.15], [-0.25, 2.55, 0.1], [0.1, 2.62, -0.25], [0.42, 2.38, 0.08], [-0.42, 2.38, -0.05]]; for (const p of bl) { const f = ext(starShape(0.05, 0.02, 5), 0.01, 0.004, 1); f.rotateX(-PI / 2 + 0.3); T(f, p); K.glow(f, P.white, 2.2); } }
-  return [0.98, 0.9];
+  const crown = [[0, 2.5, -0.1, 0.44], [0.38, 2.38, -0.05, 0.32], [-0.38, 2.4, -0.1, 0.33], [0.18, 2.42, 0.25, 0.26], [-0.2, 2.36, 0.24, 0.24], [0.0, 2.32, -0.42, 0.32], [0.34, 2.22, -0.3, 0.24], [-0.34, 2.2, -0.32, 0.24]];
+  crown.forEach(([x, y, z, r], i) => { const b = blob(r, i * 2 + 1, 0.22, 8, 6); b.translate(x, y, z); K.add(b, i % 3 === 0 ? shade(leaf, 1.15) : (i % 3 === 1 ? leaf : shade(leaf, 0.8)), MAT.leaf); });
+  // Hängende Ranken
+  for (let i = 0; i < 4; i++) { const a = -1.2 + i * 0.8, x = Math.sin(a) * 0.5, z = Math.cos(a) * 0.3; K.add(sweep([V(x, 2.25, z), V(x * 1.05, 2.0, z + 0.05), V(x * 1.1, 1.75, z)], (u) => 0.025 * (1 - u * 0.6), 3, 5), shade(P.moss, 0.85), MAT.leaf); }
+  for (let i = 0; i < 3; i++) { const cap = dome(0.06 - i * 0.012, 0.045, 6, 0.05); cap.translate(-0.36, 1.4 - i * 0.12, 0.26 + i * 0.02); K.add(cap, mix(P.ember, P.white, 0.3), MAT.cloth); }
+  if (t >= 2) { for (let i = 0; i < 5 + t * 2; i++) { const a = i * 2.1; const f = sph(0.028, 6, 4); f.translate(Math.cos(a) * 0.6, 2.0 + Math.sin(i * 1.3) * 0.35, Math.sin(a) * 0.5); K.glow(f, P.glw, 3); } }
+  if (t >= 3) { const bl = [[0.2, 2.72, 0.15], [-0.25, 2.66, 0.1], [0.1, 2.74, -0.25], [0.46, 2.5, 0.08], [-0.46, 2.5, -0.05]]; for (const p of bl) { const f = ext(starShape(0.06, 0.025, 5), 0.01, 0); f.rotateX(-PI / 2 + 0.3); T(f, p); K.glow(f, P.white, 2.2); } }
+  return [0.95, 0.9];
 }
 
 // ---- Pilz-Schamane --------------------------------------------------------------------------------
 function mushroom(K) {
-  const P = K.P, t = K.tier, cap = P.pri, stem = P.sec;
+  const P = K.P, t = K.tier, cap = mix('#b8402e', P.sec, 0.2), stem = mix('#d9c9a8', P.pri, 0.1);
   // Körper (Stiel)
   const body = lathe([[0, 0.18], [0.2, 0.2], [0.27, 0.42], [0.25, 0.7], [0.19, 0.95], [0.15, 1.1], [0, 1.12]], 14); K.add(body, stem, MAT.skin);
   // Ring (Manschette) mit Fransen
@@ -1416,7 +1442,7 @@ function mushroom(K) {
   const bulb = lathe([[0, -0.02], [0.07, 0.03], [0.09, 0.12], [0.05, 0.2], [0, 0.22]], 10); bulb.translate(-0.38, 1.25, 0.2); K.glow(bulb, P.glw, 2.8);
   const bc = dome(0.11, 0.06, 10, 0.1); bc.translate(-0.38, 1.46, 0.2); K.add(bc, cap, MAT.skin);
   // Moos-Gürtel / Blätter
-  for (let i = 0; i < 6; i++) { const lf = ext(leafShape(0.14, 0.08), 0.008, 0.004, 1, 2); R(lf, PI - 0.3, 0, 0); lf.translate(0, 0, 0.25); lf.rotateY((i / 6) * TAU); lf.translate(0, 0.62, 0); K.add(lf, P.leaf, MAT.leaf); }
+  for (let i = 0; i < 6; i++) { const lf = ext(leafShape(0.14, 0.08), 0.008, 0.004, 1, 2); R(lf, PI - 0.3, 0, 0); lf.translate(0, 0, 0.25); lf.rotateY((i / 6) * TAU); lf.translate(0, 0.62, 0); K.add(lf, mix(P.leaf, P.pri, 0.6), MAT.leaf); }
   // schwebende Sporen
   const sn = 6 + t * 3;
   for (let i = 0; i < sn; i++) { const a = i * 2.39996, r = 0.5 + 0.25 * ((i * 0.37) % 1); const s = sph(0.022 + (i % 3) * 0.008, 6, 4); s.translate(Math.cos(a) * r, 0.6 + ((i * 0.618) % 1) * 1.1, Math.sin(a) * r); K.glow(s, P.glw, 2.8); }
@@ -1620,50 +1646,55 @@ function brute(K) {
 
 // ---- Raptor ---------------------------------------------------------------------------------------
 function raptor(K) {
-  const P = K.P, t = K.tier, skin = P.pri, belly = P.sec;
-  const bd = blob(0.24, 3, 0.04); bd.scale(0.95, 1, 1.6); R(bd, -0.25, 0, 0); bd.translate(0, 1.0, -0.05); K.add(bd, skin, MAT.scale);
-  const bb = ell(0.17, 0.15, 0.3, 10, 7); R(bb, -0.25, 0, 0); bb.translate(0, 0.9, 0.04); K.add(bb, belly, MAT.skin);
+  const P = K.P, t = K.tier, skin = P.pri, belly = mix(P.sec, '#d8c8a0', 0.6), stripe = shade(P.pri, 0.55);
+  // Rumpf (waagerecht)
+  const bd = blob(0.27, 3, 0.04); bd.scale(0.88, 0.95, 1.45); R(bd, -0.12, 0, 0); bd.translate(0, 1.0, -0.02); K.add(bd, skin, MAT.scale);
+  const bb = ell(0.19, 0.14, 0.32, 10, 6); R(bb, -0.15, 0, 0); bb.translate(0, 0.87, 0.04); K.add(bb, belly, MAT.skin);
+  // Streifen über den Rücken
+  for (let i = 0; i < 5; i++) { const st = tor(0.24 - Math.abs(i - 1) * 0.02, 0.025, 3, 10, PI * 0.9); st.rotateY(PI / 2); st.rotateZ(PI * 0.05); st.scale(0.92, 1, 1); st.translate(0, 0.98 - i * 0.01, 0.2 - i * 0.14); K.add(st, stripe, MAT.scale); }
   // Hals + Kopf
-  K.add(sweep([[0, 1.12, 0.25], [0, 1.32, 0.4], [0, 1.45, 0.5]], (u) => 0.13 - u * 0.04, 8, 8), skin, MAT.scale);
-  const hc = V(0, 1.5, 0.6);
-  const sk = ell(0.12, 0.11, 0.16, 10, 7); T(sk, hc); K.add(sk, skin, MAT.scale);
-  K.add(seg(hc.clone().add(V(0, 0.0, 0.06)), hc.clone().add(V(0, -0.02, 0.3)), 0.085, 0.05, 7, 2), skin, MAT.scale);
-  K.add(seg(hc.clone().add(V(0, -0.07, 0.04)), hc.clone().add(V(0, -0.14, 0.26)), 0.06, 0.035, 7, 2), shade(belly, 0.9), MAT.skin);
-  for (const s of [1, -1]) for (let i = 0; i < 4; i++) { const f = cone(0.01, 0.04, 4); f.rotateX(PI); f.translate(s * 0.045, hc.y - 0.06 - i * 0.008, hc.z + 0.1 + i * 0.05); K.add(f, P.white, MAT.bone); }
-  eyes(K, [0, hc.y + 0.03, hc.z + 0.08], 0.085, 0.02, P.glw, 3.6, 0.5);
-  // Federkamm
-  for (let i = 0; i < 5; i++) { const f = ext(featherShape(0.24 - i * 0.03, 0.06), 0.008, 0.004, 1, 2); R(f, -1.0 - i * 0.12, 0, 0); f.translate(0, hc.y + 0.08 - i * 0.03, hc.z - 0.04 - i * 0.07); K.add(f, i % 2 ? P.sec : shade(P.glw, 0.6), MAT.cloth); }
-  // Beine (kräftig, digitigrad, Sichelkralle)
+  K.add(sweep([[0, 1.1, 0.28], [0, 1.28, 0.42], [0, 1.38, 0.52]], (u) => 0.14 - u * 0.04, 8, 8), skin, MAT.scale);
+  const hc = V(0, 1.44, 0.6);
+  const sk = ell(0.13, 0.12, 0.17, 10, 7); T(sk, hc); K.add(sk, skin, MAT.scale);
+  K.add(seg(hc.clone().add(V(0, 0.0, 0.08)), hc.clone().add(V(0, -0.03, 0.34)), 0.095, 0.055, 7, 2), skin, MAT.scale);
+  K.add(seg(hc.clone().add(V(0, -0.08, 0.05)), hc.clone().add(V(0, -0.17, 0.3)), 0.07, 0.04, 7, 2), shade(belly, 0.85), MAT.skin);
+  const mouth = box(0.07, 0.04, 0.2); mouth.rotateX(-0.2); mouth.translate(hc.x, hc.y - 0.08, hc.z + 0.2); K.add(mouth, P.dark, MAT.skin);
+  for (const s of [1, -1]) for (let i = 0; i < 4; i++) { const f = cone(0.012, 0.045, 4); f.rotateX(PI); f.translate(s * 0.05, hc.y - 0.05 - i * 0.008, hc.z + 0.12 + i * 0.055); K.add(f, P.white, MAT.bone); }
+  const brow = ell(0.05, 0.025, 0.08, 6, 4); brow.translate(0.08, hc.y + 0.06, hc.z + 0.08); K.sym(brow, stripe, MAT.scale);
+  eyes(K, [0, hc.y + 0.04, hc.z + 0.1], 0.09, 0.022, P.glw, 3.6, 0.5);
+  // Federkamm über Kopf und Hals
+  for (let i = 0; i < 6; i++) { const f = ext(featherShape(0.24 - i * 0.025, 0.07), 0.012, 0); R(f, -1.15 - i * 0.1, 0, 0); f.translate(0, hc.y + 0.1 - i * 0.04, hc.z - 0.04 - i * 0.07); K.add(f, i % 2 ? mix(P.glw, P.sec, 0.5) : P.sec, MAT.cloth); }
+  // Beine
   for (const s of [1, -1]) {
     const f = s > 0 ? 0.12 : -0.1;
-    const hip = V(0.15 * s, 0.98, -0.1), kn = V(0.2 * s, 0.68, 0.12 + f * 0.3), an = V(0.18 * s, 0.3, -0.12 + f), ft = V(0.18 * s, 0.05, 0.0 + f);
-    K.add(seg(hip, kn, 0.14, 0.09, 8, 2), skin, MAT.scale); K.add(seg(kn, an, 0.07, 0.05, 7, 2), skin, MAT.scale); K.add(seg(an, ft, 0.045, 0.04, 6, 2), skin, MAT.scale);
-    for (let i = -1; i <= 1; i++) K.add(sweep([ft, ft.clone().add(V(i * 0.05, -0.02, 0.1)), ft.clone().add(V(i * 0.07, -0.04, 0.16))], (u) => 0.025 * (1 - u * 0.7), 5, 5), skin, MAT.scale);
-    K.add(sweep([ft.clone().add(V(0.02 * s, 0.02, 0.02)), ft.clone().add(V(0.03 * s, 0.1, 0.08)), ft.clone().add(V(0.03 * s, 0.06, 0.16))], (u) => 0.02 * (1 - u * 0.85), 5, 6), P.bone, MAT.bone);
-    // Ärmchen
-    const sh = V(0.13 * s, 1.08, 0.3), el = V(0.16 * s, 0.94, 0.38), ha = V(0.12 * s, 0.92, 0.48);
-    K.add(seg(sh, el, 0.04, 0.03, 6, 2), skin, MAT.scale); K.add(seg(el, ha, 0.03, 0.025, 6, 2), skin, MAT.scale);
+    const hip = V(0.16 * s, 0.98, -0.08), kn = V(0.21 * s, 0.64, 0.14 + f * 0.3), an = V(0.19 * s, 0.28, -0.1 + f), ft = V(0.19 * s, 0.05, 0.02 + f);
+    const th = blob(0.16, 4 + s, 0.04, 9, 7); th.scale(0.8, 1.2, 1); T(th, hip.clone().lerp(kn, 0.4)); K.add(th, skin, MAT.scale);
+    K.add(seg(kn, an, 0.075, 0.05, 6, 2), skin, MAT.scale); K.add(seg(an, ft, 0.05, 0.04, 6, 2), stripe, MAT.scale);
+    for (let i = -1; i <= 1; i++) K.add(sweep([ft, ft.clone().add(V(i * 0.05, -0.02, 0.1)), ft.clone().add(V(i * 0.07, -0.04, 0.16))], (u) => 0.025 * (1 - u * 0.7), 4, 4), stripe, MAT.scale);
+    K.add(sweep([ft.clone().add(V(0.02 * s, 0.02, 0.02)), ft.clone().add(V(0.03 * s, 0.12, 0.08)), ft.clone().add(V(0.03 * s, 0.07, 0.17))], (u) => 0.022 * (1 - u * 0.85), 5, 6), P.bone, MAT.bone);
+    const sh = V(0.13 * s, 1.0, 0.32), el = V(0.17 * s, 0.86, 0.38), ha = V(0.13 * s, 0.84, 0.48);
+    K.add(seg(sh, el, 0.045, 0.035, 6, 2), skin, MAT.scale); K.add(seg(el, ha, 0.035, 0.028, 6, 2), skin, MAT.scale);
+    for (let i = 0; i < 2; i++) { const c = cone(0.012, 0.06, 4); aim(c, ha, V(i * 0.3 - 0.15, -0.6, 1)); K.add(c, P.bone, MAT.bone); }
   }
-  // Schwanz
-  K.add(sweep([[0, 1.05, -0.35], [0, 1.08, -0.7], [0, 1.0, -1.05], [0, 0.88, -1.35]], (u) => 0.14 * (1 - u * 0.9), 8, 14), skin, MAT.scale);
-  // Rückenstreifen / Platten
-  for (let i = 0; i < 6; i++) { const pl = ell(0.06, 0.02, 0.07, 6, 4); pl.translate(0, 1.24 - i * 0.02 - (i > 3 ? (i - 3) * 0.04 : 0), 0.15 - i * 0.18); K.add(pl, P.sec, MAT.scale); }
-  // Rüstung: Kopfplatte
+  // Schwanz (dick an der Wurzel, waagerecht)
+  K.add(sweep([[0, 1.02, -0.32], [0, 1.08, -0.68], [0, 1.02, -1.05], [0, 0.92, -1.4]], (u) => 0.17 * (1 - u * 0.92), 8, 14), skin, MAT.scale);
+  for (let i = 0; i < 4; i++) { const st = ell(0.1 - i * 0.02, 0.04, 0.05, 6, 4); st.translate(0, 1.13 - i * 0.03, -0.55 - i * 0.22); K.add(st, stripe, MAT.scale); }
+  // Rüstung: Kopfplatte + Sattelgurt
   const hm = dome(0.1, 0.05, 8, 0.1); hm.scale(1, 1, 1.5); hm.translate(hc.x, hc.y + 0.08, hc.z + 0.02); K.add(hm, P.met, MAT.metal);
-  if (t >= 2) { const c = tor(0.15, 0.025, 4, 12); R(c, PI / 2 - 0.9, 0, 0); c.translate(0, 1.3, 0.42); K.add(c, P.met, MAT.metal); }
-  if (t >= 3) { for (let i = 0; i < 4; i++) { const sp = cone(0.03, 0.14, 5); R(sp, -0.5, 0, 0); sp.translate(0, 1.22 - i * 0.03, 0.05 - i * 0.2); K.add(sp, P.met, MAT.metal); } }
+  if (t >= 2) { const c = tor(0.15, 0.025, 4, 12); R(c, PI / 2 - 0.9, 0, 0); c.translate(0, 1.26, 0.42); K.add(c, P.met, MAT.metal); }
+  if (t >= 3) { for (let i = 0; i < 4; i++) { const sp = cone(0.03, 0.14, 5); R(sp, -0.5, 0, 0); sp.translate(0, 1.24 - i * 0.03, 0.08 - i * 0.2); K.add(sp, P.met, MAT.metal); } }
   return [1.05, 0.65];
 }
 
 // ---- Naga / Schlangenkrieger ----------------------------------------------------------------------
 function serpent(K) {
-  const P = K.P, t = K.tier, scale = P.pri, belly = P.sec;
+  const P = K.P, t = K.tier, scale = P.pri, belly = mix(P.sec, '#d8c8a0', 0.5);
   // Schlangenschwanz: Spirale am Boden, dann aufrecht
   const pts = [];
   for (let i = 0; i <= 10; i++) { const a = -0.6 + i * 0.6, r = 0.18 + i * 0.035; pts.push(V(Math.sin(a) * r, 0.1 + Math.max(0, 7 - i) * 0.008, -Math.cos(a) * r * 0.9 - 0.05)); }
   pts.reverse();
   pts.push(V(0, 0.32, 0.06), V(0, 0.65, 0.02), V(0, 0.95, -0.02));
-  const tail = sweep(pts, (u) => 0.025 + 0.16 * Math.pow(u, 0.6), 8, 36);
+  const tail = sweep(pts, (u) => 0.025 + 0.16 * Math.pow(u, 0.6), 7, 30);
   K.add(tail, scale, MAT.scale);
   // Bauchschuppen vorne am aufrechten Teil
   for (let i = 0; i < 6; i++) { const b = ell(0.11, 0.035, 0.05, 6, 3); b.translate(0, 0.35 + i * 0.1, 0.17 - i * 0.01); K.add(b, belly, MAT.scale); }
@@ -1719,7 +1750,7 @@ function vent(K, p, dir, r, col, k = 3) {
 
 // ---- Automaton ------------------------------------------------------------------------------------
 function automaton(K) {
-  const P = K.P, t = K.tier, paint = P.pri, steel = P.met;
+  const P = K.P, t = K.tier, paint = mix(P.sec, P.pri, 0.25), panel = P.pri, steel = P.met;
   // Beine
   for (const s of [1, -1]) {
     const f = s > 0 ? 0.1 : -0.06;
@@ -1729,7 +1760,7 @@ function automaton(K) {
     const shin = lathe([[0, 0], [0.09, 0.0], [0.11, 0.12], [0.1, 0.32], [0.075, 0.4], [0, 0.4]], 8); between(shin, ank, knee); K.add(shin, paint, MAT.paint);
     joint(K, knee, 0.08); joint(K, hip, 0.08, steel);
     const ft = rbox(0.17, 0.09, 0.3, 0.03, 1); ft.translate(ank.x, 0.05, ank.z + 0.06); K.add(ft, steel, MAT.metal);
-    const toe = rbox(0.15, 0.06, 0.08, 0.025, 1); toe.rotateX(0.3); toe.translate(ank.x, 0.07, ank.z + 0.2); K.add(toe, paint, MAT.paint);
+    const toe = box(0.15, 0.06, 0.08); toe.rotateX(0.3); toe.translate(ank.x, 0.07, ank.z + 0.2); K.add(toe, paint, MAT.paint);
   }
   // Becken + Taille
   K.add(rbox(0.38, 0.17, 0.26, 0.05, 1).translate(0, 0.95, 0), steel, MAT.metal);
@@ -1738,7 +1769,7 @@ function automaton(K) {
   // Brustpanzer
   const ch = lathe([[0, 1.18], [0.22, 1.2], [0.3, 1.32], [0.36, 1.48], [0.34, 1.62], [0.22, 1.7], [0, 1.72]], 12); ch.scale(1, 1, 0.78); K.add(ch, paint, MAT.paint);
   const plate = ext(shape([[-0.24, -0.16], [0.24, -0.16], [0.28, 0.08], [0.16, 0.2], [-0.16, 0.2], [-0.28, 0.08]]), 0.03, 0.012, 1); bend(plate, 1.6);
-  plate.translate(0, 1.45, 0.24); K.add(plate, steel, MAT.metal);
+  plate.translate(0, 1.45, 0.24); K.add(plate, panel, MAT.paint);
   // Kern
   const cr = tor(0.09, 0.025, 6, 16); cr.translate(0, 1.46, 0.29); K.add(cr, P.gold, MAT.gold);
   const core = sph(0.075, 12, 8); core.translate(0, 1.46, 0.28); K.glow(core, P.glw, 3.6);
@@ -1776,21 +1807,21 @@ function automaton(K) {
 
 // ---- Läufer (Vierbein-Mech mit Balliste) ----------------------------------------------------------
 function walker(K) {
-  const P = K.P, t = K.tier, paint = P.pri, steel = P.met;
+  const P = K.P, t = K.tier, paint = mix(P.sec, P.pri, 0.25), panel = P.pri, steel = P.met;
   const hy = 1.0;
   // Rumpf
-  const hull = lathe([[0, hy - 0.22], [0.3, hy - 0.2], [0.44, hy - 0.08], [0.46, hy + 0.04], [0.38, hy + 0.14], [0, hy + 0.16]], 12); hull.scale(1, 1, 1.15); K.add(hull, paint, MAT.paint);
+  const hull = lathe([[0, hy - 0.22], [0.3, hy - 0.2], [0.44, hy - 0.08], [0.46, hy + 0.04], [0.38, hy + 0.14], [0, hy + 0.16]], 10); hull.scale(1, 1, 1.15); K.add(hull, paint, MAT.paint);
   const skirt = tor(0.45, 0.03, 4, 16); skirt.rotateX(PI / 2); skirt.scale(1, 1, 1.15); skirt.translate(0, hy - 0.02, 0); K.add(skirt, P.gold, MAT.gold);
   const belly = ell(0.3, 0.12, 0.34, 10, 6); belly.translate(0, hy - 0.2, 0); K.add(belly, shade(steel, 0.55), MAT.dmetal);
   // Sensorkopf vorne
-  const head = rbox(0.24, 0.14, 0.18, 0.05, 1); head.translate(0, hy, 0.5); K.add(head, steel, MAT.metal);
+  const head = rbox(0.24, 0.14, 0.18, 0.05, 1); head.translate(0, hy, 0.5); K.add(head, panel, MAT.paint);
   const eye = cyl(0.045, 0.045, 0.03, 10); eye.rotateX(PI / 2); eye.translate(0, hy + 0.01, 0.6); K.glow(eye, P.glw, 3.6);
   for (const s of [1, -1]) { const e = cyl(0.022, 0.022, 0.03, 8); e.rotateX(PI / 2); e.translate(0.08 * s, hy - 0.02, 0.595); K.glow(e, P.glw, 2.6); }
   // Beine (4, insektenartig)
   for (const sx of [1, -1]) for (const sz of [1, -1]) {
     const hip = V(0.34 * sx, hy - 0.04, 0.3 * sz), kn = V(0.6 * sx, hy + 0.22, 0.5 * sz), ft = V(0.7 * sx, 0.0, 0.62 * sz);
     joint(K, hip, 0.11, steel);
-    K.add(shaft(hip, kn, [[0, 0], [0.09, 0.05], [0.12, 0.4], [0.08, 0.95], [0, 1]], 8), paint, MAT.paint);
+    K.add(shaft(hip, kn, [[0, 0], [0.09, 0.05], [0.12, 0.4], [0.08, 0.95], [0, 1]], 7), paint, MAT.paint);
     const kp = dome(0.1, 0.08, 8, 0.1); aim(kp, kn, kn.clone().sub(hip).normalize().add(V(0, 0.6, 0))); K.add(kp, steel, MAT.metal);
     joint(K, kn, 0.085);
     K.add(shaft(kn, ft.clone().add(V(0, 0.14, 0)), [[0, 0], [0.08, 0.06], [0.09, 0.3], [0.055, 1]], 8), shade(steel, 0.7), MAT.dmetal);
@@ -1821,7 +1852,7 @@ function walker(K) {
 
 // ---- Mörser-Mech ----------------------------------------------------------------------------------
 function mortar(K) {
-  const P = K.P, t = K.tier, paint = P.pri, steel = P.met;
+  const P = K.P, t = K.tier, paint = mix(P.sec, P.pri, 0.25), panel = P.pri, steel = P.met;
   // Stummelbeine
   for (const s of [1, -1]) {
     const hip = V(0.3 * s, 0.6, 0), kn = V(0.4 * s, 0.38, 0.12), ft = V(0.38 * s, 0.08, 0.04);
@@ -1833,7 +1864,7 @@ function mortar(K) {
   }
   // Rumpf (breit, gedrungen)
   const hull = rbox(0.78, 0.5, 0.62, 0.16, 2); hull.translate(0, 0.85, 0); K.add(hull, paint, MAT.paint);
-  const fr = ext(shape([[-0.3, -0.18], [0.3, -0.18], [0.34, 0.1], [0.22, 0.2], [-0.22, 0.2], [-0.34, 0.1]]), 0.04, 0.015, 1); bend(fr, 0.8); fr.translate(0, 0.86, 0.32); K.add(fr, steel, MAT.metal);
+  const fr = ext(shape([[-0.3, -0.18], [0.3, -0.18], [0.34, 0.1], [0.22, 0.2], [-0.22, 0.2], [-0.34, 0.1]]), 0.04, 0.015, 1); bend(fr, 0.8); fr.translate(0, 0.86, 0.32); K.add(fr, panel, MAT.paint);
   const bar = tor(0.4, 0.03, 4, 16); bar.rotateX(PI / 2); bar.scale(1.05, 1, 0.85); bar.translate(0, 0.62, 0); K.add(bar, P.gold, MAT.gold);
   // Kanzel/Auge
   const eyeH = dome(0.14, 0.1, 10, 0.1); eyeH.rotateX(PI / 2); eyeH.translate(0, 0.95, 0.36); K.add(eyeH, steel, MAT.metal);
@@ -1864,9 +1895,10 @@ function core(K) {
   const P = K.P, t = K.tier, lift = 0.45;
   const c = V(0, 0.85 + lift, 0);
   // Hauptkristall: Hülle (Körper) + leuchtender Kern
-  const shell = crystal(0.24, 0.85, 6); shell.translate(c.x, c.y - 0.3, c.z); K.add(shell, P.pri, MAT.crystal);
+  const cc = shade(mix(P.glw, P.sec, 0.3), 0.75);
+  const shell = crystal(0.24, 0.85, 6); shell.translate(c.x, c.y - 0.3, c.z); K.add(shell, cc, MAT.crystal);
   const inner = crystal(0.15, 0.6, 6); inner.translate(c.x, c.y - 0.2, c.z); K.glow(inner, P.glw, 2.6);
-  const lower = crystal(0.18, 0.4, 6); lower.rotateX(PI); lower.translate(c.x, c.y - 0.34, c.z); K.add(lower, shade(P.pri, 0.8), MAT.crystal);
+  const lower = crystal(0.18, 0.4, 6); lower.rotateX(PI); lower.translate(c.x, c.y - 0.34, c.z); K.add(lower, shade(cc, 0.8), MAT.crystal);
   // Goldene Klammern
   for (let i = 0; i < 3; i++) {
     const a = (i / 3) * TAU;
@@ -1879,14 +1911,14 @@ function core(K) {
   if (t >= 2) rings.push([0.8, 0.02, 1.1, -0.5]);
   rings.forEach(([rr, th, rx, rz], i) => {
     const ring = tor(rr, th, 4, 36); ring.rotateX(PI / 2 + rx); ring.rotateZ(rz); T(ring, c); K.add(ring, i === 0 ? P.gold : P.met, MAT.gold);
-    for (let k = 0; k < 4; k++) { const a = (k / 4) * TAU + i; const r = rbox(0.05, 0.035, 0.035, 0.01); r.translate(Math.cos(a) * rr, 0, Math.sin(a) * rr); r.rotateX(rx); r.rotateZ(rz); T(r, c); K.glow(r, P.glw, 3); }
+    for (let k = 0; k < 4; k++) { const a = (k / 4) * TAU + i; const r = box(0.05, 0.035, 0.035); r.translate(Math.cos(a) * rr, 0, Math.sin(a) * rr); r.rotateX(rx); r.rotateZ(rz); T(r, c); K.glow(r, P.glw, 3); }
   });
   // Schwebende Splitter
   const ns = 5 + t * 2;
   for (let i = 0; i < ns; i++) {
     const a = (i / ns) * TAU + 0.3, r = 0.42 + (i % 2) * 0.12;
     const s = crystal(0.045, 0.16 + (i % 3) * 0.04, 5); R(s, (i % 2) * 0.4, a, 0.3); s.translate(Math.cos(a) * r, c.y - 0.15 + Math.sin(i * 2.1) * 0.25, Math.sin(a) * r);
-    K.add(s, P.pri, MAT.crystal);
+    K.add(s, cc, MAT.crystal);
   }
   // Boden-Glyphe
   runeRing(K, [0, 0.05, 0], 0.4, 10, P.glw, 2.2);
@@ -1897,11 +1929,11 @@ function core(K) {
 
 // ---- Tesla-Spinne ---------------------------------------------------------------------------------
 function spider(K) {
-  const P = K.P, t = K.tier, paint = P.pri, steel = P.met, by = 0.6;
+  const P = K.P, t = K.tier, paint = mix(P.sec, P.pri, 0.25), panel = P.pri, steel = P.met, by = 0.6;
   // Hinterleib + Kopfbrust
-  const ab = lathe([[0, -0.3], [0.22, -0.26], [0.34, -0.08], [0.36, 0.08], [0.28, 0.24], [0, 0.3]], 12); ab.rotateX(PI / 2 + 0.25); ab.scale(1, 0.8, 1.1); ab.translate(0, by + 0.12, -0.38); K.add(ab, paint, MAT.paint);
-  for (let i = 0; i < 3; i++) { const b = tor(0.3 - Math.abs(i - 1) * 0.06, 0.02, 3, 12); b.scale(1, 0.8, 1); R(b, 0.25, 0, 0); b.translate(0, by + 0.12 + i * 0.0, -0.38 - (i - 1) * 0.18); K.add(b, P.gold, MAT.gold); }
-  const th = ell(0.24, 0.16, 0.26, 12, 8); th.translate(0, by, 0.12); K.add(th, steel, MAT.metal);
+  const ab = lathe([[0, -0.3], [0.22, -0.26], [0.34, -0.08], [0.36, 0.08], [0.28, 0.24], [0, 0.3]], 11); ab.rotateX(PI / 2 + 0.25); ab.scale(1, 0.8, 1.1); ab.translate(0, by + 0.12, -0.38); K.add(ab, paint, MAT.paint);
+  for (let i = 0; i < 3; i++) { const b = tor(0.3 - Math.abs(i - 1) * 0.06, 0.02, 3, 10); b.scale(1, 0.8, 1); R(b, 0.25, 0, 0); b.translate(0, by + 0.12 + i * 0.0, -0.38 - (i - 1) * 0.18); K.add(b, P.gold, MAT.gold); }
+  const th = ell(0.24, 0.16, 0.26, 12, 8); th.translate(0, by, 0.12); K.add(th, panel, MAT.paint);
   const tp = dome(0.2, 0.08, 10, 0.08); tp.scale(1.1, 1, 1.3); tp.translate(0, by + 0.1, 0.12); K.add(tp, paint, MAT.paint);
   // Kopf mit Augen-Cluster + Beißzangen
   const hc = V(0, by + 0.02, 0.4);
@@ -1912,7 +1944,7 @@ function spider(K) {
   // 8 Beine
   for (const s of [1, -1]) for (let i = 0; i < 4; i++) {
     const z = 0.28 - i * 0.16, spread = (1.5 - i) * 0.35;
-    const a = V(0.18 * s, by, z), b = V(0.44 * s, by + 0.32, z + spread * 0.4), c = V(0.66 * s, by + 0.12, z + spread * 0.8), d = V(0.74 * s, 0.0, z + spread * 0.95);
+    const a = V(0.18 * s, by, z), b = V(0.46 * s, by + 0.3, z + spread * 0.4), c = V(0.7 * s, by - 0.12, z + spread * 0.8), d = V(0.76 * s, 0.0, z + spread * 0.92);
     joint(K, a, 0.06, steel);
     bugLeg(K, [a, b, c, d], 0.065, paint, MAT.paint, P.gold, shade(steel, 0.75));
   }
@@ -1940,7 +1972,7 @@ function bonethrower(K) {
   for (const s of [1, -1]) {
     const f = s > 0 ? 0.14 : -0.08;
     const hip = V(0.16 * s, 0.82, -0.05), kn = V(0.22 * s, 0.46, 0.12 + f * 0.4), an = V(0.22 * s, 0.1, f);
-    K.add(seg(hip, kn, 0.06, 0.05, 6, 2), bone, MAT.bone); K.add(seg(kn, an, 0.05, 0.045, 6, 2), bone, MAT.bone);
+    K.add(seg(hip, kn, 0.06, 0.05, 6, 1), bone, MAT.bone); K.add(seg(kn, an, 0.05, 0.045, 6, 1), bone, MAT.bone);
     joint(K, kn, 0.07, shade(bone, 0.9));
     const ft = ell(0.08, 0.05, 0.15, 7, 5); ft.translate(an.x, 0.05, an.z + 0.06); K.add(ft, bone, MAT.bone);
   }
@@ -1948,12 +1980,12 @@ function bonethrower(K) {
   const pel = ell(0.2, 0.1, 0.13, 10, 6); pel.translate(0, 0.86, -0.04); K.add(pel, bone, MAT.bone);
   // Wirbelsäule (gekrümmt nach vorne)
   const spine = [V(0, 0.88, -0.08), V(0, 1.15, -0.12), V(0, 1.38, 0.0), V(0, 1.52, 0.2)];
-  K.add(sweep(spine, [0.045, 0.04], 6, 12), bone, MAT.bone);
-  for (let i = 0; i < 6; i++) { const p = new THREE.CatmullRomCurve3(spine).getPointAt(i / 6); const v = sph(0.055, 6, 3); v.scale(1, 0.6, 1); T(v, p); K.add(v, shade(bone, 0.85), MAT.bone); }
+  K.add(sweep(spine, [0.045, 0.04], 5, 9), bone, MAT.bone);
+  for (let i = 0; i < 4; i++) { const p = new THREE.CatmullRomCurve3(spine).getPointAt(0.15 + i * 0.2); const v = sph(0.055, 6, 3); v.scale(1, 0.6, 1); T(v, p); K.add(v, shade(bone, 0.85), MAT.bone); }
   // Brustkorb
   const rc = V(0, 1.28, 0.06);
   for (let i = 0; i < 4; i++) {
-    const r = tor(0.24 - Math.abs(i - 1.2) * 0.03, 0.025, 3, 7, PI * 0.8);
+    const r = tor(0.24 - Math.abs(i - 1.2) * 0.03, 0.028, 3, 6, PI * 0.8);
     r.rotateX(PI / 2); r.rotateY(PI / 2 + PI * 0.1); r.scale(1, 1, 0.85);
     Rp(r, [0, 0, 0], lean * 0.6, 0, 0);
     r.translate(rc.x, rc.y + 0.12 - i * 0.09, rc.z - 0.04 + i * 0.03); K.sym(r, bone, MAT.bone);
@@ -1988,7 +2020,7 @@ function bonethrower(K) {
   // Knochenhaufen am Boden (Korb)
   const pile = V(0.38, 0, -0.32);
   const basket = lathe([[0, 0.0], [0.2, 0.0], [0.24, 0.18], [0.22, 0.2], [0.18, 0.04], [0, 0.04]], 10); T(basket, pile); K.add(basket, P.wood, MAT.wood);
-  for (let i = 0; i < 6; i++) { const a = i * 1.7; const b = seg([pile.x + Math.cos(a) * 0.12, 0.2 + (i % 2) * 0.05, pile.z + Math.sin(a) * 0.1], [pile.x - Math.cos(a) * 0.1, 0.24, pile.z - Math.sin(a) * 0.12 + 0.04], 0.024, 0.024, 4, 1); K.add(b, bone, MAT.bone); }
+  for (let i = 0; i < 4; i++) { const a = i * 1.7; const b = seg([pile.x + Math.cos(a) * 0.12, 0.2 + (i % 2) * 0.05, pile.z + Math.sin(a) * 0.1], [pile.x - Math.cos(a) * 0.1, 0.24, pile.z - Math.sin(a) * 0.12 + 0.04], 0.024, 0.024, 4, 1); K.add(b, bone, MAT.bone); }
   const s2 = sph(0.07, 7, 5); s2.translate(pile.x, 0.3, pile.z); K.add(s2, bone, MAT.bone);
   if (t >= 3) { const c = tor(0.16, 0.012, 3, 18); c.rotateX(PI / 2); c.translate(hc.x, hc.y + 0.24, hc.z - 0.04); K.glow(c, P.glw, 3); }
   return [1.1, 0.62];
@@ -1996,7 +2028,7 @@ function bonethrower(K) {
 
 // ---- Gruft-Golem (genähter Knochen-Koloss) --------------------------------------------------------
 function cryptgolem(K) {
-  const P = K.P, t = K.tier, flesh = P.pri, bone = P.bone;
+  const P = K.P, t = K.tier, flesh = mix('#76806a', P.pri, 0.3), bone = P.bone;
   // Beine
   for (const s of [1, -1]) {
     const f = s > 0 ? 0.12 : -0.06;
@@ -2083,7 +2115,7 @@ function elemental(K) {
 
 // ---- Kristall-Golem -------------------------------------------------------------------------------
 function golem(K) {
-  const P = K.P, t = K.tier, stone = P.sec, cry = P.pri;
+  const P = K.P, t = K.tier, stone = mix(P.pri, '#5f6472', 0.55), cry = shade(mix(P.glw, P.sec, 0.4), 0.8);
   const cluster = (p, n, s, dir) => {
     for (let i = 0; i < n; i++) {
       const c = crystal(0.07 * s * (1 - i * 0.12), 0.38 * s * (1 - i * 0.15), 6);
@@ -2135,10 +2167,10 @@ function worker(K) {
   for (let i = 0; i < 4; i++) {
     const a = (i / 4) * TAU + 0.4;
     const cr = crystal(0.05, 0.2, 5); R(cr, 0.9, 0, 0); cr.rotateY(a); T(cr, c.clone().add(V(Math.sin(a) * 0.1, -0.02, Math.cos(a) * 0.1)));
-    K.add(cr, i % 2 ? P.pri : shade(P.pri, 0.7), MAT.crystal);
+    K.add(cr, shade(mix(P.glw, P.pri, 0.5), i % 2 ? 0.8 : 0.6), MAT.crystal);
   }
   const ring = tor(0.17, 0.014, 4, 20); ring.rotateX(PI / 2 + 0.35); T(ring, c); K.add(ring, P.gold, MAT.gold);
-  const cap = crystal(0.05, 0.16, 5); T(cap, c.clone().add(V(0, 0.1, 0))); K.add(cap, P.pri, MAT.crystal);
+  const cap = crystal(0.05, 0.16, 5); T(cap, c.clone().add(V(0, 0.1, 0))); K.add(cap, shade(mix(P.glw, P.pri, 0.5), 0.7), MAT.crystal);
   K.glow(sweep([c.clone().add(V(0, -0.08, -0.05)), c.clone().add(V(0.02, -0.2, -0.16)), c.clone().add(V(-0.02, -0.3, -0.3))], (u) => 0.05 * (1 - u), 6, 8), P.glw, 1.8);
   for (let i = 0; i < 3 + t; i++) { const a = i * 2.2; const s = sph(0.018, 5, 4); s.translate(Math.cos(a) * 0.24, 0.4 + (i % 3) * 0.12, Math.sin(a) * 0.24); K.glow(s, P.glw, 3); }
   // kleine Spitzhacke (Werkzeug)
@@ -2151,7 +2183,7 @@ function worker(K) {
 
 // ---- Boss: Stein-Titan ----------------------------------------------------------------------------
 function boss_titan(K) {
-  const P = K.P, t = K.tier, st = P.pri, lava = P.glw;
+  const P = K.P, t = K.tier, st = mix('#6f6a64', P.pri, 0.3), lava = P.glw;
   // Beine (Säulen)
   for (const s of [1, -1]) {
     const f = s > 0 ? 0.1 : -0.06;
@@ -2248,7 +2280,7 @@ function boss_drake(K) {
 
 // ---- Boss: Dämonenfürst ---------------------------------------------------------------------------
 function boss_lord(K) {
-  const P = K.P, t = K.tier, skin = P.pri, arm = P.met, fire = P.glw;
+  const P = K.P, t = K.tier, skin = mix('#a8242a', P.pri, 0.25), arm = mix('#2e2b33', P.met, 0.4), fire = mix(P.glw, '#ff5a1a', 0.45);
   // Ziegenbeine mit Hufen
   for (const s of [1, -1]) {
     const f = s > 0 ? 0.12 : -0.08;
@@ -2333,11 +2365,11 @@ const DEFAULTS = {
   voidmage: { primary: '#2c1745', secondary: '#7c3dd6', metal: '#3a3346', glow: '#c06bff' },
   shade: { primary: '#1d1b2e', secondary: '#3b3566', metal: '#555', glow: '#5ef2ff' },
   knightfallen: { primary: '#5a1020', secondary: '#9a2a2a', metal: '#3d3f48', glow: '#ff3b2f' },
-  king: { primary: '#2f63d8', secondary: '#e8c766', metal: '#c8ced8', glow: '#7fe0ff' },
-  wolf: { primary: '#6b737e', secondary: '#9b2f2f', metal: '#a2abb8', glow: '#7fe8ff' },
-  bear: { primary: '#6b4a32', secondary: '#2f63d8', metal: '#a9b2bd', glow: '#ffcf5a' },
-  griffin: { primary: '#a8702e', secondary: '#d8c6a0', metal: '#c9b07a', glow: '#8fe3ff' },
-  treant: { primary: '#5a3f2b', secondary: '#4f9e3a', metal: '#777', glow: '#b6ff6a' },
+  king: { primary: '#2f63d8', secondary: '#e8c766', metal: '#b3bbc7', glow: '#7fe0ff' },
+  wolf: { primary: '#5d646e', secondary: '#9b2f2f', metal: '#a2abb8', glow: '#7fe8ff' },
+  bear: { primary: '#2f63d8', secondary: '#6b4a32', metal: '#a9b2bd', glow: '#ffcf5a' },
+  griffin: { primary: '#ece4cf', secondary: '#2f5fb3', metal: '#c9b07a', glow: '#8fe3ff' },
+  treant: { primary: '#5f8a3c', secondary: '#7a4f2c', metal: '#777', glow: '#b6ff6a' },
   mushroom: { primary: '#c8342f', secondary: '#d9c9a8', metal: '#888', glow: '#7dffd8' },
   crawler: { primary: '#4a7a3a', secondary: '#c9d35a', metal: '#555', glow: '#c8ff3a' },
   hound: { primary: '#3a302c', secondary: '#1b1717', metal: '#444', glow: '#ff6a1a' },
@@ -2346,15 +2378,15 @@ const DEFAULTS = {
   brute: { primary: '#7a8b5a', secondary: '#7a2e24', metal: '#8a8f98', glow: '#ff5a3a' },
   raptor: { primary: '#5d7d3c', secondary: '#d9c58a', metal: '#8f98a3', glow: '#ffd23a' },
   serpent: { primary: '#2e7a6a', secondary: '#d9c88a', metal: '#b9a46a', glow: '#5affd0' },
-  automaton: { primary: '#c2562a', secondary: '#2a2f3a', metal: '#9aa3ae', glow: '#5ad8ff' },
-  walker: { primary: '#3f6fb5', secondary: '#2a2f3a', metal: '#9aa3ae', glow: '#ffb84a' },
-  mortar: { primary: '#5f7a3a', secondary: '#2a2f3a', metal: '#8f98a3', glow: '#ff7a2a' },
+  automaton: { primary: '#4a5361', secondary: '#c2562a', metal: '#9aa3ae', glow: '#5ad8ff' },
+  walker: { primary: '#4a5361', secondary: '#3f6fb5', metal: '#9aa3ae', glow: '#ffb84a' },
+  mortar: { primary: '#4a5361', secondary: '#6f8a3a', metal: '#8f98a3', glow: '#ff7a2a' },
   core: { primary: '#5a7dff', secondary: '#c9b2ff', metal: '#b6bfd0', glow: '#7ff0ff' },
-  spider: { primary: '#7a3fb0', secondary: '#2a2f3a', metal: '#9aa3ae', glow: '#8ad8ff' },
+  spider: { primary: '#4a5361', secondary: '#8a4fc0', metal: '#9aa3ae', glow: '#8ad8ff' },
   bonethrower: { primary: '#4a3b30', secondary: '#2d3a2a', metal: '#6f6458', glow: '#7dff6a' },
   cryptgolem: { primary: '#6a7656', secondary: '#7a4a5e', metal: '#5f646c', glow: '#8aff5a' },
   elemental: { primary: '#6a5a4c', secondary: '#c98a3a', metal: '#555', glow: '#ff8a2a' },
-  golem: { primary: '#5ac8ff', secondary: '#5a5f6e', metal: '#777', glow: '#9af4ff' },
+  golem: { primary: '#4a5262', secondary: '#5ac8ff', metal: '#777', glow: '#9af4ff' },
   worker: { primary: '#5a9fe0', secondary: '#ffffff', metal: '#c9b07a', glow: '#ffe28a' },
   boss_titan: { primary: '#6f6a64', secondary: '#4a4744', metal: '#5a4a3a', glow: '#ff7a1a' },
   boss_drake: { primary: '#4a1f5e', secondary: '#c0782a', metal: '#555', glow: '#ff6a2a' },

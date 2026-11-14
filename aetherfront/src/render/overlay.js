@@ -48,9 +48,9 @@ export class Overlay {
     this.root.add(this.range);
 
     // Hologramm-Vorschau
-    this.ghostMat = new THREE.MeshBasicMaterial({ color: new THREE.Color(0.5, 1.3, 2.0), transparent: true, opacity: 0.35, depthWrite: false, toneMapped: false, blending: THREE.AdditiveBlending });
-    this.ghostBad = new THREE.Color(2.0, 0.4, 0.4);
-    this.ghostGood = new THREE.Color(0.5, 1.3, 2.0);
+    this.ghostMat = new THREE.MeshBasicMaterial({ color: new THREE.Color(0.3, 0.8, 1.2), transparent: true, opacity: 0.25, depthWrite: false, toneMapped: false, blending: THREE.AdditiveBlending });
+    this.ghostBad = new THREE.Color(1.3, 0.25, 0.25);
+    this.ghostGood = new THREE.Color(0.3, 0.8, 1.2);
     this.ghost = new THREE.Mesh(new THREE.BufferGeometry(), this.ghostMat);
     this.ghost.visible = false;
     this.root.add(this.ghost);
@@ -119,7 +119,8 @@ export class Overlay {
       this.ghost.rotation.y = Math.PI;
       const bad = state.occupied?.has(`${state.hoverCell.col},${state.hoverCell.row}`) || !state.canAfford;
       this.ghostMat.color.copy(bad ? this.ghostBad : this.ghostGood);
-      this.ghostMat.opacity = 0.28 + Math.sin(this.time * 5) * 0.06;
+      this.ghostMat.opacity = 0.22 + Math.sin(this.time * 5) * 0.05;
+      this.ghost.scale.setScalar(1.3);
       this.ghost.visible = true;
       this.range.visible = true;
       this.range.position.set(cc.x, 0.1, cc.z);

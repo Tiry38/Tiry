@@ -13,6 +13,9 @@ import { Menus } from './ui/menus.js';
 import { LocalSession, NetSession } from './net/session.js';
 import { UNITS, SENDS, WAVES, FACTIONS, factionUnits } from './sim/data.js';
 import { laneCenterX, kingPos } from './sim/layout.js';
+import { MISSIONS, missionSetup, missionStars } from './sim/campaign.js';
+import { modeCode } from './sim/modes.js';
+import { Progress } from './ui/progress.js';
 
 const $ = (id) => document.getElementById(id);
 const BOT_NAMES = ['Aldric', 'Mira', 'Thorne', 'Kaela', 'Vex', 'Sorin', 'Lyra', 'Doran', 'Isolde', 'Ravik', 'Selka', 'Bram', 'Nyx', 'Corvin'];
@@ -28,6 +31,7 @@ class App {
     this.audio.applySettings = () => this.applyAudio();
     this.applyAudio();
     this.portraits = new Portraits(160);
+    this.progress = new Progress();
     this.mode = 'boot';
     this.session = null;
     this.time = 0;
@@ -37,6 +41,14 @@ class App {
     this.hover = null;
     this.lastCountdown = -1;
     $('version').textContent = `v${VERSION}`;
+    // Oberfläche passt sich der Fenstergröße an (Referenz 1760×990)
+    const uiScale = () => {
+      const z = Math.max(0.6, Math.min(1.3, Math.min(window.innerWidth / 1760, window.innerHeight / 990)));
+      window.__uiZoom = z;
+      $('ui').style.zoom = z;
+    };
+    uiScale();
+    window.addEventListener('resize', uiScale);
   }
 
   async init() {
@@ -60,11 +72,12 @@ class App {
       onFocusKing: (t) => { const k = kingPos(t); this.cam.focus(k.x, k.z - 6, 55); },
     });
     this.menus = new Menus({
-      settings: this.settings, audio: this.audio, portraits: this.portraits,
+      settings: this.settings, audio: this.audio, portraits: this.portraits, progress: this.progress,
       onStart: (cfg) => this.startGame(cfg),
+      onStartMission: (m, opts) => this.startMission(m, opts),
       onResume: () => this.resume(),
       onSurrender: () => this.toMenu(),
-      onRematch: () => this.startGame(this.lastConfig),
+      onRematch: () => (this.mission ? this.startMission(this.mission, this.missionOpts) : this.startGame(this.lastConfig)),
       onToMenu: () => this.toMenu(),
       onQuit: () => window.aetherfront && window.aetherfront.quit(),
       onApplyGraphics: () => { this.engine.applySettings(); this.env.setQuality && this.env.setQuality(this.settings.get('quality')); },
@@ -130,11 +143,21 @@ class App {
     const n = cfg.teamSize;
     const names = BOT_NAMES.slice().sort(() => Math.random() - 0.5);
     const players = [{ name: cfg.name, team: 0, faction: cfg.faction, bot: false }];
-    for (let i = 1; i < n * 2; i++) players.push({ name: names[i % names.length], team: i % 2, faction: 'random', bot: true, difficulty: cfg.difficulty });
-    return { seed: (Math.random() * 1e9) | 0, players };
+    for (let i = 1; i < n * 2; i++) players.push({ name: names[i % names.length], team: i % 2, faction: 'random', bot: true, difficulty: i % 2 === 0 ? (cfg.allyDifficulty || 'normal') : cfg.difficulty });
+    return { seed: (Math.random() * 1e9) | 0, players, rules: cfg.rules || {} };
+  }
+
+  startMission(m, opts) {
+    this.mission = m;
+    this.missionOpts = opts;
+    const setup = missionSetup(m, { name: this.settings.get('playerName') || 'Tiry', faction: opts.faction, difficulty: opts.difficulty, totalStars: this.progress.total });
+    const s = new LocalSession(setup, 0);
+    s.speed = this.settings.get('gameSpeed') || 1;
+    this.enterGame(s);
   }
 
   startGame(cfg) {
+    this.mission = null;
     this.lastConfig = cfg;
     const s = new LocalSession(this.buildSetup(cfg), 0);
     s.speed = this.settings.get('gameSpeed') || 1;
@@ -148,6 +171,7 @@ class App {
       close: () => { try { mp.ws.close(); } catch { /* egal */ } },
     };
     if (start.you < 0) { this.hud.toast('Zuschauer-Modus wird noch nicht unterstützt'); return; }
+    this.mission = null;
     this.enterGame(new NetSession(transport, start));
   }
 
@@ -158,6 +182,7 @@ class App {
     const me = sim.players[session.localPid];
     this.me = me;
     this.overlay.setLane(me.team, me.slot);
+    if (sim.rules.champions) this.view.warmup(sim.waves.map((w) => w.champ).filter(Boolean));
     this.hud.build(session);
     this.menus.inGame = true;
     this.mode = 'game';
@@ -169,8 +194,15 @@ class App {
     this.cam.focus(0, 10, 190, { instant: true, yaw: 0, pitch: 0.9 });
     setTimeout(() => this.cam.focus(lx, 4, 58, { yaw: 0, pitch: 0.98 }), 250);
     this.audio.playMusic('build');
-    this.hud.banner('AETHERFRONT', `${FACTIONS[me.faction].name} · Bahn ${me.slot + 1} · Team ${me.team === 0 ? 'West' : 'Ost'}`);
-    this.hud.feed('Setze Kämpfer mit Q W E R T auf dein leuchtendes Bauraster.', 'good');
+    const facName = me.faction === 'hybrid' ? 'Hybrid' : FACTIONS[me.faction].name;
+    if (this.mission) {
+      this.hud.banner(this.mission.title.toUpperCase(), `Mission ${this.mission.id} · ${this.mission.goal === 'siege' ? 'Belagerung' : 'Halten'}`);
+      this.hud.feed(this.mission.goal === 'siege' ? 'Schicke Söldner (1–7) gegen die Rissfeste – und halte deine Bahn!' : 'Halte deine Bahn bis zur letzten Welle!', 'good');
+      if (this.mission.tips) this.hud.feed(this.mission.tips[0], '');
+    } else {
+      this.hud.banner(`AETHERFRONT · ${modeCode(sim.rules)}`, `${facName} · Bahn ${me.slot + 1} · Team ${me.team === 0 ? 'West' : 'Ost'}`);
+      this.hud.feed('Setze Kämpfer mit Q W E R T auf dein leuchtendes Bauraster.', 'good');
+    }
   }
 
   focusLane(pid) {
@@ -189,10 +221,13 @@ class App {
     this.menus.go('hud');
   }
   toMenu() {
+    const back = this.mission ? 'campaign' : 'menu';
+    this.mission = null;
     this.menus.inGame = false;
     this.startAttract();
     this.mode = 'menu';
     this.menus.go('menu');
+    if (back === 'campaign') this.menus.go('campaign', true);
     this.audio.playMusic('menu');
     this.hud.toggleKingPanel(false);
     this.hud.showScoreboard(false);
@@ -239,8 +274,8 @@ class App {
       }
       if (this.menus.current !== 'hud') return;
       if (k === 'Tab') { e.preventDefault(); this.hud.showScoreboard(true); return; }
-      const fu = factionUnits(me.faction).find((u) => u.hotkey === k);
-      if (fu) { this.startPlacing(fu); return; }
+      const li = ['Q', 'W', 'E', 'R', 'T'].indexOf(k);
+      if (li >= 0 && me.lines[li]) { this.startPlacing(UNITS[me.lines[li]]); return; }
       const s = SENDS.find((x) => x.hotkey === k);
       if (s) { this.session.submit({ type: 'send', send: s.id }); return; }
       if (k === 'U' && this.selected && this.selected.type === 'f') this.session.submit({ type: 'upgrade', id: this.selected.id });
@@ -346,13 +381,24 @@ class App {
     const loser = draw ? me.team : 1 - (e.winner);
     const kp = kingPos(loser);
     this.cam.focus(kp.x, kp.z - 4, 45);
+    const m = this.mission;
+    let stars = 0;
+    if (m) { stars = missionStars(m, this.session.sim); if (stars) this.progress.record(m.id, stars); }
     setTimeout(() => {
       const sim = this.session.sim;
-      $('end-title').textContent = draw ? 'UNENTSCHIEDEN' : win ? 'SIEG' : 'NIEDERLAGE';
+      $('end-title').textContent = m ? (win ? 'MISSION ERFÜLLT' : 'MISSION GESCHEITERT') : draw ? 'UNENTSCHIEDEN' : win ? 'SIEG' : 'NIEDERLAGE';
       $('end-title').className = `end-title${win ? '' : ' lose'}`;
-      $('end-sub').textContent = `${e.reason} · Welle ${sim.wave}`;
+      $('end-sub').innerHTML = `${e.reason} · Welle ${sim.wave}${m && win ? `<div class="end-stars">${'★'.repeat(stars)}<i>${'★'.repeat(3 - stars)}</i></div>` : ''}`;
       const st = [[sim.wave, 'Welle'], [sim.armyValue(me.id).toLocaleString('de-DE'), 'Armeewert'], [me.stats.kills, 'Besiegt'], [me.stats.leaks, 'Durchbrüche'], [me.stats.sent, 'Söldner'], [me.income, 'Einkommen']];
       $('end-stats').innerHTML = st.map(([v, l]) => `<div class="st"><b>${v}</b><small>${l}</small></div>`).join('');
+      $('btn-rematch').textContent = m ? 'Erneut versuchen' : 'Revanche';
+      const next = m && win && MISSIONS.find((x) => x.id === m.id + 1);
+      let nb = $('btn-next');
+      if (!nb) { nb = document.createElement('button'); nb.id = 'btn-next'; nb.className = 'pill big primary'; $('btn-rematch').before(nb); nb.addEventListener('click', () => { this.audio.ui('confirm'); const n = MISSIONS.find((x) => x.id === this.mission.id + 1); this.settings.set('campMission', n.id); this.startMission(n, this.missionOpts); }); }
+      nb.style.display = next ? '' : 'none';
+      if (next) nb.textContent = `Weiter: ${next.title}`;
+      $('btn-rematch').className = next ? 'pill big' : 'pill big primary';
+      $('btn-tomenu').textContent = m ? 'Zur Kampagne' : 'Hauptmenü';
       this.menus.go('end');
     }, 2800);
   }

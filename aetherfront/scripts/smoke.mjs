@@ -22,12 +22,16 @@ await page.waitForFunction(() => window.__app && window.__app.mode === 'splash',
 await wait(1500); await shot('01-splash');
 await page.keyboard.press('Space');
 await wait(4000); await shot('02-menu');
-await page.click('[data-go="setup"]'); await wait(800); await shot('03-setup');
+await page.click('[data-go="campaign"]'); await wait(800); await shot('03a-campaign');
+await page.click('#screen-campaign [data-go="menu"]'); await wait(300);
+await page.click('[data-go="setup"]'); await wait(800);
+await page.click('#seg-pick button:nth-child(3)'); await page.click('#seg-cc button:nth-child(2)'); await wait(300);
+await shot('03-setup');
 await page.click('#btn-start'); await wait(3500); await shot('04-game-start');
 // Ein paar Einheiten bauen
 await page.evaluate(() => {
   const a = window.__app, s = a.session, me = a.me;
-  const units = Object.values(window.__app.hud.buildCards).map((c) => c.u);
+  const units = window.__app.hud.buildCards.map((c) => c.u);
   let i = 0;
   for (const [c, r] of [[1, 1], [2, 1], [3, 1], [4, 1], [2, 3], [3, 3]]) s.submit({ type: 'build', unit: units[i++ % units.length].id, col: c, row: r });
 });
@@ -43,10 +47,11 @@ await wait(7000); await shot('07-battle');
 await page.evaluate(() => { const a = window.__app; a.cam.focus(a.me && -70, 30, 120, { pitch: 0.75 }); });
 await wait(3000); await shot('08-overview');
 await page.keyboard.down('Tab'); await wait(400); await shot('09-scoreboard'); await page.keyboard.up('Tab');
-await page.keyboard.press('Escape'); await wait(500); await shot('10-pause');
+await page.evaluate(() => window.__app.select(null)); await page.keyboard.press('Escape'); await wait(500); await shot('10-pause');
 await page.click('#screen-pause [data-go="settings"]'); await wait(500); await shot('11-settings');
 await page.keyboard.press('Escape'); await page.keyboard.press('Escape'); await wait(300);
 const info = await page.evaluate(() => ({ calls: window.__app.engine.renderer.info.render.calls, tris: window.__app.engine.renderer.info.render.triangles, wave: window.__app.session.sim.wave, phase: window.__app.session.sim.phase }));
 console.log('info', JSON.stringify(info));
 console.log('Fehler/Warnungen:', errors.length ? '\n' + [...new Set(errors)].slice(0, 30).join('\n') : 'keine');
 await browser.close();
+

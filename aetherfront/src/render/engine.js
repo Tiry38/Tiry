@@ -53,7 +53,7 @@ export class Engine {
     r.toneMappingExposure = 1.0;
     r.outputColorSpace = THREE.SRGBColorSpace;
     r.shadowMap.enabled = true;
-    r.shadowMap.type = THREE.PCFSoftShadowMap;
+    r.shadowMap.type = THREE.PCFShadowMap;
     this.scene = new THREE.Scene();
     this.camera = new THREE.PerspectiveCamera(42, 1, 0.5, 2500);
     this.camera.position.set(0, 120, 160);

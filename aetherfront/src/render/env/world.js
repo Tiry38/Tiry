@@ -11,7 +11,7 @@ import {
   StoneKit, merge, prep, treeTrunkGeometry, treeCanopyGeometry, rockGeometry, grassClumpGeometry, flowerGeometry,
   crystalClusterGeometry, crystalShardGeometry, COLORS,
 } from './props.js';
-import { createCrystalMaterial, createPortalMaterial, createRuneMaterial, createSealMaterial, createBeamMaterial } from './magic.js';
+import { createCrystalMaterial, createPortalMaterial, createRuneMaterial, createSealMaterial, createBeamMaterial, createLightShafts } from './magic.js';
 import { createFlagstoneTextures, createRuneStrip, createSealTexture, createWispTexture } from './textures.js';
 import { createWaterfalls, createWisps } from './water.js';
 import { createParticles } from './particles.js';
@@ -210,7 +210,7 @@ export function buildWorld(U, { anisotropy = 8 } = {}) {
       const tint = (x, z, zone) => {
         const a = ao(x);
         const rift = 1 - smoothstep(LANE_Z0, -27, z);
-        let c = zone ? [0.74, 0.84, 1.02] : [1.0, 0.97, 0.93];
+        let c = zone ? [0.66, 0.77, 1.0] : [1.0, 0.97, 0.93];
         c = [lerp(c[0], 0.78, rift), lerp(c[1], 0.66, rift), lerp(c[2], 0.98, rift)];
         return [c[0] * a, c[1] * a, c[2] * a];
       };
@@ -284,7 +284,7 @@ export function buildWorld(U, { anisotropy = 8 } = {}) {
   floorGeo.setIndex(fidx);
   floorGeo.computeVertexNormals();
   const floorMat = patchMaterial(new THREE.MeshStandardMaterial({
-    map: tex.map, normalMap: tex.normalMap, normalScale: new THREE.Vector2(1.1, 1.1), vertexColors: true, roughness: 0.82, metalness: 0, side: THREE.DoubleSide,
+    map: tex.map, normalMap: tex.normalMap, normalScale: new THREE.Vector2(1.1, 1.1), vertexColors: true, roughness: 0.9, metalness: 0, side: THREE.DoubleSide,
   }), U);
   const floor = new THREE.Mesh(floorGeo, floorMat);
   floor.receiveShadow = true;
@@ -324,6 +324,12 @@ export function buildWorld(U, { anisotropy = 8 } = {}) {
         const path = [];
         for (let z = LANE_Z0 + 1.2; z <= LANE_Z1 - 1.0; z += 2) path.push([lx + sx * (HALF - 0.55), z]);
         addStrip(path, 0.5, TEAL.map((c) => c * 0.85), 0);
+      }
+      // Eckwinkel der Bauzone (dezente Markierung)
+      const gx = (GRID_COLS * CELL) / 2 + 0.15;
+      for (const sx of [-1, 1]) for (const [z0, sz] of [[BUILD_Z0 - 0.15, 1], [BUILD_Z1 + 0.15, -1]]) {
+        addStrip([[lx + sx * gx, z0 + sz * 1.6], [lx + sx * gx, z0]], 0.16, TEAL.map((c) => c * 0.55), 0, 0.022, 1 / 30);
+        addStrip([[lx + sx * gx, z0], [lx + sx * (gx - 1.6), z0]], 0.16, TEAL.map((c) => c * 0.55), 0, 0.022, 1 / 30);
       }
       const b = tm.bridges[s];
       const len = Math.hypot(b.bx - b.ax, b.bz - b.az);
@@ -439,24 +445,52 @@ export function buildWorld(U, { anisotropy = 8 } = {}) {
       for (let d = len; d > 0; d -= 0.25) { const h = topYAt(king, b.ax + fx * d, b.az + fz * d); if (!h || h.t > 0.97) { t1 = d; break; } }
       tm.bridges[k].span = [t0, t1];
       const a0 = t0 - 3, a1 = t1 + 3;
-      const segs = Math.max(4, Math.round((a1 - a0) / 1.6));
-      for (let i = 0; i < segs; i++) {
-        const u = (i + 0.5) / segs;
-        const d = lerp(a0, a1, u);
-        const thick = 1.1 + 3.4 * Math.pow(Math.abs(u * 2 - 1), 2.2);
-        const g = new THREE.BoxGeometry(BRIDGE_HW * 2 + 0.9, thick, (a1 - a0) / segs + 0.05);
-        const m = new THREE.Matrix4().makeRotationY(yaw);
-        m.setPosition(b.ax + fx * d, -0.16 - thick / 2, b.az + fz * d);
-        kit.add(g, m, kit.stoneFn(i + k * 10, [0.5, 0.44, 0.44]));
-      }
-      // Zierbogen unter der Brücke
-      for (let i = 0; i <= 8; i++) {
-        const u = i / 8;
-        const d = lerp(a0 + 1, a1 - 1, u);
-        const g = new THREE.BoxGeometry(BRIDGE_HW * 2 + 1.3, 0.35, 0.5);
-        const m = new THREE.Matrix4().makeRotationY(yaw);
-        m.setPosition(b.ax + fx * d, -0.25, b.az + fz * d);
-        kit.add(g, m, COLORS.GOLD, { metal: 1 });
+      // glatter Bogenkörper (Querschnitt entlang der Brücke extrudiert)
+      {
+        const n = Math.max(8, Math.round((a1 - a0) / 0.8));
+        const hw = BRIDGE_HW + 0.45, top = -0.16;
+        const P = [], C = [];
+        const sl = [];
+        for (let i = 0; i <= n; i++) {
+          const u = i / n;
+          const d = lerp(a0, a1, u);
+          const cx0 = b.ax + fx * d, cz0 = b.az + fz * d;
+          const bot = top - (1.0 + 3.6 * Math.pow(Math.abs(u * 2 - 1), 2.4));
+          const sxv = -fz, szv = fx;
+          sl.push([
+            [cx0 + sxv * hw, top, cz0 + szv * hw], [cx0 + sxv * hw * 0.92, bot, cz0 + szv * hw * 0.92],
+            [cx0 - sxv * hw * 0.92, bot, cz0 - szv * hw * 0.92], [cx0 - sxv * hw, top, cz0 - szv * hw],
+          ]);
+        }
+        const quad = (p0, p1, p2, p3, col) => {
+          for (const p of [p0, p2, p1, p0, p3, p2]) { P.push(...p); C.push(...col); }
+        };
+        for (let i = 0; i < n; i++) {
+          const A = sl[i], B = sl[i + 1];
+          const k2 = 0.9 + 0.1 * Math.sin(i * 1.7);
+          const c = [0.52 * k2, 0.46 * k2, 0.46 * k2];
+          quad(A[0], B[0], B[1], A[1], c);
+          quad(A[1], B[1], B[2], A[2], [0.36, 0.31, 0.34]);
+          quad(A[2], B[2], B[3], A[3], c);
+        }
+        const g = new THREE.BufferGeometry();
+        g.setAttribute('position', new THREE.Float32BufferAttribute(P, 3));
+        g.setAttribute('color', new THREE.Float32BufferAttribute(C, 3));
+        g.computeVertexNormals();
+        kit.add(g, null);
+        // Gesimsband (Gold) entlang beider Seiten
+        for (const sx of [-1, 1]) {
+          const gl = new THREE.BoxGeometry(0.22, 0.22, a1 - a0);
+          const m = new THREE.Matrix4().makeRotationY(yaw);
+          const mid = (a0 + a1) / 2;
+          m.setPosition(b.ax + fx * mid - fz * (hw + 0.05) * sx, -0.45, b.az + fz * mid + fx * (hw + 0.05) * sx);
+          kit.add(gl, m, COLORS.GOLD, { metal: 1 });
+        }
+        // Schlussstein mit Leuchtrune unter der Brückenmitte
+        const mid = (t0 + t1) / 2;
+        const key = new THREE.OctahedronGeometry(0.5, 0);
+        key.scale(1, 1.6, 1);
+        kit.add(key, new THREE.Matrix4().makeTranslation(b.ax + fx * mid, -1.7, b.az + fz * mid), [0.3, 0.3, 0.3], { emit: [1.6, 0.8, 0.25] });
       }
       // Torsäulen am Brückenkopf
       for (const sx of [-1, 1]) {
@@ -470,7 +504,7 @@ export function buildWorld(U, { anisotropy = 8 } = {}) {
     const bridgeAngles = tm.bridges.map((b) => Math.atan2(b.az - KING_Z, b.ax - tm.cx));
     for (let i = 0; i < 16; i++) {
       const a = (i / 16) * Math.PI * 2;
-      const near = bridgeAngles.some((ba) => Math.abs(Math.atan2(Math.sin(a - ba), Math.cos(a - ba))) < 0.36);
+      const near = bridgeAngles.some((ba) => Math.abs(Math.atan2(Math.sin(a - ba), Math.cos(a - ba))) < 0.5);
       if (near) continue;
       const r = PLATEAU_R + 1.6;
       const x = tm.cx + Math.cos(a) * r, z = KING_Z + Math.sin(a) * r;
@@ -689,12 +723,15 @@ export function buildWorld(U, { anisotropy = 8 } = {}) {
       [-330, -10, 60, 10], [-260, 140, 40, -2], [340, 40, 66, 12], [270, 190, 36, -6],
       // Süden
       [-120, 260, 50, 4], [110, 300, 60, 8], [0, 520, 110, 26], [-420, 330, 90, 18], [430, 360, 95, 22],
+      // Mittelgrund (Tiefenstaffelung)
+      [-205, 25, 26, -14], [215, 70, 22, -10], [-185, 125, 18, -20], [190, -85, 20, -4], [-175, -95, 16, 6],
+      [-15, -135, 14, -22], [130, 150, 16, -26],
     ];
     ring.forEach(([x, z, r, y], i) => {
       const seed = 700 + i;
       const isl = buildIsland({
         cx: x, cz: z, topY: y, radius: (th) => r * (1 + 0.15 * fbm2(Math.cos(th) * 2 + i, Math.sin(th) * 2, 3, seed)),
-        depth: r * (1.3 + FR() * 0.8), seed, segs: 64, rings: 7, sideRings: 22, rimDrop: r * 0.05,
+        depth: r * (1.3 + FR() * 0.8), seed, segs: 52, rings: 6, sideRings: 18, rimDrop: r * 0.05,
         height: (px, pz, t) => (1 - t * t) * r * 0.12 * (0.5 + fbm2(px * 0.02, pz * 0.02, 3, seed) + 0.5),
         grass: lushGrass(seed), edgeNoise: 0.05, taper: 0.55, lobes: 0.6,
       });
@@ -745,7 +782,7 @@ export function buildWorld(U, { anisotropy = 8 } = {}) {
       {
         vec3 vd = normalize(vHazeWorld - cameraPosition);
         float back = pow(max(dot(vd, normalize(uSunDir + vec3(0.0, 0.3, 0.0))), 0.0), 3.0);
-        gl_FragColor.rgb += diffuseColor.rgb * back * 0.55;
+        gl_FragColor.rgb += diffuseColor.rgb * back * 0.22;
       }`,
   });
   const treeColor = (c, R2) => {
@@ -775,6 +812,7 @@ export function buildWorld(U, { anisotropy = 8 } = {}) {
       if (kind === 1) col.offsetHSL(0.06, -0.1, -0.06);
       canopy.setColorAt(i, col);
     });
+    trunk.name = `aeth-trunks-${slot}`; canopy.name = `aeth-canopies-${slot}`;
     for (const im of [trunk, canopy]) {
       im.castShadow = !far; im.receiveShadow = !far;
       im.computeBoundingSphere();
@@ -826,7 +864,7 @@ export function buildWorld(U, { anisotropy = 8 } = {}) {
       const a = (i / 8) * Math.PI * 2;
       floatSpots.push({ x: HERO.x + Math.cos(a) * 6.5, y: 6 + (i % 3) * 3.5, z: HERO.z + Math.sin(a) * 6.5, s: 0.9 + (i % 2) * 0.6, c: i % 2 ? TEAL_C : VIOLET_C });
     }
-    const mat = createCrystalMaterial(U, { floating: true, intensity: 1.4 });
+    const mat = createCrystalMaterial(U, { floating: true, intensity: 0.7 });
     const im = new THREE.InstancedMesh(crystalShardGeometry(), mat, floatSpots.length);
     const m = new THREE.Matrix4();
     floatSpots.forEach((f, i) => {
@@ -867,7 +905,7 @@ export function buildWorld(U, { anisotropy = 8 } = {}) {
         }
       });
     }
-    const geo = new RoundedBoxGeometry(0.72, 0.62, 1, 2, 0.14);
+    const geo = new RoundedBoxGeometry(0.72, 0.62, 1, 1, 0.14);
     const mat = patchMaterial(new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.85 }), U, { detail: 2.5 });
     const im = new THREE.InstancedMesh(geo, mat, curbs.length);
     const m = new THREE.Matrix4(), q = new THREE.Quaternion();
@@ -908,7 +946,7 @@ export function buildWorld(U, { anisotropy = 8 } = {}) {
     for (let i = spots.length - 1; i > 0; i--) { const j = Math.floor(RS() * (i + 1)); [spots[i], spots[j]] = [spots[j], spots[i]]; }
     const count = Math.min(MAX_GRASS, spots.length);
     const gmat = patchMaterial(new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.85, side: THREE.DoubleSide }), U, { wind: 1 });
-    grass = new THREE.InstancedMesh(grassClumpGeometry(5, 9), gmat, count);
+    grass = new THREE.InstancedMesh(grassClumpGeometry(5, 8), gmat, count);
     const m = new THREE.Matrix4(), q = new THREE.Quaternion();
     const col = new THREE.Color();
     for (let i = 0; i < count; i++) {
@@ -923,6 +961,7 @@ export function buildWorld(U, { anisotropy = 8 } = {}) {
       grass.setColorAt(i, col);
     }
     grass.receiveShadow = true;
+    grass.name = 'aeth-grass';
     grass.computeBoundingSphere();
     grass.frustumCulled = false;
     root.add(grass);
@@ -940,6 +979,7 @@ export function buildWorld(U, { anisotropy = 8 } = {}) {
       flowers.setColorAt(i, col.setRGB(c[0], c[1], c[2]));
     }
     flowers.receiveShadow = true;
+    flowers.name = 'aeth-flowers';
     flowers.frustumCulled = false;
     root.add(flowers);
   }
@@ -1005,6 +1045,20 @@ export function buildWorld(U, { anisotropy = 8 } = {}) {
   }
   root.add(createWisps(U, createWispTexture(256), wispItems));
 
+  // ---------- Lichtschächte unter/zwischen den Inseln ----------
+  {
+    const L = U.uLightDir.value;
+    const SR = rng(808);
+    const shafts = [];
+    for (let i = 0; i < 26; i++) {
+      const len = 60 + SR() * 30;
+      const lx = (SR() - 0.5) * 300, lz = -90 + SR() * 200;
+      const y0 = CLOUD_TOP + 2;
+      shafts.push({ x: lx + L.x * len / 2, y: y0 + L.y * len / 2, z: lz + L.z * len / 2, w: 5 + SR() * 12, len });
+    }
+    root.add(createLightShafts(U, shafts, 0.085));
+  }
+
   // ---------- Partikel ----------
   const fixed = [], scalable = [];
   const PR = rng(17);
@@ -1015,7 +1069,7 @@ export function buildWorld(U, { anisotropy = 8 } = {}) {
   for (const d of islandDescs) {
     const n = d.kind === 'team' ? 500 : d.kind === 'king' ? 120 : 80;
     const pts = scatterOn(d, n, null, 3000 + islandDescs.indexOf(d), 0.95);
-    for (const p of pts) scalable.push({ x: p.x, y: p.y + 0.6 + PR() * 3.5, z: p.z, kind: 0, size: 0.22 + PR() * 0.18, c: PR() < 0.7 ? [1.5, 1.7, 0.55] : [0.6, 1.7, 1.2] });
+    for (const p of pts) scalable.push({ x: p.x, y: p.y + 0.6 + PR() * 3.5, z: p.z, kind: 0, size: 0.22 + PR() * 0.18, c: PR() < 0.7 ? [0.95, 1.05, 0.35] : [0.4, 1.05, 0.8] });
   }
   for (let i = 0; i < 2200; i++) {
     scalable.push({ x: (PR() - 0.5) * 290, y: -6 + PR() * 14, z: -60 + PR() * 140, kind: 1, size: 0.09 + PR() * 0.09, range: 18 + PR() * 14, c: [1.3, 0.95, 0.6] });

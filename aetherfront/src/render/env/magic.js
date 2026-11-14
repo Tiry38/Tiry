@@ -72,9 +72,11 @@ export function createCrystalMaterial(U, { floating = false, intensity = 1.0, sp
         col += vCol * (fres * 0.55 + pow(vH, 2.5) * 0.95 * pulse) * uIntensity;
         col += vCol * inner * 0.18 * uIntensity;
         #if SPIRE == 1
-          float band = smoothstep(0.92, 1.0, sin(vWorld.y * 0.9 - uTime * 2.0) * 0.5 + 0.5);
-          col += vCol * band * 0.7;
-          col += vCol * 0.12;
+          float band = smoothstep(0.94, 1.0, sin(vWorld.y * 0.7 - uTime * 1.6) * 0.5 + 0.5);
+          float veins = smoothstep(0.62, 0.7, fbm(vec2(vWorld.y * 0.35 + uTime * 0.05, atan(vWorld.z - 6.0, vWorld.x) * 2.0)));
+          float facet = abs(dot(N, normalize(vec3(0.3, 0.2, 0.9))));
+          col = mix(col, vCol * vec3(0.08, 0.12, 0.3), 0.35 * (1.0 - fres));
+          col += vCol * band * 0.8 + vec3(0.7, 0.9, 1.0) * veins * 0.35 + vCol * facet * 0.15;
         #endif
         col += vec3(1.0, 0.85, 0.7) * spec * 1.5;
         col = applyHaze(col, vWorld);
@@ -115,12 +117,12 @@ export function createPortalMaterial(U) {
         c += vec3(0.02, 0.0, 0.05) * core;
         c = mix(c, vec3(0.015, 0.0, 0.04), core * (0.75 - n * 0.3));
         c += vec3(0.9, 0.5, 1.6) * pow(1.0 - r, 10.0) * 0.35 * (0.6 + 0.4 * sin(t * 3.0));
-        float alpha = smoothstep(1.0, 0.92, r);
+        float alpha = 1.0 - smoothstep(0.93, 1.0, r);
         gl_FragColor = vec4(c, alpha);
       }`,
     transparent: true,
     side: THREE.DoubleSide,
-    depthWrite: false,
+    depthWrite: true,
   });
 }
 
@@ -204,4 +206,54 @@ export function createBeamMaterial(U, color = new THREE.Color(0.35, 0.8, 1.0)) {
     depthWrite: false,
     side: THREE.DoubleSide,
   });
+}
+
+/** Lichtschächte (God Rays): additive, um ihre Achse zur Kamera gedrehte Bänder entlang der Lichtrichtung. */
+export function createLightShafts(U, items, strength = 0.07) {
+  const geo = new THREE.PlaneGeometry(1, 1);
+  const mat = new THREE.ShaderMaterial({
+    uniforms: { uTime: U.uTime, uLightDir: U.uLightDir, uStrength: { value: strength } },
+    vertexShader: /* glsl */ `
+      uniform vec3 uLightDir;
+      varying vec2 vUv; varying float vSeed; varying float vFace;
+      void main() {
+        vec3 c = instanceMatrix[3].xyz;
+        float w = length(instanceMatrix[0].xyz), len = length(instanceMatrix[1].xyz);
+        vec3 A = normalize(uLightDir);
+        vec3 toCam = normalize(cameraPosition - c);
+        vec3 side = normalize(cross(A, toCam));
+        vec3 wp = c + A * position.y * len + side * position.x * w;
+        vSeed = fract(c.x * 0.137 + c.z * 0.071);
+        vFace = (1.0 - abs(dot(A, toCam))) * smoothstep(40.0, 140.0, length(cameraPosition - c));
+        vUv = uv;
+        gl_Position = projectionMatrix * viewMatrix * vec4(wp, 1.0);
+      }`,
+    fragmentShader: /* glsl */ `
+      uniform float uTime; uniform float uStrength;
+      varying vec2 vUv; varying float vSeed; varying float vFace;
+      ${GLSL_NOISE}
+      void main() {
+        float across = sin(vUv.x * 3.14159); across *= across;
+        float along = smoothstep(0.0, 0.3, vUv.y) * smoothstep(1.0, 0.55, vUv.y);
+        float n = vnoise(vec2(vUv.x * 4.0 + vSeed * 17.0, vUv.y * 1.5 - uTime * 0.04));
+        float flick = 0.75 + 0.25 * sin(uTime * 0.25 + vSeed * 40.0);
+        vec3 col = vec3(1.0, 0.70, 0.42) * across * along * (0.45 + 0.9 * n) * flick * uStrength * vFace;
+        gl_FragColor = vec4(col, 1.0);
+      }`,
+    transparent: true,
+    blending: THREE.AdditiveBlending,
+    depthWrite: false,
+    side: THREE.DoubleSide,
+  });
+  const im = new THREE.InstancedMesh(geo, mat, items.length);
+  const m = new THREE.Matrix4();
+  items.forEach((it, i) => {
+    m.makeScale(it.w, it.len, 1);
+    m.setPosition(it.x, it.y, it.z);
+    im.setMatrixAt(i, m);
+  });
+  im.frustumCulled = false;
+  im.renderOrder = 6;
+  im.name = 'aeth-shafts';
+  return im;
 }

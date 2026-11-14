@@ -1,5 +1,5 @@
 // Bot-KI: läuft innerhalb der Simulation (deterministisch, nutzt sim.rng) und gibt normale Befehle ab.
-import { UNITS, SENDS, ECON, KING, kingUpgradeCost, factionUnits } from './data.js';
+import { UNITS, SENDS, ECON, KING, kingUpgradeCost } from './data.js';
 import { GRID_COLS, GRID_ROWS } from './layout.js';
 
 const FRONT_ROLES = new Set(['tank', 'melee', 'assassin']);
@@ -14,14 +14,14 @@ export function botThink(sim, p) {
   if (k.hp < k.maxHp * 0.4 && k.heals > 0 && k.healCd <= 0) sim.applyCommand(p.id, { type: 'heal' });
 
   // Arbeiter (frühe Investition)
-  const targetWorkers = Math.min(ECON.maxWorkers, 1 + Math.floor(sim.wave * (p.difficulty === 'easy' ? 0.3 : 0.5)));
+  const targetWorkers = Math.min(ECON.maxWorkers, sim.rules.startWorkers + Math.floor((sim.wave - sim.rules.startWave + 1) * (p.difficulty === 'easy' ? 0.3 : 0.5)));
   if (p.workers < targetWorkers && p.gold >= sim.workerCost(p) + 70 && sim.wave >= 2 && rng.next() < 0.5) {
     sim.applyCommand(p.id, { type: 'worker' });
   }
 
   // Söldner senden / König aufwerten
   if (rng.next() < sk.send) {
-    const avail = SENDS.filter((s) => sim.sendAvailable(s) && s.cost <= p.aether);
+    const avail = SENDS.filter((s) => sim.sendAvailable(s) && sim.sendCost(s) <= p.aether);
     if (avail.length && !(sim.wave % 10 === 9 && p.difficulty !== 'easy' && rng.next() < 0.5)) {
       const s = avail[avail.length - 1];
       sim.applyCommand(p.id, { type: 'send', send: s.id });
@@ -37,13 +37,13 @@ export function botThink(sim, p) {
   const budget = p.gold * sk.spend - (sim.wave >= 3 ? 20 : 0);
   if (budget <= 30) return;
   const mine = sim.fightersOf(p.id);
-  const lines = factionUnits(p.faction);
+  const lines = p.lines.map((id) => UNITS[id]);
   const used = mine.length;
   const wantUpgrade = used >= 6 && rng.next() < sk.upg;
 
   if (wantUpgrade) {
     const cands = mine.filter((f) => UNITS[f.def].upgradeTo).map((f) => ({ f, next: UNITS[UNITS[f.def].upgradeTo] }))
-      .filter((c) => c.next.cost <= budget)
+      .filter((c) => c.next.cost <= budget && c.next.tier <= sim.rules.maxTier)
       .sort((a, b) => a.next.tier - b.next.tier || a.next.cost - b.next.cost || a.f.id - b.f.id);
     if (cands.length) {
       const c = cands[Math.min(cands.length - 1, rng.int(Math.min(3, cands.length)))];
@@ -51,7 +51,7 @@ export function botThink(sim, p) {
       return;
     }
   }
-  if (used >= GRID_COLS * GRID_ROWS - 2) return;
+  if (used >= GRID_COLS * sim.rules.gridRows - 2) return;
 
   // Rollen-Mischung: ca. 50 % vorne, 40 % hinten, Heiler/Unterstützer dazu
   const counts = { front: 0, back: 0, sup: 0 };
@@ -77,7 +77,7 @@ function pickCell(sim, p, front) {
   const colOrder = [2, 3, 1, 4, 0, 5];
   const rows = front ? [1, 2, 0, 3, 4, 5, 6, 7] : [3, 4, 2, 5, 6, 1, 7, 0];
   for (const r of rows) for (const c of colOrder) order.push([c, r]);
-  for (const [c, r] of order) if (sim.cellFree(p.id, c, r)) return [c, r];
+  for (const [c, r] of order) if (r < sim.rules.gridRows && sim.cellFree(p.id, c, r)) return [c, r];
   return null;
 }
 

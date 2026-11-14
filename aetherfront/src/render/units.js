@@ -148,8 +148,9 @@ export class UnitsView {
   }
   fighterKey(def) { return { key: `f|${def.id}`, arch: def.model, pal: FACTIONS[def.faction].palette, tier: def.tier }; }
   creepKey(def) {
-    const id = def.id || `w${def.n}`;
-    return { key: `c|${id}`, arch: def.model, pal: def.palette, tier: def.boss ? 3 : def.id ? 2 : 1 + (def.n > 10 ? 1 : 0) + (def.n > 20 ? 1 : 0) };
+    const id = def.key || def.id || `w${def.n}`;
+    const pal = def.champion ? { ...def.palette, glow: '#ffd23a', metal: '#e8b84a' } : def.palette;
+    return { key: `c|${id}`, arch: def.model, pal, tier: def.boss || def.champion ? 3 : def.id ? 2 : 1 + (def.n > 10 ? 1 : 0) + (def.n > 20 ? 1 : 0) };
   }
 
   /** Vorab erzeugen, damit beim ersten Auftauchen nichts ruckelt */
@@ -179,6 +180,7 @@ export class UnitsView {
     const teamCol = TEAM_COLORS.map((c) => new THREE.Color(c));
     const creepRing = new THREE.Color('#ff3a2a').multiplyScalar(0.6);
     const sendRing = new THREE.Color('#ff2a8a');
+    const champRing = new THREE.Color('#ffc83a').multiplyScalar(1.6);
     const battle = sim.phase === 'battle';
     const seen = new Set();
 
@@ -204,7 +206,7 @@ export class UnitsView {
       d.key = kk.key; d.arch = kk.arch; d.height = pool.model.height;
 
       const moving = e.moving != null && sim.tick - e.moving < 3;
-      const scaleBase = (def.size || 1);
+      const scaleBase = (def.size || 1) * (isF ? 1.3 : 1.2);
       let y = HOVER.has(kk.arch) ? 0.55 + Math.sin(t * 2.2 + d.phase) * 0.15 : 0;
       let lean = 0, fwd = 0, sq = 1;
       if (moving) {
@@ -239,7 +241,7 @@ export class UnitsView {
       pool.push(_m, _c);
 
       // Ring
-      const ringCol = isF ? teamCol[e.team] : e.isSend ? sendRing : creepRing;
+      const ringCol = isF ? teamCol[e.team] : def.champion ? champRing : e.isSend ? sendRing : creepRing;
       const rr = (pool.model.radius || 0.7) * 2.4 * scaleBase;
       const sel = ctx.selectedId === e.id, hov = ctx.hoverId === e.id;
       _m.compose(_p.set(d.x, 0.06, d.z), _q.identity(), _s.set(rr, 1, rr));
@@ -280,7 +282,8 @@ export class UnitsView {
     for (let team = 0; team < 2; team++) {
       const king = sim.teams[team].king;
       const kp = kingPos(team);
-      const pool = this.pool(`king|${team}`, 'king', KING_PALETTES[team], 3);
+      const citadel = king.citadel;
+      const pool = citadel ? this.pool('citadel', 'boss_lord', { primary: '#2a1430', secondary: '#ff2a5a', metal: '#6a5a7a', glow: '#ff3a8a' }, 3) : this.pool(`king|${team}`, 'king', KING_PALETTES[team], 3);
       const fx = this.kingFx[team];
       const at = t - fx.atkT;
       let lean = 0;
@@ -290,12 +293,13 @@ export class UnitsView {
       _e.set(lean, fx.cf + Math.PI, 0, 'YXZ');
       _q.setFromEuler(_e);
       const br = 1 + Math.sin(t * 1.4 + team) * 0.01;
-      _m.compose(_p.set(kp.x, king.alive ? 0 : -3, kp.z), _q, _s.set(1, br, 1));
+      const ks = citadel ? 1.6 : 1;
+      _m.compose(_p.set(kp.x, king.alive ? 0 : -3, kp.z), _q, _s.set(ks, br * ks, ks));
       const ht = t - fx.hitT;
       _c.setScalar(ht < 0.15 ? 1 + 1.6 * (1 - ht / 0.15) : 1);
       pool.push(_m, _c);
       if (nb < 1024) {
-        _m.compose(_p.set(kp.x, pool.model.height + 1.6, kp.z), _q.identity(), _s.set(5, 1, 1));
+        _m.compose(_p.set(kp.x, pool.model.height * ks + 1.6, kp.z), _q.identity(), _s.set(5, 1, 1));
         bars.setMatrixAt(nb, _m); bars.setColorAt(nb, _c.set(TEAM_COLORS[team]));
         hpA[nb] = king.hp / king.maxHp; alA[nb] = 1; nb++;
       }

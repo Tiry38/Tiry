@@ -148,7 +148,7 @@ const LIMITS = {
   'sfx:build': [3, 0.06, 0.04, 1],
   'sfx:upgrade': [2, 0.08, 0, 1.8],
   'sfx:sell': [2, 0.1, 0.03, 1.2],
-  'sfx:gold': [3, 0.045, 0.1, 1],
+  'sfx:gold': [3, 0.045, 0.1, 0.8],
   'sfx:sword': [6, 0.022, 0.1, 1],
   'sfx:blunt': [5, 0.03, 0.1, 1],
   'sfx:arrow': [6, 0.022, 0.1, 1],
@@ -941,7 +941,7 @@ export class AudioEngine {
   constructor(opts = {}) {
     this.ctx = null;
     this.q = opts.quality === 'low' ? 'low' : 'high';
-    this._vol = { master: 0.9, music: 0.75, sfx: 0.9, ui: 0.75 };
+    this._vol = { master: 0.8, music: 0.55, sfx: 0.8, ui: 0.7 };
     this._muted = false;
     this._iTarget = 0.3;
     this._track = null;
@@ -1042,7 +1042,8 @@ export class AudioEngine {
   /** Diagnose: aktive Stimmen, laufende Spur. */
   stats() {
     let fx = 0;
-    for (const st of this._fxState.values()) fx += st.voices.length;
+    const now = this.ctx ? this.ctx.currentTime : 0;
+    for (const st of this._fxState.values()) fx += st.voices.filter((x) => x.end > now && !x.v.dead).length;
     return { liveVoices: this._live, fxVoices: fx, track: this._track ? this._track.name : null, quality: this.q, state: this.ctx ? this.ctx.state : 'none' };
   }
 
@@ -1058,7 +1059,19 @@ export class AudioEngine {
     this.sfxIn = c.createGain();
     this.uiIn = c.createGain();
     this._bus = c.createGain();
-    for (const g of [this.musicIn, this.sfxIn, this.uiIn]) g.connect(this._bus);
+    // Musik-Mastering-EQ: etwas weniger Wummern, mehr Glanz/Luft
+    this._mLow = c.createBiquadFilter();
+    this._mLow.type = 'lowshelf';
+    this._mLow.frequency.value = 140;
+    this._mLow.gain.value = -2.5;
+    this._mHigh = c.createBiquadFilter();
+    this._mHigh.type = 'highshelf';
+    this._mHigh.frequency.value = 3500;
+    this._mHigh.gain.value = 4;
+    this.musicIn.connect(this._mLow);
+    this._mLow.connect(this._mHigh);
+    this._mHigh.connect(this._bus);
+    for (const g of [this.sfxIn, this.uiIn]) g.connect(this._bus);
 
     // Bus-Kompressor („Glue“) + schneller Limiter
     this.comp = c.createDynamicsCompressor();
@@ -1110,7 +1123,7 @@ export class AudioEngine {
     hallHp.frequency.value = 160;
     const hallLp = c.createBiquadFilter();
     hallLp.type = 'lowpass';
-    hallLp.frequency.value = 7500;
+    hallLp.frequency.value = 10000;
     this._hallRet = c.createGain();
     this.hallIn.connect(this._hall);
     this._hall.connect(hallHp);
@@ -1187,7 +1200,7 @@ export class AudioEngine {
     if (!this._graph) return;
     const node = { master: this.master, music: this.musicIn, sfx: this.sfxIn, ui: this.uiIn }[ch];
     let g = this._vol[ch];
-    g = g * g; // wahrnehmungsgerechte Kurve
+    g = Math.pow(g, 1.5); // wahrnehmungsgerechte Kurve
     if (ch === 'master' && this._muted) g = 0;
     const now = this.ctx.currentTime;
     node.gain.cancelScheduledValues(now);
@@ -1333,7 +1346,10 @@ export class AudioEngine {
     st.voices = st.voices.filter((x) => x.end > now && !x.v.dead);
     // globale Obergrenze
     let total = 0;
-    for (const s of this._fxState.values()) total += s.voices.length;
+    for (const s of this._fxState.values()) {
+      if (s !== st) s.voices = s.voices.filter((x) => x.end > now && !x.v.dead);
+      total += s.voices.length;
+    }
     if (total >= (this.q === 'high' ? 48 : 22)) return false;
     if (st.voices.length >= max) {
       const old = st.voices.shift();
@@ -1397,7 +1413,7 @@ export class AudioEngine {
     pr.connect(lp);
     lp.connect(amp);
     amp.connect(dest);
-    const cut = Math.min(15000, (650 + vel * 2600) * (o.bright ?? 1) + f * 1.5);
+    const cut = Math.min(16000, (1000 + vel * 4200) * (o.bright ?? 1) + f * 2);
     const peak = (vel * (o.gain ?? 1) * 0.42) / Math.sqrt(n);
     let tEnd;
     if (stac) {
@@ -1628,7 +1644,7 @@ export class AudioEngine {
     lp.frequency.value = 140 + f * 2.5;
     lp.Q.value = 0.7;
     const amp = v.n(c.createGain());
-    const peak = vel * (o.gain ?? 1) * 0.45;
+    const peak = vel * (o.gain ?? 1) * 0.36;
     amp.gain.value = 0;
     amp.gain.setValueAtTime(0, t);
     amp.gain.linearRampToValueAtTime(peak, t + atk);

@@ -25,8 +25,9 @@
       <div class="menu-left">
         <div class="logo small"><span>AETHER</span><span>FRONT</span></div>
         <nav class="menu-nav">
-          <button class="pill big primary" data-go="setup" data-hint="Gegen Bots, 1 gegen 1 bis 4 gegen 4">Gefecht starten</button>
-          <button class="pill big" data-go="multi" data-hint="Online mit Freunden – in Vorbereitung">Mehrspieler</button>
+          <button class="pill big primary" data-go="campaign" data-hint="Solo: 15 Missionen gegen den Rissfürsten">Kampagne</button>
+          <button class="pill big" data-go="setup" data-hint="Gegen Bots – 1 gegen 1 bis 4 gegen 4, alle Spielmodi">Gefecht</button>
+          <button class="pill big" data-go="multi" data-hint="Online mit Freunden – Host wählt den Modus">Mehrspieler</button>
           <button class="pill big" data-go="codex" data-hint="So funktioniert das Spiel">Kodex &amp; Anleitung</button>
           <button class="pill big" data-go="settings" data-hint="Grafik, Audio, Steuerung">Einstellungen</button>
           <button class="pill big ghost" id="btn-quit" data-hint="Spiel beenden">Beenden</button>
@@ -42,14 +43,18 @@
         <header class="panel-head"><h2>Gefecht einrichten</h2><button class="pill ghost" data-go="menu">Zurück</button></header>
         <div class="setup-grid">
           <div class="setup-col">
-            <h3>Modus</h3>
+            <h3>Teams</h3>
             <div class="seg" id="seg-mode"></div>
-            <h3>Gegner-Stärke</h3>
+            <h3>Spielmodus <span class="code-badge" id="mode-code">AP</span></h3>
+            <div class="seg" id="seg-pick"></div>
+            <div class="mode-desc" id="mode-desc"></div>
+            <div class="row"><div class="seg" id="seg-cc"></div><div class="seg" id="seg-waves"></div></div>
+            <h3>Verbündete Bots</h3>
+            <div class="seg" id="seg-ally"></div>
+            <h3>Gegnerische Bots</h3>
             <div class="seg" id="seg-diff"></div>
-            <h3>Dein Name</h3>
-            <input id="inp-name" class="field" maxlength="16" />
-            <h3>Spieltempo</h3>
-            <div class="seg" id="seg-speed"></div>
+            <h3>Dein Name · Spieltempo</h3>
+            <div class="row"><input id="inp-name" class="field" maxlength="16" style="width:200px" /><div class="seg" id="seg-speed"></div></div>
           </div>
           <div class="setup-col grow">
             <h3>Fraktion</h3>
@@ -60,9 +65,22 @@
       </div>
     </section>
 
+    <!-- Kampagne -->
+    <section id="screen-campaign" class="screen panel-screen">
+      <div class="glass panel wide camp-panel">
+        <header class="panel-head"><h2>Chronik des Risses</h2><div class="row"><span class="star-total" id="star-total"></span><button class="pill ghost" data-go="menu">Zurück</button></div></header>
+        <div class="seg" id="act-tabs"></div>
+        <div class="camp-body">
+          <div class="camp-map" id="camp-map"></div>
+          <div class="camp-detail" id="camp-detail"></div>
+        </div>
+        <div class="talents" id="talents"></div>
+      </div>
+    </section>
+
     <!-- Mehrspieler -->
     <section id="screen-multi" class="screen panel-screen">
-      <div class="glass panel">
+      <div class="glass panel wide scroll">
         <header class="panel-head"><h2>Mehrspieler <span class="badge">Vorschau</span></h2><button class="pill ghost" data-go="menu">Zurück</button></header>
         <p class="lead">Das Spiel ist bereits auf Online-Partien ausgelegt: Alle Aktionen laufen als Befehle über eine
           deterministische Simulation (Lockstep). Ein kleiner Relay-Server verteilt nur die Befehle – das spart Bandbreite
@@ -75,7 +93,8 @@
             <button class="pill" id="btn-mp-join">Beitreten</button>
           </div>
           <div id="mp-lobby" class="mp-lobby"></div>
-          <div class="row"><button class="pill primary" id="btn-mp-start" disabled>Starten (Host)</button></div>
+          <div id="mp-host" class="mp-host"></div>
+          <div class="row"><button class="pill" id="btn-mp-team">Team wechseln</button><button class="pill primary" id="btn-mp-start" disabled>Starten (Host)</button></div>
           <p class="fine">Hinweis: Online-Partien sind experimentell. Server lokal starten mit <code>npm run server</code>
             (Port 7710). Für Freunde über das Internet muss der Port weitergeleitet oder ein Server gemietet werden.</p>
         </div>
@@ -106,6 +125,7 @@
         <div class="phase glass" id="phase"></div>
         <div class="kings" id="kings"></div>
       </div>
+      <div class="objective" id="objective"></div>
       <div class="feed" id="feed"></div>
       <div class="lanes glass" id="lanes"></div>
       <div class="hud-bottom">

@@ -1,0 +1,77 @@
+import { test } from 'node:test';
+import assert from 'node:assert/strict';
+import { Sim } from '../src/sim/sim.js';
+import { UNITS } from '../src/sim/data.js';
+import { parseModeCode, modeCode } from '../src/sim/modes.js';
+import { MISSIONS, missionSetup, missionStars, talentBonus } from '../src/sim/campaign.js';
+
+const players = (n) => Array.from({ length: n * 2 }, (_, i) => ({ name: `P${i}`, team: i % 2, faction: 'orden', bot: i > 0, difficulty: 'normal' }));
+
+test('Moduskürzel: PRCC, HP, AP', () => {
+  assert.deepEqual(parseModeCode('PRCC'), { pickMode: 'pr', champions: true });
+  assert.deepEqual(parseModeCode('-hp'), { pickMode: 'hp', champions: false });
+  assert.equal(modeCode({ pickMode: 'ar', champions: true }), 'ARCC');
+});
+
+test('PR: zufällige Fraktion mit Bonusgold, einmal neu würfeln', () => {
+  const sim = new Sim({ seed: 4, players: players(2), rules: parseModeCode('PRCC') });
+  const p = sim.players[0];
+  assert.ok(p.randomed);
+  const before = p.faction;
+  assert.ok(sim.applyCommand(0, { type: 'reroll' }));
+  assert.notEqual(p.faction, before);
+  assert.equal(sim.applyCommand(0, { type: 'reroll' }), false);
+  assert.ok(sim.applyCommand(0, { type: 'build', unit: p.lines[0], col: 0, row: 0 }));
+});
+
+test('CC: Champions erscheinen in der Welle', () => {
+  const sim = new Sim({ seed: 2, players: players(1), rules: parseModeCode('APCC') });
+  sim.phaseTime = 0;
+  let champs = 0;
+  sim.step();
+  for (const e of sim.entities.values()) if (e.type === 'c' && e.def.champion) champs++;
+  assert.equal(champs, 2 * 2); // 8 Krabbler je Bahn → 2 Champions, 2 Bahnen
+});
+
+test('HP: Hybrid-Baumeister hat 5 Linien aus verschiedenen Fraktionen und kann sie bauen', () => {
+  const sim = new Sim({ seed: 9, players: players(4), rules: parseModeCode('HP') });
+  for (const p of sim.players) {
+    assert.equal(p.lines.length, 5);
+    assert.equal(new Set(p.lines).size, 5);
+    assert.ok(p.lines.filter((id) => ['tank', 'melee', 'assassin'].includes(UNITS[id].role)).length >= 2);
+  }
+  const p = sim.players[0];
+  assert.ok(sim.applyCommand(0, { type: 'build', unit: p.lines[4], col: 1, row: 1 }));
+  while (sim.phase !== 'over' && sim.tick < 20 * 60 * 8) sim.step();
+  assert.ok(sim.wave > 3);
+});
+
+test('Kampagne: jede Mission startet und läuft; Söldner belagern die Rissfeste', () => {
+  for (const m of MISSIONS) {
+    const s = missionSetup(m, { seed: 1, totalStars: 45 });
+    s.players[0].bot = true; s.players[0].difficulty = 'hard';
+    const sim = new Sim(s);
+    assert.equal(sim.wave, m.startWave);
+    assert.ok(sim.teams[1].king.citadel);
+    for (let i = 0; i < 20 * 120 && sim.phase !== 'over'; i++) sim.step();
+  }
+  const m = MISSIONS[1];
+  const sim = new Sim(missionSetup(m, { seed: 3 }));
+  sim.players[0].aether = 500;
+  const hp0 = sim.teams[1].king.hp;
+  assert.ok(sim.applyCommand(0, { type: 'send', send: 's_rat' }));
+  for (let i = 0; i < 20 * 120 && sim.wave === 1; i++) sim.step();
+  assert.ok(sim.teams[1].king.hp < hp0, 'Rissfeste hat Schaden genommen');
+});
+
+test('Kampagne: Sterne und Talente', () => {
+  const m = MISSIONS[0];
+  const s = missionSetup(m, { seed: 5 });
+  s.players[0].bot = true;
+  const sim = new Sim(s);
+  while (sim.phase !== 'over') sim.step();
+  assert.equal(sim.winner, 0);
+  assert.ok(missionStars(m, sim) >= 2);
+  assert.equal(talentBonus(0).gold, 0);
+  assert.equal(talentBonus(45).gold, 90);
+});
