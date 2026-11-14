@@ -215,6 +215,7 @@ function execute(sim, h, slot, ab, target) {
     }
     case 'bolt': {
       if (!tgt || !tgt.alive) break;
+      if (ab.mark) { tgt.cursePct = Math.max(tgt.cursePct || 0, ab.mark); tgt.curseT = 6; }
       const pr = { id: sim.nextId++, type: 'p', src: h.id, tgt: tgt.id, x: h.x, z: h.z, y: 1.6, dmg: ab.dmg * h.power, atk: def.atk, abil: {}, side: 'f', speed: 26, kind: def.atk === 'stich' ? 'arrow' : def.atk === 'chaos' ? 'void' : 'magic', lane: h.lane, team: h.team, ox: h.x, oz: h.z, tx: tgt.x, tz: tgt.z, hero: true };
       sim.entities.set(pr.id, pr);
       break;
@@ -262,8 +263,16 @@ function execute(sim, h, slot, ab, target) {
     }
     case 'leap': {
       h.x = target.x; h.z = target.z; h.vy = 4; h.grounded = false;
-      for (const e of enemiesNear(sim, h, h.x, h.z, ab.radius || 4)) hit(sim, h, e, ab.dmg || 0);
+      for (const e of enemiesNear(sim, h, h.x, h.z, ab.radius || 4)) hit(sim, h, e, ab.dmg || 0, { stun: ab.stun });
       sim.emit({ e: 'splash', x: h.x, z: h.z, r: ab.radius || 4, atk: 'wucht' });
+      break;
+    }
+    case 'heal_self': {
+      const amt = h.maxHp * (ab.healPct || 0.2);
+      if (ab.hot) h.buffs.push({ t: ab.hot, hot: amt / ab.hot, kind: 'hot' });
+      else { const b = h.hp; h.hp = Math.min(h.maxHp, h.hp + amt); h.stats.heal += h.hp - b; sim.emit({ e: 'heal', src: h.id, tgt: h.id, x: h.x, z: h.z, amount: Math.round(h.hp - b) }); }
+      if (ab.armorBuff) h.buffs.push({ t: ab.dur || 6, armor: ab.armorBuff, kind: 'guard' });
+      if (ab.absorbPct) { h.shield = (h.shield || 0) + h.maxHp * ab.absorbPct; h.shieldT = ab.dur || 8; sim.emit({ e: 'shield', id: h.id, x: h.x, z: h.z }); }
       break;
     }
     case 'buff_self': h.buffs.push({ t: ab.dur, haste: ab.haste || 0, lifesteal: ab.lifesteal || 0, armor: ab.armor || 0, dmg: ab.dmgBuff || 0, kind: 'self' }); break;
@@ -338,7 +347,11 @@ export function updateHero(sim, h, creeps) {
   if (h.atkCd > 0) h.atkCd -= DT;
   if (h.tauntT > 0) h.tauntT -= DT;
   if (h.shieldT > 0) { h.shieldT -= DT; if (h.shieldT <= 0) h.shield = 0; }
-  for (let i = h.buffs.length - 1; i >= 0; i--) { h.buffs[i].t -= DT; if (h.buffs[i].t <= 0) h.buffs.splice(i, 1); }
+  for (let i = h.buffs.length - 1; i >= 0; i--) {
+    const b = h.buffs[i];
+    if (b.hot && h.alive) { const before = h.hp; h.hp = Math.min(h.maxHp, h.hp + b.hot * DT); h.stats.heal += h.hp - before; }
+    b.t -= DT; if (b.t <= 0) h.buffs.splice(i, 1);
+  }
 
   if (!h.alive) {
     h.respawn -= DT;
@@ -468,8 +481,9 @@ export function heroDied(sim, h) {
   h.alive = false;
   h.hp = 0;
   h.cast = null; h.zones = []; h.auto = false;
-  h.respawn = Math.min(20, 6 + sim.wave * 0.5);
-  sim.emit({ e: 'heroDeath', id: h.id, pid: h.owner, x: h.x, z: h.z, respawn: h.respawn });
+  // Gefallen: Der Held kehrt erst zur nächsten Bauphase zurück – bis dahin halten nur die Vasallen die Bahn
+  h.respawn = Infinity;
+  sim.emit({ e: 'heroDeath', id: h.id, pid: h.owner, x: h.x, z: h.z, respawn: -1 });
 }
 
 export function heroGainXp(sim, h, xp) {
@@ -545,6 +559,7 @@ export function heroBotThink(sim, h) {
   for (const slot of order) {
     const ab = abilityAt(def.abilities[slot], h.level, slot);
     if (h.cds[slot] > 0 || h.res < ab.cost) continue;
+    if (ab.type === 'heal_self' && h.hp > h.maxHp * 0.5) continue;
     if (['heal_area', 'revive'].includes(ab.type)) {
       let hurt = 0; for (const a of alliesNear(sim, h, h.x, h.z, ab.radius)) if (a.alive && a.hp < a.maxHp * 0.6) hurt++;
       if (hurt < 2) continue;
@@ -552,7 +567,7 @@ export function heroBotThink(sim, h) {
     if (['aoe_self', 'taunt'].includes(ab.type) && enemiesNear(sim, h, h.x, h.z, ab.radius).length < 2) continue;
     if (['aura_vassals'].includes(ab.type) && enemiesNear(sim, h, h.x, h.z, 12).length < 3) continue;
     if (ab.type === 'leap_back' || (ab.type === 'blink' && !ab.behind)) continue;
-    if (ab.range && d > ab.range && !['aoe_self', 'heal_area', 'aura_vassals', 'buff_self', 'taunt', 'revive', 'summon'].includes(ab.type)) continue;
+    if (ab.range && d > ab.range && !['aoe_self', 'heal_area', 'aura_vassals', 'buff_self', 'taunt', 'revive', 'summon', 'heal_self'].includes(ab.type)) continue;
     if (ab.cast > 0 && sim.rng.next() < 0.3) continue;
     if (tryCast(sim, h, slot, { target: best.id, x: best.x, z: best.z }, false)) { p.hin.f = 0; return; }
   }
