@@ -184,3 +184,5 @@
 - 14.11.2026: Showroom-Beleuchtung von oben in Start- und Marken-Showroom: weicher Lichtkegel aus der Decke, Lichtfleck am Boden + Kontaktschatten. Keine sichtbare Lampe (Tiry: „es braucht keine lampe! die BELEUCHTUNG REICHT!“).
 
 - 14.11.2026: Showroom-Beleuchtung wieder komplett entfernt (Tiry: „mach die beleuchtung wieder weg“). Showrooms wie vorher.
+
+- 14.11.2026: Ausgeblendete Räder/Farben (Bestand-Verwaltung) laufen in keinem Showroom mehr. Ursache: Showroom-Liste wurde nur beim ersten Laden gebaut, spätere Ausblendungen aus der Datenbank kamen nicht an. Jetzt bei jeder Bestandsänderung neu (admRefresh → srBuild).

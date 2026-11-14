@@ -3930,7 +3930,7 @@ function srBuild(){const P={},G=new Set();BR.forEach(b=>P[b.k]=[srBase(b)]);
    P[br.k].push({k:br.k,m:(m.marke+' '+m.modell).replace(/\s+/g,' ').trim(),f:x.farbe||'',img:'img/show/'+fn,st:x.status==='bestellt'?'bestellt':'lager'})})});
  SR.all={};Object.keys(P).forEach(k=>SR.all[k]=P[k].filter(x=>!x.cur));/* alle echten Bestandsfotos je Marke (Start-Showroom) */
  Object.keys(P).forEach(k=>{P[k]=SRFIX.includes(k)?P[k].filter(x=>x.cur||(k==='vanraam'&&/compact\s*plus/i.test(x.m))):(P[k].length>1?P[k].filter(x=>!x.cur):P[k])});/* feste Plätze = festes Bild, Rest nur aus dem Bestand */
- SR.pool=P;SR.th={};Object.keys(P).forEach(k=>{const L=P[k];SR.th[k]=L[srRnd(L.length)].img});SR.subs.forEach(f=>f())}
+ const first=!SR.pool;SR.pool=P;SR.th={};Object.keys(P).forEach(k=>{const L=P[k];SR.th[k]=L[srRnd(L.length)].img});if(first)SR.subs.forEach(f=>f())}
 /* Marken-Runde (Tiry 14.11.2026): jede Marke mit Foto 1× pro Runde, zufällige Reihenfolge, nie dieselbe Marke direkt hintereinander */
 function bagNext(B,keys){if(!B.q||!B.q.length){const q=keys.slice();for(let i=q.length-1;i>0;i--){const j=srRnd(i+1);[q[i],q[j]]=[q[j],q[i]]}if(q.length>1&&q[0]===B.l){const j=1+srRnd(q.length-1);[q[0],q[j]]=[q[j],q[0]]}B.q=q}B.l=B.q.shift();return B.l}
 const srNorm=t=>String(t||'').toLowerCase().replace(/\(.*?\)/g,'').replace(/matt|glanz|glossy|glänzend/g,'').replace(/[^a-zäöü]/g,'');
@@ -4160,7 +4160,7 @@ fRender();
   if(fx&&(k<bs.length-1||!SR.pool)){k=(k+1)%bs.length;swap(bs[k],bs[k].dataset.l);return}
   fx=false;if(!D.length)for(let j=0;j<2;j++){const im=document.createElement('img');im.className='hb off';im.decoding='async';hv.insertBefore(im,fl);D.push(im)}
   const ks=Object.keys(SR.all||{}).filter(j=>SR.all[j].length);if(!ks.length)return;/* nur echte Bestandsräder mit eigenem Foto, nie Katalogbild */
-  const bk=bagNext(HB,ks),L=SR.all[bk];let c=L.filter(y=>!SR.last.includes(y.img)&&(!SR.lastF||srNorm(y.f)!==SR.lastF));if(!c.length)c=L.filter(y=>y.img!==SR.lb['h'+bk]);if(!c.length)c=L;
+  const bk=bagNext(HB,ks),L=SR.all[bk];if(!L||!L.length){HB.q=null;return}let c=L.filter(y=>!SR.last.includes(y.img)&&(!SR.lastF||srNorm(y.f)!==SR.lastF));if(!c.length)c=L.filter(y=>y.img!==SR.lb['h'+bk]);if(!c.length)c=L;
   const x=c[srRnd(c.length)];SR.lb['h'+bk]=x.img;SR.last.unshift(x.img);SR.last.length=Math.min(SR.last.length,24);srLS(SR.last);SR.lastF=srNorm(x.f);const br=BR.find(y=>y.k===x.k);if(!br)return;dk^=1;const el=D[dk];busy=1;
   const pre=new Image();pre.src=x.img;const go=()=>{el.src=x.img;el.alt=x.m+(x.f?' in '+x.f:'');busy=0;requestAnimationFrame(()=>swap(el,br.logo))};pre.decode?pre.decode().then(go,go):(pre.onload=go)},4800);
  const bq=berlin(),{d,m}=bq,q=$('#qkHours'),TD=slotsAt(bq.y,bq.mo,bq.dd,d);if(q){const op=TD.some(([a,b])=>m>=a&&m<b);q.innerHTML='<i class="qd'+(op?' on':'')+'"></i>'+(op?'Jetzt geöffnet':'Heute: '+(TD.length?TD.map(([a,b])=>hm(a)+'–'+hm(b)).join(' · '):'geschlossen'))}})();
@@ -4338,7 +4338,7 @@ function admMerge(d){d=d||{};const R=[],rows=ADM.rows,st=ADM.set;
  Object.keys(rows).filter(i=>i.startsWith('neu-')).sort().forEach(i=>{const n=rows[i];if(n&&n.rad&&!n.hidden&&(n.rad.farben||[]).length)R.push(Object.assign({},n.rad,{eigen:true}))});
  R.forEach(r=>{r.farben=(r.farben||[]).map(f=>typeof f.bild==='string'&&f.bild.startsWith('fs:')?Object.assign({},f,{bild:fotoSrc(f.bild)}):f)});
  return Object.assign({},d,{raeder:R},st.hinweis!=null&&st.hinweis!==''?{hinweis:st.hinweis}:{},st.hinweisAus?{hinweis:''}:{},st.stand?{stand:st.stand}:{})}
-function admRefresh(){if(!admBase())return;lgApply();admDeals();if(LG.ok)lgRender();if(!$('#adm').hidden&&ADM.ok&&$('#admDr').hidden&&!ADM.imp)admRender()}
+function admRefresh(){if(!admBase())return;lgApply();if(SR.pool)srBuild();/* ausgeblendete Räder sofort aus beiden Showrooms (Tiry 14.11.2026) */admDeals();if(LG.ok)lgRender();if(!$('#adm').hidden&&ADM.ok&&$('#admDr').hidden&&!ADM.imp)admRender()}
 /* Datenbank still im Hintergrund verbinden: Änderungen erscheinen bei allen angemeldeten Besuchern live */
 /* Live-Seite: Google Firebase (Anmeldung + Datenbank, Rechte prüft der Server). Prototyp: claude.ai. FBC setzt tools/live_bauen.py. */
 const FBC=null;/*FBCFG*/
