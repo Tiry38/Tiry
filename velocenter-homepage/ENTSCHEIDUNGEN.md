@@ -190,3 +190,5 @@
 - 14.11.2026: Kennzahlen E-Dreiräder (Compact Plus + Easy Rider 3) neu: Glas-Leiste mit sanft wanderndem Farbschimmer statt weißer Pillen im Rahmen, neue Linien-Symbole im Stil der Seite (Einstieg, Maßpfeile Länge/Innenbein, Speichenrad, Gewicht, Tacho, Akku), Farbstrich je Wert. Desktop 4 bzw. 3 Spalten, Tablet/Handy 2.
 
 - 14.11.2026: Handy: Beim Radwechsel in der Kachel „Auf Lager“ blinkten die unteren Kacheln mit. Ursache: je Wechsel neues Bild-Element (neue Grafik-Ebene, Nachbarkacheln wurden neu gezeichnet). Jetzt zwei feste Bilder im Wechsel + feste Ebenen je Kachel (translateZ, contain:paint, will-change).
+
+- 14.11.2026: Ticker – Bosch-Pille war schief (machte die Kursiv-Neigung mit → Parallelogramm, Bosch-Ring zum Oval verzerrt) und die Buchstaben stießen oben fast an. Jetzt gerade Kapsel (Gegen-Neigung skewX(9deg) an Pille und Logo, Ring wieder rund), Großbuchstaben mittig mit gleichem Rand oben/unten, etwas mehr Innenabstand. Text bleibt kursiv auf der Zeilen-Grundlinie.
