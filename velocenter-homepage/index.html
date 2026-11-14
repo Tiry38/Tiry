@@ -2303,9 +2303,8 @@ a.hchip.hc.hlive .hla b svg{width:16px;height:16px;fill:none;stroke:#fff;stroke-
 .road .bus .puff:nth-of-type(4){animation-delay:.65s}.road .bus .puff:nth-of-type(5){animation-delay:1.3s}.road .bus .puff:nth-of-type(6){animation-delay:1.95s}
 @keyframes puff{0%{opacity:0;transform:translate(0,0) scale(.4)}10%{opacity:1}55%{opacity:.7}100%{opacity:0;transform:translate(240%,-85%) scale(3)}}
 @media (prefers-reduced-motion:reduce){.road .bus,.road .bus .whl{animation:none!important}.road .bus .puff{display:none}}
-/* Ticker-Trenner: schräger Leuchtbalken statt ✦ (Tiry 14.11.2026) */
-.band span em{display:inline-block;width:.16em;height:.74em;padding:0!important;margin:0 .82em 0 .6em;vertical-align:-.02em;border-radius:999px;opacity:1!important;font-size:inherit;background:linear-gradient(180deg,#fff 0%,#FFC83D 50%,#FF7A00 100%);box-shadow:.28em 0 0 rgba(255,255,255,.38),0 0 14px rgba(255,170,60,.6)}
-.band span em::before,.band span em::after{content:none!important}
+/* Ticker-Trenner: Funkelstern in Türkis (Tiry 14.11.2026) */
+.band span em{opacity:1!important;color:#5EEAD4;-webkit-text-stroke:0;text-shadow:0 0 14px rgba(94,234,212,.65)}
 /* Tempo (Tiry 12.11.2026): unsichtbare Animationen pausieren, Hintergrund-Ebenen eigene GPU-Ebene */
 .apz,.apz *,.apz *::before,.apz *::after{animation-play-state:paused!important}
 html.scr .sky,html.scr .blobs i,html.scr .blobs::after,html.scr .ribbons i{animation-play-state:paused!important}
@@ -3905,7 +3904,7 @@ const ACC=[['Bosch','bosch.svg'],['Shimano','shimano.webp'],['Schwalbe','schwalb
 $('#acc').innerHTML=ACC.map(([n,f])=>'<span><img src="img/zub-'+f+'" alt="'+esc(n)+'" loading="lazy"></span>').join('');
 
 /* ---------- Laufbänder ---------- */
-const tkIt=u=>u.split('|').map(x=>'<span>'+esc(x).replace('★','<b class="tks">★</b>').replace("i:SY&#39;s",'<b class="tko">i:SY&#39;s</b>').replace("i:SY's",'<b class="tko">i:SY\'s</b>').replace('i:SY Experte','<b class="tko">i:SY</b> Experte').replace('Bosch ','<b class="tkb">Bosch</b> ').replace('300+','<b class="tkn">300+</b>')+'<em aria-hidden="true"></em></span>').join('');
+const tkIt=u=>u.split('|').map(x=>'<span>'+esc(x).replace('★','<b class="tks">★</b>').replace("i:SY&#39;s",'<b class="tko">i:SY&#39;s</b>').replace("i:SY's",'<b class="tko">i:SY\'s</b>').replace('i:SY Experte','<b class="tko">i:SY</b> Experte').replace('Bosch ','<b class="tkb">Bosch</b> ').replace('300+','<b class="tkn">300+</b>')+'<em aria-hidden="true">✦</em></span>').join('');
 $$('.band .tk').forEach(t=>{const items=tkIt(t.dataset.t);t.innerHTML=items+items+items+items});
 /* Google-Bewertung: google.json (alle 3 Tage vom GitHub-Lauf geschrieben); fehlt sie, bleiben die eingetragenen Werte */
 fetch('google.json',{cache:'no-store'}).then(r=>r.ok?r.json():null).then(g=>{if(!g)return;const v=Number(g.rating),n=Number(g.count);if(!(v>=1&&v<=5)||!(Number.isInteger(n)&&n>0))return;

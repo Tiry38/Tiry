@@ -173,3 +173,6 @@
 
 ## 14.11.2026 – Ticker-Trenner neu (Tiry: ✦ wirkt wie KI-Wasserzeichen)
 - ✦ ersetzt durch schrägen Doppel-Leuchtstrich (Verlauf Weiß → Gold → Orange, zweiter Strich halbtransparent, leichtes Leuchten), reines CSS am leeren `em`.
+
+## 14.11.2026 – Ticker-Trenner: Funkelstern zurück, in Türkis (Tiry)
+- Doppelstrich verworfen; ✦ wieder da, Farbe #5EEAD4 mit Leuchten (nicht rot/gelb/orange, Tiry).
