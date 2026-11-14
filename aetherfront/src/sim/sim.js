@@ -12,6 +12,7 @@ import {
 import { botThink } from './ai.js';
 import { FACTION_LINES } from './data.js';
 import { HEROES, HERO_IDS } from './heroes.js';
+import { leaderDef, bossKit, updateLeader, leaderAura } from './leader.js';
 import { createHero, heroCommand, updateHero, heroWaveStart, heroWaveEnd, heroTakeDamage, heroDied, heroGainXp, heroBotThink, heroArmor, heroArmorType, HERO_RADIUS } from './hero.js';
 
 // Regeln einer Partie (Standard = Versus wie im Original; Kampagne/Modi überschreiben einzelne Werte)
@@ -28,6 +29,7 @@ export const DEFAULT_RULES = {
   gridRows: 8, maxTier: 3, kingHpMul: 1,
   transition: 2.0,         // Kameraschwenk: so lange ruht das Spiel zu Wellenbeginn/-ende (alle synchron)
   heroes: true,            // Helden-System an
+  leaders: true,           // Wellen-Anführer
   campaign: null,          // { goal: 'siege'|'survive', citadelHp, citadelRegen, citadelDmg, siegeMul, enemySends: [{wave, send, count}] }
 };
 
@@ -60,6 +62,13 @@ export class Sim {
     this.waves = WAVES.map((w) => {
       const d = { ...w, key: `w${w.n}`, hp: Math.round(w.hp * R.waveHpMul * heroHp * (w.boss && R.champions ? 1.25 : 1)), dmg: w.dmg * R.waveDmgMul * heroDmg, armor: w.armor + R.waveArmorAdd, bounty: Math.max(1, Math.round(w.bounty * R.bountyMul)) };
       d.champ = w.boss ? null : { ...d, key: `w${w.n}c`, champion: true, name: `Champion: ${w.name}`, hp: d.hp * 3, dmg: d.dmg * 1.6, armor: d.armor + 2, bounty: d.bounty * 3, size: 1.3 };
+      d.hunter = ['raptor', 'hound', 'imp'].includes(w.model);
+      if (R.leaders) {
+        if (w.boss) return bossKit(d);
+        d.leaderDef = leaderDef(d);
+        d.hp = Math.round(d.hp * 0.85); // ein Teil der Wellenstärke steckt im Anführer
+        if (d.champ) d.champ.hp = Math.round(d.champ.hp * 0.85);
+      }
       return d;
     });
     this.battleTime = 0;
@@ -375,6 +384,15 @@ export class Sim {
         const def = this.rules.champions && w.champ && i % 4 === 3 ? w.champ : w;
         this.spawnCreep(p.id, def, x, z, { bounty: def.bounty, wave: true });
       }
+      // Anführer der Welle (hinter der Formation)
+      if (w.leaderDef) {
+        const rows = Math.ceil(w.count / perRow);
+        const L = this.spawnCreep(p.id, w.leaderDef, lx, LANE_SPAWN_Z + 1 - rows * 1.8 - 1.5, { bounty: w.leaderDef.bounty, wave: true });
+        L.spawnT = 0;
+        this.emit({ e: 'leaderSpawn', id: L.id, lane: p.id, name: w.leaderDef.name, kit: w.leaderDef.kit });
+      } else if (w.boss && w.leader) {
+        for (const e of this.entities.values()) if (e.type === 'c' && e.lane === p.id && e.def === w) { e.spawnT = 0; this.emit({ e: 'leaderSpawn', id: e.id, lane: p.id, name: w.name, kit: w.kit, boss: true }); }
+      }
       // Söldner der Gegner
       p.sendQueue.forEach((q, i) => {
         const s = SEND_BY_ID[q.send];
@@ -479,6 +497,7 @@ export class Sim {
       for (const f of fs) this.updateFighter(f, fs, cs);
       for (const h of hs) updateHero(this, h, cs);
       const defenders = hs.length ? fs.concat(hs.filter((h) => h.alive)) : fs;
+      if (this.rules.leaders) leaderAura(this, cs);
       for (const c of cs) this.updateCreep(c, defenders);
       this.separate(defenders.concat(cs.filter((c) => c.alive)), this.laneX(p.id));
     }
@@ -643,7 +662,11 @@ export class Sim {
 
   updateCreep(c, fs) {
     const def = c.def;
-    if (!this.tickStatus(c)) return;
+    const free = this.tickStatus(c);
+    if (def.leader && c.stage === 'lane' && !this.rage && c.z < LANE_END_Z) {
+      if (updateLeader(this, c, fs)) return;
+    }
+    if (!free) return;
     const lx = this.laneX(c.lane);
     const sp = def.speed * (1 - c.slowPct);
     if (c.z >= LANE_END_Z) {
@@ -691,12 +714,12 @@ export class Sim {
     c.face = Math.atan2(tgt.x - c.x, tgt.z - c.z);
     if (dist > reach) { this.moveToward(c, tgt.x, tgt.z, sp); return; }
     if (c.cd <= 0) {
-      c.cd = def.cd;
+      c.cd = def.cd / (c.enraged ? 1.6 : 1);
       c.atkT = this.time;
-      if (def.ranged) this.fireProjectile(c, tgt, def);
+      if (def.ranged) this.fireProjectile(c, tgt, def, 1 + (c.moraleDmg || 0));
       else {
         this.emit({ e: 'attack', id: c.id, tgt: tgt.id, melee: true, atk: def.atk });
-        this.damage(c, tgt, def.dmg, def.atk, {}, fs, true);
+        this.damage(c, tgt, def.dmg * (1 + (c.moraleDmg || 0)), def.atk, {}, fs, true);
       }
     }
   }
@@ -717,7 +740,7 @@ export class Sim {
     }
     if (c.cd <= 0 && k.alive) {
       c.cd = c.def.cd; c.atkT = this.time;
-      const mult = DAMAGE_TABLE[c.def.atk].festung * (c.def.boss ? 0.45 : 1); // Boss-Durchbruch tut weh, beendet aber nicht sofort die Partie
+      const mult = DAMAGE_TABLE[c.def.atk].festung * (c.def.boss ? 0.3 : 1); // Boss-Durchbruch tut weh, beendet aber nicht sofort die Partie
       this.hurtKing(c.team, c.def.dmg * mult * (1 - armorReduction(k.armor)), c.id);
     }
   }
@@ -754,7 +777,9 @@ export class Sim {
       k.atkCd = KING.cd;
       this.emit({ e: 'kingAttack', team: t.id, tgt: tgt.id, x: tgt.x, z: tgt.z });
       const kingSrc = { type: 'k', team: t.id, x: k.x, z: k.z, alive: true, hp: 1, maxHp: 1 };
-      this.damage(kingSrc, tgt, KING.dmg * k.dmgMul, KING.atk, { splash: KING.splash }, near, true);
+      // Der König wächst mit dem Krieg (wie die Wellen) – Verbesserungen kommen obendrauf
+      const growth = k.citadel ? 1 : Math.pow(1.1, Math.max(0, this.wave - 1));
+      this.damage(kingSrc, tgt, KING.dmg * k.dmgMul * growth, KING.atk, { splash: KING.splash }, near, true);
     }
   }
 
@@ -811,7 +836,7 @@ export class Sim {
     let armorType, armor;
     if (tgt.type === 'f') { armorType = UNITS[tgt.def].armorType; armor = UNITS[tgt.def].armor + tgt.auraArmor; }
     else if (tgt.type === 'h') { armorType = heroArmorType(tgt); armor = heroArmor(tgt); }
-    else { armorType = tgt.def.armorType; armor = tgt.def.armor; }
+    else { armorType = tgt.def.armorType; armor = tgt.def.armor + (tgt.moraleArmor || 0); }
     const mult = DAMAGE_TABLE[atk][armorType] ?? 1;
     let final = Math.max(1, dmg * mult * (1 - armorReduction(armor || 0)) * (1 + (tgt.cursePct || 0)));
     if (tgt.type === 'h') final = heroTakeDamage(this, tgt, final);
@@ -847,7 +872,17 @@ export class Sim {
           if (byHero) h.stats.kills++;
         }
       }
-      this.emit({ e: 'death', id: e.id, x: e.x, z: e.z, type: 'c', model: e.def.model, boss: !!e.def.boss, champion: !!e.def.champion });
+      if (e.def.leader && e.stage === 'lane') {
+        const quick = this.battleTime - (e.spawnT || 0) <= 20;
+        const w = this.waveDef();
+        const bonus = quick ? Math.round(w.bounty * w.count * 0.4) : 0;
+        const p = this.players[e.lane];
+        if (bonus) { p.gold += bonus; this.emit({ e: 'gold', pid: p.id, amount: bonus, x: e.x, z: e.z }); }
+        const h = p.heroEnt && this.entities.get(p.heroEnt);
+        if (h) heroGainXp(this, h, quick ? 60 : 30);
+        this.emit({ e: 'leaderDown', id: e.id, lane: e.lane, quick, bonus, x: e.x, z: e.z, byHero: !!(src && src.type === 'h') });
+      }
+      this.emit({ e: 'death', id: e.id, x: e.x, z: e.z, type: 'c', model: e.def.model, boss: !!e.def.boss, champion: !!e.def.champion, leader: !!e.def.leader });
     } else {
       this.emit({ e: 'death', id: e.id, x: e.x, z: e.z, type: 'f', model: UNITS[e.def].model });
     }

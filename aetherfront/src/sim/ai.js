@@ -27,7 +27,9 @@ export function botThink(sim, p) {
       sim.applyCommand(p.id, { type: 'send', send: s.id });
     }
   }
-  if (p.difficulty !== 'easy' && k.hp < k.maxHp * 0.75 && rng.next() < 0.3) {
+  // König vorausschauend aufrüsten (vor Bosswellen und regelmäßig), nicht erst wenn er wankt
+  const bossSoon = sim.wave % 10 >= 8 || sim.wave % 10 === 0;
+  if (p.difficulty !== 'easy' && (k.hp < k.maxHp * 0.75 || bossSoon || sim.wave % 4 === 0) && rng.next() < (p.difficulty === 'hard' ? 0.5 : 0.3)) {
     const up = rng.pick(['hp', 'regen', 'dmg']);
     if (p.aether >= kingUpgradeCost(up, k.levels[up])) sim.applyCommand(p.id, { type: 'king', up });
   }
