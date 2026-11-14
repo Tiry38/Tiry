@@ -8,8 +8,8 @@ import { LANE_WIDTH } from '../sim/layout.js';
 export const HERO_FOV = 56;
 export const ZOOM_MIN = 1.5, ZOOM_MAX = 20;
 export const PITCH_MIN = -0.55, PITCH_MAX = 1.42;
-const HEAD = 1.65;            // Blickpunkt knapp unter Schulterhöhe → Held steht groß im unteren Bilddrittel, Füße über der Aktionsleiste
-export const DEFAULT_DIST = 5, DEFAULT_PITCH = 0.09; // WoW-Standard: ~5 m dahinter, Kamera ≈ 2,1 m hoch
+const HEAD = 1.95;            // Blickpunkt auf Brust-/Schulterhöhe des Helden (Modell × 1,4 ≈ 2,65 m)
+export const DEFAULT_DIST = 5.5, DEFAULT_PITCH = -0.04; // leichte Untersicht: Kamera ≈ 1,7 m hoch, Held ≈ 40 % Bildhöhe
 const LANE_Z0 = -38.5, LANE_Z1 = 28.5;
 const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
 const _v = new THREE.Vector3();

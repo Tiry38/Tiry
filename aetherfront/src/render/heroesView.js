@@ -14,7 +14,7 @@ import { ANIM_TIME, CAST_HOLD, animTime, abilityAnim, autoAnim, impactDelay } fr
 
 const _v = new THREE.Vector3();
 const RELEASE = 0.38;   // Sekunden: Freisetzen nach Zauberende
-export const HERO_SCALE = 1.25; // Helden überragen ihre Vasallen
+export const HERO_SCALE = 1.4; // Helden überragen ihre Vasallen (~1,12× Vasallenhöhe)
 const wrap = (a) => Math.atan2(Math.sin(a), Math.cos(a));
 
 export class HeroesView {
@@ -34,6 +34,12 @@ export class HeroesView {
     this.localId = 0;
     this.pillar = this.makePillar();
     this.root.add(this.pillar);
+    // Präsentation des eigenen Helden: Gegenlicht (Rim) in Klassenfarbe + weiches Fülllicht – nur in Heldennähe
+    // (kurze Reichweite), immer vorhanden (Intensität 0 statt Ein-/Ausbau → keine Shader-Neuübersetzung)
+    this.rim = new THREE.PointLight(0xffffff, 0, 5.5, 1.6);
+    this.fill = new THREE.PointLight(0xfff0dd, 0, 6, 1.8);
+    this.root.add(this.rim, this.fill);
+    this.moteT = 0;
   }
 
   makePillar() {
@@ -336,13 +342,36 @@ export class HeroesView {
         this.pillar.position.set(s.x, 0, s.z);
         this.pillar.material.uniforms.uK.value = h.alive ? Math.min(1, Math.max(0, (camD - 14) / 40)) * (ctx.heroMode ? 0.18 : 0.42) : 0;
         this.pillar.material.uniforms.uTime.value = this.time;
+        this.present(s, h, ctx, dt);
       }
       this.updatePlate(s, h, ctx, own, myTeam, sim);
     }
     for (const id of [...this.map.keys()]) if (!seen.has(id)) this.remove(id);
-    if (!this.localId || !seen.has(this.localId)) this.pillar.material.uniforms.uK.value = 0;
+    if (!this.localId || !seen.has(this.localId)) { this.pillar.material.uniforms.uK.value = 0; this.rim.intensity = 0; this.fill.intensity = 0; }
     this.list = list;
     this.abilityFx.update(dt, sim, list);
+  }
+
+  /** Heldenblick: Rim-Licht hinter dem Helden (von der Kamera aus), Fülllicht vorn, aufsteigende Funken am Boden */
+  present(s, h, ctx, dt) {
+    const on = ctx.heroMode && h.alive && ctx.camera;
+    const k = 1 - Math.exp(-dt * 4);
+    this.rim.intensity += ((on ? 9 : 0) - this.rim.intensity) * k;
+    this.fill.intensity += ((on ? 2.2 : 0) - this.fill.intensity) * k;
+    if (this.rim.intensity < 0.01) return;
+    this.rim.color.set(s.color);
+    const c = ctx.camera.position;
+    let dx = s.x - c.x, dz = s.z - c.z; const d = Math.hypot(dx, dz) || 1; dx /= d; dz /= d;
+    const H = (s.rig.height || 1.9) * HERO_SCALE;
+    this.rim.position.set(s.x + dx * 1.3 + dz * 0.5, s.y + H * 0.85, s.z + dz * 1.3 - dx * 0.5);
+    this.fill.position.set(s.x - dx * 1.6, s.y + H * 0.6, s.z - dz * 1.6);
+    // Bodenaura: wenige, langsam aufsteigende Funken in Klassenfarbe
+    this.moteT += dt;
+    while (on && this.moteT > 0.07) {
+      this.moteT -= 0.07;
+      const a = Math.random() * Math.PI * 2, r = 0.5 + Math.random() * 0.9;
+      this.fx.emitVel(s.x + Math.cos(a) * r, s.y + 0.08, s.z + Math.sin(a) * r, -Math.cos(a) * 0.15, 0.6 + Math.random() * 0.7, -Math.sin(a) * 0.15, { color: s.color, life: 1.4, size: 0.12, intensity: 2.4, drag: 0.4 });
+    }
   }
 
   updatePlate(s, h, ctx, own, myTeam, sim) {
