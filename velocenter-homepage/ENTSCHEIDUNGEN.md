@@ -154,3 +154,6 @@
 - Front exakt nach den Glasformen im Original maskiert: Außenspiegel bleibt original, schräge Unterkante des Fahrerfensters, Säulen durchgehend (vorher Rechteck über die ganze Front).
 - Bild in 3-facher Auflösung (2940×759) neu gerechnet: Hochrechnen mit vormultipliziertem Alpha, Außenkante geglättet (Weichzeichnen + weiche Schwelle), Fenster/Rahmen/Räder in hoher Auflösung gezeichnet → keine Treppenkanten mehr auf Retina. Profil-Striche am Reifen entfernt, Lüftungsgitter-Oberkante schräg exakt freigestellt.
 - Abgasdampf: 4 weiche graue Wölkchen am Heck, versetzt (2,6 s), wachsen, ziehen nach hinten weg und verblassen; aus bei „weniger Bewegung“.
+
+## 14.11.2026 – Ticker: „4,8 ★ bei Google“ (Tiry: Wort „Sterne“ raus)
+- Text und Aktualisierung aus google.json (Regex) angepasst.

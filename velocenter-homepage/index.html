@@ -2630,7 +2630,7 @@ a.hchip.hc:hover .ha{background:#1B1E25;color:#fff;transform:translateX(2px)}
 <section class="view" data-v="start">
  <div class="bands top" aria-hidden="true">
   <div class="band b"><div class="tk" data-t="Wörth am Rhein|Hartmannstraße 25|Familienbetrieb|Probefahrt|Ehrliche Beratung|0 % Finanzierung"></div></div>
-  <div class="band a"><div class="tk" data-t="Seit 1995|300+ E-Bikes|4,8 ★ Sterne bei Google|Bosch Service Center|i:SY Experte|Weltrekord 283"></div></div>
+  <div class="band a"><div class="tk" data-t="Seit 1995|300+ E-Bikes|4,8 ★ bei Google|Bosch Service Center|i:SY Experte|Weltrekord 283"></div></div>
  </div>
  <div class="stage0" id="hero">
   <canvas id="speed" aria-hidden="true"></canvas>
@@ -3904,7 +3904,7 @@ fetch('google.json',{cache:'no-store'}).then(r=>r.ok?r.json():null).then(g=>{if(
  const vs=v.toFixed(1).replace('.',','),ns=n.toLocaleString('de-DE'),d=g.geprueft?new Date(g.geprueft):null;
  $$('[data-g="r"]').forEach(x=>x.textContent=vs);$$('[data-g="n"]').forEach(x=>x.textContent=ns+' Rezensionen bei Google');
  $$('[data-g="st"]').forEach(x=>x.textContent='('+vs+' bei '+ns+' Rezensionen, automatisch geprüft'+(d&&!isNaN(d)?' am '+d.toLocaleDateString('de-DE'):'')+')');
- $$('.band .tk').forEach(t=>{const o=t.dataset.t,u=o.replace(/\d,\d ★ Sterne bei Google/,vs+' ★ Sterne bei Google');if(u===o)return;t.dataset.t=u;const it=tkIt(u);t.innerHTML=it+it+it+it})}).catch(()=>{});
+ $$('.band .tk').forEach(t=>{const o=t.dataset.t,u=o.replace(/\d,\d ★ bei Google/,vs+' ★ bei Google');if(u===o)return;t.dataset.t=u;const it=tkIt(u);t.innerHTML=it+it+it+it})}).catch(()=>{});
 
 /* ---------- Showroom (Start + Marken) ---------- */
 /* Showroom-Pool: zufällige Räder aus dem Bestand (nur mit Foto, freigestellt + geschärft in img/show/), jeder 5. Wechsel = Van Raam Dreirad */
