@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src https://graph.facebook.com; manifest-src 'self'; worker-src 'self'; base-uri 'none'; form-action 'none'; object-src 'none'">
+<meta name="referrer" content="no-referrer">
+<meta name="theme-color" content="#1E2026">
+<meta name="description" content="Auswertung des Facebook-Gewinnspiels „Durchzieher – 30 Tage. 1 E-Bike.“ von Velocenter Hessert.">
+<title>Durchzieher-Zentrale</title>
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="stylesheet" href="app.css">
+</head>
+<body>
+<div class="bg" aria-hidden="true"><span class="blob b1"></span><span class="blob b2"></span><span class="blob b3"></span></div>
+<a class="skip" href="#view">Zum Inhalt springen</a>
+<div class="shell">
+  <aside class="side" aria-label="Navigation">
+    <div class="brand">
+      <span class="logo" aria-hidden="true">DZ</span>
+      <span class="brand-txt"><strong>Durchzieher</strong><small>Velocenter Hessert</small></span>
+    </div>
+    <nav id="nav" class="nav"></nav>
+    <div id="sideFoot" class="side-foot"></div>
+  </aside>
+  <main class="main">
+    <header class="top">
+      <div class="top-txt">
+        <p class="eyebrow">30 Tage. 1 E-Bike.</p>
+        <h1 id="title">Übersicht</h1>
+      </div>
+      <div class="top-act">
+        <span id="fetchInfo" class="fetch-info"></span>
+        <button type="button" class="btn btn-grad" data-act="fetch"><span class="ic" data-ic="sync"></span><span>Jetzt abrufen</span></button>
+      </div>
+    </header>
+    <div id="view" class="view" tabindex="-1"></div>
+  </main>
+</div>
+<nav id="dock" class="dock" aria-label="Navigation (Handy)"></nav>
+<div id="printArea" class="print-area" aria-hidden="true"></div>
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+<div id="modal" class="modal" hidden></div>
+<script src="engine.js"></script>
+<script src="meta.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
