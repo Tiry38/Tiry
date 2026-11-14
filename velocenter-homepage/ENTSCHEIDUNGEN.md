@@ -124,3 +124,12 @@
 - Marken-Showroom: Chip „● LIVE · Unser Live-Bestand · Jetzt ansehen“ oben mittig über dem Rad, Link `#lager` (14.11.2026).
 - Marken-Showroom sieht jetzt aus wie der Showroom auf Start (Tiry 14.11.2026): gleiche Bausteine `hvis` (Ring, Markenlogo, Rad, Boden-Linie, Chip „300+ E-Bikes vor Ort“ oben rechts, „LIVE · Unser Live-Bestand“ unten links), ohne Pfeile; Marken-Leiste darunter bleibt klickbar, Wischen geht weiter, Info-Zeile mit Marken-Links bleibt. Klasse `mvis`.
 - Laufband oben: „4,8 ★ Sterne bei Google“ statt „4,8 ★ · 221 Google-Rezensionen“, Stern gelb (#FFC83D, leichtes Leuchten); Wert kommt weiter automatisch aus google.json (14.11.2026).
+
+## 14.11.2026 – Profi-Feinschliff (Tiry: Punkte 1, 3, 4, 5, 7 + Menü edler)
+- Eine Formregel: Knöpfe/Chips = Pille, Icon-Flächen = Kreis, Karten = 28 px Radius.
+- Helle Abschnitte ohne eigene Farbtöne (Zonen-Verläufe aus), Abschnitts-Abstand 64–100 px statt 140/168 px.
+- Kundenstimmen: drei Karten nebeneinander neben der 4,8 (Sterne gelb), Punkte-Navigation aus; Struktur `#qs .q` bleibt (Admin-Bearbeitung).
+- Handy: Logo 200 px, Showroom-Rad direkt unter der Überschrift (Reihenfolge per `display:contents` + `order`).
+- ADFC: eigenes Herz-Symbol `i-heart` statt Platzhalter. „Besuch uns“: Zeiten auf heller Glas-Karte.
+- Kopf: Menü als Glas-Pille mit Verlaufsrand, aktiver Reiter dunkle Pille; Kopf-Raster `auto 1fr auto`, unsichtbares Logo fällt im Startbereich zusammen → Öffnungsstatus zeigt auf dem Desktop (ab 1400 px) wieder Text.
+- Punkt 6 (neue einheitliche Fotos) kommt nach dem Laden-Umbau – nur vorgemerkt.

@@ -2248,6 +2248,46 @@ a.hchip.hc.hlive .hla b svg{width:16px;height:16px;fill:none;stroke:#fff;stroke-
 .mvis .hb.mbk{transition:opacity .45s ease,transform .6s var(--ease)}
 .mvis .hb.mbk.out-l{opacity:0;transform:translate(-80%,-50%)}
 .mvis .hb.mbk.in-r{opacity:0;transform:translate(-20%,-50%);transition:none}
+
+/* ===== Profi-Feinschliff (Tiry 14.11.2026): eine Formregel, ruhige Flächen, edle Navigation ===== */
+/* Formregel: Knöpfe + Chips = Pille, Icon-Flächen = Kreis, Karten = 28 px */
+.cta,.ghost,.hdr .cta{border-radius:999px!important}
+.cta svg,.ghost svg,.hdr .cta svg{border-radius:50%!important}
+.srow .ic,.srow .go,.qa .ic{border-radius:50%!important}
+.qa,.gcard,.wcard{border-radius:28px!important}
+/* Navigation: Glas-Pille mit feinem Verlaufsrand, aktiver Reiter dunkel */
+.hdr .nav{border-radius:999px!important;padding:5px!important;border:1px solid transparent!important;background:linear-gradient(rgba(255,253,250,.86),rgba(255,253,250,.86)) padding-box,linear-gradient(110deg,rgba(184,115,51,.6),rgba(226,35,45,.35),rgba(167,139,250,.45),rgba(184,115,51,.6)) border-box!important;box-shadow:0 12px 32px -14px rgba(27,30,37,.3),inset 0 1px 0 rgba(255,255,255,.95)!important;backdrop-filter:blur(14px) saturate(1.3);-webkit-backdrop-filter:blur(14px) saturate(1.3)}
+.hdr .nav a{border-radius:999px!important;color:#2A2E38;transition:background .25s,color .25s,box-shadow .25s}
+.hdr .nav a:hover{background:rgba(27,30,37,.06)}
+.hdr .nav a.on{background:linear-gradient(135deg,#1B1E25,#343A4A)!important;color:#fff!important;box-shadow:0 8px 18px -8px rgba(27,30,37,.7),inset 0 1px 0 rgba(255,255,255,.14)!important}
+.hdr .nav a.on::after,.hdr .nav a.on::before{display:none!important}
+/* Ruhige Flächen: keine eigenen Farbtöne je Abschnitt, weniger Leerraum */
+.zone::before{background:none!important}
+.sec.zone{padding-block:clamp(64px,7vw,100px)!important}
+/* Kundenstimmen: drei Karten nebeneinander statt Einzel-Zitat */
+#qs.qwrap{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;height:auto!important;min-height:0!important}
+#qs .q{position:relative!important;inset:auto!important;opacity:1!important;transform:none!important;visibility:visible!important;pointer-events:auto!important;display:flex!important;flex-direction:column;gap:12px;padding:22px 22px 20px;border-radius:28px;background:rgba(255,255,255,.74);box-shadow:0 16px 36px -22px rgba(27,30,37,.4),inset 0 0 0 1px rgba(184,115,51,.18)}
+#qs .q::before{content:"★★★★★";color:#FBBF24;letter-spacing:3px;font-size:15px;line-height:1}
+#qs .q p{font:600 16px/1.5 var(--body,inherit)!important;letter-spacing:0!important;color:var(--ink)}
+#qs .q p::before,#qs .q p::after{content:none!important}
+#qs .q small{margin-top:auto;font:700 12px/1 var(--display);letter-spacing:.1em;text-transform:uppercase;color:var(--dim)}
+#qd{display:none!important}
+@media (max-width:1100px){#qs.qwrap{grid-template-columns:1fr}}
+/* Besuch uns: Zeiten auf ruhiger Glasfläche statt direkt auf dem Foto */
+.visit .in{background:rgba(255,251,246,.9);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-radius:28px;padding:clamp(24px,3vw,40px)!important;margin-block:56px;box-shadow:0 30px 60px -32px rgba(27,30,37,.4),inset 0 0 0 1px rgba(184,115,51,.2)}
+/* Handy: Rad direkt unter die Überschrift */
+@media (max-width:980px){
+ .hgrid{display:flex!important;flex-direction:column;align-items:stretch}
+ .hgrid .htxt{display:contents}
+ .htxt .logobox{order:1}.hgrid .hnote{order:2}.hgrid .hh1{order:3}
+ .hgrid>.hvis{order:4;align-self:center;margin-top:6px}
+ .htxt .lead{order:5}.hgrid .row{order:6}.hgrid .trust{order:7}
+}
+@media (max-width:640px){.htxt .logobox{width:200px!important;margin-bottom:12px}.hgrid>.hvis{height:min(76vw,380px)}}
+/* Kopf: Seiten nur so breit wie nötig, damit Menü + Öffnungsstatus mit Text Platz haben */
+@media (min-width:981px){.hdr .wrap{grid-template-columns:auto minmax(0,1fr) auto!important}.hdr .nav{justify-self:center}}
+@media (min-width:981px){.hdr .logo{max-width:220px;transition:opacity .35s,transform .35s,max-width .45s var(--ease)}body.herotop .hdr .logo{max-width:0;overflow:hidden}body.herotop .hlft{gap:0}}
+@media (min-width:981px){.hdr .nav.tight:not(.tight2) a{padding-left:9px!important;padding-right:9px!important}}
 /* Tempo (Tiry 12.11.2026): unsichtbare Animationen pausieren, Hintergrund-Ebenen eigene GPU-Ebene */
 .apz,.apz *,.apz *::before,.apz *::after{animation-play-state:paused!important}
 html.scr .sky,html.scr .blobs i,html.scr .blobs::after,html.scr .ribbons i{animation-play-state:paused!important}
@@ -2532,7 +2572,7 @@ a.hchip.hc:hover .ha{background:#1B1E25;color:#fff;transform:translateX(2px)}
   <symbol id="i-spark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v4M12 17v4M3 12h4M17 12h4M6 6l2.5 2.5M15.5 15.5 18 18M6 18l2.5-2.5M15.5 8.5 18 6"/></symbol>
   <symbol id="i-tune" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></symbol>
   <symbol id="i-box" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7l9-4 9 4v10l-9 4-9-4z"/><path d="M3 7l9 4 9-4M12 11v10"/></symbol>
-  <symbol id="i-gift" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="8" width="18" height="5" rx="1.5"/><path d="M5 13v8h14v-8M12 8v13M12 8S10.5 3 8 3.5 7 8 12 8zM12 8s1.5-5 4-4.5S17 8 12 8z"/></symbol>
+  <symbol id="i-heart" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20.5s-7.5-4.6-9.4-9.3C1.3 7.9 3.4 4.5 6.9 4.5c2.2 0 3.6 1.2 5.1 3 1.5-1.8 2.9-3 5.1-3 3.5 0 5.6 3.4 4.3 6.7-1.9 4.7-9.4 9.3-9.4 9.3z"/></symbol><symbol id="i-gift" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="8" width="18" height="5" rx="1.5"/><path d="M5 13v8h14v-8M12 8v13M12 8S10.5 3 8 3.5 7 8 12 8zM12 8s1.5-5 4-4.5S17 8 12 8z"/></symbol>
  </defs>
 </svg>
 
@@ -2962,7 +3002,7 @@ m696 -454 c28 -13 46 -31 55 -51 22 -53 -50 -177 -173 -300 -187 -186 -647
     <h2 class="big">Hier schraubt <span class="gt">der Chef</span> noch selbst.</h2>
     <p class="lead">Uns ist wichtig, dass du am Ende glücklich mit deinem E-Bike bist und dich ehrlich beraten fühlst. Kauf, Werkstatt und Service bekommst du bei uns aus einer Hand.</p>
     <div class="sig"><svg><use href="#i-wrench"/></svg>Stefan Hessert, Inhaber</div>
-    <div class="woerth pre"><p class="eyebrow">Aus Wörth <b>für Wörth</b></p><div class="wrows"><div class="srow wrow" style="--c:#F472B6"><span class="ic"><svg><use href="#i-gift"/></svg></span><span><small>2020</small><h3>Kinderfasching</h3><p>Kinderrad für die Tombola</p></span></div><div class="srow wrow" style="--c:#22D3EE"><span class="ic"><svg><use href="#i-bike"/></svg></span><span><small>2021</small><h3>Stadtradeln-Rallye</h3><p>Gutschein für die Rallye</p></span></div><div class="srow wrow" style="--c:#E2232D"><span class="ic"><svg><use href="#i-cal"/></svg></span><span><small>2025 · 2026</small><h3>Lions-Adventskalender</h3><p>Verkaufsstelle für Wörth&#8209;Kandel</p></span></div><div class="srow wrow" style="--c:#60A5FA"><span class="ic"><svg><use href="#i-spark"/></svg></span><span><small>Mitglied</small><h3>ADFC</h3><p>Fördermitglied</p></span></div></div></div>
+    <div class="woerth pre"><p class="eyebrow">Aus Wörth <b>für Wörth</b></p><div class="wrows"><div class="srow wrow" style="--c:#F472B6"><span class="ic"><svg><use href="#i-gift"/></svg></span><span><small>2020</small><h3>Kinderfasching</h3><p>Kinderrad für die Tombola</p></span></div><div class="srow wrow" style="--c:#22D3EE"><span class="ic"><svg><use href="#i-bike"/></svg></span><span><small>2021</small><h3>Stadtradeln-Rallye</h3><p>Gutschein für die Rallye</p></span></div><div class="srow wrow" style="--c:#E2232D"><span class="ic"><svg><use href="#i-cal"/></svg></span><span><small>2025 · 2026</small><h3>Lions-Adventskalender</h3><p>Verkaufsstelle für Wörth&#8209;Kandel</p></span></div><div class="srow wrow" style="--c:#60A5FA"><span class="ic"><svg><use href="#i-heart"/></svg></span><span><small>Mitglied</small><h3>ADFC</h3><p>Fördermitglied</p></span></div></div></div>
    </div>
    <div class="rows">
     <a class="srow pre" href="#beratung" style="--c:#F472B6"><span class="ic"><svg><use href="#i-bike"/></svg></span><span><h3>Beratung & Probefahrt</h3><p>Wir hören zu, zeigen eine passende Auswahl und begleiten dich auf Wunsch bei der Probefahrt.</p></span><span class="go"><svg><use href="#i-arrow"/></svg></span></a>
