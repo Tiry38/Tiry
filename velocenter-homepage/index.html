@@ -2207,29 +2207,27 @@ body.fz2 main,body.fz2 .foot{zoom:1.25}
 .qbk img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;filter:drop-shadow(0 10px 14px rgba(0,0,0,.45));opacity:0;transform:translateX(26px) scale(.96);transition:opacity .6s ease,transform .8s var(--spring)}
 .qbk img.in{opacity:1;transform:none}
 .qbk img.out{opacity:0;transform:translateX(-26px) scale(.96)}
-.qlive{position:absolute;z-index:4;bottom:calc(100% + 4px);left:var(--qx,37%);transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;text-decoration:none;color:var(--ink);transition:transform .35s var(--spring)}
-.qlive:hover{transform:translateX(-50%) translateY(-3px)}
-.qlp{position:relative;display:inline-flex;align-items:center;gap:9px;padding:8px 8px 8px 13px;border-radius:999px;white-space:nowrap;border:2px solid transparent;background:linear-gradient(#fff,#fff) padding-box,linear-gradient(110deg,#E2232D,#C026D3,#2563EB,#22D3EE,#E2232D) border-box;background-size:100% 100%,300% 100%;animation:hcflow 6s linear infinite;box-shadow:0 14px 30px -12px rgba(226,35,45,.55)}
-.qlp::after{content:"";position:absolute;inset:-6px;border-radius:999px;border:2px solid rgba(226,35,45,.45);animation:qlring 2.4s ease-out infinite;pointer-events:none}
-@keyframes qlring{from{transform:scale(.96);opacity:.9}to{transform:scale(1.12,1.35);opacity:0}}
-.qla{animation:qlbob 1.6s ease-in-out infinite}
-@keyframes qlbob{50%{transform:translateY(4px)}}
-.qlp b{font:800 13px/1 var(--display);letter-spacing:.01em}
-.qlp em{display:inline-flex;align-items:center;gap:6px;padding:7px 11px;border-radius:999px;background:linear-gradient(135deg,#E2232D,#B3121F);color:#fff;font:800 11.5px/1 var(--display);font-style:normal;letter-spacing:.06em;text-transform:uppercase}
-.qlp em svg{width:13px;height:13px;transition:transform .35s var(--spring)}
-.qlive:hover .qlp em svg{transform:translateX(3px)}
 .qld{position:relative;width:9px;height:9px;border-radius:50%;background:#22C55E}
 .qld::after{content:"";position:absolute;inset:-5px;border-radius:50%;border:2px solid #22C55E;animation:qldp 1.8s ease-out infinite}
 @keyframes qldp{from{transform:scale(.4);opacity:1}to{transform:scale(1.5);opacity:0}}
-.qla{width:42px;height:32px;margin:-2px 0 -12px 40px;translate:var(--qa,0) 0;fill:none;stroke:#E2232D;stroke-width:3.2;stroke-linecap:round;stroke-linejoin:round;filter:drop-shadow(0 2px 3px rgba(255,255,255,.7))}
-@media (max-width:760px){.qacc{margin-top:66px}.qbk{top:4px;height:52%;width:78%;transform:translateX(-36%)}.qlp{padding:6px 6px 6px 10px;gap:7px}.qlp b{font-size:12px}.qlp em{padding:6px 9px;font-size:10.5px}.qla{width:30px;height:24px;margin:-2px 0 -10px 30px}}
-.qacc{margin-top:clamp(56px,5vw,70px)}
-@media (max-width:760px){.qacc{margin-top:66px}}
-@media (prefers-reduced-motion:reduce){.qlp,.qlp::after,.qla{animation:none}.qld::after{animation:none}.qbk img{transition:opacity .3s}}
+@media (max-width:760px){.qbk{top:4px;height:52%;width:78%;transform:translateX(-36%)}}
+@media (prefers-reduced-motion:reduce){.qld::after{animation:none}.qbk img{transition:opacity .3s}}
 .nlive{display:inline-flex;align-items:center;gap:4px;margin-left:6px;padding:3px 6px 3px 5px;border-radius:999px;vertical-align:2px;background:linear-gradient(135deg,#E2232D,#C026D3);color:#fff;font:800 9px/1 var(--display);font-style:normal;letter-spacing:.1em;text-transform:uppercase;box-shadow:0 4px 10px -4px rgba(226,35,45,.7)}
 .nlive::before{content:"";width:5px;height:5px;border-radius:50%;background:#fff;animation:nlv 1.6s ease-in-out infinite}
 @keyframes nlv{50%{opacity:.25}}
 @media (prefers-reduced-motion:reduce){.nlive::before{animation:none}}
+a.hchip.hc.hlive{--hg:linear-gradient(110deg,#E2232D,#C026D3,#2563EB,#22D3EE,#E2232D);border-width:2px;overflow:visible;box-shadow:0 14px 30px -12px rgba(226,35,45,.55)}
+a.hchip.hc.hlive::after{content:"";position:absolute;inset:-6px;border-radius:999px;border:2px solid rgba(226,35,45,.4);animation:hlring 2.4s ease-out infinite;pointer-events:none}
+@keyframes hlring{from{transform:scale(.96);opacity:.9}to{transform:scale(1.1,1.4);opacity:0}}
+.hlv{display:inline-flex;align-items:center;gap:7px;height:28px;padding:0 10px 0 9px;border-radius:999px;background:#1B1E25;color:#fff;font:800 11px/1 var(--display);letter-spacing:.12em;text-transform:uppercase}
+.hgo{display:inline-flex;align-items:center;gap:6px;height:28px;padding:0 11px;border-radius:999px;background:linear-gradient(135deg,#E2232D,#B3121F);color:#fff;font:800 11px/1 var(--display);letter-spacing:.06em;text-transform:uppercase;box-shadow:0 6px 14px -6px rgba(226,35,45,.8)}
+a.hchip.hc.hlive .hgo svg{width:12px;height:12px;transition:transform .3s var(--spring)}
+a.hchip.hc.hlive:hover .hgo svg{transform:translateX(3px)}
+a.hchip.hc.hlive svg.hla{position:absolute;left:50%;top:calc(100% + 2px);width:40px;height:66px;margin-left:-20px;transform-origin:50% 0;transform:rotate(var(--ang,0deg));fill:none;stroke:#E2232D;stroke-width:4;stroke-linecap:round;stroke-linejoin:round;filter:drop-shadow(0 2px 3px rgba(255,255,255,.8));pointer-events:none;overflow:visible}
+.hla path{animation:hlbob 1.6s ease-in-out infinite}
+@keyframes hlbob{50%{transform:translateY(5px)}}
+@media (max-width:640px){.hlv,.hgo{height:24px;font-size:10px;padding:0 8px}a.hchip.hc.hlive svg.hla{width:24px;height:40px;margin-left:-12px}}
+@media (prefers-reduced-motion:reduce){a.hchip.hc.hlive::after,.hla path{animation:none}}
 /* Tempo (Tiry 12.11.2026): unsichtbare Animationen pausieren, Hintergrund-Ebenen eigene GPU-Ebene */
 .apz,.apz *,.apz *::before,.apz *::after{animation-play-state:paused!important}
 html.scr .sky,html.scr .blobs i,html.scr .blobs::after,html.scr .ribbons i{animation-play-state:paused!important}
@@ -2895,7 +2893,7 @@ m696 -454 c28 -13 46 -31 55 -51 22 -53 -50 -177 -173 -300 -187 -186 -647
      <img class="hb off" src="img/p-victoria-veloa7.webp" alt="Victoria Veloa 7 E-Bike" data-l="img/marke-victoria.svg" width="2770" height="1732" loading="lazy">
      <div class="hfloor"></div>
      <a class="hchip hc c1" href="#lager" aria-label="300+ E-Bikes vor Ort – Räder im Laden ansehen"><span class="hn">300<i>+</i></span><span class="hl"><strong>E-Bikes vor Ort</strong></span><span class="ha"><svg><use href="#i-arrow"/></svg></span></a>
-     <a class="hchip hc c2" href="#termin" data-pre="Probefahrt" aria-label="Probefahrt vor Ort – Termin anfragen"><span class="hi"><svg><use href="#i-bike"/></svg></span><span class="hl"><strong>Probefahrt vor Ort</strong></span><span class="ha"><svg><use href="#i-arrow"/></svg></span></a>
+     <a class="hchip hc c2 hlive" id="hLive" href="#lager" aria-label="Unser Live-Bestand: jetzt im Laden ansehen"><span class="hlv"><i class="qld" aria-hidden="true"></i>Live</span><span class="hl"><strong>Unser Live-Bestand</strong></span><span class="hgo">Jetzt ansehen<svg><use href="#i-arrow"/></svg></span><svg class="hla" viewBox="0 0 40 64" aria-hidden="true"><path d="M20 2c-9 14 9 30 0 54"/><path d="M11 47l9 11 9-11"/></svg></a>
     </div>
    </div>
    <nav class="qacc hello" style="--d:1.45s" aria-label="Schnellzugriff">
@@ -2903,7 +2901,6 @@ m696 -454 c28 -13 46 -31 55 -51 22 -53 -50 -177 -173 -300 -187 -186 -647
     <a class="qa qlg" id="qaLg" href="#lager" style="--img:url(img/laden-innen.webp);--pos:50% 55%"><span class="bg"></span><span class="qbk" id="qBk" aria-hidden="true"></span><span class="ic"><svg><use href="#i-bike"/></svg></span><span class="tx"><i>02 · Ausstellung</i><b>Im Laden</b><small id="qkLager">Räder sofort verfügbar</small><em>Räder ansehen</em></span></a>
     <a class="qa qice" id="qkSeason" href="#deal" style="--img:url(img/laden-eingang.webp);--pos:50% 45%"><span class="bg"></span><span class="ic"><svg><use href="#i-gift"/></svg></span><span class="tx"><i>03 · Bis 28.02.</i><b>Winter-Aktion</b><small>–20 € auf jede Inspektion</small><em>Zur Aktion</em></span></a>
     <a class="qa" href="#besuch" style="--img:url(img/fassade.webp);--pos:50% 50%"><span class="bg"></span><span class="ic"><svg><use href="#i-clock"/></svg></span><span class="tx"><i>04 · Wörth am Rhein</i><b>Öffnungszeiten</b><small id="qkHours">Mo, Di, Do, Fr · Sa vormittags</small><em>Besuch planen</em></span></a>
-    <a class="qlive" id="qLive" href="#lager" aria-label="Unser Live-Bestand: jetzt ansehen"><span class="qlp"><i class="qld" aria-hidden="true"></i><b>Unser Live-Bestand</b><em>jetzt ansehen<svg><use href="#i-arrow"/></svg></em></span><svg class="qla" viewBox="0 0 60 46" aria-hidden="true"><path d="M8 4c18 2 34 10 38 32"/><path d="M38 30l8 8 7-10"/></svg></a>
    </nav>
   </div>
  </div>
@@ -4072,8 +4069,15 @@ fRender();
 
 
 /* ---------- Kopf: Rad-Wechsel + heutige Öffnungszeit ---------- */
-(function(){const hv=$('#hvis');if(!hv)return;const bs=$$('.hb',hv),lg=$('#hlg');let k=0;
- setInterval(()=>{if(cur!=='start'||scrollY>innerHeight)return;bs[k].classList.add('off');k=(k+1)%bs.length;bs[k].classList.remove('off');lg.classList.add('swap');setTimeout(()=>{lg.src=bs[k].dataset.l;lg.classList.remove('swap')},350)},4800);
+(function(){const hv=$('#hvis');if(!hv)return;const bs=$$('.hb',hv),lg=$('#hlg'),fl=$('.hfloor',hv);let k=0,on=bs[0],fx=true,D=[],dk=0,busy=0;
+ /* Tiry 14.11.2026: die festen Bilder genau 1× durch, danach nur noch zufällige Räder aus dem Bestand (srPick) */
+ const swap=(el,logo)=>{on.classList.add('off');el.classList.remove('off');on=el;lg.classList.add('swap');setTimeout(()=>{lg.src=logo;lg.classList.remove('swap')},350)};
+ setInterval(()=>{if(cur!=='start'||scrollY>innerHeight||document.hidden||busy)return;
+  if(fx&&(k<bs.length-1||!SR.pool)){k=(k+1)%bs.length;swap(bs[k],bs[k].dataset.l);return}
+  fx=false;if(!D.length)for(let j=0;j<2;j++){const im=document.createElement('img');im.className='hb off';im.decoding='async';hv.insertBefore(im,fl);D.push(im)}
+  let x=null;for(let t=0;t<12&&(!x||x.cur);t++)x=srPick('*');/* nur echte Bestandsräder mit eigenem Foto, nie Katalogbild */
+  const br=x&&!x.cur&&BR.find(y=>y.k===x.k);if(!br)return;dk^=1;const el=D[dk];busy=1;
+  const pre=new Image();pre.src=x.img;const go=()=>{el.src=x.img;el.alt=x.m+(x.f?' in '+x.f:'');busy=0;requestAnimationFrame(()=>swap(el,br.logo))};pre.decode?pre.decode().then(go,go):(pre.onload=go)},4800);
  const bq=berlin(),{d,m}=bq,q=$('#qkHours'),TD=slotsAt(bq.y,bq.mo,bq.dd,d);if(q){const op=TD.some(([a,b])=>m>=a&&m<b);q.innerHTML='<i class="qd'+(op?' on':'')+'"></i>'+(op?'Jetzt geöffnet':'Heute: '+(TD.length?TD.map(([a,b])=>hm(a)+'–'+hm(b)).join(' · '):'geschlossen'))}})();
 
 /* ================= AUF LAGER (Modelle mit Varianten, ohne Stückzahlen) ================= */
@@ -4151,8 +4155,10 @@ function qlNext(){const box=$('#qBk');if(!box||!QL.p.length)return;if(QL.i>=QL.p
  im.onload=()=>{[...box.querySelectorAll('img')].forEach(o=>{o.classList.remove('in');o.classList.add('out');setTimeout(()=>o.remove(),900)});box.appendChild(im);requestAnimationFrame(()=>requestAnimationFrame(()=>im.classList.add('in')))};
  im.onerror=()=>{QL.p.splice(QL.i-1,1);QL.i--};im.src=src;
  const nx=QL.p[QL.i];if(nx){const pre=new Image();pre.src=nx}}
-(function(){const t=$('#qaLg'),l=$('#qLive');if(!t||!l)return;const pos=()=>{const W=t.parentNode.clientWidth,w=l.offsetWidth,c=t.offsetLeft+t.offsetWidth/2,x=Math.max(w/2,Math.min(W-w/2,c));l.style.setProperty('--qx',x+'px');l.style.setProperty('--qa',(c-x)+'px')};pos();setTimeout(pos,1500);
- if(window.ResizeObserver)new ResizeObserver(pos).observe(t);addEventListener('resize',pos)})();
+(function(){const t=$('#qaLg'),c=$('#hLive'),a=c&&$('.hla',c);if(!t||!a)return;
+ const pos=()=>{const A=a.getBoundingClientRect(),T=t.getBoundingClientRect();if(!A.width||!T.width)return;const x0=A.left+A.width/2,y0=A.top,x1=T.left+T.width/2,y1=T.top;
+  const ang=-Math.atan2(x1-x0,y1-y0)*180/Math.PI;a.style.setProperty('--ang',Math.max(-75,Math.min(75,ang))+'deg')};
+ pos();setTimeout(pos,1600);setTimeout(pos,4000);addEventListener('resize',pos);if(window.ResizeObserver)new ResizeObserver(pos).observe(t)})();
 function lgApply(){const d=admMerge(admBase());LG.M=lgNorm(d);LG.ok=true;
  $('#lgStand').textContent=/^\d/.test(d.stand||'')?'Stand '+d.stand:(d.stand||'aktuell');const hw=d.hinweis||(d.quelle==='Beispieldaten'?'Sobald der Veloport-Export eingespielt ist, steht hier euer echter Bestand.':'');$('#lgDemo').hidden=!hw;$('#lgDemoT').innerHTML='<b>'+(d.quelle==='Beispieldaten'?'Beispieldaten.':'Hinweis:')+'</b> '+esc(hw);
  const nL=LG.M.filter(m=>m.lager).length,nB=LG.M.length-nL,nD=LG.M.filter(m=>m.deal).length,nMk=new Set(LG.M.map(lgMkName)).size;
