@@ -75,3 +75,36 @@ test('Kampagne: Sterne und Talente', () => {
   assert.equal(talentBonus(0).gold, 0);
   assert.equal(talentBonus(45).gold, 90);
 });
+
+test('Spielmodi: Schnell (20 Wellen), Lang (+2 Heilungen), Hart (stärkere Wellen), Endwellen', async () => {
+  const fast = new Sim({ seed: 1, players: players(1), rules: { gameMode: 'fast' } });
+  assert.equal(fast.rules.maxWaves, 20);
+  const long = new Sim({ seed: 1, players: players(1), rules: { gameMode: 'long' } });
+  assert.equal(long.teams[0].king.heals, 5);
+  const normal = new Sim({ seed: 1, players: players(1) });
+  const hard = new Sim({ seed: 1, players: players(1), rules: { gameMode: 'hard' } });
+  assert.ok(hard.waveDef(5).hp > normal.waveDef(5).hp);
+  const end = normal.waveDef(31);
+  assert.ok(end.endwave && end.hp > normal.waveDef(21).hp);
+  assert.ok(normal.waveDef(41).hp > end.hp);
+});
+
+test('Sammeln verbessern erhöht den Äther-Ertrag', () => {
+  const sim = new Sim({ seed: 2, players: players(1) });
+  const p = sim.players[0];
+  p.gold = 1000;
+  assert.ok(sim.applyCommand(0, { type: 'gather' }));
+  assert.equal(p.gatherLvl, 1);
+  const a0 = p.aether;
+  for (let i = 0; i < 20; i++) sim.step();
+  assert.ok(Math.abs((p.aether - a0) - p.workers * 0.45 * 1.25) < 0.05);
+});
+
+test('Anführer: erscheint je Bahn, wirkt Fähigkeiten mit Bodenwarnung', () => {
+  const sim = new Sim({ seed: 3, players: players(1), rules: { startWave: 12 } });
+  sim.phaseTime = 0;
+  const ev = [];
+  for (let i = 0; i < 20 * 60 && sim.phase === 'build' || (sim.phase === 'battle' && i < 20 * 90); i++) for (const e of sim.step()) ev.push(e);
+  assert.equal(ev.filter((e) => e.e === 'leaderSpawn').length, 2);
+  assert.ok(ev.some((e) => e.e === 'leaderCast'));
+});

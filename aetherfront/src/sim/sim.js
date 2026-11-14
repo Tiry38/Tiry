@@ -30,6 +30,9 @@ export const DEFAULT_RULES = {
   transition: 2.0,         // Kameraschwenk: so lange ruht das Spiel zu Wellenbeginn/-ende (alle synchron)
   heroes: true,            // Helden-System an
   leaders: true,           // Wellen-Anführer
+  gameMode: 'normal',      // normal | fast (Endwellen ab 20) | long (+2 Königsheilungen) | hard (Wellen +25 %)
+  endless: true,           // Endwellen nach der letzten regulären Welle, bis ein König fällt (Versus)
+  mirror: false,           // Gespiegelte Auswahl: Gegner-Paare bekommen dieselben Würfe
   campaign: null,          // { goal: 'siege'|'survive', citadelHp, citadelRegen, citadelDmg, siegeMul, enemySends: [{wave, send, count}] }
 };
 
@@ -47,6 +50,9 @@ export class Sim {
   constructor(setup) {
     this.setup = JSON.parse(JSON.stringify(setup));
     const R = (this.rules = { ...DEFAULT_RULES, ...(setup.rules || {}) });
+    if (R.gameMode === 'fast') R.maxWaves = Math.min(R.maxWaves, 20);
+    if (R.gameMode === 'hard') { R.waveHpMul *= 1.25; R.waveDmgMul *= 1.15; }
+    if (R.campaign) R.endless = false;
     this.rng = new Rng(setup.seed || 1);
     this.tick = 0;
     this.time = 0;
@@ -111,6 +117,14 @@ export class Sim {
         connected: true,
       };
     });
+    if (R.mirror) {
+      // Gespiegelte Auswahl: Spieler auf gleicher Position im Gegnerteam bekommen dieselben Würfe
+      for (const p of this.players) {
+        if (p.team !== 1) continue;
+        const twin = this.players.find((o) => o.team === 0 && o.slot === p.slot);
+        if (twin && (twin.randomed || R.pickMode !== 'ap')) { p.faction = twin.faction; p.lines = twin.lines.slice(); p.randomed = twin.randomed; }
+      }
+    }
     for (const p of this.players) {
       const others = this.players.filter((o) => o.team !== p.team);
       p.opponent = (others.find((o) => o.slot === p.slot) || others[0] || p).id;
@@ -119,11 +133,12 @@ export class Sim {
       const k = kingPos(t);
       const camp = this.campaign && t === 1;
       const hp = camp ? this.campaign.citadelHp : Math.round(KING.hp * R.kingHpMul * (1 + (setup.kingBonus?.[t] || 0)));
+      const longHeals = R.gameMode === 'long' ? 2 : 0;
       return {
         id: t,
         king: {
           x: k.x, z: k.z, hp, maxHp: hp, regen: camp ? (this.campaign.citadelRegen || 0) : KING.regen, dmgMul: camp ? (this.campaign.citadelDmg || 1) : 1, armor: KING.armor,
-          levels: { hp: 0, dmg: 0, regen: 0 }, heals: camp ? 0 : KING.heals + (setup.extraHeals?.[t] || 0), maxHeals: camp ? 0 : KING.heals + (setup.extraHeals?.[t] || 0), healCd: 0, atkCd: 0, alive: true, citadel: camp,
+          levels: { hp: 0, dmg: 0, regen: 0 }, heals: camp ? 0 : KING.heals + longHeals + (setup.extraHeals?.[t] || 0), maxHeals: camp ? 0 : KING.heals + longHeals + (setup.extraHeals?.[t] || 0), healCd: 0, atkCd: 0, alive: true, citadel: camp,
         },
       };
     });
@@ -153,7 +168,20 @@ export class Sim {
     while (pick.length < 5) { const u = all[this.rng.int(all.length)]; if (!pick.includes(u)) pick.push(u); }
     return pick;
   }
-  waveDef(n = this.wave) { return this.waves[Math.min(this.waves.length, Math.max(1, n)) - 1]; }
+  waveDef(n = this.wave) {
+    if (n <= this.waves.length) return this.waves[Math.max(1, n) - 1];
+    // Endwellen: die letzten 10 Wellen kehren verstärkt zurück (+35 % je Durchgang und Welle)
+    this.endWaves = this.endWaves || new Map();
+    if (!this.endWaves.has(n)) {
+      const k = n - this.waves.length;
+      const base = this.waves[this.waves.length - 10 + ((k - 1) % 10)];
+      const m = Math.pow(1.35, k);
+      const d = { ...base, n, key: base.key, name: `Endwelle ${k}: ${base.name}`, hp: Math.round(base.hp * m), dmg: base.dmg * Math.sqrt(m), bounty: base.bounty * 2, endwave: true };
+      if (base.leaderDef) d.leaderDef = { ...base.leaderDef, hp: Math.round(base.leaderDef.hp * m), dmg: base.leaderDef.dmg * Math.sqrt(m) };
+      this.endWaves.set(n, d);
+    }
+    return this.endWaves.get(n);
+  }
   sendCost(s) { return Math.round(s.cost * this.rules.sendCostMul); }
 
   // ---------- Hilfen ----------
@@ -183,6 +211,7 @@ export class Sim {
       case 'sell': return this.cmdSell(p, cmd);
       case 'send': return this.cmdSend(p, cmd);
       case 'worker': return this.cmdWorker(p);
+      case 'gather': return this.cmdGather(p);
       case 'king': return this.cmdKing(p, cmd);
       case 'heal': return this.cmdHeal(p);
       case 'ready': p.ready = true; this.checkReady(); return true;
@@ -270,6 +299,16 @@ export class Sim {
     this.emit({ e: 'worker', pid: p.id, workers: p.workers });
     return true;
   }
+  gatherCost(p) { return 150 + 120 * (p.gatherLvl || 0); }
+  cmdGather(p) {
+    const lvl = p.gatherLvl || 0;
+    if (lvl >= ECON.maxGather) return this.fail(p, 'Sammeln ist voll ausgebaut');
+    const cost = this.gatherCost(p);
+    if (p.gold < cost) return this.fail(p, 'Nicht genug Gold');
+    p.gold -= cost; p.gatherLvl = lvl + 1;
+    this.emit({ e: 'gather', pid: p.id, level: p.gatherLvl });
+    return true;
+  }
   cmdKing(p, { up }) {
     const k = this.teams[p.team].king;
     const u = KING.upgrades[up];
@@ -334,7 +373,7 @@ export class Sim {
     if (this.tick % 5 === 0) for (const p of this.players) if (p.bot && p.heroEnt) heroBotThink(this, this.entities.get(p.heroEnt));
 
     // Äther der Arbeiter
-    for (const p of this.players) p.aether += p.workers * ECON.workerRate * DT;
+    for (const p of this.players) p.aether += p.workers * ECON.workerRate * (1 + ECON.gatherBonus * (p.gatherLvl || 0)) * DT;
 
     if (this.phase === 'build') {
       this.phaseTime -= DT;
@@ -455,7 +494,10 @@ export class Sim {
       this.emit({ e: 'income', pid: p.id, amount: p.income });
     }
     this.emit({ e: 'waveEnd', wave: this.wave, leaks });
-    if (this.wave >= this.rules.maxWaves) {
+    if (this.wave === this.rules.maxWaves && this.rules.endless && !this.campaign) {
+      this.emit({ e: 'endwaves', wave: this.wave + 1 });
+    }
+    if (this.wave >= this.rules.maxWaves && !(this.rules.endless && !this.campaign)) {
       if (this.campaign) {
         if (this.campaign.goal === 'siege') this.finish(1, 'Die Rissfeste steht noch – der Riss hat sich geschlossen');
         else this.finish(0, 'Alle Wellen überstanden');

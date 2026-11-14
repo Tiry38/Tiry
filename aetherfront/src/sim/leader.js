@@ -102,8 +102,12 @@ export function updateLeader(sim, c, defenders) {
     c.lcd[k] = a.cd;
     c.lcast = lc;
     sim.emit({ e: 'leaderCast', id: c.id, ability: k, name: a.name, wind: lc.t, x: lc.x ?? c.x, z: lc.z ?? c.z, fx: c.x, fz: c.z, r: a.radius || 0, interruptible: !!a.interruptible, lane: c.lane });
-    if (k === 'slam') sim.emit({ e: 'telegraph', shape: 'circle', x: c.x, z: c.z, r: a.radius, dur: lc.t, lane: c.lane });
-    if (k === 'charge') sim.emit({ e: 'telegraph', shape: 'line', x: c.x, z: c.z, x2: lc.x, z2: lc.z, w: 2.2, dur: lc.t, lane: c.lane });
+    const tg = k === 'slam' ? { shape: 'circle', x: c.x, z: c.z, r: a.radius } : k === 'charge' ? { shape: 'line', x: c.x, z: c.z, x2: lc.x, z2: lc.z, w: 2.2 } : null;
+    if (tg) {
+      Object.assign(tg, { dur: lc.t, lane: c.lane, until: sim.time + lc.t, src: c.id });
+      (sim.telegraphs = sim.telegraphs || []).push(tg);
+      sim.emit({ e: 'telegraph', ...tg });
+    }
     return true;
   }
   return false;
@@ -156,7 +160,12 @@ function resolve(sim, c, lc, defenders) {
   }
 }
 
-function distToSeg(px, pz, ax, az, bx, bz) {
+export function inTelegraph(t, x, z, pad = 0.8) {
+  if (t.shape === 'circle') return (x - t.x) ** 2 + (z - t.z) ** 2 <= (t.r + pad) ** 2;
+  return distToSeg(x, z, t.x, t.z, t.x2, t.z2) <= t.w / 2 + pad + 0.6;
+}
+
+export function distToSeg(px, pz, ax, az, bx, bz) {
   const vx = bx - ax, vz = bz - az, wx = px - ax, wz = pz - az;
   const t = Math.max(0, Math.min(1, (wx * vx + wz * vz) / (vx * vx + vz * vz || 1)));
   return Math.hypot(px - (ax + vx * t), pz - (az + vz * t));

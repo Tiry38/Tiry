@@ -3,7 +3,7 @@ import { UNITS, SENDS, ECON, KING, kingUpgradeCost } from './data.js';
 import { GRID_COLS, GRID_ROWS } from './layout.js';
 
 const FRONT_ROLES = new Set(['tank', 'melee', 'assassin']);
-const SKILL = { easy: { spend: 0.6, upg: 0.35, send: 0.25 }, normal: { spend: 0.92, upg: 0.6, send: 0.55 }, hard: { spend: 1, upg: 0.8, send: 0.75 } };
+const SKILL = { easy: { spend: 0.6, upg: 0.35, send: 0.25 }, normal: { spend: 0.92, upg: 0.6, send: 0.55 }, hard: { spend: 1, upg: 0.8, send: 0.75 }, extreme: { spend: 1, upg: 0.85, send: 0.85 } };
 
 export function botThink(sim, p) {
   const sk = SKILL[p.difficulty] || SKILL.normal;
@@ -18,6 +18,9 @@ export function botThink(sim, p) {
   if (p.workers < targetWorkers && p.gold >= sim.workerCost(p) + 70 && sim.wave >= 2 && rng.next() < 0.5) {
     sim.applyCommand(p.id, { type: 'worker' });
   }
+
+  // Sammeln verbessern (mittel- und hochstufige Bots investieren in Wirtschaft)
+  if ((p.difficulty === 'hard' || p.difficulty === 'extreme') && p.workers >= 4 && (p.gatherLvl || 0) < 4 && p.gold >= sim.gatherCost(p) + 150 && rng.next() < 0.25) sim.applyCommand(p.id, { type: 'gather' });
 
   // Söldner senden / König aufwerten
   if (rng.next() < sk.send) {

@@ -10,6 +10,8 @@ export const ECON = {
   workerCostStep: 5,          // jeder weitere Arbeiter kostet etwas mehr
   workerRate: 0.45,           // Äther pro Sekunde je Arbeiter
   maxWorkers: 16,
+  maxGather: 4,
+  gatherBonus: 0.25,         // je Sammel-Stufe +25 % Äther pro Funke
   randomBonusGold: 40,        // Bonus für Zufallsfraktion
   buildTimeFirst: 45,
   buildTime: 32,

@@ -4,6 +4,7 @@
 import { HEROES, HERO_STATS as HS, abilityAt } from './heroes.js';
 import { UNITS, DAMAGE_TABLE, armorReduction } from './data.js';
 import { LANE_WIDTH, LANE_SPAWN_Z, LANE_END_Z, BUILD_Z0, BUILD_Z1 } from './layout.js';
+import { inTelegraph } from './leader.js';
 
 const DT = 1 / 20;
 export const HERO_RADIUS = 0.7;
@@ -509,6 +510,32 @@ export function heroBotThink(sim, h) {
   }
   const dx = best.x - h.x, dz = best.z - h.z, d = Math.hypot(dx, dz);
   const yaw = Math.round(Math.atan2(dx, dz) * 1000);
+  const skilled = p.difficulty === 'hard' || p.difficulty === 'extreme';
+  // Ausweichen: aus angekündigten Bodenwarnungen herauslaufen (schwere/extreme Bots)
+  if (skilled && sim.telegraphs) {
+    sim.telegraphs = sim.telegraphs.filter((t) => t.until > sim.time);
+    const danger = sim.telegraphs.find((t) => t.lane === h.lane && inTelegraph(t, h.x, h.z));
+    if (danger) {
+      const ax = h.x - (danger.shape === 'circle' ? danger.x : (danger.x + danger.x2) / 2), az = h.z - (danger.shape === 'circle' ? danger.z : (danger.z + danger.z2) / 2);
+      const side = danger.shape === 'line' ? Math.atan2(-(danger.z2 - danger.z), danger.x2 - danger.x) : Math.atan2(ax || 0.1, az);
+      p.hin = { f: 1, s: 0, yaw: Math.round(side * 1000), jump: 0 };
+      return;
+    }
+  }
+  // Unterbrechen: wirkt ein Anführer einen unterbrechbaren Zauber, mit einer Betäubung kontern
+  if (skilled) {
+    for (const e of sim.entities.values()) {
+      if (e.type !== 'c' || !e.alive || e.lane !== h.lane || !e.lcast || !LEADER_INTERRUPT.has(e.lcast.k)) continue;
+      for (let slot = 0; slot < 5; slot++) {
+        const ab = abilityAt(def.abilities[slot], h.level, slot);
+        if (!(ab.stun || ab.root) || h.cds[slot] > 0 || h.res < ab.cost || (ab.gcd && h.gcd > 0) || h.cast) continue;
+        const dd = Math.hypot(e.x - h.x, e.z - h.z);
+        if (ab.type === 'aoe_self' ? dd > ab.radius : dd > (ab.range || 3) + 1) continue;
+        p.hin = { f: 0, s: 0, yaw: Math.round(Math.atan2(e.x - h.x, e.z - h.z) * 1000), jump: 0 };
+        if (tryCast(sim, h, slot, { target: e.id, x: e.x, z: e.z }, false)) return;
+      }
+    }
+  }
   const want = def.range > 4 ? def.range - 2 : 1.8;
   p.hin = { f: h.cast ? 0 : d > want ? 1 : 0, s: 0, yaw, jump: 0 };
   if (h.target !== best.id || !h.auto) { h.target = best.id; h.auto = true; }
@@ -530,6 +557,8 @@ export function heroBotThink(sim, h) {
     if (tryCast(sim, h, slot, { target: best.id, x: best.x, z: best.z }, false)) { p.hin.f = 0; return; }
   }
 }
+
+const LEADER_INTERRUPT = new Set(['heal', 'shield', 'summon']);
 
 export function isHeroEnt(e) { return e && e.type === 'h'; }
 export { DAMAGE_TABLE, armorReduction };
