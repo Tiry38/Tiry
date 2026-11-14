@@ -232,7 +232,7 @@ export function head(S, B, o = {}) {
 export function pauldron(S, B, o = {}) {
   const j = joints(B), s = B.skel.s;
   const c = add(j('upperArmL'), [(o.dx ?? 0.025) * s, (o.dy ?? 0.035) * s, (o.dz ?? 0) * s]);
-  const r = (o.r ?? 0.12) * s, layers = o.layers ?? 3, th = (o.th ?? 0.006) * s;
+  const r = (o.r ?? 0.12) * s, layers = o.layers ?? 3, th = (o.th ?? 0.013) * s;
   const bind = (p) => { const t = smooth(c[1] - 0.06 * s, c[1] + 0.04 * s, p[1]); return [['shoulderL', 0.25 + 0.4 * t], ['upperArmL', 0.75 - 0.4 * t]]; };
   const A = { mat: o.mat || 'steel', col: o.col || 'primary', bind, wear: 1 };
   const tilt = o.tilt ?? 0.5;
@@ -257,7 +257,7 @@ export function pauldron(S, B, o = {}) {
     // Zierkante: Torus am unteren Rand der obersten Kuppel
     const cy = 0.12 * r;
     const R = r * 1.02 * sqrt(max(0.05, 1 - (cy / (r * 0.94)) ** 2)) + th * 0.5;
-    S.torus(add(c, [B0.y[0] * cy, B0.y[1] * cy, B0.y[2] * cy]), R, th * 0.95, { rot: B0, mat: o.trimMat || 'gold', col: o.trim, bind, k: 0.002 * s });
+    S.torus(add(c, [B0.y[0] * cy, B0.y[1] * cy, B0.y[2] * cy]), R, 0.0075 * s, { rot: B0, mat: o.trimMat || 'gold', col: o.trim, bind, k: 0.002 * s });
   }
   if (o.ridge) S.torus(add(c, [0, 0, 0]), r * 1.0, th * 0.8, { rot: rotBasis(B0, 0, 0, PI / 2), arc: 2.0, mat: o.trimMat || 'gold', col: o.trim || A.col, bind, k: 0.004 * s });
   return { c, r, bind };
@@ -266,7 +266,7 @@ export function pauldron(S, B, o = {}) {
 /** Röhrenschale um einen Knochenabschnitt (Armschiene/Beinschiene) – Kegel a→b mit Rand-Wülsten */
 export function bracer(S, a, b, r0, r1, o = {}) {
   a = P(a); b = P(b);
-  const s = o.s ?? 1, th = (o.th ?? 0.006) * s;
+  const s = o.s ?? 1, th = (o.th ?? 0.013) * s;
   const A = { mat: o.mat || 'steel', col: o.col || 'primary', region: o.region, bind: o.bind, bone: o.bone, wear: 1 };
   const d = norm(sub(b, a)), L = len(sub(b, a));
   S.group({ k: 0 }, () => {
@@ -275,8 +275,8 @@ export function bracer(S, a, b, r0, r1, o = {}) {
     });
     if (o.rim !== false) {
       const B0 = basisY(d);
-      S.torus(a, r0 + th * 0.5, th * 0.75, { rot: B0, ...A, mat: o.rimMat || A.mat, col: o.rimCol || A.col });
-      S.torus(b, r1 + th * 0.5, th * 0.75, { rot: B0, ...A, mat: o.rimMat || A.mat, col: o.rimCol || A.col });
+      S.torus(a, r0 + th * 0.6, 0.0055 * s, { rot: B0, ...A, mat: o.rimMat || A.mat, col: o.rimCol || A.col });
+      S.torus(b, r1 + th * 0.6, 0.0055 * s, { rot: B0, ...A, mat: o.rimMat || A.mat, col: o.rimCol || A.col });
     }
     if (o.ridge) S.capsule(madd(madd(a, d, 0.01 * s), [0, 0, 1], r0 + th * 0.6), madd(madd(b, d, -0.01 * s), [0, 0, 1], r1 + th * 0.6), th * 0.7, { ...A, k: 0.006 * s });
   });
@@ -289,7 +289,7 @@ export function belt(S, B, o = {}) {
   const A = { mat: o.mat || 'leather', col: o.col || '#3b2618', region: 'pelvis', vary: 0.08 };
   const rx = (o.rx ?? 0.172) * s, rz = (o.rz ?? 0.128) * s, h = (o.h ?? 0.045) * s;
   // Ring als Schale eines elliptischen Zylinders
-  S.shell({ off: 0, th: (o.th ?? 0.012) * s, ...A, clip: (x, yy, z) => abs(yy - y) - h / 2, ck: 0.004 * s }, () => {
+  S.shell({ off: 0, th: (o.th ?? 0.015) * s, ...A, clip: (x, yy, z) => abs(yy - y) - h / 2, ck: 0.004 * s }, () => {
     S.ellipsoid([0, y, -0.005 * s], [rx, h * 3, rz], {});
   });
   if (o.buckle) {

@@ -41,13 +41,13 @@ export function build(S, B, P) {
   };
   const cuirassRef = () => torsoShape(S, B, { bulk: 1.04, k: 0.07 });
   S.group({ k: 0 }, () => {
-    S.shell({ off: 0.016 * s, th: 0.009 * s, mat: 'steel', col: steel, region: 'torso', clip: cuirassClip, ck: 0.006 * s, disp: Detail.hammered({ amp: 0.0006 * s }) }, cuirassRef);
+    S.shell({ off: 0.016 * s, th: 0.014 * s, mat: 'steel', col: steel, region: 'torso', clip: cuirassClip, ck: 0.008 * s }, cuirassRef);
     // Mittelgrat
     S.capsule([0, yBot + 0.02 * s, 0.155 * s], [0, chest[1] + 0.16 * s, 0.152 * s], 0.006 * s, 0.004 * s, { mat: 'steel', col: steel, region: 'torso', k: 0.025 * s });
   });
   // Goldkanten (Band-Schalen an Ober-/Unterkante)
-  S.shell({ off: 0.024 * s, th: 0.004 * s, mat: 'gold', col: gold, region: 'torso', clip: (x, y, z) => max(cuirassClip(x, y, z), y - yBot - 0.022 * s), ck: 0.003 * s }, cuirassRef);
-  S.shell({ off: 0.024 * s, th: 0.004 * s, mat: 'gold', col: gold, region: 'torso', clip: (x, y, z) => max(cuirassClip(x, y, z), -cuirassClip(x, y, z) - 0.018 * s), ck: 0.003 * s }, cuirassRef);
+  S.shell({ off: 0.027 * s, th: 0.006 * s, mat: 'gold', col: gold, region: 'torso', clip: (x, y, z) => max(cuirassClip(x, y, z), y - yBot - 0.022 * s), ck: 0.003 * s }, cuirassRef);
+  S.shell({ off: 0.027 * s, th: 0.006 * s, mat: 'gold', col: gold, region: 'torso', clip: (x, y, z) => max(cuirassClip(x, y, z), -cuirassClip(x, y, z) - 0.018 * s), ck: 0.003 * s }, cuirassRef);
   // Brust-Emblem: Sonnenstern (gold) – relief auf der Brust
   S.prim([0, chest[1] + 0.085 * s, 0.168 * s], {
     f: (x, y, z) => { const r = hypot(x, y), a = atan2(y, x); const st = r - (0.03 + 0.024 * (0.5 + 0.5 * cos(a * 8))) * s; return max(st, abs(z) - 0.007 * s); },
@@ -56,22 +56,22 @@ export function build(S, B, P) {
   // Bauchreifen (Lamellen) unter dem Kürass
   for (let i = 0; i < 3; i++) {
     const y1 = yBot + 0.01 * s - i * 0.042 * s, y0 = y1 - 0.05 * s;
-    S.shell({ off: (0.018 + i * 0.004) * s, th: 0.007 * s, mat: 'steel', col: i % 2 ? 'primary*0.9' : steel, region: 'pelvis', clip: (x, y, z) => max(y0 - y, y - y1), ck: 0.004 * s }, () => torsoShape(S, B, { bulk: 1.04 }));
-    S.shell({ off: (0.025 + i * 0.004) * s, th: 0.003 * s, mat: 'gold', col: gold, region: 'pelvis', clip: (x, y, z) => max(y0 - y, y - y0 - 0.01 * s), ck: 0.002 * s }, () => torsoShape(S, B, { bulk: 1.04 }));
+    S.shell({ off: (0.018 + i * 0.004) * s, th: 0.013 * s, mat: 'steel', col: i % 2 ? 'primary*0.9' : steel, region: 'pelvis', clip: (x, y, z) => max(y0 - y, y - y1), ck: 0.004 * s }, () => torsoShape(S, B, { bulk: 1.04 }));
+    S.shell({ off: (0.028 + i * 0.004) * s, th: 0.005 * s, mat: 'gold', col: gold, region: 'pelvis', clip: (x, y, z) => max(y0 - y, y - y0 - 0.01 * s), ck: 0.002 * s }, () => torsoShape(S, B, { bulk: 1.04 }));
   }
   belt(S, B, { dy: -0.025, rx: 0.19, rz: 0.15, h: 0.045, col: leather, buckle: gold });
 
   // ======================= Wappenrock (vorn + hinten) =======================
   skirt(S, B, {
-    top: hips[1] - 0.02 * s, bottom: j('shinL')[1] + 0.07 * s, r0: 0.19, r1: 0.25, col: blue, mat: 'silk', fold: 0.008, folds: 9,
-    panels: [[0, 0.62], [PI, 0.62]], hem: gold, hemW: 0.018, th: 0.009,
+    top: hips[1] - 0.02 * s, bottom: j('shinL')[1] + 0.07 * s, r0: 0.19, r1: 0.25, col: blue, mat: 'silk', fold: 0.008, folds: 9, th: 0.014,
+    panels: [[0, 0.62], [PI, 0.62]], hem: gold, hemW: 0.018,
     grad: { axis: 'y', from: hips[1], to: j('shinL')[1], k: 0.7 },
   });
   // Tassets (Beinplatten) seitlich vorn
   S.sym(() => {
     for (let k = 0; k < 3; k++) {
       const y1 = hips[1] - 0.035 * s - k * 0.065 * s, y0 = y1 - 0.075 * s;
-      S.shell({ off: (0.03 + k * 0.006) * s, th: 0.007 * s, mat: 'steel', col: k % 2 ? 'primary*0.92' : steel, region: 'skirt', clip: (x, y, z) => {
+      S.shell({ off: (0.03 + k * 0.008) * s, th: 0.013 * s, mat: 'steel', col: k % 2 ? 'primary*0.92' : steel, region: 'skirt', clip: (x, y, z) => {
         const a = atan2(x, z);
         return max(max(y0 - y, y - y1), abs(a - 0.95) * 0.2 * s - 0.11 * s);
       }, ck: 0.004 * s }, () => S.ellipsoid([0, hips[1] - 0.06 * s, 0], [0.19 * s, 0.25 * s, 0.16 * s], {}));
@@ -80,12 +80,12 @@ export function build(S, B, P) {
 
   // ======================= Arme =======================
   S.sym(() => {
-    pauldron(S, B, { r: 0.125, layers: 3, col: steel, col2: 'primary*0.9', trim: gold, tilt: 0.5, th: 0.0075 });
+    pauldron(S, B, { r: 0.125, layers: 3, col: steel, col2: 'primary*0.9', trim: gold, tilt: 0.5, th: 0.013 });
     // Oberarmröhre
     bracer(S, add(ua, [0.006 * s, -0.09 * s, 0]), add(j('foreArmL'), [0, 0.04 * s, 0]), 0.056 * s, 0.05 * s, { s, col: steel, region: 'armL', rimMat: 'gold', rimCol: gold });
     // Ellbogenkachel
     const el = j('foreArmL');
-    S.shell({ off: 0.006 * s, th: 0.007 * s, mat: 'steel', col: steel, region: 'armL', clip: (x, y, z) => z - el[2] + 0.005 * s }, () => S.sphere(add(el, [0.004 * s, 0, -0.004 * s]), 0.047 * s, {}));
+    S.shell({ off: 0.006 * s, th: 0.013 * s, mat: 'steel', col: steel, region: 'armL', clip: (x, y, z) => z - el[2] + 0.005 * s }, () => S.sphere(add(el, [0.004 * s, 0, -0.004 * s]), 0.047 * s, {}));
     S.prim(add(el, [0.05 * s, -0.01 * s, -0.02 * s]), {
       f: (x, y, z) => { const r = hypot(x, y); return max(max(r - 0.045 * s, abs(z) - 0.004 * s), -y - 0.01 * s + abs(x) * 0.2); },
       box: [-0.05 * s, -0.05 * s, -0.005 * s, 0.05 * s, 0.05 * s, 0.005 * s],
@@ -98,9 +98,9 @@ export function build(S, B, P) {
   S.sym(() => {
     const th = j('thighL'), kn = j('shinL'), an = j('footL');
     // Oberschenkel-Platte (vorne)
-    S.shell({ off: 0.012 * s, th: 0.007 * s, mat: 'steel', col: steel, region: 'legL', clip: (x, y, z) => max(max(kn[1] + 0.06 * s - y, y - (th[1] - 0.06 * s)), -(z - kn[2]) - 0.01 * s), ck: 0.004 * s }, () => thighShape(S, B, { bulk: 1.06, muscle: false }));
+    S.shell({ off: 0.012 * s, th: 0.013 * s, mat: 'steel', col: steel, region: 'legL', clip: (x, y, z) => max(max(kn[1] + 0.06 * s - y, y - (th[1] - 0.06 * s)), -(z - kn[2]) - 0.01 * s), ck: 0.004 * s }, () => thighShape(S, B, { bulk: 1.06, muscle: false }));
     // Kniekachel + Flügel
-    S.shell({ off: 0.005 * s, th: 0.008 * s, mat: 'steel', col: steel, bind: (p) => [['thighL', 0.5], ['shinL', 0.5]], clip: (x, y, z) => kn[2] - 0.0 * s - z }, () => S.ellipsoid(add(kn, [0, 0.01 * s, 0.022 * s]), [0.06 * s, 0.07 * s, 0.05 * s], {}));
+    S.shell({ off: 0.005 * s, th: 0.013 * s, mat: 'steel', col: steel, bind: (p) => [['thighL', 0.5], ['shinL', 0.5]], clip: (x, y, z) => kn[2] - 0.0 * s - z }, () => S.ellipsoid(add(kn, [0, 0.01 * s, 0.022 * s]), [0.06 * s, 0.07 * s, 0.05 * s], {}));
     S.prim(add(kn, [0.062 * s, 0.0, 0.0]), {
       f: (x, y, z) => { const r = hypot(x, y); return max(max(r - 0.05 * s, abs(z) - 0.004 * s), 0); },
       box: [-0.05 * s, -0.05 * s, -0.005 * s, 0.05 * s, 0.05 * s, 0.005 * s],
@@ -108,7 +108,7 @@ export function build(S, B, P) {
     // Beinschiene
     bracer(S, add(kn, [0, -0.045 * s, 0.006 * s]), add(an, [0, 0.12 * s, 0]), 0.058 * s, 0.046 * s, { s, col: steel, region: 'legL', rimMat: 'gold', rimCol: gold, ridge: true });
     // Stahlschuhe (Lamellen)
-    S.shell({ off: 0.006 * s, th: 0.008 * s, mat: 'steel', col: steel, region: 'legL', clip: (x, y, z) => max(y - an[1] - 0.11 * s, -y + 0.004 * s), ck: 0.004 * s }, () => footShape(S, B, { w: 1.05 }));
+    S.shell({ off: 0.006 * s, th: 0.013 * s, mat: 'steel', col: steel, region: 'legL', clip: (x, y, z) => max(y - an[1] - 0.11 * s, -y + 0.004 * s), ck: 0.004 * s }, () => footShape(S, B, { w: 1.05 }));
     footShape(S, B, { w: 1.02, o: { mat: 'leather', col: '#2a1c14', region: 'legL' } });
     for (let k = 0; k < 3; k++) S.torus([an[0], 0.045 * s, an[2] + (0.04 + k * 0.035) * s], 0.05 * s, 0.004 * s, { rot: [PI / 2 - 0.35, 0, 0], arc: PI * 0.95, mat: 'gold', col: gold, region: 'legL', k: 0.002 * s });
   });
@@ -121,7 +121,7 @@ export function build(S, B, P) {
   // ======================= Umhang =======================
   cape(S, B, {
     top: neck[1] - 0.03 * s, bottom: 0.32 * s, r0: 0.175, r1: 0.42, arc: 1.15, col: blue, mat: 'silk', folds: 7, fold: 0.016, hem: gold,
-    grad: { axis: 'y', from: neck[1], to: 0.4 * s, k: 0.65 }, back: 0.05, th: 0.012,
+    grad: { axis: 'y', from: neck[1], to: 0.4 * s, k: 0.65 }, back: 0.05, th: 0.015,
   });
   // Umhangspangen
   S.sym(() => {
@@ -149,7 +149,7 @@ export function build(S, B, P) {
       S.ellipsoid(add(hc, [0, -0.05 * s, -0.06 * s]), [0.095 * s, 0.11 * s, 0.08 * s], { k: 0.05 * s });
     });
     // Kamm (Grat von der Stirn zum Nacken)
-    S.torus(add(hc, [0, 0.0, -0.008 * s]), 0.13 * s, 0.009 * s, { rot: [0, PI / 2, 0], arc: 2.6, mat: 'gold', col: gold, region: 'head', k: 0.01 * s });
+    S.torus(add(hc, [0, 0.0, -0.008 * s]), 0.124 * s, 0.009 * s, { rot: { x: [0, 0, 1], y: [1, 0, 0], z: [0, 1, 0] }, arc: 3.4, mat: 'gold', col: gold, region: 'head', k: 0.01 * s });
   });
   // Stirnband + Nieten
   S.shell({ off: 0.007 * s, th: 0.004 * s, mat: 'gold', col: gold, region: 'head', clip: (x, y, z) => max(abs(y - hc[1] - 0.045 * s) - 0.011 * s, helmClip(x, y, z)), ck: 0.002 * s }, () => {
@@ -181,8 +181,8 @@ export function build(S, B, P) {
     handShape(S, B, { curl: 1, bulk: 1.12, o: { mat: 'steel', col: 'primary*0.8', region: ['foreArmL', 'handL'] } });
     // Stulpe
     const F = handFrame(B, 'L');
-    bracer(S, F.at(-0.02, 0, 0), F.at(0.045, 0, 0.004), 0.047 * s, 0.043 * s, { s, col: steel, region: ['foreArmL', 'handL'], rimMat: 'gold', rimCol: gold });
-    S.shell({ off: 0.004 * s, th: 0.005 * s, mat: 'steel', col: steel, region: ['handL'], clip: (x, y, z) => { const p = [x - F.o[0], y - F.o[1], z - F.o[2]]; return -(p[0] * F.i[0] + p[1] * F.i[1] + p[2] * F.i[2]) - 0.002 * s; } }, () => {
+    bracer(S, F.at(-0.02, 0, 0), F.at(0.045, 0, 0.004), 0.047 * s, 0.043 * s, { s, th: 0.008, col: steel, region: ['foreArmL', 'handL'], rimMat: 'gold', rimCol: gold });
+    S.shell({ off: 0.004 * s, th: 0.008 * s, mat: 'steel', col: steel, region: ['handL'], clip: (x, y, z) => { const p = [x - F.o[0], y - F.o[1], z - F.o[2]]; return -(p[0] * F.i[0] + p[1] * F.i[1] + p[2] * F.i[2]) - 0.002 * s; } }, () => {
       S.box(F.at(0.05, 0, 0.004), [0.044 * s, 0.05 * s, 0.018 * s], { r: 0.014 * s, rot: { x: F.f, y: F.d, z: F.i } });
     });
   });

@@ -7,7 +7,7 @@ import { gradient, fbm, BIG } from './sdf.js';
 // Shader-IDs: 0 allgemein, 1 Stahl/Eisen, 2 Edelmetall (Gold/Kupfer/Bronze), 3 Leder, 4 Stoff, 5 Haut, 6 Haar/Fell,
 //             7 Holz/Rinde, 8 Stein/Knochen, 9 Kristall, 10 Blatt, 11 Auge, 12 Lack/Emaille
 export const MATS = {
-  steel: [0.3, 1, 1], metal: [0.34, 1, 1], silver: [0.24, 1, 1], iron: [0.5, 0.95, 1], dmetal: [0.46, 0.92, 1], mail: [0.42, 1, 1],
+  steel: [0.36, 1, 1], metal: [0.38, 1, 1], silver: [0.3, 1, 1], iron: [0.5, 0.95, 1], dmetal: [0.46, 0.92, 1], mail: [0.42, 1, 1],
   gold: [0.26, 1, 2], copper: [0.33, 1, 2], bronze: [0.38, 1, 2], brass: [0.3, 1, 2],
   leather: [0.58, 0, 3], dleather: [0.66, 0, 3],
   cloth: [0.86, 0, 4], silk: [0.48, 0, 4], velvet: [0.92, 0, 4], linen: [0.8, 0, 4],
@@ -78,7 +78,7 @@ function hemiDirs(n) {
   }
   return out;
 }
-const DIRS = hemiDirs(10);
+const DIRS = hemiDirs(8);
 
 /**
  * Attribute für Vertices backen.
