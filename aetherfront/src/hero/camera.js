@@ -6,9 +6,10 @@ import * as THREE from 'three';
 import { LANE_WIDTH } from '../sim/layout.js';
 
 export const HERO_FOV = 56;
-export const ZOOM_MIN = 2, ZOOM_MAX = 28;
+export const ZOOM_MIN = 1.5, ZOOM_MAX = 20;
 export const PITCH_MIN = -0.55, PITCH_MAX = 1.42;
-const HEAD = 2.05;            // Blickpunkt über dem Boden (knapp über Kopfhöhe des Helden, 1,25 × Modell)
+const HEAD = 1.65;            // Blickpunkt knapp unter Schulterhöhe → Held steht groß im unteren Bilddrittel, Füße über der Aktionsleiste
+export const DEFAULT_DIST = 5, DEFAULT_PITCH = 0.09; // WoW-Standard: ~5 m dahinter, Kamera ≈ 2,1 m hoch
 const LANE_Z0 = -38.5, LANE_Z1 = 28.5;
 const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
 const _v = new THREE.Vector3();
@@ -41,8 +42,8 @@ export class HeroCamera {
     this.camera = camera;
     this.settings = settings;
     this.yaw = Math.PI;          // absolute Kamerablickrichtung
-    this.pitch = 0.32;
-    this.dist = settings.get('heroCamDist') || 9;
+    this.pitch = DEFAULT_PITCH;
+    this.dist = settings.get('heroCamDist') || DEFAULT_DIST;
     this.distGoal = this.dist;
     this.lift = 0;               // weiches Anheben bei Hindernissen
     this.pose = { pos: new THREE.Vector3(), look: new THREE.Vector3() };
@@ -53,8 +54,8 @@ export class HeroCamera {
 
   reset(yaw) {
     this.yaw = yaw;
-    this.pitch = 0.32;
-    this.distGoal = this.dist = clamp(this.settings.get('heroCamDist') || 9, ZOOM_MIN, ZOOM_MAX);
+    this.pitch = DEFAULT_PITCH;
+    this.distGoal = this.dist = clamp(this.settings.get('heroCamDist') || DEFAULT_DIST, ZOOM_MIN, ZOOM_MAX);
     this.lift = 0;
     this.spectate = null;
   }

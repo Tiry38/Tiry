@@ -16,7 +16,7 @@ const HERO = process.env.HERO || 'lyra';
 const browser = await chromium.launch({ args: ['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist', '--autoplay-policy=no-user-gesture-required'] });
 const page = await browser.newPage({ viewport: { width: W, height: H } });
 page.setDefaultTimeout(240000);
-await page.addInitScript(({ hero }) => { try { const k = 'aetherfront.settings.v1'; const v = JSON.parse(localStorage.getItem(k) || '{}'); Object.assign(v, { quality: 'low', qualityAuto: false, showFps: true, hero, teamSize: 1, swoop: 'normal', damageNumbers: false }); localStorage.setItem(k, JSON.stringify(v)); } catch {} }, { hero: HERO });
+await page.addInitScript(({ hero }) => { try { const k = 'aetherfront.settings.v1'; const v = JSON.parse(localStorage.getItem(k) || '{}'); Object.assign(v, { quality: 'low', renderScale: 0.75, qualityAuto: false, showFps: true, hero, teamSize: 1, swoop: 'normal', damageNumbers: false }); localStorage.setItem(k, JSON.stringify(v)); } catch {} }, { hero: HERO });
 const errors = [];
 page.on('console', (m) => { if (m.type() === 'error') errors.push(`${m.type()}: ${m.text()}`); });
 page.on('pageerror', (e) => errors.push(`pageerror: ${e.message}`));
@@ -83,8 +83,12 @@ check('Schwenk endet im Heldenblick, Steuerung aktiv', (await ev(() => window.__
 await page.waitForFunction(() => window.__app.session.sim.freeze <= 0);
 await wait(600);
 await shot('heldenblick');
-// Gegner aus der Bahn holen, damit Ziele erreichbar sind (Testhilfe: nur Positionen)
-await ev(() => { const s = window.__app.session, h = s.sim.heroOf(0); let i = 0; for (const e of s.sim.entities.values()) if (e.type === 'c' && e.lane === 0) { e.x = h.x + ((i % 4) - 1.5) * 2.4; e.z = h.z - 9 - Math.floor(i / 4) * 2; i++; } });
+// Testhilfe: Gegner vor den Helden stellen und festhalten; Held bleibt während der Steuerungsprüfung am Leben
+await ev(() => {
+  const s = window.__app.session, h = s.sim.heroOf(0); let i = 0;
+  for (const e of s.sim.entities.values()) if (e.type === 'c' && e.lane === 0) { e.x = h.x + ((i % 4) - 1.5) * 2.4; e.z = h.z - 12 - Math.floor(i / 4) * 2; e.rootT = 9999; i++; }
+  window.__god = setInterval(() => { const hh = window.__app.session.sim.heroOf(0); if (hh.alive) hh.hp = hh.maxHp; }, 30);
+});
 
 // ---------- Bewegung ----------
 let a = await state();
@@ -109,17 +113,18 @@ check('Q seitwärts links', b.x < a.x - 0.8);
 a = await state();
 await hold('KeyA', 10);
 b = await state();
-const turnRate = (b.yaw - a.yaw);
-check('A dreht nach links (Blick + Kamera)', turnRate > 0.2 && Math.abs(b.camYaw - b.yaw) < 0.05, `Δ ${turnRate.toFixed(2)} rad`);
+const wrapA = (x) => Math.atan2(Math.sin(x), Math.cos(x));
+const turnRate = wrapA(b.yaw - a.yaw);
+check('A dreht nach links (Blick + Kamera)', turnRate > 0.2 && Math.abs(wrapA(b.camYaw - b.yaw)) < 0.05, `Δ ${turnRate.toFixed(2)} rad`);
 a = await state();
 await hold('KeyD', 10);
 b = await state();
-check('D dreht nach rechts', b.yaw < a.yaw - 0.2);
+check('D dreht nach rechts', wrapA(b.yaw - a.yaw) < -0.2);
 // Sprung
 await page.keyboard.press('Space');
-await page.waitForFunction(() => window.__app.session.sim.heroOf(0).y > 0.4, null, { polling: 20 });
+const jumped = await page.waitForFunction(() => window.__app.session.sim.heroOf(0).y > 0.4, null, { polling: 20, timeout: 60000 }).then(() => true).catch(() => false);
 await shot('sprung');
-check('Leertaste springt', (await state()).y > 0.4);
+check('Leertaste springt', jumped);
 await page.waitForFunction(() => window.__app.session.sim.heroOf(0).grounded);
 // Automatisch laufen
 await page.keyboard.press('NumLock');
@@ -139,18 +144,18 @@ await page.mouse.move(cx, cy); await page.mouse.down({ button: 'left' });
 for (let i = 1; i <= 8; i++) await page.mouse.move(cx + i * 25, cy + i * 4);
 await page.mouse.up({ button: 'left' });
 b = await state();
-check('Linke Maustaste ziehen: Kamera dreht frei, Held behält Blick', Math.abs(b.camYaw - a.camYaw) > 0.3 && Math.abs(b.yaw - a.yaw) < 0.02, `Kamera Δ ${(b.camYaw - a.camYaw).toFixed(2)}, Held Δ ${(b.yaw - a.yaw).toFixed(3)}`);
+check('Linke Maustaste ziehen: Kamera dreht frei, Held behält Blick', Math.abs(wrapA(b.camYaw - a.camYaw)) > 0.3 && Math.abs(wrapA(b.yaw - a.yaw)) < 0.02, `Kamera Δ ${(b.camYaw - a.camYaw).toFixed(2)}, Held Δ ${(b.yaw - a.yaw).toFixed(3)}`);
 await shot('kamera-frei');
 a = await state();
 await page.mouse.move(cx, cy); await page.mouse.down({ button: 'right' });
 for (let i = 1; i <= 8; i++) await page.mouse.move(cx - i * 25, cy - i * 3);
 b = await state();
-check('Rechte Maustaste ziehen: Held + Kamera folgen der Maus', Math.abs(b.yaw - b.camYaw) < 0.02 && Math.abs(b.yaw - a.yaw) > 0.3, `Held Δ ${(b.yaw - a.yaw).toFixed(2)}`);
+check('Rechte Maustaste ziehen: Held + Kamera folgen der Maus', Math.abs(wrapA(b.yaw - b.camYaw)) < 0.02 && Math.abs(wrapA(b.yaw - a.yaw)) > 0.3, `Held Δ ${(b.yaw - a.yaw).toFixed(2)}`);
 // A/D werden mit gehaltener rechter Maustaste zu Seitschritten
 a = await state();
 await hold('KeyD', 8);
 b = await state();
-check('Rechte Maustaste + D = seitwärts statt drehen', Math.abs(b.yaw - a.yaw) < 0.02 && Math.hypot(b.x - a.x, b.z - a.z) > 0.8);
+check('Rechte Maustaste + D = seitwärts statt drehen', Math.abs(wrapA(b.yaw - a.yaw)) < 0.02 && Math.hypot(b.x - a.x, b.z - a.z) > 0.8);
 // beide Tasten → vorwärts
 a = await state();
 await page.mouse.down({ button: 'left' });
@@ -165,7 +170,7 @@ await page.mouse.wheel(0, 400); await wait(300);
 b = await state();
 check('Mausrad zoomt heraus', b.dist > a.dist + 1, `${a.dist.toFixed(1)} → ${b.dist.toFixed(1)} m`);
 await page.mouse.wheel(0, -900); await wait(300);
-check('Mausrad zoomt hinein (min. 2 m)', (await state()).dist < b.dist && (await state()).dist >= 2);
+check('Mausrad zoomt hinein (min. 1,5 m)', (await state()).dist < b.dist && (await state()).dist >= 1.5);
 await page.mouse.wheel(0, 300); await wait(400);
 // ---------- Ziele ----------
 // zum Gegner drehen
@@ -217,7 +222,7 @@ await wait(300);
 check('Umschalt+1 ist für Gegenstände reserviert', (await ev(() => document.getElementById('herr').textContent)).includes('Gegenstand'));
 await shot('fehlertext');
 // Gegner in Reichweite holen
-await ev(() => { const s = window.__app.session, h = s.sim.heroOf(0); let i = 0; for (const e of s.sim.entities.values()) if (e.type === 'c' && e.alive && e.lane === 0) { e.x = h.x + Math.sin(h.face) * (7 + (i % 3)) + ((i % 4) - 1.5) * 1.6; e.z = h.z + Math.cos(h.face) * (7 + (i % 3)); e.cd = 3; i++; } });
+await ev(() => { const s = window.__app.session, h = s.sim.heroOf(0); let i = 0; for (const e of s.sim.entities.values()) if (e.type === 'c' && e.alive && e.lane === 0) { e.x = h.x + Math.sin(h.face) * (7 + (i % 3)) + ((i % 4) - 1.5) * 1.6; e.z = h.z + Math.cos(h.face) * (7 + (i % 3)); e.rootT = 9999; i++; } });
 await ticks(3);
 for (let slot = 0; slot < 5; slot++) {
   const before = await ev(() => window.__ev.length);
@@ -265,6 +270,7 @@ if (castAb >= 0) {
   await shot('zauber-abgebrochen');
 }
 // ---------- Heldentod → zurück in die Vogelperspektive ----------
+await ev(() => clearInterval(window.__god));
 await ev(() => { const s = window.__app.session, h = s.sim.heroOf(0); s.sim.applyHit({ type: 'c', alive: true, x: h.x, z: h.z, hp: 1, maxHp: 1 }, h, 1e7, 'klinge', false); });
 await page.waitForFunction(() => window.__app.vmode === 'dead' || window.__app.vmode === 'swoopOut', null, { polling: 30 });
 await wait(800);

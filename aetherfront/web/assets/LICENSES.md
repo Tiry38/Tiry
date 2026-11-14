@@ -37,3 +37,20 @@ Neu laden: `node scripts/fetch-assets.mjs` (Auswahl in `src/render/asset-catalog
 | `assets/hdri/sky_haze.hdr` | Qwantani Late Afternoon (Pure Sky) (HDRI 1k) | Greg Zaal, Jarod Guest | https://polyhaven.com/a/qwantani_late_afternoon_puresky | https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/1k/qwantani_late_afternoon_puresky_1k.hdr | Akt 3/4 – dunstiger Spätnachmittag (Schmiede-Glut, Abgrund-Violett per Grading) | CC0 1.0 |
 
 Gesamtgröße: 35.42 MB
+
+## Motion Capture (`assets/anim/clips.json`)
+
+Bewegungsdaten: **CMU Graphics Lab Motion Capture Database, mocap.cs.cmu.edu** – „The data used in this project was
+obtained from mocap.cs.cmu.edu. The database was created with funding from NSF EIA-0196217.“ Frei für jede Nutzung,
+auch kommerziell. BVH-Fassung von Bruce Hahne (cgspeed), bezogen über https://github.com/una-dinosauria/cmu-mocap.
+Retargeting, Schleifen und Kompression: `node scripts/mocap-import.mjs`.
+
+| Clip | CMU-Aufnahme | Beschreibung (CMU-Index) | Verwendung |
+|---|---|---|---|
+| `idle` | 77_02 | standing | Ruhehaltung, Atmen |
+| `walk` | 16_15 | walk | Gehen |
+| `jog` | 09_01 | run | Laufen (Schrittweite auf 7 m/s angepasst) |
+| `backWalk` | 76_11 | quick large steps backwards | langsames Rückwärtsgehen |
+| `backRun` | 09_01 (zeitlich umgekehrt) | run | Rückwärtslauf 4,5 m/s |
+| `turnL` / `turnR` | 69_16 (+ gespiegelt) | turn in place | Drehen auf der Stelle |
+| `jump` | 13_39 | jump | Absprung, Flug, Landung |

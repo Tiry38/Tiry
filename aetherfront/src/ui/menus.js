@@ -354,7 +354,7 @@ export class Menus {
       sub('Heldenblick (Kampf)');
       row('Mausempfindlichkeit', 'Kamera drehen mit gehaltener Maustaste', slider('mouseSens', 0.3, 3, 0.05, (v) => `${v.toFixed(2).replace('.', ',')}×`));
       row('Maus-Y umkehren', 'Maus nach oben = Kamera nach unten', toggle('invertY'));
-      row('Kameraabstand', 'Startabstand hinter dem Helden (Mausrad zoomt im Spiel 2–28 m)', slider('heroCamDist', 2, 28, 0.5, (v) => `${String(v).replace('.', ',')} m`));
+      row('Kameraabstand', 'Startabstand hinter dem Helden (Mausrad zoomt im Spiel 1,5–20 m)', slider('heroCamDist', 1.5, 20, 0.5, (v) => `${String(v).replace('.', ',')} m`));
       row('Windzug-Schwenk', 'Kamerafahrt zwischen Vogelperspektive und Heldenblick', segc('swoop', [['normal', 'Normal'], ['short', 'Kurz'], ['off', 'Aus (Überblenden)']]));
       sub('Tastenbelegung Held');
       this.renderBinds(body);

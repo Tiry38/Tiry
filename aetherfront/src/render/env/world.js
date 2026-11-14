@@ -165,7 +165,7 @@ export function buildWorld(U, { anisotropy = 8, assets = null } = {}) {
   const farTerrain = terrainMaps;
   const islandMat = patchMaterial(new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.93, metalness: 0 }), U, { terrain: terrainMaps });
   const islandMesh = new THREE.Mesh(merge(nearIsles.map((g) => { const n = g.toNonIndexed(); return n; })), islandMat);
-  islandMesh.castShadow = true;
+  islandMesh.castShadow = false; // flache Hügel – Schatten kaum sichtbar, spart den teuren Schattenpass der Inselkörper
   islandMesh.receiveShadow = true;
   islandMesh.name = 'aeth-islands';
   root.add(islandMesh);
@@ -758,7 +758,7 @@ export function buildWorld(U, { anisotropy = 8, assets = null } = {}) {
       const radius = (th) => r * (1 + 0.24 * fbm2(Math.cos(th) * 2 + i, Math.sin(th) * 2, 3, seed)
         + 0.09 * Math.sin(th * 3 + ph) + 0.05 * Math.sin(th * 5 + ph2));
       const isl = buildIsland({
-        cx: x, cz: z, topY: y, radius, depth: r * (1.1 + FR() * 0.9), seed, segs: 76, rings: 8, sideRings: 26, rimDrop: r * 0.05,
+        cx: x, cz: z, topY: y, radius, depth: r * (1.1 + FR() * 0.9), seed, segs: 64, rings: 7, sideRings: 22, rimDrop: r * 0.05,
         height: (px, pz, t) => (1 - t * t) * r * 0.12 * (0.5 + fbm2(px * 0.02, pz * 0.02, 3, seed) + 0.5)
           + Math.max(0, fbm2(px * 0.05, pz * 0.05, 3, seed + 9)) * r * 0.06 * (1 - t),
         grass: lushGrass(seed), edgeNoise: 0.14, taper: 0.42 + FR() * 0.35, lobes: 1.1, rough: Math.max(1, r / 22),
@@ -839,7 +839,7 @@ export function buildWorld(U, { anisotropy = 8, assets = null } = {}) {
     const list = allTrees[slot];
     if (!list.length) continue;
     const trunk = new THREE.InstancedMesh(treeTrunkGeometry(kind), trunkMat, list.length);
-    const canopy = new THREE.InstancedMesh(treeFoliageGeometry(kind, 3 + kind + slot, far ? 0.55 : 1), canopyMat, list.length);
+    const canopy = new THREE.InstancedMesh(treeFoliageGeometry(kind, 3 + kind + slot, far ? 0.4 : 1), canopyMat, list.length);
     const m = new THREE.Matrix4(), q = new THREE.Quaternion(), e = new THREE.Euler();
     const R2 = rng(31 + slot);
     list.forEach((t, i) => {

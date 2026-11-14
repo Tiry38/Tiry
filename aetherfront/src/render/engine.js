@@ -303,6 +303,7 @@ export class Engine {
   render(dt) {
     const r = this.renderer, L = this.look, q = this.q;
     this.time += dt;
+    this.flash = Math.max(0, this.flash - dt * 1.4);
     // Laufzeit-Benchmark (nur Automatik): Bildzeit messen, bei Bedarf Stufe wechseln
     const now = performance.now();
     if (this.autoTuner && this._lastFrame && !document.hidden) {
@@ -317,8 +318,20 @@ export class Engine {
         if (this.autoTuner && this.autoTuner.done) this.autoTuner = null;
       }
     }
+    // Bildtakt bei extrem langsamen Bildern (Software-Rendering ohne Grafiktreiber, > ~0,35 s pro Bild):
+    // nach jedem teuren Bild eine Pause einlegen, damit GPU-Prozess, Compositor und Oberfläche (Menüs,
+    // Klicks, Bildschirmfotos) bedienbar bleiben, statt dauerhaft hinter dem 3D-Bild zu warten.
+    if (this._lastFrame) {
+      const ft = now - this._lastFrame;
+      if (!this._skipped) this.frameMs = this.frameMs ? this.frameMs * 0.7 + ft * 0.3 : ft;
+    }
+    if (this.frameMs > 350) {
+      // gerade ein teures Bild fertig geworden → Pause beginnen
+      if (!this._skipped && this._lastFrame) this._nextRenderAt = now + Math.min(4000, this.frameMs * 0.75);
+      if (now < (this._nextRenderAt || 0)) { this._lastFrame = now; this._skipped = true; return; }
+    }
     this._lastFrame = now;
-    this.flash = Math.max(0, this.flash - dt * 1.4);
+    this._skipped = false;
     r.info.reset();
     const pre = this.scene.userData.aethPreRender;
     if (pre) pre(this.camera, this);

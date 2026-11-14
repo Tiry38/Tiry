@@ -4,6 +4,7 @@
 //         → Sekundärbewegung (Federketten: Umhang, Busch, Haar, Rock) → Schwebeobjekte / Glühen.
 import * as THREE from 'three';
 import { STYLES } from './styles.js';
+import { MocapRuntime, getMocapLibrary, loadMocapLibrary } from './mocap.js';
 
 const TAU = Math.PI * 2;
 const clamp = (x, a, b) => (x < a ? a : x > b ? b : x);
@@ -216,7 +217,7 @@ export class HeroAnimator {
     // Armschwung (Gegenschwung zu den Beinen) – geglättet
     const ksm = damp(16, dt);
     this.armSm.L += (-offRn - this.armSm.L) * ksm; this.armSm.R += (-offLn - this.armSm.R) * ksm;
-    const swA = lerp(0.35, 0.75, runF) * mw * (this.back ? 0.5 : 1);
+    const swA = lerp(0.35, 0.75, runF) * mw * (this.back ? 0.5 : 1) * (this.mocap ? 0.35 : 1); // Mocap liefert den Schwung selbst
     E.upperArmL[0] -= this.armSm.L * swA * st.swing.L; E.upperArmR[0] -= this.armSm.R * swA * st.swing.R;
     E.foreArmL[0] -= Math.max(0, this.armSm.L) * 0.25 * swA * st.swing.L; E.foreArmR[0] -= Math.max(0, this.armSm.R) * 0.25 * swA * st.swing.R;
     // Waffen-Pendeln im Stand
@@ -400,6 +401,13 @@ export class HeroAnimator {
       thJ.quaternion.copy(_q); shJ.quaternion.copy(_q2); ftJ.quaternion.copy(_q3);
     }
 
+    // ---------- Motion-Capture-Grundbewegung (falls Clips geladen) – prozedurale Aktionen als Oberkörper-Ebene ----------
+    if (this._mocapReady()) {
+      const c = this.actClip && this.actW > 0.001 ? this.actClip._c : null;
+      const full = c && (c.scalars.includes('legFK') || c.scalars.includes('yaw')) ? this.actW : 0;
+      this.mocap.update(dt, s, { upper: Math.max(c ? this.actW : 0, this.stunW, this.vicW), whole: Math.max(this.deathW, full), arms: st.mocapArms ?? 0.65 });
+    }
+
     // ---------- Sekundärbewegung ----------
     this._springs(dt, t, minFootZ, pitchH + E.spine[0] + E.chest[0] + (this.deathW > 0.5 ? 0 : 0));
     this._floaters(dt, t, s);
@@ -439,6 +447,17 @@ export class HeroAnimator {
     if (this.rig.lights) for (const L of this.rig.lights) L.intensity = L.userData.base * (0.9 + 0.08 * Math.sin(t * 7.3) + 0.05 * Math.sin(t * 17.1)) * (1 + this.castGlow * 1.2) * (dead ? 0.3 : 1);
     for (const m of this.rig.glowMaterials) m.color.setScalar(gk * (m.userData.pulse ?? 1) * (m.userData.base ?? 1));
     for (const m of this.rig.bodyMaterials) if (m.userData.uniforms) m.userData.uniforms.uFlash.value = ha < 0.18 ? (1 - ha / 0.18) * 0.9 : 0;
+  }
+
+  /** Mocap-Laufzeit bei Bedarf anlegen; false → rein prozedural (Clips fehlen/abgeschaltet) */
+  _mocapReady() {
+    if (this.useMocap === false || HeroAnimator.mocap === false) return false;
+    if (this.mocap === undefined) {
+      const lib = getMocapLibrary();
+      if (!lib) { loadMocapLibrary(); return false; }
+      try { this.mocap = new MocapRuntime(this.rig, lib); } catch (e) { console.warn('Mocap aus:', e.message); this.mocap = null; }
+    }
+    return !!this.mocap;
   }
 
   _blendInto(pose, w) {

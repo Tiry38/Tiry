@@ -379,7 +379,10 @@ export class HeroControls {
     // Bewegung bricht eigene Zauber-Pose sofort ab (die Sim bricht im nächsten Tick ab)
     if ((f || st) && this.heroes.localCast()) this.heroes.localCancel('move');
     // Sprung-Bestätigung abwarten (max. 0,5 s)
-    if (this.jumpPending && performance.now() - this.jumpPending > 500) this.jumpPending = 0;
+    // (in Sim-Ticks gemessen, damit es auch bei sehr niedriger Bildrate zuverlässig bleibt)
+    if (this.jumpPending && this.jumpTick == null && this.sent.jump) this.jumpTick = s.sim.tick;
+    if (this.jumpPending && this.jumpTick != null && s.sim.tick > this.jumpTick + 8) { this.jumpPending = 0; this.jumpTick = null; }
+    if (!this.jumpPending) this.jumpTick = null;
     // Senden: Bewegungswechsel sofort, reine Drehung höchstens 20×/s
     const yawQ = Math.round(wrap(this.yaw) * 1000);
     const jump = this.jumpPending ? 1 : 0;

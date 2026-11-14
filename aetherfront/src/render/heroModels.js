@@ -17,6 +17,7 @@ import * as varo from './hero/varo.js';
 import * as selene from './hero/selene.js';
 import * as mira from './hero/mira.js';
 import * as brann from './hero/brann.js';
+import { buildForgedHero, preloadForge } from './forge/loader.js';
 
 export { HeroAnimator };
 
@@ -33,7 +34,11 @@ export const HERO_MODEL_IDS = Object.keys(DESIGNS);
 const tierOf = (lv) => (lv >= 9 ? 9 : lv >= 6 ? 6 : lv >= 3 ? 3 : 0);
 const FALLBACK_PAL = { primary: '#aab3bf', secondary: '#3a6ee8', metal: '#c9a24a', glow: '#7fd8ff' };
 
-export function buildHero(modelId, { palette, level = 1 } = {}) {
+// Aether-Forge: vorgebackene Skulptur-Modelle (web/assets/models) im Hintergrund laden; vorhanden → werden benutzt.
+preloadForge();
+
+export function buildHero(modelId, { palette, level = 1, forge = true } = {}) {
+  if (forge) { const f = buildForgedHero(DESIGNS[modelId] ? modelId : 'hero_kael', { level }); if (f) return f; }
   const D = DESIGNS[modelId] || DESIGNS.hero_kael;
   const id = (DESIGNS[modelId] ? modelId : 'hero_kael').replace('hero_', '');
   const pal = { ...FALLBACK_PAL, ...(HEROES[id] && HEROES[id].palette), ...(palette || {}) };
