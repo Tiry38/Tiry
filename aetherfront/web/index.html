@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; connect-src 'self' ws: wss:; media-src 'self' blob: data:;" />
+  <title>Aetherfront</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <canvas id="scene"></canvas>
+  <div id="floaters"></div>
+  <div id="ui">
+    <!-- Startbildschirm -->
+    <section id="screen-splash" class="screen active">
+      <div class="splash-inner">
+        <div class="logo"><span>AETHER</span><span>FRONT</span></div>
+        <div class="tagline">Lane-Defense · Teamkrieg · 4 Fraktionen</div>
+        <div class="press">Klicken oder beliebige Taste drücken</div>
+      </div>
+    </section>
+
+    <!-- Hauptmenü -->
+    <section id="screen-menu" class="screen">
+      <div class="menu-left">
+        <div class="logo small"><span>AETHER</span><span>FRONT</span></div>
+        <nav class="menu-nav">
+          <button class="pill big primary" data-go="setup" data-hint="Gegen Bots, 1 gegen 1 bis 4 gegen 4">Gefecht starten</button>
+          <button class="pill big" data-go="multi" data-hint="Online mit Freunden – in Vorbereitung">Mehrspieler</button>
+          <button class="pill big" data-go="codex" data-hint="So funktioniert das Spiel">Kodex &amp; Anleitung</button>
+          <button class="pill big" data-go="settings" data-hint="Grafik, Audio, Steuerung">Einstellungen</button>
+          <button class="pill big ghost" id="btn-quit" data-hint="Spiel beenden">Beenden</button>
+        </nav>
+        <div class="menu-hint" id="menu-hint">&nbsp;</div>
+      </div>
+      <div class="menu-foot"><span id="version">v0.1</span> · Hintergrund: Live-Gefecht zwischen Bots</div>
+    </section>
+
+    <!-- Spiel einrichten -->
+    <section id="screen-setup" class="screen panel-screen">
+      <div class="glass panel wide">
+        <header class="panel-head"><h2>Gefecht einrichten</h2><button class="pill ghost" data-go="menu">Zurück</button></header>
+        <div class="setup-grid">
+          <div class="setup-col">
+            <h3>Modus</h3>
+            <div class="seg" id="seg-mode"></div>
+            <h3>Gegner-Stärke</h3>
+            <div class="seg" id="seg-diff"></div>
+            <h3>Dein Name</h3>
+            <input id="inp-name" class="field" maxlength="16" />
+            <h3>Spieltempo</h3>
+            <div class="seg" id="seg-speed"></div>
+          </div>
+          <div class="setup-col grow">
+            <h3>Fraktion</h3>
+            <div class="factions" id="factions"></div>
+          </div>
+        </div>
+        <footer class="panel-foot"><div class="setup-summary" id="setup-summary"></div><button class="pill big primary" id="btn-start">Schlacht beginnen</button></footer>
+      </div>
+    </section>
+
+    <!-- Mehrspieler -->
+    <section id="screen-multi" class="screen panel-screen">
+      <div class="glass panel">
+        <header class="panel-head"><h2>Mehrspieler <span class="badge">Vorschau</span></h2><button class="pill ghost" data-go="menu">Zurück</button></header>
+        <p class="lead">Das Spiel ist bereits auf Online-Partien ausgelegt: Alle Aktionen laufen als Befehle über eine
+          deterministische Simulation (Lockstep). Ein kleiner Relay-Server verteilt nur die Befehle – das spart Bandbreite
+          und hält alle Spieler synchron. Leere Plätze übernehmen Bots.</p>
+        <div class="multi-grid">
+          <label>Server-Adresse<input id="inp-server" class="field" /></label>
+          <div class="row">
+            <button class="pill" id="btn-mp-create">Raum erstellen</button>
+            <input id="inp-room" class="field short" placeholder="Code" maxlength="5" />
+            <button class="pill" id="btn-mp-join">Beitreten</button>
+          </div>
+          <div id="mp-lobby" class="mp-lobby"></div>
+          <div class="row"><button class="pill primary" id="btn-mp-start" disabled>Starten (Host)</button></div>
+          <p class="fine">Hinweis: Online-Partien sind experimentell. Server lokal starten mit <code>npm run server</code>
+            (Port 7710). Für Freunde über das Internet muss der Port weitergeleitet oder ein Server gemietet werden.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Kodex -->
+    <section id="screen-codex" class="screen panel-screen">
+      <div class="glass panel wide scroll">
+        <header class="panel-head"><h2>Kodex</h2><button class="pill ghost" data-back>Zurück</button></header>
+        <div id="codex-body" class="codex"></div>
+      </div>
+    </section>
+
+    <!-- Einstellungen -->
+    <section id="screen-settings" class="screen panel-screen">
+      <div class="glass panel wide scroll">
+        <header class="panel-head"><h2>Einstellungen</h2><button class="pill ghost" data-back>Zurück</button></header>
+        <div class="tabs" id="settings-tabs"></div>
+        <div id="settings-body" class="settings"></div>
+      </div>
+    </section>
+
+    <!-- HUD -->
+    <section id="hud" class="screen">
+      <div class="hud-top">
+        <div class="res-row" id="res-row"></div>
+        <div class="phase glass" id="phase"></div>
+        <div class="kings" id="kings"></div>
+      </div>
+      <div class="feed" id="feed"></div>
+      <div class="lanes glass" id="lanes"></div>
+      <div class="hud-bottom">
+        <div class="select-card glass" id="select-card"></div>
+        <div class="dock glass" id="build-dock"></div>
+        <div class="side-docks">
+          <div class="dock glass small" id="send-dock"></div>
+          <div class="dock glass small" id="eco-dock"></div>
+        </div>
+      </div>
+      <div class="king-panel glass" id="king-panel"></div>
+      <div class="scoreboard glass" id="scoreboard"></div>
+      <div class="tooltip glass" id="tooltip"></div>
+      <div class="fps" id="fps"></div>
+    </section>
+
+    <!-- Pause -->
+    <section id="screen-pause" class="screen overlay">
+      <div class="glass panel small center">
+        <h2>Pause</h2>
+        <button class="pill big primary" id="btn-resume">Fortsetzen</button>
+        <button class="pill big" data-go="settings">Einstellungen</button>
+        <button class="pill big" data-go="codex">Kodex</button>
+        <button class="pill big ghost" id="btn-surrender">Aufgeben &amp; Hauptmenü</button>
+      </div>
+    </section>
+
+    <!-- Spielende -->
+    <section id="screen-end" class="screen overlay">
+      <div class="glass panel center wide">
+        <div class="end-title" id="end-title"></div>
+        <div class="end-sub" id="end-sub"></div>
+        <div class="end-stats" id="end-stats"></div>
+        <div class="row center">
+          <button class="pill big primary" id="btn-rematch">Revanche</button>
+          <button class="pill big" id="btn-tomenu">Hauptmenü</button>
+        </div>
+      </div>
+    </section>
+
+    <div id="banner" class="banner"></div>
+    <div id="toast" class="toast"></div>
+    <div id="loading" class="loading"><div class="spinner"></div><div>Welt wird erschaffen …</div></div>
+  </div>
+  <script src="game.js"></script>
+</body>
+</html>

@@ -1,0 +1,43 @@
+{
+  "name": "aetherfront",
+  "productName": "Aetherfront",
+  "version": "0.1.0",
+  "description": "Aetherfront – Lane-Defense-Strategiespiel (Team-Tower-Wars) mit 3D-Grafik, Musik und Mehrspieler-Vorbereitung.",
+  "main": "electron/main.js",
+  "author": "Kevin Thirolf",
+  "license": "UNLICENSED",
+  "private": true,
+  "type": "commonjs",
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "start": "node scripts/build.mjs && electron .",
+    "web": "node scripts/build.mjs && node scripts/serve.mjs",
+    "test": "node --test test/*.test.mjs",
+    "smoke": "node scripts/build.mjs && node scripts/smoke.mjs",
+    "server": "node server/relay-server.js",
+    "dist": "node scripts/build.mjs && electron-builder --win --x64"
+  },
+  "dependencies": {
+    "ws": "^8.23.0"
+  },
+  "devDependencies": {
+    "electron": "^45.2.1",
+    "electron-builder": "^26.18.0",
+    "esbuild": "^0.28.2",
+    "three": "^0.187.0"
+  },
+  "build": {
+    "appId": "de.tiry.aetherfront",
+    "productName": "Aetherfront",
+    "directories": { "output": "dist", "buildResources": "build" },
+    "files": ["electron/**/*", "web/**/*", "package.json"],
+    "win": { "target": [{ "target": "nsis", "arch": ["x64"] }] },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "shortcutName": "Aetherfront",
+      "artifactName": "Aetherfront-Setup-${version}.${ext}"
+    }
+  }
+}

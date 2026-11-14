@@ -1,0 +1,53 @@
+name: Aetherfront – Windows-Spiel bauen
+
+# Baut den Windows-Installer von Aetherfront. Auf main zusätzlich als GitHub-Release veröffentlicht.
+on:
+  push:
+    paths: ['aetherfront/**', '.github/workflows/aetherfront-windows.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: aetherfront-windows-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: windows-latest
+    timeout-minutes: 40
+    defaults:
+      run:
+        working-directory: aetherfront
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: aetherfront/package-lock.json
+      - run: npm ci
+      - run: npm test
+      - name: Versionsnummer setzen (0.1.<Lauf>)
+        shell: bash
+        run: npm version "0.1.${{ github.run_number }}" --no-git-tag-version --allow-same-version
+      - name: Spiel bündeln & Installer bauen
+        run: |
+          node scripts/build.mjs
+          npx electron-builder --win --x64 --publish never
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Aetherfront-Windows-Installer
+          path: aetherfront/dist/*.exe
+      - name: Release veröffentlichen (nur main)
+        if: github.ref == 'refs/heads/main'
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          VER="0.1.${{ github.run_number }}"
+          TAG="aetherfront-v$VER"
+          git tag "$TAG" "$GITHUB_SHA" && git push origin "refs/tags/$TAG"
+          gh release create "$TAG" dist/*.exe --verify-tag --title "Aetherfront $VER" \
+            --notes "Windows-Installer von Aetherfront. Herunterladen, ausführen, spielen."

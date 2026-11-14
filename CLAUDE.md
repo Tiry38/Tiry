@@ -53,3 +53,11 @@ testet, bewertet und dauerhaft selbst weiterentwickelt. Besitzer: Tiry. UI-Sprac
 - **WoW-Forever-Add-ons** in `wow-addons/` – eigener Leitfaden `wow-addons/CLAUDE.md`, Stand in `wow-addons/UEBERGABE.md`.
   Für Arbeit dort gelten die Regeln aus `wow-addons/CLAUDE.md` (die App-Forge-Befehle oben betreffen nur `app-forge/`).
   Arbeitsstand im Branch **`claude/wow-addons`**, bis Tiry ihn nach `main` holt. Skills dafür: `.claude/skills/wow-*`.
+
+## Drittes Projekt im Repo: Aetherfront (Spiel)
+- **Aetherfront** in `aetherfront/` – 3D-Lane-Defense-Spiel (Electron + Three.js), Doku in `aetherfront/README.md`.
+- Befehle dort: `npm test` (Regeln, Determinismus, Online-Sync – vor jedem Commit grün), `npm run build`,
+  `npm run smoke` (Playwright-Screenshots, nach UI-/Grafikänderungen ansehen), `npm start`, `npm run server`.
+- Simulation (`src/sim/`) muss deterministisch bleiben: kein `Math.random`, keine Zeit/Rendering-Abhängigkeit,
+  alle Aktionen als Befehle über `applyCommand` – sonst bricht das spätere Online-Spiel (Lockstep).
+- Keine fremden Assets, Markennamen oder Figuren bestehender Spiele; Modelle, Musik und Effekte werden prozedural erzeugt.
