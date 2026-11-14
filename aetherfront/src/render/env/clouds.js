@@ -137,7 +137,7 @@ export function createCloudSea(U, noiseTex, steps = 20) {
         vec2 dxz = normalize(rd.xz + vec2(1e-5));
         float warm = dot(dxz, sdir) * 0.5 + 0.5;
         vec3 lit = mix(vec3(1.15, 1.12, 1.08), vec3(1.8, 1.32, 0.88), warm);
-        vec3 shade = mix(vec3(0.13, 0.20, 0.36), vec3(0.30, 0.28, 0.36), warm);
+        vec3 shade = mix(vec3(0.12, 0.20, 0.36), vec3(0.27, 0.29, 0.34), warm);
         float isl = isleShadow(p);
         float lt = ndl * shadow * (1.0 - isl * 0.85);
         vec3 col = mix(shade, lit, smoothstep(0.0, 1.0, lt));
@@ -150,7 +150,7 @@ export function createCloudSea(U, noiseTex, steps = 20) {
         col += vec3(1.4, 1.0, 0.65) * rim * pow(sunAmt, 4.0) * shadow * 0.8;
         // Sonnenglitzern auf Kuppen
         col += vec3(1.0, 0.75, 0.45) * pow(sunAmt, 24.0) * smoothstep(0.6, 1.0, h) * 0.45;
-        col *= 0.78;
+        col *= 0.88;
         col *= mix(1.0, 0.7, isl);
         // Dunst zum Horizont
         float dist = length(p - ro);

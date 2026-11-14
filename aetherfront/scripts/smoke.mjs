@@ -17,7 +17,7 @@ page.on('console', (m) => { if (m.type() === 'error' || m.type() === 'warning') 
 page.on('pageerror', (e) => errors.push(`pageerror: ${e.message}`));
 // Wartet, bis alle endlichen CSS-Animationen (Einblenden von Bildschirmen/Panels) fertig sind –
 // Software-WebGL liefert nur wenige Bilder pro Sekunde, sonst landen halb eingeblendete Panels im Bild.
-const settle = () => page.waitForFunction(() => document.getAnimations().every((a) => a.playState !== 'running' || a.effect.getComputedTiming().iterations === Infinity), null, { timeout: 30000, polling: 200 }).catch(() => {});
+const settle = () => page.waitForFunction(() => document.getAnimations().every((a) => !(a instanceof CSSAnimation) || a.playState !== 'running' || a.effect.getComputedTiming().iterations === Infinity || a.animationName === 'banner'), null, { timeout: 30000, polling: 200 }).catch(() => {});
 const shot = async (n) => { await settle(); await page.screenshot({ path: path.join(out, `${n}.png`) }); console.log('📸', n); };
 const wait = (ms) => page.waitForTimeout(ms);
 await page.goto('file://' + path.resolve('web/index.html'));

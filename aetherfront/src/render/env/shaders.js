@@ -78,8 +78,8 @@ vec3 applyHaze(vec3 col, vec3 worldPos) {
   float dist = length(v);
   vec3 d = v / max(dist, 1e-4);
   float f = 1.0 - exp(-uFogDensity * uFogDensity * dist * dist);
-  float hf = smoothstep(-12.0, -70.0, worldPos.y) * uHeightFog;
-  f = clamp(max(f, hf * 0.6), 0.0, 1.0);
+  float hf = smoothstep(-22.0, -88.0, worldPos.y) * uHeightFog;
+  f = clamp(max(f, hf * 0.55), 0.0, 1.0);
   vec3 hc = hazeColor(d);
   vec3 low = mix(hc, vec3(0.30, 0.40, 0.56), 0.5);
   return mix(col, mix(hc, low, hf), f);
@@ -109,14 +109,16 @@ export function patchMaterial(material, U, opts = {}) {
     wind = 0, emissiveAttr = false, metalAttr = false, clampFar = false, extraFragment = '', detail = 0, bump = 0,
     terrain = null, foliage = false, bark = false, grass = false, floor = false,
   } = opts;
-  material.customProgramCacheKey = () => `aeth2-${wind}-${emissiveAttr}-${metalAttr}-${clampFar}-${extraFragment.length}-${detail}-${bump}-${!!terrain}-${foliage}-${bark}-${grass}-${floor}`;
+  const stone = terrain && !terrain.ground;
+  const rs = (terrain && terrain.scale) || 14;
+  material.customProgramCacheKey = () => `aeth2-${wind}-${emissiveAttr}-${metalAttr}-${clampFar}-${extraFragment.length}-${detail}-${bump}-${!!terrain}-${stone}-${rs}-${foliage}-${bark}-${grass}-${floor}`;
   material.onBeforeCompile = (shader) => {
     Object.assign(shader.uniforms, {
       uTime: U.uTime, uSunDir: U.uSunDir, uLightDir: U.uLightDir, uSunColor: U.uSunColor, uFogDensity: U.uFogDensity, uHeightFog: U.uHeightFog,
     });
     if (terrain) {
       Object.assign(shader.uniforms, {
-        uGround: { value: terrain.ground }, uGroundN: { value: terrain.groundN }, uRock: { value: terrain.rock }, uRockN: { value: terrain.rockN },
+        uGround: { value: terrain.ground || terrain.rock }, uGroundN: { value: terrain.groundN || terrain.rockN }, uRock: { value: terrain.rock }, uRockN: { value: terrain.rockN },
       });
     }
     let vs = shader.vertexShader;
@@ -210,6 +212,8 @@ ${GLSL_BUMP}
     float m = fbm(vHazeWorld.xz * 0.045);
     float m2 = vnoise(vHazeWorld.xz * 0.21);
     diffuseColor.rgb *= 0.86 + 0.24 * m + 0.06 * m2;
+    // Lesbarkeit: Bodenkontrast leicht zurücknehmen (Einheiten heben sich ab)
+    diffuseColor.rgb = mix(vec3(0.27, 0.25, 0.22) * vColor.rgb, diffuseColor.rgb, 0.8);
   }`;
     }
     if (bark) {
@@ -232,17 +236,19 @@ ${GLSL_BUMP}
   {
     vec3 wp = vHazeWorld; vec3 wn = normalize(vTerrN);
     aethUp = smoothstep(0.5, 0.82, wn.y);
-    vec4 g = texture2D(uGround, wp.xz / 7.0);
+    ${stone ? 'aethUp = 0.0; aethCover = 0.0; vec3 top = vec3(0.0);' : `vec4 g = texture2D(uGround, wp.xz / 7.0);
     vec4 gm = texture2D(uGround, wp.xz / 29.0 + 0.37);
     vec4 gn = texture2D(uGroundN, wp.xz / 7.0);
     aethCover = clamp(g.a * 0.75 + gm.a * 0.55 - 0.18, 0.0, 1.0);
     vec3 grassCol = diffuseColor.rgb * (0.55 + 0.75 * gn.a);
-    vec3 top = mix(g.rgb * mix(vec3(1.0), diffuseColor.rgb * 3.5, 0.25), grassCol, aethCover);
+    vec3 top = mix(g.rgb * mix(vec3(1.0), diffuseColor.rgb * 3.5, 0.25), grassCol, aethCover);`}
     vec3 bw = pow(abs(wn), vec3(4.0)); bw /= dot(bw, vec3(1.0));
-    vec4 rx = texture2D(uRock, wp.zy / 14.0), ry = texture2D(uRock, wp.xz / 14.0), rz = texture2D(uRock, wp.xy / 14.0);
+    vec4 rx = texture2D(uRock, wp.zy / ${rs.toFixed(2)}), ry = texture2D(uRock, wp.xz / ${rs.toFixed(2)}), rz = texture2D(uRock, wp.xy / ${rs.toFixed(2)});
     aethRk = rx * bw.x + ry * bw.y + rz * bw.z;
-    vec3 rockCol = diffuseColor.rgb * aethRk.rgb * 1.5 * (1.0 - aethRk.a * 0.5);
+    vec3 rockCol = diffuseColor.rgb * aethRk.rgb * ${stone ? '1.9' : '1.5'} * (1.0 - aethRk.a * ${stone ? '0.35' : '0.5'});
+    vec3 aethBase = diffuseColor.rgb;
     diffuseColor.rgb = mix(rockCol, top, aethUp);
+    ${metalAttr ? 'diffuseColor.rgb = mix(diffuseColor.rgb, aethBase, vMetal);' : ''}
   }`;
     }
     if (colorAdd) fs = fs.replace('#include <color_fragment>', `#include <color_fragment>${colorAdd}`);
@@ -268,7 +274,7 @@ ${GLSL_BUMP}
     }
     if (terrain) {
       fs = fs.replace('#include <roughnessmap_fragment>', `#include <roughnessmap_fragment>
-  roughnessFactor = mix(0.88 + aethRk.a * 0.08, mix(0.97, 0.8, aethCover), aethUp);`);
+  roughnessFactor = ${stone ? 'clamp(roughnessFactor * (0.92 + aethRk.a * 0.15), 0.05, 1.0)' : 'mix(0.88 + aethRk.a * 0.08, mix(0.97, 0.8, aethCover), aethUp)'};`);
     }
     // ---- Normalen
     let normalAdd = '';
@@ -277,18 +283,18 @@ ${GLSL_BUMP}
   {
     vec3 wp = vHazeWorld; vec3 wn = normalize(vTerrN);
     vec3 bw = pow(abs(wn), vec3(4.0)); bw /= dot(bw, vec3(1.0));
-    vec3 tx = texture2D(uRockN, wp.zy / 14.0).xyz * 2.0 - 1.0;
-    vec3 ty = texture2D(uRockN, wp.xz / 14.0).xyz * 2.0 - 1.0;
-    vec3 tz = texture2D(uRockN, wp.xy / 14.0).xyz * 2.0 - 1.0;
-    vec3 tg = texture2D(uGroundN, wp.xz / 7.0).xyz * 2.0 - 1.0;
-    float k = 1.25;
+    vec3 tx = texture2D(uRockN, wp.zy / ${rs.toFixed(2)}).xyz * 2.0 - 1.0;
+    vec3 ty = texture2D(uRockN, wp.xz / ${rs.toFixed(2)}).xyz * 2.0 - 1.0;
+    vec3 tz = texture2D(uRockN, wp.xy / ${rs.toFixed(2)}).xyz * 2.0 - 1.0;
+    float k = ${stone ? '0.8' : '1.25'};
     tx.xy *= k; tz.xy *= k; ty.xy *= k;
-    ty = mix(ty, tg, aethUp);
+    ${stone ? '' : 'vec3 tg = texture2D(uGroundN, wp.xz / 7.0).xyz * 2.0 - 1.0; ty = mix(ty, tg, aethUp);'}
     tx = vec3(tx.xy + wn.zy, abs(tx.z) * wn.x);
     ty = vec3(ty.xy + wn.xz, abs(ty.z) * wn.y);
     tz = vec3(tz.xy + wn.xy, abs(tz.z) * wn.z);
     vec3 wN = normalize(tx.zyx * bw.x + ty.xzy * bw.y + tz.xyz * bw.z);
-    normal = normalize((viewMatrix * vec4(wN, 0.0)).xyz);
+    vec3 aethTN = normalize((viewMatrix * vec4(wN, 0.0)).xyz);
+    normal = ${metalAttr ? 'normalize(mix(aethTN, normal, vMetal))' : 'aethTN'};
   }`;
     }
     if (bump || bark) {

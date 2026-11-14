@@ -61,19 +61,22 @@ const CompositeShader = {
       // leichte chromatische Aberration nur zum Rand hin
       vec2 off = d * uAberration * r2 * 4.0;
       vec3 hc = vec3(texture2D(tHDR, vUv + off).r, texture2D(tHDR, vUv).g, texture2D(tHDR, vUv - off).b) + texture2D(tRays, vUv).rgb * uRayColor * uRays;
-      vec3 c = grade(hc);
-      // Kontrast-adaptive Schärfung (AMD-CAS-Prinzip)
+      // Kontrast-adaptive Schärfung (AMD-CAS-Prinzip) auf HDR, Gewichte aus wahrnehmungsnaher Luminanz
       if (uSharpen > 0.0) {
-        vec3 a = grade(hdrAt(vUv + vec2(0.0, -uTexel.y)));
-        vec3 b = grade(hdrAt(vUv + vec2(-uTexel.x, 0.0)));
-        vec3 e = grade(hdrAt(vUv + vec2(uTexel.x, 0.0)));
-        vec3 f = grade(hdrAt(vUv + vec2(0.0, uTexel.y)));
-        vec3 mn = min(min(min(a, b), min(e, f)), c);
-        vec3 mx = max(max(max(a, b), max(e, f)), c);
-        vec3 amp = sqrt(clamp(min(mn, 2.0 - mx) / max(mx, 1e-4), 0.0, 1.0));
-        vec3 w = amp * (-1.0 / mix(8.0, 4.6, uSharpen));
-        c = clamp((c + (a + b + e + f) * w) / (1.0 + 4.0 * w), 0.0, 1.0);
+        vec3 a = hdrAt(vUv + vec2(0.0, -uTexel.y));
+        vec3 b = hdrAt(vUv + vec2(-uTexel.x, 0.0));
+        vec3 e = hdrAt(vUv + vec2(uTexel.x, 0.0));
+        vec3 f = hdrAt(vUv + vec2(0.0, uTexel.y));
+        vec4 L4 = vec4(luma(a), luma(b), luma(e), luma(f));
+        L4 = L4 / (1.0 + L4);
+        float lc = luma(hc); lc = lc / (1.0 + lc);
+        float mn = min(min(min(L4.x, L4.y), min(L4.z, L4.w)), lc);
+        float mx = max(max(max(L4.x, L4.y), max(L4.z, L4.w)), lc);
+        float amp = sqrt(clamp(min(mn, 1.0 - mx) / max(mx, 1e-4), 0.0, 1.0));
+        float w = amp * (-1.0 / mix(8.0, 4.6, uSharpen));
+        hc = max((hc + (a + b + e + f) * w) / (1.0 + 4.0 * w), 0.0);
       }
+      vec3 c = grade(hc);
       c *= 1.0 - uVignette * smoothstep(0.1, 0.62, r2 * 1.6);
       c += (hash(gl_FragCoord.xy + fract(uTime) * 917.0) - 0.5) * uGrain;
       c = mix(c, uFlashColor, uFlash * smoothstep(0.05, 0.5, r2));
@@ -181,7 +184,7 @@ export class Engine {
     this.dof = { enabled: false, focus: -1 };
     this.stats = { sceneCalls: 0, calls: 0, triangles: 0 };
     // Look-Parameter (zur Laufzeit justierbar: window.__app.engine.look)
-    this.look = { exposure: 1.0, temperature: 0.12, tint: 0.0, saturation: 1.12, contrast: 1.1, bloom: 0.3, bloomRadius: 0.3, bloomThreshold: 2.4, rays: 0.5, aoIntensity: 0.9, aoRadius: 2.2 };
+    this.look = { exposure: 1.0, temperature: 0.12, tint: 0.0, saturation: 1.12, contrast: 1.1, bloom: 0.3, bloomRadius: 0.3, bloomThreshold: 2.4, rays: 0.5, aoIntensity: 1.0, aoRadius: 2.0 };
     this.quad = new FullScreenQuad(null);
     this.compositeMat = new THREE.ShaderMaterial({ ...CompositeShader, uniforms: THREE.UniformsUtils.clone(CompositeShader.uniforms), depthTest: false, depthWrite: false });
     this.dofMat = new THREE.ShaderMaterial({ ...DofShader, uniforms: THREE.UniformsUtils.clone(DofShader.uniforms), depthTest: false, depthWrite: false });
@@ -199,7 +202,7 @@ export class Engine {
   disposeTargets() {
     for (const t of [this.sceneRT, this.rtA, this.rtB, this.rayA, this.rayB]) t?.dispose();
     this.bloom?.dispose();
-    this.ao?.dispose();
+    if (this.ao) { this.ao.dispose(); this.ao.gtaoMaterial?.dispose(); this.ao.blendMaterial?.dispose(); }
   }
 
   buildComposer() {
@@ -217,6 +220,7 @@ export class Engine {
     this.rayA = rt(Math.ceil(w / 2), Math.ceil(h / 2));
     this.rayB = rt(Math.ceil(w / 2), Math.ceil(h / 2));
     this.ao = null;
+    this._aoRadius = null;
     if (q.ao && this.settings.get('ao')) {
       const s = q.aoScale;
       this.ao = new GTAOPass(this.scene, this.camera, Math.ceil(w * s), Math.ceil(h * s));
@@ -226,7 +230,6 @@ export class Engine {
     }
     this.bloom = new UnrealBloomPass(new THREE.Vector2(w / 2, h / 2), this.look.bloom, this.look.bloomRadius, this.look.bloomThreshold);
     this.bloom.enabled = this.settings.get('bloom') && q.bloom;
-    this.bloomRT = null;
     this.size = { w, h };
   }
 
@@ -298,7 +301,7 @@ export class Engine {
       this.ao.blendIntensity = L.aoIntensity;
       if (this._aoRadius !== L.aoRadius) {
         this._aoRadius = L.aoRadius;
-        this.ao.updateGtaoMaterial({ radius: L.aoRadius, distanceExponent: 1.6, thickness: 2.2, scale: 1.0, samples: 16 });
+        this.ao.updateGtaoMaterial({ radius: L.aoRadius, distanceExponent: 1.4, thickness: 2.5, scale: 1.7, samples: 12 });
       }
       const dst = next();
       this.ao.render(r, dst, src);
@@ -312,7 +315,7 @@ export class Engine {
       u.uTexel.value.set(1 / this.size.w, 1 / this.size.h);
       u.uNear.value = this.camera.near; u.uFar.value = this.camera.far; u.uFocus.value = this.dof.focus;
       const s = this.size.h / 900;
-      u.uAperture.value = 16 * s; u.uMaxBlur.value = 13 * s;
+      u.uAperture.value = 12 * s; u.uMaxBlur.value = 11 * s;
       const dst = next();
       this.pass(this.dofMat, dst);
       src = dst;

@@ -225,13 +225,13 @@ export function treeFoliageGeometry(kind = 0, seed = 3) {
     ];
     for (const [x, y, z, r] of clusters) {
       const c = new THREE.Vector3(x, y, z);
-      blob(c, r * 0.42);
-      const n = Math.round(r * r * 4.2);
+      if (y >= 4.4) blob(c, r * 0.3);
+      const n = Math.round(r * r * 7.5);
       for (let i = 0; i < n; i++) {
         const dir = new THREE.Vector3(R() * 2 - 1, R() * 1.6 - 0.5, R() * 2 - 1).normalize();
         const cc = c.clone().addScaledVector(dir, r * (0.45 + 0.5 * Math.sqrt(R())));
         const nn = dir.clone().add(new THREE.Vector3(R() - 0.5, R() - 0.5, R() - 0.5).multiplyScalar(1.4));
-        card(cc, nn, 1.45 + R() * 0.8, R() * Math.PI * 2, 0.0, 0.5);
+        card(cc, nn, 1.05 + R() * 0.6, R() * Math.PI * 2, 0.0, 0.5);
       }
     }
   } else {
@@ -446,8 +446,8 @@ export function crystalShardGeometry() {
 }
 
 // ---------- Steinbaukasten (Ruinen, Brücken, Ringe) ----------
-const STONE = [0.50, 0.47, 0.43];
-const STONE_DARK = [0.31, 0.29, 0.28];
+const STONE = [0.42, 0.39, 0.35];
+const STONE_DARK = [0.27, 0.25, 0.24];
 const GOLD = [1.0, 0.72, 0.36];
 
 export class StoneKit {

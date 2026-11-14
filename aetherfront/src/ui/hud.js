@@ -80,7 +80,7 @@ export class Hud {
       rr.appendChild(el);
     }
     // Könige
-    this.healMax = [KING.heals, KING.heals];
+    this.healMax = [sim.teams[0].king.heals, sim.teams[1].king.heals];
     for (const t of [0, 1]) {
       const el = $(`king-${t}`);
       const label = t === me.team ? 'Dein König' : sim.teams[t].king.citadel ? 'Rissfeste' : 'Feindkönig';

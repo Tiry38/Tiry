@@ -350,8 +350,6 @@ input[type=range]:focus-visible::-webkit-slider-thumb { box-shadow: 0 0 0 2px #0
     radial-gradient(ellipse 80% 50% at 50% 100%, rgba(111, 227, 255, 0.05), transparent 70%),
     linear-gradient(180deg, rgba(18, 23, 38, 0.93), rgba(7, 9, 17, 0.95));
 }
-/* feine Eck-Ornamente */
-.frame > .orn { display: none; }
 .panel {
   position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);
   width: min(760px, calc(100% - 64px)); max-height: calc(100% - 64px);
@@ -478,6 +476,8 @@ input[type=range]:focus-visible::-webkit-slider-thumb { box-shadow: 0 0 0 2px #0
     linear-gradient(180deg, rgba(10, 13, 24, 0.9), rgba(5, 7, 13, 0.95));
   flex: 1.15; min-height: 400px;
 }
+.camp-map .map-title { position: absolute; left: 26px; bottom: 20px; font: 600 30px/1 var(--f-epic); color: rgba(245, 238, 223, 0.16); letter-spacing: .04em; pointer-events: none; display: flex; flex-direction: column; gap: 6px; }
+.camp-map .map-title small { font: 600 12px var(--f-cond); letter-spacing: .4em; text-transform: uppercase; color: rgba(232, 196, 122, 0.55); }
 .camp-map svg.path { position: absolute; inset: 0; width: 100%; height: 100%; filter: drop-shadow(0 0 4px rgba(255, 220, 160, .45)); }
 .node-wrap { position: absolute; transform: translate(-50%, -50%); width: 96px; height: 106px; cursor: pointer; transition: transform .25s var(--ease-back), filter .25s; }
 .node-wrap:hover { transform: translate(-50%, -50%) scale(1.07); }
@@ -831,6 +831,9 @@ input[type=range]:focus-visible::-webkit-slider-thumb { box-shadow: 0 0 0 2px #0
    Banner, Toast, schwebende Zahlen
    ===================================================================== */
 .banner { position: absolute; left: 0; right: 0; top: 22%; text-align: center; pointer-events: none; opacity: 0; display: flex; flex-direction: column; align-items: center; }
+.banner { isolation: isolate; }
+.banner::before { content: ''; position: absolute; left: 0; right: 0; top: -60px; bottom: -50px; z-index: -1; background: radial-gradient(ellipse 42% 50% at 50% 50%, rgba(3, 4, 9, 0.62), rgba(3, 4, 9, 0.25) 60%, transparent 80%); }
+.banner.boss::before { background: radial-gradient(ellipse 46% 50% at 50% 50%, rgba(30, 2, 6, 0.7), rgba(30, 2, 6, 0.28) 60%, transparent 80%); }
 .banner.show { animation: banner 3.4s var(--ease) forwards; }
 .banner .t {
   font: 700 clamp(56px, 5.4vw, 96px)/1 var(--f-epic); letter-spacing: .1em; margin-right: -.1em;
@@ -868,12 +871,12 @@ input[type=range]:focus-visible::-webkit-slider-thumb { box-shadow: 0 0 0 2px #0
   -webkit-mask: radial-gradient(circle, #000 10%, transparent 62%); mask: radial-gradient(circle, #000 10%, transparent 62%); animation: rays 40s linear infinite; }
 @keyframes rays { to { transform: rotate(360deg); } }
 .end-title {
-  font: 700 clamp(84px, 7vw, 128px)/1 var(--f-epic); letter-spacing: .1em; margin-right: -.1em;
-  background: linear-gradient(180deg, #fffaf0 0%, #ffe6a8 30%, #e2b45f 52%, #9c6b2c 58%, #f3d08a 80%, #fff3d0 100%);
+  font: 700 clamp(84px, 7vw, 120px)/1.05 var(--f-epic); letter-spacing: .1em; margin-right: -.1em;
+  background: linear-gradient(180deg, #fffaf0 0%, #ffe6a8 30%, #e2b45f 52%, #9c6b2c 58%, #f3d08a 80%, #fff3d0 100%) 0 0 / 100% 1.05em repeat-y;
   -webkit-background-clip: text; background-clip: text; color: transparent;
   filter: drop-shadow(0 3px 0 rgba(60, 36, 8, .9)) drop-shadow(0 10px 50px rgba(255, 190, 90, .45));
 }
-.end-title.lose { background: linear-gradient(180deg, #f0e8ea 0%, #c9a3aa 35%, #8a2a38 56%, #5a1a26 62%, #c07a84 100%); -webkit-background-clip: text; background-clip: text; filter: drop-shadow(0 3px 0 rgba(30, 6, 10, .9)) drop-shadow(0 10px 50px rgba(255, 60, 80, .35)); }
+.end-title.lose { background: linear-gradient(180deg, #f6eef0 0%, #d9b3ba 35%, #a03848 56%, #6a2030 62%, #d08a94 100%) 0 0 / 100% 1.05em repeat-y; -webkit-background-clip: text; background-clip: text; filter: drop-shadow(0 3px 0 rgba(30, 6, 10, .9)) drop-shadow(0 10px 50px rgba(255, 60, 80, .35)); }
 #screen-end:has(.end-title.lose) .end-rays { background: radial-gradient(circle, rgba(255, 70, 90, 0.18), transparent 45%); }
 .end-sub { display: flex; flex-direction: column; align-items: center; gap: 6px; color: var(--ink-2); font: 600 15px var(--f-cond); letter-spacing: .3em; text-transform: uppercase; }
 .end-sub::before { content: ''; width: 420px; height: 1px; margin-bottom: 10px; background: linear-gradient(90deg, transparent, var(--gold), transparent); }

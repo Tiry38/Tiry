@@ -107,16 +107,16 @@ export function createPortalMaterial(U) {
         vec2 q = vec2(cos(sw), sin(sw)) * (1.2 + r * 2.5);
         float n = fbm(q + vec2(t * 0.2, -t * 0.35));
         float n2 = fbm(q * 2.3 - t * 0.5);
-        float arms = pow(0.5 + 0.5 * sin(sw * 3.0 + n * 6.0), 3.0);
-        vec3 violet = vec3(0.50, 0.08, 1.0);
-        vec3 teal = vec3(0.0, 0.85, 0.95);
-        vec3 col = mix(violet, teal, smoothstep(0.3, 0.8, n2));
-        float edge = smoothstep(0.55, 0.97, r) * (1.0 - smoothstep(0.97, 1.0, r));
-        float core = 1.0 - smoothstep(0.0, 0.55, r);
-        vec3 c = col * (arms * 0.6 * (0.25 + r) + edge * 0.9 * (0.6 + n));
-        c += vec3(0.02, 0.0, 0.05) * core;
-        c = mix(c, vec3(0.015, 0.0, 0.04), core * (0.75 - n * 0.3));
-        c += vec3(0.9, 0.5, 1.6) * pow(1.0 - r, 10.0) * 0.35 * (0.6 + 0.4 * sin(t * 3.0));
+        // Energie-Wirbel: weiche, verwirbelte Schleier statt harter Spiralstreifen, tiefer dunkler Kern
+        float arms = smoothstep(0.35, 1.0, 0.5 + 0.5 * sin(sw * 2.0 + n * 7.0)) * (0.55 + 0.45 * n2);
+        vec3 violet = vec3(0.42, 0.10, 0.95);
+        vec3 teal = vec3(0.05, 0.75, 0.95);
+        vec3 col = mix(violet, teal, smoothstep(0.35, 0.85, n2));
+        float edge = smoothstep(0.72, 0.97, r) * (1.0 - smoothstep(0.97, 1.0, r));
+        float core = 1.0 - smoothstep(0.0, 0.7, r);
+        vec3 c = col * (arms * 0.45 * smoothstep(0.1, 0.9, r) + edge * 1.4 * (0.55 + n));
+        c = mix(c, vec3(0.01, 0.004, 0.03) + col * 0.04 * n, core * 0.85);
+        c += vec3(1.2, 0.8, 2.0) * pow(max(1.0 - r, 0.0), 14.0) * 0.5 * (0.6 + 0.4 * sin(t * 3.0));
         float alpha = 1.0 - smoothstep(0.93, 1.0, r);
         gl_FragColor = vec4(c, alpha);
       }`,

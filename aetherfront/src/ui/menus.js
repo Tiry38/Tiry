@@ -179,7 +179,7 @@ export class Menus {
     const pos = ms.map((_, i) => [14 + (i * 72) / Math.max(1, ms.length - 1), i % 2 ? 66 : 34]);
     let d = `M ${pos[0][0]} ${pos[0][1]}`;
     for (let i = 1; i < pos.length; i++) { const [x0, y0] = pos[i - 1], [x1, y1] = pos[i]; d += ` C ${(x0 + x1) / 2} ${y0}, ${(x0 + x1) / 2} ${y1}, ${x1} ${y1}`; }
-    map.innerHTML = `<svg class="path" viewBox="0 0 100 100" preserveAspectRatio="none"><defs><linearGradient id="pg" x1="0" x2="1"><stop offset="0" stop-color="${A.grad[0]}"/><stop offset=".5" stop-color="${A.grad[1]}"/><stop offset="1" stop-color="${A.grad[2]}"/></linearGradient></defs><path d="${d}" stroke="url(#pg)" stroke-width="0.8" fill="none" stroke-dasharray="2 1.6" opacity="0.7"/></svg>`;
+    map.innerHTML = `<svg class="path" viewBox="0 0 100 100" preserveAspectRatio="none"><defs><linearGradient id="pg" x1="0" x2="1"><stop offset="0" stop-color="${A.grad[0]}"/><stop offset=".5" stop-color="${A.grad[1]}"/><stop offset="1" stop-color="${A.grad[2]}"/></linearGradient></defs><path d="${d}" stroke="url(#pg)" stroke-width="0.8" fill="none" stroke-dasharray="2 1.6" opacity="0.7"/></svg><div class="map-title"><small>${A.name.split(' – ')[0]}</small>${A.short}</div>`;
     ms.forEach((m, i) => {
       const n = document.createElement('div');
       const stars = P.stars[m.id] || 0;

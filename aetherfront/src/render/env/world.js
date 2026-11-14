@@ -287,7 +287,7 @@ export function buildWorld(U, { anisotropy = 8 } = {}) {
   floorGeo.setIndex(fidx);
   floorGeo.computeVertexNormals();
   const floorMat = patchMaterial(new THREE.MeshStandardMaterial({
-    map: tex.map, normalMap: tex.normalMap, normalScale: new THREE.Vector2(1.0, 1.0), aoMap: tex.ormMap, aoMapIntensity: 1.0,
+    map: tex.map, normalMap: tex.normalMap, normalScale: new THREE.Vector2(0.9, 0.9), aoMap: tex.ormMap, aoMapIntensity: 0.8,
     roughnessMap: tex.ormMap, roughness: 1.0, vertexColors: true, metalness: 0, side: THREE.DoubleSide,
   }), U, { floor: true });
   const floor = new THREE.Mesh(floorGeo, floorMat);
@@ -327,7 +327,7 @@ export function buildWorld(U, { anisotropy = 8 } = {}) {
       for (const sx of [-1, 1]) {
         const path = [];
         for (let z = LANE_Z0 + 1.2; z <= LANE_Z1 - 1.0; z += 2) path.push([lx + sx * (HALF - 0.55), z]);
-        addStrip(path, 0.5, TEAL.map((c) => c * 0.85), 0);
+        addStrip(path, 0.5, TEAL.map((c) => c * 0.5), 0);
       }
       // Eckwinkel der Bauzone (dezente Markierung)
       const gx = (GRID_COLS * CELL) / 2 + 0.15;
@@ -568,8 +568,9 @@ export function buildWorld(U, { anisotropy = 8 } = {}) {
     }
   }
 
+  const stoneTri = { rock: terrainMaps.rock, rockN: terrainMaps.rockN, scale: 4.5 };
   const stoneMat = patchMaterial(new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.84, metalness: 0 }), U, {
-    emissiveAttr: true, metalAttr: true, detail: 2, bump: 1.4,
+    emissiveAttr: true, metalAttr: true, terrain: stoneTri,
   });
 
   // ---------- Heldenwahrzeichen: Kristallturm + Ringe ----------
@@ -906,7 +907,7 @@ export function buildWorld(U, { anisotropy = 8 } = {}) {
       });
     }
     const geo = new RoundedBoxGeometry(0.72, 0.62, 1, 1, 0.14);
-    const mat = patchMaterial(new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.86 }), U, { detail: 2.5, bump: 1.4 });
+    const mat = patchMaterial(new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.86 }), U, { terrain: stoneTri });
     const im = new THREE.InstancedMesh(geo, mat, curbs.length);
     const m = new THREE.Matrix4(), q = new THREE.Quaternion();
     const RC = rng(12);

@@ -2432,6 +2432,8 @@ float bNoise(vec3 p) {
   return mix(mix(mix(bHash(i), bHash(i + vec3(1,0,0)), u.x), mix(bHash(i + vec3(0,1,0)), bHash(i + vec3(1,1,0)), u.x), u.y),
              mix(mix(bHash(i + vec3(0,0,1)), bHash(i + vec3(1,0,1)), u.x), mix(bHash(i + vec3(0,1,1)), bHash(i + vec3(1,1,1)), u.x), u.y), u.z);
 }`)
+      .replace('#include <color_fragment>', `#include <color_fragment>
+	diffuseColor.rgb *= mix( 0.62, 1.0, smoothstep( -0.05, 0.75, vObjP.y ) ); // Bodenverdeckung an den Füßen`)
       .replace('#include <roughnessmap_fragment>', `float microN = bNoise(vObjP * 22.0) * 0.6 + bNoise(vObjP * 61.0) * 0.4;
 float roughnessFactor = clamp(roughness * vPbr.x * (0.88 + 0.24 * microN), 0.06, 1.0);`)
       .replace('#include <metalnessmap_fragment>', 'float metalnessFactor = clamp(metalness * vPbr.y, 0.0, 1.0);')
@@ -2458,7 +2460,7 @@ float roughnessFactor = clamp(roughness * vPbr.x * (0.88 + 0.24 * microN), 0.06,
 		totalEmissiveRadiance += diffuseColor.rgb * 0.035;
 	}`);
   };
-  m.customProgramCacheKey = () => 'aetherfront-body-pbr-v2';
+  m.customProgramCacheKey = () => 'aetherfront-body-pbr-v3';
   return m;
 }
 
