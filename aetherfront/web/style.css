@@ -1082,7 +1082,7 @@ body.hero-view #vignette { opacity: .8; }
 #ctext { z-index: 3; }
 .np { position: absolute; left: 0; top: 0; display: flex; flex-direction: column; align-items: center; gap: 2px; will-change: transform; transform-origin: 50% 100%; }
 .np .nm { font: 600 12px var(--f-cond); letter-spacing: .06em; color: #ffd9d9; text-shadow: 0 0 2px #000, 0 1px 3px #000; white-space: nowrap; }
-.np .bar { display: block; position: relative; width: 74px; height: 8px; background: rgba(0, 0, 0, .75); box-shadow: 0 0 0 1px rgba(0, 0, 0, .9); clip-path: polygon(3px 0, 100% 0, 100% calc(100% - 3px), calc(100% - 3px) 100%, 0 100%, 0 3px); }
+.np .bar { display: block; flex: none; position: relative; overflow: hidden; width: 74px; height: 8px; background: rgba(0, 0, 0, .75); box-shadow: 0 0 0 1px rgba(0, 0, 0, .9); clip-path: polygon(3px 0, 100% 0, 100% calc(100% - 3px), calc(100% - 3px) 100%, 0 100%, 0 3px); }
 .np .bar i { position: absolute; inset: 0 auto 0 0; }
 .np .bar .f { background: linear-gradient(180deg, #ff8a8a, #d42a3a 60%, #8a1020); }
 .np .bar .g { background: #ffd27a; opacity: .8; }
