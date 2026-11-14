@@ -17,7 +17,7 @@ const CompositeShader = {
     uTexel: { value: new THREE.Vector2(1, 1) }, uTime: { value: 0 },
     uExposure: { value: 1 }, uWB: { value: new THREE.Vector3(1, 1, 1) }, uSat: { value: 1.12 }, uContrast: { value: 1.12 },
     uShadowTint: { value: new THREE.Vector3(-0.012, 0.0, 0.02) }, uHighTint: { value: new THREE.Vector3(0.018, 0.006, -0.016) },
-    uLift: { value: 0.006 }, uSharpen: { value: 0.55 }, uVignette: { value: 0.28 }, uGrain: { value: 0.02 },
+    uLift: { value: 0.006 }, uSharpen: { value: 0.55 }, uVignette: { value: 0.2 }, uGrain: { value: 0.02 },
     uAberration: { value: 0.0009 }, uFlash: { value: 0 }, uFlashColor: { value: new THREE.Color(1, 0.3, 0.2) },
   },
   vertexShader: VS,
@@ -132,7 +132,7 @@ const RayMaskShader = {
       float l = dot(c, vec3(0.2126, 0.7152, 0.0722));
       vec2 dv = (vUv - uSun) * vec2(uAspect, 1.0);
       float fall = exp(-dot(dv, dv) * 9.0);
-      gl_FragColor = vec4(c * smoothstep(0.35, 2.5, l) * sky * fall + vec3(0.9, 0.75, 0.55) * sky * fall * 0.12, 1.0);
+      gl_FragColor = vec4(c * smoothstep(1.2, 6.0, l) * sky * fall, 1.0);
     }`,
 };
 const RayBlurShader = {
@@ -181,7 +181,7 @@ export class Engine {
     this.dof = { enabled: false, focus: -1 };
     this.stats = { sceneCalls: 0, calls: 0, triangles: 0 };
     // Look-Parameter (zur Laufzeit justierbar: window.__app.engine.look)
-    this.look = { exposure: 1.0, temperature: 0.0, tint: 0.0, saturation: 1.12, contrast: 1.1, bloom: 0.32, bloomRadius: 0.35, bloomThreshold: 1.6, rays: 0.55, aoIntensity: 0.9, aoRadius: 2.2 };
+    this.look = { exposure: 1.0, temperature: 0.12, tint: 0.0, saturation: 1.12, contrast: 1.1, bloom: 0.3, bloomRadius: 0.3, bloomThreshold: 2.4, rays: 0.5, aoIntensity: 0.9, aoRadius: 2.2 };
     this.quad = new FullScreenQuad(null);
     this.compositeMat = new THREE.ShaderMaterial({ ...CompositeShader, uniforms: THREE.UniformsUtils.clone(CompositeShader.uniforms), depthTest: false, depthWrite: false });
     this.dofMat = new THREE.ShaderMaterial({ ...DofShader, uniforms: THREE.UniformsUtils.clone(DofShader.uniforms), depthTest: false, depthWrite: false });

@@ -273,9 +273,9 @@ export function createLeafAtlas() {
     g.save();
     g.translate(x, y); g.rotate(ang);
     const grd = g.createLinearGradient(0, 0, len, 0);
-    const c0 = Math.round(l * 150), c1 = Math.round(Math.min(255, l * 235));
-    grd.addColorStop(0, `rgb(${c0 * 0.92 | 0},${c0},${c0 * 0.7 | 0})`);
-    grd.addColorStop(1, `rgb(${c1 * 0.95 | 0},${c1},${c1 * 0.72 | 0})`);
+    const c0 = Math.round(l * 120), c1 = Math.round(Math.min(255, l * 200));
+    grd.addColorStop(0, `rgb(${c0 * 0.94 | 0},${c0},${c0 * 0.84 | 0})`);
+    grd.addColorStop(1, `rgb(${c1 * 0.96 | 0},${c1},${c1 * 0.86 | 0})`);
     g.fillStyle = grd;
     g.beginPath();
     g.moveTo(0, 0);

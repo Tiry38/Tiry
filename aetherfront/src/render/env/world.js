@@ -786,7 +786,7 @@ export function buildWorld(U, { anisotropy = 8 } = {}) {
   }), U, { wind: 2, foliage: true });
   canopyMat.shadowSide = THREE.DoubleSide;
   const treeColor = (c, R2) => {
-    if (c === 'blossom') return new THREE.Color().setHSL(0.94 + R2() * 0.03, 0.6, 0.58 + R2() * 0.1);
+    if (c === 'blossom') return new THREE.Color().setHSL(0.93 + R2() * 0.03, 0.75, 0.62 + R2() * 0.1);
     if (c === 'gold') return new THREE.Color().setHSL(0.08 + R2() * 0.03, 0.8, 0.36);
     return new THREE.Color().setHSL(0.21 + R2() * 0.07, 0.5 + R2() * 0.2, 0.17 + R2() * 0.07);
   };
@@ -957,7 +957,7 @@ export function buildWorld(U, { anisotropy = 8 } = {}) {
       grass.setMatrixAt(i, m);
       const n = fbm2(p.x * 0.045, p.z * 0.045, 3, 11) * 0.5 + 0.5;
       const dry = smoothstep(0.62, 0.8, fbm2(p.x * 0.18, p.z * 0.18, 2, 18) * 0.5 + 0.5);
-      col.setRGB(lerp(0.050, 0.110, n) + dry * 0.11, lerp(0.115, 0.200, n) + dry * 0.045, lerp(0.022, 0.032, n));
+      col.setRGB(lerp(0.062, 0.135, n) + dry * 0.12, lerp(0.140, 0.240, n) + dry * 0.05, lerp(0.026, 0.036, n));
       grass.setColorAt(i, col);
     }
     grass.receiveShadow = true;

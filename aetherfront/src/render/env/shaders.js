@@ -8,7 +8,7 @@ export function createSharedUniforms() {
     uTime: { value: 0 },
     uSunDir: { value: new THREE.Vector3(0.6, 0.18, -0.78).normalize() }, // sichtbare Sonne (tief)
     uLightDir: { value: new THREE.Vector3(0.5, 0.6, -0.6).normalize() }, // Lichtrichtung (höher)
-    uSunColor: { value: new THREE.Color(1.0, 0.86, 0.68) },
+    uSunColor: { value: new THREE.Color(1.0, 0.82, 0.60) },
     uFogDensity: { value: 0.0013 },
     uHeightFog: { value: 1.0 },
   };
@@ -27,17 +27,17 @@ vec3 skyColor(vec3 d) {
   float warm = az * az * az;
   float yy = max(y, 0.0);
   vec3 zenith = vec3(0.030, 0.095, 0.34);
-  vec3 mid    = vec3(0.090, 0.230, 0.58);
-  vec3 horA   = vec3(0.42, 0.56, 0.78);
-  vec3 horS   = vec3(1.10, 0.82, 0.56);
+  vec3 mid    = vec3(0.070, 0.200, 0.56);
+  vec3 horA   = vec3(0.30, 0.46, 0.74);
+  vec3 horS   = vec3(0.95, 0.72, 0.50);
   vec3 hor = mix(horA, horS, warm);
   vec3 c = mix(hor, mid, pow(smoothstep(0.0, 0.42, yy), 0.75));
   c = mix(c, zenith, smoothstep(0.35, 1.0, yy));
-  c += vec3(0.20, 0.19, 0.17) * exp(-abs(y) * 24.0) * (0.5 + 0.5 * warm);
-  vec3 below = mix(vec3(0.36, 0.46, 0.60), vec3(0.85, 0.68, 0.50), warm);
+  c += vec3(0.14, 0.15, 0.16) * exp(-abs(y) * 24.0) * (0.35 + 0.65 * warm);
+  vec3 below = mix(vec3(0.30, 0.43, 0.66), vec3(0.85, 0.68, 0.50), warm);
   c = mix(c, below, smoothstep(0.0, -0.08, y));
   float g = max(sd, 0.0);
-  c += vec3(1.0, 0.72, 0.42) * (pow(g, 7.0) * 0.40 + pow(g, 80.0) * 1.1);
+  c += vec3(1.0, 0.72, 0.42) * (pow(g, 8.0) * 0.22 + pow(g, 90.0) * 0.8);
   return c;
 }
 // Dunstfarbe für Luftperspektive: bläulich, zur Sonne hin warm (kein rosa Schleier)
@@ -45,10 +45,10 @@ vec3 hazeColor(vec3 d) {
   vec2 dxz = normalize(d.xz + vec2(1e-5));
   float az = dot(dxz, normalize(uSunDir.xz)) * 0.5 + 0.5;
   float warm = az * az * az;
-  vec3 c = mix(vec3(0.40, 0.53, 0.74), vec3(0.98, 0.78, 0.56), warm);
+  vec3 c = mix(vec3(0.31, 0.46, 0.74), vec3(0.98, 0.78, 0.56), warm);
   float g = max(dot(normalize(vec3(d.x, max(d.y, 0.0) * 0.5, d.z)), uSunDir), 0.0);
-  c += vec3(0.9, 0.62, 0.32) * pow(g, 9.0) * 0.35;
-  return c * 0.82;
+  c += vec3(0.9, 0.62, 0.32) * pow(g, 10.0) * 0.2;
+  return c * 0.78;
 }
 `;
 
@@ -311,7 +311,7 @@ ${GLSL_BUMP}
     vec3 vd = normalize(vHazeWorld - cameraPosition);
     float back = pow(max(dot(vd, uLightDir), 0.0), 2.5);
     float wrap = max(dot(normalize(vNormal), normalize((viewMatrix * vec4(uLightDir, 0.0)).xyz)) * -0.5 + 0.5, 0.0);
-    gl_FragColor.rgb += diffuseColor.rgb * uSunColor * (back * ${foliage ? '0.9' : '0.6'} + wrap * ${foliage ? '0.06' : '0.03'});
+    gl_FragColor.rgb += diffuseColor.rgb * uSunColor * (back * ${foliage ? '0.45' : '0.4'} + wrap * ${foliage ? '0.05' : '0.03'});
   }`;
     }
     fs = fs.replace('#include <fog_fragment>', `${trans}${extraFragment}

@@ -43,14 +43,14 @@ export function createEnvironment({ scene, renderer, quality = 'high' } = {}) {
   envScene.add(envSky);
   const envRT = pmrem.fromScene(envScene, 0, 0.1, 1000);
   scene.environment = envRT.texture;
-  if ('environmentIntensity' in scene) scene.environmentIntensity = 0.62;
+  if ('environmentIntensity' in scene) scene.environmentIntensity = 0.5;
   envSky.geometry.dispose(); envSky.material.dispose();
   pmrem.dispose();
   scene.userData.aethSunDir = U.uSunDir.value;
 
   // ---------- Licht ----------
   // Warmes Schlüssellicht (späte Nachmittagssonne), kühles Himmelslicht als Füllung.
-  const sun = new THREE.DirectionalLight(U.uSunColor.value.clone(), 3.4);
+  const sun = new THREE.DirectionalLight(U.uSunColor.value.clone(), 3.7);
   sun.name = 'aeth-sun';
   const target = new THREE.Vector3(0, 0, 12);
   sun.position.copy(target).addScaledVector(U.uLightDir.value, 260);
@@ -62,11 +62,11 @@ export function createEnvironment({ scene, renderer, quality = 'high' } = {}) {
   fitShadowCamera(sun, SHADOW_BOX);
   scene.add(sun, sun.target);
 
-  const hemi = new THREE.HemisphereLight(new THREE.Color(0.52, 0.66, 1.0), new THREE.Color(0.30, 0.25, 0.17), 0.55);
+  const hemi = new THREE.HemisphereLight(new THREE.Color(0.48, 0.64, 1.0), new THREE.Color(0.30, 0.25, 0.17), 0.36);
   hemi.name = 'aeth-hemi';
   scene.add(hemi);
   // kühles Gegenlicht (Himmel gegenüber der Sonne) für die Schattenseiten
-  const rim = new THREE.DirectionalLight(new THREE.Color(0.50, 0.62, 1.0), 0.35);
+  const rim = new THREE.DirectionalLight(new THREE.Color(0.50, 0.62, 1.0), 0.28);
   rim.position.set(-az.x * 100, 70, -az.y * 100);
   rim.name = 'aeth-rim';
   scene.add(rim);
