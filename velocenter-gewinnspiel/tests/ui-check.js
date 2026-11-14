@@ -45,6 +45,8 @@ const VIEWS = ['uebersicht', 'teilnehmer', 'person', 'tage', 'auslosung', 'joker
       }
       await page.waitForTimeout(250);
       if (v === 'tage') await page.click('.drow summary');
+      await page.evaluate(() => { document.querySelector('#toast').className = 'toast'; });
+      await page.waitForTimeout(450);
       const sw = await page.evaluate(() => ({ sw: document.documentElement.scrollWidth, w: window.innerWidth }));
       if (sw.sw > sw.w) problems.push(vp.name + ' ' + v + ': horizontales Scrollen (' + sw.sw + ' > ' + sw.w + ')');
       const small = await page.evaluate(() => Array.from(document.querySelectorAll('.btn, .pill, .nav-i, select, input:not([type=file])'))

@@ -94,7 +94,8 @@
     $('#dock').innerHTML = VIEWS.map((v) => item(v, true)).join('');
     const t = res.today;
     const pct = t.phase === 'vor' ? 0 : t.phase === 'vorbei' ? 100 : Math.round(((t.current - 1) / 30) * 100);
-    $('#sideFoot').innerHTML = ring(pct, 64, 7) + '<div><strong>' + dayLabel() + '</strong><small>' + h(phaseText()) + '</small></div>';
+    const s = res.settings;
+    $('#sideFoot').innerHTML = ring(pct, 64, 7) + '<div><strong>' + dayLabel() + '</strong><small>' + E.fmtDateDe(s.startDate) + ' – ' + E.fmtDateDe(E.dayDate(s, 30)) + (s.asOf ? '<br>Teststichtag ' + E.fmtDateDe(s.asOf) : '') + '</small></div>';
     $('#fetchInfo').textContent = 'Stand: ' + fmtStamp(state.lastFetch);
   }
   function dayLabel() {
@@ -147,7 +148,7 @@
     const orbs = [
       { k: 'Teilnehmer', v: c.participants, cls: 'o1' },
       { k: t.phase === 'vorbei' ? 'Am Tag 30 aktiv' : 'Heute aktiv', v: c.activeToday, cls: 'o2' },
-      { k: 'Im Rennen', v: c.inRace, cls: 'o3' },
+      { k: 'Noch dabei', v: c.inRace, cls: 'o3' },
       { k: 'Raus', v: c.out, cls: 'o4' },
     ].map((o) => '<div class="orb ' + o.cls + '"><strong>' + n(o.v) + '</strong><span>' + h(o.k) + '</span></div>').join('');
     const top = res.persons.slice().sort((a, b) => b.streak - a.streak || b.fulfilled - a.fulfilled).slice(0, 5)
@@ -168,7 +169,8 @@
   }
 
   function chart() {
-    const W = 900, H = 240, pad = 30, bw = (W - pad * 2) / 30;
+    const narrow = window.innerWidth < 640;
+    const W = narrow ? 420 : 900, H = narrow ? 220 : 240, pad = narrow ? 12 : 30, bw = (W - pad * 2) / 30;
     const maxC = Math.max(5, ...res.days.map((d) => d.onTime));
     const maxL = Math.max(5, ...res.days.map((d) => d.likes));
     let bars = '', line = '', pts = '';
@@ -203,7 +205,7 @@
       '<span class="pc-name">' + avatar(p) + '<span><strong>' + h(p.name) + '</strong>' + chip(p.status) + (p.weeklyWin ? '<span class="chip st-win">' + ic('star') + p.weeklyWin + '</span>' : '') + '</span></span>' +
       '<span class="pc-strip">' + dots(p) + weekPills(p) + '</span>' +
       '<span class="pc-stats">' +
-      '<span class="st"><strong>' + p.fulfilled + '</strong>/30<small>Tage</small></span>' +
+      '<span class="st"><strong>' + p.fulfilled + '<span class="of">/30</span></strong><small>Tage</small></span>' +
       '<span class="st"><strong>' + p.streak + '</strong><small>in Folge</small></span>' +
       '<span class="st"><strong>' + p.longest + '</strong><small>längste</small></span>' +
       '<span class="st"><strong>' + p.likes + '</strong><small>Likes</small></span>' +
@@ -280,7 +282,7 @@
       '<p class="muted small mono">Gezogen ' + fmtStamp(d.time) + ' · Lostopf ' + d.poolSize + ' · SHA-256 ' + h(d.poolHash.slice(0, 16)) + '…</p></div>' : '';
     const btn = closed ? '<button type="button" class="btn ' + (d ? 'btn-soft' : 'btn-grad') + '" data-act="draw" data-key="' + key + '"' + (poolList.length ? '' : ' disabled') + '>' + ic('draw') + (d ? 'Neu ziehen' : 'Jetzt auslosen') + '</button>' : '<span class="chip">läuft noch</span>';
     return '<section class="glass dcard' + (key === 'MAIN' ? ' main-prize' : '') + '"><div class="ph"><div><p class="eyebrow">' + h(range) + '</p><h2>' + h(label) + '</h2></div>' + btn + '</div>' +
-      '<p class="pool"><strong>' + poolList.length + '</strong> im Lostopf ' + h(extra) + '</p>' + res_ + '</section>';
+      (d ? '<p class="pool"><strong>' + d.poolSize + '</strong> im Lostopf bei der Ziehung ' + h(extra) + '</p>' : '<p class="pool"><strong>' + poolList.length + '</strong> im Lostopf ' + h(extra) + '</p>') + res_ + '</section>';
   }
   function viewDraw() {
     const s = res.settings;
@@ -298,7 +300,7 @@
     const others = res.persons.filter((p) => p.status !== 'joker' && !p.joker);
     const opt = (p) => '<option value="' + h(p.id) + '">' + h(p.name) + (p.gaps.length ? ' – verpasst Tag ' + p.gaps.join(', ') : '') + '</option>';
     const list = used.map((j) => '<li class="glass urow"><span><strong class="mono">' + h(j.code) + '</strong><br><a href="#person/' + encodeURIComponent(j.userId) + '">' + h(j.name) + '</a> · Tag ' + j.day + '</span><button type="button" class="btn btn-ghost" data-act="joker-free" data-code="' + h(j.code) + '">Freigeben</button></li>').join('');
-    return '<section class="hero glass"><div class="orbs">' +
+    return '<section class="hero glass"><div class="orbs joker-orbs">' +
       '<div class="orb o1"><strong>' + all.length + '</strong><span>Codes</span></div><div class="orb o3"><strong>' + (all.length - used.length) + '</strong><span>frei</span></div><div class="orb o2"><strong>' + used.length + '</strong><span>benutzt</span></div><div class="orb o4"><strong>' + needing.length + '</strong><span>brauchen Joker</span></div></div>' +
       '<div class="actions"><button type="button" class="btn btn-grad" data-act="joker-gen">' + ic('plus') + (all.length ? '100 weitere Codes' : '100 Codes erzeugen') + '</button><button type="button" class="btn btn-soft" data-act="joker-print"' + (all.length ? '' : ' disabled') + '>' + ic('print') + 'Code-Karten drucken</button></div></section>' +
       '<section class="glass panel"><h2>Joker einlösen</h2><p class="muted">Die Person schickt den Code per Facebook-Nachricht. Code und Person wählen, Tag prüfen, buchen.</p>' +
