@@ -276,12 +276,15 @@ LINES.glut = [
 export const BUILD_KEYS = ['Q', 'W', 'E', 'R', 'A', 'S', 'D', 'F'];
 const HOTKEYS = BUILD_KEYS;
 
+// Balancing-Regler je Volk (per Bot-Simulation ermittelt: scripts/balance.mjs)
+export const FACTION_EFF = { orden: 1.03, wild: 1.08, schmiede: 1.13, abgrund: 0.97, schwarm: 0.97, glut: 0.98 };
+
 function buildUnits() {
   const units = {};
   const make = (fid, line, li, t, idSuffix, spec, value) => {
     const role = spec.role || line.role;
     const r = ROLES[role];
-    const eff = 1 + 0.12 * t; // Aufwertungen sind effizienter (Platz ist begrenzt)
+    const eff = (1 + 0.12 * t) * (FACTION_EFF[fid] || 1); // Aufwertungen sind effizienter (Platz ist begrenzt)
     const id = `${fid}_${line.key}_${idSuffix}`;
     units[id] = {
       id, faction: fid, line: line.key, lineIndex: li, hotkey: HOTKEYS[li], branch: spec.branch || 'a',

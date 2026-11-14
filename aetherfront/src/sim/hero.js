@@ -560,6 +560,7 @@ export function heroBotThink(sim, h) {
     const ab = abilityAt(def.abilities[slot], h.level, slot);
     if (h.cds[slot] > 0 || h.res < ab.cost) continue;
     if (ab.type === 'heal_self' && h.hp > h.maxHp * 0.5) continue;
+    if (ab.minRange && d < ab.minRange) continue;
     if (['heal_area', 'revive'].includes(ab.type)) {
       let hurt = 0; for (const a of alliesNear(sim, h, h.x, h.z, ab.radius)) if (a.alive && a.hp < a.maxHp * 0.6) hurt++;
       if (hurt < 2) continue;

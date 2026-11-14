@@ -45,7 +45,7 @@ export const HEROES = {
     id: 'lyra', name: 'Lyra Morgenfeder', title: 'Jägerin der Wipfel', role: 'ranged', roleLabel: 'Fernkampf', cls: 'Jägerin', difficulty: 2,
     synergy: ['wild', 'schwarm'], model: 'hero_lyra', resource: 'fokus', resName: 'Fokus', resMax: 100, resRegen: 10,
     palette: { primary: '#5d7f3a', secondary: '#8a5a32', metal: '#c0a060', glow: '#b6ff7a' },
-    hp: 860, armor: 2, armorType: 'mittel', dmg: 30, atk: 'stich', range: 16, cd: 1.6,
+    hp: 960, armor: 2, armorType: 'mittel', dmg: 36, atk: 'stich', range: 16, cd: 1.5,
     lore: 'Sie wuchs in den Kronen der Himmelswälder auf. Ihr Pfeil trifft, was das Auge kaum sieht.',
     abilities: [
       A({ id: 'l1', name: 'Zielschuss', type: 'bolt', range: 20, cd: 0, cost: 25, cast: 1.4, dmg: 120, mark: 0.15, icon: 'aim', anim: 'draw', desc: 'Konzentrierter Schuss mit {dmg} Schaden – das Ziel erleidet danach mehr Schaden von deinen Vasallen.' }),
@@ -59,7 +59,7 @@ export const HEROES = {
     id: 'selene', name: 'Selene Äthersang', title: 'Stimme des Kristalls', role: 'caster', roleLabel: 'Fernkampf', cls: 'Magierin', difficulty: 2,
     synergy: ['schmiede', 'glut'], model: 'hero_selene', resource: 'mana', resName: 'Mana', resMax: 200, resRegen: 9,
     palette: { primary: '#e8e4f6', secondary: '#3a46b8', metal: '#b7c3d6', glow: '#5ae2ff' },
-    hp: 780, armor: 1, armorType: 'leicht', dmg: 28, atk: 'arkan', range: 15, cd: 1.7,
+    hp: 880, armor: 1, armorType: 'leicht', dmg: 32, atk: 'arkan', range: 15, cd: 1.6,
     lore: 'Die Ätherschmiede formten ihr Herz aus Kristall. Sie hört den Riss singen – und singt zurück.',
     abilities: [
       A({ id: 's1', name: 'Ätherlanze', type: 'bolt', range: 22, cd: 0, cost: 30, cast: 1.8, dmg: 140, icon: 'lance', anim: 'cast', desc: 'Schleudert eine Lanze aus Äther: {dmg} Schaden (Zauberzeit).' }),
