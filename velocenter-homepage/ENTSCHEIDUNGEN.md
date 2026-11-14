@@ -163,3 +163,7 @@
 
 ## 14.11.2026 – Ticker: Bosch-Pille + i:SY orange (Tiry)
 - „Bosch“ im Laufband wie der Chip im Hero: weiße Pille mit kleinem Bosch-Logo (zub-bosch.svg) und roter Schrift #ED0007 (Klasse `tkb`); „i:SY“ in „i:SY Experte“ kräftig orange (`tko`).
+
+## 14.11.2026 – Ticker: Bosch auf einer Linie, 300+ hervorgehoben (Tiry)
+- Bosch-Pille saß tiefer: Grundlinie kam vom leeren Logo-Element. Jetzt Pille inline-block auf Text-Grundlinie, Logo als ::before (auf den Ring zugeschnitten).
+- „300+“ goldgelb #FFC83D, 1,14-fach, Leuchten (Klasse `tkn`).

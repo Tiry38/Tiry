@@ -175,8 +175,9 @@ h1,h2,h3{font-family:var(--display);margin:0;text-wrap:balance;letter-spacing:-.
 .band span{flex:none;padding:0 .5em;font:900 clamp(30px,4.4vw,64px)/1 var(--display);text-transform:uppercase;letter-spacing:-.01em;white-space:nowrap;transform:skewX(-9deg)}
 .band.a span{color:#fff}
 .band.b span{color:transparent;-webkit-text-stroke:1.4px rgba(255,255,255,.35)}
-.band span b.tkb{display:inline-flex;align-items:center;gap:.22em;font:inherit;color:#ED0007;-webkit-text-stroke:0;text-shadow:none;background:#fff;border-radius:999px;padding:.1em .42em .1em .18em;margin-right:.08em;line-height:1;box-shadow:0 6px 16px -8px rgba(0,0,0,.5);vertical-align:.04em}
-.band span b.tkb i{width:.82em;height:.82em;flex:none;background:url(img/zub-bosch.svg) 0 50%/auto .82em no-repeat;transform:skewX(9deg)}
+.band span b.tkb{display:inline-block;font:inherit;color:#ED0007;-webkit-text-stroke:0;text-shadow:none;position:relative;background:#fff;border-radius:999px;padding:.1em .42em .1em 1.12em;margin-right:.06em;line-height:1;box-shadow:0 6px 16px -8px rgba(0,0,0,.5);vertical-align:baseline}
+.band span b.tkb::before{content:"";position:absolute;left:.2em;top:50%;width:.8em;height:.8em;margin-top:-.4em;background:url(img/zub-bosch.svg) 0 50%/auto .8em no-repeat}
+.band span b.tkn{font:inherit;font-size:1.14em;color:#FFC83D;-webkit-text-stroke:0;text-shadow:0 0 18px rgba(255,200,61,.6);letter-spacing:-.02em}
 .band span b.tko{font:inherit;text-transform:none;color:#FF7A00;-webkit-text-stroke:0;text-shadow:0 0 16px rgba(255,122,0,.55)}
 .band span b.tks{font:inherit;color:#FFC83D;-webkit-text-stroke:0;text-shadow:0 0 18px rgba(255,200,61,.55)}
 .band span em{font-style:normal;padding:0 .35em;opacity:.75}
@@ -3900,7 +3901,7 @@ const ACC=[['Bosch','bosch.svg'],['Shimano','shimano.webp'],['Schwalbe','schwalb
 $('#acc').innerHTML=ACC.map(([n,f])=>'<span><img src="img/zub-'+f+'" alt="'+esc(n)+'" loading="lazy"></span>').join('');
 
 /* ---------- Laufbänder ---------- */
-const tkIt=u=>u.split('|').map(x=>'<span>'+esc(x).replace('★','<b class="tks">★</b>').replace("i:SY&#39;s",'<b class="tko">i:SY&#39;s</b>').replace("i:SY's",'<b class="tko">i:SY\'s</b>').replace('i:SY Experte','<b class="tko">i:SY</b> Experte').replace('Bosch ','<b class="tkb"><i aria-hidden="true"></i>Bosch</b> ')+'<em>✦</em></span>').join('');
+const tkIt=u=>u.split('|').map(x=>'<span>'+esc(x).replace('★','<b class="tks">★</b>').replace("i:SY&#39;s",'<b class="tko">i:SY&#39;s</b>').replace("i:SY's",'<b class="tko">i:SY\'s</b>').replace('i:SY Experte','<b class="tko">i:SY</b> Experte').replace('Bosch ','<b class="tkb">Bosch</b> ').replace('300+','<b class="tkn">300+</b>')+'<em>✦</em></span>').join('');
 $$('.band .tk').forEach(t=>{const items=tkIt(t.dataset.t);t.innerHTML=items+items+items+items});
 /* Google-Bewertung: google.json (alle 3 Tage vom GitHub-Lauf geschrieben); fehlt sie, bleiben die eingetragenen Werte */
 fetch('google.json',{cache:'no-store'}).then(r=>r.ok?r.json():null).then(g=>{if(!g)return;const v=Number(g.rating),n=Number(g.count);if(!(v>=1&&v<=5)||!(Number.isInteger(n)&&n>0))return;
