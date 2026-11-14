@@ -136,3 +136,6 @@
 
 ## 14.11.2026 – Marken-Showroom schneller (Tiry: „dauert ewig“)
 - Automatischer Wechsel alle 4 s statt 7 s; Pause bei Maus über dem Showroom entfernt (am PC lag die Maus fast immer drauf → kein Wechsel). Nach Klick/Wischen weiter 20 s Ruhe.
+
+## 14.11.2026 – Marken-Showroom mit Markenrunden (Tiry: ja)
+- Automatischer Wechsel nimmt je Runde jede Bestandsmarke einmal (bagNext, eigener Beutel MB), nie dieselbe Marke zweimal hintereinander; feste Einschübe (Van Raam, VdV, Victoria, Stevens) bleiben.

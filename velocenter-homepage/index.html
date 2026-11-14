@@ -3928,11 +3928,12 @@ function showroom(root,prefix){
   const tag=x.cur?'Beispielmodell':(x.st==='bestellt'?'Bald bei uns':'Bei uns im Laden');
   info.innerHTML='<span class="blogo"><img src="'+b.logo+'" alt="'+esc(b.n)+'"></span><div><p class="mdl">'+tag+' · '+esc(x.m)+(x.f?' · <span class="srf">'+esc(x.f)+'</span>':'')+'</p><h3>'+esc(b.n)+'</h3><p>'+esc(b.t)+'</p></div><div class="row">'+b.a.map(([t,h])=>'<a class="ghost" href="'+h+'"'+(h.startsWith('http')?' target="_blank" rel="noopener"':'')+'>'+esc(t)+'<svg><use href="#i-arrow"/></svg></a>').join('')+'<a class="ghost" href="#lager" data-brand="'+esc(b.n)+'">Auf Lager</a><a class="cta" href="#termin" data-pre="Probefahrt '+esc(b.n)+'"><svg><use href="#i-bike"/></svg>Probefahrt</a></div>';
   $$('button',th).forEach((y,j)=>y.classList.toggle('on',j===i));}
+ const MB={};/* Markenrunden: jede Marke einmal je Runde, nie zweimal hintereinander */
  const FX=[[5,BR.findIndex(b=>b.k==='vanraam')],[7,BR.findIndex(b=>b.k==='vdv')],[9,BR.findIndex(b=>b.k==='victoria')],[10,BR.findIndex(b=>b.k==='stevens')]],FXI=FX.map(f=>f[1]);let q=[];
  /* how: 'tab' = Marke gewählt (bleibt bei der Marke), sonst Pfeil/Wischen/automatisch */
  function to(n,how){if(busy)return;cnt++;n=(n+BR.length)%BR.length;
   FX.forEach(([e,j])=>{if(cnt%e===0&&!q.includes(j))q.push(j)});
-  let x;if(how!=='tab'){if(q.length){n=q.shift();x=srPick(BR[n].k)}else{x=srPick('*');n=BR.findIndex(b=>b.k===x.k)}}
+  let x;if(how!=='tab'){if(q.length){n=q.shift();x=srPick(BR[n].k)}else{const ks=SR.pool?Object.keys(SR.pool).filter(j=>!SRFIX.includes(j)&&SR.pool[j].length&&BR.some(b=>b.k===j)):[];x=ks.length?srPick(bagNext(MB,ks)):srPick('*');n=BR.findIndex(b=>b.k===x.k)}MB.l=BR[n].k}
   else{q=q.filter(j=>j!==n);x=srPick(BR[n].k)}if(n===i&&cur&&x.img===cur.img)return;i=n;cur=x;const b=BR[i];busy=1;
   bk.classList.add('out-l');wm.classList.add('swap');rf.style.opacity=0;
   setTimeout(()=>{const pre=new Image();pre.src=x.img;const go=()=>{bk.classList.add('in-r');bk.classList.remove('out-l');bk.src=x.img;bk.alt=x.m+(x.f?' in '+x.f:'');rf.src=x.img;wm.src=b.logo;thSet(i,x.img);paint();void bk.offsetWidth;bk.classList.remove('in-r');wm.classList.remove('swap');rf.style.opacity='';busy=0};pre.decode?pre.decode().then(go,go):go()},420);}
@@ -3947,7 +3948,7 @@ function showroom(root,prefix){
  setInterval(()=>{if(vis&&!document.hidden&&Date.now()>hold&&SR.pool)to(i+1,'next')},4000);
  /* Start: zufälliges Bestandsrad der ersten Marke, sobald der Bestand geladen ist */
  SR.subs.push(()=>{BR.forEach((b,j)=>{const t=SR.th&&SR.th[b.k];if(t)thSet(j,t)});
-  const x=srPick('*');const n=BR.findIndex(b=>b.k===x.k);if(n<0)return;i=n;cur=x;thSet(i,x.img);const pre=new Image();pre.src=x.img;const go=()=>{bk.src=x.img;rf.src=x.img;bk.alt=x.m+(x.f?' in '+x.f:'');wm.src=BR[i].logo;paint();s.classList.add('srok')};pre.decode?pre.decode().then(go,go):go()});
+  const x=srPick('*');const n=BR.findIndex(b=>b.k===x.k);if(n<0)return;i=n;cur=x;MB.l=x.k;thSet(i,x.img);const pre=new Image();pre.src=x.img;const go=()=>{bk.src=x.img;rf.src=x.img;bk.alt=x.m+(x.f?' in '+x.f:'');wm.src=BR[i].logo;paint();s.classList.add('srok')};pre.decode?pre.decode().then(go,go):go()});
  paint();return{to};
 }
 /* Showroom nur noch auf der Markenseite (Start-Showroom entfernt, Tiry 14.11.2026) */
