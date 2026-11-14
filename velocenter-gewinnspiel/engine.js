@@ -594,9 +594,8 @@
     // anonymer Kommentar + eigene Seite (werden korrekt ignoriert)
     st.comments.push({ id: 'c' + (cid++), postId: st.posts[2].id, message: 'Super Aktion!', created_time: berlinToUtcIso(dayDate(s, 3), '10:00') });
     st.comments.push({ id: 'c' + (cid++), postId: st.posts[2].id, userId: s.pageId, name: 'Velocenter Hessert', message: 'Danke euch!', created_time: berlinToUtcIso(dayDate(s, 3), '10:05') });
-    let seed = 7;
-    const rnd = () => { seed = (Math.imul(seed, 1664525) + 1013904223) >>> 0; return seed; };
-    st.jokers = generateJokerCodes(100, rnd, []);
+    const r2 = mulberry32(7);
+    st.jokers = generateJokerCodes(100, () => Math.floor(r2() * 4294967296), []);
     st.lastFetch = berlinToUtcIso('2026-12-22', '08:30');
     // Joker: einigen Personen mit genau einer Lücke einen Joker geben
     const res = compute(st);

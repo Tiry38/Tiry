@@ -162,7 +162,7 @@
       '<section class="glass panel"><div class="ph"><h2>Kommentare und Likes je Tag</h2><span class="legend"><i class="lg-c"></i>pünktliche Kommentare <i class="lg-l"></i>Likes</span></div>' + chart() + '</section>' +
       '<div class="two">' +
       '<section class="glass panel"><h2>Wer hält durch?</h2><div class="funnel">' + funnel + '</div></section>' +
-      '<section class="glass panel"><h2>Längste Serien gerade</h2>' + (top ? '<ol class="top">' + top + '</ol>' : '<p class="muted">Noch niemand dabei.</p>') + '</section>' +
+      '<section class="glass panel"><h2>Längste Serien gerade</h2>' + (top ? '<ol class="toplist">' + top + '</ol>' : '<p class="muted">Noch niemand dabei.</p>') + '</section>' +
       '</div>' +
       '<p class="muted small">' + n(c.comments) + ' Kommentare · ' + n(c.likes) + ' Likes · ' + n(c.excluded) + ' ausgeschlossen (eigene Seite, Mitarbeiter, Sperrliste)</p>';
   }

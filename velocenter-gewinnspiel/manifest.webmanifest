@@ -1,0 +1,14 @@
+{
+  "name": "Durchzieher-Zentrale",
+  "short_name": "Durchzieher",
+  "description": "Auswertung des Facebook-Gewinnspiels von Velocenter Hessert.",
+  "lang": "de",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#121419",
+  "theme_color": "#1E2026",
+  "icons": [
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
+}
