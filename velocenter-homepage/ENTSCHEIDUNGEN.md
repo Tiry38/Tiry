@@ -139,3 +139,9 @@
 
 ## 14.11.2026 – Marken-Showroom mit Markenrunden (Tiry: ja)
 - Automatischer Wechsel nimmt je Runde jede Bestandsmarke einmal (bagNext, eigener Beutel MB), nie dieselbe Marke zweimal hintereinander; feste Einschübe (Van Raam, VdV, Victoria, Stevens) bleiben.
+
+## 14.11.2026 – i:SY Werbe-Bus: Räder drehen, freigestellt (Tiry)
+- Fahrt-Animation am Wrapper `.bus`, zwei Räder als eigene runde Scheiben (`img/isy-bus-rad-f/r.webp`: Reifenring gezeichnet, Felge aus dem Foto) drehen mit (1,3 s/Umdrehung, passend zur Fahrgeschwindigkeit); reduced-motion = Stillstand.
+- Reifen sauber rund freigestellt (alte flach abgeschnittene Reifenkanten unterhalb der Schwelle entfernt).
+- Fenster: Innenraum/Transporter im Hintergrund ersetzt durch dunkel getöntes Glas mit Spiegelstreifen; Fensterrahmen an den im Foto gemessenen Positionen nachgezeichnet, QNV bleibt.
+- Original: `img/quelle/isy-bus-original.webp`, Werkzeug: `python3 tools/bus_bearbeiten.py img/quelle/isy-bus-original.webp img`.

@@ -2288,6 +2288,12 @@ a.hchip.hc.hlive .hla b svg{width:16px;height:16px;fill:none;stroke:#fff;stroke-
 @media (min-width:981px){.hdr .wrap{grid-template-columns:auto minmax(0,1fr) auto!important}.hdr .nav{justify-self:center}}
 @media (min-width:981px){.hdr .logo{max-width:220px;transition:opacity .35s,transform .35s,max-width .45s var(--ease)}body.herotop .hdr .logo{max-width:0;overflow:hidden}body.herotop .hlft{gap:0}}
 @media (min-width:981px){.hdr .nav.tight:not(.tight2) a{padding-left:9px!important;padding-right:9px!important}}
+/* i:SY Werbe-Bus: Räder drehen mit (Tiry 14.11.2026) – Fahrt am Wrapper, Räder als Ausschnitte aus dem Foto */
+.road .bus{position:absolute;bottom:6px;height:92%;aspect-ratio:980/253;left:0;animation:drive 13s linear infinite}
+.road .bus img{position:absolute;inset:0;bottom:auto;height:100%;width:100%;animation:none!important}
+.road .bus .whl{position:absolute;top:70.356%;width:7.551%;aspect-ratio:1;background:center/100% 100% no-repeat;border-radius:50%;animation:whl 1.3s linear infinite reverse}
+@keyframes whl{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion:reduce){.road .bus,.road .bus .whl{animation:none!important}}
 /* Tempo (Tiry 12.11.2026): unsichtbare Animationen pausieren, Hintergrund-Ebenen eigene GPU-Ebene */
 .apz,.apz *,.apz *::before,.apz *::after{animation-play-state:paused!important}
 html.scr .sky,html.scr .blobs i,html.scr .blobs::after,html.scr .ribbons i{animation-play-state:paused!important}
@@ -3360,7 +3366,7 @@ m696 -454 c28 -13 46 -31 55 -51 22 -53 -50 -177 -173 -300 -187 -186 -647
 
  <div class="sec">
   <div class="wrap pre"><p class="eyebrow">Einmalig <b style="color:#EA580C">in Deutschland</b></p><h2 class="big" style="margin-top:16px">Der erste und einzige<br><span class="org">i:SY Werbe-Bus.</span></h2></div>
-  <div class="road pre"><img src="img/isy-bus.webp" alt="Linienbus mit i:SY- und Velocenter-Werbung" width="980" height="253"></div>
+  <div class="road pre"><div class="bus"><img src="img/isy-bus.webp" alt="Linienbus mit i:SY- und Velocenter-Werbung" width="980" height="253"><i class="whl" style="left:19.082%;background-image:url(img/isy-bus-rad-f.webp)"></i><i class="whl" style="left:68.521%;background-image:url(img/isy-bus-rad-r.webp)"></i></div></div>
  </div>
 </section>
 
