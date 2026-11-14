@@ -2306,14 +2306,6 @@ a.hchip.hc.hlive .hla b svg{width:16px;height:16px;fill:none;stroke:#fff;stroke-
 /* Ticker-Trenner: Funkelstern in Türkis (Tiry 14.11.2026) */
 .band span{padding:0!important}
 .band span em{padding:0 .72em!important;opacity:1!important;color:#5EEAD4;-webkit-text-stroke:0;text-shadow:0 0 14px rgba(94,234,212,.65)}
-/* Showroom-Beleuchtung (Tiry 14.11.2026): Lichtkegel von oben ohne sichtbare Lampe (Tiry: keine Lampe), weicher Lichtstrahl, Lichtfleck + Kontaktschatten */
-.hvis .hspot{position:absolute;inset:0;pointer-events:none;z-index:1}
-.hvis .hbeam{position:absolute;left:50%;top:0;width:92%;height:94%;transform:translateX(-50%);mix-blend-mode:screen;opacity:.95}
-.hvis .hspot::before{content:"";position:absolute;left:30%;right:30%;top:-30px;height:60px;border-radius:50%;background:radial-gradient(closest-side,rgba(255,250,238,.85),rgba(255,244,225,0));mix-blend-mode:screen;filter:blur(6px)}
-.hvis .hpool{position:absolute;left:12%;right:12%;bottom:calc(18% - 26px);height:54px;border-radius:50%;background:radial-gradient(closest-side,rgba(255,251,242,.9),rgba(255,240,218,.45) 45%,rgba(255,235,210,0) 100%);mix-blend-mode:screen}
-.hvis .hpool::after{content:"";position:absolute;left:22%;right:22%;top:44%;height:10px;border-radius:50%;background:radial-gradient(closest-side,rgba(25,20,35,.28),rgba(25,20,35,0));mix-blend-mode:multiply}
-.hvis .hchip,.hvis .arrow{z-index:2}
-@media (max-width:640px){.hvis .hbeam{opacity:.8}}
 /* Tempo (Tiry 12.11.2026): unsichtbare Animationen pausieren, Hintergrund-Ebenen eigene GPU-Ebene */
 .apz,.apz *,.apz *::before,.apz *::after{animation-play-state:paused!important}
 html.scr .sky,html.scr .blobs i,html.scr .blobs::after,html.scr .ribbons i{animation-play-state:paused!important}
@@ -2977,7 +2969,7 @@ m696 -454 c28 -13 46 -31 55 -51 22 -53 -50 -177 -173 -300 -187 -186 -647
      <img class="hb off" src="img/p-vanraam.webp" alt="Van Raam Easy Rider E-Dreirad" data-l="img/marke-vanraam.svg" width="1600" height="1193" loading="lazy">
      <img class="hb off" src="img/p-gudereit.webp" alt="Gudereit EC-35 Evo E-Bike" data-l="img/marke-gudereit.svg" width="1600" height="1128" loading="lazy">
      <img class="hb off" src="img/p-victoria-veloa7.webp" alt="Victoria Veloa 7 E-Bike" data-l="img/marke-victoria.svg" width="2770" height="1732" loading="lazy">
-     <div class="hfloor"></div><div class="hspot" aria-hidden="true"><svg class="hbeam" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><defs><linearGradient id="hbG1" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFF9EE" stop-opacity=".95"/><stop offset=".35" stop-color="#FFF3E0" stop-opacity=".5"/><stop offset=".75" stop-color="#FFEBD2" stop-opacity=".14"/><stop offset="1" stop-color="#FFEBD2" stop-opacity="0"/></linearGradient><filter id="hbF1" x="-30%" y="-10%" width="160%" height="130%"><feGaussianBlur stdDeviation="3.2"/></filter><filter id="hbC1" x="-30%" y="-10%" width="160%" height="130%"><feGaussianBlur stdDeviation="1.6"/></filter></defs><polygon points="38,0 62,0 88,96 12,96" fill="url(#hbG1)" filter="url(#hbF1)"/><polygon points="45,0 55,0 67,80 33,80" fill="url(#hbG1)" opacity=".55" filter="url(#hbC1)"/></svg><i class="hpool"></i></div>
+     <div class="hfloor"></div>
      <a class="hchip hc c1" href="#lager" aria-label="300+ E-Bikes vor Ort – zum Lager"><span class="hn">300<i>+</i></span><span class="hl"><strong>E-Bikes vor Ort</strong></span><span class="ha"><svg><use href="#i-arrow"/></svg></span></a>
      <a class="hchip hc c2 hlive" id="hLive" href="#lager" aria-label="Unser Live-Bestand: Räder auf Lager ansehen"><span class="hlv"><i class="qld" aria-hidden="true"></i>Live</span><span class="hl"><strong>Unser Live-Bestand</strong></span><span class="hgo">Jetzt ansehen<svg><use href="#i-arrow"/></svg></span></a>
     </div>
@@ -3302,7 +3294,7 @@ m696 -454 c28 -13 46 -31 55 -51 22 -53 -50 -177 -173 -300 -187 -186 -647
     <img class="hlg" id="m-swm" src="img/marke-isy.svg" alt="" aria-hidden="true">
     <img class="hb mbk" id="m-bk" src="img/p-isy.webp" alt="i:SY E5 ZR F CX Century" width="1600" height="1104">
     <img id="m-brefl" src="img/p-isy.webp" alt="" aria-hidden="true" hidden>
-    <div class="hfloor"></div><div class="hspot" aria-hidden="true"><svg class="hbeam" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><defs><linearGradient id="hbG2" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFF9EE" stop-opacity=".95"/><stop offset=".35" stop-color="#FFF3E0" stop-opacity=".5"/><stop offset=".75" stop-color="#FFEBD2" stop-opacity=".14"/><stop offset="1" stop-color="#FFEBD2" stop-opacity="0"/></linearGradient><filter id="hbF2" x="-30%" y="-10%" width="160%" height="130%"><feGaussianBlur stdDeviation="3.2"/></filter><filter id="hbC2" x="-30%" y="-10%" width="160%" height="130%"><feGaussianBlur stdDeviation="1.6"/></filter></defs><polygon points="38,0 62,0 88,96 12,96" fill="url(#hbG2)" filter="url(#hbF2)"/><polygon points="45,0 55,0 67,80 33,80" fill="url(#hbG2)" opacity=".55" filter="url(#hbC2)"/></svg><i class="hpool"></i></div>
+    <div class="hfloor"></div>
     <a class="hchip hc c1" href="#lager" aria-label="300+ E-Bikes vor Ort – zum Lager"><span class="hn">300<i>+</i></span><span class="hl"><strong>E-Bikes vor Ort</strong></span><span class="ha"><svg><use href="#i-arrow"/></svg></span></a>
     <a class="hchip hc c2 hlive" href="#lager" aria-label="Unser Live-Bestand: Räder auf Lager ansehen"><span class="hlv"><i class="qld" aria-hidden="true"></i>Live</span><span class="hl"><strong>Unser Live-Bestand</strong></span><span class="hgo">Jetzt ansehen<svg><use href="#i-arrow"/></svg></span></a>
     <button class="arrow p" id="m-sp" aria-label="Vorherige Marke" hidden></button><button class="arrow n" id="m-sn" aria-label="Nächste Marke" hidden></button>

@@ -182,3 +182,5 @@
 - Stern war links 12 px / rechts 48 px vom Text entfernt → Span-Innenabstand 0, Stern `padding:0 .72em` → beidseitig gleich.
 
 - 14.11.2026: Showroom-Beleuchtung von oben in Start- und Marken-Showroom: weicher Lichtkegel aus der Decke, Lichtfleck am Boden + Kontaktschatten. Keine sichtbare Lampe (Tiry: „es braucht keine lampe! die BELEUCHTUNG REICHT!“).
+
+- 14.11.2026: Showroom-Beleuchtung wieder komplett entfernt (Tiry: „mach die beleuchtung wieder weg“). Showrooms wie vorher.
