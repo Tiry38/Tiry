@@ -2242,8 +2242,11 @@ a.hchip.hc.hlive .hla b svg{width:16px;height:16px;fill:none;stroke:#fff;stroke-
 @keyframes hlbob{50%{transform:translateY(3px)}}
 @media (max-width:640px){.hlv,.hgo{height:24px;font-size:10px;padding:0 8px}a.hchip.hc.hlive .hla{height:58px}.hla b{width:26px;height:26px;margin-left:-13px}.hla i{bottom:26px}}
 @media (prefers-reduced-motion:reduce){a.hchip.hc.hlive::after,.hla b,.hla i::after{animation:none}}
-.bikearea a.hchip.srlive{top:2%;left:0;right:0;margin:0 auto;width:max-content;z-index:5}
-@media (max-width:640px){.bikearea a.hchip.srlive{top:-4px}.bikearea a.hchip.srlive .hl strong{font-size:12.5px}}
+.mvis{width:min(620px,100%);margin:22px auto 0;height:min(46vw,520px)}
+@media (max-width:980px){.mvis{height:min(80vw,480px)}}
+.mvis .hb.mbk{transition:opacity .45s ease,transform .6s var(--ease)}
+.mvis .hb.mbk.out-l{opacity:0;transform:translate(-80%,-50%)}
+.mvis .hb.mbk.in-r{opacity:0;transform:translate(-20%,-50%);transition:none}
 /* Tempo (Tiry 12.11.2026): unsichtbare Animationen pausieren, Hintergrund-Ebenen eigene GPU-Ebene */
 .apz,.apz *,.apz *::before,.apz *::after{animation-play-state:paused!important}
 html.scr .sky,html.scr .blobs i,html.scr .blobs::after,html.scr .ribbons i{animation-play-state:paused!important}
@@ -3227,14 +3230,15 @@ m696 -454 c28 -13 46 -31 55 -51 22 -53 -50 -177 -173 -300 -187 -186 -647
   <div class="glow"></div>
   <div class="wrap">
    <div class="showtop pre"><div><p class="eyebrow">Unser <b>Showroom</b></p><h2 class="big" style="margin-top:14px">Acht Marken.<br><span class="gt">Ein Laden.</span></h2></div><p class="lead" style="max-width:40ch">Klick dich durch. Im Laden warten über 300 E-Bikes zum Anfassen und Probefahren.</p></div>
-   <div class="bikearea pre" id="m-bikearea">
-    <img class="wml" id="m-swm" src="img/marke-isy.svg" alt="" aria-hidden="true">
-    <div class="floor"></div>
-    <img class="refl" id="m-brefl" src="img/p-isy.webp" alt="" aria-hidden="true">
-    <img class="bk" id="m-bk" src="img/p-isy.webp" alt="i:SY E5 ZR F CX Century" width="1600" height="1104">
-    <a class="hchip hc hlive srlive" href="#lager" aria-label="Unser Live-Bestand: Räder auf Lager ansehen"><span class="hlv"><i class="qld" aria-hidden="true"></i>Live</span><span class="hl"><strong>Unser Live-Bestand</strong></span><span class="hgo">Jetzt ansehen<svg><use href="#i-arrow"/></svg></span></a>
-    <button class="arrow p" id="m-sp" aria-label="Vorherige Marke"><svg><use href="#i-arrow"/></svg></button>
-    <button class="arrow n" id="m-sn" aria-label="Nächste Marke"><svg><use href="#i-arrow"/></svg></button>
+   <div class="hvis mvis pre" id="m-bikearea">
+    <div class="hring"></div>
+    <img class="hlg" id="m-swm" src="img/marke-isy.svg" alt="" aria-hidden="true">
+    <img class="hb mbk" id="m-bk" src="img/p-isy.webp" alt="i:SY E5 ZR F CX Century" width="1600" height="1104">
+    <img id="m-brefl" src="img/p-isy.webp" alt="" aria-hidden="true" hidden>
+    <div class="hfloor"></div>
+    <a class="hchip hc c1" href="#lager" aria-label="300+ E-Bikes vor Ort – zum Lager"><span class="hn">300<i>+</i></span><span class="hl"><strong>E-Bikes vor Ort</strong></span><span class="ha"><svg><use href="#i-arrow"/></svg></span></a>
+    <a class="hchip hc c2 hlive" href="#lager" aria-label="Unser Live-Bestand: Räder auf Lager ansehen"><span class="hlv"><i class="qld" aria-hidden="true"></i>Live</span><span class="hl"><strong>Unser Live-Bestand</strong></span><span class="hgo">Jetzt ansehen<svg><use href="#i-arrow"/></svg></span></a>
+    <button class="arrow p" id="m-sp" aria-label="Vorherige Marke" hidden></button><button class="arrow n" id="m-sn" aria-label="Nächste Marke" hidden></button>
    </div>
    <div class="showinfo pre" id="m-sinfo"></div>
    <div class="thumbs pre" id="m-thumbs" role="tablist" aria-label="Marke wählen"></div>
