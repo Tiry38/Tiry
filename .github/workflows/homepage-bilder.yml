@@ -163,7 +163,7 @@ jobs:
           [ -n "$WEB_TOKEN" ] || { echo "GitHub-Secret WEB_TOKEN fehlt – gespeichert, aber nicht live."; exit 1; }
           git clone -q --depth 1 "https://x-access-token:${WEB_TOKEN}@github.com/${WEB_REPO}.git" "$RUNNER_TEMP/web"
           cd "$RUNNER_TEMP/web"
-          find . -mindepth 1 -maxdepth 1 ! -name .git ! -name README.md -exec rm -rf {} +
+          find . -mindepth 1 -maxdepth 1 ! -name .git ! -name README.md ! -name google.json -exec rm -rf {} +
           cp -a "$RUNNER_TEMP/live/." . && rm -f CNAME
           git config user.name "Homepage-Bilder-Agent"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
