@@ -15,7 +15,7 @@ import { Menus } from './ui/menus.js';
 import { NetChat } from './ui/chat.js';
 import { LocalSession, NetSession } from './net/session.js';
 import { UNITS, SENDS, WAVES, FACTIONS } from './sim/data.js';
-import { laneCenterX, kingPos } from './sim/layout.js';
+import { laneCenterX, kingPos, ARENA } from './sim/layout.js';
 import { MISSIONS, missionSetup, missionStars } from './sim/campaign.js';
 import { missionHook } from './sim/missions.js';
 import { modeCode } from './sim/modes.js';
@@ -106,6 +106,14 @@ class App {
       onNetDisconnect: () => this.onNetDisconnect(),
     });
     $('btn-netpause').addEventListener('click', () => { this.audio.ui('confirm'); this.netSend({ t: 'pause' }); this.resume(); });
+    // Online: Unentschieden vorschlagen – ein Befehl im Lockstep, die Partie endet, wenn alle Menschen zustimmen
+    $('btn-drawvote').addEventListener('click', () => {
+      const me = this.session && this.session.sim.players[this.session.localPid];
+      if (!me) return;
+      this.audio.ui('confirm');
+      this.session.submit({ type: 'drawVote', yes: !me.drawVote });
+      this.resume();
+    });
     this.settings.onChange((k) => { if (k === 'quality') this.audio.setQuality(this.settings.get('quality') === 'low' ? 'low' : 'high'); });
     this.bindInput();
     this.startAttract();
@@ -163,6 +171,8 @@ class App {
     this.objectives.clear();
     this.selected = null; this.placing = null; this.hover = null; this.targeting = null;
     this.gameOverAt = null;
+    this.endwaveShown = false;
+    if (this.env && this.env.setArena) this.env.setArena(false);
     this.matchStats = { leaders: 0, quickLeaders: 0, upgrades: 0 };
   }
 
@@ -284,7 +294,7 @@ class App {
     const facName = me.faction === 'hybrid' ? 'Hybrid' : FACTIONS[me.faction].name;
     if (this.mission) {
       this.hud.banner(this.mission.title.toUpperCase(), `Mission ${this.mission.id} · ${this.mission.goal === 'siege' ? 'Belagerung' : 'Halten'}`);
-      this.hud.feed(this.mission.goal === 'siege' ? 'Schicke Söldner (1–7) gegen die Rissfeste – und halte deine Bahn!' : 'Halte deine Bahn bis zur letzten Welle!', 'good');
+      this.hud.feed(this.mission.goal === 'siege' ? 'Schicke Söldner (1–6, ⇧1–⇧6) gegen die Rissfeste – und halte deine Bahn!' : 'Halte deine Bahn bis zur letzten Welle!', 'good');
       if (this.mission.tips) this.hud.feed(this.mission.tips[0], '');
     } else {
       this.hud.banner(`AETHERFRONT · ${modeCode(sim.rules)}`, `${facName} · Bahn ${me.slot + 1} · Team ${me.team === 0 ? 'West' : 'Ost'}`);
@@ -302,6 +312,8 @@ class App {
     if (this.mode !== 'game' || this.gameOverAt) return;
     if (!this.session.online) this.session.paused = true;
     $('btn-netpause').hidden = !this.session.online;
+    $('btn-drawvote').hidden = !this.session.online;
+    if (this.session.online) $('btn-drawvote').textContent = this.me.drawVote ? 'Unentschieden-Stimme zurückziehen' : 'Unentschieden vorschlagen';
     this.chat.close();
     this.menus.go('pause');
     this.audio.ui('open');
@@ -326,6 +338,8 @@ class App {
     this.audio.playMusic('menu');
     this.hud.toggleKingPanel(false);
     this.hud.showScoreboard(false);
+    if (this.hud.upOpen) this.hud.toggleUpgrades(false);
+    if (this.hud.ecoOpen) this.hud.toggleEco(false, true);
   }
 
   // ---------- Eingabe ----------
@@ -406,11 +420,15 @@ class App {
         if (sim.phase === 'build') { this.session.submit({ type: 'ready' }); this.audio.ui('confirm'); }
         return;
       }
+      // König-Fähigkeiten F1–F3 (vor dem Alt/Strg-Filter, F-Tasten haben sonst Browser-Funktionen)
+      const fk = ['F1', 'F2', 'F3'].indexOf(e.key);
+      if (fk >= 0) { e.preventDefault(); this.hud.castKing(['stomp', 'shock', 'purge'][fk]); return; }
       if (e.ctrlKey || e.metaKey || e.altKey) return;
+      // Söldner: 1–6 Kaserne, ⇧1–⇧6 Erweiterte Kaserne (über e.code, damit ⇧ die Ziffer nicht verändert)
+      const s = SENDS.find((x) => x.keyCode === e.code && x.shift === e.shiftKey);
+      if (s) { this.session.submit({ type: 'send', send: s.id }); return; }
       const li = BUILD_KEYS.indexOf(k);
       if (li >= 0 && me.lines[li]) { this.startPlacing(UNITS[me.lines[li]]); return; }
-      const s = SENDS.find((x) => x.hotkey === k);
-      if (s) { this.session.submit({ type: 'send', send: s.id }); return; }
       const sel = this.selected && this.selected.type === 'f' && this.selected.owner === me.id ? this.selected : null;
       const ui = UPGRADE_KEYS.indexOf(k);
       if ((ui >= 0 || k === 'U') && sel) {
@@ -419,6 +437,9 @@ class App {
         if (to) this.session.submit({ type: 'upgrade', id: sel.id, to }); else this.hud.toast(ui === 1 ? 'Nur ein Aufwertungs-Pfad' : 'Höchste Stufe erreicht');
       } else if ((k === 'X' || k === 'Delete') && sel) this.session.submit({ type: 'sell', id: sel.id });
       else if (k === 'B') this.session.submit({ type: 'worker' });
+      else if (k === 'N') this.session.submit({ type: 'gather' });
+      else if (k === 'T') this.hud.toggleUpgrades();
+      else if (k === 'G') this.hud.toggleEco();
       else if (k === 'H') this.session.submit({ type: 'heal' });
       else if (k === 'K') this.hud.toggleKingPanel();
       else if (k === ' ') { e.preventDefault(); this.focusLane(me.id); }
@@ -511,9 +532,33 @@ class App {
             this.audio.sfx(e.boss ? 'boss' : 'wave_start');
             this.audio.playMusic(e.boss ? 'boss' : 'battle');
             this.cam.addShake(0.4);
+            // Endwellen: einmal das ganze Feld zeigen
+            if (sim.waveDef(e.wave).endwave && !this.endwaveShown) { this.endwaveShown = true; this.cam.focus(0, 12, 190, { yaw: 0, pitch: 0.9 }); }
           }
           break;
-        case 'waveEnd': if (inGame) { this.audio.sfx('wave_clear'); this.audio.playMusic('build'); } break;
+        case 'waveEnd': if (inGame) { this.audio.sfx('wave_clear'); if (!sim.isArenaWave(e.wave)) this.audio.playMusic('build'); } break;
+        case 'arenaStart':
+          if (inGame) {
+            // Kamera fährt auf die Arena (ganzes Arena-Feld im Bild), danach zurück zur eigenen Bahn
+            this.select(null); this.stopPlacing();
+            this.cam.focus(ARENA.x, ARENA.z + 4, 74, { yaw: 0, pitch: 0.95 });
+            this.env.setArena && this.env.setArena(true);
+            this.audio.sfx('boss'); this.audio.playMusic('boss');
+          }
+          break;
+        case 'arenaFight': if (inGame) { this.audio.sfx('wave_start'); this.cam.addShake(0.5); this.fx.shock(ARENA.x, ARENA.z, { r: ARENA.r, color: '#ffd27a', life: 0.9, intensity: 3 }); } break;
+        case 'arenaEnd': if (inGame) this.audio.sfx(e.winner === this.me.team ? 'victory' : e.winner < 0 ? 'wave_clear' : 'leak', { volume: 0.7 }); break;
+        case 'arenaDone': if (inGame) { this.audio.playMusic('build'); this.focusLane(this.me.id); } this.env.setArena && this.env.setArena(false); break;
+        case 'kingCast': {
+          const col = { stomp: '#ffb85a', shock: '#6fe3ff', purge: '#fff3c8' }[e.ab] || '#ffd27a';
+          if (e.ab === 'stomp') { this.fx.shock(e.x, e.z, { r: e.r, color: col, life: 0.8, intensity: 4 }); this.sfxAt('explosion', e.x, e.z, 0.9); if (inGame && e.team === this.me.team) this.cam.addShake(0.35); }
+          else if (e.ab === 'shock') {
+            for (let i = 1; i <= 6; i++) { const t = i / 6; this.fx.shock(e.x + (e.tx - e.x) * t, e.z + (e.tz - e.z) * t, { r: e.w + 0.6, color: col, life: 0.35 + t * 0.4, intensity: 3 }); }
+            this.sfxAt('lightning', e.x, e.z, 0.9);
+          } else { this.fx.shock(e.x, e.z, { r: 2.4, color: col, life: 0.9, intensity: 4 }); this.sfxAt('heal', e.x, e.z, 0.9); }
+          break;
+        }
+        case 'drawVote': if (inGame && this.session.online) this.audio.ui('open'); break;
         case 'gameOver': if (inGame) this.onGameOver(e); else this.restartAttractSoon = true; break;
         default: break;
       }

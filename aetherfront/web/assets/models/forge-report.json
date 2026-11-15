@@ -2,6 +2,5088 @@
  "cell": 0.007,
  "report": [
   {
+   "id": "unit_boss_titan_1",
+   "hiTris": 73060,
+   "lods": [
+    9000,
+    3600,
+    1416
+   ],
+   "verts": [
+    4501,
+    1807,
+    711
+   ],
+   "ms": {
+    "sculpt": 4,
+    "mesh": 1493,
+    "decimate": 2473,
+    "bake": 951,
+    "total": 5282
+   },
+   "bytes": 475576
+  },
+  {
+   "id": "unit_knight_1",
+   "hiTris": 58516,
+   "lods": [
+    2808,
+    1000,
+    398
+   ],
+   "verts": [
+    973,
+    271,
+    92
+   ],
+   "ms": {
+    "sculpt": 10,
+    "mesh": 521,
+    "decimate": 1697,
+    "bake": 270,
+    "total": 2570
+   },
+   "bytes": 102560
+  },
+  {
+   "id": "unit_boss_drake_1",
+   "hiTris": 163060,
+   "lods": [
+    9012,
+    3628,
+    1436
+   ],
+   "verts": [
+    4456,
+    1761,
+    664
+   ],
+   "ms": {
+    "sculpt": 3,
+    "mesh": 1318,
+    "decimate": 5610,
+    "bake": 625,
+    "total": 8111
+   },
+   "bytes": 468284
+  },
+  {
+   "id": "unit_boss_lord_1",
+   "hiTris": 235802,
+   "lods": [
+    9014,
+    3633,
+    1440
+   ],
+   "verts": [
+    4150,
+    1453,
+    604
+   ],
+   "ms": {
+    "sculpt": 6,
+    "mesh": 4183,
+    "decimate": 6785,
+    "bake": 933,
+    "total": 12530
+   },
+   "bytes": 431432
+  },
+  {
+   "id": "unit_knight_3b",
+   "hiTris": 91368,
+   "lods": [
+    2594,
+    1130,
+    454
+   ],
+   "verts": [
+    1144,
+    410,
+    171
+   ],
+   "ms": {
+    "sculpt": 3,
+    "mesh": 1052,
+    "decimate": 4826,
+    "bake": 273,
+    "total": 6256
+   },
+   "bytes": 124680
+  },
+  {
+   "id": "unit_knight_2a",
+   "hiTris": 89724,
+   "lods": [
+    2600,
+    1088,
+    446
+   ],
+   "verts": [
+    1142,
+    386,
+    165
+   ],
+   "ms": {
+    "sculpt": 24,
+    "mesh": 1004,
+    "decimate": 5283,
+    "bake": 381,
+    "total": 6833
+   },
+   "bytes": 121780
+  },
+  {
+   "id": "unit_king_1",
+   "hiTris": 314728,
+   "lods": [
+    9034,
+    3638,
+    1438
+   ],
+   "verts": [
+    4193,
+    1495,
+    623
+   ],
+   "ms": {
+    "sculpt": 9,
+    "mesh": 5030,
+    "decimate": 9153,
+    "bake": 1087,
+    "total": 16187
+   },
+   "bytes": 437340
+  },
+  {
+   "id": "unit_knight_2b",
+   "hiTris": 73824,
+   "lods": [
+    2950,
+    998,
+    386
+   ],
+   "verts": [
+    1038,
+    293,
+    118
+   ],
+   "ms": {
+    "sculpt": 3,
+    "mesh": 1019,
+    "decimate": 2335,
+    "bake": 375,
+    "total": 3852
+   },
+   "bytes": 109552
+  },
+  {
+   "id": "unit_archer_1",
+   "hiTris": 54092,
+   "lods": [
+    2600,
+    1000,
+    380
+   ],
+   "verts": [
+    1153,
+    439,
+    170
+   ],
+   "ms": {
+    "sculpt": 2,
+    "mesh": 406,
+    "decimate": 1750,
+    "bake": 192,
+    "total": 2402
+   },
+   "bytes": 124384
+  },
+  {
+   "id": "unit_archer_3a",
+   "hiTris": 81232,
+   "lods": [
+    2612,
+    1030,
+    430
+   ],
+   "verts": [
+    1117,
+    468,
+    199
+   ],
+   "ms": {
+    "sculpt": 7,
+    "mesh": 572,
+    "decimate": 2458,
+    "bake": 266,
+    "total": 3379
+   },
+   "bytes": 127972
+  },
+  {
+   "id": "unit_archer_2a",
+   "hiTris": 70172,
+   "lods": [
+    2600,
+    1000,
+    380
+   ],
+   "verts": [
+    1128,
+    445,
+    166
+   ],
+   "ms": {
+    "sculpt": 2,
+    "mesh": 650,
+    "decimate": 1997,
+    "bake": 306,
+    "total": 3027
+   },
+   "bytes": 123116
+  },
+  {
+   "id": "unit_archer_3b",
+   "hiTris": 89400,
+   "lods": [
+    2598,
+    996,
+    454
+   ],
+   "verts": [
+    1143,
+    452,
+    203
+   ],
+   "ms": {
+    "sculpt": 2,
+    "mesh": 658,
+    "decimate": 2793,
+    "bake": 196,
+    "total": 3711
+   },
+   "bytes": 127636
+  },
+  {
+   "id": "unit_knight_3a",
+   "hiTris": 114640,
+   "lods": [
+    3226,
+    1031,
+    508
+   ],
+   "verts": [
+    1197,
+    338,
+    183
+   ],
+   "ms": {
+    "sculpt": 3,
+    "mesh": 1332,
+    "decimate": 3568,
+    "bake": 426,
+    "total": 5486
+   },
+   "bytes": 128776
+  },
+  {
+   "id": "unit_priest_2b",
+   "hiTris": 107476,
+   "lods": [
+    2599,
+    1002,
+    436
+   ],
+   "verts": [
+    1162,
+    454,
+    179
+   ],
+   "ms": {
+    "sculpt": 2,
+    "mesh": 950,
+    "decimate": 3169,
+    "bake": 199,
+    "total": 4438
+   },
+   "bytes": 128376
+  },
+  {
+   "id": "unit_priest_1",
+   "hiTris": 100368,
+   "lods": [
+    2600,
+    1216,
+    380
+   ],
+   "verts": [
+    1154,
+    462,
+    146
+   ],
+   "ms": {
+    "sculpt": 2,
+    "mesh": 939,
+    "decimate": 3307,
+    "bake": 248,
+    "total": 4609
+   },
+   "bytes": 125832
+  },
+  {
+   "id": "unit_archer_2b",
+   "hiTris": 67108,
+   "lods": [
+    2600,
+    1020,
+    412
+   ],
+   "verts": [
+    1138,
+    456,
+    184
+   ],
+   "ms": {
+    "sculpt": 8,
+    "mesh": 615,
+    "decimate": 1871,
+    "bake": 303,
+    "total": 2891
+   },
+   "bytes": 127452
+  },
+  {
+   "id": "unit_priest_3a",
+   "hiTris": 118608,
+   "lods": [
+    2622,
+    1030,
+    416
+   ],
+   "verts": [
+    1126,
+    480,
+    206
+   ],
+   "ms": {
+    "sculpt": 3,
+    "mesh": 959,
+    "decimate": 3740,
+    "bake": 216,
+    "total": 5047
+   },
+   "bytes": 129644
+  },
+  {
+   "id": "unit_priest_2a",
+   "hiTris": 103284,
+   "lods": [
+    2599,
+    999,
+    438
+   ],
+   "verts": [
+    1176,
+    464,
+    184
+   ],
+   "ms": {
+    "sculpt": 8,
+    "mesh": 935,
+    "decimate": 3331,
+    "bake": 229,
+    "total": 4609
+   },
+   "bytes": 128280
+  },
+  {
+   "id": "unit_priest_3b",
+   "hiTris": 123492,
+   "lods": [
+    2598,
+    998,
+    390
+   ],
+   "verts": [
+    1169,
+    461,
+    175
+   ],
+   "ms": {
+    "sculpt": 2,
+    "mesh": 1042,
+    "decimate": 3934,
+    "bake": 224,
+    "total": 5327
+   },
+   "bytes": 128068
+  },
+  {
+   "id": "unit_paladin_heavy_2b",
+   "hiTris": 222864,
+   "lods": [
+    3086,
+    1024,
+    412
+   ],
+   "verts": [
+    1152,
+    387,
+    163
+   ],
+   "ms": {
+    "sculpt": 3,
+    "mesh": 2339,
+    "decimate": 6814,
+    "bake": 256,
+    "total": 9768
+   },
+   "bytes": 126360
+  },
+  {
+   "id": "unit_paladin_heavy_2a",
+   "hiTris": 241276,
+   "lods": [
+    2600,
+    1048,
+    450
+   ],
+   "verts": [
+    1209,
+    438,
+    185
+   ],
+   "ms": {
+    "sculpt": 8,
+    "mesh": 2732,
+    "decimate": 14397,
+    "bake": 270,
+    "total": 17781
+   },
+   "bytes": 129096
+  },
+  {
+   "id": "unit_griffin_2a",
+   "hiTris": 73392,
+   "lods": [
+    2600,
+    1000,
+    380
+   ],
+   "verts": [
+    1186,
+    412,
+    198
+   ],
+   "ms": {
+    "sculpt": 2,
+    "mesh": 606,
+    "decimate": 4272,
+    "bake": 176,
+    "total": 5115
+   },
+   "bytes": 126292
+  },
+  {
+   "id": "unit_lancer_1",
+   "hiTris": 67900,
+   "lods": [
+    2752,
+    998,
+    380
+   ],
+   "verts": [
+    914,
+    238,
+    96
+   ],
+   "ms": {
+    "sculpt": 2,
+    "mesh": 543,
+    "decimate": 1924,
+    "bake": 225,
+    "total": 2777
+   },
+   "bytes": 97244
+  },
+  {
+   "id": "unit_griffin_1",
+   "hiTris": 66436,
+   "lods": [
+    2600,
+    1000,
+    380
+   ],
+   "verts": [
+    1157,
+    382,
+    188
+   ],
+   "ms": {
+    "sculpt": 2,
+    "mesh": 627,
+    "decimate": 3747,
+    "bake": 202,
+    "total": 4636
+   },
+   "bytes": 122500
+  },
+  {
+   "id": "unit_paladin_heavy_1",
+   "hiTris": 220360,
+   "lods": [
+    2600,
+    1024,
+    458
+   ],
+   "verts": [
+    1197,
+    415,
+    179
+   ],
+   "ms": {
+    "sculpt": 3,
+    "mesh": 2778,
+    "decimate": 13340,
+    "bake": 406,
+    "total": 16873
+   },
+   "bytes": 126740
+  },
+  {
+   "id": "unit_lancer_3b",
+   "hiTris": 100204,
+   "lods": [
+    3094,
+    998,
+    426
+   ],
+   "verts": [
+    1090,
+    258,
+    92
+   ],
+   "ms": {
+    "sculpt": 6,
+    "mesh": 686,
+    "decimate": 3112,
+    "bake": 205,
+    "total": 4094
+   },
+   "bytes": 111448
+  },
+  {
+   "id": "unit_monk_3a",
+   "hiTris": 53828,
+   "lods": [
+    2600,
+    1024,
+    422
+   ],
+   "verts": [
+    1245,
+    500,
+    201
+   ],
+   "ms": {
+    "sculpt": 6,
+    "mesh": 335,
+    "decimate": 1438,
+    "bake": 188,
+    "total": 2012
+   },
+   "bytes": 136704
+  },
+  {
+   "id": "unit_paladin_heavy_3a",
+   "hiTris": 281724,
+   "lods": [
+    2632,
+    1210,
+    418
+   ],
+   "verts": [
+    1238,
+    529,
+    191
+   ],
+   "ms": {
+    "sculpt": 3,
+    "mesh": 2722,
+    "decimate": 17653,
+    "bake": 240,
+    "total": 21051
+   },
+   "bytes": 138828
+  },
+  {
+   "id": "unit_griffin_3b",
+   "hiTris": 102564,
+   "lods": [
+    2600,
+    1000,
+    376
+   ],
+   "verts": [
+    1208,
+    421,
+    191
+   ],
+   "ms": {
+    "sculpt": 2,
+    "mesh": 733,
+    "decimate": 6316,
+    "bake": 218,
+    "total": 7361
+   },
+   "bytes": 127852
+  },
+  {
+   "id": "unit_ballista_2b",
+   "hiTris": 116224,
+   "lods": [
+    2598,
+    1010,
+    414
+   ],
+   "verts": [
+    1248,
+    475,
+    211
+   ],
+   "ms": {
+    "sculpt": 1,
+    "mesh": 253,
+    "decimate": 2841,
+    "bake": 77,
+    "total": 3217
+   },
+   "bytes": 137496
+  },
+  {
+   "id": "unit_lancer_3a",
+   "hiTris": 97768,
+   "lods": [
+    3204,
+    1030,
+    416
+   ],
+   "verts": [
+    1144,
+    284,
+    137
+   ],
+   "ms": {
+    "sculpt": 2,
+    "mesh": 763,
+    "decimate": 2732,
+    "bake": 284,
+    "total": 3884
+   },
+   "bytes": 119656
+  },
+  {
+   "id": "unit_griffin_2b",
+   "hiTris": 76216,
+   "lods": [
+    2600,
+    1010,
+    412
+   ],
+   "verts": [
+    1175,
+    400,
+    209
+   ],
+   "ms": {
+    "sculpt": 2,
+    "mesh": 747,
+    "decimate": 4416,
+    "bake": 187,
+    "total": 5445
+   },
+   "bytes": 127572
+  },
+  {
+   "id": "unit_monk_2b",
+   "hiTris": 49156,
+   "lods": [
+    2598,
+    999,
+    380
+   ],
+   "verts": [
+    1248,
+    448,
+    172
+   ],
+   "ms": {
+    "sculpt": 19,
+    "mesh": 299,
+    "decimate": 1464,
+    "bake": 172,
+    "total": 1991
+   },
+   "bytes": 131248
+  },
+  {
+   "id": "unit_treant_2a",
+   "hiTris": 124618,
+   "lods": [
+    2638,
+    1038,
+    420
+   ],
+   "verts": [
+    1047,
+    446,
+    204
+   ],
+   "ms": {
+    "sculpt": 2,
+    "mesh": 1689,
+    "decimate": 3780,
+    "bake": 183,
+    "total": 5781
+   },
+   "bytes": 123480
+  },
+  {
+   "id": "unit_lancer_2a",
+   "hiTris": 76192,
+   "lods": [
+    2688,
+    1000,
+    380
+   ],
+   "verts": [
+    907,
+    250,
+    99
+   ],
+   "ms": {
+    "sculpt": 7,
+    "mesh": 632,
+    "decimate": 2218,
+    "bake": 217,
+    "total": 3146
+   },
+   "bytes": 97324
+  },
+  {
+   "id": "unit_monk_1",
+   "hiTris": 38104,
+   "lods": [
+    2600,
+    1000,
+    380
+   ],
+   "verts": [
+    1248,
+    448,
+    169
+   ],
+   "ms": {
+    "sculpt": 6,
+    "mesh": 352,
+    "decimate": 1261,
+    "bake": 253,
+    "total": 1946
+   },
+   "bytes": 130016
+  },
+  {
+   "id": "unit_ballista_2a",
+   "hiTris": 108352,
+   "lods": [
+    2600,
+    1000,
+    380
+   ],
+   "verts": [
+    1243,
+    443,
+    175
+   ],
+   "ms": {
+    "sculpt": 1,
+    "mesh": 185,
+    "decimate": 3500,
+    "bake": 135,
+    "total": 3865
+   },
+   "bytes": 129048
+  },
+  {
+   "id": "unit_monk_3b",
+   "hiTris": 60624,
+   "lods": [
+    2600,
+    1000,
+    380
+   ],
+   "verts": [
+    1177,
+    433,
+    186
+   ],
+   "ms": {
+    "sculpt": 3,
+    "mesh": 381,
+    "decimate": 2452,
+    "bake": 279,
+    "total": 3186
+   },
+   "bytes": 125920
+  },
+  {
+   "id": "unit_wolf_1",
+   "hiTris": 56400,
+   "lods": [
+    2600,
+    1000,
+    378
+   ],
+   "verts": [
+    861,
+    215,
+    90
+   ],
+   "ms": {
+    "sculpt": 1,
+    "mesh": 1029,
+    "decimate": 4238,
+    "bake": 197,
+    "total": 5554
+   },
+   "bytes": 91336
+  },
+  {
+   "id": "unit_paladin_heavy_3b",
+   "hiTris": 256834,
+   "lods": [
+    2598,
+    998,
+    402
+   ],
+   "verts": [
+    1236,
+    421,
+    177
+   ],
+   "ms": {
+    "sculpt": 7,
+    "mesh": 2547,
+    "decimate": 17498,
+    "bake": 271,
+    "total": 20658
+   },
+   "bytes": 130024
+  },
+  {
+   "id": "unit_ballista_3a",
+   "hiTris": 125284,
+   "lods": [
+    2614,
+    1236,
+    414
+   ],
+   "verts": [
+    1245,
+    556,
+    207
+   ],
+   "ms": {
+    "sculpt": 1,
+    "mesh": 320,
+    "decimate": 3180,
+    "bake": 77,
+    "total": 3639
+   },
+   "bytes": 140652
+  },
+  {
+   "id": "unit_treant_1",
+   "hiTris": 115708,
+   "lods": [
+    2636,
+    1038,
+    420
+   ],
+   "verts": [
+    1057,
+    448,
+    199
+   ],
+   "ms": {
+    "sculpt": 6,
+    "mesh": 2115,
+    "decimate": 4022,
+    "bake": 192,
+    "total": 6536
+   },
+   "bytes": 123852
+  },
+  {
+   "id": "unit_wolf_3b",
+   "hiTris": 79072,
+   "lods": [
+    2622,
+    998,
+    380
+   ],
+   "verts": [
+    902,
+    404,
+    140
+   ],
+   "ms": {
+    "sculpt": 1,
+    "mesh": 845,
+    "decimate": 3602,
+    "bake": 100,
+    "total": 4604
+   },
+   "bytes": 109828
+  },
+  {
+   "id": "unit_griffin_3a",
+   "hiTris": 88888,
+   "lods": [
+    2616,
+    1030,
+    416
+   ],
+   "verts": [
+    1216,
+    439,
+    223
+   ],
+   "ms": {
+    "sculpt": 7,
+    "mesh": 623,
+    "decimate": 4947,
+    "bake": 153,
+    "total": 5787
+   },
+   "bytes": 133128
+  },
+  {
+   "id": "unit_druid_3a",
+   "hiTris": 136196,
+   "lods": [
+    2598,
+    998,
+    416
+   ],
+   "verts": [
+    1179,
+    471,
+    207
+   ],
+   "ms": {
+    "sculpt": 3,
+    "mesh": 748,
+    "decimate": 3624,
+    "bake": 240,
+    "total": 4714
+   },
+   "bytes": 134016
+  },
+  {
+   "id": "unit_treant_2b",
+   "hiTris": 145900,
+   "lods": [
+    3114,
+    1032,
+    416
+   ],
+   "verts": [
+    1225,
+    433,
+    207
+   ],
+   "ms": {
+    "sculpt": 1,
+    "mesh": 1802,
+    "decimate": 4463,
+    "bake": 208,
+    "total": 6600
+   },
+   "bytes": 137856
+  },
+  {
+   "id": "unit_lancer_2b",
+   "hiTris": 87536,
+   "lods": [
+    2876,
+    996,
+    380
+   ],
+   "verts": [
+    992,
+    264,
+    92
+   ],
+   "ms": {
+    "sculpt": 2,
+    "mesh": 640,
+    "decimate": 2496,
+    "bake": 324,
+    "total": 3541
+   },
+   "bytes": 103480
+  },
+  {
+   "id": "unit_wolf_2a",
+   "hiTris": 55240,
+   "lods": [
+    3096,
+    998,
+    380
+   ],
+   "verts": [
+    1011,
+    254,
+    120
+   ],
+   "ms": {
+    "sculpt": 1,
+    "mesh": 835,
+    "decimate": 2678,
+    "bake": 123,
+    "total": 3728
+   },
+   "bytes": 106364
+  },
+  {
+   "id": "unit_monk_2a",
+   "hiTris": 42684,
+   "lods": [
+    2600,
+    1000,
+    380
+   ],
+   "verts": [
+    1248,
+    448,
+    170
+   ],
+   "ms": {
+    "sculpt": 2,
+    "mesh": 581,
+    "decimate": 1481,
+    "bake": 231,
+    "total": 2362
+   },
+   "bytes": 130072
+  },
+  {
+   "id": "unit_treant_3b",
+   "hiTris": 160496,
+   "lods": [
+    2666,
+    998,
+    390
+   ],
+   "verts": [
+    1253,
+    476,
+    193
+   ],
+   "ms": {
+    "sculpt": 1,
+    "mesh": 1853,
+    "decimate": 9875,
+    "bake": 386,
+    "total": 12296
+   },
+   "bytes": 137640
+  },
+  {
+   "id": "unit_ballista_1",
+   "hiTris": 97904,
+   "lods": [
+    2600,
+    1000,
+    378
+   ],
+   "verts": [
+    1270,
+    470,
+    194
+   ],
+   "ms": {
+    "sculpt": 1,
+    "mesh": 179,
+    "decimate": 2913,
+    "bake": 70,
+    "total": 3207
+   },
+   "bytes": 133048
+  },
+  {
+   "id": "unit_wolf_3a",
+   "hiTris": 64380,
+   "lods": [
+    3230,
+    1026,
+    414
+   ],
+   "verts": [
+    1110,
+    307,
+    160
+   ],
+   "ms": {
+    "sculpt": 1,
+    "mesh": 857,
+    "decimate": 1767,
+    "bake": 143,
+    "total": 2836
+   },
+   "bytes": 119940
+  },
+  {
+   "id": "unit_druid_1",
+   "hiTris": 104504,
+   "lods": [
+    2598,
+    1024,
+    414
+   ],
+   "verts": [
+    1203,
+    481,
+    195
+   ],
+   "ms": {
+    "sculpt": 2,
+    "mesh": 892,
+    "decimate": 5632,
+    "bake": 388,
+    "total": 7019
+   },
+   "bytes": 133168
+  },
+  {
+   "id": "unit_ballista_3b",
+   "hiTris": 135988,
+   "lods": [
+    2602,
+    1022,
+    388
+   ],
+   "verts": [
+    1249,
+    476,
+    204
+   ],
+   "ms": {
+    "sculpt": 2,
+    "mesh": 213,
+    "decimate": 3834,
+    "bake": 59,
+    "total": 4163
+   },
+   "bytes": 136412
+  },
+  {
+   "id": "unit_druid_2b",
+   "hiTris": 109232,
+   "lods": [
+    2606,
+    1026,
+    414
+   ],
+   "verts": [
+    1182,
+    475,
+    210
+   ],
+   "ms": {
+    "sculpt": 3,
+    "mesh": 962,
+    "decimate": 3175,
+    "bake": 204,
+    "total": 4427
+   },
+   "bytes": 132560
+  },
+  {
+   "id": "unit_mushroom_2b",
+   "hiTris": 152016,
+   "lods": [
+    2598,
+    1012,
+    408
+   ],
+   "verts": [
+    1283,
+    490,
+    212
+   ],
+   "ms": {
+    "sculpt": 1,
+    "mesh": 334,
+    "decimate": 16016,
+    "bake": 159,
+    "total": 16601
+   },
+   "bytes": 138552
+  },
+  {
+   "id": "unit_druid_3b",
+   "hiTris": 125816,
+   "lods": [
+    2599,
+    1025,
+    376
+   ],
+   "verts": [
+    1207,
+    482,
+    191
+   ],
+   "ms": {
+    "sculpt": 2,
+    "mesh": 1391,
+    "decimate": 6065,
+    "bake": 186,
+    "total": 7746
+   },
+   "bytes": 132320
+  },
+  {
+   "id": "unit_bear_2a",
+   "hiTris": 98384,
+   "lods": [
+    2600,
+    1000,
+    379
+   ],
+   "verts": [
+    1211,
+    492,
+    183
+   ],
+   "ms": {
+    "sculpt": 1,
+    "mesh": 1830,
+    "decimate": 2838,
+    "bake": 210,
+    "total": 4977
+   },
+   "bytes": 131140
+  },
+  {
+   "id": "unit_treant_3a",
+   "hiTris": 135110,
+   "lods": [
+    2806,
+    1032,
+    416
+   ],
+   "verts": [
+    1112,
+    444,
+    203
+   ],
+   "ms": {
+    "sculpt": 1,
+    "mesh": 3013,
+    "decimate": 6185,
+    "bake": 208,
+    "total": 9596
+   },
+   "bytes": 127792
+  },
+  {
+   "id": "unit_owl_1",
+   "hiTris": 52040,
+   "lods": [
+    2600,
+    1000,
+    380
+   ],
+   "verts": [
+    1294,
+    494,
+    184
+   ],
+   "ms": {
+    "sculpt": 1,
+    "mesh": 741,
+    "decimate": 1341,
+    "bake": 131,
+    "total": 2263
+   },
+   "bytes": 135432
+  },
+  {
+   "id": "unit_mushroom_2a",
+   "hiTris": 150096,
+   "lods": [
+    2600,
+    1000,
+    380
+   ],
+   "verts": [
+    1270,
+    476,
+    186
+   ],
+   "ms": {
+    "sculpt": 1,
+    "mesh": 430,
+    "decimate": 10371,
+    "bake": 95,
+    "total": 10996
+   },
+   "bytes": 133708
+  },
+  {
+   "id": "unit_wolf_2b",
+   "hiTris": 60700,
+   "lods": [
+    2600,
+    998,
+    392
+   ],
+   "verts": [
+    878,
+    229,
+    99
+   ],
+   "ms": {
+    "sculpt": 10,
+    "mesh": 930,
+    "decimate": 6390,
+    "bake": 129,
+    "total": 7506
+   },
+   "bytes": 95156
+  },
+  {
+   "id": "unit_bear_1",
+   "hiTris": 88584,
+   "lods": [
+    2600,
+    1052,
+    380
+   ],
+   "verts": [
+    1220,
+    446,
+    168
+   ],
+   "ms": {
+    "sculpt": 1,
+    "mesh": 2362,
+    "decimate": 4776,
+    "bake": 201,
+    "total": 7509
+   },
+   "bytes": 128588
+  },
+  {
+   "id": "unit_owl_3b",
+   "hiTris": 102992,
+   "lods": [
+    2600,
+    996,
+    384
+   ],
+   "verts": [
+    1214,
+    442,
+    190
+   ],
+   "ms": {
+    "sculpt": 1,
+    "mesh": 695,
+    "decimate": 10549,
+    "bake": 142,
+    "total": 11448
+   },
+   "bytes": 131892
+  },
+  {
+   "id": "unit_druid_2a",
+   "hiTris": 104844,
+   "lods": [
+    2599,
+    1000,
+    470
+   ],
+   "verts": [
+    1203,
+    480,
+    218
+   ],
+   "ms": {
+    "sculpt": 2,
+    "mesh": 1479,
+    "decimate": 5482,
+    "bake": 237,
+    "total": 7362
+   },
+   "bytes": 132676
+  },
+  {
+   "id": "unit_mushroom_3a",
+   "hiTris": 197280,
+   "lods": [
+    2628,
+    1036,
+    416
+   ],
+   "verts": [
+    1217,
+    426,
+    200
+   ],
+   "ms": {
+    "sculpt": 1,
+    "mesh": 552,
+    "decimate": 17790,
+    "bake": 83,
+    "total": 18501
+   },
+   "bytes": 131244
+  },
+  {
+   "id": "unit_stag_3a",
+   "hiTris": 55352,
+   "lods": [
+    2600,
+    1024,
+    414
+   ],
+   "verts": [
+    1279,
+    491,
+    222
+   ],
+   "ms": {
+    "sculpt": 1,
+    "mesh": 1312,
+    "decimate": 3320,
+    "bake": 174,
+    "total": 4904
+   },
+   "bytes": 139112
+  },
+  {
+   "id": "unit_bear_3b",
+   "hiTris": 117236,
+   "lods": [
+    2600,
+    1000,
+    386
+   ],
+   "verts": [
+    1227,
+    506,
+    195
+   ],
+   "ms": {
+    "sculpt": 2,
+    "mesh": 2964,
+    "decimate": 5300,
+    "bake": 173,
+    "total": 8717
+   },
+   "bytes": 136740
+  },
+  {
+   "id": "unit_mushroom_1",
+   "hiTris": 111064,
+   "lods": [
+    3162,
+    1000,
+    380
+   ],
+   "verts": [
+    1203,
+    402,
+    170
+   ],
+   "ms": {
+    "sculpt": 1,
+    "mesh": 296,
+    "decimate": 4741,
+    "bake": 92,
+    "total": 5225
+   },
+   "bytes": 128444
+  },
+  {
+   "id": "unit_bear_2b",
+   "hiTris": 98852,
+   "lods": [
+    2600,
+    1160,
+    380
+   ],
+   "verts": [
+    1229,
+    509,
+    181
+   ],
+   "ms": {
+    "sculpt": 1,
+    "mesh": 1227,
+    "decimate": 4555,
+    "bake": 356,
+    "total": 6228
+   },
+   "bytes": 136300
+  },
+  {
+   "id": "unit_dryad_2b",
+   "hiTris": 46392,
+   "lods": [
+    2600,
+    998,
+    380
+   ],
+   "verts": [
+    1262,
+    461,
+    191
+   ],
+   "ms": {
+    "sculpt": 4,
+    "mesh": 1911,
+    "decimate": 2786,
+    "bake": 717,
+    "total": 5539
+   },
+   "bytes": 133744
+  },
+  {
+   "id": "unit_owl_3a",
+   "hiTris": 89152,
+   "lods": [
+    2616,
+    1030,
+    414
+   ],
+   "verts": [
+    1254,
+    470,
+    222
+   ],
+   "ms": {
+    "sculpt": 7,
+    "mesh": 895,
+    "decimate": 7054,
+    "bake": 181,
+    "total": 8311
+   },
+   "bytes": 136312
+  },
+  {
+   "id": "unit_automaton_2a",
+   "hiTris": 49004,
+   "lods": [
+    2608,
+    1028,
+    414
+   ],
+   "verts": [
+    1302,
+    512,
+    201
+   ],
+   "ms": {
+    "sculpt": 1,
+    "mesh": 637,
+    "decimate": 3461,
+    "bake": 87,
+    "total": 4222
+   },
+   "bytes": 140760
+  },
+  {
+   "id": "unit_walker_1",
+   "hiTris": 47172,
+   "lods": [
+    2604,
+    1026,
+    414
+   ],
+   "verts": [
+    1305,
+    516,
+    210
+   ],
+   "ms": {
+    "sculpt": 1,
+    "mesh": 99,
+    "decimate": 1210,
+    "bake": 99,
+    "total": 1421
+   },
+   "bytes": 140836
+  },
+  {
+   "id": "unit_stag_2b",
+   "hiTris": 43588,
+   "lods": [
+    2598,
+    1018,
+    472
+   ],
+   "verts": [
+    1280,
+    490,
+    217
+   ],
+   "ms": {
+    "sculpt": 1,
+    "mesh": 957,
+    "decimate": 1233,
+    "bake": 143,
+    "total": 2380
+   },
+   "bytes": 139140
+  },
+  {
+   "id": "unit_owl_2a",
+   "hiTris": 68324,
+   "lods": [
+    2600,
+    1000,
+    380
+   ],
+   "verts": [
+    1201,
+    416,
+    187
+   ],
+   "ms": {
+    "sculpt": 1,
+    "mesh": 1243,
+    "decimate": 8618,
+    "bake": 161,
+    "total": 10424
+   },
+   "bytes": 126192
+  },
+  {
+   "id": "unit_dryad_2a",
+   "hiTris": 42376,
+   "lods": [
+    2598,
+    1000,
+    384
+   ],
+   "verts": [
+    1262,
+    463,
+    196
+   ],
+   "ms": {
+    "sculpt": 2,
+    "mesh": 1493,
+    "decimate": 1125,
+    "bake": 399,
+    "total": 3072
+   },
+   "bytes": 134392
+  },
+  {
+   "id": "unit_walker_3b",
+   "hiTris": 80656,
+   "lods": [
+    2600,
+    998,
+    414
+   ],
+   "verts": [
+    1251,
+    486,
+    197
+   ],
+   "ms": {
+    "sculpt": 1,
+    "mesh": 179,
+    "decimate": 3811,
+    "bake": 47,
+    "total": 4075
+   },
+   "bytes": 136752
+  },
+  {
+   "id": "unit_automaton_1",
+   "hiTris": 34188,
+   "lods": [
+    2598,
+    1022,
+    412
+   ],
+   "verts": [
+    1295,
+    507,
+    200
+   ],
+   "ms": {
+    "sculpt": 1,
+    "mesh": 51,
+    "decimate": 1533,
+    "bake": 171,
+    "total": 1765
+   },
+   "bytes": 139928
+  },
+  {
+   "id": "unit_stag_1",
+   "hiTris": 41560,
+   "lods": [
+    2600,
+    1000,
+    466
+   ],
+   "verts": [
+    1270,
+    470,
+    203
+   ],
+   "ms": {
+    "sculpt": 14,
+    "mesh": 868,
+    "decimate": 2601,
+    "bake": 190,
+    "total": 3706
+   },
+   "bytes": 134756
+  },
+  {
+   "id": "unit_mortar_3a",
+   "hiTris": 140072,
+   "lods": [
+    2832,
+    998,
+    382
+   ],
+   "verts": [
+    1232,
+    455,
+    186
+   ],
+   "ms": {
+    "sculpt": 1,
+    "mesh": 366,
+    "decimate": 3776,
+    "bake": 65,
+    "total": 4246
+   },
+   "bytes": 132356
+  },
+  {
+   "id": "unit_automaton_3b",
+   "hiTris": 91224,
+   "lods": [
+    2598,
+    1000,
+    382
+   ],
+   "verts": [
+    1295,
+    494,
+    200
+   ],
+   "ms": {
+    "sculpt": 1,
+    "mesh": 311,
+    "decimate": 6423,
+    "bake": 83,
+    "total": 6876
+   },
+   "bytes": 138416
+  },
+  {
+   "id": "unit_core_2b",
+   "hiTris": 101058,
+   "lods": [
+    2600,
+    998,
+    418
+   ],
+   "verts": [
+    1281,
+    473,
+    189
+   ],
+   "ms": {
+    "sculpt": 1,
+    "mesh": 563,
+    "decimate": 2894,
+    "bake": 72,
+    "total": 3916
+   },
+   "bytes": 137604
+  },
+  {
+   "id": "unit_stag_3b",
+   "hiTris": 85512,
+   "lods": [
+    2600,
+    1026,
+    380
+   ],
+   "verts": [
+    1217,
+    475,
+    179
+   ],
+   "ms": {
+    "sculpt": 1,
+    "mesh": 2086,
+    "decimate": 3730,
+    "bake": 234,
+    "total": 6115
+   },
+   "bytes": 132912
+  },
+  {
+   "id": "unit_spider_2a",
+   "hiTris": 65752,
+   "lods": [
+    2598,
+    1000,
+    400
+   ],
+   "verts": [
+    1250,
+    445,
+    181
+   ],
+   "ms": {
+    "sculpt": 1,
+    "mesh": 359,
+    "decimate": 1683,
+    "bake": 161,
+    "total": 2340
+   },
+   "bytes": 131932
+  },
+  {
+   "id": "unit_walker_3a",
+   "hiTris": 65796,
+   "lods": [
+    2600,
+    1008,
+    408
+   ],
+   "verts": [
+    1249,
+    453,
+    217
+   ],
+   "ms": {
+    "sculpt": 1,
+    "mesh": 123,
+    "decimate": 2436,
+    "bake": 80,
+    "total": 2666
+   },
+   "bytes": 134324
+  },
+  {
+   "id": "unit_drone_1",
+   "hiTris": 37804,
+   "lods": [
+    2600,
+    998,
+    390
+   ],
+   "verts": [
+    1236,
+    435,
+    189
+   ],
+   "ms": {
+    "sculpt": 1,
+    "mesh": 297,
+    "decimate": 1112,
+    "bake": 43,
+    "total": 1477
+   },
+   "bytes": 130456
+  },
+  {
+   "id": "unit_drone_3b",
+   "hiTris": 67892,
+   "lods": [
+    2600,
+    996,
+    426
+   ],
+   "verts": [
+    1155,
+    486,
+    202
+   ],
+   "ms": {
+    "sculpt": 0,
+    "mesh": 142,
+    "decimate": 1625,
+    "bake": 43,
+    "total": 1829
+   },
+   "bytes": 131128
+  },
+  {
+   "id": "unit_dryad_3a",
+   "hiTris": 58656,
+   "lods": [
+    2598,
+    1164,
+    382
+   ],
+   "verts": [
+    1248,
+    529,
+    193
+   ],
+   "ms": {
+    "sculpt": 2,
+    "mesh": 2120,
+    "decimate": 3109,
+    "bake": 907,
+    "total": 6260
+   },
+   "bytes": 137932
+  },
+  {
+   "id": "unit_mushroom_3b",
+   "hiTris": 214760,
+   "lods": [
+    2598,
+    1014,
+    412
+   ],
+   "verts": [
+    1213,
+    414,
+    194
+   ],
+   "ms": {
+    "sculpt": 1,
+    "mesh": 457,
+    "decimate": 28109,
+    "bake": 191,
+    "total": 28834
+   },
+   "bytes": 131804
+  },
+  {
+   "id": "unit_mortar_2b",
+   "hiTris": 115400,
+   "lods": [
+    2600,
+    1000,
+    384
+   ],
+   "verts": [
+    1175,
+    491,
+    189
+   ],
+   "ms": {
+    "sculpt": 1,
+    "mesh": 477,
+    "decimate": 3833,
+    "bake": 144,
+    "total": 4537
+   },
+   "bytes": 130064
+  },
+  {
+   "id": "unit_core_2a",
+   "hiTris": 90458,
+   "lods": [
+    2597,
+    996,
+    386
+   ],
+   "verts": [
+    1309,
+    504,
+    203
+   ],
+   "ms": {
+    "sculpt": 1,
+    "mesh": 217,
+    "decimate": 2955,
+    "bake": 82,
+    "total": 3306
+   },
+   "bytes": 141332
+  },
+  {
+   "id": "unit_automaton_2b",
+   "hiTris": 59892,
+   "lods": [
+    2614,
+    1030,
+    416
+   ],
+   "verts": [
+    1294,
+    502,
+    212
+   ],
+   "ms": {
+    "sculpt": 1,
+    "mesh": 244,
+    "decimate": 3646,
+    "bake": 193,
+    "total": 4132
+   },
+   "bytes": 140432
+  },
+  {
+   "id": "unit_tank_3a",
+   "hiTris": 124192,
+   "lods": [
+    2600,
+    1012,
+    410
+   ],
+   "verts": [
+    1199,
+    505,
+    213
+   ],
+   "ms": {
+    "sculpt": 1,
+    "mesh": 576,
+    "decimate": 5009,
+    "bake": 89,
+    "total": 5793
+   },
+   "bytes": 134132
+  },
+  {
+   "id": "unit_spider_1",
+   "hiTris": 61232,
+   "lods": [
+    2600,
+    998,
+    398
+   ],
+   "verts": [
+    1272,
+    463,
+    188
+   ],
+   "ms": {
+    "sculpt": 1,
+    "mesh": 149,
+    "decimate": 2427,
+    "bake": 128,
+    "total": 2735
+   },
+   "bytes": 134492
+  },
+  {
+   "id": "unit_walker_2a",
+   "hiTris": 53180,
+   "lods": [
+    2608,
+    1028,
+    414
+   ],
+   "verts": [
+    1307,
+    517,
+    210
+   ],
+   "ms": {
+    "sculpt": 1,
+    "mesh": 202,
+    "decimate": 2336,
+    "bake": 124,
+    "total": 2702
+   },
+   "bytes": 141040
+  },
+  {
+   "id": "unit_tesla_2b",
+   "hiTris": 63912,
+   "lods": [
+    2598,
+    1042,
+    404
+   ],
+   "verts": [
+    1239,
+    461,
+    176
+   ],
+   "ms": {
+    "sculpt": 1,
+    "mesh": 233,
+    "decimate": 2900,
+    "bake": 76,
+    "total": 3256
+   },
+   "bytes": 133536
+  },
+  {
+   "id": "unit_bear_3a",
+   "hiTris": 109404,
+   "lods": [
+    2619,
+    1031,
+    417
+   ],
+   "verts": [
+    1215,
+    509,
+    205
+   ],
+   "ms": {
+    "sculpt": 2,
+    "mesh": 2628,
+    "decimate": 6835,
+    "bake": 355,
+    "total": 10135
+   },
+   "bytes": 135872
+  },
+  {
+   "id": "unit_spider_3b",
+   "hiTris": 83596,
+   "lods": [
+    2602,
+    992,
+    384
+   ],
+   "verts": [
+    1233,
+    439,
+    189
+   ],
+   "ms": {
+    "sculpt": 1,
+    "mesh": 353,
+    "decimate": 3834,
+    "bake": 75,
+    "total": 4319
+   },
+   "bytes": 132248
+  },
+  {
+   "id": "unit_mortar_1",
+   "hiTris": 100928,
+   "lods": [
+    2600,
+    1228,
+    394
+   ],
+   "verts": [
+    1230,
+    544,
+    196
+   ],
+   "ms": {
+    "sculpt": 1,
+    "mesh": 372,
+    "decimate": 4695,
+    "bake": 75,
+    "total": 5208
+   },
+   "bytes": 138020
+  },
+  {
+   "id": "unit_drone_3a",
+   "hiTris": 53804,
+   "lods": [
+    2600,
+    1074,
+    388
+   ],
+   "verts": [
+    1255,
+    492,
+    204
+   ],
+   "ms": {
+    "sculpt": 1,
+    "mesh": 117,
+    "decimate": 1359,
+    "bake": 85,
+    "total": 1577
+   },
+   "bytes": 135736
+  },
+  {
+   "id": "unit_tank_2b",
+   "hiTris": 104924,
+   "lods": [
+    2600,
+    1000,
+    402
+   ],
+   "verts": [
+    1282,
+    482,
+    212
+   ],
+   "ms": {
+    "sculpt": 1,
+    "mesh": 277,
+    "decimate": 2654,
+    "bake": 68,
+    "total": 3037
+   },
+   "bytes": 137160
+  },
+  {
+   "id": "unit_shade_2a",
+   "hiTris": 100012,
+   "lods": [
+    2620,
+    1033,
+    416
+   ],
+   "verts": [
+    1084,
+    466,
+    195
+   ],
+   "ms": {
+    "sculpt": 1,
+    "mesh": 895,
+    "decimate": 6822,
+    "bake": 114,
+    "total": 7944
+   },
+   "bytes": 125600
+  },
+  {
+   "id": "unit_tesla_2a",
+   "hiTris": 44640,
+   "lods": [
+    2598,
+    998,
+    378
+   ],
+   "verts": [
+    1283,
+    483,
+    173
+   ],
+   "ms": {
+    "sculpt": 1,
+    "mesh": 134,
+    "decimate": 3599,
+    "bake": 111,
+    "total": 3856
+   },
+   "bytes": 134412
+  },
+  {
+   "id": "unit_owl_2b",
+   "hiTris": 72192,
+   "lods": [
+    2598,
+    1004,
+    394
+   ],
+   "verts": [
+    1221,
+    417,
+    199
+   ],
+   "ms": {
+    "sculpt": 1,
+    "mesh": 969,
+    "decimate": 7923,
+    "bake": 162,
+    "total": 9192
+   },
+   "bytes": 129608
+  },
+  {
+   "id": "unit_mortar_3b",
+   "hiTris": 149040,
+   "lods": [
+    2886,
+    998,
+    396
+   ],
+   "verts": [
+    1253,
+    455,
+    199
+   ],
+   "ms": {
+    "sculpt": 1,
+    "mesh": 555,
+    "decimate": 7378,
+    "bake": 141,
+    "total": 8168
+   },
+   "bytes": 136556
+  },
+  {
+   "id": "unit_bonethrower_1",
+   "hiTris": 79270,
+   "lods": [
+    2630,
+    1036,
+    418
+   ],
+   "verts": [
+    1055,
+    424,
+    197
+   ],
+   "ms": {
+    "sculpt": 1,
+    "mesh": 162,
+    "decimate": 4268,
+    "bake": 107,
+    "total": 4566
+   },
+   "bytes": 121340
+  },
+  {
+   "id": "unit_stag_2a",
+   "hiTris": 44948,
+   "lods": [
+    2600,
+    1000,
+    380
+   ],
+   "verts": [
+    1270,
+    470,
+    188
+   ],
+   "ms": {
+    "sculpt": 2,
+    "mesh": 684,
+    "decimate": 2846,
+    "bake": 483,
+    "total": 4068
+   },
+   "bytes": 133412
+  },
+  {
+   "id": "unit_shade_1",
+   "hiTris": 97920,
+   "lods": [
+    2621,
+    1033,
+    417
+   ],
+   "verts": [
+    1159,
+    478,
+    172
+   ],
+   "ms": {
+    "sculpt": 1,
+    "mesh": 972,
+    "decimate": 4741,
+    "bake": 120,
+    "total": 5960
+   },
+   "bytes": 129132
+  },
+  {
+   "id": "unit_core_3a",
+   "hiTris": 129408,
+   "lods": [
+    2598,
+    998,
+    380
+   ],
+   "verts": [
+    1316,
+    499,
+    193
+   ],
+   "ms": {
+    "sculpt": 1,
+    "mesh": 499,
+    "decimate": 4727,
+    "bake": 79,
+    "total": 5357
+   },
+   "bytes": 140752
+  },
+  {
+   "id": "unit_shade_3b",
+   "hiTris": 112780,
+   "lods": [
+    2599,
+    999,
+    382
+   ],
+   "verts": [
+    1101,
+    434,
+    183
+   ],
+   "ms": {
+    "sculpt": 1,
+    "mesh": 626,
+    "decimate": 3129,
+    "bake": 97,
+    "total": 3929
+   },
+   "bytes": 123024
+  },
+  {
+   "id": "unit_spider_2b",
+   "hiTris": 71712,
+   "lods": [
+    2598,
+    998,
+    388
+   ],
+   "verts": [
+    1241,
+    455,
+    184
+   ],
+   "ms": {
+    "sculpt": 1,
+    "mesh": 515,
+    "decimate": 4083,
+    "bake": 120,
+    "total": 4824
+   },
+   "bytes": 134220
+  },
+  {
+   "id": "unit_dryad_1",
+   "hiTris": 38672,
+   "lods": [
+    2600,
+    998,
+    390
+   ],
+   "verts": [
+    1256,
+    455,
+    197
+   ],
+   "ms": {
+    "sculpt": 1,
+    "mesh": 4200,
+    "decimate": 2206,
+    "bake": 1111,
+    "total": 7733
+   },
+   "bytes": 133812
+  },
+  {
+   "id": "unit_bonethrower_3a",
+   "hiTris": 96478,
+   "lods": [
+    2598,
+    1131,
+    413
+   ],
+   "verts": [
+    1211,
+    465,
+    196
+   ],
+   "ms": {
+    "sculpt": 1,
+    "mesh": 227,
+    "decimate": 2938,
+    "bake": 72,
+    "total": 3268
+   },
+   "bytes": 132340
+  },
+  {
+   "id": "unit_drone_2a",
+   "hiTris": 47692,
+   "lods": [
+    2598,
+    998,
+    390
+   ],
+   "verts": [
+    1191,
+    471,
+    205
+   ],
+   "ms": {
+    "sculpt": 1,
+    "mesh": 153,
+    "decimate": 2381,
+    "bake": 75,
+    "total": 2635
+   },
+   "bytes": 130800
+  },
+  {
+   "id": "unit_bonethrower_3b",
+   "hiTris": 111330,
+   "lods": [
+    2600,
+    1022,
+    394
+   ],
+   "verts": [
+    1209,
+    424,
+    192
+   ],
+   "ms": {
+    "sculpt": 2,
+    "mesh": 275,
+    "decimate": 12513,
+    "bake": 101,
+    "total": 12961
+   },
+   "bytes": 130560
+  },
+  {
+   "id": "unit_tank_1",
+   "hiTris": 89044,
+   "lods": [
+    2598,
+    1014,
+    410
+   ],
+   "verts": [
+    1295,
+    503,
+    201
+   ],
+   "ms": {
+    "sculpt": 4,
+    "mesh": 265,
+    "decimate": 3014,
+    "bake": 75,
+    "total": 3392
+   },
+   "bytes": 138712
+  },
+  {
+   "id": "unit_dryad_3b",
+   "hiTris": 64264,
+   "lods": [
+    2598,
+    1090,
+    404
+   ],
+   "verts": [
+    1254,
+    505,
+    203
+   ],
+   "ms": {
+    "sculpt": 1,
+    "mesh": 3273,
+    "decimate": 2396,
+    "bake": 281,
+    "total": 6016
+   },
+   "bytes": 138292
+  },
+  {
+   "id": "unit_voidmage_3a",
+   "hiTris": 124796,
+   "lods": [
+    2600,
+    1005,
+    440
+   ],
+   "verts": [
+    1209,
+    499,
+    212
+   ],
+   "ms": {
+    "sculpt": 12,
+    "mesh": 1079,
+    "decimate": 4762,
+    "bake": 173,
+    "total": 6215
+   },
+   "bytes": 135304
+  },
+  {
+   "id": "unit_voidmage_2b",
+   "hiTris": 126106,
+   "lods": [
+    2655,
+    1000,
+    400
+   ],
+   "verts": [
+    1094,
+    413,
+    166
+   ],
+   "ms": {
+    "sculpt": 2,
+    "mesh": 2308,
+    "decimate": 6785,
+    "bake": 109,
+    "total": 9396
+   },
+   "bytes": 121792
+  },
+  {
+   "id": "unit_automaton_3a",
+   "hiTris": 60540,
+   "lods": [
+    2598,
+    1000,
+    398
+   ],
+   "verts": [
+    1225,
+    512,
+    198
+   ],
+   "ms": {
+    "sculpt": 1,
+    "mesh": 376,
+    "decimate": 4573,
+    "bake": 104,
+    "total": 5075
+   },
+   "bytes": 135720
+  },
+  {
+   "id": "unit_tank_3b",
+   "hiTris": 127146,
+   "lods": [
+    2600,
+    1024,
+    380
+   ],
+   "verts": [
+    1290,
+    494,
+    199
+   ],
+   "ms": {
+    "sculpt": 0,
+    "mesh": 695,
+    "decimate": 6824,
+    "bake": 113,
+    "total": 7786
+   },
+   "bytes": 137016
+  },
+  {
+   "id": "unit_walker_2b",
+   "hiTris": 55532,
+   "lods": [
+    2600,
+    1000,
+    396
+   ],
+   "verts": [
+    1295,
+    495,
+    193
+   ],
+   "ms": {
+    "sculpt": 1,
+    "mesh": 102,
+    "decimate": 3479,
+    "bake": 102,
+    "total": 3701
+   },
+   "bytes": 137592
+  },
+  {
+   "id": "unit_tesla_3a",
+   "hiTris": 62800,
+   "lods": [
+    2598,
+    1000,
+    380
+   ],
+   "verts": [
+    1281,
+    482,
+    183
+   ],
+   "ms": {
+    "sculpt": 1,
+    "mesh": 107,
+    "decimate": 1633,
+    "bake": 55,
+    "total": 1812
+   },
+   "bytes": 134880
+  },
+  {
+   "id": "unit_cryptgolem_2a",
+   "hiTris": 99284,
+   "lods": [
+    2598,
+    998,
+    396
+   ],
+   "verts": [
+    1284,
+    480,
+    201
+   ],
+   "ms": {
+    "sculpt": 1,
+    "mesh": 515,
+    "decimate": 5291,
+    "bake": 231,
+    "total": 6097
+   },
+   "bytes": 137116
+  },
+  {
+   "id": "unit_cryptgolem_2b",
+   "hiTris": 116296,
+   "lods": [
+    2600,
+    1000,
+    400
+   ],
+   "verts": [
+    1274,
+    470,
+    198
+   ],
+   "ms": {
+    "sculpt": 1,
+    "mesh": 445,
+    "decimate": 8716,
+    "bake": 108,
+    "total": 9392
+   },
+   "bytes": 135952
+  },
+  {
+   "id": "unit_shade_2b",
+   "hiTris": 101188,
+   "lods": [
+    2604,
+    1027,
+    486
+   ],
+   "verts": [
+    1112,
+    474,
+    209
+   ],
+   "ms": {
+    "sculpt": 1,
+    "mesh": 1068,
+    "decimate": 4433,
+    "bake": 86,
+    "total": 6021
+   },
+   "bytes": 128664
+  },
+  {
+   "id": "unit_mortar_2a",
+   "hiTris": 116504,
+   "lods": [
+    2600,
+    1000,
+    462
+   ],
+   "verts": [
+    1173,
+    485,
+    216
+   ],
+   "ms": {
+    "sculpt": 1,
+    "mesh": 500,
+    "decimate": 7225,
+    "bake": 57,
+    "total": 7850
+   },
+   "bytes": 131664
+  },
+  {
+   "id": "unit_bonethrower_2a",
+   "hiTris": 85518,
+   "lods": [
+    2608,
+    1026,
+    416
+   ],
+   "verts": [
+    1048,
+    413,
+    195
+   ],
+   "ms": {
+    "sculpt": 1,
+    "mesh": 173,
+    "decimate": 3660,
+    "bake": 68,
+    "total": 3925
+   },
+   "bytes": 119960
+  },
+  {
+   "id": "unit_witch_1",
+   "hiTris": 113610,
+   "lods": [
+    2599,
+    1018,
+    484
+   ],
+   "verts": [
+    1154,
+    468,
+    201
+   ],
+   "ms": {
+    "sculpt": 3,
+    "mesh": 1634,
+    "decimate": 7154,
+    "bake": 161,
+    "total": 9112
+   },
+   "bytes": 130112
+  },
+  {
+   "id": "unit_core_1",
+   "hiTris": 57180,
+   "lods": [
+    2599,
+    999,
+    383
+   ],
+   "verts": [
+    1306,
+    504,
+    196
+   ],
+   "ms": {
+    "sculpt": 0,
+    "mesh": 208,
+    "decimate": 2626,
+    "bake": 179,
+    "total": 3036
+   },
+   "bytes": 140784
+  },
+  {
+   "id": "unit_witch_2a",
+   "hiTris": 119998,
+   "lods": [
+    2599,
+    1015,
+    474
+   ],
+   "verts": [
+    1154,
+    473,
+    199
+   ],
+   "ms": {
+    "sculpt": 3,
+    "mesh": 1347,
+    "decimate": 7718,
+    "bake": 180,
+    "total": 9506
+   },
+   "bytes": 130184
+  },
+  {
+   "id": "unit_ghoul_1",
+   "hiTris": 43688,
+   "lods": [
+    2634,
+    1038,
+    414
+   ],
+   "verts": [
+    1216,
+    418,
+    189
+   ],
+   "ms": {
+    "sculpt": 1,
+    "mesh": 396,
+    "decimate": 1395,
+    "bake": 225,
+    "total": 2058
+   },
+   "bytes": 130276
+  },
+  {
+   "id": "unit_ghoul_3b",
+   "hiTris": 57672,
+   "lods": [
+    2598,
+    1160,
+    378
+   ],
+   "verts": [
+    1215,
+    483,
+    175
+   ],
+   "ms": {
+    "sculpt": 2,
+    "mesh": 460,
+    "decimate": 1445,
+    "bake": 200,
+    "total": 2154
+   },
+   "bytes": 132056
+  },
+  {
+   "id": "unit_voidmage_1",
+   "hiTris": 117338,
+   "lods": [
+    2709,
+    1012,
+    411
+   ],
+   "verts": [
+    1103,
+    419,
+    174
+   ],
+   "ms": {
+    "sculpt": 1,
+    "mesh": 1176,
+    "decimate": 6183,
+    "bake": 120,
+    "total": 7731
+   },
+   "bytes": 123676
+  },
+  {
+   "id": "unit_banshee_3a",
+   "hiTris": 94398,
+   "lods": [
+    2672,
+    999,
+    402
+   ],
+   "verts": [
+    1135,
+    426,
+    207
+   ],
+   "ms": {
+    "sculpt": 1,
+    "mesh": 563,
+    "decimate": 3542,
+    "bake": 81,
+    "total": 4227
+   },
+   "bytes": 126684
+  },
+  {
+   "id": "unit_core_3b",
+   "hiTris": 138402,
+   "lods": [
+    2599,
+    999,
+    424
+   ],
+   "verts": [
+    1286,
+    476,
+    195
+   ],
+   "ms": {
+    "sculpt": 1,
+    "mesh": 965,
+    "decimate": 8829,
+    "bake": 85,
+    "total": 10118
+   },
+   "bytes": 138004
+  },
+  {
+   "id": "unit_witch_3b",
+   "hiTris": 134828,
+   "lods": [
+    2598,
+    1000,
+    380
+   ],
+   "verts": [
+    1134,
+    444,
+    180
+   ],
+   "ms": {
+    "sculpt": 1,
+    "mesh": 1589,
+    "decimate": 9910,
+    "bake": 386,
+    "total": 12077
+   },
+   "bytes": 125144
+  },
+  {
+   "id": "unit_voidmage_3b",
+   "hiTris": 133786,
+   "lods": [
+    2599,
+    1000,
+    380
+   ],
+   "verts": [
+    1235,
+    506,
+    191
+   ],
+   "ms": {
+    "sculpt": 1,
+    "mesh": 1328,
+    "decimate": 4513,
+    "bake": 137,
+    "total": 6200
+   },
+   "bytes": 134728
+  },
+  {
+   "id": "unit_gargoyle_2b",
+   "hiTris": 66076,
+   "lods": [
+    2598,
+    1002,
+    436
+   ],
+   "verts": [
+    1263,
+    492,
+    209
+   ],
+   "ms": {
+    "sculpt": 2,
+    "mesh": 1522,
+    "decimate": 2751,
+    "bake": 203,
+    "total": 4525
+   },
+   "bytes": 139656
+  },
+  {
+   "id": "unit_spider_3a",
+   "hiTris": 78820,
+   "lods": [
+    2598,
+    998,
+    398
+   ],
+   "verts": [
+    1254,
+    444,
+    189
+   ],
+   "ms": {
+    "sculpt": 1,
+    "mesh": 349,
+    "decimate": 5259,
+    "bake": 184,
+    "total": 5825
+   },
+   "bytes": 132424
+  },
+  {
+   "id": "unit_ghoul_3a",
+   "hiTris": 58036,
+   "lods": [
+    2600,
+    1012,
+    422
+   ],
+   "verts": [
+    1125,
+    484,
+    198
+   ],
+   "ms": {
+    "sculpt": 1,
+    "mesh": 981,
+    "decimate": 4048,
+    "bake": 373,
+    "total": 5579
+   },
+   "bytes": 128884
+  },
+  {
+   "id": "unit_crawler_2a",
+   "hiTris": 55996,
+   "lods": [
+    2630,
+    1036,
+    418
+   ],
+   "verts": [
+    1297,
+    500,
+    191
+   ],
+   "ms": {
+    "sculpt": 1,
+    "mesh": 119,
+    "decimate": 3358,
+    "bake": 130,
+    "total": 3631
+   },
+   "bytes": 138752
+  },
+  {
+   "id": "unit_drone_2b",
+   "hiTris": 47928,
+   "lods": [
+    2598,
+    1000,
+    382
+   ],
+   "verts": [
+    1183,
+    465,
+    198
+   ],
+   "ms": {
+    "sculpt": 1,
+    "mesh": 476,
+    "decimate": 2565,
+    "bake": 63,
+    "total": 3201
+   },
+   "bytes": 129496
+  },
+  {
+   "id": "unit_tank_2a",
+   "hiTris": 105892,
+   "lods": [
+    2598,
+    1020,
+    412
+   ],
+   "verts": [
+    1283,
+    494,
+    213
+   ],
+   "ms": {
+    "sculpt": 1,
+    "mesh": 340,
+    "decimate": 3003,
+    "bake": 92,
+    "total": 3524
+   },
+   "bytes": 138300
+  },
+  {
+   "id": "unit_cryptgolem_3a",
+   "hiTris": 139240,
+   "lods": [
+    2600,
+    998,
+    440
+   ],
+   "verts": [
+    1225,
+    495,
+    208
+   ],
+   "ms": {
+    "sculpt": 1,
+    "mesh": 1880,
+    "decimate": 7458,
+    "bake": 517,
+    "total": 10043
+   },
+   "bytes": 135440
+  },
+  {
+   "id": "unit_tesla_1",
+   "hiTris": 38676,
+   "lods": [
+    2598,
+    1000,
+    378
+   ],
+   "verts": [
+    1281,
+    482,
+    171
+   ],
+   "ms": {
+    "sculpt": 2,
+    "mesh": 80,
+    "decimate": 1206,
+    "bake": 40,
+    "total": 1338
+   },
+   "bytes": 133956
+  },
+  {
+   "id": "unit_beetle_1",
+   "hiTris": 102268,
+   "lods": [
+    2770,
+    996,
+    380
+   ],
+   "verts": [
+    1255,
+    477,
+    190
+   ],
+   "ms": {
+    "sculpt": 1,
+    "mesh": 432,
+    "decimate": 6375,
+    "bake": 69,
+    "total": 6945
+   },
+   "bytes": 136632
+  },
+  {
+   "id": "unit_banshee_2b",
+   "hiTris": 82182,
+   "lods": [
+    2598,
+    999,
+    393
+   ],
+   "verts": [
+    1169,
+    471,
+    161
+   ],
+   "ms": {
+    "sculpt": 1,
+    "mesh": 642,
+    "decimate": 7134,
+    "bake": 255,
+    "total": 8114
+   },
+   "bytes": 127904
+  },
+  {
+   "id": "unit_tesla_3b",
+   "hiTris": 77672,
+   "lods": [
+    2600,
+    998,
+    380
+   ],
+   "verts": [
+    1234,
+    468,
+    179
+   ],
+   "ms": {
+    "sculpt": 0,
+    "mesh": 458,
+    "decimate": 4016,
+    "bake": 37,
+    "total": 4540
+   },
+   "bytes": 132760
+  },
+  {
+   "id": "unit_witch_2b",
+   "hiTris": 120862,
+   "lods": [
+    2599,
+    998,
+    486
+   ],
+   "verts": [
+    1155,
+    463,
+    204
+   ],
+   "ms": {
+    "sculpt": 2,
+    "mesh": 1270,
+    "decimate": 5268,
+    "bake": 311,
+    "total": 6950
+   },
+   "bytes": 129796
+  },
+  {
+   "id": "unit_gargoyle_2a",
+   "hiTris": 54984,
+   "lods": [
+    2630,
+    1036,
+    418
+   ],
+   "verts": [
+    1305,
+    508,
+    199
+   ],
+   "ms": {
+    "sculpt": 1,
+    "mesh": 2972,
+    "decimate": 3170,
+    "bake": 300,
+    "total": 6553
+   },
+   "bytes": 140372
+  },
+  {
+   "id": "unit_ghoul_2a",
+   "hiTris": 46300,
+   "lods": [
+    2604,
+    1026,
+    412
+   ],
+   "verts": [
+    1214,
+    425,
+    200
+   ],
+   "ms": {
+    "sculpt": 1,
+    "mesh": 1573,
+    "decimate": 2362,
+    "bake": 360,
+    "total": 4339
+   },
+   "bytes": 130812
+  },
+  {
+   "id": "unit_crawler_1",
+   "hiTris": 54780,
+   "lods": [
+    2630,
+    1036,
+    418
+   ],
+   "verts": [
+    1303,
+    506,
+    197
+   ],
+   "ms": {
+    "sculpt": 1,
+    "mesh": 148,
+    "decimate": 3648,
+    "bake": 123,
+    "total": 3945
+   },
+   "bytes": 139744
+  },
+  {
+   "id": "unit_shade_3a",
+   "hiTris": 115076,
+   "lods": [
+    2665,
+    1024,
+    414
+   ],
+   "verts": [
+    1109,
+    457,
+    187
+   ],
+   "ms": {
+    "sculpt": 1,
+    "mesh": 1534,
+    "decimate": 7615,
+    "bake": 169,
+    "total": 9382
+   },
+   "bytes": 126196
+  },
+  {
+   "id": "unit_banshee_1",
+   "hiTris": 76542,
+   "lods": [
+    2630,
+    1036,
+    419
+   ],
+   "verts": [
+    1182,
+    497,
+    180
+   ],
+   "ms": {
+    "sculpt": 1,
+    "mesh": 806,
+    "decimate": 3830,
+    "bake": 128,
+    "total": 4835
+   },
+   "bytes": 132008
+  },
+  {
+   "id": "unit_crawler_3b",
+   "hiTris": 75296,
+   "lods": [
+    2596,
+    994,
+    418
+   ],
+   "verts": [
+    1249,
+    487,
+    190
+   ],
+   "ms": {
+    "sculpt": 1,
+    "mesh": 516,
+    "decimate": 2704,
+    "bake": 93,
+    "total": 3387
+   },
+   "bytes": 136060
+  },
+  {
+   "id": "unit_beetle_3b",
+   "hiTris": 170524,
+   "lods": [
+    2598,
+    1000,
+    376
+   ],
+   "verts": [
+    1249,
+    436,
+    191
+   ],
+   "ms": {
+    "sculpt": 1,
+    "mesh": 695,
+    "decimate": 13624,
+    "bake": 66,
+    "total": 14458
+   },
+   "bytes": 132524
+  },
+  {
+   "id": "unit_bonethrower_2b",
+   "hiTris": 94288,
+   "lods": [
+    2597,
+    998,
+    398
+   ],
+   "verts": [
+    1191,
+    410,
+    176
+   ],
+   "ms": {
+    "sculpt": 1,
+    "mesh": 283,
+    "decimate": 2800,
+    "bake": 75,
+    "total": 3215
+   },
+   "bytes": 128504
+  },
+  {
+   "id": "unit_banshee_3b",
+   "hiTris": 92034,
+   "lods": [
+    2599,
+    999,
+    386
+   ],
+   "verts": [
+    1158,
+    483,
+    161
+   ],
+   "ms": {
+    "sculpt": 2,
+    "mesh": 364,
+    "decimate": 2591,
+    "bake": 83,
+    "total": 3082
+   },
+   "bytes": 127140
+  },
+  {
+   "id": "unit_carapace_3a",
+   "hiTris": 131948,
+   "lods": [
+    2614,
+    1226,
+    416
+   ],
+   "verts": [
+    1232,
+    538,
+    199
+   ],
+   "ms": {
+    "sculpt": 1,
+    "mesh": 389,
+    "decimate": 3799,
+    "bake": 83,
+    "total": 4328
+   },
+   "bytes": 138668
+  },
+  {
+   "id": "unit_voidmage_2a",
+   "hiTris": 111966,
+   "lods": [
+    2599,
+    1165,
+    397
+   ],
+   "verts": [
+    1230,
+    508,
+    192
+   ],
+   "ms": {
+    "sculpt": 1,
+    "mesh": 678,
+    "decimate": 3185,
+    "bake": 135,
+    "total": 4074
+   },
+   "bytes": 136512
+  },
+  {
+   "id": "unit_gargoyle_3a",
+   "hiTris": 77092,
+   "lods": [
+    2600,
+    1018,
+    412
+   ],
+   "verts": [
+    1293,
+    500,
+    232
+   ],
+   "ms": {
+    "sculpt": 3,
+    "mesh": 575,
+    "decimate": 2267,
+    "bake": 201,
+    "total": 3102
+   },
+   "bytes": 140580
+  },
+  {
+   "id": "unit_raptor_2b",
+   "hiTris": 44488,
+   "lods": [
+    2620,
+    1032,
+    418
+   ],
+   "verts": [
+    1290,
+    496,
+    210
+   ],
+   "ms": {
+    "sculpt": 5,
+    "mesh": 373,
+    "decimate": 1146,
+    "bake": 157,
+    "total": 1715
+   },
+   "bytes": 141576
+  },
+  {
+   "id": "unit_beetle_3a",
+   "hiTris": 164068,
+   "lods": [
+    2600,
+    1000,
+    380
+   ],
+   "verts": [
+    1320,
+    508,
+    203
+   ],
+   "ms": {
+    "sculpt": 1,
+    "mesh": 268,
+    "decimate": 6272,
+    "bake": 67,
+    "total": 6659
+   },
+   "bytes": 141444
+  },
+  {
+   "id": "unit_crawler_2b",
+   "hiTris": 61132,
+   "lods": [
+    2632,
+    1036,
+    418
+   ],
+   "verts": [
+    1282,
+    506,
+    197
+   ],
+   "ms": {
+    "sculpt": 1,
+    "mesh": 125,
+    "decimate": 1668,
+    "bake": 69,
+    "total": 1888
+   },
+   "bytes": 140976
+  },
+  {
+   "id": "unit_cryptgolem_1",
+   "hiTris": 86500,
+   "lods": [
+    2598,
+    1000,
+    444
+   ],
+   "verts": [
+    1283,
+    480,
+    202
+   ],
+   "ms": {
+    "sculpt": 1,
+    "mesh": 340,
+    "decimate": 2224,
+    "bake": 110,
+    "total": 2732
+   },
+   "bytes": 137628
+  },
+  {
+   "id": "unit_queen_2a",
+   "hiTris": 101204,
+   "lods": [
+    2600,
+    998,
+    400
+   ],
+   "verts": [
+    1166,
+    483,
+    182
+   ],
+   "ms": {
+    "sculpt": 3,
+    "mesh": 191,
+    "decimate": 2774,
+    "bake": 78,
+    "total": 3086
+   },
+   "bytes": 129388
+  },
+  {
+   "id": "unit_carapace_2b",
+   "hiTris": 108904,
+   "lods": [
+    2600,
+    1002,
+    428
+   ],
+   "verts": [
+    1286,
+    483,
+    222
+   ],
+   "ms": {
+    "sculpt": 1,
+    "mesh": 276,
+    "decimate": 3037,
+    "bake": 60,
+    "total": 3413
+   },
+   "bytes": 140724
+  },
+  {
+   "id": "unit_raptor_2a",
+   "hiTris": 36400,
+   "lods": [
+    2600,
+    1000,
+    380
+   ],
+   "verts": [
+    1292,
+    492,
+    182
+   ],
+   "ms": {
+    "sculpt": 1,
+    "mesh": 281,
+    "decimate": 930,
+    "bake": 201,
+    "total": 1459
+   },
+   "bytes": 135152
+  },
+  {
+   "id": "unit_locust_1",
+   "hiTris": 63900,
+   "lods": [
+    2626,
+    1032,
+    416
+   ],
+   "verts": [
+    1163,
+    450,
+    203
+   ],
+   "ms": {
+    "sculpt": 1,
+    "mesh": 122,
+    "decimate": 2420,
+    "bake": 56,
+    "total": 2619
+   },
+   "bytes": 131636
+  },
+  {
+   "id": "unit_beetle_2a",
+   "hiTris": 127648,
+   "lods": [
+    2600,
+    1000,
+    378
+   ],
+   "verts": [
+    1314,
+    510,
+    209
+   ],
+   "ms": {
+    "sculpt": 1,
+    "mesh": 207,
+    "decimate": 5045,
+    "bake": 63,
+    "total": 5348
+   },
+   "bytes": 141628
+  },
+  {
+   "id": "unit_cryptgolem_3b",
+   "hiTris": 145108,
+   "lods": [
+    2598,
+    1018,
+    378
+   ],
+   "verts": [
+    1248,
+    466,
+    195
+   ],
+   "ms": {
+    "sculpt": 1,
+    "mesh": 523,
+    "decimate": 4026,
+    "bake": 116,
+    "total": 4756
+   },
+   "bytes": 133444
+  },
+  {
+   "id": "unit_queen_1",
+   "hiTris": 85448,
+   "lods": [
+    2598,
+    998,
+    398
+   ],
+   "verts": [
+    1239,
+    435,
+    195
+   ],
+   "ms": {
+    "sculpt": 3,
+    "mesh": 162,
+    "decimate": 2267,
+    "bake": 75,
+    "total": 2533
+   },
+   "bytes": 131392
+  },
+  {
+   "id": "unit_carapace_1",
+   "hiTris": 83632,
+   "lods": [
+    2628,
+    1034,
+    452
+   ],
+   "verts": [
+    1285,
+    488,
+    197
+   ],
+   "ms": {
+    "sculpt": 1,
+    "mesh": 219,
+    "decimate": 2177,
+    "bake": 71,
+    "total": 2496
+   },
+   "bytes": 137940
+  },
+  {
+   "id": "unit_locust_3b",
+   "hiTris": 99570,
+   "lods": [
+    2597,
+    1087,
+    381
+   ],
+   "verts": [
+    1124,
+    426,
+    169
+   ],
+   "ms": {
+    "sculpt": 1,
+    "mesh": 206,
+    "decimate": 4059,
+    "bake": 62,
+    "total": 4359
+   },
+   "bytes": 125832
+  },
+  {
+   "id": "unit_mantis_3a",
+   "hiTris": 54552,
+   "lods": [
+    2598,
+    1020,
+    412
+   ],
+   "verts": [
+    1270,
+    479,
+    221
+   ],
+   "ms": {
+    "sculpt": 1,
+    "mesh": 136,
+    "decimate": 1346,
+    "bake": 65,
+    "total": 1565
+   },
+   "bytes": 137372
+  },
+  {
+   "id": "unit_queen_3b",
+   "hiTris": 137952,
+   "lods": [
+    2598,
+    998,
+    446
+   ],
+   "verts": [
+    1144,
+    476,
+    202
+   ],
+   "ms": {
+    "sculpt": 1,
+    "mesh": 269,
+    "decimate": 3674,
+    "bake": 49,
+    "total": 4032
+   },
+   "bytes": 131148
+  },
+  {
+   "id": "unit_witch_3a",
+   "hiTris": 133734,
+   "lods": [
+    2599,
+    1000,
+    402
+   ],
+   "verts": [
+    1127,
+    470,
+    198
+   ],
+   "ms": {
+    "sculpt": 4,
+    "mesh": 837,
+    "decimate": 3880,
+    "bake": 161,
+    "total": 4971
+   },
+   "bytes": 127796
+  },
+  {
+   "id": "unit_ghoul_2b",
+   "hiTris": 45896,
+   "lods": [
+    2600,
+    1000,
+    400
+   ],
+   "verts": [
+    1204,
+    406,
+    182
+   ],
+   "ms": {
+    "sculpt": 2,
+    "mesh": 428,
+    "decimate": 1340,
+    "bake": 254,
+    "total": 2078
+   },
+   "bytes": 127860
+  },
+  {
+   "id": "unit_carapace_3b",
+   "hiTris": 145968,
+   "lods": [
+    2598,
+    1006,
+    416
+   ],
+   "verts": [
+    1275,
+    492,
+    191
+   ],
+   "ms": {
+    "sculpt": 1,
+    "mesh": 360,
+    "decimate": 4165,
+    "bake": 65,
+    "total": 4650
+   },
+   "bytes": 138220
+  },
+  {
+   "id": "unit_raptor_3a",
+   "hiTris": 44252,
+   "lods": [
+    2598,
+    1020,
+    412
+   ],
+   "verts": [
+    1299,
+    510,
+    206
+   ],
+   "ms": {
+    "sculpt": 1,
+    "mesh": 327,
+    "decimate": 1071,
+    "bake": 133,
+    "total": 1561
+   },
+   "bytes": 139964
+  },
+  {
+   "id": "unit_brute_2b",
+   "hiTris": 111606,
+   "lods": [
+    2600,
+    1000,
+    378
+   ],
+   "verts": [
+    1198,
+    441,
+    178
+   ],
+   "ms": {
+    "sculpt": 8,
+    "mesh": 910,
+    "decimate": 3054,
+    "bake": 255,
+    "total": 4313
+   },
+   "bytes": 129752
+  },
+  {
+   "id": "unit_locust_3a",
+   "hiTris": 96054,
+   "lods": [
+    2605,
+    1026,
+    442
+   ],
+   "verts": [
+    1133,
+    484,
+    208
+   ],
+   "ms": {
+    "sculpt": 1,
+    "mesh": 226,
+    "decimate": 3835,
+    "bake": 85,
+    "total": 4178
+   },
+   "bytes": 132032
+  },
+  {
+   "id": "unit_banshee_2a",
+   "hiTris": 80790,
+   "lods": [
+    2599,
+    999,
+    426
+   ],
+   "verts": [
+    1151,
+    464,
+    171
+   ],
+   "ms": {
+    "sculpt": 2,
+    "mesh": 316,
+    "decimate": 2359,
+    "bake": 101,
+    "total": 2825
+   },
+   "bytes": 127500
+  },
+  {
+   "id": "unit_mantis_2b",
+   "hiTris": 42656,
+   "lods": [
+    2598,
+    1000,
+    456
+   ],
+   "verts": [
+    1293,
+    492,
+    218
+   ],
+   "ms": {
+    "sculpt": 1,
+    "mesh": 101,
+    "decimate": 1031,
+    "bake": 72,
+    "total": 1218
+   },
+   "bytes": 139052
+  },
+  {
+   "id": "unit_gargoyle_1",
+   "hiTris": 50392,
+   "lods": [
+    2630,
+    1036,
+    418
+   ],
+   "verts": [
+    1310,
+    513,
+    204
+   ],
+   "ms": {
+    "sculpt": 1,
+    "mesh": 467,
+    "decimate": 1271,
+    "bake": 198,
+    "total": 1975
+   },
+   "bytes": 141192
+  },
+  {
+   "id": "unit_queen_2b",
+   "hiTris": 113092,
+   "lods": [
+    2598,
+    1000,
+    432
+   ],
+   "verts": [
+    1118,
+    474,
+    193
+   ],
+   "ms": {
+    "sculpt": 3,
+    "mesh": 201,
+    "decimate": 2910,
+    "bake": 75,
+    "total": 3222
+   },
+   "bytes": 129448
+  },
+  {
+   "id": "unit_elemental_2a",
+   "hiTris": 105784,
+   "lods": [
+    2600,
+    1000,
+    392
+   ],
+   "verts": [
+    1253,
+    437,
+    168
+   ],
+   "ms": {
+    "sculpt": 1,
+    "mesh": 396,
+    "decimate": 2654,
+    "bake": 129,
+    "total": 3221
+   },
+   "bytes": 128376
+  },
+  {
+   "id": "unit_brute_2a",
+   "hiTris": 87752,
+   "lods": [
+    2600,
+    1000,
+    380
+   ],
+   "verts": [
+    1238,
+    436,
+    175
+   ],
+   "ms": {
+    "sculpt": 11,
+    "mesh": 845,
+    "decimate": 2325,
+    "bake": 276,
+    "total": 3549
+   },
+   "bytes": 129156
+  },
+  {
+   "id": "unit_gargoyle_3b",
+   "hiTris": 80792,
+   "lods": [
+    2598,
+    998,
+    378
+   ],
+   "verts": [
+    1242,
+    459,
+    189
+   ],
+   "ms": {
+    "sculpt": 1,
+    "mesh": 507,
+    "decimate": 2234,
+    "bake": 181,
+    "total": 2971
+   },
+   "bytes": 134340
+  },
+  {
+   "id": "unit_locust_2a",
+   "hiTris": 78432,
+   "lods": [
+    2628,
+    1162,
+    416
+   ],
+   "verts": [
+    1159,
+    515,
+    207
+   ],
+   "ms": {
+    "sculpt": 1,
+    "mesh": 172,
+    "decimate": 3122,
+    "bake": 73,
+    "total": 3387
+   },
+   "bytes": 136008
+  },
+  {
+   "id": "unit_pyromancer_1",
+   "hiTris": 97704,
+   "lods": [
+    2598,
+    1000,
+    378
+   ],
+   "verts": [
+    1232,
+    450,
+    185
+   ],
+   "ms": {
+    "sculpt": 1,
+    "mesh": 788,
+    "decimate": 2530,
+    "bake": 191,
+    "total": 3589
+   },
+   "bytes": 131640
+  },
+  {
+   "id": "unit_mantis_1",
+   "hiTris": 40008,
+   "lods": [
+    2624,
+    1034,
+    428
+   ],
+   "verts": [
+    1295,
+    500,
+    197
+   ],
+   "ms": {
+    "sculpt": 1,
+    "mesh": 94,
+    "decimate": 1047,
+    "bake": 77,
+    "total": 1232
+   },
+   "bytes": 138984
+  },
+  {
+   "id": "unit_crawler_3a",
+   "hiTris": 65832,
+   "lods": [
+    2600,
+    1024,
+    414
+   ],
+   "verts": [
+    1272,
+    484,
+    218
+   ],
+   "ms": {
+    "sculpt": 2,
+    "mesh": 138,
+    "decimate": 1665,
+    "bake": 72,
+    "total": 1903
+   },
+   "bytes": 137680
+  },
+  {
+   "id": "unit_elemental_1",
+   "hiTris": 92596,
+   "lods": [
+    2598,
+    998,
+    394
+   ],
+   "verts": [
+    1288,
+    488,
+    172
+   ],
+   "ms": {
+    "sculpt": 4,
+    "mesh": 347,
+    "decimate": 2383,
+    "bake": 96,
+    "total": 2860
+   },
+   "bytes": 133016
+  },
+  {
+   "id": "unit_mantis_3b",
+   "hiTris": 71636,
+   "lods": [
+    2600,
+    1068,
+    378
+   ],
+   "verts": [
+    1230,
+    458,
+    178
+   ],
+   "ms": {
+    "sculpt": 1,
+    "mesh": 200,
+    "decimate": 1857,
+    "bake": 68,
+    "total": 2150
+   },
+   "bytes": 133264
+  },
+  {
+   "id": "unit_pyromancer_3b",
+   "hiTris": 125872,
+   "lods": [
+    2600,
+    1000,
+    380
+   ],
+   "verts": [
+    1224,
+    460,
+    181
+   ],
+   "ms": {
+    "sculpt": 1,
+    "mesh": 742,
+    "decimate": 3521,
+    "bake": 143,
+    "total": 4498
+   },
+   "bytes": 130576
+  },
+  {
+   "id": "unit_elemental_3b",
+   "hiTris": 138916,
+   "lods": [
+    2600,
+    1108,
+    380
+   ],
+   "verts": [
+    1245,
+    485,
+    189
+   ],
+   "ms": {
+    "sculpt": 1,
+    "mesh": 477,
+    "decimate": 3497,
+    "bake": 93,
+    "total": 4110
+   },
+   "bytes": 132476
+  },
+  {
+   "id": "unit_beetle_2b",
+   "hiTris": 134992,
+   "lods": [
+    2600,
+    998,
+    378
+   ],
+   "verts": [
+    1280,
+    475,
+    206
+   ],
+   "ms": {
+    "sculpt": 1,
+    "mesh": 256,
+    "decimate": 4725,
+    "bake": 61,
+    "total": 5088
+   },
+   "bytes": 137604
+  },
+  {
+   "id": "unit_salamander_3a",
+   "hiTris": 59476,
+   "lods": [
+    2600,
+    998,
+    394
+   ],
+   "verts": [
+    1310,
+    509,
+    213
+   ],
+   "ms": {
+    "sculpt": 4,
+    "mesh": 433,
+    "decimate": 1550,
+    "bake": 155,
+    "total": 2182
+   },
+   "bytes": 140408
+  },
+  {
+   "id": "unit_brute_3a",
+   "hiTris": 115596,
+   "lods": [
+    2620,
+    1032,
+    450
+   ],
+   "verts": [
+    1237,
+    517,
+    221
+   ],
+   "ms": {
+    "sculpt": 4,
+    "mesh": 973,
+    "decimate": 3320,
+    "bake": 241,
+    "total": 4660
+   },
+   "bytes": 138660
+  },
+  {
+   "id": "unit_imp_2b",
+   "hiTris": 40368,
+   "lods": [
+    2600,
+    998,
+    386
+   ],
+   "verts": [
+    1272,
+    471,
+    193
+   ],
+   "ms": {
+    "sculpt": 2,
+    "mesh": 241,
+    "decimate": 967,
+    "bake": 188,
+    "total": 1423
+   },
+   "bytes": 135620
+  },
+  {
+   "id": "unit_carapace_2a",
+   "hiTris": 101328,
+   "lods": [
+    2630,
+    1036,
+    418
+   ],
+   "verts": [
+    1287,
+    490,
+    202
+   ],
+   "ms": {
+    "sculpt": 1,
+    "mesh": 318,
+    "decimate": 2632,
+    "bake": 86,
+    "total": 3083
+   },
+   "bytes": 138256
+  },
+  {
+   "id": "unit_pyromancer_3a",
+   "hiTris": 124040,
+   "lods": [
+    2600,
+    1122,
+    380
+   ],
+   "verts": [
+    1210,
+    496,
+    178
+   ],
+   "ms": {
+    "sculpt": 2,
+    "mesh": 761,
+    "decimate": 3502,
+    "bake": 137,
+    "total": 4483
+   },
+   "bytes": 132792
+  },
+  {
+   "id": "unit_hound_2a",
+   "hiTris": 47136,
+   "lods": [
+    2612,
+    1028,
+    416
+   ],
+   "verts": [
+    1310,
+    518,
+    212
+   ],
+   "ms": {
+    "sculpt": 1,
+    "mesh": 468,
+    "decimate": 1210,
+    "bake": 187,
+    "total": 1899
+   },
+   "bytes": 141780
+  },
+  {
+   "id": "unit_raptor_1",
+   "hiTris": 33220,
+   "lods": [
+    2600,
+    1000,
+    380
+   ],
+   "verts": [
+    1298,
+    498,
+    188
+   ],
+   "ms": {
+    "sculpt": 1,
+    "mesh": 292,
+    "decimate": 831,
+    "bake": 172,
+    "total": 1319
+   },
+   "bytes": 136140
+  },
+  {
+   "id": "unit_elemental_2b",
+   "hiTris": 111852,
+   "lods": [
+    2598,
+    1000,
+    380
+   ],
+   "verts": [
+    1282,
+    483,
+    198
+   ],
+   "ms": {
+    "sculpt": 1,
+    "mesh": 428,
+    "decimate": 2974,
+    "bake": 81,
+    "total": 3522
+   },
+   "bytes": 134364
+  },
+  {
+   "id": "unit_salamander_2b",
+   "hiTris": 52704,
+   "lods": [
+    2598,
+    1000,
+    380
+   ],
+   "verts": [
+    1310,
+    493,
+    186
+   ],
+   "ms": {
+    "sculpt": 1,
+    "mesh": 401,
+    "decimate": 1359,
+    "bake": 141,
+    "total": 1938
+   },
+   "bytes": 137728
+  },
+  {
+   "id": "unit_raptor_3b",
+   "hiTris": 59896,
+   "lods": [
+    2600,
+    1012,
+    380
+   ],
+   "verts": [
+    1258,
+    487,
+    189
+   ],
+   "ms": {
+    "sculpt": 0,
+    "mesh": 332,
+    "decimate": 1405,
+    "bake": 107,
+    "total": 1878
+   },
+   "bytes": 135932
+  },
+  {
+   "id": "unit_golem_1",
+   "hiTris": 71040,
+   "lods": [
+    2608,
+    1028,
+    416
+   ],
+   "verts": [
+    1297,
+    507,
+    211
+   ],
+   "ms": {
+    "sculpt": 1,
+    "mesh": 457,
+    "decimate": 1898,
+    "bake": 173,
+    "total": 2576
+   },
+   "bytes": 142968
+  },
+  {
+   "id": "unit_imp_2a",
+   "hiTris": 41032,
+   "lods": [
+    2600,
+    998,
+    398
+   ],
+   "verts": [
+    1272,
+    471,
+    197
+   ],
+   "ms": {
+    "sculpt": 2,
+    "mesh": 252,
+    "decimate": 1003,
+    "bake": 206,
+    "total": 1491
+   },
+   "bytes": 136164
+  },
+  {
+   "id": "unit_pyromancer_2a",
+   "hiTris": 106188,
+   "lods": [
+    2600,
+    998,
+    380
+   ],
+   "verts": [
+    1214,
+    436,
+    172
+   ],
+   "ms": {
+    "sculpt": 2,
+    "mesh": 708,
+    "decimate": 2702,
+    "bake": 143,
+    "total": 3635
+   },
+   "bytes": 128956
+  },
+  {
+   "id": "unit_hound_1",
+   "hiTris": 45812,
+   "lods": [
+    2612,
+    1028,
+    416
+   ],
+   "verts": [
+    1311,
+    519,
+    213
+   ],
+   "ms": {
+    "sculpt": 1,
+    "mesh": 471,
+    "decimate": 1135,
+    "bake": 241,
+    "total": 1880
+   },
+   "bytes": 141952
+  },
+  {
+   "id": "unit_queen_3a",
+   "hiTris": 124924,
+   "lods": [
+    2600,
+    998,
+    402
+   ],
+   "verts": [
+    1208,
+    499,
+    197
+   ],
+   "ms": {
+    "sculpt": 2,
+    "mesh": 212,
+    "decimate": 3209,
+    "bake": 79,
+    "total": 3537
+   },
+   "bytes": 133392
+  },
+  {
+   "id": "unit_golem_3b",
+   "hiTris": 108812,
+   "lods": [
+    2600,
+    996,
+    378
+   ],
+   "verts": [
+    1198,
+    476,
+    181
+   ],
+   "ms": {
+    "sculpt": 1,
+    "mesh": 573,
+    "decimate": 2957,
+    "bake": 129,
+    "total": 3726
+   },
+   "bytes": 132444
+  },
+  {
+   "id": "unit_salamander_1",
+   "hiTris": 48324,
+   "lods": [
+    2598,
+    1000,
+    398
+   ],
+   "verts": [
+    1314,
+    515,
+    212
+   ],
+   "ms": {
+    "sculpt": 1,
+    "mesh": 363,
+    "decimate": 1229,
+    "bake": 148,
+    "total": 1776
+   },
+   "bytes": 141048
+  },
+  {
+   "id": "unit_hound_3b",
+   "hiTris": 61352,
+   "lods": [
+    2598,
+    1000,
+    378
+   ],
+   "verts": [
+    1296,
+    495,
+    196
+   ],
+   "ms": {
+    "sculpt": 2,
+    "mesh": 504,
+    "decimate": 1537,
+    "bake": 180,
+    "total": 2260
+   },
+   "bytes": 136656
+  },
+  {
+   "id": "unit_salamander_3b",
+   "hiTris": 66804,
+   "lods": [
+    2600,
+    1000,
+    402
+   ],
+   "verts": [
+    1295,
+    489,
+    208
+   ],
+   "ms": {
+    "sculpt": 1,
+    "mesh": 399,
+    "decimate": 1684,
+    "bake": 107,
+    "total": 2225
+   },
+   "bytes": 139340
+  },
+  {
+   "id": "unit_locust_2b",
+   "hiTris": 76408,
+   "lods": [
+    2620,
+    1096,
+    416
+   ],
+   "verts": [
+    1159,
+    491,
+    209
+   ],
+   "ms": {
+    "sculpt": 1,
+    "mesh": 136,
+    "decimate": 3005,
+    "bake": 50,
+    "total": 3214
+   },
+   "bytes": 134320
+  },
+  {
+   "id": "unit_golem_3a",
+   "hiTris": 87436,
+   "lods": [
+    2600,
+    1032,
+    406
+   ],
+   "verts": [
+    1241,
+    460,
+    214
+   ],
+   "ms": {
+    "sculpt": 1,
+    "mesh": 565,
+    "decimate": 2328,
+    "bake": 153,
+    "total": 3100
+   },
+   "bytes": 137368
+  },
+  {
+   "id": "unit_mantis_2a",
+   "hiTris": 45936,
+   "lods": [
+    2626,
+    1034,
+    504
+   ],
+   "verts": [
+    1295,
+    499,
+    232
+   ],
+   "ms": {
+    "sculpt": 1,
+    "mesh": 107,
+    "decimate": 1095,
+    "bake": 80,
+    "total": 1298
+   },
+   "bytes": 141324
+  },
+  {
+   "id": "unit_imp_3a",
+   "hiTris": 54580,
+   "lods": [
+    2600,
+    1000,
+    392
+   ],
+   "verts": [
+    1264,
+    458,
+    192
+   ],
+   "ms": {
+    "sculpt": 2,
+    "mesh": 287,
+    "decimate": 1341,
+    "bake": 230,
+    "total": 1894
+   },
+   "bytes": 134564
+  },
+  {
+   "id": "unit_priest_glut_3a",
+   "hiTris": 116572,
+   "lods": [
+    2598,
+    1016,
+    410
+   ],
+   "verts": [
+    1279,
+    484,
+    217
+   ],
+   "ms": {
+    "sculpt": 2,
+    "mesh": 971,
+    "decimate": 3067,
+    "bake": 200,
+    "total": 4353
+   },
+   "bytes": 138472
+  },
+  {
+   "id": "unit_hound_2b",
+   "hiTris": 50408,
+   "lods": [
+    2598,
+    998,
+    382
+   ],
+   "verts": [
+    1293,
+    501,
+    194
+   ],
+   "ms": {
+    "sculpt": 1,
+    "mesh": 486,
+    "decimate": 1261,
+    "bake": 170,
+    "total": 1956
+   },
+   "bytes": 137968
+  },
+  {
+   "id": "unit_brute_1",
+   "hiTris": 80160,
+   "lods": [
+    2600,
+    1000,
+    380
+   ],
+   "verts": [
+    1247,
+    447,
+    184
+   ],
+   "ms": {
+    "sculpt": 6,
+    "mesh": 817,
+    "decimate": 2090,
+    "bake": 245,
+    "total": 3232
+   },
+   "bytes": 130752
+  },
+  {
+   "id": "unit_priest_glut_2b",
+   "hiTris": 95332,
+   "lods": [
+    2598,
+    1006,
+    408
+   ],
+   "verts": [
+    1273,
+    473,
+    202
+   ],
+   "ms": {
+    "sculpt": 2,
+    "mesh": 974,
+    "decimate": 2516,
+    "bake": 215,
+    "total": 3821
+   },
+   "bytes": 136676
+  },
+  {
+   "id": "unit_phoenix_2b",
+   "hiTris": 89744,
+   "lods": [
+    2600,
+    998,
+    388
+   ],
+   "verts": [
+    1283,
+    481,
+    209
+   ],
+   "ms": {
+    "sculpt": 1,
+    "mesh": 356,
+    "decimate": 4220,
+    "bake": 65,
+    "total": 4682
+   },
+   "bytes": 132232
+  },
+  {
+   "id": "unit_golem_2a",
+   "hiTris": 77528,
+   "lods": [
+    2606,
+    1030,
+    410
+   ],
+   "verts": [
+    1287,
+    503,
+    205
+   ],
+   "ms": {
+    "sculpt": 1,
+    "mesh": 505,
+    "decimate": 2067,
+    "bake": 174,
+    "total": 2796
+   },
+   "bytes": 141832
+  },
+  {
+   "id": "unit_phoenix_2a",
+   "hiTris": 82256,
+   "lods": [
+    2600,
+    998,
+    378
+   ],
+   "verts": [
+    1251,
+    456,
+    205
+   ],
+   "ms": {
+    "sculpt": 1,
+    "mesh": 404,
+    "decimate": 3869,
+    "bake": 76,
+    "total": 4387
+   },
+   "bytes": 129352
+  },
+  {
+   "id": "unit_brute_3b",
+   "hiTris": 132808,
+   "lods": [
+    2596,
+    1052,
+    396
+   ],
+   "verts": [
+    1182,
+    468,
+    189
+   ],
+   "ms": {
+    "sculpt": 1,
+    "mesh": 919,
+    "decimate": 3759,
+    "bake": 189,
+    "total": 4963
+   },
+   "bytes": 132760
+  },
+  {
    "id": "unit_priest_glut_1",
    "hiTris": 91584,
    "lods": [
@@ -15,102 +5097,520 @@
     208
    ],
    "ms": {
-    "sculpt": 18,
-    "mesh": 1799,
-    "decimate": 3631,
-    "bake": 329,
-    "total": 6097
+    "sculpt": 2,
+    "mesh": 932,
+    "decimate": 2537,
+    "bake": 238,
+    "total": 3806
    },
    "bytes": 137948
   },
   {
-   "id": "unit_priest_glut_2a",
-   "hiTris": 94952,
+   "id": "unit_knightfallen_1",
+   "hiTris": 121548,
    "lods": [
-    2600,
-    1012,
-    408
+    2946,
+    1034,
+    416
    ],
    "verts": [
-    1273,
-    473,
-    206
+    1088,
+    313,
+    122
    ],
    "ms": {
-    "sculpt": 5,
-    "mesh": 1594,
-    "decimate": 5437,
-    "bake": 939,
-    "total": 8228
+    "sculpt": 2,
+    "mesh": 1031,
+    "decimate": 3551,
+    "bake": 218,
+    "total": 4942
    },
-   "bytes": 136956
+   "bytes": 115520
   },
   {
-   "id": "unit_priest_glut_2b",
-   "hiTris": 103988,
-   "lods": [
-    2600,
-    998,
-    406
-   ],
-   "verts": [
-    1294,
-    483,
-    212
-   ],
-   "ms": {
-    "sculpt": 10,
-    "mesh": 2431,
-    "decimate": 6521,
-    "bake": 255,
-    "total": 9387
-   },
-   "bytes": 141080
-  },
-  {
-   "id": "unit_priest_glut_3a",
-   "hiTris": 138162,
+   "id": "unit_serpent_1",
+   "hiTris": 48920,
    "lods": [
     2600,
     1000,
+    380
+   ],
+   "verts": [
+    1257,
+    457,
+    173
+   ],
+   "ms": {
+    "sculpt": 1,
+    "mesh": 698,
+    "decimate": 1390,
+    "bake": 289,
+    "total": 2431
+   },
+   "bytes": 131560
+  },
+  {
+   "id": "unit_elemental_3a",
+   "hiTris": 116604,
+   "lods": [
+    2600,
+    1000,
+    378
+   ],
+   "verts": [
+    1220,
+    467,
+    195
+   ],
+   "ms": {
+    "sculpt": 2,
+    "mesh": 482,
+    "decimate": 3222,
+    "bake": 68,
+    "total": 3818
+   },
+   "bytes": 129772
+  },
+  {
+   "id": "unit_priest_glut_3b",
+   "hiTris": 112670,
+   "lods": [
+    2600,
+    1000,
+    382
+   ],
+   "verts": [
+    1253,
+    465,
+    183
+   ],
+   "ms": {
+    "sculpt": 1,
+    "mesh": 923,
+    "decimate": 3234,
+    "bake": 210,
+    "total": 4483
+   },
+   "bytes": 133140
+  },
+  {
+   "id": "unit_serpent_3b",
+   "hiTris": 65492,
+   "lods": [
+    2600,
+    998,
     398
    ],
    "verts": [
     1253,
-    519,
-    204
+    453,
+    191
    ],
    "ms": {
-    "sculpt": 6,
-    "mesh": 3458,
-    "decimate": 6576,
-    "bake": 309,
-    "total": 10633
+    "sculpt": 2,
+    "mesh": 809,
+    "decimate": 1798,
+    "bake": 265,
+    "total": 2927
    },
-   "bytes": 137740
+   "bytes": 135188
   },
   {
-   "id": "unit_priest_glut_3b",
-   "hiTris": 213380,
+   "id": "unit_knightfallen_2b",
+   "hiTris": 125884,
+   "lods": [
+    2872,
+    1028,
+    416
+   ],
+   "verts": [
+    1050,
+    305,
+    110
+   ],
+   "ms": {
+    "sculpt": 1,
+    "mesh": 986,
+    "decimate": 3653,
+    "bake": 202,
+    "total": 4983
+   },
+   "bytes": 111932
+  },
+  {
+   "id": "unit_pyromancer_2b",
+   "hiTris": 105024,
+   "lods": [
+    2600,
+    1000,
+    386
+   ],
+   "verts": [
+    1225,
+    448,
+    178
+   ],
+   "ms": {
+    "sculpt": 1,
+    "mesh": 741,
+    "decimate": 3007,
+    "bake": 162,
+    "total": 4056
+   },
+   "bytes": 130700
+  },
+  {
+   "id": "unit_serpent_2b",
+   "hiTris": 52340,
+   "lods": [
+    2600,
+    998,
+    394
+   ],
+   "verts": [
+    1265,
+    464,
+    192
+   ],
+   "ms": {
+    "sculpt": 2,
+    "mesh": 680,
+    "decimate": 1235,
+    "bake": 260,
+    "total": 2222
+   },
+   "bytes": 135020
+  },
+  {
+   "id": "unit_salamander_2a",
+   "hiTris": 49364,
    "lods": [
     2598,
     998,
-    400
+    410
    ],
    "verts": [
-    1276,
-    484,
-    207
+    1305,
+    505,
+    209
+   ],
+   "ms": {
+    "sculpt": 1,
+    "mesh": 425,
+    "decimate": 1272,
+    "bake": 144,
+    "total": 1880
+   },
+   "bytes": 139896
+  },
+  {
+   "id": "unit_phoenix_3a",
+   "hiTris": 109032,
+   "lods": [
+    2598,
+    1000,
+    378
+   ],
+   "verts": [
+    1187,
+    459,
+    204
+   ],
+   "ms": {
+    "sculpt": 1,
+    "mesh": 433,
+    "decimate": 4676,
+    "bake": 41,
+    "total": 5195
+   },
+   "bytes": 126008
+  },
+  {
+   "id": "unit_knightfallen_3b",
+   "hiTris": 138600,
+   "lods": [
+    3146,
+    1000,
+    386
+   ],
+   "verts": [
+    1186,
+    312,
+    107
    ],
    "ms": {
     "sculpt": 3,
-    "mesh": 2546,
-    "decimate": 9129,
-    "bake": 144,
-    "total": 12021
+    "mesh": 985,
+    "decimate": 3681,
+    "bake": 204,
+    "total": 5001
    },
-   "bytes": 137052
+   "bytes": 120404
+  },
+  {
+   "id": "unit_imp_1",
+   "hiTris": 34188,
+   "lods": [
+    2598,
+    1000,
+    392
+   ],
+   "verts": [
+    1075,
+    403,
+    174
+   ],
+   "ms": {
+    "sculpt": 1,
+    "mesh": 205,
+    "decimate": 967,
+    "bake": 177,
+    "total": 1377
+   },
+   "bytes": 120328
+  },
+  {
+   "id": "unit_serpent_2a",
+   "hiTris": 57992,
+   "lods": [
+    2600,
+    1000,
+    380
+   ],
+   "verts": [
+    1258,
+    458,
+    181
+   ],
+   "ms": {
+    "sculpt": 1,
+    "mesh": 677,
+    "decimate": 1354,
+    "bake": 233,
+    "total": 2314
+   },
+   "bytes": 132108
+  },
+  {
+   "id": "unit_imp_3b",
+   "hiTris": 56904,
+   "lods": [
+    2598,
+    1030,
+    380
+   ],
+   "verts": [
+    1252,
+    464,
+    189
+   ],
+   "ms": {
+    "sculpt": 2,
+    "mesh": 331,
+    "decimate": 1367,
+    "bake": 147,
+    "total": 1883
+   },
+   "bytes": 132720
+  },
+  {
+   "id": "unit_worker_1",
+   "hiTris": 21892,
+   "lods": [
+    2598,
+    998,
+    430
+   ],
+   "verts": [
+    1303,
+    503,
+    219
+   ],
+   "ms": {
+    "sculpt": 0,
+    "mesh": 24,
+    "decimate": 467,
+    "bake": 16,
+    "total": 511
+   },
+   "bytes": 141444
+  },
+  {
+   "id": "unit_hound_3a",
+   "hiTris": 58732,
+   "lods": [
+    2598,
+    1008,
+    432
+   ],
+   "verts": [
+    1309,
+    502,
+    214
+   ],
+   "ms": {
+    "sculpt": 1,
+    "mesh": 506,
+    "decimate": 1401,
+    "bake": 159,
+    "total": 2105
+   },
+   "bytes": 140748
+  },
+  {
+   "id": "unit_serpent_3a",
+   "hiTris": 90728,
+   "lods": [
+    2610,
+    1048,
+    416
+   ],
+   "verts": [
+    1243,
+    461,
+    192
+   ],
+   "ms": {
+    "sculpt": 1,
+    "mesh": 782,
+    "decimate": 2358,
+    "bake": 174,
+    "total": 3380
+   },
+   "bytes": 134428
+  },
+  {
+   "id": "unit_golem_2b",
+   "hiTris": 88596,
+   "lods": [
+    2612,
+    1028,
+    432
+   ],
+   "verts": [
+    1221,
+    494,
+    200
+   ],
+   "ms": {
+    "sculpt": 1,
+    "mesh": 497,
+    "decimate": 2224,
+    "bake": 121,
+    "total": 2894
+   },
+   "bytes": 137584
+  },
+  {
+   "id": "unit_priest_glut_2a",
+   "hiTris": 97068,
+   "lods": [
+    2600,
+    1022,
+    412
+   ],
+   "verts": [
+    1281,
+    488,
+    205
+   ],
+   "ms": {
+    "sculpt": 1,
+    "mesh": 880,
+    "decimate": 2494,
+    "bake": 185,
+    "total": 3644
+   },
+   "bytes": 138356
+  },
+  {
+   "id": "unit_phoenix_1",
+   "hiTris": 68772,
+   "lods": [
+    2600,
+    998,
+    380
+   ],
+   "verts": [
+    1233,
+    448,
+    191
+   ],
+   "ms": {
+    "sculpt": 1,
+    "mesh": 314,
+    "decimate": 3093,
+    "bake": 59,
+    "total": 3498
+   },
+   "bytes": 127748
+  },
+  {
+   "id": "unit_phoenix_3b",
+   "hiTris": 127064,
+   "lods": [
+    2598,
+    996,
+    420
+   ],
+   "verts": [
+    1260,
+    489,
+    224
+   ],
+   "ms": {
+    "sculpt": 1,
+    "mesh": 514,
+    "decimate": 5912,
+    "bake": 42,
+    "total": 6518
+   },
+   "bytes": 134948
+  },
+  {
+   "id": "unit_knightfallen_3a",
+   "hiTris": 154934,
+   "lods": [
+    2624,
+    1248,
+    418
+   ],
+   "verts": [
+    1201,
+    507,
+    196
+   ],
+   "ms": {
+    "sculpt": 2,
+    "mesh": 1050,
+    "decimate": 8759,
+    "bake": 215,
+    "total": 10169
+   },
+   "bytes": 135864
+  },
+  {
+   "id": "unit_knightfallen_2a",
+   "hiTris": 121436,
+   "lods": [
+    2628,
+    1034,
+    466
+   ],
+   "verts": [
+    1136,
+    451,
+    227
+   ],
+   "ms": {
+    "sculpt": 1,
+    "mesh": 952,
+    "decimate": 7325,
+    "bake": 237,
+    "total": 8652
+   },
+   "bytes": 129924
   }
  ],
- "totalBytes": 42398933
+ "totalBytes": 42085345
 }

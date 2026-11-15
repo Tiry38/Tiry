@@ -110,7 +110,8 @@ test('Anführer: erscheint je Bahn, wirkt Fähigkeiten mit Bodenwarnung', () => 
   const sim = new Sim({ seed: 3, players: players(1), rules: { startWave: 12 } });
   sim.phaseTime = 0;
   const ev = [];
-  for (let i = 0; i < 20 * 60 && sim.phase === 'build' || (sim.phase === 'battle' && i < 20 * 90); i++) for (const e of sim.step()) ev.push(e);
+  // genau eine Welle (bis zum ersten Wellenende)
+  for (let i = 0; i < 20 * 120 && !ev.some((e) => e.e === 'waveEnd'); i++) for (const e of sim.step()) ev.push(e);
   assert.equal(ev.filter((e) => e.e === 'leaderSpawn').length, 2);
   assert.ok(ev.some((e) => e.e === 'leaderCast'));
 });

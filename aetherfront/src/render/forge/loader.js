@@ -5,7 +5,7 @@ import * as THREE from 'three';
 import { decodeAFM } from './format.js';
 import { createForgeMaterial, createForgeGlowMaterial, createForgeGlassMaterial } from './materials.js';
 import { attachHeroFx } from './fx.js';
-import { ARCH_FIT, TIER_SCALE } from './roster.js';
+import { ARCH_FIT, TIER_SCALE, formFit, PALETTE_LIFT } from './roster.js';
 
 const BASE = 'assets/models/';
 const cache = new Map();      // id → { header, arrays }
@@ -232,15 +232,16 @@ export function buildForgedUnit(arch, opts = {}, defaults = {}) {
   if (!asset) return null;
   const { header, arrays } = asset;
   const info = header.info || {};
+  const lift = (h) => (h && PALETTE_LIFT[String(h).toLowerCase()]) || h;
   const pal = {
-    1: hexLin(opts.primary || defaults.primary || header.palette.primary),
-    2: hexLin(opts.secondary || defaults.secondary || header.palette.secondary),
-    3: hexLin(opts.metal || defaults.metal || header.palette.metal),
+    1: hexLin(lift(opts.primary || defaults.primary || header.palette.primary)),
+    2: hexLin(lift(opts.secondary || defaults.secondary || header.palette.secondary)),
+    3: hexLin(lift(opts.metal || defaults.metal || header.palette.metal)),
     4: hexLin(opts.glow || defaults.glow || header.palette.glow),
   };
   const tier = Math.max(1, Math.min(3, opts.tier | 0 || (opts.form ? +String(opts.form)[0] : 1) || 1));
   const formed = !!info.form;
-  const scale = formed ? (opts.fit ?? ARCH_FIT[arch] ?? 1) * TIER_SCALE[tier] : [1, 1.12, 1.25][tier - 1];
+  const scale = formed ? (opts.fit ?? ARCH_FIT[arch] ?? 1) * (info.form ? formFit(arch, info.form) : TIER_SCALE[tier]) : [1, 1.12, 1.25][tier - 1];
   const lodN = header.meshes[0].lods.length;
   const L = Math.max(0, Math.min(lodN - 1, opts.lod ?? lodBias));
   const out = {};

@@ -30,6 +30,7 @@ function robe(S, BL, s, col, o = {}) {
 }
 /** Kapuze / Haube über dem Kopf */
 function hood(S, BL, col, o = {}) {
+  if (S.noHelm) return;
   const H = headInfo(BL), s = H.s;
   S.shell({ off: 0.012 * s, th: 0.02 * s, mat: 'cloth', col, region: 'head', clip: (x, y, z) => -max(max(abs(x) - 0.07 * s, y - H.c[1] - 0.05 * s), -(z - H.c[2] - 0.035 * s)) }, () => {
     S.ellipsoid(H.at(0, 0.02, -0.02), [0.105, 0.125, 0.115], {});
@@ -91,12 +92,12 @@ A.griffin = { H: 2.2, style: 'orden', build(S, P, F) {
   // Flügel: Stufe I angelegt, ab II halb, III-B übernimmt die Form-Schicht
   const spread = F.tier === 1 ? 0.15 : 0.45;
   const c = quadCls(J, 2.2, 0.36 * 2.2);
-  if (!(F.tier >= 3 && F.path === 'b')) {
+  if (true) {
     for (const [sd, k] of [['L', 1], ['R', -1]]) {
       const root = [k * 0.18, 1.12, 0.12];
       J['wing' + sd] = { pos: V(...root), parent: 'chest' }; c['wing' + sd] = [4, root[0], root[1], 0];
     }
-    S.sym(() => wing(S, [0.18, 1.12, 0.12], F.tier === 1 ? 0.8 : 1.05, { style: 'orden', region: ['wingL'], up: spread, col: 'primary' }));
+    S.sym(() => wing(S, [0.18, 1.12, 0.12], [0.7, 0.82, 0.92][T(F) - 1], { style: 'orden', region: ['wingL'], up: spread + 0.35, col: 'primary', glowEdge: isB(F) }));
   }
   if (isB(F)) glow(S, () => { S.capsule(add(h, [0, 0.12, -0.05]), add(h, [0, 0.28, -0.3]), 0.025, 0.006, G({ region: ['head'], glow: 3.2 })); });
   return plan(J, { cls: c, radius: 0.75, H: 2.0, anchors: { ...quadAnchors(J, { headUp: 0.16, backUp: 0.28, backZ: 0.2 }), shoulder: { p: [0.2, 1.08, 0.33], r: 0.13, region: ['chest', 'flegL'] } }, wingL: 1.3 });
@@ -291,12 +292,12 @@ A.owl = { H: 2.0, style: 'wild', build(S, P, F) {
   for (const sd of ['L', 'R']) { const f = jp(J, 'foot' + sd); S.capsule(jp(J, 'thigh' + sd), f, 0.05, 0.035, { mat: 'scale', col: 'metal', region: ['thigh' + sd, 'foot' + sd] }); for (let k = 0; k < 3; k++) S.capsule(f, add(f, [(k - 1) * 0.06, -0.02, 0.12]), 0.02, 0.006, { mat: 'horn', col: '#2a2420', region: ['foot' + sd] }); }
   // angelegte Flügel (Seiten) bzw. ausgebreitet ab II
   const c = {};
-  if (!(F.tier >= 3 && F.path === 'b')) for (const [sd, k] of [['L', 1], ['R', -1]]) {
+  for (const [sd, k] of [['L', 1], ['R', -1]]) {
     const root = [k * 0.32, 1.15, -0.05];
     J['wing' + sd] = { pos: V(...root), parent: 'chest' }; c['wing' + sd] = [4, root[0], root[1], 0];
   }
   if (F.tier === 1) S.sym(() => S.ellipsoid([0.34, 0.85, -0.05], [0.12, 0.42, 0.26], { rot: [0.15, 0, 0.12], ...fea, col: 'secondary*0.8', region: ['wingL'] }));
-  else if (!(F.tier >= 3 && F.path === 'b')) S.sym(() => wing(S, [0.32, 1.15, -0.05], 1.1, { style: 'orden', region: ['wingL'], up: 0.35, col: 'secondary' }));
+  else S.sym(() => wing(S, [0.32, 1.15, -0.05], T(F) === 3 ? 0.95 : 0.85, { style: 'orden', region: ['wingL'], up: 0.7, col: 'secondary', glowEdge: isB(F) }));
   // Stab-Feder (Seherin): Glühmuster
   if (isB(F)) glow(S, () => { S.torus([0, 1.44, 0.22], 0.28, 0.012, { rot: [PI / 2, 0, 0], ...G({ region: ['head'], glow: 2.6 }) }); });
   return plan(J, { cls: c, radius: 0.6, H: 2.0, hipY: 0.55, anchors: { head: { p: [0, 1.72, 0.04], r: 0.14, region: ['head'] }, back: { p: [0, 1.15, -0.32], w: 0.3, region: ['chest'], parentJoint: 'chest' }, shoulder: { p: [0.3, 1.18, 0.0], r: 0.12, region: ['chest'] } }, wingL: 1.3 });
@@ -702,9 +703,9 @@ A.gargoyle = { H: 2.1, style: 'abgrund', build(S, P, F) {
   S.tube([add(jp(J, 'hips'), [0, 0, -0.15]), [0, 0.3, -0.5], [0.15, 0.05, -0.75], [0.3, 0.04, -0.85]], [0.06, 0.045, 0.03, 0.008], { ...stone, region: 'torso' });
   // Flügel (Stein-Fledermaus): angelegt bei I/II
   const c = {};
-  if (!(F.tier >= 3 && F.path === 'b')) {
+  if (true) {
     for (const [sd, k] of [['L', 1], ['R', -1]]) { const root = [k * 0.2, 1.08, -0.12]; J['wing' + sd] = { pos: V(...root), parent: 'chest' }; c['wing' + sd] = [4, root[0], root[1], 0]; }
-    S.sym(() => wing(S, [0.2, 1.08, -0.12], [0.75, 0.95, 1.1][T(F) - 1], { style: 'abgrund', region: ['wingL'], up: 0.95, bone: '#4a4650', skin: '#5a5660' }));
+    S.sym(() => wing(S, [0.2, 1.08, -0.12], [0.65, 0.75, 0.85][T(F) - 1], { style: 'abgrund', glowEdge: isB(F), region: ['wingL'], up: 0.95, bone: '#4a4650', skin: '#5a5660' }));
   }
   eyes(S, add(jp(J, 'head'), [0, 0.03, 0.13]), 0.05, 0.02, 'head', 3.6);
   return plan(J, { cls: c, radius: 0.7, H: 1.6, anchors: humanAnchors(J, s, { headTop: 0.12, backZ: 0.22, backW: 0.25 }), wingL: 1.2 });
@@ -806,7 +807,7 @@ A.locust = { H: 1.6, style: 'schwarm', hover: true, build(S, P, F) {
   }
   bugLegs(S, J, cls, 2, { rx: 0.14, y: 0.7, kx: 0.38, ky: 0.62, fx: 0.46, z0: 0.3, dz: 0.2, r: 0.03, mat: ch });
   // Flügel immer (Heuschrecke); III-B ersetzt sie durch die Form-Schicht
-  if (!(F.tier >= 3 && F.path === 'b')) {
+  if (true) {
     for (const [sd, k] of [['L', 1], ['R', -1]]) { const root = [k * 0.12, 0.95, 0.05]; J['wing' + sd] = { pos: V(...root), parent: 'chest' }; cls['wing' + sd] = [4, root[0], root[1], 0]; }
     S.sym(() => wing(S, [0.12, 0.95, 0.05], [0.75, 0.9, 1.0][T(F) - 1], { style: 'schwarm', region: ['wingL'], up: 0.25 }));
   }
@@ -933,7 +934,7 @@ A.imp = { H: 1.4, style: 'glut', hover: true, build(S, P, F) {
   for (const a of [-1, 0, 1]) S.capsule(fr.at(a * 0.07, 0.85), fr.at(a * 0.08, 1.05 + (a ? 0 : 0.05)), 0.016, 0.003, { mat: 'iron', col: 'metal', bone: 'weaponR' });
   // Flügel (klein, Fledermaus)
   const c = {};
-  if (!(F.tier >= 3 && F.path === 'b')) {
+  if (true) {
     for (const [sd, k] of [['L', 1], ['R', -1]]) { const root = [k * 0.1, 1.15 * s + 0.15, -0.1]; J['wing' + sd] = { pos: V(...root), parent: 'chest' }; c['wing' + sd] = [4, root[0], root[1], 0]; }
     S.sym(() => wing(S, [0.1, 1.15 * s + 0.15, -0.1], [0.55, 0.7, 0.8][T(F) - 1], { style: 'abgrund', region: ['wingL'], up: 0.8, bone: '#2a1a1a', skin: 'primary*1.5' }));
   }
@@ -984,9 +985,9 @@ A.phoenix = { H: 2.2, style: 'glut', build(S, P, F) {
     for (const sx of [1, -1]) S.sphere([sx * 0.07, 1.74, 0.4], 0.022, G({ region: ['head'], glow: 4 }));
   });
   const c = {}; tailCls(c, ['tail', 'tail1', 'tail2'], 2.0, 0.05);
-  if (!(F.tier >= 3 && F.path === 'b')) {
+  if (true) {
     for (const [sd, k] of [['L', 1], ['R', -1]]) { const root = [k * 0.22, 1.2, -0.02]; J['wing' + sd] = { pos: V(...root), parent: 'chest' }; c['wing' + sd] = [4, root[0], root[1], 0]; }
-    S.sym(() => wing(S, [0.22, 1.2, -0.02], [0.9, 1.15, 1.35][T(F) - 1], { style: 'glut', region: ['wingL'], up: 0.6 }));
+    S.sym(() => wing(S, [0.22, 1.2, -0.02], [0.75, 0.88, 1.0][T(F) - 1], { style: 'glut', region: ['wingL'], up: 0.9 }));
   }
   return plan(J, { cls: c, radius: 0.65, H: 2.0, hipY: 0.75, anchors: { head: { p: [0, 1.86, 0.28], r: 0.1, region: ['head'] }, back: { p: [0, 1.2, -0.2], w: 0.24, region: ['chest'], parentJoint: 'chest' }, shoulder: { p: [0.22, 1.25, 0.1], r: 0.1, region: ['chest'] } }, wingL: 1.35 });
 } };

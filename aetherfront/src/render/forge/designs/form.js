@@ -121,15 +121,13 @@ export function groundRing(S, R, style, heavy) {
   const reg = ['hips'];
   const y = 0.03;
   if (heavy) {
-    S.torus([0, y, 0], R, 0.035, { mat: 'gold', col: 'metal', region: reg, wear: 1 });
-    S.torus([0, y, 0], R * 0.86, 0.018, { mat: 'steel', col: 'metal', region: reg });
-    onLayer(S, 'glow', () => { for (let i = 0; i < 8; i++) { const a = (i / 8) * TAU; S.sphere([sin(a) * R, y + 0.03, cos(a) * R], 0.038, G({ region: reg, glow: 3.4 })); } });
+    S.torus([0, y, 0], R, 0.022, { mat: 'gold', col: 'metal', region: reg, wear: 1 });
+    onLayer(S, 'glow', () => { for (let i = 0; i < 4; i++) { const a = (i / 4) * TAU + PI / 4; S.sphere([sin(a) * R, y + 0.02, cos(a) * R], 0.03, G({ region: reg, glow: 2.6 })); } });
     return;
   }
   onLayer(S, 'glow', () => {
-    S.torus([0, y, 0], R, 0.022, G({ region: reg, glow: 2.6 }));
-    S.torus([0, y, 0], R * 0.78, 0.014, G({ region: reg, glow: 2.2 }));
-    const n = style === 'schmiede' ? 16 : style === 'schwarm' ? 6 : 8;
+    S.torus([0, y, 0], R, 0.016, G({ region: reg, glow: 2.0 }));
+    const n = style === 'schmiede' ? 8 : style === 'schwarm' ? 6 : 6;
     for (let i = 0; i < n; i++) {
       const a = (i / n) * TAU + 0.2;
       const p0 = [sin(a) * R * 0.78, y, cos(a) * R * 0.78], p1 = [sin(a) * R * 1.12, y, cos(a) * R * 1.12];
@@ -144,114 +142,13 @@ export function groundRing(S, R, style, heavy) {
 }
 
 /**
- * Form-Schicht. plan: { J (Skelett, wird ergänzt), cls, radius, H, anchors: { head:{p,r,region}, back:{p,w,region},
- * shoulder:{p,r,region} | null, quad?: bool } }
+ * Form-Schicht (dezent): Die eigentliche Entwicklung (Waffen, Kopf, Extras, Größe) kommt je Linie aus
+ * roster.EVOLVE (gear.js). Hier nur noch die Volks-Signatur der Stufe III: ein schmaler Bodenring
+ * (A Metall, B Leuchtglyphe) – keine Flügel/Kugeln/Banner mehr für alle.
  */
 export function applyForm(S, F, plan, style) {
-  const { tier, path } = F;
-  if (tier < 2 || plan.noForm) return plan;
-  const A = plan.anchors || {};
-  const u = (plan.H || 2) / 2;
-  const heavy = path === 'a';
-  const st = style || 'orden';
-  const mat = st === 'schwarm' ? 'chitin' : st === 'wild' ? 'bark' : st === 'abgrund' ? 'iron' : 'steel';
-  const col = st === 'wild' ? 'secondary' : 'metal';
-  // --- Schultern ---
-  if (A.shoulder) {
-    const sh = A.shoulder, r = sh.r ?? 0.12 * u;
-    if (heavy) {
-      S.sym(() => {
-        S.group({ k: 0.01 * u }, () => {
-          S.ellipsoid(sh.p, [r * 1.25, r * 0.8, r * 1.2], { mat, col, region: sh.region, wear: 1 });
-          S.torus(add(sh.p, [0, -r * 0.2, 0]), r * 1.18, r * 0.16, { rot: [0, 0, -0.25], mat: 'gold', col: st === 'wild' ? 'metal' : 'secondary', region: sh.region });
-        });
-        if (tier >= 3) for (let k = 0; k < 2; k++) S.capsule(add(sh.p, [r * 0.3, r * 0.5, (k - 0.5) * r * 0.9]), add(sh.p, [r * 1.0, r * 1.9 - k * 0.3 * r, (k - 0.5) * r * 1.3]), r * 0.24, r * 0.03, { mat: st === 'wild' ? 'wood' : st === 'schwarm' ? 'chitin' : 'iron', col: st === 'orden' ? 'metal' : '#2e2a30', region: sh.region });
-      });
-    } else {
-      // zwei schwebende Kugeln über den Schultern
-      S.sym(() => orb(S, add(sh.p, [r * 1.6, r * 2.2 + 0.16 * u, -r * 0.4]), (tier >= 3 ? 0.13 : 0.11) * u, sh.region));
-    }
-  }
-  // --- Kopf ---
-  if (A.head) {
-    const hd = A.head, r = hd.r ?? 0.1 * u, p = hd.p;
-    if (heavy) {
-      // Helmkamm (II) bzw. Krone (III)
-      if (tier === 2) S.capsule(add(p, [0, -r * 0.2, r * 0.5]), add(p, [0, r * 0.5, -r * 0.6]), r * 0.22, r * 0.12, { mat, col, region: hd.region });
-      else {
-        S.torus(add(p, [0, -r * 0.15, 0]), r * 0.95, r * 0.18, { mat: 'gold', col: 'metal', region: hd.region });
-        for (let i = 0; i < 6; i++) { const a = (i / 6) * TAU; S.capsule(add(p, [sin(a) * r * 0.95, -r * 0.1, cos(a) * r * 0.95]), add(p, [sin(a) * r * 1.15, r * (0.75 + 0.35 * (i % 2)), cos(a) * r * 1.15]), r * 0.2, r * 0.04, { mat: 'gold', col: 'metal', region: hd.region }); }
-      }
-    } else {
-      onLayer(S, 'glow', () => {
-        if (tier === 2) S.sphere(add(p, [0, -r * 0.2, r * 0.85]), r * 0.22, G({ region: hd.region, glow: 3.6 }));
-        else if (st === 'glut') { for (let i = 0; i < 5; i++) { const a = -0.9 + i * 0.45; S.capsule(add(p, [sin(a) * r * 0.7, -r * 0.1, cos(a) * r * 0.3 - r * 0.2]), add(p, [sin(a) * r * 1.0, r * (1.1 + 0.5 * (i === 2)), -r * 0.4]), r * 0.26, r * 0.04, G({ region: hd.region, glow: 3.2 })); } }
-        else {
-          S.torus(add(p, [0, r * 0.75, -r * 0.35]), r * 1.25, r * 0.12, { rot: [-0.35, 0, 0], ...G({ region: hd.region, glow: 3.2 }) });
-          if (st === 'abgrund' || st === 'schwarm') for (let i = 0; i < 5; i++) { const a = -0.8 + i * 0.4; S.capsule(add(p, [sin(a) * r * 1.25, r * 0.75, -r * 0.35 + cos(a) * r * 0.2]), add(p, [sin(a) * r * 1.35, r * 1.5, -r * 0.5]), r * 0.1, r * 0.02, G({ region: hd.region })); }
-        }
-      });
-    }
-  }
-  if (tier < 3) return plan;
-  // --- Rücken (III) ---
-  const R = (plan.radius || 0.6) * 1.18;
-  if (A.back) {
-    const bk = A.back, w = bk.w ?? 0.2 * u, p = bk.p;
-    if (heavy) {
-      if (st === 'orden') {
-        // Banner an Stange
-        const top = add(p, [0, 1.1 * u, -0.08 * u]);
-        S.capsule(add(p, [0, -0.2 * u, 0]), top, 0.03 * u, 0.025 * u, { mat: 'gold', col: 'metal', region: bk.region });
-        S.sphere(top, 0.07 * u, { mat: 'gold', col: 'metal', region: bk.region });
-        S.box(add(top, [0, -0.38 * u, -0.06 * u]), [0.22 * u, 0.3 * u, 0.012 * u], { mat: 'cloth', col: 'secondary', region: bk.region, r: 0.01 * u });
-        S.box(add(top, [0, -0.12 * u, -0.05 * u]), [0.25 * u, 0.025 * u, 0.02 * u], { mat: 'gold', col: 'metal', region: bk.region, r: 0.01 * u });
-        onLayer(S, 'glow', () => S.sphere(add(top, [0, -0.38 * u, -0.08 * u]), 0.07 * u, G({ region: bk.region, glow: 3 })));
-      } else if (st === 'schmiede') {
-        // Schlote mit Glut
-        S.sym(() => { const b = add(p, [w * 0.55, 0, 0]); S.capsule(b, add(b, [0.08 * u, 0.75 * u, -0.12 * u]), 0.08 * u, 0.065 * u, { mat: 'brass', col: 'secondary', region: bk.region }); onLayer(S, 'glow', () => S.sphere(add(b, [0.08 * u, 0.78 * u, -0.12 * u]), 0.06 * u, G({ region: bk.region, glow: 3.4 }))); });
-        S.cylinder(add(p, [0, 0.12 * u, -0.06 * u]), 0.2 * u, 0.04 * u, { rot: [PI / 2, 0, 0], mat: 'steel', col: 'metal', region: bk.region, r: 0.015 * u });
-      } else {
-        // Stachelkamm
-        const m2 = st === 'wild' ? { mat: 'wood', col: '#6a4a2a' } : st === 'schwarm' ? { mat: 'chitin', col: 'secondary' } : st === 'glut' ? { mat: 'stone', col: '#241c1c' } : { mat: 'bone', col: '#d8ccb4' };
-        for (let i = 0; i < 5; i++) {
-          const t = (i - 2) / 2, b = add(p, [t * w * 0.9, -abs(t) * 0.12 * u, 0]);
-          const tip = add(b, [t * 0.3 * u, (0.55 - 0.18 * abs(t)) * u, -0.3 * u]);
-          S.capsule(b, tip, 0.07 * u, 0.012 * u, { ...m2, region: bk.region });
-          if (st === 'glut' || st === 'abgrund') onLayer(S, 'glow', () => S.sphere(tip, 0.035 * u, G({ region: bk.region, glow: 3.2 })));
-        }
-      }
-    } else {
-      if (plan.machine) {
-        // Maschinen: schwebender Ätherring + Kern über dem Aufbau statt Flügeln
-        const c = add(p, [0, 0.55 * u, 0.1 * u]);
-        onLayer(S, 'glow', () => { S.torus(c, 0.42 * u, 0.025 * u, { rot: [PI / 2 - 0.25, 0, 0], ...G({ region: bk.region, glow: 2.6 }) }); S.sphere(c, 0.12 * u, G({ region: bk.region, glow: 3.4 })); });
-        S.torus(c, 0.5 * u, 0.03 * u, { rot: [PI / 2 - 0.25, 0, 0], mat: 'gold', col: 'metal', region: bk.region });
-        S.capsule(p, add(c, [0, -0.1 * u, 0]), 0.04 * u, 0.025 * u, { mat: 'gold', col: 'metal', region: bk.region });
-      } else {
-      // leuchtende Flügel
-      const L = (plan.wingL || 1.0) * u;
-      const wsty = st === 'glut' ? 'glut' : st;
-      for (const [sd, k] of [['L', 1], ['R', -1]]) {
-        const root = [k * w * 0.5 + p[0], p[1], p[2]];
-        plan.J['wing' + sd] = { pos: V(root[0], root[1], root[2]), parent: bk.parentJoint || 'chest' };
-        plan.cls = plan.cls || {};
-        plan.cls['wing' + sd] = [4, root[0], root[1], 0];
-      }
-      S.sym(() => wing(S, [w * 0.5 + p[0], p[1], p[2]], L, { style: wsty, region: ['wingL'], glowEdge: true, col: st === 'orden' ? 'primary' : undefined }));
-      }
-    }
-  }
-  // --- kreisende Splitter (III-B) ---
-  if (!heavy) {
-    const y = (plan.H || 2) * 0.62;
-    for (let i = 0; i < 4; i++) {
-      const a = (i / 4) * TAU + PI / 4, c = [sin(a) * R * 0.95, y + 0.12 * u * (i % 2), cos(a) * R * 0.95];
-      onLayer(S, 'glass', () => S.prim(c, crystalPrim(0.06 * u, 0.3 * u), { rot: [0.3 * cos(a), a, 0.3 * sin(a)], mat: 'crystal', col: 'glow', region: ['hips'] }));
-      onLayer(S, 'glow', () => S.sphere(add(c, [0, 0.12 * u, 0]), 0.03 * u, G({ region: ['hips'], glow: 3.4 })));
-    }
-  }
-  groundRing(S, R, st, heavy);
+  if (F.tier < 3 || plan.noForm) return plan;
+  groundRing(S, (plan.radius || 0.6) * 1.0, style || 'orden', F.path === 'a');
   return plan;
 }
 

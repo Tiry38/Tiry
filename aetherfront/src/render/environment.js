@@ -1,7 +1,7 @@
 // Aetherfront – 3D-Welt: Schwebeinseln über einem sonnenbeschienenen Wolkenmeer.
 // Echte CC0-Assets (PBR-Texturen + HDRI, siehe asset-catalog.js) mit prozeduralem Rückfall. API:
 //   createEnvironment({ scene, renderer, quality, assets, look, settings })
-//     -> { update(dt, t), sun, setQuality(q), setBiome(id), biome, dispose() }
+//     -> { update(dt, t), sun, setQuality(q), setBiome(id), setArena(on), biome, dispose() }
 //   loadEnvironmentAssets(renderer) (re-exportiert) lädt die Assets vorab (async).
 // Biome (Art Bible, docs/ART-BIBLE.md): 'sky' (Akt 1 Himmelsinseln), 'wild' (Akt 2 Wildwald),
 //   'forge' (Akt 3 Eisen-/Wüstenschmiede), 'abyss' (Akt 4 Abgrund/Schattenwelt).
@@ -13,6 +13,7 @@ import { createCloudSea } from './env/clouds.js';
 import { createCloudNoise } from './env/textures.js';
 import { buildWorld } from './env/world.js';
 import { loadEnvironmentAssets, disposeAssets } from './assets.js';
+import { createArena } from './arena.js';
 
 export { loadEnvironmentAssets };
 
@@ -74,7 +75,7 @@ export const BIOMES = {
 };
 
 // Spielfläche, die der Sonnenschatten abdecken muss (inkl. Höhe der Requisiten)
-const SHADOW_BOX = new THREE.Box3(new THREE.Vector3(-135, -8, -50), new THREE.Vector3(135, 42, 74));
+const SHADOW_BOX = new THREE.Box3(new THREE.Vector3(-135, -8, -70), new THREE.Vector3(135, 42, 74)); // inkl. Arena im Norden
 
 export function createEnvironment({ scene, renderer, quality = 'high', assets = null, look = null, settings = null } = {}) {
   const U = createSharedUniforms();
@@ -121,6 +122,8 @@ export function createEnvironment({ scene, renderer, quality = 'high', assets = 
   const maxAniso = renderer.capabilities?.getMaxAnisotropy?.() ?? 8;
   const world = buildWorld(U, { anisotropy: Math.min(8, maxAniso), assets });
   scene.add(world.root);
+  // Arena (nach Welle 10/20) zwischen den Teams
+  const arena = createArena(scene);
 
   // ---------- Umgebungslicht (PMREM aus dem Himmel inkl. HDRI) ----------
   const pmrem = new THREE.PMREMGenerator(renderer);
@@ -239,6 +242,7 @@ export function createEnvironment({ scene, renderer, quality = 'high', assets = 
   const m = new THREE.Matrix4(), q = new THREE.Quaternion(), e = new THREE.Euler(), v = new THREE.Vector3(), s = new THREE.Vector3();
   function update(dt, t) {
     U.uTime.value = t;
+    arena.update(dt, t);
     const A = world.animated;
     if (A.spire) {
       A.spire.position.y = 21 + Math.sin(t * 0.5) * 0.8;
@@ -277,6 +281,7 @@ export function createEnvironment({ scene, renderer, quality = 'high', assets = 
       obj.removeFromParent();
     }
     for (const tx of textures) tx.dispose();
+    arena.dispose();
     disposeAssets(assets);
     scene.remove(sun, sun.target, hemi, rim);
     sun.shadow.map?.dispose();
@@ -292,7 +297,7 @@ export function createEnvironment({ scene, renderer, quality = 'high', assets = 
   }
 
   return {
-    update, sun, setQuality, setBiome, dispose, uniforms: U,
+    update, sun, setQuality, setBiome, dispose, uniforms: U, setArena: arena.setActive,
     get quality() { return current; }, get biome() { return biome; }, get usesAssets() { return !!(assets && assets.count); },
   };
 }

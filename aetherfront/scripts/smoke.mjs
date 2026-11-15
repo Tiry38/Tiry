@@ -54,6 +54,13 @@ await page.click('#screen-codex [data-back]'); await wait(300);
 await page.click('[data-go="setup"]'); await wait(1500);
 await page.click('#seg-pick button:nth-child(3)'); await page.click('#seg-cc button:nth-child(2)'); await page.click('#seg-diff button:nth-child(4)'); await wait(300);
 await shot('03-setup');
+// Gefecht einrichten muss ohne Scrollen passen (auch bei 1280×720)
+const setupFits = async () => page.evaluate(() => { const g = document.getElementById('setup-grid'); const b = document.getElementById('btn-start').getBoundingClientRect(); return { scroll: g.scrollHeight - g.clientHeight, startVisible: b.bottom <= window.innerHeight && b.top >= 0 }; });
+console.log('Setup 1600×900:', JSON.stringify(await setupFits()));
+await page.setViewportSize({ width: 1280, height: 720 }); await wait(800);
+console.log('Setup 1280×720:', JSON.stringify(await setupFits()));
+await shot('03-setup-720');
+await page.setViewportSize({ width: W, height: H }); await wait(800);
 await page.click('#btn-start'); await wait(3500); await shot('04-game-start');
 // Ein paar Einheiten bauen
 await page.evaluate(() => {
@@ -75,10 +82,48 @@ await page.hover('.up-path:nth-child(2)'); await wait(500); await shot('06b-upgr
 await page.keyboard.press('V'); await wait(800); await shot('06c-upgraded');
 await page.evaluate(() => window.__app.session.submit({ type: 'ready' }));
 await wait(7000); await shot('07-battle');
+// König-Fähigkeiten freischalten (Äther), Söldner-Bestand teilweise leeren
+await page.evaluate(() => {
+  const a = window.__app, s = a.session; a.me.aether = 2000;
+  for (const ab of ['stomp', 'fire', 'shock', 'purge']) s.submit({ type: 'kingAbility', ab });
+  s.submit({ type: 'kingAbility', ab: 'stomp' });
+  for (let i = 0; i < 3; i++) s.submit({ type: 'send', send: 's_rat' });
+  s.submit({ type: 'send', send: 's_raptor' });
+});
+await wait(1200);
 await page.keyboard.press('K'); await wait(1000); await shot('07b-kinghall'); await page.keyboard.press('K'); await wait(300);
+await page.hover('#send-dock .slot:nth-child(1)'); await wait(600); await shot('07c-send-stock');
+// Stampfer am König: Gegner zum König holen, dann F1
+await page.evaluate(() => {
+  const a = window.__app, sim = a.session.sim, k = sim.teams[a.me.team].king;
+  let n = 0;
+  for (const e of sim.entities.values()) if (e.type === 'c' && e.team === a.me.team && n < 5) { e.stage = 'king'; e.x = k.x + (n - 2) * 1.6; e.z = k.z - 4; n++; }
+  a.cam.focus(k.x, k.z - 4, 40, { pitch: 0.95 });
+});
+await wait(2500);
+await page.keyboard.press('F1'); await wait(350); await shot('07d-king-stomp');
+await page.mouse.move(10, H / 2);
 await page.evaluate(() => { const a = window.__app; a.cam.focus(a.me && -70, 30, 120, { pitch: 0.75 }); });
 await wait(3000); await shot('08-overview');
 await page.keyboard.down('Tab'); await wait(400); await shot('09-scoreboard'); await page.keyboard.up('Tab');
+await page.keyboard.press('T'); await wait(800); await shot('09b-upgrades'); await page.keyboard.press('T'); await wait(300);
+await page.keyboard.press('G'); await wait(800); await shot('09c-economy'); await page.keyboard.press('G'); await wait(300);
+// Arena nach Welle 10: Wellenende erzwingen → Kopien aller Kämpfer treten in der Arena an
+await page.evaluate(() => {
+  const a = window.__app, sim = a.session.sim;
+  for (const p of sim.players) { p.gold = Math.max(p.gold, 1200); }
+  sim.wave = 10; sim.phase = 'battle';
+  for (const [id, e] of sim.entities) if (e.type === 'c' || e.type === 'p') sim.entities.delete(id);
+});
+await page.waitForFunction(() => window.__app.session.sim.phase === 'arena', null, { timeout: 30000 });
+await wait(2500); await shot('08b-arena-countdown');
+await page.waitForFunction(() => { const A = window.__app.session.sim.arena; return A && A.stage === 'fight' && A.time > 4; }, null, { timeout: 60000 });
+await shot('08c-arena-fight');
+await page.waitForFunction(() => { const A = window.__app.session.sim.arena; return !A || A.stage === 'result'; }, null, { timeout: 180000 });
+await wait(600); await shot('08d-arena-result');
+console.log('Arena:', await page.evaluate(() => { const s = window.__app.session.sim; return JSON.stringify({ phase: s.phase, wave: s.wave, arena: s.arena && { winner: s.arena.winner, count: s.arena.count } }); }));
+await page.waitForFunction(() => window.__app.session.sim.phase === 'build', null, { timeout: 60000 });
+await wait(1500);
 await page.evaluate(() => window.__app.select(null)); await page.keyboard.press('Escape'); await wait(1200);
 // Heldenansicht belegt Escape ggf. selbst (Ziel abwählen) → Pause dann direkt öffnen
 if (!(await page.isVisible('#screen-pause [data-go="settings"]'))) { await page.evaluate(() => window.__app.pause && window.__app.pause()); await wait(1200); }

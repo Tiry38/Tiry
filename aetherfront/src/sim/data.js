@@ -428,7 +428,7 @@ export const SENDS = [
   const k = (i % 6) + 1;
   return {
     ...s, row, bounty: Math.round(s.cost * 0.4),
-    hotkey: row === 1 ? String(k) : `⇧${k}`, keyCode: `Digit${k}`, shift: row === 2,
+    hotkey: row === 1 ? String(k) : `⇧${k}`, hotkeyHtml: row === 1 ? String(k) : `<small>⇧</small>${k}`, keyCode: `Digit${k}`, shift: row === 2,
     palette: row === 1 ? { primary: '#1e1a2a', secondary: '#ff3a5a', metal: '#4a4a5a', glow: '#ff3a6a' } : { primary: '#1a1430', secondary: '#b04aff', metal: '#5a4a6a', glow: '#c86aff' },
   };
 });
@@ -454,12 +454,17 @@ export function kingUpgradeCost(kind, level) {
 export const KING_ABILITIES = {
   stomp: { name: 'Stampfer', key: 'F1', icon: 'stomp', cost: [90, 120, 150], cd: [15, 15, 15], radius: [6, 7, 8], stun: [1.5, 2, 2.5], dmg: [80, 140, 220],
     desc: (l) => `Betäubt alle Gegner im Umkreis ${KING_ABILITIES.stomp.radius[l]} um den König ${KING_ABILITIES.stomp.stun[l]} s (Bosse halb so lang) und verursacht Schaden.` },
-  fire: { name: 'Feueraura', key: 'passiv', icon: 'fire', passive: true, cost: [90, 120, 160], radius: [6, 7, 8], dps: [20, 35, 55],
+  fire: { name: 'Feueraura', key: 'passiv', icon: 'fire', passive: true, cost: [90, 120, 160], radius: [5, 6, 7], dps: [12, 20, 30],
     desc: (l) => `Dauerhaft: Gegner im Umkreis ${KING_ABILITIES.fire.radius[l]} erleiden ${KING_ABILITIES.fire.dps[l]} Schaden pro Sekunde (wächst mit der Welle).` },
-  shock: { name: 'Schockwelle', key: 'F2', icon: 'speed', cost: [100, 130, 160], cd: [20, 18, 16], len: [16, 19, 22], width: 2.6, dmg: [200, 320, 480],
+  shock: { name: 'Schockwelle', key: 'F2', icon: 'speed', cost: [100, 130, 160], cd: [20, 18, 16], len: [16, 19, 22], width: 2.6, dmg: [150, 240, 360],
     desc: (l) => `Eine Welle aus Äther rollt ${KING_ABILITIES.shock.len[l]} Schritt vom König in Richtung der Gegner und trifft alles auf der Linie.` },
   purge: { name: 'Läuterung', key: 'F3', icon: 'purge', cost: [100, 80, 80], cd: [30, 25, 20], slow: [0.5, 0.6, 0.7], dur: 3,
     desc: (l) => `Entfernt einem Gegner (zuerst Champions/Bosse) alle Champion-Boni und verlangsamt ihn ${KING_ABILITIES.purge.dur} s um ${Math.round(KING_ABILITIES.purge.slow[l] * 100)} %.` },
 };
+// Kurzfassung je Stufe (für die Königshalle)
+KING_ABILITIES.stomp.short = (l) => { const d = KING_ABILITIES.stomp; return `Umkreis ${d.radius[l]} · ${String(d.stun[l]).replace('.', ',')} s Betäubung · ${d.dmg[l]} Schaden`; };
+KING_ABILITIES.fire.short = (l) => { const d = KING_ABILITIES.fire; return `Umkreis ${d.radius[l]} · ${d.dps[l]} Schaden/s`; };
+KING_ABILITIES.shock.short = (l) => { const d = KING_ABILITIES.shock; return `Linie ${d.len[l]} Schritt · ${d.dmg[l]} Schaden`; };
+KING_ABILITIES.purge.short = (l) => { const d = KING_ABILITIES.purge; return `Champion-Boni weg · ${Math.round(d.slow[l] * 100)} % langsamer`; };
 export const KING_ABILITY_IDS = Object.keys(KING_ABILITIES);
 export function kingAbilityCost(id, level) { return KING_ABILITIES[id].cost[Math.min(level, 2)]; }

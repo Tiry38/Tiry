@@ -48,6 +48,14 @@ export const I = {
   aim: svg('<circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M12 2v6M12 16v6M2 12h6M16 12h6" stroke="currentColor" stroke-width="1.6"/><circle cx="12" cy="12" r="1.8" fill="currentColor"/>'),
   collection: svg('<path d="M4 6l8-3.5L20 6v12l-8 3.5L4 18z" fill="currentColor" opacity=".3"/><path d="M4 6l8 3.5L20 6M12 9.5v12M4 6v12l8 3.5 8-3.5V6l-8-3.5z" fill="none" stroke="currentColor" stroke-width="1.6"/>'),
   campaign: svg('<path d="M3 5.5l6-2 6 2 6-2v15l-6 2-6-2-6 2z" fill="currentColor" opacity=".3"/><path d="M3 5.5l6-2 6 2 6-2v15l-6 2-6-2-6 2zM9 3.5v15M15 5.5v15" fill="none" stroke="currentColor" stroke-width="1.6"/>'),
+  // König-Fähigkeiten, Arena, Übersichten
+  stomp: svg('<path d="M12 4v8" stroke="currentColor" stroke-width="2.4"/><path d="M8.5 9.5L12 13l3.5-3.5" fill="none" stroke="currentColor" stroke-width="2"/><ellipse cx="12" cy="17.5" rx="9" ry="3.2" fill="none" stroke="currentColor" stroke-width="1.6"/><ellipse cx="12" cy="17.5" rx="4.5" ry="1.5" fill="currentColor" opacity=".6"/>'),
+  fire: svg('<path d="M12 2.5c1.5 3.6 5.5 5.6 5.5 10.5a5.5 5.5 0 01-11 0c0-2.6 1.4-4.2 2.6-5.5.2 1.8 1 3 2.2 3.4-.7-3.3.2-6 .7-8.4z" fill="currentColor"/><path d="M12 13.5c.9 1.4 2.3 2.2 2.3 4a2.3 2.3 0 01-4.6 0c0-1.6 1.4-2.6 2.3-4z" fill="#000" fill-opacity=".35"/>'),
+  purge: svg('<circle cx="12" cy="12" r="8.5" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M12 5.5l1.6 4.9 4.9 1.6-4.9 1.6-1.6 4.9-1.6-4.9-4.9-1.6 4.9-1.6z" fill="currentColor"/>'),
+  arena: svg('<ellipse cx="12" cy="13" rx="9.5" ry="6.5" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M7 9.5l10 7M17 9.5l-10 7" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>'),
+  coins: svg('<circle cx="9" cy="10" r="5.5" fill="currentColor" opacity=".5"/><circle cx="15" cy="14" r="5.5" fill="currentColor"/><path d="M15 11.5v5M13.2 12.6h3.6" stroke="#000" stroke-opacity=".4" stroke-width="1.3"/>'),
+  tree: svg('<circle cx="5" cy="12" r="2.5" fill="currentColor"/><circle cx="18" cy="6" r="2.5" fill="currentColor"/><circle cx="18" cy="18" r="2.5" fill="currentColor"/><path d="M7.5 12h4l4-5.5M11.5 12l4 5.5" fill="none" stroke="currentColor" stroke-width="1.6"/>'),
+  barracks: svg('<path d="M3 20V9l9-5 9 5v11h-6v-5h-6v5z" fill="currentColor" opacity=".35"/><path d="M3 20V9l9-5 9 5v11h-6v-5h-6v5zM1.5 20.5h21" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M12 7.5v3M10.5 9h3" stroke="currentColor" stroke-width="1.5"/>'),
 };
 
 /** Kleines Symbol + Wert, z. B. für Wertechips */

@@ -232,7 +232,9 @@ export class UnitsView {
     const battle = sim.phase === 'battle';
     const seen = new Set();
     // Kamera: Sichtbarkeit + Detailstufe je Instanz
-    const cam = this.cam;
+    // Hauptkamera bevorzugen (andere Durchgänge wie Minikarte/Arena rendern dieselbe Szene mit eigener Kamera)
+    const mainCam = typeof window !== 'undefined' && window.__app && window.__app.engine && window.__app.engine.camera;
+    const cam = mainCam && mainCam.isPerspectiveCamera ? mainCam : this.cam;
     let pxK = 0;
     if (cam) {
       cam.updateMatrixWorld(); _pm.multiplyMatrices(cam.projectionMatrix, cam.matrixWorldInverse); _frus.setFromProjectionMatrix(_pm);

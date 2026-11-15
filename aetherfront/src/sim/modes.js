@@ -7,7 +7,7 @@ export const PICK_MODES = {
   hp: { code: 'HP', name: 'Hybrid', desc: 'Jeder bekommt 5 zufällige Kämpferlinien aus allen Fraktionen gemischt (mit Bonusgold).' },
 };
 export const MODIFIERS = {
-  cc: { code: 'CC', name: 'Champions', desc: 'Jeder vierte Gegner einer Welle ist ein Champion (3× Leben, mehr Schaden, 3× Kopfgeld). Bosse +25 % Leben.' },
+  cc: { code: 'CC', name: 'Champions', desc: 'Jeder vierte Gegner einer Welle ist ein Champion (3× Leben, mehr Schaden, 3× Kopfgeld). Bosse werden Champions: +25 % Leben, +25 % Schaden, +2 Rüstung (Läuterung entfernt das).' },
 };
 export function modeCode(rules) {
   return `${PICK_MODES[rules.pickMode || 'ap'].code}${rules.champions ? 'CC' : ''}`;

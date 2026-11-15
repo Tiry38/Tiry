@@ -27,16 +27,18 @@ export function botThink(sim, p) {
   if ((p.difficulty === 'hard' || p.difficulty === 'extreme') && p.workers >= 4 && (p.gatherLvl || 0) < 4 && p.gold >= sim.gatherCost(p) + 150 && rng.next() < 0.25) sim.applyCommand(p.id, { type: 'gather' });
 
   // Erweiterte Kaserne freischalten, sobald sich die zweite Reihe lohnt
-  if (!p.barracks && sim.wave >= 9 && p.aether >= ECON.barracksCost * sim.rules.sendCostMul + 60 && rng.next() < sk.send) sim.applyCommand(p.id, { type: 'barracks' });
+  // (ab Welle 9 wird dafür gespart; leichte Bots erst später)
+  const wantBarracks = !p.barracks && sim.wave >= (p.difficulty === 'easy' ? 13 : 9);
+  if (wantBarracks && p.aether >= ECON.barracksCost * sim.rules.sendCostMul) sim.applyCommand(p.id, { type: 'barracks' });
   // König-Fähigkeiten freischalten/aufrüsten (Stampfer und Feueraura zuerst)
   // In manchen Wellen spart der Bot Äther dafür (jeder Spieler eines Teams in einer anderen Welle)
-  let saving = false;
+  let saving = wantBarracks && !p.barracks;
   if (p.difficulty !== 'easy' && !k.citadel && sim.wave >= 5) {
     const step = KING_PLAN.find(([a, l]) => k.abil[a] < l && (a !== 'purge' || sim.rules.champions));
     if (step) {
       const cost = kingAbilityCost(step[0], k.abil[step[0]]);
       if (p.aether >= cost) { if (rng.next() < 0.5) sim.applyCommand(p.id, { type: 'kingAbility', ab: step[0] }); }
-      else saving = (sim.wave + p.slot) % 3 === 0;
+      else saving = saving || (sim.wave + p.slot) % 3 === 0;
     }
   }
   // Söldner senden (Bestand beachten) / König aufwerten

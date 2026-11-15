@@ -98,7 +98,7 @@ export class Menus {
     this.seg($('seg-gamemode'), GAME_MODES, 'gameMode', () => this.refreshSummary());
     this.seg($('seg-endless'), [[true, 'An'], [false, 'Aus']], 'endless', () => this.refreshSummary());
     this.seg($('seg-pick'), Object.entries(PICK_MODES).map(([k, m]) => [k, m.code]), 'pickMode', () => this.refreshSetup());
-    this.seg($('seg-cc'), [[false, 'Ohne Champions'], [true, 'CC – Champions']], 'champions', () => this.refreshSummary());
+    this.seg($('seg-cc'), [[false, 'Aus'], [true, 'CC an']], 'champions', () => this.refreshSummary());
     this.seg($('seg-waves'), [[20, '20 Wellen'], [30, '30 Wellen']], 'waves', () => this.refreshSummary());
     this.seg($('seg-speed'), [[1, '1×'], [1.5, '1,5×'], [2, '2×']], 'gameSpeed', () => this.refreshSummary());
     const nm = $('inp-name');
@@ -344,16 +344,17 @@ export class Menus {
     $('codex-body').innerHTML = `
       <section><h4>Das Ziel</h4>Zwei Teams – <b>West</b> und <b>Ost</b> – verteidigen je einen <b>König</b>. Jeder Spieler hat eine eigene Bahn. Alle Bahnen werden gleichzeitig von Gegnerwellen angegriffen. Fällt dein König, verliert dein Team. Überstehen beide Könige alle ${ECON.maxWaves} Wellen, gewinnt das Team mit dem gesünderen König.</section>
       <section><h4>Bauphase &amp; Kampf</h4>Vor jeder Welle hast du <b>${ECON.buildTime} Sekunden</b> (erste Welle ${ECON.buildTimeFirst}s), um Kämpfer auf dein <b>Bauraster</b> zu setzen. Dann startet die Welle: Deine Kämpfer greifen automatisch an. Nach der Welle stehen alle Kämpfer wieder geheilt auf ihrem Platz – gefallene Kämpfer kehren zurück. Mit <span class="key">↵</span> „Bereit“ startest du die Welle früher.</section>
-      <section><h4>Durchbrüche</h4>Gegner, die das Ende deiner Bahn erreichen, laufen zum <b>König deines Teams</b> und greifen ihn an. Der König wehrt sich mit Flächenschaden. Nach ${ECON.battleRageTime} Sekunden geraten übrige Gegner in <b>Raserei</b> und stürmen direkt zum König.</section>
+      <section><h4>Durchbrüche</h4>Gegner, die das Ende deiner Bahn erreichen, laufen zum <b>König deines Teams</b> (auf der Brücke 60 % schneller) und greifen ihn an. Der König wehrt sich mit Flächenschaden. Wer in einer Welle viele Gegner durchlässt, bekommt für den Rest der Welle weniger <b>Kopfgeld</b> (bis −40 %); erledigt der König einen Durchbrecher, teilen sich die übrigen Mitspieler die Hälfte des Kopfgelds. Nach ${ECON.battleRageTime} Sekunden geraten übrige Gegner in <b>Raserei</b> und stürmen direkt zum König.</section>
+      <section><h4>Arena</h4>Nach den Wellen <b>10</b> und <b>20</b> treten Kopien aller gebauten Kämpfer beider Teams in der <b>Arena</b> gegeneinander an (5 s Aufstellung, höchstens ${ECON.arenaMaxTime} s Kampf). Jeder Spieler des Siegerteams bekommt <b>${ECON.arenaGold[10]}</b> bzw. <b>${ECON.arenaGold[20]} Gold</b>. Deine echten Kämpfer bleiben dabei unverändert auf ihren Plätzen.</section>
       <section><h4>Gold &amp; Einkommen</h4>Jeder besiegte Gegner bringt <b>Kopfgeld</b>. Nach jeder Welle bekommst du zusätzlich dein <b>Einkommen</b>. Kämpfer lassen sich in mehreren Stufen <b>aufwerten</b> (stärker und platzsparend). Verkaufen erstattet ${Math.round(ECON.sellRefund * 100)} % – oder 100 %, wenn der Kämpfer in derselben Bauphase gebaut wurde.</section>
-      <section><h4>Äther, Funken &amp; Söldner</h4><b>Funken</b> (Arbeiter) kosten Gold und sammeln dauerhaft <b>Äther</b>. Mit Äther schickst du <b>Söldner</b> in die Bahn deines Gegners – sie laufen mit der nächsten Welle mit. Jeder Söldner erhöht dein <b>Einkommen</b> dauerhaft. Mit Äther verbesserst du auch deinen König.</section>
-      <section><h4>Der König</h4>Start: ${KING.hp} Leben, starker Flächenangriff. Verbesserungen: Lebenskraft, Königsmacht, Erneuerung. Dein Team hat <b>${KING.heals} Heilungen</b> (je ${Math.round(KING.healPct * 100)} %).</section>
+      <section><h4>Äther, Funken &amp; Söldner</h4><b>Funken</b> (Arbeiter) kosten Gold und sammeln dauerhaft <b>Äther</b> (höchstens ${ECON.maxWorkers}, im 1 gegen 1 ${ECON.maxWorkersDuel}). Mit Äther schickst du <b>Söldner</b> in die Bahn deines Gegners – sie laufen mit der nächsten Welle mit. Jeder Söldner erhöht dein <b>Einkommen</b> dauerhaft. Jeder Söldnertyp hat einen <b>Bestand</b> (1–3), der sich mit der Zeit wieder auffüllt. Die billigen Söldner der ersten Reihe werden ab Welle 10, 12 bzw. 15 <b>ausgemustert</b>; die <b>Erweiterte Kaserne</b> (${ECON.barracksCost} Äther) schaltet sechs stärkere frei.</section>
+      <section><h4>Der König</h4>Start: ${KING.hp} Leben, starker Flächenangriff. Verbesserungen: Lebenskraft, Königsmacht, Erneuerung. Fähigkeiten (Königshalle, je 3 Stufen): <b>Stampfer</b> <span class="key">F1</span> betäubt alles um den König, <b>Schockwelle</b> <span class="key">F2</span> trifft eine Linie, <b>Läuterung</b> <span class="key">F3</span> nimmt einem Champion seine Boni, die <b>Feueraura</b> brennt dauerhaft. Dein Team hat <b>${KING.heals} Heilungen</b> (je ${Math.round(KING.healPct * 100)} %, höchstens ${KING.healCap}; Regel „Lang“ +2). Verlässt ein Mitspieler die Partie, verliert das Team eine Heilung.</section>
       <section><h4>Angriff gegen Rüstung</h4>Jeder Kämpfer und Gegner hat eine Angriffs- und eine Rüstungsart. Wähle Kämpfer passend zur nächsten Welle (Wellenname und Typ siehst du oben).<br><br>${table}</section>
       <section><h4>Fraktionen</h4>${FACTION_IDS.map((f) => `<b>${FACTIONS[f].name}</b> – ${FACTIONS[f].desc}`).join('<br>')}<br><br>Zufällige Fraktion: <b>+${ECON.randomBonusGold} Gold</b> zum Start.</section>
       <section><h4>Aufwerten</h4>Jeder Kämpfer der Stufe I hat <b>zwei Aufwertungs-Pfade</b>. Klicke ihn an: Die Auswahlkarte zeigt beide Pfade mit Porträt, Kosten und Wertevergleich. <span class="key">C</span> wählt den ersten, <span class="key">V</span> den zweiten Pfad. Stufe II führt danach geradlinig zu Stufe III.</section>
-      <section><h4>Anführer &amp; Bosse</h4>Ab Welle 2 führt ein <b>Anführer</b> jede Welle an. Seine Fähigkeiten kündigen sich mit roten <b>Bodenwarnungen</b> an; manche lassen sich mit Betäubungen unterbrechen. Schnell besiegt (unter 20 s) bringt er <b>Bonusgold</b>. Die Wellen 10, 20 und 30 sind Bosse mit Phasen.</section>
+      <section><h4>Anführer &amp; Bosse</h4>Ab Welle 2 führt ein <b>Anführer</b> jede Welle an. Seine Fähigkeiten kündigen sich mit roten <b>Bodenwarnungen</b> an; manche lassen sich mit Betäubungen unterbrechen. Schnell besiegt (unter 20 s) bringt er <b>Bonusgold</b>. Die Wellen 10, 20 und 30 sind Bosse mit Phasen – mit <b>CC</b> sind sie Champions (+25 % Leben, +25 % Schaden, +2 Rüstung). Nach Welle ${ECON.maxWaves} folgen die <b>Endwellen</b>, bis ein König fällt.</section>
       <section><h4>Kampagne</h4>Jede der 24 Missionen hat eine eigene Mechanik: Funken anklicken, Leuchtfeuer entzünden, Käfige retten, Ventile ablassen, Pakte schließen, Rammböcke bauen … Das Ziel und alle Aktionen stehen links oben im <b>Missionsfenster</b>. Anklickbare Missionsobjekte leuchten mit einem goldenen Ring.</section>
-      <section><h4>Mehrspieler</h4>Hoste ein Spiel direkt auf deinem PC oder tritt per Code bei. <span class="key">↵</span> öffnet im Online-Spiel den Chat (<b>/t</b> = nur Team), <span class="key">Alt</span> + Klick setzt eine Markierung für dein Team, im Menü kannst du eine <b>Pause beantragen</b>. Bricht die Verbindung ab, verbindet sich das Spiel automatisch neu.</section>
+      <section><h4>Mehrspieler</h4>Hoste ein Spiel direkt auf deinem PC oder tritt per Code bei. <span class="key">↵</span> öffnet im Online-Spiel den Chat (<b>/t</b> = nur Team), <span class="key">Alt</span> + Klick setzt eine Markierung für dein Team, im Menü kannst du eine <b>Pause beantragen</b> oder ein <b>Unentschieden vorschlagen</b> (alle müssen zustimmen). Bricht die Verbindung ab, verbindet sich das Spiel automatisch neu.</section>
       <section><h4>Steuerung</h4><div class="keys">${KEYS.map(([k, d]) => `<span>${k.split(' ').map((x) => `<span class="key">${x}</span>`).join(' ')}</span><span>${d}</span>`).join('')}</div></section>`;
   }
 }
@@ -365,10 +366,15 @@ export const KEYS = [
   ['Rechtsklick', 'Bauen abbrechen / Auswahl aufheben'],
   ['C V', 'Ausgewählten Kämpfer aufwerten (Pfad 1 / 2)'],
   ['X Entf', 'Ausgewählten Kämpfer verkaufen'],
-  ['1 – 7', 'Söldner zum Gegner schicken'],
+  ['1 – 6', 'Söldner der Kaserne schicken'],
+  ['⇧ + 1 – 6', 'Söldner der Erweiterten Kaserne schicken'],
   ['B', 'Äther-Funken (Arbeiter) anwerben'],
+  ['N', 'Sammeln verbessern'],
   ['K', 'Königshalle öffnen'],
   ['H', 'König heilen'],
+  ['F1 F2 F3', 'Stampfer / Schockwelle / Läuterung'],
+  ['T', 'Aufwertungs-Übersicht'],
+  ['G', 'Wirtschaft (Einkommen, Äther, Ausgaben)'],
   ['↵', 'Bereit – Welle früher starten (online: Chat, Strg + ↵ = Bereit)'],
   ['Alt + Klick', 'Markierung setzen (online für dein Team)'],
   ['Leertaste', 'Kamera zur eigenen Bahn'],

@@ -92,7 +92,7 @@ export const MISSIONS = [
     tips: ['Klicke einen Pfeiler an (25 Äther). Geladene Pfeiler beschleunigen Vasallen in der Nähe bis Wellenende um 40 %.'], star3: { type: 'noHeal' } }),
   M({ id: 17, act: 3, biome: 'desert', title: 'Belagerung von Karrak', goal: 'siege', startWave: 18, endWave: 25, faction: 'schmiede', mechanic: 'ram',
     story: 'Orrik hat sich in der Feste verschanzt. Es gibt nur einen Weg hinein: durch die Mauer.',
-    mods: ['Söldner −15 % Äther'], rules: { waveHpMul: 0.92, sendCostMul: 0.85 }, tips: ['Jeder Söldner (1–7) rammt die Feste und erhöht dein Einkommen.', 'In jeder Bauphase kannst du einen Rammbock bauen – er rollt mit der Welle gegen die Mauer.'],
+    mods: ['Söldner −15 % Äther'], rules: { waveHpMul: 0.92, sendCostMul: 0.85 }, tips: ['Jeder Söldner (1–6, ⇧1–⇧6) rammt die Feste und erhöht dein Einkommen.', 'In jeder Bauphase kannst du einen Rammbock bauen – er rollt mit der Welle gegen die Mauer.'],
     citadel: { hp: 36000, regen: 30, dmg: 1.3 }, star3: { type: 'byWave', wave: 24 } }),
   K({ id: 18, act: 3, biome: 'ember', title: 'Orrik, der Verräter', goal: 'survive', startWave: 14, endWave: 20, faction: 'schmiede', mechanic: 'colossus', mechanicCfg: { name: 'Orrik in seinem Kolosspanzer' },
     story: 'Brann stellt seinen Lehrer. Orrik hat sich in den größten Koloss der Schmiede gesetzt.',

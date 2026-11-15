@@ -522,6 +522,8 @@ export class Sculpt {
   }
   _leaf(prim, c, B, o) {
     o = { ...o };
+    // Ausrüstungs-Tausch (Entwicklungsstufen): Standardwaffen bestimmter Knochen weglassen
+    if (this.suppress && this.suppress.size && this.suppress.has(o.bone ?? this.defaults.bone)) return null;
     const tier = o.tier ?? this.defaults.tier ?? 0;
     const leaf = new Leaf(prim, P(c), B, { op: o.op, k: o.k ?? (o.op ? 0 : this.defaults.k ?? 0), disp: o.disp ?? this.defaults.disp, attr: this._attr(o), paint: o.paint, scale: o.scale }, this.mirror);
     return this._push(leaf, tier);

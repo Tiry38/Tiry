@@ -2429,7 +2429,7 @@ export function buildModel(archetype, opts = {}) {
 // ---------------------------------------------------------------------------------------------
 export function createBodyMaterial() {
   // Aether-Forge-Über-Material (versteht alte und geschmiedete Geometrie; Materialklasse 0 = alter Look)
-  return createForgeMaterial({ physical: false, unitAnim: injectUnitAnim, rim: 0.2, env: 1.15 });
+  return createForgeMaterial({ physical: false, unitAnim: injectUnitAnim, rim: 0.32, env: 1.2 });
 }
 export function createBodyMaterialLegacy() {
   // PBR je Vertex (Attribut 'pbr' = Rauheit/Metall-Faktor), prozedurales Mikro-Relief (Objektraum, mit Abstand

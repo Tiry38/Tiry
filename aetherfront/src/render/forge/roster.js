@@ -86,3 +86,82 @@ export function bakeList() {
   for (const a of ['knightfallen', 'serpent']) for (const f of FORMS) add(a, f);
   return [...set.values()];
 }
+
+// ---------------------------------------------------------------------------------------------
+// Entwicklungs-Storys je Linie: jede Form eine eigene Einheit (Waffen R/L, Kopf H, Extras X, Größe fit).
+// Formen: 1 = Grundform · 2a/3a = Pfad A (schwer, Metall) · 2b/3b = Pfad B (magisch/elementar, leuchtend).
+// Waffen: sword greatsword mace hammer axe spear lance halberd scythe staff staffOrb staffSun bo bow crossbow
+//   tome banner claws fist torch flail · Schilde: buckler kite tower mirror · Suffix XL = groß, Glow = leuchtend.
+// Köpfe: cap great tower winged horned plume crown hood mitre halo sunhalo skull flame antler mask bald topknot crystal
+// Extras: pauldron pauldronXL cape quiver pavise backBanner bladesOrbit mirrorOrbit floatTome bracers barding
+//   helmHorn horns spines crystals mane crownS plates cannon coil veins eyesGlow
+// ---------------------------------------------------------------------------------------------
+const E = (a, b2, c2, a3, b3) => ({ '1': a, '2a': b2, '2b': c2, '3a': a3, '3b': b3 });
+export const EVOLVE = {
+  // Sonnenorden
+  knight: E('R:sword L:buckler H:cap fit:0.86', 'R:mace L:tower H:great X:pauldron fit:1.04', 'R:sword L:sword H:plume fit:0.98', 'R:hammer L:towerXL H:tower X:pauldronXL fit:1.2', 'R:greatswordGlow L:swordGlow H:winged X:bladesOrbit fit:1.12'),
+  archer: E('L:bow X:quiver fit:0.86', 'L:crossbow H:cap X:quiver,pauldron fit:1', 'L:bowGlow H:hood X:quiver fit:1', 'L:crossbowXL H:great X:pavise,pauldron fit:1.14', 'L:bowGlow H:flame X:quiver,cape fit:1.12'),
+  priest: E('R:staff fit:0.86', 'R:mace L:tome H:mitre fit:1', 'R:staffOrb H:halo fit:1', 'R:hammer L:buckler H:mitre X:pauldron fit:1.14', 'R:staffSun H:sunhalo X:floatTome fit:1.12'),
+  paladin_heavy: E('fit:0.86', 'R:spear L:tower H:great fit:1', 'R:sword L:mirror H:mask fit:1', 'R:hammerXL L:towerXL H:tower X:pauldronXL fit:1.16', 'R:swordGlow L:mirrorXL H:crown X:mirrorOrbit fit:1.12'),
+  griffin: E('fit:0.82', 'X:barding fit:1', 'X:crownS,eyesGlow fit:0.98', 'X:barding,helmHorn fit:1.15', 'X:mane,crownS fit:1.12'),
+  lancer: E('R:spear H:cap fit:0.86', 'R:lance L:kite H:great fit:1', 'R:banner H:plume X:cape fit:1', 'R:lanceXL L:kite H:winged X:pauldronXL fit:1.15', 'R:bannerXL L:kite H:crown X:cape fit:1.12'),
+  monk: E('H:bald fit:0.86', 'R:fist L:fist X:bracers fit:1', 'R:bo H:topknot fit:1', 'R:fistXL L:fistXL H:topknot X:bracers,pauldron fit:1.16', 'R:fistGlow L:fistGlow H:sunhalo fit:1.12'),
+  ballista: E('fit:0.86', 'X:plates fit:1', 'X:crystals fit:1', 'X:plates,cannon fit:1.15', 'X:crystals,crownS fit:1.12'),
+  // Wildherz
+  treant: E('fit:0.86', 'X:spines fit:1.02', 'X:crystals,eyesGlow fit:1', 'H:antler X:spines fit:1.2', 'H:crystal X:crystals fit:1.14'),
+  wolf: E('fit:0.82', 'X:barding fit:1', 'X:eyesGlow,mane fit:1', 'X:barding,helmHorn,spines fit:1.18', 'X:mane,crystals,eyesGlow fit:1.14'),
+  druid: E('fit:0.86', 'R:scythe fit:1', 'R:staffGlow L:tome fit:1', 'R:staffOrb X:crystals fit:1.14', 'R:staffSun H:halo X:floatTome fit:1.12'),
+  mushroom: E('fit:0.82', 'X:spines fit:1', 'X:eyesGlow fit:1', 'X:spines,crownS fit:1.16', 'X:crystals fit:1.14'),
+  bear: E('fit:0.82', 'fit:1', 'fit:1', 'X:helmHorn fit:1.18', 'X:mane fit:1.14'),
+  owl: E('fit:0.82', 'X:crownS fit:1', 'X:eyesGlow fit:1', 'X:helmHorn,barding fit:1.15', 'X:crystals,crownS fit:1.12'),
+  stag: E('fit:0.84', 'X:barding fit:1', 'fit:1', 'X:barding,crownS fit:1.16', 'X:crystals,mane fit:1.14'),
+  dryad: E('fit:0.86', 'R:claws L:claws fit:1', 'R:staffGlow fit:1', 'R:clawsXL L:clawsXL H:antler X:spines fit:1.15', 'R:staffSun H:crystal fit:1.12'),
+  // Ätherschmiede
+  automaton: E('fit:0.86', 'R:axe L:buckler X:plates fit:1', 'R:mace L:tower H:great fit:1', 'R:greatsword L:sword X:pauldronXL,coil fit:1.18', 'R:hammerXL L:towerXL H:tower X:plates fit:1.2'),
+  walker: E('fit:0.86', 'X:plates fit:1', 'X:coil fit:1', 'X:plates,cannon fit:1.15', 'X:coil,crystals fit:1.12'),
+  mortar: E('fit:0.86', 'X:plates fit:1', 'X:coil fit:1', 'X:plates fit:1.15', 'X:coil,crystals fit:1.12'),
+  core: E('fit:0.86', 'fit:1', 'X:crystals fit:1', 'X:cannon fit:1.15', 'X:crystals fit:1.14'),
+  spider: E('fit:0.86', 'X:plates fit:1', 'X:crystals fit:1', 'X:plates,cannon fit:1.15', 'X:crystals,crownS fit:1.12'),
+  drone: E('fit:0.86', 'X:cannon fit:1', 'X:coil fit:1', 'X:cannon,plates fit:1.15', 'X:coil,crystals fit:1.12'),
+  tank: E('fit:0.86', 'X:plates fit:1', 'X:coil fit:1', 'X:plates,cannon fit:1.15', 'X:coil fit:1.12'),
+  tesla: E('fit:0.86', 'X:plates fit:1', 'X:crystals fit:1', 'X:plates,cannon fit:1.15', 'X:crystals fit:1.12'),
+  // Abgrund
+  shade: E('R:claws fit:0.86', 'R:sword L:sword H:hood fit:1', 'R:scytheGlow H:hood fit:1', 'R:scytheXL H:skull X:cape fit:1.16', 'R:scytheGlow L:claws H:skull X:veins fit:1.12'),
+  bonethrower: E('fit:0.86', 'X:spines fit:1', 'X:crystals fit:1', 'X:spines,plates fit:1.15', 'X:crystals,spines fit:1.12'),
+  voidmage: E('fit:0.86', 'R:staffOrb H:skull fit:1', 'R:staffOrb L:tome fit:1', 'R:scythe H:crown X:cape,veins fit:1.15', 'R:staffOrb L:tomeGlow H:skull X:floatTome,veins fit:1.12'),
+  cryptgolem: E('fit:0.86', 'R:flail X:spines fit:1', 'L:tower X:spines fit:1', 'R:axeXL L:flail H:skull X:pauldronXL fit:1.15', 'L:towerXL H:skull X:spines,veins fit:1.15'),
+  witch: E('fit:0.86', 'L:tome fit:1', 'L:torch fit:1', 'L:tomeGlow X:cape fit:1.14', 'L:torch R:scytheGlow X:veins fit:1.12'),
+  ghoul: E('fit:0.86', 'X:spines fit:1', 'X:veins fit:1', 'R:clawsXL L:clawsXL H:horned X:spines fit:1.16', 'H:skull X:veins,spines fit:1.12'),
+  banshee: E('fit:0.86', 'H:crown fit:1', 'X:veins fit:1', 'R:scythe H:crown fit:1.14', 'H:sunhalo X:veins fit:1.12'),
+  gargoyle: E('fit:0.86', 'X:helmHorn fit:1', 'X:crystals,eyesGlow fit:1', 'R:axe L:buckler X:helmHorn,spines fit:1.15', 'X:crystals,crownS,eyesGlow fit:1.12'),
+  // Schwarmbrut
+  crawler: E('fit:0.84', 'X:spines fit:1', 'X:crystals fit:1', 'X:spines,helmHorn fit:1.16', 'X:crystals,mane fit:1.14'),
+  beetle: E('fit:0.84', 'X:spines fit:1', 'X:crystals fit:1', 'X:spines,helmHorn fit:1.16', 'X:crystals,crownS fit:1.14'),
+  carapace: E('fit:0.84', 'X:spines fit:1', 'X:crystals fit:1', 'X:spines,helmHorn fit:1.16', 'X:crystals,mane fit:1.14'),
+  raptor: E('fit:0.84', 'X:spines fit:1', 'X:eyesGlow,crystals fit:1', 'X:spines,helmHorn fit:1.16', 'X:crystals,mane fit:1.14'),
+  queen: E('fit:0.86', 'X:spines fit:1', 'X:crystals fit:1', 'X:spines,crownS fit:1.15', 'X:crystals,crownS fit:1.12'),
+  locust: E('fit:0.84', 'X:spines fit:1', 'X:eyesGlow fit:1', 'X:spines,helmHorn fit:1.15', 'X:crystals fit:1.12'),
+  mantis: E('fit:0.86', 'X:spines fit:1', 'X:eyesGlow fit:1', 'X:spines,crownS fit:1.15', 'X:crystals,crownS fit:1.12'),
+  brute: E('fit:0.86', 'R:axe X:spines fit:1', 'R:hammer X:crystals fit:1', 'R:axeXL L:flail H:horned X:pauldronXL fit:1.15', 'R:hammerXL H:crystal X:crystals fit:1.15'),
+  // Glutgeborene
+  elemental: E('fit:0.86', 'R:axe X:spines fit:1', 'L:tower H:flame fit:1', 'R:greatsword H:horned X:spines fit:1.16', 'L:towerXL H:flame X:spines fit:1.18'),
+  pyromancer: E('fit:0.86', 'R:staffGlow fit:1', 'L:tomeGlow H:mask fit:1', 'R:staffSun H:crown X:veins fit:1.14', 'R:torch L:tomeGlow H:flame X:floatTome fit:1.12'),
+  salamander: E('fit:0.84', 'X:spines fit:1', 'X:mane fit:1', 'X:spines,helmHorn fit:1.16', 'X:mane,crystals fit:1.14'),
+  imp: E('fit:0.86', 'R:spear H:horned fit:1', 'R:torch fit:1', 'R:halberd H:horned X:pauldron fit:1.15', 'R:torch L:torch H:flame fit:1.12'),
+  hound: E('fit:0.84', 'X:barding fit:1', 'X:mane fit:1', 'X:barding,horns,spines fit:1.16', 'X:mane,horns fit:1.14'),
+  golem: E('fit:0.86', 'X:spines fit:1', 'X:crystals fit:1', 'X:spines,horns fit:1.16', 'X:crystals,mane fit:1.14'),
+  priest_glut: E('fit:0.86', 'R:mace L:tome fit:1', 'R:staffGlow fit:1', 'R:hammer L:buckler X:pauldron fit:1.14', 'R:staffSun H:flame fit:1.12'),
+  phoenix: E('fit:0.84', 'X:crownS fit:1', 'X:mane fit:1', 'X:crownS,barding fit:1.15', 'X:mane,crystals fit:1.12'),
+  // nur Wellen
+  knightfallen: E('fit:0.9', 'X:pauldron fit:1', 'R:scytheGlow fit:1', 'R:greatsword L:tower H:horned X:pauldronXL fit:1.15', 'R:scytheGlow H:skull X:veins fit:1.12'),
+  serpent: E('fit:0.9', 'L:buckler fit:1', 'X:veins fit:1', 'L:tower H:crown fit:1.12', 'H:crystal X:veins fit:1.12'),
+};
+/** Ausrüstungs-Spec einer Form (String) */
+export function gearSpec(arch, form) { return (EVOLVE[arch] && EVOLVE[arch][form]) || ''; }
+/** Größenfaktor einer Form (Entwicklungs-Story), sonst Stufenmaßstab */
+export function formFit(arch, form) {
+  const m = /fit:([\d.]+)/.exec(gearSpec(arch, form));
+  return m ? +m[1] : TIER_SCALE[+String(form || '1')[0]] || 1;
+}
+/** Dunkle Volksfarben für die Draufsicht anheben (Abgrund, Glut) – Kontrast/Randlicht */
+export const PALETTE_LIFT = { '#2c2440': '#4a3d70', '#6a1f52': '#9a2f78', '#3a2422': '#5e3a32', '#8a5a3a': '#b07a4a' };

@@ -77,7 +77,7 @@ export const MECHANICS = {
       if (sim.phase === 'battle' && w === 0) return 'Kampf! Deine Vasallen kämpfen von selbst. Fallen sie, stehen sie nach der Welle wieder auf.';
       if (sim.phase === 'battle' && w === 1) return 'Gegner, die durchbrechen, greifen deinen König an. Klicke Gegner an, um ihre Werte zu sehen.';
       if (sim.phase === 'build' && w === 2) return 'Klicke einen Vasallen an und werte ihn auf – jede Stufe hat zwei Pfade (C / V).';
-      if (sim.phase === 'build' && w >= 3) return 'Funken (B) sammeln Äther. Mit Äther schickst du Söldner (1–7) und erhöhst dein Einkommen.';
+      if (sim.phase === 'build' && w >= 3) return 'Funken (B) sammeln Äther. Mit Äther schickst du Söldner (1–6) und erhöhst dein Einkommen.';
       return `Halte die Bahn: noch ${sim.rules.maxWaves - sim.wave + (sim.phase === 'build' ? 1 : 0)} Wellen.`;
     },
   },

@@ -12,7 +12,8 @@ import { longsword, towerShield, bladePrim, staff, longbow } from './weapons.js'
 import { crystalPrim } from './selene.js';
 import { parseForm, applyForm, humanAnchors } from './form.js';
 import { ARMY, quadAnchors } from './army.js';
-import { ARCH_STYLE } from '../roster.js';
+import { ARCH_STYLE, gearSpec } from '../roster.js';
+import { parseGear, setGearSuppress, applyGear } from './gear.js';
 import { FACTIONS } from '../../../sim/data.js';
 
 const { abs, max, min, sin, cos, atan2, hypot, sqrt } = Math;
@@ -136,6 +137,7 @@ function plateTorso(S, BL, o = {}) {
   if (o.trim) S.shell({ off: 0.026 * s, th: 0.007 * s, mat: 'gold', col: o.trim, region: 'torso', clip: (x, y, z) => max(clip(x, y, z), y - hips[1] - 0.08 * s) }, () => torsoShape(S, BL, { bulk: o.bulk ?? 1.02 }));
 }
 function helmet(S, BL, o = {}) {
+  if (S.noHelm) return;
   const H = headInfo(BL), s = H.s;
   S.group({ k: 0 }, () => {
     S.ellipsoid(H.at(0, 0.015, 0), [0.108 * s, 0.125 * s, 0.118 * s], { ...steelA(o.col), region: 'head' });
@@ -712,8 +714,12 @@ export function unitDef(arch, cell = 0.007, form = '1', style = null) {
   const def = {
     id: `unit_${arch}_${F.form}`, kind: 'unit', palette, scale: 1, cell: cell * (big ? 2.2 : 1), budgets: big ? [9000, 3600, 1400] : (D.budgets2 || [2600, 1000, 380]), H: D.H, glowCellK: 0.8, fineK: 1,
     build: (S) => {
+      const gear = noForm ? { X: [] } : parseGear(gearSpec(arch, F.form));
+      F.gear = gear;
+      setGearSuppress(S, gear);
       res = D.build(S, palette, F);
       const plan = res.anchors ? res : { ...res, H: D.H, anchors: legacyAnchors(arch, res.J, D.H) };
+      applyGear(S, gear, plan, st);
       if (!noForm && !plan.noForm) applyForm(S, F, plan, st);
       def.skeleton = skeletonOf(plan.J); def.cls = plan.cls; if (plan.hipY) def.hipY = plan.hipY; def.torsoW = plan.torsoW ?? D.torsoW;
       const an = plan.anchors || {};
