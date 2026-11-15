@@ -2888,7 +2888,7 @@ html.er .smoke{opacity:.03!important}
 html.er{--bg:#D3DCE5}
 html.er,html.er body{--mut:#262B35}
 html.er .sky{background:
- repeating-linear-gradient(115deg,rgba(255,255,255,.2) 0 1px,transparent 1px 4px),
+ repeating-linear-gradient(115deg,rgba(255,255,255,0) 0,rgba(255,255,255,.15) 2px,rgba(255,255,255,0) 4px),
  linear-gradient(115deg,transparent 28%,rgba(255,255,255,.42) 44%,transparent 60%),
  linear-gradient(180deg,#B7C5D3 0%,#C9D4DF 30%,#D4DDE6 62%,#E3E8EE 100%)!important}
 html.er .sky::after{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='56' height='97' viewBox='0 0 56 97'%3E%3Cpath d='M28 0l28 16.2v32.3L28 64.7 0 48.5V16.2zM28 64.7v32.3' fill='none' stroke='%23FFFFFF' stroke-width='1.6'/%3E%3C/svg%3E")!important;opacity:.24!important}
@@ -2901,13 +2901,13 @@ html.er .ribbons i:nth-child(3){background:linear-gradient(90deg,transparent 6%,
 html.er main{position:relative}
 .erl{--h:900px;--g:96px;position:absolute;top:88px;right:calc(var(--g)*-1);height:calc(var(--h) + var(--g)*2.146);width:calc(var(--h)*.466 + var(--g)*2);z-index:-1;pointer-events:none}
 main:has(> section.view[data-v="start"]:not([hidden])) > .erl{--h:min(1200px,135vh)}
-.erl .erg{position:absolute;inset:0;clip-path:polygon(0 0,var(--g) 0,100% 100%,calc(100% - var(--g)) 100%);
- background:repeating-linear-gradient(115deg,rgba(255,255,255,.35) 0 1px,transparent 1px 4px),linear-gradient(65deg,#D2DBE4 0%,#E6ECF2 48%,#F6F8FA 100%)}
+.erl .erg{position:absolute;inset:0;clip-path:polygon(0 0,calc(var(--g) + 12px) 0,100% calc(100% - 25.75px),100% 100%,calc(100% - var(--g)) 100%);
+ background:repeating-linear-gradient(115deg,rgba(255,255,255,0) 0,rgba(255,255,255,.26) 2px,rgba(255,255,255,0) 4px),linear-gradient(65deg,#D2DBE4 0%,#E6ECF2 48%,#F6F8FA 100%)}
 .erl .errw{position:absolute;top:0;right:0;bottom:0;left:var(--g);filter:drop-shadow(-14px 12px 22px rgba(22,26,34,.26))}
 .erl .erh{position:absolute;inset:0;background:#868282;clip-path:polygon(0 0,100% 0,100% 100%)}
 .erl .err{position:absolute;inset:0;clip-path:polygon(3px 0,100% 0,100% calc(100% - 6.44px));
  background:
-  repeating-linear-gradient(115deg,rgba(255,255,255,.05) 0 1px,transparent 1px 4px),
+  repeating-linear-gradient(115deg,rgba(255,255,255,0) 0,rgba(255,255,255,.04) 2px,rgba(255,255,255,0) 4px),
   linear-gradient(200deg,#B8132F 0%,#960F27 34%,#6E0C1F 70%,#42121B 100%)}
 @media (max-width:760px){.erl,main:has(> section.view[data-v="start"]:not([hidden])) > .erl{--h:250px;--g:44px;top:84px}}
 

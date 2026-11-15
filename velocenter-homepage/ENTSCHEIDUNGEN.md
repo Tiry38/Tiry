@@ -282,3 +282,12 @@
 - Hover-Vorschau i:SY Treffen hat unter „Auf dieser Seite“ die Zeile **„Jahrgänge“**: Glas-Pillen 2024 · 2023 · 2022 · 2019 · 2017
   (neueste zuerst wie die Galerie, 2024 mit ★ und rotem Lichtrand = Weltrekord, Hover = roter Verlauf). Klick springt zur Galerie
   „Bilder & Videos“ (`#tgY`) und filtert direkt auf dieses Jahr (`window.tgYear(y)`, `data-tgy`). Funktion `yr()` + 7. Parameter von `tx()`.
+
+## 15.11.2026 – Hintergrund-Striche ohne Pixel (Tiry: „100 % scharf, keine verpixelten Stellen“)
+- Gemessen: die Striche selbst (clip-path) sind sauber kantengeglättet, auch über die Grafikkarte. Verpixelt wirkten zwei Dinge daneben:
+  1. Feine 115°-Schliffspuren (Eis-Grund, Glasklinge, Rot) waren 1-px-Linien mit harten Farbstopps → Chrome glättet die nicht → Treppen.
+     Jetzt weiche Welle `0 → Spitze bei 2px → 0 bei 4px` (gleiche Optik, keine Treppen). **Nie wieder harte Stopps in schrägen repeating-Verläufen.**
+  2. Glasklinge und graue Kante teilten sich exakt dieselbe Kante → Hintergrund schimmerte im Kanten-Pixel durch. Klinge reicht jetzt 12 px unter die Kante
+     (`.erg`-Polygon mit `100% calc(100% - 25.75px)`, 25,75 = 12 × 2,146 = tan 65°).
+- Vorlage „Metall gebürstet“ für die rote Fläche: `entwurf-menue/metall/` (nur mit `html.mtl`, Umschalter unten, Taste M), online als
+  `vorlage-metall.html` im Web-Repo (noindex, nicht in der Sitemap). Entscheidung von Tiry offen.
