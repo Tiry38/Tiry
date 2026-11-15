@@ -300,3 +300,9 @@
   `canonical` bleibt www.velo-center.de. Am Umzugstag `BILD_BASIS = BASIS` (steht in LIVEGANG.md).
 - `live/og-bild.jpg` neu (1200×630, aus der aktuellen Startseite: Laufband, Logo, Überschrift, Knöpfe, Showroom, Metall-Rot). Ohne Menüleiste und ohne
   Geöffnet/Geschlossen-Anzeige (zeitabhängig). Bei großen Optik-Änderungen der Startseite neu erzeugen (2-fach rendern, Lanczos auf 1200×630).
+
+## 15.11.2026 – Rote Fläche bündig unter dem Laufband (Tiry, Handy)
+- Startseite: `.erl` hatte festen Abstand (84/88 px ab `main`), auf Handy/Tablet (≤ ~1024 px) blieb eine Lücke zwischen Laufband und Rot.
+  Jetzt setzt ein Skript (`eisRotJs`, nach dem Anlegen von `.erl`) `top` auf die Mitte von `.bands` – dort sind beide Bänder zentriert und decken die
+  Oberkante bei jeder Breite ab. Neu berechnet bei Größe, Schrift (A+), Laden und Reiterwechsel; andere Reiter unverändert (CSS-Wert).
+- Handy-Animationen: Telefon mit „Bewegung reduzieren“/Energiesparmodus stoppt alle Animationen (Pflichtregel). Mittelweg (ruhige Effekte trotzdem) nur nach Tirys „ja“.

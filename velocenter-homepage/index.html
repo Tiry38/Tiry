@@ -5906,6 +5906,14 @@ new MutationObserver(act).observe(n,{subtree:true,attributes:true,attributeFilte
 if(typeof hdrFit==='function')setTimeout(hdrFit,60)})();
 
 (function(){const m=document.querySelector('main');if(m&&!m.querySelector('.erl')){const d=document.createElement('div');d.className='erl';d.setAttribute('aria-hidden','true');d.innerHTML='<i class="erg"></i><span class="errw"><i class="erh"></i><i class="err"></i><i class="erx"></i></span>';m.prepend(d)}
+/* Rote Fläche auf der Startseite beginnt genau in der Mitte des Laufbands (beide Bänder sind dort zentriert und decken die Kante immer ab).
+   Vorher fester Abstand → auf Handy/Tablet Lücke zwischen Laufband und Rot (Tiry 15.11.2026). */
+(function(){const m=document.querySelector('main'),e=m&&m.querySelector(':scope > .erl'),b=document.querySelector('main > section.view[data-v="start"] .bands');if(!e||!b)return;
+ const fit=()=>{const s=b.closest('section.view');if(s.hidden){e.style.top='';return}const r=b.getBoundingClientRect();if(!r.height){e.style.top='';return}
+  const t=Math.round(r.top+r.height/2-m.getBoundingClientRect().top)+'px';if(e.style.top!==t)e.style.top=t};
+ let q=0;const go=()=>{cancelAnimationFrame(q);q=requestAnimationFrame(fit)};
+ addEventListener('resize',go);addEventListener('load',go);addEventListener('hashchange',()=>{setTimeout(go,520);setTimeout(go,1100)});
+ if(document.fonts&&document.fonts.ready)document.fonts.ready.then(go);if(window.ResizeObserver)new ResizeObserver(go).observe(m);go()})();
 const k=document.body;if(k&&!document.querySelector('.strk')){const t=document.createElement('div');t.className='strk';t.setAttribute('aria-hidden','true');t.innerHTML='<i class="sa"></i><i class="sb"></i><i class="sc"></i>';k.prepend(t)}})();
 
 </script>
