@@ -290,4 +290,6 @@
   2. Glasklinge und graue Kante teilten sich exakt dieselbe Kante → Hintergrund schimmerte im Kanten-Pixel durch. Klinge reicht jetzt 12 px unter die Kante
      (`.erg`-Polygon mit `100% calc(100% - 25.75px)`, 25,75 = 12 × 2,146 = tan 65°).
 - Vorlage „Metall gebürstet“ für die rote Fläche: `entwurf-menue/metall/` (nur mit `html.mtl`, Umschalter unten, Taste M), online als
-  `vorlage-metall.html` im Web-Repo (noindex, nicht in der Sitemap). Entscheidung von Tiry offen.
+  `vorlage-metall.html` im Web-Repo (noindex, nicht in der Sitemap).
+- **Tiry: „metallik live“ (15.11.2026)** → Regeln ohne `html.mtl` fest in `index.html` hinter `.erl .erx`, Vorlage-Seite im Web-Repo gelöscht.
+  Rote Fläche = Metall gebürstet; nicht auf die alte flache Fassung zurückbauen.
