@@ -322,3 +322,8 @@
   darüber (am Handy lag das Formular ~2 Bildschirme tiefer). Menü-Vorschau „Termin anfragen in 30 Sekunden“ ebenfalls direkt aufs Formular (`lbFind`).
 - Geprüft: alle Termin-Knöpfe (Startseite, Service, Marken, i:SY, E-Dreirad, Dienstrad-Rechner, Kopf, untere Leiste, Menü) am Handy (Pixel 7) und PC:
   Formular-Oberkante 74–96 px unter dem Fensterrand, Art + Text werden passend vorbelegt. Winter-Karte 2× hintereinander → jedes Mal Formular.
+
+## 15.11.2026 – Striche dezenter, „Aus Wörth für Wörth“ entfernt (Tiry)
+- Hintergrund-Striche (`.strk`): grau `.sa/.sb` Deckkraft .42, rot `.sc` .5 (vorher grau voll, rot .92). Form/Position unverändert.
+- Abschnitt „Aus Wörth für Wörth“ (Kinderfasching, Stadtradeln, Lions-Adventskalender, ADFC) unter „Unser Versprechen“ komplett gelöscht
+  (Tiry: „interessiert keinen“), samt CSS `.woerth/.wrows/.wrow`. Linke Spalte ist sticky → keine Lücke. Nicht wieder einbauen.

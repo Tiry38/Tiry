@@ -430,17 +430,6 @@ a.tflk{font-weight:700;color:#C2410C;text-underline-offset:3px}
 .tchr li.on b{font-size:48px}
 .tvoi{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:22px}.tvoi blockquote{margin:0;padding:28px 30px;border-radius:32px;background:linear-gradient(140deg,rgba(124,58,237,.08),rgba(225,29,72,.06));border:1px solid var(--line);font:700 20px/1.45 var(--display)}.tvoi cite{display:block;margin-top:14px;font:600 14px var(--sans,inherit);font-style:normal;color:#3B3F48}.tvoi small{display:block;margin-top:2px;color:var(--mut);font-weight:500}
 .tpress{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-top:24px}.tpress p{margin:0 6px 0 0;font-weight:700}.tpress a{padding:10px 18px;border-radius:999px;background:rgba(255,255,255,.8);border:1px solid var(--line);font-weight:700;font-size:14px;text-decoration:none;color:inherit;min-height:44px;display:inline-flex;align-items:center}.tpress a:hover{border-color:#C026D3}
-.woerth{margin:34px 0 6px}.woerth .eyebrow{margin-bottom:10px}
-.wrows{display:grid;grid-template-columns:1fr 1fr;column-gap:28px}
-.srow.wrow{grid-template-columns:46px 1fr;gap:14px;padding:16px 4px;cursor:default}
-.srow.wrow:nth-last-child(2){border-bottom:1px solid var(--line)}
-.srow.wrow:hover{padding-left:4px}.srow.wrow::before{display:none}
-.srow.wrow .ic{width:46px;height:46px}.srow.wrow .ic svg{width:21px;height:21px}
-.srow.wrow:hover .ic{transform:none}
-.srow.wrow small{display:block;font:800 11px/1 var(--display);letter-spacing:.12em;text-transform:uppercase;color:var(--c);filter:brightness(.8);margin-bottom:5px}
-.srow.wrow h3{font-size:17px;line-height:1.15}
-.srow.wrow p{font-size:13.5px;margin-top:3px}
-@media (max-width:560px){.wrows{grid-template-columns:1fr}.srow.wrow:nth-last-child(2){border-bottom:0}}
 @media (max-width:1000px){.tvoi{grid-template-columns:1fr}.tcl{display:none}.tchw::before{content:"";position:absolute;left:47px;top:20px;bottom:20px;width:5px;border-radius:5px;background:linear-gradient(180deg,#F59E0B,#F43F5E,#C026D3,#7C3AED)}
 .tchr{grid-template-columns:1fr;gap:26px;text-align:left}.tchr li,.tchr li:nth-child(even){margin-top:0;display:grid;grid-template-columns:100px 1fr;column-gap:18px;align-items:center}
 .tcf{width:100px;grid-row:1/4;margin:0;padding:4px}.tcf img{border-width:3px}.tchr b{margin-top:0;font-size:32px}.tchr li.on b{font-size:36px}.tct{margin:4px 0 0;max-width:none}
@@ -2884,7 +2873,7 @@ html.er .sky::before{background:none!important}
 .strk .sa{background:#868282;clip-path:polygon(calc(7vw + 6.6vh) 0,calc(8vw + 7.066vh) 0,calc(8vw + 7.066vh - 46.63vh) 100%,calc(7vw + 6.6vh - 46.63vh) 100%);-webkit-mask-image:none;mask-image:none}
 .strk .sb{background:#868282;clip-path:polygon(calc(62.000vw + 28.910vh) 0,calc(63.500vw + 29.610vh) 0,calc(63.500vw + 29.610vh - 46.63vh) 100%,calc(62.000vw + 28.910vh - 46.63vh) 100%)}
 .strk .sc{background:#CF1A2C;clip-path:polygon(calc(66.000vw + 30.775vh) 0,calc(67.000vw + 31.242vh) 0,calc(67.000vw + 31.242vh - 46.63vh) 100%,calc(66.000vw + 30.775vh - 46.63vh) 100%)}
-.strk .sc{opacity:.92}
+.strk .sa,.strk .sb{opacity:.42}.strk .sc{opacity:.5}/* Tiry 15.11.2026: Striche dezenter */
 /* Seiten mit Foto oben (i:SY Experte): Kopf als Perlglas-Leiste mit Weichzeichner, damit Logo und Menü über dem Foto klar lesbar sind */
 html.er body:has(section.view[data-v="isy"]:not([hidden])) .hdr{background:linear-gradient(180deg,rgba(250,252,254,.9),rgba(238,243,248,.82))!important;
  backdrop-filter:blur(22px) saturate(1.6)!important;-webkit-backdrop-filter:blur(22px) saturate(1.6)!important;
@@ -3377,7 +3366,6 @@ m696 -454 c28 -13 46 -31 55 -51 22 -53 -50 -177 -173 -300 -187 -186 -647
     <h2 class="big">Hier schraubt <span class="gt">der Chef</span> noch selbst.</h2>
     <p class="lead">Uns ist wichtig, dass du am Ende glücklich mit deinem E-Bike bist und dich ehrlich beraten fühlst. Kauf, Werkstatt und Service bekommst du bei uns aus einer Hand.</p>
     <div class="sig"><svg><use href="#i-wrench"/></svg>Stefan Hessert, Inhaber</div>
-    <div class="woerth pre"><p class="eyebrow">Aus Wörth <b>für Wörth</b></p><div class="wrows"><div class="srow wrow" style="--c:#F472B6"><span class="ic"><svg><use href="#i-gift"/></svg></span><span><small>2020</small><h3>Kinderfasching</h3><p>Kinderrad für die Tombola</p></span></div><div class="srow wrow" style="--c:#22D3EE"><span class="ic"><svg><use href="#i-bike"/></svg></span><span><small>2021</small><h3>Stadtradeln-Rallye</h3><p>Gutschein für die Rallye</p></span></div><div class="srow wrow" style="--c:#E2232D"><span class="ic"><svg><use href="#i-cal"/></svg></span><span><small>2025 · 2026</small><h3>Lions-Adventskalender</h3><p>Verkaufsstelle für Wörth&#8209;Kandel</p></span></div><div class="srow wrow" style="--c:#60A5FA"><span class="ic"><svg><use href="#i-heart"/></svg></span><span><small>Mitglied</small><h3>ADFC</h3><p>Fördermitglied</p></span></div></div></div>
    </div>
    <div class="rows">
     <a class="srow pre" href="#beratung" style="--c:#F472B6"><span class="ic"><svg><use href="#i-bike"/></svg></span><span><h3>Beratung & Probefahrt</h3><p>Wir hören zu, zeigen eine passende Auswahl und begleiten dich auf Wunsch bei der Probefahrt.</p></span><span class="go"><svg><use href="#i-arrow"/></svg></span></a>
