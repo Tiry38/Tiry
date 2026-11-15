@@ -324,6 +324,7 @@
   Formular-Oberkante 74–96 px unter dem Fensterrand, Art + Text werden passend vorbelegt. Winter-Karte 2× hintereinander → jedes Mal Formular.
 
 ## 15.11.2026 – Striche dezenter, „Aus Wörth für Wörth“ entfernt (Tiry)
-- Hintergrund-Striche (`.strk`): grau `.sa/.sb` Deckkraft .42, rot `.sc` .5 (vorher grau voll, rot .92). Form/Position unverändert.
+- Hintergrund-Striche (`.strk`): grau `.sa/.sb` Deckkraft .11, rot `.sc` .12 (vorher grau voll, rot .92; Zwischenstand .42/.5 wirkte laut Chefin
+  noch wie Durchstreichen über der Schrift). Nur noch ein Hauch, **nie wieder kräftiger**. Form/Position unverändert.
 - Abschnitt „Aus Wörth für Wörth“ (Kinderfasching, Stadtradeln, Lions-Adventskalender, ADFC) unter „Unser Versprechen“ komplett gelöscht
   (Tiry: „interessiert keinen“), samt CSS `.woerth/.wrows/.wrow`. Linke Spalte ist sticky → keine Lücke. Nicht wieder einbauen.
