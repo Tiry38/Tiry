@@ -314,3 +314,11 @@
 - **Logo und Rad kommen gleichzeitig** in beiden Showrooms: Logos werden vorab geladen + dekodiert; Wechsel erst, wenn Rad und Logo bereit sind
   (max. 2,5 s Wartezeit), dann starten beide im selben Frame mit gleicher Dauer (`.hlg` 0,9 s/1,1 s wie `.hb`, Ausblenden 0,3 s; `showroom()` mit `dec`/`rdy`).
 - Diagnose: Seite mit `?diag` zeigt unten ein Feld „Bewegung reduzieren AN/AUS · laufende Animationen“ (Klick schließt). Ohne `?diag` unsichtbar.
+
+## 15.11.2026 – Termin-Knöpfe landen direkt im Formular (Tiry, Handy)
+- Schleife behoben: Die Winter-Karte im Terminbereich zeigte auf `#deal` (Startseite), deren Knopf „Winter-Termin sichern“ wieder auf `#termin` → man kam nie ans Formular.
+  Karte jetzt `href="#termin" data-pre="Winter-Inspektion"` (Inspektion vorgewählt, Text „Winter-Inspektion: “).
+- `#termin` springt jetzt direkt auf das Formular `#tf` (ALIAS `termin:['service','tf']`, `#tf{scroll-margin-top:96px}`), nicht mehr auf die Überschrift
+  darüber (am Handy lag das Formular ~2 Bildschirme tiefer). Menü-Vorschau „Termin anfragen in 30 Sekunden“ ebenfalls direkt aufs Formular (`lbFind`).
+- Geprüft: alle Termin-Knöpfe (Startseite, Service, Marken, i:SY, E-Dreirad, Dienstrad-Rechner, Kopf, untere Leiste, Menü) am Handy (Pixel 7) und PC:
+  Formular-Oberkante 74–96 px unter dem Fensterrand, Art + Text werden passend vorbelegt. Winter-Karte 2× hintereinander → jedes Mal Formular.
