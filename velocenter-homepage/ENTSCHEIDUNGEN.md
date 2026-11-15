@@ -260,3 +260,5 @@
 - **Stichpunkte der Menü-Vorschau ohne Nummern (15.11.2026, Tiry: „moderne Punkte statt Zahlen“):** Liste „Auf dieser Seite“ zeigt
   einen leuchtenden Rot-Punkt (Verlauf #FF5466 → #8E0E26) mit weißem Glas-Hof; beim Drüberfahren wird er zur kurzen Pille, der Text bleibt stehen.
 - **Etikett Service mit Zugabe (15.11.2026, Tiry):** „–20 €“-Etikett hat als 3. Zeile „+ Sattelüberzug geschenkt“ („+“ in Logo-Rot), damit die ganze Winter-Aktion drinsteht.
+- **KEINE Bestandszahlen auf der Homepage (15.11.2026, Tiry, verbindlich):** keine Anzahl „im Laden / bestellt / Angebote“ o. Ä. öffentlich zeigen –
+  auch nicht in der Menü-Vorschau (dort entfernt). `#lgNum` auf der Lager-Seite bleibt `hidden`. Einzelne Räder mit Preis bleiben.
