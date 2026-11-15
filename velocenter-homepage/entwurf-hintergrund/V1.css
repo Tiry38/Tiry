@@ -1,0 +1,6 @@
+/* V1 Weniger Rosa */
+.sky{background:linear-gradient(160deg,#F5ECE6 0%,#EDE3E2 26%,#E4DEEA 52%,#D6DEEA 78%,#E8DFCE 100%)!important}
+.blobs i:nth-child(1){--c:#C8102E;opacity:.2!important}
+.blobs i:nth-child(5){--c:#5B5FC7;opacity:.2!important}
+.ribbons i:nth-child(1){background:radial-gradient(closest-side,rgba(200,16,46,.11),rgba(200,16,46,.05) 45%,rgba(200,16,46,.015) 72%,transparent)!important}
+.ribbons i:nth-child(4){background:radial-gradient(closest-side,rgba(176,18,31,.09),rgba(176,18,31,.04) 48%,transparent 74%)!important}

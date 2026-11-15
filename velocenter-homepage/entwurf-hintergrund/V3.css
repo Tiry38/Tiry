@@ -1,0 +1,10 @@
+/* V3 Graphit-Weinrot: kühles Silber, Rot dunkler (Wein statt Pink) */
+.sky{background:linear-gradient(160deg,#EFEDED 0%,#E6E3E5 26%,#DFDEE6 52%,#D6DBE3 78%,#E4DED4 100%)!important}
+.blobs i:nth-child(1){--c:#8E0E1E;opacity:.24!important}
+.blobs i:nth-child(2){--c:#D9A766;opacity:.36!important}
+.blobs i:nth-child(3){--c:#4B3A8C;opacity:.28!important}
+.blobs i:nth-child(4){--c:#0E7C86;opacity:.24!important}
+.blobs i:nth-child(5){--c:#3A3D44;opacity:.24!important}
+.blobs i:nth-child(6){--c:#3A3D44;opacity:.2!important}
+.ribbons i:nth-child(1){background:radial-gradient(closest-side,rgba(120,12,26,.13),rgba(120,12,26,.05) 45%,transparent 72%)!important}
+.ribbons i:nth-child(4){background:radial-gradient(closest-side,rgba(120,12,26,.1),rgba(120,12,26,.04) 48%,transparent 74%)!important}
