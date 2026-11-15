@@ -214,3 +214,15 @@
 - Kontrast WCAG AA: Orange-Texte #D45200 / #C2410C, Jahres-Knopf, i:SY-Liste, Testflotten-Überschriften; Mini-Texte auf 11 px.
 - Schnellzugriff-Kacheln 761–1100 px als 2×2-Raster (vorher gequetscht).
 - axe-core: 0 Verstöße auf allen Ansichten bei 1440 und 390 px.
+
+## 15.11.2026 – UX-Prüfung, Stufe B (Tiry: B1–B8 freigegeben)
+- **B1** Feste Aktionsleiste unten (Handy ≤720 px und Touch-Geräte bis 1024 px): Anrufen · Termin · WhatsApp; ersetzt dort den WhatsApp-Kreis.
+- **B2** Hero: Hauptknopf „Werkstatt-Termin anfragen“, zweiter Knopf „E-Bike finden“.
+- **B3** Termin-Formular sendet direkt: „Per WhatsApp senden“ (Haupt) oder „Per E-Mail senden“; Text-Ausgabe nur noch als Ersatz, falls sich nichts öffnet.
+- **B4** Weniger Dauer-Bewegung: Tempo-Linien nur ~4 s beim Laden; Puls-Ringe 3× statt endlos; Öffnungs-Ring pulsiert nur bei „offen“; „Live“-Punkt im Menü ruhig. Ticker bleibt.
+- **B5** Bilder neu komprimiert (max. 1600 px, WebP q80; 140 Dateien, ~60 → ~45 MB); Hero-Wechselbilder laden erst kurz vor dem Zeigen. Handy-Start 8,6 → 4,2 MB. `img/bestand/` unverändert (Bilder-Agent).
+- **B6** Handy-Menü: roter Knopf „07271 78033 anrufen“ ganz oben.
+- **B7** Lager: H2 „Sofort verfügbar – E-Bikes auf Lager“.
+- **B8** JSON-LD: geo (49.05512, 8.26684 – OpenStreetMap-Eintrag „Velocenter Hessert“), image (og-bild.jpg), hasMap.
+- „Meisterwerkstatt“ aus der Google-Beschreibung entfernt → „eigene Werkstatt“ (Stefan hat keinen Meisterbrief). **Nie „Meister…“ verwenden.**
+- Fehler behoben: Im offenen Handy-Menü lag das ✕ unter dem Menü (nicht antippbar), Menü war unten abgeschnitten.
