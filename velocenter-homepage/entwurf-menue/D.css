@@ -1,0 +1,17 @@
+@media (min-width:1181px){
+html body .hdr .nav{gap:6px!important;align-items:flex-start!important}
+html body .hdr .nav a{position:relative;display:flex!important;flex-direction:column;align-items:center;gap:7px;padding:4px 8px!important;font-size:13.5px!important;font-weight:700;color:#232734!important;transition:color .3s!important}
+.vph{position:relative;width:48px;height:48px;border-radius:50%;display:grid;place-items:center;transition:transform .5s cubic-bezier(.22,1.35,.36,1)}
+.vph::before{content:"";position:absolute;inset:-3px;border-radius:50%;background:conic-gradient(from var(--vr),#E2232D,#D9306F,#9B3FD8,#2F6FB0,#0EA5B7,#9B3FD8,#E2232D);opacity:.0;transition:opacity .35s}
+.vph::after{content:"";position:absolute;inset:-1px;border-radius:50%;box-shadow:0 0 0 1.5px rgba(255,255,255,.95),0 10px 20px -10px rgba(60,20,90,.55)}
+.vph i{position:relative;z-index:1;width:100%;height:100%;border-radius:50%;overflow:hidden;background:radial-gradient(circle at 35% 30%,#fff,#F3E6F0);display:block}
+.vph img{width:100%;height:100%;object-fit:cover;display:block}
+.vph img.c{object-fit:contain;padding:5px}
+html body .hdr .nav a:hover .vph{transform-origin:50% 100%;transform:translateY(-3px) scale(1.16)}
+html body .hdr .nav a:hover .vph::before{opacity:.75;animation:vRim 3s linear infinite}
+html body .hdr .nav a.on .vph::before{opacity:1;inset:-4px;animation:vRim 6s linear infinite}
+html body .hdr .nav a.on .vt{background:linear-gradient(100deg,#C8102E,#B4237A 50%,#5B3FC0);-webkit-background-clip:text;background-clip:text;color:transparent}
+html body .hdr .nav a .nlive{position:absolute;top:0;right:-4px;transform:scale(.8);z-index:2}
+html body.sc .vph{width:38px;height:38px}
+html body.sc .hdr .nav a{gap:4px;font-size:12.5px!important}
+}

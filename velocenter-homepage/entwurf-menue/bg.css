@@ -1,0 +1,13 @@
+/* Hintergrund „Perlmutt + Eisblau“ (Entwurf, gilt für alle 6 Vorlagen): Aufbau bleibt, Farben kühler und perliger */
+:root{--bg:#F1F4F8!important}
+html body .sky{background:linear-gradient(160deg,#F6F5F3 0%,#EEEDF3 20%,#E2E9F2 42%,#D4E6F2 62%,#E4EEF5 80%,#F1ECE4 100%)!important}
+html body .sky::after{content:"";position:absolute;inset:0;pointer-events:none;opacity:.55;mix-blend-mode:soft-light;
+ background:conic-gradient(from 210deg at 70% 30%,#FFFFFF,#CFE9F7,#E6DDF7,#FFF3E2,#D7F1F0,#FFFFFF)}
+html body .blobs i:nth-child(1){background:#9CC9EA!important;opacity:.34!important}
+html body .blobs i:nth-child(2){background:#EFE2CC!important;opacity:.5!important}
+html body .blobs i:nth-child(3){background:#B9AEE8!important;opacity:.26!important}
+html body .blobs i:nth-child(4){background:#8FD3F0!important;opacity:.32!important}
+html body .blobs i:nth-child(5){background:#BFE6EC!important;opacity:.34!important}
+html body .blobs i:nth-child(6){background:#A9B4C8!important;opacity:.14!important}
+html body .ribbons i:nth-child(1){background:radial-gradient(closest-side,rgba(120,170,210,.16),rgba(120,170,210,.06) 45%,transparent 72%)!important}
+html body .ribbons i:nth-child(4){background:radial-gradient(closest-side,rgba(170,150,220,.12),rgba(170,150,220,.04) 48%,transparent 74%)!important}

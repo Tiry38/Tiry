@@ -1,0 +1,19 @@
+@media (min-width:1181px){
+html body .hdr .wrap{position:relative;isolation:isolate}
+html body .hdr .wrap::before{content:"";position:absolute;left:12px;right:12px;top:0;bottom:10px;z-index:-1;border-radius:0 0 40px 40px;
+ background:radial-gradient(420px 120px at 18% 120%,rgba(226,35,45,.13),transparent 70%),radial-gradient(520px 130px at 60% 130%,rgba(155,63,216,.13),transparent 70%),radial-gradient(420px 120px at 95% 0%,rgba(14,165,183,.12),transparent 70%),linear-gradient(180deg,rgba(255,255,255,.35),rgba(255,255,255,.72));
+ backdrop-filter:blur(18px) saturate(1.5);-webkit-backdrop-filter:blur(18px) saturate(1.5);box-shadow:0 22px 46px -30px rgba(90,30,110,.5),inset 0 -1px 0 #fff}
+html body .hdr .nav{gap:2px!important}
+html body .hdr .nav a{position:relative;display:flex!important;flex-direction:column;align-items:flex-start;gap:3px;padding:10px 13px!important;font-size:16px!important;font-weight:700;color:#1E2230!important;line-height:1.1;transition:transform .4s cubic-bezier(.22,1.3,.36,1)!important}
+html body .hdr .nav a::before,html body .hdr .nav a.on::before{content:attr(data-e)!important;display:block!important;position:static;font-size:10.5px;font-weight:800;letter-spacing:.15em;text-transform:uppercase;
+ background:linear-gradient(100deg,#C8102E,#B4237A 55%,#6D3BE0);-webkit-background-clip:text;background-clip:text;color:transparent;white-space:nowrap}
+html body .hdr .nav a::after{content:""!important;display:block!important;position:absolute;height:auto!important;width:auto!important;inset:-6px -4px;z-index:-1;border-radius:26px;opacity:0;transform:scale(.9);
+ background:radial-gradient(closest-side,rgba(255,255,255,.95),rgba(255,255,255,.55) 60%,transparent);transition:opacity .3s,transform .45s cubic-bezier(.22,1.3,.36,1)}
+html body .hdr .nav a:hover{transform:translateY(-2px)}html body .hdr .nav a:hover::after{opacity:1;transform:none}
+html body .hdr .nav a.on .vt{background:linear-gradient(100deg,#C8102E,#B4237A 50%,#5B3FC0);-webkit-background-clip:text;background-clip:text;color:transparent}
+html body .hdr .nav a.on::after{content:""!important;display:block!important;opacity:1;transform:none;background:radial-gradient(closest-side,rgba(255,255,255,1),rgba(255,236,244,.7) 55%,transparent)}
+html body .hdr .nav a .vt{display:inline-flex;align-items:center;gap:6px}
+html body .hdr .nav a .nlive{display:none!important}
+html body .hdr .nav a[data-r=lager]::before{content:"● " attr(data-e)!important}
+html body.sc .hdr .wrap::before{display:none}
+}

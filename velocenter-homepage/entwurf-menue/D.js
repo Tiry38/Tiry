@@ -1,0 +1,4 @@
+(function(){const P={start:['img/fassade.webp'],service:['img/zub-bosch.svg','c'],marken:['img/laden-innen.webp'],lager:['img/p-isy.webp','c'],isy:['img/isy-experte-rund.webp','c'],treffen:['img/treffen-luft.webp'],dreirad:['img/p-vanraam.webp','c'],kontakt:['img/laden-eingang.webp']};
+document.querySelectorAll('#nav a[data-r]').forEach(a=>{const t=[...a.childNodes].find(x=>x.nodeType===3&&x.textContent.trim());if(t){const s=document.createElement('span');s.className='vt';s.textContent=t.textContent.trim();a.replaceChild(s,t)}
+ const p=P[a.dataset.r];if(!p)return;const d=document.createElement('span');d.className='vph';d.setAttribute('aria-hidden','true');d.innerHTML='<i><img src="'+p[0]+'" alt=""'+(p[1]?' class="c"':'')+'></i>';a.prepend(d)});
+if(typeof hdrFit==='function')setTimeout(hdrFit,50)})();
