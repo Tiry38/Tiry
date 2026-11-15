@@ -142,8 +142,9 @@ function makeSprites(cap) {
         if (vSp.x < 0.5) a = exp(-r * r * 5.0) + 0.9 * exp(-r * r * 30.0);
         else if (vSp.x < 1.5) {
           float n = n2(vec2(p.x * 3.0, p.y * 2.0 - vSp.z * 9.0) + vSp.w * 7.0);
-          float shape = 1.0 - smoothstep(0.25, 1.0, length(vec2(p.x * (1.2 + 0.5 * (p.y + 1.0)), (p.y + 0.35) * 0.8)) + (n - 0.5) * 0.6);
-          a = shape * (0.6 + 0.6 * n);
+          float d = length(vec2(p.x * (1.5 + 0.7 * (p.y + 1.0)), (p.y + 0.3) * 1.05));
+          float shape = 1.0 - smoothstep(0.15, 0.8, d + (n - 0.5) * 0.4);
+          a = shape * (0.55 + 0.6 * n) * (1.0 - smoothstep(0.7, 1.0, max(abs(p.x), abs(p.y))));
         } else if (vSp.x < 2.5) {
           float ang = atan(p.y, p.x);
           float band = 1.0 - smoothstep(0.0, 0.12, abs(r - 0.78));
@@ -559,7 +560,7 @@ export class Fx {
       this.flash(x, 0.9, z, { size: 1.5 * k, size1: 3.4 * k, color: '#ff7a22', intensity: 3.2, life: 0.38, shape: 1, vy: 1.5 });
       this.flash(x, 0.6, z, { size: 2.4 * k, size1: 2.8 * k, color: '#ff5a1a', intensity: 1.6, life: 0.55, shape: 0 });
       this.smoke(x, 0.3, z, { n: Math.round(16 * k), color: '#8a7a66', speed: 4.5 * k, up: 1.2, life: 2.0, size: 1.3 * k, grow: 2.2, rise: 0.35, drag: 3.2, spread: 0.8, alpha: 0.75 });
-      this.smoke(x, 0.6, z, { n: Math.round(7 * k), color: '#3e3834', speed: 1.2, up: 2.6, life: 2.4, size: 1.0 * k, grow: 2.6, rise: 0.9, drag: 1.5, spread: 0.6, alpha: 0.7 });
+      this.smoke(x, 0.6, z, { n: Math.round(6 * k), color: '#4e4640', speed: 1.2, up: 2.6, life: 2.4, size: 1.0 * k, grow: 2.6, rise: 0.9, drag: 1.5, spread: 0.6, alpha: 0.7 });
       this.debris(x, 0.3, z, { n: Math.round(12 * k), speed: 6 * k, up: 7 * k, size: 0.16 * k, color: '#6a5a4a' });
       this.emit(x, 0.6, z, { n: Math.round(26 * k), color: '#ffb35a', speed: 9, up: 6, life: 0.8, size: 0.3, grav: -14, drag: 1, intensity: 4 });
       this.shock(x, z, { r: 2.4 * k, color: '#ffb36a', life: 0.45, intensity: 2.5 });
