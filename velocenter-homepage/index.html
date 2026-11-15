@@ -678,7 +678,7 @@ body.sc .hdr{background:rgba(250,247,244,.84);box-shadow:0 1px 0 rgba(27,30,37,.
 }
 
 /* ================= Mehr Farbe, aber hell (Tiry 12.11.2026) ================= */
-:root{--bg:#FDEFF2}
+:root{--bg:#F4EFEA}
 .sky{background:
  radial-gradient(38% 34% at 2% 0%,rgba(96,165,250,.55),transparent 70%),
  radial-gradient(40% 36% at 100% 0%,rgba(251,113,133,.6),transparent 70%),
@@ -1344,8 +1344,8 @@ body.sc .hdr{backdrop-filter:none!important;-webkit-backdrop-filter:none!importa
 .lgchips button.dealx:hover{background:#A60D25!important}
 /* Hintergrund: rote Verschleierungen statt roter Striche (weiche Schleier, kein Echtzeit-Weichzeichner) */
 .ribbons i:nth-child(1),.ribbons i:nth-child(4){filter:none!important;-webkit-mask-image:none!important;mask-image:none!important;border-radius:50%}
-.ribbons i:nth-child(1){top:4%!important;left:-10%!important;width:85%!important;height:46vh!important;background:radial-gradient(closest-side,rgba(200,16,46,.20),rgba(200,16,46,.09) 45%,rgba(200,16,46,.03) 72%,transparent)!important}
-.ribbons i:nth-child(4){top:58%!important;left:35%!important;width:80%!important;height:42vh!important;background:radial-gradient(closest-side,rgba(176,18,31,.17),rgba(176,18,31,.07) 48%,rgba(176,18,31,.02) 74%,transparent)!important}
+.ribbons i:nth-child(1){top:4%!important;left:-10%!important;width:85%!important;height:46vh!important;background:radial-gradient(closest-side,rgba(58,61,68,.12),rgba(58,61,68,.05) 45%,transparent 72%)!important}
+.ribbons i:nth-child(4){top:58%!important;left:35%!important;width:80%!important;height:42vh!important;background:radial-gradient(closest-side,rgba(158,15,34,.08),rgba(158,15,34,.03) 48%,transparent 74%)!important}
 /* Schnellzugriff: Foto-Kacheln als Akkordeon – Kachel unter der Maus wird breit, Foto zoomt langsam */
 .qacc{position:relative;z-index:3;display:flex;gap:10px;height:clamp(170px,14vw,200px);margin-top:clamp(28px,4vw,46px)}
 .qa{position:relative;flex:1 1 0;min-width:0;overflow:hidden;isolation:isolate;border-radius:22px;color:#fff;text-decoration:none;background:#1B1E25;box-shadow:0 24px 44px -26px rgba(18,20,25,.7);transition:flex-grow .7s cubic-bezier(.6,.05,.2,1),box-shadow .4s}
@@ -2133,13 +2133,13 @@ body.fz2 main,body.fz2 .foot{zoom:1.25}
 
 
 /* ===== Mehr Farbe + Anthrazit-Struktur im Hintergrund (Tiry 12.11.2026) ===== */
-.sky{background:linear-gradient(160deg,#F7E6DE 0%,#EED6D6 26%,#E3D3E4 52%,#D3DCEA 78%,#E6DCCB 100%)!important}
-.blobs i:nth-child(1){--c:#C8102E;opacity:.34!important}
-.blobs i:nth-child(2){--c:#E0A458;opacity:.5!important}
-.blobs i:nth-child(3){--c:#5B3FA0;opacity:.3!important}
+.sky{background:linear-gradient(160deg,#F4EFEA 0%,#ECE7E8 24%,#E3E3EC 48%,#DCE4EC 72%,#ECE4D4 100%)!important}
+.blobs i:nth-child(1){--c:#B3122A;opacity:.16!important}
+.blobs i:nth-child(2){--c:#E0A458;opacity:.42!important}
+.blobs i:nth-child(3){--c:#5B3FA0;opacity:.24!important}
 .blobs i:nth-child(4){--c:#0E8A93;opacity:.26!important}
-.blobs i:nth-child(5){--c:#B0256B;opacity:.28!important}
-.blobs i:nth-child(6){--c:#3A3D44;opacity:.22!important}
+.blobs i:nth-child(5){--c:#2F6FB0;opacity:.2!important}
+.blobs i:nth-child(6){--c:#3A3D44;opacity:.2!important}
 .sky::after{content:"";position:absolute;inset:0;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='56' height='97' viewBox='0 0 56 97'%3E%3Cpath d='M28 0l28 16.2v32.3L28 64.7 0 48.5V16.2zM28 64.7v32.3' fill='none' stroke='%232A2D35' stroke-width='1.3'/%3E%3C/svg%3E");background-size:56px 97px;opacity:.18;
  -webkit-mask-image:radial-gradient(120% 90% at 50% 45%,transparent 30%,#000 78%);mask-image:radial-gradient(120% 90% at 50% 45%,transparent 30%,#000 78%)}
 .sky::before{content:"";position:absolute;inset:0;background:

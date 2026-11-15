@@ -233,3 +233,6 @@
 - Handy-Menü: Social-Symbole linksbündig mit den Menüpunkten.
 - Termin-Formular: beide Sende-Knöpfe gleich breit in einer Reihe, „Per WhatsApp senden“ ohne Umbruch; Tageszeit-Auswahl in einer Zeile.
 - Drei Design-Konzepte (Rennlinie / Atelier / Werkstatt-Nacht) als Vorschau gebaut – Wahl durch Tiry offen.
+
+## 15.11.2026 – Hintergrund „Perlmutt“ (Tiry)
+- Style und Aufbau des Hintergrunds bleiben (Tiry: „sehr geil“), nur das Rosa raus: Grundverlauf Perle/Lavendel/Eisblau/Champagner, Magenta-Licht → Blau (#2F6FB0), rotes Licht nur noch zart (.16), große rote Lichtflächen → Graphit bzw. sehr zartes Weinrot, `--bg` #F4EFEA. Rot nur noch in Logo/Knöpfen.
