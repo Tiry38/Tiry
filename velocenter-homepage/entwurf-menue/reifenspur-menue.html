@@ -1,0 +1,155 @@
+<title>Reifenspur-Menü</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;700;800&display=swap">
+<style>
+/* Layout: Homepage-Bild als Hintergrund, darüber echter Kopf + Vollbild-Menü mit Reifenspur-Effekt (ein fester Look wie die Homepage) */
+:root{--ink:#1B1E25;--mut:#5A5F6B;--red:#C8102E;--red2:#F4404D;--pearl:#F4EFEA;--ln:rgba(27,30,37,.14);--disp:"Outfit",system-ui,sans-serif}
+html,body{height:100%}
+body{background:var(--pearl);color:var(--ink);font-family:var(--disp);overflow:hidden}
+#app{position:relative;height:100%;overflow:hidden}
+.bgp img{position:absolute;inset:0;width:100%;height:100%;max-width:none;object-fit:cover;object-position:top center}
+/* Kopf */
+#lm{position:absolute;z-index:30;left:0;right:0;top:0;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:12px;padding:18px max(24px,env(safe-area-inset-right,0px)) 0 max(24px,env(safe-area-inset-left,0px));pointer-events:none}
+#lm>*{pointer-events:auto}
+#lm .lgo img{height:62px;display:block;filter:drop-shadow(0 6px 16px rgba(200,16,46,.25))}
+#lm .st{justify-self:center;display:inline-flex;align-items:center;gap:12px;height:56px;padding:0 22px 0 10px;border-radius:99px;background:linear-gradient(135deg,#1F2029,#2E2A3A);color:#fff;box-shadow:0 14px 28px -14px rgba(20,16,30,.7),inset 0 1px 0 rgba(255,255,255,.12)}
+#lm .st i{width:36px;height:36px;border-radius:50%;border:3px solid rgba(255,107,122,.35);border-top-color:#FF6B7A;box-shadow:inset 0 0 0 9px #1F2029,inset 0 0 0 18px #FF6B7A}
+#lm .st span{display:grid;gap:3px}
+#lm .st small{font:700 10px/1 var(--disp);letter-spacing:.14em;text-transform:uppercase;color:#FF8A96}
+#lm .st b{font:700 15px/1 var(--disp)}
+#lm .rt{justify-self:end;display:flex;align-items:center;gap:10px}
+#lm .tm{display:inline-flex;align-items:center;gap:10px;height:56px;padding:0 24px;border-radius:16px;background:var(--red);color:#fff;font:800 16px/1 var(--disp);letter-spacing:.04em;text-transform:uppercase;box-shadow:0 14px 28px -12px rgba(200,16,46,.7)}
+#mb{position:relative;width:56px;height:56px;border-radius:50%;border:1.5px solid var(--ink);background:rgba(255,255,255,.6);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);cursor:pointer;transition:background .3s,border-color .3s}
+#mb svg{position:absolute;inset:6px;width:calc(100% - 12px);height:calc(100% - 12px);transition:transform .9s cubic-bezier(.7,0,.2,1)}
+#mb svg *{fill:none;stroke:var(--ink);stroke-width:2.2;stroke-linecap:round;transition:stroke .3s}
+#mb:hover svg{transform:rotate(120deg)}
+#mb:focus-visible,.big a:focus-visible{outline:3px solid var(--red);outline-offset:3px}
+.open #mb{background:var(--red);border-color:var(--red)}
+.open #mb svg{transform:rotate(360deg)}
+.open #mb svg *{stroke:#fff}
+.open #mb .sp{opacity:0}
+#mb .x{opacity:0}.open #mb .x{opacity:1}
+/* Vollbild-Menü */
+#lmo{position:absolute;inset:0;z-index:20;visibility:hidden;clip-path:url(#cpO)}
+#lmo.vis{visibility:visible}
+.lay{position:absolute;inset:0;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.05fr);grid-template-rows:minmax(0,1fr) auto auto;gap:18px 56px;padding:108px max(48px,env(safe-area-inset-right,0px)) 30px max(48px,env(safe-area-inset-left,0px))}
+.lay.base{background:radial-gradient(70% 60% at 0% 0%,rgba(200,16,46,.09),transparent 60%),radial-gradient(60% 60% at 100% 100%,rgba(47,111,176,.14),transparent 60%),linear-gradient(160deg,#F4EFEA,#ECE7E8 30%,#E3E3EC 60%,#DCE4EC);--fg:var(--ink);--sub:var(--mut);--tr:var(--red);--l:var(--ln)}
+.lay.lens{background:linear-gradient(135deg,#F4404D,#C8102E 45%,#8E0E1E);--fg:#fff;--sub:rgba(255,255,255,.85);--tr:#fff;--l:rgba(255,255,255,.3);clip-path:url(#cpL);pointer-events:none}
+.ph{grid-row:1/4;display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;gap:20px;max-width:600px;min-height:0;padding-bottom:40px}
+.ph figure{margin:0;min-height:0;border-radius:28px;overflow:hidden;box-shadow:0 24px 50px -28px rgba(0,0,0,.5)}
+.ph figure:nth-child(even){position:relative;top:40px}
+.ph img{width:100%;height:100%;max-width:none;object-fit:cover;display:block}
+.base .ph img{filter:grayscale(1) contrast(1.05) brightness(1.05)}
+.big{align-self:center;justify-self:center;display:grid;justify-items:center}
+.big a{position:relative;color:var(--fg);text-decoration:none;cursor:pointer;font:800 clamp(34px,6.3vh,72px)/1.03 var(--disp);letter-spacing:-.01em;text-transform:uppercase;white-space:nowrap}
+.big a.on{opacity:.5}
+.big a.on::after{content:"";position:absolute;left:-5%;right:-5%;top:50%;height:10px;margin-top:-5px;border-radius:3px;background:repeating-linear-gradient(115deg,var(--tr) 0 9px,transparent 9px 15px);opacity:1}
+.big em{font:800 12px/1 var(--disp);letter-spacing:.1em;font-style:normal;color:#fff;background:#E2232D;border-radius:99px;padding:5px 8px;vertical-align:super;margin-left:8px}
+.lens .big em{background:#fff;color:var(--red)}
+.emb{grid-column:2;justify-self:center;font:700 12px/1.3 var(--disp);letter-spacing:.14em;text-transform:uppercase;color:var(--sub);text-align:center}
+.ft{grid-column:2;justify-self:center;display:flex;flex-wrap:wrap;justify-content:center;gap:10px 28px;padding-top:16px;border-top:1px solid var(--l);font:800 14px/1 var(--disp);letter-spacing:.06em;text-transform:uppercase;color:var(--fg)}
+/* Rad + Iris */
+#fx{position:absolute;inset:0;z-index:25;width:100%;height:100%;pointer-events:none;overflow:visible}
+#wh{opacity:0;transition:opacity .4s}
+.open #wh{opacity:1}
+#hint{transition:opacity .8s;position:absolute;z-index:31;left:max(24px,env(safe-area-inset-left,0px));bottom:calc(14px + env(safe-area-inset-bottom,0px));max-width:calc(100% - 48px);padding:10px 18px;border-radius:99px;background:rgba(27,30,37,.86);color:#fff;font:500 13px/1.3 var(--disp);text-align:center;pointer-events:none}
+@media (max-width:760px){
+ #lm{grid-template-columns:1fr auto;padding-top:12px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+ #lm .st{display:none}#lm .lgo img{height:44px}
+ #lm .tm{height:48px;padding:0 16px;font-size:14px;border-radius:14px}
+ #mb{width:48px;height:48px}
+ .lay{grid-template-columns:minmax(0,1fr);padding:84px max(16px,env(safe-area-inset-right,0px)) 64px max(16px,env(safe-area-inset-left,0px))}
+ .ph{display:none}.emb,.ft{grid-column:1}
+ .big a{font-size:clamp(28px,9vw,42px)}
+ .ft{gap:10px 18px;font-size:12px}
+}
+</style>
+
+<div id="app">
+ <picture class="bgp"><source media="(max-width:760px)" srcset="img/bg-handy.webp"><img src="img/bg-pc.webp" alt="Velocenter Startseite"></picture>
+ <header id="lm">
+  <span class="lgo"><img src="img/logo.svg" alt="Velocenter Hessert"></span>
+  <span class="st"><i></i><span><small>Geschlossen</small><b>ab Mo 9:00</b></span></span>
+  <div class="rt"><span class="tm">Termin</span>
+   <button id="mb" type="button" aria-label="Menü öffnen oder schließen" aria-expanded="false">
+    <svg viewBox="0 0 44 44"><circle cx="22" cy="22" r="19" stroke-dasharray="4 3.4"/><circle cx="22" cy="22" r="3"/><g class="sp"><path d="M22 19V6M22 25v13M19 22H6M25 22h13"/></g><g class="x"><path d="M13 13l18 18M31 13L13 31"/></g></svg>
+   </button></div>
+ </header>
+ <div id="lmo" aria-hidden="true"><div class="lay base"></div><div class="lay lens" aria-hidden="true"></div></div>
+ <svg id="fx" aria-hidden="true">
+  <defs>
+   <clipPath id="cpO" clipPathUnits="userSpaceOnUse"><circle id="oc" cx="0" cy="0" r="0"/></clipPath>
+   <clipPath id="cpL" clipPathUnits="userSpaceOnUse"><circle id="lc" cx="-999" cy="-999" r="0"/><path id="rp" clip-rule="evenodd" d=""/></clipPath>
+  </defs>
+  <circle id="iris" cx="0" cy="0" r="0" fill="none" stroke="#C8102E" stroke-width="14" stroke-dasharray="26 16" opacity="0"/>
+  <g id="wh"><g id="whr">
+   <circle r="100" fill="none" stroke="#1B1E25" stroke-width="9" stroke-dasharray="10 7"/>
+   <circle r="91" fill="none" stroke="#fff" stroke-width="3"/>
+   <g id="spk" stroke="#fff" stroke-width="2" stroke-linecap="round" opacity=".9"></g>
+   <circle r="9" fill="#fff"/>
+  </g></g>
+ </svg>
+ <div id="hint">Demo · Maus oder Finger bewegen: das Rad rollt mit · Klick: Rad dreht durch</div>
+</div>
+
+<script>
+(()=>{
+const IT=[['Start','laden-eingang'],['Service','laden-innen'],['Marken','isy-ausstellung'],['Auf Lager','laden-innen',1],['i:SY Experte','isy-ausstellung'],['i:SY Treffen','treffen-luft'],['E-Dreiräder','treffen-hafen'],['Kontakt','fassade']];
+const tpl=()=>`<div class="ph">${['laden-eingang','laden-innen','isy-ausstellung','treffen-luft'].map(f=>`<figure><img src="img/${f}.webp" alt=""></figure>`).join('')}</div>
+<nav class="big">${IT.map(([t,,l],k)=>`<a role="button" tabindex="0" data-k="${k}" class="${k?'':'on'}">${t}${l?'<em>Live</em>':''}</a>`).join('')}</nav>
+<div class="emb">Familienbetrieb seit 1995 · Wörth am Rhein</div>
+<div class="ft"><span>07271 78033</span><span>WhatsApp</span><span>Instagram</span><span>Facebook</span><span>Öffnungszeiten</span></div>`;
+const $=s=>document.querySelector(s),app=$('#app'),ov=$('#lmo'),mb=$('#mb');
+document.querySelectorAll('.lay').forEach(l=>l.innerHTML=tpl());
+$('.lens').querySelectorAll('a').forEach(a=>a.removeAttribute('tabindex'));
+const setOn=k=>document.querySelectorAll('.big a').forEach(a=>a.classList.toggle('on',+a.dataset.k===k));
+$('.base .big').addEventListener('click',e=>{const a=e.target.closest('a');if(a)setOn(+a.dataset.k)});
+$('.base .big').addEventListener('keydown',e=>{if(e.key==='Enter'){const a=e.target.closest('a');if(a)setOn(+a.dataset.k)}});
+const NS='http://www.w3.org/2000/svg',spk=$('#spk');
+for(let i=0;i<14;i++){const l=document.createElementNS(NS,'line');const a=i/14*Math.PI*2;l.setAttribute('x2',(Math.cos(a)*90).toFixed(1));l.setAttribute('y2',(Math.sin(a)*90).toFixed(1));spk.appendChild(l)}
+const TR=[],trg=$('#cpL'),NT=90;
+for(let i=0;i<NT;i++){const r=document.createElementNS(NS,'rect');r.setAttribute('x',-16);r.setAttribute('y',-6);r.setAttribute('width',32);r.setAttribute('height',12);r.setAttribute('rx',4);r.setAttribute('transform','scale(0)');trg.appendChild(r);TR.push({el:r,x:0,y:0,a:0,t:-1e9})}
+const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+let W=0,H=0,open=false,o=0,oFrom=0,oT0=0,bx=0,by=0;
+let px=0,py=0,cx=-999,cy=-999,lastMove=-1e9,rot=0,pulse=0,ripT=-1e9,ripX=0,ripY=0,sx=0,sy=0,ti=0,side=1,spin=0;
+const size=()=>{const r=app.getBoundingClientRect();W=r.width;H=r.height;const b=mb.getBoundingClientRect();bx=b.left-r.left+b.width/2;by=b.top-r.top+b.height/2};
+size();addEventListener('resize',size);
+const toggle=v=>{open=v===undefined?!open:v;oFrom=o;oT0=performance.now();app.classList.toggle('open',open);mb.setAttribute('aria-expanded',open);ov.setAttribute('aria-hidden',!open);if(open){ov.classList.add('vis');cx=px=W*.7;cy=py=H*.5;sx=cx;sy=cy}};
+mb.addEventListener('click',()=>toggle());
+addEventListener('keydown',e=>{if(e.key==='Escape'&&open)toggle(false)});
+const mv=e=>{const r=app.getBoundingClientRect();px=e.clientX-r.left;py=e.clientY-r.top;lastMove=performance.now()};
+app.addEventListener('pointermove',mv);
+app.addEventListener('pointerdown',e=>{mv(e);if(!open||e.target.closest('#mb'))return;pulse=1;spin=26;ripT=performance.now();ripX=px;ripY=py});
+const ease=t=>t<.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2;
+const oc=$('#oc'),lc=$('#lc'),rp=$('#rp'),iris=$('#iris'),wh=$('#wh'),whr=$('#whr');
+const circ=(x,y,r)=>`M${x-r},${y}a${r},${r} 0 1,0 ${2*r},0a${r},${r} 0 1,0 ${-2*r},0Z`;
+function frame(now){
+ // Öffnen wie ein aufrollendes Rad
+ const k=Math.min(1,(now-oT0)/(reduce?1:950));o=oFrom+((open?1:0)-oFrom)*ease(k);
+ const R=o*Math.hypot(Math.max(bx,W-bx),Math.max(by,H-by))*1.08;
+ oc.setAttribute('cx',bx);oc.setAttribute('cy',by);oc.setAttribute('r',R.toFixed(1));
+ const moving=o>0.001&&o<0.999;
+ iris.setAttribute('cx',bx);iris.setAttribute('cy',by);iris.setAttribute('r',Math.max(0,R-7).toFixed(1));iris.setAttribute('opacity',moving?1:0);iris.setAttribute('stroke-dashoffset',(-R*1.2).toFixed(1));
+ if(!open&&o<=0.001)ov.classList.remove('vis');
+ if(open&&!reduce){
+  const idle=now-lastMove>2600;let tx=px,ty=py;
+  if(idle){const t=now/1000;tx=W*(W>760?.72:.5)+Math.cos(t*.7)*W*(W>760?.2:.3);ty=H*.47+Math.sin(t*1.1)*H*.24}
+  const ox=cx,oy=cy;cx+=(tx-cx)*.16;cy+=(ty-cy)*.16;
+  const dx=cx-ox,dy=cy-oy,d=Math.hypot(dx,dy),base=W>760?92:60;
+  pulse*=.9;spin*=.93;const r=base*(1+pulse*.35);
+  rot+=(dx>=0?1:-1)*d/r*57.3+spin;
+  lc.setAttribute('cx',cx.toFixed(1));lc.setAttribute('cy',cy.toFixed(1));lc.setAttribute('r',r.toFixed(1));
+  wh.setAttribute('transform',`translate(${cx.toFixed(1)},${cy.toFixed(1)}) scale(${(r/100).toFixed(3)})`);whr.setAttribute('transform',`rotate(${rot.toFixed(1)})`);
+  // Reifenspur: Profilblöcke entlang des Wegs
+  if(Math.hypot(cx-sx,cy-sy)>12&&d>.4){const a=Math.atan2(dy,dx),nx=-Math.sin(a),ny=Math.cos(a);
+   for(const s of [-1,1]){const b=TR[ti++%NT];b.x=cx-Math.cos(a)*r*.2+nx*s*r*.34;b.y=cy-Math.sin(a)*r*.2+ny*s*r*.34;b.a=a*57.3+s*side*32;b.t=now}
+   side=-side;sx=cx;sy=cy}
+  for(const b of TR){const age=(now-b.t)/2400;if(age>=1){if(b.on){b.el.setAttribute('transform','scale(0)');b.on=0}continue}b.on=1;const sc=(1-age*age)*(W>760?1:.75);b.el.setAttribute('transform',`translate(${b.x.toFixed(1)},${b.y.toFixed(1)}) rotate(${b.a.toFixed(1)}) scale(${sc.toFixed(3)})`)}
+  // Klick: Ring wie ein Klingel-Kreis
+  const ra=(now-ripT)/700;if(ra<1){const rr=r+ra*260,th=30*(1-ra);rp.setAttribute('d',circ(ripX,ripY,rr+th)+circ(ripX,ripY,Math.max(1,rr)))}else if(rp.getAttribute('d'))rp.setAttribute('d','');
+ }
+ requestAnimationFrame(frame)}
+requestAnimationFrame(frame);
+setTimeout(()=>toggle(true),700);setTimeout(()=>{$('#hint').style.opacity=0},9000);
+})();
+</script>
