@@ -243,3 +243,4 @@
 - Qualitäts-Regel für alle Vorschläge steht in CLAUDE.md (Abschnitt Homepage).
 
 - 15.11.2026 (Tiry): Menüband-Entwurf „Kapsel“ (dunkle Glas-Kapsel beim Scrollen) verworfen: **kein dunkler Balken**, Farbverläufe mit dunklem Anteil erlaubt. Veränderungen müssen deutlich sichtbar sein, nicht nur eine andere Farbe.
+- 15.11.2026 (Tiry): **Menü-Vorschau ist fest eingebaut und live** – beim Drüberfahren am PC (Maus, ab 1181 px) klappt unter dem Menüpunkt eine Übersicht des Reiters auf (Bild, Fakten, Knöpfe). Bleibt bei jedem neuen Menüband erhalten. Knöpfe im Stil der Seite (rot / umrandet), **keine Regenbogen-Knöpfe**. Code: Block „Menü-Vorschau“ am Ende von `<style>` und am Ende des Skripts. Handy/Tablet ohne Vorschau.
