@@ -247,3 +247,10 @@
 - **Menü-Vorschau korrigiert (15.11.2026):** Nach dem ersten Drüberfahren blieb der Inhalt stehen (fehlende Reiter-Reihenfolge `ord` → Skriptfehler). Jede Vorschau zeigt jetzt die echte Seite: Überschrift der Seite, kurzer Text, „Auf dieser Seite“ mit den echten Abschnitten, Bild der Seite. Test: alle Reiter nacheinander ohne Neuladen.
 - **Menü-Vorschau Farbe + Lager (15.11.2026, Tiry):** Mehr Struktur und Farbe, aber nicht rosa: jede Vorschau hat eine eigene Farbwelt (Bühne rechts im Verlauf, Nummern-Kreise, Knopf), Überschrift wie auf der Seite (zweiter Teil im Verlauf). **Lager zeigt immer nur 1 Rad** (zwei Räder hingen ineinander) – echte Räder aus dem Bestand (`bestandData`), wechseln alle 2,8 s, mit Preis/Angebot, Zahlen „im Laden / bestellt / Angebote“, „LIVE · Stand <Datum>“.
 - **Vorschau-Farbe richtig verstanden (15.11.2026, Tiry):** „Mehr Farbe“ heißt Farbe in der **Fläche** der Vorschau (Eisblau/Lavendel/Champagner-Verlauf + zarte Waben + Lichtstreif), **nicht** farbige Bühnen, Rahmen, Knöpfe oder Nummern – die bleiben ruhig im Seitenstil (rot/weiß). Kein Rosa.
+
+## 15.11.2026 – Look „Eis & Rot“ live (Tiry: „nr 6 ist geil! mach da genau so live!“)
+- Live wie die Vorlage `entwurf-menue/F-eis-rot/` mit Variante 6: Menü F (Flüssig-Linse), Grund gebürstetes Eis-Silber mit weißen Waben,
+  Logo-Striche (Grau #868282, Rot #CF1A2C, scharf, kein Schimmer, linker Strich bis in die Navi), rote Ebene rechts hinter dem Showroom
+  mit Glasklinge und **gebürstetem Eloxal-Rot** (Schliffspuren + Lichtkante). Ohne Umschalter, ohne Info-Varianten.
+- Eingebaut als `<style id="eisRot">` direkt nach dem Haupt-Stil und `<script id="eisRotJs">` am Ende von `index.html`.
+  Änderungen an diesem Look dort machen (die Vorlagen-Dateien sind nur noch Archiv).
