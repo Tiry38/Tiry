@@ -241,3 +241,5 @@
 - Verworfen als „unprofessionell/Billo“: 6 Menü-Varianten (Neon-Leiste, Insel, Seiten-Leiste, Dock, Farb-Pillen, zweistöckig), Vollbild-Menü mit rollendem Rad/Reifenspur, flaches Menüband mit Wellenlinie bzw. geradem Strich. Nicht wieder vorschlagen.
 - Startseite bleibt wie sie ist; geändert werden darf nur das Menüband oben. Vorbild für Modernität: landonorris.com (aber kein Wasser-Motiv).
 - Qualitäts-Regel für alle Vorschläge steht in CLAUDE.md (Abschnitt Homepage).
+
+- 15.11.2026 (Tiry): Menüband-Entwurf „Kapsel“ (dunkle Glas-Kapsel beim Scrollen) verworfen: **kein dunkler Balken**, Farbverläufe mit dunklem Anteil erlaubt. Veränderungen müssen deutlich sichtbar sein, nicht nur eine andere Farbe.
