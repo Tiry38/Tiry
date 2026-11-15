@@ -1,0 +1,42 @@
+/* ===== Entwurf „Eis & Rot“ (Tiry 15.11.2026) – Grund gebürstetes Eis-Silber mit rötlichem Verlauf,
+   rote Ebene oben rechts hinter dem Showroom, Glaskante als Trennung. Striche + Waben bleiben, keine Kreise/Wellen, kein Rosa. ===== */
+html.er .blobs i{display:none!important}
+html.er .blobs::after{opacity:0!important}
+html.er .ribbons i:nth-child(1),html.er .ribbons i:nth-child(4){display:none!important}
+html.er .ribbons i:nth-child(2){opacity:.3!important}
+html.er .smoke{opacity:.03!important}
+html.er{--bg:#D3DCE5}
+html.er,html.er body{--mut:#262B35}
+html.er .sky{background:
+ repeating-linear-gradient(115deg,rgba(255,255,255,.2) 0 1px,transparent 1px 4px),
+ linear-gradient(115deg,transparent 28%,rgba(255,255,255,.42) 44%,transparent 60%),
+ linear-gradient(180deg,#B7C5D3 0%,#C9D4DF 30%,#D4DDE6 62%,#E3E8EE 100%)!important}
+html.er .sky::before{background:
+ linear-gradient(115deg,transparent 0 62%,rgba(255,255,255,.85) 62% 63.5%,transparent 63.5% 66%,rgba(179,18,47,.82) 66% 67%,rgba(176,18,44,.3) 67%,rgba(176,18,44,.1) 69.5%,transparent 72%),
+ linear-gradient(115deg,transparent 0 15.5%,rgba(150,14,36,.12) 16.8%,rgba(176,18,44,.5) 18%,rgba(255,255,255,.85) 18% 19%,transparent 19%)!important}
+html.er .sky::after{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='56' height='97' viewBox='0 0 56 97'%3E%3Cpath d='M28 0l28 16.2v32.3L28 64.7 0 48.5V16.2zM28 64.7v32.3' fill='none' stroke='%23FFFFFF' stroke-width='1.6'/%3E%3C/svg%3E")!important;opacity:.24!important}
+html.er .ribbons i:nth-child(3){background:linear-gradient(90deg,transparent 6%,rgba(30,40,55,.12) 30%,rgba(30,40,55,.16) 55%,rgba(30,40,55,.06) 80%,transparent 95%)!important}
+@media (min-width:1181px){html.er body.sc .hdr{background:linear-gradient(180deg,rgba(250,252,254,.9),rgba(236,242,248,.84))!important;box-shadow:0 14px 40px -26px rgba(30,60,100,.38)!important}}
+
+/* Rote Ebene: Glasklinge vorne, Rot dahinter mit Schatten, scrollt mit der Seite */
+html.er main{position:relative}
+.erl{--h:900px;--g:96px;position:absolute;top:88px;right:0;height:var(--h);width:calc(var(--h)*.466 + var(--g));z-index:-1;pointer-events:none}
+main:has(> section.view[data-v="start"]:not([hidden])) > .erl{--h:min(1200px,135vh)}
+.erl .erg{position:absolute;inset:0;clip-path:polygon(0 0,var(--g) 0,100% 100%,calc(100% - var(--g)) 100%);
+ background:linear-gradient(65deg,rgba(255,255,255,.18),rgba(255,255,255,.62) 70%,rgba(255,255,255,.8));backdrop-filter:blur(8px) saturate(1.25);-webkit-backdrop-filter:blur(8px) saturate(1.25)}
+.erl .errw{position:absolute;top:0;right:0;bottom:0;left:var(--g);filter:drop-shadow(-16px 14px 26px rgba(70,6,20,.38))}
+.erl .err{position:absolute;inset:0;clip-path:polygon(0 0,100% 0,100% 100%);
+ background:
+  linear-gradient(65deg,transparent 50%,rgba(255,255,255,.95) 50% 50.25%,rgba(255,255,255,.26) 50.35%,rgba(255,255,255,0) 55%),
+  repeating-linear-gradient(115deg,rgba(255,255,255,.05) 0 1px,transparent 1px 4px),
+  linear-gradient(115deg,transparent 0 70%,rgba(255,255,255,.07) 70% 71%,transparent 71%),
+  linear-gradient(200deg,#B8132F 0%,#960F27 34%,#6E0C1F 70%,#42121B 100%)}
+@media (max-width:760px){.erl,main:has(> section.view[data-v="start"]:not([hidden])) > .erl{--h:250px;--g:44px;top:84px}}
+
+/* Showroom liegt als eigene Glas-Bühne VOR dem Rot: das Rot läuft dahinter, nie durch den Kreis */
+html.er .hring{background:radial-gradient(closest-side,#FFFFFF,#F3F6F9 62%,#E6EDF4 100%)!important;
+ box-shadow:inset 0 0 0 1px rgba(184,115,51,.5),inset 0 -14px 30px -18px rgba(90,110,135,.35),0 0 0 1.5px rgba(255,255,255,.75),0 44px 70px -36px rgba(60,6,18,.6)!important}
+
+/* Karten über dem Rot deckend, damit nichts rosa wird */
+html.er :is(.q,.panel,.etw,.drin,.lgc,.finder,.drcard,.drk2){background-color:rgba(246,249,252,.96)!important}
+html.er .dealn{background:rgba(246,249,252,.94);border-radius:999px;padding:3px 10px;width:max-content;max-width:100%}

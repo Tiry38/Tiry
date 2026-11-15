@@ -1,0 +1,16 @@
+@media (min-width:1181px){
+html body .hdr .nav{position:relative;gap:4px!important;isolation:isolate}
+html body .hdr .nav a{position:relative;z-index:2;padding:13px 16px!important;font-size:16.5px!important;font-weight:700;color:#232734!important;transition:color .3s!important}
+html body .hdr .nav a.on{color:#8E0E26!important}
+.lq{position:absolute;z-index:3;top:0;left:0;height:100%;border-radius:999px;pointer-events:none;opacity:0;transition:opacity .25s ease;
+ backdrop-filter:url(#lqf) saturate(1.7) brightness(1.06);-webkit-backdrop-filter:saturate(1.7) brightness(1.06);
+ background:radial-gradient(120% 90% at 30% 15%,rgba(255,255,255,.55),rgba(255,255,255,.08) 55%,rgba(255,255,255,.18));
+ box-shadow:inset 1.5px 1.5px 0 rgba(255,255,255,.95),inset -1px -1.5px 0 rgba(255,255,255,.55),inset 0 0 14px rgba(255,255,255,.35),0 10px 26px -10px rgba(60,20,90,.35),0 2px 6px rgba(60,20,90,.12)}
+.lq.on{opacity:1}
+.lqa{position:absolute;z-index:1;top:4px;left:0;height:calc(100% - 8px);border-radius:999px;pointer-events:none;
+ background:radial-gradient(90% 70% at 28% 12%,rgba(255,255,255,.95),rgba(255,255,255,.35) 50%,transparent 70%),radial-gradient(80% 60% at 70% 110%,rgba(200,16,46,.30),transparent 70%),linear-gradient(160deg,rgba(226,240,252,.85),rgba(196,222,244,.6));
+ backdrop-filter:blur(6px) saturate(1.6);-webkit-backdrop-filter:blur(6px) saturate(1.6);
+ box-shadow:inset 2px 2px 0 #fff,inset -1.5px -2px 0 rgba(255,255,255,.7),inset 0 -8px 16px rgba(47,111,176,.18),0 14px 28px -12px rgba(30,60,110,.45),0 6px 14px -8px rgba(200,16,46,.45)}
+html body.sc .hdr .nav a{padding:11px 14px!important;font-size:15.5px!important}
+}
+html body .hdr .nav a{z-index:3}.lq,.lqa{z-index:1!important}

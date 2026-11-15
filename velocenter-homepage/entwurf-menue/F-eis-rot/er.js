@@ -1,0 +1,1 @@
+(function(){const m=document.querySelector('main');if(!m||m.querySelector('.erl'))return;const d=document.createElement('div');d.className='erl';d.setAttribute('aria-hidden','true');d.innerHTML='<i class="erg"></i><span class="errw"><i class="err"></i></span>';m.prepend(d)})();
