@@ -236,3 +236,8 @@
 
 ## 15.11.2026 – Hintergrund „Perlmutt“ (Tiry)
 - Style und Aufbau des Hintergrunds bleiben (Tiry: „sehr geil“), nur das Rosa raus: Grundverlauf Perle/Lavendel/Eisblau/Champagner, Magenta-Licht → Blau (#2F6FB0), rotes Licht nur noch zart (.16), große rote Lichtflächen → Graphit bzw. sehr zartes Weinrot, `--bg` #F4EFEA. Rot nur noch in Logo/Knöpfen.
+
+## 15.11.2026 – Menüband: verworfene Entwürfe + Qualitäts-Regel (Tiry)
+- Verworfen als „unprofessionell/Billo“: 6 Menü-Varianten (Neon-Leiste, Insel, Seiten-Leiste, Dock, Farb-Pillen, zweistöckig), Vollbild-Menü mit rollendem Rad/Reifenspur, flaches Menüband mit Wellenlinie bzw. geradem Strich. Nicht wieder vorschlagen.
+- Startseite bleibt wie sie ist; geändert werden darf nur das Menüband oben. Vorbild für Modernität: landonorris.com (aber kein Wasser-Motiv).
+- Qualitäts-Regel für alle Vorschläge steht in CLAUDE.md (Abschnitt Homepage).
