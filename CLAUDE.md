@@ -42,6 +42,7 @@ testet, bewertet und dauerhaft selbst weiterentwickelt. Besitzer: Tiry. UI-Sprac
   Organisch: Kreise, Pillen, Blobs, Wellen, große Radien, gestaffelte Layouts.
 - **Coole Farbverläufe** überall (3+ Farben, sanft animiert), Glas-Effekte, weiche Glows.
 - Kontrast Text ≥ 4.5:1, Tipp-Flächen ≥ 44 px, `prefers-reduced-motion` beachten, kein horizontales Scrollen.
+  **Ausnahme Homepage (Tiry 15.11.2026):** Dort laufen alle Animationen immer, auch bei „Bewegung reduzieren“ – keine Reduce-Regeln wieder einbauen.
 - Erzeugte Apps: eine HTML-Datei, offline, keine externen Ressourcen/Google Fonts, keine Tracker.
 
 ## Arbeitsweise

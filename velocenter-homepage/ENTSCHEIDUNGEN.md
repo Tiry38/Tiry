@@ -306,3 +306,11 @@
   Jetzt setzt ein Skript (`eisRotJs`, nach dem Anlegen von `.erl`) `top` auf die Mitte von `.bands` – dort sind beide Bänder zentriert und decken die
   Oberkante bei jeder Breite ab. Neu berechnet bei Größe, Schrift (A+), Laden und Reiterwechsel; andere Reiter unverändert (CSS-Wert).
 - Handy-Animationen: Telefon mit „Bewegung reduzieren“/Energiesparmodus stoppt alle Animationen (Pflichtregel). Mittelweg (ruhige Effekte trotzdem) nur nach Tirys „ja“.
+
+## 15.11.2026 – Animationen immer an + Logo gleichzeitig mit Rad (Tiry)
+- **Animationen laufen auf jedem Gerät immer**, auch wenn das Handy „Bewegung reduzieren“/Energiesparen meldet (Tiry: „das Band oben läuft auf dem Handy nicht“).
+  Alle 37 `@media (prefers-reduced-motion:reduce)`-Blöcke entfernt, JS-Abfragen raus (`RM=false`, Menü-Vorschau `lgRun`, Menü-Linse `aim`).
+  Geprüft: Pixel 7 mit „reduce“ = 21 laufende Animationen, gleich wie ohne (Laufband `run@tk` inkl.). **Nie wieder Reduce-Regeln einbauen.**
+- **Logo und Rad kommen gleichzeitig** in beiden Showrooms: Logos werden vorab geladen + dekodiert; Wechsel erst, wenn Rad und Logo bereit sind
+  (max. 2,5 s Wartezeit), dann starten beide im selben Frame mit gleicher Dauer (`.hlg` 0,9 s/1,1 s wie `.hb`, Ausblenden 0,3 s; `showroom()` mit `dec`/`rdy`).
+- Diagnose: Seite mit `?diag` zeigt unten ein Feld „Bewegung reduzieren AN/AUS · laufende Animationen“ (Klick schließt). Ohne `?diag` unsichtbar.
