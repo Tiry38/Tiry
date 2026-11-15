@@ -11,10 +11,6 @@
   <canvas id="scene"></canvas>
   <div id="vignette"></div>
   <div id="floaters"></div>
-  <div id="heroplates"></div>
-  <div id="nameplates"></div>
-  <div id="ctext"></div>
-  <div id="xfade"></div>
   <div id="ui">
     <!-- Startbildschirm -->
     <section id="screen-splash" class="screen active">
@@ -23,7 +19,7 @@
           <span class="l1">AETHER</span>
           <span class="l2"><i></i>FRONT<i></i></span>
         </div>
-        <div class="tagline">Lane-Defense <b>◆</b> Teamkrieg <b>◆</b> 4 Fraktionen</div>
+        <div class="tagline">Lane-Defense <b>◆</b> Teamkrieg <b>◆</b> 6 Völker</div>
         <div class="press"><span class="press-line"></span><span>Klicken oder beliebige Taste drücken</span><span class="press-line"></span></div>
       </div>
     </section>
@@ -33,12 +29,13 @@
       <div class="menu-left">
         <div class="logo small"><span class="l1">AETHER</span><span class="l2"><i></i>FRONT<i></i></span></div>
         <nav class="menu-nav">
-          <button class="mnav primary" data-go="campaign" data-hint="Solo: 15 Missionen gegen den Rissfürsten"><span class="ix">01</span><span class="lb">Kampagne</span><span class="arrow"></span></button>
+          <button class="mnav primary" data-go="campaign" data-hint="Solo: 24 Missionen gegen den Rissfürsten – jede mit eigener Mechanik"><span class="ix">01</span><span class="lb">Kampagne</span><span class="arrow"></span></button>
           <button class="mnav" data-go="setup" data-hint="Gegen Bots – 1 gegen 1 bis 4 gegen 4, alle Spielmodi"><span class="ix">02</span><span class="lb">Gefecht</span><span class="arrow"></span></button>
-          <button class="mnav" data-go="multi" data-hint="Online mit Freunden – Host wählt den Modus"><span class="ix">03</span><span class="lb">Mehrspieler</span><span class="arrow"></span></button>
-          <button class="mnav" data-go="codex" data-hint="So funktioniert das Spiel"><span class="ix">04</span><span class="lb">Kodex &amp; Anleitung</span><span class="arrow"></span></button>
-          <button class="mnav" data-go="settings" data-hint="Grafik, Audio, Steuerung"><span class="ix">05</span><span class="lb">Einstellungen</span><span class="arrow"></span></button>
-          <button class="mnav quiet" id="btn-quit" data-hint="Spiel beenden"><span class="ix">06</span><span class="lb">Beenden</span><span class="arrow"></span></button>
+          <button class="mnav" data-go="multi" data-hint="Online mit Freunden – Spiel hosten, Räume, Schnellspiel"><span class="ix">03</span><span class="lb">Mehrspieler</span><span class="arrow"></span></button>
+          <button class="mnav" data-go="collection" data-hint="Profil, Völker, Erfolge, Herausforderungen, Bestenliste"><span class="ix">04</span><span class="lb">Sammlung</span><span class="arrow"></span></button>
+          <button class="mnav" data-go="codex" data-hint="So funktioniert das Spiel"><span class="ix">05</span><span class="lb">Kodex &amp; Anleitung</span><span class="arrow"></span></button>
+          <button class="mnav" data-go="settings" data-hint="Grafik, Audio, Steuerung"><span class="ix">06</span><span class="lb">Einstellungen</span><span class="arrow"></span></button>
+          <button class="mnav quiet" id="btn-quit" data-hint="Spiel beenden"><span class="ix">07</span><span class="lb">Beenden</span><span class="arrow"></span></button>
         </nav>
         <div class="menu-hint" id="menu-hint">&nbsp;</div>
       </div>
@@ -53,14 +50,13 @@
           <div class="ttl"><small>Einzelspieler</small><h2>Gefecht einrichten</h2></div>
           <button class="btn ghost back" data-go="menu"><span class="bi back"></span>Zurück</button>
         </header>
-        <div class="seg tabs-rail setup-tabs" id="setup-tabs"><button data-tab="hero" class="on"><b>1</b>Held wählen</button><button data-tab="game"><b>2</b>Gefecht &amp; Fraktion</button></div>
-        <div class="hero-pick" id="hero-pick"></div>
-        <div class="setup-grid" id="setup-grid" hidden>
+        <div class="setup-grid" id="setup-grid">
           <div class="setup-col">
             <div class="fg"><h3>Teams</h3><div class="seg" id="seg-mode"></div></div>
             <div class="fg"><h3>Spielmodus <span class="code-badge" id="mode-code">AP</span></h3><div class="seg" id="seg-pick"></div>
               <div class="mode-desc" id="mode-desc"></div></div>
-            <div class="fg two"><div><h3>Champions</h3><div class="seg" id="seg-cc"></div></div><div><h3>Länge</h3><div class="seg" id="seg-waves"></div></div></div>
+            <div class="fg"><h3>Regeln</h3><div class="seg" id="seg-gamemode"></div></div>
+            <div class="fg two"><div><h3>Champions</h3><div class="seg" id="seg-cc"></div></div><div><h3>Länge</h3><div class="seg" id="seg-waves"></div></div><div><h3>Endlos</h3><div class="seg" id="seg-endless"></div></div></div>
             <div class="fg two"><div><h3>Verbündete Bots</h3><div class="seg" id="seg-ally"></div></div><div><h3>Gegnerische Bots</h3><div class="seg" id="seg-diff"></div></div></div>
             <div class="fg two"><div><h3>Dein Name</h3><input id="inp-name" class="field" maxlength="16" /></div><div><h3>Spieltempo</h3><div class="seg" id="seg-speed"></div></div></div>
           </div>
@@ -89,34 +85,14 @@
       </div>
     </section>
 
-    <!-- Mehrspieler -->
+    <!-- Mehrspieler (Lobby: src/ui/lobby.js) -->
     <section id="screen-multi" class="screen panel-screen">
-      <div class="panel wide frame scroll">
-        <header class="panel-head">
-          <div class="ttl"><small>Online</small><h2>Mehrspieler <span class="badge">Vorschau</span></h2></div>
-          <button class="btn ghost back" data-go="menu"><span class="bi back"></span>Zurück</button>
-        </header>
-        <div class="multi-grid">
-          <p class="lead">Das Spiel ist bereits auf Online-Partien ausgelegt: Alle Aktionen laufen als Befehle über eine
-            deterministische Simulation (Lockstep). Ein kleiner Relay-Server verteilt nur die Befehle – das spart Bandbreite
-            und hält alle Spieler synchron. Leere Plätze übernehmen Bots.</p>
-          <div class="mp-connect">
-            <label class="fg"><h3>Server-Adresse</h3><input id="inp-server" class="field" /></label>
-            <div class="fg"><h3>Raum</h3>
-              <div class="row">
-                <button class="btn" id="btn-mp-create">Raum erstellen</button>
-                <input id="inp-room" class="field short" placeholder="CODE" maxlength="5" />
-                <button class="btn" id="btn-mp-join">Beitreten</button>
-              </div>
-            </div>
-          </div>
-          <div id="mp-lobby" class="mp-lobby"></div>
-          <div id="mp-host" class="mp-host"></div>
-          <div class="row mp-actions"><button class="btn" id="btn-mp-team">Team wechseln</button><button class="btn primary" id="btn-mp-start" disabled>Starten (Host)</button></div>
-          <p class="fine">Hinweis: Online-Partien sind experimentell. Server lokal starten mit <code>npm run server</code>
-            (Port 7710). Für Freunde über das Internet muss der Port weitergeleitet oder ein Server gemietet werden.</p>
-        </div>
-      </div>
+      <div class="panel wide frame lobby-panel" id="lobby-root"></div>
+    </section>
+
+    <!-- Sammlung (src/ui/collection.js) -->
+    <section id="screen-collection" class="screen panel-screen">
+      <div class="panel wide frame collection-panel" id="collection-root"></div>
     </section>
 
     <!-- Kodex -->
@@ -175,30 +151,18 @@
         </div>
       </div>
       <div class="scoreboard" id="scoreboard"></div>
+      <div class="chat frame" id="chat"><div class="chat-log" id="chat-log"></div><input class="field" id="chat-input" maxlength="200" placeholder="Nachricht an alle … (/t Team) – Enter senden, Esc schließen" /></div>
+      <div class="netstat" id="netstat"></div>
       <div class="tooltip" id="tooltip"></div>
       <div class="fps" id="fps"></div>
     </section>
-
-    <!-- Kampf-Oberfläche (Heldenblick) -->
-    <div id="combat" class="combat">
-      <div class="uf player" id="cf-player"></div>
-      <div class="uf target" id="cf-target"></div>
-      <div class="cwave" id="cf-wave"><div class="cw-title" id="cw-title"></div><div class="cw-bar" id="cw-bar"><i></i></div><div class="cw-meta"><span id="cw-count"></span><span id="cw-time"></span></div></div>
-      <div class="minimap" id="minimap"><canvas id="mm-canvas" width="220" height="220"></canvas><span class="mm-n">N</span><div class="mm-king" id="mm-king"><span class="mm-crown"></span><i></i><b id="mm-kingt"></b></div></div>
-      <div class="actionbar" id="cb">
-        <div class="castbar" id="cb-cast"><span class="ci"></span><div class="cbar"><i class="cf"></i><div class="ticks"></div><span class="cn"></span><span class="ctime"></span></div></div>
-        <div class="ab-row" id="cb-bar"></div>
-        <div class="xpbar" id="cb-xp"><i></i><span id="cb-xpt"></span></div>
-      </div>
-      <div class="ab-tip" id="cb-tip"></div>
-    </div>
-    <div id="herr" class="herr"></div>
 
     <!-- Pause -->
     <section id="screen-pause" class="screen overlay">
       <div class="panel small center frame pause-panel">
         <div class="ttl center"><small>Partie angehalten</small><h2>Pause</h2></div>
         <button class="btn big primary" id="btn-resume">Fortsetzen</button>
+        <button class="btn big" id="btn-netpause" hidden>Pause beantragen</button>
         <button class="btn big" data-go="settings">Einstellungen</button>
         <button class="btn big" data-go="codex">Kodex</button>
         <button class="btn big danger" id="btn-surrender">Aufgeben &amp; Hauptmenü</button>
@@ -212,6 +176,7 @@
         <div class="end-title" id="end-title"></div>
         <div class="end-sub" id="end-sub"></div>
         <div class="end-stats" id="end-stats"></div>
+        <div class="end-meta" id="end-meta"></div>
         <div class="row center end-btns">
           <button class="btn big primary" id="btn-rematch">Revanche</button>
           <button class="btn big" id="btn-tomenu">Hauptmenü</button>

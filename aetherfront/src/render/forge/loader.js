@@ -5,14 +5,18 @@ import * as THREE from 'three';
 import { decodeAFM } from './format.js';
 import { createForgeMaterial, createForgeGlowMaterial, createForgeGlassMaterial } from './materials.js';
 import { attachHeroFx } from './fx.js';
+import { ARCH_FIT, TIER_SCALE } from './roster.js';
 
 const BASE = 'assets/models/';
 const cache = new Map();      // id → { header, arrays }
-let lodBias = 0;              // 0 = höchste Stufe (Kino/Ultra), 1 = mittel, 2 = niedrig
+let lodBias = 0;              // Grund-LOD der Einheiten: 0 = hoch/ultra, 1 = mittel/niedrig (Draufsicht wählt je Instanz feiner)
+let heroLod = 1;              // Helden in der Draufsicht: mittlere Stufe reicht (≈ 11 k statt 36 k Dreiecke)
 let ready = null;
 
 export function setForgeLod(q) {
-  lodBias = q === 'low' ? 1 : 0;
+  lodBias = q === 'low' || q === 'medium' ? 1 : 0;
+  heroLod = q === 'ultra' ? 1 : 2;
+  if (q === 'high') heroLod = 1;
 }
 export function forgeLodBias() { return lodBias; }
 
@@ -121,7 +125,7 @@ export function buildForgedHero(modelId, { level = 1, lod } = {}) {
   root.updateMatrixWorld(true);
   const bones = sk.names.map((n) => joints[n]);
   const skeleton = new THREE.Skeleton(bones);
-  const L = Math.min(header.meshes[0].lods.length - 1, lod ?? lodBias);
+  const L = Math.min(header.meshes[0].lods.length - 1, lod ?? heroLod);
   const body = createForgeMaterial({ physical: true, rim: 0.34 });
   if (header.palette && header.palette.glow) body.userData.uniforms.uRimCol.value.set(header.palette.glow);
   const glow = createForgeGlowMaterial(1);
@@ -210,12 +214,21 @@ function hexLin(hex) {
 }
 void srgbToLin;
 
+/** Datei-Id einer Einheiten-Form (mit Rückfall auf benachbarte Formen) */
+function unitAsset(arch, form) {
+  const tries = form ? [`unit_${arch}_${form}`, `unit_${arch}_${form[0]}a`, `unit_${arch}_1`, `unit_${arch}_2a`, `unit_${arch}`] : [`unit_${arch}_2a`, `unit_${arch}_1`, `unit_${arch}`];
+  for (const id of tries) { const a = cache.get(id); if (a) return a; }
+  return null;
+}
+export function hasForgedUnit(arch, form) { return !!unitAsset(arch, form); }
+export function forgedUnitInfo(arch, form) { const a = unitAsset(arch, form); return a ? a.header.info || {} : null; }
+
 /**
- * Geschmiedete Einheit oder null. opts: { primary, secondary, metal, glow, tier }
- * Rückgabe wie models.buildModel: { body, glow, height, radius }
+ * Geschmiedete Einheit oder null. opts: { primary, secondary, metal, glow, tier, form, lod, fit }
+ * Rückgabe wie models.buildModel: { body, glow, height, radius }. Mit form: Maßstab = Archetyp-Passform × Stufe.
  */
 export function buildForgedUnit(arch, opts = {}, defaults = {}) {
-  const asset = cache.get('unit_' + arch);
+  const asset = unitAsset(arch, opts.form);
   if (!asset) return null;
   const { header, arrays } = asset;
   const info = header.info || {};
@@ -225,12 +238,14 @@ export function buildForgedUnit(arch, opts = {}, defaults = {}) {
     3: hexLin(opts.metal || defaults.metal || header.palette.metal),
     4: hexLin(opts.glow || defaults.glow || header.palette.glow),
   };
-  const tier = Math.max(1, Math.min(3, opts.tier | 0 || 1));
-  const scale = [1, 1.12, 1.25][tier - 1];
-  const L = Math.min(header.meshes[0].lods.length - 1, lodBias);
+  const tier = Math.max(1, Math.min(3, opts.tier | 0 || (opts.form ? +String(opts.form)[0] : 1) || 1));
+  const formed = !!info.form;
+  const scale = formed ? (opts.fit ?? ARCH_FIT[arch] ?? 1) * TIER_SCALE[tier] : [1, 1.12, 1.25][tier - 1];
+  const lodN = header.meshes[0].lods.length;
+  const L = Math.max(0, Math.min(lodN - 1, opts.lod ?? lodBias));
   const out = {};
   for (const layer of ['body', 'glow']) {
-    const list = header.meshes.filter((m) => (m.layer === layer || (layer === 'body' && m.layer === 'glass')) && m.tier <= (tier - 1) * 3);
+    const list = header.meshes.filter((m) => (m.layer === layer || (layer === 'body' && m.layer === 'glass')) && (formed || m.tier <= (tier - 1) * 3));
     if (!list.length) { out[layer] = null; continue; }
     const geos = list.map((m) => {
       const lod = m.lods[Math.min(L, m.lods.length - 1)];
@@ -258,7 +273,7 @@ export function buildForgedUnit(arch, opts = {}, defaults = {}) {
     out[layer] = g;
   }
   if (opts.variant && opts.variant.parts && opts.variant.parts.length) {
-    try { const bb = out.body.boundingBox; attachParts(out, opts.variant, pal, scale, (bb.max.z - bb.min.z) > 0.9 * bb.max.y); } catch (e) { console.warn('[Forge] Anbauteile:', e); }
+    try { const bb = out.body.boundingBox; attachParts(out, opts.variant, pal, scale, (bb.max.z - bb.min.z) > 0.9 * bb.max.y, false, info.anchors ? { ...info.anchors, radius: info.radius } : null); } catch (e) { console.warn('[Forge] Anbauteile:', e); }
   }
   if (opts.variant) {
     const v = opts.variant;
@@ -267,7 +282,8 @@ export function buildForgedUnit(arch, opts = {}, defaults = {}) {
   }
   let top = out.body.boundingBox.max.y;
   if (out.glow) top = Math.max(top, out.glow.boundingBox.max.y);
-  return { body: out.body, glow: out.glow, height: +top.toFixed(3), radius: +((info.radius || 0.6) * scale).toFixed(3), forged: true };
+  const tris = (out.body.index.count + (out.glow ? out.glow.index.count : 0)) / 3;
+  return { body: out.body, glow: out.glow, height: +top.toFixed(3), radius: +((info.radius || 0.6) * scale).toFixed(3), forged: true, lod: L, lods: lodN, tris, hover: !!info.hover, scale };
 }
 
 // ---------------------------------------------------------------------------------------------
@@ -337,8 +353,16 @@ export function attachPartsLegacy(res, v, palette) {
   res.height = +top.toFixed(3);
   return res;
 }
-function attachParts(out, v, pal, scale, quad, legacy = false) {
+function attachParts(out, v, pal, scale, quad, legacy = false, baked = null) {
   const A = anchorsOf(out.body, quad);
+  if (baked && baked.head) {
+    // exakte Kopf-/Rückenpunkte aus dem Backen (skaliert) – Krone & Co. sitzen bündig
+    const k = scale, h = baked.head;
+    A.head = [h.p[0] * k, h.p[1] * k - h.r * k * 0.35, h.p[2] * k];
+    A.k = Math.max(0.5, (h.r * k) / 0.11) * 0.95;
+    if (baked.back) A.back = [baked.back.p[0] * k, baked.back.p[1] * k, baked.back.p[2] * k];
+  }
+  if (baked && baked.radius) A.radius = (baked.radius * scale * 1.3) / 0.62;
   const add = { body: [], glow: [] };
   for (const name of v.parts) {
     const asset = cache.get('part_' + name); if (!asset) continue;
@@ -352,7 +376,7 @@ function attachParts(out, v, pal, scale, quad, legacy = false) {
         const g = lodGeometry(arrays, lod, { palette: pal });
         if (layer === 'glow') { g.deleteAttribute('pbr'); g.deleteAttribute('bake'); }
         const pos = g.attributes.position.array, nrm = g.attributes.normal.array;
-        const a = A[anchor], k = A.k * (anchor === 'base' ? 1.1 : 1);
+        const a = A[anchor], k = anchor === 'base' && A.radius ? A.radius : A.k * (anchor === 'base' ? 1.1 : 1);
         for (let i = 0; i < pos.length; i += 3) {
           pos[i] = a[0] * sx + pos[i] * k * sx; pos[i + 1] = a[1] + pos[i + 1] * k; pos[i + 2] = a[2] + pos[i + 2] * k;
           if (sx < 0) nrm[i] = -nrm[i];

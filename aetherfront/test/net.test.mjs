@@ -49,7 +49,7 @@ test('Online-Lockstep: zwei Clients über den Relay-Server bleiben synchron', as
   const [sa, sb] = await Promise.all([a.wait((m) => m.t === 'start'), b.wait((m) => m.t === 'start')]);
   assert.equal(sa.setup.seed, sb.setup.seed);
   assert.notEqual(sa.you, sb.you);
-  assert.deepEqual(sa.setup.rules, { pickMode: 'pr', champions: true, maxWaves: 20, gameMode: 'normal', heroes: true });
+  assert.deepEqual(sa.setup.rules, { pickMode: 'pr', champions: true, maxWaves: 20, gameMode: 'normal' });
   const na = new NetSession(a, sa), nb = new NetSession(b, sb);
   na.submit({ type: 'build', unit: na.sim.players[sa.you].lines[0], col: 2, row: 1 });
   nb.submit({ type: 'build', unit: nb.sim.players[sb.you].lines[1], col: 3, row: 1 });

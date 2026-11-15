@@ -32,7 +32,7 @@
     "appId": "de.tiry.aetherfront",
     "productName": "Aetherfront",
     "directories": { "output": "dist", "buildResources": "build" },
-    "files": ["electron/**/*", "web/**/*", "package.json"],
+    "files": ["electron/**/*", "server/**/*", "web/**/*", "package.json"],
     "win": { "target": [{ "target": "nsis", "arch": ["x64"] }] },
     "nsis": {
       "oneClick": false,

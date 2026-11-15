@@ -53,6 +53,11 @@ function create() {
   win.webContents.on('will-navigate', (e) => e.preventDefault());
 }
 ipcMain.on('quit', () => app.quit());
+// Mehrspieler: Der Host-PC startet den Relay-Server direkt im Spiel (electron/host.js)
+const host = require('./host.js');
+ipcMain.handle('host-server', (_e, port) => host.hostServer(port));
+ipcMain.handle('stop-server', () => { host.stopServer(); return { ok: true }; });
+app.on('before-quit', () => host.stopServer());
 ipcMain.on('fullscreen', (_e, on) => { if (win) win.setFullScreen(!!on); });
 // Einmalige Übernahme alter Spielstände: Bis v0.1 lief das Spiel unter file://, dessen localStorage
 // (Einstellungen, Kampagnen-Fortschritt) unter app:// nicht sichtbar ist. Ein unsichtbares Fenster liest die

@@ -11,15 +11,10 @@ import {
 } from './layout.js';
 import { botThink } from './ai.js';
 import { FACTION_LINES } from './data.js';
-import { HEROES, HERO_IDS } from './heroes.js';
 import { leaderDef, bossKit, updateLeader, leaderAura } from './leader.js';
 import { createMission, missionHook } from './missions.js';
-import { createHero, heroCommand, updateHero, heroWaveStart, heroWaveEnd, heroTakeDamage, heroDied, heroGainXp, heroBotThink, heroArmor, heroArmorType, HERO_RADIUS } from './hero.js';
 
 // Regeln einer Partie (Standard = Versus wie im Original; Kampagne/Modi überschreiben einzelne Werte)
-export const HERO_WAVE_HP = 1.4;
-export const HERO_WAVE_DMG = 1.15;
-
 export const DEFAULT_RULES = {
   pickMode: 'ap',          // ap = Alle wählen, ar = Alle zufällig, pr = Zufall mit einmal Neu-Würfeln, hp = Hybrid
   champions: false,        // CC: Champions in jeder Welle
@@ -29,7 +24,6 @@ export const DEFAULT_RULES = {
   waveHpMul: 1, waveDmgMul: 1, waveArmorAdd: 0, bountyMul: 1, sendCostMul: 1,
   gridRows: 8, maxTier: 3, kingHpMul: 1,
   transition: 2.0,         // Kameraschwenk: so lange ruht das Spiel zu Wellenbeginn/-ende (alle synchron)
-  heroes: true,            // Helden-System an
   leaders: true,           // Wellen-Anführer
   gameMode: 'normal',      // normal | fast (Endwellen ab 20) | long (+2 Königsheilungen) | hard (Wellen +25 %)
   endless: true,           // Endwellen nach der letzten regulären Welle, bis ein König fällt (Versus)
@@ -64,10 +58,8 @@ export class Sim {
     this.siegeQueue = [];
     this.freeze = 0;
     // Wellen mit Modifikatoren & Champions vorbereiten
-    // Mit Helden sind die Bahnen stärker → Wellen entsprechend kräftiger (gemessen per Bot-Simulation)
-    const heroHp = R.heroes ? HERO_WAVE_HP : 1, heroDmg = R.heroes ? HERO_WAVE_DMG : 1;
     this.waves = WAVES.map((w) => {
-      const d = { ...w, key: `w${w.n}`, hp: Math.round(w.hp * R.waveHpMul * heroHp * (w.boss && R.champions ? 1.25 : 1)), dmg: w.dmg * R.waveDmgMul * heroDmg, speed: w.speed * (R.creepSpeedMul || 1), armor: w.armor + R.waveArmorAdd, bounty: Math.max(1, Math.round(w.bounty * R.bountyMul)) };
+      const d = { ...w, key: `w${w.n}`, hp: Math.round(w.hp * R.waveHpMul * (w.boss && R.champions ? 1.25 : 1)), dmg: w.dmg * R.waveDmgMul, speed: w.speed * (R.creepSpeedMul || 1), armor: w.armor + R.waveArmorAdd, bounty: Math.max(1, Math.round(w.bounty * R.bountyMul)) };
       d.champ = w.boss ? null : { ...d, key: `w${w.n}c`, champion: true, name: `Champion: ${w.name}`, hp: d.hp * 3, dmg: d.dmg * 1.6, armor: d.armor + 2, bounty: d.bounty * 3, size: 1.3 };
       d.hunter = ['raptor', 'hound', 'imp'].includes(w.model);
       if (R.leaders) {
@@ -107,12 +99,13 @@ export class Sim {
         }
         lines = FACTION_LINES[faction].slice();
       }
+      // Extrem-Bots: schneller und mit kleinem Wirtschaftsvorsprung
+      const ext = ps.bot && ps.difficulty === 'extreme';
       return {
         id, name: ps.name || `Spieler ${id + 1}`, team: ps.team, slot: slots[slotIdx[ps.team]++],
         faction, lines, bot: !!ps.bot, difficulty: ps.difficulty || 'normal', randomed: bonus > 0,
         rerolls: R.pickMode === 'pr' ? 1 : 0,
-        heroId: HEROES[ps.hero] ? ps.hero : null,
-        gold: R.startGold + bonus + (ps.bonusGold || 0), aether: R.startAether, income: R.startIncome + (ps.bonusIncome || 0), workers: R.startWorkers + (ps.bonusWorkers || 0),
+        gold: R.startGold + bonus + (ps.bonusGold || 0) + (ext ? 60 : 0), aether: R.startAether, income: R.startIncome + (ps.bonusIncome || 0) + (ext ? 6 : 0), workers: R.startWorkers + (ps.bonusWorkers || 0),
         ready: false, sendQueue: [], botTimer: 0.6 + id * 0.17,
         stats: { leaks: 0, kills: 0, sent: 0, sentValue: 0, leaked: 0 },
         connected: true,
@@ -123,7 +116,7 @@ export class Sim {
       for (const p of this.players) {
         if (p.team !== 1) continue;
         const twin = this.players.find((o) => o.team === 0 && o.slot === p.slot);
-        if (twin && (twin.randomed || R.pickMode !== 'ap')) { p.faction = twin.faction; p.lines = twin.lines.slice(); p.randomed = twin.randomed; }
+        if (twin) { p.faction = twin.faction; p.lines = twin.lines.slice(); p.randomed = twin.randomed; }
       }
     }
     for (const p of this.players) {
@@ -143,24 +136,9 @@ export class Sim {
         },
       };
     });
-    this.initHeroes();
     this.mission = R.mission ? createMission(R.mission) : null;
     missionHook(this, 'init');
   }
-
-  initHeroes() {
-    if (!this.rules.heroes) return;
-    for (const p of this.players) {
-      if (!p.heroId) {
-        // Bots und Spieler ohne Wahl: Held passend zum Volk (deterministisch)
-        const fits = HERO_IDS.filter((id) => HEROES[id].synergy.includes(p.faction));
-        const pool = fits.length ? fits : HERO_IDS;
-        p.heroId = pool[this.rng.int(pool.length)];
-      }
-      createHero(this, p);
-    }
-  }
-  heroOf(pid) { const p = this.players[pid]; return p && p.heroEnt ? this.entities.get(p.heroEnt) : null; }
 
   /** Hybrid-Baumeister: 5 zufällige Kämpferlinien aus allen Fraktionen, mind. 2 Frontkämpfer */
   rollHybrid() {
@@ -222,7 +200,12 @@ export class Sim {
       case 'ready': p.ready = true; this.checkReady(); return true;
       case 'reroll': return this.cmdReroll(p);
       case 'leave': p.connected = false; p.bot = true; return true; // Bot übernimmt (Online)
-      case 'hin': case 'hcast': case 'htarget': case 'hauto': case 'hstop': return heroCommand(this, p, cmd);
+      case 'mission': {
+        // Missions-Aktion (Klick auf Missionsobjekt, Pakt, Leuchtkugel …) – nur in Kampagnen-Missionen
+        const r = missionHook(this, 'command', p, cmd);
+        if (typeof r === 'string') return this.fail(p, r);
+        return r === true;
+      }
       default: return false;
     }
   }
@@ -370,13 +353,12 @@ export class Sim {
       if (!p.bot) continue;
       p.botTimer -= DT;
       if (p.botTimer <= 0) {
-        p.botTimer = p.difficulty === 'easy' ? 1.6 : p.difficulty === 'hard' ? 0.5 : 0.9;
+        p.botTimer = p.difficulty === 'easy' ? 1.6 : p.difficulty === 'hard' ? 0.5 : p.difficulty === 'extreme' ? 0.35 : 0.9;
         botThink(this, p);
+        // Bots bedienen auch Missions-Mechaniken (Klick-Objekte, Pakte …)
+        if (this.mission && this.phase !== 'over') { const mc = missionHook(this, 'bot', p); if (mc) this.applyCommand(p.id, mc); }
       }
     }
-
-    // Bot-Helden (alle 0,25 s)
-    if (this.tick % 5 === 0) for (const p of this.players) if (p.bot && p.heroEnt) heroBotThink(this, this.entities.get(p.heroEnt));
 
     // Äther der Arbeiter
     for (const p of this.players) p.aether += p.workers * ECON.workerRate * (1 + ECON.gatherBonus * (p.gatherLvl || 0)) * DT;
@@ -416,7 +398,6 @@ export class Sim {
     this.rage = false;
     for (const p of this.players) p.ready = false;
     for (const e of this.entities.values()) if (e.type === 'f') e.fresh = false;
-    for (const e of this.entities.values()) if (e.type === 'h') heroWaveStart(this, e);
     this.freeze = this.rules.transition;
     for (const p of this.players) {
       const lx = this.laneX(p.id);
@@ -485,10 +466,6 @@ export class Sim {
     // Projektile entfernen, Kämpfer zurücksetzen
     for (const [id, e] of this.entities) {
       if (e.type === 'p' || e.type === 'c' || (e.type === 'f' && e.summon)) this.entities.delete(id);
-      else if (e.type === 'h') {
-        heroWaveEnd(this, e);
-        if (!leaks[e.owner]) heroGainXp(this, e, 25 + 3 * this.wave);
-      }
       else if (e.type === 'f') {
         const d = UNITS[e.def];
         Object.assign(e, {
@@ -532,14 +509,13 @@ export class Sim {
 
   // ---------- Kampf ----------
   updateBattle() {
-    const lanesF = new Map(), lanesC = new Map(), lanesH = new Map();
+    const lanesF = new Map(), lanesC = new Map();
     const kingCreeps = [[], []];
     const projectiles = [];
-    for (const p of this.players) { lanesF.set(p.id, []); lanesC.set(p.id, []); lanesH.set(p.id, []); }
+    for (const p of this.players) { lanesF.set(p.id, []); lanesC.set(p.id, []); }
     for (const e of this.entities.values()) {
       if (e.type === 'p') { projectiles.push(e); continue; }
       if (e.type === 'o') continue; // Missions-Objekte
-      if (e.type === 'h') { lanesH.get(e.lane).push(e); continue; }
       if (!e.alive) continue;
       if (e.type === 'f') lanesF.get(e.lane).push(e);
       else if (e.stage === 'lane') lanesC.get(e.lane).push(e);
@@ -547,14 +523,12 @@ export class Sim {
     }
 
     for (const p of this.players) {
-      const fs = lanesF.get(p.id), cs = lanesC.get(p.id), hs = lanesH.get(p.id);
+      const fs = lanesF.get(p.id), cs = lanesC.get(p.id);
       this.computeAuras(fs);
       for (const f of fs) this.updateFighter(f, fs, cs);
-      for (const h of hs) updateHero(this, h, cs);
-      const defenders = hs.length ? fs.concat(hs.filter((h) => h.alive)) : fs;
       if (this.rules.leaders) leaderAura(this, cs);
-      for (const c of cs) this.updateCreep(c, defenders);
-      this.separate(defenders.concat(cs.filter((c) => c.alive)), this.laneX(p.id));
+      for (const c of cs) this.updateCreep(c, fs);
+      this.separate(fs.concat(cs.filter((c) => c.alive)), this.laneX(p.id));
     }
     for (let t = 0; t < 2; t++) for (const c of kingCreeps[t]) this.updateKingCreep(c);
     for (const pr of projectiles) this.updateProjectile(pr);
@@ -576,7 +550,7 @@ export class Sim {
       f.swarmMul = 1 + Math.min(0.5, n * sw);
     }
     for (const f of fs) {
-      // Helden-Buffs (Banner, Überladung, Hain) zählen wie Auren
+      // Missions-Buffs (z. B. Kristallpfeiler) zählen wie Auren
       if (f.hbT > 0) { f.hbT -= DT; f.auraArmor = f.hbArmor || 0; f.auraSpeed = f.hbHaste || 0; if (f.hbRegen && f.hp < f.maxHp) f.hp = Math.min(f.maxHp, f.hp + f.hbRegen * DT); }
       else { f.auraArmor = 0; f.auraSpeed = 0; }
       if (f.shieldT > 0) { f.shieldT -= DT; if (f.shieldT <= 0) f.shield = 0; }
@@ -599,7 +573,7 @@ export class Sim {
         d.next -= DT;
         if (d.next <= 0) {
           d.next += d.every; d.left--;
-          const src = this.entities.get(d.src) || { type: 'h', alive: false };
+          const src = this.entities.get(d.src) || { type: 'env', alive: false };
           this.applyHit(src, e, d.dmg, 'chaos', false);
           if (!e.alive) return false;
           if (d.left <= 0) e.dots.splice(i, 1);
@@ -715,7 +689,6 @@ export class Sim {
 
   radiusOf(e) {
     if (e.type === 'c') return e.def.boss ? 1.8 : 0.6;
-    if (e.type === 'h') return HERO_RADIUS;
     return 0.6 * (UNITS[e.def].size || 1);
   }
 
@@ -773,31 +746,20 @@ export class Sim {
       return;
     }
     if (this.rage) { this.moveToward(c, lx, LANE_END_Z + 1, sp * 1.5); return; }
-    if (c.fearT > 0) {
-      // Grauen: weg vom nächsten Helden fliehen
-      c.fearT -= DT;
-      let hx = c.x, hz = c.z - 1;
-      for (const f of fs) if (f.type === 'h') { hx = f.x; hz = f.z; }
-      const dx = c.x - hx, dz = c.z - hz, d = Math.hypot(dx, dz) || 1;
-      if (c.rootT <= 0) this.moveToward(c, c.x + (dx / d) * 3, c.z + (dz / d) * 3, sp * 0.8);
-      return;
-    }
 
     let tgt = c.target && this.entities.get(c.target);
     const forced = c.forcedT > 0 && tgt && tgt.alive;
     if (!forced && (!tgt || !tgt.alive || Math.hypot(tgt.x - c.x, tgt.z - c.z) > AGGRO + 2)) {
       tgt = null; let bd = AGGRO * AGGRO, taunt = false;
-      const huntR = (def.hunter || def.leader ? 11 : AGGRO) ** 2;
       for (const f of fs) {
         if (!f.alive || f.converted > 0) continue;
         const d = (f.x - c.x) ** 2 + (f.z - c.z) ** 2;
-        if (f.type === 'h' && (def.hunter || def.leader) && d <= huntR) { tgt = f; taunt = true; bd = -1; break; }
-        const isT = f.type === 'h' ? f.tauntT > 0 : !!UNITS[f.def].abil.taunt;
+        const isT = !!UNITS[f.def].abil.taunt;
         if (d <= AGGRO * AGGRO && ((isT && !taunt) || (isT === taunt && d < bd))) { bd = d; tgt = f; taunt = isT; }
       }
       c.target = tgt ? tgt.id : 0;
     }
-    if (c.rootT > 0 && tgt && Math.hypot(tgt.x - c.x, tgt.z - c.z) > def.range + this.radiusOf(tgt) + 0.3) return;
+    if ((c.rootT || 0) > 0 && tgt && Math.hypot(tgt.x - c.x, tgt.z - c.z) > def.range + this.radiusOf(tgt) + 0.3) return;
     if (!tgt) {
       // die Bahn hinab, leicht zur Mitte ziehen
       const tx = c.x + (lx - c.x) * 0.15;
@@ -938,21 +900,14 @@ export class Sim {
     if (!tgt.alive) return 0;
     let armorType, armor;
     if (tgt.type === 'f') { armorType = UNITS[tgt.def].armorType; armor = UNITS[tgt.def].armor + tgt.auraArmor; }
-    else if (tgt.type === 'h') { armorType = heroArmorType(tgt); armor = heroArmor(tgt); }
     else { armorType = tgt.def.armorType; armor = tgt.def.armor + (tgt.moraleArmor || 0); }
     const mult = DAMAGE_TABLE[atk][armorType] ?? 1;
     let final = Math.max(1, dmg * mult * (1 - armorReduction(armor || 0)) * (1 + (tgt.cursePct || 0)));
     if (this.mission && this.mission.m.dmgMul) final *= missionHook(this, 'dmgMul', src, tgt, atk) || 1;
-    if (tgt.type === 'h') final = heroTakeDamage(this, tgt, final);
-    else {
-      if (tgt.shield > 0) { const a = Math.min(tgt.shield, final); tgt.shield -= a; final -= a; }
-      tgt.hp -= final;
-    }
-    if (!secondary || crit) this.emit({ e: 'hit', id: tgt.id, x: tgt.x, z: tgt.z, dmg: Math.round(final), crit, atk, eff: mult, hero: src && src.type === 'h' ? src.owner : -1, onHero: tgt.type === 'h' });
-    if (tgt.hp <= 0) {
-      if (tgt.type === 'h') heroDied(this, tgt);
-      else this.kill(tgt, src);
-    }
+    if (tgt.shield > 0) { const a = Math.min(tgt.shield, final); tgt.shield -= a; final -= a; }
+    tgt.hp -= final;
+    if (!secondary || crit) this.emit({ e: 'hit', id: tgt.id, x: tgt.x, z: tgt.z, dmg: Math.round(final), crit, atk, eff: mult });
+    if (tgt.hp <= 0) this.kill(tgt, src);
     return final;
   }
 
@@ -970,12 +925,6 @@ export class Sim {
         const p = this.players[e.lane];
         p.gold += e.bounty; p.stats.kills++;
         this.emit({ e: 'gold', pid: p.id, amount: e.bounty, x: e.x, z: e.z });
-        const h = p.heroEnt && this.entities.get(p.heroEnt);
-        if (h) {
-          const byHero = src && src.type === 'h';
-          heroGainXp(this, h, byHero ? 6 + e.bounty : 2 + Math.floor(e.bounty / 3));
-          if (byHero) h.stats.kills++;
-        }
       }
       if (e.def.leader && e.stage === 'lane') {
         const quick = this.battleTime - (e.spawnT || 0) <= 20;
@@ -983,9 +932,7 @@ export class Sim {
         const bonus = quick ? Math.round(w.bounty * w.count * 0.4) : 0;
         const p = this.players[e.lane];
         if (bonus) { p.gold += bonus; this.emit({ e: 'gold', pid: p.id, amount: bonus, x: e.x, z: e.z }); }
-        const h = p.heroEnt && this.entities.get(p.heroEnt);
-        if (h) heroGainXp(this, h, quick ? 60 : 30);
-        this.emit({ e: 'leaderDown', id: e.id, lane: e.lane, quick, bonus, x: e.x, z: e.z, byHero: !!(src && src.type === 'h') });
+        this.emit({ e: 'leaderDown', id: e.id, lane: e.lane, quick, bonus, x: e.x, z: e.z });
       }
       this.emit({ e: 'death', id: e.id, x: e.x, z: e.z, type: 'c', model: e.def.model, boss: !!e.def.boss, champion: !!e.def.champion, leader: !!e.def.leader });
     } else {

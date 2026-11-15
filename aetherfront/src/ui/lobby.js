@@ -1,17 +1,16 @@
 // Mehrspieler-Lobby: Verbinden/Hosten, öffentliche Räume, Schnellsuche, Plätze (Mensch/Bot/geschlossen),
-// Host-Einstellungen (Modus, Teams, Wellen, Bots, Ausgleich), Volk/Held/Bereit, Chat, Einladungscode.
+// Host-Einstellungen (Modus, Teams, Wellen, Bots, Ausgleich), Volk/Bereit, Chat, Einladungscode.
 import { FACTIONS, FACTION_IDS } from '../sim/data.js';
-import { HEROES, HERO_IDS } from '../sim/heroes.js';
 
 const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const DIFF = { easy: 'Leicht', normal: 'Normal', hard: 'Schwer', extreme: 'Extrem' };
 const PICK = { ap: 'AP · Alle wählen', ar: 'AR · Alle zufällig', pr: 'PR · Zufall + Neu würfeln', hp: 'HP · Hybrid', mirror: 'Gespiegelte Auswahl' };
-const GAMEMODE = { normal: 'Normal', fast: 'Schnell (20 Wellen + Endwellen)', long: 'Lang (+2 Heilungen)', hard: 'Hart (+25 % Wellen)' };
+const GAMEMODE = { normal: 'Normal', fast: 'Schnell (20 Wellen)', long: 'Lang (+2 Heilungen)', hard: 'Hart (+25 % Wellen)', random: 'Zufall' };
 
 export class Lobby {
-  /** root: Container-Element; settings: Settings; audio; onStart(mp, startMsg) */
-  constructor(root, { settings, audio, onStart }) {
-    this.root = root; this.settings = settings; this.audio = audio; this.onStart = onStart;
+  /** root: Container-Element; settings: Settings; audio; onStart(mp, startMsg); onBack(); onDisconnect() – Verbindung im Spiel verloren */
+  constructor(root, { settings, audio, onStart, onBack, onDisconnect }) {
+    this.root = root; this.settings = settings; this.audio = audio; this.onStart = onStart; this.onBack = onBack; this.onDisconnect = onDisconnect;
     this.mp = null; this.state = null; this.rooms = []; this.chat = [];
     this.render();
   }
@@ -25,7 +24,13 @@ export class Lobby {
     const mp = { ws, handlers: [], myId: null, token: null };
     ws.onopen = () => { this.send({ t: 'hello', name: this.settings.get('playerName') || 'Tiry' }); this.status('Verbunden'); this.send({ t: 'list' }); };
     ws.onerror = () => this.status('Server nicht erreichbar – läuft er? (Spiel hosten oder SERVER-EINRICHTEN.md)');
-    ws.onclose = () => { if (this.mp === mp && !this.inGame) this.status('Verbindung getrennt'); };
+    ws.onclose = () => {
+      if (this.mp !== mp) return;
+      if (this.inGame) { this.onDisconnect && this.onDisconnect(); return; }
+      this.state = null;
+      this.render();
+      this.status('Verbindung getrennt', true);
+    };
     ws.onmessage = (ev) => {
       const m = JSON.parse(ev.data);
       if (m.t === 'welcome') { mp.myId = m.id; mp.token = m.token; }
@@ -53,6 +58,18 @@ export class Lobby {
   get isHost() { return this.state && this.mp && this.state.host === this.mp.myId; }
   get me() { return this.state && this.mp ? this.state.players.find((p) => p.id === this.mp.myId) : null; }
 
+  /** Spiel verlassen: Verbindung bewusst schließen (kein automatisches Wiederverbinden) */
+  leaveGame() {
+    this.inGame = false;
+    try { localStorage.removeItem('aetherfront.rejoin'); } catch { /* egal */ }
+    if (this.mp) { const mp = this.mp; this.mp = null; this.state = null; try { mp.ws.close(); } catch { /* egal */ } }
+  }
+  /** Lokal gestarteten Server beenden (Electron) */
+  async stopHosting() {
+    if (window.aetherfront && window.aetherfront.stopServer) await window.aetherfront.stopServer();
+    this.hostInfo = null;
+  }
+
   async host() {
     this.audio?.ui('confirm');
     if (window.aetherfront && window.aetherfront.hostServer) {
@@ -74,7 +91,8 @@ export class Lobby {
     try {
       const r = JSON.parse(localStorage.getItem('aetherfront.rejoin') || 'null');
       if (!r) return this.status('Kein laufendes Spiel gespeichert', true);
-      this.settings.set('serverUrl', r.url); this.mp = null;
+      this.settings.set('serverUrl', r.url);
+      if (this.mp) { const old = this.mp; this.mp = null; try { old.ws.close(); } catch { /* egal */ } }
       this.send({ t: 'rejoin', room: r.room, token: r.token });
     } catch { this.status('Wiederverbinden fehlgeschlagen', true); }
   }
@@ -85,7 +103,7 @@ export class Lobby {
     const st = this.state;
     const ipInfo = this.hostInfo ? `<div class="lb-ips">Freunde verbinden sich mit: ${this.hostInfo.addresses.map((a) => `<code>ws://${esc(a)}:${this.hostInfo.port}</code>`).join(' · ')}</div>` : '';
     this.root.innerHTML = `
-      <header class="panel-head"><div class="ttl"><small>Online</small><h2>Mehrspieler</h2></div><button class="btn ghost back" data-lb="back">Zurück</button></header>
+      <header class="panel-head"><div class="ttl"><small>Online</small><h2>Mehrspieler</h2></div><button class="btn ghost back" data-lb="back">${this.state ? 'Raum verlassen' : 'Zurück'}</button></header>
       <div class="lb">
         <div class="lb-col">
           <h3>Verbindung</h3>
@@ -116,8 +134,7 @@ export class Lobby {
         const h = humans[i];
         if (i >= st.mode && !h) return '';
         if (h) {
-          const hero = HEROES[h.hero];
-          return `<div class="lb-slot human${h.id === this.mp?.myId ? ' me' : ''}"><span class="lb-dot ${h.ready ? 'ready' : ''}"></span><b>${st.host === h.id ? '♛ ' : ''}${esc(h.name)}</b><small>${FACTIONS[h.faction] ? FACTIONS[h.faction].name : 'Zufall'} · ${hero ? hero.cls : 'Held: Auto'}${h.connected === false ? ' · getrennt' : ''}</small></div>`;
+          return `<div class="lb-slot human${h.id === this.mp?.myId ? ' me' : ''}"><span class="lb-dot ${h.ready ? 'ready' : ''}"></span><b>${st.host === h.id ? '♛ ' : ''}${esc(h.name)}</b><small>${FACTIONS[h.faction] ? FACTIONS[h.faction].name : 'Zufallsvolk'}${h.ready ? ' · bereit' : ''}${h.connected === false ? ' · getrennt' : ''}</small></div>`;
         }
         const label = s.kind === 'bot' ? `Bot · ${DIFF[s.difficulty]}` : s.kind === 'closed' ? 'Geschlossen' : c.bots ? 'Offen (sonst Bot)' : 'Offen';
         return `<button class="lb-slot ${s.kind}" ${host ? `data-lb="slot" data-team="${team}" data-i="${i}"` : 'disabled'}><b>${label}</b><small>${host ? 'Klicken: Offen → Bot (Stärke) → Geschlossen' : ''}</small></button>`;
@@ -125,14 +142,13 @@ export class Lobby {
     };
     const sel = (key, opts, cur, dis) => `<select class="field" data-cfg="${key}" ${dis ? 'disabled' : ''}>${Object.entries(opts).map(([v, t]) => `<option value="${v}" ${String(cur) === String(v) ? 'selected' : ''}>${t}</option>`).join('')}</select>`;
     return `
-      <div class="lb-head"><h3>Raum <span class="code-badge">${st.room}</span></h3><button class="btn ghost" data-lb="copy">Einladung kopieren</button></div>
+      <div class="lb-head"><h3>Raum <span class="code-badge">${st.room}</span></h3><div class="row"><button class="btn ghost small" data-lb="copy">Einladung kopieren</button>${host ? '<button class="btn primary" data-lb="start">Spiel starten</button>' : '<span class="fine">Der Host startet das Spiel.</span>'}</div></div>
       <div class="lb-teams">
         <div><h4 class="west">Team West</h4>${slotHtml(0)}</div>
         <div><h4 class="east">Team Ost</h4>${slotHtml(1)}</div>
       </div>
       <div class="lb-me">
         <label class="fg">Volk${sel('_faction', { random: 'Zufall (+Gold)', ...Object.fromEntries(FACTION_IDS.map((f) => [f, FACTIONS[f].name])) }, me?.faction || 'random')}</label>
-        <label class="fg">Held${sel('_hero', Object.fromEntries(HERO_IDS.map((h) => [h, `${HEROES[h].name} · ${HEROES[h].cls}`])), me?.hero || HERO_IDS[0])}</label>
         <div class="row"><button class="btn" data-lb="team">Team wechseln</button><button class="btn ${me?.ready ? 'primary' : ''}" data-lb="ready">${me?.ready ? 'Bereit ✓' : 'Bereit?'}</button></div>
       </div>
       <div class="lb-cfg">
@@ -141,13 +157,13 @@ export class Lobby {
         <label class="fg">Teamgröße${sel('mode', { 1: '1 gegen 1', 2: '2 gegen 2', 3: '3 gegen 3', 4: '4 gegen 4' }, st.mode, !host)}</label>
         <label class="fg">Wellen${sel('waves', { 10: '10', 20: '20', 30: '30 (+ Endwellen)' }, c.waves, !host)}</label>
         <label class="fg">Champions (CC)${sel('champions', { false: 'Aus', true: 'An' }, c.champions, !host)}</label>
+        <label class="fg">Endlos${sel('endless', { true: 'Endwellen bis ein König fällt', false: 'Entscheidung nach der letzten Welle' }, c.endless !== false, !host)}</label>
         <label class="fg">Leere Plätze${sel('bots', { true: 'Bots füllen auf', false: 'bleiben leer' }, c.bots, !host)}</label>
         <label class="fg">Bot-Stärke${sel('botDifficulty', DIFF, c.botDifficulty, !host)}</label>
         <label class="fg">Ungleiche Teams${sel('autobalance', { true: 'automatisch ausgleichen', false: 'kein Ausgleich' }, c.autobalance, !host)}</label>
         <label class="fg">Sichtbarkeit${sel('public', { false: 'Privat (nur mit Code)', true: 'Öffentlich' }, st.public, !host)}</label>
       </div>
-      <div class="lb-chat"><div class="lb-log" id="lb-log"></div><input class="field" id="lb-msg" placeholder="Nachricht … (Enter)" maxlength="200"></div>
-      <div class="row end">${host ? '<button class="btn primary big" data-lb="start">Spiel starten</button>' : '<span class="fine">Der Host startet das Spiel.</span>'}</div>`;
+      <div class="lb-chat"><div class="lb-log" id="lb-log"></div><input class="field" id="lb-msg" placeholder="Nachricht an den Raum … (Enter)" maxlength="200"></div>`;
   }
 
   renderChat() {
@@ -168,13 +184,12 @@ export class Lobby {
       if (v === 'true' || v === 'false') v = v === 'true';
       else if (/^\d+$/.test(v)) v = +v;
       if (k === '_faction') { S.set('faction', v); this.send({ t: 'slot', faction: v }); return; }
-      if (k === '_hero') { S.set('hero', v); this.send({ t: 'slot', hero: v }); return; }
       this.send({ t: 'config', config: { [k]: v } });
     }));
     this.root.querySelectorAll('[data-lb]').forEach((el) => el.addEventListener('click', () => {
       this.audio?.ui('click');
       const a = el.dataset.lb;
-      if (a === 'back') this.onBack && this.onBack();
+      if (a === 'back') { if (this.state) this.leaveGame(); this.onBack && this.onBack(); }
       else if (a === 'host') this.host();
       else if (a === 'refresh') { this.connect(); this.send({ t: 'list' }); }
       else if (a === 'join') { const code = q('#lb-code').value.trim(); if (code) this.send({ t: 'join', room: code }); }
@@ -182,7 +197,7 @@ export class Lobby {
       else if (a === 'rejoin') this.rejoinLast();
       else if (a === 'quick') this.send({ t: 'quick', mode: +el.dataset.n });
       else if (a === 'team') this.send({ t: 'slot', team: this.me?.team === 0 ? 1 : 0 });
-      else if (a === 'ready') this.send({ t: 'slot', ready: !this.me?.ready, faction: S.get('faction'), hero: S.get('hero') });
+      else if (a === 'ready') this.send({ t: 'slot', ready: !this.me?.ready, faction: S.get('faction') });
       else if (a === 'start') this.send({ t: 'start' });
       else if (a === 'copy') {
         const txt = `Aetherfront – komm in mein Spiel! Server: ${S.get('serverUrl')} · Code: ${this.state.room}`;
@@ -195,8 +210,6 @@ export class Lobby {
         this.send({ t: 'slotKind', team: +el.dataset.team, index: +el.dataset.i, kind, difficulty });
       }
     }));
-    if (this.state && this.me && (this.me.faction !== S.get('faction') || (S.get('hero') && this.me.hero !== S.get('hero')))) {
-      this.send({ t: 'slot', faction: S.get('faction'), hero: S.get('hero') });
-    }
+    if (this.state && this.me && this.me.faction !== S.get('faction')) this.send({ t: 'slot', faction: S.get('faction') });
   }
 }

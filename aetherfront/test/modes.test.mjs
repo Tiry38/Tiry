@@ -4,6 +4,7 @@ import { Sim } from '../src/sim/sim.js';
 import { UNITS } from '../src/sim/data.js';
 import { parseModeCode, modeCode } from '../src/sim/modes.js';
 import { MISSIONS, missionSetup, missionStars, talentBonus } from '../src/sim/campaign.js';
+import { MECHANICS } from '../src/sim/missions.js';
 
 const players = (n) => Array.from({ length: n * 2 }, (_, i) => ({ name: `P${i}`, team: i % 2, faction: 'orden', bot: i > 0, difficulty: 'normal' }));
 
@@ -46,9 +47,10 @@ test('HP: Hybrid-Baumeister hat 5 Linien aus verschiedenen Fraktionen und kann s
   assert.ok(sim.wave > 3);
 });
 
-test('Kampagne: 24 Missionen mit eigener Mechanik starten und laufen; Söldner belagern die Rissfeste', () => {
+test('Kampagne: 24 Missionen mit je eigener Mechanik starten und laufen; Söldner belagern die Rissfeste', () => {
   assert.equal(MISSIONS.length, 24);
-  assert.equal(new Set(MISSIONS.filter((x) => x.mechanic && x.mechanic !== 'boss').map((x) => x.mechanic)).size, 19);
+  assert.equal(new Set(MISSIONS.map((x) => x.mechanic)).size, 24, 'jede Mission hat eine einzigartige Mechanik');
+  for (const m of MISSIONS) assert.ok(MECHANICS[m.mechanic], m.mechanic);
   for (const m of MISSIONS) {
     const s = missionSetup(m, { seed: 1, totalStars: 45 });
     s.players[0].bot = true; s.players[0].difficulty = 'hard';

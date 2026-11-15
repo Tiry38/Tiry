@@ -14,7 +14,8 @@ const PROTOCOL_VERSION = 2;
 const RECONNECT_GRACE_MS = 45000;
 const PAUSE_MAX_MS = 90000;
 
-const DEFAULT_CONFIG = () => ({ pickMode: 'ap', champions: false, waves: 30, gameMode: 'normal', bots: true, botDifficulty: 'normal', autobalance: true, heroes: true });
+const DEFAULT_CONFIG = () => ({ pickMode: 'ap', champions: false, waves: 30, gameMode: 'normal', endless: true, bots: true, botDifficulty: 'normal', autobalance: true });
+const GAME_MODES = ['normal', 'fast', 'long', 'hard'];
 
 function createRelayServer({ port = 7710, log = console.log, server } = {}) {
   const wss = server ? new WebSocketServer({ server }) : new WebSocketServer({ port });
@@ -30,7 +31,7 @@ function createRelayServer({ port = 7710, log = console.log, server } = {}) {
     return {
       t: 'lobby', room: room.code, name: room.name, public: room.public, host: room.host, mode: room.mode, started: room.started, config: room.config,
       slots: room.slots,
-      players: room.clients.map((c) => ({ id: c.id, name: c.name, team: c.team, faction: c.faction, hero: c.hero, ready: !!c.ready, connected: c.ws?.readyState === 1 })),
+      players: room.clients.map((c) => ({ id: c.id, name: c.name, team: c.team, faction: c.faction, ready: !!c.ready, connected: c.ws?.readyState === 1 })),
     };
   }
   const pushLobby = (room) => { if (!room.started) broadcast(room, lobbyState(room)); };
@@ -66,7 +67,7 @@ function createRelayServer({ port = 7710, log = console.log, server } = {}) {
       for (const t of [0, 1]) {
         const slot = room.slots[t][i];
         const human = room.clients.filter((c) => c.team === t)[i];
-        if (human) { human.pid = players.length; players.push({ name: human.name, team: t, faction: human.faction, hero: human.hero, bot: false }); teamSize[t]++; }
+        if (human) { human.pid = players.length; players.push({ name: human.name, team: t, faction: human.faction, bot: false }); teamSize[t]++; }
         else if (slot.kind === 'bot' || (slot.kind === 'open' && room.config.bots)) {
           players.push({ name: `Bot ${players.length + 1}`, team: t, faction: 'random', bot: true, difficulty: slot.kind === 'bot' ? slot.difficulty : room.config.botDifficulty });
           teamSize[t]++;
@@ -84,7 +85,10 @@ function createRelayServer({ port = 7710, log = console.log, server } = {}) {
     room.pending = new Map();
     room.hashes = new Map();
     const c = room.config;
-    const rules = { pickMode: c.pickMode || 'ap', champions: !!c.champions, maxWaves: c.waves || 30, gameMode: c.gameMode || 'normal', heroes: c.heroes !== false };
+    // „Zufall“: der Server würfelt den Spielmodus einmal aus (alle Clients bekommen dasselbe Ergebnis)
+    const gameMode = c.gameMode === 'random' ? GAME_MODES[crypto.randomBytes(1)[0] % GAME_MODES.length] : (c.gameMode || 'normal');
+    const rules = { pickMode: c.pickMode || 'ap', champions: !!c.champions, maxWaves: c.waves || 30, gameMode };
+    if (c.endless === false) rules.endless = false;
     if (c.pickMode === 'mirror') { rules.pickMode = 'ar'; rules.mirror = true; }
     room.setup = { seed: (crypto.randomBytes(4).readUInt32BE(0) >>> 1), players, rules };
     for (const cl of room.clients) send(cl.ws, { t: 'start', setup: room.setup, you: cl.pid ?? -1, token: cl.token, version: PROTOCOL_VERSION });
@@ -150,7 +154,7 @@ function createRelayServer({ port = 7710, log = console.log, server } = {}) {
   }
 
   wss.on('connection', (ws) => {
-    let client = { id: nextClient++, ws, name: 'Spieler', team: 0, faction: 'random', hero: null, room: null, pid: null, token: crypto.randomBytes(12).toString('hex') };
+    let client = { id: nextClient++, ws, name: 'Spieler', team: 0, faction: 'random', room: null, pid: null, token: crypto.randomBytes(12).toString('hex') };
     send(ws, { t: 'welcome', id: client.id, token: client.token, version: PROTOCOL_VERSION });
     ws.on('message', (raw) => {
       let m; try { m = JSON.parse(raw); } catch { return; }
@@ -175,7 +179,6 @@ function createRelayServer({ port = 7710, log = console.log, server } = {}) {
         case 'slot': if (room && !room.started) {
           if (m.team === 0 || m.team === 1) { const want = m.team; if (want !== client.team && seatsFree(room, want) > 0) client.team = want; }
           if (m.faction) client.faction = String(m.faction);
-          if (m.hero) client.hero = String(m.hero);
           if (typeof m.ready === 'boolean') client.ready = m.ready;
           pushLobby(room);
         } break;
@@ -190,7 +193,8 @@ function createRelayServer({ port = 7710, log = console.log, server } = {}) {
           if (['ap', 'ar', 'pr', 'hp', 'mirror'].includes(c.pickMode)) room.config.pickMode = c.pickMode;
           if (typeof c.champions === 'boolean') room.config.champions = c.champions;
           if ([10, 20, 30].includes(c.waves)) room.config.waves = c.waves;
-          if (['normal', 'fast', 'long', 'hard'].includes(c.gameMode)) room.config.gameMode = c.gameMode;
+          if ([...GAME_MODES, 'random'].includes(c.gameMode)) room.config.gameMode = c.gameMode;
+          if (typeof c.endless === 'boolean') room.config.endless = c.endless;
           if (typeof c.bots === 'boolean') room.config.bots = c.bots;
           if (typeof c.autobalance === 'boolean') room.config.autobalance = c.autobalance;
           if (typeof c.public === 'boolean') room.public = c.public;

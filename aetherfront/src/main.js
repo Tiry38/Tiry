@@ -1,4 +1,5 @@
 // Aetherfront – Einstieg: verbindet Simulation, Grafik, Audio und Oberfläche.
+// Reines Lane-Defense-Spiel mit fester Draufsicht: bauen, aufwerten, Söldner schicken, König verteidigen.
 import { Engine } from './render/engine.js';
 import { RtsCamera } from './render/camera.js';
 import { createEnvironment, loadEnvironmentAssets } from './render/environment.js';
@@ -6,29 +7,29 @@ import { UnitsView } from './render/units.js';
 import { Fx } from './render/fx.js';
 import { Overlay } from './render/overlay.js';
 import { Portraits } from './render/portraits.js';
+import { ObjectivesView } from './render/objectives.js';
 import { AudioEngine } from './audio/audio.js';
 import { Settings } from './ui/settings.js';
-import { Hud } from './ui/hud.js';
+import { Hud, BUILD_KEYS, UPGRADE_KEYS } from './ui/hud.js';
 import { Menus } from './ui/menus.js';
+import { NetChat } from './ui/chat.js';
 import { LocalSession, NetSession } from './net/session.js';
-import { UNITS, SENDS, WAVES, FACTIONS, factionUnits } from './sim/data.js';
+import { UNITS, SENDS, WAVES, FACTIONS } from './sim/data.js';
 import { laneCenterX, kingPos } from './sim/layout.js';
 import { MISSIONS, missionSetup, missionStars } from './sim/campaign.js';
+import { missionHook } from './sim/missions.js';
 import { modeCode } from './sim/modes.js';
 import { Progress } from './ui/progress.js';
+import { Profile } from './meta/profile.js';
 import * as THREE from 'three';
-import { HeroesView } from './render/heroesView.js';
-import { HeroPreview } from './render/heroPreview.js';
-import { HeroCamera, HERO_FOV } from './hero/camera.js';
-import { HeroControls } from './hero/controls.js';
-import { Swoop, rtsPose, SWOOP_DUR } from './hero/transition.js';
-import { CombatHud } from './hero/combatHud.js';
 
 const $ = (id) => document.getElementById(id);
 const BOT_NAMES = ['Aldric', 'Mira', 'Thorne', 'Kaela', 'Vex', 'Sorin', 'Lyra', 'Doran', 'Isolde', 'Ravik', 'Selka', 'Bram', 'Nyx', 'Corvin'];
 const VERSION = '0.1.0';
 const _sv = new THREE.Vector3();
-const HERO_SFX = { strike: 'sword', aoe_self: 'explosion', taunt: 'boss', cone: 'arrow', bolt: 'magic', heal_area: 'heal', revive: 'upgrade', heal_self: 'heal', dash: 'blunt', leap: 'explosion', leap_back: 'jump', blink: 'magic', mark: 'magic', dot: 'sword', root_target: 'magic', shield: 'heal', aoe_ground: 'magic', pull: 'lightning', summon: 'build', turret: 'build', buff_self: 'upgrade', aura_vassals: 'upgrade', drain: 'magic' };
+// Lichtstimmung der Kampagnen-Missionen → Biome der Welt (environment.setBiome)
+const BIOME = { sky: 'sky', dusk: 'sky', forest: 'wild', ember: 'forge', desert: 'forge', void: 'abyss' };
+const PING_COLORS = ['#ffd27a', '#6fe3ff', '#74f0a6', '#ff7ac3', '#c8a2ff', '#ffb85a', '#9ad0ff', '#ff6878'];
 
 class App {
   constructor() {
@@ -40,16 +41,14 @@ class App {
     this.audio.applySettings = () => this.applyAudio();
     this.applyAudio();
     this.portraits = new Portraits(160);
-    this.heroPreview = new HeroPreview();
-    this.vmode = 'rts';          // rts | swoopIn | hero | swoopOut – Kamera-/Steuerungsmodus
-    this.deferred = [];          // Ereignisse, deren Darstellung auf den Treffer-Moment wartet
-    this.rtsFov = this.engine.camera.fov;
     this.progress = new Progress();
+    this.profile = new Profile();
     this.mode = 'boot';
     this.session = null;
     this.time = 0;
     this.mouse = { x: 0, y: 0, ground: null };
     this.placing = null;
+    this.targeting = null;       // Missions-Aktion, die einen Klick auf die Bahn erwartet (z. B. Leuchtkugel)
     this.selected = null;
     this.hover = null;
     this.lastCountdown = -1;
@@ -67,7 +66,7 @@ class App {
   async init() {
     $('loading').classList.add('show');
     await frame();
-    // M1 Grafik: echte CC0-Assets (PBR/HDRI) vorab laden; fehlen sie, nutzt die Welt prozedurale Texturen
+    // Echte CC0-Assets (PBR/HDRI) vorab laden; fehlen sie, nutzt die Welt prozedurale Texturen
     const envAssets = await loadEnvironmentAssets(this.engine.renderer);
     this.env = createEnvironment({
       scene: this.engine.scene, renderer: this.engine.renderer, quality: this.settings.get('quality'),
@@ -76,14 +75,7 @@ class App {
     this.view = new UnitsView(this.engine.scene);
     this.fx = new Fx(this.engine.scene, this.engine.camera, this.settings);
     this.overlay = new Overlay(this.engine.scene, this.engine.camera);
-    this.heroes = new HeroesView(this.engine.scene, this.fx, this.settings);
-    this.hcam = new HeroCamera(this.engine.camera, this.settings);
-    this.swoop = new Swoop({ camera: this.engine.camera, scene: this.engine.scene, engine: this.engine, audio: this.audio });
-    this.heroes.abilityFx.shake = (a, x, z) => {
-      const c = this.engine.camera.position;
-      const k = Math.max(0, 1 - Math.hypot(x - c.x, z - c.z) / 60);
-      if (this.vmode === 'hero') this.hcam.addShake(a * k); else if (!this.attract) this.cam.addShake(a * 0.5 * k);
-    };
+    this.objectives = new ObjectivesView(this.engine.scene);
     // Alle Modelle vorab erzeugen (kein Ruckeln beim ersten Auftauchen)
     this.view.warmup([...Object.values(UNITS), ...WAVES, ...SENDS]);
     this.engine.applySettings();
@@ -97,32 +89,23 @@ class App {
       onFocusLane: (pid) => this.focusLane(pid),
       onFocusKing: (t) => { const k = kingPos(t); this.cam.focus(k.x, k.z - 6, 55); },
       onPause: () => this.pause(),
+      onTargetAction: (a) => this.startTargeting(a),
     });
-    this.combat = new CombatHud({
-      settings: this.settings, audio: this.audio, portraits: this.portraits, heroPreview: this.heroPreview,
-      getSession: () => this.session, heroes: this.heroes, view: this.view,
-    });
-    this.controls = new HeroControls({
-      canvas: this.canvas, settings: this.settings, camera: this.engine.camera, hcam: this.hcam, heroes: this.heroes, view: this.view, audio: this.audio,
-      getSession: () => this.session,
-      onError: (m) => this.combat.error(m),
-      onMenu: () => this.pause(),
-      onFeedback: (k, d) => this.combat.feedback(k, d),
-    });
-    this.combat.controls = this.controls;
-    this.settings.onChange((k) => { if (k === 'keybinds') this.combat.refreshKeys(); });
+    this.chat = new NetChat({ audio: this.audio, send: ({ text, team }) => this.netSend({ t: 'chat', text, team }) });
     this.menus = new Menus({
-      settings: this.settings, audio: this.audio, portraits: this.portraits, progress: this.progress, heroPreview: this.heroPreview,
+      settings: this.settings, audio: this.audio, portraits: this.portraits, progress: this.progress, profile: this.profile,
       onStart: (cfg) => this.startGame(cfg),
       onStartMission: (m, opts) => this.startMission(m, opts),
       onResume: () => this.resume(),
       onSurrender: () => this.toMenu(),
-      onRematch: () => (this.mission ? this.startMission(this.mission, this.missionOpts) : this.startGame(this.lastConfig)),
+      onRematch: () => this.rematch(),
       onToMenu: () => this.toMenu(),
       onQuit: () => window.aetherfront && window.aetherfront.quit(),
       onApplyGraphics: () => { this.engine.applySettings(); this.env.setQuality && this.env.setQuality(this.settings.get('quality')); },
       onMultiplayerStart: (mp, start) => this.startOnline(mp, start),
+      onNetDisconnect: () => this.onNetDisconnect(),
     });
+    $('btn-netpause').addEventListener('click', () => { this.audio.ui('confirm'); this.netSend({ t: 'pause' }); this.resume(); });
     this.settings.onChange((k) => { if (k === 'quality') this.audio.setQuality(this.settings.get('quality') === 'low' ? 'low' : 'high'); });
     this.bindInput();
     this.startAttract();
@@ -151,11 +134,13 @@ class App {
     this.audio.setVolume('sfx', S.get('volSfx'));
     this.audio.setVolume('ui', S.get('volUi'));
   }
+  setBiome(id) { if (this.env.setBiome && this.env.biome !== id) this.env.setBiome(id); }
 
   // ---------- Sitzungen ----------
   startAttract() {
     const players = [];
     for (let i = 0; i < 8; i++) players.push({ name: BOT_NAMES[i], team: i % 2, faction: 'random', bot: true, difficulty: 'hard' });
+    this.setBiome('sky');
     this.setSession(new LocalSession({ seed: (Math.random() * 1e9) | 0, players }, -1));
     this.session.speed = 1.6;
     this.attract = true;
@@ -175,18 +160,16 @@ class App {
     this.session = s;
     this.view.clear();
     this.fx.clear();
-    this.heroes.clear();
-    this.combat.clear();
-    this.exitHeroMode(true);
-    this.deferred.length = 0;
-    this.selected = null; this.placing = null; this.hover = null;
+    this.objectives.clear();
+    this.selected = null; this.placing = null; this.hover = null; this.targeting = null;
     this.gameOverAt = null;
+    this.matchStats = { leaders: 0, quickLeaders: 0, upgrades: 0 };
   }
 
   buildSetup(cfg) {
     const n = cfg.teamSize;
     const names = BOT_NAMES.slice().sort(() => Math.random() - 0.5);
-    const players = [{ name: cfg.name, team: 0, faction: cfg.faction, bot: false, hero: cfg.hero || this.settings.get('hero') }];
+    const players = [{ name: cfg.name, team: 0, faction: cfg.faction, bot: false }];
     for (let i = 1; i < n * 2; i++) players.push({ name: names[i % names.length], team: i % 2, faction: 'random', bot: true, difficulty: i % 2 === 0 ? (cfg.allyDifficulty || 'normal') : cfg.difficulty });
     return { seed: (Math.random() * 1e9) | 0, players, rules: cfg.rules || {} };
   }
@@ -194,10 +177,11 @@ class App {
   startMission(m, opts) {
     this.mission = m;
     this.missionOpts = opts;
+    this.lastConfig = null;
     const setup = missionSetup(m, { name: this.settings.get('playerName') || 'Tiry', faction: opts.faction, difficulty: opts.difficulty, totalStars: this.progress.total });
-    setup.players[0].hero = this.settings.get('hero');
     const s = new LocalSession(setup, 0);
     s.speed = this.settings.get('gameSpeed') || 1;
+    this.setBiome(BIOME[m.biome] || 'sky');
     this.enterGame(s);
   }
 
@@ -206,18 +190,74 @@ class App {
     this.lastConfig = cfg;
     const s = new LocalSession(this.buildSetup(cfg), 0);
     s.speed = this.settings.get('gameSpeed') || 1;
+    this.setBiome('sky');
     this.enterGame(s);
   }
 
+  rematch() {
+    if (this.session && this.session.online) { this.toMenu(); this.menus.go('multi', true); return; }
+    if (this.mission) this.startMission(this.mission, this.missionOpts); else this.startGame(this.lastConfig);
+  }
+
   startOnline(mp, start) {
+    if (start.you < 0) { this.hud.toast('Zuschauer-Modus wird noch nicht unterstützt'); return; }
+    this.mp = mp;
+    this.reconnects = 0;
     const transport = {
       send: (o) => { if (mp.ws.readyState === 1) mp.ws.send(JSON.stringify(o)); },
       onMessage: (fn) => mp.handlers.push(fn),
       close: () => { try { mp.ws.close(); } catch { /* egal */ } },
     };
-    if (start.you < 0) { this.hud.toast('Zuschauer-Modus wird noch nicht unterstützt'); return; }
+    mp.handlers.push((m) => this.onNetMsg(m));
     this.mission = null;
+    this.lastConfig = null;
+    this.setBiome('sky');
     this.enterGame(new NetSession(transport, start));
+    if (start.rejoin) { this.hud.feed('Wieder verbunden – die Partie wird aufgeholt …', 'good'); $('netstat').classList.remove('show'); }
+  }
+  netSend(o) { const ws = this.mp && this.mp.ws; if (ws && ws.readyState === 1 && this.session && this.session.online) ws.send(JSON.stringify(o)); }
+
+  /** Online-Nachrichten außerhalb des Locksteps: Chat, Markierungen, Pause, Desync */
+  onNetMsg(m) {
+    if (this.mode !== 'game' || !this.session || !this.session.online) return;
+    const ns = $('netstat');
+    switch (m.t) {
+      case 'chat': this.chat.add({ from: m.from, text: m.text, team: m.team, system: m.from === 'System' }); break;
+      case 'mark': {
+        const p = this.session.sim.players[m.pid];
+        this.objectives.ping(m.x, m.z, PING_COLORS[(m.pid ?? 0) % PING_COLORS.length]);
+        this.audio.ui('open');
+        if (m.pid !== this.session.localPid) this.hud.feed(`${p ? p.name : m.from} setzt eine Markierung`, '');
+        break;
+      }
+      case 'pauseVote': this.hud.feed(`${m.by} möchte pausieren (${m.yes}/${m.need}) – Menü → „Pause beantragen“`, ''); break;
+      case 'paused':
+        ns.innerHTML = `<b>Pausiert</b><span>von ${m.by} · höchstens ${m.max} s</span><button class="btn small primary" id="btn-netresume">Fortsetzen</button>`;
+        ns.classList.add('show');
+        $('btn-netresume').addEventListener('click', () => { this.audio.ui('confirm'); this.netSend({ t: 'resume' }); });
+        this.audio.ui('open');
+        break;
+      case 'resumed': ns.classList.remove('show'); this.hud.feed(m.by ? `${m.by} setzt das Spiel fort` : 'Die Pause ist abgelaufen', 'good'); break;
+      case 'desync': this.hud.feed(`Abweichung zwischen den Spielern erkannt (Tick ${m.tick})`, 'bad'); break;
+      default: break;
+    }
+  }
+
+  /** Verbindung im Online-Spiel verloren → automatisch wiederverbinden (bis zu 5 Versuche) */
+  onNetDisconnect() {
+    if (this.mode !== 'game' || !this.session || !this.session.online || this.gameOverAt) return;
+    this.reconnects = (this.reconnects || 0) + 1;
+    const ns = $('netstat');
+    if (this.reconnects > 5) {
+      ns.classList.remove('show');
+      this.hud.toast('Verbindung verloren – zurück zum Hauptmenü');
+      this.toMenu();
+      return;
+    }
+    ns.innerHTML = `<b>Verbindung verloren</b><span>Wiederverbinden … (Versuch ${this.reconnects}/5)</span>`;
+    ns.classList.add('show');
+    clearTimeout(this.rejoinT);
+    this.rejoinT = setTimeout(() => this.menus.lobby.rejoinLast(), 1500 * this.reconnects);
   }
 
   enterGame(session) {
@@ -229,7 +269,8 @@ class App {
     this.overlay.setLane(me.team, me.slot);
     if (sim.rules.champions) this.view.warmup(sim.waves.map((w) => w.champ).filter(Boolean));
     this.hud.build(session);
-    this.combat.build(session);
+    this.chat.reset(!!session.online);
+    $('netstat').classList.remove('show');
     this.menus.inGame = true;
     this.mode = 'game';
     this.menus.go('hud');
@@ -247,7 +288,8 @@ class App {
       if (this.mission.tips) this.hud.feed(this.mission.tips[0], '');
     } else {
       this.hud.banner(`AETHERFRONT · ${modeCode(sim.rules)}`, `${facName} · Bahn ${me.slot + 1} · Team ${me.team === 0 ? 'West' : 'Ost'}`);
-      this.hud.feed('Setze Kämpfer mit Q W E R T auf dein leuchtendes Bauraster.', 'good');
+      this.hud.feed('Setze Kämpfer mit Q W E R A S D F auf dein leuchtendes Bauraster.', 'good');
+      if (session.online) this.hud.feed('↵ Chat · Alt + Klick Markierung · Strg + ↵ Bereit', '');
     }
   }
 
@@ -259,7 +301,8 @@ class App {
   pause() {
     if (this.mode !== 'game' || this.gameOverAt) return;
     if (!this.session.online) this.session.paused = true;
-    if (document.pointerLockElement) document.exitPointerLock?.();
+    $('btn-netpause').hidden = !this.session.online;
+    this.chat.close();
     this.menus.go('pause');
     this.audio.ui('open');
   }
@@ -269,8 +312,13 @@ class App {
   }
   toMenu() {
     const back = this.mission ? 'campaign' : 'menu';
+    if (this.session && this.session.online) this.menus.lobby.leaveGame();
+    clearTimeout(this.rejoinT);
+    this.mp = null;
     this.mission = null;
     this.menus.inGame = false;
+    this.chat.reset(false);
+    $('netstat').classList.remove('show');
     this.startAttract();
     this.mode = 'menu';
     this.menus.go('menu');
@@ -283,35 +331,63 @@ class App {
   // ---------- Eingabe ----------
   startPlacing(u) {
     if (this.session.sim.phase !== 'build') { this.hud.toast('Bauen nur in der Bauphase'); this.audio.ui('error'); return; }
+    this.targeting = null;
     this.placing = u;
     this.hud.setPlacing(u);
   }
   stopPlacing() { this.placing = null; this.hud.setPlacing(null); }
+  startTargeting(a) {
+    this.stopPlacing();
+    this.targeting = a;
+    this.hud.toast(`${a.label}: Klicke auf deine Bahn (Rechtsklick bricht ab)`);
+  }
+
+  /** Klick-Ziel einer Missions-Mechanik? (Funken, Käfige, Ventile, Dornenfürst …) */
+  missionClickable(e) {
+    const sim = this.session && this.session.sim;
+    return !!(sim && sim.mission && e && missionHook(sim, 'clickable', e));
+  }
 
   bindInput() {
     const c = this.canvas;
     c.addEventListener('mousemove', (e) => { this.mouse.x = e.clientX; this.mouse.y = e.clientY; });
-    c.addEventListener('contextmenu', (e) => { e.preventDefault(); if (this.mode !== 'game' || this.vmode !== 'rts') return; if (this.placing) this.stopPlacing(); else this.select(null); });
+    c.addEventListener('contextmenu', (e) => {
+      e.preventDefault();
+      if (this.mode !== 'game') return;
+      if (this.targeting) this.targeting = null;
+      else if (this.placing) this.stopPlacing(); else this.select(null);
+    });
     c.addEventListener('mousedown', (e) => {
-      if (this.mode !== 'game' || e.button !== 0 || this.vmode !== 'rts') return;
+      if (this.mode !== 'game' || e.button !== 0) return;
       const sim = this.session.sim;
+      const g = this.mouse.ground;
+      // Markierung (Ping): online für das eigene Team, offline nur für dich
+      if (e.altKey && g) {
+        if (this.session.online) this.netSend({ t: 'mark', x: Math.round(g.x * 10) / 10, z: Math.round(g.z * 10) / 10, kind: 'here' });
+        else { this.objectives.ping(g.x, g.z, PING_COLORS[0]); this.audio.ui('open'); }
+        return;
+      }
+      if (this.targeting) {
+        if (g) { this.session.submit({ ...this.targeting.cmd, x: Math.round(g.x * 10) / 10, z: Math.round(g.z * 10) / 10 }); this.audio.ui('confirm'); }
+        this.targeting = null;
+        return;
+      }
       if (this.placing) {
-        const cell = this.overlay.cellAt(this.mouse.ground);
+        const cell = this.overlay.cellAt(g);
         if (cell) {
           this.session.submit({ type: 'build', unit: this.placing.id, col: cell.col, row: cell.row });
           if (!e.shiftKey) this.stopPlacing();
         }
         return;
       }
-      this.select(this.hover ? sim.entities.get(this.hover) : null);
-      if (this.hover) this.audio.ui('click');
+      const ent = this.hover ? sim.entities.get(this.hover) : null;
+      if (ent && this.missionClickable(ent)) { this.session.submit({ type: 'mission', id: ent.id }); this.audio.ui('confirm'); return; }
+      this.select(ent && ent.type !== 'o' ? ent : null);
+      if (ent) this.audio.ui('click');
     });
     window.addEventListener('keydown', (e) => {
       if (this.mode !== 'game') return;
-      if (e.target.closest && e.target.closest('input')) return;
-      // Heldenblick: WoW-Steuerung hat Vorrang (Esc ohne Ziel öffnet das Menü)
-      if (this.vmode === 'hero' && this.menus.current === 'hud' && this.controls.onKeyDown(e)) return;
-      if (this.vmode !== 'rts' && this.menus.current === 'hud' && e.key !== 'Escape') { if (['Tab', ' '].includes(e.key)) e.preventDefault(); return; }
+      if (e.target.closest && e.target.closest('input, select, textarea')) return;
       const k = e.key.length === 1 ? e.key.toUpperCase() : e.key;
       const sim = this.session.sim;
       const me = this.me;
@@ -319,25 +395,36 @@ class App {
         if (this.menus.current === 'pause') { this.resume(); return; }
         if (this.menus.current === 'end') return;
         if (this.menus.current !== 'hud') { this.menus.back(); return; }
-        if (this.placing) this.stopPlacing(); else if (this.selected) this.select(null); else this.pause();
+        if (this.targeting) this.targeting = null;
+        else if (this.placing) this.stopPlacing(); else if (this.selected) this.select(null); else this.pause();
         return;
       }
       if (this.menus.current !== 'hud') return;
       if (k === 'Tab') { e.preventDefault(); this.hud.showScoreboard(true); return; }
-      const li = ['Q', 'W', 'E', 'R', 'T'].indexOf(k);
+      if (k === 'Enter') {
+        if (this.session.online && !e.ctrlKey) { e.preventDefault(); this.chat.open(); return; }
+        if (sim.phase === 'build') { this.session.submit({ type: 'ready' }); this.audio.ui('confirm'); }
+        return;
+      }
+      if (e.ctrlKey || e.metaKey || e.altKey) return;
+      const li = BUILD_KEYS.indexOf(k);
       if (li >= 0 && me.lines[li]) { this.startPlacing(UNITS[me.lines[li]]); return; }
       const s = SENDS.find((x) => x.hotkey === k);
       if (s) { this.session.submit({ type: 'send', send: s.id }); return; }
-      if (k === 'U' && this.selected && this.selected.type === 'f') this.session.submit({ type: 'upgrade', id: this.selected.id });
-      else if ((k === 'X' || k === 'Delete') && this.selected && this.selected.type === 'f') this.session.submit({ type: 'sell', id: this.selected.id });
+      const sel = this.selected && this.selected.type === 'f' && this.selected.owner === me.id ? this.selected : null;
+      const ui = UPGRADE_KEYS.indexOf(k);
+      if ((ui >= 0 || k === 'U') && sel) {
+        const ups = UNITS[sel.def].upgrades;
+        const to = ups[ui >= 0 ? ui : 0];
+        if (to) this.session.submit({ type: 'upgrade', id: sel.id, to }); else this.hud.toast(ui === 1 ? 'Nur ein Aufwertungs-Pfad' : 'Höchste Stufe erreicht');
+      } else if ((k === 'X' || k === 'Delete') && sel) this.session.submit({ type: 'sell', id: sel.id });
       else if (k === 'B') this.session.submit({ type: 'worker' });
       else if (k === 'H') this.session.submit({ type: 'heal' });
       else if (k === 'K') this.hud.toggleKingPanel();
-      else if (k === 'Enter') { if (sim.phase === 'build') { this.session.submit({ type: 'ready' }); this.audio.ui('confirm'); } }
       else if (k === ' ') { e.preventDefault(); this.focusLane(me.id); }
       else if (k === 'Home') { const kp = kingPos(me.team); this.cam.focus(kp.x, kp.z - 6, 55); }
     });
-    window.addEventListener('keyup', (e) => { if (e.key === 'Tab') { e.preventDefault(); if (this.vmode === 'rts') this.hud.showScoreboard(false); } });
+    window.addEventListener('keyup', (e) => { if (e.key === 'Tab') { e.preventDefault(); this.hud.showScoreboard(false); } });
   }
 
   select(ent) {
@@ -348,93 +435,47 @@ class App {
   pickHover() {
     const g = (this.mouse.ground = this.overlay.screenToGround(this.mouse.x, this.mouse.y));
     this.hover = null;
-    if (!g || this.placing) return;
-    let best = 1.6 * 1.6;
+    if (!g || this.placing || this.targeting) { this.canvas.style.cursor = this.targeting ? 'crosshair' : 'default'; this.objectives.setHover(null); return; }
+    let best = Infinity;
+    let click = false;
     for (const e of this.session.sim.entities.values()) {
       if (e.type === 'p' || !e.alive) continue;
-      const d = this.view.pos(e.id);
+      let d;
+      if (e.type === 'o') { if (!this.missionClickable(e)) continue; d = e; } else d = this.view.pos(e.id);
       if (!d) continue;
       const dd = (d.x - g.x) ** 2 + (d.z - g.z) ** 2;
-      if (dd < best) { best = dd; this.hover = e.id; }
+      if (dd < (e.type === 'o' ? 1.8 * 1.8 : 1.6 * 1.6) && dd < best) { best = dd; this.hover = e.id; click = e.type === 'o' || this.missionClickable(e); }
     }
-    this.canvas.style.cursor = this.hover ? 'pointer' : 'default';
+    this.objectives.setHover(this.hover);
+    this.canvas.style.cursor = this.hover ? (click ? 'cell' : 'pointer') : 'default';
   }
 
   // ---------- Ereignisse → Ton ----------
   sfxAt(name, x, z, vol = 1, pitch) {
-    // Hörer = Kamera (RTS: Blickpunkt am Boden, Heldenblick: Held), Panorama aus dem Kameraraum
-    let lx, lz, range;
-    if (this.vmode === 'rts') { const c = this.cam.cur; lx = c.x; lz = c.z; range = 30 + c.dist * 0.9; } else { const p = this.hcam.pose.look; lx = p.x; lz = p.z; range = 46; }
-    const d = Math.hypot(x - lx, z - lz);
+    // Hörer = Blickpunkt der Kamera am Boden, Panorama aus dem Kameraraum
+    const c = this.cam.cur;
+    const range = 30 + c.dist * 0.9;
+    const d = Math.hypot(x - c.x, z - c.z);
     if (d > range) return;
     const v = vol * (1 - d / range) * (this.attract ? 0.35 : 1);
     if (v < 0.03) return;
     _sv.set(x, 1, z).applyMatrix4(this.engine.camera.matrixWorldInverse);
     this.audio.sfx(name, { volume: v, pan: Math.max(-1, Math.min(1, _sv.x / 22)), pitch });
   }
-  entPos(id) { return this.view.pos(id) || this.heroes.posOf(id); }
 
   handleEvents(events) {
     const sim = this.session.sim;
-    for (const e of events) {
-      // Animationen sofort (Ausholen beginnt), Treffer-Darstellung ggf. im Einschlag-Moment
-      this.heroes.onEvent(e, sim);
-      this.controls.onEvent(e);
-      const d = this.heroes.presentDelay(e, sim);
-      if (d > 0.01) {
-        if (e.e === 'death') this.view.onEvent({ ...e, delay: d }, sim);
-        this.deferred.push({ t: d, e, skipView: e.e === 'death' });
-      } else this.present(e);
-      this.onSimEvent(e);
-    }
-    this.heroes.endBatch();
-  }
-
-  /** Verzögerte Ereignisse fällig? */
-  flushDeferred(dt) {
-    for (let i = this.deferred.length - 1; i >= 0; i--) {
-      const it = this.deferred[i];
-      it.t -= dt;
-      if (it.t <= 0) { this.deferred.splice(i, 1); this.present(it.e, it.skipView); }
-    }
-  }
-
-  /** Steuerungs-relevante Ereignisse (sofort): Modus-Wechsel Held ↔ Vogelperspektive */
-  onSimEvent(e) {
-    if (this.mode !== 'game') return;
-    const local = this.session.localPid;
-    switch (e.e) {
-      case 'waveStart': this.startSwoopIn(); break;
-      case 'waveEnd': if (this.vmode !== 'rts') this.startSwoopOut(); break;
-      case 'heroDeath': if (e.pid === local) this.onLocalHeroDeath(e); break;
-      case 'heroError': if (e.pid === local && this.vmode === 'hero') this.combat.error(e.reason); break;
-      case 'heroJump': { const h = this.session.sim.entities.get(e.id); if (h && h.owner === local) this.audio.sfx('jump', { volume: 0.5 }); break; }
-      default: break;
-    }
-  }
-
-  present(e, skipView = false) {
-    const sim = this.session.sim;
     const local = this.session.localPid;
     const inGame = this.mode === 'game';
-    {
-      if (!skipView) this.view.onEvent(e, sim);
+    for (const e of events) {
+      this.view.onEvent(e, sim);
       this.fx.onEvent(e, sim, this.view, local);
-      this.heroes.abilityFx.onEvent(e, sim, (id) => this.entPos(id));
-      if (inGame) { this.hud.onEvent(e); this.combat.onEvent(e); }
+      this.objectives.onEvent(e, sim);
+      if (inGame) this.hud.onEvent(e);
       switch (e.e) {
-        case 'heroAbility': {
-          const p = this.entPos(e.id) || e;
-          const name = HERO_SFX[e.type] || 'magic';
-          this.sfxAt(name, e.tx ?? p.x, e.tz ?? p.z, e.pid === local ? 1 : 0.6, e.ult ? 0.8 : 1);
-          if (['strike', 'aoe_self', 'leap', 'dash'].includes(e.type)) this.sfxAt('swing', p.x, p.z, 0.6);
-          break;
-        }
         case 'attack': {
-          const ent = sim.entities.get(e.id);
-          const d = ent && this.entPos(e.id);
+          const d = this.view.pos(e.id);
           if (!d) break;
-          if (ent.type === 'h' && e.melee) this.sfxAt('swing', d.x, d.z, 0.5);
           if (e.melee) this.sfxAt(e.atk === 'wucht' ? 'blunt' : 'sword', d.x, d.z, 0.55, 0.9 + Math.random() * 0.2);
           else this.sfxAt(e.kind === 'arrow' ? 'arrow' : e.kind === 'shell' || e.kind === 'bone' ? 'fire' : 'magic', d.x, d.z, 0.45, 0.9 + Math.random() * 0.2);
           break;
@@ -447,7 +488,7 @@ class App {
           if (e.boss) { this.cam.addShake(1); this.engine.hitFlash(0.25, 0xffc070); }
           break;
         case 'build': if (e.pid === local) this.audio.sfx('build'); break;
-        case 'upgrade': if (e.pid === local) this.audio.sfx('upgrade'); break;
+        case 'upgrade': if (e.pid === local) { this.audio.sfx('upgrade'); this.matchStats.upgrades++; } break;
         case 'sell': if (e.pid === local) this.audio.sfx('sell'); break;
         case 'gold': if (e.pid === local) this.audio.sfx('gold', { volume: 0.35 }); break;
         case 'send': if (e.pid === local || e.to === local) this.audio.sfx('send', { volume: e.pid === local ? 0.8 : 0.5 }); break;
@@ -456,6 +497,12 @@ class App {
         case 'king': if (sim.players[e.pid].team === this.me?.team && inGame) this.audio.sfx('upgrade', { volume: 0.6, pitch: 0.8 }); break;
         case 'kingHeal': if (inGame && e.team === this.me.team) this.audio.sfx('heal'); break;
         case 'leak': if (inGame && e.pid === local) this.audio.sfx('leak', { volume: 0.7 }); break;
+        case 'leaderDown': if (e.lane === local) { this.matchStats.leaders++; if (e.quick) this.matchStats.quickLeaders++; } break;
+        case 'objLit': if (inGame) { this.sfxAt('magic', e.x, e.z, 0.8); this.fx.shock(e.x, e.z, { r: 2.6, color: '#ffd27a', life: 0.6, intensity: 3 }); } break;
+        case 'objDone':
+          if (inGame && ['collected', 'freed', 'vented', 'shattered', 'saved', 'used'].includes(e.reason)) { this.sfxAt('upgrade', e.x, e.z, 0.7); this.fx.shock(e.x, e.z, { r: 2.4, color: '#6fe3ff', life: 0.5, intensity: 3 }); }
+          break;
+        case 'root': this.sfxAt('magic', e.x, e.z, 0.9); this.fx.shock(e.x, e.z, { r: 2, color: '#9cff6a', life: 0.8, intensity: 3 }); break;
         case 'kingHit':
           if (inGame && e.team === this.me.team) { this.engine.hitFlash(0.18); this.audio.sfx('king_hit', { volume: 0.6 }); }
           break;
@@ -463,7 +510,7 @@ class App {
           if (inGame) {
             this.audio.sfx(e.boss ? 'boss' : 'wave_start');
             this.audio.playMusic(e.boss ? 'boss' : 'battle');
-            if (this.vmode === 'rts') this.cam.addShake(0.4);
+            this.cam.addShake(0.4);
           }
           break;
         case 'waveEnd': if (inGame) { this.audio.sfx('wave_clear'); this.audio.playMusic('build'); } break;
@@ -473,11 +520,27 @@ class App {
     }
   }
 
+  /** Partie ins Meta-Profil einbuchen (Kampagne, Gefecht, Online, Endlos) */
+  recordProfile(win, stars) {
+    const sim = this.session.sim, me = this.me;
+    const m = this.mission;
+    if (m && win && m.id === MISSIONS.length) this.profile.d.campaignDone = true;
+    const clean = (sim.stats.leaksByWave || []).filter((l) => !l[me.id]).length;
+    const mode = m ? 'campaign' : this.session.online ? 'online' : sim.wave > sim.rules.maxWaves ? 'endless' : 'skirmish';
+    return this.profile.record({
+      win, wave: sim.wave, leaks: me.stats.leaks, sent: me.stats.sent, income: me.income, kills: me.stats.kills,
+      leaders: this.matchStats.leaders, quickLeaders: this.matchStats.quickLeaders, upgrades: this.matchStats.upgrades,
+      tier3: sim.fightersOf(me.id).filter((f) => UNITS[f.def].tier >= 3).length,
+      faction: me.faction, pickMode: sim.rules.pickMode, mode, online: !!this.session.online, cleanWaves: clean, stars,
+    });
+  }
+
   onGameOver(e) {
     const me = this.me;
-    if (this.vmode !== 'rts') this.exitHeroMode(false, true);
     const win = e.winner === me.team, draw = e.winner === -1;
     this.gameOverAt = performance.now();
+    this.targeting = null;
+    this.chat.close();
     this.audio.playMusic(win ? 'victory' : 'defeat');
     this.audio.sfx(win ? 'victory' : 'defeat');
     const loser = draw ? me.team : 1 - (e.winner);
@@ -486,6 +549,8 @@ class App {
     const m = this.mission;
     let stars = 0;
     if (m) { stars = missionStars(m, this.session.sim); if (stars) this.progress.record(m.id, stars); }
+    let meta = null;
+    try { meta = this.recordProfile(win, stars); } catch (err) { console.warn('Profil konnte nicht gespeichert werden', err); }
     setTimeout(() => {
       const sim = this.session.sim;
       $('end-title').textContent = m ? (win ? 'MISSION ERFÜLLT' : 'MISSION GESCHEITERT') : draw ? 'UNENTSCHIEDEN' : win ? 'SIEG' : 'NIEDERLAGE';
@@ -493,7 +558,8 @@ class App {
       $('end-sub').innerHTML = `${e.reason} · Welle ${sim.wave}${m && win ? `<div class="end-stars">${'★'.repeat(stars)}<i>${'★'.repeat(3 - stars)}</i></div>` : ''}`;
       const st = [[sim.wave, 'Welle'], [sim.armyValue(me.id).toLocaleString('de-DE'), 'Armeewert'], [me.stats.kills, 'Besiegt'], [me.stats.leaks, 'Durchbrüche'], [me.stats.sent, 'Söldner'], [me.income, 'Einkommen']];
       $('end-stats').innerHTML = st.map(([v, l]) => `<div class="st"><b>${v}</b><small>${l}</small></div>`).join('');
-      $('btn-rematch').textContent = m ? 'Erneut versuchen' : 'Revanche';
+      $('end-meta').innerHTML = meta ? `<span class="em-xp"><b>+${meta.xp}</b> Erfahrung</span><span>Stufe <b>${meta.level}</b> · ${meta.title}</span>${meta.levelUps.length ? `<span class="em-up">Stufenaufstieg!</span>` : ''}${meta.masteryUp ? `<span class="em-up">Meisterschaft ${FACTIONS[me.faction]?.name || ''} Stufe ${meta.masteryUp}</span>` : ''}${meta.achievements.map((a) => `<span class="em-ach">Erfolg: ${a}</span>`).join('')}${meta.challenges.map((c) => `<span class="em-ach">Herausforderung: ${c}</span>`).join('')}` : '';
+      $('btn-rematch').textContent = this.session.online ? 'Zur Lobby' : m ? 'Erneut versuchen' : 'Revanche';
       const next = m && win && MISSIONS.find((x) => x.id === m.id + 1);
       let nb = $('btn-next');
       if (!nb) { nb = document.createElement('button'); nb.id = 'btn-next'; nb.className = 'btn big primary'; $('btn-rematch').before(nb); nb.addEventListener('click', () => { this.audio.ui('confirm'); const n = MISSIONS.find((x) => x.id === this.mission.id + 1); this.settings.set('campMission', n.id); this.startMission(n, this.missionOpts); }); }
@@ -503,96 +569,6 @@ class App {
       $('btn-tomenu').textContent = m ? 'Zur Kampagne' : 'Hauptmenü';
       this.menus.go('end');
     }, 2800);
-  }
-
-  // ---------- Heldenblick ↔ Vogelperspektive ----------
-  swoopMode() {
-    const reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    const m = this.settings.get('swoop') || 'normal';
-    return reduce ? 'off' : SWOOP_DUR[m] != null ? m : 'normal';
-  }
-  /** Überblenden statt Kamerafahrt: Bild abdunkeln, schneiden, aufhellen */
-  crossfade(cut, done) {
-    const x = $('xfade');
-    x.classList.add('on');
-    setTimeout(() => { cut(); requestAnimationFrame(() => { x.classList.remove('on'); done && done(); }); }, 300);
-  }
-  startSwoopIn() {
-    const s = this.session, sim = s.sim;
-    const h = sim.heroOf(s.localPid);
-    if (!h || !h.alive || !sim.rules.heroes || this.vmode === 'hero' || this.vmode === 'swoopIn') return;
-    this.stopPlacing(); this.select(null); this.hud.showScoreboard(false); this.hud.toggleKingPanel(false);
-    this.swoop.cancel();
-    this.vmode = 'swoopIn';
-    this.cam.enabled = false;
-    this.hcam.reset(h.face);
-    this.hcam.stopSpectate();
-    this.combat.build(s);
-    document.body.classList.add('hero-view');
-    const lx = sim.laneX(s.localPid);
-    const cam = this.engine.camera;
-    const to = () => { const p = this.hcam.targetPose(h.x, h.y || 0, h.z, lx, h.face); return { pos: p.pos, look: p.look, fov: HERO_FOV }; };
-    const finish = () => { this.vmode = 'hero'; this.controls.enable(); this.combat.show(true); this.hcam.fov = HERO_FOV; };
-    const mode = this.swoopMode();
-    if (mode === 'off') {
-      this.crossfade(() => { const e = to(); cam.position.copy(e.pos); cam.lookAt(e.look); cam.fov = HERO_FOV; cam.updateProjectionMatrix(); finish(); });
-      return;
-    }
-    const dur = Math.min(SWOOP_DUR[mode], Math.max(0.6, sim.freeze / (s.speed || 1)));
-    const look = new THREE.Vector3(this.cam.cur.x, 0, this.cam.cur.z - 2);
-    this.swoop.start({ kind: 'in', from: { pos: cam.position.clone(), look, fov: cam.fov }, to, dur,
-      onProgress: (x) => { if (x > 0.55 && !this.combat.visible) this.combat.show(true); },
-      onDone: finish });
-  }
-  /** Zurück in die Vogelperspektive (Wellenende oder Heldentod) */
-  startSwoopOut() {
-    const s = this.session, me = this.me;
-    if (!s || this.vmode === 'rts' || this.vmode === 'swoopOut') return;
-    this.controls.disable();
-    this.combat.show(false);
-    this.hcam.stopSpectate();
-    this.swoop.cancel();
-    this.vmode = 'swoopOut';
-    const lx = laneCenterX(me.team, me.slot);
-    this.cam.focus(lx, 4, 58, { instant: true, yaw: 0, pitch: 0.98 });
-    const end = rtsPose(this.cam.cur);
-    const cam = this.engine.camera;
-    const finish = () => { this.vmode = 'rts'; this.cam.enabled = true; document.body.classList.remove('hero-view'); cam.fov = this.rtsFov; cam.updateProjectionMatrix(); };
-    const mode = this.swoopMode();
-    if (mode === 'off') { this.crossfade(finish); return; }
-    const look = this.hcam.pose.look.clone();
-    this.swoop.start({ kind: 'out', from: { pos: cam.position.clone(), look, fov: cam.fov }, to: () => ({ pos: end.pos, look: end.look, fov: this.rtsFov }), dur: SWOOP_DUR[mode] * (mode === 'normal' ? 0.9 : 1),
-      onProgress: (x) => { if (x > 0.45) document.body.classList.remove('hero-view'); },
-      onDone: finish });
-  }
-  /** Eigener Held gefallen: kurzer Zuschauerblick, dann Schwenk in die Vogelperspektive (Vasallen kämpfen weiter) */
-  onLocalHeroDeath(e) {
-    if (this.vmode !== 'hero') return;
-    this.controls.disable();
-    this.combat.show(false);
-    this.vmode = 'dead';
-    this.hcam.startSpectate(e.x, e.z);
-    this.audio.sfx('defeat', { volume: 0.35 });
-    this.hud.banner('DEIN HELD IST GEFALLEN', 'Deine Vasallen kämpfen allein weiter', true);
-    this.hud.feed('Dein Held ist gefallen – deine Vasallen kämpfen allein weiter. Er kehrt zur nächsten Bauphase zurück.', 'bad');
-    clearTimeout(this.deathT);
-    this.deathT = setTimeout(() => { if (this.vmode === 'dead') this.startSwoopOut(); }, 1700);
-  }
-  /** Heldenmodus sofort beenden (Sitzungswechsel / Spielende) */
-  exitHeroMode(instant, fade = false) {
-    clearTimeout(this.deathT);
-    this.swoop?.cancel();
-    this.controls?.disable();
-    this.combat?.show(false);
-    this.hcam?.stopSpectate();
-    document.body.classList.remove('hero-view');
-    const was = this.vmode;
-    this.vmode = 'rts';
-    if (this.cam) this.cam.enabled = !this.attract;
-    const cam = this.engine.camera;
-    if (cam.fov !== this.rtsFov) { cam.fov = this.rtsFov; cam.updateProjectionMatrix(); }
-    cam.up.set(0, 1, 0);
-    if (fade && was !== 'rts' && !instant) this.crossfade(() => {});
   }
 
   // ---------- Hauptschleife ----------
@@ -605,20 +581,8 @@ class App {
       if (this.mode === 'game' && !s.online) s.speed = this.settings.get('gameSpeed') || 1;
       const events = s.update(dt);
       this.handleEvents(events);
-      this.flushDeferred(dt);
       const sim = s.sim;
-      let pose = null;
-      if (this.mode === 'game' && this.vmode !== 'rts') {
-        if (this.vmode === 'hero') pose = this.controls.update(dt);
-        this.overlay.update(dt, { showGrid: false });
-        if (this.placing) this.stopPlacing();
-        if (sim.phase === 'battle') {
-          let n = 0; for (const e of sim.entities.values()) if (e.type === 'c' && (e.lane === this.me.id || e.stage === 'king')) n++;
-          const k = sim.teams[this.me.team].king;
-          this.audio.setIntensity(Math.min(1, n / 14 + (1 - k.hp / k.maxHp) * 0.6));
-        }
-        this.hud.update(dt);
-      } else if (this.mode === 'game') {
+      if (this.mode === 'game') {
         this.pickHover();
         if (this.placing && sim.phase !== 'build') this.stopPlacing();
         const occupied = new Set();
@@ -652,17 +616,9 @@ class App {
           this.restartTimer = setTimeout(() => { this.restartTimer = null; if (this.attract) this.startAttract(); }, 6000);
         }
       }
-      this.view.update(sim, dt, { selectedId: this.selected?.id, hoverId: this.hover, localPid: s.localPid, hideCreepBars: this.vmode === 'hero' });
-      // Kamera: Vogelperspektive, Windzug-Schwenk oder Heldenblick
-      if (this.swoop.running) this.swoop.update(dt);
-      else if (this.vmode === 'hero' || this.vmode === 'dead') {
-        const h = sim.heroOf(s.localPid);
-        const P = pose || (h ? { x: h.x, y: h.y || 0, z: h.z } : null);
-        if (P) this.hcam.update(dt, P.x, P.y, P.z, sim.laneX(s.localPid), this.time);
-      } else this.cam.update(dt, this.time);
-      this.engine.camera.updateMatrixWorld(); // Projektion der Plaketten mit der Kamera dieses Bildes
-      this.heroes.update(sim, dt, { localPid: this.attract ? -1 : s.localPid, local: pose, plates: this.mode === 'game', camera: this.engine.camera, heroMode: this.vmode === 'hero' || this.vmode === 'swoopIn' });
-      if (this.mode === 'game') this.combat.update(dt, { camera: this.engine.camera, camYaw: this.vmode === 'hero' ? this.hcam.yaw : null });
+      this.view.update(sim, dt, { selectedId: this.selected?.id, hoverId: this.hover, localPid: s.localPid });
+      this.objectives.update(sim, dt, this.mode === 'game' ? (e) => this.missionClickable(e) : null);
+      this.cam.update(dt, this.time);
       this.fx.update(sim, dt);
     } else this.cam.update(dt, this.time);
     this.env.update(dt, this.time);

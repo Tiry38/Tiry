@@ -2,27 +2,25 @@
  "cell": 0.007,
  "report": [
   {
-   "id": "hero_varo",
-   "hiTris": 465454,
+   "id": "unit_knight",
+   "hiTris": 232990,
    "lods": [
-    36031,
-    11036,
-    3630
+    5199,
+    1600
    ],
    "verts": [
-    13889,
-    3459,
-    1246
+    2303,
+    695
    ],
    "ms": {
-    "sculpt": 12,
-    "mesh": 3843,
-    "decimate": 17537,
-    "bake": 3030,
-    "total": 25080
+    "sculpt": 6,
+    "mesh": 2071,
+    "decimate": 6165,
+    "bake": 531,
+    "total": 9012
    },
-   "bytes": 1005412
+   "bytes": 208636
   }
  ],
- "totalBytes": 11680491
+ "totalBytes": 11679064
 }

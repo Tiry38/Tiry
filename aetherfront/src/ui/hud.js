@@ -1,7 +1,13 @@
 // Spiel-Oberfläche (HUD): Ressourcen, Phase/Timer, Könige, Kommando-Konsole (Kämpfer, Söldner, Wirtschaft),
-// Auswahlkarte, Königshalle, Punktetafel, Meldungen, Banner, Tooltips.
+// Auswahlkarte (mit beiden Aufwertungs-Pfaden), Königshalle, Punktetafel, Missionsziel mit Aktionen, Meldungen,
+// Banner, Tooltips.
 import { UNITS, SENDS, KING, ECON, FACTIONS, ATTACK_TYPES, ARMOR_TYPES, kingUpgradeCost } from '../sim/data.js';
+import { missionHook } from '../sim/missions.js';
 import { I, stat } from './icons.js';
+
+/** Bau-Tasten der 8 Kämpferlinien (Q W E R / A S D F) und Aufwertungs-Tasten der zwei Pfade */
+export const BUILD_KEYS = ['Q', 'W', 'E', 'R', 'A', 'S', 'D', 'F'];
+export const UPGRADE_KEYS = ['C', 'V'];
 
 const $ = (id) => document.getElementById(id);
 const h = (tag, cls, html) => { const e = document.createElement(tag); if (cls) e.className = cls; if (html != null) e.innerHTML = html; return e; };
@@ -37,7 +43,8 @@ function statGrid(def, hpHtml) {
 }
 
 export class Hud {
-  constructor({ portraits, submit, onPlace, onSelect, onFocusLane, onFocusKing, onPause, audio, settings }) {
+  constructor({ portraits, submit, onPlace, onSelect, onFocusLane, onFocusKing, onPause, onTargetAction, audio, settings }) {
+    this.onTargetAction = onTargetAction || (() => {});
     this.portraits = portraits;
     this.submit = submit;
     this.onPlace = onPlace;
@@ -64,6 +71,7 @@ export class Hud {
   }
 
   build(session) {
+    this.tip(null);
     this.session = session;
     const sim = session.sim;
     const me = sim.players[session.localPid];
@@ -134,7 +142,7 @@ export class Hud {
     this.buildCards = me.lines.map((id, i) => {
       const u = UNITS[id];
       const g = FACTIONS[u.faction].grad;
-      const hk = ['Q', 'W', 'E', 'R', 'T'][i];
+      const hk = BUILD_KEYS[i] || '';
       const c = h('div', 'slot build', `<img src="${this.unitPortrait(u)}" alt=""/><span class="need"></span><span class="shine"></span><span class="hk">${hk}</span><span class="cost g">${I.gold}<b>${u.cost}</b></span>`);
       c.style.setProperty('--sc', `${g[0]}66`);
       c.addEventListener('click', () => { this.audio.ui('click'); this.onPlace(u); });
@@ -202,6 +210,8 @@ export class Hud {
     $('feed').innerHTML = '';
     const ob = $('objective');
     ob.classList.toggle('show', !!this.camp);
+    ob.innerHTML = '<div class="obj-goal" id="obj-goal"></div><div class="obj-text" id="obj-text"></div><div class="obj-actions" id="obj-actions"></div>';
+    this.last.objActs = null;
     this.setSelected(null);
     this.refresh(true);
   }
@@ -232,12 +242,11 @@ export class Hud {
     return '<h5>Armeewert</h5>Gesamtwert deiner Kämpfer inklusive Aufwertungen.';
   }
   unitTip(u, hk) {
-    const chain = [u];
-    while (chain[chain.length - 1].upgradeTo) chain.push(UNITS[chain[chain.length - 1].upgradeTo]);
+    const paths = u.upgrades.map((id) => { const a = UNITS[id]; const b = a.upgradeTo && UNITS[a.upgradeTo]; return `<b>${a.name}</b>${b ? ` → ${b.name}` : ''}`; });
     return `<h5>${u.name} <span class="muted">${u.roleLabel}</span></h5>` + statGrid(u) +
       `${abilityText(u.abil).map((a) => `<div class="abil">${a}</div>`).join('')}` +
       `<div class="tt-cost">${stat('gold', `<b class="g">${u.cost}</b> Gold`)}${hk ? `<span class="stat"><span class="key">${hk}</span> bauen</span>` : ''}</div>` +
-      `<div class="tt-foot">Aufwertung: <b>${chain.map((c) => c.name).join(' → ')}</b></div>`;
+      (paths.length ? `<div class="tt-foot">Aufwertung: ${paths.join(' · oder ')}</div>` : '');
   }
   sendTip(s) {
     const sim = this.session.sim;
@@ -286,17 +295,18 @@ export class Hud {
     const card = $('select-card');
     const isF = e.type === 'f';
     const def = isF ? UNITS[e.def] : e.def;
-    const key = `${isF ? e.def : def.id || def.n}|${Math.round(e.hp)}|${sim.phase}|${Math.floor(this.me.gold)}`;
+    const key = `${isF ? e.def : def.id || def.n}|${Math.round(e.hp)}|${sim.phase}|${Math.floor(this.me.gold)}|${isF && sim.mission ? this.missionActionsHtml('sel') : ''}`;
     if (!force && key === this.lastSelKey) return;
     this.lastSelKey = key;
     const own = isF && e.owner === this.me.id;
     const ally = isF && sim.players[e.owner].team === this.me.team;
     const por = isF ? this.unitPortrait(def) : this.portraits.get(`c|${def.key || def.id}`, def.model, def.palette, def.boss || def.champion ? 3 : 2);
-    const next = isF && def.upgradeTo ? UNITS[def.upgradeTo] : null;
+    const ups = isF ? def.upgrades.map((id) => UNITS[id]).filter((u) => u && u.tier <= sim.rules.maxTier) : [];
     const refund = isF ? (e.fresh ? def.value : Math.floor(def.value * ECON.sellRefund)) : 0;
     const build = sim.phase === 'build';
     const grad = isF ? FACTIONS[def.faction].grad : ['#ff5d70', '#ff5d70', '#ff5d70'];
     const hpPct = Math.max(0, Math.min(100, (e.hp / e.maxHp) * 100));
+    card.classList.toggle('paths', own && ups.length > 0);
     card.innerHTML = `<div class="por" style="--pc:${grad[0]}88"><img src="${por}" alt=""/></div><div class="info">
       <div class="nm">${def.name} ${isF ? `<span class="stars">${'★'.repeat(def.tier)}</span>` : ''}</div>
       <div class="sub">${isF ? `${FACTIONS[def.faction].name} · ${def.roleLabel} · Wert ${def.value}` : (e.isSend ? 'Söldner' : `${def.champion ? 'Champion · ' : ''}Welle ${def.n}`)}${isF && !own ? ` · ${escapeHtml(sim.players[e.owner].name)}` : ''}</div>
@@ -304,21 +314,62 @@ export class Hud {
       ${statGrid(def, `<b>${fmt(e.maxHp)}</b> Leben`)}
       ${isF ? abilityText(def.abil).map((a) => `<div class="abil">${a}</div>`).join('') : ''}
       ${own ? `<div class="sel-actions">
-        ${next ? `<button class="btn small primary" id="sel-up" ${!build || this.me.gold < next.cost ? 'disabled' : ''}>${I.up} Aufwerten ${next.cost} <span class="key">U</span></button>` : `<span class="maxed">${I.star} Höchste Stufe</span>`}
-        <button class="btn small" id="sel-sell" ${!build ? 'disabled' : ''}>Verkaufen +${refund} <span class="key">X</span></button></div>` : ''}
-    </div>`;
-    const up = card.querySelector('#sel-up');
-    if (up) {
-      up.addEventListener('click', () => { this.audio.ui('click'); this.submit({ type: 'upgrade', id: e.id }); });
-      up.addEventListener('mouseenter', () => this.tip(up, `<h5>Aufwerten → ${next.name}</h5>` + statGrid(next) + abilityText(next.abil).map((a) => `<div class="abil">${a}</div>`).join('') + `<div class="tt-cost">${stat('gold', `<b class="g">${next.cost}</b> Gold`)}<span class="stat"><span class="key">U</span></span></div>`));
-      up.addEventListener('mouseleave', () => this.tip(null));
-    }
+        ${ups.length ? '' : `<span class="maxed">${I.star} Höchste Stufe</span>`}
+        <button class="btn small" id="sel-sell" ${!build ? 'disabled' : ''}>Verkaufen +${refund} <span class="key">X</span></button>${this.missionActionsHtml('sel')}</div>` : ''}
+    </div>
+    ${own && ups.length ? `<div class="up-paths">${ups.map((n, i) => this.pathHtml(def, n, i, build)).join('')}</div>` : ''}`;
+    card.querySelectorAll('[data-up]').forEach((b) => {
+      const n = UNITS[b.dataset.up];
+      b.addEventListener('click', () => { this.audio.ui('click'); this.submit({ type: 'upgrade', id: e.id, to: n.id }); });
+      b.addEventListener('mouseenter', () => { this.audio.ui('hover'); this.tip(b, `<h5>${n.name} <span class="muted">${n.roleLabel} · Stufe ${n.tier}</span></h5>${statGrid(n)}${abilityText(n.abil).map((a) => `<div class="abil">${a}</div>`).join('')}${n.upgradeTo ? `<div class="tt-foot">Danach: <b>${UNITS[n.upgradeTo].name}</b></div>` : ''}`); });
+      b.addEventListener('mouseleave', () => this.tip(null));
+    });
+    this.bindMissionActions(card);
     const sell = card.querySelector('#sel-sell');
     if (sell) {
       sell.addEventListener('click', () => { this.audio.ui('click'); this.submit({ type: 'sell', id: e.id }); });
       sell.addEventListener('mouseenter', () => this.tip(sell, `<h5>Verkaufen</h5>Erstattet <b class="g">${refund} Gold</b>${e.fresh ? ' (volle Erstattung – in dieser Bauphase gebaut)' : ` (${Math.round(ECON.sellRefund * 100)} %)`}.<div class="tt-foot">Taste <span class="key">X</span> oder <span class="key">Entf</span></div>`));
       sell.addEventListener('mouseleave', () => this.tip(null));
     }
+  }
+
+  /** Eine Aufwertungs-Option: Porträt, Name, Kosten, Wertevergleich zum aktuellen Kämpfer */
+  pathHtml(cur, n, i, build) {
+    const dps = (d) => (d.dmg / d.cd) * (d.abil.multishot ? d.abil.multishot.targets * 0.6 + 0.4 : 1);
+    const cmp = (label, a, b, fmtV = (v) => fmt(v)) => {
+      const d = b - a;
+      return `<span class="cmp"><small>${label}</small><b>${fmtV(b)}</b>${Math.abs(d) > 1e-6 ? `<em class="${d > 0 ? 'up' : 'down'}">${d > 0 ? '+' : '−'}${fmtV(Math.abs(d))}</em>` : ''}</span>`;
+    };
+    const change = (a, b, names) => (a !== b ? `<span class="chg">${names[b].name}</span>` : '');
+    const poor = this.me.gold < n.cost;
+    const newAbil = abilityText(n.abil).filter((x) => !abilityText(cur.abil).includes(x));
+    return `<button class="up-path${poor ? ' poor' : ''}" data-up="${n.id}" ${!build ? 'disabled' : ''} style="--pc:${FACTIONS[n.faction].grad[i % 3]}">
+      <span class="up-key key">${UPGRADE_KEYS[i]}</span>
+      <span class="up-por"><img src="${this.unitPortrait(n)}" alt=""/></span>
+      <span class="up-body"><span class="up-name">${n.name}<span class="stars">${'★'.repeat(n.tier)}</span></span>
+        <span class="up-role">${n.roleLabel}${change(cur.atk, n.atk, ATTACK_TYPES)}${change(cur.armorType, n.armorType, ARMOR_TYPES)}</span>
+        <span class="up-cmp">${cmp('Leben', cur.hp, n.hp)}${cmp('Schaden/s', dps(cur), dps(n), (v) => v.toFixed(0))}${cmp('Rüstung', cur.armor, n.armor)}</span>
+        ${newAbil.length ? `<span class="up-abil">${newAbil.slice(0, 2).join(' · ')}</span>` : ''}</span>
+      <span class="up-cost">${I.gold}<b>${n.cost}</b></span></button>`;
+  }
+
+  /** Missions-Aktionen (Kampagne): Schaltflächen im Zielfenster bzw. auf der Auswahlkarte */
+  missionActions(where) {
+    const sim = this.session?.sim;
+    if (!sim || !sim.mission) return [];
+    const acts = missionHook(sim, 'actions', { selectedId: this.selected?.id }) || [];
+    return acts.filter((a) => (where === 'sel' ? a.id === 'oath' : a.id !== 'oath'));
+  }
+  missionActionsHtml(where) {
+    return this.missionActions(where).map((a) => `<button class="btn small ${a.target ? '' : 'primary'} obj-act" data-act="${a.id}" ${a.disabled ? 'disabled' : ''}>${a.target ? I.aim : I.diamond}${a.label}${a.cost ? ` <small>${a.cost}</small>` : ''}</button>`).join('');
+  }
+  bindMissionActions(root) {
+    root.querySelectorAll('[data-act]').forEach((b) => b.addEventListener('click', () => {
+      const a = this.missionActions(b.closest('.select-card') ? 'sel' : 'obj').find((x) => x.id === b.dataset.act);
+      if (!a || a.disabled) return;
+      this.audio.ui('click');
+      if (a.target === 'ground') this.onTargetAction(a); else this.submit(a.cmd);
+    }));
   }
 
   toast(msg) {
@@ -373,6 +424,10 @@ export class Hud {
       case 'kingHeal': if (e.team === me.team) this.feed(`König geheilt (+${fmt(e.amount)})`, 'good'); break;
       case 'kingHit': if (e.team === me.team) { const k = $(`king-${e.team}`); if (k && !k.classList.contains('hurt')) { k.classList.add('hurt'); setTimeout(() => k.classList.remove('hurt'), 450); } } break;
       case 'rage': this.feed('Die Gegner geraten in Raserei und stürmen zum König!', 'bad'); break;
+      case 'objective': this.feed(e.text, ''); break;
+      case 'leaderSpawn': if (e.lane === me.id) this.feed(`${e.boss ? 'Boss' : 'Anführer'}: <b>${escapeHtml(e.name)}</b> führt die Welle an${e.boss ? '' : ' – schnell besiegt gibt Bonusgold'}`, 'bad'); break;
+      case 'leaderCast': if (e.lane === me.id && e.wind > 0) this.feedOnce(`lc${e.id}${e.ability}`, `${escapeHtml(e.name)}${e.interruptible ? ' – mit Betäubung unterbrechen!' : ''}`, 'bad'); break;
+      case 'leaderDown': if (e.lane === me.id) this.feed(e.quick ? `Anführer schnell besiegt · +${e.bonus} Gold` : 'Anführer besiegt', 'good'); break;
       case 'sell': case 'upgrade': if (this.selected && this.selected.id === e.id) { const ent = sim.entities.get(e.id); this.setSelected(ent || null); this.onSelect(ent || null); } break;
       default: break;
     }
@@ -408,6 +463,8 @@ export class Hud {
 
   refresh() {
     const sim = this.session.sim;
+    // Tooltip, dessen Anker neu gezeichnet wurde (z. B. Auswahlkarte), schließen
+    if (this.tipFor && !this.tipFor.isConnected) this.tip(null);
     const me = this.me;
     const build = sim.phase === 'build';
     this.setValue('r-gold', me.gold);
@@ -494,14 +551,18 @@ export class Hud {
       ku.el.classList.toggle('off', !max && me.aether < cost);
     }
 
-    // Kampagnenziel
+    // Kampagnenziel + Missionsziel (Mechanik) + Missions-Aktionen
     if (this.camp) {
       const c = sim.teams[1].king;
       const left = sim.rules.maxWaves - sim.wave + (sim.phase === 'build' ? 1 : 0);
       const txt = this.camp.goal === 'siege'
         ? `${I.siege}<span>Ziel: Rissfeste zerstören · <b>${fmt(c.hp)}</b> Leben übrig · noch ${left} Welle${left === 1 ? '' : 'n'}</span>`
-        : `${I.hold}<span>Ziel: bis Welle ${sim.rules.maxWaves} halten · noch <b>${left}</b> Welle${left === 1 ? '' : 'n'} · Rissfeste ${Math.round((c.hp / c.maxHp) * 100)} %</span>`;
-      this.setHtml($('objective'), 'obj', txt);
+        : `${I.hold}<span>Ziel: bis Welle ${sim.rules.maxWaves} halten · noch <b>${left}</b> Welle${left === 1 ? '' : 'n'}</span>`;
+      this.setHtml($('obj-goal'), 'obj', txt);
+      const mt = sim.mission ? missionHook(sim, 'text') : '';
+      this.setHtml($('obj-text'), 'objText', mt ? `${I.flag}<span>${escapeHtml(mt)}</span>` : '');
+      const acts = this.missionActionsHtml('obj');
+      if (this.last.objActs !== acts) { this.last.objActs = acts; const box = $('obj-actions'); box.innerHTML = acts; this.bindMissionActions(box); }
     }
     // Bahnen
     for (const r of this.laneRows) {

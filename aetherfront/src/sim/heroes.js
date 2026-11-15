@@ -1,5 +1,5 @@
 // Helden: 6 Klassen (Tank, Heilerin, Jägerin, Magierin, Krieger, Schurke) mit je 5 Fähigkeiten (Tasten 1–5).
-// Alle Nicht-Heiler haben eine leichte Selbstheilung (heal_self) – schwächer als die Heilerin. Reine Daten – die Logik steckt in sim/hero.js.
+// Alle Nicht-Heiler haben eine leichte Selbstheilung (heal_self) – schwächer als die Heilerin. Reine Daten (Erzählfiguren der Kampagne, Modell-Schmiede) – nicht mehr spielbar.
 // Fähigkeits-Typen: strike, bolt, cone, aoe_self, aoe_ground, dash, blink, leap_back, buff_self, aura_vassals,
 // heal_area, shield, mark, dot, drain, summon, turret, taunt, revive, pull, root_target.
 // Werte skalieren mit Heldenstufe: dmg * (1 + 0.12*(lvl-1)), heal ebenso. Fähigkeit 5 wird ab Stufe 6 zur Ultimate (ult-Werte).

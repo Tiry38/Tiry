@@ -6,10 +6,11 @@ export const DEFAULTS = {
   volMaster: 0.8, volMusic: 0.55, volSfx: 0.8, volUi: 0.7, muted: false,
   camSpeed: 1, edgeScroll: true,
   gameSpeed: 1, playerName: 'Tiry', faction: 'random', teamSize: 4, difficulty: 'normal', allyDifficulty: 'normal',
-  pickMode: 'ap', champions: false, waves: 30, campDifficulty: 'normal', campFaction: 'orden', campMission: 1,
+  pickMode: 'ap', champions: false, waves: 30, gameMode: 'normal', endless: true, campDifficulty: 'normal', campFaction: 'orden', campMission: 1,
   serverUrl: 'ws://localhost:7710', fullscreen: false,
-  hero: 'kael', keybinds: {}, mouseSens: 1, invertY: false, heroCamDist: 5.5, swoop: 'normal',
 };
+// Einstellungen aus der Zeit der Heldensicht (entfernt) – beim Laden verwerfen
+const OBSOLETE = ['hero', 'keybinds', 'mouseSens', 'invertY', 'heroCamDist', 'swoop'];
 
 export class Settings {
   constructor() {
@@ -19,6 +20,7 @@ export class Settings {
       const saved = JSON.parse(localStorage.getItem(KEY) || '{}');
       // Ältere Speicherstände ohne Automatik-Flag: eine vom Standard abweichende Stufe war eine bewusste Wahl
       if (!('qualityAuto' in saved) && saved.quality && saved.quality !== DEFAULTS.quality) saved.qualityAuto = false;
+      for (const k of OBSOLETE) delete saved[k];
       Object.assign(this.v, saved);
     } catch { /* Standardwerte */ }
   }

@@ -10,6 +10,10 @@ import {
 } from './lib.js';
 import { longsword, towerShield, bladePrim, staff, longbow } from './weapons.js';
 import { crystalPrim } from './selene.js';
+import { parseForm, applyForm, humanAnchors } from './form.js';
+import { ARMY, quadAnchors } from './army.js';
+import { ARCH_STYLE } from '../roster.js';
+import { FACTIONS } from '../../../sim/data.js';
 
 const { abs, max, min, sin, cos, atan2, hypot, sqrt } = Math;
 const V = (x, y, z) => ({ x, y, z });
@@ -151,7 +155,7 @@ function simpleBoot(S, B0, col = '#2a1c14') { footShape(S, B0, { w: 1.12, o: { m
 // ---------------------------------------------------------------------------------------------
 const U = {};
 
-U.knight = { H: 2.07, budgets: [5200, 1600], build(S, P) {
+U.knight = { H: 2.07, budgets: [5200, 1600], build(S, P, F = { tier: 2, path: 'a' }) {
   const s = 1.06;
   const J = humanoid(s, { armR: [[0.3, 1.18, 0.12], [0.33, 1.06, 0.3]], armL: [[0.31, 1.2, 0.1], [0.33, 1.12, 0.28]] });
   J.weaponR = { pos: V(-0.33 * s, 1.06 * s, 0.32 * s), parent: 'handR' };
@@ -159,27 +163,28 @@ U.knight = { H: 2.07, budgets: [5200, 1600], build(S, P) {
   const { BL, BR } = humanBody(S, J, s, { base: { mat: 'mail', col: '#5a606a' }, torso: { mat: 'cloth', col: 'primary*0.6' } });
   plateTorso(S, BL, { col: 'metal', trim: 'secondary' });
   bothSides(S, BL, BR, (B0) => {
-    pauldron(S, B0, { r: 0.12, layers: 2, col: 'metal', trim: 'secondary', tilt: 0.5, th: 0.016 });
+    if (F.tier >= 2) pauldron(S, B0, { r: 0.12, layers: 2, col: 'metal', trim: 'secondary', tilt: 0.5, th: 0.016 });
     simpleBoot(S, B0, '#4a4e58'); simpleHand(S, B0, '#6a707a', 'steel');
     bracer(S, add(jp(B0.J, 'foreArmL'), [0, -0.03, 0]), add(jp(B0.J, 'handL'), [0, 0.02, 0]), 0.05, 0.044, { s, col: 'metal', region: 'armL', th: 0.016, rim: false });
   });
   skirt(S, BL, { top: 1.02 * s, bottom: 0.56 * s, r0: 0.19, r1: 0.24, col: 'primary', mat: 'cloth', folds: 8, fold: 0.008, th: 0.016, panels: [[0, 0.6], [PI, 0.6]] });
   belt(S, BL, { dy: 0.04, col: '#3b2618' });
-  helmet(S, BL, { col: 'metal', crest: 'primary' });
-  cape(S, BL, { top: 1.5 * s, bottom: 0.45 * s, r0: 0.18, r1: 0.36, arc: 1.0, col: 'primary', folds: 6, fold: 0.014, th: 0.016, chain: ['chest', 'spine', 'hips', 'hips'] });
+  helmet(S, BL, { col: 'metal', crest: F.tier >= 2 ? 'primary' : null });
+  if (F.tier >= 2) cape(S, BL, { top: 1.5 * s, bottom: 0.45 * s, r0: 0.18, r1: 0.36, arc: 1.0, col: 'primary', folds: 6, fold: 0.014, th: 0.016, chain: ['chest', 'spine', 'hips', 'hips'] });
   // Schwert + Rundschild
   const fr = frame(jp(J, 'weaponR'), [0.1, 0.25, 0.96], [0, 1, -0.2]);
-  S.prim(fr.o, bladePrim({ y0: 0.06, L: 0.82, w: 0.07, th: 0.018 }), { rot: fr.basis, mat: 'steel', col: '#b8c0c8', bone: 'weaponR' });
+  S.prim(fr.o, bladePrim({ y0: 0.06, L: [0.72, 0.92, 1.1][F.tier - 1], w: 0.07 + 0.012 * F.tier, th: 0.02 }), { rot: fr.basis, mat: 'steel', col: '#b8c0c8', bone: 'weaponR' });
+  if (F.path === 'b' && F.tier > 1) { S.layer('glow'); S.capsule(fr.at(0, 0.15, 0.012), fr.at(0, [0.72, 0.92, 1.1][F.tier - 1] - 0.05, 0.012), 0.012, 0.004, { mat: 'glow', col: 'glow', glow: 3.2, bone: 'weaponR' }); S.layer('body'); }
   S.capsule(fr.at(-0.1, 0.04), fr.at(0.1, 0.04), 0.014, { mat: 'steel', col: 'secondary', bone: 'weaponR' });
   S.capsule(fr.at(0, 0.03), fr.at(0, -0.15), 0.017, { mat: 'leather', col: '#2a1a12', bone: 'weaponR' });
   const sf = frame(jp(J, 'weaponL'), [0, 1, 0], [1, 0, -0.35]);
   S.cylinder(sf.o, 0.27, 0.014, { rot: sf.rot(PI / 2, 0, 0), mat: 'paint', col: 'primary', bone: 'weaponL', r: 0.008 });
   S.torus(sf.o, 0.27, 0.018, { rot: sf.rot(PI / 2, 0, 0), ...steelA('metal'), bone: 'weaponL' });
   S.sphere(sf.at(0, 0, 0.02), 0.06, { ...steelA('secondary'), bone: 'weaponL', k: 0.01 });
-  return { skeleton: skeletonOf(J), radius: 0.6 };
+  return { J, skeleton: skeletonOf(J), radius: 0.6 };
 } };
 
-U.paladin_heavy = { H: 2.93, budgets: [6500, 2000], build(S, P) {
+U.paladin_heavy = { H: 2.93, budgets: [6500, 2000], build(S, P, F = { tier: 2, path: 'a' }) {
   const s = 1.45;
   const J = humanoid(s, { sw: 1.15, armR: [[0.3, 0.83, 0.05], [0.31, 0.78, 0.18]], armL: [[0.3, 0.84, 0.08], [0.31, 0.76, 0.24]] });
   J.weaponR = { pos: V(-0.31 * s, 0.78 * s, 0.2 * s), parent: 'handR' };
@@ -199,10 +204,10 @@ U.paladin_heavy = { H: 2.93, budgets: [6500, 2000], build(S, P) {
   const hf = frame(jp(J, 'weaponR'), [-0.15, 1, -0.5], [1, 0, 0]);
   S.capsule(hf.at(0, -0.2), hf.at(0, 0.95), 0.035, { mat: 'leather', col: '#3a2418', bone: 'weaponR' });
   S.box(hf.at(0, 1.0), [0.2, 0.11, 0.11], { rot: hf.basis, ...steelA('metal'), bone: 'weaponR', r: 0.03 });
-  return { skeleton: skeletonOf(J), radius: 0.8 };
+  return { J, skeleton: skeletonOf(J), radius: 0.8 };
 } };
 
-U.archer = { H: 2.19, budgets: [5000, 1500], build(S, P) {
+U.archer = { H: 2.19, budgets: [5000, 1500], build(S, P, F = { tier: 2, path: 'a' }) {
   const s = 1.04;
   const J = humanoid(s, { armL: [[0.3, 1.38, 0.24], [0.22, 1.38, 0.48]], armR: [[0.36, 1.4, -0.12], [0.06, 1.46, 0.06]] });
   J.weaponL = { pos: V(0.22 * s, 1.38 * s, 0.5 * s), parent: 'handL' };
@@ -210,7 +215,7 @@ U.archer = { H: 2.19, budgets: [5000, 1500], build(S, P) {
   bothSides(S, BL, BR, (B0) => { simpleBoot(S, B0); simpleHand(S, B0, '#3a2818'); bracer(S, add(jp(B0.J, 'foreArmL'), [0, 0, 0]), jp(B0.J, 'handL'), 0.046, 0.04, { s, mat: 'leather', col: '#4a3020', region: 'armL', th: 0.015, rim: false }); });
   skirt(S, BL, { top: 1.05 * s, bottom: 0.7 * s, r0: 0.18, r1: 0.23, col: 'primary', folds: 6, fold: 0.008, th: 0.016, slits: [0, PI] });
   belt(S, BL, { dy: 0.03, col: '#3b2618' });
-  cape(S, BL, { top: 1.52 * s, bottom: 0.55 * s, r0: 0.18, r1: 0.34, arc: 1.3, col: 'primary', folds: 6, fold: 0.014, th: 0.016, chain: ['chest', 'spine', 'hips', 'hips'] });
+  if (F.tier >= 2) cape(S, BL, { top: 1.52 * s, bottom: 0.55 * s, r0: 0.18, r1: 0.34, arc: 1.3, col: 'primary', folds: 6, fold: 0.014, th: 0.016, chain: ['chest', 'spine', 'hips', 'hips'] });
   // Kapuze (geschlossen, Gesicht im Schatten)
   const H = headInfo(BL);
   S.shell({ off: 0.012, th: 0.016, mat: 'cloth', col: 'primary', region: 'head', clip: (x, y, z) => -max(max(abs(x) - 0.06, y - H.c[1] - 0.05), -(z - H.c[2] - 0.04)) }, () => {
@@ -220,11 +225,12 @@ U.archer = { H: 2.19, budgets: [5000, 1500], build(S, P) {
   S.ellipsoid(H.at(0, -0.02, 0.0), [0.085, 0.1, 0.09], { mat: 'cloth', col: '#0c0a08', region: 'head' });
   S.sphere(add(jp(J, 'chest'), [0.0, 0.08, -0.18]), 0.06, { mat: 'leather', col: '#4a3020', bone: 'chest' });
   const fr = frame(jp(J, 'weaponL'), [0, 1, 0], [1, 0, 0]);
-  longbow(S, fr, { s: 1.0, bone: 'weaponL', wood: '#5a3a20', trim: 'metal', h: 0.62 });
-  return { skeleton: skeletonOf(J), radius: 0.55 };
+  longbow(S, fr, { s: [0.95, 1.1, 1.25][F.tier - 1], bone: 'weaponL', wood: F.path === 'b' && F.tier > 1 ? 'metal' : '#5a3a20', trim: 'metal', h: 0.62 });
+  if (F.path === 'b' && F.tier > 1) { S.layer('glow'); S.sphere(fr.at(0, 0, 0.05), 0.05 + 0.02 * F.tier, { mat: 'glow', col: 'glow', glow: 3.4, bone: 'weaponL' }); S.layer('body'); }
+  return { J, skeleton: skeletonOf(J), radius: 0.55 };
 } };
 
-U.priest = { H: 2.27, budgets: [4800, 1500], build(S, P) {
+U.priest = { H: 2.27, budgets: [4800, 1500], build(S, P, F = { tier: 2, path: 'a' }) {
   const s = 1.05;
   const J = humanoid(s, { armR: [[0.3, 1.22, 0.1], [0.3, 1.12, 0.26]], armL: [[0.3, 1.2, 0.12], [0.18, 1.18, 0.3]] });
   J.weaponR = { pos: V(-0.3 * s, 1.12 * s, 0.28 * s), parent: 'handR' };
@@ -243,10 +249,10 @@ U.priest = { H: 2.27, budgets: [4800, 1500], build(S, P) {
   const st = staff(S, fr, { s: 1.0, len: 1.55, below: 0.62, wood: '#8a6440', metal: 'metal', r: 0.02, bone: 'weaponR' });
   S.torus(fr.at(0, st.topY + 0.07), 0.07, 0.01, { rot: fr.rot(PI / 2, 0, 0), mat: 'gold', col: 'metal', bone: 'weaponR' });
   S.layer('glow'); S.sphere(fr.at(0, st.topY + 0.07), 0.035, { mat: 'glow', col: 'glow', glow: 2.4, bone: 'weaponR' }); S.layer('body');
-  return { skeleton: skeletonOf(J), radius: 0.55 };
+  return { J, skeleton: skeletonOf(J), radius: 0.55 };
 } };
 
-U.knightfallen = { H: 2.38, budgets: [5600, 1700], build(S, P) {
+U.knightfallen = { H: 2.38, budgets: [5600, 1700], build(S, P, F = { tier: 2, path: 'a' }) {
   const s = 1.2;
   const J = humanoid(s, { sw: 1.08, armR: [[0.3, 1.18, 0.14], [0.32, 1.06, 0.32]], armL: [[0.32, 1.18, 0.0], [0.34, 0.98, 0.06]] });
   J.weaponR = { pos: V(-0.32 * s, 1.06 * s, 0.34 * s), parent: 'handR' };
@@ -267,10 +273,10 @@ U.knightfallen = { H: 2.38, budgets: [5600, 1700], build(S, P) {
   S.prim(fr.o, bladePrim({ y0: 0.07, L: 1.05, w: 0.1, th: 0.022, leaf: 0.2 }), { rot: fr.basis, mat: 'iron', col: '#3a3a44', bone: 'weaponR' });
   S.capsule(fr.at(-0.13, 0.05), fr.at(0.13, 0.05), 0.018, { mat: 'iron', col: '#2a2a30', bone: 'weaponR' });
   S.layer('glow'); S.capsule(fr.at(0, 0.15, 0.011), fr.at(0, 0.9, 0.011), 0.005, { mat: 'glow', col: 'glow', glow: 2.6, bone: 'weaponR' }); S.layer('body');
-  return { skeleton: skeletonOf(J), radius: 0.67 };
+  return { J, skeleton: skeletonOf(J), radius: 0.67 };
 } };
 
-U.automaton = { H: 2.15, budgets: [5000, 1500], build(S, P) {
+U.automaton = { H: 2.15, budgets: [5000, 1500], build(S, P, F = { tier: 2, path: 'a' }) {
   const s = 1.08;
   const J = humanoid(s, { sw: 1.1, armR: [[0.32, 1.12, 0.1], [0.34, 0.95, 0.3]], armL: [[0.32, 1.12, 0.08], [0.34, 0.95, 0.26]], stance: 0.05 });
   const A = { mat: 'paint', col: 'primary', wear: 1 }, M = { mat: 'brass', col: 'secondary', wear: 1 };
@@ -304,12 +310,12 @@ U.automaton = { H: 2.15, budgets: [5000, 1500], build(S, P) {
   S.cylinder(add(jp(J, 'chest'), [0, 0.05, 0.19]), 0.07, 0.006, { rot: [PI / 2, 0, 0], mat: 'glow', col: 'glow', glow: 2.6, region: 'torso' });
   S.box(add(jp(J, 'head'), [0, 0.11, 0.098]), [0.06, 0.007, 0.006], { mat: 'glow', col: 'glow', glow: 3, region: 'head' });
   S.layer('body');
-  return { skeleton: skeletonOf(J), radius: 0.62 };
+  return { J, skeleton: skeletonOf(J), radius: 0.62 };
 } };
 
 function rotTo(d) { const y = norm(d); let x = norm(sub([1, 0, 0], scl(y, y[0]))); if (!isFinite(x[0])) x = [0, 0, 1]; const z = [x[1] * y[2] - x[2] * y[1], x[2] * y[0] - x[0] * y[2], x[0] * y[1] - x[1] * y[0]]; return { x, y, z }; }
 
-U.brute = { H: 2.43, budgets: [5200, 1600], build(S, P) {
+U.brute = { H: 2.43, budgets: [5200, 1600], build(S, P, F = { tier: 2, path: 'a' }) {
   const s = 1.2;
   const J = humanoid(s, { sw: 1.3, armR: [[0.36, 1.05, 0.12], [0.38, 0.8, 0.28]], armL: [[0.38, 1.05, 0.06], [0.4, 0.82, 0.16]], stance: 0.06 });
   J.weaponR = { pos: V(-0.38 * s, 0.8 * s, 0.3 * s), parent: 'handR' };
@@ -327,10 +333,10 @@ U.brute = { H: 2.43, budgets: [5200, 1600], build(S, P) {
   const fr = frame(jp(J, 'weaponR'), [-0.1, -0.2, 1], [0, 1, 0]);
   S.capsule(fr.at(0, -0.1), fr.at(0, 0.6), 0.035, 0.08, { mat: 'wood', col: '#5a4028', bone: 'weaponR', disp: Detail.noise({ amp: 0.008, freq: 14 }) });
   for (let i = 0; i < 5; i++) { const a = i * 1.3; S.capsule(fr.at(cos(a) * 0.07, 0.45 + i * 0.03, sin(a) * 0.07), fr.at(cos(a) * 0.13, 0.47 + i * 0.03, sin(a) * 0.13), 0.014, 0.002, { mat: 'iron', col: '#5a5a60', bone: 'weaponR' }); }
-  return { skeleton: skeletonOf(J), radius: 0.92 };
+  return { J, skeleton: skeletonOf(J), radius: 0.92 };
 } };
 
-U.golem = { H: 2.19, budgets: [4200, 1400], build(S, P) {
+U.golem = { H: 2.19, budgets: [4200, 1400], build(S, P, F = { tier: 2, path: 'a' }) {
   const s = 1.05;
   const J = humanoid(s, { sw: 1.4, armR: [[0.42, 1.0, 0.06], [0.44, 0.7, 0.12]], armL: [[0.42, 1.0, 0.06], [0.44, 0.7, 0.12]], stance: 0.08 });
   const stone = { mat: 'stone', col: 'primary', disp: Detail.noise({ amp: 0.012, freq: 9, ridged: true }) };
@@ -355,10 +361,10 @@ U.golem = { H: 2.19, budgets: [4200, 1400], build(S, P) {
   S.capsule(add(jp(J, 'chest'), [0.05, -0.05, 0.24]), add(jp(J, 'chest'), [0.14, 0.1, 0.22]), 0.012, { mat: 'glow', col: 'glow', glow: 2.6, region: 'torso' });
   for (const sx of [1, -1]) S.sphere(add(jp(J, 'head'), [sx * 0.045, 0.08, 0.165]), 0.018, { mat: 'glow', col: 'glow', glow: 3.2, region: 'head' });
   S.layer('body');
-  return { skeleton: skeletonOf(J), radius: 0.75 };
+  return { J, skeleton: skeletonOf(J), radius: 0.75 };
 } };
 
-U.shade = { H: 1.87, budgets: [4200, 1300], torsoW: 0.6, build(S, P) {
+U.shade = { H: 1.87, budgets: [4200, 1300], torsoW: 0.6, build(S, P, F = { tier: 2, path: 'a' }) {
   const s = 1.0;
   const J = humanoid(s, { armR: [[0.36, 1.2, 0.2], [0.42, 1.12, 0.34]], armL: [[0.36, 1.2, 0.2], [0.42, 1.12, 0.34]] });
   const BL = fakeB(J, s), BR = fakeB(J, s, true);
@@ -383,10 +389,10 @@ U.shade = { H: 1.87, budgets: [4200, 1300], torsoW: 0.6, build(S, P) {
   for (const sx of [1, -1]) S.sphere(H.at(sx * 0.035, 0.0, 0.09), 0.014, { mat: 'glow', col: 'glow', glow: 4, region: 'head' });
   S.sphere([0, 1.25, 0.2], 0.05, { mat: 'glow', col: 'glow', glow: 2.4, region: 'torso' });
   S.layer('body');
-  return { skeleton: skeletonOf(J), radius: 0.6 };
+  return { J, skeleton: skeletonOf(J), radius: 0.6 };
 } };
 
-U.treant = { H: 2.79, budgets: [5600, 1700], build(S, P) {
+U.treant = { H: 2.79, budgets: [5600, 1700], build(S, P, F = { tier: 2, path: 'a' }) {
   const s = 1.3;
   const J = humanoid(s, { sw: 1.3, armR: [[0.42, 1.0, 0.1], [0.48, 0.72, 0.18]], armL: [[0.42, 1.0, 0.08], [0.48, 0.72, 0.16]], stance: 0.08 });
   const bark = { mat: 'bark', col: 'secondary', disp: Detail.bark({ amp: 0.014, n: 16, freq: 8 }) };
@@ -411,7 +417,7 @@ U.treant = { H: 2.79, budgets: [5600, 1700], build(S, P) {
   S.layer('glow');
   for (const sx of [1, -1]) S.sphere(add(jp(J, 'head'), [sx * 0.05, 0.12, 0.17]), 0.018, { mat: 'glow', col: 'glow', glow: 3, region: 'head' });
   S.layer('body');
-  return { skeleton: skeletonOf(J), radius: 0.86 };
+  return { J, skeleton: skeletonOf(J), radius: 0.86 };
 } };
 
 // ---- Vierbeiner ----
@@ -479,15 +485,15 @@ function canine(S, J, o = {}) {
   for (const sx of [1, -1]) S.capsule(add(h, [sx * 0.03, -0.075, 0.2]), add(h, [sx * 0.03, -0.1, 0.21]), 0.008, 0.002, { mat: 'bone', col: '#e8e0c8', region: ['head'] });
 }
 
-U.wolf = { H: 1.42, budgets: [4200, 1300], build(S, P) {
+U.wolf = { H: 1.42, budgets: [4200, 1300], build(S, P, F = { tier: 2, path: 'a' }) {
   const J = quadSkeleton({});
   canine(S, J, { col: '#5d646e' });
   // Schulterplatte (schlicht) + Halsband
   S.shell({ off: 0.02, th: 0.018, ...steelA('metal'), region: ['chest', 'spine'], clip: (x, y, z) => 0.86 - y }, () => S.ellipsoid(jp(J, 'chest'), [0.25, 0.28, 0.3], {}));
   S.torus(add(jp(J, 'neck'), [0, -0.02, -0.02]), 0.17, 0.022, { rot: [PI / 2 - 0.7, 0, 0], mat: 'leather', col: '#3a2418', region: ['chest', 'neck'] });
-  return { skeleton: skeletonOf(J), radius: 0.78, cls: quadCls(J, 1.42, 0.42 * 1.42) };
+  return { J, skeleton: skeletonOf(J), radius: 0.78, cls: quadCls(J, 1.42, 0.42 * 1.42) };
 } };
-U.hound = { H: 1.5, budgets: [4200, 1300], build(S, P) {
+U.hound = { H: 1.5, budgets: [4200, 1300], build(S, P, F = { tier: 2, path: 'a' }) {
   const J = quadSkeleton({ y: 0.78, headP: [0, 1.1, 0.68] });
   canine(S, J, { col: '#3a302c', furAmp: 0.006 });
   // Knochenplatten + Glutrisse
@@ -496,10 +502,10 @@ U.hound = { H: 1.5, budgets: [4200, 1300], build(S, P) {
   for (const sx of [1, -1]) S.sphere(add(jp(J, 'head'), [sx * 0.055, 0.03, 0.12]), 0.016, { mat: 'glow', col: 'glow', glow: 3.4, region: ['head'] });
   S.capsule([0.18, 0.8, 0.2], [0.2, 0.7, -0.2], 0.008, { mat: 'glow', col: 'glow', glow: 2.4, region: ['chest', 'spine'] });
   S.layer('body');
-  return { skeleton: skeletonOf(J), radius: 0.77, cls: quadCls(J, 1.5, 0.42 * 1.5) };
+  return { J, skeleton: skeletonOf(J), radius: 0.77, cls: quadCls(J, 1.5, 0.42 * 1.5) };
 } };
 
-U.raptor = { H: 1.73, budgets: [4200, 1300], build(S, P) {
+U.raptor = { H: 1.73, budgets: [4200, 1300], build(S, P, F = { tier: 2, path: 'a' }) {
   const J = {};
   const set = (n, p, parent) => { J[n] = { pos: V(...p), parent }; };
   set('hips', [0, 0.95, -0.15], null); set('chest', [0, 1.05, 0.25], 'hips'); set('neck', [0, 1.25, 0.5], 'chest'); set('head', [0, 1.45, 0.7], 'neck');
@@ -526,10 +532,10 @@ U.raptor = { H: 1.73, budgets: [4200, 1300], build(S, P) {
   const c = { neck: [7, 0, 1.15, 0.3], head: [7, 0, 1.15, 0.3], armL: [7, 0, 1.15, 0.3], armR: [7, 0, 1.15, 0.3] };
   for (const sd of ['L', 'R']) for (const n of ['thigh', 'shin', 'foot']) c[n + sd] = [1, sd === 'L' ? 0 : PI, 0.92, -0.12];
   for (const n of ['tail', 'tail1', 'tail2']) c[n] = [5, 0, 0.08 * 2.1, 6 / 2.1];
-  return { skeleton: skeletonOf(J), radius: 0.68, cls: c };
+  return { J, skeleton: skeletonOf(J), radius: 0.68, cls: c };
 } };
 
-U.crawler = { H: 1.32, budgets: [4200, 1300], build(S, P) {
+U.crawler = { H: 1.32, budgets: [4200, 1300], build(S, P, F = { tier: 2, path: 'a' }) {
   const J = {};
   const set = (n, p, parent) => { J[n] = { pos: V(...p), parent }; };
   set('hips', [0, 0.55, -0.4], null); set('chest', [0, 0.6, 0.15], 'hips'); set('head', [0, 0.62, 0.55], 'chest');
@@ -552,10 +558,10 @@ U.crawler = { H: 1.32, budgets: [4200, 1300], build(S, P) {
   S.layer('glow');
   for (const sx of [1, -1]) for (const dz of [0, 0.04]) S.sphere(add(jp(J, 'head'), [sx * 0.07, 0.07, 0.13 + dz]), 0.014, { mat: 'glow', col: 'glow', glow: 3, region: ['head'] });
   S.layer('body');
-  return { skeleton: skeletonOf(J), radius: 0.75, cls };
+  return { J, skeleton: skeletonOf(J), radius: 0.75, cls };
 } };
 
-U.serpent = { H: 2.71, budgets: [5000, 1500], build(S, P) {
+U.serpent = { H: 2.71, budgets: [5000, 1500], build(S, P, F = { tier: 2, path: 'a' }) {
   const s = 1.15;
   const J = humanoid(s, { armR: [[0.32, 1.25, 0.12], [0.34, 1.18, 0.32]], armL: [[0.32, 1.25, 0.12], [0.3, 1.25, 0.32]] });
   for (const k of Object.keys(J)) J[k].pos.y += 0.25;
@@ -577,7 +583,7 @@ U.serpent = { H: 2.71, budgets: [5000, 1500], build(S, P) {
   S.capsule(fr.at(0, -0.6), fr.at(0, 1.0), 0.02, { mat: 'gold', col: 'metal', bone: 'weaponR' });
   for (const a of [-0.4, 0, 0.4]) S.capsule(fr.at(0, 1.0), fr.at(sin(a) * 0.12, 1.25, 0), 0.02, 0.003, { mat: 'steel', col: '#c0c8c8', bone: 'weaponR' });
   const c = {}; for (const n of ['tail', 'tail1', 'tail2']) c[n] = [5, 0, 0.07 * 2.7, 3 / 2.7];
-  return { skeleton: skeletonOf(J), radius: 0.66, cls: c, hipY: 1.24 };
+  return { J, skeleton: skeletonOf(J), radius: 0.66, cls: c, hipY: 1.24 };
 } };
 
 // ---- Bosse ----
@@ -587,7 +593,7 @@ function bossHumanoid(S, s, o) {
   const { BL, BR } = humanBody(S, J, s, { bulk: o.bulk ?? 1.2, armBulk: o.armBulk ?? 1.3, legBulk: o.legBulk ?? 1.2, base: o.base, torso: o.torso, legs: o.legs });
   return { J, BL, BR };
 }
-U.boss_titan = { H: 6.1, budgets: [9000, 2800], build(S, P) {
+U.boss_titan = { H: 6.1, budgets: [9000, 2800], build(S, P, F = { tier: 2, path: 'a' }) {
   const s = 3.1;
   const stone = { mat: 'stone', col: 'primary', disp: Detail.noise({ amp: 0.03, freq: 3.5, ridged: true }) };
   const { J, BL, BR } = bossHumanoid(S, s, { sw: 1.35, bulk: 1.35, armBulk: 1.7, legBulk: 1.4, base: stone, armR: [[0.4, 1.0, 0.08], [0.42, 0.72, 0.16]], armL: [[0.4, 1.0, 0.08], [0.42, 0.72, 0.16]] });
@@ -598,9 +604,9 @@ U.boss_titan = { H: 6.1, budgets: [9000, 2800], build(S, P) {
   S.capsule(add(jp(J, 'chest'), [0.1, -0.2, 0.55]), add(jp(J, 'chest'), [0.35, 0.3, 0.5]), 0.03, { mat: 'glow', col: 'glow', glow: 2.6, region: 'torso' });
   for (const sx of [1, -1]) S.sphere(add(jp(J, 'head'), [sx * 0.1, 0.28, 0.38]), 0.045, { mat: 'glow', col: 'glow', glow: 3.5, region: 'head' });
   S.layer('body');
-  return { skeleton: skeletonOf(J), radius: 2.16 };
+  return { J, skeleton: skeletonOf(J), radius: 2.16 };
 } };
-U.boss_lord = { H: 6.65, budgets: [9000, 2800], build(S, P) {
+U.boss_lord = { H: 6.65, budgets: [9000, 2800], build(S, P, F = { tier: 2, path: 'a' }) {
   const s = 3.2;
   const { J, BL, BR } = bossHumanoid(S, s, { weapon: true, base: { mat: 'iron', col: 'metal' }, torso: { mat: 'cloth', col: 'primary' }, armR: [[0.33, 1.15, 0.12], [0.35, 1.0, 0.32]], armL: [[0.34, 1.15, 0.08], [0.36, 1.0, 0.2]] });
   plateTorso(S, BL, { col: 'metal', mat: 'iron', trim: 'secondary', bulk: 1.2 });
@@ -620,9 +626,9 @@ U.boss_lord = { H: 6.65, budgets: [9000, 2800], build(S, P) {
   S.capsule(fr.at(-0.45, 0.2), fr.at(0.45, 0.2), 0.06, { mat: 'gold', col: 'secondary', bone: 'weaponR' });
   S.capsule(fr.at(0, 0.18), fr.at(0, -0.55), 0.05, { mat: 'leather', col: '#2a1a18', bone: 'weaponR' });
   S.layer('glow'); S.capsule(fr.at(0, 0.5, 0.036), fr.at(0, 3.0, 0.036), 0.015, { mat: 'glow', col: 'glow', glow: 2.6, bone: 'weaponR' }); S.layer('body');
-  return { skeleton: skeletonOf(J), radius: 2.08 };
+  return { J, skeleton: skeletonOf(J), radius: 2.08 };
 } };
-U.king = { H: 6.43, budgets: [9000, 2800], build(S, P) {
+U.king = { H: 6.43, budgets: [9000, 2800], build(S, P, F = { tier: 2, path: 'a' }) {
   const s = 3.25;
   const { J, BL, BR } = bossHumanoid(S, s, { sw: 1.15, bulk: 1.1, armBulk: 1.15, legBulk: 1.1, weapon: true, base: { mat: 'mail', col: '#6a707a' }, torso: { mat: 'velvet', col: 'primary' }, armR: [[0.3, 1.2, 0.1], [0.32, 1.1, 0.28]], armL: [[0.3, 1.2, 0.1], [0.3, 1.14, 0.28]] });
   plateTorso(S, BL, { col: 'metal', trim: 'secondary', bulk: 1.1 });
@@ -639,9 +645,9 @@ U.king = { H: 6.43, budgets: [9000, 2800], build(S, P) {
   S.capsule(fr.at(0, -1.3), fr.at(0, 1.6), 0.04, { mat: 'gold', col: 'secondary', bone: 'weaponR' });
   S.sphere(fr.at(0, 1.7), 0.14, { mat: 'gold', col: 'secondary', bone: 'weaponR' });
   S.layer('glow'); S.sphere(fr.at(0, 1.72, 0.1), 0.06, { mat: 'glow', col: 'glow', glow: 3, bone: 'weaponR' }); S.layer('body');
-  return { skeleton: skeletonOf(J), radius: 2.25 };
+  return { J, skeleton: skeletonOf(J), radius: 2.25 };
 } };
-U.boss_drake = { H: 6.06, budgets: [9000, 2800], build(S, P) {
+U.boss_drake = { H: 6.06, budgets: [9000, 2800], build(S, P, F = { tier: 2, path: 'a' }) {
   const J = quadSkeleton({ y: 2.3, zf: 1.2, zb: -1.2, w: 0.55, headP: [0, 4.0, 2.9] });
   J.neck.pos.y = 3.1; J.neck.pos.z = 2.0;
   J.tail.pos = V(0, 2.4, -1.8); J.tail1.pos = V(0, 2.1, -3.2); J.tail2.pos = V(0, 1.2, -4.8);
@@ -673,21 +679,46 @@ U.boss_drake = { H: 6.06, budgets: [9000, 2800], build(S, P) {
     c['wing' + sd] = [4, k * 0.7, 3.1, 0];
   }
   S.layer('glow'); for (const sx of [1, -1]) S.sphere(add(p('head'), [sx * 0.24, 0.12, 0.4]), 0.07, { mat: 'glow', col: 'glow', glow: 3.4, region: ['head'] }); S.layer('body');
-  return { skeleton: skeletonOf(J), radius: 2.09, cls: c };
+  return { J, skeleton: skeletonOf(J), radius: 2.09, cls: c };
 } };
 
 export const UNIT_DESIGNS = U;
+export { humanoid, fakeB, humanBody, bothSides, skeletonOf, jp, plateTorso, helmet, simpleHand, simpleBoot, rotTo, quadSkeleton, quadCls, canine, makeUnitRig, steelA, V };
 
-/** Forge-Definition einer Einheit */
-export function unitDef(arch, cell = 0.007) {
-  const D = U[arch];
-  const palette = { ...(DEFAULTS[arch] || {}) };
+/** Bauplan-Anker für die bestehenden (Helden-Anatomie-)Archetypen */
+function legacyAnchors(arch, J, H) {
+  if (J.upperArmL) { const s = J.hips.pos.y / 0.985; return humanAnchors(J, s, arch === 'brute' ? { headTop: 0.2, shR: 0.13, backW: 0.3 } : arch === 'golem' ? { headTop: 0.16, shX: 0.08, shY: 0.16, shR: 0.15, backW: 0.32, backZ: 0.3 } : arch === 'treant' ? { headTop: 0.3, shR: 0.14, backZ: 0.3, backW: 0.3 } : {}); }
+  if (J.flegL) return quadAnchors(J, { headUp: 0.15 });
+  const P = (n) => [J[n].pos.x, J[n].pos.y, J[n].pos.z];
+  if (arch === 'raptor') return { head: { p: add(P('head'), [0, 0.12, -0.02]), r: 0.09, region: ['head'] }, back: { p: add(P('chest'), [0, 0.22, -0.15]), w: 0.2, region: ['chest', 'hips'], parentJoint: 'chest' }, shoulder: { p: add(P('chest'), [0.14, 0.14, 0.05]), r: 0.1, region: ['chest'] } };
+  if (arch === 'crawler') return { head: { p: add(P('head'), [0, 0.14, 0]), r: 0.1, region: ['head'] }, back: { p: add(P('hips'), [0, 0.3, 0.1]), w: 0.25, region: ['hips'], parentJoint: 'hips' }, shoulder: { p: add(P('chest'), [0.2, 0.16, 0]), r: 0.11, region: ['chest'] } };
+  void H; return {};
+}
+
+/** Forge-Definition einer Einheit: arch + Form ('1','2a','2b','3a','3b'); Stil = Volk (Formsprache) */
+export function unitDef(arch, cell = 0.007, form = '1', style = null) {
+  const D = U[arch] || ARMY[arch];
+  if (!D) throw new Error('Forge: unbekannter Archetyp ' + arch);
+  const F = parseForm(form);
+  const st = style || D.style || ARCH_STYLE[arch] || 'orden';
+  const palette = { ...((FACTIONS[st] && FACTIONS[st].palette) || {}), ...(DEFAULTS[arch] || {}) };
+  const noForm = D.noForm || /^(boss_|king)/.test(arch);
   let res = null;
+  const big = D.H > 4;
   const def = {
-    id: 'unit_' + arch, kind: 'unit', palette, scale: 1, cell: cell * (D.H > 4 ? 2.6 : 1.25), budgets: D.budgets, H: D.H,
-    build: (S) => { res = D.build(S, palette); def.skeleton = res.skeleton; def.cls = res.cls; if (res.hipY) def.hipY = res.hipY; def.torsoW = D.torsoW; return { radius: res.radius }; },
+    id: `unit_${arch}_${F.form}`, kind: 'unit', palette, scale: 1, cell: cell * (big ? 2.2 : 1), budgets: big ? [9000, 3600, 1400] : (D.budgets2 || [2600, 1000, 380]), H: D.H, glowCellK: 0.8, fineK: 1,
+    build: (S) => {
+      res = D.build(S, palette, F);
+      const plan = res.anchors ? res : { ...res, H: D.H, anchors: legacyAnchors(arch, res.J, D.H) };
+      if (!noForm && !plan.noForm) applyForm(S, F, plan, st);
+      def.skeleton = skeletonOf(plan.J); def.cls = plan.cls; if (plan.hipY) def.hipY = plan.hipY; def.torsoW = plan.torsoW ?? D.torsoW;
+      const an = plan.anchors || {};
+      const ser = (a) => (a && a.p ? { p: a.p.map((v) => +v.toFixed(3)), r: +(a.r || 0.1).toFixed(3) } : null);
+      return { radius: plan.radius, arch, form: F.form, style: st, anchors: { head: ser(an.head), back: ser(an.back) }, hover: !!D.hover };
+    },
     unitRig: null,
   };
   def.unitRig = (...a) => makeUnitRig(def)(...a);
   return def;
 }
+export const ALL_DESIGNS = () => ({ ...U, ...ARMY });

@@ -1,7 +1,9 @@
 // Missions-Objekte und Bodenwarnungen (Telegraphs) in der 3D-Welt.
 // - Bodenwarnungen: rote, sich füllende Kreise/Schneisen – Zeitpunkt des Einschlags ist am Rand ablesbar.
 // - Objekte: Ätherfunken (schwebende Kristalle), Leuchtfeuer (Feuerschale), Käfige (mit Ablauf-Ring),
-//   Kristallpfeiler (Obelisk, lädt sich auf), Kraftknoten (leuchtende Bodenfelder).
+//   Kristallpfeiler (Obelisk, lädt sich auf), Kraftknoten (leuchtende Bodenfelder), Runensteine, Dampfventile,
+//   Risskerne, Leuchtkugeln. Anklickbare Objekte bekommen einen pulsierenden Hinweisring (Hover hebt ihn hervor).
+// - Markierungen (Pings) der Mitspieler: aufsteigende Ringe mit Lichtsäule.
 import * as THREE from 'three';
 
 const TELE_CAP = 48;
@@ -63,14 +65,35 @@ export class ObjectivesView {
       flame: new THREE.MeshBasicMaterial({ color: new THREE.Color(3.5, 1.4, 0.3), toneMapped: false }),
       ring: new THREE.MeshBasicMaterial({ color: new THREE.Color(0.6, 2.2, 3), toneMapped: false, transparent: true, opacity: 0.8, blending: THREE.AdditiveBlending, depthWrite: false }),
       node: new THREE.MeshBasicMaterial({ color: new THREE.Color(0.6, 2.4, 0.8), toneMapped: false, transparent: true, opacity: 0.55, blending: THREE.AdditiveBlending, depthWrite: false }),
+      rune: new THREE.MeshStandardMaterial({ color: 0x5a5560, roughness: 0.7, metalness: 0.1, emissive: 0xffb84a, emissiveIntensity: 0.35 }),
+      brass: new THREE.MeshStandardMaterial({ color: 0xb08a4a, roughness: 0.35, metalness: 0.95 }),
+      steam: new THREE.MeshBasicMaterial({ color: new THREE.Color(2.4, 2.2, 2.0), toneMapped: false, transparent: true, opacity: 0.35, depthWrite: false }),
+      rift: new THREE.MeshStandardMaterial({ color: 0x2a0a3a, emissive: 0xb04aff, emissiveIntensity: 2.4, roughness: 0.2, metalness: 0.3 }),
+      flare: new THREE.MeshBasicMaterial({ color: new THREE.Color(4, 3.4, 2.2), toneMapped: false }),
+      hint: new THREE.MeshBasicMaterial({ color: new THREE.Color(2.6, 2.0, 0.8), toneMapped: false, transparent: true, opacity: 0.6, blending: THREE.AdditiveBlending, depthWrite: false }),
     };
+    this.hintGeo = new THREE.RingGeometry(1.35, 1.55, 48).rotateX(-Math.PI / 2);
+    this.pings = [];
+    this.hoverId = null;
+  }
+
+  /** Markierung (Ping) an einer Stelle der Welt – color: CSS-Farbe */
+  ping(x, z, color = '#ffd27a') {
+    const g = new THREE.Group();
+    const c = new THREE.Color(color).multiplyScalar(2.6);
+    const mat = new THREE.MeshBasicMaterial({ color: c, toneMapped: false, transparent: true, opacity: 1, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide });
+    for (let i = 0; i < 2; i++) { const r = new THREE.Mesh(new THREE.RingGeometry(0.8, 1.05, 48).rotateX(-Math.PI / 2), mat); r.position.y = 0.1 + i * 0.02; g.add(r); }
+    const beam = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.35, 9, 10, 1, true), mat); beam.position.y = 4.5; g.add(beam);
+    g.position.set(x, 0, z);
+    this.root.add(g);
+    this.pings.push({ g, mat, t: 0 });
   }
 
   /** Ereignisse aus der Simulation */
   onEvent(e, sim) {
     if (e.e === 'telegraph') this.teles.push({ ...e, t: 0 });
-    else if (e.e === 'objLit') { const o = this.objs.get(e.id); if (o) o.lit = true; }
   }
+  setHover(id) { this.hoverId = id; }
 
   makeObj(e) {
     const g = new THREE.Group();
@@ -102,14 +125,44 @@ export class ObjectivesView {
     } else if (k === 'node') {
       const d = new THREE.Mesh(new THREE.CircleGeometry(0.9, 32).rotateX(-Math.PI / 2), this.mats.node); d.position.y = 0.08; g.add(d);
       g.userData.pulse = d;
+    } else if (k === 'rune') {
+      const st = new THREE.Mesh(new THREE.CylinderGeometry(0.5, 0.75, 2.4, 6), this.mats.rune); st.position.y = 1.2; st.castShadow = true; g.add(st);
+      const gem = new THREE.Mesh(new THREE.OctahedronGeometry(0.32, 0), this.mats.crystal); gem.position.y = 2.8; g.add(gem); g.userData.spin = gem; g.userData.spinY = 2.8;
+    } else if (k === 'valve') {
+      const pipe = new THREE.Mesh(new THREE.CylinderGeometry(0.45, 0.55, 1.6, 12), this.mats.brass); pipe.position.y = 0.8; pipe.castShadow = true; g.add(pipe);
+      const wheel = new THREE.Mesh(new THREE.TorusGeometry(0.55, 0.08, 6, 20).rotateX(Math.PI / 2), this.mats.metal); wheel.position.y = 1.7; g.add(wheel); g.userData.wheel = wheel;
+      const puff = new THREE.Mesh(new THREE.SphereGeometry(0.5, 12, 8), this.mats.steam); puff.position.y = 2.2; g.add(puff); g.userData.puff = puff;
+    } else if (k === 'riftcore') {
+      const c = new THREE.Mesh(new THREE.IcosahedronGeometry(0.7, 0), this.mats.rift); c.position.y = 1.6; g.add(c); g.userData.spin = c; g.userData.spinY = 1.6;
+      const ring = new THREE.Mesh(new THREE.RingGeometry(4.7, 5, 64).rotateX(-Math.PI / 2), new THREE.MeshBasicMaterial({ color: new THREE.Color(1.6, 0.4, 2.6), toneMapped: false, transparent: true, opacity: 0.45, blending: THREE.AdditiveBlending, depthWrite: false })); ring.position.y = 0.07; g.add(ring);
+      const light = new THREE.PointLight(0xb04aff, 25, 10, 1.8); light.position.y = 1.6; g.add(light);
+    } else if (k === 'flare') {
+      const f = new THREE.Mesh(new THREE.SphereGeometry(0.35, 12, 8), this.mats.flare); f.position.y = 5; g.add(f); g.userData.flare = f;
+      const light = new THREE.PointLight(0xfff0c0, 120, 18, 1.4); light.position.y = 5; g.add(light); g.userData.light = light;
+      const ring = new THREE.Mesh(new THREE.RingGeometry(7.6, 8, 64).rotateX(-Math.PI / 2), this.mats.ring.clone()); ring.position.y = 0.06; g.add(ring);
+    } else {
+      const c = new THREE.Mesh(new THREE.OctahedronGeometry(0.45, 0), this.mats.crystal); c.position.y = 1.4; g.add(c); g.userData.spin = c;
     }
+    // Hinweisring für anklickbare Objekte
+    const hint = new THREE.Mesh(this.hintGeo, this.mats.hint.clone()); hint.position.y = 0.05; hint.visible = false; g.add(hint);
+    g.userData.hint = hint;
     g.position.set(e.x, 0, e.z);
     this.root.add(g);
-    return { g, kind: k, lit: !!e.lit };
+    return { g, kind: k };
   }
 
-  update(sim, dt) {
+  /** clickable(e) → bool: Hinweisring für anklickbare Objekte */
+  update(sim, dt, clickable) {
     this.time += dt;
+    for (let i = this.pings.length - 1; i >= 0; i--) {
+      const p = this.pings[i];
+      p.t += dt;
+      const k = p.t / 2.4;
+      if (k >= 1) { this.root.remove(p.g); p.g.traverse((c) => c.geometry && c.geometry.dispose()); p.mat.dispose(); this.pings.splice(i, 1); continue; }
+      p.g.children[0].scale.setScalar(1 + k * 3);
+      p.g.children[1].scale.setScalar(1 + ((k * 3) % 1) * 2);
+      p.mat.opacity = 1 - k;
+    }
     this.teleMat.uniforms.uTime.value = this.time;
     // Objekte mit der Simulation abgleichen
     const seen = new Set();
@@ -119,20 +172,28 @@ export class ObjectivesView {
       let o = this.objs.get(e.id);
       if (!o) { o = this.makeObj(e); this.objs.set(e.id, o); }
       const u = o.g.userData;
-      if (u.spin) { u.spin.rotation.y += dt * 1.6; u.spin.position.y = 1.4 + Math.sin(this.time * 2.4 + e.id) * 0.18; }
+      if (u.spin) { u.spin.rotation.y += dt * 1.6; u.spin.position.y = (u.spinY || 1.4) + Math.sin(this.time * 2.4 + e.id) * 0.18; }
+      if (u.hint) {
+        const can = clickable ? !!clickable(e) : false;
+        u.hint.visible = can;
+        if (can) { const hov = this.hoverId === e.id; u.hint.material.opacity = hov ? 1 : 0.35 + 0.3 * Math.sin(this.time * 5); u.hint.scale.setScalar(hov ? 1.15 : 1); }
+      }
+      if (u.wheel) u.wheel.rotation.y += dt * 2;
+      if (u.puff) { const f = 1 - Math.max(0, Math.min(1, (e.timer ?? 7) / (e.maxTimer || 7))); u.puff.scale.setScalar(0.6 + f * 1.6 + Math.sin(this.time * 18) * 0.08 * f); u.puff.material.opacity = 0.2 + f * 0.5; }
+      if (u.flare) { const f = Math.max(0, (e.timer ?? 6) / (e.maxTimer || 6)); u.light.intensity = 120 * Math.min(1, f * 3); u.flare.position.y = 3 + f * 2; }
       if (o.kind === 'beacon') {
-        const lit = e.lit || o.lit;
+        const lit = !!e.lit;
         u.flame.visible = lit; u.light.intensity = lit ? 60 : 0;
         if (lit) u.flame.scale.set(1 + Math.sin(this.time * 13) * 0.08, 1 + Math.sin(this.time * 9) * 0.15, 1);
-        u.ring.material.opacity = lit ? 0 : 0.35 + 0.5 * Math.min(1, e.charge / 1.5);
+        u.ring.material.opacity = lit ? 0.15 * Math.min(1, (e.burn || 0) / 4) : 0.55;
       }
       if (o.kind === 'pylon') {
-        const lit = e.lit || o.lit;
-        u.ob.material.emissiveIntensity = lit ? 3 + Math.sin(this.time * 4) * 0.6 : 0.4 + 2 * Math.min(1, e.charge / 2);
+        const lit = !!e.lit;
+        u.ob.material.emissiveIntensity = lit ? 3 + Math.sin(this.time * 4) * 0.6 : 0.4;
         u.ring.material.opacity = lit ? 0.15 : 0.5;
       }
       if (o.kind === 'cage' && u.timer) {
-        const f = Math.max(0, Math.min(1, (e.timer ?? 30) / 30));
+        const f = Math.max(0, Math.min(1, (e.timer ?? 30) / (e.maxTimer || 30)));
         u.timer.geometry.dispose();
         u.timer.geometry = new THREE.RingGeometry(1.2, 1.45, 48, 1, 0, Math.PI * 2 * f).rotateX(-Math.PI / 2);
         u.timer.material.color.setRGB(2.5, 0.6 + 1.2 * f, 0.3 * f);
@@ -170,6 +231,8 @@ export class ObjectivesView {
 
   clear() {
     this.teles.length = 0;
+    for (const p of this.pings) this.root.remove(p.g);
+    this.pings.length = 0;
     for (const o of this.objs.values()) this.root.remove(o.g);
     this.objs.clear();
   }
