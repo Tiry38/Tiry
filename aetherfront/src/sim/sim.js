@@ -5,7 +5,7 @@
 import { Rng } from './rng.js';
 import {
   ECON, UNITS, WAVES, SENDS, KING, FACTIONS, FACTION_IDS, DAMAGE_TABLE, armorReduction, kingUpgradeCost,
-  KING_ABILITIES, KING_ABILITY_IDS, kingAbilityCost,
+  KING_ABILITIES, KING_ABILITY_IDS, kingAbilityCost, KING_SOLO_MUL,
 } from './data.js';
 import {
   GRID_COLS, GRID_ROWS, LANE_WIDTH, LANE_SPAWN_Z, LANE_END_Z, laneCenterX, kingPos, cellCenter, slotsForTeamSize,
@@ -222,6 +222,8 @@ export class Sim {
     return (this.rules.arenaWaves || []).includes(n);
   }
   kingGrowth(k) { return k.citadel ? 1 : Math.pow(1.1, Math.max(0, this.wave - 1)); }
+  /** König-Fähigkeiten schützen im 1 gegen 1 nur eine Bahn und wirken dort viel stärker – deshalb abgeschwächt */
+  kingAbilMul(team) { return this.players.filter((p) => p.team === team).length <= 1 ? KING_SOLO_MUL : 1; }
   armyValue(pid) { let v = 0; for (const f of this.fightersOf(pid)) v += UNITS[f.def].value; return v; }
 
   // ---------- Befehle ----------
@@ -422,7 +424,8 @@ export class Sim {
     if (this.phase !== 'battle') return this.fail(p, 'Nur während einer Welle');
     if (k.abilCd[ab] > 0) return this.fail(p, `${d.name} lädt noch (${Math.ceil(k.abilCd[ab])} s)`);
     const L = lv - 1;
-    const g = this.kingGrowth(k);
+    const g = this.kingGrowth(k) * this.kingAbilMul(p.team);
+    const sm = this.kingAbilMul(p.team);
     const src = { type: 'k', team: p.team, x: k.x, z: k.z, alive: true, hp: 1, maxHp: 1 };
     if (ab === 'stomp') {
       const r2 = d.radius[L] ** 2;
@@ -430,7 +433,7 @@ export class Sim {
       if (!hit.length) return this.fail(p, 'Keine Gegner beim König');
       this.emit({ e: 'kingCast', team: p.team, pid: p.id, ab, x: k.x, z: k.z, r: d.radius[L], n: hit.length });
       for (const c of hit) {
-        c.stun = Math.max(c.stun, d.stun[L] * (c.def.boss ? 0.5 : 1));
+        c.stun = Math.max(c.stun, d.stun[L] * sm * (c.def.boss ? 0.5 : 1));
         if (c.lcast) c.lcast = null; // unterbricht Anführer-Zauber
         this.emit({ e: 'stun', id: c.id });
         this.applyHit(src, c, d.dmg[L] * g, 'wucht', false, true);
@@ -1159,7 +1162,7 @@ export class Sim {
           k.fireT = 0.5;
           const F = KING_ABILITIES.fire, L = k.abil.fire - 1, r2 = F.radius[L] ** 2;
           const src = { type: 'k', team: t.id, x: k.x, z: k.z, alive: true, hp: 1, maxHp: 1 };
-          for (const c of this.teamThreats(t.id)) if ((c.x - k.x) ** 2 + (c.z - k.z) ** 2 <= r2) this.applyHit(src, c, F.dps[L] * 0.5 * this.kingGrowth(k), 'chaos', false, true);
+          for (const c of this.teamThreats(t.id)) if ((c.x - k.x) ** 2 + (c.z - k.z) ** 2 <= r2) this.applyHit(src, c, F.dps[L] * 0.5 * this.kingGrowth(k) * this.kingAbilMul(t.id), 'chaos', false, true);
         }
       }
       if (this.phase !== 'battle' || k.atkCd > 0) continue;

@@ -114,7 +114,7 @@ test('König-Fähigkeiten: freischalten, Stampfer betäubt, Abklingzeit, Feuerau
   const c = sim.spawnCreep(0, w, k.x + 2, k.z - 2, { bounty: 1, wave: true }); c.stage = 'king';
   const hp0 = c.hp;
   assert.ok(sim.applyCommand(0, { type: 'kingCast', ab: 'stomp' }));
-  assert.ok(c.stun >= KING_ABILITIES.stomp.stun[1] - 1e-9);
+  assert.ok(c.stun >= KING_ABILITIES.stomp.stun[1] * sim.kingAbilMul(0) - 1e-9);
   assert.ok(c.hp < hp0 || !c.alive);
   assert.equal(sim.applyCommand(0, { type: 'kingCast', ab: 'stomp' }), false, 'Abklingzeit');
   // Feueraura brennt dauerhaft
@@ -209,4 +209,14 @@ test('Bots nutzen Bestand, Erweiterte Kaserne und König-Fähigkeiten', () => {
   assert.ok(seen.barracks > 0, 'Erweiterte Kaserne');
   assert.ok(seen.arenaEnd >= 1, 'Arena');
   for (const p of sim.players) for (const s of SENDS) assert.ok(p.stock[s.id] >= 0 && p.stock[s.id] <= s.stock);
+});
+
+test('König-Fähigkeiten im 1 gegen 1 abgeschwächt, im Teamspiel volle Stärke', async () => {
+  const { KING_SOLO_MUL } = await import('../src/sim/data.js');
+  assert.ok(KING_SOLO_MUL > 0 && KING_SOLO_MUL < 1);
+  const solo = new Sim({ seed: 3, players: [{ team: 0, faction: 'orden', bot: true }, { team: 1, faction: 'orden', bot: true }] });
+  assert.equal(solo.kingAbilMul(0), KING_SOLO_MUL);
+  const duo = new Sim({ seed: 3, players: [0, 1, 0, 1].map((team) => ({ team, faction: 'orden', bot: true })) });
+  assert.equal(duo.kingAbilMul(0), 1);
+  assert.match(KING_ABILITIES.stomp.short(0, KING_SOLO_MUL), new RegExp(`${Math.round(KING_ABILITIES.stomp.dmg[0] * KING_SOLO_MUL)} Schaden`));
 });

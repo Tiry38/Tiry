@@ -1,7 +1,7 @@
 // Spiel-Oberfläche (HUD): Ressourcen, Phase/Timer, Könige, Kommando-Konsole (Kämpfer, Söldner, Wirtschaft),
 // Auswahlkarte (mit beiden Aufwertungs-Pfaden), Königshalle, Punktetafel, Missionsziel mit Aktionen, Meldungen,
 // Banner, Tooltips.
-import { UNITS, SENDS, KING, ECON, FACTIONS, ATTACK_TYPES, ARMOR_TYPES, kingUpgradeCost, KING_ABILITIES, KING_ABILITY_IDS, kingAbilityCost } from '../sim/data.js';
+import { UNITS, SENDS, KING, ECON, FACTIONS, ATTACK_TYPES, ARMOR_TYPES, kingUpgradeCost, KING_ABILITIES, KING_ABILITY_IDS, kingAbilityCost, KING_SOLO_MUL } from '../sim/data.js';
 import { missionHook } from '../sim/missions.js';
 import { I, stat } from './icons.js';
 
@@ -265,7 +265,8 @@ export class Hud {
     const k = this.session.sim.teams[this.me.team].king;
     const lv = k.abil[id];
     const cur = lv ? d.desc(lv - 1) : d.desc(0);
-    return `<h5>${d.name} <span class="muted">${lv ? `Stufe ${lv} / 3` : 'gesperrt'}</span></h5>${cur}` +
+    const solo = this.session.sim.kingAbilMul(this.me.team) < 1;
+    return `<h5>${d.name} <span class="muted">${lv ? `Stufe ${lv} / 3` : 'gesperrt'}</span></h5>${cur}${solo && id !== 'purge' ? `<div class="muted">Im 1 gegen 1 wirkt sie mit ${Math.round(KING_SOLO_MUL * 100)} % Stärke (der König schützt nur eine Bahn).</div>` : ''}` +
       (d.cd ? `<div class="tt-cost">${stat('speed', `Abklingzeit <b>${d.cd[Math.max(0, lv - 1)]} s</b>`)}${lv < 3 ? stat('aether', `<b class="a">${kingAbilityCost(id, lv)}</b> Äther für Stufe ${lv + 1}`) : ''}</div>` : (lv < 3 ? `<div class="tt-cost">${stat('aether', `<b class="a">${kingAbilityCost(id, lv)}</b> Äther für Stufe ${lv + 1}`)}</div>` : '')) +
       `<div class="tt-foot">${d.passive ? 'Wirkt dauerhaft, sobald freigeschaltet (Königshalle <span class="key">K</span>)' : `Wirken: <span class="key">${d.key}</span> · freischalten in der Königshalle <span class="key">K</span>`}${id === 'purge' ? ' · Ausgewählter Gegner wird bevorzugt' : ''}</div>`;
   }
@@ -682,7 +683,7 @@ export class Hud {
       const max = lv >= 3;
       const cost = max ? 0 : kingAbilityCost(ka.id, lv);
       const L = Math.max(0, max ? 2 : lv);
-      this.setHtml(ka.desc, `kabd${ka.id}`, `${lv && !max ? '<i>nächste Stufe:</i> ' : ''}${ka.d.short(L)}${ka.d.cd ? ` · <i>${ka.d.cd[L]} s</i>` : ''}`);
+      this.setHtml(ka.desc, `kabd${ka.id}`, `${lv && !max ? '<i>nächste Stufe:</i> ' : ''}${ka.d.short(L, this.session.sim.kingAbilMul(this.me.team))}${ka.d.cd ? ` · <i>${ka.d.cd[L]} s</i>` : ''}`);
       ka.bar.style.setProperty('--p', `${(lv / 3) * 100}%`);
       this.setHtml(ka.c, `kabc${ka.id}`, max ? 'Max' : `${I.aether}${cost}${lv ? '' : '<small>Freischalten</small>'}`);
       ka.el.classList.toggle('max', max);

@@ -46,6 +46,7 @@ Fertige Installer baut GitHub Actions bei jeder Änderung (`.github/workflows/ae
   3000 Leben; Regel „Lang“ +2; verlässt ein Spieler die Partie, verliert sein Team eine Heilung).
   **Fähigkeiten** (Königshalle, je 3 Stufen, Äther, gelten fürs Team): **Stampfer** (F1, Fläche betäuben, 15 s),
   **Schockwelle** (F2, Linie), **Läuterung** (F3, entfernt Champion-Boni), **Feueraura** (dauerhaft Schaden um den König).
+  Im 1 gegen 1 wirken Schaden und Betäubung der Fähigkeiten mit 45 % Stärke, weil der König dort nur eine Bahn schützt.
   Bots schalten sie frei und setzen sie ein.
 - **30 Wellen**, Bosse auf 10/20/30. Sieg: gegnerischer König fällt – oder gesünderer König nach Welle 30.
   Danach (Endlos) die **Endwellen**: als „Endwelle n“ angezeigt, das ganze Feld wird gezeigt.

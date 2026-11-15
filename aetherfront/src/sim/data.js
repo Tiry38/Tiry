@@ -462,9 +462,11 @@ export const KING_ABILITIES = {
     desc: (l) => `Entfernt einem Gegner (zuerst Champions/Bosse) alle Champion-Boni und verlangsamt ihn ${KING_ABILITIES.purge.dur} s um ${Math.round(KING_ABILITIES.purge.slow[l] * 100)} %.` },
 };
 // Kurzfassung je Stufe (für die Königshalle)
-KING_ABILITIES.stomp.short = (l) => { const d = KING_ABILITIES.stomp; return `Umkreis ${d.radius[l]} · ${String(d.stun[l]).replace('.', ',')} s Betäubung · ${d.dmg[l]} Schaden`; };
-KING_ABILITIES.fire.short = (l) => { const d = KING_ABILITIES.fire; return `Umkreis ${d.radius[l]} · ${d.dps[l]} Schaden/s`; };
-KING_ABILITIES.shock.short = (l) => { const d = KING_ABILITIES.shock; return `Linie ${d.len[l]} Schritt · ${d.dmg[l]} Schaden`; };
+KING_ABILITIES.stomp.short = (l, m = 1) => { const d = KING_ABILITIES.stomp; return `Umkreis ${d.radius[l]} · ${String(Math.round(d.stun[l] * m * 10) / 10).replace('.', ',')} s Betäubung · ${Math.round(d.dmg[l] * m)} Schaden`; };
+KING_ABILITIES.fire.short = (l, m = 1) => { const d = KING_ABILITIES.fire; return `Umkreis ${d.radius[l]} · ${Math.round(d.dps[l] * m)} Schaden/s`; };
+KING_ABILITIES.shock.short = (l, m = 1) => { const d = KING_ABILITIES.shock; return `Linie ${d.len[l]} Schritt · ${Math.round(d.dmg[l] * m)} Schaden`; };
 KING_ABILITIES.purge.short = (l) => { const d = KING_ABILITIES.purge; return `Champion-Boni weg · ${Math.round(d.slow[l] * 100)} % langsamer`; };
+/** Faktor für Schaden und Betäubung der König-Fähigkeiten, wenn ein Team nur einen Spieler hat (1 gegen 1) */
+export const KING_SOLO_MUL = 0.45;
 export const KING_ABILITY_IDS = Object.keys(KING_ABILITIES);
 export function kingAbilityCost(id, level) { return KING_ABILITIES[id].cost[Math.min(level, 2)]; }
