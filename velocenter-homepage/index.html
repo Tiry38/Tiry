@@ -5821,7 +5821,7 @@ document.body.appendChild(pan);pan.querySelectorAll('.lbp-pg').forEach(e=>pg[e.d
 if(window.ResizeObserver){const ro=new ResizeObserver(fit);Object.values(pg).forEach(e=>ro.observe(e))}
 pan.querySelectorAll('img').forEach(i=>i.addEventListener('load',fit));
 pan.addEventListener('pointerleave',leave);pan.addEventListener('pointerenter',()=>clearTimeout(tClose));
-pan.addEventListener('click',e=>{const L=e.target.closest('[data-lbq]');if(L){e.preventDefault();close();const [v,q]=L.dataset.lbq.split('|'),sv=document.querySelector('main > section.view:not([hidden])');
+pan.addEventListener('click',e=>{const L=e.target.closest('[data-lbq]');if(L){e.preventDefault();e.stopPropagation();close();const [v,q]=L.dataset.lbq.split('|'),sv=document.querySelector('main > section.view:not([hidden])');
  if(sv&&sv.dataset.v===v)lbJump(v,q,true);else{location.hash=v;setTimeout(()=>lbJump(v,q,false),640)}return}
  if(e.target.closest('a'))close()})}
 let cur=null,tOpen=0,tClose=0;

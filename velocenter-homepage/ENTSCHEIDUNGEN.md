@@ -272,3 +272,8 @@
 ## 15.11.2026 – Ticker: „Google“ in Google-Farben (Tiry)
 - „Google“ in „4,8 ★ bei Google“ als weiße Pille wie die Bosch-Pille, Buchstaben in Google-Farben (G/g blau #4285F4, o/e rot #EA4335,
   o gelb #FBBC05, l grün #34A853), Klasse `tkg` in `tkIt`. Weiße Pille, weil Rot/Blau direkt auf dem roten Band nicht lesbar wären.
+
+## 15.11.2026 – Menü-Sprünge ohne Umweg nach oben (Tiry)
+- Klick auf ein Thema im Hover-Menü (z. B. i:SY Experte → „Der erste und einzige i:SY Werbe-Bus“) im gleichen Reiter sprang erst ganz nach oben
+  und dann zum Thema. Ursache: der allgemeine Klick-Handler (`href === location.hash` → `go(false)` → nach oben) lief zusätzlich zu `lbJump`.
+  Fix: Menü-Panel stoppt das Weiterreichen des Klicks (`e.stopPropagation()`); die Seite gleitet jetzt direkt von der aktuellen Stelle zum Thema.
