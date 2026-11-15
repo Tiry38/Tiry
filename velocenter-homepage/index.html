@@ -2692,6 +2692,25 @@ body.menu .hdr{z-index:80}
  .mnu a.r{font-size:clamp(28px,8.2vw,38px);line-height:1.14}
  .mnu .msoc{margin-top:14px}
 }
+
+/* ---------- Design-Prüfung: Qualitätskorrekturen (15.11.2026, Look unverändert) ---------- */
+/* „Bewegung reduzieren“ gilt jetzt überall (vorher liefen Hintergrund-Blobs, Bänder, Ticker, Verlaufsschrift weiter) */
+@media (prefers-reduced-motion:reduce){
+ *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;animation-delay:0s!important;transition-duration:.01ms!important;transition-delay:0s!important;scroll-behavior:auto!important}
+ #speed{display:none}
+}
+/* Footer: WhatsApp-Symbol mittig wie Instagram/Facebook */
+footer .soc a{display:grid!important;place-items:center}
+/* Handy-Menü: Social-Symbole bündig mit den Menüpunkten */
+@media (max-width:720px){.mnu .msoc{justify-content:flex-start}}
+/* Termin-Formular: beide Sende-Knöpfe gleich breit in einer Reihe */
+.tsend{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:12px}
+.tsend>.cta{justify-content:center;width:100%;padding-left:16px;padding-right:16px}
+.tsend .tsh{grid-column:1/-1}
+@container (max-width:540px){.tsend{grid-template-columns:1fr}}
+/* Tageszeit-Auswahl passt in eine Zeile */
+#tZeit button{padding:10px 13px}
+.tsend>.cta{white-space:nowrap;letter-spacing:.08em;gap:10px}
 </style>
 
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">

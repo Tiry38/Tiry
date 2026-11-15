@@ -226,3 +226,10 @@
 - **B8** JSON-LD: geo (49.05512, 8.26684 – OpenStreetMap-Eintrag „Velocenter Hessert“), image (og-bild.jpg), hasMap.
 - „Meisterwerkstatt“ aus der Google-Beschreibung entfernt → „eigene Werkstatt“ (Stefan hat keinen Meisterbrief). **Nie „Meister…“ verwenden.**
 - Fehler behoben: Im offenen Handy-Menü lag das ✕ unter dem Menü (nicht antippbar), Menü war unten abgeschnitten.
+
+## 15.11.2026 – Design-Prüfung: Qualitätskorrekturen (Look unverändert)
+- „Bewegung reduzieren“ (Systemeinstellung) gilt jetzt überall: vorher liefen Hintergrund-Blobs, Bänder, Ticker, Verlaufsschrift und Tempo-Linien weiter.
+- Footer: WhatsApp-Symbol mittig wie Instagram/Facebook (war durch die 44-px-Regel nach links verrutscht).
+- Handy-Menü: Social-Symbole linksbündig mit den Menüpunkten.
+- Termin-Formular: beide Sende-Knöpfe gleich breit in einer Reihe, „Per WhatsApp senden“ ohne Umbruch; Tageszeit-Auswahl in einer Zeile.
+- Drei Design-Konzepte (Rennlinie / Atelier / Werkstatt-Nacht) als Vorschau gebaut – Wahl durch Tiry offen.
