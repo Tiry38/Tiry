@@ -4,11 +4,12 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import * as THREE from 'three';
 import { MocapLibrary, MocapRuntime, setMocapLibrary, solveTwoBone } from '../src/render/hero/mocap.js';
 import { buildHero, HeroAnimator, HERO_MODEL_IDS } from '../src/render/heroModels.js';
 
-const ROOT = path.resolve(path.dirname(new URL(import.meta.url).pathname), '..');
+const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const JSON_PATH = path.join(ROOT, 'web/assets/anim/clips.json');
 const data = JSON.parse(fs.readFileSync(JSON_PATH, 'utf8'));
 const lib = new MocapLibrary(data);

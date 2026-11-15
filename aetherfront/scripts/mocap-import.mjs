@@ -6,10 +6,11 @@
 //   node scripts/mocap-import.mjs            (MOCAP_CACHE=… für einen anderen Zwischenspeicher)
 import fs from 'node:fs';
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import * as THREE from 'three';
 import * as L from './mocap-lib.mjs';
 
-const ROOT = path.resolve(path.dirname(new URL(import.meta.url).pathname), '..');
+const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const CACHE = process.env.MOCAP_CACHE || path.join(ROOT, 'node_modules/.cache/cmu-bvh');
 const OUT = path.join(ROOT, 'web/assets/anim/clips.json');
 const BASE = 'https://raw.githubusercontent.com/una-dinosauria/cmu-mocap/master/data/';
@@ -194,7 +195,7 @@ export async function buildClips({ log = console.log } = {}) {
   return { out, built, tgt };
 }
 
-if (process.argv[1] && path.resolve(process.argv[1]) === path.resolve(new URL(import.meta.url).pathname)) {
+if (process.argv[1] && path.resolve(process.argv[1]) === path.resolve(fileURLToPath(import.meta.url))) {
   console.log('Mocap-Import (CMU) → ' + path.relative(ROOT, OUT));
   const { out } = await buildClips();
   fs.mkdirSync(path.dirname(OUT), { recursive: true });
