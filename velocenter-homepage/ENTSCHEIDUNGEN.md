@@ -262,3 +262,6 @@
 - **Etikett Service mit Zugabe (15.11.2026, Tiry):** „–20 €“-Etikett hat als 3. Zeile „+ Sattelüberzug geschenkt“ („+“ in Logo-Rot), damit die ganze Winter-Aktion drinsteht.
 - **KEINE Bestandszahlen auf der Homepage (15.11.2026, Tiry, verbindlich):** keine Anzahl „im Laden / bestellt / Angebote“ o. Ä. öffentlich zeigen –
   auch nicht in der Menü-Vorschau (dort entfernt). `#lgNum` auf der Lager-Seite bleibt `hidden`. Einzelne Räder mit Preis bleiben.
+- **Rote Fläche läuft spitz aus (15.11.2026, Tiry: „rechts total abgeschnitten … soll komplett spitz rauslaufen“):** Glasklinge ist jetzt ein
+  spitz zulaufender Keil, Klinge und Rot enden unten rechts in einem Punkt. Höhe passt sich je Reiter an (`erFit()`): Spitze genau am Ende
+  des Kopfbereichs (`.ph`, Start `.stage0`, i:SY `.isyhero`), Breite folgt der Höhe (gleicher Winkel wie die Striche). Handy: feste 250 px, ebenfalls spitz.

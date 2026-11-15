@@ -2873,11 +2873,13 @@ html.er .sky::after{background-image:url("data:image/svg+xml,%3Csvg xmlns='http:
 html.er .ribbons i:nth-child(3){background:linear-gradient(90deg,transparent 6%,rgba(30,40,55,.12) 30%,rgba(30,40,55,.16) 55%,rgba(30,40,55,.06) 80%,transparent 95%)!important}
 @media (min-width:1181px){html.er body.sc .hdr{background:linear-gradient(180deg,rgba(250,252,254,.9),rgba(236,242,248,.84))!important;box-shadow:0 14px 40px -26px rgba(30,60,100,.38)!important}}
 
-/* Rote Ebene: Glasklinge vorne, Rot dahinter mit Schatten, scrollt mit der Seite */
+/* Rote Ebene: Glasklinge vorne, Rot dahinter mit Schatten, scrollt mit der Seite.
+   15.11.2026 (Tiry „rechts abgeschnitten, soll spitz rauslaufen“): Klinge läuft spitz zu und trifft das Rot unten rechts in einem Punkt;
+   die Höhe --h setzt erFit() (JS) auf das Ende des Kopfbereichs (.ph / .stage0 / .isyhero) des sichtbaren Reiters. */
 html.er main{position:relative}
 .erl{--h:900px;--g:96px;position:absolute;top:88px;right:0;height:var(--h);width:calc(var(--h)*.466 + var(--g));z-index:-1;pointer-events:none}
 main:has(> section.view[data-v="start"]:not([hidden])) > .erl{--h:min(1200px,135vh)}
-.erl .erg{position:absolute;inset:0;clip-path:polygon(0 0,var(--g) 0,100% 100%,calc(100% - var(--g)) 100%);
+.erl .erg{position:absolute;inset:0;clip-path:polygon(0 0,var(--g) 0,100% 100%);
  background:repeating-linear-gradient(115deg,rgba(255,255,255,.35) 0 1px,transparent 1px 4px),linear-gradient(65deg,#D2DBE4 0%,#E6ECF2 48%,#F6F8FA 100%)}
 .erl .errw{position:absolute;top:0;right:0;bottom:0;left:var(--g);filter:drop-shadow(-14px 12px 22px rgba(22,26,34,.26))}
 .erl .erh{position:absolute;inset:0;background:#868282;clip-path:polygon(0 0,100% 0,100% 100%)}
@@ -5858,4 +5860,15 @@ if(typeof hdrFit==='function')setTimeout(hdrFit,60)})();
 (function(){const m=document.querySelector('main');if(m&&!m.querySelector('.erl')){const d=document.createElement('div');d.className='erl';d.setAttribute('aria-hidden','true');d.innerHTML='<i class="erg"></i><span class="errw"><i class="erh"></i><i class="err"></i><i class="erx"></i></span>';m.prepend(d)}
 const k=document.body;if(k&&!document.querySelector('.strk')){const t=document.createElement('div');t.className='strk';t.setAttribute('aria-hidden','true');t.innerHTML='<i class="sa"></i><i class="sb"></i><i class="sc"></i>';k.prepend(t)}})();
 
+/* Rote Ebene passt sich dem Kopfbereich des sichtbaren Reiters an, damit die Spitze genau an dessen Ende ausläuft */
+(function(){const e=document.querySelector('main > .erl');if(!e)return;let q=0;
+function fit(){q=0;if(innerWidth<=760){e.style.removeProperty('--h');return}
+ const v=document.querySelector('main > section.view:not([hidden])'),h=v&&v.querySelector(':scope > .ph, :scope > .stage0, :scope > .isyhero');
+ if(!h){e.style.removeProperty('--h');return}
+ const H=Math.round(h.getBoundingClientRect().bottom-e.getBoundingClientRect().top);if(H>320)e.style.setProperty('--h',Math.min(H,1600)+'px')}
+function later(){if(!q)q=requestAnimationFrame(fit)}
+addEventListener('resize',later);addEventListener('hashchange',()=>{later();setTimeout(fit,700)});addEventListener('load',fit);
+new MutationObserver(later).observe(document.querySelector('main'),{attributes:true,subtree:true,attributeFilter:['hidden']});
+if(window.ResizeObserver){const ro=new ResizeObserver(later);document.querySelectorAll('main > section.view > :is(.ph,.stage0,.isyhero)').forEach(x=>ro.observe(x))}
+fit();window.erFit=fit})();
 </script>
