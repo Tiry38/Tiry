@@ -20,3 +20,18 @@ Umschalter unten mittig (Tasten 1–5), Datei `rv.css` + `rv.js`:
 4. **Kennzahlen** – 300+ · 4,8 ★ · 1995 rechts im Rot (nicht auf der Startseite, dort steht die Showroom-Scheibe).
 5. **Laden-Foto** – echtes Ladenfoto (`laden-innen.webp`) als dunkles Rot-Duoton.
 Am Handy: Info-Varianten (3, 4) aus, Strukturen bleiben.
+
+## Rote Fläche – 10 weitere Varianten (15.11.2026)
+Umschalter unten mittig mit Gruppen „Runde 1“ (1–5) und „Neu“ (6–15), Pfeiltasten blättern, gemerkt in `localStorage.rv2`.
+Dateien `rv2.css` + `rv2.js` + `switch2.css` (der alte Umschalter aus `rv.js` ist abgeschaltet, `rv.js` liefert nur noch `window.erStat`).
+6. **Eloxiert** – gebürstetes Alu-Rot (feine lange Schliffspuren + Lichtkante).
+7. **Riffelblech** – Werkstatt-Trittblech als Relief.
+8. **Reifenprofil** – Stollenprofil mit Lamellen als Relief.
+9. **Pyramiden** – kleine Pyramiden-Prägung, Licht von oben links.
+10. **Riffelglas** – Glasrippen schräg zur Kante.
+11. **Logo-Prägung** – Velocenter-Logo groß als Prägung im Rot.
+12. **Technik-Zeichnung** – Raster + Rahmengeometrie-Linien wie eine Konstruktionszeichnung.
+13. **Marken** – die 8 Hauptmarken-Logos weiß im Rot.
+14. **Kundenstimme** – echte Google-Zitate der Seite (`#qs .q`) wechseln alle 6,5 s, dazu 4,8 ★ · 221 Rezensionen.
+15. **Öffnungszeiten** – live „Jetzt geöffnet / Gerade geschlossen“, heutiger Tag hervorgehoben.
+Info-Varianten 13–15: nicht auf der Startseite (Showroom) und nicht am Handy. Bekannt: Gudereit-Logo zeigt einfarbig weiß eine volle Scheibe (Emblem).

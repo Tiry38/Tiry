@@ -10,13 +10,5 @@
   const n=H(d).find(r=>m<r[0]);if(n)return[0,'Geschlossen · heute ab '+hh(n[0])];
   for(let i=1;i<8;i++){const k=(d+i)%7,r=H(k);if(r.length)return[0,'Geschlossen · ab '+D[k]+' '+hh(r[0][0])]}return[0,'Geschlossen']}
  function fill(){const s=stat(),one='<span class="st'+(s[0]?'':' zu')+'"><i></i>'+s[1]+'</span>'+T.map(t=>'<span>'+t+'</span>').join('');f.querySelector('.rail').innerHTML=one+one}
- fill();setInterval(fill,60000)}
-const V=[['1','Carbon','repeating-linear-gradient(45deg,#7E0C20 0 4px,#B8132F 4px 8px)'],['2','Facetten','conic-gradient(from 30deg,#B8132F,#7E0C20,#D2263F,#960F27,#B8132F)'],['3','Info-Kante','linear-gradient(115deg,#B8132F 0 66%,#fff 66% 72%,#7E0C20 72%)'],['4','Kennzahlen','linear-gradient(160deg,#B8132F,#6E0C1F)'],['5','Laden-Foto','linear-gradient(160deg,#C9A5AB,#7E0C20)']];
-let cur='1';try{cur=localStorage.getItem('rv')||'1'}catch(_){}
-const d=document.createElement('div');d.className='bgsw';d.setAttribute('role','group');d.setAttribute('aria-label','Rote Fläche wählen');
-d.innerHTML='<span class="lab"><small>Rot</small><b class="nm"></b></span>'+V.map(v=>`<button type="button" data-v="${v[0]}" style="--sw:${v[2]};color:#fff" title="${v[1]}" aria-label="Variante ${v[0]}: ${v[1]}">${v[0]}</button>`).join('');
-document.body.appendChild(d);
-function set(v){cur=v;document.documentElement.setAttribute('data-rv',v);d.querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.v===v));d.querySelector('.nm').textContent=V.find(x=>x[0]===v)[1];try{localStorage.setItem('rv',v)}catch(_){}}
-d.addEventListener('click',e=>{const b=e.target.closest('button');if(b)set(b.dataset.v)});
-addEventListener('keydown',e=>{if(/^[1-5]$/.test(e.key)&&!/INPUT|TEXTAREA|SELECT/.test((e.target||{}).tagName||''))set(e.key)});
-set(cur)})();
+ window.erStat=stat;fill();setInterval(fill,60000)}
+})();
