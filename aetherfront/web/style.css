@@ -1264,3 +1264,16 @@ select.field option { background: #0c101c; color: var(--ink); }
 .kup.kab .t small { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .kup.kab .c { height: 32px; min-width: 70px; }
 .king-panel .kup:not(.kab) { min-height: 52px; padding-top: 5px; padding-bottom: 5px; }
+.upgrade-panel { width: 1320px; }
+.up-lines { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.up-line > .up-node { flex: 0 0 150px; }
+.up-branch .up-node { flex: 1 1 0; min-width: 0; }
+.up-branches { min-width: 0; }
+.king-panel { width: 470px; }
+.eco-panel { width: 500px; }
+.eco-panel .eco-grid:not(.two) { grid-template-columns: 1fr; gap: 5px; }
+.eco-panel .eco-row { padding: 6px 14px; }
+.eco-panel .eco-row span { flex-direction: row; align-items: baseline; gap: 10px; }
+.eco-panel .eco-row span small { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.eco-panel .eco-grid.two .eco-row span small { display: none; }
+.up-line > .up-node { flex: 0 0 168px; }

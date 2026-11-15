@@ -26,11 +26,32 @@ Fertige Installer baut GitHub Actions bei jeder Änderung (`.github/workflows/ae
 - **2 Teams** (West/Ost), 1 gegen 1 bis 4 gegen 4, freie Plätze spielen Bots (Leicht/Normal/Schwer).
 - **Bauphase** (45 s vor Welle 1, sonst 32 s): Kämpfer auf das 6×8-Bauraster der eigenen Bahn setzen, aufwerten (3 Stufen), verkaufen.
 - **Kampf**: Alle Bahnen werden gleichzeitig angegriffen. Kämpfer kämpfen automatisch und stehen nach der Welle geheilt wieder auf ihrem Platz.
-- **Durchbrüche**: Gegner am Bahnende laufen zum König des Teams. Nach 70 s Raserei → alle stürmen zum König.
-- **Gold**: Kopfgeld pro Gegner + Einkommen nach jeder Welle. **Äther**: von Funken (Arbeitern) gesammelt.
+- **Bauphase direkt nach dem Wellenende** – keine Zwangspause mehr zu Wellenbeginn.
+- **Durchbrüche**: Gegner am Bahnende laufen über die Brücke (+60 % Tempo) zum König des Teams. Nach 70 s Raserei → alle stürmen zum König.
+  **Kopfgeld-Abzug**: Wer in einer Welle durchlässt, bekommt für den Rest der Welle weniger Kopfgeld
+  (−60 % × Anteil der durchgelassenen Gegner, höchstens −40 %); erledigt der König einen Durchbrecher, teilen sich die
+  *übrigen* Mitspieler die Hälfte des Kopfgelds. (Ein Abfangen durch eigene Kämpfer in der Mitte gibt es nicht: Die Bahnen
+  enden in Brücken zum König, Kämpfer bleiben auf ihrem Bauraster – die Mitte verteidigt der König mit seinen Fähigkeiten.)
+- **Gold**: Kopfgeld pro Gegner + Einkommen nach jeder Welle. **Äther**: von Funken (Arbeitern) gesammelt –
+  höchstens 16 Funken, **im 1 gegen 1 höchstens 10**; „Sammeln verbessern“ (N) +25 % je Stufe.
 - **Söldner** (Äther): laufen mit der nächsten Welle in die Bahn des Gegners und erhöhen dauerhaft das Einkommen.
-- **König**: Flächenangriff, Verbesserungen (Leben/Macht/Erneuerung) mit Äther, 3 Team-Heilungen.
+  12 Söldner in zwei Reihen: **Kaserne** (1–6) und **Erweiterte Kaserne** (⇧1–⇧6, für 150 Äther freischalten).
+  Jeder Typ hat einen **Bestand** (1–3), der sich alle 6–30 s um eins auffüllt; Schattenkrabbler, Klingenraptor und
+  Grollhund werden ab Welle 10/12/15 **ausgemustert**.
+- **Arena nach Welle 10 und 20**: Kopien aller gebauten Kämpfer beider Teams kämpfen auf der Arena-Insel zwischen den
+  Teams (5 s Aufstellung, höchstens 60 s, danach entscheidet der verbliebene Armeewert). Jeder Spieler des Siegerteams
+  erhält **150 bzw. 300 Gold**, die Verlierer nichts. Die echten Kämpfer bleiben unverändert auf ihren Plätzen.
+  Regel `arena` (in der Kampagne aus).
+- **König**: Flächenangriff, Verbesserungen (Leben/Macht/Erneuerung) mit Äther, 3 Team-Heilungen (je 30 %, höchstens
+  3000 Leben; Regel „Lang“ +2; verlässt ein Spieler die Partie, verliert sein Team eine Heilung).
+  **Fähigkeiten** (Königshalle, je 3 Stufen, Äther, gelten fürs Team): **Stampfer** (F1, Fläche betäuben, 15 s),
+  **Schockwelle** (F2, Linie), **Läuterung** (F3, entfernt Champion-Boni), **Feueraura** (dauerhaft Schaden um den König).
+  Bots schalten sie frei und setzen sie ein.
 - **30 Wellen**, Bosse auf 10/20/30. Sieg: gegnerischer König fällt – oder gesünderer König nach Welle 30.
+  Danach (Endlos) die **Endwellen**: als „Endwelle n“ angezeigt, das ganze Feld wird gezeigt.
+- **Übersichten**: **T** Aufwertungs-Übersicht (alle Linien, beide Pfade, Kosten der nächsten Stufen),
+  **G** Wirtschaft (Einkommen, Äther/min, Kopfgeld-Faktor, Ausgaben/Einnahmen). Online im Menü: **Unentschieden
+  vorschlagen** (alle Menschen müssen zustimmen).
 - **Angriff vs. Rüstung**: 5 Angriffsarten × 5 Rüstungsarten (Tabelle im Kodex im Spiel).
 - **4 Fraktionen** mit je 5 Kämpferlinien × 3 Stufen (60 Kämpfer), 7 Söldner, 30 Wellen mit eigenen Gegnertypen.
 
@@ -42,14 +63,15 @@ Fertige Installer baut GitHub Actions bei jeder Änderung (`.github/workflows/ae
 | AR | Alle zufällig | Zufällige Fraktion für alle, mit Bonusgold |
 | PR | Zufall mit Neu-Würfeln | Zufällige Fraktion + Bonusgold, in der ersten Bauphase einmal neu würfeln |
 | HP | Hybrid | 5 zufällige Kämpferlinien aus allen Fraktionen gemischt |
-| +CC | Champions | Jeder 4. Gegner ist ein Champion (3× Leben, 3× Kopfgeld), Bosse +25 % |
+| +CC | Champions | Jeder 4. Gegner ist ein Champion (3× Leben, 3× Kopfgeld); Bosse werden Champions (+25 % Leben, +25 % Schaden, +2 Rüstung) – die Läuterung des Königs entfernt das |
 
 Kombinierbar, z. B. **PRCC** oder **HPCC**. Dazu: Teamgröße 1v1–4v4, 10/20/30 Wellen, Bots für leere Plätze,
 Bot-Stärke (Leicht/Normal/Schwer/Extrem) getrennt für Verbündete und Gegner, **Regeln** Normal/Schnell/Lang/Hart/
 Gespiegelt/Zufall und **Endlos** (Endwellen, bis ein König fällt).
 
 Feste Draufsicht, keine spielbaren Helden. Steuerung: Kämpfer bauen mit **Q W E R A S D F**, ausgewählten Kämpfer
-aufwerten mit **C / V** (die Auswahlkarte zeigt beide Pfade mit Wertevergleich), Söldner **1–7**.
+aufwerten mit **C / V** (die Auswahlkarte zeigt beide Pfade mit Wertevergleich), Söldner **1–6** / **⇧1–⇧6**,
+König-Fähigkeiten **F1–F3**, Funke **B**, Sammeln **N**, Königshalle **K**, Heilen **H**, Übersichten **T** / **G**.
 
 ## Solo-Kampagne „Chronik des Risses“
 

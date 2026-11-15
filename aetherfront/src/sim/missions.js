@@ -568,7 +568,7 @@ export const MECHANICS = {
   // 22 – Letzte Bastion
   lastbastion: {
     init: (sim) => { const k = sim.teams[0].king; k.heals = 2; k.maxHeals = 2; },
-    allow: (sim, st, p, cmd) => (cmd.type === 'king' ? 'In der letzten Bastion gibt es keine Verbesserungen' : true),
+    allow: (sim, st, p, cmd) => (cmd.type === 'king' || cmd.type === 'kingAbility' ? 'In der letzten Bastion gibt es keine Verbesserungen' : true),
     text: () => 'Letzte Bastion: keine König-Verbesserungen, nur 2 Heilungen.',
   },
 

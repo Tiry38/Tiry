@@ -48,7 +48,7 @@ export function createArena(scene) {
   // ---------- Steinboden mit Kante ----------
   const floor = new THREE.CylinderGeometry(R, R, 0.7, 96, 1);
   floor.translate(0, -0.4, 0);
-  const floorMat = new THREE.MeshStandardMaterial({ color: 0x5d6170, roughness: 0.88, metalness: 0.05 });
+  const floorMat = new THREE.MeshStandardMaterial({ color: 0x3d4150, roughness: 0.85, metalness: 0.08 });
   const floorMesh = new THREE.Mesh(floor, floorMat);
   floorMesh.receiveShadow = true;
   root.add(floorMesh);
@@ -73,7 +73,7 @@ export function createArena(scene) {
         float mid = smoothstep(0.012, 0.0, abs(vP.x) / uR) * step(r, 0.96) * 0.6;
         vec3 col = grad(ang / 6.2832 + uTime * 0.04 + r * 0.25);
         vec3 side = vP.x < 0.0 ? vec3(0.35,0.64,1.0) : vec3(1.0,0.36,0.44);
-        float halfGlow = smoothstep(0.96, 0.4, r) * 0.10 * (0.4 + uActive);
+        float halfGlow = smoothstep(0.96, 0.4, r) * 0.05 * (0.4 + uActive);
         float a = (rings + spokes + mid) * (0.45 + 0.75 * uActive) * step(r, 1.0);
         gl_FragColor = vec4(col * a + side * halfGlow, 1.0);
       }`,

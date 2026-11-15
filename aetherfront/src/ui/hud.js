@@ -96,7 +96,7 @@ export class Hud {
       const el = $(`king-${t}`);
       const hold = this.holdBar && t !== me.team;
       el.classList.toggle('hold', hold);
-      const label = t === me.team ? 'Dein König' : hold ? 'Missionsfortschritt' : sim.teams[t].king.citadel ? 'Rissfeste' : 'Feindkönig';
+      const label = t === me.team ? 'Dein König' : hold ? 'Fortschritt' : sim.teams[t].king.citadel ? 'Rissfeste' : 'Feindkönig';
       el.innerHTML = `<div class="kb-crest">${hold ? I.hold : sim.teams[t].king.citadel ? I.siege : I.crown}</div><div class="kb-body">
         <div class="kb-top"><b>${label}</b><span class="kb-pct" id="k-pct-${t}">100%</span></div>
         <div class="kb-bar"><i class="kb-ghost" id="k-ghost-${t}"></i><i class="kb-fill" id="k-fill-${t}"></i></div>
@@ -166,8 +166,9 @@ export class Hud {
     const sd = $('send-dock');
     sd.innerHTML = '';
     const stockOn = sim.rules.sendStock;
-    this.sendCards = SENDS.map((s) => {
+    this.sendCards = SENDS.map((s, i) => {
       const c = h('div', `slot xs merc r${s.row}`, `<img src="${this.sendPortrait(s)}" alt=""/><span class="need"></span><span class="cd"></span><span class="shine"></span><span class="hk">${s.hotkeyHtml}</span>${stockOn ? `<span class="stk">${'<i></i>'.repeat(s.stock)}</span>` : ''}<span class="cost a">${I.aether}<b>${s.cost}</b></span><div class="lock" style="display:none"></div>`);
+      c.style.gridColumn = String((i % 6) + 1);
       c.addEventListener('click', () => { this.audio.ui('click'); this.submit({ type: 'send', send: s.id }); });
       this.hover(c, () => this.sendTip(s));
       sd.appendChild(c);
@@ -300,12 +301,13 @@ export class Hud {
   sendTip(s) {
     const sim = this.session.sim;
     const me = this.me;
-    const stock = sim.rules.sendStock ? `${stat('count', `Bestand <b>${me.stock[s.id]}</b> / ${s.stock} · +1 alle ${s.restock} s`)}` : '';
+    const stock = sim.rules.sendStock ? `${stat('count', `Bestand <b>${me.stock[s.id]}</b> / ${s.stock}`)}` : '';
+    const refill = sim.rules.sendStock ? ` · Bestand +1 alle ${s.restock} s` : '';
     let foot;
     if (sim.sendRetired(s)) foot = `Seit Welle ${s.retire} <b>ausgemustert</b>`;
     else if (sim.wave < s.unlock) foot = `Verfügbar ab <b>Welle ${s.unlock}</b>${s.retire && sim.rules.sendRetire ? ` · ausgemustert ab Welle ${s.retire}` : ''}`;
     else if (s.row === 2 && !me.barracks) foot = 'Erst die <b>Erweiterte Kaserne</b> freischalten';
-    else foot = `Taste <span class="key">${s.hotkey}</span>${s.retire && sim.rules.sendRetire ? ` · ausgemustert ab Welle ${s.retire}` : ''}`;
+    else foot = `Taste <span class="key">${s.hotkey}</span>${refill}${s.retire && sim.rules.sendRetire ? ` · ausgemustert ab Welle ${s.retire}` : ''}`;
     return `<h5>${s.name} <span class="muted">Söldner · ${s.row === 2 ? 'Erweiterte Kaserne' : 'Kaserne'}</span></h5>${this.camp ? `Marschiert mit der nächsten Welle gegen die Rissfeste und rammt sie (${s.cost * (this.camp.impactMul || 14)} Wucht).` : 'Läuft mit der nächsten Welle in die Bahn deines Gegners.'}` +
       `<div class="stats" style="margin-top:8px">${stat('heart', `<b>${fmt(s.hp)}</b> Leben`, 'hp')}${stat('sword', `<b>${s.dmg}</b> / ${s.cd}s`, 'atk')}${stat('type', ATTACK_TYPES[s.atk].name, 'atk')}${stat('shield', ARMOR_TYPES[s.armorType].name, 'arm')}</div>` +
       `<div class="tt-cost">${stat('aether', `<b class="a">${sim.sendCost(s)}</b> Äther`)}${stat('income', `<b class="ok">+${s.income}</b> Einkommen`)}${stock}</div>` +
@@ -568,7 +570,7 @@ export class Hud {
     ph.classList.toggle('urgent', (build && tleft <= 5) || (A && A.stage === 'countdown'));
     if (A) {
       this.setValue('ph-time', A.stage === 'fight' ? mmss(A.time) : A.stage === 'countdown' ? `${Math.max(1, Math.ceil(A.t))}` : '–');
-      this.setValue('ph-tag', A.stage === 'countdown' ? 'Arena gleich' : A.stage === 'fight' ? 'Arena' : 'Arena vorbei');
+      this.setValue('ph-tag', A.stage === 'countdown' ? 'Start' : A.stage === 'fight' ? 'Arena' : 'Ende');
       $('ph-fill').style.transform = `scaleX(${A.stage === 'countdown' ? A.t / ECON.arenaCountdown : A.stage === 'fight' ? Math.min(1, A.time / ECON.arenaMaxTime) : 1})`;
     } else {
       this.setValue('ph-time', build ? mmss(tleft) : mmss(sim.battleTime || 0));
@@ -578,7 +580,7 @@ export class Hud {
     const waveKey = `${sim.wave}|${sim.rules.maxWaves}|${w ? w.name : ''}|${A ? 'arena' : ''}`;
     if (waveKey !== this.phaseKey) {
       this.phaseKey = waveKey;
-      if (A) $('ph-wave').innerHTML = `<span class="arena-tag">${I.arena} Arena</span><span class="nm">nach Welle ${A.wave} · Sieger je +${A.reward} Gold</span>`;
+      if (A) $('ph-wave').innerHTML = `<span class="arena-tag">${I.arena} Arena</span><span class="nm">nach Welle ${A.wave} · +${A.reward} Gold</span>`;
       else if (w && w.endwave) $('ph-wave').innerHTML = `<small>Endwelle</small><b>${sim.wave - sim.waves.length}</b><span>· Welle ${sim.wave}</span><span class="boss">${I.skull} Endwellen</span><span class="nm">${w.name.replace(/^Endwelle \d+: /, '')}</span>`;
       else $('ph-wave').innerHTML = `<small>Welle</small><b>${sim.wave}</b><span>/ ${sim.rules.maxWaves}</span>${w && w.boss ? `<span class="boss">${I.skull} ${w.champion ? 'Champion-Boss' : 'Boss'}</span>` : ''}${w ? `<span class="nm">${w.name}</span>` : ''}`;
       if (!A) $('ph-meta').innerHTML = w ? `${stat('count', `${w.count}×`, 'cnt')}${stat('shield', ARMOR_TYPES[w.armorType].name, 'arm')}${stat('sword', `${ATTACK_TYPES[w.atk].name}${w.ranged ? ' · Fern' : ''}`, 'atk')}${sim.isArenaWave() && build ? stat('arena', 'danach Arena', 'arm') : ''}` : '';
@@ -735,7 +737,7 @@ export class Hud {
     const el = $('upgrade-panel');
     this.upOpen = force ?? !this.upOpen;
     el.classList.toggle('show', this.upOpen);
-    this.last.upg = null;
+    this.last.upg = null; this.upKey = null; this.upPor = new Map();
     if (this.upOpen) { this.toggleEco(false, true); this.renderUpgrades(); }
     this.audio.ui(this.upOpen ? 'open' : 'close');
   }
@@ -744,12 +746,17 @@ export class Hud {
     const counts = {};
     for (const f of sim.fightersOf(me.id)) counts[f.def] = (counts[f.def] || 0) + 1;
     const gold = Math.floor(me.gold);
+    // nur neu aufbauen, wenn sich Gold, Kämpfer oder Linien geändert haben (Porträts sind teuer)
+    const key = `${gold}|${me.lines.join(',')}|${Object.entries(counts).map(([k, v]) => `${k}:${v}`).join(',')}`;
+    if (key === this.upKey) return;
+    this.upKey = key;
+    const por = (u) => { if (!this.upPor.has(u.id)) this.upPor.set(u.id, this.unitPortrait(u)); return this.upPor.get(u.id); };
     const node = (u, i, hk) => {
       if (!u) return '<span class="up-node none"></span>';
       const n = counts[u.id] || 0;
       const blocked = u.tier > sim.rules.maxTier;
       return `<span class="up-node t${u.tier}${n ? ' has' : ''}${gold < u.cost ? ' poor' : ''}${blocked ? ' blocked' : ''}" style="--pc:${FACTIONS[u.faction].grad[i % 3]}">
-        <img src="${this.unitPortrait(u)}" alt=""/><span class="un"><b>${u.name}</b><small>${'★'.repeat(u.tier)} ${u.roleLabel}${hk ? ` · <span class="key">${hk}</span>` : ''}</small></span>
+        <img src="${por(u)}" alt=""/><span class="un"><b>${u.name}</b><small>${'★'.repeat(u.tier)} ${u.roleLabel}${hk ? ` · <span class="key">${hk}</span>` : ''}</small></span>
         <span class="uc">${I.gold}${u.cost}</span>${n ? `<span class="ux">×${n}</span>` : ''}</span>`;
     };
     const rows = me.lines.map((id, li) => {

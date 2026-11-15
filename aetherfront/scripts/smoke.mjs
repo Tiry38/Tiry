@@ -28,7 +28,9 @@ page.on('pageerror', (e) => errors.push(`pageerror: ${e.message}`));
 // Wartet, bis alle endlichen CSS-Animationen (Einblenden von Bildschirmen/Panels) fertig sind –
 // Software-WebGL liefert nur wenige Bilder pro Sekunde, sonst landen halb eingeblendete Panels im Bild.
 const settle = () => page.waitForFunction(() => document.getAnimations().every((a) => !(a instanceof CSSAnimation) || a.playState !== 'running' || a.effect.getComputedTiming().iterations === Infinity || a.animationName === 'banner'), null, { timeout: 30000, polling: 200 }).catch(() => {});
-const shot = async (n) => { await settle(); await page.screenshot({ path: path.join(out, `${n}.png`) }); console.log('📸', n); };
+// Software-WebGL: die Engine drosselt bei langsamer GPU das Neuzeichnen (bis zu 3 s) → vor jedem Bild ein frisches Bild erzwingen
+const fresh = async () => { await page.evaluate(() => { const e = window.__app && window.__app.engine; if (e) { e._nextRenderAt = 0; e.gpuMs = 0; e._fence = null; } }).catch(() => {}); await page.waitForTimeout(1300); };
+const shot = async (n) => { await settle(); await fresh(); await page.screenshot({ path: path.join(out, `${n}.png`) }); console.log('📸', n); };
 const wait = (ms) => page.waitForTimeout(ms);
 // Über den lokalen Webserver laden (unter file:// blockiert Chromium Texturen/HDRIs aus web/assets/)
 const server = await startServer(0);
@@ -101,8 +103,9 @@ await page.evaluate(() => {
   a.cam.focus(k.x, k.z - 4, 40, { pitch: 0.95 });
 });
 await wait(2500);
+await page.evaluate(() => { const a = window.__app; a.session.sim.teams[a.me.team].king.abilCd.stomp = 0; });
 await page.keyboard.press('F1'); await wait(350); await shot('07d-king-stomp');
-await page.mouse.move(10, H / 2);
+await page.mouse.move(W / 2, H / 2 - 120); // Mitte (nicht an den Rand: Randscrollen)
 await page.evaluate(() => { const a = window.__app; a.cam.focus(a.me && -70, 30, 120, { pitch: 0.75 }); });
 await wait(3000); await shot('08-overview');
 await page.keyboard.down('Tab'); await wait(400); await shot('09-scoreboard'); await page.keyboard.up('Tab');
@@ -142,7 +145,7 @@ await wait(6000);
 await page.evaluate(() => { const a = window.__app; const o = [...a.session.sim.entities.values()].find((e) => e.type === 'o'); if (o) a.cam.focus(o.x, o.z, 40, { pitch: 0.9 }); });
 await wait(2500); await shot('14-mission-battle');
 const clicked = await page.evaluate(() => { const a = window.__app; const o = [...a.session.sim.entities.values()].find((e) => e.type === 'o' && e.kind === 'shard'); if (!o) return false; a.session.submit({ type: 'mission', id: o.id }); return a.session.sim.mission.st.count; });
-await wait(800);
+await page.waitForFunction(() => window.__app.session.sim.mission.st.count > 0, null, { timeout: 15000 }).catch(() => {});
 console.log('Funke angeklickt:', clicked, '→ gesammelt', await page.evaluate(() => window.__app.session.sim.mission.st.count));
 await shot('15-mission-collected');
 const info = await page.evaluate(() => ({ calls: window.__app.engine.renderer.info.render.calls, tris: window.__app.engine.renderer.info.render.triangles, wave: window.__app.session.sim.wave, phase: window.__app.session.sim.phase }));
