@@ -259,3 +259,4 @@
   („E-Bikes vor Ort · zum Probefahren“ bzw. „Winter-Aktion · auf jede Inspektion“), Lichtkante Rot → Grau, leiser Glanz (aus bei „Bewegung reduzieren“). Keine Kreis-Plaketten mehr.
 - **Stichpunkte der Menü-Vorschau ohne Nummern (15.11.2026, Tiry: „moderne Punkte statt Zahlen“):** Liste „Auf dieser Seite“ zeigt
   einen leuchtenden Rot-Punkt (Verlauf #FF5466 → #8E0E26) mit weißem Glas-Hof; beim Drüberfahren wird er zur kurzen Pille, der Text bleibt stehen.
+- **Etikett Service mit Zugabe (15.11.2026, Tiry):** „–20 €“-Etikett hat als 3. Zeile „+ Sattelüberzug geschenkt“ („+“ in Logo-Rot), damit die ganze Winter-Aktion drinsteht.

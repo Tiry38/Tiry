@@ -2810,6 +2810,8 @@ footer .soc a{display:grid!important;place-items:center}
 .lbp-tag span{position:relative;padding-left:13px;font-size:12px;line-height:1.3;font-weight:600;color:rgba(255,255,255,.74);white-space:nowrap}
 .lbp-tag span::before{content:"";position:absolute;left:0;top:2px;bottom:2px;width:1.5px;border-radius:2px;background:linear-gradient(180deg,#E8283C,rgba(134,130,130,.6))}
 .lbp-tag em{display:block;font-style:normal;font-size:10px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:#fff;margin-bottom:2px}
+.lbp-tag strong{display:block;margin-top:3px;font-size:12px;font-weight:700;color:#fff}
+.lbp-tag strong i{font-style:normal;font-weight:800;color:#FF5466;margin-right:2px}
 @media (prefers-reduced-motion:reduce){.lbp-tag::after{animation:none;opacity:0}}
 
 /* Stichpunkte der Menü-Vorschau (15.11.2026, Tiry: „moderne Punkte statt Zahlen“): leuchtender Rot-Punkt mit Glas-Hof, wird beim Drüberfahren zur Pille */
@@ -5768,7 +5770,7 @@ const P={
 start:tx('Start · Familienbetrieb seit 1995','<span style="white-space:nowrap">E-Bike &amp;</span> <span style="white-space:nowrap">E-Dreirad-Spezialist</span><br><span class="gt it">mit eigener Werkstatt.</span>','Über 300 E-Bikes zum Probefahren und ein Bosch Service Center in Wörth.','start',['Showroom: über 300 E-Bikes vor Ort','Hier schraubt der Chef noch selbst','Das sagen unsere Kunden bei Google','Besuch uns: Hartmannstraße 25'],cta(['Zur Startseite','#start'],['Termin','#termin']))+
  `<div class="lbp-vi"><div class="lbp-ph"><img src="img/laden-innen.webp" alt=""></div><div class="lbp-tag" style="right:-14px;bottom:-10px"><b>300<i>+</i></b><span><em>E-Bikes vor Ort</em>zum Probefahren</span></div></div>`,
 service:tx('Service · Bosch Service Center','Wir überzeugen<br><span class="gt it">mit Service.</span>','Beratung, Werkstatt und clevere Bezahlung aus einer Hand.','service',['Beratung &amp; Probefahrt','Inspektion &amp; Reparatur','Termin anfragen in 30 Sekunden','0 % Finanzierung, ENRA-Versicherung, Dienstrad-Leasing'],cta(['Zum Service','#service'],['Termin','#termin']))+
- `<div class="lbp-vi"><div class="lbp-blob"></div><img class="lbp-cut" src="img/sattelueberzug.webp" alt="" style="width:200px;left:64px;top:22px"><div class="lbp-tag" style="right:-14px;bottom:2px"><b>–20<i>€</i></b><span><em>Winter-Aktion</em>auf jede Inspektion</span></div></div>`,
+ `<div class="lbp-vi"><div class="lbp-blob"></div><img class="lbp-cut" src="img/sattelueberzug.webp" alt="" style="width:200px;left:64px;top:22px"><div class="lbp-tag" style="right:-14px;bottom:2px"><b>–20<i>€</i></b><span><em>Winter-Aktion</em>auf jede Inspektion<strong><i>+</i> Sattelüberzug geschenkt</strong></span></div></div>`,
 marken:tx('Marken','Top-Marken.<br><span class="gt it">Große Auswahl.</span>','Von KTM bis i:SY: acht Marken, dazu gutes Zubehör.','marken',['Acht Marken. Ein Laden.','Gutes Zubehör macht den Unterschied.'],cta(['Zu den Marken','#marken']))+
  `<div class="lbp-lg">${M.map(m=>`<a href="#marken" tabindex="-1"><img src="img/marke-${m}.svg" alt=""></a>`).join('')}</div>`,
 lager:tx('Auf Lager · Live','Sofort da.<br><span class="gt it">Sofort Probe fahren.</span>','Diese Räder stehen jetzt bei uns in Wörth: ansehen, reservieren, Probe fahren.','lager',['Sonderangebote: nur solange vorrätig','Rad-Finder: Was passt zu mir?','Bestand mit Suche und Filter'],'<div class="lbp-st" data-lgst></div>'+cta(['Zum Lager','#lager']))+
