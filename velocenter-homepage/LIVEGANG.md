@@ -37,6 +37,7 @@ Der Prototyp bleibt unverändert, Änderungen immer dort machen und neu bauen.
 1. Claude baut die Live-Fassung und legt sie ins neue Repo, GitHub Pages an (Branch `main`, Wurzel).
 2. Testadresse prüfen: `https://tiry38.github.io/<repo>/` (ohne eigene Domain). Stefan schaut drüber.
 3. In GitHub Pages die eigene Domain `www.velo-center.de` eintragen.
+   Danach in `tools/live_bauen.py` `BILD_BASIS = BASIS` setzen (WhatsApp-Vorschaubild), neu bauen und hochladen.
 4. **IONOS → Domains → velo-center.de → DNS** (nur diese Einträge ändern):
    | Typ | Name | Wert |
    |---|---|---|

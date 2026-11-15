@@ -18,6 +18,9 @@ QUELLE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 ZIEL = os.path.abspath(sys.argv[1]) if len(sys.argv) > 1 else os.path.join(os.path.dirname(QUELLE), 'velocenter-homepage-live')
 DOMAIN = 'www.velo-center.de'
 BASIS = 'https://' + DOMAIN + '/'
+# Vorschaubild + og:url für WhatsApp/Facebook: müssen JETZT erreichbar sein. Bis zum Domain-Umzug liefert www.velo-center.de noch Coco (404).
+# github.io leitet nach dem Umzug automatisch auf die eigene Domain weiter. Am Umzugstag auf BASIS umstellen (LIVEGANG.md).
+BILD_BASIS = 'https://tiry38.github.io/velo-center-web/'
 
 # alte Adressen der Coco-Seite -> neue Bereiche
 ALT = {
@@ -55,7 +58,7 @@ def seite(s, pfad, view, seo):
     s = re.sub(r'<meta property="og:title" content="[^"]*">', '<meta property="og:title" content="' + html_attr(t) + '">', s, count=1)
     s = re.sub(r'<meta property="og:description" content="[^"]*">', '<meta property="og:description" content="' + html_attr(d) + '">', s, count=1)
     s = ersetze(s, '<link rel="canonical" href="' + BASIS + '">', '<link rel="canonical" href="' + url + '">')
-    s = ersetze(s, '<meta property="og:url" content="' + BASIS + '">', '<meta property="og:url" content="' + url + '">')
+    s = ersetze(s, '<meta property="og:url" content="' + BILD_BASIS + '">', '<meta property="og:url" content="' + BILD_BASIS + (pfad + '/' if pfad else '') + '">')
     return s
 
 
@@ -114,8 +117,8 @@ def html_bauen():
                 '<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">\n'
                 '<meta name="theme-color" content="#C8102E">\n'
                 '<link rel="icon" href="favicon.png" type="image/png">\n<link rel="apple-touch-icon" href="apple-touch-icon.png">\n'
-                f'<meta property="og:image" content="{BASIS}og-bild.jpg"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">\n'
-                f'<meta property="og:url" content="{BASIS}"><meta name="twitter:card" content="summary_large_image">\n<title>')
+                f'<meta property="og:image" content="{BILD_BASIS}og-bild.jpg"><meta property="og:image:secure_url" content="{BILD_BASIS}og-bild.jpg"><meta property="og:image:type" content="image/jpeg"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630"><meta property="og:image:alt" content="Velocenter Hessert: E-Bike- und E-Dreirad-Spezialist mit eigener Werkstatt in Wörth am Rhein"><meta name="twitter:image" content="{BILD_BASIS}og-bild.jpg">\n'
+                f'<meta property="og:url" content="{BILD_BASIS}"><meta name="twitter:card" content="summary_large_image">\n<title>')
     # Prototyp-Knopf, Footer-Link, Seite „Prototyp-Infos“
     s = block_raus(s, '<a class="proto" href="#warum">', '</a>\n')
     s = ersetze(s, '<a href="#warum">Prototyp-Infos</a>', '')

@@ -293,3 +293,10 @@
   `vorlage-metall.html` im Web-Repo (noindex, nicht in der Sitemap).
 - **Tiry: „metallik live“ (15.11.2026)** → Regeln ohne `html.mtl` fest in `index.html` hinter `.erl .erx`, Vorlage-Seite im Web-Repo gelöscht.
   Rote Fläche = Metall gebürstet; nicht auf die alte flache Fassung zurückbauen.
+
+## 15.11.2026 – WhatsApp-/Facebook-Vorschaubild (Tiry)
+- Vorschau zeigte kein Bild: `og:image` zeigte auf www.velo-center.de (bis zum Umzug noch Coco → 404). Jetzt `BILD_BASIS` in `tools/live_bauen.py`
+  (github.io, leitet nach dem Umzug selbst weiter) für `og:image`, `og:image:secure_url`, `twitter:image` und `og:url`; dazu `og:image:type` + `og:image:alt`.
+  `canonical` bleibt www.velo-center.de. Am Umzugstag `BILD_BASIS = BASIS` (steht in LIVEGANG.md).
+- `live/og-bild.jpg` neu (1200×630, aus der aktuellen Startseite: Laufband, Logo, Überschrift, Knöpfe, Showroom, Metall-Rot). Ohne Menüleiste und ohne
+  Geöffnet/Geschlossen-Anzeige (zeitabhängig). Bei großen Optik-Änderungen der Startseite neu erzeugen (2-fach rendern, Lanczos auf 1200×630).
