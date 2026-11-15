@@ -268,3 +268,7 @@
 - **Menü F auf schmalen PCs (15.11.2026):** Bei 1000–1366 px rutschte „Kontakt“ unter die Öffnungs-Pille, weil die feste Menü-F-Größe die
   Verdichtungs-Stufen `tight/tight2/tight3` von `hdrFit()` überschrieb → Stufen haben jetzt Vorrang (geprüft 1000–2560 px, oben + gescrollt).
   Sind die Social-Knöpfe dabei ausgeblendet (`.hdr.nosoc`), ist der linke Strich im Kopfbereich ausgeblendet, damit er nicht durchs Logo läuft.
+
+## 15.11.2026 – Ticker: „Google“ in Google-Farben (Tiry)
+- „Google“ in „4,8 ★ bei Google“ als weiße Pille wie die Bosch-Pille, Buchstaben in Google-Farben (G/g blau #4285F4, o/e rot #EA4335,
+  o gelb #FBBC05, l grün #34A853), Klasse `tkg` in `tkIt`. Weiße Pille, weil Rot/Blau direkt auf dem roten Band nicht lesbar wären.
