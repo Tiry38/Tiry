@@ -11,3 +11,12 @@ Gewählt von Tiry aus den 5 Hintergründen (Nr. 3), überarbeitet:
 - Karten über dem Rot sind deckend.
 
 Bauen: `python3 tools/live_bauen.py <tmp>`, dann `python3 inject.py <tmp>`.
+
+## Rote Fläche – 5 Varianten (15.11.2026)
+Umschalter unten mittig (Tasten 1–5), Datei `rv.css` + `rv.js`:
+1. **Carbon** – Köper-Gewebe als Struktur, Lichtstreif läuft langsam darüber.
+2. **Facetten** – scharfe Dreiecks-Facetten (SVG), Licht von oben rechts.
+3. **Info-Kante** – Lauftext entlang der Schnittkante: live geöffnet/geschlossen (Europe/Berlin), Bosch Service Center, 4,8 bei Google · 221 Rezensionen, 300+ E-Bikes, Adresse, Telefon.
+4. **Kennzahlen** – 300+ · 4,8 ★ · 1995 rechts im Rot (nicht auf der Startseite, dort steht die Showroom-Scheibe).
+5. **Laden-Foto** – echtes Ladenfoto (`laden-innen.webp`) als dunkles Rot-Duoton.
+Am Handy: Info-Varianten (3, 4) aus, Strukturen bleiben.
