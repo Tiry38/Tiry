@@ -277,3 +277,8 @@
 - Klick auf ein Thema im Hover-Menü (z. B. i:SY Experte → „Der erste und einzige i:SY Werbe-Bus“) im gleichen Reiter sprang erst ganz nach oben
   und dann zum Thema. Ursache: der allgemeine Klick-Handler (`href === location.hash` → `go(false)` → nach oben) lief zusätzlich zu `lbJump`.
   Fix: Menü-Panel stoppt das Weiterreichen des Klicks (`e.stopPropagation()`); die Seite gleitet jetzt direkt von der aktuellen Stelle zum Thema.
+
+## 15.11.2026 – Jahrgänge im Menü „i:SY Treffen“ (Tiry)
+- Hover-Vorschau i:SY Treffen hat unter „Auf dieser Seite“ die Zeile **„Jahrgänge“**: Glas-Pillen 2024 · 2023 · 2022 · 2019 · 2017
+  (neueste zuerst wie die Galerie, 2024 mit ★ und rotem Lichtrand = Weltrekord, Hover = roter Verlauf). Klick springt zur Galerie
+  „Bilder & Videos“ (`#tgY`) und filtert direkt auf dieses Jahr (`window.tgYear(y)`, `data-tgy`). Funktion `yr()` + 7. Parameter von `tx()`.

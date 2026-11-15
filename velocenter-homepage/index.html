@@ -2829,6 +2829,21 @@ footer .soc a{display:grid!important;place-items:center}
  transition:width .35s cubic-bezier(.22,1.2,.36,1),margin .35s cubic-bezier(.22,1.2,.36,1),box-shadow .3s ease}
 .lbp-ls a:hover i,.lbp-ls a:focus-visible i{width:16px;margin-right:7px;box-shadow:0 0 0 4px rgba(207,26,44,.16),0 0 0 5px rgba(255,255,255,.85),0 6px 14px -3px rgba(207,26,44,.7)}
 @media (prefers-reduced-motion:reduce){.lbp-ls i{transition:none}}
+/* Jahrgänge-Leiste in der Menü-Vorschau i:SY Treffen (15.11.2026, Tiry): Glas-Pillen, 2024 = Weltrekord mit rotem Lichtrand */
+.lbp-yr{display:flex;flex-wrap:nowrap;gap:7px;margin:2px 0 4px}
+.lbp-yr a{position:relative;display:inline-flex;align-items:center;justify-content:center;gap:4px;height:40px;min-width:0;padding:0 13px;border-radius:999px;isolation:isolate;
+ font-size:14.5px;font-weight:800;letter-spacing:.02em;color:#1B1E25;text-decoration:none;font-variant-numeric:tabular-nums;
+ background:linear-gradient(160deg,rgba(255,255,255,.96),rgba(238,243,250,.86));
+ box-shadow:inset 0 0 0 1px rgba(27,30,37,.1),inset 0 1px 0 #fff,0 8px 16px -12px rgba(30,50,90,.55);
+ transition:transform .35s cubic-bezier(.22,1.3,.36,1),box-shadow .3s ease,color .25s ease}
+.lbp-yr a::before{content:"";position:absolute;inset:0;z-index:-1;border-radius:inherit;opacity:0;transition:opacity .3s ease;
+ background:linear-gradient(135deg,#FF5466 0%,#D0142F 55%,#8E0E26 100%)}
+.lbp-yr a:hover,.lbp-yr a:focus-visible{transform:translateY(-3px);color:#fff;outline:none;box-shadow:inset 0 1px 0 rgba(255,255,255,.35),0 12px 22px -10px rgba(207,26,44,.7)}
+.lbp-yr a:hover::before,.lbp-yr a:focus-visible::before{opacity:1}
+.lbp-yr a.rk{color:#B30F2B;box-shadow:inset 0 0 0 1.5px rgba(207,26,44,.55),inset 0 1px 0 #fff,0 0 0 4px rgba(207,26,44,.08),0 10px 18px -12px rgba(207,26,44,.7)}
+.lbp-yr a.rk i{font-style:normal;font-size:12px;line-height:1}
+.lbp-yr a.rk:hover,.lbp-yr a.rk:focus-visible{color:#fff}
+@media (prefers-reduced-motion:reduce){.lbp-yr a,.lbp-yr a::before{transition:none}}
 </style>
 <script>document.documentElement.classList.add('er')</script>
 <style id="eisRot">
@@ -5050,6 +5065,7 @@ function admHash(){if(location.hash==='#admin')admOpen()}addEventListener('hashc
  function vid(id,t,ok){if(!ok&&!ytOk()){st.innerHTML=ytConsent(id,t);cap.textContent=t;lb.querySelectorAll('.tgnav').forEach(b=>b.hidden=true);return}st.innerHTML='<div class="tgvf"><iframe src="https://www.youtube-nocookie.com/embed/'+id+'?autoplay=1&rel=0" title="'+esc(t)+'" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen></iframe></div>';
   cap.innerHTML=esc(t)+'<a href="https://www.youtube.com/watch?v='+id+'" target="_blank" rel="noopener">Auf YouTube öffnen ↗</a>';lb.querySelectorAll('.tgnav').forEach(b=>b.hidden=true)}
  $('#tgY').addEventListener('click',e=>{const b=e.target.closest('[data-y]');if(!b)return;Y=b.dataset.y;draw()});
+ window.tgYear=y=>{Y=YS.includes(y)?y:'';draw()};
  G.addEventListener('click',e=>{const yv=e.target.closest('[data-yt]');if(yv){vid(yv.dataset.yt,yv.dataset.t);open();return}const b=e.target.closest('[data-i]');if(!b)return;show(+b.dataset.i);open()});
  
  lb.addEventListener('click',e=>{const yg=e.target.closest('[data-ytgo]');if(yg){if($('#ytRem')&&$('#ytRem').checked)LS.set('vc_yt',1);vid(yg.dataset.ytgo,yg.dataset.t,1);return}if(e.target.closest('[data-tgx]')||e.target===lb||e.target===st){close();return}const n=e.target.closest('[data-tgn]');if(n)show(K+ +n.dataset.tgn)});
@@ -5779,7 +5795,9 @@ function lbJump(v,q,sm){const s=document.querySelector('main > section.view[data
  const t=lbFind(s,q);if(!t)return;let n=0,stop=0;const st=()=>{stop=1};['wheel','touchstart','keydown'].forEach(e=>addEventListener(e,st,{once:true,passive:true}));
  const go=b=>{if(stop)return;const H=((document.querySelector('.hdr')||{}).offsetHeight||80)+18,y=Math.max(0,Math.round(t.getBoundingClientRect().top+scrollY-H));
   if(Math.abs(scrollY-y)>6)scrollTo({top:y,behavior:b?'smooth':'auto'});if(++n<5)setTimeout(()=>go(false),n===1?(b?900:350):400)};go(sm)}
-const tx=(ey,hh,p,k,it,c)=>`<div class="lbp-tx"><div class="lbp-ey">${ey}</div><h3 class="lbp-h">${hh}</h3>${p?`<p class="lbp-p">${p}</p>`:''}<div class="lbp-on">Auf dieser Seite</div>${ls(k,it)}${c}</div>`;
+const tx=(ey,hh,p,k,it,c,x)=>`<div class="lbp-tx"><div class="lbp-ey">${ey}</div><h3 class="lbp-h">${hh}</h3>${p?`<p class="lbp-p">${p}</p>`:''}<div class="lbp-on">Auf dieser Seite</div>${ls(k,it)}${x||''}${c}</div>`;
+/* Jahrgänge der i:SY-Treffen (Tiry 15.11.2026): Klick = Galerie mit diesem Jahr gefiltert */
+const yr=ys=>`<div class="lbp-on">Jahrgänge</div><div class="lbp-yr">${ys.map(y=>`<a href="#treffen" tabindex="-1" data-lbq="treffen|#tgY" data-tgy="${y}"${y==='2024'?' class="rk" title="2024: Weltrekord"':''}>${y==='2024'?'<i aria-hidden="true">★</i>':''}${y}</a>`).join('')}</div>`;
 const M=['ktm','isy','gudereit','vdv','qio','vanraam','victoria','stevens'];
 const P={
 start:tx('Start · Familienbetrieb seit 1995','<span style="white-space:nowrap">E-Bike &amp;</span> <span style="white-space:nowrap">E-Dreirad-Spezialist</span><br><span class="gt it">mit eigener Werkstatt.</span>','Über 300 E-Bikes zum Probefahren und ein Bosch Service Center in Wörth.','start',['Showroom: über 300 E-Bikes vor Ort','Hier schraubt der Chef noch selbst','Das sagen unsere Kunden bei Google','Besuch uns: Hartmannstraße 25'],cta(['Zur Startseite','#start'],['Termin','#termin']))+
@@ -5792,7 +5810,7 @@ lager:tx('Auf Lager · Live','Sofort da.<br><span class="gt it">Sofort Probe fah
  `<div class="lbp-vi" data-lgvi><div class="lbp-blob"></div><span class="lbp-live" style="left:14px;top:14px"><i></i>LIVE</span></div>`,
 isy:tx('i:SY Experte · seit 2015','i:SY Händler<br><span class="gt it">mit Leib und Seele.</span>','Über 1.000 i:SY haben wir seit 2015 verkauft.','isy',['Unsere i:SY Testflotte','Warum zu uns für dein i:SY?','Der erste und einzige i:SY Werbe-Bus'],cta(['Zum i:SY Experten','#isy']))+
  `<div class="lbp-vi"><div class="lbp-ph"><img src="img/isy-ausstellung.webp" alt=""></div><img class="lbp-cut" src="img/isy-experte-rund.webp" alt="" style="width:108px;right:-12px;bottom:-14px"></div>`,
-treffen:tx('i:SY Treffen · 2017–2024','Wir haben den<br><span class="gt it">Weltrekord.</span>','09.06.2024: die längste statische Fahrrad-Schlange einer Marke, bestätigt vom RID.','treffen',['Von 100 Fans zum Weltrekord','Fünf Treffen. Unzählige Momente.','i:SY-Treffen wieder ein toller Erfolg'],cta(['Zum i:SY Treffen','#treffen']))+
+treffen:tx('i:SY Treffen · 2017–2024','Wir haben den<br><span class="gt it">Weltrekord.</span>','09.06.2024: die längste statische Fahrrad-Schlange einer Marke, bestätigt vom RID.','treffen',['Von 100 Fans zum Weltrekord','Fünf Treffen. Unzählige Momente.','i:SY-Treffen wieder ein toller Erfolg'],cta(['Zum i:SY Treffen','#treffen']),yr(['2024','2023','2022','2019','2017']))+
  `<div class="lbp-vi"><div class="lbp-ph"><img src="img/treffen-luft.webp" alt=""></div><img class="lbp-cut" src="img/weltrekord-button.webp" alt="" style="width:112px;right:-14px;bottom:-12px"></div>`,
 dreirad:tx('E-Dreiräder · Van Raam','Sicher auf<br><span class="gt it">drei Rädern.</span>','Easy Rider Compact Plus und Easy Rider 3: bequem wie im Sessel.','dreirad',['Welcher Easy Rider passt zu dir?','Compact Plus: kompakt, komfortabel, voll ausgestattet','Easy Rider 3: der Klassiker','Stell dir deinen Easy Rider zusammen'],cta(['Zu den E-Dreirädern','#dreirad']))+
  `<div class="lbp-vi"><div class="lbp-blob"></div><img class="lbp-cut" src="img/p-vanraam.webp" alt="" style="width:290px;left:22px;top:20px"></div>`,
@@ -5821,7 +5839,7 @@ document.body.appendChild(pan);pan.querySelectorAll('.lbp-pg').forEach(e=>pg[e.d
 if(window.ResizeObserver){const ro=new ResizeObserver(fit);Object.values(pg).forEach(e=>ro.observe(e))}
 pan.querySelectorAll('img').forEach(i=>i.addEventListener('load',fit));
 pan.addEventListener('pointerleave',leave);pan.addEventListener('pointerenter',()=>clearTimeout(tClose));
-pan.addEventListener('click',e=>{const L=e.target.closest('[data-lbq]');if(L){e.preventDefault();e.stopPropagation();close();const [v,q]=L.dataset.lbq.split('|'),sv=document.querySelector('main > section.view:not([hidden])');
+pan.addEventListener('click',e=>{const L=e.target.closest('[data-lbq]');if(L){e.preventDefault();e.stopPropagation();close();if(L.dataset.tgy&&window.tgYear)tgYear(L.dataset.tgy);const [v,q]=L.dataset.lbq.split('|'),sv=document.querySelector('main > section.view:not([hidden])');
  if(sv&&sv.dataset.v===v)lbJump(v,q,true);else{location.hash=v;setTimeout(()=>lbJump(v,q,false),640)}return}
  if(e.target.closest('a'))close()})}
 let cur=null,tOpen=0,tClose=0;
