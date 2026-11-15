@@ -1,0 +1,65 @@
+/* ===== Entwurf: 5 Hintergründe (Tiry 15.11.2026) – Striche, Waben, Showroom bleiben; keine Kreise, keine Wellen, kein Rosa ===== */
+html[data-bgv] .blobs i{display:none!important}
+html[data-bgv] .ribbons i:nth-child(1),html[data-bgv] .ribbons i:nth-child(4){display:none!important}
+html[data-bgv] .smoke{opacity:.03!important}
+@media (min-width:1181px){html[data-bgv] body.sc .hdr{background:linear-gradient(180deg,rgba(250,252,254,.88),rgba(238,244,250,.82))!important;box-shadow:0 14px 40px -26px rgba(30,60,100,.38)!important}}
+@keyframes bgvShim{to{background-position:100% 0,0 0,0 0}}
+
+/* 1 PERLE – ganz hell, kräftige Perlmutt-Lichtbahnen, die langsam wandern */
+html[data-bgv="1"]{--bg:#F6F6F4}
+html[data-bgv="1"] .sky{background:
+ linear-gradient(115deg,rgba(255,255,255,0) 8%,rgba(255,255,255,.85) 20%,rgba(255,255,255,0) 32%,rgba(255,255,255,.7) 52%,rgba(255,255,255,0) 64%,rgba(255,255,255,.8) 82%,rgba(255,255,255,0) 94%),
+ linear-gradient(115deg,#F7F2EA 0%,#E4EEF7 20%,#EDEAF4 36%,#E0F2EF 52%,#F6EDDF 68%,#E2EDF8 84%,#F5F3EF 100%)!important;background-size:240% 100%,100% 100%!important;animation:bgvShim 30s ease-in-out infinite alternate!important}
+html[data-bgv="1"] .sky::after{opacity:.12!important}
+html[data-bgv="1"] .ribbons i:nth-child(3){background:linear-gradient(90deg,transparent 6%,rgba(255,255,255,.5) 30%,rgba(255,255,255,.7) 55%,rgba(255,255,255,.2) 80%,transparent 95%)!important}
+
+/* 2 GLETSCHER – die ganze Seite in klarem Eisblau, Waben und Striche weiß */
+html[data-bgv="2"]{--bg:#DCEAF6}
+html[data-bgv="2"] .sky{background:linear-gradient(115deg,transparent 50%,rgba(255,255,255,.45) 64%,transparent 80%),linear-gradient(170deg,#C9DFF2 0%,#A9CBEA 34%,#BBD6EE 62%,#E2EEF8 100%)!important}
+html[data-bgv="2"] .sky::after{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='56' height='97' viewBox='0 0 56 97'%3E%3Cpath d='M28 0l28 16.2v32.3L28 64.7 0 48.5V16.2zM28 64.7v32.3' fill='none' stroke='%23FFFFFF' stroke-width='1.6'/%3E%3C/svg%3E")!important;opacity:.5!important}
+html[data-bgv="2"] .sky::before{background:linear-gradient(115deg,transparent 0 62%,rgba(255,255,255,.8) 62% 63.5%,transparent 63.5% 66%,rgba(200,16,46,.3) 66% 67%,transparent 67%),linear-gradient(115deg,transparent 0 18%,rgba(255,255,255,.75) 18% 19%,transparent 19%)!important}
+html[data-bgv="2"] .ribbons i:nth-child(3){background:linear-gradient(90deg,transparent 6%,rgba(40,90,140,.18) 30%,rgba(40,90,140,.26) 55%,rgba(40,90,140,.1) 80%,transparent 95%)!important}
+
+/* 3 EIS & ROT – Eisblau links, rechts ein großes rotes Lichtfeld entlang der Striche */
+html[data-bgv="3"]{--bg:#EEF2F6}
+html[data-bgv="3"] .sky{background:
+ linear-gradient(160deg,#F3F6F9 0%,#DCE8F4 45%,#CDDFEF 75%,#E6EEF5 100%)!important}
+html[data-bgv="3"] .sky::before{background:linear-gradient(115deg,transparent 0 62%,rgba(38,40,47,.22) 62% 63.5%,transparent 63.5% 65%,rgba(200,16,46,.75) 65% 66.4%,transparent 66.4%),linear-gradient(115deg,transparent 0 18%,rgba(38,40,47,.2) 18% 19%,transparent 19%)!important}
+html[data-bgv="3"] .ribbons i:nth-child(3){background:linear-gradient(90deg,transparent 6%,rgba(60,110,160,.14) 30%,rgba(60,110,160,.2) 55%,rgba(60,110,160,.08) 80%,transparent 95%)!important}
+
+/* 4 KRISTALL – schräge Facetten mit harten Kanten wie geschliffenes Eisglas */
+html[data-bgv="4"]{--bg:#EEF3F8}
+html[data-bgv="4"] .sky{background:
+ linear-gradient(115deg,#F7F9FB 0 14%,#CADDEE 14% 30%,#EEF3F8 30% 41%,#B4CFE8 41% 55%,#E2ECF6 55% 62%,#C4D9EC 62% 78%,#F4F6F9 78% 88%,#CCDEEF 88% 100%)!important}
+html[data-bgv="4"] .sky::before{background:
+ linear-gradient(115deg,transparent 0 13.8%,rgba(255,255,255,.95) 13.8% 14.2%,transparent 14.2% 29.8%,rgba(255,255,255,.9) 29.8% 30.2%,transparent 30.2% 40.8%,rgba(120,150,180,.35) 40.8% 41.1%,transparent 41.1% 54.8%,rgba(255,255,255,.95) 54.8% 55.2%,transparent 55.2% 62%,rgba(38,40,47,.16) 62% 63.5%,transparent 63.5% 66%,rgba(200,16,46,.22) 66% 67%,transparent 67% 77.8%,rgba(255,255,255,.9) 77.8% 78.2%,transparent 78.2%),
+ linear-gradient(115deg,transparent 0 18%,rgba(38,40,47,.14) 18% 19%,transparent 19%)!important}
+html[data-bgv="4"] .sky::after{opacity:.14!important}
+html[data-bgv="4"] .blobs::after{opacity:.6}
+
+/* 5 STAHL – kühles Silber-Stahlblau, fein gebürstet wie Metall, weiße Lichtstriche */
+html[data-bgv="5"]{--bg:#E4EAF0}
+html[data-bgv="5"] .sky{background:
+ repeating-linear-gradient(115deg,rgba(255,255,255,.18) 0 1px,transparent 1px 4px),
+ linear-gradient(115deg,transparent 30%,rgba(255,255,255,.5) 46%,transparent 62%),
+ linear-gradient(180deg,#7D93AA 0%,#98ACC0 34%,#BCCAD8 66%,#DDE4EB 100%)!important}
+html[data-bgv="5"] .sky::before{background:linear-gradient(115deg,transparent 0 62%,rgba(255,255,255,.85) 62% 63.5%,transparent 63.5% 66%,rgba(200,16,46,.32) 66% 67%,transparent 67%),linear-gradient(115deg,transparent 0 18%,rgba(255,255,255,.8) 18% 19%,transparent 19%)!important}
+html[data-bgv="5"] .sky::after{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='56' height='97' viewBox='0 0 56 97'%3E%3Cpath d='M28 0l28 16.2v32.3L28 64.7 0 48.5V16.2zM28 64.7v32.3' fill='none' stroke='%23FFFFFF' stroke-width='1.6'/%3E%3C/svg%3E")!important;opacity:.28!important}
+html[data-bgv="5"] .ribbons i:nth-child(3){background:linear-gradient(90deg,transparent 6%,rgba(30,40,55,.16) 30%,rgba(30,40,55,.22) 55%,rgba(30,40,55,.08) 80%,transparent 95%)!important}
+html[data-bgv="4"] .ribbons i:nth-child(2),html[data-bgv="5"] .ribbons i:nth-child(2){opacity:.22!important}
+html[data-bgv="5"] .blobs::after{opacity:0!important}
+@media (prefers-reduced-motion:reduce){html[data-bgv] .sky{animation:none!important}}
+/* Lesbarkeit: dunklere Begleittexte auf den kräftigeren Flächen */
+html[data-bgv="2"],html[data-bgv="2"] body{--mut:#2C3343}
+html[data-bgv="5"],html[data-bgv="5"] body{--mut:#232833}
+/* 3: halbtransparente Karten über dem roten Feld würden rosa – dort fast deckendes Eisglas */
+html[data-bgv="3"] :is(.q,.panel,.etw,.drin,.lgc,.finder,.drcard,.drk2){background-color:rgba(246,249,252,.96)!important}
+/* 3: rotes Dreieck oben rechts, scharfkantig im Winkel der Striche, scrollt mit der Seite (Text liegt nie auf Rot) */
+html[data-bgv="3"] main{position:relative}
+html[data-bgv="3"] main::before,html[data-bgv="3"] main::after{content:"";position:absolute;top:88px;right:0;--h:900px;height:var(--h);width:calc(var(--h)*.466);pointer-events:none;z-index:-1}
+html[data-bgv="3"] main::before{background:rgba(255,255,255,.95);clip-path:polygon(0 0,100% 0,100% 100%)}
+html[data-bgv="3"] main::after{background:linear-gradient(205deg,#B0122E 0%,#930F26 30%,#6C0C1E 65%,#3E1219 100%);clip-path:polygon(1.4% 0,100% 0,100% 98.6%);
+ box-shadow:none}
+html[data-bgv="3"] main:has(> section.view[data-v="start"]:not([hidden]))::before,html[data-bgv="3"] main:has(> section.view[data-v="start"]:not([hidden]))::after{--h:min(1200px,135vh)}
+@media (max-width:760px){html[data-bgv="3"] main::before,html[data-bgv="3"] main::after,html[data-bgv="3"] main:has(> section.view[data-v="start"]:not([hidden]))::before,html[data-bgv="3"] main:has(> section.view[data-v="start"]:not([hidden]))::after{--h:250px;top:84px}}
+html[data-bgv="3"] .dealn{background:rgba(246,249,252,.94);border-radius:999px;padding:3px 10px;width:max-content;max-width:100%}

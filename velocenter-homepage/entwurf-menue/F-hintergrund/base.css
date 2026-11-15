@@ -1,0 +1,11 @@
+@property --vr{syntax:'<angle>';inherits:false;initial-value:0deg}
+@keyframes vRim{to{--vr:360deg}}
+@keyframes vFlow{0%{background-position:0% 50%}100%{background-position:200% 50%}}
+@media (min-width:1181px){
+html body .hdr .nav{background:none!important;border:0!important;box-shadow:none!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important;padding:0!important}
+html body .hdr .nav a,html body .hdr .nav a:hover,html body .hdr .nav a.on{background:none!important;box-shadow:none!important}
+html body .hdr .nav a::before,html body .hdr .nav a::after{display:none!important}
+html body.sc .hdr{background:radial-gradient(520px 120px at 0% 0%,rgba(226,35,45,.12),transparent 70%),radial-gradient(520px 120px at 100% 0%,rgba(47,111,176,.13),transparent 70%),radial-gradient(700px 120px at 55% 130%,rgba(155,63,216,.12),transparent 70%),rgba(252,249,250,.82)!important;box-shadow:0 14px 40px -26px rgba(90,30,110,.35)!important}
+html body.sc .hdr::after{display:none!important}
+}
+@media (prefers-reduced-motion:reduce){html body .hdr *{animation:none!important;transition:none!important}}

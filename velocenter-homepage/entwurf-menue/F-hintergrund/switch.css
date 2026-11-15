@@ -1,0 +1,11 @@
+/* Umschalter nur für die Vorlage (nicht für die echte Seite) */
+.bgsw{position:fixed;z-index:9999;right:calc(12px + env(safe-area-inset-right,0px));top:50%;transform:translateY(-50%);display:flex;flex-direction:column;align-items:center;gap:6px;padding:12px 6px 6px;border-radius:32px;
+ background:linear-gradient(180deg,rgba(255,255,255,.9),rgba(236,243,250,.85));backdrop-filter:blur(18px) saturate(1.6);-webkit-backdrop-filter:blur(18px) saturate(1.6);
+ box-shadow:0 18px 40px -18px rgba(20,40,70,.5),inset 0 1px 0 #fff,inset 0 0 0 1px rgba(27,30,37,.08);font:600 13px/1.2 Outfit,system-ui,sans-serif;color:#1B1E25}
+.bgsw .lab{display:grid;gap:2px;text-align:center;width:72px;margin-bottom:2px}.bgsw .lab small{font-size:9px!important;letter-spacing:.1em!important}.bgsw .nm{font-size:11px}.bgsw .lab small{font-size:10.5px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:#C8102E}
+.bgsw button{width:44px;height:44px;border-radius:50%;border:0;padding:0;cursor:pointer;font:800 15px Outfit,system-ui,sans-serif;color:#1B1E25;background:var(--sw);
+ box-shadow:inset 0 0 0 1px rgba(27,30,37,.12),0 6px 12px -8px rgba(20,40,70,.5);transition:transform .3s cubic-bezier(.22,1.3,.36,1),box-shadow .3s}
+.bgsw button:hover{transform:translateY(-2px)}
+.bgsw button[aria-pressed="true"]{box-shadow:0 0 0 3px #fff,0 0 0 5px #C8102E,0 8px 16px -8px rgba(200,16,46,.6)}
+.bgsw button:focus-visible{outline:3px solid #2F6FB0;outline-offset:3px}
+@media (max-width:620px){.bgsw{top:auto;right:auto;left:50%;bottom:calc(80px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);flex-direction:row;padding:6px}.bgsw .lab{display:none}}
