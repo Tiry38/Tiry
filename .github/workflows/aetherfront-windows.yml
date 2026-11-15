@@ -40,6 +40,12 @@ jobs:
         with:
           name: Aetherfront-Windows-Installer
           path: aetherfront/dist/*.exe
+          compression-level: 0
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Aetherfront-ohne-Installer
+          path: aetherfront/dist/win-unpacked/
+
       - name: Release veröffentlichen (nur main)
         if: github.ref == 'refs/heads/main'
         shell: bash
@@ -49,5 +55,5 @@ jobs:
           VER="0.1.${{ github.run_number }}"
           TAG="aetherfront-v$VER"
           git tag "$TAG" "$GITHUB_SHA" && git push origin "refs/tags/$TAG"
-          gh release create "$TAG" dist/*.exe --verify-tag --title "Aetherfront $VER" \
+          gh release create "$TAG" dist/*.exe dist/*.zip --verify-tag --title "Aetherfront $VER" \
             --notes "Windows-Installer von Aetherfront. Herunterladen, ausführen, spielen."
