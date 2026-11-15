@@ -224,6 +224,8 @@ export function createEnvironment({ scene, renderer, quality = 'high', assets = 
   let current = null;
   /** Welt an die belegten Bahnen anpassen ({ key, lanes, march } aus mapLayout). Neubau nur bei neuem Kartenbild. */
   function setLayout(layout) {
+    // Arena-Insel nur zeigen, wenn die Partie eine Arena hat (Kampagne/Arena aus: kein rätselhaftes Rund im Norden)
+    arena.root.visible = !layout || layout.arena !== false;
     const key = layout && !layout.full ? layout.key : FULL;
     if (key === layoutKey) return false;
     let next = worlds.get(key);

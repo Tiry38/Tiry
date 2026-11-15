@@ -8,6 +8,7 @@ import { ATTACK_TYPES, UNITS, FACTIONS } from '../sim/data.js';
 
 const _m = new THREE.Matrix4(), _p = new THREE.Vector3(), _q = new THREE.Quaternion(), _s = new THREE.Vector3(), _c = new THREE.Color(), _v = new THREE.Vector3();
 const _a = new THREE.Vector3(), _b = new THREE.Vector3(), _side = new THREE.Vector3(), _n = new THREE.Vector3(), _toCam = new THREE.Vector3();
+const C_FIRE = new THREE.Color('#ff7a22'), C_FIRE2 = new THREE.Color('#ff4a12'), C_SMOKE1 = new THREE.Color('#2e2a28'), C_SMOKE2 = new THREE.Color('#4a4440');
 const UP = new THREE.Vector3(0, 1, 0), FWD = new THREE.Vector3(0, 0, 1);
 const rnd = (a = 0, b = 1) => a + Math.random() * (b - a);
 
@@ -499,7 +500,7 @@ export class Fx {
       if (e.kind === 'arrow') {
         if (na < 512) {
           _q.setFromUnitVectors(FWD, s.dir);
-          const L = 1.05 * s.big;
+          const L = 1.3 * s.big;
           _m.compose(_p.set(s.x, s.y, s.z), _q, _s.set(L * 1.15, L * 1.15, L));
           this.arrows.setMatrixAt(na, _m); this.arrows.setColorAt(na, s.big > 1.3 ? _c.setRGB(0.8, 0.85, 0.95) : _c.setRGB(1, 1, 1)); na++;
         }
@@ -509,15 +510,15 @@ export class Fx {
         const R = 0.42 * s.big;
         _m.compose(_p.set(s.x, s.y, s.z), _q.setFromAxisAngle(s.ax, s.ang), _s.setScalar(R));
         if (e.kind === 'shell') {
-          if (nr < 128) { this.rocks.setMatrixAt(nr, _m); this.rocks.setColorAt(nr, _c.setRGB(0.42, 0.36, 0.32)); nr++; }
-          // brennend: flackernde Flammen + Glut, dicke Rauchfahne
+          if (nr < 128) { this.rocks.setMatrixAt(nr, _m); this.rocks.setColorAt(nr, _c.setRGB(0.2, 0.17, 0.15)); nr++; }
+          // brennend: flackernde Flamme hinter dem Brocken (Flugrichtung), Glut, dicke Rauchfahne
           const fl = 0.85 + Math.random() * 0.3;
-          this.spriteNow(s.x - s.dir.x * R * 0.6, s.y + R * 0.2, s.z - s.dir.z * R * 0.6, R * 3.4 * fl, _c.set('#ff7a22'), 1, rnd(-0.2, 0.2), 1.6);
-          this.spriteNow(s.x, s.y, s.z, R * 2.4, _c.set('#ffb05a'), 0, 0, 1.3);
+          this.spriteNow(s.x - s.dir.x * R * 1.3, s.y - s.dir.y * R * 1.3 + R * 0.3, s.z - s.dir.z * R * 1.3, R * 2.6 * fl, C_FIRE, 1, rnd(-0.25, 0.25), 1.25);
+          this.spriteNow(s.x - s.dir.x * R * 2.4, s.y - s.dir.y * R * 2.4, s.z - s.dir.z * R * 2.4, R * 2.0 * fl, C_FIRE2, 0, 0, 0.8);
           s.acc += dt * 40 * Math.min(1, 0.4 + 0.6 * this.density);
           while (s.acc >= 1) {
             s.acc -= 1;
-            this.smokeP.add(s.x + rnd(-0.2, 0.2) * R, s.y + rnd(-0.2, 0.2) * R, s.z + rnd(-0.2, 0.2) * R, rnd(-0.3, 0.3), rnd(0.2, 0.7), rnd(-0.3, 0.3), _c.set(Math.random() < 0.5 ? '#4a4440' : '#6a625a'), 1, rnd(1.0, 1.8), R * 2.2, 0.5, 1.2, 2.2, 0.55);
+            this.smokeP.add(s.x - s.dir.x * R * 1.5 + rnd(-0.3, 0.3) * R, s.y - s.dir.y * R * 1.5 + rnd(-0.3, 0.3) * R, s.z - s.dir.z * R * 1.5 + rnd(-0.3, 0.3) * R, rnd(-0.3, 0.3), rnd(0.2, 0.7), rnd(-0.3, 0.3), Math.random() < 0.5 ? C_SMOKE1 : C_SMOKE2, 1, rnd(1.2, 2.0), R * 2.6, 0.5, 1.2, 2.4, 0.75);
             if (Math.random() < 0.5) this.glowP.add(s.x, s.y, s.z, rnd(-1, 1), rnd(0, 1.5), rnd(-1, 1), _c.set('#ff8a2a'), 3, rnd(0.25, 0.5), 0.22 * s.big, -3, 1.5);
           }
         } else {

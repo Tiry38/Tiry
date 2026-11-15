@@ -73,6 +73,10 @@ Gespiegelt/Zufall und **Endlos** (Endwellen, bis ein König fällt).
 Feste Draufsicht, keine spielbaren Helden. Steuerung: Kämpfer bauen mit **Q W E R A S D F**, ausgewählten Kämpfer
 aufwerten mit **C / V** (die Auswahlkarte zeigt beide Pfade mit Wertevergleich), Söldner **1–6** / **⇧1–⇧6**,
 König-Fähigkeiten **F1–F3**, Funke **B**, Sammeln **N**, Königshalle **K**, Heilen **H**, Übersichten **T** / **G**.
+Kamera: **Pfeiltasten** oder Maus an den Bildschirmrand, **rechte/mittlere Maustaste ziehen** greift die Karte, **Mausrad**
+zoomt zum Mauszeiger, **Minimap** (rechts unten) anklicken/ziehen, **Leertaste** eigene Bahn, **Pos1** eigener König,
+**Alt + mittlere Maustaste** dreht. Die Welt zeigt nur belegte Bahnen (Kampagne: nur deine Bahn + Marschweg zur
+Rissfeste; Gefechte mit weniger als 4 Spielern je Team: Landschaft statt leerer Bahnen); Kamera-Grenzen und Minimap folgen.
 
 ## Solo-Kampagne „Chronik des Risses“
 

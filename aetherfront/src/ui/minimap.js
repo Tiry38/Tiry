@@ -82,8 +82,9 @@ export class Minimap {
     const land = (path) => {
       path();
       const gr = g.createLinearGradient(0, 0, this.w, this.h);
-      gr.addColorStop(0, 'rgba(70, 120, 92, 0.55)'); gr.addColorStop(0.5, 'rgba(52, 96, 110, 0.5)'); gr.addColorStop(1, 'rgba(84, 78, 120, 0.55)');
-      g.fillStyle = gr; g.fill();
+      gr.addColorStop(0, 'rgba(86, 150, 98, 0.66)'); gr.addColorStop(0.5, 'rgba(58, 128, 128, 0.6)'); gr.addColorStop(1, 'rgba(104, 92, 150, 0.62)');
+      g.save(); g.shadowColor = 'rgba(111, 227, 255, 0.35)'; g.shadowBlur = 8 * this.dpr;
+      g.fillStyle = gr; g.fill(); g.restore();
       g.lineWidth = Math.max(1, 1.2 * this.dpr); g.strokeStyle = 'rgba(190, 240, 255, 0.22)'; g.stroke();
     };
     land(() => circle(HERO.x, HERO.z, HERO.r));
