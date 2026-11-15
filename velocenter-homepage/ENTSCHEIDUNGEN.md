@@ -340,3 +340,8 @@
   dem Rot lag und es blass/rosa machte (gemessen Service 192/63/79 statt Start 189/37/68). Schein oben rechts entfernt, links unten bleibt.
 - Dazu am PC (≥ 761 px) überall dieselbe Größe wie Start (`--h:min(1200px,135vh)`), Handy unverändert (250 px).
 - Ergebnis: Service/Marken/Kontakt 176/31/60 – gleich kräftig wie Start. **Nie wieder Licht/Schein über die rote Fläche legen.**
+
+## 15.11.2026 – Rad-Finder-Angebote + Hänger behoben (Tiry)
+- **Rad-Finder-Ergebnis:** Angebotsräder zeigen Schild „% Sonderangebot“ auf dem Bild, alten Preis durchgestrichen, Angebotspreis rot mit *, „Du sparst …“ und „* Angebotspreis, nicht bei Leasing & Finanzierung“. Nie wieder Angebotspreis als normalen Preis zeigen.
+- **Hänger („nichts klickbar, nach Aktualisieren geht es“):** Ursache war die Wisch-Sperre beim Reiterwechsel (1 s) – Tipps in dieser Zeit wurden verschluckt, Seite blieb im falschen Reiter. Jetzt wird der Tipp nach der Animation ausgeführt (`pend` im Router).
+- Reiterwechsel (auch Zurück-Wischen am Handy) schließt offene Fenster (Rad, Finder, Vergleich); schnelles Zu/Auf öffnet sicher (Schließ-Timer wird abgebrochen); Marken-Showroom-Sperre löst spätestens nach 2,5 s.

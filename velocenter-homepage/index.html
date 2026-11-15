@@ -1989,6 +1989,16 @@ body.fz2 main,body.fz2 .foot{zoom:1.25}
 .rfc .pr{display:flex;justify-content:space-between;align-items:center;margin-top:4px;font:800 17px/1 var(--display)}
 .rfc .pr em{font-style:normal;font-size:12px;color:var(--dim);margin-right:4px;font-weight:600}
 .rfc .pr i{font-style:normal;font:700 12.5px/1 var(--display);color:#C8102E}
+/* Rad-Finder: Angebot klar kennzeichnen (Tiry 15.11.2026) */
+.rfc .im{position:relative}
+.rfdl{position:absolute;left:10px;bottom:10px;padding:6px 11px;border-radius:999px;font:800 12px/1 var(--display);letter-spacing:.04em;color:#fff;background:linear-gradient(110deg,#E2232D,#B5102A 55%,#7C3AED);box-shadow:0 8px 18px -8px rgba(200,16,46,.75)}
+.rfc .pr.dl{align-items:flex-end}
+.rfc .pr.dl>span{display:flex;flex-direction:column;gap:3px}
+.rfc .pr.dl s{font:600 13px/1 var(--display);color:var(--dim)}
+.rfc .pr.dl b.an{font:800 19px/1 var(--display);color:#C8102E}
+.rfc .pr.dl .ast{font-size:11px;margin-left:1px}
+.rfc .pr.dl .sv{font:700 12px/1.2 var(--display);color:#047857}
+.rfc .pr.dl .anl{margin-top:1px}
 .rf-none{padding:24px;border-radius:18px;background:#fff;border:1px dashed rgba(27,30,37,.2)}
 /* Merken-Herz */
 .hrt{position:absolute;z-index:4;top:10px;right:10px;width:42px;height:42px;display:grid;place-items:center;border-radius:50%;border:1px solid rgba(27,30,37,.1);background:rgba(255,255,255,.92);color:#1B1E25;cursor:pointer;transition:transform .3s var(--spring),background .25s,color .25s}
@@ -4316,7 +4326,7 @@ function showroom(root,prefix){
   let x;if(how!=='tab'){if(q.length){n=q.shift();x=srPick(BR[n].k)}else{const ks=SR.pool?Object.keys(SR.pool).filter(j=>!SRFIX.includes(j)&&SR.pool[j].length&&BR.some(b=>b.k===j)):[];x=ks.length?srPick(bagNext(MB,ks)):srPick('*');n=BR.findIndex(b=>b.k===x.k)}MB.l=BR[n].k}
   else{q=q.filter(j=>j!==n);x=srPick(BR[n].k)}if(n===i&&cur&&x.img===cur.img)return;i=n;cur=x;const b=BR[i];busy=1;
   bk.classList.add('out-l');wm.classList.add('swap');rf.style.opacity=0;
-  setTimeout(()=>{const go=()=>{bk.classList.add('in-r');bk.classList.remove('out-l');bk.src=x.img;bk.alt=x.m+(x.f?' in '+x.f:'');rf.src=x.img;wm.src=b.logo;thSet(i,x.img);paint();rdy([bk,wm]).then(()=>{void bk.offsetWidth;bk.classList.remove('in-r');wm.classList.remove('swap');rf.style.opacity='';busy=0})};Promise.all([dec(x.img),dec(b.logo)]).then(go)},420);}
+  setTimeout(()=>{const go=()=>{bk.classList.add('in-r');bk.classList.remove('out-l');bk.src=x.img;bk.alt=x.m+(x.f?' in '+x.f:'');rf.src=x.img;wm.src=b.logo;thSet(i,x.img);paint();rdy([bk,wm]).then(()=>{void bk.offsetWidth;bk.classList.remove('in-r');wm.classList.remove('swap');rf.style.opacity='';busy=0})};Promise.race([Promise.all([dec(x.img),dec(b.logo)]),new Promise(r=>setTimeout(r,2500))]).then(go)},420);}
  const user=()=>{hold=Date.now()+20000};
  th.addEventListener('click',e=>{const b=e.target.closest('button');if(b){user();to(+b.dataset.j,'tab')}});
  $('#'+prefix+'sp').addEventListener('click',()=>{user();to(i-1,'prev')});
@@ -4414,12 +4424,14 @@ function arm(sec){$$('.pre',sec).forEach(el=>{el.classList.remove('in');if(!io){
  const r=el.getBoundingClientRect();if(r.top<innerHeight*.92)el.classList.add('in');else io.observe(el)})}
 
 /* ---------- Router + Wischer ---------- */
-let cur=null,busy=false;
+let cur=null,busy=false,pend=false;
 /* Sprungziel nachführen, falls Bilder/Animationen darüber die Höhe noch ändern */
 function anchFix(t,d=0){let n=0;const k=()=>{if(++n>6)return;const y=t.getBoundingClientRect().top;if(Math.abs(y-96)>24)t.scrollIntoView({behavior:'auto',block:'start'});setTimeout(k,350)};setTimeout(k,d+250);['wheel','touchstart','keydown'].forEach(e=>addEventListener(e,()=>{n=99},{once:true,passive:true}))}
 let RADK=null;
 function target(){const h=decodeURIComponent(location.hash.slice(1));if(h.startsWith('rad=')){RADK=h.slice(4);return['lager',null]}if(ALIAS[h])return ALIAS[h];return[ROUTES.includes(h)?h:'start',null]}
 function show(v,anchor,first){
+ /* Reiterwechsel (auch Zurück-Taste am Handy) schließt offene Fenster, sonst bleibt die Seite gesperrt */
+ if(!first){if(!$('#lgm').hidden&&!RADK)lgClose();if(!$('#rf').hidden)rfClose();if(!$('#cmp').hidden)cmpClose()}
  $$('.view').forEach(s=>{s.hidden=s.dataset.v!==v;s.classList.remove('enter')});
  const sec=$('.view[data-v="'+v+'"]');void sec.offsetWidth;sec.classList.add('enter');
  $$('[data-r]').forEach(a=>a.classList.toggle('on',a.dataset.r===v));
@@ -4435,8 +4447,9 @@ function go(first){
  if(first){show(v,anchor,first);return}
  if(v===cur&&RADK&&v==='lager'){lgOpen();return}
  if(v===cur){if(anchor){const t=document.getElementById(anchor);if(t){t.scrollIntoView({behavior:'smooth',block:'start'});anchFix(t,900)}}else scrollTo({top:0,behavior:'smooth'});return}
- if(busy)return;busy=true;const w=$('#wipe');w.classList.remove('go');void w.offsetWidth;w.classList.add('go');
- setTimeout(()=>show(v,anchor),480);setTimeout(()=>{w.classList.remove('go');busy=false},1050);
+ /* Tipps während der Wisch-Animation nicht verschlucken (Tiry 15.11.2026: Seite „hing“ im falschen Reiter) */
+ if(busy){pend=true;return}busy=true;const w=$('#wipe');w.classList.remove('go');void w.offsetWidth;w.classList.add('go');
+ setTimeout(()=>show(v,anchor),480);setTimeout(()=>{w.classList.remove('go');busy=false;if(pend){pend=false;const [v2,a2]=target();if(v2!==cur||a2)go(false)}},1050);
 }
 addEventListener('hashchange',()=>go(false));
 $('#burger').addEventListener('click',()=>{const o=document.body.classList.toggle('menu');$('#burger').setAttribute('aria-expanded',String(o));$('#burger').setAttribute('aria-label',o?'Menü schließen':'Menü öffnen')});
@@ -4668,11 +4681,11 @@ function lgShow(k,dir){const L=LG.list;if(!L.length)return;LG.i=(k+L.length)%L.l
  lgStage();
  st.classList.remove('go-l','go-r');void st.offsetWidth;st.classList.add(dir<0?'go-r':'go-l');
  lgInfo();
- if(M.hidden){M.hidden=false;document.body.style.overflow='hidden';requestAnimationFrame(()=>M.classList.add('on'));$('.lgm-x',M).focus()}}
+ clearTimeout(LG.ht);if(M.hidden||!M.classList.contains('on')){M.hidden=false;document.body.style.overflow='hidden';requestAnimationFrame(()=>M.classList.add('on'));$('.lgm-x',M).focus()}}
 function lgStage(){const m=LG.list[LG.i],b=lgBrand(m.marke),im=lgImg(m,LG.vi),st=$('#lgmStage');
  const bk=$('#lgmBk'),rf=$('#lgmRf'),wl=$('#lgmWl');bk.src=im||'';rf.src=im||'';bk.alt=m.marke+' '+m.modell;wl.src=b?b.logo:'';wl.hidden=!b;bk.hidden=rf.hidden=!im;
  let ph=$('.phm',st);if(!im){if(!ph){ph=document.createElement('div');ph.className='phm';st.append(ph)}ph.innerHTML=(b?'<img src="'+b.logo+'" alt="">':'<b>'+esc(m.marke)+'</b>')+'<small>Foto folgt</small>';ph.hidden=false;wl.hidden=true}else if(ph)ph.hidden=true}
-function lgClose(){if(location.hash.startsWith('#rad='))history.replaceState(null,'',location.pathname+location.search+'#lager');const m=$('#lgm');m.classList.remove('on');document.body.style.overflow='';setTimeout(()=>{m.hidden=true},320)}
+function lgClose(){if(location.hash.startsWith('#rad='))history.replaceState(null,'',location.pathname+location.search+'#lager');const m=$('#lgm');m.classList.remove('on');document.body.style.overflow='';clearTimeout(LG.ht);LG.ht=setTimeout(()=>{m.hidden=true},320)}
 $('#lgGrid').addEventListener('click',e=>{if(e.target.closest('#lgReset')){LG.f={q:'',mk:'',rf:'',nur:false,deal:false,sort:LG.f.sort};$('#lgQ').value='';$('#lgNur').checked=false;lgChips();lgRender();return}const c=e.target.closest('.lgc');if(c)lgShow(+c.dataset.k,1)});
 $('#lgGrid').addEventListener('keydown',e=>{const c=e.target.closest('.lgc');if(c&&(e.key==='Enter'||e.key===' ')){e.preventDefault();lgShow(+c.dataset.k,1)}});
 $('#lgMk').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;if(b.hasAttribute('data-dealx')){LG.f.deal=false;lgChips();lgRender();return}LG.f.mk=b.dataset.mk;lgChips();lgRender()});
@@ -5111,8 +5124,8 @@ addEventListener('hashchange',()=>setTimeout(merkUI,600));
 
 /* ---------- Vergleich ---------- */
 function cmpModels(){const by=new Map((LG.M||[]).map(m=>[mKey(m),m]));return MERK.map(k=>({k,m:by.get(k)}))}
-function cmpOpen(){lgLoad().then(()=>{const c=$('#cmp');cmpDraw();c.hidden=false;document.body.style.overflow='hidden';requestAnimationFrame(()=>c.classList.add('on'));$('.rf-x',c).focus()})}
-function cmpClose(){const c=$('#cmp');c.classList.remove('on');document.body.style.overflow='';setTimeout(()=>{c.hidden=true},320)}
+function cmpOpen(){lgLoad().then(()=>{const c=$('#cmp');cmpDraw();clearTimeout(c._ht);c.hidden=false;document.body.style.overflow='hidden';requestAnimationFrame(()=>c.classList.add('on'));$('.rf-x',c).focus()})}
+function cmpClose(){const c=$('#cmp');c.classList.remove('on');document.body.style.overflow='';clearTimeout(c._ht);c._ht=setTimeout(()=>{c.hidden=true},320)}
 function cmpDraw(){const L=cmpModels(),ok=L.filter(x=>x.m);
  $('#cmpS').textContent=L.length?(L.length===1?'1 Rad gemerkt. Merk dir ein zweites, um zu vergleichen.':L.length+' Räder nebeneinander. Gelb markiert = Unterschied.'):'';
  if(!L.length){$('#cmpB').innerHTML='<div class="cmp-empty"><p>Noch nichts gemerkt.</p><p style="margin-top:8px">Tipp bei einem Rad auf das Herz '+HEART.replace('<svg','<svg style="width:18px;height:18px;vertical-align:-3px;fill:none;stroke:#C8102E;stroke-width:2"')+', dann erscheint es hier.</p></div>';$('#cmpF').innerHTML='<a class="cta" href="#lager" data-cmpx>Zum Lager</a>';return}
@@ -5157,8 +5170,8 @@ const RFQ=[{id:'e',q:'Wofür möchtest du dein Rad nutzen?',h:'Wähl, was am bes
  {id:'w',q:'Was ist dir noch wichtig?',h:'Mehrfachauswahl möglich – oder einfach weiter.',multi:1,o:[['sofort','Sofort verfügbar','Steht schon bei uns in Wörth','#059669'],['deal','Sonderangebot','Reduzierte Räder bevorzugen','#C8102E'],['akku','Großer Akku','Ab 625 Wh für lange Strecken','#2563EB']]}];
 const RF={a:{w:[]},i:0,h:172,sl:''};
 const rfSteps=()=>RFQ.filter(q=>!(q.skip&&q.skip(RF.a)));
-function rfOpen(){lgLoad().then(()=>{RF.a={w:[]};RF.i=0;rfDraw();const r=$('#rf');r.hidden=false;document.body.style.overflow='hidden';requestAnimationFrame(()=>r.classList.add('on'))})}
-function rfClose(){const r=$('#rf');r.classList.remove('on');document.body.style.overflow='';setTimeout(()=>{r.hidden=true},320)}
+function rfOpen(){lgLoad().then(()=>{RF.a={w:[]};RF.i=0;rfDraw();const r=$('#rf');clearTimeout(r._ht);r.hidden=false;document.body.style.overflow='hidden';requestAnimationFrame(()=>r.classList.add('on'))})}
+function rfClose(){const r=$('#rf');r.classList.remove('on');document.body.style.overflow='';clearTimeout(r._ht);r._ht=setTimeout(()=>{r.hidden=true},320)}
 const rfTarget=()=>{const sl=parseFloat(String(RF.sl).replace(',','.'));const L=sl>=55&&sl<=110?sl:RF.h*.47;return{t:L*.66,m:L*.574,sl:sl>=55&&sl<=110}};
 function rfDraw(){const S=rfSteps(),n=S.length,B=$('#rfB');
  if(RF.i>=n){rfResult();$('#rfBar').style.width='100%';$('#rfStep').textContent='Ergebnis';return}
@@ -5192,10 +5205,10 @@ function rfScore(m){const A=RF.a,T=rfTarget();let best=null;
 function rfResult(){const R=(LG.M||[]).map(m=>{const b=rfScore(m);return b?{m,b,p:Math.max(0,Math.min(99,Math.round(b.s/b.mx*100)))}:null}).filter(x=>x&&x.p>=45).sort((a,b)=>b.p-a.p||(b.m.lager-a.m.lager)).slice(0,9);
  RF.res=R;const B=$('#rfB');
  B.innerHTML='<h2 class="rf-q" id="rfT">'+(R.length?'Diese Räder passen zu dir.':'Gerade nichts Passendes im Lager.')+'</h2><p class="rf-h">'+(R.length?'Sortiert nach Übereinstimmung. Antippen für Fotos, Farben und Größen.':'Kein Problem: Wir bestellen dir das passende Rad. Schreib uns kurz, was du suchst.')+'</p>'+
-  (R.length?'<div class="rf-res">'+R.map((x,i)=>{const m=x.m,v=m.v[x.b.vi]||m.v[0],b=lgBrand(m.marke),im=lgImg(m,x.b.vi)||lgImg(m),k=mKey(m),on=merkHas(k);
-   return '<div class="rfc" role="button" tabindex="0" data-rfshow="'+i+'" style="--ac:'+(b?b.c:'#8C9097')+'"><div class="im">'+(im?'<img src="'+im+'" alt="" loading="lazy">':'<span class="nf">Foto folgt</span>')+'</div><span class="pc">'+x.p+' % passend</span><button type="button" class="hrt'+(on?' on':'')+'" data-merk="'+esc(k)+'" aria-pressed="'+on+'" aria-label="Merken">'+HEART+'</button>'+
+  (R.length?'<div class="rf-res">'+R.map((x,i)=>{const m=x.m,v=m.v[x.b.vi]||m.v[0],b=lgBrand(m.marke),im=lgImg(m,x.b.vi)||lgImg(m),k=mKey(m),on=merkHas(k),dl=!!(v.angebot&&v.preis>v.angebot);
+   return '<div class="rfc" role="button" tabindex="0" data-rfshow="'+i+'" style="--ac:'+(b?b.c:'#8C9097')+'"><div class="im">'+(im?'<img src="'+im+'" alt="" loading="lazy">':'<span class="nf">Foto folgt</span>')+(dl?'<span class="rfdl">% Sonderangebot</span>':'')+'</div><span class="pc">'+x.p+' % passend</span><button type="button" class="hrt'+(on?' on':'')+'" data-merk="'+esc(k)+'" aria-pressed="'+on+'" aria-label="Merken">'+HEART+'</button>'+
     '<div class="bd2"><span class="mk">'+esc(m.marke)+'</span><h4>'+esc(m.modell)+'</h4><div class="why">'+x.b.why.slice(0,4).map(w=>'<span>'+esc(w)+'</span>').join('')+x.b.warn.map(w=>'<span class="w">'+esc(w)+'</span>').join('')+'</div>'+
-    '<div class="pr"><span>'+(vP(v)?eur(vP(v)):'Preis auf Anfrage')+(v.angebot?'<small class="anl">* nicht bei Leasing & Finanzierung</small>':'')+'</span><i>'+(v.status!=='bestellt'?'Sofort da':'Lieferung ausstehend')+'</i></div></div></div>'}).join('')+'</div>':'<div class="rf-none"><a class="cta wa" href="https://wa.me/'+WA+'?text='+encodeURIComponent('Hallo Velocenter, ich suche ein Rad. Könnt ihr mich beraten?')+'" target="_blank" rel="noopener"><svg><use href="#i-chat"/></svg>Beratung per WhatsApp</a></div>')+
+    '<div class="pr'+(dl?' dl':'')+'"><span>'+(dl?'<s>'+eur(v.preis)+'</s><b class="an">'+eur(v.angebot)+'<sup class="ast">*</sup></b><small class="sv">Du sparst '+eur(v.preis-v.angebot)+'</small><small class="anl">* Angebotspreis, nicht bei Leasing & Finanzierung</small>':(vP(v)?eur(vP(v)):'Preis auf Anfrage'))+'</span><i>'+(v.status!=='bestellt'?'Sofort da':'Lieferung ausstehend')+'</i></div></div></div>'}).join('')+'</div>':'<div class="rf-none"><a class="cta wa" href="https://wa.me/'+WA+'?text='+encodeURIComponent('Hallo Velocenter, ich suche ein Rad. Könnt ihr mich beraten?')+'" target="_blank" rel="noopener"><svg><use href="#i-chat"/></svg>Beratung per WhatsApp</a></div>')+
   '<div class="rf-nav"><button type="button" class="lk" data-rfre>Nochmal von vorn</button><div class="row" style="gap:10px"><a class="ghost" href="#termin" data-pre="Probefahrt" data-rfx>Beratungstermin</a><a class="cta" href="#lager" data-rfx>Ganzes Lager ansehen</a></div></div>';B.scrollTop=0}
 $('#rf').addEventListener('click',e=>{const t=e.target;if(t.closest('[data-rfx]')){rfClose();return}
  const S=rfSteps(),q=S[RF.i];
