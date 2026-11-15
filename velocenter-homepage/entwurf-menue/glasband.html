@@ -1,0 +1,110 @@
+<title>Velocenter Glasband</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;600;700;800&display=swap">
+<style>
+/* Layout: echte Startseite als Bild (unverändert), darauf liegt nur das neue Menüband zum Ausprobieren; darunter kurze Erklärung */
+:root{--ink:#1B1E25;--mut:#5A5F6B;--red:#C8102E;--pearl:#F4EFEA;--card:#FFFFFF;--ln:rgba(27,30,37,.12);--disp:"Outfit",ui-sans-serif,system-ui,"Segoe UI",sans-serif}
+@property --ba{syntax:"<angle>";inherits:false;initial-value:0deg}
+body{background:var(--pearl);color:var(--ink);font:500 16px/1.55 var(--disp)}
+.w{max-width:1480px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:20px 48px;display:grid;gap:18px}
+.bar{display:flex;flex-wrap:wrap;align-items:center;gap:10px 16px;justify-content:space-between}
+.bar h1{font:800 clamp(20px,2.6vw,28px)/1.1 var(--disp);margin:0}
+.sw{display:inline-flex;padding:4px;border-radius:999px;background:var(--card);border:1px solid var(--ln)}
+.sw button{min-height:44px;padding:0 18px;border:0;border-radius:999px;background:none;color:var(--ink);font:700 14px/1 var(--disp);cursor:pointer}
+.sw button[aria-pressed="true"]{background:var(--ink);color:#fff}
+.sw button:focus-visible{outline:3px solid var(--red);outline-offset:2px}
+#vp{position:relative;overflow:hidden;border-radius:22px;border:1px solid var(--ln);box-shadow:0 30px 60px -36px rgba(27,30,37,.5);background:#E9E6EA}
+#st{position:absolute;left:0;top:0;width:1440px;height:900px;transform-origin:0 0}
+#st>img{position:absolute;inset:0;width:1440px;height:900px;max-width:none;display:block}
+#st>img.alt{display:none}
+#vp.alt #st>img.alt{display:block}#vp.alt #gb{display:none}
+/* ---------- Das Menüband ---------- */
+#gb{position:absolute;left:215.3px;top:30px;width:801.4px;height:56px;border-radius:999px;font:600 17px/17px var(--disp);letter-spacing:.01em;
+ background:linear-gradient(180deg,rgba(255,255,255,.78),rgba(255,251,247,.58));-webkit-backdrop-filter:blur(18px) saturate(1.6);backdrop-filter:blur(18px) saturate(1.6);
+ box-shadow:0 18px 36px -18px rgba(27,30,37,.42),0 2px 6px -2px rgba(27,30,37,.12),inset 0 1px 0 rgba(255,255,255,.95),inset 0 -1px 0 rgba(27,30,37,.05);-webkit-user-select:none;user-select:none;touch-action:none}
+#gb .rim,#gb .beam{position:absolute;inset:0;border-radius:inherit;padding:1.2px;pointer-events:none;-webkit-mask:linear-gradient(#000 0 0) content-box exclude,linear-gradient(#000 0 0);mask:linear-gradient(#000 0 0) content-box exclude,linear-gradient(#000 0 0)}
+#gb .rim{background:linear-gradient(110deg,rgba(184,115,51,.6),rgba(226,35,45,.35),rgba(167,139,250,.45),rgba(184,115,51,.6))}
+#gb .beam{background:conic-gradient(from var(--ba),transparent 0 72%,rgba(226,35,45,.0) 74%,rgba(226,35,45,.95) 83%,#fff 88%,rgba(167,139,250,.95) 93%,transparent 99%);animation:beam 7s linear infinite}
+@keyframes beam{to{--ba:360deg}}
+#gb .glow{position:absolute;inset:0;border-radius:inherit;pointer-events:none;opacity:0;transition:opacity .35s;background:radial-gradient(150px 70px at var(--mx,50%) var(--my,50%),rgba(255,255,255,.75),rgba(255,255,255,0) 70%)}
+#gb.in .glow{opacity:1}
+#gb .th{position:absolute;top:6px;height:44px;left:0;width:0;border-radius:999px;pointer-events:none;will-change:left,width,transform}
+#th{background:linear-gradient(135deg,#1B1E25,#343A4A);box-shadow:0 10px 22px -10px rgba(27,30,37,.75),0 12px 26px -14px rgba(200,16,46,.55),inset 0 1px 0 rgba(255,255,255,.16),inset 0 -1px 0 rgba(0,0,0,.35);transition:transform .25s cubic-bezier(.3,1.6,.5,1)}
+#th::after{content:"";position:absolute;inset:1px;border-radius:inherit;background:linear-gradient(180deg,rgba(255,255,255,.13),rgba(255,255,255,0) 48%)}
+#gb.dn #th{transform:scale(.97,.92)}
+#hv{opacity:0;transition:opacity .25s;background:linear-gradient(180deg,rgba(255,255,255,.98),rgba(255,255,255,.62));box-shadow:0 8px 18px -10px rgba(27,30,37,.4),inset 0 1px 0 #fff,inset 0 -1px 0 rgba(27,30,37,.07),0 0 0 1px rgba(255,255,255,.7)}
+#gb.hov #hv{opacity:1}
+#gb .row{position:absolute;inset:0;display:flex;align-items:center;gap:2px;padding:0 6px}
+#gb .row a{flex:none;height:44px;display:flex;align-items:center;justify-content:center;border-radius:999px;color:#2A2E38;text-decoration:none;cursor:pointer;white-space:nowrap;transition:color .2s}
+#gb .row.base a:focus-visible{outline:3px solid var(--red);outline-offset:1px}
+#gb .row.top{pointer-events:none}
+#gb .row.top a{color:#fff}
+#gb em{display:inline-flex;align-items:center;gap:4px;margin-left:6px;padding:3px 6px 3px 5px;border-radius:999px;background:linear-gradient(135deg,#E2232D,#C026D3);color:#fff;font:800 9px/1 var(--disp);font-style:normal;letter-spacing:.1em;text-transform:uppercase;box-shadow:0 4px 10px -4px rgba(226,35,45,.7)}
+#gb em::before{content:"";width:5px;height:5px;border-radius:50%;background:#fff}
+.info{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px}
+.info div{background:var(--card);border:1px solid var(--ln);border-radius:22px;padding:16px 18px;min-width:0}
+.info b{display:block;font:800 16px/1.2 var(--disp);margin-bottom:4px}
+.info span{color:var(--mut);font-size:14.5px}
+.cap{color:var(--mut);font-size:13.5px;margin:0}
+@media (prefers-reduced-motion:reduce){#gb .beam{animation:none;opacity:0}}
+</style>
+
+<div class="w">
+ <div class="bar">
+  <h1>Menüband · Entwurf zum Ausprobieren</h1>
+  <div class="sw" role="group" aria-label="Ansicht"><button type="button" id="bNeu" aria-pressed="true">Neu</button><button type="button" id="bAlt" aria-pressed="false">Heute</button></div>
+ </div>
+ <div id="vp"><div id="st">
+  <img src="img/bg.webp" alt="Velocenter Startseite, unverändert">
+  <img class="alt" src="img/bgalt.webp" alt="Velocenter Startseite mit heutigem Menüband">
+  <nav id="gb" aria-label="Hauptnavigation (Entwurf)">
+   <span class="rim"></span><span class="beam"></span><span class="glow"></span>
+   <span class="th" id="hv"></span><span class="th" id="th"></span>
+   <div class="row base"></div><div class="row top" aria-hidden="true"></div>
+  </nav>
+ </div></div>
+ <div class="info">
+  <div><b>Gleitende Glas-Linse</b><span>Unter der Maus liegt eine helle Glas-Linse. Sie gleitet von Punkt zu Punkt, dehnt sich dabei und federt weich nach.</span></div>
+  <div><b>Aktiver Punkt wandert mit</b><span>Der dunkle Knopf springt nicht mehr, er gleitet zum neuen Bereich. Die Schrift wird exakt dort weiß, wo der Knopf gerade ist.</span></div>
+  <div><b>Licht im Glas</b><span>Ein Lichtpunkt läuft langsam um den Rand, ein weicher Schein folgt der Maus. Form, Größe und Platz des Bands bleiben wie heute.</span></div>
+ </div>
+ <p class="cap">Nur das Menüband ist bedienbar. Alles andere ist ein Bild deiner Startseite, damit sichtbar bleibt: der Rest der Seite ändert sich nicht. Am Handy gibt es das Band nicht (dort bleibt das Menü-Symbol), die Vorschau zeigt dort den Ausschnitt mit dem Band. Stand 15.11.2026, nicht live.</p>
+</div>
+
+<script>
+(()=>{
+const IT=[['Start',58.7],['Service',75.5],['Marken',77.9],['Auf Lager',146.1,1],['i:SY Experte',113.5],['i:SY Treffen',109.2],['E-Dreiräder',113.8],['Kontakt',80.8]];
+const $=s=>document.querySelector(s),gb=$('#gb'),vp=$('#vp'),st=$('#st'),th=$('#th'),hv=$('#hv'),top=$('.row.top');
+const html=IT.map(([t,w,l],i)=>`<a data-i="${i}" style="width:${w}px"${'' }>${t}${l?'<em>Live</em>':''}</a>`).join('');
+$('.row.base').innerHTML=html;top.innerHTML=html;
+[...$('.row.base').children].forEach(a=>{a.setAttribute('role','button');a.setAttribute('tabindex','0')});
+const X=[];let x=6;IT.forEach(([,w])=>{X.push([x,x+w]);x+=w+2});
+// Feder je Kante: die vordere Kante ist straffer, die hintere zieht nach -> die Linse dehnt sich beim Gleiten
+const mk=(l,r)=>({l,r,vl:0,vr:0,tl:l,tr:r,kl:300,kr:300});
+const A=mk(X[0][0],X[0][1]),H=mk(X[0][0],X[0][1]);let act=0,hov=-1,scale=1,last=0;
+const aim=(s,i)=>{const [l,r]=X[i],right=l>s.tl;s.tl=l;s.tr=r;s.kl=right?170:420;s.kr=right?420:170};
+const step=(s,dt)=>{for(const [p,v,t,k] of [['l','vl','tl','kl'],['r','vr','tr','kr']]){const a=(s[t]-s[p])*s[k]-s[v]*2*Math.sqrt(s[k])*.72;s[v]+=a*dt;s[p]+=s[v]*dt}};
+const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+function frame(t){const dt=Math.min(.032,(t-last)/1000||.016);last=t;
+ if(reduce){A.l=A.tl;A.r=A.tr;H.l=H.tl;H.r=H.tr}else{step(A,dt);step(H,dt)}
+ th.style.left=A.l+'px';th.style.width=Math.max(8,A.r-A.l)+'px';hv.style.left=H.l+'px';hv.style.width=Math.max(8,H.r-H.l)+'px';
+ top.style.clipPath=`inset(6px ${(801.4-A.r).toFixed(1)}px 6px ${A.l.toFixed(1)}px round 22px)`;
+ requestAnimationFrame(frame)}
+requestAnimationFrame(frame);
+const setAct=i=>{act=i;aim(A,i);gb.classList.toggle('hov',hov>=0&&hov!==act)};
+const setHov=i=>{if(i===hov)return;if(i>=0){if(hov<0){H.l=H.tl=X[i][0];H.r=H.tr=X[i][1];H.vl=H.vr=0}else aim(H,i)}hov=i;gb.classList.toggle('hov',i>=0&&i!==act)};
+const idx=e=>{const a=e.target.closest('.row.base a');return a?+a.dataset.i:-1};
+gb.addEventListener('pointermove',e=>{const r=gb.getBoundingClientRect();gb.style.setProperty('--mx',((e.clientX-r.left)/scale)+'px');gb.style.setProperty('--my',((e.clientY-r.top)/scale)+'px');gb.classList.add('in');if(e.pointerType!=='touch')setHov(idx(e))});
+gb.addEventListener('pointerleave',()=>{gb.classList.remove('in','dn');setHov(-1)});
+gb.addEventListener('pointerdown',e=>{if(idx(e)>=0)gb.classList.add('dn')});
+addEventListener('pointerup',()=>gb.classList.remove('dn'));
+gb.addEventListener('click',e=>{const i=idx(e);if(i>=0)setAct(i)});
+gb.addEventListener('keydown',e=>{const i=idx(e);if(i<0)return;if(e.key==='Enter'||e.key===' '){e.preventDefault();setAct(i)}});
+gb.addEventListener('focusin',e=>setHov(idx(e)));gb.addEventListener('focusout',()=>setHov(-1));
+// Bühne einpassen: am PC ganze Seite, schmal nur der Ausschnitt mit dem Band
+function fit(){const w=vp.clientWidth;if(w>=760){scale=w/1440;st.style.transform=`scale(${scale})`;vp.style.height=900*scale+'px'}else{scale=w/860;st.style.transform=`translate(${-195*scale}px,0) scale(${scale})`;vp.style.height=260*scale+'px'}}
+fit();addEventListener('resize',fit);
+const bN=$('#bNeu'),bA=$('#bAlt');const view=a=>{vp.classList.toggle('alt',a);bN.setAttribute('aria-pressed',!a);bA.setAttribute('aria-pressed',a)};
+bN.onclick=()=>view(false);bA.onclick=()=>view(true);
+})();
+</script>
