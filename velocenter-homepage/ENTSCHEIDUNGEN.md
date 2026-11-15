@@ -205,3 +205,12 @@
 - Handy-Kopf: Social-Symbole weichen zuerst → Öffnungsstatus mit Text („Zu · ab Mo 9:00“) statt nur Ring.
 - Marken-Filter: Velo de Ville, Victoria, KTM, i:SY, QiO, Stevens optisch gleich groß/kräftig.
 - Handy-Start: Logo zuerst, dann „Familienbetrieb seit 1995“, dann Überschrift.
+
+## 15.11.2026 – UX-Prüfung, Stufe A (ohne Freigabe umgesetzt)
+- Skip-Link „Zum Inhalt springen“ (sichtbar bei Tastatur-Fokus).
+- Lager-Karte: kein verschachteltes `role=button` mehr, echter Knopf „Ansehen“ mit aria-label; Herz mobil 44 px.
+- Telefon im Termin-Hinweis als `tel:`-Link; i:SY-Testflotte per Tastatur fokussierbar.
+- Tipp-Flächen ≥ 44 px: Marken-Chips, Footer-Links (Tel., Mail, WhatsApp, Impressum, Datenschutz).
+- Kontrast WCAG AA: Orange-Texte #D45200 / #C2410C, Jahres-Knopf, i:SY-Liste, Testflotten-Überschriften; Mini-Texte auf 11 px.
+- Schnellzugriff-Kacheln 761–1100 px als 2×2-Raster (vorher gequetscht).
+- axe-core: 0 Verstöße auf allen Ansichten bei 1440 und 390 px.

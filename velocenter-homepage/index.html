@@ -2620,6 +2620,36 @@ a.hchip.hc:hover .ha{background:#1B1E25;color:#fff;transform:translateX(2px)}
 .lgchips button.lgo img[alt="Stevens"]{height:16px!important}
 /* Handy-Kopf Start: Logo zuerst, dann „Familienbetrieb seit 1995“ */
 @media (max-width:980px){.hgrid .htxt>.eyebrow{order:2;margin-top:4px}}
+
+/* ================= UX-Prüfung Stufe A (15.11.2026) ================= */
+/* Sprung-Link */
+.skip{position:fixed;left:16px;top:-80px;z-index:1000;padding:12px 18px;border-radius:999px;background:#1B1E25;color:#fff;font:700 15px/1 var(--display);text-decoration:none;transition:top .2s}
+.skip:focus{top:16px;outline:3px solid #C8102E;outline-offset:2px}
+#main:focus{outline:none}
+/* Lager: „Ansehen“ ist ein echter Knopf */
+.ft button.go{background:none;border:0;padding:0;cursor:pointer;min-height:44px}
+.ft button.go:focus-visible{outline:2px solid #1B1E25;outline-offset:4px;border-radius:6px}
+@media (max-width:640px){.ft .go{display:inline-flex!important;position:absolute!important;width:1px!important;height:1px!important;min-height:0!important;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+ .lgc .hrt{width:44px!important;height:44px!important;top:4px!important;right:4px!important}}
+/* Schnellzugriff-Kacheln: Tablet/Klapp-Handy 2×2 statt abgeschnittener Texte */
+@media (min-width:761px) and (max-width:1100px){.qacc{display:grid;grid-template-columns:1fr 1fr;height:auto;gap:12px}
+ .qa{height:170px;border-radius:20px}.qa .tx b{white-space:normal;font-size:18px}.qa .tx i{display:none}
+ .qa .tx small{max-height:none!important;opacity:1!important;white-space:normal!important}.qa .tx em{display:none}
+ .qa .ic{background:#C8102E;border-color:#C8102E}.qa.qice .ic{background:#2563EB;border-color:#2563EB}}
+/* Fußzeile: Kontakt- und Rechtslinks mit 44 px Tippfläche */
+footer a[href^="tel:"],footer a[href^="mailto:"],footer a[href*="wa.me"],footer a[href="#impressum"],footer a[href="#datenschutz"]{display:inline-flex;align-items:center;min-height:44px}
+/* Kontrast i:SY-Orange auf hellem Grund / Jahres-Knopf */
+.figs .org{color:#D45200}
+.isyj li b{color:#FFB26B}
+#tgY button.on{background:linear-gradient(135deg,#C2410C,#B8410C)!important;border-color:#B8410C!important;color:#fff!important}
+#tgY button.on small{color:#fff!important;opacity:1!important}
+.eyebrow b[style*="EA580C"]{color:#C2410C!important}
+.quote .org,h2 .org{color:#D45200}
+.lgchips button{min-height:44px}
+.tfr h3 em{color:color-mix(in srgb,var(--c) 45%,#1B1E25)!important}
+/* Kleinstschriften mindestens 11 px */
+.wcd i{font-size:11px!important;letter-spacing:.12em!important}
+.ostat .otx small{font-size:11px!important}
 </style>
 
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
@@ -2654,6 +2684,7 @@ a.hchip.hc:hover .ha{background:#1B1E25;color:#fff;transform:translateX(2px)}
 
 <div class="sky"></div><div class="blobs" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></div><div class="ribbons" aria-hidden="true"><i></i><i></i><i></i><i></i></div><div class="smoke"></div><div class="grain"></div>
 
+<a class="skip" href="#main">Zum Inhalt springen</a>
 <header class="hdr">
  <div class="wrap">
 <div class="hlft"><div class="hsoc" aria-label="Velocenter in den sozialen Medien"><a class="ig" href="https://www.instagram.com/velocenterhessert/" target="_blank" rel="noopener" aria-label="Instagram" title="Instagram"><svg><use href="#i-ig"/></svg></a><a class="fb" href="https://www.facebook.com/velocenterhessert" target="_blank" rel="noopener" aria-label="Facebook" title="Facebook"><svg><use href="#i-fb"/></svg></a><a class="wk" href="https://whatsapp.com/channel/0029VaIekua60eBc6k2bMD0q" target="_blank" rel="noopener" aria-label="WhatsApp-Kanal" title="WhatsApp-Kanal"><svg><use href="#i-chat"/></svg><span>Kanal</span></a></div>  <a class="logo" href="#start" aria-label="Velocenter Hessert – Startseite"><img src="img/velocenter-logo.svg" alt="Velocenter Hessert" width="160" height="84"></a></div>
@@ -3206,7 +3237,7 @@ m696 -454 c28 -13 46 -31 55 -51 22 -53 -50 -177 -173 -300 -187 -186 -647
     <div class="fl"><label for="tMsg">Deine Nachricht (optional)</label><textarea class="inp" id="tMsg" placeholder="z. B. Bremse quietscht, Akku lädt nicht, Modell …"></textarea></div>
     <div class="err" id="tErr" role="alert"></div>
     <div class="tsend"><button class="cta" type="submit" data-via="out"><svg><use href="#i-arrow"/></svg>Anfrage erstellen</button><span class="tor" aria-hidden="true">oder</span><button class="cta wa" type="submit" data-via="wa"><svg><use href="#i-chat"/></svg>Per WhatsApp</button><small class="tsh">Per WhatsApp ist alles schon eingetragen – du musst nur noch abschicken.</small></div>
-    <div class="out" id="tOut" hidden><b style="font-family:var(--display)">Deine Anfrage ist fertig:</b><pre id="tTxt"></pre><div class="row"><a class="cta wa" id="tWa" target="_blank" rel="noopener"><svg><use href="#i-chat"/></svg>Per WhatsApp senden</a><a class="ghost" id="tMail"><svg><use href="#i-mail"/></svg>Per E-Mail</a><button type="button" class="copy" id="tCopy">Text kopieren</button></div><p class="note">Oder ruf an: 07271 78033.</p></div>
+    <div class="out" id="tOut" hidden><b style="font-family:var(--display)">Deine Anfrage ist fertig:</b><pre id="tTxt"></pre><div class="row"><a class="cta wa" id="tWa" target="_blank" rel="noopener"><svg><use href="#i-chat"/></svg>Per WhatsApp senden</a><a class="ghost" id="tMail"><svg><use href="#i-mail"/></svg>Per E-Mail</a><button type="button" class="copy" id="tCopy">Text kopieren</button></div><p class="note">Oder ruf an: <a href="tel:+49727178033">07271 78033</a>.</p></div>
    </form>
   </div>
  </div>
@@ -3408,7 +3439,7 @@ m696 -454 c28 -13 46 -31 55 -51 22 -53 -50 -177 -173 -300 -187 -186 -647
   <div class="wrap">
    <div class="pre"><p class="eyebrow">Probefahrt <b style="color:#EA580C">vor Ort oder übers Wochenende</b></p><h2 class="big" style="margin-top:14px">Unsere i:SY<br><span class="org">Testflotte.</span></h2>
    <p class="lead" style="margin-top:18px;max-width:720px">Sechs Testräder, sechs Fahrgefühle. Such dir eins aus, wir machen es für dich startklar.</p></div>
-   <ol class="tflot"><li class="tfr pre" style="--c:#38BDF8"><span class="tfn">01</span><span class="tfb"><img src="img/isy-test-sky.webp" alt="i:SY SKYFLY mit CX- und SX-Motor Testrad in Carbon-Schwarz" width="800" height="560" loading="lazy"></span><h3>i:SY SKYFLY <em>mit CX- und SX-Motor</em></h3><p>Carbon-Leichtgewicht · Bosch CX oder SX</p></li><li class="tfr pre" style="--c:#2DD4BF"><span class="tfn">02</span><span class="tfb"><img src="img/isy-test-n38.webp" alt="i:SY N3.8 ZR F Testrad in Gelb" width="800" height="560" loading="lazy"></span><h3>i:SY N3.8 ZR F</h3><p>Stufenlose Enviolo-Nabe · Zahnriemen</p></li><li class="tfr pre" style="--c:#F472B6"><span class="tfn">03</span><span class="tfb"><img src="img/isy-test-n38ac.webp" alt="i:SY N3.8 ZR CX Auto Comfort Testrad in Berry Red" width="800" height="560" loading="lazy"></span><h3>i:SY N3.8 ZR CX <em>Auto Comfort</em></h3><p>Enviolo Automatiq schaltet selbst · Bosch CX</p></li><li class="tfr pre" style="--c:#A78BFA"><span class="tfn">04</span><span class="tfb"><img src="img/isy-test-e5rt.webp" alt="i:SY E5 ZR RT Testrad in Gelb" width="800" height="560" loading="lazy"></span><h3>i:SY E5 ZR RT</h3><p>5-Gang-Nabe mit Rücktritt · Zahnriemen</p></li><li class="tfr pre" style="--c:#FBBF24"><span class="tfn">05</span><span class="tfb"><img src="img/isy-test-popart.webp" alt="i:SY E5 ZR RT Pop Art Testrad" width="800" height="560" loading="lazy"></span><h3>i:SY E5 ZR RT <em>Pop Art</em></h3><p>Design Edition · 5-Gang mit Rücktritt</p></li><li class="tfr pre" style="--c:#60A5FA"><span class="tfn">06</span><span class="tfb"><img src="img/isy-test-xxl.webp" alt="i:SY XXL N3.8 Testrad in Gelb" width="800" height="560" loading="lazy"></span><h3>i:SY XXL N3.8</h3><p>Für große Fahrer · stufenlos schalten</p></li></ol>
+   <ol class="tflot" tabindex="0" aria-label="i:SY Testflotte – zum Blättern wischen oder Pfeiltasten"><li class="tfr pre" style="--c:#38BDF8"><span class="tfn">01</span><span class="tfb"><img src="img/isy-test-sky.webp" alt="i:SY SKYFLY mit CX- und SX-Motor Testrad in Carbon-Schwarz" width="800" height="560" loading="lazy"></span><h3>i:SY SKYFLY <em>mit CX- und SX-Motor</em></h3><p>Carbon-Leichtgewicht · Bosch CX oder SX</p></li><li class="tfr pre" style="--c:#2DD4BF"><span class="tfn">02</span><span class="tfb"><img src="img/isy-test-n38.webp" alt="i:SY N3.8 ZR F Testrad in Gelb" width="800" height="560" loading="lazy"></span><h3>i:SY N3.8 ZR F</h3><p>Stufenlose Enviolo-Nabe · Zahnriemen</p></li><li class="tfr pre" style="--c:#F472B6"><span class="tfn">03</span><span class="tfb"><img src="img/isy-test-n38ac.webp" alt="i:SY N3.8 ZR CX Auto Comfort Testrad in Berry Red" width="800" height="560" loading="lazy"></span><h3>i:SY N3.8 ZR CX <em>Auto Comfort</em></h3><p>Enviolo Automatiq schaltet selbst · Bosch CX</p></li><li class="tfr pre" style="--c:#A78BFA"><span class="tfn">04</span><span class="tfb"><img src="img/isy-test-e5rt.webp" alt="i:SY E5 ZR RT Testrad in Gelb" width="800" height="560" loading="lazy"></span><h3>i:SY E5 ZR RT</h3><p>5-Gang-Nabe mit Rücktritt · Zahnriemen</p></li><li class="tfr pre" style="--c:#FBBF24"><span class="tfn">05</span><span class="tfb"><img src="img/isy-test-popart.webp" alt="i:SY E5 ZR RT Pop Art Testrad" width="800" height="560" loading="lazy"></span><h3>i:SY E5 ZR RT <em>Pop Art</em></h3><p>Design Edition · 5-Gang mit Rücktritt</p></li><li class="tfr pre" style="--c:#60A5FA"><span class="tfn">06</span><span class="tfb"><img src="img/isy-test-xxl.webp" alt="i:SY XXL N3.8 Testrad in Gelb" width="800" height="560" loading="lazy"></span><h3>i:SY XXL N3.8</h3><p>Für große Fahrer · stufenlos schalten</p></li></ol>
    <div class="row pre" style="margin-top:44px;justify-content:center"><a class="cta" href="#termin" data-pre="Probefahrt i:SY"><svg><use href="#i-bike"/></svg>Testrad anfragen</a></div>
   </div>
  </div>
@@ -4153,6 +4184,8 @@ document.addEventListener('click',e=>{const a=e.target.closest('a[href^="#"]');i
  size();addEventListener('resize',size);
  let t0=0;(function loop(t){DT=t0?Math.min(3,(t-t0)/16.67)*.6:1;t0=t;if(cur==='start'&&scrollY<H2)draw();requestAnimationFrame(loop)})(0);draw();
 })();
+/* Sprung-Link zum Inhalt (Barrierefreiheit, 15.11.2026) */
+$('.skip')?.addEventListener('click',e=>{e.preventDefault();const m=$('#main');m.setAttribute('tabindex','-1');m.focus({preventScroll:false})});
 /* WhatsApp-Knopf am Handy erst nach dem ersten Bildschirm (Tiry 15.11.2026) */
 (function(){let f=0;const up=()=>{f=0;document.body.classList.toggle('fabhide',innerWidth<=720&&scrollY<innerHeight*.75)};addEventListener('scroll',()=>{if(!f){f=1;requestAnimationFrame(up)}},{passive:true});addEventListener('resize',up);addEventListener('hashchange',()=>setTimeout(up,60));up()})();
 /* ---------- Schnee im Winter-Band ---------- */
@@ -4335,10 +4368,10 @@ function lgPriceM(m){const d=m.v.filter(x=>x.angebot).sort((a,b)=>a.angebot-b.an
  return m.minP?'<span class="lgpr"><b>'+(m.multiP?'<em>ab</em> ':'')+eur(m.minP)+'</b></span>':'<span class="lgpr"><b>Preis auf Anfrage</b></span>'}
 function lgRender(){if(!LG.ok)return;const L=LG.list=lgFilter();const g=$('#lgGrid');
  if(!L.length){g.innerHTML='<p class="lgempty">'+(LG.f.deal?'Aktuell gibt es dazu keine Sonderangebote.':'Kein Rad passt zu diesen Filtern.')+' <button type="button" class="ghost" id="lgReset">Filter zurücksetzen</button></p>';return}
- g.innerHTML=L.map((m,k)=>{const b=lgBrand(m.marke),im=lgImg(m);return '<article class="lgc'+(m.deal?' deal':'')+'" role="button" tabindex="0" data-k="'+k+'" style="--ac:'+(b?b.c:'#8C9097')+';--d:'+Math.min(k,12)*0.04+'s" aria-label="'+esc(m.marke+' '+m.modell)+' ansehen">'+
+ g.innerHTML=L.map((m,k)=>{const b=lgBrand(m.marke),im=lgImg(m);return '<article class="lgc'+(m.deal?' deal':'')+'" data-k="'+k+'" style="--ac:'+(b?b.c:'#8C9097')+';--d:'+Math.min(k,12)*0.04+'s" aria-label="'+esc(m.marke+' '+m.modell)+' ansehen">'+
   '<div class="lgst">'+'<button type="button" class="hrt'+(merkHas(mKey(m))?' on':'')+'" data-merk="'+esc(mKey(m))+'" aria-pressed="'+merkHas(mKey(m))+'" aria-label="'+esc(m.marke+' '+m.modell)+' merken">'+HEART+'</button>'+(b?'<img class="wl" src="'+b.logo+'" alt="">':'')+(im?'<img class="bk" src="'+im+'" alt="" loading="lazy">':'<span class="phl">'+(b?'<img src="'+b.logo+'" alt="">':'<b>'+esc(m.marke)+'</b>')+'<small>Foto folgt</small></span>')+'<div class="bds">'+lgBadgesM(m)+'</div></div>'+
   '<div class="lgin"><span class="mk">'+esc(m.marke)+'</span><h3>'+esc(m.modell)+'</h3><div class="sp">'+(m.grs.length?'<span>'+esc(m.grs.length>1?m.grs.length+' Größen: '+m.grs.join(' · '):m.grs[0])+'</span>':'')+(m.fs.length?'<span class="fs">'+m.fs.slice(0,8).map(f=>'<i title="'+esc(f)+'" style="background:'+lgFarbe(f)+'"></i>').join('')+(m.fs.length===1?esc(m.fs[0]):m.fs.length+' Farben')+'</span>':'')+(m.rahmen?'<span>'+esc(m.rahmen)+'</span>':'')+'</div>'+
-  '<div class="ft">'+lgPriceM(m)+'<span class="go">Ansehen</span></div></div></article>'}).join('')}
+  '<div class="ft">'+lgPriceM(m)+'<button type="button" class="go" aria-label="'+esc(m.marke+' '+m.modell)+' ansehen">Ansehen</button></div></div></article>'}).join('')}
 function lgOpen(){lgLoad().then(()=>{lgChips();lgRender();if(RADK&&Array.isArray(LG.M)){const i=LG.M.findIndex(m=>rk(m)===RADK);RADK=null;if(i>=0)lgOpenList(LG.M,i)}})}
 const rk=m=>admSlug(mKey(m).replace(/\|/g,' '));
 /* Detailansicht im Showroom-Stil */
