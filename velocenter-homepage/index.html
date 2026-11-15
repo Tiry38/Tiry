@@ -2811,6 +2811,15 @@ footer .soc a{display:grid!important;place-items:center}
 .lbp-tag span::before{content:"";position:absolute;left:0;top:2px;bottom:2px;width:1.5px;border-radius:2px;background:linear-gradient(180deg,#E8283C,rgba(134,130,130,.6))}
 .lbp-tag em{display:block;font-style:normal;font-size:10px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:#fff;margin-bottom:2px}
 @media (prefers-reduced-motion:reduce){.lbp-tag::after{animation:none;opacity:0}}
+
+/* Stichpunkte der Menü-Vorschau (15.11.2026, Tiry: „moderne Punkte statt Zahlen“): leuchtender Rot-Punkt mit Glas-Hof, wird beim Drüberfahren zur Pille */
+.lbp-ls a{gap:3px;padding-left:8px}
+.lbp-ls i{display:block;flex:none;width:9px;height:9px;min-width:0;margin:0 14px 0 4px;border-radius:999px;font-size:0;
+ background:linear-gradient(135deg,#FF5466 0%,#D0142F 55%,#8E0E26 100%);
+ box-shadow:0 0 0 4px rgba(207,26,44,.10),0 0 0 5px rgba(255,255,255,.75),0 4px 10px -2px rgba(207,26,44,.55);
+ transition:width .35s cubic-bezier(.22,1.2,.36,1),margin .35s cubic-bezier(.22,1.2,.36,1),box-shadow .3s ease}
+.lbp-ls a:hover i,.lbp-ls a:focus-visible i{width:16px;margin-right:7px;box-shadow:0 0 0 4px rgba(207,26,44,.16),0 0 0 5px rgba(255,255,255,.85),0 6px 14px -3px rgba(207,26,44,.7)}
+@media (prefers-reduced-motion:reduce){.lbp-ls i{transition:none}}
 </style>
 <script>document.documentElement.classList.add('er')</script>
 <style id="eisRot">
@@ -5740,7 +5749,7 @@ const n=document.getElementById('nav');if(!n)return;
 const mq=matchMedia('(min-width:1181px)'),hov=matchMedia('(hover:hover)');
 const AR='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>';
 const cta=(a,b)=>`<div class="lbp-cta"><a href="${a[1]}">${a[0]}${AR}</a>${b?`<a href="${b[1]}">${b[0]}</a>`:''}</div>`;
-const ls=(k,it)=>`<ol class="lbp-ls">${it.map((t,i)=>`<li><a href="#${k}" tabindex="-1" data-lbq="${k}|${Q[k]&&Q[k][i]||'^'}"><i>${String(i+1).padStart(2,'0')}</i>${t}</a></li>`).join('')}</ol>`;
+const ls=(k,it)=>`<ol class="lbp-ls">${it.map((t,i)=>`<li><a href="#${k}" tabindex="-1" data-lbq="${k}|${Q[k]&&Q[k][i]||'^'}"><i aria-hidden="true"></i>${t}</a></li>`).join('')}</ol>`;
 /* Sprungziele je Punkt (Tiry 15.11.2026): Klick führt direkt zum Thema im Reiter. '^' = oben, '#id' = Element, sonst Textanfang einer Überschrift/eines Elements */
 const Q={start:['^','Hier schraubt','Das sagen unsere Kunden','#besuch'],service:['Beratung & Probefahrt','Inspektion & Reparatur','Termin anfragen','Dein Traumrad'],marken:['Acht Marken','Gutes Zubehör'],lager:['#lgDeals','Rad-Finder','Sofort verfügbar'],isy:['Unsere i:SY','Warum zu uns','Der erste und einzige'],treffen:['Von 100 Fans','Fünf Treffen','i:SY-Treffen wieder'],dreirad:['Welcher Easy Rider','Kompakt, komfortabel','Der Klassiker','Stell dir deinen Easy Rider'],kontakt:['Hartmannstraße 25','Schreib uns direkt']};
 const nz=t=>String(t).replace(/[\u00ad\s]+/g,'').toLowerCase();

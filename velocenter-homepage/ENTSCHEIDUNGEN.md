@@ -257,3 +257,5 @@
 - **Menü-Vorschau ohne rote Kreise (15.11.2026, Tiry: „wirklich sehr unschön“):** „300+“ (Start) und „–20 €“ (Service) sind jetzt
   dunkle Glas-Etiketten `.lbp-tag` wie die Status-Pille im Kopf: große Zahl weiß, „+“/„€“ in Logo-Rot, Trennstrich, kleine Zeile
   („E-Bikes vor Ort · zum Probefahren“ bzw. „Winter-Aktion · auf jede Inspektion“), Lichtkante Rot → Grau, leiser Glanz (aus bei „Bewegung reduzieren“). Keine Kreis-Plaketten mehr.
+- **Stichpunkte der Menü-Vorschau ohne Nummern (15.11.2026, Tiry: „moderne Punkte statt Zahlen“):** Liste „Auf dieser Seite“ zeigt
+  einen leuchtenden Rot-Punkt (Verlauf #FF5466 → #8E0E26) mit weißem Glas-Hof; beim Drüberfahren wird er zur kurzen Pille, der Text bleibt stehen.
