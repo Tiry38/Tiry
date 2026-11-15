@@ -231,7 +231,7 @@ export function dagger(S, F, o = {}) {
   if (o.glow) {
     S.layer('glow');
     // glühende Schneide (dünne Kante entlang der Klinge)
-    S.prim(F.o, bladePrim({ y0: 0.08 * s, L: L * 0.92, w: w * 1.08, th: 0.004 * s, tip: 0.3, taper: 0.1, leaf: 0.35, curve: o.curve ?? 0.06, edge: 0.0004 }), {
+    S.prim(F.o, bladePrim({ y0: 0.08 * s, L: L * 0.94, w: w * 1.22, th: 0.0045 * s, tip: 0.3, taper: 0.1, leaf: 0.35, curve: o.curve ?? 0.06, edge: 0.0004 }), {
       rot: F.basis, mat: 'glow', col: o.glow, glow: o.k ?? 3, bone, op: 'add',
     });
     S.layer(o.layer || 'body:fine');

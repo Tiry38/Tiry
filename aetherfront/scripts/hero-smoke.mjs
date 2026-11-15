@@ -266,7 +266,7 @@ const k0 = await ev(() => window.__ev.length);
 const castAb = await ev(() => { const a = window.__app, h = a.session.sim.heroOf(0); return a.controls.def.abilities.findIndex((x) => x.cast > 0); });
 if (castAb >= 0) {
   // frischen Gegner 8 m vor den Helden stellen und anvisieren
-  await ev(() => { const a = window.__app, s = a.session, h = s.sim.heroOf(0); const c = s.sim.spawnCreep(0, { ...s.sim.waveDef(1), hp: 99999, key: 'smoke' }, h.x + Math.sin(a.controls.yaw) * 8, h.z + Math.cos(a.controls.yaw) * 8, { bounty: 1, wave: true }); c.rootT = 9999; a.controls.setTarget(c.id); });
+  await ev(() => { const a = window.__app, s = a.session, h = s.sim.heroOf(0); const c = s.sim.spawnCreep(0, { ...s.sim.waveDef(1), hp: 99999, key: 'smoke' }, h.x + Math.sin(h.face) * 8, h.z + Math.cos(h.face) * 8, { bounty: 1, wave: true }); c.rootT = 9999; a.controls.setTarget(c.id); });
   await ticks(3);
   await page.keyboard.press(`Digit${castAb + 1}`);
   await page.waitForFunction(() => !!window.__app.session.sim.heroOf(0).cast, null, { polling: 20, timeout: 30000 }).catch(() => {});
@@ -278,7 +278,18 @@ if (castAb >= 0) {
 }
 // ---------- Heldentod → zurück in die Vogelperspektive ----------
 await ev(() => clearInterval(window.__god));
-await ev(() => { const s = window.__app.session, h = s.sim.heroOf(0); s.sim.applyHit({ type: 'c', alive: true, x: h.x, z: h.z, hp: 1, maxHp: 1 }, h, 1e7, 'klinge', false); });
+// innerhalb eines Sim-Ticks töten (step() leert die Ereignisliste zu Beginn)
+await ev(() => {
+  const sim = window.__app.session.sim, orig = sim.step;
+  sim.step = function (cmds) {
+    sim.step = orig;
+    const out = orig.call(this, cmds);
+    const h = this.heroOf(0);
+    h.shield = 0;
+    this.applyHit({ type: 'c', alive: true, x: h.x, z: h.z, hp: 1, maxHp: 1 }, h, 1e7, 'klinge', false);
+    return out;
+  };
+});
 await page.waitForFunction(() => window.__app.vmode === 'dead' || window.__app.vmode === 'swoopOut', null, { polling: 30 });
 await wait(800);
 await shot('held-gefallen');
