@@ -34,7 +34,7 @@ const args = process.argv.slice(2).filter((a) => !a.startsWith('-'));
 const want = (id) => !args.length || args.includes(id);
 const cell = +(process.env.FORGE_CELL || 0.007);
 // Einheiten: Zellgröße für die Draufsicht (gröber als Helden, reicht für ~100 px hohe Figuren)
-const unitCell = +(process.env.FORGE_UNIT_CELL || 0.0115);
+const unitCell = +(process.env.FORGE_UNIT_CELL || 0.015);
 
 // --- Arbeiter-Modus: backt eine Liste von Einheiten-Formen und meldet Statistiken als JSON-Zeilen ---
 if (process.env.FORGE_WORKER) {

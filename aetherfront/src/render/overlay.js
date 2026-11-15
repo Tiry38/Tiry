@@ -4,6 +4,7 @@ import * as THREE from 'three';
 import { buildModel } from './models.js';
 import { GRID_COLS, GRID_ROWS, CELL, cellCenter, laneCenterX, BUILD_Z0 } from '../sim/layout.js';
 import { FACTIONS } from '../sim/data.js';
+import { fighterArch, formOf } from './forge/roster.js';
 
 const _c = new THREE.Color();
 
@@ -77,7 +78,7 @@ export class Overlay {
 
   ghostFor(unit) {
     let g = this.ghostCache.get(unit.id);
-    if (!g) { g = buildModel(unit.model, { ...FACTIONS[unit.faction].palette, tier: unit.tier, seed: 1 }).body; this.ghostCache.set(unit.id, g); }
+    if (!g) { const m = buildModel(fighterArch(unit), { ...FACTIONS[unit.faction].palette, tier: unit.tier, form: formOf(unit), seed: 1, lod: 1 }); g = m.body; if (m.forged) this.ghostCache.set(unit.id, g); }
     return g;
   }
 

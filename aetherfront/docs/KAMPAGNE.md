@@ -12,15 +12,18 @@ das **Wildherz** (Hüter der Wälder), die **Ätherschmiede** (Erfinder aus den 
 riss er den Himmel auf: Durch den **Riss** will er den Abgrund mit Aethra verschmelzen – er glaubt, nur die dunkle
 Energie der Tiefe könne die Welt erhalten. Dass dabei alles Leben auf den Inseln vergeht, nimmt er in Kauf.
 
-## Die Hauptfiguren (spielbare Helden)
-| Held | Rolle | Motivation |
+## Die Hauptfiguren (Erzählfiguren – nicht spielbar)
+Aetherfront ist ein reines Lane-Defense-Spiel mit fester Draufsicht. Die Figuren tragen die Geschichte in Missionstexten
+und Dialogen; gespielt wird ausschließlich über Bahn, Bauraster, Aufwertungen, Söldner, König und Missions-Aktionen.
+
+| Figur | Rolle in der Geschichte | Motivation |
 | --- | --- | --- |
-| **Kael Sturmbrecher** | Tank | Letzter Hauptmann der Himmelsbastion. Will niemanden mehr verlieren – und verliert fast alles. |
-| **Mira Lichtquell** | Heilerin | Priesterin des Leuchtturms. Glaubt, dass jeder gerettet werden kann – sogar Vael’Thar. |
-| **Lyra Morgenfeder** | Jägerin | Ihre Heimat, der Himmelswald, brennt als Erstes. Sie sucht Rache und findet Verantwortung. |
-| **Selene Äthersang** | Magierin | Ihr Herz ist ein Splitter des Ätherkristalls. Vael’Thar braucht sie für sein Ritual. |
-| **Brann Eisenfaust** | Krieger | Schmied der Äthermaschinen. Sein Lehrmeister Orrik ist der Verräter. |
-| **Varo Glutklinge** | Schurke | Einst Vael’Thars Klinge. Wechselt die Seite – aber erst in Akt IV erfährt man, warum. |
+| **Kael Sturmbrecher** | Hauptmann der Himmelsbastion | Will niemanden mehr verlieren – und verliert fast alles. |
+| **Mira Lichtquell** | Priesterin des Leuchtturms | Glaubt, dass jeder gerettet werden kann – sogar Vael’Thar. |
+| **Lyra Morgenfeder** | Jägerin des Himmelswalds | Ihre Heimat brennt als Erstes. Sie sucht Rache und findet Verantwortung. |
+| **Selene Äthersang** | Kristallmagierin | Ihr Herz ist ein Splitter des Ätherkristalls. Vael’Thar braucht sie für sein Ritual. |
+| **Brann Eisenfaust** | Schmied der Äthermaschinen | Sein Lehrmeister Orrik ist der Verräter. |
+| **Varo Glutklinge** | Vael’Thars Klinge | Wechselt die Seite – aber erst in Akt IV erfährt man, warum. |
 
 ## Story-Bogen
 - **Akt I – Das Erwachen (Himmelsinseln):** Der Riss öffnet sich. Kael und Mira halten die Himmelsbastion, retten
@@ -37,35 +40,37 @@ Energie der Tiefe könne die Welt erhalten. Dass dabei alles Leben auf den Insel
   Aethra. Finale: Vael’Thar in vier Phasen. Selene gibt einen Teil ihres Herzens, um den Kristall neu zu entzünden.
 
 ## Missionen (jede mit eigener Mechanik)
-| # | Akt | Mission | Mechanik (nur hier) | Ziel |
-| --- | --- | --- | --- | --- |
-| 1 | I | Der erste Riss | **Tutorial**: Bauen, Welle, Heldensteuerung Schritt für Schritt | 5 Wellen halten |
-| 2 | I | Funken im Wind | **Ätherfunken einsammeln**: Der Held sammelt in jeder Kampfphase Splitter auf der Bahn | 8 Funken + 7 Wellen |
-| 3 | I | Die bröckelnde Brücke | **Spur bricht ein**: Mit jeder Welle stürzt die vorderste Baureihe ab | 8 Wellen halten |
-| 4 | I | Leuchtfeuer | **Nacht**: Vasallen sehen Gegner nur im Licht – der Held entzündet Leuchtfeuer | 8 Wellen halten |
-| 5 | I | Die Pilgerkarawane | **Eskorte**: Pilger ziehen durch deine Bahn zum König und müssen überleben | Alle Pilger retten |
-| 6 | I | Der Steintitan | **Bossmission**: Held gegen den Titan (Phasen, Bodenwarnungen), Vasallen halten Diener | Titan besiegen |
-| 7 | II | Wurzelnetz | **Kraftknoten**: Leuchtende Felder geben Vasallen +50 % – sie wandern jede Welle | 8 Wellen halten |
-| 8 | II | Sporenregen | **Wetter**: Jede Welle wechselt das Wetter und verändert den Schaden der Angriffsarten | 8 Wellen halten |
-| 9 | II | Verderbte Wächter | **Türme kippen**: Verderber-Schamanen übernehmen Vasallen, wenn der Held sie nicht unterbricht | 8 Wellen halten |
-| 10 | II | Die Gefangenen | **Rettung unter Zeitdruck**: Der Held muss Käfige an der Bahnspitze erreichen, bevor sie fallen | 6 Gefangene retten |
-| 11 | II | Jagd auf den Dornenfürsten | **Verfolgung**: Der Anführer flieht zum Portal – der Held muss ihn stellen | Dornenfürst erlegen |
-| 12 | II | Die Aschendrachin | **Bossmission**: Fliegender Boss, Feuerschneisen, Phasen | Drachin besiegen |
-| 13 | III | Sandsturm | **Sandsturm**: Fernkampf schwächer, Gegner schneller – Nahkampf und Held zählen | 8 Wellen halten |
-| 14 | III | Die Schmiede brennt | **Lavaschlote**: Angekündigte Ausbrüche treffen auch eigene Vasallen | 8 Wellen halten |
-| 15 | III | Verrat am Tor | **Überläufer**: In bestimmten Wellen laufen eigene Vasallen zum Feind über | 8 Wellen halten |
-| 16 | III | Kristallpfeiler | **Pfeiler aktivieren**: Der Held lädt Kristallpfeiler auf, die Vasallen beschleunigen | 8 Wellen halten |
-| 17 | III | Belagerung von Karrak | **Belagerung**: Söldner rammen die Feste des Verräters | Feste zerstören |
-| 18 | III | Orrik, der Verräter | **Bossmission**: Mechanischer Koloss mit Geschützen und Schildphase | Orrik besiegen |
-| 19 | IV | Schatten im Licht | **Unsichtbare**: Gegner sind nur nahe am Helden sichtbar und angreifbar | 8 Wellen halten |
-| 20 | IV | Spiegelwelt | **Spiegel**: Die Wellen bestehen aus Kopien deiner eigenen Vasallen | 8 Wellen halten |
-| 21 | IV | Zerfallende Zeit | **Zeitzerfall**: Bauzeit schrumpft jede Welle, das Einkommen verdoppelt sich | 8 Wellen halten |
-| 22 | IV | Letzte Bastion | **Ohne Rückhalt**: Keine Königs-Verbesserungen, nur 2 Heilungen | 8 Wellen halten |
-| 23 | IV | Varos Wahl | **Duell**: Varo führt die Welle – ein Anführer mit Helden-Fähigkeiten | Varo bezwingen |
-| 24 | IV | Vael’Thar | **Finale**: 4 Phasen, die Arena zerfällt, Diener-Wellen, Wiederbelebung der Welt | Vael’Thar besiegen |
+Alle Spieler-Aktionen sind Befehle (`{ type: 'mission', … }` über `applyCommand`) – deterministisch und online-fähig.
+Anklickbare Missionsobjekte leuchten mit einem goldenen Ring; Ziel und Aktionen stehen im Missionsfenster links oben.
+
+| # | Akt | Mission | Mechanik (nur hier) | Spieler wirkt über | Ziel |
+| --- | --- | --- | --- | --- | --- |
+| 1 | I | Der erste Riss | `tutorial` – Einführung Schritt für Schritt | Bauen, Bereit, Aufwerten (C/V), Söldner | 5 Wellen halten |
+| 2 | I | Funken im Wind | `shards` – Ätherfunken verglühen nach Sekunden | Klick auf Funken (+15 Äther) | 8 Funken + alle Wellen |
+| 3 | I | Die bröckelnde Brücke | `collapse` – vorderste Baureihe stürzt ab (Erstattung) | Bau-Entscheidung: weiter hinten bauen | alle Wellen |
+| 4 | I | Leuchtfeuer | `night` – Vasallen sehen nur im Licht | Klick entzündet Leuchtfeuer für 12 s (immer wieder) | alle Wellen |
+| 5 | I | Die Pilgerkarawane | `escort` – Pilger laufen durch die Bahn | Spott-Vasallen und Heiler schützen sie | höchstens 2 verloren |
+| 6 | I | Der Steintitan | `titan` – Runensteine schwächen den Boss | Klick + Äther: je Rune −7 % Titan-Leben | Titan (Welle 10) überstehen |
+| 7 | II | Wurzelnetz | `nodes` – Kraftknoten +50 % Schaden, wandern | Umbauen in der Bauphase | alle Wellen |
+| 8 | II | Sporenregen | `weather` – Wetter ändert Angriffsarten | Vorhersage lesen, passend bauen | alle Wellen |
+| 9 | II | Verderbte Wächter | `corrupt` – Verderber übernehmen Vasallen | Betäubende/Fernkampf-Vasallen | alle Wellen |
+| 10 | II | Die Gefangenen | `rescue` – Käfige stürzen nach 9 s ab | schneller Klick (+20 Gold) | 8 Gefangene |
+| 11 | II | Jagd auf den Dornenfürsten | `chase` – Fürst flieht zum Portal | Klick = Wurzelfalle (2,5 s, alle 10 s), Verlangsamung | 4× stellen |
+| 12 | II | Die Aschendrachin | `drake` – Feueratem trifft die dichteste Rasterspalte | Bau-Entscheidung: breit verteilen | Drachin (Welle 20) überstehen |
+| 13 | III | Sandsturm | `sandstorm` – Fernkampf −40 %, Gegner schneller | Nahkampf-Aufstellung | alle Wellen |
+| 14 | III | Die Schmiede brennt | `lava` – Lavaschlote treffen alle | Aufstellung, Heiler | alle Wellen |
+| 15 | III | Verrat am Tor | `betrayal` – Vasallen laufen über | Treueschwur (Vasall anklicken, 40 Gold, max. 4) | alle Wellen |
+| 16 | III | Kristallpfeiler | `pylons` – geladene Pfeiler +40 % Angriffstempo | Klick + 25 Äther, bis Wellenende | alle Wellen |
+| 17 | III | Belagerung von Karrak | `ram` – Rammböcke gegen die Feste | Rammbock bauen (Gold, 1 je Welle) + Söldner | Feste zerstören |
+| 18 | III | Orrik, der Verräter | `colossus` – Dampfventile platzen | Klick lässt Ventil ab → Koloss −1 Rüstung | Koloss (Welle 20) überstehen |
+| 19 | IV | Schatten im Licht | `shadows` – Gegner unsichtbar | Heiler/Unterstützer tragen Licht, Leuchtkugel (Ziel-Klick) | alle Wellen |
+| 20 | IV | Spiegelwelt | `mirror` – Wellen kopieren deine Vasallen | gemischte Armee | alle Wellen |
+| 21 | IV | Zerfallende Zeit | `timedecay` – Bauzeit schrumpft, Einkommen doppelt | schnelles Bauen | alle Wellen |
+| 22 | IV | Letzte Bastion | `lastbastion` – keine König-Verbesserungen, 2 Heilungen | Heilungen klug einsetzen | alle Wellen |
+| 23 | IV | Varos Wahl | `duel` – Varos Pakte, Varo führt die letzte Welle | Pakt annehmen (Gold jetzt, Welle +20 %) oder ablehnen | Varo bezwingen |
+| 24 | IV | Vael’Thar | `riftlord` – Risskerne schirmen Gegner ab, Lava im Finale | Klick + 30 Äther zerschlägt Kerne | Vael’Thar (Welle 30) überstehen |
 
 ## Belohnungen
 - 3 Sterne je Mission: Sieg · König ≥ 50 % · Missions-Herausforderung. Sterne schalten Talente frei.
-- Jeder Akt schaltet ein Volk und einen Helden frei; Abschluss schaltet den **Heldenhaften Modus** frei.
-- Geheimnisse: In jeder Mission liegt ein verstecktes **Chronik-Fragment** auf der Bahn, das nur der Held am Boden
-  findet (+1 Kodex-Eintrag, Erfahrung).
+- Jeder Akt schaltet ein Volk frei. Schwierigkeit: Entspannt, Normal, Legendär.
+- Jede Mission zählt ins Meta-Profil (Erfahrung, Völker-Meisterschaft, Erfolge – „Chronist“ für den Abschluss).

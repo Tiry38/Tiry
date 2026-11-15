@@ -70,7 +70,7 @@ export class ObjectivesView {
       steam: new THREE.MeshBasicMaterial({ color: new THREE.Color(2.4, 2.2, 2.0), toneMapped: false, transparent: true, opacity: 0.35, depthWrite: false }),
       rift: new THREE.MeshStandardMaterial({ color: 0x2a0a3a, emissive: 0xb04aff, emissiveIntensity: 2.4, roughness: 0.2, metalness: 0.3 }),
       flare: new THREE.MeshBasicMaterial({ color: new THREE.Color(4, 3.4, 2.2), toneMapped: false }),
-      hint: new THREE.MeshBasicMaterial({ color: new THREE.Color(2.6, 2.0, 0.8), toneMapped: false, transparent: true, opacity: 0.6, blending: THREE.AdditiveBlending, depthWrite: false }),
+      hint: new THREE.MeshBasicMaterial({ color: new THREE.Color(1.25, 0.78, 0.12), toneMapped: false, transparent: true, opacity: 0.6, blending: THREE.AdditiveBlending, depthWrite: false }),
     };
     this.hintGeo = new THREE.RingGeometry(1.35, 1.55, 48).rotateX(-Math.PI / 2);
     this.pings = [];

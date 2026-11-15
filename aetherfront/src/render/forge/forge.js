@@ -111,7 +111,13 @@ export function forgeAsset(def, log = () => {}) {
       for (let i = 0; i < n; i++) g[i] = hiTo0.get(C.src[i]);
       const pre = `${k}#${li}`;
       buffers[pre + ':pos'] = Float32Array.from(C.positions);
-      const nrm = new Int16Array(n * 3); for (let i = 0; i < n; i++) for (let c = 0; c < 3; c++) nrm[i * 3 + c] = Math.round(Math.max(-1, Math.min(1, bk.normal[g[i] * 3 + c])) * 32767);
+      const nrm = new Int16Array(n * 3);
+      for (let i = 0; i < n; i++) {
+        const o = g[i] * 3; let nx = bk.normal[o], ny = bk.normal[o + 1], nz = bk.normal[o + 2];
+        const l = Math.hypot(nx, ny, nz);
+        if (!(l > 1e-4)) { nx = 0; ny = 1; nz = 0; } else { nx /= l; ny /= l; nz /= l; } // keine Null-/NaN-Normalen (sonst NaN-Pixel → Bloom-Flecken)
+        nrm[i * 3] = Math.round(nx * 32767); nrm[i * 3 + 1] = Math.round(ny * 32767); nrm[i * 3 + 2] = Math.round(nz * 32767);
+      }
       buffers[pre + ':nrm'] = nrm;
       const col = new Uint8Array(n * 4);
       for (let i = 0; i < n; i++) {

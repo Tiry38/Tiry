@@ -45,11 +45,17 @@ Fertige Installer baut GitHub Actions bei jeder Änderung (`.github/workflows/ae
 | +CC | Champions | Jeder 4. Gegner ist ein Champion (3× Leben, 3× Kopfgeld), Bosse +25 % |
 
 Kombinierbar, z. B. **PRCC** oder **HPCC**. Dazu: Teamgröße 1v1–4v4, 10/20/30 Wellen, Bots für leere Plätze,
-Bot-Stärke getrennt für Verbündete und Gegner.
+Bot-Stärke (Leicht/Normal/Schwer/Extrem) getrennt für Verbündete und Gegner, **Regeln** Normal/Schnell/Lang/Hart/
+Gespiegelt/Zufall und **Endlos** (Endwellen, bis ein König fällt).
+
+Feste Draufsicht, keine spielbaren Helden. Steuerung: Kämpfer bauen mit **Q W E R A S D F**, ausgewählten Kämpfer
+aufwerten mit **C / V** (die Auswahlkarte zeigt beide Pfade mit Wertevergleich), Söldner **1–7**.
 
 ## Solo-Kampagne „Chronik des Risses“
 
-15 Missionen in 4 Akten. Du hältst deine Bahn wie gewohnt – aber deine **Söldner** schicken sich nicht zu einem
+24 Missionen in 4 Akten – jede mit einer eigenen Mechanik (Funken anklicken, Leuchtfeuer, Käfige, Treueschwur,
+Rammböcke, Ventile, Pakte, Risskerne …; Übersicht in `docs/KAMPAGNE.md`). Missions-Aktionen sind Befehle über
+`applyCommand` und damit deterministisch. Du hältst deine Bahn wie gewohnt – aber deine **Söldner** schicken sich nicht zu einem
 Mitspieler, sondern stürmen über die Brücke die **Rissfeste** des Rissfürsten Vael’Thar (Rammstoß + Angriff) und
 erhöhen dabei dein Einkommen. Missionsziele: **Belagerung** (Feste zerstören, bevor die letzte Welle vorbei ist)
 oder **Halten** (alle Wellen überstehen). Der Rissfürst schickt eigene Söldner, Missionen haben Modifikatoren
@@ -66,10 +72,20 @@ oder **Halten** (alle Wellen überstehen). Der Rissfürst schickt eigene Söldne
 - `src/audio/audio.js` – live synthetisierte Orchestermusik (Menü/Bau/Kampf/Boss/Sieg/Niederlage) und Effekte (Web Audio).
 - `src/ui/` – Menüs, HUD, Einstellungen (gespeichert). `electron/` – Windows-Hülle.
 
-## Online mit Freunden (Stand: vorbereitet)
+## Online mit Freunden
+
+Mehrspieler-Lobby: **Spiel hosten** startet den Relay-Server direkt auf dem PC (Windows-Version), Räume per Code oder
+öffentlicher Liste, Schnellsuche, Plätze (Mensch/Bot mit Stärke/geschlossen), Host-Einstellungen (Modus PR/AP/AR/HP + CC,
+Regeln, Endlos, Wellen, Bots, Ausgleich), Chat, Einladung kopieren. Im Spiel: Chat mit ↵ (`/t` = Team), Markierung mit
+Alt + Klick, Pausenabstimmung im Menü, automatisches Wiederverbinden.
+
+Sammlung (Hauptmenü): Profil-Stufe und Titel, Völker-Meisterschaft mit Bannern, Aufwertungs-Bäume, Erfolge,
+tägliche/wöchentliche Herausforderungen, Endlos-Bestenliste – jede Partie zählt.
+
+### Technik dahinter
 
 Die Architektur ist fertig für Online-Partien: Jede Aktion ist ein Befehl, alle Clients rechnen dieselbe Simulation
 (Lockstep), der Server stempelt Befehle auf Ticks und vergleicht Prüfsummen. Der Test `test/net.test.mjs` spielt eine
 Partie mit zwei Clients über den echten Server und prüft, dass beide identisch bleiben.
-Für echtes Spielen über das Internet fehlen noch: ein öffentlich erreichbarer Server (z. B. kleiner VPS),
-Wiederverbinden nach Abbruch, Chat-Oberfläche und eine polierte Lobby.
+Für Spielen über das Internet braucht es einen erreichbaren Server (Portweiterleitung am Host-PC oder ein kleiner VPS,
+siehe `SERVER-EINRICHTEN.md`).

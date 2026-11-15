@@ -77,15 +77,14 @@ export function updateLeader(sim, c, defenders) {
     if (c.lcast.t <= 0) { const lc = c.lcast; c.lcast = null; resolve(sim, c, lc, defenders); }
     return true; // während des Wirkens keine normale Aktion
   }
-  if (c.stun > 0 || c.fearT > 0) return false;
+  if (c.stun > 0) return false;
   // neue Fähigkeit wählen
-  const hero = defenders.find((x) => x.type === 'h' && x.alive);
   for (const k of d.kit) {
     if (k === 'enrage' || (c.lcd[k] || 0) > 0) continue;
     const a = LEADER_ABILITIES[k];
     let ok = false, lc = { k, t: a.wind / (d.phases && c.phase === 3 ? 1.3 : 1) };
     if (k === 'charge') {
-      const t = hero || nearest(defenders, c);
+      const t = nearest(defenders, c);
       if (t) { const dist = Math.hypot(t.x - c.x, t.z - c.z); if (dist >= a.minRange && dist <= a.range) { ok = true; lc.tgt = t.id; lc.x = t.x; lc.z = t.z; } }
     } else if (k === 'slam') {
       const t = nearest(defenders, c);

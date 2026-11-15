@@ -58,6 +58,7 @@ export class Menus {
   /** push=true merkt sich den vorherigen Bildschirm für „Zurück“ */
   go(id, push = false) {
     if (push) this.stack.push(this.current);
+    $('tooltip').classList.remove('show');
     if (id === 'setup') this.refreshSetup();
     if (id === 'campaign') this.refreshCampaign();
     if (id === 'multi') this.lobby.render();

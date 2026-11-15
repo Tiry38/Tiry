@@ -23,13 +23,13 @@ Object.assign(ARCH_STYLE, { knightfallen: 'abgrund', serpent: 'schwarm' });
 export const HOVER_ARCH = new Set(['core', 'drone', 'banshee', 'imp', 'locust', 'shade', 'worker', 'boss_drake', 'dryad']);
 /** Laufzeit-Grundmaßstab je Archetyp (Zellen-Ausfüllung: Stufe II ≈ 2-m-Zelle) */
 export const ARCH_FIT = {
-  knight: 1.18, archer: 1.12, priest: 1.12, paladin_heavy: 1.0, griffin: 1.15, lancer: 1.12, monk: 1.2, ballista: 1.15,
-  treant: 1.0, wolf: 1.3, druid: 1.12, mushroom: 1.2, bear: 1.2, owl: 1.2, stag: 1.1, dryad: 1.15,
-  automaton: 1.18, walker: 1.12, mortar: 1.2, core: 1.25, spider: 1.25, drone: 1.15, tank: 1.15, tesla: 1.12,
-  shade: 1.2, bonethrower: 1.15, voidmage: 1.1, cryptgolem: 1.0, witch: 1.1, ghoul: 1.3, banshee: 1.15, gargoyle: 1.25,
-  crawler: 1.3, beetle: 1.3, carapace: 1.15, raptor: 1.2, queen: 1.1, locust: 1.35, mantis: 1.1, brute: 1.05,
-  elemental: 1.15, pyromancer: 1.12, salamander: 1.25, imp: 1.45, hound: 1.3, golem: 1.15, priest_glut: 1.1, phoenix: 1.15,
-  knightfallen: 1.1, serpent: 1.0,
+  knight: 1.5, archer: 1.45, priest: 1.42, paladin_heavy: 1.25, griffin: 1.3, lancer: 1.4, monk: 1.5, ballista: 1.2,
+  treant: 1.2, wolf: 1.5, druid: 1.4, mushroom: 1.35, bear: 1.35, owl: 1.35, stag: 1.3, dryad: 1.4,
+  automaton: 1.45, walker: 1.3, mortar: 1.3, core: 1.35, spider: 1.35, drone: 1.3, tank: 1.25, tesla: 1.25,
+  shade: 1.45, bonethrower: 1.25, voidmage: 1.35, cryptgolem: 1.2, witch: 1.35, ghoul: 1.5, banshee: 1.35, gargoyle: 1.45,
+  crawler: 1.45, beetle: 1.45, carapace: 1.25, raptor: 1.4, queen: 1.25, locust: 1.5, mantis: 1.3, brute: 1.25,
+  elemental: 1.35, pyromancer: 1.38, salamander: 1.35, imp: 1.6, hound: 1.45, golem: 1.3, priest_glut: 1.35, phoenix: 1.3,
+  knightfallen: 1.3, serpent: 1.15, king: 1.0, worker: 1.0,
 };
 /** Formfaktor: Stufe I klein/schlicht → II spürbar größer → III Verwandlung */
 export const TIER_SCALE = { 1: 0.86, 2: 1.0, 3: 1.14 };

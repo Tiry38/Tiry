@@ -3,10 +3,20 @@
 import * as THREE from 'three';
 
 const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+const smooth = (a, b, x) => { const t = clamp((x - a) / (b - a), 0, 1); return t * t * (3 - 2 * t); };
+
+// Draufsicht wie im Genre-Vorbild: leichtes Tele (wenig Verzerrung, Figuren wirken größer und „plastischer“),
+// Neigung ~56°. Die Standardansicht der eigenen Bahn (Abstand 58 aus dem Spiel) rückt näher heran, sodass das
+// Bauraster gut die Hälfte der Bildhöhe füllt; Übersichten (≥ 150) behalten ihren bisherigen Bildausschnitt.
+export const RTS_FOV = 30;
+const FOV_K = Math.tan((42 * Math.PI) / 360) / Math.tan((RTS_FOV * Math.PI) / 360);
+/** Eingestellter Abstand → tatsächlicher Kameraabstand (monoton) */
+export function effectiveDist(d) { return d * (0.76 + (FOV_K - 0.76) * smooth(55, 150, d)); }
 
 export class RtsCamera {
   constructor(camera, dom, settings) {
     this.camera = camera;
+    this.camera.fov = RTS_FOV; this.camera.updateProjectionMatrix();
     this.dom = dom;
     this.settings = settings;
     this.target = new THREE.Vector3(0, 0, 0);
@@ -45,7 +55,7 @@ export class RtsCamera {
     dom.addEventListener('wheel', (e) => {
       if (!this.enabled) return;
       e.preventDefault();
-      this.goal.dist = clamp(this.goal.dist * Math.pow(1.0015, e.deltaY), 18, 200);
+      this.goal.dist = clamp(this.goal.dist * Math.pow(1.0015, e.deltaY), 20, 210);
     }, { passive: false });
   }
 
@@ -93,10 +103,11 @@ export class RtsCamera {
     for (const key of ['x', 'z', 'dist', 'yaw', 'pitch']) this.cur[key] += (this.goal[key] - this.cur[key]) * f;
 
     const c = this.cur;
-    const horiz = Math.cos(c.pitch) * c.dist;
+    const dist = effectiveDist(c.dist);
+    const horiz = Math.cos(c.pitch) * dist;
     const sx = (Math.random() - 0.5) * this.shake, sy = (Math.random() - 0.5) * this.shake;
     this.shake = Math.max(0, this.shake - dt * 2.5);
-    this.camera.position.set(c.x + Math.sin(c.yaw) * horiz + sx, Math.sin(c.pitch) * c.dist + sy, c.z + Math.cos(c.yaw) * horiz);
+    this.camera.position.set(c.x + Math.sin(c.yaw) * horiz + sx, Math.sin(c.pitch) * dist + sy, c.z + Math.cos(c.yaw) * horiz);
     this.target.set(c.x, 0, c.z - 2);
     this.camera.lookAt(this.target);
   }

@@ -1,13 +1,17 @@
 // Einheiten-Darstellung: alle Kämpfer, Gegner, Könige und Arbeiter als GPU-Instanzen
-// (ein Draw-Call je Modelltyp), mit weicher Interpolation, Lauf-/Angriffs-Animation,
+// (ein Draw-Call je Modelltyp und Detailstufe), mit weicher Interpolation, Lauf-/Angriffs-Animation,
 // Treffer-Aufblitzen, Teamringen und Lebensbalken.
+// Draufsicht-Leistung: je Instanz Sichtbarkeitstest (Kamera-Pyramide) und Detailstufe nach Bildschirmgröße
+// (LOD0 ≈ 2,6 k, LOD1 ≈ 1 k, LOD2 ≈ 0,4 k Dreiecke) – 8 Bahnen × 30 Einheiten bleiben weit unter dem Budget.
 import * as THREE from 'three';
 import { unitVariant, creepVariant } from './forge/variants.js';
-import { buildModel, createBodyMaterial, createGlowMaterial, setInstanceAnim, createUnitDepthMaterial } from './models.js';
+import { fighterArch, formOf, creepModel, HOVER_ARCH, CREEP_FIT } from './forge/roster.js';
+import { forgeReady } from './forge/loader.js';
+import { buildModel, DEFAULTS, createBodyMaterial, createGlowMaterial, setInstanceAnim, createUnitDepthMaterial } from './models.js';
 import { UNITS, FACTIONS } from '../sim/data.js';
 import { kingPos, laneCenterX, LANE_END_Z } from '../sim/layout.js';
 
-const HOVER = new Set(['griffin', 'imp', 'core', 'shade', 'boss_drake', 'worker']);
+const HOVER = HOVER_ARCH;
 export const TEAM_COLORS = ['#3d8bff', '#ff4a5a'];
 export const KING_PALETTES = [
   { primary: '#e9eef8', secondary: '#2b62e8', metal: '#d8b45c', glow: '#62c4ff' },
@@ -19,48 +23,61 @@ let UNIT_DEPTH = null;
 const _anim = [0, 0, 0, 0];
 const _m = new THREE.Matrix4(), _p = new THREE.Vector3(), _q = new THREE.Quaternion(), _s = new THREE.Vector3(), _e = new THREE.Euler(), _c = new THREE.Color();
 
+// LOD-Schwellen: projizierte Figurenhöhe in Bildpunkten
+const LOD_PX = [95, 42];
+const _sph = new THREE.Sphere(), _frus = new THREE.Frustum(), _pm = new THREE.Matrix4(), _cp = new THREE.Vector3();
+
 class Pool {
-  constructor(root, model, bodyMat, glowMat, cap = 16) {
-    this.root = root; this.model = model; this.bodyMat = bodyMat; this.glowMat = glowMat;
-    this.n = 0;
-    this.alloc(cap);
+  /** models: [LOD0, LOD1, LOD2] (je { body, glow, height, radius }) */
+  constructor(root, models, bodyMat, glowMat, cap = 16) {
+    this.root = root; this.models = models; this.model = models[0]; this.bodyMat = bodyMat; this.glowMat = glowMat;
+    this.levels = models.map(() => ({ n: 0, cap: 0, body: null, glow: null }));
+    this.models.forEach((m, i) => this.alloc(i, cap));
   }
-  alloc(cap) {
-    if (this.body) { this.root.remove(this.body); this.body.dispose(); }
-    if (this.glow) { this.root.remove(this.glow); this.glow.dispose(); }
-    this.cap = cap;
-    this.body = new THREE.InstancedMesh(this.model.body, this.bodyMat, cap);
-    this.body.castShadow = true; this.body.receiveShadow = true; this.body.frustumCulled = false;
-    this.body.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
-    this.body.setColorAt(0, _c.set(1, 1, 1));
-    this.body.customDepthMaterial = UNIT_DEPTH || (UNIT_DEPTH = createUnitDepthMaterial());
-    this.root.add(this.body);
-    if (this.model.glow) {
-      this.glow = new THREE.InstancedMesh(this.model.glow, this.glowMat, cap);
-      this.glow.frustumCulled = false;
-      this.glow.setColorAt(0, _c.set(1, 1, 1));
-      this.root.add(this.glow);
-    } else this.glow = null;
+  alloc(i, cap) {
+    const L = this.levels[i], model = this.models[i];
+    if (L.body) { this.root.remove(L.body); L.body.dispose(); }
+    if (L.glow) { this.root.remove(L.glow); L.glow.dispose(); }
+    L.cap = cap;
+    L.body = new THREE.InstancedMesh(model.body, this.bodyMat, cap);
+    L.body.castShadow = true; L.body.receiveShadow = true; L.body.frustumCulled = false;
+    L.body.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
+    L.body.setColorAt(0, _c.set(1, 1, 1));
+    L.body.customDepthMaterial = UNIT_DEPTH || (UNIT_DEPTH = createUnitDepthMaterial());
+    L.body.count = 0; L.body.visible = false;
+    this.root.add(L.body);
+    if (model.glow) {
+      L.glow = new THREE.InstancedMesh(model.glow, this.glowMat, cap);
+      L.glow.frustumCulled = false;
+      L.glow.setColorAt(0, _c.set(1, 1, 1));
+      L.glow.count = 0; L.glow.visible = false;
+      this.root.add(L.glow);
+    } else L.glow = null;
   }
-  begin() { this.n = 0; }
-  /** anim: [Laufphase rad, Laufstärke 0..1, Angriff 0..1 (Treffer ≈0.45), Treffer-Zucken 0..1] (optional) */
-  push(m, color, anim) {
-    if (this.n >= this.cap) { this.alloc(this.cap * 2); }
-    this.body.setMatrixAt(this.n, m);
-    this.body.setColorAt(this.n, color);
+  begin() { for (const L of this.levels) L.n = 0; }
+  /** anim: [Laufphase rad, Laufstärke 0..1, Angriff 0..1 (Treffer ≈0.45), Treffer-Zucken 0..1] (optional); lod: Detailstufe */
+  push(m, color, anim, lod = 0) {
+    const i = Math.min(lod, this.levels.length - 1), L = this.levels[i];
+    if (L.n >= L.cap) this.alloc(i, L.cap * 2);
+    L.body.setMatrixAt(L.n, m);
+    L.body.setColorAt(L.n, color);
     const A = anim || NO_ANIM;
-    setInstanceAnim(this.body, this.n, A[0], A[1], A[2], A[3]);
-    if (this.glow) { this.glow.setMatrixAt(this.n, m); this.glow.setColorAt(this.n, color); setInstanceAnim(this.glow, this.n, A[0], A[1], A[2], A[3]); }
-    this.n++;
+    setInstanceAnim(L.body, L.n, A[0], A[1], A[2], A[3]);
+    if (L.glow) { L.glow.setMatrixAt(L.n, m); L.glow.setColorAt(L.n, color); setInstanceAnim(L.glow, L.n, A[0], A[1], A[2], A[3]); }
+    L.n++;
   }
   end() {
-    for (const mesh of [this.body, this.glow]) {
+    for (const L of this.levels) for (const mesh of [L.body, L.glow]) {
       if (!mesh) continue;
-      mesh.count = this.n;
+      mesh.count = L.n;
+      mesh.visible = L.n > 0;
+      if (!L.n) continue;
       mesh.instanceMatrix.needsUpdate = true;
       if (mesh.instanceColor) mesh.instanceColor.needsUpdate = true;
     }
   }
+  /** Dreiecke dieser Runde (für Statistik) */
+  tris() { let t = 0; this.levels.forEach((L, i) => { if (!L.n) return; const m = this.models[i]; t += L.n * ((m.body.index ? m.body.index.count : m.body.attributes.position.count) + (m.glow ? (m.glow.index ? m.glow.index.count : m.glow.attributes.position.count) : 0)) / 3; }); return t; }
 }
 
 // Lebensbalken (Billboard-Pillen) als eine Instanz-Gruppe
@@ -135,34 +152,57 @@ export class UnitsView {
     this.root.add(this.bars, this.rings);
     this.kingFx = [{ hitT: -9, atkT: -9 }, { hitT: -9, atkT: -9 }];
     this.time = 0;
+    this.stats = { tris: 0, drawn: 0, culled: 0 };
+    // Kamera der Hauptszene abgreifen (für Sichtbarkeitstest und Detailstufen) – unsichtbarer Späher
+    this.cam = null;
+    const spy = new THREE.Mesh(new THREE.BufferGeometry().setAttribute('position', new THREE.BufferAttribute(new Float32Array(9), 3)), new THREE.MeshBasicMaterial({ colorWrite: false, depthWrite: false }));
+    spy.frustumCulled = false; spy.renderOrder = -100;
+    spy.onBeforeRender = (r, sc, cam) => { if (cam && cam.isPerspectiveCamera) this.cam = cam; };
+    this.root.add(spy);
+    // Sobald die gebackenen Figuren geladen sind: vorher entstandene Ersatzmodelle verwerfen und neu aufbauen
+    forgeReady().then(() => this.rebuildFallbacks());
+  }
+  rebuildFallbacks() {
+    for (const [key, p] of [...this.pools]) {
+      if (p.model.forged) continue;
+      for (const L of p.levels) for (const m of [L.body, L.glow]) if (m) { this.root.remove(m); m.dispose(); }
+      this.pools.delete(key);
+      for (const k of [...this.models.keys()]) if (k.startsWith(key + '#')) { const m = this.models.get(k); m.body.dispose(); if (m.glow) m.glow.dispose(); this.models.delete(k); }
+    }
   }
 
-  modelFor(key, archetype, palette, tier, variant) {
-    let m = this.models.get(key);
+  modelFor(key, archetype, palette, tier, variant, form, lod = 0, fit) {
+    const k = key + '#' + lod;
+    let m = this.models.get(k);
     if (!m) {
-      m = buildModel(archetype, { ...palette, tier, seed: hashStr(key), variant });
-      this.models.set(key, m);
+      m = buildModel(archetype, { ...palette, tier, seed: hashStr(key), variant, form, lod, fit });
+      this.models.set(k, m);
     }
     return m;
   }
-  pool(key, archetype, palette, tier, variant) {
+  pool(key, archetype, palette, tier, variant, form, fit) {
     let p = this.pools.get(key);
     if (!p) {
-      const model = this.modelFor(key, archetype, palette, tier, variant);
-      p = new Pool(this.root, model, this.bodyMat, this.glowMat, archetype === 'king' ? 2 : 24);
+      const m0 = this.modelFor(key, archetype, palette, tier, variant, form, 0, fit);
+      const models = [m0];
+      if (m0.forged && m0.lods > 1) for (let l = 1; l < m0.lods; l++) models.push(this.modelFor(key, archetype, palette, tier, variant, form, l, fit));
+      p = new Pool(this.root, models, this.bodyMat, this.glowMat, archetype === 'king' ? 2 : 24);
+      p.hover = HOVER.has(archetype) || !!m0.hover;
       this.pools.set(key, p);
     }
     return p;
   }
-  fighterKey(def) { return { key: `f|${def.id}`, arch: def.model, pal: FACTIONS[def.faction].palette, tier: def.tier, variant: unitVariant(def) }; }
+  fighterKey(def) { return { key: `f|${def.id}`, arch: fighterArch(def), form: formOf(def), pal: FACTIONS[def.faction].palette, tier: def.tier, variant: unitVariant(def) }; }
   creepKey(def) {
     const id = def.key || def.id || `w${def.n}`;
-    const pal = def.champion ? { ...def.palette, glow: '#ffd23a', metal: '#e8b84a' } : def.palette;
-    return { key: `c|${id}`, arch: def.model, pal, tier: def.boss || def.champion ? 3 : def.id ? 2 : 1 + (def.n > 10 ? 1 : 0) + (def.n > 20 ? 1 : 0), variant: creepVariant(def) };
+    const cm = creepModel(def);
+    // Bosse in ihren eigenen Farben (Wellenpaletten wiederholen sich alle 5 Wellen)
+    const pal = def.boss && DEFAULTS[cm.arch] ? DEFAULTS[cm.arch] : cm.lead ? { ...def.palette, glow: '#ffd23a', metal: '#e8b84a' } : def.palette;
+    return { key: `c|${id}`, arch: cm.arch, form: cm.form, pal, tier: +cm.form[0] || 1, variant: creepVariant(def), fit: CREEP_FIT[cm.arch] };
   }
 
   /** Vorab erzeugen, damit beim ersten Auftauchen nichts ruckelt */
-  warmup(defs) { for (const d of defs) { const k = d.faction ? this.fighterKey(d) : this.creepKey(d); this.pool(k.key, k.arch, k.pal, k.tier, k.variant); } }
+  warmup(defs) { for (const d of defs) { const k = d.faction ? this.fighterKey(d) : this.creepKey(d); this.pool(k.key, k.arch, k.pal, k.tier, k.variant, k.form, k.fit); } }
 
   onEvent(e, sim) {
     if (e.e === 'hit') { const d = this.disp.get(e.id); if (d) d.hitT = this.time; }
@@ -191,6 +231,22 @@ export class UnitsView {
     const champRing = new THREE.Color('#ffc83a').multiplyScalar(1.6);
     const battle = sim.phase === 'battle';
     const seen = new Set();
+    // Kamera: Sichtbarkeit + Detailstufe je Instanz
+    const cam = this.cam;
+    let pxK = 0;
+    if (cam) {
+      cam.updateMatrixWorld(); _pm.multiplyMatrices(cam.projectionMatrix, cam.matrixWorldInverse); _frus.setFromProjectionMatrix(_pm);
+      _cp.setFromMatrixPosition(cam.matrixWorld);
+      pxK = (typeof window !== 'undefined' ? window.innerHeight : 900) / (2 * Math.tan((cam.fov * Math.PI) / 360));
+    }
+    const lodOf = (x, y, z, h) => {
+      if (!cam) return 0;
+      _sph.center.set(x, y + h * 0.5, z); _sph.radius = h * 0.9 + 0.8;
+      if (!_frus.intersectsSphere(_sph)) return -1;
+      const px = (h * pxK) / Math.max(1, _cp.distanceTo(_sph.center));
+      return px > LOD_PX[0] ? 0 : px > LOD_PX[1] ? 1 : 2;
+    };
+    let drawn = 0, culled = 0;
 
     for (const e of sim.entities.values()) {
       if (e.type !== 'f' && e.type !== 'c') continue; // Helden, Geschosse, Missions-Objekte zeichnen eigene Module
@@ -198,7 +254,7 @@ export class UnitsView {
       const isF = e.type === 'f';
       const def = isF ? UNITS[e.def] : e.def;
       const kk = isF ? this.fighterKey(def) : this.creepKey(def);
-      const pool = this.pool(kk.key, kk.arch, kk.pal, kk.tier, kk.variant);
+      const pool = this.pool(kk.key, kk.arch, kk.pal, kk.tier, kk.variant, kk.form, kk.fit);
       seen.add(e.id);
       let d = this.disp.get(e.id);
       if (!d) {
@@ -214,8 +270,10 @@ export class UnitsView {
       d.key = kk.key; d.arch = kk.arch; d.height = pool.model.height;
 
       const moving = e.moving != null && sim.tick - e.moving < 3;
-      const scaleBase = (def.size || 1) * (isF ? 1.3 : 1.2);
-      let y = HOVER.has(kk.arch) ? 0.55 + Math.sin(t * 2.2 + d.phase) * 0.15 : 0;
+      // Maßstab steckt in der Geometrie (Archetyp-Passform × Stufe); hier nur Rolle/Champion/alte Modelle
+      const scaleBase = (def.size || 1) * (pool.model.forged ? 1 : isF ? 1.3 : 1.2);
+      const boss = !isF && def.boss;
+      let y = pool.hover ? 0.45 + Math.sin(t * 2.2 + d.phase) * 0.15 : 0;
       let lean = 0, fwd = 0, sq = 1;
       if (moving) {
         const cyc = t * 9 + d.phase;
@@ -224,6 +282,8 @@ export class UnitsView {
       } else {
         sq = 1 + Math.sin(t * 2 + d.phase) * 0.015;
       }
+      // Bosse: eigenes Leerlauf-Atmen (tief, langsam) bzw. Schweben
+      if (boss) { sq = 1 + Math.sin(t * 1.3 + d.phase) * 0.035; if (pool.hover) y = 0.8 + Math.sin(t * 1.1) * 0.35; }
       // Vertex-Animation: Laufphase, Laufstärke, Angriffs-Fortschritt (Ausholen vor dem nächsten Schlag), Treffer
       d.walkW = (d.walkW || 0) + ((moving ? 1 : 0) - (d.walkW || 0)) * (1 - Math.exp(-dt * 8));
       d.gait = (d.gait || d.phase) + dt * (moving ? 9 : 2.2);
@@ -256,15 +316,23 @@ export class UnitsView {
       if (t - d.stunT < 0.8) _c.setRGB(0.7, 0.85, 1.6);
       if (e.slowPct > 0) _c.multiply(new THREE.Color(0.75, 0.9, 1.25));
       if (e.cursePct > 0) _c.multiply(new THREE.Color(1.2, 0.7, 1.3));
-      pool.push(_m, _c, _anim);
+      const lod = lodOf(d.x, y, d.z, pool.model.height * s);
+      if (lod >= 0) { pool.push(_m, _c, _anim, lod); drawn++; } else culled++;
 
       // Ring
       const ringCol = isF ? teamCol[e.team] : def.champion ? champRing : e.isSend ? sendRing : creepRing;
-      const rr = (pool.model.radius || 0.7) * 2.4 * scaleBase;
+      const rr = (pool.model.radius || 0.7) * (pool.model.forged ? 2.1 : 2.4) * scaleBase;
       const sel = ctx.selectedId === e.id, hov = ctx.hoverId === e.id;
       _m.compose(_p.set(d.x, 0.06, d.z), _q.identity(), _s.set(rr, 1, rr));
       _c.copy(ringCol).multiplyScalar(sel ? 2.2 : hov ? 1.5 : isF ? 0.8 : 0.55);
       if (nr < 1024) { rings.setMatrixAt(nr, _m); rings.setColorAt(nr, _c); nr++; }
+      // Boss-Aura: zweiter, pulsierender Ring
+      if (boss && nr < 1024) {
+        const pu = 0.5 + 0.5 * Math.sin(t * 2.2);
+        _m.compose(_p.set(d.x, 0.07, d.z), _q.identity(), _s.set(rr * (1.5 + 0.25 * pu), 1, rr * (1.5 + 0.25 * pu)));
+        _c.set(def.palette && def.palette.glow || '#ff6a2a').multiplyScalar(0.9 + 0.8 * pu);
+        rings.setMatrixAt(nr, _m); rings.setColorAt(nr, _c); nr++;
+      }
 
       // Lebensbalken
       const ratio = e.hp / e.maxHp;
@@ -294,7 +362,8 @@ export class UnitsView {
       _q.setFromEuler(_e);
       _m.compose(_p.set(dd.x, -a * a * (dd.height || 2) * 0.9, dd.z), _q, _s.setScalar(1 - 0.4 * a));
       _anim[0] = dd.gait || 0; _anim[1] = 0; _anim[2] = 0; _anim[3] = dd.t < 0 ? 0 : 0.95 * (1 - a);
-      pool.push(_m, dd.t < 0 ? _c.setRGB(1, 1, 1) : _c.setRGB(1 + 1.5 * (1 - a), 0.7, 0.7), _anim);
+      const dl = lodOf(dd.x, 0, dd.z, dd.height || 2);
+      if (dl >= 0) pool.push(_m, dd.t < 0 ? _c.setRGB(1, 1, 1) : _c.setRGB(1 + 1.5 * (1 - a), 0.7, 0.7), _anim, dl);
     }
 
     // Könige
@@ -302,7 +371,7 @@ export class UnitsView {
       const king = sim.teams[team].king;
       const kp = kingPos(team);
       const citadel = king.citadel;
-      const pool = citadel ? this.pool('citadel', 'boss_lord', { primary: '#2a1430', secondary: '#ff2a5a', metal: '#6a5a7a', glow: '#ff3a8a' }, 3) : this.pool(`king|${team}`, 'king', KING_PALETTES[team], 3);
+      const pool = citadel ? this.pool('citadel', 'boss_lord', { primary: '#2a1430', secondary: '#ff2a5a', metal: '#6a5a7a', glow: '#ff3a8a' }, 3, null, '1') : this.pool(`king|${team}`, 'king', KING_PALETTES[team], 3, null, '1');
       const fx = this.kingFx[team];
       const at = t - fx.atkT;
       let lean = 0;
@@ -316,7 +385,8 @@ export class UnitsView {
       _m.compose(_p.set(kp.x, king.alive ? 0 : -3, kp.z), _q, _s.set(ks, br * ks, ks));
       const ht = t - fx.hitT;
       _c.setScalar(ht < 0.15 ? 1 + 1.6 * (1 - ht / 0.15) : 1);
-      pool.push(_m, _c);
+      const kl = lodOf(kp.x, 0, kp.z, pool.model.height * ks);
+      if (kl >= 0) pool.push(_m, _c, null, kl);
       if (nb < 1024) {
         _m.compose(_p.set(kp.x, pool.model.height * ks + 1.6, kp.z), _q.identity(), _s.set(5, 1, 1));
         bars.setMatrixAt(nb, _m); bars.setColorAt(nb, _c.set(TEAM_COLORS[team]));
@@ -325,18 +395,21 @@ export class UnitsView {
     }
 
     // Arbeiter: schwebende Funken über dem hinteren Bahnende
-    const wp = this.pool('worker', 'worker', { primary: '#ffffff', secondary: '#a0e8ff', metal: '#d0d8ff', glow: '#7ae8ff' }, 1);
+    const wp = this.pool('worker', 'worker', { primary: '#ffffff', secondary: '#a0e8ff', metal: '#d0d8ff', glow: '#7ae8ff' }, 1, null, '1');
     for (const p of sim.players) {
       const lx = laneCenterX(p.team, p.slot);
       const n = Math.min(p.workers, 16);
       for (let i = 0; i < n; i++) {
         const a = t * 0.7 + (i / n) * Math.PI * 2 + p.id;
         _m.compose(_p.set(lx + Math.cos(a) * 3.2, 4.2 + Math.sin(t * 2 + i) * 0.4, LANE_END_Z - 4 + Math.sin(a) * 1.6), _q.identity(), _s.setScalar(0.8));
-        wp.push(_m, _c.setScalar(1));
+        const wl = lodOf(_p.x, _p.y - 0.5, _p.z, 1);
+        if (wl >= 0) wp.push(_m, _c.setScalar(1), null, Math.max(1, wl));
       }
     }
 
     for (const p of this.pools.values()) p.end();
+    this.stats.drawn = drawn; this.stats.culled = culled;
+    if (sim.tick % 30 === 0) { let tr = 0; for (const p of this.pools.values()) tr += p.tris(); this.stats.tris = Math.round(tr); }
     rings.count = nr; rings.instanceMatrix.needsUpdate = true; if (rings.instanceColor) rings.instanceColor.needsUpdate = true;
     bars.count = nb; bars.instanceMatrix.needsUpdate = true; if (bars.instanceColor) bars.instanceColor.needsUpdate = true;
     bars.geometry.attributes.aHp.needsUpdate = true; bars.geometry.attributes.aAlpha.needsUpdate = true;

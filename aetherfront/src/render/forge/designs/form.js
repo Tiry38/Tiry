@@ -37,8 +37,8 @@ export function wing(S, root, L, o = {}) {
     for (const f of fingers) S.capsule(el, f, 0.018 * L, 0.006 * L, { mat: 'bone', col: o.bone || '#3a3034', region: reg });
     const pts = [root, el, tip, ...fingers, at(0.12, 0.42 * L)];
     void pts;
-    for (const [a, b, c] of [[root, el, fingers[2]], [el, fingers[2], fingers[1]], [el, fingers[1], fingers[0]], [el, fingers[0], tip], [root, fingers[2], at(0.1, 0.45 * L)]]) membrane(S, a, b, c, 0.012 * L, { mat: 'leather', col: o.skin || 'secondary', region: reg });
-    if (o.glowEdge) onLayer(S, 'glow', () => { for (const f of fingers) S.sphere(f, 0.025 * L, G({ region: reg, glow: 3 })); });
+    for (const [a, b, c] of [[root, el, fingers[2]], [el, fingers[2], fingers[1]], [el, fingers[1], fingers[0]], [el, fingers[0], tip], [root, fingers[2], at(0.1, 0.45 * L)]]) membrane(S, a, b, c, 0.018 * L, { mat: 'leather', col: o.skin || 'primary*1.5', region: reg });
+    if (o.glowEdge) onLayer(S, 'glow', () => { for (const f of fingers) S.capsule(lerp3(el, f, 0.35), f, 0.012 * L, 0.006 * L, G({ region: reg, glow: 2.6 })); S.capsule(el, tip, 0.012 * L, 0.006 * L, G({ region: reg, glow: 2.6 })); });
     return;
   }
   if (st === 'schwarm') {
@@ -72,7 +72,7 @@ export function wing(S, root, L, o = {}) {
   const flame = st === 'glut';
   const leaf = st === 'wild';
   if (!flame) S.tube([root, at(0.5, -0.04 * L), at(1.0, 0.02 * L)], [0.055 * L, 0.04 * L, 0.014 * L], { mat: leaf ? 'bark' : 'feather', col: leaf ? '#5a3a22' : o.col || 'primary', region: reg });
-  else onLayer(S, 'glow', () => S.tube([root, at(0.5, -0.04 * L), at(1.0, 0.02 * L)], [0.05 * L, 0.035 * L, 0.01 * L], G({ region: reg, glow: 3.2 })));
+  else onLayer(S, 'glow', () => S.tube([root, at(0.5, -0.04 * L), at(1.0, 0.02 * L)], [0.05 * L, 0.035 * L, 0.01 * L], G({ region: reg, glow: 2.6 })));
   const n = leaf ? 5 : 8;
   for (let i = 0; i < n; i++) {
     const t = 0.12 + (i / (n - 1)) * 0.86;
@@ -83,7 +83,7 @@ export function wing(S, root, L, o = {}) {
     const F = frame(c, d, u);
     const w = (leaf ? 0.17 : 0.07) * L;
     const A = { rot: { x: F.x, y: F.y, z: F.z }, region: reg };
-    if (flame) onLayer(S, 'glow', () => S.ellipsoid(c, [w * 0.9, len * 0.5, 0.012 * L], { ...A, ...G({ glow: 2.6 + 0.8 * (i % 2) }) }));
+    if (flame) onLayer(S, 'glow', () => S.ellipsoid(c, [w * 0.9, len * 0.5, 0.014 * L], { ...A, ...G({ col: i % 2 ? 'glow' : 'secondary', glow: i % 2 ? 2.2 : 1.9 }) }));
     else {
       S.ellipsoid(c, [w, len * 0.5, 0.014 * L], { ...A, mat: leaf ? 'leaf' : 'feather', col: leaf ? (i % 2 ? 'primary' : 'primary*0.75') : (i % 3 === 2 ? 'secondary' : o.col || 'primary') });
       if (o.glowEdge) onLayer(S, 'glow', () => S.capsule(add(c, scl(d, len * 0.3)), add(c, scl(d, len * 0.48)), 0.014 * L, 0.006 * L, G({ region: reg, glow: 2.6 })));
@@ -169,7 +169,7 @@ export function applyForm(S, F, plan, style) {
       });
     } else {
       // zwei schwebende Kugeln über den Schultern
-      S.sym(() => orb(S, add(sh.p, [r * 1.9, r * 2.4 + 0.1 * u, -r * 0.6]), (tier >= 3 ? 0.11 : 0.085) * u, sh.region));
+      S.sym(() => orb(S, add(sh.p, [r * 1.6, r * 2.2 + 0.16 * u, -r * 0.4]), (tier >= 3 ? 0.13 : 0.11) * u, sh.region));
     }
   }
   // --- Kopf ---
@@ -222,8 +222,15 @@ export function applyForm(S, F, plan, style) {
         }
       }
     } else {
+      if (plan.machine) {
+        // Maschinen: schwebender Ätherring + Kern über dem Aufbau statt Flügeln
+        const c = add(p, [0, 0.55 * u, 0.1 * u]);
+        onLayer(S, 'glow', () => { S.torus(c, 0.42 * u, 0.025 * u, { rot: [PI / 2 - 0.25, 0, 0], ...G({ region: bk.region, glow: 2.6 }) }); S.sphere(c, 0.12 * u, G({ region: bk.region, glow: 3.4 })); });
+        S.torus(c, 0.5 * u, 0.03 * u, { rot: [PI / 2 - 0.25, 0, 0], mat: 'gold', col: 'metal', region: bk.region });
+        S.capsule(p, add(c, [0, -0.1 * u, 0]), 0.04 * u, 0.025 * u, { mat: 'gold', col: 'metal', region: bk.region });
+      } else {
       // leuchtende Flügel
-      const L = (plan.wingL || 1.25) * u;
+      const L = (plan.wingL || 1.0) * u;
       const wsty = st === 'glut' ? 'glut' : st;
       for (const [sd, k] of [['L', 1], ['R', -1]]) {
         const root = [k * w * 0.5 + p[0], p[1], p[2]];
@@ -232,6 +239,7 @@ export function applyForm(S, F, plan, style) {
         plan.cls['wing' + sd] = [4, root[0], root[1], 0];
       }
       S.sym(() => wing(S, [w * 0.5 + p[0], p[1], p[2]], L, { style: wsty, region: ['wingL'], glowEdge: true, col: st === 'orden' ? 'primary' : undefined }));
+      }
     }
   }
   // --- kreisende Splitter (III-B) ---

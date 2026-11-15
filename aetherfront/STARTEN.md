@@ -17,8 +17,9 @@ Spielen alle im selben WLAN, reicht die lokale Adresse (z. B. `192.168.178.20`).
 Für Freunde über das Internet bitte einmal **SERVER-EINRICHTEN.md** befolgen (5 Minuten, kostenlos).
 
 ## Tastenbelegung (Standard)
-- **Bauphase (Vogelperspektive):** Q W E R A S D F Vasallen · Klick setzen · C/V Aufwertungspfad 1/2 · X verkaufen ·
-  1–7 Söldner · B Funke · K Königshalle · H König heilen · ↵ Bereit · Pfeiltasten/Mausrad Kamera · Pos1 eigene Bahn
-- **Kampf (Held, wie World of Warcraft):** W/S vor/zurück · A/D drehen · Q/E seitwärts · rechte Maustaste lenken ·
-  linke Maustaste Kamera drehen · beide Tasten laufen · Leertaste springen · Num automatisch laufen · Tab Ziel ·
-  Rechtsklick angreifen · 1–5 Fähigkeiten · Esc Ziel löschen
+- **Bauen & Aufwerten:** Q W E R A S D F Kämpfer · Klick setzen (Shift = mehrere) · C/V Aufwertungspfad 1/2 · X verkaufen ·
+  1–7 Söldner · B Funke · K Königshalle · H König heilen · ↵ Bereit · Leertaste eigene Bahn · Pos1 eigener König ·
+  Pfeiltasten/Mausrad/mittlere Maustaste Kamera · Tab Punktetafel · Esc Menü
+- **Kampagne:** Missionsobjekte mit goldenem Ring anklicken (Funken, Leuchtfeuer, Käfige, Ventile …), Aktionen im
+  Missionsfenster links oben
+- **Online:** ↵ Chat (`/t` = Team) · Strg + ↵ Bereit · Alt + Klick Markierung · Menü → Pause beantragen

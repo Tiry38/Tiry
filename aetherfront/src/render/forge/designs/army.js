@@ -99,7 +99,7 @@ A.griffin = { H: 2.2, style: 'orden', build(S, P, F) {
     S.sym(() => wing(S, [0.18, 1.12, 0.12], F.tier === 1 ? 0.8 : 1.05, { style: 'orden', region: ['wingL'], up: spread, col: 'primary' }));
   }
   if (isB(F)) glow(S, () => { S.capsule(add(h, [0, 0.12, -0.05]), add(h, [0, 0.28, -0.3]), 0.025, 0.006, G({ region: ['head'], glow: 3.2 })); });
-  return plan(J, { cls: c, radius: 0.75, H: 2.0, anchors: { ...quadAnchors(J, { headUp: 0.16, backUp: 0.28, backZ: 0.2 }), shoulder: { p: [0.2, 1.08, 0.33], r: 0.13, region: ['chest', 'flegL'] } }, wingL: 1.5 });
+  return plan(J, { cls: c, radius: 0.75, H: 2.0, anchors: { ...quadAnchors(J, { headUp: 0.16, backUp: 0.28, backZ: 0.2 }), shoulder: { p: [0.2, 1.08, 0.33], r: 0.13, region: ['chest', 'flegL'] } }, wingL: 1.3 });
 } };
 
 A.lancer = { H: 2.25, style: 'orden', build(S, P, F) {
@@ -115,7 +115,7 @@ A.lancer = { H: 2.25, style: 'orden', build(S, P, F) {
   // Helmbusch (Feder) – lange Silhouette nach hinten
   S.tube([H.at(0, 0.12, 0.02), H.at(0, 0.24, -0.1), H.at(0, 0.2, -0.3), H.at(0, 0.06, -0.42)], [0.04 * s, 0.05 * s, 0.04 * s, 0.01 * s], { mat: 'feather', col: 'secondary', region: 'head', disp: Detail.fur({ amp: 0.006, freq: 30 }) });
   // Lanze: lang, schräg nach vorn; Wimpel
-  const fr = frame(jp(J, 'weaponR'), [0, 0.42, 1], [1, 0, 0]);
+  const fr = frame(jp(J, 'weaponR'), [-0.12, 1, 0.45], [1, 0, 0]);
   const L = [2.0, 2.4, 2.7][T(F) - 1];
   S.capsule(fr.at(0, -0.5), fr.at(0, L), 0.03, 0.022, { mat: 'wood', col: '#e8dcc0', bone: 'weaponR' });
   S.capsule(fr.at(0, -0.05), fr.at(0, 0.25), 0.075, 0.035, { mat: 'steel', col: 'metal', bone: 'weaponR' });
@@ -125,7 +125,7 @@ A.lancer = { H: 2.25, style: 'orden', build(S, P, F) {
   // Drachenschild
   const sf = frame(jp(J, 'weaponL'), [0, 1, 0.1], [1, 0, -0.35]);
   const sc = 0.95 + 0.12 * T(F);
-  S.prim(sf.o, { f: (x, y, z) => { const w = 0.24 * sc * (1 - max(0, -y) / (0.5 * sc)) ** 0.7; const top = 0.24 * sc; return max(max(abs(x) - max(0.01, w), y - top), max(-0.5 * sc - y, abs(z) - 0.02)); }, box: [-0.25 * sc, -0.5 * sc, -0.03, 0.25 * sc, 0.25 * sc, 0.03] }, { rot: sf.basis, mat: 'paint', col: 'primary', bone: 'weaponL' });
+  S.prim(sf.o, { f: (x, y, z) => { const w = 0.24 * sc * max(0, 1 - max(0, -y) / (0.5 * sc)) ** 0.7; const top = 0.24 * sc; return max(max(abs(x) - max(0.01, w), y - top), max(-0.5 * sc - y, abs(z) - 0.02)); }, box: [-0.25 * sc, -0.5 * sc, -0.03, 0.25 * sc, 0.25 * sc, 0.03] }, { rot: sf.basis, mat: 'paint', col: 'primary', bone: 'weaponL' });
   S.capsule(sf.at(0, -0.4 * sc, 0.025), sf.at(0, 0.2 * sc, 0.025), 0.022, { mat: 'gold', col: 'metal', bone: 'weaponL' });
   S.capsule(sf.at(-0.18 * sc, 0.1 * sc, 0.025), sf.at(0.18 * sc, 0.1 * sc, 0.025), 0.02, { mat: 'gold', col: 'metal', bone: 'weaponL' });
   return plan(J, { radius: 0.62, H: 2.25, anchors: humanAnchors(J, s, { headTop: 0.24 }) });
@@ -177,7 +177,7 @@ A.ballista = { H: 1.7, style: 'orden', build(S, P, F) {
   S.cylinder([0, 0.9, 0.73], 0.16, 0.02, { rot: [PI / 2, 0, 0], mat: 'paint', col: 'secondary', region: ['chest'], r: 0.01 });
   if (isB(F)) glow(S, () => { S.capsule([0, 0.92, 0.95], [0, 0.92, 1.3], 0.05, 0.01, G({ region: ['chest'], glow: 3.4 })); S.sphere([0, 0.9, 0.76], 0.08, G({ region: ['chest'] })); });
   const cls = { hips: [0, 0, 0, 0], chest: [7, 0, 0.9, 0.0] };
-  return plan(J, { cls, radius: 0.8, H: 1.7, torsoW: 0, anchors: { head: { p: [0, 1.15, 0.3], r: 0.14, region: ['chest'] }, back: { p: [0, 0.75, -0.6], w: 0.35, region: ['hips'], parentJoint: 'hips' }, shoulder: { p: [0.42, 0.62, 0.0], r: 0.13, region: ['hips'] } } });
+  return plan(J, { cls, machine: true, radius: 0.8, H: 1.7, torsoW: 0, anchors: { head: { p: [0, 1.15, 0.3], r: 0.14, region: ['chest'] }, back: { p: [0, 0.75, -0.6], w: 0.35, region: ['hips'], parentJoint: 'hips' }, shoulder: { p: [0.42, 0.62, 0.0], r: 0.13, region: ['hips'] } } });
 } };
 
 // =============================================================================================
@@ -228,14 +228,14 @@ A.mushroom = { H: 1.9, style: 'wild', build(S, P, F) {
   const R = [0.62, 0.74, 0.86][T(F) - 1];
   const capY = 1.32;
   S.group({ k: 0.04 }, () => {
-    S.ellipsoid([0, capY, 0], [R, 0.36 + 0.04 * T(F), R], { mat: 'lacquer', col: 'primary', region: 'head' });
+    S.ellipsoid([0, capY, 0], [R, 0.36 + 0.04 * T(F), R], { mat: 'lacquer', col: F.path === 'b' && T(F) > 1 ? '#7a3ac8' : '#c8342f', region: 'head' });
     S.ellipsoid([0, capY - 0.16, 0], [R * 0.92, 0.12, R * 0.92], { op: 'sub', mat: 'skin', col: '#d8c8a8', region: 'head' });
   });
   S.ellipsoid([0, capY - 0.13, 0], [R * 0.8, 0.06, R * 0.8], { mat: 'skin', col: '#c8b898', region: 'head' });
-  for (let i = 0; i < 9; i++) { const a = i * 2.39996, rr = R * (0.25 + 0.6 * ((i * 0.37) % 1)); const y = capY + 0.34 * (1 - (rr / R) ** 2) ** 0.5; S.ellipsoid([sin(a) * rr, y, cos(a) * rr], [0.08, 0.04, 0.08], { mat: 'cloth', col: 'secondary', region: 'head' }); }
+  for (let i = 0; i < 9; i++) { const a = i * 2.39996, rr = R * (0.25 + 0.6 * ((i * 0.37) % 1)); const y = capY + 0.34 * (1 - (rr / R) ** 2) ** 0.5; S.ellipsoid([sin(a) * rr, y, cos(a) * rr], [0.08, 0.04, 0.08], { mat: 'cloth', col: '#f0e8d8', region: 'head' }); }
   if (isB(F)) glow(S, () => { for (let i = 0; i < 6; i++) { const a = i * 1.05; S.sphere([sin(a) * R * 0.75, capY - 0.12, cos(a) * R * 0.75], 0.05, G({ region: 'head', glow: 3 })); } });
   // kleine Begleitpilze am Fuß
-  for (const [x, z, r] of [[0.35, 0.25, 0.12], [-0.4, -0.1, 0.1]]) { S.capsule([x, 0, z], [x, r * 1.6, z], r * 0.4, { ...stem, region: 'torso' }); S.ellipsoid([x, r * 1.7, z], [r, r * 0.6, r], { mat: 'lacquer', col: 'primary', region: 'torso' }); }
+  for (const [x, z, r] of [[0.35, 0.25, 0.12], [-0.4, -0.1, 0.1]]) { S.capsule([x, 0, z], [x, r * 1.6, z], r * 0.4, { ...stem, region: 'torso' }); S.ellipsoid([x, r * 1.7, z], [r, r * 0.6, r], { mat: 'lacquer', col: '#c8342f', region: 'torso' }); }
   const cls = { head: [3, 0, 1.1, 0] };
   return plan(J, { cls, radius: 0.62, H: 1.9, torsoW: 0.5, anchors: { head: { p: [0, capY + 0.36, 0], r: 0.16, region: 'head' }, back: { p: [0, 0.95, -0.25], w: 0.25, region: 'torso', parentJoint: 'chest' }, shoulder: { p: [0.26, 1.02, 0], r: 0.09, region: 'shoulderL' } } });
 } };
@@ -420,7 +420,7 @@ A.mortar = { H: 1.6, style: 'schmiede', build(S, P, F) {
   S.capsule([0.18, 0.85, -0.45], [0.2, 1.3, -0.5], 0.05, { mat: 'iron', col: '#2a2a30', region: ['hips'] });
   glow(S, () => { S.sphere([0.2, 1.33, -0.5], 0.06, G({ region: ['hips'], glow: 3.2 })); S.sphere(tip, R * 0.7, G({ region: ['chest'], glow: isB(F) ? 3.6 : 2.4 })); S.box([0, 0.82, -0.2], [0.1, 0.04, 0.02], G({ region: ['hips'] })); });
   const cls = { hips: [0, 0, 0, 0], chest: [7, 0, 0.75, 0.1] };
-  return plan(J, { cls, radius: 0.72, H: 1.6, torsoW: 0, anchors: { head: null, back: { p: [0, 0.7, -0.6], w: 0.35, region: ['hips'], parentJoint: 'hips' }, shoulder: { p: [0.42, 0.62, 0.15], r: 0.12, region: ['hips'] } } });
+  return plan(J, { cls, machine: true, radius: 0.72, H: 1.6, torsoW: 0, anchors: { head: null, back: { p: [0, 0.7, -0.6], w: 0.35, region: ['hips'], parentJoint: 'hips' }, shoulder: { p: [0.42, 0.62, 0.15], r: 0.12, region: ['hips'] } } });
 } };
 
 A.core = { H: 2.0, style: 'schmiede', hover: true, build(S, P, F) {
@@ -434,7 +434,7 @@ A.core = { H: 2.0, style: 'schmiede', hover: true, build(S, P, F) {
   if (T(F) >= 2) S.torus([0, 1.1, 0], r * 2.2, 0.03, { rot: [PI / 2, 0, 0], mat: 'brass', col: 'secondary', region: ['chest'] });
   for (let i = 0; i < 3; i++) { const a = (i / 3) * TAU; S.capsule([sin(a) * r * 0.5, 1.1 - r * 1.5, cos(a) * r * 0.5], [sin(a) * r * 1.2, 0.35, cos(a) * r * 1.2], 0.03, 0.02, { mat: 'steel', col: 'metal', region: ['hips'] }); S.sphere([sin(a) * r * 1.2, 0.33, cos(a) * r * 1.2], 0.05, { mat: 'brass', col: 'secondary', region: ['hips'] }); }
   const cls = { hips: [0, 0, 0, 0], chest: [0, 0, 0, 0] };
-  return plan(J, { cls, radius: 0.55, H: 2.0, torsoW: 0, anchors: { head: { p: [0, 1.1 + r * 2.2, 0], r: 0.1, region: ['hips'] }, back: { p: [0, 1.15, -r * 1.2], w: 0.2, region: ['hips'], parentJoint: 'hips' }, shoulder: null } });
+  return plan(J, { cls, machine: true, radius: 0.55, H: 2.0, torsoW: 0, anchors: { head: { p: [0, 1.1 + r * 2.2, 0], r: 0.1, region: ['hips'] }, back: { p: [0, 1.15, -r * 1.2], w: 0.2, region: ['hips'], parentJoint: 'hips' }, shoulder: null } });
 } };
 
 A.spider = { H: 1.4, style: 'schmiede', build(S, P, F) {
@@ -482,7 +482,7 @@ A.drone = { H: 2.0, style: 'schmiede', hover: true, build(S, P, F) {
   S.sphere([0, 0.95, 0.12], 0.1, { mat: 'brass', col: 'secondary', region: ['chest'] });
   glow(S, () => { S.sphere([0, 1.15, 0.34], 0.07, G({ region: ['hips'], glow: 3.8 })); S.sphere([0, 0.88, 0.6 + 0.1 * T(F)], 0.04, G({ region: ['chest'] })); for (let i = 0; i < n; i++) { const a = (i / n) * TAU + PI / n; S.sphere([sin(a) * 0.62, 1.12, cos(a) * 0.62], 0.04, G({ region: ['hips'] })); } });
   const cls = { hips: [0, 0, 0, 0], chest: [7, 0, 0.95, 0.1] };
-  return plan(J, { cls, radius: 0.7, H: 1.7, torsoW: 0, anchors: { head: { p: [0, 1.42, 0], r: 0.12, region: ['hips'] }, back: { p: [0, 1.25, -0.3], w: 0.25, region: ['hips'], parentJoint: 'hips' }, shoulder: null } });
+  return plan(J, { cls, machine: true, radius: 0.7, H: 1.7, torsoW: 0, anchors: { head: { p: [0, 1.42, 0], r: 0.12, region: ['hips'] }, back: { p: [0, 1.25, -0.3], w: 0.25, region: ['hips'], parentJoint: 'hips' }, shoulder: null } });
 } };
 
 A.tank = { H: 1.5, style: 'schmiede', build(S, P, F) {
@@ -507,7 +507,7 @@ A.tank = { H: 1.5, style: 'schmiede', build(S, P, F) {
   S.capsule([0.25, 0.7, -0.55 * sc], [0.28, 1.2, -0.6 * sc], 0.07, 0.06, { mat: 'iron', col: '#2a2a30', region: ['hips'] });
   glow(S, () => { S.sphere([0.28, 1.24, -0.6 * sc], 0.07, G({ region: ['hips'], glow: 3.2 })); S.box([0, 0.6, 0.66 * sc], [0.2, 0.03, 0.01], G({ region: ['hips'] })); if (isB(F)) S.sphere([0, 0.9, 0.24 + bl], 0.09, G({ region: ['chest'], glow: 3.8 })); });
   const cls = { hips: [0, 0, 0, 0], chest: [7, 0, 0.8, -0.05] };
-  return plan(J, { cls, radius: 0.85, H: 1.4, torsoW: 0, anchors: { head: { p: [0, 1.05, -0.05], r: 0.14, region: ['chest'] }, back: { p: [0, 0.75, -0.6], w: 0.4, region: ['hips'], parentJoint: 'hips' }, shoulder: { p: [0.5, 0.45, 0.25], r: 0.14, region: ['hips'] } } });
+  return plan(J, { cls, machine: true, radius: 0.85, H: 1.4, torsoW: 0, anchors: { head: { p: [0, 1.05, -0.05], r: 0.14, region: ['chest'] }, back: { p: [0, 0.75, -0.6], w: 0.4, region: ['hips'], parentJoint: 'hips' }, shoulder: { p: [0.5, 0.45, 0.25], r: 0.14, region: ['hips'] } } });
 } };
 
 A.tesla = { H: 2.4, style: 'schmiede', build(S, P, F) {
@@ -526,7 +526,7 @@ A.tesla = { H: 2.4, style: 'schmiede', build(S, P, F) {
   for (let i = 0; i < 5; i++) S.torus([0, 1.0 + i * hh * 0.18, 0], 0.18 - i * 0.015, 0.03, { rot: [PI / 2, 0, 0], mat: 'copper', col: 'secondary', region: ['chest'] });
   S.torus([0, 0.95 + hh, 0], 0.22, 0.05, { rot: [PI / 2, 0, 0], mat: 'steel', col: 'metal', region: ['chest'] });
   glow(S, () => { S.sphere([0, 1.05 + hh, 0], 0.15 + (isB(F) ? 0.05 : 0), G({ region: ['chest'], glow: 3.8 })); for (let i = 0; i < 4; i++) { const a = i * PI / 2; S.capsule([0, 1.05 + hh, 0], [sin(a) * 0.32, 0.9 + hh + 0.1 * (i % 2), cos(a) * 0.32], 0.018, 0.005, G({ region: ['chest'], glow: 3 })); } });
-  return plan(J, { cls: c, radius: 0.65, H: 0.95 + hh + 0.2, torsoW: 0.4, anchors: { head: null, back: { p: [0, 1.3, -0.12], w: 0.2, region: ['chest'], parentJoint: 'chest' }, shoulder: { p: [0.22, 0.95, 0], r: 0.1, region: ['hips'] } } });
+  return plan(J, { cls: c, machine: true, radius: 0.65, H: 0.95 + hh + 0.2, torsoW: 0.4, anchors: { head: null, back: { p: [0, 1.3, -0.12], w: 0.2, region: ['chest'], parentJoint: 'chest' }, shoulder: { p: [0.22, 0.95, 0], r: 0.1, region: ['hips'] } } });
 } };
 
 // =============================================================================================
@@ -551,7 +551,7 @@ A.bonethrower = { H: 1.7, style: 'abgrund', build(S, P, F) {
   for (const [x, y, z] of [[0, 0.62, 0.45], [0.15, 0.58, 0.4], [-0.15, 0.58, 0.4], [0, 0.78, 0.4]]) S.sphere([x, y, z], 0.1, { mat: 'bone', col: '#e0d4b8', region: ['hips'] });
   glow(S, () => { for (const sx of [1, -1]) S.sphere(add(tip, [sx * 0.07, 0.04, 0.19]), 0.025, G({ region: ['chest'], glow: 3.4 })); if (isB(F)) S.sphere(add(tip, [0, 0.18, 0]), 0.14, G({ region: ['chest'], glow: 3 })); });
   const cls = { hips: [0, 0, 0, 0], chest: [7, 0, 0.95, -0.05] };
-  return plan(J, { cls, radius: 0.75, H: 1.7, torsoW: 0, anchors: { head: null, back: { p: [0, 0.6, -0.6], w: 0.35, region: ['hips'], parentJoint: 'hips' }, shoulder: { p: [0.4, 0.5, 0.2], r: 0.1, region: ['hips'] } } });
+  return plan(J, { cls, machine: true, radius: 0.75, H: 1.7, torsoW: 0, anchors: { head: null, back: { p: [0, 0.6, -0.6], w: 0.35, region: ['hips'], parentJoint: 'hips' }, shoulder: { p: [0.4, 0.5, 0.2], r: 0.1, region: ['hips'] } } });
 } };
 
 /** Magier-Grundkörper (Leerenmagier, Pyromantin) */
@@ -584,7 +584,7 @@ A.cryptgolem = { H: 2.6, style: 'abgrund', build(S, P, F) {
   const s = 1.2;
   const J = humanoid(s, { sw: 1.45, armR: [[0.44, 1.0, 0.1], [0.48, 0.66, 0.16]], armL: [[0.44, 1.0, 0.1], [0.48, 0.66, 0.16]], stance: 0.08 });
   J.head.pos.z += 0.12; J.neck.pos.z += 0.08; J.head.pos.y -= 0.08;
-  const flesh = { mat: 'skin', col: 'primary', disp: Detail.muscle({ amp: 0.006, freq: 14 }) };
+  const flesh = { mat: 'skin', col: '#7a8a70', disp: Detail.muscle({ amp: 0.006, freq: 14 }) };
   S.group({ k: 0.06 }, () => {
     S.ellipsoid(add(jp(J, 'chest'), [0, 0.08, 0]), [0.48, 0.38, 0.36], { ...flesh, region: 'torso' });
     S.ellipsoid(jp(J, 'hips'), [0.3, 0.2, 0.24], { ...flesh, region: 'torso' });
@@ -641,7 +641,7 @@ A.ghoul = { H: 1.7, style: 'abgrund', build(S, P, F) {
   // stark gebückt: Oberkörper nach vorn
   for (const n of ['chest', 'neck', 'head', 'shoulderL', 'shoulderR', 'upperArmL', 'upperArmR']) { const pp = J[n].pos; const dy = pp.y - J.hips.pos.y; pp.z += dy * 0.9; pp.y = J.hips.pos.y + dy * 0.6; }
   J.head.pos.z += 0.06;
-  const flesh = { mat: 'skin', col: 'primary*1.6', disp: Detail.muscle({ amp: 0.005, freq: 20 }) };
+  const flesh = { mat: 'skin', col: '#8a9a80', disp: Detail.muscle({ amp: 0.005, freq: 20 }) };
   const { BL, BR } = humanBody(S, J, s, { bulk: 1.05, armBulk: 1.1, legBulk: 1.05, base: flesh, legs: { mat: 'cloth', col: 'secondary' } });
   head(S, BL, { skin: '#8a9a7a', eye: '#e0ff60', brow: false, lips: '#2a1a1a', jaw: 1.25 });
   // Wirbelkamm + Lumpen
@@ -683,7 +683,7 @@ A.gargoyle = { H: 2.1, style: 'abgrund', build(S, P, F) {
   // hockend: Hüfte tiefer, Knie vorn
   J.hips.pos.y = 0.7; J.spine.pos.y = 0.82; J.chest.pos.y = 1.0; J.chest.pos.z = 0.1; J.neck.pos.y = 1.18; J.neck.pos.z = 0.2; J.head.pos.y = 1.26; J.head.pos.z = 0.26;
   for (const sd of ['L', 'R']) { const k = sd === 'L' ? 1 : -1; J['shoulder' + sd].pos.y = 1.1; J['upperArm' + sd].pos.set ? 0 : 0; J['upperArm' + sd].pos = V(k * 0.24, 1.1, 0.1); J['thigh' + sd].pos = V(k * 0.12, 0.66, 0); J['shin' + sd].pos = V(k * 0.18, 0.55, 0.32); J['foot' + sd].pos = V(k * 0.16, 0.08, 0.12); }
-  const stone = { mat: 'stone', col: 'primary*1.8', disp: Detail.noise({ amp: 0.01, freq: 10, ridged: true }) };
+  const stone = { mat: 'stone', col: '#6e6a74', disp: Detail.noise({ amp: 0.01, freq: 10, ridged: true }) };
   S.group({ k: 0.06 }, () => {
     S.ellipsoid(add(jp(J, 'chest'), [0, 0.0, 0]), [0.3, 0.26, 0.24], { ...stone, region: 'torso' });
     S.ellipsoid(jp(J, 'hips'), [0.22, 0.16, 0.2], { ...stone, region: 'torso' });
@@ -704,10 +704,10 @@ A.gargoyle = { H: 2.1, style: 'abgrund', build(S, P, F) {
   const c = {};
   if (!(F.tier >= 3 && F.path === 'b')) {
     for (const [sd, k] of [['L', 1], ['R', -1]]) { const root = [k * 0.2, 1.08, -0.12]; J['wing' + sd] = { pos: V(...root), parent: 'chest' }; c['wing' + sd] = [4, root[0], root[1], 0]; }
-    S.sym(() => wing(S, [0.2, 1.08, -0.12], [0.75, 0.95, 1.1][T(F) - 1], { style: 'abgrund', region: ['wingL'], up: 0.95, bone: '#4a4650', skin: 'primary*1.4' }));
+    S.sym(() => wing(S, [0.2, 1.08, -0.12], [0.75, 0.95, 1.1][T(F) - 1], { style: 'abgrund', region: ['wingL'], up: 0.95, bone: '#4a4650', skin: '#5a5660' }));
   }
   eyes(S, add(jp(J, 'head'), [0, 0.03, 0.13]), 0.05, 0.02, 'head', 3.6);
-  return plan(J, { cls: c, radius: 0.7, H: 1.6, anchors: humanAnchors(J, s, { headTop: 0.12, backZ: 0.22, backW: 0.25 }), wingL: 1.4 });
+  return plan(J, { cls: c, radius: 0.7, H: 1.6, anchors: humanAnchors(J, s, { headTop: 0.12, backZ: 0.22, backW: 0.25 }), wingL: 1.2 });
 } };
 
 // =============================================================================================
@@ -730,7 +730,8 @@ A.beetle = { H: 1.4, style: 'schwarm', build(S, P, F) {
   const ch = { mat: 'chitin', col: 'primary', wear: 1 };
   const sac = [0.42, 0.5, 0.58][T(F) - 1];
   bugBody(S, [[[0, 0.62, 0.12], [0.3, 0.24, 0.3], ['chest']], [[0, 0.88, 0.42], [0.18, 0.18, 0.2], ['head']]], ch);
-  S.ellipsoid([0, 0.65, -0.45], [sac * 0.85, sac * 0.75, sac], { mat: 'skin', col: 'secondary', region: ['hips'] });
+  glass(S, () => S.ellipsoid([0, 0.65, -0.45], [sac * 0.85, sac * 0.75, sac], { mat: 'crystal', col: 'glow', region: ['hips'] }));
+  glow(S, () => S.ellipsoid([0, 0.65, -0.45], [sac * 0.55, sac * 0.48, sac * 0.65], G({ region: ['hips'], glow: 1.8 })));
   for (let i = 0; i < 4; i++) S.torus([0, 0.65, -0.2 - i * 0.18], sac * (0.82 - i * 0.08), 0.03, { rot: [PI / 2, 0, 0], mat: 'chitin', col: 'primary', region: ['hips'] });
   S.capsule([0, 0.95, 0.55], [0, 1.08, 0.82], 0.07, 0.05, { ...ch, region: ['head'] });
   for (const sx of [1, -1]) S.capsule([sx * 0.1, 1.0, 0.5], [sx * 0.2, 1.25, 0.6], 0.02, 0.005, { mat: 'horn', col: 'secondary', region: ['head'] });
@@ -844,16 +845,16 @@ A.mantis = { H: 2.3, style: 'schwarm', build(S, P, F) {
 A.elemental = { H: 2.2, style: 'glut', build(S, P, F) {
   const s = 1.05;
   const J = humanoid(s, { sw: 1.3, armR: [[0.4, 1.05, 0.12], [0.44, 0.78, 0.22]], armL: [[0.4, 1.05, 0.12], [0.44, 0.78, 0.22]], stance: 0.08 });
-  const rock = { mat: 'stone', col: 'primary*1.4', disp: Detail.noise({ amp: 0.016, freq: 8, ridged: true }) };
+  const rock = { mat: 'stone', col: 'primary', disp: Detail.noise({ amp: 0.016, freq: 8, ridged: true }) };
   // Brocken um einen glühenden Kern (getrennte Felsstücke = Silhouette)
   const ch = jp(J, 'chest');
-  glow(S, () => { S.ellipsoid(add(ch, [0, 0.02, 0]), [0.24, 0.3, 0.2], G({ region: 'torso', glow: 3.2 })); S.capsule(jp(J, 'hips'), ch, 0.14, G({ region: 'torso', glow: 2.6 })); });
-  for (const [o, r] of [[[0.18, 0.15, 0.1], [0.2, 0.18, 0.16]], [[-0.18, 0.12, 0.08], [0.2, 0.2, 0.16]], [[0, -0.12, 0.14], [0.22, 0.14, 0.12]], [[0, 0.08, -0.16], [0.26, 0.24, 0.12]]]) S.ellipsoid(add(ch, o), r, { ...rock, region: 'torso' });
+  glow(S, () => { S.ellipsoid(add(ch, [0, 0.02, 0]), [0.27, 0.32, 0.24], G({ col: 'secondary', region: 'torso', glow: 2.2 })); S.capsule(jp(J, 'hips'), ch, 0.16, G({ col: 'secondary', region: 'torso', glow: 2 })); for (const sd of ['L', 'R']) S.capsule(jp(J, 'upperArm' + sd), jp(J, 'hand' + sd), 0.06, 0.07, G({ col: 'secondary', region: 'arm' + sd, glow: 2 })); });
+  for (const [o, r] of [[[0.2, 0.17, 0.12], [0.16, 0.14, 0.12]], [[-0.2, 0.14, 0.1], [0.15, 0.16, 0.12]], [[0, -0.16, 0.16], [0.18, 0.1, 0.1]], [[0.12, 0.12, -0.2], [0.14, 0.16, 0.1]], [[-0.12, -0.02, -0.2], [0.13, 0.14, 0.1]]]) S.ellipsoid(add(ch, o), r, { ...rock, region: 'torso' });
   S.ellipsoid(jp(J, 'hips'), [0.22, 0.13, 0.17], { ...rock, region: 'torso' });
   for (const sd of ['L', 'R']) {
     const sh = jp(J, 'upperArm' + sd), el = jp(J, 'foreArm' + sd), ha = jp(J, 'hand' + sd);
     S.ellipsoid(add(sh, [sd === 'L' ? 0.06 : -0.06, 0.06, 0]), [0.18, 0.16, 0.17], { ...rock, region: 'shoulder' + sd });
-    S.capsule(sh, el, 0.09, 0.08, { ...rock, region: 'arm' + sd });
+    S.ellipsoid(lerp3(sh, el, 0.5), [0.1, 0.13, 0.1], { ...rock, region: 'arm' + sd });
     S.ellipsoid(ha, [0.13, 0.15, 0.13], { ...rock, region: 'arm' + sd });
     S.capsule(jp(J, 'thigh' + sd), jp(J, 'shin' + sd), 0.1, 0.09, { ...rock, region: 'leg' + sd });
     S.capsule(jp(J, 'shin' + sd), add(jp(J, 'foot' + sd), [0, -0.03, 0.05]), 0.09, 0.11, { ...rock, region: 'leg' + sd });
@@ -868,7 +869,7 @@ A.elemental = { H: 2.2, style: 'glut', build(S, P, F) {
 } };
 
 A.pyromancer = { H: 2.25, style: 'glut', build(S, P, F) {
-  const { J, BL, BR, s } = mageBody(S, F, { robe: 'primary*1.4', skin: '#b87050', female: true, wave: 0.04 });
+  const { J, BL, BR, s } = mageBody(S, F, { robe: 'secondary*0.5', skin: '#b87050', female: true, wave: 0.04 });
   const H = head(S, BL, { female: true, skin: '#b87050', eye: '#ffd040', brow: false, lips: '#4a1a1a' });
   // Hörner-Diadem + Flammenhaar
   for (const sx of [1, -1]) S.tube([H.at(sx * 0.07, 0.07, 0.03), H.at(sx * 0.14, 0.16, -0.04), H.at(sx * 0.16, 0.28, -0.14)], [0.022, 0.015, 0.004], { mat: 'horn', col: '#1a1010', region: 'head' });
@@ -937,15 +938,15 @@ A.imp = { H: 1.4, style: 'glut', hover: true, build(S, P, F) {
     S.sym(() => wing(S, [0.1, 1.15 * s + 0.15, -0.1], [0.55, 0.7, 0.8][T(F) - 1], { style: 'abgrund', region: ['wingL'], up: 0.8, bone: '#2a1a1a', skin: 'primary*1.5' }));
   }
   glow(S, () => { for (const sx of [1, -1]) S.sphere(add(hc, [sx * 0.05, 0.02, 0.11]), 0.022, G({ region: 'head', glow: 4 })); S.sphere(add(jp(J, 'handL'), [0, 0.07, 0.03]), 0.06 + 0.015 * T(F), G({ region: 'armL', glow: 3.4 })); });
-  return plan(J, { cls: c, radius: 0.5, H: 1.3, anchors: humanAnchors(J, s, { headTop: 0.36, headR: 0.13 }), wingL: 1.3 });
+  return plan(J, { cls: c, radius: 0.5, H: 1.3, anchors: humanAnchors(J, s, { headTop: 0.36, headR: 0.13 }), wingL: 1.2 });
 } };
 
 A.priest_glut = { H: 2.4, style: 'glut', build(S, P, F) {
   const s = 1.05;
-  const { J, BL, BR } = hum(S, s, { armR: [[0.3, 1.2, 0.12], [0.3, 1.1, 0.3]], armL: [[0.3, 1.2, 0.12], [0.2, 1.22, 0.32]] }, { female: true, base: { mat: 'cloth', col: 'primary*1.6' } });
+  const { J, BL, BR } = hum(S, s, { armR: [[0.3, 1.2, 0.12], [0.3, 1.1, 0.3]], armL: [[0.3, 1.2, 0.12], [0.2, 1.22, 0.32]] }, { female: true, base: { mat: 'cloth', col: '#5a1a16' } });
   J.weaponR = { pos: V(-0.3 * s, 1.1 * s, 0.32 * s), parent: 'handR' };
   bothSides(S, BL, BR, (B0) => simpleHand(S, B0, '#b87050', 'skin'));
-  robe(S, BL, s, 'primary*1.6', { r1: 0.4, hem: 'metal', fold: 0.016 });
+  robe(S, BL, s, '#5a1a16', { r1: 0.4, hem: 'metal', fold: 0.016 });
   skirt(S, BL, { top: 1.1 * s, bottom: 0.15, r0: 0.18, r1: 0.4, col: 'secondary', mat: 'silk', folds: 4, fold: 0.006, th: 0.016, panels: [[0, 0.35]] });
   // Schulterkragen aus Goldplatten
   for (let i = 0; i < 7; i++) { const a = -1.5 + i * 0.5; S.ellipsoid(add(jp(J, 'neck'), [sin(a) * 0.2, -0.07, cos(a) * 0.14]), [0.08, 0.02, 0.1], { rot: [0.4, a, 0], mat: 'gold', col: 'metal', region: 'upper' }); }
@@ -987,7 +988,7 @@ A.phoenix = { H: 2.2, style: 'glut', build(S, P, F) {
     for (const [sd, k] of [['L', 1], ['R', -1]]) { const root = [k * 0.22, 1.2, -0.02]; J['wing' + sd] = { pos: V(...root), parent: 'chest' }; c['wing' + sd] = [4, root[0], root[1], 0]; }
     S.sym(() => wing(S, [0.22, 1.2, -0.02], [0.9, 1.15, 1.35][T(F) - 1], { style: 'glut', region: ['wingL'], up: 0.6 }));
   }
-  return plan(J, { cls: c, radius: 0.65, H: 2.0, hipY: 0.75, anchors: { head: { p: [0, 1.86, 0.28], r: 0.1, region: ['head'] }, back: { p: [0, 1.2, -0.2], w: 0.24, region: ['chest'], parentJoint: 'chest' }, shoulder: { p: [0.22, 1.25, 0.1], r: 0.1, region: ['chest'] } }, wingL: 1.6 });
+  return plan(J, { cls: c, radius: 0.65, H: 2.0, hipY: 0.75, anchors: { head: { p: [0, 1.86, 0.28], r: 0.1, region: ['head'] }, back: { p: [0, 1.2, -0.2], w: 0.24, region: ['chest'], parentJoint: 'chest' }, shoulder: { p: [0.22, 1.25, 0.1], r: 0.1, region: ['chest'] } }, wingL: 1.35 });
 } };
 
 // Arbeiter: schwebender Funke (Bergbau-Drohnchen)

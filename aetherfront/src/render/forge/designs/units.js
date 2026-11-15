@@ -170,7 +170,7 @@ U.knight = { H: 2.07, budgets: [5200, 1600], build(S, P, F = { tier: 2, path: 'a
   skirt(S, BL, { top: 1.02 * s, bottom: 0.56 * s, r0: 0.19, r1: 0.24, col: 'primary', mat: 'cloth', folds: 8, fold: 0.008, th: 0.016, panels: [[0, 0.6], [PI, 0.6]] });
   belt(S, BL, { dy: 0.04, col: '#3b2618' });
   helmet(S, BL, { col: 'metal', crest: F.tier >= 2 ? 'primary' : null });
-  if (F.tier >= 2) cape(S, BL, { top: 1.5 * s, bottom: 0.45 * s, r0: 0.18, r1: 0.36, arc: 1.0, col: 'primary', folds: 6, fold: 0.014, th: 0.016, chain: ['chest', 'spine', 'hips', 'hips'] });
+  if (F.tier >= 2) cape(S, BL, { top: 1.5 * s, bottom: 0.7 * s, r0: 0.18, r1: 0.3, arc: 0.9, col: 'secondary', folds: 5, fold: 0.012, th: 0.016, hem: 'metal', chain: ['chest', 'spine', 'hips', 'hips'] });
   // Schwert + Rundschild
   const fr = frame(jp(J, 'weaponR'), [0.1, 0.25, 0.96], [0, 1, -0.2]);
   S.prim(fr.o, bladePrim({ y0: 0.06, L: [0.72, 0.92, 1.1][F.tier - 1], w: 0.07 + 0.012 * F.tier, th: 0.02 }), { rot: fr.basis, mat: 'steel', col: '#b8c0c8', bone: 'weaponR' });
@@ -223,7 +223,11 @@ U.archer = { H: 2.19, budgets: [5000, 1500], build(S, P, F = { tier: 2, path: 'a
     S.capsule(H.at(0, 0.08, -0.05), H.at(0, 0.0, -0.17), 0.05, 0.01, { k: 0.05 });
   });
   S.ellipsoid(H.at(0, -0.02, 0.0), [0.085, 0.1, 0.09], { mat: 'cloth', col: '#0c0a08', region: 'head' });
-  S.sphere(add(jp(J, 'chest'), [0.0, 0.08, -0.18]), 0.06, { mat: 'leather', col: '#4a3020', bone: 'chest' });
+  // Köcher mit Pfeilen (Rückensilhouette)
+  { const q0 = add(jp(J, 'chest'), [0.1, -0.12, -0.19]), q1 = add(jp(J, 'chest'), [-0.08, 0.3, -0.24]);
+    S.capsule(q0, q1, 0.07, 0.075, { mat: 'leather', col: '#5a3a20', region: 'torso' });
+    S.torus(q1, 0.075, 0.012, { rot: rotTo(sub(q1, q0)), mat: 'gold', col: 'metal', region: 'torso' });
+    for (let i = 0; i < 5; i++) { const o = [(i - 2) * 0.025, 0, (i % 2) * 0.03 - 0.015]; S.capsule(add(q1, o), add(add(q1, o), [-0.04, 0.16, -0.02]), 0.012, { mat: 'feather', col: i % 2 ? 'secondary' : '#e8dcc0', region: 'torso' }); } }
   const fr = frame(jp(J, 'weaponL'), [0, 1, 0], [1, 0, 0]);
   longbow(S, fr, { s: [0.95, 1.1, 1.25][F.tier - 1], bone: 'weaponL', wood: F.path === 'b' && F.tier > 1 ? 'metal' : '#5a3a20', trim: 'metal', h: 0.62 });
   if (F.path === 'b' && F.tier > 1) { S.layer('glow'); S.sphere(fr.at(0, 0, 0.05), 0.05 + 0.02 * F.tier, { mat: 'glow', col: 'glow', glow: 3.4, bone: 'weaponL' }); S.layer('body'); }

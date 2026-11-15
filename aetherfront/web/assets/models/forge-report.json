@@ -2,25 +2,115 @@
  "cell": 0.007,
  "report": [
   {
-   "id": "unit_knight",
-   "hiTris": 232990,
+   "id": "unit_priest_glut_1",
+   "hiTris": 91584,
    "lods": [
-    5199,
-    1600
+    2598,
+    1010,
+    408
    ],
    "verts": [
-    2303,
-    695
+    1280,
+    482,
+    208
+   ],
+   "ms": {
+    "sculpt": 18,
+    "mesh": 1799,
+    "decimate": 3631,
+    "bake": 329,
+    "total": 6097
+   },
+   "bytes": 137948
+  },
+  {
+   "id": "unit_priest_glut_2a",
+   "hiTris": 94952,
+   "lods": [
+    2600,
+    1012,
+    408
+   ],
+   "verts": [
+    1273,
+    473,
+    206
+   ],
+   "ms": {
+    "sculpt": 5,
+    "mesh": 1594,
+    "decimate": 5437,
+    "bake": 939,
+    "total": 8228
+   },
+   "bytes": 136956
+  },
+  {
+   "id": "unit_priest_glut_2b",
+   "hiTris": 103988,
+   "lods": [
+    2600,
+    998,
+    406
+   ],
+   "verts": [
+    1294,
+    483,
+    212
+   ],
+   "ms": {
+    "sculpt": 10,
+    "mesh": 2431,
+    "decimate": 6521,
+    "bake": 255,
+    "total": 9387
+   },
+   "bytes": 141080
+  },
+  {
+   "id": "unit_priest_glut_3a",
+   "hiTris": 138162,
+   "lods": [
+    2600,
+    1000,
+    398
+   ],
+   "verts": [
+    1253,
+    519,
+    204
    ],
    "ms": {
     "sculpt": 6,
-    "mesh": 2071,
-    "decimate": 6165,
-    "bake": 531,
-    "total": 9012
+    "mesh": 3458,
+    "decimate": 6576,
+    "bake": 309,
+    "total": 10633
    },
-   "bytes": 208636
+   "bytes": 137740
+  },
+  {
+   "id": "unit_priest_glut_3b",
+   "hiTris": 213380,
+   "lods": [
+    2598,
+    998,
+    400
+   ],
+   "verts": [
+    1276,
+    484,
+    207
+   ],
+   "ms": {
+    "sculpt": 3,
+    "mesh": 2546,
+    "decimate": 9129,
+    "bake": 144,
+    "total": 12021
+   },
+   "bytes": 137052
   }
  ],
- "totalBytes": 11679064
+ "totalBytes": 42398933
 }

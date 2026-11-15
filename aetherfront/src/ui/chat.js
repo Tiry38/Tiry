@@ -38,7 +38,7 @@ export class NetChat {
     if (!this.enabled) return;
     this.box.classList.add('open');
     this.input.value = '';
-    setTimeout(() => this.input.focus(), 0);
+    this.input.focus();
   }
   close() {
     this.box.classList.remove('open');
