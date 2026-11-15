@@ -1,9 +1,26 @@
 // Electron-Hauptprozess: startet Aetherfront als Windows-Programm.
 'use strict';
-const { app, BrowserWindow, ipcMain, Menu, protocol, net } = require('electron');
+const { app, BrowserWindow, ipcMain, Menu, protocol, net, dialog } = require('electron');
 const path = require('path');
 const { pathToFileURL } = require('url');
 const fs = require('fs');
+
+// Start-Protokoll: %APPDATA%/Aetherfront/start.log – damit Startprobleme auf fremden PCs nachvollziehbar sind
+let logFile = null;
+function log(...a) {
+  const line = `[${new Date().toISOString()}] ${a.map((x) => (x instanceof Error ? x.stack : typeof x === 'string' ? x : JSON.stringify(x))).join(' ')}\n`;
+  try { if (!logFile) { const dir = app.getPath('userData'); fs.mkdirSync(dir, { recursive: true }); logFile = path.join(dir, 'start.log'); fs.writeFileSync(logFile, ''); } fs.appendFileSync(logFile, line); } catch { /* ohne Log weiter */ }
+  console.log(line.trimEnd());
+}
+function fatal(title, err) {
+  log('FEHLER', title, err);
+  try { dialog.showErrorBox(`Aetherfront – ${title}`, `${err && err.stack ? err.stack : err}\n\nProtokoll: ${logFile || '(nicht verfügbar)'}`); } catch { /* */ }
+}
+process.on('uncaughtException', (e) => fatal('Unerwarteter Fehler', e));
+process.on('unhandledRejection', (e) => fatal('Unerwarteter Fehler', e));
+// Nur eine Instanz: ein zweiter Start holt das vorhandene Fenster nach vorn
+if (!app.requestSingleInstanceLock()) app.quit();
+app.on('second-instance', () => { if (win) { if (win.isMinimized()) win.restore(); win.show(); win.focus(); } });
 
 // Eigenes Protokoll app://aetherfront/ liefert den Ordner web/ aus. Grund: Unter file:// blockiert Chromium
 // fetch/XHR und das Hochladen von Bildern als WebGL-Textur (fremder Ursprung). app:// ist ein „sicherer“
@@ -29,6 +46,7 @@ app.commandLine.appendSwitch('enable-unsafe-swiftshader'); // Notlösung für PC
 
 let win;
 function create() {
+  log('Fenster wird erstellt');
   Menu.setApplicationMenu(null);
   win = new BrowserWindow({
     width: 1600, height: 900, minWidth: 1100, minHeight: 650, backgroundColor: '#07061a', show: false,
@@ -36,7 +54,12 @@ function create() {
     webPreferences: { preload: path.join(__dirname, 'preload.js'), contextIsolation: true, nodeIntegration: false, sandbox: true, backgroundThrottling: false },
   });
   win.loadURL('app://aetherfront/index.html');
-  win.once('ready-to-show', () => { win.maximize(); win.show(); });
+  const reveal = () => { if (win && !win.isDestroyed() && !win.isVisible()) { win.maximize(); win.show(); log('Fenster sichtbar'); } };
+  win.once('ready-to-show', reveal);
+  setTimeout(reveal, 4000); // Sicherheitsnetz: Fenster nie unsichtbar lassen, auch wenn das Laden hängt
+  win.webContents.on('did-fail-load', (_e, code, desc, url) => fatal('Laden fehlgeschlagen', `${desc} (${code}) bei ${url}`));
+  win.webContents.on('render-process-gone', (_e, d) => fatal('Spiel abgestürzt', `Grund: ${d.reason} (Code ${d.exitCode})`));
+  win.webContents.on('console-message', (e) => { if (e.level === 'error' || e.level === 3) log('Konsole:', e.message || ''); });
   // Rauchtest: `electron . --smoke` speichert nach dem Start einen Screenshot und beendet sich
   if (process.argv.includes('--smoke')) {
     const out = process.env.AETHER_SMOKE_OUT || require('os').tmpdir();
@@ -77,5 +100,14 @@ async function readLegacyStorage() {
   } catch (e) { console.warn('[speicher] Übernahme übersprungen:', e.message); } finally { w.destroy(); }
 }
 ipcMain.on('legacy-storage', (e) => { e.returnValue = migrated; migrated = {}; });
-app.whenReady().then(async () => { serveWeb(); await readLegacyStorage(); create(); });
-app.on('window-all-closed', () => app.quit());
+app.on('child-process-gone', (_e, d) => log('Prozess beendet:', d.type, d.reason, d.exitCode));
+app.whenReady().then(async () => {
+  log(`Start v${app.getVersion()} · ${process.platform} ${require('os').release()} · Electron ${process.versions.electron}`);
+  serveWeb();
+  // Alte Spielstände übernehmen, aber höchstens 3 s warten – der Start darf daran nie hängen
+  await Promise.race([readLegacyStorage(), new Promise((r) => setTimeout(r, 3000))]).catch((e) => log('Übernahme:', e));
+  create();
+}).catch((e) => fatal('Start fehlgeschlagen', e));
+// Nur beenden, wenn das Spielfenster existierte – das unsichtbare Hilfsfenster der Spielstand-Übernahme
+// darf beim allerersten Start nicht als „alle Fenster zu“ zählen (sonst beendet sich das Spiel wortlos).
+app.on('window-all-closed', () => { if (win) app.quit(); });

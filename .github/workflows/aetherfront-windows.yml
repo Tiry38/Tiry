@@ -46,6 +46,24 @@ jobs:
           name: Aetherfront-ohne-Installer
           path: aetherfront/dist/win-unpacked/
 
+      - name: Startprobe – fertiges Spiel mit frischem Profil starten (wie auf einem neuen PC)
+        shell: pwsh
+        run: |
+          $out = Join-Path $env:RUNNER_TEMP "startprobe"
+          New-Item -ItemType Directory -Force $out | Out-Null
+          Remove-Item -Recurse -Force (Join-Path $env:APPDATA "Aetherfront") -ErrorAction SilentlyContinue
+          $env:AETHER_SMOKE_OUT = $out
+          $env:AETHER_SMOKE_DELAY = "20000"
+          $p = Start-Process -FilePath "dist\win-unpacked\Aetherfront.exe" -ArgumentList "--smoke" -PassThru
+          if (-not $p.WaitForExit(120000)) { $p.Kill(); Write-Error "Spiel hat sich nicht beendet" }
+          Get-Content (Join-Path $env:APPDATA "Aetherfront\start.log") -ErrorAction SilentlyContinue
+          if (-not (Test-Path (Join-Path $out "electron-smoke.png"))) { Write-Error "Kein Startbild – das Spiel startet auf Windows nicht"; exit 1 }
+          Write-Host "Startprobe ok"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: Startprobe-Bild
+          path: ${{ runner.temp }}/startprobe/
       - name: Release veröffentlichen (nur main)
         if: github.ref == 'refs/heads/main'
         shell: bash
