@@ -1,6 +1,5 @@
 // Weltaufbau: Inseln, Bahnen, Brücken, Königsplateau, Portale, Wahrzeichen, Requisiten, Hintergrund.
 import * as THREE from 'three';
-import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
 import {
   laneCenterX, TEAM_CENTER_X, LANE_WIDTH, LANE_END_Z, KING_Z, LANES_PER_TEAM, BUILD_Z0, BUILD_Z1, GRID_COLS, CELL,
 } from '../../sim/layout.js';
@@ -9,8 +8,9 @@ import { patchMaterial } from './shaders.js';
 import { buildIsland, buildStalactite, buildFloatingRock, superellipse } from './islands.js';
 import {
   StoneKit, merge, prep, treeTrunkGeometry, treeFoliageGeometry, rockGeometry, grassClumpGeometry, flowerGeometry,
-  crystalClusterGeometry, crystalShardGeometry, COLORS,
+  crystalClusterGeometry, crystalShardGeometry, chamferBoxGeometry, COLORS,
 } from './props.js';
+import { createInstanceCuller } from './culling.js';
 import { createCrystalMaterial, createPortalMaterial, createRuneMaterial, createSealMaterial, createBeamMaterial, createLightShafts } from './magic.js';
 import { createFlagstoneTextures, createGroundTextures, createRockTextures, createLeafAtlas, createRuneStrip, createSealTexture, createWispTexture } from './textures.js';
 import { createWaterfalls, createWisps } from './water.js';
@@ -82,7 +82,9 @@ export function buildWorld(U, { anisotropy = 8, assets = null } = {}) {
   };
 
   // ---------- Inseln (nah) ----------
-  const nearIsles = [];
+  // Je Team ein Mesh (Teaminsel + Felszapfen + Königsinsel), Heldeninsel extra → Frustum-Culling greift je Seite.
+  const isleGroups = new Map(); // key → Geometrien
+  const pushIsle = (key, g) => { if (!isleGroups.has(key)) isleGroups.set(key, []); isleGroups.get(key).push(g); };
   const islandDescs = [];
   for (const tm of teams) {
     const seed = 11 + tm.team * 31;
@@ -102,10 +104,10 @@ export function buildWorld(U, { anisotropy = 8, assets = null } = {}) {
       return lerp(nat, -0.45, flatMask(tm, x, z));
     };
     const isl = buildIsland({
-      cx: tm.cx, cz: TEAM_ISLE.cz, topY: 0, radius: rad, depth: 40, seed, segs: 220, rings: 34, sideRings: 40,
+      cx: tm.cx, cz: TEAM_ISLE.cz, topY: 0, radius: rad, depth: 40, seed, segs: 220, rings: 34, sideRings: 22,
       height, grass: lushGrass(seed), rimDrop: 1.4, edgeNoise: 0.0, taper: 0.6, lobes: 0.4,
     });
-    nearIsles.push(isl.geometry);
+    pushIsle(tm.team, isl.geometry);
     islandDescs.push({ kind: 'team', tm, cx: tm.cx, cz: TEAM_ISLE.cz, topY: 0, height, edgeAt: isl.edgeAt, rimDrop: 1.4 });
     // hängende Felszapfen
     for (let k = 0; k < 9; k++) {
@@ -114,7 +116,7 @@ export function buildWorld(U, { anisotropy = 8, assets = null } = {}) {
       const x = tm.cx + Math.cos(a) * ex, z = TEAM_ISLE.cz + Math.sin(a) * ex;
       const s = 1 - Math.pow(rr, 1 / 0.6);
       const y = -1.4 - s * 40 + 6;
-      nearIsles.push(buildStalactite({ x, y, z, r: 4 + R() * 6, len: 10 + R() * 18, seed: 100 + k + tm.team * 20 }));
+      pushIsle(tm.team, buildStalactite({ x, y, z, r: 4 + R() * 6, len: 10 + R() * 18, seed: 100 + k + tm.team * 20 }));
     }
     // Königsinsel
     const kseed = 51 + tm.team * 13;
@@ -130,10 +132,10 @@ export function buildWorld(U, { anisotropy = 8, assets = null } = {}) {
       return lerp(nat, -0.45, flatMask(tm, x, z));
     };
     const kisl = buildIsland({
-      cx: tm.cx, cz: kcz, topY: 0, radius: krad, depth: 30, seed: kseed, segs: 140, rings: 22, sideRings: 32,
+      cx: tm.cx, cz: kcz, topY: 0, radius: krad, depth: 30, seed: kseed, segs: 140, rings: 22, sideRings: 18,
       height: kheight, grass: lushGrass(kseed), rimDrop: 1.3, edgeNoise: 0, taper: 0.55, lobes: 0.5,
     });
-    nearIsles.push(kisl.geometry);
+    pushIsle(tm.team, kisl.geometry);
     islandDescs.push({ kind: 'king', tm, cx: tm.cx, cz: kcz, topY: 0, height: kheight, edgeAt: kisl.edgeAt, rimDrop: 1.3 });
   }
   // Heldeninsel (Mitte)
@@ -146,10 +148,10 @@ export function buildWorld(U, { anisotropy = 8, assets = null } = {}) {
       return lerp(0.5 + n + 0.4 * smoothstep(0.5, 0.9, t), 0.0, 1 - smoothstep(6.5, 7.5, d));
     };
     const isl = buildIsland({
-      cx: HERO.x, cz: HERO.z, topY: HERO.y, radius: rad, depth: 46, seed, segs: 120, rings: 20, sideRings: 40,
+      cx: HERO.x, cz: HERO.z, topY: HERO.y, radius: rad, depth: 46, seed, segs: 120, rings: 20, sideRings: 26,
       height, grass: lushGrass(seed), rimDrop: 1.3, edgeNoise: 0, taper: 0.5, lobes: 0.6,
     });
-    nearIsles.push(isl.geometry);
+    pushIsle('hero', isl.geometry);
     islandDescs.push({ kind: 'hero', cx: HERO.x, cz: HERO.z, topY: HERO.y, height, edgeAt: isl.edgeAt, rimDrop: 1.3 });
   }
   // Gelände-Material: echte PBR-Sätze (Waldboden, Erde, Felswand, Moos) oder prozeduraler Rückfall
@@ -164,11 +166,17 @@ export function buildWorld(U, { anisotropy = 8, assets = null } = {}) {
   }
   const farTerrain = terrainMaps;
   const islandMat = patchMaterial(new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.93, metalness: 0 }), U, { terrain: terrainMaps });
-  const islandMesh = new THREE.Mesh(merge(nearIsles.map((g) => { const n = g.toNonIndexed(); return n; })), islandMat);
-  islandMesh.castShadow = false; // flache Hügel – Schatten kaum sichtbar, spart den teuren Schattenpass der Inselkörper
-  islandMesh.receiveShadow = true;
-  islandMesh.name = 'aeth-islands';
-  root.add(islandMesh);
+  // Indiziert lassen (gleiche Dreiecke, aber geteilte Eckpunkte → ~6× weniger Vertex-Shader-Arbeit)
+  const islandMeshes = [];
+  for (const [key, list] of isleGroups) {
+    const mesh = new THREE.Mesh(merge(list), islandMat);
+    mesh.castShadow = false; // flache Hügel – Schatten kaum sichtbar, spart den teuren Schattenpass der Inselkörper
+    mesh.receiveShadow = true;
+    mesh.name = `aeth-islands-${key}`;
+    root.add(mesh);
+    islandMeshes.push(mesh);
+  }
+  const islandMesh = islandMeshes[0];
 
   const topYAt = (d, x, z) => {
     const th = Math.atan2(z - d.cz, x - d.cx);
@@ -433,7 +441,7 @@ export function buildWorld(U, { anisotropy = 8, assets = null } = {}) {
         }
       }
       // Goldreif
-      const ring = new THREE.TorusGeometry(PORTAL_R + 1.42, 0.12, 6, 64);
+      const ring = new THREE.TorusGeometry(PORTAL_R + 1.42, 0.12, 4, 56);
       kit.add(ring, new THREE.Matrix4().makeTranslation(lx, PORTAL_Y, PORTAL_Z + 0.6), COLORS.GOLD, { metal: 1 });
       // Sockel
       const plinth = new THREE.BoxGeometry(3.6, 1.0, 2.6);
@@ -570,7 +578,7 @@ export function buildWorld(U, { anisotropy = 8, assets = null } = {}) {
     const step = new THREE.CylinderGeometry(7.4, 8.0, 0.6, 40);
     step.translate(HERO.x, HERO.y - 0.4, HERO.z);
     kit.add(step, null, kit.stoneFn(4, COLORS.STONE_DARK));
-    const trim = new THREE.TorusGeometry(6.35, 0.1, 6, 64);
+    const trim = new THREE.TorusGeometry(6.35, 0.1, 4, 56);
     trim.rotateX(Math.PI / 2);
     trim.translate(HERO.x, HERO.y + 0.6, HERO.z);
     kit.add(trim, null, COLORS.GOLD, { metal: 1 });
@@ -735,6 +743,7 @@ export function buildWorld(U, { anisotropy = 8, assets = null } = {}) {
 
   // ---------- Hintergrund-Inseln ----------
   const farGeos = [];
+  const farSectors = new Map(); // Sektor (Richtung vom Zentrum) → Geometrien, damit Frustum-Culling greift
   const farTrees = [];
   const farDefs = [];
   {
@@ -757,8 +766,11 @@ export function buildWorld(U, { anisotropy = 8, assets = null } = {}) {
       const ph = FR() * 6.28, ph2 = FR() * 6.28;
       const radius = (th) => r * (1 + 0.24 * fbm2(Math.cos(th) * 2 + i, Math.sin(th) * 2, 3, seed)
         + 0.09 * Math.sin(th * 3 + ph) + 0.05 * Math.sin(th * 5 + ph2));
+      // Segmente nach Größe (kleine Inseln im Mittelgrund brauchen weniger), Flanken gröber – aus > 150 m nicht sichtbar
+      const segs = Math.round(clamp(r * 0.55 + 22, 30, 64));
+      farGeos.length = 0;
       const isl = buildIsland({
-        cx: x, cz: z, topY: y, radius, depth: r * (1.1 + FR() * 0.9), seed, segs: 64, rings: 7, sideRings: 22, rimDrop: r * 0.05,
+        cx: x, cz: z, topY: y, radius, depth: r * (1.1 + FR() * 0.9), seed, segs, rings: 5, sideRings: 14, rimDrop: r * 0.05,
         height: (px, pz, t) => (1 - t * t) * r * 0.12 * (0.5 + fbm2(px * 0.02, pz * 0.02, 3, seed) + 0.5)
           + Math.max(0, fbm2(px * 0.05, pz * 0.05, 3, seed + 9)) * r * 0.06 * (1 - t),
         grass: lushGrass(seed), edgeNoise: 0.14, taper: 0.42 + FR() * 0.35, lobes: 1.1, rough: Math.max(1, r / 22),
@@ -767,14 +779,14 @@ export function buildWorld(U, { anisotropy = 8, assets = null } = {}) {
       for (let k = 0; k < nStal; k++) {
         const a = FR() * Math.PI * 2, rr = Math.sqrt(FR()) * 0.5;
         const sr = r * (0.16 + FR() * 0.16);
-        farGeos.push(buildStalactite({ x: x + Math.cos(a) * r * rr, y: y - r * 0.15, z: z + Math.sin(a) * r * rr, r: sr, len: r * (0.7 + FR() * 0.8), seed: seed * 7 + k, segs: 16 }).toNonIndexed());
+        farGeos.push(buildStalactite({ x: x + Math.cos(a) * r * rr, y: y - r * 0.15, z: z + Math.sin(a) * r * rr, r: sr, len: r * (0.7 + FR() * 0.8), seed: seed * 7 + k, segs: 10 }).toNonIndexed());
       }
       if (r > 25) {
         for (let k = 0; k < 2; k++) {
           const a = FR() * Math.PI * 2, d = r * (1.25 + FR() * 0.4), sr = r * (0.12 + FR() * 0.1);
           const sat = buildIsland({
             cx: x + Math.cos(a) * d, cz: z + Math.sin(a) * d, topY: y - r * (0.05 + FR() * 0.25), radius: (th) => sr * (1 + 0.3 * fbm2(Math.cos(th) * 2, Math.sin(th) * 2, 3, seed + k)),
-            depth: sr * 2.4, seed: seed * 3 + k, segs: 20, rings: 3, sideRings: 10, rimDrop: sr * 0.2, edgeNoise: 0.25, taper: 0.7, lobes: 0.8,
+            depth: sr * 2.4, seed: seed * 3 + k, segs: 14, rings: 3, sideRings: 7, rimDrop: sr * 0.2, edgeNoise: 0.25, taper: 0.7, lobes: 0.8,
             grass: lushGrass(seed), rough: Math.max(1, sr / 22),
           });
           farGeos.push(sat.geometry.toNonIndexed());
@@ -795,7 +807,7 @@ export function buildWorld(U, { anisotropy = 8, assets = null } = {}) {
       }
       if (i % 2 === 1 && r > 40) {
         // Ruinen-Silhouetten
-        const fk = new StoneKit(seed);
+        const fk = new StoneKit(seed, { far: true });
         for (let p = 0; p < 4; p++) {
           const a = (p / 4) * Math.PI * 2 + i;
           fk.pillar(x + Math.cos(a) * r * 0.3, y + r * 0.1, z + Math.sin(a) * r * 0.3, 10 + (p % 2) * 6, 1.4, { broken: p % 2 === 1 });
@@ -804,19 +816,26 @@ export function buildWorld(U, { anisotropy = 8, assets = null } = {}) {
         farGeos.push(...fk.parts.map((g) => { const c = g.clone(); c.deleteAttribute('emit'); c.deleteAttribute('metal'); return c; }));
       }
       wispItems.push({ x: x + (FR() - 0.5) * r, y: y - r * 0.9, z: z + (FR() - 0.5) * r, s: r * 2.2, a: 0.35, stretch: 2.2 });
+      const sec = Math.round(((Math.atan2(z, x) / (Math.PI * 2)) * 8 + 8)) % 8;
+      if (!farSectors.has(sec)) farSectors.set(sec, []);
+      farSectors.get(sec).push(...farGeos);
     });
     // Leuchtender Kristall auf der großen Nordinsel
     crystalSpots.push({ x: 40, y: 34 + 120 * 0.1, z: -560, s: 9, rot: 0, c: TEAL_C, tilt: 0 });
     crystalSpots.push({ x: 330, y: 20 + 80 * 0.1, z: -380, s: 6, rot: 1, c: PINK_C, tilt: 0.2 });
   }
   const farMat = patchMaterial(new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.95 }), U, { clampFar: true, terrain: farTerrain, far: true });
-  const farMesh = new THREE.Mesh(merge(farGeos.map((g) => {
-    for (const k of Object.keys(g.attributes)) if (!['position', 'normal', 'color'].includes(k)) g.deleteAttribute(k);
-    return g;
-  })), farMat);
-  farMesh.name = 'aeth-far-islands';
-  farMesh.frustumCulled = false;
-  root.add(farMesh);
+  for (const [sec, list] of farSectors) {
+    const farMesh = new THREE.Mesh(merge(list.map((g) => {
+      for (const k of Object.keys(g.attributes)) if (!['position', 'normal', 'color'].includes(k)) g.deleteAttribute(k);
+      return g;
+    })), farMat);
+    farMesh.name = `aeth-far-islands-${sec}`;
+    // Hülle selbst berechnen (Material klemmt weit entfernte Eckpunkte an die far-Ebene → Kugel großzügig)
+    farMesh.geometry.computeBoundingSphere();
+    farMesh.geometry.boundingSphere.radius += 40;
+    root.add(farMesh);
+  }
 
   // ---------- Bäume (instanziert) ----------
   const trunkMat = patchMaterial(new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.92 }), U, { wind: 2, bark: A.bark && A.bark.normal ? A.bark : true });
@@ -833,13 +852,15 @@ export function buildWorld(U, { anisotropy = 8, assets = null } = {}) {
   };
   const allTrees = [treeSpots[0], treeSpots[1], farTrees.filter((t, i) => i % 3), farTrees.filter((t, i) => !(i % 3))];
   const treeMeshes = [];
+  const culler = createInstanceCuller();
   for (let slot = 0; slot < 4; slot++) {
     const kind = slot % 2;
     const far = slot >= 2;
     const list = allTrees[slot];
     if (!list.length) continue;
-    const trunk = new THREE.InstancedMesh(treeTrunkGeometry(kind), trunkMat, list.length);
-    const canopy = new THREE.InstancedMesh(treeFoliageGeometry(kind, 3 + kind + slot, far ? 0.4 : 1), canopyMat, list.length);
+    // Fern-LOD für die Hintergrund-Inseln (≥ 150 m entfernt, Bäume dort nur wenige Pixel groß)
+    const trunk = new THREE.InstancedMesh(treeTrunkGeometry(kind, { far }), trunkMat, list.length);
+    const canopy = new THREE.InstancedMesh(treeFoliageGeometry(kind, 3 + kind + slot, far ? 0.2 : 1, { blobScale: far ? 1.25 : 1 }), canopyMat, list.length);
     const m = new THREE.Matrix4(), q = new THREE.Quaternion(), e = new THREE.Euler();
     const R2 = rng(31 + slot);
     list.forEach((t, i) => {
@@ -860,6 +881,8 @@ export function buildWorld(U, { anisotropy = 8, assets = null } = {}) {
       root.add(im);
       treeMeshes.push(im);
     }
+    // nur Bäume im Bild (+ Rand für Schatten, die von außerhalb hereinfallen) zeichnen
+    culler.add([canopy, trunk], far ? 2 : 14);
   }
 
   // ---------- Felsen ----------
@@ -876,6 +899,7 @@ export function buildWorld(U, { anisotropy = 8, assets = null } = {}) {
     rocks.castShadow = true; rocks.receiveShadow = true;
     rocks.computeBoundingSphere();
     root.add(rocks);
+    culler.add(rocks, 5);
   }
 
   // ---------- Kristalle ----------
@@ -893,6 +917,7 @@ export function buildWorld(U, { anisotropy = 8, assets = null } = {}) {
     im.castShadow = true;
     im.computeBoundingSphere();
     root.add(im);
+    culler.add(im, 5);
   }
   // Schwebende Splitter (Lampen, Säulen, Portale) + Satelliten
   {
@@ -914,15 +939,28 @@ export function buildWorld(U, { anisotropy = 8, assets = null } = {}) {
       im.setMatrixAt(i, m);
       im.setColorAt(i, f.c);
     });
-    im.frustumCulled = false;
     root.add(im);
+    culler.add(im, 1);
   }
 
   // ---------- Steinbaukasten fertigstellen ----------
-  const stoneMesh = new THREE.Mesh(kit.build(), stoneMat);
-  stoneMesh.castShadow = true; stoneMesh.receiveShadow = true;
-  stoneMesh.name = 'aeth-stone';
-  root.add(stoneMesh);
+  // nach Seite getrennt (West-Team / Mitte / Ost-Team) → Frustum-Culling im Haupt- und Schattenpass
+  {
+    const regions = [[], [], []];
+    const c = new THREE.Vector3();
+    for (const g of kit.parts) {
+      g.computeBoundingBox();
+      g.boundingBox.getCenter(c);
+      regions[c.x < -28 ? 0 : c.x > 28 ? 2 : 1].push(g);
+    }
+    regions.forEach((list, i) => {
+      if (!list.length) return;
+      const stoneMesh = new THREE.Mesh(merge(list), stoneMat);
+      stoneMesh.castShadow = true; stoneMesh.receiveShadow = true;
+      stoneMesh.name = `aeth-stone-${i}`;
+      root.add(stoneMesh);
+    });
+  }
 
   // ---------- Bordsteine & Brüstungen (instanziert) ----------
   {
@@ -946,7 +984,7 @@ export function buildWorld(U, { anisotropy = 8, assets = null } = {}) {
         }
       });
     }
-    const geo = new RoundedBoxGeometry(0.72, 0.62, 1, 1, 0.14);
+    const geo = chamferBoxGeometry(0.72, 0.62, 1, 0.12);
     const mat = patchMaterial(new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.86 }), U, stonePbr ? { stone: { ...stonePbr, mossAmount: 0.75 } } : { terrain: stoneTri });
     const im = new THREE.InstancedMesh(geo, mat, curbs.length);
     const m = new THREE.Matrix4(), q = new THREE.Quaternion();
@@ -961,6 +999,7 @@ export function buildWorld(U, { anisotropy = 8, assets = null } = {}) {
     im.castShadow = true; im.receiveShadow = true;
     im.computeBoundingSphere();
     root.add(im);
+    culler.add(im, 3);
   }
 
   // ---------- Gras & Blumen (räumlich gekachelt → Frustum-Culling je Kachel; feine Halme, Distanz-Ausblendung) ----------
@@ -1024,7 +1063,8 @@ export function buildWorld(U, { anisotropy = 8, assets = null } = {}) {
     }
     const mat = patchMaterial(new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.92 }), U, { terrain: terrainMaps });
     const im = new THREE.InstancedMesh(geo, mat, list.length);
-    im.castShadow = true; im.receiveShadow = true;
+    // keine Schattenwerfer: liegen unter der Inseloberkante bzw. außerhalb des Schattenvolumens (y ≥ −8)
+    im.castShadow = false; im.receiveShadow = true;
     im.frustumCulled = false;
     root.add(im);
     animated.floatRocks = { mesh: im, list };
@@ -1103,7 +1143,13 @@ export function buildWorld(U, { anisotropy = 8, assets = null } = {}) {
   const particles = createParticles(U, { fixed, scalable });
   root.add(particles.points);
 
-  return { root, grass, flowers, particles, animated, islandMesh, teams };
+  /** Pro Bild vor dem Rendern: Deko außerhalb des Bildes bzw. jenseits der Gras-Sichtweite nicht zeichnen. */
+  const cull = (camera) => {
+    culler.update(camera);
+    grass.lod(camera.position, U.uGrassFar.value);
+    flowers.lod(camera.position, U.uGrassFar.value);
+  };
+  return { root, grass, flowers, particles, animated, islandMesh, teams, cull };
 }
 
 /**
@@ -1129,9 +1175,21 @@ function chunkedInstances(points, cell, geoFor, material, setter, name, R) {
     im.userData.max = list.length;
     meshes.push(im);
   }
+  // Kacheln, deren nächster Punkt weiter als die Gras-Sichtweite (uGrassFar) von der Kamera entfernt ist, sind im
+  // Shader ohnehin auf Höhe 0 ausgeblendet → gar nicht erst zeichnen (kein sichtbarer Unterschied).
+  let frac = 1;
+  const apply = (im) => { im.count = Math.max(0, Math.floor(im.userData.max * frac * (im.userData.lod ?? 1))); im.visible = im.count > 0; };
   return {
     meshes,
-    setFraction(f) { for (const im of meshes) im.count = Math.max(0, Math.floor(im.userData.max * f)); },
+    setFraction(f) { frac = f; for (const im of meshes) apply(im); },
+    lod(camPos, far) {
+      for (const im of meshes) {
+        const bs = im.boundingSphere;
+        const d = camPos.distanceTo(bs.center) - bs.radius;
+        const l = d > far ? 0 : 1;
+        if (l !== im.userData.lod) { im.userData.lod = l; apply(im); }
+      }
+    },
     get count() { return meshes.reduce((a, im) => a + im.count, 0); },
   };
 }

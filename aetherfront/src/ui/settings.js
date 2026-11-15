@@ -6,7 +6,7 @@ export const DEFAULTS = {
   volMaster: 0.8, volMusic: 0.55, volSfx: 0.8, volUi: 0.7, muted: false,
   camSpeed: 1, edgeScroll: true,
   gameSpeed: 1, playerName: 'Tiry', faction: 'random', teamSize: 4, difficulty: 'normal', allyDifficulty: 'normal',
-  pickMode: 'ap', champions: false, waves: 30, gameMode: 'normal', endless: true, campDifficulty: 'normal', campFaction: 'orden', campMission: 1,
+  pickMode: 'ap', champions: false, waves: 30, gameMode: 'normal', endless: true, arena: true, campDifficulty: 'normal', campFaction: 'orden', campMission: 1,
   serverUrl: 'ws://localhost:7710', fullscreen: false,
 };
 // Einstellungen aus der Zeit der Heldensicht (entfernt) – beim Laden verwerfen

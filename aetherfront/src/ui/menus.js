@@ -97,6 +97,7 @@ export class Menus {
     this.seg($('seg-ally'), Object.entries(DIFF_LABEL), 'allyDifficulty', () => this.refreshSummary());
     this.seg($('seg-gamemode'), GAME_MODES, 'gameMode', () => this.refreshSummary());
     this.seg($('seg-endless'), [[true, 'An'], [false, 'Aus']], 'endless', () => this.refreshSummary());
+    this.seg($('seg-arena'), [[true, 'An'], [false, 'Aus']], 'arena', () => this.refreshSummary());
     this.seg($('seg-pick'), Object.entries(PICK_MODES).map(([k, m]) => [k, m.code]), 'pickMode', () => this.refreshSetup());
     this.seg($('seg-cc'), [[false, 'Aus'], [true, 'CC an']], 'champions', () => this.refreshSummary());
     this.seg($('seg-waves'), [[20, '20 Wellen'], [30, '30 Wellen']], 'waves', () => this.refreshSummary());
@@ -149,7 +150,7 @@ export class Menus {
     const gm = S.get('gameMode') || 'normal';
     $('mode-desc').textContent = `${PICK_MODES[pick].name}: ${PICK_MODES[pick].desc}${S.get('champions') ? ` · ${MODIFIERS.cc.desc}` : ''} · Regeln: ${GAME_MODE_DESC[gm] || ''}`;
     const gmName = (GAME_MODES.find(([k]) => k === gm) || GAME_MODES[0])[1];
-    $('setup-summary').innerHTML = `<b>${code}</b> · ${gmName} · ${n} gegen ${n} · ${pick === 'ap' ? (f ? f.name : 'Zufallsvolk') : PICK_MODES[pick].name}<br>Verbündete ${DIFF_LABEL[S.get('allyDifficulty')] || 'Normal'} · Gegner ${DIFF_LABEL[S.get('difficulty')] || 'Normal'} · ${S.get('waves')} Wellen${S.get('endless') ? ' + Endlos' : ''} · Tempo ${String(S.get('gameSpeed')).replace('.', ',')}×`;
+    $('setup-summary').innerHTML = `<b>${code}</b> · ${gmName} · ${n} gegen ${n} · ${pick === 'ap' ? (f ? f.name : 'Zufallsvolk') : PICK_MODES[pick].name}<br>Verbündete ${DIFF_LABEL[S.get('allyDifficulty')] || 'Normal'} · Gegner ${DIFF_LABEL[S.get('difficulty')] || 'Normal'} · ${S.get('waves')} Wellen${S.get('endless') ? ' + Endlos' : ''}${S.get('arena') !== false ? ' · Arena' : ''} · Tempo ${String(S.get('gameSpeed')).replace('.', ',')}×`;
   }
   setupConfig() {
     const S = this.settings;
@@ -159,7 +160,7 @@ export class Menus {
     if (gm === 'random') gm = ['normal', 'fast', 'long', 'hard'][Math.floor(Math.random() * 4)];
     if (mirror) gm = 'normal';
     return { teamSize: S.get('teamSize'), faction: S.get('faction'), difficulty: S.get('difficulty'), allyDifficulty: S.get('allyDifficulty'), name: S.get('playerName') || 'Tiry',
-      rules: { pickMode: S.get('pickMode'), champions: !!S.get('champions'), maxWaves: S.get('waves'), gameMode: gm, mirror, endless: S.get('endless') !== false } };
+      rules: { pickMode: S.get('pickMode'), champions: !!S.get('champions'), maxWaves: S.get('waves'), gameMode: gm, mirror, endless: S.get('endless') !== false, arena: S.get('arena') !== false } };
   }
 
   // ---------- Hauptmenü: Fortschrittskarte ----------

@@ -44,7 +44,8 @@ test('Online-Lockstep: zwei Clients über den Relay-Server bleiben synchron', as
   await new Promise((r) => setTimeout(r, 100));
   a.send({ t: 'config', config: { pickMode: 'pr', champions: true, waves: 20, bots: true, botDifficulty: 'hard' } });
   b.send({ t: 'config', config: { pickMode: 'ar' } }); // kein Host → ignoriert
-  await a.wait((m) => m.t === 'lobby' && m.config.pickMode === 'pr');
+  const cfgLobby = await a.wait((m) => m.t === 'lobby' && m.config.pickMode === 'pr');
+  assert.equal(cfgLobby.config.arena, true, 'Arena standardmäßig an');
   a.send({ t: 'start' });
   const [sa, sb] = await Promise.all([a.wait((m) => m.t === 'start'), b.wait((m) => m.t === 'start')]);
   assert.equal(sa.setup.seed, sb.setup.seed);
@@ -92,16 +93,20 @@ test('Online: Plätze (Bot/geschlossen), Liste, Schnellsuche, Wiederverbinden mi
   b.send({ t: 'quick', mode: 2 });
   await a.wait((m) => m.t === 'lobby' && m.players.length === 2);
   // Host: Team West Platz 2 = schwerer Bot, Team Ost Platz 2 geschlossen
-  a.send({ t: 'config', config: { bots: false } });
+  a.send({ t: 'config', config: { bots: false, arena: false } });
+  b.send({ t: 'config', config: { arena: true } }); // kein Host → ignoriert
   a.send({ t: 'slotKind', team: 0, index: 1, kind: 'bot', difficulty: 'hard' });
   a.send({ t: 'slotKind', team: 1, index: 1, kind: 'closed' });
   await a.wait((m) => m.t === 'lobby' && m.slots[1][1].kind === 'closed' && m.slots[0][1].kind === 'bot');
   a.send({ t: 'start' });
   const [sa, sb] = await Promise.all([a.wait((m) => m.t === 'start'), b.wait((m) => m.t === 'start')]);
   assert.equal(sa.setup.players.length, 3, '2 Menschen + 1 Bot');
+  assert.equal(sa.setup.rules.arena, false, 'Host hat die Arena abgeschaltet');
+  assert.equal(sb.setup.rules.arena, false);
   assert.ok(sa.setup.players.some((p) => p.bot && p.difficulty === 'hard'));
   assert.ok(sa.setup.players.filter((p) => p.team === 1).every((p) => p.bonusGold > 0), 'Ausgleich für das kleinere Team');
   const na = new NetSession(a, sa);
+  assert.equal(na.sim.isArenaWave(10), false);
   na.submit({ type: 'build', unit: na.sim.players[sa.you].lines[0], col: 1, row: 1 });
   for (let i = 0; i < 30; i++) { na.update(0.05); await new Promise((r) => setTimeout(r, 25)); }
   // Gast verliert die Verbindung und kommt mit seinem Token zurück

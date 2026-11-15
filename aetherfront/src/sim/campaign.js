@@ -24,7 +24,7 @@ function econAt(w) {
 
 const M = (o) => {
   const e = o.startWave > 1 ? econAt(o.startWave) : {};
-  return { ...o, rules: { buildTimeFirst: o.startWave > 1 ? 70 : 45, ...e, ...(o.rules || {}), startWave: o.startWave, maxWaves: o.endWave } };
+  return { ...o, rules: { buildTimeFirst: o.startWave > 1 ? 70 : 45, ...e, ...(o.rules || {}), arena: false, startWave: o.startWave, maxWaves: o.endWave } };
 };
 
 // goal: 'survive' (alle Wellen halten) · 'siege' (Rissfeste zerstören) · Missions-Mechanik kann eigene Ziele setzen.

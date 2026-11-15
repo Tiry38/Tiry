@@ -151,7 +151,7 @@ export function buildStalactite({ x, y, z, r = 4, len = 14, seed = 1, segs = 14 
 /** Kleiner schwebender Felsbrocken mit Grashaube (Deko). */
 export function buildFloatingRock(seed, r = 3) {
   return buildIsland({
-    cx: 0, cz: 0, topY: 0, radius: () => r, depth: r * 2.4, seed, segs: 18, rings: 3, sideRings: 9,
+    cx: 0, cz: 0, topY: 0, radius: () => r, depth: r * 2.4, seed, segs: 13, rings: 3, sideRings: 7,
     rimDrop: r * 0.25, taper: 0.7, lobes: 0.6, edgeNoise: 0.22,
     height: (x, z, t) => (1 - t * t) * r * 0.15,
   }).geometry;

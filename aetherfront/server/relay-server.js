@@ -14,7 +14,7 @@ const PROTOCOL_VERSION = 2;
 const RECONNECT_GRACE_MS = 45000;
 const PAUSE_MAX_MS = 90000;
 
-const DEFAULT_CONFIG = () => ({ pickMode: 'ap', champions: false, waves: 30, gameMode: 'normal', endless: true, bots: true, botDifficulty: 'normal', autobalance: true });
+const DEFAULT_CONFIG = () => ({ pickMode: 'ap', champions: false, waves: 30, gameMode: 'normal', endless: true, arena: true, bots: true, botDifficulty: 'normal', autobalance: true });
 const GAME_MODES = ['normal', 'fast', 'long', 'hard'];
 
 function createRelayServer({ port = 7710, log = console.log, server } = {}) {
@@ -89,6 +89,7 @@ function createRelayServer({ port = 7710, log = console.log, server } = {}) {
     const gameMode = c.gameMode === 'random' ? GAME_MODES[crypto.randomBytes(1)[0] % GAME_MODES.length] : (c.gameMode || 'normal');
     const rules = { pickMode: c.pickMode || 'ap', champions: !!c.champions, maxWaves: c.waves || 30, gameMode };
     if (c.endless === false) rules.endless = false;
+    if (c.arena === false) rules.arena = false;
     if (c.pickMode === 'mirror') { rules.pickMode = 'ar'; rules.mirror = true; }
     room.setup = { seed: (crypto.randomBytes(4).readUInt32BE(0) >>> 1), players, rules };
     for (const cl of room.clients) send(cl.ws, { t: 'start', setup: room.setup, you: cl.pid ?? -1, token: cl.token, version: PROTOCOL_VERSION });
@@ -195,6 +196,7 @@ function createRelayServer({ port = 7710, log = console.log, server } = {}) {
           if ([10, 20, 30].includes(c.waves)) room.config.waves = c.waves;
           if ([...GAME_MODES, 'random'].includes(c.gameMode)) room.config.gameMode = c.gameMode;
           if (typeof c.endless === 'boolean') room.config.endless = c.endless;
+          if (typeof c.arena === 'boolean') room.config.arena = c.arena;
           if (typeof c.bots === 'boolean') room.config.bots = c.bots;
           if (typeof c.autobalance === 'boolean') room.config.autobalance = c.autobalance;
           if (typeof c.public === 'boolean') room.public = c.public;

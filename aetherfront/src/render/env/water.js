@@ -8,7 +8,7 @@ import { CLOUD_TOP } from './clouds.js';
  */
 export function createWaterfalls(U, falls) {
   const pos = [], uv = [], fall = [], idx = [];
-  const segs = 44, across = 6;
+  const segs = 26, across = 6; // Strömung läuft im Shader – die Kurve braucht nur genug Stützpunkte
   for (const f of falls) {
     for (let layer = 0; layer < 2; layer++) {
       const base = pos.length / 3;

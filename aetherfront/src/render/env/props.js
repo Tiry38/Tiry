@@ -53,10 +53,11 @@ function canopyColor(y, ny, y0, y1) {
   return [k * lerp(0.80, 1.06, t), k * lerp(0.92, 1.0, t), k * lerp(1.18, 0.78, t)];
 }
 
-export function treeTrunkGeometry(kind = 0) {
+export function treeTrunkGeometry(kind = 0, { far = false } = {}) {
   const parts = [];
   const h = kind === 0 ? 3.4 : 2.2;
-  const trunk = new THREE.CylinderGeometry(0.22, 0.42, h, 7, 5, true);
+  // Fern-LOD (Hintergrund-Inseln, > 150 m): schlichter Stamm ohne Wurzeln/Äste – aus der Draufsicht nicht unterscheidbar
+  const trunk = new THREE.CylinderGeometry(0.22, 0.42, h, far ? 5 : 7, far ? 1 : 3, true);
   trunk.translate(0, h / 2, 0);
   const p = trunk.attributes.position;
   for (let i = 0; i < p.count; i++) {
@@ -65,6 +66,7 @@ export function treeTrunkGeometry(kind = 0) {
     p.setZ(i, p.getZ(i) + Math.cos(y * 0.6) * 0.08);
   }
   parts.push(prep(trunk, (x, y) => [0.26 + y * 0.02, 0.17 + y * 0.012, 0.13 + y * 0.01]));
+  if (far) return merge(parts);
   // Wurzelansätze
   for (let r = 0; r < 4; r++) {
     const root = new THREE.ConeGeometry(0.22, 1.1, 5);
@@ -170,7 +172,7 @@ export function treeCanopyGeometry(kind = 0, seed = 3) {
  * Attribute: position, normal (kugelförmig vom Kronenzentrum → weiche Beleuchtung), uv (Atlas; innen uv = -1),
  * color (Verdeckung: innen/unten dunkler). kind 0 = Laubbaum, 1 = Nadelbaum.
  */
-export function treeFoliageGeometry(kind = 0, seed = 3, density = 1) {
+export function treeFoliageGeometry(kind = 0, seed = 3, density = 1, { blobDetail = 0, blobScale = 1 } = {}) {
   const R = rng(seed * 7 + 1);
   const pos = [], nor = [], uv = [], col = [];
   const center = new THREE.Vector3(0, kind === 0 ? 4.5 : 4.6, 0);
@@ -206,7 +208,7 @@ export function treeFoliageGeometry(kind = 0, seed = 3, density = 1) {
     }
   };
   const blob = (c, r, sx = 1, sy = 0.85) => {
-    const g0 = new THREE.IcosahedronGeometry(r, 1); const g = g0.index ? g0.toNonIndexed() : g0;
+    const g0 = new THREE.IcosahedronGeometry(r * blobScale, blobDetail); const g = g0.index ? g0.toNonIndexed() : g0;
     const p = g.attributes.position;
     for (let i = 0; i < p.count; i++) {
       const v = new THREE.Vector3(p.getX(i) * sx, p.getY(i) * sy, p.getZ(i) * sx).add(c);
@@ -286,10 +288,10 @@ export function treeFoliageGeometry(kind = 0, seed = 3, density = 1) {
 }
 
 // ---------- Felsen ----------
-export function rockGeometry(seed = 1) {
+export function rockGeometry(seed = 1, detail = 2) {
   // Findling: Rauschen + einige Schnittebenen (gebrochene Facetten), flache Unterseite
   const R = rng(seed * 13 + 5);
-  const g = new THREE.IcosahedronGeometry(1, 3);
+  const g = new THREE.IcosahedronGeometry(1, detail);
   const planes = [];
   for (let k = 0; k < 7; k++) {
     const n = new THREE.Vector3(R() * 2 - 1, R() * 1.4 - 0.4, R() * 2 - 1).normalize();
@@ -331,8 +333,9 @@ export function rockGeometry(seed = 1) {
 
 // ---------- Gras & Blumen ----------
 export function grassClumpGeometry(seed = 5, blades = 10) {
-  // Feine, unterschiedlich hohe Halme (2 Segmente + Spitze), leicht gebogen, Farbe: dunkler Ansatz → helle Spitze,
-  // einzelne trockene/gelbliche Halme. Normale nach oben (weiche, gleichmäßige Beleuchtung wie bei echtem Rasen).
+  // Feine, unterschiedlich hohe Halme (je ein spitzes Dreieck, Spitze zur Seite geneigt), Farbe: dunkler Ansatz → helle
+  // Spitze, einzelne trockene/gelbliche Halme. Normale nach oben (weiche, gleichmäßige Beleuchtung wie bei echtem Rasen).
+  // Ein Dreieck statt drei je Halm: bei 1–3 px Halmbreite aus der Draufsicht nicht unterscheidbar, ⅓ der Dreiecke.
   const R = rng(seed);
   const pos = [], col = [], nor = [], idx = [];
   for (let b = 0; b < blades; b++) {
@@ -349,7 +352,7 @@ export function grassClumpGeometry(seed = 5, blades = 10) {
     const dryB = R() < 0.14 ? 1 : 0;
     const tint = [1 + dryB * 0.55 + (R() - 0.5) * 0.12, 1 + dryB * 0.18 + (R() - 0.5) * 0.1, 1 - dryB * 0.1];
     const base = pos.length / 3;
-    const levels = 2;
+    const levels = 1;
     for (let l = 0; l <= levels; l++) {
       const t = l / levels;
       const y = h * t;
@@ -368,7 +371,7 @@ export function grassClumpGeometry(seed = 5, blades = 10) {
         nor.push(0, 1, 0);
       }
     }
-    idx.push(base, base + 1, base + 2, base + 1, base + 3, base + 2, base + 2, base + 3, base + 4);
+    idx.push(base, base + 1, base + 2);
   }
   const g = new THREE.BufferGeometry();
   g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
@@ -457,13 +460,64 @@ export function crystalShardGeometry() {
   return ng;
 }
 
+/**
+ * Quader mit abgefasten Oberkanten (Bordsteine): 26 Dreiecke statt 108 einer RoundedBoxGeometry. Ohne Unterseite
+ * (liegt auf dem Boden). Weiche Normalen: Fasen- und Seitenflächen teilen sich gemittelte Normalen wie gerundete Kanten.
+ */
+export function chamferBoxGeometry(w = 1, h = 1, d = 1, c = 0.12) {
+  const x = w / 2, z = d / 2, xi = x - c, zi = z - c, y0 = -h / 2, y1 = h / 2, yc = y1 - c;
+  const V = [];
+  const tri = (a, b, cc) => V.push(a, b, cc);
+  const quad = (a, b, cc, dd) => { tri(a, b, cc); tri(a, cc, dd); };
+  // Deckfläche
+  quad([-xi, y1, -zi], [-xi, y1, zi], [xi, y1, zi], [xi, y1, -zi]);
+  // Fasen (vier Seiten) + Eckdreiecke
+  const bevel = [
+    [[-xi, y1, zi], [-xi, yc, z], [xi, yc, z], [xi, y1, zi]],
+    [[xi, y1, zi], [x, yc, zi], [x, yc, -zi], [xi, y1, -zi]],
+    [[xi, y1, -zi], [xi, yc, -z], [-xi, yc, -z], [-xi, y1, -zi]],
+    [[-xi, y1, -zi], [-x, yc, -zi], [-x, yc, zi], [-xi, y1, zi]],
+  ];
+  for (const q of bevel) quad(q[0], q[1], q[2], q[3]);
+  tri([xi, y1, zi], [xi, yc, z], [x, yc, zi]);
+  tri([xi, y1, -zi], [x, yc, -zi], [xi, yc, -z]);
+  tri([-xi, y1, -zi], [-xi, yc, -z], [-x, yc, -zi]);
+  tri([-xi, y1, zi], [-x, yc, zi], [-xi, yc, z]);
+  // Seitenwände (achteckiger Grundriss)
+  const ring = [[-xi, z], [xi, z], [x, zi], [x, -zi], [xi, -z], [-xi, -z], [-x, -zi], [-x, zi]];
+  for (let i = 0; i < 8; i++) {
+    const [ax, az] = ring[i], [bx, bz] = ring[(i + 1) % 8];
+    quad([ax, yc, az], [ax, y0, az], [bx, y0, bz], [bx, yc, bz]);
+  }
+  const pos = new Float32Array(V.flat());
+  const g = new THREE.BufferGeometry();
+  g.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+  g.computeVertexNormals();
+  // Normalen glätten: gleiche Positionen mitteln (wirkt wie gerundete Kanten)
+  const n = g.attributes.normal, p = g.attributes.position;
+  const acc = new Map();
+  for (let i = 0; i < p.count; i++) {
+    const k = `${p.getX(i).toFixed(4)},${p.getY(i).toFixed(4)},${p.getZ(i).toFixed(4)}`;
+    const a = acc.get(k) || [0, 0, 0];
+    a[0] += n.getX(i); a[1] += n.getY(i); a[2] += n.getZ(i);
+    acc.set(k, a);
+  }
+  for (let i = 0; i < p.count; i++) {
+    const a = acc.get(`${p.getX(i).toFixed(4)},${p.getY(i).toFixed(4)},${p.getZ(i).toFixed(4)}`);
+    const l = Math.hypot(a[0], a[1], a[2]) || 1;
+    n.setXYZ(i, a[0] / l, a[1] / l, a[2] / l);
+  }
+  return g;
+}
+
 // ---------- Steinbaukasten (Ruinen, Brücken, Ringe) ----------
 const STONE = [0.42, 0.39, 0.35];
 const STONE_DARK = [0.27, 0.25, 0.24];
 const GOLD = [1.0, 0.72, 0.36];
 
 export class StoneKit {
-  constructor(seed = 1) { this.parts = []; this.R = rng(seed); }
+  /** far = Fern-LOD (Ruinen-Silhouetten auf Hintergrund-Inseln): weniger Segmente, keine Zierringe */
+  constructor(seed = 1, { far = false } = {}) { this.parts = []; this.R = rng(seed); this.far = far; }
   add(geo, matrix, color = STONE, opts = {}) {
     const g = prep(geo, color, opts);
     if (matrix) g.applyMatrix4(matrix);
@@ -487,7 +541,11 @@ export class StoneKit {
     const m = new THREE.Matrix4().compose(new THREE.Vector3(x, y, z),
       new THREE.Quaternion().setFromEuler(new THREE.Euler(tilt, rotY, tilt * 0.5)), new THREE.Vector3(1, 1, 1));
     const seed = this.R() * 100;
-    const shaft = new THREE.CylinderGeometry(r * 0.9, r, h, 20, Math.max(2, Math.round(h * 1.5)));
+    const far = this.far;
+    if (far) gold = false;
+    const rs = far ? 10 : 20; // Rundungssegmente (20 = fünf Kanneluren sauber aufgelöst)
+    // Höhensegmente nur so viele, wie die Bruchkante/Farbvariation braucht
+    const shaft = new THREE.CylinderGeometry(r * 0.9, r, h, rs, far ? 1 : Math.max(2, Math.round(h * (broken ? 1.2 : 0.7))));
     shaft.translate(0, h / 2 + 0.5, 0);
     const p = shaft.attributes.position;
     for (let i = 0; i < p.count; i++) {
@@ -501,24 +559,24 @@ export class StoneKit {
       }
     }
     this.add(shaft, m, this.stoneFn(seed));
-    const base = new THREE.CylinderGeometry(r * 1.35, r * 1.5, 0.55, 20);
+    const base = new THREE.CylinderGeometry(r * 1.35, r * 1.5, 0.55, rs);
     base.translate(0, 0.27, 0);
     this.add(base, m, this.stoneFn(seed, STONE_DARK));
     if (gold) {
-      const ring = new THREE.TorusGeometry(r * 1.02, 0.07, 6, 24);
+      const ring = new THREE.TorusGeometry(r * 1.02, 0.07, 4, 20);
       ring.rotateX(Math.PI / 2);
       ring.translate(0, 1.1, 0);
       this.add(ring, m, GOLD, { metal: 1 });
     }
     if (!broken) {
-      const cap = new THREE.CylinderGeometry(r * 1.4, r * 1.0, 0.5, 20);
+      const cap = new THREE.CylinderGeometry(r * 1.4, r * 1.0, 0.5, rs);
       cap.translate(0, h + 0.75, 0);
       this.add(cap, m, this.stoneFn(seed));
-      const slab = new THREE.CylinderGeometry(r * 1.55, r * 1.45, 0.32, 20);
+      const slab = new THREE.CylinderGeometry(r * 1.55, r * 1.45, 0.32, rs);
       slab.translate(0, h + 1.15, 0);
       this.add(slab, m, this.stoneFn(seed, STONE_DARK));
       if (gold) {
-        const ring2 = new THREE.TorusGeometry(r * 1.25, 0.06, 6, 24);
+        const ring2 = new THREE.TorusGeometry(r * 1.25, 0.06, 4, 20);
         ring2.rotateX(Math.PI / 2);
         ring2.translate(0, h + 0.55, 0);
         this.add(ring2, m, GOLD, { metal: 1 });
@@ -530,7 +588,7 @@ export class StoneKit {
     const m = new THREE.Matrix4().compose(new THREE.Vector3(x, y, z),
       new THREE.Quaternion().setFromEuler(new THREE.Euler(0, rotY, 0)), new THREE.Vector3(1, 1, 1));
     const half = span / 2;
-    const tmp = new StoneKit(this.R() * 1000);
+    const tmp = new StoneKit(this.R() * 1000, { far: this.far });
     tmp.pillar(-half, 0, 0, h, 0.6, { gold: true });
     tmp.pillar(half, 0, 0, h, 0.6, { gold: true });
     const blocks = 11;

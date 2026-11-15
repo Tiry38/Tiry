@@ -1,5 +1,5 @@
 // Mehrspieler-Lobby: Verbinden/Hosten, öffentliche Räume, Schnellsuche, Plätze (Mensch/Bot/geschlossen),
-// Host-Einstellungen (Modus, Teams, Wellen, Bots, Ausgleich), Volk/Bereit, Chat, Einladungscode.
+// Host-Einstellungen (Modus, Teams, Wellen, Arena, Bots, Ausgleich), Volk/Bereit, Chat, Einladungscode.
 import { FACTIONS, FACTION_IDS } from '../sim/data.js';
 
 const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -158,6 +158,7 @@ export class Lobby {
         <label class="fg">Wellen${sel('waves', { 10: '10', 20: '20', 30: '30 (+ Endwellen)' }, c.waves, !host)}</label>
         <label class="fg">Champions (CC)${sel('champions', { false: 'Aus', true: 'An' }, c.champions, !host)}</label>
         <label class="fg">Endlos${sel('endless', { true: 'Endwellen bis ein König fällt', false: 'Entscheidung nach der letzten Welle' }, c.endless !== false, !host)}</label>
+        <label class="fg">Arena${sel('arena', { true: 'An (nach Welle 10/20)', false: 'Aus' }, c.arena !== false, !host)}</label>
         <label class="fg">Leere Plätze${sel('bots', { true: 'Bots füllen auf', false: 'bleiben leer' }, c.bots, !host)}</label>
         <label class="fg">Bot-Stärke${sel('botDifficulty', DIFF, c.botDifficulty, !host)}</label>
         <label class="fg">Ungleiche Teams${sel('autobalance', { true: 'automatisch ausgleichen', false: 'kein Ausgleich' }, c.autobalance, !host)}</label>

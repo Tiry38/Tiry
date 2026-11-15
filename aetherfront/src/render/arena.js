@@ -24,7 +24,7 @@ export function createArena(scene) {
     const r = R * (1 - Math.pow(t, 0.75)) + 0.6 * (1 - t);
     prof.push(new THREE.Vector2(Math.max(0.3, r), -0.6 - t * 26));
   }
-  const rock = new THREE.LatheGeometry(prof, 64);
+  const rock = new THREE.LatheGeometry(prof, 48);
   {
     const p = rock.attributes.position, col = [];
     const c = new THREE.Color();
@@ -46,7 +46,7 @@ export function createArena(scene) {
   root.add(rockMesh);
 
   // ---------- Steinboden mit Kante ----------
-  const floor = new THREE.CylinderGeometry(R, R, 0.7, 96, 1);
+  const floor = new THREE.CylinderGeometry(R, R, 0.7, 72, 1);
   floor.translate(0, -0.4, 0);
   const floorMat = new THREE.MeshStandardMaterial({ color: 0x3d4150, roughness: 0.85, metalness: 0.08 });
   const floorMesh = new THREE.Mesh(floor, floorMat);
@@ -95,7 +95,7 @@ export function createArena(scene) {
         vec3 col = t < 0.333 ? mix(a,b,t*3.0) : t < 0.666 ? mix(b,c,(t-0.333)*3.0) : mix(c,a,(t-0.666)*3.0);
         gl_FragColor = vec4(col * (1.4 + 1.8 * uActive), 1.0); }`,
   });
-  const rimRing = new THREE.Mesh(new THREE.TorusGeometry(R - 0.1, 0.28, 10, 160), rimMat);
+  const rimRing = new THREE.Mesh(new THREE.TorusGeometry(R - 0.1, 0.28, 8, 128), rimMat);
   rimRing.rotation.x = -Math.PI / 2;
   rimRing.position.y = 0.02;
   root.add(rimRing);

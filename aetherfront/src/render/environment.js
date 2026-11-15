@@ -110,7 +110,8 @@ export function createEnvironment({ scene, renderer, quality = 'high', assets = 
   // Schattenkamera pro Bild an den sichtbaren Ausschnitt anpassen (scharfe Schatten in der Nähe)
   let shadowSize = 2048;
   let fitter = null;
-  scene.userData.aethPreRender = (camera) => fitter && fitter(camera, shadowSize);
+  let cullWorld = null;
+  scene.userData.aethPreRender = (camera) => { if (fitter) fitter(camera, shadowSize); if (cullWorld) cullWorld(camera); };
 
   // ---------- Wolkenmeer ----------
   const cloudNoise = createCloudNoise(256);
@@ -122,6 +123,7 @@ export function createEnvironment({ scene, renderer, quality = 'high', assets = 
   const maxAniso = renderer.capabilities?.getMaxAnisotropy?.() ?? 8;
   const world = buildWorld(U, { anisotropy: Math.min(8, maxAniso), assets });
   scene.add(world.root);
+  cullWorld = world.cull;
   // Arena (nach Welle 10/20) zwischen den Teams
   const arena = createArena(scene);
 
