@@ -1,5 +1,5 @@
-# Entwurf Menüband „Glasband“ (15.11.2026, nicht eingebaut)
-
-Demo: https://claude.ai/artifact/MyzBhSrSaupXedmXF4angz
-
-Nur das Menüband, Rest der Seite unverändert. Form/Größe/Platz wie heute (801×56 px bei 1440). Neu: helle Glas-Linse unter der Maus (Feder je Kante, dehnt sich beim Gleiten), dunkler aktiver Knopf gleitet zum neuen Punkt, weiße Schrift per clip-path exakt unter dem Knopf, Lichtpunkt läuft um den Rand, Schein folgt der Maus. Wartet auf Tirys Urteil.
+# Entwurf Menüband „Kapsel“ (15.11.2026, noch nicht live)
+Nur das Menüband am PC ab 1181 px. Oben wie heute, beim Scrollen (`body.sc`) schwebende dunkle Glas-Kapsel mit Leuchtrand,
+gleitender Markierung des aktiven Punkts und weichem Einblenden des Inhalts. Handy/Tablet/Startseite unverändert.
+Einbau nach Tirys Freigabe: `kapsel.css` ans Ende des letzten `<style>`, `kapsel.js` ans Ende des Skripts; danach dieser Ordner weg.
+Vorschau: https://claude.ai/artifact/9icCJYfjCTxTDYfujdjjqh
