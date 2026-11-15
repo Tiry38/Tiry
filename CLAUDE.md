@@ -49,6 +49,11 @@ testet, bewertet und dauerhaft selbst weiterentwickelt. Besitzer: Tiry. UI-Sprac
 - Keine Geheimnisse committen (API-Keys, Service-Accounts). Secrets nur über GitHub-Secrets bzw. verschlüsselte Settings.
 - Keine Kopien bestehender Apps/Spiele, keine Markennamen in erzeugten Apps.
 
+## Homepage (wichtigstes Thema aktuell)
+- **„Homepage“ meint IMMER die neue Seite https://tiry38.github.io/velo-center-web/** – nie die alte velo-center.de (Coco).
+- Quelle: `velocenter-homepage/` (Regeln in `ENTSCHEIDUNGEN.md`, Ablauf in `LIVEGANG.md`), bauen mit
+  `python3 tools/live_bauen.py <tmp>`, dann in Repo `Tiry38/velo-center-web` (`main`) kopieren (ohne `CNAME`, `README.md`, `google.json`).
+
 ## Weiteres Projekt im Repo
 - **WoW-Forever-Add-ons** in `wow-addons/` – eigener Leitfaden `wow-addons/CLAUDE.md`, Stand in `wow-addons/UEBERGABE.md`.
   Für Arbeit dort gelten die Regeln aus `wow-addons/CLAUDE.md` (die App-Forge-Befehle oben betreffen nur `app-forge/`).
