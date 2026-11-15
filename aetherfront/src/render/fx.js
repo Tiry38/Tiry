@@ -98,7 +98,7 @@ class Particles {
     }
     this.n = n;
     const g = this.points.geometry;
-    g.setDrawRange(0, n);
+    g.setDrawRange(0, n); this.points.visible = n > 0;
     for (const k of ['position', 'color', 'size', 'alpha']) g.attributes[k].needsUpdate = true;
     this.points.material.uniforms.uScale.value = scale;
   }
@@ -353,7 +353,7 @@ export class Fx {
       n++;
     }
     B.length = 0;
-    mesh.count = n;
+    mesh.count = n; mesh.visible = n > 0;
     mesh.instanceMatrix.needsUpdate = true; if (mesh.instanceColor) mesh.instanceColor.needsUpdate = true;
     mesh.geometry.attributes.aSp.needsUpdate = true;
   }
@@ -374,7 +374,7 @@ export class Fx {
       n++;
     }
     B.length = 0;
-    mesh.count = n;
+    mesh.count = n; mesh.visible = n > 0;
     mesh.instanceMatrix.needsUpdate = true; if (mesh.instanceColor) mesh.instanceColor.needsUpdate = true;
     mesh.geometry.attributes.aSt.needsUpdate = true;
   }
@@ -391,7 +391,7 @@ export class Fx {
       dc[n * 4] = d.seed; dc[n * 4 + 1] = d.t / d.life; dc[n * 4 + 2] = d.glow; dc[n * 4 + 3] = d.crack;
       n++;
     }
-    mesh.count = n;
+    mesh.count = n; mesh.visible = n > 0;
     mesh.instanceMatrix.needsUpdate = true; if (mesh.instanceColor) mesh.instanceColor.needsUpdate = true;
     mesh.geometry.attributes.aDc.needsUpdate = true;
   }
@@ -432,7 +432,7 @@ export class Fx {
       this.debMesh.setMatrixAt(n, _m); this.debMesh.setColorAt(n, d.col);
       n++;
     }
-    this.debMesh.count = n;
+    this.debMesh.count = n; this.debMesh.visible = n > 0;
     this.debMesh.instanceMatrix.needsUpdate = true;
     if (this.debMesh.instanceColor) this.debMesh.instanceColor.needsUpdate = true;
   }
@@ -559,8 +559,8 @@ export class Fx {
       this.flash(x, 0.8, z, { size: 3.2 * k, size1: 1.2, color: '#ffd090', intensity: 5, life: 0.16, shape: 3, rot: Math.random() });
       this.flash(x, 0.9, z, { size: 1.5 * k, size1: 3.4 * k, color: '#ff7a22', intensity: 3.2, life: 0.38, shape: 1, vy: 1.5 });
       this.flash(x, 0.6, z, { size: 2.4 * k, size1: 2.8 * k, color: '#ff5a1a', intensity: 1.6, life: 0.55, shape: 0 });
-      this.smoke(x, 0.3, z, { n: Math.round(16 * k), color: '#8a7a66', speed: 4.5 * k, up: 1.2, life: 2.0, size: 1.3 * k, grow: 2.2, rise: 0.35, drag: 3.2, spread: 0.8, alpha: 0.75 });
-      this.smoke(x, 0.6, z, { n: Math.round(6 * k), color: '#4e4640', speed: 1.2, up: 2.6, life: 2.4, size: 1.0 * k, grow: 2.6, rise: 0.9, drag: 1.5, spread: 0.6, alpha: 0.7 });
+      this.smoke(x, 0.3, z, { n: Math.round(13 * k), color: '#8a7a66', speed: 4.5 * k, up: 1.2, life: 1.7, size: 1.2 * k, grow: 2.0, rise: 0.35, drag: 3.2, spread: 0.8, alpha: 0.6 });
+      this.smoke(x, 0.6, z, { n: Math.round(4 * k), color: '#4e4640', speed: 1.2, up: 2.6, life: 2.0, size: 0.9 * k, grow: 2.4, rise: 0.9, drag: 1.5, spread: 0.6, alpha: 0.55 });
       this.debris(x, 0.3, z, { n: Math.round(12 * k), speed: 6 * k, up: 7 * k, size: 0.16 * k, color: '#6a5a4a' });
       this.emit(x, 0.6, z, { n: Math.round(26 * k), color: '#ffb35a', speed: 9, up: 6, life: 0.8, size: 0.3, grav: -14, drag: 1, intensity: 4 });
       this.shock(x, z, { r: 2.4 * k, color: '#ffb36a', life: 0.45, intensity: 2.5 });
@@ -654,7 +654,7 @@ export class Fx {
       _c.copy(w.color).multiplyScalar(1 - a);
       this.waveMesh.setMatrixAt(n, _m); this.waveMesh.setColorAt(n, _c); n++;
     }
-    this.waveMesh.count = n;
+    this.waveMesh.count = n; this.waveMesh.visible = n > 0;
     this.waveMesh.instanceMatrix.needsUpdate = true;
     if (this.waveMesh.instanceColor) this.waveMesh.instanceColor.needsUpdate = true;
   }
@@ -714,7 +714,7 @@ export class Fx {
         n++;
       }
     }
-    this.beamMesh.count = n;
+    this.beamMesh.count = n; this.beamMesh.visible = n > 0;
     this.beamMesh.instanceMatrix.needsUpdate = true;
     if (this.beamMesh.instanceColor) this.beamMesh.instanceColor.needsUpdate = true;
   }
@@ -749,7 +749,7 @@ export class Fx {
       this.pillarMesh.setColorAt(n, _c.copy(p.color).multiplyScalar(1 - a));
       n++;
     }
-    this.pillarMesh.count = n;
+    this.pillarMesh.count = n; this.pillarMesh.visible = n > 0;
     this.pillarMesh.instanceMatrix.needsUpdate = true;
     if (this.pillarMesh.instanceColor) this.pillarMesh.instanceColor.needsUpdate = true;
   }
