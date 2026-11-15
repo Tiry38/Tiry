@@ -40,9 +40,10 @@ html.er .dealn{background:rgba(246,249,252,.94);border-radius:999px;padding:3px 
 /* Striche als echte Vektor-Flächen (clip-path, kantenglatt) statt Verlaufs-Kanten. Lage = wie bisher (115°, 18 % / 62 % / 66 %).
    Grau = Logo-Grau #868282, Rot = Logo-Rot. Kein Schimmer. Im Kopfbereich ausgeblendet, damit Logo/Menü nicht im Strich hängen. */
 html.er .sky::before{background:none!important}
-.strk{position:fixed;inset:0;z-index:-2;pointer-events:none;-webkit-mask-image:linear-gradient(180deg,transparent 0,transparent 92px,#000 150px);mask-image:linear-gradient(180deg,transparent 0,transparent 118px,#000 200px)}
+.strk{position:fixed;inset:0;z-index:-2;pointer-events:none}
+.strk .sb,.strk .sc{-webkit-mask-image:linear-gradient(180deg,transparent 0,transparent 118px,#000 200px);mask-image:linear-gradient(180deg,transparent 0,transparent 118px,#000 200px)}
 .strk i{position:absolute;inset:0}
-.strk .sa{background:#868282;clip-path:polygon(calc(9vw + 11vh) 0,calc(10vw + 11.466vh) 0,calc(10vw + 11.466vh - 46.63vh) 100%,calc(9vw + 11vh - 46.63vh) 100%);-webkit-mask-image:linear-gradient(180deg,transparent 0,transparent 140px,#000 270px);mask-image:linear-gradient(180deg,transparent 0,transparent 140px,#000 270px)}
+.strk .sa{background:#868282;clip-path:polygon(calc(7vw + 6.6vh) 0,calc(8vw + 7.066vh) 0,calc(8vw + 7.066vh - 46.63vh) 100%,calc(7vw + 6.6vh - 46.63vh) 100%);-webkit-mask-image:none;mask-image:none}
 .strk .sb{background:#868282;clip-path:polygon(calc(62.000vw + 28.910vh) 0,calc(63.500vw + 29.610vh) 0,calc(63.500vw + 29.610vh - 46.63vh) 100%,calc(62.000vw + 28.910vh - 46.63vh) 100%)}
 .strk .sc{background:#CF1A2C;clip-path:polygon(calc(66.000vw + 30.775vh) 0,calc(67.000vw + 31.242vh) 0,calc(67.000vw + 31.242vh - 46.63vh) 100%,calc(66.000vw + 30.775vh - 46.63vh) 100%)}
 .strk .sc{opacity:.92}
@@ -52,5 +53,4 @@ html.er body:has(section.view[data-v="isy"]:not([hidden])) .hdr{background:linea
  box-shadow:inset 0 -1px 0 rgba(255,255,255,.75),0 18px 44px -26px rgba(12,18,30,.6)!important}
 html.er body:has(section.view[data-v="isy"]:not([hidden])) .hdr::after{content:"";display:block!important;position:absolute;left:0;right:0;bottom:-1px;height:2px;background:linear-gradient(90deg,transparent,#868282 18%,#CF1A2C 50%,#868282 82%,transparent);opacity:.8}
 
-body:has(section.view[data-v="start"]:not([hidden])) .strk .sa{clip-path:polygon(calc(30vw + 22.8vh) 0,calc(31vw + 23.266vh) 0,calc(31vw + 23.266vh - 46.63vh) 100%,calc(30vw + 22.8vh - 46.63vh) 100%);-webkit-mask-image:linear-gradient(180deg,transparent 0,transparent 200px,#000 300px);mask-image:linear-gradient(180deg,transparent 0,transparent 200px,#000 300px)}
-@media (max-width:760px){body:has(section.view[data-v="start"]:not([hidden])) .strk .sa{display:none}}
+@media (max-width:760px){.strk .sa{display:none}}
