@@ -2569,6 +2569,57 @@ a.hchip.hc:hover .ha{background:#1B1E25;color:#fff;transform:translateX(2px)}
 @media (max-width:980px){.ostat{height:46px;padding:4px 14px 4px 4px}}
 @media (max-width:560px){.ostat{padding-right:12px}}
 @media (prefers-reduced-motion:reduce){.ostat::before{animation:none;display:none}}
+
+/* ================= Optik-Runde (Tiry 15.11.2026) ================= */
+/* WhatsApp-Knopf Handy: kleiner, erst nach dem ersten Bildschirm (verdeckte Live-Chip und Filter) */
+@media (max-width:720px){.fab{width:54px;height:54px;right:calc(14px + env(safe-area-inset-right,0px));bottom:calc(14px + env(safe-area-inset-bottom,0px));transition:opacity .3s,transform .3s var(--spring)}.fab svg{width:28px;height:28px}
+ body.fabhide .fab{opacity:0;transform:scale(.6);pointer-events:none}}
+/* Lager-Karten: sofort verfügbar = grüner Punkt, Ersparnis statt „Sonderangebot“, Sternchen statt Leasing-Zeile */
+.bd.ok.dt{width:26px;padding:0;justify-content:center;border-radius:50%}
+.bd.ok.dt i{display:none}
+.lgpr .ast{font-size:.5em;font-weight:800;vertical-align:super;margin-left:2px;color:#9F1239}
+/* Handy: 2 Räder pro Zeile */
+@media (max-width:640px){
+ .lggrid{grid-template-columns:1fr 1fr!important;gap:10px}
+ .lgc{border-radius:16px}
+ .lgst{height:136px}.lgst .bk{max-height:104px;max-width:92%}
+ .lgst .bds{top:8px;left:8px;right:44px!important;gap:4px}
+ .lgst .bd{height:22px;padding:0 7px;font-size:10.5px;border-radius:7px}.lgst .bd.ok.dt{width:22px;padding:0;border-radius:50%}
+ .lgc .hrt{top:7px;right:7px;width:34px;height:34px}.lgc .hrt svg{width:17px;height:17px}
+ .lgin{padding:10px 11px 12px;gap:6px}
+ .lgin .mk{font-size:10px;letter-spacing:.12em}
+ .lgin h3{font-size:15px;line-height:1.2}
+ .sp{gap:4px}.sp span{padding:4px 6px;font-size:10.5px;gap:4px}
+ .ft{padding-top:8px}.ft .go{display:none}
+ .lgpr s{font-size:11px}.lgpr b{font-size:17px}
+}
+/* Showroom-Chip „Kommt bald“ für bestellte Räder */
+.hlive.soon{--hg:linear-gradient(110deg,#F59E0B,#FB7185,#F59E0B);box-shadow:0 14px 30px -12px rgba(245,158,11,.5)}
+.hlive.soon::after{border-color:rgba(245,158,11,.4);animation:none;opacity:0}
+.hlive.soon .qld{background:#F59E0B}.hlive.soon .qld::after{border-color:#F59E0B;animation:none;opacity:0}
+.hlive.soon .hgo{background:linear-gradient(180deg,#F59E0B,#D97706)}
+/* 4,8 im Velocenter-Rot statt Braun */
+.score b{background-image:linear-gradient(180deg,#F0313B,#C8102E 55%,#7A0B1F)!important}
+/* Abstände Startseite enger */
+.ice.apz{padding-top:120px!important;padding-bottom:120px!important}
+.zone.z-peach.apz+.zone.z-lilac.apz{padding-top:24px!important}
+@media (max-width:640px){.ice.apz{padding-top:84px!important;padding-bottom:84px!important}.zone.z-peach.apz+.zone.z-lilac.apz{padding-top:8px!important}}
+/* Tempo-Linien nicht unter dem Text */
+@media (min-width:981px){#speed{-webkit-mask-image:linear-gradient(90deg,rgba(0,0,0,.25) 0,rgba(0,0,0,.12) 30%,rgba(0,0,0,.25) 48%,#000 62%);mask-image:linear-gradient(90deg,rgba(0,0,0,.25) 0,rgba(0,0,0,.12) 30%,rgba(0,0,0,.25) 48%,#000 62%)}}
+@media (max-width:980px){#speed{opacity:.4}}
+/* Schnellzugriff-Kacheln: Text immer lesbar (Bosch-Schrift lag hinter „Termin anfragen“) */
+.qa .bg::after{content:"";position:absolute;inset:0;background:linear-gradient(0deg,rgba(14,16,22,.82),rgba(14,16,22,.35) 55%,rgba(14,16,22,0) 85%)}
+@media (max-width:980px){.qa[href="#termin"]{--pos:100% 20%!important}}
+/* Öffnungsstatus Handy: Social-Symbole weichen, Status mit Text */
+@media (max-width:980px){.hdr.nosoc .hsoc{display:none}}
+/* Marken-Filter: alle Logos gleich kräftig */
+.lgchips button.lgo img[alt="Velo de Ville"]{height:42px!important;max-width:180px!important;margin:-10px -6px}
+.lgchips button.lgo img[alt="Victoria"]{height:32px!important;margin:-5px 0;filter:saturate(1.7) brightness(.72)}
+.lgchips button.lgo img[alt="i:SY"],.lgchips button.lgo img[alt="QiO"]{height:20px!important}
+.lgchips button.lgo img[alt="KTM"]{height:26px!important;margin:-2px 0}
+.lgchips button.lgo img[alt="Stevens"]{height:16px!important}
+/* Handy-Kopf Start: Logo zuerst, dann „Familienbetrieb seit 1995“ */
+@media (max-width:980px){.hgrid .htxt>.eyebrow{order:2;margin-top:4px}}
 </style>
 
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
@@ -3929,6 +3980,11 @@ const SRFIX=['vanraam','vdv','victoria','stevens'];/* feste Plätze: jeder 5. / 
 const srRnd=n=>{try{const a=new Uint32Array(1);crypto.getRandomValues(a);return ((a[0]^(Date.now()*2654435761>>>0)^((performance.now()*1e3)|0))>>>0)%n}catch(e){return Math.floor(Math.random()*n)}};
 const srLS=v=>{try{if(v===undefined)return JSON.parse(localStorage.getItem('vc_srl')||'[]');localStorage.setItem('vc_srl',JSON.stringify(v))}catch(e){return []}};
 const SR={lb:{},pool:null,last:srLS().slice(0,24),lastF:'',n:0,vr:0,subs:[]};
+/* Chip unter dem Showroom-Rad: bestelltes Rad = „Kommt bald“ statt „Live-Bestand“ (Tiry 15.11.2026) */
+function liveSoon(el,on){if(!el)return;on=!!on;if(el.classList.contains('soon')===on)return;el.classList.toggle('soon',on);
+ const lv=el.querySelector('.hlv'),st=el.querySelector('.hl strong'),go=el.querySelector('.hgo');
+ lv.lastChild.nodeValue=on?'Bestellt':'Live';st.textContent=on?'Kommt bald zu uns':'Unser Live-Bestand';go.firstChild.nodeValue=on?'Ansehen':'Jetzt ansehen';
+ el.setAttribute('aria-label',on?'Dieses Rad kommt bald zu uns – Räder auf Lager ansehen':'Unser Live-Bestand: Räder auf Lager ansehen')}
 const srBase=b=>({k:b.k,m:b.m,f:'',img:b.img,st:'',cur:1});
 const SRDUP=new Set(['isy-34.webp','isy-36.webp','qio-19.webp']);/* bildgleiche Dubletten */
 function srBuild(){const P={},G=new Set();BR.forEach(b=>P[b.k]=[srBase(b)]);
@@ -3951,6 +4007,7 @@ function showroom(root,prefix){
  const thSet=(j,src)=>{const im=$$('button',th)[j]?.querySelector('img');if(im&&im.getAttribute('src')!==src)im.src=src};
  function paint(){const b=BR[i],x=cur||srBase(b);s.style.setProperty('--ac',b.c);wm.style.setProperty('--wo',b.o);
   const tag=x.cur?'Beispielmodell':(x.st==='bestellt'?'Bald bei uns':'Bei uns im Laden');
+  liveSoon($('.hlive',s),x.st==='bestellt');
   info.innerHTML='<span class="blogo"><img src="'+b.logo+'" alt="'+esc(b.n)+'"></span><div><p class="mdl">'+tag+' · '+esc(x.m)+(x.f?' · <span class="srf">'+esc(x.f)+'</span>':'')+'</p><h3>'+esc(b.n)+'</h3><p>'+esc(b.t)+'</p></div><div class="row">'+b.a.map(([t,h])=>'<a class="ghost" href="'+h+'"'+(h.startsWith('http')?' target="_blank" rel="noopener"':'')+'>'+esc(t)+'<svg><use href="#i-arrow"/></svg></a>').join('')+'<a class="ghost" href="#lager" data-brand="'+esc(b.n)+'">Auf Lager</a><a class="cta" href="#termin" data-pre="Probefahrt '+esc(b.n)+'"><svg><use href="#i-bike"/></svg>Probefahrt</a></div>';
   $$('button',th).forEach((y,j)=>y.classList.toggle('on',j===i));}
  const MB={};/* Markenrunden: jede Marke einmal je Runde, nie zweimal hintereinander */
@@ -4030,7 +4087,7 @@ let hfT=0;function hdrFit(){const n=$('#nav'),o=$('#ostat'),h=$('.hdr');if(!n||!
  const links=()=>Math.max(0,...[...document.querySelectorAll('.hdr .hsoc a,.hdr .logo')].filter(sicht).map(e=>e.getBoundingClientRect().right));
  const ov=()=>(!mob&&n.scrollWidth>n.clientWidth+1)||(sicht(o)&&links()+6>o.getBoundingClientRect().left);
  const add=(e,c)=>()=>e.classList.add(c);
- const sc=document.body.classList.contains('sc');const S=mob?[add(o,'f2'),add(o,'f3')]:[add(o,'f1'),add(n,'tight'),...(sc?[add(h,'nosoc')]:[]),add(o,'f2'),add(n,'tight2'),add(h,'nosoc'),add(n,'tight3')];
+ const sc=document.body.classList.contains('sc');const S=mob?[add(h,'nosoc'),add(o,'f2'),add(o,'f3')]:[add(o,'f1'),add(n,'tight'),...(sc?[add(h,'nosoc')]:[]),add(o,'f2'),add(n,'tight2'),add(h,'nosoc'),add(n,'tight3')];
  for(const st of S){if(!ov())break;st()}}
 const hdrFitL=()=>{cancelAnimationFrame(hfT);hfT=requestAnimationFrame(hdrFit)};addEventListener('resize',hdrFitL);if(document.fonts&&document.fonts.ready)document.fonts.ready.then(hdrFitL);
 {let k0=null;const B=document.body.classList;new MutationObserver(()=>{const k=B.contains('sc')+'|'+B.contains('herotop')+'|'+B.contains('fz1')+B.contains('fz2');if(k!==k0){k0=k;setTimeout(hdrFitL,480)}}).observe(document.body,{attributes:true,attributeFilter:['class']});addEventListener('load',()=>setTimeout(hdrFitL,300))}
@@ -4089,13 +4146,15 @@ addEventListener('keydown',e=>{if(e.key==='Escape')document.body.classList.remov
 document.addEventListener('click',e=>{const a=e.target.closest('a[href^="#"]');if(!a)return;if(a.dataset.pre)preset(a.dataset.pre);if(a.getAttribute('href')===location.hash){e.preventDefault();go(false)}});
 
 /* ---------- Tempo-Linien hinter dem Logo ---------- */
-(function(){const cv=$('#speed');if(!cv)return;const cx=cv.getContext('2d');let W,H2,L=[],DT=1;const cols=['226,35,45','219,39,119','124,58,237','37,99,235','27,30,37'];
+(function(){const cv=$('#speed');if(!cv)return;const cx=cv.getContext('2d');let W,H2,L=[],DT=1;const cols=['226,35,45','219,39,119','124,58,237','37,99,235'];
  function size(){const r=cv.getBoundingClientRect(),dpr=Math.min(2,devicePixelRatio||1);W=r.width;H2=r.height;cv.width=W*dpr;cv.height=H2*dpr;cx.setTransform(dpr,0,0,dpr,0,0);
   L=Array.from({length:Math.round(W/22)},()=>({x:Math.random()*W,y:H2*(.15+Math.random()*.7),l:60+Math.random()*260,v:1+Math.random()*3.5,w:Math.random()<.2?2:1,c:cols[Math.random()*cols.length|0],a:.08+Math.random()*.35}))}
  function draw(){cx.clearRect(0,0,W,H2);L.forEach(s=>{const g=cx.createLinearGradient(s.x,0,s.x+s.l,0);g.addColorStop(0,'rgba('+s.c+',0)');g.addColorStop(1,'rgba('+s.c+','+s.a+')');cx.strokeStyle=g;cx.lineWidth=s.w;cx.beginPath();cx.moveTo(s.x,s.y);cx.lineTo(s.x+s.l,s.y);cx.stroke();{s.x-=s.v*DT;if(s.x+s.l<0){s.x=W+Math.random()*200;s.y=H2*(.15+Math.random()*.7)}}})}
  size();addEventListener('resize',size);
  let t0=0;(function loop(t){DT=t0?Math.min(3,(t-t0)/16.67)*.6:1;t0=t;if(cur==='start'&&scrollY<H2)draw();requestAnimationFrame(loop)})(0);draw();
 })();
+/* WhatsApp-Knopf am Handy erst nach dem ersten Bildschirm (Tiry 15.11.2026) */
+(function(){let f=0;const up=()=>{f=0;document.body.classList.toggle('fabhide',innerWidth<=720&&scrollY<innerHeight*.75)};addEventListener('scroll',()=>{if(!f){f=1;requestAnimationFrame(up)}},{passive:true});addEventListener('resize',up);addEventListener('hashchange',()=>setTimeout(up,60));up()})();
 /* ---------- Schnee im Winter-Band ---------- */
 (function(){const cv=$('#snow');if(!cv)return;const cx=cv.getContext('2d');let W,H2,F=[];
  function size(){const r=cv.getBoundingClientRect();W=r.width;H2=r.height;cv.width=W;cv.height=H2;F=Array.from({length:Math.round(W/14)},()=>({x:Math.random()*W,y:Math.random()*H2,r:.6+Math.random()*2.2,v:.3+Math.random()*1,s:Math.random()*6}))}
@@ -4169,7 +4228,7 @@ fRender();
   const ks=Object.keys(SR.all||{}).filter(j=>SR.all[j].length);if(!ks.length)return;/* nur echte Bestandsräder mit eigenem Foto, nie Katalogbild */
   const bk=bagNext(HB,ks),L=SR.all[bk];if(!L||!L.length){HB.q=null;return}let c=L.filter(y=>!SR.last.includes(y.img)&&(!SR.lastF||srNorm(y.f)!==SR.lastF));if(!c.length)c=L.filter(y=>y.img!==SR.lb['h'+bk]);if(!c.length)c=L;
   const x=c[srRnd(c.length)];SR.lb['h'+bk]=x.img;SR.last.unshift(x.img);SR.last.length=Math.min(SR.last.length,24);srLS(SR.last);SR.lastF=srNorm(x.f);const br=BR.find(y=>y.k===x.k);if(!br)return;dk^=1;const el=D[dk];busy=1;
-  const pre=new Image();pre.src=x.img;const go=()=>{el.src=x.img;el.alt=x.m+(x.f?' in '+x.f:'');busy=0;requestAnimationFrame(()=>swap(el,br.logo))};pre.decode?pre.decode().then(go,go):(pre.onload=go)},4800);
+  const pre=new Image();pre.src=x.img;const go=()=>{el.src=x.img;el.alt=x.m+(x.f?' in '+x.f:'');busy=0;requestAnimationFrame(()=>{swap(el,br.logo);liveSoon($('#hLive'),x.st==='bestellt')})};pre.decode?pre.decode().then(go,go):(pre.onload=go)},4800);
  const bq=berlin(),{d,m}=bq,q=$('#qkHours'),TD=slotsAt(bq.y,bq.mo,bq.dd,d);if(q){const op=TD.some(([a,b])=>m>=a&&m<b);q.innerHTML='<i class="qd'+(op?' on':'')+'"></i>'+(op?'Jetzt geöffnet':'Heute: '+(TD.length?TD.map(([a,b])=>hm(a)+'–'+hm(b)).join(' · '):'geschlossen'))}})();
 
 /* ================= AUF LAGER (Modelle mit Varianten, ohne Stückzahlen) ================= */
@@ -4268,9 +4327,11 @@ function lgFilter(){const f=LG.f,q=f.q.toLowerCase().trim().split(/\s+/).filter(
  else L.sort((a,b)=>(!b.lager-!a.lager)*-1||(b.deal-a.deal)||a._i-b._i);
  return L}
 function lgStat(lager,ab){return lager?'<span class="bd ok">Sofort verfügbar</span>':'<span class="bd z">Lieferung ausstehend'+(ab?' · voraussichtl. '+esc(ab):'')+'</span>'}
-function lgBadgesM(m){const vl=m.v.filter(x=>x.status!=='bestellt');return lgStat(m.lager,m.ab)+(vl.length&&vl.every(x=>x.res)?'<span class="bd rs">Reserviert</span>':'')+(m.deal?'<span class="bd an">Sonderangebot</span>':'')+(m.v.some(x=>x.vorfuehr)?'<span class="bd vf">Vorführrad</span>':'')+(m.v.some(x=>x.gebraucht)?'<span class="bd gb">Gebraucht</span>':'')}
+/* Karten-Schilder schlank (Tiry 15.11.2026): sofort verfügbar = grüner Punkt, Sonderangebot = Ersparnis in € */
+function lgSave(m){const S=m.v.filter(x=>x.angebot&&x.preis>x.angebot).map(x=>x.preis-x.angebot);if(!S.length)return '';const mx=Math.max(...S);return (S.some(v=>v!==mx)?'bis ':'')+'–'+eur(mx)}
+function lgBadgesM(m){const vl=m.v.filter(x=>x.status!=='bestellt');return (m.lager?'<span class="bd ok dt" role="img" title="Sofort verfügbar" aria-label="Sofort verfügbar"><i></i></span>':lgStat(m.lager,m.ab))+(vl.length&&vl.every(x=>x.res)?'<span class="bd rs">Reserviert</span>':'')+(m.deal?'<span class="bd an">'+(lgSave(m)||'Sonderangebot')+'</span>':'')+(m.v.some(x=>x.vorfuehr)?'<span class="bd vf">Vorführrad</span>':'')+(m.v.some(x=>x.gebraucht)?'<span class="bd gb">Gebraucht</span>':'')}
 function lgPriceM(m){const d=m.v.filter(x=>x.angebot).sort((a,b)=>a.angebot-b.angebot)[0];
- if(d)return '<span class="lgpr"><s>'+eur(d.preis)+'</s><b class="an">'+(m.multiP?'<em>ab</em> ':'')+eur(d.angebot)+'</b><small class="anl">* nicht bei Leasing & Finanzierung</small></span>';
+ if(d)return '<span class="lgpr"><s>'+eur(d.preis)+'</s><b class="an">'+(m.multiP?'<em>ab</em> ':'')+eur(d.angebot)+'<sup class="ast" title="Nicht bei Leasing & Finanzierung">*</sup></b></span>';
  return m.minP?'<span class="lgpr"><b>'+(m.multiP?'<em>ab</em> ':'')+eur(m.minP)+'</b></span>':'<span class="lgpr"><b>Preis auf Anfrage</b></span>'}
 function lgRender(){if(!LG.ok)return;const L=LG.list=lgFilter();const g=$('#lgGrid');
  if(!L.length){g.innerHTML='<p class="lgempty">'+(LG.f.deal?'Aktuell gibt es dazu keine Sonderangebote.':'Kein Rad passt zu diesen Filtern.')+' <button type="button" class="ghost" id="lgReset">Filter zurücksetzen</button></p>';return}

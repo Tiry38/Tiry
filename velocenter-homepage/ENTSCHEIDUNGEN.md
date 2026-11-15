@@ -192,3 +192,16 @@
 - 14.11.2026: Handy: Beim Radwechsel in der Kachel „Auf Lager“ blinkten die unteren Kacheln mit. Ursache: je Wechsel neues Bild-Element (neue Grafik-Ebene, Nachbarkacheln wurden neu gezeichnet). Jetzt zwei feste Bilder im Wechsel + feste Ebenen je Kachel (translateZ, contain:paint, will-change).
 
 - 14.11.2026: Ticker – Bosch-Pille war schief (machte die Kursiv-Neigung mit → Parallelogramm, Bosch-Ring zum Oval verzerrt) und die Buchstaben stießen oben fast an. Jetzt gerade Kapsel (Gegen-Neigung skewX(9deg) an Pille und Logo, Ring wieder rund), Großbuchstaben mittig mit gleichem Rand oben/unten, etwas mehr Innenabstand. Text bleibt kursiv auf der Zeilen-Grundlinie.
+
+## 15.11.2026 – Optik-Runde (Tiry: alle Punkte ja)
+- WhatsApp-Knopf am Handy: 54 px, erst sichtbar nach ¾ Bildschirm Scrollen (`body.fabhide`), verdeckt oben nichts mehr.
+- Lager-Karten: „Sofort verfügbar“ nur noch als grüner Punkt (Text als Tooltip/aria), „Sonderangebot“ zeigt die Ersparnis („–800 €“ bzw. „bis –1.000 €“, `lgSave`), Leasing-Zeile auf der Karte ersetzt durch „*“ am Preis (Fußnote unter dem Raster bleibt).
+- Handy: Lager mit 2 Rädern pro Zeile, kompakte Karten, „Ansehen“ ausgeblendet (ganze Karte klickbar).
+- Showroom (Start + Marken): bestelltes Rad → Chip „Bestellt · Kommt bald zu uns · Ansehen“ in Orange statt „LIVE · Unser Live-Bestand“ (`liveSoon`).
+- 4,8 bei den Kundenstimmen im Velocenter-Rot statt Braun.
+- Abstände: Winter-Band 120 px (Handy 84 px) statt bis 170 px, Kundenstimmen direkt nach „Unser Versprechen“ (24 px).
+- Tempo-Linien im Kopf: kein Grau mehr, im Textbereich stark abgeschwächt (Maske), Handy 40 %.
+- Schnellzugriff-Kacheln: dunkler Verlauf hinter dem Text; Handy: Bosch-Foto der Kachel „Termin“ nach rechts.
+- Handy-Kopf: Social-Symbole weichen zuerst → Öffnungsstatus mit Text („Zu · ab Mo 9:00“) statt nur Ring.
+- Marken-Filter: Velo de Ville, Victoria, KTM, i:SY, QiO, Stevens optisch gleich groß/kräftig.
+- Handy-Start: Logo zuerst, dann „Familienbetrieb seit 1995“, dann Überschrift.
