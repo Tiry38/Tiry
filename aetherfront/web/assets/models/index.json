@@ -28,5 +28,21 @@
   "unit_king",
   "unit_boss_drake"
  ],
- "built": "2026-11-14T20:52:15.349Z"
+ "parts": [
+  "part_crown",
+  "part_horns",
+  "part_crest",
+  "part_halo",
+  "part_antlers",
+  "part_pauldron",
+  "part_spikes",
+  "part_crystals",
+  "part_wings_feather",
+  "part_wings_bat",
+  "part_gears",
+  "part_backspikes",
+  "part_flames",
+  "part_aura"
+ ],
+ "built": "2026-11-14T21:17:19.390Z"
 }

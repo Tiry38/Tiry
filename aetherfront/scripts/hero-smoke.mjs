@@ -22,7 +22,9 @@ page.on('console', (m) => { if (m.type() === 'error') errors.push(`${m.type()}: 
 page.on('pageerror', (e) => errors.push(`pageerror: ${e.message}`));
 const wait = (ms) => page.waitForTimeout(ms);
 let n = 0;
-const shot = async (name) => { await page.screenshot({ path: path.join(out, `${String(++n).padStart(2, '0')}-${name}.png`) }); console.log('📸', name); };
+// Die Engine überspringt bei sehr langsamer Software-GPU Bilder (gpuMs-Drossel) – vor jeder Aufnahme ein frisches Bild erzwingen
+const fresh = async () => { await page.evaluate(() => { const e = window.__app && window.__app.engine; if (e) { e.gpuMs = 0; e._nextRenderAt = 0; } }).catch(() => {}); await page.evaluate(() => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)))).catch(() => {}); };
+const shot = async (name) => { await fresh(); await page.screenshot({ path: path.join(out, `${String(++n).padStart(2, '0')}-${name}.png`) }); console.log('📸', name); };
 const ev = (fn, arg) => page.evaluate(fn, arg);
 const results = [];
 const check = (control, ok, detail = '') => { results.push({ control, ok: !!ok, detail }); console.log(`${ok ? '✔' : '✘'} ${control}${detail ? ` – ${detail}` : ''}`); };

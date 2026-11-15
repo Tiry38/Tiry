@@ -62,7 +62,10 @@ await page.keyboard.press('K'); await wait(1000); await shot('07b-kinghall'); aw
 await page.evaluate(() => { const a = window.__app; a.cam.focus(a.me && -70, 30, 120, { pitch: 0.75 }); });
 await wait(3000); await shot('08-overview');
 await page.keyboard.down('Tab'); await wait(400); await shot('09-scoreboard'); await page.keyboard.up('Tab');
-await page.evaluate(() => window.__app.select(null)); await page.keyboard.press('Escape'); await wait(1200); await shot('10-pause');
+await page.evaluate(() => window.__app.select(null)); await page.keyboard.press('Escape'); await wait(1200);
+// Heldenansicht belegt Escape ggf. selbst (Ziel abwählen) → Pause dann direkt öffnen
+if (!(await page.isVisible('#screen-pause [data-go="settings"]'))) { await page.evaluate(() => window.__app.pause && window.__app.pause()); await wait(1200); }
+await shot('10-pause');
 await page.click('#screen-pause [data-go="settings"]'); await wait(1200); await shot('11-settings');
 await page.keyboard.press('Escape'); await page.keyboard.press('Escape'); await wait(300);
 await page.evaluate(() => window.__app.onGameOver({ winner: window.__app.me.team, reason: 'Der feindliche König ist gefallen' }));

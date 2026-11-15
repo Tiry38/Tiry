@@ -29,7 +29,7 @@ export function preloadForge() {
       const r = await fetch(BASE + 'index.json', { cache: 'no-cache' });
       if (!r.ok) return false;
       const idx = await r.json();
-      const ids = [...(idx.heroes || []), ...(idx.units || [])];
+      const ids = [...(idx.heroes || []), ...(idx.units || []), ...(idx.parts || [])];
       await Promise.all(ids.map(async (id) => {
         try {
           const res = await fetch(BASE + id + '.afm');
@@ -53,8 +53,9 @@ export function registerForge(id, buffer) { cache.set(id, decodeAFM(buffer)); }
 // ---------------------------------------------------------------------------------------------
 function lodGeometry(arrays, lod, o = {}) {
   const k = lod.key, g = new THREE.BufferGeometry();
-  g.setAttribute('position', new THREE.BufferAttribute(arrays[k + ':pos'], 3));
-  g.setAttribute('normal', new THREE.BufferAttribute(arrays[k + ':nrm'], 3, true));
+  // Kopien: Position/Normale/Index werden später verschoben/gespiegelt (Quell-Puffer bleiben unverändert)
+  g.setAttribute('position', new THREE.BufferAttribute(arrays[k + ':pos'].slice(), 3));
+  g.setAttribute('normal', new THREE.BufferAttribute(arrays[k + ':nrm'].slice(), 3, true));
   // Farbe: Gamma-2-kodiert → linear (Float)
   const c8 = arrays[k + ':col'], n = lod.n, col = new Float32Array(n * 3);
   const pal = o.palette;
@@ -62,7 +63,7 @@ function lodGeometry(arrays, lod, o = {}) {
   for (let i = 0; i < n; i++) {
     const s = slot ? slot[i] : 0;
     if (s && pal && pal[s]) {
-      const kk = (c8[i * 4 + 3] / 255) * 2;
+      const kk = (c8[i * 4 + 3] / 255) * 4;
       col[i * 3] = pal[s][0] * kk; col[i * 3 + 1] = pal[s][1] * kk; col[i * 3 + 2] = pal[s][2] * kk;
     } else {
       for (let c = 0; c < 3; c++) { const v = c8[i * 4 + c] / 255; col[i * 3 + c] = v * v * lod.cmax; }
@@ -73,7 +74,7 @@ function lodGeometry(arrays, lod, o = {}) {
   if (arrays[k + ':bake']) g.setAttribute('bake', new THREE.BufferAttribute(arrays[k + ':bake'], 4, true));
   if (arrays[k + ':si']) g.setAttribute('skinIndex', new THREE.BufferAttribute(arrays[k + ':si'], 4));
   if (arrays[k + ':sw']) g.setAttribute('skinWeight', new THREE.BufferAttribute(arrays[k + ':sw'], 4, true));
-  g.setIndex(new THREE.BufferAttribute(arrays[k + ':idx'], 1));
+  g.setIndex(new THREE.BufferAttribute(arrays[k + ':idx'].slice(), 1));
   return g;
 }
 function mergeGeos(list) {
@@ -83,6 +84,7 @@ function mergeGeos(list) {
   const out = new THREE.BufferGeometry();
   for (const name of Object.keys(list[0].attributes)) {
     const a0 = list[0].attributes[name];
+    if (!list.every((g) => g.attributes[name])) continue;
     const arr = new a0.array.constructor(nv * a0.itemSize);
     let o = 0;
     for (const g of list) { const a = g.attributes[name]; arr.set(a.array, o); o += a.array.length; }
@@ -255,9 +257,125 @@ export function buildForgedUnit(arch, opts = {}, defaults = {}) {
     g.computeBoundingBox(); g.computeBoundingSphere();
     out[layer] = g;
   }
+  if (opts.variant && opts.variant.parts && opts.variant.parts.length) {
+    try { const bb = out.body.boundingBox; attachParts(out, opts.variant, pal, scale, (bb.max.z - bb.min.z) > 0.9 * bb.max.y); } catch (e) { console.warn('[Forge] Anbauteile:', e); }
+  }
+  if (opts.variant) {
+    const v = opts.variant;
+    if ((v.widen && v.widen !== 1) || (v.scale && v.scale !== 1)) for (const g of [out.body, out.glow]) if (g) { const k = v.scale || 1; g.scale((v.widen || 1) * k, k, (v.widen || 1) * k); g.computeBoundingBox(); g.computeBoundingSphere(); }
+    if (v.glow && v.glow !== 1 && out.glow) { const c = out.glow.attributes.color.array; for (let i = 0; i < c.length; i++) c[i] *= v.glow; }
+  }
   let top = out.body.boundingBox.max.y;
   if (out.glow) top = Math.max(top, out.glow.boundingBox.max.y);
   return { body: out.body, glow: out.glow, height: +top.toFixed(3), radius: +((info.radius || 0.6) * scale).toFixed(3), forged: true };
+}
+
+// ---------------------------------------------------------------------------------------------
+// Anbauteile (Bau-Grammatik): an Ankerpunkten des (bereits skalierten) Grundmodells einsetzen
+// ---------------------------------------------------------------------------------------------
+function anchorsOf(g, quad) {
+  const p = g.attributes.position.array, n = p.length / 3;
+  let x0 = Infinity, x1 = -Infinity, y1 = -Infinity, z0 = Infinity, z1 = -Infinity;
+  for (let i = 0; i < n; i++) { const x = p[i * 3], y = p[i * 3 + 1], z = p[i * 3 + 2]; if (x < x0) x0 = x; if (x > x1) x1 = x; if (y > y1) y1 = y; if (z < z0) z0 = z; if (z > z1) z1 = z; }
+  const H = y1, L = z1 - z0;
+  const band = (ylo, yhi, zlo = -Infinity, zhi = Infinity) => {
+    let ax = 0, sx = 0, cx = 0, cz = 0, c = 0, mz = Infinity, my = -Infinity;
+    for (let i = 0; i < n; i++) { const x = p[i * 3], y = p[i * 3 + 1], z = p[i * 3 + 2]; if (y < ylo || y > yhi || z < zlo || z > zhi) continue; ax = Math.max(ax, Math.abs(x)); sx += Math.abs(x); cx += x; cz += z; c++; mz = Math.min(mz, z); my = Math.max(my, y); }
+    return { ax, mean: c ? sx / c : 0, cx: c ? cx / c : 0, cz: c ? cz / c : 0, mz, my, c };
+  };
+  if (!quad) {
+    // Kopf: höchster Punkt nahe der Mittelachse (erhobene Waffen ignorieren)
+    let hy = 0, hz = 0; for (let i = 0; i < n; i++) { const x = p[i * 3], y = p[i * 3 + 1]; if (Math.abs(x) < 0.09 * H && y > hy && y < H * 0.99 + 1) { hy = y; hz = p[i * 3 + 2]; } }
+    const top = { cx: 0, cz: hz };
+    const Hh = hy || H;
+    const sh = band(Hh * 0.74, Hh * 0.84, -Infinity, Infinity);
+    const bk = band(H * 0.62, H * 0.8, -Infinity, (z0 + z1) / 2);
+    return { k: Hh / 2.0, head: [0, Hh - 0.01 * Hh, top.cz], shoulder: [Math.min(Math.max(sh.mean * 1.6, Hh * 0.1), Hh * 0.2), Hh * 0.81, sh.cz], back: [0, Hh * 0.72, isFinite(bk.mz) ? bk.mz + 0.02 * Hh : z0], base: [0, 0, (z0 + z1) / 2] };
+  }
+  const front = band(-1, H + 1, z1 - 0.3 * L);
+  const mid = band(H * 0.4, H + 1, z0 + 0.3 * L, z1 - 0.3 * L);
+  return { k: Math.max(H, L * 0.55) / 1.6, head: [0, front.my, front.cz], shoulder: [mid.mean * 0.9, mid.my * 0.96, z0 + 0.62 * L], back: [0, mid.my, (z0 + z1) / 2], base: [0, 0, (z0 + z1) / 2] };
+}
+function nearestRig(base, px, py, pz) {
+  const p = base.attributes.position.array, r = base.attributes.aRig ? base.attributes.aRig.array : null;
+  if (!r) return [0, 0, 0, 0];
+  let best = Infinity, bi = 0;
+  for (let i = 0; i < p.length / 3; i += 2) { const dx = p[i * 3] - px, dy = p[i * 3 + 1] - py, dz = p[i * 3 + 2] - pz, d = dx * dx + dy * dy + dz * dz; if (d < best) { best = d; bi = i; } }
+  return [r[bi * 4], r[bi * 4 + 1], r[bi * 4 + 2], r[bi * 4 + 3]];
+}
+/** Für alte (nicht geschmiedete) Modelle: Teile in deren Format (nicht indiziert, pbr vec2, Float-Normalen) bringen */
+function toLegacy(g) {
+  const n = g.toNonIndexed();
+  const nr = n.attributes.normal; const f = new Float32Array(nr.count * 3);
+  for (let i = 0; i < nr.count; i++) { f[i * 3] = nr.getX(i); f[i * 3 + 1] = nr.getY(i); f[i * 3 + 2] = nr.getZ(i); }
+  n.setAttribute('normal', new THREE.BufferAttribute(f, 3));
+  if (n.attributes.pbr) { const p = n.attributes.pbr, q = new Float32Array(p.count * 2); for (let i = 0; i < p.count; i++) { q[i * 2] = p.getX(i); q[i * 2 + 1] = p.getY(i); } n.setAttribute('pbr', new THREE.BufferAttribute(q, 2)); }
+  n.deleteAttribute('bake');
+  return n;
+}
+function mergeLegacy(list) {
+  let nv = 0; for (const g of list) nv += g.attributes.position.count;
+  const out = new THREE.BufferGeometry();
+  for (const name of Object.keys(list[0].attributes)) {
+    if (!list.every((g) => g.attributes[name])) continue;
+    const a0 = list[0].attributes[name], arr = new Float32Array(nv * a0.itemSize);
+    let o = 0; for (const g of list) { const a = g.attributes[name]; for (let i = 0; i < a.count; i++) for (let c = 0; c < a0.itemSize; c++) arr[o++] = a.getComponent(i, c); }
+    out.setAttribute(name, new THREE.BufferAttribute(arr, a0.itemSize));
+  }
+  return out;
+}
+/** Bau-Grammatik auch für alte Modelle (buildModel-Ergebnis { body, glow }) */
+export function attachPartsLegacy(res, v, palette) {
+  if (!v || !v.parts || !v.parts.length) return res;
+  const pal = { 1: hexLin(palette.primary), 2: hexLin(palette.secondary), 3: hexLin(palette.metal), 4: hexLin(palette.glow) };
+  const out = { body: res.body, glow: res.glow };
+  const bb = (res.body.computeBoundingBox(), res.body.boundingBox);
+  attachParts(out, v, pal, 1, (bb.max.z - bb.min.z) > 0.9 * bb.max.y, true);
+  res.body = out.body; res.glow = out.glow;
+  if (v.glow && v.glow !== 1 && res.glow) { const c = res.glow.attributes.color.array; for (let i = 0; i < c.length; i++) c[i] *= v.glow; }
+  let top = res.body.boundingBox.max.y; if (res.glow) top = Math.max(top, res.glow.boundingBox.max.y);
+  res.height = +top.toFixed(3);
+  return res;
+}
+function attachParts(out, v, pal, scale, quad, legacy = false) {
+  const A = anchorsOf(out.body, quad);
+  const add = { body: [], glow: [] };
+  for (const name of v.parts) {
+    const asset = cache.get('part_' + name); if (!asset) continue;
+    const { header, arrays } = asset;
+    const anchor = header.info.anchor || 'head';
+    const placements = anchor === 'shoulder' ? [1, -1] : [1];
+    for (const m of header.meshes) {
+      const layer = m.layer === 'glass' ? 'body' : m.layer;
+      const lod = m.lods[Math.min(lodBias, m.lods.length - 1)];
+      for (const sx of placements) {
+        const g = lodGeometry(arrays, lod, { palette: pal });
+        if (layer === 'glow') { g.deleteAttribute('pbr'); g.deleteAttribute('bake'); }
+        const pos = g.attributes.position.array, nrm = g.attributes.normal.array;
+        const a = A[anchor], k = A.k * (anchor === 'base' ? 1.1 : 1);
+        for (let i = 0; i < pos.length; i += 3) {
+          pos[i] = a[0] * sx + pos[i] * k * sx; pos[i + 1] = a[1] + pos[i + 1] * k; pos[i + 2] = a[2] + pos[i + 2] * k;
+          if (sx < 0) nrm[i] = -nrm[i];
+        }
+        if (sx < 0) { const ix = g.index.array; for (let t = 0; t < ix.length; t += 3) { const q = ix[t + 1]; ix[t + 1] = ix[t + 2]; ix[t + 2] = q; } }
+        // Vertex-Animation vom nächsten Körperpunkt übernehmen (Teil bewegt sich mit Kopf/Arm/Rumpf)
+        const c = [0, 0, 0]; for (let i = 0; i < pos.length; i += 3) { c[0] += pos[i]; c[1] += pos[i + 1]; c[2] += pos[i + 2]; }
+        const nv = pos.length / 3; const rig = nearestRig(out.body, c[0] / nv, c[1] / nv, c[2] / nv);
+        const ra = new Float32Array(nv * 4); for (let i = 0; i < nv; i++) ra.set(rig, i * 4);
+        g.setAttribute('aRig', new THREE.BufferAttribute(ra, 4));
+        add[layer].push(g);
+      }
+    }
+  }
+  if (legacy) {
+    if (add.body.length) out.body = mergeLegacy([out.body, ...add.body.map(toLegacy)]);
+    if (add.glow.length) out.glow = mergeLegacy(out.glow ? [out.glow, ...add.glow.map(toLegacy)] : add.glow.map(toLegacy));
+  } else {
+    if (add.body.length) { out.body = mergeGeos([out.body, ...add.body]); }
+    if (add.glow.length) { out.glow = mergeGeos(out.glow ? [out.glow, ...add.glow] : add.glow); }
+  }
+  for (const g of [out.body, out.glow]) if (g) { g.computeBoundingBox(); g.computeBoundingSphere(); }
+  void scale;
 }
 
 export { createForgeMaterial, createForgeGlowMaterial, createForgeGlassMaterial };

@@ -64,6 +64,7 @@ const CompositeShader = {
       vec2 off = d * uAberration * r2 * 4.0;
       vec3 hc = vec3(texture2D(tHDR, vUv + off).r, texture2D(tHDR, vUv).g, texture2D(tHDR, vUv - off).b) + texture2D(tRays, vUv).rgb * uRayColor * uRays;
       if (any(isnan(hc)) || any(isinf(hc))) hc = vec3(0.0);
+      hc = min(hc, vec3(64.0)); // Glühwürmchen-/Ausreißer-Begrenzung (HDR)
       // Kontrast-adaptive Schärfung (AMD-CAS-Prinzip) auf HDR, Gewichte aus wahrnehmungsnaher Luminanz
       if (uSharpen > 0.0) {
         vec3 a = hdrAt(vUv + vec2(0.0, -uTexel.y));
@@ -251,7 +252,7 @@ export class Engine {
     {
       const hp = this.bloom.materialHighPassFilter;
       hp.fragmentShader = hp.fragmentShader.replace('vec4 texel = texture2D( tDiffuse, vUv );',
-        'vec4 texel = texture2D( tDiffuse, vUv ); if (any(isnan(texel)) || any(isinf(texel))) texel = vec4(0.0); texel = min(texel, vec4(256.0));');
+        'vec4 texel = texture2D( tDiffuse, vUv ); if (any(isnan(texel)) || any(isinf(texel))) texel = vec4(0.0); texel = min(texel, vec4(24.0));');
       hp.needsUpdate = true;
     }
     this.bloom.enabled = this.settings.get('bloom') && q.bloom;

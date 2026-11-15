@@ -2,6 +2,7 @@
 // (ein Draw-Call je Modelltyp), mit weicher Interpolation, Lauf-/Angriffs-Animation,
 // Treffer-Aufblitzen, Teamringen und Lebensbalken.
 import * as THREE from 'three';
+import { unitVariant, creepVariant } from './forge/variants.js';
 import { buildModel, createBodyMaterial, createGlowMaterial, setInstanceAnim, createUnitDepthMaterial } from './models.js';
 import { UNITS, FACTIONS } from '../sim/data.js';
 import { kingPos, laneCenterX, LANE_END_Z } from '../sim/layout.js';
@@ -136,32 +137,32 @@ export class UnitsView {
     this.time = 0;
   }
 
-  modelFor(key, archetype, palette, tier) {
+  modelFor(key, archetype, palette, tier, variant) {
     let m = this.models.get(key);
     if (!m) {
-      m = buildModel(archetype, { ...palette, tier, seed: hashStr(key) });
+      m = buildModel(archetype, { ...palette, tier, seed: hashStr(key), variant });
       this.models.set(key, m);
     }
     return m;
   }
-  pool(key, archetype, palette, tier) {
+  pool(key, archetype, palette, tier, variant) {
     let p = this.pools.get(key);
     if (!p) {
-      const model = this.modelFor(key, archetype, palette, tier);
+      const model = this.modelFor(key, archetype, palette, tier, variant);
       p = new Pool(this.root, model, this.bodyMat, this.glowMat, archetype === 'king' ? 2 : 24);
       this.pools.set(key, p);
     }
     return p;
   }
-  fighterKey(def) { return { key: `f|${def.id}`, arch: def.model, pal: FACTIONS[def.faction].palette, tier: def.tier }; }
+  fighterKey(def) { return { key: `f|${def.id}`, arch: def.model, pal: FACTIONS[def.faction].palette, tier: def.tier, variant: unitVariant(def) }; }
   creepKey(def) {
     const id = def.key || def.id || `w${def.n}`;
     const pal = def.champion ? { ...def.palette, glow: '#ffd23a', metal: '#e8b84a' } : def.palette;
-    return { key: `c|${id}`, arch: def.model, pal, tier: def.boss || def.champion ? 3 : def.id ? 2 : 1 + (def.n > 10 ? 1 : 0) + (def.n > 20 ? 1 : 0) };
+    return { key: `c|${id}`, arch: def.model, pal, tier: def.boss || def.champion ? 3 : def.id ? 2 : 1 + (def.n > 10 ? 1 : 0) + (def.n > 20 ? 1 : 0), variant: creepVariant(def) };
   }
 
   /** Vorab erzeugen, damit beim ersten Auftauchen nichts ruckelt */
-  warmup(defs) { for (const d of defs) { const k = d.faction ? this.fighterKey(d) : this.creepKey(d); this.pool(k.key, k.arch, k.pal, k.tier); } }
+  warmup(defs) { for (const d of defs) { const k = d.faction ? this.fighterKey(d) : this.creepKey(d); this.pool(k.key, k.arch, k.pal, k.tier, k.variant); } }
 
   onEvent(e, sim) {
     if (e.e === 'hit') { const d = this.disp.get(e.id); if (d) d.hitT = this.time; }
@@ -197,7 +198,7 @@ export class UnitsView {
       const isF = e.type === 'f';
       const def = isF ? UNITS[e.def] : e.def;
       const kk = isF ? this.fighterKey(def) : this.creepKey(def);
-      const pool = this.pool(kk.key, kk.arch, kk.pal, kk.tier);
+      const pool = this.pool(kk.key, kk.arch, kk.pal, kk.tier, kk.variant);
       seen.add(e.id);
       let d = this.disp.get(e.id);
       if (!d) {

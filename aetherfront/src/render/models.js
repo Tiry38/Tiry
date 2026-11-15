@@ -7,7 +7,7 @@ import * as THREE from 'three';
 import { mergeGeometries, mergeVertices, toCreasedNormals } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import { RoundedBoxGeometry } from 'three/examples/jsm/geometries/RoundedBoxGeometry.js';
 import { addUnitRig, injectUnitAnim, setInstanceAnim, createUnitDepthMaterial, rigType } from './hero/unitRig.js';
-import { buildForgedUnit, createForgeMaterial, createForgeGlowMaterial, preloadForge } from './forge/loader.js';
+import { buildForgedUnit, attachPartsLegacy, createForgeMaterial, createForgeGlowMaterial, preloadForge } from './forge/loader.js';
 preloadForge();
 
 export { setInstanceAnim, createUnitDepthMaterial, rigType };
@@ -2419,6 +2419,8 @@ export function buildModel(archetype, opts = {}) {
   // Vertex-Animation (Laufen/Angriff/Treffer) – siehe hero/unitRig.js, gesteuert per setInstanceAnim()
   addUnitRig(archetype, res.body, res.body, bodyCounts);
   if (res.glow) addUnitRig(archetype, res.glow, res.body, glowCounts);
+  // Aether-Forge-Bau-Grammatik (Stufe/Pfad/Volk) auch für noch nicht geschmiedete Archetypen
+  if (opts.variant && opts.forge !== false) { try { attachPartsLegacy(res, opts.variant, o); } catch (e) { console.warn('[Forge] Teile:', e); } }
   return res;
 }
 

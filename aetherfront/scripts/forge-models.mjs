@@ -16,6 +16,7 @@ import * as oldMira from '../src/render/hero/mira.js';
 import * as oldBrann from '../src/render/hero/brann.js';
 import { HERO_DESIGNS } from '../src/render/forge/designs/heroes.js';
 import { UNIT_DESIGNS, unitDef } from '../src/render/forge/designs/units.js';
+import { PARTS, partDef } from '../src/render/forge/designs/parts.js';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const outDir = path.join(root, 'web/assets/models');
@@ -49,7 +50,7 @@ function captureRig(id, pal) {
   return { B, skeleton: { names, parents, rest }, info };
 }
 
-const index = { heroes: [], units: [], built: new Date().toISOString() };
+const index = { heroes: [], units: [], parts: [], built: new Date().toISOString() };
 const prev = fs.existsSync(path.join(outDir, 'index.json')) ? JSON.parse(fs.readFileSync(path.join(outDir, 'index.json'), 'utf8')) : null;
 const report = [];
 for (const id of Object.keys(HERO_DESIGNS)) {
@@ -79,6 +80,14 @@ for (const arch of Object.keys(UNIT_DESIGNS)) {
   index.units.push(fileId);
   report.push(stats);
   console.log(`   LOD Δ ${stats.lods.join(' / ')} · hoch ${stats.hiTris} · ${(stats.bytes / 1024).toFixed(0)} KB · ${JSON.stringify(stats.ms)}`);
+}
+for (const name of Object.keys(PARTS)) {
+  const fileId = 'part_' + name;
+  if (!want(fileId) && !args.includes('parts')) { if (prev?.parts?.includes(fileId) && fs.existsSync(path.join(outDir, fileId + '.afm'))) index.parts.push(fileId); continue; }
+  const { bytes, stats } = forgeAsset(partDef(name, cell));
+  fs.writeFileSync(path.join(outDir, fileId + '.afm'), bytes);
+  index.parts.push(fileId); report.push(stats);
+  console.log(`⚒  ${fileId}: Δ ${stats.lods.join(' / ')} · ${(stats.bytes / 1024).toFixed(0)} KB`);
 }
 fs.writeFileSync(path.join(outDir, 'index.json'), JSON.stringify(index, null, 1));
 let total = 0; for (const f of fs.readdirSync(outDir)) total += fs.statSync(path.join(outDir, f)).size;

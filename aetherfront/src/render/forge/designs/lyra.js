@@ -55,7 +55,7 @@ export function build(S, B, P) {
   const hairC = '#8a3a18';
   const hairBind = chainBind(B, ['hair', 'hair1', 'hair2'], 'head');
   S.with({ region: 'head' }, () => S.group({ k: 0 }, () => {
-    S.ellipsoid(H.at(0, 0.03, -0.02), [0.09 * s, 0.098 * s, 0.1 * s], { mat: 'hair', col: hairC, disp: Detail.fur({ amp: 0.0025 * s, freq: 70, dir: [0, -0.3, -1] }) });
+    S.ellipsoid(H.at(0, 0.034, -0.022), [0.096 * s, 0.105 * s, 0.106 * s], { mat: 'hair', col: hairC, disp: Detail.fur({ amp: 0.0025 * s, freq: 70, dir: [0, -0.3, -1] }) });
     S.box(H.at(0, -0.055, 0.03), [0.12 * s, 0.07 * s, 0.09 * s], { op: 'sub', k: 0.02 * s, mat: 'hair', col: hairC });
     S.box(H.at(0, 0.045, 0.105), [0.12 * s, 0.035 * s, 0.05 * s], { op: 'sub', k: 0.02 * s, rot: [0.5, 0, 0], mat: 'hair', col: hairC });
     // Stirnsträhnen

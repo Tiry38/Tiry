@@ -55,7 +55,7 @@ export function build(S, B, P) {
   const H = head(S, B, { female: true, skin: '#eab99a', eye: '#3a7a5a', brow: '#b08a40', lips: '#c0685e', jaw: 0.84 });
   S.with({ region: 'head' }, () => S.group({ k: 0 }, () => {
     // Haarkappe + Hochsteckfrisur + Zopf
-    S.ellipsoid(H.at(0, 0.03, -0.022), [0.09 * s, 0.098 * s, 0.1 * s], { mat: 'hair', col: '#d9aa52', disp: Detail.fur({ amp: 0.003 * s, freq: 70, dir: [0, -1, -0.4] }) });
+    S.ellipsoid(H.at(0, 0.034, -0.024), [0.097 * s, 0.106 * s, 0.107 * s], { mat: 'hair', col: '#d9aa52', disp: Detail.fur({ amp: 0.003 * s, freq: 70, dir: [0, -1, -0.4] }) });
     S.box(H.at(0, -0.055, 0.03), [0.12 * s, 0.07 * s, 0.09 * s], { op: 'sub', k: 0.02 * s, mat: 'hair', col: '#d9aa52' });
     S.box(H.at(0, 0.045, 0.1), [0.12 * s, 0.035 * s, 0.05 * s], { op: 'sub', k: 0.02 * s, rot: [0.5, 0, 0], mat: 'hair', col: '#d9aa52' });
     S.ellipsoid(H.at(0, 0.06, -0.1), [0.05 * s, 0.045 * s, 0.045 * s], { mat: 'hair', col: '#d9aa52', k: 0.02 * s, disp: Detail.fur({ amp: 0.003 * s, freq: 80 }) });
@@ -105,7 +105,7 @@ export function build(S, B, P) {
   S.prim(lc, { f: (x, y, z) => { const ay = abs(y), r = hypot(x, z); return max(r + ay * 0.5 - 0.022 * s, ay - 0.04 * s); }, box: [-0.03 * s, -0.045 * s, -0.03 * s, 0.03 * s, 0.045 * s, 0.03 * s] }, { mat: 'glow', col: glowC, glow: 4, bone: 'weaponR' });
   S.sphere(fr.at(0, ty, 0.02 * s), 0.009 * s, { mat: 'glow', col: glowC, glow: 3.4, bone: 'weaponR' });
   S.layer('body');
-  info.cores.push({ joint: 'weaponR', p: lc, size: 0.32, k: 2.6 }, { joint: 'weaponR', p: fr.at(0, ty, 0), size: 0.12 });
+  info.cores.push({ joint: 'weaponR', p: lc, size: 0.18, k: 1.6 }, { joint: 'weaponR', p: fr.at(0, ty, 0), size: 0.12 });
   info.trails.push({ joint: 'weaponR', a: fr.at(0, ty - 0.3 * s, 0), b: fr.at(0, ty + 0.1 * s, 0) });
   info.light = { joint: 'lantern', color: glowC, intensity: 0.9, distance: 4 };
   return info;

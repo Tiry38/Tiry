@@ -33,7 +33,7 @@ export function forgeAsset(def, log = () => {}) {
   let hiTris = 0;
   for (const k of keys) {
     const full = k.split('@')[0], layer = full.split(':')[0];
-    const h = full.endsWith(':fine') ? cell * (def.fineK || 0.5) : layer === 'body' ? cell : cell * (def.glowCellK || 0.85);
+    const h = full.endsWith(':fine') ? cell * (def.fineK || 0.5) : layer === 'body' ? cell : cell * (def.glowCellK || 0.42);
     const m = meshSDF(roots[k], h);
     hi[k] = m;
     hiTris += m.indices.length / 3;
@@ -93,7 +93,7 @@ export function forgeAsset(def, log = () => {}) {
     // 2) LOD0 backen + skinnen, niedrigere Stufen übernehmen (Vertex-Teilmengen)
     const tb = now();
     const L0 = chain[0], n0 = L0.positions.length / 3;
-    const bk = bakeVertices(L0.positions, q, occ, def.palette || {}, { scale: def.scale || 1, skipBake: layer === 'glow', eps: cell * 0.35 });
+    const bk = bakeVertices(L0.positions, q, occ, def.palette || {}, { scale: def.scale || 1, skipBake: layer === 'glow', eps: cell * 0.35, ground: def.kind !== 'part' });
     const adj0 = adjacency(n0, L0.indices);
     // Rückverweis: Original-Index (hochaufgelöst) → LOD0-Index
     const hiTo0 = new Map(); for (let i = 0; i < n0; i++) hiTo0.set(L0.src[i], i);
@@ -103,7 +103,7 @@ export function forgeAsset(def, log = () => {}) {
     if (def.unitRig) rig0 = def.unitRig(L0.positions, bk.owners, bk.owners2, bk.w2s, adj0);
     let cmax = 1;
     if (layer === 'glow') {
-      for (let i = 0; i < n0; i++) { const a = bk.owners[i]; const kk = a?.k ?? 1; for (let c = 0; c < 3; c++) { bk.color[i * 3 + c] *= kk; cmax = Math.max(cmax, bk.color[i * 3 + c]); } }
+      for (let i = 0; i < n0; i++) { const a = bk.owners[i]; const kk = a?.k ?? 1; bk.slotK[i] *= kk; for (let c = 0; c < 3; c++) { bk.color[i * 3 + c] *= kk; cmax = Math.max(cmax, bk.color[i * 3 + c]); } }
     }
     for (let li = 0; li < chain.length; li++) {
       const C = chain[li], n = C.positions.length / 3;
@@ -117,13 +117,13 @@ export function forgeAsset(def, log = () => {}) {
       for (let i = 0; i < n; i++) {
         const o = g[i];
         for (let c = 0; c < 3; c++) col[i * 4 + c] = Math.round(Math.max(0, Math.min(1, Math.sqrt(Math.max(0, bk.color[o * 3 + c]) / cmax))) * 255); // Gamma 2 für Präzision
-        col[i * 4 + 3] = bk.slot[o] ? Math.round(Math.min(1, bk.slotK[o] / 2) * 255) : 0;
+        col[i * 4 + 3] = bk.slot[o] ? Math.round(Math.min(1, bk.slotK[o] / 4) * 255) : 0;
       }
       buffers[pre + ':col'] = col;
       const pbr = new Uint8Array(n * 4); for (let i = 0; i < n; i++) for (let c = 0; c < 4; c++) pbr[i * 4 + c] = Math.round(Math.max(0, Math.min(1, bk.pbr[g[i] * 4 + c])) * 255);
       buffers[pre + ':pbr'] = pbr;
       if (layer !== 'glow') { const bb = new Int8Array(n * 4); for (let i = 0; i < n; i++) for (let c = 0; c < 4; c++) bb[i * 4 + c] = Math.round(Math.max(-1, Math.min(1, bk.bake[g[i] * 4 + c])) * 127); buffers[pre + ':bake'] = bb; }
-      if (def.kind === 'unit') { const sl = new Uint8Array(n); for (let i = 0; i < n; i++) sl[i] = bk.slot[g[i]]; buffers[pre + ':slot'] = sl; }
+      if (def.kind !== 'hero') { const sl = new Uint8Array(n); for (let i = 0; i < n; i++) sl[i] = bk.slot[g[i]]; buffers[pre + ':slot'] = sl; }
       if (sk) {
         const si = new Uint8Array(n * 4), sw = new Uint8Array(n * 4);
         for (let i = 0; i < n; i++) {
