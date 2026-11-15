@@ -11,9 +11,6 @@ html.er .sky{background:
  repeating-linear-gradient(115deg,rgba(255,255,255,.2) 0 1px,transparent 1px 4px),
  linear-gradient(115deg,transparent 28%,rgba(255,255,255,.42) 44%,transparent 60%),
  linear-gradient(180deg,#B7C5D3 0%,#C9D4DF 30%,#D4DDE6 62%,#E3E8EE 100%)!important}
-html.er .sky::before{background:
- linear-gradient(115deg,transparent 0 62%,rgba(255,255,255,.85) 62% 63.5%,transparent 63.5% 66%,rgba(179,18,47,.82) 66% 67%,rgba(176,18,44,.3) 67%,rgba(176,18,44,.1) 69.5%,transparent 72%),
- linear-gradient(115deg,transparent 0 15.5%,rgba(150,14,36,.12) 16.8%,rgba(176,18,44,.5) 18%,rgba(255,255,255,.85) 18% 19%,transparent 19%)!important}
 html.er .sky::after{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='56' height='97' viewBox='0 0 56 97'%3E%3Cpath d='M28 0l28 16.2v32.3L28 64.7 0 48.5V16.2zM28 64.7v32.3' fill='none' stroke='%23FFFFFF' stroke-width='1.6'/%3E%3C/svg%3E")!important;opacity:.24!important}
 html.er .ribbons i:nth-child(3){background:linear-gradient(90deg,transparent 6%,rgba(30,40,55,.12) 30%,rgba(30,40,55,.16) 55%,rgba(30,40,55,.06) 80%,transparent 95%)!important}
 @media (min-width:1181px){html.er body.sc .hdr{background:linear-gradient(180deg,rgba(250,252,254,.9),rgba(236,242,248,.84))!important;box-shadow:0 14px 40px -26px rgba(30,60,100,.38)!important}}
@@ -23,13 +20,12 @@ html.er main{position:relative}
 .erl{--h:900px;--g:96px;position:absolute;top:88px;right:0;height:var(--h);width:calc(var(--h)*.466 + var(--g));z-index:-1;pointer-events:none}
 main:has(> section.view[data-v="start"]:not([hidden])) > .erl{--h:min(1200px,135vh)}
 .erl .erg{position:absolute;inset:0;clip-path:polygon(0 0,var(--g) 0,100% 100%,calc(100% - var(--g)) 100%);
- background:linear-gradient(65deg,rgba(255,255,255,.18),rgba(255,255,255,.62) 70%,rgba(255,255,255,.8));backdrop-filter:blur(8px) saturate(1.25);-webkit-backdrop-filter:blur(8px) saturate(1.25)}
-.erl .errw{position:absolute;top:0;right:0;bottom:0;left:var(--g);filter:drop-shadow(-16px 14px 26px rgba(70,6,20,.38))}
-.erl .err{position:absolute;inset:0;clip-path:polygon(0 0,100% 0,100% 100%);
+ background:repeating-linear-gradient(115deg,rgba(255,255,255,.35) 0 1px,transparent 1px 4px),linear-gradient(65deg,#D2DBE4 0%,#E6ECF2 48%,#F6F8FA 100%)}
+.erl .errw{position:absolute;top:0;right:0;bottom:0;left:var(--g);filter:drop-shadow(-14px 12px 22px rgba(22,26,34,.26))}
+.erl .erh{position:absolute;inset:0;background:#868282;clip-path:polygon(0 0,100% 0,100% 100%)}
+.erl .err{position:absolute;inset:0;clip-path:polygon(3px 0,100% 0,100% calc(100% - 6.44px));
  background:
-  linear-gradient(65deg,transparent 50%,rgba(255,255,255,.95) 50% 50.25%,rgba(255,255,255,.26) 50.35%,rgba(255,255,255,0) 55%),
   repeating-linear-gradient(115deg,rgba(255,255,255,.05) 0 1px,transparent 1px 4px),
-  linear-gradient(115deg,transparent 0 70%,rgba(255,255,255,.07) 70% 71%,transparent 71%),
   linear-gradient(200deg,#B8132F 0%,#960F27 34%,#6E0C1F 70%,#42121B 100%)}
 @media (max-width:760px){.erl,main:has(> section.view[data-v="start"]:not([hidden])) > .erl{--h:250px;--g:44px;top:84px}}
 
@@ -40,3 +36,21 @@ html.er .hring{background:radial-gradient(closest-side,#FFFFFF,#F3F6F9 62%,#E6ED
 /* Karten über dem Rot deckend, damit nichts rosa wird */
 html.er :is(.q,.panel,.etw,.drin,.lgc,.finder,.drcard,.drk2){background-color:rgba(246,249,252,.96)!important}
 html.er .dealn{background:rgba(246,249,252,.94);border-radius:999px;padding:3px 10px;width:max-content;max-width:100%}
+
+/* Striche als echte Vektor-Flächen (clip-path, kantenglatt) statt Verlaufs-Kanten. Lage = wie bisher (115°, 18 % / 62 % / 66 %).
+   Grau = Logo-Grau #868282, Rot = Logo-Rot. Kein Schimmer. Im Kopfbereich ausgeblendet, damit Logo/Menü nicht im Strich hängen. */
+html.er .sky::before{background:none!important}
+.strk{position:fixed;inset:0;z-index:-2;pointer-events:none;-webkit-mask-image:linear-gradient(180deg,transparent 0,transparent 92px,#000 150px);mask-image:linear-gradient(180deg,transparent 0,transparent 118px,#000 200px)}
+.strk i{position:absolute;inset:0}
+.strk .sa{background:#868282;clip-path:polygon(calc(9vw + 11vh) 0,calc(10vw + 11.466vh) 0,calc(10vw + 11.466vh - 46.63vh) 100%,calc(9vw + 11vh - 46.63vh) 100%);-webkit-mask-image:linear-gradient(180deg,transparent 0,transparent 140px,#000 270px);mask-image:linear-gradient(180deg,transparent 0,transparent 140px,#000 270px)}
+.strk .sb{background:#868282;clip-path:polygon(calc(62.000vw + 28.910vh) 0,calc(63.500vw + 29.610vh) 0,calc(63.500vw + 29.610vh - 46.63vh) 100%,calc(62.000vw + 28.910vh - 46.63vh) 100%)}
+.strk .sc{background:#CF1A2C;clip-path:polygon(calc(66.000vw + 30.775vh) 0,calc(67.000vw + 31.242vh) 0,calc(67.000vw + 31.242vh - 46.63vh) 100%,calc(66.000vw + 30.775vh - 46.63vh) 100%)}
+.strk .sc{opacity:.92}
+/* Seiten mit Foto oben (i:SY Experte): Kopf als Perlglas-Leiste mit Weichzeichner, damit Logo und Menü über dem Foto klar lesbar sind */
+html.er body:has(section.view[data-v="isy"]:not([hidden])) .hdr{background:linear-gradient(180deg,rgba(250,252,254,.9),rgba(238,243,248,.82))!important;
+ backdrop-filter:blur(22px) saturate(1.6)!important;-webkit-backdrop-filter:blur(22px) saturate(1.6)!important;
+ box-shadow:inset 0 -1px 0 rgba(255,255,255,.75),0 18px 44px -26px rgba(12,18,30,.6)!important}
+html.er body:has(section.view[data-v="isy"]:not([hidden])) .hdr::after{content:"";display:block!important;position:absolute;left:0;right:0;bottom:-1px;height:2px;background:linear-gradient(90deg,transparent,#868282 18%,#CF1A2C 50%,#868282 82%,transparent);opacity:.8}
+
+body:has(section.view[data-v="start"]:not([hidden])) .strk .sa{clip-path:polygon(calc(30vw + 22.8vh) 0,calc(31vw + 23.266vh) 0,calc(31vw + 23.266vh - 46.63vh) 100%,calc(30vw + 22.8vh - 46.63vh) 100%);-webkit-mask-image:linear-gradient(180deg,transparent 0,transparent 200px,#000 300px);mask-image:linear-gradient(180deg,transparent 0,transparent 200px,#000 300px)}
+@media (max-width:760px){body:has(section.view[data-v="start"]:not([hidden])) .strk .sa{display:none}}
