@@ -1,0 +1,7 @@
+/* H1 Seide: ruhiger Premium-Mesh, hell, keine Muster */
+#vxbg{background:radial-gradient(120% 90% at 0% 0%,#FBE3E1 0%,transparent 55%),radial-gradient(90% 80% at 100% 10%,#E9E1F7 0%,transparent 60%),radial-gradient(100% 90% at 80% 100%,#E0ECF5 0%,transparent 60%),radial-gradient(80% 70% at 10% 100%,#F6EADB 0%,transparent 60%),#F8F4F1}
+#vxbg i:nth-child(1){width:60vmax;height:60vmax;left:-20vmax;top:-25vmax;background:radial-gradient(closest-side,rgba(226,35,45,.24),transparent);animation:vxa 30s ease-in-out infinite alternate}
+#vxbg i:nth-child(2){width:55vmax;height:55vmax;right:-18vmax;top:10vh;background:radial-gradient(closest-side,rgba(139,92,246,.22),transparent);animation:vxb 34s ease-in-out infinite alternate}
+#vxbg i:nth-child(3){width:50vmax;height:50vmax;left:30vw;bottom:-28vmax;background:radial-gradient(closest-side,rgba(20,184,166,.16),transparent);animation:vxa 38s ease-in-out infinite alternate-reverse}
+#vxbg::after{content:"";position:absolute;inset:-30%;background:linear-gradient(115deg,transparent 40%,rgba(255,255,255,.55) 49%,rgba(255,255,255,.1) 53%,transparent 60%);animation:vxs 16s ease-in-out infinite alternate}
+@keyframes vxa{to{transform:translate(8vw,6vh) scale(1.1)}}@keyframes vxb{to{transform:translate(-7vw,8vh) scale(1.08)}}@keyframes vxs{from{transform:translateX(-12%)}to{transform:translateX(12%)}}

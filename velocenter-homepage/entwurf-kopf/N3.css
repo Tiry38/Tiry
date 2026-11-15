@@ -1,0 +1,7 @@
+/* N3 Graphit-Kapsel (passt zum Öffnungs-Status) */
+html body .hdr .wrap .nav{background:linear-gradient(135deg,rgba(28,30,40,.92),rgba(44,40,58,.92)) padding-box,linear-gradient(110deg,rgba(226,35,45,.9),rgba(155,92,255,.7),rgba(34,195,214,.6),rgba(226,35,45,.9)) border-box!important;border:1.5px solid transparent!important;box-shadow:0 16px 36px -14px rgba(20,16,30,.6),inset 0 1px 0 rgba(255,255,255,.12)!important;backdrop-filter:blur(16px)!important}
+html body .hdr .nav a{color:rgba(255,255,255,.82)!important}
+html body .hdr .nav a:hover{background:rgba(255,255,255,.08)!important;color:#fff!important}
+html body .hdr .nav a.on{background:linear-gradient(120deg,#F4404D,#C8102E 55%,#8E1A6E)!important;color:#fff!important;box-shadow:0 0 0 1px rgba(255,255,255,.15),0 8px 22px -6px rgba(226,35,45,.75)!important}
+.nav .nlive{filter:saturate(1.2)}
+.hdr,body.sc .hdr{background:rgba(250,246,243,.6)!important;backdrop-filter:blur(18px)!important;-webkit-backdrop-filter:blur(18px)!important}
