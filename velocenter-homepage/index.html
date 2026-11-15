@@ -2855,6 +2855,8 @@ main:has(> section.view[data-v="start"]:not([hidden])) > .erl{--h:min(1200px,135
   repeating-linear-gradient(115deg,rgba(255,255,255,0) 0,rgba(255,255,255,.04) 2px,rgba(255,255,255,0) 4px),
   linear-gradient(200deg,#B8132F 0%,#960F27 34%,#6E0C1F 70%,#42121B 100%)}
 @media (max-width:760px){.erl,main:has(> section.view[data-v="start"]:not([hidden])) > .erl{--h:250px;--g:44px;top:84px}}
+/* i:SY Experte (Tiry 15.11.2026): am PC/Tablet läge das Rot hinter den Zahlen (1.000+) → dort weg; am Handy beginnt es unter dem Foto (Skript in eisRotJs) */
+@media (min-width:761px){main:has(> section.view[data-v="isy"]:not([hidden])) > .erl{display:none}}
 
 /* Showroom liegt als eigene Glas-Bühne VOR dem Rot: das Rot läuft dahinter, nie durch den Kreis */
 html.er .hring{background:radial-gradient(closest-side,#FFFFFF,#F3F6F9 62%,#E6EDF4 100%)!important;
@@ -5868,7 +5870,10 @@ if(typeof hdrFit==='function')setTimeout(hdrFit,60)})();
 /* Rote Fläche auf der Startseite beginnt genau in der Mitte des Laufbands (beide Bänder sind dort zentriert und decken die Kante immer ab).
    Vorher fester Abstand → auf Handy/Tablet Lücke zwischen Laufband und Rot (Tiry 15.11.2026). */
 (function(){const m=document.querySelector('main'),e=m&&m.querySelector(':scope > .erl'),b=document.querySelector('main > section.view[data-v="start"] .bands');if(!e||!b)return;
- const fit=()=>{const s=b.closest('section.view');if(s.hidden){e.style.top='';return}const r=b.getBoundingClientRect();if(!r.height){e.style.top='';return}
+ const fit=()=>{const s=b.closest('section.view');if(s.hidden){
+   /* i:SY Experte (Tiry 15.11.2026): Rot beginnt erst unter dem großen Foto – Fotokante rechts liegt bei 94 % (clip-path), links tiefer und deckt ab */
+   const ih=m.querySelector(':scope > section.view[data-v="isy"]:not([hidden]) .isyhero'),hr=ih&&ih.getBoundingClientRect();
+   const ti=hr&&hr.height?Math.round(hr.top+hr.height*.94-m.getBoundingClientRect().top-2)+'px':'';if(e.style.top!==ti)e.style.top=ti;return}const r=b.getBoundingClientRect();if(!r.height){e.style.top='';return}
   const t=Math.round(r.top+r.height/2-m.getBoundingClientRect().top)+'px';if(e.style.top!==t)e.style.top=t};
  let q=0;const go=()=>{cancelAnimationFrame(q);q=requestAnimationFrame(fit)};
  addEventListener('resize',go);addEventListener('load',go);addEventListener('hashchange',()=>{setTimeout(go,520);setTimeout(go,1100)});

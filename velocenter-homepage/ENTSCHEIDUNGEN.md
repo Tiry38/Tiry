@@ -328,3 +328,9 @@
   noch wie Durchstreichen über der Schrift). Nur noch ein Hauch, **nie wieder kräftiger**. Form/Position unverändert.
 - Abschnitt „Aus Wörth für Wörth“ (Kinderfasching, Stadtradeln, Lions-Adventskalender, ADFC) unter „Unser Versprechen“ komplett gelöscht
   (Tiry: „interessiert keinen“), samt CSS `.woerth/.wrows/.wrow`. Linke Spalte ist sticky → keine Lücke. Nicht wieder einbauen.
+
+## 15.11.2026 – i:SY Experte: rotes Dreieck (Tiry: „hat gar keine Wirkung“)
+- Vorher lag `.erl` fest oben (88 px) und fast komplett hinter dem großen Foto – nur ein Rest schaute unten raus.
+- **Handy (≤ 760 px):** Rot beginnt jetzt direkt unter dem Foto (Skript in `eisRotJs`, `fit()`: Oberkante = Fotokante rechts bei 94 % wegen clip-path).
+- **PC/Tablet (≥ 761 px):** auf diesem Reiter ausgeblendet – unter dem Foto läge es hinter den Zahlen (orange „1.000+“ auf Rot unlesbar).
+- Andere Reiter unverändert (Startseite: unter dem Laufband; übrige: CSS-Wert).
