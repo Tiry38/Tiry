@@ -32,6 +32,8 @@ const settle = () => page.waitForFunction(() => document.getAnimations().every((
 const fresh = async () => { await page.evaluate(() => { const e = window.__app && window.__app.engine; if (e) { e._nextRenderAt = 0; e.gpuMs = 0; e._fence = null; } }).catch(() => {}); await page.waitForTimeout(1300); };
 const shot = async (n) => { await settle(); await fresh(); await page.screenshot({ path: path.join(out, `${n}.png`) }); console.log('📸', n); };
 const wait = (ms) => page.waitForTimeout(ms);
+// Partien mit weniger Bahnen bauen die Welt neu (Ladeanzeige) – abwarten
+const worldReady = () => page.waitForFunction(() => !document.getElementById('loading').classList.contains('show'), null, { timeout: 180000, polling: 250 }).catch(() => {});
 // Über den lokalen Webserver laden (unter file:// blockiert Chromium Texturen/HDRIs aus web/assets/)
 const server = await startServer(0);
 await page.goto(server.url + 'index.html');
@@ -63,7 +65,7 @@ await page.setViewportSize({ width: 1280, height: 720 }); await wait(800);
 console.log('Setup 1280×720:', JSON.stringify(await setupFits()));
 await shot('03-setup-720');
 await page.setViewportSize({ width: W, height: H }); await wait(800);
-await page.click('#btn-start'); await wait(3500); await shot('04-game-start');
+await page.click('#btn-start'); await worldReady(); await wait(3500); await shot('04-game-start');
 // Ein paar Einheiten bauen
 await page.evaluate(() => {
   const a = window.__app, s = a.session, me = a.me;
@@ -139,7 +141,7 @@ await wait(3800); await shot('12-end');
 await page.click('#btn-tomenu'); await wait(1500);
 await page.click('[data-go="campaign"]'); await wait(1200);
 await page.click('#camp-map .node-wrap >> nth=1'); await wait(600);
-await page.click('#btn-mission'); await wait(3500); await shot('13-mission-build');
+await page.click('#btn-mission'); await worldReady(); await wait(3500); await shot('13-mission-build');
 await page.evaluate(() => { const s = window.__app.session; s.sim.phaseTime = 0.05; });
 await wait(6000);
 await page.evaluate(() => { const a = window.__app; const o = [...a.session.sim.entities.values()].find((e) => e.type === 'o'); if (o) a.cam.focus(o.x, o.z, 40, { pitch: 0.9 }); });

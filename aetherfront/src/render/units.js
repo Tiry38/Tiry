@@ -5,7 +5,7 @@
 // (LOD0 ≈ 2,6 k, LOD1 ≈ 1 k, LOD2 ≈ 0,4 k Dreiecke) – 8 Bahnen × 30 Einheiten bleiben weit unter dem Budget.
 import * as THREE from 'three';
 import { unitVariant, creepVariant } from './forge/variants.js';
-import { fighterArch, formOf, creepModel, HOVER_ARCH, CREEP_FIT } from './forge/roster.js';
+import { fighterArch, formOf, creepModel, HOVER_ARCH, CREEP_FIT, linePalette } from './forge/roster.js';
 import { forgeReady } from './forge/loader.js';
 import { buildModel, DEFAULTS, createBodyMaterial, createGlowMaterial, setInstanceAnim, createUnitDepthMaterial } from './models.js';
 import { UNITS, FACTIONS } from '../sim/data.js';
@@ -20,7 +20,8 @@ export const KING_PALETTES = [
 
 const NO_ANIM = [0, 0, 0, 0];
 let UNIT_DEPTH = null;
-const _anim = [0, 0, 0, 0];
+const _anim = [0, 0, 0, 0], _fx = [0, 0, 0, 2];
+const _m2 = new THREE.Matrix4(), _m3 = new THREE.Matrix4();
 const _m = new THREE.Matrix4(), _p = new THREE.Vector3(), _q = new THREE.Quaternion(), _s = new THREE.Vector3(), _e = new THREE.Euler(), _c = new THREE.Color();
 
 // LOD-Schwellen: projizierte Figurenhöhe in Bildpunkten
@@ -55,15 +56,17 @@ class Pool {
     } else L.glow = null;
   }
   begin() { for (const L of this.levels) L.n = 0; }
-  /** anim: [Laufphase rad, Laufstärke 0..1, Angriff 0..1 (Treffer ≈0.45), Treffer-Zucken 0..1] (optional); lod: Detailstufe */
-  push(m, color, anim, lod = 0) {
+  /** anim: [Laufphase rad, Laufstärke 0..1, Angriff 0..1 (Treffer ≈0.45), Treffer-Zucken 0..1] (optional); lod: Detailstufe;
+   *  fx: [Auflösen 0..1, Treffer-Blitz 0..1, Wirk-Pose 0..1, Modellhöhe] (optional) */
+  push(m, color, anim, lod = 0, fx = null) {
     const i = Math.min(lod, this.levels.length - 1), L = this.levels[i];
     if (L.n >= L.cap) this.alloc(i, L.cap * 2);
     L.body.setMatrixAt(L.n, m);
     L.body.setColorAt(L.n, color);
     const A = anim || NO_ANIM;
-    setInstanceAnim(L.body, L.n, A[0], A[1], A[2], A[3]);
-    if (L.glow) { L.glow.setMatrixAt(L.n, m); L.glow.setColorAt(L.n, color); setInstanceAnim(L.glow, L.n, A[0], A[1], A[2], A[3]); }
+    const F = fx || (this._fx || (this._fx = [0, 0, 0, this.model.height || 2]));
+    setInstanceAnim(L.body, L.n, A[0], A[1], A[2], A[3], F);
+    if (L.glow) { L.glow.setMatrixAt(L.n, m); L.glow.setColorAt(L.n, color); setInstanceAnim(L.glow, L.n, A[0], A[1], A[2], A[3], F); }
     L.n++;
   }
   end() {
@@ -188,11 +191,17 @@ export class UnitsView {
       if (m0.forged && m0.lods > 1) for (let l = 1; l < m0.lods; l++) models.push(this.modelFor(key, archetype, palette, tier, variant, form, l, fit));
       p = new Pool(this.root, models, this.bodyMat, this.glowMat, archetype === 'king' ? 2 : 24);
       p.hover = HOVER.has(archetype) || !!m0.hover;
+      // Körperbau für Ganzkörper-Animation/Tod: Maschine (kaum Gelenke), Vierbeiner (länger als hoch)
+      const rig = m0.body.attributes.aRig, bb = (m0.body.boundingBox || (m0.body.computeBoundingBox(), m0.body.boundingBox));
+      let n0 = 0, nn = 0;
+      if (rig) for (let i = 0; i < rig.count; i += 3) { nn++; if (Math.floor(rig.array[i * 4] + 1e-4) === 0) n0++; }
+      p.machine = !rig || nn === 0 || n0 / nn > 0.3;
+      p.quad = !p.machine && (bb.max.z - bb.min.z) > 0.85 * bb.max.y;
       this.pools.set(key, p);
     }
     return p;
   }
-  fighterKey(def) { return { key: `f|${def.id}`, arch: fighterArch(def), form: formOf(def), pal: FACTIONS[def.faction].palette, tier: def.tier, variant: unitVariant(def) }; }
+  fighterKey(def) { return { key: `f|${def.id}`, arch: fighterArch(def), form: formOf(def), pal: linePalette(def, FACTIONS[def.faction].palette), tier: def.tier, variant: unitVariant(def) }; }
   creepKey(def) {
     const id = def.key || def.id || `w${def.n}`;
     const cm = creepModel(def);
@@ -209,12 +218,14 @@ export class UnitsView {
     else if (e.e === 'stun') { const d = this.disp.get(e.id); if (d) d.stunT = this.time; }
     else if (e.e === 'death') {
       const d = this.disp.get(e.id);
-      if (d && d.key) this.dying.push({ ...d, t: -(e.delay || 0), boss: e.boss }); // delay: Treffer-Moment der Heldenanimation abwarten
+      if (d && d.key) this.dying.push({ ...d, id: e.id, t: -(e.delay || 0), boss: e.boss, hoverY: d.hover ? 0.5 : 0 }); // delay: Treffer-Moment der Heldenanimation abwarten
       if (e.type === 'c') this.disp.delete(e.id);
     } else if (e.e === 'kingHit') this.kingFx[e.team].hitT = this.time;
     else if (e.e === 'kingAttack') { this.kingFx[e.team].atkT = this.time; this.kingFx[e.team].face = Math.atan2(e.x - kingPos(e.team).x, e.z - kingPos(e.team).z); }
     else if (e.e === 'build' || e.e === 'upgrade') { const d = this.disp.get(e.id); if (d) d.spawnT = this.time; else this.pendingSpawn = { id: e.id, t: this.time }; }
     else if (e.e === 'sell') this.disp.delete(e.id);
+    else if (e.e === 'leaderCast' && e.wind > 0) { const d = this.disp.get(e.id); if (d) { d.castT = this.time; d.castDur = e.wind; d.slamT = null; } }
+    else if (e.e === 'leaderImpact' || e.e === 'leaderInterrupt') { const d = this.disp.get(e.id); if (d) { d.castT = null; if (e.e === 'leaderImpact') d.slamT = this.time; } }
   }
 
   update(sim, dt, ctx = {}) {
@@ -275,51 +286,79 @@ export class UnitsView {
       // Maßstab steckt in der Geometrie (Archetyp-Passform × Stufe); hier nur Rolle/Champion/alte Modelle
       const scaleBase = (def.size || 1) * (pool.model.forged ? 1 : isF ? 1.3 : 1.2);
       const boss = !isF && def.boss;
-      let y = pool.hover ? 0.45 + Math.sin(t * 2.2 + d.phase) * 0.15 : 0;
-      let lean = 0, fwd = 0, sq = 1;
-      if (moving) {
-        const cyc = t * 9 + d.phase;
-        y += Math.abs(Math.sin(cyc)) * 0.12;
-        lean = 0.1;
-      } else {
-        sq = 1 + Math.sin(t * 2 + d.phase) * 0.015;
-      }
-      // Bosse: eigenes Leerlauf-Atmen (tief, langsam) bzw. Schweben
-      if (boss) { sq = 1 + Math.sin(t * 1.3 + d.phase) * 0.035; if (pool.hover) y = 0.8 + Math.sin(t * 1.1) * 0.35; }
-      // Vertex-Animation: Laufphase, Laufstärke, Angriffs-Fortschritt (Ausholen vor dem nächsten Schlag), Treffer
+      const H = pool.model.height, mach = pool.machine;
+      d.mach = mach; d.quad = pool.quad; d.hover = pool.hover; d.s = scaleBase; d.boss = boss;
+      // Schrittfrequenz aus der tatsächlichen (angezeigten) Geschwindigkeit → keine rutschenden Füße
+      const mv = Math.hypot(vx * k, vz * k) / Math.max(dt, 1e-3);
+      d.spd = (d.spd || 0) + (mv - (d.spd || 0)) * (1 - Math.exp(-dt * 6));
       d.walkW = (d.walkW || 0) + ((moving ? 1 : 0) - (d.walkW || 0)) * (1 - Math.exp(-dt * 8));
-      d.gait = (d.gait || d.phase) + dt * (moving ? 9 : 2.2);
-      const atA = sim.time - e.atkT, cdA = def.cd || 1.2;
+      const idleRate = pool.hover ? 6.5 : boss ? 1.5 : 2.2;
+      const walkRate = Math.min(13, Math.max(4, (5.4 * Math.max(d.spd, 1.2)) / Math.max(0.6, H * scaleBase)));
+      d.gait = (d.gait == null ? d.phase * 7 : d.gait) + dt * (idleRate + (walkRate - idleRate) * d.walkW);
+      const wW = d.walkW, g = d.gait;
+      // Angriff: Ausholen vor dem nächsten Schlag (nur wenn das Ziel in Reichweite ist), Schlag-Moment = Schaden der Simulation
+      const atA = sim.time - e.atkT;
       let atkP = 0;
-      if (atA >= 0 && atA < 0.45) atkP = 0.45 + (atA / 0.45) * 0.55;          // Schlag ist erfolgt → Nachschwung
-      else if (atA >= 0 && atA < cdA * 1.6 && cdA - atA < 0.32 && cdA - atA > 0) atkP = 0.45 * (1 - (cdA - atA) / 0.32); // Ausholen vor dem nächsten Schlag
-      if (def.ranged) atkP = -atkP; // Fernkampf: Spannen/Werfen statt Hieb
-      const htA = t - d.hitT;
-      _anim[0] = d.gait; _anim[1] = d.walkW; _anim[2] = atkP; _anim[3] = htA >= 0 && htA < 0.3 ? 1 - htA / 0.3 : 0;
-      const at = sim.time - e.atkT;
-      if (at >= 0 && at < 0.35) {
-        const a = Math.sin((at / 0.35) * Math.PI);
-        if (def.ranged) { fwd = -0.18 * a; lean -= 0.08 * a; } else { fwd = 0.4 * a; lean += 0.22 * a; sq = 1 - 0.06 * a; }
+      if (atA >= 0 && atA < 0.5) atkP = 0.45 + (atA / 0.5) * 0.55;
+      else if (e.cd > 0 && e.cd < 0.4 && !(e.stun > 0) && e.target) {
+        const tg = sim.entities.get(e.target);
+        if (tg && tg.alive && Math.hypot(tg.x - e.x, tg.z - e.z) <= (def.range || 1) + (tg.type === 'c' && tg.def.boss ? 1.8 : 0.6) + 0.5) atkP = 0.45 * (1 - e.cd / 0.4);
       }
+      // Anführer-Fähigkeit: langes Ausholen während des Wirkens, Schlag beim Einschlag
+      let lead = 0;
+      if (d.castT != null) {
+        const ct = t - d.castT;
+        if (ct < d.castDur) { lead = ct / d.castDur; atkP = 0.42 * Math.min(1, lead * 1.4); } else if (d.slamT == null || t - d.slamT > 0.6) d.castT = null;
+      }
+      if (d.slamT != null && t - d.slamT < 0.55) atkP = 0.45 + ((t - d.slamT) / 0.55) * 0.55;
+      const caster = def.ranged && !mach && (def.atk === 'arkan' || def.atk === 'chaos');
+      const raise = smooth01(0.02, 0.42, atkP) * (1 - smooth01(0.5, 0.85, atkP));
+      if (def.ranged && !lead) atkP = -atkP; // Fernkampf: Spannen/Werfen statt Hieb
+      const htA = t - d.hitT;
+      const hitE = htA >= 0 && htA < 0.3 ? 1 - htA / 0.3 : 0;
+      _anim[0] = g; _anim[1] = wW; _anim[2] = atkP; _anim[3] = hitE;
+      _fx[0] = 0; _fx[1] = htA >= 0 && htA < 0.2 ? 1 - htA / 0.2 : 0; _fx[2] = caster ? Math.max(0.001, raise) : lead ? lead : 0; _fx[3] = H;
+      // Ganzkörper (Matrix): Lauf-Neigung, Schwebe-Pendeln, Maschinen-Schaukeln/Rückstoß, Ausfallschritt, Zurückzucken
+      let y = pool.hover ? 0.45 + Math.sin(t * 2.2 + d.phase) * 0.15 : 0;
+      let lean = 0.05 * wW, roll = 0, fwd = 0, sq = 1;
+      const a = Math.abs(atkP);
+      const strikeE = smooth01(0.38, 0.46, a) * (1 - smooth01(0.55, 0.9, a));
+      const recoil = a > 0.45 ? Math.pow(1 - (a - 0.45) / 0.55, 2) : 0;
+      if (pool.hover) {
+        roll = 0.07 * Math.sin(t * 1.6 + d.phase); lean += 0.16 * wW + 0.05 * Math.sin(t * 2.2 + d.phase + 1);
+      } else if (mach) {
+        y += Math.abs(Math.sin(g)) * 0.04 * wW + 0.006 * Math.sin(t * 38 + d.phase) * (1 - wW);
+        lean += 0.035 * Math.sin(g * 2) * wW; roll = 0.025 * Math.sin(g) * wW;
+      } else {
+        roll = 0.022 * Math.sin(g * 0.45) * (1 - wW);
+      }
+      if (def.ranged) {
+        const k2 = mach ? 1 : 0.4;
+        fwd -= 0.32 * recoil * k2; lean -= (mach ? 0.14 : 0.05) * recoil; sq = 1 - (mach ? 0.07 : 0.02) * recoil;
+        if (mach && a < 0.45) { lean += 0.05 * smooth01(0.1, 0.42, a); }
+      } else {
+        fwd += 0.42 * strikeE; lean += 0.12 * strikeE - 0.05 * smooth01(0.05, 0.4, a) * (1 - strikeE); sq = 1 - 0.05 * strikeE;
+      }
+      if (!boss) { fwd -= 0.16 * hitE * hitE; lean -= 0.08 * hitE; }
+      if (boss) { sq *= 1 + Math.sin(t * 1.3 + d.phase) * 0.03; if (pool.hover) y = 0.8 + Math.sin(t * 1.1) * 0.35; }
+      if (lead) { sq *= 1 + 0.06 * lead; y += Math.sin(t * 40) * 0.02 * lead; }
       const sp = t - d.spawnT;
       let grow = 1;
       if (sp >= 0 && sp < 0.5) grow = 0.3 + 0.7 * easeOutBack(sp / 0.5);
       const fx = Math.sin(d.face), fz = Math.cos(d.face);
       _p.set(d.x + fx * fwd, y, d.z + fz * fwd);
-      _e.set(lean, d.face, 0, 'YXZ');
+      _e.set(lean, d.face, roll, 'YXZ');
       _q.setFromEuler(_e);
       const s = scaleBase * grow;
       _s.set(s * (2 - sq), s * sq, s * (2 - sq));
       _m.compose(_p, _q, _s);
-      // Farbe: Treffer-Blitz, Betäubung, frisch gebaut (Bauphase leicht leuchtend)
-      const ht = t - d.hitT;
+      // Farbe: Betäubung, Verlangsamung, Fluch (Treffer-Blitz macht der Shader)
       _c.setRGB(1, 1, 1);
-      if (ht < 0.12) _c.setScalar(1 + 2.2 * (1 - ht / 0.12));
       if (t - d.stunT < 0.8) _c.setRGB(0.7, 0.85, 1.6);
       if (e.slowPct > 0) _c.multiply(new THREE.Color(0.75, 0.9, 1.25));
       if (e.cursePct > 0) _c.multiply(new THREE.Color(1.2, 0.7, 1.3));
       const lod = lodOf(d.x, y, d.z, pool.model.height * s);
-      if (lod >= 0) { pool.push(_m, _c, _anim, lod); drawn++; } else culled++;
+      if (lod >= 0) { pool.push(_m, _c, _anim, lod, _fx); drawn++; } else culled++;
 
       // Ring
       const ringCol = isF ? teamCol[e.team] : def.champion ? champRing : e.isSend ? sendRing : creepRing;
@@ -351,21 +390,38 @@ export class UnitsView {
       }
     }
 
-    // Sterbende Einheiten versinken
+    // Sterbende Einheiten: Umkippen (Zweibeiner nach hinten, Vierbeiner auf die Seite, Flieger stürzen, Maschinen
+    // sacken vornüber), danach Auflösen mit glühender Kante (Asche-Partikel kommen aus fx.js)
     for (let i = this.dying.length - 1; i >= 0; i--) {
       const dd = this.dying[i];
       dd.t += dt;
-      const dur = dd.boss ? 1.6 : 0.55;
+      const fallT = dd.boss ? 1.1 : 0.5, dur = dd.boss ? 3.2 : 1.75;
       if (dd.t > dur) { this.dying.splice(i, 1); continue; }
       const pool = this.pools.get(dd.key);
       if (!pool) continue;
-      const a = Math.max(0, dd.t / dur);
-      _e.set(0.6 * a, dd.face, 0.3 * a, 'YXZ');
-      _q.setFromEuler(_e);
-      _m.compose(_p.set(dd.x, -a * a * (dd.height || 2) * 0.9, dd.z), _q, _s.setScalar(1 - 0.4 * a));
-      _anim[0] = dd.gait || 0; _anim[1] = 0; _anim[2] = 0; _anim[3] = dd.t < 0 ? 0 : 0.95 * (1 - a);
-      const dl = lodOf(dd.x, 0, dd.z, dd.height || 2);
-      if (dl >= 0) pool.push(_m, dd.t < 0 ? _c.setRGB(1, 1, 1) : _c.setRGB(1 + 1.5 * (1 - a), 0.7, 0.7), _anim, dl);
+      const tt = Math.max(0, dd.t);
+      const f = Math.min(1, tt / fallT);
+      const bounce = f >= 1 ? Math.exp(-(tt - fallT) * 9) * Math.sin((tt - fallT) * 22) * 0.06 : 0;
+      const fall = f * f + bounce;
+      const H = dd.height || 2, s = dd.s || 1, r = H * 0.22;
+      const dis = smooth01(fallT * 0.75, dur - 0.1, tt);
+      let y = 0, pitch = 0, rollA = 0, pz = 0, px = 0;
+      if (dd.hover) { y = Math.max(0, (dd.hoverY ?? 0.5) * (1 - f * f)); pitch = 0.5 * f; rollA = 0.9 * fall * (dd.id % 2 ? 1 : -1); px = 0; }
+      else if (dd.mach) { pitch = 0.22 * fall; rollA = 0.12 * fall; pz = r; y = -0.08 * H * dis; }
+      else if (dd.quad) { rollA = 1.35 * fall * (dd.id % 2 ? 1 : -1); px = (dd.id % 2 ? -1 : 1) * r * 1.2; }
+      else { pitch = -1.42 * fall; pz = -r * 0.9; }
+      y -= dis * dis * 0.25 * H;
+      _e.set(0, dd.face, 0, 'YXZ'); _q.setFromEuler(_e);
+      _m.compose(_p.set(dd.x, y, dd.z), _q, _s.setScalar(s));
+      _m2.makeTranslation(px, 0, pz);
+      _m3.makeRotationFromEuler(_e.set(pitch, 0, rollA, 'XYZ')); _m2.multiply(_m3);
+      _m3.makeTranslation(-px, 0, -pz); _m2.multiply(_m3);
+      _m.multiply(_m2);
+      const ht = tt / 0.3;
+      _anim[0] = dd.gait || 0; _anim[1] = 0; _anim[2] = 0; _anim[3] = dd.t < 0 ? 0 : Math.max(0, 0.95 * (1 - ht));
+      _fx[0] = dd.t < 0 ? 0 : dis; _fx[1] = dd.t < 0 ? 0 : Math.max(0, 1 - tt / 0.25) * 0.8; _fx[2] = 0; _fx[3] = H;
+      const dl = lodOf(dd.x, 0, dd.z, H * s);
+      if (dl >= 0) pool.push(_m, _c.setRGB(1, 1, 1), _anim, dl, _fx);
     }
 
     // Könige
@@ -386,9 +442,11 @@ export class UnitsView {
       const ks = citadel ? 1.6 : 1;
       _m.compose(_p.set(kp.x, king.alive ? 0 : -3, kp.z), _q, _s.set(ks, br * ks, ks));
       const ht = t - fx.hitT;
-      _c.setScalar(ht < 0.15 ? 1 + 1.6 * (1 - ht / 0.15) : 1);
+      _c.setScalar(1);
+      _anim[0] = t * 2 + team * 2.7; _anim[1] = 0; _anim[2] = at >= 0 && at < 0.5 ? 0.45 + (at / 0.5) * 0.55 : 0; _anim[3] = ht < 0.3 ? 0.6 * (1 - ht / 0.3) : 0;
+      _fx[0] = 0; _fx[1] = ht < 0.18 ? 0.8 * (1 - ht / 0.18) : 0; _fx[2] = 0; _fx[3] = pool.model.height;
       const kl = lodOf(kp.x, 0, kp.z, pool.model.height * ks);
-      if (kl >= 0) pool.push(_m, _c, null, kl);
+      if (kl >= 0) pool.push(_m, _c, _anim, kl, _fx);
       if (nb < 1024) {
         _m.compose(_p.set(kp.x, pool.model.height * ks + 1.6, kp.z), _q.identity(), _s.set(5, 1, 1));
         bars.setMatrixAt(nb, _m); bars.setColorAt(nb, _c.set(TEAM_COLORS[team]));
@@ -427,5 +485,6 @@ export class UnitsView {
   }
 }
 
+function smooth01(a, b, x) { const t = Math.min(1, Math.max(0, (x - a) / (b - a))); return t * t * (3 - 2 * t); }
 function easeOutBack(x) { const c1 = 1.70158, c3 = c1 + 1; return 1 + c3 * Math.pow(x - 1, 3) + c1 * Math.pow(x - 1, 2); }
 function hashStr(s) { let h = 2166136261; for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return h >>> 0; }

@@ -6,7 +6,7 @@
 import * as THREE from 'three';
 import { mergeGeometries, mergeVertices, toCreasedNormals } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import { RoundedBoxGeometry } from 'three/examples/jsm/geometries/RoundedBoxGeometry.js';
-import { addUnitRig, injectUnitAnim, setInstanceAnim, createUnitDepthMaterial, rigType } from './hero/unitRig.js';
+import { addUnitRig, injectUnitAnim, injectUnitAnimGlow, setInstanceAnim, createUnitDepthMaterial, rigType } from './hero/unitRig.js';
 import { buildForgedUnit, attachPartsLegacy, createForgeMaterial, createForgeGlowMaterial, preloadForge } from './forge/loader.js';
 preloadForge();
 
@@ -2429,7 +2429,7 @@ export function buildModel(archetype, opts = {}) {
 // ---------------------------------------------------------------------------------------------
 export function createBodyMaterial() {
   // Aether-Forge-Über-Material (versteht alte und geschmiedete Geometrie; Materialklasse 0 = alter Look)
-  return createForgeMaterial({ physical: false, unitAnim: injectUnitAnim, rim: 0.32, env: 1.2 });
+  return createForgeMaterial({ physical: false, unitAnim: injectUnitAnim, rim: 0.44, env: 1.2 });
 }
 export function createBodyMaterialLegacy() {
   // PBR je Vertex (Attribut 'pbr' = Rauheit/Metall-Faktor), prozedurales Mikro-Relief (Objektraum, mit Abstand
@@ -2485,11 +2485,11 @@ float roughnessFactor = clamp(roughness * vPbr.x * (0.88 + 0.24 * microN), 0.06,
 }
 
 export function createGlowMaterial() {
-  return createForgeGlowMaterial(1, { unitAnim: injectUnitAnim });
+  return createForgeGlowMaterial(1, { unitAnim: injectUnitAnimGlow });
 }
 export function createGlowMaterialLegacy() {
   const m = new THREE.MeshBasicMaterial({ vertexColors: true, toneMapped: false });
-  m.onBeforeCompile = (sh) => injectUnitAnim(sh);
-  m.customProgramCacheKey = () => 'aetherfront-glow-anim-v1';
+  m.onBeforeCompile = (sh) => injectUnitAnimGlow(sh);
+  m.customProgramCacheKey = () => 'aetherfront-glow-anim-v2';
   return m;
 }

@@ -15,7 +15,8 @@ import { Menus } from './ui/menus.js';
 import { NetChat } from './ui/chat.js';
 import { LocalSession, NetSession } from './net/session.js';
 import { UNITS, SENDS, WAVES, FACTIONS } from './sim/data.js';
-import { laneCenterX, kingPos, ARENA } from './sim/layout.js';
+import { laneCenterX, kingPos, ARENA, mapLayout } from './sim/layout.js';
+import { Minimap } from './ui/minimap.js';
 import { MISSIONS, missionSetup, missionStars } from './sim/campaign.js';
 import { missionHook } from './sim/missions.js';
 import { modeCode } from './sim/modes.js';
@@ -37,6 +38,15 @@ class App {
     this.canvas = $('scene');
     this.engine = new Engine(this.canvas, this.settings);
     this.cam = new RtsCamera(this.engine.camera, this.canvas, this.settings);
+    // Kamera nur im Spiel ohne offenes Menü (Pause, Kodex …) per Tasten/Rand bewegen
+    this.cam.canScroll = () => this.mode === 'game' && this.menus && this.menus.current === 'hud';
+    // Rechtsklick ohne Ziehen: Platzieren/Zielen abbrechen bzw. Auswahl aufheben (Ziehen = Karte greifen)
+    this.cam.onRightClick = () => {
+      if (this.mode !== 'game') return;
+      if (this.targeting) this.targeting = null;
+      else if (this.placing) this.stopPlacing(); else this.select(null);
+    };
+    this.minimap = new Minimap($('minimap'), { onMove: (x, z) => this.cam.focus(x, z + 2) });
     this.audio = new AudioEngine();
     this.audio.applySettings = () => this.applyAudio();
     this.applyAudio();
@@ -173,7 +183,24 @@ class App {
     this.gameOverAt = null;
     this.endwaveShown = false;
     if (this.env && this.env.setArena) this.env.setArena(false);
+    this.applyLayout(s);
     this.matchStats = { leaders: 0, quickLeaders: 0, upgrades: 0 };
+  }
+
+  /** Kartenbild der Partie: nur belegte Bahnen in Welt, Kamera-Grenzen und Minimap */
+  applyLayout(s) {
+    const sim = s.sim;
+    const layout = mapLayout(sim.players, { campaign: !!sim.campaign, arena: !!(sim.rules.arena && !sim.campaign) });
+    this.layout = layout;
+    this.cam.setBounds(layout.camBounds);
+    const me = sim.players[s.localPid];
+    this.minimap.setLayout(layout, me ? { team: me.team, slot: me.slot } : null);
+    if (!this.env || !this.env.setLayout) return;
+    if (this.env.needsBuild(layout)) {
+      // Neubau dauert einen Moment → erst die Ladeanzeige zeigen, im übernächsten Bild bauen (loop)
+      this.pendingLayout = { layout, frames: 0 };
+      $('loading').classList.add('show');
+    } else { this.pendingLayout = null; this.env.setLayout(layout); }
   }
 
   buildSetup(cfg) {
@@ -305,7 +332,7 @@ class App {
 
   focusLane(pid) {
     const p = this.session.sim.players[pid];
-    this.cam.focus(laneCenterX(p.team, p.slot), 2, 58);
+    this.cam.focus(laneCenterX(p.team, p.slot), 2, 58, { yaw: 0, pitch: 0.98 }); // auch Drehung zurücksetzen
   }
 
   pause() {
@@ -365,12 +392,8 @@ class App {
   bindInput() {
     const c = this.canvas;
     c.addEventListener('mousemove', (e) => { this.mouse.x = e.clientX; this.mouse.y = e.clientY; });
-    c.addEventListener('contextmenu', (e) => {
-      e.preventDefault();
-      if (this.mode !== 'game') return;
-      if (this.targeting) this.targeting = null;
-      else if (this.placing) this.stopPlacing(); else this.select(null);
-    });
+    // Rechtsklick wertet die Kamera aus (Klick = Abbrechen, Ziehen = Karte greifen) – hier nur das Kontextmenü unterdrücken
+    c.addEventListener('contextmenu', (e) => e.preventDefault());
     c.addEventListener('mousedown', (e) => {
       if (this.mode !== 'game' || e.button !== 0) return;
       const sim = this.session.sim;
@@ -443,7 +466,7 @@ class App {
       else if (k === 'H') this.session.submit({ type: 'heal' });
       else if (k === 'K') this.hud.toggleKingPanel();
       else if (k === ' ') { e.preventDefault(); this.focusLane(me.id); }
-      else if (k === 'Home') { const kp = kingPos(me.team); this.cam.focus(kp.x, kp.z - 6, 55); }
+      else if (k === 'Home') { const kp = kingPos(me.team); this.cam.focus(kp.x, kp.z - 6, 55, { yaw: 0 }); }
     });
     window.addEventListener('keyup', (e) => { if (e.key === 'Tab') { e.preventDefault(); this.hud.showScoreboard(false); } });
   }
@@ -481,7 +504,7 @@ class App {
     const v = vol * (1 - d / range) * (this.attract ? 0.35 : 1);
     if (v < 0.03) return;
     _sv.set(x, 1, z).applyMatrix4(this.engine.camera.matrixWorldInverse);
-    this.audio.sfx(name, { volume: v, pan: Math.max(-1, Math.min(1, _sv.x / 22)), pitch });
+    this.audio.sfx(name, { volume: v, pan: Math.max(-1, Math.min(1, _sv.x / 22)), pitch, far: d / range });
   }
 
   handleEvents(events) {
@@ -530,7 +553,7 @@ class App {
         case 'waveStart':
           if (inGame) {
             this.audio.sfx(e.boss ? 'boss' : 'wave_start');
-            this.audio.playMusic(e.boss ? 'boss' : 'battle');
+            this.audio.playMusic(e.boss || sim.waveDef(e.wave).endwave ? 'boss' : 'battle');
             this.cam.addShake(0.4);
             // Endwellen: einmal das ganze Feld zeigen
             if (sim.waveDef(e.wave).endwave && !this.endwaveShown) { this.endwaveShown = true; this.cam.focus(0, 12, 190, { yaw: 0, pitch: 0.9 }); }
@@ -543,18 +566,18 @@ class App {
             this.select(null); this.stopPlacing();
             this.cam.focus(ARENA.x, ARENA.z + 4, 74, { yaw: 0, pitch: 0.95 });
             this.env.setArena && this.env.setArena(true);
-            this.audio.sfx('boss'); this.audio.playMusic('boss');
+            this.audio.sfx('wave_start'); this.audio.playMusic('arena');
           }
           break;
-        case 'arenaFight': if (inGame) { this.audio.sfx('wave_start'); this.cam.addShake(0.5); this.fx.shock(ARENA.x, ARENA.z, { r: ARENA.r, color: '#ffd27a', life: 0.9, intensity: 3 }); } break;
+        case 'arenaFight': if (inGame) { this.audio.sfx('gong'); this.cam.addShake(0.5); this.fx.shock(ARENA.x, ARENA.z, { r: ARENA.r, color: '#ffd27a', life: 0.9, intensity: 3 }); } break;
         case 'arenaEnd': if (inGame) this.audio.sfx(e.winner === this.me.team ? 'victory' : e.winner < 0 ? 'wave_clear' : 'leak', { volume: 0.7 }); break;
         case 'arenaDone': if (inGame) { this.audio.playMusic('build'); this.focusLane(this.me.id); } this.env.setArena && this.env.setArena(false); break;
         case 'kingCast': {
           const col = { stomp: '#ffb85a', shock: '#6fe3ff', purge: '#fff3c8' }[e.ab] || '#ffd27a';
-          if (e.ab === 'stomp') { this.fx.shock(e.x, e.z, { r: e.r, color: col, life: 0.8, intensity: 4 }); this.sfxAt('explosion', e.x, e.z, 0.9); if (inGame && e.team === this.me.team) this.cam.addShake(0.35); }
+          if (e.ab === 'stomp') { this.fx.shock(e.x, e.z, { r: e.r, color: col, life: 0.8, intensity: 4 }); this.sfxAt('stomp', e.x, e.z, 0.9); if (inGame && e.team === this.me.team) this.cam.addShake(0.35); }
           else if (e.ab === 'shock') {
             for (let i = 1; i <= 6; i++) { const t = i / 6; this.fx.shock(e.x + (e.tx - e.x) * t, e.z + (e.tz - e.z) * t, { r: e.w + 0.6, color: col, life: 0.35 + t * 0.4, intensity: 3 }); }
-            this.sfxAt('lightning', e.x, e.z, 0.9);
+            this.sfxAt('shockwave', e.x, e.z, 0.9);
           } else { this.fx.shock(e.x, e.z, { r: 2.4, color: col, life: 0.9, intensity: 4 }); this.sfxAt('heal', e.x, e.z, 0.9); }
           break;
         }
@@ -618,6 +641,14 @@ class App {
 
   // ---------- Hauptschleife ----------
   loop(now) {
+    if (this.pendingLayout && ++this.pendingLayout.frames > 2) {
+      const { layout } = this.pendingLayout;
+      this.pendingLayout = null;
+      this.env.setLayout(layout);
+      $('loading').classList.remove('show');
+      now = performance.now();
+      this.last = now;
+    }
     const dt = Math.min(0.1, (now - this.last) / 1000);
     this.last = now;
     this.time += dt;
@@ -664,6 +695,7 @@ class App {
       this.view.update(sim, dt, { selectedId: this.selected?.id, hoverId: this.hover, localPid: s.localPid });
       this.objectives.update(sim, dt, this.mode === 'game' ? (e) => this.missionClickable(e) : null);
       this.cam.update(dt, this.time);
+      if (this.mode === 'game') this.minimap.update(dt, sim, this.cam);
       this.fx.update(sim, dt);
     } else this.cam.update(dt, this.time);
     this.env.update(dt, this.time);

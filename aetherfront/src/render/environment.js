@@ -1,7 +1,7 @@
 // Aetherfront – 3D-Welt: Schwebeinseln über einem sonnenbeschienenen Wolkenmeer.
 // Echte CC0-Assets (PBR-Texturen + HDRI, siehe asset-catalog.js) mit prozeduralem Rückfall. API:
 //   createEnvironment({ scene, renderer, quality, assets, look, settings })
-//     -> { update(dt, t), sun, setQuality(q), setBiome(id), setArena(on), biome, dispose() }
+//     -> { update(dt, t), sun, setQuality(q), setBiome(id), setLayout(mapLayout), needsBuild(mapLayout), setArena(on), biome, dispose() }
 //   loadEnvironmentAssets(renderer) (re-exportiert) lädt die Assets vorab (async).
 // Biome (Art Bible, docs/ART-BIBLE.md): 'sky' (Akt 1 Himmelsinseln), 'wild' (Akt 2 Wildwald),
 //   'forge' (Akt 3 Eisen-/Wüstenschmiede), 'abyss' (Akt 4 Abgrund/Schattenwelt).
@@ -121,9 +121,14 @@ export function createEnvironment({ scene, renderer, quality = 'high', assets = 
 
   // ---------- Welt ----------
   const maxAniso = renderer.capabilities?.getMaxAnisotropy?.() ?? 8;
-  const world = buildWorld(U, { anisotropy: Math.min(8, maxAniso), assets });
+  const buildOpts = { anisotropy: Math.min(8, maxAniso), assets };
+  let world = buildWorld(U, buildOpts);
   scene.add(world.root);
   cullWorld = world.cull;
+  // Welten je Kartenbild (belegte Bahnen): die volle Welt (Menü, 4 gegen 4) bleibt immer, dazu die zuletzt genutzte
+  const FULL = '0123|0123|';
+  let layoutKey = FULL;
+  const worlds = new Map([[FULL, world]]);
   // Arena (nach Welle 10/20) zwischen den Teams
   const arena = createArena(scene);
 
@@ -217,6 +222,54 @@ export function createEnvironment({ scene, renderer, quality = 'high', assets = 
   }
 
   let current = null;
+  /** Welt an die belegten Bahnen anpassen ({ key, lanes, march } aus mapLayout). Neubau nur bei neuem Kartenbild. */
+  function setLayout(layout) {
+    const key = layout && !layout.full ? layout.key : FULL;
+    if (key === layoutKey) return false;
+    let next = worlds.get(key);
+    if (!next) {
+      for (const [k, w] of worlds) if (k !== FULL && k !== layoutKey) { disposeWorld(w); worlds.delete(k); }
+      next = buildWorld(U, { ...buildOpts, lanes: layout.lanes, march: layout.march });
+      worlds.set(key, next);
+    }
+    // die vorige Sonder-Welt nur behalten, solange höchstens zwei Welten im Speicher liegen
+    if (layoutKey !== FULL && worlds.size > 2) { disposeWorld(worlds.get(layoutKey)); worlds.delete(layoutKey); }
+    scene.remove(world.root);
+    world = next;
+    scene.add(world.root);
+    cullWorld = world.cull;
+    layoutKey = key;
+    setQuality(current);
+    update(U.uTime.value, U.uTime.value);
+    return true;
+  }
+  /** Braucht dieses Kartenbild einen (spürbaren) Neubau? → Ladeanzeige vorher einblenden */
+  const needsBuild = (layout) => { const key = layout && !layout.full ? layout.key : FULL; return key !== layoutKey && !worlds.has(key); };
+  // Welt freigeben – ohne die geteilten Asset-Texturen (gehören allen Welten)
+  const assetTex = new Set();
+  if (assets) {
+    for (const st of Object.values(assets.textures || {})) if (st) for (const v of Object.values(st)) if (v && v.isTexture) assetTex.add(v);
+    for (const h of Object.values(assets.hdri || {})) if (h && h.texture) assetTex.add(h.texture);
+  }
+  function disposeWorld(w) {
+    if (!w) return;
+    const tex = new Set();
+    w.root.traverse((o) => {
+      if (o.geometry) o.geometry.dispose();
+      const mats = o.material ? (Array.isArray(o.material) ? o.material : [o.material]) : [];
+      for (const mat of mats) {
+        for (const k of Object.keys(mat)) { const val = mat[k]; if (val && val.isTexture) tex.add(val); }
+        if (mat.uniforms) for (const u of Object.values(mat.uniforms)) if (u && u.value && u.value.isTexture) tex.add(u.value);
+        mat.dispose();
+      }
+      if (o.isInstancedMesh) o.dispose();
+    });
+    w.root.removeFromParent();
+    for (const t of tex) if (!assetTex.has(t) && !isShared(t)) t.dispose();
+  }
+  // Texturen aus den gemeinsamen Uniforms (Himmel/Wolken) nie freigeben
+  const isShared = (t) => Object.values(U).some((u) => u && u.value === t) || Object.values(S).some((u) => u && u.value === t);
+
   function setQuality(q) {
     const Q = QUALITY[q] || QUALITY.high;
     current = q in QUALITY ? q : 'high';
@@ -274,6 +327,7 @@ export function createEnvironment({ scene, renderer, quality = 'high', assets = 
       if (mat.uniforms) for (const u of Object.values(mat.uniforms)) if (u && u.value && u.value.isTexture) textures.add(u.value);
       mat.dispose();
     };
+    for (const w of worlds.values()) if (w !== world) disposeWorld(w);
     for (const obj of [world.root, sky, clouds]) {
       obj.traverse((o) => {
         if (o.geometry) o.geometry.dispose();
@@ -299,7 +353,7 @@ export function createEnvironment({ scene, renderer, quality = 'high', assets = 
   }
 
   return {
-    update, sun, setQuality, setBiome, dispose, uniforms: U, setArena: arena.setActive,
+    update, sun, setQuality, setBiome, setLayout, needsBuild, dispose, uniforms: U, setArena: arena.setActive,
     get quality() { return current; }, get biome() { return biome; }, get usesAssets() { return !!(assets && assets.count); },
   };
 }

@@ -129,109 +129,206 @@ export function addUnitRig(arch, geo, ref = geo, counts = null) {
 
 // ---------------------------------------------------------------------------------------------
 // Shader-Einbindung (für MeshStandardMaterial / MeshBasicMaterial / MeshDepthMaterial)
+// Pro Instanz zusätzlich aFx (vec4): x Auflösen 0..1 (Tod), y Treffer-Blitz 0..1 (weiß → rot),
+// z Wirk-Pose 0..1 (>0 = Zauberer: beide Arme heben, Glühen), w Modellhöhe in m (Maß für Wippen/Gelenke).
+// Bewegungen: Laufen (Wippen, Hüftdrehung, Bein-Pendel mit Knie, Fuß heben in der Schwungphase, Arm-Pendel mit
+// Ellbogen), Leerlauf (Atmen, Gewicht verlagern, Umschauen, gelegentlich Waffe schwingen – zeitversetzt über die
+// Phase), Nahkampf (Ausholen über Kopf mit Ellbogen → Schlag-Bogen → Durchschwung), Fernkampf (Spannen),
+// Zaubern (Arme nach vorn/oben, Stoß beim Auslösen), Treffer (Zurückzucken), Flügel/Schwanz/Insektenbeine.
 // ---------------------------------------------------------------------------------------------
 const GLSL = /* glsl */`
 attribute vec4 aRig;
 attribute vec4 aAnim;
+attribute vec4 aFx;
+varying vec4 vAfFx;
+varying vec3 vAfP;
 vec3 afRotX(vec3 p, vec2 piv, float a) { float c = cos(a), s = sin(a); vec2 q = p.yz - piv; return vec3(p.x, piv.x + q.x * c - q.y * s, piv.y + q.x * s + q.y * c); }
 vec3 afRotY(vec3 p, float pz, float a) { float c = cos(a), s = sin(a); vec2 q = vec2(p.x, p.z - pz); return vec3(q.x * c + q.y * s, p.y, pz - q.x * s + q.y * c); }
 vec3 afRotZ(vec3 p, vec2 piv, float a) { float c = cos(a), s = sin(a); vec2 q = p.xy - piv; return vec3(piv.x + q.x * c - q.y * s, piv.y + q.x * s + q.y * c, p.z); }
 void afAnim(inout vec3 p, inout vec3 n) {
+  vAfFx = aFx; vAfP = p;
   float cls = floor(aRig.x + 1e-4);
-  if (cls < 0.5 || abs(aAnim.x) + aAnim.y + aAnim.z < 1e-5) return;
+  if (cls < 0.5) return;
+  float Hm = max(aFx.w, 0.4);
   float w = clamp(fract(aRig.x + 1e-4) / 0.9, 0.0, 1.0);
   float ph = aAnim.x, walk = clamp(aAnim.y, 0.0, 1.0), atk = clamp(abs(aAnim.z), 0.0, 1.0);
-  float ranged = aAnim.z < 0.0 ? 1.0 : 0.0;   // negativ = Fernkampf (Spannen/Werfen statt Hieb)
+  float caster = step(0.0005, aFx.z);
+  float ranged = aAnim.z < 0.0 ? 1.0 - caster : 0.0;   // negativ = Fernkampf (Spannen/Werfen statt Hieb)
+  float melee = (1.0 - ranged) * (1.0 - caster);
   float hit = aAnim.w < 0.999 ? aAnim.w : 0.0;
-  float wind = smoothstep(0.02, 0.36, atk) * (1.0 - smoothstep(0.36, 0.5, atk));
-  float strike = smoothstep(0.34, 0.47, atk) * (1.0 - smoothstep(0.6, 1.0, atk));
+  // Hüllkurven: Ausholen bis 0.42, Schlag-Moment 0.45 (= Schaden in der Simulation), Durchschwung danach
+  float wind = smoothstep(0.02, 0.4, atk) * (1.0 - smoothstep(0.41, 0.47, atk));
+  float strike = smoothstep(0.4, 0.46, atk) * (1.0 - smoothstep(0.52, 0.8, atk));
+  float follow = smoothstep(0.46, 0.6, atk) * (1.0 - smoothstep(0.65, 1.0, atk));
+  float raise = caster * clamp(aFx.z, 0.0, 1.0);
+  float push = caster * strike;
+  float act = max(max(wind, strike), max(hit, raise));
+  float idle = (1.0 - walk) * (1.0 - act);
+  float breath = sin(ph * 1.1);
+  float fidget = pow(max(0.0, sin(ph * 0.19 + 1.3)), 12.0);   // gelegentlich (≈ alle 15 s, je Einheit versetzt)
+  float look = sin(ph * 0.33) * smoothstep(0.2, 0.9, sin(ph * 0.11 + 0.7));
   vec3 q = p, m = n;
   float hipY = aRig.z;
-  if (cls < 1.5) {                       // Bein: Pendeln (Scherung um Hüfthöhe), beim Aufsetzen leicht angehoben
-    float a = walk * 0.62 * sin(ph + aRig.y) * w;
-    q = afRotX(q, vec2(aRig.z, aRig.w), -a); m = afRotX(m, vec2(0.0), -a);
-    q.y += max(0.0, -cos(ph + aRig.y)) * walk * 0.05 * w * max(0.0, aRig.z - q.y) / max(0.05, aRig.z);
-  } else if (cls < 2.5 || (cls > 7.5 && cls < 8.5)) { // Arme
-    float a = -walk * 0.5 * sin(ph + aRig.y) * w;
-    float draw = smoothstep(0.02, 0.4, atk) * (1.0 - smoothstep(0.45, 0.8, atk));
-    if (ranged > 0.5) a += (cls > 7.5 ? -1.25 : -1.45) * draw * w;
-    else if (cls > 7.5) a += (-2.3 * wind - 0.75 * strike) * w;
-    else a += -0.5 * wind * w;
+  if (cls < 1.5) {                       // Bein: Knie (Unterschenkel) + Hüfte (ganzes Bein), Fuß heben in der Schwungphase
+    float lp = ph + aRig.y;
+    float swing = max(0.0, cos(lp)) * walk;
+    float kneeY = hipY * 0.5;
+    float kw = smoothstep(kneeY + 0.05 * Hm, kneeY - 0.06 * Hm, q.y) * w;
+    float kb = (0.95 * swing + 0.12 * walk + idle * 0.16 * (0.5 + 0.5 * sin(ph * 0.45 + aRig.y)) + 0.25 * hit) * kw;
+    q = afRotX(q, vec2(kneeY, aRig.w), kb); m = afRotX(m, vec2(0.0), kb);
+    float a = (walk * 0.58 * sin(lp) + melee * 0.18 * strike * cos(aRig.y)) * w;
+    q = afRotX(q, vec2(hipY, aRig.w), -a); m = afRotX(m, vec2(0.0), -a);
+    q.y += swing * 0.05 * Hm * w * clamp((hipY - p.y) / max(0.05, hipY), 0.0, 1.0);
+  } else if (cls < 2.5 || (cls > 7.5 && cls < 8.5)) { // Arme (8 = Waffenarm)
+    float wpn = step(7.5, cls);
+    vec2 sp = vec2(aRig.z, aRig.w);
+    vec2 d = q.yz - sp; float r = length(d);
+    float el = smoothstep(0.1 * Hm, 0.17 * Hm, r);
+    vec2 ep = sp + d / max(r, 1e-4) * min(r, 0.14 * Hm);
+    float sa = -walk * 0.55 * sin(ph + aRig.y);
+    float ea = -walk * (0.2 + 0.25 * max(0.0, sin(ph + aRig.y)));
+    sa += idle * (0.05 * breath - wpn * 0.55 * fidget) + 0.35 * hit;
+    ea += idle * (-0.12 - wpn * 0.9 * fidget) - 0.3 * hit;
+    if (caster > 0.5) {                  // Wirken: Arme nach vorn/oben, beim Auslösen nach vorn stoßen
+      sa += -1.55 * raise + 0.45 * push * (1.0 - raise) - 0.6 * push;
+      ea += -0.55 * raise + 0.45 * push;
+    } else if (ranged > 0.5) {           // Bogen/Wurf: Spannen (beide Arme hoch), Lösen
+      float draw = smoothstep(0.02, 0.4, atk) * (1.0 - smoothstep(0.45, 0.75, atk));
+      sa += (wpn > 0.5 ? -1.25 : -1.45) * draw;
+      ea += (wpn > 0.5 ? -0.9 : 0.0) * draw + 0.3 * strike;
+    } else if (wpn > 0.5) {              // Hieb: Ausholen über den Kopf, Waffe hinter dem Kopf → Schlag-Bogen → Durchschwung
+      sa += -2.5 * wind - 0.3 * strike + 0.35 * follow;
+      ea += -1.25 * wind + 0.2 * strike + 0.1 * follow;
+    } else {                             // Schildarm: vorhalten
+      sa += -0.7 * wind - 0.45 * strike - 0.2 * follow;
+      ea += -0.5 * wind - 0.3 * strike;
+    }
+    q = afRotX(q, ep, ea * el * w); m = afRotX(m, vec2(0.0), ea * el * w);
+    q = afRotX(q, sp, sa * w); m = afRotX(m, vec2(0.0), sa * w);
+  } else if (cls < 3.5) {               // Kopf: Wippen, Umschauen, Zucken
+    float a = (0.07 * walk * sin(ph * 2.0) - 0.35 * hit + 0.15 * strike * melee - 0.18 * raise + 0.04 * idle * breath) * w;
     q = afRotX(q, vec2(aRig.z, aRig.w), a); m = afRotX(m, vec2(0.0), a);
-  } else if (cls < 3.5) {               // Kopf: Wippen + Zucken
-    float a = (0.07 * walk * sin(ph * 2.0) - 0.3 * hit + 0.12 * strike) * w;
-    q = afRotX(q, vec2(aRig.z, aRig.w), a); m = afRotX(m, vec2(0.0), a);
-  } else if (cls < 4.5) {               // Flügel: Schlagen um die Körperlängsachse
+    float y = (0.45 * idle * look) * w;
+    q = afRotY(q, aRig.w, y); m = afRotY(m, 0.0, y);
+  } else if (cls < 4.5) {               // Flügel: Schlagen um die Körperlängsachse, Abschlag beim Angriff
     float sd = sign(aRig.y);
-    float a = sd * (0.32 + 0.22 * walk) * sin(ph * 1.6) * w - sd * 0.2 * hit;
+    float a = sd * ((0.42 + 0.2 * walk) * sin(ph * 1.7) + 0.55 * strike - 0.4 * wind - 0.3 * hit) * w;
     q = afRotZ(q, vec2(aRig.y, aRig.z), a); m = afRotZ(m, vec2(0.0), a);
   } else if (cls < 5.5) {               // Welle / Schwanz
     float k = aRig.w, amp = aRig.z;
-    float o = sin(ph * 0.7 + q.z * k * 6.2832) * amp * (0.35 + 0.65 * walk) * w + 0.6 * amp * strike * w;
+    float o = sin(ph * 0.8 + q.z * k * 6.2832) * amp * (0.45 + 0.75 * walk) * w + 0.7 * amp * (strike - 0.5 * wind) * w;
     q.x += o;
   } else if (cls < 6.5) {               // Oberkörper (Biped) / Rumpf
-    float rk = 1.0 - 0.8 * ranged;
-    float a = (0.2 * strike * rk - 0.12 * wind * rk - 0.25 * hit) * w;
-    float tw = (-0.38 * wind + 0.32 * strike) * rk * w;
-    q = afRotY(q, 0.0, tw); m = afRotY(m, 0.0, tw);
-    q = afRotX(q, vec2(hipY, 0.0), a); m = afRotX(m, vec2(0.0), a);
-  } else if (cls < 7.5) {               // Vorderleib/Kopf (Biss)
-    float a = (0.6 * strike - 0.35 * wind - 0.3 * hit + 0.06 * walk * sin(ph * 2.0)) * w;
+    float a = (0.24 * strike * melee - 0.16 * wind * melee - 0.3 * hit - 0.1 * raise + 0.14 * push + 0.08 * walk + 0.03 * walk * sin(ph * 2.0)) * w;
+    float tw = ((-0.42 * wind + 0.38 * strike) * melee + 0.09 * walk * sin(ph)) * w;
+    q = afRotY(q, aRig.w, tw); m = afRotY(m, 0.0, tw);
+    q = afRotX(q, vec2(hipY, aRig.w), a); m = afRotX(m, vec2(0.0), a);
+  } else if (cls < 7.5) {               // Vorderleib/Kopf (Biss) bzw. Geschützrohr
+    float a = (0.65 * strike - 0.4 * wind - 0.32 * hit + 0.06 * walk * sin(ph * 2.0) + 0.06 * idle * sin(ph * 0.8)) * w;
     q = afRotX(q, vec2(aRig.z, aRig.w), a); m = afRotX(m, vec2(0.0), a);
+    float y = 0.3 * idle * look * w;
+    q = afRotY(q, aRig.w, y); m = afRotY(m, 0.0, y);
   } else {                              // Spinnen-/Käferbein: Fegen um die Hochachse an der Beinwurzel + Heben
     float a = walk * 0.6 * sin(ph + aRig.y) * w * sign(aRig.z);
     float c = cos(a), sn = sin(a);
     vec2 r = vec2(q.x - aRig.z, q.z - aRig.w);
     q.x = aRig.z + r.x * c + r.y * sn; q.z = aRig.w - r.x * sn + r.y * c;
     m = vec3(m.x * c + m.z * sn, m.y, -m.x * sn + m.z * c);
-    q.y += max(0.0, cos(ph + aRig.y)) * walk * 0.25 * w * abs(r.x);
-    float b = (0.25 * strike - 0.15 * wind - 0.15 * hit) * w;
+    q.y += max(0.0, cos(ph + aRig.y)) * walk * 0.28 * w * abs(r.x);
+    float b = (0.3 * strike - 0.2 * wind - 0.2 * hit + 0.05 * idle * sin(ph * 0.9 + aRig.y)) * w;
     q.y += b * abs(r.x) * 0.3;
   }
   // Arme und Kopf folgen dem Oberkörper (Biped)
   if ((cls > 1.5 && cls < 3.5) || (cls > 7.5 && cls < 8.5)) {
-    float rk = 1.0 - 0.8 * ranged;
-    float a = (0.2 * strike - 0.12 * wind) * rk - 0.25 * hit;
-    float tw = (-0.38 * wind + 0.32 * strike) * rk;
+    float a = (0.24 * strike - 0.16 * wind) * melee - 0.3 * hit - 0.1 * raise + 0.14 * push + 0.08 * walk;
+    float tw = (-0.42 * wind + 0.38 * strike) * melee + 0.09 * walk * sin(ph);
     q = afRotY(q, 0.0, tw); m = afRotY(m, 0.0, tw);
     q = afRotX(q, vec2(aRig.z * 0.6, 0.0), a); m = afRotX(m, vec2(0.0), a);
   }
+  // Ganzer Körper: Wippen beim Laufen (Füße bleiben am Boden), Atmen (Brustkorb weitet sich, Schultern heben)
+  float up = clamp(p.y / (0.45 * Hm), 0.0, 1.0);
+  q.y += walk * 0.04 * Hm * (0.5 + 0.5 * cos(2.0 * ph)) * up;
+  float chest = smoothstep(0.45 * Hm, 0.7 * Hm, p.y) * (1.0 - smoothstep(0.82 * Hm, 0.95 * Hm, p.y));
+  float br = breath * (0.35 + 0.65 * idle);
+  q.xz *= 1.0 + 0.022 * br * chest * step(cls, 6.5) * step(5.5, cls);
+  q.y += 0.012 * Hm * br * smoothstep(0.55 * Hm, 0.8 * Hm, p.y);
   p = q; n = m;
 }
 `;
-/** In onBeforeCompile eines Materials einhängen */
-export function injectUnitAnim(sh) {
+// Fragment: Auflösen (Rauschen von oben nach unten, glühende Kante), Treffer-Blitz (weiß → rot), Wirk-Glühen
+const FRAG_HEAD = /* glsl */`
+varying vec4 vAfFx;
+varying vec3 vAfP;
+float afdHash(vec3 p) { p = fract(p * 0.1031); p += dot(p, p.zyx + 31.32); return fract((p.x + p.y) * p.z); }
+float afdNoise(vec3 p) {
+  vec3 i = floor(p), f = fract(p); vec3 u = f * f * (3.0 - 2.0 * f);
+  return mix(mix(mix(afdHash(i), afdHash(i + vec3(1,0,0)), u.x), mix(afdHash(i + vec3(0,1,0)), afdHash(i + vec3(1,1,0)), u.x), u.y),
+             mix(mix(afdHash(i + vec3(0,0,1)), afdHash(i + vec3(1,0,1)), u.x), mix(afdHash(i + vec3(0,1,1)), afdHash(i + vec3(1,1,1)), u.x), u.y), u.z);
+}
+float afDissolveN() {
+  float H = max(vAfFx.w, 0.4);
+  float n = afdNoise(vAfP * (5.5 / H) + 3.1) * 0.65 + afdNoise(vAfP * (14.0 / H)) * 0.35;
+  return n * 0.72 + 0.28 * (1.0 - clamp(vAfP.y / H, 0.0, 1.0));
+}
+`;
+const FRAG_DISCARD = /* glsl */`
+	if ( vAfFx.x > 0.001 && afDissolveN() < vAfFx.x * 1.12 - 0.04 ) discard;`;
+const FRAG_COLOR = (glow) => /* glsl */`
+	{
+		float afF = clamp( vAfFx.y, 0.0, 1.0 );
+		vec3 afFlash = mix( vec3( 1.0, 0.18, 0.1 ), vec3( 1.2 ), smoothstep( 0.55, 0.9, afF ) );
+		outgoingLight = mix( outgoingLight, afFlash * ${glow ? '3.0' : '1.4'}, afF * ${glow ? '0.45' : '0.6'} );
+		if ( vAfFx.x > 0.001 ) {
+			float afE = 1.0 - smoothstep( 0.0, 0.07, afDissolveN() - ( vAfFx.x * 1.12 - 0.04 ) );
+			outgoingLight = mix( outgoingLight * ( 1.0 - 0.6 * vAfFx.x ), vec3( 2.6, 0.75, 0.16 ) * ${glow ? '2.0' : '1.0'}, afE );
+		}
+${glow ? '\t\toutgoingLight *= 1.0 + 3.0 * clamp( vAfFx.z, 0.0, 1.0 );\n' : ''}	}`;
+function inject(sh, glow, depth) {
   sh.vertexShader = sh.vertexShader.replace('#include <common>', '#include <common>\n' + GLSL);
   // Normale (falls vorhanden) und Position getrennt verformen – robust auch in #ifdef-Blöcken
   sh.vertexShader = sh.vertexShader
     .replace('#include <beginnormal_vertex>', '#include <beginnormal_vertex>\n\t{ vec3 afP0 = position; afAnim(afP0, objectNormal); }')
-    .replace('#include <begin_vertex>', '#include <begin_vertex>\n\t{ vec3 afN0 = vec3(0.0, 1.0, 0.0); afAnim(transformed, afN0); }');
+    .replace('#include <begin_vertex>', '#include <begin_vertex>\n\t{ vec3 afN0 = vec3(0.0, 1.0, 0.0); afAnim(transformed, afN0); vAfP = position; }');
+  sh.fragmentShader = sh.fragmentShader
+    .replace('#include <common>', '#include <common>\n' + FRAG_HEAD)
+    .replace('#include <clipping_planes_fragment>', '#include <clipping_planes_fragment>\n' + FRAG_DISCARD);
+  if (!depth) sh.fragmentShader = sh.fragmentShader.replace('#include <opaque_fragment>', FRAG_COLOR(glow) + '\n#include <opaque_fragment>');
 }
-/** Tiefenmaterial für Schatten, das dieselbe Verformung anwendet */
+/** In onBeforeCompile eines Materials einhängen (Körper) */
+export function injectUnitAnim(sh) { inject(sh, false, false); }
+/** … für die Glüh-Ebene (Wirk-Glühen verstärkt) */
+export function injectUnitAnimGlow(sh) { inject(sh, true, false); }
+/** Tiefenmaterial für Schatten, das dieselbe Verformung (und das Auflösen) anwendet */
 export function createUnitDepthMaterial() {
   const m = new THREE.MeshDepthMaterial({ depthPacking: THREE.RGBADepthPacking });
-  m.onBeforeCompile = (sh) => injectUnitAnim(sh);
-  m.customProgramCacheKey = () => 'af-unit-depth-v1';
+  m.onBeforeCompile = (sh) => inject(sh, false, true);
+  m.customProgramCacheKey = () => 'af-unit-depth-v2';
   return m;
 }
 
-/**
- * Animationszustand einer Instanz setzen. mesh: InstancedMesh (Geometrie mit aRig).
- * phase: Laufphase in rad (läuft beim Gehen weiter), walk 0..1, attack 0..1 (Treffer ≈0.45; negativ −0..−1 = Fernkampf:
- * Bogen spannen/werfen statt Hieb), hit 0..1.
- */
-export function setInstanceAnim(mesh, index, phase, walk, attack, hit) {
+function instAttr(mesh, name) {
   const g = mesh.geometry;
-  let a = g.attributes.aAnim;
+  let a = g.attributes[name];
   const cap = mesh.instanceMatrix.count;
   if (!a || a.count < cap) {
     const arr = new Float32Array(cap * 4);
     if (a) arr.set(a.array.subarray(0, Math.min(a.array.length, arr.length)));
     a = new THREE.InstancedBufferAttribute(arr, 4);
     a.setUsage(THREE.DynamicDrawUsage);
-    g.setAttribute('aAnim', a);
+    g.setAttribute(name, a);
   }
-  const o = index * 4;
-  a.array[o] = phase % 6283.185; a.array[o + 1] = walk; a.array[o + 2] = attack; a.array[o + 3] = Math.min(0.95, Math.max(0, hit));
   a.needsUpdate = true;
+  return a.array;
+}
+/**
+ * Animationszustand einer Instanz setzen. mesh: InstancedMesh (Geometrie mit aRig).
+ * phase: Lauf-/Leerlaufphase in rad (läuft immer weiter, je Einheit versetzt), walk 0..1, attack 0..1 (Schlag-Moment
+ * ≈0.45; negativ −0..−1 = Fernkampf: Bogen spannen/werfen statt Hieb), hit 0..1.
+ * fx (optional): [Auflösen 0..1, Treffer-Blitz 0..1, Wirk-Pose 0..1 (>0 = Zauberer), Modellhöhe m]
+ */
+export function setInstanceAnim(mesh, index, phase, walk, attack, hit, fx) {
+  const a = instAttr(mesh, 'aAnim'), o = index * 4;
+  a[o] = phase % 6283.185; a[o + 1] = walk; a[o + 2] = attack; a[o + 3] = Math.min(0.95, Math.max(0, hit));
+  const f = instAttr(mesh, 'aFx');
+  if (fx) { f[o] = fx[0]; f[o + 1] = fx[1]; f[o + 2] = fx[2]; f[o + 3] = fx[3]; } else { f[o] = 0; f[o + 1] = 0; f[o + 2] = 0; f[o + 3] = 2; }
 }

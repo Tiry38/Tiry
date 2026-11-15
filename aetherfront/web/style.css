@@ -65,7 +65,7 @@ body[data-screen="hud"] #vignette { opacity: .55; }
 #hud.active { animation: none; }
 .screen.active > * { pointer-events: auto; }
 #hud.active > * { pointer-events: none; }
-#hud.active .res-row, #hud.active .battle-head, #hud.active .hud-actions, #hud.active .lanes, #hud.active .select-card, #hud.active .console, #hud.active .scoreboard { pointer-events: auto; }
+#hud.active .res-row, #hud.active .battle-head, #hud.active .hud-actions, #hud.active .lanes, #hud.active .minimap, #hud.active .select-card, #hud.active .console, #hud.active .scoreboard { pointer-events: auto; }
 @keyframes screenIn { from { opacity: 0; } }
 button { font-family: inherit; }
 .i { width: 1em; height: 1em; display: inline-block; vertical-align: -0.14em; flex: none; }
@@ -641,6 +641,23 @@ input[type=range]:focus-visible::-webkit-slider-thumb { box-shadow: 0 0 0 2px #0
 .feed .msg.send { --mc: var(--send); color: #ffe4f2; }
 .feed .msg.out { opacity: 0; transform: translateX(-20px); transition: all .5s; }
 @keyframes msgin { from { opacity: 0; transform: translateX(-24px); } }
+
+/* Minimap (rechts unten über den Söldnern): Glas-Pille mit sanft wanderndem Verlaufsrand */
+.minimap {
+  position: absolute; right: 16px; bottom: 160px; width: 252px; height: 150px; border-radius: 44px; overflow: hidden; isolation: isolate;
+  background: radial-gradient(ellipse 70% 60% at 30% 20%, rgba(111, 227, 255, 0.14), transparent 70%), radial-gradient(ellipse 60% 70% at 80% 90%, rgba(192, 107, 255, 0.14), transparent 70%), rgba(7, 10, 20, 0.62);
+  backdrop-filter: blur(10px) saturate(1.25);
+  box-shadow: 0 0 22px rgba(111, 227, 255, 0.16), 0 14px 34px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.10);
+}
+.minimap::before {
+  content: ''; position: absolute; inset: 0; border-radius: inherit; padding: 1.5px; z-index: 2; pointer-events: none;
+  background: linear-gradient(120deg, #ffe2a0, #6fe3ff 35%, #c06bff 65%, #ffe2a0); background-size: 300% 300%;
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask-composite: exclude;
+  animation: mmGlow 9s ease-in-out infinite;
+}
+.minimap canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; cursor: crosshair; }
+@keyframes mmGlow { 50% { background-position: 100% 50%; } }
+@media (prefers-reduced-motion: reduce) { .minimap::before { animation: none; } }
 
 /* Fronten (rechts) */
 .lanes { --c: 12px; position: absolute; right: 16px; top: 84px; width: 252px; padding: 8px 8px 10px; display: flex; flex-direction: column; gap: 2px; transition: width .3s var(--ease); }

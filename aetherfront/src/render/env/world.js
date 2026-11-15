@@ -38,7 +38,12 @@ function segDist(px, pz, ax, az, bx, bz) {
   return Math.hypot(px - (ax + vx * t), pz - (az + vz * t));
 }
 
-export function buildWorld(U, { anisotropy = 8, assets = null } = {}) {
+/**
+ * @param lanes  belegte Bahn-Slots je Team ([[0..3], [0..3]], Standard: alle). Unbelegte Bahnen werden nicht gebaut –
+ *               dort wächst Landschaft (Wiese, Bäume, Felsen, Kristalle) statt eines leeren Weges.
+ * @param march  je Team: Marschweg (Brücke) vom Inselsüden zum König, auch ohne Bahn (Kampagne: Weg zur Rissfeste)
+ */
+export function buildWorld(U, { anisotropy = 8, assets = null, lanes: activeLanes = null, march = [false, false] } = {}) {
   const A = assets?.textures || {};
   const root = new THREE.Group();
   root.name = 'aetherfront-environment';
@@ -48,10 +53,14 @@ export function buildWorld(U, { anisotropy = 8, assets = null } = {}) {
   // ---------- Teams & Wege ----------
   const teams = [0, 1].map((team) => {
     const cx = TEAM_CENTER_X[team];
-    const lanes = [];
-    for (let s = 0; s < LANES_PER_TEAM; s++) lanes.push(laneCenterX(team, s));
+    const allLanes = [];
+    for (let s = 0; s < LANES_PER_TEAM; s++) allLanes.push(laneCenterX(team, s));
+    const slots = activeLanes ? activeLanes[team] || [] : allLanes.map((_, s) => s);
+    const lanes = allLanes.filter((_, s) => slots.includes(s));
+    const idle = allLanes.filter((_, s) => !slots.includes(s));
     const bridges = lanes.map((lx) => ({ ax: lx, az: LANE_END_Z - 2, bx: cx, bz: KING_Z }));
-    return { team, cx, lanes, bridges };
+    if (march[team]) bridges.push({ ax: cx, az: LANE_END_Z - 2, bx: cx, bz: KING_Z, march: true });
+    return { team, cx, lanes, allLanes, idle, bridges };
   });
 
   const flatMask = (tm, x, z) => {
@@ -552,7 +561,7 @@ export function buildWorld(U, { anisotropy = 8, assets = null } = {}) {
     kit.pillar(tm.cx - side * 44.5, 0.3, 14, 4, 0.55, { broken: true });
     // Nordrand zwischen Portalen: Obelisken
     for (let s = 0; s < 3; s++) {
-      const x = (tm.lanes[s] + tm.lanes[s + 1]) / 2;
+      const x = (tm.allLanes[s] + tm.allLanes[s + 1]) / 2;
       kit.obelisk(x, 0.4, -39.2, 6 + (s % 2) * 1.5, s * 0.5, [0.25, 1.3, 1.6]);
       crystalSpots.push({ x: x - 2.4, y: 0.4, z: -37.5, s: 1.3, rot: s, c: TEAL_C, tilt: 0.2 });
       crystalSpots.push({ x: x + 2.2, y: 0.4, z: -38.8, s: 0.9, rot: s + 2, c: VIOLET_C, tilt: -0.2 });
@@ -672,7 +681,7 @@ export function buildWorld(U, { anisotropy = 8, assets = null } = {}) {
       const side = tm.team === 0 ? -1 : 1;
       // Hügel zwischen den Bahnen
       for (let s = 0; s < 3; s++) {
-        const bx = (tm.lanes[s] + tm.lanes[s + 1]) / 2;
+        const bx = (tm.allLanes[s] + tm.allLanes[s + 1]) / 2;
         let z = -33 + R() * 3;
         let k = 0;
         while (z < 27) {
@@ -698,6 +707,23 @@ export function buildWorld(U, { anisotropy = 8, assets = null } = {}) {
         else if (i % 7 === 5) { crystalSpots.push({ x: p.x, y: p.y - 0.2, z: p.z, s: 1.3 + p.r * 0.9, rot: p.r * 9, c: i % 2 ? TEAL_C : PINK_C, tilt: 0.1 }); occupy(p.x, p.z, 1.6); }
         else { treeSpots[i % 3 === 0 ? 1 : 0].push({ x: p.x, y: p.y - 0.15, z: p.z, s: 0.8 + p.r * 0.55, c: i % 6 === 1 ? 'blossom' : i % 9 === 4 ? 'gold' : 'green' }); occupy(p.x, p.z, 2.6); }
       });
+      // Unbelegte Bahnen (Kampagne, kleine Teams): natürliche Landschaft statt leerer Wege
+      if (tm.idle.length) {
+        const IR = rng(4100 + tm.team * 7);
+        for (const ix of tm.idle) {
+          for (let z = -37; z < 31; z += 4.4) {
+            for (const off of [-5, 0, 5]) {
+              const x = ix + off + (IR() - 0.5) * 2.8, zz = z + (IR() - 0.5) * 2.6;
+              const r = IR();
+              const h = topYAt(d, x, zz);
+              if (!h || h.t > 0.92 || flatMask(tm, x, zz) > 0.01 || !free(x, zz, 1.9)) continue;
+              if (r < 0.46) { treeSpots[r < 0.16 ? 1 : 0].push({ x, y: h.y - 0.15, z: zz, s: 0.62 + IR() * 0.4, c: r < 0.07 ? 'blossom' : r < 0.11 ? 'gold' : 'green' }); occupy(x, zz, 2.4); }
+              else if (r < 0.56) { crystalSpots.push({ x, y: h.y - 0.2, z: zz, s: 0.8 + IR() * 0.7, rot: IR() * 6, c: r < 0.51 ? TEAL_C : VIOLET_C, tilt: (IR() - 0.5) * 0.3 }); occupy(x, zz, 1.4); }
+              else if (r < 0.74) { rockSpots.push({ x, y: h.y - 0.1, z: zz, s: 0.7 + IR() * 0.9, rot: IR() * 6 }); occupy(x, zz, 1.5); }
+            }
+          }
+        }
+      }
       // Wasserfälle an den Außenkanten
       for (const fz of [-22, 12]) {
         const th = Math.atan2(fz - d.cz, side * 60);
@@ -923,7 +949,7 @@ export function buildWorld(U, { anisotropy = 8, assets = null } = {}) {
   {
     // zusätzliche Schwebe-Splitter über den Hügeln
     for (const tm of teams) for (let s = 0; s < 3; s++) {
-      const bx = (tm.lanes[s] + tm.lanes[s + 1]) / 2;
+      const bx = (tm.allLanes[s] + tm.allLanes[s + 1]) / 2;
       for (const z of [-20, 0, 18]) floatSpots.push({ x: bx + (R() - 0.5) * 2, y: 4.5 + R() * 2.5, z: z + R() * 4, s: 0.5 + R() * 0.3, c: s === 1 ? VIOLET_C : TEAL_C });
     }
     for (let i = 0; i < 8; i++) {

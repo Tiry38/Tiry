@@ -2,8 +2,8 @@
 
 3D-Lane-Defense-Strategiespiel für Windows (Team-Tower-Wars-Genre): Zwei Teams verteidigen je einen König,
 jeder Spieler baut Kämpfer auf seiner eigenen Bahn, schickt Söldner zum Gegner und baut seine Wirtschaft auf.
-Eigene Welt, eigene Fraktionen und Figuren – alle Grafiken, Modelle, Musik und Effekte werden im Programm erzeugt
-(keine fremden Assets).
+Eigene Welt, eigene Fraktionen und Figuren – Modelle und Effekte werden im Programm erzeugt; Texturen, Himmel, Musik und
+Geräusche sind gemeinfreie CC0-Aufnahmen (Quellen in `web/assets/LICENSES.md`), keine Markennamen oder fremden Figuren.
 
 ## Spielen
 
@@ -92,7 +92,7 @@ oder **Halten** (alle Wellen überstehen). Der Rissfürst schickt eigene Söldne
 - `server/relay-server.js` – Relay-Server: Räume, Lobby, Tick-Stempel, Desync-Erkennung. Er verteilt nur Befehle.
 - `src/render/` – Three.js: PBR-Materialien, weiche Schatten, Bloom, Ambient Occlusion (Ultra), Farbgrading,
   GPU-Instancing (ein Draw-Call pro Modelltyp), Partikel, prozedurale Modelle (`models.js`) und Welt (`environment.js`).
-- `src/audio/audio.js` – live synthetisierte Orchestermusik (Menü/Bau/Kampf/Boss/Sieg/Niederlage) und Effekte (Web Audio).
+- `src/audio/audio.js` – Audio-Engine (Web Audio): Orchester-Musik je Stimmung (Menü/Bau/Kampf/Boss/Arena/Sieg/Niederlage) mit Überblendung und Ducking, geschichtete Kampfgeräusche mit Varianten, Stimmenlimit, Entfernungsfilter, Kompressor/Limiter. Aufnahmen (CC0) in `web/assets/audio/`, Quellen in `web/assets/LICENSES.md`, Sprite-Positionen in `src/audio/audio-manifest.js`.
 - `src/ui/` – Menüs, HUD, Einstellungen (gespeichert). `electron/` – Windows-Hülle.
 
 ## Online mit Freunden

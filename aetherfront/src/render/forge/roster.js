@@ -165,3 +165,25 @@ export function formFit(arch, form) {
 }
 /** Dunkle Volksfarben für die Draufsicht anheben (Abgrund, Glut) – Kontrast/Randlicht */
 export const PALETTE_LIFT = { '#2c2440': '#4a3d70', '#6a1f52': '#9a2f78', '#3a2422': '#5e3a32', '#8a5a3a': '#b07a4a' };
+
+/**
+ * Linien-Akzente (nur Grafik): jede Linie eines Volks bekommt eine eigene Zweitfarbe (Umhang/Wappenrock), damit
+ * z. B. der Sonnenorden nicht durchgehend blau wirkt; Pfad B (ab Stufe II) leuchtet in einer Gegenfarbe des Volks,
+ * damit sich A/B schon aus der Draufsicht unterscheiden.
+ */
+export const LINE_ACCENT = {
+  orden: { squire: '#2f5fb3', archer: '#2f7a46', priest: '#c8962e', guard: '#23408f', griffin: '#2a8a9a', lancer: '#a32a3a', monk: '#c8742a', ballista: '#7a5230' },
+  wild: { druid: '#a8742c', owl: '#6a5a8a', shroom: '#a83a5a', ent: '#4a7a2a' },
+  schmiede: { core: '#3a7ac2', drone: '#c2a03a', arc: '#5a5ad2', tank: '#8a3a2a' },
+  abgrund: { witch: '#3a6a3a', banshee: '#4a8aa8', bone: '#8a7a4a', ghoul: '#5a2a2a' },
+  schwarm: { queen: '#a83a8a', spitter: '#3a8a6a', locust: '#c25a2a' },
+  glut: { priestess: '#e8b23a', phoenix: '#ffcf3a', imp: '#a82a5a' },
+};
+export const PATH_B_GLOW = { orden: '#8fd8ff', wild: '#ffcc4a', schmiede: '#ff8a3a', abgrund: '#ff4a7a', schwarm: '#ff7a3a', glut: '#6ad0ff' };
+export function linePalette(def, base) {
+  if (!def || !base) return base;
+  const acc = LINE_ACCENT[def.faction] && LINE_ACCENT[def.faction][def.line];
+  const pb = def.branch === 'b' && (def.tier | 0) >= 2 ? PATH_B_GLOW[def.faction] : null;
+  if (!acc && !pb) return base;
+  return { ...base, ...(acc ? { secondary: acc } : {}), ...(pb ? { glow: pb } : {}) };
+}

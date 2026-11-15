@@ -3,8 +3,9 @@
 // gebackenen Kopfpunkt und ein Aura-Ring am Boden, dazu stärkeres Leuchten.
 const cache = new Map();
 
-/** Vasallen: keine Laufzeit-Teile mehr (Formen sind gebacken) */
-export function unitVariant(def) { void def; return null; }
+/** Vasallen: keine Laufzeit-Teile mehr (Formen sind gebacken); Pfad B leuchtet kräftiger (Farbe: roster.linePalette) */
+const PATH_B = { parts: [], glow: 1.7 };
+export function unitVariant(def) { return def && def.branch === 'b' && (def.tier | 0) >= 2 ? PATH_B : null; }
 
 /** Gegner: Anführer/Champion bekommen Krone + Aura, Bosse nur mehr Leuchten */
 export function creepVariant(def) {

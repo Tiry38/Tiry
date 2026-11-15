@@ -49,6 +49,37 @@ export function arenaSpot(team, idx, n, col, row) {
   return { x, z };
 }
 
+/**
+ * Kartenbild einer Partie: welche Bahnen sind belegt (je Team die Slots der Spieler), braucht die Kampagne einen
+ * Marschweg zur Rissfeste, ist die Arena aktiv – und daraus die Grenzen für Kamera und Minimap.
+ * Rein lesend (ändert die Simulation nicht). Welt, Kamera und Minimap zeigen nur belegte Bahnen –
+ * leere Bahnen würden nie bespielt und sähen aus, als fehle jemand.
+ * @param players Spieler [{ team, slot }]
+ */
+export function mapLayout(players, { campaign = false, arena = false } = {}) {
+  const lanes = [[], []];
+  for (const p of players || []) if (p && lanes[p.team] && !lanes[p.team].includes(p.slot)) lanes[p.team].push(p.slot);
+  for (const l of lanes) l.sort((a, b) => a - b);
+  // Kampagne: Team Ost hat keine Bahn – die Söldner marschieren über einen eigenen Weg zur Rissfeste
+  const march = [false, !!campaign && !lanes[1].length];
+  const xs = [];
+  for (const t of [0, 1]) {
+    for (const s of lanes[t]) xs.push(laneCenterX(t, s));
+    if (lanes[t].length || march[t]) xs.push(TEAM_CENTER_X[t]);
+  }
+  if (!xs.length) xs.push(0);
+  const minX = Math.min(...xs), maxX = Math.max(...xs);
+  return {
+    lanes, march, arena: !!arena,
+    key: `${lanes[0].join('')}|${lanes[1].join('')}|${march[1] ? 'm' : ''}`,
+    full: lanes.every((l) => l.length === LANES_PER_TEAM),
+    // Blickpunkt der Kamera (Bildmitte) darf sich hier bewegen: alle Bahnen von Portal bis König, Mitte, Arena
+    camBounds: { x0: Math.min(minX - 12, -16), x1: Math.max(maxX + 12, 16), z0: arena ? ARENA.z - 6 : LANE_SPAWN_Z - 12, z1: KING_Z + 12 },
+    // Ausschnitt der Minimap (Welteinheiten)
+    mapRect: { x0: Math.min(minX - 16, -18), x1: Math.max(maxX + 16, 18), z0: arena ? ARENA.z - ARENA.r - 3 : LANE_SPAWN_Z - 14, z1: KING_Z + 19 },
+  };
+}
+
 export const LAYOUT = {
   ARENA, CELL, GRID_COLS, GRID_ROWS, LANE_WIDTH, LANE_SPAWN_Z, BUILD_Z0, BUILD_Z1, LANE_END_Z, KING_Z,
   TEAM_CENTER_X, LANE_SPACING, LANES_PER_TEAM,
