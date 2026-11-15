@@ -2793,6 +2793,24 @@ footer .soc a{display:grid!important;place-items:center}
 .lbp-cap .m{overflow:hidden;text-overflow:ellipsis}
 }
 @media (min-width:1181px) and (prefers-reduced-motion:reduce){.lbp,.lbp-pg{transition:opacity .2s ease!important}.lbp-bk{transition:opacity .3s ease}}
+
+/* Kennzahl-Etikett in der Menü-Vorschau (15.11.2026, Tiry: rote Kreise raus) – dunkles Glas wie die Status-Pille im Kopf,
+   Lichtkante Logo-Rot → Logo-Grau, leiser Glanz-Durchlauf */
+.lbp-tag{position:absolute;z-index:2;display:flex;align-items:center;gap:13px;padding:11px 18px 11px 16px;border-radius:22px;color:#fff;isolation:isolate;overflow:hidden;
+ background:linear-gradient(150deg,rgba(40,42,54,.9),rgba(16,17,24,.94));-webkit-backdrop-filter:blur(14px) saturate(1.4);backdrop-filter:blur(14px) saturate(1.4);
+ box-shadow:inset 0 1px 0 rgba(255,255,255,.18),0 24px 44px -20px rgba(18,8,14,.75),0 12px 30px -16px rgba(207,26,44,.6)}
+.lbp-tag::before{content:"";position:absolute;inset:0;border-radius:inherit;padding:1.2px;pointer-events:none;
+ background:linear-gradient(120deg,#E8283C,rgba(255,255,255,.5) 46%,#868282 78%,rgba(255,255,255,.25));
+ -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask:linear-gradient(#000 0 0) content-box exclude,linear-gradient(#000 0 0)}
+.lbp-tag::after{content:"";position:absolute;inset:0 -60%;z-index:-1;pointer-events:none;background:linear-gradient(105deg,transparent 42%,rgba(255,255,255,.13) 50%,transparent 58%);transform:translateX(-60%);animation:lbpTagSh 6.5s cubic-bezier(.45,0,.2,1) 1.2s infinite}
+@keyframes lbpTagSh{0%{transform:translateX(-60%)}38%,100%{transform:translateX(60%)}}
+.lbp-tag b{font-size:31px;font-weight:800;letter-spacing:-.035em;line-height:1;white-space:nowrap;
+ background:linear-gradient(180deg,#FFFFFF 30%,#E4E7EE);-webkit-background-clip:text;background-clip:text;color:transparent}
+.lbp-tag b i{font-style:normal;margin-left:2px;background:linear-gradient(180deg,#FF5466,#E2233A);-webkit-background-clip:text;background-clip:text;color:transparent}
+.lbp-tag span{position:relative;padding-left:13px;font-size:12px;line-height:1.3;font-weight:600;color:rgba(255,255,255,.74);white-space:nowrap}
+.lbp-tag span::before{content:"";position:absolute;left:0;top:2px;bottom:2px;width:1.5px;border-radius:2px;background:linear-gradient(180deg,#E8283C,rgba(134,130,130,.6))}
+.lbp-tag em{display:block;font-style:normal;font-size:10px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:#fff;margin-bottom:2px}
+@media (prefers-reduced-motion:reduce){.lbp-tag::after{animation:none;opacity:0}}
 </style>
 <script>document.documentElement.classList.add('er')</script>
 <style id="eisRot">
@@ -5739,9 +5757,9 @@ const tx=(ey,hh,p,k,it,c)=>`<div class="lbp-tx"><div class="lbp-ey">${ey}</div><
 const M=['ktm','isy','gudereit','vdv','qio','vanraam','victoria','stevens'];
 const P={
 start:tx('Start · Familienbetrieb seit 1995','<span style="white-space:nowrap">E-Bike &amp;</span> <span style="white-space:nowrap">E-Dreirad-Spezialist</span><br><span class="gt it">mit eigener Werkstatt.</span>','Über 300 E-Bikes zum Probefahren und ein Bosch Service Center in Wörth.','start',['Showroom: über 300 E-Bikes vor Ort','Hier schraubt der Chef noch selbst','Das sagen unsere Kunden bei Google','Besuch uns: Hartmannstraße 25'],cta(['Zur Startseite','#start'],['Termin','#termin']))+
- `<div class="lbp-vi"><div class="lbp-ph"><img src="img/laden-innen.webp" alt=""></div><div class="lbp-bd" style="width:98px;height:98px;right:-10px;bottom:-12px;font-size:26px">300+<small style="display:block;font-size:9.5px;letter-spacing:.1em;margin-top:5px">E-BIKES</small></div></div>`,
+ `<div class="lbp-vi"><div class="lbp-ph"><img src="img/laden-innen.webp" alt=""></div><div class="lbp-tag" style="right:-14px;bottom:-10px"><b>300<i>+</i></b><span><em>E-Bikes vor Ort</em>zum Probefahren</span></div></div>`,
 service:tx('Service · Bosch Service Center','Wir überzeugen<br><span class="gt it">mit Service.</span>','Beratung, Werkstatt und clevere Bezahlung aus einer Hand.','service',['Beratung &amp; Probefahrt','Inspektion &amp; Reparatur','Termin anfragen in 30 Sekunden','0 % Finanzierung, ENRA-Versicherung, Dienstrad-Leasing'],cta(['Zum Service','#service'],['Termin','#termin']))+
- `<div class="lbp-vi"><div class="lbp-blob"></div><img class="lbp-cut" src="img/sattelueberzug.webp" alt="" style="width:200px;left:64px;top:22px"><div class="lbp-bd" style="width:98px;height:98px;right:8px;top:6px;font-size:26px">–20 €<small style="display:block;font-size:9.5px;letter-spacing:.1em;margin-top:5px">INSPEKTION</small></div></div>`,
+ `<div class="lbp-vi"><div class="lbp-blob"></div><img class="lbp-cut" src="img/sattelueberzug.webp" alt="" style="width:200px;left:64px;top:22px"><div class="lbp-tag" style="right:-14px;bottom:2px"><b>–20<i>€</i></b><span><em>Winter-Aktion</em>auf jede Inspektion</span></div></div>`,
 marken:tx('Marken','Top-Marken.<br><span class="gt it">Große Auswahl.</span>','Von KTM bis i:SY: acht Marken, dazu gutes Zubehör.','marken',['Acht Marken. Ein Laden.','Gutes Zubehör macht den Unterschied.'],cta(['Zu den Marken','#marken']))+
  `<div class="lbp-lg">${M.map(m=>`<a href="#marken" tabindex="-1"><img src="img/marke-${m}.svg" alt=""></a>`).join('')}</div>`,
 lager:tx('Auf Lager · Live','Sofort da.<br><span class="gt it">Sofort Probe fahren.</span>','Diese Räder stehen jetzt bei uns in Wörth: ansehen, reservieren, Probe fahren.','lager',['Sonderangebote: nur solange vorrätig','Rad-Finder: Was passt zu mir?','Bestand mit Suche und Filter'],'<div class="lbp-st" data-lgst></div>'+cta(['Zum Lager','#lager']))+

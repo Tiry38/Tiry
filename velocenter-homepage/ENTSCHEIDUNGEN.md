@@ -254,3 +254,6 @@
   mit Glasklinge und **gebürstetem Eloxal-Rot** (Schliffspuren + Lichtkante). Ohne Umschalter, ohne Info-Varianten.
 - Eingebaut als `<style id="eisRot">` direkt nach dem Haupt-Stil und `<script id="eisRotJs">` am Ende von `index.html`.
   Änderungen an diesem Look dort machen (die Vorlagen-Dateien sind nur noch Archiv).
+- **Menü-Vorschau ohne rote Kreise (15.11.2026, Tiry: „wirklich sehr unschön“):** „300+“ (Start) und „–20 €“ (Service) sind jetzt
+  dunkle Glas-Etiketten `.lbp-tag` wie die Status-Pille im Kopf: große Zahl weiß, „+“/„€“ in Logo-Rot, Trennstrich, kleine Zeile
+  („E-Bikes vor Ort · zum Probefahren“ bzw. „Winter-Aktion · auf jede Inspektion“), Lichtkante Rot → Grau, leiser Glanz (aus bei „Bewegung reduzieren“). Keine Kreis-Plaketten mehr.
