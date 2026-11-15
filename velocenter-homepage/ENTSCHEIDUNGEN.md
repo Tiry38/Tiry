@@ -262,6 +262,9 @@
 - **Etikett Service mit Zugabe (15.11.2026, Tiry):** „–20 €“-Etikett hat als 3. Zeile „+ Sattelüberzug geschenkt“ („+“ in Logo-Rot), damit die ganze Winter-Aktion drinsteht.
 - **KEINE Bestandszahlen auf der Homepage (15.11.2026, Tiry, verbindlich):** keine Anzahl „im Laden / bestellt / Angebote“ o. Ä. öffentlich zeigen –
   auch nicht in der Menü-Vorschau (dort entfernt). `#lgNum` auf der Lager-Seite bleibt `hidden`. Einzelne Räder mit Preis bleiben.
-- **Rote Fläche läuft spitz aus (15.11.2026, Tiry: „rechts total abgeschnitten … soll komplett spitz rauslaufen“):** Glasklinge ist jetzt ein
-  spitz zulaufender Keil, Klinge und Rot enden unten rechts in einem Punkt. Höhe passt sich je Reiter an (`erFit()`): Spitze genau am Ende
-  des Kopfbereichs (`.ph`, Start `.stage0`, i:SY `.isyhero`), Breite folgt der Höhe (gleicher Winkel wie die Striche). Handy: feste 250 px, ebenfalls spitz.
+- **Rote Fläche läuft aus dem Bild (15.11.2026, Tiry):** Größe und Form wie vorher, die weiße Glasklinge bleibt **parallel** (kein Keil,
+  keine Anpassung an den Kopfbereich – beides hat Tiry verworfen). Die Ebene steht um `--g` über den rechten Rand und ist entsprechend länger:
+  Klinge und Rot laufen unten schräg aus dem rechten Bildrand (Rot endet dort spitz), nie mehr waagrecht abgeschnitten.
+- **Menü F auf schmalen PCs (15.11.2026):** Bei 1000–1366 px rutschte „Kontakt“ unter die Öffnungs-Pille, weil die feste Menü-F-Größe die
+  Verdichtungs-Stufen `tight/tight2/tight3` von `hdrFit()` überschrieb → Stufen haben jetzt Vorrang (geprüft 1000–2560 px, oben + gescrollt).
+  Sind die Social-Knöpfe dabei ausgeblendet (`.hdr.nosoc`), ist der linke Strich im Kopfbereich ausgeblendet, damit er nicht durchs Logo läuft.
