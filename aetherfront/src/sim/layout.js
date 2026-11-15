@@ -35,7 +35,21 @@ export function slotsForTeamSize(n) {
   return [[1], [1, 2], [0, 1, 2], [0, 1, 2, 3]][Math.max(1, Math.min(4, n)) - 1];
 }
 
+// Arena (nach Welle 10 und 20): runde Kampffläche zwischen den Teams, nördlich der Mittelinsel.
+// Team West stellt sich links (−x), Team Ost rechts (+x) auf.
+export const ARENA = { x: 0, z: -46, r: 21 };
+
+/** Aufstellung eines Kämpfers in der Arena: Bauraster wird gedreht, vordere Reihen zur Mitte hin.
+ *  idx = Position des Spielers im Team (0..n-1), n = Spieler im Team */
+export function arenaSpot(team, idx, n, col, row) {
+  const side = team === 0 ? -1 : 1;
+  const x = ARENA.x + side * (2.6 + row * 1.45);
+  const block = 8.4;                                  // Breite eines Spieler-Blocks (6 Spalten)
+  const z = ARENA.z + (idx - (n - 1) / 2) * block + (col - (GRID_COLS - 1) / 2) * 1.3;
+  return { x, z };
+}
+
 export const LAYOUT = {
-  CELL, GRID_COLS, GRID_ROWS, LANE_WIDTH, LANE_SPAWN_Z, BUILD_Z0, BUILD_Z1, LANE_END_Z, KING_Z,
+  ARENA, CELL, GRID_COLS, GRID_ROWS, LANE_WIDTH, LANE_SPAWN_Z, BUILD_Z0, BUILD_Z1, LANE_END_Z, KING_Z,
   TEAM_CENTER_X, LANE_SPACING, LANES_PER_TEAM,
 };

@@ -10,6 +10,7 @@ export const ECON = {
   workerCostStep: 5,          // jeder weitere Arbeiter kostet etwas mehr
   workerRate: 0.45,           // Äther pro Sekunde je Arbeiter
   maxWorkers: 16,
+  maxWorkersDuel: 10,         // Obergrenze im 1 gegen 1
   maxGather: 4,
   gatherBonus: 0.25,         // je Sammel-Stufe +25 % Äther pro Funke
   randomBonusGold: 40,        // Bonus für Zufallsfraktion
@@ -19,6 +20,15 @@ export const ECON = {
   sellRefund: 0.5,            // Verkaufswert nach einer Welle
   kingShare: 0.5,             // Kopfgeldanteil, wenn der König einen Durchbrecher tötet
   maxWaves: 30,
+  // Arena nach Welle 10 und 20: Gold je Spieler des Siegerteams
+  arenaGold: { 10: 150, 20: 300 },
+  arenaCountdown: 5,          // Sekunden Aufstellung vor dem Kampf
+  arenaMaxTime: 60,           // danach entscheidet der verbliebene Armeewert
+  arenaResultTime: 3.5,       // Ergebnis-Anzeige, danach Bauphase
+  // Kopfgeld-Abzug: wer in einer Welle viel durchlässt, bekommt für den Rest der Welle weniger Kopfgeld
+  leakBountyCut: 0.6,         // Abzug = Anteil durchgelassener Gegner × 0.6 …
+  leakBountyMin: 0.6,         // … höchstens bis auf 60 % Kopfgeld
+  barracksCost: 150,          // Äther: Erweiterte Kaserne (zweite Söldner-Reihe)
 };
 
 // Angriffs- und Rüstungsarten (Multiplikatoren)
@@ -397,20 +407,36 @@ export const WAVES = WAVE_DEFS.map(([name, model, count, armorType, atk, ranged]
 });
 
 // ---------- Söldner (Senden) ----------
+// Zwei Reihen: Kaserne (1–6) und Erweiterte Kaserne (⇧1–⇧6, mit Äther freischalten).
+// Jeder Söldnertyp hat einen Bestand (stock), der sich alle `restock` Sekunden um 1 auffüllt.
+// Frühe, billige Söldner werden ab Welle `retire` ausgemustert.
 export const SENDS = [
-  { id: 's_rat', name: 'Schattenkrabbler', model: 'crawler', cost: 20, income: 2, hp: 300, dmg: 10, cd: 1.0, range: 1.3, speed: 3.6, armorType: 'leicht', atk: 'klinge', armor: 0, unlock: 1, hotkey: '1' },
-  { id: 's_hound', name: 'Grollhund', model: 'hound', cost: 40, income: 4, hp: 560, dmg: 18, cd: 1.0, range: 1.3, speed: 4.0, armorType: 'mittel', atk: 'klinge', armor: 1, unlock: 2, hotkey: '2' },
-  { id: 's_beetle', name: 'Felspanzer', model: 'beetle', cost: 70, income: 7, hp: 1250, dmg: 22, cd: 1.2, range: 1.3, speed: 2.6, armorType: 'festung', atk: 'wucht', armor: 4, unlock: 4, hotkey: '3' },
-  { id: 's_imp', name: 'Feuerimp', model: 'imp', cost: 110, income: 11, hp: 1000, dmg: 46, cd: 1.3, range: 5.5, speed: 3.2, armorType: 'leicht', atk: 'arkan', armor: 1, unlock: 6, hotkey: '4' },
-  { id: 's_ogre', name: 'Kriegsoger', model: 'brute', cost: 170, income: 16, hp: 2700, dmg: 70, cd: 1.3, range: 1.4, speed: 3.0, armorType: 'schwer', atk: 'wucht', armor: 4, unlock: 9, hotkey: '5' },
-  { id: 's_golem', name: 'Kristallkoloss', model: 'golem', cost: 260, income: 24, hp: 4400, dmg: 100, cd: 1.4, range: 1.5, speed: 2.6, armorType: 'festung', atk: 'arkan', armor: 6, unlock: 12, hotkey: '6' },
-  { id: 's_knight', name: 'Höllenritter', model: 'knightfallen', cost: 400, income: 36, hp: 6800, dmg: 170, cd: 1.2, range: 1.5, speed: 3.2, armorType: 'schwer', atk: 'chaos', armor: 6, unlock: 16, hotkey: '7' },
-].map((s) => ({ ...s, bounty: Math.round(s.cost * 0.4), palette: { primary: '#1e1a2a', secondary: '#ff3a5a', metal: '#4a4a5a', glow: '#ff3a6a' } }));
+  { id: 's_rat', name: 'Schattenkrabbler', model: 'crawler', cost: 20, income: 2, hp: 300, dmg: 10, cd: 1.0, range: 1.3, speed: 3.6, armorType: 'leicht', atk: 'klinge', armor: 0, unlock: 1, retire: 10, stock: 3, restock: 6 },
+  { id: 's_raptor', name: 'Klingenraptor', model: 'raptor', cost: 30, income: 3, hp: 420, dmg: 15, cd: 0.9, range: 1.3, speed: 4.2, armorType: 'leicht', atk: 'stich', armor: 0, unlock: 2, retire: 12, stock: 3, restock: 7 },
+  { id: 's_hound', name: 'Grollhund', model: 'hound', cost: 40, income: 4, hp: 560, dmg: 18, cd: 1.0, range: 1.3, speed: 4.0, armorType: 'mittel', atk: 'klinge', armor: 1, unlock: 3, retire: 15, stock: 3, restock: 8 },
+  { id: 's_beetle', name: 'Felspanzer', model: 'beetle', cost: 70, income: 7, hp: 1250, dmg: 22, cd: 1.2, range: 1.3, speed: 2.6, armorType: 'festung', atk: 'wucht', armor: 4, unlock: 4, stock: 2, restock: 10 },
+  { id: 's_imp', name: 'Feuerimp', model: 'imp', cost: 110, income: 11, hp: 1000, dmg: 46, cd: 1.3, range: 5.5, speed: 3.2, armorType: 'leicht', atk: 'arkan', armor: 1, unlock: 6, stock: 2, restock: 12 },
+  { id: 's_ogre', name: 'Kriegsoger', model: 'brute', cost: 170, income: 16, hp: 2700, dmg: 70, cd: 1.3, range: 1.4, speed: 3.0, armorType: 'schwer', atk: 'wucht', armor: 4, unlock: 9, stock: 2, restock: 14 },
+  { id: 's_naga', name: 'Nagaschütze', model: 'serpent', cost: 220, income: 20, hp: 2600, dmg: 95, cd: 1.3, range: 5.5, speed: 3.1, armorType: 'mittel', atk: 'stich', armor: 3, unlock: 10, stock: 2, restock: 16, row: 2 },
+  { id: 's_golem', name: 'Kristallkoloss', model: 'golem', cost: 260, income: 24, hp: 4400, dmg: 100, cd: 1.4, range: 1.5, speed: 2.6, armorType: 'festung', atk: 'arkan', armor: 6, unlock: 12, stock: 2, restock: 18, row: 2 },
+  { id: 's_spirit', name: 'Magmageist', model: 'elemental', cost: 320, income: 29, hp: 4600, dmg: 120, cd: 1.3, range: 1.5, speed: 3.0, armorType: 'mittel', atk: 'chaos', armor: 5, unlock: 14, stock: 1, restock: 20, row: 2 },
+  { id: 's_knight', name: 'Höllenritter', model: 'knightfallen', cost: 400, income: 36, hp: 6800, dmg: 170, cd: 1.2, range: 1.5, speed: 3.2, armorType: 'schwer', atk: 'chaos', armor: 6, unlock: 16, stock: 1, restock: 22, row: 2 },
+  { id: 's_warlord', name: 'Ogerkriegsherr', model: 'brute', cost: 520, income: 46, hp: 9400, dmg: 210, cd: 1.3, range: 1.5, speed: 3.0, armorType: 'schwer', atk: 'wucht', armor: 7, unlock: 19, stock: 1, restock: 25, row: 2 },
+  { id: 's_titan', name: 'Leerentitan', model: 'golem', cost: 680, income: 58, hp: 12500, dmg: 260, cd: 1.4, range: 1.6, speed: 2.6, armorType: 'festung', atk: 'chaos', armor: 9, unlock: 23, stock: 1, restock: 30, row: 2 },
+].map((s, i) => {
+  const row = s.row || 1;
+  const k = (i % 6) + 1;
+  return {
+    ...s, row, bounty: Math.round(s.cost * 0.4),
+    hotkey: row === 1 ? String(k) : `⇧${k}`, keyCode: `Digit${k}`, shift: row === 2,
+    palette: row === 1 ? { primary: '#1e1a2a', secondary: '#ff3a5a', metal: '#4a4a5a', glow: '#ff3a6a' } : { primary: '#1a1430', secondary: '#b04aff', metal: '#5a4a6a', glow: '#c86aff' },
+  };
+});
 
 // ---------- König ----------
 export const KING = {
   hp: 6000, dmg: 160, cd: 1.0, range: 7.5, splash: { radius: 3, pct: 0.6 }, regen: 6, armor: 3, atk: 'chaos', armorType: 'festung',
-  heals: 3, healPct: 0.3, healCd: 30,
+  heals: 3, healPct: 0.3, healCd: 30, healCap: 3000, // eine Heilung stellt höchstens 3000 Leben her
   upgrades: {
     hp: { name: 'Lebenskraft', desc: '+900 maximales Leben', base: 60, step: 35, max: 15 },
     dmg: { name: 'Königsmacht', desc: '+20 % Angriffsschaden', base: 70, step: 40, max: 15 },
@@ -421,3 +447,19 @@ export function kingUpgradeCost(kind, level) {
   const u = KING.upgrades[kind];
   return u.base + u.step * level;
 }
+
+// König-Fähigkeiten: mit Äther freischalten (Stufe 1) und aufrüsten (bis Stufe 3). Gelten für das ganze Team.
+// Aktive Fähigkeiten wirkt jeder Spieler des Teams (gemeinsame Abklingzeit), die Feueraura wirkt dauerhaft.
+// Schaden wächst wie der Königsangriff mit der Welle (×1,1 je Welle).
+export const KING_ABILITIES = {
+  stomp: { name: 'Stampfer', key: 'F1', icon: 'stomp', cost: [90, 120, 150], cd: [15, 15, 15], radius: [6, 7, 8], stun: [1.5, 2, 2.5], dmg: [80, 140, 220],
+    desc: (l) => `Betäubt alle Gegner im Umkreis ${KING_ABILITIES.stomp.radius[l]} um den König ${KING_ABILITIES.stomp.stun[l]} s (Bosse halb so lang) und verursacht Schaden.` },
+  fire: { name: 'Feueraura', key: 'passiv', icon: 'fire', passive: true, cost: [90, 120, 160], radius: [6, 7, 8], dps: [20, 35, 55],
+    desc: (l) => `Dauerhaft: Gegner im Umkreis ${KING_ABILITIES.fire.radius[l]} erleiden ${KING_ABILITIES.fire.dps[l]} Schaden pro Sekunde (wächst mit der Welle).` },
+  shock: { name: 'Schockwelle', key: 'F2', icon: 'speed', cost: [100, 130, 160], cd: [20, 18, 16], len: [16, 19, 22], width: 2.6, dmg: [200, 320, 480],
+    desc: (l) => `Eine Welle aus Äther rollt ${KING_ABILITIES.shock.len[l]} Schritt vom König in Richtung der Gegner und trifft alles auf der Linie.` },
+  purge: { name: 'Läuterung', key: 'F3', icon: 'purge', cost: [100, 80, 80], cd: [30, 25, 20], slow: [0.5, 0.6, 0.7], dur: 3,
+    desc: (l) => `Entfernt einem Gegner (zuerst Champions/Bosse) alle Champion-Boni und verlangsamt ihn ${KING_ABILITIES.purge.dur} s um ${Math.round(KING_ABILITIES.purge.slow[l] * 100)} %.` },
+};
+export const KING_ABILITY_IDS = Object.keys(KING_ABILITIES);
+export function kingAbilityCost(id, level) { return KING_ABILITIES[id].cost[Math.min(level, 2)]; }

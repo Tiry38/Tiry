@@ -22,7 +22,7 @@ function removeObj(sim, o, reason) { o.alive = false; sim.entities.delete(o.id);
 function near(a, b, r) { return a && b && (a.x - b.x) ** 2 + (a.z - b.z) ** 2 <= r * r; }
 function laneX(sim) { return sim.laneX(lanePlayer(sim).id); }
 function wavesDone(sim) { return sim.wave - sim.rules.startWave; }
-function battle(sim) { return sim.phase === 'battle' && sim.freeze <= 0; }
+function battle(sim) { return sim.phase === 'battle'; }
 function say(sim, text) { sim.emit({ e: 'objective', text }); }
 /** Befehl zielt auf ein Missionsobjekt dieser Art? */
 function objFor(sim, cmd, kind) { const o = cmd.id != null && sim.entities.get(cmd.id); return o && o.type === 'o' && o.kind === kind && o.alive ? o : null; }
