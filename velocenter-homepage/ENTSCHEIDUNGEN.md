@@ -334,3 +334,9 @@
 - **Handy (≤ 760 px):** Rot beginnt jetzt direkt unter dem Foto (Skript in `eisRotJs`, `fit()`: Oberkante = Fotokante rechts bei 94 % wegen clip-path).
 - **PC/Tablet (≥ 761 px):** auf diesem Reiter ausgeblendet – unter dem Foto läge es hinter den Zahlen (orange „1.000+“ auf Rot unlesbar).
 - Andere Reiter unverändert (Startseite: unter dem Laufband; übrige: CSS-Wert).
+
+## 15.11.2026 – Rotes Dreieck auf allen Reitern so kräftig wie auf Start (Tiry)
+- Ursache: Der Seitenkopf `.ph` (alle Reiter außer Start) hatte in `::before` oben rechts einen beigen Lichtschein (85 % 30 %), der genau über
+  dem Rot lag und es blass/rosa machte (gemessen Service 192/63/79 statt Start 189/37/68). Schein oben rechts entfernt, links unten bleibt.
+- Dazu am PC (≥ 761 px) überall dieselbe Größe wie Start (`--h:min(1200px,135vh)`), Handy unverändert (250 px).
+- Ergebnis: Service/Marken/Kontakt 176/31/60 – gleich kräftig wie Start. **Nie wieder Licht/Schein über die rote Fläche legen.**
