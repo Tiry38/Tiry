@@ -152,5 +152,8 @@ const md = [
   `Gesamtgröße: ${mb(total)}`,
   '',
 ].join('\n');
-writeFile('assets/LICENSES.md', md);
+// Audio-Abschnitt (von Hand gepflegt, siehe web/assets/audio/) beibehalten
+let audioPart = '';
+try { const old = fs.readFileSync(path.join(WEB, 'assets/LICENSES.md'), 'utf8'); const i = old.indexOf('<!-- AUDIO'); if (i >= 0) audioPart = '\n' + old.slice(i); } catch { /* neu */ }
+writeFile('assets/LICENSES.md', md + audioPart);
 console.log(`Fertig: ${licenses.length} Dateien, ${mb(total)} → web/assets/`);
