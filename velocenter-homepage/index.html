@@ -5950,15 +5950,15 @@ varying vec3 vCol;varying float vA,vHot,vSq;
 mat2 rot(float a){float c=cos(a),s=sin(a);return mat2(c,-s,s,c);}
 void main(){float t0=uR0+aK.x*uRW;float t1=max(uR0+aK.y*uRW+uF,t0+.12);float p=clamp((uT-uLag-t0)/(t1-t0),0.,1.);
  float mv=smoothstep(.12,.88,p);float e=mv<.5?4.*mv*mv*mv:1.-pow(-2.*mv+2.,3.)/2.;
- /* Schwarm: Pixel lösen sich, ziehen sich zu einem wirbelnden Schwarm zusammen, der im Bogen fliegt und als neues Rad landet */
+ /* Nano-Schwarm: Pixel lösen sich, schwirren als dichter Schwarm (viele kleine Strömungen, kein großer Wirbel) und bauen das neue Rad Stück für Stück auf */
  float w=smoothstep(.10,.42,p)*(1.-smoothstep(.58,.90,p))*uGlowOn;
  vec2 base=mix(aA,aB,e);vec2 cen=mix(uCA,uCB,e);vec2 rel=base-cen;
- rel=rot(w*(2.4+1.2*aR))*rel*(1.-.66*w);
- vec2 path=vec2(-sin(6.2832*e)*.15,-sin(3.1416*e)*.13)*uSW*uGlowOn;
+ rel*=1.-.16*w;
+ vec2 path=vec2(0.,-.025*sin(3.1416*e))*uSW*uGlowOn;
  vec2 pos=cen+rel+path;
- vec2 q=pos/uSW*5.;float tt=uT*7.;
- pos+=vec2(sin(q.y*1.9+tt+cos(q.x*1.3-tt*.7)),cos(q.x*1.7-tt*.9+sin(q.y*1.2)))*uSW*.035*w;
- pos+=vec2(fract(aR*91.7)-.5,fract(aR*57.3)-.5)*uSW*.07*w;
+ vec2 q=pos/uSW*16.;float tt=uT*9.;
+ pos+=(vec2(sin(q.y*1.3+tt+cos(q.x*.9-tt*.6)),cos(q.x*1.1-tt*.8+sin(q.y*.8)))*.016+vec2(sin(q.y*2.9-tt*1.7),cos(q.x*3.1+tt*1.5))*.007)*uSW*w;
+ pos+=vec2(fract(aR*91.7)-.5,fract(aR*57.3)-.5)*uSW*.028*w+vec2(sin(uT*95.+aR*517.),cos(uT*88.+aR*311.))*1.3*w;
  float g=3.2;float sn=smoothstep(0.,.10,p)*(1.-smoothstep(.90,1.,p))*(1.-w)*uGlowOn;pos=mix(pos,(floor(pos/g)+.5)*g,sn);
  vec2 c=pos*uDpr/uRes*2.-1.;gl_Position=vec4(c.x,-c.y,0.,1.);
  float hot=max(exp(-p*18.),exp(-(1.-p)*18.))*uGlowOn;
