@@ -365,3 +365,4 @@
 - Umschalter unten „Wie jetzt | Verwandlung“ + „Nächstes“ (Tasten V / N), gilt für Start-Showroom und Marken-Showroom.
 - **LIVE seit 16.11.2026 (Tiry: „GEIL GEMACHT! mach es live“):** Verwandlung fest in `index.html` (Block `vMorph`/`vMorphJs` + 4 Stellen im Start-/Marken-Showroom), ohne Vorlagen-Umschalter.
   Änderungen am Effekt in `entwurf-menue/morph/morph.js` machen und den `vMorphJs`-Block in `index.html` damit ersetzen.
+- **16.11.2026 (Tiry):** Pixel tragen die echten Farben des alten Rads und verlaufen in die des neuen (kein festes Rot/Blau mehr), Kante in Radfarbe; doppelt so viele, feinere Pixel (Raster 3,2 px), 3 Stufen (zerfallen an Ort und Stelle → fliegen → landen und werden scharf), Dauer 2,3 s.
