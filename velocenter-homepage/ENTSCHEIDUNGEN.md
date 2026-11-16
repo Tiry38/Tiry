@@ -371,3 +371,4 @@
 
 ## Handy-Navi oben (16.11.2026, Tiry)
 - Auf dem Handy (≤ 980 px) steht ganz oben eine wischbare Navi-Leiste (`.mnav`/`#mnt`, Glas-Pille, aktive Seite rot, schiebt sich automatisch auf die aktive Seite). Darunter die bisherige Zeile (Social/Öffnungszeiten/A+/Menü), Höhe 74 px (beim Scrollen 64). Inhalt rückt 62 px nach unten (`#main`). PC unverändert.
+- **Öffnungs-Anzeige (16.11.2026, Tiry):** geschlossen/Mittagspause zeigt „öffnet 14:30 Uhr“ (Handy „öffnet 14:30“) statt „ab 14:30 Uhr“ – „ab“ wirkte, als finge die Pause erst an.
