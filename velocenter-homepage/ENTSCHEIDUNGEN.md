@@ -363,3 +363,5 @@
   (Datenpunkte in Velocenter-Rot und Eisblau) und setzen sich als neues Rad/Logo zusammen; Spiegelung im Shader, Ring leuchtet währenddessen.
   Leinwand existiert nur während der Verwandlung; ohne WebGL automatisch der bisherige Wechsel.
 - Umschalter unten „Wie jetzt | Verwandlung“ + „Nächstes“ (Tasten V / N), gilt für Start-Showroom und Marken-Showroom.
+- **LIVE seit 16.11.2026 (Tiry: „GEIL GEMACHT! mach es live“):** Verwandlung fest in `index.html` (Block `vMorph`/`vMorphJs` + 4 Stellen im Start-/Marken-Showroom), ohne Vorlagen-Umschalter.
+  Änderungen am Effekt in `entwurf-menue/morph/morph.js` machen und den `vMorphJs`-Block in `index.html` damit ersetzen.
