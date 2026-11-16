@@ -2808,7 +2808,8 @@ footer .soc a{display:grid!important;place-items:center}
 /* Handy-Navi oben, wischbar (Tiry 16.11.2026) */
 .mnav{display:none}
 @media (max-width:980px){
- .mnav{display:block;position:relative;padding:8px 0 0}
+ .mnav{display:block;position:relative;padding:8px 0 0;max-height:80px;transition:max-height .4s var(--ease),opacity .25s,padding .4s var(--ease)}
+ body.menu .mnav{max-height:0;opacity:0;padding-top:0;overflow:hidden;pointer-events:none}
  .mnt{display:flex;gap:6px;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x proximity;scroll-padding:0 40px;scrollbar-width:none;-webkit-overflow-scrolling:touch;overscroll-behavior-x:contain;
   margin:0 max(10px,env(safe-area-inset-left,0px));padding:5px;border-radius:999px;
   background:linear-gradient(135deg,rgba(255,255,255,.72),rgba(236,242,250,.58) 55%,rgba(255,236,242,.62));
