@@ -355,3 +355,11 @@
 - **Fehler behoben:** „Abstände Startseite enger“ (15.11.) galt nur außerhalb des Bildschirms (`.apz`) → Abstände sprangen beim Scrollen,
   Seite wurde 226 px länger/kürzer (Ruckeln + Neuaufbau). Jetzt gelten die beschlossenen Werte immer (Winter-Band 120 px / Handy 84 px,
   Kundenstimmen 24 px / Handy 8 px). Nie wieder Abstände an `.apz` hängen – `.apz` heißt nur „außerhalb des Bildschirms“.
+
+## Vorlage Showroom-Verwandlung (16.11.2026, Tiry: „richtig abartig modern“)
+- Nur Vorlage: `vorlage-showroom.html` (noindex, nicht in der Sitemap), Quelle `entwurf-menue/morph/` (`inject.py` + `morph.js` + `morph.css` + `panel.js`).
+  Bauen: `python3 entwurf-menue/morph/inject.py <live-index.html> <ziel>/vorlage-showroom.html`. **Live-Seite unverändert, bis Tiry freigibt.**
+- Technik: WebGL, ~1,8 s. Rad + Markenlogo zerfallen entlang einer Laser-Kante in ein digitales Voxel-Raster
+  (Datenpunkte in Velocenter-Rot und Eisblau) und setzen sich als neues Rad/Logo zusammen; Spiegelung im Shader, Ring leuchtet währenddessen.
+  Leinwand existiert nur während der Verwandlung; ohne WebGL automatisch der bisherige Wechsel.
+- Umschalter unten „Wie jetzt | Verwandlung“ + „Nächstes“ (Tasten V / N), gilt für Start-Showroom und Marken-Showroom.
