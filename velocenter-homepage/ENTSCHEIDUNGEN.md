@@ -368,3 +368,6 @@
 - **16.11.2026 (Tiry):** Pixel tragen die echten Farben des alten Rads und verlaufen in die des neuen (kein festes Rot/Blau mehr), Kante in Radfarbe; doppelt so viele, feinere Pixel (Raster 3,2 px), 3 Stufen (zerfallen an Ort und Stelle → fliegen → landen und werden scharf), Dauer 2,3 s.
 - **16.11.2026 (Tiry: „Pixel-Schwarm wie in Zukunftsfilmen“):** Pixel lösen sich, ziehen sich zu einem wirbelnden Schwarm zusammen (gemeinsames Strömungsfeld, Bogenflug), landen als neues Rad. Farben gesättigt; graue/schwarze Pixel nehmen im Schwarm die Hauptfarbe des Rads an (`dom`, nach Sättigung gewichtet). Dauer 2,6 s.
 - **16.11.2026 (Tiry: „nicht so schwunghaft, keine Wirbel“):** Keine Drehung, kein Bogenflug mehr. Der Nano-Schwarm schwirrt an Ort und Stelle (feine Strömungen, Summen) und baut das neue Rad Stück für Stück auf. Große Wirbel nicht wieder einbauen.
+
+## Handy-Navi oben (16.11.2026, Tiry)
+- Auf dem Handy (≤ 980 px) steht ganz oben eine wischbare Navi-Leiste (`.mnav`/`#mnt`, Glas-Pille, aktive Seite rot, schiebt sich automatisch auf die aktive Seite). Darunter die bisherige Zeile (Social/Öffnungszeiten/A+/Menü), Höhe 74 px (beim Scrollen 64). Inhalt rückt 62 px nach unten (`#main`). PC unverändert.

@@ -2804,6 +2804,32 @@ footer .soc a{display:grid!important;place-items:center}
 .lbp-yr a.rk i{font-style:normal;font-size:12px;line-height:1}
 .lbp-yr a.rk:hover,.lbp-yr a.rk:focus-visible{color:#fff}
 </style>
+<style id="mnavCss">
+/* Handy-Navi oben, wischbar (Tiry 16.11.2026) */
+.mnav{display:none}
+@media (max-width:980px){
+ .mnav{display:block;position:relative;padding:8px 0 0}
+ .mnt{display:flex;gap:6px;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x proximity;scroll-padding:0 40px;scrollbar-width:none;-webkit-overflow-scrolling:touch;overscroll-behavior-x:contain;
+  margin:0 max(10px,env(safe-area-inset-left,0px));padding:5px;border-radius:999px;
+  background:linear-gradient(135deg,rgba(255,255,255,.72),rgba(236,242,250,.58) 55%,rgba(255,236,242,.62));
+  backdrop-filter:blur(18px) saturate(1.5);-webkit-backdrop-filter:blur(18px) saturate(1.5);
+  box-shadow:0 10px 28px rgba(27,30,37,.12),0 2px 6px rgba(27,30,37,.06),inset 0 0 0 1px rgba(255,255,255,.85),inset 0 -1px 0 rgba(184,115,51,.18);
+  -webkit-mask-image:linear-gradient(90deg,transparent 0,#000 14px,#000 calc(100% - 14px),transparent);mask-image:linear-gradient(90deg,transparent 0,#000 14px,#000 calc(100% - 14px),transparent)}
+ .mnt::-webkit-scrollbar{display:none}
+ .mnt a{flex:none;scroll-snap-align:center;display:inline-flex;align-items:center;min-height:44px;padding:0 17px;border-radius:999px;
+  font:700 15px/1 var(--display);letter-spacing:.01em;color:#1B1E25;text-decoration:none;white-space:nowrap;-webkit-tap-highlight-color:transparent;
+  transition:background .35s,color .35s,box-shadow .35s}
+ .mnt a:first-child{margin-left:6px}.mnt a:last-child{margin-right:6px}
+ .mnt a:active{background:rgba(255,255,255,.7)}
+ .mnt a.on{color:#fff;background:linear-gradient(135deg,#F0434C,#E2232D 40%,#B3122B 75%,#8E1846);
+  box-shadow:0 6px 16px rgba(226,35,45,.38),inset 0 1px 0 rgba(255,255,255,.4),inset 0 -2px 6px rgba(80,0,20,.25)}
+ .mnt a.on .nlive{background:#fff;color:#E2232D}
+ .hdr .wrap{height:74px}body.sc .hdr .wrap{height:64px}
+ #main{padding-top:62px}
+ #drCP,#drER,.tpc,#termin-form,#tf,#dienstrad{scroll-margin-top:160px}
+}
+</style>
+
 <style id="vMorph">
 /* Showroom-Verwandlung (Tiry 16.11.2026): Ring leuchtet während Rad + Logo sich verwandeln */
 .hring{transition:filter .7s ease}
@@ -2963,6 +2989,7 @@ body:has(.hdr.nosoc) .strk .sa{-webkit-mask-image:linear-gradient(180deg,transpa
 
 <a class="skip" href="#main">Zum Inhalt springen</a>
 <header class="hdr">
+ <nav class="mnav" id="mnav" aria-label="Seiten (Handy)"><div class="mnt" id="mnt"><a href="#start" data-r="start">Start</a><a href="#service" data-r="service">Service</a><a href="#marken" data-r="marken">Marken</a><a href="#lager" data-r="lager">Auf Lager<i class="nlive" aria-hidden="true">Live</i></a><a href="#isy" data-r="isy">i:SY Experte</a><a href="#treffen" data-r="treffen">i:SY Treffen</a><a href="#dreirad" data-r="dreirad">E-Dreiräder</a><a href="#kontakt" data-r="kontakt">Kontakt</a></div></nav>
  <div class="wrap">
 <div class="hlft"><div class="hsoc" aria-label="Velocenter in den sozialen Medien"><a class="ig" href="https://www.instagram.com/velocenterhessert/" target="_blank" rel="noopener" aria-label="Instagram" title="Instagram"><svg><use href="#i-ig"/></svg></a><a class="fb" href="https://www.facebook.com/velocenterhessert" target="_blank" rel="noopener" aria-label="Facebook" title="Facebook"><svg><use href="#i-fb"/></svg></a><a class="wk" href="https://whatsapp.com/channel/0029VaIekua60eBc6k2bMD0q" target="_blank" rel="noopener" aria-label="WhatsApp-Kanal" title="WhatsApp-Kanal"><svg><use href="#i-chat"/></svg><span>Kanal</span></a></div>  <a class="logo" href="#start" aria-label="Velocenter Hessert – Startseite"><img src="img/velocenter-logo.svg" alt="Velocenter Hessert" width="160" height="84"></a></div>
   
@@ -4443,7 +4470,7 @@ function show(v,anchor,first){
  if(!first){if(!$('#lgm').hidden&&!RADK)lgClose();if(!$('#rf').hidden)rfClose();if(!$('#cmp').hidden)cmpClose()}
  $$('.view').forEach(s=>{s.hidden=s.dataset.v!==v;s.classList.remove('enter')});
  const sec=$('.view[data-v="'+v+'"]');void sec.offsetWidth;sec.classList.add('enter');
- $$('[data-r]').forEach(a=>a.classList.toggle('on',a.dataset.r===v));
+ $$('[data-r]').forEach(a=>a.classList.toggle('on',a.dataset.r===v));{const t=$('#mnt'),a=t&&t.querySelector('a.on');if(a&&t.offsetParent)t.scrollTo({left:a.offsetLeft-(t.clientWidth-a.offsetWidth)/2,behavior:'smooth'})}
  seoSet(v);
  cur=v;merkUI();
  if(anchor){const t=document.getElementById(anchor);if(t){t.scrollIntoView({behavior:'auto',block:'start'});anchFix(t)}}else window.scrollTo(0,0);
@@ -5276,7 +5303,7 @@ function ytConsent(id,t){return '<div class="ytc"><b>Video von YouTube</b><p>Bei
  const play=(id,t)=>{st.innerHTML='<div class="tgvf"><iframe src="https://www.youtube-nocookie.com/embed/'+id+'?autoplay=1&rel=0" title="'+esc(t)+'" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen></iframe></div>'};
  const close=()=>{lb.hidden=true;st.innerHTML='';document.body.style.overflow=''};
  $$('.drv').forEach(V=>V.addEventListener('click',e=>{const b=e.target.closest('[data-dryt]');if(!b)return;lb.hidden=false;document.body.style.overflow='hidden';if(ytOk())play(b.dataset.dryt,b.dataset.t);else st.innerHTML=ytConsent(b.dataset.dryt,b.dataset.t)}));
- $$('.drsw button').forEach(b=>b.addEventListener('click',()=>{const t=$('#'+b.dataset.drj);if(t)scrollTo({top:t.getBoundingClientRect().top+scrollY-90,behavior:'smooth'})}));
+ $$('.drsw button').forEach(b=>b.addEventListener('click',()=>{const t=$('#'+b.dataset.drj);if(t)scrollTo({top:t.getBoundingClientRect().top+scrollY-((document.querySelector('.hdr')||{}).offsetHeight||72)-18,behavior:'smooth'})}));
  /* Aktionen nach Ablauf ausblenden */
  $$('[data-bis]').forEach(e=>{if(new Date()>new Date(e.dataset.bis+'T23:59:59+01:00'))e.remove()});
  lb.addEventListener('click',e=>{const g=e.target.closest('[data-ytgo]');if(g){if($('#ytRem',lb)&&$('#ytRem',lb).checked)LS.set('vc_yt',1);play(g.dataset.ytgo,g.dataset.t);return}
