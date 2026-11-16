@@ -2805,29 +2805,30 @@ footer .soc a{display:grid!important;place-items:center}
 .lbp-yr a.rk:hover,.lbp-yr a.rk:focus-visible{color:#fff}
 </style>
 <style id="mnavCss">
-/* Handy-Navi oben, wischbar (Tiry 16.11.2026) */
+/* Handy-Kopf (Tiry 16.11.2026): 8 Reiter in 2 Reihen à 4, darunter Öffnungszeiten; kein Burger-Menü */
 .mnav{display:none}
 @media (max-width:980px){
- .mnav{display:block;position:relative;padding:8px 0 0;max-height:80px;transition:max-height .4s var(--ease),opacity .25s,padding .4s var(--ease)}
- body.menu .mnav{max-height:0;opacity:0;padding-top:0;overflow:hidden;pointer-events:none}
- .mnt{display:flex;gap:6px;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x proximity;scroll-padding:0 40px;scrollbar-width:none;-webkit-overflow-scrolling:touch;overscroll-behavior-x:contain;
-  margin:0 max(10px,env(safe-area-inset-left,0px));padding:5px;border-radius:999px;
-  background:linear-gradient(135deg,rgba(255,255,255,.72),rgba(236,242,250,.58) 55%,rgba(255,236,242,.62));
+ .mnav{display:block;position:relative;padding:8px max(10px,env(safe-area-inset-right,0px)) 0 max(10px,env(safe-area-inset-left,0px))}
+ .mnt{position:relative;display:grid;gap:4px;padding:5px;border-radius:28px;overflow:hidden;isolation:isolate;
+  background:linear-gradient(135deg,rgba(255,255,255,.78),rgba(236,242,250,.62) 50%,rgba(255,234,240,.68));
   backdrop-filter:blur(18px) saturate(1.5);-webkit-backdrop-filter:blur(18px) saturate(1.5);
-  box-shadow:0 10px 28px rgba(27,30,37,.12),0 2px 6px rgba(27,30,37,.06),inset 0 0 0 1px rgba(255,255,255,.85),inset 0 -1px 0 rgba(184,115,51,.18);
-  -webkit-mask-image:linear-gradient(90deg,transparent 0,#000 14px,#000 calc(100% - 14px),transparent);mask-image:linear-gradient(90deg,transparent 0,#000 14px,#000 calc(100% - 14px),transparent)}
- .mnt::-webkit-scrollbar{display:none}
- .mnt a{flex:none;scroll-snap-align:center;display:inline-flex;align-items:center;min-height:44px;padding:0 17px;border-radius:999px;
-  font:700 15px/1 var(--display);letter-spacing:.01em;color:#1B1E25;text-decoration:none;white-space:nowrap;-webkit-tap-highlight-color:transparent;
-  transition:background .35s,color .35s,box-shadow .35s}
- .mnt a:first-child{margin-left:6px}.mnt a:last-child{margin-right:6px}
- .mnt a:active{background:rgba(255,255,255,.7)}
- .mnt a.on{color:#fff;background:linear-gradient(135deg,#F0434C,#E2232D 40%,#B3122B 75%,#8E1846);
-  box-shadow:0 6px 16px rgba(226,35,45,.38),inset 0 1px 0 rgba(255,255,255,.4),inset 0 -2px 6px rgba(80,0,20,.25)}
- .mnt a.on .nlive{background:#fff;color:#E2232D}
- .hdr .wrap{height:74px}body.sc .hdr .wrap{height:64px}
- #main{padding-top:62px}
- #drCP,#drER,.tpc,#termin-form,#tf,#dienstrad{scroll-margin-top:160px}
+  box-shadow:0 12px 30px rgba(27,30,37,.13),0 2px 6px rgba(27,30,37,.06),inset 0 0 0 1px rgba(255,255,255,.9),inset 0 -1px 0 rgba(184,115,51,.22)}
+ .mnt::before{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;border-radius:inherit;
+  background:linear-gradient(115deg,transparent 0 38%,rgba(255,255,255,.55) 46%,transparent 54%) 0 0/250% 100%;animation:mnGlanz 7s ease-in-out infinite}
+ @keyframes mnGlanz{0%,55%{background-position:120% 0}100%{background-position:-60% 0}}
+ .mnr{display:flex;gap:4px}
+ .mnr a{flex:1 1 auto;display:flex;align-items:center;justify-content:center;gap:4px;min-height:44px;padding:0 6px;border-radius:999px;
+  font:700 clamp(11.5px,3.25vw,14.5px)/1.05 var(--display);letter-spacing:0;color:#1B1E25;text-decoration:none;text-align:center;white-space:nowrap;
+  -webkit-tap-highlight-color:transparent;transition:background .35s,color .35s,box-shadow .35s}
+ .mnr a:active{background:rgba(255,255,255,.75)}
+ .mnr a.on{color:#fff;background:linear-gradient(135deg,#F0434C,#E2232D 40%,#B3122B 75%,#8E1846);
+  box-shadow:0 6px 16px rgba(226,35,45,.36),inset 0 1px 0 rgba(255,255,255,.4),inset 0 -2px 6px rgba(80,0,20,.25)}
+ .mnr .nlive{margin-left:2px;padding:2px 5px 2px 4px;font-size:7.5px;vertical-align:0}
+ .mnr a.on .nlive{background:#fff;color:#E2232D}
+ .hdr .burger{display:none!important}
+ .hdr .wrap{height:66px}body.sc .hdr .wrap{height:60px}
+ #main{padding-top:102px}
+ #drCP,#drER,.tpc,#termin-form,#tf,#dienstrad{scroll-margin-top:200px}
 }
 </style>
 
@@ -2990,7 +2991,7 @@ body:has(.hdr.nosoc) .strk .sa{-webkit-mask-image:linear-gradient(180deg,transpa
 
 <a class="skip" href="#main">Zum Inhalt springen</a>
 <header class="hdr">
- <nav class="mnav" id="mnav" aria-label="Seiten (Handy)"><div class="mnt" id="mnt"><a href="#start" data-r="start">Start</a><a href="#service" data-r="service">Service</a><a href="#marken" data-r="marken">Marken</a><a href="#lager" data-r="lager">Auf Lager<i class="nlive" aria-hidden="true">Live</i></a><a href="#isy" data-r="isy">i:SY Experte</a><a href="#treffen" data-r="treffen">i:SY Treffen</a><a href="#dreirad" data-r="dreirad">E-Dreiräder</a><a href="#kontakt" data-r="kontakt">Kontakt</a></div></nav>
+ <nav class="mnav" id="mnav" aria-label="Seiten (Handy)"><div class="mnt" id="mnt"><div class="mnr"><a href="#start" data-r="start">Start</a><a href="#service" data-r="service">Service</a><a href="#marken" data-r="marken">Marken</a><a href="#lager" data-r="lager">Auf Lager<i class="nlive" aria-hidden="true">Live</i></a></div><div class="mnr"><a href="#isy" data-r="isy">i:SY Experte</a><a href="#treffen" data-r="treffen">i:SY Treffen</a><a href="#dreirad" data-r="dreirad">E-Dreiräder</a><a href="#kontakt" data-r="kontakt">Kontakt</a></div></div></nav>
  <div class="wrap">
 <div class="hlft"><div class="hsoc" aria-label="Velocenter in den sozialen Medien"><a class="ig" href="https://www.instagram.com/velocenterhessert/" target="_blank" rel="noopener" aria-label="Instagram" title="Instagram"><svg><use href="#i-ig"/></svg></a><a class="fb" href="https://www.facebook.com/velocenterhessert" target="_blank" rel="noopener" aria-label="Facebook" title="Facebook"><svg><use href="#i-fb"/></svg></a><a class="wk" href="https://whatsapp.com/channel/0029VaIekua60eBc6k2bMD0q" target="_blank" rel="noopener" aria-label="WhatsApp-Kanal" title="WhatsApp-Kanal"><svg><use href="#i-chat"/></svg><span>Kanal</span></a></div>  <a class="logo" href="#start" aria-label="Velocenter Hessert – Startseite"><img src="img/velocenter-logo.svg" alt="Velocenter Hessert" width="160" height="84"></a></div>
   
