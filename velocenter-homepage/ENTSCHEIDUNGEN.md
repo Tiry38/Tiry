@@ -345,3 +345,13 @@
 - **Rad-Finder-Ergebnis:** Angebotsräder zeigen Schild „% Sonderangebot“ auf dem Bild, alten Preis durchgestrichen, Angebotspreis rot mit *, „Du sparst …“ und „* Angebotspreis, nicht bei Leasing & Finanzierung“. Nie wieder Angebotspreis als normalen Preis zeigen.
 - **Hänger („nichts klickbar, nach Aktualisieren geht es“):** Ursache war die Wisch-Sperre beim Reiterwechsel (1 s) – Tipps in dieser Zeit wurden verschluckt, Seite blieb im falschen Reiter. Jetzt wird der Tipp nach der Animation ausgeführt (`pend` im Router).
 - Reiterwechsel (auch Zurück-Wischen am Handy) schließt offene Fenster (Rad, Finder, Vergleich); schnelles Zu/Auf öffnet sicher (Schließ-Timer wird abgebrochen); Marken-Showroom-Sperre löst spätestens nach 2,5 s.
+
+## 16.11.2026 – Flüssiger auf schwachen PCs (Tiry: „hängt am Mini-PC“), Optik und Animationen unverändert
+- Gemessen mit 4-fach gedrosselter CPU (wie Mini-PC). Alle Animationen laufen weiter (gleiche Liste vorher/nachher geprüft).
+- **Scrollen:** Klasse `scr` (Hintergrund steht beim Scrollen still) sitzt jetzt nur an `.sky/.blobs/.ribbons`, nicht mehr an `<html>` –
+  vorher rechnete jeder Scroll-Start/-Stopp das Aussehen aller `<i>` der Seite neu (1.680 → 260 Neuberechnungen). Scroll-Handler laufen
+  einmal pro Bild (rAF), Hero-Höhe per ResizeObserver statt bei jedem Ereignis messen → Scroll-Ereignisse 104 → 6 ms/s.
+- Schnee-Band: kein `getBoundingClientRect` mehr pro Bild. Tempo-Linien: nach dem Ausblenden `visibility:hidden` (keine unsichtbare Vollbild-Ebene).
+- **Fehler behoben:** „Abstände Startseite enger“ (15.11.) galt nur außerhalb des Bildschirms (`.apz`) → Abstände sprangen beim Scrollen,
+  Seite wurde 226 px länger/kürzer (Ruckeln + Neuaufbau). Jetzt gelten die beschlossenen Werte immer (Winter-Band 120 px / Handy 84 px,
+  Kundenstimmen 24 px / Handy 8 px). Nie wieder Abstände an `.apz` hängen – `.apz` heißt nur „außerhalb des Bildschirms“.

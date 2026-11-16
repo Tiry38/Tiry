@@ -2289,7 +2289,7 @@ a.hchip.hc.hlive .hla b svg{width:16px;height:16px;fill:none;stroke:#fff;stroke-
 .band span em{padding:0 .72em!important;opacity:1!important;color:#5EEAD4;-webkit-text-stroke:0;text-shadow:0 0 14px rgba(94,234,212,.65)}
 /* Tempo (Tiry 12.11.2026): unsichtbare Animationen pausieren, Hintergrund-Ebenen eigene GPU-Ebene */
 .apz,.apz *,.apz *::before,.apz *::after{animation-play-state:paused!important}
-html.scr .sky,html.scr .blobs i,html.scr .blobs::after,html.scr .ribbons i{animation-play-state:paused!important}
+.sky.scr,.blobs.scr i,.blobs.scr::after,.ribbons.scr i{animation-play-state:paused!important}
 .sky,.blobs,.ribbons{contain:strict;will-change:transform}
 .hb.off{-webkit-box-reflect:none}
 
@@ -2574,9 +2574,10 @@ a.hchip.hc:hover .ha{background:#1B1E25;color:#fff;transform:translateX(2px)}
 /* 4,8 im Velocenter-Rot statt Braun */
 .score b{background-image:linear-gradient(180deg,#F0313B,#C8102E 55%,#7A0B1F)!important}
 /* Abstände Startseite enger */
-.ice.apz{padding-top:120px!important;padding-bottom:120px!important}
-.zone.z-peach.apz+.zone.z-lilac.apz{padding-top:24px!important}
-@media (max-width:640px){.ice.apz{padding-top:84px!important;padding-bottom:84px!important}.zone.z-peach.apz+.zone.z-lilac.apz{padding-top:8px!important}}
+/* 16.11.2026: gilt immer (vorher nur außerhalb des Bildschirms → Seite sprang beim Scrollen um 226 px) */
+.ice.ice{padding-top:120px!important;padding-bottom:120px!important}
+.zone.z-peach+.zone.z-lilac.z-lilac{padding-top:24px!important}
+@media (max-width:640px){.ice.ice{padding-top:84px!important;padding-bottom:84px!important}.zone.z-peach+.zone.z-lilac.z-lilac{padding-top:8px!important}}
 /* Tempo-Linien nicht unter dem Text */
 @media (min-width:981px){#speed{-webkit-mask-image:linear-gradient(90deg,rgba(0,0,0,.25) 0,rgba(0,0,0,.12) 30%,rgba(0,0,0,.25) 48%,#000 62%);mask-image:linear-gradient(90deg,rgba(0,0,0,.25) 0,rgba(0,0,0,.12) 30%,rgba(0,0,0,.25) 48%,#000 62%)}}
 @media (max-width:980px){#speed{opacity:.4}}
@@ -4414,9 +4415,11 @@ if(now<start||dd<0)$('#deal').hidden=true;else $('#dealDays').textContent=dd;
 $('#yr').textContent=now.getFullYear();
 
 /* ---------- Kopf beim Scrollen ---------- */
+/* 16.11.2026: Hero-Höhe gemerkt (ResizeObserver) statt bei jedem Scroll-Ereignis neu messen */
+let heroH=0;(function(){const h=$('#hero');if(!h)return;heroH=h.offsetHeight;if('ResizeObserver' in window)new ResizeObserver(e=>{heroH=h.offsetHeight}).observe(h)})();
 function onScroll(){const y=scrollY;document.body.classList.toggle('sc',y>30);
- const h=$('#hero');document.body.classList.toggle('herotop',cur==='start'&&h&&y<h.offsetHeight*.55)}
-addEventListener('scroll',onScroll,{passive:true});
+ const h=$('#hero');document.body.classList.toggle('herotop',cur==='start'&&h&&y<(('ResizeObserver' in window)?heroH:h.offsetHeight)*.55)}
+{let sf=0;addEventListener('scroll',()=>{if(!sf){sf=1;requestAnimationFrame(()=>{sf=0;onScroll()})}},{passive:true})}/* 16.11.2026: einmal pro Bild statt pro Scroll-Ereignis */
 
 /* ---------- Einblenden beim Scrollen ---------- */
 const io='IntersectionObserver' in window?new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target)}}),{rootMargin:'0px 0px -8% 0px',threshold:.08}):null;
@@ -4462,7 +4465,7 @@ document.addEventListener('click',e=>{const a=e.target.closest('a[href^="#"]');i
   L=Array.from({length:Math.round(W/22)},()=>({x:Math.random()*W,y:H2*(.15+Math.random()*.7),l:60+Math.random()*260,v:1+Math.random()*3.5,w:Math.random()<.2?2:1,c:cols[Math.random()*cols.length|0],a:.08+Math.random()*.35}))}
  function draw(){cx.clearRect(0,0,W,H2);L.forEach(s=>{const g=cx.createLinearGradient(s.x,0,s.x+s.l,0);g.addColorStop(0,'rgba('+s.c+',0)');g.addColorStop(1,'rgba('+s.c+','+s.a+')');cx.strokeStyle=g;cx.lineWidth=s.w;cx.beginPath();cx.moveTo(s.x,s.y);cx.lineTo(s.x+s.l,s.y);cx.stroke();{s.x-=s.v*DT;if(s.x+s.l<0){s.x=W+Math.random()*200;s.y=H2*(.15+Math.random()*.7)}}})}
  size();addEventListener('resize',size);
- let t0=0,tS=performance.now();setTimeout(()=>cv.classList.add('off'),4200);(function loop(t){DT=t0?Math.min(3,(t-t0)/16.67)*.6:1;t0=t;if(cur==='start'&&scrollY<H2)draw();if(t-tS<6000)requestAnimationFrame(loop)})(0);draw();
+ let t0=0,tS=performance.now();setTimeout(()=>cv.classList.add('off'),4200);setTimeout(()=>{cv.style.visibility='hidden'},5800);/* 16.11.2026: nach dem Ausblenden keine unsichtbare Vollbild-Ebene mehr */(function loop(t){DT=t0?Math.min(3,(t-t0)/16.67)*.6:1;t0=t;if(cur==='start'&&scrollY<H2)draw();if(t-tS<6000)requestAnimationFrame(loop)})(0);draw();
 })();
 /* Sprung-Link zum Inhalt (Barrierefreiheit, 15.11.2026) */
 $('.skip')?.addEventListener('click',e=>{e.preventDefault();const m=$('#main');m.setAttribute('tabindex','-1');m.focus({preventScroll:false})});
@@ -4472,7 +4475,7 @@ $('.skip')?.addEventListener('click',e=>{e.preventDefault();const m=$('#main');m
 (function(){const cv=$('#snow');if(!cv)return;const cx=cv.getContext('2d');let W,H2,F=[];
  function size(){const r=cv.getBoundingClientRect();W=r.width;H2=r.height;cv.width=W;cv.height=H2;F=Array.from({length:Math.round(W/14)},()=>({x:Math.random()*W,y:Math.random()*H2,r:.6+Math.random()*2.2,v:.3+Math.random()*1,s:Math.random()*6}))}
  size();addEventListener('resize',size);
- let t0=0,vis=false,on=false;new IntersectionObserver(e=>{vis=e[0].isIntersecting;if(vis&&!on){on=true;t0=0;requestAnimationFrame(loop)}}).observe(cv);function loop(t){if(!vis||document.hidden){on=false;return}const dt=t0?Math.min(3,(t-t0)/16.67)*.7:1;t0=t;const r=cv.getBoundingClientRect();if(cur==='start'&&r.bottom>0&&r.top<innerHeight){if(!W)size();cx.clearRect(0,0,W,H2);cx.fillStyle='rgba(255,255,255,.85)';F.forEach(f=>{f.y+=f.v*dt;f.x+=Math.sin((t/1000)+f.s)*.3;if(f.y>H2){f.y=-4;f.x=Math.random()*W}cx.beginPath();cx.arc(f.x,f.y,f.r,0,7);cx.fill()})}requestAnimationFrame(loop)}
+ let t0=0,vis=false,on=false;new IntersectionObserver(e=>{vis=e[0].isIntersecting;if(vis&&!on){on=true;t0=0;requestAnimationFrame(loop)}}).observe(cv);function loop(t){if(!vis||document.hidden){on=false;return}const dt=t0?Math.min(3,(t-t0)/16.67)*.7:1;t0=t;if(cur==='start'){if(!W)size();cx.clearRect(0,0,W,H2);cx.fillStyle='rgba(255,255,255,.85)';F.forEach(f=>{f.y+=f.v*dt;f.x+=Math.sin((t/1000)+f.s)*.3;if(f.y>H2){f.y=-4;f.x=Math.random()*W}cx.beginPath();cx.arc(f.x,f.y,f.r,0,7);cx.fill()})}requestAnimationFrame(loop)}
 })();
 
 /* ---------- Bewertungen wechseln ---------- */
@@ -5762,8 +5765,10 @@ go(true);
 /* Tempo: Dauer-Animationen nur, wenn sichtbar; Hintergrund steht beim Scrollen still */
 (function(){const io=new IntersectionObserver(es=>es.forEach(e=>e.target.classList.toggle('apz',!e.isIntersecting)),{rootMargin:'120px 0px'});
  const reg=()=>document.querySelectorAll('.view>*,.foot').forEach(el=>{if(!el._apz){el._apz=1;io.observe(el)}});reg();setTimeout(reg,3000);
- let st=0;addEventListener('scroll',()=>{if(!st)document.documentElement.classList.add('scr');clearTimeout(st);st=setTimeout(()=>{document.documentElement.classList.remove('scr');st=0},180)},{passive:true});
- document.addEventListener('visibilitychange',()=>document.documentElement.classList.toggle('scr',document.hidden));})();
+ /* 16.11.2026: Klasse nur an den 3 Hintergrund-Ebenen statt an <html> (sonst rechnete jeder Scroll-Start/-Stopp alle <i> der Seite neu) */
+ const BGE=document.querySelectorAll('.sky,.blobs,.ribbons'),bgS=on=>BGE.forEach(e=>e.classList.toggle('scr',on));
+ let st=0;addEventListener('scroll',()=>{if(!st)bgS(true);clearTimeout(st);st=setTimeout(()=>{bgS(false);st=0},180)},{passive:true});
+ document.addEventListener('visibilitychange',()=>bgS(document.hidden));})();
 /* Menü-Vorschau (15.11.2026, Tiry): Übersicht des Reiters beim Drüberfahren – nur PC mit Maus ab 1181 px */
 (function(){
 const n=document.getElementById('nav');if(!n)return;
@@ -5856,7 +5861,7 @@ var leave=()=>{clearTimeout(tOpen);clearTimeout(tClose);tClose=setTimeout(close,
 n.addEventListener('pointerleave',leave);
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&cur){close();const a=n.querySelector('a:focus');if(a)a.blur()}});
 document.addEventListener('focusin',e=>{if(cur&&!n.contains(e.target)&&!pan.contains(e.target))close()});
-addEventListener('scroll',()=>{if(cur&&Math.abs(scrollY-(window.__lbY||0))>80)close();window.__lbY=scrollY},{passive:true});
+{let lf=0;addEventListener('scroll',()=>{if(lf)return;lf=1;requestAnimationFrame(()=>{lf=0;if(cur&&Math.abs(scrollY-(window.__lbY||0))>80)close();window.__lbY=scrollY})},{passive:true})}
 mq.addEventListener('change',()=>{if(!mq.matches)close()});
 })();
 </script>
