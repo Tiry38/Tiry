@@ -3,7 +3,7 @@
    des neuen Bildes und setzen es dort wieder zusammen. Gleiche Front für Rad, Spiegelung und Logo. Läuft nur während des Wechsels
    (≈1,8 s), danach ist die Zeichenfläche weg – kein Dauer-Aufwand. Ohne WebGL: alter Wechsel. */
 (function(){'use strict';
-const VM=window.VM={on:true,ok:false,dur:2300};
+const VM=window.VM={on:true,ok:false,dur:2600};
 /* ---- Rauschfeld (64×64, wiederholend) – identisch auf CPU und GPU ---- */
 const NS=64,NZ=new Uint8Array(NS*NS);
 {let s=20261116;const r=()=>(s=(s*16807)%2147483647)/2147483647;const a=new Float32Array(NS*NS);for(let i=0;i<a.length;i++)a[i]=r();
@@ -34,26 +34,37 @@ void main(){vec2 uv=vU;vec2 p=vC;float m=1.;
  vec3 holo=min(c.rgb*1.35+.1*c.a,vec3(c.a));vec3 rgb=mix(c.rgb,holo,h*.6);float a=c.a*mix(1.,scan,h*.9);rgb*=mix(1.,scan,h*.9);
  float e=(1.-smoothstep(0.,.007,d))*uGlowOn*fade;float ec=1.-smoothstep(0.,.0025,d);vec3 own=c.a>.01?c.rgb/c.a:vec3(1.);rgb=mix(rgb,mix(min(own*1.6+.18,vec3(1.)),vec3(1.),ec*.65)*a,e);
  gl_FragColor=vec4(rgb,a)*vis*m;}`;
-const VS_P=`attribute vec2 aA,aB,aK;attribute vec3 aCA,aCB;attribute float aR;uniform vec2 uRes;uniform float uDpr,uT,uPs,uGlowOn,uR0,uRW,uF,uLag,uTrail;uniform vec3 uEdge,uHolo;
+const VS_P=`attribute vec2 aA,aB,aK;attribute vec3 aCA,aCB;attribute float aR;uniform vec2 uRes,uCA,uCB;uniform float uDpr,uT,uPs,uGlowOn,uR0,uRW,uF,uLag,uTrail,uSW;uniform vec3 uEdge,uHolo,uDA,uDB;
 varying vec3 vCol;varying float vA,vHot,vSq;
+mat2 rot(float a){float c=cos(a),s=sin(a);return mat2(c,-s,s,c);}
 void main(){float t0=uR0+aK.x*uRW;float t1=max(uR0+aK.y*uRW+uF,t0+.12);float p=clamp((uT-uLag-t0)/(t1-t0),0.,1.);
- /* 3 Stufen: an Ort und Stelle zu Voxeln zerfallen → fliegen → als Voxel landen und scharf werden */
- float mv=smoothstep(.16,.84,p);float e=mv<.5?4.*mv*mv*mv:1.-pow(-2.*mv+2.,3.)/2.;
- vec2 d=aB-aA;float L=length(d);vec2 n=L>.001?vec2(-d.y,d.x)/L:vec2(0.,1.);float s=sin(3.14159*mv);
- vec2 pos=mix(aA,aB,e)+n*s*(aR-.5)*(.035*L+4.)+vec2(0.,-1.)*s*(2.+6.*fract(aR*7.13));
- float g=3.2;float sn=smoothstep(0.,.14,p)*(1.-smoothstep(.86,1.,p))*uGlowOn;pos=mix(pos,(floor(pos/g)+.5)*g,sn);
+ float mv=smoothstep(.12,.88,p);float e=mv<.5?4.*mv*mv*mv:1.-pow(-2.*mv+2.,3.)/2.;
+ /* Schwarm: Pixel lösen sich, ziehen sich zu einem wirbelnden Schwarm zusammen, der im Bogen fliegt und als neues Rad landet */
+ float w=smoothstep(.10,.42,p)*(1.-smoothstep(.58,.90,p))*uGlowOn;
+ vec2 base=mix(aA,aB,e);vec2 cen=mix(uCA,uCB,e);vec2 rel=base-cen;
+ rel=rot(w*(2.4+1.2*aR))*rel*(1.-.66*w);
+ vec2 path=vec2(-sin(6.2832*e)*.15,-sin(3.1416*e)*.13)*uSW*uGlowOn;
+ vec2 pos=cen+rel+path;
+ vec2 q=pos/uSW*5.;float tt=uT*7.;
+ pos+=vec2(sin(q.y*1.9+tt+cos(q.x*1.3-tt*.7)),cos(q.x*1.7-tt*.9+sin(q.y*1.2)))*uSW*.035*w;
+ pos+=vec2(fract(aR*91.7)-.5,fract(aR*57.3)-.5)*uSW*.07*w;
+ float g=3.2;float sn=smoothstep(0.,.10,p)*(1.-smoothstep(.90,1.,p))*(1.-w)*uGlowOn;pos=mix(pos,(floor(pos/g)+.5)*g,sn);
  vec2 c=pos*uDpr/uRes*2.-1.;gl_Position=vec4(c.x,-c.y,0.,1.);
- float hot=max(exp(-p*16.),exp(-(1.-p)*16.))*uGlowOn;
- float isE=step(fract(aR*13.7),.10);
- gl_PointSize=mix(uPs*(1.+.6*hot),g*.84,sn)*uDpr*(1.+.3*isE*s)*(1.-.25*uTrail);
+ float hot=max(exp(-p*18.),exp(-(1.-p)*18.))*uGlowOn;
+ float isE=step(fract(aR*13.7),.12);
+ gl_PointSize=mix(uPs*(1.+.5*hot+.35*w),g*.84,sn)*uDpr*(1.+.5*isE*w)*(1.-.2*uTrail);
  vA=smoothstep(0.,.03,p)*(1.-smoothstep(.97,1.,p))*(1.-uTrail);
- /* Farbe: echte Pixel des alten Rads verlaufen unterwegs in die Pixel des neuen Rads */
- vec3 col=mix(aCA,aCB,smoothstep(.22,.78,p));
- vCol=mix(col,min(col*1.45+.12,vec3(1.)),clamp(isE*s+.6*hot,0.,1.)*uGlowOn);vHot=max(hot,isE*s*.7)*uGlowOn;vSq=sn;}`;
+ /* Farben: echte Radfarben, kräftiger; graue/schwarze Pixel nehmen im Schwarm die Hauptfarbe des Rads an */
+ float cm=smoothstep(.30,.70,p);vec3 col=mix(aCA,aCB,cm);float lu=dot(col,vec3(.3,.59,.11));
+ float sat=max(col.r,max(col.g,col.b))-min(col.r,min(col.g,col.b));
+ col=clamp(mix(vec3(lu),col,1.55),0.,1.);
+ vec3 dom=mix(uDA,uDB,cm);col=mix(col,dom*(.55+.9*lu)+.06,clamp(1.-sat*3.5,0.,1.)*w*.85);
+ col=col*(1.+.4*w)+.05*w;
+ vCol=mix(clamp(col,0.,1.),min(col*1.5+.15,vec3(1.)),clamp(isE*w+.6*hot,0.,1.));vHot=max(hot,isE*w*.8)*uGlowOn;vSq=sn;}`;
 const FS_P=`precision mediump float;varying vec3 vCol;varying float vA,vHot,vSq;
 void main(){vec2 q=abs(gl_PointCoord-.5);float r=mix(length(q),max(q.x,q.y),vSq);
  float a=mix(smoothstep(.5,.1,r),1.-smoothstep(.40,.5,r),vSq)*vA;if(a<.004)discard;
- float rim=vSq*smoothstep(.30,.46,r);vec3 c=mix(vCol,vCol*.8,rim);
+ float rim=vSq*smoothstep(.30,.46,r);vec3 c=mix(vCol,vCol*.85,rim);
  c=mix(c,vec3(1.),.6*smoothstep(.24,.0,r)*vHot);gl_FragColor=vec4(c*a,a);}`;
 /* ---- GL je Zeichenfläche ---- */
 function mk(cv){const gl=cv.getContext('webgl',{premultipliedAlpha:true,alpha:true,antialias:true,preserveDrawingBuffer:false});if(!gl)return null;
@@ -91,12 +102,13 @@ async function layer(root,cv,o,kind){const dpr=Math.min(2,devicePixelRatio||1),W
  const [ia,ib,ra,rb]=await Promise.all([load(o.from),load(o.to),measure(o.tplA,o.from),measure(o.tplB,o.to)]);if(!ia||!ib)throw new Error('Bild');
  cv.width=Math.round(W*dpr);cv.height=Math.round(H*dpr);if(!cv._G)cv._G=mk(cv);const G=cv._G;if(!G)throw new Error('WebGL');
  texUp(G,G.tex[0],raster(ia,ra,dpr));texUp(G,G.tex[1],raster(ib,rb,dpr));
- const area=Math.max(ra.w*ra.h,rb.w*rb.h);const N=Math.round(Math.min(kind==='bike'?32000:12000,Math.max(3000,area/(kind==='bike'?6:10))));
+ const area=Math.max(ra.w*ra.h,rb.w*rb.h);const N=Math.round(Math.min(kind==='bike'?28000:11000,Math.max(3000,area/(kind==='bike'?6:10))));
  const step=kind==='bike'?1.1:1.4;const A=points(ia,ra,step,N,W,H),B=points(ib,rb,step,N,W,H);
+ const dom=P=>{let r=0,g=0,b=0,t=0;for(const q of P){const mx=Math.max(q[2],q[3],q[4]),mn=Math.min(q[2],q[3],q[4]),w=(mx-mn)*(mx-mn)*mx;r+=q[2]*w;g+=q[3]*w;b+=q[4]*w;t+=w}if(t<.5)return[.62,.66,.72];const m=Math.max(r,g,b)/t;const k=Math.min(1.6,.85/Math.max(m,.05));return[r/t*k,g/t*k,b/t*k].map(v=>Math.min(1,v))};const dA=dom(A),dB=dom(B);
  let k0=Infinity,k1=-Infinity;for(const p of A){k0=Math.min(k0,p[5]);k1=Math.max(k1,p[5])}for(const p of B){k0=Math.min(k0,p[5]);k1=Math.max(k1,p[5])}if(k1-k0<.01)k1=k0+.01;
  const f=new Float32Array(N*13);for(let i=0;i<N;i++){const a=A[i],b=B[i],q=i*13;f[q]=a[0];f[q+1]=a[1];f[q+2]=b[0];f[q+3]=b[1];f[q+4]=(a[5]-k0)/(k1-k0);f[q+5]=(b[5]-k0)/(k1-k0);f[q+6]=a[2];f[q+7]=a[3];f[q+8]=a[4];f[q+9]=b[2];f[q+10]=b[3];f[q+11]=b[4];f[q+12]=Math.random()}
  const gl=G.gl;gl.bindBuffer(gl.ARRAY_BUFFER,G.pb);gl.bufferData(gl.ARRAY_BUFFER,f,gl.STATIC_DRAW);
- return{G,N,ra,rb,k0,k1,W,H,dpr,ps:kind==='bike'?1.3:1.6,glow:kind==='bike'?1:.7,refl:!!o.refl}}
+ return{G,N,ra,rb,k0,k1,W,H,dpr,dA,dB,ps:kind==='bike'?1.3:1.6,glow:kind==='bike'?1:.7,refl:!!o.refl}}
 function draw(L,T,glow){const{G,N,ra,rb,k0,k1,W,H,dpr}=L,gl=G.gl;gl.viewport(0,0,gl.canvas.width,gl.canvas.height);gl.clearColor(0,0,0,0);gl.clear(gl.COLOR_BUFFER_BIT);
  gl.enable(gl.BLEND);gl.blendFunc(gl.ONE,gl.ONE_MINUS_SRC_ALPHA);
  const Q=G.q;gl.useProgram(Q.p);gl.bindBuffer(gl.ARRAY_BUFFER,G.quad);gl.enableVertexAttribArray(Q.a.aP);gl.vertexAttribPointer(Q.a.aP,2,gl.FLOAT,false,0,0);
@@ -110,8 +122,9 @@ function draw(L,T,glow){const{G,N,ra,rb,k0,k1,W,H,dpr}=L,gl=G.gl;gl.viewport(0,0
  at('aA',2,0);at('aB',2,2);at('aK',2,4);at('aCA',3,6);at('aCB',3,9);at('aR',1,12);
  gl.uniform2f(P.u.uRes,gl.canvas.width,gl.canvas.height);gl.uniform1f(P.u.uDpr,dpr);gl.uniform1f(P.u.uT,T);gl.uniform1f(P.u.uPs,L.ps);gl.uniform1f(P.u.uGlowOn,L.glow);gl.uniform3fv(P.u.uEdge,glow);gl.uniform3fv(P.u.uHolo,HOLO);
  gl.uniform1f(P.u.uR0,R0);gl.uniform1f(P.u.uRW,RW);gl.uniform1f(P.u.uF,FL);
+ gl.uniform2f(P.u.uCA,ra.x+ra.w/2,ra.y+ra.h/2);gl.uniform2f(P.u.uCB,rb.x+rb.w/2,rb.y+rb.h/2);gl.uniform1f(P.u.uSW,Math.max(ra.w,rb.w));gl.uniform3fv(P.u.uDA,L.dA);gl.uniform3fv(P.u.uDB,L.dB);
  /* Schweif: zwei verzögerte, blassere Durchgänge, dann die Partikel selbst */
- for(const [lag,tr] of L.glow?[[.05,.82],[.025,.6],[0,0]]:[[0,0]]){gl.uniform1f(P.u.uLag,lag);gl.uniform1f(P.u.uTrail,tr);gl.drawArrays(gl.POINTS,0,N)}
+ for(const [lag,tr] of L.glow?[[.045,.8],[.022,.55],[0,0]]:[[0,0]]){gl.uniform1f(P.u.uLag,lag);gl.uniform1f(P.u.uTrail,tr);gl.drawArrays(gl.POINTS,0,N)}
  ['aA','aB','aK','aCA','aCB','aR'].forEach(n=>gl.disableVertexAttribArray(P.a[n]))}
 /* Zeichenflächen je Showroom (bleiben bestehen, im Ruhezustand ausgeblendet) */
 function cvFor(root,key,place){root._vm=root._vm||{};let c=root._vm[key];if(!c){c=document.createElement('canvas');c.className='vmcv';c.setAttribute('aria-hidden','true');root._vm[key]=c;place(c)}return c}
