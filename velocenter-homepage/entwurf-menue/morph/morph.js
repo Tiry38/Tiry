@@ -52,14 +52,14 @@ void main(){float t0=uR0+aK.x*uRW;float t1=max(uR0+aK.y*uRW+uF,t0+.12);float p=c
  vec2 c=pos*uDpr/uRes*2.-1.;gl_Position=vec4(c.x,-c.y,0.,1.);
  float hot=max(exp(-p*18.),exp(-(1.-p)*18.))*uGlowOn;
  float isE=step(fract(aR*13.7),.12);
- gl_PointSize=mix(uPs*(1.+.5*hot+.35*w),g*.84,sn)*uDpr*(1.+.5*isE*w)*(1.-.2*uTrail);
+ gl_PointSize=mix(uPs*(1.+.5*hot+.6*w),g*.84,sn)*uDpr*(1.+.5*isE*w)*(1.-.2*uTrail);
  vA=smoothstep(0.,.03,p)*(1.-smoothstep(.97,1.,p))*(1.-uTrail);
  /* Farben: echte Radfarben, kräftiger; graue/schwarze Pixel nehmen im Schwarm die Hauptfarbe des Rads an */
  float cm=smoothstep(.30,.70,p);vec3 col=mix(aCA,aCB,cm);float lu=dot(col,vec3(.3,.59,.11));
  float sat=max(col.r,max(col.g,col.b))-min(col.r,min(col.g,col.b));
- col=clamp(mix(vec3(lu),col,1.55),0.,1.);
- vec3 dom=mix(uDA,uDB,cm);col=mix(col,dom*(.55+.9*lu)+.06,clamp(1.-sat*3.5,0.,1.)*w*.85);
- col=col*(1.+.4*w)+.05*w;
+ col=clamp(mix(vec3(lu),col,1.9),0.,1.);
+ vec3 dom=mix(uDA,uDB,cm);col=mix(col,dom*(.5+.85*lu),clamp(1.-sat*3.5,0.,1.)*w);
+ col=col*(1.+.18*w);
  vCol=mix(clamp(col,0.,1.),min(col*1.5+.15,vec3(1.)),clamp(isE*w+.6*hot,0.,1.));vHot=max(hot,isE*w*.8)*uGlowOn;vSq=sn;}`;
 const FS_P=`precision mediump float;varying vec3 vCol;varying float vA,vHot,vSq;
 void main(){vec2 q=abs(gl_PointCoord-.5);float r=mix(length(q),max(q.x,q.y),vSq);
