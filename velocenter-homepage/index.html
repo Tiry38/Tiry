@@ -2805,29 +2805,40 @@ footer .soc a{display:grid!important;place-items:center}
 .lbp-yr a.rk:hover,.lbp-yr a.rk:focus-visible{color:#fff}
 </style>
 <style id="mnavCss">
-/* Handy-Kopf (Tiry 16.11.2026): 8 Reiter in 2 Reihen à 4, darunter Öffnungszeiten; kein Burger-Menü */
+/* Handy-Kopf (Tiry 16.11.2026): eine Glas-Kopfzeile – 8 Reiter im festen 4er-Raster, darunter Öffnungszeiten über die ganze Breite + A+; kein Burger, kein Logo/Social im Kopf */
 .mnav{display:none}
 @media (max-width:980px){
- .mnav{display:block;position:relative;padding:8px max(10px,env(safe-area-inset-right,0px)) 0 max(10px,env(safe-area-inset-left,0px))}
- .mnt{position:relative;display:grid;gap:4px;padding:5px;border-radius:28px;overflow:hidden;isolation:isolate;
-  background:linear-gradient(135deg,rgba(255,255,255,.78),rgba(236,242,250,.62) 50%,rgba(255,234,240,.68));
-  backdrop-filter:blur(18px) saturate(1.5);-webkit-backdrop-filter:blur(18px) saturate(1.5);
-  box-shadow:0 12px 30px rgba(27,30,37,.13),0 2px 6px rgba(27,30,37,.06),inset 0 0 0 1px rgba(255,255,255,.9),inset 0 -1px 0 rgba(184,115,51,.22)}
+ html body .hdr.hdr.hdr.hdr.hdr.hdr{background:linear-gradient(180deg,#FBFCFE,#F1F4F8)!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important;
+  border-radius:0 0 26px 26px;box-shadow:0 14px 34px rgba(27,30,37,.14),0 1px 0 rgba(255,255,255,.9) inset,0 -1px 0 rgba(184,115,51,.25) inset!important}
+ html body .hdr.hdr.hdr.hdr.hdr.hdr::after{display:none!important}
+ .mnav{display:block;position:relative;padding:8px 10px 0}
+ .mnt{position:relative;display:grid;gap:4px;padding:5px;border-radius:24px;overflow:hidden;isolation:isolate;
+  background:linear-gradient(135deg,rgba(255,255,255,.75),rgba(232,238,247,.7) 55%,rgba(253,236,241,.72));
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.95),0 4px 14px rgba(27,30,37,.07)}
  .mnt::before{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;border-radius:inherit;
-  background:linear-gradient(115deg,transparent 0 38%,rgba(255,255,255,.55) 46%,transparent 54%) 0 0/250% 100%;animation:mnGlanz 7s ease-in-out infinite}
+  background:linear-gradient(115deg,transparent 0 38%,rgba(255,255,255,.6) 46%,transparent 54%) 0 0/250% 100%;animation:mnGlanz 7s ease-in-out infinite}
  @keyframes mnGlanz{0%,55%{background-position:120% 0}100%{background-position:-60% 0}}
- .mnr{display:flex;gap:4px}
- .mnr a{flex:1 1 auto;display:flex;align-items:center;justify-content:center;gap:4px;min-height:44px;padding:0 6px;border-radius:999px;
-  font:700 clamp(11.5px,3.25vw,14.5px)/1.05 var(--display);letter-spacing:0;color:#1B1E25;text-decoration:none;text-align:center;white-space:nowrap;
+ .mnr{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:4px}
+ .mnr a{position:relative;display:flex;align-items:center;justify-content:center;min-height:44px;padding:0 4px;border-radius:999px;
+  font:700 clamp(11px,3.05vw,14px)/1 var(--display);letter-spacing:0;color:#1B1E25;text-decoration:none;text-align:center;white-space:nowrap;
   -webkit-tap-highlight-color:transparent;transition:background .35s,color .35s,box-shadow .35s}
- .mnr a:active{background:rgba(255,255,255,.75)}
+ .mnr a:active{background:rgba(255,255,255,.8)}
  .mnr a.on{color:#fff;background:linear-gradient(135deg,#F0434C,#E2232D 40%,#B3122B 75%,#8E1846);
-  box-shadow:0 6px 16px rgba(226,35,45,.36),inset 0 1px 0 rgba(255,255,255,.4),inset 0 -2px 6px rgba(80,0,20,.25)}
- .mnr .nlive{margin-left:2px;padding:2px 5px 2px 4px;font-size:7.5px;vertical-align:0}
+  box-shadow:0 6px 16px rgba(226,35,45,.34),inset 0 1px 0 rgba(255,255,255,.4),inset 0 -2px 6px rgba(80,0,20,.25)}
+ .mnr .nlive{position:absolute;top:1px;right:2px;margin:0;padding:2px 4px 2px 3px;font-size:7px;gap:3px;box-shadow:0 2px 6px rgba(192,38,211,.35)}
  .mnr a.on .nlive{background:#fff;color:#E2232D}
- .hdr .burger{display:none!important}
- .hdr .wrap{height:66px}body.sc .hdr .wrap{height:60px}
- #main{padding-top:102px}
+ .hdr .burger,.hdr .logo,.hdr .hsoc{display:none!important}
+ .hdr .wrap{height:64px;padding-left:15px;padding-right:15px;gap:8px}body.sc .hdr .wrap{height:64px}
+ .hdr .hdact{flex:1;min-width:0;margin-left:0;gap:8px}
+ .hdr .owrap{flex:1;min-width:0}
+ .hdr .owrap .ostat,.hdr .owrap .ostat.f2,.hdr .owrap .ostat.f3{display:flex!important;width:100%!important;height:48px;padding:4px 16px 4px 4px!important;gap:10px!important;justify-content:flex-start}
+ .hdr .ostat .otx,.hdr .ostat.f2 .otx{display:flex!important;flex-direction:column;justify-content:center;gap:3px}
+ .hdr .ostat .otx .ld,.hdr .ostat .otx .t{display:inline!important}
+ .hdr .ostat .otx .lm,.hdr .ostat .otx .tm,.hdr .ostat .osh{display:none!important}
+ .hdr .ostat .otx .t{font-size:15px}
+ .hdr .ostat::after{content:"";margin-left:auto;width:8px;height:8px;border-right:2px solid rgba(255,255,255,.55);border-bottom:2px solid rgba(255,255,255,.55);transform:rotate(-45deg)}
+ .hdr .fzb{height:48px;min-width:48px;border-radius:999px}
+ #main{padding-top:108px}
  #drCP,#drER,.tpc,#termin-form,#tf,#dienstrad{scroll-margin-top:200px}
 }
 </style>
