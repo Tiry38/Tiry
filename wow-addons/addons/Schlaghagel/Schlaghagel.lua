@@ -1,6 +1,6 @@
--- Schlaghagel 1.1.0 - Proc-Anzeigen fuer den Verstaerker-Schamanen
+-- Schlaghagel 1.2.0 - Proc-Anzeigen fuer den Verstaerker-Schamanen
 --   Schlaghagel          Buff 16257 (Forever: einzige Buff-ID, 15 s, 3 Ladungen;
---                        Talent 16256 mit 6/12/18/24/30 %)
+--                        Talent 16256 mit 6/12/18/24/30 %) - ab 1.2 mit Hagelsturm-Animation
 --   Waffe des Mahlstroms Buff 408505 (30 s, bis 5 Stapel, je Stapel -20 % Zauberzeit/Mana des
 --                        naechsten Blitzschlags; Talent 408498, 5 Raenge) - neu in 1.1, eigene Anzeige
 --                        ueber dem Charakter, Blitz-/Strom-Animation
@@ -18,7 +18,7 @@
 --  * Kein Ton. Das Add-on selbst liest im Kampf nichts.
 -- Aufbau nur ausserhalb des Kampfes (der Slot ist fuer Add-ons gesperrt, solange Auren geheim sind).
 
-local VERSION = "1.1.0"
+local VERSION = "1.2.0"
 local SIZE = 76
 local MEDIA = "Interface\\AddOns\\Schlaghagel\\Media\\"
 
@@ -27,13 +27,13 @@ local PROFILES = {
   SHAMAN = {
     {
       key = "hagel", id = 16257, dur = 15, name = "Schlaghagel", icon = "Interface\\Icons\\Ability_GhoulFrenzy",
-      glow = { 0.15, 0.75, 1, 0.85 }, top = "|cff4dd9ffSCHLAG|r|cffffd24dHAGEL!|r",
+      glow = { 0.20, 0.78, 1, 0.85 }, topText = "SCHLAGHAGEL!", stops = "HAGEL",
       sub = "|cffbfeeffAngriffstempo hoch|r", count = { 1, 0.82, 0.3 }, demo = "3",
-      x = 0, y = -150, frame = "Schlaghagel",
+      x = 0, y = -150, frame = "Schlaghagel", fx = "hagel",     -- Hagelsturm-Animation (1.2)
     },
     {
       key = "mahl", id = 408505, dur = 30, name = "Waffe des Mahlstroms", icon = "Interface\\Icons\\Spell_Nature_Lightning",
-      glow = { 0.55, 0.40, 1, 0.80 }, top = nil, topText = "MAHLSTROM!",
+      glow = { 0.55, 0.40, 1, 0.80 }, topText = "MAHLSTROM!", stops = "STROM",
       sub = "|cffd9ccffBlitzschlag schneller|r", count = { 0.86, 0.95, 1 }, demo = "5",
       x = 0, y = 120, frame = "SchlaghagelMahl", fx = "strom",   -- ueber dem Charakter (Bildmitte, hoeher)
     },
@@ -63,7 +63,7 @@ end
 
 local function inCombat() return InCombatLockdown and InCombatLockdown() end
 
--- Text mit Farbverlauf (Violett -> Tuerkis -> Weiss), Buchstabe fuer Buchstabe
+-- Text mit Farbverlauf, Buchstabe fuer Buchstabe
 local function gradText(t, stops)
   local out, n = {}, #t
   for i = 1, n do
@@ -75,7 +75,10 @@ local function gradText(t, stops)
   end
   return table.concat(out)
 end
-local STROM_TEXT = { { 0.72, 0.50, 1 }, { 0.30, 0.85, 1 }, { 0.92, 0.97, 1 } }
+local STOPS = {
+  STROM = { { 0.72, 0.50, 1 }, { 0.30, 0.85, 1 }, { 0.92, 0.97, 1 } },   -- Violett -> Tuerkis -> Weiss
+  HAGEL = { { 0.30, 0.85, 1 }, { 0.88, 0.97, 1 }, { 1, 0.80, 0.28 } },   -- Eis-Tuerkis -> Weiss -> Gold
+}
 
 -- Speicherplatz je Proc: "hagel" = DB selbst (kompatibel zu 1.0), sonst DB[key]
 local function store(pr)
@@ -119,17 +122,22 @@ local BOLTS = {   -- Winkel (Grad, 0 = oben; nur seitlich, damit Titel/Hinweis l
   { 55, 1, 1.15, 0.00 }, { 92, 2, 1.30, 0.55 }, { 128, 3, 1.05, 0.20 },
   { 232, 1, 1.40, 0.80 }, { 268, 2, 1.20, 0.35 }, { 305, 3, 1.25, 0.95 },
 }
+local function fxTex(V, icon, layer, sub, file, size, r, g, b, a)
+  local t = V:CreateTexture(nil, layer, nil, sub)
+  t:SetTexture(MEDIA .. file)
+  t:SetPoint("CENTER", icon, "CENTER")
+  t:SetSize(size, size)
+  t:SetBlendMode("ADD")
+  t:SetVertexColor(r, g, b, 1)
+  t:SetAlpha(a)
+  return t
+end
+local function setScale(a, s0, s1)
+  pcall(function() a:SetScaleFrom(s0, s0) a:SetScaleTo(s1, s1) end)
+end
+
 local function strom(V, icon)
-  local function tex(layer, sub, file, size, r, g, b, a)
-    local t = V:CreateTexture(nil, layer, nil, sub)
-    t:SetTexture(MEDIA .. file)
-    t:SetPoint("CENTER", icon, "CENTER")
-    t:SetSize(size, size)
-    t:SetBlendMode("ADD")
-    t:SetVertexColor(r, g, b, 1)
-    t:SetAlpha(a)
-    return t
-  end
+  local function tex(...) return fxTex(V, icon, ...) end
   local plasma = tex("BACKGROUND", 2, "strom_plasma", SIZE * 1.62, 0.42, 0.50, 1, 0.85)
   local arc2 = tex("OVERLAY", 1, "strom_arc2", SIZE * 1.42, 0.68, 0.48, 1, 0.9)
   local arc1 = tex("OVERLAY", 2, "strom_arc1", SIZE * 1.30, 0.70, 0.95, 1, 1)
@@ -175,11 +183,109 @@ local function strom(V, icon)
   r1:SetTarget(ring) r1:SetFromAlpha(1) r1:SetToAlpha(0) r1:SetDuration(0.40) r1:SetSmoothing("OUT")
   local r2 = strike:CreateAnimation("Scale")
   r2:SetTarget(ring)
-  pcall(function() r2:SetScaleFrom(0.7, 0.7) r2:SetScaleTo(1.9, 1.9) end)
+  setScale(r2, 0.7, 1.9)
   r2:SetDuration(0.40) r2:SetSmoothing("OUT")
   groups[#groups + 1] = strike
 
   return groups, { plasma = plasma, arc1 = arc1, arc2 = arc2, flash = flash, ring = ring }
+end
+
+-- ---------- Hagelsturm-Optik (Schlaghagel, 1.2) ----------
+-- Hagel der Schlaege: drei Klingen-Schnitte im "Ta-ta-ta"-Takt (= 3 Ladungen) quer ueber das Symbol, jeder mit
+-- Treffer-Funke; Hagelkoerner prasseln schraeg herab (zwei Lagen, eigener Takt); Tempo-Striche links/rechts flackern;
+-- beim Erscheinen Lichtblitz + Funken-Explosion. Bewusst keine Kreise/Ringe.
+local CUTS = {   -- Drehung (Grad, gegen den Uhrzeigersinn), Versatz im Takt (s), Funke (x, y) relativ zum Symbol
+  { 32, 0.00, 13, 7 }, { -32, 0.12, -12, 6 }, { 6, 0.24, 3, -10 },
+}
+local CUT_CYCLE = 1.2
+local function hagelsturm(V, icon)
+  local function tex(...) return fxTex(V, icon, ...) end
+  local flash = tex("OVERLAY", 4, "strom_glow", SIZE * 3.0, 0.80, 0.95, 1, 0)
+
+  local groups = {}
+  -- Hagel: Lage faellt (Versatz), blendet ein und aus; zwei Lagen mit eigenem Takt -> durchgehendes Prasseln
+  local function hail(file, w, h, dx, dy, d, a, r, g, b)
+    local t = tex("BACKGROUND", 3, file, w, r, g, b, 0)
+    t:SetSize(w, h)
+    t:ClearAllPoints()
+    t:SetPoint("CENTER", icon, "CENTER", -dx / 2, -dy / 2)
+    local grp = V:CreateAnimationGroup()
+    grp:SetLooping("REPEAT")
+    local inA = grp:CreateAnimation("Alpha")
+    inA:SetTarget(t) inA:SetFromAlpha(0) inA:SetToAlpha(a) inA:SetDuration(d * 0.18) inA:SetOrder(1)
+    local m1 = grp:CreateAnimation("Translation")
+    m1:SetTarget(t) m1:SetOffset(dx * 0.18, dy * 0.18) m1:SetDuration(d * 0.18) m1:SetOrder(1)
+    local m2 = grp:CreateAnimation("Translation")
+    m2:SetTarget(t) m2:SetOffset(dx * 0.54, dy * 0.54) m2:SetDuration(d * 0.54) m2:SetOrder(2)
+    local outA = grp:CreateAnimation("Alpha")
+    outA:SetTarget(t) outA:SetFromAlpha(a) outA:SetToAlpha(0) outA:SetDuration(d * 0.28) outA:SetOrder(3)
+    local m3 = grp:CreateAnimation("Translation")
+    m3:SetTarget(t) m3:SetOffset(dx * 0.28, dy * 0.28) m3:SetDuration(d * 0.28) m3:SetOrder(3)
+    groups[#groups + 1] = grp
+    return t
+  end
+  local fall1 = hail("hagel_fall1", SIZE * 2.6, SIZE * 1.35, 7, -30, 0.95, 0.85, 0.70, 0.92, 1)
+  local fall2 = hail("hagel_fall2", SIZE * 2.3, SIZE * 1.25, 6, -26, 1.25, 0.70, 0.85, 0.97, 1)
+
+  -- Tempo-Striche links (zeigen zum Symbol) und rechts (gespiegelt), flackern versetzt
+  local function speed(side, d)
+    local t = V:CreateTexture(nil, "BACKGROUND", nil, 4)
+    t:SetTexture(MEDIA .. "hagel_speed")
+    t:SetSize(SIZE * 0.95, SIZE * 0.95)
+    t:SetPoint(side == -1 and "RIGHT" or "LEFT", icon, side == -1 and "LEFT" or "RIGHT", side * -4, 0)
+    t:SetBlendMode("ADD")
+    t:SetVertexColor(1, 0.84, 0.40, 1)
+    t:SetAlpha(0.9)
+    if side == 1 then t:SetTexCoord(1, 0, 0, 1) end
+    local x = V:CreateAnimationGroup()
+    x:SetLooping("BOUNCE")
+    local a = x:CreateAnimation("Alpha")
+    a:SetTarget(t) a:SetFromAlpha(0.95) a:SetToAlpha(0.15) a:SetDuration(d) a:SetSmoothing("IN_OUT")
+    groups[#groups + 1] = x
+    return t
+  end
+  local speedL, speedR = speed(-1, 0.09), speed(1, 0.11)
+
+  -- Klingen-Schnitte: aufblitzen (0,04 s), dann nachziehen und verblassen (0,26 s); Funke springt mit
+  local cuts = {}
+  for _, c in ipairs(CUTS) do
+    local t = tex("OVERLAY", 3, "hagel_cut", SIZE * 2.5, 1, 0.97, 0.82, 0)
+    t:SetRotation(math.rad(c[1]))
+    local sp = tex("OVERLAY", 4, "hagel_spark", SIZE * 0.95, 0.75, 0.95, 1, 0)
+    sp:ClearAllPoints()
+    sp:SetPoint("CENTER", icon, "CENTER", c[3], c[4])
+    sp:SetRotation(math.rad(c[1] * 1.7))
+    local g = V:CreateAnimationGroup()
+    g:SetLooping("REPEAT")
+    local on = g:CreateAnimation("Alpha")
+    on:SetTarget(t) on:SetFromAlpha(0) on:SetToAlpha(1) on:SetDuration(0.04) on:SetStartDelay(c[2]) on:SetOrder(1)
+    local son = g:CreateAnimation("Alpha")
+    son:SetTarget(sp) son:SetFromAlpha(0) son:SetToAlpha(1) son:SetDuration(0.04) son:SetStartDelay(c[2]) son:SetOrder(1)
+    local off = g:CreateAnimation("Alpha")
+    off:SetTarget(t) off:SetFromAlpha(1) off:SetToAlpha(0) off:SetDuration(0.26) off:SetSmoothing("IN") off:SetOrder(2)
+    off:SetEndDelay(math.max(0.05, CUT_CYCLE - c[2] - 0.30))
+    local sc = g:CreateAnimation("Scale")
+    sc:SetTarget(t) setScale(sc, 0.85, 1.15) sc:SetDuration(0.26) sc:SetSmoothing("OUT") sc:SetOrder(2)
+    local soff = g:CreateAnimation("Alpha")
+    soff:SetTarget(sp) soff:SetFromAlpha(1) soff:SetToAlpha(0) soff:SetDuration(0.20) soff:SetSmoothing("OUT") soff:SetOrder(2)
+    local ssc = g:CreateAnimation("Scale")
+    ssc:SetTarget(sp) setScale(ssc, 0.6, 1.5) ssc:SetDuration(0.20) ssc:SetSmoothing("OUT") ssc:SetOrder(2)
+    groups[#groups + 1] = g
+    cuts[#cuts + 1] = t
+  end
+
+  -- Einschlag beim Erscheinen: Lichtblitz + grosse Funken-Explosion
+  local strike = V:CreateAnimationGroup()
+  local burst = tex("OVERLAY", 4, "hagel_spark", SIZE * 1.6, 1, 0.90, 0.55, 0)
+  local f1 = strike:CreateAnimation("Alpha")
+  f1:SetTarget(flash) f1:SetFromAlpha(1) f1:SetToAlpha(0) f1:SetDuration(0.45) f1:SetSmoothing("OUT")
+  local b1 = strike:CreateAnimation("Alpha")
+  b1:SetTarget(burst) b1:SetFromAlpha(1) b1:SetToAlpha(0) b1:SetDuration(0.50) b1:SetSmoothing("OUT")
+  local b2 = strike:CreateAnimation("Scale")
+  b2:SetTarget(burst) setScale(b2, 0.5, 2.2) b2:SetDuration(0.50) b2:SetSmoothing("OUT")
+  groups[#groups + 1] = strike
+
+  return groups, { flash = flash, fall1 = fall1, fall2 = fall2, speedL = speedL, speedR = speedR, cuts = cuts, burst = burst }
 end
 
 -- ---------- Optik (einmal fuer den Live-Slot, einmal fuer Vorschau/Test) ----------
@@ -193,7 +299,7 @@ local function build(parent, pr)
   V:SetFrameStrata("HIGH")
 
   local glow = V:CreateTexture(nil, "BACKGROUND")
-  if pr.fx == "strom" then
+  if pr.fx then
     glow:SetTexture(MEDIA .. "strom_glow")
     glow:SetSize(SIZE * 2.5, SIZE * 2.5)
   else
@@ -216,8 +322,9 @@ local function build(parent, pr)
     icon:AddMaskTexture(m)
   end)
 
-  local fx, fxTex
-  if pr.fx == "strom" then fx, fxTex = strom(V, icon) end
+  local fx, fxT
+  if pr.fx == "strom" then fx, fxT = strom(V, icon)
+  elseif pr.fx == "hagel" then fx, fxT = hagelsturm(V, icon) end
 
   local cd = CreateFrame("Cooldown", nil, V, "CooldownFrameTemplate")
   cd:SetAllPoints(icon)
@@ -246,7 +353,7 @@ local function build(parent, pr)
   top:SetFont(STANDARD_TEXT_FONT, 21, "OUTLINE")
   top:SetPoint("BOTTOM", V, "TOP", 0, pr.fx and 22 or 12)
   top:SetShadowOffset(2, -2)
-  top:SetText(pr.top or gradText(pr.topText, STROM_TEXT))
+  top:SetText(gradText(pr.topText, STOPS[pr.stops]))
 
   local sub = txt:CreateFontString(nil, "OVERLAY")
   sub:SetFont(STANDARD_TEXT_FONT, 12, "OUTLINE")
@@ -266,7 +373,7 @@ local function build(parent, pr)
   pcall(function() if not a3.SetScaleFrom then a3:SetScale(1.12, 1.12) end end)
   a3:SetDuration(0.32) a3:SetSmoothing("IN_OUT")
 
-  return { V = V, icon = icon, cd = cd, timer = timer, count = count, pulse = pulse, fx = fx or {}, fxTex = fxTex }
+  return { V = V, icon = icon, cd = cd, timer = timer, count = count, pulse = pulse, fx = fx or {}, fxTex = fxT }
 end
 
 -- ---------- Live: Blizzard-Aura-Slot je Proc ----------
@@ -284,10 +391,10 @@ local function initSlot(pr, button)
   hook("Symbol", function() button:SetIcon(p.icon) end)
   hook("Ablauf", function() button:SetDurationCooldown(p.cd) end)
   hook("Restzeit", function() button:SetDurationText(p.timer) end)
-  hook(pr.fx and "Stapel" or "Ladungen", function() button:SetApplicationCount(p.count) end)
+  hook(pr.key == "mahl" and "Stapel" or "Ladungen", function() button:SetApplicationCount(p.count) end)
   if DB.blink then hook("Blinken", function() button:AddAuraShownAnimation(p.pulse) end) end
   if #p.fx > 0 and DB.strom ~= false then
-    hook("Strom", function() for _, g in ipairs(p.fx) do button:AddAuraShownAnimation(g) end end)
+    hook(pr.fx == "strom" and "Strom" or "Hagelsturm", function() for _, g in ipairs(p.fx) do button:AddAuraShownAnimation(g) end end)
   end
 end
 
@@ -463,10 +570,10 @@ SlashCmdList.SCHLAGHAGEL = function(arg)
     DB.blink = not DB.blink
     msg("Blinken " .. (DB.blink and "|cff40ff59an|r" or "|cffff5555aus|r") .. " - im Kampf ab |cff40ff59/reload|r (Vorschau sofort).")
     for _, pr in ipairs(PROCS) do preview(pr, 3) end
-  elseif cmd == "strom" or cmd == "blitz" then
+  elseif cmd == "strom" or cmd == "blitz" or cmd == "effekte" or cmd == "fx" then
     DB.strom = not DB.strom
-    msg("Strom-Animation (Mahlstrom) " .. (DB.strom and "|cff40ff59an|r" or "|cffff5555aus|r") .. " - im Kampf ab |cff40ff59/reload|r (Vorschau sofort).")
-    if BYKEY.mahl then preview(BYKEY.mahl, 3) end
+    msg("Effekt-Animationen (Hagelsturm + Strom) " .. (DB.strom and "|cff40ff59an|r" or "|cffff5555aus|r") .. " - im Kampf ab |cff40ff59/reload|r (Vorschau sofort).")
+    for _, pr in ipairs(PROCS) do preview(pr, 3) end
   elseif cmd == "reset" then
     if inCombat() then msg("erst nach dem Kampf.") return end
     for _, pr in ipairs(pick(words)) do
@@ -476,7 +583,7 @@ SlashCmdList.SCHLAGHAGEL = function(arg)
     end
     msg("Position zurueckgesetzt.")
   elseif cmd == "diag" then
-    msg("Version " .. VERSION .. " · Blinken " .. (DB.blink and "an" or "aus") .. " · Strom " .. (DB.strom and "an" or "aus"))
+    msg("Version " .. VERSION .. " · Blinken " .. (DB.blink and "an" or "aus") .. " · Effekte " .. (DB.strom and "an" or "aus"))
     for _, pr in ipairs(PROCS) do
       local L = pr.live
       msg(pr.name .. " (Buff " .. pr.id .. "): " .. (L.state == "an" and "|cff40ff59aktiv|r (zeigt sich auch im Kampf)" or ("|cffff5555" .. L.state .. "|r " .. tostring(L.why or ""))))
@@ -490,6 +597,6 @@ SlashCmdList.SCHLAGHAGEL = function(arg)
     end
   else
     msg("|cff40ff59/hagel test|r Vorschau · |cff40ff59unlock|r/|cff40ff59lock|r verschieben · |cff40ff59groesse 1.3|r (|cff40ff59groesse mahl 1.3|r nur Mahlstrom)")
-    msg("|cff40ff59/hagel mahl|r bzw. |cff40ff59schlag|r an/aus · |cff40ff59blinken|r · |cff40ff59strom|r (Blitz-Animation) · |cff40ff59reset|r · |cff40ff59diag|r")
+    msg("|cff40ff59/hagel mahl|r bzw. |cff40ff59schlag|r an/aus · |cff40ff59blinken|r · |cff40ff59effekte|r (Hagelsturm/Strom) · |cff40ff59reset|r · |cff40ff59diag|r")
   end
 end

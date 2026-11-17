@@ -518,3 +518,14 @@ Aus 4.2 weiter offen: `C_Map.GetMapPosFromWorldPos`, Flugmeister-IDs, Hochplatea
 - [ ] `/hagel unlock` → beide ziehbar, getrennt speichern; `/hagel lock`. `/hagel groesse mahl 1.3` ändert nur Mahlstrom.
 - [ ] `/hagel mahl` aus/an, `/hagel strom` (Blitz-Animation aus/an, im Kampf ab `/reload`).
 - Nur im Spiel prüfbar: ob Forever den Aura-Slot für 408505 im Kampf füllt, Drehen/Skalieren von Texturen in Aura-Animationen, Optik der additiven Blitze über der echten Spielwelt.
+
+# Ingame-Test – Schlaghagel 1.2.0 (Hagelsturm-Animation)
+
+Installation: Ordner `Schlaghagel` ersetzen, **WoW komplett neu starten** (neue Grafikdateien).
+
+- [ ] `/hagel test hagel`: Klingen-Schnitte als X quer über das Symbol, je mit Funke, im Takt „ta-ta-ta – Pause“.
+- [ ] Hagelkörner prasseln schräg nach unten, Tempo-Striche links/rechts flackern, beim Start Lichtblitz + Funken-Explosion.
+- [ ] Titel „SCHLAGHAGEL!“ und Hinweis bleiben lesbar.
+- [ ] Im Kampf (echter Proc): dieselbe Animation startet mit dem Buff und stoppt, wenn die Ladungen verbraucht sind.
+- [ ] Falls Hagel/Schnitte im Kampf **stehen bleiben** oder fehlen: `/hagel diag` – Zeile „Hagelsturm“ melden.
+- [ ] `/hagel effekte` schaltet Hagelsturm und Strom aus/an (im Kampf ab `/reload`).

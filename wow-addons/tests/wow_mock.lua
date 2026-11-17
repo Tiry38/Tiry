@@ -417,7 +417,7 @@ function Obj.Stop(o) o.__playing = false end
 function Obj.IsPlaying(o) return o.__playing == true end
 function Obj.SetDuration(o, d) assert(type(d) == "number" and d > 0) o.__dur = d end
 function Obj.SetSmoothing(o, s) assert(SMOOTH[s], "Ungültiges Smoothing: " .. tostring(s)) o.__smooth = s end
-function Obj.SetOffset(o, x, y) assert(type(x) == "number" and type(y) == "number") end
+function Obj.SetOffset(o, x, y) assert(type(x) == "number" and type(y) == "number") o.__ox, o.__oy = x, y end
 function Obj.SetFromAlpha(o, a) assert(type(a) == "number") o.__from = a end
 function Obj.SetToAlpha(o, a) assert(type(a) == "number") o.__to = a end
 function Obj.SetTarget(o, t) assert(type(t) == "table" and t.__kind, "SetTarget braucht Region/Frame") o.__target = t end
@@ -457,7 +457,8 @@ function M.animState(g, t)
       local tg = a.__target or g.__parent
       if a.__kind == "Alpha" then out[#out + 1] = { tg, "alpha", a.__from + (a.__to - a.__from) * p }
       elseif a.__kind == "Rotation" then out[#out + 1] = { tg, "rot", math.rad(a.__deg or 0) * p }
-      elseif a.__kind == "Scale" and a.__sfrom then out[#out + 1] = { tg, "scale", a.__sfrom[1] + (a.__sto[1] - a.__sfrom[1]) * p } end
+      elseif a.__kind == "Scale" and a.__sfrom then out[#out + 1] = { tg, "scale", a.__sfrom[1] + (a.__sto[1] - a.__sfrom[1]) * p }
+      elseif a.__kind == "Translation" and a.__ox then out[#out + 1] = { tg, "move", { a.__ox * p, a.__oy * p } } end
     end
   end
   return out, total

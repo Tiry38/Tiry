@@ -79,6 +79,7 @@ if want hagel; then
   run "Schlaghagel (Schamane)" "$A" - env PROC_CLASS=SHAMAN lua5.1 "$T/hagel.lua"
   run "Schlaghagel (Hexer)" "$A" - env PROC_CLASS=WARLOCK lua5.1 "$T/hagel.lua"
   run "Schlaghagel: Mahlstrom-Strom-Animation (strenger Nachbau)" "$ROOT" "STROM TESTS OK" lua5.1 "$T/hagel_strom.lua"
+  run "Schlaghagel: Hagelsturm-Animation (strenger Nachbau)" "$ROOT" "HAGELSTURM TESTS OK" lua5.1 "$T/hagel_sturm.lua"
 fi
 if want blitzschild; then
   run "Blitzschild: bs" "$A/Blitzschild" - lua5.1 "$T/bs.lua"

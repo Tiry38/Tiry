@@ -1,4 +1,4 @@
--- Schlaghagel 1.1 - Simulation (Schlaghagel + Waffe des Mahlstroms) (Klasse per Umgebungsvariable PROC_CLASS=SHAMAN|WARLOCK; Standard SHAMAN): Blizzard-Aura-Slot (CustomAuraContainerTemplate), Kampf-Sperre, kein Ton.
+-- Schlaghagel 1.2 - Simulation (Schlaghagel mit Hagelsturm + Waffe des Mahlstroms) (Klasse per Umgebungsvariable PROC_CLASS=SHAMAN|WARLOCK; Standard SHAMAN): Blizzard-Aura-Slot (CustomAuraContainerTemplate), Kampf-Sperre, kein Ton.
 -- Aufruf aus addons/:  cd addons && lua5.1 ../tests/proc.lua
 local CLASS = os.getenv("PROC_CLASS") or "SHAMAN"
 local ID = ({ SHAMAN = 16257 })[CLASS]
@@ -117,7 +117,7 @@ for _, id in ipairs({ ID, MAHL }) do
     check(s.btn.icon and s.btn.cd and s.btn.text and rawget(s.btn, "count") ~= nil, "Symbol/Ablauf/Restzeit/Ladungen an Blizzard (" .. id .. ")")
   end
 end
-check(#slots[ID].btn.anims == 1, "Schlaghagel: nur Blinken")
+check(#slots[ID].btn.anims == 1 + 4 + 3 + 1, "Schlaghagel: Blinken + 2 Hagel + 2 Tempo-Striche + 3 Klingen-Schnitte + Einschlag (" .. #slots[ID].btn.anims .. ")")
 check(#slots[MAHL].btn.anims == 1 + 5 + 6 + 1, "Mahlstrom: Blinken + 5 Strom-Schleifen + 6 Blitze + Einschlag (" .. #slots[MAHL].btn.anims .. ")")
 check(_G.SchlaghagelAnchor and _G.SchlaghagelMahlAnchor, "zwei Anker")
 check(SchlaghagelDB.mahl and SchlaghagelDB.mahl.y == 120 and SchlaghagelDB.y == -150, "Mahlstrom ueber dem Charakter, Schlaghagel darunter")
@@ -131,7 +131,8 @@ check(slots[MAHL].btn._shown and not slots[ID].btn._shown, "nur Mahlstrom sichtb
 local allPlay = true for _, g in ipairs(slots[MAHL].btn.anims) do allPlay = allPlay and g.playing end
 check(allPlay, "Strom-Animation laeuft im Kampf")
 gameAura(ID, true)
-check(slots[ID].btn._shown and slots[ID].btn.anims[1].playing, "Schlaghagel dazu, blinkt")
+local hPlay = true for _, g in ipairs(slots[ID].btn.anims) do hPlay = hPlay and g.playing end
+check(slots[ID].btn._shown and hPlay, "Schlaghagel dazu, blinkt + Hagelsturm laeuft")
 gameAura(MAHL, false)
 local anyPlay = false for _, g in ipairs(slots[MAHL].btn.anims) do anyPlay = anyPlay or g.playing end
 check(not slots[MAHL].btn._shown and not anyPlay and slots[ID].btn._shown, "Mahlstrom weg (Blitzschlag), Animation aus, Schlaghagel bleibt")
@@ -177,8 +178,11 @@ check(not SchlaghagelDB.mahl.aus and slots[MAHL].container._shown and containers
 local b0 = SchlaghagelDB.blink
 SlashCmdList.SCHLAGHAGEL("blinken")
 check(SchlaghagelDB.blink == not b0 and said("/reload"), "blinken umschalten")
+SlashCmdList.SCHLAGHAGEL("effekte")
+check(SchlaghagelDB.strom == false and said("Hagelsturm"), "Effekt-Animationen aus (/hagel effekte)")
 SlashCmdList.SCHLAGHAGEL("strom")
-check(SchlaghagelDB.strom == false, "Strom-Animation aus")
+check(SchlaghagelDB.strom == true, "/hagel strom schaltet weiterhin um")
+SlashCmdList.SCHLAGHAGEL("strom")
 -- Neu laden mit 1.0-Daten: Schlaghagel-Platz bleibt, Mahlstrom bekommt Standard
 SchlaghagelDB = { x = 33, y = -99, scale = 1.3, blink = false }
 containers, slots = 0, {}
