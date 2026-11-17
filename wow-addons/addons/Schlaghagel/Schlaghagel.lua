@@ -1,4 +1,4 @@
--- Schlaghagel 1.2.0 - Proc-Anzeigen fuer den Verstaerker-Schamanen
+-- Schlaghagel 1.2.1 - Proc-Anzeigen fuer den Verstaerker-Schamanen
 --   Schlaghagel          Buff 16257 (Forever: einzige Buff-ID, 15 s, 3 Ladungen;
 --                        Talent 16256 mit 6/12/18/24/30 %) - ab 1.2 mit Hagelsturm-Animation
 --   Waffe des Mahlstroms Buff 408505 (30 s, bis 5 Stapel, je Stapel -20 % Zauberzeit/Mana des
@@ -18,7 +18,7 @@
 --  * Kein Ton. Das Add-on selbst liest im Kampf nichts.
 -- Aufbau nur ausserhalb des Kampfes (der Slot ist fuer Add-ons gesperrt, solange Auren geheim sind).
 
-local VERSION = "1.2.0"
+local VERSION = "1.2.1"
 local SIZE = 76
 local MEDIA = "Interface\\AddOns\\Schlaghagel\\Media\\"
 
@@ -27,14 +27,12 @@ local PROFILES = {
   SHAMAN = {
     {
       key = "hagel", id = 16257, dur = 15, name = "Schlaghagel", icon = "Interface\\Icons\\Ability_GhoulFrenzy",
-      glow = { 0.20, 0.78, 1, 0.85 }, topText = "SCHLAGHAGEL!", stops = "HAGEL",
-      sub = "|cffbfeeffAngriffstempo hoch|r", count = { 1, 0.82, 0.3 }, demo = "3",
+      glow = { 0.20, 0.78, 1, 0.85 }, count = { 1, 0.82, 0.3 }, demo = "3",
       x = 0, y = -150, frame = "Schlaghagel", fx = "hagel",     -- Hagelsturm-Animation (1.2)
     },
     {
       key = "mahl", id = 408505, dur = 30, name = "Waffe des Mahlstroms", icon = "Interface\\Icons\\Spell_Nature_Lightning",
-      glow = { 0.55, 0.40, 1, 0.80 }, topText = "MAHLSTROM!", stops = "STROM",
-      sub = "|cffd9ccffBlitzschlag schneller|r", count = { 0.86, 0.95, 1 }, demo = "5",
+      glow = { 0.55, 0.40, 1, 0.80 }, count = { 0.86, 0.95, 1 }, demo = "5",
       x = 0, y = 120, frame = "SchlaghagelMahl", fx = "strom",   -- ueber dem Charakter (Bildmitte, hoeher)
     },
   },
@@ -63,22 +61,6 @@ end
 
 local function inCombat() return InCombatLockdown and InCombatLockdown() end
 
--- Text mit Farbverlauf, Buchstabe fuer Buchstabe
-local function gradText(t, stops)
-  local out, n = {}, #t
-  for i = 1, n do
-    local f = n > 1 and (i - 1) / (n - 1) * (#stops - 1) or 0
-    local k = math.min(#stops - 1, math.floor(f))
-    local a, b, u = stops[k + 1], stops[math.min(#stops, k + 2)], f - k
-    out[#out + 1] = string.format("|cff%02x%02x%02x%s|r", math.floor((a[1] + (b[1] - a[1]) * u) * 255),
-      math.floor((a[2] + (b[2] - a[2]) * u) * 255), math.floor((a[3] + (b[3] - a[3]) * u) * 255), t:sub(i, i))
-  end
-  return table.concat(out)
-end
-local STOPS = {
-  STROM = { { 0.72, 0.50, 1 }, { 0.30, 0.85, 1 }, { 0.92, 0.97, 1 } },   -- Violett -> Tuerkis -> Weiss
-  HAGEL = { { 0.30, 0.85, 1 }, { 0.88, 0.97, 1 }, { 1, 0.80, 0.28 } },   -- Eis-Tuerkis -> Weiss -> Gold
-}
 
 -- Speicherplatz je Proc: "hagel" = DB selbst (kompatibel zu 1.0), sonst DB[key]
 local function store(pr)
@@ -289,8 +271,7 @@ local function hagelsturm(V, icon)
 end
 
 -- ---------- Optik (einmal fuer den Live-Slot, einmal fuer Vorschau/Test) ----------
--- Farbiger Glow, rundes Symbol mit Ablauf-Kreis, Titel oben, Hinweis unten,
--- grosse Ladungen/Stapel in der Mitte, Restzeit klein darunter.
+-- Farbiger Glow, rundes Symbol mit Ablauf-Kreis, grosse Ladungen/Stapel in der Mitte, Restzeit klein darunter (kein Titel/Hinweis).
 local function build(parent, pr)
   local V = CreateFrame("Frame", nil, parent)
   noMouse(V)
@@ -349,16 +330,7 @@ local function build(parent, pr)
   timer:SetPoint("BOTTOM", icon, "BOTTOM", 0, 5)
   timer:SetTextColor(0.75, 0.93, 1)
 
-  local top = txt:CreateFontString(nil, "OVERLAY")
-  top:SetFont(STANDARD_TEXT_FONT, 21, "OUTLINE")
-  top:SetPoint("BOTTOM", V, "TOP", 0, pr.fx and 22 or 12)
-  top:SetShadowOffset(2, -2)
-  top:SetText(gradText(pr.topText, STOPS[pr.stops]))
-
-  local sub = txt:CreateFontString(nil, "OVERLAY")
-  sub:SetFont(STANDARD_TEXT_FONT, 12, "OUTLINE")
-  sub:SetPoint("TOP", V, "BOTTOM", 0, pr.fx and -18 or -9)
-  sub:SetText(pr.sub)
+  -- Ohne Titel/Hinweis (1.2.1): nur Symbol, Ablauf-Kreis, Ladungen/Stapel, Restzeit und Animation
 
   -- Pulsieren (Symbol + Glow blinken, Ganzes atmet) - wie Schlaghagel
   local pulse = V:CreateAnimationGroup()

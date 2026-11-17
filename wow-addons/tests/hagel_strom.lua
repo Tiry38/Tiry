@@ -38,6 +38,18 @@ end
 
 SlashCmdList.SCHLAGHAGEL("test mahl")
 ok(P.__shown and not G.SchlaghagelPreview.__shown, "test mahl zeigt nur Mahlstrom")
+-- nur Ladungen/Stapel + Restzeit als Text, kein Titel/Hinweis (1.2.1)
+local function texts(o, out)
+  for _, c in ipairs(o.__children or {}) do
+    if c.__kind == "FontString" then out[#out + 1] = c end
+    texts(c, out)
+  end
+  return out
+end
+local fsl = texts(P, {})
+local wordy = false
+for _, f in ipairs(fsl) do if tostring(f.__text or ""):gsub("|c%x%x%x%x%x%x%x%x", ""):find("%a") then wordy = true end end
+ok(#fsl == 2 and not wordy, "nur 2 Texte (Zahl + Sekunden), keine Woerter: " .. #fsl)
 -- alle Animationsgruppen der Vorschau einsammeln
 local groups = {}
 local function walk(o)

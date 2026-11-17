@@ -51,6 +51,7 @@ nach; mit Ordner 60 Einzelbilder → `render_pages.py` → GIF `previews/Schlagh
 Kreise/Ringe/Drehungen** (Test prüft das). Grafiken `python3 -I tools/hagel_media.py` (nutzt Helfer aus `strom_media.py`, eigener Zufall).
 Test `lua5.1 tests/hagel_sturm.lua [ordner]` („HAGELSTURM TESTS OK“, Mock rechnet jetzt auch Translation nach) → GIF
 `previews/Schlaghagel_1.2_Hagelsturm.gif`. `/hagel effekte` (= `strom`) schaltet beide Effekt-Animationen.
+**1.2.1:** Tiry will **keine Texte** in den Anzeigen (kein Titel/Hinweis) – nur Ladungen/Stapel + Sekunden; beide Strenge-Tests prüfen das.
 
 ## WindBaem (Windzorn-Ton)
 `addons/WindBaem/`: meldet per `C_UnitAuras.AddAuraSound(Added, {unitToken="player", spellID, soundFileName, outputChannel,

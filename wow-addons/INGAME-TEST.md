@@ -525,7 +525,7 @@ Installation: Ordner `Schlaghagel` ersetzen, **WoW komplett neu starten** (neue 
 
 - [ ] `/hagel test hagel`: Klingen-Schnitte als X quer über das Symbol, je mit Funke, im Takt „ta-ta-ta – Pause“.
 - [ ] Hagelkörner prasseln schräg nach unten, Tempo-Striche links/rechts flackern, beim Start Lichtblitz + Funken-Explosion.
-- [ ] Titel „SCHLAGHAGEL!“ und Hinweis bleiben lesbar.
+- [ ] (1.2.1) Kein Titel, kein Hinweis: nur Symbol, Ablauf-Kreis, Ladungen/Stapel, Sekunden, Animation.
 - [ ] Im Kampf (echter Proc): dieselbe Animation startet mit dem Buff und stoppt, wenn die Ladungen verbraucht sind.
 - [ ] Falls Hagel/Schnitte im Kampf **stehen bleiben** oder fehlen: `/hagel diag` – Zeile „Hagelsturm“ melden.
 - [ ] `/hagel effekte` schaltet Hagelsturm und Strom aus/an (im Kampf ab `/reload`).
