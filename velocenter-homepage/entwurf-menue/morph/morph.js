@@ -67,12 +67,17 @@ void main(){vec2 q=abs(gl_PointCoord-.5);float r=mix(length(q),max(q.x,q.y),vSq)
  float rim=vSq*smoothstep(.30,.46,r);vec3 c=mix(vCol,vCol*.85,rim);
  c=mix(c,vec3(1.),.6*smoothstep(.24,.0,r)*vHot);gl_FragColor=vec4(c*a,a);}`;
 /* ---- GL je Zeichenfläche ---- */
-function mk(cv){const gl=cv.getContext('webgl',{premultipliedAlpha:true,alpha:true,antialias:true,preserveDrawingBuffer:false});if(!gl)return null;
- const sh=(t,s)=>{const o=gl.createShader(t);gl.shaderSource(o,s);gl.compileShader(o);if(!gl.getShaderParameter(o,gl.COMPILE_STATUS))throw new Error(gl.getShaderInfoLog(o));return o};
- const pr=(v,f)=>{const p=gl.createProgram();gl.attachShader(p,sh(gl.VERTEX_SHADER,v));gl.attachShader(p,sh(gl.FRAGMENT_SHADER,f));gl.linkProgram(p);if(!gl.getProgramParameter(p,gl.LINK_STATUS))throw new Error(gl.getProgramInfoLog(p));
+/* Aufbau asynchron (Tiry 17.11.2026: Seite hing kurz beim ersten Wechsel): Shader werden – wo der Browser es kann – im Hintergrund
+   übersetzt (KHR_parallel_shader_compile), erst danach wird der Status abgefragt; sonst blockiert die Abfrage den Hauptfaden */
+async function mk(cv){const gl=cv.getContext('webgl',{premultipliedAlpha:true,alpha:true,antialias:true,preserveDrawingBuffer:false});if(!gl)return null;
+ const pc=gl.getExtension('KHR_parallel_shader_compile');
+ const sh=(t,s)=>{const o=gl.createShader(t);gl.shaderSource(o,s);gl.compileShader(o);return o};
+ const P0=[[VS_Q,FS_Q],[VS_P,FS_P]].map(([v,f])=>{const p=gl.createProgram(),a=sh(gl.VERTEX_SHADER,v),b=sh(gl.FRAGMENT_SHADER,f);gl.attachShader(p,a);gl.attachShader(p,b);gl.linkProgram(p);return{p,a,b}});
+ if(pc){const t0=performance.now();while(!P0.every(x=>gl.getProgramParameter(x.p,pc.COMPLETION_STATUS_KHR))&&performance.now()-t0<8000)await new Promise(r=>setTimeout(r,30))}
+ const pr=({p,a:sv,b:sf})=>{if(!gl.getProgramParameter(p,gl.LINK_STATUS))throw new Error((gl.getShaderInfoLog(sv)||'')+(gl.getShaderInfoLog(sf)||'')+gl.getProgramInfoLog(p));
   const u={},a={};const nu=gl.getProgramParameter(p,gl.ACTIVE_UNIFORMS);for(let i=0;i<nu;i++){const n=gl.getActiveUniform(p,i).name;u[n]=gl.getUniformLocation(p,n)}
   const na=gl.getProgramParameter(p,gl.ACTIVE_ATTRIBUTES);for(let i=0;i<na;i++){const n=gl.getActiveAttrib(p,i).name;a[n]=gl.getAttribLocation(p,n)}return{p,u,a}};
- const G={gl,q:pr(VS_Q,FS_Q),pt:pr(VS_P,FS_P)};
+ const G={gl,q:pr(P0[0]),pt:pr(P0[1])};
  G.quad=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,G.quad);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([0,0,1,0,0,1,1,1]),gl.STATIC_DRAW);
  G.nt=gl.createTexture();gl.bindTexture(gl.TEXTURE_2D,G.nt);gl.pixelStorei(gl.UNPACK_ALIGNMENT,1);gl.texImage2D(gl.TEXTURE_2D,0,gl.LUMINANCE,NS,NS,0,gl.LUMINANCE,gl.UNSIGNED_BYTE,NZ);
  gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.LINEAR);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,gl.REPEAT);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,gl.REPEAT);
@@ -100,10 +105,10 @@ const hex=s=>{s=String(s||'').trim();const m=s.match(/^#?([0-9a-f]{6})$/i);if(m)
 /* ---- eine Ebene (Rad oder Logo) vorbereiten ---- */
 async function layer(root,cv,o,kind){const dpr=Math.min(2,devicePixelRatio||1),W=root.clientWidth,H=root.clientHeight;
  const [ia,ib,ra,rb]=await Promise.all([load(o.from),load(o.to),measure(o.tplA,o.from),measure(o.tplB,o.to)]);if(!ia||!ib)throw new Error('Bild');
- cv.width=Math.round(W*dpr);cv.height=Math.round(H*dpr);if(!cv._G)cv._G=mk(cv);const G=cv._G;if(!G)throw new Error('WebGL');
- texUp(G,G.tex[0],raster(ia,ra,dpr));texUp(G,G.tex[1],raster(ib,rb,dpr));
+ cv.width=Math.round(W*dpr);cv.height=Math.round(H*dpr);if(!cv._G)cv._G=mk(cv);const G=await cv._G;if(!G)throw new Error('WebGL');const chk=()=>{if(o.dead&&o.dead())throw new Error('abgelöst')};chk();
+ const yl=()=>new Promise(r=>setTimeout(r,0)).then(chk);texUp(G,G.tex[0],raster(ia,ra,dpr));await yl();texUp(G,G.tex[1],raster(ib,rb,dpr));await yl();
  const area=Math.max(ra.w*ra.h,rb.w*rb.h);const N=Math.round(Math.min(kind==='bike'?28000:11000,Math.max(3000,area/(kind==='bike'?6:10))));
- const step=kind==='bike'?1.1:1.4;const A=points(ia,ra,step,N,W,H),B=points(ib,rb,step,N,W,H);
+ const step=kind==='bike'?1.1:1.4;const A=points(ia,ra,step,N,W,H);await yl();const B=points(ib,rb,step,N,W,H);await yl();
  const dom=P=>{let r=0,g=0,b=0,t=0;for(const q of P){const mx=Math.max(q[2],q[3],q[4]),mn=Math.min(q[2],q[3],q[4]),w=(mx-mn)*(mx-mn)*mx;r+=q[2]*w;g+=q[3]*w;b+=q[4]*w;t+=w}if(t<.5)return[.62,.66,.72];const m=Math.max(r,g,b)/t;const k=Math.min(1.6,.85/Math.max(m,.05));return[r/t*k,g/t*k,b/t*k].map(v=>Math.min(1,v))};const dA=dom(A),dB=dom(B);
  let k0=Infinity,k1=-Infinity;for(const p of A){k0=Math.min(k0,p[5]);k1=Math.max(k1,p[5])}for(const p of B){k0=Math.min(k0,p[5]);k1=Math.max(k1,p[5])}if(k1-k0<.01)k1=k0+.01;
  const f=new Float32Array(N*13);for(let i=0;i<N;i++){const a=A[i],b=B[i],q=i*13;f[q]=a[0];f[q+1]=a[1];f[q+2]=b[0];f[q+3]=b[1];f[q+4]=(a[5]-k0)/(k1-k0);f[q+5]=(b[5]-k0)/(k1-k0);f[q+6]=a[2];f[q+7]=a[3];f[q+8]=a[4];f[q+9]=b[2];f[q+10]=b[3];f[q+11]=b[4];f[q+12]=Math.random()}
@@ -127,17 +132,22 @@ function draw(L,T,glow){const{G,N,ra,rb,k0,k1,W,H,dpr}=L,gl=G.gl;gl.viewport(0,0
  for(const [lag,tr] of L.glow?[[.045,.8],[.022,.55],[0,0]]:[[0,0]]){gl.uniform1f(P.u.uLag,lag);gl.uniform1f(P.u.uTrail,tr);gl.drawArrays(gl.POINTS,0,N)}
  ['aA','aB','aK','aCA','aCB','aR'].forEach(n=>gl.disableVertexAttribArray(P.a[n]))}
 /* Zeichenflächen je Showroom (bleiben bestehen, im Ruhezustand ausgeblendet) */
-function cvFor(root,key,place){root._vm=root._vm||{};let c=root._vm[key];if(!c){c=document.createElement('canvas');c.className='vmcv';c.setAttribute('aria-hidden','true');root._vm[key]=c;place(c)}return c}
+function cvFor(root,key,place){root._vm=root._vm||{};let c=root._vm[key];if(!c){c=document.createElement('canvas');c.className='vmcv';c.style.display='none';c.setAttribute('aria-hidden','true');root._vm[key]=c;place(c)}return c}
+const cvs=(root,bNew,lgEl)=>{const fl=root.querySelector(':scope>.hfloor');return[cvFor(root,'b',c=>fl?fl.before(c):bNew.after(c)),cvFor(root,'l',c=>lgEl.after(c))]};
+/* Vorwärmen im Leerlauf: Grafik-Programme schon fertig, bevor der erste Wechsel kommt */
+VM.warm=(root,bikeEl,logoEl)=>{if(!VM.ok||!root||root._vmW)return;root._vmW=1;const go=()=>{try{cvs(root,bikeEl,logoEl).forEach(c=>{if(!c._G)c._G=mk(c).catch(()=>null)})}catch(_){}};window.requestIdleCallback?requestIdleCallback(go,{timeout:2500}):setTimeout(go,600)};
 const quiet=(el,fn)=>{el.style.transition='none';fn();requestAnimationFrame(()=>requestAnimationFrame(()=>{el.style.transition=''}))};
 /* o = {root, bike:{oldEl,newEl,to,from?,alt?}, logo:{el,to,from?,op0?}} – erledigt den kompletten Wechsel */
 VM.run=async function(o){const root=o.root,bk=o.bike,lg=o.logo;const bOld=bk.oldEl,bNew=bk.newEl,from=bk.from||bOld.currentSrc||bOld.src,lFrom=lg.from||lg.el.currentSrc||lg.el.src;
- const fl=root.querySelector(':scope>.hfloor');const cB=cvFor(root,'b',c=>fl?fl.before(c):bNew.after(c)),cL=cvFor(root,'l',c=>lg.el.after(c));
+ const [cB,cL]=cvs(root,bNew,lg.el);
  const csB=getComputedStyle(bOld),csL=getComputedStyle(lg.el);const op0=lg.op0!=null?lg.op0:csL.opacity;
  const finish=()=>{if(bNew===bOld){if(bNew.getAttribute('src')!==bk.to)bNew.src=bk.to}quiet(bNew,()=>{bNew.classList.remove('off','out-l','in-r');bNew.style.opacity=''});
   if(bOld!==bNew)quiet(bOld,()=>{bOld.classList.add('off');bOld.style.opacity=''});if(bk.alt)bNew.alt=bk.alt;
-  quiet(lg.el,()=>{lg.el.style.opacity=''});cB.style.display='none';cL.style.display='none';root.classList.remove('vmrun')};
- try{let Lb,Ll;[Lb,Ll]=await Promise.all([layer(root,cB,{from,to:bk.to,tplA:bOld,tplB:bNew,refl:(csB.webkitBoxReflect||'none')!=='none'},'bike'),
-   layer(root,cL,{from:lFrom,to:lg.to,tplA:lg.el,tplB:lg.el},'logo')]);
+  quiet(lg.el,()=>{lg.el.style.opacity=''});cB.style.display='none';cL.style.display='none';root.classList.remove('vmrun');root._vmH=0};
+ const tok=root._vmTok=(root._vmTok||0)+1,dead=()=>root._vmTok!==tok;
+ try{let Lb,Ll;const prep=Promise.all([layer(root,cB,{from,to:bk.to,tplA:bOld,tplB:bNew,refl:(csB.webkitBoxReflect||'none')!=='none',dead},'bike'),
+   layer(root,cL,{from:lFrom,to:lg.to,tplA:lg.el,tplB:lg.el,dead},'logo')]);prep.catch(()=>{});
+  let tm;[Lb,Ll]=await Promise.race([prep,new Promise((_,rj)=>{tm=setTimeout(()=>{if(!dead())root._vmTok++;rj(new Error('Zeit'))},window.__vmSW?60000:5000)})]);clearTimeout(tm);
   cB.style.cssText='position:absolute;left:0;top:0;width:100%;height:100%;pointer-events:none;filter:'+csB.filter;
   cL.style.cssText='position:absolute;left:0;top:0;width:100%;height:100%;pointer-events:none;mix-blend-mode:'+csL.mixBlendMode+';filter:'+csL.filter+';opacity:'+op0;
   const ac=()=>hex(getComputedStyle(root.closest('.show')||root).getPropertyValue('--ac')||'#E2232D');let glow=[.886,.137,.176];try{glow=ac()}catch(_){}
@@ -147,10 +157,17 @@ VM.run=async function(o){const root=o.root,bk=o.bike,lg=o.logo;const bOld=bk.old
   lg.el.src=lg.to;if(bNew===bOld)bNew.src=bk.to;
   const op1=lg.op1!=null?lg.op1:(()=>{const v=lg.el.style.opacity;lg.el.style.opacity='';const r=getComputedStyle(lg.el).opacity;lg.el.style.opacity=v;return r})();
   cL.style.transition='opacity '+VM.dur+'ms ease';requestAnimationFrame(()=>{cL.style.opacity=op1});
-  await new Promise(res=>{const t0=performance.now();let gl0=0;const f=now=>{const T=VM.fixT!=null?VM.fixT:Math.min(1,(now-t0)/VM.dur);if(!gl0&&T>.05){gl0=1;try{glow=ac()}catch(_){}}draw(Lb,T,glow);draw(Ll,T,glow);if(T<1||VM.fixT!=null&&VM.fixT<1)requestAnimationFrame(f);else res()};requestAnimationFrame(f)});
+  let fr=0,sd=0;await new Promise(res=>{let tp=performance.now(),Tc=0,gl0=0,hz=0;const f=now=>{fr++;const dt=Math.min(100,Math.max(0,now-tp));tp=now;sd+=dt;if(root._vmH&&!hz){hz=1;cL.style.transition='opacity 350ms ease'}Tc=Math.min(1,Tc+dt/(root._vmH?VM.dur/6:VM.dur));const T=VM.fixT!=null?VM.fixT:Tc;if(!gl0&&T>.05){gl0=1;try{glow=ac()}catch(_){}}draw(Lb,T,glow);draw(Ll,T,glow);if(T<1||VM.fixT!=null&&VM.fixT<1)requestAnimationFrame(f);else res()};requestAnimationFrame(f)});
+  if(VM.fixT==null&&!root._vmH&&sd>600&&fr<sd/1000*12){VM.on=false;console.info('Verwandlung: zu langsam auf diesem Gerät, ab jetzt einfacher Wechsel')}
   await Promise.all([bNew.decode?bNew.decode().catch(()=>{}):0,lg.el.decode?lg.el.decode().catch(()=>{}):0]);
   bNew.style.opacity='';finish()}
  catch(e){console.warn('Verwandlung:',e);finish()}};
+/* Klick während einer Verwandlung: Rest in ~0,4 s fertig spielen (Tiry 17.11.2026: Klicks gingen verloren) */
+VM.hurry=root=>{if(root)root._vmH=1};
 /* WebGL vorhanden? */
-try{const t=document.createElement('canvas');VM.ok=!!(t.getContext('webgl'));}catch(_){VM.ok=false}
+/* Nur mit echter Grafik-Beschleunigung: Software-Grafik (SwiftShader/llvmpipe, z. B. gesperrter Treiber) friert die Seite
+   beim Shader-Bau sekundenlang ein -> dort bleibt der einfache Wechsel (Tiry 17.11.2026: „Seite hängt sich ab und zu auf“) */
+try{const t=document.createElement('canvas'),sw=!!window.__vmSW,g=t.getContext('webgl',sw?{}:{failIfMajorPerformanceCaveat:true});VM.ok=!!g;
+ if(g&&!sw){const d=g.getExtension('WEBGL_debug_renderer_info'),r=d?String(g.getParameter(d.UNMASKED_RENDERER_WEBGL)):'';if(/swiftshader|llvmpipe|software|basic render/i.test(r))VM.ok=false}
+ const lx=g&&g.getExtension('WEBGL_lose_context');if(lx)lx.loseContext()}catch(_){VM.ok=false}
 })();
