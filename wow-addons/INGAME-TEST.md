@@ -505,3 +505,16 @@ Aus 4.2 weiter offen: `C_Map.GetMapPosFromWorldPos`, Flugmeister-IDs, Hochplatea
 - Klassen-Symbol im Kopf (rund) kommt aus Blizzards `UI-Classes-Circles` – in der Vorschau nicht darstellbar.
 - Grind überspringen: RXPNeon hakt RXPs Grind-Zeile ab (wie ein Klick von dir); reiner Grind-Schritt → zusätzlich `RXP.SetStep(+1)`. Ob RXP dabei nie zurückspringt, zeigt erst das Spiel.
 - „VORQUEST FEHLT“ liest RXPs eigene Prüfung (Fehler-Symbol + Liste im Tooltip) – nur so gut wie RXPs Daten.
+
+
+# Ingame-Test – Schlaghagel 1.1.0 (Waffe des Mahlstroms)
+
+- [ ] Nach dem Einloggen: Chat nennt **Schlaghagel bereit · Waffe des Mahlstroms bereit**.
+- [ ] `/hagel test mahl` → über dem Charakter: Symbol mit „5“, violett-türkiser Plasma-Ring, zwei kreisende Blitzbögen, seitlich zuckende Blitze, heller Einschlag am Anfang, Titel „MAHLSTROM!“.
+- [ ] Draußen auf Gegner hauen bis Mahlstrom procct → Anzeige erscheint mit Einschlag, Stapelzahl 1–5 zählt hoch, Restzeit läuft (30 s).
+- [ ] Blitzschlag wirken → Anzeige verschwindet.
+- [ ] **Im Kampf (wichtigster Test):** Anzeige, Stapel und Strom-Animation kommen auch dort. Bitte melden: erscheint sie? Zählen die Stapel? Lua-Fehler?
+- [ ] Schlaghagel und Mahlstrom gleichzeitig → beide Anzeigen unabhängig (Schlaghagel unten, Mahlstrom oben).
+- [ ] `/hagel unlock` → beide ziehbar, getrennt speichern; `/hagel lock`. `/hagel groesse mahl 1.3` ändert nur Mahlstrom.
+- [ ] `/hagel mahl` aus/an, `/hagel strom` (Blitz-Animation aus/an, im Kampf ab `/reload`).
+- Nur im Spiel prüfbar: ob Forever den Aura-Slot für 408505 im Kampf füllt, Drehen/Skalieren von Texturen in Aura-Animationen, Optik der additiven Blitze über der echten Spielwelt.

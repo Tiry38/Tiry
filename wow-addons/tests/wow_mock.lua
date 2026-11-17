@@ -410,15 +410,58 @@ function Obj.CreateAnimation(o, kind)
   table.insert(o.__anims, a)
   return a
 end
-function Obj.SetLooping(o, l) assert(LOOP[l], "Ungültiges Looping: " .. tostring(l)) end
+-- Werte werden gespeichert, damit Tests den Ablauf nachrechnen koennen (M.animState)
+function Obj.SetLooping(o, l) assert(LOOP[l], "Ungültiges Looping: " .. tostring(l)) o.__loop = l end
 function Obj.Play(o) o.__playing = true end
 function Obj.Stop(o) o.__playing = false end
 function Obj.IsPlaying(o) return o.__playing == true end
-function Obj.SetDuration(o, d) assert(type(d) == "number" and d > 0) end
-function Obj.SetSmoothing(o, s) assert(SMOOTH[s], "Ungültiges Smoothing: " .. tostring(s)) end
+function Obj.SetDuration(o, d) assert(type(d) == "number" and d > 0) o.__dur = d end
+function Obj.SetSmoothing(o, s) assert(SMOOTH[s], "Ungültiges Smoothing: " .. tostring(s)) o.__smooth = s end
 function Obj.SetOffset(o, x, y) assert(type(x) == "number" and type(y) == "number") end
-function Obj.SetFromAlpha(o, a) assert(type(a) == "number") end
-function Obj.SetToAlpha(o, a) assert(type(a) == "number") end
+function Obj.SetFromAlpha(o, a) assert(type(a) == "number") o.__from = a end
+function Obj.SetToAlpha(o, a) assert(type(a) == "number") o.__to = a end
+function Obj.SetTarget(o, t) assert(type(t) == "table" and t.__kind, "SetTarget braucht Region/Frame") o.__target = t end
+function Obj.SetDegrees(o, d) assert(type(d) == "number") o.__deg = d end
+function Obj.SetStartDelay(o, d) assert(type(d) == "number" and d >= 0) o.__delay = d end
+function Obj.SetEndDelay(o, d) assert(type(d) == "number" and d >= 0) o.__enddelay = d end
+function Obj.SetOrder(o, n) assert(type(n) == "number" and n >= 0 and n <= 100) o.__order = n end
+function Obj.SetScaleFrom(o, x, y) assert(type(x) == "number" and type(y) == "number") o.__sfrom = { x, y } end
+function Obj.SetScaleTo(o, x, y) assert(type(x) == "number" and type(y) == "number") o.__sto = { x, y } end
+
+-- Stand aller Animationen einer Gruppe zur Zeit t (Sekunden seit Play) -> Liste {target, kind, wert}
+local function ease(s, p)
+  if s == "IN" then return p * p elseif s == "OUT" then return 1 - (1 - p) * (1 - p)
+  elseif s == "IN_OUT" then return p * p * (3 - 2 * p) end
+  return p
+end
+function M.animState(g, t)
+  local orders, starts, total = {}, {}, 0
+  for _, a in ipairs(g.__anims) do
+    local k = a.__order or 1
+    local len = (a.__delay or 0) + (a.__dur or 0) + (a.__enddelay or 0)
+    orders[k] = math.max(orders[k] or 0, len)
+  end
+  local ks = {} for k in pairs(orders) do ks[#ks + 1] = k end table.sort(ks)
+  for _, k in ipairs(ks) do starts[k] = total total = total + orders[k] end
+  local tt = t
+  if g.__loop == "REPEAT" then tt = t % total
+  elseif g.__loop == "BOUNCE" then
+    local ph = math.floor(t / total) tt = t % total
+    if ph % 2 == 1 then tt = total - tt end
+  elseif t >= total then return {}, total end          -- einmalig: danach wieder Grundzustand
+  local out = {}
+  for _, a in ipairs(g.__anims) do
+    local loc = tt - starts[a.__order or 1] - (a.__delay or 0)
+    if loc >= 0 then
+      local p = ease(a.__smooth, math.min(1, loc / a.__dur))
+      local tg = a.__target or g.__parent
+      if a.__kind == "Alpha" then out[#out + 1] = { tg, "alpha", a.__from + (a.__to - a.__from) * p }
+      elseif a.__kind == "Rotation" then out[#out + 1] = { tg, "rot", math.rad(a.__deg or 0) * p }
+      elseif a.__kind == "Scale" and a.__sfrom then out[#out + 1] = { tg, "scale", a.__sfrom[1] + (a.__sto[1] - a.__sfrom[1]) * p } end
+    end
+  end
+  return out, total
+end
 
 ----------------------------------------------------------------------------
 -- Globale Umgebung

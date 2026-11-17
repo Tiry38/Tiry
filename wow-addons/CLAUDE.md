@@ -37,6 +37,16 @@ Aktueller Stand und offene Punkte: **[`UEBERGABE.md`](UEBERGABE.md)** – zuerst
   Wird nur für die Routen-Werkzeuge gebraucht. Beide GPL-3.0 → LevelPilot und Tiry's Zentrale tragen `LIZENZ.txt` +
   `LICENSE-GPL-3.0.md` (Repo ist öffentlich; neue Datenquellen dort eintragen).
 
+## Schlaghagel 1.1 (Schlaghagel + Waffe des Mahlstroms)
+`addons/Schlaghagel/`: `PROFILES.SHAMAN` = Liste von Procs (`hagel` 16257, `mahl` 408505 – Forever-Talent 408498, Buff 30 s, 5 Stapel).
+Je Proc eigener Anker (`<frame>Anchor`), Vorschau (`<frame>Preview`) und Aura-Container (`<frame>AuraContainer`); Position/Größe
+von `hagel` direkt in `SchlaghagelDB` (1.0-kompatibel), andere in `DB[key]`. `fx = "strom"` baut Plasma-Ring, Blitzbögen, 6 Blitze
+(`BOLTS`, nur seitlich wegen Titel/Hinweis) und Einschlag – jede Dauerschleife in eigener AnimationGroup (sonst steht die schnelle
+still, bis die langsamste fertig ist). Alle Gruppen per `AddAuraShownAnimation` (Spiel startet/stoppt sie, auch im Kampf).
+Grafiken: `python3 -I tools/strom_media.py`. Tests: `cd addons && lua5.1 ../tests/hagel.lua` („HAGEL TESTS OK“) und aus `wow-addons/`
+`lua5.1 tests/hagel_strom.lua [ordner]` („STROM TESTS OK“; strenger Nachbau, `M.animState(group, t)` rechnet Alpha/Drehung/Skalierung
+nach; mit Ordner 60 Einzelbilder → `render_pages.py` → GIF `previews/Schlaghagel_1.1_Mahlstrom.gif`).
+
 ## WindBaem (Windzorn-Ton)
 `addons/WindBaem/`: meldet per `C_UnitAuras.AddAuraSound(Added, {unitToken="player", spellID, soundFileName, outputChannel,
 throttleSeconds})` die 7 Windzorn-Proc-Auren an (Effekt „Extra Attacks“ in `allspells.txt`; Aura mit „No Aura Icon“). Nur außerhalb
