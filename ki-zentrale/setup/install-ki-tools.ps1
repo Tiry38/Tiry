@@ -9,6 +9,11 @@
 #   3. Strix (+ 9 Skills)  github.com/usestrix/strix
 #   4. claude-code-setup   github.com/anthropics/claude-plugins-official
 #   5. awesome-free-llm-apis (Skill) github.com/aradotso/trending-skills
+#   6. design-taste-frontend (Skill) github.com/Leonxlnx/taste-skill
+#   7. grilling (Skill)      github.com/mattpocock/skills
+#   8. find-skills (Skill)   github.com/vercel-labs/skills
+#   9. agent-browser         github.com/vercel-labs/agent-browser (CLI + Skill + Chrome for Testing)
+#  10. Hyperframes (Plugin)  github.com/heygen-com/hyperframes (+ FFmpeg)
 #
 #  Es wird KEIN Scan gestartet und KEIN API-Guthaben verbraucht.
 # =====================================================================
@@ -29,6 +34,12 @@ function PfadNeuLaden {
     if ((Test-Path $uvBin) -and ($env:Path -notlike "*$uvBin*")) { $env:Path = "$uvBin;$env:Path" }
 }
 
+function SkillAdd($quelle, $name) {
+    npx.cmd -y skills add $quelle --skill $name --agent claude-code -g -y | Out-Host
+    if (Test-Path (Join-Path $env:USERPROFILE ".claude\skills\$name\SKILL.md")) { Ok "Skill $name"; return 'OK' }
+    Fehler "Skill $name nicht gefunden"; return 'FEHLER'
+}
+
 function Version($cmd, $arg = '--version') {
     try { ((& $cmd $arg 2>&1) | Select-Object -First 1).ToString().Trim() } catch { $null }
 }
@@ -37,21 +48,23 @@ function Version($cmd, $arg = '--version') {
 Titel "0. Bestandsaufnahme"
 PfadNeuLaden
 
-# Node.js (claude-mem verlangt 20.19+ oder 22.12+)
+# Node.js: 22.12+ (claude-mem 22.12+, Hyperframes + Taste-Skill 22+)
 $nodeOk = $false
 if (Hat node) {
     $nv = (Version node) -replace '^v', ''
     $p = $nv.Split('.') | ForEach-Object { [int]$_ }
-    $nodeOk = ($p[0] -ge 23) -or ($p[0] -eq 22 -and $p[1] -ge 12) -or ($p[0] -eq 20 -and $p[1] -ge 19)
-    if ($nodeOk) { Ok "Node.js $nv" } else { Warn "Node.js $nv ist zu alt (noetig: 20.19+ oder 22.12+)" }
+    $nodeOk = ($p[0] -ge 23) -or ($p[0] -eq 22 -and $p[1] -ge 12)
+    if ($nodeOk) { Ok "Node.js $nv" } else { Warn "Node.js $nv ist zu alt (noetig: 22.12+)" }
 } else { Warn "Node.js fehlt" }
 
 if (-not $nodeOk) {
     if (Hat winget) {
-        Write-Host "  -> Installiere Node.js LTS ueber winget ..."
-        winget install --id OpenJS.NodeJS.LTS -e --accept-source-agreements --accept-package-agreements
+        Write-Host "  -> Installiere/aktualisiere Node.js LTS ueber winget ..."
+        if (Hat node) { winget upgrade --id OpenJS.NodeJS.LTS -e --accept-source-agreements --accept-package-agreements }
+        else { winget install --id OpenJS.NodeJS.LTS -e --accept-source-agreements --accept-package-agreements }
         PfadNeuLaden
-        $nodeOk = Hat node
+        if (Hat node) { $nv = (Version node) -replace '^v', ''; $p = $nv.Split('.') | ForEach-Object { [int]$_ }
+                        $nodeOk = ($p[0] -ge 23) -or ($p[0] -eq 22 -and $p[1] -ge 12) }
         if ($nodeOk) { Ok "Node.js $(Version node) installiert" }
     }
     if (-not $nodeOk) { Fehler "Node.js manuell installieren: https://nodejs.org (LTS) - danach Skript neu starten."; Read-Host "Enter zum Beenden"; exit 1 }
@@ -140,6 +153,43 @@ if (Test-Path (Join-Path $env:USERPROFILE '.claude\skills\awesome-free-llm-apis\
 } else { Fehler "Skill nicht gefunden"; $Ergebnis['awesome-free-llm-apis'] = 'FEHLER' }
 
 # ---------------------------------------------------------------------
+Titel "6.-8. Skills: design-taste-frontend, grilling, find-skills"
+$Ergebnis['design-taste-frontend'] = SkillAdd 'https://github.com/Leonxlnx/taste-skill' 'design-taste-frontend'
+$Ergebnis['grilling']              = SkillAdd 'mattpocock/skills' 'grilling'
+$Ergebnis['find-skills']           = SkillAdd 'vercel-labs/skills' 'find-skills'
+
+# ---------------------------------------------------------------------
+Titel "9. agent-browser (Programm + Chrome for Testing + Skill)"
+if (Hat agent-browser) { npm.cmd install -g agent-browser@latest } else { npm.cmd install -g agent-browser }
+PfadNeuLaden
+if (Hat agent-browser) {
+    agent-browser install    # laedt Chrome for Testing (einmalig, eigener Browser, dein Chrome bleibt unberuehrt)
+    Ok "agent-browser $(Version agent-browser)"
+    $Ergebnis['agent-browser'] = SkillAdd 'vercel-labs/agent-browser' 'agent-browser'
+} else { Fehler "agent-browser nicht gefunden"; $Ergebnis['agent-browser'] = 'FEHLER' }
+
+# ---------------------------------------------------------------------
+Titel "10. Hyperframes (Video aus HTML) + FFmpeg"
+if (-not (Hat ffmpeg)) {
+    if (Hat winget) {
+        Write-Host "  -> Installiere FFmpeg ueber winget ..."
+        winget install --id Gyan.FFmpeg -e --accept-source-agreements --accept-package-agreements
+        PfadNeuLaden
+    }
+}
+if (Hat ffmpeg) { Ok "FFmpeg vorhanden" } else { Warn "FFmpeg fehlt - Hyperframes kann ohne FFmpeg keine Videos rendern (nach Neustart pruefen)" }
+if ($claudeOk) {
+    claude plugin marketplace add heygen-com/hyperframes 2>$null
+    claude plugin install hyperframes@hyperframes
+    if ($LASTEXITCODE -eq 0) { Ok "Hyperframes-Plugin installiert"; $Ergebnis['Hyperframes'] = 'OK' }
+    else { Fehler "Plugin-Installation fehlgeschlagen"; $Ergebnis['Hyperframes'] = 'FEHLER - in Claude Code: /plugin install hyperframes@hyperframes' }
+} else {
+    npx.cmd -y hyperframes skills update
+    $Ergebnis['Hyperframes'] = 'Skills ohne Plugin (Claude Code fehlte)'
+}
+if (-not (Hat ffmpeg)) { $Ergebnis['Hyperframes'] += ' / FFmpeg fehlt' }
+
+# ---------------------------------------------------------------------
 Titel "1. claude-mem (zuletzt, weil die Einrichtung im Browser laeuft)"
 Write-Host "  Der Browser oeffnet sich mit der Einrichtungsseite. Dort waehlen:"
 Write-Host "   - Agent: Claude Code"
@@ -160,8 +210,9 @@ Titel "ERGEBNIS"
 $Ergebnis.GetEnumerator() | ForEach-Object { Write-Host ("  {0,-24} {1}" -f $_.Key, $_.Value) }
 Write-Host ""
 Write-Host "  JETZT: Alle Terminals und Claude Code komplett schliessen und neu starten." -ForegroundColor Cyan
-Write-Host "  Test in Claude Code:  /plugin   (claude-mem + claude-code-setup muessen aktiv sein)"
-Write-Host "                        /skills   (agent-reach, awesome-free-llm-apis, 9x strix)"
+Write-Host "  Test in Claude Code:  /plugin   (claude-mem, claude-code-setup, hyperframes aktiv)"
+Write-Host "                        /skills   (agent-reach, awesome-free-llm-apis, 9x strix,"
+Write-Host "                         design-taste-frontend, grilling, find-skills, agent-browser)"
 Write-Host ""
 Write-Host "  Strix-Scan erst nach Kostenfreigabe. Vorher setzen:" -ForegroundColor Yellow
 Write-Host '    setx STRIX_LLM "openrouter/z-ai/glm-5.3"   (Format laut Strix-README: anbieter/modell)'
