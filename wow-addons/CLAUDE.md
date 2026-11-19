@@ -34,14 +34,16 @@ Aktueller Stand und offene Punkte: **[`UEBERGABE.md`](UEBERGABE.md)** – zuerst
 - `qdb/` – **nicht im Repo** (.gitignore): `git clone https://github.com/Questie/QuestieDB.git qdb/QuestieDB`
   (Questies Datenbank; Forever-Daten in `data/Forever/`) und
   `git clone https://github.com/JagTheHero/guidelime-pathfinder.git qdb/guidelime-pathfinder` (Navmesh-Wegdaten).
-  Wird nur für die Routen-Werkzeuge gebraucht. Beide GPL-3.0 → LevelPilot und Tiry's Zentrale tragen `LIZENZ.txt` +
+  Wird nur für die Routen-Werkzeuge gebraucht. Beide GPL-3.0 → LevelPilot und RezeptRadar tragen `LIZENZ.txt` +
   `LICENSE-GPL-3.0.md` (Repo ist öffentlich; neue Datenquellen dort eintragen).
 
-## Tiry's Zentrale 7.0 – nur noch Rezept-Berater (19.11.)
+## RezeptRadar 1.0 (bis 19.11. „Tiry's Zentrale 7.0“) – nur Rezept-Berater
+`addons/RezeptRadar/` (4 TOCs), Globals `RezeptRadar`, `RezeptRadarDB`/`RezeptRadarCharDB`, `/rr` `/rezept` `/tz`.
+Tests `bash tools/test_all.sh rezept` (Ziel `zentrale` geht auch), Spec `spec/rezeptradar_spec.lua`.
 Tiry: „nur noch eine einzige Funktion … ein Fenster … lohnenswerte Rezepte für Kochen und Lederverarbeitung im AH …
 Nicht das Rezept, sondern das, was ich crafte, soll Gold bringen … nur Rezepte, die ich noch nicht habe … für mein Skill,
 am besten mit Skillpunkten, aber primär Gold.“
-- **Keine weiteren Seiten/Funktionen wieder einbauen**, ohne dass Tiry es will. Aufbau und Rechenweg: `ZENTRALE.md`.
+- **Keine weiteren Seiten/Funktionen wieder einbauen**, ohne dass Tiry es will. Aufbau und Rechenweg: `REZEPTRADAR.md`.
 - Gewinn je Herstellung = max(AH-Min × Menge × 0,95, Händlerpreis) − Material; seelengebunden → nur Händler.
   Material = min(Händler mit unbegrenztem Vorrat + eigener Fraktion, AH über Preisstufen für `Advisor.CRAFTS` = 5).
 - Sortierung **nur nach Gewinn**; Skill-Punkte sind Filter/Anzeige („Nur mit Skillpunkten“, Farbe), nicht Sortierung.

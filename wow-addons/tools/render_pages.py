@@ -10,7 +10,7 @@ from PIL import Image, ImageDraw, ImageFont, ImageChops
 TOKEN = re.compile(r"\|c[0-9a-fA-F]{8}|\|r|\x01|[^|\x01]+|\|")
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-ADDON = os.path.join(HERE, "..", "TirysZentrale")
+ADDON = os.path.join(HERE, "..", "addons", "RezeptRadar")
 FONTS = {"regular": "Poppins-Regular.ttf", "semibold": "Poppins-SemiBold.ttf", "bold": "Poppins-ExtraBold.ttf"}
 SCALE = 1.5
 _tex, _font = {}, {}
@@ -50,10 +50,10 @@ def texture(name):
         return _tex[name]
     img = None
     m = re.match(r"(?i)^Interface\\AddOns\\([^\\]+)\\Media\\", name)
-    if m:  # Media eines eigenen Add-ons (Zentrale liegt eigen, alle anderen unter addons/<Name>/)
+    if m:  # Media eines eigenen Add-ons (alle unter addons/<Name>/)
         fn = name.split("Media\\")[-1]
         fn = fn if fn.lower().endswith((".tga", ".blp")) else fn + ".tga"
-        base = ADDON if m.group(1) == "TirysZentrale" else os.path.join(HERE, "..", "addons", m.group(1))
+        base = os.path.join(HERE, "..", "addons", m.group(1))
         p = os.path.join(base, "Media", fn.replace("\\", os.sep))
         if os.path.exists(p):
             img = Image.open(p).convert("RGBA")

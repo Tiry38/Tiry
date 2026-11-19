@@ -1,4 +1,4 @@
--- Tiry's Zentrale 7 – Szenario-Test gegen den strengen Forever-Nachbau (tests/wow_mock.lua).
+-- RezeptRadar – Szenario-Test gegen den strengen Forever-Nachbau (tests/wow_mock.lua).
 -- Ablauf wie im Spiel: Fenster -> AH öffnen -> Komplett-Scan -> Liste -> Filter -> Händler -> Berufsfenster -> neu gelernt.
 -- Aufruf (aus wow-addons/): lua5.1 tests/run_tests.lua
 package.path = package.path .. ";tests/?.lua;spec/?.lua"
@@ -50,9 +50,9 @@ check("ohne Fehler geladen", #W.errors == 0, W.errors[1])
 check("Berufe erkannt", ns.ProfRank("COOKING") == 60 and ns.ProfRank("LEATHERWORKING") == 110 and not ns.professions[393])
 check("503 kaufbare Rezepte geladen", #ns.Craft.Load() == 503, #ns.Craft.Load())
 check("Hotfix Gerbrahmen (lernbar 125)", ns.Craft.Get(1263031).learn == 125 and ns.Craft.Get(1263031).grey == 130)
-SlashCmdList.TIRYSZENTRALE("")
+SlashCmdList.REZEPTRADAR("")
 W.flush()
-local F = TirysZentraleMainFrame
+local F = RezeptRadarMainFrame
 check("Fenster offen", F and F:IsShown())
 check("Leer: noch kein Scan", F.empty:IsShown() and F.empty.title:GetText() == "Noch kein Scan", F.empty.title:GetText())
 check("Scan-Knopf ohne AH gesperrt", not F.scan.btn:IsEnabled())
@@ -80,7 +80,7 @@ W.fire("REPLICATE_ITEM_LIST_UPDATE")
 W.fire("REPLICATE_ITEM_LIST_UPDATE") -- doppelte Meldung
 W.flush()
 check("bis zu 3x nachgelesen (fehlende Item-Daten)", reads == 4, reads)
-local ah = TirysZentraleDB.ah
+local ah = RezeptRadarDB.ah
 check("Scan gespeichert", ah.time == W.now and ah.total == #SCAN + 1, tostring(ah.total))
 check("nur beobachtete Items gespeichert", ah.items[2889] and not ah.items[4306] and not ah.items[5000])
 check("Preisstufen sortiert", ah.items[2888].p == 900 and ah.items[2888].b[1] == 900 and ah.items[2888].b[3] == 1000 and ah.items[2888].q == 3)
@@ -152,8 +152,8 @@ end
 W.merchant = { { id = 2894, name = "Rhapsodiemalz", price = 50, stack = 1, avail = -1 }, { id = 3356, name = "Königsblut", price = 100, stack = 1, avail = 2 } }
 W.fire("MERCHANT_SHOW")
 W.flush()
-check("unbegrenzter Händlerpreis gelernt", TirysZentraleDB.vendor[2894] == 50)
-check("begrenzter Vorrat nicht gelernt", TirysZentraleDB.vendor[3356] == nil)
+check("unbegrenzter Händlerpreis gelernt", RezeptRadarDB.vendor[2894] == 50)
+check("begrenzter Vorrat nicht gelernt", RezeptRadarDB.vendor[3356] == nil)
 ns.UI.Refresh()
 e = find(F.list, 2795)
 check("Eberrippchen mit Händler-Malz", e and e.mats[2].src == "vendor" and e.cost == 100 and e.profit == 755, e and e.cost)
@@ -166,8 +166,8 @@ W.recipes = { [2795] = { name = "Eberrippchen in Biersauce", learned = true, out
 C_TradeSkillUI.GetBaseProfessionInfo = function() return { professionName = "Kochkunst", skillLevel = 60, maxSkillLevel = 75 } end
 W.fire("TRADE_SKILL_SHOW")
 W.flush()
-check("Berufsfenster gelesen", TirysZentraleCharDB.seen.COOKING ~= nil and TirysZentraleCharDB.learned[2795])
-check("über Ergebnis-Item zugeordnet", TirysZentraleCharDB.learned[3371])
+check("Berufsfenster gelesen", RezeptRadarCharDB.seen.COOKING ~= nil and RezeptRadarCharDB.learned[2795])
+check("über Ergebnis-Item zugeordnet", RezeptRadarCharDB.learned[3371])
 ns.UI.Refresh()
 check("gelernte Kochrezepte weg", not find(F.list, 2795) and not find(F.list, 3371), names(F.list))
 check("Fußzeile: Kochkunst erkannt, Leder offen", F.foot:GetText():find("Kochkunst |cff39ff6berkannt") and F.foot:GetText():find("Berufsfenster einmal"), F.foot:GetText())
@@ -192,21 +192,22 @@ for _, fn in ipairs(timers) do fn() end -- Entprellung läuft -> erster Block ge
 check("liest in Blöcken", ns.Scan.reading and ns.Scan.progress and ns.Scan.progress < 1, ns.Scan.progress)
 W.fire("AUCTION_HOUSE_CLOSED")
 W.flush()
-check("AH zu: Lesen abgebrochen, alter Scan bleibt", not ns.Scan.reading and TirysZentraleDB.ah.time == W.now - 901)
+check("AH zu: Lesen abgebrochen, alter Scan bleibt", not ns.Scan.reading and RezeptRadarDB.ah.time == W.now - 901)
 
 ----------------------------------------------------------------------------
 -- 9) Gespeicherte Daten aus 6.x: Neubau, Position und gelernte Rezepte bleiben
 ----------------------------------------------------------------------------
 check("keine Fehler im Ablauf", #W.errors == 0, W.errors[1])
 local ns2, W2 = E.load({ skills = SKILLS, db = { settings = { point = { "TOP", "TOP", 10, -40 }, craft = {} }, priceHistory = { [1] = 1 }, vendorBuy = {} } })
-check("alte Daten verworfen", TirysZentraleDB.v == 7 and TirysZentraleDB.priceHistory == nil and TirysZentraleDB.vendorBuy == nil)
-check("Fensterposition behalten", TirysZentraleDB.settings.point[1] == "TOP" and TirysZentraleDB.settings.point[3] == 10)
+check("alte Daten verworfen", RezeptRadarDB.v == 7 and RezeptRadarDB.priceHistory == nil and RezeptRadarDB.vendorBuy == nil)
+check("Fensterposition behalten", RezeptRadarDB.settings.point[1] == "TOP" and RezeptRadarDB.settings.point[3] == 10)
 check("Standardfilter", ns2.settings.prof == "ALL" and ns2.settings.range == "now" and ns2.settings.skillOnly == false)
-SlashCmdList.TIRYSZENTRALE("hilfe")
-SlashCmdList.TIRYSZENTRALE("fehler")
-SlashCmdList.TIRYSZENTRALE("scan")
-SlashCmdList.TIRYSZENTRALE("reset")
+SlashCmdList.REZEPTRADAR("hilfe")
+SlashCmdList.REZEPTRADAR("fehler")
+SlashCmdList.REZEPTRADAR("scan")
+SlashCmdList.REZEPTRADAR("reset")
+check("Befehle /rr, /rezept und /tz", SLASH_REZEPTRADAR1 == "/rr" and SLASH_REZEPTRADAR2 == "/rezept" and SLASH_REZEPTRADAR3 == "/tz")
 check("Befehle ohne Fehler", #W2.errors == 0, W2.errors[1])
 
-print(string.format("Zentrale 7: %d bestanden, %d fehlgeschlagen", passed, failed))
+print(string.format("RezeptRadar: %d bestanden, %d fehlgeschlagen", passed, failed))
 if failed > 0 then os.exit(1) end

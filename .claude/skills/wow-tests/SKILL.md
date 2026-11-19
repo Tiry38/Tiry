@@ -1,13 +1,13 @@
 ---
 name: wow-tests
-description: Führt alle Tests der WoW-Forever-Add-ons in wow-addons/ aus (Tiry's Zentrale, LevelPilot, ProcAlarm, Schlaghagel, Blitzschild, ChatHoch, MiniPost, EnhanceHUD, Syntax) und meldet das Ergebnis. Nach jeder Änderung an einem Add-on und vor jedem Commit oder Release verwenden.
-argument-hint: "[zentrale|levelpilot|proc|hagel|blitzschild|chathoch|minipost|enhancehud|syntax]"
+description: Führt alle Tests der WoW-Forever-Add-ons in wow-addons/ aus (RezeptRadar, LevelPilot, ProcAlarm, Schlaghagel, Blitzschild, ChatHoch, MiniPost, EnhanceHUD, Syntax) und meldet das Ergebnis. Nach jeder Änderung an einem Add-on und vor jedem Commit oder Release verwenden.
+argument-hint: "[rezept|levelpilot|proc|hagel|blitzschild|chathoch|minipost|enhancehud|syntax]"
 ---
 
 # WoW-Add-on-Tests
 
 > **Branch:** Die Add-ons liegen (bis Tiry sie nach `main` holt) im Branch `claude/wow-addons`. Fehlt der Ordner
-> `wow-addons/TirysZentrale` im Arbeitsordner: `git fetch origin claude/wow-addons` und auf diesem Branch arbeiten.
+> `wow-addons/addons/RezeptRadar` im Arbeitsordner: `git fetch origin claude/wow-addons` und auf diesem Branch arbeiten.
 
 Ein Befehl für alle Tests (Lua 5.1 gegen den Forever-Nachbau, busted, luacheck, Layout, Syntax):
 
@@ -15,12 +15,12 @@ Ein Befehl für alle Tests (Lua 5.1 gegen den Forever-Nachbau, busted, luacheck,
 bash wow-addons/tools/test_all.sh $ARGUMENTS
 ```
 
-Ohne Argument laufen alle Ziele (~25 s). Mit Ziel nur dieses, z. B. `zentrale` oder `levelpilot syntax`.
+Ohne Argument laufen alle Ziele (~25 s). Mit Ziel nur dieses, z. B. `rezept` oder `levelpilot syntax`.
 Exit-Code 0 und die letzte Zeile `ALLES GRUEN` = bestanden.
 
 ## Bei Fehlern
 1. Die Zeilen unter `FEHLER` zeigen die letzten 20 Ausgabezeilen des Tests. Den Test einzeln nachstellen:
-   - Zentrale: aus `wow-addons/`: `lua5.1 tests/run_tests.lua`, `busted`, `luacheck TirysZentrale`,
+   - RezeptRadar: aus `wow-addons/`: `lua5.1 tests/run_tests.lua`, `busted`, `luacheck addons/RezeptRadar`,
      `lua5.1 tests/check_layout.lua <ordner>` (Bilder: `python3 -I tools/render_pages.py <ordner>`)
    - LevelPilot: `cd wow-addons/addons/LevelPilot && lua5.1 ../../tests/v4.lua` (muss „ALLE TESTS OK“ melden),
      ebenso `lp.lua`, `lp2.lua`, `nav.lua`, `fly.lua`, `route.lua`

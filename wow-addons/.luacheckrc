@@ -1,4 +1,4 @@
--- luacheck-Konfiguration für Tiry's Zentrale (Lua 5.1, WoW: Forever 1.60.1)
+-- luacheck-Konfiguration für RezeptRadar (Lua 5.1, WoW: Forever 1.60.1)
 std = "lua51"
 max_line_length = false
 exclude_files = { "tests/**", "tools/**" }
@@ -7,10 +7,10 @@ unused_args = false
 
 -- Globale Namen, die das Addon SCHREIBT (alles andere wäre ein Leck)
 globals = {
-  "TirysZentrale", "TirysZentraleDB", "TirysZentraleCharDB",
-  "SLASH_TIRYSZENTRALE1", "SLASH_TIRYSZENTRALE2", "SLASH_TIRYSZENTRALE3", "SlashCmdList",
-  "BINDING_HEADER_TIRYSZENTRALE", "BINDING_NAME_TIRYSZENTRALE_TOGGLE",
-  "TirysZentrale_OnAddonCompartmentClick", "TirysZentrale_OnAddonCompartmentEnter", "TirysZentrale_OnAddonCompartmentLeave",
+  "RezeptRadar", "RezeptRadarDB", "RezeptRadarCharDB",
+  "SLASH_REZEPTRADAR1", "SLASH_REZEPTRADAR2", "SLASH_REZEPTRADAR3", "SlashCmdList",
+  "BINDING_HEADER_REZEPTRADAR", "BINDING_NAME_REZEPTRADAR_TOGGLE",
+  "RezeptRadar_OnAddonCompartmentClick", "RezeptRadar_OnAddonCompartmentEnter", "RezeptRadar_OnAddonCompartmentLeave",
 }
 
 -- WoW-API, die das Addon LIEST (geprüft gegen den Forever-Quellcode, siehe AUDIT.md)

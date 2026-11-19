@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Erzeugt alle Grafiken (TGA, 32 Bit mit Alpha) für das WoW-Addon Tiry's Zentrale.
+"""Erzeugt alle Grafiken (TGA, 32 Bit mit Alpha) für das WoW-Addon RezeptRadar.
 
 Aufruf:  python3 wow-addons/tools/make_media.py
 Benötigt: Pillow, numpy. Schrift: Poppins (liegt im Addon unter Media/Fonts).
@@ -13,7 +13,7 @@ import numpy as np
 from PIL import Image, ImageDraw, ImageFilter, ImageFont
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-ADDON = os.path.normpath(os.path.join(HERE, "..", "TirysZentrale"))
+ADDON = os.path.normpath(os.path.join(HERE, "..", "addons", "RezeptRadar"))
 MEDIA = os.path.join(ADDON, "Media")
 FONTS = os.path.join(MEDIA, "Fonts")
 SS = 4  # Supersampling-Faktor für glatte Kanten
@@ -165,23 +165,45 @@ def logo(size=256):
     # Innenring
     inset = int(big * 0.13)
     d.ellipse((inset, inset, big - inset, big - inset), outline=(225, 255, 235, 235), width=int(big * 0.018))
-    # Großes G
-    font = ImageFont.truetype(os.path.join(FONTS, "Poppins-ExtraBold.ttf"), int(big * 0.56))
-    text = "T"
-    bbox = d.textbbox((0, 0), text, font=font)
-    tw, th = bbox[2] - bbox[0], bbox[3] - bbox[1]
-    tx = (big - tw) / 2 - bbox[0]
-    ty = (big - th) / 2 - bbox[1] + big * 0.005
-    shadow = Image.new("RGBA", (big, big), (0, 0, 0, 0))
-    ImageDraw.Draw(shadow).text((tx + big * 0.012, ty + big * 0.02), text, font=font, fill=(0, 55, 38, 160))
-    shadow = shadow.filter(ImageFilter.GaussianBlur(big * 0.012))
-    img = Image.alpha_composite(img, shadow)
-    tmask = Image.new("L", (big, big), 0)
-    ImageDraw.Draw(tmask).text((tx, ty), text, font=font, fill=255)
-    tgrad = gradient_rgb(big, big, [(255, 255, 255), (225, 255, 235), (175, 240, 205)], angle_deg=90)
-    tl = Image.fromarray(np.uint8(tgrad), "RGB").convert("RGBA")
-    tl.putalpha(tmask)
-    img = Image.alpha_composite(img, tl)
+    # Radar: dunkles Glas-Zifferblatt, Neon-Ringe, Leuchtkegel (läuft im Uhrzeigersinn aus), zwei Funde
+    c = big / 2
+    rr = big / 2 - inset
+    yy, xx = np.mgrid[0:big, 0:big]
+    dist = np.hypot(xx - c, yy - c)
+    face = np.clip(dist / rr, 0, 1)
+    rgb = np.stack([10 + 8 * face, 30 + 22 * face, 30 + 16 * face], -1)
+    dial = Image.fromarray(np.uint8(rgb), "RGB").convert("RGBA")
+    dial.putalpha(Image.fromarray(np.uint8((dist <= rr) * 255), "L"))
+    img = Image.alpha_composite(img, dial)
+    d = ImageDraw.Draw(img)
+    neon = (57, 255, 107)
+    for k, a in ((0.34, 110), (0.67, 130)):
+        r = rr * k
+        d.ellipse((c - r, c - r, c + r, c + r), outline=neon + (a,), width=int(big * 0.011))
+    d.line((c, c - rr, c, c + rr), fill=neon + (60,), width=int(big * 0.007))
+    d.line((c - rr, c, c + rr, c), fill=neon + (60,), width=int(big * 0.007))
+    ang = (np.degrees(np.arctan2(yy - c, xx - c)) + 360) % 360  # 0° = rechts, im Uhrzeigersinn (Bild-y nach unten)
+    lead = 315.0  # Vorderkante des Strahls (oben rechts)
+    behind = (lead - ang) % 360
+    cone = np.clip(1 - behind / 110.0, 0, 1) ** 1.8 * (dist <= rr)
+    sweep = Image.new("RGBA", (big, big), (45, 226, 230, 0))
+    sweep.putalpha(Image.fromarray(np.uint8(cone * 200), "L"))
+    img = Image.alpha_composite(img, sweep)
+    d = ImageDraw.Draw(img)
+    ex, ey = c + rr * math.cos(math.radians(lead)), c + rr * math.sin(math.radians(lead))
+    d.line((c, c, ex, ey), fill=(220, 255, 240, 255), width=int(big * 0.02))
+    for deg, k, br, a in ((287, 0.52, 0.062, 255), (150, 0.80, 0.042, 170)):
+        px, py, r = c + rr * k * math.cos(math.radians(deg)), c + rr * k * math.sin(math.radians(deg)), big * br
+        halo = Image.new("L", (big, big), 0)
+        ImageDraw.Draw(halo).ellipse((px - r * 2.4, py - r * 2.4, px + r * 2.4, py + r * 2.4), fill=int(a * 0.75))
+        halo = halo.filter(ImageFilter.GaussianBlur(r * 0.9))
+        hl_b = Image.new("RGBA", (big, big), (140, 255, 77, 0))
+        hl_b.putalpha(halo)
+        img = Image.alpha_composite(img, hl_b)
+        d = ImageDraw.Draw(img)
+        d.ellipse((px - r, py - r, px + r, py + r), fill=(235, 255, 225, a))
+    cr = big * 0.04
+    d.ellipse((c - cr, c - cr, c + cr, c + cr), fill=(220, 255, 240, 255))
     # Glanzlicht oben links
     hl = Image.new("L", (big, big), 0)
     ImageDraw.Draw(hl).ellipse((int(big * 0.16), int(big * 0.1), int(big * 0.56), int(big * 0.42)), fill=90)
@@ -189,16 +211,13 @@ def logo(size=256):
     hl_img = Image.new("RGBA", (big, big), (255, 255, 255, 0))
     hl_img.putalpha(Image.fromarray(np.minimum(np.array(hl), np.array(body_mask)).astype(np.uint8), "L"))
     img = Image.alpha_composite(img, hl_img)
-    # Funkeln
-    sp = sparkle(int(big * 0.34)).resize((int(big * 0.34), int(big * 0.34)), Image.LANCZOS)
-    img.alpha_composite(sp, (int(big * 0.64), int(big * 0.02)))
     return down(img, (size, size))
 
 
 def wordmark(w=512, h=128):
     big_w, big_h = w * SS, h * SS
     font = ImageFont.truetype(os.path.join(FONTS, "Poppins-ExtraBold.ttf"), int(big_h * 0.62))
-    text = "Tiry's Zentrale"
+    text = "RezeptRadar"
     tmp = ImageDraw.Draw(Image.new("L", (10, 10)))
     bbox = tmp.textbbox((0, 0), text, font=font)
     tw, th = bbox[2] - bbox[0], bbox[3] - bbox[1]

@@ -1,0 +1,26 @@
+## Interface: 16001
+## Title: |cff39ff6bRezept|r|cff2de2e6Radar|r
+## Notes: Rezept-Radar fuer Kochkunst und Lederverarbeitung: zeigt nach einem AH-Scan unbekannte Rezepte, deren Hergestelltes Gold bringt.
+## Notes-deDE: Rezept-Radar fuer Kochkunst und Lederverarbeitung: zeigt nach einem AH-Scan unbekannte Rezepte, deren Hergestelltes Gold bringt.
+## Author: Tiry
+## Version: 1.0.0
+## Category: Auctions
+## Category-enUS: Auctions
+## Category-deDE: Auktionen
+## SavedVariables: RezeptRadarDB
+## SavedVariablesPerCharacter: RezeptRadarCharDB
+## OptionalDeps: Auctionator
+## IconTexture: Interface\AddOns\RezeptRadar\Media\logo
+## AddonCompartmentFunc: RezeptRadar_OnAddonCompartmentClick
+## AddonCompartmentFuncOnEnter: RezeptRadar_OnAddonCompartmentEnter
+## AddonCompartmentFuncOnLeave: RezeptRadar_OnAddonCompartmentLeave
+
+Core.lua
+Data_Hotfix.lua
+Data_Craft.lua
+Data_VendorMats.lua
+Craft.lua
+Scan.lua
+Advisor.lua
+UI\Widgets.lua
+UI\Window.lua

@@ -1,4 +1,4 @@
--- Tiry's Zentrale 7 – Rezept-Berater: Welche Rezepte, die du noch NICHT kannst, lohnen sich im AH zu kaufen,
+-- RezeptRadar 1.0 – Rezept-Berater: Welche Rezepte, die du noch NICHT kannst, lohnen sich im AH zu kaufen,
 -- weil das Hergestellte Gold bringt? Gewinn je Herstellung = Verkaufswert des Ergebnisses − Materialkosten.
 --   Verkaufswert: günstigstes AH-Angebot des Ergebnisses × Menge × (1 − 5 % AH-Anteil), sonst Händler-Verkaufspreis
 --                 (der höhere zählt; seelengebundene Ergebnisse nur Händler).

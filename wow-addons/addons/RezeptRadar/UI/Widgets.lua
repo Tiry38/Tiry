@@ -1,4 +1,4 @@
--- Tiry's Zentrale – Design-System 6.0 "Neon Glass": Farben, Schrift, Glasflächen, runde Formen, Bausteine
+-- RezeptRadar – Design-System 6.0 "Neon Glass": Farben, Schrift, Glasflächen, runde Formen, Bausteine
 local _, ns = ...
 
 local UI = {}
@@ -513,7 +513,7 @@ end
 ----------------------------------------------------------------------------
 -- Knöpfe
 ----------------------------------------------------------------------------
--- Klicks & Co. abgesichert: Ein Fehler in einem Knopf landet in der eigenen Fehleranzeige (/tz fehler)
+-- Klicks & Co. abgesichert: Ein Fehler in einem Knopf landet in der eigenen Fehleranzeige (/rr fehler)
 -- statt still zu verschwinden – und bricht nie das ganze Fenster.
 local GUARDED = { OnClick = true, OnEnter = true, OnLeave = true, OnMouseDown = true, OnMouseUp = true, OnDragStart = true, OnDragStop = true }
 function UI.Guard(frame)

@@ -1,5 +1,0 @@
-<Bindings>
-	<Binding name="TIRYSZENTRALE_TOGGLE" header="TIRYSZENTRALE">
-		TirysZentrale.UI.ToggleWindow()
-	</Binding>
-</Bindings>

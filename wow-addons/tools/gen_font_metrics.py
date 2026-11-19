@@ -6,7 +6,7 @@ here = os.path.dirname(os.path.abspath(__file__))
 fonts = {"regular": "Poppins-Regular.ttf", "semibold": "Poppins-SemiBold.ttf", "bold": "Poppins-ExtraBold.ttf"}
 out = ["-- AUTOMATISCH ERZEUGT: Zeichenbreiten (Anteil der Schriftgröße) für Poppins", "return {"]
 for key, fn in fonts.items():
-    f = TTFont(os.path.join(here, "..", "TirysZentrale", "Media", "Fonts", fn))
+    f = TTFont(os.path.join(here, "..", "addons", "RezeptRadar", "Media", "Fonts", fn))
     upm = f["head"].unitsPerEm
     cmap = f.getBestCmap()
     hmtx = f["hmtx"]

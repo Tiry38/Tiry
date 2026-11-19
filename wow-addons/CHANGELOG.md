@@ -1,4 +1,11 @@
-# Changelog – Tiry's Zentrale
+# Changelog – RezeptRadar (bis 7.0.0: Tiry's Zentrale)
+
+## RezeptRadar 1.0.0 (19.11.2026)
+**Neuer Name: aus „Tiry's Zentrale“ wird „RezeptRadar“** – passt zur einzigen Aufgabe seit 7.0. Funktion unverändert.
+- Ordner `RezeptRadar` (vier TOCs wie alle anderen Add-ons), Titel und Logo neu (Radar statt „T“).
+- Befehle `/rr` und `/rezept`; `/tz` funktioniert weiter.
+- Gespeicherte Daten heißen `RezeptRadarDB` / `RezeptRadarCharDB` und starten leer: Berufsfenster einmal öffnen, einmal scannen.
+- Alten Ordner `TirysZentrale` löschen.
 
 ## 7.0.0 (19.11.2026)
 **Neubau: nur noch eine Funktion, ein Fenster – der Rezept-Berater für Kochkunst und Lederverarbeitung.**

@@ -1,4 +1,4 @@
--- Tiry's Zentrale 7 – das eine Fenster: lohnende Rezepte für Kochkunst und Lederverarbeitung
+-- RezeptRadar 1.0 – das eine Fenster: lohnende Rezepte für Kochkunst und Lederverarbeitung
 -- Kopf (Marke, Scan-Status, Scan-Knopf) · Filter (Beruf, Skill, nur mit Skillpunkten) · Liste (Gewinn zuerst)
 local _, ns = ...
 local UI = ns.UI
@@ -202,7 +202,7 @@ local function rowClick(row)
   local api = Auctionator and Auctionator.API and Auctionator.API.v1
   if not ns.Scan.ahOpen then ns.Print("Öffne das Auktionshaus, dann sucht ein Klick das Rezept dort.") return end
   if api and api.MultiSearchExact then
-    local ok = pcall(api.MultiSearchExact, "TirysZentrale", { ns.Item(e.r.item).name })
+    local ok = pcall(api.MultiSearchExact, "RezeptRadar", { ns.Item(e.r.item).name })
     if ok then return end
   end
   ns.Print("Suche im AH nach: |cff39ff6b" .. ns.Item(e.r.item).name .. "|r")
@@ -388,7 +388,7 @@ end
 ----------------------------------------------------------------------------
 local function create()
   if frame then return frame end
-  local f = CreateFrame("Frame", "TirysZentraleMainFrame", UIParent)
+  local f = CreateFrame("Frame", "RezeptRadarMainFrame", UIParent)
   frame = f
   f:SetSize(WIDTH, HEIGHT)
   f:SetFrameStrata("HIGH")
@@ -407,7 +407,7 @@ local function create()
   if type(p) == "table" and p[1] then f:SetPoint(p[1], UIParent, p[2] or p[1], p[3] or 0, p[4] or 0) else f:SetPoint("CENTER") end
   f:SetScale(ns.settings.scale or 1)
   f:Hide()
-  tinsert(UISpecialFrames, "TirysZentraleMainFrame") -- ESC schließt
+  tinsert(UISpecialFrames, "RezeptRadarMainFrame") -- ESC schließt
   buildBackground(f)
   buildBrand(f)
   buildScanCard(f)
@@ -454,7 +454,7 @@ function UI.UpdateMinimap()
   if not Minimap then return end
   if not ns.settings.minimap.show then if mini then mini:Hide() end return end
   if not mini then
-    mini = UI.SafeButton(Minimap, "TirysZentraleMinimapButton")
+    mini = UI.SafeButton(Minimap, "RezeptRadarMinimapButton")
     mini:SetSize(34, 34)
     mini:SetFrameStrata("MEDIUM")
     mini:SetFrameLevel(Minimap:GetFrameLevel() + 8)
@@ -475,7 +475,7 @@ function UI.UpdateMinimap()
     mini:SetScript("OnEnter", function(self)
       hl:SetAlpha(0.55)
       GameTooltip:SetOwner(self, "ANCHOR_LEFT")
-      GameTooltip:SetText("Tiry's Zentrale", 0.22, 1, 0.42)
+      GameTooltip:SetText("RezeptRadar", 0.22, 1, 0.42)
       GameTooltip:AddLine("Klick: lohnende Rezepte (Kochkunst & Leder)", 0.9, 0.9, 1)
       GameTooltip:AddLine("Ziehen: Knopf verschieben", 0.7, 0.7, 0.85)
       GameTooltip:Show()
@@ -499,14 +499,14 @@ end
 
 ns.Listen("LOGIN", function() ns.Safe(UI.UpdateMinimap) end)
 
-BINDING_HEADER_TIRYSZENTRALE = "Tiry's Zentrale"
-BINDING_NAME_TIRYSZENTRALE_TOGGLE = "Rezept-Berater öffnen/schließen"
+BINDING_HEADER_REZEPTRADAR = "RezeptRadar"
+BINDING_NAME_REZEPTRADAR_TOGGLE = "Rezept-Berater öffnen/schließen"
 
-function TirysZentrale_OnAddonCompartmentClick() UI.ToggleWindow() end
-function TirysZentrale_OnAddonCompartmentEnter(_, menuButton)
+function RezeptRadar_OnAddonCompartmentClick() UI.ToggleWindow() end
+function RezeptRadar_OnAddonCompartmentEnter(_, menuButton)
   GameTooltip:SetOwner(menuButton or UIParent, "ANCHOR_LEFT")
-  GameTooltip:SetText("Tiry's Zentrale", 0.22, 1, 0.42)
+  GameTooltip:SetText("RezeptRadar", 0.22, 1, 0.42)
   GameTooltip:AddLine("Lohnende Rezepte für Kochkunst & Lederverarbeitung", 0.9, 0.9, 1)
   GameTooltip:Show()
 end
-function TirysZentrale_OnAddonCompartmentLeave() GameTooltip:Hide() end
+function RezeptRadar_OnAddonCompartmentLeave() GameTooltip:Hide() end

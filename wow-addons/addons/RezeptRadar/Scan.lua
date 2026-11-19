@@ -1,4 +1,4 @@
--- Tiry's Zentrale 7 – AH-Komplett-Scan lesen (eigener Knopf oder von Auctionator & Co. gestartet)
+-- RezeptRadar 1.0 – AH-Komplett-Scan lesen (eigener Knopf oder von Auctionator & Co. gestartet)
 -- und Händlerpreise lernen. Gespeichert wird nur, was der Rezept-Berater braucht (Ergebnisse, Material, Rezepte).
 -- Blizzard: C_AuctionHouse.ReplicateItems() -> REPLICATE_ITEM_LIST_UPDATE -> GetReplicateItemInfo(i), i ab 0.
 -- Rückgabe 3 = Anzahl, 10 = Sofortkauf (ganze Auktion), 17 = itemID, 18 = hasAllInfo. Nur alle 15 Minuten erlaubt.

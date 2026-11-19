@@ -6,7 +6,7 @@ description: Geprüftes Wissen über WoW Forever (Interface 16001) für Add-on-C
 # WoW Forever – Wissen für Add-on-Code
 
 > **Branch:** Die Add-ons liegen (bis Tiry sie nach `main` holt) im Branch `claude/wow-addons`. Fehlt der Ordner
-> `wow-addons/TirysZentrale` im Arbeitsordner: `git fetch origin claude/wow-addons` und auf diesem Branch arbeiten.
+> `wow-addons/addons/RezeptRadar` im Arbeitsordner: `git fetch origin claude/wow-addons` und auf diesem Branch arbeiten.
 
 Projektleitfaden: `wow-addons/CLAUDE.md`, Stand und offene Punkte: `wow-addons/UEBERGABE.md` (zuerst lesen).
 Unsicheres immer als unsicher benennen – vieles ist nur im Spiel prüfbar.
@@ -14,7 +14,7 @@ Unsicheres immer als unsicher benennen – vieles ist nur im Spiel prüfbar.
 ## Client
 - Blizzard-Client **WoW Forever**, `## Interface: 16001`, moderne Retail-API mit Classic-Inhalten.
 - Jedes Add-on unter `wow-addons/addons/<Name>/` hat **vier TOCs** (`<Name>.toc`, `_Forever`, `_Camelot`,
-  `_Mainline`), alle mit Interface 16001 und gleicher `## Version:`. Ausnahme: `wow-addons/TirysZentrale/` (eine TOC).
+  `_Mainline`), alle mit Interface 16001 und gleicher `## Version:` (ohne Ausnahme, auch RezeptRadar).
 - Blizzards Forever-UI-Code zum Nachlesen: github.com/reckhou/WoWBlzCode (Ordner `Forever/`).
   Spell-Daten: github.com/simulationcraft/simc-forever (`SpellDataDump/allspells.txt`).
 
@@ -47,14 +47,14 @@ Unsicheres immer als unsicher benennen – vieles ist nur im Spiel prüfbar.
   Formel 5/20/60 % vom Händlerpreis ist **unbestätigt**. AH-Gebühr 5 %.
 - Bekannter Fehler: „Interner Auktionsfehler“ beim Einstellen unter dem günstigsten Angebot.
 - **Auctionator:** Preise über `Auctionator.API.v1` (`GetAuctionPriceByItemID`, `GetAuctionAgeByItemID`,
-  `MultiSearchExact`, `CreateShoppingList`, `RegisterForDBUpdate`). Kein öffentlicher Scan-Start. Die Zentrale 7
+  `MultiSearchExact`, `CreateShoppingList`, `RegisterForDBUpdate`). Kein öffentlicher Scan-Start. RezeptRadar (früher Zentrale 7)
   ruft `C_AuctionHouse.ReplicateItems()` selbst (Knopf) und liest per `hooksecurefunc` auch Auctionator-Scans mit.
 
 ## Tests
 - Strenger Nachbau `wow-addons/tests/wow_mock.lua`: Widget-Methoden nur, wenn sie in Blizzards Forever-API
   stehen (`tests/forever_widget_api.lua`), Ereignisse nur aus `tests/forever_events.lua`.
 - Alles prüfen mit dem Skill `wow-tests` (`bash wow-addons/tools/test_all.sh`); `luac5.1 -p` auf alle .lua.
-- Neue Logik in der Zentrale immer mit Spec in `wow-addons/spec/zentrale_spec.lua` (`E.load(opts)` aus
+- Neue Logik in RezeptRadar immer mit Spec in `wow-addons/spec/rezeptradar_spec.lua` (`E.load(opts)` aus
   `spec/addon_env.lua`: itemInfo, skills, faction, known; `W.replicate` = Komplett-Scan-Zeilen; `W.now` = Mock-Zeit, `W.flush()` = Timer).
 
 ## Design (Tirys Anspruch)

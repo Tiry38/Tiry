@@ -1,4 +1,4 @@
--- Tiry's Zentrale 7 – Kern: Namensraum, Ereignisse, Speicher, Berufe, Items, Geld, Befehle
+-- RezeptRadar 1.0 – Kern: Namensraum, Ereignisse, Speicher, Berufe, Items, Geld, Befehle
 -- Eine Aufgabe: nach einem AH-Scan zeigen, welche Koch- und Lederverarbeitungs-Rezepte sich zu kaufen lohnen.
 -- Zielclient: World of Warcraft: Forever (Interface 16001, moderne API)
 local ADDON, ns = ...
@@ -7,15 +7,15 @@ ns.name = ADDON
 ns.version = (C_AddOns and C_AddOns.GetAddOnMetadata and C_AddOns.GetAddOnMetadata(ADDON, "Version")) or "7.0.0"
 ns.MEDIA = "Interface\\AddOns\\" .. ADDON .. "\\Media\\"
 
-TirysZentrale = ns -- einziger Namens-Export (Slash-Befehl, Addon-Menü, Tastenbelegung, Fehlersuche)
+RezeptRadar = ns -- einziger Namens-Export (Slash-Befehl, Addon-Menü, Tastenbelegung, Fehlersuche)
 
 ----------------------------------------------------------------------------
--- Sicheres Aufrufen: ein Fehler legt nie das ganze Add-on lahm (Meldung einmal im Chat, Liste per /tz fehler)
+-- Sicheres Aufrufen: ein Fehler legt nie das ganze Add-on lahm (Meldung einmal im Chat, Liste per /rr fehler)
 ----------------------------------------------------------------------------
 local errlog, shown = {}, {}
 function ns.LogError(err)
   local msg = tostring(err or "?"):gsub("^.-AddOns[\\/]", "")
-  local db = type(TirysZentraleDB) == "table" and TirysZentraleDB or nil
+  local db = type(RezeptRadarDB) == "table" and RezeptRadarDB or nil
   local list = db and (type(db.errorLog) == "table" and db.errorLog or {}) or errlog
   if db then db.errorLog = list end
   for _, e in ipairs(list) do
@@ -25,12 +25,12 @@ function ns.LogError(err)
   while #list > 20 do table.remove(list) end
   if not shown[msg] and DEFAULT_CHAT_FRAME then
     shown[msg] = true
-    DEFAULT_CHAT_FRAME:AddMessage("|cffff6b81Tiry's Zentrale – Fehler:|r " .. msg:sub(1, 160) .. "  |cff93a39d(/tz fehler zeigt alle)|r")
+    DEFAULT_CHAT_FRAME:AddMessage("|cffff6b81RezeptRadar – Fehler:|r " .. msg:sub(1, 160) .. "  |cff93a39d(/rr fehler zeigt alle)|r")
   end
 end
 
 function ns.ErrorLog()
-  return (type(TirysZentraleDB) == "table" and TirysZentraleDB.errorLog) or errlog
+  return (type(RezeptRadarDB) == "table" and RezeptRadarDB.errorLog) or errlog
 end
 
 local function handler(err)
@@ -120,20 +120,20 @@ end
 
 ns.On("ADDON_LOADED", function(_, name)
   if name ~= ADDON then return end
-  local db = type(TirysZentraleDB) == "table" and TirysZentraleDB or {}
+  local db = type(RezeptRadarDB) == "table" and RezeptRadarDB or {}
   if db.v ~= ns.DB_VERSION then
     local old = type(db.settings) == "table" and db.settings or {}
     db = { v = ns.DB_VERSION, settings = { point = old.point, scale = old.scale } }
   end
   applyDefaults(db, { settings = DEFAULTS, vendor = {}, ah = {} })
-  TirysZentraleDB = db
-  local char = type(TirysZentraleCharDB) == "table" and TirysZentraleCharDB or {}
+  RezeptRadarDB = db
+  local char = type(RezeptRadarCharDB) == "table" and RezeptRadarCharDB or {}
   if char.v ~= ns.DB_VERSION then
     -- gelernte Rezepte aus dem Berufsfenster-Scan (6.x) übernehmen: die sind weiter richtig
     char = { v = ns.DB_VERSION, learned = type(char.learned) == "table" and char.learned or {} }
   end
   applyDefaults(char, { learned = {}, seen = {} })
-  TirysZentraleCharDB = char
+  RezeptRadarCharDB = char
   ns.db, ns.settings, ns.char = db, db.settings, char
   ns.Fire("DB_READY")
 end)
@@ -289,7 +289,7 @@ function ns.Clamp(v, lo, hi)
 end
 
 function ns.Print(msg)
-  if DEFAULT_CHAT_FRAME then DEFAULT_CHAT_FRAME:AddMessage("|cff8cff4dTiry's|r |cff26ff73Zentrale|r: " .. msg) end
+  if DEFAULT_CHAT_FRAME then DEFAULT_CHAT_FRAME:AddMessage("|cff39ff6bRezept|r|cff2de2e6Radar|r: " .. msg) end
 end
 
 -- Item-Link in den Chat/ins Eingabefeld legen
@@ -303,10 +303,10 @@ function ns.LinkItem(id)
 end
 
 ----------------------------------------------------------------------------
--- Befehle: /tz (Fenster), /tz scan, /tz fehler, /tz reset
+-- Befehle (/tz bleibt als Alias der alten Zentrale): /rr (Fenster), /rr scan, /rr fehler, /rr reset
 ----------------------------------------------------------------------------
-SLASH_TIRYSZENTRALE1, SLASH_TIRYSZENTRALE2, SLASH_TIRYSZENTRALE3 = "/tz", "/zentrale", "/gold"
-SlashCmdList.TIRYSZENTRALE = function(msg)
+SLASH_REZEPTRADAR1, SLASH_REZEPTRADAR2, SLASH_REZEPTRADAR3 = "/rr", "/rezept", "/tz"
+SlashCmdList.REZEPTRADAR = function(msg)
   msg = (msg or ""):lower():gsub("^%s+", ""):gsub("%s+$", "")
   if msg == "fehler" or msg == "errors" then
     local log = ns.ErrorLog()
@@ -322,7 +322,7 @@ SlashCmdList.TIRYSZENTRALE = function(msg)
     if ns.UI and ns.UI.ResetPosition then ns.UI.ResetPosition() end
     ns.Print("Fensterposition zurückgesetzt.")
   elseif msg == "hilfe" or msg == "help" or msg == "?" then
-    ns.Print("|cff39ff6b/tz|r Fenster  ·  |cff39ff6b/tz scan|r AH-Scan (AH offen)  ·  |cff39ff6b/tz reset|r Fensterposition  ·  |cff39ff6b/tz fehler|r Fehlerliste")
+    ns.Print("|cff39ff6b/rr|r Fenster  ·  |cff39ff6b/rr scan|r AH-Scan (AH offen)  ·  |cff39ff6b/rr reset|r Fensterposition  ·  |cff39ff6b/rr fehler|r Fehlerliste")
   else
     if ns.UI and ns.UI.ToggleWindow then ns.UI.ToggleWindow() end
   end

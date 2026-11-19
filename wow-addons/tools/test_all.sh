@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Alle Tests der WoW-Forever-Add-ons mit einem Befehl.
 # Aufruf (von überall):  bash wow-addons/tools/test_all.sh [ziel ...]
-#   Ziele: zentrale levelpilot totemtakt windbaem proc hagel blitzschild chathoch minipost enhancehud syntax  (ohne Ziel = alle)
+#   Ziele: rezept (= zentrale) levelpilot totemtakt windbaem proc hagel blitzschild chathoch minipost enhancehud syntax  (ohne Ziel = alle)
 # Exit-Code 0 = alles grün. Am Ende steht eine Zusammenfassung.
 set -u
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
@@ -38,7 +38,7 @@ want() {
   return 1
 }
 
-if [ ! -d "$ROOT/TirysZentrale" ] || [ ! -d "$ROOT/addons" ]; then
+if [ ! -d "$ROOT/addons/RezeptRadar" ]; then
   echo "Die Add-ons fehlen in diesem Arbeitsstand – sie liegen im Branch claude/wow-addons:"
   echo "  git fetch origin claude/wow-addons && git checkout claude/wow-addons"
   exit 2
@@ -48,13 +48,13 @@ TARGETS=("$@")
 A="$ROOT/addons"
 T="$ROOT/tests"
 
-if want zentrale; then
-  run "Zentrale: Ladetest (Forever-Nachbau)" "$ROOT" " 0 fehlgeschlagen" lua5.1 tests/run_tests.lua
-  if have busted; then run "Zentrale: Specs (busted)" "$ROOT" " 0 failures / 0 errors" busted
-  else echo "UEBERSPRUNGEN  Zentrale: Specs (busted fehlt)"; fi
-  if have luacheck; then run "Zentrale: luacheck" "$ROOT" "0 warnings / 0 errors" luacheck --no-color TirysZentrale
-  else echo "UEBERSPRUNGEN  Zentrale: luacheck (fehlt)"; fi
-  run "Zentrale: Layout" "$ROOT" "0 Layout-Probleme" lua5.1 tests/check_layout.lua
+if want rezept || want zentrale; then
+  run "RezeptRadar: Ladetest (Forever-Nachbau)" "$ROOT" " 0 fehlgeschlagen" lua5.1 tests/run_tests.lua
+  if have busted; then run "RezeptRadar: Specs (busted)" "$ROOT" " 0 failures / 0 errors" busted
+  else echo "UEBERSPRUNGEN  RezeptRadar: Specs (busted fehlt)"; fi
+  if have luacheck; then run "RezeptRadar: luacheck" "$ROOT" "0 warnings / 0 errors" luacheck --no-color addons/RezeptRadar
+  else echo "UEBERSPRUNGEN  RezeptRadar: luacheck (fehlt)"; fi
+  run "RezeptRadar: Layout" "$ROOT" "0 Layout-Probleme" lua5.1 tests/check_layout.lua
 fi
 
 if want levelpilot; then
@@ -102,7 +102,7 @@ if want syntax; then
   bad=0
   while IFS= read -r -d '' f; do
     if ! luac5.1 -p "$f" 2>"$LOG/luac.txt"; then bad=$((bad + 1)); cat "$LOG/luac.txt"; fi
-  done < <(find "$ROOT/addons" "$ROOT/TirysZentrale" -name '*.lua' -print0)
+  done < <(find "$ROOT/addons" -name '*.lua' -print0)
   if [ "$bad" -eq 0 ]; then pass=$((pass + 1)); echo "OK      Syntax (luac5.1 -p, alle .lua)"
   else fail=$((fail + 1)); failed+=("Syntax"); echo "FEHLER  Syntax: $bad Datei(en)"; fi
 fi

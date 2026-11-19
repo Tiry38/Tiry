@@ -1,4 +1,4 @@
--- Tiry's Zentrale 7 – Layout-Prüfung des einen Fensters (realistische Liste, Leer-Zustände, Scan läuft)
+-- RezeptRadar – Layout-Prüfung des einen Fensters (realistische Liste, Leer-Zustände, Scan läuft)
 -- Aufruf (aus wow-addons/): lua5.1 tests/check_layout.lua [ausgabeordner]  -> Bilder: python3 -I tools/render_pages.py <ordner>
 package.path = package.path .. ";tests/?.lua;spec/?.lua"
 local OUT = arg[1]
@@ -19,9 +19,9 @@ local function check(name, frame)
   frame:SetHeight(h)
 end
 
-SlashCmdList.TIRYSZENTRALE("")
+SlashCmdList.REZEPTRADAR("")
 W.flush()
-local F = TirysZentraleMainFrame
+local F = RezeptRadarMainFrame
 check("leer_ohne_scan", F)
 
 W.fire("AUCTION_HOUSE_SHOW")
@@ -56,7 +56,7 @@ check("liste_kochen_skill", F)
 ns.settings.prof, ns.settings.skillOnly = "ALL", false
 
 -- nichts mit Gewinn
-TirysZentraleDB.ah.items = {}
+RezeptRadarDB.ah.items = {}
 ns.UI.Refresh()
 check("leer_nichts", F)
 

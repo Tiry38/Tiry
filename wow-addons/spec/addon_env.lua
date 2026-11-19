@@ -1,11 +1,11 @@
--- Lädt Tiry's Zentrale frisch in den strengen Forever-Nachbau (tests/wow_mock.lua).
+-- Lädt RezeptRadar frisch in den strengen Forever-Nachbau (tests/wow_mock.lua).
 -- opts: auctionator (false = fehlt), prices, skills, level, faction, class, remove = { "C_X.Func", ... }, combat
 local E = {}
-local ROOT = "TirysZentrale/"
+local ROOT = "addons/RezeptRadar/"
 
 local function tocFiles()
   local files = {}
-  for line in io.lines(ROOT .. "TirysZentrale.toc") do
+  for line in io.lines(ROOT .. "RezeptRadar.toc") do
     if not line:match("^##") and line:match("%S") then files[#files + 1] = (line:gsub("\\", "/"):gsub("%s+$", "")) end
   end
   return files
@@ -40,13 +40,13 @@ function E.load(opts)
   W.combat = opts.combat
   W.install({ auctionator = opts.auctionator, locale = opts.locale })
   for _, path in ipairs(opts.remove or {}) do removePath(path) end
-  TirysZentraleDB, TirysZentraleCharDB = opts.db, nil
+  RezeptRadarDB, RezeptRadarCharDB = opts.db, nil
   local ns = {}
   for _, f in ipairs(tocFiles()) do
     local chunk = assert(loadfile(ROOT .. f))
-    chunk("TirysZentrale", ns)
+    chunk("RezeptRadar", ns)
   end
-  W.fire("ADDON_LOADED", "TirysZentrale")
+  W.fire("ADDON_LOADED", "RezeptRadar")
   W.fire("PLAYER_LOGIN")
   W.flush()
   return ns, W

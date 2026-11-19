@@ -1,10 +1,10 @@
--- Tiry's Zentrale – Blizzard-Hotfixes, die (noch) nicht in den Spieldaten-Dateien stehen (serverseitig).
+-- RezeptRadar – Blizzard-Hotfixes, die (noch) nicht in den Spieldaten-Dateien stehen (serverseitig).
 -- Von Hand gepflegt, je Eintrag mit Datum und Quelle. Wird beim Laden über die erzeugten Daten gelegt.
 -- Quelle: news.blizzard.com/en-us/article/24315281/wow-forever-hotfixes-november-10-2026 (Einträge 05.11. bis 10.11.)
 -- Wirkt überall: Item-Datenbank (Händlerpreis, Bindung), ns.Item, Snipe-Scanner, Händler-Untergrenzen.
 -- Nicht einzeln aufgeführt, weil Blizzard keine Items nennt: 10.11. "Reduced the price vendors pay for some crafted
 -- armor items from Leatherworking, Tailoring, and Blacksmithing" – laut Blizzard nur seelengebundene Items; die
--- rechnet die Zentrale ohnehin nicht als Weiterverkauf (Wert 0), daher keine falschen Gewinne.
+-- rechnet RezeptRadar ohnehin nicht als Weiterverkauf (Wert 0), daher keine falschen Gewinne.
 local _, ns = ...
 ns.HOTFIX = {
   recipes = {

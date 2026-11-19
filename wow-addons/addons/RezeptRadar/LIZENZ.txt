@@ -1,4 +1,4 @@
-Tiry's Zentrale – Rezept-Berater für WoW Forever
+RezeptRadar – Rezept-Berater für WoW Forever
 Lizenz: GNU General Public License v3.0 (siehe LICENSE-GPL-3.0.md)
 
 Enthaltene Daten und Quellen:

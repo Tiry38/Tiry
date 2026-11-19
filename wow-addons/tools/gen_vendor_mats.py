@@ -1,4 +1,4 @@
-"""Tiry's Zentrale 7 - Haendler-Zutaten fuer Kochen und Lederverarbeitung -> TirysZentrale/Data_VendorMats.lua
+"""RezeptRadar - Haendler-Zutaten fuer Kochen und Lederverarbeitung -> addons/RezeptRadar/Data_VendorMats.lua
 
 Quelle Preis: Forever-Spieldaten ItemSparse (BuyPrice gilt fuer VendorStackCount Stueck -> Preis je Stueck).
 Quelle "beim Haendler": QuestieDB Forever (Item-Feld vendors = NPC-IDs), Fraktion der Haendler aus tools/full.json.
@@ -66,7 +66,7 @@ def main():
             fr = (npcs.get(str(n)) or {}).get("fr")
             fac |= set(fr) if fr else {"A", "H"}
         rows.append((i, max(1, round(price / stack)), "".join(sorted(fac)), name))
-    out = os.path.join(ROOT, "TirysZentrale", "Data_VendorMats.lua")
+    out = os.path.join(ROOT, "addons", "RezeptRadar", "Data_VendorMats.lua")
     with open(out, "w", encoding="utf-8") as f:
         f.write("-- AUTOMATISCH ERZEUGT von wow-addons/tools/gen_vendor_mats.py - nicht von Hand bearbeiten.\n")
         f.write("-- Zutaten fuer Kochen/Lederverarbeitung, die Haendler verkaufen: Preis je Stueck (Kupfer, Forever-Spieldaten)\n")

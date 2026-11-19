@@ -1,0 +1,5 @@
+<Bindings>
+	<Binding name="REZEPTRADAR_TOGGLE" header="REZEPTRADAR">
+		RezeptRadar.UI.ToggleWindow()
+	</Binding>
+</Bindings>

@@ -1,4 +1,4 @@
--- Strenger Nachbau der WoW-Forever-Umgebung (Lua 5.1) für Tiry's Zentrale-Tests.
+-- Strenger Nachbau der WoW-Forever-Umgebung (Lua 5.1) für RezeptRadar und die anderen Add-ons.
 -- Widget-Methoden sind nur erlaubt, wenn sie in Blizzards Forever-API-Doku stehen (forever_widget_api.lua).
 local M = {}
 local HERE = (debug.getinfo(1, "S").source:match("^@(.*/)") or "./")
@@ -298,7 +298,7 @@ function Obj.SetTextureSliceMode(o, m) assert(m == 0 or m == 1, "SliceMode 0 (ge
 function Obj.SetFont(o, file, size, flags)
   assert(type(file) == "string" and file ~= "", "SetFont: Datei fehlt")
   assert(type(size) == "number" and size > 0, "SetFont: Größe fehlt")
-  if file:match("^Interface\\AddOns\\TirysZentrale\\") then checkAddonFile(file, { "ttf" }) end
+  if file:match("^Interface\\AddOns\\RezeptRadar\\") then checkAddonFile(file, { "ttf" }) end
   o.__font = file
   o.__size = size
   o.__weight = file:find("ExtraBold") and "bold" or (file:find("SemiBold") and "semibold" or (file:upper():find("ARIALN") and "narrow" or "regular"))

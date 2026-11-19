@@ -5,7 +5,7 @@ Aufruf (aus beliebigem Ordner, immer mit -I):
     python3 -I wow-addons/tools/release.py <Add-on> <Version> [--no-zip] [--dry-run]
 
 Beispiele:
-    python3 -I wow-addons/tools/release.py zentrale 6.0.0
+    python3 -I wow-addons/tools/release.py RezeptRadar 1.0.1
     python3 -I wow-addons/tools/release.py LevelPilot 4.1.1
 
 Was passiert:
@@ -21,7 +21,7 @@ import sys
 import zipfile
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))  # .../wow-addons
-ALIASES = {"zentrale": "TirysZentrale", "tz": "TirysZentrale", "lp": "LevelPilot", "proc": "ProcAlarm",
+ALIASES = {"rr": "RezeptRadar", "rezept": "RezeptRadar", "zentrale": "RezeptRadar", "tz": "RezeptRadar", "lp": "LevelPilot", "proc": "ProcAlarm",
            "hagel": "Schlaghagel"}
 SKIP_DIRS = {"__pycache__", ".git"}
 
@@ -41,7 +41,7 @@ def find_addon(name):
     if not os.path.isdir(addons):
         sys.exit("Die Add-ons fehlen in diesem Arbeitsstand – sie liegen im Branch claude/wow-addons "
                  "(git fetch origin claude/wow-addons && git checkout claude/wow-addons).")
-    known = ["TirysZentrale"] + sorted(os.listdir(addons))
+    known = sorted(os.listdir(addons))
     sys.exit("Add-on '%s' nicht gefunden. Bekannt: %s" % (name, ", ".join(known)))
 
 

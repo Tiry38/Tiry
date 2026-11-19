@@ -1,4 +1,4 @@
--- Tiry's Zentrale 7 – Rechen-Regeln des Rezept-Beraters (busted, strenger Forever-Nachbau)
+-- RezeptRadar – Rechen-Regeln des Rezept-Beraters (busted, strenger Forever-Nachbau)
 local E = require("addon_env")
 
 local SKILLS = {
@@ -59,7 +59,7 @@ describe("Material", function()
   end)
   it("im Spiel gelernter Händlerpreis geht vor der Liste", function()
     local ns = E.load({ skills = SKILLS })
-    TirysZentraleDB.vendor[2321] = 80
+    RezeptRadarDB.vendor[2321] = 80
     assert.equal(80, (ns.Advisor.MatUnit(2321, 2)))
   end)
 end)
@@ -88,8 +88,8 @@ describe("Ohne Beruf", function()
     local list, stats = ns.Advisor.List({ prof = "ALL", range = "now" })
     assert.equal(0, #list)
     assert.equal(2, #stats.noProf)
-    SlashCmdList.TIRYSZENTRALE("")
-    assert.equal("Beruf nicht gelernt", TirysZentraleMainFrame.empty.title:GetText())
+    SlashCmdList.REZEPTRADAR("")
+    assert.equal("Beruf nicht gelernt", RezeptRadarMainFrame.empty.title:GetText())
     assert.equal(0, #W.errors)
   end)
 end)

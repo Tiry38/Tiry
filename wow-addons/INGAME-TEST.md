@@ -1,7 +1,8 @@
-# Ingame-Test – Tiry's Zentrale 7.0.0 (Rezept-Berater)
+# Ingame-Test – RezeptRadar 1.0.0 (Rezept-Berater, vorher Tiry's Zentrale 7.0)
 
-Vorher: alten Ordner `TirysZentrale` löschen, neuen hineinkopieren, `/console scriptErrors 1`, `/reload`.
-- [ ] `/tz` öffnet **ein** Fenster: Kopf, Scan-Karte, Filter, Liste. ESC und × schließen. Minikarten-Knopf öffnet/schließt.
+Vorher: alten Ordner `TirysZentrale` löschen, `RezeptRadar` hineinkopieren, **WoW komplett neu starten**, `/console scriptErrors 1`.
+- [ ] AddOn-Liste: „RezeptRadar“ mit Radar-Symbol, nicht „veraltet“
+- [ ] `/rr` öffnet (auch `/rezept` und `/tz`) **ein** Fenster: Kopf, Scan-Karte, Filter, Liste. ESC und × schließen. Minikarten-Knopf öffnet/schließt.
 - [ ] Ohne AH: Karte „Noch kein Scan“, Knopf gesperrt
 - [ ] Kochkunst- und Leder-Berufsfenster einmal öffnen → Fußzeile zeigt bei beiden „erkannt“
 - [ ] Am AH „AH scannen“ → nach ein paar Sekunden Chat „Scan fertig: N Angebote“, Angebotszahl plausibel (zehntausende)
@@ -12,7 +13,7 @@ Vorher: alten Ordner `TirysZentrale` löschen, neuen hineinkopieren, `/console s
 - [ ] Filter Kochkunst/Leder, Bald (+25), Nur mit Skillpunkten ändern die Liste
 - [ ] Rezept kaufen und lernen → verschwindet sofort aus der Liste
 - [ ] Händler mit Gewürzen/Faden besuchen → keine Fehler (Preise werden still gelernt)
-- [ ] Auctionator-Komplett-Scan statt eigenem Knopf → Zentrale liest mit („Scan fertig“)
+- [ ] Auctionator-Komplett-Scan statt eigenem Knopf → RezeptRadar liest mit („Scan fertig“)
 
 ---
 

@@ -1,4 +1,4 @@
--- Tiry's Zentrale 7 – Rezepte (Kochkunst + Lederverarbeitung, nur kaufbare mit Rezept-Item) und
+-- RezeptRadar 1.0 – Rezepte (Kochkunst + Lederverarbeitung, nur kaufbare mit Rezept-Item) und
 -- Erkennung, welche du schon kannst: Zauberbuch (C_SpellBook) + Berufsfenster (C_TradeSkillUI) + "Neues Rezept".
 local _, ns = ...
 

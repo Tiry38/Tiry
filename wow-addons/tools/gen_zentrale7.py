@@ -1,4 +1,4 @@
-"""Tiry's Zentrale 7 - kompakte Daten fuer den Rezept-Berater (Kochen + Lederverarbeitung) -> TirysZentrale/Data_Craft.lua
+"""RezeptRadar - kompakte Daten fuer den Rezept-Berater (Kochen + Lederverarbeitung) -> addons/RezeptRadar/Data_Craft.lua
 
 Quelle: tools/zentrale_src/ - die aus den Forever-Spieldaten erzeugten Dateien Data_Recipes.lua, Data_RecipeItems.lua und
 Data_AllItems.lua (Item-Name, Qualitaet, Symbol, Haendler-Verkaufspreis, Bindung). Nur Rezepte, die ein Rezept-Item
@@ -8,7 +8,7 @@ Aufruf (aus wow-addons/): python3 -I tools/gen_zentrale7.py
 import os, re
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-TZ = os.path.join(os.path.dirname(HERE), "TirysZentrale")
+TZ = os.path.join(os.path.dirname(HERE), "addons", "RezeptRadar")
 PROFS = ("COOKING", "LEATHERWORKING")
 
 
