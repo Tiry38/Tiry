@@ -1,0 +1,890 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#F6F1EC">
+<title>Velocenter Hessert – E-Bike &amp; E-Dreirad-Spezialist in Wörth am Rhein</title>
+<meta name="description" content="Dein E-Bike & E-Dreirad-Spezialist mit eigener Werkstatt. Über 300 E-Bikes zum Probefahren, ehrliche Beratung und ein Bosch Service Center in Wörth am Rhein.">
+<link rel="preload" href="fonts/outfit-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="img/p-isy.webp" as="image" fetchpriority="high">
+<style>
+@font-face{font-family:Outfit;src:url(fonts/outfit-latin.woff2) format('woff2');font-weight:100 900;font-display:swap}
+@font-face{font-family:Sora;src:url(fonts/sora-latin.woff2) format('woff2');font-weight:100 900;font-display:swap}
+@property --ang{syntax:'<angle>';inherits:false;initial-value:0deg}
+
+:root{
+  --rot:#E2232D;--crim:#C8102E;--rot-d:#A50D24;
+  --graphit:#1B1E25;--graphit2:#2A2D34;--logo:#868282;--txt2:#474B54;
+  --eis1:#DCEBF5;--eis2:#B9D6EA;--eis3:#7FB4D8;--eis4:#22B0EE;
+  --pm1:#F6F1EC;--pm2:#EDE6F0;--pm3:#E3EEF3;--champ:#F0C8A0;--rose:#F3D3DA;
+  --pad:clamp(16px,4.2vw,72px);
+  --ease:cubic-bezier(.16,.84,.12,1);
+  --F:min(8.6vw,138px);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-text-size-adjust:100%;scroll-behavior:smooth;scroll-padding-top:96px}
+body{background:var(--pm1);color:var(--graphit);font:400 17px/1.6 Sora,system-ui,sans-serif;overflow-x:clip;-webkit-font-smoothing:antialiased;min-height:100vh}
+img{display:block;max-width:100%;height:auto}
+a{color:inherit;text-decoration:none}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+:focus-visible{outline:3px solid var(--eis4);outline-offset:3px;border-radius:999px}
+
+/* ---------- Hintergrund: fließender Perlmutt-Mesh ---------- */
+#mesh{position:fixed;inset:0;width:100%;height:100%;z-index:-3;display:block}
+.grain{position:fixed;inset:-50%;z-index:-2;pointer-events:none;opacity:.07;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .1 0 0 0 0 .1 0 0 0 0 .12 0 0 0 .9 0'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
+  animation:grain 1.2s steps(4) infinite}
+@keyframes grain{0%{transform:translate(0,0)}25%{transform:translate(-3%,2%)}50%{transform:translate(2%,-3%)}75%{transform:translate(-2%,-1%)}100%{transform:translate(0,0)}}
+.cglow{position:fixed;left:0;top:0;width:560px;height:560px;margin:-280px 0 0 -280px;border-radius:50%;pointer-events:none;z-index:60;
+  background:radial-gradient(circle,rgba(255,255,255,.42) 0,rgba(127,180,216,.16) 28%,rgba(226,35,45,.06) 48%,transparent 68%);mix-blend-mode:soft-light;opacity:0;transition:opacity .4s}
+@media (pointer:fine){.cglow{opacity:1}}
+
+/* ---------- Bausteine ---------- */
+.wrap{width:min(1320px,100% - 2*var(--pad));margin-inline:auto}
+.glass{background:linear-gradient(135deg,rgba(255,255,255,.78),rgba(255,255,255,.42));-webkit-backdrop-filter:blur(20px) saturate(1.6);backdrop-filter:blur(20px) saturate(1.6);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.95),inset 0 -1px 0 rgba(185,214,234,.35),0 24px 60px -28px rgba(27,30,37,.35)}
+.iri{position:relative;isolation:isolate}
+.iri::before{content:"";position:absolute;inset:0;border-radius:inherit;padding:1.5px;pointer-events:none;z-index:2;
+  background:conic-gradient(from var(--ang),#F0C8A0,#F3D3DA,#FFFFFF,#B9D6EA,#7FB4D8,#EDE6F0,#F0C8A0);
+  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;animation:spin 7s linear infinite}
+@keyframes spin{to{--ang:360deg}}
+.eyebrow{display:inline-flex;align-items:center;gap:12px;font:600 13px/1 Outfit;letter-spacing:.22em;text-transform:uppercase;color:var(--txt2)}
+.eyebrow i{width:10px;height:10px;border-radius:50%;background:linear-gradient(135deg,var(--rot),var(--crim));box-shadow:0 0 0 5px rgba(226,35,45,.12)}
+.eyebrow b{color:var(--crim);font-weight:700}
+.redtxt{background:linear-gradient(100deg,#B50E2A 0%,#E2232D 30%,#FF5A3C 50%,#E2232D 70%,#B50E2A 100%);background-size:220% 100%;
+  -webkit-background-clip:text;background-clip:text;color:transparent;animation:redflow 6s ease-in-out infinite}
+@keyframes redflow{0%,100%{background-position:0% 50%}50%{background-position:100% 50%}}
+.pmtxt{background:linear-gradient(110deg,#FFFFFF 0%,#F6F1EC 22%,#F0C8A0 40%,#FFFFFF 55%,#DCEBF5 72%,#F3D3DA 88%,#FFFFFF 100%);background-size:250% 100%;
+  -webkit-background-clip:text;background-clip:text;color:transparent;animation:redflow 9s ease-in-out infinite}
+
+.btn{position:relative;display:inline-flex;align-items:center;gap:14px;min-height:60px;padding:8px 8px 8px 28px;border-radius:999px;font:700 16px/1.1 Outfit;letter-spacing:.01em;white-space:nowrap;transition:box-shadow .4s,background-color .4s;will-change:transform}
+.btn .lbl{position:relative;display:inline-block;transition:transform .3s var(--ease)}
+.btn .ar{width:44px;height:44px;flex:none;border-radius:50%;display:grid;place-items:center;transition:transform .5s var(--ease)}
+.btn:hover .ar{transform:rotate(-45deg)}
+.btn svg{width:20px;height:20px}
+.btn-red{color:#fff;background:linear-gradient(120deg,#A50D24 0%,#C8102E 45%,#E2232D 100%);box-shadow:inset 0 1px 0 rgba(255,255,255,.35),0 18px 40px -14px rgba(200,16,46,.75),0 0 0 1px rgba(165,13,36,.4)}
+.btn-red .ar{background:rgba(255,255,255,.18);box-shadow:inset 0 1px 0 rgba(255,255,255,.35)}
+.btn-red:hover{box-shadow:inset 0 1px 0 rgba(255,255,255,.35),0 24px 56px -12px rgba(226,35,45,.85),0 0 0 1px rgba(165,13,36,.4)}
+.btn-glass{color:var(--graphit)}
+.btn-glass .ar{background:var(--graphit);color:#fff}
+.btn-white{color:var(--crim);background:linear-gradient(135deg,#fff,#F6F1EC 60%,#E3EEF3);box-shadow:inset 0 1px 0 #fff,0 18px 40px -16px rgba(60,0,10,.6)}
+.btn-white .ar{background:linear-gradient(135deg,var(--crim),var(--rot));color:#fff}
+.live{display:inline-flex;align-items:center;gap:6px;font:700 11px/1 Outfit;letter-spacing:.14em;color:#fff;background:linear-gradient(120deg,var(--crim),var(--rot));padding:5px 9px 5px 8px;border-radius:999px}
+.live::before{content:"";width:6px;height:6px;border-radius:50%;background:#fff;animation:blink 1.6s ease-in-out infinite}
+@keyframes blink{50%{opacity:.25}}
+
+/* Zeilen-Masken (kinetische Typo) */
+.ln{display:block;overflow:hidden;padding:.04em 0 .1em;margin:-.04em 0 -.1em}
+.ln>span{display:inline-block;transform:translateY(112%) rotate(4deg);transform-origin:0 100%;transition:transform 1.25s var(--ease);transition-delay:var(--d,0s)}
+.in .ln>span,.ln.in>span{transform:none}
+.fx{opacity:0;transform:translateY(40px);transition:opacity 1s var(--ease),transform 1.2s var(--ease);transition-delay:var(--d,0s)}
+.fx.in,.in>.fx{opacity:1;transform:none}
+
+/* ---------- Kopf ---------- */
+.top{position:fixed;z-index:50;left:0;right:0;top:14px;padding:0 var(--pad);pointer-events:none}
+.top .bar{pointer-events:auto;margin-inline:auto;max-width:1400px;height:68px;border-radius:999px;display:flex;align-items:center;gap:10px;padding:0 10px 0 22px;transition:transform .6s var(--ease)}
+.logo{display:flex;align-items:center;flex:none;height:48px}
+.logo img{height:46px;width:auto}
+.nav{display:flex;align-items:center;gap:2px;margin:0 auto;font:600 15px/1 Outfit}
+.nav a{position:relative;display:inline-flex;align-items:center;gap:7px;height:44px;padding:0 13px;border-radius:999px;color:var(--graphit2);transition:background-color .3s,color .3s}
+.nav a:hover{background:rgba(255,255,255,.75);color:var(--crim)}
+.nav a[aria-current]{background:var(--graphit);color:#fff}
+.nav .live{padding:4px 7px 4px 6px;font-size:9.5px}
+.status{display:inline-flex;align-items:center;gap:10px;height:48px;padding:0 16px 0 12px;border-radius:999px;font:600 14px/1.15 Outfit;color:var(--graphit);background:rgba(255,255,255,.6);box-shadow:inset 0 0 0 1px rgba(255,255,255,.9);white-space:nowrap}
+.status .dot{position:relative;width:12px;height:12px;border-radius:50%;background:var(--dot,#E2232D);flex:none}
+.status .dot::after{content:"";position:absolute;inset:-6px;border-radius:50%;background:var(--dot,#E2232D);opacity:.25;animation:pulse 2s ease-out infinite}
+@keyframes pulse{0%{transform:scale(.5);opacity:.45}100%{transform:scale(1.6);opacity:0}}
+.status small{display:block;font:500 12px/1.1 Sora;color:var(--txt2)}
+.top .btn{min-height:52px;padding:4px 4px 4px 22px;font-size:15px}
+.top .btn .ar{width:42px;height:42px}
+.menu-btn{display:none;width:48px;height:48px;border-radius:50%;background:var(--graphit);color:#fff;place-items:center;flex:none}
+.menu-btn span{display:block;width:18px;height:2px;border-radius:2px;background:#fff;box-shadow:0 6px 0 #fff;transform:translateY(-3px);transition:transform .4s,box-shadow .4s}
+.menu-open .menu-btn span{transform:rotate(45deg);box-shadow:none}
+.menu-open .menu-btn span::after{content:"";display:block;width:18px;height:2px;border-radius:2px;background:#fff;transform:rotate(-90deg)}
+.overlay{position:fixed;inset:0;z-index:45;padding:110px var(--pad) 120px;display:flex;flex-direction:column;gap:6px;overflow:auto;
+  background:linear-gradient(160deg,rgba(246,241,236,.92),rgba(227,238,243,.92) 50%,rgba(243,211,218,.9));-webkit-backdrop-filter:blur(26px);backdrop-filter:blur(26px);
+  clip-path:circle(0% at calc(100% - 50px) 48px);transition:clip-path .9s var(--ease);visibility:hidden}
+.menu-open .overlay{clip-path:circle(150% at calc(100% - 50px) 48px);visibility:visible}
+.overlay a.big{display:flex;align-items:center;gap:14px;font:800 clamp(34px,9vw,64px)/1.05 Outfit;letter-spacing:-.04em;color:var(--graphit);min-height:48px}
+.overlay a.big small{font:600 13px/1 Outfit;letter-spacing:.2em;color:var(--crim)}
+.overlay .ln>span{transition-duration:.9s}
+.overlay .row{display:flex;flex-wrap:wrap;gap:10px;margin-top:22px}
+
+/* ---------- Hero ---------- */
+.hero{position:relative;min-height:100svh;padding:112px var(--pad) 26px;overflow:clip;display:flex;flex-direction:column}
+.hero .eyebrow{margin-bottom:18px}
+.h1{position:relative;font:800 var(--F)/.88 Outfit;letter-spacing:-.052em;color:var(--graphit);max-width:1400px}
+.h1 .l{position:relative;display:block}
+.h1 .l.back{z-index:1}.h1 .l.front{z-index:3}
+.h1 .l2{padding-left:.9em}
+.h1 .l4{display:flex;align-items:flex-end;gap:.18em}
+.h1 .tag{font:800 calc(var(--F)*.34)/.92 Outfit;letter-spacing:-.04em;color:var(--graphit);padding-bottom:.16em;text-align:left;flex:none}
+.h1 .amp{font-weight:300;color:var(--crim)}
+.h1 .redtxt{filter:drop-shadow(0 0 1.5px rgba(255,255,255,.95)) drop-shadow(0 6px 22px rgba(255,255,255,.75))}
+.stage{position:absolute;z-index:0;right:-25vw;top:21vh;width:min(64vw,1040px);aspect-ratio:1;
+  background:radial-gradient(circle at 30% 28%,rgba(255,140,120,.55),transparent 42%),linear-gradient(140deg,#FF4B3A 0%,#E2232D 30%,#C8102E 62%,#8E0B20 100%);
+  border-radius:47% 53% 41% 59%/52% 44% 56% 48%;animation:morph 16s ease-in-out infinite,float 12s ease-in-out infinite;
+  box-shadow:inset -30px -40px 90px rgba(80,0,15,.45),inset 30px 40px 80px rgba(255,190,170,.35),0 60px 140px -40px rgba(200,16,46,.6)}
+.stage::after{content:"";position:absolute;inset:7%;border-radius:inherit;background:conic-gradient(from var(--ang),transparent 0 60%,rgba(255,255,255,.28) 72%,transparent 84%);animation:spin 11s linear infinite;filter:blur(14px)}
+@keyframes morph{0%,100%{border-radius:47% 53% 41% 59%/52% 44% 56% 48%}33%{border-radius:58% 42% 52% 48%/43% 58% 42% 57%}66%{border-radius:41% 59% 57% 43%/58% 47% 53% 42%}}
+@keyframes float{0%,100%{translate:0 0}50%{translate:-1.5vw 2vh}}
+.halo{position:absolute;z-index:0;left:-12vw;top:40vh;width:48vw;aspect-ratio:1;border-radius:50%;background:radial-gradient(circle,rgba(127,180,216,.45),rgba(220,235,245,.2) 45%,transparent 70%);filter:blur(10px)}
+.bike{position:absolute;z-index:2;right:max(1vw,calc(50% - 720px));top:calc(112px + 31px + var(--F)*.62);width:min(57vw,880px);pointer-events:none;will-change:transform}
+.bike img{width:100%;filter:drop-shadow(0 30px 30px rgba(60,10,20,.35)) drop-shadow(0 6px 8px rgba(0,0,0,.18));opacity:0;transform:translateX(12vw) rotate(-3deg);transition:opacity 1.2s ease .35s,transform 1.8s var(--ease) .35s}
+.loaded .bike img{opacity:1;transform:none}
+.bike::after{content:"";position:absolute;left:8%;right:8%;bottom:-3%;height:9%;border-radius:50%;background:radial-gradient(closest-side,rgba(60,0,15,.45),transparent);z-index:-1;filter:blur(6px)}
+.hero-sub{position:relative;z-index:3;display:flex;flex-direction:column;gap:26px;margin-top:clamp(20px,3vh,34px);max-width:600px}
+.hero-sub p{font-size:clamp(16px,1.25vw,19px);color:var(--txt2);max-width:520px}
+.hero-sub p strong{color:var(--graphit);font-weight:600}
+.cta{display:flex;flex-wrap:wrap;gap:12px}
+.facts{position:relative;z-index:3;display:flex;flex-wrap:wrap;gap:10px;margin-top:auto;padding-top:28px;justify-content:flex-end}
+.chip{display:inline-flex;align-items:center;gap:12px;min-height:56px;padding:8px 22px 8px 8px;border-radius:999px;font:600 15px/1.15 Outfit;color:var(--graphit)}
+.chip .ic{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;flex:none;font:800 14px/1 Outfit;color:#fff;background:linear-gradient(135deg,var(--crim),var(--rot))}
+.chip .ic.dark{background:var(--graphit)}
+.chip .ic.ice{background:linear-gradient(135deg,var(--eis3),var(--eis4))}
+.chip .ic.wh{background:#fff;box-shadow:inset 0 0 0 1px rgba(27,30,37,.08)}
+.chip small{display:block;font:500 12px/1.2 Sora;color:var(--txt2)}
+.chip .ic svg{width:20px;height:20px}
+.star{color:#C8102E}
+
+/* ---------- Schnellzugriff-Dock ---------- */
+.dock{position:relative;z-index:4;display:flex;gap:8px;padding:8px;border-radius:999px;margin-top:clamp(40px,7vw,90px)}
+.dock a{flex:1;display:flex;align-items:center;gap:14px;min-height:84px;padding:10px 26px 10px 10px;border-radius:999px;transition:flex-grow .7s var(--ease),background-color .4s}
+.dock a:hover{flex-grow:1.45;background:rgba(255,255,255,.85)}
+.dock .bub{width:64px;height:64px;border-radius:50%;flex:none;display:grid;place-items:center;color:#fff;transition:transform .7s var(--ease)}
+.dock a:hover .bub{transform:rotate(-12deg) scale(1.06)}
+.dock .bub svg{width:26px;height:26px}
+.dock b{display:block;font:700 19px/1.15 Outfit;letter-spacing:-.01em}
+.dock small{display:block;font:500 13px/1.3 Sora;color:var(--txt2);margin-top:3px}
+.b-red{background:linear-gradient(135deg,#E2232D,#C8102E 60%,#8E0B20);box-shadow:0 14px 30px -12px rgba(200,16,46,.8),inset 0 1px 0 rgba(255,255,255,.35)}
+.b-dark{background:linear-gradient(135deg,#3A3E47,#1B1E25);box-shadow:0 14px 30px -12px rgba(27,30,37,.7),inset 0 1px 0 rgba(255,255,255,.2)}
+.b-champ{background:linear-gradient(135deg,#F7DDC2,#F0C8A0 50%,#D9A273);color:#5A3415!important;box-shadow:0 14px 30px -12px rgba(200,140,90,.8),inset 0 1px 0 rgba(255,255,255,.6)}
+.b-ice{background:linear-gradient(135deg,#B9D6EA,#7FB4D8 50%,#3C8FC4);box-shadow:0 14px 30px -12px rgba(60,143,196,.8),inset 0 1px 0 rgba(255,255,255,.5)}
+
+/* ---------- Abschnitte ---------- */
+section{position:relative}
+.sec{padding:clamp(80px,11vw,170px) 0}
+.h2{font:800 clamp(46px,7.4vw,118px)/.9 Outfit;letter-spacing:-.05em;color:var(--graphit)}
+.lead{font-size:clamp(16px,1.3vw,19px);color:var(--txt2);max-width:520px}
+
+/* Winter */
+.winter{position:relative;border-radius:clamp(40px,6vw,96px);overflow:hidden;color:#fff;isolation:isolate;
+  background:linear-gradient(135deg,#7E0A1C 0%,#A50D24 22%,#C8102E 48%,#E2232D 72%,#B50E2A 100%);
+  box-shadow:0 60px 120px -50px rgba(165,13,36,.75),inset 0 1px 0 rgba(255,255,255,.3)}
+.winter::before{content:"";position:absolute;inset:-30%;z-index:-1;background:
+  radial-gradient(40% 35% at 78% 30%,rgba(255,120,100,.55),transparent 70%),
+  radial-gradient(35% 40% at 15% 85%,rgba(60,0,15,.55),transparent 70%),
+  conic-gradient(from var(--ang) at 70% 40%,transparent 0 30%,rgba(255,255,255,.12) 40%,transparent 55%,rgba(240,200,160,.14) 75%,transparent 90%);
+  animation:spin 18s linear infinite}
+.winter .in-w{display:grid;grid-template-columns:1.25fr 1fr;gap:clamp(24px,4vw,64px);padding:clamp(40px,6vw,96px)}
+.winter .eyebrow{color:rgba(255,255,255,.88)}.winter .eyebrow i{background:#fff;box-shadow:0 0 0 5px rgba(255,255,255,.18)}
+.minus{font:800 clamp(120px,20vw,330px)/.82 Outfit;letter-spacing:-.07em;margin:22px 0 10px -.04em;white-space:nowrap;filter:drop-shadow(0 20px 40px rgba(60,0,15,.35))}
+.minus .eur{font-weight:300;letter-spacing:-.04em}
+.winter h3{font:700 clamp(28px,3.2vw,48px)/1.02 Outfit;letter-spacing:-.03em}
+.winter p{color:rgba(255,255,255,.92);max-width:520px;margin-top:16px}
+.gift{position:relative;display:grid;place-items:center;align-self:center}
+.gift .orb{position:relative;width:min(100%,430px);aspect-ratio:1;border-radius:50%;display:grid;place-items:center;
+  background:radial-gradient(circle at 35% 30%,#fff,#F6F1EC 35%,#E3EEF3 60%,#F3D3DA 85%);box-shadow:inset 0 -20px 60px rgba(185,214,234,.7),inset 0 10px 30px #fff,0 40px 80px -30px rgba(40,0,10,.7)}
+.gift .orb::after{content:"";position:absolute;inset:-2px;border-radius:50%;background:conic-gradient(from var(--ang),rgba(240,200,160,.0),rgba(240,200,160,.9),rgba(185,214,234,.9),rgba(243,211,218,.9),rgba(240,200,160,0));
+  -webkit-mask:radial-gradient(closest-side,transparent 96%,#000 97%);mask:radial-gradient(closest-side,transparent 96%,#000 97%);animation:spin 6s linear infinite}
+.gift img{width:70%;animation:bob 6s ease-in-out infinite;filter:drop-shadow(0 26px 24px rgba(40,60,0,.35))}
+@keyframes bob{0%,100%{transform:translateY(0) rotate(-6deg)}50%{transform:translateY(-14px) rotate(3deg)}}
+.gift .tagp{position:absolute;top:8%;right:4%;padding:12px 18px;border-radius:999px;font:800 14px/1 Outfit;letter-spacing:.14em;color:var(--crim);background:#fff;box-shadow:0 14px 30px -10px rgba(40,0,10,.6);transform:rotate(8deg)}
+.gift .cap{position:absolute;bottom:4%;left:50%;transform:translateX(-50%);white-space:nowrap;padding:12px 20px;border-radius:999px;font:700 15px/1.2 Outfit;color:var(--graphit);background:rgba(255,255,255,.92);box-shadow:0 14px 30px -10px rgba(40,0,10,.5)}
+.cd{display:flex;gap:12px;margin:28px 0 30px}
+.cd div{width:clamp(70px,7vw,96px);aspect-ratio:1;border-radius:50%;display:grid;place-content:center;text-align:center;
+  background:linear-gradient(145deg,rgba(255,255,255,.26),rgba(255,255,255,.06));-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.55),inset 0 -10px 20px rgba(80,0,15,.25),0 14px 30px -14px rgba(40,0,10,.6)}
+.cd b{font:800 clamp(26px,2.6vw,36px)/1 Outfit;letter-spacing:-.03em;font-variant-numeric:tabular-nums}
+.cd small{font:600 10px/1 Outfit;letter-spacing:.2em;text-transform:uppercase;margin-top:6px;color:rgba(255,255,255,.9)}
+
+/* Marken */
+.marquee{position:relative;overflow:hidden;padding:18px 0;-webkit-mask:linear-gradient(90deg,transparent,#000 10%,#000 90%,transparent);mask:linear-gradient(90deg,transparent,#000 10%,#000 90%,transparent)}
+.marquee .track{display:flex;gap:14px;width:max-content;animation:mq 46s linear infinite}
+.marquee:hover .track{animation-play-state:paused}
+@keyframes mq{to{transform:translateX(calc(-50% - 7px))}}
+.mlogo{height:84px;padding:0 44px;border-radius:999px;display:grid;place-items:center;flex:none;transition:transform .5s var(--ease)}
+.mlogo:hover{transform:translateY(-4px) scale(1.04)}
+.mlogo img{height:44px;width:auto}
+.mlogo img.flat{height:20px}
+.mlogo img.vdv{height:70px}
+.mlogo img.wide{height:34px}
+.show{position:relative;margin-top:clamp(30px,4vw,60px);min-height:clamp(560px,52vw,760px);overflow:clip;border-radius:clamp(40px,6vw,96px);isolation:isolate}
+.show .ghost{position:absolute;left:50%;top:44%;transform:translate(-50%,-50%);z-index:0;white-space:nowrap;font:900 clamp(150px,26vw,420px)/.8 Outfit;letter-spacing:-.07em;pointer-events:none}
+.show .ghost span{display:inline-block;background:linear-gradient(180deg,rgba(127,180,216,.55),rgba(185,214,234,.5) 50%,rgba(240,200,160,.55));-webkit-background-clip:text;background-clip:text;color:transparent;
+  transform:translateY(0);transition:transform .9s var(--ease),opacity .6s;transition-delay:calc(var(--i)*.045s);filter:drop-shadow(0 18px 30px rgba(127,180,216,.35))}
+.show .ghost.out span{transform:translateY(-110%);opacity:0}
+.show .ghost.pre span{transform:translateY(110%);opacity:0;transition:none}
+.show .disc{position:absolute;z-index:0;left:50%;top:52%;width:min(62%,760px);aspect-ratio:1;transform:translate(-36%,-50%);border-radius:50%;
+  background:radial-gradient(circle at 40% 35%,#fff 0,#F6F1EC 30%,#E3EEF3 60%,rgba(243,211,218,.8) 85%);box-shadow:inset 0 -30px 80px rgba(127,180,216,.5),0 40px 100px -40px rgba(27,30,37,.35)}
+.show .bikes{position:absolute;z-index:2;right:3%;top:50%;width:min(62%,880px);aspect-ratio:1.5;transform:translateY(-46%)}
+.show .bikes img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;opacity:0;transform:translateX(14%) rotate(-4deg) scale(.94);filter:drop-shadow(0 34px 30px rgba(27,30,37,.3));transition:opacity .8s ease,transform 1.2s var(--ease)}
+.show .bikes img.on{opacity:1;transform:none}
+.show .bikes img.gone{opacity:0;transform:translateX(-18%) rotate(3deg) scale(.94)}
+.show .info{position:absolute;z-index:3;left:clamp(24px,4vw,64px);top:clamp(30px,4vw,60px);max-width:380px}
+.show .count{font:800 15px/1 Outfit;letter-spacing:.2em;color:var(--crim)}
+.show .count span{color:var(--txt2)}
+.show .blogo{height:76px;margin:22px 0 14px;display:flex;align-items:center}
+.show .blogo img{max-height:76px;width:auto;max-width:280px}
+.show .info p{font:600 clamp(20px,1.8vw,26px)/1.2 Outfit;letter-spacing:-.02em;color:var(--graphit)}
+.show .info .btn{margin-top:24px}
+.picker{position:absolute;z-index:4;left:50%;bottom:clamp(18px,2.5vw,34px);transform:translateX(-50%);display:flex;gap:6px;padding:7px;border-radius:999px;max-width:calc(100% - 32px)}
+.picker button{position:relative;height:58px;min-width:96px;padding:0 16px;border-radius:999px;display:grid;place-items:center;overflow:hidden;transition:background-color .4s}
+.picker button img{height:28px;width:auto;max-width:100px;position:relative;z-index:1;filter:grayscale(1);opacity:.62;transition:filter .4s,opacity .4s}
+.picker button img.flat{height:12px}
+.picker button:hover img,.picker button.on img{filter:none;opacity:1}
+.picker button.on{background:#fff;box-shadow:0 8px 20px -10px rgba(27,30,37,.4)}
+.picker button .pr{position:absolute;left:14px;right:14px;bottom:7px;height:3px;border-radius:3px;background:rgba(200,16,46,.12);overflow:hidden;opacity:0}
+.picker button.on .pr{opacity:1}
+.picker button .pr i{position:absolute;inset:0;background:linear-gradient(90deg,var(--crim),var(--rot));transform-origin:0 50%;transform:scaleX(0)}
+.picker button.on .pr i{animation:prog var(--dur,5.5s) linear forwards}
+.show:hover .picker button.on .pr i{animation-play-state:paused}
+@keyframes prog{to{transform:scaleX(1)}}
+
+/* Versprechen */
+.promise{display:grid;grid-template-columns:1.1fr .9fr;gap:clamp(30px,5vw,80px);align-items:center}
+.quote-big{font:800 clamp(48px,6.6vw,108px)/.92 Outfit;letter-spacing:-.05em}
+.quote-big .q{margin-right:.02em}
+.who{display:flex;align-items:center;gap:14px;margin-top:30px;font:600 17px/1.3 Outfit}
+.who i{width:52px;height:52px;border-radius:50%;display:grid;place-items:center;background:var(--graphit);color:#fff;font:800 16px Outfit;font-style:normal}
+.who small{display:block;font:500 13px Sora;color:var(--txt2)}
+.blob-img{position:relative;aspect-ratio:4/4.4;border-radius:58% 42% 50% 50%/46% 52% 48% 54%;overflow:hidden;animation:morph 18s ease-in-out infinite;box-shadow:0 50px 100px -40px rgba(27,30,37,.45)}
+.blob-img img{width:100%;height:100%;object-fit:cover;transform:scale(1.08)}
+.blob-img::after{content:"";position:absolute;inset:0;background:linear-gradient(200deg,rgba(220,235,245,.0) 50%,rgba(200,16,46,.28)),linear-gradient(20deg,transparent 60%,rgba(240,200,160,.25))}
+.promise .wrapimg{position:relative}
+.promise .badge{position:absolute;left:-6%;bottom:8%;z-index:2;display:flex;align-items:center;gap:12px;padding:10px 22px 10px 10px;border-radius:999px;font:700 16px/1.2 Outfit}
+.promise .badge img{width:96px;height:auto;padding:12px 10px;background:#fff;border-radius:999px}
+
+.chapters{margin-top:clamp(80px,9vw,140px)}
+.chapters .head{display:flex;justify-content:space-between;align-items:flex-end;gap:30px;flex-wrap:wrap;margin-bottom:clamp(26px,3vw,44px)}
+.chap{position:relative;display:block;width:100%;text-align:left;border-radius:999px;padding:0;margin-bottom:10px;transition:background-color .5s,box-shadow .5s}
+.chap .row{display:grid;grid-template-columns:clamp(110px,13vw,200px) 1fr minmax(240px,420px) 64px;align-items:center;gap:clamp(14px,2vw,30px);min-height:clamp(96px,9vw,132px);padding:0 14px 0 clamp(20px,3vw,44px)}
+.chap .num{font:800 clamp(60px,7vw,112px)/.9 Outfit;letter-spacing:-.06em;color:transparent;-webkit-text-stroke:1.5px rgba(27,30,37,.28);transition:color .5s,-webkit-text-stroke-color .5s}
+.chap .tt{font:700 clamp(26px,3vw,46px)/1 Outfit;letter-spacing:-.035em;transition:transform .6s var(--ease)}
+.chap .tt small{display:block;font:600 12px/1 Outfit;letter-spacing:.2em;text-transform:uppercase;color:var(--crim);margin-bottom:10px}
+.chap .ds{font-size:15px;color:var(--txt2);line-height:1.55}
+.chap .go{width:64px;height:64px;border-radius:50%;display:grid;place-items:center;background:rgba(255,255,255,.7);box-shadow:inset 0 0 0 1px rgba(27,30,37,.08);transition:transform .6s var(--ease),background-color .4s,color .4s}
+.chap .go svg{width:22px;height:22px}
+.chap:hover,.chap.open{background:rgba(255,255,255,.62);box-shadow:inset 0 1px 0 #fff,0 24px 60px -30px rgba(27,30,37,.35)}
+.chap:hover .num,.chap.open .num{color:var(--crim);-webkit-text-stroke-color:transparent;background:linear-gradient(120deg,#A50D24,#E2232D 50%,#FF5A3C);-webkit-background-clip:text;background-clip:text}
+.chap:hover .tt{transform:translateX(10px)}
+.chap:hover .go{background:var(--graphit);color:#fff;transform:rotate(-45deg)}
+.chap .more{display:none}
+.pv{position:fixed;left:0;top:0;z-index:40;width:340px;height:250px;margin:-125px 0 0 -170px;pointer-events:none;border-radius:46% 54% 50% 50%/52% 48% 52% 48%;overflow:hidden;
+  opacity:0;transform:scale(.6);transition:opacity .4s,transform .5s var(--ease),border-radius .8s;box-shadow:0 40px 80px -30px rgba(27,30,37,.55);background:var(--pm3)}
+.pv.on{opacity:1;transform:scale(1)}
+.pv img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .35s}
+.pv img.on{opacity:1}
+.pv img.fit{object-fit:contain;padding:22px;background:radial-gradient(circle at 40% 35%,#fff,#E3EEF3 60%,#F3D3DA)}
+
+/* Bewertungen */
+.rv-top{display:flex;align-items:flex-end;gap:clamp(20px,3vw,48px);flex-wrap:wrap}
+.score{font:800 clamp(130px,17vw,270px)/.78 Outfit;letter-spacing:-.07em}
+.stars{display:flex;gap:6px;margin-bottom:12px}
+.stars svg{width:30px;height:30px}
+.rv-top p{font:600 clamp(18px,1.6vw,24px)/1.3 Outfit;color:var(--graphit);padding-bottom:.6em}
+.rv-top p small{display:block;font:500 15px Sora;color:var(--txt2);margin-top:6px}
+.quotes{display:grid;grid-template-columns:1.35fr 1fr;gap:clamp(20px,4vw,70px);margin-top:clamp(50px,6vw,90px);align-items:start}
+.qt{position:relative;padding:clamp(30px,4vw,60px);border-radius:clamp(40px,5vw,72px)}
+.qt .mk{position:absolute;top:-26px;left:clamp(26px,4vw,56px);width:64px;height:64px;border-radius:50%;display:grid;place-items:center;background:linear-gradient(135deg,#FF5A3C,#E2232D 45%,#A50D24);box-shadow:0 16px 34px -12px rgba(200,16,46,.8),inset 0 1px 0 rgba(255,255,255,.4)}
+.qt .mk svg{width:28px;height:28px}
+.qt blockquote{position:relative;font:700 clamp(30px,3.3vw,54px)/1.08 Outfit;letter-spacing:-.035em}
+.qt.sm blockquote{font-size:clamp(22px,2vw,30px);line-height:1.18}
+.qt cite{display:flex;align-items:center;gap:12px;margin-top:26px;font:600 16px/1.2 Outfit;font-style:normal}
+.qt cite i{width:46px;height:46px;border-radius:50%;display:grid;place-items:center;font:800 16px Outfit;font-style:normal;color:#fff;background:linear-gradient(135deg,var(--eis3),#3C8FC4)}
+.qt cite small{display:block;font:500 13px Sora;color:var(--txt2)}
+.qt.feat{background:linear-gradient(135deg,#2A2D34,#1B1E25);color:#fff;box-shadow:0 50px 100px -40px rgba(27,30,37,.6)}
+.qt.feat cite small{color:rgba(255,255,255,.75)}
+.qt.feat cite i{background:linear-gradient(135deg,var(--crim),var(--rot))}
+.qcol{display:flex;flex-direction:column;gap:clamp(18px,2vw,28px)}
+.qcol .qt:nth-child(2){margin-left:clamp(0px,4vw,60px)}
+
+/* Besuch */
+.visit{display:grid;grid-template-columns:1fr 1fr;gap:clamp(30px,5vw,80px);align-items:center}
+.visit .blob-img{aspect-ratio:4/3.3;border-radius:44% 56% 40% 60%/50% 42% 58% 50%}
+.visit address{font:600 clamp(22px,2.2vw,32px)/1.2 Outfit;font-style:normal;letter-spacing:-.02em;margin-top:22px}
+.visit .park{font-size:15px;color:var(--txt2);margin-top:10px;max-width:460px}
+.hours{list-style:none;margin:26px 0;display:flex;flex-direction:column;gap:6px}
+.hours li{display:flex;justify-content:space-between;align-items:center;gap:20px;min-height:48px;padding:0 22px;border-radius:999px;font:600 16px/1.2 Outfit}
+.hours li span:last-child{font-weight:500;color:var(--txt2);text-align:right;font-family:Sora;font-size:15px}
+.hours li.zu span:last-child{color:var(--crim);font-weight:600}
+.hours li.today{background:var(--graphit);color:#fff}
+.hours li.today span:last-child{color:#fff}
+.stat-big{display:inline-flex;align-items:center;gap:14px;padding:10px 22px 10px 12px;border-radius:999px;font:700 17px/1.2 Outfit}
+.stat-big .dot{position:relative;width:16px;height:16px;border-radius:50%;background:var(--dot,#E2232D)}
+.stat-big .dot::after{content:"";position:absolute;inset:-7px;border-radius:50%;background:var(--dot,#E2232D);opacity:.25;animation:pulse 2s ease-out infinite}
+.stat-big small{display:block;font:500 13px Sora;color:var(--txt2)}
+.contact{display:flex;flex-wrap:wrap;gap:10px;margin-top:8px}
+
+/* Fuß */
+footer{position:relative;margin-top:clamp(60px,8vw,120px);background:linear-gradient(160deg,#2A2D34,#1B1E25 55%,#14161B);color:#fff;border-radius:clamp(44px,6vw,100px) clamp(44px,6vw,100px) 0 0;overflow:hidden;isolation:isolate}
+footer::before{content:"";position:absolute;inset:-20%;z-index:-1;background:radial-gradient(30% 40% at 85% 20%,rgba(200,16,46,.35),transparent 70%),radial-gradient(35% 40% at 10% 90%,rgba(127,180,216,.22),transparent 70%)}
+.f-in{padding:clamp(60px,7vw,110px) 0 40px}
+.f-big{font:900 clamp(64px,15.5vw,250px)/.8 Outfit;letter-spacing:-.07em;white-space:nowrap}
+.f-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:30px;margin-top:clamp(40px,5vw,70px)}
+.f-grid h4{font:600 12px/1 Outfit;letter-spacing:.22em;text-transform:uppercase;color:var(--champ);margin-bottom:16px}
+.f-grid a,.f-grid p{display:block;font-size:15px;line-height:1.5;color:rgba(255,255,255,.88);padding:6px 0}
+.f-grid a{min-height:44px;display:flex;align-items:center}
+.f-grid a:hover{color:#fff}
+.socials{display:flex;gap:10px}
+.socials a{width:48px;height:48px;border-radius:50%;justify-content:center;background:rgba(255,255,255,.1);box-shadow:inset 0 1px 0 rgba(255,255,255,.18);padding:0}
+.socials svg{width:20px;height:20px}
+.f-low{display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-top:40px;padding-top:24px;font-size:13px;color:rgba(255,255,255,.7)}
+.f-logo{display:inline-flex;padding:12px 22px;border-radius:999px;background:#fff;margin-top:24px}
+.f-logo img{height:44px;width:auto}
+
+/* Handy-Leiste */
+.mbar{display:none}
+
+/* ---------- Responsiv ---------- */
+@media (max-width:1240px){
+  .nav a{padding:0 9px;font-size:14px}
+  .status small{display:none}
+}
+@media (max-width:1120px){
+  .nav,.top .status{display:none}
+  .menu-btn{display:grid}
+  .top .bar{justify-content:space-between}
+  .top .btn{margin-left:auto}
+}
+@media (max-width:999px){
+  :root{--F:12.4vw}
+  .hero{padding-top:84px;min-height:auto}
+  .hero .eyebrow{font-size:11px;letter-spacing:.16em;margin-bottom:12px;gap:9px}
+  .h1 .l2{padding-left:.55em}
+  .h1 .tag{font-size:calc(var(--F)*.26)}
+  .bike{position:relative;right:auto;top:auto;width:112%;margin:calc(var(--F)*-.38) -6% 0;z-index:2}
+  .bike img{transform:translateX(30vw) rotate(-3deg)}
+  .stage{right:-34vw;width:96vw;top:calc(84px + var(--F)*4.15)}
+  .halo{display:none}
+  .hero-sub{margin-top:14px;gap:18px}
+  .hero-sub .cta{order:-1}
+  .hero-sub p{font-size:15.5px}
+  .facts{justify-content:flex-start;padding-top:22px}
+  .dock{display:grid;grid-template-columns:1fr 1fr;border-radius:44px;padding:8px}
+  .dock a{flex:1 1 calc(50% - 4px);min-height:72px;padding:8px 14px 8px 8px;gap:10px}
+  .dock a:hover{flex-grow:1}
+  .dock .bub{width:52px;height:52px}
+  .dock .bub svg{width:22px;height:22px}
+  .dock b{font-size:16px}
+  .dock small{font-size:11.5px}
+  .dock b{font-size:15px}
+  .winter .in-w{grid-template-columns:1fr}
+  .gift{order:-1}
+  .gift .orb{width:min(78%,340px)}
+  .show{min-height:auto;padding:28px 20px 24px;display:flex;flex-direction:column}
+  .show .ghost{top:44%;font-size:34vw}
+  .show .info{position:relative;left:auto;top:auto;max-width:none;z-index:3}
+  .show .blogo{height:52px;margin:16px 0 8px}
+  .show .blogo img{max-height:52px;max-width:200px}
+  .show .info .btn{display:none}
+  .show .disc{position:absolute;width:90vw;top:56%;transform:translate(-50%,-50%)}
+  .show .bikes{position:relative;right:auto;top:auto;transform:none;width:100%;margin:10px 0 12px}
+  .picker{position:relative;left:auto;bottom:auto;transform:none;flex-wrap:wrap;justify-content:center;border-radius:34px;max-width:none}
+  .picker button{flex:1 1 calc(25% - 6px);min-width:0;height:52px;padding:0 8px}
+  .picker button img{height:22px;max-width:70px}
+  .promise{grid-template-columns:1fr}
+  .promise .badge{left:4%}
+  .chap{border-radius:36px}
+  .chap .row{grid-template-columns:auto 1fr 52px;min-height:88px;padding:6px 8px 6px 20px;gap:14px}
+  .chap .num{font-size:52px}
+  .chap .tt{font-size:24px}
+  .chap .tt small{font-size:10.5px;margin-bottom:6px}
+  .chap .ds{display:none}
+  .chap .go{width:52px;height:52px;transform:rotate(90deg)}
+  .chap.open .go{transform:rotate(-90deg);background:var(--graphit);color:#fff}
+  .chap:hover .tt{transform:none}
+  .chap:hover .go{transform:rotate(90deg)}
+  .chap .more{display:grid;grid-template-rows:0fr;transition:grid-template-rows .6s var(--ease)}
+  .chap.open .more{grid-template-rows:1fr}
+  .chap .more>div{overflow:hidden}
+  .chap .more p{padding:0 22px 14px;font-size:15.5px;color:var(--txt2)}
+  .chap .more img{width:calc(100% - 20px);margin:0 10px 12px;aspect-ratio:16/9;object-fit:cover;border-radius:28px}
+  .chap .more img.fit{object-fit:contain;padding:18px;background:radial-gradient(circle at 40% 35%,#fff,#E3EEF3 60%,#F3D3DA)}
+  .pv{display:none}
+  .quotes{grid-template-columns:1fr}
+  .qcol .qt:nth-child(2){margin-left:0}
+  .visit{grid-template-columns:1fr}
+  .f-grid{grid-template-columns:1fr 1fr}
+  .mbar{display:flex;position:fixed;z-index:48;left:10px;right:10px;bottom:calc(10px + env(safe-area-inset-bottom));gap:6px;padding:6px;border-radius:999px}
+  .mbar a{flex:1;display:flex;align-items:center;justify-content:center;gap:8px;min-height:54px;border-radius:999px;font:700 15px/1 Outfit;color:#fff}
+  .mbar a svg{width:19px;height:19px}
+  .mbar .m1{background:linear-gradient(135deg,#3A3E47,#1B1E25)}
+  .mbar .m2{background:linear-gradient(120deg,#A50D24,#C8102E 45%,#E2232D);box-shadow:0 10px 24px -10px rgba(200,16,46,.8)}
+  .mbar .m3{background:linear-gradient(135deg,#128C4A,#0B6B37)}
+  body{padding-bottom:84px}
+}
+@media (max-width:560px){
+  .top{top:8px}
+  .top .bar{height:60px;padding:0 6px 0 14px;gap:6px}
+  .logo img{height:38px}
+  .top .btn{display:none}
+  .mstat{display:inline-flex!important}
+  .btn{min-height:54px;padding:5px 5px 5px 20px;font-size:15px;gap:10px}
+  .btn .ar{width:44px;height:44px}
+  .cta .btn{flex:1 1 auto;justify-content:space-between}
+  .chip{min-height:50px;font-size:14px;padding:5px 16px 5px 5px}
+  .chip .ic{width:38px;height:38px}
+  .minus{font-size:31vw;margin-top:14px}
+  .cd{gap:8px}
+  .hero .eyebrow{font-size:10.5px;letter-spacing:.13em}
+  .dock small{display:none}
+  .dock a{min-height:64px}
+  .dock .bub{width:44px;height:44px}
+  .dock a{padding:8px 10px 8px 8px}
+  .cd div{width:calc((100% - 24px)/4);max-width:84px}
+  .winter .in-w{padding:34px 22px 30px}
+  .winter .btn{width:100%;justify-content:space-between}
+  .hours li{padding:0 16px;font-size:15px}
+  .hours li span:last-child{font-size:13px}
+  .f-grid{grid-template-columns:1fr}
+  .qt{padding:30px 24px}
+  .mlogo{height:68px;padding:0 30px}
+  .mlogo img{height:34px}.mlogo img.wide{height:26px}.mlogo img.flat{height:15px}.mlogo img.vdv{height:54px}
+}
+.mstat{display:none;align-items:center;gap:8px;height:44px;padding:0 14px 0 12px;border-radius:999px;font:600 13px/1.1 Outfit;background:rgba(255,255,255,.7);box-shadow:inset 0 0 0 1px rgba(255,255,255,.9);margin-left:auto;white-space:nowrap}
+.mstat .dot{position:relative;width:10px;height:10px;border-radius:50%;background:var(--dot,#E2232D)}
+@media (max-width:360px){
+  .mbar a{font-size:13.5px;gap:6px}
+  .mstat{font-size:12px;padding:0 10px}
+}
+</style>
+</head>
+<body>
+<canvas id="mesh" aria-hidden="true"></canvas>
+<div class="grain" aria-hidden="true"></div>
+<div class="cglow" aria-hidden="true"></div>
+
+<!-- Kopf -->
+<header class="top">
+  <div class="bar glass iri">
+    <a class="logo" href="#" aria-label="Velocenter Hessert – Startseite"><img src="img/velocenter-logo.svg" width="88" height="46" alt="Velocenter Hessert"></a>
+    <nav class="nav" aria-label="Hauptnavigation">
+      <a href="#" aria-current="page">Start</a>
+      <a href="#leistungen">Service</a>
+      <a href="#marken">Marken</a>
+      <a href="#">Auf Lager <span class="live">LIVE</span></a>
+      <a href="#">i:SY Experte</a>
+      <a href="#">i:SY Treffen</a>
+      <a href="#">E-Dreiräder</a>
+      <a href="#besuch">Kontakt</a>
+    </nav>
+    <a class="status js-stat" href="#besuch"><span class="dot"></span><span><span class="st-a">Geöffnet</span><small class="st-b">bis 18:00 Uhr</small></span></a>
+    <a class="mstat js-mstat" href="#besuch"><span class="dot"></span><span class="st-a">Geöffnet</span></a>
+    <a class="btn btn-red mag" href="#besuch"><span class="lbl">Termin</span><span class="ar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></a>
+    <button class="menu-btn" aria-label="Menü öffnen" aria-expanded="false"><span></span></button>
+  </div>
+</header>
+<div class="overlay" aria-hidden="true">
+  <a class="big ln" href="#"><span>Start</span></a>
+  <a class="big ln" href="#leistungen" style="--d:.04s"><span>Service</span></a>
+  <a class="big ln" href="#marken" style="--d:.08s"><span>Marken</span></a>
+  <a class="big ln" href="#" style="--d:.12s"><span>Auf Lager <small class="live">LIVE</small></span></a>
+  <a class="big ln" href="#" style="--d:.16s"><span>i:SY Experte</span></a>
+  <a class="big ln" href="#" style="--d:.2s"><span>i:SY Treffen</span></a>
+  <a class="big ln" href="#" style="--d:.24s"><span>E-Dreiräder</span></a>
+  <a class="big ln" href="#besuch" style="--d:.28s"><span>Kontakt</span></a>
+  <div class="row">
+    <a class="status js-stat" href="#besuch"><span class="dot"></span><span><span class="st-a">Geöffnet</span><small class="st-b">bis 18:00 Uhr</small></span></a>
+  </div>
+</div>
+
+<main>
+<!-- Hero -->
+<section class="hero" id="start">
+  <div class="stage" aria-hidden="true"></div>
+  <div class="halo" aria-hidden="true"></div>
+  <span class="eyebrow fx" style="--d:.1s"><i></i><span>Familienbetrieb seit 1995 · <b>Wörth am Rhein</b></span></span>
+  <h1 class="h1" id="h1">
+    <span class="l l1 front ln" style="--d:.15s"><span>Dein E-Bike <span class="amp">&amp;</span></span></span>
+    <span class="l l2 back ln" style="--d:.27s"><span>E-Dreirad-</span></span>
+    <span class="l l3 back ln" style="--d:.39s"><span>Spezialist</span></span>
+    <span class="l l4 front ln" style="--d:.51s"><span class="l4"><span class="tag">mit<br>eigener</span><span class="redtxt">Werkstatt.</span></span></span>
+  </h1>
+  <div class="bike" id="heroBike"><img src="img/p-isy.webp" width="1600" height="1104" alt="i:SY E-Bike in Dunkelgrün mit braunen Reifen" fetchpriority="high" decoding="async"></div>
+  <div class="hero-sub">
+    <p class="fx" style="--d:.75s">Über 300 E-Bikes zum Probefahren, ehrliche Beratung und ein <strong>Bosch Service Center</strong>, in dem der Chef noch selbst schraubt.</p>
+    <div class="cta fx" style="--d:.85s">
+      <a class="btn btn-red mag" href="#besuch"><span class="lbl">Werkstatt-Termin anfragen</span><span class="ar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></a>
+      <a class="btn btn-glass glass iri mag" href="#marken"><span class="lbl">E-Bike finden</span><span class="ar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></a>
+    </div>
+  </div>
+  <div class="facts">
+    <span class="chip glass fx" style="--d:1s"><span class="ic wh"><svg viewBox="0 0 24 24"><path fill="#C8102E" d="M12 2.8l2.8 5.9 6.4.8-4.7 4.4 1.2 6.4L12 17.2l-5.7 3.1 1.2-6.4-4.7-4.4 6.4-.8z"/></svg></span><span>4,8 bei Google<small>221 Rezensionen</small></span></span>
+    <span class="chip glass fx" style="--d:1.08s"><span class="ic wh"><svg viewBox="0 0 24 24" fill="none" stroke="#ED0007" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M9 7v10M15 7v10M9 12h6" stroke-width="2"/></svg></span><span>Bosch Service Center<small>eigene Werkstatt</small></span></span>
+    <span class="chip glass fx" style="--d:1.16s"><span class="ic">300+</span><span>E-Bikes vor Ort<small>zum Probefahren</small></span></span>
+    <a class="chip glass fx" style="--d:1.24s" href="#"><span class="ic dark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3" fill="#E2232D" stroke="none"/><path d="M6.3 6.3a8 8 0 0 0 0 11.4M17.7 6.3a8 8 0 0 1 0 11.4"/></svg></span><span>Live-Bestand<small>Auf Lager ansehen</small></span></a>
+  </div>
+</section>
+
+<!-- Schnellzugriffe -->
+<div class="wrap">
+  <nav class="dock glass iri fx" aria-label="Schnellzugriffe">
+    <a href="#besuch" class="mag"><span class="bub b-red"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5" width="17" height="15" rx="4"/><path d="M8 3v4M16 3v4M3.5 10h17"/></svg></span><span><b>Termin anfragen</b><small>Werkstatt oder Probefahrt</small></span></a>
+    <a href="#" class="mag"><span class="bub b-dark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="16" r="3.5"/><circle cx="18" cy="16" r="3.5"/><path d="M6 16l4-7h5l3 7M10 9l-1.5-3H6M13 9l2-3h2"/></svg></span><span><b>Auf Lager</b><small>Live-Bestand online</small></span></a>
+    <a href="#winter" class="mag"><span class="bub b-champ"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20M3.3 7l17.4 10M3.3 17L20.7 7M9 3.5l3 2.5 3-2.5M9 20.5l3-2.5 3 2.5"/></svg></span><span><b>Winter-Aktion</b><small>–20 € bis 28.02.</small></span></a>
+    <a href="#besuch" class="mag"><span class="bub b-ice"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/></svg></span><span><b>Öffnungs&shy;zeiten</b><small class="st-b2">Mi &amp; So geschlossen</small></span></a>
+  </nav>
+</div>
+
+<!-- Winter-Aktion -->
+<section class="sec" id="winter">
+  <div class="wrap">
+    <div class="winter fx">
+      <div class="in-w">
+        <div>
+          <span class="eyebrow"><i></i>Winter-Inspektion 2026/27</span>
+          <div class="minus rv"><span class="ln"><span class="pmtxt">–20<span class="eur"> €</span></span></span></div>
+          <h3>auf jede Inspektion.</h3>
+          <p>Gültig vom 01.11.2026 bis 28.02.2027, nur solange Termine verfügbar sind – auch für E-Dreiräder und Lastenräder.</p>
+          <div class="cd" id="cd" aria-label="Countdown bis 28.02.2027, 23:59 Uhr">
+            <div><b data-k="d">00</b><small>Tage</small></div>
+            <div><b data-k="h">00</b><small>Std</small></div>
+            <div><b data-k="m">00</b><small>Min</small></div>
+            <div><b data-k="s">00</b><small>Sek</small></div>
+          </div>
+          <a class="btn btn-white mag" href="#besuch"><span class="lbl">Winter-Termin sichern</span><span class="ar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></a>
+        </div>
+        <div class="gift">
+          <div class="orb">
+            <img src="img/sattelueberzug.webp" width="894" height="900" alt="Sattelüberzug mit Velocenter-Logo" loading="lazy" decoding="async">
+          </div>
+          <span class="tagp">GRATIS</span>
+          <span class="cap">+ Sattelüberzug mit Velocenter-Logo</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Marken -->
+<section id="marken">
+  <div class="wrap">
+    <span class="eyebrow fx"><i></i>Marken-Showroom</span>
+    <h2 class="h2 rv" style="margin-top:20px"><span class="ln"><span>Acht Marken.</span></span><span class="ln" style="--d:.12s"><span>Ein <span class="redtxt">Showroom.</span></span></span></h2>
+  </div>
+  <div class="marquee fx" style="margin-top:clamp(26px,3vw,44px)" aria-label="Unsere Marken">
+    <div class="track" id="mq"></div>
+  </div>
+  <div class="wrap">
+    <div class="show glass iri fx" id="show">
+      <div class="disc" aria-hidden="true"></div>
+      <div class="ghost" id="ghost" aria-hidden="true"></div>
+      <div class="info">
+        <div class="count" id="cnt">01 <span>/ 07</span></div>
+        <div class="blogo" id="blogo"></div>
+        <p id="btxt"></p>
+        <a class="btn btn-red mag" href="#"><span class="lbl">Im Live-Bestand ansehen</span><span class="ar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></a>
+      </div>
+      <div class="bikes" id="bikes"></div>
+      <div class="picker glass" id="picker" role="tablist" aria-label="Marke wählen"></div>
+    </div>
+  </div>
+</section>
+
+<!-- Versprechen + Leistungen -->
+<section class="sec" id="leistungen">
+  <div class="wrap">
+    <div class="promise">
+      <div>
+        <span class="eyebrow fx"><i></i>Unser Versprechen</span>
+        <p class="quote-big rv" style="margin-top:22px"><span class="ln"><span><span class="q redtxt">„</span>Hier schraubt</span></span><span class="ln" style="--d:.1s"><span>der Chef noch</span></span><span class="ln" style="--d:.2s"><span class="redtxt">selbst.“</span></span></p>
+        <div class="who fx" style="--d:.3s"><i>SH</i><span>Stefan Hessert<small>Inhaber · Velocenter Hessert</small></span></div>
+      </div>
+      <div class="wrapimg fx" style="--d:.15s">
+        <div class="blob-img"><img src="img/laden-innen.webp" width="1280" height="722" alt="Blick in den Laden des Velocenter Hessert" loading="lazy" decoding="async"></div>
+        <span class="badge glass"><img src="img/zub-bosch.svg" width="96" height="21" alt="Bosch" loading="lazy">Service Center</span>
+      </div>
+    </div>
+
+    <div class="chapters">
+      <div class="head">
+        <h2 class="h2 rv"><span class="ln"><span>Fünf Kapitel</span></span><span class="ln" style="--d:.1s"><span>Service.</span></span></h2>
+        <p class="lead fx">Von der ersten Probefahrt bis zur Inspektion – alles unter einem Dach in Wörth am Rhein.</p>
+      </div>
+      <div id="chaps">
+        <button class="chap fx" data-pv="0" aria-expanded="false"><span class="row"><span class="num">01</span><span class="tt"><small>Showroom</small>Beratung &amp; Probefahrt</span><span class="ds">Über 300 E-Bikes vor Ort zum Probefahren – mit ehrlicher Beratung, die zu dir passt.</span><span class="go"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></span>
+          <span class="more"><span><p>Über 300 E-Bikes vor Ort zum Probefahren – mit ehrlicher Beratung, die zu dir passt.</p><img src="img/isy-ausstellung.webp" width="1600" height="1200" alt="i:SY Ausstellung im Laden" loading="lazy" decoding="async"></span></span></button>
+        <button class="chap fx" data-pv="1" aria-expanded="false"><span class="row"><span class="num">02</span><span class="tt"><small>Werkstatt</small>Inspektion &amp; Reparatur</span><span class="ds">Bosch Service Center mit eigener Werkstatt – hier schraubt der Chef noch selbst.</span><span class="go"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></span>
+          <span class="more"><span><p>Bosch Service Center mit eigener Werkstatt – hier schraubt der Chef noch selbst.</p><img src="img/bosch-motor.webp" width="1920" height="450" alt="Bosch Antrieb" loading="lazy" decoding="async" style="object-position:70% 50%"></span></span></button>
+        <button class="chap fx" data-pv="2" aria-expanded="false"><span class="row"><span class="num">03</span><span class="tt"><small>TARGOBANK</small>0 % Finanzierung</span><span class="ds">Bis zu 24 Monate, mit Anzahlung, zum regulären Preis (nicht auf Aktionspreise).</span><span class="go"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></span>
+          <span class="more"><span><p>Über die TARGOBANK, bis zu 24 Monate, mit Anzahlung, zum regulären Preis (nicht auf Aktionspreise).</p><img class="fit" src="img/logo-targobank.svg" width="117" height="18" alt="TARGOBANK" loading="lazy" decoding="async"></span></span></button>
+        <button class="chap fx" data-pv="3" aria-expanded="false"><span class="row"><span class="num">04</span><span class="tt"><small>ENRA</small>Versicherung</span><span class="ds">Schutz bei Diebstahl, Vollkasko mit Verschleiß und Pick-up-Service.</span><span class="go"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></span>
+          <span class="more"><span><p>ENRA Versicherung: Diebstahl, Vollkasko mit Verschleiß und Pick-up-Service.</p><img class="fit" src="img/logo-enra.svg" width="427" height="121" alt="ENRA" loading="lazy" decoding="async"></span></span></button>
+        <button class="chap fx" data-pv="4" aria-expanded="false"><span class="row"><span class="num">05</span><span class="tt"><small>Dienstrad</small>Leasing</span><span class="ds">Mit fast allen Leasing-Firmen, z. B. JobRad, Bikeleasing und Company Bike.</span><span class="go"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></span>
+          <span class="more"><span><p>Dienstrad-Leasing mit fast allen Leasing-Firmen, z. B. JobRad, Bikeleasing und Company Bike.</p><img src="img/laden-eingang.webp" width="1280" height="722" alt="Eingang des Velocenter Hessert" loading="lazy" decoding="async"></span></span></button>
+      </div>
+    </div>
+  </div>
+</section>
+<div class="pv" id="pv" aria-hidden="true">
+  <img src="img/isy-ausstellung.webp" width="1600" height="1200" alt="" loading="lazy" decoding="async">
+  <img src="img/bosch-motor.webp" width="1920" height="450" alt="" loading="lazy" decoding="async">
+  <img class="fit" src="img/logo-targobank.svg" width="117" height="18" alt="" loading="lazy" decoding="async">
+  <img class="fit" src="img/logo-enra.svg" width="427" height="121" alt="" loading="lazy" decoding="async">
+  <img src="img/laden-eingang.webp" width="1280" height="722" alt="" loading="lazy" decoding="async">
+</div>
+
+<!-- Bewertungen -->
+<section class="sec" id="bewertungen" style="padding-top:0">
+  <div class="wrap">
+    <span class="eyebrow fx"><i></i>Das sagen unsere Kunden</span>
+    <div class="rv-top" style="margin-top:18px">
+      <div class="score rv"><span class="ln"><span class="redtxt">4,8</span></span></div>
+      <div class="fx" style="--d:.2s">
+        <div class="stars" aria-label="4,8 von 5 Sternen">
+          <svg viewBox="0 0 24 24"><path fill="#C8102E" d="M12 2.8l2.8 5.9 6.4.8-4.7 4.4 1.2 6.4L12 17.2l-5.7 3.1 1.2-6.4-4.7-4.4 6.4-.8z"/></svg><svg viewBox="0 0 24 24"><path fill="#C8102E" d="M12 2.8l2.8 5.9 6.4.8-4.7 4.4 1.2 6.4L12 17.2l-5.7 3.1 1.2-6.4-4.7-4.4 6.4-.8z"/></svg><svg viewBox="0 0 24 24"><path fill="#C8102E" d="M12 2.8l2.8 5.9 6.4.8-4.7 4.4 1.2 6.4L12 17.2l-5.7 3.1 1.2-6.4-4.7-4.4 6.4-.8z"/></svg><svg viewBox="0 0 24 24"><path fill="#C8102E" d="M12 2.8l2.8 5.9 6.4.8-4.7 4.4 1.2 6.4L12 17.2l-5.7 3.1 1.2-6.4-4.7-4.4 6.4-.8z"/></svg><svg viewBox="0 0 24 24"><defs><linearGradient id="hs"><stop offset="80%" stop-color="#C8102E"/><stop offset="80%" stop-color="#C8102E" stop-opacity=".22"/></linearGradient></defs><path fill="url(#hs)" d="M12 2.8l2.8 5.9 6.4.8-4.7 4.4 1.2 6.4L12 17.2l-5.7 3.1 1.2-6.4-4.7-4.4 6.4-.8z"/></svg>
+        </div>
+        <p>Sterne bei Google<small>aus 221 Rezensionen</small></p>
+      </div>
+    </div>
+    <div class="quotes">
+      <figure class="qt feat fx">
+        <span class="mk" aria-hidden="true"><svg viewBox="0 0 24 24" fill="#fff"><path d="M4 18c0-5 1.5-9 6-11l1 1.8c-2.4 1.3-3.4 3-3.6 5.2H11V20H4zM13 18c0-5 1.5-9 6-11l1 1.8c-2.4 1.3-3.4 3-3.6 5.2H20V20h-7z"/></svg></span>
+        <blockquote>Gesagt, getan: Zeitrahmen und Kostenprognose eingehalten. So ist das guter Kundenservice. Weiter so.</blockquote>
+        <cite><i>B</i><span>Bernd M.<small>Google-Rezension</small></span></cite>
+      </figure>
+      <div class="qcol">
+        <figure class="qt sm glass iri fx" style="--d:.12s">
+          <blockquote>Super Service. Gestern gebracht, heute vormittag abgeholt. Wartung/Inspektion</blockquote>
+          <cite><i>P</i><span>Peter<small>Google-Rezension</small></span></cite>
+        </figure>
+        <figure class="qt sm glass iri fx" style="--d:.24s">
+          <blockquote>Seit wir die Fahrräder haben, einfach einen guten Service.</blockquote>
+          <cite><i>J</i><span>Jürgen K.<small>Google-Rezension</small></span></cite>
+        </figure>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Besuch -->
+<section class="sec" id="besuch" style="padding-top:0">
+  <div class="wrap visit">
+    <div class="fx">
+      <div class="blob-img"><img src="img/fassade.webp" width="800" height="600" alt="Fassade des Velocenter Hessert in der Hartmannstraße" loading="lazy" decoding="async"></div>
+    </div>
+    <div>
+      <span class="eyebrow fx"><i></i>Besuch uns</span>
+      <h2 class="h2 rv" style="margin-top:18px"><span class="ln"><span>Komm</span></span><span class="ln" style="--d:.1s"><span class="redtxt">vorbei.</span></span></h2>
+      <address class="fx">Hartmannstraße 25<br>76744 Wörth am Rhein</address>
+      <p class="park fx">Parkplätze ca. 100 m entfernt am Friedhof. Zum Be- und Entladen kurz vor dem Geschäft halten.</p>
+      <div class="fx" style="margin-top:24px"><span class="stat-big glass js-stat"><span class="dot"></span><span><span class="st-a">Geöffnet</span><small class="st-b">bis 18:00 Uhr</small></span></span></div>
+      <ul class="hours fx" id="hours">
+        <li data-d="1"><span>Montag</span><span>09:00–12:00 · 14:30–18:00</span></li>
+        <li data-d="2"><span>Dienstag</span><span>09:00–12:00 · 14:30–18:00</span></li>
+        <li data-d="3" class="zu"><span>Mittwoch</span><span>geschlossen</span></li>
+        <li data-d="4"><span>Donnerstag</span><span>09:00–12:00 · 14:30–18:00</span></li>
+        <li data-d="5"><span>Freitag</span><span>09:00–12:00 · 14:30–18:00</span></li>
+        <li data-d="6"><span>Samstag</span><span>09:00–12:00</span></li>
+        <li data-d="0" class="zu"><span>Sonntag</span><span>geschlossen</span></li>
+      </ul>
+      <div class="contact fx">
+        <a class="btn btn-red mag" href="tel:0727178033"><span class="lbl">07271 78033</span><span class="ar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2"/></svg></span></a>
+        <a class="btn btn-glass glass iri mag" href="https://wa.me/491635343133"><span class="lbl">WhatsApp</span><span class="ar"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm5.3 14.1c-.2.6-1.3 1.2-1.8 1.2-.5.1-1 .2-3.3-.7-2.8-1.1-4.5-4-4.7-4.2-.1-.2-1.1-1.5-1.1-2.8s.7-2 1-2.3c.2-.3.5-.3.7-.3h.5c.2 0 .4 0 .6.5l.9 2.1c.1.2.1.3 0 .5l-.3.5-.4.4c-.1.1-.3.3-.1.6.2.3.8 1.3 1.6 2.1 1.1 1 2.1 1.3 2.4 1.4.3.1.5.1.6-.1l.9-1.1c.2-.3.4-.2.6-.1l2 1c.3.1.5.2.5.3.1.2.1.7-.1 1.4z"/></svg></span></a>
+        <a class="btn btn-glass glass iri mag" href="mailto:info@velo-center.de"><span class="lbl">info@velo-center.de</span><span class="ar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="4"/><path d="M4 7l8 6 8-6"/></svg></span></a>
+      </div>
+    </div>
+  </div>
+</section>
+</main>
+
+<footer>
+  <div class="wrap f-in">
+    <div class="f-big rv"><span class="ln"><span class="pmtxt">Velocenter</span></span></div>
+    <div class="f-grid">
+      <div>
+        <h4>Velocenter Hessert</h4>
+        <p>Familienbetrieb seit 1995.<br>Dein E-Bike &amp; E-Dreirad-Spezialist mit eigener Werkstatt.</p>
+        <span class="f-logo"><img src="img/velocenter-logo.svg" width="84" height="44" alt="Velocenter Hessert Logo" loading="lazy"></span>
+      </div>
+      <div>
+        <h4>Adresse</h4>
+        <p>Hartmannstraße 25<br>76744 Wörth am Rhein</p>
+        <p>Mo, Di, Do, Fr 09:00–12:00 &amp; 14:30–18:00<br>Sa 09:00–12:00 · Mi &amp; So geschlossen</p>
+      </div>
+      <div>
+        <h4>Kontakt</h4>
+        <a href="tel:0727178033">Telefon 07271 78033</a>
+        <a href="https://wa.me/491635343133">WhatsApp 0163 5343133</a>
+        <a href="mailto:info@velo-center.de">info@velo-center.de</a>
+      </div>
+      <div>
+        <h4>Folgen</h4>
+        <div class="socials">
+          <a href="https://www.instagram.com/velocenterhessert" aria-label="Instagram velocenterhessert"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="5.5"/><circle cx="12" cy="12" r="4.2"/><circle cx="17.4" cy="6.6" r="1" fill="currentColor"/></svg></a>
+          <a href="https://www.facebook.com/velocenterhessert" aria-label="Facebook velocenterhessert"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M14 8.5V7c0-.8.4-1.2 1.3-1.2H17V2.6h-2.6C11.6 2.6 10.6 4.3 10.6 7v1.5H8V12h2.6v9.4H14V12h2.7l.4-3.5z"/></svg></a>
+          <a href="https://wa.me/491635343133" aria-label="WhatsApp"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm5.3 14.1c-.2.6-1.3 1.2-1.8 1.2-.5.1-1 .2-3.3-.7-2.8-1.1-4.5-4-4.7-4.2-.1-.2-1.1-1.5-1.1-2.8s.7-2 1-2.3c.2-.3.5-.3.7-.3h.5c.2 0 .4 0 .6.5l.9 2.1c.1.2.1.3 0 .5l-.3.5-.4.4c-.1.1-.3.3-.1.6.2.3.8 1.3 1.6 2.1 1.1 1 2.1 1.3 2.4 1.4.3.1.5.1.6-.1l.9-1.1c.2-.3.4-.2.6-.1l2 1c.3.1.5.2.5.3.1.2.1.7-.1 1.4z"/></svg></a>
+        </div>
+        <a href="#">Impressum</a>
+        <a href="#">Datenschutz</a>
+      </div>
+    </div>
+    <div class="f-low"><span>© 2026 Velocenter Hessert · Wörth am Rhein</span><span>Bosch Service Center · 4,8 ★ bei Google</span></div>
+  </div>
+</footer>
+
+<nav class="mbar glass iri" aria-label="Schnellaktionen">
+  <a class="m1" href="tel:0727178033"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2"/></svg>Anrufen</a>
+  <a class="m2" href="#besuch"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5" width="17" height="15" rx="4"/><path d="M8 3v4M16 3v4M3.5 10h17"/></svg>Termin</a>
+  <a class="m3" href="https://wa.me/491635343133"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm5.3 14.1c-.2.6-1.3 1.2-1.8 1.2-.5.1-1 .2-3.3-.7-2.8-1.1-4.5-4-4.7-4.2-.1-.2-1.1-1.5-1.1-2.8s.7-2 1-2.3c.2-.3.5-.3.7-.3h.5c.2 0 .4 0 .6.5l.9 2.1c.1.2.1.3 0 .5l-.3.5-.4.4c-.1.1-.3.3-.1.6.2.3.8 1.3 1.6 2.1 1.1 1 2.1 1.3 2.4 1.4.3.1.5.1.6-.1l.9-1.1c.2-.3.4-.2.6-.1l2 1c.3.1.5.2.5.3.1.2.1.7-.1 1.4z"/></svg>WhatsApp</a>
+</nav>
+
+<script>
+(function(){
+'use strict';
+var D=document, W=window, fine=W.matchMedia('(pointer:fine)').matches;
+
+/* ---- Mesh-Gradient (Perlmutt / Eisblau / Champagner / Rosé) ---- */
+var cv=D.getElementById('mesh'), cx=cv.getContext('2d');
+var blobs=[
+  {c:[185,214,234],x:.12,y:.18,r:.62,sx:.11,sy:.08,p:0},
+  {c:[240,200,160],x:.85,y:.12,r:.5,sx:.09,sy:.12,p:1.7},
+  {c:[243,211,218],x:.7,y:.78,r:.6,sx:.07,sy:.1,p:3.1},
+  {c:[220,235,245],x:.25,y:.85,r:.55,sx:.12,sy:.07,p:4.4},
+  {c:[237,230,240],x:.5,y:.45,r:.5,sx:.08,sy:.09,p:2.3},
+  {c:[255,255,255],x:.42,y:.2,r:.38,sx:.13,sy:.11,p:5.2},
+  {c:[127,180,216],x:.95,y:.55,r:.32,sx:.1,sy:.13,p:.8}
+];
+function rs(){cv.width=Math.max(60,Math.ceil(innerWidth/7));cv.height=Math.max(60,Math.ceil(innerHeight/7));}
+rs();W.addEventListener('resize',rs);
+var last=0;
+function mesh(t){
+  if(t-last>40){last=t;
+    var w=cv.width,h=cv.height,s=t/1000,m=Math.max(w,h);
+    cx.globalCompositeOperation='source-over';cx.fillStyle='#F6F1EC';cx.fillRect(0,0,w,h);
+    for(var i=0;i<blobs.length;i++){var b=blobs[i];
+      var x=(b.x+Math.sin(s*b.sx+b.p)*.2)*w, y=(b.y+Math.cos(s*b.sy+b.p*1.3)*.18)*h, r=b.r*m*(1+Math.sin(s*.2+b.p)*.12);
+      var g=cx.createRadialGradient(x,y,0,x,y,r);
+      var a=i===6?.45:.85;
+      g.addColorStop(0,'rgba('+b.c+','+a+')');g.addColorStop(1,'rgba('+b.c+',0)');
+      cx.fillStyle=g;cx.fillRect(0,0,w,h);}
+  }
+  requestAnimationFrame(mesh);
+}
+requestAnimationFrame(mesh);
+
+/* ---- Laden / Reveal ---- */
+requestAnimationFrame(function(){requestAnimationFrame(function(){D.body.classList.add('loaded');
+  var hero=D.querySelector('.hero');hero.classList.add('in');[].forEach.call(hero.querySelectorAll('.fx,.ln'),function(e){e.classList.add('in')});});});
+var io=('IntersectionObserver' in W)?new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target);}})},{rootMargin:'0px 0px -8% 0px',threshold:.05}):null;
+[].forEach.call(D.querySelectorAll('.fx,.rv'),function(e){if(e.closest('.hero'))return;io?io.observe(e):e.classList.add('in')});
+
+/* ---- Menü ---- */
+var mb=D.querySelector('.menu-btn'),ov=D.querySelector('.overlay');
+function menu(on){D.body.classList.toggle('menu-open',on);mb.setAttribute('aria-expanded',on);ov.setAttribute('aria-hidden',!on);
+  [].forEach.call(ov.querySelectorAll('.ln'),function(e){e.classList.toggle('in',on)});}
+mb.addEventListener('click',function(){menu(!D.body.classList.contains('menu-open'))});
+[].forEach.call(ov.querySelectorAll('a'),function(a){a.addEventListener('click',function(){menu(false)})});
+D.addEventListener('keydown',function(e){if(e.key==='Escape')menu(false)});
+
+/* ---- Öffnungsstatus (Europe/Berlin) ---- */
+var SL={1:[[540,720],[870,1080]],2:[[540,720],[870,1080]],3:[],4:[[540,720],[870,1080]],5:[[540,720],[870,1080]],6:[[540,720]],0:[]};
+var TN=['So','Mo','Di','Mi','Do','Fr','Sa'];
+function hm(m){return ('0'+Math.floor(m/60)).slice(-2)+':'+('0'+m%60).slice(-2)}
+function berlin(){var n=new Date();try{return new Date(n.toLocaleString('en-US',{timeZone:'Europe/Berlin'}))}catch(e){return n}}
+function stat(){
+  var n=berlin(),d=n.getDay(),m=n.getHours()*60+n.getMinutes(),s=SL[d],r;
+  for(var i=0;i<s.length;i++){if(m>=s[i][0]&&m<s[i][1]){r={a:'Geöffnet',b:'bis '+hm(s[i][1])+' Uhr',c:'#1E9E5A',k:'Offen'};break}}
+  if(!r){
+    if(s.length===2&&m>=s[0][1]&&m<s[1][0])r={a:'Mittagspause',b:'öffnet '+hm(s[1][0])+' Uhr',c:'#D99A2B',k:'Pause · ab '+hm(s[1][0])};
+    else if(s.length&&m<s[0][0])r={a:'Geschlossen',b:'öffnet heute '+hm(s[0][0])+' Uhr',c:'#E2232D',k:'Zu · heute '+hm(s[0][0])};
+    else{for(var k=1;k<8;k++){var dd=(d+k)%7;if(SL[dd].length){var t=k===1?'morgen':TN[dd];r={a:'Geschlossen',b:'öffnet '+t+' '+hm(SL[dd][0][0])+' Uhr',c:'#E2232D',k:'Zu · '+(k===1?'morgen':TN[dd])+' '+hm(SL[dd][0][0])};break}}}
+  }
+  [].forEach.call(D.querySelectorAll('.js-stat'),function(e){e.style.setProperty('--dot',r.c);e.querySelector('.st-a').textContent=r.a;e.querySelector('.st-b').textContent=r.b});
+  [].forEach.call(D.querySelectorAll('.js-mstat'),function(e){e.style.setProperty('--dot',r.c);e.querySelector('.st-a').textContent=r.k});
+  var sb=D.querySelector('.st-b2');if(sb)sb.textContent=r.a+' · '+r.b;
+  [].forEach.call(D.querySelectorAll('#hours li'),function(li){li.classList.toggle('today',+li.dataset.d===d)});
+}
+stat();setInterval(stat,30000);
+
+/* ---- Countdown bis 28.02.2027 23:59 (MEZ) ---- */
+var END=new Date('2027-02-28T23:59:00+01:00').getTime(),cd=D.getElementById('cd');
+function tick(){var x=Math.max(0,END-Date.now()),dd=Math.floor(x/864e5),h=Math.floor(x/36e5)%24,mi=Math.floor(x/6e4)%60,se=Math.floor(x/1e3)%60;
+  var v={d:dd,h:h,m:mi,s:se};[].forEach.call(cd.querySelectorAll('b'),function(b){var k=b.dataset.k,t=k==='d'?String(v.d):('0'+v[k]).slice(-2);if(b.textContent!==t)b.textContent=t})}
+tick();setInterval(tick,1000);
+
+/* ---- Marken ---- */
+var BR=[
+  {n:'i:SY',g:'i:SY',i:'p-isy-orange.webp',w:1600,h:1195,l:'marke-isy.svg',t:'Wir sind i:SY Experte – kompakte E-Bikes zum Probefahren in Wörth.'},
+  {n:'KTM',g:'KTM',i:'p-ktm.webp',w:1600,h:1006,l:'marke-ktm.svg',t:'KTM E-Bikes im Showroom – direkt zum Probefahren.'},
+  {n:'QiO',g:'QiO',i:'p-qio-eins-fineline.webp',w:1600,h:1068,l:'marke-qio.svg',t:'QiO im Showroom – vor Ort probefahren.'},
+  {n:'Velo de Ville',g:'VdV',i:'p-vdv-aebpro.webp',w:1600,h:1001,l:'marke-vdv.svg',t:'Velo de Ville im Showroom – vor Ort probefahren.'},
+  {n:'Van Raam',g:'Easy',i:'p-vanraam.webp',w:1600,h:1193,l:'marke-vanraam.svg',t:'E-Dreirad Easy Rider von Van Raam – bei uns probefahren.',f:1},
+  {n:'Gudereit',g:'Gude',i:'p-gudereit.webp',w:1600,h:1128,l:'marke-gudereit.svg',t:'Gudereit im Showroom – vor Ort probefahren.',wd:1},
+  {n:'Victoria',g:'Vicky',i:'p-victoria-veloa7.webp',w:1600,h:1000,l:'marke-victoria.svg',t:'Victoria im Showroom – vor Ort probefahren.'}
+];
+BR[6].g='Victoria';BR[5].g='Gudereit';BR[4].g='Van Raam';
+var ALL=BR.map(function(b){return {n:b.n,l:b.l,f:b.f,wd:b.wd}}).concat([{n:'Stevens',l:'marke-stevens.svg',fl:1}]);
+var mq=D.getElementById('mq'),html='';
+for(var r=0;r<2;r++)ALL.forEach(function(b){html+='<span class="mlogo glass iri"'+(r?' aria-hidden="true"':'')+'><img src="img/'+b.l+'" alt="'+(r?'':b.n)+'" width="160" height="72" class="'+(b.fl?'flat':(b.f||b.wd?'wide':(b.l==='marke-vdv.svg'?'vdv':'')))+'" loading="lazy" decoding="async"></span>'});
+mq.innerHTML=html;
+
+var bikes=D.getElementById('bikes'),picker=D.getElementById('picker'),ghost=D.getElementById('ghost'),blogo=D.getElementById('blogo'),btxt=D.getElementById('btxt'),cnt=D.getElementById('cnt'),show=D.getElementById('show');
+BR.forEach(function(b,i){
+  var im=D.createElement('img');im.src='img/'+b.i;im.width=b.w;im.height=b.h;im.alt=b.n+' E-Bike';im.loading='lazy';im.decoding='async';bikes.appendChild(im);
+  var bt=D.createElement('button');bt.setAttribute('role','tab');bt.setAttribute('aria-label',b.n);bt.innerHTML='<img src="img/'+b.l+'" alt="" width="100" height="40" class="'+(b.f||b.wd?'wide':'')+'" loading="lazy"><span class="pr"><i></i></span>';
+  bt.addEventListener('click',function(){go(i,true)});picker.appendChild(bt);
+});
+var cur=-1,timer=null,DUR=5500,paused=false;
+function ghostSet(txt){
+  ghost.classList.add('out');
+  setTimeout(function(){ghost.innerHTML=txt.split('').map(function(c,i){return '<span style="--i:'+i+'">'+(c===' '?'&nbsp;':c)+'</span>'}).join('');
+    ghost.classList.remove('out');ghost.classList.add('pre');void ghost.offsetWidth;ghost.classList.remove('pre');},cur<0?0:420);
+}
+function go(i,user){
+  if(i===cur)return;var ims=bikes.children,bts=picker.children;
+  if(cur>=0){ims[cur].classList.remove('on');ims[cur].classList.add('gone');bts[cur].classList.remove('on');bts[cur].setAttribute('aria-selected','false');(function(k){setTimeout(function(){ims[k].classList.remove('gone')},1200)})(cur)}
+  ims[i].classList.add('on');bts[i].classList.add('on');bts[i].setAttribute('aria-selected','true');
+  var pr=bts[i].querySelector('.pr i');pr.style.animation='none';void pr.offsetWidth;pr.style.animation='';
+  ghostSet(BR[i].g);cur=i;
+  blogo.innerHTML='<img src="img/'+BR[i].l+'" alt="'+BR[i].n+'" width="280" height="76">';
+  btxt.textContent=BR[i].t;cnt.innerHTML=('0'+(i+1)).slice(-2)+' <span>/ 0'+BR.length+'</span>';
+  sched();
+}
+function sched(){clearTimeout(timer);timer=setTimeout(function(){if(paused){sched();return}go((cur+1)%BR.length)},DUR)}
+show.style.setProperty('--dur',DUR/1000+'s');
+if(fine){show.addEventListener('mouseenter',function(){paused=true});show.addEventListener('mouseleave',function(){paused=false;});}
+go(0);
+
+/* ---- Kapitel ---- */
+var pv=D.getElementById('pv'),pvi=pv.querySelectorAll('img'),px=0,py=0,tx=0,ty=0,desk=function(){return fine&&innerWidth>999};
+[].forEach.call(D.querySelectorAll('.chap'),function(c){
+  c.addEventListener('click',function(){if(desk())return;var o=!c.classList.contains('open');c.classList.toggle('open',o);c.setAttribute('aria-expanded',o)});
+  c.addEventListener('mouseenter',function(){if(!desk())return;var k=+c.dataset.pv;[].forEach.call(pvi,function(im,j){im.classList.toggle('on',j===k)});pv.classList.add('on')});
+  c.addEventListener('mouseleave',function(){pv.classList.remove('on')});
+});
+
+/* ---- Maus: Glow, Magnet, Vorschau ---- */
+var glow=D.querySelector('.cglow'),gx=innerWidth/2,gy=innerHeight/2,cgx=gx,cgy=gy;
+if(fine){
+  W.addEventListener('mousemove',function(e){gx=e.clientX;gy=e.clientY;tx=e.clientX;ty=e.clientY},{passive:true});
+  [].forEach.call(D.querySelectorAll('.mag'),function(el){
+    var lb=el.querySelector('.lbl');
+    el.addEventListener('mousemove',function(e){var r=el.getBoundingClientRect(),dx=e.clientX-(r.left+r.width/2),dy=e.clientY-(r.top+r.height/2);
+      el.style.transform='translate('+dx*.18+'px,'+dy*.32+'px)';if(lb)lb.style.transform='translate('+dx*.07+'px,'+dy*.1+'px)'});
+    el.addEventListener('mouseleave',function(){el.style.transition='transform .7s cubic-bezier(.16,.84,.12,1)';el.style.transform='';if(lb)lb.style.transform='';setTimeout(function(){el.style.transition=''},700)});
+  });
+}
+
+/* ---- Scroll-Kinetik ---- */
+var L1=D.querySelector('.h1 .l1'),L2=D.querySelector('.h1 .l2'),L3=D.querySelector('.h1 .l3'),bk=D.getElementById('heroBike'),top=D.querySelector('.top .bar'),lastY=0;
+function loop(){
+  var y=W.scrollY||0;
+  if(y<1200){var k=y;
+    L1.style.translate=(-k*.12)+'px 0';L2.style.translate=(k*.16)+'px 0';L3.style.translate=(-k*.06)+'px 0';
+    if(innerWidth>999)bk.style.transform='translate3d('+(k*.05)+'px,'+(-k*.12)+'px,0) rotate('+(-k*.004)+'deg)';else bk.style.transform='';
+  }
+  top.style.transform=(y>lastY+4&&y>300&&!D.body.classList.contains('menu-open'))?'translateY(-130%)':(y<lastY-4||y<300?'':top.style.transform);
+  lastY=y;
+  if(fine){cgx+=(gx-cgx)*.12;cgy+=(gy-cgy)*.12;glow.style.transform='translate3d('+cgx+'px,'+cgy+'px,0)';
+    px+=(tx-px)*.14;py+=(ty-py)*.14;var vx=(tx-px);pv.style.left=px+'px';pv.style.top=py+'px';pv.style.rotate=Math.max(-10,Math.min(10,vx*.08))+'deg';}
+  requestAnimationFrame(loop);
+}
+requestAnimationFrame(loop);
+})();
+</script>
+</body>
+</html>
