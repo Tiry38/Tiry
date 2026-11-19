@@ -125,7 +125,7 @@ for _, id in ipairs({ ID, MAHL }) do
   end
 end
 check(#slots[ID].btn.anims == 1 + 4 + 3 + 1, "Schlaghagel: Blinken + 2 Hagel + 2 Tempo-Striche + 3 Klingen-Schnitte + Einschlag (" .. #slots[ID].btn.anims .. ")")
-check(#slots[MAHL].btn.anims == 1 + 5 + 6 + 6, "Mahlstrom: Blinken + 5 Strom-Schleifen + 6 Blitze + 6 Ring-Schleifen 1.4 (Einschlag erst bei 5 Stapeln) (" .. #slots[MAHL].btn.anims .. ")")
+check(#slots[MAHL].btn.anims == 1 + 2 + 2 + 5, "Mahlstrom: Blinken + 2 Funken-Lagen + 2 Tempo-Striche + 5 Blitz-Schnitte (Einschlag erst bei 5 Stapeln) (" .. #slots[MAHL].btn.anims .. ")")
 do
   local b = slots[MAHL].btn
   check(b.bar and b.bar._kind == "StatusBar" and b.barOpts.minApplications == 5 and b.barOpts.maxApplications == 5, "Mahlstrom: Stapelschwelle 5 an Blizzard (Application Bar)")

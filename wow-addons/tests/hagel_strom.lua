@@ -1,5 +1,5 @@
--- Schlaghagel 1.1: Mahlstrom-Anzeige im strengen Forever-Nachbau (nur echte Widget-Methoden/Animationstypen),
--- Strom-Animation nachgerechnet (Drehen, Flackern, Blitze, Einschlag) und optional Bild fuer Bild exportiert.
+-- Schlaghagel 1.4: Mahlstrom-Anzeige im strengen Forever-Nachbau (nur echte Widget-Methoden/Animationstypen),
+-- Blitzsturm nachgerechnet (5 Blitz-Schnitte, aufsteigende Funken, Tempo-Striche, Einschlag) und optional Bild fuer Bild exportiert.
 -- Aufruf aus wow-addons/: lua5.1 tests/hagel_strom.lua [ausgabeordner]   -> "STROM TESTS OK"
 -- Mit Ordner: <ordner>/f_000.tsv ... (python3 -I tools/render_pages.py <ordner>, dann zu GIF zusammensetzen)
 local HERE = arg[0]:match("^(.*/)") or "./"
@@ -31,7 +31,7 @@ ok(#W.errors == 0, "keine Lua-Fehler beim Laden: " .. table.concat(W.errors, " |
 local A, P = G.SchlaghagelMahlAnchor, G.SchlaghagelMahlPreview
 ok(A and P and G.SchlaghagelAnchor, "beide Anker gebaut")
 ok(A.__points.CENTER and A.__points.CENTER[4] == 120, "Mahlstrom ueber der Bildmitte (y +120)")
-for _, f in ipairs({ "strom_glow", "strom_plasma", "strom_arc1", "strom_arc2", "strom_bolt1", "strom_bolt2", "strom_bolt3", "strom_comet", "strom_comet2", "strom_orbit", "strom_wave" }) do
+for _, f in ipairs({ "strom_glow", "blitz_slash", "blitz_rise1", "blitz_rise2", "hagel_spark", "hagel_speed" }) do
   local h = io.open("addons/Schlaghagel/Media/" .. f .. ".tga", "rb")
   ok(h ~= nil, "Grafik " .. f) if h then h:close() end
 end
@@ -60,9 +60,21 @@ local function walk(o)
 end
 walk(P)
 local playing = 0 for _, g in ipairs(groups) do if g.__playing then playing = playing + 1 end end
-ok(#groups == 19 and playing == 19, "19 Animationen (Puls, 5 Strom, 6 Blitze, 3 Kometen/Funken, Atmen, 2 Wellen, Einschlag) laufen: " .. #groups .. "/" .. playing)
+ok(#groups == 11 and playing == 11, "11 Animationen (Puls, 2 Funken-Lagen, 2 Tempo, 5 Blitz-Schnitte, Einschlag) laufen: " .. #groups .. "/" .. playing)
+-- 1.4: Stil wie Schlaghagel - keine Kreise/Ringe/Kometen und keine Drehung
+local round = false
+local function scan(o)
+  for _, c in ipairs(o.__children or {}) do
+    local f = tostring(c.__file or "")
+    if f:find("strom_arc") or f:find("strom_plasma") or f:find("strom_comet") or f:find("strom_orbit")
+      or f:find("strom_wave") or f:find("ring") then round = true end
+    if c.__kind == "AnimationGroup" then for _, a in ipairs(c.__anims) do if a.__kind == "Rotation" then round = true end end end
+    scan(c)
+  end
+end
+scan(P)
+ok(not round, "keine Kreise/Ringe/Drehungen (Stil wie Schlaghagel)")
 
--- Ablauf nachrechnen
 local function at(t)
   local res = {}
   for _, g in ipairs(groups) do
@@ -70,56 +82,71 @@ local function at(t)
   end
   return res
 end
--- Blitze: jeder zuckt einmal je Takt, kurz hell, sonst aus
-local bolts = {}
+-- Blitz-Schnitte: "ta-ta-ta-ta-ta" (= 5 Stapel), dann Pause; Takt 1,5 s
+local slashes = {}
 for _, g in ipairs(groups) do
   local a = g.__anims[1]
-  if a and a.__target and tostring(a.__target.__file):find("strom_bolt", 1, true) then bolts[#bolts + 1] = g end
+  if a and a.__target and tostring(a.__target.__file):find("blitz_slash", 1, true) then slashes[#slashes + 1] = g end
 end
-ok(#bolts == 6, "6 Blitze")
-local lit, maxLit, minLit = {}, 0, 99
-for step = 0, 119 do
-  local t = step * 0.02
-  local cnt = 0
-  for i, g in ipairs(bolts) do
-    local a = 0
-    for _, e in ipairs((W.animState(g, t))) do a = e[3] end
-    if a > 0.5 then cnt = cnt + 1 lit[i] = true end
+ok(#slashes == 5, "5 Blitz-Schnitte (= 5 Stapel)")
+local function cutAlpha(g, t)
+  local a, sp = 0, 0
+  for _, e in ipairs((W.animState(g, t))) do
+    if e[2] == "alpha" then
+      if e[1] == g.__anims[1].__target then a = e[3] else sp = e[3] end
+    end
   end
-  maxLit, minLit = math.max(maxLit, cnt), math.min(minLit, cnt)
+  return a, sp
 end
-local all = true for i = 1, 6 do all = all and lit[i] == true end
-ok(all, "jeder Blitz zuckt in 2,4 s")
-ok(maxLit <= 2, "nie mehr als 2 Blitze gleichzeitig hell (" .. maxLit .. ") - wirkt wie Zucken, nicht wie Dauerlicht")
--- Drehungen laufen durchgehend (kein Stillstand)
-local spins = {}
+local first, maxLit, litPause, sparkSeen = {}, 0, false, 0
+for step = 0, 149 do
+  local t = step * 0.01
+  local cnt = 0
+  for i, g in ipairs(slashes) do
+    local a, sp = cutAlpha(g, t)
+    if a > 0.5 then cnt = cnt + 1 first[i] = first[i] or t end
+    if sp > 0.5 then sparkSeen = sparkSeen + 1 end
+  end
+  maxLit = math.max(maxLit, cnt)
+  if t > 0.95 and cnt > 0 then litPause = true end
+end
+local seq = true
+for i = 1, 5 do seq = seq and first[i] ~= nil and (i == 1 or first[i] > first[i - 1]) end
+ok(seq, "Blitze schlagen nacheinander")
+ok(sparkSeen > 0, "Treffer-Funken blitzen mit")
+ok(first[5] and first[5] - first[1] < 0.5, "fuenf Schlaege kurz hintereinander")
+ok(maxLit <= 3, "nie alle gleichzeitig (" .. maxLit .. ")")
+ok(not litPause, "danach Pause bis zum naechsten Takt")
+ok((cutAlpha(slashes[1], 1.52)) > 0.5, "Takt wiederholt sich (1,5 s)")
+-- Funken: beide Lagen steigen nach oben, sichtbar in der Mitte des Takts, unsichtbar am Takt-Ende
+local rises = {}
 for _, g in ipairs(groups) do
   local a = g.__anims[1]
-  if a and a.__kind == "Rotation" then spins[#spins + 1] = g end
+  if a and a.__target and tostring(a.__target.__file):find("blitz_rise", 1, true) then rises[#rises + 1] = g end
 end
-ok(#spins == 6, "6 Drehungen (Plasma, 2 Boegen, 2 Kometen, Funken): " .. #spins)
--- 1.4: Ring bewegt sich sichtbar - Komet schnell, Druckwellen laufen jede Sekunde nach aussen
-local cometG, waves = nil, {}
+ok(#rises == 2, "2 Funken-Lagen")
+local function riseAt(g, t)
+  local dy, a = 0, 0
+  for _, e in ipairs((W.animState(g, t))) do
+    if e[2] == "move" then dy = dy + e[3][2] elseif e[2] == "alpha" then a = e[3] end
+  end
+  return dy, a
+end
+for _, g in ipairs(rises) do
+  local _, total = W.animState(g, 0)
+  local y1, a1 = riseAt(g, total * 0.3)
+  local y2, a2 = riseAt(g, total * 0.6)
+  local y3, a3 = riseAt(g, total * 0.99)
+  ok(y2 > y1 and y3 > y2 and a1 > 0.5 and a2 > 0.5 and a3 < 0.1, "Funken steigen und blenden aus (" .. string.format("%.2f", total) .. " s)")
+end
+local _, t1 = W.animState(rises[1], 0) local _, t2 = W.animState(rises[2], 0)
+ok(math.abs(t1 - t2) > 0.1, "Funken-Lagen mit eigenem Takt")
+local fl = 0
 for _, g in ipairs(groups) do
   local a = g.__anims[1]
-  local f = a and a.__target and tostring(a.__target.__file) or ""
-  if f:find("strom_comet$") and a.__kind == "Rotation" then cometG = g end
-  if f:find("strom_wave", 1, true) then waves[#waves + 1] = g end
+  if g.__loop == "BOUNCE" and a and a.__target and tostring(a.__target.__file):find("hagel_speed", 1, true) then fl = fl + 1 end
 end
-ok(cometG and cometG.__anims[1].__dur <= 1.2, "Neon-Komet dreht schnell (<= 1,2 s je Runde)")
-ok(#waves == 2, "2 Druckwellen")
-local function waveAt(t)
-  local best = 0
-  for _, g in ipairs(waves) do for _, e in ipairs((W.animState(g, t))) do if e[2] == "alpha" then best = math.max(best, e[3]) end end end
-  return best
-end
-for _, t in ipairs({ 0.05, 0.55, 1.05, 1.55, 2.05, 3.05 }) do ok(waveAt(t) > 0.2, "Druckwelle sichtbar bei " .. t .. " s") end
-for _, g in ipairs(spins) do
-  local r1 = W.animState(g, 3.0)[1][3]
-  local r2 = W.animState(g, 3.1)[1][3]
-  ok(math.abs(r2 - r1) > 0.05, "dreht bei 3 s weiter (" .. tostring(g.__anims[1].__dur) .. " s/Runde)")
-end
--- Einschlag nur am Anfang
+ok(fl == 2, "Tempo-Striche links und rechts flackern")
 local strike
 for _, g in ipairs(groups) do if g.__loop == nil and #g.__anims == 3 then strike = g end end
 ok(strike and #W.animState(strike, 0.1) == 3 and #W.animState(strike, 1.0) == 0, "Einschlag einmalig beim Erscheinen")
@@ -135,24 +162,32 @@ if OUT then
   bg:SetSize(76 * 3.6, 76 * 3.6)
   local saved = {}
   local frames = 0
+  local function restore()
+    for o, v in pairs(saved) do
+      o.__alpha, o.__rot, o.__w, o.__h = v[1], v[2], v[3], v[4]
+      if v[5] then o.__points.CENTER[3], o.__points.CENTER[4] = v[5], v[6] end
+    end
+    saved = {}
+  end
   for step = 0, 59 do                       -- 2,4 s mit 25 Bildern/s
     local t = step * 0.04
-    for o, v in pairs(saved) do o.__alpha, o.__rot, o.__w, o.__h = v[1], v[2], v[3], v[4] end
-    saved = {}
+    restore()
     for _, e in ipairs(at(t)) do
       local o = e[1]
       if o.__kind == "Texture" then
-        saved[o] = saved[o] or { o.__alpha, o.__rot, o.__w, o.__h }
+        local c = o.__points and o.__points.CENTER
+        saved[o] = saved[o] or { o.__alpha, o.__rot, o.__w, o.__h, c and c[3], c and c[4] }
         local s = saved[o]
         if e[2] == "alpha" then o.__alpha = e[3]
         elseif e[2] == "rot" then o.__rot = (s[2] or 0) + e[3]
-        elseif e[2] == "scale" then o.__w, o.__h = s[3] * e[3], s[4] * e[3] end
+        elseif e[2] == "scale" then o.__w, o.__h = s[3] * e[3], s[4] * e[3]
+        elseif e[2] == "move" and c then c[3], c[4] = c[3] + e[3][1], c[4] + e[3][2] end
       end
     end
     L.dump(A, string.format("%s/f_%03d.tsv", OUT, step))
     frames = frames + 1
   end
-  for o, v in pairs(saved) do o.__alpha, o.__rot, o.__w, o.__h = v[1], v[2], v[3], v[4] end
+  restore()
   ok(frames == 60, "60 Bilder exportiert")
 end
 

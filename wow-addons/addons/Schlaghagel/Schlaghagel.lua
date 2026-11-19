@@ -3,7 +3,7 @@
 --                        Talent 16256 mit 6/12/18/24/30 %) - ab 1.2 mit Hagelsturm-Animation
 --   Waffe des Mahlstroms Buff 408505 (30 s, bis 5 Stapel, je Stapel -20 % Zauberzeit/Mana des
 --                        naechsten Blitzschlags; Talent 408498, 5 Raenge) - neu in 1.1, eigene Anzeige
---                        ueber dem Charakter, Blitz-/Strom-Animation
+--                        ueber dem Charakter; ab 1.4 Blitzsturm-Animation im Stil des Hagelsturms
 --   Spieldaten: simc-forever SpellDataDump/allspells.txt, Build 70862
 --
 -- WoW Forever sperrt Aura-Daten im Kampf (Midnight-Regeln, "secret values"). Ein Add-on
@@ -18,7 +18,7 @@
 --  * Kein Ton. Das Add-on selbst liest im Kampf nichts.
 -- Aufbau nur ausserhalb des Kampfes (der Slot ist fuer Add-ons gesperrt, solange Auren geheim sind).
 
-local VERSION = "1.4.0"
+local VERSION = "1.5.0"
 local SIZE = 76
 local MEDIA = "Interface\\AddOns\\Schlaghagel\\Media\\"
 
@@ -98,13 +98,10 @@ local function makeAnchor(pr)
   pr.A = A
 end
 
--- ---------- Strom-Optik (Waffe des Mahlstroms) ----------
--- Plasma-Ring (dreht langsam), zwei zackige Blitzboegen (gegenlaeufig, flackern), sechs Blitze, die
--- reihum vom Symbol nach aussen zucken, und ein Einschlag-Blitz beim Erscheinen.
-local BOLTS = {   -- Winkel (Grad, 0 = oben; nur seitlich, damit Titel/Hinweis lesbar bleiben), Textur, Takt (s), Versatz (s)
-  { 55, 1, 1.15, 0.00 }, { 92, 2, 1.30, 0.55 }, { 128, 3, 1.05, 0.20 },
-  { 232, 1, 1.40, 0.80 }, { 268, 2, 1.20, 0.35 }, { 305, 3, 1.25, 0.95 },
-}
+-- ---------- Effekt-Optik: Hagelsturm (Schlaghagel) und Blitzsturm (Waffe des Mahlstroms, 1.4) ----------
+-- Gleiche Bildsprache, keine Kreise/Ringe/Drehungen: Schnitte im Takt quer ueber das Symbol, jeder mit Treffer-Funke;
+-- Partikel-Lagen (Hagel faellt / Funken steigen), Tempo-Striche links/rechts flackern; beim Erscheinen Lichtblitz +
+-- Funken-Explosion. Jede Dauerschleife in eigener AnimationGroup (eigener Takt).
 local function fxTex(V, icon, layer, sub, file, size, r, g, b, a)
   local t = V:CreateTexture(nil, layer, nil, sub)
   t:SetTexture(MEDIA .. file)
@@ -119,99 +116,42 @@ local function setScale(a, s0, s1)
   pcall(function() a:SetScaleFrom(s0, s0) a:SetScaleTo(s1, s1) end)
 end
 
-local function strom(V, icon)
-  local function tex(...) return fxTex(V, icon, ...) end
-  local plasma = tex("BACKGROUND", 2, "strom_plasma", SIZE * 1.62, 0.42, 0.50, 1, 0.85)
-  local arc2 = tex("OVERLAY", 1, "strom_arc2", SIZE * 1.42, 0.68, 0.48, 1, 0.9)
-  local arc1 = tex("OVERLAY", 2, "strom_arc1", SIZE * 1.30, 0.70, 0.95, 1, 1)
-  local flash = tex("OVERLAY", 4, "strom_glow", SIZE * 3.0, 0.85, 0.90, 1, 0)
-
-  local groups = {}
-  -- Dauerschleifen: je Textur eine eigene Gruppe, damit jede in ihrem Takt weiterlaeuft
-  local function loop(mode) local g = V:CreateAnimationGroup() g:SetLooping(mode) groups[#groups + 1] = g return g end
-  local function rot(t, deg, d)
-    local r = loop("REPEAT"):CreateAnimation("Rotation")
-    r:SetTarget(t) r:SetDegrees(deg) r:SetDuration(d)
-  end
-  rot(plasma, -360, 6.6)                     -- negativ = im Uhrzeigersinn
-  rot(arc1, -360, 2.2)
-  rot(arc2, 360, 3.3)
-  local function fl(t, a0, a1, d)
-    local x = loop("BOUNCE"):CreateAnimation("Alpha")
-    x:SetTarget(t) x:SetFromAlpha(a0) x:SetToAlpha(a1) x:SetDuration(d)
-  end
-  fl(arc1, 1, 0.30, 0.07)
-  fl(arc2, 0.90, 0.20, 0.11)
-
-  -- 1.4: moderner Energie-Ring um den Kreis (farbige Grafiken, nicht eingefaerbt):
-  -- Neon-Komet rast im Uhrzeigersinn, zweiter Komet gegenlaeufig, 3 kreisende Funken,
-  -- Plasma-Ring atmet, alle 1 s laeuft eine Druckwelle nach aussen.
-  local comet = tex("OVERLAY", 2, "strom_comet", SIZE * 1.55, 1, 1, 1, 1)
-  local comet2 = tex("OVERLAY", 1, "strom_comet2", SIZE * 1.72, 1, 1, 1, 0.9)
-  local orbit = tex("OVERLAY", 3, "strom_orbit", SIZE * 1.42, 1, 1, 1, 1)
-  rot(comet, -360, 1.1)
-  rot(comet2, 360, 1.7)
-  rot(orbit, -360, 2.6)
-  do
-    local b = loop("BOUNCE"):CreateAnimation("Scale")
-    b:SetTarget(plasma) setScale(b, 0.94, 1.08) b:SetDuration(0.9) b:SetSmoothing("IN_OUT")
-  end
-  for _, w in ipairs({ { 0, 1.0 }, { 1.0, 0 } }) do   -- Versatz/Rest im 2-s-Takt -> eine Welle je Sekunde
-    local t = tex("BACKGROUND", 3, "strom_wave", SIZE * 1.30, 1, 1, 1, 0)
-    local g = loop("REPEAT")
-    local sc = g:CreateAnimation("Scale")
-    sc:SetTarget(t) setScale(sc, 0.85, 1.85) sc:SetDuration(1.0) sc:SetSmoothing("OUT")
-    sc:SetStartDelay(w[1]) sc:SetEndDelay(w[2])
-    local a = g:CreateAnimation("Alpha")
-    a:SetTarget(t) a:SetFromAlpha(0.9) a:SetToAlpha(0) a:SetDuration(1.0) a:SetSmoothing("IN")
-    a:SetStartDelay(w[1]) a:SetEndDelay(w[2])
-  end
-
-  -- Blitze: kurz an (0,05 s), ausklingen (0,16 s), Pause bis zum naechsten Takt
-  for _, b in ipairs(BOLTS) do
-    local t = tex("OVERLAY", 3, "strom_bolt" .. b[2], SIZE * 2.6, 0.80, 0.90, 1, 0)
-    t:SetRotation(math.rad(-b[1]))           -- Textur zeigt nach oben, SetRotation dreht gegen den Uhrzeigersinn
-    local g = V:CreateAnimationGroup()
-    g:SetLooping("REPEAT")
-    local on = g:CreateAnimation("Alpha")
-    on:SetTarget(t) on:SetFromAlpha(0) on:SetToAlpha(1) on:SetDuration(0.05) on:SetStartDelay(b[4]) on:SetOrder(1)
-    local off = g:CreateAnimation("Alpha")
-    off:SetTarget(t) off:SetFromAlpha(1) off:SetToAlpha(0) off:SetDuration(0.16) off:SetOrder(2)
-    off:SetEndDelay(math.max(0.05, b[3] - b[4] - 0.21))
-    groups[#groups + 1] = g
-  end
-
-  -- Einschlag beim Erscheinen: heller Blitz + Ring, der nach aussen schlaegt
-  local strike = V:CreateAnimationGroup()
-  local ring = tex("OVERLAY", 4, "strom_arc2", SIZE * 1.42, 0.85, 0.92, 1, 0)
-  local f1 = strike:CreateAnimation("Alpha")
-  f1:SetTarget(flash) f1:SetFromAlpha(1) f1:SetToAlpha(0) f1:SetDuration(0.45) f1:SetSmoothing("OUT")
-  local r1 = strike:CreateAnimation("Alpha")
-  r1:SetTarget(ring) r1:SetFromAlpha(1) r1:SetToAlpha(0) r1:SetDuration(0.40) r1:SetSmoothing("OUT")
-  local r2 = strike:CreateAnimation("Scale")
-  r2:SetTarget(ring)
-  setScale(r2, 0.7, 1.9)
-  r2:SetDuration(0.40) r2:SetSmoothing("OUT")
-  groups[#groups + 1] = strike
-
-  return groups, { plasma = plasma, arc1 = arc1, arc2 = arc2, flash = flash, ring = ring, comet = comet, comet2 = comet2, orbit = orbit }
-end
-
--- ---------- Hagelsturm-Optik (Schlaghagel, 1.2) ----------
--- Hagel der Schlaege: drei Klingen-Schnitte im "Ta-ta-ta"-Takt (= 3 Ladungen) quer ueber das Symbol, jeder mit
--- Treffer-Funke; Hagelkoerner prasseln schraeg herab (zwei Lagen, eigener Takt); Tempo-Striche links/rechts flackern;
--- beim Erscheinen Lichtblitz + Funken-Explosion. Bewusst keine Kreise/Ringe.
-local CUTS = {   -- Drehung (Grad, gegen den Uhrzeigersinn), Versatz im Takt (s), Funke (x, y) relativ zum Symbol
-  { 32, 0.00, 13, 7 }, { -32, 0.12, -12, 6 }, { 6, 0.24, 3, -10 },
+local STYLES = {
+  hagel = {   -- Hagel der Schlaege: 3 Klingen-Schnitte "Ta-ta-ta" (= 3 Ladungen), Hagel prasselt schraeg herab
+    cut = "hagel_cut", cutSize = 2.5, cycle = 1.2, cutScale = { 0.85, 1.15 },
+    cuts = {   -- Drehung (Grad, gegen den Uhrzeigersinn), Versatz im Takt (s), Funke (x, y) relativ zum Symbol
+      { 32, 0.00, 13, 7 }, { -32, 0.12, -12, 6 }, { 6, 0.24, 3, -10 },
+    },
+    cutCol = { 1, 0.97, 0.82 }, sparkCol = { 0.75, 0.95, 1 },
+    parts = {  -- Textur, Breite, Hoehe (x SIZE), Weg dx, dy, Takt, Alpha, Farbe
+      { "hagel_fall1", 2.6, 1.35, 7, -30, 0.95, 0.85, 0.70, 0.92, 1 },
+      { "hagel_fall2", 2.3, 1.25, 6, -26, 1.25, 0.70, 0.85, 0.97, 1 },
+    },
+    speedCol = { 1, 0.84, 0.40 }, speed = { 0.09, 0.11 },
+    flashCol = { 0.80, 0.95, 1 }, burstCol = { 1, 0.90, 0.55 },
+  },
+  blitz = {   -- Blitzsturm: 5 Blitz-Schnitte "Ta-ta-ta-ta-ta" (= 5 Stapel), elektrische Funken steigen auf
+    cut = "blitz_slash", cutSize = 2.5, cycle = 1.5, cutScale = { 0.90, 1.12 },
+    cuts = {
+      { 30, 0.00, 13, 7 }, { -34, 0.10, -12, 6 }, { 8, 0.20, 3, -10 }, { -62, 0.30, -6, -12 }, { 64, 0.40, 8, 12 },
+    },
+    cutCol = { 0.78, 0.88, 1 }, sparkCol = { 0.62, 0.78, 1 },
+    parts = {
+      { "blitz_rise1", 2.6, 1.35, -5, 30, 1.00, 0.90, 0.45, 0.80, 1 },
+      { "blitz_rise2", 2.3, 1.25, 4, 26, 1.30, 0.80, 0.72, 0.55, 1 },
+    },
+    speedCol = { 0.40, 0.68, 1 }, speed = { 0.08, 0.10 },
+    flashCol = { 0.55, 0.70, 1 }, burstCol = { 0.70, 0.82, 1 },
+  },
 }
-local CUT_CYCLE = 1.2
-local function hagelsturm(V, icon)
+
+local function sturm(V, icon, st)
   local function tex(...) return fxTex(V, icon, ...) end
-  local flash = tex("OVERLAY", 4, "strom_glow", SIZE * 3.0, 0.80, 0.95, 1, 0)
+  local flash = tex("OVERLAY", 4, "strom_glow", SIZE * 3.0, st.flashCol[1], st.flashCol[2], st.flashCol[3], 0)
 
   local groups = {}
-  -- Hagel: Lage faellt (Versatz), blendet ein und aus; zwei Lagen mit eigenem Takt -> durchgehendes Prasseln
-  local function hail(file, w, h, dx, dy, d, a, r, g, b)
+  -- Partikel: Lage bewegt sich (Versatz), blendet ein und aus; zwei Lagen mit eigenem Takt -> durchgehend
+  local function layer(file, w, h, dx, dy, d, a, r, g, b)
     local t = tex("BACKGROUND", 3, file, w, r, g, b, 0)
     t:SetSize(w, h)
     t:ClearAllPoints()
@@ -231,8 +171,9 @@ local function hagelsturm(V, icon)
     groups[#groups + 1] = grp
     return t
   end
-  local fall1 = hail("hagel_fall1", SIZE * 2.6, SIZE * 1.35, 7, -30, 0.95, 0.85, 0.70, 0.92, 1)
-  local fall2 = hail("hagel_fall2", SIZE * 2.3, SIZE * 1.25, 6, -26, 1.25, 0.70, 0.85, 0.97, 1)
+  local p1, p2 = st.parts[1], st.parts[2]
+  local fall1 = layer(p1[1], SIZE * p1[2], SIZE * p1[3], p1[4], p1[5], p1[6], p1[7], p1[8], p1[9], p1[10])
+  local fall2 = layer(p2[1], SIZE * p2[2], SIZE * p2[3], p2[4], p2[5], p2[6], p2[7], p2[8], p2[9], p2[10])
 
   -- Tempo-Striche links (zeigen zum Symbol) und rechts (gespiegelt), flackern versetzt
   local function speed(side, d)
@@ -241,7 +182,7 @@ local function hagelsturm(V, icon)
     t:SetSize(SIZE * 0.95, SIZE * 0.95)
     t:SetPoint(side == -1 and "RIGHT" or "LEFT", icon, side == -1 and "LEFT" or "RIGHT", side * -4, 0)
     t:SetBlendMode("ADD")
-    t:SetVertexColor(1, 0.84, 0.40, 1)
+    t:SetVertexColor(st.speedCol[1], st.speedCol[2], st.speedCol[3], 1)
     t:SetAlpha(0.9)
     if side == 1 then t:SetTexCoord(1, 0, 0, 1) end
     local x = V:CreateAnimationGroup()
@@ -251,14 +192,15 @@ local function hagelsturm(V, icon)
     groups[#groups + 1] = x
     return t
   end
-  local speedL, speedR = speed(-1, 0.09), speed(1, 0.11)
+  local speedL, speedR = speed(-1, st.speed[1]), speed(1, st.speed[2])
 
-  -- Klingen-Schnitte: aufblitzen (0,04 s), dann nachziehen und verblassen (0,26 s); Funke springt mit
+  -- Schnitte: aufblitzen (0,04 s), dann nachziehen und verblassen (0,26 s); Funke springt mit
   local cuts = {}
-  for _, c in ipairs(CUTS) do
-    local t = tex("OVERLAY", 3, "hagel_cut", SIZE * 2.5, 1, 0.97, 0.82, 0)
+  local cc, sc0 = st.cutCol, st.sparkCol
+  for _, c in ipairs(st.cuts) do
+    local t = tex("OVERLAY", 3, st.cut, SIZE * st.cutSize, cc[1], cc[2], cc[3], 0)
     t:SetRotation(math.rad(c[1]))
-    local sp = tex("OVERLAY", 4, "hagel_spark", SIZE * 0.95, 0.75, 0.95, 1, 0)
+    local sp = tex("OVERLAY", 4, "hagel_spark", SIZE * 0.95, sc0[1], sc0[2], sc0[3], 0)
     sp:ClearAllPoints()
     sp:SetPoint("CENTER", icon, "CENTER", c[3], c[4])
     sp:SetRotation(math.rad(c[1] * 1.7))
@@ -270,9 +212,9 @@ local function hagelsturm(V, icon)
     son:SetTarget(sp) son:SetFromAlpha(0) son:SetToAlpha(1) son:SetDuration(0.04) son:SetStartDelay(c[2]) son:SetOrder(1)
     local off = g:CreateAnimation("Alpha")
     off:SetTarget(t) off:SetFromAlpha(1) off:SetToAlpha(0) off:SetDuration(0.26) off:SetSmoothing("IN") off:SetOrder(2)
-    off:SetEndDelay(math.max(0.05, CUT_CYCLE - c[2] - 0.30))
+    off:SetEndDelay(math.max(0.05, st.cycle - c[2] - 0.30))
     local sc = g:CreateAnimation("Scale")
-    sc:SetTarget(t) setScale(sc, 0.85, 1.15) sc:SetDuration(0.26) sc:SetSmoothing("OUT") sc:SetOrder(2)
+    sc:SetTarget(t) setScale(sc, st.cutScale[1], st.cutScale[2]) sc:SetDuration(0.26) sc:SetSmoothing("OUT") sc:SetOrder(2)
     local soff = g:CreateAnimation("Alpha")
     soff:SetTarget(sp) soff:SetFromAlpha(1) soff:SetToAlpha(0) soff:SetDuration(0.20) soff:SetSmoothing("OUT") soff:SetOrder(2)
     local ssc = g:CreateAnimation("Scale")
@@ -283,7 +225,8 @@ local function hagelsturm(V, icon)
 
   -- Einschlag beim Erscheinen: Lichtblitz + grosse Funken-Explosion
   local strike = V:CreateAnimationGroup()
-  local burst = tex("OVERLAY", 4, "hagel_spark", SIZE * 1.6, 1, 0.90, 0.55, 0)
+  local bc = st.burstCol
+  local burst = tex("OVERLAY", 4, "hagel_spark", SIZE * 1.6, bc[1], bc[2], bc[3], 0)
   local f1 = strike:CreateAnimation("Alpha")
   f1:SetTarget(flash) f1:SetFromAlpha(1) f1:SetToAlpha(0) f1:SetDuration(0.45) f1:SetSmoothing("OUT")
   local b1 = strike:CreateAnimation("Alpha")
@@ -329,8 +272,8 @@ local function build(parent, pr)
   end)
 
   local fx, fxT
-  if pr.fx == "strom" then fx, fxT = strom(V, icon)
-  elseif pr.fx == "hagel" then fx, fxT = hagelsturm(V, icon) end
+  if pr.fx == "strom" then fx, fxT = sturm(V, icon, STYLES.blitz)
+  elseif pr.fx == "hagel" then fx, fxT = sturm(V, icon, STYLES.hagel) end
 
   local cd = CreateFrame("Cooldown", nil, V, "CooldownFrameTemplate")
   cd:SetAllPoints(icon)

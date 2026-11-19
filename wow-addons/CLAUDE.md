@@ -50,11 +50,10 @@ am besten mit Skillpunkten, aber primär Gold.“
 - Daten nur aus Spieldaten/QuestieDB über `tools/gen_zentrale7.py` / `tools/gen_vendor_mats.py`; Rohdaten in `tools/zentrale_src/`.
 - `UI.Toggle` ist der Schalter-Baustein aus `Widgets.lua` – das Fenster heißt `UI.ToggleWindow` (Namenskollision!).
 
-## Schlaghagel 1.4 (Schlaghagel + Waffe des Mahlstroms)
+## Schlaghagel 1.5 (Schlaghagel + Waffe des Mahlstroms)
 `addons/Schlaghagel/`: `PROFILES.SHAMAN` = Liste von Procs (`hagel` 16257, `mahl` 408505 – Forever-Talent 408498, Buff 30 s, 5 Stapel).
 Je Proc eigener Anker (`<frame>Anchor`), Vorschau (`<frame>Preview`) und Aura-Container (`<frame>AuraContainer`); Position/Größe
-von `hagel` direkt in `SchlaghagelDB` (1.0-kompatibel), andere in `DB[key]`. `fx = "strom"` baut Plasma-Ring, Blitzbögen, 6 Blitze
-(`BOLTS`, nur seitlich wegen Titel/Hinweis) und Einschlag – jede Dauerschleife in eigener AnimationGroup (sonst steht die schnelle
+von `hagel` direkt in `SchlaghagelDB` (1.0-kompatibel), andere in `DB[key]`. `fx = "strom"` baut seit 1.5 den Blitzsturm (s. u.) – jede Dauerschleife in eigener AnimationGroup (sonst steht die schnelle
 still, bis die langsamste fertig ist). Alle Gruppen per `AddAuraShownAnimation` (Spiel startet/stoppt sie, auch im Kampf).
 Grafiken: `python3 -I tools/strom_media.py`. Tests: `cd addons && lua5.1 ../tests/hagel.lua` („HAGEL TESTS OK“) und aus `wow-addons/`
 `lua5.1 tests/hagel_strom.lua [ordner]` („STROM TESTS OK“; strenger Nachbau, `M.animState(group, t)` rechnet Alpha/Drehung/Skalierung
@@ -71,10 +70,12 @@ Test `lua5.1 tests/hagel_sturm.lua [ordner]` („HAGELSTURM TESTS OK“, Mock re
 Restzeit groß mittig. Einschlag nicht über `AddAuraShownAnimation` (liefe schon bei Stapel 1), sondern `gate` `OnShow` → `strike:Play()`.
 Schlägt `SetApplicationBar` fehl, bleibt `gate` sichtbar (Rückfall: ab 1 Stapel). `/hagel ab5` (`DB.mahl.ab5`) schaltet die Schwelle, ab `/reload`.
 Vorschau-GIF `previews/Schlaghagel_1.3_Mahlstrom_ab5.gif`.
-**1.4 – Ring-Animation:** WoW stoppt Animationen der versteckten `gate` (Stapel 1–4) → `gate` `OnShow` startet alle Schleifen + Blinken neu
-(sonst „Kreis leuchtet nur“), `OnHide` stoppt. Neu im Ring: `strom_comet` (Neon-Komet, 1,1 s), `strom_comet2` (gegenläufig), `strom_orbit`
-(3 Funken), Plasma-Atmen, 2 Druckwellen `strom_wave` (je 1 s versetzt). Diese Grafiken sind **farbig** (Verlauf Türkis→Blau→Violett,
-Vertex-Farbe weiß), erzeugt in `strom_media.py` `modern()`. Vorschau `previews/Schlaghagel_1.4_Mahlstrom_Ring.gif`.
+**1.4/1.5 – Animation bei 5 Stapeln:** WoW stoppt Animationen der versteckten `gate` (Stapel 1–4) → `gate` `OnShow` startet alle
+Schleifen + Blinken neu (sonst „Kreis leuchtet nur“), `OnHide` stoppt. **1.5:** Tiry fand die Ring-/Kometen-Version 1.4 „billig“ – Mahlstrom
+nutzt jetzt den **Blitzsturm im Stil des Hagelsturms**: beide Effekte über `sturm(V, icon, STYLES.hagel|STYLES.blitz)` (gleiche Mechanik,
+nur Stil-Tabelle). Blitz: 5 Schnitte `blitz_slash` (Takt 1,5 s, = 5 Stapel), Funken `blitz_rise1/2` steigen (Translation +y), Tempo-Striche
+blau, Einschlag. **Keine Ringe/Drehungen auch beim Mahlstrom** (Test prüft das). Grafiken `python3 -I tools/blitz_media.py`;
+`strom_media.py` erzeugt nur noch `strom_glow` + Helfer. Vorschau `previews/Schlaghagel_1.5_Mahlstrom_Blitzsturm.gif`.
 
 ## WindBaem (Windzorn-Ton)
 `addons/WindBaem/`: meldet per `C_UnitAuras.AddAuraSound(Added, {unitToken="player", spellID, soundFileName, outputChannel,
