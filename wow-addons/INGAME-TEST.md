@@ -529,3 +529,14 @@ Installation: Ordner `Schlaghagel` ersetzen, **WoW komplett neu starten** (neue 
 - [ ] Im Kampf (echter Proc): dieselbe Animation startet mit dem Buff und stoppt, wenn die Ladungen verbraucht sind.
 - [ ] Falls Hagel/Schnitte im Kampf **stehen bleiben** oder fehlen: `/hagel diag` – Zeile „Hagelsturm“ melden.
 - [ ] `/hagel effekte` schaltet Hagelsturm und Strom aus/an (im Kampf ab `/reload`).
+
+# Ingame-Test – Schlaghagel 1.3.0 (Mahlstrom erst ab 5 Stapeln)
+
+Installation: Ordner `Schlaghagel` ersetzen, `/reload` reicht (keine neuen Dateien).
+
+- [ ] Kampf, Mahlstrom 1–4 Stapel: **nichts** zu sehen.
+- [ ] 5 Stapel: Symbol mit Blitz-Animation erscheint, Einschlag-Blitz, **Restzeit groß in der Mitte**, keine Stapelzahl.
+- [ ] Blitzschlag als Sofortzauber gewirkt: Anzeige verschwindet.
+- [ ] `/hagel diag`: Zeile „Ab 5 Stapeln ok“. Steht dort FEHLER, zeigt das Add-on ab dem ersten Stapel (Rückfall) – Zeile melden.
+- [ ] Erscheint der Einschlag-Blitz bei 5 Stapeln nicht, laufen die übrigen Animationen trotzdem (Einschlag = Zusatz).
+- [ ] `/hagel ab5` + `/reload`: wieder ab dem ersten Stapel; nochmal = zurück auf 5.

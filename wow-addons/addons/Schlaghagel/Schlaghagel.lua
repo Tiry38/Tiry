@@ -1,4 +1,4 @@
--- Schlaghagel 1.2.1 - Proc-Anzeigen fuer den Verstaerker-Schamanen
+-- Schlaghagel 1.3.0 - Proc-Anzeigen fuer den Verstaerker-Schamanen
 --   Schlaghagel          Buff 16257 (Forever: einzige Buff-ID, 15 s, 3 Ladungen;
 --                        Talent 16256 mit 6/12/18/24/30 %) - ab 1.2 mit Hagelsturm-Animation
 --   Waffe des Mahlstroms Buff 408505 (30 s, bis 5 Stapel, je Stapel -20 % Zauberzeit/Mana des
@@ -18,7 +18,7 @@
 --  * Kein Ton. Das Add-on selbst liest im Kampf nichts.
 -- Aufbau nur ausserhalb des Kampfes (der Slot ist fuer Add-ons gesperrt, solange Auren geheim sind).
 
-local VERSION = "1.2.1"
+local VERSION = "1.3.0"
 local SIZE = 76
 local MEDIA = "Interface\\AddOns\\Schlaghagel\\Media\\"
 
@@ -33,6 +33,7 @@ local PROFILES = {
     {
       key = "mahl", id = 408505, dur = 30, name = "Waffe des Mahlstroms", icon = "Interface\\Icons\\Spell_Nature_Lightning",
       glow = { 0.55, 0.40, 1, 0.80 }, count = { 0.86, 0.95, 1 }, demo = "5",
+      minStacks = 5,   -- 1.3: erst ab 5 Stapeln zeigen (Blizzard-Stapelschwelle), ohne Stapelzahl, Restzeit mittig
       x = 0, y = 120, frame = "SchlaghagelMahl", fx = "strom",   -- ueber dem Charakter (Bildmitte, hoeher)
     },
   },
@@ -322,13 +323,20 @@ local function build(parent, pr)
   noMouse(txt)
 
   local timer = txt:CreateFontString(nil, "OVERLAY")
-  local count = txt:CreateFontString(nil, "OVERLAY")
-  count:SetFont(STANDARD_TEXT_FONT, 30, "THICKOUTLINE")
-  count:SetPoint("CENTER", icon, "CENTER", 0, 4)
-  count:SetTextColor(pr.count[1], pr.count[2], pr.count[3])
-  timer:SetFont(STANDARD_TEXT_FONT, 12, "OUTLINE")
-  timer:SetPoint("BOTTOM", icon, "BOTTOM", 0, 5)
-  timer:SetTextColor(0.75, 0.93, 1)
+  local count
+  if pr.minStacks then                        -- Mahlstrom (1.3): keine Stapelzahl, Restzeit gross in der Mitte
+    timer:SetFont(STANDARD_TEXT_FONT, 24, "THICKOUTLINE")
+    timer:SetPoint("CENTER", icon, "CENTER", 0, 0)
+    timer:SetTextColor(pr.count[1], pr.count[2], pr.count[3])
+  else
+    count = txt:CreateFontString(nil, "OVERLAY")
+    count:SetFont(STANDARD_TEXT_FONT, 30, "THICKOUTLINE")
+    count:SetPoint("CENTER", icon, "CENTER", 0, 4)
+    count:SetTextColor(pr.count[1], pr.count[2], pr.count[3])
+    timer:SetFont(STANDARD_TEXT_FONT, 12, "OUTLINE")
+    timer:SetPoint("BOTTOM", icon, "BOTTOM", 0, 5)
+    timer:SetTextColor(0.75, 0.93, 1)
+  end
 
   -- Ohne Titel/Hinweis (1.2.1): nur Symbol, Ablauf-Kreis, Ladungen/Stapel, Restzeit und Animation
 
@@ -354,19 +362,45 @@ local function initSlot(pr, button)
   button:SetSize(SIZE, SIZE)
   button:ClearAllPoints()
   button:SetPoint("CENTER", pr.A, "CENTER")
-  local p = build(button, pr)
   pr.live.parts = {}
   local function hook(name, fn)
     local ok, err = pcall(fn)
     pr.live.parts[#pr.live.parts + 1] = name .. (ok and " |cff40ff59ok|r" or (" |cffff5555FEHLER|r " .. tostring(err)))
+    return ok
   end
+  -- Stapelschwelle (Mahlstrom): die ganze Anzeige haengt an einer unsichtbaren StatusBar, die Blizzards
+  -- Aura-Knopf als "Application Bar" fuehrt. Das Spiel zeigt sie nur bei Stapeln >= minApplications
+  -- (Blizzard_CustomAuraButton ApplyApplicationBar: SetShown(applications >= minApplications)) - auch im Kampf.
+  -- Schlaegt das fehl, bleibt die Leiste sichtbar = Anzeige ab dem ersten Stapel (sicherer Rueckfall).
+  local gate, strike
+  local parent = button
+  if pr.minStacks and store(pr).ab5 ~= false then
+    gate = CreateFrame("StatusBar", nil, button)
+    gate:SetAllPoints(button)
+    pcall(function() gate:SetStatusBarTexture("Interface\\Buttons\\WHITE8X8") gate:SetStatusBarColor(0, 0, 0, 0) end)
+    noMouse(gate)
+    parent = gate
+  end
+  local p = build(parent, pr)
   hook("Symbol", function() button:SetIcon(p.icon) end)
   hook("Ablauf", function() button:SetDurationCooldown(p.cd) end)
   hook("Restzeit", function() button:SetDurationText(p.timer) end)
-  hook(pr.key == "mahl" and "Stapel" or "Ladungen", function() button:SetApplicationCount(p.count) end)
+  if p.count then hook("Ladungen", function() button:SetApplicationCount(p.count) end) end
+  if gate then
+    hook("Ab " .. pr.minStacks .. " Stapeln", function()
+      button:SetApplicationBar(gate, { minApplications = pr.minStacks, maxApplications = pr.minStacks })
+    end)
+  end
   if DB.blink then hook("Blinken", function() button:AddAuraShownAnimation(p.pulse) end) end
   if #p.fx > 0 and DB.strom ~= false then
-    hook(pr.fx == "strom" and "Strom" or "Hagelsturm", function() for _, g in ipairs(p.fx) do button:AddAuraShownAnimation(g) end end)
+    local loops = p.fx
+    if gate then            -- Einschlag erst, wenn die Schwelle erreicht ist (Leiste erscheint), nicht beim 1. Stapel
+      loops = {}
+      for i = 1, #p.fx - 1 do loops[i] = p.fx[i] end
+      strike = p.fx[#p.fx]
+      gate:SetScript("OnShow", function() pcall(strike.Play, strike) end)
+    end
+    hook(pr.fx == "strom" and "Strom" or "Hagelsturm", function() for _, g in ipairs(loops) do button:AddAuraShownAnimation(g) end end)
   end
 end
 
@@ -432,7 +466,7 @@ local function preview(pr, seconds)
   if not pr.prev then return false end
   pr.tEnd = GetTime() + seconds
   pcall(function() pr.prev.cd:SetCooldown(GetTime(), seconds) end)
-  pr.prev.count:SetText(pr.demo)
+  if pr.prev.count then pr.prev.count:SetText(pr.demo) end
   pr.P:Show()
   if DB.blink then pr.prev.pulse:Play() else pr.prev.pulse:Stop() end
   for _, g in ipairs(pr.prev.fx) do if DB.strom ~= false then g:Play() else g:Stop() end end
@@ -542,6 +576,12 @@ SlashCmdList.SCHLAGHAGEL = function(arg)
     DB.blink = not DB.blink
     msg("Blinken " .. (DB.blink and "|cff40ff59an|r" or "|cffff5555aus|r") .. " - im Kampf ab |cff40ff59/reload|r (Vorschau sofort).")
     for _, pr in ipairs(PROCS) do preview(pr, 3) end
+  elseif cmd == "ab5" or cmd == "stapel" then
+    local pr = BYKEY.mahl
+    if not pr then msg("Nur fuer Schamanen (Waffe des Mahlstroms).") return end
+    local st = store(pr)
+    st.ab5 = st.ab5 == false
+    msg("Mahlstrom " .. (st.ab5 and "erst ab |cff40ff595 Stapeln|r" or "ab dem |cffffd24dersten Stapel|r") .. " - gilt ab |cff40ff59/reload|r (ausserhalb des Kampfes).")
   elseif cmd == "strom" or cmd == "blitz" or cmd == "effekte" or cmd == "fx" then
     DB.strom = not DB.strom
     msg("Effekt-Animationen (Hagelsturm + Strom) " .. (DB.strom and "|cff40ff59an|r" or "|cffff5555aus|r") .. " - im Kampf ab |cff40ff59/reload|r (Vorschau sofort).")
@@ -569,6 +609,6 @@ SlashCmdList.SCHLAGHAGEL = function(arg)
     end
   else
     msg("|cff40ff59/hagel test|r Vorschau · |cff40ff59unlock|r/|cff40ff59lock|r verschieben · |cff40ff59groesse 1.3|r (|cff40ff59groesse mahl 1.3|r nur Mahlstrom)")
-    msg("|cff40ff59/hagel mahl|r bzw. |cff40ff59schlag|r an/aus · |cff40ff59blinken|r · |cff40ff59effekte|r (Hagelsturm/Strom) · |cff40ff59reset|r · |cff40ff59diag|r")
+    msg("|cff40ff59/hagel mahl|r bzw. |cff40ff59schlag|r an/aus · |cff40ff59blinken|r · |cff40ff59effekte|r (Hagelsturm/Strom) · |cff40ff59ab5|r (Mahlstrom erst ab 5 Stapeln) · |cff40ff59reset|r · |cff40ff59diag|r")
   end
 end

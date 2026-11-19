@@ -1,4 +1,4 @@
--- Schlaghagel 1.2 - Simulation (Schlaghagel mit Hagelsturm + Waffe des Mahlstroms) (Klasse per Umgebungsvariable PROC_CLASS=SHAMAN|WARLOCK; Standard SHAMAN): Blizzard-Aura-Slot (CustomAuraContainerTemplate), Kampf-Sperre, kein Ton.
+-- Schlaghagel 1.3 - Simulation (Schlaghagel mit Hagelsturm + Waffe des Mahlstroms) (Klasse per Umgebungsvariable PROC_CLASS=SHAMAN|WARLOCK; Standard SHAMAN): Blizzard-Aura-Slot (CustomAuraContainerTemplate), Kampf-Sperre, kein Ton.
 -- Aufruf aus addons/:  cd addons && lua5.1 ../tests/proc.lua
 local CLASS = os.getenv("PROC_CLASS") or "SHAMAN"
 local ID = ({ SHAMAN = 16257 })[CLASS]
@@ -63,6 +63,7 @@ function CreateFrame(kind, name, parent, tpl)
       rawset(b, "SetDurationText", function(s, x) s.text = x end)
       rawset(b, "AddAuraShownAnimation", function(s, g) s.anims[#s.anims + 1] = g end)
       rawset(b, "SetApplicationCount", function(s, x) s.count = x end)
+      rawset(b, "SetApplicationBar", function(s, bar, o) s.bar, s.barOpts = bar, o end)
       opts.initializeFrame(b)
       local id = next(opts.candidateFilters.includeSpellIDs)
       slots[id] = { btn = b, opts = opts, container = f, key = key }
@@ -71,11 +72,17 @@ function CreateFrame(kind, name, parent, tpl)
   end
   return f
 end
-local function gameAura(id, on)   -- so wie CustomAuraButtonPrivateMixin:ApplyVisibility
+local function gameAura(id, on, stacks)   -- so wie CustomAuraButtonPrivateMixin:ApplyApplicationBar + ApplyVisibility
   buff[id] = on or nil
   local s = slots[id]
   if not s then return end
   local b = s.btn
+  if rawget(b, "bar") then            -- Application Bar: SetShown(applications >= minApplications)
+    local show = on and (stacks or 1) >= b.barOpts.minApplications or false
+    local was = b.bar._shown
+    b.bar._shown = show
+    if show and not was and b.bar._scripts.OnShow then b.bar._scripts.OnShow(b.bar) end
+  end
   local match = on and s.opts.candidateFilters.includeSpellIDs[id] == true and s.container._shown
   local was = b._shown
   b._shown = match and true or false
@@ -114,11 +121,17 @@ for _, id in ipairs({ ID, MAHL }) do
   if s then
     local n = 0 for _ in pairs(s.opts.candidateFilters.includeSpellIDs) do n = n + 1 end
     check(n == 1, "genau eine Buff-ID je Slot (" .. id .. ")")
-    check(s.btn.icon and s.btn.cd and s.btn.text and rawget(s.btn, "count") ~= nil, "Symbol/Ablauf/Restzeit/Ladungen an Blizzard (" .. id .. ")")
+    check(s.btn.icon and s.btn.cd and s.btn.text, "Symbol/Ablauf/Restzeit an Blizzard (" .. id .. ")")
   end
 end
 check(#slots[ID].btn.anims == 1 + 4 + 3 + 1, "Schlaghagel: Blinken + 2 Hagel + 2 Tempo-Striche + 3 Klingen-Schnitte + Einschlag (" .. #slots[ID].btn.anims .. ")")
-check(#slots[MAHL].btn.anims == 1 + 5 + 6 + 1, "Mahlstrom: Blinken + 5 Strom-Schleifen + 6 Blitze + Einschlag (" .. #slots[MAHL].btn.anims .. ")")
+check(#slots[MAHL].btn.anims == 1 + 5 + 6, "Mahlstrom: Blinken + 5 Strom-Schleifen + 6 Blitze (Einschlag erst bei 5 Stapeln) (" .. #slots[MAHL].btn.anims .. ")")
+do
+  local b = slots[MAHL].btn
+  check(b.bar and b.bar._kind == "StatusBar" and b.barOpts.minApplications == 5 and b.barOpts.maxApplications == 5, "Mahlstrom: Stapelschwelle 5 an Blizzard (Application Bar)")
+  check(rawget(b, "count") == nil, "Mahlstrom: keine Stapelzahl")
+  check(rawget(slots[ID].btn, "bar") == nil and rawget(slots[ID].btn, "count") ~= nil, "Schlaghagel: Ladungen wie bisher, keine Schwelle")
+end
 check(_G.SchlaghagelAnchor and _G.SchlaghagelMahlAnchor, "zwei Anker")
 check(SchlaghagelDB.mahl and SchlaghagelDB.mahl.y == 120 and SchlaghagelDB.y == -150, "Mahlstrom ueber dem Charakter, Schlaghagel darunter")
 check(said("Schlaghagel") and said("Waffe des Mahlstroms"), "Login nennt beide")
@@ -126,14 +139,21 @@ ev("PLAYER_REGEN_ENABLED")
 check(containers == 2, "nicht doppelt gebaut")
 -- 3) Procs im Kampf: das Spiel zeigt, Add-on liest nichts; beide unabhaengig
 incombat = true
-gameAura(MAHL, true)
-check(slots[MAHL].btn._shown and not slots[ID].btn._shown, "nur Mahlstrom sichtbar")
+local MB = slots[MAHL].btn
+for st = 1, 4 do
+  gameAura(MAHL, true, st)
+  check(not MB.bar._shown, "Mahlstrom bei " .. st .. " Stapel(n) unsichtbar")
+end
+gameAura(MAHL, true, 5)
+check(MB.bar._shown and MB._shown and not slots[ID].btn._shown, "Mahlstrom erst bei 5 Stapeln sichtbar, Schlaghagel nicht")
+check(type(MB.bar._scripts.OnShow) == "function", "Einschlag-Blitz beim Erreichen der 5 Stapel (OnShow)")
 local allPlay = true for _, g in ipairs(slots[MAHL].btn.anims) do allPlay = allPlay and g.playing end
 check(allPlay, "Strom-Animation laeuft im Kampf")
 gameAura(ID, true)
 local hPlay = true for _, g in ipairs(slots[ID].btn.anims) do hPlay = hPlay and g.playing end
 check(slots[ID].btn._shown and hPlay, "Schlaghagel dazu, blinkt + Hagelsturm laeuft")
 gameAura(MAHL, false)
+check(not MB.bar._shown, "nach Blitzschlag (Buff weg) wieder unsichtbar")
 local anyPlay = false for _, g in ipairs(slots[MAHL].btn.anims) do anyPlay = anyPlay or g.playing end
 check(not slots[MAHL].btn._shown and not anyPlay and slots[ID].btn._shown, "Mahlstrom weg (Blitzschlag), Animation aus, Schlaghagel bleibt")
 gameAura(ID, false)
@@ -175,6 +195,11 @@ check(not slots[MAHL].btn._shown, "aus: kein Proc-Bild")
 gameAura(MAHL, false)
 SlashCmdList.SCHLAGHAGEL("mahl")
 check(not SchlaghagelDB.mahl.aus and slots[MAHL].container._shown and containers == 2, "Mahlstrom wieder an, ohne neuen Container")
+out = {}
+SlashCmdList.SCHLAGHAGEL("ab5")
+check(SchlaghagelDB.mahl.ab5 == false and said("ersten Stapel"), "/hagel ab5 aus: ab dem ersten Stapel")
+SlashCmdList.SCHLAGHAGEL("ab5")
+check(SchlaghagelDB.mahl.ab5 == true and said("5 Stapeln"), "/hagel ab5 wieder an")
 local b0 = SchlaghagelDB.blink
 SlashCmdList.SCHLAGHAGEL("blinken")
 check(SchlaghagelDB.blink == not b0 and said("/reload"), "blinken umschalten")

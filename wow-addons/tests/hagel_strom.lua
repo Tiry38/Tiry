@@ -49,7 +49,8 @@ end
 local fsl = texts(P, {})
 local wordy = false
 for _, f in ipairs(fsl) do if tostring(f.__text or ""):gsub("|c%x%x%x%x%x%x%x%x", ""):find("%a") then wordy = true end end
-ok(#fsl == 2 and not wordy, "nur 2 Texte (Zahl + Sekunden), keine Woerter: " .. #fsl)
+ok(#fsl == 1 and not wordy, "Mahlstrom: nur 1 Text (Sekunden, mittig), keine Stapelzahl, keine Woerter: " .. #fsl)
+ok(fsl[1] and fsl[1].__points.CENTER ~= nil, "Sekunden in der Mitte")
 -- alle Animationsgruppen der Vorschau einsammeln
 local groups = {}
 local function walk(o)
@@ -111,6 +112,7 @@ ok(#L.problems(A) == 0, "Layout: " .. table.concat(L.problems(A), " | "))
 
 -- Bild fuer Bild exportieren (Hintergrund fest, damit alle Bilder gleich gross sind)
 if OUT then
+  if fsl[1] then fsl[1]:SetText("24") end   -- Restzeit wie im Spiel (Vorschau-Zaehler laeuft im Nachbau nicht)
   local bg = A:CreateTexture(nil, "BACKGROUND", nil, -8)
   bg:SetColorTexture(0.055, 0.06, 0.075, 1)
   bg:SetPoint("CENTER", A, "CENTER", 0, 10)

@@ -37,7 +37,7 @@ Aktueller Stand und offene Punkte: **[`UEBERGABE.md`](UEBERGABE.md)** – zuerst
   Wird nur für die Routen-Werkzeuge gebraucht. Beide GPL-3.0 → LevelPilot und Tiry's Zentrale tragen `LIZENZ.txt` +
   `LICENSE-GPL-3.0.md` (Repo ist öffentlich; neue Datenquellen dort eintragen).
 
-## Schlaghagel 1.2 (Schlaghagel + Waffe des Mahlstroms)
+## Schlaghagel 1.3 (Schlaghagel + Waffe des Mahlstroms)
 `addons/Schlaghagel/`: `PROFILES.SHAMAN` = Liste von Procs (`hagel` 16257, `mahl` 408505 – Forever-Talent 408498, Buff 30 s, 5 Stapel).
 Je Proc eigener Anker (`<frame>Anchor`), Vorschau (`<frame>Preview`) und Aura-Container (`<frame>AuraContainer`); Position/Größe
 von `hagel` direkt in `SchlaghagelDB` (1.0-kompatibel), andere in `DB[key]`. `fx = "strom"` baut Plasma-Ring, Blitzbögen, 6 Blitze
@@ -45,13 +45,19 @@ von `hagel` direkt in `SchlaghagelDB` (1.0-kompatibel), andere in `DB[key]`. `fx
 still, bis die langsamste fertig ist). Alle Gruppen per `AddAuraShownAnimation` (Spiel startet/stoppt sie, auch im Kampf).
 Grafiken: `python3 -I tools/strom_media.py`. Tests: `cd addons && lua5.1 ../tests/hagel.lua` („HAGEL TESTS OK“) und aus `wow-addons/`
 `lua5.1 tests/hagel_strom.lua [ordner]` („STROM TESTS OK“; strenger Nachbau, `M.animState(group, t)` rechnet Alpha/Drehung/Skalierung
-nach; mit Ordner 60 Einzelbilder → `render_pages.py` → GIF `previews/Schlaghagel_1.1_Mahlstrom.gif`).
+nach; mit Ordner 60 Einzelbilder → `render_pages.py` → GIF, heute `previews/Schlaghagel_1.3_Mahlstrom_ab5.gif`).
 **1.2:** `hagel` hat `fx = "hagel"` (Hagelsturm): 3 Klingen-Schnitte (`CUTS`, X + flach, Takt 1,2 s = 3 Ladungen) mit Treffer-Funken,
 2 Hagel-Lagen (Translation + Ein/Aus, eigener Takt), 2 flackernde Tempo-Striche, Einschlag. **Tiry will beim Schlaghagel keine
 Kreise/Ringe/Drehungen** (Test prüft das). Grafiken `python3 -I tools/hagel_media.py` (nutzt Helfer aus `strom_media.py`, eigener Zufall).
 Test `lua5.1 tests/hagel_sturm.lua [ordner]` („HAGELSTURM TESTS OK“, Mock rechnet jetzt auch Translation nach) → GIF
 `previews/Schlaghagel_1.2_Hagelsturm.gif`. `/hagel effekte` (= `strom`) schaltet beide Effekt-Animationen.
 **1.2.1:** Tiry will **keine Texte** in den Anzeigen (kein Titel/Hinweis) – nur Ladungen/Stapel + Sekunden; beide Strenge-Tests prüfen das.
+**1.3 – Mahlstrom erst ab 5 Stapeln:** `pr.minStacks = 5`. Die ganze Optik hängt an einer unsichtbaren `StatusBar` (`gate`), die per
+`button:SetApplicationBar(gate, {minApplications = 5, maxApplications = 5})` Blizzards Knopf übergeben wird – das Spiel macht
+`SetShown(applications >= minApplications)` (`Blizzard_CustomAuraButton` `ApplyApplicationBar`), auch im Kampf. Keine Stapelzahl,
+Restzeit groß mittig. Einschlag nicht über `AddAuraShownAnimation` (liefe schon bei Stapel 1), sondern `gate` `OnShow` → `strike:Play()`.
+Schlägt `SetApplicationBar` fehl, bleibt `gate` sichtbar (Rückfall: ab 1 Stapel). `/hagel ab5` (`DB.mahl.ab5`) schaltet die Schwelle, ab `/reload`.
+Vorschau-GIF `previews/Schlaghagel_1.3_Mahlstrom_ab5.gif`.
 
 ## WindBaem (Windzorn-Ton)
 `addons/WindBaem/`: meldet per `C_UnitAuras.AddAuraSound(Added, {unitToken="player", spellID, soundFileName, outputChannel,
