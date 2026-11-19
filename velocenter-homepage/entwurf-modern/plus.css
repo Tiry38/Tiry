@@ -267,3 +267,6 @@ html.er body .finder{border-radius:var(--pl-r-xl)!important;box-shadow:var(--pl-
 
 /* 360 px: Familienbetrieb-Zeile einzeilig statt zweispaltig umbrechen */
 @media (max-width:400px){[data-v="start"] .eyebrow.hello{font-size:9.5px!important;letter-spacing:.07em!important;gap:4px!important;flex-wrap:nowrap!important;white-space:nowrap!important}}
+
+/* ---------- Tempo (19.11.2026): --plH ohne Vererbung, nur an #main gesetzt (plus.js) ---------- */
+@property --plH{syntax:'<length>';inherits:false;initial-value:158px}
