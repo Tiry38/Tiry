@@ -31,7 +31,7 @@ ok(#W.errors == 0, "keine Lua-Fehler beim Laden: " .. table.concat(W.errors, " |
 local A, P = G.SchlaghagelMahlAnchor, G.SchlaghagelMahlPreview
 ok(A and P and G.SchlaghagelAnchor, "beide Anker gebaut")
 ok(A.__points.CENTER and A.__points.CENTER[4] == 120, "Mahlstrom ueber der Bildmitte (y +120)")
-for _, f in ipairs({ "strom_glow", "strom_plasma", "strom_arc1", "strom_arc2", "strom_bolt1", "strom_bolt2", "strom_bolt3" }) do
+for _, f in ipairs({ "strom_glow", "strom_plasma", "strom_arc1", "strom_arc2", "strom_bolt1", "strom_bolt2", "strom_bolt3", "strom_comet", "strom_comet2", "strom_orbit", "strom_wave" }) do
   local h = io.open("addons/Schlaghagel/Media/" .. f .. ".tga", "rb")
   ok(h ~= nil, "Grafik " .. f) if h then h:close() end
 end
@@ -60,7 +60,7 @@ local function walk(o)
 end
 walk(P)
 local playing = 0 for _, g in ipairs(groups) do if g.__playing then playing = playing + 1 end end
-ok(#groups == 13 and playing == 13, "13 Animationen (Puls, 5 Strom, 6 Blitze, Einschlag) laufen: " .. #groups .. "/" .. playing)
+ok(#groups == 19 and playing == 19, "19 Animationen (Puls, 5 Strom, 6 Blitze, 3 Kometen/Funken, Atmen, 2 Wellen, Einschlag) laufen: " .. #groups .. "/" .. playing)
 
 -- Ablauf nachrechnen
 local function at(t)
@@ -97,7 +97,23 @@ for _, g in ipairs(groups) do
   local a = g.__anims[1]
   if a and a.__kind == "Rotation" then spins[#spins + 1] = g end
 end
-ok(#spins == 3, "3 Drehungen")
+ok(#spins == 6, "6 Drehungen (Plasma, 2 Boegen, 2 Kometen, Funken): " .. #spins)
+-- 1.4: Ring bewegt sich sichtbar - Komet schnell, Druckwellen laufen jede Sekunde nach aussen
+local cometG, waves = nil, {}
+for _, g in ipairs(groups) do
+  local a = g.__anims[1]
+  local f = a and a.__target and tostring(a.__target.__file) or ""
+  if f:find("strom_comet$") and a.__kind == "Rotation" then cometG = g end
+  if f:find("strom_wave", 1, true) then waves[#waves + 1] = g end
+end
+ok(cometG and cometG.__anims[1].__dur <= 1.2, "Neon-Komet dreht schnell (<= 1,2 s je Runde)")
+ok(#waves == 2, "2 Druckwellen")
+local function waveAt(t)
+  local best = 0
+  for _, g in ipairs(waves) do for _, e in ipairs((W.animState(g, t))) do if e[2] == "alpha" then best = math.max(best, e[3]) end end end
+  return best
+end
+for _, t in ipairs({ 0.05, 0.55, 1.05, 1.55, 2.05, 3.05 }) do ok(waveAt(t) > 0.2, "Druckwelle sichtbar bei " .. t .. " s") end
 for _, g in ipairs(spins) do
   local r1 = W.animState(g, 3.0)[1][3]
   local r2 = W.animState(g, 3.1)[1][3]

@@ -124,6 +124,95 @@ def plasma():
     return np.clip(a, 0, 1)
 
 
+# ---------- 1.4: moderner Energie-Ring (farbig, im Spiel ohne Einfaerbung) ----------
+#   strom_comet   Neon-Komet: heller Kopf, Schweif ueber 300 Grad, Verlauf Weiss -> Tuerkis -> Blau -> Violett
+#   strom_comet2  zweiter, duennerer Komet (Gegenstrom)
+#   strom_orbit   3 kreisende Funken mit kurzem Schweif
+#   strom_wave    duenne Druckwelle mit Kegel-Verlauf (Tuerkis/Blau/Violett rundum)
+STOPS = [(0.00, (235, 255, 255)), (0.10, (45, 226, 230)), (0.45, (60, 125, 255)), (1.00, (150, 90, 255))]
+
+
+def ramp(f, stops=STOPS):
+    f = np.clip(f, 0, 1)
+    out = np.zeros(f.shape + (3,), np.float32)
+    xs = [p for p, _ in stops]
+    for c in range(3):
+        out[..., c] = np.interp(f, xs, [col[c] for _, col in stops])
+    return out
+
+
+def save_rgba(rgb, a, name):
+    a = np.clip(a, 0, 1)
+    img = Image.fromarray(np.uint8(np.dstack([np.clip(rgb, 0, 255), a * 255])), "RGBA")
+    img.save(os.path.join(OUT, name + ".tga"))
+
+
+def grid(ss=2):
+    M = N * ss
+    y, x = np.mgrid[0:M, 0:M].astype(np.float32)
+    c = (M - 1) / 2
+    r = np.hypot(x - c, y - c) / ss                    # Pixel im N-Raster
+    th = np.arctan2(x - c, -(y - c)) % (2 * math.pi)  # 0 = oben, im Uhrzeigersinn
+    return M, r, th, ss
+
+
+def down(rgb, a, ss):
+    """Supersampling: Farbe alpha-gewichtet mitteln."""
+    M = a.shape[0]
+    k = M // N
+    aw = a.reshape(N, k, N, k).mean(axis=(1, 3))
+    cw = (rgb * a[..., None]).reshape(N, k, N, k, 3).mean(axis=(1, 3)) / np.maximum(aw[..., None], 1e-6)
+    return cw, aw
+
+
+def comet(heads, radius, span, core, halo, head_r, tail_pow=1.7):
+    M, r, th, ss = grid(4)
+    c = (M - 1) / 2
+    px = (np.arange(M, dtype=np.float32) - c) / ss + N / 2
+    X, Y = np.meshgrid(px, px)
+    acc = np.zeros(r.shape + (3,), np.float32)   # Farbe x Deckkraft (Summe)
+    wsum = np.zeros_like(r)
+    keep = np.ones_like(r)                         # 1 - Deckkraft (Produkt)
+    hot = ramp(np.full(r.shape, 0.04))
+    for h in heads:
+        d = ((h - th + 0.3) % (2 * math.pi)) - 0.3  # Abstand hinter dem Kopf (Schweif gegen die Drehrichtung)
+        f = np.clip(d / span, 0, 1)
+        lead = 0.035 * (0.40 * N) / radius          # weiche Vorderkante (~4 px) statt harter Kante
+        along = np.where(d < 0, np.exp(-(d / lead) ** 2), np.where(d < span, (1 - f) ** tail_pow, 0))
+        w = 1 - 0.65 * f                           # Schweif wird duenner
+        dr = r - radius
+        at = np.clip(along * (np.exp(-(dr / (core * w)) ** 2) + 0.45 * np.exp(-(dr / (halo * w)) ** 2)), 0, 1)
+        hx, hy = N / 2 + radius * math.sin(h), N / 2 - radius * math.cos(h)
+        dh = np.hypot(X - hx, Y - hy)
+        ah = np.clip(np.exp(-(dh / head_r) ** 2) + 0.40 * np.exp(-(dh / (head_r * 3.0)) ** 2), 0, 1)
+        acc += ramp(f) * at[..., None] + hot * ah[..., None]
+        wsum += at + ah
+        keep *= (1 - at) * (1 - ah)
+    rgb = acc / np.maximum(wsum[..., None], 1e-6)
+    A = 1 - keep
+    rgb, A = down(rgb, A, ss)
+    yy, xx = np.mgrid[0:N, 0:N]
+    A *= np.clip((N / 2 - 1 - np.hypot(xx - (N - 1) / 2, yy - (N - 1) / 2)) / 6, 0, 1)  # Rand sauber
+    return rgb, A
+
+
+def wave(radius, core, halo):
+    M, r, th, ss = grid(4)
+    dr = r - radius
+    a = np.exp(-(dr / core) ** 2) + 0.5 * np.exp(-(dr / halo) ** 2)
+    f = (np.cos(th) * 0.5 + 0.5)                       # Kegel-Verlauf rundum: oben Tuerkis, unten Violett
+    rgb = ramp(0.08 + 0.92 * (1 - f))
+    return down(rgb, np.clip(a, 0, 1), ss)
+
+
+def modern():
+    save_rgba(*comet([0.0], 0.40 * N, math.radians(300), 0.018 * N, 0.075 * N, 0.030 * N), "strom_comet")
+    save_rgba(*comet([math.pi], 0.43 * N, math.radians(170), 0.010 * N, 0.050 * N, 0.020 * N, 2.2), "strom_comet2")
+    save_rgba(*comet([0.0, 2 * math.pi / 3, 4 * math.pi / 3], 0.37 * N, math.radians(40),
+                     0.012 * N, 0.04 * N, 0.022 * N, 1.4), "strom_orbit")
+    save_rgba(*wave(0.40 * N, 0.010 * N, 0.045 * N), "strom_wave")
+
+
 if __name__ == "__main__":
     os.makedirs(OUT, exist_ok=True)
     save(glow(), "strom_glow")
@@ -132,4 +221,5 @@ if __name__ == "__main__":
     save(arc(0.7, 3, 0.43 * N, 1.45), "strom_arc2")
     for i in (1, 2, 3):
         save(bolt(i - 1), "strom_bolt%d" % i)
+    modern()
     print("Strom-Grafiken ->", OUT)

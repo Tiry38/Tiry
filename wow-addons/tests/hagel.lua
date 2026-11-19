@@ -125,7 +125,7 @@ for _, id in ipairs({ ID, MAHL }) do
   end
 end
 check(#slots[ID].btn.anims == 1 + 4 + 3 + 1, "Schlaghagel: Blinken + 2 Hagel + 2 Tempo-Striche + 3 Klingen-Schnitte + Einschlag (" .. #slots[ID].btn.anims .. ")")
-check(#slots[MAHL].btn.anims == 1 + 5 + 6, "Mahlstrom: Blinken + 5 Strom-Schleifen + 6 Blitze (Einschlag erst bei 5 Stapeln) (" .. #slots[MAHL].btn.anims .. ")")
+check(#slots[MAHL].btn.anims == 1 + 5 + 6 + 6, "Mahlstrom: Blinken + 5 Strom-Schleifen + 6 Blitze + 6 Ring-Schleifen 1.4 (Einschlag erst bei 5 Stapeln) (" .. #slots[MAHL].btn.anims .. ")")
 do
   local b = slots[MAHL].btn
   check(b.bar and b.bar._kind == "StatusBar" and b.barOpts.minApplications == 5 and b.barOpts.maxApplications == 5, "Mahlstrom: Stapelschwelle 5 an Blizzard (Application Bar)")
@@ -144,7 +144,11 @@ for st = 1, 4 do
   gameAura(MAHL, true, st)
   check(not MB.bar._shown, "Mahlstrom bei " .. st .. " Stapel(n) unsichtbar")
 end
+-- so wie WoW: versteckte Schwelle stoppt die Animationen (1.3.1-Fehlerbild: Kreis leuchtet nur)
+for _, g in ipairs(MB.anims) do g:Stop() end
 gameAura(MAHL, true, 5)
+local again = true for _, g in ipairs(MB.anims) do again = again and g.playing end
+check(again, "Strom-Animation startet beim 5. Stapel neu (Ring dreht, Blitze zucken)")
 check(MB.bar._shown and MB._shown and not slots[ID].btn._shown, "Mahlstrom erst bei 5 Stapeln sichtbar, Schlaghagel nicht")
 check(type(MB.bar._scripts.OnShow) == "function", "Einschlag-Blitz beim Erreichen der 5 Stapel (OnShow)")
 local allPlay = true for _, g in ipairs(slots[MAHL].btn.anims) do allPlay = allPlay and g.playing end

@@ -18,7 +18,7 @@
 --  * Kein Ton. Das Add-on selbst liest im Kampf nichts.
 -- Aufbau nur ausserhalb des Kampfes (der Slot ist fuer Add-ons gesperrt, solange Auren geheim sind).
 
-local VERSION = "1.3.0"
+local VERSION = "1.4.0"
 local SIZE = 76
 local MEDIA = "Interface\\AddOns\\Schlaghagel\\Media\\"
 
@@ -143,6 +143,30 @@ local function strom(V, icon)
   fl(arc1, 1, 0.30, 0.07)
   fl(arc2, 0.90, 0.20, 0.11)
 
+  -- 1.4: moderner Energie-Ring um den Kreis (farbige Grafiken, nicht eingefaerbt):
+  -- Neon-Komet rast im Uhrzeigersinn, zweiter Komet gegenlaeufig, 3 kreisende Funken,
+  -- Plasma-Ring atmet, alle 1 s laeuft eine Druckwelle nach aussen.
+  local comet = tex("OVERLAY", 2, "strom_comet", SIZE * 1.55, 1, 1, 1, 1)
+  local comet2 = tex("OVERLAY", 1, "strom_comet2", SIZE * 1.72, 1, 1, 1, 0.9)
+  local orbit = tex("OVERLAY", 3, "strom_orbit", SIZE * 1.42, 1, 1, 1, 1)
+  rot(comet, -360, 1.1)
+  rot(comet2, 360, 1.7)
+  rot(orbit, -360, 2.6)
+  do
+    local b = loop("BOUNCE"):CreateAnimation("Scale")
+    b:SetTarget(plasma) setScale(b, 0.94, 1.08) b:SetDuration(0.9) b:SetSmoothing("IN_OUT")
+  end
+  for _, w in ipairs({ { 0, 1.0 }, { 1.0, 0 } }) do   -- Versatz/Rest im 2-s-Takt -> eine Welle je Sekunde
+    local t = tex("BACKGROUND", 3, "strom_wave", SIZE * 1.30, 1, 1, 1, 0)
+    local g = loop("REPEAT")
+    local sc = g:CreateAnimation("Scale")
+    sc:SetTarget(t) setScale(sc, 0.85, 1.85) sc:SetDuration(1.0) sc:SetSmoothing("OUT")
+    sc:SetStartDelay(w[1]) sc:SetEndDelay(w[2])
+    local a = g:CreateAnimation("Alpha")
+    a:SetTarget(t) a:SetFromAlpha(0.9) a:SetToAlpha(0) a:SetDuration(1.0) a:SetSmoothing("IN")
+    a:SetStartDelay(w[1]) a:SetEndDelay(w[2])
+  end
+
   -- Blitze: kurz an (0,05 s), ausklingen (0,16 s), Pause bis zum naechsten Takt
   for _, b in ipairs(BOLTS) do
     local t = tex("OVERLAY", 3, "strom_bolt" .. b[2], SIZE * 2.6, 0.80, 0.90, 1, 0)
@@ -170,7 +194,7 @@ local function strom(V, icon)
   r2:SetDuration(0.40) r2:SetSmoothing("OUT")
   groups[#groups + 1] = strike
 
-  return groups, { plasma = plasma, arc1 = arc1, arc2 = arc2, flash = flash, ring = ring }
+  return groups, { plasma = plasma, arc1 = arc1, arc2 = arc2, flash = flash, ring = ring, comet = comet, comet2 = comet2, orbit = orbit }
 end
 
 -- ---------- Hagelsturm-Optik (Schlaghagel, 1.2) ----------
@@ -398,7 +422,18 @@ local function initSlot(pr, button)
       loops = {}
       for i = 1, #p.fx - 1 do loops[i] = p.fx[i] end
       strike = p.fx[#p.fx]
-      gate:SetScript("OnShow", function() pcall(strike.Play, strike) end)
+      -- 1.3.1: WoW stoppt Animationen, solange die Schwelle (1-4 Stapel) versteckt ist. Beim Erreichen
+      -- der 5 deshalb alle Schleifen (Plasma-Ring, Blitzboegen, Blitze, Blinken) neu starten, nicht nur den Einschlag.
+      local again = {}
+      for i = 1, #loops do again[i] = loops[i] end
+      if DB.blink then again[#again + 1] = p.pulse end
+      gate:SetScript("OnShow", function()
+        for _, g in ipairs(again) do pcall(g.Stop, g) pcall(g.Play, g) end
+        pcall(strike.Play, strike)
+      end)
+      gate:SetScript("OnHide", function()
+        for _, g in ipairs(again) do pcall(g.Stop, g) end
+      end)
     end
     hook(pr.fx == "strom" and "Strom" or "Hagelsturm", function() for _, g in ipairs(loops) do button:AddAuraShownAnimation(g) end end)
   end
