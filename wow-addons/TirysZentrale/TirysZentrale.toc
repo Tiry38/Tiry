@@ -1,9 +1,9 @@
 ## Interface: 16001
 ## Title: |cff8cff4dTiry's|r |cff26ff73Zentrale|r
-## Notes: Deine Gold-Zentrale für WoW Forever: Craft-Planer mit Einkaufsliste, Kürschner-Zentrale, Farm-Spots auf der Karte, Live-Preise (Auctionator), Autopilot und komplette deutsche Item-Datenbank.
-## Notes-deDE: Deine Gold-Zentrale für WoW Forever: Craft-Planer mit Einkaufsliste, Kürschner-Zentrale, Farm-Spots auf der Karte, Live-Preise (Auctionator), Autopilot und komplette deutsche Item-Datenbank.
+## Notes: Rezept-Berater: zeigt nach einem AH-Scan, welche Koch- und Lederverarbeitungs-Rezepte du noch nicht kannst und deren Hergestelltes Gold bringt.
+## Notes-deDE: Rezept-Berater: zeigt nach einem AH-Scan, welche Koch- und Lederverarbeitungs-Rezepte du noch nicht kannst und deren Hergestelltes Gold bringt.
 ## Author: Tiry
-## Version: 6.4.0
+## Version: 7.0.0
 ## Category: Auctions
 ## Category-enUS: Auctions
 ## Category-deDE: Auktionen
@@ -16,64 +16,11 @@
 ## AddonCompartmentFuncOnLeave: TirysZentrale_OnAddonCompartmentLeave
 
 Core.lua
-Data_Items.lua
-Data_AllItems.lua
-Data.lua
-Data_Farm.lua
-Data_Spots.lua
-Data_Recipes.lua
-Data_RecipeItems.lua
-Data_RecipeExtra.lua
 Data_Hotfix.lua
-Database.lua
-Recipes.lua
-Maps.lua
-Market.lua
-PriceString.lua
-Scanner.lua
-Tracker.lua
-Skinning.lua
-Autopilot.lua
-Extras.lua
-Shopping.lua
-Ledger.lua
-Demand.lua
-Snipe.lua
-Timing.lua
-Inventory.lua
-Deals.lua
-Session.lua
-Alerts.lua
+Data_Craft.lua
+Data_VendorMats.lua
+Craft.lua
+Scan.lua
 Advisor.lua
-Guide.lua
-AuctionWatch.lua
-CraftBook.lua
-Goal.lua
-ZoneGold.lua
 UI\Widgets.lua
-UI\ItemList.lua
-UI\Main.lua
-UI\HomeCards.lua
-UI\PageHome.lua
-UI\PageMethods.lua
-UI\PageFarm.lua
-UI\PageSkinning.lua
-UI\PageMarket.lua
-UI\PageDatabase.lua
-UI\PageScanner.lua
-UI\PageRecipes.lua
-UI\PageTracker.lua
-UI\PageLedger.lua
-UI\PageBasics.lua
-UI\PageSettings.lua
-UI\PageSession.lua
-UI\PageAlerts.lua
-UI\PageAdvisor.lua
-UI\PageGlossary.lua
-UI\PageAuctions.lua
-UI\PageResults.lua
-UI\MerchantHelper.lua
-UI\ShopWindow.lua
-UI\CraftPanel.lua
-UI\Wizard.lua
-UI\Search.lua
+UI\Window.lua

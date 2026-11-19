@@ -1,5 +1,16 @@
 # Changelog – Tiry's Zentrale
 
+## 7.0.0 (19.11.2026)
+**Neubau: nur noch eine Funktion, ein Fenster – der Rezept-Berater für Kochkunst und Lederverarbeitung.**
+- Nach einem AH-Scan: Rezepte, die du **noch nicht kannst**, die **im AH zu kaufen** sind und deren **Hergestelltes Gold bringt**, bester Gewinn zuerst.
+- Je Zeile: Rezeptpreis, Gewinn je Herstellung, nach wie vielen Herstellungen das Rezept bezahlt ist, Skill-Farbe bei deinem Stand.
+- Filter: Beruf, Jetzt lernbar / Bald (+25) / Alle, Nur mit Skillpunkten.
+- Material: Händler (unbegrenzter Vorrat, deine Fraktion, im Spiel gelernte Preise) oder AH über echte Preisstufen für 5 Herstellungen.
+- Gelernte Rezepte: Zauberbuch + Berufsfenster (einmal öffnen) + sofort bei „Neues Rezept gelernt“.
+- Eigener Komplett-Scan mit 15-Min.-Anzeige; liest auch mit, wenn Auctionator scannt. Auctionator ist nicht mehr nötig.
+- Entfernt: alle anderen Seiten und Funktionen von 6.x. Gespeicherte Daten werden einmal zurückgesetzt (Fensterposition und gelernte Rezepte bleiben).
+- Add-on von ~1,7 MB auf ~0,3 MB Daten.
+
 ## 6.4.0 (11.11.2026)
 **Neu: eigenes Berufsfenster. Bei „TZ“ verschwindet Blizzards Fenster, und das Zentrale-Fenster kommt an seine Stelle statt daneben.**
 - **Links die Rezeptliste:**

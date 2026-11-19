@@ -37,6 +37,17 @@ Aktueller Stand und offene Punkte: **[`UEBERGABE.md`](UEBERGABE.md)** – zuerst
   Wird nur für die Routen-Werkzeuge gebraucht. Beide GPL-3.0 → LevelPilot und Tiry's Zentrale tragen `LIZENZ.txt` +
   `LICENSE-GPL-3.0.md` (Repo ist öffentlich; neue Datenquellen dort eintragen).
 
+## Tiry's Zentrale 7.0 – nur noch Rezept-Berater (19.11.)
+Tiry: „nur noch eine einzige Funktion … ein Fenster … lohnenswerte Rezepte für Kochen und Lederverarbeitung im AH …
+Nicht das Rezept, sondern das, was ich crafte, soll Gold bringen … nur Rezepte, die ich noch nicht habe … für mein Skill,
+am besten mit Skillpunkten, aber primär Gold.“
+- **Keine weiteren Seiten/Funktionen wieder einbauen**, ohne dass Tiry es will. Aufbau und Rechenweg: `ZENTRALE.md`.
+- Gewinn je Herstellung = max(AH-Min × Menge × 0,95, Händlerpreis) − Material; seelengebunden → nur Händler.
+  Material = min(Händler mit unbegrenztem Vorrat + eigener Fraktion, AH über Preisstufen für `Advisor.CRAFTS` = 5).
+- Sortierung **nur nach Gewinn**; Skill-Punkte sind Filter/Anzeige („Nur mit Skillpunkten“, Farbe), nicht Sortierung.
+- Daten nur aus Spieldaten/QuestieDB über `tools/gen_zentrale7.py` / `tools/gen_vendor_mats.py`; Rohdaten in `tools/zentrale_src/`.
+- `UI.Toggle` ist der Schalter-Baustein aus `Widgets.lua` – das Fenster heißt `UI.ToggleWindow` (Namenskollision!).
+
 ## Schlaghagel 1.3 (Schlaghagel + Waffe des Mahlstroms)
 `addons/Schlaghagel/`: `PROFILES.SHAMAN` = Liste von Procs (`hagel` 16257, `mahl` 408505 – Forever-Talent 408498, Buff 30 s, 5 Stapel).
 Je Proc eigener Anker (`<frame>Anchor`), Vorschau (`<frame>Preview`) und Aura-Container (`<frame>AuraContainer`); Position/Größe

@@ -47,15 +47,15 @@ Unsicheres immer als unsicher benennen – vieles ist nur im Spiel prüfbar.
   Formel 5/20/60 % vom Händlerpreis ist **unbestätigt**. AH-Gebühr 5 %.
 - Bekannter Fehler: „Interner Auktionsfehler“ beim Einstellen unter dem günstigsten Angebot.
 - **Auctionator:** Preise über `Auctionator.API.v1` (`GetAuctionPriceByItemID`, `GetAuctionAgeByItemID`,
-  `MultiSearchExact`, `CreateShoppingList`, `RegisterForDBUpdate`). Kein öffentlicher Scan-Start; die Zentrale
-  nutzt abgesichert `Auctionator.State.FullScanFrameRef:InitiateScan()` (Replicate, 15-Min.-Sperre `CanInitiate`).
+  `MultiSearchExact`, `CreateShoppingList`, `RegisterForDBUpdate`). Kein öffentlicher Scan-Start. Die Zentrale 7
+  ruft `C_AuctionHouse.ReplicateItems()` selbst (Knopf) und liest per `hooksecurefunc` auch Auctionator-Scans mit.
 
 ## Tests
 - Strenger Nachbau `wow-addons/tests/wow_mock.lua`: Widget-Methoden nur, wenn sie in Blizzards Forever-API
   stehen (`tests/forever_widget_api.lua`), Ereignisse nur aus `tests/forever_events.lua`.
 - Alles prüfen mit dem Skill `wow-tests` (`bash wow-addons/tools/test_all.sh`); `luac5.1 -p` auf alle .lua.
 - Neue Logik in der Zentrale immer mit Spec in `wow-addons/spec/zentrale_spec.lua` (`E.load(opts)` aus
-  `spec/addon_env.lua`: itemInfo, prices, bags, known; `W.now` = Mock-Zeit, `W.flush()` = Timer).
+  `spec/addon_env.lua`: itemInfo, skills, faction, known; `W.replicate` = Komplett-Scan-Zeilen; `W.now` = Mock-Zeit, `W.flush()` = Timer).
 
 ## Design (Tirys Anspruch)
 - Extrem modern, glatte Flächen, starke Farbverläufe, abgerundet, Glas + Neon-Glow; **nichts nach Baukasten /

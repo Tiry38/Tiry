@@ -612,6 +612,14 @@ function M.install(opts)
     GetItemKeyInfo = function(key) return { itemID = key.itemID, isCommodity = not (M.nonCommodity or {})[key.itemID] } end,
     MakeItemKey = function(id) return { itemID = id, itemLevel = 0, itemSuffix = 0, battlePetSpeciesID = 0 } end,
     ReplicateItems = function() M.replicated = (M.replicated or 0) + 1 end,
+    -- Komplett-Scan: M.replicate = { { itemID, Anzahl, Sofortkauf gesamt, Verkäufer, hasAllInfo }, ... } (Index ab 0 wie Blizzard)
+    GetNumReplicateItems = function() return #(M.replicate or {}) end,
+    GetReplicateItemInfo = function(i)
+      assert(type(i) == "number", "GetReplicateItemInfo(index)")
+      local r = (M.replicate or {})[i + 1]
+      if not r then return nil end
+      return "Item", 134400, r[2], 1, true, 1, 1, 0, 0, r[3], 0, false, nil, r[4] or "Händler", nil, 0, r[1], r[5] ~= false
+    end,
   }
   G.AUCTION_EXPIRED_MAIL_SUBJECT = "Auktion abgelaufen: %s"
   G.GetRealmName = function() return "Forever-Testrealm" end

@@ -1,4 +1,22 @@
-# Ingame-Test – Tiry's Zentrale 6.2.0
+# Ingame-Test – Tiry's Zentrale 7.0.0 (Rezept-Berater)
+
+Vorher: alten Ordner `TirysZentrale` löschen, neuen hineinkopieren, `/console scriptErrors 1`, `/reload`.
+- [ ] `/tz` öffnet **ein** Fenster: Kopf, Scan-Karte, Filter, Liste. ESC und × schließen. Minikarten-Knopf öffnet/schließt.
+- [ ] Ohne AH: Karte „Noch kein Scan“, Knopf gesperrt
+- [ ] Kochkunst- und Leder-Berufsfenster einmal öffnen → Fußzeile zeigt bei beiden „erkannt“
+- [ ] Am AH „AH scannen“ → nach ein paar Sekunden Chat „Scan fertig: N Angebote“, Angebotszahl plausibel (zehntausende)
+- [ ] Knopf zeigt danach „in 14:59“ und zählt herunter
+- [ ] Liste: nur Rezepte, die du **nicht** kannst; Stichprobe: Rezept im AH suchen – Preis stimmt mit „Rezept“ überein
+- [ ] Maus über eine Zeile: Rechnung mit Verkaufspreis, Zutaten (Händler/AH), Lernstufe
+- [ ] Klick auf Zeile sucht das Rezept im AH (Auctionator) · Shift-Klick verlinkt
+- [ ] Filter Kochkunst/Leder, Bald (+25), Nur mit Skillpunkten ändern die Liste
+- [ ] Rezept kaufen und lernen → verschwindet sofort aus der Liste
+- [ ] Händler mit Gewürzen/Faden besuchen → keine Fehler (Preise werden still gelernt)
+- [ ] Auctionator-Komplett-Scan statt eigenem Knopf → Zentrale liest mit („Scan fertig“)
+
+---
+
+# Ingame-Test – Tiry's Zentrale 6.2.0 (veraltet seit 7.0)
 
 Zum Abhaken im Spiel. Vorher einmal eingeben:
 ```

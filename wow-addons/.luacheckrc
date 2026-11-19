@@ -9,8 +9,7 @@ unused_args = false
 globals = {
   "TirysZentrale", "TirysZentraleDB", "TirysZentraleCharDB",
   "SLASH_TIRYSZENTRALE1", "SLASH_TIRYSZENTRALE2", "SLASH_TIRYSZENTRALE3", "SlashCmdList",
-  "BINDING_HEADER_TIRYSZENTRALE", "BINDING_NAME_TIRYSZENTRALE_TOGGLE", "BINDING_NAME_TIRYSZENTRALE_SEARCH",
-  "BINDING_NAME_TIRYSZENTRALE_SHOP", "BINDING_NAME_TIRYSZENTRALE_CRAFTNEXT",
+  "BINDING_HEADER_TIRYSZENTRALE", "BINDING_NAME_TIRYSZENTRALE_TOGGLE",
   "TirysZentrale_OnAddonCompartmentClick", "TirysZentrale_OnAddonCompartmentEnter", "TirysZentrale_OnAddonCompartmentLeave",
 }
 

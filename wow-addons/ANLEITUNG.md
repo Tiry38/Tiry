@@ -1,61 +1,47 @@
-# Tiry's Zentrale – Anleitung für Einsteiger
+# Tiry's Zentrale 7 – Rezept-Berater (Kochkunst & Lederverarbeitung)
+
+**Eine Aufgabe, ein Fenster:** Nach einem AH-Scan siehst du, welche Rezepte du **noch nicht kannst**, im
+Auktionshaus **kaufen kannst** und deren **Hergestelltes Gold bringt** – bester Gewinn zuerst.
 
 ## Installation (Windows)
-1. `TirysZentrale.zip` herunterladen.
-2. Rechtsklick → **Alle extrahieren**.
-3. Den Ordner **`TirysZentrale`** kopieren nach:
-   `World of Warcraft\_forever_\Interface\AddOns\`
-   (Gibt es `AddOns` noch nicht: Ordner selbst anlegen.)
-   Richtig ist: `...\Interface\AddOns\TirysZentrale\TirysZentrale.toc`, also kein doppelter Ordner `TirysZentrale\TirysZentrale`.
-4. **Auctionator** für WoW Forever installieren (kostenlos, z. B. über CurseForge oder Wago). Ohne Auctionator kennt das Addon keine Preise.
-5. Spiel starten → Charakterauswahl → unten links **AddOns** → beide anhaken.
+1. `TirysZentrale.zip` entpacken.
+2. Den Ordner **`TirysZentrale`** nach `World of Warcraft\_forever_\Interface\AddOns\` kopieren.
+   Richtig ist `...\AddOns\TirysZentrale\TirysZentrale.toc` (kein doppelter Ordner).
+   **Alte Version vorher löschen** – 7.0 ist ein Neubau, alte Dateien im Ordner stören nicht, sind aber Ballast.
+3. Spiel starten, unter „AddOns“ anhaken. Auctionator ist **nicht nötig** (wird für die Suche per Klick genutzt, wenn vorhanden).
 
-## Erster Start
-1. Im Spiel `/tz` eintippen oder auf die **grüne Münze** an der Minikarte klicken.
-2. Der **Einsteiger-Assistent** zeigt in 3 Schritten, was erkannt wurde und was du zuerst tun solltest.
-3. Einmal zum **Auktionshaus** gehen, es öffnen und oben rechts auf **„AH scannen“** klicken.
-   **Ein Scan aktualisiert alle Reiter** – Preise, Verkäufe pro Tag, Schnäppchen und deine Auktionen. Du musst in keinem Reiter extra suchen.
-   Blizzard erlaubt den Komplett-Scan nur alle 15 Minuten; dazwischen macht der Knopf einen Schnell-Scan.
+## So geht's
+1. `/tz` oder Klick auf den Knopf an der Minikarte → das Fenster öffnet sich.
+2. **Berufsfenster einmal öffnen** (Kochkunst und Lederverarbeitung). Dann weiß die Zentrale sicher, welche Rezepte du schon kannst.
+   Die Fußzeile zeigt, für welchen Beruf das erkannt ist.
+3. Zum **Auktionshaus**, im Fenster auf **„AH scannen“** klicken. Nach ein paar Sekunden steht die Liste.
+   Blizzard erlaubt den Komplett-Scan nur **alle 15 Minuten** – der Knopf zeigt die Wartezeit.
+   Startet Auctionator einen Komplett-Scan, liest die Zentrale automatisch mit.
+4. **Liste lesen** (bester Gewinn oben):
+   - **Rezept** – günstigstes Angebot des Rezepts im AH
+   - **+Gewinn je Herstellung** – Verkaufswert minus Material
+   - **zurück** – nach so vielen Herstellungen hat sich das Rezept bezahlt
+   - Punkt + Farbe = Skill-Farbe bei deinem Stand (orange/gelb/grün = gibt noch Punkte, grau = keine mehr)
+5. **Klick auf eine Zeile** sucht das Rezept im AH (über Auctionator). **Shift-Klick** verlinkt es im Chat.
+   **Maus drüber** zeigt die ganze Rechnung: Verkaufspreis, jede Zutat mit Quelle, Lernstufe, gelb/grau.
 
-## Das Fenster
-Oben in der Mitte die **fünf Hauptpunkte**: **Start · Herstellen · Farmen · Handel · Mein Gold**. Darunter die Reiter des Hauptpunkts.
-Oben rechts: **Lupe** (alles durchsuchen), **?** (AH-Schule und Glossar), **Zahnrad** (Einstellungen), **AH scannen**.
+## Filter
+- **Beide / Kochkunst / Leder**
+- **Jetzt lernbar** (Standard) · **Bald (+25)** = bis 25 Skillpunkte über dir · **Alle**
+- **Nur mit Skillpunkten** – blendet Rezepte aus, die bei dir schon grau sind
 
-## Berufsfenster (neu in 6.4)
-Öffnest du einen Beruf, kommt statt Blizzards Fenster das **Berufsfenster der Zentrale**. Du musst die Zentrale dafür nicht aufmachen.
-Oben schaltest du um: **WoW** = Blizzards Fenster, **TZ** = Zentrale-Fenster. Die Wahl bleibt gespeichert.
-- **Links alle Rezepte:** Suche, Filter (Herstellbar, Skill-Up, Gewinn, Favoriten), Sortierung. Rechtsklick = Favorit, Shift-Klick = Link in den Chat.
-- **Oben:** Skill-Balken, **Skill-Tipp** (billigster nächster Skillpunkt), deine Berufe zum Umschalten und Knöpfe direkt in die Zentrale (Planer, Lernen?, Ergebnis, Preise, Verkäufe, Auktionen).
-- **Unten:** Menge, **Herstellen**, **Alle**, dazu **Nächstes craften** und **Einkauf**. Verzauberungen gehen über Blizzards Fenster (Knopf „Im WoW-Fenster verzaubern“).
-- **Rezept:** Gewinn, Material („hast X“), Absatz, Voraussetzungen und Empfehlung. „Einplanen“ setzt die empfohlene Menge auf die Craft-Liste.
-- **Top-Rezepte:** was gerade Gold bringt. Klick = im Berufsfenster anwählen, **+** = einplanen, „Alle in die Liste“ = ganze Liste + Einkaufsfenster.
-- **Liste:** deine Craft-Liste mit −/+/×. **Optionen:** Mindestgewinn, Menge, Filter.
-- Unten: **Nächstes craften** und **Einkauf**.
+## So wird gerechnet
+- **Verkaufswert:** günstigstes AH-Angebot des Ergebnisses × Menge, minus 5 % AH-Anteil. Bringt der Händler mehr
+  (oder ist das Ergebnis seelengebunden), zählt der Händlerpreis.
+- **Material:** je Zutat das Günstigere aus **Händler** (nur Zutaten mit unbegrenztem Vorrat, nur Händler deiner Fraktion;
+  Preise, die du beim Händler siehst, lernt die Zentrale automatisch) und **AH**. Beim AH wird für **5 Herstellungen**
+  über die echten Preisstufen gerechnet – nicht nur das billigste Einzelstück. Reicht das Angebot nicht, steht „AH, knapp“.
+- **Nicht in der Liste:** Rezepte, die du kannst, die gerade nicht im AH sind, die Ruf brauchen, bei denen eine Zutat
+  nirgends zu haben ist, oder die gerade Verlust machen. Ist die Liste leer, steht darunter, wie viele es davon gibt.
 
-## So machst du Gold (die Startseite führt dich)
-Auf der Startseite steht dein **Gold-Kreislauf**. Der orange Schritt ist immer dran:
-1. **Planen:** Klick auf **„Liste erstellen“**. Alle Rezepte deiner Berufe, die gerade Gold bringen, landen auf der Craft-Liste.
-   Sortiert wird nach **Gold pro Tag**: Billige Ware, die sich oft verkauft, schlägt teure Ladenhüter (Kleinvieh macht auch Mist).
-2. **Einkaufen:** Die **Einkaufsliste** zeigt nur das fehlende Material. Beim Händler: „Beim Händler kaufen“. Im AH: „Im AH suchen“. Gekauftes verschwindet von selbst.
-   **„Kaufen bis“** = höchster Stückpreis, bei dem dein Craft noch Gewinn bringt. Liegt das AH drüber, warnt die Liste.
-   Kannst du ein Material (z. B. Geschmeidiger Balg) selbst günstiger herstellen, kauft die Liste die Rohstoffe dafür. Das gilt nur mit deinen eigenen Rezepten.
-3. **Herstellen:** **„Nächstes craften“** oder ganz normal im Berufsfenster. Jedes Stück wird von selbst abgehakt.
-4. **Verkaufen:** Unter **Herstellen → Craft-Planer → Schritt 4** und unter **Handel → Meine Auktionen** stehen deine Items mit Preisvorschlag, Menge und **„Nicht unter“**-Preis. Im AH: Auctionator → „Verkaufen“ → Item anklicken. Nie unter „Nicht unter“ verkaufen.
+## Befehle
+`/tz` Fenster · `/tz scan` Scan (AH offen) · `/tz reset` Fensterposition · `/tz fehler` gespeicherte Fehler
 
-Was dir Herstellen wirklich gebracht hat, zeigt **Herstellen → „Ergebnis“**. „Je Rezept: auto“ macht von jedem Rezept nur so viele, wie sich verkaufen.
-
-Was du als Nächstes lernen solltest, zeigt **Herstellen → „Was lernen?“**: Rezepte für deinen Skill, die sich lohnen. Shift-Klick legt sie direkt in die Auctionator-Suche.
-
-## Handeln wie ein Goldmacher
-- **Verkäufe pro Tag:** Steht in Tooltip, Craft-Planer und Preisen. Gemessen aus zwei Komplett-Scans (15 Min. bis 12 Std. Abstand).
-- **Menge:** Beim Neu-Einstellen empfiehlt die Zentrale so viele, wie in ca. 3 Tagen weggehen. **„Markt voll“** = über 2 Wochen Vorrat im AH – nicht nachlegen.
-- **Schnäppchen:** **Handel → Preise → „Schnäppchen“** (oder `/tz schnapp`). „Unter Händlerpreis“ = sicherer Gewinn beim Händler. Kaufen bleibt immer dein Klick.
-- **Ausrüstung in ganzen Silbern** einstellen – krumme Kupferbeträge lösen oft den „Internen Auktionsfehler“ aus. Die Vorschläge machen das schon so.
-- **Anzahlung:** Jede Auktion kostet mindestens 1 Kupfer (seit 10.11.2026, vorher 1 Silber), teure Ware mehr; bei Ablauf ist sie weg. Zweimal abgelaufen und nie verkauft? Billiger oder zum Händler.
-
-## Gut zu wissen
-- Alles lässt sich rückgängig machen: **×** neben Reglern, **Rückgängig** nach „Alles leeren“, ausgeblendete Rezepte per Klick zurückholen.
-- Fachbegriffe erklärt **? → Glossar**.
-- Im **Kampf** kauft, verkauft und craftet das Addon nichts. Nach dem Kampf einfach nochmal klicken.
-- Tastenkürzel: Optionen → Tastaturbelegung → „Tiry's Zentrale“.
-- Befehle: `/tz` (Fenster), `/tz suche`, `/tz handel`, `/tz schnapp`, `/tz buch`, `/tz assistent`, `/tz wegpunkt` (Kartenpunkt löschen), `/tz leeren` (Craft-Liste leeren), `/tz cf` (Berufsfenster TZ/WoW umschalten), `/tz reset` (Fenster in die Mitte), `/tz fehler` (gespeicherte Fehler anzeigen).
+## Was nur im Spiel prüfbar ist
+- Ob der Komplett-Scan auf deinem Server vollständig ankommt (Angebotszahl in der Scan-Karte).
+- Ob „Berufsfenster einmal öffnen“ alle gelernten Rezepte erkennt (Forever liefert manche Rezepte mit anderer Nummer – die Zentrale ordnet dann über das hergestellte Item zu).

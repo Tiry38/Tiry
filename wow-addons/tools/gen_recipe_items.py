@@ -9,7 +9,7 @@ src = sys.argv[1]
 here = os.path.dirname(os.path.abspath(__file__))
 def rd(n): return csv.DictReader(open(os.path.join(src, n), encoding="utf-8"))
 
-recipes = set(int(m) for m in re.findall(r"^[A-Z_]+\t(\d+)\t", open(os.path.join(here, "..", "TirysZentrale", "Data_Recipes.lua"), encoding="utf-8").read(), re.M))
+recipes = set(int(m) for m in re.findall(r"^[A-Z_]+\t(\d+)\t", open(os.path.join(here, "zentrale_src", "Data_Recipes.lua"), encoding="utf-8").read(), re.M))
 effects = {int(r["ID"]): int(r["SpellID"]) for r in rd("ItemEffect.csv")}
 items = {int(r["ID"]): r for r in rd("ItemSparse_deDE.csv")}
 JUNK = ("(DNT)", "NYI", "OBSOLETE", "DEPRECATED", "Deprecated", "[PH]", "zzOLD", "Monster -")
@@ -36,5 +36,5 @@ for spell in sorted(by_spell):
     rep, _, best, req = sorted(by_spell[spell])[0]
     out.append(f"  [{spell}] = {{ {best}, {req}, {rep} }},")
 out.append("}")
-open(os.path.join(here, "..", "TirysZentrale", "Data_RecipeItems.lua"), "w", encoding="utf-8").write("\n".join(out) + "\n")
+open(os.path.join(here, "zentrale_src", "Data_RecipeItems.lua"), "w", encoding="utf-8").write("\n".join(out) + "\n")
 print(len(by_spell), "Rezepte mit Rezept-Item von", len(recipes))
