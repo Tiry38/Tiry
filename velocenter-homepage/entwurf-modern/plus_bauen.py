@@ -19,7 +19,9 @@ from PIL import Image
 
 HIER = os.path.dirname(os.path.abspath(__file__))
 REPO_IMG = os.path.normpath(os.path.join(HIER, '..', 'img'))
-LIVE = sys.argv[1] if len(sys.argv) > 1 else '/tmp/claude-0/-home-user/aa06df28-a730-5a50-9b3b-74be1455e397/scratchpad/live5'
+LIVEMODUS = '--live' in sys.argv  # echte Auslieferung: alle Seiten, Google bleibt an, Winter-Aktion unverändert
+ARGS = [a for a in sys.argv[1:] if a != '--live']
+LIVE = ARGS[0] if ARGS else '/tmp/claude-0/-home-user/aa06df28-a730-5a50-9b3b-74be1455e397/scratchpad/live5'
 LIMG = os.path.join(LIVE, 'img')
 
 # ---------------------------------------------------------------- Bildvarianten
@@ -54,6 +56,8 @@ for dp, _, fs in os.walk(LIMG):
 for k in VARS:
     VARS[k].sort()
 
+SEITEN_LIVE = ['index.html'] + [d + '/index.html' for d in ('service', 'hersteller', 'lager', 'isy-experte', 'isy-treffen',
+                                                            'e-dreiraeder', 'kontakt', 'impressum', 'datenschutz')]
 src = open(os.path.join(LIVE, 'index.html'), encoding='utf-8').read()
 s = src
 
@@ -91,8 +95,9 @@ def srcset(path):
 
 
 # ---------------------------------------------------------------- Kopf: Vorlage, nicht für Google
-rep('<meta name="robots" content="index,follow">', '<meta name="robots" content="noindex">')
-rep('<link rel="canonical" href="https://www.velo-center.de/">\n', '')
+if not LIVEMODUS:
+    rep('<meta name="robots" content="index,follow">', '<meta name="robots" content="noindex">')
+    rep('<link rel="canonical" href="https://www.velo-center.de/">\n', '')
 
 # ---------------------------------------------------------------- Punkt 4: Bilder
 # 4a) Hero: erstes Rad mit srcset + fetchpriority, weitere Räder als 900er-Variante (VM.run liest currentSrc/src → bleibt gleich)
@@ -217,6 +222,20 @@ print('JS-Vorlagen:', jc)
 # ================================================================ Design (Punkte 1, 2, 3, 5)
 PLUS_CSS = open(os.path.join(HIER, 'plus.css'), encoding='utf-8').read()
 PLUS_JS = open(os.path.join(HIER, 'plus.js'), encoding='utf-8').read()
+if LIVEMODUS:  # Tiry 19.11.2026: Winter-Aktion auf der Startseite bleibt wie vorher (Sternen-Block)
+    wa_ = PLUS_CSS.index('/* ---------- 1) Winter-Aktion')
+    wb_ = PLUS_CSS.index('/* ---------- 1) Gutschein')
+    PLUS_CSS = PLUS_CSS[:wa_] + PLUS_CSS[wb_:]
+    for a_, b_ in ((',.ice>.wrap,', ','), (':is(.ice>.wrap,.gcard,', ':is(.gcard,'),
+                   ('html.er body .eyebrow,html.er body .ice .eyebrow,', 'html.er body .eyebrow:not(.ice *),'),
+                   ('html.er body .eyebrow b,html.er body .ice .eyebrow b{', 'html.er body .eyebrow:not(.ice *) b{'),
+                   ('html.er body .eyebrow::before,html.er body .ice .eyebrow::before,', 'html.er body .eyebrow:not(.ice *)::before,'),
+                   ('html.er body .eyebrow+:is(', 'html.er body .eyebrow:not(.ice *)+:is('),
+                   ('.ice .mid,', ''),
+                   ('.cta:not(.wa)', '.cta:not(.wa):not(.ice *)')):
+        assert a_ in PLUS_CSS, a_
+        PLUS_CSS = PLUS_CSS.replace(a_, b_)
+    assert '.ice' not in PLUS_CSS.replace('.ice *)', ''), [l for l in PLUS_CSS.splitlines() if '.ice' in l.replace('.ice *)', '')]
 
 # eigener Stil nach allen bestehenden Stilen (Ende des letzten Stil-Blocks „eisRot“)
 ea = s.index('<style id="eisRot">')
@@ -228,7 +247,18 @@ exec(open(os.path.join(HIER, 'plus_markup.py'), encoding='utf-8').read())  # Mar
 # eigenes Skript ganz am Ende
 rep('\n</html>', '\n<script id="plusJs">\n' + PLUS_JS + '\n</script>\n</html>')
 
-out = os.path.join(LIVE, 'vorlage-plus.html')
-open(out, 'w', encoding='utf-8').write(s)
-shutil.copyfile(out, os.path.join(HIER, 'vorlage-plus.html'))
-print('geschrieben:', out, len(s.encode()) // 1024, 'KB')
+if LIVEMODUS:
+    open(os.path.join(LIVE, 'index.html'), 'w', encoding='utf-8').write(s)
+    print('live:', 'index.html', len(s.encode()) // 1024, 'KB')
+    _me = open(os.path.abspath(__file__), encoding='utf-8').read()
+    _blk = _me[_me.index('# ---------------------------------------------------------------- Kopf'):_me.index('\nif LIVEMODUS:\n    open(')]
+    for _sp in SEITEN_LIVE[1:]:
+        s = open(os.path.join(LIVE, _sp), encoding='utf-8').read()
+        exec(compile(_blk, 'plus-block', 'exec'), globals())
+        open(os.path.join(LIVE, _sp), 'w', encoding='utf-8').write(s)
+        print('live:', _sp, len(s.encode()) // 1024, 'KB')
+else:
+    out = os.path.join(LIVE, 'vorlage-plus.html')
+    open(out, 'w', encoding='utf-8').write(s)
+    shutil.copyfile(out, os.path.join(HIER, 'vorlage-plus.html'))
+    print('geschrieben:', out, len(s.encode()) // 1024, 'KB')

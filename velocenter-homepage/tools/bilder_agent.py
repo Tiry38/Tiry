@@ -439,7 +439,7 @@ def cmd_aufraeumen(args):
     geloescht = []
     for f in glob.glob(os.path.join(BASIS, 'img', 'bestand', '*.webp')) + glob.glob(os.path.join(BASIS, 'img', 'kandidat', '*.webp')):
         rel = os.path.relpath(f, BASIS).replace(os.sep, '/')
-        if rel not in benutzt: os.remove(f); geloescht.append(rel)
+        if re.sub(r'-(400|640)\.webp$', '.webp', rel) not in benutzt: os.remove(f); geloescht.append(rel)  # Plus-Varianten bleiben
     open(HTML, 'w', encoding='utf-8').write(s); status_schreiben(st)
     print('Zuordnungen entfernt: %d, Dateien gelöscht: %d' % (weg, len(geloescht)))
     for g in geloescht: print('  -', g)

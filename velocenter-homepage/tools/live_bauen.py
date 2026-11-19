@@ -208,6 +208,17 @@ def weiterleitung(ziel_hash, tiefe=1):
             f'<body><a href="{rel}">Weiter zu Velocenter Hessert</a></body></html>\n')
 
 
+def plus_design():
+    """Design „Plus“ (live seit 19.11.2026, Tiry) auf alle Seiten legen – Winter-Aktion bleibt im Sternen-Look.
+    Bricht laut ab, wenn eine Ersetzung nicht mehr passt (dann geht nichts live)."""
+    import subprocess
+    try:
+        import PIL  # noqa: F401
+    except ImportError:  # GitHub-Läufe ohne Pillow
+        subprocess.run([sys.executable, '-m', 'pip', 'install', '-q', '--user', '--break-system-packages', 'pillow==12.3.0'], check=True)
+    subprocess.run([sys.executable, os.path.join(QUELLE, 'entwurf-modern', 'plus_bauen.py'), '--live', ZIEL], check=True)
+
+
 def main():
     s = html_bauen()
     if os.path.isdir(ZIEL):
@@ -250,6 +261,7 @@ def main():
     open(os.path.join(ZIEL, '404.html'), 'w', encoding='utf-8').write(
         '<!doctype html><html lang="de"><head><meta charset="utf-8"><title>Velocenter Hessert</title><meta name="robots" content="noindex">'
         f'<meta http-equiv="refresh" content="0;url={BASIS}"></head><body><a href="{BASIS}">Weiter zu Velocenter Hessert</a></body></html>\n')
+    plus_design()
     groesse = sum(os.path.getsize(os.path.join(dp, f)) for dp, _, fs in os.walk(ZIEL) for f in fs)
     print(f'Live-Fassung: {ZIEL}  ·  {len(dateien)} Bilder/Schriften  ·  {groesse / 1e6:.1f} MB')
 
