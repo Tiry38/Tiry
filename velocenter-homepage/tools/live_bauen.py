@@ -239,6 +239,14 @@ def main():
             shutil.copy2(q, os.path.join(ZIEL, f))
         else:
             print('Hinweis: live/' + f + ' fehlt')
+    # Kurz-Links für Social Media (live/links/<name>/index.html -> /<name>/), z. B. /winter/ = WhatsApp-Terminanfrage (Tiry 20.11.2026)
+    lk = os.path.join(QUELLE, 'live', 'links')
+    if os.path.isdir(lk):
+        for n in sorted(os.listdir(lk)):
+            q = os.path.join(lk, n, 'index.html')
+            if os.path.isfile(q):
+                os.makedirs(os.path.join(ZIEL, n), exist_ok=True)
+                shutil.copy2(q, os.path.join(ZIEL, n, 'index.html'))
     # Google-Bewertung: Abruf-Skript + GitHub-Lauf (google.json selbst schreibt nur der Lauf im Web-Repo)
     os.makedirs(os.path.join(ZIEL, '.github', 'workflows'), exist_ok=True)
     shutil.copy2(os.path.join(QUELLE, 'tools', 'google_bewertung.js'), os.path.join(ZIEL, '.github', 'google_bewertung.js'))
