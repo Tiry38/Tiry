@@ -2191,6 +2191,20 @@ body.fz2 main,body.fz2 .foot{zoom:1.25}
 /* 4,8 nicht abschneiden (Tiry 12.11.2026) */
 .gt{padding-bottom:.16em;margin-bottom:-.16em;padding-left:.1em;padding-right:.12em;margin-left:-.1em;margin-right:-.12em;-webkit-box-decoration-break:clone;box-decoration-break:clone}
 .score b{padding:.04em .1em .06em .1em;margin:0 -.1em 0 -.1em;width:max-content;max-width:calc(100% + .2em)}
+/* Winter-Aktion: Hinweis Marken-Fahrräder mit Bosch-Antrieb + Inklusive Checkliste/Bosch Servicebericht (Tiry 20.11.2026) */
+.wbk{display:inline-flex;align-items:center;gap:12px;margin:18px 0 0;padding:9px 20px 9px 10px;border-radius:999px;background:linear-gradient(135deg,rgba(255,255,255,.16),rgba(255,255,255,.05));border:1.5px solid rgba(255,255,255,.28);box-shadow:0 14px 36px -14px rgba(0,0,0,.55),inset 0 1px 0 rgba(255,255,255,.3);font:800 clamp(14px,1.5vw,18px)/1.2 var(--display);color:#fff;letter-spacing:-.01em;max-width:100%}
+.wbk>i{flex:none;display:grid;place-items:center;width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,#E2232D,#C026D3 60%,#7C3AED);font:900 16px/1 var(--display);font-style:normal;color:#fff;box-shadow:0 6px 16px -4px rgba(226,35,45,.7)}
+.wbk b{background:linear-gradient(90deg,#FFD1D8,#FF8A9B);-webkit-background-clip:text;background-clip:text;color:transparent}
+.winc{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-top:20px}
+.winc>span{font:800 12px/1 var(--display);letter-spacing:.16em;text-transform:uppercase;color:#BEF264;margin-right:4px}
+.winc>i{display:inline-flex;align-items:center;gap:10px;padding:7px 16px 7px 7px;border-radius:999px;font:800 clamp(13px,1.3vw,16px)/1 var(--display);font-style:normal;color:#fff;background:linear-gradient(135deg,rgba(255,255,255,.16),rgba(255,255,255,.05));border:1.5px solid rgba(255,255,255,.26);box-shadow:0 12px 30px -14px rgba(0,0,0,.55),inset 0 1px 0 rgba(255,255,255,.3)}
+.winc>i b{display:grid;place-items:center;width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,#84CC16,#22C55E 55%,#0EA5E9);font:900 14px/1 var(--display);color:#fff;box-shadow:0 6px 14px -4px rgba(132,204,22,.7)}
+.wstrip.wcard{grid-template-areas:"p u" "k k" "c g" "n n"}
+.wkx{grid-area:k;display:flex;flex-direction:column;align-items:flex-start;gap:10px;min-width:0}
+.wkx .wbk{margin:0;font-size:14px;padding:6px 14px 6px 7px}.wkx .wbk>i{width:24px;height:24px;font-size:13px}
+.wkx .winc{margin:0;gap:8px}.wkx .winc>i{font-size:13px;padding:5px 12px 5px 5px}.wkx .winc>i b{width:22px;height:22px;font-size:12px}.wkx .winc>span{font-size:10.5px}
+.wbk b{white-space:nowrap}
+@media (max-width:640px){.wstrip.wcard{grid-template-areas:"p" "u" "k" "c" "g" "n"}.wbk{font-size:14px}.winc>span{flex-basis:100%;margin:0 0 2px}}
 /* Winter-Aktion: helleres Dunkelgrau, weißer Schnee (Tiry 12.11.2026) */
 .ice{background:linear-gradient(120deg,#4A4F5A,#3D424C 45%,#454150 80%,#4E4552)!important}
 .ice::before{background:radial-gradient(50% 70% at 85% 30%,rgba(255,255,255,.1),transparent 70%),radial-gradient(40% 60% at 10% 80%,rgba(200,16,46,.16),transparent 70%)!important}
@@ -2784,6 +2798,7 @@ footer .soc a{display:grid!important;place-items:center}
 .lbp-tag span::before{content:"";position:absolute;left:0;top:2px;bottom:2px;width:1.5px;border-radius:2px;background:linear-gradient(180deg,#E8283C,rgba(134,130,130,.6))}
 .lbp-tag em{display:block;font-style:normal;font-size:10px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:#fff;margin-bottom:2px}
 .lbp-tag strong{display:block;margin-top:3px;font-size:12px;font-weight:700;color:#fff}
+.lbp-tag u{display:block;margin-top:4px;font-size:10px;font-weight:700;text-decoration:none;letter-spacing:.02em;color:#FFB3BE}
 .lbp-tag strong i{font-style:normal;font-weight:800;color:#FF5466;margin-right:2px}
 
 /* Stichpunkte der Menü-Vorschau (15.11.2026, Tiry: „moderne Punkte statt Zahlen“): leuchtender Rot-Punkt mit Glas-Hof, wird beim Drüberfahren zur Pille */
@@ -3389,7 +3404,7 @@ m696 -454 c28 -13 46 -31 55 -51 22 -53 -50 -177 -173 -300 -187 -186 -647
    <nav class="qacc hello" style="--d:1.45s" aria-label="Schnellzugriff">
     <a class="qa on" href="#termin" style="--img:url(img/bosch-motor.webp);--pos:86% 40%"><span class="bg"></span><span class="ic"><svg><use href="#i-cal"/></svg></span><span class="tx"><i>01 · Werkstatt</i><b>Termin anfragen</b><small>Werkstatt oder Probefahrt</small><em>Jetzt anfragen</em></span></a>
     <a class="qa qlg" id="qaLg" href="#lager" style="--img:url(img/laden-innen.webp);--pos:50% 55%"><span class="bg"></span><span class="qbk" id="qBk" aria-hidden="true"></span><span class="ic"><svg><use href="#i-bike"/></svg></span><span class="tx"><i>02 · Ausstellung</i><b>Auf Lager</b><small id="qkLager">Räder sofort verfügbar</small><em>Räder ansehen</em></span></a>
-    <a class="qa qice" id="qkSeason" href="#deal" style="--img:url(img/laden-eingang.webp);--pos:50% 45%"><span class="bg"></span><span class="ic"><svg><use href="#i-gift"/></svg></span><span class="tx"><i>03 · Bis 28.02.</i><b>Winter-Aktion</b><small>–20 € auf jede Inspektion</small><em>Zur Aktion</em></span></a>
+    <a class="qa qice" id="qkSeason" href="#deal" style="--img:url(img/laden-eingang.webp);--pos:50% 45%"><span class="bg"></span><span class="ic"><svg><use href="#i-gift"/></svg></span><span class="tx"><i>03 · Bis 28.02.</i><b>Winter-Aktion</b><small>–20 € auf jede Inspektion, nur Marken-Fahrräder mit Bosch-Antrieb</small><em>Zur Aktion</em></span></a>
     <a class="qa" href="#besuch" style="--img:url(img/fassade.webp);--pos:50% 50%"><span class="bg"></span><span class="ic"><svg><use href="#i-clock"/></svg></span><span class="tx"><i>04 · Wörth am Rhein</i><b>Öffnungszeiten</b><small id="qkHours">Mo, Di, Do, Fr · Sa vormittags</small><em>Besuch planen</em></span></a>
    </nav>
   </div>
@@ -3403,10 +3418,12 @@ m696 -454 c28 -13 46 -31 55 -51 22 -53 -50 -177 -173 -300 -187 -186 -647
     <p class="eyebrow">Winter-Inspektion <b>2026/27</b></p>
     <div class="minus" style="margin-top:18px">–20 €</div>
     <h2 class="mid">auf jede Inspektion.</h2>
+    <p class="wbk"><i aria-hidden="true">!</i><span>Gültig nur für <b>Marken-Fahrräder</b> mit <b>Bosch-Antrieb</b></span></p>
     <div class="sux"><div class="suimg"><span class="sug" aria-hidden="true"></span><img src="img/sattelueberzug.webp" alt="Sattelüberzug in Neongelb mit Velocenter-Logo" width="894" height="900" loading="lazy"><b class="sust">Gratis</b></div><div class="sutx"><span class="suk">+ Geschenkt dazu</span><b>Sattelüberzug mit Velocenter-Logo</b><small>Zu jeder Winter-Inspektion</small></div></div>
+    <div class="winc"><span>+ Inklusive</span><i><b aria-hidden="true">✓</b>Checkliste</i><i><b aria-hidden="true">✓</b>Bosch Servicebericht</i></div>
    </div>
    <div class="pre" style="--d:.15s">
-    <p class="lead">Gültig vom 01.11.2026 bis 28.02.2027, <b>nur solange Termine verfügbar sind</b>, auch für E-Dreiräder und Lastenräder. Jetzt ist die Werkstatt entspannt, im Frühling ist dein Rad startklar.</p>
+    <p class="lead">Gültig vom 01.11.2026 bis 28.02.2027, <b>nur solange Termine verfügbar sind</b>. Jetzt ist die Werkstatt entspannt, im Frühling ist dein Rad startklar.</p>
     <div class="cdn" role="timer" aria-label="Aktion gilt bis 28.02.2027"><div><b id="dealDays">–</b><span>Tage</span></div><div><b id="cdH">–</b><span>Std</span></div><div><b id="cdM">–</b><span>Min</span></div><div><b id="cdS">–</b><span>Sek</span></div></div>
     <a class="cta" href="#termin" data-pre="Winter-Inspektion"><svg><use href="#i-cal"/></svg>Winter-Termin sichern</a>
    </div>
@@ -3527,7 +3544,7 @@ m696 -454 c28 -13 46 -31 55 -51 22 -53 -50 -177 -173 -300 -187 -186 -647
      <li><b>Akku-Test:</b> Mit dem Bosch CapacityTester messen wir, wie viel Kapazität dein Akku noch hat.</li>
      <li><b>Erste Inspektion:</b> Wir empfehlen sie nach 500 bis 1.000 km, danach regelmäßige Service-Checks.</li>
      <li><b>Leasing- und Versicherungsräder:</b> Wir rechnen direkt mit deinem Anbieter ab. Teile und Arbeiten außerhalb deines Pakets zahlst du selbst, das klären wir vorher mit dir.</li>
-     <li><b>Winter-Aktion:</b> –20 € auf jede Inspektion plus Sattelüberzug geschenkt, bis 28.02.2027, nur solange Termine verfügbar sind.</li>
+     <li><b>Winter-Aktion:</b> –20 € auf jede Inspektion plus Sattelüberzug geschenkt, inklusive Checkliste und Bosch Servicebericht, bis 28.02.2027, nur solange Termine verfügbar sind. Gültig nur für Marken-Fahrräder mit Bosch-Antrieb.</li>
     </ul>
     <p class="tsub">Akku-Tipps von Bosch für den Winter</p>
     <ul class="tfl">
@@ -3547,7 +3564,7 @@ m696 -454 c28 -13 46 -31 55 -51 22 -53 -50 -177 -173 -300 -187 -186 -647
     <p class="eyebrow">Online-<b>Terminanfrage</b></p>
     <h2 class="big" style="margin-top:16px">Termin anfragen <span class="gt">in 30 Sekunden.</span></h2>
     <p class="lead" style="margin-top:20px">Probefahrt oder Werkstatt: Wunschtag wählen, kurz beschreiben, abschicken. Deine Anfrage geht direkt an uns, wir melden uns mit einem festen Termin.</p>
-    <a class="wstrip wcard" href="#termin" data-pre="Winter-Inspektion" aria-label="Winter-Aktion: –20 € auf jede Inspektion plus Sattelüberzug geschenkt, bis 28.02.2027, nur solange Termine verfügbar sind"><span class="wsn" aria-hidden="true"></span><span class="wcp"><small>Winter-Inspektion <b>2026/27</b></small><b>–20 €</b><em>auf jede Inspektion.</em></span><span class="wsu"><span class="wsi"><span class="sug"></span><img src="img/sattelueberzug.webp" width="894" height="900" alt="" loading="lazy" decoding="async"><b>Gratis</b></span><span class="wst"><small>+ Geschenkt dazu</small><b>Sattelüberzug mit Velocenter-Logo</b></span></span><span class="wcd" aria-hidden="true"><span><b class="wsd">–</b><i>Tage</i></span><span><b class="wsh">–</b><i>Std</i></span><span><b class="wsm">–</b><i>Min</i></span><span><b class="wss">–</b><i>Sek</i></span></span><span class="wgo">Winter-Termin sichern<svg><use href="#i-arrow"/></svg></span><span class="wnote">Bis 28.02.2027 · nur solange Termine verfügbar sind</span></a>
+    <a class="wstrip wcard" href="#termin" data-pre="Winter-Inspektion" aria-label="Winter-Aktion: –20 € auf jede Inspektion plus Sattelüberzug geschenkt, inklusive Checkliste und Bosch Servicebericht, gültig nur für Marken-Fahrräder mit Bosch-Antrieb, bis 28.02.2027, nur solange Termine verfügbar sind"><span class="wsn" aria-hidden="true"></span><span class="wcp"><small>Winter-Inspektion <b>2026/27</b></small><b>–20 €</b><em>auf jede Inspektion.</em></span><span class="wsu"><span class="wsi"><span class="sug"></span><img src="img/sattelueberzug.webp" width="894" height="900" alt="" loading="lazy" decoding="async"><b>Gratis</b></span><span class="wst"><small>+ Geschenkt dazu</small><b>Sattelüberzug mit Velocenter-Logo</b></span></span><span class="wkx"><span class="wbk"><i aria-hidden="true">!</i><span>Gültig nur für <b>Marken-Fahrräder</b> mit <b>Bosch-Antrieb</b></span></span><span class="winc"><span>+ Inklusive</span><i><b aria-hidden="true">✓</b>Checkliste</i><i><b aria-hidden="true">✓</b>Bosch Servicebericht</i></span></span><span class="wcd" aria-hidden="true"><span><b class="wsd">–</b><i>Tage</i></span><span><b class="wsh">–</b><i>Std</i></span><span><b class="wsm">–</b><i>Min</i></span><span><b class="wss">–</b><i>Sek</i></span></span><span class="wgo">Winter-Termin sichern<svg><use href="#i-arrow"/></svg></span><span class="wnote">Bis 28.02.2027 · nur solange Termine verfügbar sind</span></a>
     <a class="wstrip spring" href="#termin" data-pre="Frühjahrs-Check (Inspektion)" hidden aria-label="Frühjahrs-Check: Rad fit für die Saison, jetzt Termin sichern"><i aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2.6M12 18.9v2.6M2.5 12h2.6M18.9 12h2.6M5.3 5.3l1.8 1.8M16.9 16.9l1.8 1.8M5.3 18.7l1.8-1.8M16.9 7.1l1.8-1.8"/></svg></i><span class="wt"><small>Saisonstart · Frühjahrs-Check</small><strong>Rad fit für die Saison <em>– jetzt Termin sichern</em></strong></span><span class="wa"><svg><use href="#i-arrow"/></svg></span></a>
     <div class="blobimg" style="margin-top:34px;max-width:460px"><img src="img/isy-blumen.webp" alt="i:SY E-Bikes mit Blumenkörben vor einer Holzhütte" loading="lazy" width="800" height="600"></div>
    </div>
@@ -5854,7 +5871,7 @@ const P={
 start:tx('Start · Familienbetrieb seit 1995','<span style="white-space:nowrap">E-Bike &amp;</span> <span style="white-space:nowrap">E-Dreirad-Spezialist</span><br><span class="gt it">mit eigener Werkstatt.</span>','Über 300 E-Bikes zum Probefahren und ein Bosch Service Center in Wörth.','start',['Showroom: über 300 E-Bikes vor Ort','Hier schraubt der Chef noch selbst','Das sagen unsere Kunden bei Google','Besuch uns: Hartmannstraße 25'],cta(['Zur Startseite','#start'],['Termin','#termin']))+
  `<div class="lbp-vi"><div class="lbp-ph"><img src="img/laden-innen.webp" alt=""></div><div class="lbp-tag" style="right:-14px;bottom:-10px"><b>300<i>+</i></b><span><em>E-Bikes vor Ort</em>zum Probefahren</span></div></div>`,
 service:tx('Service · Bosch Service Center','Wir überzeugen<br><span class="gt it">mit Service.</span>','Beratung, Werkstatt und clevere Bezahlung aus einer Hand.','service',['Beratung &amp; Probefahrt','Inspektion &amp; Reparatur','Termin anfragen in 30 Sekunden','0 % Finanzierung, ENRA-Versicherung, Dienstrad-Leasing'],cta(['Zum Service','#service'],['Termin','#termin']))+
- `<div class="lbp-vi"><div class="lbp-blob"></div><img class="lbp-cut" src="img/sattelueberzug.webp" alt="" style="width:200px;left:64px;top:22px"><div class="lbp-tag" style="right:-14px;bottom:2px"><b>–20<i>€</i></b><span><em>Winter-Aktion</em>auf jede Inspektion<strong><i>+</i> Sattelüberzug geschenkt</strong></span></div></div>`,
+ `<div class="lbp-vi"><div class="lbp-blob"></div><img class="lbp-cut" src="img/sattelueberzug.webp" alt="" style="width:200px;left:64px;top:22px"><div class="lbp-tag" style="right:-14px;bottom:2px"><b>–20<i>€</i></b><span><em>Winter-Aktion</em>auf jede Inspektion<strong><i>+</i> Sattelüberzug geschenkt</strong><strong><i>✓</i> Checkliste + Bosch Servicebericht</strong><u>Nur Marken-Fahrräder mit Bosch-Antrieb</u></span></div></div>`,
 marken:tx('Marken','Top-Marken.<br><span class="gt it">Große Auswahl.</span>','Von KTM bis i:SY: acht Marken, dazu gutes Zubehör.','marken',['Acht Marken. Ein Laden.','Gutes Zubehör macht den Unterschied.'],cta(['Zu den Marken','#marken']))+
  `<div class="lbp-lg">${M.map(m=>`<a href="#marken" tabindex="-1"><img src="img/marke-${m}.svg" alt=""></a>`).join('')}</div>`,
 lager:tx('Auf Lager · Live','Sofort da.<br><span class="gt it">Sofort Probe fahren.</span>','Diese Räder stehen jetzt bei uns in Wörth: ansehen, reservieren, Probe fahren.','lager',['Sonderangebote: nur solange vorrätig','Rad-Finder: Was passt zu mir?','Bestand mit Suche und Filter'],cta(['Zum Lager','#lager']))+
