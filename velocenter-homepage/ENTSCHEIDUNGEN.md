@@ -385,3 +385,6 @@
 - Überall (Winter-Block #deal, Service-Karte, Service-Liste, Start-Kachel, Menü-Vorschau Service): **„Gültig nur für Marken-Fahrräder mit Bosch-Antrieb“** + **„Inklusive ✓ Checkliste ✓ Bosch Servicebericht“**.
 - **E-Dreiräder und Lastenräder nicht mehr erwähnt** (wollen wir primär nicht reparieren). Nicht wieder einbauen.
 - CSS `.wbk` (Hinweis-Pille) und `.winc` (Inklusive-Pillen) direkt in index.html, weil `.ice` von Plus ausgenommen ist.
+
+## Kurz-Link /winter/ entfernt (Tiry 20.11.2026)
+- `/winter/` (tiry38-Adresse) wieder von der Homepage genommen, wird nicht genutzt. Für Social Media direkt wa.me-Links verwenden. `live_bauen.py` kopiert `live/links/*` weiter, falls später nötig.
