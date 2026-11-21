@@ -47,11 +47,26 @@ local function makeSkin(frame)
   return s
 end
 
+
+-- Bild mit Motiv (cover = Seitenverhaeltnis Breite/Hoehe): fuellt die Flaeche ohne Verzerren, Motiv bleibt in der Mitte
+local function coverCoords(tex, ratio, w, h)
+  local fr = w / h
+  if fr >= ratio then
+    local span = ratio / fr
+    tex:SetTexCoord(0, 1, 0, span) -- oben bleibt (Kopf des Motivs), unten wird abgeschnitten
+  else
+    local span = fr / ratio
+    local u0 = (1 - span) / 2
+    tex:SetTexCoord(u0, u0 + span, 0, 1)
+  end
+end
+
 function Skin:Tile()
   local b = self.bgDef
-  if not b or not b.tile then return end
+  if not b or not (b.tile or b.cover) then return end
   local w, h = self.frame:GetWidth() or 0, self.frame:GetHeight() or 0
-  if w > 0 and h > 0 then self.bg:SetTexCoord(0, w / b.tile, 0, h / b.tile) end
+  if w <= 0 or h <= 0 then return end
+  if b.cover then coverCoords(self.bg, b.cover, w, h) else self.bg:SetTexCoord(0, w / b.tile, 0, h / b.tile) end
 end
 
 function Skin:Apply()

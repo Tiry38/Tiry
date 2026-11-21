@@ -12,7 +12,7 @@
 local ADDON, ns = ...
 KampfWerk = ns
 ns.NAME = ADDON or "KampfWerk"
-ns.VERSION = "1.1.0"
+ns.VERSION = "1.2.0"
 ns.MEDIA = "Interface\\AddOns\\KampfWerk\\Media\\"
 local MEDIA = ns.MEDIA
 
@@ -91,6 +91,9 @@ ns.BACKGROUNDS = {
   { key = "leder", label = "Leder", file = MEDIA .. "bg_leder" },
   { key = "stein", label = "Stein", file = MEDIA .. "bg_stein" },
   { key = "karbon", label = "Karbon", file = MEDIA .. "bg_karbon" },
+  -- cover = Bild mit Motiv: Seitenverhaeltnis bleibt, Motiv rechts sichtbar (ausgeschnitten statt verzerrt)
+  { key = "psi", label = "Psi-Sturm", file = MEDIA .. "bg_psi", cover = 2 },
+  { key = "eigen", label = "Eigenes Bild", file = MEDIA .. "eigenes_bild", cover = 2 },
   { key = "b_dialog", label = "WoW: Dialog", file = "Interface\\DialogFrame\\UI-DialogBox-Background-Dark", tile = 64 },
   { key = "b_marmor", label = "WoW: Marmor", file = "Interface\\FrameGeneral\\UI-Background-Marble", tile = 256 },
   { key = "b_fels", label = "WoW: Fels", file = "Interface\\FrameGeneral\\UI-Background-Rock", tile = 256 },

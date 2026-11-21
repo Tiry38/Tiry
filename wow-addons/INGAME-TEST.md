@@ -595,3 +595,7 @@ Installation: Ordner `Schlaghagel` ersetzen, `/reload` reicht (keine neuen Datei
 1. `/cw` → „Aussehen“: Nordlicht anklicken → Bild im Chatfenster, runde Ecken, Text gut lesbar? Regler „Hintergrund“ ändert die Stärke.
 2. Farbthema „Cyber-Pink“: Rand, Eckklammern, aktiver Reiter, Unterstrich, Kugel, Griff und Eingabezeile (Enter) werden pink/blau.
 3. „WoW: Dialog/Marmor/Fels“: erscheint eine Textur (gekachelt, nicht verzerrt)? Wenn leer: melden.
+4. (1.4) Ein paar Zeilen im Chat, 60 s warten → alte Zeilen blenden aus, neue stehen. Maus über den Chat → alles wieder da. Mausrad nach oben → alte Zeilen sichtbar.
+
+# KampfWerk 1.2
+1. `/kw` → Aussehen → „Eigenes Bild“: Mewtu-Bild im Fenster, Figur mittig, nicht verzerrt? Auch bei schmalem Fenster und bei „Ein Fenster“ (Figur bleibt mittig sichtbar).

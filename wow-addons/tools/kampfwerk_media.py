@@ -269,6 +269,31 @@ def mask_round(size=64, r=16):
     return down(img, (size, size))
 
 
+def bg_psi(w=512, h=256, cx=0.5, cy=0.42):
+    """Psi-Sturm: dunkles Violett, Energie-Ausbruch mit feinen Strahlen in der Mitte (Motiv zentral).
+    Auch Platzhalter fuer 'Eigenes Bild' (Media/eigenes_bild.tga - Tiry kann die Datei durch ein eigenes Bild ersetzen)."""
+    ys, xs = np.mgrid[0:h, 0:w].astype(np.float32)
+    dx, dy = (xs - cx * w) / h, (ys - cy * h) / h
+    r = np.sqrt(dx * dx + dy * dy)
+    ang = np.arctan2(dy, dx)
+    rng = np.random.default_rng(77)
+    rays = np.zeros_like(r)
+    for _ in range(140):
+        a0 = rng.random() * 2 * math.pi
+        width = 0.004 + rng.random() * 0.018
+        strength = 0.25 + rng.random() * 0.75
+        da = np.angle(np.exp(1j * (ang - a0)))
+        rays += strength * np.exp(-(da / width) ** 2)
+    rays = np.clip(rays, 0, 1.6) * np.exp(-r * 1.6)
+    glow = np.exp(-(r / 0.28) ** 2) * 0.9 + np.exp(-(r / 0.75) ** 2) * 0.45
+    n = fbm(w, h, 91, octaves=4, base=3, aspect=w / h)
+    v = np.clip(glow * 0.75 + rays * 0.55 + (n - 0.5) * 0.12, 0, 1)
+    rgb = ramp(v, [(0.0, (8, 5, 14)), (0.25, (38, 14, 58)), (0.5, (110, 40, 150)), (0.75, (200, 110, 230)),
+                   (1.0, (255, 225, 255))])
+    rgb *= vignette(w, h, 0.45)[..., None]
+    return to_img(rgb)
+
+
 def main():
     print("Erzeuge KampfWerk-Grafiken in", mm.MEDIA)
     save(logo(256), "logo")
@@ -277,8 +302,9 @@ def main():
     save(mask_round(32, 8), "mask_round8")
     for name, fn in {"arkan": bg_arkan, "teufel": bg_teufel, "frost": bg_frost, "glut": bg_glut, "horde": bg_horde,
                      "allianz": bg_allianz, "nacht": bg_nacht, "leder": bg_leder, "stein": bg_stein,
-                     "karbon": bg_karbon}.items():
+                     "karbon": bg_karbon, "psi": bg_psi}.items():
         save(fn(), "bg_" + name)
+    save(bg_psi(), "eigenes_bild")
     for name, fn in {"detach": icon_detach, "text": icon_text, "palette": icon_palette, "layers": icon_layers}.items():
         save(fn(), "i_" + name)
 

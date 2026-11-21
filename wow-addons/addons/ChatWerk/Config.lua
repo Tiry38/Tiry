@@ -77,7 +77,14 @@ local function choice(parent, w, h, item, onPick)
     b.prev:SetPoint("TOPLEFT", 2, -2)
     b.prev:SetPoint("BOTTOMRIGHT", -2, 2)
     if item.tile then b.prev:SetTexture(item.tex, "REPEAT", "REPEAT") b.prev:SetTexCoord(0, (w - 4) / item.tile, 0, (h - 4) / item.tile)
-    else b.prev:SetTexture(item.tex) end
+    else
+      b.prev:SetTexture(item.tex)
+      if item.cover then
+        local fr, span = (w - 4) / (h - 4), item.cover / ((w - 4) / (h - 4))
+        if fr >= item.cover then b.prev:SetTexCoord(0, 1, 0, span)
+        else local sp = fr / item.cover b.prev:SetTexCoord((1 - sp) / 2, (1 + sp) / 2, 0, 1) end
+      end
+    end
     b.mask = b:CreateMaskTexture()
     b.mask:SetTexture(MEDIA .. "mask_round", "CLAMPTOBLACKADDITIVE", "CLAMPTOBLACKADDITIVE")
     pcall(b.mask.SetTextureSliceMargins, b.mask, 16, 16, 16, 16)
@@ -462,8 +469,10 @@ local function generalPage()
   st:Title("Chatfenster")
   local font = UI.Stepper(p, "Schrift", half, function() return F.font or 13 end,
     function(v) F.font = v refreshWindows() end, 1, 9, 24, function(v) return v .. " px" end)
-  local fade = UI.Stepper(p, "Ausblenden", half, function() return F.fade or 0 end,
+  local fade = UI.Stepper(p, "Alte Zeilen weg", half, function() return F.fade or 0 end,
     function(v) F.fade = v refreshWindows() end, 10, 0, 600, function(v) return v == 0 and "nie" or (v .. " s") end)
+  UI.SetTooltip(fade, "Alte Zeilen ausblenden", "Zeilen verschwinden so viele Sekunden nach dem Eintreffen von selbst - "
+    .. "es bleibt nur das Neueste stehen. Maus ueber das Fenster oder Mausrad holt alles zurueck. 0 = nie.")
   st:Add(font, 34, 0)
   fade:SetPoint("LEFT", font, "RIGHT", 24, 0)
   st:Space(10)
@@ -502,6 +511,7 @@ local function generalPage()
     { "Ton bei Fluestern", "soundWhisper", "Kurzer Ton, wenn dir jemand fluestert." },
     { "Ton bei Stichwort", "soundKeyword", "Ton, wenn eines deiner Stichwoerter faellt." },
     { "Eigenen Namen hervorheben", "ownName", "Nennt dich jemand, wird die Zeile mit ! markiert." },
+    { "Maus drueber zeigt alte Zeilen", "mouseFade", "Ausgeblendete Zeilen erscheinen wieder, solange die Maus ueber dem Chat ist (und blenden danach wieder aus)." },
     { "Namen in [Klammern]", "nameBrackets", "Wie im Blizzard-Chat: [Name] statt Name." },
     { "Verlauf speichern", "history", "Die letzten Zeilen bleiben nach /reload und Neustart." },
     { "Animationen", "animations", "Fliessender Neon-Rand, Lauflicht, pulsierende Kugel und atmende Eckklammern." },
@@ -551,7 +561,7 @@ local function lookPage()
   st:Title("Hintergrund")
   local items = {}
   for _, b in ipairs(ns.BACKGROUNDS) do
-    items[#items + 1] = { value = b.key, label = b.label, tex = b.file, tile = b.tile }
+    items[#items + 1] = { value = b.key, label = b.label, tex = b.file, tile = b.tile, cover = b.cover }
   end
   grid(p, st, items, function(v) return (F.bg or "glas") == v end, function(v) F.bg = v refreshWindows() end, 4, 56, 10)
   st:Para("Die drei WoW-Hintergruende kommen direkt aus dem Spiel. Fehlt einer in Forever, bleibt die Flaeche leer - "

@@ -11,7 +11,7 @@
 local ADDON, ns = ...
 ChatWerk = ns
 ns.NAME = ADDON or "ChatWerk"
-ns.VERSION = "1.3.0"
+ns.VERSION = "1.4.0"
 local VERSION = ns.VERSION
 ns.MEDIA = "Interface\\AddOns\\ChatWerk\\Media\\"
 
@@ -262,6 +262,9 @@ ns.BACKGROUNDS = {
   { key = "leder", label = "Leder", file = MEDIA .. "bg_leder" },
   { key = "stein", label = "Stein", file = MEDIA .. "bg_stein" },
   { key = "karbon", label = "Karbon", file = MEDIA .. "bg_karbon" },
+  -- cover = Bild mit Motiv: Seitenverhaeltnis bleibt, Motiv rechts sichtbar (ausgeschnitten statt verzerrt)
+  { key = "psi", label = "Psi-Sturm", file = MEDIA .. "bg_psi", cover = 2 },
+  { key = "eigen", label = "Eigenes Bild", file = MEDIA .. "eigenes_bild", cover = 2 },
   { key = "b_dialog", label = "WoW: Dialog", file = "Interface\\DialogFrame\\UI-DialogBox-Background-Dark", tile = 64 },
   { key = "b_marmor", label = "WoW: Marmor", file = "Interface\\FrameGeneral\\UI-Background-Marble", tile = 256 },
   { key = "b_fels", label = "WoW: Fels", file = "Interface\\FrameGeneral\\UI-Background-Rock", tile = 256 },
@@ -278,7 +281,7 @@ end
 local DEFAULTS = {
   hideBlizzard = true, classColors = true, channelStyle = "name", timestamp = "%H:%M", links = true, spam = true,
   lootPrices = true, keywords = "", ownName = true, soundWhisper = true, soundKeyword = true, history = true,
-  historyLines = 150, nameBrackets = false, mouseFade = false, font = "tech", animations = true,
+  historyLines = 150, nameBrackets = false, mouseFade = true, font = "tech", animations = true,
 }
 
 local function initDB()
@@ -292,7 +295,7 @@ local function initDB()
   if not DB.windows or #DB.windows == 0 then
     -- Start: ein Fenster, drei Reiter
     DB.windows = {}
-    DB.v = 120
+    DB.v = 130
     local main = ns.NewWindow("Allgemein", catSet(DEFAULT_MAIN))
     main.newChannels = true
     main.chans["ch:Handel"] = false
@@ -320,8 +323,14 @@ local function initDB()
     DB.v = 120
     if DB.font == nil or DB.font == "poppins" then DB.font = "tech" end
   end
+  if (DB.v or 100) < 130 then
+    -- 1.4 (Tirys Wunsch): alte Zeilen blenden von selbst aus, nur das Neueste bleibt stehen; Maus drueber zeigt alles wieder
+    DB.v = 130
+    if DB.frame and (DB.frame.fade or 0) == 0 then DB.frame.fade = 60 end
+    DB.mouseFade = true
+  end
   DB.frame = DB.frame or {}
-  for k, v in pairs({ x = 16, y = 40, w = 520, h = 230, alpha = 0.62, font = 13, fade = 0, locked = false, barFade = 5,
+  for k, v in pairs({ x = 16, y = 40, w = 520, h = 230, alpha = 0.62, font = 13, fade = 60, locked = false, barFade = 5,
       bg = "glas", theme = "neon", bgAlpha = 0.55 }) do
     if DB.frame[k] == nil then DB.frame[k] = v end
   end

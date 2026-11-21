@@ -44,7 +44,14 @@ local function choice(parent, w, h, item, onPick)
     b.prev:SetPoint("TOPLEFT", 2, -2)
     b.prev:SetPoint("BOTTOMRIGHT", -2, 2)
     if item.tile then b.prev:SetTexture(item.tex, "REPEAT", "REPEAT") b.prev:SetTexCoord(0, (w - 4) / item.tile, 0, (h - 4) / item.tile)
-    else b.prev:SetTexture(item.tex) end
+    else
+      b.prev:SetTexture(item.tex)
+      if item.cover then
+        local fr, span = (w - 4) / (h - 4), item.cover / ((w - 4) / (h - 4))
+        if fr >= item.cover then b.prev:SetTexCoord(0, 1, 0, span)
+        else local sp = fr / item.cover b.prev:SetTexCoord((1 - sp) / 2, (1 + sp) / 2, 0, 1) end
+      end
+    end
     b.mask = b:CreateMaskTexture()
     b.mask:SetTexture(MEDIA .. "mask_round", "CLAMPTOBLACKADDITIVE", "CLAMPTOBLACKADDITIVE")
     pcall(b.mask.SetTextureSliceMargins, b.mask, 16, 16, 16, 16)
@@ -312,7 +319,7 @@ local function lookPage()
   st:Title("Hintergrund")
   local items = {}
   for _, b in ipairs(ns.BACKGROUNDS) do
-    items[#items + 1] = { value = b.key, label = b.label, tex = b.file, tile = b.tile }
+    items[#items + 1] = { value = b.key, label = b.label, tex = b.file, tile = b.tile, cover = b.cover }
   end
   grid(p, st, items, function(v) return look.bg == v end, function(v) look.bg = v refreshMeter() end, 4, 56, 10)
   st:Para("Die drei WoW-Hintergruende kommen direkt aus dem Spiel. Fehlt einer in Forever, bleibt die Flaeche leer - "

@@ -341,6 +341,19 @@ ok(sk.hud.flow.colors[1][1] == 1 and sk.hud.flow.colors[1][2] == 0.86, "Farbthem
 DB.look.bg = "b_marmor"
 M.Apply()
 ok(sk.bg.__file == "Interface\\FrameGeneral\\UI-Background-Marble" and sk.bg.__coord, "WoW-Marmor gekachelt")
+DB.look.bg = "eigen"
+M.Apply()
+do
+  local c = sk.bg.__coord or {}
+  local w, h = KampfWerkFrame:GetWidth(), KampfWerkFrame:GetHeight()
+  local ok1 = sk.bg.__file:find("eigenes_bild") and c[1] == 0 and c[2] == 1 and math.abs((c[4] - c[3]) - 2 / (w / h)) < 0.001
+  ok(ok1, "Eigenes Bild: volle Breite, Hoehe ausgeschnitten statt verzerrt")
+  KampfWerkFrame:SetSize(200, 200)
+  sk:Tile()
+  c = sk.bg.__coord
+  ok(math.abs(c[1] - 0.25) < 0.001 and math.abs(c[2] - 0.75) < 0.001 and c[3] == 0 and c[4] == 1, "schmales Fenster: Bildmitte (Motiv) bleibt")
+  KampfWerkFrame:SetSize(w, h)
+end
 DB.look.bg = "glas"
 DB.look.theme = "neon"
 M.Apply()
@@ -456,8 +469,13 @@ if OUT then
   M.Apply()
   L.dump(UIParent, OUT .. "/kw_meter_nordlicht.tsv", { levels = true })
   M.ToggleDock(DB.panes[2].id)
-  DB.look.bg, DB.look.theme = "glas", "neon"
+  DB.look.bg, DB.look.theme = "eigen", "arkan"
+  M.Apply()
+  L.dump(UIParent, OUT .. "/kw_meter_eigenes_bild.tsv", { levels = true })
   M.SetCount(1)
+  M.Apply()
+  L.dump(UIParent, OUT .. "/kw_meter_eins_bild.tsv", { levels = true })
+  DB.look.bg, DB.look.theme = "glas", "neon"
   M.Apply()
   L.dump(UIParent, OUT .. "/kw_meter_eins.tsv", { levels = true })
 end

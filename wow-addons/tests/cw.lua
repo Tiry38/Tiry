@@ -450,10 +450,24 @@ ns.Config.Show(DB.windows[2].id)
 check("cw_handel", ChatWerkConfig)
 ns.Config.Show("general")
 check("cw_allgemein", ChatWerkConfig)
+-- 1.4: alte Zeilen blenden von selbst aus (Standard 60 s), Maus drueber zeigt sie wieder
+do
+  local m = Main:Active().msg
+  ok(DB.frame.fade == 60 and m.__fading == true and m.__timeVisible == 60, "alte Zeilen blenden nach 60 s aus")
+  ok(DB.mouseFade == true, "Maus drueber zeigt alte Zeilen (Standard an)")
+  local resets = 0
+  rawset(m, "ResetAllFadeTimes", function() resets = resets + 1 end)
+  Main:Hover(true)
+  ok(resets == 1, "Maus drueber holt ausgeblendete Zeilen zurueck")
+  m:GetScript("OnMouseWheel")(m, 1)
+  ok(resets == 2, "Mausrad holt ausgeblendete Zeilen zurueck")
+  Main:Hover(false)
+  rawset(m, "ResetAllFadeTimes", nil)
+end
 -- 1.3 Aussehen: gleiche Hintergruende/Farbthemen/Transparenz wie KampfWerk
 ns.Config.Show("look")
 check("cw_aussehen", ChatWerkConfig)
-ok(#ns.BACKGROUNDS == 14 and #ns.THEMES == 9, "14 Hintergruende + 9 Farbthemen")
+ok(#ns.BACKGROUNDS == 16 and #ns.THEMES == 9, "16 Hintergruende + 9 Farbthemen")
 local function pill(text) return find(ChatWerkConfig, function(o) return o.item and o.text and o.text.__text == text and L.isShown(o) end) end
 local nl = pill("Nordlicht")
 ok(nl ~= nil, "Hintergrund-Kachel Nordlicht")
