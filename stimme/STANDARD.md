@@ -33,3 +33,9 @@ Stimme „Sarah“ `EXAVITQu4vr4xnSDxMaL` · Modell `eleven_v4` · `language_cod
 
 ## 5. Messverfahren (für beide)
 Verständlichkeit: faster-whisper small, Vergleich mit Soll-Text (0–1). Natürlichkeit: DNSMOS (OVRL+P808)/2 (1–5). Lebendigkeit: Tonhöhen-Streuung in Halbtönen (librosa pyin). Werkzeuge: `aivox/stimmen-labor/` auf dem AIVOX-Branch. **Endgültig entscheidet Tirys Blindtest.**
+
+## 6. Abstimmungsregel (Tiry, 21.11.2026)
+Passiert in **einem** der beiden Chats irgendetwas zur Stimme (Entscheidung von Tiry, Messwert, Code, Einstellung, Fund),
+schickt die betroffene Sitzung **sofort** eine Nachricht an die andere:
+`STIMME-UPDATE: <was> · <warum> · <Commit/Datei>`.
+Sitzungen: AIVOX `session_01AC3hVefvGxsa4HNgSaq8Sg` · Luna `session_01AC3hVeEDxUbkck1rCSq8wC` (per send_message).

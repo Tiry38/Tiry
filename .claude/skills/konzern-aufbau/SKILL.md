@@ -86,6 +86,7 @@ kein Versprechen. Die Geschichte selbst ist ein Vertriebs-Asset.
   bzw. Rufumleitung von der Betriebsnummer. Web: Next.js auf Cloudflare/Vercel Free, Supabase, Resend, Stripe/Mollie SEPA.
 - Ab ~5–10 Kunden: Eigenbau Pipecat/LiveKit auf EU-Server, Claude über Bedrock/Vertex EU (DSGVO, halbe Kosten).
 - Demo-Stimmen ohne Konto/Kosten: **Chatterbox Multilingual** (MIT) lokal, mit ECHTEN Referenzaufnahmen als Vorbild (Thorsten-Voice CC0; MLS CC BY 4.0) – nie synthetische Stimmen als Referenz. 2–3 Varianten je Zeile, beste per faster-whisper wählen. Zahlen als Wörter schreiben, Name als „Ei-Wox“. Fallback Piper TTS. Browser-Stimmen (speechSynthesis) nie verwenden.
+- Stimmen-Abstimmung mit der Luna-Sitzung: jede Stimmen-Änderung sofort als „STIMME-UPDATE“ melden (siehe `stimme/STANDARD.md` §6).
 - Modelle: Standard `claude-opus-5-5` für Entwicklung/Content, Telefon-Echtzeit `claude-haiku-5-5`. Vor API-Code den
   Skill `claude-api` laden.
 
