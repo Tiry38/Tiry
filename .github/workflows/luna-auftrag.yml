@@ -74,6 +74,8 @@ jobs:
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          # Die Kette (nächster Auftrag) startet den Ablauf per GitHub-Automat – den ausdrücklich erlauben
+          allowed_bots: "github-actions"
           claude_args: |
             --model claude-opus-5-5
             --max-turns 80
@@ -119,7 +121,7 @@ jobs:
           fi
       # GitHub hält pro Warteschlange nur EINEN wartenden Lauf – liegengebliebene Aufträge daher nacheinander abarbeiten
       - name: Nächsten offenen Auftrag starten
-        if: always()
+        if: success()   # nur nach erfolgreichem Auftrag – verhindert Endlosschleifen bei Fehlern
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           CUR: ${{ steps.auftrag.outputs.num }}
