@@ -3,140 +3,87 @@
   const $ = (s, el = document) => el.querySelector(s);
   const $$ = (s, el = document) => [...el.querySelectorAll(s)];
   const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-  /* ================= Reiter (Hash-Routing) ================= */
-  const VIEWS = ['start', 'hoerprobe', 'funktionen', 'preise', 'fragen'];
-  const glow = $('.tab-glow');
-  const moveGlow = () => {
-    const a = $('.tab[aria-current="page"]');
-    if (!a || !glow || !a.offsetWidth) return;
-    glow.style.width = a.offsetWidth + 'px';
-    glow.style.transform = `translateX(${a.offsetLeft - 4}px)`;
+  const store = {
+    get(k) { try { return sessionStorage.getItem(k); } catch (e) { return null; } },
+    set(k, v) { try { sessionStorage.setItem(k, v); } catch (e) { /* ohne Speicher */ } },
   };
-  const show = (first) => {
-    const id = location.hash.slice(1);
-    const view = VIEWS.includes(id) ? id : 'start';
-    $$('.view').forEach((v) => {
-      const on = v.dataset.view === view;
-      if (on && v.hidden) { v.hidden = false; v.classList.remove('enter'); void v.offsetWidth; if (!first) v.classList.add('enter'); }
-      else if (!on) v.hidden = true;
-    });
-    $$('.tab, .dock-i').forEach((a) => {
-      if (a.getAttribute('href') === '#' + view) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current');
-    });
-    moveGlow();
-    if (!first) window.scrollTo({ top: 0, behavior: reduce ? 'auto' : 'smooth' });
-    requestAnimationFrame(() => plasmas.forEach((p) => p.resize()));
-  };
-  addEventListener('hashchange', () => show(false));
-  addEventListener('resize', moveGlow);
-  document.fonts && document.fonts.ready.then(moveGlow);
 
-  /* ================= Licht folgt der Maus ================= */
-  document.addEventListener('pointermove', (e) => {
-    const el = e.target.closest && e.target.closest('.spot');
-    if (!el) return;
-    const r = el.getBoundingClientRect();
-    el.style.setProperty('--x', (e.clientX - r.left) + 'px');
-    el.style.setProperty('--y', (e.clientY - r.top) + 'px');
-  }, { passive: true });
-
-  /* ================= Gespräch ================= */
-  const SCRIPT = [
-    { who: 'ki', name: 'AVOX', src: 'audio/l1.mp3', text: 'Fahrrad-Werkstatt am Markt, guten Tag! Hier spricht die digitale Assistenz. Ich bin eine künstliche Intelligenz. Wie kann ich Ihnen helfen?' },
-    { who: 'anrufer', name: 'Anrufer', src: 'audio/l2.mp3', text: 'Hallo, guten Tag! Mein E-Bike braucht eine Inspektion. Geht diese Woche noch was?' },
-    { who: 'ki', name: 'AVOX', src: 'audio/l3.mp3', text: 'Gerne. Am Donnerstag um halb elf ist noch frei. Soll ich den Termin für Sie eintragen?' },
-    { who: 'anrufer', name: 'Anrufer', src: 'audio/l4.mp3', text: 'Ja, perfekt.' },
-    { who: 'ki', name: 'AVOX', src: 'audio/l5.mp3', text: 'Erledigt. Sie bekommen gleich eine Bestätigung per E-Mail. Einen schönen Tag noch!', booked: true },
-  ];
-  const list = $('.script');
-  SCRIPT.forEach((l) => {
-    const li = document.createElement('li'); li.className = l.who;
-    const w = document.createElement('span'); w.className = 'who'; w.textContent = l.name;
-    const t = document.createElement('span'); t.className = 'txt'; t.textContent = l.text;
-    li.append(w, t); list.appendChild(li);
-  });
-  const lis = $$('li', list);
-  const caption = $('.caption'), capWho = $('.cap-who'), capText = $('.cap-text');
-  const booked = $('.booked');
-
-  /* Audio-Kette: Datei -> Analyser -> Lautsprecher */
-  const audio = { ctx: null, analyser: null, freq: null, wave: null, els: [] };
-  const level = { v: 0, bands: [0, 0, 0, 0, 0, 0], who: 'idle' };
+  /* ===================== Audio-Kern ===================== */
+  const A = { ctx: null, analyser: null, wave: null, freq: null, sfxOut: null, noise: null, sfx: false, els: new Map() };
   const ensureCtx = () => {
-    if (audio.els.length) return;
+    if (A.ctx) { if (A.ctx.state === 'suspended') A.ctx.resume().catch(() => {}); return true; }
     try {
       const AC = window.AudioContext || window.webkitAudioContext;
-      audio.ctx = new AC();
-      audio.analyser = audio.ctx.createAnalyser();
-      audio.analyser.fftSize = 1024; audio.analyser.smoothingTimeConstant = 0.55;
-      audio.analyser.connect(audio.ctx.destination);
-      audio.freq = new Uint8Array(audio.analyser.frequencyBinCount);
-      audio.wave = new Uint8Array(audio.analyser.fftSize);
-    } catch (e) { audio.ctx = null; }
-    audio.els = SCRIPT.map((l) => {
-      const a = new Audio(l.src); a.preload = 'auto';
-      if (audio.ctx) { try { audio.ctx.createMediaElementSource(a).connect(audio.analyser); } catch (e) { /* direkt */ } }
-      return a;
-    });
+      A.ctx = new AC();
+      A.analyser = A.ctx.createAnalyser(); A.analyser.fftSize = 1024; A.analyser.smoothingTimeConstant = 0.55;
+      A.analyser.connect(A.ctx.destination);
+      A.wave = new Uint8Array(A.analyser.fftSize); A.freq = new Uint8Array(A.analyser.frequencyBinCount);
+      A.sfxOut = A.ctx.createGain(); A.sfxOut.gain.value = 0.55; A.sfxOut.connect(A.ctx.destination);
+      const len = A.ctx.sampleRate; A.noise = A.ctx.createBuffer(1, len, len);
+      const d = A.noise.getChannelData(0); for (let i = 0; i < len; i++) d[i] = Math.random() * 2 - 1;
+      return true;
+    } catch (e) { A.ctx = null; return false; }
+  };
+  const audioEl = (src) => {
+    if (A.els.has(src)) return A.els.get(src);
+    const a = new Audio(src); a.preload = 'auto';
+    if (A.ctx) { try { A.ctx.createMediaElementSource(a).connect(A.analyser); } catch (e) { /* spielt direkt */ } }
+    A.els.set(src, a); return a;
   };
 
-  let run = 0, playing = false;
-  const buttons = $$('.js-play');
-  const setPressed = (on) => buttons.forEach((b) => {
-    b.setAttribute('aria-pressed', String(on));
-    b.setAttribute('aria-label', on ? 'Beispielanruf stoppen' : 'Beispielanruf anhören');
-  });
-  const stop = () => {
-    run++; playing = false; level.who = 'idle';
-    audio.els.forEach((a) => { a.pause(); a.currentTime = 0; });
-    setPressed(false); caption.classList.remove('live');
-    lis.forEach((li) => li.classList.remove('now'));
+  /* ===================== Klangeffekte (synthetisch) ===================== */
+  const SFX = {
+    ok() { return A.sfx && A.ctx; },
+    tone(f, dur, type = 'sine', gain = 0.04, f2 = null, delay = 0) {
+      if (!this.ok()) return;
+      const t = A.ctx.currentTime + delay, o = A.ctx.createOscillator(), g = A.ctx.createGain();
+      o.type = type; o.frequency.setValueAtTime(f, t); if (f2) o.frequency.exponentialRampToValueAtTime(f2, t + dur);
+      g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(gain, t + 0.008); g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+      o.connect(g).connect(A.sfxOut); o.start(t); o.stop(t + dur + 0.05);
+    },
+    noise(dur, type, f1, f2, gain, delay = 0, q = 1) {
+      if (!this.ok()) return;
+      const t = A.ctx.currentTime + delay, s = A.ctx.createBufferSource(), fl = A.ctx.createBiquadFilter(), g = A.ctx.createGain();
+      s.buffer = A.noise; fl.type = type; fl.Q.value = q; fl.frequency.setValueAtTime(f1, t); fl.frequency.exponentialRampToValueAtTime(f2, t + dur);
+      g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(gain, t + dur * 0.25); g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+      s.connect(fl).connect(g).connect(A.sfxOut); s.start(t, Math.random() * 0.5); s.stop(t + dur + 0.05);
+    },
+    hover() { this.tone(2100, 0.035, 'sine', 0.012); },
+    tick() { this.tone(2600, 0.045, 'sine', 0.03); this.tone(1300, 0.06, 'triangle', 0.015); },
+    whoosh() { this.noise(0.5, 'bandpass', 350, 2600, 0.07, 0, 1.4); },
+    zap() { this.noise(0.09, 'highpass', 2500, 6000, 0.05); this.tone(1400, 0.08, 'square', 0.012, 180); },
+    chime() { this.tone(1046.5, 1.1, 'sine', 0.035); this.tone(1568, 1.3, 'sine', 0.025, null, 0.09); },
+    boot() {
+      this.tone(36, 1.8, 'sine', 0.22, 74);
+      this.tone(90, 1.5, 'sawtooth', 0.025, 720);
+      this.noise(1.5, 'lowpass', 200, 4200, 0.05, 0, 0.8);
+      this.zap(); setTimeout(() => this.zap(), 1450);
+      this.tone(880, 1.4, 'sine', 0.03, null, 1.5); this.tone(1320, 1.6, 'sine', 0.02, null, 1.58);
+    },
   };
-  const playLine = (i, id) => new Promise((resolve) => {
-    const a = audio.els[i];
-    const done = () => { a.removeEventListener('ended', done); resolve(); };
-    a.addEventListener('ended', done);
-    a.currentTime = 0;
-    a.play().catch(() => setTimeout(done, SCRIPT[i].text.length * 60));
+  const sndBtn = $('.snd');
+  const setSfx = (on) => { A.sfx = !!on; sndBtn.setAttribute('aria-pressed', String(A.sfx)); };
+  sndBtn.addEventListener('click', () => { if (!A.sfx) ensureCtx(); setSfx(!A.sfx); SFX.tick(); });
+  let lastHover = 0;
+  document.addEventListener('pointerover', (e) => {
+    const el = e.target.closest && e.target.closest('a, button, .chip, input[type="range"]');
+    if (!el || el.contains(e.relatedTarget)) return;
+    const n = performance.now(); if (n - lastHover > 70) { lastHover = n; SFX.hover(); }
   });
-  const start = async () => {
-    ensureCtx();
-    if (audio.ctx && audio.ctx.state === 'suspended') { try { await audio.ctx.resume(); } catch (e) { /* egal */ } }
-    const id = ++run; playing = true; setPressed(true);
-    booked.classList.remove('show'); lis.forEach((li) => li.classList.remove('now', 'done'));
-    caption.classList.add('live');
-    for (let i = 0; i < SCRIPT.length; i++) {
-      if (id !== run) return;
-      const l = SCRIPT[i];
-      level.who = l.who;
-      capWho.textContent = l.name; capText.textContent = l.text;
-      lis.forEach((li, k) => { li.classList.toggle('now', k === i); li.classList.toggle('done', k < i); });
-      await playLine(i, id);
-      if (id !== run) return;
-      if (l.booked) booked.classList.add('show');
-      level.who = 'pause';
-      await new Promise((r) => setTimeout(r, 380));
-    }
-    if (id === run) {
-      lis.forEach((li) => { li.classList.remove('now'); li.classList.add('done'); });
-      capWho.textContent = 'Termin eingetragen'; capText.textContent = 'Do · 10:30 · Inspektion E-Bike. Bestätigung ist raus.';
-      playing = false; level.who = 'idle'; setPressed(false); caption.classList.remove('live');
-    }
-  };
-  buttons.forEach((b) => b.addEventListener('click', () => (playing ? stop() : start())));
+  document.addEventListener('click', (e) => { if (e.target.closest('a, button:not(.snd)')) SFX.tick(); });
 
-  /* Pegel aus dem Analyser lesen (oder simulieren, falls Web Audio fehlt) */
+  /* ===================== Pegel (Stimme -> Linie) ===================== */
+  const level = { v: 0, bands: [0, 0, 0, 0, 0, 0], who: 'idle', speaking: false };
   const readLevel = (t) => {
     let target = 0; const bands = [0, 0, 0, 0, 0, 0];
-    if (playing && level.who !== 'pause') {
-      if (audio.analyser) {
-        audio.analyser.getByteTimeDomainData(audio.wave);
-        let sum = 0; for (let i = 0; i < audio.wave.length; i++) { const d = (audio.wave[i] - 128) / 128; sum += d * d; }
-        target = Math.min(1, Math.sqrt(sum / audio.wave.length) * 6);
-        audio.analyser.getByteFrequencyData(audio.freq);
-        const edges = [2, 6, 12, 24, 48, 96, 180];
-        for (let b = 0; b < 6; b++) { let s = 0; for (let i = edges[b]; i < edges[b + 1]; i++) s += audio.freq[i]; bands[b] = s / ((edges[b + 1] - edges[b]) * 255); }
+    if (level.speaking) {
+      if (A.analyser) {
+        A.analyser.getByteTimeDomainData(A.wave);
+        let sum = 0; for (let i = 0; i < A.wave.length; i++) { const d = (A.wave[i] - 128) / 128; sum += d * d; }
+        target = Math.min(1, Math.sqrt(sum / A.wave.length) * 5);
+        A.analyser.getByteFrequencyData(A.freq);
+        const e = [2, 6, 12, 24, 48, 96, 180];
+        for (let b = 0; b < 6; b++) { let s = 0; for (let i = e[b]; i < e[b + 1]; i++) s += A.freq[i]; bands[b] = s / ((e[b + 1] - e[b]) * 255); }
       } else {
         target = 0.35 + 0.35 * Math.abs(Math.sin(t * 9) * Math.sin(t * 3.3));
         for (let b = 0; b < 6; b++) bands[b] = target * (0.5 + 0.5 * Math.sin(t * (4 + b * 2.7)));
@@ -146,104 +93,366 @@
     for (let b = 0; b < 6; b++) level.bands[b] += (bands[b] - level.bands[b]) * 0.35;
   };
 
-  /* ================= Stromlinie (Canvas) ================= */
+  /* ===================== Stromlinie ===================== */
+  const pointer = { x: -1e4, y: -1e4, t: 0 };
+  addEventListener('pointermove', (e) => { pointer.x = e.clientX; pointer.y = e.clientY; pointer.t = performance.now(); }, { passive: true });
+  addEventListener('pointerdown', (e) => { pointer.x = e.clientX; pointer.y = e.clientY; pointer.t = performance.now(); }, { passive: true });
+  let lastZap = 0;
+
   class Plasma {
-    constructor(canvas) {
-      this.c = canvas; this.g = canvas.getContext('2d'); this.sparks = []; this.big = canvas.dataset.size === 'big';
-      this.seed = Math.random() * 100; this.resize();
+    constructor(c) {
+      this.c = c; this.g = c.getContext('2d'); this.kind = c.dataset.size; this.sparks = []; this.seed = Math.random() * 100;
+      this.span = this.kind === 'intro' ? 0 : 1; this.spanTarget = this.span; this.resize();
     }
     resize() {
-      const d = Math.min(devicePixelRatio || 1, 2);
-      const w = this.c.clientWidth, h = this.c.clientHeight;
-      if (!w) return;
-      this.d = d; this.w = w; this.h = h;
-      this.c.width = Math.round(w * d); this.c.height = Math.round(h * d);
+      const d = Math.min(devicePixelRatio || 1, 2), w = this.c.clientWidth, h = this.c.clientHeight;
+      if (!w) return; this.d = d; this.w = w; this.h = h; this.c.width = Math.round(w * d); this.c.height = Math.round(h * d);
     }
-    visible() { return this.c.offsetParent !== null && this.w; }
-    path(t, amp, phase, sharp) {
-      const { w, h } = this, mid = h / 2, n = Math.max(80, Math.floor(w / 5)), pts = [];
-      const B = level.bands;
+    visible() { return this.c.offsetParent !== null || this.kind === 'intro'; }
+    path(t, amp, phase, sharp, rect) {
+      const { w, h } = this, mid = h / 2, n = Math.max(80, Math.floor(w / 5)), pts = [], B = level.bands;
+      let px = null, py = null, prox = 0;
+      if (rect && this.kind !== 'intro' && performance.now() - pointer.t < 2500 && !reduce) {
+        px = pointer.x - rect.left; py = pointer.y - rect.top;
+        prox = (px > -40 && px < w + 40 && py > -h * 0.6 && py < h * 1.6) ? Math.exp(-Math.abs(py - mid) / (h * 0.9)) : 0;
+      }
+      const half = this.span / 2;
       for (let i = 0; i <= n; i++) {
-        const x = i / n, env = Math.pow(Math.sin(Math.PI * x), 1.35);
-        let y = 0;
-        y += Math.sin(x * 9 + t * 2.1 + phase) * (0.12 + B[0] * 0.9);
-        y += Math.sin(x * 23 - t * 3.7 + phase * 1.7) * (0.06 + B[1] * 0.7);
-        y += Math.sin(x * 47 + t * 6.3 + phase * 2.3) * (0.03 + B[2] * 0.55);
-        y += Math.sin(x * 91 - t * 9.1 + phase) * (B[3] * 0.4 + B[4] * 0.3);
-        const crackle = (Math.random() - 0.5) * sharp;
-        y = (y * amp + crackle * amp) * env * h * 0.42;
+        const x = i / n, dx = Math.abs(x - 0.5);
+        const mask = dx <= half ? Math.min(1, (half - dx) / 0.06 + 0.001) : 0;
+        const env = Math.pow(Math.sin(Math.PI * x), 1.35) * mask;
+        let y = Math.sin(x * 9 + t * 2.1 + phase) * (0.12 + B[0] * 0.9)
+          + Math.sin(x * 23 - t * 3.7 + phase * 1.7) * (0.06 + B[1] * 0.7)
+          + Math.sin(x * 47 + t * 6.3 + phase * 2.3) * (0.03 + B[2] * 0.55)
+          + Math.sin(x * 91 - t * 9.1 + phase) * (B[3] * 0.4 + B[4] * 0.3);
+        y = Math.tanh((y * amp + (Math.random() - 0.5) * sharp * amp) * 1.15) * env * h * (this.kind === 'intro' ? 0.3 : 0.36);
+        if (prox > 0) {
+          const d = x * w - px, gk = Math.exp(-(d * d) / (2 * 110 * 110));
+          y += Math.max(-h * 0.42, Math.min(h * 0.42, (py - mid) * 0.6)) * gk * prox * mask;
+        }
         pts.push([x * w, mid + y]);
       }
-      return pts;
+      return { pts, px, py, prox };
     }
     stroke(pts, width, color, alpha) {
-      const g = this.g, { w } = this;
-      const grad = g.createLinearGradient(0, 0, w, 0);
+      const g = this.g, w = this.w, a = Math.max(0, 0.5 - this.span / 2) * w, b = Math.min(1, 0.5 + this.span / 2) * w;
+      const grad = g.createLinearGradient(a, 0, b, 0);
       grad.addColorStop(0, 'rgba(0,0,0,0)'); grad.addColorStop(0.12, color); grad.addColorStop(0.88, color); grad.addColorStop(1, 'rgba(0,0,0,0)');
       g.globalAlpha = alpha; g.strokeStyle = grad; g.lineWidth = width; g.lineJoin = 'round'; g.lineCap = 'round';
-      g.beginPath(); g.moveTo(pts[0][0], pts[0][1]);
-      for (let i = 1; i < pts.length; i++) g.lineTo(pts[i][0], pts[i][1]);
-      g.stroke();
+      g.beginPath(); g.moveTo(pts[0][0], pts[0][1]); for (let i = 1; i < pts.length; i++) g.lineTo(pts[i][0], pts[i][1]); g.stroke();
+    }
+    bolt(x1, y1, x2, y2, color) {
+      const seg = [[x1, y1], [x2, y2]];
+      const split = (a, b, depth) => {
+        if (depth === 0) return [a, b];
+        const len = Math.hypot(b[0] - a[0], b[1] - a[1]);
+        const m = [(a[0] + b[0]) / 2 + (Math.random() - 0.5) * len * 0.35, (a[1] + b[1]) / 2 + (Math.random() - 0.5) * len * 0.35];
+        const l = split(a, m, depth - 1), r = split(m, b, depth - 1); return l.concat(r.slice(1));
+      };
+      const pts = split(seg[0], seg[1], 5), g = this.g;
+      [[7, 0.15], [2.4, 0.55], [1, 1]].forEach(([wd, al], i) => {
+        g.globalAlpha = al; g.strokeStyle = i === 2 ? '#ffffff' : color; g.lineWidth = wd;
+        g.beginPath(); g.moveTo(pts[0][0], pts[0][1]); for (const p of pts) g.lineTo(p[0], p[1]); g.stroke();
+      });
     }
     draw(t) {
-      if (!this.visible()) return;
+      if (!this.visible() || !this.w) return;
+      this.span += (this.spanTarget - this.span) * 0.045;
       const g = this.g, { w, h, d } = this;
-      g.setTransform(d, 0, 0, d, 0, 0);
-      g.globalCompositeOperation = 'source-over'; g.globalAlpha = 1; g.clearRect(0, 0, w, h);
+      g.setTransform(d, 0, 0, d, 0, 0); g.globalCompositeOperation = 'source-over'; g.globalAlpha = 1; g.clearRect(0, 0, w, h);
       g.globalCompositeOperation = 'lighter';
       const talk = level.who === 'ki', caller = level.who === 'anrufer';
-      const idle = reduce ? 0.06 : 0.07 + 0.03 * Math.sin(t * 0.8);
-      const amp = idle + level.v * (talk ? 2.3 : 1.5);
-      const sharp = talk ? 0.18 + level.v * 0.5 : caller ? 0.08 : 0.04;
+      const amp = (reduce ? 0.06 : 0.07 + 0.03 * Math.sin(t * 0.8)) + level.v * (talk ? 1.5 : 1.0);
+      const sharp = talk ? 0.1 + level.v * 0.22 : caller ? 0.06 : 0.04;
       const core = caller ? 'rgba(255,236,214,1)' : 'rgba(225,246,255,1)';
       const halo = caller ? 'rgba(255,190,140,1)' : 'rgba(127,212,255,1)';
       const deep = caller ? 'rgba(255,140,90,1)' : 'rgba(58,141,255,1)';
       const tt = reduce ? t * 0.2 : t;
-      const main = this.path(tt, amp, this.seed, sharp);
-      this.stroke(main, (this.big ? 26 : 20) + level.v * 30, deep, 0.07 + level.v * 0.08);
-      this.stroke(main, 9 + level.v * 10, halo, 0.22 + level.v * 0.2);
-      this.stroke(main, 2.6, halo, 0.75);
-      this.stroke(main, 1.2, core, 1);
-      // Nebenstränge: elektrische Fäden um die Hauptlinie
-      for (let k = 1; k <= 2; k++) {
-        const p = this.path(tt * (1 + k * 0.13), amp * (0.7 + k * 0.25), this.seed + k * 2.1, sharp * 1.6);
-        this.stroke(p, 1, halo, 0.28 + level.v * 0.3);
+      const rect = this.c.getBoundingClientRect();
+      const { pts: main, px, py, prox } = this.path(tt, amp, this.seed, sharp, rect);
+      const cx = w / 2, cy = h / 2;
+      if (this.span < 0.08) {
+        const r = 60 + 30 * Math.sin(t * 3), rg = g.createRadialGradient(cx, cy, 0, cx, cy, r);
+        rg.addColorStop(0, 'rgba(240,250,255,1)'); rg.addColorStop(0.12, 'rgba(127,212,255,.7)'); rg.addColorStop(1, 'rgba(58,141,255,0)');
+        g.globalAlpha = 1; g.fillStyle = rg; g.beginPath(); g.arc(cx, cy, r, 0, Math.PI * 2); g.fill();
       }
-      // Wandernder Signalpuls, solange niemand spricht
-      if (!playing || level.who === 'pause') {
-        const px = ((t * 0.18) % 1.4) - 0.2;
-        if (px > 0.05 && px < 0.95) {
-          const idx = Math.round(px * (main.length - 1)), [x, y] = main[idx];
-          const r = 46, rg = g.createRadialGradient(x, y, 0, x, y, r);
+      if (this.span > 0.01) {
+        this.stroke(main, (this.kind === 'big' ? 26 : 20) + level.v * 30, deep, 0.07 + level.v * 0.08);
+        this.stroke(main, 9 + level.v * 10, halo, 0.22 + level.v * 0.2);
+        this.stroke(main, 2.6, halo, 0.75);
+        this.stroke(main, 1.2, core, 1);
+        for (let k = 1; k <= 2; k++) {
+          const p = this.path(tt * (1 + k * 0.13), amp * (0.7 + k * 0.25), this.seed + k * 2.1, sharp * 0.8, null).pts;
+          this.stroke(p, 1, halo, 0.28 + level.v * 0.3);
+        }
+      }
+      // Lichtbogen zum Finger / Mauszeiger
+      if (px !== null && prox > 0.25 && this.span > 0.5 && px > 30 && px < w - 30) {
+        const idx = Math.round((px / w) * (main.length - 1)), lp = main[Math.max(0, Math.min(main.length - 1, idx))];
+        const dist = Math.hypot(px - lp[0], py - lp[1]);
+        if (dist > 16 && dist < 150 && Math.random() < 0.55) {
+          this.bolt(lp[0], lp[1], px, py, halo);
+          const n = performance.now(); if (n - lastZap > 380) { lastZap = n; SFX.zap(); }
+        }
+      }
+      // Signalpuls im Leerlauf
+      if (!level.speaking && this.span > 0.9) {
+        const p = ((t * 0.18 + this.seed) % 1.4) - 0.2;
+        if (p > 0.05 && p < 0.95) {
+          const [x, y] = main[Math.round(p * (main.length - 1))], r = 46, rg = g.createRadialGradient(x, y, 0, x, y, r);
           rg.addColorStop(0, 'rgba(230,248,255,.9)'); rg.addColorStop(0.25, 'rgba(127,212,255,.35)'); rg.addColorStop(1, 'rgba(58,141,255,0)');
           g.globalAlpha = 1; g.fillStyle = rg; g.beginPath(); g.arc(x, y, r, 0, Math.PI * 2); g.fill();
         }
       }
-      // Funken bei lauter Stimme
-      if (!reduce && level.v > 0.35 && Math.random() < level.v * 0.9) {
+      if (!reduce && level.v > 0.35 && Math.random() < level.v * 0.9 && this.span > 0.3) {
         const [x, y] = main[Math.floor(main.length * (0.15 + Math.random() * 0.7))];
         this.sparks.push({ x, y, vx: (Math.random() - 0.5) * 2.4, vy: (Math.random() - 0.5) * 3.2, life: 1 });
       }
       this.sparks = this.sparks.filter((s) => (s.life -= 0.035) > 0);
       for (const s of this.sparks) {
         s.x += s.vx; s.y += s.vy; s.vy += 0.04;
-        g.globalAlpha = s.life; g.fillStyle = core;
-        g.beginPath(); g.arc(s.x, s.y, 1.4, 0, Math.PI * 2); g.fill();
-        g.globalAlpha = s.life * 0.35; g.fillStyle = halo;
-        g.beginPath(); g.arc(s.x, s.y, 5, 0, Math.PI * 2); g.fill();
+        g.globalAlpha = s.life; g.fillStyle = core; g.beginPath(); g.arc(s.x, s.y, 1.4, 0, Math.PI * 2); g.fill();
+        g.globalAlpha = s.life * 0.35; g.fillStyle = halo; g.beginPath(); g.arc(s.x, s.y, 5, 0, Math.PI * 2); g.fill();
       }
       g.globalAlpha = 1; g.globalCompositeOperation = 'source-over';
     }
   }
   const plasmas = $$('.plasma').map((c) => new Plasma(c));
+  const introPlasma = plasmas.find((p) => p.kind === 'intro');
   addEventListener('resize', () => plasmas.forEach((p) => p.resize()));
-  const loop = (now) => {
-    const t = now / 1000;
-    readLevel(t);
-    plasmas.forEach((p) => p.draw(t));
-    requestAnimationFrame(loop);
+
+  /* ===================== Text-Dekodierung ===================== */
+  const GLYPHS = 'AVOX01<>/\\|#*+=:;ÄÖÜ';
+  const decode = (el) => {
+    if (reduce || !el) return;
+    const nodes = []; const walk = (n) => n.childNodes.forEach((c) => (c.nodeType === 3 ? nodes.push(c) : walk(c)));
+    walk(el);
+    const orig = nodes.map((n) => (n.__o = n.__o || n.textContent));
+    const total = orig.reduce((s, x) => s + x.length, 0), start = performance.now(), dur = 900;
+    const step = (now) => {
+      const k = Math.min(1, (now - start) / dur), shown = Math.floor(k * total); let c = 0;
+      nodes.forEach((n, i) => {
+        n.textContent = [...orig[i]].map((ch) => { c++; return c <= shown || ch === ' ' ? ch : GLYPHS[(Math.random() * GLYPHS.length) | 0]; }).join('');
+      });
+      if (k < 1) requestAnimationFrame(step); else nodes.forEach((n, i) => { n.textContent = orig[i]; });
+    };
+    requestAnimationFrame(step);
   };
 
-  show(true);
+  /* ===================== Reiter ===================== */
+  const VIEWS = ['start', 'live', 'funktionen', 'preise', 'fragen'];
+  const glow = $('.tab-glow'), scan = $('.scan');
+  const moveGlow = () => {
+    const a = $('.tab[aria-current="page"]'); if (!a || !a.offsetWidth) return;
+    glow.style.width = a.offsetWidth + 'px'; glow.style.transform = `translateX(${a.offsetLeft - 4}px)`;
+  };
+  const show = (first) => {
+    let id = location.hash.slice(1); if (id === 'hoerprobe') id = 'live';
+    const view = VIEWS.includes(id) ? id : 'start';
+    $$('.view').forEach((v) => {
+      const on = v.dataset.view === view;
+      if (on && v.hidden) {
+        v.hidden = false; v.classList.remove('enter'); void v.offsetWidth;
+        if (!first) { v.classList.add('enter'); $$('[data-decode]', v).slice(0, 1).forEach(decode); }
+      } else if (!on) v.hidden = true;
+    });
+    $$('.tab, .dock-i').forEach((a) => (a.getAttribute('href') === '#' + view ? a.setAttribute('aria-current', 'page') : a.removeAttribute('aria-current')));
+    moveGlow();
+    if (!first) {
+      scan.classList.remove('go'); void scan.offsetWidth; if (!reduce) scan.classList.add('go');
+      SFX.whoosh(); window.scrollTo({ top: 0, behavior: 'auto' });
+    }
+    requestAnimationFrame(() => plasmas.forEach((p) => p.resize()));
+  };
+  addEventListener('hashchange', () => show(false));
+  addEventListener('resize', moveGlow);
+  if (document.fonts) document.fonts.ready.then(moveGlow);
+
+  /* Weitere Überschriften dekodieren, sobald sie ins Bild kommen */
+  if ('IntersectionObserver' in window) {
+    const io = new IntersectionObserver((es) => es.forEach((e) => { if (e.isIntersecting) { decode(e.target); io.unobserve(e.target); } }), { threshold: 0.6 });
+    $$('.block [data-decode]').forEach((h) => io.observe(h));
+  }
+
+  /* Licht folgt der Maus */
+  document.addEventListener('pointermove', (e) => {
+    const el = e.target.closest && e.target.closest('.spot'); if (!el) return;
+    const r = el.getBoundingClientRect();
+    el.style.setProperty('--x', (e.clientX - r.left) + 'px'); el.style.setProperty('--y', (e.clientY - r.top) + 'px');
+  }, { passive: true });
+
+  /* Uhr */
+  const clocks = $$('.js-clock');
+  const tickClock = () => { const s = new Date().toLocaleTimeString('de-DE'); clocks.forEach((c) => { c.textContent = s; }); };
+  tickClock(); setInterval(tickClock, 1000);
+
+  /* ===================== Gespräche ===================== */
+  const S = (who, src, text) => ({ who, name: who === 'ki' ? 'AVOX' : 'Anrufer', src: 'audio/' + src + '.mp3', text });
+  const SCN = [
+    { title: 'Termin buchen', lines: [
+      S('ki', 's1-1', 'Fahrrad-Werkstatt am Markt, guten Tag! Hier spricht die digitale Assistenz. Ich bin eine künstliche Intelligenz. Wie kann ich Ihnen helfen?'),
+      S('anrufer', 's1-2', 'Hallo, guten Tag! Mein E-Bike braucht eine Inspektion. Geht diese Woche noch was?'),
+      S('ki', 's1-3', 'Gerne. Am Donnerstag um halb elf ist noch frei. Soll ich den Termin für Sie eintragen?'),
+      S('anrufer', 's1-4', 'Ja, perfekt.'),
+      S('ki', 's1-5', 'Erledigt. Sie bekommen gleich eine Bestätigung per E-Mail. Einen schönen Tag noch!')],
+      fields: [['Anliegen', 'Inspektion E-Bike', 1], ['Freier Termin', 'Donnerstag, 10:30 Uhr', 2], ['Ergebnis', 'Im Kalender eingetragen · Bestätigung per E-Mail', 4, 1]] },
+    { title: 'Ist mein Rad fertig?', lines: [
+      S('anrufer', 's2-1', 'Guten Tag, hier spricht Meier. Ist mein Fahrrad schon fertig?'),
+      S('ki', 's2-2', 'Guten Tag, Herr Meier. Ihr Trekkingrad ist fertig und kann ab 16 Uhr abgeholt werden. Die Rechnung beträgt 89 Euro.'),
+      S('anrufer', 's2-3', 'Super, vielen Dank!'),
+      S('ki', 's2-4', 'Sehr gern. Bis später in der Werkstatt!')],
+      fields: [['Anrufer', 'Herr Meier', 0], ['Anliegen', 'Abholstatus', 0], ['Auskunft', 'Fertig ab 16:00 Uhr · 89 €', 1], ['Ergebnis', 'Erledigt, kein Rückruf nötig', 3, 1]] },
+    { title: 'Panne, eilig', lines: [
+      S('anrufer', 's3-1', 'Hallo! Ich habe einen Platten und brauche mein Rad morgen früh für die Arbeit.'),
+      S('ki', 's3-2', 'Das bekommen wir hin. Wenn Sie das Rad heute bis 18 Uhr bringen, ist es morgen ab halb acht fertig. Soll ich das für Sie notieren?'),
+      S('anrufer', 's3-3', 'Ja, bitte gerne.'),
+      S('ki', 's3-4', 'Ist notiert. Bis gleich in der Werkstatt!')],
+      fields: [['Anliegen', 'Platten · Rad wird morgen früh gebraucht', 0], ['Lösung', 'Abgabe heute bis 18:00 · fertig ab 7:30', 1], ['Ergebnis', 'Auftrag für die Werkstatt notiert', 3, 1]] },
+    { title: 'Nach Feierabend', lines: [
+      S('anrufer', 's4-1', 'Guten Abend! Haben Sie heute noch geöffnet?'),
+      S('ki', 's4-2', 'Wir haben heute schon geschlossen. Morgen sind wir ab 9 Uhr für Sie da. Soll ich Ihnen einen Rückruf eintragen?'),
+      S('anrufer', 's4-3', 'Ja, sehr gerne.'),
+      S('ki', 's4-4', 'Erledigt. Unser Team ruft Sie morgen früh zurück. Einen schönen Abend!')],
+      fields: [['Uhrzeit', 'Nach Ladenschluss', 0], ['Auskunft', 'Morgen ab 9:00 Uhr geöffnet', 1], ['Ergebnis', 'Rückruf für morgen früh eingetragen', 3, 1]] },
+  ];
+  let sel = 0;
+  const chips = $('.chips'), list = $('.script'), exList = $('.ex-list');
+  SCN.forEach((s, i) => {
+    const b = document.createElement('button'); b.type = 'button'; b.className = 'chip'; b.textContent = s.title;
+    b.setAttribute('aria-pressed', String(i === 0));
+    b.addEventListener('click', () => { sel = i; $$('.chip').forEach((c, k) => c.setAttribute('aria-pressed', String(k === i))); render(); play(i); });
+    chips.appendChild(b);
+  });
+  const render = () => {
+    const s = SCN[sel]; list.textContent = ''; exList.textContent = '';
+    s.lines.forEach((l) => {
+      const li = document.createElement('li'); li.className = l.who;
+      const w = document.createElement('span'); w.className = 'who'; w.textContent = l.name;
+      const t = document.createElement('span'); t.className = 'txt'; t.textContent = l.text;
+      li.append(w, t); list.appendChild(li);
+    });
+    s.fields.forEach(([k, v]) => {
+      const d = document.createElement('div'), dt = document.createElement('dt'), dd = document.createElement('dd');
+      dt.textContent = k; dd.textContent = v; d.append(dt, dd); exList.appendChild(d);
+    });
+  };
+  render();
+
+  const capWho = $('.cap-who'), capText = $('.cap-text'), caption = $('.caption');
+  const btns = $$('.js-play');
+  let run = 0, playing = -1;
+  const setPressed = (on) => btns.forEach((b) => { b.setAttribute('aria-pressed', String(on)); });
+  const stopAll = () => {
+    run++; playing = -1; level.speaking = false; level.who = 'idle';
+    A.els.forEach((a) => { a.pause(); a.currentTime = 0; });
+    setPressed(false); caption.classList.remove('live'); $$('li', list).forEach((li) => li.classList.remove('now'));
+  };
+  const say = (src, id) => new Promise((resolve) => {
+    const a = audioEl(src); let done = false;
+    const fin = () => { if (!done) { done = true; a.removeEventListener('ended', fin); resolve(); } };
+    a.addEventListener('ended', fin); a.currentTime = 0;
+    a.play().then(() => { level.speaking = true; }).catch(() => setTimeout(fin, 2500));
+  });
+  const play = async (i) => {
+    stopAll(); ensureCtx();
+    const id = run, s = SCN[i]; playing = i; setPressed(true); caption.classList.add('live');
+    const lis = sel === i ? $$('li', list) : [], fs = sel === i ? $$('div', exList) : [];
+    fs.forEach((f) => f.classList.remove('on', 'done'));
+    for (let k = 0; k < s.lines.length; k++) {
+      if (id !== run) return;
+      const l = s.lines[k];
+      level.who = l.who; capWho.textContent = l.name; capText.textContent = l.text;
+      lis.forEach((li, j) => { li.classList.toggle('now', j === k); li.classList.toggle('done', j < k); });
+      s.fields.forEach(([, , at], j) => { if (at === k && fs[j]) fs[j].classList.add('on'); });
+      await say(l.src, id);
+      level.speaking = false;
+      if (id !== run) return;
+      s.fields.forEach(([, , at, fin], j) => { if (at === k && fin && fs[j]) { fs[j].classList.add('done'); SFX.chime(); } });
+      level.who = 'pause';
+      await new Promise((r) => setTimeout(r, 350));
+    }
+    if (id === run) {
+      lis.forEach((li) => { li.classList.remove('now'); li.classList.add('done'); });
+      const last = s.fields[s.fields.length - 1];
+      capWho.textContent = 'Ergebnis'; capText.textContent = last[1];
+      playing = -1; level.who = 'idle'; setPressed(false); caption.classList.remove('live');
+    }
+  };
+  btns.forEach((b) => b.addEventListener('click', () => {
+    if (playing >= 0) return stopAll();
+    play(b.dataset.scn === 'sel' ? sel : Number(b.dataset.scn));
+  }));
+
+  /* ===================== Rechner ===================== */
+  const cCalls = $('#c-calls'), cRate = $('#c-rate'), cValue = $('#c-value'), res = $('.js-res'), factor = $('.js-factor');
+  const fmt = (n) => Math.round(n).toLocaleString('de-DE');
+  let shown = 0, anim = 0;
+  const calc = (e) => {
+    [cCalls, cRate, cValue].forEach((r) => {
+      r.style.setProperty('--p', ((r.value - r.min) / (r.max - r.min)) * 100 + '%');
+      const o = $(`output[for="${r.id}"]`); o.textContent = r === cRate ? r.value + ' %' : r === cValue ? r.value + ' €' : r.value;
+    });
+    const target = cCalls.value * 4.33 * (cRate.value / 100) * cValue.value;
+    factor.textContent = target > 129 ? `Das ist das ${(target / 129).toLocaleString('de-DE', { maximumFractionDigits: 1 })}-Fache davon.` : '';
+    const from = shown, t0 = performance.now(); cancelAnimationFrame(anim);
+    const step = (n) => { const k = Math.min(1, (n - t0) / 600), ease = 1 - Math.pow(1 - k, 3); shown = from + (target - from) * ease; res.textContent = fmt(shown); if (k < 1) anim = requestAnimationFrame(step); };
+    anim = requestAnimationFrame(step);
+    if (e) SFX.tone(600 + target / 8, 0.03, 'sine', 0.012);
+  };
+  [cCalls, cRate, cValue].forEach((r) => r.addEventListener('input', calc));
+  calc();
+
+  /* ===================== Formular ===================== */
+  const form = $('.join'), msg = $('.join-msg');
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const name = $('#f-name'), mail = $('#f-mail');
+    const okName = name.value.trim().length > 1, okMail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(mail.value.trim());
+    name.setAttribute('aria-invalid', String(!okName)); mail.setAttribute('aria-invalid', String(!okMail));
+    if (!okName || !okMail) { msg.textContent = !okName ? 'Bitte trag den Namen deiner Werkstatt ein.' : 'Bitte prüf deine E-Mail-Adresse.'; return; }
+    msg.textContent = `Danke, ${name.value.trim()}! Dein Platz ist vorgemerkt. (Entwurf: Das Formular ist noch nicht angeschlossen, es wurde nichts verschickt.)`;
+    SFX.chime();
+  });
+
+  /* ===================== Begrüßung ===================== */
+  const intro = $('.intro'), cap = $('.intro-cap'), greetEl = $('.js-greet');
+  const hour = new Date().getHours();
+  const greet = hour < 11 ? ['Guten Morgen', 'g-morgen'] : hour < 18 ? ['Guten Tag', 'g-tag'] : ['Guten Abend', 'g-abend'];
+  greetEl.textContent = greet[0];
+  let introDone = false;
+  const leaveIntro = () => {
+    if (introDone) return; introDone = true;
+    A.els.forEach((a) => a.pause()); level.speaking = false; level.who = 'idle';
+    store.set('avox-intro', '1');
+    intro.classList.add('leaving'); document.body.classList.remove('booting');
+    SFX.whoosh();
+    setTimeout(() => { intro.hidden = true; intro.classList.remove('leaving', 'playing'); show(true); decode($('#t-start')); }, reduce ? 50 : 1100);
+  };
+  const openIntro = () => {
+    introDone = false; intro.hidden = false; intro.classList.remove('playing', 'leaving'); cap.textContent = '';
+    document.body.classList.add('booting'); introPlasma.spanTarget = 0.16; introPlasma.resize();
+    setTimeout(() => decode($('.intro-word')), 250);
+  };
+  $$('.js-enter').forEach((b) => b.addEventListener('click', async () => {
+    const withSound = b.dataset.sound === '1';
+    if (!withSound) { setSfx(false); leaveIntro(); return; }
+    ensureCtx(); setSfx(true); SFX.boot();
+    intro.classList.add('playing'); introPlasma.spanTarget = 1;
+    await new Promise((r) => setTimeout(r, 1500));
+    if (introDone) return;
+    level.who = 'ki';
+    cap.textContent = `${greet[0]}. Willkommen bei AVOX. Ich bin die künstliche Intelligenz, die für deine Werkstatt ans Telefon geht. Tag und Nacht.`;
+    await say('audio/' + greet[1] + '.mp3');
+    level.speaking = false;
+    setTimeout(leaveIntro, 500);
+  }));
+  $('.js-skip').addEventListener('click', leaveIntro);
+  $('.js-replay').addEventListener('click', () => { stopAll(); window.scrollTo(0, 0); openIntro(); });
+  addEventListener('keydown', (e) => { if (e.key === 'Escape' && !intro.hidden) leaveIntro(); });
+
+  /* ===================== Start ===================== */
+  if (store.get('avox-intro') === '1') { intro.hidden = true; document.body.classList.remove('booting'); show(true); }
+  else { show(true); openIntro(); }
+  const loop = (now) => { const t = now / 1000; readLevel(t); plasmas.forEach((p) => p.draw(t)); requestAnimationFrame(loop); };
   requestAnimationFrame(loop);
 })();
