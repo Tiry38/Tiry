@@ -19,6 +19,26 @@ Android-App im Stil von J.A.R.V.I.S.: Handy liegt neben dir, du sagst **„Hey L
      Key: elevenlabs.io → Profil → API Keys. Gratis-Kontingent vorhanden.
    - **Stimme testen** antippen.
 
+## Heimnetz: FRITZ!Box & PC (Grundlage steht, Details besprechen wir)
+
+1. FRITZ!Box: Heimnetz → Netzwerk → Netzwerkeinstellungen → **„Zugriff für Anwendungen zulassen“**.
+   System → FRITZ!Box-Benutzer → Benutzer mit Passwort (Recht „FRITZ!Box-Einstellungen“).
+2. Luna → Zahnrad → **Heimnetz**: Benutzer, Passwort, PC-Name (wie in der FRITZ!Box) eintragen → „Verbindung testen“.
+3. PC: Wake-on-LAN im BIOS/UEFI und bei der Netzwerkkarte einschalten (Windows: Geräte-Manager → Netzwerkadapter →
+   Energieverwaltung → „Gerät kann den Computer aus dem Ruhezustand aktivieren“). Fernsteuerung: z. B. **RustDesk** oder
+   **Chrome Remote Desktop** auf PC und Handy.
+4. Unterwegs: FRITZ!Box → Internet → Freigaben → VPN (WireGuard) → Verbindung für dieses Handy anlegen, in der
+   **WireGuard-App** importieren, dort Einstellungen → **„Allow remote control apps“** an. Tunnelname in Luna eintragen.
+
+Dann geht z. B.: „Hey Luna, mach meinen PC an“, „Ich will meinen PC fernsteuern“ (VPN → PC wecken → warten →
+Fernsteuerungs-App öffnen), „Gast-WLAN an“, „Wer ist im WLAN?“, „Wer hat angerufen?“.
+
+## Luna als System-Assistent
+
+Zahnrad → **„Standard-Assistent festlegen“** → Digitaler Assistent → Luna. Dann startet Luna statt Google Assistant
+(langer Druck auf Power-/Home-Taste, auch auf dem Sperrbildschirm). Tiefer geht es ohne Root nicht – eine echte
+System-App bräuchte ein gerootetes Handy bzw. eigenes Android.
+
 ## Benutzen
 
 - **„Hey Luna“** (oder nur „Luna“) → kurz warten, bis sie antwortet → Befehl sagen.
@@ -34,6 +54,7 @@ Android-App im Stil von J.A.R.V.I.S.: Handy liegt neben dir, du sagst **„Hey L
 | Lautstärke, Lautlos, Taschenlampe | Termine lesen und eintragen |
 | Wetter, Navigation, Google-Suche | Benachrichtigungen zusammenfassen |
 | Zurück, Home, Sperren, Screenshot | Merkt sich Dinge über dich, gibt passende Tipps |
+| PC an, PC fernsteuern, Gast-WLAN, Geräte, Anrufliste, VPN | „Guck mal“: sieht den Bildschirm als Bild und tippt dann gezielt |
 
 ## Ehrliche Grenzen
 
@@ -52,7 +73,8 @@ Android-App im Stil von J.A.R.V.I.S.: Handy liegt neben dir, du sagst **„Hey L
   ~2900 häufigen deutschen Wörtern als Ablenker (`assets/wake_words.txt`).
 - Gehirn: `anthropic-java` (Werkzeugschleife in `Brain.kt`, 31 Handy-Werkzeuge in `PhoneTools.kt`, Websuche,
   Prompt-Caching, effort `low`, serverseitiger Fallback). Offline: `LocalIntentParser.kt`.
-- Steuerung: `LunaAccessibilityService.kt`, Benachrichtigungen: `NotificationService.kt`.
+- Steuerung: `LunaAccessibilityService.kt` (inkl. Screenshot), Benachrichtigungen: `NotificationService.kt`,
+  FRITZ!Box TR-064 + Wake-on-LAN: `HomeNet.kt`, System-Assistent: `SystemAssistant.kt`.
 - Bauen: Modell nach `app/src/main/assets/model-de/` entpacken, dann `./gradlew :app:assembleRelease`.
   Tests: `./gradlew :app:testDebugUnitTest` (Parser, Wake-Word, Claude-Schleife gegen Mock-Server, Screenshots nach `app/build/screens/`).
 - GitHub Actions (`.github/workflows/luna-apk.yml`) baut bei jeder Änderung eine APK als Release `luna-v1.0.<n>`

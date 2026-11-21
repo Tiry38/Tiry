@@ -52,6 +52,7 @@ class ScreenshotTest {
         val a = Robolectric.buildActivity(SettingsActivity::class.java).setup().get()
         shot(a, "6-einstellungen")
         shot(a, "7-einstellungen-mitte", 2600)
-        shot(a, "8-einstellungen-rechte", 5200)
+        shot(a, "8-einstellungen-heimnetz", 5200)
+        shot(a, "9-einstellungen-assistent", 7600)
     }
 }

@@ -76,6 +76,30 @@ class ClaudeBrainTest {
         assertTrue(server.takeRequest().getHeader("anthropic-beta")!!.contains("server-side-fallback"))
     }
 
+    @Test fun screenshotAlsBild() {
+        server.enqueue(json("""{"id":"m1","type":"message","role":"assistant","model":"claude-opus-5-5",
+            "content":[{"type":"tool_use","id":"toolu_9","name":"look_at_screen","input":{}}],
+            "stop_reason":"tool_use","stop_sequence":null,"usage":{"input_tokens":1,"output_tokens":1}}"""))
+        server.enqueue(json("""{"id":"m2","type":"message","role":"assistant","model":"claude-opus-5-5",
+            "content":[{"type":"text","text":"Ich sehe dein Spiel."}],"stop_reason":"end_turn","stop_sequence":null,"usage":{"input_tokens":1,"output_tokens":1}}"""))
+        val tools = object : ToolExecutor {
+            override var endRequested = false
+            var img: String? = null
+            override fun run(name: String, a: Map<String, Any?>): String { img = "AAAA"; return "Hier ist der Bildschirm." }
+            override fun takeImage(): String? = img.also { img = null }
+        }
+        val r = ClaudeBrain({ cfg }, tools, server.url("/").toString().trimEnd('/')).reply("Guck mal", "x", {})
+        assertEquals("Ich sehe dein Spiel.", r.text)
+        server.takeRequest()
+        val msgs = JSONObject(server.takeRequest().body.readUtf8()).getJSONArray("messages")
+        val content = msgs.getJSONObject(2).getJSONArray("content").getJSONObject(0).getJSONArray("content")
+        assertEquals("text", content.getJSONObject(0).getString("type"))
+        val image = content.getJSONObject(1)
+        assertEquals("image", image.getString("type"))
+        assertEquals("image/jpeg", image.getJSONObject("source").getString("media_type"))
+        assertEquals("AAAA", image.getJSONObject("source").getString("data"))
+    }
+
     @Test fun falscherSchluessel() {
         server.enqueue(MockResponse().setResponseCode(401).setHeader("Content-Type", "application/json")
             .setBody("""{"type":"error","error":{"type":"authentication_error","message":"invalid x-api-key"}}"""))

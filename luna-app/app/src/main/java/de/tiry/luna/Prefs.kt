@@ -64,6 +64,22 @@ class Prefs(context: Context) {
         get() = p.getString("last_briefing_day", "")!!
         set(v) = p.edit().putString("last_briefing_day", v).apply()
 
+    // ---------- Heimnetz: FRITZ!Box, PC, VPN ----------
+    private fun str(k: String, d: String = "") = p.getString(k, d)!!
+    private fun put(k: String, v: String) = p.edit().putString(k, v.trim()).apply()
+
+    /** Adresse der FRITZ!Box: zu Hause „fritz.box“ (über VPN auch unterwegs). */
+    var fritzHost: String get() = str("fritz_host", "fritz.box").ifBlank { "fritz.box" }; set(v) = put("fritz_host", v)
+    var fritzUser: String get() = str("fritz_user"); set(v) = put("fritz_user", v)
+    var fritzPass: String get() = str("fritz_pass"); set(v) = put("fritz_pass", v)
+    /** PC: Name, wie er in der FRITZ!Box heißt, und/oder MAC-Adresse. */
+    var pcName: String get() = str("pc_name"); set(v) = put("pc_name", v)
+    var pcMac: String get() = str("pc_mac"); set(v) = put("pc_mac", v)
+    /** Fernsteuerungs-App (Paketname), z. B. RustDesk, Chrome Remote Desktop, Windows App. Leer = automatisch suchen. */
+    var remoteApp: String get() = str("remote_app"); set(v) = put("remote_app", v)
+    /** Name des WireGuard-Tunnels zur FRITZ!Box (für unterwegs). */
+    var vpnTunnel: String get() = str("vpn_tunnel"); set(v) = put("vpn_tunnel", v)
+
     /** Dinge, die Luna sich merken soll („Merk dir …“). */
     var memories: List<String>
         get() = p.getString("memories", "")!!.split('\n').filter { it.isNotBlank() }

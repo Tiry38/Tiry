@@ -7,6 +7,7 @@ import com.anthropic.errors.AnthropicServiceException
 import com.anthropic.errors.BadRequestException
 import com.anthropic.errors.RateLimitException
 import com.anthropic.errors.UnauthorizedException
+import com.anthropic.models.messages.Base64ImageSource
 import com.anthropic.models.messages.CacheControlEphemeral
 import com.anthropic.models.messages.ContentBlockParam
 import com.anthropic.models.messages.Message
@@ -45,6 +46,8 @@ data class BrainConfig(
 interface ToolExecutor {
     fun run(name: String, a: Map<String, Any?>): String
     var endRequested: Boolean
+    /** Bild (JPEG, Base64) vom letzten Werkzeug, z. B. Screenshot – wird nur einmal abgeholt. */
+    fun takeImage(): String? = null
 }
 
 class ClaudeBrain(
@@ -94,7 +97,9 @@ So sprichst du:
 
 So handelst du:
 - Wenn er etwas am Handy will, benutze sofort die Werkzeuge, statt zu erklären, wie es geht. Danach kurz bestätigen.
-- Für fremde Apps: erst read_screen, dann tap_element / type_text / scroll – Schritt für Schritt, bis es erledigt ist.
+- Für fremde Apps: erst read_screen (Text) oder look_at_screen (Bild), dann tap_element / tap_at / type_text / scroll – Schritt für Schritt, bis es erledigt ist.
+- „Guck mal“, „was siehst du“, „was ist das“, Bilder, Fotos, Spiele, Karten: look_at_screen benutzen und beschreiben, was du siehst.
+- FRITZ!Box und PC: Mit den fritz_*- und pc_*-Werkzeugen. Unterwegs vorher vpn_connect, falls die FRITZ!Box nicht erreichbar ist.
 - Nachrichten (SMS, WhatsApp) nur senden, wenn Empfänger und Inhalt klar sind; bei Unklarheit kurz nachfragen.
 - Für aktuelle Infos (Nachrichten, Öffnungszeiten, Preise, Sport, Fakten) nutze die Websuche.
 - Wichtige persönliche Infos, die er dir erzählt, mit remember speichern.
@@ -159,7 +164,15 @@ Wohnort für Wetter & Co.: ${cfg.homeCity}.
                             @Suppress("UNCHECKED_CAST")
                             val args = try { tu._input().convert(Map::class.java) as? Map<String, Any?> ?: emptyMap() } catch (_: Exception) { emptyMap() }
                             val out = tools.run(tu.name(), args)
-                            ContentBlockParam.ofToolResult(ToolResultBlockParam.builder().toolUseId(tu.id()).content(out).build())
+                            val img = tools.takeImage()
+                            val res = ToolResultBlockParam.builder().toolUseId(tu.id())
+                            if (img == null) res.content(out)
+                            else res.contentOfBlocks(listOf(
+                                ToolResultBlockParam.Content.Block.ofText(out),
+                                ToolResultBlockParam.Content.Block.ofImage(Base64ImageSource.builder()
+                                    .mediaType(Base64ImageSource.MediaType.IMAGE_JPEG).data(img).build()),
+                            ))
+                            ContentBlockParam.ofToolResult(res.build())
                         }
                         history += MessageParam.ofUserOfContentBlockParams(results)
                     }

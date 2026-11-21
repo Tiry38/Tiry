@@ -50,10 +50,14 @@ class PhoneTools(private val ctx: Context, private val prefs: Prefs) : ToolExecu
         val required: List<String> = emptyList(),
     )
 
+    @Volatile private var pendingImage: String? = null
+    override fun takeImage(): String? = pendingImage.also { pendingImage = null }
+
     /** Wird nach einem Werkzeug gesetzt, wenn Luna das Gespräch beenden soll. */
     @Volatile override var endRequested = false
 
     companion object {
+        const val WG_PERMISSION = "com.wireguard.android.permission.CONTROL_TUNNELS"
         private fun s(desc: String) = mapOf("type" to "string", "description" to desc)
         private fun i(desc: String) = mapOf("type" to "integer", "description" to desc)
         private fun b(desc: String) = mapOf("type" to "boolean", "description" to desc)
@@ -100,11 +104,24 @@ class PhoneTools(private val ctx: Context, private val prefs: Prefs) : ToolExecu
             ToolDef("read_screen", "Liest alle sichtbaren Texte und Knöpfe des aktuellen Bildschirms (zum Steuern fremder Apps)."),
             ToolDef("tap_element", "Tippt auf einen Knopf/Text auf dem Bildschirm (Text oder Beschreibung des Elements).",
                 mapOf("text" to s("Sichtbarer Text oder Beschreibung")), listOf("text")),
+            ToolDef("look_at_screen", "Macht einen Screenshot und zeigt ihn dir als Bild – für „guck mal“, Bilder, Spiele, Apps ohne lesbaren Text."),
+            ToolDef("tap_at", "Tippt auf eine Stelle im zuletzt mit look_at_screen gesehenen Bild (Pixel-Koordinaten im Bild).",
+                mapOf("x" to i("x im Bild"), "y" to i("y im Bild")), listOf("x", "y")),
             ToolDef("scroll", "Scrollt den Bildschirm.", mapOf("direction" to e("Richtung", "up", "down", "left", "right")), listOf("direction")),
             ToolDef("type_text", "Schreibt Text in das gerade ausgewählte Eingabefeld.", mapOf("text" to s("Text")), listOf("text")),
             ToolDef("open_settings", "Öffnet eine Einstellungsseite: wifi, bluetooth, internet, volume, display, battery, location, nfc, apps, all.",
                 mapOf("page" to e("Seite", "wifi", "bluetooth", "internet", "volume", "display", "battery", "location", "nfc", "apps", "all")), listOf("page")),
             ToolDef("set_brightness", "Bildschirmhelligkeit in Prozent.", mapOf("level" to i("0-100")), listOf("level")),
+            ToolDef("fritz_status", "FRITZ!Box: Modell, FRITZ!OS, Laufzeit, Internet-Adresse."),
+            ToolDef("fritz_devices", "FRITZ!Box: welche Geräte gerade im Heimnetz online sind.", mapOf("all" to b("true = auch offline Geräte"))),
+            ToolDef("fritz_guest_wifi", "FRITZ!Box: Gast-WLAN an/aus oder Status (on weglassen = nur Status).", mapOf("on" to b("an/aus"))),
+            ToolDef("fritz_reconnect", "FRITZ!Box: Internet neu verbinden (neue IP). Nur auf ausdrücklichen Wunsch – Internet ist kurz weg."),
+            ToolDef("fritz_calls", "FRITZ!Box: letzte Anrufe am Festnetz.", mapOf("max" to i("Anzahl, Standard 5"))),
+            ToolDef("fritz_wake_device", "Weckt ein Gerät im Heimnetz per Wake-on-LAN (Name aus der FRITZ!Box oder MAC).", mapOf("device" to s("Gerätename oder MAC")), listOf("device")),
+            ToolDef("pc_wake", "Schaltet Tirys PC per Wake-on-LAN ein (auch unterwegs über VPN)."),
+            ToolDef("pc_status", "Prüft, ob Tirys PC an ist."),
+            ToolDef("pc_remote", "PC fernsteuern: PC einschalten (falls aus), warten bis er da ist, dann die Fernsteuerungs-App öffnen."),
+            ToolDef("vpn_connect", "Verbindet/trennt das WireGuard-VPN zur FRITZ!Box (für Zugriff von unterwegs).", mapOf("on" to b("true = verbinden")), listOf("on")),
             ToolDef("remember", "Merkt sich dauerhaft eine Info über Tiry (Vorlieben, Termine, Fakten).", mapOf("fact" to s("Was gemerkt werden soll")), listOf("fact")),
             ToolDef("forget", "Löscht gemerkte Infos, die diesen Text enthalten.", mapOf("match" to s("Suchtext")), listOf("match")),
             ToolDef("end_conversation", "Beendet das Gespräch nach deiner Antwort (Tiry sagt tschüss/danke/passt). Danach wartet Luna wieder auf „Hey Luna“."),
@@ -137,9 +154,28 @@ class PhoneTools(private val ctx: Context, private val prefs: Prefs) : ToolExecu
             "create_calendar_event" -> createEvent(str(a, "title"), str(a, "start"), int(a, "duration_minutes") ?: 60, a["location"]?.toString())
             "screen_action" -> acc { it.global(str(a, "action")) }
             "read_screen" -> acc { it.readScreen() }
+            "look_at_screen" -> acc { svc ->
+                val img = svc.screenshotJpeg()
+                if (img == null) "Screenshot ging nicht (braucht Android 11+ und die Bedienungshilfe)." else { pendingImage = img; "Hier ist der aktuelle Bildschirm." }
+            }
+            "tap_at" -> acc { svc ->
+                val sc = svc.lastShotScale
+                if (svc.tapAt((int(a, "x") ?: 0) / sc, (int(a, "y") ?: 0) / sc)) "Getippt." else "Tippen hat nicht geklappt."
+            }
             "tap_element" -> acc { it.tapText(str(a, "text")) }
             "scroll" -> acc { it.scroll(str(a, "direction")) }
             "type_text" -> acc { it.typeText(str(a, "text")) }
+            "fritz_status" -> fritz().info()
+            "fritz_devices" -> fritz().hosts().filter { it.active || a["all"]?.toString() == "true" }.let { l ->
+                if (l.isEmpty()) "Keine Geräte gefunden." else "${l.count { it.active }} Geräte online: " + l.joinToString(", ") { it.name + (if (it.active) "" else " (offline)") } }
+            "fritz_guest_wifi" -> fritz().guestWifi(a["on"]?.toString()?.toBooleanStrictOrNull())
+            "fritz_reconnect" -> { fritz().reconnect(); "Die FRITZ!Box verbindet sich neu. Das Internet ist ein paar Sekunden weg." }
+            "fritz_calls" -> fritz().callList(int(a, "max") ?: 5)
+            "fritz_wake_device" -> wakeDevice(str(a, "device"))
+            "pc_wake" -> pcWake()
+            "pc_status" -> if (pcOnline()) "Dein PC ist an." else "Dein PC ist aus oder nicht erreichbar."
+            "pc_remote" -> pcRemote()
+            "vpn_connect" -> vpn(a["on"]?.toString()?.toBooleanStrictOrNull() ?: true)
             "open_settings" -> openSettings(str(a, "page"))
             "set_brightness" -> brightness(int(a, "level") ?: 50)
             "remember" -> { prefs.addMemory(str(a, "fact")); "Gemerkt." }
@@ -478,6 +514,71 @@ class PhoneTools(private val ctx: Context, private val prefs: Prefs) : ToolExecu
         }
         ctx.contentResolver.insert(CalendarContract.Events.CONTENT_URI, v)
         return "Termin „$title“ eingetragen: " + SimpleDateFormat("EEEE, d. MMMM HH:mm", de).format(Date(begin)) + "."
+    }
+
+    // ---------- Heimnetz: FRITZ!Box, PC, VPN ----------
+    private fun fritz(): FritzBox {
+        if (prefs.fritzPass.isBlank()) throw IllegalStateException("Die FRITZ!Box ist noch nicht eingerichtet. Tiry muss in Lunas Einstellungen unter Heimnetz Benutzer und Passwort eintragen.")
+        return FritzBox(prefs.fritzHost, prefs.fritzUser, prefs.fritzPass)
+    }
+
+    private fun wakeDevice(dev: String): String {
+        val mac = if (Regex("([0-9a-fA-F]{2}[:-]){5}[0-9a-fA-F]{2}").matches(dev)) dev
+            else fritz().findHost(dev)?.mac ?: return "Ich finde kein Gerät „$dev“ in der FRITZ!Box."
+        fritz().wake(mac)
+        return "Weckruf an $dev gesendet."
+    }
+
+    private fun pcMac(): String? = prefs.pcMac.ifBlank { null }
+        ?: if (prefs.pcName.isNotBlank() && prefs.fritzPass.isNotBlank()) fritz().findHost(prefs.pcName)?.mac else null
+
+    private fun pcIp(): String? = if (prefs.fritzPass.isNotBlank() && prefs.pcName.isNotBlank())
+        try { fritz().findHost(prefs.pcName)?.ip?.ifBlank { null } } catch (_: Exception) { null } else null
+
+    fun pcOnline(): Boolean {
+        if (prefs.fritzPass.isNotBlank() && prefs.pcName.isNotBlank()) {
+            val h = try { fritz().findHost(prefs.pcName) } catch (_: Exception) { null }
+            if (h != null) return h.active || (h.ip.isNotBlank() && FritzBox.reachable(h.ip))
+        }
+        return pcIp()?.let { FritzBox.reachable(it) } ?: false
+    }
+
+    private fun pcWake(): String {
+        val mac = pcMac() ?: return "Ich kenne deinen PC noch nicht. Trag in Lunas Einstellungen unter Heimnetz den PC-Namen oder die MAC-Adresse ein."
+        return if (prefs.fritzPass.isNotBlank()) { fritz().wake(mac); "Dein PC wird geweckt. Das dauert meist 20 bis 60 Sekunden." }
+        else { FritzBox.magicPacket(mac); "Weckruf an deinen PC gesendet (funktioniert so nur im WLAN zu Hause)." }
+    }
+
+    private val remoteApps = listOf(
+        "com.carriez.flutter_hbb" to "RustDesk", "com.google.chromeremotedesktop" to "Chrome Remote Desktop",
+        "com.microsoft.rdc.androidx" to "Windows App", "com.anydesk.anydeskandroid" to "AnyDesk",
+        "com.teamviewer.teamviewer.market.mobile" to "TeamViewer",
+    )
+
+    private fun pcRemote(): String {
+        var woke = false
+        if (!pcOnline()) {
+            pcWake(); woke = true
+            val until = System.currentTimeMillis() + 120_000
+            while (System.currentTimeMillis() < until && !pcOnline()) Thread.sleep(5000)
+            if (!pcOnline()) return "Ich habe den PC geweckt, aber er meldet sich noch nicht. Gib ihm noch eine Minute und frag nochmal."
+        }
+        val pkg = prefs.remoteApp.ifBlank { null }?.takeIf { installed(it) } ?: remoteApps.firstOrNull { installed(it.first) }?.first
+            ?: return (if (woke) "Dein PC ist jetzt an. " else "Dein PC ist an. ") + "Es ist aber keine Fernsteuerungs-App installiert – ich empfehle RustDesk oder Chrome Remote Desktop."
+        ctx.packageManager.getLaunchIntentForPackage(pkg)?.let { launch(it) }
+        val name = remoteApps.firstOrNull { it.first == pkg }?.second ?: "die Fernsteuerung"
+        return (if (woke) "Dein PC ist hochgefahren. " else "Dein PC läuft. ") + "Ich habe $name geöffnet."
+    }
+
+    private fun vpn(on: Boolean): String {
+        val tunnel = prefs.vpnTunnel.ifBlank { return "Trag in Lunas Einstellungen unter Heimnetz den Namen deines WireGuard-Tunnels ein." }
+        if (!installed("com.wireguard.android")) return "Die WireGuard-App ist nicht installiert."
+        if (ctx.checkSelfPermission(WG_PERMISSION) != PackageManager.PERMISSION_GRANTED)
+            return "Mir fehlt das Recht, WireGuard zu steuern. Bitte in Lunas Einstellungen unter Rechte freigeben."
+        ctx.sendBroadcast(Intent(if (on) "com.wireguard.android.action.SET_TUNNEL_UP" else "com.wireguard.android.action.SET_TUNNEL_DOWN")
+            .setPackage("com.wireguard.android").putExtra("tunnel", tunnel))
+        if (on) Thread.sleep(2500)
+        return if (on) "VPN nach Hause ist verbunden (falls in WireGuard „Allow remote control apps“ an ist)." else "VPN getrennt."
     }
 
     // ---------- Wetter (Open-Meteo, kostenlos, ohne Key) ----------

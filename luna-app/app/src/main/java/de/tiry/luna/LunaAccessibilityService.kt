@@ -27,6 +27,9 @@ class LunaAccessibilityService : AccessibilityService() {
         }
     }
 
+    /** Verkleinerungsfaktor des letzten Screenshots (Bild-Koordinaten → Bildschirm-Koordinaten). */
+    @Volatile var lastShotScale = 1f
+
     override fun onServiceConnected() { instance = this }
     override fun onDestroy() { instance = null; super.onDestroy() }
     override fun onAccessibilityEvent(event: AccessibilityEvent?) {}
@@ -113,6 +116,34 @@ class LunaAccessibilityService : AccessibilityService() {
         }
         val ok = dispatchGesture(GestureDescription.Builder().addStroke(GestureDescription.StrokeDescription(p, 0, 350)).build(), null, null)
         return if (ok) "Gescrollt." else "Scrollen hat nicht geklappt."
+    }
+
+    /** Screenshot als JPEG (Base64, max. 1280 px), für „Guck mal da“. Ab Android 11. Blockiert bis zu 5 s – nicht auf dem Haupt-Thread aufrufen. */
+    fun screenshotJpeg(): String? {
+        if (Build.VERSION.SDK_INT < 30) return null
+        val latch = java.util.concurrent.CountDownLatch(1)
+        var out: String? = null
+        takeScreenshot(android.view.Display.DEFAULT_DISPLAY, mainExecutor, object : TakeScreenshotCallback {
+            override fun onSuccess(r: ScreenshotResult) {
+                try {
+                    val hw = android.graphics.Bitmap.wrapHardwareBuffer(r.hardwareBuffer, r.colorSpace)
+                    val soft = hw?.copy(android.graphics.Bitmap.Config.ARGB_8888, false)
+                    r.hardwareBuffer.close()
+                    if (soft != null) {
+                        val scale = 1280f / maxOf(soft.width, soft.height)
+                        lastShotScale = if (scale < 1f) scale else 1f
+                        val bmp = if (scale < 1f) android.graphics.Bitmap.createScaledBitmap(soft, (soft.width * scale).toInt(), (soft.height * scale).toInt(), true) else soft
+                        val bos = java.io.ByteArrayOutputStream()
+                        bmp.compress(android.graphics.Bitmap.CompressFormat.JPEG, 75, bos)
+                        out = android.util.Base64.encodeToString(bos.toByteArray(), android.util.Base64.NO_WRAP)
+                    }
+                } catch (_: Exception) {}
+                latch.countDown()
+            }
+            override fun onFailure(errorCode: Int) { latch.countDown() }
+        })
+        latch.await(5, java.util.concurrent.TimeUnit.SECONDS)
+        return out
     }
 
     fun typeText(text: String): String {

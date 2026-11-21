@@ -72,6 +72,19 @@ class LocalIntentParserTest {
         assertEquals("screenshot", p("Mach einen Screenshot")!!.args["action"])
         assertEquals("back", p("Zurück")!!.args["action"])
     }
+    @Test fun heimnetz() {
+        assertEquals("pc_wake", p("Mach meinen PC an")!!.tool)
+        assertEquals("pc_wake", p("Fahr den Rechner hoch")!!.tool)
+        assertEquals("pc_remote", p("Ich will meinen PC fernsteuern")!!.tool)
+        assertEquals("pc_remote", p("Mach den PC an und verbinde mich per Remote")!!.tool)
+        assertEquals("pc_status", p("Ist mein PC an?")!!.tool)
+        assertEquals(true, p("Gast-WLAN an")!!.args["on"])
+        assertEquals(false, p("Schalte das Gastwlan aus")!!.args["on"])
+        assertEquals("fritz_devices", p("Wer ist im WLAN?")!!.tool)
+        assertEquals("fritz_calls", p("Wer hat mich angerufen")!!.tool)
+        assertEquals(true, p("Verbinde VPN")!!.args["on"])
+    }
+
     @Test fun unbekannt() { assertNull(p("Erklär mir Quantenphysik in einfachen Worten")) }
 
     @Test fun wakeWord() {

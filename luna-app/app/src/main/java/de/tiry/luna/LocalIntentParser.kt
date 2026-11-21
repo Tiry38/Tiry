@@ -66,6 +66,20 @@ object LocalIntentParser {
             parseClock(t)?.let { (h, m) -> return Command("set_alarm", mapOf("hour" to h, "minute" to m)) }
         }
 
+        // Heimnetz: PC & FRITZ!Box
+        if (Regex("\\b(pc|computer|rechner)\\b").containsMatchIn(t)) {
+            if (Regex("fernsteuer|remote|fernzugriff|draufschalten|aufschalten|verbinde mich").containsMatchIn(t)) return Command("pc_remote")
+            if (Regex("ist .*(an|online)|läuft (mein|der)").containsMatchIn(t)) return Command("pc_status")
+            if (Regex("\\ban\\b|einschalten|anschalten|hochfahren|\\bhoch\\b|starte|aufwecken|weck").containsMatchIn(t)) return Command("pc_wake")
+        }
+        if (Regex("gast.?wlan|gästewlan|gast.?netz").containsMatchIn(t)) {
+            val on = when { Regex("\\baus\\b|ausschalten|abschalten").containsMatchIn(t) -> false; Regex("\\ban\\b|einschalten|anschalten").containsMatchIn(t) -> true; else -> null }
+            return Command("fritz_guest_wifi", if (on == null) emptyMap() else mapOf("on" to on))
+        }
+        if (Regex("wer ist (im|online|alles im)|welche geräte|geräte (im|online)").containsMatchIn(t)) return Command("fritz_devices")
+        if (Regex("wer hat (mich )?angerufen|anrufliste|verpasste anrufe").containsMatchIn(t)) return Command("fritz_calls")
+        if (Regex("vpn|verbindung nach hause").containsMatchIn(t)) return Command("vpn_connect", mapOf("on" to !Regex("\\baus\\b|trenn|beende").containsMatchIn(t)))
+
         // Anrufen
         Regex("^(?:bitte )?(?:ruf|rufe) (.+?) an$").find(t)?.let { return Command("call_contact", mapOf("name" to it.groupValues[1].trim())) }
         Regex("^(.+?) anrufen$").find(t)?.let { return Command("call_contact", mapOf("name" to it.groupValues[1].replace(Regex("^(bitte )"), "").trim())) }

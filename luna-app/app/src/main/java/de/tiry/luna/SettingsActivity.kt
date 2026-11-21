@@ -83,6 +83,33 @@ class SettingsActivity : Activity() {
             }
         }
 
+        section("Heimnetz – FRITZ!Box & PC")
+        hint("Damit Luna die FRITZ!Box steuert und deinen PC einschaltet. In der FRITZ!Box einmal: Heimnetz → Netzwerk → Netzwerkeinstellungen → „Zugriff für Anwendungen zulassen“. Benutzer unter System → FRITZ!Box-Benutzer (Rechte: FRITZ!Box-Einstellungen).")
+        field("FRITZ!Box-Adresse", prefs.fritzHost) { prefs.fritzHost = it }
+        field("FRITZ!Box-Benutzer", prefs.fritzUser) { prefs.fritzUser = it }
+        field("FRITZ!Box-Passwort", prefs.fritzPass, secret = true) { prefs.fritzPass = it }
+        field("PC-Name (wie in der FRITZ!Box angezeigt)", prefs.pcName) { prefs.pcName = it }
+        field("PC-MAC-Adresse (optional, z. B. AA:BB:CC:DD:EE:FF)", prefs.pcMac) { prefs.pcMac = it }
+        hint("Am PC einmal Wake-on-LAN einschalten (BIOS/UEFI + Netzwerkkarte → Energieverwaltung „Gerät kann den Computer reaktivieren“). Für die Fernsteuerung z. B. RustDesk oder Chrome Remote Desktop auf PC und Handy installieren.")
+        field("Fernsteuerungs-App (Paketname, leer = automatisch)", prefs.remoteApp) { prefs.remoteApp = it }
+        hint("Unterwegs: In der FRITZ!Box unter Internet → Freigaben → VPN (WireGuard) eine Verbindung für dieses Handy anlegen und in der WireGuard-App importieren. In der WireGuard-App unter Einstellungen „Allow remote control apps“ (Fernsteuerung durch Apps) einschalten.")
+        field("Name des WireGuard-Tunnels", prefs.vpnTunnel) { prefs.vpnTunnel = it }
+        button("FRITZ!Box-Verbindung testen") {
+            saveAll()
+            Toast.makeText(this, "Teste …", Toast.LENGTH_SHORT).show()
+            Thread {
+                val msg = try { FritzBox(prefs.fritzHost, prefs.fritzUser, prefs.fritzPass).info() } catch (e: Exception) { "Fehler: ${e.message}" }
+                runOnUiThread { Toast.makeText(this, msg, Toast.LENGTH_LONG).show() }
+            }.start()
+        }
+
+        section("Luna als System-Assistent")
+        hint("Mach Luna zum digitalen Assistenten von Android – dann startet sie statt Google Assistant, z. B. bei langem Druck auf die Power- oder Home-Taste, auch auf dem Sperrbildschirm. Dort „Digitaler Assistent“ bzw. „Assistent-App“ → Luna wählen.")
+        button("Standard-Assistent festlegen", filled = true) {
+            val tries = listOf(Intent(Settings.ACTION_VOICE_INPUT_SETTINGS), Intent(Settings.ACTION_MANAGE_DEFAULT_APPS_SETTINGS), Intent(Settings.ACTION_SETTINGS))
+            for (i in tries) { try { startActivity(i); break } catch (_: Exception) {} }
+        }
+
         section("Aufwecken")
         slider("Empfindlichkeit für „Hey Luna“", prefs.sensitivity) { prefs.sensitivity = it }
         hint("Links = weniger Fehlalarme, rechts = reagiert schneller. Falls Luna bei Gesprächen im Raum anspringt: nach links oder „Nur mit Hey“ einschalten.")
@@ -131,7 +158,7 @@ class SettingsActivity : Activity() {
 
     private fun openPermission(key: String) {
         val i = when (key) {
-            "mic", "runtime" -> { requestPermissions(Permissions.RUNTIME.toTypedArray(), 2); return }
+            "mic", "runtime" -> { requestPermissions(Permissions.runtimeFor(this).toTypedArray(), 2); return }
             "access" -> Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)
             "notif" -> Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS)
             "battery" -> Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS, Uri.parse("package:$packageName"))

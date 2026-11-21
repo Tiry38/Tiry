@@ -162,7 +162,7 @@ class MainActivity : Activity(), LunaBus.Listener {
     private fun hasMic() = checkSelfPermission(Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED
 
     private fun askRuntimePermissions() {
-        val need = Permissions.RUNTIME.filter { checkSelfPermission(it) != PackageManager.PERMISSION_GRANTED }
+        val need = Permissions.runtimeFor(this).filter { checkSelfPermission(it) != PackageManager.PERMISSION_GRANTED }
         if (need.isNotEmpty()) requestPermissions(need.toTypedArray(), 1)
     }
 
@@ -182,6 +182,10 @@ object Permissions {
         add(Manifest.permission.READ_CALENDAR); add(Manifest.permission.WRITE_CALENDAR)
     }
 
+    fun runtimeFor(a: Activity): List<String> = RUNTIME + (if (wireguardInstalled(a)) listOf(PhoneTools.WG_PERMISSION) else emptyList())
+
+    private fun wireguardInstalled(a: Activity) = try { a.packageManager.getPackageInfo("com.wireguard.android", 0); true } catch (_: Exception) { false }
+
     data class Item(val key: String, val title: String, val why: String, val granted: Boolean)
 
     fun all(a: Activity): List<Item> {
@@ -189,7 +193,7 @@ object Permissions {
         fun rt(p: String) = a.checkSelfPermission(p) == PackageManager.PERMISSION_GRANTED
         return listOf(
             Item("mic", "Mikrofon", "Damit Luna „Hey Luna“ hört.", rt(Manifest.permission.RECORD_AUDIO)),
-            Item("runtime", "Kontakte, Anrufe, SMS, Kalender", "Anrufen, Nachrichten schreiben, Termine.", RUNTIME.all { rt(it) }),
+            Item("runtime", "Kontakte, Anrufe, SMS, Kalender" + (if (wireguardInstalled(a)) ", VPN" else ""), "Anrufen, Nachrichten schreiben, Termine, VPN nach Hause.", runtimeFor(a).all { rt(it) }),
             Item("access", "Bedienungshilfe (Handy steuern)", "Tippen, scrollen, Bildschirm lesen, WhatsApp senden, sperren.", LunaAccessibilityService.enabled(a)),
             Item("notif", "Benachrichtigungen lesen", "Damit Luna dir neue Nachrichten vorliest.", NotificationStore.enabled(a)),
             Item("battery", "Akku-Optimierung aus", "Sonst schläfert Android Luna nachts ein.", pm.isIgnoringBatteryOptimizations(a.packageName)),
