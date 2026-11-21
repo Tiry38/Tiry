@@ -1,4 +1,4 @@
-# Design-Regelwerk AVOX 2026 (Stand 21.11.2026)
+# Design-Regelwerk AIVOX 2026 (Stand 21.11.2026)
 
 Leitsatz: **Ruhig, eigenständig, echt.** KI zeigt sich im Produkt, nicht im Slogan. Eigene Effekte und Bildsysteme,
 weil KI-Baukästen alles gleich aussehen lassen. Ergänzt die Design-Regeln in `CLAUDE.md`
@@ -16,7 +16,7 @@ weil KI-Baukästen alles gleich aussehen lassen. Ergänzt die Design-Regeln in `
 - Motion: wenige bedeutungsvolle Mikro-Interaktionen; native Scroll-driven Animations (Baseline seit Firefox 159, 10/2026)
   und View Transitions; immer `prefers-reduced-motion`.
 - Voice-Orb mit Zuständen idle/connecting/listening/thinking/speaking/error, reagiert auf echtes Audio, eigene Form/Farbe.
-- Logo: Wortmarke „AVOX“ in Michroma (breit, Automotive-Look) mit leuchtendem Strompunkt + kompaktes Symbol (App-Icon/Favicon), animierbar wie der Orb.
+- Logo: Wortmarke „AIVOX“ in Michroma (breit, Automotive-Look) mit leuchtendem Strompunkt + kompaktes Symbol (App-Icon/Favicon), animierbar wie der Orb.
 
 ## DON'T (gilt 2026 als alt/AI-Slop)
 - Lila-blaue Verläufe, Tailwind-Standard-Indigo (Gigazine 04/2026: 10,7 % aller Seiten mit lila CTA).

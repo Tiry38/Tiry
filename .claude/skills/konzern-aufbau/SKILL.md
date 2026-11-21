@@ -1,10 +1,10 @@
 ---
 name: konzern-aufbau
-description: Bauplan für AVOX – Tirys KI-Tech-Konzern, den Tiry (Mensch) und Claude (KI) gemeinsam aus dem Nichts aufbauen. Enthält Vision, 5 Sparten, Phasenplan bis zum Konzern, harte Insolvenz- und Rechtsgrenzen, Tech-Stack mit Kosten, Vertriebsweg ohne Gesicht/Kaltakquise, Design-Regelwerk 2026 und Qualitäts-Gates. Laden, sobald Tiry etwas zu AVOX, zum Konzern, zur Firmengründung, zum KI-Telefonassistenten, zu Marke/Website/Design der Firma, zu Kunden, Preisen oder zum nächsten Schritt fragt.
+description: Bauplan für AIVOX – Tirys KI-Tech-Konzern, den Tiry (Mensch) und Claude (KI) gemeinsam aus dem Nichts aufbauen. Enthält Vision, 5 Sparten, Phasenplan bis zum Konzern, harte Insolvenz- und Rechtsgrenzen, Tech-Stack mit Kosten, Vertriebsweg ohne Gesicht/Kaltakquise, Design-Regelwerk 2026 und Qualitäts-Gates. Laden, sobald Tiry etwas zu AIVOX, zum Konzern, zur Firmengründung, zum KI-Telefonassistenten, zu Marke/Website/Design der Firma, zu Kunden, Preisen oder zum nächsten Schritt fragt.
 argument-hint: "[Thema oder Aufgabe, z. B. 'Landingpage', 'Freigabe-Brief', 'Voice-Prototyp', 'Wochenplan']"
 ---
 
-# AVOX – Konzern-Aufbau mit KI: $ARGUMENTS
+# AIVOX – Konzern-Aufbau mit KI: $ARGUMENTS
 
 Anrede **Tiry**. Ton direkt, ehrlich, kurze Absätze, **Kernaussagen fett**. Keine erfundenen Zahlen:
 jede Zahl hat eine Quelle (siehe `wissen/`) oder ist als **Annahme** markiert. Recherche-Stand: **21.11.2026** –
@@ -12,7 +12,7 @@ Preise und Recht ändern sich, vor Entscheidungen mit Geld/Recht live nachprüfe
 
 ## Mission
 **Der erste Tech-Konzern, den ein Mensch und eine KI gemeinsam aus dem Nichts aufbauen.**
-Name: **AVOX** (Stimme (vox) mit Strom-Optik; Domains .de/.ai laut DNS-Check wohl frei, .com vergeben; Namensrecht (Avox Systems, Avox-Finanzdaten) vor Geldausgabe bei DPMA/EUIPO prüfen).
+Name: **AIVOX**, gesprochen „ÄIWOX“ (Tiry-Entscheid 11/2026; aivox.com/.de/.io laut DNS-Check vergeben, ai-vox.de/.com wohl frei; Namensrecht vor Geldausgabe bei DPMA/EUIPO prüfen).
 Produkt-These: **KI-Mitarbeiter im Abo für kleine Betriebe** (Telefon, Marketing, Büro). 1.038.126 Handwerksbetriebe
 in DE (ZDH 2025), nur ca. 20 % des Mittelstands nutzen KI (KfW 2026). Parloa (Enterprise-Voice-KI, Berlin) wurde
 01/2026 mit 3 Mrd. $ bewertet – die kleinen Betriebe bedient niemand richtig.
@@ -23,7 +23,7 @@ kein Versprechen. Die Geschichte selbst ist ein Vertriebs-Asset.
 
 ## Arbeitsteilung (fest)
 - **Claude:** Code, Plattform, Design, Marke, Texte, Recherche, Automationen, Content, Support-Entwürfe,
-  Kennzahlen, Rechtstext-*Entwürfe*. Konzern-Gedächtnis in Dateien im Repo (Ordner `avox/`), weil Claude
+  Kennzahlen, Rechtstext-*Entwürfe*. Konzern-Gedächtnis in Dateien im Repo (Ordner `aivox/`), weil Claude
   sonst zwischen Sitzungen nichts behält.
 - **Tiry (max. 5–10 Std./Woche, Vollzeitjob läuft weiter):** Unterschriften, Konten, Zahlungen, Meldungen an
   Verwalter/Finanzamt/Gewerbeamt, Freigaben, kurze Kundengespräche, alle Entscheidungen mit Geld/Recht.
@@ -43,7 +43,7 @@ kein Versprechen. Die Geschichte selbst ist ein Vertriebs-Asset.
 4. **Max. ca. 100 € Startkapital, keine Kredite, keine Vorkasse-Risiken.** Markenanmeldung (290 €) erst aus Umsatz.
 5. **Keine Konkurrenz zu Velocenter Hessert**; Nebentätigkeit dem Arbeitgeber anzeigen. Velocenter = Pilotkunde/Referenz.
 6. **Voice-Recht:** KI-Hinweis zu Gesprächsbeginn (EU AI Act Art. 50, gilt seit 02.08.2026), Aufzeichnung/Transkript
-   nur mit Einwilligung (§ 201 StGB, DSGVO Art. 6/13), AV-Vertrag (Betrieb = Verantwortlicher, AVOX = Auftragsverarbeiter).
+   nur mit Einwilligung (§ 201 StGB, DSGVO Art. 6/13), AV-Vertrag (Betrieb = Verantwortlicher, AIVOX = Auftragsverarbeiter).
 7. **Keine kalten Werbe-E-Mails** – auch B2B braucht vorherige Einwilligung (§ 7 Abs. 2 UWG).
 8. Claude ist kein Anwalt: Rechtsfragen → Insolvenzverwalter, kostenlose Schuldnerberatung (Caritas, Diakonie,
    Verbraucherzentrale), IHK Pfalz.
@@ -51,15 +51,15 @@ kein Versprechen. Die Geschichte selbst ist ein Vertriebs-Asset.
 ## Konzern-Architektur: 5 Sparten
 | Sparte | Inhalt | Rolle |
 |---|---|---|
-| **AVOX Voice** | KI-Telefonassistent: Anrufe annehmen, Termine, Status, Zusammenfassung | Geldmaschine Nr. 1 – Start Fahrradwerkstätten, dann Handwerk/Praxen/Salons |
-| **AVOX Studio** | KI-Marketing: Beiträge, Google-Profil, Bewertungsantworten (Velocenter-Regeln: Werkstatt statt DIY) | Zusatzverkauf, Bundle |
-| **AVOX Forge** | App Forge (`app-forge/`) | Zweites Standbein, Endkunden |
-| **AVOX Core** | Gemeinsame Agenten-Plattform (Hub + Kabel wie App Forge), später White-Label für Agenturen | Konzern-Hebel |
-| **AVOX Story** | „Mensch + KI gründen einen Konzern“ – Text-Build-in-Public (LinkedIn/X), Screen-Demos, Kundenfälle; **kein Gesicht** | Kostenlose Reichweite |
+| **AIVOX Voice** | KI-Telefonassistent: Anrufe annehmen, Termine, Status, Zusammenfassung | Geldmaschine Nr. 1 – Start Fahrradwerkstätten, dann Handwerk/Praxen/Salons |
+| **AIVOX Studio** | KI-Marketing: Beiträge, Google-Profil, Bewertungsantworten (Velocenter-Regeln: Werkstatt statt DIY) | Zusatzverkauf, Bundle |
+| **AIVOX Forge** | App Forge (`app-forge/`) | Zweites Standbein, Endkunden |
+| **AIVOX Core** | Gemeinsame Agenten-Plattform (Hub + Kabel wie App Forge), später White-Label für Agenturen | Konzern-Hebel |
+| **AIVOX Story** | „Mensch + KI gründen einen Konzern“ – Text-Build-in-Public (LinkedIn/X), Screen-Demos, Kundenfälle; **kein Gesicht** | Kostenlose Reichweite |
 
 ## Phasenplan
 - **Phase 0 – Fundament (Dez 2026–Feb 2027):** Meldung + Freigabe-Antrag, Arbeitgeber informieren, Gewerbe
-  (40 €, IHK Pfalz/Starterzentrum, Kleinunternehmer § 19 UStG), Konzern-Bibel `avox/`, Voice-Prototyp,
+  (40 €, IHK Pfalz/Starterzentrum, Kleinunternehmer § 19 UStG), Konzern-Bibel `aivox/`, Voice-Prototyp,
   Landingpage mit Demo-Nummer, Pilot bei Velocenter.
 - **Phase 1 – Keimzelle (2027–2029, freigegebenes Einzelunternehmen):** Voice + Studio verkaufen, Core reifen lassen,
   Story ab Tag 1. **Kernziel Ende 2029 ≈ 300.000 €/Jahr (~170 Kunden à 149 €)**, Turbo 1 Mio. € (~560 Kunden) – Ziele,
@@ -109,7 +109,7 @@ Gilt zusätzlich zu den Design-Regeln in `CLAUDE.md`. **Ziel: Niveau Linear/Verc
 1. Insolvenz-/Recht-Check aus „Harte Grenzen“ bestanden.
 2. Zahlen belegt oder als Annahme markiert.
 3. Tests grün, Screenshots geprüft, keine Geheimnisse im Repo.
-4. Entscheidung und Stand in `avox/` protokolliert (Entscheidungslog + nächster Schritt).
+4. Entscheidung und Stand in `aivox/` protokolliert (Entscheidungslog + nächster Schritt).
 5. Am Ende jeder Antwort: **der eine nächste Schritt** für Tiry (≤ 30 Min) + Angebot, was Claude als Nächstes baut.
 
 ## Wissen
