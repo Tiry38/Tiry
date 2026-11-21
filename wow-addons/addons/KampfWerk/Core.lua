@@ -12,7 +12,7 @@
 local ADDON, ns = ...
 KampfWerk = ns
 ns.NAME = ADDON or "KampfWerk"
-ns.VERSION = "1.3.2"
+ns.VERSION = "1.3.3"
 ns.MEDIA = "Interface\\AddOns\\KampfWerk\\Media\\"
 local MEDIA = ns.MEDIA
 
@@ -233,7 +233,8 @@ SlashCmdList.KAMPFWERK = function(msg)
     ns.Print("v" .. ns.VERSION .. " - |cff39ff6b/kw|r Einstellungen · |cff39ff6b/kw zahlen|r Zahlen-Studio · "
       .. "|cff39ff6b/kw reset|r Kampfdaten leeren · |cff39ff6b/kw an|r / |cff39ff6baus|r Fenster zeigen/verstecken · "
       .. "|cff39ff6b/kw sperren|r Fenster sperren/frei · |cff39ff6b/kw neu|r weiterer Teil · "
-      .. "|cff39ff6b/kw eins|r / |cff39ff6bzwei|r / |cff39ff6bdrei|r ein Fenster oder geteilt")
+      .. "|cff39ff6b/kw eins|r / |cff39ff6bzwei|r / |cff39ff6bdrei|r ein Fenster oder geteilt · "
+      .. "|cff39ff6b/kw diag|r Zahlen-Diagnose")
   elseif msg == "zahlen" then
     if ns.Config then ns.Config.Open("zahlen") end
   elseif msg == "reset" then
@@ -255,6 +256,8 @@ SlashCmdList.KAMPFWERK = function(msg)
   elseif msg == "neu" then
     ns.NewPane("kicks")
     if ns.Meter then ns.Meter.Rebuild() end
+  elseif msg == "diag" then
+    if ns.Numbers then ns.Numbers.Diag() end
   elseif msg == "fehler" then
     if #ns.errors == 0 then ns.Print("Keine Fehler.") end
     for _, e in ipairs(ns.errors) do ns.Print(e) end

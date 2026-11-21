@@ -81,13 +81,32 @@ local function cvarExists(name)
 end
 Numbers.CVarExists = cvarExists
 
+-- Setzen + Rueckwert pruefen; Ergebnis fuer /kw diag merken (C_CVar.SetCVar, sonst altes SetCVar)
+Numbers.cvLog = {}
+local function trySet(name, value)
+  local ok, res = pcall(C_CVar.SetCVar, name, value)
+  local now = C_CVar.GetCVar(name)
+  if now ~= value and SetCVar then
+    pcall(SetCVar, name, value)
+    now = C_CVar.GetCVar(name)
+  end
+  local good = now == value
+  Numbers.cvLog[name] = { want = value, got = now, ok = good, err = (not ok) and tostring(res) or nil }
+  if not good and not Numbers.warned then
+    Numbers.warned = true
+    ns.Print("|cffff5050WoW laesst KampfWerk die Einstellung " .. name .. " nicht aendern|r (" .. tostring(now)
+      .. "). Bitte |cff39ff6b/kw diag|r ausfuehren und mir zeigen.")
+  end
+  return good
+end
+
 local function setCVar(name, value)
   if not cvarExists(name) then return false end
   if InCombatLockdown and InCombatLockdown() then
-    ns.OutOfCombat(function() pcall(C_CVar.SetCVar, name, value) end)
+    ns.OutOfCombat(function() trySet(name, value) end)
     return true
   end
-  return (pcall(C_CVar.SetCVar, name, value))
+  return trySet(name, value)
 end
 
 -- Forever-Namen (Blizzard_SettingsDefinitions_Frame/Mainline/CombatOverrides.lua): mit "_v2"; alte Namen als Rueckfall
@@ -296,7 +315,17 @@ local function isPlayer(unit)
   return same == true
 end
 
+-- Zaehler fuer /kw diag: welche Einheiten liefern UNIT_COMBAT (nur Klartext-Teile)
+Numbers.seen = {}
+local function count(unit, event)
+  if secret(unit) or secret(event) or type(unit) ~= "string" then return end
+  local kind = unit:match("^(%a+)") or unit
+  local k = kind .. ":" .. tostring(event)
+  Numbers.seen[k] = (Numbers.seen[k] or 0) + 1
+end
+
 function Numbers.OnCombat(_, unit, event, flagText, amount)
+  count(unit, event)
   local n = N()
   if not n.own or secret(unit) or secret(event) then return end
   local crit = not secret(flagText) and flagText == "CRITICAL"
@@ -333,4 +362,25 @@ function Numbers.Init()
     -- Instanz rein/raus: Blizzards Heilzahlen dort an, draussen wieder unsere
     ns.On("PLAYER_ENTERING_WORLD", function() Numbers.ApplyBlizzard() end)
   end
+end
+
+-- /kw diag: alles, was fuer die Zahlen zaehlt, in den Chat
+function Numbers.Diag()
+  local n = N()
+  local P = ns.Print
+  P("KampfWerk " .. tostring(ns.VERSION) .. " - Zahlen-Diagnose")
+  P(("eigene Zahlen: %s | Schaden: %s | Heilung: %s | Freundes-Namen: %s | Instanz: %s"):format(
+    tostring(n.own), tostring(n.damage.on), tostring(n.heal.on), tostring(n.friendPlates ~= false), tostring(Numbers.InInstance())))
+  local names = { Numbers.CV_DAMAGE[1], Numbers.CV_DAMAGE[2], Numbers.CV_HEAL[1], Numbers.CV_HEAL[2],
+    Numbers.CV_FRIENDS, Numbers.CV_ONLYNAME, "enableFloatingCombatText", "WorldTextScale" }
+  for _, name in ipairs(names) do
+    local v = C_CVar and C_CVar.GetCVar and C_CVar.GetCVar(name)
+    local log = Numbers.cvLog[name]
+    P(("  %s = %s%s"):format(name, v == nil and "|cffff5050fehlt|r" or tostring(v),
+      log and ("  (gesetzt %s -> %s%s)"):format(log.want, tostring(log.got), log.err and (" Fehler: " .. log.err) or "") or ""))
+  end
+  local any = false
+  for k, c in pairs(Numbers.seen) do P("  UNIT_COMBAT " .. k .. " x" .. c) any = true end
+  if not any then P("  UNIT_COMBAT: noch kein Ereignis (einmal kaempfen/heilen, dann erneut /kw diag)") end
+  P("  Fehler: " .. #ns.errors .. (#ns.errors > 0 and " (/kw fehler)" or ""))
 end

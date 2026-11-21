@@ -90,7 +90,9 @@ G.UnitDetailedThreatSituation = function(u, mob)
   if u == "party1" then return S(true), S(3), S(100), S(110), S(10000) end
 end
 G.UnitIsUnit = function(a, b) if a == "nameplate1" and b == "target" then return true end return a == b end
-G.C_CVar = { GetCVar = function(n) return W.cvars[n] end, SetCVar = function(n, v) assert(type(v) == "string") W.cvars[n] = v end }
+W.locked = {}
+G.C_CVar = { GetCVar = function(n) return W.cvars[n] end, SetCVar = function(n, v) assert(type(v) == "string")
+  if W.locked[n] then return false end W.cvars[n] = v return true end }
 -- echte Forever-Namen (CombatOverrides.lua / Nameplates.lua); die alten ohne "_v2" gibt es dort nicht
 W.cvars = { WorldTextScale = "1", floatingCombatTextCombatDamage_v2 = "1", floatingCombatTextCombatHealing_v2 = "1",
   nameplateShowFriendlyPlayers = "0", nameplateShowOnlyNameForFriendlyPlayerUnits = "0" }
@@ -517,6 +519,22 @@ ns.Numbers.SetOwn(false)
 ok(W.cvars.floatingCombatTextCombatDamage_v2 == "1" and W.cvars.floatingCombatTextCombatHealing_v2 == "1"
   and W.cvars.nameplateShowFriendlyPlayers == "0" and W.cvars.nameplateShowOnlyNameForFriendlyPlayerUnits == "0", "aus: alles wie vorher")
 ns.Numbers.SetOwn(true)
+-- /kw diag + Warnung, wenn WoW eine Einstellung nicht annimmt
+local printed = {}
+local oldPrint = ns.Print
+ns.Print = function(m) printed[#printed + 1] = m end
+W.fire("UNIT_COMBAT", "nameplate2", "HEAL", "", SECRET, 1)
+SlashCmdList.KAMPFWERK("diag")
+local all = table.concat(printed, "\n")
+ok(all:find("floatingCombatTextCombatDamage_v2 = 0") and all:find("UNIT_COMBAT nameplate:HEAL"), "/kw diag zeigt Einstellungen + Ereignisse")
+ok(all:find("floatingCombatTextCombatDamage = |cffff5050fehlt"), "/kw diag meldet fehlende alte Namen")
+printed = {}
+W.locked.floatingCombatTextCombatHealing_v2 = true
+ns.Numbers.SetOwn(false)
+ok(table.concat(printed, "\n"):find("nicht aendern"), "Warnung, wenn WoW die Einstellung ablehnt")
+W.locked.floatingCombatTextCombatHealing_v2 = nil
+ns.Numbers.SetOwn(true)
+ns.Print = oldPrint
 -- Umstellung fuer Tirys gespeicherte 1.3.0-Daten: Schrift gewaehlt, own aus -> einmalig an
 do
   local keep = KampfWerkDB
