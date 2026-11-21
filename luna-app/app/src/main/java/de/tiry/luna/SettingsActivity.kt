@@ -69,8 +69,35 @@ class SettingsActivity : Activity() {
             Prefs.MODEL_OPUS to "Opus 5.5 · Maximum",
         ), prefs.model) { prefs.model = it }
 
+        section("Stimme · Google HD (mobil)")
+        hint("Lunas Hauptstimme – menschlich und überall unterwegs: Google „Chirp 3 HD“. So bekommst du den Schlüssel (einmalig, ca. 5 Minuten): " +
+            "console.cloud.google.com → Projekt anlegen → Abrechnung aktivieren (kein Abo, Abrechnung nach Nutzung, monatliches Gratis-Kontingent laut Google-Preisseite) → " +
+            "„Cloud Text-to-Speech API“ aktivieren → APIs & Dienste → Anmeldedaten → API-Schlüssel erstellen. " +
+            "Sicherheit: Schlüssel bearbeiten → Anwendungseinschränkung „Android-Apps“ → Paket de.tiry.luna + SHA-1 unten eintragen, API-Einschränkung „Cloud Text-to-Speech API“. Dann funktioniert er nur in Luna.")
+        col.addView(Ui.text(this, "SHA-1 von Luna: " + (signatureSha1() ?: "–"), 12f, Ui.ICE).apply {
+            typeface = android.graphics.Typeface.MONOSPACE; setPadding(dp(6), 0, dp(6), dp(10)); setTextIsSelectable(true) })
+        field("Google-API-Schlüssel", prefs.googleKey, secret = true) { prefs.googleKey = it }
+        col.addView(Ui.text(this, "Stimme wählen (antippen = Hörprobe):", 12.5f, Ui.DIM).apply { setPadding(dp(8), dp(6), 0, dp(4)) })
+        run {
+            val btns = mutableListOf<Pair<String, LightButton>>()
+            CloudVoice.FEMALE.forEachIndexed { idx, name ->
+                val b = LightButton(this, name); b.selected2 = name == prefs.googleVoice
+                b.setOnClickListener {
+                    saveAll()
+                    prefs.googleVoice = name; btns.forEach { (n, x) -> x.selected2 = n == name }
+                    if (prefs.googleKey.isBlank()) { Toast.makeText(this, "Erst den Google-Schlüssel eintragen.", Toast.LENGTH_LONG).show(); return@setOnClickListener }
+                    if (speaker == null) speaker = Speaker(this, prefs)
+                    speaker?.speak("Hey ${prefs.userName}. Ich bin Luna. So klinge ich als $name … gefällt's dir?") {
+                        speaker?.lastError?.let { Toast.makeText(this, it, Toast.LENGTH_LONG).show() }
+                    }
+                }
+                btns += name to b
+                col.addView(b, LinearLayout.LayoutParams(WRAP_CONTENT, WRAP_CONTENT).apply { marginStart = dp((idx % 3) * 14) })
+            }
+        }
+
         section("Heim-Stimme (PC)")
-        hint("Lunas menschliche Stimme kommt von deinem eigenen PC: Dort läuft der Luna-Stimmserver mit Kartoffel-Orpheus – kostenlos, offline, nur in deinem Heimnetz (unterwegs über dein VPN). Ist der PC aus, spricht Luna kurz mit der Handy-Stimme.")
+        hint("Optional für zu Hause: Stimme vom eigenen PC. Dort läuft der Luna-Stimmserver mit Kartoffel-Orpheus – kostenlos, offline, nur in deinem Heimnetz (unterwegs über dein VPN). Ist der PC aus, spricht Luna kurz mit der Handy-Stimme.")
         field("Adresse des PCs (z. B. tiry-pc.fritz.box)", prefs.voiceHost.ifBlank { if (prefs.pcName.isNotBlank()) prefs.pcName.lowercase().replace(" ", "-") + ".fritz.box" else "" }) { prefs.voiceHost = it }
         field("Schlüssel vom Stimmserver", prefs.voiceToken, secret = true) { prefs.voiceToken = it }
         val homeBox = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
@@ -268,6 +295,14 @@ class SettingsActivity : Activity() {
 
     private var smsAsked = false
 
+    @Suppress("DEPRECATION")
+    private fun signatureSha1(): String? = try {
+        val sig = if (android.os.Build.VERSION.SDK_INT >= 28)
+            packageManager.getPackageInfo(packageName, android.content.pm.PackageManager.GET_SIGNING_CERTIFICATES).signingInfo?.apkContentsSigners?.firstOrNull()
+        else packageManager.getPackageInfo(packageName, android.content.pm.PackageManager.GET_SIGNATURES).signatures?.firstOrNull()
+        sig?.let { java.security.MessageDigest.getInstance("SHA-1").digest(it.toByteArray()).joinToString(":") { b -> "%02X".format(b) } }
+    } catch (_: Exception) { null }
+
     private fun openPermission(key: String) {
         val i = when (key) {
             "mic" -> { requestPermissions(Permissions.FIRST.toTypedArray(), 2); return }
@@ -302,7 +337,7 @@ class SettingsActivity : Activity() {
 
     // ---------- Bausteine ----------
     private var chapter = 0
-    private val chapters = 11
+    private val chapters = 12
 
     /** Kapitel-Kopf: „03 / 10“ in Haarlinien-Pille + Titel in breiter Chrom-Schrift. */
     private fun section(t: String) {

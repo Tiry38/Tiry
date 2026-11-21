@@ -43,8 +43,9 @@ class Prefs(context: Context) {
         set(v) = p.edit().putInt("eleven_tune", v).apply()
 
     /** Stimme kann Emotions-Tags ([laughs], [sighs] …) sprechen? Nur ElevenLabs v3. */
-    val voiceTags get() = (homeVoice && voiceServerTags.isNotBlank()) ||
-        (elevenKey.isNotBlank() && (elevenModel == "eleven_v3" || elevenModel == "eleven_v4"))
+    /** Gefühls-Tags nur, wenn die Hauptstimme sie kann (Google Chirp kann es nicht → dann nur Pausen „…“). */
+    val voiceTags get() = !cloudVoice && ((homeVoice && voiceServerTags.isNotBlank()) ||
+        (elevenKey.isNotBlank() && (elevenModel == "eleven_v3" || elevenModel == "eleven_v4")))
 
     var aboutMe: String
         get() = p.getString("about_me", DEFAULT_ABOUT)!!
@@ -107,6 +108,11 @@ class Prefs(context: Context) {
     var pcMac: String get() = str("pc_mac"); set(v) = put("pc_mac", v)
     /** Fernsteuerungs-App (Paketname), z. B. RustDesk, Chrome Remote Desktop, Windows App. Leer = automatisch suchen. */
     var remoteApp: String get() = str("remote_app"); set(v) = put("remote_app", v)
+    // ---------- Mobile Stimme: Google Cloud Chirp 3 HD ----------
+    var googleKey: String get() = Vault.read(p, "google_tts_key"); set(v) = Vault.write(p, "google_tts_key", v)
+    var googleVoice: String get() = str("google_voice", "Aoede").ifBlank { "Aoede" }; set(v) = put("google_voice", v)
+    val cloudVoice get() = googleKey.isNotBlank()
+
     // ---------- Heim-Stimme: Stimm-Server auf Tirys PC (Kartoffel-Orpheus) ----------
     /** Adresse des Stimm-Servers, z. B. „tiry-pc.fritz.box“ (leer = aus). */
     var voiceHost: String get() = str("voice_host"); set(v) = put("voice_host", v)

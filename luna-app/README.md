@@ -88,7 +88,15 @@ ohne Rückfrage. Manuell: „Luna, update dich“ oder Einstellungen → Über �
 | Zurück, Home, Sperren, Screenshot | Merkt sich Dinge über dich, gibt passende Tipps |
 | PC an, PC fernsteuern, Gast-WLAN, Geräte, Anrufliste, VPN | „Guck mal“: sieht den Bildschirm als Bild und tippt dann gezielt |
 
-## Heim-Stimme: Lunas menschliche Stimme kommt von deinem PC
+## Stimme: mobil zuerst (Google Chirp 3 HD)
+
+Hauptstimme überall unterwegs: **Google Cloud Text-to-Speech „Chirp 3 HD“** (14 weibliche deutsche Stimmen, z. B. Aoede,
+Kore, Leda, Zephyr). Schlüssel: console.cloud.google.com → Projekt → Abrechnung aktivieren (nach Nutzung, kein Abo; Gratis-
+Kontingent laut Google-Preisseite) → „Cloud Text-to-Speech API“ aktivieren → API-Schlüssel erstellen → auf „Android-Apps“
+(Paket `de.tiry.luna` + SHA-1 aus Lunas Einstellungen) und „Cloud Text-to-Speech API“ beschränken. Reihenfolge der Stimmen:
+Google HD → Heim-Stimme (PC, optional) → ElevenLabs (optional) → Handy-Stimme.
+
+## Heim-Stimme (optional): Stimme vom eigenen PC
 
 Kein ElevenLabs nötig. Auf dem PC läuft der **Luna-Stimmserver** (Kartoffel-Orpheus, kostenlos, offline; gebaut von
 der AIVOX-Sitzung). Luna holt das Audio über das Heimnetz (unterwegs per VPN). Einrichtung: Zahnrad → „Heim-Stimme (PC)“

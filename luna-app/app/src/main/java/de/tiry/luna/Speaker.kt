@@ -65,12 +65,40 @@ class Speaker(private val ctx: Context, private val prefs: Prefs) {
     } catch (_: Exception) { null }
 
     /** Heim-Stimme (PC) bevorzugt, ElevenLabs nur noch optional. */
-    val usesHumanVoice get() = (prefs.homeVoice && System.currentTimeMillis() > homeDownUntil) || prefs.elevenKey.isNotBlank()
+    val usesHumanVoice get() = (prefs.cloudVoice && System.currentTimeMillis() > cloudDownUntil) ||
+        (prefs.homeVoice && System.currentTimeMillis() > homeDownUntil) || prefs.elevenKey.isNotBlank()
+    @Volatile private var cloudDownUntil = 0L
+
+    /** SHA-1 des Signatur-Zertifikats (für die App-Beschränkung des Google-Schlüssels). */
+    private val certSha1: String? by lazy {
+        try {
+            val pm = ctx.packageManager
+            @Suppress("DEPRECATION")
+            val sig = if (android.os.Build.VERSION.SDK_INT >= 28)
+                pm.getPackageInfo(ctx.packageName, android.content.pm.PackageManager.GET_SIGNING_CERTIFICATES).signingInfo?.apkContentsSigners?.firstOrNull()
+            else pm.getPackageInfo(ctx.packageName, android.content.pm.PackageManager.GET_SIGNATURES).signatures?.firstOrNull()
+            sig?.let { MessageDigest.getInstance("SHA-1").digest(it.toByteArray()).joinToString("") { b -> "%02X".format(b) } }
+        } catch (_: Exception) { null }
+    }
     /** PC aus/nicht erreichbar → 60 s lang direkt die Handy-Stimme nehmen (kein Warten bei jedem Satz). */
     @Volatile private var homeDownUntil = 0L
 
     /** Holt einen Abschnitt von der Heim-Stimme, sonst von ElevenLabs. */
     private fun fetchHuman(text: String, prev: String?, next: String?): File {
+        // 1. Mobile Hauptstimme: Google Cloud Chirp 3 HD (überall)
+        if (prefs.cloudVoice && System.currentTimeMillis() > cloudDownUntil) {
+            val f = cacheFile("google|" + prefs.googleVoice + "|" + text)
+            if (f.exists() && f.length() > 1000) return f
+            try {
+                CloudVoice(prefs.googleKey, ctx.packageName, certSha1).tts(text, prefs.googleVoice, f)
+                return f
+            } catch (e: Exception) {
+                cloudDownUntil = System.currentTimeMillis() + 60_000
+                lastError = e.message
+                if (!prefs.homeVoice && prefs.elevenKey.isBlank()) throw e
+            }
+        }
+        // 2. Heim-Stimme vom PC (Kartoffel-Orpheus), 3. ElevenLabs (optional)
         if (prefs.homeVoice && System.currentTimeMillis() > homeDownUntil) {
             val f = File(cacheDir, cacheFile("home|" + prefs.voiceName + "|" + text).name.replace(".mp3", ".wav"))
             if (f.exists() && f.length() > 1000) return f
