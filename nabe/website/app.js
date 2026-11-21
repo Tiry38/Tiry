@@ -1,224 +1,249 @@
 (() => {
   'use strict';
-  const root = document.documentElement;
-  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const fine = matchMedia('(pointer: fine)').matches;
   const $ = (s, el = document) => el.querySelector(s);
+  const $$ = (s, el = document) => [...el.querySelectorAll(s)];
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  /* ---------- Theme ---------- */
-  try { const t = localStorage.getItem('nabe-theme'); if (t) root.dataset.theme = t; } catch (e) { /* ohne Speicher */ }
-  const isLight = () => root.dataset.theme ? root.dataset.theme === 'light' : matchMedia('(prefers-color-scheme: light)').matches;
-  if (!root.dataset.theme) root.dataset.theme = isLight() ? 'light' : 'dark';
-  $('.theme').addEventListener('click', () => {
-    root.dataset.theme = isLight() ? 'dark' : 'light';
-    try { localStorage.setItem('nabe-theme', root.dataset.theme); } catch (e) { /* egal */ }
-  });
-
-  /* ---------- Speichen der Nabe ---------- */
-  const spokes = $('.spokes');
-  const NS = 'http://www.w3.org/2000/svg';
-  for (let i = 0; i < 24; i++) {
-    const a = (i / 24) * Math.PI * 2;
-    const r1 = 222, r2 = i % 2 ? 242 : 248;
-    const l = document.createElementNS(NS, 'line');
-    l.setAttribute('x1', 300 + Math.cos(a) * r1); l.setAttribute('y1', 300 + Math.sin(a) * r1);
-    l.setAttribute('x2', 300 + Math.cos(a) * r2); l.setAttribute('y2', 300 + Math.sin(a) * r2);
-    spokes.appendChild(l);
-    if (i % 6 === 0) {
-      const c = document.createElementNS(NS, 'circle');
-      c.setAttribute('cx', 300 + Math.cos(a) * 250); c.setAttribute('cy', 300 + Math.sin(a) * 250); c.setAttribute('r', 3.5);
-      spokes.appendChild(c);
-    }
-  }
-
-  /* ---------- Einblenden ---------- */
-  document.querySelectorAll('.eyebrow, .lede, .cta-row, .price-note, .proof-list li').forEach((el, i) => {
-    el.classList.add('reveal'); el.style.transitionDelay = (0.45 + i * 0.08) + 's';
-  });
-  document.querySelectorAll('.title .word').forEach((w, i) => { w.style.transitionDelay = (0.08 + i * 0.09) + 's'; });
-  requestAnimationFrame(() => requestAnimationFrame(() => root.classList.add('ready')));
-
-  /* ---------- Cursor + magnetische Buttons + Parallax ---------- */
-  const stage = $('.stage');
-  if (fine && !reduce) {
-    const cur = $('.cursor'), label = $('.cursor-label');
-    let x = innerWidth / 2, y = innerHeight / 2, cx = x, cy = y;
-    cur.classList.add('hidden');
-    addEventListener('pointermove', (e) => { if (!e.clientX && !e.clientY) return; x = e.clientX; y = e.clientY; cur.classList.remove('hidden'); cur.classList.add('on'); }, { passive: true });
-    document.addEventListener('pointerleave', () => cur.classList.add('hidden'));
-    document.addEventListener('pointerenter', () => cur.classList.remove('hidden'));
-    (function loop() {
-      cx += (x - cx) * 0.2; cy += (y - cy) * 0.2;
-      cur.style.transform = `translate(${cx}px, ${cy}px)`;
-      const r = stage.getBoundingClientRect();
-      const nx = (x - (r.left + r.width / 2)) / innerWidth, ny = (y - (r.top + r.height / 2)) / innerHeight;
-      stage.style.setProperty('--ry', (nx * 14).toFixed(2) + 'deg');
-      stage.style.setProperty('--rx', (-ny * 14).toFixed(2) + 'deg');
-      stage.style.setProperty('--ox', (nx * 26).toFixed(1) + 'px');
-      stage.style.setProperty('--oy', (ny * 26).toFixed(1) + 'px');
-      requestAnimationFrame(loop);
-    })();
-    document.querySelectorAll('[data-cursor], a, button').forEach((el) => {
-      el.addEventListener('pointerenter', () => { if (el.dataset.cursor) { cur.classList.add('big'); label.textContent = el.dataset.cursor; } });
-      el.addEventListener('pointerleave', () => { cur.classList.remove('big'); });
+  /* ================= Reiter (Hash-Routing) ================= */
+  const VIEWS = ['start', 'hoerprobe', 'funktionen', 'preise', 'fragen'];
+  const glow = $('.tab-glow');
+  const moveGlow = () => {
+    const a = $('.tab[aria-current="page"]');
+    if (!a || !glow || !a.offsetWidth) return;
+    glow.style.width = a.offsetWidth + 'px';
+    glow.style.transform = `translateX(${a.offsetLeft - 4}px)`;
+  };
+  const show = (first) => {
+    const id = location.hash.slice(1);
+    const view = VIEWS.includes(id) ? id : 'start';
+    $$('.view').forEach((v) => {
+      const on = v.dataset.view === view;
+      if (on && v.hidden) { v.hidden = false; v.classList.remove('enter'); void v.offsetWidth; if (!first) v.classList.add('enter'); }
+      else if (!on) v.hidden = true;
     });
-    document.querySelectorAll('.magnetic').forEach((el) => {
-      el.addEventListener('pointermove', (e) => {
-        const r = el.getBoundingClientRect();
-        el.style.setProperty('--mx', ((e.clientX - r.left - r.width / 2) * 0.28).toFixed(1) + 'px');
-        el.style.setProperty('--my', ((e.clientY - r.top - r.height / 2) * 0.38).toFixed(1) + 'px');
-      });
-      el.addEventListener('pointerleave', () => { el.style.setProperty('--mx', '0px'); el.style.setProperty('--my', '0px'); });
+    $$('.tab, .dock-i').forEach((a) => {
+      if (a.getAttribute('href') === '#' + view) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current');
     });
-  }
+    moveGlow();
+    if (!first) window.scrollTo({ top: 0, behavior: reduce ? 'auto' : 'smooth' });
+    requestAnimationFrame(() => plasmas.forEach((p) => p.resize()));
+  };
+  addEventListener('hashchange', () => show(false));
+  addEventListener('resize', moveGlow);
+  document.fonts && document.fonts.ready.then(moveGlow);
 
-  /* ---------- Orb (WebGL-Shader) ---------- */
-  const canvas = $('.orb');
-  const orb = { amp: 0.15, target: 0.15, light: 0 };
-  const gl = canvas.getContext('webgl', { premultipliedAlpha: true, antialias: true });
-  if (!gl) { root.classList.add('no-webgl'); }
-  else {
-    const vs = 'attribute vec2 p;void main(){gl_Position=vec4(p,0.,1.);}';
-    const fs = `precision highp float;
-uniform vec2 uRes;uniform float uTime;uniform float uAmp;uniform float uLight;
-float h(vec3 p){p=fract(p*.3183099+.1);p*=17.;return fract(p.x*p.y*p.z*(p.x+p.y+p.z));}
-float n(vec3 x){vec3 i=floor(x),f=fract(x);f=f*f*(3.-2.*f);
-return mix(mix(mix(h(i),h(i+vec3(1,0,0)),f.x),mix(h(i+vec3(0,1,0)),h(i+vec3(1,1,0)),f.x),f.y),
-mix(mix(h(i+vec3(0,0,1)),h(i+vec3(1,0,1)),f.x),mix(h(i+vec3(0,1,1)),h(i+vec3(1,1,1)),f.x),f.y),f.z);}
-float fbm(vec3 p){float v=0.,a=.5;for(int i=0;i<5;i++){v+=a*n(p);p=p*2.03+vec3(1.7,9.2,3.1);a*=.5;}return v;}
-void main(){
-vec2 uv=(gl_FragCoord.xy*2.-uRes)/min(uRes.x,uRes.y);uv*=1.18;
-float ang=atan(uv.y,uv.x);float t=uTime;
-float wob=(n(vec3(cos(ang)*1.6,sin(ang)*1.6,t*.9))-.5)*.09*(.4+uAmp*1.6);
-float R=.9+wob+uAmp*.035;float r=length(uv)/R;
-vec3 copper=vec3(.93,.53,.29),ember=vec3(.9,.3,.18),gold=vec3(.98,.82,.5),petrol=vec3(.12,.5,.58),deep=vec3(.07,.09,.12);
-vec3 col=vec3(0.);float a=0.;
-if(r<1.){
-vec3 nr=vec3(uv/R,sqrt(max(0.,1.-r*r)));
-vec3 q=nr*1.15+vec3(0.,0.,t*.16);
-float w=fbm(q+fbm(q*1.2+t*.1)*1.8);
-float w2=fbm(nr*2.2-vec3(t*.12,t*.05,0.));
-col=mix(ember,copper,smoothstep(.28,.72,w));
-col=mix(col,gold,smoothstep(.55,.85,w2)*.9);
-float band=sin((nr.y*1.3+nr.x*.4+w*2.2)*7.-t*1.4)*.5+.5;
-col+=smoothstep(.82,1.,band)*gold*(.28+uAmp*.4);
-vec3 L=normalize(vec3(-.45,.55,.75));float dif=max(dot(nr,L),0.);
-col=mix(col,mix(petrol,deep,.35),(1.-dif)*.62);
-col*=.72+.5*dif;
-col+=pow(nr.z,4.)*.22*gold;
-float spec=pow(max(dot(reflect(-L,nr),vec3(0,0,1)),0.),28.);
-col+=spec*.4*vec3(1.,.93,.8);
-float fr=pow(1.-nr.z,2.4);col+=fr*mix(copper,gold,.55)*(.6+uAmp*.7);
-a=smoothstep(1.,.985,r);
-}
-float g=exp(-max(r-1.,0.)*(7.-uAmp*2.5))*(.32+uAmp*.38);
-vec3 gc=mix(copper,ember,.3);
-col=col*a+gc*g*(1.-a)*(1.-uLight*.35);
-float al=max(a,g*(1.-a)*(1.-uLight*.25));
-gl_FragColor=vec4(col,al);}`;
-    const mk = (type, src) => { const s = gl.createShader(type); gl.shaderSource(s, src); gl.compileShader(s); return s; };
-    const prog = gl.createProgram();
-    gl.attachShader(prog, mk(gl.VERTEX_SHADER, vs)); gl.attachShader(prog, mk(gl.FRAGMENT_SHADER, fs)); gl.linkProgram(prog);
-    if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) { root.classList.add('no-webgl'); }
-    else {
-      gl.useProgram(prog);
-      const buf = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, buf);
-      gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), gl.STATIC_DRAW);
-      const loc = gl.getAttribLocation(prog, 'p'); gl.enableVertexAttribArray(loc); gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
-      const U = (k) => gl.getUniformLocation(prog, k);
-      const uRes = U('uRes'), uTime = U('uTime'), uAmp = U('uAmp'), uLight = U('uLight');
-      gl.enable(gl.BLEND); gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
-      const size = () => {
-        const d = Math.min(devicePixelRatio || 1, 2), w = canvas.clientWidth * d;
-        if (canvas.width !== w) { canvas.width = w; canvas.height = w; }
-        gl.viewport(0, 0, canvas.width, canvas.height);
-      };
-      let last = performance.now(), time = 0, visible = true;
-      new IntersectionObserver(([e]) => { visible = e.isIntersecting; }).observe(canvas);
-      const frame = (now) => {
-        const dt = Math.min((now - last) / 1000, 0.05); last = now;
-        orb.amp += (orb.target - orb.amp) * Math.min(dt * 5, 1);
-        orb.light += ((isLight() ? 1 : 0) - orb.light) * Math.min(dt * 4, 1);
-        time += dt * (reduce ? 0.15 : 0.55 + orb.amp * 1.4);
-        if (visible) {
-          size();
-          gl.clearColor(0, 0, 0, 0); gl.clear(gl.COLOR_BUFFER_BIT);
-          gl.uniform2f(uRes, canvas.width, canvas.height); gl.uniform1f(uTime, time);
-          gl.uniform1f(uAmp, orb.amp); gl.uniform1f(uLight, orb.light);
-          gl.drawArrays(gl.TRIANGLES, 0, 3);
-        }
-        requestAnimationFrame(frame);
-      };
-      requestAnimationFrame(frame);
-    }
-  }
+  /* ================= Licht folgt der Maus ================= */
+  document.addEventListener('pointermove', (e) => {
+    const el = e.target.closest && e.target.closest('.spot');
+    if (!el) return;
+    const r = el.getBoundingClientRect();
+    el.style.setProperty('--x', (e.clientX - r.left) + 'px');
+    el.style.setProperty('--y', (e.clientY - r.top) + 'px');
+  }, { passive: true });
 
-  /* ---------- Hörprobe ---------- */
+  /* ================= Gespräch ================= */
   const SCRIPT = [
-    { who: 'ki', name: 'NABE', text: 'Radwerkstatt am Markt, guten Tag! Hier spricht die digitale Assistenz – ich bin eine KI. Wie kann ich helfen?' },
-    { who: 'kunde', name: 'Anrufer', text: 'Hallo, mein E-Bike braucht eine Inspektion. Geht diese Woche noch was?' },
-    { who: 'ki', name: 'NABE', text: 'Gern. Donnerstag um 10:30 Uhr ist noch frei. Soll ich den Termin für Sie eintragen?' },
-    { who: 'kunde', name: 'Anrufer', text: 'Ja, perfekt.' },
-    { who: 'ki', name: 'NABE', text: 'Erledigt. Sie bekommen gleich eine Bestätigung per E-Mail. Einen schönen Tag noch!', booked: true },
+    { who: 'ki', name: 'AVOX', src: 'audio/l1.mp3', text: 'Fahrrad-Werkstatt am Markt, guten Tag! Hier spricht die digitale Assistenz. Ich bin eine künstliche Intelligenz. Wie kann ich Ihnen helfen?' },
+    { who: 'anrufer', name: 'Anrufer', src: 'audio/l2.mp3', text: 'Hallo, guten Tag! Mein E-Bike braucht eine Inspektion. Geht diese Woche noch was?' },
+    { who: 'ki', name: 'AVOX', src: 'audio/l3.mp3', text: 'Gerne. Am Donnerstag um halb elf ist noch frei. Soll ich den Termin für Sie eintragen?' },
+    { who: 'anrufer', name: 'Anrufer', src: 'audio/l4.mp3', text: 'Ja, perfekt.' },
+    { who: 'ki', name: 'AVOX', src: 'audio/l5.mp3', text: 'Erledigt. Sie bekommen gleich eine Bestätigung per E-Mail. Einen schönen Tag noch!', booked: true },
   ];
-  const btn = $('.play'), btnText = $('.play-text'), list = $('.transcript'), timeEl = $('.call-time');
-  const stateText = $('.state-text'), booked = $('.booked');
-  const STATES = { idle: ['Bereit', 0.15], listening: ['Hört zu', 0.32], thinking: ['Denkt nach', 0.24], speaking: ['Spricht', 0.75] };
-  const setState = (s) => { stage.dataset.state = s; stateText.textContent = STATES[s][0]; orb.target = STATES[s][1]; };
-  setState('idle');
-
-  const synth = 'speechSynthesis' in window ? window.speechSynthesis : null;
-  let voice = null;
-  const pickVoice = () => {
-    if (!synth) return;
-    const vs = synth.getVoices().filter((v) => /^de/i.test(v.lang));
-    voice = vs.find((v) => /natural|neural|google|online/i.test(v.name)) || vs[0] || null;
-  };
-  if (synth) { pickVoice(); synth.addEventListener('voiceschanged', pickVoice); }
-
-  let run = 0, clock = null, started = 0;
-  const wait = (ms) => new Promise((r) => setTimeout(r, ms));
-  const say = (line, id) => new Promise((resolve) => {
-    const fallback = () => wait(Math.max(1400, line.text.length * 55)).then(resolve);
-    if (!synth || !voice) return fallback();
-    const u = new SpeechSynthesisUtterance(line.text);
-    u.voice = voice; u.lang = voice.lang; u.rate = line.who === 'ki' ? 1.04 : 1.0; u.pitch = line.who === 'ki' ? 1.05 : 0.85;
-    let done = false; const fin = () => { if (!done) { done = true; resolve(); } };
-    u.onend = fin; u.onerror = fin;
-    u.onboundary = () => { if (id === run && line.who === 'ki') orb.amp = Math.min(orb.amp + 0.25, 1.1); };
-    synth.speak(u);
-    setTimeout(fin, line.text.length * 110 + 2500);
+  const list = $('.script');
+  SCRIPT.forEach((l) => {
+    const li = document.createElement('li'); li.className = l.who;
+    const w = document.createElement('span'); w.className = 'who'; w.textContent = l.name;
+    const t = document.createElement('span'); t.className = 'txt'; t.textContent = l.text;
+    li.append(w, t); list.appendChild(li);
   });
-  const addLine = (line) => {
-    const li = document.createElement('li'); li.className = line.who;
-    const w = document.createElement('span'); w.className = 'who'; w.textContent = line.name;
-    li.append(w, document.createTextNode(line.text)); list.appendChild(li);
-    while (list.children.length > 3) list.firstElementChild.remove();
+  const lis = $$('li', list);
+  const caption = $('.caption'), capWho = $('.cap-who'), capText = $('.cap-text');
+  const booked = $('.booked');
+
+  /* Audio-Kette: Datei -> Analyser -> Lautsprecher */
+  const audio = { ctx: null, analyser: null, freq: null, wave: null, els: [] };
+  const level = { v: 0, bands: [0, 0, 0, 0, 0, 0], who: 'idle' };
+  const ensureCtx = () => {
+    if (audio.els.length) return;
+    try {
+      const AC = window.AudioContext || window.webkitAudioContext;
+      audio.ctx = new AC();
+      audio.analyser = audio.ctx.createAnalyser();
+      audio.analyser.fftSize = 1024; audio.analyser.smoothingTimeConstant = 0.55;
+      audio.analyser.connect(audio.ctx.destination);
+      audio.freq = new Uint8Array(audio.analyser.frequencyBinCount);
+      audio.wave = new Uint8Array(audio.analyser.fftSize);
+    } catch (e) { audio.ctx = null; }
+    audio.els = SCRIPT.map((l) => {
+      const a = new Audio(l.src); a.preload = 'auto';
+      if (audio.ctx) { try { audio.ctx.createMediaElementSource(a).connect(audio.analyser); } catch (e) { /* direkt */ } }
+      return a;
+    });
   };
+
+  let run = 0, playing = false;
+  const buttons = $$('.js-play');
+  const setPressed = (on) => buttons.forEach((b) => {
+    b.setAttribute('aria-pressed', String(on));
+    b.setAttribute('aria-label', on ? 'Beispielanruf stoppen' : 'Beispielanruf anhören');
+  });
   const stop = () => {
-    run++; if (synth) synth.cancel(); clearInterval(clock);
-    btn.setAttribute('aria-pressed', 'false'); btnText.textContent = 'Hörprobe abspielen'; setState('idle');
+    run++; playing = false; level.who = 'idle';
+    audio.els.forEach((a) => { a.pause(); a.currentTime = 0; });
+    setPressed(false); caption.classList.remove('live');
+    lis.forEach((li) => li.classList.remove('now'));
   };
-  btn.addEventListener('click', async () => {
-    if (btn.getAttribute('aria-pressed') === 'true') return stop();
-    const id = ++run;
-    btn.setAttribute('aria-pressed', 'true'); btnText.textContent = 'Hörprobe stoppen';
-    list.textContent = ''; booked.classList.remove('show');
-    started = performance.now(); clearInterval(clock);
-    clock = setInterval(() => {
-      const s = Math.floor((performance.now() - started) / 1000);
-      timeEl.textContent = `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`;
-    }, 250);
-    for (const line of SCRIPT) {
-      if (id !== run) return;
-      if (line.who === 'ki') { setState('thinking'); await wait(500); if (id !== run) return; setState('speaking'); }
-      else setState('listening');
-      addLine(line);
-      await say(line, id);
-      if (line.booked && id === run) booked.classList.add('show');
-    }
-    if (id === run) { await wait(600); stop(); }
+  const playLine = (i, id) => new Promise((resolve) => {
+    const a = audio.els[i];
+    const done = () => { a.removeEventListener('ended', done); resolve(); };
+    a.addEventListener('ended', done);
+    a.currentTime = 0;
+    a.play().catch(() => setTimeout(done, SCRIPT[i].text.length * 60));
   });
-  /* Idle-Atmen, damit der Orb nie tot wirkt */
-  if (!reduce) setInterval(() => { if (stage.dataset.state === 'idle') orb.target = 0.12 + Math.random() * 0.08; }, 1800);
+  const start = async () => {
+    ensureCtx();
+    if (audio.ctx && audio.ctx.state === 'suspended') { try { await audio.ctx.resume(); } catch (e) { /* egal */ } }
+    const id = ++run; playing = true; setPressed(true);
+    booked.classList.remove('show'); lis.forEach((li) => li.classList.remove('now', 'done'));
+    caption.classList.add('live');
+    for (let i = 0; i < SCRIPT.length; i++) {
+      if (id !== run) return;
+      const l = SCRIPT[i];
+      level.who = l.who;
+      capWho.textContent = l.name; capText.textContent = l.text;
+      lis.forEach((li, k) => { li.classList.toggle('now', k === i); li.classList.toggle('done', k < i); });
+      await playLine(i, id);
+      if (id !== run) return;
+      if (l.booked) booked.classList.add('show');
+      level.who = 'pause';
+      await new Promise((r) => setTimeout(r, 380));
+    }
+    if (id === run) {
+      lis.forEach((li) => { li.classList.remove('now'); li.classList.add('done'); });
+      capWho.textContent = 'Termin eingetragen'; capText.textContent = 'Do · 10:30 · Inspektion E-Bike. Bestätigung ist raus.';
+      playing = false; level.who = 'idle'; setPressed(false); caption.classList.remove('live');
+    }
+  };
+  buttons.forEach((b) => b.addEventListener('click', () => (playing ? stop() : start())));
+
+  /* Pegel aus dem Analyser lesen (oder simulieren, falls Web Audio fehlt) */
+  const readLevel = (t) => {
+    let target = 0; const bands = [0, 0, 0, 0, 0, 0];
+    if (playing && level.who !== 'pause') {
+      if (audio.analyser) {
+        audio.analyser.getByteTimeDomainData(audio.wave);
+        let sum = 0; for (let i = 0; i < audio.wave.length; i++) { const d = (audio.wave[i] - 128) / 128; sum += d * d; }
+        target = Math.min(1, Math.sqrt(sum / audio.wave.length) * 4.2);
+        audio.analyser.getByteFrequencyData(audio.freq);
+        const edges = [2, 6, 12, 24, 48, 96, 180];
+        for (let b = 0; b < 6; b++) { let s = 0; for (let i = edges[b]; i < edges[b + 1]; i++) s += audio.freq[i]; bands[b] = s / ((edges[b + 1] - edges[b]) * 255); }
+      } else {
+        target = 0.35 + 0.35 * Math.abs(Math.sin(t * 9) * Math.sin(t * 3.3));
+        for (let b = 0; b < 6; b++) bands[b] = target * (0.5 + 0.5 * Math.sin(t * (4 + b * 2.7)));
+      }
+    }
+    level.v += (target - level.v) * (target > level.v ? 0.45 : 0.12);
+    for (let b = 0; b < 6; b++) level.bands[b] += (bands[b] - level.bands[b]) * 0.35;
+  };
+
+  /* ================= Stromlinie (Canvas) ================= */
+  class Plasma {
+    constructor(canvas) {
+      this.c = canvas; this.g = canvas.getContext('2d'); this.sparks = []; this.big = canvas.dataset.size === 'big';
+      this.seed = Math.random() * 100; this.resize();
+    }
+    resize() {
+      const d = Math.min(devicePixelRatio || 1, 2);
+      const w = this.c.clientWidth, h = this.c.clientHeight;
+      if (!w) return;
+      this.d = d; this.w = w; this.h = h;
+      this.c.width = Math.round(w * d); this.c.height = Math.round(h * d);
+    }
+    visible() { return this.c.offsetParent !== null && this.w; }
+    path(t, amp, phase, sharp) {
+      const { w, h } = this, mid = h / 2, n = Math.max(80, Math.floor(w / 5)), pts = [];
+      const B = level.bands;
+      for (let i = 0; i <= n; i++) {
+        const x = i / n, env = Math.pow(Math.sin(Math.PI * x), 1.35);
+        let y = 0;
+        y += Math.sin(x * 9 + t * 2.1 + phase) * (0.12 + B[0] * 0.9);
+        y += Math.sin(x * 23 - t * 3.7 + phase * 1.7) * (0.06 + B[1] * 0.7);
+        y += Math.sin(x * 47 + t * 6.3 + phase * 2.3) * (0.03 + B[2] * 0.55);
+        y += Math.sin(x * 91 - t * 9.1 + phase) * (B[3] * 0.4 + B[4] * 0.3);
+        const crackle = (Math.random() - 0.5) * sharp;
+        y = (y * amp + crackle * amp) * env * h * 0.42;
+        pts.push([x * w, mid + y]);
+      }
+      return pts;
+    }
+    stroke(pts, width, color, alpha) {
+      const g = this.g, { w } = this;
+      const grad = g.createLinearGradient(0, 0, w, 0);
+      grad.addColorStop(0, 'rgba(0,0,0,0)'); grad.addColorStop(0.12, color); grad.addColorStop(0.88, color); grad.addColorStop(1, 'rgba(0,0,0,0)');
+      g.globalAlpha = alpha; g.strokeStyle = grad; g.lineWidth = width; g.lineJoin = 'round'; g.lineCap = 'round';
+      g.beginPath(); g.moveTo(pts[0][0], pts[0][1]);
+      for (let i = 1; i < pts.length; i++) g.lineTo(pts[i][0], pts[i][1]);
+      g.stroke();
+    }
+    draw(t) {
+      if (!this.visible()) return;
+      const g = this.g, { w, h, d } = this;
+      g.setTransform(d, 0, 0, d, 0, 0);
+      g.globalCompositeOperation = 'source-over'; g.globalAlpha = 1; g.clearRect(0, 0, w, h);
+      g.globalCompositeOperation = 'lighter';
+      const talk = level.who === 'ki', caller = level.who === 'anrufer';
+      const idle = reduce ? 0.06 : 0.07 + 0.03 * Math.sin(t * 0.8);
+      const amp = idle + level.v * (talk ? 1.25 : 0.7);
+      const sharp = talk ? 0.18 + level.v * 0.5 : caller ? 0.08 : 0.04;
+      const core = caller ? 'rgba(255,236,214,1)' : 'rgba(225,246,255,1)';
+      const halo = caller ? 'rgba(255,190,140,1)' : 'rgba(127,212,255,1)';
+      const deep = caller ? 'rgba(255,140,90,1)' : 'rgba(58,141,255,1)';
+      const tt = reduce ? t * 0.2 : t;
+      const main = this.path(tt, amp, this.seed, sharp);
+      this.stroke(main, (this.big ? 26 : 20) + level.v * 30, deep, 0.07 + level.v * 0.08);
+      this.stroke(main, 9 + level.v * 10, halo, 0.22 + level.v * 0.2);
+      this.stroke(main, 2.6, halo, 0.75);
+      this.stroke(main, 1.2, core, 1);
+      // Nebenstränge: elektrische Fäden um die Hauptlinie
+      for (let k = 1; k <= 2; k++) {
+        const p = this.path(tt * (1 + k * 0.13), amp * (0.7 + k * 0.25), this.seed + k * 2.1, sharp * 1.6);
+        this.stroke(p, 1, halo, 0.28 + level.v * 0.3);
+      }
+      // Wandernder Signalpuls, solange niemand spricht
+      if (!playing || level.who === 'pause') {
+        const px = ((t * 0.18) % 1.4) - 0.2;
+        if (px > 0.05 && px < 0.95) {
+          const idx = Math.round(px * (main.length - 1)), [x, y] = main[idx];
+          const r = 46, rg = g.createRadialGradient(x, y, 0, x, y, r);
+          rg.addColorStop(0, 'rgba(230,248,255,.9)'); rg.addColorStop(0.25, 'rgba(127,212,255,.35)'); rg.addColorStop(1, 'rgba(58,141,255,0)');
+          g.globalAlpha = 1; g.fillStyle = rg; g.beginPath(); g.arc(x, y, r, 0, Math.PI * 2); g.fill();
+        }
+      }
+      // Funken bei lauter Stimme
+      if (!reduce && level.v > 0.35 && Math.random() < level.v * 0.9) {
+        const [x, y] = main[Math.floor(main.length * (0.15 + Math.random() * 0.7))];
+        this.sparks.push({ x, y, vx: (Math.random() - 0.5) * 2.4, vy: (Math.random() - 0.5) * 3.2, life: 1 });
+      }
+      this.sparks = this.sparks.filter((s) => (s.life -= 0.035) > 0);
+      for (const s of this.sparks) {
+        s.x += s.vx; s.y += s.vy; s.vy += 0.04;
+        g.globalAlpha = s.life; g.fillStyle = core;
+        g.beginPath(); g.arc(s.x, s.y, 1.4, 0, Math.PI * 2); g.fill();
+        g.globalAlpha = s.life * 0.35; g.fillStyle = halo;
+        g.beginPath(); g.arc(s.x, s.y, 5, 0, Math.PI * 2); g.fill();
+      }
+      g.globalAlpha = 1; g.globalCompositeOperation = 'source-over';
+    }
+  }
+  const plasmas = $$('.plasma').map((c) => new Plasma(c));
+  addEventListener('resize', () => plasmas.forEach((p) => p.resize()));
+  const loop = (now) => {
+    const t = now / 1000;
+    readLevel(t);
+    plasmas.forEach((p) => p.draw(t));
+    requestAnimationFrame(loop);
+  };
+
+  show(true);
+  requestAnimationFrame(loop);
 })();
