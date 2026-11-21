@@ -257,14 +257,22 @@ class MainActivity : Activity(), LunaBus.Listener {
 
     private fun hasMic() = checkSelfPermission(Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED
 
+    /**
+     * Schrittweise fragen: zuerst nur Mikrofon (+ Benachrichtigungen), danach den Rest.
+     * SMS wird hier nie gefragt – Android sperrt es bei selbst installierten Apps („eingeschränkte Einstellung“),
+     * und eine Sperre im Sammelaufruf würde sonst auch das Mikrofon mitreißen.
+     */
     private fun askRuntimePermissions() {
-        val need = Permissions.runtimeFor(this).filter { checkSelfPermission(it) != PackageManager.PERMISSION_GRANTED }
-        if (need.isNotEmpty()) requestPermissions(need.toTypedArray(), 1)
+        val first = Permissions.FIRST.filter { checkSelfPermission(it) != PackageManager.PERMISSION_GRANTED }
+        if (first.isNotEmpty()) { requestPermissions(first.toTypedArray(), 1); return }
+        val rest = Permissions.runtimeFor(this).filter { checkSelfPermission(it) != PackageManager.PERMISSION_GRANTED }
+        if (rest.isNotEmpty()) requestPermissions(rest.toTypedArray(), 2)
     }
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         if (hasMic() && prefs.wakeWanted && !LunaService.running) LunaService.start(this)
+        if (requestCode == 1 && hasMic()) askRuntimePermissions()   // danach die übrigen Rechte
         refreshChrome()
     }
 }
@@ -274,8 +282,14 @@ object Permissions {
     val RUNTIME: List<String> = buildList {
         add(Manifest.permission.RECORD_AUDIO)
         if (Build.VERSION.SDK_INT >= 33) add(Manifest.permission.POST_NOTIFICATIONS)
-        add(Manifest.permission.READ_CONTACTS); add(Manifest.permission.CALL_PHONE); add(Manifest.permission.SEND_SMS)
+        add(Manifest.permission.READ_CONTACTS); add(Manifest.permission.CALL_PHONE)
         add(Manifest.permission.READ_CALENDAR); add(Manifest.permission.WRITE_CALENDAR)
+    }
+
+    /** Zuerst und einzeln: das Wichtigste. */
+    val FIRST: List<String> = buildList {
+        add(Manifest.permission.RECORD_AUDIO)
+        if (Build.VERSION.SDK_INT >= 33) add(Manifest.permission.POST_NOTIFICATIONS)
     }
 
     fun runtimeFor(a: Activity): List<String> = RUNTIME + (if (wireguardInstalled(a)) listOf(PhoneTools.WG_PERMISSION) else emptyList())
@@ -289,7 +303,8 @@ object Permissions {
         fun rt(p: String) = a.checkSelfPermission(p) == PackageManager.PERMISSION_GRANTED
         return listOf(
             Item("mic", "Mikrofon", "Damit Luna „Hey Luna“ hört.", rt(Manifest.permission.RECORD_AUDIO)),
-            Item("runtime", "Kontakte, Anrufe, SMS, Kalender" + (if (wireguardInstalled(a)) ", VPN" else ""), "Anrufen, Nachrichten schreiben, Termine, VPN nach Hause.", runtimeFor(a).all { rt(it) }),
+            Item("runtime", "Kontakte, Anrufe, Kalender" + (if (wireguardInstalled(a)) ", VPN" else ""), "Anrufen, Termine, VPN nach Hause.", runtimeFor(a).all { rt(it) }),
+            Item("sms", "SMS senden (optional)", "Nur für SMS per Sprache. Wird blockiert? App-Info → ⋮ → „Eingeschränkte Einstellungen zulassen“, dann hier erneut tippen.", rt(Manifest.permission.SEND_SMS)),
             Item("access", "Bedienungshilfe (Handy steuern)", "Tippen, scrollen, Bildschirm lesen, WhatsApp senden, sperren.", LunaAccessibilityService.enabled(a)),
             Item("notif", "Benachrichtigungen lesen", "Damit Luna dir neue Nachrichten vorliest.", NotificationStore.enabled(a)),
             Item("battery", "Akku-Optimierung aus", "Sonst schläfert Android Luna nachts ein.", pm.isIgnoringBatteryOptimizations(a.packageName)),
@@ -298,7 +313,7 @@ object Permissions {
         )
     }
 
-    fun missing(a: Activity) = all(a).filter { !it.granted && it.key != "write" }
+    fun missing(a: Activity) = all(a).filter { !it.granted && it.key != "write" && it.key != "sms" }
 }
 
 /** Ordnet die Anker in zwei geschwungenen Waben-Bögen an (oben 5, darunter 4 versetzt) – kein Raster. */

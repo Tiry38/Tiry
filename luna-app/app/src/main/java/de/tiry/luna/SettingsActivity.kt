@@ -157,9 +157,18 @@ class SettingsActivity : Activity() {
         }
     }
 
+    private var smsAsked = false
+
     private fun openPermission(key: String) {
         val i = when (key) {
-            "mic", "runtime" -> { requestPermissions(Permissions.runtimeFor(this).toTypedArray(), 2); return }
+            "mic" -> { requestPermissions(Permissions.FIRST.toTypedArray(), 2); return }
+            "runtime" -> { requestPermissions(Permissions.runtimeFor(this).toTypedArray(), 2); return }
+            "sms" -> {
+                if (shouldShowRequestPermissionRationale(android.Manifest.permission.SEND_SMS) || checkSelfPermission(android.Manifest.permission.SEND_SMS) != android.content.pm.PackageManager.PERMISSION_GRANTED && !smsAsked) {
+                    smsAsked = true; requestPermissions(arrayOf(android.Manifest.permission.SEND_SMS), 3); return
+                }
+                Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.parse("package:$packageName"))
+            }
             "access" -> Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)
             "notif" -> Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS)
             "battery" -> Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS, Uri.parse("package:$packageName"))
