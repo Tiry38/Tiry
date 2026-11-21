@@ -70,7 +70,7 @@ class Speaker(private val ctx: Context, private val prefs: Prefs) {
     fun speak(raw: String, onDone: () -> Unit) {
         pendingDone = null
         stop()
-        val text = clean(raw)
+        val text = pronounce(clean(raw))
         if (text.isBlank()) { main.post(onDone); return }
         val my = ++token
         pendingDone = onDone
@@ -144,6 +144,12 @@ class Speaker(private val ctx: Context, private val prefs: Prefs) {
         t.speak(text, TextToSpeech.QUEUE_FLUSH, params, "luna-$my")
     }
 
+    /** Namen so aussprechen, wie Tiry es will („Tiry“ geschrieben, „Tiri“ gesprochen). */
+    private fun pronounce(t: String): String {
+        val written = prefs.userName; val spoken = prefs.spokenName
+        return if (written.isBlank() || written == spoken) t else t.replace(Regex("\\b" + Regex.escape(written) + "\\b", RegexOption.IGNORE_CASE), spoken)
+    }
+
     private fun cacheFile(text: String): File {
         val key = prefs.elevenVoice + "|" + prefs.elevenModel + "|" + text
         val h = MessageDigest.getInstance("SHA-1").digest(key.toByteArray()).joinToString("") { "%02x".format(it) }
@@ -160,7 +166,7 @@ class Speaker(private val ctx: Context, private val prefs: Prefs) {
         c.setRequestProperty("Content-Type", "application/json")
         c.setRequestProperty("Accept", "audio/mpeg")
         val body = JSONObject().put("text", text).put("model_id", prefs.elevenModel)
-            .put("voice_settings", JSONObject().put("stability", 0.42).put("similarity_boost", 0.8).put("style", 0.3).put("use_speaker_boost", true))
+            .put("voice_settings", JSONObject().put("stability", 0.35).put("similarity_boost", 0.8).put("style", 0.45).put("use_speaker_boost", true))
         c.outputStream.use { it.write(body.toString().toByteArray()) }
         if (c.responseCode !in 200..299) {
             val err = c.errorStream?.bufferedReader()?.use { it.readText() }?.take(200) ?: ""
@@ -177,7 +183,7 @@ class Speaker(private val ctx: Context, private val prefs: Prefs) {
     /** Begrüßungen vorab erzeugen, damit Luna nach „Hey Luna“ ohne Verzögerung antwortet. */
     fun precache(phrases: List<String>) {
         if (!usesHumanVoice) return
-        io.execute { phrases.forEach { try { fetchEleven(clean(it)) } catch (e: Exception) { lastError = "Stimme: ${e.message}" } } }
+        io.execute { phrases.forEach { try { fetchEleven(pronounce(clean(it))) } catch (e: Exception) { lastError = "Stimme: ${e.message}" } } }
     }
 
     fun shutdown() { stop(); tts?.shutdown(); io.shutdown(); waiter.shutdown() }

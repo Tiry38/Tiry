@@ -188,8 +188,10 @@ class LunaService : Service(), WakeWordEngine.Callback, Listener.Callback {
             wl.acquire(8000)
         } catch (_: Exception) {}
         try {
-            startActivity(Intent(this, MainActivity::class.java).putExtra(MainActivity.EXTRA_AWAKE, true)
-                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_REORDER_TO_FRONT))
+            // Cockpit offen → dort bleiben; sonst die schlichte Stimm-Linie über allem zeigen
+            if (MainActivity.visible || AwakeActivity.visible) return
+            startActivity(Intent(this, AwakeActivity::class.java)
+                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_NO_ANIMATION))
         } catch (_: Exception) { /* ohne Bedienungshilfe/Overlay-Recht darf Android die App nicht nach vorn holen */ }
     }
 
@@ -226,9 +228,22 @@ class LunaService : Service(), WakeWordEngine.Callback, Listener.Callback {
     override fun onPartial(text: String) { LunaBus.update { it.copy(userText = text) } }
 
     override fun onNothing() {
-        // Nichts gesagt → zurück in den Wartemodus (bei Nachfragen leise, sonst kurz quittieren)
-        if (followUps == 0) LunaBus.update { it.copy(lunaText = "Ich bin da, wenn du mich brauchst.") }
+        // Direkt nach dem Aufwecken nichts gehört → kurz nachfragen; im Nachfrage-Modus still zurück
+        if (followUps == 0 && inConversation) {
+            val id = conversationId
+            val msg = listOf("Hm? Ich hab nichts gehört.", "Ich bin noch da, falls du was brauchst.", "Na gut, dann eben nicht.").random()
+            LunaBus.update { it.copy(lunaText = msg) }
+            state(LunaState.SPEAKING, "Spreche …")
+            speaker.speak(msg) { if (id == conversationId) main.postDelayed({ startWake() }, 300) }
+            return
+        }
         main.postDelayed({ startWake() }, 300)
+    }
+
+    private var retries = 0
+    override fun onRetry() {
+        if (retries++ < 3) main.postDelayed({ listenNow() }, 600)
+        else { retries = 0; onListenError("Mein Mikrofon ist gerade belegt. Versuch's gleich nochmal.") }
     }
 
     override fun onListenError(msg: String) {
@@ -238,6 +253,7 @@ class LunaService : Service(), WakeWordEngine.Callback, Listener.Callback {
     }
 
     override fun onHeard(text: String) {
+        retries = 0
         val id = conversationId
         LunaBus.update { it.copy(userText = text, level = 0f) }
         state(LunaState.THINKING, "Moment …")
@@ -254,6 +270,10 @@ class LunaService : Service(), WakeWordEngine.Callback, Listener.Callback {
 
     private fun answer(r: Reply, id: Int) {
         // Luna hat erkannt, dass sie gar nicht gemeint war → still zurück in den Wartemodus
+        if (r.text.trim().startsWith("[STILL]") && followUps == 0) {
+            // direkt nach „Hey Luna“ war er sicher gemeint → nicht schweigen, sondern nachfragen
+            return answer(Reply("Hm? Sag das nochmal, ${prefs.userName}."), id)
+        }
         if (r.text.trim().startsWith("[STILL]")) {
             LunaBus.update { it.copy(userText = "", lunaText = "") }
             claude.reset()
@@ -322,7 +342,8 @@ class LunaService : Service(), WakeWordEngine.Callback, Listener.Callback {
         val first = prefs.lastBriefingDay != today
         if (first) prefs.lastBriefingDay = today
         val bat = try { tools.batteryPercent() } catch (_: Exception) { -1 }
-        return "Jetzt: $now; Akku $bat %" + (if (first) "; erstes Gespräch heute" else "")
+        return "Jetzt: $now; Akku $bat %" + (if (first) "; erstes Gespräch heute" else "") +
+            (if (followUps == 0) "; direkt nach „Hey Luna“ – du bist gemeint" else "; Nachfrage-Modus – prüfe, ob du gemeint bist")
     }
 
     private var lastGreeting = ""

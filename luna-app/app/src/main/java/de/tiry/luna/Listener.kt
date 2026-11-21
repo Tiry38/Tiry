@@ -16,6 +16,8 @@ class Listener(private val ctx: Context) {
         fun onHeard(text: String)
         fun onNothing()
         fun onListenError(msg: String)
+        /** Mikrofon kurz belegt → gleich nochmal versuchen. */
+        fun onRetry()
     }
 
     private var sr: SpeechRecognizer? = null
@@ -23,7 +25,7 @@ class Listener(private val ctx: Context) {
     fun listen(cb: Callback, longPause: Boolean = false) {
         cancel()
         if (!SpeechRecognizer.isRecognitionAvailable(ctx)) { cb.onListenError("Auf diesem Handy ist keine Spracherkennung installiert (Google-App nötig)."); return }
-        val r = SpeechRecognizer.createSpeechRecognizer(ctx)
+        val r = createRecognizer()
         sr = r
         var done = false
         r.setRecognitionListener(object : RecognitionListener {
@@ -36,9 +38,10 @@ class Listener(private val ctx: Context) {
                 if (done) return; done = true
                 when (error) {
                     SpeechRecognizer.ERROR_NO_MATCH, SpeechRecognizer.ERROR_SPEECH_TIMEOUT -> cb.onNothing()
-                    SpeechRecognizer.ERROR_INSUFFICIENT_PERMISSIONS -> cb.onListenError("Mikrofon-Recht fehlt.")
-                    SpeechRecognizer.ERROR_NETWORK, SpeechRecognizer.ERROR_NETWORK_TIMEOUT -> cb.onListenError("Kein Internet für die Spracherkennung.")
-                    else -> cb.onNothing()
+                    SpeechRecognizer.ERROR_INSUFFICIENT_PERMISSIONS -> cb.onListenError("Mir fehlt das Mikrofon-Recht.")
+                    SpeechRecognizer.ERROR_NETWORK, SpeechRecognizer.ERROR_NETWORK_TIMEOUT -> cb.onListenError("Ich hab gerade kein Internet für die Spracherkennung.")
+                    SpeechRecognizer.ERROR_RECOGNIZER_BUSY, SpeechRecognizer.ERROR_AUDIO -> cb.onRetry()
+                    else -> cb.onListenError("Ich konnte dich nicht verstehen, die Spracherkennung meldet Fehler $error. Sag's nochmal?")
                 }
             }
             override fun onResults(results: Bundle?) {
@@ -59,6 +62,21 @@ class Listener(private val ctx: Context) {
             .putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_COMPLETE_SILENCE_LENGTH_MILLIS, if (longPause) 1800L else 1200L)
             .putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_POSSIBLY_COMPLETE_SILENCE_LENGTH_MILLIS, if (longPause) 1500L else 1000L)
         r.startListening(i)
+    }
+
+    /**
+     * Immer eine ECHTE Spracherkennung nehmen – nie Lunas eigenen Platzhalter (der wird zum Standard, wenn Luna
+     * digitaler Assistent ist, und versteht nichts). Bevorzugt Google, sonst Samsung/andere, sonst die On-Device-Erkennung.
+     */
+    private fun createRecognizer(): SpeechRecognizer {
+        val services = ctx.packageManager.queryIntentServices(Intent(android.speech.RecognitionService.SERVICE_INTERFACE), 0)
+            .map { it.serviceInfo }.filter { it.packageName != ctx.packageName }
+        val pick = services.firstOrNull { it.packageName == "com.google.android.googlequicksearchbox" }
+            ?: services.firstOrNull { it.packageName.startsWith("com.google") }
+            ?: services.firstOrNull()
+        if (pick != null) return SpeechRecognizer.createSpeechRecognizer(ctx, android.content.ComponentName(pick.packageName, pick.name))
+        if (android.os.Build.VERSION.SDK_INT >= 31 && SpeechRecognizer.isOnDeviceRecognitionAvailable(ctx)) return SpeechRecognizer.createOnDeviceSpeechRecognizer(ctx)
+        return SpeechRecognizer.createSpeechRecognizer(ctx)
     }
 
     fun cancel() {

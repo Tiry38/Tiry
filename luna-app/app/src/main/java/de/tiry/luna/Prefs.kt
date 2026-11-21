@@ -11,6 +11,11 @@ class Prefs(context: Context) {
         get() = p.getString("user_name", "Tiry")!!.ifBlank { "Tiry" }
         set(v) = p.edit().putString("user_name", v.trim()).apply()
 
+    /** So spricht Luna den Namen aus (Schrift bleibt „Tiry“). */
+    var spokenName: String
+        get() = p.getString("spoken_name", "")!!.ifBlank { if (userName.equals("Tiry", true)) "Tiri" else userName }
+        set(v) = p.edit().putString("spoken_name", v.trim()).apply()
+
     var claudeKey: String
         get() = p.getString("claude_key", "")!!
         set(v) = p.edit().putString("claude_key", v.trim()).apply()

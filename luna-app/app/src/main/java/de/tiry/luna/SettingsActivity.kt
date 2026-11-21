@@ -56,6 +56,7 @@ class SettingsActivity : Activity() {
 
         section("Du")
         field("Wie soll Luna dich nennen?", prefs.userName) { prefs.userName = it }
+        field("So spricht Luna deinen Namen aus", prefs.spokenName) { prefs.spokenName = it }
         field("Wohnort (für Wetter)", prefs.homeCity) { prefs.homeCity = it }
         field("Über mich – damit Luna dich kennt und passende Tipps gibt", prefs.aboutMe, multi = true) { prefs.aboutMe = it }
 

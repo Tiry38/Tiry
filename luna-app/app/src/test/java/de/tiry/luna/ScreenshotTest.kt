@@ -48,6 +48,12 @@ class ScreenshotTest {
         shot(a, "5-denkt")
     }
 
+    @Test fun stimmLinie() {
+        val a = Robolectric.buildActivity(AwakeActivity::class.java).setup().get()
+        LunaBus.update { it.copy(state = LunaState.SPEAKING, userText = "", lunaText = "Bin da, Tiry. Was brauchst du?") }
+        shot(a, "10-stimmlinie")
+    }
+
     @Test fun einstellungen() {
         val a = Robolectric.buildActivity(SettingsActivity::class.java).setup().get()
         shot(a, "6-einstellungen")

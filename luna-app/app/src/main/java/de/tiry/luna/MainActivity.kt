@@ -31,7 +31,10 @@ import java.util.Locale
  */
 class MainActivity : Activity(), LunaBus.Listener {
 
-    companion object { const val EXTRA_AWAKE = "awake" }
+    companion object {
+        const val EXTRA_AWAKE = "awake"
+        @Volatile var visible = false
+    }
 
     /** true, wenn Luna das Handy per „Hey Luna“ aufgeweckt hat. */
     private var awakened = false
@@ -231,6 +234,7 @@ class MainActivity : Activity(), LunaBus.Listener {
 
     override fun onResume() {
         super.onResume()
+        visible = true
         LunaBus.add(this)
         if (prefs.wakeWanted && !LunaService.running && hasMic()) LunaService.start(this)
         refreshChrome()
@@ -252,7 +256,7 @@ class MainActivity : Activity(), LunaBus.Listener {
         super.onStop()
     }
 
-    override fun onPause() { LunaBus.remove(this); ui.removeCallbacks(hudTick); super.onPause() }
+    override fun onPause() { visible = false; LunaBus.remove(this); ui.removeCallbacks(hudTick); super.onPause() }
 
     private fun setWake(on: Boolean) { field.wells.firstOrNull { it.id == "wake" }?.active = on }
 
