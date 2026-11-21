@@ -429,13 +429,13 @@
     { title: 'Termin buchen', lines: [
       S('ki', 's1-1', 'Fahrrad-Werkstatt am Markt, guten Tag! Hier spricht die digitale Assistenz. Ich bin eine künstliche Intelligenz. Wie kann ich Ihnen helfen?'),
       S('anrufer', 's1-2', 'Hallo, guten Tag! Mein E-Bike braucht eine Inspektion. Geht diese Woche noch was?'),
-      S('ki', 's1-3', 'Gerne. Am Donnerstag um halb elf ist noch frei. Soll ich den Termin für Sie eintragen?'),
+      S('ki', 's1-3', 'Sehr gerne. Am Donnerstag um halb elf ist noch frei. Soll ich den Termin für Sie eintragen?'),
       S('anrufer', 's1-4', 'Ja, perfekt.'),
       S('ki', 's1-5', 'Erledigt. Sie bekommen gleich eine Bestätigung per E-Mail. Einen schönen Tag noch!')],
       fields: [['Anliegen', 'Inspektion E-Bike', 1], ['Freier Termin', 'Donnerstag, 10:30 Uhr', 2], ['Ergebnis', 'Im Kalender eingetragen · Bestätigung per E-Mail', 4, 1]] },
     { title: 'Ist mein Rad fertig?', lines: [
       S('anrufer', 's2-1', 'Guten Tag, hier spricht Meier. Ist mein Fahrrad schon fertig?'),
-      S('ki', 's2-2', 'Guten Tag, Herr Meier. Ihr Trekkingrad ist fertig und kann ab 16 Uhr abgeholt werden. Die Rechnung beträgt 89 Euro.'),
+      S('ki', 's2-2', 'Guten Tag, Herr Meier. Ihr Rad ist fertig und kann ab 16 Uhr abgeholt werden. Die Rechnung beträgt 89 Euro.'),
       S('anrufer', 's2-3', 'Super, vielen Dank!'),
       S('ki', 's2-4', 'Sehr gern. Bis später in der Werkstatt!')],
       fields: [['Anrufer', 'Herr Meier', 0], ['Anliegen', 'Abholstatus', 0], ['Auskunft', 'Fertig ab 16:00 Uhr · 89 €', 1], ['Ergebnis', 'Erledigt, kein Rückruf nötig', 3, 1]] },
@@ -448,7 +448,7 @@
     { title: 'Nach Feierabend', lines: [
       S('anrufer', 's4-1', 'Guten Abend! Haben Sie heute noch geöffnet?'),
       S('ki', 's4-2', 'Wir haben heute schon geschlossen. Morgen sind wir ab 9 Uhr für Sie da. Soll ich Ihnen einen Rückruf eintragen?'),
-      S('anrufer', 's4-3', 'Ja, sehr gerne.'),
+      S('anrufer', 's4-3', 'Ja, bitte.'),
       S('ki', 's4-4', 'Erledigt. Unser Team ruft Sie morgen früh zurück. Einen schönen Abend!')],
       fields: [['Uhrzeit', 'Nach Ladenschluss', 0], ['Auskunft', 'Morgen ab 9:00 Uhr geöffnet', 1], ['Ergebnis', 'Rückruf für morgen früh eingetragen', 3, 1]] },
   ];

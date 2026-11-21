@@ -85,7 +85,7 @@ kein Versprechen. Die Geschichte selbst ist ein Vertriebs-Asset.
 - Start: **Retell AI (pay-as-you-go) + Claude Haiku 5.5**, deutsche Stimme Cartesia/ElevenLabs Flash, Nummer Twilio/Telnyx
   bzw. Rufumleitung von der Betriebsnummer. Web: Next.js auf Cloudflare/Vercel Free, Supabase, Resend, Stripe/Mollie SEPA.
 - Ab ~5–10 Kunden: Eigenbau Pipecat/LiveKit auf EU-Server, Claude über Bedrock/Vertex EU (DSGVO, halbe Kosten).
-- Demo-Stimmen ohne Konto/Kosten: **Piper TTS** lokal (pip `piper-tts`, Stimmen „thorsten“ high + „kerstin“ low, beide CC0, Anrufer mit Telefon-Bandfilter 300–3400 Hz), Verständlichkeit mit faster-whisper gegenprüfen. Browser-Stimmen (speechSynthesis) klingen roboterhaft – nie wieder.
+- Demo-Stimmen ohne Konto/Kosten: **Chatterbox Multilingual** (MIT) lokal, mit ECHTEN Referenzaufnahmen als Vorbild (Thorsten-Voice CC0; MLS CC BY 4.0) – nie synthetische Stimmen als Referenz. 2–3 Varianten je Zeile, beste per faster-whisper wählen. Zahlen als Wörter schreiben, Name als „Ei-Wox“. Fallback Piper TTS. Browser-Stimmen (speechSynthesis) nie verwenden.
 - Modelle: Standard `claude-opus-5-5` für Entwicklung/Content, Telefon-Echtzeit `claude-haiku-5-5`. Vor API-Code den
   Skill `claude-api` laden.
 
