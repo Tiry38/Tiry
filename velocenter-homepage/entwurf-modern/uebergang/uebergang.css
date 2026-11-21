@@ -1,0 +1,119 @@
+/* Vorlage „Übergänge“ – View Transitions (Tiry 21.11.2026) */
+#vtfx{position:fixed;inset:0;width:100vw;height:100vh;pointer-events:none;z-index:2147483000;view-transition-name:vtfx}
+html.vtx::view-transition-old(root),html.vtx::view-transition-new(root){animation:none;mix-blend-mode:normal}
+html.vtx::view-transition-group(root){animation:none}
+html.vtx::view-transition-group(vtfx),html.vtx::view-transition-old(vtfx),html.vtx::view-transition-new(vtfx){animation:none}
+html.vtx::view-transition-group(vtsw),html.vtx::view-transition-old(vtsw),html.vtx::view-transition-new(vtsw),html.vtx::view-transition-group(vttip),html.vtx::view-transition-old(vttip),html.vtx::view-transition-new(vttip){animation:none}
+html.vtx::view-transition-old(vtsw),html.vtx::view-transition-old(vttip){display:none}
+html.vtx::view-transition-group(vthdr),html.vtx::view-transition-group(vtfab){animation-duration:.42s;animation-timing-function:cubic-bezier(.4,0,.2,1)}
+html.vtx::view-transition-old(vthdr),html.vtx::view-transition-new(vthdr),html.vtx::view-transition-old(vtfab),html.vtx::view-transition-new(vtfab){animation-duration:.42s}
+/* Linse: neue Seite liegt oben (Kreis), Untergrund Graphit */
+html.vt-linse::view-transition{background:#0E1015}
+/* Lamellen: alte Seite liegt oben und bricht in 115°-Lamellen weg */
+html.vt-lamellen::view-transition-old(root){z-index:2}
+html.vt-lamellen::view-transition{background:#0E1015}
+/* Tiefe: Raum hinter den Karten – Graphit, rotes Licht, feine 115°-Riffel wie auf der Seite */
+html.vt-tiefe::view-transition{background:
+ radial-gradient(60% 55% at 78% 8%,rgba(226,35,45,.38),transparent 70%),
+ radial-gradient(55% 60% at 12% 96%,rgba(200,16,46,.26),transparent 70%),
+ repeating-linear-gradient(115deg,rgba(255,255,255,.035) 0 2px,transparent 2px 9px),
+ linear-gradient(160deg,#23262E 0%,#14161C 55%,#0B0C10 100%)}
+html.vt-tiefe::view-transition-old(root){transform-origin:50% 0%}
+html.vt-tiefe::view-transition-new(root){transform-origin:50% 0%;z-index:2}
+
+/* Umschalter */
+#ueSw{position:fixed;z-index:9000;left:calc(12px + env(safe-area-inset-left,0px));top:50%;transform:translateY(-50%);
+ display:flex;flex-direction:column;align-items:center;gap:6px;padding:6px;border-radius:999px;
+ background:linear-gradient(135deg,rgba(35,38,46,.86),rgba(16,18,24,.9));backdrop-filter:blur(16px) saturate(1.4);-webkit-backdrop-filter:blur(16px) saturate(1.4);
+ box-shadow:0 0 0 1px rgba(255,255,255,.09) inset,0 14px 40px rgba(11,12,16,.38),0 2px 8px rgba(11,12,16,.25);font-family:Outfit,Sora,system-ui,sans-serif}
+#ueSw .ue-k{writing-mode:vertical-rl;transform:rotate(180deg);padding:10px 0 6px;font-size:10px;font-weight:800;letter-spacing:.2em;text-transform:uppercase;color:rgba(255,255,255,.62)}
+#ueSw button{all:unset;cursor:pointer;position:relative;display:grid;place-items:center;width:44px;height:44px;border-radius:999px;
+ color:rgba(255,255,255,.86);font-size:14px;font-weight:700;letter-spacing:.01em;transition:background .35s,color .35s,box-shadow .35s,transform .35s cubic-bezier(.2,.9,.3,1.3)}
+#ueSw button span{position:absolute;left:calc(100% + 14px);top:50%;transform:translate(-6px,-50%);opacity:0;pointer-events:none;white-space:nowrap;display:flex;flex-direction:column;line-height:1.05;padding:9px 14px;border-radius:14px;color:#fff;
+ background:linear-gradient(135deg,rgba(35,38,46,.94),rgba(16,18,24,.96));box-shadow:0 0 0 1px rgba(255,255,255,.1) inset,0 12px 30px rgba(11,12,16,.35);transition:opacity .3s,transform .4s cubic-bezier(.16,1,.3,1)}
+#ueSw button:hover span,#ueSw button:focus-visible span{opacity:1;transform:translate(0,-50%)}
+#ueSw button small{font-size:10.5px;font-weight:600;letter-spacing:.04em;opacity:.7;margin-top:2px}
+#ueSw button b{display:grid;place-items:center;width:34px;height:34px;border-radius:50%;font-size:13px;font-weight:800;
+ background:rgba(255,255,255,.08);box-shadow:0 0 0 1px rgba(255,255,255,.12) inset;transition:background .35s,box-shadow .35s}
+#ueSw button:hover{background:rgba(255,255,255,.07)}
+#ueSw button.on b{animation:none}
+#ueSw button:active{transform:scale(.96)}
+#ueSw button:focus-visible{box-shadow:0 0 0 2px #fff,0 0 0 4px #E2232D}
+#ueSw button.on{color:#fff;background:linear-gradient(120deg,#F0414B 0%,#D4152B 45%,#8E0F1F 100%);background-size:200% 100%;animation:ueFlow 6s ease-in-out infinite;
+ box-shadow:0 0 0 1px rgba(255,255,255,.22) inset,0 8px 24px rgba(226,35,45,.45)}
+#ueSw button.on b{background:#fff;color:#C8102E;box-shadow:0 2px 8px rgba(110,11,24,.4)}
+@keyframes ueFlow{0%,100%{background-position:0% 50%}50%{background-position:100% 50%}}
+#ueTip{position:fixed;z-index:9001;left:50%;bottom:calc(84px + env(safe-area-inset-bottom,0px));transform:translate(-50%,16px);opacity:0;pointer-events:none;
+ padding:12px 20px;border-radius:22px;width:max-content;max-width:calc(100vw - 32px);text-align:center;font:600 14px/1.2 Outfit,Sora,system-ui,sans-serif;color:#fff;
+ background:linear-gradient(135deg,rgba(35,38,46,.92),rgba(16,18,24,.94));box-shadow:0 0 0 1px rgba(255,255,255,.1) inset,0 14px 36px rgba(11,12,16,.4);
+ transition:opacity .4s,transform .5s cubic-bezier(.16,1,.3,1)}
+#ueTip b{color:#FF6B73}
+#ueTip.on{opacity:1;transform:translate(-50%,0)}
+@media (max-width:1180px){
+ #ueSw{top:auto;left:50%;transform:translateX(-50%);bottom:calc(12px + env(safe-area-inset-bottom,0px));flex-direction:row;gap:4px;padding:5px}
+ #ueSw .ue-k{writing-mode:horizontal-tb;transform:none;padding:0 6px 0 10px}
+ #ueSw button span{display:none}
+ #ueTip{bottom:calc(76px + env(safe-area-inset-bottom,0px));font-size:13px}
+}
+@media (max-width:400px){#ueSw .ue-k{display:none}}
+/* Handy: über der festen Leiste (Anrufen/WhatsApp) */
+@media (max-width:720px){#ueSw{bottom:calc(86px + env(safe-area-inset-bottom,0px))}#ueTip{bottom:calc(148px + env(safe-area-inset-bottom,0px))}}
+
+/* ================= Hintergründe (Tiry 21.11.2026): ohne weiße Glasklinge am Keil, ohne die schrägen Striche ================= */
+html.bgx .erl .erg,html.bgx .strk{display:none!important}
+
+/* --- 1 · Klinge: gebürstetes Rot bleibt, Kante wie gefräst (Fase mit Lichtkante), tiefer Schatten --- */
+html.bg-klinge .erl .errw{filter:drop-shadow(-18px 16px 30px rgba(70,8,20,.30))}
+html.bg-klinge .erl .erh{background:linear-gradient(180deg,#F0505F 0%,#D21C34 18%,#A80F2A 48%,#6E0B1D 80%,#3E0710 100%)!important}
+html.bg-klinge .erl .err,html.bg-klinge .erl .erx{clip-path:polygon(7px 0,100% 0,100% calc(100% - 15px))!important}
+html.bg-klinge .erl .erx{opacity:.85}
+
+/* --- 2 · Rotglas: drei Glasscheiben hintereinander, jede mit Lichtkante, Tiefe beim Scrollen --- */
+html.bg-glas .erl .errw{filter:none}
+html.bg-glas .erl .erh,html.bg-glas .erl .err,html.bg-glas .erl .erx{clip-path:polygon(0 0,100% 0,100% 100%)!important;overflow:hidden}
+html.bg-glas .erl .erh{inset:-6% 0 auto -34%!important;height:112%;opacity:1;background:
+  linear-gradient(to top right,rgba(255,255,255,0) 50%,rgba(255,255,255,.4) calc(50% + 1px),rgba(255,255,255,0) calc(50% + 3px)),
+  linear-gradient(205deg,rgba(110,108,112,.34) 0%,rgba(134,130,130,.22) 45%,rgba(95,97,104,.08) 100%)!important}
+html.bg-glas .erl .err{inset:2% 0 auto -12%!important;height:100%;background:
+  linear-gradient(to top right,rgba(255,255,255,0) 50%,rgba(255,150,165,.75) calc(50% + 1px),rgba(255,255,255,0) calc(50% + 3px)),
+  linear-gradient(to top right,rgba(255,255,255,0) 50%,rgba(255,80,100,.18) calc(50% + 2px),rgba(255,255,255,0) calc(50% + 40px)),
+  linear-gradient(205deg,rgba(200,16,46,.86) 0%,rgba(163,15,40,.80) 50%,rgba(110,11,29,.74) 100%)!important}
+html.bg-glas .erl .erx{inset:12% 0 auto 22%!important;height:88%;opacity:1;background:
+  linear-gradient(to top right,rgba(255,255,255,0) 50%,rgba(255,170,182,.8) calc(50% + 1px),rgba(255,255,255,0) calc(50% + 3px)),
+  linear-gradient(to top right,rgba(255,255,255,0) 50%,rgba(255,90,110,.2) calc(50% + 2px),rgba(255,255,255,0) calc(50% + 36px)),
+  repeating-linear-gradient(0deg,rgba(255,255,255,0) 0,rgba(255,110,130,.08) 1px,rgba(0,0,0,.10) 2px,rgba(255,255,255,0) 3px),
+  linear-gradient(200deg,#D4152B 0%,#A30F28 40%,#6E0B1D 100%)!important;box-shadow:none}
+html.bg-glas .erl .erx::after{opacity:.9}
+@supports (animation-timeline:scroll()){
+ html.bg-glas .erl .erh{animation:glP1 linear both;animation-timeline:scroll(root);animation-range:0px 1400px}
+ html.bg-glas .erl .err{animation:glP2 linear both;animation-timeline:scroll(root);animation-range:0px 1400px}
+ html.bg-glas .erl .erx{animation:glP3 linear both;animation-timeline:scroll(root);animation-range:0px 1400px}
+}
+@keyframes glP1{to{transform:translate3d(0,90px,0)}}
+@keyframes glP2{to{transform:translate3d(0,30px,0)}}
+@keyframes glP3{to{transform:translate3d(0,-60px,0)}}
+
+/* --- 3 · Facette: Rot wie geschliffen – vier Flächen, Licht von oben links, scharfe Kanten --- */
+html.bg-facette .erl .errw{filter:drop-shadow(-16px 18px 30px rgba(40,6,14,.32))}
+html.bg-facette .erl .erh{background:#5E0A19!important;clip-path:polygon(0 0,100% 0,100% 100%)!important}
+html.bg-facette .erl .err,html.bg-facette .erl .erx,html.bg-facette .erl .errw::before,html.bg-facette .erl .errw::after{position:absolute;inset:0;content:""}
+/* F1 oben (hellste Fläche) */
+html.bg-facette .erl .err{clip-path:polygon(0 0,100% 0,72% 30%)!important;background:
+  repeating-linear-gradient(0deg,rgba(255,255,255,0) 0,rgba(255,120,140,.07) 1px,rgba(0,0,0,.07) 2px,rgba(255,255,255,0) 3px),
+  linear-gradient(165deg,#F0414B 0%,#D4152B 45%,#B5122E 100%)!important}
+/* F2 links (zur Seite gedreht), Lichtkante an der Schnittkante */
+html.bg-facette .erl .erx{opacity:1;overflow:hidden;clip-path:polygon(0 0,72% 30%,55% 55%)!important;background:
+  linear-gradient(to top right,rgba(255,255,255,0) 50%,rgba(255,215,222,.95) calc(50% + .5px),rgba(255,255,255,0) calc(50% + 4px)),
+  linear-gradient(120deg,#C8102E 0%,#A30F28 55%,#7E0C21 100%)!important}
+html.bg-facette .erl .erx::after{display:none}
+/* F3 rechts (abgewandt, dunkler) */
+html.bg-facette .erl .errw::before{clip-path:polygon(100% 0,100% 62%,72% 30%);background:linear-gradient(200deg,#8E0F1F 0%,#6E0B1D 60%,#560817 100%)}
+/* F4 unten (dunkelste Fläche), Lichtkante unten weiter */
+html.bg-facette .erl .errw::after{clip-path:polygon(55% 55%,72% 30%,100% 62%,100% 100%);background:
+  linear-gradient(to top right,rgba(255,255,255,0) 50%,rgba(255,190,200,.7) calc(50% + .5px),rgba(255,255,255,0) calc(50% + 4px)),
+  linear-gradient(185deg,#6A0B1C 0%,#4A0812 60%,#2E050B 100%)}
+/* feine Schliffkanten zwischen den Flächen */
+html.bg-facette .erl .erg{display:block!important;clip-path:none!important;inset:0 0 0 var(--g)!important;background:none!important;
+  -webkit-mask:none;mask:none;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' preserveAspectRatio='none'%3E%3Cg fill='none' stroke-width='.35' vector-effect='non-scaling-stroke'%3E%3Cpath d='M0 0L72 30L100 0' stroke='%23FFD0D6' stroke-opacity='.55' vector-effect='non-scaling-stroke' stroke-width='1'/%3E%3Cpath d='M72 30L55 55M72 30L100 62' stroke='%23FFFFFF' stroke-opacity='.28' vector-effect='non-scaling-stroke' stroke-width='1'/%3E%3C/g%3E%3C/svg%3E")!important;
+  background-size:100% 100%!important}
