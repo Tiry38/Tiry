@@ -400,3 +400,8 @@
 ## 21.11.2026 – Lichtkegel von oben im Showroom entfernt (Tiry: „sieht blöd aus“)
 - `.pl-cone` (Lichtstrahl über dem Rad im Kopf-Showroom) raus: Quelle `entwurf-modern/plus.css` + `plus_markup.py`,
   live direkt in den 10 Seiten des Web-Repos (Commit cee8107). Bodenschatten/Spiegelung bleiben. **Nicht wieder einbauen.**
+
+## 21.11.2026 – Vorschau-Seite zum Verschicken (Tiry: „für meine Mum, genauso animiert, 1/2/3 klickbar“)
+- https://tiry38.github.io/velo-center-web/vorschau-landschaften/ = Live-Seite + Vorlage „Pässe & Küste“ (hintergrund10), Umschalter links.
+- Nicht verlinkt, `noindex`; Bilder aus `../img/`, Hintergründe in `vorschau-landschaften/hg10/`. Die echte Startseite bleibt unverändert.
+- Löschen, wenn nicht mehr gebraucht (Ordner im Web-Repo entfernen).
