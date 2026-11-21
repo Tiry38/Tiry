@@ -50,6 +50,7 @@ local function styleEdit(eb)
   end
   ns.Safe(function()
     eb.cwGlass = UI.Glass(eb, { radius = 15, sheen = 0.06, line = 0.25, edgeMode = "neon", edge = 0.45, sub = -8 })
+    UI.HUD(eb, { radius = 15, grid = false, corner = false, flow = eb.cwGlass.edge, flowAlpha = 0.5, streakW = 110, streakPause = 6 })
   end)
 end
 

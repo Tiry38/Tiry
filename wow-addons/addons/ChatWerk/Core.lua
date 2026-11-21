@@ -11,7 +11,7 @@
 local ADDON, ns = ...
 ChatWerk = ns
 ns.NAME = ADDON or "ChatWerk"
-ns.VERSION = "1.1.0"
+ns.VERSION = "1.2.0"
 local VERSION = ns.VERSION
 ns.MEDIA = "Interface\\AddOns\\ChatWerk\\Media\\"
 
@@ -236,7 +236,7 @@ end
 local DEFAULTS = {
   hideBlizzard = true, classColors = true, channelStyle = "name", timestamp = "%H:%M", links = true, spam = true,
   lootPrices = true, keywords = "", ownName = true, soundWhisper = true, soundKeyword = true, history = true,
-  historyLines = 150, nameBrackets = false, mouseFade = false,
+  historyLines = 150, nameBrackets = false, mouseFade = false, font = "tech", animations = true,
 }
 
 local function initDB()
@@ -250,7 +250,7 @@ local function initDB()
   if not DB.windows or #DB.windows == 0 then
     -- Start: ein Fenster, drei Reiter
     DB.windows = {}
-    DB.v = 110
+    DB.v = 120
     local main = ns.NewWindow("Allgemein", catSet(DEFAULT_MAIN))
     main.newChannels = true
     main.chans["ch:Handel"] = false
@@ -272,6 +272,11 @@ local function initDB()
     if DB.channelStyle == "kurz" then DB.channelStyle = "name" end
     DB.active = DB.editWin or w1.id
     DB.editWin = nil
+  end
+  if (DB.v or 100) < 120 then
+    -- 1.2 "2045": neue Tech-Schrift im Chat (wer bewusst die Spielschrift hatte, behaelt sie)
+    DB.v = 120
+    if DB.font == nil or DB.font == "poppins" then DB.font = "tech" end
   end
   DB.frame = DB.frame or {}
   for k, v in pairs({ x = 16, y = 40, w = 520, h = 230, alpha = 0.62, font = 13, fade = 0, locked = false }) do
@@ -301,7 +306,7 @@ end
 local function stamp()
   local fmt = ns.DB.timestamp
   if not fmt or fmt == "" or fmt == "aus" then return "" end
-  return "|cff7f8f8a" .. date(fmt) .. "|r "
+  return "|cff4fb3a4" .. date(fmt) .. "|r "
 end
 ns.Stamp = stamp
 

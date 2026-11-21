@@ -76,8 +76,9 @@ function Config.Copy(title, text)
     copy:RegisterForDrag("LeftButton")
     copy:SetScript("OnDragStart", copy.StartMoving)
     copy:SetScript("OnDragStop", copy.StopMovingOrSizing)
-    UI.Glass(copy, { radius = 22, body = UI.GLASS.window, edgeMode = "neon", edge = 0.55, halo = 0.12 })
-    copy.title = UI.Text(copy, 15, "bold", C.text)
+    local cg = UI.Glass(copy, { radius = 22, body = UI.GLASS.window, edgeMode = "neon", edge = 0.55, halo = 0.12 })
+    UI.HUD(copy, { radius = 22, flow = cg.edge, flowAlpha = 0.55, grid = 0.04 })
+    copy.title = UI.Text(copy, 14, "display", C.text)
     copy.title:SetPoint("TOPLEFT", 22, -18)
     copy.hint = label(copy, "Strg+C kopiert die Markierung · Esc schliesst", 12)
     copy.hint:SetPoint("TOPLEFT", copy.title, "BOTTOMLEFT", 0, -4)
@@ -103,7 +104,7 @@ function Config.Copy(title, text)
     copy.edit = eb
     tinsert(UISpecialFrames, "ChatWerkCopy")
   end
-  copy.title:SetText(title)
+  copy.title:SetText(UI.Upper(title))
   copy.edit:SetText(text or "")
   copy:Show()
   copy.edit:SetFocus()
@@ -185,9 +186,9 @@ local function groupTitle(text, onAll, onNone)
   UI.SetGradV(dot, C.amber, C.teal, 1)
   local g = UI.Glow(f, C.amber, 24, 0.45, "ARTWORK")
   g:SetPoint("CENTER", dot, "CENTER")
-  local t = UI.Text(f, 16, "bold", C.text)
+  local t = UI.Text(f, 14, "display", C.text)
   t:SetPoint("LEFT", dot, "RIGHT", 9, 0)
-  t:SetText(text)
+  t:SetText(UI.Upper(text))
   local none = UI.Button(f, "Keine", "ghost", 76, 28)
   none:SetPoint("RIGHT", 0, 0)
   none:SetScript("OnClick", onNone)
@@ -376,8 +377,8 @@ local function generalPage()
   seg("Herkunft vorne in jeder Zeile", { { label = "[Handel]", value = "name" }, { label = "[2·H]", value = "kurz" },
     { label = "[2]", value = "nummer" }, { label = "[2. Handel]", value = "voll" } },
     function() return DB().channelStyle end, function(v) DB().channelStyle = v end)
-  seg("Schrift", { { label = "Poppins (modern)", value = "poppins" }, { label = "Spielschrift", value = "spiel" } },
-    function() return DB().font or "poppins" end, function(v) DB().font = v end)
+  seg("Chat-Schrift", { { label = "Tech 2045", value = "tech" }, { label = "Poppins", value = "poppins" },
+    { label = "Spielschrift", value = "spiel" } }, function() return DB().font or "tech" end, function(v) DB().font = v end)
 
   local toggles = {
     { "Klassenfarben fuer Namen", "classColors", "Spielernamen in Klassenfarbe: Chat, Beute, Emotes, Freunde, Kaeufer." },
@@ -389,13 +390,14 @@ local function generalPage()
     { "Eigenen Namen hervorheben", "ownName", "Nennt dich jemand, wird die Zeile mit ! markiert." },
     { "Namen in [Klammern]", "nameBrackets", "Wie im Blizzard-Chat: [Name] statt Name." },
     { "Verlauf speichern", "history", "Die letzten Zeilen bleiben nach /reload und Neustart." },
+    { "Animationen", "animations", "Fliessender Neon-Rand, Lauflicht, pulsierende Kugel und atmende Eckklammern." },
     { "Knoepfe immer zeigen", "alwaysHeader", "Zahnrad, Schloss, Kopieren und + sonst nur, wenn die Maus ueber dem Fenster ist." },
   }
   st:Space(6)
   st:Title("Funktionen")
   for _, t in ipairs(toggles) do
     local tg = UI.Toggle(p, t[1], function() return DB()[t[2]] == true end,
-      function(v) DB()[t[2]] = v refreshWindows() end, t[3], w)
+      function(v) DB()[t[2]] = v refreshWindows() if t[2] == "animations" then UI.UpdateAnimations() end end, t[3], w)
     st:Add(tg, tg:GetHeight(), 6)
   end
 
@@ -515,7 +517,8 @@ local function build()
   frame:RegisterForDrag("LeftButton")
   frame:SetScript("OnDragStart", frame.StartMoving)
   frame:SetScript("OnDragStop", frame.StopMovingOrSizing)
-  UI.Glass(frame, { radius = 28, body = UI.GLASS.window, edgeMode = "neon", edge = 0.6, halo = 0.16, haloPad = 30, sheen = 0.05 })
+  local glass = UI.Glass(frame, { radius = 28, body = UI.GLASS.window, edgeMode = "neon", edge = 0.6, halo = 0.16, haloPad = 30, sheen = 0.05 })
+  UI.HUD(frame, { radius = 28, flow = glass.edge, flowAlpha = 0.65, grid = 0.045, streakW = 220, streakTime = 4 })
   tinsert(UISpecialFrames, "ChatWerkConfig")
 
   -- weiche Farb-Leuchten im Hintergrund (organisch statt Kasten)
@@ -528,9 +531,9 @@ local function build()
   logo:SetTexture(ns.MEDIA .. "logo")
   logo:SetSize(46, 46)
   logo:SetPoint("TOPLEFT", 24, -18)
-  local title = UI.Text(frame, 24, "bold", C.text)
-  title:SetPoint("TOPLEFT", logo, "TOPRIGHT", 12, -1)
-  title:SetText(UI.GradText("ChatWerk"))
+  local title = UI.Text(frame, 22, "display", C.text)
+  title:SetPoint("TOPLEFT", logo, "TOPRIGHT", 12, -2)
+  title:SetText(UI.GradText("CHATWERK", C.amber, C.aqua))
   frame.sub = UI.Text(frame, 13, "regular", C.muted)
   frame.sub:SetPoint("TOPLEFT", title, "BOTTOMLEFT", 1, -3)
   local ver = UI.Chip(frame, "v" .. ns.VERSION, C.teal)

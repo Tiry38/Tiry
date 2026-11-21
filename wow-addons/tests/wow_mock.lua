@@ -304,7 +304,13 @@ function Obj.SetFont(o, file, size, flags)
   if file:match("^Interface\\AddOns\\RezeptRadar\\") or file:match("^Interface\\AddOns\\ChatWerk\\") then checkAddonFile(file, { "ttf" }) end
   o.__font = file
   o.__size = size
-  o.__weight = file:find("ExtraBold") and "bold" or (file:find("SemiBold") and "semibold" or (file:upper():find("ARIALN") and "narrow" or "regular"))
+  if file:find("Rajdhani") then
+    o.__weight = file:find("SemiBold") and "techsemi" or (file:find("Bold") and "techbold" or "tech")
+  elseif file:find("Orbitron") then
+    o.__weight = "display"
+  else
+    o.__weight = file:find("ExtraBold") and "bold" or (file:find("SemiBold") and "semibold" or (file:upper():find("ARIALN") and "narrow" or "regular"))
+  end
   o.__outline = type(flags) == "string" and flags:find("OUTLINE") and true or nil
   return true
 end

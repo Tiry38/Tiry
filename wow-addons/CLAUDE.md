@@ -83,6 +83,11 @@ blau, Einschlag. **Keine Ringe/Drehungen auch beim Mahlstrom** (Test prüft das)
   Geld-„Grund“ gegen Doppelzeilen), `Blizzard.lua` (Blizzard-Chat in unsichtbaren Rahmen, Eingabezeile, `print`-Einsammeln über
   `hooksecurefunc(ChatFrameN, "AddMessage")`: ohne 5. Argument = Add-on-Ausgabe), `Window.lua` (ein Rahmen `ChatWerkFrame` = `ns.Main`, Reiterleiste; je Reiter eigener ScrollingMessageFrame in `ns.Windows[id]`, nur der aktive `DB.active` sichtbar, `unread`-Zähler),
   `Config.lua` (Auswahlliste), `UI/Widgets.lua` (Neon-Glas aus RezeptRadar).
+- **Optik 1.2 „2045“:** `UI/Widgets.lua` – Schriften Rajdhani (regular/semibold/bold, `FONT_SCALE` 1.14) + Orbitron (`"display"`,
+  Titel in `UI.Upper`), `UI.HUD(frame, opts)` = Eckklammern `hud_corner` (skaliert mit Radius), Hex-Raster `hex` (REPEAT + TexCoord),
+  Lauflicht `streak` (Translation), fließender Rand (`flow` = Round, ein gemeinsamer OnUpdate-Treiber, 20/s, nur sichtbare).
+  `DB.animations` schaltet alles (`UI.UpdateAnimations`). Grafiken `tools/chatwerk_media.py`. Mock/Renderer kennen die Schriften
+  (Gewichte `tech`/`techsemi`/`techbold`/`display`, Zeichenbreiten aus `tools/gen_font_metrics.py`).
 - **Datenmodell 1.1:** `DB.windows` = Reiter (`id,name,cats,chans,newChannels`, Reihenfolge = Liste), `DB.frame` = Lage/Größe/Glas/Schrift/
   Ausblenden/Sperre des einen Fensters, `DB.active`. `DB.v = 110` stellt 1.0-Daten einmalig um. Kanalstil `name` = Herkunft ausgeschrieben.
 - **Geheimwerte:** CHAT_MSG-Text/Name/GUID im Chat-Lockdown nie anfassen (`issecretvalue` zuerst), nur `AddMessage` durchreichen,

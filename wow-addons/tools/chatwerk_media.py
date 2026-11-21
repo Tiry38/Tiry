@@ -114,10 +114,69 @@ def logo(size=256):
     return down(out, (size, size))
 
 
+# ---------------------------------------------------------------- 2045-HUD (1.2)
+def hud_corner(size=128, view=40.0):
+    """Neon-Eckklammer oben links: Bogen um die runde Fensterecke + auslaufende Schenkel, weicher Glow.
+    Im Spiel 40 px gross, 6 px ueber die Fensterkante hinaus (Fensterradius 16 -> Klammer-Radius 20)."""
+    k = size * mm.SS / view          # Textur-Pixel je Bildschirm-Pixel (hochaufgeloest)
+    big = size * mm.SS
+    m = Image.new("L", (big, big), 0)
+    d = ImageDraw.Draw(m)
+    c, r, lw = 22 * k, 20 * k, 1.6 * k
+    ro = r + lw / 2                  # PIL zeichnet die Bogenbreite nach innen -> aussen um lw/2 erweitern
+    d.arc((c - ro, c - ro, c + ro, c + ro), 180, 270, fill=255, width=int(round(lw)))
+    # Schenkel mit Auslauf
+    for i in range(int(c), int(big)):
+        t = (i - c) / (big - c)
+        a = int(255 * max(0.0, 1 - t) ** 1.6)
+        d.line([(2 * k - lw / 2, i), (2 * k + lw / 2, i)], fill=a)
+        d.line([(i, 2 * k - lw / 2), (i, 2 * k + lw / 2)], fill=a)
+    # kleiner Datenpunkt am Bogen
+    pr = 1.6 * k
+    px = c - r * math.cos(math.radians(45))
+    d.ellipse((px - pr, px - pr, px + pr, px + pr), fill=255)
+    glow = m.filter(ImageFilter.GaussianBlur(2.2 * k))
+    arr = np.maximum(np.array(m, np.float32), np.array(glow, np.float32) * 1.6)
+    return mm.white_from_mask(down(Image.fromarray(np.uint8(np.clip(arr, 0, 255)), "L"), (size, size)))
+
+
+def hex_tile(size=128):
+    """Kachelbares Hex-Raster (flache Waben). Kachel = 3 s x sqrt(3) s, im Spiel ueber TexCoord entzerrt."""
+    S = 4 * size
+    s = S / 3.0
+    h = math.sqrt(3) * s
+    m = Image.new("L", (S, int(round(h))), 0)
+    d = ImageDraw.Draw(m)
+    lw = max(2, int(S / 120))
+
+    def hexagon(cx, cy):
+        pts = [(cx + s * math.cos(math.radians(a)), cy + s * math.sin(math.radians(a))) for a in range(0, 360, 60)]
+        d.line(pts + [pts[0]], fill=255, width=lw, joint="curve")
+    for cx, cy in ((0, 0), (3 * s, 0), (0, h), (3 * s, h), (1.5 * s, h / 2), (1.5 * s, -h / 2), (1.5 * s, 1.5 * h),
+                   (-1.5 * s, h / 2), (4.5 * s, h / 2)):
+        hexagon(cx, cy)
+    # Knotenpunkte leuchten etwas staerker
+    m = m.resize((size, size), Image.LANCZOS)
+    return mm.white_from_mask(m)
+
+
+def streak(w=256, h=32):
+    """Lauflicht: heller Kern, zu beiden Enden und nach oben/unten weich auslaufend."""
+    y, x = np.mgrid[0:h, 0:w].astype(np.float32)
+    fx = np.exp(-((x / (w - 1) - 0.5) ** 2) / (2 * 0.16 ** 2))
+    core = np.exp(-((y / (h - 1) - 0.5) ** 2) / (2 * 0.05 ** 2))
+    halo = np.exp(-((y / (h - 1) - 0.5) ** 2) / (2 * 0.22 ** 2)) * 0.45
+    a = np.clip(fx * (core + halo), 0, 1) * 255
+    return mm.white_from_mask(Image.fromarray(np.uint8(a), "L"))
+
+
 def main():
     print("Erzeuge ChatWerk-Grafiken in", mm.MEDIA)
     save(logo(256), "logo")
     save(grip(64), "grip")
+    save(hud_corner(128), "hud_corner")
+    save(hex_tile(128), "hex")
+    save(streak(256, 32), "streak")
     for name, fn in {"chat": icon_chat, "lock": icon_lock, "unlock": icon_unlock, "copy": icon_copy,
                      "down": icon_down, "trash": icon_trash}.items():
         save(fn(), "i_" + name)

@@ -12,6 +12,8 @@ TOKEN = re.compile(r"\|c[0-9a-fA-F]{8}|\|r|\x01|[^|\x01]+|\|")
 HERE = os.path.dirname(os.path.abspath(__file__))
 ADDON = os.path.join(HERE, "..", "addons", "RezeptRadar")
 FONTS = {"regular": "Poppins-Regular.ttf", "semibold": "Poppins-SemiBold.ttf", "bold": "Poppins-ExtraBold.ttf"}
+CW_FONTS = {"tech": "Rajdhani-Medium.ttf", "techsemi": "Rajdhani-SemiBold.ttf", "techbold": "Rajdhani-Bold.ttf",
+            "display": "Orbitron-Bold.ttf"}
 SCALE = 1.5
 _tex, _font = {}, {}
 
@@ -25,7 +27,11 @@ def font(weight, size):
     if key not in _font and weight == "narrow":
         _font[key] = ImageFont.truetype(NARROW, max(6, int(round(size * SCALE))))
     if key not in _font:
-        _font[key] = ImageFont.truetype(os.path.join(ADDON, "Media", "Fonts", FONTS.get(weight, FONTS["regular"])), max(6, int(round(size * SCALE))))
+        if weight in CW_FONTS:
+            path = os.path.join(HERE, "..", "addons", "ChatWerk", "Media", "Fonts", CW_FONTS[weight])
+        else:
+            path = os.path.join(ADDON, "Media", "Fonts", FONTS.get(weight, FONTS["regular"]))
+        _font[key] = ImageFont.truetype(path, max(6, int(round(size * SCALE))))
     return _font[key]
 
 

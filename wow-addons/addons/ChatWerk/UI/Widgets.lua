@@ -1,4 +1,5 @@
--- ChatWerk – Design-System "Neon Glass" (aus RezeptRadar uebernommen): Farben, Schrift, Glasflaechen, runde Formen, Bausteine
+-- ChatWerk – Design-System "Neon Glass 2045" (Basis aus RezeptRadar): Farben, Schrift (Rajdhani/Orbitron), Glasflaechen,
+-- runde Formen, HUD (Neon-Klammern, Hex-Raster, fliessender Leuchtrand, Lauflicht), Bausteine
 local _, ns = ...
 
 local UI = {}
@@ -112,11 +113,16 @@ UI.QUALITY = {
 ----------------------------------------------------------------------------
 -- Schrift (eigene Poppins-Schrift mit sicherem Rückfall auf die Spielschrift)
 ----------------------------------------------------------------------------
+-- 2045: technische Schmalschrift Rajdhani fuer alles, Orbitron fuer Titel ("display")
 local FONT_FILES = {
-  regular = MEDIA .. "Fonts\\Poppins-Regular.ttf",
-  semibold = MEDIA .. "Fonts\\Poppins-SemiBold.ttf",
-  bold = MEDIA .. "Fonts\\Poppins-ExtraBold.ttf",
+  regular = MEDIA .. "Fonts\\Rajdhani-Medium.ttf",
+  semibold = MEDIA .. "Fonts\\Rajdhani-SemiBold.ttf",
+  bold = MEDIA .. "Fonts\\Rajdhani-Bold.ttf",
+  display = MEDIA .. "Fonts\\Orbitron-Bold.ttf",
 }
+-- Rajdhani wirkt bei gleicher Pixelgroesse kleiner als Poppins -> etwas groesser setzen (gleich gut lesbar)
+local FONT_SCALE = { regular = 1.14, semibold = 1.14, bold = 1.14, display = 1 }
+UI.FONT_FILES = FONT_FILES
 local fallbackFont
 local function gameFont()
   if fallbackFont then return fallbackFont end
@@ -127,6 +133,7 @@ end
 
 function UI.SetFont(fs, size, weight, flags)
   local file = FONT_FILES[weight or "regular"] or FONT_FILES.regular
+  size = math.floor(size * (FONT_SCALE[weight or "regular"] or 1) + 0.5)
   local ok, res = pcall(fs.SetFont, fs, file, size, flags or "")
   if not ok or res == false then
     pcall(fs.SetFont, fs, gameFont(), size, flags or "")
@@ -463,6 +470,158 @@ function Glass:SetShown(s)
   if self.halo then self.halo:SetShown(s) end
 end
 
+----------------------------------------------------------------------------
+-- 2045-HUD: Neon-Eckklammern, Hex-Raster, fliessender Leuchtrand (Farben wandern), Lauflicht oben
+-- opts: radius (Fensterradius, Klammern passen auf 16), corner (Groesse, Std. 40), grid (Alpha, false = aus),
+--       streak (false = aus), flow (Round, deren Verlauf wandert, z. B. glass.edge), flowAlpha, cornerAlpha
+----------------------------------------------------------------------------
+local flows = {}
+local flowDriver
+local FLOW = { C.amber, C.teal, C.aqua, C.teal }
+local function flowColor(t)
+  t = t % 1 * #FLOW
+  local i = math.floor(t)
+  return lerp(FLOW[i + 1], FLOW[(i + 1) % #FLOW + 1], t - i)
+end
+local function startFlow()
+  if flowDriver then return end
+  flowDriver = CreateFrame("Frame")
+  local acc = 0
+  flowDriver:SetScript("OnUpdate", function(_, el)
+    acc = acc + el
+    if acc < 0.05 then return end
+    local now = (GetTime and GetTime() or 0)
+    acc = 0
+    if not UI.AnimationsOn() then return end
+    for _, f in ipairs(flows) do
+      if f.frame:IsVisible() then
+        local t = now / f.period
+        f.round:SetGradient({ flowColor(t), flowColor(t + 0.33), flowColor(t + 0.66) }, f.alpha)
+      end
+    end
+  end)
+end
+
+function UI.AnimationsOn()
+  return not ns.DB or ns.DB.animations ~= false
+end
+
+function UI.HUD(frame, opts)
+  opts = opts or {}
+  local h = { frame = frame }
+  local radius = opts.radius or 16
+  -- Hex-Raster (kachelt, Waben bleiben bei jeder Fenstergroesse gleich gross)
+  if opts.grid ~= false then
+    local inset = math.ceil(radius * 0.4)
+    local g = frame:CreateTexture(nil, "BACKGROUND", nil, -2)
+    g:SetTexture(MEDIA .. "hex", "REPEAT", "REPEAT")
+    g:SetPoint("TOPLEFT", inset, -inset)
+    g:SetPoint("BOTTOMRIGHT", -inset, inset)
+    g:SetBlendMode("ADD")
+    g:SetVertexColor(C.teal[1], C.teal[2], C.teal[3], opts.grid or 0.045)
+    local cell = opts.cell or 11
+    local function tile()
+      local w, hh = (frame:GetWidth() or 0) - inset * 2, (frame:GetHeight() or 0) - inset * 2
+      if w > 0 and hh > 0 then g:SetTexCoord(0, w / (3 * cell), 0, hh / (1.7320508 * cell)) end
+    end
+    tile()
+    frame:HookScript("OnSizeChanged", tile)
+    h.grid = g
+  end
+  -- Neon-Eckklammern: links Neon-Gruen, rechts Aqua (wie der Hauptverlauf)
+  -- Klammer-Geometrie skaliert mit dem Fensterradius (Textur: Radius 16 -> 40 px Klammer, 6 px Abstand)
+  local scale = radius / 16
+  local cs = 40 * scale
+  local out = 6 * scale
+  local cols = { TOPLEFT = C.amber, TOPRIGHT = C.aqua, BOTTOMLEFT = C.teal, BOTTOMRIGHT = C.aqua }
+  local tcs = { TOPLEFT = { 0, 1, 0, 1 }, TOPRIGHT = { 1, 0, 0, 1 }, BOTTOMLEFT = { 0, 1, 1, 0 }, BOTTOMRIGHT = { 1, 0, 1, 0 } }
+  local sx = { TOPLEFT = -1, TOPRIGHT = 1, BOTTOMLEFT = -1, BOTTOMRIGHT = 1 }
+  local sy = { TOPLEFT = 1, TOPRIGHT = 1, BOTTOMLEFT = -1, BOTTOMRIGHT = -1 }
+  h.corners = {}
+  if opts.corner ~= false then
+    for pt, c in pairs(cols) do
+      local t = frame:CreateTexture(nil, "BORDER", nil, 6)
+      t:SetTexture(MEDIA .. "hud_corner")
+      local u = tcs[pt]
+      t:SetTexCoord(u[1], u[2], u[3], u[4])
+      t:SetSize(cs, cs)
+      t:SetPoint(pt, frame, pt, sx[pt] * out, sy[pt] * out)
+      t:SetBlendMode("ADD")
+      t:SetVertexColor(c[1], c[2], c[3], opts.cornerAlpha or 0.85)
+      h.corners[#h.corners + 1] = t
+    end
+    -- Klammern "atmen" leicht
+    for i, t in ipairs(h.corners) do
+      local ag = t:CreateAnimationGroup()
+      ag:SetLooping("BOUNCE")
+      local a = ag:CreateAnimation("Alpha")
+      a:SetFromAlpha(1)
+      a:SetToAlpha(0.45)
+      a:SetDuration(2.4)
+      a:SetStartDelay((i - 1) * 0.3)
+      a:SetSmoothing("IN_OUT")
+      UI.animations = UI.animations or {}
+      table.insert(UI.animations, ag)
+      if UI.AnimationsOn() then ag:Play() end
+    end
+  end
+  -- Lauflicht entlang der Oberkante
+  if opts.streak ~= false then
+    local holder = CreateFrame("Frame", nil, frame)
+    holder:SetPoint("TOPLEFT", 0, 0)
+    holder:SetPoint("TOPRIGHT", 0, 0)
+    holder:SetHeight(1)
+    holder:SetFrameLevel(frame:GetFrameLevel() + (opts.streakLevel or 8))
+    local st = holder:CreateTexture(nil, "OVERLAY")
+    st:SetTexture(MEDIA .. "streak")
+    st:SetSize(opts.streakW or 150, 14)
+    st:SetPoint("CENTER", holder, "LEFT", radius, 0)
+    st:SetBlendMode("ADD")
+    st:SetVertexColor(C.teal[1], C.teal[2], C.teal[3], 1)
+    st:SetAlpha(0)
+    local ag = st:CreateAnimationGroup()
+    ag:SetLooping("REPEAT")
+    local mv = ag:CreateAnimation("Translation")
+    mv:SetDuration(opts.streakTime or 3.2)
+    mv:SetStartDelay(opts.streakPause or 3)
+    mv:SetSmoothing("IN_OUT")
+    local fi = ag:CreateAnimation("Alpha")
+    fi:SetFromAlpha(0) fi:SetToAlpha(1) fi:SetDuration(0.5) fi:SetStartDelay(opts.streakPause or 3)
+    local fo = ag:CreateAnimation("Alpha")
+    fo:SetFromAlpha(1) fo:SetToAlpha(0) fo:SetDuration(0.6)
+    fo:SetStartDelay((opts.streakPause or 3) + (opts.streakTime or 3.2) - 0.6)
+    local function span()
+      local w = frame:GetWidth() or 0
+      mv:SetOffset(math.max(w - radius * 2, 0), 0)
+    end
+    span()
+    frame:HookScript("OnSizeChanged", function()
+      local playing = ag:IsPlaying()
+      if playing then ag:Stop() end
+      span()
+      if playing then ag:Play() end
+    end)
+    UI.animations = UI.animations or {}
+    table.insert(UI.animations, ag)
+    if UI.AnimationsOn() then ag:Play() end
+    h.streak, h.streakAnim = st, ag
+  end
+  -- fliessender Leuchtrand: die drei Verlaufsfarben wandern langsam um das Fenster
+  if opts.flow then
+    h.flow = { frame = frame, round = opts.flow, alpha = opts.flowAlpha or 0.7, period = opts.flowPeriod or 9 }
+    flows[#flows + 1] = h.flow
+    startFlow()
+  end
+  return h
+end
+
+-- Grossbuchstaben auch fuer Umlaute (Reiter, Titel im HUD-Stil)
+local UP = { ["ä"] = "Ä", ["ö"] = "Ö", ["ü"] = "Ü" }
+function UI.Upper(s)
+  s = tostring(s or ""):upper()
+  return (s:gsub("\195[\164\182\188]", UP))
+end
+
 -- Sanfte Endlos-Animation (Atmen/Treiben); respektiert die Einstellung "Animationen"
 function UI.Drift(region, dx, dy, duration, alphaFrom, alphaTo)
   local ag = region:CreateAnimationGroup()
@@ -484,7 +643,7 @@ function UI.Drift(region, dx, dy, duration, alphaFrom, alphaTo)
 end
 
 function UI.UpdateAnimations()
-  local on = not ns.settings or ns.settings.animations ~= false
+  local on = UI.AnimationsOn()
   for _, ag in ipairs(UI.animations or {}) do
     if on then
       if not ag:IsPlaying() then ag:Play() end
@@ -990,6 +1149,9 @@ function UI.Toggle(parent, label, getter, setter, desc, width)
     f.desc = UI.Para(f, 11, C.dim, (width or 520) - 70)
     f.desc:SetPoint("TOPLEFT", f.label, "BOTTOMLEFT", 0, -3)
     f.desc:SetText(desc)
+    -- mehrzeilige Beschreibung: Schalter waechst mit (nichts ragt heraus)
+    local need = 4 + (f.label:GetStringHeight() or 16) + 3 + (f.desc:GetStringHeight() or 14) + 4
+    if need > 54 then f:SetHeight(math.ceil(need)) end
   end
   local sw = CreateFrame("Frame", nil, f)
   sw:SetSize(46, 26)
@@ -1253,8 +1415,8 @@ end
 
 -- Abschnitts-Überschrift: Neon-Akzentpunkt + Titel
 function Stack:Title(text, size, color, gap)
-  local fs = UI.Text(self.content, size or 17, "bold", color or C.text)
-  fs:SetText(text)
+  local fs = UI.Text(self.content, size or 14, "display", color or C.text)
+  fs:SetText(UI.Upper(text))
   self:Add(fs, nil, nil, 14)
   local dot = self.content:CreateTexture(nil, "ARTWORK")
   dot:SetTexture(UI.TEX.circle)
@@ -1264,7 +1426,7 @@ function Stack:Title(text, size, color, gap)
   local glow = UI.Glow(self.content, C.amber, 22, 0.45, "ARTWORK")
   glow:SetPoint("CENTER", dot, "CENTER")
   fs.dot, fs.glow = dot, glow
-  self.y = self.y + (size or 17) + 6 + (gap or 8)
+  self.y = self.y + (size or 14) + 9 + (gap or 8)
   return fs
 end
 

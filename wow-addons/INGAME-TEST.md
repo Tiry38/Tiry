@@ -560,8 +560,13 @@ Installation: Ordner `Schlaghagel` ersetzen, `/reload` reicht (keine neuen Datei
 - [ ] Erscheint der Einschlag-Blitz bei 5 Stapeln nicht, laufen die übrigen Animationen trotzdem (Einschlag = Zusatz).
 - [ ] `/hagel ab5` + `/reload`: wieder ab dem ersten Stapel; nochmal = zurück auf 5.
 
+# Teil ChatWerk 1.2 („2045“-Optik)
+1. Fenster: Neon-Klammern an allen 4 Ecken, feines Waben-Raster, Rand wechselt langsam die Farbe, alle paar Sekunden läuft ein Lichtstreifen oben entlang, grüne Kugel links pulsiert, aktiver Reiter mit Neon-Strich darunter.
+2. Schrift im Chat gut lesbar? Sonst `/cw` → Einstellungen → „Chat-Schrift“ auf Poppins oder Spielschrift, Größe mit „Schrift“.
+3. „Animationen“ aus → Lauflicht/Puls/Farbwandern stehen still. Keine Ruckler/FPS-Verluste mit Animationen an?
+
 # Teil ChatWerk 1.1
-1. Einloggen: EIN Glas-Fenster unten links mit Reitern „Allgemein · Handel · Gilde · +“, Blizzard-Chat weg, Zeile „ChatWerk: Version 1.1.0 geladen“. (Wer 1.0 hatte: die alten Fenster sind jetzt Reiter.)
+1. Einloggen: EIN Glas-Fenster unten links mit Reitern „Allgemein · Handel · Gilde · +“, Blizzard-Chat weg, Zeile „ChatWerk: Version 1.2.0 geladen“. (Wer 1.0 hatte: die alten Fenster sind jetzt Reiter.)
 2. Reiter anklicken → genau dieser Chat steht darunter; Zahl auf anderen Reitern = ungelesene Zeilen, verschwindet beim Anklicken.
 3. Handelskanal: Zeilen beginnen mit **[Handel]**, Allgemein mit **[Allgemein]**, Gilde **[Gilde]**, Sagen **[Sagen]**.
 4. „+“ (Maus übers Fenster) oder `/cw` → „Neuer Reiter“ → Name eintippen (Enter), Arten anhaken; Reiter erscheint oben. „Nach links/rechts“ ordnet ihn um. Rechtsklick auf einen Reiter öffnet seine Seite.

@@ -13,10 +13,13 @@ local TAB_H = 22
 local Main = { tabs = {}, buttons = {}, hover = false }
 ns.Main = Main
 
+-- Chat-Schrift: "tech" (Rajdhani, 2045-Look, etwas groesser gesetzt), "poppins", "spiel"
 local function fontFile()
-  if ns.DB.font == "spiel" then return STANDARD_TEXT_FONT or "Fonts\\FRIZQT__.TTF" end
-  return MEDIA .. "Fonts\\Poppins-Regular.ttf"
+  if ns.DB.font == "spiel" then return STANDARD_TEXT_FONT or "Fonts\\FRIZQT__.TTF", 1 end
+  if ns.DB.font == "poppins" then return MEDIA .. "Fonts\\Poppins-Regular.ttf", 1 end
+  return MEDIA .. "Fonts\\Rajdhani-SemiBold.ttf", 1.15
 end
+ns.ChatFont = fontFile
 local function FD() return ns.DB.frame end
 
 ----------------------------------------------------------------------------
@@ -103,8 +106,9 @@ end
 
 function Tab:Style()
   local m, d = self.msg, FD()
-  local size = ns.Clamp(d.font or 13, 9, 24)
-  local ok = pcall(m.SetFont, m, fontFile(), size, "")
+  local file, k = fontFile()
+  local size = math.floor(ns.Clamp(d.font or 13, 9, 24) * k + 0.5)
+  local ok = pcall(m.SetFont, m, file, size, "")
   if not ok then pcall(m.SetFont, m, STANDARD_TEXT_FONT or "Fonts\\FRIZQT__.TTF", size, "") end
   m:SetShadowColor(0, 0, 0, 0.85)
   m:SetShadowOffset(1, -1)
@@ -151,7 +155,7 @@ local function tabButton(i)
   b.glow:SetPoint("CENTER", 0, -2)
   local shape = UI.PillShape(b, TAB_H, 1, true)
   b.edge, b.bg, b.gloss = shape.edge, shape.body, shape.gloss
-  b.text = UI.Text(b, 12, "semibold", C.text)
+  b.text = UI.Text(b, 12, "bold", C.text)
   b.text:SetWordWrap(false)
   -- Zaehler: kleine Neon-Pille mit dunkler Zahl
   local bd = CreateFrame("Frame", nil, b)
@@ -181,7 +185,8 @@ local function tabButton(i)
     paintTab(self)
     if GameTooltip then
       GameTooltip:SetOwner(self, "ANCHOR_TOP")
-      GameTooltip:SetText(self.name or "Chat", 1, 1, 1)
+      local d = ns.WindowById(self.id)
+      GameTooltip:SetText(d and d.name or "Chat", 1, 1, 1)
       GameTooltip:AddLine("Linksklick: anzeigen · Rechtsklick: einstellen, was hier steht · ziehen: Fenster verschieben", 0.75, 0.8, 0.78, true)
       GameTooltip:Show()
     end
@@ -212,19 +217,19 @@ end
 -- Reiter nebeneinander; reicht der Platz nicht, werden alle gleich schmal und die Namen gekuerzt
 function Main:LayoutTabs()
   local list = ns.DB.windows
-  local avail = self.frame:GetWidth() - 10 - (#self.buttons * 24 + 8) - 28
+  local avail = self.frame:GetWidth() - 28 - (#self.buttons * 24 + 8) - 28
   local gap = 4
   local wants, total = {}, 0
   for i, d in ipairs(list) do
     local b = tabButton(i)
-    b.id, b.name = d.id, d.name or "Chat"
+    b.id, b.name = d.id, UI.Upper(d.name or "Chat")
     b.text:SetText(b.name)
     local bw = b.badge:IsShown() and (b.badge:GetWidth() + 4) or 0
     wants[i] = math.ceil(b.text:GetUnboundedStringWidth()) + 26 + bw
     total = total + wants[i] + gap
   end
   local cap = (total > avail and #list > 0) and math.max(math.floor((avail - gap * #list) / #list), 40) or nil
-  local x = 8
+  local x = 26
   for i = 1, #list do
     local b = self.tabs[i]
     local bw = b.badge:IsShown() and (b.badge:GetWidth() + 4) or 0
@@ -245,6 +250,15 @@ function Main:LayoutTabs()
     b:SetPoint("LEFT", self.head, "LEFT", x, 0)
     b:Show()
     paintTab(b)
+    if b.id == ns.DB.active then
+      -- Neon-Unterstrich + Lichtpunkt unter dem aktiven Reiter
+      self.under:ClearAllPoints()
+      self.under:SetPoint("TOPLEFT", b, "BOTTOMLEFT", 10, -3)
+      self.under:SetPoint("TOPRIGHT", b, "BOTTOMRIGHT", -10, -3)
+      self.underGlow:ClearAllPoints()
+      self.underGlow:SetPoint("CENTER", self.under, "CENTER", 0, 0)
+      self.underGlow:SetWidth(w + 30)
+    end
     x = x + w + gap
   end
   for i = #list + 1, #self.tabs do self.tabs[i]:Hide() end
@@ -299,9 +313,11 @@ function Main:Apply()
   local d = FD()
   self:Place()
   local a = ns.Clamp(d.alpha or 0.62, 0, 1)
-  self.glass:SetBody({ 0.040, 0.050, 0.055, 0.96 }, { 0.070, 0.085, 0.090, 0.96 }, a)
+  self.glass:SetBody({ 0.028, 0.040, 0.046, 0.96 }, { 0.055, 0.070, 0.078, 0.96 }, a)
   self.glass:SetShown(a > 0.01)
-  self.glass:SetEdge("light", 0.05 + a * 0.28)
+  self.glass:SetEdge("neon", 0.18 + a * 0.45)
+  self.hud.flow.alpha = 0.18 + a * 0.45
+  if self.hud.grid then self.hud.grid:SetShown(a > 0.05) end
   for _, t in pairs(ns.Windows) do t:Style() end
   self.lock.icon:SetTexture(UI.Icon(d.locked and "lock" or "unlock"))
   self.grip:SetShown(not d.locked)
@@ -339,6 +355,7 @@ local function build()
   f:SetResizeBounds(MIN_W, MIN_H, MAX_W, MAX_H)
   f:EnableMouse(false)
   Main.glass = UI.Glass(f, { radius = 16, sheen = 0.035, line = 0.18, edge = 0.2 })
+  Main.hud = UI.HUD(f, { radius = 16, flow = Main.glass.edge, flowAlpha = 0.45, grid = 0.05 })
 
   -- Reiterleiste: ziehen = verschieben
   local head = CreateFrame("Frame", nil, f)
@@ -350,6 +367,39 @@ local function build()
   head:RegisterForDrag("LeftButton")
   Main.headBg = UI.Round(head, 14, "BACKGROUND", 2, 3)
   Main.headBg:SetGradient(UI.GRAD_EDGE or UI.GRAD, 0.08)
+  -- feine Neon-Linie unter der Reiterleiste
+  local sep = UI.Hairline(head, C.teal, 0.35, "ARTWORK", true)
+  sep:SetPoint("BOTTOMLEFT", head, "BOTTOMLEFT", 14, -1)
+  sep:SetPoint("BOTTOMRIGHT", head, "BOTTOMRIGHT", -14, -1)
+  -- pulsierende Status-Kugel links ("live")
+  local orb = head:CreateTexture(nil, "ARTWORK", nil, 2)
+  orb:SetTexture(UI.TEX.circle)
+  orb:SetSize(7, 7)
+  orb:SetPoint("LEFT", 12, 0)
+  UI.SetGradV(orb, C.amber, C.teal, 1)
+  local og = UI.Glow(head, C.amber, 26, 0.55, "ARTWORK")
+  og:SetPoint("CENTER", orb, "CENTER")
+  og:SetBlendMode("ADD")
+  local pulse = og:CreateAnimationGroup()
+  pulse:SetLooping("BOUNCE")
+  local pa = pulse:CreateAnimation("Alpha")
+  pa:SetFromAlpha(1) pa:SetToAlpha(0.25) pa:SetDuration(1.1) pa:SetSmoothing("IN_OUT")
+  local ps = pulse:CreateAnimation("Scale")
+  ps:SetScaleFrom(1, 1) ps:SetScaleTo(1.35, 1.35) ps:SetDuration(1.1) ps:SetSmoothing("IN_OUT")
+  UI.animations = UI.animations or {}
+  table.insert(UI.animations, pulse)
+  if UI.AnimationsOn() then pulse:Play() end
+  Main.orb = orb
+  -- Unterstrich unter dem aktiven Reiter
+  Main.under = head:CreateTexture(nil, "OVERLAY", nil, 3)
+  Main.under:SetTexture(UI.TEX.white)
+  Main.under:SetHeight(2)
+  UI.SetGradH(Main.under, C.amber, C.aqua, 1)
+  Main.underGlow = head:CreateTexture(nil, "OVERLAY", nil, 2)
+  Main.underGlow:SetTexture(MEDIA .. "streak")
+  Main.underGlow:SetHeight(14)
+  Main.underGlow:SetBlendMode("ADD")
+  Main.underGlow:SetVertexColor(C.teal[1], C.teal[2], C.teal[3], 0.9)
   head:SetScript("OnDragStart", function() if not FD().locked then f:StartMoving() end end)
   head:SetScript("OnDragStop", function() Main:StopMove() end)
   head:SetScript("OnMouseUp", function(_, button)
