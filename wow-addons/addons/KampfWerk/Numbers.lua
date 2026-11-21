@@ -132,9 +132,11 @@ function Numbers.InInstance()
   return inside and kind ~= "none" and true or false
 end
 
+-- Instanz: Freundes-Plaketten gesperrt -> eigene Heilzahlen an der Gruppenanzeige (groupHeal, Standard an),
+-- sonst Blizzards Heilzahlen
 function Numbers.OwnHeal()
   local n = N()
-  return n.own and n.heal.on and not Numbers.InInstance()
+  return n.own and n.heal.on and (not Numbers.InInstance() or n.groupHeal ~= false)
 end
 
 function Numbers.ApplyBlizzard()
@@ -143,7 +145,7 @@ function Numbers.ApplyBlizzard()
   -- Blizzard-Zahlen nur aendern, wenn Tiry den Schalter benutzt hat (sonst bleibt seine Spiel-Einstellung)
   if n.blizzDamageSet then setFirst(Numbers.CV_DAMAGE, n.hideBlizzDamage and "0" or "1") end
   if n.blizzHealSet then
-    local hide = n.hideBlizzHeal and not (n.own and Numbers.InInstance())
+    local hide = n.hideBlizzHeal and not (n.own and Numbers.InInstance() and n.groupHeal == false)
     setFirst(Numbers.CV_HEAL, hide and "0" or "1")
   end
   Numbers.ApplyFriendPlates()
@@ -268,6 +270,40 @@ local function setup(f, kind, crit)
   f.fadeOut:SetStartDelay(anim == "pop" and 0.6 or 0.8)
 end
 
+function Numbers.PlateFor(unit)
+  if not (C_NamePlate and C_NamePlate.GetNamePlateForUnit) then return nil end
+  local ok, p = pcall(C_NamePlate.GetNamePlateForUnit, unit)
+  return ok and p or nil
+end
+
+-- Gruppenanzeige zu party1-4 / raid1-40 (Blizzard_UnitFrame: CompactPartyFrameMemberN, CompactRaidGroupXMemberY,
+-- CompactRaidFrameN, PartyFrame.MemberFrameN; jeweils Feld .unit)
+local function frameShows(fr, unit)
+  return fr and fr.unit == unit and fr.IsVisible and fr:IsVisible()
+end
+function Numbers.GroupFrame(unit)
+  for i = 1, 5 do
+    local fr = _G["CompactPartyFrameMember" .. i]
+    if frameShows(fr, unit) then return fr end
+  end
+  if PartyFrame then
+    for i = 1, 4 do
+      local fr = PartyFrame["MemberFrame" .. i]
+      if frameShows(fr, unit) then return fr end
+    end
+  end
+  for g = 1, 8 do
+    for i = 1, 5 do
+      local fr = _G["CompactRaidGroup" .. g .. "Member" .. i]
+      if frameShows(fr, unit) then return fr end
+    end
+  end
+  for i = 1, 40 do
+    local fr = _G["CompactRaidFrame" .. i]
+    if frameShows(fr, unit) then return fr end
+  end
+end
+
 local function anchorFor(unit, kind)
   local plate
   if (unit == "target" or unit:match("^nameplate%d+$")) and C_NamePlate and C_NamePlate.GetNamePlateForUnit then
@@ -280,7 +316,7 @@ local function anchorFor(unit, kind)
 end
 
 -- Eine Zahl zeigen. amount darf geheim sein (nur durchgereicht).
-function Numbers.Show(unit, kind, amount, crit)
+function Numbers.Show(unit, kind, amount, crit, at)
   local n = N()
   if not n.own or not n[kind] or not n[kind].on then return end
   local f = table.remove(pool) or newText()
@@ -291,6 +327,8 @@ function Numbers.Show(unit, kind, amount, crit)
   f.text:SetText(text)
   f.prefix:SetText(kind == "heal" and "+" or "")
   local anchor, x, y = anchorFor(unit, kind)
+  if at then anchor, x, y = at, 0, 0 end
+  f:SetScale(at and 0.75 or 1)   -- an der Gruppenanzeige etwas kleiner
   f:ClearAllPoints()
   f:SetPoint("CENTER", anchor, "CENTER", x + math.random(-26, 26), y + math.random(-6, 10))
   f:SetAlpha(1)
@@ -336,9 +374,22 @@ function Numbers.OnCombat(_, unit, event, flagText, amount)
   elseif event == "HEAL" then
     -- ueber dir, deinem Ziel und jedem Freund mit Namensplakette (Freundes-Plaketten schaltet KampfWerk ein);
     -- in Instanzen zeigt Blizzard die Heilzahlen (Plaketten dort fuer Add-ons gesperrt)
-    if not Numbers.OwnHeal() then return end
-    if unit == "player" or unit == "target" or (plate and not isTarget(unit) and not isPlayer(unit)) then
+    if not Numbers.OwnHeal() or type(unit) ~= "string" then return end
+    local group = unit:match("^party%d$") or unit:match("^raid%d+$")
+    if Numbers.InInstance() then
+      -- Plaketten gesperrt: du selbst in der Mitte, Gruppenmitglieder an ihrer Gruppenanzeige
+      if unit == "player" then Numbers.Show(unit, "heal", amount, crit)
+      elseif group then
+        local fr = Numbers.GroupFrame(unit)
+        if fr then Numbers.Show(unit, "heal", amount, crit, fr) end
+      end
+      return
+    end
+    if unit == "player" then
       Numbers.Show(unit, "heal", amount, crit)
+    elseif (unit == "target" or (plate and not isTarget(unit))) and not isPlayer(unit) then
+      -- ueber der Plakette; ohne Plakette (zu weit weg) nicht irgendwo in der Mitte
+      if Numbers.PlateFor(unit) then Numbers.Show(unit, "heal", amount, crit) end
     end
   end
 end
@@ -369,8 +420,8 @@ function Numbers.Diag()
   local n = N()
   local P = ns.Print
   P("KampfWerk " .. tostring(ns.VERSION) .. " - Zahlen-Diagnose")
-  P(("eigene Zahlen: %s | Schaden: %s | Heilung: %s | Freundes-Namen: %s | Instanz: %s"):format(
-    tostring(n.own), tostring(n.damage.on), tostring(n.heal.on), tostring(n.friendPlates ~= false), tostring(Numbers.InInstance())))
+  P(("eigene Zahlen: %s | Schaden: %s | Heilung: %s | Freundes-Namen: %s | Instanz: %s | Gruppenanzeige: %s"):format(
+    tostring(n.own), tostring(n.damage.on), tostring(n.heal.on), tostring(n.friendPlates ~= false), tostring(Numbers.InInstance()), tostring(n.groupHeal ~= false)))
   local names = { Numbers.CV_DAMAGE[1], Numbers.CV_DAMAGE[2], Numbers.CV_HEAL[1], Numbers.CV_HEAL[2],
     Numbers.CV_FRIENDS, Numbers.CV_ONLYNAME, "enableFloatingCombatText", "WorldTextScale" }
   for _, name in ipairs(names) do

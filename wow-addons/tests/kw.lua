@@ -502,17 +502,38 @@ for _, ch in ipairs(UIParent.__children) do
   if ch.prefix and ch:IsShown() and select(2, ch:GetPoint(1)) == W.friendPlate then onFriend = ch end
 end
 ok(onFriend ~= nil, "Heilzahl ueber dem geheilten Freund")
--- Instanz: Plaketten gesperrt -> Blizzards Heilzahlen an, unsere schweigen
+-- Instanz (Tirys /kw diag: Instanz true, party:HEAL kommt): Plaketten gesperrt -> Heilzahl an der Gruppenanzeige
+local gf = CreateFrame("Button", "CompactPartyFrameMember2", UIParent)
+gf.unit = "party1"
 W.instance = "party"
 W.fire("PLAYER_ENTERING_WORLD", false, false)
-ok(W.cvars.floatingCombatTextCombatHealing_v2 == "1" and W.cvars.floatingCombatTextCombatDamage_v2 == "0", "Dungeon: Blizzard-Heilzahlen an, Schaden weiter eigene")
+ok(W.cvars.floatingCombatTextCombatHealing_v2 == "0" and W.cvars.floatingCombatTextCombatDamage_v2 == "0", "Dungeon: Blizzard-Zahlen bleiben aus")
+local function heals(anchor)
+  local c = 0
+  for _, ch in ipairs(UIParent.__children) do
+    if ch.prefix and ch.prefix.__text == "+" and ch:IsShown() and (not anchor or select(2, ch:GetPoint(1)) == anchor) then c = c + 1 end
+  end
+  return c
+end
 ns.Numbers.Clear()
+W.fire("UNIT_COMBAT", "party1", "HEAL", "", SECRET, 1)
+ok(heals(gf) == 1, "Dungeon: Heilzahl am Gruppenfenster des Freundes")
+W.fire("UNIT_COMBAT", "softfriend", "HEAL", "", SECRET, 1)
+W.fire("UNIT_COMBAT", "target", "HEAL", "", SECRET, 1)
+ok(heals() == 1, "Dungeon: keine Doppel ueber Ziel/softfriend")
 W.fire("UNIT_COMBAT", "player", "HEAL", "", SECRET, 1)
-local act = 0
-for _, ch in ipairs(UIParent.__children) do if ch.prefix and ch.prefix.__text == "+" and ch:IsShown() then act = act + 1 end end
-ok(act == 0, "Dungeon: keine doppelten Heilzahlen")
+ok(heals() == 2, "Dungeon: Heilung auf dich")
+DB.numbers.groupHeal = false
+ns.Numbers.ApplyBlizzard()
+ns.Numbers.Clear()
+W.fire("UNIT_COMBAT", "party1", "HEAL", "", SECRET, 1)
+ok(W.cvars.floatingCombatTextCombatHealing_v2 == "1" and heals() == 0, "Gruppenanzeige aus: Blizzards Heilzahlen statt eigener")
+DB.numbers.groupHeal = true
 W.instance = "none"
 W.fire("PLAYER_ENTERING_WORLD", false, false)
+ns.Numbers.Clear()
+W.fire("UNIT_COMBAT", "party1", "HEAL", "", SECRET, 1)
+ok(heals() == 0, "draussen: party-Ereignis nicht doppelt (Plakette zeigt es)")
 ok(W.cvars.floatingCombatTextCombatHealing_v2 == "0", "draussen: wieder eigene Heilzahlen")
 -- Ausschalten gibt Blizzards Zahlen + alte Plaketten-Werte zurueck
 ns.Numbers.SetOwn(false)

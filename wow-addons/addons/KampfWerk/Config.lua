@@ -418,8 +418,13 @@ local function numbersPage()
     local fp = UI.Toggle(p, "Heilzahlen ueber Freunden", function() return n.friendPlates ~= false end,
       function(v) n.friendPlates = v Numbers.ApplyBlizzard() end,
       "Schaltet die Namen ueber Mitspielern ein (nur Name) - nur dort kann KampfWerk Zahlen zeigen. "
-      .. "In Dungeons/Schlachtzuegen sperrt WoW das, dort bleiben Blizzards Heilzahlen.", w)
+      .. "Draussen erscheint die Zahl dann ueber dem Freund.", w)
     st:Add(fp, fp:GetHeight(), 12)
+    local gh = UI.Toggle(p, "Im Dungeon an der Gruppenanzeige", function() return n.groupHeal ~= false end,
+      function(v) n.groupHeal = v Numbers.ApplyBlizzard() end,
+      "In Dungeons/Schlachtzuegen sperrt WoW die Namen ueber Mitspielern fuer Add-ons. Dann erscheint die Heilzahl "
+      .. "an seinem Gruppenfenster (eigene Schrift). Aus = dort Blizzards Heilzahlen.", w)
+    st:Add(gh, gh:GetHeight(), 12)
   end
 
   -- Vorschau-Band

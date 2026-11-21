@@ -617,3 +617,7 @@ Installation: Ordner `Schlaghagel` ersetzen, `/reload` reicht (keine neuen Datei
 
 # KampfWerk 1.3.3
 1. Einloggen, einmal Gegner schlagen und dich/einen Freund heilen, dann `/kw diag` → Screenshot vom Chat an Claude.
+
+# KampfWerk 1.3.4
+1. Im Dungeon Mitspieler heilen: Heilzahl in deiner Schrift am Gruppenfenster des Freundes, keine grüne Blizzard-Zahl mehr?
+2. Draußen in der Welt einen Mitspieler heilen: Zahl über seinem Namen?
