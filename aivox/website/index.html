@@ -42,20 +42,37 @@
 <!-- ================= BEGRÜSSUNG ================= -->
 <div class="intro" role="dialog" aria-modal="true" aria-labelledby="intro-title">
   <canvas class="intro-fx" aria-hidden="true"></canvas>
-  <canvas class="plasma intro-plasma" data-size="intro" aria-hidden="true"></canvas>
+  <div class="intro-grid" aria-hidden="true"></div>
+  <span class="hud-corner tl" aria-hidden="true"></span><span class="hud-corner tr" aria-hidden="true"></span><span class="hud-corner bl" aria-hidden="true"></span><span class="hud-corner br" aria-hidden="true"></span>
   <div class="intro-hud">
-    <span>AIVOX OS · 65.0</span>
+    <span>AIVOX OS · 2300</span>
     <span class="hud-r"><span class="hud-dot" aria-hidden="true"></span><span class="js-clock">--:--:--</span></span>
   </div>
   <ol class="boot-log" aria-hidden="true"></ol>
+  <ul class="hud-data" aria-hidden="true">
+    <li>SIGNAL<b class="js-d1">100 %</b></li>
+    <li>LATENZ<b class="js-d2">0,18 s</b></li>
+    <li>STIMME<b>LEDA · HD</b></li>
+    <li>KANAL<b>GESICHERT</b></li>
+  </ul>
   <div class="intro-core">
-    <p class="intro-kicker js-greet">Willkommen</p>
     <h1 id="intro-title" class="vh">AIVOX</h1>
-    <div class="intro-logo-space" aria-hidden="true"></div>
-    <p class="intro-line">Die Stimme deiner Werkstatt.</p>
-    <button class="intro-tap js-enter" type="button" aria-label="AIVOX starten"><span class="tap-ring" aria-hidden="true"></span><span class="tap-txt">Tippen, um AIVOX zu hören</span></button>
+    <div class="intro-stage">
+      <div class="holo" aria-hidden="true"><svg viewBox="0 0 400 400"><defs><linearGradient id="holoG" x1="0" x2="1"><stop offset="0" stop-color="#2f8cff"/><stop offset=".45" stop-color="#7fd4ff"/><stop offset=".6" stop-color="#ffffff"/><stop offset=".8" stop-color="#ffb340"/><stop offset="1" stop-color="#ff4a24"/></linearGradient></defs>
+      <g class="r1"><circle cx="200" cy="200" r="196" fill="none" stroke="url(#holoG)" stroke-opacity=".55" stroke-width="1" stroke-dasharray="1 5"/></g>
+      <g class="r2"><circle cx="200" cy="200" r="182" fill="none" stroke="url(#holoG)" stroke-opacity=".7" stroke-width="1.6" stroke-dasharray="140 30 18 30 60 40"/></g>
+      <g class="r3"><circle cx="200" cy="200" r="166" fill="none" stroke="#7fd4ff" stroke-opacity=".16" stroke-width="10" stroke-dasharray="2 6"/></g>
+      <g class="r4"><circle cx="200" cy="200" r="150" fill="none" stroke="#ffb340" stroke-opacity=".5" stroke-width="1" stroke-dasharray="40 14 4 14"/><circle cx="200" cy="50" r="3" fill="#fff"/></g>
+    </svg></div>
+      <div class="flare" aria-hidden="true"></div>
+      <div class="intro-logo-space" aria-hidden="true"></div>
+    </div>
+    <canvas class="plasma intro-plasma" data-size="intro" aria-hidden="true"></canvas>
+    <p class="intro-line">Die Stimme deiner Werkstatt</p>
     <p class="intro-cap" aria-live="polite"></p>
   </div>
+  <div class="hud-spec" aria-hidden="true"></div>
+  <button class="intro-sound js-sound" type="button" hidden>TON EINSCHALTEN</button>
   <button class="intro-skip js-skip" type="button">Überspringen</button>
 </div>
 

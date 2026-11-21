@@ -86,7 +86,7 @@
   const readLevel = (t) => {
     let target = 0; const bands = [0, 0, 0, 0, 0, 0];
     if (level.speaking) {
-      if (A.analyser) {
+      if (A.analyser && !level.direct) {
         A.analyser.getByteTimeDomainData(A.wave);
         let sum = 0; for (let i = 0; i < A.wave.length; i++) { const d = (A.wave[i] - 128) / 128; sum += d * d; }
         target = Math.min(1, Math.sqrt(sum / A.wave.length) * 5);
@@ -264,7 +264,7 @@
   addEventListener('resize', () => plasmas.forEach((p) => p.resize()));
 
   /* ===================== Partikel-Schriftzug (Begrüßung) ===================== */
-  const LOGO_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 100"><g fill="none" stroke="#fff" stroke-width="8" stroke-linecap="square"><path d="M4 96 L42 6 L80 96"/><path d="M114 6 V96"/><path d="M148 6 L188 96 L228 6"/><path d="M287.4 9.4 A44 44 0 1 0 312.6 9.4"/><path d="M362 6 L392 46 M410 54 L440 96 M440 6 L410 46 M392 54 L362 96"/></g><g fill="#fff"><circle cx="300" cy="51" r="7"/><circle cx="401" cy="50" r="4"/><rect x="296" y="0" width="8" height="22" rx="2"/></g></svg>`;
+  const LOGO_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 444 100"><g fill="none" stroke="#fff" stroke-width="8" stroke-linecap="square"><path d="M4 96 L42 6 L80 96"/><path d="M114 6 V96"/><path d="M148 6 L188 96 L228 6"/><path d="M287.4 9.4 A44 44 0 1 0 312.6 9.4"/><path d="M362 6 L392 46 M410 54 L440 96 M440 6 L410 46 M392 54 L362 96"/></g><g fill="#fff"><circle cx="300" cy="51" r="7"/><circle cx="401" cy="50" r="4"/><rect x="296" y="0" width="8" height="22" rx="2"/></g></svg>`;
   const FX = {
     c: $('.intro-fx'), g: null, parts: [], dust: [], state: 'off', t0: 0, ring: -1, wave: -1, flash: 0, ready: false,
     init() {
@@ -280,12 +280,12 @@
       const box = $('.intro-logo-space').getBoundingClientRect(), self = this;
       const img = new Image();
       img.onload = () => {
-        const W = Math.max(200, Math.round(box.width)), H = Math.round(W / 5.2);
+        const W = Math.max(200, Math.round(box.width)), H = Math.round(W / 4.44);
         const oc = document.createElement('canvas'); oc.width = W; oc.height = H;
         const og = oc.getContext('2d'); og.drawImage(img, 0, 0, W, H);
-        const data = og.getImageData(0, 0, W, H).data, step = Math.max(2, Math.round(W / 210)), pts = [];
+        const data = og.getImageData(0, 0, W, H).data, step = Math.max(2, Math.round(W / 330)), pts = [];
         for (let y = 0; y < H; y += step) for (let x = 0; x < W; x += step) if (data[(y * W + x) * 4 + 3] > 120) pts.push([x, y]);
-        const max = 2600; while (pts.length > max) pts.splice((Math.random() * pts.length) | 0, 1);
+        const max = 5200; while (pts.length > max) pts.splice((Math.random() * pts.length) | 0, 1);
         const ox = box.left + (box.width - W) / 2, oy = box.top + (box.height - H) / 2;
         self.parts = pts.map(([x, y]) => {
           const a = Math.random() * Math.PI * 2, r = Math.max(self.w, self.h) * (0.6 + Math.random() * 0.5);
@@ -313,6 +313,22 @@
         rg.addColorStop(0, `rgba(${c[0]},${c[1]},${c[2]},${0.05 + 0.03 * breathe + level.v * 0.05})`); rg.addColorStop(1, 'rgba(0,0,0,0)');
         g.fillStyle = rg; g.fillRect(0, 0, w, h);
       });
+      // Hyperraum-Sprung: Sterne rasen auf den Betrachter zu und bremsen ab
+      if (!this.stars) this.stars = Array.from({ length: 560 }, () => ({ x: Math.random() * 2 - 1, y: Math.random() * 2 - 1, z: Math.random(), c: specAt(Math.random()) }));
+      {
+        const sp = reduce ? 0.0008 : (el < 1.8 ? 0.05 * (1 - el / 1.8) ** 2 : 0) + 0.0016 + level.v * 0.004;
+        const cx0 = w / 2, cy0 = h / 2, f = Math.max(w, h) * 0.32;
+        g.lineCap = 'round';
+        for (const s of this.stars) {
+          s.z -= sp;
+          if (s.z <= 0.03) { s.z = 1; s.x = Math.random() * 2 - 1; s.y = Math.random() * 2 - 1; continue; }
+          const x1 = cx0 + (s.x / s.z) * f, y1 = cy0 + (s.y / s.z) * f, zb = s.z + sp * 7, x0 = cx0 + (s.x / zb) * f, y0 = cy0 + (s.y / zb) * f;
+          if (x1 < -50 || x1 > w + 50 || y1 < -50 || y1 > h + 50) { s.z = 1; continue; }
+          const k = 1 - s.z;
+          g.globalAlpha = Math.min(1, k * 1.3); g.strokeStyle = `rgb(${s.c[0] | 0},${s.c[1] | 0},${s.c[2] | 0})`; g.lineWidth = 0.4 + k * 2.2;
+          g.beginPath(); g.moveTo(x0, y0); g.lineTo(x1, y1); g.stroke();
+        }
+      }
       // Sternenstaub
       for (const s of this.dust) {
         s.y -= 0.0004 * (0.3 + s.z); if (s.y < 0) s.y = 1;
@@ -340,7 +356,7 @@
         g.fillRect(p.x + jx, p.y + jy, size, size);
       }
       // Lichtblitz und Schockwelle nach dem Zusammensetzen
-      if (this.state === 'assemble' && el > 1.9 && this.ring < 0) { this.ring = now; this.flash = 1; }
+      if (this.state === 'assemble' && el > 1.9 && this.ring < 0) { this.ring = now; this.flash = 1; this.wave = now; $('.intro').classList.add('lock'); SFX.zap(); SFX.tone(70, 1.2, 'sine', 0.08, 38); }
       if (this.ring > 0) {
         const re = (now - this.ring) / 1400;
         if (re < 1) {
@@ -557,7 +573,7 @@
   const intro = $('.intro'), cap = $('.intro-cap'), greetEl = $('.js-greet'), bootLog = $('.boot-log');
   const hour = new Date().getHours();
   const greet = hour < 11 ? ['Guten Morgen', 'g-morgen'] : hour < 18 ? ['Guten Tag', 'g-tag'] : ['Guten Abend', 'g-abend'];
-  greetEl.textContent = greet[0];
+  if (greetEl) greetEl.textContent = greet[0];
   const BOOT = ['Stromkreis prüfen', 'Stimme laden', 'Werkstattwissen laden', 'Leitung sichern'];
   const runBoot = () => {
     bootLog.textContent = '';
@@ -572,26 +588,65 @@
     A.els.forEach((a) => a.pause()); level.speaking = false; level.who = 'idle';
     store.set('aivox-intro', '1'); FX.explode(); SFX.whoosh();
     intro.classList.add('leaving'); document.body.classList.remove('booting');
-    setTimeout(() => { intro.hidden = true; intro.classList.remove('leaving', 'playing'); FX.state = 'off'; show(true); decode($('#t-start')); }, reduce ? 50 : 1200);
+    setTimeout(() => { intro.hidden = true; intro.classList.remove('leaving', 'playing', 'lock', 'booted'); FX.state = 'off'; show(true); decode($('#t-start')); }, reduce ? 50 : 1200);
   };
   const openIntro = () => {
     introDone = false; started = false; intro.hidden = false; intro.classList.remove('playing', 'leaving'); cap.textContent = '';
     document.body.classList.add('booting'); introPlasma.span = 0; introPlasma.spanTarget = 0.12; introPlasma.resize();
+    intro.classList.remove('lock', 'booted'); soundBtn.hidden = true;
     FX.resize(); FX.ring = -1; FX.wave = -1; FX.flash = 0; FX.build(); runBoot();
+    requestAnimationFrame(() => intro.classList.add('booted'));
+    setTimeout(startIntro, 350);
   };
   let started = false;
+  const soundBtn = $('.js-sound');
+  // Spricht die Begrüßung. Blockiert der Browser den Ton, startet sie mit der ersten Berührung/Taste – ohne extra Knopf.
+  const speakIntro = (a, text) => new Promise((resolve) => {
+    let done = false, typed = false;
+    const end = () => { if (done) return; done = true; cleanup(); resolve(); };
+    const go = () => { level.speaking = true; soundBtn.hidden = true; if (!typed) { typed = true; typeOut(cap, text, ((a.duration || 7) * 1000) * 0.92); } };
+    const onGesture = (e) => {
+      if (e.target.closest && e.target.closest('.js-skip')) return;
+      ensureCtx(); setSfx(true);
+      a.play().then(go).catch(end);
+    };
+    const evs = ['pointerdown', 'keydown', 'touchend'];
+    let tm = 0;
+    const cleanup = () => { evs.forEach((t) => removeEventListener(t, onGesture, true)); clearTimeout(tm); a.removeEventListener('ended', end); };
+    a.addEventListener('ended', end);
+    a.play().then(go).catch(() => {
+      soundBtn.hidden = false; typed = true; typeOut(cap, text, 6500);
+      evs.forEach((t) => addEventListener(t, onGesture, true));
+      tm = setTimeout(end, 14000);
+    });
+  });
   const startIntro = async () => {
     if (started || introDone) return; started = true;
     ensureCtx(); setSfx(true); SFX.boot();
-    intro.classList.add('playing'); FX.wave = performance.now(); introPlasma.spanTarget = 1;
-    await new Promise((r) => setTimeout(r, 1500));
+    intro.classList.add('playing'); introPlasma.spanTarget = 1;
+    await new Promise((r) => setTimeout(r, reduce ? 300 : 2400));
     if (introDone) return;
-    FX.flash = 1; level.who = 'ki';
-    cap.textContent = `${greet[0]}. Willkommen bei AIVOX. Ich bin die künstliche Intelligenz, die für deine Werkstatt ans Telefon geht. Tag und Nacht.`;
-    await say('audio/' + greet[1] + '.mp3');
-    level.speaking = false;
-    if (!introDone) setTimeout(leaveIntro, 700);
+    FX.flash = 1; FX.wave = performance.now(); level.who = 'ki';
+    const src = 'audio/' + greet[1] + '.mp3', running = !!(A.ctx && A.ctx.state === 'running');
+    const a = running ? audioEl(src) : new Audio(src);
+    level.direct = !running; a.currentTime = 0;
+    await speakIntro(a, `${greet[0]}. Willkommen bei AIVOX. Ich bin die künstliche Intelligenz, die für deine Werkstatt ans Telefon geht. Tag und Nacht.`);
+    level.speaking = false; level.direct = false; soundBtn.hidden = true;
+    if (!introDone) setTimeout(leaveIntro, 900);
   };
+  /* HUD: Spektrum + Messwerte */
+  const specWrap = $('.hud-spec'), specBars = [];
+  for (let i = 0; i < 44; i++) { const b = document.createElement('i'); specWrap.appendChild(b); specBars.push(b); }
+  const drawHud = (t) => {
+    const n = specBars.length;
+    for (let i = 0; i < n; i++) {
+      const m = Math.abs(i - n / 2) / (n / 2), band = level.bands[Math.min(5, Math.floor(m * 6))] || 0;
+      const v = 3 + (band * 26 + level.v * 12) * (0.55 + 0.45 * Math.sin(t * 9 + i * 0.7)) + 2.5 * (1 + Math.sin(t * 2 + i * 0.4));
+      specBars[i].style.height = Math.min(34, v).toFixed(1) + 'px';
+    }
+  };
+  const d1 = $('.js-d1'), d2 = $('.js-d2');
+  setInterval(() => { if (intro.hidden) return; d1.textContent = (97 + Math.random() * 3).toFixed(1).replace('.', ',') + ' %'; d2.textContent = '0,' + (14 + Math.floor(Math.random() * 9)) + ' s'; }, 160);
   intro.addEventListener('pointerdown', (e) => { if (!e.target.closest('.js-skip')) startIntro(); });
   addEventListener('keydown', (e) => { if (!intro.hidden && e.key !== 'Escape' && e.key !== 'Tab') startIntro(); });
   $('.js-skip').addEventListener('click', leaveIntro);
@@ -857,6 +912,6 @@ gl_FragColor=vec4(col*glow+vec3(stars*.25),glow+stars*.2);}`;
   show(true);
   if (store.get('aivox-intro') === '1') { intro.hidden = true; document.body.classList.remove('booting'); }
   else openIntro();
-  const loop = (now) => { const t = now / 1000; readLevel(t); if (!intro.hidden) FX.draw(now); plasmas.forEach((p) => p.draw(t)); if (sky) sky.draw(t); if (core) core.draw(t); if (trail) trail.draw(); if (net) net.draw(t); requestAnimationFrame(loop); };
+  const loop = (now) => { const t = now / 1000; readLevel(t); if (!intro.hidden) { FX.draw(now); drawHud(t); } plasmas.forEach((p) => p.draw(t)); if (sky) sky.draw(t); if (core) core.draw(t); if (trail) trail.draw(); if (net) net.draw(t); requestAnimationFrame(loop); };
   requestAnimationFrame(loop);
 })();

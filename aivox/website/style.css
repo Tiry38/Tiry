@@ -665,3 +665,84 @@ main { transition: transform .6s cubic-bezier(.2,.8,.2,1), filter .6s, opacity 1
 .calm-steps span { color: var(--steel); font-size: .88rem; }
 
 .calm-steps li { align-content: start; }
+
+/* =================== v15: Begrüßung 2300 =================== */
+.intro { place-items: center; }
+.intro-core { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0; }
+.intro-stage { position: relative; display: grid; place-items: center; width: min(92vw, 1180px); }
+.intro-logo-space { width: 100%; margin: 0; }
+.intro .intro-plasma { position: relative; inset: auto; top: auto; left: auto; translate: none; width: 100vw; height: clamp(90px, 15vh, 160px); margin: clamp(.4rem, 2vh, 1.4rem) 0 0; flex: none; }
+.intro-line { margin: .2rem 0 0; font: 400 clamp(.7rem, 1.4vw, .92rem)/1.4 var(--wide); letter-spacing: .5em; padding-left: .5em; text-transform: uppercase; color: var(--steel); animation-delay: 2.1s; }
+.intro.playing .intro-core .intro-line { opacity: 1 !important; animation: none; }
+.intro-cap { min-height: 3.2em; max-width: 40rem; margin: 1.4rem 0 0; font-size: clamp(1rem, 1.8vw, 1.2rem); line-height: 1.6; color: var(--ink); text-shadow: 0 0 24px rgba(127,212,255,.35); }
+@keyframes introOut { 0% { clip-path: inset(0 0 0 0); } 55% { clip-path: inset(49.6% 0 49.6% 0); opacity: 1; } 100% { clip-path: inset(50% 50% 50% 50%); opacity: 0; } }
+
+/* Holo-Ringe hinter dem Schriftzug */
+.holo { position: absolute; left: 50%; top: 50%; width: min(78vh, 74vw); aspect-ratio: 1; translate: -50% -50%; pointer-events: none; opacity: 0; scale: .6; transition: opacity 1.2s ease, scale 1.6s cubic-bezier(.2,.8,.2,1); }
+.intro.lock .holo { opacity: 1; scale: 1; }
+.holo svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+.holo .r1 { animation: spin 38s linear infinite; }
+.holo .r2 { animation: spin 22s linear infinite reverse; }
+.holo .r3 { animation: spin 60s linear infinite; }
+.holo .r4 { animation: spin 14s linear infinite reverse; }
+.holo g { transform-origin: 50% 50%; transform-box: view-box; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* Projektor-Scheibe + Lichtkegel */
+.emitter { position: absolute; left: 50%; top: 100%; width: min(70vw, 820px); aspect-ratio: 1; translate: -50% -50%; transform: perspective(900px) rotateX(76deg); pointer-events: none; opacity: 0; transition: opacity 1s ease .3s; }
+.intro.lock .emitter { opacity: .9; }
+.emitter::before, .emitter::after { content: ""; position: absolute; inset: 0; border-radius: 50%; }
+.emitter::before { background: conic-gradient(from 0deg, transparent 0 8%, rgba(127,212,255,.7) 10%, transparent 14% 40%, rgba(255,179,64,.6) 44%, transparent 48% 70%, rgba(255,74,36,.6) 74%, transparent 78%); -webkit-mask: radial-gradient(circle, transparent 46%, #000 47% 49%, transparent 50% 62%, #000 63% 64%, transparent 65%); mask: radial-gradient(circle, transparent 46%, #000 47% 49%, transparent 50% 62%, #000 63% 64%, transparent 65%); animation: spin 9s linear infinite; }
+.emitter::after { background: radial-gradient(circle, rgba(127,212,255,.25), rgba(255,179,64,.08) 40%, transparent 66%); }
+.beam { position: absolute; left: 50%; bottom: 0; width: min(64vw, 760px); height: 260%; translate: -50% 0; pointer-events: none; opacity: 0; transition: opacity 1.2s ease .4s;
+  background: linear-gradient(to top, rgba(127,212,255,.16), rgba(255,179,64,.05) 45%, transparent 80%); clip-path: polygon(38% 100%, 62% 100%, 100% 0, 0 0); filter: blur(6px); mix-blend-mode: screen; }
+.intro.lock .beam { opacity: 1; animation: beamFlick 4s ease-in-out infinite; }
+@keyframes beamFlick { 50% { opacity: .7; } 52% { opacity: 1; } 54% { opacity: .8; } }
+
+/* Anamorpher Lichtstreifen beim Einrasten */
+.flare { position: absolute; left: 50%; top: 50%; width: 140vw; height: 2px; translate: -50% -50%; pointer-events: none; opacity: 0;
+  background: linear-gradient(90deg, transparent, rgba(47,140,255,.6) 25%, #fff 50%, rgba(255,179,64,.6) 75%, transparent); box-shadow: 0 0 30px 6px rgba(127,212,255,.45); }
+.flare::after { content: ""; position: absolute; left: 50%; top: 50%; width: 220px; height: 220px; translate: -50% -50%; border-radius: 50%; background: radial-gradient(circle, rgba(255,255,255,.9), rgba(127,212,255,.25) 30%, transparent 65%); }
+.intro.lock .flare { animation: flare 1.6s cubic-bezier(.2,.8,.2,1) forwards; }
+@keyframes flare { 0% { opacity: 0; scale: .2 1; } 12% { opacity: 1; scale: 1 1; } 100% { opacity: 0; scale: 1.2 .4; } }
+
+/* Chromatische Aberration beim Einrasten */
+.intro.lock .intro-fx { animation: chroma .5s steps(5) 1; }
+@keyframes chroma {
+  0% { filter: drop-shadow(6px 0 rgba(255,0,70,.8)) drop-shadow(-6px 0 rgba(0,200,255,.8)); translate: 3px 0; }
+  40% { filter: drop-shadow(-4px 0 rgba(255,0,70,.7)) drop-shadow(4px 0 rgba(0,200,255,.7)); translate: -2px 1px; }
+  100% { filter: none; translate: 0 0; } }
+
+/* Perspektiv-Gitter am Boden */
+.intro-grid { position: absolute; left: -50%; right: -50%; bottom: 0; height: 46vh; pointer-events: none; perspective: 420px; opacity: 0; transition: opacity 2s ease; -webkit-mask: linear-gradient(to top, #000 10%, transparent 90%); mask: linear-gradient(to top, #000 10%, transparent 90%); }
+.intro-grid::before { content: ""; position: absolute; inset: -60% 0 0; transform: rotateX(70deg); transform-origin: 50% 100%;
+  background-image: linear-gradient(rgba(127,212,255,.35) 1px, transparent 1px), linear-gradient(90deg, rgba(255,179,64,.28) 1px, transparent 1px);
+  background-size: 64px 64px; animation: gridRun 1.6s linear infinite; }
+@keyframes gridRun { to { background-position: 0 64px; } }
+.intro.booted .intro-grid { opacity: .55; }
+
+/* HUD: Ecken, Datenleiste, Spektrum */
+.hud-corner { position: absolute; width: clamp(28px, 4vw, 54px); aspect-ratio: 1; border: 1px solid rgba(127,212,255,.5); pointer-events: none; opacity: 0; transition: opacity .6s ease, inset .9s cubic-bezier(.2,.8,.2,1); }
+.hud-corner.tl { left: 2.2vw; top: 3.2rem; border-right: 0; border-bottom: 0; }
+.hud-corner.tr { right: 2.2vw; top: 3.2rem; border-left: 0; border-bottom: 0; border-color: rgba(255,179,64,.55); }
+.hud-corner.bl { left: 2.2vw; bottom: 3.6rem; border-right: 0; border-top: 0; }
+.hud-corner.br { right: 2.2vw; bottom: 3.6rem; border-left: 0; border-top: 0; border-color: rgba(255,74,36,.55); }
+.intro.booted .hud-corner { opacity: 1; }
+.hud-data { position: absolute; right: calc(2.2vw + 1rem); top: 50%; translate: 0 -50%; margin: 0; padding: 0; list-style: none; display: grid; gap: .7rem; text-align: right; font: 400 .6rem/1.3 var(--wide); letter-spacing: .22em; color: var(--dim); opacity: 0; transition: opacity 1s ease .4s; }
+.hud-data b { display: block; font: 500 .82rem/1.2 var(--mono); letter-spacing: .06em; color: var(--ink); }
+.intro.lock .hud-data { opacity: 1; }
+.hud-spec { position: absolute; left: 50%; bottom: calc(1.4rem + env(safe-area-inset-bottom, 0px)); translate: -50% 0; display: flex; align-items: flex-end; gap: 3px; height: 34px; opacity: 0; transition: opacity 1s ease; }
+.hud-spec i { display: block; width: 3px; height: 4px; border-radius: 2px; background: var(--spectrum); background-size: 100% 34px; background-position: bottom; }
+.intro.lock .hud-spec { opacity: 1; }
+.intro-sound { position: absolute; left: 50%; bottom: calc(4.6rem + env(safe-area-inset-bottom, 0px)); translate: -50% 0; min-height: 44px; padding: 0 1.4rem; border-radius: 999px; border: 1px solid rgba(127,212,255,.45); background: rgba(2,8,14,.6); backdrop-filter: blur(10px); color: var(--ink); font: 400 .66rem/1 var(--wide); letter-spacing: .24em; cursor: pointer; animation: tapPulse 2.2s ease-in-out infinite; }
+@media (max-width: 760px) { .hud-data, .hud-corner { display: none; } .holo { width: 96vw; } }
+@media (prefers-reduced-motion: reduce) { .holo g, .emitter::before, .intro-grid::before, .beam, .intro.lock .intro-fx, .intro.lock .flare { animation: none !important; } }
+
+.intro { cursor: default; }
+
+.intro-core { padding: 0; }
+.intro-logo-space { aspect-ratio: 444 / 100; }
+.intro-stage { width: min(90vw, 1080px); }
+.hud-data { top: auto; bottom: 6.2rem; translate: none; }
+.intro-sound { white-space: nowrap; }
+@media (max-width: 760px) { .intro-line { letter-spacing: .28em; padding-left: .28em; } .intro-cap { padding: 0 1.2rem; } }
