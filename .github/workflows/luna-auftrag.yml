@@ -62,6 +62,9 @@ jobs:
         with:
           ref: ${{ steps.auftrag.outputs.branch }}
           fetch-depth: 0
+      - name: Ausgangsstand merken
+        id: start
+        run: echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
@@ -88,17 +91,32 @@ jobs:
                ändere nichts, sondern schreib das im Kommentar.
             2. Sonst setz den Auftrag vollständig und sorgfältig in luna-app/ um. Halte dich an CLAUDE.md (Deutsch,
                Design-Regeln, keine Geheimnisse committen). Unklare Stellen entscheidest du sinnvoll im Sinne von Tiry.
-            3. Teste: cd luna-app && ./gradlew --no-daemon :app:testDebugUnitTest – alles muss grün sein. Ergänze Tests, wo sinnvoll.
+               SCHNELLWEG: Lässt sich der Wunsch über Live-Inhalte lösen (Persönlichkeit/Verhalten → luna-app/live/persona.md,
+               Stimme → live/config.json, Gesicht/Mimik/Licht → live/luna3d/*.vert|frag, live/luna_face.jpg, live/luna3d/head.bin;
+               siehe luna-app/live/LIESMICH.md), dann NUR dort ändern und danach python3 luna-app/tools/live_manifest.py ausführen –
+               Luna holt das in Sekunden ohne Installation. Programmcode nur ändern, wenn es anders nicht geht.
+               Öffentliches Repo: keine privaten Daten über Tiry in live/.
+            3. Teste: cd luna-app && ./gradlew --no-daemon :app:testDebugUnitTest – alles muss grün sein (auch kompilieren!).
+               Ergänze Tests, wo sinnvoll. Schlagen Tests fehl oder lassen sie sich nicht ausführen: NICHT pushen, sondern beheben.
+               Achtung Android: Regex-Muster mit „{“/„}“ immer maskieren (Test RegexAndroidTest).
             4. Committe mit einer deutschen Nachricht und pushe auf den aktuellen Branch:
                git push origin HEAD:${{ steps.auftrag.outputs.branch }}
                (Abgelehnt, weil der Branch weiter ist? Dann git pull --no-rebase origin ${{ steps.auftrag.outputs.branch }} und erneut pushen.)
             5. Schreib als Kommentar an Auftrag #${{ steps.auftrag.outputs.num }} in 2–4 kurzen deutschen Sätzen, was du geändert hast
                (Luna liest das Tiry vor), und schließe den Auftrag.
             Ändere nichts außerhalb von luna-app/ und .github/workflows/luna-apk.yml.
-      - name: Update für Luna bauen lassen
+      - name: Update für Luna bauen lassen (nur bei Programm-Änderungen)
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: gh workflow run luna-apk.yml --ref "${{ steps.auftrag.outputs.branch }}"
+          BR: ${{ steps.auftrag.outputs.branch }}
+          START: ${{ steps.start.outputs.sha }}
+        run: |
+          git fetch -q origin "$BR"
+          if git diff --quiet "$START" "origin/$BR" -- luna-app ':!luna-app/live'; then
+            echo "Nur Live-Inhalte (oder nichts) geändert – Luna holt das ohne neue App."
+          else
+            gh workflow run luna-apk.yml --ref "$BR"
+          fi
       # GitHub hält pro Warteschlange nur EINEN wartenden Lauf – liegengebliebene Aufträge daher nacheinander abarbeiten
       - name: Nächsten offenen Auftrag starten
         if: always()
