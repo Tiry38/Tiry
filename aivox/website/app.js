@@ -378,7 +378,7 @@
   };
 
   /* ===================== Reiter + Menü ===================== */
-  const VIEWS = ['start', 'live', 'funktionen', 'sicherheit', 'branchen', 'preise', 'ueber', 'fragen'];
+  const VIEWS = ['start', 'ablauf', 'live', 'einrichtung', 'cockpit', 'sicherheit', 'preise', 'fragen'];
   const glow = $('.tab-glow'), scan = $('.scan'), menu = $('.menu'), menuBtn = $('.menu-btn');
   const moveGlow = () => {
     const a = $('.tab[aria-current="page"]'); if (!a || !a.offsetWidth) return;
@@ -392,18 +392,11 @@
   menuBtn.addEventListener('click', () => setMenu(menu.hidden));
   menu.addEventListener('click', (e) => { if (e.target.closest('a')) setMenu(false); });
   const show = (first) => {
-    let id = location.hash.slice(1); if (id === 'hoerprobe') id = 'live';
-    const view = VIEWS.includes(id) ? id : 'start';
-    $$('.view').forEach((v) => {
-      const on = v.dataset.view === view;
-      if (on && v.hidden) {
-        v.hidden = false; v.classList.remove('enter'); void v.offsetWidth;
-        if (!first) { v.classList.add('enter'); $$('[data-decode]', v).slice(0, 1).forEach(decode); }
-      } else if (!on) v.hidden = true;
-    });
-    $$('.tab, .menu a').forEach((a) => (a.getAttribute('href') === '#' + view ? a.setAttribute('aria-current', 'page') : a.removeAttribute('aria-current')));
-    moveGlow();
-    if (!first) { scan.classList.remove('go'); void scan.offsetWidth; if (!reduce) scan.classList.add('go'); SFX.whoosh(); window.scrollTo({ top: 0, behavior: 'auto' }); }
+    const id = location.hash.slice(1);
+    if (VIEWS.includes(id)) {
+      if (first) { const el = document.getElementById(id); if (el) requestAnimationFrame(() => el.scrollIntoView({ behavior: 'auto' })); }
+      else { scan.classList.remove('go'); void scan.offsetWidth; if (!reduce) scan.classList.add('go'); SFX.whoosh(); }
+    }
     requestAnimationFrame(() => plasmas.forEach((p) => p.resize()));
   };
   addEventListener('hashchange', () => show(false));
@@ -427,30 +420,36 @@
   const S = (who, src, text) => ({ who, name: who === 'ki' ? 'AIVOX' : 'Anrufer', src: 'audio/' + src + '.mp3', text });
   const SCN = [
     { title: 'Termin buchen', lines: [
-      S('ki', 's1-1', 'Fahrrad-Werkstatt am Markt, guten Tag! Hier spricht die digitale Assistenz. Ich bin eine künstliche Intelligenz. Wie kann ich Ihnen helfen?'),
-      S('anrufer', 's1-2', 'Hallo, guten Tag! Mein E-Bike braucht eine Inspektion. Geht diese Woche noch was?'),
-      S('ki', 's1-3', 'Sehr gerne. Am Donnerstag um halb elf ist noch frei. Soll ich den Termin für Sie eintragen?'),
-      S('anrufer', 's1-4', 'Ja, perfekt.'),
-      S('ki', 's1-5', 'Erledigt. Sie bekommen gleich eine Bestätigung per E-Mail. Einen schönen Tag noch!')],
-      fields: [['Anliegen', 'Inspektion E-Bike', 1], ['Freier Termin', 'Donnerstag, 10:30 Uhr', 2], ['Ergebnis', 'Im Kalender eingetragen · Bestätigung per E-Mail', 4, 1]] },
+      S('ki', 's1-1', 'Fahrrad-Werkstatt am Markt, guten Tag! Sie sprechen mit der digitalen Assistenz – ich bin eine künstliche Intelligenz. Was kann ich für Sie tun?'),
+      S('anrufer', 's1-2', 'Hallo! Mein E-Bike müsste mal zur Inspektion. Geht diese Woche noch was?'),
+      S('ki', 's1-3', 'Klar, einen Moment, ich schau kurz in den Kalender. Am Donnerstag um halb elf wäre noch was frei. Passt Ihnen das?'),
+      S('anrufer', 's1-4', 'Ja, das passt.'),
+      S('ki', 's1-5', 'Prima. Auf welchen Namen darf ich den Termin eintragen?'),
+      S('anrufer', 's1-6', 'Auf Becker.'),
+      S('ki', 's1-7', 'Danke, Frau Becker. Ich schicke Ihnen die Bestätigung per SMS an die Nummer, mit der Sie gerade anrufen. Ist das in Ordnung?'),
+      S('anrufer', 's1-8', 'Ja, gerne.'),
+      S('ki', 's1-9', 'Erledigt. Dann bis Donnerstag!')],
+      fields: [['Anliegen', 'Inspektion E-Bike', 1], ['Freier Termin (aus deinem Kalender)', 'Donnerstag, 10:30 Uhr', 2], ['Name (erfragt)', 'Becker', 5], ['Bestätigung', 'SMS an die Anrufnummer (zugestimmt)', 7], ['Ergebnis', 'Termin eingetragen · SMS gesendet · Zusammenfassung an dich', 8, 1]] },
     { title: 'Ist mein Rad fertig?', lines: [
-      S('anrufer', 's2-1', 'Guten Tag, hier spricht Meier. Ist mein Fahrrad schon fertig?'),
-      S('ki', 's2-2', 'Guten Tag, Herr Meier. Ihr Rad ist fertig und kann ab 16 Uhr abgeholt werden. Die Rechnung beträgt 89 Euro.'),
-      S('anrufer', 's2-3', 'Super, vielen Dank!'),
-      S('ki', 's2-4', 'Sehr gern. Bis später in der Werkstatt!')],
-      fields: [['Anrufer', 'Herr Meier', 0], ['Anliegen', 'Abholstatus', 0], ['Auskunft', 'Fertig ab 16:00 Uhr · 89 €', 1], ['Ergebnis', 'Erledigt, kein Rückruf nötig', 3, 1]] },
+      S('anrufer', 's2-1', 'Hallo, ich wollte fragen, ob mein Fahrrad schon fertig ist.'),
+      S('ki', 's2-2', 'Gern. Sie rufen von der Nummer aus Ihrem Reparaturauftrag an. Spreche ich mit Frau Meier?'),
+      S('anrufer', 's2-3', 'Ja, genau.'),
+      S('ki', 's2-4', 'Ihr Rad ist fertig, Frau Meier. Sie können es ab 16 Uhr abholen, die Rechnung liegt bei 89 Euro.'),
+      S('anrufer', 's2-5', 'Super, danke!'),
+      S('ki', 's2-6', 'Sehr gern. Bis später!')],
+      fields: [['Anliegen', 'Abholstatus', 0], ['Erkannt über', 'Rufnummer im Reparaturauftrag', 1], ['Bestätigt', 'Frau Meier', 2], ['Auskunft (aus dem Auftragsstatus)', 'Fertig ab 16:00 Uhr · 89 €', 3], ['Ergebnis', 'Erledigt, kein Rückruf nötig', 5, 1]] },
     { title: 'Panne, eilig', lines: [
-      S('anrufer', 's3-1', 'Hallo! Ich habe einen Platten und brauche mein Rad morgen früh für die Arbeit.'),
-      S('ki', 's3-2', 'Das bekommen wir hin. Wenn Sie das Rad heute bis 18 Uhr bringen, ist es morgen ab halb acht fertig. Soll ich das für Sie notieren?'),
-      S('anrufer', 's3-3', 'Ja, bitte gerne.'),
-      S('ki', 's3-4', 'Ist notiert. Bis gleich in der Werkstatt!')],
-      fields: [['Anliegen', 'Platten · Rad wird morgen früh gebraucht', 0], ['Lösung', 'Abgabe heute bis 18:00 · fertig ab 7:30', 1], ['Ergebnis', 'Auftrag für die Werkstatt notiert', 3, 1]] },
+      S('anrufer', 's3-1', 'Hallo, ich hab einen Platten und brauch mein Rad morgen früh für die Arbeit.'),
+      S('ki', 's3-2', 'Oh, das ist ärgerlich – aber das kriegen wir hin. Wenn Sie es heute bis 18 Uhr bringen, ist es morgen ab halb acht fertig. Wie ist Ihr Name?'),
+      S('anrufer', 's3-3', 'Schneider.'),
+      S('ki', 's3-4', 'Danke, Frau Schneider. Ich habe es für die Werkstatt notiert. Bis nachher!')],
+      fields: [['Anliegen', 'Platten · Rad morgen früh gebraucht', 0], ['Lösung (deine Regel: Express)', 'Abgabe bis 18:00 · fertig ab 7:30', 1], ['Name (erfragt)', 'Schneider', 2], ['Ergebnis', 'Auftrag für die Werkstatt notiert', 3, 1]] },
     { title: 'Nach Feierabend', lines: [
-      S('anrufer', 's4-1', 'Guten Abend! Haben Sie heute noch geöffnet?'),
-      S('ki', 's4-2', 'Wir haben heute schon geschlossen. Morgen sind wir ab 9 Uhr für Sie da. Soll ich Ihnen einen Rückruf eintragen?'),
-      S('anrufer', 's4-3', 'Ja, bitte.'),
-      S('ki', 's4-4', 'Erledigt. Unser Team ruft Sie morgen früh zurück. Einen schönen Abend!')],
-      fields: [['Uhrzeit', 'Nach Ladenschluss', 0], ['Auskunft', 'Morgen ab 9:00 Uhr geöffnet', 1], ['Ergebnis', 'Rückruf für morgen früh eingetragen', 3, 1]] },
+      S('anrufer', 's4-1', 'Guten Abend, haben Sie heute noch offen?'),
+      S('ki', 's4-2', 'Heute haben wir leider schon geschlossen. Morgen sind wir ab 9 Uhr wieder da. Soll Sie jemand aus dem Team zurückrufen?'),
+      S('anrufer', 's4-3', 'Ja, gern.'),
+      S('ki', 's4-4', 'Alles klar. Wir rufen Sie morgen früh an, unter der Nummer, mit der Sie gerade anrufen. Schönen Abend noch!')],
+      fields: [['Uhrzeit', 'Nach Ladenschluss', 0], ['Auskunft (aus deinem Profil)', 'Morgen ab 9:00 Uhr geöffnet', 1], ['Rückrufnummer', 'Übertragene Anrufnummer', 3], ['Ergebnis', 'Rückruf für morgen früh in deiner Liste', 3, 1]] },
   ];
   let sel = 0;
   const chips = $('.chips'), list = $('.script'), exList = $('.ex-list');
@@ -659,11 +658,64 @@ gl_FragColor=vec4(col*glow+vec3(stars*.25),glow+stars*.2);}`;
     co.observe(ck);
   }
 
+
+  /* ===================== v9: 3D-Stimmkern ===================== */
+  const core = (() => {
+    const c = $('.core'); if (!c) return null;
+    const g = c.getContext('2d'); const P = [];
+    for (let la = 1; la < 18; la++) {
+      const th = (la / 18) * Math.PI, n = Math.max(8, Math.round(64 * Math.sin(th)));
+      for (let k = 0; k < n; k++) { const ph = (k / n) * Math.PI * 2; P.push([th, ph, specAt(k / n)]); }
+    }
+    let rot = 0, tiltX = 0.35, tiltY = 0;
+    const size = () => { const d = Math.min(devicePixelRatio || 1, 2); c.width = c.clientWidth * d; c.height = c.clientHeight * d; };
+    size(); addEventListener('resize', size);
+    return {
+      draw(t) {
+        if (c.offsetParent === null) return;
+        const w = c.width, h = c.height, R = Math.min(w, h) * 0.3, cx = w / 2, cy = h / 2;
+        g.setTransform(1, 0, 0, 1, 0, 0); g.clearRect(0, 0, w, h); g.globalCompositeOperation = 'lighter';
+        rot += reduce ? 0.0008 : 0.004 + level.v * 0.02;
+        if (performance.now() - pointer.t < 2500) {
+          const r = c.getBoundingClientRect();
+          tiltY += (((pointer.x - r.left) / r.width - 0.5) * 0.9 - tiltY) * 0.04;
+          tiltX += (0.35 + ((pointer.y - r.top) / r.height - 0.5) * 0.6 - tiltX) * 0.04;
+        }
+        const cxr = Math.cos(tiltX), sxr = Math.sin(tiltX), cyr = Math.cos(rot + tiltY), syr = Math.sin(rot + tiltY);
+        const glow = g.createRadialGradient(cx, cy, 0, cx, cy, R * 1.6);
+        glow.addColorStop(0, `rgba(127,212,255,${0.1 + level.v * 0.2})`); glow.addColorStop(0.5, `rgba(255,74,36,${0.04 + level.v * 0.08})`); glow.addColorStop(1, 'rgba(0,0,0,0)');
+        g.fillStyle = glow; g.fillRect(0, 0, w, h);
+        for (const [th, ph, col] of P) {
+          const wob = 1 + 0.035 * Math.sin(th * 5 + t * 1.3) + level.v * 0.22 * Math.sin(th * 9 + ph * 3 + t * 9);
+          let x = Math.sin(th) * Math.cos(ph) * R * wob, y = Math.cos(th) * R * wob, z = Math.sin(th) * Math.sin(ph) * R * wob;
+          const x1 = x * cyr - z * syr, z1 = x * syr + z * cyr;
+          const y2 = y * cxr - z1 * sxr, z2 = y * sxr + z1 * cxr;
+          const p = 900 / (900 + z2 * 1.2), sx = cx + x1 * p, sy = cy + y2 * p, depth = (z2 / R + 1) / 2;
+          const a = 0.18 + (1 - depth) * 0.75, s = (1.2 + (1 - depth) * 1.8) * (w / 520);
+          g.globalAlpha = a; g.fillStyle = `rgb(${col[0] | 0},${col[1] | 0},${col[2] | 0})`;
+          g.fillRect(sx - s / 2, sy - s / 2, s, s);
+        }
+        g.globalAlpha = 1; g.globalCompositeOperation = 'source-over';
+      },
+    };
+  })();
+
+  /* ===================== v9: Kapitel-Navigation (Scroll-Spy) ===================== */
+  if ('IntersectionObserver' in window) {
+    const spy = new IntersectionObserver((es) => es.forEach((e) => {
+      if (!e.isIntersecting) return;
+      const v = e.target.dataset.view;
+      $$('.tab, .menu a').forEach((a) => (a.getAttribute('href') === '#' + v ? a.setAttribute('aria-current', 'page') : a.removeAttribute('aria-current')));
+      moveGlow();
+    }), { rootMargin: '-45% 0px -50% 0px' });
+    $$('.view').forEach((s) => spy.observe(s));
+  }
+
   /* ===================== Start ===================== */
   FX.init();
   show(true);
   if (store.get('aivox-intro') === '1') { intro.hidden = true; document.body.classList.remove('booting'); }
   else openIntro();
-  const loop = (now) => { const t = now / 1000; readLevel(t); if (!intro.hidden) FX.draw(now); plasmas.forEach((p) => p.draw(t)); if (sky) sky.draw(t); requestAnimationFrame(loop); };
+  const loop = (now) => { const t = now / 1000; readLevel(t); if (!intro.hidden) FX.draw(now); plasmas.forEach((p) => p.draw(t)); if (sky) sky.draw(t); if (core) core.draw(t); requestAnimationFrame(loop); };
   requestAnimationFrame(loop);
 })();
