@@ -80,3 +80,17 @@ Primär lösen, im Notfall an Geschäft/Chef übergeben: **Zuhören** (Ärger an
 **Lösen** (Lösung im Rahmen der Werkstatt-Regeln, zwei Optionen) → **Übergeben** (Chef-Wunsch oder keine Einigung: sofort durchstellen, sonst Rückruf in 30 Min, Priorität Rot, Zusammenfassung vorab) →
 **Grenzen** (keine Versprechen außerhalb der Regeln, keine Geld-/Rechtsentscheidungen, bei Beleidigung ruhig Grenze setzen und übergeben).
 Stimme dabei: ruhiger, etwas langsamer (Tempo 0,96), warm. Demo: Vindemiatrix (AIVOX) / Charon (verärgerter Anrufer, 1,1). Szene s5 in `charaktere.py`.
+
+## 14. Tiefe weibliche Chirp-Stimmen (gemessen von der AIVOX-Sitzung für Luna, 21.11.2026)
+Ein Testsatz (ruhig, abendlich), Tempo 1,0 / 0,9. Tonhöhe = Median-Grundfrequenz, Lebendigkeit = Streuung in Halbtönen, Natürlichkeit = DNSMOS (1–5, Messrauschen ca. ±0,1).
+| Stimme | Tonhöhe | Lebendigkeit | Natürlichkeit | Tempo 0,9 |
+|---|---|---|---|---|
+| **Gacrux** | **165 Hz (tiefste)** | 4,5 | 3,58 | 164 Hz · 4,7 · 3,59 |
+| Vindemiatrix | 174 Hz | 6,2 | 3,58 | 176 Hz · 6,0 · 3,61 |
+| Despina | 176 Hz | 4,2 | 3,74 | 191 Hz · 6,9 · 3,60 |
+| Aoede | 183 Hz | 7,1 | 3,49 | 188 Hz · 3,6 · 3,65 |
+| Leda | 215 Hz | 3,9 | 3,59 | – |
+| Achernar | 233 Hz | 6,0 | 3,59 | – |
+| Erinome / Sulafat | 229–233 Hz | ≈4 | 3,40 | – |
+Ergebnis: Gacrux ist die tiefste deutsche Chirp-Frauenstimme, Tempo 0,9 kostet keine Natürlichkeit. −5 % Wiedergabe-Tonhöhe ≈ −0,9 Halbtöne → ca. 157 Hz.
+Achernar ist hell (233 Hz) und passt nicht zu „tief“. Alternative mit mehr Ausdruck: Vindemiatrix (174 Hz, Lebendigkeit 6). Endgültig entscheidet Tirys Ohr.
