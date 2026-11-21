@@ -38,7 +38,7 @@ class ScreenshotTest {
     @Test fun hauptbildschirm() {
         val a = Robolectric.buildActivity(MainActivity::class.java).setup().get()
         shot(a, "1-start")
-        LunaBus.update { it.copy(state = LunaState.WAITING, status = "Sag „Hey Luna“ oder einfach „Luna“", userText = "", lunaText = "Hey Tiry, was gibt's?") }
+        LunaBus.update { it.copy(state = LunaState.WAITING, status = "Bereit", userText = "", lunaText = "Hey Tiry, was gibt's?") }
         shot(a, "2-wartet")
         LunaBus.update { it.copy(state = LunaState.LISTENING, status = "Ich höre …", userText = "Wie wird das Wetter morgen in Wörth", level = 0.7f) }
         shot(a, "3-hoert")
@@ -52,7 +52,7 @@ class ScreenshotTest {
         val a = Robolectric.buildActivity(SettingsActivity::class.java).setup().get()
         shot(a, "6-einstellungen")
         shot(a, "7-einstellungen-mitte", 2600)
-        shot(a, "8-einstellungen-heimnetz", 5200)
-        shot(a, "9-einstellungen-assistent", 7600)
+        shot(a, "8-einstellungen-heimnetz", 6400)
+        shot(a, "9-einstellungen-rechte", 11500)
     }
 }

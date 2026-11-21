@@ -38,6 +38,7 @@ class LunaService : Service(), WakeWordEngine.Callback, Listener.Callback {
         const val ACTION_SAY = "de.tiry.luna.SAY"
         const val ACTION_INTERRUPT = "de.tiry.luna.INTERRUPT"
         const val ACTION_RELOAD = "de.tiry.luna.RELOAD"
+        const val ACTION_QUICK = "de.tiry.luna.QUICK"
         const val CH_SERVICE = "luna_service"
         const val CH_REMINDER = "luna_reminder"
         private const val NOTIF_ID = 7
@@ -49,8 +50,10 @@ class LunaService : Service(), WakeWordEngine.Callback, Listener.Callback {
             if (Build.VERSION.SDK_INT >= 26) ctx.startForegroundService(i) else ctx.startService(i)
         }
 
-        fun send(ctx: Context, action: String) {
-            if (running) ctx.startService(Intent(ctx, LunaService::class.java).setAction(action)) else start(ctx, action)
+        fun send(ctx: Context, action: String, extra: String? = null) {
+            val i = Intent(ctx, LunaService::class.java).setAction(action).apply { if (extra != null) putExtra("id", extra) }
+            if (running) ctx.startService(i)
+            else if (Build.VERSION.SDK_INT >= 26) ctx.startForegroundService(i) else ctx.startService(i)
         }
 
         fun ensureChannels(ctx: Context) {
@@ -108,6 +111,7 @@ class LunaService : Service(), WakeWordEngine.Callback, Listener.Callback {
             ACTION_LISTEN -> main.postDelayed({ beginListening(greet = false) }, if (wake.ready) 50 else 300)
             ACTION_INTERRUPT -> interrupt()
             ACTION_SAY -> intent.getStringExtra("text")?.let { say(it) }
+            ACTION_QUICK -> intent.getStringExtra("id")?.let { quick(it) }
             ACTION_RELOAD -> { speaker.precache(greetings()); if (!inConversation) startWake() }
         }
         return START_STICKY
@@ -130,7 +134,7 @@ class LunaService : Service(), WakeWordEngine.Callback, Listener.Callback {
         if (prefs.stayAwake) {
             wakeLock = (getSystemService(POWER_SERVICE) as PowerManager).newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "luna:wake").apply { acquire() }
         }
-        state(LunaState.LOADING, "Lade Sprachmodell …")
+        state(LunaState.LOADING, "Startet …")
         speaker.precache(greetings())
         worker.execute {
             try {
@@ -169,7 +173,7 @@ class LunaService : Service(), WakeWordEngine.Callback, Listener.Callback {
         releaseFocus()
         if (!wake.ready) return
         wake.start(this)
-        state(LunaState.WAITING, if (prefs.requireHey) "Sag „Hey Luna“" else "Sag „Hey Luna“ oder einfach „Luna“")
+        state(LunaState.WAITING, "Bereit")
     }
 
     override fun onWake(heard: String) { main.post { if (!inConversation) beginListening(greet = true) } }
@@ -239,7 +243,7 @@ class LunaService : Service(), WakeWordEngine.Callback, Listener.Callback {
         speaker.speak(r.text) {
             if (id != conversationId) return@speak
             followUps++
-            if (r.end || !prefs.followUp || followUps > 8) main.postDelayed({ startWake() }, 300)
+            if (r.end || !prefs.followUp || followUps > 40) main.postDelayed({ startWake() }, 300)
             else main.postDelayed({ listenNow() }, 250)
         }
     }
@@ -252,6 +256,25 @@ class LunaService : Service(), WakeWordEngine.Callback, Listener.Callback {
         LunaBus.update { it.copy(lunaText = text) }
         state(LunaState.SPEAKING, "Spreche …")
         speaker.speak(text) { if (id == conversationId) main.postDelayed({ startWake() }, 300) }
+    }
+
+    /** Ein-Knopf-Aktion aus der Kontrollleiste: sofort ausführen, Ergebnis kurz ansagen. */
+    private fun quick(id: String) {
+        conversationId++
+        val my = conversationId
+        inConversation = true
+        wake.stop(); listener.cancel()
+        state(LunaState.THINKING, "Erledige das …")
+        worker.execute {
+            val out = tools.quick(id)
+            main.post {
+                if (my != conversationId) return@post
+                LunaBus.update { it.copy(userText = "", lunaText = out) }
+                grabFocus()
+                state(LunaState.SPEAKING, "Spreche …")
+                speaker.speak(out) { if (my == conversationId) main.postDelayed({ startWake() }, 300) }
+            }
+        }
     }
 
     private fun interrupt() {

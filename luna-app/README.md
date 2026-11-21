@@ -14,10 +14,24 @@ Android-App im Stil von J.A.R.V.I.S.: Handy liegt neben dir, du sagst **„Hey L
    - **Benachrichtigungen lesen**, **Akku-Optimierung aus**, **Über anderen Apps**.
 5. Optional, aber empfohlen (Zahnrad):
    - **Claude API-Key** → Luna denkt frei mit, sucht im Netz, bedient fremde Apps, gibt Tipps.
-     Key: console.anthropic.com → API Keys. Modell wählbar (Opus 5.5 klügste, Haiku 5.5 schnellste/günstigste).
+     Key: console.anthropic.com → API Keys. Standard ist **Haiku 5.5** (am schnellsten, unter 1 Cent pro Frage); Sonnet/Opus wählbar.
    - **ElevenLabs API-Key** → Stimme klingt wie ein echter Mensch (Standard „Sarah“, Modell Multilingual v2).
      Key: elevenlabs.io → Profil → API Keys. Gratis-Kontingent vorhanden.
    - **Stimme testen** antippen.
+
+## Oberfläche „Luna 2100“
+
+Tiefes Schwarz, Chrom-Schrift (Michroma), eisblaues Leuchten, 3D-Stimmkern aus Partikeln mit Orbit-Ringen und
+Plasmalinie, HUD (Akku, Netz, Uhrzeit). **Kontrollleiste** mit Ein-Knopf-Aktionen: PC an, Remote, VPN, Gast-WLAN,
+Licht, Lautlos, Sperren, Wetter – ein Tipp, Luna erledigt es und sagt kurz Bescheid.
+
+## Komplette Handy-Steuerung
+
+Luna bedient jede App und jede Systemecke selbst: Bildschirm lesen (mit Koordinaten) oder ansehen (Screenshot),
+tippen, lange drücken, wischen, schreiben, Enter, scrollen, Schnelleinstellungen (WLAN, Bluetooth, Flugmodus, Hotspot,
+Standort, Nicht stören …), Benachrichtigungen öffnen, beliebige Android-Befehle (Intents), App-Liste, Zwischenablage.
+Sie arbeitet Schritt für Schritt, bis die Aufgabe erledigt ist (bis 30 Schritte pro Auftrag).
+Sicherheitsregel: Käufe, Löschen, Überweisungen und Nachrichten nur nach deiner Bestätigung.
 
 ## Heimnetz: FRITZ!Box & PC (Grundlage steht, Details besprechen wir)
 
@@ -69,7 +83,7 @@ System-App bräuchte ein gerootetes Handy bzw. eigenes Android.
 
 ## Technik (für Entwickler)
 
-- Kotlin, minSdk 26, targetSdk 35. Wake-Word: Vosk `vosk-model-small-de-0.15` + Grammatik aus „lu na“ und
+- Kotlin, minSdk 26, targetSdk 35. Schriften Michroma + Sora (SIL Open Font License, `assets/licenses/`). Wake-Word: Vosk `vosk-model-small-de-0.15` + Grammatik aus „lu na“ und
   ~2900 häufigen deutschen Wörtern als Ablenker (`assets/wake_words.txt`).
 - Gehirn: `anthropic-java` (Werkzeugschleife in `Brain.kt`, 31 Handy-Werkzeuge in `PhoneTools.kt`, Websuche,
   Prompt-Caching, effort `low`, serverseitiger Fallback). Offline: `LocalIntentParser.kt`.

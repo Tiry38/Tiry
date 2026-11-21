@@ -122,6 +122,20 @@ class PhoneTools(private val ctx: Context, private val prefs: Prefs) : ToolExecu
             ToolDef("pc_status", "Prüft, ob Tirys PC an ist."),
             ToolDef("pc_remote", "PC fernsteuern: PC einschalten (falls aus), warten bis er da ist, dann die Fernsteuerungs-App öffnen."),
             ToolDef("vpn_connect", "Verbindet/trennt das WireGuard-VPN zur FRITZ!Box (für Zugriff von unterwegs).", mapOf("on" to b("true = verbinden")), listOf("on")),
+            ToolDef("long_press", "Lange drücken: auf einen Text/Knopf (text) ODER auf Koordinaten x,y aus read_screen/look_at_screen.",
+                mapOf("text" to s("Sichtbarer Text"), "x" to i("x"), "y" to i("y"))),
+            ToolDef("swipe", "Wischen von (x1,y1) nach (x2,y2) in Koordinaten aus read_screen/look_at_screen – für Spiele, Karten, Slider, Entsperr-Gesten.",
+                mapOf("x1" to i("Start x"), "y1" to i("Start y"), "x2" to i("Ziel x"), "y2" to i("Ziel y"), "ms" to i("Dauer in ms, Standard 400")), listOf("x1", "y1", "x2", "y2")),
+            ToolDef("press_enter", "Drückt Enter/Senden/Suchen im aktiven Eingabefeld."),
+            ToolDef("quick_setting", "Schaltet eine Kachel in den Schnelleinstellungen um: z. B. WLAN, Bluetooth, Flugmodus, Hotspot, Standort, Bitte nicht stören, Automatisch drehen, Energiesparmodus, NFC, Mobile Daten.",
+                mapOf("name" to s("Name der Kachel, wie sie angezeigt wird")), listOf("name")),
+            ToolDef("open_notification", "Öffnet eine Benachrichtigung, die diesen Text enthält.", mapOf("text" to s("Text aus der Benachrichtigung")), listOf("text")),
+            ToolDef("list_apps", "Liste aller installierten Apps (Namen)."),
+            ToolDef("android_intent", "Profi-Werkzeug: startet einen beliebigen Android-Intent (z. B. Einstellungsseiten, Deeplinks wie spotify:, whatsapp:, tel:, mailto:, geo:).",
+                mapOf("action" to s("Intent-Action, Standard android.intent.action.VIEW"), "data" to s("Daten-URI"), "package" to s("Paketname, optional"),
+                    "extras" to mapOf("type" to "object", "description" to "String-Extras, optional"))),
+            ToolDef("set_clipboard", "Kopiert Text in die Zwischenablage.", mapOf("text" to s("Text")), listOf("text")),
+            ToolDef("wait", "Wartet kurz, z. B. bis eine App geladen hat (1-10 Sekunden).", mapOf("seconds" to i("Sekunden")), listOf("seconds")),
             ToolDef("remember", "Merkt sich dauerhaft eine Info über Tiry (Vorlieben, Termine, Fakten).", mapOf("fact" to s("Was gemerkt werden soll")), listOf("fact")),
             ToolDef("forget", "Löscht gemerkte Infos, die diesen Text enthalten.", mapOf("match" to s("Suchtext")), listOf("match")),
             ToolDef("end_conversation", "Beendet das Gespräch nach deiner Antwort (Tiry sagt tschüss/danke/passt). Danach wartet Luna wieder auf „Hey Luna“."),
@@ -154,6 +168,21 @@ class PhoneTools(private val ctx: Context, private val prefs: Prefs) : ToolExecu
             "create_calendar_event" -> createEvent(str(a, "title"), str(a, "start"), int(a, "duration_minutes") ?: 60, a["location"]?.toString())
             "screen_action" -> acc { it.global(str(a, "action")) }
             "read_screen" -> acc { it.readScreen() }
+            "long_press" -> acc { svc ->
+                val x = int(a, "x"); val y = int(a, "y")
+                if (x != null && y != null) { if (svc.longPressAt(x.toFloat(), y.toFloat())) "Lange gedrückt." else "Lange drücken hat nicht geklappt." }
+                else svc.longPressText(str(a, "text"))
+            }
+            "swipe" -> acc { svc -> if (svc.swipe((int(a, "x1") ?: 0).toFloat(), (int(a, "y1") ?: 0).toFloat(), (int(a, "x2") ?: 0).toFloat(),
+                (int(a, "y2") ?: 0).toFloat(), (int(a, "ms") ?: 400).toLong())) "Gewischt." else "Wischen hat nicht geklappt." }
+            "press_enter" -> acc { it.pressEnter() }
+            "quick_setting" -> acc { it.quickSetting(str(a, "name")) }
+            "open_notification" -> acc { it.openNotification(str(a, "text")) }
+            "list_apps" -> listApps()
+            "android_intent" -> intent(a)
+            "set_clipboard" -> { ctx.getSystemService(android.content.ClipboardManager::class.java)
+                .setPrimaryClip(android.content.ClipData.newPlainText("Luna", str(a, "text"))); "In die Zwischenablage kopiert." }
+            "wait" -> { Thread.sleep(((int(a, "seconds") ?: 2).coerceIn(1, 10) * 1000).toLong()); "Gewartet." }
             "look_at_screen" -> acc { svc ->
                 val img = svc.screenshotJpeg()
                 if (img == null) "Screenshot ging nicht (braucht Android 11+ und die Bedienungshilfe)." else { pendingImage = img; "Hier ist der aktuelle Bildschirm." }
@@ -514,6 +543,49 @@ class PhoneTools(private val ctx: Context, private val prefs: Prefs) : ToolExecu
         }
         ctx.contentResolver.insert(CalendarContract.Events.CONTENT_URI, v)
         return "Termin „$title“ eingetragen: " + SimpleDateFormat("EEEE, d. MMMM HH:mm", de).format(Date(begin)) + "."
+    }
+
+    // ---------- Universal ----------
+    private fun listApps(): String {
+        val pm = ctx.packageManager
+        return pm.queryIntentActivities(Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_LAUNCHER), 0)
+            .map { it.loadLabel(pm).toString() }.distinct().sorted().joinToString(", ")
+    }
+
+    private fun intent(a: Map<String, Any?>): String {
+        val i = Intent(str(a, "action").ifBlank { Intent.ACTION_VIEW })
+        str(a, "data").takeIf { it.isNotBlank() }?.let { i.data = Uri.parse(it) }
+        str(a, "package").takeIf { it.isNotBlank() }?.let { i.setPackage(it) }
+        (a["extras"] as? Map<*, *>)?.forEach { (k, v) -> if (k != null && v != null) i.putExtra(k.toString(), v.toString()) }
+        if (i.resolveActivity(ctx.packageManager) == null && i.`package` == null) return "Dafür gibt es keine passende App."
+        launch(i)
+        return "Gestartet."
+    }
+
+    /** Zustand der Taschenlampe (für den Ein-Knopf-Schalter). */
+    @Volatile var torchOn = false
+    init {
+        try {
+            (ctx.getSystemService(Context.CAMERA_SERVICE) as CameraManager).registerTorchCallback(object : CameraManager.TorchCallback() {
+                override fun onTorchModeChanged(cameraId: String, enabled: Boolean) { torchOn = enabled }
+            }, android.os.Handler(android.os.Looper.getMainLooper()))
+        } catch (_: Exception) {}
+    }
+
+    /** Ein-Knopf-Aktionen der Kontrollleiste. */
+    fun quick(id: String): String = when (id) {
+        "pc" -> run("pc_wake", emptyMap())
+        "remote" -> run("pc_remote", emptyMap())
+        "vpn" -> run("vpn_connect", mapOf("on" to true))
+        "guest" -> run("fritz_guest_wifi", mapOf("on" to !(try { FritzBox(prefs.fritzHost, prefs.fritzUser, prefs.fritzPass).guestWifi(null).endsWith("an.") } catch (_: Exception) { false })))
+        "torch" -> run("flashlight", mapOf("on" to !torchOn))
+        "silent" -> {
+            val am = ctx.getSystemService(Context.AUDIO_SERVICE) as AudioManager
+            run("set_ringer_mode", mapOf("mode" to if (am.ringerMode == AudioManager.RINGER_MODE_NORMAL) "vibrate" else "normal"))
+        }
+        "lock" -> run("screen_action", mapOf("action" to "lock"))
+        "weather" -> run("get_weather", mapOf("days" to 1))
+        else -> "Unbekannter Knopf."
     }
 
     // ---------- Heimnetz: FRITZ!Box, PC, VPN ----------

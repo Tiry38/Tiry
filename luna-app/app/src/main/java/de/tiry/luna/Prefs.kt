@@ -16,7 +16,7 @@ class Prefs(context: Context) {
         set(v) = p.edit().putString("claude_key", v.trim()).apply()
 
     var model: String
-        get() = p.getString("model", MODEL_OPUS)!!
+        get() = p.getString("model", MODEL_HAIKU)!!
         set(v) = p.edit().putString("model", v).apply()
 
     var elevenKey: String

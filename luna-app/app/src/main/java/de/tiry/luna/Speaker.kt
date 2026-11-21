@@ -62,14 +62,26 @@ class Speaker(private val ctx: Context, private val prefs: Prefs) {
         val my = ++token
         pendingDone = onDone
         if (usesHumanVoice) {
-            io.execute {
-                val file = try { fetchEleven(text) } catch (e: Exception) { lastError = "Stimme: ${e.message}"; null }
-                main.post {
-                    if (my != token) return@post
-                    if (file != null) playFile(file, my) else speakLocal(text, my)
-                }
-            }
+            // Satzweise: erster Satz sofort, die nächsten werden erzeugt, während Luna schon spricht
+            val parts = chunks(text)
+            val files = parts.map { part -> io.submit<File?> { try { fetchEleven(part) } catch (e: Exception) { lastError = "Stimme: ${e.message}"; null } } }
+            playSeq(files, parts, 0, my)
         } else speakLocal(text, my)
+    }
+
+    private val waiter = Executors.newCachedThreadPool()
+
+    private fun playSeq(files: List<java.util.concurrent.Future<File?>>, parts: List<String>, i: Int, my: Int) {
+        if (my != token) return
+        if (i >= files.size) { finish(my); return }
+        waiter.execute {
+            val f = try { files[i].get(40, java.util.concurrent.TimeUnit.SECONDS) } catch (_: Exception) { null }
+            main.post {
+                if (my != token) return@post
+                if (f != null) playFile(f, my) { playSeq(files, parts, i + 1, my) }
+                else speakLocal(parts.drop(i).joinToString(" "), my)   // Netz weg → Rest mit Handy-Stimme
+            }
+        }
     }
 
     private fun finish(my: Int) {
@@ -89,13 +101,13 @@ class Speaker(private val ctx: Context, private val prefs: Prefs) {
 
     val isSpeaking get() = player?.isPlaying == true || tts?.isSpeaking == true
 
-    private fun playFile(f: File, my: Int) {
+    private fun playFile(f: File, my: Int, next: () -> Unit) {
         try {
             val mp = MediaPlayer()
             mp.setAudioAttributes(AudioAttributes.Builder().setUsage(AudioAttributes.USAGE_ASSISTANT)
                 .setContentType(AudioAttributes.CONTENT_TYPE_SPEECH).build())
             mp.setDataSource(f.absolutePath)
-            mp.setOnCompletionListener { finish(my) }
+            mp.setOnCompletionListener { it.release(); if (player === it) player = null; if (my == token) next() }
             mp.setOnErrorListener { _, _, _ -> finish(my); true }
             mp.prepare(); mp.start()
             player = mp
@@ -153,9 +165,24 @@ class Speaker(private val ctx: Context, private val prefs: Prefs) {
         io.execute { phrases.forEach { try { fetchEleven(clean(it)) } catch (e: Exception) { lastError = "Stimme: ${e.message}" } } }
     }
 
-    fun shutdown() { stop(); tts?.shutdown(); io.shutdown() }
+    fun shutdown() { stop(); tts?.shutdown(); io.shutdown(); waiter.shutdown() }
 
     companion object {
+        /** Teilt in Sprech-Häppchen: erster Satz allein (schneller Start), danach Blöcke bis ~220 Zeichen. */
+        fun chunks(text: String): List<String> {
+            val sentences = text.split(Regex("(?<=[.!?…])\\s+")).map { it.trim() }.filter { it.isNotEmpty() }
+            if (sentences.size <= 1) return listOf(text)
+            val out = mutableListOf(sentences[0])
+            val cur = StringBuilder()
+            for (snt in sentences.drop(1)) {
+                if (cur.isNotEmpty() && cur.length + snt.length > 220) { out += cur.toString(); cur.clear() }
+                if (cur.isNotEmpty()) cur.append(' ')
+                cur.append(snt)
+            }
+            if (cur.isNotEmpty()) out += cur.toString()
+            return out
+        }
+
         /** Entfernt Markdown, Emojis & Co., damit es gesprochen natürlich klingt. */
         fun clean(s: String): String = s
             .replace(Regex("```[\\s\\S]*?```"), " ")

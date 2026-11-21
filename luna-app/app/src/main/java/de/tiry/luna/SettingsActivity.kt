@@ -33,9 +33,9 @@ class SettingsActivity : Activity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         prefs = Prefs(this)
-        window.statusBarColor = 0xFF06070F.toInt(); window.navigationBarColor = 0xFF06070F.toInt()
+        window.statusBarColor = Ui.BLACK; window.navigationBarColor = Ui.BLACK
         val root = FrameLayout(this)
-        root.addView(AuroraView(this), FrameLayout.LayoutParams(MATCH_PARENT, MATCH_PARENT))
+        root.addView(SpaceView(this), FrameLayout.LayoutParams(MATCH_PARENT, MATCH_PARENT))
         val scroll = ScrollView(this)
         col = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL; setPadding(dp(20), dp(24), dp(20), dp(48)) }
         scroll.addView(col)
@@ -48,10 +48,12 @@ class SettingsActivity : Activity() {
     private fun dp(v: Int) = Ui.dpi(this, v)
 
     private fun build() {
-        val title = Ui.text(this, "Einstellungen", 30f, Ui.TEXT, true)
-        Ui.gradientText(title, Ui.CYAN, Ui.VIOLET, Ui.PINK)
+        col.addView(Ui.label(this, "Luna · System", 9f, Ui.ICE, 0.4f))
+        val title = Ui.label(this, "Einstellungen", 22f, Ui.TEXT, 0.06f).apply { setPadding(0, dp(12), 0, dp(10)) }
+        Ui.chrome(title)
         col.addView(title)
-        hint("Alles wird nur auf deinem Handy gespeichert.")
+        col.addView(HairlineView(this), LinearLayout.LayoutParams(MATCH_PARENT, dp(1)).apply { bottomMargin = dp(12) })
+        hint("Alles bleibt auf deinem Handy gespeichert.")
 
         section("Du")
         field("Wie soll Luna dich nennen?", prefs.userName) { prefs.userName = it }
@@ -59,12 +61,12 @@ class SettingsActivity : Activity() {
         field("Über mich – damit Luna dich kennt und passende Tipps gibt", prefs.aboutMe, multi = true) { prefs.aboutMe = it }
 
         section("Gehirn (Claude)")
-        hint("Ohne Schlüssel versteht Luna die wichtigsten Befehle offline. Mit Claude-Schlüssel (console.anthropic.com → API Keys) kann sie frei reden, mitdenken, im Netz suchen und fremde Apps bedienen. Kosten grob: Opus 5.5 etwa 2–5 Cent pro Frage, Haiku 5.5 deutlich unter 1 Cent. Haiku antwortet auch am schnellsten.")
+        hint("Ohne Schlüssel versteht Luna die wichtigsten Befehle offline. Mit Claude-Schlüssel (console.anthropic.com → API Keys) kann sie frei reden, mitdenken, im Netz suchen und fremde Apps bedienen. Haiku 5.5 ist eingestellt: am schnellsten, ideal fürs Handy-Steuern, Kosten deutlich unter 1 Cent pro Frage. Opus 5.5 grob 2–5 Cent.")
         field("Claude API-Key (sk-ant-…)", prefs.claudeKey, secret = true) { prefs.claudeKey = it }
         choice("Modell", listOf(
-            Prefs.MODEL_OPUS to "Opus 5.5 · klügste",
-            Prefs.MODEL_SONNET to "Sonnet 5.5 · ausgewogen",
-            Prefs.MODEL_HAIKU to "Haiku 5.5 · schnellste & günstigste",
+            Prefs.MODEL_HAIKU to "Haiku 5.5 · Empfohlen",
+            Prefs.MODEL_SONNET to "Sonnet 5.5 · Ausgewogen",
+            Prefs.MODEL_OPUS to "Opus 5.5 · Maximum",
         ), prefs.model) { prefs.model = it }
 
         section("Stimme")
@@ -72,8 +74,8 @@ class SettingsActivity : Activity() {
         field("ElevenLabs API-Key", prefs.elevenKey, secret = true) { prefs.elevenKey = it }
         field("Stimmen-ID (Standard: Sarah – warm & natürlich)", prefs.elevenVoice) { prefs.elevenVoice = it }
         choice("Sprachmodell", listOf(
-            "eleven_multilingual_v2" to "Multilingual v2 · am menschlichsten",
-            "eleven_flash_v2_5" to "Flash v2.5 · blitzschnell",
+            "eleven_multilingual_v2" to "Multilingual v2 · Menschlich",
+            "eleven_flash_v2_5" to "Flash v2.5 · Blitzschnell",
         ), prefs.elevenModel) { prefs.elevenModel = it }
         button("Stimme testen", filled = true) {
             saveAll()
@@ -143,10 +145,10 @@ class SettingsActivity : Activity() {
             val row = LinearLayout(this).apply {
                 orientation = LinearLayout.HORIZONTAL; gravity = Gravity.CENTER_VERTICAL
                 setPadding(dp(18), dp(12), dp(18), dp(12)); minimumHeight = dp(64)
-                background = Ui.ripple(Ui.glass(context, 32f, if (p.granted) 18 else 30))
+                background = Ui.ripple(Ui.hairline(context, 32f, if (p.granted) Ui.HAIR else 0x66FFD58A, 0x08FFFFFF))
                 setOnClickListener { openPermission(p.key) }
             }
-            row.addView(View(this).apply { background = Ui.gradient(context, 999f, *(if (p.granted) intArrayOf(Ui.GREEN, Ui.CYAN) else intArrayOf(Ui.RED, Ui.PINK))) },
+            row.addView(View(this).apply { background = Ui.circle(context, 0, if (p.granted) Ui.MINT else Ui.AMBER) },
                 LinearLayout.LayoutParams(dp(14), dp(14)).apply { marginEnd = dp(14) })
             val texts = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
             texts.addView(Ui.text(this, p.title, 16f, Ui.TEXT, true))
@@ -182,19 +184,30 @@ class SettingsActivity : Activity() {
     }
 
     // ---------- Bausteine ----------
+    private var chapter = 0
+    private val chapters = 9
+
+    /** Kapitel-Kopf: „03 / 10“ in Haarlinien-Pille + Titel in breiter Chrom-Schrift. */
     private fun section(t: String) {
-        col.addView(Ui.text(this, t, 20f, Ui.TEXT, true).apply { setPadding(dp(4), dp(28), 0, dp(10)) })
+        chapter++
+        col.addView(Ui.label(this, "%02d / %02d".format(chapter, chapters), 8.5f, Ui.STEEL, 0.3f).apply {
+            setPadding(dp(12), dp(7), dp(12), dp(7)); background = Ui.hairline(context)
+        }, LinearLayout.LayoutParams(WRAP_CONTENT, WRAP_CONTENT).apply { topMargin = dp(34) })
+        val h = Ui.label(this, t, 14f, Ui.TEXT, 0.12f).apply { setPadding(dp(2), dp(14), 0, dp(10)) }
+        Ui.chrome(h)
+        col.addView(h)
     }
 
     private fun hint(t: String) {
-        col.addView(Ui.text(this, t, 14f, Ui.MUTED).apply { setPadding(dp(4), dp(2), dp(4), dp(10)) })
+        col.addView(Ui.text(this, t, 13.5f, Ui.STEEL).apply { setPadding(dp(4), dp(2), dp(4), dp(12)) })
     }
 
     private fun field(label: String, value: String, secret: Boolean = false, multi: Boolean = false, save: (String) -> Unit) {
-        col.addView(Ui.text(this, label, 13f, Ui.MUTED).apply { setPadding(dp(8), dp(6), 0, dp(6)) })
+        col.addView(Ui.text(this, label, 12.5f, Ui.DIM).apply { setPadding(dp(8), dp(6), 0, dp(7)) })
         val e = EditText(this).apply {
-            setText(value); setTextColor(Ui.TEXT); setHintTextColor(Ui.MUTED); textSize = 16f
-            background = Ui.glass(context, if (multi) 28f else 999f)
+            setText(value); setTextColor(Ui.TEXT); setHintTextColor(Ui.DIM); textSize = 16f; typeface = Ui.sans(context, 400)
+            background = Ui.hairline(context, if (multi) 26f else 999f)
+            setOnFocusChangeListener { v, f -> v.background = if (f) Ui.hairline(context, if (multi) 26f else 999f, 0xB37FD4FF.toInt(), 0x147FD4FF) else Ui.hairline(context, if (multi) 26f else 999f) }
             setPadding(dp(20), dp(14), dp(20), dp(14)); minHeight = dp(52)
             inputType = when {
                 secret -> InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_PASSWORD
@@ -208,11 +221,12 @@ class SettingsActivity : Activity() {
     }
 
     private fun choice(label: String, options: List<Pair<String, String>>, current: String, save: (String) -> Unit) {
-        col.addView(Ui.text(this, label, 13f, Ui.MUTED).apply { setPadding(dp(8), dp(6), 0, dp(6)) })
+        col.addView(Ui.text(this, label, 12.5f, Ui.DIM).apply { setPadding(dp(8), dp(6), 0, dp(7)) })
         var selected = current
         val views = mutableListOf<Pair<String, TextView>>()
         fun paint() = views.forEach { (k, v) ->
-            v.background = Ui.ripple(if (k == selected) Ui.gradient(this, 999f, Ui.VIOLET, Ui.PINK, Ui.CYAN) else Ui.glass(this))
+            v.background = Ui.ripple(if (k == selected) Ui.hairline(this, 999f, 0xCC7FD4FF.toInt(), 0x1F7FD4FF) else Ui.hairline(this))
+            v.setTextColor(if (k == selected) Ui.ICE else Ui.STEEL)
         }
         options.forEachIndexed { idx, (k, text) ->
             val v = Ui.pillButton(this, text) { selected = k; save(k); paint() }
@@ -231,21 +245,22 @@ class SettingsActivity : Activity() {
     @Suppress("UseSwitchCompatOrMaterialCode")
     private fun toggle(t: String, value: Boolean, save: (Boolean) -> Unit) {
         val s = Switch(this).apply {
-            text = t; isChecked = value; setTextColor(Ui.TEXT); textSize = 16f; minHeight = dp(56)
-            setPadding(dp(20), dp(8), dp(16), dp(8)); background = Ui.glass(context)
-            thumbTintList = ColorStateList(arrayOf(intArrayOf(android.R.attr.state_checked), intArrayOf()), intArrayOf(Ui.CYAN, Color.LTGRAY))
-            trackTintList = ColorStateList(arrayOf(intArrayOf(android.R.attr.state_checked), intArrayOf()), intArrayOf(Ui.VIOLET, Color.DKGRAY))
+            text = t; isChecked = value; setTextColor(Ui.TEXT); textSize = 15f; minHeight = dp(56); typeface = Ui.sans(context, 400)
+            setPadding(dp(22), dp(8), dp(16), dp(8)); background = Ui.hairline(context)
+            thumbTintList = ColorStateList(arrayOf(intArrayOf(android.R.attr.state_checked), intArrayOf()), intArrayOf(Ui.ICE, 0xFF8C96A5.toInt()))
+            trackTintList = ColorStateList(arrayOf(intArrayOf(android.R.attr.state_checked), intArrayOf()), intArrayOf(0x807FD4FF.toInt(), 0x33FFFFFF))
             setOnCheckedChangeListener { _, c -> save(c) }
         }
         col.addView(s, LinearLayout.LayoutParams(MATCH_PARENT, WRAP_CONTENT).apply { bottomMargin = dp(10) })
     }
 
     private fun slider(t: String, value: Int, save: (Int) -> Unit) {
-        val label = Ui.text(this, "$t: $value", 15f, Ui.TEXT).apply { setPadding(dp(8), dp(6), 0, 0) }
+        val label = Ui.text(this, "$t: $value", 14f, Ui.TEXT).apply { setPadding(dp(8), dp(6), 0, 0) }
         col.addView(label)
         col.addView(SeekBar(this).apply {
             max = 9; progress = value - 1; minimumHeight = dp(48)
-            progressTintList = ColorStateList.valueOf(Ui.VIOLET); thumbTintList = ColorStateList.valueOf(Ui.CYAN)
+            progressTintList = ColorStateList.valueOf(Ui.ICE); thumbTintList = ColorStateList.valueOf(Ui.TEXT)
+            progressBackgroundTintList = ColorStateList.valueOf(0x40FFFFFF)
             setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
                 override fun onProgressChanged(sb: SeekBar?, p: Int, fromUser: Boolean) { label.text = "$t: ${p + 1}"; save(p + 1) }
                 override fun onStartTrackingTouch(sb: SeekBar?) {}
