@@ -730,6 +730,35 @@ function Meter.Rebuild()
   Meter.Apply()
 end
 
+-- Aufteilung: 1, 2 oder 3 Teile im Fenster (Tiry: "nur ein Fenster, nur Damage").
+-- Beim Verkleinern bleibt ein Schaden-Teil zuerst erhalten; beim Vergroessern kommen Heilung, dann Kicks dazu.
+local FILL = { "damage", "heal", "kicks", "dps", "hps" }
+function Meter.SetCount(n)
+  local list = ns.DB.panes
+  local old = #list
+  n = ns.Clamp(math.floor(n or 1), 1, 6)
+  while #list > n do
+    local drop = #list
+    for i = #list, 1, -1 do if list[i].view ~= "damage" then drop = i break end end
+    table.remove(list, drop)
+  end
+  while #list < n do
+    local have = {}
+    for _, d in ipairs(list) do have[d.view] = true end
+    local view = "kicks"
+    for _, v in ipairs(FILL) do if not have[v] then view = v break end end
+    ns.NewPane(view)
+  end
+  -- Gesamtbreite mitziehen, damit ein einzelner Teil nicht riesig breit wird
+  local docked = 0
+  for _, d in ipairs(list) do if d.docked then docked = docked + 1 end end
+  if old > 0 and n ~= old and docked > 0 then
+    local f = ns.DB.frame
+    f.w = ns.Clamp(math.floor((f.w or 600) * n / old + 0.5), 300, MAX_W)
+  end
+  Meter.Rebuild()
+end
+
 function Meter.Apply()
   if not Group.frame then return end
   Meter.PlaceGroup()

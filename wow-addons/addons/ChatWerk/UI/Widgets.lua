@@ -478,10 +478,11 @@ end
 local flows = {}
 local flowDriver
 local FLOW = { C.amber, C.teal, C.aqua, C.teal }
-local function flowColor(t)
-  t = t % 1 * #FLOW
+local function flowColor(t, list)
+  list = list or FLOW
+  t = t % 1 * #list
   local i = math.floor(t)
-  return lerp(FLOW[i + 1], FLOW[(i + 1) % #FLOW + 1], t - i)
+  return lerp(list[i + 1], list[(i + 1) % #list + 1], t - i)
 end
 local function startFlow()
   if flowDriver then return end
@@ -496,7 +497,8 @@ local function startFlow()
     for _, f in ipairs(flows) do
       if f.frame:IsVisible() then
         local t = now / f.period
-        f.round:SetGradient({ flowColor(t), flowColor(t + 0.33), flowColor(t + 0.66) }, f.alpha)
+        local l = f.colors
+        f.round:SetGradient({ flowColor(t, l), flowColor(t + 0.33, l), flowColor(t + 0.66, l) }, f.alpha)
       end
     end
   end)

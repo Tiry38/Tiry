@@ -216,6 +216,12 @@ local function windowPage()
   local p, st = newPage()
   local w = st:Width()
   local half = math.floor((w - 24) / 2)
+  st:Title("Aufteilung")
+  segRow(p, st, "Wie viele Teile im Fenster?", { { label = "Ein Fenster", value = 1 }, { label = "Zwei geteilt", value = 2 },
+    { label = "Drei geteilt", value = 3 } }, function() return #DB().panes end,
+    function(v) ns.Meter.SetCount(v) Config.Sidebar() Config.Show(current) end)
+  st:Para("Ein Fenster = nur ein Teil, z. B. nur Schaden. Was er zeigt: Titel im Fenster anklicken oder Teil unten anklicken.", 12, C.dim)
+  st:Space(6)
   st:Title("Teile im Fenster")
   st:Para("Von links nach rechts. Pfeile = Reihenfolge, Teil anklicken = seine Seite. Geloeste Teile schweben frei "
     .. "(eigenes Fenster, Ecke ziehen = Groesse).", 12, C.muted)
@@ -234,7 +240,7 @@ local function windowPage()
     name:SetText(v.label .. (d.docked and "" or "  |cff9fb3aa(geloest)|r"))
     local open = UI.SafeButton(row)
     open:SetPoint("TOPLEFT", 0, 0)
-    open:SetPoint("BOTTOMRIGHT", -150, 0)
+    open:SetPoint("BOTTOMRIGHT", -180, 0)
     open:SetScript("OnClick", function() UI.PlayClick() Config.Show("teil" .. d.id) end)
     local right = UI.IconButton(row, "chevron", 26, "Nach rechts")
     right:SetPoint("RIGHT", -8, 0)
@@ -246,6 +252,16 @@ local function windowPage()
     left:SetScript("OnClick", function() moveOrder(i, -1) end)
     local dock = UI.IconButton(row, d.docked and "detach" or "dock", 26, d.docked and "Loesen" or "Andocken")
     dock:SetPoint("RIGHT", left, "LEFT", -4, 0)
+    local trash = UI.IconButton(row, "trash", 26, "Teil loeschen")
+    trash:SetPoint("RIGHT", dock, "LEFT", -4, 0)
+    trash:SetShown(#DB().panes > 1)
+    trash:SetScript("OnClick", function()
+      if #DB().panes <= 1 then return end
+      table.remove(DB().panes, i)
+      ns.Meter.Rebuild()
+      Config.Sidebar()
+      Config.Show(current)
+    end)
     dock:SetScript("OnClick", function() ns.Meter.ToggleDock(d.id) Config.Show(current) end)
     st:Add(row, 40, 8)
   end
@@ -280,7 +296,8 @@ local function windowPage()
   reset:SetScript("OnClick", function() Data.Reset() end)
   st:Add(reset, 34, 16)
   st:Para("|cff39ff6b/kw|r Einstellungen · |cff39ff6b/kw zahlen|r Zahlen-Studio · |cff39ff6b/kw reset|r leeren · "
-    .. "|cff39ff6b/kw sperren|r sperren/frei · |cff39ff6b/kw aus|r / |cff39ff6ban|r verstecken/zeigen", 12, C.dim)
+    .. "|cff39ff6b/kw sperren|r sperren/frei · |cff39ff6b/kw aus|r / |cff39ff6ban|r verstecken/zeigen · "
+    .. "|cff39ff6b/kw eins|r / |cff39ff6bzwei|r / |cff39ff6bdrei|r Aufteilung", 12, C.dim)
   finish(st)
 end
 

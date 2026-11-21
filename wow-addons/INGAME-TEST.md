@@ -589,3 +589,9 @@ Installation: Ordner `Schlaghagel` ersetzen, `/reload` reicht (keine neuen Datei
 6. `/kw` → Aussehen: jeden Hintergrund einmal anklicken. **Die drei „WoW:“-Hintergründe** (Dialog, Marmor, Fels) – erscheint eine Textur? Wenn leer: melden.
 7. `/kw zahlen`: Eigene Zahlen an, Blizzard-Schadenszahlen aus. Gegner schlagen → Zahlen in der gewählten Schrift/Farbe über der **Namensplakette**? Heilung (eigene) grün über dir? „Probe“-Knopf zeigt Zahlen in der Mitte.
 8. Blizzard-Schrift wählen → Charakterauswahl und zurück → Blizzard-Zahlen in der neuen Schrift?
+9. (1.1) `/kw` → Fenster → „Ein Fenster“: nur noch Schaden, Fenster halb so breit. „Zwei geteilt“ holt Heilung zurück. `/reload` → bleibt.
+
+# Teil ChatWerk 1.3 (Aussehen)
+1. `/cw` → „Aussehen“: Nordlicht anklicken → Bild im Chatfenster, runde Ecken, Text gut lesbar? Regler „Hintergrund“ ändert die Stärke.
+2. Farbthema „Cyber-Pink“: Rand, Eckklammern, aktiver Reiter, Unterstrich, Kugel, Griff und Eingabezeile (Enter) werden pink/blau.
+3. „WoW: Dialog/Marmor/Fels“: erscheint eine Textur (gekachelt, nicht verzerrt)? Wenn leer: melden.

@@ -94,8 +94,10 @@ blau, Einschlag. **Keine Ringe/Drehungen auch beim Mahlstrom** (Test prüft das)
   nicht speichern. Ereignisname und Kanalnummer sind nie geheim.
 - Neue Nachrichtenart = Eintrag in `ns.CATS` (+ `ns.EV` bzw. `SYS`/`LOOT`-Liste). Neue Arten werden in bestehenden Reitern
   **nicht** automatisch eingeschaltet. Test: `tests/cw.lua`, Mock kennt `ScrollingMessageFrame` (`W.SMF`).
+- **Aussehen 1.3 (wie KampfWerk):** `ns.THEMES`/`ns.BACKGROUNDS`/`ns.Theme()` in `Core.lua` (gleiche Liste wie KampfWerk, Grafiken `bg_*`/`mask_round` von dort kopiert),
+  `DB.frame.bg/theme/bgAlpha`; `Main:Apply` färbt alles (auch `Blizzard.Theme()` = Eingabezeile), `Main:TileBg` kachelt WoW-Texturen. Seite `Config.Show("look")`.
 
-## KampfWerk 1.0 (Schadensmeter, geteiltes Glasfenster)
+## KampfWerk 1.1 (Schadensmeter, geteiltes Glasfenster)
 `addons/KampfWerk/`: `Core.lua` (DB, Themen `ns.THEMES`, Hintergründe `ns.BACKGROUNDS`, Teile `DB.panes` = `{id, view, session, docked, share, x,y,w,h}`, `/kw`),
 `Data.lua` (`Data.VIEWS` 12 Ansichten über `C_DamageMeter`/`Enum.DamageMeterType`, Aggro über `UnitDetailedThreatSituation`, `Data.Get(view, session)`
 → Zeilen mit getrennten FontString-Feldern), `Meter.lua` (Gruppe `KampfWerkFrame`, Teile `KampfWerkTeil<id>`, Teiler, Lösen/Andocken, Picker),
@@ -103,6 +105,7 @@ blau, Einschlag. **Keine Ringe/Drehungen auch beim Mahlstrom** (Test prüft das)
 `Blizzard.lua` (Blizzard-Meter `DamageMeter` verstecken, Daten bleiben), `Config.lua` (Seiten fenster/aussehen/zahlen/teil<id>).
 - **Kampflog ist gesperrt** (`COMBAT_LOG_EVENT_UNFILTERED` HasRestrictions) → alle Zahlen aus `C_DamageMeter`. Im Kampf sind Werte geheim:
   nur `StatusBar:SetValue`/`SetMinMaxValues`, `FontString:SetText`, `AbbreviateLargeNumbers` (alle AllowedWhenTainted); kein Vergleich, keine Prozente.
+- **1.1 Aufteilung:** `Meter.SetCount(n)` (1–6; entfernt zuerst Nicht-Schaden-Teile von hinten, ergänzt heal/kicks/dps/hps, skaliert `DB.frame.w`), `/kw eins|zwei|drei`.
 - Blizzards Weltzahlen: EINE Schrift für alles (`DAMAGE_TEXT_FONT`, nur beim Laden), feste Farben → getrennte Schrift/Farbe nur über die eigenen Zahlen.
 - Test `lua5.1 tests/kw.lua [ordner]` („KW TESTS OK“), Vorschau `render_pages.py`; Zahlen-Schriften rendert die Vorschau echt (`layout.lua` gibt `file:`-Gewicht für `\Zahlen\`-Pfade). Grafiken `python3 -I tools/kampfwerk_media.py`.
 

@@ -2,7 +2,7 @@
 ## Title: |cff39ff6bKampf|r|cff2de2e6Werk|r
 ## Notes: Schadensmeter im Neon-Glas: ein geteiltes Fenster, jeder Teil frei waehlbar (Schaden, Heilung, Kicks, Aggro ...), loesbar und skalierbar. Dazu Zahlen-Studio fuer Schadens- und Heilzahlen.
 ## Author: Tiry
-## Version: 1.0.0
+## Version: 1.1.0
 ## IconTexture: Interface\AddOns\KampfWerk\Media\logo
 ## SavedVariables: KampfWerkDB
 

@@ -121,20 +121,24 @@ end
 ----------------------------------------------------------------------------
 -- Reiter-Knoepfe oben (Glas-Pillen, aktiver Reiter im Neon-Verlauf, Zaehler fuer Ungelesenes)
 ----------------------------------------------------------------------------
+local function theme() return ns.Theme() end
+
 local function paintTab(b)
+  local t = theme()
   local on = ns.DB.active == b.id
   local hover = b:IsMouseOver()
   local show = Main.hover or ns.DB.alwaysHeader
   if on then
     b.edge:SetGradientV({ 1, 1, 1, 0.65 }, { 1, 1, 1, 0.12 })
-    b.bg:SetGradient(UI.GRAD, 1)
+    b.bg:SetGradient({ t[1], t[2], t[3] }, 1)
     b.gloss:SetAlpha(1)
+    b.glow:SetVertexColor(t[1][1], t[1][2], t[1][3], 1)
     b.glow:SetAlpha(show and 0.32 or 0.18)
     b.text:SetTextColor(C.dark[1], C.dark[2], C.dark[3], 1)
     b:SetAlpha(1)
   else
     local g = hover and UI.GLASS.pillHi or UI.GLASS.pill
-    b.edge:SetGradient(UI.GRAD_EDGE, hover and 0.6 or 0.22)
+    b.edge:SetGradient({ t[1], t[2], t[3] }, hover and 0.6 or 0.22)
     b.bg:SetGradientV(g[1], g[2], hover and 0.95 or 0.75)
     b.gloss:SetAlpha(0.35)
     b.glow:SetAlpha(0)
@@ -163,6 +167,7 @@ local function tabButton(i)
   local s = UI.PillShape(bd, 16, 3, false)
   s.edge:SetGradientV({ 1, 1, 1, 0.6 }, { 1, 1, 1, 0.1 })
   s.body:SetGradient(UI.GRAD, 1)
+  bd.body = s.body
   bd.text = UI.Text(bd, 12, "bold", C.dark)
   bd.text:SetPoint("CENTER", 0, 0)
   function bd:Set(t)
@@ -301,6 +306,14 @@ function Main:Place()
   f:SetSize(ns.Clamp(d.w or 520, MIN_W, MAX_W), ns.Clamp(d.h or 230, MIN_H, MAX_H))
 end
 
+-- WoW-Kacheltexturen wiederholen statt strecken
+function Main:TileBg()
+  local b = self.bgDef
+  if not b or not b.tile then return end
+  local w, h = self.frame:GetWidth() or 0, self.frame:GetHeight() or 0
+  if w > 0 and h > 0 then self.bg:SetTexCoord(0, w / b.tile, 0, h / b.tile) end
+end
+
 function Main:StopMove()
   self.frame:StopMovingOrSizing()
   self:Save()
@@ -313,11 +326,36 @@ function Main:Apply()
   local d = FD()
   self:Place()
   local a = ns.Clamp(d.alpha or 0.62, 0, 1)
+  local t = theme()
+  self.glass.opts.edgeStops = t
   self.glass:SetBody({ 0.028, 0.040, 0.046, 0.96 }, { 0.055, 0.070, 0.078, 0.96 }, a)
   self.glass:SetShown(a > 0.01)
   self.glass:SetEdge("neon", 0.18 + a * 0.45)
   self.hud.flow.alpha = 0.18 + a * 0.45
-  if self.hud.grid then self.hud.grid:SetShown(a > 0.05) end
+  self.hud.flow.colors = { t[1], t[2], t[3], t[2] }
+  local b = ns.BG[d.bg] or ns.BG.glas
+  self.bgDef = b
+  if b.file then
+    if b.tile then self.bg:SetTexture(b.file, "REPEAT", "REPEAT") else self.bg:SetTexture(b.file) self.bg:SetTexCoord(0, 1, 0, 1) end
+    self.bg:SetVertexColor(1, 1, 1, ns.Clamp(d.bgAlpha or 0.55, 0, 1))
+    self.bg:Show()
+    self:TileBg()
+  else
+    self.bg:Hide()
+  end
+  if self.hud.grid then self.hud.grid:SetShown(a > 0.05 and not b.file) end
+  local cols = { t[1], t[3], t[2], t[3] }
+  for i, c in ipairs(self.hud.corners or {}) do c:SetVertexColor(cols[i][1], cols[i][2], cols[i][3], 0.85) end
+  if self.hud.streak then self.hud.streak:SetVertexColor(t[2][1], t[2][2], t[2][3], 1) end
+  self.headBg:SetGradient({ t[1], t[2], t[3] }, 0.08)
+  self.sep:SetVertexColor(t[2][1], t[2][2], t[2][3], 0.35)
+  UI.SetGradV(self.orb, t[1], t[2], 1)
+  self.orbGlow:SetVertexColor(t[1][1], t[1][2], t[1][3], 0.55)
+  UI.SetGradH(self.under, t[1], t[3], 1)
+  self.underGlow:SetVertexColor(t[2][1], t[2][2], t[2][3], 0.9)
+  self.grip.tex:SetVertexColor(t[1][1], t[1][2], t[1][3], 1)
+  for _, tb in ipairs(self.tabs) do if tb.badge and tb.badge.body then tb.badge.body:SetGradient({ t[1], t[2], t[3] }, 1) end end
+  if ns.Blizzard and ns.Blizzard.Theme then ns.Blizzard.Theme() end
   for _, t in pairs(ns.Windows) do t:Style() end
   self.lock.icon:SetTexture(UI.Icon(d.locked and "lock" or "unlock"))
   self.grip:SetShown(not d.locked)
@@ -355,6 +393,17 @@ local function build()
   f:SetResizeBounds(MIN_W, MIN_H, MAX_W, MAX_H)
   f:EnableMouse(false)
   Main.glass = UI.Glass(f, { radius = 16, sheen = 0.035, line = 0.18, edge = 0.2 })
+  -- Hintergrund-Bild (wie KampfWerk): unter dem Glas-Rand, mit runder Maske
+  Main.bg = f:CreateTexture(nil, "BORDER", nil, -8)
+  Main.bg:SetPoint("TOPLEFT", 1, -1)
+  Main.bg:SetPoint("BOTTOMRIGHT", -1, 1)
+  local mask = f:CreateMaskTexture()
+  mask:SetTexture(MEDIA .. "mask_round", "CLAMPTOBLACKADDITIVE", "CLAMPTOBLACKADDITIVE")
+  pcall(mask.SetTextureSliceMargins, mask, 16, 16, 16, 16)
+  pcall(mask.SetTextureSliceMode, mask, 0)
+  mask:SetAllPoints(Main.bg)
+  Main.bg:AddMaskTexture(mask)
+  Main.bg:Hide()
   Main.hud = UI.HUD(f, { radius = 16, flow = Main.glass.edge, flowAlpha = 0.45, grid = 0.05 })
 
   -- Reiterleiste: ziehen = verschieben
@@ -369,6 +418,7 @@ local function build()
   Main.headBg:SetGradient(UI.GRAD_EDGE or UI.GRAD, 0.08)
   -- feine Neon-Linie unter der Reiterleiste
   local sep = UI.Hairline(head, C.teal, 0.35, "ARTWORK", true)
+  Main.sep = sep
   sep:SetPoint("BOTTOMLEFT", head, "BOTTOMLEFT", 14, -1)
   sep:SetPoint("BOTTOMRIGHT", head, "BOTTOMRIGHT", -14, -1)
   -- pulsierende Status-Kugel links ("live")
@@ -378,6 +428,7 @@ local function build()
   orb:SetPoint("LEFT", 12, 0)
   UI.SetGradV(orb, C.amber, C.teal, 1)
   local og = UI.Glow(head, C.amber, 26, 0.55, "ARTWORK")
+  Main.orbGlow = og
   og:SetPoint("CENTER", orb, "CENTER")
   og:SetBlendMode("ADD")
   local pulse = og:CreateAnimationGroup()
@@ -456,6 +507,7 @@ local function build()
   UI.SetTooltip(grip, "Groesse aendern", "Ziehen, um das Fenster groesser oder kleiner zu machen.")
 
   f:SetScript("OnSizeChanged", function()
+    Main:TileBg()
     local t = Main:Active()
     if t and down:IsShown() and t.msg:AtBottom() then down:Hide() end
     if Main.ready then Main:LayoutTabs() end

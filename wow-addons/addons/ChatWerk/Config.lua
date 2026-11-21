@@ -13,6 +13,8 @@ local current = "general"
 local sideButtons = {}
 
 local function DB() return ns.DB end
+local function theme() return ns.Theme() end
+local MEDIA = ns.MEDIA
 
 ----------------------------------------------------------------------------
 -- Kleine Bausteine
@@ -60,6 +62,114 @@ end
 -- Kopier-Fenster (Links, Verlauf)
 ----------------------------------------------------------------------------
 local copy
+-- (aus KampfWerk) Auswahl-Pille (Radio): optional Vorschau-Textur, Verlauf oder eigene Schrift
+local function choice(parent, w, h, item, onPick)
+  local b = UI.SafeButton(parent)
+  b:SetSize(w, h)
+  b.item = item
+  b.glow = UI.Glow(b, C.amber, w * 1.2, 0, "BACKGROUND")
+  b.glow:SetPoint("CENTER")
+  b.glow:SetHeight(h * 2)
+  local shape = UI.PillShape(b, math.min(h, 34), 0, true)
+  b.edge, b.bg, b.gloss = shape.edge, shape.body, shape.gloss
+  if item.tex then
+    b.prev = b:CreateTexture(nil, "BORDER")
+    b.prev:SetPoint("TOPLEFT", 2, -2)
+    b.prev:SetPoint("BOTTOMRIGHT", -2, 2)
+    if item.tile then b.prev:SetTexture(item.tex, "REPEAT", "REPEAT") b.prev:SetTexCoord(0, (w - 4) / item.tile, 0, (h - 4) / item.tile)
+    else b.prev:SetTexture(item.tex) end
+    b.mask = b:CreateMaskTexture()
+    b.mask:SetTexture(MEDIA .. "mask_round", "CLAMPTOBLACKADDITIVE", "CLAMPTOBLACKADDITIVE")
+    pcall(b.mask.SetTextureSliceMargins, b.mask, 16, 16, 16, 16)
+    pcall(b.mask.SetTextureSliceMode, b.mask, 0)
+    b.mask:SetAllPoints(b.prev)
+    b.prev:AddMaskTexture(b.mask)
+  end
+  if item.grad then
+    b.swf = CreateFrame("Frame", nil, b)
+    b.swf:SetSize(44, 18)
+    b.swf:SetPoint("LEFT", 10, 0)
+    b.sw = UI.Round(b.swf, 9, "ARTWORK", 0)
+    b.sw:SetGradient(item.grad, 1)
+  end
+  if item.font then
+    b.sample = b:CreateFontString(nil, "OVERLAY")
+    if not pcall(b.sample.SetFont, b.sample, item.font, item.fontSize or 18, "OUTLINE") then
+      pcall(b.sample.SetFont, b.sample, STANDARD_TEXT_FONT or "Fonts\\FRIZQT__.TTF", item.fontSize or 18, "OUTLINE")
+    end
+    b.sample:SetPoint("LEFT", 14, 0)
+    b.sample:SetText(item.sample or "12.345")
+    b.text = UI.Text(b, 12, "semibold", C.muted)
+    b.text:SetPoint("RIGHT", -12, 0)
+    b.text:SetJustifyH("RIGHT")
+    b.sample:SetPoint("RIGHT", b.text, "LEFT", -6, 0)
+    b.sample:SetJustifyH("LEFT")
+    b.sample:SetWordWrap(false)
+  else
+    b.text = UI.Text(b, 12, "bold", C.text)
+    if item.tex then
+      b.text:SetPoint("BOTTOMLEFT", 12, 6)
+      b.text:SetShadowColor(0, 0, 0, 1)
+      b.text:SetShadowOffset(1, -1)
+    elseif item.grad then
+      b.text:SetPoint("LEFT", b.swf, "RIGHT", 8, 0)
+    else
+      b.text:SetPoint("CENTER")
+    end
+  end
+  b.text:SetText(item.label or "")
+  b.check = b:CreateTexture(nil, "OVERLAY")
+  b.check:SetTexture(UI.Icon("check"))
+  b.check:SetSize(12, 12)
+  b.check:SetPoint("TOPRIGHT", -9, -7)
+  function b:Paint()
+    local t = theme()
+    local hover = self:IsMouseOver()
+    local sel = self.isSel and self.isSel() or false
+    if sel then
+      self.edge:SetGradient({ t[1], t[2], t[3] }, 1)
+    else
+      self.edge:SetGradient({ t[1], t[2], t[3] }, hover and 0.55 or 0.16)
+    end
+    local g = hover and UI.GLASS.pillHi or UI.GLASS.pill
+    self.bg:SetGradientV(g[1], g[2], (item.tex and 0) or (hover and 0.95 or 0.75))
+    self.gloss:SetAlpha(item.tex and 0 or 0.35)
+    self.glow:SetVertexColor(t[1][1], t[1][2], t[1][3], sel and 0.22 or 0)
+    self.check:SetShown(sel and not item.font) -- Schrift-Pillen: Auswahl zeigt der Leuchtrand, der Haken laege auf dem Namen
+    self.check:SetVertexColor(t[1][1], t[1][2], t[1][3], 1)
+    if self.sample and item.color then self.sample:SetTextColor(item.color()[1], item.color()[2], item.color()[3], 1) end
+  end
+  b:SetScript("OnEnter", function(self) self:Paint() end)
+  b:SetScript("OnLeave", function(self) self:Paint() end)
+  b:SetScript("OnClick", function(self)
+    UI.PlayClick()
+    onPick(self.item.value)
+    for _, o in ipairs(self.group or {}) do o:Paint() end
+  end)
+  return b
+end
+
+-- Raster aus Auswahl-Pillen; gibt die Hoehe zurueck
+local function grid(p, st, items, isSel, onPick, cols, h, gap)
+  gap = gap or 10
+  local w = st:Width()
+  local cw = math.floor((w - gap * (cols - 1)) / cols)
+  local group = {}
+  local y0 = st.y
+  for i, it in ipairs(items) do
+    local b = choice(p, cw, h, it, onPick)
+    b.isSel = function() return isSel(it.value) end
+    b.group = group
+    group[#group + 1] = b
+    local col, row = (i - 1) % cols, math.floor((i - 1) / cols)
+    b:SetPoint("TOPLEFT", p, "TOPLEFT", st.pad + col * (cw + gap), -(y0 + row * (h + gap)))
+    b:Paint()
+  end
+  local rows = math.ceil(#items / cols)
+  st.y = y0 + rows * (h + gap) + 6
+  return group
+end
+
 local function strip(s)
   s = s:gsub("|T.-|t", ""):gsub("|H.-|h(.-)|h", "%1"):gsub("|c%x%x%x%x%x%x%x%x", ""):gsub("|r", "")
   return s
@@ -352,22 +462,21 @@ local function generalPage()
   st:Title("Chatfenster")
   local font = UI.Stepper(p, "Schrift", half, function() return F.font or 13 end,
     function(v) F.font = v refreshWindows() end, 1, 9, 24, function(v) return v .. " px" end)
-  local alpha = UI.Stepper(p, "Glas", half, function() return math.floor((F.alpha or 0.62) * 100 + 0.5) end,
-    function(v) F.alpha = v / 100 refreshWindows() end, 5, 0, 100, function(v) return v .. " %" end)
-  st:Add(font, 34, 0)
-  alpha:SetPoint("LEFT", font, "RIGHT", 24, 0)
-  st:Space(10)
   local fade = UI.Stepper(p, "Ausblenden", half, function() return F.fade or 0 end,
     function(v) F.fade = v refreshWindows() end, 10, 0, 600, function(v) return v == 0 and "nie" or (v .. " s") end)
-  st:Add(fade, 34, 0)
+  st:Add(font, 34, 0)
+  fade:SetPoint("LEFT", font, "RIGHT", 24, 0)
+  st:Space(10)
+  local lockAnchor = CreateFrame("Frame", nil, p)
+  lockAnchor:SetSize(half, 34)
+  st:Add(lockAnchor, 34, 0)
   local lockT = UI.Toggle(p, "Sperren", function() return F.locked == true end,
     function(v) F.locked = v refreshWindows() end, nil, half)
-  lockT:SetPoint("LEFT", fade, "RIGHT", 24, 0)
-  st:Space(10)
+  lockT:SetPoint("LEFT", lockAnchor, "LEFT", 0, 0)
   local bar = UI.Stepper(p, "Reiter weg nach", half, function() return F.barFade or 5 end,
     function(v) F.barFade = v end, 1, 0, 60, function(v) return v == 0 and "nie" or (v .. " s") end)
   UI.SetTooltip(bar, "Reiterleiste ausblenden", "So viele Sekunden, nachdem die Maus das Chatfenster verlassen hat, blendet die Reiterleiste aus. Maus drueber = sofort wieder da. 0 = immer sichtbar.")
-  st:Add(bar, 34, 0)
+  bar:SetPoint("LEFT", lockAnchor, "RIGHT", 24, 0)
   st:Space(14)
   st:Title("Darstellung")
   local function seg(text, options, get, set)
@@ -430,6 +539,45 @@ local function generalPage()
 end
 
 ----------------------------------------------------------------------------
+-- Seite: Aussehen (gleiche Hintergruende, Farbthemen und Transparenz wie KampfWerk)
+----------------------------------------------------------------------------
+local function lookPage()
+  local p = newPage()
+  rows = nil
+  local st = UI.Stack(p, 0)
+  local w = st:Width()
+  local half = math.floor((w - 24) / 2)
+  local F = DB().frame
+  st:Title("Hintergrund")
+  local items = {}
+  for _, b in ipairs(ns.BACKGROUNDS) do
+    items[#items + 1] = { value = b.key, label = b.label, tex = b.file, tile = b.tile }
+  end
+  grid(p, st, items, function(v) return (F.bg or "glas") == v end, function(v) F.bg = v refreshWindows() end, 4, 56, 10)
+  st:Para("Die drei WoW-Hintergruende kommen direkt aus dem Spiel. Fehlt einer in Forever, bleibt die Flaeche leer - "
+    .. "dann einfach einen anderen waehlen.", 12, C.dim)
+  local ba = UI.Stepper(p, "Hintergrund", half, function() return math.floor((F.bgAlpha or 0.55) * 100 + 0.5) end,
+    function(v) F.bgAlpha = v / 100 refreshWindows() end, 5, 0, 100, function(v) return v .. " %" end)
+  local ga = UI.Stepper(p, "Glas", half, function() return math.floor((F.alpha or 0.62) * 100 + 0.5) end,
+    function(v) F.alpha = v / 100 refreshWindows() end, 5, 0, 100, function(v) return v .. " %" end)
+  UI.SetTooltip(ba, "Hintergrund", "Wie stark das Hintergrundbild durchscheint. 0 % = nur Glas.")
+  UI.SetTooltip(ga, "Glas", "Deckkraft der Glasflaeche und Staerke des Neon-Rands. 0 % = komplett durchsichtig.")
+  st:Add(ba, 34, 0)
+  ga:SetPoint("LEFT", ba, "RIGHT", 24, 0)
+  st:Space(18)
+  st:Title("Farbthema")
+  st:Para("Faerbt Neon-Rand, Eckklammern, Lauflicht, aktiven Reiter, Unterstrich, Status-Kugel und Griff.", 12, C.dim)
+  local th = {}
+  for _, t in ipairs(ns.THEMES) do th[#th + 1] = { value = t.key, label = t.label, grad = t.c } end
+  grid(p, st, th, function(v) return (F.theme or "neon") == v end,
+    function(v) F.theme = v refreshWindows() Config.Show(current) end, 3, 38, 10)
+  st:Finish(20)
+  page:SetHeight(st.y + 20)
+  content:SetHeight(st.y + 30)
+  if sf.UpdateBar then sf.UpdateBar() end
+end
+
+----------------------------------------------------------------------------
 -- Seitenleiste
 ----------------------------------------------------------------------------
 local function sideButton(i, text, value, icon)
@@ -484,6 +632,8 @@ function Config.Sidebar()
   for _, b in ipairs(sideButtons) do b:Hide() end
   local i = 1
   sideButton(i, "Einstellungen", "general", "gear")
+  i = i + 1
+  sideButton(i, "Aussehen", "look", "palette")
   for _, d in ipairs(DB().windows) do
     i = i + 1
     sideButton(i, d.name or "Chat", d.id, "chat")
@@ -494,12 +644,15 @@ end
 
 function Config.Show(value)
   current = value
-  if value ~= "general" then filter = filter or "" end
+  if value ~= "general" and value ~= "look" then filter = filter or "" end
   Config.Sidebar()
   if sf.ScrollToTop then sf:ScrollToTop() end
   if value == "general" then
     frame.sub:SetText("Allgemeine Einstellungen")
     generalPage()
+  elseif value == "look" then
+    frame.sub:SetText("Hintergrund, Farbthema, Transparenz")
+    lookPage()
   else
     local d = ns.WindowById(value)
     frame.sub:SetText("Reiter \"" .. (d and d.name or "?") .. "\" - was soll hier stehen?")

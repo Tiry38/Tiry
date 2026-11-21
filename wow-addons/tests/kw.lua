@@ -276,6 +276,36 @@ table.remove(DB.panes, 3)
 M.Rebuild()
 ok(not M.Group.dividers[2]:IsShown(), "Teil entfernt")
 
+-- 1.1 Aufteilung: nur ein Fenster (z. B. nur Schaden), dann wieder zwei
+do
+  local saved = {}
+  for i, d in ipairs(DB.panes) do saved[i] = d end
+  local id1, id2 = P1.data.id, P2.data.id
+  local hadDamage = false
+  for _, d in ipairs(DB.panes) do if d.view == "damage" then hadDamage = true end end
+  SlashCmdList.KAMPFWERK("eins")
+  ok(#DB.panes == 1 and (not hadDamage or DB.panes[1].view == "damage"), "/kw eins: nur ein Teil, Schaden bleibt")
+  ok(DB.frame.w == 350, "ein Teil: Fenster halb so breit (" .. tostring(DB.frame.w) .. ")")
+  ok(not (M.Group.dividers[1] and M.Group.dividers[1]:IsShown()), "ein Teil: kein Teiler")
+  local only = M.Panes[DB.panes[1].id]
+  L.reset()
+  local gr, pr = L.rect(KampfWerkFrame), L.rect(only.frame)
+  ok(only.frame:IsShown() and pr.r - pr.l > (gr.r - gr.l) - 30, "ein Teil fuellt das ganze Fenster")
+  for _, pp in pairs(M.Panes) do if pp ~= only then ok(false, "alter Teil noch da") end end
+  M.SetCount(2)
+  ok(#DB.panes == 2 and DB.panes[2].view == "heal" and DB.frame.w == 700, "zwei Teile: Heilung kommt dazu, Breite zurueck")
+  M.SetCount(3)
+  ok(#DB.panes == 3 and DB.panes[3].view == "kicks", "drei Teile: Kicks kommt dazu")
+  M.SetCount(1)
+  ok(#DB.panes == 1 and DB.panes[1].view == "damage", "wieder eins: Schaden bleibt")
+  for i = 1, #saved do DB.panes[i] = saved[i] end
+  for i = #saved + 1, #DB.panes do DB.panes[i] = nil end
+  DB.frame.w = 700
+  M.Rebuild()
+  P1, P2 = M.Panes[id1], M.Panes[id2]   -- (im Spiel kommen geloeschte IDs nie wieder; hier nur fuer die weiteren Pruefungen)
+  ok(#DB.panes == #saved and P1 and P2, "Teile wiederhergestellt")
+end
+
 -- Zuruecksetzen, sperren, Blizzard-Meter
 SlashCmdList.KAMPFWERK("reset")
 ok(W.resetCalled, "/kw reset leert Blizzards Kampfdaten")
@@ -425,6 +455,10 @@ if OUT then
   M.Apply()
   L.dump(UIParent, OUT .. "/kw_meter_nordlicht.tsv", { levels = true })
   M.ToggleDock(DB.panes[2].id)
+  DB.look.bg, DB.look.theme = "glas", "neon"
+  M.SetCount(1)
+  M.Apply()
+  L.dump(UIParent, OUT .. "/kw_meter_eins.tsv", { levels = true })
 end
 
 print(string.format("KampfWerk: %d Pruefungen, %d Fehler", checks, fails))

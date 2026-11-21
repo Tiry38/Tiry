@@ -50,8 +50,22 @@ local function styleEdit(eb)
   end
   ns.Safe(function()
     eb.cwGlass = UI.Glass(eb, { radius = 15, sheen = 0.06, line = 0.25, edgeMode = "neon", edge = 0.45, sub = -8 })
-    UI.HUD(eb, { radius = 15, grid = false, corner = false, flow = eb.cwGlass.edge, flowAlpha = 0.5, streakW = 110, streakPause = 6 })
+    eb.cwHud = UI.HUD(eb, { radius = 15, grid = false, corner = false, flow = eb.cwGlass.edge, flowAlpha = 0.5, streakW = 110, streakPause = 6 })
+    B.Theme()
   end)
+end
+
+-- Eingabezeile im gewaehlten Farbthema (wie das Chatfenster)
+function B.Theme()
+  local eb = ChatFrame1EditBox
+  if not eb or not eb.cwGlass or not ns.Theme then return end
+  local t = ns.Theme()
+  eb.cwGlass.opts.edgeStops = t
+  eb.cwGlass:SetEdge("neon", 0.45)
+  if eb.cwHud then
+    if eb.cwHud.flow then eb.cwHud.flow.colors = { t[1], t[2], t[3], t[2] } end
+    if eb.cwHud.streak then eb.cwHud.streak:SetVertexColor(t[2][1], t[2][2], t[2][3], 1) end
+  end
 end
 
 function B.Anchor()

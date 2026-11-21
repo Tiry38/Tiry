@@ -12,7 +12,7 @@
 local ADDON, ns = ...
 KampfWerk = ns
 ns.NAME = ADDON or "KampfWerk"
-ns.VERSION = "1.0.0"
+ns.VERSION = "1.1.0"
 ns.MEDIA = "Interface\\AddOns\\KampfWerk\\Media\\"
 local MEDIA = ns.MEDIA
 
@@ -219,7 +219,8 @@ SlashCmdList.KAMPFWERK = function(msg)
   elseif msg == "hilfe" or msg == "help" then
     ns.Print("v" .. ns.VERSION .. " - |cff39ff6b/kw|r Einstellungen · |cff39ff6b/kw zahlen|r Zahlen-Studio · "
       .. "|cff39ff6b/kw reset|r Kampfdaten leeren · |cff39ff6b/kw an|r / |cff39ff6baus|r Fenster zeigen/verstecken · "
-      .. "|cff39ff6b/kw sperren|r Fenster sperren/frei · |cff39ff6b/kw neu|r weiterer Teil")
+      .. "|cff39ff6b/kw sperren|r Fenster sperren/frei · |cff39ff6b/kw neu|r weiterer Teil · "
+      .. "|cff39ff6b/kw eins|r / |cff39ff6bzwei|r / |cff39ff6bdrei|r ein Fenster oder geteilt")
   elseif msg == "zahlen" then
     if ns.Config then ns.Config.Open("zahlen") end
   elseif msg == "reset" then
@@ -234,6 +235,10 @@ SlashCmdList.KAMPFWERK = function(msg)
     ns.DB.frame.locked = not ns.DB.frame.locked
     ns.Print(ns.DB.frame.locked and "Fenster gesperrt." or "Fenster frei.")
     if ns.Meter then ns.Meter.Apply() end
+  elseif msg == "eins" or msg == "zwei" or msg == "drei" or msg == "1" or msg == "2" or msg == "3" then
+    local n = ({ eins = 1, zwei = 2, drei = 3 })[msg] or tonumber(msg)
+    if ns.Meter then ns.Meter.SetCount(n) end
+    ns.Print(n == 1 and "Ein Fenster." or (n .. " Teile."))
   elseif msg == "neu" then
     ns.NewPane("kicks")
     if ns.Meter then ns.Meter.Rebuild() end

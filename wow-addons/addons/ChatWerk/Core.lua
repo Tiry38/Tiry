@@ -11,7 +11,7 @@
 local ADDON, ns = ...
 ChatWerk = ns
 ns.NAME = ADDON or "ChatWerk"
-ns.VERSION = "1.2.1"
+ns.VERSION = "1.3.0"
 local VERSION = ns.VERSION
 ns.MEDIA = "Interface\\AddOns\\ChatWerk\\Media\\"
 
@@ -233,6 +233,48 @@ function ns.NewWindow(name, cats)
   return win
 end
 
+-- Aussehen 1.3: gleiche Farbthemen und Hintergruende wie KampfWerk (Tirys Wunsch: alles genauso einstellbar)
+local MEDIA = ns.MEDIA
+ns.THEMES = {
+  { key = "neon", label = "Neon", c = { { 0.224, 1.00, 0.42 }, { 0.15, 0.95, 0.85 }, { 0.16, 0.70, 1.00 } } },
+  { key = "cyber", label = "Cyber-Pink", c = { { 1.00, 0.24, 0.76 }, { 0.62, 0.32, 1.00 }, { 0.20, 0.86, 1.00 } } },
+  { key = "glut", label = "Glut", c = { { 1.00, 0.86, 0.26 }, { 1.00, 0.46, 0.10 }, { 0.96, 0.18, 0.22 } } },
+  { key = "frost", label = "Frost", c = { { 0.86, 0.97, 1.00 }, { 0.40, 0.80, 1.00 }, { 0.48, 0.48, 1.00 } } },
+  { key = "teufel", label = "Teufel", c = { { 0.82, 1.00, 0.22 }, { 0.32, 1.00, 0.22 }, { 0.10, 0.72, 0.36 } } },
+  { key = "arkan", label = "Arkan", c = { { 0.96, 0.46, 1.00 }, { 0.62, 0.36, 1.00 }, { 0.32, 0.52, 1.00 } } },
+  { key = "gold", label = "Gold", c = { { 1.00, 0.95, 0.70 }, { 1.00, 0.80, 0.30 }, { 0.88, 0.56, 0.16 } } },
+  { key = "blut", label = "Blut", c = { { 1.00, 0.38, 0.38 }, { 0.84, 0.10, 0.22 }, { 0.56, 0.08, 0.38 } } },
+  { key = "chrom", label = "Chrom", c = { { 1.00, 1.00, 1.00 }, { 0.72, 0.78, 0.82 }, { 0.48, 0.54, 0.60 } } },
+}
+ns.THEME = {}
+for _, t in ipairs(ns.THEMES) do ns.THEME[t.key] = t end
+
+-- Hintergruende: eigene (prozedural erzeugt, tools/kampfwerk_media.py, gleiche wie KampfWerk) + drei klassische Blizzard-Texturen aus dem Spiel
+ns.BACKGROUNDS = {
+  { key = "glas", label = "2045-Glas" },
+  { key = "arkan", label = "Arkan", file = MEDIA .. "bg_arkan" },
+  { key = "nacht", label = "Nordlicht", file = MEDIA .. "bg_nacht" },
+  { key = "teufel", label = "Teufelsfeuer", file = MEDIA .. "bg_teufel" },
+  { key = "frost", label = "Frost", file = MEDIA .. "bg_frost" },
+  { key = "glut", label = "Glut", file = MEDIA .. "bg_glut" },
+  { key = "horde", label = "Horde", file = MEDIA .. "bg_horde" },
+  { key = "allianz", label = "Allianz", file = MEDIA .. "bg_allianz" },
+  { key = "leder", label = "Leder", file = MEDIA .. "bg_leder" },
+  { key = "stein", label = "Stein", file = MEDIA .. "bg_stein" },
+  { key = "karbon", label = "Karbon", file = MEDIA .. "bg_karbon" },
+  { key = "b_dialog", label = "WoW: Dialog", file = "Interface\\DialogFrame\\UI-DialogBox-Background-Dark", tile = 64 },
+  { key = "b_marmor", label = "WoW: Marmor", file = "Interface\\FrameGeneral\\UI-Background-Marble", tile = 256 },
+  { key = "b_fels", label = "WoW: Fels", file = "Interface\\FrameGeneral\\UI-Background-Rock", tile = 256 },
+}
+ns.BG = {}
+for _, b in ipairs(ns.BACKGROUNDS) do ns.BG[b.key] = b end
+
+function ns.Theme()
+  local f = ns.DB and ns.DB.frame
+  local t = ns.THEME[f and f.theme or "neon"] or ns.THEMES[1]
+  return t.c
+end
+
 local DEFAULTS = {
   hideBlizzard = true, classColors = true, channelStyle = "name", timestamp = "%H:%M", links = true, spam = true,
   lootPrices = true, keywords = "", ownName = true, soundWhisper = true, soundKeyword = true, history = true,
@@ -279,7 +321,8 @@ local function initDB()
     if DB.font == nil or DB.font == "poppins" then DB.font = "tech" end
   end
   DB.frame = DB.frame or {}
-  for k, v in pairs({ x = 16, y = 40, w = 520, h = 230, alpha = 0.62, font = 13, fade = 0, locked = false, barFade = 5 }) do
+  for k, v in pairs({ x = 16, y = 40, w = 520, h = 230, alpha = 0.62, font = 13, fade = 0, locked = false, barFade = 5,
+      bg = "glas", theme = "neon", bgAlpha = 0.55 }) do
     if DB.frame[k] == nil then DB.frame[k] = v end
   end
   if not ns.WindowById(DB.active) then DB.active = DB.windows[1].id end

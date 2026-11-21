@@ -450,6 +450,39 @@ ns.Config.Show(DB.windows[2].id)
 check("cw_handel", ChatWerkConfig)
 ns.Config.Show("general")
 check("cw_allgemein", ChatWerkConfig)
+-- 1.3 Aussehen: gleiche Hintergruende/Farbthemen/Transparenz wie KampfWerk
+ns.Config.Show("look")
+check("cw_aussehen", ChatWerkConfig)
+ok(#ns.BACKGROUNDS == 14 and #ns.THEMES == 9, "14 Hintergruende + 9 Farbthemen")
+local function pill(text) return find(ChatWerkConfig, function(o) return o.item and o.text and o.text.__text == text and L.isShown(o) end) end
+local nl = pill("Nordlicht")
+ok(nl ~= nil, "Hintergrund-Kachel Nordlicht")
+if nl then W.call(nl, "OnClick") end
+ok(DB.frame.bg == "nacht" and Main.bg:IsShown() and Main.bg.__file == "Interface\\AddOns\\ChatWerk\\Media\\bg_nacht",
+  "Nordlicht liegt als Bild im Chatfenster (" .. tostring(Main.bg.__file) .. ")")
+ok(not Main.hud.grid:IsShown(), "Hex-Raster aus, wenn ein Bild drin ist")
+local cy = pill("Cyber-Pink")
+if cy then W.call(cy, "OnClick") end
+ok(DB.frame.theme == "cyber", "Farbthema Cyber-Pink gewaehlt")
+local cyc = ns.THEME.cyber.c
+local ul = Main.hud.flow.colors
+ok(ul and ul[1] == cyc[1] and ul[3] == cyc[3], "fliessender Rand nimmt die Themenfarben")
+local gc = Main.grip.tex.__color or {}
+ok(math.abs((gc[1] or 0) - cyc[1][1]) < 0.01 and math.abs((gc[3] or 0) - cyc[1][3]) < 0.01, "Griff in Themenfarbe")
+local fe = pill("WoW: Fels")
+if fe then W.call(fe, "OnClick") end
+Main.frame:SetSize(512, 256)
+Main:TileBg()
+local tc = Main.bg.__coord or {}
+ok(DB.frame.bg == "b_fels" and math.abs((tc[2] or 0) - 2) < 0.01, "WoW-Fels wird gekachelt statt gestreckt")
+if OUT then
+  DB.frame.bg, DB.frame.theme = "nacht", "cyber"
+  Main:Apply()
+  ns.Config.Show("look")
+  check("cw_aussehen", ChatWerkConfig)
+end
+DB.frame.bg, DB.frame.theme = "glas", "neon"
+Main:Apply()
 ChatWerkConfig:Hide()
 
 -- /cw blizzard: alles zurueck
@@ -498,6 +531,11 @@ if OUT then
   Main:Hover(true)
   ChatFrame1EditBox:Show()
   L.dump(UIParent, OUT .. "/cw_chat.tsv", { levels = true })
+  DB.frame.bg, DB.frame.theme = "nacht", "cyber"
+  Main:Apply()
+  L.dump(UIParent, OUT .. "/cw_chat_nordlicht.tsv", { levels = true })
+  DB.frame.bg, DB.frame.theme = "glas", "neon"
+  Main:Apply()
 end
 
 ----------------------------------------------------------------------------
