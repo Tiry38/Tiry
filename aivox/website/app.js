@@ -426,7 +426,7 @@
       S('anrufer', 's1-4', 'Donnerstag, halb elf … ja, das passt super.'),
       S('ki', 's1-5', 'Wunderbar! Auf welchen Namen darf ich den Termin eintragen?'),
       S('anrufer', 's1-6', 'Bitte auf den Namen Becker.'),
-      S('ki', 's1-7', 'Danke, Herr Becker. Ich schicke Ihnen die Bestätigung per Es-Em-Es an die Nummer, mit der Sie gerade anrufen. Ist das in Ordnung?'),
+      S('ki', 's1-7', 'Danke, Herr Becker. Ich schicke Ihnen gleich eine kurze Bestätigung aufs Handy, an die Nummer, mit der Sie gerade anrufen. Ist das in Ordnung?'),
       S('anrufer', 's1-8', 'Ja, gerne. Danke Ihnen!'),
       S('ki', 's1-9', 'Sehr gern! Dann bis Donnerstag – und gute Fahrt bis dahin.')],
       fields: [["Anliegen", "Inspektion E-Bike", 1], ["Freier Termin (aus deinem Kontingent)", "Donnerstag, 10:30 Uhr", 2], ["Name (erfragt)", "Becker", 5], ["Bestätigung", "SMS an die Anrufnummer (zugestimmt)", 7], ["Ergebnis", "Termin vergeben · SMS gesendet · Übergabe-Karte an dich", 8, 1]] },
@@ -450,6 +450,16 @@
       S('anrufer', 's4-3', 'Ja … das wäre nett, danke.'),
       S('ki', 's4-4', 'Gern geschehen. Wir rufen Sie morgen früh an, unter der Nummer, mit der Sie gerade anrufen. Einen schönen Abend noch – und erholen Sie sich gut.')],
       fields: [["Uhrzeit", "Nach Ladenschluss", 0], ["Auskunft (aus deinem Profil)", "Morgen ab 9:00 Uhr geöffnet", 1], ["Rückrufnummer", "Übertragene Anrufnummer", 3], ["Ergebnis", "Rückruf für morgen früh in deiner Liste", 3, 1]] },
+    { title: 'Schwieriger Kunde', voiceKi: 'Vindemiatrix', voiceAn: 'Charon', who: 'Herr Wagner · verärgert', lines: [
+      S('anrufer', 's5-1', 'Hallo! Ich hab mein Rad gestern bei Ihnen zur Inspektion gehabt, und jetzt quietscht die Bremse schlimmer als vorher! Das kann doch nicht wahr sein!'),
+      S('ki', 's5-2', 'Das tut mir wirklich leid. Das ist ärgerlich, gerade wenn man sich auf frisch gewartete Bremsen verlässt. Damit ich Ihnen schnell helfen kann: Wie ist Ihr Name?'),
+      S('anrufer', 's5-3', 'Wagner. Und ich brauch das Rad jeden Tag, ich hab keine Zeit für so was!'),
+      S('ki', 's5-4', 'Verstehe ich gut, Herr Wagner. Eine Nachkontrolle nach einer Inspektion ist bei uns selbstverständlich kostenlos. Ich kann Ihnen heute um siebzehn Uhr oder morgen früh um halb acht einen Platz freihalten. Dann sind Sie in zwanzig Minuten wieder unterwegs. Was passt Ihnen besser?'),
+      S('anrufer', 's5-5', 'Nee. Ehrlich gesagt will ich das jetzt mit Ihrem Chef klären.'),
+      S('ki', 's5-6', 'Das kann ich gut verstehen, Herr Wagner. Ich verbinde Sie jetzt direkt mit dem Werkstattleiter. Falls er gerade nicht rangehen kann, ruft er Sie innerhalb von dreißig Minuten zurück. Ich habe ihm Ihr Anliegen schon komplett notiert, Sie müssen nichts noch einmal erklären.'),
+      S('anrufer', 's5-7', 'Hm. Okay. Danke.'),
+      S('ki', 's5-8', 'Sehr gern. Einen kleinen Moment, ich verbinde Sie.')],
+      fields: [["Stimmung", "Verärgert → beruhigt", 0], ["Anliegen", "Reklamation: Bremse quietscht nach Inspektion", 0], ["Name (erfragt)", "Wagner", 2], ["Angebot (deine Regel: Nacharbeit kostenlos)", "Nachkontrolle heute 17:00 oder morgen 7:30", 3], ["Übergabe (deine Regel: Chef-Wunsch)", "Durchstellen · sonst Rückruf in 30 Min, Priorität Rot", 5], ["Ergebnis", "Warm übergeben · Zusammenfassung liegt beim Chef", 7, 1]] },
   ];
   let sel = 0;
   const chips = $('.chips'), list = $('.script'), exList = $('.ex-list');
@@ -803,6 +813,44 @@ gl_FragColor=vec4(col*glow+vec3(stars*.25),glow+stars*.2);}`;
     const tick = () => { if (i >= words.length) return; el.textContent += (i ? ' ' : '') + words[i++]; el._t = setTimeout(tick, step); };
     clearTimeout(el._t); tick();
   };
+
+
+  /* ===================== v14: Warp-Übergänge ===================== */
+  const warp = (() => {
+    const w = document.createElement('div'); w.className = 'warp'; w.setAttribute('aria-hidden', 'true');
+    w.innerHTML = '<span class="warp-iris"></span><span class="warp-ring"></span><span class="warp-lines"></span><span class="warp-label"></span>';
+    document.body.appendChild(w);
+    const label = w.querySelector('.warp-label');
+    let busy = false;
+    const names = { start: 'START', ablauf: 'SO FUNKTIONIERT’S', live: 'LIVE-DEMO', einrichtung: 'EINRICHTUNG', cockpit: 'COCKPIT', sicherheit: 'SICHERHEIT', preise: 'PREISE', fragen: 'FRAGEN' };
+    const go = (id, x, y) => {
+      const target = document.getElementById(id); if (!target) return false;
+      if (reduce || busy) { target.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth' }); history.replaceState(null, '', '#' + id); return true; }
+      busy = true;
+      w.style.setProperty('--cx', x + 'px'); w.style.setProperty('--cy', y + 'px');
+      label.textContent = names[id] || id.toUpperCase();
+      w.classList.remove('out'); w.classList.add('in'); document.body.classList.add('warping');
+      SFX.whoosh(); setTimeout(() => SFX.zap(), 180);
+      setTimeout(() => {
+        document.documentElement.style.scrollBehavior = 'auto';
+        target.scrollIntoView({ behavior: 'auto' });
+        history.replaceState(null, '', '#' + id);
+        document.documentElement.style.scrollBehavior = '';
+        w.classList.remove('in'); w.classList.add('out'); document.body.classList.remove('warping');
+        SFX.chime && SFX.tone(1320, 0.25, 'sine', 0.02);
+        setTimeout(() => { w.classList.remove('out'); busy = false; plasmas.forEach((p) => p.resize()); }, 650);
+      }, 520);
+      return true;
+    };
+    document.addEventListener('click', (e) => {
+      const a = e.target.closest && e.target.closest('a[href^="#"]'); if (!a) return;
+      const id = a.getAttribute('href').slice(1); if (!id || !document.getElementById(id)) return;
+      e.preventDefault();
+      const r = a.getBoundingClientRect();
+      go(id, e.clientX || r.left + r.width / 2, e.clientY || r.top + r.height / 2);
+    });
+    return { go };
+  })();
 
   /* ===================== Start ===================== */
   FX.init();

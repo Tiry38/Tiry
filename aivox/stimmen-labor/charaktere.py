@@ -13,7 +13,7 @@ SCN = [
   ('an', 'Donnerstag, halb elf … [pause short] ja, das passt super.'),
   ('ki', 'Wunderbar! Auf welchen Namen darf ich den Termin eintragen?'),
   ('an', 'Bitte auf den Namen Becker.'),
-  ('ki', 'Danke, Herr Becker. [pause short] Ich schicke Ihnen die Bestätigung per Es-Em-Es an die Nummer, mit der Sie gerade anrufen. Ist das in Ordnung?'),
+  ('ki', 'Danke, Herr Becker. [pause short] Ich schicke Ihnen gleich eine kurze Bestätigung aufs Handy, an die Nummer, mit der Sie gerade anrufen. Ist das in Ordnung?'),
   ('an', 'Ja, gerne. Danke Ihnen!'),
   ('ki', 'Sehr gern! Dann bis Donnerstag – und gute Fahrt bis dahin.')],
   [['Anliegen', 'Inspektion E-Bike', 1], ['Freier Termin (aus deinem Kontingent)', 'Donnerstag, 10:30 Uhr', 2], ['Name (erfragt)', 'Becker', 5], ['Bestätigung', 'SMS an die Anrufnummer (zugestimmt)', 7], ['Ergebnis', 'Termin vergeben · SMS gesendet · Übergabe-Karte an dich', 8, 1]]),
@@ -37,6 +37,16 @@ SCN = [
   ('an', 'Ja … [pause short] das wäre nett, danke.'),
   ('ki', 'Gern geschehen. [pause short] Wir rufen Sie morgen früh an, unter der Nummer, mit der Sie gerade anrufen. Einen schönen Abend noch – und erholen Sie sich gut.')],
   [['Uhrzeit', 'Nach Ladenschluss', 0], ['Auskunft (aus deinem Profil)', 'Morgen ab 9:00 Uhr geöffnet', 1], ['Rückrufnummer', 'Übertragene Anrufnummer', 3], ['Ergebnis', 'Rückruf für morgen früh in deiner Liste', 3, 1]]),
+ ('Schwieriger Kunde', 'Vindemiatrix', 'Charon', 'Herr Wagner · verärgert', 0.96, 1.1, [
+  ('an', 'Hallo! Ich hab mein Rad gestern bei Ihnen zur Inspektion gehabt, und jetzt quietscht die Bremse schlimmer als vorher! Das kann doch nicht wahr sein!'),
+  ('ki', 'Das tut mir wirklich leid. [pause short] Das ist ärgerlich, gerade wenn man sich auf frisch gewartete Bremsen verlässt. Damit ich Ihnen schnell helfen kann: Wie ist Ihr Name?'),
+  ('an', 'Wagner. [pause short] Und ich brauch das Rad jeden Tag, ich hab keine Zeit für so was!'),
+  ('ki', 'Verstehe ich gut, Herr Wagner. [pause short] Eine Nachkontrolle nach einer Inspektion ist bei uns selbstverständlich kostenlos. Ich kann Ihnen heute um siebzehn Uhr oder morgen früh um halb acht einen Platz freihalten. Dann sind Sie in zwanzig Minuten wieder unterwegs. Was passt Ihnen besser?'),
+  ('an', 'Nee. [pause short] Ehrlich gesagt will ich das jetzt mit Ihrem Chef klären.'),
+  ('ki', 'Das kann ich gut verstehen, Herr Wagner. [pause short] Ich verbinde Sie jetzt direkt mit dem Werkstattleiter. Falls er gerade nicht rangehen kann, ruft er Sie innerhalb von dreißig Minuten zurück. Ich habe ihm Ihr Anliegen schon komplett notiert, Sie müssen nichts noch einmal erklären.'),
+  ('an', 'Hm. [pause short] Okay. Danke.'),
+  ('ki', 'Sehr gern. [pause short] Einen kleinen Moment, ich verbinde Sie.')],
+  [['Stimmung', 'Verärgert → beruhigt', 0], ['Anliegen', 'Reklamation: Bremse quietscht nach Inspektion', 0], ['Name (erfragt)', 'Wagner', 2], ['Angebot (deine Regel: Nacharbeit kostenlos)', 'Nachkontrolle heute 17:00 oder morgen 7:30', 3], ['Übergabe (deine Regel: Chef-Wunsch)', 'Durchstellen · sonst Rückruf in 30 Min, Priorität Rot', 5], ['Ergebnis', 'Warm übergeben · Zusammenfassung liegt beim Chef', 7, 1]]),
 ]
 
 TEL = 'adelay=150,highpass=f=170,lowpass=f=6500,equalizer=f=1800:t=q:w=1:g=2,acompressor=threshold=-22dB:ratio=3,loudnorm=I=-18:TP=-2'

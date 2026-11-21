@@ -16,7 +16,8 @@ Stimme „Sarah“ `EXAVITQu4vr4xnSDxMaL` · Modell `eleven_v4` · `language_cod
 
 ## 3. Text-Regeln (für alle Motoren, gemessen hilfreich ✔ / Doku ◇)
 - ✔ Zahlen, Uhrzeiten, Beträge als **gesprochene Wörter** („halb elf“, „neunundachtzig Euro“).
-- ✔ Abkürzungen ausschreiben, wie man sie spricht: „SMS“ → „Es-Em-Es“, „KI“ → „künstliche Intelligenz“ oder „Ka-I“.
+- ✔ Abkürzungen ausschreiben, wie man sie spricht: „KI“ → „künstliche Intelligenz“ oder „Ka-I“.
+- ✔ **„SMS“ nicht sprechen lassen** (klingt auch als „Es-Em-Es“ komisch – Tiry, 21.11.2026) → umformulieren: „eine kurze Bestätigung aufs Handy“, „eine Nachricht aufs Handy“.
 - ✔ Namen phonetisch: „Tiry“ → „Tiri“, „AIVOX“ → „Ei-Wox“. Anzeige-Text bleibt richtig geschrieben.
 - ✔ Kurze Sätze (Telefon: max. ~20 Wörter), ein Gedanke pro Satz.
 - ✔ Natürliche Gesprächsbausteine: „Klar, einen Moment … ich schau kurz nach.“, „Oh, das ist ärgerlich – aber das kriegen wir hin.“
@@ -73,3 +74,9 @@ Chirp kennt keine Gefühls-Tags – Charakter entsteht über: **Wortwahl** („O
 **Sprechtempo je Person** (gestresst 1,12 · müde 0,92 · normal 1,0), **Zögern** („Ähm, …“), Freude („Oh, super!“).
 Achtung: Gedankenstrich direkt nach „ja“ wird als „minus“ gelesen → Komma nutzen. Namen in ganze Sätze einbetten („Bitte auf den Namen Becker.“).
 AIVOX-Demo: jede Situation eigenes Stimmenpaar (Leda/Achird, Enceladus/Aoede, Pulcherrima/Iapetus, Algenib/Laomedeia). Skript: `aivox/stimmen-labor/charaktere.py`.
+
+## 13. Schwierige Anrufer: Ruhe-Protokoll (AIVOX, Tiry 21.11.2026)
+Primär lösen, im Notfall an Geschäft/Chef übergeben: **Zuhören** (Ärger anerkennen, keine Schuld, nicht diskutieren) → **Klären** (Name, Anliegen) →
+**Lösen** (Lösung im Rahmen der Werkstatt-Regeln, zwei Optionen) → **Übergeben** (Chef-Wunsch oder keine Einigung: sofort durchstellen, sonst Rückruf in 30 Min, Priorität Rot, Zusammenfassung vorab) →
+**Grenzen** (keine Versprechen außerhalb der Regeln, keine Geld-/Rechtsentscheidungen, bei Beleidigung ruhig Grenze setzen und übergeben).
+Stimme dabei: ruhiger, etwas langsamer (Tempo 0,96), warm. Demo: Vindemiatrix (AIVOX) / Charon (verärgerter Anrufer, 1,1). Szene s5 in `charaktere.py`.
