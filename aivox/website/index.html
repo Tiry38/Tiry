@@ -197,6 +197,7 @@
         <ul class="compat-list">
           <li><strong>Keine Installation.</strong> Nichts auf deinem PC, keine neue Hardware, kein neues Telefon.</li>
           <li><strong>Keine Schnittstelle nötig.</strong> AIVOX vergibt nur die Termin-Plätze, die du für sie reservierst – wie bei einer Online-Terminbuchung.</li>
+          <li><strong>Schnittstelle? Noch besser.</strong> Sobald deine Warenwirtschaft eine offizielle API hat, wird AIVOX direkt verbunden – und trägt Termine selbst ein, liest sie aus und verschiebt sie.</li>
           <li><strong>Deine Software bleibt.</strong> Jeder Termin kommt als fertige Übergabe-Karte – in Sekunden übernommen, egal ob große Warenwirtschaft, kleine Kasse oder Papierkalender.</li>
           <li><strong>Deine Nummer bleibt.</strong> Eine Rufumleitung – und ein Schalter, um alles wieder auszuschalten.</li>
         </ul>
@@ -284,12 +285,12 @@
       <p class="kicker">WOHER WEISS AIVOX DAS?</p>
       <h2 class="h2 chrome" data-decode>Keine Magie.<br>Nur saubere Quellen.</h2>
       <dl class="know">
-        <div class="spot"><dt>Deine freien Termine</dt><dd>Aus deinem Werkstatt-Kontingent: Du legst fest, wie viele Termine AIVOX pro Tag vergeben darf, und reservierst diese Plätze einmal in deiner Warenwirtschaft. So ist keine Doppelbuchung möglich.</dd></div>
+        <div class="spot"><dt>Deine freien Termine</dt><dd>Aus deinem Werkstatt-Kontingent: Du legst fest, wie viele Termine AIVOX pro Tag vergeben darf, und reservierst diese Plätze einmal in deiner Warenwirtschaft. So ist keine Doppelbuchung möglich.<span class="api-note"><b>Mit Schnittstelle (API)</b>Hat deine Warenwirtschaft eine offizielle Schnittstelle – oder bekommt sie eine –, verbinden wir AIVOX direkt damit. Dann liest AIVOX freie Termine live aus und trägt Termine selbst ein, verschiebt oder storniert sie. Kein Kontingent, keine Übergabe-Karte nötig.</span></dd></div>
         <div class="spot"><dt>Den Namen des Kunden</dt><dd>Sie fragt einfach nach – so wie du es auch tun würdest.</dd></div>
         <div class="spot"><dt>Die Telefonnummer</dt><dd>Wird beim Anruf mit übertragen, sofern der Anrufer sie nicht unterdrückt. Sonst fragt sie danach.</dd></div>
         <div class="spot"><dt>Die E-Mail-Adresse</dt><dd>Braucht sie meist nicht: Die Bestätigung geht nach Rückfrage per SMS an die Anrufnummer. Wer E-Mail möchte, nennt sie – AIVOX liest sie zur Kontrolle vor.</dd></div>
         <div class="spot"><dt>Preise und Öffnungszeiten</dt><dd>Aus deinem Werkstatt-Profil, das wir bei der Einrichtung gemeinsam anlegen. Ändern kannst du es jederzeit.</dd></div>
-        <div class="spot"><dt>Ob ein Rad fertig ist</dt><dd>Ein Tipp auf „fertig“ im Cockpit oder am Handy genügt. Verschickt deine Warenwirtschaft ohnehin Abhol-Nachrichten, setzt du AIVOX in Kopie – dann weiß sie es automatisch.</dd></div>
+        <div class="spot"><dt>Ob ein Rad fertig ist</dt><dd>Ein Tipp auf „fertig“ im Cockpit oder am Handy genügt. Verschickt deine Warenwirtschaft ohnehin Abhol-Nachrichten, setzt du AIVOX in Kopie – dann weiß sie es automatisch. Mit API-Anbindung liest sie den Auftragsstatus direkt aus deiner Warenwirtschaft.</dd></div>
       </dl>
     </div>
   </section>
@@ -358,7 +359,7 @@
         <ol class="tier-list">
           <li class="spot tilt"><span class="badge c-mint">Stufe 1 · sofort</span><h4>Werkstatt-Kontingent</h4><p>AIVOX vergibt nur die Plätze, die du für sie reservierst. Jeder Termin kommt als Übergabe-Karte ins Cockpit und per E-Mail – Übernahme in Sekunden. Passt nichts, nimmt sie einen Terminwunsch auf, den du mit einem Tipp bestätigst.</p></li>
           <li class="spot tilt"><span class="badge c-ice">Stufe 2 · sofort</span><h4>Status ohne Technik</h4><p>„Ist mein Rad fertig?“ – ein Tipp auf „fertig“ im Cockpit genügt. Oder AIVOX liest die Abhol-Nachrichten deiner Warenwirtschaft in Kopie mit.</p></li>
-          <li class="spot tilt"><span class="badge c-amber">Stufe 3 · im Aufbau</span><h4>Direkt-Anbindung</h4><p>Termine und Auftragsstatus live aus deiner Warenwirtschaft – über offizielle Schnittstellen, gemeinsam mit den Herstellern. Bis dahin decken Stufe 1 und 2 alles ab.</p></li>
+          <li class="spot tilt"><span class="badge c-amber">Stufe 3 · im Aufbau</span><h4>Direkt-Anbindung</h4><p>Sobald oder sofern deine Warenwirtschaft eine offizielle Schnittstelle (API) hat, verbinden wir AIVOX direkt damit: Sie sieht freie Termine live, trägt Termine selbst ein, verschiebt und storniert sie und kennt den Auftragsstatus („Ist mein Rad fertig?“). Bis dahin decken Stufe 1 und 2 alles ab – ohne Umstellung, wenn die API kommt.</p></li>
         </ol>
       </div>
       <div class="voices spot edge">
@@ -485,9 +486,9 @@
       <h2 id="t-faq" class="h2 chrome" data-decode>Ehrliche Antworten.</h2>
     </div>
     <div class="wrap faq">
-      <details class="spot" open><summary>Funktioniert das mit meiner Warenwirtschaft?</summary><p>Ja – mit jeder. AIVOX braucht keine Schnittstelle: Sie vergibt Termine aus dem Kontingent, das du für sie reservierst, und übergibt jeden Termin als fertige Karte, die du in Sekunden übernimmst. Direkte Anbindungen an einzelne Systeme bauen wir zusätzlich auf.</p></details>
+      <details class="spot" open><summary>Funktioniert das mit meiner Warenwirtschaft?</summary><p>Ja – mit jeder. AIVOX braucht keine Schnittstelle: Sie vergibt Termine aus dem Kontingent, das du für sie reservierst, und übergibt jeden Termin als fertige Karte, die du in Sekunden übernimmst. Hat deine Warenwirtschaft eine offizielle Schnittstelle (API) – oder bekommt sie eine –, wird AIVOX direkt verbunden und trägt Termine dann selbst ein, liest sie aus und verschiebt sie.</p></details>
       <details class="spot"><summary>Wie wird AIVOX an mein Telefon angebunden?</summary><p>Über eine Rufumleitung: Du leitest deine Nummer bei Besetzt, Nichtannahme oder nach Feierabend auf deine AIVOX-Nummer um. Deine Nummer bleibt, keine neue Hardware. Die Details stehen unter „Einrichtung“.</p></details>
-      <details class="spot"><summary>Woher kennt AIVOX meine Termine?</summary><p>Aus deinem Werkstatt-Kontingent. Ist es voll oder die Reparatur unklar, nimmt AIVOX einen Terminwunsch auf – du bestätigst mit einem Tipp, die Kundin bekommt automatisch eine SMS.</p></details>
+      <details class="spot"><summary>Woher kennt AIVOX meine Termine?</summary><p>Aus deinem Werkstatt-Kontingent. Ist es voll oder die Reparatur unklar, nimmt AIVOX einen Terminwunsch auf – du bestätigst mit einem Tipp, die Kundin bekommt automatisch eine SMS. Mit API-Anbindung an deine Warenwirtschaft sieht AIVOX deinen Kalender sogar live und bucht direkt hinein.</p></details>
       <details class="spot"><summary>Wie bekommt der Kunde seine Bestätigung?</summary><p>Per SMS an die Nummer, mit der er anruft – nach kurzer Rückfrage. Ist die Nummer unterdrückt, fragt AIVOX nach einer Nummer oder E-Mail und liest sie zur Kontrolle vor.</p></details>
       <details class="spot"><summary>Was macht AIVOX bei verärgerten Kunden?</summary><p>Sie bleibt ruhig, nimmt den Ärger ernst und versucht zuerst eine Lösung im Rahmen deiner Regeln – etwa eine kostenlose Nachkontrolle mit zwei Terminen zur Wahl. Reicht das nicht oder will der Kunde den Chef, stellt sie sofort durch oder sorgt für einen Rückruf in 30 Minuten – mit fertiger Zusammenfassung.</p></details>
       <details class="spot"><summary>Klingt das nicht nach Roboter?</summary><p>Hör es dir in der Live-Demo an. AIVOX sagt am Anfang offen, dass sie eine KI ist – das ist Pflicht und schafft Vertrauen.</p></details>
