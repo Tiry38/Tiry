@@ -560,3 +560,11 @@ main { counter-reset: kap; }
 .vchip:hover { border-color: rgba(127,212,255,.5); }
 .vchip.on, .vchip[aria-pressed="true"] { border-color: rgba(255,179,64,.6); background: linear-gradient(90deg, rgba(47,140,255,.12), rgba(255,74,36,.1)); box-shadow: 0 0 26px -8px rgba(255,179,64,.7); }
 .vchip.playing .vg { background: var(--spectrum); color: #05070a; animation: hum 1s infinite; }
+
+/* ---------- Anbindungs-Stufen ---------- */
+.tiers { margin-top: 1.4rem; text-align: left; }
+.tier-list { list-style: none; margin: 1rem 0 0; padding: 0; display: grid; gap: 1rem; }
+@media (min-width: 900px) { .tier-list { grid-template-columns: repeat(3, 1fr); } }
+.tier-list li { padding: 1.5rem 1.5rem 1.6rem; }
+.tier-list h4 { margin: 1rem 0 .4rem; font-size: 1.2rem; }
+.tier-list p { margin: 0; color: var(--steel); }

@@ -429,7 +429,7 @@
       S('ki', 's1-7', 'Danke, Frau Becker. Ich schicke Ihnen die Bestätigung per SMS an die Nummer, mit der Sie gerade anrufen. Ist das in Ordnung?'),
       S('anrufer', 's1-8', 'Ja, gerne.'),
       S('ki', 's1-9', 'Erledigt. Dann bis Donnerstag!')],
-      fields: [['Anliegen', 'Inspektion E-Bike', 1], ['Freier Termin (aus deinem Kalender)', 'Donnerstag, 10:30 Uhr', 2], ['Name (erfragt)', 'Becker', 5], ['Bestätigung', 'SMS an die Anrufnummer (zugestimmt)', 7], ['Ergebnis', 'Termin eingetragen · SMS gesendet · Zusammenfassung an dich', 8, 1]] },
+      fields: [['Anliegen', 'Inspektion E-Bike', 1], ['Freier Termin (aus deinem Kontingent)', 'Donnerstag, 10:30 Uhr', 2], ['Name (erfragt)', 'Becker', 5], ['Bestätigung', 'SMS an die Anrufnummer (zugestimmt)', 7], ['Ergebnis', 'Termin vergeben · SMS gesendet · Übergabe-Karte an dich', 8, 1]] },
     { title: 'Ist mein Rad fertig?', lines: [
       S('anrufer', 's2-1', 'Hallo, ich wollte fragen, ob mein Fahrrad schon fertig ist.'),
       S('ki', 's2-2', 'Gern. Sie rufen von der Nummer aus Ihrem Reparaturauftrag an. Spreche ich mit Frau Meier?'),

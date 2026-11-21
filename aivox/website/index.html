@@ -211,7 +211,7 @@
             <div class="ph-screen">
               <div class="ph-s s0"><span class="ph-label">Eingehender Anruf</span><span class="ph-num">Kunde · Mobil</span><span class="ph-ring"><i></i><i></i><i></i></span><span class="ph-sub">Werkstatt besetzt → Umleitung</span></div>
               <div class="ph-s s1"><span class="ph-label">AIVOX hat übernommen</span><span class="ph-wave"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span><span class="ph-quote">„Ich bin eine künstliche Intelligenz. Was kann ich für Sie tun?“</span><span class="ph-timer">00:07</span></div>
-              <div class="ph-s s2"><span class="ph-label">Kalender</span><span class="ph-cal"><b>Donnerstag</b><span>09:00 · Inspektion</span><span class="hit">10:30 · E-Bike · Becker · neu</span><span>13:00 · Reparatur</span></span><span class="ph-sub">Freien Termin gefunden und eingetragen</span></div>
+              <div class="ph-s s2"><span class="ph-label">Werkstatt-Kontingent</span><span class="ph-cal"><b>Donnerstag · 3 von 4 frei</b><span>09:00 · belegt</span><span class="hit">10:30 · E-Bike · Becker · neu</span><span>13:00 · frei</span></span><span class="ph-sub">Termin aus deinem Kontingent vergeben</span></div>
               <div class="ph-s s3"><span class="ph-label">SMS an Kundin</span><span class="ph-mail"><b>Fahrrad-Werkstatt am Markt</b><span>Ihr Termin: Do, 10:30 Uhr – Inspektion E-Bike. Bis dann!</span></span><span class="ph-label">E-Mail an dich</span><span class="ph-mail"><b>Neuer Termin über AIVOX</b><span>Becker · Inspektion · Do 10:30</span></span></div>
             </div>
           </div>
@@ -219,8 +219,8 @@
         <ol class="ss-steps">
           <li data-step="0"><span class="ss-n c-ice">00:00</span><h3>Es klingelt – du hast die Hände voll</h3><p>Deine Rufumleitung schickt den Anruf zu AIVOX, wenn du besetzt bist, nicht rangehst oder Feierabend hast.</p></li>
           <li data-step="1"><span class="ss-n c-mint">00:02</span><h3>AIVOX nimmt ab</h3><p>Sie sagt offen, dass sie eine KI ist, hört zu und versteht das Anliegen – auch wenn der Kunde durcheinander erzählt.</p></li>
-          <li data-step="2"><span class="ss-n c-amber">00:25</span><h3>Sie bucht den Termin</h3><p>Sie schaut in deinen verbundenen Kalender, schlägt einen freien Termin vor und fragt nach dem Namen.</p></li>
-          <li data-step="3"><span class="ss-n c-ember">00:40</span><h3>Beide wissen Bescheid</h3><p>Die Kundin bekommt nach Rückfrage eine SMS an die Nummer, mit der sie anruft. Du bekommst die Zusammenfassung per E-Mail und im Cockpit.</p></li>
+          <li data-step="2"><span class="ss-n c-amber">00:25</span><h3>Sie bucht den Termin</h3><p>Sie vergibt einen freien Platz aus deinem Werkstatt-Kontingent – genau den Plätzen, die du für AIVOX reserviert hast – und fragt nach dem Namen.</p></li>
+          <li data-step="3"><span class="ss-n c-ember">00:40</span><h3>Beide wissen Bescheid</h3><p>Die Kundin bekommt nach Rückfrage eine SMS. Du bekommst eine Übergabe-Karte im Cockpit und per E-Mail – in 30 Sekunden in deiner Warenwirtschaft.</p></li>
         </ol>
       </div>
     </div>
@@ -238,12 +238,12 @@
           <div class="fm-stages">
             <div><b class="c-ice">Hören</b><span>Spracherkennung wandelt Sprache in Text</span></div>
             <div><b class="c-mint">Verstehen</b><span>Sprachmodell erkennt Anliegen und nächsten Schritt</span></div>
-            <div><b class="c-amber">Handeln</b><span>Kalender prüfen, Termin eintragen, SMS, Notiz</span></div>
+            <div><b class="c-amber">Handeln</b><span>Kontingent prüfen, Termin vergeben, SMS, Übergabe-Karte</span></div>
             <div><b class="c-ember">Sprechen</b><span>Sprachsynthese antwortet mit natürlicher Stimme</span></div>
           </div>
         </div>
         <div class="fm-link"><i></i></div>
-        <div class="fm-node fm-ext"><span class="fm-ico">◎</span><strong>Deine Werkstatt</strong><span>Kalender · E-Mail · Cockpit</span></div>
+        <div class="fm-node fm-ext"><span class="fm-ico">◎</span><strong>Deine Werkstatt</strong><span>Cockpit · E-Mail · deine Warenwirtschaft</span></div>
       </div>
       <p class="fine">Ziel-Reaktionszeit unter einer Sekunde. Technik nach heutigem Planungsstand.</p>
     </div>
@@ -252,12 +252,12 @@
       <p class="kicker">WOHER WEISS AIVOX DAS?</p>
       <h2 class="h2 chrome" data-decode>Keine Magie.<br>Nur saubere Quellen.</h2>
       <dl class="know">
-        <div class="spot"><dt>Deine freien Termine</dt><dd>Aus deinem verbundenen Kalender (Google oder Outlook). AIVOX sieht nur, was sie für die Buchung braucht.</dd></div>
+        <div class="spot"><dt>Deine freien Termine</dt><dd>Aus deinem Werkstatt-Kontingent: Du legst fest, wie viele Termine AIVOX pro Tag vergeben darf, und reservierst diese Plätze einmal in deiner Warenwirtschaft. So ist keine Doppelbuchung möglich.</dd></div>
         <div class="spot"><dt>Den Namen des Kunden</dt><dd>Sie fragt einfach nach – so wie du es auch tun würdest.</dd></div>
         <div class="spot"><dt>Die Telefonnummer</dt><dd>Wird beim Anruf mit übertragen, sofern der Anrufer sie nicht unterdrückt. Sonst fragt sie danach.</dd></div>
         <div class="spot"><dt>Die E-Mail-Adresse</dt><dd>Braucht sie meist nicht: Die Bestätigung geht nach Rückfrage per SMS an die Anrufnummer. Wer E-Mail möchte, nennt sie – AIVOX liest sie zur Kontrolle vor.</dd></div>
         <div class="spot"><dt>Preise und Öffnungszeiten</dt><dd>Aus deinem Werkstatt-Profil, das wir bei der Einrichtung gemeinsam anlegen. Ändern kannst du es jederzeit.</dd></div>
-        <div class="spot"><dt>Ob ein Rad fertig ist</dt><dd>Aus dem Auftragsstatus, den du im Cockpit pflegst – später auch direkt aus deiner Werkstatt-Software (in Planung).</dd></div>
+        <div class="spot"><dt>Ob ein Rad fertig ist</dt><dd>Ein Tipp auf „fertig“ im Cockpit oder am Handy genügt. Verschickt deine Warenwirtschaft ohnehin Abhol-Nachrichten, setzt du AIVOX in Kopie – dann weiß sie es automatisch.</dd></div>
       </dl>
     </div>
   </section>
@@ -297,12 +297,22 @@
     <div class="wrap">
       <ol class="setup">
         <li class="spot tilt"><span class="su-n spec-text">1</span><div><h3>Werkstatt-Profil anlegen</h3><p>Ein Gespräch von etwa 20 Minuten: Öffnungszeiten, Leistungen, Preise, häufige Fragen und was AIVOX sagen darf – und was nicht.</p><span class="su-who">Du + wir</span></div></li>
-        <li class="spot tilt"><span class="su-n spec-text">2</span><div><h3>Kalender verbinden</h3><p>Google- oder Outlook-Kalender per sicherer Anmeldung verbinden – ohne dass wir dein Passwort sehen. Kein Online-Kalender? Dann nutzt du den AIVOX-Kalender im Cockpit.</p><span class="su-who">5 Minuten, du</span></div></li>
+        <li class="spot tilt"><span class="su-n spec-text">2</span><div><h3>Werkstatt-Kontingent festlegen</h3><p>Du bestimmst, wie viele Termine AIVOX pro Tag vergeben darf – zum Beispiel vier Inspektionen und zwei Express-Plätze – und blockst sie einmal in deiner Warenwirtschaft. Genau wie bei einer Online-Terminbuchung.</p><span class="su-who">10 Minuten, du + wir</span></div></li>
         <li class="spot tilt"><span class="su-n spec-text">3</span><div><h3>Benachrichtigungen festlegen</h3><p>Wohin sollen Zusammenfassungen? E-Mail, Cockpit, bei Dringendem SMS aufs Handy. Und wann darf AIVOX zu dir durchstellen?</p><span class="su-who">5 Minuten, du</span></div></li>
         <li class="spot tilt"><span class="su-n spec-text">4</span><div><h3>Probeanrufe</h3><p>Wir rufen selbst mehrfach an, testen schwierige Fälle und feilen, bis jede Antwort sitzt. Du hörst dir die Gespräche an und gibst frei.</p><span class="su-who">Wir</span></div></li>
         <li class="spot tilt"><span class="su-n spec-text">5</span><div><h3>Rufumleitung einschalten</h3><p>Im Festnetz in deinem Router (z. B. FRITZ!Box: Telefonie → Rufbehandlung → Rufumleitung) oder im Kundencenter deines Anbieters. Am Handy über die Einstellungen oder einen Code wie <code>**61*Nummer#</code> für „bei Nichtannahme“. Wir machen das gemeinsam am Telefon.</p><span class="su-who">5 Minuten, du + wir</span></div></li>
       </ol>
 
+
+      <div class="tiers">
+        <p class="kicker">ANBINDUNG AN DEINE WARENWIRTSCHAFT</p>
+        <h3 class="vh3">Funktioniert ab Tag 1 – ohne Schnittstelle.</h3>
+        <ol class="tier-list">
+          <li class="spot tilt"><span class="badge c-mint">Stufe 1 · sofort</span><h4>Werkstatt-Kontingent</h4><p>AIVOX vergibt nur die Plätze, die du für sie reservierst. Jeder Termin kommt als Übergabe-Karte ins Cockpit und per E-Mail – Übernahme in Sekunden. Passt nichts, nimmt sie einen Terminwunsch auf, den du mit einem Tipp bestätigst.</p></li>
+          <li class="spot tilt"><span class="badge c-ice">Stufe 2 · sofort</span><h4>Status ohne Technik</h4><p>„Ist mein Rad fertig?“ – ein Tipp auf „fertig“ im Cockpit genügt. Oder AIVOX liest die Abhol-Nachrichten deiner Warenwirtschaft in Kopie mit.</p></li>
+          <li class="spot tilt"><span class="badge c-amber">Stufe 3 · im Aufbau</span><h4>Direkt-Anbindung</h4><p>Termine und Auftragsstatus live aus deiner Warenwirtschaft – über offizielle Schnittstellen, gemeinsam mit den Herstellern. Bis dahin decken Stufe 1 und 2 alles ab.</p></li>
+        </ol>
+      </div>
       <div class="voices spot edge">
         <p class="kicker">DEINE STIMME · DEINE WAHL</p>
         <h3 class="vh3">30 Stimmen. Du entscheidest, wie deine Werkstatt klingt.</h3>
@@ -322,7 +332,7 @@
         <ul>
           <li>Einen Telefonanschluss mit Rufumleitung – das kann fast jeder Festnetz- und Mobilanschluss.</li>
           <li>Eine E-Mail-Adresse für die Zusammenfassungen.</li>
-          <li>Optional einen Google- oder Outlook-Kalender.</li>
+          <li>Deine bestehende Warenwirtschaft – egal welche. Auch ein Papierkalender funktioniert.</li>
           <li>Keine neue Hardware, keine Software-Installation.</li>
         </ul>
       </div>
@@ -361,6 +371,7 @@
       <p class="fine">Beispieldaten zur Veranschaulichung – so ist das Cockpit geplant.</p>
       <ul class="feats">
         <li class="spot"><strong>Gesprächsprotokoll</strong><span>Jedes Gespräch als Text, mit Kurzfassung oben.</span></li>
+        <li class="spot"><strong>Übergabe-Karten</strong><span>Jeder Termin fertig aufbereitet für deine Warenwirtschaft – übernehmen, abhaken.</span></li>
         <li class="spot"><strong>Rückruf-Liste</strong><span>Offene Rückrufe mit Name, Nummer und Anliegen – abhaken, fertig.</span></li>
         <li class="spot"><strong>Wissen bearbeiten</strong><span>Preise, Zeiten, Antworten ändern – AIVOX nutzt es ab dem nächsten Anruf.</span></li>
         <li class="spot"><strong>Auftragsstatus</strong><span>„Fertig“ markieren – und AIVOX kann Kunden Auskunft geben.</span></li>
@@ -399,7 +410,7 @@
         <p class="plan-price"><span class="spec-text">129</span><span class="eur big-eur">&nbsp;€</span><span class="per">pro Monat</span></p>
         <ul class="plan-list">
           <li>600 Gesprächsminuten inklusive</li>
-          <li>Termine direkt in Google- oder Outlook-Kalender</li>
+          <li>Termine aus deinem Werkstatt-Kontingent, Übergabe in jede Warenwirtschaft</li>
           <li>SMS-Bestätigung für Kunden, Zusammenfassung für dich</li>
           <li>Cockpit im Browser · 30 Stimmen zur Wahl</li>
           <li>KI-Hinweis und Datenschutz-Ansage eingebaut</li>
@@ -427,7 +438,8 @@
     </div>
     <div class="wrap faq">
       <details class="spot" open><summary>Wie wird AIVOX an mein Telefon angebunden?</summary><p>Über eine Rufumleitung: Du leitest deine Nummer bei Besetzt, Nichtannahme oder nach Feierabend auf deine AIVOX-Nummer um. Deine Nummer bleibt, keine neue Hardware. Die Details stehen unter „Einrichtung“.</p></details>
-      <details class="spot"><summary>Woher kennt AIVOX meine Termine?</summary><p>Aus deinem verbundenen Google- oder Outlook-Kalender. Ohne Online-Kalender nutzt du den AIVOX-Kalender im Cockpit.</p></details>
+      <details class="spot"><summary>Funktioniert das mit meiner Warenwirtschaft?</summary><p>Ja – mit jeder. AIVOX braucht keine Schnittstelle: Sie vergibt Termine aus dem Kontingent, das du für sie reservierst, und übergibt jeden Termin als fertige Karte, die du in Sekunden übernimmst. Direkte Anbindungen an einzelne Systeme bauen wir zusätzlich auf.</p></details>
+      <details class="spot"><summary>Woher kennt AIVOX meine Termine?</summary><p>Aus deinem Werkstatt-Kontingent. Ist es voll oder die Reparatur unklar, nimmt AIVOX einen Terminwunsch auf – du bestätigst mit einem Tipp, die Kundin bekommt automatisch eine SMS.</p></details>
       <details class="spot"><summary>Wie bekommt der Kunde seine Bestätigung?</summary><p>Per SMS an die Nummer, mit der er anruft – nach kurzer Rückfrage. Ist die Nummer unterdrückt, fragt AIVOX nach einer Nummer oder E-Mail und liest sie zur Kontrolle vor.</p></details>
       <details class="spot"><summary>Klingt das nicht nach Roboter?</summary><p>Hör es dir in der Live-Demo an. AIVOX sagt am Anfang offen, dass sie eine KI ist – das ist Pflicht und schafft Vertrauen.</p></details>
       <details class="spot"><summary>Was, wenn die KI Fehler macht?</summary><p>Sie arbeitet nur mit dem, was du freigibst. Ist sie unsicher, nimmt sie einen Rückruf auf, statt zu raten. Jedes Gespräch siehst du im Cockpit.</p></details>

@@ -74,6 +74,7 @@ kein Versprechen. Die Geschichte selbst ist ein Vertriebs-Asset.
   über Branchen-Tiefe + Zuverlässigkeit. Jahresrabatt, Testphase **mit** Zahlungsmittel (Conversion ~30 % statt ~5 %).
 - Kosten pro Kunde (750 Min/Monat): Retell+Haiku 5.5 ≈ 58 €, Eigenbau (Pipecat/LiveKit) ≈ 26 €. SMS nur optional
   (≈ 0,085 €/Stück frisst Marge). Ziele: Churn < 3 %/Monat, CAC-Payback < 12 Monate.
+- **Anbindung (Tiry 21.11.2026): Werkstätten nutzen Warenwirtschaft (velo.port u. a.), kaum Google/Outlook. AIVOX darf nie von einer Schnittstelle abhängen → Werkstatt-Kontingent + Übergabe-Karten + Fertig-Knopf; Direkt-Anbindung nur über offizielle Hersteller-Schnittstellen. Details `aivox/ANBINDUNG.md`.**
 - Vertrieb ohne Gesicht/Kaltakquise: Demo-Nummer zum Selbst-Anrufen, SEO-Fachartikel, OMR Reviews, Partner
   (Webdesign-Agenturen 20–30 % wiederkehrend), DiBike/ZEG/BICO/VSF wegen Integration, Handwerkskammern (BIT-Berater,
   KI-Speeddating), Erstkontakt per Brief/Kontaktformular.
