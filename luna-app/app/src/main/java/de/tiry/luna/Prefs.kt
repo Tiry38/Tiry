@@ -33,11 +33,17 @@ class Prefs(context: Context) {
         set(v) = p.edit().putString("eleven_voice", v.trim()).apply()
 
     var elevenModel: String
-        get() = p.getString("eleven_model", "eleven_v3")!!
-        set(v) = p.edit().putString("eleven_model", v).apply()
+        // neuer Schlüssel: alle starten auf Eleven v4 (alte, evtl. still auf v2 zurückgefallene Werte zählen nicht mehr)
+        get() = p.getString("eleven_model2", "eleven_v4")!!
+        set(v) = p.edit().putString("eleven_model2", v).apply()
+
+    /** Vom Stimm-Motor gelernte Einstellungen, die das Konto akzeptiert (siehe Speaker.fetchEleven). */
+    var elevenTune: Int
+        get() = p.getInt("eleven_tune", 0)
+        set(v) = p.edit().putInt("eleven_tune", v).apply()
 
     /** Stimme kann Emotions-Tags ([laughs], [sighs] …) sprechen? Nur ElevenLabs v3. */
-    val voiceTags get() = elevenKey.isNotBlank() && elevenModel == "eleven_v3"
+    val voiceTags get() = elevenKey.isNotBlank() && (elevenModel == "eleven_v3" || elevenModel == "eleven_v4")
 
     var aboutMe: String
         get() = p.getString("about_me", DEFAULT_ABOUT)!!

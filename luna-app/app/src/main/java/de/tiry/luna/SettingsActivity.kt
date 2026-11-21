@@ -74,6 +74,7 @@ class SettingsActivity : Activity() {
         field("ElevenLabs API-Key", prefs.elevenKey, secret = true) { prefs.elevenKey = it }
         field("Stimmen-ID (Standard: Sarah – warm & natürlich)", prefs.elevenVoice) { prefs.elevenVoice = it }
         choice("Sprachmodell", listOf(
+            "eleven_v4" to "v4 · Neueste Generation · Empfohlen",
             "eleven_v3" to "v3 · Emotionen: lacht, seufzt, flüstert",
             "eleven_multilingual_v2" to "Multilingual v2 · Menschlich",
             "eleven_flash_v2_5" to "Flash v2.5 · Blitzschnell",
@@ -106,6 +107,36 @@ class SettingsActivity : Activity() {
             }
         }
         renderVoices(0)
+
+        hint("Stimmen-Galerie: Die Stimme selbst macht den größten Unterschied. Lade weibliche Stimmen, hör sie dir an und tippe deine Favoritin an.")
+        val gallery = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
+        button("Weibliche Stimmen laden") {
+            saveAll()
+            if (prefs.elevenKey.isBlank()) { Toast.makeText(this, "Erst den ElevenLabs-Schlüssel eintragen.", Toast.LENGTH_LONG).show(); return@button }
+            if (speaker == null) speaker = Speaker(this, prefs)
+            Toast.makeText(this, "Lade Stimmen …", Toast.LENGTH_SHORT).show()
+            Thread {
+                val list = speaker?.femaleVoices() ?: emptyList()
+                runOnUiThread {
+                    gallery.removeAllViews()
+                    if (list.isEmpty()) { gallery.addView(Ui.text(this, "Keine Stimmen gefunden (Schlüssel/Netz prüfen).", 13.5f, Ui.STEEL)); return@runOnUiThread }
+                    val btns = mutableListOf<Pair<String, LightButton>>()
+                    list.take(40).forEachIndexed { idx, v ->
+                        val b = LightButton(this, v.name + if (v.info.isNotBlank()) "  ·  " + v.info else "")
+                        b.textSize = 9.5f
+                        b.selected2 = v.id == prefs.elevenVoice
+                        b.setOnClickListener {
+                            prefs.elevenVoice = v.id
+                            btns.forEach { (id, x) -> x.selected2 = id == v.id }
+                            v.preview?.let { speaker?.playPreview(it) }
+                        }
+                        btns += v.id to b
+                        gallery.addView(b, LinearLayout.LayoutParams(WRAP_CONTENT, WRAP_CONTENT).apply { marginStart = dp((idx % 3) * 14) })
+                    }
+                }
+            }.start()
+        }
+        col.addView(gallery)
 
         button("Stimme testen", filled = true) {
             saveAll()
@@ -271,7 +302,8 @@ class SettingsActivity : Activity() {
             if (multi) { minLines = 3; gravity = Gravity.TOP or Gravity.START } else isSingleLine = true
         }
         col.addView(e, LinearLayout.LayoutParams(MATCH_PARENT, WRAP_CONTENT).apply { bottomMargin = dp(10) })
-        savers += { save(e.text.toString()) }
+        // nur speichern, wenn wirklich geändert (sonst würden z. B. Galerie-Auswahlen überschrieben)
+        savers += { if (e.text.toString() != value) save(e.text.toString()) }
     }
 
     private fun choice(label: String, options: List<Pair<String, String>>, current: String, save: (String) -> Unit) {

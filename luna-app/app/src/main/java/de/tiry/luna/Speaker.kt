@@ -75,9 +75,10 @@ class Speaker(private val ctx: Context, private val prefs: Prefs) {
         val my = ++token
         pendingDone = onDone
         if (usesHumanVoice) {
-            // Satzweise: erster Satz sofort, die nächsten werden erzeugt, während Luna schon spricht
+            // Erster Satz sofort, der Rest als längerer Block (durchgehende Satzmelodie) – mit Kontext davor/danach
             val parts = chunks(text)
-            val files = parts.map { part -> io.submit<File?> { try { fetchEleven(part) } catch (e: Exception) { lastError = "Stimme: ${e.message}"; null } } }
+            val files = parts.mapIndexed { i, part -> io.submit<File?> {
+                try { fetchEleven(part, parts.getOrNull(i - 1), parts.getOrNull(i + 1)) } catch (e: Exception) { lastError = "Stimme: ${e.message}"; null } } }
             playSeq(files, parts, 0, my)
         } else speakLocal(text, my)
     }
@@ -156,33 +157,115 @@ class Speaker(private val ctx: Context, private val prefs: Prefs) {
         return File(cacheDir, "$h.mp3")
     }
 
-    /** Holt Audio von ElevenLabs (oder aus dem Speicher). */
-    private fun fetchEleven(text: String): File {
+    private object Tune {
+        // Bits in prefs.elevenTune: was das Konto NICHT akzeptiert hat → beim nächsten Mal gleich weglassen
+        const val NO_CONTEXT = 1      // previous_text/next_text
+        const val FMT_128 = 2         // mp3_44100_192 (braucht Creator-Abo) → 128
+        const val STAB_HALF = 4       // Stabilität fest 0.5 statt 0.4
+        const val NO_LANG = 8         // language_code
+    }
+
+    /**
+     * Holt Audio von ElevenLabs (oder aus dem Speicher). Für maximal menschlichen Klang:
+     * neuestes Modell (v4), Sprache fest Deutsch, Kontext davor/danach (durchgehende Satzmelodie), 192 kbit/s,
+     * ausdrucksstarke Einstellungen. Lehnt das Konto etwas ab, lernt Luna das und lässt es weg – erst dann wird
+     * das Modell gewechselt (v4 → v3 → Multilingual v2).
+     */
+    private fun fetchEleven(text: String, prev: String? = null, next: String? = null): File {
         val f = cacheFile(text)
         if (f.exists() && f.length() > 1000) return f
-        val c = URL("https://api.elevenlabs.io/v1/text-to-speech/${prefs.elevenVoice}?output_format=mp3_44100_128").openConnection() as HttpURLConnection
-        c.requestMethod = "POST"; c.doOutput = true; c.connectTimeout = 10000; c.readTimeout = 30000
+        val model = prefs.elevenModel
+        val tune = prefs.elevenTune
+        val modern = model == "eleven_v4" || model == "eleven_v3"
+        val fmt = if (tune and Tune.FMT_128 != 0) "mp3_44100_128" else "mp3_44100_192"
+        val c = URL("https://api.elevenlabs.io/v1/text-to-speech/${prefs.elevenVoice}?output_format=$fmt").openConnection() as HttpURLConnection
+        c.requestMethod = "POST"; c.doOutput = true; c.connectTimeout = 10000; c.readTimeout = 45000
         c.setRequestProperty("xi-api-key", prefs.elevenKey)
         c.setRequestProperty("Content-Type", "application/json")
         c.setRequestProperty("Accept", "audio/mpeg")
-        val body = JSONObject().put("text", text).put("model_id", prefs.elevenModel)
-            .put("voice_settings", JSONObject().put("stability", 0.35).put("similarity_boost", 0.8).put("style", 0.45).put("use_speaker_boost", true))
+        val stability = if (tune and Tune.STAB_HALF != 0) 0.5 else if (modern) 0.4 else 0.35
+        val body = JSONObject().put("text", text).put("model_id", model)
+            .put("voice_settings", JSONObject().put("stability", stability).put("similarity_boost", 0.8)
+                .put("style", if (modern) 0.5 else 0.45).put("use_speaker_boost", true).put("speed", 1.0))
+            .put("apply_text_normalization", "auto")
+        if (modern && tune and Tune.NO_LANG == 0) body.put("language_code", "de")
+        if (tune and Tune.NO_CONTEXT == 0) { prev?.let { body.put("previous_text", it) }; next?.let { body.put("next_text", it) } }
         c.outputStream.use { it.write(body.toString().toByteArray()) }
-        if (c.responseCode !in 200..299) {
-            val err = c.errorStream?.bufferedReader()?.use { it.readText() }?.take(200) ?: ""
-            // v3 nicht freigeschaltet o. ä. → automatisch auf Multilingual v2 (Tags vorher entfernen)
-            if (prefs.elevenModel == "eleven_v3" && c.responseCode in 400..499 && c.responseCode != 401) {
-                prefs.elevenModel = "eleven_multilingual_v2"
-                return fetchEleven(stripTags(text))
+        val code = c.responseCode
+        if (code !in 200..299) {
+            val err = (c.errorStream?.bufferedReader()?.use { it.readText() } ?: "").take(300)
+            if (code == 401) throw IllegalStateException("ElevenLabs-Schlüssel ungültig")
+            if (code in 400..499 && code != 429) {
+                val e = err.lowercase()
+                // Kontingent aufgebraucht / Text-Problem → nichts „verlernen“, nur diesmal Handy-Stimme
+                if ("quota" in e || "credit" in e || "character" in e || "too long" in e) throw IllegalStateException("ElevenLabs: $err")
+                // Gewählte Stimme nicht nutzbar → zurück auf Sarah (statt fälschlich das Modell zu verschlechtern)
+                if ("voice" in e && ("not found" in e || "not_found" in e || "does not exist" in e || "permission" in e) &&
+                    prefs.elevenVoice != Prefs.DEFAULT_VOICE) {
+                    prefs.elevenVoice = Prefs.DEFAULT_VOICE
+                    return fetchEleven(text, prev, next)
+                }
+                // Schritt für Schritt das Abgelehnte weglassen, gelernt wird dauerhaft
+                val fix = when {
+                    "output_format" in e || "format" in e || "tier" in e || "subscription" in e -> Tune.FMT_128
+                    "previous_text" in e || "next_text" in e -> Tune.NO_CONTEXT
+                    "stability" in e -> Tune.STAB_HALF
+                    "language" in e -> Tune.NO_LANG
+                    else -> listOf(Tune.NO_CONTEXT, Tune.FMT_128, Tune.STAB_HALF, Tune.NO_LANG).firstOrNull { tune and it == 0 } ?: 0
+                }
+                if (fix != 0 && tune and fix == 0) { prefs.elevenTune = tune or fix; return fetchEleven(text, prev, next) }
+                // alles probiert → älteres Modell
+                val older = when (model) { "eleven_v4" -> "eleven_v3"; "eleven_v3" -> "eleven_multilingual_v2"; else -> null }
+                if (older != null) {
+                    prefs.elevenModel = older; prefs.elevenTune = 0
+                    return fetchEleven(if (older == "eleven_multilingual_v2") stripTags(text) else text, prev, next)
+                }
             }
-            throw IllegalStateException("ElevenLabs ${c.responseCode} $err")
+            throw IllegalStateException("ElevenLabs $code $err")
         }
         val tmp = File(cacheDir, f.name + ".tmp")
         c.inputStream.use { inp -> tmp.outputStream().use { inp.copyTo(it) } }
         tmp.renameTo(f)
-        // Speicher klein halten: nur die neuesten 150 Sätze behalten
         cacheDir.listFiles()?.sortedByDescending { it.lastModified() }?.drop(150)?.forEach { it.delete() }
         return f
+    }
+
+    data class VoiceInfo(val id: String, val name: String, val info: String, val preview: String?)
+
+    /** Weibliche Stimmen fürs Deutsche aus dem ElevenLabs-Konto + der Community-Bibliothek (zum Probehören). Hintergrund-Thread! */
+    fun femaleVoices(): List<VoiceInfo> {
+        val out = LinkedHashMap<String, VoiceInfo>()
+        for (q in listOf("gender=female&page_size=50", "gender=female&language=de&voice_type=community&page_size=50&sort=name")) {
+            try {
+                val c = URL("https://api.elevenlabs.io/v2/voices?$q").openConnection() as HttpURLConnection
+                c.setRequestProperty("xi-api-key", prefs.elevenKey); c.connectTimeout = 10000; c.readTimeout = 15000
+                if (c.responseCode != 200) continue
+                val arr = JSONObject(c.inputStream.bufferedReader().use { it.readText() }).optJSONArray("voices") ?: continue
+                for (i in 0 until arr.length()) {
+                    val v = arr.getJSONObject(i)
+                    val labels = v.optJSONObject("labels")
+                    val gender = labels?.optString("gender", "") ?: ""
+                    if (gender.isNotBlank() && gender != "female") continue
+                    val de = v.optJSONArray("verified_languages")?.let { l -> (0 until l.length()).any { l.getJSONObject(it).optString("language") == "de" } } ?: false
+                    val info = listOfNotNull(if (de) "Deutsch" else null, labels?.optString("accent")?.takeIf { it.isNotBlank() },
+                        labels?.optString("age")?.takeIf { it.isNotBlank() }, labels?.optString("descriptive")?.takeIf { it.isNotBlank() }).joinToString(" · ")
+                    out.putIfAbsent(v.getString("voice_id"), VoiceInfo(v.getString("voice_id"), v.optString("name"), info, v.optString("preview_url").ifBlank { null }))
+                }
+            } catch (_: Exception) {}
+        }
+        return out.values.toList()
+    }
+
+    /** Hörprobe abspielen (Vorschau-Datei von ElevenLabs). */
+    fun playPreview(url: String) {
+        pendingDone = null; stop()
+        try {
+            val mp = MediaPlayer()
+            mp.setAudioAttributes(AudioAttributes.Builder().setUsage(AudioAttributes.USAGE_ASSISTANT).build())
+            mp.setDataSource(url); mp.setOnPreparedListener { it.start() }
+            mp.setOnCompletionListener { it.release(); if (player === it) player = null }
+            mp.prepareAsync(); player = mp
+        } catch (e: Exception) { lastError = "Hörprobe: ${e.message}" }
     }
 
     /** Begrüßungen vorab erzeugen, damit Luna nach „Hey Luna“ ohne Verzögerung antwortet. */
@@ -204,14 +287,14 @@ class Speaker(private val ctx: Context, private val prefs: Prefs) {
             }
         }
 
-        /** Teilt in Sprech-Häppchen: erster Satz allein (schneller Start), danach Blöcke bis ~220 Zeichen. */
+        /** Teilt in Sprech-Häppchen: erster Satz allein (schneller Start), danach Blöcke bis ~600 Zeichen. */
         fun chunks(text: String): List<String> {
             val sentences = text.split(Regex("(?<=[.!?…])\\s+")).map { it.trim() }.filter { it.isNotEmpty() }
             if (sentences.size <= 1) return listOf(text)
             val out = mutableListOf(sentences[0])
             val cur = StringBuilder()
             for (snt in sentences.drop(1)) {
-                if (cur.isNotEmpty() && cur.length + snt.length > 220) { out += cur.toString(); cur.clear() }
+                if (cur.isNotEmpty() && cur.length + snt.length > 600) { out += cur.toString(); cur.clear() }
                 if (cur.isNotEmpty()) cur.append(' ')
                 cur.append(snt)
             }

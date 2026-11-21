@@ -15,7 +15,9 @@ Android-App im Stil von J.A.R.V.I.S.: Handy liegt neben dir, du sagst **„Hey L
 5. Optional, aber empfohlen (Zahnrad):
    - **Claude API-Key** → Luna denkt frei mit, sucht im Netz, bedient fremde Apps, gibt Tipps.
      Key: console.anthropic.com → API Keys. Standard ist **Haiku 5.5** (am schnellsten, unter 1 Cent pro Frage); Sonnet/Opus wählbar.
-   - **ElevenLabs API-Key** → Stimme klingt wie ein echter Mensch (Standard „Sarah“, Modell Multilingual v2).
+   - **ElevenLabs API-Key** → Stimme klingt wie ein echter Mensch (Standard „Sarah“, Modell **Eleven v4** mit Deutsch fest
+     eingestellt, Kontext zwischen Sätzen, 192 kbit/s, Gefühls-Tags). Lehnt dein Abo etwas ab, passt Luna sich selbst an
+     (erst Einstellungen, dann Modell v3 → v2). Stimmen-Galerie zum Probehören in den Einstellungen.
      Key: elevenlabs.io → Profil → API Keys. Gratis-Kontingent vorhanden.
    - **Stimme testen** antippen.
 
