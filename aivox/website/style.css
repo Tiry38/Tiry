@@ -774,3 +774,77 @@ main { animation: pageIn .9s cubic-bezier(.2,.8,.2,1) backwards; }
 /* v18: Übergangs-Leinwand */
 .trans { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 96; pointer-events: none; visibility: hidden; }
 .trans.on { visibility: visible; }
+
+/* =================== v19: Inhalte + Design-Stufe =================== */
+/* Feinkörnung + Auswahl + Scrollleiste */
+body::after { content: ""; position: fixed; inset: 0; z-index: 60; pointer-events: none; opacity: .045; mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); }
+::selection { background: rgba(127,212,255,.35); color: #fff; }
+html { scrollbar-color: rgba(127,212,255,.35) transparent; }
+
+/* Glas-Karten mit Lichtkante oben */
+.spot { backdrop-filter: blur(14px) saturate(1.25); -webkit-backdrop-filter: blur(14px) saturate(1.25);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.07), 0 24px 60px -40px rgba(0,0,0,.9); transition: box-shadow .5s ease, border-color .5s ease; }
+.spot:hover { border-color: rgba(127,212,255,.22); box-shadow: inset 0 1px 0 rgba(255,255,255,.12), 0 30px 80px -36px rgba(127,212,255,.28), 0 30px 90px -50px rgba(255,74,36,.25); }
+.kicker { display: inline-flex; align-items: center; gap: .8rem; }
+.kicker::before { content: ""; width: 26px; height: 2px; border-radius: 2px; background: var(--spectrum); box-shadow: 0 0 10px rgba(127,212,255,.6); flex: none; }
+.h2.chrome { filter: drop-shadow(0 0 32px rgba(127,212,255,.14)); }
+.btn-ghost { backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); }
+.btn-ghost:hover { background: linear-gradient(rgba(6,9,14,.85), rgba(6,9,14,.85)) padding-box, var(--spectrum) border-box; border-color: transparent; }
+
+/* Sechs Sorgen */
+.trust-6 li { align-content: start; }
+.t-link { grid-column: 1 / -1; justify-self: start; margin-top: .5rem; min-height: 44px; display: inline-flex; align-items: center; padding: 0 1rem; border-radius: 999px; font-size: .9rem; font-weight: 600; color: var(--ice); text-decoration: none; border: 1px solid rgba(127,212,255,.28); background: rgba(127,212,255,.06); transition: background .3s, box-shadow .3s; }
+.t-link:hover { background: rgba(127,212,255,.14); box-shadow: 0 0 24px -6px rgba(127,212,255,.6); }
+@media (min-width: 1100px) { .trust-6 { grid-template-columns: repeat(3, 1fr); } .trust-6 li:nth-child(even) { --ty: 0; } .trust-6 li:nth-child(3n+2) { --ty: 1.8rem; } }
+
+/* Vertrauens-Treppe */
+.ladder { position: relative; list-style: none; margin: 2.8rem 0 0; padding: 0; display: grid; gap: 1.2rem; text-align: left; }
+.ladder::before { content: ""; position: absolute; left: 34px; top: 30px; bottom: 30px; width: 2px; border-radius: 2px; background: linear-gradient(#2f8cff, #7fd4ff, #ffb340, #ff4a24); box-shadow: 0 0 14px rgba(127,212,255,.5); }
+.ladder li { position: relative; display: grid; grid-template-columns: auto 1fr; gap: 1.2rem; padding: 1.4rem 1.6rem 1.4rem 1rem; border-radius: 2.2rem; }
+.ld-n { position: relative; z-index: 1; display: grid; place-items: center; width: 40px; height: 40px; margin-left: .4rem; border-radius: 50%; font: 400 1rem/1 var(--wide); color: #fff; background: radial-gradient(circle at 40% 30%, #1a2733, #05080c); border: 1.5px solid transparent; background-clip: padding-box; box-shadow: 0 0 0 1.5px rgba(127,212,255,.7), 0 0 26px -2px rgba(127,212,255,.6); }
+.ladder li:nth-child(2) .ld-n { box-shadow: 0 0 0 1.5px rgba(255,179,64,.8), 0 0 26px -2px rgba(255,179,64,.6); }
+.ladder li:nth-child(3) .ld-n { box-shadow: 0 0 0 1.5px rgba(255,74,36,.8), 0 0 26px -2px rgba(255,74,36,.6); }
+.ladder h3 { margin: .3rem 0 .35rem; font-size: 1.3rem; letter-spacing: -.02em; }
+.ladder p { margin: 0; color: var(--steel); }
+.ld-tag { display: inline-block; margin-top: .7rem; padding: .3rem .8rem; border-radius: 999px; font: 400 .6rem/1.4 var(--wide); letter-spacing: .18em; text-transform: uppercase; color: var(--ice); border: 1px solid var(--hair); }
+@media (min-width: 900px) {
+  .ladder { grid-template-columns: repeat(3, 1fr); gap: 1.4rem; }
+  .ladder::before { left: 8%; right: 8%; top: 52px; bottom: auto; width: auto; height: 2px; background: var(--spectrum); }
+  .ladder li { grid-template-columns: 1fr; padding: 1.6rem 1.7rem 1.8rem; }
+  .ld-n { width: 48px; height: 48px; margin: 0; }
+  .ladder li:nth-child(2) { transform: translateY(1.4rem); } .ladder li:nth-child(3) { transform: translateY(2.8rem); }
+}
+
+/* Ohne-Risiko-Leiste */
+.riskfree { list-style: none; margin: 2.6rem auto 0; padding: 0; display: flex; flex-wrap: wrap; justify-content: center; gap: .6rem; max-width: 60rem; }
+.riskfree li { display: inline-flex; align-items: center; gap: .6rem; min-height: 44px; padding: 0 1.1rem; border-radius: 999px; font-size: .95rem; background: rgba(77,255,195,.06); border: 1px solid rgba(77,255,195,.28); }
+.riskfree li::before { content: ""; width: 16px; height: 16px; flex: none; border-radius: 50%; background: #4dffc3 url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='m4.5 8.2 2.2 2.2 4.8-4.8' fill='none' stroke='%23021' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center/100% no-repeat; box-shadow: 0 0 12px rgba(77,255,195,.7); }
+
+/* Sonderfälle */
+.cases dt { display: flex; align-items: center; gap: .6rem; }
+.cases dt::before { content: ""; width: 8px; height: 8px; flex: none; border-radius: 50%; background: var(--amber); box-shadow: 0 0 10px var(--amber); }
+.cases dd { margin: 0; color: var(--steel); }
+
+/* Sicherheit */
+@media (min-width: 1100px) { .shield-6 { grid-template-columns: repeat(3, 1fr); } .shield-6 > :nth-child(even) { --ty: 0; } .shield-6 > :nth-child(3n+2) { --ty: 1.6rem; } }
+.ansage { margin: 3.4rem 0 0; padding: clamp(1.6rem, 4vw, 2.8rem); border-radius: 2.4rem; text-align: left; }
+.ansage blockquote { margin: .4rem 0 1rem; font-size: clamp(1.15rem, 2.4vw, 1.6rem); line-height: 1.45; font-weight: 500; letter-spacing: -.01em; padding-left: 1.2rem; border-left: 3px solid transparent; border-image: linear-gradient(#2f8cff, #ffb340, #ff4a24) 1; }
+.ansage figcaption { color: var(--dim); font-size: .9rem; }
+
+/* Preise */
+.fair { margin-top: 1.6rem; padding: 1.1rem 1.3rem; border-radius: 1.4rem; background: linear-gradient(120deg, rgba(255,179,64,.08), rgba(255,74,36,.05)); border: 1px solid rgba(255,179,64,.28); }
+.fair .kicker { margin-bottom: .5rem; color: var(--amber); }
+.fair p { margin: 0; color: var(--steel); font-size: .95rem; }
+.next-steps { counter-reset: ns; list-style: none; margin: .4rem 0 .8rem; padding: 0; display: grid; gap: .45rem; }
+.next-steps li { counter-increment: ns; display: flex; gap: .7rem; align-items: center; color: var(--ink); font-size: .95rem; }
+.next-steps li::before { content: counter(ns); display: grid; place-items: center; width: 26px; height: 26px; flex: none; border-radius: 50%; font: 400 .7rem/1 var(--wide); border: 1px solid rgba(127,212,255,.5); color: var(--ice); }
+.need-note { margin: 1rem 0 0; padding-top: 1rem; border-top: 1px solid var(--hair); color: var(--steel); font-size: .95rem; }
+.need-note strong { color: var(--ink); }
+@media (prefers-reduced-motion: reduce) { .ladder li { transform: none !important; } }
+/* v19 Fixes: Karten nicht abschneiden, Sorgen-Raster */
+.reveal { clip-path: inset(-60px -60px -120px -60px); }
+@keyframes revealIn { from { opacity: 0; transform: translateY(30px); clip-path: inset(-60px -60px 40% -60px); } to { opacity: 1; transform: none; clip-path: inset(-60px -60px -120px -60px); } }
+.trust-6 li > span:not(.t-ico) { grid-column: 1 / -1; color: var(--steel); }
+.trust-6 strong { font-size: 1.15rem; line-height: 1.3; }
+@media (min-width: 900px) { .ladder { padding-bottom: 3rem; } }
