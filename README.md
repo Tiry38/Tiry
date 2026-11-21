@@ -8,6 +8,12 @@ Windows-Programm, das automatisch sinnvolle Handy-Apps im Premium-Design erschaf
 - Cloud & Fernsteuerung: [`app-forge/cloud/README.md`](app-forge/cloud/README.md)
 - Projektleitfaden für Claude: [`CLAUDE.md`](CLAUDE.md)
 
+## Luna – Sprach-Assistentin fürs Handy → [`luna-app/`](luna-app/README.md)
+
+Android-App wie J.A.R.V.I.S.: „Hey Luna“ sagen, sie antwortet und steuert das Handy (Apps, Anrufe, WhatsApp, Wecker,
+Musik, Wetter, Bildschirm). Wake-Word offline, Gehirn optional Claude, menschliche Stimme optional ElevenLabs.
+APK unter **Releases → „Luna 1.0.x (Android)“**.
+
 ## WoW-Forever-Add-ons → Ordner `wow-addons/` (Arbeitsstand im Branch `claude/wow-addons`)
 
 Eigene World-of-Warcraft-Add-ons (Tiry's Zentrale, LevelPilot, ProcAlarm, Schlaghagel u. a.) samt Routen-Werkzeugen

@@ -1,0 +1,93 @@
+package de.tiry.luna
+
+import org.json.JSONArray
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNull
+import org.junit.Assert.assertTrue
+import org.junit.Test
+
+class LocalIntentParserTest {
+    private fun p(s: String) = LocalIntentParser.parse(s)
+
+    @Test fun zeit() { assertEquals("get_time", p("Wie spät ist es?")!!.tool) }
+    @Test fun akku() { assertEquals("get_device_status", p("Wie voll ist mein Akku")!!.tool) }
+
+    @Test fun taschenlampe() {
+        assertEquals(true, p("Taschenlampe an")!!.args["on"])
+        assertEquals(false, p("Mach die Taschenlampe aus")!!.args["on"])
+    }
+
+    @Test fun timer() {
+        assertEquals(600, p("Stell einen Timer auf 10 Minuten")!!.args["seconds"])
+        assertEquals(600, p("Timer zehn Minuten")!!.args["seconds"])
+        assertEquals(1800, p("Timer halbe Stunde")!!.args["seconds"])
+        assertEquals(5400, p("Timer 1 Stunde 30 Minuten")!!.args["seconds"])
+    }
+
+    @Test fun wecker() {
+        val c = p("Weck mich morgen um 6:30")!!
+        assertEquals("set_alarm", c.tool); assertEquals(6, c.args["hour"]); assertEquals(30, c.args["minute"])
+        assertEquals(7, p("Stell den Wecker auf 7 Uhr")!!.args["hour"])
+        val h = p("Wecker auf halb acht")!!
+        assertEquals(7, h.args["hour"]); assertEquals(30, h.args["minute"])
+    }
+
+    @Test fun anrufen() {
+        assertEquals("mama", p("Ruf Mama an")!!.args["name"])
+        assertEquals("stefan", p("Stefan anrufen")!!.args["name"])
+    }
+
+    @Test fun apps() {
+        assertEquals("whatsapp", p("Öffne WhatsApp")!!.args["name"])
+        assertEquals("spotify", p("Spotify öffnen")!!.args["name"])
+        assertEquals("youtube", p("Starte mal YouTube")!!.args["name"])
+    }
+
+    @Test fun musik() {
+        assertEquals("next", p("Nächstes Lied")!!.args["action"])
+        assertEquals("pause", p("Pause")!!.args["action"])
+        assertEquals("play_music", p("Spiel Linkin Park")!!.tool)
+    }
+
+    @Test fun lautstaerke() {
+        assertEquals(40, p("Lautstärke auf 40")!!.args["level"])
+        assertEquals("up", p("Mach lauter")!!.args["change"])
+    }
+
+    @Test fun erinnerung() {
+        val c = p("Erinnere mich in 20 Minuten an die Wäsche")!!
+        assertEquals("set_reminder", c.tool); assertEquals(20, c.args["in_minutes"]); assertEquals("die wäsche", c.args["text"])
+    }
+
+    @Test fun navigation() { assertEquals("karlsruhe", p("Navigiere nach Karlsruhe")!!.args["destination"]) }
+    @Test fun wetter() {
+        assertEquals("get_weather", p("Wie wird das Wetter morgen")!!.tool)
+        assertEquals("berlin", p("Wie ist das Wetter in Berlin")!!.args["location"])
+    }
+    @Test fun ende() { assertEquals("end_conversation", p("Danke Luna")!!.tool); assertEquals("end_conversation", p("Passt, danke")!!.tool) }
+    @Test fun merken() { assertEquals("ich habe montags beintag", p("Merk dir, ich habe montags Beintag")!!.args["fact"]) }
+    @Test fun system() {
+        assertEquals("lock", p("Sperr das Handy")!!.args["action"])
+        assertEquals("screenshot", p("Mach einen Screenshot")!!.args["action"])
+        assertEquals("back", p("Zurück")!!.args["action"])
+    }
+    @Test fun unbekannt() { assertNull(p("Erklär mir Quantenphysik in einfachen Worten")) }
+
+    @Test fun wakeWord() {
+        fun w(text: String, conf: Double) = JSONArray(text.split(" ").map { mapOf("word" to it, "conf" to conf) })
+        assertTrue(WakeWordEngine.isWake("hey lu na", w("hey lu na", 0.9), 6, false))
+        assertTrue(WakeWordEngine.isWake("lu na", w("lu na", 0.85), 6, false))
+        assertFalse(WakeWordEngine.isWake("lu na", w("lu na", 0.85), 6, true))      // „Hey“ Pflicht
+        assertFalse(WakeWordEngine.isWake("lu na", w("lu na", 0.5), 6, false))      // zu unsicher
+        assertTrue(WakeWordEngine.isWake("hey lu na", w("hey lu na", 0.65), 6, false)) // mit Hey toleranter
+        assertFalse(WakeWordEngine.isWake("[unk]", null, 10, false))
+        assertFalse(WakeWordEngine.isWake("lu ey na", w("lu ey na", 1.0), 10, false))     // nicht direkt hintereinander
+        assertFalse(WakeWordEngine.isWake("hallo zusammen", w("hallo zusammen", 1.0), 10, false))
+        assertTrue(WakeWordEngine.isWake("also hey lu na mach", w("also hey lu na mach", 0.9), 6, true))
+    }
+
+    @Test fun sprachTextBereinigen() {
+        assertEquals("Hallo Tiry! Super.", Speaker.clean("**Hallo** Tiry! 😀 Super."))
+    }
+}

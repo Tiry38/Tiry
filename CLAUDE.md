@@ -53,3 +53,10 @@ testet, bewertet und dauerhaft selbst weiterentwickelt. Besitzer: Tiry. UI-Sprac
 - **WoW-Forever-Add-ons** in `wow-addons/` – eigener Leitfaden `wow-addons/CLAUDE.md`, Stand in `wow-addons/UEBERGABE.md`.
   Für Arbeit dort gelten die Regeln aus `wow-addons/CLAUDE.md` (die App-Forge-Befehle oben betreffen nur `app-forge/`).
   Arbeitsstand im Branch **`claude/wow-addons`**, bis Tiry ihn nach `main` holt. Skills dafür: `.claude/skills/wow-*`.
+
+## Luna (Android-Sprachassistentin) in `luna-app/`
+- Kotlin-App, Anleitung/Technik in `luna-app/README.md`. Tests: `cd luna-app && ./gradlew :app:testDebugUnitTest`
+  (Screenshots landen in `app/build/screens/` – nach UI-Änderungen ansehen).
+- Vosk-Modell ist nicht im Repo: vor dem Bauen `vosk-model-small-de-0.15` nach `app/src/main/assets/model-de/` entpacken.
+- Releases heißen `luna-v1.0.<n>` und dürfen nie „latest“ sein (das Windows-Programm aktualisiert sich über „latest“).
+
