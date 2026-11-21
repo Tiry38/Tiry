@@ -5,10 +5,8 @@ rep('<div class="smoke"></div><div class="grain"></div>',
     '<div class="smoke"></div><div class="grain"></div>'
     '<div class="pl-depth" aria-hidden="true"><i class="pl-l1"></i><i class="pl-l2"></i><i class="pl-l3"></i></div>')
 
-# ---- Punkt 3: Lichtkegel + Kontaktschatten am Rad im Kopf
+# ---- Punkt 3: Kontaktschatten am Rad im Kopf (Lichtkegel von oben entfernt, Tiry 21.11.2026: „sieht blöd aus“)
 _h = s.index('id="hvis"')
-_a = s.index('<div class="hring"></div>', _h); _a += len('<div class="hring"></div>')
-s = s[:_a] + '<div class="pl-cone" aria-hidden="true"></div>' + s[_a:]
 _a = s.index('<div class="hfloor"></div>', _h); _a += len('<div class="hfloor"></div>')
 assert _a - _h < 5000
 s = s[:_a] + '<div class="pl-contact" aria-hidden="true"></div>' + s[_a:]

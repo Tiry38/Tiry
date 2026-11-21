@@ -156,10 +156,7 @@ html.er body .visit .in>*{position:relative;z-index:1}
  transform:translate3d(0,calc(var(--pl-sy,0) * -0.10px),0);animation:plBreath 18s ease-in-out infinite}
 .pl-depth .pl-l3{left:0;right:0;bottom:-30vh;height:70vh;background:radial-gradient(60% 50% at 50% 100%,rgba(70,88,118,.20),rgba(70,88,118,0) 75%)}
 
-/* ---------- 3) Rad im Kopf: Lichtkegel, Bodenschatten, Spiegelung ---------- */
-html.er body .hvis .pl-cone{position:absolute;left:20%;right:20%;top:-14%;height:78%;pointer-events:none;z-index:0;
- background:linear-gradient(180deg,rgba(255,255,255,.62),rgba(255,255,255,.14) 50%,rgba(255,255,255,0) 85%);
- clip-path:polygon(42% 0,58% 0,96% 100%,4% 100%);filter:blur(22px);opacity:.75;animation:plBreath 9s ease-in-out infinite}
+/* ---------- 3) Rad im Kopf: Bodenschatten, Spiegelung (kein Lichtkegel mehr, Tiry 21.11.2026) ---------- */
 html.er body .hvis .hb{-webkit-box-reflect:below -14px linear-gradient(to bottom,rgba(0,0,0,0) 74%,rgba(0,0,0,.20))}
 html.er body .hvis .pl-contact{position:absolute;left:18%;right:18%;bottom:13.5%;height:9%;pointer-events:none;z-index:1;border-radius:50%;
  background:radial-gradient(closest-side,rgba(18,22,32,.42),rgba(18,22,32,.16) 55%,rgba(18,22,32,0));filter:blur(4px)}

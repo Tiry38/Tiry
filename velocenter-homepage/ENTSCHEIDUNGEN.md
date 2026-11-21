@@ -396,3 +396,7 @@
 - Technik: View Transitions API (`window.VTX` im Router `go()`), Code in `<style id="vtExplo">` + `<script id="vtExploJs">` im Prototyp
   (Quelle: `uebergang2/live-explo.css|js`, aus `ue2.js` herausgelöst). Browser ohne View Transitions = bisheriger Wischer.
 - Im Web-Repo direkt in die 10 Seiten eingesetzt (nicht neu gebaut), damit der Bilder-Agent-Stand (`PVV`, Agent-Daten) erhalten bleibt.
+
+## 21.11.2026 – Lichtkegel von oben im Showroom entfernt (Tiry: „sieht blöd aus“)
+- `.pl-cone` (Lichtstrahl über dem Rad im Kopf-Showroom) raus: Quelle `entwurf-modern/plus.css` + `plus_markup.py`,
+  live direkt in den 10 Seiten des Web-Repos (Commit cee8107). Bodenschatten/Spiegelung bleiben. **Nicht wieder einbauen.**
