@@ -44,3 +44,9 @@ Sitzungen: AIVOX `session_01AC3hVefvGxsa4HNgSaq8Sg` · Luna `session_01AC3hVeEDx
 - **AIVOX (Startup, Kunden):** immer kundenfreundlich, ruhig, freundlich-professionell. **Nie** sarkastisch, kein Flirten, keine Gefühls-Tags außer dezentem, freundlichem Ton. Verantwortlich: AIVOX-Sitzung.
 - **Luna (privat, nur für Tiry):** charmant, flirtend, sarkastisch erlaubt. Verantwortlich: Luna-Sitzung.
 - Gemeinsam: Motoren, Text-Regeln (§3), Messverfahren (§5), Abstimmungsregel (§6). Charakter, Stimme und Tags legt jede Sitzung selbst fest.
+
+## 8. Luna-Entscheid: Google Chirp 3 HD (Tiry, 21.11.2026)
+Luna ist primär mobil → Hauptstimme **Google Cloud TTS „Chirp 3 HD“** (Abrechnung nach Nutzung, kein Abo). Rangfolge Luna:
+Chirp 3 HD → Heim-Stimme (PC-Stimmserver, optional) → ElevenLabs (optional) → Handy-Stimme. Umsetzung: `luna-app/.../CloudVoice.kt` (Branch `ccr-5a20bb04-mr0zu4`).
+Chirp 3 HD: `de-DE-Chirp3-HD-<Name>`, Pausen per `[pause short|pause|pause long]` im markup-Feld, **keine** Gefühls-Tags. Preise/Gratiskontingent: unverifiziert.
+AIVOX: Kartoffel-Orpheus bleibt für AIVOX ein Kandidat (Server/vorproduzierte Demos, kostenlos); Chirp 3 HD ist für AIVOX eine Option mit Nutzungskosten.
