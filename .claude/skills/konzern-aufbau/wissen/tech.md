@@ -1,4 +1,4 @@
-# Tech-Stack NABE Voice (Stand 21.11.2026, USD netto, ≈ 0,87 €/$)
+# Tech-Stack AVOX Voice (Stand 21.11.2026, USD netto, ≈ 0,87 €/$)
 
 ## Voice-Plattformen
 | Plattform | Preis/Min | Claude | EU | Start |

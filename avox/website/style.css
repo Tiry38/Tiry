@@ -200,3 +200,11 @@ main { outline: none; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: .001ms !important; animation-iteration-count: 1 !important; transition-duration: .001ms !important; }
 }
+
+.eur { font-family: var(--font); font-weight: 600; }
+@media (max-width: 560px) { .kicker { letter-spacing: .2em; } }
+@media (min-width: 900px) {
+  .feats { display: grid; grid-template-columns: repeat(2, minmax(0, 30rem)); justify-content: center; }
+  .feats li { max-width: none; border-radius: 2rem; }
+  .feats li:nth-child(even) { transform: translateY(1.6rem); }
+}

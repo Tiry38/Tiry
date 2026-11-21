@@ -133,7 +133,7 @@
       if (audio.analyser) {
         audio.analyser.getByteTimeDomainData(audio.wave);
         let sum = 0; for (let i = 0; i < audio.wave.length; i++) { const d = (audio.wave[i] - 128) / 128; sum += d * d; }
-        target = Math.min(1, Math.sqrt(sum / audio.wave.length) * 4.2);
+        target = Math.min(1, Math.sqrt(sum / audio.wave.length) * 6);
         audio.analyser.getByteFrequencyData(audio.freq);
         const edges = [2, 6, 12, 24, 48, 96, 180];
         for (let b = 0; b < 6; b++) { let s = 0; for (let i = edges[b]; i < edges[b + 1]; i++) s += audio.freq[i]; bands[b] = s / ((edges[b + 1] - edges[b]) * 255); }
@@ -193,7 +193,7 @@
       g.globalCompositeOperation = 'lighter';
       const talk = level.who === 'ki', caller = level.who === 'anrufer';
       const idle = reduce ? 0.06 : 0.07 + 0.03 * Math.sin(t * 0.8);
-      const amp = idle + level.v * (talk ? 1.25 : 0.7);
+      const amp = idle + level.v * (talk ? 2.3 : 1.5);
       const sharp = talk ? 0.18 + level.v * 0.5 : caller ? 0.08 : 0.04;
       const core = caller ? 'rgba(255,236,214,1)' : 'rgba(225,246,255,1)';
       const halo = caller ? 'rgba(255,190,140,1)' : 'rgba(127,212,255,1)';

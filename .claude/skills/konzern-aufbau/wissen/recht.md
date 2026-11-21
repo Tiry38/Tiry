@@ -37,7 +37,7 @@
   (GDD-Kurzpapier 01/2026). Sicher: ausdrückliche Einwilligung.
 - **DSGVO:** Art. 6 Abs. 1 lit. a, Info nach Art. 13 (Datenschutzseite, in Ansage verlinkt). Ansage-Ablauf:
   Begrüßung → KI- + Aufzeichnungshinweis → Datenschutz-Link → Einwilligung → Ablehnen/Mensch.
-- **AV-Vertrag Art. 28:** Betrieb = Verantwortlicher, NABE = Auftragsverarbeiter, LLM/Telefonie/TTS = Unterauftragsverarbeiter;
+- **AV-Vertrag Art. 28:** Betrieb = Verantwortlicher, AVOX = Auftragsverarbeiter, LLM/Telefonie/TTS = Unterauftragsverarbeiter;
   Drittland (USA) prüfen.
 - **EU AI Act Art. 50:** gilt seit **02.08.2026** (Digital Omnibus VO (EU) 2026/1744 hat Abs. 1 nicht verschoben).
   Anrufer muss wissen, dass er mit KI spricht. Bußgeld bis 15 Mio. € / 3 % (KMU: niedrigerer Betrag).

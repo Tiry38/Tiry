@@ -1,4 +1,4 @@
-# Design-Regelwerk NABE 2026 (Stand 21.11.2026)
+# Design-Regelwerk AVOX 2026 (Stand 21.11.2026)
 
 Leitsatz: **Ruhig, eigenständig, echt.** KI zeigt sich im Produkt, nicht im Slogan. Eigene Effekte und Bildsysteme,
 weil KI-Baukästen alles gleich aussehen lassen. Ergänzt die Design-Regeln in `CLAUDE.md`
@@ -9,14 +9,14 @@ weil KI-Baukästen alles gleich aussehen lassen. Ergänzt die Design-Regeln in `
   Signal-Orange) statt Indigo.
 - Mesh-Verläufe/Orbs mit geringer Deckkraft, lenken auf **einen** Punkt (Hero, CTA, Orb).
 - Glas funktional: Sticky Header (`backdrop-filter`), Overlays, Player.
-- Organische Markenform: Nabe/Ringe/Speichen-Motiv, Kreise, Pillen, Wellen, große Radien; strenges Raster nur für Produkt-UI.
+- Organische Markenform: Stromlinie als Leitmotiv, Kreise, Pillen, Wellen, große Radien; strenges Raster nur für Produkt-UI.
   Bento nur mit Rangfolge (eine dominante Kachel).
 - Echte Produkt-UI als Ausstellungsstück (Anruf-Protokoll, Kalender, Dashboard), echte Hörproben, konkrete Zahlen.
 - Typo-Trio: Grotesk (UI) + ausdrucksstarke variable Serif (Headlines, Wärme) + Mono (Zahlen).
 - Motion: wenige bedeutungsvolle Mikro-Interaktionen; native Scroll-driven Animations (Baseline seit Firefox 159, 10/2026)
   und View Transitions; immer `prefers-reduced-motion`.
 - Voice-Orb mit Zuständen idle/connecting/listening/thinking/speaking/error, reagiert auf echtes Audio, eigene Form/Farbe.
-- Logo: Wortmarke „NABE“ mit eigenem Detail (A/B als Nabe) + kompaktes Symbol (App-Icon/Favicon), animierbar wie der Orb.
+- Logo: Wortmarke „AVOX“ in Michroma (breit, Automotive-Look) mit leuchtendem Strompunkt + kompaktes Symbol (App-Icon/Favicon), animierbar wie der Orb.
 
 ## DON'T (gilt 2026 als alt/AI-Slop)
 - Lila-blaue Verläufe, Tailwind-Standard-Indigo (Gigazine 04/2026: 10,7 % aller Seiten mit lila CTA).
