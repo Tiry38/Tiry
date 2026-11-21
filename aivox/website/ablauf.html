@@ -1,0 +1,190 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>AIVOX · So funktioniert’s</title>
+<meta name="description" content="AIVOX ist die KI am Telefon deiner Werkstatt: nimmt ab, bucht Termine und schreibt dir alles auf – rund um die Uhr.">
+<meta name="theme-color" content="#020304">
+<link rel="icon" href="logo.svg" type="image/svg+xml">
+<link rel="preload" href="fonts/manrope-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="fonts/michroma-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="style.css">
+</head>
+<body data-page="ablauf">
+<a class="skip" href="#inhalt">Zum Inhalt springen</a>
+
+<!-- Showroom-Licht -->
+<div class="light" aria-hidden="true">
+  <span class="cone"></span><span class="rim rim-l"></span><span class="rim rim-r"></span><span class="aurora"></span><span class="floor"></span>
+</div>
+<div class="grain" aria-hidden="true"></div>
+<div class="scan" aria-hidden="true"></div>
+<div class="glowcursor" aria-hidden="true"></div>
+
+<!-- Wiederverwendbarer Schriftzug -->
+<svg width="0" height="0" class="defs" aria-hidden="true" focusable="false">
+  <defs>
+    <linearGradient id="spec" x1="0" y1="0" x2="520" y2="0" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#2f8cff"/><stop offset=".3" stop-color="#7fd4ff"/><stop offset=".52" stop-color="#ffffff"/><stop offset=".75" stop-color="#ffb340"/><stop offset="1" stop-color="#ff4a24"/>
+    </linearGradient>
+    <symbol id="wordmark" viewBox="0 0 520 100">
+      <g fill="none" stroke="url(#spec)" stroke-width="8" stroke-linecap="square">
+        <path d="M4 96 L42 6 L80 96"/><path d="M114 6 V96"/><path d="M148 6 L188 96 L228 6"/>
+        <path d="M287.4 9.4 A44 44 0 1 0 312.6 9.4"/>
+        <path d="M362 6 L392 46 M410 54 L440 96 M440 6 L410 46 M392 54 L362 96"/>
+      </g>
+      <g fill="url(#spec)"><circle cx="300" cy="51" r="7"/><circle cx="401" cy="50" r="4"/><rect x="296" y="0" width="8" height="22" rx="2"/></g>
+    </symbol>
+  </defs>
+</svg>
+
+<!-- ================= BEGRÜSSUNG ================= -->
+<div class="intro" hidden role="dialog" aria-modal="true" aria-labelledby="intro-title">
+  <canvas class="intro-fx" aria-hidden="true"></canvas>
+  <div class="intro-grid" aria-hidden="true"></div>
+  <span class="hud-corner tl" aria-hidden="true"></span><span class="hud-corner tr" aria-hidden="true"></span><span class="hud-corner bl" aria-hidden="true"></span><span class="hud-corner br" aria-hidden="true"></span>
+  <div class="intro-hud">
+    <span>AIVOX OS · 2300</span>
+    <span class="hud-r"><span class="hud-dot" aria-hidden="true"></span><span class="js-clock">--:--:--</span></span>
+  </div>
+  <ol class="boot-log" aria-hidden="true"></ol>
+  <ul class="hud-data" aria-hidden="true">
+    <li>SIGNAL<b class="js-d1">100 %</b></li>
+    <li>LATENZ<b class="js-d2">0,18 s</b></li>
+    <li>STIMME<b>LEDA · HD</b></li>
+    <li>KANAL<b>GESICHERT</b></li>
+  </ul>
+  <div class="intro-core">
+    <h1 id="intro-title" class="vh">AIVOX</h1>
+    <div class="intro-stage">
+      <div class="holo" aria-hidden="true"><svg viewBox="0 0 400 400"><defs><linearGradient id="holoG" x1="0" x2="1"><stop offset="0" stop-color="#2f8cff"/><stop offset=".45" stop-color="#7fd4ff"/><stop offset=".6" stop-color="#ffffff"/><stop offset=".8" stop-color="#ffb340"/><stop offset="1" stop-color="#ff4a24"/></linearGradient></defs>
+      <g class="r1"><circle cx="200" cy="200" r="196" fill="none" stroke="url(#holoG)" stroke-opacity=".55" stroke-width="1" stroke-dasharray="1 5"/></g>
+      <g class="r2"><circle cx="200" cy="200" r="182" fill="none" stroke="url(#holoG)" stroke-opacity=".7" stroke-width="1.6" stroke-dasharray="140 30 18 30 60 40"/></g>
+      <g class="r3"><circle cx="200" cy="200" r="166" fill="none" stroke="#7fd4ff" stroke-opacity=".16" stroke-width="10" stroke-dasharray="2 6"/></g>
+      <g class="r4"><circle cx="200" cy="200" r="150" fill="none" stroke="#ffb340" stroke-opacity=".5" stroke-width="1" stroke-dasharray="40 14 4 14"/><circle cx="200" cy="50" r="3" fill="#fff"/></g>
+    </svg></div>
+      <div class="flare" aria-hidden="true"></div>
+      <div class="intro-logo-space" aria-hidden="true"></div>
+    </div>
+    <canvas class="plasma intro-plasma" data-size="intro" aria-hidden="true"></canvas>
+    <p class="intro-line">Die Stimme deiner Werkstatt</p>
+    <p class="intro-cap" aria-live="polite"></p>
+  </div>
+  <div class="hud-spec" aria-hidden="true"></div>
+  <button class="intro-sound js-sound" type="button" hidden>TON EINSCHALTEN</button>
+  <button class="intro-skip js-skip" type="button">Überspringen</button>
+</div>
+
+<!-- ================= LEISTE ================= -->
+<header class="bar">
+  <div class="bar-in">
+    <a class="brand" href="index.html" aria-label="AIVOX Übersicht"><svg class="wm" viewBox="0 0 520 100" aria-hidden="true"><use href="#wordmark"/></svg></a>
+    <nav class="tabs" aria-label="Bereiche">
+      <span class="tab-glow" aria-hidden="true"></span>
+      <a class="tab" href="index.html">Start</a>
+      <a class="tab" href="ablauf.html" aria-current="page">So funktioniert’s</a>
+      <a class="tab" href="live.html">Live-Demo</a>
+      <a class="tab" href="einrichtung.html">Einrichtung</a>
+      <a class="tab" href="cockpit.html">Cockpit</a>
+      <a class="tab" href="sicherheit.html">Sicherheit</a>
+      <a class="tab" href="preise.html">Preise</a>
+      <a class="tab" href="fragen.html">Fragen</a>
+    </nav>
+    <div class="bar-r">
+      <button class="snd" type="button" aria-pressed="false" aria-label="Klangeffekte an oder aus">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4z"/><path class="w1" d="M15.5 9a4 4 0 0 1 0 6"/><path class="w2" d="M18 6.5a7.5 7.5 0 0 1 0 11"/><path class="x" d="m16 9.5 5 5m0-5-5 5"/></svg>
+      </button>
+      <a class="btn btn-spec btn-s" href="preise.html"><span>Testen</span></a>
+      <button class="menu-btn" type="button" aria-expanded="false" aria-controls="menu" aria-label="Menü öffnen"><span></span><span></span></button>
+    </div>
+  </div>
+</header>
+
+<div class="menu" id="menu" hidden>
+  <nav aria-label="Alle Bereiche">
+    <a href="index.html"><strong>Start</strong><span>Was AIVOX für deine Werkstatt tut</span></a>
+    <a href="ablauf.html" aria-current="page"><strong>So funktioniert’s</strong><span>Vom Klingeln bis zum Termin</span></a>
+    <a href="live.html"><strong>Live-Demo</strong><span>5 Anrufe zum Anhören</span></a>
+    <a href="einrichtung.html"><strong>Einrichtung</strong><span>In einer Woche live</span></a>
+    <a href="cockpit.html"><strong>Cockpit</strong><span>Alles auf einen Blick</span></a>
+    <a href="sicherheit.html"><strong>Sicherheit</strong><span>Datenschutz, KI-Gesetz, Kontrolle</span></a>
+    <a href="preise.html"><strong>Preise</strong><span>Ein Preis, alles drin</span></a>
+    <a href="fragen.html"><strong>Fragen</strong><span>Ehrliche Antworten</span></a>
+  </nav>
+</div>
+
+<main id="inhalt" tabindex="-1">
+<section class="view" id="ablauf" data-kap="02" data-view="ablauf" aria-labelledby="t-ablauf">
+    <div class="wrap head">
+      <p class="kicker">SO FUNKTIONIERT’S</p>
+      <h2 id="t-ablauf" class="h2 chrome" data-decode>Vom Klingeln bis zum<br>Termin in 40 Sekunden.</h2>
+    </div>
+    <div class="wrap">
+      <div class="ss">
+        <div class="ss-phone-wrap">
+          <div class="phone" data-step="0" aria-hidden="true">
+            <div class="ph-notch"></div>
+            <div class="ph-screen">
+              <div class="ph-s s0"><span class="ph-label">Eingehender Anruf</span><span class="ph-num">Kunde · Mobil</span><span class="ph-ring"><i></i><i></i><i></i></span><span class="ph-sub">Werkstatt besetzt → Umleitung</span></div>
+              <div class="ph-s s1"><span class="ph-label">AIVOX hat übernommen</span><span class="ph-wave"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span><span class="ph-quote">„Ich bin eine künstliche Intelligenz. Was kann ich für Sie tun?“</span><span class="ph-timer">00:07</span></div>
+              <div class="ph-s s2"><span class="ph-label">Werkstatt-Kontingent</span><span class="ph-cal"><b>Donnerstag · 3 von 4 frei</b><span>09:00 · belegt</span><span class="hit">10:30 · E-Bike · Becker · neu</span><span>13:00 · frei</span></span><span class="ph-sub">Termin aus deinem Kontingent vergeben</span></div>
+              <div class="ph-s s3"><span class="ph-label">SMS an Kundin</span><span class="ph-mail"><b>Fahrrad-Werkstatt am Markt</b><span>Ihr Termin: Do, 10:30 Uhr – Inspektion E-Bike. Bis dann!</span></span><span class="ph-label">E-Mail an dich</span><span class="ph-mail"><b>Neuer Termin über AIVOX</b><span>Becker · Inspektion · Do 10:30</span></span></div>
+            </div>
+          </div>
+        </div>
+        <ol class="ss-steps">
+          <li data-step="0"><span class="ss-n c-ice">00:00</span><h3>Es klingelt – du hast die Hände voll</h3><p>Deine Rufumleitung schickt den Anruf zu AIVOX, wenn du besetzt bist, nicht rangehst oder Feierabend hast.</p></li>
+          <li data-step="1"><span class="ss-n c-mint">00:02</span><h3>AIVOX nimmt ab</h3><p>Sie sagt offen, dass sie eine KI ist, hört zu und versteht das Anliegen – auch wenn der Kunde durcheinander erzählt.</p></li>
+          <li data-step="2"><span class="ss-n c-amber">00:25</span><h3>Sie bucht den Termin</h3><p>Sie vergibt einen freien Platz aus deinem Werkstatt-Kontingent – genau den Plätzen, die du für AIVOX reserviert hast – und fragt nach dem Namen.</p></li>
+          <li data-step="3"><span class="ss-n c-ember">00:40</span><h3>Beide wissen Bescheid</h3><p>Die Kundin bekommt nach Rückfrage eine SMS. Du bekommst eine Übergabe-Karte im Cockpit und per E-Mail – in 30 Sekunden in deiner Warenwirtschaft.</p></li>
+        </ol>
+      </div>
+    </div>
+
+    <div class="wrap block reveal">
+      <p class="kicker">UNTER DER HAUBE</p>
+      <h2 class="h2 chrome" data-decode>Vier Systeme.<br>Eine Stimme.</h2>
+      <div class="flowmap" aria-label="Datenfluss eines Anrufs">
+        <div class="fm-node fm-ext"><span class="fm-ico">☎</span><strong>Anrufer</strong><span>ruft deine Nummer an</span></div>
+        <div class="fm-link"><i></i></div>
+        <div class="fm-node fm-ext"><span class="fm-ico">↪</span><strong>Rufumleitung</strong><span>bei Besetzt, Nichtannahme oder Feierabend</span></div>
+        <div class="fm-link"><i></i></div>
+        <div class="fm-core spot edge">
+          <p class="fm-title"><svg class="wm" viewBox="0 0 520 100" aria-hidden="true"><use href="#wordmark"/></svg>Kern</p>
+          <div class="fm-stages">
+            <div><b class="c-ice">Hören</b><span>Spracherkennung wandelt Sprache in Text</span></div>
+            <div><b class="c-mint">Verstehen</b><span>Sprachmodell erkennt Anliegen und nächsten Schritt</span></div>
+            <div><b class="c-amber">Handeln</b><span>Kontingent prüfen, Termin vergeben, SMS, Übergabe-Karte</span></div>
+            <div><b class="c-ember">Sprechen</b><span>Sprachsynthese antwortet mit natürlicher Stimme</span></div>
+          </div>
+        </div>
+        <div class="fm-link"><i></i></div>
+        <div class="fm-node fm-ext"><span class="fm-ico">◎</span><strong>Deine Werkstatt</strong><span>Cockpit · E-Mail · deine Warenwirtschaft</span></div>
+      </div>
+      <p class="fine">Ziel-Reaktionszeit unter einer Sekunde. Technik nach heutigem Planungsstand.</p>
+    </div>
+
+    <div class="wrap block reveal">
+      <p class="kicker">WOHER WEISS AIVOX DAS?</p>
+      <h2 class="h2 chrome" data-decode>Keine Magie.<br>Nur saubere Quellen.</h2>
+      <dl class="know">
+        <div class="spot"><dt>Deine freien Termine</dt><dd>Aus deinem Werkstatt-Kontingent: Du legst fest, wie viele Termine AIVOX pro Tag vergeben darf, und reservierst diese Plätze einmal in deiner Warenwirtschaft. So ist keine Doppelbuchung möglich.<span class="api-note"><b>Mit Schnittstelle (API)</b>Hat deine Warenwirtschaft eine offizielle Schnittstelle – oder bekommt sie eine –, verbinden wir AIVOX direkt damit. Dann liest AIVOX freie Termine live aus und trägt Termine selbst ein, verschiebt oder storniert sie. Kein Kontingent, keine Übergabe-Karte nötig.</span></dd></div>
+        <div class="spot"><dt>Den Namen des Kunden</dt><dd>Sie fragt einfach nach – so wie du es auch tun würdest.</dd></div>
+        <div class="spot"><dt>Die Telefonnummer</dt><dd>Wird beim Anruf mit übertragen, sofern der Anrufer sie nicht unterdrückt. Sonst fragt sie danach.</dd></div>
+        <div class="spot"><dt>Die E-Mail-Adresse</dt><dd>Braucht sie meist nicht: Die Bestätigung geht nach Rückfrage per SMS an die Anrufnummer. Wer E-Mail möchte, nennt sie – AIVOX liest sie zur Kontrolle vor.</dd></div>
+        <div class="spot"><dt>Preise und Öffnungszeiten</dt><dd>Aus deinem Werkstatt-Profil, das wir bei der Einrichtung gemeinsam anlegen. Ändern kannst du es jederzeit.</dd></div>
+        <div class="spot"><dt>Ob ein Rad fertig ist</dt><dd>Ein Tipp auf „fertig“ im Cockpit oder am Handy genügt. Verschickt deine Warenwirtschaft ohnehin Abhol-Nachrichten, setzt du AIVOX in Kopie – dann weiß sie es automatisch. Mit API-Anbindung liest sie den Auftragsstatus direkt aus deiner Warenwirtschaft.</dd></div>
+      </dl>
+    </div>
+  </section>
+  <nav class="pager wrap" aria-label="Weitere Seiten"><a class="pager-a prev" href="index.html"><span>Zurück</span><strong>Start</strong></a><a class="pager-a next" href="live.html"><span>Weiter</span><strong>Live-Demo</strong></a></nav>
+</main>
+
+<footer class="foot wrap">
+  <svg class="wm wm-foot" viewBox="0 0 520 100" aria-hidden="true"><use href="#wordmark"/></svg>
+  <p>Entwurf · AIVOX Voice · <button class="btn-text js-replay" type="button">Begrüßung nochmal ansehen</button> · © 2026</p>
+</footer>
+<script src="app.js" defer></script>
+</body>
+</html>

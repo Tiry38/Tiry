@@ -494,9 +494,9 @@
     const b = document.createElement('button'); b.type = 'button'; b.className = 'chip'; { const st = document.createElement('strong'), sp = document.createElement('span'); st.textContent = s.title; sp.textContent = 'AIVOX: ' + s.voiceKi; b.append(st, sp); }
     b.setAttribute('aria-pressed', String(i === 0));
     b.addEventListener('click', () => { sel = i; $$('.chip').forEach((c, k) => c.setAttribute('aria-pressed', String(k === i))); render(); play(i); });
-    chips.appendChild(b);
+    if (chips) chips.appendChild(b);
   });
-  render();
+  if (list && exList) render();
 
   const capWho = $('.cap-who'), capText = $('.cap-text'), caption = $('.caption'), btns = $$('.js-play');
   let run = 0, playing = -1;
@@ -504,7 +504,7 @@
   const stopAll = () => {
     run++; playing = -1; level.speaking = false; level.who = 'idle';
     A.els.forEach((a) => { a.pause(); a.currentTime = 0; });
-    setPressed(false); caption.classList.remove('live'); $$('li', list).forEach((li) => li.classList.remove('now'));
+    setPressed(false); if (caption) caption.classList.remove('live'); if (list) $$('li', list).forEach((li) => li.classList.remove('now'));
   };
   const say = (src) => new Promise((resolve) => {
     const a = audioEl(src); let done = false;
@@ -514,13 +514,13 @@
   });
   const play = async (i) => {
     stopAll(); ensureCtx();
-    const id = run, s = SCN[i]; playing = i; setPressed(true); caption.classList.add('live');
-    const lis = sel === i ? $$('li', list) : [], fs = sel === i ? $$('div', exList) : [];
+    const id = run, s = SCN[i]; playing = i; setPressed(true); if (caption) caption.classList.add('live');
+    const lis = sel === i && list ? $$('li', list) : [], fs = sel === i && exList ? $$('div', exList) : [];
     fs.forEach((f) => f.classList.remove('on', 'done'));
     for (let k = 0; k < s.lines.length; k++) {
       if (id !== run) return;
       const l = s.lines[k];
-      level.who = l.who; capWho.textContent = l.who === 'ki' ? 'AIVOX · ' + s.voiceKi : s.who.split(' · ')[0];
+      level.who = l.who; if (capWho) capWho.textContent = l.who === 'ki' ? 'AIVOX · ' + s.voiceKi : s.who.split(' · ')[0];
       { const dur = ((audioEl(l.src).duration || l.text.length / 14) * 1000) * 0.92; typeOut(capText, l.text, dur); if (lis[k]) typeOut($('.txt', lis[k]), l.text, dur); }
       lis.forEach((li, j) => { li.classList.toggle('now', j === k); li.classList.toggle('done', j < k); });
       s.fields.forEach(([, , at], j) => { if (at === k && fs[j]) fs[j].classList.add('on'); });
@@ -533,8 +533,8 @@
     }
     if (id === run) {
       lis.forEach((li) => { li.classList.remove('now'); li.classList.add('done'); });
-      capWho.textContent = 'Ergebnis'; capText.textContent = s.fields[s.fields.length - 1][1];
-      playing = -1; level.who = 'idle'; setPressed(false); caption.classList.remove('live');
+      if (capWho) capWho.textContent = 'Ergebnis'; if (capText) capText.textContent = s.fields[s.fields.length - 1][1];
+      playing = -1; level.who = 'idle'; setPressed(false); if (caption) caption.classList.remove('live');
     }
   };
   btns.forEach((b) => b.addEventListener('click', () => { if (playing >= 0) return stopAll(); play(b.dataset.scn === 'sel' ? sel : Number(b.dataset.scn)); }));
@@ -554,12 +554,11 @@
     anim = requestAnimationFrame(step);
     if (e) SFX.tone(500 + Math.min(target, 4000) / 6, 0.03, 'sine', 0.012);
   };
-  [cCalls, cRate, cValue].forEach((r) => r.addEventListener('input', calc));
-  calc();
+  if (cCalls && cRate && cValue) { [cCalls, cRate, cValue].forEach((r) => r.addEventListener('input', calc)); calc(); }
 
   /* ===================== Formular ===================== */
   const form = $('.join'), msg = $('.join-msg');
-  form.addEventListener('submit', (e) => {
+  if (form) form.addEventListener('submit', (e) => {
     e.preventDefault();
     const name = $('#f-name'), mail = $('#f-mail');
     const okName = name.value.trim().length > 1, okMail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(mail.value.trim());
@@ -772,6 +771,7 @@ gl_FragColor=vec4(col*glow+vec3(stars*.25),glow+stars*.2);}`;
     const spy = new IntersectionObserver((es) => es.forEach((e) => {
       if (!e.isIntersecting) return;
       const v = e.target.dataset.view;
+      if (document.body.dataset.page) return;
       $$('.tab, .menu a').forEach((a) => (a.getAttribute('href') === '#' + v ? a.setAttribute('aria-current', 'page') : a.removeAttribute('aria-current')));
       moveGlow();
     }), { rootMargin: '-45% 0px -50% 0px' });
@@ -907,10 +907,45 @@ gl_FragColor=vec4(col*glow+vec3(stars*.25),glow+stars*.2);}`;
     return { go };
   })();
 
+
+  /* ===================== v17: Seitenwechsel mit Warp ===================== */
+  (() => {
+    const w = $('.warp'); if (!w) return;
+    const label = $('.warp-label', w);
+    const names = { start: 'START', ablauf: 'SO FUNKTIONIERT’S', live: 'LIVE-DEMO', einrichtung: 'EINRICHTUNG', cockpit: 'COCKPIT', sicherheit: 'SICHERHEIT', preise: 'PREISE', fragen: 'FRAGEN' };
+    const reset = () => { w.classList.remove('in', 'out', 'arrive'); document.body.classList.remove('warping'); };
+    document.addEventListener('click', (e) => {
+      const a = e.target.closest && e.target.closest('a[href]'); if (!a || e.defaultPrevented) return;
+      if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button || a.target === '_blank') return;
+      const href = a.getAttribute('href'), m = href.match(/^([a-z]+)\.html(#.*)?$/); if (!m) return;
+      const page = m[1] === 'index' ? 'start' : m[1];
+      if (page === document.body.dataset.page && m[2]) return;
+      e.preventDefault();
+      if (reduce) { location.href = href; return; }
+      const r = a.getBoundingClientRect();
+      w.style.setProperty('--cx', (e.clientX || r.left + r.width / 2) + 'px'); w.style.setProperty('--cy', (e.clientY || r.top + r.height / 2) + 'px');
+      label.textContent = names[page] || page.toUpperCase();
+      w.classList.remove('out'); w.classList.add('in'); document.body.classList.add('warping');
+      SFX.whoosh(); setTimeout(() => SFX.zap(), 180);
+      store.set('aivox-warp', label.textContent);
+      setTimeout(() => { location.href = href; }, 500);
+    });
+    addEventListener('pageshow', (e) => { if (e.persisted) reset(); });
+    const arriving = store.get('aivox-warp');
+    if (arriving && !reduce) {
+      store.set('aivox-warp', '');
+      label.textContent = arriving; w.classList.add('arrive');
+      requestAnimationFrame(() => requestAnimationFrame(() => {
+        w.classList.remove('arrive'); w.classList.add('out');
+        setTimeout(reset, 700);
+      }));
+    }
+  })();
+
   /* ===================== Start ===================== */
   FX.init();
   show(true);
-  if (store.get('aivox-intro') === '1') { intro.hidden = true; document.body.classList.remove('booting'); }
+  if (store.get('aivox-intro') === '1' || (document.body.dataset.page && document.body.dataset.page !== 'start')) { intro.hidden = true; document.body.classList.remove('booting'); }
   else openIntro();
   const loop = (now) => { const t = now / 1000; readLevel(t); if (!intro.hidden) { FX.draw(now); drawHud(t); } plasmas.forEach((p) => p.draw(t)); if (sky) sky.draw(t); if (core) core.draw(t); if (trail) trail.draw(); if (net) net.draw(t); requestAnimationFrame(loop); };
   requestAnimationFrame(loop);

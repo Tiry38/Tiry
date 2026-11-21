@@ -751,3 +751,22 @@ main { transition: transform .6s cubic-bezier(.2,.8,.2,1), filter .6s, opacity 1
 .api-note { display: block; margin-top: .9rem; padding: .8rem 1rem; border-radius: 1rem; background: linear-gradient(120deg, rgba(77,255,195,.08), rgba(127,212,255,.06), rgba(255,179,64,.06)); border: 1px solid rgba(77,255,195,.25); color: var(--ink); font-size: .92rem; }
 .api-note b { display: block; margin-bottom: .3rem; font: 400 .66rem/1.3 var(--wide); letter-spacing: .16em; text-transform: uppercase; color: var(--mint); }
 .know { align-items: start; }
+
+/* =================== v17: Einzelseiten =================== */
+.view[data-kap]::before { content: attr(data-kap) " / 08"; }
+main { animation: pageIn .9s cubic-bezier(.2,.8,.2,1) backwards; }
+@keyframes pageIn { from { opacity: 0; transform: scale(1.03); filter: blur(10px) saturate(1.6); } }
+.warp.arrive { visibility: visible; }
+.warp.arrive .warp-iris { clip-path: circle(150vmax at 50% 50%); }
+.warp.arrive .warp-label { opacity: 1; filter: none; letter-spacing: .5em; }
+.pager { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 1rem; margin-top: clamp(4rem, 8vw, 6rem); margin-bottom: 1rem; }
+.pager-a { position: relative; display: grid; gap: .35rem; min-height: 44px; padding: 1.1rem 1.8rem; border-radius: 999px; text-decoration: none; color: var(--ink);
+  border: 1px solid transparent; background: linear-gradient(rgba(6,9,14,.92), rgba(6,9,14,.92)) padding-box, linear-gradient(120deg, rgba(255,255,255,.14), rgba(255,255,255,.05)) border-box;
+  transition: transform .4s cubic-bezier(.2,.8,.2,1), box-shadow .4s; }
+.pager-a span { font: 400 .62rem/1 var(--wide); letter-spacing: .3em; text-transform: uppercase; color: var(--dim); }
+.pager-a strong { font-size: clamp(1rem, 2vw, 1.25rem); font-weight: 600; }
+.pager-a.next { margin-left: auto; text-align: right; background: linear-gradient(rgba(6,9,14,.92), rgba(6,9,14,.92)) padding-box, var(--spectrum) border-box; box-shadow: 0 0 40px -12px rgba(127,212,255,.55); }
+.pager-a.next strong::after { content: "  →"; }
+.pager-a.prev strong::before { content: "←  "; color: var(--dim); }
+.pager-a:hover, .pager-a:focus-visible { transform: translateY(-3px); box-shadow: 0 10px 50px -12px rgba(255,179,64,.55); }
+@media (max-width: 560px) { .pager-a { flex: 1 1 100%; } .pager-a.next { order: -1; } }
