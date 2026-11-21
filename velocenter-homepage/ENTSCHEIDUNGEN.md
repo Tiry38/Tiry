@@ -405,3 +405,8 @@
 - https://tiry38.github.io/velo-center-web/vorschau-landschaften/ = Live-Seite + Vorlage „Pässe & Küste“ (hintergrund10), Umschalter links.
 - Nicht verlinkt, `noindex`; Bilder aus `../img/`, Hintergründe in `vorschau-landschaften/hg10/`. Die echte Startseite bleibt unverändert.
 - Löschen, wenn nicht mehr gebraucht (Ordner im Web-Repo entfernen).
+
+## 21.11.2026 – Vorlage „Nebel, See & Schnee“ (hintergrund11, Tiry: „3 weitere unterschiedliche in diesem Style“)
+- Gleiche Technik wie hintergrund10 (echtes Foto + KI-Tiefenkarte, Live-3D), drei neue Szenen: Nebelstraße (Nebelbank zieht), Bergsee (Wasser kräuselt, Dunst), Winterpass (Schneefall in drei Tiefen).
+- Fotos frei (Unsplash-Lizenz), Person/Auto/Baustellenfässer wegretuschiert, Quellen in `entwurf-modern/hintergrund11/QUELLEN.md`.
+- Teilbare Vorschau: https://tiry38.github.io/velo-center-web/vorschau-landschaften-2/ (nicht verlinkt, `noindex`). Startseite unverändert.
