@@ -388,3 +388,11 @@
 
 ## Kurz-Link /winter/ entfernt (Tiry 20.11.2026)
 - `/winter/` (tiry38-Adresse) wieder von der Homepage genommen, wird nicht genutzt. Für Social Media direkt wa.me-Links verwenden. `live_bauen.py` kopiert `live/links/*` weiter, falls später nötig.
+
+## 21.11.2026 – Seitenwechsel „Explosionszeichnung“ live (Tiry: „fuck sind diese geil“)
+- Aus Vorlage 3 (`entwurf-modern/uebergang2/`) **nur der Übergang** live, Hintergrund der Live-Seite unverändert.
+- Ablauf: Kamera kippt die Seite in die Schrägansicht (rotateX 50°, rotateZ −24°), bis zu 12 (Handy 8) Bauteile heben sich als Ebenen ab
+  (gestrichelte Hilfslinien, roter Umriss auf der Grundplatte, „POS 01 · Z 241“), neue Seite senkt sich Ebene für Ebene ein, Kamera federt zurück (2,1 s).
+- Technik: View Transitions API (`window.VTX` im Router `go()`), Code in `<style id="vtExplo">` + `<script id="vtExploJs">` im Prototyp
+  (Quelle: `uebergang2/live-explo.css|js`, aus `ue2.js` herausgelöst). Browser ohne View Transitions = bisheriger Wischer.
+- Im Web-Repo direkt in die 10 Seiten eingesetzt (nicht neu gebaut), damit der Bilder-Agent-Stand (`PVV`, Agent-Daten) erhalten bleibt.

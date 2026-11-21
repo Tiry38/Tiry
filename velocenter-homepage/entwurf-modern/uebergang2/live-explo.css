@@ -1,0 +1,14 @@
+/* Seitenwechsel „Explosionszeichnung“ (Tiry 21.11.2026) */
+#vtfx{position:fixed;inset:0;width:100vw;height:100vh;pointer-events:none;z-index:2147483000;view-transition-name:vtfx}
+html.vtx::view-transition-old(root),html.vtx::view-transition-new(root){animation:none;mix-blend-mode:normal}
+html.vtx::view-transition-group(root){animation:none}
+html.vtx::view-transition-group(vtfx),html.vtx::view-transition-old(vtfx),html.vtx::view-transition-new(vtfx){animation:none}
+html.vtx::view-transition-group(vthdr),html.vtx::view-transition-group(vtfab){animation-duration:.42s;animation-timing-function:cubic-bezier(.4,0,.2,1)}
+html.vtx::view-transition-old(vthdr),html.vtx::view-transition-new(vthdr),html.vtx::view-transition-old(vtfab),html.vtx::view-transition-new(vtfab){animation-duration:.42s}
+html.vtx::view-transition-old(vthdr){animation:vtHo .2s cubic-bezier(.4,0,1,1) both}html.vtx::view-transition-new(vthdr){animation:vtHi .32s .12s cubic-bezier(0,0,.2,1) both}
+@keyframes vtHo{to{opacity:0}}@keyframes vtHi{from{opacity:0}}
+/* ===== 3 · Explosionszeichnung ===== */
+html.vt-explo::view-transition{background:radial-gradient(circle at 50% 46%,#FFFFFF 0,rgba(255,255,255,0) 60%),radial-gradient(rgba(70,74,82,.22) 1px,transparent 1.4px) 0 0/22px 22px,linear-gradient(180deg,#EEF0F3,#DCE0E6)}
+html.vt-explo::view-transition-old(*),html.vt-explo::view-transition-new(*){animation:none;mix-blend-mode:normal}
+html.vt-explo::view-transition-group(*){animation-duration:0s}
+html.vtx .vtm{animation:none!important}
