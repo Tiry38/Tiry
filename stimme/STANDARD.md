@@ -67,3 +67,9 @@ Standard **de-DE-Chirp3-HD-Leda**, vom Kunden im Cockpit wählbar (alle 30 Chirp
 Gemessen: alle 30 Stimmen 0,96 verständlich, Natürlichkeit 3,47–3,89, Leda 3,73 / Lebendigkeit 8,45. Messdaten: `aivox/stimmen-labor/chirp-auswahl/`.
 Aussprache-Lehre: Ein-Wort-Antworten mit Namen („Auf Becker.“) werden verschluckt → ganze Phrase („Auf den Namen Becker, bitte.“).
 - (Luna, Update) Unterbrechung **wortbasiert** statt pegelbasiert: nur fertige Erkennungsergebnisse mit Signalwörtern („Moment“, „Halt“, „Warte“ …) zählen – 0 Fehlalarme bei Geräuschen gemessen. Für AIVOX-Telefonie übernehmen (Anrufer-Geräusche sollen AIVOX nicht abbrechen). Quelle: Luna `BargeIn.kt`.
+
+## 12. Charakter & Emotion mit Chirp 3 HD (gemessen verständlich, 21.11.2026)
+Chirp kennt keine Gefühls-Tags – Charakter entsteht über: **Wortwahl** („Oh je, das ist ärgerlich – aber keine Sorge“), **Pausen** `[pause short]`,
+**Sprechtempo je Person** (gestresst 1,12 · müde 0,92 · normal 1,0), **Zögern** („Ähm, …“), Freude („Oh, super!“).
+Achtung: Gedankenstrich direkt nach „ja“ wird als „minus“ gelesen → Komma nutzen. Namen in ganze Sätze einbetten („Bitte auf den Namen Becker.“).
+AIVOX-Demo: jede Situation eigenes Stimmenpaar (Leda/Achird, Enceladus/Aoede, Pulcherrima/Iapetus, Algenib/Laomedeia). Skript: `aivox/stimmen-labor/charaktere.py`.

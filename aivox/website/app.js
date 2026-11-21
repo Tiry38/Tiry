@@ -419,42 +419,43 @@
   /* ===================== Gespräche ===================== */
   const S = (who, src, text) => ({ who, name: who === 'ki' ? 'AIVOX' : 'Anrufer', src: 'audio/' + src + '.mp3', text });
   const SCN = [
-    { title: 'Termin buchen', lines: [
+    { title: 'Termin buchen', voiceKi: 'Leda', voiceAn: 'Achird', who: 'Herr Becker · entspannt', lines: [
       S('ki', 's1-1', 'Fahrrad-Werkstatt am Markt, guten Tag! Sie sprechen mit der digitalen Assistenz – ich bin eine künstliche Intelligenz. Was kann ich für Sie tun?'),
-      S('anrufer', 's1-2', 'Hallo! Mein E-Bike müsste mal zur Inspektion. Geht diese Woche noch was?'),
-      S('ki', 's1-3', 'Klar, einen Moment, ich schau kurz in den Kalender. Am Donnerstag um halb elf wäre noch was frei. Passt Ihnen das?'),
-      S('anrufer', 's1-4', 'Ja, das passt.'),
-      S('ki', 's1-5', 'Prima. Auf welchen Namen darf ich den Termin eintragen?'),
-      S('anrufer', 's1-6', 'Auf den Namen Becker, bitte.'),
-      S('ki', 's1-7', 'Danke, Frau Becker. Ich schicke Ihnen die Bestätigung per SMS an die Nummer, mit der Sie gerade anrufen. Ist das in Ordnung?'),
-      S('anrufer', 's1-8', 'Ja, gerne.'),
-      S('ki', 's1-9', 'Erledigt. Dann bis Donnerstag!')],
-      fields: [['Anliegen', 'Inspektion E-Bike', 1], ['Freier Termin (aus deinem Kontingent)', 'Donnerstag, 10:30 Uhr', 2], ['Name (erfragt)', 'Becker', 5], ['Bestätigung', 'SMS an die Anrufnummer (zugestimmt)', 7], ['Ergebnis', 'Termin vergeben · SMS gesendet · Übergabe-Karte an dich', 8, 1]] },
-    { title: 'Ist mein Rad fertig?', lines: [
-      S('anrufer', 's2-1', 'Hallo, ich wollte fragen, ob mein Fahrrad schon fertig ist.'),
-      S('ki', 's2-2', 'Gern. Sie rufen von der Nummer aus Ihrem Reparaturauftrag an. Spreche ich mit Frau Meier?'),
-      S('anrufer', 's2-3', 'Ja, genau.'),
-      S('ki', 's2-4', 'Ihr Rad ist fertig, Frau Meier. Sie können es ab 16 Uhr abholen, die Rechnung liegt bei 89 Euro.'),
-      S('anrufer', 's2-5', 'Super, danke!'),
-      S('ki', 's2-6', 'Sehr gern. Bis später!')],
-      fields: [['Anliegen', 'Abholstatus', 0], ['Erkannt über', 'Rufnummer im Reparaturauftrag', 1], ['Bestätigt', 'Frau Meier', 2], ['Auskunft (aus dem Auftragsstatus)', 'Fertig ab 16:00 Uhr · 89 €', 3], ['Ergebnis', 'Erledigt, kein Rückruf nötig', 5, 1]] },
-    { title: 'Panne, eilig', lines: [
-      S('anrufer', 's3-1', 'Hallo, ich hab einen Platten und brauch mein Rad morgen früh für die Arbeit.'),
-      S('ki', 's3-2', 'Oh, das ist ärgerlich – aber das kriegen wir hin. Wenn Sie es heute bis 18 Uhr bringen, ist es morgen ab halb acht fertig. Wie ist Ihr Name?'),
-      S('anrufer', 's3-3', 'Schneider.'),
-      S('ki', 's3-4', 'Danke, Frau Schneider. Ich habe es für die Werkstatt notiert. Bis nachher!')],
-      fields: [['Anliegen', 'Platten · Rad morgen früh gebraucht', 0], ['Lösung (deine Regel: Express)', 'Abgabe bis 18:00 · fertig ab 7:30', 1], ['Name (erfragt)', 'Schneider', 2], ['Ergebnis', 'Auftrag für die Werkstatt notiert', 3, 1]] },
-    { title: 'Nach Feierabend', lines: [
-      S('anrufer', 's4-1', 'Guten Abend, haben Sie heute noch offen?'),
-      S('ki', 's4-2', 'Heute haben wir leider schon geschlossen. Morgen sind wir ab 9 Uhr wieder da. Soll Sie jemand aus dem Team zurückrufen?'),
-      S('anrufer', 's4-3', 'Ja, gern.'),
-      S('ki', 's4-4', 'Alles klar. Wir rufen Sie morgen früh an, unter der Nummer, mit der Sie gerade anrufen. Schönen Abend noch!')],
-      fields: [['Uhrzeit', 'Nach Ladenschluss', 0], ['Auskunft (aus deinem Profil)', 'Morgen ab 9:00 Uhr geöffnet', 1], ['Rückrufnummer', 'Übertragene Anrufnummer', 3], ['Ergebnis', 'Rückruf für morgen früh in deiner Liste', 3, 1]] },
+      S('anrufer', 's1-2', 'Ja, hallo! Mein E-Bike müsste mal wieder zur Inspektion. Geht diese Woche noch was?'),
+      S('ki', 's1-3', 'Na klar, einen Moment … ich schau kurz nach. Am Donnerstag um halb elf wäre noch ein Platz frei. Passt Ihnen das?'),
+      S('anrufer', 's1-4', 'Donnerstag, halb elf … ja, das passt super.'),
+      S('ki', 's1-5', 'Wunderbar! Auf welchen Namen darf ich den Termin eintragen?'),
+      S('anrufer', 's1-6', 'Bitte auf den Namen Becker.'),
+      S('ki', 's1-7', 'Danke, Herr Becker. Ich schicke Ihnen die Bestätigung per Es-Em-Es an die Nummer, mit der Sie gerade anrufen. Ist das in Ordnung?'),
+      S('anrufer', 's1-8', 'Ja, gerne. Danke Ihnen!'),
+      S('ki', 's1-9', 'Sehr gern! Dann bis Donnerstag – und gute Fahrt bis dahin.')],
+      fields: [["Anliegen", "Inspektion E-Bike", 1], ["Freier Termin (aus deinem Kontingent)", "Donnerstag, 10:30 Uhr", 2], ["Name (erfragt)", "Becker", 5], ["Bestätigung", "SMS an die Anrufnummer (zugestimmt)", 7], ["Ergebnis", "Termin vergeben · SMS gesendet · Übergabe-Karte an dich", 8, 1]] },
+    { title: 'Ist mein Rad fertig?', voiceKi: 'Enceladus', voiceAn: 'Aoede', who: 'Frau Meier · neugierig', lines: [
+      S('anrufer', 's2-1', 'Hallo! Ich wollte nur mal kurz fragen, ob mein Fahrrad schon fertig ist?'),
+      S('ki', 's2-2', 'Gern, ich schau sofort nach. Sie rufen von der Nummer aus Ihrem Reparaturauftrag an – spreche ich mit Frau Meier?'),
+      S('anrufer', 's2-3', 'Ja, genau, das bin ich!'),
+      S('ki', 's2-4', 'Gute Nachrichten, Frau Meier: Ihr Rad ist fertig! Sie können es ab sechzehn Uhr abholen. Die Rechnung liegt bei neunundachtzig Euro.'),
+      S('anrufer', 's2-5', 'Oh, super! Vielen Dank, dann komm ich nachher vorbei.'),
+      S('ki', 's2-6', 'Sehr gern! Bis später – wir freuen uns.')],
+      fields: [["Anliegen", "Abholstatus", 0], ["Erkannt über", "Rufnummer im Reparaturauftrag", 1], ["Bestätigt", "Frau Meier", 2], ["Auskunft (Status aus dem Cockpit)", "Fertig ab 16:00 Uhr · 89 €", 3], ["Ergebnis", "Erledigt, kein Rückruf nötig", 5, 1]] },
+    { title: 'Panne, eilig', voiceKi: 'Pulcherrima', voiceAn: 'Iapetus', who: 'Herr Schneider · gestresst', lines: [
+      S('anrufer', 's3-1', 'Hallo, ja, ich hab einen Platten, und ich brauch mein Rad eigentlich morgen früh für die Arbeit!'),
+      S('ki', 's3-2', 'Oh je, das ist ärgerlich. Aber keine Sorge – das kriegen wir hin. Wenn Sie das Rad heute bis achtzehn Uhr bringen, ist es morgen ab halb acht fertig. Wie ist Ihr Name?'),
+      S('anrufer', 's3-3', 'Schneider. Ach, Gott sei Dank – das ist perfekt.'),
+      S('ki', 's3-4', 'Sehr gern, Herr Schneider. Ich habe es für die Werkstatt notiert. Bis nachher – und Kopf hoch!')],
+      fields: [["Anliegen", "Platten · Rad morgen früh gebraucht", 0], ["Lösung (deine Regel: Express)", "Abgabe bis 18:00 · fertig ab 7:30", 1], ["Name (erfragt)", "Schneider", 2], ["Ergebnis", "Auftrag für die Werkstatt notiert", 3, 1]] },
+    { title: 'Nach Feierabend', voiceKi: 'Algenib', voiceAn: 'Laomedeia', who: 'Anruferin · am Abend, müde', lines: [
+      S('anrufer', 's4-1', 'Ähm, … guten Abend. Haben Sie heute noch offen?'),
+      S('ki', 's4-2', 'Guten Abend! Heute haben wir leider schon geschlossen. Morgen früh sind wir ab neun Uhr wieder für Sie da. Soll Sie jemand aus dem Team zurückrufen?'),
+      S('anrufer', 's4-3', 'Ja … das wäre nett, danke.'),
+      S('ki', 's4-4', 'Gern geschehen. Wir rufen Sie morgen früh an, unter der Nummer, mit der Sie gerade anrufen. Einen schönen Abend noch – und erholen Sie sich gut.')],
+      fields: [["Uhrzeit", "Nach Ladenschluss", 0], ["Auskunft (aus deinem Profil)", "Morgen ab 9:00 Uhr geöffnet", 1], ["Rückrufnummer", "Übertragene Anrufnummer", 3], ["Ergebnis", "Rückruf für morgen früh in deiner Liste", 3, 1]] },
   ];
   let sel = 0;
   const chips = $('.chips'), list = $('.script'), exList = $('.ex-list');
   const render = () => {
     const s = SCN[sel]; list.textContent = ''; exList.textContent = '';
+    const vt = $('.voice-tag'); if (vt) { vt.innerHTML = ''; const b1 = document.createElement('b'), i1 = document.createElement('i'); b1.textContent = 'AIVOX · ' + s.voiceKi; i1.textContent = s.who + ' · ' + s.voiceAn; vt.append(b1, document.createTextNode('  ↔  '), i1); }
     s.lines.forEach((l) => {
       const li = document.createElement('li'); li.className = l.who;
       const w = document.createElement('span'); w.className = 'who'; w.textContent = l.name;
@@ -464,7 +465,7 @@
     s.fields.forEach(([k, v]) => { const d = document.createElement('div'), dt = document.createElement('dt'), dd = document.createElement('dd'); dt.textContent = k; dd.textContent = v; d.append(dt, dd); exList.appendChild(d); });
   };
   SCN.forEach((s, i) => {
-    const b = document.createElement('button'); b.type = 'button'; b.className = 'chip'; b.textContent = s.title;
+    const b = document.createElement('button'); b.type = 'button'; b.className = 'chip'; { const st = document.createElement('strong'), sp = document.createElement('span'); st.textContent = s.title; sp.textContent = 'AIVOX: ' + s.voiceKi; b.append(st, sp); }
     b.setAttribute('aria-pressed', String(i === 0));
     b.addEventListener('click', () => { sel = i; $$('.chip').forEach((c, k) => c.setAttribute('aria-pressed', String(k === i))); render(); play(i); });
     chips.appendChild(b);
@@ -493,7 +494,8 @@
     for (let k = 0; k < s.lines.length; k++) {
       if (id !== run) return;
       const l = s.lines[k];
-      level.who = l.who; capWho.textContent = l.name; capText.textContent = l.text;
+      level.who = l.who; capWho.textContent = l.who === 'ki' ? 'AIVOX · ' + s.voiceKi : s.who.split(' · ')[0];
+      { const dur = ((audioEl(l.src).duration || l.text.length / 14) * 1000) * 0.92; typeOut(capText, l.text, dur); if (lis[k]) typeOut($('.txt', lis[k]), l.text, dur); }
       lis.forEach((li, j) => { li.classList.toggle('now', j === k); li.classList.toggle('done', j < k); });
       s.fields.forEach(([, , at], j) => { if (at === k && fs[j]) fs[j].classList.add('on'); });
       await say(l.src);
@@ -720,11 +722,93 @@ gl_FragColor=vec4(col*glow+vec3(stars*.25),glow+stars*.2);}`;
     level.speaking = false; level.who = 'idle'; b.classList.remove('playing');
   }));
 
+
+  /* ===================== v13: Zukunfts-Effekte ===================== */
+  // Scroll-Fortschritt als Spektrum-Linie
+  const prog = document.createElement('div'); prog.className = 'progress'; prog.setAttribute('aria-hidden', 'true'); document.body.appendChild(prog);
+  const setProg = () => { const m = document.documentElement.scrollHeight - innerHeight; prog.style.transform = `scaleX(${m > 0 ? scrollY / m : 0})`; };
+  addEventListener('scroll', setProg, { passive: true }); setProg();
+
+  // Funkenspur am Mauszeiger
+  const trail = (() => {
+    if (!fine || reduce) return null;
+    const c = document.createElement('canvas'); c.className = 'trail'; c.setAttribute('aria-hidden', 'true'); document.body.appendChild(c);
+    const g = c.getContext('2d'); let P = [], lx = null, ly = null;
+    const size = () => { c.width = innerWidth; c.height = innerHeight; }; size(); addEventListener('resize', size);
+    addEventListener('pointermove', (e) => {
+      if (lx !== null) {
+        const d = Math.hypot(e.clientX - lx, e.clientY - ly), n = Math.min(6, Math.floor(d / 6));
+        for (let i = 0; i < n; i++) { const k = i / n; P.push({ x: lx + (e.clientX - lx) * k, y: ly + (e.clientY - ly) * k, vx: (Math.random() - 0.5) * 0.6, vy: (Math.random() - 0.5) * 0.6, l: 1, c: specAt((e.clientX / innerWidth + Math.random() * 0.1) % 1) }); }
+      }
+      lx = e.clientX; ly = e.clientY;
+    }, { passive: true });
+    return { draw() {
+      g.clearRect(0, 0, c.width, c.height); if (!P.length) return;
+      g.globalCompositeOperation = 'lighter';
+      P = P.filter((p) => (p.l -= 0.045) > 0);
+      if (P.length > 260) P.splice(0, P.length - 260);
+      for (const p of P) { p.x += p.vx; p.y += p.vy; g.globalAlpha = p.l * 0.55; g.fillStyle = `rgb(${p.c[0] | 0},${p.c[1] | 0},${p.c[2] | 0})`; g.beginPath(); g.arc(p.x, p.y, 1 + p.l * 2.2, 0, Math.PI * 2); g.fill(); }
+      g.globalAlpha = 1; g.globalCompositeOperation = 'source-over';
+    } };
+  })();
+
+  // Lichtwelle beim Klicken
+  document.addEventListener('pointerdown', (e) => {
+    const el = e.target.closest && e.target.closest('.btn, .chip, .vchip, .node, .tab');
+    if (!el || reduce) return;
+    const r = el.getBoundingClientRect(), s = document.createElement('span');
+    s.className = 'ripple'; s.style.left = (e.clientX - r.left) + 'px'; s.style.top = (e.clientY - r.top) + 'px';
+    el.appendChild(s); setTimeout(() => s.remove(), 800);
+  });
+
+  // Holo-Schimmer folgt dem Zeiger
+  document.addEventListener('pointermove', (e) => {
+    const el = e.target.closest && e.target.closest('.spot'); if (!el) return;
+    el.style.setProperty('--hx', ((e.clientX / innerWidth) * 360).toFixed(0));
+  }, { passive: true });
+
+  // Neuronales Netz hinter dem Datenfluss
+  const net = (() => {
+    const host = $('.flowmap'); if (!host || reduce) return null;
+    const c = document.createElement('canvas'); c.className = 'neural'; c.setAttribute('aria-hidden', 'true'); host.prepend(c);
+    const g = c.getContext('2d'); let N = [], W = 0, H = 0;
+    const size = () => { W = c.clientWidth; H = c.clientHeight; c.width = W; c.height = H; N = Array.from({ length: Math.round(W * H / 9000) }, () => ({ x: Math.random() * W, y: Math.random() * H, vx: (Math.random() - 0.5) * 0.3, vy: (Math.random() - 0.5) * 0.3, c: specAt(Math.random()) })); };
+    size(); addEventListener('resize', size);
+    return { draw(t) {
+      if (c.offsetParent === null || !W) return;
+      const r = c.getBoundingClientRect(); if (r.bottom < 0 || r.top > innerHeight) return;
+      const px = pointer.x - r.left, py = pointer.y - r.top;
+      g.clearRect(0, 0, W, H); g.globalCompositeOperation = 'lighter';
+      for (const n of N) { n.x += n.vx; n.y += n.vy; if (n.x < 0 || n.x > W) n.vx *= -1; if (n.y < 0 || n.y > H) n.vy *= -1; }
+      for (let i = 0; i < N.length; i++) for (let j = i + 1; j < N.length; j++) {
+        const a = N[i], b = N[j], d = Math.hypot(a.x - b.x, a.y - b.y);
+        if (d < 110) {
+          const near = Math.max(0, 1 - Math.hypot((a.x + b.x) / 2 - px, (a.y + b.y) / 2 - py) / 220);
+          g.globalAlpha = (1 - d / 110) * (0.12 + near * 0.5 + level.v * 0.3);
+          g.strokeStyle = `rgb(${a.c[0] | 0},${a.c[1] | 0},${a.c[2] | 0})`; g.lineWidth = 1;
+          g.beginPath(); g.moveTo(a.x, a.y); g.lineTo(b.x, b.y); g.stroke();
+          if (((t * 0.6 + i * 0.13) % 1) < 0.02) { const k = (t * 3 + j) % 1; g.globalAlpha = 0.9; g.fillStyle = '#fff'; g.fillRect(a.x + (b.x - a.x) * k - 1, a.y + (b.y - a.y) * k - 1, 2, 2); }
+        }
+      }
+      for (const n of N) { g.globalAlpha = 0.7; g.fillStyle = `rgb(${n.c[0] | 0},${n.c[1] | 0},${n.c[2] | 0})`; g.fillRect(n.x - 1, n.y - 1, 2, 2); }
+      g.globalAlpha = 1; g.globalCompositeOperation = 'source-over';
+    } };
+  })();
+
+  // Wort-für-Wort-Mitschrift (wirkt wie Live-Erkennung)
+  const typeOut = (el, text, ms) => {
+    if (!el) return; if (reduce) { el.textContent = text; return; }
+    const words = text.split(' '); let i = 0; el.textContent = '';
+    const step = Math.max(40, ms / Math.max(1, words.length));
+    const tick = () => { if (i >= words.length) return; el.textContent += (i ? ' ' : '') + words[i++]; el._t = setTimeout(tick, step); };
+    clearTimeout(el._t); tick();
+  };
+
   /* ===================== Start ===================== */
   FX.init();
   show(true);
   if (store.get('aivox-intro') === '1') { intro.hidden = true; document.body.classList.remove('booting'); }
   else openIntro();
-  const loop = (now) => { const t = now / 1000; readLevel(t); if (!intro.hidden) FX.draw(now); plasmas.forEach((p) => p.draw(t)); if (sky) sky.draw(t); if (core) core.draw(t); requestAnimationFrame(loop); };
+  const loop = (now) => { const t = now / 1000; readLevel(t); if (!intro.hidden) FX.draw(now); plasmas.forEach((p) => p.draw(t)); if (sky) sky.draw(t); if (core) core.draw(t); if (trail) trail.draw(); if (net) net.draw(t); requestAnimationFrame(loop); };
   requestAnimationFrame(loop);
 })();

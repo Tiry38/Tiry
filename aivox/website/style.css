@@ -580,3 +580,46 @@ main { counter-reset: kap; }
 .compat-list li::before { content: ""; position: absolute; left: 0; top: .45em; width: 12px; height: 7px; border-left: 2px solid var(--mint); border-bottom: 2px solid var(--mint); rotate: -45deg; }
 .compat-list strong { color: var(--ink); }
 .compat .btn { justify-self: start; }
+
+/* =================== v13: Zukunfts-Effekte =================== */
+.progress { position: fixed; left: 0; right: 0; top: 0; height: 2px; z-index: 80; transform-origin: 0 50%; transform: scaleX(0); background: var(--spectrum); box-shadow: 0 0 12px rgba(127,212,255,.7); pointer-events: none; }
+.trail { position: fixed; inset: 0; z-index: 65; pointer-events: none; }
+.ripple { position: absolute; width: 10px; height: 10px; margin: -5px 0 0 -5px; border-radius: 50%; pointer-events: none; border: 2px solid rgba(255,255,255,.9); box-shadow: 0 0 14px rgba(127,212,255,.9), inset 0 0 10px rgba(255,74,36,.6); animation: ripple .8s cubic-bezier(.2,.8,.2,1) forwards; z-index: 3; }
+@keyframes ripple { to { transform: scale(18); opacity: 0; border-width: .5px; } }
+.btn, .chip, .vchip, .tab { overflow: hidden; }
+.node { overflow: visible; }
+
+/* Holo-Schimmer auf Lichtflächen */
+.spot { background:
+  radial-gradient(600px circle at var(--x) var(--y), rgba(127,212,255,.09), transparent 45%),
+  conic-gradient(from calc(var(--hx, 0) * 1deg) at var(--x) var(--y), rgba(47,140,255,0), rgba(127,212,255,.05), rgba(255,179,64,.05), rgba(255,74,36,.04), rgba(47,140,255,0)),
+  var(--panel); }
+
+/* Neuronales Netz */
+.flowmap { position: relative; isolation: isolate; }
+.neural { position: absolute; inset: -40px -10px; width: calc(100% + 20px); height: calc(100% + 80px); z-index: -1; pointer-events: none; opacity: .6; mask: radial-gradient(ellipse at center, #000 55%, transparent 85%); -webkit-mask: radial-gradient(ellipse at center, #000 55%, transparent 85%); }
+
+/* Live-Demo: Stimmen sichtbar */
+.chip { display: grid; gap: .1rem; text-align: center; padding: .45rem 1.1rem; min-height: 52px; }
+.chip strong { font-size: .95rem; }
+.chip span { font-size: .72rem; color: var(--dim); }
+.chip[aria-pressed="true"] span { color: var(--amber); }
+.voice-tag { margin: 1rem auto 0; font: 400 .66rem/1.6 var(--wide); letter-spacing: .18em; text-transform: uppercase; color: var(--steel); }
+.voice-tag b { color: var(--ice); font-weight: 400; }
+.voice-tag i { color: var(--amber); font-style: normal; }
+.script li.now .txt::after { content: "▍"; margin-left: .15em; color: var(--ice); animation: blink 1s steps(2) infinite; }
+@keyframes blink { 50% { opacity: 0; } }
+
+/* Flüssige Auftritte beim Scrollen (native Scroll-Animationen, wo unterstützt) */
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .pain-item, .trust li, .know > div, .setup li, .tier-list li, .feats li, .shield > div, .faq details, .who-grid > div, .fm-stages > div, .ck-kpis > div, .specs > div, .tl-item {
+      animation: rise linear both; animation-timeline: view(); animation-range: entry 0% cover 28%;
+    }
+    @keyframes rise { from { opacity: 0; transform: translateY(40px) scale(.97); filter: blur(6px); } to { opacity: 1; transform: none; filter: none; } }
+    .h2, .display { animation: glowin linear both; animation-timeline: view(); animation-range: entry 0% cover 35%; }
+    @keyframes glowin { from { opacity: .15; letter-spacing: .06em; filter: blur(8px); } to { opacity: 1; filter: none; } }
+    .hero-ghost { animation-timeline: scroll(); animation: ghostscroll linear both; animation-timeline: scroll(); }
+    @keyframes ghostscroll { to { transform: translateY(240px) scale(1.15); opacity: 0; } }
+  }
+}
