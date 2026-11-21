@@ -568,3 +568,15 @@ main { counter-reset: kap; }
 .tier-list li { padding: 1.5rem 1.5rem 1.6rem; }
 .tier-list h4 { margin: 1rem 0 .4rem; font-size: 1.2rem; }
 .tier-list p { margin: 0; color: var(--steel); }
+
+/* ---------- Kompatibilitäts-Band ---------- */
+.compat { margin-top: 2.6rem; padding: clamp(1.4rem, 3vw, 2.2rem); border-radius: 2rem; text-align: left; display: grid; gap: 1.2rem; }
+.compat-head { display: flex; gap: 1rem; align-items: center; }
+.compat-head .kicker { margin: 0 0 .4rem; }
+.compat-head .vh3 { margin: 0; }
+.compat-list { list-style: none; margin: 0; padding: 0; display: grid; gap: .8rem; }
+@media (min-width: 900px) { .compat-list { grid-template-columns: repeat(2, 1fr); gap: 1rem 2rem; } }
+.compat-list li { position: relative; padding-left: 1.7rem; color: var(--steel); }
+.compat-list li::before { content: ""; position: absolute; left: 0; top: .45em; width: 12px; height: 7px; border-left: 2px solid var(--mint); border-bottom: 2px solid var(--mint); rotate: -45deg; }
+.compat-list strong { color: var(--ink); }
+.compat .btn { justify-self: start; }
