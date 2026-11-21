@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Alle Tests der WoW-Forever-Add-ons mit einem Befehl.
 # Aufruf (von überall):  bash wow-addons/tools/test_all.sh [ziel ...]
-#   Ziele: rezept (= zentrale) levelpilot totemtakt windbaem proc hagel blitzschild chathoch minipost enhancehud syntax  (ohne Ziel = alle)
+#   Ziele: rezept (= zentrale) levelpilot totemtakt windbaem proc hagel blitzschild chathoch chatwerk minipost enhancehud syntax  (ohne Ziel = alle)
 # Exit-Code 0 = alles grün. Am Ende steht eine Zusammenfassung.
 set -u
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
@@ -92,6 +92,7 @@ fi
 if want windbaem; then run "WindBaem (Windzorn-Ton, Kampf-/Bosssperre)" "$A/WindBaem" "WB TESTS OK" lua5.1 "$T/wb.lua"; fi
 if want rxn; then run "RXPNeon (Skin + Deutsch + Tipp + Layout)" "$A/RXPNeon" "RXN TESTS OK" lua5.1 "$T/rxn.lua"; fi
 if want chathoch; then run "ChatHoch (Höhe, Geselligkeits-Knopf)" "$A/ChatHoch" "CH TESTS OK" lua5.1 "$T/ch.lua"; fi
+if want chatwerk; then run "ChatWerk (Fenster, Kategorien, Klassenfarben, Geheimwerte, AH/Post/Haendler, Einstellungen)" "$ROOT" "CW TESTS OK" lua5.1 tests/cw.lua; fi
 if want minipost; then run "MiniPost" "$A/MiniPost" - lua5.1 "$T/mp.lua"; fi
 if want enhancehud; then
   run "EnhanceHUD" "$A" - lua5.1 "$T/run.lua"

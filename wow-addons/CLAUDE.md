@@ -77,6 +77,17 @@ nur Stil-Tabelle). Blitz: 5 Schnitte `blitz_slash` (Takt 1,5 s, = 5 Stapel), Fun
 blau, Einschlag. **Keine Ringe/Drehungen auch beim Mahlstrom** (Test prüft das). Grafiken `python3 -I tools/blitz_media.py`;
 `strom_media.py` erzeugt nur noch `strom_glow` + Helfer. Vorschau `previews/Schlaghagel_1.5_Mahlstrom_Blitzsturm.gif`.
 
+## ChatWerk 1.0 (eigene Chatfenster)
+- Dateien: `Core.lua` (Kategorien `ns.CATS`/`ns.GROUPS`, Ereignis → Kategorie `ns.EV`, Systemmeldungen per GlobalStrings-Muster
+  `ns.Classify`, Formatierung, Spam, Stichwörter, `ns.Emit`), `Auction.lua` (AH/Post/Händler/Gold: Hooks auf Spieler-Klicks +
+  Geld-„Grund“ gegen Doppelzeilen), `Blizzard.lua` (Blizzard-Chat in unsichtbaren Rahmen, Eingabezeile, `print`-Einsammeln über
+  `hooksecurefunc(ChatFrameN, "AddMessage")`: ohne 5. Argument = Add-on-Ausgabe), `Window.lua` (ScrollingMessageFrame-Fenster),
+  `Config.lua` (Auswahlliste), `UI/Widgets.lua` (Neon-Glas aus RezeptRadar).
+- **Geheimwerte:** CHAT_MSG-Text/Name/GUID im Chat-Lockdown nie anfassen (`issecretvalue` zuerst), nur `AddMessage` durchreichen,
+  nicht speichern. Ereignisname und Kanalnummer sind nie geheim.
+- Neue Nachrichtenart = Eintrag in `ns.CATS` (+ `ns.EV` bzw. `SYS`/`LOOT`-Liste). Neue Arten werden in bestehenden Fenstern
+  **nicht** automatisch eingeschaltet. Test: `tests/cw.lua`, Mock kennt `ScrollingMessageFrame` (`W.SMF`).
+
 ## WindBaem (Windzorn-Ton)
 `addons/WindBaem/`: meldet per `C_UnitAuras.AddAuraSound(Added, {unitToken="player", spellID, soundFileName, outputChannel,
 throttleSeconds})` die 7 Windzorn-Proc-Auren an (Effekt „Extra Attacks“ in `allspells.txt`; Aura mit „No Aura Icon“). Nur außerhalb

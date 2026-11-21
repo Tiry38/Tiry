@@ -1,0 +1,15 @@
+## Interface: 16001
+## Title: |cff39ff6bChat|r|cff2de2e6Werk|r
+## Notes: Eigene Chatfenster: frei ziehen und skalieren, je Fenster genau auswaehlen was erscheint, Klassenfarben, AH und Gold im Detail
+## Author: Tiry
+## Version: 1.0.0
+## IconTexture: Interface\AddOns\ChatWerk\Media\logo
+## SavedVariables: ChatWerkDB
+## SavedVariablesPerCharacter: ChatWerkCharDB
+
+Core.lua
+UI\Widgets.lua
+Window.lua
+Blizzard.lua
+Auction.lua
+Config.lua

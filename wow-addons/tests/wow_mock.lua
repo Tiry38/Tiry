@@ -46,6 +46,9 @@ local ALLOWED = {
   Scale = union("SimpleObjectAPI", "SimpleFrameScriptObjectAPI", "SimpleAnimAPI", "SimpleAnimScaleAPI"),
   Rotation = union("SimpleObjectAPI", "SimpleFrameScriptObjectAPI", "SimpleAnimAPI", "SimpleAnimRotationAPI"),
 }
+-- ScrollingMessageFrame ist in Forever ein Lua-"intrinsic" Frame (Blizzard_SharedXML/ScrollingMessageFrame.xml):
+-- C-Seite = Frame, die Nachrichten-Methoden kommen aus ScrollingMessageFrameMixin/-SecureMixin (siehe SMF unten).
+ALLOWED.ScrollingMessageFrame = allowed("SimpleFrameAPI")
 -- Methoden aus Frame-Schablonen bzw. Lua-Mixins, die nicht in der C-API-Doku stehen
 ALLOWED.Frame.SetBackdrop = nil
 
@@ -298,7 +301,7 @@ function Obj.SetTextureSliceMode(o, m) assert(m == 0 or m == 1, "SliceMode 0 (ge
 function Obj.SetFont(o, file, size, flags)
   assert(type(file) == "string" and file ~= "", "SetFont: Datei fehlt")
   assert(type(size) == "number" and size > 0, "SetFont: Größe fehlt")
-  if file:match("^Interface\\AddOns\\RezeptRadar\\") then checkAddonFile(file, { "ttf" }) end
+  if file:match("^Interface\\AddOns\\RezeptRadar\\") or file:match("^Interface\\AddOns\\ChatWerk\\") then checkAddonFile(file, { "ttf" }) end
   o.__font = file
   o.__size = size
   o.__weight = file:find("ExtraBold") and "bold" or (file:find("SemiBold") and "semibold" or (file:upper():find("ARIALN") and "narrow" or "regular"))
@@ -467,6 +470,65 @@ end
 ----------------------------------------------------------------------------
 -- Globale Umgebung
 ----------------------------------------------------------------------------
+-- Nachbau der Mixin-Methoden (nur die in Forever vorhandenen Namen); Nachrichten landen in o.__msgs
+local SMF = {}
+function SMF.AddMessage(o, msg, r, g, b, ...)
+  if not (_G.issecretvalue and _G.issecretvalue(msg)) then
+    assert(type(msg) == "string" or type(msg) == "number", "AddMessage braucht Text")
+  end
+  table.insert(o.__msgs, { msg, r, g, b })
+  while #o.__msgs > (o.__maxLines or 120) do table.remove(o.__msgs, 1) end
+end
+function SMF.BackFillMessage(o, msg, r, g, b) table.insert(o.__msgs, 1, { msg, r, g, b }) end
+function SMF.GetNumMessages(o) return #o.__msgs end
+function SMF.GetMessageInfo(o, i) local m = o.__msgs[i] if m then return m[1], m[2], m[3], m[4] end end
+function SMF.Clear(o) o.__msgs = {} o.__offset = 0 end
+function SMF.SetMaxLines(o, n) assert(type(n) == "number" and n > 0) o.__maxLines = n end
+function SMF.GetMaxLines(o) return o.__maxLines or 120 end
+function SMF.ScrollByAmount(o, n) assert(type(n) == "number") o.__offset = math.max(0, math.min((o.__offset or 0) + n, math.max(#o.__msgs - 1, 0))) end
+function SMF.ScrollUp(o) SMF.ScrollByAmount(o, 1) end
+function SMF.ScrollDown(o) SMF.ScrollByAmount(o, -1) end
+function SMF.PageUp(o) SMF.ScrollByAmount(o, 10) end
+function SMF.PageDown(o) SMF.ScrollByAmount(o, -10) end
+function SMF.ScrollToTop(o) o.__offset = math.max(#o.__msgs - 1, 0) end
+function SMF.ScrollToBottom(o) o.__offset = 0 end
+function SMF.GetScrollOffset(o) return o.__offset or 0 end
+function SMF.SetScrollOffset(o, n) o.__offset = n end
+function SMF.AtBottom(o) return (o.__offset or 0) == 0 end
+function SMF.AtTop(o) return (o.__offset or 0) >= math.max(#o.__msgs - 1, 0) end
+function SMF.SetFading(o, v) o.__fading = v and true or false end
+function SMF.GetFading(o) return o.__fading end
+function SMF.SetTimeVisible(o, s) assert(type(s) == "number") o.__timeVisible = s end
+function SMF.SetFadeDuration(o, s) assert(type(s) == "number") end
+function SMF.ResetAllFadeTimes() end
+function SMF.SetInsertMode(o, m) o.__insert = m end
+function SMF.SetTextCopyable() end
+function SMF.SetScrollAllowed() end
+function SMF.SetOnScrollChangedCallback(o, fn) assert(type(fn) == "function") o.__onScroll = fn end
+function SMF.SetOnTextCopiedCallback() end
+function SMF.SetOnLineRightClickedCallback() end
+function SMF.AddOnDisplayRefreshedCallback() end
+function SMF.GetNumVisibleLines() return 8 end
+function SMF.GetMaxScrollRange(o) return math.max(#o.__msgs - 1, 0) end
+function SMF.SetFont(o, file, size, flags)
+  assert(type(file) == "string" and type(size) == "number", "SetFont(file, size, flags)")
+  checkAddonFile(file, { "ttf" })
+  o.__font = { file, size, flags }
+end
+function SMF.SetFontObject() end
+function SMF.SetTextColor(o, r, g, b) assert(type(r) == "number") end
+function SMF.SetShadowColor(o, r, g, b, a) assert(type(r) == "number") end
+function SMF.SetShadowOffset(o, x, y) assert(type(x) == "number") end
+function SMF.SetSpacing(o, s) assert(type(s) == "number") end
+function SMF.SetJustifyH(o, j) assert(JUSTH[j], "Ungültig JustifyH: " .. tostring(j)) end
+function SMF.SetJustifyV(o, j) assert(JUSTV[j], "Ungültig JustifyV: " .. tostring(j)) end
+function SMF.SetIndentedWordWrap() end
+function SMF.ForEachMessage(o, fn) for _, m in ipairs(o.__msgs) do fn(m[1], m[2], m[3], m[4]) end end
+function SMF.RemoveMessagesByPredicate(o, fn) local keep = {} for _, m in ipairs(o.__msgs) do if not fn(m[1]) then keep[#keep + 1] = m end end o.__msgs = keep end
+function SMF.AdjustMessageColors() end
+function SMF.TransformMessages() end
+M.SMF = SMF
+
 function M.install(opts)
   opts = opts or {}
   local G = _G
@@ -477,6 +539,10 @@ function M.install(opts)
     assert(ALLOWED[kind], "CreateFrame: Typ nicht im Mock: " .. tostring(kind))
     assert(template == nil, "Schablonen werden im Addon nicht benutzt: " .. tostring(template))
     local f = make(kind, parent, name)
+    if kind == "ScrollingMessageFrame" then
+      f.__msgs = {}
+      for k, fn in pairs(SMF) do rawset(f, k, fn) end
+    end
     if name then G[name] = f end
     return f
   end
