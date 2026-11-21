@@ -100,6 +100,14 @@ class LocalIntentParserTest {
         assertTrue(WakeWordEngine.isWake("also hey lu na mach", w("also hey lu na mach", 0.9), 6, true))
     }
 
+    @Test fun weiblicheStimmeErkennen() {
+        assertEquals(2, Speaker.femaleScore("de-DE-SMTf00"))
+        assertEquals(0, Speaker.femaleScore("de-DE-SMTm00"))
+        assertEquals(2, Speaker.femaleScore("de-de-x-deb#female_1-local"))
+        assertEquals(0, Speaker.femaleScore("de-de-x-deb#male_2-local"))
+        assertEquals(1, Speaker.femaleScore("de-de-x-dea-network"))
+    }
+
     @Test fun sprachTextBereinigen() {
         assertEquals("Hallo Tiry! Super.", Speaker.clean("**Hallo** Tiry! 😀 Super."))
     }

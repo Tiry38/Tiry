@@ -176,7 +176,22 @@ class LunaService : Service(), WakeWordEngine.Callback, Listener.Callback {
         state(LunaState.WAITING, "Bereit")
     }
 
-    override fun onWake(heard: String) { main.post { if (!inConversation) beginListening(greet = true) } }
+    override fun onWake(heard: String) { main.post { if (!inConversation) { wakeScreen(); beginListening(greet = true) } } }
+
+    /** Handy erwacht: Bildschirm an und Luna im Vordergrund – auch über dem Sperrbildschirm. */
+    private fun wakeScreen() {
+        if (!prefs.wakeScreen) return
+        try {
+            @Suppress("DEPRECATION")
+            val wl = (getSystemService(POWER_SERVICE) as PowerManager).newWakeLock(
+                PowerManager.SCREEN_BRIGHT_WAKE_LOCK or PowerManager.ACQUIRE_CAUSES_WAKEUP or PowerManager.ON_AFTER_RELEASE, "luna:screen")
+            wl.acquire(8000)
+        } catch (_: Exception) {}
+        try {
+            startActivity(Intent(this, MainActivity::class.java).putExtra(MainActivity.EXTRA_AWAKE, true)
+                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_REORDER_TO_FRONT))
+        } catch (_: Exception) { /* ohne Bedienungshilfe/Overlay-Recht darf Android die App nicht nach vorn holen */ }
+    }
 
     override fun onWakeError(msg: String) {
         main.post {

@@ -76,6 +76,35 @@ class SettingsActivity : Activity() {
             "eleven_multilingual_v2" to "Multilingual v2 · Menschlich",
             "eleven_flash_v2_5" to "Flash v2.5 · Blitzschnell",
         ), prefs.elevenModel) { prefs.elevenModel = it }
+        section("Handy-Stimme")
+        hint("Ohne ElevenLabs spricht Luna mit einer Stimme deines Handys. Tippe eine an, um sie zu hören und auszuwählen. Mehr Stimmen: Einstellungen → Allgemeine Verwaltung → Text-zu-Sprache → Sprachdaten installieren.")
+        val voiceBox = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
+        col.addView(voiceBox)
+        if (speaker == null) speaker = Speaker(this, prefs)
+        fun renderVoices(attempt: Int) {
+            val sp = speaker ?: return
+            if (!sp.ready) { if (attempt < 20) voiceBox.postDelayed({ renderVoices(attempt + 1) }, 300); return }
+            voiceBox.removeAllViews()
+            val voices = sp.germanVoices()
+            if (voices.isEmpty()) { voiceBox.addView(Ui.text(this, "Keine deutsche Stimme installiert.", 13.5f, Ui.STEEL)); return }
+            val current = prefs.ttsVoice.ifBlank { voices.first().name }
+            val btns = mutableListOf<Pair<String, LightButton>>()
+            voices.take(12).forEachIndexed { idx, v ->
+                val g = when (Speaker.femaleScore(v.name)) { 2 -> "weiblich"; 0 -> "männlich"; else -> "" }
+                val label = "Stimme ${idx + 1}" + (if (g.isNotEmpty()) " · $g" else "") + (if (v.isNetworkConnectionRequired) " · online" else "")
+                val b = LightButton(this, label)
+                b.selected2 = v.name == current
+                b.setOnClickListener {
+                    sp.useVoice(v.name)
+                    btns.forEach { (n, x) -> x.selected2 = n == v.name }
+                    sp.speak("Hallo ${prefs.userName}, so würde ich klingen.") {}
+                }
+                btns += v.name to b
+                voiceBox.addView(b, LinearLayout.LayoutParams(WRAP_CONTENT, WRAP_CONTENT).apply { marginStart = dp((idx % 3) * 14) })
+            }
+        }
+        renderVoices(0)
+
         button("Stimme testen", filled = true) {
             saveAll()
             if (speaker == null) speaker = Speaker(this, prefs)
@@ -117,6 +146,7 @@ class SettingsActivity : Activity() {
         toggle("Nur mit „Hey“ davor", prefs.requireHey) { prefs.requireHey = it }
         toggle("Auch bei ausgeschaltetem Bildschirm zuhören", prefs.stayAwake) { prefs.stayAwake = it }
         toggle("Nachfragen ohne erneutes „Hey Luna“", prefs.followUp) { prefs.followUp = it }
+        toggle("Bei „Hey Luna“ Display einschalten", prefs.wakeScreen) { prefs.wakeScreen = it }
 
         section("Gedächtnis")
         val mem = prefs.memories
@@ -193,7 +223,7 @@ class SettingsActivity : Activity() {
 
     // ---------- Bausteine ----------
     private var chapter = 0
-    private val chapters = 9
+    private val chapters = 10
 
     /** Kapitel-Kopf: „03 / 10“ in Haarlinien-Pille + Titel in breiter Chrom-Schrift. */
     private fun section(t: String) {

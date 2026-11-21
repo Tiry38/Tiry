@@ -52,6 +52,16 @@ class Prefs(context: Context) {
         get() = p.getBoolean("stay_awake", true)
         set(v) = p.edit().putBoolean("stay_awake", v).apply()
 
+    /** Bei „Hey Luna“ Bildschirm einschalten und Luna zeigen (auch über dem Sperrbildschirm). */
+    var wakeScreen: Boolean
+        get() = p.getBoolean("wake_screen", true)
+        set(v) = p.edit().putBoolean("wake_screen", v).apply()
+
+    /** Gewählte Handy-Stimme (Name der Android-Stimme); leer = automatisch weiblich. */
+    var ttsVoice: String
+        get() = p.getString("tts_voice", "")!!
+        set(v) = p.edit().putString("tts_voice", v).apply()
+
     var followUp: Boolean
         get() = p.getBoolean("follow_up", true)
         set(v) = p.edit().putBoolean("follow_up", v).apply()

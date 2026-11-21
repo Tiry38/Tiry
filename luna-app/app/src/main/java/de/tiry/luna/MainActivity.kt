@@ -31,6 +31,11 @@ import java.util.Locale
  */
 class MainActivity : Activity(), LunaBus.Listener {
 
+    companion object { const val EXTRA_AWAKE = "awake" }
+
+    /** true, wenn Luna das Handy per „Hey Luna“ aufgeweckt hat. */
+    private var awakened = false
+
     private lateinit var prefs: Prefs
     private lateinit var core: CoreView
     private lateinit var status: TextView
@@ -55,6 +60,38 @@ class MainActivity : Activity(), LunaBus.Listener {
         window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS)
         setContentView(build())
         if (savedInstanceState == null) askRuntimePermissions()
+        handleAwake(intent)
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        handleAwake(intent)
+    }
+
+    /** „Hey Luna“ bei ausgeschaltetem Display: über der Sperre zeigen, Display an, Lichtfeld zündet. */
+    private fun handleAwake(i: Intent?) {
+        if (i?.getBooleanExtra(EXTRA_AWAKE, false) != true) return
+        i.removeExtra(EXTRA_AWAKE)
+        awakened = true
+        if (Build.VERSION.SDK_INT >= 27) { setShowWhenLocked(true); setTurnScreenOn(true) }
+        else @Suppress("DEPRECATION") window.addFlags(WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED or WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON)
+        window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+        ui.removeCallbacks(sleepAgain)
+        // Zündung: drei Schockwellen aus dem Kern
+        field.post { field.pulseCore(2.2f) }
+        ui.postDelayed({ field.pulseCore(1.6f) }, 260)
+        ui.postDelayed({ field.pulseCore(1.1f) }, 560)
+    }
+
+    /** Gespräch vorbei → Display darf wieder ausgehen, Sperrbildschirm zurück. */
+    private val sleepAgain = Runnable {
+        if (!awakened || LunaBus.current.state != LunaState.WAITING) return@Runnable
+        awakened = false
+        window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+        if (Build.VERSION.SDK_INT >= 27) { setShowWhenLocked(false); setTurnScreenOn(false) }
+        val km = getSystemService(android.app.KeyguardManager::class.java)
+        if (km.isKeyguardLocked) moveTaskToBack(true)
     }
 
     private fun dp(v: Int) = Ui.dpi(this, v)
@@ -238,6 +275,10 @@ class MainActivity : Activity(), LunaBus.Listener {
         setWake(s.state != LunaState.OFF)
         field.state = s.state; field.level = s.level
         if (s.state == LunaState.SPEAKING && lastState != LunaState.SPEAKING) field.pulseCore(1.3f)
+        if (awakened) {
+            ui.removeCallbacks(sleepAgain)
+            if (s.state == LunaState.WAITING) ui.postDelayed(sleepAgain, 7000)
+        }
         lastState = s.state
     }
 

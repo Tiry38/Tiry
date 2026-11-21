@@ -45,10 +45,23 @@ class Speaker(private val ctx: Context, private val prefs: Prefs) {
         }
     }
 
-    private fun pickBestVoice(): Voice? = try {
+    /** Alle installierten deutschen Stimmen (für die Auswahl in den Einstellungen). */
+    fun germanVoices(): List<Voice> = try {
         tts?.voices?.filter { it.locale.language == "de" && !it.features.contains(TextToSpeech.Engine.KEY_FEATURE_NOT_INSTALLED) }
-            ?.sortedWith(compareByDescending<Voice> { it.quality }.thenBy { if (it.locale.country == "DE") 0 else 1 }.thenBy { it.latency })
-            ?.firstOrNull()
+            ?.sortedWith(compareByDescending<Voice> { femaleScore(it.name) }.thenByDescending { it.quality }.thenBy { it.name }) ?: emptyList()
+    } catch (_: Exception) { emptyList() }
+
+    val ready get() = ttsReady
+
+    fun useVoice(name: String) {
+        prefs.ttsVoice = name
+        tts?.voices?.firstOrNull { it.name == name }?.let { tts?.voice = it }
+    }
+
+    /** Gewählte Stimme, sonst automatisch weiblich (Samsung „SMTf…“, Namen mit „female“), dann beste Qualität. */
+    private fun pickBestVoice(): Voice? = try {
+        val all = germanVoices()
+        all.firstOrNull { it.name == prefs.ttsVoice } ?: all.firstOrNull()
     } catch (_: Exception) { null }
 
     val usesHumanVoice get() = prefs.elevenKey.isNotBlank()
@@ -119,6 +132,8 @@ class Speaker(private val ctx: Context, private val prefs: Prefs) {
     private fun speakLocal(text: String, my: Int) {
         val t = tts
         if (t == null || !ttsReady) { main.postDelayed({ if (ttsReady) speakLocal(text, my) else finish(my) }, 600); return }
+        // in den Einstellungen gewählte Stimme übernehmen (auch wenn sie inzwischen geändert wurde)
+        if (prefs.ttsVoice.isNotBlank() && t.voice?.name != prefs.ttsVoice) t.voices?.firstOrNull { it.name == prefs.ttsVoice }?.let { t.voice = it }
         t.setOnUtteranceProgressListener(object : UtteranceProgressListener() {
             override fun onStart(id: String?) {}
             override fun onDone(id: String?) { main.post { finish(my) } }
@@ -168,6 +183,16 @@ class Speaker(private val ctx: Context, private val prefs: Prefs) {
     fun shutdown() { stop(); tts?.shutdown(); io.shutdown(); waiter.shutdown() }
 
     companion object {
+        /** Grobe Erkennung weiblicher Stimmen am Namen (Android liefert kein Geschlecht mit). */
+        fun femaleScore(name: String): Int {
+            val n = name.lowercase()
+            return when {
+                "female" in n || Regex("smtf\\d").containsMatchIn(n) || Regex("[-_]f0\\d").containsMatchIn(n) -> 2
+                "male" in n || Regex("smtm\\d").containsMatchIn(n) || Regex("[-_]m0\\d").containsMatchIn(n) -> 0
+                else -> 1
+            }
+        }
+
         /** Teilt in Sprech-Häppchen: erster Satz allein (schneller Start), danach Blöcke bis ~220 Zeichen. */
         fun chunks(text: String): List<String> {
             val sentences = text.split(Regex("(?<=[.!?…])\\s+")).map { it.trim() }.filter { it.isNotEmpty() }
