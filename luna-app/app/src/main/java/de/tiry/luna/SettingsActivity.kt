@@ -152,10 +152,15 @@ class SettingsActivity : Activity() {
         toggle("Luna unterbrechen, wenn ich dazwischenrede", prefs.bargeIn) { prefs.bargeIn = it }
 
         section("Gedächtnis")
-        val mem = prefs.memories
-        hint(if (mem.isEmpty()) "Luna hat sich noch nichts gemerkt. Sag z. B. „Merk dir, dass ich montags Beintag habe“."
-             else mem.joinToString("\n") { "• $it" })
-        if (mem.isNotEmpty()) button("Gedächtnis löschen") { prefs.memories = emptyList(); recreate() }
+        val store = MemoryStore(java.io.File(filesDir, "memories"))
+        val snap = store.snapshot(4000)
+        hint("Luna führt ihr eigenes Gedächtnis: eine Datei über sich selbst (ich.md), eine über dich und ein Gesprächs-Tagebuch. " +
+            "Alles liegt nur auf diesem Handy.")
+        col.addView(Ui.text(this, snap.ifBlank { "Noch leer – startet mit dem ersten Gespräch." }, 12.5f, Ui.STEEL).apply {
+            typeface = android.graphics.Typeface.MONOSPACE; setPadding(dp(6), dp(4), dp(6), dp(12)) })
+        button("Gedächtnis komplett löschen") {
+            java.io.File(filesDir, "memories").deleteRecursively(); prefs.memories = emptyList(); recreate()
+        }
 
         section("Rechte")
         permBox = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }

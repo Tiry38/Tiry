@@ -85,6 +85,15 @@ ohne Rückfrage. Manuell: „Luna, update dich“ oder Einstellungen → Über �
 | Zurück, Home, Sperren, Screenshot | Merkt sich Dinge über dich, gibt passende Tipps |
 | PC an, PC fernsteuern, Gast-WLAN, Geräte, Anrufliste, VPN | „Guck mal“: sieht den Bildschirm als Bild und tippt dann gezielt |
 
+## Lunas eigenes Gedächtnis und Ich
+
+Luna nutzt Anthropics Memory-Werkzeug mit einem Speicher **nur auf diesem Handy** (`/memories` im privaten App-Speicher):
+- `ich.md` – **Luna selbst**: Persönlichkeit, Vorlieben, Meinungen, Running Gags, was bei dir gut ankommt. Sie pflegt
+  die Datei selbst und entwickelt sich damit weiter.
+- `tiry.md` – **du**: Fakten, Vorlieben, Menschen, Pläne, laufende Themen (alte „Merk dir“-Notizen werden übernommen).
+- `tagebuch.md` – kurze Notizen nach Gesprächen, damit sie weiß, wo ihr stehen geblieben seid.
+Sie speichert keine Passwörter, PINs oder Kontodaten. Ansehen/Löschen: Einstellungen → Gedächtnis.
+
 ## Sicherheit – nur für dich und deine Geräte
 
 - **Schlüssel im Hardware-Tresor:** Claude-, ElevenLabs- und FRITZ!Box-Zugangsdaten sind mit AES-256 im Android-Keystore

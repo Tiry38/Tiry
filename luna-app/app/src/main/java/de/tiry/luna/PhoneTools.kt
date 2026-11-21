@@ -50,6 +50,11 @@ class PhoneTools(private val ctx: Context, private val prefs: Prefs) : ToolExecu
         val required: List<String> = emptyList(),
     )
 
+    /** Lunas eigenes Gedächtnis (Dateien im privaten App-Speicher). */
+    val memoryStore = MemoryStore(java.io.File(ctx.filesDir, "memories")).apply { seed(prefs.userName, prefs.memories) }
+    private fun userFile() = "/memories/${prefs.userName.lowercase()}.md"
+    override fun memory(a: Map<String, Any?>): String = memoryStore.handle(a)
+
     @Volatile private var pendingImage: String? = null
     override fun takeImage(): String? = pendingImage.also { pendingImage = null }
 
@@ -65,7 +70,7 @@ class PhoneTools(private val ctx: Context, private val prefs: Prefs) : ToolExecu
             "create_calendar_event", "read_screen", "look_at_screen", "tap_element", "tap_at", "long_press", "swipe", "type_text",
             "press_enter", "scroll", "quick_setting", "android_intent", "set_clipboard", "open_app", "open_url", "list_apps",
             "fritz_status", "fritz_devices", "fritz_guest_wifi", "fritz_reconnect", "fritz_calls", "fritz_wake_device",
-            "pc_wake", "pc_status", "pc_remote", "vpn_connect", "update_luna", "forget", "list_memories", "set_brightness",
+            "pc_wake", "pc_status", "pc_remote", "vpn_connect", "update_luna", "list_memories", "memory", "set_brightness",
         )
         private fun s(desc: String) = mapOf("type" to "string", "description" to desc)
         private fun i(desc: String) = mapOf("type" to "integer", "description" to desc)
@@ -146,8 +151,6 @@ class PhoneTools(private val ctx: Context, private val prefs: Prefs) : ToolExecu
             ToolDef("set_clipboard", "Kopiert Text in die Zwischenablage.", mapOf("text" to s("Text")), listOf("text")),
             ToolDef("wait", "Wartet kurz, z. B. bis eine App geladen hat (1-10 Sekunden).", mapOf("seconds" to i("Sekunden")), listOf("seconds")),
             ToolDef("update_luna", "Sucht nach einer neuen Luna-Version auf GitHub und installiert sie."),
-            ToolDef("remember", "Merkt sich dauerhaft eine Info über Tiry (Vorlieben, Termine, Fakten).", mapOf("fact" to s("Was gemerkt werden soll")), listOf("fact")),
-            ToolDef("forget", "Löscht gemerkte Infos, die diesen Text enthalten.", mapOf("match" to s("Suchtext")), listOf("match")),
             ToolDef("end_conversation", "Beendet das Gespräch nach deiner Antwort (Tiry sagt tschüss/danke/passt). Danach wartet Luna wieder auf „Hey Luna“."),
         )
     }
@@ -232,10 +235,10 @@ class PhoneTools(private val ctx: Context, private val prefs: Prefs) : ToolExecu
             "vpn_connect" -> vpn(a["on"]?.toString()?.toBooleanStrictOrNull() ?: true)
             "open_settings" -> openSettings(str(a, "page"))
             "set_brightness" -> brightness(int(a, "level") ?: 50)
-            "remember" -> { prefs.addMemory(str(a, "fact")); "Gemerkt." }
-            "list_memories" -> prefs.memories.let { if (it.isEmpty()) "Noch nichts gemerkt." else it.joinToString("; ") }
-            "forget" -> { val m = str(a, "match").lowercase(); val before = prefs.memories.size
-                prefs.memories = prefs.memories.filterNot { it.lowercase().contains(m) }; "${before - prefs.memories.size} Einträge gelöscht." }
+            "remember" -> { memoryStore.handle(mapOf("command" to "insert", "path" to userFile(), "insert_line" to 3, "insert_text" to "- " + str(a, "fact"))); "Gemerkt." }
+            "list_memories" -> memoryStore.handle(mapOf("command" to "view", "path" to userFile())).lines()
+                .map { it.substringAfter('\t') }.filter { it.startsWith("- ") && !it.contains("(noch leer)") }
+                .joinToString("; ") { it.removePrefix("- ") }.ifBlank { "Noch nichts gemerkt." }
             "end_conversation" -> { endRequested = true; "Gespräch wird nach der Antwort beendet." }
             else -> "Unbekanntes Werkzeug $name."
         }

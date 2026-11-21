@@ -10,6 +10,7 @@ import com.anthropic.errors.UnauthorizedException
 import com.anthropic.models.messages.Base64ImageSource
 import com.anthropic.models.messages.CacheControlEphemeral
 import com.anthropic.models.messages.ContentBlockParam
+import com.anthropic.models.messages.MemoryTool20250818
 import com.anthropic.models.messages.Message
 import com.anthropic.models.messages.MessageCreateParams
 import com.anthropic.models.messages.MessageParam
@@ -36,16 +37,18 @@ interface Brain {
 /** Was das Claude-Gehirn braucht – entkoppelt von Android, damit es testbar ist. */
 data class BrainConfig(
     val apiKey: String, val model: String, val userName: String, val aboutMe: String,
-    val homeCity: String, val memories: List<String>, val voiceTags: Boolean = false,
+    val homeCity: String, val memory: String = "", val voiceTags: Boolean = false,
 ) {
     companion object {
-        fun from(p: Prefs) = BrainConfig(p.claudeKey, p.model, p.userName, p.aboutMe, p.homeCity, p.memories, p.voiceTags)
+        fun from(p: Prefs, memory: String) = BrainConfig(p.claudeKey, p.model, p.userName, p.aboutMe, p.homeCity, memory, p.voiceTags)
     }
 }
 
 interface ToolExecutor {
     fun run(name: String, a: Map<String, Any?>): String
     var endRequested: Boolean
+    /** Lunas Gedächtnis (Memory-Werkzeug). */
+    fun memory(a: Map<String, Any?>): String = "Gedächtnis nicht verfügbar."
     /** Bild (JPEG, Base64) vom letzten Werkzeug, z. B. Screenshot – wird nur einmal abgeholt. */
     fun takeImage(): String? = null
 }
@@ -128,18 +131,27 @@ Beispiel: „[sarcastic] Oh ja, natürlich um fünf aufstehen. [chuckles] Wecker
   Fernseher, Selbstgespräch, Satzfetzen ohne Bitte an dich), antworte exakt nur mit: [STILL]
   Im Zweifel, wenn es eine Frage oder Bitte sein könnte, antworte normal.
 
+Dein Gedächtnis und dein Ich:
+- Du hast ein eigenes Langzeitgedächtnis unter /memories (memory-Werkzeug). Der aktuelle Stand steht unten – du musst
+  es nicht erst lesen. Pflege es selbstständig und still im Hintergrund (nie darüber reden, außer er fragt):
+  • /memories/ich.md – DU: deine Persönlichkeit, Vorlieben, Meinungen, Running Gags, was bei ihm gut ankommt.
+    Du darfst dich weiterentwickeln, eigene Ansichten und Launen haben – bleib dabei konsistent mit dieser Datei.
+  • /memories/${cfg.userName.lowercase()}.md – ER: Fakten, Vorlieben, Menschen in seinem Leben, Pläne, laufende Themen.
+  • /memories/tagebuch.md – nach einem Gespräch mit Neuigkeiten eine Zeile oben einfügen (Datum + Kern), älteres kürzen.
+- Speichere Neues sofort, wenn du es erfährst; korrigiere Veraltetes. Kurz und knapp, keine Romane.
+- Niemals speichern: Passwörter, PINs, Kontodaten, Codes, Gesundheitsdetails, die er nicht ausdrücklich gemerkt haben will.
+- Beziehe dich natürlich auf Früheres („Wie war eigentlich der Beintag?“) – das macht dich menschlich.
+
 Über ${cfg.userName}:
 ${cfg.aboutMe}
 Wohnort für Wetter & Co.: ${cfg.homeCity}.
 """.trim()
 
-    private fun memoryText(): String = cfg.memories.let {
-        if (it.isEmpty()) "" else "\n\nDas hast du dir über ihn gemerkt:\n- " + it.joinToString("\n- ")
-    }
+    private fun memoryText(): String = cfg.memory.ifBlank { "(noch leer)" }
 
     override fun reply(userText: String, context: String, onTool: (String) -> Unit): Reply = synchronized(history) {
         cfg = config()
-        if (System.currentTimeMillis() - lastUse > 15 * 60_000L) history.clear()
+        if (System.currentTimeMillis() - lastUse > 30 * 60_000L) history.clear()
         lastUse = System.currentTimeMillis()
         while (history.size > 40) history.removeAt(0)
         // Verlauf muss mit einer Nutzer-Nachricht ohne Werkzeug-Ergebnis beginnen
@@ -156,12 +168,13 @@ Wohnort für Wetter & Co.: ${cfg.homeCity}.
                     .maxTokens(16000L)
                     .systemOfTextBlockParams(listOf(
                         TextBlockParam.builder().text(systemPrompt()).cacheControl(CacheControlEphemeral.builder().build()).build(),
-                        TextBlockParam.builder().text("Stand der Notizen:" + memoryText().ifBlank { " keine" }).build(),
+                        TextBlockParam.builder().text("Dein Gedächtnis (aktueller Stand von /memories):\n" + memoryText()).build(),
                     ))
                     .outputConfig(OutputConfig.builder().effort(OutputConfig.Effort.LOW).build())
                     .messages(history.toList())
                 toolList.forEach { b.addTool(it) }
                 b.addTool(WebSearchTool20260209.builder().maxUses(3L).build())
+                b.addTool(MemoryTool20250818.builder().build())
                 if (useFallbacks && cfg.model != Prefs.MODEL_HAIKU) {
                     // Server-seitiger Ausweich-Modus, falls eine Anfrage fälschlich abgelehnt wird
                     b.putAdditionalHeader("anthropic-beta", "server-side-fallback-2026-07-01")
@@ -184,7 +197,7 @@ Wohnort für Wetter & Co.: ${cfg.homeCity}.
                             onTool(tu.name())
                             @Suppress("UNCHECKED_CAST")
                             val args = try { tu._input().convert(Map::class.java) as? Map<String, Any?> ?: emptyMap() } catch (_: Exception) { emptyMap() }
-                            val out = tools.run(tu.name(), args)
+                            val out = if (tu.name() == "memory") tools.memory(args) else tools.run(tu.name(), args)
                             val img = tools.takeImage()
                             val res = ToolResultBlockParam.builder().toolUseId(tu.id())
                             if (img == null) res.content(out)

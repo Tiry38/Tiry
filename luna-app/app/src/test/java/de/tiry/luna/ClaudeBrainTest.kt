@@ -28,7 +28,7 @@ class ClaudeBrainTest {
     @Before fun up() { server = MockWebServer(); server.start() }
     @After fun down() { server.shutdown() }
 
-    private val cfg = BrainConfig("sk-test", Prefs.MODEL_OPUS, "Tiry", "Ich bin Tiry.", "Wörth am Rhein", listOf("Montag ist Beintag"))
+    private val cfg = BrainConfig("sk-test", Prefs.MODEL_OPUS, "Tiry", "Ich bin Tiry.", "Wörth am Rhein", "--- /memories/tiry.md ---\n- Montag ist Beintag")
 
     @Test fun werkzeugSchleife() {
         server.enqueue(json("""{"id":"msg_1","type":"message","role":"assistant","model":"claude-opus-5-5",
@@ -60,6 +60,7 @@ class ClaudeBrainTest {
         assertTrue(first.has("thinking").not() || first.getJSONObject("thinking").getString("type") == "adaptive")
         val tools0 = first.getJSONArray("tools")
         assertTrue((0 until tools0.length()).any { tools0.getJSONObject(it).optString("type") == "web_search_20260209" })
+        assertTrue((0 until tools0.length()).any { tools0.getJSONObject(it).optString("type") == "memory_20250818" })
         assertTrue(first.getJSONArray("system").getJSONObject(0).has("cache_control"))
         assertTrue(first.getJSONArray("system").getJSONObject(1).getString("text").contains("Beintag"))
 
@@ -98,6 +99,23 @@ class ClaudeBrainTest {
         assertEquals("image", image.getString("type"))
         assertEquals("image/jpeg", image.getJSONObject("source").getString("media_type"))
         assertEquals("AAAA", image.getJSONObject("source").getString("data"))
+    }
+
+    @Test fun gedaechtnisWerkzeug() {
+        server.enqueue(json("""{"id":"m1","type":"message","role":"assistant","model":"claude-opus-5-5",
+            "content":[{"type":"tool_use","id":"toolu_m","name":"memory","input":{"command":"str_replace","path":"/memories/ich.md","old_str":"a","new_str":"b"}}],
+            "stop_reason":"tool_use","stop_sequence":null,"usage":{"input_tokens":1,"output_tokens":1}}"""))
+        server.enqueue(json("""{"id":"m2","type":"message","role":"assistant","model":"claude-opus-5-5",
+            "content":[{"type":"text","text":"Notiert."}],"stop_reason":"end_turn","stop_sequence":null,"usage":{"input_tokens":1,"output_tokens":1}}"""))
+        var got: Map<String, Any?>? = null
+        val tools = object : ToolExecutor {
+            override var endRequested = false
+            override fun run(name: String, a: Map<String, Any?>) = "falsch"
+            override fun memory(a: Map<String, Any?>): String { got = a; return "Datei geändert." }
+        }
+        val r = ClaudeBrain({ cfg }, tools, server.url("/").toString().trimEnd('/')).reply("Merk dir was", "x", {})
+        assertEquals("Notiert.", r.text)
+        assertEquals("str_replace", got!!["command"]); assertEquals("/memories/ich.md", got!!["path"])
     }
 
     @Test fun falscherSchluessel() {

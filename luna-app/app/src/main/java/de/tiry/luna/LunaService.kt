@@ -353,7 +353,7 @@ class LunaService : Service(), WakeWordEngine.Callback, Listener.Callback {
     }
 
     // ---------- Gehirne ----------
-    private val claude by lazy { ClaudeBrain({ BrainConfig.from(prefs) }, tools) }
+    private val claude by lazy { ClaudeBrain({ BrainConfig.from(prefs, tools.memoryStore.snapshot()) }, tools) }
     private val local by lazy { LocalBrain(prefs, tools) }
 
     /** Kurze Standardbefehle erledigt Luna sofort selbst (schneller und ohne KI-Kosten). */
