@@ -34,7 +34,7 @@
     "anthropic-skills:caveman-compress": "off",
     "anthropic-skills:writing-skills": "off",
     "anthropic-skills:book-to-skill": "off",
-    "anthropic-skills:find-skills": "off",
+    "anthropic-skills:find-skills": "on",
     "anthropic-skills:using-superpowers": "off",
     "anthropic-skills:diagnosing-superpowers": "off",
     "anthropic-skills:dispatching-parallel-agents": "off",
