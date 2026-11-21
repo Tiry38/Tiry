@@ -463,11 +463,27 @@ local function build()
 end
 
 -- Ueberfahren erkennen
+-- Reiterleiste: x Sekunden nach dem Wegziehen der Maus weich ausblenden, beim Drueberfahren sofort wieder da
+local STEP = 0.12
+function Main:BarTick(over)
+  local d = FD()
+  local after = d.barFade or 5
+  local now = GetTime()
+  if over or after <= 0 or ns.DB.alwaysHeader then
+    self.lastOver = now
+    self.barAlpha = 1
+  elseif now - (self.lastOver or now) >= after then
+    self.barAlpha = math.max(0, (self.barAlpha or 1) - STEP / 0.5)
+  end
+  self.head:SetAlpha(self.barAlpha or 1)
+end
+
 local function tick()
   local f = Main.frame
   if f and f:IsShown() then
     local over = f:IsMouseOver() == true
     if over ~= Main.hover then Main:Hover(over) end
+    Main:BarTick(over)
   end
 end
 ns.WindowTick = tick

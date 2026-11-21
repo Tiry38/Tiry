@@ -363,6 +363,11 @@ local function generalPage()
   local lockT = UI.Toggle(p, "Sperren", function() return F.locked == true end,
     function(v) F.locked = v refreshWindows() end, nil, half)
   lockT:SetPoint("LEFT", fade, "RIGHT", 24, 0)
+  st:Space(10)
+  local bar = UI.Stepper(p, "Reiter weg nach", half, function() return F.barFade or 5 end,
+    function(v) F.barFade = v end, 1, 0, 60, function(v) return v == 0 and "nie" or (v .. " s") end)
+  UI.SetTooltip(bar, "Reiterleiste ausblenden", "So viele Sekunden, nachdem die Maus das Chatfenster verlassen hat, blendet die Reiterleiste aus. Maus drueber = sofort wieder da. 0 = immer sichtbar.")
+  st:Add(bar, 34, 0)
   st:Space(14)
   st:Title("Darstellung")
   local function seg(text, options, get, set)
@@ -391,7 +396,7 @@ local function generalPage()
     { "Namen in [Klammern]", "nameBrackets", "Wie im Blizzard-Chat: [Name] statt Name." },
     { "Verlauf speichern", "history", "Die letzten Zeilen bleiben nach /reload und Neustart." },
     { "Animationen", "animations", "Fliessender Neon-Rand, Lauflicht, pulsierende Kugel und atmende Eckklammern." },
-    { "Knoepfe immer zeigen", "alwaysHeader", "Zahnrad, Schloss, Kopieren und + sonst nur, wenn die Maus ueber dem Fenster ist." },
+    { "Leiste + Knoepfe immer zeigen", "alwaysHeader", "Reiterleiste nie ausblenden; Zahnrad, Schloss, Kopieren und + nicht nur bei Maus ueber dem Fenster." },
   }
   st:Space(6)
   st:Title("Funktionen")

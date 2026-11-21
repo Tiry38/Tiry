@@ -11,7 +11,7 @@
 local ADDON, ns = ...
 ChatWerk = ns
 ns.NAME = ADDON or "ChatWerk"
-ns.VERSION = "1.2.0"
+ns.VERSION = "1.2.1"
 local VERSION = ns.VERSION
 ns.MEDIA = "Interface\\AddOns\\ChatWerk\\Media\\"
 
@@ -279,7 +279,7 @@ local function initDB()
     if DB.font == nil or DB.font == "poppins" then DB.font = "tech" end
   end
   DB.frame = DB.frame or {}
-  for k, v in pairs({ x = 16, y = 40, w = 520, h = 230, alpha = 0.62, font = 13, fade = 0, locked = false }) do
+  for k, v in pairs({ x = 16, y = 40, w = 520, h = 230, alpha = 0.62, font = 13, fade = 0, locked = false, barFade = 5 }) do
     if DB.frame[k] == nil then DB.frame[k] = v end
   end
   if not ns.WindowById(DB.active) then DB.active = DB.windows[1].id end

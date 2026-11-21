@@ -380,6 +380,26 @@ ok(ChatWerkConfig and ChatWerkConfig:IsShown(), "neuer Reiter oeffnet seine Ausw
 DB.windows[4].cats.ah_sold = true
 W.fire("CHAT_MSG_SYSTEM", "Es wurde ein Käufer für Eure Auktion gefunden: Leinenstoff.", "", "", "", "", "", 0, 0, "", 0, 40, nil)
 ok(has(third, "Verkauft %[Leinenstoff%]") and count(third) == 1, "eigener Reiter zeigt NUR die angehakte Art")
+-- Reiterleiste blendet 5 s nach dem Wegziehen der Maus aus, Maus drueber = sofort wieder da
+ChatWerkFrame.__mouseOver = true
+ns.WindowTick()
+ok(Main.head:GetAlpha() == 1, "Reiterleiste sichtbar bei Maus drueber")
+ChatWerkFrame.__mouseOver = false
+W.now = W.now + 3
+for _ = 1, 10 do ns.WindowTick() end
+ok(Main.head:GetAlpha() == 1, "Reiterleiste nach 3 s noch da")
+W.now = W.now + 2.5
+for _ = 1, 10 do ns.WindowTick() end
+ok(Main.head:GetAlpha() == 0, "Reiterleiste nach 5 s ausgeblendet")
+ChatWerkFrame.__mouseOver = true
+ns.WindowTick()
+ok(Main.head:GetAlpha() == 1, "Maus drueber: Reiterleiste sofort wieder da")
+DB.frame.barFade = 0
+ChatWerkFrame.__mouseOver = false
+W.now = W.now + 30
+for _ = 1, 10 do ns.WindowTick() end
+ok(Main.head:GetAlpha() == 1, "Einstellung 0 = Reiterleiste immer sichtbar")
+DB.frame.barFade = 5
 -- viele Reiter: Leiste passt trotzdem (Namen gekuerzt)
 for i = 1, 4 do ns.NewWindow("Sehr langer Reitername " .. i, {}) end
 ns.BuildWindows()
