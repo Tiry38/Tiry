@@ -425,7 +425,7 @@
       S('ki', 's1-3', 'Klar, einen Moment, ich schau kurz in den Kalender. Am Donnerstag um halb elf wäre noch was frei. Passt Ihnen das?'),
       S('anrufer', 's1-4', 'Ja, das passt.'),
       S('ki', 's1-5', 'Prima. Auf welchen Namen darf ich den Termin eintragen?'),
-      S('anrufer', 's1-6', 'Auf Becker.'),
+      S('anrufer', 's1-6', 'Auf den Namen Becker, bitte.'),
       S('ki', 's1-7', 'Danke, Frau Becker. Ich schicke Ihnen die Bestätigung per SMS an die Nummer, mit der Sie gerade anrufen. Ist das in Ordnung?'),
       S('anrufer', 's1-8', 'Ja, gerne.'),
       S('ki', 's1-9', 'Erledigt. Dann bis Donnerstag!')],
@@ -710,6 +710,15 @@ gl_FragColor=vec4(col*glow+vec3(stars*.25),glow+stars*.2);}`;
     }), { rootMargin: '-45% 0px -50% 0px' });
     $$('.view').forEach((s) => spy.observe(s));
   }
+
+  /* ===================== v10: Stimmauswahl ===================== */
+  $$('.vchip').forEach((b) => b.addEventListener('click', async () => {
+    stopAll(); ensureCtx();
+    $$('.vchip').forEach((x) => { const on = x === b; x.classList.toggle('on', on); x.setAttribute('aria-pressed', String(on)); x.classList.remove('playing'); });
+    b.classList.add('playing'); level.who = 'ki';
+    await say('audio/stimmen/' + b.dataset.voice + '.mp3');
+    level.speaking = false; level.who = 'idle'; b.classList.remove('playing');
+  }));
 
   /* ===================== Start ===================== */
   FX.init();

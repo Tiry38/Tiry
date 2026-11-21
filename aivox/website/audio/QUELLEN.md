@@ -1,7 +1,7 @@
-# Stimmen der Hörprobe
-Erzeugt lokal mit **Chatterbox Multilingual** (Resemble AI, MIT-Lizenz), ohne Cloud-Dienst.
-Klang-Vorbilder (Stimm-Referenz für die KI):
-- AIVOX: echte Aufnahmen aus dem Datensatz „Thorsten-Voice“ (TV-2022.10-Neutral), Lizenz CC0.
-- Anruferin: echte Aufnahme aus „Multilingual LibriSpeech“ (Deutsch, Sprecher 8769, LibriVox-Hörbuch), Lizenz CC BY 4.0 – Pratap et al., MLS, 2020. Mit Telefon-Klangfilter.
-Jede Zeile in mehreren Varianten erzeugt; ausgewählt wurde die Variante, die eine Spracherkennung (faster-whisper) am genauesten zurückliest.
-Gespräche und Werkstatt sind fiktiv.
+# Stimmen der Website
+Alle Stimmen: **Google Cloud Text-to-Speech, „Chirp 3 HD“** (KI-Stimmen), erzeugt mit dem AIVOX-Server-Schlüssel.
+- AIVOX (Standard): `de-DE-Chirp3-HD-Leda`
+- Anruferin in den Demos: `de-DE-Chirp3-HD-Vindemiatrix`, mit leichtem Telefon-Klangfilter
+- Stimmproben (Ordner `stimmen/`): Leda, Pulcherrima, Vindemiatrix, Achird, Enceladus, Iapetus
+Gemessen (Whisper/DNSMOS): alle Zeilen wortgenau verständlich; Natürlichkeit der Stimmen 3,7–3,9 von 5.
+Gespräche, Werkstatt und Personen sind fiktiv.

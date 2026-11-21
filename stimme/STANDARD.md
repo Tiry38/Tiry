@@ -61,3 +61,8 @@ Kartoffel-Orpheus und Chatterbox: gestoppt, nur noch Archiv/Notfall.
 - Bei Verdacht auf Unterbrechung **pausieren und kurz hinhören** statt abbrechen; ohne Sprache an derselben Stelle weiterreden.
 - Antwort streamen: **erster fertiger Satz wird sofort gesprochen**; Satzgrenze nur mit Leerzeichen danach (sonst wird „7.30“ getrennt).
 - Sprechpausen-Erkennung kurz halten (~700–850 ms). Quelle: Luna, `LunaService.kt`, `BargeIn.kt`, `Brain.kt`.
+
+## 11. AIVOX-Stimme festgelegt (Tiry, 21.11.2026)
+Standard **de-DE-Chirp3-HD-Leda**, vom Kunden im Cockpit wählbar (alle 30 Chirp-Stimmen). Demo-Anruferin: Vindemiatrix mit Telefonfilter.
+Gemessen: alle 30 Stimmen 0,96 verständlich, Natürlichkeit 3,47–3,89, Leda 3,73 / Lebendigkeit 8,45. Messdaten: `aivox/stimmen-labor/chirp-auswahl/`.
+Aussprache-Lehre: Ein-Wort-Antworten mit Namen („Auf Becker.“) werden verschluckt → ganze Phrase („Auf den Namen Becker, bitte.“).
