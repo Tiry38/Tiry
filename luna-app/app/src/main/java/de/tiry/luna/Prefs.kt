@@ -43,7 +43,8 @@ class Prefs(context: Context) {
         set(v) = p.edit().putInt("eleven_tune", v).apply()
 
     /** Stimme kann Emotions-Tags ([laughs], [sighs] …) sprechen? Nur ElevenLabs v3. */
-    val voiceTags get() = elevenKey.isNotBlank() && (elevenModel == "eleven_v3" || elevenModel == "eleven_v4")
+    val voiceTags get() = (homeVoice && voiceServerTags.isNotBlank()) ||
+        (elevenKey.isNotBlank() && (elevenModel == "eleven_v3" || elevenModel == "eleven_v4"))
 
     var aboutMe: String
         get() = p.getString("about_me", DEFAULT_ABOUT)!!
@@ -106,6 +107,15 @@ class Prefs(context: Context) {
     var pcMac: String get() = str("pc_mac"); set(v) = put("pc_mac", v)
     /** Fernsteuerungs-App (Paketname), z. B. RustDesk, Chrome Remote Desktop, Windows App. Leer = automatisch suchen. */
     var remoteApp: String get() = str("remote_app"); set(v) = put("remote_app", v)
+    // ---------- Heim-Stimme: Stimm-Server auf Tirys PC (Kartoffel-Orpheus) ----------
+    /** Adresse des Stimm-Servers, z. B. „tiry-pc.fritz.box“ (leer = aus). */
+    var voiceHost: String get() = str("voice_host"); set(v) = put("voice_host", v)
+    var voiceToken: String get() = Vault.read(p, "voice_token"); set(v) = Vault.write(p, "voice_token", v)
+    var voiceName: String get() = str("voice_name"); set(v) = put("voice_name", v)
+    /** Vom Server gemeldete Gefühls-Tags (kommagetrennt, z. B. „laugh,sigh“). */
+    var voiceServerTags: String get() = str("voice_tags"); set(v) = put("voice_tags", v)
+    val homeVoice get() = voiceHost.isNotBlank() && voiceToken.isNotBlank()
+
     /** Name des WireGuard-Tunnels zur FRITZ!Box (für unterwegs). */
     var vpnTunnel: String get() = str("vpn_tunnel"); set(v) = put("vpn_tunnel", v)
 

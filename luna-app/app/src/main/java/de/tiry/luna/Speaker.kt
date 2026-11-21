@@ -64,7 +64,29 @@ class Speaker(private val ctx: Context, private val prefs: Prefs) {
         all.firstOrNull { it.name == prefs.ttsVoice } ?: all.firstOrNull()
     } catch (_: Exception) { null }
 
-    val usesHumanVoice get() = prefs.elevenKey.isNotBlank()
+    /** Heim-Stimme (PC) bevorzugt, ElevenLabs nur noch optional. */
+    val usesHumanVoice get() = (prefs.homeVoice && System.currentTimeMillis() > homeDownUntil) || prefs.elevenKey.isNotBlank()
+    /** PC aus/nicht erreichbar → 60 s lang direkt die Handy-Stimme nehmen (kein Warten bei jedem Satz). */
+    @Volatile private var homeDownUntil = 0L
+
+    /** Holt einen Abschnitt von der Heim-Stimme, sonst von ElevenLabs. */
+    private fun fetchHuman(text: String, prev: String?, next: String?): File {
+        if (prefs.homeVoice && System.currentTimeMillis() > homeDownUntil) {
+            val f = File(cacheDir, cacheFile("home|" + prefs.voiceName + "|" + text).name.replace(".mp3", ".wav"))
+            if (f.exists() && f.length() > 1000) return f
+            try {
+                val tags = prefs.voiceServerTags.split(',').filter { it.isNotBlank() }
+                HomeVoice(HomeVoice.urlFor(prefs.voiceHost), prefs.voiceToken)
+                    .tts(HomeVoice.convertTags(text, tags), prefs.voiceName, f, prev?.let { HomeVoice.convertTags(it, tags) })
+                return f
+            } catch (e: Exception) {
+                homeDownUntil = System.currentTimeMillis() + 60_000
+                lastError = "Heim-Stimme: ${e.message}"
+                if (prefs.elevenKey.isBlank()) throw e
+            }
+        }
+        return fetchEleven(text, prev, next)
+    }
 
     /** Spricht den Text. [onDone] kommt immer genau einmal (auch bei Fehler/Abbruch). */
     fun speak(raw: String, onDone: () -> Unit) {
@@ -78,7 +100,7 @@ class Speaker(private val ctx: Context, private val prefs: Prefs) {
             // Erster Satz sofort, der Rest als längerer Block (durchgehende Satzmelodie) – mit Kontext davor/danach
             val parts = chunks(text)
             val files = parts.mapIndexed { i, part -> io.submit<File?> {
-                try { fetchEleven(part, parts.getOrNull(i - 1), parts.getOrNull(i + 1)) } catch (e: Exception) { lastError = "Stimme: ${e.message}"; null } } }
+                try { fetchHuman(part, parts.getOrNull(i - 1), parts.getOrNull(i + 1)) } catch (e: Exception) { lastError = "Stimme: ${e.message}"; null } } }
             playSeq(files, parts, 0, my)
         } else speakLocal(text, my)
     }
@@ -274,7 +296,7 @@ class Speaker(private val ctx: Context, private val prefs: Prefs) {
     /** Begrüßungen vorab erzeugen, damit Luna nach „Hey Luna“ ohne Verzögerung antwortet. */
     fun precache(phrases: List<String>) {
         if (!usesHumanVoice) return
-        io.execute { phrases.forEach { try { fetchEleven(prep(it)) } catch (e: Exception) { lastError = "Stimme: ${e.message}" } } }
+        io.execute { phrases.forEach { try { fetchHuman(prep(it), null, null) } catch (e: Exception) { lastError = "Stimme: ${e.message}" } } }
     }
 
     fun shutdown() { stop(); tts?.shutdown(); io.shutdown(); waiter.shutdown() }

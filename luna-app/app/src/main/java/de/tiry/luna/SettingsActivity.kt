@@ -69,8 +69,41 @@ class SettingsActivity : Activity() {
             Prefs.MODEL_OPUS to "Opus 5.5 · Maximum",
         ), prefs.model) { prefs.model = it }
 
-        section("Stimme")
-        hint("Für eine Stimme, die wirklich wie ein Mensch klingt: kostenlosen ElevenLabs-Zugang anlegen (elevenlabs.io → Profil → API Keys; Gratis-Kontingent reicht für viele kurze Antworten). Ohne Schlüssel nutzt Luna die beste deutsche Stimme deines Handys.")
+        section("Heim-Stimme (PC)")
+        hint("Lunas menschliche Stimme kommt von deinem eigenen PC: Dort läuft der Luna-Stimmserver mit Kartoffel-Orpheus – kostenlos, offline, nur in deinem Heimnetz (unterwegs über dein VPN). Ist der PC aus, spricht Luna kurz mit der Handy-Stimme.")
+        field("Adresse des PCs (z. B. tiry-pc.fritz.box)", prefs.voiceHost.ifBlank { if (prefs.pcName.isNotBlank()) prefs.pcName.lowercase().replace(" ", "-") + ".fritz.box" else "" }) { prefs.voiceHost = it }
+        field("Schlüssel vom Stimmserver", prefs.voiceToken, secret = true) { prefs.voiceToken = it }
+        val homeBox = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
+        button("Verbindung testen & Stimmen laden", filled = true) {
+            saveAll()
+            if (!prefs.homeVoice) { Toast.makeText(this, "Adresse und Schlüssel eintragen.", Toast.LENGTH_LONG).show(); return@button }
+            Toast.makeText(this, "Verbinde …", Toast.LENGTH_SHORT).show()
+            Thread {
+                val res = try { HomeVoice(HomeVoice.urlFor(prefs.voiceHost), prefs.voiceToken).health() } catch (e: Exception) { e }
+                runOnUiThread {
+                    homeBox.removeAllViews()
+                    if (res is HomeVoice.Health) {
+                        prefs.voiceServerTags = res.tags.joinToString(",")
+                        homeBox.addView(Ui.text(this, "Verbunden: ${res.engine}" + (if (res.tags.isNotEmpty()) " · Gefühle: ${res.tags.joinToString(", ")}" else ""), 13.5f, Ui.MINT))
+                        val btns = mutableListOf<Pair<String, LightButton>>()
+                        res.voices.forEachIndexed { idx, v ->
+                            val b = LightButton(this, v); b.selected2 = v == prefs.voiceName || (prefs.voiceName.isBlank() && idx == 0)
+                            b.setOnClickListener {
+                                prefs.voiceName = v; btns.forEach { (n, x) -> x.selected2 = n == v }
+                                if (speaker == null) speaker = Speaker(this, prefs)
+                                speaker?.speak("Hey ${prefs.userName}. So klinge ich mit dieser Stimme.") {}
+                            }
+                            btns += v to b
+                            homeBox.addView(b, LinearLayout.LayoutParams(WRAP_CONTENT, WRAP_CONTENT).apply { marginStart = dp((idx % 3) * 14) })
+                        }
+                    } else homeBox.addView(Ui.text(this, "Keine Verbindung: ${(res as Exception).message}. Läuft der Stimmserver auf dem PC und bist du im WLAN bzw. VPN?", 13.5f, Ui.AMBER))
+                }
+            }.start()
+        }
+        col.addView(homeBox)
+
+        section("Stimme · ElevenLabs (optional)")
+        hint("Nicht nötig, wenn die Heim-Stimme läuft. Nur falls du ElevenLabs doch einmal nutzen willst.")
         field("ElevenLabs API-Key", prefs.elevenKey, secret = true) { prefs.elevenKey = it }
         field("Stimmen-ID (Standard: Sarah – warm & natürlich)", prefs.elevenVoice) { prefs.elevenVoice = it }
         choice("Sprachmodell", listOf(
@@ -269,7 +302,7 @@ class SettingsActivity : Activity() {
 
     // ---------- Bausteine ----------
     private var chapter = 0
-    private val chapters = 10
+    private val chapters = 11
 
     /** Kapitel-Kopf: „03 / 10“ in Haarlinien-Pille + Titel in breiter Chrom-Schrift. */
     private fun section(t: String) {

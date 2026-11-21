@@ -88,6 +88,14 @@ ohne Rückfrage. Manuell: „Luna, update dich“ oder Einstellungen → Über �
 | Zurück, Home, Sperren, Screenshot | Merkt sich Dinge über dich, gibt passende Tipps |
 | PC an, PC fernsteuern, Gast-WLAN, Geräte, Anrufliste, VPN | „Guck mal“: sieht den Bildschirm als Bild und tippt dann gezielt |
 
+## Heim-Stimme: Lunas menschliche Stimme kommt von deinem PC
+
+Kein ElevenLabs nötig. Auf dem PC läuft der **Luna-Stimmserver** (Kartoffel-Orpheus, kostenlos, offline; gebaut von
+der AIVOX-Sitzung). Luna holt das Audio über das Heimnetz (unterwegs per VPN). Einrichtung: Zahnrad → „Heim-Stimme (PC)“
+→ Adresse (z. B. `tiry-pc.fritz.box`) + Schlüssel vom Server → „Verbindung testen & Stimmen laden“ → Stimme antippen.
+Ist der PC aus, spricht Luna vorübergehend mit der Handy-Stimme.
+Vertrag „Luna-Stimmserver v1“: `GET /health`, `POST /tts` (JSON → WAV), Port 5055, `Authorization: Bearer <Schlüssel>`.
+
 ## Lunas eigenes Gedächtnis und Ich
 
 Luna nutzt Anthropics Memory-Werkzeug mit einem Speicher **nur auf diesem Handy** (`/memories` im privaten App-Speicher):
