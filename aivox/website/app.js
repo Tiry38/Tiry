@@ -909,38 +909,188 @@ gl_FragColor=vec4(col*glow+vec3(stars*.25),glow+stars*.2);}`;
   })();
 
 
-  /* ===================== v17: Seitenwechsel mit Warp ===================== */
+
+  /* ===================== v18: Seitenwechsel – je Seite eigener Übergang ===================== */
+  const TRANS = (() => {
+    const c = document.createElement('canvas'); c.className = 'trans'; c.setAttribute('aria-hidden', 'true');
+    document.body.appendChild(c);
+    const g = c.getContext('2d');
+    let W = 0, H = 0;
+    const size = () => { W = c.width = innerWidth; H = c.height = innerHeight; };
+    size(); addEventListener('resize', size);
+    const BG = '#020304', SP = ['#2f8cff', '#7fd4ff', '#ffffff', '#ffb340', '#ff4a24'];
+    const GLYPH = 'AIVOX0123456789<>/\\|#*+=:;ÄÖÜ{}[]';
+    const ease = (t) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
+    const cl = (v) => Math.max(0, Math.min(1, v));
+    const hspec = (a = 1) => { const lg = g.createLinearGradient(0, 0, W, 0); SP.forEach((s, i) => lg.addColorStop(i / 4, s)); g.globalAlpha = a; return lg; };
+    const NAMES = { start: ['HYPERRAUM', 'START'], ablauf: ['DATENFLUSS', 'SO FUNKTIONIERT’S'], live: ['STIMMWELLE', 'LIVE-DEMO'], einrichtung: ['BAUPLAN', 'EINRICHTUNG'],
+      cockpit: ['RADAR', 'COCKPIT'], sicherheit: ['VERRIEGELUNG', 'SICHERHEIT'], preise: ['GOLDVORHANG', 'PREISE'], fragen: ['DECODIERUNG', 'FRAGEN'] };
+
+    // Jeder Effekt zeichnet bei Abdeckung k (0 = frei, 1 = Bildschirm bedeckt). Rückweg = gleicher Effekt rückwärts.
+    const FX = {
+      start: { // Hyperraum: Lichtkreis + Sternstreifen ab Klickpunkt
+        init: (s) => { s.st = Array.from({ length: 160 }, () => ({ a: Math.random() * Math.PI * 2, v: 0.4 + Math.random(), c: SP[(Math.random() * 5) | 0] })); },
+        draw(k, s) {
+          const R = k * Math.hypot(W, H) * 1.05, rg = g.createRadialGradient(s.x, s.y, Math.max(0, R - 60), s.x, s.y, R + 2);
+          g.fillStyle = BG; g.beginPath(); g.arc(s.x, s.y, Math.max(0.1, R - 30), 0, 7); g.fill();
+          rg.addColorStop(0, 'rgba(2,3,4,1)'); rg.addColorStop(0.7, 'rgba(127,212,255,.55)'); rg.addColorStop(1, 'rgba(255,255,255,0)');
+          g.fillStyle = rg; g.beginPath(); g.arc(s.x, s.y, R + 2, 0, 7); g.fill();
+          const f = Math.sin(Math.PI * k); g.lineWidth = 1.6;
+          s.st.forEach((p) => { const r0 = (k * 0.9 + 0.05) * Math.max(W, H) * p.v * 0.6, r1 = r0 + 40 + 260 * f * p.v;
+            g.globalAlpha = 0.85 * f; g.strokeStyle = p.c; g.beginPath(); g.moveTo(s.x + Math.cos(p.a) * r0, s.y + Math.sin(p.a) * r0); g.lineTo(s.x + Math.cos(p.a) * r1, s.y + Math.sin(p.a) * r1); g.stroke(); });
+        },
+      },
+      ablauf: { // Datenfluss: Bahnen schießen von links nach rechts, Datenpakete rasen mit
+        init: (s) => { s.n = 16; s.d = Array.from({ length: s.n }, () => Math.random() * 0.45); s.pk = Array.from({ length: 70 }, () => ({ y: Math.random(), o: Math.random(), v: 0.8 + Math.random() * 1.6, c: SP[(Math.random() * 5) | 0] })); },
+        draw(k, s, t) {
+          const bh = H / s.n;
+          for (let i = 0; i < s.n; i++) {
+            const w = cl((k * 1.45 - s.d[i]) / 1) * W; if (w <= 0) continue;
+            g.globalAlpha = 1; g.fillStyle = BG; g.fillRect(0, i * bh - 0.5, w, bh + 1);
+            const lg = g.createLinearGradient(w - 140, 0, w, 0); lg.addColorStop(0, 'rgba(127,212,255,0)'); lg.addColorStop(1, SP[i % 5]);
+            g.fillStyle = lg; g.globalAlpha = w < W ? 0.9 : 0.15; g.fillRect(w - 140, i * bh + bh * 0.46, 140, Math.max(1.5, bh * 0.08));
+          }
+          const f = Math.sin(Math.PI * k);
+          s.pk.forEach((p) => { const x = ((t * 1.6 * p.v + p.o) % 1.2) * W * 1.1 - 80; g.globalAlpha = f; g.fillStyle = p.c; g.fillRect(x, p.y * H, 40 + 90 * p.v, 1.5); });
+        },
+      },
+      live: { // Stimmwelle: Schallwelle öffnet sich aus der Mitte
+        init() {},
+        draw(k, s, t) {
+          const cy = H / 2, hh = ease(k) * H * 0.56, A = 10 + 46 * Math.sin(Math.PI * k);
+          const wave = (sgn, ph) => { g.beginPath(); for (let x = 0; x <= W; x += 6) { const e = Math.sin((x / W) * Math.PI);
+            const y = cy + sgn * hh + Math.sin(x * 0.018 + t * 9 + ph) * A * e * (0.6 + 0.4 * Math.sin(x * 0.004 + t * 3)); x ? g.lineTo(x, y) : g.moveTo(x, y); } };
+          g.globalAlpha = 1; g.fillStyle = BG; wave(-1, 0); for (let x = W; x >= 0; x -= 6) g.lineTo(x, cy + hh); g.closePath(); g.fill();
+          g.lineWidth = 2.2; g.shadowBlur = 24; g.shadowColor = '#7fd4ff';
+          for (const [sg, ph] of [[-1, 0], [1, 2], [-1, 1.2], [1, 3.1]]) { g.strokeStyle = hspec(ph > 1 ? 0.45 : 0.95); wave(sg, ph); g.stroke(); }
+          g.shadowBlur = 0;
+        },
+      },
+      einrichtung: { // Bauplan: Lichtzellen wachsen vom Klickpunkt aus, Maßlinien zeichnen sich
+        init: (s) => { const r = 46, pts = []; for (let y = -r, row = 0; y < H + r; y += r * 0.866, row++) for (let x = (row % 2) * r / 2 - r; x < W + r; x += r) pts.push([x, y, Math.hypot(x - s.x, y - s.y)]);
+          const m = Math.max(...pts.map((p) => p[2])); s.p = pts.map((p) => [p[0], p[1], p[2] / m]); s.r = r; },
+        draw(k, s) {
+          g.globalAlpha = 1; g.fillStyle = BG;
+          s.p.forEach(([x, y, d]) => { const q = cl((k * 1.5 - d * 0.8) / 0.7); if (!q) return; g.beginPath(); g.arc(x, y, q * s.r * 0.78, 0, 7); g.fill(); });
+          const f = Math.sin(Math.PI * k); g.strokeStyle = '#7fd4ff'; g.lineWidth = 1; g.globalAlpha = 0.55 * f;
+          for (let i = 1; i < 6; i++) { const y = (H / 6) * i, L = W * cl(k * 1.4 - i * 0.05); g.beginPath(); g.moveTo(0, y); g.lineTo(L, y); g.stroke();
+            for (let x = 0; x < L; x += 40) { g.beginPath(); g.moveTo(x, y - 4); g.lineTo(x, y + 4); g.stroke(); } }
+          for (let i = 1; i < 9; i++) { const x = (W / 9) * i, L = H * cl(k * 1.4 - i * 0.04); g.globalAlpha = 0.3 * f; g.beginPath(); g.moveTo(x, 0); g.lineTo(x, L); g.stroke(); }
+          g.globalAlpha = 0.9 * f; g.strokeStyle = '#ffb340'; g.lineWidth = 1.5; g.beginPath(); g.arc(s.x, s.y, 20 + 200 * k, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * k); g.stroke();
+        },
+      },
+      cockpit: { // Radar: Abtaststrahl fegt um den Mittelpunkt, Ringe pulsieren
+        init() {},
+        draw(k, s) {
+          const cx = W / 2, cy = H / 2, R = Math.hypot(W, H), a0 = -Math.PI / 2, a1 = a0 + Math.PI * 2 * ease(k);
+          g.globalAlpha = 1; g.fillStyle = BG; g.beginPath(); g.moveTo(cx, cy); g.arc(cx, cy, R, a0, a1); g.closePath(); g.fill();
+          if (g.createConicGradient && k < 0.999) { const cg = g.createConicGradient(a1 - 0.6, cx, cy); cg.addColorStop(0, 'rgba(77,255,195,0)'); cg.addColorStop(0.094, 'rgba(77,255,195,.55)'); cg.addColorStop(0.096, 'rgba(77,255,195,0)');
+            g.fillStyle = cg; g.beginPath(); g.moveTo(cx, cy); g.arc(cx, cy, R, a1 - 0.6, a1); g.closePath(); g.fill(); }
+          const f = Math.sin(Math.PI * k); g.lineWidth = 1; g.strokeStyle = '#4dffc3';
+          for (let r = 90; r < Math.max(W, H); r += 110) { g.globalAlpha = 0.35 * f; g.beginPath(); g.arc(cx, cy, r, 0, 7); g.stroke(); }
+          g.globalAlpha = f; g.lineWidth = 2; g.strokeStyle = '#fff'; g.beginPath(); g.moveTo(cx, cy); g.lineTo(cx + Math.cos(a1) * R, cy + Math.sin(a1) * R); g.stroke();
+          const b = 70 + 30 * (1 - k); g.strokeStyle = '#ffb340'; g.lineWidth = 2;
+          [[-1, -1], [1, -1], [1, 1], [-1, 1]].forEach(([sx, sy]) => { g.beginPath(); g.moveTo(cx + sx * b, cy + sy * (b - 22)); g.lineTo(cx + sx * b, cy + sy * b); g.lineTo(cx + sx * (b - 22), cy + sy * b); g.stroke(); });
+        },
+      },
+      sicherheit: { // Verriegelung: Blendenlamellen schließen sich drehend
+        init() {},
+        draw(k, s) {
+          const cx = W / 2, cy = H / 2, R = Math.hypot(W, H) * 0.6, r = (1 - ease(k)) * R, rot = ease(k) * Math.PI * 0.6, n = 8;
+          const v = Array.from({ length: n }, (_, i) => { const a = rot + (i / n) * Math.PI * 2; return [cx + Math.cos(a) * r, cy + Math.sin(a) * r, a]; });
+          g.globalAlpha = 1; g.fillStyle = BG; g.beginPath(); g.rect(0, 0, W, H);
+          if (r > 1) { g.moveTo(v[0][0], v[0][1]); for (let i = n - 1; i >= 0; i--) g.lineTo(v[i][0], v[i][1]); g.closePath(); }
+          g.fill('evenodd');
+          const f = Math.sin(Math.PI * k);
+          v.forEach(([x, y, a], i) => { const ta = a + Math.PI / 2 + 0.35; g.globalAlpha = 0.8 * f; g.strokeStyle = i % 2 ? '#ffb340' : '#7fd4ff'; g.lineWidth = 1.5;
+            g.beginPath(); g.moveTo(x, y); g.lineTo(x + Math.cos(ta) * R * 1.4, y + Math.sin(ta) * R * 1.4); g.stroke(); });
+          if (r > 1) { g.globalAlpha = f; g.strokeStyle = '#fff'; g.lineWidth = 2; g.shadowBlur = 20; g.shadowColor = '#7fd4ff'; g.beginPath(); v.forEach(([x, y], i) => (i ? g.lineTo(x, y) : g.moveTo(x, y))); g.closePath(); g.stroke(); g.shadowBlur = 0; }
+        },
+      },
+      preise: { // Goldvorhang: schließt aus beiden Seiten zur Mitte, mit Lichtstreifen
+        init() {},
+        draw(k) {
+          const hw = ease(k) * W / 2;
+          g.globalAlpha = 1; g.fillStyle = BG; g.fillRect(0, 0, hw, H); g.fillRect(W - hw, 0, hw, H);
+          const f = Math.sin(Math.PI * k);
+          [hw, W - hw].forEach((x, i) => { const lg = g.createLinearGradient(x - 50, 0, x + 50, 0);
+            lg.addColorStop(0, 'rgba(255,179,64,0)'); lg.addColorStop(0.5, i ? '#ffb340' : '#ffd890'); lg.addColorStop(1, 'rgba(255,74,36,0)');
+            g.globalAlpha = 0.9 * (k < 1 ? 1 : 0.2); g.fillStyle = lg; g.fillRect(x - 50, 0, 100, H); });
+          const fl = g.createLinearGradient(0, 0, W, 0); fl.addColorStop(0, 'rgba(255,179,64,0)'); fl.addColorStop(0.5, '#fff'); fl.addColorStop(1, 'rgba(255,74,36,0)');
+          g.globalAlpha = f; g.fillStyle = fl; g.fillRect(0, H / 2 - 1.5, W, 3); g.globalAlpha = 0.18 * f; g.fillRect(0, H / 2 - 30, W, 60);
+        },
+      },
+      fragen: { // Decodierung: Zeichenregen füllt den Bildschirm spaltenweise
+        init: (s) => { s.cw = 18; s.n = Math.ceil(W / s.cw); s.d = Array.from({ length: s.n }, () => Math.random() * 0.5); },
+        draw(k, s) {
+          g.font = '500 15px ' + (getComputedStyle(document.documentElement).getPropertyValue('--mono') || 'monospace'); g.textAlign = 'center';
+          for (let i = 0; i < s.n; i++) {
+            const h = cl((k * 1.5 - s.d[i]) / 1) * H, x = i * s.cw; if (h <= 0) continue;
+            g.globalAlpha = 1; g.fillStyle = BG; g.fillRect(x, 0, s.cw + 0.5, h);
+            if (h < H) { g.fillStyle = '#fff'; g.fillText(GLYPH[(Math.random() * GLYPH.length) | 0], x + s.cw / 2, h);
+              for (let j = 1; j < 7; j++) { g.globalAlpha = 0.7 - j * 0.1; g.fillStyle = j % 2 ? '#7fd4ff' : '#ffb340'; g.fillText(GLYPH[(Math.random() * GLYPH.length) | 0], x + s.cw / 2, h - j * 18); } }
+          }
+        },
+      },
+    };
+    const SOUND = {
+      start: () => { SFX.whoosh(); setTimeout(() => SFX.zap(), 180); },
+      ablauf: () => { for (let i = 0; i < 7; i++) SFX.tone(900 + i * 160, 0.05, 'square', 0.008, null, i * 0.05); SFX.whoosh(); },
+      live: () => SFX.tone(180, 0.55, 'sine', 0.05, 760),
+      einrichtung: () => { [523, 659, 784, 1046].forEach((f, i) => SFX.tone(f, 0.16, 'sine', 0.025, null, i * 0.08)); },
+      cockpit: () => { SFX.tone(1250, 0.5, 'sine', 0.04, 1180); SFX.tone(1250, 0.4, 'sine', 0.015, null, 0.3); },
+      sicherheit: () => { SFX.noise(0.25, 'lowpass', 900, 120, 0.09, 0.32, 2); SFX.tone(70, 0.35, 'sine', 0.09, 45, 0.32); },
+      preise: () => { SFX.chime(); SFX.whoosh(); },
+      fragen: () => { for (let i = 0; i < 10; i++) SFX.tick && SFX.tone(1800 + Math.random() * 1600, 0.03, 'square', 0.006, null, i * 0.045); },
+    };
+    const wide = () => getComputedStyle(document.documentElement).getPropertyValue('--wide') || 'sans-serif';
+    const label = (txt, kick, a) => {
+      if (a <= 0) return;
+      const fs = Math.max(16, Math.min(34, W * 0.028));
+      g.textAlign = 'center'; g.textBaseline = 'middle';
+      if ('letterSpacing' in g) g.letterSpacing = (fs * 0.45) + 'px';
+      g.font = `400 ${fs}px ${wide()}`; g.fillStyle = hspec(a); g.fillText(txt, W / 2 + fs * 0.22, H / 2);
+      g.font = `400 ${fs * 0.36}px ${wide()}`; if ('letterSpacing' in g) g.letterSpacing = (fs * 0.2) + 'px';
+      g.globalAlpha = a * 0.7; g.fillStyle = '#9aa6b2'; g.fillText('AIVOX · ' + kick, W / 2 + fs * 0.1, H / 2 - fs * 1.4);
+      if ('letterSpacing' in g) g.letterSpacing = '0px';
+      g.textBaseline = 'alphabetic';
+    };
+    let raf = 0;
+    const run = (page, mode, x, y, done) => {
+      const fx = FX[page] || FX.start, nm = NAMES[page] || NAMES.start, s = { x, y }, dur = mode === 'in' ? 580 : 760, t0 = performance.now();
+      size(); fx.init && fx.init(s); cancelAnimationFrame(raf); c.classList.add('on');
+      const frame = (now) => {
+        const p = cl((now - t0) / dur), k = mode === 'in' ? p : 1 - p;
+        g.setTransform(1, 0, 0, 1, 0, 0); g.globalAlpha = 1; g.clearRect(0, 0, W, H);
+        fx.draw(k, s, now / 1000);
+        label(nm[1], nm[0], mode === 'in' ? cl((p - 0.45) / 0.4) : cl(1 - p / 0.35));
+        g.globalAlpha = 1;
+        if (p < 1) raf = requestAnimationFrame(frame);
+        else { if (mode === 'out') { g.clearRect(0, 0, W, H); c.classList.remove('on'); } if (done) done(); }
+      };
+      raf = requestAnimationFrame(frame);
+    };
+    return { run, sound: (p) => (SOUND[p] || SOUND.start)(), names: NAMES };
+  })();
+
   (() => {
-    const w = $('.warp'); if (!w) return;
-    const label = $('.warp-label', w);
-    const names = { start: 'START', ablauf: 'SO FUNKTIONIERT’S', live: 'LIVE-DEMO', einrichtung: 'EINRICHTUNG', cockpit: 'COCKPIT', sicherheit: 'SICHERHEIT', preise: 'PREISE', fragen: 'FRAGEN' };
-    const reset = () => { w.classList.remove('in', 'out', 'arrive'); document.body.classList.remove('warping'); };
+    const pageOf = (f) => (f === 'index' ? 'start' : f);
     document.addEventListener('click', (e) => {
       const a = e.target.closest && e.target.closest('a[href]'); if (!a || e.defaultPrevented) return;
       if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button || a.target === '_blank') return;
       const href = a.getAttribute('href'), m = href.match(/^([a-z]+)\.html(#.*)?$/); if (!m) return;
-      const page = m[1] === 'index' ? 'start' : m[1];
+      const page = pageOf(m[1]);
       if (page === document.body.dataset.page && m[2]) return;
       e.preventDefault();
       if (reduce) { location.href = href; return; }
-      const r = a.getBoundingClientRect();
-      w.style.setProperty('--cx', (e.clientX || r.left + r.width / 2) + 'px'); w.style.setProperty('--cy', (e.clientY || r.top + r.height / 2) + 'px');
-      label.textContent = names[page] || page.toUpperCase();
-      w.classList.remove('out'); w.classList.add('in'); document.body.classList.add('warping');
-      SFX.whoosh(); setTimeout(() => SFX.zap(), 180);
-      store.set('aivox-warp', label.textContent);
-      setTimeout(() => { location.href = href; }, 500);
+      const r = a.getBoundingClientRect(), x = e.clientX || r.left + r.width / 2, y = e.clientY || r.top + r.height / 2;
+      document.body.classList.add('warping'); TRANS.sound(page);
+      store.set('aivox-warp', JSON.stringify({ page, x, y }));
+      TRANS.run(page, 'in', x, y, () => { location.href = href; });
     });
-    addEventListener('pageshow', (e) => { if (e.persisted) reset(); });
-    const arriving = store.get('aivox-warp');
-    if (arriving && !reduce) {
-      store.set('aivox-warp', '');
-      label.textContent = arriving; w.classList.add('arrive');
-      requestAnimationFrame(() => requestAnimationFrame(() => {
-        w.classList.remove('arrive'); w.classList.add('out');
-        setTimeout(reset, 700);
-      }));
-    }
+    addEventListener('pageshow', (e) => { if (e.persisted) { document.body.classList.remove('warping'); const c = $('.trans'); if (c) { c.classList.remove('on'); c.getContext('2d').clearRect(0, 0, c.width, c.height); } } });
+    let arr = null; try { arr = JSON.parse(store.get('aivox-warp') || 'null'); } catch (e) { arr = null; }
+    if (arr && arr.page && !reduce) { store.set('aivox-warp', ''); TRANS.run(arr.page, 'out', arr.x, arr.y); }
   })();
 
   /* ===================== Start ===================== */
