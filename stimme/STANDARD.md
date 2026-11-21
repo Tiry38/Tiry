@@ -1,13 +1,14 @@
 # Stimmen-Standard für Luna und AIVOX
 
 Gemeinsame Regeln beider Sitzungen (Luna: Branch `ccr-5a20bb04-mr0zu4`, AIVOX: Branch `claude/charming-volta-lz27vg`).
-Stand: 21.11.2026. Grundsatz: **Was nicht gemessen oder von Tiry gehört wurde, gilt als ungeprüft.**
+Stand: 21.11.2026. Luna: Textregeln implementiert in `luna-app/.../SpeechText.kt`. Grundsatz: **Was nicht gemessen oder von Tiry gehört wurde, gilt als ungeprüft.**
 
 ## 1. Motoren (Rangfolge)
 | Rang | Motor | Einsatz | Kosten | Lizenz | Status |
 |---|---|---|---|---|---|
-| 1 | ElevenLabs v4 (Rückfall v3 → multilingual_v2) | Luna live, wenn Schlüssel vorhanden | Abo | kommerziell | Klang von uns beiden **nicht** gehört (kein Schlüssel in der Cloud) |
-| 2 | Kartoffel-Orpheus 3B (deutsch, natürliche Sprecher, Gefühle) | lokal/offline, Demo-Audio | 0 € | Llama 3.2 Community, „Built with Llama“ | **im Test** (AIVOX-Sitzung) |
+| 1 | Kartoffel-Orpheus 3B (deutsch, natürliche Sprecher, Gefühle) – sobald gemessen gewonnen | AIVOX-Demo/Server, Luna über „Heim-Stimme“ (Stimmserver auf Tirys PC) | 0 € | Llama 3.2 Community, „Built with Llama“ | **im Test** (AIVOX-Sitzung) |
+| 2 | Chatterbox Multilingual + echte Referenz (siehe Rang 3 unten, aktuell Standard) | lokal/offline | 0 € | MIT | gemessen |
+| – | ElevenLabs v4 | **nur optional/Altlast** – Tiry-Entscheid 21.11.2026: kein ElevenLabs | Abo | kommerziell | nicht genutzt |
 | 3 | Chatterbox Multilingual + echte Referenz | lokal/offline | 0 € | MIT | gemessen, Natürlichkeit 3,5–3,8/5 |
 | – | Piper, Handy-/Browser-Stimme | nur Notfall | 0 € | – | roboterhaft (≈ 2,8/5) – nicht verwenden |
 
