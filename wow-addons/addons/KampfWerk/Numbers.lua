@@ -98,6 +98,25 @@ function Numbers.ApplyBlizzard()
   if n.blizzHealSet then setCVar("floatingCombatTextCombatHealing", n.hideBlizzHeal and "0" or "1") end
 end
 
+-- Eigene Zahlen an/aus. An = Blizzards Schadens- und Heilzahlen aus (sonst stehen beide da und Tiry sieht
+-- nur die Blizzard-Schrift), aus = Blizzards Zahlen wieder an.
+function Numbers.SetOwn(on)
+  local n = N()
+  n.own = on and true or false
+  n.hideBlizzDamage, n.hideBlizzHeal = n.own, n.own
+  n.blizzDamageSet, n.blizzHealSet = true, true
+  Numbers.ApplyBlizzard()
+  if not n.own then Numbers.Clear() end
+end
+
+-- Jede Aenderung im Zahlen-Studio meint die eigenen Zahlen -> automatisch einschalten
+function Numbers.EnsureOwn()
+  if N().own then return false end
+  Numbers.SetOwn(true)
+  ns.Print("Eigene Zahlen eingeschaltet - Blizzards Kampfzahlen sind dafuer aus (Zahlen-Studio, Schalter oben).")
+  return true
+end
+
 ----------------------------------------------------------------------------
 -- 2) Eigene Neon-Zahlen
 ----------------------------------------------------------------------------

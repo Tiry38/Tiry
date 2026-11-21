@@ -12,7 +12,7 @@
 local ADDON, ns = ...
 KampfWerk = ns
 ns.NAME = ADDON or "KampfWerk"
-ns.VERSION = "1.3.0"
+ns.VERSION = "1.3.1"
 ns.MEDIA = "Interface\\AddOns\\KampfWerk\\Media\\"
 local MEDIA = ns.MEDIA
 
@@ -166,7 +166,15 @@ local function initDB()
   end
   if not ns.THEME[db.look.theme] then db.look.theme = "neon" end
   if not ns.BG[db.look.bg] then db.look.bg = "glas" end
-  db.v = 100
+  -- 1.3.1: hat Tiry im Zahlen-Studio schon eine Schrift gewaehlt, aber die eigenen Zahlen waren noch aus
+  -- (Standard), sah er nur Blizzards Zahlen -> einmalig einschalten
+  if (db.v or 0) < 131 and not fresh then
+    local n, d = db.numbers, DEFAULTS.numbers
+    if not n.own and (n.damage.font ~= d.damage.font or n.heal.font ~= d.heal.font) then
+      n.own, n.hideBlizzDamage, n.hideBlizzHeal, n.blizzDamageSet, n.blizzHealSet = true, true, true, true, true
+    end
+  end
+  db.v = 131
 end
 ns.InitDB = initDB
 

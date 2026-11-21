@@ -469,11 +469,32 @@ ok(DB.look.bg == "frost", "Klick waehlt Hintergrund Frost")
 local cyber = find(KampfWerkConfig, function(o) return o.item and o.item.value == "cyber" and o.item.grad and L.isShown(o) end)
 if cyber then cyber:GetScript("OnClick")(cyber) end
 ok(DB.look.theme == "cyber", "Klick waehlt Farbthema Cyber-Pink")
+-- Tirys Fall 1.3.0: Schrift gewaehlt, eigene Zahlen aber aus -> nur Blizzard-Zahlen. Jetzt schaltet die Wahl sie ein.
+ns.Numbers.SetOwn(false)
+ok(not N.own and W.cvars.floatingCombatTextCombatDamage == "1" and W.cvars.floatingCombatTextCombatHealing == "1", "eigene Zahlen aus: Blizzard-Zahlen an")
 ns.Config.Show("zahlen")
 check("kw_zahlen", KampfWerkConfig)
 local bebas = find(KampfWerkConfig, function(o) return o.item and o.item.value == "bebas" and o.item.font and L.isShown(o) end)
 if bebas then bebas:GetScript("OnClick")(bebas) end
 ok(N.damage.font == "bebas", "Klick waehlt Schaden-Schrift Bebas")
+ok(N.own and W.cvars.floatingCombatTextCombatDamage == "0" and W.cvars.floatingCombatTextCombatHealing == "0",
+  "Schrift-Wahl schaltet eigene Zahlen ein, Blizzard-Zahlen aus")
+W.fire("UNIT_COMBAT", "player", "HEAL", "", SECRET, 1)
+local hv
+for _, ch in ipairs(UIParent.__children) do if ch.prefix and ch.prefix.__text == "+" and ch:IsShown() then hv = ch end end
+ok(hv ~= nil, "danach erscheinen die eigenen Heilzahlen")
+-- Umstellung fuer Tirys gespeicherte 1.3.0-Daten: Schrift gewaehlt, own aus -> einmalig an
+do
+  local keep = KampfWerkDB
+  KampfWerkDB = { v = 100, numbers = { own = false, heal = { font = "marker" }, damage = { font = "bangers" } } }
+  ns.InitDB()
+  ok(KampfWerkDB.numbers.own and KampfWerkDB.numbers.hideBlizzHeal and KampfWerkDB.v == 131, "1.3.0-Daten: eigene Zahlen eingeschaltet")
+  KampfWerkDB = { v = 100, numbers = { own = false } }
+  ns.InitDB()
+  ok(not KampfWerkDB.numbers.own, "nichts gewaehlt: bleibt aus")
+  KampfWerkDB = keep
+  ns.DB = keep
+end
 ns.Config.Show("teil" .. DB.panes[1].id)
 check("kw_teil", KampfWerkConfig)
 local heal2 = find(KampfWerkConfig, function(o) return o.item and o.item.value == "heal" and L.isShown(o) end)

@@ -604,3 +604,8 @@ Installation: Ordner `Schlaghagel` ersetzen, `/reload` reicht (keine neuen Datei
 1. `/kw` → Aussehen → „Schrift in den Balken“: Standard „Kontur“ – Namen (auch weißer Priester) auf hellem Bild gut lesbar? „Dicker Rand“ und „Fette Schrift“ testen, dunkle Farbe probieren.
 2. Fenster unten rechts kleiner ziehen: die letzte Zeile liegt nicht mehr unter dem Griff in der Ecke?
 3. Fenster schmal ziehen: oben steht „HEILUNG“ / „SCHADEN“ statt „GEWIRKTE …“ / „VERURSACHTER …“?
+
+# KampfWerk 1.3.1
+1. Nach dem Einbau: Gegner schlagen / heilen – erscheinen die Zahlen in der Studio-Schrift (z. B. Marker), Blizzards Zahlen weg?
+2. Heilung auf Gruppenmitglieder: erscheint nur, wenn deren Namensplakette sichtbar ist (oder sie dein Ziel sind).
+3. Kommen gar keine eigenen Zahlen: Zahlen-Studio → „Eigene Zahlen anzeigen“ aus = Blizzards Zahlen zurück, mir Bescheid geben.
