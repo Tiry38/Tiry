@@ -7,9 +7,8 @@ Stand: 21.11.2026. Luna: Textregeln implementiert in `luna-app/.../SpeechText.kt
 | Rang | Motor | Einsatz | Kosten | Lizenz | Status |
 |---|---|---|---|---|---|
 | 1 | Kartoffel-Orpheus 3B (deutsch, natürliche Sprecher, Gefühle) – sobald gemessen gewonnen | AIVOX-Demo/Server, Luna über „Heim-Stimme“ (Stimmserver auf Tirys PC) | 0 € | Llama 3.2 Community, „Built with Llama“ | **im Test** (AIVOX-Sitzung) |
-| 2 | Chatterbox Multilingual + echte Referenz (siehe Rang 3 unten, aktuell Standard) | lokal/offline | 0 € | MIT | gemessen |
 | – | ElevenLabs v4 | **nur optional/Altlast** – Tiry-Entscheid 21.11.2026: kein ElevenLabs | Abo | kommerziell | nicht genutzt |
-| 3 | Chatterbox Multilingual + echte Referenz | lokal/offline | 0 € | MIT | gemessen, Natürlichkeit 3,5–3,8/5 |
+| 2 | Chatterbox Multilingual + echte Referenz (aktueller Standard bis Rang 1 gewinnt) | lokal/offline | 0 € | MIT | gemessen, Natürlichkeit 3,5–3,8/5 |
 | – | Piper, Handy-/Browser-Stimme | nur Notfall | 0 € | – | roboterhaft (≈ 2,8/5) – nicht verwenden |
 
 ## 2. ElevenLabs-Einstellungen (Luna, Doku geprüft, Klang ungeprüft)
