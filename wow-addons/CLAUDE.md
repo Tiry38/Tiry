@@ -98,7 +98,7 @@ blau, Einschlag. **Keine Ringe/Drehungen auch beim Mahlstrom** (Test prüft das)
   `DB.frame.bg/theme/bgAlpha`; `Main:Apply` färbt alles (auch `Blizzard.Theme()` = Eingabezeile), `Main:TileBg` kachelt WoW-Texturen. Seite `Config.Show("look")`.
 - **1.4:** `DB.frame.fade` Standard 60 s (alte Zeilen blenden aus, `DB.v = 130` stellt 0 → 60 um), `DB.mouseFade` an: Maus/Mausrad → `ResetAllFadeTimes`.
 
-## KampfWerk 1.1 (Schadensmeter, geteiltes Glasfenster)
+## KampfWerk 1.3 (Schadensmeter, geteiltes Glasfenster)
 `addons/KampfWerk/`: `Core.lua` (DB, Themen `ns.THEMES`, Hintergründe `ns.BACKGROUNDS`, Teile `DB.panes` = `{id, view, session, docked, share, x,y,w,h}`, `/kw`),
 `Data.lua` (`Data.VIEWS` 12 Ansichten über `C_DamageMeter`/`Enum.DamageMeterType`, Aggro über `UnitDetailedThreatSituation`, `Data.Get(view, session)`
 → Zeilen mit getrennten FontString-Feldern), `Meter.lua` (Gruppe `KampfWerkFrame`, Teile `KampfWerkTeil<id>`, Teiler, Lösen/Andocken, Picker),
@@ -106,6 +106,7 @@ blau, Einschlag. **Keine Ringe/Drehungen auch beim Mahlstrom** (Test prüft das)
 `Blizzard.lua` (Blizzard-Meter `DamageMeter` verstecken, Daten bleiben), `Config.lua` (Seiten fenster/aussehen/zahlen/teil<id>).
 - **Kampflog ist gesperrt** (`COMBAT_LOG_EVENT_UNFILTERED` HasRestrictions) → alle Zahlen aus `C_DamageMeter`. Im Kampf sind Werte geheim:
   nur `StatusBar:SetValue`/`SetMinMaxValues`, `FontString:SetText`, `AbbreviateLargeNumbers` (alle AllowedWhenTainted); kein Vergleich, keine Prozente.
+- **1.3 Lesbarkeit:** `look.textColor/textStyle/textBold` → `styleRow` (Flags `Meter.TEXT_FLAGS`: schatten "", kontur OUTLINE, dick THICKOUTLINE; alle Zeilentexte in `textColor`, Neben-Texte × 0.78). `Pane:Style` probiert voller Titel (Orbitron, Rajdhani) → `view.short`. `Pane:Draw` lässt unten `Meter.CORNER` frei (Griff).
 - **1.2 Bild-Hintergründe:** Eintrag mit `cover = 2` (Seitenverhältnis) → `coverCoords` schneidet aus statt zu verzerren, Motiv bleibt mittig. `eigenes_bild.tga` im Repo = Platzhalter (Psi-Sturm); **Tirys Fan-Bild (Pokémon) nie committen** – nur nachträglich in sein ZIP legen.
 - **1.1 Aufteilung:** `Meter.SetCount(n)` (1–6; entfernt zuerst Nicht-Schaden-Teile von hinten, ergänzt heal/kicks/dps/hps, skaliert `DB.frame.w`), `/kw eins|zwei|drei`.
 - Blizzards Weltzahlen: EINE Schrift für alles (`DAMAGE_TEXT_FONT`, nur beim Laden), feste Farben → getrennte Schrift/Farbe nur über die eigenen Zahlen.

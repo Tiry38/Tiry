@@ -340,6 +340,7 @@ function Obj.SetFont(o, file, size, flags)
     o.__weight = file:find("ExtraBold") and "bold" or (file:find("SemiBold") and "semibold" or (file:upper():find("ARIALN") and "narrow" or "regular"))
   end
   o.__outline = type(flags) == "string" and flags:find("OUTLINE") and true or nil
+  o.__flags = flags or ""
   return true
 end
 function Obj.SetText(o, t)
@@ -427,7 +428,7 @@ function Obj.SetJustifyV(o, j) assert(JUSTV[j], "Ungültig JustifyV: " .. tostri
 function Obj.SetWordWrap(o, v) o.__wrap = v and true or false end
 function Obj.SetSpacing(o, s) assert(type(s) == "number") o.__spacing = s end
 function Obj.SetShadowColor(o, r, g, b, a) assert(type(r) == "number") end
-function Obj.SetShadowOffset(o, x, y) assert(type(x) == "number" and type(y) == "number") end
+function Obj.SetShadowOffset(o, x, y) assert(type(x) == "number" and type(y) == "number") o.__shadowX = x end
 
 -- Scrollrahmen
 function Obj.SetScrollChild(o, c) o.__child = c end

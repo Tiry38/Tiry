@@ -599,3 +599,8 @@ Installation: Ordner `Schlaghagel` ersetzen, `/reload` reicht (keine neuen Datei
 
 # KampfWerk 1.2
 1. `/kw` → Aussehen → „Eigenes Bild“: Mewtu-Bild im Fenster, Figur mittig, nicht verzerrt? Auch bei schmalem Fenster und bei „Ein Fenster“ (Figur bleibt mittig sichtbar).
+
+# KampfWerk 1.3
+1. `/kw` → Aussehen → „Schrift in den Balken“: Standard „Kontur“ – Namen (auch weißer Priester) auf hellem Bild gut lesbar? „Dicker Rand“ und „Fette Schrift“ testen, dunkle Farbe probieren.
+2. Fenster unten rechts kleiner ziehen: die letzte Zeile liegt nicht mehr unter dem Griff in der Ecke?
+3. Fenster schmal ziehen: oben steht „HEILUNG“ / „SCHADEN“ statt „GEWIRKTE …“ / „VERURSACHTER …“?

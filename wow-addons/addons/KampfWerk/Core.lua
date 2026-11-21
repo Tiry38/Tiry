@@ -12,7 +12,7 @@
 local ADDON, ns = ...
 KampfWerk = ns
 ns.NAME = ADDON or "KampfWerk"
-ns.VERSION = "1.2.0"
+ns.VERSION = "1.3.0"
 ns.MEDIA = "Interface\\AddOns\\KampfWerk\\Media\\"
 local MEDIA = ns.MEDIA
 
@@ -113,7 +113,8 @@ local DEFAULTS = {
   v = 100,
   frame = { x = 420, y = 40, w = 600, h = 210, locked = false },
   look = { bg = "glas", theme = "neon", alpha = 0.78, bgAlpha = 0.55, barH = 20, gap = 3, font = 13,
-           barColor = "klasse", barStyle = "glanz", numbers = "kurz" },
+           barColor = "klasse", barStyle = "glanz", numbers = "kurz",
+           textColor = { 1, 1, 1 }, textStyle = "kontur", textBold = false },
   showSelf = true,
   hideBlizzard = false,
   animations = true,

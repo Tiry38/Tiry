@@ -145,10 +145,17 @@ local function grid(p, st, items, isSel, onPick, cols, h, gap)
 end
 
 -- Farbfelder (runde Glas-Kugeln)
-local function swatches(p, st, get, set)
+-- Schriftfarben fuer die Balken: hell UND dunkel (dunkel = lesbar auf hellen Bildern)
+local TEXT_SWATCHES = {
+  { 1.00, 1.00, 1.00 }, { 0.80, 0.85, 0.90 }, { 1.00, 0.82, 0.22 }, { 1.00, 0.55, 0.12 }, { 1.00, 0.30, 0.25 },
+  { 1.00, 0.24, 0.76 }, { 0.70, 0.40, 1.00 }, { 0.20, 0.90, 1.00 }, { 0.22, 1.00, 0.42 }, { 0.35, 0.38, 0.42 },
+  { 0.12, 0.13, 0.15 }, { 0.00, 0.00, 0.00 },
+}
+
+local function swatches(p, st, get, set, list)
   local size, gap = 26, 8
   local dots = {}
-  for i, c in ipairs(Numbers.SWATCHES) do
+  for i, c in ipairs(list or Numbers.SWATCHES) do
     local b = UI.SafeButton(p)
     b:SetSize(size, size)
     b.ring = b:CreateTexture(nil, "BACKGROUND")
@@ -354,8 +361,19 @@ local function lookPage()
     function() return look.barStyle end, function(v) look.barStyle = v refreshMeter() end)
   segRow(p, st, "Zahlen", { { label = "Kurz (12,3K)", value = "kurz" }, { label = "Voll (12.345)", value = "voll" } },
     function() return look.numbers end, function(v) look.numbers = v refreshMeter() end)
+
   st:Para("Im Kampf zeigt WoW die Werte nur verschluesselt an Add-ons weiter - dann immer kurz und ohne Prozent. "
     .. "Prozent und Zauber-Details (Maus ueber einen Balken) erscheinen nach dem Kampf.", 12, C.dim)
+  st:Space(14)
+  st:Title("Schrift in den Balken")
+  st:Add(label(p, "Farbe"), 18, 4, 14)
+  swatches(p, st, function() return ns.Meter.TextColor() end,
+    function(c) look.textColor = c refreshMeter() end, TEXT_SWATCHES)
+  segRow(p, st, "Rand", { { label = "Schatten", value = "schatten" }, { label = "Kontur", value = "kontur" }, { label = "Dicker Rand", value = "dick" } },
+    function() return look.textStyle or "kontur" end, function(v) look.textStyle = v refreshMeter() end)
+  local bold = UI.Toggle(p, "Fette Schrift", function() return look.textBold end,
+    function(v) look.textBold = v refreshMeter() end, "Namen und Zahlen in der kraeftigsten Schrift.", w)
+  st:Add(bold, bold:GetHeight(), 12)
   finish(st)
 end
 

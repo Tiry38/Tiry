@@ -16,6 +16,7 @@ local Group = {}
 Meter.Group = Group
 
 local HEAD = 28
+Meter.CORNER = 16
 local MIN_W, MIN_H = 150, 90
 local MAX_W, MAX_H = 1800, 1100
 local DIV = 12            -- Breite der Teiler-Zone zwischen zwei Teilen
@@ -238,6 +239,15 @@ local function newRow(pane)
   return r
 end
 
+-- Schrift in den Balken: Farbe + Rand (Tiry: weisse Namen auf hellem Bild schlecht lesbar)
+Meter.TEXT_FLAGS = { schatten = "", kontur = "OUTLINE", dick = "THICKOUTLINE" }
+function Meter.TextFlags() return Meter.TEXT_FLAGS[L().textStyle or "kontur"] or "OUTLINE" end
+function Meter.TextColor()
+  local c = L().textColor
+  if type(c) == "table" and c[1] then return c end
+  return { 1, 1, 1 }
+end
+
 local function styleRow(r)
   local look = L()
   local h = look.barH or 20
@@ -249,12 +259,24 @@ local function styleRow(r)
   r.track:SetVertexColor(1, 1, 1, 0.06)
   r.spark:SetSize(h * 1.4, h * 1.6)
   r.spark:SetShown(look.barStyle == "neon")
-  UI.SetFont(r.rank, fs - 1, "bold")
-  UI.SetFont(r.name, fs, "semibold")
-  UI.SetFont(r.value, fs, "bold")
-  UI.SetFont(r.unit, fs - 2, "semibold")
-  UI.SetFont(r.sub, fs - 1, "semibold")
-  UI.SetFont(r.pct, fs - 1, "semibold")
+  local fl = Meter.TextFlags()
+  local nw = look.textBold and "bold" or "semibold"
+  UI.SetFont(r.rank, fs - 1, "bold", fl)
+  UI.SetFont(r.name, fs, nw, fl)
+  UI.SetFont(r.value, fs, "bold", fl)
+  UI.SetFont(r.unit, fs - 2, nw, fl)
+  UI.SetFont(r.sub, fs - 1, nw, fl)
+  UI.SetFont(r.pct, fs - 1, nw, fl)
+  -- Schatten: kraeftig, wenn kein Rand gewaehlt ist (sonst weich wie bisher)
+  local strong = look.textStyle == "schatten"
+  local tc = Meter.TextColor()
+  for _, k in ipairs({ "rank", "name", "value", "unit", "sub", "pct" }) do
+    local f = r[k]
+    f:SetShadowColor(0, 0, 0, strong and 0.95 or 0.6)
+    if strong then f:SetShadowOffset(1, -1) else f:SetShadowOffset(0, -1) end
+    local d = (k == "name" or k == "value") and 1 or 0.78
+    f:SetTextColor(tc[1] * d, tc[2] * d, tc[3] * d, 1)
+  end
   r.rank:ClearAllPoints()
   r.rank:SetPoint("LEFT", 7, 0)
   r.rank:SetWidth(18)
@@ -289,7 +311,6 @@ local function fillRow(pane, r, row, i, n, wide)
   r.sb:SetValue(row.bar or 0)
   r.rank:SetText(tostring(row.index or i))
   r.name:SetText(row.name or "?")
-  if row.isSelf then r.name:SetTextColor(1, 1, 1, 1) else r.name:SetTextColor(C.text[1], C.text[2], C.text[3], 1) end
   r.value:SetText(row.valueText or "")
   local showSub = wide and row.subText ~= nil
   r.sub:SetText(showSub and row.subText or "")
@@ -448,15 +469,17 @@ function Pane:Style()
   local w = self.frame:GetWidth() or 300
   -- Platz: links 12, Pfeil 17, rechts drei Knoepfe 82, Uhr 44 (nur breit)
   local avail = w - 12 - 17 - 82 - (w > 340 and 44 or 0)
+  -- Titel: voller Name in Orbitron, sonst schmale Rajdhani; passt beides nicht, nur der Kurzname
+  -- ("HEILUNG" statt "GEWIRKTE HEILUNG ...")
   local full = UI.Upper(view.label)
-  -- Titel in Orbitron; passt er nicht, in der schmalen Rajdhani (gleiches Gross-Schrift-Bild)
-  UI.SetFont(self.title, 12, "display")
-  self.title:SetText(full)
-  local tw = self.title:GetUnboundedStringWidth() or 0
-  if tw > avail then
-    UI.SetFont(self.title, 14, "bold")
-    self.title:SetText(full)
+  local short = UI.Upper(view.short or view.label)
+  local tw
+  for _, c in ipairs({ { full, 12, "display" }, { full, 14, "bold" }, { short, 12, "display" }, { short, 14, "bold" } }) do
+    UI.SetFont(self.title, c[2], c[3])
+    self.title:SetText(c[1])
+    full = c[1]
     tw = self.title:GetUnboundedStringWidth() or 0
+    if tw <= avail then break end
   end
   self.sess.text:SetText(UI.Upper(Data.SessionLabel(self.data.session)))
   local sw = math.max(54, (self.sess.text:GetUnboundedStringWidth() or 40) + 18)
@@ -482,7 +505,8 @@ function Pane:Draw()
   local look = L()
   local h = look.barH or 20
   local gap = look.gap or 3
-  local bodyH = (self.frame:GetHeight() or 0) - HEAD - 10
+  -- unten 16 px frei: die letzte Zeile liegt nie unter dem Groessen-Griff in der Ecke
+  local bodyH = (self.frame:GetHeight() or 0) - HEAD - 10 - Meter.CORNER
   local count = math.max(0, math.floor((bodyH + gap) / (h + gap)))
   local res = Data.Get(self.data.view, self.data.session)
   self.res = res

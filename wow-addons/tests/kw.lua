@@ -307,6 +307,47 @@ do
   ok(#DB.panes == #saved and P1 and P2, "Teile wiederhergestellt")
 end
 
+-- 1.3 Lesbarkeit: Schriftfarbe, Rand, fett, freie Ecke, Kurztitel
+do
+  local look = DB.look
+  ok(look.textStyle == "kontur" and look.textColor[1] == 1 and look.textBold == false, "Standard: weiss mit Kontur")
+  local r = P2.rows[1]
+  ok(r and r.name.__flags == "OUTLINE" and r.value.__flags == "OUTLINE", "Kontur an Namen und Zahlen")
+  look.textStyle = "dick"; look.textColor = { 0, 0, 0 }; look.textBold = true
+  M.Refresh(true)
+  r = P2.rows[1]
+  ok(r.name.__flags == "THICKOUTLINE" and r.rank.__flags == "THICKOUTLINE", "dicker Rand")
+  ok(r.name.__tc[1] == 0 and r.name.__tc[2] == 0 and r.value.__tc[3] == 0, "Schriftfarbe schwarz")
+  ok(r.name.__weight == "techbold", "fette Schrift fuer Namen (" .. tostring(r.name.__weight) .. ")")
+  look.textStyle = "schatten"
+  M.Refresh(true)
+  r = P2.rows[1]
+  ok(r.name.__flags == "" and r.name.__shadowX == 1, "Schatten ohne Rand, kraeftig")
+  look.textStyle = "kontur"; look.textColor = { 1, 1, 1 }; look.textBold = false
+  M.Refresh(true)
+  -- letzte Zeile endet ueber dem Groessen-Griff
+  L.reset()
+  local fr = L.rect(P2.frame)
+  local lowest
+  for _, rr in ipairs(P2.rows) do
+    if rr:IsShown() then local b = L.rect(rr).b; lowest = lowest and math.min(lowest, b) or b end
+  end
+  ok(lowest and lowest >= fr.b + 21, "Ecke unten rechts frei (Zeile bis " .. tostring(lowest) .. ", Teil bis " .. fr.b .. ")")
+  -- schmal: nur der Kurzname
+  local w0 = DB.frame.w
+  DB.frame.w = 380
+  M.Rebuild()
+  P1, P2 = M.Panes[DB.panes[1].id], M.Panes[DB.panes[2].id]
+  local t1, t2 = plain(P1.title:GetText()), plain(P2.title:GetText())
+  ok((t1 == "HEILUNG" and t2 == "SCHADEN") or (t1 == "SCHADEN" and t2 == "HEILUNG"),
+    "schmal: Kurztitel (" .. tostring(plain(P1.title:GetText())) .. " | " .. tostring(plain(P2.title:GetText())) .. ")")
+  DB.frame.w = w0
+  M.Rebuild()
+  P1, P2 = M.Panes[DB.panes[1].id], M.Panes[DB.panes[2].id]
+  t1, t2 = plain(P1.title:GetText()), plain(P2.title:GetText())
+  ok((t1 .. t2):find("GEWIRKTE HEILUNG") and (t1 .. t2):find("VERURSACHTER SCHADEN"), "breit: wieder voller Titel")
+end
+
 -- Zuruecksetzen, sperren, Blizzard-Meter
 SlashCmdList.KAMPFWERK("reset")
 ok(W.resetCalled, "/kw reset leert Blizzards Kampfdaten")
@@ -472,6 +513,17 @@ if OUT then
   DB.look.bg, DB.look.theme = "eigen", "arkan"
   M.Apply()
   L.dump(UIParent, OUT .. "/kw_meter_eigenes_bild.tsv", { levels = true })
+  -- Lesbarkeit: schmal (Kurztitel), dicker Rand + fett
+  DB.look.textStyle, DB.look.textBold = "dick", true
+  local fw, fh = DB.frame.w, DB.frame.h
+  DB.frame.w, DB.frame.h = 430, 170
+  M.Rebuild()
+  M.Apply()
+  L.dump(UIParent, OUT .. "/kw_meter_lesbar.tsv", { levels = true })
+  DB.look.textStyle, DB.look.textBold = "kontur", false
+  DB.frame.w, DB.frame.h = fw, fh
+  M.Rebuild()
+  M.Apply()
   M.SetCount(1)
   M.Apply()
   L.dump(UIParent, OUT .. "/kw_meter_eins_bild.tsv", { levels = true })
