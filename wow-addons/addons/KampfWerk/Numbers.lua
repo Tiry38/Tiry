@@ -90,12 +90,63 @@ local function setCVar(name, value)
   return (pcall(C_CVar.SetCVar, name, value))
 end
 
+-- Forever-Namen (Blizzard_SettingsDefinitions_Frame/Mainline/CombatOverrides.lua): mit "_v2"; alte Namen als Rueckfall
+Numbers.CV_DAMAGE = { "floatingCombatTextCombatDamage_v2", "floatingCombatTextCombatDamage" }
+Numbers.CV_HEAL = { "floatingCombatTextCombatHealing_v2", "floatingCombatTextCombatHealing" }
+-- Namensplaketten freundlicher Spieler (Blizzard_SettingsDefinitions_Frame/Nameplates.lua): nur dort kann ein Add-on
+-- Zahlen ueber einem Freund zeigen. "Nur Name" haelt sie schlank.
+Numbers.CV_FRIENDS = "nameplateShowFriendlyPlayers"
+Numbers.CV_ONLYNAME = "nameplateShowOnlyNameForFriendlyPlayerUnits"
+
+local function setFirst(list, value)
+  for _, name in ipairs(list) do
+    if cvarExists(name) then return setCVar(name, value) end
+  end
+  return false
+end
+
+-- In Instanzen sperrt WoW die Plaketten freundlicher Spieler fuer Add-ons ("forbidden") -> dort keine eigenen
+-- Heilzahlen ueber Freunden moeglich; Blizzards Heilzahlen bleiben dann an, unsere Heilzahlen schweigen.
+function Numbers.InInstance()
+  if not IsInInstance then return false end
+  local inside, kind = IsInInstance()
+  return inside and kind ~= "none" and true or false
+end
+
+function Numbers.OwnHeal()
+  local n = N()
+  return n.own and n.heal.on and not Numbers.InInstance()
+end
+
 function Numbers.ApplyBlizzard()
   local n = N()
   if cvarExists("WorldTextScale") then setCVar("WorldTextScale", tostring(n.worldScale or 1)) end
   -- Blizzard-Zahlen nur aendern, wenn Tiry den Schalter benutzt hat (sonst bleibt seine Spiel-Einstellung)
-  if n.blizzDamageSet then setCVar("floatingCombatTextCombatDamage", n.hideBlizzDamage and "0" or "1") end
-  if n.blizzHealSet then setCVar("floatingCombatTextCombatHealing", n.hideBlizzHeal and "0" or "1") end
+  if n.blizzDamageSet then setFirst(Numbers.CV_DAMAGE, n.hideBlizzDamage and "0" or "1") end
+  if n.blizzHealSet then
+    local hide = n.hideBlizzHeal and not (n.own and Numbers.InInstance())
+    setFirst(Numbers.CV_HEAL, hide and "0" or "1")
+  end
+  Numbers.ApplyFriendPlates()
+end
+
+-- Freundes-Plaketten (nur Name) fuer die Heilzahlen; alte Werte merken und beim Ausschalten zurueckgeben
+function Numbers.ApplyFriendPlates()
+  local n = N()
+  local want = n.own and n.heal.on and n.friendPlates ~= false
+  if not (cvarExists(Numbers.CV_FRIENDS) and C_CVar.GetCVar) then return end
+  if want then
+    if not n.platesSaved then
+      n.platesSaved = { show = C_CVar.GetCVar(Numbers.CV_FRIENDS), only = cvarExists(Numbers.CV_ONLYNAME) and C_CVar.GetCVar(Numbers.CV_ONLYNAME) or nil }
+    end
+    setCVar(Numbers.CV_FRIENDS, "1")
+    if cvarExists(Numbers.CV_ONLYNAME) then setCVar(Numbers.CV_ONLYNAME, "1") end
+  elseif n.platesSaved then
+    local sv = n.platesSaved
+    n.platesSaved = nil
+    if sv.show then setCVar(Numbers.CV_FRIENDS, sv.show) end
+    if sv.only and cvarExists(Numbers.CV_ONLYNAME) then setCVar(Numbers.CV_ONLYNAME, sv.only) end
+  end
 end
 
 -- Eigene Zahlen an/aus. An = Blizzards Schadens- und Heilzahlen aus (sonst stehen beide da und Tiry sieht
@@ -238,6 +289,13 @@ local function isTarget(unit)
   return same == true
 end
 
+local function isPlayer(unit)
+  if not (UnitIsUnit) then return false end
+  local same = UnitIsUnit(unit, "player")
+  if secret(same) then return false end
+  return same == true
+end
+
 function Numbers.OnCombat(_, unit, event, flagText, amount)
   local n = N()
   if not n.own or secret(unit) or secret(event) then return end
@@ -247,7 +305,12 @@ function Numbers.OnCombat(_, unit, event, flagText, amount)
     -- Schaden an Gegnern: am Ziel; an anderen Namensplaketten nur, wenn sie nicht das Ziel sind (sonst doppelt)
     if unit == "target" or (plate and not isTarget(unit)) then Numbers.Show(unit, "damage", amount, crit) end
   elseif event == "HEAL" then
-    if unit == "player" or unit == "target" or (plate and not isTarget(unit)) then Numbers.Show(unit, "heal", amount, crit) end
+    -- ueber dir, deinem Ziel und jedem Freund mit Namensplakette (Freundes-Plaketten schaltet KampfWerk ein);
+    -- in Instanzen zeigt Blizzard die Heilzahlen (Plaketten dort fuer Add-ons gesperrt)
+    if not Numbers.OwnHeal() then return end
+    if unit == "player" or unit == "target" or (plate and not isTarget(unit) and not isPlayer(unit)) then
+      Numbers.Show(unit, "heal", amount, crit)
+    end
   end
 end
 
@@ -267,5 +330,7 @@ function Numbers.Init()
   if not Numbers.hooked then
     Numbers.hooked = true
     ns.On("UNIT_COMBAT", Numbers.OnCombat)
+    -- Instanz rein/raus: Blizzards Heilzahlen dort an, draussen wieder unsere
+    ns.On("PLAYER_ENTERING_WORLD", function() Numbers.ApplyBlizzard() end)
   end
 end

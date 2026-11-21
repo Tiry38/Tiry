@@ -609,3 +609,8 @@ Installation: Ordner `Schlaghagel` ersetzen, `/reload` reicht (keine neuen Datei
 1. Nach dem Einbau: Gegner schlagen / heilen – erscheinen die Zahlen in der Studio-Schrift (z. B. Marker), Blizzards Zahlen weg?
 2. Heilung auf Gruppenmitglieder: erscheint nur, wenn deren Namensplakette sichtbar ist (oder sie dein Ziel sind).
 3. Kommen gar keine eigenen Zahlen: Zahlen-Studio → „Eigene Zahlen anzeigen“ aus = Blizzards Zahlen zurück, mir Bescheid geben.
+
+# KampfWerk 1.3.2
+1. Zahlen-Studio → „Blizzard-Schadenszahlen/-Heilzahlen ausblenden“: verschwinden Blizzards Zahlen jetzt sofort?
+2. Draußen einen Mitspieler heilen: erscheint die eigene Heilzahl über ihm (über seinem Namen)?
+3. Im Dungeon: Blizzards Heilzahlen sind wieder da (WoW sperrt dort die Freundes-Namen für Add-ons) – Schaden weiter in eigener Schrift?

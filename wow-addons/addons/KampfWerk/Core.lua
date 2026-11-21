@@ -12,7 +12,7 @@
 local ADDON, ns = ...
 KampfWerk = ns
 ns.NAME = ADDON or "KampfWerk"
-ns.VERSION = "1.3.1"
+ns.VERSION = "1.3.2"
 ns.MEDIA = "Interface\\AddOns\\KampfWerk\\Media\\"
 local MEDIA = ns.MEDIA
 
@@ -126,6 +126,7 @@ local DEFAULTS = {
     own = false,                -- eigene Neon-Zahlen (Schaden/Heilung getrennt einstellbar)
     hideBlizzDamage = false,
     hideBlizzHeal = false,
+    friendPlates = true,        -- Namensplaketten freundlicher Spieler (nur Name) -> Heilzahlen ueber Freunden
     anim = "steigen",
     damage = { on = true, font = "bangers", size = 26, color = { 1.00, 0.82, 0.22 }, crit = { 1.00, 0.36, 0.20 },
                style = "dick", critScale = 1.5 },

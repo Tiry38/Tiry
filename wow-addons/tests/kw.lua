@@ -91,9 +91,16 @@ G.UnitDetailedThreatSituation = function(u, mob)
 end
 G.UnitIsUnit = function(a, b) if a == "nameplate1" and b == "target" then return true end return a == b end
 G.C_CVar = { GetCVar = function(n) return W.cvars[n] end, SetCVar = function(n, v) assert(type(v) == "string") W.cvars[n] = v end }
-W.cvars = { WorldTextScale = "1", floatingCombatTextCombatDamage = "1", floatingCombatTextCombatHealing = "1" }
+-- echte Forever-Namen (CombatOverrides.lua / Nameplates.lua); die alten ohne "_v2" gibt es dort nicht
+W.cvars = { WorldTextScale = "1", floatingCombatTextCombatDamage_v2 = "1", floatingCombatTextCombatHealing_v2 = "1",
+  nameplateShowFriendlyPlayers = "0", nameplateShowOnlyNameForFriendlyPlayerUnits = "0" }
+W.instance = "none"
+G.IsInInstance = function() return W.instance ~= "none", W.instance end
 W.plate = CreateFrame("Frame", "NamePlate1", UIParent)
-G.C_NamePlate = { GetNamePlateForUnit = function(u) assert(type(u) == "string") if u == "target" or u == "nameplate1" then return W.plate end end }
+W.friendPlate = CreateFrame("Frame", "NamePlate2", UIParent)
+G.C_NamePlate = { GetNamePlateForUnit = function(u) assert(type(u) == "string")
+  if u == "target" or u == "nameplate1" then return W.plate end
+  if u == "nameplate2" then return W.friendPlate end end }
 -- Blizzards eigenes Meter (zum Verstecken)
 local blzMeter = CreateFrame("Frame", "DamageMeter", UIParent)
 
@@ -442,7 +449,7 @@ W.fire("ADDON_LOADED", "KampfWerk")
 ok(DAMAGE_TEXT_FONT and DAMAGE_TEXT_FONT:find("Orbitron%-Black"), "DAMAGE_TEXT_FONT = Neon 2045")
 N.hideBlizzDamage, N.blizzDamageSet = true, true
 ns.Numbers.ApplyBlizzard()
-ok(W.cvars.floatingCombatTextCombatDamage == "0" and W.cvars.floatingCombatTextCombatHealing == "1", "Blizzard-Schadenszahlen aus, Heilung bleibt")
+ok(W.cvars.floatingCombatTextCombatDamage_v2 == "0" and W.cvars.floatingCombatTextCombatHealing_v2 == "1", "Blizzard-Schadenszahlen aus, Heilung bleibt")
 
 ----------------------------------------------------------------------------
 -- Einstellungen: alle Seiten ohne Layout-Probleme
@@ -471,18 +478,45 @@ if cyber then cyber:GetScript("OnClick")(cyber) end
 ok(DB.look.theme == "cyber", "Klick waehlt Farbthema Cyber-Pink")
 -- Tirys Fall 1.3.0: Schrift gewaehlt, eigene Zahlen aber aus -> nur Blizzard-Zahlen. Jetzt schaltet die Wahl sie ein.
 ns.Numbers.SetOwn(false)
-ok(not N.own and W.cvars.floatingCombatTextCombatDamage == "1" and W.cvars.floatingCombatTextCombatHealing == "1", "eigene Zahlen aus: Blizzard-Zahlen an")
+ok(not N.own and W.cvars.floatingCombatTextCombatDamage_v2 == "1" and W.cvars.floatingCombatTextCombatHealing_v2 == "1", "eigene Zahlen aus: Blizzard-Zahlen an")
 ns.Config.Show("zahlen")
 check("kw_zahlen", KampfWerkConfig)
 local bebas = find(KampfWerkConfig, function(o) return o.item and o.item.value == "bebas" and o.item.font and L.isShown(o) end)
 if bebas then bebas:GetScript("OnClick")(bebas) end
 ok(N.damage.font == "bebas", "Klick waehlt Schaden-Schrift Bebas")
-ok(N.own and W.cvars.floatingCombatTextCombatDamage == "0" and W.cvars.floatingCombatTextCombatHealing == "0",
+ok(N.own and W.cvars.floatingCombatTextCombatDamage_v2 == "0" and W.cvars.floatingCombatTextCombatHealing_v2 == "0",
   "Schrift-Wahl schaltet eigene Zahlen ein, Blizzard-Zahlen aus")
 W.fire("UNIT_COMBAT", "player", "HEAL", "", SECRET, 1)
 local hv
 for _, ch in ipairs(UIParent.__children) do if ch.prefix and ch.prefix.__text == "+" and ch:IsShown() then hv = ch end end
 ok(hv ~= nil, "danach erscheinen die eigenen Heilzahlen")
+-- Heilung auf einen Freund (Namensplakette nameplate2): Zahl ueber dem Freund, Freundes-Plaketten (nur Name) an
+ok(W.cvars.nameplateShowFriendlyPlayers == "1" and W.cvars.nameplateShowOnlyNameForFriendlyPlayerUnits == "1",
+  "Freundes-Plaketten (nur Name) eingeschaltet")
+ok(N.platesSaved and N.platesSaved.show == "0", "alter Plaketten-Wert gemerkt")
+W.fire("UNIT_COMBAT", "nameplate2", "HEAL", "", SECRET, 1)
+local onFriend
+for _, ch in ipairs(UIParent.__children) do
+  if ch.prefix and ch:IsShown() and select(2, ch:GetPoint(1)) == W.friendPlate then onFriend = ch end
+end
+ok(onFriend ~= nil, "Heilzahl ueber dem geheilten Freund")
+-- Instanz: Plaketten gesperrt -> Blizzards Heilzahlen an, unsere schweigen
+W.instance = "party"
+W.fire("PLAYER_ENTERING_WORLD", false, false)
+ok(W.cvars.floatingCombatTextCombatHealing_v2 == "1" and W.cvars.floatingCombatTextCombatDamage_v2 == "0", "Dungeon: Blizzard-Heilzahlen an, Schaden weiter eigene")
+ns.Numbers.Clear()
+W.fire("UNIT_COMBAT", "player", "HEAL", "", SECRET, 1)
+local act = 0
+for _, ch in ipairs(UIParent.__children) do if ch.prefix and ch.prefix.__text == "+" and ch:IsShown() then act = act + 1 end end
+ok(act == 0, "Dungeon: keine doppelten Heilzahlen")
+W.instance = "none"
+W.fire("PLAYER_ENTERING_WORLD", false, false)
+ok(W.cvars.floatingCombatTextCombatHealing_v2 == "0", "draussen: wieder eigene Heilzahlen")
+-- Ausschalten gibt Blizzards Zahlen + alte Plaketten-Werte zurueck
+ns.Numbers.SetOwn(false)
+ok(W.cvars.floatingCombatTextCombatDamage_v2 == "1" and W.cvars.floatingCombatTextCombatHealing_v2 == "1"
+  and W.cvars.nameplateShowFriendlyPlayers == "0" and W.cvars.nameplateShowOnlyNameForFriendlyPlayerUnits == "0", "aus: alles wie vorher")
+ns.Numbers.SetOwn(true)
 -- Umstellung fuer Tirys gespeicherte 1.3.0-Daten: Schrift gewaehlt, own aus -> einmalig an
 do
   local keep = KampfWerkDB

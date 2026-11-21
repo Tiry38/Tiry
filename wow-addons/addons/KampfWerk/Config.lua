@@ -412,8 +412,15 @@ local function numbersPage()
     for _, t in ipairs(blizzToggles) do t:Refresh() end
   end
   local on = UI.Toggle(p, editKind == "damage" and "Schadenszahlen" or "Heilzahlen", function() return o.on end,
-    function(v) o.on = v if v then used() end end, nil, w)
+    function(v) o.on = v if v then used() end Numbers.ApplyBlizzard() end, nil, w)
   st:Add(on, on:GetHeight(), 12)
+  if editKind == "heal" then
+    local fp = UI.Toggle(p, "Heilzahlen ueber Freunden", function() return n.friendPlates ~= false end,
+      function(v) n.friendPlates = v Numbers.ApplyBlizzard() end,
+      "Schaltet die Namen ueber Mitspielern ein (nur Name) - nur dort kann KampfWerk Zahlen zeigen. "
+      .. "In Dungeons/Schlachtzuegen sperrt WoW das, dort bleiben Blizzards Heilzahlen.", w)
+    st:Add(fp, fp:GetHeight(), 12)
+  end
 
   -- Vorschau-Band
   local pv = CreateFrame("Frame", nil, p)
