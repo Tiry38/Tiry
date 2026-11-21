@@ -560,14 +560,16 @@ Installation: Ordner `Schlaghagel` ersetzen, `/reload` reicht (keine neuen Datei
 - [ ] Erscheint der Einschlag-Blitz bei 5 Stapeln nicht, laufen die übrigen Animationen trotzdem (Einschlag = Zusatz).
 - [ ] `/hagel ab5` + `/reload`: wieder ab dem ersten Stapel; nochmal = zurück auf 5.
 
-# Teil ChatWerk 1.0
-1. Einloggen: zwei Glas-Fenster „Chat“ (unten links) und „Handel & Beute“ daneben, Blizzard-Chat weg, Zeile „ChatWerk: Version 1.0.0 geladen“.
-2. **Enter** drücken: Eingabezeile erscheint unter „Chat“, Text senden, Flüstern beantworten (R) klappt.
-3. Fenster an der Kopfleiste ziehen, Punkte unten rechts ziehen (Größe), `/reload` → Position/Größe bleiben.
-4. `/cw` → Fenster wählen → Arten an/aus schalten; Suche „auktion“. `/cw neu` → eigenes Fenster nur mit z. B. „AH: Verkauft“.
-5. Namen in Klassenfarbe (Sagen, Gilde, Flüstern, Beute anderer), Klick auf Name = flüstern, Rechtsklick = Menü, Item-Links mit Tooltip.
-6. **AH:** einstellen (Stapel + Einzel-Item), etwas kaufen, Gebot, abbrechen → je eine Detailzeile; Verkauf → „Verkauft … Stückpreis“.
-7. **Briefkasten:** Abrechnung mit Käufer, Gebühr, Kaution, Erlös; Gold nehmen → „Auktionserlös: +…“, keine Doppelzeile.
-8. **Händler:** verkaufen, kaufen, reparieren → Zeilen je Item + „Händler-Bilanz“ beim Schließen.
-9. **Instanz im Kampf (Chat-Lockdown):** Gruppen-/Sagen-Zeilen erscheinen trotzdem (ohne Klassenfarbe), kein Lua-Fehler (`/cw fehler`).
-10. Ausgabe anderer Add-ons (z. B. RezeptRadar) erscheint im „Chat“-Fenster. `/cw blizzard` holt den Blizzard-Chat zurück.
+# Teil ChatWerk 1.1
+1. Einloggen: EIN Glas-Fenster unten links mit Reitern „Allgemein · Handel · Gilde · +“, Blizzard-Chat weg, Zeile „ChatWerk: Version 1.1.0 geladen“. (Wer 1.0 hatte: die alten Fenster sind jetzt Reiter.)
+2. Reiter anklicken → genau dieser Chat steht darunter; Zahl auf anderen Reitern = ungelesene Zeilen, verschwindet beim Anklicken.
+3. Handelskanal: Zeilen beginnen mit **[Handel]**, Allgemein mit **[Allgemein]**, Gilde **[Gilde]**, Sagen **[Sagen]**.
+4. „+“ (Maus übers Fenster) oder `/cw` → „Neuer Reiter“ → Name eintippen (Enter), Arten anhaken; Reiter erscheint oben. „Nach links/rechts“ ordnet ihn um. Rechtsklick auf einen Reiter öffnet seine Seite.
+5. **Enter** drücken: Eingabezeile erscheint unter dem Fenster, Text senden, Flüstern beantworten (R) klappt.
+6. An der Reiterleiste ziehen = verschieben, Punkte unten rechts = Größe, `/reload` → Position/Größe/aktiver Reiter bleiben. Viele Reiter → Namen werden gekürzt, nichts ragt heraus.
+7. Namen in Klassenfarbe (Sagen, Gilde, Flüstern, Beute anderer), Klick auf Name = flüstern, Rechtsklick = Menü, Item-Links mit Tooltip.
+8. **AH:** einstellen (Stapel + Einzel-Item), etwas kaufen, Gebot, abbrechen → je eine Detailzeile im Reiter „Handel“; Verkauf → „Verkauft … Stückpreis“.
+9. **Briefkasten:** Abrechnung mit Käufer, Gebühr, Kaution, Erlös; Gold nehmen → „Auktionserlös: +…“, keine Doppelzeile.
+10. **Händler:** verkaufen, kaufen, reparieren → Zeilen je Item + „Händler-Bilanz“ beim Schließen.
+11. **Instanz im Kampf (Chat-Lockdown):** Gruppen-/Sagen-Text erscheint trotzdem im richtigen Reiter, aber ohne Herkunft/Name davor (Blizzard sperrt den Text), kein Lua-Fehler (`/cw fehler`).
+12. Ausgabe anderer Add-ons (z. B. RezeptRadar) erscheint im Reiter „Allgemein“. `/cw blizzard` holt den Blizzard-Chat zurück.

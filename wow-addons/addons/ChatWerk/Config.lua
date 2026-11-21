@@ -1,6 +1,6 @@
--- ChatWerk: Einstellungen. Links die Fenster (+ neues Fenster), rechts fuer das gewaehlte Fenster die komplette
--- Auswahlliste aller Nachrichtenarten (mit Suche, "alle an/aus" je Gruppe, Kanaele einzeln) und das Aussehen.
--- Seite "Allgemein": Zeitstempel, Kanalnamen, Klassenfarben, Spam-Filter, Stichwoerter, Blizzard-Chat ...
+-- ChatWerk: Einstellungen. Links die Reiter des Chatfensters (+ neuer Reiter), rechts fuer den gewaehlten Reiter
+-- Name, Reihenfolge und die komplette Auswahlliste aller Nachrichtenarten (Suche, "alle an/aus" je Gruppe, Kanaele).
+-- Seite "Allgemein": Fenster-Aussehen, Zeitstempel, Kanalnamen, Klassenfarben, Spam-Filter, Stichwoerter, Blizzard-Chat ...
 local _, ns = ...
 local UI = ns.UI
 local C = UI.C
@@ -211,52 +211,59 @@ local function windowPage(id)
   local w = p:GetWidth()
   rows = {}
 
-  -- Kopf: Name, Eingabezeile, Loeschen
+  -- Kopf: Name, Loeschen
   local name = editPill(p, 300, d.name, function(txt)
     txt = txt:gsub("^%s+", ""):gsub("%s+$", "")
     if txt ~= "" and txt ~= d.name then d.name = txt refreshWindows() Config.Sidebar() end
   end, 24)
   name:SetPoint("TOPLEFT", 0, -26)
-  local nl = label(p, "Name des Fensters")
+  local nl = label(p, "Name des Reiters")
   nl:SetPoint("BOTTOMLEFT", name, "TOPLEFT", 14, 4)
 
-  local del = UI.Button(p, "Fenster loeschen", "danger", 156, 34, "trash")
+  local del = UI.Button(p, "Reiter loeschen", "danger", 156, 34, "trash")
   del:SetPoint("TOPRIGHT", 0, -27)
   del:SetEnabled(#DB().windows > 1)
   del:SetScript("OnClick", function(self)
     if not self.armed then
       self.armed = true
       self:SetLabel("Wirklich?")
-      C_Timer.After(3, function() if self.armed then self.armed = nil self:SetLabel("Fenster loeschen") end end)
+      C_Timer.After(3, function() if self.armed then self.armed = nil self:SetLabel("Reiter loeschen") end end)
       return
     end
     local _, idx = ns.WindowById(id)
     if idx then table.remove(DB().windows, idx) end
     ns.CDB.hist[id] = nil
-    if DB().editWin == id then DB().editWin = DB().windows[1].id end
+    if DB().active == id then DB().active = DB().windows[1].id end
     refreshWindows()
     Config.Sidebar()
     Config.Show(DB().windows[1].id)
   end)
 
-  local editT = UI.Toggle(p, "Eingabezeile hier", function() return DB().editWin == id end,
-    function(v) if v then DB().editWin = id end if ns.Blizzard then ns.Blizzard.Anchor() end end, nil, (w - 24) / 2)
-  editT:SetPoint("TOPLEFT", 0, -76)
-  local lockT = UI.Toggle(p, "Fenster sperren", function() return d.locked end,
-    function(v) d.locked = v refreshWindows() end, nil, (w - 24) / 2)
-  lockT:SetPoint("TOPLEFT", (w - 24) / 2 + 24, -76)
-
-  -- Aussehen
-  local sw = math.floor((w - 24) / 2) + 8
-  local font = UI.Stepper(p, "Schrift", sw - 8, function() return d.font or 13 end,
-    function(v) d.font = v refreshWindows() end, 1, 9, 24, function(v) return v .. " px" end)
-  font:SetPoint("TOPLEFT", 0, -124)
-  local alpha = UI.Stepper(p, "Glas", sw - 8, function() return math.floor((d.alpha or 0.6) * 100 + 0.5) end,
-    function(v) d.alpha = v / 100 refreshWindows() end, 5, 0, 100, function(v) return v .. " %" end)
-  alpha:SetPoint("TOPLEFT", sw + 16, -124)
-  local fade = UI.Stepper(p, "Ausblenden", sw - 8, function() return d.fade or 0 end,
-    function(v) d.fade = v refreshWindows() end, 10, 0, 600, function(v) return v == 0 and "nie" or (v .. " s") end)
-  fade:SetPoint("TOPLEFT", 0, -168)
+  -- Reihenfolge der Reiter
+  local _, idx = ns.WindowById(id)
+  local n = #DB().windows
+  local function move(dir)
+    local _, k = ns.WindowById(id)
+    local list = DB().windows
+    local o = k + dir
+    if not k or o < 1 or o > #list then return end
+    list[k], list[o] = list[o], list[k]
+    refreshWindows()
+    Config.Show(id)
+  end
+  local ol = label(p, "Position oben in der Reiterleiste:  " .. idx .. " von " .. n)
+  ol:SetPoint("TOPLEFT", 14, -82)
+  local left = UI.Button(p, "Nach links", "soft", 120, 32)
+  left:SetPoint("TOPLEFT", 0, -102)
+  left:SetEnabled(idx > 1)
+  left:SetScript("OnClick", function() move(-1) end)
+  local right = UI.Button(p, "Nach rechts", "soft", 124, 32)
+  right:SetPoint("LEFT", left, "RIGHT", 8, 0)
+  right:SetEnabled(idx < n)
+  right:SetScript("OnClick", function() move(1) end)
+  local show = UI.Button(p, "Jetzt anzeigen", "cool", 150, 32, "chat")
+  show:SetPoint("TOPRIGHT", 0, -102)
+  show:SetScript("OnClick", function() if ns.Main then ns.Main:Select(id) end end)
 
   -- Vorlagen
   local function preset(list)
@@ -278,20 +285,20 @@ local function windowPage(id)
   }
   local px = 0
   local pl = label(p, "Schnell-Auswahl")
-  pl:SetPoint("TOPLEFT", 14, -220)
+  pl:SetPoint("TOPLEFT", 14, -150)
   for _, pr in ipairs(presets) do
     local bw = pr[3]
     local b = UI.Button(p, pr[1], pr[2], bw, 32)
-    b:SetPoint("TOPLEFT", px, -240)
+    b:SetPoint("TOPLEFT", px, -170)
     b:SetScript("OnClick", pr[4])
     px = px + bw + 8
   end
 
   local search = UI.SearchBox(p, w, "Nachrichtenart suchen (z. B. Auktion, Gilde, Handel) ...", function(t)
     filter = t or ""
-    layoutRows(344)
+    layoutRows(274)
   end)
-  search:SetPoint("TOPLEFT", 0, -288)
+  search:SetPoint("TOPLEFT", 0, -218)
   search.edit:SetText(filter)
 
   -- Auswahlliste
@@ -331,7 +338,7 @@ local function windowPage(id)
     end
     rows[#rows + 1] = entry
   end
-  layoutRows(344)
+  layoutRows(274)
 end
 
 local function generalPage()
@@ -340,6 +347,22 @@ local function generalPage()
   rows = nil
   local st = UI.Stack(p, 0)
   local half = math.floor((w - 24) / 2)
+  local F = DB().frame
+  st:Title("Chatfenster")
+  local font = UI.Stepper(p, "Schrift", half, function() return F.font or 13 end,
+    function(v) F.font = v refreshWindows() end, 1, 9, 24, function(v) return v .. " px" end)
+  local alpha = UI.Stepper(p, "Glas", half, function() return math.floor((F.alpha or 0.62) * 100 + 0.5) end,
+    function(v) F.alpha = v / 100 refreshWindows() end, 5, 0, 100, function(v) return v .. " %" end)
+  st:Add(font, 34, 0)
+  alpha:SetPoint("LEFT", font, "RIGHT", 24, 0)
+  st:Space(10)
+  local fade = UI.Stepper(p, "Ausblenden", half, function() return F.fade or 0 end,
+    function(v) F.fade = v refreshWindows() end, 10, 0, 600, function(v) return v == 0 and "nie" or (v .. " s") end)
+  st:Add(fade, 34, 0)
+  local lockT = UI.Toggle(p, "Sperren", function() return F.locked == true end,
+    function(v) F.locked = v refreshWindows() end, nil, half)
+  lockT:SetPoint("LEFT", fade, "RIGHT", 24, 0)
+  st:Space(14)
   st:Title("Darstellung")
   local function seg(text, options, get, set)
     local l = label(p, text)
@@ -350,8 +373,9 @@ local function generalPage()
   end
   seg("Zeitstempel", { { label = "Aus", value = "aus" }, { label = "14:05", value = "%H:%M" }, { label = "14:05:33", value = "%H:%M:%S" } },
     function() return DB().timestamp end, function(v) DB().timestamp = v end)
-  seg("Kanalnamen", { { label = "Kurz  [2·H]", value = "kurz" }, { label = "Nummer  [2]", value = "nummer" },
-    { label = "Voll  [2. Handel]", value = "voll" } }, function() return DB().channelStyle end, function(v) DB().channelStyle = v end)
+  seg("Herkunft vorne in jeder Zeile", { { label = "[Handel]", value = "name" }, { label = "[2·H]", value = "kurz" },
+    { label = "[2]", value = "nummer" }, { label = "[2. Handel]", value = "voll" } },
+    function() return DB().channelStyle end, function(v) DB().channelStyle = v end)
   seg("Schrift", { { label = "Poppins (modern)", value = "poppins" }, { label = "Spielschrift", value = "spiel" } },
     function() return DB().font or "poppins" end, function(v) DB().font = v end)
 
@@ -365,7 +389,7 @@ local function generalPage()
     { "Eigenen Namen hervorheben", "ownName", "Nennt dich jemand, wird die Zeile mit ! markiert." },
     { "Namen in [Klammern]", "nameBrackets", "Wie im Blizzard-Chat: [Name] statt Name." },
     { "Verlauf speichern", "history", "Die letzten Zeilen bleiben nach /reload und Neustart." },
-    { "Kopfleiste immer zeigen", "alwaysHeader", "Sonst nur, wenn die Maus ueber dem Fenster ist." },
+    { "Knoepfe immer zeigen", "alwaysHeader", "Zahnrad, Schloss, Kopieren und + sonst nur, wenn die Maus ueber dem Fenster ist." },
   }
   st:Space(6)
   st:Title("Funktionen")
@@ -385,12 +409,12 @@ local function generalPage()
   st:Title("Blizzard-Chat")
   local bz = UI.Toggle(p, "Blizzard-Chat ausblenden", function() return DB().hideBlizzard end,
     function(v) DB().hideBlizzard = v if ns.Blizzard then ns.Blizzard.Apply() end end,
-    "Die normalen Chatfenster verschwinden, ChatWerk zeigt alles. Die Eingabezeile (Enter) sitzt unter dem gewaehlten Fenster.", w)
+    "Die normalen Chatfenster verschwinden, ChatWerk zeigt alles. Die Eingabezeile (Enter) sitzt unter dem Chatfenster.", w)
   st:Add(bz, bz:GetHeight(), 12)
-  local hl = UI.Stepper(p, "Verlauf je Fenster", half, function() return DB().historyLines or 150 end,
+  local hl = UI.Stepper(p, "Verlauf je Reiter", half, function() return DB().historyLines or 150 end,
     function(v) DB().historyLines = v end, 50, 50, 1000, function(v) return v .. " Zeilen" end)
   st:Add(hl, 34, 14)
-  st:Para("|cff39ff6b/cw|r Einstellungen · |cff39ff6b/cw neu|r neues Fenster · |cff39ff6b/cw sperren|r alle Fenster sperren/frei · "
+  st:Para("|cff39ff6b/cw|r Einstellungen · |cff39ff6b/cw neu|r neuer Reiter · |cff39ff6b/cw sperren|r Fenster sperren/frei · "
     .. "|cff39ff6b/cw blizzard|r Blizzard-Chat ein/aus", 12, C.dim)
   st:Finish(20)
   page:SetHeight(st.y + 20)
@@ -452,7 +476,7 @@ function Config.Sidebar()
   if not side then return end
   for _, b in ipairs(sideButtons) do b:Hide() end
   local i = 1
-  sideButton(i, "Allgemein", "general", "gear")
+  sideButton(i, "Einstellungen", "general", "gear")
   for _, d in ipairs(DB().windows) do
     i = i + 1
     sideButton(i, d.name or "Chat", d.id, "chat")
@@ -471,7 +495,7 @@ function Config.Show(value)
     generalPage()
   else
     local d = ns.WindowById(value)
-    frame.sub:SetText("Fenster \"" .. (d and d.name or "?") .. "\" - was soll es zeigen?")
+    frame.sub:SetText("Reiter \"" .. (d and d.name or "?") .. "\" - was soll hier stehen?")
     windowPage(value)
   end
 end
@@ -522,16 +546,16 @@ local function build()
   side:SetPoint("BOTTOMLEFT", 16, 16)
   side:SetWidth(SIDE)
   UI.Glass(side, { radius = 22, body = { { 0.05, 0.065, 0.068, 0.82 }, { 0.035, 0.042, 0.050, 0.82 } }, sheen = 0.03, line = 0.15, edge = 0.18 })
-  side.add = UI.Button(side, "Neues Fenster", "primary", SIDE - 28, 38, "plus")
+  side.add = UI.Button(side, "Neuer Reiter", "primary", SIDE - 28, 38, "plus")
   side.add:SetScript("OnClick", function()
-    local n = #DB().windows + 1
-    local d = ns.NewWindow("Chat " .. n, {}, 300 + n * 24, 320 + n * 18, 380, 180)
+    local d = ns.NewWindow(nil, {})
     refreshWindows()
+    if ns.Main then ns.Main:Select(d.id) end
     Config.Show(d.id)
   end)
   local tip = UI.Para(side, 12, C.dim, SIDE - 40)
   tip:SetPoint("BOTTOMLEFT", 20, 18)
-  tip:SetText("Fenster verschieben: an der Kopfleiste ziehen. Groesse: Punkte unten rechts ziehen. Rechtsklick auf die Kopfleiste oeffnet diese Seite.")
+  tip:SetText("Jeder Reiter ist ein eigener Chat oben im Fenster. Rechtsklick auf einen Reiter oeffnet seine Seite. Verschieben: an der Reiterleiste ziehen.")
 
   body = CreateFrame("Frame", nil, frame)
   body:SetPoint("TOPLEFT", side, "TOPRIGHT", 20, -4)

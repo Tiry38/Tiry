@@ -67,9 +67,8 @@ function B.Anchor()
     end
     return
   end
-  local d = ns.WindowById(ns.DB.editWin) or ns.DB.windows[1]
-  local w = d and ns.Windows[d.id]
-  if not w then return end
+  local w = ns.Main
+  if not w or not w.frame then return end
   B.editMoved = true
   if eb:GetParent() ~= UIParent then pcall(eb.SetParent, eb, UIParent) end
   pcall(eb.SetIgnoreParentAlpha, eb, true)

@@ -1,92 +1,43 @@
--- ChatWerk: die Chatfenster. Glas-Flaeche, frei verschiebbar (Kopfleiste ziehen), Groesse an der Ecke ziehen,
--- Mausrad-Blaettern, anklickbare Links, "nach unten"-Knopf, optional Ausblenden nach x Sekunden.
+-- ChatWerk: EIN grosses Chatfenster mit Reitern oben. Jeder Reiter ist ein eigener "Chat" (Name + Auswahl, was er
+-- zeigt, in den Einstellungen). Glas-Flaeche, an Reiterleiste ziehen = verschieben, Ecke ziehen = Groesse,
+-- Mausrad-Blaettern, anklickbare Links, "nach unten"-Knopf, Ungelesen-Zaehler auf inaktiven Reitern.
 local _, ns = ...
 local UI = ns.UI
 local C = UI.C
 local MEDIA = ns.MEDIA
 
-ns.Windows = {}
-local MIN_W, MIN_H, MAX_W, MAX_H = 200, 80, 1600, 1000
-local HEAD = 24
+ns.Windows = {}         -- Reiter-ID -> Reiter-Objekt (eigene Nachrichtenflaeche)
+local MIN_W, MIN_H, MAX_W, MAX_H = 260, 100, 1600, 1000
+local HEAD = 30         -- Hoehe der Reiterleiste
+local TAB_H = 22
+local Main = { tabs = {}, buttons = {}, hover = false }
+ns.Main = Main
 
 local function fontFile()
   if ns.DB.font == "spiel" then return STANDARD_TEXT_FONT or "Fonts\\FRIZQT__.TTF" end
   return MEDIA .. "Fonts\\Poppins-Regular.ttf"
 end
+local function FD() return ns.DB.frame end
 
-local Win = {}
-Win.__index = Win
+----------------------------------------------------------------------------
+-- Reiter (Nachrichten)
+----------------------------------------------------------------------------
+local Tab = {}
+Tab.__index = Tab
 
--- Text hinzufuegen (nicht geheim). Fehler im Fenster nie ins Spiel werfen.
-function Win:Add(line, r, g, b)
-  local ok = pcall(self.msg.AddMessage, self.msg, line, r or 1, g or 1, b or 1)
-  if not ok then pcall(self.msg.AddMessage, self.msg, (tostring(line):gsub("|", "||")), r or 1, g or 1, b or 1) end
-  self:Unread()
-end
+function Tab:IsActive() return ns.DB.active == self.data.id end
 
-function Win:Unread()
-  if not self.msg.AtBottom or self.msg:AtBottom() then return end
-  self.down:Show()
-end
-
-function Win:Save()
-  local f, d = self.frame, self.data
-  local s = f:GetEffectiveScale() / UIParent:GetEffectiveScale()
-  local l, b = f:GetLeft(), f:GetBottom()
-  if l and b then d.x, d.y = math.floor(l * s + 0.5), math.floor(b * s + 0.5) end
-  d.w, d.h = math.floor(f:GetWidth() + 0.5), math.floor(f:GetHeight() + 0.5)
-end
-
-function Win:Place()
-  local f, d = self.frame, self.data
-  f:ClearAllPoints()
-  f:SetPoint("BOTTOMLEFT", UIParent, "BOTTOMLEFT", d.x or 20, d.y or 40)
-  f:SetSize(ns.Clamp(d.w or 420, MIN_W, MAX_W), ns.Clamp(d.h or 200, MIN_H, MAX_H))
-end
-
--- Aussehen + Verhalten aus den Einstellungen uebernehmen
-function Win:Apply()
-  local d, f, m = self.data, self.frame, self.msg
-  self:Place()
-  local a = ns.Clamp(d.alpha or 0.6, 0, 1)
-  self.glass:SetBody({ 0.040, 0.050, 0.055, 0.96 }, { 0.070, 0.085, 0.090, 0.96 }, a)
-  self.glass:SetShown(a > 0.01)
-  self.glass:SetEdge("light", 0.05 + a * 0.28)
-  local size = ns.Clamp(d.font or 13, 9, 24)
-  local ok = pcall(m.SetFont, m, fontFile(), size, "")
-  if not ok then pcall(m.SetFont, m, STANDARD_TEXT_FONT or "Fonts\\FRIZQT__.TTF", size, "") end
-  m:SetShadowColor(0, 0, 0, 0.85)
-  m:SetShadowOffset(1, -1)
-  m:SetSpacing(ns.DB.spacing or 2)
-  local fade = (d.fade or 0) > 0
-  m:SetFading(fade)
-  if fade then m:SetTimeVisible(d.fade) m:SetFadeDuration(2) end
-  self.title:SetText(d.name or "Chat")
-  self.lock.icon:SetTexture(UI.Icon(d.locked and "lock" or "unlock"))
-  self.grip:SetShown(not d.locked)
-  f:SetMovable(true)
-  f:SetResizable(true)
-  self:Hover(self.hover)
-end
-
--- Kopfleiste + Griff nur beim Ueberfahren deutlich (Chat bleibt ruhig)
-function Win:Hover(on)
-  self.hover = on
-  local d = self.data
-  local show = on or ns.DB.alwaysHeader
-  self.headBg:SetAlpha(show and 1 or 0)
-  self.title:SetAlpha(show and 1 or (d.alpha or 0.6) > 0.15 and 0.55 or 0)
-  self.dot:SetAlpha(show and 1 or 0.5)
-  for _, b in ipairs(self.buttons) do b:SetAlpha(show and 1 or 0) b:EnableMouse(show) end
-  self.grip:SetAlpha(show and 0.9 or 0)
-  if ns.DB.mouseFade and (d.fade or 0) > 0 and on then pcall(self.msg.ResetAllFadeTimes, self.msg) end
-end
-
-local function iconButton(w, icon, tip, fn)
-  local b = UI.IconButton(w.head, icon, 20, tip)
-  b:SetScript("OnClick", function() UI.PlayClick() fn() end)
-  w.buttons[#w.buttons + 1] = b
-  return b
+-- Text hinzufuegen. secret = Text ist geheim (Chat-Lockdown): nur durchreichen, nie anfassen.
+function Tab:Add(line, r, g, b, secret)
+  local m = self.msg
+  local ok = pcall(m.AddMessage, m, line, r or 1, g or 1, b or 1)
+  if not ok and not secret then pcall(m.AddMessage, m, (tostring(line):gsub("|", "||")), r or 1, g or 1, b or 1) end
+  if self:IsActive() then
+    if m.AtBottom and not m:AtBottom() then Main.down:Show() end
+  else
+    self.unread = (self.unread or 0) + 1
+    Main:Badge(self)
+  end
 end
 
 local function onHyperlink(self, link, text, button)
@@ -110,63 +61,12 @@ local function onHyperlinkEnter(self, link)
   end
 end
 
-function ns.CreateWindow(data)
-  local w = setmetatable({ data = data, buttons = {}, hover = false }, Win)
-  local f = CreateFrame("Frame", "ChatWerkWindow" .. data.id, UIParent)
-  w.frame = f
-  f:SetFrameStrata("LOW")
-  f:SetClampedToScreen(true)
-  f:SetMovable(true)
-  f:SetResizable(true)
-  f:SetResizeBounds(MIN_W, MIN_H, MAX_W, MAX_H)
-  f:EnableMouse(false)
-  w.glass = UI.Glass(f, { radius = 16, sheen = 0.035, line = 0.18, edge = 0.2 })
-
-  -- Kopfleiste: ziehen = verschieben, Rechtsklick = Einstellungen dieses Fensters
-  local head = CreateFrame("Frame", nil, f)
-  w.head = head
-  head:SetPoint("TOPLEFT", 0, 0)
-  head:SetPoint("TOPRIGHT", 0, 0)
-  head:SetHeight(HEAD)
-  head:EnableMouse(true)
-  head:RegisterForDrag("LeftButton")
-  w.headBg = UI.Round(head, 12, "BACKGROUND", 2, 3)
-  w.headBg:SetGradient(UI.GRAD_EDGE or UI.GRAD, 0.10)
-  w.dot = head:CreateTexture(nil, "ARTWORK")
-  w.dot:SetTexture(UI.TEX.circle)
-  w.dot:SetSize(7, 7)
-  w.dot:SetPoint("LEFT", 12, 0)
-  UI.SetGradV(w.dot, C.amber, C.teal, 1)
-  w.title = UI.Text(head, 12, "semibold", C.text)
-  w.title:SetPoint("LEFT", w.dot, "RIGHT", 7, 0)
-  head:SetScript("OnDragStart", function()
-    if not w.data.locked then f:StartMoving() end
-  end)
-  head:SetScript("OnDragStop", function()
-    f:StopMovingOrSizing()
-    w:Save()
-    w:Place()
-  end)
-  head:SetScript("OnMouseUp", function(_, button)
-    if button == "RightButton" and ns.Config then ns.Config.Open(w.data.id) end
-  end)
-
-  w.close = iconButton(w, "gear", "Einstellungen dieses Fensters", function() if ns.Config then ns.Config.Open(w.data.id) end end)
-  w.close:SetPoint("RIGHT", head, "RIGHT", -6, -1)
-  w.lock = iconButton(w, "unlock", "Fenster sperren / freigeben", function()
-    w.data.locked = not w.data.locked
-    w:Apply()
-  end)
-  w.lock:SetPoint("RIGHT", w.close, "LEFT", -4, 0)
-  w.copy = iconButton(w, "copy", "Verlauf kopieren", function()
-    if ns.Config and ns.Config.CopyHistory then ns.Config.CopyHistory(w.data.id) end
-  end)
-  w.copy:SetPoint("RIGHT", w.lock, "LEFT", -4, 0)
-
-  -- Nachrichten
-  local m = CreateFrame("ScrollingMessageFrame", nil, f)
-  w.msg = m
-  m:SetPoint("TOPLEFT", 12, -HEAD - 2)
+local function newTab(data)
+  local t = setmetatable({ data = data, unread = 0 }, Tab)
+  t.frame = Main.frame
+  local m = CreateFrame("ScrollingMessageFrame", nil, Main.frame)
+  t.msg = m
+  m:SetPoint("TOPLEFT", 12, -HEAD - 4)
   m:SetPoint("BOTTOMRIGHT", -12, 9)
   m:SetJustifyH("LEFT")
   m:SetIndentedWordWrap(true)
@@ -186,84 +86,361 @@ function ns.CreateWindow(data)
     else
       self:ScrollByAmount(delta * (ns.DB.wheelLines or 3))
     end
-    if self:AtBottom() then w.down:Hide() else w.down:Show() end
+    Main.down:SetShown(not self:AtBottom())
   end)
   if m.SetOnScrollChangedCallback then
-    m:SetOnScrollChangedCallback(function() if m:AtBottom() then w.down:Hide() end end)
+    m:SetOnScrollChangedCallback(function() if t:IsActive() and m:AtBottom() then Main.down:Hide() end end)
   end
-
-  -- "Neue Nachrichten unten": runde Neon-Kugel unten rechts
-  local down = UI.IconButton(f, "down", 26, "Nach unten")
-  w.down = down
-  down:SetPoint("BOTTOMRIGHT", -18, 12)
-  down:SetFrameLevel(m:GetFrameLevel() + 5)
-  down:SetScript("OnClick", function() UI.PlayClick() m:ScrollToBottom() down:Hide() end)
-  down:Hide()
-
-  -- Groessen-Griff unten rechts
-  local grip = UI.SafeButton(f)
-  w.grip = grip
-  grip:SetSize(18, 18)
-  grip:SetPoint("BOTTOMRIGHT", -3, 3)
-  grip:SetFrameLevel(m:GetFrameLevel() + 6)
-  grip.tex = grip:CreateTexture(nil, "OVERLAY")
-  grip.tex:SetTexture(MEDIA .. "grip")
-  grip.tex:SetAllPoints()
-  grip.tex:SetVertexColor(C.amber[1], C.amber[2], C.amber[3], 1)
-  grip:SetScript("OnMouseDown", function()
-    if not w.data.locked then f:StartSizing("BOTTOMRIGHT") end
-  end)
-  grip:SetScript("OnMouseUp", function()
-    f:StopMovingOrSizing()
-    w:Save()
-    w:Place()
-  end)
-  UI.SetTooltip(grip, "Groesse aendern", "Ziehen, um das Fenster groesser oder kleiner zu machen.")
-
-  f:SetScript("OnSizeChanged", function() if w.down:IsShown() and m:AtBottom() then w.down:Hide() end end)
-
   -- Verlauf zurueckholen
   local h = ns.DB.history and ns.CDB.hist[data.id]
   if h and #h > 0 then
     for _, e in ipairs(h) do pcall(m.AddMessage, m, e[1], e[2], e[3], e[4]) end
     pcall(m.AddMessage, m, "|cff4d5a57- - - - - - - -  Verlauf  - - - - - - - -|r", 1, 1, 1)
   end
-  ns.Windows[data.id] = w
-  w:Apply()
-  return w
+  ns.Windows[data.id] = t
+  return t
 end
 
--- Ueberfahren erkennen (ein Takt fuer alle Fenster)
-local function tick()
-  for _, w in pairs(ns.Windows) do
-    if w.frame:IsShown() then
-      local over = w.frame:IsMouseOver() == true
-      if over ~= w.hover then w:Hover(over) end
+function Tab:Style()
+  local m, d = self.msg, FD()
+  local size = ns.Clamp(d.font or 13, 9, 24)
+  local ok = pcall(m.SetFont, m, fontFile(), size, "")
+  if not ok then pcall(m.SetFont, m, STANDARD_TEXT_FONT or "Fonts\\FRIZQT__.TTF", size, "") end
+  m:SetShadowColor(0, 0, 0, 0.85)
+  m:SetShadowOffset(1, -1)
+  m:SetSpacing(ns.DB.spacing or 2)
+  local fade = (d.fade or 0) > 0
+  m:SetFading(fade)
+  if fade then m:SetTimeVisible(d.fade) m:SetFadeDuration(2) end
+end
+
+----------------------------------------------------------------------------
+-- Reiter-Knoepfe oben (Glas-Pillen, aktiver Reiter im Neon-Verlauf, Zaehler fuer Ungelesenes)
+----------------------------------------------------------------------------
+local function paintTab(b)
+  local on = ns.DB.active == b.id
+  local hover = b:IsMouseOver()
+  local show = Main.hover or ns.DB.alwaysHeader
+  if on then
+    b.edge:SetGradientV({ 1, 1, 1, 0.65 }, { 1, 1, 1, 0.12 })
+    b.bg:SetGradient(UI.GRAD, 1)
+    b.gloss:SetAlpha(1)
+    b.glow:SetAlpha(show and 0.32 or 0.18)
+    b.text:SetTextColor(C.dark[1], C.dark[2], C.dark[3], 1)
+    b:SetAlpha(1)
+  else
+    local g = hover and UI.GLASS.pillHi or UI.GLASS.pill
+    b.edge:SetGradient(UI.GRAD_EDGE, hover and 0.6 or 0.22)
+    b.bg:SetGradientV(g[1], g[2], hover and 0.95 or 0.75)
+    b.gloss:SetAlpha(0.35)
+    b.glow:SetAlpha(0)
+    local c = hover and C.text or C.muted
+    b.text:SetTextColor(c[1], c[2], c[3], 1)
+    b:SetAlpha((show or (b.unread or 0) > 0) and 1 or 0.6)
+  end
+end
+
+local function tabButton(i)
+  local b = Main.tabs[i]
+  if b then return b end
+  b = UI.SafeButton(Main.head)
+  b:SetHeight(TAB_H)
+  b:RegisterForClicks("LeftButtonUp", "RightButtonUp")
+  b:RegisterForDrag("LeftButton")
+  b.glow = UI.Glow(b, C.amber, 90, 0, "BACKGROUND")
+  b.glow:SetPoint("CENTER", 0, -2)
+  local shape = UI.PillShape(b, TAB_H, 1, true)
+  b.edge, b.bg, b.gloss = shape.edge, shape.body, shape.gloss
+  b.text = UI.Text(b, 12, "semibold", C.text)
+  b.text:SetWordWrap(false)
+  -- Zaehler: kleine Neon-Pille mit dunkler Zahl
+  local bd = CreateFrame("Frame", nil, b)
+  bd:SetHeight(16)
+  local s = UI.PillShape(bd, 16, 3, false)
+  s.edge:SetGradientV({ 1, 1, 1, 0.6 }, { 1, 1, 1, 0.1 })
+  s.body:SetGradient(UI.GRAD, 1)
+  bd.text = UI.Text(bd, 12, "bold", C.dark)
+  bd.text:SetPoint("CENTER", 0, 0)
+  function bd:Set(t)
+    self.text:SetText(t)
+    self:SetWidth(math.max(16, math.ceil(self.text:GetStringWidth()) + 10))
+  end
+  bd:Hide()
+  b.badge = bd
+  b:SetScript("OnClick", function(self, button)
+    UI.PlayClick()
+    if button == "RightButton" then
+      if ns.Config then ns.Config.Open(self.id) end
+    else
+      Main:Select(self.id)
+    end
+  end)
+  b:SetScript("OnDragStart", function() if not FD().locked then Main.frame:StartMoving() end end)
+  b:SetScript("OnDragStop", function() Main:StopMove() end)
+  b:SetScript("OnEnter", function(self)
+    paintTab(self)
+    if GameTooltip then
+      GameTooltip:SetOwner(self, "ANCHOR_TOP")
+      GameTooltip:SetText(self.name or "Chat", 1, 1, 1)
+      GameTooltip:AddLine("Linksklick: anzeigen · Rechtsklick: einstellen, was hier steht · ziehen: Fenster verschieben", 0.75, 0.8, 0.78, true)
+      GameTooltip:Show()
+    end
+  end)
+  b:SetScript("OnLeave", function(self) paintTab(self) if GameTooltip then GameTooltip:Hide() end end)
+  Main.tabs[i] = b
+  return b
+end
+
+function Main:Badge(t)
+  for _, b in ipairs(self.tabs) do
+    if b.id == t.data.id and b:IsShown() then
+      local n = t.unread or 0
+      b.unread = n
+      if n > 0 then
+        b.badge:Set(n > 99 and "99+" or tostring(n))
+        b.badge:Show()
+      else
+        b.badge:Hide()
+      end
+      paintTab(b)
+      self:LayoutTabs()
+      return
     end
   end
 end
 
--- Alle Fenster an die Einstellungen anpassen: neue bauen, geloeschte verstecken
+-- Reiter nebeneinander; reicht der Platz nicht, werden alle gleich schmal und die Namen gekuerzt
+function Main:LayoutTabs()
+  local list = ns.DB.windows
+  local avail = self.frame:GetWidth() - 10 - (#self.buttons * 24 + 8) - 28
+  local gap = 4
+  local wants, total = {}, 0
+  for i, d in ipairs(list) do
+    local b = tabButton(i)
+    b.id, b.name = d.id, d.name or "Chat"
+    b.text:SetText(b.name)
+    local bw = b.badge:IsShown() and (b.badge:GetWidth() + 4) or 0
+    wants[i] = math.ceil(b.text:GetUnboundedStringWidth()) + 26 + bw
+    total = total + wants[i] + gap
+  end
+  local cap = (total > avail and #list > 0) and math.max(math.floor((avail - gap * #list) / #list), 40) or nil
+  local x = 8
+  for i = 1, #list do
+    local b = self.tabs[i]
+    local bw = b.badge:IsShown() and (b.badge:GetWidth() + 4) or 0
+    local w = cap and math.min(wants[i], cap) or wants[i]
+    b:SetWidth(w)
+    UI.FitText(b.text, b.name, w - 22 - bw)
+    if b.text:GetUnboundedStringWidth() > w - 22 - bw then
+      -- ein langes Wort: hart kuerzen
+      local s = b.name
+      while #s > 1 and b.text:GetUnboundedStringWidth() > w - 22 - bw do s = s:sub(1, -2) b.text:SetText(s .. "..") end
+    end
+    b.text:ClearAllPoints()
+    b.text:SetPoint("LEFT", b, "LEFT", 11, 0)
+    b.text:SetPoint("RIGHT", b, "RIGHT", -11 - bw, 0)
+    b.badge:ClearAllPoints()
+    b.badge:SetPoint("RIGHT", b, "RIGHT", -4, 0)
+    b:ClearAllPoints()
+    b:SetPoint("LEFT", self.head, "LEFT", x, 0)
+    b:Show()
+    paintTab(b)
+    x = x + w + gap
+  end
+  for i = #list + 1, #self.tabs do self.tabs[i]:Hide() end
+  self.add:ClearAllPoints()
+  self.add:SetPoint("LEFT", self.head, "LEFT", x + 2, 0)
+end
+
+function Main:Select(id)
+  if not ns.WindowById(id) then id = ns.DB.windows[1] and ns.DB.windows[1].id end
+  ns.DB.active = id
+  for tid, t in pairs(ns.Windows) do
+    local on = tid == id
+    t.msg:SetShown(on)
+    if on then
+      t.unread = 0
+      self.down:SetShown(not t.msg:AtBottom())
+    end
+  end
+  for _, b in ipairs(self.tabs) do
+    if b.id == id then b.unread = 0 b.badge:Hide() end
+    if b:IsShown() then paintTab(b) end
+  end
+  self:LayoutTabs()
+end
+
+function Main:Active() return ns.Windows[ns.DB.active] end
+
+function Main:Save()
+  local f, d = self.frame, FD()
+  local s = f:GetEffectiveScale() / UIParent:GetEffectiveScale()
+  local l, b = f:GetLeft(), f:GetBottom()
+  if l and b then d.x, d.y = math.floor(l * s + 0.5), math.floor(b * s + 0.5) end
+  d.w, d.h = math.floor(f:GetWidth() + 0.5), math.floor(f:GetHeight() + 0.5)
+end
+
+function Main:Place()
+  local f, d = self.frame, FD()
+  f:ClearAllPoints()
+  f:SetPoint("BOTTOMLEFT", UIParent, "BOTTOMLEFT", d.x or 16, d.y or 40)
+  f:SetSize(ns.Clamp(d.w or 520, MIN_W, MAX_W), ns.Clamp(d.h or 230, MIN_H, MAX_H))
+end
+
+function Main:StopMove()
+  self.frame:StopMovingOrSizing()
+  self:Save()
+  self:Place()
+  self:LayoutTabs()
+end
+
+-- Aussehen + Verhalten aus den Einstellungen uebernehmen
+function Main:Apply()
+  local d = FD()
+  self:Place()
+  local a = ns.Clamp(d.alpha or 0.62, 0, 1)
+  self.glass:SetBody({ 0.040, 0.050, 0.055, 0.96 }, { 0.070, 0.085, 0.090, 0.96 }, a)
+  self.glass:SetShown(a > 0.01)
+  self.glass:SetEdge("light", 0.05 + a * 0.28)
+  for _, t in pairs(ns.Windows) do t:Style() end
+  self.lock.icon:SetTexture(UI.Icon(d.locked and "lock" or "unlock"))
+  self.grip:SetShown(not d.locked)
+  self:Hover(self.hover)
+end
+
+-- Knoepfe + Griff nur beim Ueberfahren deutlich (Chat bleibt ruhig); die Reiter bleiben immer sichtbar
+function Main:Hover(on)
+  self.hover = on
+  local show = on or ns.DB.alwaysHeader
+  self.headBg:SetAlpha(show and 1 or 0)
+  for _, b in ipairs(self.buttons) do b:SetAlpha(show and 1 or 0) b:EnableMouse(show) end
+  self.add:SetAlpha(show and 1 or 0)
+  self.add:EnableMouse(show)
+  self.grip:SetAlpha(show and 0.9 or 0)
+  for _, b in ipairs(self.tabs) do if b:IsShown() then paintTab(b) end end
+  local t = self:Active()
+  if t and ns.DB.mouseFade and (FD().fade or 0) > 0 and on then pcall(t.msg.ResetAllFadeTimes, t.msg) end
+end
+
+local function iconButton(icon, tip, fn)
+  local b = UI.IconButton(Main.head, icon, 20, tip)
+  b:SetScript("OnClick", function() UI.PlayClick() fn() end)
+  Main.buttons[#Main.buttons + 1] = b
+  return b
+end
+
+local function build()
+  local f = CreateFrame("Frame", "ChatWerkFrame", UIParent)
+  Main.frame = f
+  f:SetFrameStrata("LOW")
+  f:SetClampedToScreen(true)
+  f:SetMovable(true)
+  f:SetResizable(true)
+  f:SetResizeBounds(MIN_W, MIN_H, MAX_W, MAX_H)
+  f:EnableMouse(false)
+  Main.glass = UI.Glass(f, { radius = 16, sheen = 0.035, line = 0.18, edge = 0.2 })
+
+  -- Reiterleiste: ziehen = verschieben
+  local head = CreateFrame("Frame", nil, f)
+  Main.head = head
+  head:SetPoint("TOPLEFT", 0, 0)
+  head:SetPoint("TOPRIGHT", 0, 0)
+  head:SetHeight(HEAD)
+  head:EnableMouse(true)
+  head:RegisterForDrag("LeftButton")
+  Main.headBg = UI.Round(head, 14, "BACKGROUND", 2, 3)
+  Main.headBg:SetGradient(UI.GRAD_EDGE or UI.GRAD, 0.08)
+  head:SetScript("OnDragStart", function() if not FD().locked then f:StartMoving() end end)
+  head:SetScript("OnDragStop", function() Main:StopMove() end)
+  head:SetScript("OnMouseUp", function(_, button)
+    if button == "RightButton" and ns.Config then ns.Config.Open(ns.DB.active) end
+  end)
+
+  local gear = iconButton("gear", "Einstellungen", function() if ns.Config then ns.Config.Open(ns.DB.active) end end)
+  gear:SetPoint("RIGHT", head, "RIGHT", -6, 0)
+  Main.lock = iconButton("unlock", "Fenster sperren / freigeben", function()
+    FD().locked = not FD().locked
+    Main:Apply()
+  end)
+  Main.lock:SetPoint("RIGHT", gear, "LEFT", -4, 0)
+  local copy = iconButton("copy", "Verlauf dieses Reiters kopieren", function()
+    if ns.Config and ns.Config.CopyHistory then ns.Config.CopyHistory(ns.DB.active) end
+  end)
+  copy:SetPoint("RIGHT", Main.lock, "LEFT", -4, 0)
+
+  -- "+" direkt hinter dem letzten Reiter: neuer Chat
+  Main.add = UI.IconButton(head, "plus", 20, "Neuer Reiter")
+  Main.add:SetScript("OnClick", function()
+    UI.PlayClick()
+    local d = ns.NewWindow(nil, {})
+    ns.BuildWindows()
+    Main:Select(d.id)
+    if ns.Config then ns.Config.Open(d.id) end
+  end)
+
+  -- "Neue Nachrichten unten": runde Neon-Kugel unten rechts
+  local down = UI.IconButton(f, "down", 26, "Nach unten")
+  Main.down = down
+  down:SetPoint("BOTTOMRIGHT", -18, 12)
+  down:SetFrameLevel(f:GetFrameLevel() + 10)
+  down:SetScript("OnClick", function()
+    UI.PlayClick()
+    local t = Main:Active()
+    if t then t.msg:ScrollToBottom() end
+    down:Hide()
+  end)
+  down:Hide()
+
+  -- Groessen-Griff unten rechts
+  local grip = UI.SafeButton(f)
+  Main.grip = grip
+  grip:SetSize(18, 18)
+  grip:SetPoint("BOTTOMRIGHT", -3, 3)
+  grip:SetFrameLevel(f:GetFrameLevel() + 11)
+  grip.tex = grip:CreateTexture(nil, "OVERLAY")
+  grip.tex:SetTexture(MEDIA .. "grip")
+  grip.tex:SetAllPoints()
+  grip.tex:SetVertexColor(C.amber[1], C.amber[2], C.amber[3], 1)
+  grip:SetScript("OnMouseDown", function() if not FD().locked then f:StartSizing("BOTTOMRIGHT") end end)
+  grip:SetScript("OnMouseUp", function() Main:StopMove() end)
+  UI.SetTooltip(grip, "Groesse aendern", "Ziehen, um das Fenster groesser oder kleiner zu machen.")
+
+  f:SetScript("OnSizeChanged", function()
+    local t = Main:Active()
+    if t and down:IsShown() and t.msg:AtBottom() then down:Hide() end
+    if Main.ready then Main:LayoutTabs() end
+  end)
+end
+
+-- Ueberfahren erkennen
+local function tick()
+  local f = Main.frame
+  if f and f:IsShown() then
+    local over = f:IsMouseOver() == true
+    if over ~= Main.hover then Main:Hover(over) end
+  end
+end
+ns.WindowTick = tick
+
+-- Fenster + Reiter an die Einstellungen anpassen: neue Reiter bauen, geloeschte entfernen
 function ns.BuildWindows()
+  if not Main.frame then build() end
   local keep = {}
   for _, d in ipairs(ns.DB.windows) do
     keep[d.id] = true
-    local w = ns.Windows[d.id]
-    if w then
-      w.data = d
-      w.frame:Show()
-      w:Apply()
-    else
-      ns.CreateWindow(d)
-    end
+    local t = ns.Windows[d.id]
+    if t then t.data = d else newTab(d) end
   end
-  for id, w in pairs(ns.Windows) do
+  for id, t in pairs(ns.Windows) do
     if not keep[id] then
-      w.frame:Hide()
+      t.msg:Hide()
       ns.Windows[id] = nil
     end
   end
+  Main.ready = true
+  Main.frame:Show()
+  Main:Apply()
+  Main:Select(ns.DB.active)
   if not ns.ticker and C_Timer and C_Timer.NewTicker then ns.ticker = C_Timer.NewTicker(0.12, function() ns.Safe(tick) end) end
   if ns.Blizzard and ns.Blizzard.Anchor then ns.Blizzard.Anchor() end
 end
-ns.WindowTick = tick

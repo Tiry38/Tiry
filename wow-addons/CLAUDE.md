@@ -77,15 +77,17 @@ nur Stil-Tabelle). Blitz: 5 Schnitte `blitz_slash` (Takt 1,5 s, = 5 Stapel), Fun
 blau, Einschlag. **Keine Ringe/Drehungen auch beim Mahlstrom** (Test prüft das). Grafiken `python3 -I tools/blitz_media.py`;
 `strom_media.py` erzeugt nur noch `strom_glow` + Helfer. Vorschau `previews/Schlaghagel_1.5_Mahlstrom_Blitzsturm.gif`.
 
-## ChatWerk 1.0 (eigene Chatfenster)
+## ChatWerk 1.1 (ein Chatfenster mit Reitern)
 - Dateien: `Core.lua` (Kategorien `ns.CATS`/`ns.GROUPS`, Ereignis → Kategorie `ns.EV`, Systemmeldungen per GlobalStrings-Muster
   `ns.Classify`, Formatierung, Spam, Stichwörter, `ns.Emit`), `Auction.lua` (AH/Post/Händler/Gold: Hooks auf Spieler-Klicks +
   Geld-„Grund“ gegen Doppelzeilen), `Blizzard.lua` (Blizzard-Chat in unsichtbaren Rahmen, Eingabezeile, `print`-Einsammeln über
-  `hooksecurefunc(ChatFrameN, "AddMessage")`: ohne 5. Argument = Add-on-Ausgabe), `Window.lua` (ScrollingMessageFrame-Fenster),
+  `hooksecurefunc(ChatFrameN, "AddMessage")`: ohne 5. Argument = Add-on-Ausgabe), `Window.lua` (ein Rahmen `ChatWerkFrame` = `ns.Main`, Reiterleiste; je Reiter eigener ScrollingMessageFrame in `ns.Windows[id]`, nur der aktive `DB.active` sichtbar, `unread`-Zähler),
   `Config.lua` (Auswahlliste), `UI/Widgets.lua` (Neon-Glas aus RezeptRadar).
+- **Datenmodell 1.1:** `DB.windows` = Reiter (`id,name,cats,chans,newChannels`, Reihenfolge = Liste), `DB.frame` = Lage/Größe/Glas/Schrift/
+  Ausblenden/Sperre des einen Fensters, `DB.active`. `DB.v = 110` stellt 1.0-Daten einmalig um. Kanalstil `name` = Herkunft ausgeschrieben.
 - **Geheimwerte:** CHAT_MSG-Text/Name/GUID im Chat-Lockdown nie anfassen (`issecretvalue` zuerst), nur `AddMessage` durchreichen,
   nicht speichern. Ereignisname und Kanalnummer sind nie geheim.
-- Neue Nachrichtenart = Eintrag in `ns.CATS` (+ `ns.EV` bzw. `SYS`/`LOOT`-Liste). Neue Arten werden in bestehenden Fenstern
+- Neue Nachrichtenart = Eintrag in `ns.CATS` (+ `ns.EV` bzw. `SYS`/`LOOT`-Liste). Neue Arten werden in bestehenden Reitern
   **nicht** automatisch eingeschaltet. Test: `tests/cw.lua`, Mock kennt `ScrollingMessageFrame` (`W.SMF`).
 
 ## WindBaem (Windzorn-Ton)

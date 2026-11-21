@@ -160,9 +160,15 @@ end)
 ok(okLoad, "Laden/Login: " .. tostring(errLoad))
 
 local DB = ChatWerkDB
-local main, trade = ns.Windows[DB.windows[1].id], ns.Windows[DB.windows[2].id]
-ok(main and trade, "zwei Startfenster")
-ok(main.msg:GetObjectType() == "ScrollingMessageFrame", "Fenster nutzt ScrollingMessageFrame")
+local main, trade, guild = ns.Windows[DB.windows[1].id], ns.Windows[DB.windows[2].id], ns.Windows[DB.windows[3].id]
+ok(main and trade and guild and #DB.windows == 3, "ein Fenster mit drei Start-Reitern")
+ok(DB.windows[1].name == "Allgemein" and DB.windows[2].name == "Handel" and DB.windows[3].name == "Gilde", "Reiter Allgemein/Handel/Gilde")
+ok(main.frame == ChatWerkFrame and trade.frame == ChatWerkFrame, "alle Reiter im selben grossen Fenster")
+ok(main.msg:GetObjectType() == "ScrollingMessageFrame", "Reiter nutzt ScrollingMessageFrame")
+ok(DB.active == main.data.id and main.msg:IsShown() and not trade.msg:IsShown(), "nur der aktive Reiter ist sichtbar")
+local Main = ns.Main
+local function tabBtn(id) for _, b in ipairs(Main.tabs) do if b.id == id and b:IsShown() then return b end end end
+ok(tabBtn(main.data.id) and tabBtn(trade.data.id) and tabBtn(DB.windows[3].id), "Reiter-Knoepfe oben in der Leiste")
 
 local function texts(w) local t = {} for _, m in ipairs(w.msg.__msgs) do t[#t + 1] = m[1] end return t end
 local function count(w) return #w.msg.__msgs end
@@ -171,13 +177,13 @@ local function plain(s) return type(s) == "string" and W.strip(s):gsub("|H.-|h",
 local function has(w, pat) for _, s in ipairs(texts(w)) do if type(s) == "string" and plain(s):find(pat) then return true, s end end return false end
 
 ok(has(main, "Frueh"), "Add-on-Ausgabe vor dem Login landet nach dem Login im Chat")
-ok(has(main, "Version 1%.0%.0 geladen"), "Begruessung im Chatfenster")
+ok(has(main, "Version " .. ns.VERSION:gsub("%%.", "%%%%.") .. " geladen"), "Begruessung im Chatfenster")
 
 -- Blizzard-Chat weg, Eingabezeile unter Fenster 1
 ok(ChatFrame1:GetParent() == ns.Blizzard.hider and ChatFrame2Tab:GetParent() == ns.Blizzard.hider, "Blizzard-Chat ausgeblendet")
 ok(ChatFrame1EditBox:GetParent() == UIParent, "Eingabezeile aus dem Blizzard-Chat geloest")
 local p1, rel = ChatFrame1EditBox:GetPoint(1)
-ok(rel == main.frame, "Eingabezeile haengt unter dem Hauptfenster")
+ok(rel == ChatWerkFrame, "Eingabezeile haengt unter dem Chatfenster")
 
 ----------------------------------------------------------------------------
 -- Gespraeche: Klassenfarben, Ziel-Fenster, Spam-Filter, Kanaele
@@ -193,15 +199,22 @@ local nMain = count(main)
 W.fire("CHAT_MSG_SAY", "Lok'tar! Wer kommt mit nach Orgrimmar?", "Thrall-Forever", "Orcisch", "", "", "", 0, 0, "", 0, 12, "Player-1-AAA")
 ok(count(main) == nMain, "Spam-Filter: gleiche Zeile innerhalb 60 s geschluckt")
 W.fire("CHAT_MSG_CHANNEL", "VK [Seidenstoff] 2g das Stueck", "Jaina-Forever", "Orcisch", "2. Handel - Stadt", "", "", 2, 2, "Handel - Stadt", 0, 13, "Player-1-BBB")
-ok(has(main, "%[2·H%] Jaina: VK"), "Kanal kurz [2·H] + Name")
-ok(last(main):find("|Hchannel:channel:2|h", 1, true) ~= nil, "Kanal-Tag anklickbar")
-ok(count(trade) == nTrade, "Handelskanal im Handelsfenster abgewaehlt")
+ok(has(trade, "%[Handel%] Jaina: VK"), "Handelskanal: vorne [Handel] + Name, im Reiter Handel")
+ok(not has(main, "Jaina: VK"), "Handelskanal NICHT im Reiter Allgemein")
+ok(trade.unread == 1 and tabBtn(trade.data.id).badge:IsShown(), "inaktiver Reiter zaehlt Ungelesenes")
+DB.channelStyle = "kurz"
+W.fire("CHAT_MSG_CHANNEL", "Wer geht Brachland?", "Jaina-Forever", "Orcisch", "1. Allgemein - Durotar", "", "", 1, 1, "Allgemein - Durotar", 0, 113, "Player-1-BBB")
+ok(has(main, "%[1·A%] Jaina: Wer"), "Kanal kurz [1·A] einstellbar")
+DB.channelStyle = "name"
+ok(has(main, "%[Sagen%] Thrall"), "Sagen hat vorne [Sagen]")
+ok(last(trade):find("|Hchannel:channel:2|h", 1, true) ~= nil, "Kanal-Tag anklickbar")
 ok(DB.channels["Handel - Stadt"] or DB.channels["Handel"], "Kanal in der Auswahlliste bekannt")
 W.fire("CHAT_MSG_WHISPER", "Hey Tiry, kaufst du Stoff?", "Garrosh-Forever", "Orcisch", "", "", "", 0, 0, "", 0, 14, "Player-1-CCC")
 ok(has(main, "Garrosh fluestert: Hey") and last(main):find("|cffffd24dTiry|r", 1, true), "Fluestern + eigener Name hervorgehoben")
 W.fire("CHAT_MSG_GUILD", "schaut mal https://forever.example/guide", "Jaina-Forever", "Orcisch", "", "", "", 0, 0, "", 0, 15, "Player-1-BBB")
-local okUrl, line = has(main, "%[G%] Jaina")
-ok(okUrl and line:find("|Hcwurl:https://forever.example/guide|h", 1, true), "Gilde: Tag [G] + Link anklickbar")
+local okUrl, line = has(main, "%[Gilde%] Jaina")
+ok(has(guild, "%[Gilde%] Jaina"), "Gildenchat auch im Reiter Gilde")
+ok(okUrl and line:find("|Hcwurl:https://forever.example/guide|h", 1, true), "Gilde: Tag [Gilde] + Link anklickbar")
 -- Link-Klick -> Kopierfenster
 W.call(main.msg, "OnHyperlinkClick", "cwurl:https://forever.example/guide", "[x]", "LeftButton")
 ok(ChatWerkCopy and ChatWerkCopy:IsShown() and ChatWerkCopy.edit:GetText() == "https://forever.example/guide", "Link-Klick oeffnet Kopierfenster")
@@ -343,22 +356,40 @@ W.flush()
 ok(count(main) == nMain, "Systemzeile aus Ereignis + Blizzard-Ausgabe nur einmal")
 
 ----------------------------------------------------------------------------
--- Fenster: Groesse ziehen, Mausrad, neue Fenster, Kategorien umschalten
+-- Fenster + Reiter: Groesse ziehen, Mausrad, Reiter wechseln, neuer Reiter, Kategorien umschalten
 ----------------------------------------------------------------------------
-main.frame:SetSize(520, 260)
-W.call(main.grip, "OnMouseUp")
-ok(main.data.w == 520 and main.data.h == 260, "Groesse am Griff gespeichert")
+ChatWerkFrame:SetSize(560, 260)
+W.call(Main.grip, "OnMouseUp")
+ok(DB.frame.w == 560 and DB.frame.h == 260, "Groesse am Griff gespeichert")
 for _ = 1, 4 do W.call(main.msg, "OnMouseWheel", 1) end
-ok(main.msg:GetScrollOffset() > 0 and main.down:IsShown(), "Mausrad blaettert + 'nach unten'-Knopf")
-W.call(main.down, "OnClick")
-ok(main.msg:AtBottom() and not main.down:IsShown(), "'nach unten' springt ans Ende")
+ok(main.msg:GetScrollOffset() > 0 and Main.down:IsShown(), "Mausrad blaettert + 'nach unten'-Knopf")
+W.call(Main.down, "OnClick")
+ok(main.msg:AtBottom() and not Main.down:IsShown(), "'nach unten' springt ans Ende")
+ok(trade.unread > 5, "Handel-Reiter hat ungelesene Zeilen (" .. trade.unread .. ")")
+W.call(tabBtn(trade.data.id), "OnClick", "LeftButton")
+ok(DB.active == trade.data.id and trade.msg:IsShown() and not main.msg:IsShown(), "Klick auf Reiter zeigt diesen Chat")
+ok(trade.unread == 0 and not tabBtn(trade.data.id).badge:IsShown(), "Zaehler weg nach dem Anklicken")
+W.call(tabBtn(main.data.id), "OnClick", "RightButton")
+ok(ChatWerkConfig and ChatWerkConfig:IsShown() and DB.active == trade.data.id, "Rechtsklick oeffnet Einstellungen des Reiters")
+ChatWerkConfig:Hide()
 SlashCmdList.CHATWERK("neu")
-ok(#DB.windows == 3 and ns.Windows[DB.windows[3].id], "/cw neu baut ein drittes Fenster")
-local third = ns.Windows[DB.windows[3].id]
-ok(ChatWerkConfig and ChatWerkConfig:IsShown(), "neues Fenster oeffnet seine Auswahlliste")
-DB.windows[3].cats.ah_sold = true
+ok(#DB.windows == 4 and ns.Windows[DB.windows[4].id], "/cw neu baut einen vierten Reiter")
+local third = ns.Windows[DB.windows[4].id]
+ok(third.frame == ChatWerkFrame and tabBtn(third.data.id) and DB.active == third.data.id, "neuer Reiter haengt oben an und ist aktiv")
+ok(ChatWerkConfig and ChatWerkConfig:IsShown(), "neuer Reiter oeffnet seine Auswahlliste")
+DB.windows[4].cats.ah_sold = true
 W.fire("CHAT_MSG_SYSTEM", "Es wurde ein Käufer für Eure Auktion gefunden: Leinenstoff.", "", "", "", "", "", 0, 0, "", 0, 40, nil)
-ok(has(third, "Verkauft %[Leinenstoff%]") and count(third) == 1, "eigenes Fenster zeigt NUR die angehakte Art")
+ok(has(third, "Verkauft %[Leinenstoff%]") and count(third) == 1, "eigener Reiter zeigt NUR die angehakte Art")
+-- viele Reiter: Leiste passt trotzdem (Namen gekuerzt)
+for i = 1, 4 do ns.NewWindow("Sehr langer Reitername " .. i, {}) end
+ns.BuildWindows()
+L.reset()
+local rightmost = 0
+for _, b in ipairs(Main.tabs) do if b:IsShown() then rightmost = math.max(rightmost, L.rect(b).r) end end
+ok(rightmost <= L.rect(Main.buttons[3]).l, "8 Reiter passen in die Leiste vor die Knoepfe")
+for _ = 1, 4 do table.remove(DB.windows) end
+ns.BuildWindows()
+ok(#Main.tabs >= 8 and not Main.tabs[6]:IsShown(), "geloeschte Reiter verschwinden")
 -- Verlauf
 ok(#ChatWerkCharDB.hist[trade.data.id] > 10, "Verlauf gespeichert")
 
@@ -380,7 +411,7 @@ local toggle = find(ChatWerkConfig, function(o) return o.label and o.label.__tex
 ok(toggle ~= nil, "Auswahlliste enthaelt AH-Verkauft")
 if toggle then
   W.call(toggle, "OnClick")
-  ok(DB.windows[3].cats.ah_sold == nil, "Schalter schaltet die Art fuer dieses Fenster aus")
+  ok(DB.windows[4].cats.ah_sold == nil, "Schalter schaltet die Art fuer diesen Reiter aus")
 end
 local sb = find(ChatWerkConfig, function(o) return o.__kind == "EditBox" and o.__parent and o.__parent.hint and L.isShown(o) end)
 ok(sb ~= nil, "Suchfeld vorhanden")
@@ -413,7 +444,6 @@ for _, e in ipairs(ns.errors) do ok(false, "ChatWerk-Fehler: " .. e:gsub("\n.*",
 -- Vorschau: Chat-Zeilen als Textzeilen einzeichnen (Nachbau dessen, was ScrollingMessageFrame darstellt)
 ----------------------------------------------------------------------------
 if OUT then
-  ns.Windows[DB.windows[3].id].frame:Hide()
   local function show(w, n)
     local m = w.msg
     local r = L.rect(m)
@@ -421,10 +451,10 @@ if OUT then
     local list = m.__msgs
     for i = #list, math.max(1, #list - n), -1 do
       local text = list[i][1]
-      if rawequal(text, SECRET) then text = "|cff40ff40[Gilde] Jaina: (im Kampf geheim - wird trotzdem angezeigt)|r" end
+      if rawequal(text, SECRET) then text = "|cff40ff40(Kampf-Sperre: Gildentext wird ohne Absender durchgereicht)|r" end
       text = text:gsub("|H.-|h", ""):gsub("|h", "")
       local fs = m:CreateFontString(nil, "OVERLAY")
-      fs:SetFont(ns.MEDIA .. "Fonts\\Poppins-Regular.ttf", w.data.font or 13, "")
+      fs:SetFont(ns.MEDIA .. "Fonts\\Poppins-Regular.ttf", DB.frame.font or 13, "")
       fs:SetWidth(width)
       fs:SetWordWrap(true)
       fs:SetJustifyH("LEFT")
@@ -437,11 +467,33 @@ if OUT then
       y = y + h + 2
     end
   end
+  Main:Select(main.data.id)
+  W.fire("CHAT_MSG_CHANNEL", "VK [Seidenstoff] 2g das Stueck", "Jaina-Forever", "Orcisch", "2. Handel - Stadt", "", "", 2, 2, "Handel - Stadt", 0, 213, "Player-1-BBB")
+  W.fire("CHAT_MSG_CHANNEL", "LFM Flammenschlund noch Heiler", "Garrosh-Forever", "Orcisch", "2. Handel - Stadt", "", "", 2, 2, "Handel - Stadt", 0, 214, "Player-1-CCC")
   show(main, 14)
-  show(trade, 14)
-  for _, w in pairs(ns.Windows) do w:Hover(w == trade) end
+  Main:Hover(true)
   ChatFrame1EditBox:Show()
   L.dump(UIParent, OUT .. "/cw_chat.tsv", { levels = true })
+end
+
+----------------------------------------------------------------------------
+-- Umstieg von 1.0: zwei Fenster -> zwei Reiter im grossen Fenster
+----------------------------------------------------------------------------
+do
+  ChatWerkDB = { windows = {
+    { id = 1, name = "Chat", x = 30, y = 50, w = 600, h = 250, alpha = 0.5, font = 14, fade = 0, locked = true, cats = { say = true }, chans = {}, newChannels = true },
+    { id = 2, name = "Handel & Beute", x = 700, y = 50, w = 400, h = 200, alpha = 0.6, font = 13, fade = 0, cats = { ah_sold = true }, chans = { ["ch:Handel"] = false } },
+  }, nextId = 2, channelStyle = "kurz", editWin = 2 }
+  local ns2 = {}
+  for line in io.lines(ROOT .. "ChatWerk.toc") do
+    if line:match("^Core") then assert(loadfile(ROOT .. "Core.lua"))("ChatWerk", ns2) end
+  end
+  ns2.Blizzard = nil
+  W.fire("ADDON_LOADED", "ChatWerk")
+  local D = ChatWerkDB
+  ok(D.frame and D.frame.x == 30 and D.frame.w == 600 and D.frame.font == 14 and D.frame.locked == true, "1.0: Lage/Groesse vom ersten Fenster uebernommen")
+  ok(#D.windows == 2 and D.windows[2].x == nil and D.windows[2].cats.ah_sold, "1.0: Fenster werden Reiter, Auswahl bleibt")
+  ok(D.channelStyle == "name" and D.active == 2 and D.editWin == nil, "1.0: Kanalnamen ausgeschrieben, aktiver Reiter")
 end
 
 print(string.format("ChatWerk: %d Pruefungen, %d Fehler", checks, fails))

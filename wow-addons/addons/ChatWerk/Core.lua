@@ -11,7 +11,7 @@
 local ADDON, ns = ...
 ChatWerk = ns
 ns.NAME = ADDON or "ChatWerk"
-ns.VERSION = "1.0.0"
+ns.VERSION = "1.1.0"
 local VERSION = ns.VERSION
 ns.MEDIA = "Interface\\AddOns\\ChatWerk\\Media\\"
 
@@ -221,23 +221,22 @@ local DEFAULT_TRADE = {
   "gold_mail", "gold_trade", "gold_other", "money", "loot_self", "loot_roll", "crafted", "currency", "xp", "rep",
   "honor", "skill", "learned", "quest",
 }
+local DEFAULT_GUILD = { "guild", "officer", "guild_sys" }
 local function catSet(list) local s = {} for _, k in ipairs(list) do s[k] = true end return s end
 
-function ns.NewWindow(name, cats, x, y, w, h)
+-- Ein Reiter im grossen Chatfenster: Name + was er zeigt (Kategorien, Kanaele)
+function ns.NewWindow(name, cats)
   local DB = ns.DB
   DB.nextId = (DB.nextId or 0) + 1
-  local win = {
-    id = DB.nextId, name = name or ("Chat " .. DB.nextId), x = x or 380, y = y or 300, w = w or 420, h = h or 200,
-    alpha = 0.62, font = 13, fade = 0, locked = false, cats = cats or {}, chans = {}, newChannels = false,
-  }
+  local win = { id = DB.nextId, name = name or ("Chat " .. (#DB.windows + 1)), cats = cats or {}, chans = {}, newChannels = false }
   DB.windows[#DB.windows + 1] = win
   return win
 end
 
 local DEFAULTS = {
-  hideBlizzard = true, classColors = true, channelStyle = "kurz", timestamp = "%H:%M", links = true, spam = true,
+  hideBlizzard = true, classColors = true, channelStyle = "name", timestamp = "%H:%M", links = true, spam = true,
   lootPrices = true, keywords = "", ownName = true, soundWhisper = true, soundKeyword = true, history = true,
-  historyLines = 150, editWin = 1, nameBrackets = false, mouseFade = false,
+  historyLines = 150, nameBrackets = false, mouseFade = false,
 }
 
 local function initDB()
@@ -249,13 +248,36 @@ local function initDB()
   ns.CDB.hist = ns.CDB.hist or {}
   ns.CDB.posts = ns.CDB.posts or {}
   if not DB.windows or #DB.windows == 0 then
+    -- Start: ein Fenster, drei Reiter
     DB.windows = {}
-    local main = ns.NewWindow("Chat", catSet(DEFAULT_MAIN), 16, 40, 440, 210)
+    DB.v = 110
+    local main = ns.NewWindow("Allgemein", catSet(DEFAULT_MAIN))
     main.newChannels = true
-    local trade = ns.NewWindow("Handel & Beute", catSet(DEFAULT_TRADE), 470, 40, 420, 210)
-    trade.chans["ch:Handel"] = false
-    DB.editWin = main.id
+    main.chans["ch:Handel"] = false
+    local trade = ns.NewWindow("Handel", catSet(DEFAULT_TRADE))
+    trade.chans["ch:Handel"] = true
+    ns.NewWindow("Gilde", catSet(DEFAULT_GUILD))
+    DB.active = main.id
   end
+  if (DB.v or 100) < 110 then
+    -- 1.0 -> 1.1: die einzelnen Fenster werden Reiter im grossen Fenster (Lage/Groesse/Aussehen vom ersten),
+    -- Kanalnamen ausgeschrieben, damit vorne immer klar steht, woher die Zeile kommt
+    DB.v = 110
+    local w1 = DB.windows[1]
+    DB.frame = DB.frame or { x = w1.x, y = w1.y, w = math.max(w1.w or 520, 520), h = math.max(w1.h or 230, 230),
+      alpha = w1.alpha, font = w1.font, fade = w1.fade, locked = w1.locked }
+    for _, w in ipairs(DB.windows) do
+      w.x, w.y, w.w, w.h, w.alpha, w.font, w.fade, w.locked = nil, nil, nil, nil, nil, nil, nil, nil
+    end
+    if DB.channelStyle == "kurz" then DB.channelStyle = "name" end
+    DB.active = DB.editWin or w1.id
+    DB.editWin = nil
+  end
+  DB.frame = DB.frame or {}
+  for k, v in pairs({ x = 16, y = 40, w = 520, h = 230, alpha = 0.62, font = 13, fade = 0, locked = false }) do
+    if DB.frame[k] == nil then DB.frame[k] = v end
+  end
+  if not ns.WindowById(DB.active) then DB.active = DB.windows[1].id end
   -- neue Kategorien aus spaeteren Versionen: nicht automatisch einschalten (nur was Tiry will)
 end
 
@@ -297,7 +319,7 @@ function ns.Emit(cat, text, r, g, b, opts)
       hit = true
       local W = ns.Windows and ns.Windows[win.id]
       if W then
-        if isSecret then pcall(W.msg.AddMessage, W.msg, text, r or 1, g or 1, b or 1) else W:Add(line, r, g, b) end
+        if isSecret then W:Add(text, r, g, b, true) else W:Add(line, r, g, b) end
       end
       if not isSecret and DB.history then
         local h = ns.CDB.hist[win.id] or {}
@@ -308,9 +330,9 @@ function ns.Emit(cat, text, r, g, b, opts)
       end
     end
   end
-  -- Ausgaben von ChatWerk selbst nie verschlucken: notfalls ins erste Fenster
+  -- Ausgaben von ChatWerk selbst nie verschlucken: notfalls in den gerade offenen Reiter
   if not hit and opts.force and DB.windows[1] then
-    local W = ns.Windows and ns.Windows[DB.windows[1].id]
+    local W = ns.Windows and (ns.Windows[DB.active] or ns.Windows[DB.windows[1].id])
     if W then W:Add(line, r, g, b) end
   end
   return hit
@@ -379,6 +401,8 @@ local TAGS = {
   RAID = { "R", "Schlachtzug" }, RAID_LEADER = { "RL", "Schlachtzugsleiter" }, RAID_WARNING = { "RW", "Schlachtzugswarnung" },
   INSTANCE_CHAT = { "I", "Instanz" }, INSTANCE_CHAT_LEADER = { "IL", "Instanzleiter" },
 }
+-- nur bei ausgeschriebenen Kanalnamen: auch Sagen/Schreien bekommen vorne ihre Herkunft
+local SAYTAGS = { SAY = "Sagen", YELL = "Schreien" }
 local LINKTYPE = { PARTY_LEADER = "PARTY", RAID_LEADER = "RAID", RAID_WARNING = "RAID_WARNING", INSTANCE_CHAT_LEADER = "INSTANCE_CHAT" }
 local CHAN_SHORT = {
   ["allgemein"] = "A", ["general"] = "A", ["handel"] = "H", ["trade"] = "H", ["lokaleverteidigung"] = "LV",
@@ -396,6 +420,7 @@ function ns.ChannelTag(num, base)
   local label
   if style == "nummer" then label = tostring(num)
   elseif style == "voll" then label = num .. ". " .. base
+  elseif style == "name" then label = base ~= "" and base or ("Kanal " .. num)
   else
     local key = base:lower():gsub("[%s%-_]", "")
     local s = CHAN_SHORT[key]
@@ -407,8 +432,13 @@ end
 local function typeTag(chatType)
   local t = TAGS[chatType]
   if not t then return "" end
-  local label = ns.DB.channelStyle == "voll" and t[2] or t[1]
+  local long = ns.DB.channelStyle == "voll" or ns.DB.channelStyle == "name"
+  local label = long and t[2] or t[1]
   return string.format("|Hchannel:%s|h[%s]|h ", LINKTYPE[chatType] or chatType, label)
+end
+local function sayTag(chatType)
+  if ns.DB.channelStyle ~= "name" then return "" end
+  return string.format("|Hchannel:%s|h[%s]|h ", chatType, SAYTAGS[chatType])
 end
 
 -- Links im Text: http(s)/www anklickbar (Kopierfenster)
@@ -569,9 +599,9 @@ function ns.OnChat(event, ...)
     out = ns.ChannelTag(chanNum or 0, ns.ChannelBase(chanName, chanBase)) .. " " .. special
       .. ns.NameLink(name, guid, lineID, "CHANNEL", chanNum) .. ": " .. lang2 .. body
   elseif chatType == "SAY" then
-    out = special .. ns.NameLink(name, guid, lineID, "SAY") .. ": " .. lang2 .. body
+    out = sayTag("SAY") .. special .. ns.NameLink(name, guid, lineID, "SAY") .. ": " .. lang2 .. body
   elseif chatType == "YELL" then
-    out = special .. ns.NameLink(name, guid, lineID, "YELL") .. " schreit: " .. lang2 .. body
+    out = sayTag("YELL") .. special .. ns.NameLink(name, guid, lineID, "YELL") .. " schreit: " .. lang2 .. body
   elseif chatType == "EMOTE" then
     out = special .. ns.NameLink(name, guid, lineID, "EMOTE") .. " " .. body
   elseif chatType == "TEXT_EMOTE" then
@@ -752,19 +782,18 @@ SlashCmdList.CHATWERK = function(msg)
   if msg == "" or msg == "einstellungen" or msg == "config" then
     if ns.Config then ns.Config.Toggle() end
   elseif msg == "neu" then
-    local w = ns.NewWindow(nil, {}, 500, 400, 380, 180)
+    local w = ns.NewWindow(nil, {})
     if ns.BuildWindows then ns.BuildWindows() end
+    if ns.Main and ns.Main.Select then ns.Main:Select(w.id) end
     if ns.Config then ns.Config.Open(w.id) end
   elseif msg == "blizzard" then
     ns.DB.hideBlizzard = not ns.DB.hideBlizzard
     if ns.Blizzard then ns.Blizzard.Apply() end
     ns.Print("Blizzard-Chat " .. (ns.DB.hideBlizzard and "|cffff7080ausgeblendet|r" or "|cff39ff6bsichtbar|r"))
   elseif msg == "sperren" or msg == "lock" then
-    local any = false
-    for _, w in ipairs(ns.DB.windows) do any = any or not w.locked end
-    for _, w in ipairs(ns.DB.windows) do w.locked = any end
+    ns.DB.frame.locked = not ns.DB.frame.locked
     if ns.BuildWindows then ns.BuildWindows() end
-    ns.Print(any and "Alle Fenster gesperrt." or "Alle Fenster frei (ziehen + Groesse an der Ecke).")
+    ns.Print(ns.DB.frame.locked and "Chatfenster gesperrt." or "Chatfenster frei (an den Reitern ziehen + Groesse an der Ecke).")
   elseif msg == "fehler" then
     if #ns.errors == 0 then ns.Print("Keine Fehler.") end
     for _, e in ipairs(ns.errors) do ns.Print("|cffff7080" .. e:gsub("\n.*", "") .. "|r") end
@@ -772,7 +801,7 @@ SlashCmdList.CHATWERK = function(msg)
     ChatWerkDB = nil
     ns.Print("Alles zurueckgesetzt - bitte |cff39ff6b/reload|r.")
   else
-    ns.Print("|cff39ff6b/cw|r Einstellungen · |cff39ff6bneu|r neues Fenster · |cff39ff6bsperren|r Fenster sperren/frei · "
+    ns.Print("|cff39ff6b/cw|r Einstellungen · |cff39ff6bneu|r neuer Reiter · |cff39ff6bsperren|r Fenster sperren/frei · "
       .. "|cff39ff6bblizzard|r Blizzard-Chat ein/aus · |cff39ff6bfehler|r · |cff39ff6breset|r")
   end
 end
