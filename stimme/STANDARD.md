@@ -66,3 +66,4 @@ Kartoffel-Orpheus und Chatterbox: gestoppt, nur noch Archiv/Notfall.
 Standard **de-DE-Chirp3-HD-Leda**, vom Kunden im Cockpit wählbar (alle 30 Chirp-Stimmen). Demo-Anruferin: Vindemiatrix mit Telefonfilter.
 Gemessen: alle 30 Stimmen 0,96 verständlich, Natürlichkeit 3,47–3,89, Leda 3,73 / Lebendigkeit 8,45. Messdaten: `aivox/stimmen-labor/chirp-auswahl/`.
 Aussprache-Lehre: Ein-Wort-Antworten mit Namen („Auf Becker.“) werden verschluckt → ganze Phrase („Auf den Namen Becker, bitte.“).
+- (Luna, Update) Unterbrechung **wortbasiert** statt pegelbasiert: nur fertige Erkennungsergebnisse mit Signalwörtern („Moment“, „Halt“, „Warte“ …) zählen – 0 Fehlalarme bei Geräuschen gemessen. Für AIVOX-Telefonie übernehmen (Anrufer-Geräusche sollen AIVOX nicht abbrechen). Quelle: Luna `BargeIn.kt`.
