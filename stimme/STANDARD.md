@@ -50,3 +50,8 @@ Luna ist primär mobil → Hauptstimme **Google Cloud TTS „Chirp 3 HD“** (Ab
 Chirp 3 HD (mobil) → Heim-Stimme = Kartoffel-Stimmserver der AIVOX-Sitzung auf Tirys PC (zu Hause/VPN) → ElevenLabs (Altlast) → Handy-Stimme. Kartoffel ist NICHT verworfen, nur nicht handytauglich (Abschätzung Luna, ungemessen). Umsetzung: `luna-app/.../CloudVoice.kt` (Branch `ccr-5a20bb04-mr0zu4`).
 Chirp 3 HD: `de-DE-Chirp3-HD-<Name>`, Pausen per `[pause short|pause|pause long]` im markup-Feld, **keine** Gefühls-Tags. Preise/Gratiskontingent: unverifiziert.
 AIVOX: Kartoffel-Orpheus bleibt für AIVOX ein Kandidat (Server/vorproduzierte Demos, kostenlos); Chirp 3 HD ist für AIVOX eine Option mit Nutzungskosten.
+
+## 9. AIVOX-Entscheid: ebenfalls Google Chirp 3 HD (Tiry, 21.11.2026)
+Tiry: „Es soll das gleiche Modell laufen wie bei Luna“ – Luna klingt auf dem Handy mit Chirp 3 HD „extrem vertretbar“.
+→ **Beide Projekte: Google Cloud TTS Chirp 3 HD.** AIVOX: kundenfreundliche Stimme aus der Chirp-Liste (de-DE), Auswahl per Messung + Tirys Ohr.
+Kartoffel-Orpheus und Chatterbox: gestoppt, nur noch Archiv/Notfall.
