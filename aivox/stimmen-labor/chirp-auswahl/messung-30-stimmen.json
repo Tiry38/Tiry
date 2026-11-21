@@ -1,0 +1,212 @@
+[
+ {
+  "stimme": "Enceladus",
+  "geschlecht": "m",
+  "verst": 0.957,
+  "natur": 3.89,
+  "lebendig": 5.24
+ },
+ {
+  "stimme": "Achird",
+  "geschlecht": "m",
+  "verst": 0.957,
+  "natur": 3.86,
+  "lebendig": 6.77
+ },
+ {
+  "stimme": "Algieba",
+  "geschlecht": "m",
+  "verst": 0.957,
+  "natur": 3.86,
+  "lebendig": 3.92
+ },
+ {
+  "stimme": "Charon",
+  "geschlecht": "m",
+  "verst": 0.957,
+  "natur": 3.82,
+  "lebendig": 5.3
+ },
+ {
+  "stimme": "Algenib",
+  "geschlecht": "m",
+  "verst": 0.957,
+  "natur": 3.8,
+  "lebendig": 6.64
+ },
+ {
+  "stimme": "Iapetus",
+  "geschlecht": "m",
+  "verst": 0.957,
+  "natur": 3.79,
+  "lebendig": 7.04
+ },
+ {
+  "stimme": "Orus",
+  "geschlecht": "m",
+  "verst": 0.957,
+  "natur": 3.79,
+  "lebendig": 6.87
+ },
+ {
+  "stimme": "Sadaltager",
+  "geschlecht": "m",
+  "verst": 0.957,
+  "natur": 3.79,
+  "lebendig": 6.16
+ },
+ {
+  "stimme": "Alnilam",
+  "geschlecht": "m",
+  "verst": 0.957,
+  "natur": 3.78,
+  "lebendig": 6.1
+ },
+ {
+  "stimme": "Pulcherrima",
+  "geschlecht": "w",
+  "verst": 0.957,
+  "natur": 3.76,
+  "lebendig": 7.97
+ },
+ {
+  "stimme": "Vindemiatrix",
+  "geschlecht": "w",
+  "verst": 0.957,
+  "natur": 3.76,
+  "lebendig": 7.43
+ },
+ {
+  "stimme": "Aoede",
+  "geschlecht": "w",
+  "verst": 0.957,
+  "natur": 3.75,
+  "lebendig": 6.48
+ },
+ {
+  "stimme": "Sadachbia",
+  "geschlecht": "m",
+  "verst": 0.957,
+  "natur": 3.75,
+  "lebendig": 7.35
+ },
+ {
+  "stimme": "Zubenelgenubi",
+  "geschlecht": "m",
+  "verst": 0.957,
+  "natur": 3.75,
+  "lebendig": 6.32
+ },
+ {
+  "stimme": "Fenrir",
+  "geschlecht": "m",
+  "verst": 0.957,
+  "natur": 3.74,
+  "lebendig": 5.86
+ },
+ {
+  "stimme": "Gacrux",
+  "geschlecht": "w",
+  "verst": 0.957,
+  "natur": 3.74,
+  "lebendig": 7.59
+ },
+ {
+  "stimme": "Laomedeia",
+  "geschlecht": "w",
+  "verst": 0.957,
+  "natur": 3.74,
+  "lebendig": 7.32
+ },
+ {
+  "stimme": "Leda",
+  "geschlecht": "w",
+  "verst": 0.957,
+  "natur": 3.73,
+  "lebendig": 8.45
+ },
+ {
+  "stimme": "Puck",
+  "geschlecht": "m",
+  "verst": 0.957,
+  "natur": 3.73,
+  "lebendig": 7.11
+ },
+ {
+  "stimme": "Callirrhoe",
+  "geschlecht": "w",
+  "verst": 0.957,
+  "natur": 3.7,
+  "lebendig": 7.84
+ },
+ {
+  "stimme": "Kore",
+  "geschlecht": "w",
+  "verst": 0.957,
+  "natur": 3.69,
+  "lebendig": 7.44
+ },
+ {
+  "stimme": "Autonoe",
+  "geschlecht": "w",
+  "verst": 0.957,
+  "natur": 3.68,
+  "lebendig": 7.46
+ },
+ {
+  "stimme": "Rasalgethi",
+  "geschlecht": "m",
+  "verst": 0.957,
+  "natur": 3.68,
+  "lebendig": 7.37
+ },
+ {
+  "stimme": "Umbriel",
+  "geschlecht": "m",
+  "verst": 0.957,
+  "natur": 3.67,
+  "lebendig": 6.15
+ },
+ {
+  "stimme": "Despina",
+  "geschlecht": "w",
+  "verst": 0.957,
+  "natur": 3.66,
+  "lebendig": 9.57
+ },
+ {
+  "stimme": "Achernar",
+  "geschlecht": "w",
+  "verst": 0.957,
+  "natur": 3.61,
+  "lebendig": 7.77
+ },
+ {
+  "stimme": "Erinome",
+  "geschlecht": "w",
+  "verst": 0.957,
+  "natur": 3.59,
+  "lebendig": 5.17
+ },
+ {
+  "stimme": "Schedar",
+  "geschlecht": "m",
+  "verst": 0.957,
+  "natur": 3.54,
+  "lebendig": 4.49
+ },
+ {
+  "stimme": "Zephyr",
+  "geschlecht": "w",
+  "verst": 0.957,
+  "natur": 3.51,
+  "lebendig": 10.04
+ },
+ {
+  "stimme": "Sulafat",
+  "geschlecht": "w",
+  "verst": 0.957,
+  "natur": 3.47,
+  "lebendig": 2.77
+ }
+]
