@@ -40,6 +40,7 @@ class LunaService : Service(), WakeWordEngine.Callback, Listener.Callback {
         const val ACTION_RELOAD = "de.tiry.luna.RELOAD"
         const val ACTION_QUICK = "de.tiry.luna.QUICK"
         const val CH_SERVICE = "luna_service"
+        val FILLERS = listOf("Sekunde.", "Mhm, bin dran.", "Moment.", "Schau ich nach.", "Gib mir 'nen Augenblick.", "Okay, Moment.")
         const val CH_REMINDER = "luna_reminder"
         private const val NOTIF_ID = 7
 
@@ -112,7 +113,7 @@ class LunaService : Service(), WakeWordEngine.Callback, Listener.Callback {
             ACTION_INTERRUPT -> interrupt()
             ACTION_SAY -> intent.getStringExtra("text")?.let { say(it) }
             ACTION_QUICK -> intent.getStringExtra("id")?.let { quick(it) }
-            ACTION_RELOAD -> { speaker.precache(greetings()); if (!inConversation) startWake() }
+            ACTION_RELOAD -> { speaker.precache(greetings() + FILLERS); if (!inConversation) startWake() }
         }
         return START_STICKY
     }
@@ -135,7 +136,7 @@ class LunaService : Service(), WakeWordEngine.Callback, Listener.Callback {
             wakeLock = (getSystemService(POWER_SERVICE) as PowerManager).newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "luna:wake").apply { acquire() }
         }
         state(LunaState.LOADING, "Startet …")
-        speaker.precache(greetings())
+        speaker.precache(greetings() + FILLERS)
         worker.execute {
             try {
                 wake.load()
@@ -169,6 +170,7 @@ class LunaService : Service(), WakeWordEngine.Callback, Listener.Callback {
     // ---------- Ablauf ----------
     private fun startWake() {
         if (!running) return
+        barge.stop()
         inConversation = false
         releaseFocus()
         if (!wake.ready) return
@@ -214,12 +216,13 @@ class LunaService : Service(), WakeWordEngine.Callback, Listener.Callback {
             val g = greeting()
             LunaBus.update { it.copy(userText = "", lunaText = g) }
             state(LunaState.SPEAKING, g)
-            speaker.speak(g) { if (id == conversationId) listenNow() }
+            talk(g, id) { listenNow() }
         } else main.postDelayed({ if (id == conversationId) listenNow() }, 250)
     }
 
     private fun listenNow() {
         if (!running) return
+        barge.stop()
         state(LunaState.LISTENING, "Ich höre …")
         listener.listen(this, longPause = followUps == 0)
     }
@@ -260,11 +263,36 @@ class LunaService : Service(), WakeWordEngine.Callback, Listener.Callback {
         val fast = fastPath(text)
         val brain: Brain = if (prefs.claudeKey.isBlank() || fast) local else claude
         val ctxLine = contextLine()
+        // Menschliche Denkpause: dauert es länger, sagt Luna kurz etwas, statt stumm zu sein
+        main.postDelayed({
+            if (id == conversationId && LunaBus.current.state == LunaState.THINKING && !speaker.isSpeaking)
+                speaker.speak(FILLERS.random()) {}
+        }, 2300)
         worker.execute {
             val reply = try {
                 brain.reply(text, ctxLine) { tool -> LunaBus.update { it.copy(status = toolLabel(tool)) } }
             } catch (e: Exception) { Reply("Da ist etwas schiefgelaufen: ${e.message}") }
             main.post { if (id == conversationId) answer(reply, id) }
+        }
+    }
+
+    private val barge = BargeIn()
+    @Volatile private var barged = false
+
+    /** Sprechen mit Unterbrechungs-Erkennung: Redest du dazwischen, verstummt Luna und hört dir zu. */
+    private fun talk(text: String, id: Int, then: () -> Unit) {
+        barged = false
+        speaker.speak(text) {
+            barge.stop()
+            if (id != conversationId) return@speak
+            if (barged) { barged = false; LunaBus.update { it.copy(userText = "") }; main.postDelayed({ listenNow() }, 120) }
+            else then()
+        }
+        if (prefs.bargeIn && checkSelfPermission(Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED) {
+            // kurz warten, bis die Wiedergabe läuft (sonst lernt der Detektor Stille statt Echo)
+            main.postDelayed({
+                if (id == conversationId) barge.start { main.post { if (id == conversationId && !barged) { barged = true; speaker.stop() } } }
+            }, 250)
         }
     }
 
@@ -280,10 +308,9 @@ class LunaService : Service(), WakeWordEngine.Callback, Listener.Callback {
             main.postDelayed({ startWake() }, 200)
             return
         }
-        LunaBus.update { it.copy(lunaText = r.text) }
+        LunaBus.update { it.copy(lunaText = Speaker.stripTags(r.text)) }
         state(LunaState.SPEAKING, "Spreche …")
-        speaker.speak(r.text) {
-            if (id != conversationId) return@speak
+        talk(r.text, id) {
             followUps++
             if (r.end || !prefs.followUp || followUps > 40) main.postDelayed({ startWake() }, 300)
             else main.postDelayed({ listenNow() }, 250)
@@ -321,7 +348,7 @@ class LunaService : Service(), WakeWordEngine.Callback, Listener.Callback {
 
     private fun interrupt() {
         conversationId++
-        listener.cancel(); speaker.stop()
+        barge.stop(); listener.cancel(); speaker.stop()
         main.postDelayed({ startWake() }, 200)
     }
 

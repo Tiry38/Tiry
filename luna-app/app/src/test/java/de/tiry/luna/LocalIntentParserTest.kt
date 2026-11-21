@@ -130,6 +130,23 @@ class LocalIntentParserTest {
         assertEquals(1, Speaker.femaleScore("de-de-x-dea-network"))
     }
 
+    @Test fun unterbrechenErkennen() {
+        // Echo von Lunas Stimme (gleichmäßig ~400) → nie Unterbrechung
+        val echo = BargeIn.Detector()
+        assertFalse((0 until 300).any { echo.feed(380.0 + (it % 7) * 10) })
+        // Tiry redet dazwischen: deutlich lauter, länger als 0,2 s → Unterbrechung
+        val talk = BargeIn.Detector()
+        repeat(40) { talk.feed(400.0) }
+        assertFalse((0 until 5).any { talk.feed(2500.0) })      // kurzer Knall/Klopfen reicht nicht
+        repeat(3) { talk.feed(400.0) }
+        assertTrue((0 until 12).any { talk.feed(2500.0) })
+    }
+
+    @Test fun emotionsTags() {
+        assertEquals("Oh ja, natürlich. Wecker steht.", Speaker.stripTags("[sarcastic] Oh ja, natürlich. [chuckles] Wecker steht."))
+        assertEquals("Hallo", Speaker.stripTags("Hallo"))
+    }
+
     @Test fun sprachTextBereinigen() {
         assertEquals("Hallo Tiry! Super.", Speaker.clean("**Hallo** Tiry! 😀 Super."))
     }

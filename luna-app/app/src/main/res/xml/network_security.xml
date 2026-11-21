@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Alles nur verschlüsselt (HTTPS). Einzige Ausnahme: die eigene FRITZ!Box im Heimnetz (TR-064 läuft dort über http). -->
+<network-security-config>
+    <base-config cleartextTrafficPermitted="false">
+        <trust-anchors><certificates src="system" /></trust-anchors>
+    </base-config>
+    <domain-config cleartextTrafficPermitted="true">
+        <domain includeSubdomains="false">fritz.box</domain>
+        <domain includeSubdomains="false">192.168.178.1</domain>
+    </domain-config>
+</network-security-config>

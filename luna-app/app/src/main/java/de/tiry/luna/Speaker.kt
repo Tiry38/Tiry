@@ -70,7 +70,7 @@ class Speaker(private val ctx: Context, private val prefs: Prefs) {
     fun speak(raw: String, onDone: () -> Unit) {
         pendingDone = null
         stop()
-        val text = pronounce(clean(raw))
+        val text = pronounce(clean(if (prefs.voiceTags) raw else stripTags(raw)))
         if (text.isBlank()) { main.post(onDone); return }
         val my = ++token
         pendingDone = onDone
@@ -170,6 +170,11 @@ class Speaker(private val ctx: Context, private val prefs: Prefs) {
         c.outputStream.use { it.write(body.toString().toByteArray()) }
         if (c.responseCode !in 200..299) {
             val err = c.errorStream?.bufferedReader()?.use { it.readText() }?.take(200) ?: ""
+            // v3 nicht freigeschaltet o. ä. → automatisch auf Multilingual v2 (Tags vorher entfernen)
+            if (prefs.elevenModel == "eleven_v3" && c.responseCode in 400..499 && c.responseCode != 401) {
+                prefs.elevenModel = "eleven_multilingual_v2"
+                return fetchEleven(stripTags(text))
+            }
             throw IllegalStateException("ElevenLabs ${c.responseCode} $err")
         }
         val tmp = File(cacheDir, f.name + ".tmp")
@@ -213,6 +218,9 @@ class Speaker(private val ctx: Context, private val prefs: Prefs) {
             if (cur.isNotEmpty()) out += cur.toString()
             return out
         }
+
+        /** Emotions-Tags wie [laughs] oder [sarcastic] entfernen (für Anzeige und Stimmen ohne v3). */
+        fun stripTags(s: String) = s.replace(Regex("\\[[a-zA-Z ]{2,24}]\\s*"), "").trim()
 
         /** Entfernt Markdown, Emojis & Co., damit es gesprochen natürlich klingt. */
         fun clean(s: String): String = s

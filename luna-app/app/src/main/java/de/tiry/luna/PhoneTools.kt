@@ -58,6 +58,15 @@ class PhoneTools(private val ctx: Context, private val prefs: Prefs) : ToolExecu
 
     companion object {
         const val WG_PERMISSION = "com.wireguard.android.permission.CONTROL_TUNNELS"
+
+        /** Werkzeuge, die bei gesperrtem Handy erst nach dem Entsperren laufen. */
+        val SENSITIVE = setOf(
+            "send_sms", "send_whatsapp", "call_contact", "read_notifications", "open_notification", "get_calendar_events",
+            "create_calendar_event", "read_screen", "look_at_screen", "tap_element", "tap_at", "long_press", "swipe", "type_text",
+            "press_enter", "scroll", "quick_setting", "android_intent", "set_clipboard", "open_app", "open_url", "list_apps",
+            "fritz_status", "fritz_devices", "fritz_guest_wifi", "fritz_reconnect", "fritz_calls", "fritz_wake_device",
+            "pc_wake", "pc_status", "pc_remote", "vpn_connect", "update_luna", "forget", "list_memories", "set_brightness",
+        )
         private fun s(desc: String) = mapOf("type" to "string", "description" to desc)
         private fun i(desc: String) = mapOf("type" to "integer", "description" to desc)
         private fun b(desc: String) = mapOf("type" to "boolean", "description" to desc)
@@ -143,7 +152,21 @@ class PhoneTools(private val ctx: Context, private val prefs: Prefs) : ToolExecu
         )
     }
 
-    override fun run(name: String, a: Map<String, Any?>): String = try {
+    /**
+     * Sperrschutz: Ist das Handy gesperrt (PIN/Fingerabdruck), führt Luna nichts Heikles aus. So kann niemand, der dein
+     * gesperrtes Handy anspricht, Nachrichten schicken, anrufen, deinen Bildschirm lesen oder Heimnetz/PC steuern.
+     */
+    override fun run(name: String, a: Map<String, Any?>): String {
+        if (name in SENSITIVE && isLocked()) {
+            Unlock.request(ctx)
+            return "GESPERRT: Das Handy ist gesperrt. Sag Tiry, er soll kurz mit Fingerabdruck oder PIN entsperren und es dann nochmal sagen."
+        }
+        return runUnchecked(name, a)
+    }
+
+    private fun isLocked() = try { ctx.getSystemService(android.app.KeyguardManager::class.java).isDeviceLocked } catch (_: Exception) { false }
+
+    private fun runUnchecked(name: String, a: Map<String, Any?>): String = try {
         when (name) {
             "get_time" -> timeText()
             "get_device_status" -> deviceStatus()
@@ -575,7 +598,7 @@ class PhoneTools(private val ctx: Context, private val prefs: Prefs) : ToolExecu
     }
 
     /** Ein-Knopf-Aktionen der Kontrollleiste. */
-    fun quick(id: String): String = when (id) {
+    fun quick(id: String): String = if (id in setOf("pc", "remote", "vpn", "guest") && isLocked()) { Unlock.request(ctx); "Erst entsperren, dann mach ich das." } else when (id) {
         "pc" -> run("pc_wake", emptyMap())
         "remote" -> run("pc_remote", emptyMap())
         "vpn" -> run("vpn_connect", mapOf("on" to true))

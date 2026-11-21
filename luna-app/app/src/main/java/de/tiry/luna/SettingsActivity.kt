@@ -74,6 +74,7 @@ class SettingsActivity : Activity() {
         field("ElevenLabs API-Key", prefs.elevenKey, secret = true) { prefs.elevenKey = it }
         field("Stimmen-ID (Standard: Sarah – warm & natürlich)", prefs.elevenVoice) { prefs.elevenVoice = it }
         choice("Sprachmodell", listOf(
+            "eleven_v3" to "v3 · Emotionen: lacht, seufzt, flüstert",
             "eleven_multilingual_v2" to "Multilingual v2 · Menschlich",
             "eleven_flash_v2_5" to "Flash v2.5 · Blitzschnell",
         ), prefs.elevenModel) { prefs.elevenModel = it }
@@ -148,6 +149,7 @@ class SettingsActivity : Activity() {
         toggle("Auch bei ausgeschaltetem Bildschirm zuhören", prefs.stayAwake) { prefs.stayAwake = it }
         toggle("Nachfragen ohne erneutes „Hey Luna“", prefs.followUp) { prefs.followUp = it }
         toggle("Bei „Hey Luna“ Display einschalten", prefs.wakeScreen) { prefs.wakeScreen = it }
+        toggle("Luna unterbrechen, wenn ich dazwischenrede", prefs.bargeIn) { prefs.bargeIn = it }
 
         section("Gedächtnis")
         val mem = prefs.memories

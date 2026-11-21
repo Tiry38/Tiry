@@ -85,12 +85,26 @@ ohne Rückfrage. Manuell: „Luna, update dich“ oder Einstellungen → Über �
 | Zurück, Home, Sperren, Screenshot | Merkt sich Dinge über dich, gibt passende Tipps |
 | PC an, PC fernsteuern, Gast-WLAN, Geräte, Anrufliste, VPN | „Guck mal“: sieht den Bildschirm als Bild und tippt dann gezielt |
 
+## Sicherheit – nur für dich und deine Geräte
+
+- **Schlüssel im Hardware-Tresor:** Claude-, ElevenLabs- und FRITZ!Box-Zugangsdaten sind mit AES-256 im Android-Keystore
+  verschlüsselt. Der Schlüssel ist an dieses Handy gebunden – kopierte Daten sind woanders wertlos.
+- **Sperrschutz:** Bei gesperrtem Handy macht Luna nichts Heikles (Nachrichten, Anrufe, Bildschirm lesen/steuern,
+  FRITZ!Box, PC, VPN, Apps öffnen). Sie fordert erst Fingerabdruck/PIN an.
+- **Netzwerk:** Nur verschlüsselte Verbindungen (HTTPS). Einzige Ausnahme: die eigene FRITZ!Box (`fritz.box`, `192.168.178.1`).
+- **Kein Backup:** Lunas Daten werden nie in Cloud-Backups oder beim Handywechsel kopiert.
+- **Updates:** nur aus `Tiry38/Tiry`, nur mit derselben Signatur (Luna prüft selbst, Android zusätzlich).
+- **Empfehlung:** eigenen Signatur-Schlüssel als GitHub-Secret hinterlegen (siehe Technik) – der mitgelieferte
+  Debug-Schlüssel liegt öffentlich im Repo.
+
 ## Ehrliche Grenzen
 
 - **Gesperrter Bildschirm:** Luna hört und spricht, aber Apps öffnen/Anrufen erscheint hinter der Sperre –
   Android lässt keine App die PIN umgehen.
 - **Nach Neustart (Android 14+):** Luna einmal antippen, dann hört sie wieder zu (Android-Vorgabe fürs Mikrofon).
 - **Akku:** Dauerhaftes Zuhören kostet etwas Akku. „Auch bei ausgeschaltetem Bildschirm zuhören“ ist abschaltbar.
+- **Unterbrechen:** funktioniert über Echo-Unterdrückung des Handys. Bei sehr lauter Wiedergabe kann sich Luna selten
+  selbst unterbrechen – dann in den Einstellungen „Luna unterbrechen …“ ausschalten oder leiser stellen.
 - **Wake-Word:** komplett offline. Getestet mit synthetischen Stimmen: 24/24 erkannt, 4 Fehlalarme in 120 Sätzen
   (fast nur bei klanggleichen Sätzen wie „Lou, na komm“). Empfindlichkeit + „Nur mit Hey“ in den Einstellungen.
 - **Datenschutz:** Beim Warten verlässt kein Ton das Handy. Was du nach „Hey Luna“ sagst, geht an die

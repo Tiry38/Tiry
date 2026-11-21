@@ -50,7 +50,8 @@
 
     <application
         android:allowBackup="false"
-        android:usesCleartextTraffic="true"
+        android:dataExtractionRules="@xml/data_extraction"
+        android:networkSecurityConfig="@xml/network_security"
         android:icon="@mipmap/ic_launcher"
         android:roundIcon="@mipmap/ic_launcher"
         android:label="Luna"

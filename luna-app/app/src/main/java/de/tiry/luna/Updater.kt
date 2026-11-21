@@ -58,15 +58,35 @@ object Updater {
                 android.net.Uri.parse("package:" + ctx.packageName)).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
             return "Es gibt ein Update auf Version 1.0.${r.versionCode}. Erlaube mir einmal, Apps zu installieren – dann mache ich das ab jetzt selbst."
         }
+        // Sicherheit 1: nur Downloads aus Tirys eigenem Repo
+        if (!r.apkUrl.startsWith("https://github.com/Tiry38/Tiry/releases/download/luna-v")) return "Update abgelehnt: unbekannte Quelle."
         val dir = File(ctx.cacheDir, "update").apply { mkdirs() }
         val apk = File(dir, "luna-${r.versionCode}.apk")
         val c = URL(r.apkUrl).openConnection() as HttpURLConnection
         c.instanceFollowRedirects = true; c.connectTimeout = 15000; c.readTimeout = 60000
         c.setRequestProperty("User-Agent", "Luna-Updater")
         c.inputStream.use { inp -> apk.outputStream().use { inp.copyTo(it) } }
+        // Sicherheit 2: Update muss mit exakt demselben Zertifikat signiert sein wie die installierte Luna
+        if (!sameSigner(ctx, apk)) { apk.delete(); return "Update abgelehnt: falsche Signatur. Da stimmt was nicht – ich installiere das nicht." }
         install(ctx, apk)
         return "Update auf Version 1.0.${r.versionCode} wird installiert. Bis gleich."
     }
+
+    @Suppress("DEPRECATION")
+    private fun sameSigner(ctx: Context, apk: File): Boolean = try {
+        val pm = ctx.packageManager
+        fun certs(info: android.content.pm.PackageInfo?): Set<String> {
+            val sigs = if (Build.VERSION.SDK_INT >= 28) info?.signingInfo?.apkContentsSigners else info?.signatures
+            return sigs?.map { java.security.MessageDigest.getInstance("SHA-256").digest(it.toByteArray()).joinToString("") { b -> "%02x".format(b) } }?.toSet() ?: emptySet()
+        }
+        val flag = if (Build.VERSION.SDK_INT >= 28) android.content.pm.PackageManager.GET_SIGNING_CERTIFICATES else android.content.pm.PackageManager.GET_SIGNATURES
+        val mine = certs(pm.getPackageInfo(ctx.packageName, flag))
+        val theirs = certs(pm.getPackageArchiveInfo(apk.absolutePath, flag))
+        val pkgOk = pm.getPackageArchiveInfo(apk.absolutePath, 0)?.packageName == ctx.packageName
+        // Kann Android die Signatur des Archivs nicht auslesen, greift trotzdem Androids eigene Prüfung:
+        // ein Update mit anderem Zertifikat wird vom System immer abgelehnt.
+        pkgOk && (theirs.isEmpty() || mine == theirs)
+    } catch (_: Exception) { false }
 
     private fun install(ctx: Context, apk: File) {
         val pi = ctx.packageManager.packageInstaller

@@ -66,7 +66,16 @@ class AwakeActivity : Activity(), LunaBus.Listener {
         setContentView(root)
     }
 
-    override fun onResume() { super.onResume(); visible = true; LunaBus.add(this) }
+    override fun onResume() { super.onResume(); visible = true; LunaBus.add(this); maybeUnlock(intent) }
+
+    override fun onNewIntent(intent: android.content.Intent) { super.onNewIntent(intent); setIntent(intent); maybeUnlock(intent) }
+
+    /** Sperrschutz: Android-eigene Entsperr-Abfrage (Fingerabdruck/PIN) anzeigen. */
+    private fun maybeUnlock(i: android.content.Intent?) {
+        if (i?.getBooleanExtra(Unlock.EXTRA, false) != true) return
+        i.removeExtra(Unlock.EXTRA)
+        if (Build.VERSION.SDK_INT >= 26) getSystemService(android.app.KeyguardManager::class.java).requestDismissKeyguard(this, null)
+    }
     override fun onPause() { visible = false; LunaBus.remove(this); ui.removeCallbacks(close); super.onPause() }
 
     override fun onLuna(s: LunaBus.Snapshot) {
@@ -124,5 +133,16 @@ class VoiceLineView(c: Context) : View(c) {
             c.drawPath(path, p)
         }
         if (!reduce && isAttachedToWindow) postInvalidateOnAnimation()
+    }
+}
+
+/** Fordert das Entsperren an (zeigt die Stimm-Linie über der Sperre und darüber Androids Entsperr-Dialog). */
+object Unlock {
+    const val EXTRA = "unlock"
+    fun request(ctx: Context) {
+        try {
+            ctx.startActivity(android.content.Intent(ctx, AwakeActivity::class.java).putExtra(EXTRA, true)
+                .addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK or android.content.Intent.FLAG_ACTIVITY_SINGLE_TOP))
+        } catch (_: Exception) {}
     }
 }

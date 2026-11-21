@@ -17,24 +17,27 @@ class Prefs(context: Context) {
         set(v) = p.edit().putString("spoken_name", v.trim()).apply()
 
     var claudeKey: String
-        get() = p.getString("claude_key", "")!!
-        set(v) = p.edit().putString("claude_key", v.trim()).apply()
+        get() = Vault.read(p, "claude_key")
+        set(v) = Vault.write(p, "claude_key", v)
 
     var model: String
         get() = p.getString("model", MODEL_HAIKU)!!
         set(v) = p.edit().putString("model", v).apply()
 
     var elevenKey: String
-        get() = p.getString("eleven_key", "")!!
-        set(v) = p.edit().putString("eleven_key", v.trim()).apply()
+        get() = Vault.read(p, "eleven_key")
+        set(v) = Vault.write(p, "eleven_key", v)
 
     var elevenVoice: String
         get() = p.getString("eleven_voice", DEFAULT_VOICE)!!.ifBlank { DEFAULT_VOICE }
         set(v) = p.edit().putString("eleven_voice", v.trim()).apply()
 
     var elevenModel: String
-        get() = p.getString("eleven_model", "eleven_multilingual_v2")!!
+        get() = p.getString("eleven_model", "eleven_v3")!!
         set(v) = p.edit().putString("eleven_model", v).apply()
+
+    /** Stimme kann Emotions-Tags ([laughs], [sighs] …) sprechen? Nur ElevenLabs v3. */
+    val voiceTags get() = elevenKey.isNotBlank() && elevenModel == "eleven_v3"
 
     var aboutMe: String
         get() = p.getString("about_me", DEFAULT_ABOUT)!!
@@ -67,6 +70,11 @@ class Prefs(context: Context) {
         get() = p.getString("tts_voice", "")!!
         set(v) = p.edit().putString("tts_voice", v).apply()
 
+    /** Luna darf beim Sprechen unterbrochen werden. */
+    var bargeIn: Boolean
+        get() = p.getBoolean("barge_in", true)
+        set(v) = p.edit().putBoolean("barge_in", v).apply()
+
     var followUp: Boolean
         get() = p.getBoolean("follow_up", true)
         set(v) = p.edit().putBoolean("follow_up", v).apply()
@@ -86,7 +94,7 @@ class Prefs(context: Context) {
     /** Adresse der FRITZ!Box: zu Hause „fritz.box“ (über VPN auch unterwegs). */
     var fritzHost: String get() = str("fritz_host", "fritz.box").ifBlank { "fritz.box" }; set(v) = put("fritz_host", v)
     var fritzUser: String get() = str("fritz_user"); set(v) = put("fritz_user", v)
-    var fritzPass: String get() = str("fritz_pass"); set(v) = put("fritz_pass", v)
+    var fritzPass: String get() = Vault.read(p, "fritz_pass"); set(v) = Vault.write(p, "fritz_pass", v)
     /** PC: Name, wie er in der FRITZ!Box heißt, und/oder MAC-Adresse. */
     var pcName: String get() = str("pc_name"); set(v) = put("pc_name", v)
     var pcMac: String get() = str("pc_mac"); set(v) = put("pc_mac", v)

@@ -36,10 +36,10 @@ interface Brain {
 /** Was das Claude-Gehirn braucht – entkoppelt von Android, damit es testbar ist. */
 data class BrainConfig(
     val apiKey: String, val model: String, val userName: String, val aboutMe: String,
-    val homeCity: String, val memories: List<String>,
+    val homeCity: String, val memories: List<String>, val voiceTags: Boolean = false,
 ) {
     companion object {
-        fun from(p: Prefs) = BrainConfig(p.claudeKey, p.model, p.userName, p.aboutMe, p.homeCity, p.memories)
+        fun from(p: Prefs) = BrainConfig(p.claudeKey, p.model, p.userName, p.aboutMe, p.homeCity, p.memories, p.voiceTags)
     }
 }
 
@@ -105,7 +105,11 @@ So sprichst du (alles wird laut vorgelesen):
 - Du verstehst ihn wie ein Mensch: auch Umgangssprache, Dialekt, halbe Sätze, Versprecher. Frag nur nach, wenn es
   wirklich nicht eindeutig ist – sonst mach einfach.
 
-So handelst du – du hast vollen Zugriff auf das Handy:
+${if (cfg.voiceTags) """Deine Stimme kann Gefühle zeigen: Setz sparsam (höchstens ein, zwei pro Antwort) englische Audio-Tags in eckigen Klammern
+direkt vor die Stelle, z. B. [laughs], [chuckles], [sighs], [whispers], [sarcastic], [excited], [playfully], [teasing].
+Beispiel: „[sarcastic] Oh ja, natürlich um fünf aufstehen. [chuckles] Wecker steht.“ Keine anderen Klammern verwenden.
+
+""" else ""}So handelst du – du hast vollen Zugriff auf das Handy:
 - Wenn er etwas am Handy will, tu es sofort mit den Werkzeugen. Danach kurz bestätigen.
 - Fremde Apps und jede Ecke des Systems bedienst du selbst: open_app → read_screen (Texte + Koordinaten) oder look_at_screen (Bild)
   → tap_element / tap_at / long_press / swipe / type_text / press_enter / scroll → wieder prüfen. Wiederhole, bis es wirklich erledigt ist.
