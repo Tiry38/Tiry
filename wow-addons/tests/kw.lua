@@ -107,7 +107,8 @@ for _, suf in ipairs({ "", "_Forever", "_Camelot", "_Mainline" }) do
   if f then tocs[#tocs + 1] = f:read("*a") f:close() end
 end
 ok(#tocs == 4 and tocs[1] == tocs[2] and tocs[1] == tocs[3] and tocs[1] == tocs[4], "vier gleiche TOCs")
-ok(tocs[1]:find("## Interface: 16001", 1, true) and tocs[1]:find("## Version: 1.0.0", 1, true), "TOC: Interface 16001 + Version")
+local TOCVER = tocs[1]:match("## Version: ([%d%.]+)")
+ok(tocs[1]:find("## Interface: 16001", 1, true) and TOCVER ~= nil, "TOC: Interface 16001 + Version")
 
 local ns = {}
 for line in io.lines(ROOT .. "KampfWerk.toc") do
@@ -116,7 +117,7 @@ for line in io.lines(ROOT .. "KampfWerk.toc") do
     assert(loadfile(f))("KampfWerk", ns)
   end
 end
-ok(ns.VERSION == "1.0.0", "Version im Code = TOC")
+ok(ns.VERSION == TOCVER, "Version im Code = TOC (" .. tostring(TOCVER) .. ")")
 local okLoad, errLoad = pcall(function()
   W.fire("ADDON_LOADED", "KampfWerk")
   W.fire("PLAYER_LOGIN")
