@@ -478,16 +478,33 @@ ok(DB.look.bg == "frost", "Klick waehlt Hintergrund Frost")
 local cyber = find(KampfWerkConfig, function(o) return o.item and o.item.value == "cyber" and o.item.grad and L.isShown(o) end)
 if cyber then cyber:GetScript("OnClick")(cyber) end
 ok(DB.look.theme == "cyber", "Klick waehlt Farbthema Cyber-Pink")
--- Tirys Fall 1.3.0: Schrift gewaehlt, eigene Zahlen aber aus -> nur Blizzard-Zahlen. Jetzt schaltet die Wahl sie ein.
+-- 1.4.0 (Tiry: "eigentlich sollte nur die Schrift der Blizzard-Zahlen geaendert werden"):
+-- oben waehlt man die Schrift von Blizzards Zahlen, Blizzards Zahlen bleiben an, eigene Zahlen nur als Zusatz
 ns.Numbers.SetOwn(false)
 ok(not N.own and W.cvars.floatingCombatTextCombatDamage_v2 == "1" and W.cvars.floatingCombatTextCombatHealing_v2 == "1", "eigene Zahlen aus: Blizzard-Zahlen an")
 ns.Config.Show("zahlen")
 check("kw_zahlen", KampfWerkConfig)
-local bebas = find(KampfWerkConfig, function(o) return o.item and o.item.value == "bebas" and o.item.font and L.isShown(o) end)
+local function fontTile(key, sample)
+  return find(KampfWerkConfig, function(o) return o.item and o.item.value == key and o.item.font
+    and (not sample or o.item.sample == sample) and L.isShown(o) end)
+end
+local mk = fontTile("marker", "12.345")
+ok(mk ~= nil, "Schriften fuer Blizzards Zahlen ganz oben")
+if mk then mk:GetScript("OnClick")(mk) end
+ok(N.blizzFont == "marker" and not N.own and W.cvars.floatingCombatTextCombatDamage_v2 == "1"
+  and W.cvars.floatingCombatTextCombatHealing_v2 == "1", "Schrift-Wahl: Blizzards Zahlen bleiben, nur Schrift gemerkt")
+ok(fontTile("bebas", "8.421") == nil, "eigene Zahlen aus: ihre Einstellungen versteckt")
+W.fire("ADDON_LOADED", "KampfWerk")
+ok(DAMAGE_TEXT_FONT:find("PermanentMarker") and ns.Numbers.BlizzFontActive(), "beim naechsten Laden: DAMAGE_TEXT_FONT = Marker")
+-- Zusatz: eigene Zahlen
+ns.Numbers.SetOwn(true)
+ns.Config.Show("zahlen")
+check("kw_zahlen_eigene", KampfWerkConfig)
+local bebas = fontTile("bebas", "8.421")
 if bebas then bebas:GetScript("OnClick")(bebas) end
 ok(N.damage.font == "bebas", "Klick waehlt Schaden-Schrift Bebas")
 ok(N.own and W.cvars.floatingCombatTextCombatDamage_v2 == "0" and W.cvars.floatingCombatTextCombatHealing_v2 == "0",
-  "Schrift-Wahl schaltet eigene Zahlen ein, Blizzard-Zahlen aus")
+  "eigene Zahlen an: Blizzard-Zahlen aus")
 W.fire("UNIT_COMBAT", "player", "HEAL", "", SECRET, 1)
 local hv
 for _, ch in ipairs(UIParent.__children) do if ch.prefix and ch.prefix.__text == "+" and ch:IsShown() then hv = ch end end
@@ -540,6 +557,37 @@ ns.Numbers.SetOwn(false)
 ok(W.cvars.floatingCombatTextCombatDamage_v2 == "1" and W.cvars.floatingCombatTextCombatHealing_v2 == "1"
   and W.cvars.nameplateShowFriendlyPlayers == "0" and W.cvars.nameplateShowOnlyNameForFriendlyPlayerUnits == "0", "aus: alles wie vorher")
 ns.Numbers.SetOwn(true)
+-- 1.3.5: Tirys Bild "die stehen dauerhaft da" - bei > 24 Zahlen blieb die aelteste stehen
+do
+  ns.Numbers.Clear()
+  W.flush()
+  local function visible()
+    local c = 0
+    for _, ch in ipairs(UIParent.__children) do if ch.prefix and ch:IsShown() then c = c + 1 end end
+    return c
+  end
+  for _ = 1, 40 do W.fire("UNIT_COMBAT", "target", "WOUND", "", SECRET, 1) end
+  ok(visible() <= ns.Numbers.MAX, "nie mehr als " .. ns.Numbers.MAX .. " Zahlen sichtbar (" .. visible() .. ")")
+  W.flush()
+  ok(visible() == 0, "nach 2,5 s ist jede Zahl weg, auch ohne fertige Animation")
+  -- gestaffelt: vier Treffer am selben Ziel liegen nicht uebereinander
+  local spots = {}
+  for _ = 1, 4 do W.fire("UNIT_COMBAT", "target", "WOUND", "", SECRET, 1) end
+  for _, ch in ipairs(UIParent.__children) do
+    if ch.prefix and ch:IsShown() then local _, _, _, x, y = ch:GetPoint(1) spots[#spots + 1] = { x, y } end
+  end
+  local apart = #spots == 4
+  for i = 1, #spots do for j = i + 1, #spots do
+    if math.abs(spots[i][1] - spots[j][1]) < 12 and math.abs(spots[i][2] - spots[j][2]) < 10 then apart = false end
+  end end
+  ok(apart, "Treffer am selben Ziel gestaffelt")
+  ns.Numbers.Clear()
+  DB.numbers.allEnemies = false
+  W.fire("UNIT_COMBAT", "nameplate3", "WOUND", "", SECRET, 1)
+  ok(visible() == 0, "nur Ziel: andere Gegner ohne Zahlen")
+  DB.numbers.allEnemies = true
+  ns.Numbers.Clear()
+end
 -- /kw diag + Warnung, wenn WoW eine Einstellung nicht annimmt
 local printed = {}
 local oldPrint = ns.Print
@@ -556,15 +604,19 @@ ok(table.concat(printed, "\n"):find("nicht aendern"), "Warnung, wenn WoW die Ein
 W.locked.floatingCombatTextCombatHealing_v2 = nil
 ns.Numbers.SetOwn(true)
 ns.Print = oldPrint
--- Umstellung fuer Tirys gespeicherte 1.3.0-Daten: Schrift gewaehlt, own aus -> einmalig an
+-- Umstellung fuer Tirys gespeicherte 1.3.x-Daten: eigene Zahlen an + Marker gewaehlt -> Blizzard-Zahlen in Marker
 do
   local keep = KampfWerkDB
-  KampfWerkDB = { v = 100, numbers = { own = false, heal = { font = "marker" }, damage = { font = "bangers" } } }
+  KampfWerkDB = { v = 131, numbers = { own = true, hideBlizzDamage = true, hideBlizzHeal = true, blizzFont = "aus",
+    heal = { font = "marker" }, damage = { font = "bangers" } } }
   ns.InitDB()
-  ok(KampfWerkDB.numbers.own and KampfWerkDB.numbers.hideBlizzHeal and KampfWerkDB.v == 131, "1.3.0-Daten: eigene Zahlen eingeschaltet")
+  local nn = KampfWerkDB.numbers
+  ok(not nn.own and not nn.hideBlizzHeal and nn.blizzFont == "marker" and KampfWerkDB.v == 140 and ns.migratedFont == "marker",
+    "1.3.x-Daten: Marker wird Schrift der Blizzard-Zahlen, eigene aus")
+  ns.migratedFont = nil
   KampfWerkDB = { v = 100, numbers = { own = false } }
   ns.InitDB()
-  ok(not KampfWerkDB.numbers.own, "nichts gewaehlt: bleibt aus")
+  ok(not KampfWerkDB.numbers.own and KampfWerkDB.numbers.blizzFont == "aus", "nichts gewaehlt: bleibt Spiel-Standard")
   KampfWerkDB = keep
   ns.DB = keep
 end

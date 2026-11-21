@@ -621,3 +621,12 @@ Installation: Ordner `Schlaghagel` ersetzen, `/reload` reicht (keine neuen Datei
 # KampfWerk 1.3.4
 1. Im Dungeon Mitspieler heilen: Heilzahl in deiner Schrift am Gruppenfenster des Freundes, keine grüne Blizzard-Zahl mehr?
 2. Draußen in der Welt einen Mitspieler heilen: Zahl über seinem Namen?
+
+# KampfWerk 1.3.5
+1. Gruppe gegen mehrere Gegner: verschwinden alle Zahlen nach spätestens 2,5 s? Liegen sie gestaffelt statt übereinander?
+2. Zahlen-Studio → Schaden → „An allen Gegnern“ aus: Zahlen nur noch am Ziel?
+
+# KampfWerk 1.4.0
+1. Nach dem Einbau beim Einloggen: Chat-Hinweis „Deine Zahlen-Schrift Marker gilt jetzt für Blizzards …“?
+2. Blizzards Schadens- und Heilzahlen wieder da, in der Marker-Schrift (Farben wie immer)?
+3. Andere Schrift wählen → ausloggen (Charakterauswahl) → einloggen → neue Schrift?

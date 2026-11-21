@@ -98,7 +98,7 @@ blau, Einschlag. **Keine Ringe/Drehungen auch beim Mahlstrom** (Test prüft das)
   `DB.frame.bg/theme/bgAlpha`; `Main:Apply` färbt alles (auch `Blizzard.Theme()` = Eingabezeile), `Main:TileBg` kachelt WoW-Texturen. Seite `Config.Show("look")`.
 - **1.4:** `DB.frame.fade` Standard 60 s (alte Zeilen blenden aus, `DB.v = 130` stellt 0 → 60 um), `DB.mouseFade` an: Maus/Mausrad → `ResetAllFadeTimes`.
 
-## KampfWerk 1.3 (Schadensmeter, geteiltes Glasfenster)
+## KampfWerk 1.4 (Schadensmeter, geteiltes Glasfenster)
 `addons/KampfWerk/`: `Core.lua` (DB, Themen `ns.THEMES`, Hintergründe `ns.BACKGROUNDS`, Teile `DB.panes` = `{id, view, session, docked, share, x,y,w,h}`, `/kw`),
 `Data.lua` (`Data.VIEWS` 12 Ansichten über `C_DamageMeter`/`Enum.DamageMeterType`, Aggro über `UnitDetailedThreatSituation`, `Data.Get(view, session)`
 → Zeilen mit getrennten FontString-Feldern), `Meter.lua` (Gruppe `KampfWerkFrame`, Teile `KampfWerkTeil<id>`, Teiler, Lösen/Andocken, Picker),
@@ -106,6 +106,8 @@ blau, Einschlag. **Keine Ringe/Drehungen auch beim Mahlstrom** (Test prüft das)
 `Blizzard.lua` (Blizzard-Meter `DamageMeter` verstecken, Daten bleiben), `Config.lua` (Seiten fenster/aussehen/zahlen/teil<id>).
 - **Kampflog ist gesperrt** (`COMBAT_LOG_EVENT_UNFILTERED` HasRestrictions) → alle Zahlen aus `C_DamageMeter`. Im Kampf sind Werte geheim:
   nur `StatusBar:SetValue`/`SetMinMaxValues`, `FontString:SetText`, `AbbreviateLargeNumbers` (alle AllowedWhenTainted); kein Vergleich, keine Prozente.
+- **1.4.0 Zahlen-Studio = Blizzard-Schrift zuerst:** Tiry will nur Blizzards Zahlen in anderer Schrift (`blizzFont` → `DAMAGE_TEXT_FONT` in `Numbers.EarlyFont` beim ADDON_LOADED, Forever liest es aus `Blizzard_Fonts_Shared/Shared/GameFonts.xml`). Eigene Zahlen nur als ausdrücklicher Zusatz, nie automatisch einschalten.
+- **1.3.5:** Eigene Zahlen nie nur `ag:Stop()` – immer `Numbers.Recycle(f)` (Hide + Pool); Sicherung per Timer 2,5 s. `UNIT_COMBAT` hat keinen Verursacher → Zahlen zeigen alle Treffer/Heilungen der Einheit.
 - **1.3.4:** In Instanzen sind Freundes-Plaketten forbidden → Heilung auf Gruppenmitglieder (`party%d`/`raid%d+`) am Gruppenfenster (`Numbers.GroupFrame`, `groupHeal`); `/kw diag` zeigt CVars + `UNIT_COMBAT`-Zähler je Einheitenart.
 - **1.3.2:** Forever-CVars mit `_v2` (`Numbers.CV_DAMAGE/CV_HEAL`, Quelle `Blizzard_SettingsDefinitions_Frame/Mainline/CombatOverrides.lua`) – CVar-Namen immer im Forever-Code prüfen, Mock kennt nur echte. Heilung über Freunden nur über Freundes-Plaketten (`Numbers.ApplyFriendPlates`, `friendPlates`); `Numbers.InInstance()` → Blizzards Heilzahlen an, eigene aus (Plaketten dort forbidden).
 - **1.3.1 Zahlen-Studio:** Studio-Einstellungen gelten nur für die eigenen Zahlen → jede Änderung ruft `Numbers.EnsureOwn()`; `Numbers.SetOwn(on)` schaltet Blizzards Welt-Zahlen (CVars `floatingCombatTextCombatDamage/Healing`) gegenläufig. Blizzards Zahlen selbst: nur eine Schrift (`blizzFont`), erst nach Neu-Einloggen.

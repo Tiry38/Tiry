@@ -394,117 +394,128 @@ local function numbersPage()
   local w = st:Width()
   local half = math.floor((w - 24) / 2)
   local n = DB().numbers
-  st:Title("Eigene Neon-Zahlen")
-  st:Para("KampfWerk zeichnet Schaden und Heilung selbst ueber Gegner (Namensplakette) bzw. ueber dich - "
-    .. "Schrift, Farbe, Groesse und Rand fuer beides getrennt. Nur diese Zahlen nehmen die Schrift von hier.", 12, C.muted)
-  local own
-  own = UI.Toggle(p, "Eigene Zahlen anzeigen", function() return n.own end, function(v) Numbers.SetOwn(v) for _, t in ipairs(blizzToggles) do t:Refresh() end end,
-    "An = Blizzards Kampfzahlen gehen dafuer aus. Aus = wieder Blizzards Zahlen.", w)
-  st:Add(own, own:GetHeight(), 12)
-  local seg = segRow(p, st, "Bearbeiten", { { label = "Schaden", value = "damage" }, { label = "Heilung", value = "heal" } },
-    function() return editKind end, function(v) editKind = v Config.Show(current) end)
-  local o = n[editKind]
-  -- jede Aenderung hier schaltet die eigenen Zahlen ein (sonst sieht man nur Blizzards Schrift)
-  local blizzToggles = {}
-  local function used()
-    if not Numbers.EnsureOwn() then return end
-    own:Refresh()
-    for _, t in ipairs(blizzToggles) do t:Refresh() end
-  end
-  local on = UI.Toggle(p, editKind == "damage" and "Schadenszahlen" or "Heilzahlen", function() return o.on end,
-    function(v) o.on = v if v then used() end Numbers.ApplyBlizzard() end, nil, w)
-  st:Add(on, on:GetHeight(), 12)
-  if editKind == "heal" then
-    local fp = UI.Toggle(p, "Heilzahlen ueber Freunden", function() return n.friendPlates ~= false end,
-      function(v) n.friendPlates = v Numbers.ApplyBlizzard() end,
-      "Schaltet die Namen ueber Mitspielern ein (nur Name) - nur dort kann KampfWerk Zahlen zeigen. "
-      .. "Draussen erscheint die Zahl dann ueber dem Freund.", w)
-    st:Add(fp, fp:GetHeight(), 12)
-    local gh = UI.Toggle(p, "Im Dungeon an der Gruppenanzeige", function() return n.groupHeal ~= false end,
-      function(v) n.groupHeal = v Numbers.ApplyBlizzard() end,
-      "In Dungeons/Schlachtzuegen sperrt WoW die Namen ueber Mitspielern fuer Add-ons. Dann erscheint die Heilzahl "
-      .. "an seinem Gruppenfenster (eigene Schrift). Aus = dort Blizzards Heilzahlen.", w)
-    st:Add(gh, gh:GetHeight(), 12)
-  end
 
-  -- Vorschau-Band
-  local pv = CreateFrame("Frame", nil, p)
-  pv:SetSize(w, 92)
-  local pg = UI.Glass(pv, { radius = 20, body = UI.GLASS.window, edgeMode = "neon", edge = 0.35 })
-  pg.opts.edgeStops = theme()
-  pg:SetEdge("neon", 0.35)
-  local sampleA = pv:CreateFontString(nil, "OVERLAY")
-  local sampleB = pv:CreateFontString(nil, "OVERLAY")
-  local pglow = pv:CreateTexture(nil, "ARTWORK")
-  pglow:SetTexture(UI.TEX.glow)
-  pglow:SetBlendMode("ADD")
-  pglow:SetPoint("CENTER", -w * 0.18, -8)
-  local function preview()
-    local file = Numbers.FontFile(o.font)
-    for i, fs in ipairs({ sampleA, sampleB }) do
-      local crit = i == 2
-      local size = math.floor(o.size * (crit and o.critScale or 1) + 0.5)
-      if not pcall(fs.SetFont, fs, file, size, Numbers.Flags(o.style)) then pcall(fs.SetFont, fs, STANDARD_TEXT_FONT or "Fonts\\FRIZQT__.TTF", size, "") end
-      local c = crit and o.crit or o.color
-      fs:SetTextColor(c[1], c[2], c[3], 1)
-      fs:SetShadowColor(0, 0, 0, o.style == "schatten" and 0.9 or 0)
-      fs:SetShadowOffset(o.style == "schatten" and 2 or 0, o.style == "schatten" and -2 or 0)
-    end
-    local pre = editKind == "heal" and "+" or ""
-    sampleA:SetText(pre .. "8.421")
-    sampleB:SetText(pre .. "24.680")
-    pglow:SetShown(o.style == "neon")
-    pglow:SetSize(o.size * 5, o.size * 2.2)
-    pglow:SetVertexColor(o.color[1], o.color[2], o.color[3], 0.45)
-  end
-  sampleA:SetPoint("CENTER", pv, "CENTER", -w * 0.18, -8)
-  sampleB:SetPoint("CENTER", pv, "CENTER", w * 0.18, -8)
-  local hint = label(pv, "NORMAL", 11, C.dim)
-  hint:SetPoint("TOP", pv, "TOP", -w * 0.18, -8)
-  local hint2 = label(pv, "KRITISCH", 11, C.dim)
-  hint2:SetPoint("TOP", pv, "TOP", w * 0.18, -8)
-  preview()
-  st:Add(pv, 92, 14)
-
-  local l = label(p, "Schrift (" .. #Numbers.FONTS .. " zur Wahl)")
-  st:Add(l, 18, 8, 14)
-  grid(p, st, fontItems(o, editKind == "heal" and "+8.421" or "8.421"), function(v) return o.font == v end,
-    function(v) o.font = v used() preview() end, 3, 40, 8)
-  local l2 = label(p, "Farbe")
-  st:Add(l2, 18, 4, 14)
-  swatches(p, st, function() return o.color end, function(c) o.color = c used() preview() end)
-  local l3 = label(p, "Farbe bei kritischen Treffern")
-  st:Add(l3, 18, 4, 14)
-  swatches(p, st, function() return o.crit end, function(c) o.crit = c used() preview() end)
-  local sz = UI.Stepper(p, "Groesse", half, function() return o.size end,
-    function(v) o.size = v used() preview() end, 1, 12, 64, function(v) return v .. " px" end)
-  local cs = UI.Stepper(p, "Krit groesser", half, function() return math.floor(o.critScale * 100 + 0.5) end,
-    function(v) o.critScale = v / 100 used() preview() end, 5, 100, 250, function(v) return v .. " %" end)
-  st:Add(sz, 34, 0)
-  cs:SetPoint("LEFT", sz, "RIGHT", 24, 0)
-  st:Space(14)
-  segRow(p, st, "Rand", Numbers.STYLES, function() return o.style end, function(v) o.style = v used() preview() end)
-  segRow(p, st, "Bewegung (Schaden + Heilung)", Numbers.ANIMS, function() return n.anim end, function(v) n.anim = v used() end)
-  local test = UI.Button(p, "Probe in der Bildschirmmitte", "primary", 280, 34, "star")
-  test:SetScript("OnClick", function() used() Numbers.Test() end)
-  st:Add(test, 34, 20)
-
-  st:Title("Blizzard-Kampfzahlen")
-  st:Para("Die Zahlen des Spiels selbst. WoW erlaubt hier nur EINE Schrift fuer Schaden und Heilung zusammen; die Farben "
-    .. "legt das Spiel fest. |cffffd34dWirkt erst nach dem naechsten Einloggen|r (Charakterauswahl und zurueck).", 12, C.muted)
+  -- 1) Das, was Tiry eigentlich will: Blizzards Zahlen bleiben, nur ihre Schrift wechselt
+  st:Title("Schrift der Kampfzahlen")
+  st:Para("Tauscht die Schrift von Blizzards Schadens- und Heilzahlen - die Zahlen selbst bleiben genau wie im Spiel "
+    .. "(gleiche Stelle, gleiche Farben, nur deine). WoW erlaubt EINE Schrift fuer beide. "
+    .. "|cffffd34dWirkt nach Ausloggen zur Charakterauswahl und wieder Einloggen|r (/reload reicht nicht).", 12, C.muted)
+  local cur = Numbers.FONT[n.blizzFont or "spiel"]
+  local active = Numbers.BlizzFontActive()
+  local state = label(p, "Gewaehlt: " .. (cur and cur.label or "Spiel-Standard")
+    .. (active and "  |cff39ff6b(aktiv)|r" or "  |cffffd34d(nach Neu-Einloggen aktiv)|r"), 13, C.text, "semibold")
+  st:Add(state, 20, 4, 14)
   grid(p, st, fontItems(nil, "12.345"), function(v) return (n.blizzFont or "spiel") == v end,
-    function(v) n.blizzFont = v ns.Print("Schrift der Blizzard-Kampfzahlen gespeichert - wirkt nach dem naechsten Einloggen.") end, 3, 40, 8)
-  local t1 = UI.Toggle(p, "Blizzard-Schadenszahlen ausblenden", function() return n.hideBlizzDamage end,
-    function(v) n.hideBlizzDamage = v n.blizzDamageSet = true Numbers.ApplyBlizzard() end, nil, w)
-  st:Add(t1, t1:GetHeight(), 6)
-  local t2 = UI.Toggle(p, "Blizzard-Heilzahlen ausblenden", function() return n.hideBlizzHeal end,
-    function(v) n.hideBlizzHeal = v n.blizzHealSet = true Numbers.ApplyBlizzard() end, nil, w)
-  blizzToggles[1], blizzToggles[2] = t1, t2
-  st:Add(t2, t2:GetHeight(), 10)
+    function(v)
+      n.blizzFont = v
+      ns.Print("Schrift der Kampfzahlen: " .. (Numbers.FONT[v] and Numbers.FONT[v].label or v)
+        .. " - jetzt einmal ausloggen (Charakterauswahl) und wieder einloggen.")
+      Config.Show(current)
+    end, 3, 40, 8)
   if Numbers.CVarExists("WorldTextScale") then
-    local ws = UI.Stepper(p, "Groesse Blizzard-Zahlen", w, function() return math.floor((n.worldScale or 1) * 100 + 0.5) end,
+    local ws = UI.Stepper(p, "Groesse der Kampfzahlen", w, function() return math.floor((n.worldScale or 1) * 100 + 0.5) end,
       function(v) n.worldScale = v / 100 Numbers.ApplyBlizzard() end, 10, 50, 300, function(v) return v .. " %" end)
     st:Add(ws, 34, 14)
+  end
+  st:Space(10)
+
+  -- 2) Zusatz fuer Profis: eigene Zahlen (getrennte Schrift/Farbe), ersetzen Blizzards
+  st:Title("Zusatz: eigene Zahlen")
+  st:Para("Nur noetig, wenn Schaden und Heilung GETRENNTE Schriften/Farben haben sollen. Dann blendet KampfWerk "
+    .. "Blizzards Zahlen aus und zeichnet selbst. Grenze von WoW: Add-ons erfahren nicht, wer getroffen/geheilt hat - "
+    .. "es erscheinen auch die Zahlen deiner Gruppe.", 12, C.muted)
+  local own = UI.Toggle(p, "Eigene Zahlen statt Blizzards", function() return n.own end,
+    function(v) Numbers.SetOwn(v) Config.Show(current) end, nil, w)
+  st:Add(own, own:GetHeight(), 12)
+  if n.own then
+    local seg = segRow(p, st, "Bearbeiten", { { label = "Schaden", value = "damage" }, { label = "Heilung", value = "heal" } },
+      function() return editKind end, function(v) editKind = v Config.Show(current) end)
+    local o = n[editKind]
+    local on = UI.Toggle(p, editKind == "damage" and "Schadenszahlen" or "Heilzahlen", function() return o.on end,
+      function(v) o.on = v Numbers.ApplyBlizzard() end, nil, w)
+    st:Add(on, on:GetHeight(), 12)
+    if editKind == "heal" then
+      local fp = UI.Toggle(p, "Heilzahlen ueber Freunden", function() return n.friendPlates ~= false end,
+        function(v) n.friendPlates = v Numbers.ApplyBlizzard() end,
+        "Schaltet die Namen ueber Mitspielern ein (nur Name) - nur dort kann KampfWerk Zahlen zeigen. "
+        .. "Draussen erscheint die Zahl dann ueber dem Freund.", w)
+      st:Add(fp, fp:GetHeight(), 12)
+      local gh = UI.Toggle(p, "Im Dungeon an der Gruppenanzeige", function() return n.groupHeal ~= false end,
+        function(v) n.groupHeal = v Numbers.ApplyBlizzard() end,
+        "In Dungeons/Schlachtzuegen sperrt WoW die Namen ueber Mitspielern fuer Add-ons. Dann erscheint die Heilzahl "
+        .. "an seinem Gruppenfenster (eigene Schrift). Aus = dort Blizzards Heilzahlen.", w)
+      st:Add(gh, gh:GetHeight(), 12)
+    end
+
+    -- Vorschau-Band
+    local pv = CreateFrame("Frame", nil, p)
+    pv:SetSize(w, 92)
+    local pg = UI.Glass(pv, { radius = 20, body = UI.GLASS.window, edgeMode = "neon", edge = 0.35 })
+    pg.opts.edgeStops = theme()
+    pg:SetEdge("neon", 0.35)
+    local sampleA = pv:CreateFontString(nil, "OVERLAY")
+    local sampleB = pv:CreateFontString(nil, "OVERLAY")
+    local pglow = pv:CreateTexture(nil, "ARTWORK")
+    pglow:SetTexture(UI.TEX.glow)
+    pglow:SetBlendMode("ADD")
+    pglow:SetPoint("CENTER", -w * 0.18, -8)
+    local function preview()
+      local file = Numbers.FontFile(o.font)
+      for i, fs in ipairs({ sampleA, sampleB }) do
+        local crit = i == 2
+        local size = math.floor(o.size * (crit and o.critScale or 1) + 0.5)
+        if not pcall(fs.SetFont, fs, file, size, Numbers.Flags(o.style)) then pcall(fs.SetFont, fs, STANDARD_TEXT_FONT or "Fonts\\FRIZQT__.TTF", size, "") end
+        local c = crit and o.crit or o.color
+        fs:SetTextColor(c[1], c[2], c[3], 1)
+        fs:SetShadowColor(0, 0, 0, o.style == "schatten" and 0.9 or 0)
+        fs:SetShadowOffset(o.style == "schatten" and 2 or 0, o.style == "schatten" and -2 or 0)
+      end
+      local pre = editKind == "heal" and "+" or ""
+      sampleA:SetText(pre .. "8.421")
+      sampleB:SetText(pre .. "24.680")
+      pglow:SetShown(o.style == "neon")
+      pglow:SetSize(o.size * 5, o.size * 2.2)
+      pglow:SetVertexColor(o.color[1], o.color[2], o.color[3], 0.45)
+    end
+    sampleA:SetPoint("CENTER", pv, "CENTER", -w * 0.18, -8)
+    sampleB:SetPoint("CENTER", pv, "CENTER", w * 0.18, -8)
+    local hint = label(pv, "NORMAL", 11, C.dim)
+    hint:SetPoint("TOP", pv, "TOP", -w * 0.18, -8)
+    local hint2 = label(pv, "KRITISCH", 11, C.dim)
+    hint2:SetPoint("TOP", pv, "TOP", w * 0.18, -8)
+    preview()
+    st:Add(pv, 92, 14)
+
+    local l = label(p, "Schrift (" .. #Numbers.FONTS .. " zur Wahl)")
+    st:Add(l, 18, 8, 14)
+    grid(p, st, fontItems(o, editKind == "heal" and "+8.421" or "8.421"), function(v) return o.font == v end,
+      function(v) o.font = v preview() end, 3, 40, 8)
+    local l2 = label(p, "Farbe")
+    st:Add(l2, 18, 4, 14)
+    swatches(p, st, function() return o.color end, function(c) o.color = c preview() end)
+    local l3 = label(p, "Farbe bei kritischen Treffern")
+    st:Add(l3, 18, 4, 14)
+    swatches(p, st, function() return o.crit end, function(c) o.crit = c preview() end)
+    local sz = UI.Stepper(p, "Groesse", half, function() return o.size end,
+      function(v) o.size = v preview() end, 1, 12, 64, function(v) return v .. " px" end)
+    local cs = UI.Stepper(p, "Krit groesser", half, function() return math.floor(o.critScale * 100 + 0.5) end,
+      function(v) o.critScale = v / 100 preview() end, 5, 100, 250, function(v) return v .. " %" end)
+    st:Add(sz, 34, 0)
+    cs:SetPoint("LEFT", sz, "RIGHT", 24, 0)
+    st:Space(14)
+    segRow(p, st, "Rand", Numbers.STYLES, function() return o.style end, function(v) o.style = v preview() end)
+    if editKind == "damage" then
+      local ae = UI.Toggle(p, "An allen Gegnern", function() return n.allEnemies ~= false end,
+        function(v) n.allEnemies = v end,
+        "WoW verraet Add-ons nicht, wer getroffen hat: es erscheinen alle Treffer (auch deiner Gruppe). "
+        .. "Aus = nur an deinem Ziel.", w)
+      st:Add(ae, ae:GetHeight(), 12)
+    end
+    segRow(p, st, "Bewegung (Schaden + Heilung)", Numbers.ANIMS, function() return n.anim end, function(v) n.anim = v end)
+    local test = UI.Button(p, "Probe in der Bildschirmmitte", "primary", 280, 34, "star")
+    test:SetScript("OnClick", function() Numbers.Test() end)
+    st:Add(test, 34, 20)
+
   end
   finish(st)
 end

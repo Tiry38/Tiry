@@ -74,6 +74,14 @@ function Numbers.EarlyFont()
   local key = ns.DB and N().blizzFont
   local f = key and Numbers.FONT[key]
   if f and f.file then DAMAGE_TEXT_FONT = f.file end
+  Numbers.loadedFont = (f and f.file) and key or "spiel"
+end
+
+-- Ist die gewaehlte Schrift schon die, mit der dieses Einloggen gestartet ist?
+function Numbers.BlizzFontActive()
+  local key = N().blizzFont
+  if not key or key == "aus" then key = "spiel" end
+  return Numbers.loadedFont == key
 end
 
 local function cvarExists(name)
@@ -181,18 +189,12 @@ function Numbers.SetOwn(on)
   if not n.own then Numbers.Clear() end
 end
 
--- Jede Aenderung im Zahlen-Studio meint die eigenen Zahlen -> automatisch einschalten
-function Numbers.EnsureOwn()
-  if N().own then return false end
-  Numbers.SetOwn(true)
-  ns.Print("Eigene Zahlen eingeschaltet - Blizzards Kampfzahlen sind dafuer aus (Zahlen-Studio, Schalter oben).")
-  return true
-end
-
 ----------------------------------------------------------------------------
 -- 2) Eigene Neon-Zahlen
 ----------------------------------------------------------------------------
 local pool, active = {}, {}
+Numbers.MAX = 24
+Numbers.lanes = setmetatable({}, { __mode = "k" })
 
 local function newText()
   local f = CreateFrame("Frame", nil, UIParent)
@@ -213,22 +215,23 @@ local function newText()
   f.scale = ag:CreateAnimation("Scale")
   f.fadeIn = ag:CreateAnimation("Alpha")
   f.fadeOut = ag:CreateAnimation("Alpha")
-  ag:SetScript("OnFinished", function()
-    f:Hide()
-    for i, a in ipairs(active) do if a == f then table.remove(active, i) break end end
-    pool[#pool + 1] = f
-  end)
+  ag:SetScript("OnFinished", function() Numbers.Recycle(f) end)
   return f
+end
+
+-- Zahl weg + zurueck in den Vorrat (auch wenn die Animation nie fertig wird)
+function Numbers.Recycle(f)
+  if f.free then return end
+  f.free = true
+  f.ag:Stop()
+  f:Hide()
+  for i, a in ipairs(active) do if a == f then table.remove(active, i) break end end
+  pool[#pool + 1] = f
 end
 
 -- alle sichtbaren Zahlen sofort weg (Ausschalten, Vorschau)
 function Numbers.Clear()
-  while #active > 0 do
-    local f = table.remove(active)
-    f.ag:Stop()
-    f:Hide()
-    pool[#pool + 1] = f
-  end
+  while #active > 0 do Numbers.Recycle(active[#active]) end
 end
 
 local function setup(f, kind, crit)
@@ -319,8 +322,10 @@ end
 function Numbers.Show(unit, kind, amount, crit, at)
   local n = N()
   if not n.own or not n[kind] or not n[kind].on then return end
+  -- Fehler bis 1.3.4: die aelteste wurde nur angehalten, nie versteckt -> blieb dauerhaft stehen
+  if #active >= Numbers.MAX then Numbers.Recycle(active[1]) end
   local f = table.remove(pool) or newText()
-  if #active > 24 then local old = table.remove(active, 1) old.ag:Stop() end
+  f.free = false
   setup(f, kind, crit)
   local text = (ns.DB.look.numbers == "voll" and BreakUpLargeNumbers and not secret(amount)) and BreakUpLargeNumbers(amount)
     or (AbbreviateLargeNumbers and AbbreviateLargeNumbers(amount)) or tostring(amount)
@@ -328,14 +333,25 @@ function Numbers.Show(unit, kind, amount, crit, at)
   f.prefix:SetText(kind == "heal" and "+" or "")
   local anchor, x, y = anchorFor(unit, kind)
   if at then anchor, x, y = at, 0, 0 end
+  -- viele Treffer am selben Ort: abwechselnd links/rechts und gestaffelt nach oben statt alle uebereinander
+  local lane = (Numbers.lanes[anchor] or 0) % 4
+  Numbers.lanes[anchor] = lane + 1
+  x = x + ((lane % 2 == 0) and -1 or 1) * (14 + lane * 10)
+  y = y + lane * 14
   f:SetScale(at and 0.75 or 1)   -- an der Gruppenanzeige etwas kleiner
   f:ClearAllPoints()
-  f:SetPoint("CENTER", anchor, "CENTER", x + math.random(-26, 26), y + math.random(-6, 10))
+  f:SetPoint("CENTER", anchor, "CENTER", x + math.random(-8, 8), y + math.random(-3, 3))
   f:SetAlpha(1)
   f:Show()
   active[#active + 1] = f
   f.ag:Stop()
   f.ag:Play()
+  -- Sicherung: spaetestens nach 2,5 s weg (Animation kann im Spiel haengen, z. B. wenn die Plakette verschwindet)
+  local token = (f.token or 0) + 1
+  f.token = token
+  if C_Timer and C_Timer.After then
+    C_Timer.After(2.5, function() if f.token == token then Numbers.Recycle(f) end end)
+  end
 end
 
 local function isTarget(unit)
@@ -370,7 +386,8 @@ function Numbers.OnCombat(_, unit, event, flagText, amount)
   local plate = type(unit) == "string" and unit:match("^nameplate%d+$")
   if event == "WOUND" then
     -- Schaden an Gegnern: am Ziel; an anderen Namensplaketten nur, wenn sie nicht das Ziel sind (sonst doppelt)
-    if unit == "target" or (plate and not isTarget(unit)) then Numbers.Show(unit, "damage", amount, crit) end
+    -- allEnemies aus: nur dein Ziel (weniger Gewusel in der Gruppe)
+    if unit == "target" or (plate and N().allEnemies ~= false and not isTarget(unit)) then Numbers.Show(unit, "damage", amount, crit) end
   elseif event == "HEAL" then
     -- ueber dir, deinem Ziel und jedem Freund mit Namensplakette (Freundes-Plaketten schaltet KampfWerk ein);
     -- in Instanzen zeigt Blizzard die Heilzahlen (Plaketten dort fuer Add-ons gesperrt)

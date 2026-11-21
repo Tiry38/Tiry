@@ -12,7 +12,7 @@
 local ADDON, ns = ...
 KampfWerk = ns
 ns.NAME = ADDON or "KampfWerk"
-ns.VERSION = "1.3.4"
+ns.VERSION = "1.4.0"
 ns.MEDIA = "Interface\\AddOns\\KampfWerk\\Media\\"
 local MEDIA = ns.MEDIA
 
@@ -127,7 +127,8 @@ local DEFAULTS = {
     hideBlizzDamage = false,
     hideBlizzHeal = false,
     friendPlates = true,
-    groupHeal = true,           -- in Instanzen: eigene Heilzahlen an der Gruppenanzeige statt Blizzards        -- Namensplaketten freundlicher Spieler (nur Name) -> Heilzahlen ueber Freunden
+    groupHeal = true,
+    allEnemies = true,          -- Schadenszahlen an allen Gegner-Plaketten (aus = nur am Ziel)           -- in Instanzen: eigene Heilzahlen an der Gruppenanzeige statt Blizzards        -- Namensplaketten freundlicher Spieler (nur Name) -> Heilzahlen ueber Freunden
     anim = "steigen",
     damage = { on = true, font = "bangers", size = 26, color = { 1.00, 0.82, 0.22 }, crit = { 1.00, 0.36, 0.20 },
                style = "dick", critScale = 1.5 },
@@ -168,15 +169,20 @@ local function initDB()
   end
   if not ns.THEME[db.look.theme] then db.look.theme = "neon" end
   if not ns.BG[db.look.bg] then db.look.bg = "glas" end
-  -- 1.3.1: hat Tiry im Zahlen-Studio schon eine Schrift gewaehlt, aber die eigenen Zahlen waren noch aus
-  -- (Standard), sah er nur Blizzards Zahlen -> einmalig einschalten
-  if (db.v or 0) < 131 and not fresh then
+  -- 1.4.0: Tiry wollte nur Blizzards Zahlen in anderer Schrift. Eigene Zahlen wieder aus, Blizzards Zahlen an,
+  -- seine im Zahlen-Studio gewaehlte Schrift wird die Schrift der Blizzard-Zahlen (wirkt sofort beim Laden).
+  if (db.v or 0) < 140 and not fresh then
     local n, d = db.numbers, DEFAULTS.numbers
-    if not n.own and (n.damage.font ~= d.damage.font or n.heal.font ~= d.heal.font) then
-      n.own, n.hideBlizzDamage, n.hideBlizzHeal, n.blizzDamageSet, n.blizzHealSet = true, true, true, true, true
+    if n.own then
+      n.own = false
+      n.hideBlizzDamage, n.hideBlizzHeal, n.blizzDamageSet, n.blizzHealSet = false, false, true, true
+    end
+    if not n.blizzFont or n.blizzFont == "aus" or n.blizzFont == "spiel" then
+      local pick = (n.heal.font ~= d.heal.font and n.heal.font) or (n.damage.font ~= d.damage.font and n.damage.font)
+      if pick then n.blizzFont = pick ns.migratedFont = pick end
     end
   end
-  db.v = 131
+  db.v = 140
 end
 ns.InitDB = initDB
 
@@ -219,6 +225,12 @@ ns.On("PLAYER_LOGIN", function()
   if ns.Meter then ns.Meter.Build() end
   if ns.Numbers then ns.Numbers.Init() end
   if ns.Blizzard then ns.Blizzard.Apply() end
+  if ns.migratedFont and ns.Numbers then
+    local f = ns.Numbers.FONT[ns.migratedFont]
+    ns.Print("Deine Zahlen-Schrift |cff39ff6b" .. (f and f.label or ns.migratedFont)
+      .. "|r gilt jetzt fuer Blizzards Schadens- und Heilzahlen. Eigene Zahlen sind aus (Zahlen-Studio, unten).")
+    ns.migratedFont = nil
+  end
 end)
 
 ----------------------------------------------------------------------------
