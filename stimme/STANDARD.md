@@ -55,3 +55,9 @@ AIVOX: Kartoffel-Orpheus bleibt für AIVOX ein Kandidat (Server/vorproduzierte D
 Tiry: „Es soll das gleiche Modell laufen wie bei Luna“ – Luna klingt auf dem Handy mit Chirp 3 HD „extrem vertretbar“.
 → **Beide Projekte: Google Cloud TTS Chirp 3 HD.** AIVOX: kundenfreundliche Stimme aus der Chirp-Liste (de-DE), Auswahl per Messung + Tirys Ohr.
 Kartoffel-Orpheus und Chatterbox: gestoppt, nur noch Archiv/Notfall.
+
+## 10. Live-Gespräch: Lehren aus Luna (für AIVOX-Telefonie übernehmen)
+- Unterbrechungs-Erkennung (Barge-in) erst ab **hörbarer** Wiedergabe eichen, sonst hält das System die eigene Stimme für den Anrufer.
+- Bei Verdacht auf Unterbrechung **pausieren und kurz hinhören** statt abbrechen; ohne Sprache an derselben Stelle weiterreden.
+- Antwort streamen: **erster fertiger Satz wird sofort gesprochen**; Satzgrenze nur mit Leerzeichen danach (sonst wird „7.30“ getrennt).
+- Sprechpausen-Erkennung kurz halten (~700–850 ms). Quelle: Luna, `LunaService.kt`, `BargeIn.kt`, `Brain.kt`.
