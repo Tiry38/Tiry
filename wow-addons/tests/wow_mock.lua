@@ -49,6 +49,8 @@ local ALLOWED = {
 -- ScrollingMessageFrame ist in Forever ein Lua-"intrinsic" Frame (Blizzard_SharedXML/ScrollingMessageFrame.xml):
 -- C-Seite = Frame, die Nachrichten-Methoden kommen aus ScrollingMessageFrameMixin/-SecureMixin (siehe SMF unten).
 ALLOWED.ScrollingMessageFrame = allowed("SimpleFrameAPI")
+-- StatusBar (KampfWerk): SetValue/SetMinMaxValues nehmen laut Forever-Doku geheime Werte an (AllowedWhenTainted)
+ALLOWED.StatusBar = allowed("SimpleFrameAPI", "SimpleStatusBarAPI")
 -- Methoden aus Frame-Schablonen bzw. Lua-Mixins, die nicht in der C-API-Doku stehen
 ALLOWED.Frame.SetBackdrop = nil
 
@@ -275,6 +277,32 @@ function Obj.SetTexture(o, file, wrapH, wrapV)
   o.__file = file
 end
 function Obj.SetDesaturated(o, v) o.__desat = v end
+-- StatusBar
+function Obj.SetStatusBarTexture(o, tex)
+  if type(tex) == "string" then checkAddonFile(tex, { "tga", "blp" }) end
+  if not o.__sbtex then o.__sbtex = M.make("Texture", o) end
+  o.__sbtex.__file = tex
+end
+function Obj.GetStatusBarTexture(o)
+  if not o.__sbtex then o.__sbtex = M.make("Texture", o) end
+  return o.__sbtex
+end
+function Obj.SetMinMaxValues(o, lo, hi)
+  if secret(lo) or secret(hi) then o.__minmax = "secret" M.secretSeen.bar = true return end
+  assert(type(lo) == "number" and type(hi) == "number", "SetMinMaxValues braucht Zahlen")
+  o.__minmax = { lo, hi }
+end
+function Obj.SetValue(o, v)
+  if secret(v) then o.__value = "secret" M.secretSeen.bar = true return end
+  assert(type(v) == "number", "SetValue braucht eine Zahl")
+  o.__value = v
+end
+function Obj.GetValue(o) return o.__value end
+function Obj.GetMinMaxValues(o) if type(o.__minmax) == "table" then return o.__minmax[1], o.__minmax[2] end end
+function Obj.SetStatusBarColor(o, r, g, b, a)
+  assert(type(r) == "number" and type(g) == "number" and type(b) == "number", "SetStatusBarColor braucht Zahlen")
+  o.__sbcolor = { r, g, b, a or 1 }
+end
 function Obj.SetAtlas(o, name) assert(type(name) == "string") o.__file = "ATLAS:" .. name end
 function Obj.SetColorTexture(o, r, g, b, a) assert(type(r) == "number") o.__file = "WHITE" o.__color = { r, g, b, a or 1 } o.__grad = nil end
 function Obj.SetTexCoord(o, ...) local n = select("#", ...) assert(n == 4 or n == 8, "SetTexCoord braucht 4 oder 8 Werte") o.__coord = { ... } end
@@ -301,7 +329,7 @@ function Obj.SetTextureSliceMode(o, m) assert(m == 0 or m == 1, "SliceMode 0 (ge
 function Obj.SetFont(o, file, size, flags)
   assert(type(file) == "string" and file ~= "", "SetFont: Datei fehlt")
   assert(type(size) == "number" and size > 0, "SetFont: Größe fehlt")
-  if file:match("^Interface\\AddOns\\RezeptRadar\\") or file:match("^Interface\\AddOns\\ChatWerk\\") then checkAddonFile(file, { "ttf" }) end
+  if file:match("^Interface\\AddOns\\RezeptRadar\\") or file:match("^Interface\\AddOns\\ChatWerk\\") or file:match("^Interface\\AddOns\\KampfWerk\\") then checkAddonFile(file, { "ttf" }) end
   o.__font = file
   o.__size = size
   if file:find("Rajdhani") then

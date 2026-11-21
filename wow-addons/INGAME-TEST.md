@@ -579,3 +579,13 @@ Installation: Ordner `Schlaghagel` ersetzen, `/reload` reicht (keine neuen Datei
 10. **Händler:** verkaufen, kaufen, reparieren → Zeilen je Item + „Händler-Bilanz“ beim Schließen.
 11. **Instanz im Kampf (Chat-Lockdown):** Gruppen-/Sagen-Text erscheint trotzdem im richtigen Reiter, aber ohne Herkunft/Name davor (Blizzard sperrt den Text), kein Lua-Fehler (`/cw fehler`).
 12. Ausgabe anderer Add-ons (z. B. RezeptRadar) erscheint im Reiter „Allgemein“. `/cw blizzard` holt den Blizzard-Chat zurück.
+
+# Teil KampfWerk 1.0
+1. Einloggen: Glas-Fenster mittig unten, links „GEWIRKTE HEILUNG“, rechts „VERURSACHTER SCHADEN“. Blizzards Schadensmeter ist weg (Einstellung „Blizzard-Meter ausblenden“).
+2. Kampf gegen ein paar Gegner: Balken füllen sich **während** des Kampfes, Zahlen kurz (z. B. 12,3K), Uhr läuft. Nach dem Kampf erscheinen Prozente. **Kein Lua-Fehler** (`/kw fehler`).
+3. Klick auf einen Titel → Liste → „Unterbrechungen“ bzw. „Aggro“ wählen. Aggro: Ziel anklicken, Werte erscheinen.
+4. Session-Knopf (Kreis-Pfeil) / Rechtsklick Titel → Einstellungen. Kampf „Gesamt“ und einen alten Kampf wählen.
+5. Teiler in der Mitte ziehen → Breiten ändern sich. Lösen-Knopf → Teil wird eigenes Fenster, ziehen + Ecke ziehen; Andocken holt ihn zurück. `/reload` → alles bleibt.
+6. `/kw` → Aussehen: jeden Hintergrund einmal anklicken. **Die drei „WoW:“-Hintergründe** (Dialog, Marmor, Fels) – erscheint eine Textur? Wenn leer: melden.
+7. `/kw zahlen`: Eigene Zahlen an, Blizzard-Schadenszahlen aus. Gegner schlagen → Zahlen in der gewählten Schrift/Farbe über der **Namensplakette**? Heilung (eigene) grün über dir? „Probe“-Knopf zeigt Zahlen in der Mitte.
+8. Blizzard-Schrift wählen → Charakterauswahl und zurück → Blizzard-Zahlen in der neuen Schrift?

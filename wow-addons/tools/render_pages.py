@@ -26,6 +26,15 @@ def font(weight, size):
     key = (weight, size)
     if key not in _font and weight == "narrow":
         _font[key] = ImageFont.truetype(NARROW, max(6, int(round(size * SCALE))))
+    if key not in _font and weight.startswith("file:"):
+        m = re.match(r"(?i)^Interface\\AddOns\\([^\\]+)\\(.*)$", weight[5:])
+        if m:
+            path = os.path.join(HERE, "..", "addons", m.group(1), *m.group(2).split("\\"))
+            if os.path.exists(path):
+                _font[key] = ImageFont.truetype(path, max(6, int(round(size * SCALE))))
+        if key not in _font:
+            weight = "regular"
+            key = (weight, size)
     if key not in _font:
         if weight in CW_FONTS:
             path = os.path.join(HERE, "..", "addons", "ChatWerk", "Media", "Fonts", CW_FONTS[weight])

@@ -250,7 +250,10 @@ function L.dump(root, path, opts)
         else
           local tc = rgn.__tc
           local lines = colorLines(rgn)
-          f:write(table.concat({ "F", r.l, r.b, r.r, r.t, rgn.__weight or "regular", rgn.__size or 12, tc[1], tc[2], tc[3], (tc[4] or 1) * fa,
+          local wt = rgn.__weight or "regular"
+          -- Schriften aus Zahlen-Ordnern (KampfWerk-Zahlen-Studio): Datei mitgeben, damit die Vorschau sie echt zeichnet
+          if type(rgn.__font) == "string" and rgn.__font:find("\\Zahlen\\") then wt = "file:" .. rgn.__font end
+          f:write(table.concat({ "F", r.l, r.b, r.r, r.t, wt, rgn.__size or 12, tc[1], tc[2], tc[3], (tc[4] or 1) * fa,
             rgn.__justH or "CENTER", rgn.__justV or "MIDDLE", rgn.__spacing or 0, table.concat(lines, "\31"), rgn.__outline and "OUTLINE" or "" }, "\t"), "\n")
         end
       end

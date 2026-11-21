@@ -95,6 +95,17 @@ blau, Einschlag. **Keine Ringe/Drehungen auch beim Mahlstrom** (Test prüft das)
 - Neue Nachrichtenart = Eintrag in `ns.CATS` (+ `ns.EV` bzw. `SYS`/`LOOT`-Liste). Neue Arten werden in bestehenden Reitern
   **nicht** automatisch eingeschaltet. Test: `tests/cw.lua`, Mock kennt `ScrollingMessageFrame` (`W.SMF`).
 
+## KampfWerk 1.0 (Schadensmeter, geteiltes Glasfenster)
+`addons/KampfWerk/`: `Core.lua` (DB, Themen `ns.THEMES`, Hintergründe `ns.BACKGROUNDS`, Teile `DB.panes` = `{id, view, session, docked, share, x,y,w,h}`, `/kw`),
+`Data.lua` (`Data.VIEWS` 12 Ansichten über `C_DamageMeter`/`Enum.DamageMeterType`, Aggro über `UnitDetailedThreatSituation`, `Data.Get(view, session)`
+→ Zeilen mit getrennten FontString-Feldern), `Meter.lua` (Gruppe `KampfWerkFrame`, Teile `KampfWerkTeil<id>`, Teiler, Lösen/Andocken, Picker),
+`Numbers.lua` (Zahlen-Studio: `Numbers.FONTS` 24 Schriften in `Media/Zahlen/`, eigene Zahlen per `UNIT_COMBAT`, `DAMAGE_TEXT_FONT` früh setzen),
+`Blizzard.lua` (Blizzard-Meter `DamageMeter` verstecken, Daten bleiben), `Config.lua` (Seiten fenster/aussehen/zahlen/teil<id>).
+- **Kampflog ist gesperrt** (`COMBAT_LOG_EVENT_UNFILTERED` HasRestrictions) → alle Zahlen aus `C_DamageMeter`. Im Kampf sind Werte geheim:
+  nur `StatusBar:SetValue`/`SetMinMaxValues`, `FontString:SetText`, `AbbreviateLargeNumbers` (alle AllowedWhenTainted); kein Vergleich, keine Prozente.
+- Blizzards Weltzahlen: EINE Schrift für alles (`DAMAGE_TEXT_FONT`, nur beim Laden), feste Farben → getrennte Schrift/Farbe nur über die eigenen Zahlen.
+- Test `lua5.1 tests/kw.lua [ordner]` („KW TESTS OK“), Vorschau `render_pages.py`; Zahlen-Schriften rendert die Vorschau echt (`layout.lua` gibt `file:`-Gewicht für `\Zahlen\`-Pfade). Grafiken `python3 -I tools/kampfwerk_media.py`.
+
 ## WindBaem (Windzorn-Ton)
 `addons/WindBaem/`: meldet per `C_UnitAuras.AddAuraSound(Added, {unitToken="player", spellID, soundFileName, outputChannel,
 throttleSeconds})` die 7 Windzorn-Proc-Auren an (Effekt „Extra Attacks“ in `allspells.txt`; Aura mit „No Aura Icon“). Nur außerhalb

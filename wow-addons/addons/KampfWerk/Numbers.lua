@@ -1,0 +1,252 @@
+-- KampfWerk: Zahlen-Studio. Zwei Wege fuer die Zahlen ueber Gegnern:
+--  1) Blizzard-Kampfzahlen in einer anderen Schrift: das Spiel liest die globale Variable DAMAGE_TEXT_FONT beim
+--     Betreten der Welt (Blizzard_Fonts_Shared/GameFonts.xml). Gilt fuer Schaden UND Heilung gemeinsam (eine Schrift),
+--     Farben legt das Spiel fest. Wirkt nach dem naechsten Einloggen.
+--  2) Eigene Neon-Zahlen: KampfWerk zeichnet Schaden und Heilung selbst - Schrift, Farbe, Groesse, Rand, Bewegung
+--     fuer Schaden und Heilung getrennt. Quelle: Ereignis UNIT_COMBAT (Betrag ist geheim -> nur ueber
+--     AbbreviateLargeNumbers/SetText durchgereicht). Es zeigt jeden Treffer am Ziel bzw. an dir.
+local _, ns = ...
+local UI = ns.UI
+local secret = ns.IsSecret
+local Numbers = {}
+ns.Numbers = Numbers
+
+local Z = ns.MEDIA .. "Zahlen\\"
+Numbers.FONTS = {
+  { key = "spiel", label = "Spiel-Standard" },
+  { key = "neon", label = "Neon 2045", file = Z .. "Orbitron-Black.ttf" },
+  { key = "cyber", label = "Cyber Schmal", file = ns.MEDIA .. "Fonts\\Rajdhani-Bold.ttf" },
+  { key = "bebas", label = "Bebas Neue", file = Z .. "BebasNeue-Regular.ttf" },
+  { key = "anton", label = "Anton", file = Z .. "Anton-Regular.ttf" },
+  { key = "russo", label = "Russo One", file = Z .. "RussoOne-Regular.ttf" },
+  { key = "bangers", label = "Bangers (Comic)", file = Z .. "Bangers-Regular.ttf" },
+  { key = "blackops", label = "Black Ops", file = Z .. "BlackOpsOne-Regular.ttf" },
+  { key = "audiowide", label = "Audiowide", file = Z .. "Audiowide-Regular.ttf" },
+  { key = "righteous", label = "Righteous", file = Z .. "Righteous-Regular.ttf" },
+  { key = "pixel", label = "Pixel 8-Bit", file = Z .. "PressStart2P-Regular.ttf" },
+  { key = "bungee", label = "Bungee", file = Z .. "Bungee-Regular.ttf" },
+  { key = "luckiest", label = "Luckiest Guy", file = Z .. "LuckiestGuy-Regular.ttf" },
+  { key = "lilita", label = "Lilita One", file = Z .. "LilitaOne-Regular.ttf" },
+  { key = "titan", label = "Titan One", file = Z .. "TitanOne-Regular.ttf" },
+  { key = "marker", label = "Marker", file = Z .. "PermanentMarker-Regular.ttf" },
+  { key = "chakra", label = "Chakra Petch", file = Z .. "ChakraPetch-Bold.ttf" },
+  { key = "teko", label = "Teko", file = Z .. "Teko-SemiBold.ttf" },
+  { key = "oxanium", label = "Oxanium", file = Z .. "Oxanium-Bold.ttf" },
+  { key = "glitch", label = "Glitch", file = Z .. "RubikGlitch-Regular.ttf" },
+  { key = "horror", label = "Horror", file = Z .. "Creepster-Regular.ttf" },
+  { key = "friz", label = "WoW Klassik", file = "Fonts\\FRIZQT__.TTF" },
+  { key = "morpheus", label = "WoW Morpheus", file = "Fonts\\MORPHEUS.TTF" },
+  { key = "skurri", label = "WoW Skurri", file = "Fonts\\SKURRI.TTF" },
+}
+Numbers.FONT = {}
+for _, f in ipairs(Numbers.FONTS) do Numbers.FONT[f.key] = f end
+
+Numbers.SWATCHES = {
+  { 1.00, 0.82, 0.22 }, { 1.00, 0.55, 0.12 }, { 1.00, 0.30, 0.25 }, { 1.00, 0.24, 0.76 }, { 0.70, 0.40, 1.00 },
+  { 0.30, 0.60, 1.00 }, { 0.20, 0.90, 1.00 }, { 0.15, 0.95, 0.85 }, { 0.22, 1.00, 0.42 }, { 0.70, 1.00, 0.30 },
+  { 1.00, 1.00, 1.00 }, { 0.80, 0.85, 0.90 },
+}
+Numbers.STYLES = {
+  { value = "kontur", label = "Kontur" }, { value = "dick", label = "Dicker Rand" },
+  { value = "schatten", label = "Schatten" }, { value = "neon", label = "Neon-Glow" },
+}
+Numbers.ANIMS = { { value = "steigen", label = "Steigen" }, { value = "bogen", label = "Bogen" }, { value = "pop", label = "Pop" } }
+
+local function N() return ns.DB.numbers end
+
+function Numbers.FontFile(key)
+  local f = Numbers.FONT[key]
+  if f and f.file then return f.file end
+  return STANDARD_TEXT_FONT or "Fonts\\FRIZQT__.TTF"
+end
+
+local function flags(style)
+  if style == "dick" then return "THICKOUTLINE" end
+  if style == "kontur" or style == "neon" then return "OUTLINE" end
+  return ""
+end
+Numbers.Flags = flags
+
+----------------------------------------------------------------------------
+-- 1) Blizzard-Kampfzahlen: Schrift, Groesse, an/aus
+----------------------------------------------------------------------------
+function Numbers.EarlyFont()
+  local key = ns.DB and N().blizzFont
+  local f = key and Numbers.FONT[key]
+  if f and f.file then DAMAGE_TEXT_FONT = f.file end
+end
+
+local function cvarExists(name)
+  return C_CVar and C_CVar.GetCVar and C_CVar.GetCVar(name) ~= nil
+end
+Numbers.CVarExists = cvarExists
+
+local function setCVar(name, value)
+  if not cvarExists(name) then return false end
+  if InCombatLockdown and InCombatLockdown() then
+    ns.OutOfCombat(function() pcall(C_CVar.SetCVar, name, value) end)
+    return true
+  end
+  return (pcall(C_CVar.SetCVar, name, value))
+end
+
+function Numbers.ApplyBlizzard()
+  local n = N()
+  if cvarExists("WorldTextScale") then setCVar("WorldTextScale", tostring(n.worldScale or 1)) end
+  -- Blizzard-Zahlen nur aendern, wenn Tiry den Schalter benutzt hat (sonst bleibt seine Spiel-Einstellung)
+  if n.blizzDamageSet then setCVar("floatingCombatTextCombatDamage", n.hideBlizzDamage and "0" or "1") end
+  if n.blizzHealSet then setCVar("floatingCombatTextCombatHealing", n.hideBlizzHeal and "0" or "1") end
+end
+
+----------------------------------------------------------------------------
+-- 2) Eigene Neon-Zahlen
+----------------------------------------------------------------------------
+local pool, active = {}, {}
+
+local function newText()
+  local f = CreateFrame("Frame", nil, UIParent)
+  f:SetFrameStrata("MEDIUM")
+  f:SetSize(240, 60)
+  f:EnableMouse(false)
+  f.glow = f:CreateTexture(nil, "BACKGROUND")
+  f.glow:SetTexture(UI.TEX.glow)
+  f.glow:SetBlendMode("ADD")
+  f.glow:SetPoint("CENTER")
+  f.text = f:CreateFontString(nil, "OVERLAY")
+  f.text:SetPoint("CENTER", 0, 0)
+  f.prefix = f:CreateFontString(nil, "OVERLAY")
+  f.prefix:SetPoint("RIGHT", f.text, "LEFT", -1, 0)
+  local ag = f:CreateAnimationGroup()
+  f.ag = ag
+  f.move = ag:CreateAnimation("Translation")
+  f.scale = ag:CreateAnimation("Scale")
+  f.fadeIn = ag:CreateAnimation("Alpha")
+  f.fadeOut = ag:CreateAnimation("Alpha")
+  ag:SetScript("OnFinished", function()
+    f:Hide()
+    for i, a in ipairs(active) do if a == f then table.remove(active, i) break end end
+    pool[#pool + 1] = f
+  end)
+  return f
+end
+
+-- alle sichtbaren Zahlen sofort weg (Ausschalten, Vorschau)
+function Numbers.Clear()
+  while #active > 0 do
+    local f = table.remove(active)
+    f.ag:Stop()
+    f:Hide()
+    pool[#pool + 1] = f
+  end
+end
+
+local function setup(f, kind, crit)
+  local n = N()
+  local o = n[kind]
+  local size = math.floor((o.size or 24) * (crit and (o.critScale or 1.5) or 1) + 0.5)
+  local file = Numbers.FontFile(o.font)
+  local fl = flags(o.style)
+  for _, fs in ipairs({ f.text, f.prefix }) do
+    if not pcall(fs.SetFont, fs, file, size, fl) then pcall(fs.SetFont, fs, STANDARD_TEXT_FONT or "Fonts\\FRIZQT__.TTF", size, fl) end
+    local c = crit and o.crit or o.color
+    fs:SetTextColor(c[1], c[2], c[3], 1)
+    if o.style == "schatten" then
+      fs:SetShadowColor(0, 0, 0, 0.9)
+      fs:SetShadowOffset(2, -2)
+    else
+      fs:SetShadowColor(0, 0, 0, 0)
+      fs:SetShadowOffset(0, 0)
+    end
+  end
+  local c = crit and o.crit or o.color
+  f.glow:SetShown(o.style == "neon")
+  f.glow:SetSize(size * 5, size * 2.4)
+  f.glow:SetVertexColor(c[1], c[2], c[3], 0.45)
+  -- Bewegung
+  local anim = n.anim or "steigen"
+  local dx = anim == "bogen" and ((math.random() < 0.5) and -60 or 60) or 0
+  local dy = anim == "pop" and 18 or 70
+  f.move:SetOffset(dx, dy)
+  f.move:SetDuration(anim == "pop" and 1.0 or 1.25)
+  f.move:SetSmoothing("OUT")
+  local s0 = (crit or anim == "pop") and 1.7 or 1.15
+  f.scale:SetScaleFrom(s0, s0)
+  f.scale:SetScaleTo(1, 1)
+  f.scale:SetDuration(0.22)
+  f.scale:SetSmoothing("OUT")
+  f.fadeIn:SetFromAlpha(0) f.fadeIn:SetToAlpha(1) f.fadeIn:SetDuration(0.08)
+  f.fadeOut:SetFromAlpha(1) f.fadeOut:SetToAlpha(0) f.fadeOut:SetDuration(0.45)
+  f.fadeOut:SetStartDelay(anim == "pop" and 0.6 or 0.8)
+end
+
+local function anchorFor(unit, kind)
+  local plate
+  if (unit == "target" or unit:match("^nameplate%d+$")) and C_NamePlate and C_NamePlate.GetNamePlateForUnit then
+    local ok, p = pcall(C_NamePlate.GetNamePlateForUnit, unit)
+    if ok then plate = p end
+  end
+  if plate then return plate, 0, 34 end
+  if unit == "player" or kind == "heal" then return UIParent, 0, 60 end
+  return UIParent, 0, 170
+end
+
+-- Eine Zahl zeigen. amount darf geheim sein (nur durchgereicht).
+function Numbers.Show(unit, kind, amount, crit)
+  local n = N()
+  if not n.own or not n[kind] or not n[kind].on then return end
+  local f = table.remove(pool) or newText()
+  if #active > 24 then local old = table.remove(active, 1) old.ag:Stop() end
+  setup(f, kind, crit)
+  local text = (ns.DB.look.numbers == "voll" and BreakUpLargeNumbers and not secret(amount)) and BreakUpLargeNumbers(amount)
+    or (AbbreviateLargeNumbers and AbbreviateLargeNumbers(amount)) or tostring(amount)
+  f.text:SetText(text)
+  f.prefix:SetText(kind == "heal" and "+" or "")
+  local anchor, x, y = anchorFor(unit, kind)
+  f:ClearAllPoints()
+  f:SetPoint("CENTER", anchor, "CENTER", x + math.random(-26, 26), y + math.random(-6, 10))
+  f:SetAlpha(1)
+  f:Show()
+  active[#active + 1] = f
+  f.ag:Stop()
+  f.ag:Play()
+end
+
+local function isTarget(unit)
+  if unit == "target" then return true end
+  if not (UnitIsUnit and UnitExists and UnitExists("target")) then return false end
+  local same = UnitIsUnit(unit, "target")
+  if secret(same) then return true end   -- unklar -> wie Ziel behandeln (nicht doppelt zeigen)
+  return same == true
+end
+
+function Numbers.OnCombat(_, unit, event, flagText, amount)
+  local n = N()
+  if not n.own or secret(unit) or secret(event) then return end
+  local crit = not secret(flagText) and flagText == "CRITICAL"
+  local plate = type(unit) == "string" and unit:match("^nameplate%d+$")
+  if event == "WOUND" then
+    -- Schaden an Gegnern: am Ziel; an anderen Namensplaketten nur, wenn sie nicht das Ziel sind (sonst doppelt)
+    if unit == "target" or (plate and not isTarget(unit)) then Numbers.Show(unit, "damage", amount, crit) end
+  elseif event == "HEAL" then
+    if unit == "player" or unit == "target" or (plate and not isTarget(unit)) then Numbers.Show(unit, "heal", amount, crit) end
+  end
+end
+
+-- Probe in der Bildschirmmitte (Einstellungen)
+function Numbers.Test()
+  local was = N().own
+  N().own = true
+  Numbers.Show("test", "damage", 12345, false)
+  Numbers.Show("test", "damage", 48210, true)
+  Numbers.Show("player", "heal", 6789, false)
+  Numbers.Show("player", "heal", 15320, true)
+  N().own = was
+end
+
+function Numbers.Init()
+  Numbers.ApplyBlizzard()
+  if not Numbers.hooked then
+    Numbers.hooked = true
+    ns.On("UNIT_COMBAT", Numbers.OnCombat)
+  end
+end
