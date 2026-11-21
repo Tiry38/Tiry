@@ -94,3 +94,6 @@ Ein Testsatz (ruhig, abendlich), Tempo 1,0 / 0,9. Tonhöhe = Median-Grundfrequen
 | Erinome / Sulafat | 229–233 Hz | ≈4 | 3,40 | – |
 Ergebnis: Gacrux ist die tiefste deutsche Chirp-Frauenstimme, Tempo 0,9 kostet keine Natürlichkeit. −5 % Wiedergabe-Tonhöhe ≈ −0,9 Halbtöne → ca. 157 Hz.
 Achernar ist hell (233 Hz) und passt nicht zu „tief“. Alternative mit mehr Ausdruck: Vindemiatrix (174 Hz, Lebendigkeit 6). Endgültig entscheidet Tirys Ohr.
+Absenkung Gacrux (Tempo 0,9, librosa-Phasenvocoder, DNSMOS): 0 % 3,59 · −5 % 3,06 · −10 % 2,97 · −15 % 2,92 · −20 % 2,83 · −25 % 2,69.
+Der Sprung bei −5 % ist vermutlich ein Artefakt des Phasenvocoders (Android nutzt Sonic) – aussagekräftig ist die flache Steigung bis −15 %, danach fällt es deutlicher.
+Empfehlung: −10 % gut, −15 % Obergrenze. Chirp 3 HD lehnt den API-Parameter `pitch` ab (HTTP 400, geprüft 21.11.2026) → Absenkung nur clientseitig.
