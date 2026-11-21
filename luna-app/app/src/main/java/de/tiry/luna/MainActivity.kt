@@ -239,8 +239,8 @@ class MainActivity : Activity(), LunaBus.Listener {
         if (prefs.wakeWanted && !LunaService.running && hasMic()) LunaService.start(this)
         refreshChrome()
         ui.post(hudTick)
-        // Selbst-Update im Hintergrund (höchstens alle 6 Stunden)
-        if (Updater.due(this)) Thread {
+        // Selbst-Update beim Öffnen (höchstens alle 2 Minuten)
+        if (Updater.due(this, 2)) Thread {
             val msg = try { Updater.run(applicationContext) } catch (_: Exception) { "" }
             if (msg.isNotBlank()) runOnUiThread { lunaText.text = msg }
         }.start()

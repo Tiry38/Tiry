@@ -50,10 +50,11 @@ object Updater {
     }
 
     /** Prüft, lädt und installiert. Hintergrund-Thread! Gibt einen Satz für Luna zurück. */
-    fun run(ctx: Context, onlyIfNew: Boolean = true): String {
+    fun run(ctx: Context, onlyIfNew: Boolean = true, background: Boolean = false): String {
         val r = try { check() } catch (e: Exception) { return "Ich komme gerade nicht an GitHub ran." }
             ?: return if (onlyIfNew) "" else "Ich bin schon auf dem neuesten Stand, Version ${BuildConfig.VERSION_NAME}."
         if (!ctx.packageManager.canRequestPackageInstalls()) {
+            if (background) { notifyPermission(ctx, r.versionCode); return "" }
             ctx.startActivity(Intent(android.provider.Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES,
                 android.net.Uri.parse("package:" + ctx.packageName)).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
             return "Es gibt ein Update auf Version 1.0.${r.versionCode}. Erlaube mir einmal, Apps zu installieren – dann mache ich das ab jetzt selbst."
@@ -103,11 +104,22 @@ object Updater {
         }
     }
 
-    /** Höchstens alle 6 Stunden automatisch prüfen. */
-    fun due(ctx: Context): Boolean {
+    /** Einmalige Bitte per Benachrichtigung, Installationen zu erlauben (danach läuft alles automatisch). */
+    private fun notifyPermission(ctx: Context, code: Int) {
+        LunaService.ensureChannels(ctx)
+        val i = Intent(android.provider.Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES, android.net.Uri.parse("package:" + ctx.packageName))
+        val pi = PendingIntent.getActivity(ctx, 77, i, PendingIntent.FLAG_IMMUTABLE)
+        val n = androidx.core.app.NotificationCompat.Builder(ctx, LunaService.CH_REMINDER).setSmallIcon(R.drawable.ic_stat_luna)
+            .setContentTitle("Luna-Update 1.0.$code bereit").setContentText("Einmal antippen und „Apps installieren“ erlauben – danach aktualisiere ich mich selbst.")
+            .setContentIntent(pi).setAutoCancel(true).build()
+        ctx.getSystemService(android.app.NotificationManager::class.java).notify(77, n)
+    }
+
+    /** Prüf-Intervall: im Hintergrund alle 15 Minuten, beim Öffnen der App alle 2 Minuten. */
+    fun due(ctx: Context, minutes: Int = 2): Boolean {
         val p = ctx.getSharedPreferences("luna", Context.MODE_PRIVATE)
         val last = p.getLong("update_check", 0)
-        if (System.currentTimeMillis() - last < 6 * 3600_000L) return false
+        if (System.currentTimeMillis() - last < minutes * 60_000L) return false
         p.edit().putLong("update_check", System.currentTimeMillis()).apply()
         return true
     }
@@ -132,6 +144,19 @@ class UpdateReceiver : BroadcastReceiver() {
 class UpdatedReceiver : BroadcastReceiver() {
     override fun onReceive(ctx: Context, intent: Intent) {
         if (intent.action != Intent.ACTION_MY_PACKAGE_REPLACED) return
-        try { ctx.startActivity(Intent(ctx, MainActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)) } catch (_: Exception) {}
+        if (!Prefs(ctx).wakeWanted) return
+        // Unsichtbare Mini-Activity: startet den Dienst (Android erlaubt das Mikrofon nur aus dem Vordergrund) und schließt sich sofort
+        try { ctx.startActivity(Intent(ctx, RestartActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_NO_ANIMATION)) }
+        catch (_: Exception) { LunaService.postStartHint(ctx) }
+    }
+}
+
+/** Unsichtbar: startet Luna nach einem Update neu und verschwindet in derselben Sekunde. */
+class RestartActivity : android.app.Activity() {
+    override fun onCreate(savedInstanceState: android.os.Bundle?) {
+        super.onCreate(savedInstanceState)
+        try { LunaService.start(this) } catch (_: Exception) { LunaService.postStartHint(this) }
+        finish()
+        @Suppress("DEPRECATION") overridePendingTransition(0, 0)
     }
 }

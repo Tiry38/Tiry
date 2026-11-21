@@ -137,6 +137,8 @@ class LunaService : Service(), WakeWordEngine.Callback, Listener.Callback {
         }
         state(LunaState.LOADING, "Startet …")
         speaker.precache(greetings() + FILLERS)
+        main.postDelayed(updateTick, 20_000)
+        announceUpdate()
         worker.execute {
             try {
                 wake.load()
@@ -147,8 +149,26 @@ class LunaService : Service(), WakeWordEngine.Callback, Listener.Callback {
         }
     }
 
+    /** Automatische Updates: alle 15 Minuten im Hintergrund prüfen, nie mitten im Gespräch. */
+    private val updateTick: Runnable = object : Runnable {
+        override fun run() {
+            if (!running) return
+            if (!inConversation && Updater.due(this@LunaService, 15)) worker.execute { try { Updater.run(this@LunaService, background = true) } catch (_: Exception) {} }
+            main.postDelayed(this, 5 * 60_000L)
+        }
+    }
+
+    /** Nach einem Update einmal still anzeigen, welche Version jetzt läuft. */
+    private fun announceUpdate() {
+        val p = getSharedPreferences("luna", MODE_PRIVATE)
+        val last = p.getInt("last_version", 0)
+        if (last != 0 && last != BuildConfig.VERSION_CODE) LunaBus.update { it.copy(lunaText = "Update installiert – ich laufe jetzt auf Version ${BuildConfig.VERSION_NAME}.") }
+        p.edit().putInt("last_version", BuildConfig.VERSION_CODE).apply()
+    }
+
     private fun shutdown() {
         running = false
+        main.removeCallbacks(updateTick)
         conversationId++
         try { wake.release() } catch (_: Exception) {}
         listener.cancel(); speaker.stop()
@@ -243,10 +263,17 @@ class LunaService : Service(), WakeWordEngine.Callback, Listener.Callback {
         main.postDelayed({ startWake() }, 300)
     }
 
-    private var retries = 0
-    override fun onRetry() {
-        if (retries++ < 3) main.postDelayed({ listenNow() }, 600)
-        else { retries = 0; onListenError("Mein Mikrofon ist gerade belegt. Versuch's gleich nochmal.") }
+    private var notUnderstood = 0
+
+    /** Gesprochen, aber nicht verstanden → einmal menschlich nachfragen, beim zweiten Mal still zurück. */
+    override fun onNotUnderstood() {
+        if (notUnderstood++ >= 1) { notUnderstood = 0; main.postDelayed({ startWake() }, 300); return }
+        val id = conversationId
+        val msg = listOf("Hm, das hab ich nicht ganz mitbekommen. Nochmal?", "Sorry, sag das nochmal?", "Wie bitte?",
+            "Da war ich kurz raus. Nochmal, bitte?").random()
+        LunaBus.update { it.copy(lunaText = msg) }
+        state(LunaState.SPEAKING, "Spreche …")
+        talk(msg, id) { listenNow() }
     }
 
     override fun onListenError(msg: String) {
@@ -256,7 +283,7 @@ class LunaService : Service(), WakeWordEngine.Callback, Listener.Callback {
     }
 
     override fun onHeard(text: String) {
-        retries = 0
+        notUnderstood = 0
         val id = conversationId
         LunaBus.update { it.copy(userText = text, level = 0f) }
         state(LunaState.THINKING, "Moment …")

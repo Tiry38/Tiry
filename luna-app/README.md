@@ -64,7 +64,8 @@ System-App bräuchte ein gerootetes Handy bzw. eigenes Android.
 
 ## Updates (automatisch ab Version 1.0.7)
 
-Luna prüft beim Öffnen (höchstens alle 6 Stunden) GitHub auf eine neue Version, lädt sie und installiert sie selbst.
+Luna prüft alle 15 Minuten im Hintergrund (und bei jedem Öffnen) GitHub auf eine neue Version, lädt sie, installiert
+sie selbst (nie mitten im Gespräch) und startet sich danach neu.
 Beim ersten Mal fragt Android einmal „Apps installieren erlauben?“ und „Installieren?“ – danach (Android 12+)
 ohne Rückfrage. Manuell: „Luna, update dich“ oder Einstellungen → Über → „Nach Updates suchen“.
 

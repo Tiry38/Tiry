@@ -98,6 +98,8 @@
             <intent-filter><action android:name="android.speech.RecognitionService" /></intent-filter>
             <meta-data android:name="android.speech" android:resource="@xml/recognition" />
         </service>
+        <activity android:name=".RestartActivity" android:exported="false" android:excludeFromRecents="true"
+            android:noHistory="true" android:theme="@android:style/Theme.Translucent.NoTitleBar" />
         <activity android:name=".AssistActivity" android:exported="true" android:theme="@android:style/Theme.Translucent.NoTitleBar"
             android:excludeFromRecents="true" android:showWhenLocked="true">
             <intent-filter>
