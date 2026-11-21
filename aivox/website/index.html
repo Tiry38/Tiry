@@ -3,32 +3,58 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>AVOX Voice</title>
-<meta name="description" content="AVOX ist die KI am Telefon deiner Werkstatt: nimmt ab, bucht Termine und schreibt dir alles auf – rund um die Uhr.">
-<meta name="theme-color" content="#030405">
+<title>AIVOX Voice</title>
+<meta name="description" content="AIVOX ist die KI am Telefon deiner Werkstatt: nimmt ab, bucht Termine und schreibt dir alles auf – rund um die Uhr.">
+<meta name="theme-color" content="#020304">
+<link rel="icon" href="logo.svg" type="image/svg+xml">
 <link rel="preload" href="fonts/manrope-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="fonts/michroma-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="style.css">
 </head>
 <body class="booting">
 <a class="skip" href="#inhalt">Zum Inhalt springen</a>
-<div class="light" aria-hidden="true"><span class="cone"></span><span class="floor"></span></div>
+
+<!-- Showroom-Licht -->
+<div class="light" aria-hidden="true">
+  <span class="cone"></span><span class="rim rim-l"></span><span class="rim rim-r"></span><span class="aurora"></span><span class="floor"></span>
+</div>
 <div class="grain" aria-hidden="true"></div>
 <div class="scan" aria-hidden="true"></div>
+<div class="glowcursor" aria-hidden="true"></div>
+
+<!-- Wiederverwendbarer Schriftzug -->
+<svg width="0" height="0" class="defs" aria-hidden="true" focusable="false">
+  <defs>
+    <linearGradient id="spec" x1="0" y1="0" x2="520" y2="0" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#2f8cff"/><stop offset=".3" stop-color="#7fd4ff"/><stop offset=".52" stop-color="#ffffff"/><stop offset=".75" stop-color="#ffb340"/><stop offset="1" stop-color="#ff4a24"/>
+    </linearGradient>
+    <symbol id="wordmark" viewBox="0 0 520 100">
+      <g fill="none" stroke="url(#spec)" stroke-width="8" stroke-linecap="square">
+        <path d="M4 96 L42 6 L80 96"/><path d="M114 6 V96"/><path d="M148 6 L188 96 L228 6"/>
+        <path d="M287.4 9.4 A44 44 0 1 0 312.6 9.4"/>
+        <path d="M362 6 L392 46 M410 54 L440 96 M440 6 L410 46 M392 54 L362 96"/>
+      </g>
+      <g fill="url(#spec)"><circle cx="300" cy="51" r="7"/><circle cx="401" cy="50" r="4"/><rect x="296" y="0" width="8" height="22" rx="2"/></g>
+    </symbol>
+  </defs>
+</svg>
 
 <!-- ================= BEGRÜSSUNG ================= -->
 <div class="intro" role="dialog" aria-modal="true" aria-labelledby="intro-title">
+  <canvas class="intro-fx" aria-hidden="true"></canvas>
   <canvas class="plasma intro-plasma" data-size="intro" aria-hidden="true"></canvas>
   <div class="intro-hud">
-    <span class="hud-l">AVOX OS · 1.0</span>
+    <span>AIVOX OS · 65.0</span>
     <span class="hud-r"><span class="hud-dot" aria-hidden="true"></span><span class="js-clock">--:--:--</span></span>
   </div>
+  <ol class="boot-log" aria-hidden="true"></ol>
   <div class="intro-core">
     <p class="intro-kicker js-greet">Willkommen</p>
-    <h1 id="intro-title" class="intro-word" data-decode>AVOX</h1>
+    <h1 id="intro-title" class="vh">AIVOX</h1>
+    <div class="intro-logo-space" aria-hidden="true"></div>
     <p class="intro-line">Die Stimme deiner Werkstatt.</p>
     <div class="intro-actions">
-      <button class="btn btn-light js-enter" type="button" data-sound="1">Eintreten mit Ton</button>
+      <button class="btn btn-spec js-enter" type="button" data-sound="1"><span>Eintreten mit Ton</span></button>
       <button class="btn-text js-enter" type="button" data-sound="0">ohne Ton</button>
     </div>
     <p class="intro-cap" aria-live="polite"></p>
@@ -36,32 +62,50 @@
   <button class="intro-skip js-skip" type="button">Überspringen</button>
 </div>
 
+<!-- ================= LEISTE ================= -->
 <header class="bar">
   <div class="bar-in">
-    <a class="brand" href="#start" aria-label="AVOX Übersicht"><span class="brand-node" aria-hidden="true"></span>AVOX</a>
+    <a class="brand" href="#start" aria-label="AIVOX Übersicht"><svg class="wm" viewBox="0 0 520 100" aria-hidden="true"><use href="#wordmark"/></svg></a>
     <nav class="tabs" aria-label="Bereiche">
       <span class="tab-glow" aria-hidden="true"></span>
       <a class="tab" href="#start">Übersicht</a>
       <a class="tab" href="#live">Live-Demo</a>
       <a class="tab" href="#funktionen">Funktionen</a>
+      <a class="tab" href="#sicherheit">Sicherheit</a>
+      <a class="tab" href="#branchen">Branchen</a>
       <a class="tab" href="#preise">Preise</a>
+      <a class="tab" href="#ueber">Über uns</a>
       <a class="tab" href="#fragen">Fragen</a>
     </nav>
     <div class="bar-r">
       <button class="snd" type="button" aria-pressed="false" aria-label="Klangeffekte an oder aus">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4z"/><path class="w1" d="M15.5 9a4 4 0 0 1 0 6"/><path class="w2" d="M18 6.5a7.5 7.5 0 0 1 0 11"/><path class="x" d="m16 9.5 5 5m0-5-5 5"/></svg>
       </button>
-      <a class="btn btn-light btn-s" href="#preise">Testen</a>
+      <a class="btn btn-spec btn-s" href="#preise"><span>Testen</span></a>
+      <button class="menu-btn" type="button" aria-expanded="false" aria-controls="menu" aria-label="Menü öffnen"><span></span><span></span></button>
     </div>
   </div>
 </header>
+
+<div class="menu" id="menu" hidden>
+  <nav aria-label="Alle Bereiche">
+    <a href="#start"><strong>Übersicht</strong><span>Was AIVOX für deine Werkstatt tut</span></a>
+    <a href="#live"><strong>Live-Demo</strong><span>4 echte Anrufe zum Anhören</span></a>
+    <a href="#funktionen"><strong>Funktionen</strong><span>Alles, was sie kann</span></a>
+    <a href="#sicherheit"><strong>Sicherheit</strong><span>Datenschutz, KI-Gesetz, Kontrolle</span></a>
+    <a href="#branchen"><strong>Branchen</strong><span>Für wen AIVOX gebaut ist</span></a>
+    <a href="#preise"><strong>Preise</strong><span>Ein Preis, alles drin</span></a>
+    <a href="#ueber"><strong>Über uns</strong><span>Gebaut von Mensch und KI</span></a>
+    <a href="#fragen"><strong>Fragen</strong><span>Ehrliche Antworten</span></a>
+  </nav>
+</div>
 
 <main id="inhalt" tabindex="-1">
 
   <!-- ================= ÜBERSICHT ================= -->
   <section class="view" data-view="start" aria-labelledby="t-start">
     <div class="wrap hero">
-      <p class="status"><span class="hud-dot" aria-hidden="true"></span>AVOX ONLINE · <span class="js-clock mono">--:--:--</span><span class="hide-s"> · Leitung frei</span></p>
+      <p class="status"><span class="hud-dot" aria-hidden="true"></span>AIVOX ONLINE · <span class="js-clock">--:--:--</span><span class="hide-s"> · Leitung frei</span></p>
       <h1 id="t-start" class="chrome display" data-decode>Jeder Anruf.<br>Angenommen.</h1>
       <p class="sub">Die KI am Telefon deiner Werkstatt. Sie nimmt ab, bucht Termine und schreibt dir alles auf – rund um die Uhr, auf Deutsch.</p>
     </div>
@@ -72,36 +116,34 @@
         <svg class="i-play" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13l11-6.5z"/></svg>
         <svg class="i-stop" viewBox="0 0 24 24" aria-hidden="true"><rect x="7" y="7" width="10" height="10" rx="1.5"/></svg>
       </button>
-      <p class="caption" aria-live="polite"><span class="cap-who">Beispielanruf</span><span class="cap-text">Tippe auf den Punkt und hör AVOX live zu. Oder berühr die Linie.</span></p>
+      <p class="caption" aria-live="polite"><span class="cap-who">Beispielanruf</span><span class="cap-text">Tippe auf den Punkt und hör AIVOX zu. Oder berühr die Linie.</span></p>
     </div>
     <div class="wrap">
       <dl class="specs">
-        <div><dt class="spec-v">24/7</dt><dd>erreichbar, auch nach Feierabend</dd></div>
+        <div><dt class="spec-v" data-count="24">24/7</dt><dd>erreichbar, auch nach Feierabend</dd></div>
         <div><dt class="spec-v">129<span class="eur">&nbsp;€</span></dt><dd>im Monat, monatlich kündbar</dd></div>
         <div><dt class="spec-v">0<span class="eur">&nbsp;€</span></dt><dd>Einrichtung, machen wir für dich</dd></div>
         <div><dt class="spec-v">1</dt><dd>Rufumleitung genügt, Nummer bleibt</dd></div>
       </dl>
       <div class="cta-row">
-        <a class="btn btn-light" href="#preise">14 Tage kostenlos testen</a>
-        <a class="btn btn-ghost" href="#live">Live-Demo starten</a>
+        <a class="btn btn-spec magnetic" href="#preise"><span>14 Tage kostenlos testen</span></a>
+        <a class="btn btn-ghost magnetic" href="#live">Live-Demo starten</a>
       </div>
     </div>
 
-    <!-- Sorgen nehmen -->
-    <div class="wrap block">
+    <div class="wrap block reveal">
       <p class="kicker">KEINE ANGST VOR KI</p>
       <h2 class="chrome h2" data-decode>Klingt freundlich.<br>Arbeitet verlässlich.</h2>
-      <p class="lead">Die meisten Betriebe haben zwei Sorgen: dass es nach Roboter klingt und dass die KI Fehler macht. Genau dafür ist AVOX gebaut.</p>
+      <p class="lead">Die meisten Betriebe haben zwei Sorgen: dass es nach Roboter klingt und dass die KI Fehler macht. Genau dafür ist AIVOX gebaut.</p>
       <ul class="trust">
-        <li class="spot"><span class="t-ico" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 10v4M8 7v10M12 4v16M16 8v8M20 11v2"/></svg></span><strong>Natürliche Stimme</strong><span>Ruhig, freundlich, klares Deutsch. Sie sagt ehrlich, dass sie eine KI ist – danach zählt nur, dass das Anliegen erledigt ist.</span></li>
-        <li class="spot"><span class="t-ico" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 3 4.5 6v5.5c0 4.6 3.2 8.4 7.5 9.5 4.3-1.1 7.5-4.9 7.5-9.5V6z"/><path d="m9 12 2 2 4-4"/></svg></span><strong>Lieber Rückruf als Raten</strong><span>Weiß sie etwas nicht, sagt sie das und notiert einen Rückruf – statt sich etwas auszudenken.</span></li>
-        <li class="spot"><span class="t-ico" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="15" rx="3"/><path d="M4 10h16M9 3v4M15 3v4"/></svg></span><strong>Nur deine Regeln</strong><span>Sie bucht nur freie Zeiten, nennt nur Preise, die du freigibst, und sagt nichts, was du ihr nicht beigebracht hast.</span></li>
-        <li class="spot"><span class="t-ico" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 7v5l3 2"/></svg></span><strong>Du behältst die Kontrolle</strong><span>Jedes Gespräch landet als Zusammenfassung bei dir. Und abschalten heißt: Rufumleitung aus. Fertig.</span></li>
+        <li class="spot tilt"><span class="t-ico c-ice" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 10v4M8 7v10M12 4v16M16 8v8M20 11v2"/></svg></span><strong>Natürliche Stimme</strong><span>Ruhig, freundlich, klares Deutsch. Sie sagt ehrlich, dass sie eine KI ist – danach zählt nur, dass das Anliegen erledigt ist.</span></li>
+        <li class="spot tilt"><span class="t-ico c-mint" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 3 4.5 6v5.5c0 4.6 3.2 8.4 7.5 9.5 4.3-1.1 7.5-4.9 7.5-9.5V6z"/><path d="m9 12 2 2 4-4"/></svg></span><strong>Lieber Rückruf als Raten</strong><span>Weiß sie etwas nicht, sagt sie das und notiert einen Rückruf – statt sich etwas auszudenken.</span></li>
+        <li class="spot tilt"><span class="t-ico c-amber" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="15" rx="3"/><path d="M4 10h16M9 3v4M15 3v4"/></svg></span><strong>Nur deine Regeln</strong><span>Sie bucht nur freie Zeiten, nennt nur Preise, die du freigibst, und sagt nichts, was du ihr nicht beigebracht hast.</span></li>
+        <li class="spot tilt"><span class="t-ico c-ember" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 7v5l3 2"/></svg></span><strong>Du behältst die Kontrolle</strong><span>Jedes Gespräch landet als Zusammenfassung bei dir. Und abschalten heißt: Rufumleitung aus. Fertig.</span></li>
       </ul>
     </div>
 
-    <!-- Zukunft, durch die Blume -->
-    <div class="wrap block future">
+    <div class="wrap block reveal">
       <p class="kicker">DER NÄCHSTE SCHRITT</p>
       <h2 class="chrome h2" data-decode>Erst kam die Website.<br>Jetzt kommt die Stimme.</h2>
       <div class="timeline" aria-label="Wie sich Werkstätten verändert haben">
@@ -112,34 +154,41 @@
       <p class="lead">Niemand muss der Erste sein. Aber Kunden merken sich schnell, wo immer jemand abnimmt – und wo es nur klingelt.</p>
     </div>
 
-    <!-- Rechner -->
-    <div class="wrap block">
+    <div class="wrap block reveal">
       <p class="kicker">RECHNE SELBST</p>
       <h2 class="chrome h2" data-decode>Was klingelt bei dir<br>ins Leere?</h2>
       <div class="calc spot">
         <div class="sliders">
-          <label class="sl" for="c-calls"><span>Verpasste Anrufe pro Woche</span><output class="mono" for="c-calls">6</output><input id="c-calls" type="range" min="0" max="40" step="1" value="6"></label>
-          <label class="sl" for="c-rate"><span>Davon würden Aufträge</span><output class="mono" for="c-rate">30 %</output><input id="c-rate" type="range" min="5" max="80" step="5" value="30"></label>
-          <label class="sl" for="c-value"><span>Durchschnittlicher Auftrag</span><output class="mono" for="c-value">120 €</output><input id="c-value" type="range" min="30" max="600" step="10" value="120"></label>
+          <label class="sl" for="c-calls"><span>Verpasste Anrufe pro Woche</span><output for="c-calls">6</output><input id="c-calls" type="range" min="0" max="40" step="1" value="6"></label>
+          <label class="sl" for="c-rate"><span>Davon würden Aufträge</span><output for="c-rate">30 %</output><input id="c-rate" type="range" min="5" max="80" step="5" value="30"></label>
+          <label class="sl" for="c-value"><span>Durchschnittlicher Auftrag</span><output for="c-value">120 €</output><input id="c-value" type="range" min="30" max="600" step="10" value="120"></label>
         </div>
         <div class="result">
           <p class="res-label">Umsatz pro Monat, der heute an dir vorbeiklingelt</p>
-          <p class="res-num"><span class="chrome js-res">0</span><span class="eur res-eur">&nbsp;€</span></p>
-          <p class="res-vs">AVOX kostet <strong>129 €</strong> im Monat. <span class="js-factor"></span></p>
+          <p class="res-num"><span class="spec-text js-res">0</span><span class="eur res-eur">&nbsp;€</span></p>
+          <p class="res-vs">AIVOX kostet <strong>129 €</strong> im Monat. <span class="js-factor"></span></p>
           <p class="fine-l">Rechnung mit deinen Werten: Anrufe × 4,33 Wochen × Quote × Auftrag.</p>
         </div>
       </div>
-      <div class="cta-row">
-        <a class="btn btn-light" href="#preise">Platz als Pilot-Werkstatt sichern</a>
-      </div>
+    </div>
+
+    <div class="wrap block reveal">
+      <p class="kicker">SO STARTEST DU</p>
+      <h2 class="chrome h2" data-decode>In einer Woche live.</h2>
+      <ol class="flow">
+        <li><span class="flow-dot c-ice"></span><strong>Tag 1</strong><span>Kurzes Gespräch: Öffnungszeiten, Leistungen, Preise, was AIVOX sagen darf.</span></li>
+        <li><span class="flow-dot c-amber"></span><strong>Tag 2–5</strong><span>Wir richten alles ein und rufen selbst zur Probe an, bis jede Antwort sitzt.</span></li>
+        <li><span class="flow-dot c-ember"></span><strong>Tag 6</strong><span>Du schaltest die Rufumleitung ein. Ab jetzt geht kein Anruf mehr verloren.</span></li>
+      </ol>
+      <div class="cta-row"><a class="btn btn-spec magnetic" href="#preise"><span>Platz als Pilot-Werkstatt sichern</span></a></div>
     </div>
   </section>
 
   <!-- ================= LIVE-DEMO ================= -->
   <section class="view" data-view="live" aria-labelledby="t-live" hidden>
     <div class="wrap head">
-      <p class="kicker">LIVE-DEMO · 4 ECHTE SITUATIONEN</p>
-      <h2 id="t-live" class="chrome h2" data-decode>Hör zu, wie AVOX<br>deine Anrufe löst.</h2>
+      <p class="kicker">LIVE-DEMO · 4 SITUATIONEN</p>
+      <h2 id="t-live" class="chrome h2" data-decode>Hör zu, wie AIVOX<br>deine Anrufe löst.</h2>
       <div class="chips" role="group" aria-label="Situation wählen"></div>
     </div>
     <div class="line-stage tall">
@@ -152,12 +201,12 @@
     </div>
     <div class="wrap console">
       <ol class="script" aria-label="Gesprächsverlauf"></ol>
-      <aside class="extract spot" aria-label="Was AVOX erkannt hat">
+      <aside class="extract spot" aria-label="Was AIVOX erkannt hat">
         <p class="ex-head"><span class="hud-dot" aria-hidden="true"></span>Erkannt</p>
         <dl class="ex-list"></dl>
       </aside>
     </div>
-    <p class="fine wrap">Beispielgespräche, Werkstatt fiktiv. Beide Stimmen sind KI-Stimmen (frei lizenziert, CC0), der Anrufer klingt bewusst nach Telefon.</p>
+    <p class="fine wrap">Beispielgespräche, Werkstatt fiktiv. Beide Stimmen sind KI-Stimmen, der Anrufer klingt bewusst nach Telefon.</p>
   </section>
 
   <!-- ================= FUNKTIONEN ================= -->
@@ -168,16 +217,50 @@
     </div>
     <div class="wrap">
       <ol class="steps">
-        <li class="spot"><span class="step-n">01</span><h3>Rufumleitung an</h3><p>Du leitest deine Nummer bei Besetzt oder nach Feierabend auf AVOX um. Deine Nummer bleibt, deine Kunden merken nur, dass immer jemand abnimmt.</p></li>
-        <li class="spot"><span class="step-n">02</span><h3>AVOX nimmt ab</h3><p>Sie sagt offen, dass sie eine KI ist, versteht das Anliegen und bucht freie Termine direkt in deinen Kalender.</p></li>
-        <li class="spot"><span class="step-n">03</span><h3>Du liest nur noch</h3><p>Nach jedem Anruf bekommst du eine kurze Zusammenfassung per E-Mail: wer, was, wann, Rückruf ja oder nein.</p></li>
+        <li class="spot tilt"><span class="step-n c-ice">Rufumleitung</span><h3>Du leitest um</h3><p>Bei Besetzt, nach Feierabend oder immer. Deine Nummer bleibt, deine Kunden merken nur, dass immer jemand abnimmt.</p></li>
+        <li class="spot tilt"><span class="step-n c-amber">Gespräch</span><h3>AIVOX nimmt ab</h3><p>Sie sagt offen, dass sie eine KI ist, versteht das Anliegen und bucht freie Termine direkt in deinen Kalender.</p></li>
+        <li class="spot tilt"><span class="step-n c-ember">Zusammenfassung</span><h3>Du liest nur noch</h3><p>Nach jedem Anruf eine kurze E-Mail: wer, was, wann, Rückruf ja oder nein.</p></li>
       </ol>
       <ul class="feats">
         <li class="spot"><strong>Termine buchen</strong><span>Inspektion, Reparatur, Abholung – mit deinen echten Zeiten.</span></li>
         <li class="spot"><strong>Status geben</strong><span>„Ist mein Rad fertig?“ beantwortet sie, sobald du den Status pflegst.</span></li>
         <li class="spot"><strong>Rückruf notieren</strong><span>Was sie nicht lösen kann, landet sauber als Rückrufwunsch bei dir.</span></li>
         <li class="spot"><strong>Werkstatt-Wissen</strong><span>Öffnungszeiten, Preise, Leasing-Fragen – genau so, wie du es ihr sagst.</span></li>
+        <li class="spot"><strong>Kalender-Sync</strong><span>Google- oder Outlook-Kalender, keine Doppelbuchungen.</span></li>
+        <li class="spot"><strong>Dringendes weiterleiten</strong><span>Echte Notfälle stellt sie sofort auf dein Handy durch.</span></li>
+        <li class="spot"><strong>Feierabend-Modus</strong><span>Nach Ladenschluss Auskunft geben und Rückrufe sammeln.</span></li>
+        <li class="spot soon"><strong>Mehrsprachig</strong><span>Englisch und weitere Sprachen. <em>Kommt bald.</em></span></li>
       </ul>
+    </div>
+  </section>
+
+  <!-- ================= SICHERHEIT ================= -->
+  <section class="view" data-view="sicherheit" aria-labelledby="t-sich" hidden>
+    <div class="wrap head">
+      <p class="kicker">SICHERHEIT & RECHT</p>
+      <h2 id="t-sich" class="chrome h2" data-decode>Sauber gebaut.<br>Von Anfang an.</h2>
+      <p class="lead">KI am Telefon ist neu. Die Regeln dafür sind klar – und AIVOX hält sie ein.</p>
+    </div>
+    <div class="wrap shield">
+      <div class="spot tilt"><span class="badge c-ice">EU AI Act</span><h3>Offen als KI erkennbar</h3><p>Seit August 2026 müssen Anrufer erfahren, dass sie mit einer KI sprechen. AIVOX sagt es zu Beginn jedes Gesprächs.</p></div>
+      <div class="spot tilt"><span class="badge c-mint">DSGVO</span><h3>Einwilligung zuerst</h3><p>Aufgezeichnet oder mitgeschrieben wird nur mit Einwilligung. Die Datenschutzhinweise nennt sie in der Ansage.</p></div>
+      <div class="spot tilt"><span class="badge c-amber">Vertrag</span><h3>Auftragsverarbeitung</h3><p>Du bekommst einen Vertrag zur Auftragsverarbeitung. Deine Daten gehören dir.</p></div>
+      <div class="spot tilt"><span class="badge c-ember">Kontrolle</span><h3>Ein Schalter genügt</h3><p>Rufumleitung aus – und alles läuft wieder wie vorher. Ohne Kündigungsfrist.</p></div>
+    </div>
+    <p class="fine wrap">Hinweis: Entwurf. Die Rechtstexte werden vor dem Start fachlich geprüft.</p>
+  </section>
+
+  <!-- ================= BRANCHEN ================= -->
+  <section class="view" data-view="branchen" aria-labelledby="t-br" hidden>
+    <div class="wrap head">
+      <p class="kicker">BRANCHEN</p>
+      <h2 id="t-br" class="chrome h2" data-decode>Geboren in der Werkstatt.<br>Gebaut für alle, die anpacken.</h2>
+    </div>
+    <div class="wrap orbit">
+      <div class="orb-item main spot tilt"><span class="badge c-mint">Jetzt</span><h3>Fahrradwerkstätten</h3><p>Inspektion, Reparatur, Abholung, Leasing-Fragen. Hier ist AIVOX entstanden – sie kennt jedes Gespräch, das am Werkstatt-Telefon vorkommt.</p></div>
+      <div class="orb-item spot tilt"><span class="badge c-amber">Bald</span><h3>Handwerk</h3><p>Termine, Notdienst, Rückrufe – für Betriebe, die auf der Baustelle stehen statt am Telefon.</p></div>
+      <div class="orb-item spot tilt"><span class="badge c-amber">Bald</span><h3>Salons & Studios</h3><p>Buchen, verschieben, absagen – ohne dass jemand die Arbeit unterbrechen muss.</p></div>
+      <div class="orb-item spot tilt"><span class="badge c-amber">Bald</span><h3>Praxen</h3><p>Terminanfragen und Rückrufe sortiert, das Team am Empfang entlastet.</p></div>
     </div>
   </section>
 
@@ -188,16 +271,16 @@
       <h2 id="t-preis" class="chrome h2" data-decode>Ein Preis.<br>Alles drin.</h2>
     </div>
     <div class="wrap price-grid">
-      <article class="plan spot">
-        <p class="plan-name">AVOX Voice</p>
-        <p class="plan-price"><span class="chrome">129<span class="eur">&nbsp;€</span></span><span class="per">pro Monat</span></p>
+      <article class="plan spot tilt">
+        <p class="plan-name">AIVOX Voice</p>
+        <p class="plan-price"><span class="spec-text">129</span><span class="eur big-eur">&nbsp;€</span><span class="per">pro Monat</span></p>
         <ul class="plan-list">
           <li>600 Gesprächsminuten inklusive</li>
           <li>Termine direkt in Google- oder Outlook-Kalender</li>
           <li>Zusammenfassung jedes Anrufs per E-Mail</li>
           <li>KI-Hinweis und Datenschutz-Ansage eingebaut</li>
           <li>Einrichtung durch uns, 0 €</li>
-          <li>Monatlich kündbar</li>
+          <li>Monatlich kündbar · Jahresabo: 2 Monate geschenkt</li>
         </ul>
       </article>
       <form class="join spot" novalidate>
@@ -206,9 +289,25 @@
         <label class="fld" for="f-name"><span>Name der Werkstatt</span><input id="f-name" name="werkstatt" type="text" autocomplete="organization" required></label>
         <label class="fld" for="f-mail"><span>E-Mail</span><input id="f-mail" name="email" type="email" autocomplete="email" required></label>
         <label class="fld" for="f-ort"><span>Ort</span><input id="f-ort" name="ort" type="text" autocomplete="address-level2"></label>
-        <button class="btn btn-light" type="submit">Platz anfragen</button>
+        <button class="btn btn-spec" type="submit"><span>Platz anfragen</span></button>
         <p class="join-msg" aria-live="polite"></p>
       </form>
+    </div>
+  </section>
+
+  <!-- ================= ÜBER UNS ================= -->
+  <section class="view" data-view="ueber" aria-labelledby="t-ueber" hidden>
+    <div class="wrap head">
+      <p class="kicker">ÜBER AIVOX</p>
+      <h2 id="t-ueber" class="chrome h2" data-decode>Ein Mechaniker.<br>Eine KI. Ein Ziel.</h2>
+    </div>
+    <div class="wrap story">
+      <p class="story-big">AIVOX ist in einer echten Fahrradwerkstatt entstanden – zwischen Montageständer, Kettenöl und einem Telefon, das immer dann klingelt, wenn man gerade beide Hände voll hat.</p>
+      <div class="story-cols">
+        <div class="spot tilt"><span class="badge c-amber">Der Mensch</span><h3>Weiß, wie Werkstatt geht</h3><p>Jeden Tag am Rad, jeden Tag die gleichen Anrufe. Er weiß, was Kunden fragen und was eine Werkstatt wirklich braucht.</p></div>
+        <div class="spot tilt"><span class="badge c-ice">Die KI</span><h3>Baut in Hochgeschwindigkeit</h3><p>Programmiert, gestaltet und testet AIVOX gemeinsam mit ihm – in Tagen statt Monaten.</p></div>
+      </div>
+      <p class="lead">Unser Ziel: Jeder kleine Betrieb soll klingen wie ein großer – und arbeiten können, ohne ständig ans Telefon zu müssen.</p>
     </div>
   </section>
 
@@ -219,25 +318,21 @@
       <h2 id="t-faq" class="chrome h2" data-decode>Was Werkstätten<br>uns zuerst fragen.</h2>
     </div>
     <div class="wrap faq">
-      <details class="spot" open><summary>Klingt das nicht nach Roboter?</summary><p>Hör es dir in der Live-Demo an. AVOX spricht ruhig und natürlich. Sie sagt am Anfang offen, dass sie eine KI ist – das ist Pflicht und schafft Vertrauen.</p></details>
-      <details class="spot"><summary>Was, wenn die KI Fehler macht?</summary><p>AVOX arbeitet nur mit dem, was du freigibst: deine Zeiten, deine Preise, deine Antworten. Ist sie unsicher, nimmt sie einen Rückruf auf, statt zu raten. Jedes Gespräch siehst du als Zusammenfassung.</p></details>
+      <details class="spot" open><summary>Klingt das nicht nach Roboter?</summary><p>Hör es dir in der Live-Demo an. AIVOX spricht ruhig und natürlich. Sie sagt am Anfang offen, dass sie eine KI ist – das ist Pflicht und schafft Vertrauen.</p></details>
+      <details class="spot"><summary>Was, wenn die KI Fehler macht?</summary><p>AIVOX arbeitet nur mit dem, was du freigibst: deine Zeiten, deine Preise, deine Antworten. Ist sie unsicher, nimmt sie einen Rückruf auf, statt zu raten. Jedes Gespräch siehst du als Zusammenfassung.</p></details>
       <details class="spot"><summary>Muss ich meine Telefonnummer ändern?</summary><p>Nein. Du richtest bei deinem Anbieter eine Rufumleitung ein, zum Beispiel nur bei Besetzt oder nach Feierabend. Deine Nummer bleibt gleich.</p></details>
-      <details class="spot"><summary>Bin ich nicht zu klein für so etwas?</summary><p>Gerade kleine Betriebe profitieren: Wer allein oder zu zweit in der Werkstatt steht, kann nicht ständig ans Telefon. Genau da springt AVOX ein.</p></details>
+      <details class="spot"><summary>Bin ich nicht zu klein für so etwas?</summary><p>Gerade kleine Betriebe profitieren: Wer allein oder zu zweit in der Werkstatt steht, kann nicht ständig ans Telefon. Genau da springt AIVOX ein.</p></details>
+      <details class="spot"><summary>Brauche ich Technik-Wissen?</summary><p>Nein. Wir richten alles ein. Du musst nur die Rufumleitung einschalten – wir zeigen dir, wie.</p></details>
       <details class="spot"><summary>Wie ist das mit dem Datenschutz?</summary><p>Anrufer werden zu Beginn informiert, Aufzeichnung nur mit Einwilligung. Du bekommst einen Vertrag zur Auftragsverarbeitung.</p></details>
       <details class="spot"><summary>Wie schnell kann ich kündigen?</summary><p>Monatlich. Keine Mindestlaufzeit, kein Kleingedrucktes.</p></details>
     </div>
   </section>
 </main>
 
-<nav class="dock" aria-label="Bereiche">
-  <a class="dock-i" href="#start"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12h4l2-5 4 10 2-5h6"/></svg>Übersicht</a>
-  <a class="dock-i" href="#live"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 10v4M8 7v10M12 4v16M16 8v8M20 11v2"/></svg>Live-Demo</a>
-  <a class="dock-i" href="#funktionen"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><circle cx="12" cy="12" r="8.5"/></svg>Funktionen</a>
-  <a class="dock-i" href="#preise"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M17 6.5A6.5 6.5 0 1 0 17 17.5M4 10.5h9M4 13.5h9"/></svg>Preise</a>
-  <a class="dock-i" href="#fragen"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M9.6 9.4a2.5 2.5 0 1 1 3.4 2.3c-.6.3-1 .8-1 1.5v.3M12 16.6v.1"/></svg>Fragen</a>
-</nav>
-
-<footer class="foot wrap">Entwurf · AVOX Voice · Stimmen: Piper TTS „thorsten“ und „kerstin“ (CC0) · <button class="btn-text js-replay" type="button">Begrüßung nochmal ansehen</button> · © 2026</footer>
+<footer class="foot wrap">
+  <svg class="wm wm-foot" viewBox="0 0 520 100" aria-hidden="true"><use href="#wordmark"/></svg>
+  <p>Entwurf · AIVOX Voice · <button class="btn-text js-replay" type="button">Begrüßung nochmal ansehen</button> · © 2026</p>
+</footer>
 <script src="app.js" defer></script>
 </body>
 </html>
