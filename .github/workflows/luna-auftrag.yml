@@ -1,0 +1,101 @@
+name: Luna-Auftrag an Claude Code
+
+# Tiry sagt Luna, was an ihr verbessert werden soll → Luna legt ein Issue mit Label „luna-auftrag“ an →
+# Claude Code setzt es in luna-app/ um, testet, pusht auf den Branch, aus dem Luna gebaut wurde → die APK wird gebaut
+# und Luna aktualisiert sich selbst.
+# Sicherheit: läuft NUR für Issues, die Tirys eigenes Konto angelegt hat.
+# Einmalig nötig: Repository-Secret CLAUDE_CODE_OAUTH_TOKEN (am PC „claude setup-token“, Claude-Abo)
+# oder ANTHROPIC_API_KEY (API-Abrechnung).
+# Hinweis: Issue-Abläufe startet GitHub nur aus dem Standard-Branch – diese Datei muss daher in „main“ liegen.
+on:
+  issues:
+    types: [opened]
+  workflow_dispatch:
+    inputs:
+      issue:
+        description: "Nummer des Luna-Auftrags (Issue), der (erneut) umgesetzt werden soll"
+        required: true
+
+permissions:
+  contents: write
+  issues: write
+  pull-requests: write
+  actions: write
+  id-token: write
+
+concurrency:
+  group: luna-auftrag
+  cancel-in-progress: false
+
+jobs:
+  umsetzen:
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (contains(github.event.issue.labels.*.name, 'luna-auftrag') &&
+       github.event.issue.user.login == 'Tiry38' &&
+       github.event.issue.state == 'open')
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - name: Auftrag und Ziel-Branch lesen
+        id: auftrag
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NUM: ${{ github.event.issue.number || inputs.issue }}
+        run: |
+          gh api "repos/${{ github.repository }}/issues/$NUM" > /tmp/issue.json
+          AUTHOR=$(jq -r .user.login /tmp/issue.json)
+          LABELS=$(jq -r '[.labels[].name] | join(",")' /tmp/issue.json)
+          if [ "$AUTHOR" != "Tiry38" ] || ! echo "$LABELS" | grep -q luna-auftrag; then
+            echo "Kein Luna-Auftrag von Tiry – Abbruch."; exit 1
+          fi
+          B=$(jq -r .body /tmp/issue.json | sed -n 's/^Branch: `\([A-Za-z0-9._/-]*\)`.*/\1/p' | head -1)
+          [ -z "$B" ] && B="ccr-5a20bb04-mr0zu4"
+          echo "branch=$B" >> "$GITHUB_OUTPUT"
+          echo "num=$NUM" >> "$GITHUB_OUTPUT"
+          {
+            echo "text<<LUNA_EOF"
+            jq -r '.title + "\n\n" + (.body // "")' /tmp/issue.json
+            echo "LUNA_EOF"
+          } >> "$GITHUB_OUTPUT"
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ steps.auftrag.outputs.branch }}
+          fetch-depth: 0
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+          cache: gradle
+      - uses: anthropics/claude-code-action@v1
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          claude_args: |
+            --model claude-opus-5-5
+            --max-turns 80
+            --allowedTools Bash,Edit,Read,Write,Glob,Grep
+          prompt: |
+            Du arbeitest an Luna, Tirys Android-Sprachassistentin (Ordner luna-app/, Anleitung luna-app/README.md und CLAUDE.md).
+            Tiry hat Luna per Sprache diesen Verbesserungsauftrag gegeben (Auftrag #${{ steps.auftrag.outputs.num }}):
+
+            ---
+            ${{ steps.auftrag.outputs.text }}
+            ---
+
+            So gehst du vor:
+            1. Prüfe zuerst, ob der Auftrag im aktuellen Stand schon erledigt ist (schau dir die letzten Commits an). Wenn ja,
+               ändere nichts, sondern schreib das im Kommentar.
+            2. Sonst setz den Auftrag vollständig und sorgfältig in luna-app/ um. Halte dich an CLAUDE.md (Deutsch,
+               Design-Regeln, keine Geheimnisse committen). Unklare Stellen entscheidest du sinnvoll im Sinne von Tiry.
+            3. Teste: cd luna-app && ./gradlew --no-daemon :app:testDebugUnitTest – alles muss grün sein. Ergänze Tests, wo sinnvoll.
+            4. Committe mit einer deutschen Nachricht und pushe auf den aktuellen Branch:
+               git push origin HEAD:${{ steps.auftrag.outputs.branch }}
+               (Abgelehnt, weil der Branch weiter ist? Dann git pull --no-rebase origin ${{ steps.auftrag.outputs.branch }} und erneut pushen.)
+            5. Schreib als Kommentar an Auftrag #${{ steps.auftrag.outputs.num }} in 2–4 kurzen deutschen Sätzen, was du geändert hast
+               (Luna liest das Tiry vor), und schließe den Auftrag.
+            Ändere nichts außerhalb von luna-app/ und .github/workflows/luna-apk.yml.
+      - name: Update für Luna bauen lassen
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh workflow run luna-apk.yml --ref "${{ steps.auftrag.outputs.branch }}"
