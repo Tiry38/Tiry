@@ -136,6 +136,7 @@ class PhoneTools(private val ctx: Context, private val prefs: Prefs) : ToolExecu
                     "extras" to mapOf("type" to "object", "description" to "String-Extras, optional"))),
             ToolDef("set_clipboard", "Kopiert Text in die Zwischenablage.", mapOf("text" to s("Text")), listOf("text")),
             ToolDef("wait", "Wartet kurz, z. B. bis eine App geladen hat (1-10 Sekunden).", mapOf("seconds" to i("Sekunden")), listOf("seconds")),
+            ToolDef("update_luna", "Sucht nach einer neuen Luna-Version auf GitHub und installiert sie."),
             ToolDef("remember", "Merkt sich dauerhaft eine Info über Tiry (Vorlieben, Termine, Fakten).", mapOf("fact" to s("Was gemerkt werden soll")), listOf("fact")),
             ToolDef("forget", "Löscht gemerkte Infos, die diesen Text enthalten.", mapOf("match" to s("Suchtext")), listOf("match")),
             ToolDef("end_conversation", "Beendet das Gespräch nach deiner Antwort (Tiry sagt tschüss/danke/passt). Danach wartet Luna wieder auf „Hey Luna“."),
@@ -179,6 +180,7 @@ class PhoneTools(private val ctx: Context, private val prefs: Prefs) : ToolExecu
             "quick_setting" -> acc { it.quickSetting(str(a, "name")) }
             "open_notification" -> acc { it.openNotification(str(a, "text")) }
             "list_apps" -> listApps()
+            "update_luna" -> Updater.run(ctx, onlyIfNew = false)
             "android_intent" -> intent(a)
             "set_clipboard" -> { ctx.getSystemService(android.content.ClipboardManager::class.java)
                 .setPrimaryClip(android.content.ClipData.newPlainText("Luna", str(a, "text"))); "In die Zwischenablage kopiert." }

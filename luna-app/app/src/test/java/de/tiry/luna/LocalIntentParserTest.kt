@@ -100,6 +100,17 @@ class LocalIntentParserTest {
         assertTrue(WakeWordEngine.isWake("also hey lu na mach", w("also hey lu na mach", 0.9), 6, true))
     }
 
+    @Test fun updateErkennen() {
+        assertEquals("update_luna", p("Luna, update dich")!!.tool)
+        assertEquals(7, Updater.codeOf("luna-v1.0.7"))
+        assertEquals(null, Updater.codeOf("v1.0.3"))
+        val json = """[{"tag_name":"v1.0.3","assets":[{"name":"x.exe","browser_download_url":"u"}]},
+            {"tag_name":"luna-v1.0.6","name":"Luna 1.0.6","assets":[{"name":"Luna-1.0.6.apk","browser_download_url":"https://a/6.apk"}]},
+            {"tag_name":"luna-v1.0.12","name":"Luna 1.0.12","assets":[{"name":"Luna-1.0.12.apk","browser_download_url":"https://a/12.apk"}]}]"""
+        val r = Updater.newest(json)!!
+        assertEquals(12, r.versionCode); assertEquals("https://a/12.apk", r.apkUrl)
+    }
+
     @Test fun weiblicheStimmeErkennen() {
         assertEquals(2, Speaker.femaleScore("de-DE-SMTf00"))
         assertEquals(0, Speaker.femaleScore("de-DE-SMTm00"))

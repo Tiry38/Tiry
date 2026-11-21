@@ -163,6 +163,13 @@ class SettingsActivity : Activity() {
         }
 
         section("Über")
+        button("Nach Updates suchen", filled = true) {
+            Toast.makeText(this, "Suche …", Toast.LENGTH_SHORT).show()
+            Thread {
+                val msg = try { Updater.run(applicationContext, onlyIfNew = false) } catch (e: Exception) { "Fehler: ${e.message}" }
+                runOnUiThread { Toast.makeText(this, msg, Toast.LENGTH_LONG).show() }
+            }.start()
+        }
         hint("Luna ${BuildConfig.VERSION_NAME} · Wake-Word offline (das Mikrofon-Audio verlässt beim Warten nie das Handy). Gesprochenes nach „Hey Luna“ geht an die Google-Spracherkennung und – mit Schlüssel – an Claude bzw. ElevenLabs.")
     }
 

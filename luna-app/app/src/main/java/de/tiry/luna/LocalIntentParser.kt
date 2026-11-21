@@ -66,6 +66,9 @@ object LocalIntentParser {
             parseClock(t)?.let { (h, m) -> return Command("set_alarm", mapOf("hour" to h, "minute" to m)) }
         }
 
+        // Selbst-Update
+        if (Regex("update dich|aktualisier dich|neue version|nach updates|updaten").containsMatchIn(t)) return Command("update_luna")
+
         // Heimnetz: PC & FRITZ!Box
         if (Regex("\\b(pc|computer|rechner)\\b").containsMatchIn(t)) {
             if (Regex("fernsteuer|remote|fernzugriff|draufschalten|aufschalten|verbinde mich").containsMatchIn(t)) return Command("pc_remote")
