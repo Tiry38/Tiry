@@ -99,3 +99,13 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: gh workflow run luna-apk.yml --ref "${{ steps.auftrag.outputs.branch }}"
+      # GitHub hält pro Warteschlange nur EINEN wartenden Lauf – liegengebliebene Aufträge daher nacheinander abarbeiten
+      - name: Nächsten offenen Auftrag starten
+        if: always()
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          CUR: ${{ steps.auftrag.outputs.num }}
+        run: |
+          NEXT=$(gh api "repos/${{ github.repository }}/issues?labels=luna-auftrag&state=open&creator=Tiry38&sort=created&direction=asc&per_page=50" \
+            --jq "[.[] | select(.number != ${CUR:-0} and .comments == 0)][0].number // empty")
+          if [ -n "$NEXT" ]; then echo "Nächster Auftrag: #$NEXT"; gh workflow run luna-auftrag.yml --ref main -f issue="$NEXT"; else echo "Keine offenen Aufträge mehr."; fi
