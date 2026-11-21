@@ -1,5 +1,6 @@
 (() => {
   'use strict';
+  if (!document.body.dataset.page) document.body.dataset.page = 'start'; // eingebettete Startseite ohne body-Attribute
   const $ = (s, el = document) => el.querySelector(s);
   const $$ = (s, el = document) => [...el.querySelectorAll(s)];
   const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
