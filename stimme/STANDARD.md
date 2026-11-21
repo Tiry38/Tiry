@@ -1,0 +1,35 @@
+# Stimmen-Standard für Luna und AIVOX
+
+Gemeinsame Regeln beider Sitzungen (Luna: Branch `ccr-5a20bb04-mr0zu4`, AIVOX: Branch `claude/charming-volta-lz27vg`).
+Stand: 21.11.2026. Grundsatz: **Was nicht gemessen oder von Tiry gehört wurde, gilt als ungeprüft.**
+
+## 1. Motoren (Rangfolge)
+| Rang | Motor | Einsatz | Kosten | Lizenz | Status |
+|---|---|---|---|---|---|
+| 1 | ElevenLabs v4 (Rückfall v3 → multilingual_v2) | Luna live, wenn Schlüssel vorhanden | Abo | kommerziell | Klang von uns beiden **nicht** gehört (kein Schlüssel in der Cloud) |
+| 2 | Kartoffel-Orpheus 3B (deutsch, natürliche Sprecher, Gefühle) | lokal/offline, Demo-Audio | 0 € | Llama 3.2 Community, „Built with Llama“ | **im Test** (AIVOX-Sitzung) |
+| 3 | Chatterbox Multilingual + echte Referenz | lokal/offline | 0 € | MIT | gemessen, Natürlichkeit 3,5–3,8/5 |
+| – | Piper, Handy-/Browser-Stimme | nur Notfall | 0 € | – | roboterhaft (≈ 2,8/5) – nicht verwenden |
+
+## 2. ElevenLabs-Einstellungen (Luna, Doku geprüft, Klang ungeprüft)
+Stimme „Sarah“ `EXAVITQu4vr4xnSDxMaL` · Modell `eleven_v4` · `language_code: "de"` (nur v3/v4) · stability 0.4 · similarity_boost 0.8 · style 0.5 · speed 1.0 · speaker_boost an · `previous_text`/`next_text` zwischen Abschnitten · `mp3_44100_192` (Rückfall 128). Keine SSML-Pausen bei v3/v4.
+
+## 3. Text-Regeln (für alle Motoren, gemessen hilfreich ✔ / Doku ◇)
+- ✔ Zahlen, Uhrzeiten, Beträge als **gesprochene Wörter** („halb elf“, „neunundachtzig Euro“).
+- ✔ Abkürzungen ausschreiben, wie man sie spricht: „SMS“ → „Es-Em-Es“, „KI“ → „künstliche Intelligenz“ oder „Ka-I“.
+- ✔ Namen phonetisch: „Tiry“ → „Tiri“, „AIVOX“ → „Ei-Wox“. Anzeige-Text bleibt richtig geschrieben.
+- ✔ Kurze Sätze (Telefon: max. ~20 Wörter), ein Gedanke pro Satz.
+- ✔ Natürliche Gesprächsbausteine: „Klar, einen Moment … ich schau kurz nach.“, „Oh, das ist ärgerlich – aber das kriegen wir hin.“
+- ◇ Pausen mit „…“, Betonung mit GROSSBUCHSTABEN, Audio-Tags sparsam (max. 1–2 pro Antwort) – nur ElevenLabs v3/v4.
+- Füllwörter bei Wartezeit > 2 s („Sekunde.“, „Mhm, bin dran.“), vorab erzeugt und gecacht (Luna).
+- Begrüßungen nach Tageszeit, nie zweimal dieselbe hintereinander (Luna, AIVOX).
+- Markdown, Emojis, Links vor der Sprachausgabe entfernen.
+
+## 4. Lokale Pipeline (AIVOX, gemessen)
+- Chatterbox: **echte** Referenzaufnahme (nie synthetische!) – Thorsten-Voice CC0. **Gemischte Referenz** (neutral + amüsiert) bei exaggeration 0.5, cfg 0.4: **+30 % Lebendigkeit**, gleiche Natürlichkeit.
+- 3 Varianten je Zeile, Auswahl: Verständlichkeit ≥ 0,9 (Whisper), dann höchste Natürlichkeit (DNSMOS).
+- **Nicht geholfen:** satzweises Zusammensetzen, Raumhall, Voice-Conversion (erfindet Wörter).
+- Anrufer-Stimme im Demo: HD-Telefonklang (Bandpass ~180–6500 Hz).
+
+## 5. Messverfahren (für beide)
+Verständlichkeit: faster-whisper small, Vergleich mit Soll-Text (0–1). Natürlichkeit: DNSMOS (OVRL+P808)/2 (1–5). Lebendigkeit: Tonhöhen-Streuung in Halbtönen (librosa pyin). Werkzeuge: `aivox/stimmen-labor/` auf dem AIVOX-Branch. **Endgültig entscheidet Tirys Blindtest.**
