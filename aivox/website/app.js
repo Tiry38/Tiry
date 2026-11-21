@@ -564,12 +564,13 @@
     setTimeout(() => { intro.hidden = true; intro.classList.remove('leaving', 'playing'); FX.state = 'off'; show(true); decode($('#t-start')); }, reduce ? 50 : 1200);
   };
   const openIntro = () => {
-    introDone = false; intro.hidden = false; intro.classList.remove('playing', 'leaving'); cap.textContent = '';
+    introDone = false; started = false; intro.hidden = false; intro.classList.remove('playing', 'leaving'); cap.textContent = '';
     document.body.classList.add('booting'); introPlasma.span = 0; introPlasma.spanTarget = 0.12; introPlasma.resize();
     FX.resize(); FX.ring = -1; FX.wave = -1; FX.flash = 0; FX.build(); runBoot();
   };
-  $$('.js-enter').forEach((b) => b.addEventListener('click', async () => {
-    if (b.dataset.sound !== '1') { setSfx(false); leaveIntro(); return; }
+  let started = false;
+  const startIntro = async () => {
+    if (started || introDone) return; started = true;
     ensureCtx(); setSfx(true); SFX.boot();
     intro.classList.add('playing'); FX.wave = performance.now(); introPlasma.spanTarget = 1;
     await new Promise((r) => setTimeout(r, 1500));
@@ -578,8 +579,10 @@
     cap.textContent = `${greet[0]}. Willkommen bei AIVOX. Ich bin die künstliche Intelligenz, die für deine Werkstatt ans Telefon geht. Tag und Nacht.`;
     await say('audio/' + greet[1] + '.mp3');
     level.speaking = false;
-    if (!introDone) setTimeout(leaveIntro, 600);
-  }));
+    if (!introDone) setTimeout(leaveIntro, 700);
+  };
+  intro.addEventListener('pointerdown', (e) => { if (!e.target.closest('.js-skip')) startIntro(); });
+  addEventListener('keydown', (e) => { if (!intro.hidden && e.key !== 'Escape' && e.key !== 'Tab') startIntro(); });
   $('.js-skip').addEventListener('click', leaveIntro);
   $('.js-replay').addEventListener('click', () => { stopAll(); window.scrollTo(0, 0); openIntro(); });
   addEventListener('keydown', (e) => {

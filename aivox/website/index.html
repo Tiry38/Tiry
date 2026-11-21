@@ -53,10 +53,7 @@
     <h1 id="intro-title" class="vh">AIVOX</h1>
     <div class="intro-logo-space" aria-hidden="true"></div>
     <p class="intro-line">Die Stimme deiner Werkstatt.</p>
-    <div class="intro-actions">
-      <button class="btn btn-spec js-enter" type="button" data-sound="1"><span>Eintreten mit Ton</span></button>
-      <button class="btn-text js-enter" type="button" data-sound="0">ohne Ton</button>
-    </div>
+    <button class="intro-tap js-enter" type="button" aria-label="AIVOX starten"><span class="tap-ring" aria-hidden="true"></span><span class="tap-txt">Tippen, um AIVOX zu hören</span></button>
     <p class="intro-cap" aria-live="polite"></p>
   </div>
   <button class="intro-skip js-skip" type="button">Überspringen</button>
@@ -104,6 +101,7 @@
 
   <!-- ================= ÜBERSICHT ================= -->
   <section class="view" data-view="start" aria-labelledby="t-start">
+    <svg class="hero-ghost" viewBox="0 0 520 100" aria-hidden="true"><use href="#wordmark"/></svg>
     <div class="wrap hero">
       <p class="status"><span class="hud-dot" aria-hidden="true"></span>AIVOX ONLINE · <span class="js-clock">--:--:--</span><span class="hide-s"> · Leitung frei</span></p>
       <h1 id="t-start" class="chrome display" data-decode>Jeder Anruf.<br>Angenommen.</h1>
@@ -130,6 +128,7 @@
         <a class="btn btn-ghost magnetic" href="#live">Live-Demo starten</a>
       </div>
     </div>
+    <div class="ticker" aria-hidden="true"><div class="ticker-in"><span>24/7 ERREICHBAR</span><span>KLARES DEUTSCH</span><span>TERMINE IM KALENDER</span><span>RÜCKRUF STATT RATEN</span><span>EU AI ACT KONFORM</span><span>DSGVO-ANSAGE</span><span>NUMMER BLEIBT</span><span>MONATLICH KÜNDBAR</span><span>24/7 ERREICHBAR</span><span>KLARES DEUTSCH</span><span>TERMINE IM KALENDER</span><span>RÜCKRUF STATT RATEN</span><span>EU AI ACT KONFORM</span><span>DSGVO-ANSAGE</span><span>NUMMER BLEIBT</span><span>MONATLICH KÜNDBAR</span></div></div>
 
     <div class="wrap block reveal">
       <p class="kicker">KEINE ANGST VOR KI</p>
@@ -157,7 +156,7 @@
     <div class="wrap block reveal">
       <p class="kicker">RECHNE SELBST</p>
       <h2 class="chrome h2" data-decode>Was klingelt bei dir<br>ins Leere?</h2>
-      <div class="calc spot">
+      <div class="calc spot edge">
         <div class="sliders">
           <label class="sl" for="c-calls"><span>Verpasste Anrufe pro Woche</span><output for="c-calls">6</output><input id="c-calls" type="range" min="0" max="40" step="1" value="6"></label>
           <label class="sl" for="c-rate"><span>Davon würden Aufträge</span><output for="c-rate">30 %</output><input id="c-rate" type="range" min="5" max="80" step="5" value="30"></label>
@@ -257,7 +256,7 @@
       <h2 id="t-br" class="chrome h2" data-decode>Geboren in der Werkstatt.<br>Gebaut für alle, die anpacken.</h2>
     </div>
     <div class="wrap orbit">
-      <div class="orb-item main spot tilt"><span class="badge c-mint">Jetzt</span><h3>Fahrradwerkstätten</h3><p>Inspektion, Reparatur, Abholung, Leasing-Fragen. Hier ist AIVOX entstanden – sie kennt jedes Gespräch, das am Werkstatt-Telefon vorkommt.</p></div>
+      <div class="orb-item main spot tilt edge"><span class="badge c-mint">Jetzt</span><h3>Fahrradwerkstätten</h3><p>Inspektion, Reparatur, Abholung, Leasing-Fragen. Hier ist AIVOX entstanden – sie kennt jedes Gespräch, das am Werkstatt-Telefon vorkommt.</p></div>
       <div class="orb-item spot tilt"><span class="badge c-amber">Bald</span><h3>Handwerk</h3><p>Termine, Notdienst, Rückrufe – für Betriebe, die auf der Baustelle stehen statt am Telefon.</p></div>
       <div class="orb-item spot tilt"><span class="badge c-amber">Bald</span><h3>Salons & Studios</h3><p>Buchen, verschieben, absagen – ohne dass jemand die Arbeit unterbrechen muss.</p></div>
       <div class="orb-item spot tilt"><span class="badge c-amber">Bald</span><h3>Praxen</h3><p>Terminanfragen und Rückrufe sortiert, das Team am Empfang entlastet.</p></div>
@@ -271,7 +270,7 @@
       <h2 id="t-preis" class="chrome h2" data-decode>Ein Preis.<br>Alles drin.</h2>
     </div>
     <div class="wrap price-grid">
-      <article class="plan spot tilt">
+      <article class="plan spot tilt edge">
         <p class="plan-name">AIVOX Voice</p>
         <p class="plan-price"><span class="spec-text">129</span><span class="eur big-eur">&nbsp;€</span><span class="per">pro Monat</span></p>
         <ul class="plan-list">
