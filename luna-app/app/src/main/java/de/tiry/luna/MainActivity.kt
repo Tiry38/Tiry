@@ -101,7 +101,7 @@ class MainActivity : Activity(), LunaBus.Listener {
 
     private fun build(): View {
         val root = FrameLayout(this)
-        field = FieldView(this).apply { setTypeface(Ui.wide(context)) }
+        field = FieldView(this).apply { setTypeface(Ui.sans(context, 500)) }
         root.addView(field, FrameLayout.LayoutParams(MATCH_PARENT, MATCH_PARENT))
         val col = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL; gravity = Gravity.CENTER_HORIZONTAL }
         root.addView(col, FrameLayout.LayoutParams(MATCH_PARENT, MATCH_PARENT))
@@ -139,7 +139,8 @@ class MainActivity : Activity(), LunaBus.Listener {
         core = CoreView(this).apply { contentDescription = "Luna – antippen zum Sprechen"; setOnClickListener { talk() } }
         col.addView(core, LinearLayout.LayoutParams(MATCH_PARENT, 0, 1.15f))
         field.coreAnchor = core
-        col.addView(Ui.label(this, "Kern antippen  ·  oder „Hey Luna“", 8f, Ui.DIM, 0.3f))
+        col.addView(Ui.label(this, "Kern antippen  ·  oder „Hey Luna“", 8f, Ui.DIM, 0.3f).apply { gravity = Gravity.CENTER },
+            LinearLayout.LayoutParams(MATCH_PARENT, WRAP_CONTENT))
 
         // ── Dialog
         val talkBox = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL; gravity = Gravity.CENTER_HORIZONTAL }
@@ -152,22 +153,23 @@ class MainActivity : Activity(), LunaBus.Listener {
             setPadding(dp(12), dp(12), dp(12), dp(12)); isClickable = true
             setOnClickListener { startActivity(Intent(context, SettingsActivity::class.java).putExtra("focus", "rechte")) }
         }
-        col.addView(permHint)
+        permHint.gravity = Gravity.CENTER
+        col.addView(permHint, LinearLayout.LayoutParams(MATCH_PARENT, WRAP_CONTENT))
 
         // ── Dellen-Feld: zwei geschwungene Waben-Bögen (5 oben, 4 versetzt darunter)
         val deck = WellLayout(this)
-        listOf("pc" to "PC an", "remote" to "Remote", "wake" to "Wachmodus", "vpn" to "VPN", "guest" to "Gast-WLAN",
-            "torch" to "Licht", "silent" to "Lautlos", "lock" to "Sperren", "weather" to "Wetter")
+        listOf("pc" to "PC an", "remote" to "Remote", "vpn" to "VPN", "guest" to "Gast-WLAN",
+            "torch" to "Licht", "silent" to "Lautlos", "lock" to "Sperren", "wake" to "Wachmodus")
             .forEach { (id, label) -> deck.addView(anchor(id, label)) }
-        col.addView(deck, LinearLayout.LayoutParams(MATCH_PARENT, dp(196)))
+        col.addView(deck, LinearLayout.LayoutParams(MATCH_PARENT, dp(210)))
 
         // Dellen registrieren
         val icons = mapOf("pc" to "power", "remote" to "remote", "wake" to "mic", "vpn" to "shield", "guest" to "wifi",
             "torch" to "torch", "silent" to "bell", "lock" to "lock", "weather" to "cloud", "settings" to "gear")
-        val labels = mapOf("pc" to "PC an", "remote" to "Remote", "wake" to "Wach", "vpn" to "VPN", "guest" to "Gast-WLAN",
+        val labels = mapOf("pc" to "PC an", "remote" to "Remote", "wake" to "Wachmodus", "vpn" to "VPN", "guest" to "Gast-WLAN",
             "torch" to "Licht", "silent" to "Lautlos", "lock" to "Sperren", "weather" to "Wetter", "settings" to "")
         for ((id, v) in anchors) {
-            field.wells += FieldView.Well(id, icons[id], labels[id] ?: "", v, mass = if (id == "wake") 1.25f else if (id == "settings") 0.75f else 1f) { onWell(id) }.apply {
+            field.wells += FieldView.Well(id, icons[id], labels[id] ?: "", v, mass = if (id == "settings") 0.75f else 1f) { onWell(id) }.apply {
                 activeColor = when (id) { "torch" -> Ui.AMBER; "silent" -> Ui.VIOLET; "wake" -> Ui.MINT; else -> Ui.ICE }
             }
         }
@@ -362,27 +364,22 @@ object Permissions {
     fun missing(a: Activity) = all(a).filter { !it.granted && it.key != "write" && it.key != "sms" }
 }
 
-/** Ordnet die Anker in zwei geschwungenen Waben-Bögen an (oben 5, darunter 4 versetzt) – kein Raster. */
+/** Ordnet die Anker übersichtlich an: zwei Reihen à vier, gleichmäßig verteilt. */
 class WellLayout(c: Context) : android.view.ViewGroup(c) {
     override fun onMeasure(wSpec: Int, hSpec: Int) {
-        val s = Ui.dpi(context, 60)
-        for (i in 0 until childCount) getChildAt(i).measure(MeasureSpecExact(s), MeasureSpecExact(s))
+        val s = Ui.dpi(context, 64)
+        val spec = MeasureSpec.makeMeasureSpec(s, MeasureSpec.EXACTLY)
+        for (i in 0 until childCount) getChildAt(i).measure(spec, spec)
         setMeasuredDimension(MeasureSpec.getSize(wSpec), MeasureSpec.getSize(hSpec))
     }
-    private fun MeasureSpecExact(v: Int) = MeasureSpec.makeMeasureSpec(v, MeasureSpec.EXACTLY)
     override fun onLayout(changed: Boolean, l: Int, t: Int, r: Int, b: Int) {
         val w = r - l; val h = b - t
-        val s = Ui.dpi(context, 60)
+        val s = Ui.dpi(context, 64)
         for (i in 0 until childCount) {
-            val top = i < 5
-            val idx = if (top) i else i - 5
-            val n = if (top) 5 else 4
-            val fx = if (top) (idx + 0.5f) / 5f else (idx + 1f) / 5f
-            val curve = ((fx - 0.5f) * 2f).let { it * it }          // Bogen: Mitte höher, Ränder tiefer
-            val cy = (if (top) h * 0.24f else h * 0.70f) + curve * Ui.dp(context, 18f)
-            val cx = w * fx
+            val row = i / 4; val colIdx = i % 4
+            val cx = w * (colIdx + 0.5f) / 4f
+            val cy = h * (if (row == 0) 0.22f else 0.67f)
             getChildAt(i).layout((cx - s / 2).toInt(), (cy - s / 2).toInt(), (cx + s / 2).toInt(), (cy + s / 2).toInt())
-            if (n == 0) break
         }
     }
 }

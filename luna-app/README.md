@@ -19,17 +19,20 @@ Android-App im Stil von J.A.R.V.I.S.: Handy liegt neben dir, du sagst **„Hey L
      Key: elevenlabs.io → Profil → API Keys. Gratis-Kontingent vorhanden.
    - **Stimme testen** antippen.
 
-## Oberfläche: das Lichtfeld-Interface (eigene Erfindung)
+## Oberfläche: Cockpit
 
-Keine Knöpfe, keine Rahmen, keine Pillen. Der Bildschirm ist ein **Raumzeit-Gitter aus Licht**:
-- Jede Funktion ist eine **Gravitationsdelle** – das Gitter krümmt sich zu ihr hin. Antippen vertieft die Delle und
-  schickt eine **Schockwelle durchs ganze Feld** (mit Vibration).
-- **Luna** ist die größte Masse in der Mitte (3D-Partikelkern mit Orbit-Ringen und Plasmalinie). Wenn sie spricht,
-  **schwingt das gesamte Gitter mit ihrer Stimme**. Zuhören färbt das Feld mint, Denken violett.
-- Aktive Funktionen glühen weiter: Licht (bernstein), Lautlos (violett), VPN, Wachmodus (mint).
-- Dellen in zwei geschwungenen Waben-Bögen: PC an, Remote, Wach, VPN, Gast-WLAN, Licht, Lautlos, Sperren, Wetter.
-- Einstellungen ebenfalls rahmenlos: Lichtzeilen statt Knöpfe, HUD-Unterstrich-Felder, Energieknoten als Schalter.
-- Schriften: Michroma (breite Automotive-Schrift) und Sora. `prefers-reduced-motion` bzw. „Animationen aus“ wird beachtet.
+Tiefes Schwarz, ruhiges Punkteraster, 3D-Partikelkern mit Orbit-Ringen und Plasmalinie, HUD (Akku, Netz, Uhrzeit).
+Beim Sprechen/Zuhören laufen Schallwellen-Ringe aus dem Kern. Acht **Reaktor-Ringe** in zwei Reihen: PC an, Remote,
+VPN, Gast-WLAN, Licht, Lautlos, Sperren, Wachmodus – aktive Funktionen leuchten in ihrer Farbe und drehen sich.
+Einstellungen rahmenlos: Lichtzeilen statt Knöpfe, HUD-Unterstrich-Felder, Energieknoten als Schalter.
+
+## Ansprechen: wann Luna reagiert
+
+- **„Hey Luna“** (oder „Hallo/Okay Luna“) – immer.
+- **„Luna“ allein** mit kurzer Pause – nur, wenn gerade nicht geredet wird.
+- **Erwähnung im Satz** („ich hab Luna gebaut“, „Luna ist cool“) – ignoriert.
+- Nach dem Aufwecken prüft Luna selbst, ob das Gesagte an sie gerichtet war; wenn nicht, bleibt sie still.
+- Befehl in einem Atemzug geht mit „Hey Luna, …“; sonst „Hey Luna“ → Begrüßung abwarten → Befehl.
 
 ## Komplette Handy-Steuerung
 

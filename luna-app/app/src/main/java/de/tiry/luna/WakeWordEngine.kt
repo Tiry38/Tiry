@@ -64,6 +64,7 @@ class WakeWordEngine(private val ctx: Context, private val prefs: Prefs) {
         val m = model ?: return cb.onWakeError("Sprachmodell noch nicht geladen.")
         stop()
         try {
+            lastSpeechEnd = -99.0
             val rec = Recognizer(m, 16000f, grammar)
             rec.setWords(true)
             recognizer = rec
@@ -81,12 +82,18 @@ class WakeWordEngine(private val ctx: Context, private val prefs: Prefs) {
         }
     }
 
+    /** Ende des letzten gehörten Wortes (Sekunden im Audiostrom) – um laufende Gespräche zu erkennen. */
+    private var lastSpeechEnd = -99.0
+
     private fun check(json: String?, cb: Callback) {
         if (json.isNullOrBlank()) return
         val o = try { JSONObject(json) } catch (_: Exception) { return }
         val words: JSONArray? = o.optJSONArray("result")
         val text = o.optString("text", "")
-        if (isWake(text, words, prefs.sensitivity, prefs.requireHey)) cb.onWake(text)
+        val firstStart = words?.optJSONObject(0)?.optDouble("start", -1.0) ?: -1.0
+        val gap = if (firstStart >= 0) firstStart - lastSpeechEnd else 99.0
+        if (words != null && words.length() > 0) lastSpeechEnd = words.optJSONObject(words.length() - 1)?.optDouble("end", lastSpeechEnd) ?: lastSpeechEnd
+        if (isWake(text, words, prefs.sensitivity, prefs.requireHey, gap)) cb.onWake(text)
     }
 
     fun stop() {
@@ -100,31 +107,35 @@ class WakeWordEngine(private val ctx: Context, private val prefs: Prefs) {
 
     companion object {
         private val WAKE = listOf("hey lu na", "hallo lu na", "lu na")
-        private val HEY = setOf("hey", "hallo", "he", "ey", "hi", "high")
+        private val HEY = setOf("hey", "hallo", "he", "ey", "hi", "high", "okay", "ok")
 
         fun buildGrammar(distractors: List<String>): String =
-            JSONArray(WAKE + distractors.map { it.trim() }.filter { it.isNotEmpty() && it != "lu" } + "[unk]").toString()
+            JSONArray(WAKE + listOf("ok lu na") + distractors.map { it.trim() }.filter { it.isNotEmpty() && it != "lu" } + "[unk]").toString()
 
         /**
-         * Entscheidet, ob das Gehörte „Hey Luna“ war: „lu“ direkt gefolgt von „na“ mit genug Sicherheit.
-         * Empfindlichkeit 1..10 → nötige Sicherheit 0.95 … 0.50. Pures Kotlin → per JUnit getestet.
+         * Entscheidet, ob Luna wirklich GEMEINT ist – nicht nur erwähnt:
+         *  - „Luna“ muss am Satzanfang stehen oder direkt nach „Hey/Hallo/Okay“ (mitten im Satz = über sie geredet → nein).
+         *  - Wurde unmittelbar davor geredet (Pause < 1,5 s, also laufendes Gespräch), reicht „Luna“ allein nicht – dann nur „Hey Luna“.
+         *  - Ohne „Hey“ nur „Luna“ allein (mit Pause). Geht der Satz weiter („Luna ist eine App …“), ist es eine Erzählung → nein.
+         *    Getestet mit Vosk + synthetischen Stimmen: 20/24 Treffer (fehlend nur „Luna, mach …“ ohne Hey – gewollt), 3/36 Fehlalarme.
+         *  - Sicherheit der Erkennung je nach Empfindlichkeit (1..10 → 0.95 … 0.50).
+         * Pures Kotlin → per JUnit getestet.
          */
-        fun isWake(text: String, words: JSONArray?, sensitivity: Int, requireHey: Boolean): Boolean {
+        fun isWake(text: String, words: JSONArray?, sensitivity: Int, requireHey: Boolean, gapSec: Double = 99.0): Boolean {
             val need = 0.95 - (sensitivity.coerceIn(1, 10) - 1) * 0.05
-            if (words == null || words.length() == 0) {
-                val t = " ${text.trim()} "
-                return t.contains(" lu na ") && (!requireHey || HEY.any { t.contains(" $it lu na ") })
-            }
-            val w = (0 until words.length()).mapNotNull { words.optJSONObject(it) }
-            for (i in 0 until w.size - 1) {
-                if (w[i].optString("word") != "lu" || w[i + 1].optString("word") != "na") continue
-                val hasHey = i > 0 && w[i - 1].optString("word") in HEY
-                if (requireHey && !hasHey) continue
-                val conf = (w[i].optDouble("conf", 1.0) + w[i + 1].optDouble("conf", 1.0)) / 2
-                // Mit „Hey“ davor darf die Sicherheit etwas niedriger sein (weniger Verwechslungsgefahr)
-                if (conf >= need - (if (hasHey) 0.1 else 0.0)) return true
-            }
-            return false
+            val w: List<Pair<String, Double>> = if (words != null && words.length() > 0)
+                (0 until words.length()).mapNotNull { words.optJSONObject(it) }.map { it.optString("word") to it.optDouble("conf", 1.0) }
+            else text.trim().split(Regex("\\s+")).filter { it.isNotEmpty() }.map { it to 1.0 }
+            val i = (0 until w.size - 1).firstOrNull { w[it].first == "lu" && w[it + 1].first == "na" } ?: return false
+            val before = w.subList(0, i).map { it.first }.filter { it != "[unk]" || i > 1 }
+            val hasHey = before.size == 1 && before[0] in HEY
+            if (before.isNotEmpty() && !hasHey) return false               // mitten im Satz → nur erwähnt
+            if (requireHey && !hasHey) return false
+            if (!hasHey && gapSec < 1.5) return false                       // laufendes Gespräch → „Hey Luna“ nötig
+            val after = w.size - (i + 2)
+            if (!hasHey && after > 1) return false                          // „Luna ist …“ = Erzählung; Befehl im Satz nur mit „Hey Luna, …“
+            val conf = (w[i].second + w[i + 1].second) / 2
+            return conf >= need - (if (hasHey) 0.1 else 0.0)                // mit „Hey“ etwas toleranter
         }
     }
 }

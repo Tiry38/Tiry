@@ -97,7 +97,18 @@ class LocalIntentParserTest {
         assertFalse(WakeWordEngine.isWake("[unk]", null, 10, false))
         assertFalse(WakeWordEngine.isWake("lu ey na", w("lu ey na", 1.0), 10, false))     // nicht direkt hintereinander
         assertFalse(WakeWordEngine.isWake("hallo zusammen", w("hallo zusammen", 1.0), 10, false))
-        assertTrue(WakeWordEngine.isWake("also hey lu na mach", w("also hey lu na mach", 0.9), 6, true))
+        // Nur erwähnt statt angesprochen → Luna bleibt still
+        assertFalse(WakeWordEngine.isWake("ich hab lu na gebaut", w("ich hab lu na gebaut", 1.0), 6, false))
+        assertFalse(WakeWordEngine.isWake("also hey lu na mach", w("also hey lu na mach", 0.9), 6, false))
+        // Gezielt angesprochen
+        assertFalse(WakeWordEngine.isWake("lu na ist echt cool geworden", w("lu na ist echt cool geworden", 0.9), 6, false))
+        assertTrue(WakeWordEngine.isWake("hey lu na mach das licht an", w("hey lu na mach das licht an", 0.9), 6, false))
+        assertTrue(WakeWordEngine.isWake("ok lu na", w("ok lu na", 0.9), 6, true))
+        // Laufendes Gespräch (Pause < 1,5 s): „Luna“ allein reicht nicht, „Hey Luna“ schon
+        assertFalse(WakeWordEngine.isWake("lu na", w("lu na", 0.95), 6, false, gapSec = 0.6))
+        assertTrue(WakeWordEngine.isWake("hey lu na", w("hey lu na", 0.95), 6, false, gapSec = 0.6))
+        // Lange Erzählung über Luna ohne „Hey“
+        assertFalse(WakeWordEngine.isWake("lu na ist eine app die ich selbst gebaut habe", w("lu na ist eine app die ich selbst gebaut habe", 1.0), 6, false))
     }
 
     @Test fun updateErkennen() {

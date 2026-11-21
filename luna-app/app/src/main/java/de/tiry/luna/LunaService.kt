@@ -253,6 +253,13 @@ class LunaService : Service(), WakeWordEngine.Callback, Listener.Callback {
     }
 
     private fun answer(r: Reply, id: Int) {
+        // Luna hat erkannt, dass sie gar nicht gemeint war → still zurück in den Wartemodus
+        if (r.text.trim().startsWith("[STILL]")) {
+            LunaBus.update { it.copy(userText = "", lunaText = "") }
+            claude.reset()
+            main.postDelayed({ startWake() }, 200)
+            return
+        }
         LunaBus.update { it.copy(lunaText = r.text) }
         state(LunaState.SPEAKING, "Spreche …")
         speaker.speak(r.text) {
@@ -318,21 +325,30 @@ class LunaService : Service(), WakeWordEngine.Callback, Listener.Callback {
         return "Jetzt: $now; Akku $bat %" + (if (first) "; erstes Gespräch heute" else "")
     }
 
-    private fun greetings(): List<String> {
+    private var lastGreeting = ""
+
+    /** Begrüßungen je Tageszeit – Jarvis-Stil, abwechslungsreich. */
+    private fun greetingsFor(hour: Int, firstToday: Boolean): List<String> {
         val n = prefs.userName
-        return listOf("Hey $n, was gibt's?", "Ja, $n?", "Ich höre.", "Was kann ich für dich tun?", "Bin da. Was brauchst du?",
-            "Guten Morgen, $n! Was steht an?", "Guten Abend, $n. Was kann ich tun?", "Na, $n? Schieß los.")
+        val any = listOf("Ja, $n?", "Ich höre.", "Bin da.", "Was liegt an?", "Schieß los.", "Zu Diensten.", "Ich bin ganz Ohr.",
+            "Was kann ich tun?", "Hier. Was brauchst du?", "$n. Was gibt's?", "Online und bereit.", "Sag an.")
+        val tod = when (hour) {
+            in 4..10 -> listOf("Guten Morgen, $n.", "Morgen, $n. Was steht an?", "Morgen. Kaffee schon gehabt?")
+            in 11..13 -> listOf("Mittag, $n. Was brauchst du?", "Na, Mittagspause?")
+            in 14..17 -> listOf("Nachmittag, $n. Was liegt an?")
+            in 18..22 -> listOf("Guten Abend, $n.", "Abend, $n. Was kann ich tun?", "Feierabend-Modus. Was brauchst du?")
+            else -> listOf("Noch wach, $n?", "Späte Stunde. Was brauchst du?", "Nachtschicht? Ich bin da.")
+        }
+        return if (firstToday) tod else any + tod
     }
 
+    private fun greetings(): List<String> = (0..23 step 4).flatMap { greetingsFor(it, false) }.distinct()
+
     private fun greeting(): String {
-        val g = greetings()
         val h = Calendar.getInstance().get(Calendar.HOUR_OF_DAY)
         val today = SimpleDateFormat("yyyy-MM-dd", Locale.US).format(Date())
-        return when {
-            h in 4..10 && prefs.lastBriefingDay != today -> g[5]
-            h >= 19 && Math.random() < 0.3 -> g[6]
-            else -> listOf(g[0], g[0], g[1], g[2], g[3], g[4], g[7]).random()
-        }
+        val options = greetingsFor(h, prefs.lastBriefingDay != today).filter { it != lastGreeting }
+        return options.random().also { lastGreeting = it }
     }
 
     private fun toolLabel(t: String) = when (t) {
