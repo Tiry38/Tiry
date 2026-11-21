@@ -19,11 +19,17 @@ Android-App im Stil von J.A.R.V.I.S.: Handy liegt neben dir, du sagst **„Hey L
      Key: elevenlabs.io → Profil → API Keys. Gratis-Kontingent vorhanden.
    - **Stimme testen** antippen.
 
-## Oberfläche „Luna 2100“
+## Oberfläche: das Lichtfeld-Interface (eigene Erfindung)
 
-Tiefes Schwarz, Chrom-Schrift (Michroma), eisblaues Leuchten, 3D-Stimmkern aus Partikeln mit Orbit-Ringen und
-Plasmalinie, HUD (Akku, Netz, Uhrzeit). **Kontrollleiste** mit Ein-Knopf-Aktionen: PC an, Remote, VPN, Gast-WLAN,
-Licht, Lautlos, Sperren, Wetter – ein Tipp, Luna erledigt es und sagt kurz Bescheid.
+Keine Knöpfe, keine Rahmen, keine Pillen. Der Bildschirm ist ein **Raumzeit-Gitter aus Licht**:
+- Jede Funktion ist eine **Gravitationsdelle** – das Gitter krümmt sich zu ihr hin. Antippen vertieft die Delle und
+  schickt eine **Schockwelle durchs ganze Feld** (mit Vibration).
+- **Luna** ist die größte Masse in der Mitte (3D-Partikelkern mit Orbit-Ringen und Plasmalinie). Wenn sie spricht,
+  **schwingt das gesamte Gitter mit ihrer Stimme**. Zuhören färbt das Feld mint, Denken violett.
+- Aktive Funktionen glühen weiter: Licht (bernstein), Lautlos (violett), VPN, Wachmodus (mint).
+- Dellen in zwei geschwungenen Waben-Bögen: PC an, Remote, Wach, VPN, Gast-WLAN, Licht, Lautlos, Sperren, Wetter.
+- Einstellungen ebenfalls rahmenlos: Lichtzeilen statt Knöpfe, HUD-Unterstrich-Felder, Energieknoten als Schalter.
+- Schriften: Michroma (breite Automotive-Schrift) und Sora. `prefers-reduced-motion` bzw. „Animationen aus“ wird beachtet.
 
 ## Komplette Handy-Steuerung
 

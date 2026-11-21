@@ -17,7 +17,6 @@ import android.widget.FrameLayout
 import android.widget.LinearLayout
 import android.widget.ScrollView
 import android.widget.SeekBar
-import android.widget.Switch
 import android.widget.TextView
 import android.widget.Toast
 
@@ -35,7 +34,7 @@ class SettingsActivity : Activity() {
         prefs = Prefs(this)
         window.statusBarColor = Ui.BLACK; window.navigationBarColor = Ui.BLACK
         val root = FrameLayout(this)
-        root.addView(SpaceView(this), FrameLayout.LayoutParams(MATCH_PARENT, MATCH_PARENT))
+        root.addView(FieldView(this).apply { calm = true }, FrameLayout.LayoutParams(MATCH_PARENT, MATCH_PARENT))
         val scroll = ScrollView(this)
         col = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL; setPadding(dp(20), dp(24), dp(20), dp(48)) }
         scroll.addView(col)
@@ -144,15 +143,15 @@ class SettingsActivity : Activity() {
         for (p in Permissions.all(this)) {
             val row = LinearLayout(this).apply {
                 orientation = LinearLayout.HORIZONTAL; gravity = Gravity.CENTER_VERTICAL
-                setPadding(dp(18), dp(12), dp(18), dp(12)); minimumHeight = dp(64)
-                background = Ui.ripple(Ui.hairline(context, 32f, if (p.granted) Ui.HAIR else 0x66FFD58A, 0x08FFFFFF))
+                setPadding(dp(4), dp(12), dp(8), dp(12)); minimumHeight = dp(64)
                 setOnClickListener { openPermission(p.key) }
             }
-            row.addView(View(this).apply { background = Ui.circle(context, 0, if (p.granted) Ui.MINT else Ui.AMBER) },
-                LinearLayout.LayoutParams(dp(14), dp(14)).apply { marginEnd = dp(14) })
+            // Lichtstab: Mint = erteilt, Bernstein = fehlt
+            row.addView(View(this).apply { background = Ui.gradient(context, 2f, *(if (p.granted) intArrayOf(Ui.MINT, 0x10B9FFE4) else intArrayOf(Ui.AMBER, 0x10FFD58A))) },
+                LinearLayout.LayoutParams(dp(3), dp(40)).apply { marginEnd = dp(16) })
             val texts = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
-            texts.addView(Ui.text(this, p.title, 16f, Ui.TEXT, true))
-            texts.addView(Ui.text(this, if (p.granted) "Erteilt" else p.why + " Antippen zum Freigeben.", 13f, Ui.MUTED))
+            texts.addView(Ui.text(this, p.title, 15.5f, Ui.TEXT, true))
+            texts.addView(Ui.text(this, if (p.granted) "Erteilt" else p.why + " Antippen zum Freigeben.", 13f, Ui.STEEL).apply { setPadding(0, dp(3), 0, 0) })
             row.addView(texts, LinearLayout.LayoutParams(0, WRAP_CONTENT, 1f))
             permBox.addView(row, LinearLayout.LayoutParams(MATCH_PARENT, WRAP_CONTENT).apply { bottomMargin = dp(10) })
         }
@@ -190,9 +189,10 @@ class SettingsActivity : Activity() {
     /** Kapitel-Kopf: „03 / 10“ in Haarlinien-Pille + Titel in breiter Chrom-Schrift. */
     private fun section(t: String) {
         chapter++
-        col.addView(Ui.label(this, "%02d / %02d".format(chapter, chapters), 8.5f, Ui.STEEL, 0.3f).apply {
-            setPadding(dp(12), dp(7), dp(12), dp(7)); background = Ui.hairline(context)
-        }, LinearLayout.LayoutParams(WRAP_CONTENT, WRAP_CONTENT).apply { topMargin = dp(34) })
+        val row = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL; gravity = Gravity.CENTER_VERTICAL }
+        row.addView(HairlineView(this), LinearLayout.LayoutParams(dp(28), dp(1)).apply { marginEnd = dp(10) })
+        row.addView(Ui.label(this, "%02d / %02d".format(chapter, chapters), 8.5f, Ui.ICE, 0.3f))
+        col.addView(row, LinearLayout.LayoutParams(WRAP_CONTENT, WRAP_CONTENT).apply { topMargin = dp(38) })
         val h = Ui.label(this, t, 14f, Ui.TEXT, 0.12f).apply { setPadding(dp(2), dp(14), 0, dp(10)) }
         Ui.chrome(h)
         col.addView(h)
@@ -206,9 +206,9 @@ class SettingsActivity : Activity() {
         col.addView(Ui.text(this, label, 12.5f, Ui.DIM).apply { setPadding(dp(8), dp(6), 0, dp(7)) })
         val e = EditText(this).apply {
             setText(value); setTextColor(Ui.TEXT); setHintTextColor(Ui.DIM); textSize = 16f; typeface = Ui.sans(context, 400)
-            background = Ui.hairline(context, if (multi) 26f else 999f)
-            setOnFocusChangeListener { v, f -> v.background = if (f) Ui.hairline(context, if (multi) 26f else 999f, 0xB37FD4FF.toInt(), 0x147FD4FF) else Ui.hairline(context, if (multi) 26f else 999f) }
-            setPadding(dp(20), dp(14), dp(20), dp(14)); minHeight = dp(52)
+            background = Ui.underline(context)
+            setOnFocusChangeListener { v, f -> v.background = Ui.underline(context, f) }
+            setPadding(dp(14), dp(12), dp(14), dp(16)); minHeight = dp(52)
             inputType = when {
                 secret -> InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_PASSWORD
                 multi -> InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_FLAG_MULTI_LINE or InputType.TYPE_TEXT_FLAG_CAP_SENTENCES
@@ -225,15 +225,14 @@ class SettingsActivity : Activity() {
         var selected = current
         val views = mutableListOf<Pair<String, TextView>>()
         fun paint() = views.forEach { (k, v) ->
-            v.background = Ui.ripple(if (k == selected) Ui.hairline(this, 999f, 0xCC7FD4FF.toInt(), 0x1F7FD4FF) else Ui.hairline(this))
-            v.setTextColor(if (k == selected) Ui.ICE else Ui.STEEL)
+            (v as LightButton).selected2 = k == selected
         }
         options.forEachIndexed { idx, (k, text) ->
             val v = Ui.pillButton(this, text) { selected = k; save(k); paint() }
             v.gravity = Gravity.CENTER_VERTICAL or Gravity.START
             views += k to v
             // gestaffelt statt Raster
-            col.addView(v, LinearLayout.LayoutParams(WRAP_CONTENT, WRAP_CONTENT).apply { bottomMargin = dp(8); marginStart = dp(idx * 18) })
+            col.addView(v, LinearLayout.LayoutParams(WRAP_CONTENT, WRAP_CONTENT).apply { bottomMargin = dp(2); marginStart = dp(idx * 18) })
         }
         paint()
     }
@@ -242,16 +241,18 @@ class SettingsActivity : Activity() {
         col.addView(Ui.pillButton(this, t, filled) { click() }, LinearLayout.LayoutParams(WRAP_CONTENT, WRAP_CONTENT).apply { topMargin = dp(6); bottomMargin = dp(8) })
     }
 
-    @Suppress("UseSwitchCompatOrMaterialCode")
+    /** Zeile mit Energieknoten statt Schalter. */
     private fun toggle(t: String, value: Boolean, save: (Boolean) -> Unit) {
-        val s = Switch(this).apply {
-            text = t; isChecked = value; setTextColor(Ui.TEXT); textSize = 15f; minHeight = dp(56); typeface = Ui.sans(context, 400)
-            setPadding(dp(22), dp(8), dp(16), dp(8)); background = Ui.hairline(context)
-            thumbTintList = ColorStateList(arrayOf(intArrayOf(android.R.attr.state_checked), intArrayOf()), intArrayOf(Ui.ICE, 0xFF8C96A5.toInt()))
-            trackTintList = ColorStateList(arrayOf(intArrayOf(android.R.attr.state_checked), intArrayOf()), intArrayOf(0x807FD4FF.toInt(), 0x33FFFFFF))
-            setOnCheckedChangeListener { _, c -> save(c) }
+        val node = NodeToggle(this).apply { on = value }
+        val row = LinearLayout(this).apply {
+            orientation = LinearLayout.HORIZONTAL; gravity = Gravity.CENTER_VERTICAL; minimumHeight = dp(56)
+            setPadding(dp(6), dp(6), dp(4), dp(6)); isClickable = true; isFocusable = true
+            contentDescription = t
+            setOnClickListener { node.on = !node.on; save(node.on) }
         }
-        col.addView(s, LinearLayout.LayoutParams(MATCH_PARENT, WRAP_CONTENT).apply { bottomMargin = dp(10) })
+        row.addView(Ui.text(this, t, 15f, Ui.TEXT), LinearLayout.LayoutParams(0, WRAP_CONTENT, 1f))
+        row.addView(node, LinearLayout.LayoutParams(dp(34), dp(34)))
+        col.addView(row, LinearLayout.LayoutParams(MATCH_PARENT, WRAP_CONTENT))
     }
 
     private fun slider(t: String, value: Int, save: (Int) -> Unit) {

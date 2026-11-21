@@ -119,15 +119,107 @@ object Ui {
         }
     }
 
-    /** Pillen-Knopf (min. 52 dp hoch). solid = weiße Tesla-Pille. */
-    fun pillButton(c: Context, label: String, solid: Boolean = false, onClick: (View) -> Unit) = TextView(c).apply {
-        text = label.uppercase(); textSize = 11f; typeface = wide(c); letterSpacing = 0.18f
-        setTextColor(if (solid) BLACK else TEXT)
-        gravity = Gravity.CENTER; minHeight = dpi(c, 52)
-        setPadding(dpi(c, 24), dpi(c, 14), dpi(c, 24), dpi(c, 14))
-        background = ripple(if (solid) solid(c) else hairline(c))
+    /** Lichtzeilen-Knopf (kein Rahmen): Raute + breite Schrift + Leuchtspur darunter. primary = hellere Spur. */
+    fun pillButton(c: Context, label: String, solid: Boolean = false, onClick: (View) -> Unit): TextView =
+        LightButton(c, label, solid).apply { setOnClickListener(onClick) }
+
+    /** Unterstrich-Feld mit HUD-Eckmarken; fokussiert leuchtet es eisblau. */
+    fun underline(c: Context, focused: Boolean = false): Drawable = UnderlineDrawable(c, focused)
+}
+
+/** Knopf aus reinem Licht: ◇-Raute, Text, darunter eine Linie mit wandernder Leuchtspur. */
+class LightButton(c: Context, label: String, private val primary: Boolean = false) : TextView(c) {
+    var selected2 = false
+        set(v) { field = v; setTextColor(if (v || primary) Ui.ICE else Ui.TEXT); invalidate() }
+    private val p = Paint(Paint.ANTI_ALIAS_FLAG)
+    private val reduce = !android.animation.ValueAnimator.areAnimatorsEnabled()
+    private var t = (Math.random() * 10).toFloat()
+    private var flash = 0f
+
+    init {
+        text = label.uppercase(); textSize = 10.5f; typeface = Ui.wide(c); letterSpacing = 0.2f
+        setTextColor(if (primary) Ui.ICE else Ui.TEXT)
+        gravity = Gravity.CENTER_VERTICAL; minHeight = Ui.dpi(c, 50)
+        setPadding(Ui.dpi(c, 24), Ui.dpi(c, 12), Ui.dpi(c, 6), Ui.dpi(c, 14))
         isClickable = true; isFocusable = true
-        setOnClickListener(onClick)
+        background = null
+    }
+
+    override fun performClick(): Boolean { flash = 1f; invalidate(); return super.performClick() }
+
+    override fun onDraw(canvas: Canvas) {
+        super.onDraw(canvas)
+        val d = resources.displayMetrics.density
+        if (!reduce) t += 0.016f
+        flash = (flash - 0.03f).coerceAtLeast(0f)
+        val on = selected2 || primary
+        val cy = height / 2f - d
+        // Raute links
+        val r = 4.2f * d; val x0 = 9f * d
+        val path = Path().apply { moveTo(x0, cy - r); lineTo(x0 + r, cy); lineTo(x0, cy + r); lineTo(x0 - r, cy); close() }
+        p.shader = null; p.strokeWidth = 1.2f * d
+        p.style = if (on) Paint.Style.FILL else Paint.Style.STROKE
+        p.color = if (on) Ui.ICE else Ui.STEEL
+        canvas.drawPath(path, p)
+        // Linie + Leuchtspur
+        val textW = paint.measureText(text.toString()) + paddingLeft
+        val y = height - 4f * d
+        p.style = Paint.Style.STROKE; p.strokeWidth = 1f * d
+        p.color = if (on) 0x807FD4FF.toInt() else 0x33FFFFFF
+        canvas.drawLine(paddingLeft.toFloat(), y, textW, y, p)
+        val len = (textW - paddingLeft) * 0.35f
+        val head = paddingLeft + ((t * 0.35f) % 1.4f) * (textW - paddingLeft + len) - len
+        p.shader = LinearGradient(head - len, 0f, head, 0f, intArrayOf(0x007FD4FF, Ui.ICE, 0x007FD4FF), floatArrayOf(0f, 0.8f, 1f), Shader.TileMode.CLAMP)
+        p.strokeWidth = 1.6f * d; p.alpha = if (on) 255 else 150
+        canvas.drawLine(maxOf(paddingLeft.toFloat(), head - len), y, minOf(textW, head), y, p)
+        if (flash > 0f) {
+            p.shader = null; p.color = Ui.ICE; p.alpha = (flash * 255).toInt(); p.strokeWidth = 2.4f * d
+            canvas.drawLine(paddingLeft.toFloat(), y, paddingLeft + (textW - paddingLeft) * (1f - flash * 0.3f), y, p)
+        }
+        if (!reduce && isAttachedToWindow) postInvalidateOnAnimation()
+    }
+}
+
+/** Nur eine Grundlinie mit kleinen hochgezogenen Ecken – wie ein HUD-Zielfeld. */
+class UnderlineDrawable(private val c: Context, private val focused: Boolean) : Drawable() {
+    private val p = Paint(Paint.ANTI_ALIAS_FLAG).apply { style = Paint.Style.STROKE; strokeCap = Paint.Cap.ROUND }
+    override fun draw(canvas: Canvas) {
+        val b = bounds; val d = c.resources.displayMetrics.density
+        val y = b.bottom - 2f * d
+        p.strokeWidth = if (focused) 1.5f * d else 1f * d
+        p.shader = if (focused) LinearGradient(b.left.toFloat(), 0f, b.right.toFloat(), 0f, intArrayOf(Ui.ICE, Ui.VIOLET, Ui.MINT), null, Shader.TileMode.CLAMP) else null
+        p.color = if (focused) Ui.ICE else 0x40FFFFFF
+        canvas.drawLine(b.left + 4 * d, y, b.right - 4 * d, y, p)
+        p.shader = null; p.color = if (focused) Ui.ICE else 0x66FFFFFF
+        canvas.drawLine(b.left + 4 * d, y, b.left + 4 * d, y - 7 * d, p)
+        canvas.drawLine(b.right - 4 * d, y, b.right - 4 * d, y - 7 * d, p)
+    }
+    override fun setAlpha(alpha: Int) {}
+    override fun setColorFilter(cf: ColorFilter?) {}
+    @Deprecated("Deprecated in Java") override fun getOpacity() = PixelFormat.TRANSLUCENT
+}
+
+/** Energieknoten als Schalter: Ring aus Segmenten, innen ein Kern, der bei „an“ leuchtet und rotiert. */
+class NodeToggle(c: Context) : View(c) {
+    var on = false; set(v) { field = v; invalidate() }
+    private val p = Paint(Paint.ANTI_ALIAS_FLAG).apply { strokeCap = Paint.Cap.ROUND }
+    private var t = 0f
+    private val reduce = !android.animation.ValueAnimator.areAnimatorsEnabled()
+    override fun onDraw(canvas: Canvas) {
+        val d = resources.displayMetrics.density
+        val cx = width / 2f; val cy = height / 2f; val r = minOf(width, height) / 2f - 3 * d
+        if (!reduce && on) t += 1.2f
+        p.style = Paint.Style.STROKE; p.strokeWidth = 1.6f * d
+        for (k in 0 until 8) {
+            p.color = if (on) (if (k % 2 == 0) Ui.ICE else Ui.MINT) else 0x40FFFFFF
+            canvas.drawArc(RectF(cx - r, cy - r, cx + r, cy + r), t + k * 45f + 6f, 33f, false, p)
+        }
+        p.style = Paint.Style.FILL
+        if (on) {
+            p.shader = android.graphics.RadialGradient(cx, cy, r * 0.75f, intArrayOf(Color.WHITE, Ui.ICE, 0x007FD4FF), floatArrayOf(0f, 0.4f, 1f), Shader.TileMode.CLAMP)
+            canvas.drawCircle(cx, cy, r * 0.75f, p); p.shader = null
+        } else { p.color = 0x4DFFFFFF; canvas.drawCircle(cx, cy, 2.2f * d, p) }
+        if (on && !reduce && isAttachedToWindow) postInvalidateOnAnimation()
     }
 }
 

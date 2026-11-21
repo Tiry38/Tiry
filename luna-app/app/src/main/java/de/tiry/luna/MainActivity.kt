@@ -19,8 +19,6 @@ import android.view.ViewGroup.LayoutParams.MATCH_PARENT
 import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
 import android.view.WindowManager
 import android.widget.FrameLayout
-import android.widget.HorizontalScrollView
-import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.ScrollView
 import android.widget.TextView
@@ -39,7 +37,7 @@ class MainActivity : Activity(), LunaBus.Listener {
     private lateinit var statusDot: View
     private lateinit var userText: TextView
     private lateinit var lunaText: TextView
-    private lateinit var wakeToggle: TextView
+    private var lastState = LunaState.OFF
     private lateinit var permHint: TextView
     private lateinit var hudBattery: TextView
     private lateinit var hudNet: TextView
@@ -61,42 +59,37 @@ class MainActivity : Activity(), LunaBus.Listener {
 
     private fun dp(v: Int) = Ui.dpi(this, v)
 
+    private lateinit var field: FieldView
+    private val anchors = HashMap<String, View>()
+
     private fun build(): View {
         val root = FrameLayout(this)
-        root.addView(SpaceView(this), FrameLayout.LayoutParams(MATCH_PARENT, MATCH_PARENT))
+        field = FieldView(this).apply { setTypeface(Ui.wide(context)) }
+        root.addView(field, FrameLayout.LayoutParams(MATCH_PARENT, MATCH_PARENT))
         val col = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL; gravity = Gravity.CENTER_HORIZONTAL }
         root.addView(col, FrameLayout.LayoutParams(MATCH_PARENT, MATCH_PARENT))
-        col.setPadding(dp(22), dp(40), dp(22), dp(24))
+        col.setPadding(dp(22), dp(40), dp(22), dp(16))
         root.setOnApplyWindowInsetsListener { _, ins ->
             @Suppress("DEPRECATION")
-            col.setPadding(dp(22), ins.systemWindowInsetTop + dp(14), dp(22), ins.systemWindowInsetBottom + dp(18))
+            col.setPadding(dp(22), ins.systemWindowInsetTop + dp(14), dp(22), ins.systemWindowInsetBottom + dp(10))
             ins
         }
 
-        // ── Kopf: LUNA · Status-Pille · Einstellungen
+        // ── Kopf: LUNA · Statuslicht · Einstellungs-Delle (alles ohne Rahmen)
         val head = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL; gravity = Gravity.CENTER_VERTICAL }
         val title = Ui.label(this, "Luna", 19f, Ui.TEXT, 0.55f)
         Ui.chrome(title)
         head.addView(title)
         head.addView(View(this), LinearLayout.LayoutParams(0, 1, 1f))
-        val pill = LinearLayout(this).apply {
-            orientation = LinearLayout.HORIZONTAL; gravity = Gravity.CENTER_VERTICAL
-            setPadding(dp(14), dp(9), dp(16), dp(9)); background = Ui.hairline(context)
-        }
         statusDot = View(this).apply { background = Ui.circle(context, 0, Ui.MINT) }
-        pill.addView(statusDot, LinearLayout.LayoutParams(dp(7), dp(7)).apply { marginEnd = dp(9) })
-        status = Ui.label(this, "Bereit", 9.5f, Ui.TEXT, 0.25f).apply { maxLines = 1; ellipsize = android.text.TextUtils.TruncateAt.END; maxWidth = dp(170) }
-        pill.addView(status)
-        head.addView(pill)
-        head.addView(ImageView(this).apply {
-            setImageDrawable(LineIcon("gear", Ui.STEEL)); contentDescription = "Einstellungen"
-            setPadding(dp(13), dp(13), dp(13), dp(13)); background = Ui.ripple(Ui.circle(context))
-            setOnClickListener { startActivity(Intent(context, SettingsActivity::class.java)) }
-        }, LinearLayout.LayoutParams(dp(48), dp(48)).apply { marginStart = dp(10) })
+        head.addView(statusDot, LinearLayout.LayoutParams(dp(6), dp(6)).apply { marginEnd = dp(9) })
+        status = Ui.label(this, "Bereit", 9.5f, Ui.TEXT, 0.28f).apply { maxLines = 1; ellipsize = android.text.TextUtils.TruncateAt.END; maxWidth = dp(170) }
+        head.addView(status)
+        head.addView(anchor("settings", "Einstellungen"), LinearLayout.LayoutParams(dp(48), dp(48)).apply { marginStart = dp(14) })
         col.addView(head, LinearLayout.LayoutParams(MATCH_PARENT, WRAP_CONTENT))
 
         // ── HUD-Zeile mit Spektrum-Haarlinie
-        col.addView(HairlineView(this), LinearLayout.LayoutParams(MATCH_PARENT, dp(1)).apply { topMargin = dp(16) })
+        col.addView(HairlineView(this), LinearLayout.LayoutParams(MATCH_PARENT, dp(1)).apply { topMargin = dp(10) })
         val hud = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL; gravity = Gravity.CENTER_VERTICAL; setPadding(0, dp(10), 0, 0) }
         hudBattery = Ui.label(this, "Akku –", 9f).apply { isSingleLine = true }; hudNet = Ui.label(this, "Netz –", 9f).apply { gravity = Gravity.CENTER; isSingleLine = true }
         hudTime = Ui.label(this, "--:--", 9f).apply { gravity = Gravity.END; isSingleLine = true }
@@ -105,63 +98,79 @@ class MainActivity : Activity(), LunaBus.Listener {
         hud.addView(hudTime, LinearLayout.LayoutParams(0, WRAP_CONTENT, 1f))
         col.addView(hud, LinearLayout.LayoutParams(MATCH_PARENT, WRAP_CONTENT))
 
-        // ── Stimmkern
+        // ── Stimmkern = größte Masse im Feld, antippen = sprechen
         core = CoreView(this).apply { contentDescription = "Luna – antippen zum Sprechen"; setOnClickListener { talk() } }
-        col.addView(core, LinearLayout.LayoutParams(MATCH_PARENT, 0, 1.3f))
+        col.addView(core, LinearLayout.LayoutParams(MATCH_PARENT, 0, 1.15f))
+        field.coreAnchor = core
+        col.addView(Ui.label(this, "Kern antippen  ·  oder „Hey Luna“", 8f, Ui.DIM, 0.3f))
 
         // ── Dialog
         val talkBox = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL; gravity = Gravity.CENTER_HORIZONTAL }
-        userText = Ui.text(this, "", 14f, Ui.STEEL).apply { gravity = Gravity.CENTER; setPadding(dp(8), 0, dp(8), dp(8)) }
-        lunaText = Ui.text(this, "", 20f, Ui.TEXT).apply { gravity = Gravity.CENTER; typeface = Ui.sans(context, 300); setPadding(dp(8), 0, dp(8), 0) }
+        userText = Ui.text(this, "", 14f, Ui.STEEL).apply { gravity = Gravity.CENTER; setPadding(dp(8), dp(12), dp(8), dp(8)) }
+        lunaText = Ui.text(this, "", 19f, Ui.TEXT).apply { gravity = Gravity.CENTER; typeface = Ui.sans(context, 300); setPadding(dp(8), 0, dp(8), 0) }
         talkBox.addView(userText); talkBox.addView(lunaText)
-        col.addView(ScrollView(this).apply { isVerticalScrollBarEnabled = false; addView(talkBox) }, LinearLayout.LayoutParams(MATCH_PARENT, 0, 0.62f))
+        col.addView(ScrollView(this).apply { isVerticalScrollBarEnabled = false; addView(talkBox) }, LinearLayout.LayoutParams(MATCH_PARENT, 0, 0.55f))
 
-        permHint = Ui.pillButton(this, "", false) { startActivity(Intent(this, SettingsActivity::class.java).putExtra("focus", "rechte")) }.apply {
-            setTextColor(Ui.AMBER); textSize = 9.5f
+        permHint = Ui.label(this, "", 9f, Ui.AMBER, 0.25f).apply {
+            setPadding(dp(12), dp(12), dp(12), dp(12)); isClickable = true
+            setOnClickListener { startActivity(Intent(context, SettingsActivity::class.java).putExtra("focus", "rechte")) }
         }
-        col.addView(permHint, LinearLayout.LayoutParams(WRAP_CONTENT, WRAP_CONTENT).apply { topMargin = dp(8); bottomMargin = dp(10) })
+        col.addView(permHint)
 
-        // ── Kontrollleiste: Ein-Knopf-Aktionen
-        col.addView(Ui.label(this, "Kontrolle", 8.5f, Ui.DIM, 0.4f), LinearLayout.LayoutParams(WRAP_CONTENT, WRAP_CONTENT).apply { bottomMargin = dp(10) })
-        val deck = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL; setPadding(dp(4), 0, dp(4), 0) }
-        listOf(
-            Triple("pc", "power", "PC an"), Triple("remote", "remote", "Remote"), Triple("vpn", "shield", "VPN"),
-            Triple("guest", "wifi", "Gast-WLAN"), Triple("torch", "torch", "Licht"), Triple("silent", "bell", "Lautlos"),
-            Triple("lock", "lock", "Sperren"), Triple("weather", "cloud", "Wetter"),
-        ).forEach { (id, icon, label) -> deck.addView(quickButton(id, icon, label)) }
-        col.addView(HorizontalScrollView(this).apply { isHorizontalScrollBarEnabled = false; addView(deck) },
-            LinearLayout.LayoutParams(MATCH_PARENT, WRAP_CONTENT).apply { bottomMargin = dp(16) })
+        // ── Dellen-Feld: zwei geschwungene Waben-Bögen (5 oben, 4 versetzt darunter)
+        val deck = WellLayout(this)
+        listOf("pc" to "PC an", "remote" to "Remote", "wake" to "Wachmodus", "vpn" to "VPN", "guest" to "Gast-WLAN",
+            "torch" to "Licht", "silent" to "Lautlos", "lock" to "Sperren", "weather" to "Wetter")
+            .forEach { (id, label) -> deck.addView(anchor(id, label)) }
+        col.addView(deck, LinearLayout.LayoutParams(MATCH_PARENT, dp(196)))
 
-        // ── Unten: Wachmodus-Pille + Mikro
-        val bar = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL; gravity = Gravity.CENTER_VERTICAL }
-        wakeToggle = Ui.pillButton(this, "", false) { toggleWake() }.apply { textSize = 10f }
-        bar.addView(wakeToggle, LinearLayout.LayoutParams(0, WRAP_CONTENT, 1f).apply { marginEnd = dp(14) })
-        val mic = ImageView(this).apply {
-            setImageDrawable(LineIcon("mic", Ui.TEXT)); contentDescription = "Jetzt sprechen"
-            setPadding(dp(22), dp(22), dp(22), dp(22)); background = Ui.ripple(Ui.iceCircle(context))
-            setOnClickListener { talk() }
+        // Dellen registrieren
+        val icons = mapOf("pc" to "power", "remote" to "remote", "wake" to "mic", "vpn" to "shield", "guest" to "wifi",
+            "torch" to "torch", "silent" to "bell", "lock" to "lock", "weather" to "cloud", "settings" to "gear")
+        val labels = mapOf("pc" to "PC an", "remote" to "Remote", "wake" to "Wach", "vpn" to "VPN", "guest" to "Gast-WLAN",
+            "torch" to "Licht", "silent" to "Lautlos", "lock" to "Sperren", "weather" to "Wetter", "settings" to "")
+        for ((id, v) in anchors) {
+            field.wells += FieldView.Well(id, icons[id], labels[id] ?: "", v, mass = if (id == "wake") 1.25f else if (id == "settings") 0.75f else 1f) { onWell(id) }.apply {
+                activeColor = when (id) { "torch" -> Ui.AMBER; "silent" -> Ui.VIOLET; "wake" -> Ui.MINT; else -> Ui.ICE }
+            }
         }
-        bar.addView(mic, LinearLayout.LayoutParams(dp(76), dp(76)))
-        col.addView(bar, LinearLayout.LayoutParams(MATCH_PARENT, WRAP_CONTENT))
         return root
     }
 
-    /** Runder Ein-Knopf: Haarlinien-Kreis + Linien-Icon + Label darunter. */
-    private fun quickButton(id: String, icon: String, label: String): View {
-        val box = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL; gravity = Gravity.CENTER_HORIZONTAL; setPadding(dp(5), 0, dp(5), 0) }
-        val b = ImageView(this).apply {
-            setImageDrawable(LineIcon(icon, Ui.TEXT)); contentDescription = label
-            setPadding(dp(17), dp(17), dp(17), dp(17)); background = Ui.ripple(Ui.circle(context))
-            setOnClickListener {
-                background = Ui.ripple(Ui.iceCircle(context))
-                postDelayed({ background = Ui.ripple(Ui.circle(context)) }, 1200)
-                LunaService.send(context, LunaService.ACTION_QUICK, id)
-            }
+    /** Unsichtbarer Anker: gibt der Delle ihre Position, nimmt Berührung + TalkBack entgegen. */
+    private fun anchor(id: String, label: String): View = View(this).apply {
+        contentDescription = label; isClickable = true; isFocusable = true
+        setOnTouchListener { _, e -> if (e.actionMasked == android.view.MotionEvent.ACTION_DOWN) field.touchDown(id); false }
+        setOnClickListener { field.trigger(id) }
+        anchors[id] = this
+    }
+
+    private fun onWell(id: String) {
+        when (id) {
+            "settings" -> startActivity(Intent(this, SettingsActivity::class.java))
+            "wake" -> toggleWake()
+            else -> LunaService.send(this, LunaService.ACTION_QUICK, id)
         }
-        box.addView(b, LinearLayout.LayoutParams(dp(60), dp(60)))
-        box.addView(Ui.text(this, label, 11f, Ui.STEEL).apply { gravity = Gravity.CENTER; setPadding(0, dp(7), 0, 0) },
-            LinearLayout.LayoutParams(dp(72), WRAP_CONTENT))
-        return box
+        ui.postDelayed({ updateActive() }, 1500)
+    }
+
+    /** Aktive Dellen glühen in ihrer Farbe (Licht an, Lautlos, VPN, Wachmodus). */
+    private fun updateActive() {
+        val am = getSystemService(AUDIO_SERVICE) as android.media.AudioManager
+        val cm = getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        val vpn = cm.getNetworkCapabilities(cm.activeNetwork)?.hasTransport(NetworkCapabilities.TRANSPORT_VPN) == true
+        for (w in field.wells) w.active = when (w.id) {
+            "torch" -> torchOn
+            "silent" -> am.ringerMode != android.media.AudioManager.RINGER_MODE_NORMAL
+            "vpn" -> vpn
+            "wake" -> LunaService.running
+            else -> false
+        }
+    }
+
+    @Volatile private var torchOn = false
+    private val torchCb = object : android.hardware.camera2.CameraManager.TorchCallback() {
+        override fun onTorchModeChanged(cameraId: String, enabled: Boolean) { torchOn = enabled; updateActive() }
     }
 
     private fun updateHud() {
@@ -178,6 +187,7 @@ class MainActivity : Activity(), LunaBus.Listener {
             else -> "ONLINE"
         }
         hudTime.text = SimpleDateFormat("HH:mm", Locale.GERMANY).format(Date())
+        updateActive()
     }
 
     override fun onResume() {
@@ -188,18 +198,25 @@ class MainActivity : Activity(), LunaBus.Listener {
         ui.post(hudTick)
     }
 
+    override fun onStart() {
+        super.onStart()
+        try { getSystemService(android.hardware.camera2.CameraManager::class.java).registerTorchCallback(torchCb, ui) } catch (_: Exception) {}
+    }
+
+    override fun onStop() {
+        try { getSystemService(android.hardware.camera2.CameraManager::class.java).unregisterTorchCallback(torchCb) } catch (_: Exception) {}
+        super.onStop()
+    }
+
     override fun onPause() { LunaBus.remove(this); ui.removeCallbacks(hudTick); super.onPause() }
 
-    private fun setWake(on: Boolean) {
-        wakeToggle.text = if (on) "Wachmodus  ·  an" else "Wachmodus  ·  aus"
-        wakeToggle.setTextColor(if (on) Ui.MINT else Ui.STEEL)
-    }
+    private fun setWake(on: Boolean) { field.wells.firstOrNull { it.id == "wake" }?.active = on }
 
     private fun refreshChrome() {
         setWake(LunaService.running)
         val missing = Permissions.missing(this)
         permHint.visibility = if (missing.isEmpty()) View.GONE else View.VISIBLE
-        permHint.text = if (missing.size == 1) "1 RECHT FEHLT  ›" else "${missing.size} RECHTE FEHLEN  ›"
+        permHint.text = if (missing.size == 1) "◇  1 RECHT FEHLT  ›" else "◇  ${missing.size} RECHTE FEHLEN  ›"
         if (!LunaService.running && LunaBus.current.state == LunaState.OFF) {
             status.text = if (hasMic()) "SCHLÄFT" else "KEIN MIKROFON"
             statusDot.background = Ui.circle(this, 0, Ui.DIM)
@@ -218,7 +235,10 @@ class MainActivity : Activity(), LunaBus.Listener {
         })
         userText.text = if (s.userText.isBlank()) "" else "„${s.userText}“"
         if (s.lunaText.isNotBlank()) lunaText.text = s.lunaText
-        if (::wakeToggle.isInitialized) setWake(s.state != LunaState.OFF)
+        setWake(s.state != LunaState.OFF)
+        field.state = s.state; field.level = s.level
+        if (s.state == LunaState.SPEAKING && lastState != LunaState.SPEAKING) field.pulseCore(1.3f)
+        lastState = s.state
     }
 
     private fun talk() {
@@ -232,7 +252,7 @@ class MainActivity : Activity(), LunaBus.Listener {
         if (!hasMic()) { askRuntimePermissions(); return }
         if (LunaService.running) LunaService.send(this, LunaService.ACTION_STOP)
         else { prefs.wakeWanted = true; LunaService.start(this) }
-        wakeToggle.postDelayed({ refreshChrome() }, 400)
+        ui.postDelayed({ refreshChrome() }, 400)
     }
 
     private fun hasMic() = checkSelfPermission(Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED
@@ -279,4 +299,29 @@ object Permissions {
     }
 
     fun missing(a: Activity) = all(a).filter { !it.granted && it.key != "write" }
+}
+
+/** Ordnet die Anker in zwei geschwungenen Waben-Bögen an (oben 5, darunter 4 versetzt) – kein Raster. */
+class WellLayout(c: Context) : android.view.ViewGroup(c) {
+    override fun onMeasure(wSpec: Int, hSpec: Int) {
+        val s = Ui.dpi(context, 60)
+        for (i in 0 until childCount) getChildAt(i).measure(MeasureSpecExact(s), MeasureSpecExact(s))
+        setMeasuredDimension(MeasureSpec.getSize(wSpec), MeasureSpec.getSize(hSpec))
+    }
+    private fun MeasureSpecExact(v: Int) = MeasureSpec.makeMeasureSpec(v, MeasureSpec.EXACTLY)
+    override fun onLayout(changed: Boolean, l: Int, t: Int, r: Int, b: Int) {
+        val w = r - l; val h = b - t
+        val s = Ui.dpi(context, 60)
+        for (i in 0 until childCount) {
+            val top = i < 5
+            val idx = if (top) i else i - 5
+            val n = if (top) 5 else 4
+            val fx = if (top) (idx + 0.5f) / 5f else (idx + 1f) / 5f
+            val curve = ((fx - 0.5f) * 2f).let { it * it }          // Bogen: Mitte höher, Ränder tiefer
+            val cy = (if (top) h * 0.24f else h * 0.70f) + curve * Ui.dp(context, 18f)
+            val cx = w * fx
+            getChildAt(i).layout((cx - s / 2).toInt(), (cy - s / 2).toInt(), (cx + s / 2).toInt(), (cy + s / 2).toInt())
+            if (n == 0) break
+        }
+    }
 }
