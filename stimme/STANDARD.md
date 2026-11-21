@@ -39,3 +39,8 @@ Passiert in **einem** der beiden Chats irgendetwas zur Stimme (Entscheidung von 
 schickt die betroffene Sitzung **sofort** eine Nachricht an die andere:
 `STIMME-UPDATE: <was> · <warum> · <Commit/Datei>`.
 Sitzungen: AIVOX `session_01AC3hVefvGxsa4HNgSaq8Sg` · Luna `session_01AC3hVeEDxUbkck1rCSq8wC` (per send_message).
+
+## 7. Zwei Charaktere, eine Technik (Tiry, 21.11.2026)
+- **AIVOX (Startup, Kunden):** immer kundenfreundlich, ruhig, freundlich-professionell. **Nie** sarkastisch, kein Flirten, keine Gefühls-Tags außer dezentem, freundlichem Ton. Verantwortlich: AIVOX-Sitzung.
+- **Luna (privat, nur für Tiry):** charmant, flirtend, sarkastisch erlaubt. Verantwortlich: Luna-Sitzung.
+- Gemeinsam: Motoren, Text-Regeln (§3), Messverfahren (§5), Abstimmungsregel (§6). Charakter, Stimme und Tags legt jede Sitzung selbst fest.
