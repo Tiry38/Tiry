@@ -70,7 +70,7 @@ class Speaker(private val ctx: Context, private val prefs: Prefs) {
     fun speak(raw: String, onDone: () -> Unit) {
         pendingDone = null
         stop()
-        val text = pronounce(clean(if (prefs.voiceTags) raw else stripTags(raw)))
+        val text = prep(raw)
         if (text.isBlank()) { main.post(onDone); return }
         val my = ++token
         pendingDone = onDone
@@ -144,6 +144,9 @@ class Speaker(private val ctx: Context, private val prefs: Prefs) {
         val params = android.os.Bundle().apply { putInt(TextToSpeech.Engine.KEY_PARAM_STREAM, android.media.AudioManager.STREAM_MUSIC) }
         t.speak(text, TextToSpeech.QUEUE_FLUSH, params, "luna-$my")
     }
+
+    /** Text sprechbar machen (gemeinsamer Stimmen-Standard): säubern, Tags je nach Stimme, Zahlen/Abkürzungen, Namen. */
+    private fun prep(raw: String) = pronounce(SpeechText.normalize(clean(if (prefs.voiceTags) raw else stripTags(raw))))
 
     /** Namen so aussprechen, wie Tiry es will („Tiry“ geschrieben, „Tiri“ gesprochen). */
     private fun pronounce(t: String): String {
@@ -271,7 +274,7 @@ class Speaker(private val ctx: Context, private val prefs: Prefs) {
     /** Begrüßungen vorab erzeugen, damit Luna nach „Hey Luna“ ohne Verzögerung antwortet. */
     fun precache(phrases: List<String>) {
         if (!usesHumanVoice) return
-        io.execute { phrases.forEach { try { fetchEleven(pronounce(clean(it))) } catch (e: Exception) { lastError = "Stimme: ${e.message}" } } }
+        io.execute { phrases.forEach { try { fetchEleven(prep(it)) } catch (e: Exception) { lastError = "Stimme: ${e.message}" } } }
     }
 
     fun shutdown() { stop(); tts?.shutdown(); io.shutdown(); waiter.shutdown() }

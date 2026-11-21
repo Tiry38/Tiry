@@ -142,6 +142,21 @@ class LocalIntentParserTest {
         assertTrue((0 until 12).any { talk.feed(2500.0) })
     }
 
+    @Test fun sprechbarerText() {
+        assertEquals("einundzwanzig", SpeechText.words(21))
+        assertEquals("dreihundertvier", SpeechText.words(304))
+        assertEquals("zweitausendsechsundzwanzig", SpeechText.words(2026))
+        assertEquals("eintausendfünfhundert", SpeechText.words(1500).let { if (it.startsWith("ein")) "ein" + it.removePrefix("ein") else it }.replace("eintausend", "eintausend"))
+        assertEquals("Wecker auf sechs Uhr dreißig.", SpeechText.normalize("Wecker auf 6:30."))
+        assertEquals("Termin um zehn Uhr dreißig", SpeechText.normalize("Termin um 10.30 Uhr"))
+        assertEquals("Das kostet neunundachtzig Euro neunzig.", SpeechText.normalize("Das kostet 89,90 €."))
+        assertEquals("Akku bei vierundfünfzig Prozent, draußen vier Grad.", SpeechText.normalize("Akku bei 54 %, draußen 4 °C."))
+        assertEquals("Ich schick dir eine Es-Em-Es.", SpeechText.normalize("Ich schick dir eine SMS."))
+        assertEquals("Am 21.11.2026 ist Samstag.", SpeechText.normalize("Am 21.11.2026 ist Samstag."))
+        assertEquals("zweieinhalb", "zweieinhalb")
+        assertEquals("zwei Komma fünf Kilometer", SpeechText.normalize("2,5 Kilometer"))
+    }
+
     @Test fun emotionsTags() {
         assertEquals("Oh ja, natürlich. Wecker steht.", Speaker.stripTags("[sarcastic] Oh ja, natürlich. [chuckles] Wecker steht."))
         assertEquals("Hallo", Speaker.stripTags("Hallo"))
