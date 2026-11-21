@@ -98,9 +98,21 @@ object Updater {
         val id = pi.createSession(params)
         pi.openSession(id).use { s ->
             s.openWrite("luna.apk", 0, apk.length()).use { out -> apk.inputStream().use { it.copyTo(out) }; s.fsync(out) }
-            val status = PendingIntent.getBroadcast(ctx, id, Intent(ctx, UpdateReceiver::class.java),
+            val status = PendingIntent.getBroadcast(ctx, id, Intent(ctx, UpdateReceiver::class.java).putExtra("apk", apk.absolutePath),
                 PendingIntent.FLAG_MUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
             s.commit(status.intentSender)
+        }
+    }
+
+    /** Klassischer Weg: System-Installer mit der heruntergeladenen APK (nur ein Tipp auf „Installieren“). */
+    fun openSystemInstaller(ctx: Context, apk: File) {
+        try {
+            val uri = androidx.core.content.FileProvider.getUriForFile(ctx, "de.tiry.luna.updates", apk)
+            val i = Intent(Intent.ACTION_VIEW).setDataAndType(uri, "application/vnd.android.package-archive")
+                .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_ACTIVITY_NEW_TASK)
+            ctx.startActivity(i)
+        } catch (e: Exception) {
+            android.widget.Toast.makeText(ctx, "Update bitte manuell installieren: ${e.message}", android.widget.Toast.LENGTH_LONG).show()
         }
     }
 
@@ -135,7 +147,12 @@ class UpdateReceiver : BroadcastReceiver() {
                 ctx.startActivity(confirm.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
             }
             PackageInstaller.STATUS_SUCCESS -> {}
-            else -> android.widget.Toast.makeText(ctx, "Update: " + (intent.getStringExtra(PackageInstaller.EXTRA_STATUS_MESSAGE) ?: "fehlgeschlagen"), android.widget.Toast.LENGTH_LONG).show()
+            // Hersteller blockiert das stille Selbst-Update (z. B. Samsung) → normales Installieren-Fenster öffnen
+            else -> {
+                val path = intent.getStringExtra("apk")
+                if (path != null && File(path).exists()) Updater.openSystemInstaller(ctx, File(path))
+                else android.widget.Toast.makeText(ctx, "Update: " + (intent.getStringExtra(PackageInstaller.EXTRA_STATUS_MESSAGE) ?: "fehlgeschlagen"), android.widget.Toast.LENGTH_LONG).show()
+            }
         }
     }
 }

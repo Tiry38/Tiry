@@ -1,0 +1,3 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Nur der Update-Ordner wird für den System-Installer freigegeben. -->
+<paths><cache-path name="update" path="update/" /></paths>
