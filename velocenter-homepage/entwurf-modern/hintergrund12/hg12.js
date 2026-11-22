@@ -99,29 +99,38 @@ void main(){
  col+=vec3(1.,.93,.84)*uSun.z*(exp(-sr*7.)*.35*pul+ray*exp(-sr*2.2)*.20*max(sky,fm*.6));
  /* Klick: rote Lichtwelle läuft durch die Tiefe (kein Ring am Mauszeiger, Tiry 22.11.2026) */
  float age=uT-uK.z;
- if(age<6.&&uLd>.5){
-  /* Herbstallee: Scan läuft als ruhiges Band über die Ebene, über die Kuppe und die Straße hinauf bis in den Nebel (keine Wand);
-     fein: Kanten/Blätter im Band leuchten zart nach, nur bei genauem Hinsehen */
-  float cr=.385,vy=.64;
-  float ds=q.y<cr?max(d,(.6164-q.y)*1.647):max(min(d*2.4,.42),.38*(1.-(q.y-cr)/(vy-cr)));
-  float fr=1.05-age*.42,dz=ds-fr,ft=exp(-age*.22);
-  float bw=mix(46.,24.,clamp(ds,0.,1.));
-  float front=exp(-pow(dz*bw,2.));
-  float trail=step(0.,dz)*exp(-dz*14.)*(1.-front);
+ if(age<7.5&&uLd>.5){
+  /* Herbstallee (Tiry 22.11.2026): Scan NUR auf der Straße – läuft vorne los, über die Kuppe die Straße hinauf bis in den Nebel,
+     wird nach hinten langsamer. Haarfeine Lichtkante, dahinter Holo-Raster in echter Perspektive auf dem Asphalt,
+     Asphalt-Körnung/Mittellinie/Laub leuchten im Band fein auf, einzelne Messpunkte. Keine Bäume, kein Himmel. */
+  float vx=.497;
   float sat=max(base.r,max(base.g,base.b))-min(base.r,min(base.g,base.b));
-  float tree=0.;
-  vec2 ex=vec2(.0014,0.),ey=vec2(0.,.0014);
-  float eg=abs(dot(P(q+ex)-P(q-ex),vec3(.33)))+abs(dot(P(q+ey)-P(q-ey),vec3(.33)));
-  float edg=smoothstep(.04,.18,eg);
-  vec2 gq=q*vec2(uImg.x/uImg.y,1.)*300.;float hp=fract(sin(dot(floor(gq),vec2(127.1,311.7)))*43758.5);
-  float pts=step(.965,hp)*smoothstep(.45,.1,length(fract(gq)-.5));
-  float m=(1.-smoothstep(vy+.04,vy+.14,q.y))*(1.-tree*.6)*(1.-smoothstep(.6,1.,sky)*.15)*(1.-smoothstep(5.,6.,age));
-  /* scharfe Vorderkante + Tiefen-Höhenlinien (folgen Baumformen/Straße) – technisch, aber leise */
-  float rim=exp(-pow((dz+.55/bw)*bw*3.2,2.));
-  float iso=smoothstep(.55,1.,sin(ds*560.))*smoothstep(0.,.25,front);
-  float a1=(front*(.48+.32*edg)+iso*front*.30+trail*(edg*.22+smoothstep(.75,1.,sin(ds*560.))*.10))*ft*m;
-  col=mix(col,RED,clamp(a1*.85,0.,1.));
-  col+=vec3(1.,.80,.78)*(rim*(.22+.30*edg)+front*.10*edg+pts*front*.55)*ft*m;
+  float onN=1.-smoothstep(.374,.392,q.y);
+  float tf=clamp((q.y-.388)/(.60-.388),0.,1.);
+  float hw=mix(.078,.020,smoothstep(0.,.7,tf));
+  float onF=smoothstep(.380,.394,q.y)*(1.-smoothstep(hw*.55,hw*1.0,abs(q.x-vx)))*(1.-smoothstep(.54,.62,q.y));
+  float road=max(onN*(1.-smoothstep(.34,.55,sat)*.5),onF*(1.-smoothstep(.16,.32,sat)));
+  float nn=q.y<.388?max((.6164-q.y)*1.647,.38):mix(.085,.004,tf);
+  float sp=q.y<.388?(1.-nn)/.62*.70:.70+.30*tf;
+  float pr=clamp(age/5.6,0.,1.);float S=-.04+1.08*(1.-pow(1.-pr,1.45));
+  float dz=sp-S,bw=mix(.034,.014,sp);
+  float front=exp(-pow(dz/bw,2.));
+  float rim=exp(-pow((dz+bw*1.05)/(bw*.20),2.));
+  float scn=smoothstep(-bw*.3,bw*.6,dz)*exp(-max(dz,0.)*5.5);
+  float z=1./max(nn,.004),xw=(q.x-vx)*z;
+  float gz=abs(fract(z*1.7+.5)-.5),gx=abs(fract(xw*1.3)-.5);
+  float near=smoothstep(.05,.30,nn);
+  float grid=max(smoothstep(.07,.0,gz)*near,smoothstep(.05,.0,gx)*(.35+.65*near));
+  vec2 cl=floor(vec2(xw*1.3+.5,z*1.7));float hh=fract(sin(dot(cl,vec2(127.1,311.7)))*43758.5);
+  float pt=step(.78,hh)*smoothstep(.16,.02,max(gx,gz))*(.5+.5*sin(uT*9.+hh*40.))*near;
+  float lu=dot(base,vec3(.333));
+  float lb=(dot(P(q+vec2(.0035,0.)),vec3(.333))+dot(P(q-vec2(.0035,0.)),vec3(.333))+dot(P(q+vec2(0.,.0035)),vec3(.333))+dot(P(q-vec2(0.,.0035)),vec3(.333)))*.25;
+  float hp=clamp((lu-lb)*7.,0.,1.);
+  float A=road*(1.-smoothstep(6.,7.5,age))*(1.-smoothstep(.75,1.,sky)*.3);
+  float fF=mix(1.,.38,smoothstep(0.,.15,tf)*(1.-onN));
+  col=mix(col,RED,clamp((front*(.42+.38*hp)*fF+scn*grid*.40+scn*.06*fF)*A,0.,1.));
+  col+=vec3(1.,.86,.86)*(rim*.60+front*hp*.45+scn*grid*.10+pt*(front+scn*.6)*.9)*A;
+  col+=vec3(.9,.25,.3)*rim*.18*A;
  }else if(age<6.){float fr=1.05-age*.42;float wvv=exp(-pow((d-fr)*24.,2.))*exp(-age*.55)*(1.-smoothstep(.2,.6,sky));
   col=mix(col,RED,clamp(wvv*.85,0.,1.));col+=vec3(1.,.7,.7)*wvv*.15;}
  /* Farbführung Rot/Grau/Weiß: Rosa/Lila raus, leicht entsättigt, klar */
