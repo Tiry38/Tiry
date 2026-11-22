@@ -1,10 +1,10 @@
-"""Baut die Vorlage „Herbst, Wein & Polarlicht“: python3 inject.py <live-index.html> <ziel.html> [herbst|wein|island] [--feste-bilder]
+"""Baut die Vorlage „Heimat: Rheinaue, Reben & Pfälzerwald“: python3 inject.py <live-index.html> <ziel.html> [auen|reben|pfalz] [--feste-bilder]
 Ändert nur den Hintergrund; Inhalt, Übergänge und Funktionen bleiben die Live-Seite."""
 import sys,os
 D=os.path.dirname(os.path.abspath(__file__))
 a=[x for x in sys.argv[1:] if not x.startswith('--')]
 s=open(a[0],encoding='utf8').read()
-modus=a[2] if len(a)>2 else 'herbst'
+modus=a[2] if len(a)>2 else 'auen'
 rd=lambda n:open(D+'/'+n,encoding='utf8').read()
 def rep(x,y):
     global s
@@ -12,7 +12,7 @@ def rep(x,y):
     s=s.replace(x,y)
 s=s.replace('<meta name="robots" content="index,follow">','<meta name="robots" content="noindex,nofollow">',1)
 assert 'noindex,nofollow' in s
-i=s.index('<title>');j=s.index('</title>')+8;s=s[:i]+'<title>Vorlage Herbst, Wein & Polarlicht</title>'+s[j:]
+i=s.index('<title>');j=s.index('</title>')+8;s=s[:i]+'<title>Vorlage Heimat: Rheinaue, Reben & Pfälzerwald</title>'+s[j:]
 if '--feste-bilder' in sys.argv:
     rep('PV=function(p,w){var v=PVV[p];if(!v||!p)return p;',
         'PV=function(p,w){var v=PVV[p];if(!v||!p)return p;var b=v.filter(function(x){return x<=960}).pop()||v[0];return p.slice(0,-5)+"-"+b+".webp";')

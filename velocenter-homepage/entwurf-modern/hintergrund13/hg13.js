@@ -1,28 +1,30 @@
-/* Vorlage „Herbst, Wein & Polarlicht“ (Tiry 21.11.2026: „nochmal 3 andere … so viel Auswahl wie möglich“ + „noch mehr Innovation in die Hintergründe“).
-   Drei große, echte Landschaften mit Straße (Unsplash-Lizenz, frei auch gewerblich), ohne Fahrräder, Personen, Fahrzeuge.
-   Neu gegenüber hg10/hg11:
-   - Kino-Schärfe: die Kamera stellt live auf die Tiefe unter der Maus scharf (Tiefenunschärfe aus der KI-Tiefenkarte).
-   - Wolkenschatten ziehen über das Gelände.
-   - Herbstallee: Laub fällt in echter 3D-Tiefe (verschwindet hinter näheren Bäumen), die Maus ist Wind; Lichtstrahlen fallen durch den Dunst.
-   - Weinberg: Scrollen = der Tag läuft ab (Morgen → Mittag → Goldene Stunde → Dämmerung), Sonne wandert, Licht färbt sich.
-   - Island: Scrollen = es wird Nacht, Sterne gehen auf, rot-weißes Polarlicht wogt über den Bergen.
+/* Vorlage „Heimat: Rheinaue, Reben & Pfälzerwald“ (Tiry 22.11.2026: „ortsbezogen zu uns … Wörth am Rhein … womit wir mehr Verbindung haben“).
+   Drei echte Fotos aus unserer Gegend (frei: CC0 bzw. Pexels-Lizenz), ohne Fahrräder, Personen, Fahrzeuge:
+   - Rheinaue Wörth (NSG Goldgrund, Goldkehle): Wasser lebt – Maus zieht Wellen, Klick wirft einen Stein, Sonne glitzert.
+   - Weinberge Maikammer (Blick zum Blättersberg): Licht nach echter Uhrzeit (morgens kühl, abends golden), Scrollen = Abend, Wolkenschatten, Wind in den Reben.
+   - Pfälzerwald (Felsen bei Wilgartswiesen): Scrollen = Sternennacht mit Abendglühen, Sternschnuppen und Glühwürmchen.
+   Technik wie hg12 (Kino-Schärfe, Tiefenkarte, automatische Qualität).
    Daten je Szene: <name>-2400/1400.webp, <name>-d.png (R Tiefe, G Himmel, B Wolken/Dunst), <name>-m.png (R Pflanzen, G Wasser, B frei). */
 (function(){
-var MODES=[['herbst','Herbstallee','Laub fällt in 3D, Maus = Wind'],['wein','Weinberg','Scrollen = der Tag vergeht'],['island','Hochland','Scrollen = Polarlicht-Nacht']];
+var MODES=[['auen','Rheinaue Wörth','Wasser lebt: Maus & Klick schlagen Wellen'],['reben','Weinberge Maikammer','Licht nach echter Uhrzeit'],['pfalz','Pfälzerwald','Scrollen = Sternennacht']];
 /* je Szene: ty = Kamera schwenkt beim Scrollen, Fokus (Bild-x, Bild-y von unten), Spiegeln, Fokus-Ebene, Wolken (Stärke, Tempo), Wasser (Weg, Tempo), Sonne (x,y von unten; z = Stärke),
    fg = Dunst, sn/sz/sc = Teilchen (Stärke/Größe/Farbe), ld = Laub mit 3D-Verdeckung + Maus-Wind, df = Kino-Schärfe, gr = Lichtstrahlen, cs = Wolkenschatten, dy = Tageslauf, nt = Polarlicht-Nacht */
-var CFG={herbst:{ty:[0,-.04],fxm:.50,fx:.50,fy:.55,fl:0,fp:.20,am:.030,sp:.012,wf:[0,0],sun:[.50,.66,.20],fg:1.6,sn:.95,sz:2.2,sc:[.92,.46,.12],ld:1,df:1,gr:.30,cs:0,dy:0,nt:0},
- wein:{ty:[.02,-.05],fxm:.70,fx:.52,fy:.50,fl:0,fp:.25,am:.060,sp:.016,wf:[0,0],sun:[.62,.90,.18],fg:1,sn:0,ld:0,df:1,gr:0,cs:.42,dy:1,nt:0},
- island:{ty:[.02,-.04],fxm:.62,fx:.50,fy:.50,fl:1,fp:.30,am:.055,sp:.014,wf:[0,0],sun:[.40,.85,.10],fg:1.2,sn:0,ld:0,df:1,gr:0,cs:.32,dy:0,nt:1}};
+var CFG={auen:{ty:[0,-.03],fxm:.50,fx:.50,fy:.50,fl:1,fp:.25,am:.035,sp:.012,wf:[0,0],sun:[.45,.80,.08],fg:.6,sn:0,ld:0,df:1,gr:0,cs:0,dy:0,nt:0,wr:1},
+ reben:{ty:[0,-.04],fxm:.60,fx:.50,fy:.48,fl:0,fp:.25,am:.050,sp:.014,wf:[0,0],sun:[.70,.88,.14],fg:.8,sn:0,ld:0,df:1,gr:0,cs:.38,dy:1,nt:0,rt:1},
+ pfalz:{ty:[0,-.03],fxm:.45,fx:.50,fy:.50,fl:0,fp:.30,am:.030,sp:.010,wf:[0,0],sun:[.03,.42,.22],fg:1.0,sn:0,ld:0,df:.45,gr:0,cs:0,dy:0,nt:2}};
+/* echte Uhrzeit -> Tageslicht 0..1 (6 Uhr Morgen, 12 Uhr Mittag, 17 Uhr Goldene Stunde, 20 Uhr Dämmerung); ?zeit=18.5 zum Testen */
+function tagZeit(){var h;try{h=parseFloat(new URLSearchParams(location.search).get('zeit'))}catch(e){}if(!(h>=0)){var n=new Date();h=n.getHours()+n.getMinutes()/60}
+ var P=[[0,.86],[5,.86],[6.5,0],[12,.3],[15,.42],[17.5,.65],[20,.86],[24,.86]];for(var i=1;i<P.length;i++)if(h<=P[i][0]){var a=P[i-1],b=P[i];return a[1]+(b[1]-a[1])*(h-a[0])/(b[0]-a[0])}return .86}
+var TG0=tagZeit();setInterval(function(){TG0=tagZeit()},60000);
 var BASE=(window.HG13_BASE||'img/hg13/');
-var mode=window.HG13_DEFAULT||'herbst';
+var mode=window.HG13_DEFAULT||'auen';
 try{var q=new URLSearchParams(location.search).get('hg');if(q)mode=q;else{var s0=localStorage.getItem('vc_hg13');if(s0)mode=s0}}catch(e){}
-if(!MODES.some(function(m){return m[0]===mode}))mode='herbst';
+if(!MODES.some(function(m){return m[0]===mode}))mode='auen';
 var de=document.documentElement;
 
 var FSRC=`#extension GL_OES_standard_derivatives : enable
 precision highp float;
-uniform vec2 uR,uM,uFoc,uImg;uniform vec2 uTy,uWf;uniform float uFg,uSn,uSz,uLd,uDf,uGr,uCs,uDy,uNt;uniform vec3 uSc;uniform float uT,uS,uFl,uFp,uAm,uSp,uFade,uV;uniform vec3 uK,uSun,uPo;
+uniform vec2 uR,uM,uFoc,uImg;uniform vec2 uTy,uWf;uniform float uFg,uSn,uSz,uLd,uDf,uGr,uCs,uDy,uNt,uWr,uTg;uniform vec3 uSc;uniform float uT,uS,uFl,uFp,uAm,uSp,uFade,uV;uniform vec3 uK,uSun,uPo;
 uniform sampler2D uP,uD,uE;
 const vec3 RED=vec3(.886,.137,.176);
 float h21(vec2 p){p=fract(p*vec2(123.34,456.21));p+=dot(p,p+45.32);return fract(p.x*p.y);}
@@ -49,6 +51,13 @@ void main(){
  float gust=.35+.65*smoothstep(-.2,1.,sin(uT*.7-q.x*5.)*.5+.5);
  q.x+=mk.r*(.4+.6*d)*gust*(sin(uT*2.6+q.y*55.+nz(q*9.)*6.)*.0021+sin(uT*1.1+q.x*7.)*.0012);
  q.y+=mk.g*(sin(q.y*1100.-uT*2.4+q.x*35.)*.0006+(nz(vec2(q.x*70.,q.y*420.-uT*1.6))-.5)*.0016);
+ /* Wasser lebt: die Maus zieht Wellenringe, ein Klick wirft einen Stein (Ringe laufen nach außen) */
+ if(uWr>0.&&mk.g>.02){vec2 pm2=c+(uM-.5)*s;vec2 dm=(q-pm2)*vec2(iA,2.8);float r0=length(dm);
+  float rip=sin(r0*110.-uT*6.5)*exp(-r0*6.5)*smoothstep(0.,.025,r0)*smoothstep(.05,.4,texture2D(uE,fl(pm2)).g);
+  float ag=uT-uK.z;vec2 dk=(uv-uK.xy)*vec2(A,2.8);float rk=length(dk);float rr1=rk-ag*.16;
+  float st1=ag<7.?sin(rr1*95.)*exp(-abs(rr1)*11.)*exp(-ag*.55)*smoothstep(0.,.3,ag):0.;
+  q+=(normalize(dm+1e-5)*rip*.0042+normalize(dk+1e-5)*st1*.0075)*mk.g*uWr;
+  q.y+=mk.g*uWr*sin(q.x*26.+uT*.9+sin(q.y*40.)*2.)*.0011;}
  /* Fließen (Cinemagraph): zwei phasenversetzte Proben, weich überblendet – Wolken/Nebel ziehen endlos */
  vec2 dir=vec2(1.,.12*sin(q.x*9.+uT*.1))*(.55+.45*nz(q*4.+uT*.02));
  float f1=fract(uT*uSp),f2=fract(uT*uSp+.5);float wv=abs(1.-2.*f1);
@@ -69,7 +78,8 @@ void main(){
   float wo=min(texture2D(uE,fl(w1)).b,texture2D(uE,fl(w2)).b);
   vec3 wc=mix(P(w1),P(w2),1.-gw);col=mix(col,wc,clamp(mk3.b*smoothstep(.15,.6,wo)*1.1,0.,1.));
   col+=vec3(.06)*mk3.b*smoothstep(.55,.9,nz(vec2(q.x*90.,q.y*160.+uT*uWf.y*9.)));}
- col+=vec3(1.,.98,.94)*mk.g*pow(nz(vec2(q.x*520.,q.y*1300.+uT*2.8)),26.)*1.6*step(D(q).r,.35);
+ col+=vec3(1.,.98,.94)*mk.g*pow(nz(vec2(q.x*520.,q.y*1300.+uT*2.8)),26.)*1.6*step(D(q).r,.35)*(1.-uWr);
+ if(uWr>0.){float gl2=nz(vec2(q.x*90.+uT*.25,q.y*520.-uT*.9))*nz(vec2(q.x*37.-uT*.1,q.y*210.+uT*.5));col+=vec3(1.,.97,.9)*mk.g*smoothstep(.62,.82,gl2)*.20*smoothstep(.55,.85,dot(col,vec3(.33)));}
  /* zusätzliche Nebelschleier (bewegt) auf Fließ-Flächen und im Tal */
  float mist=fbm(vec2(q.x*5.-uT*.035,q.y*14.+uT*.01));
  float band=fm*(1.-sky*.6)*.20*uFg+smoothstep(.10,.0,abs(d-.16))*.14*(1.-sky);
@@ -107,9 +117,9 @@ void main(){
  float pink=clamp(min(col.r,col.b)-col.g,0.,1.)*4.;col=mix(col,vec3(lu*1.02),clamp(pink,0.,.9));
  col=mix(vec3(lu),col,.86);col=(col-.5)*1.05+.5;
  /* Scrollen: Licht wird zum warmen Abend */
- float ev=smoothstep(.2,2.6,uS)*(1.-uDy)*(1.-uNt);col=mix(col,col*vec3(1.10,.97,.86)+vec3(.03,.0,-.01),ev*.55);
+ float ev=smoothstep(.2,2.6,uS)*(1.-uDy)*(1.-min(uNt,1.));col=mix(col,col*vec3(1.10,.97,.86)+vec3(.03,.0,-.01),ev*.55);
  /* Tageslauf (Weinberg): Morgen kühl -> Mittag klar -> Goldene Stunde -> Dämmerung, Himmel glüht am Horizont orange-rot */
- if(uDy>0.){float tg=clamp(uS/2.6,0.,1.);
+ if(uDy>0.){float tg=clamp(uTg+(1.-uTg)*uS/2.6,0.,1.);
   vec3 g1=mix(vec3(.94,.98,1.07),vec3(1.),smoothstep(0.,.3,tg));g1=mix(g1,vec3(1.18,.98,.74),smoothstep(.3,.65,tg));g1=mix(g1,vec3(.84,.62,.46),smoothstep(.65,1.,tg));
   float lum2=dot(col,vec3(.3,.59,.11));float gh=smoothstep(.3,.65,tg)*(1.-smoothstep(.75,1.,tg));col=mix(col,pow(col,vec3(1.25)),gh*.8*(1.-sky*.5));col=col*g1;col=mix(col,vec3(lum2)*vec3(.55,.6,.8),smoothstep(.8,1.,tg)*.35*(1.-sky));
   float hz=sky*smoothstep(.35,1.,tg)*(1.-smoothstep(.0,.45,q.y-.45));col=mix(col,col*vec3(1.28,.84,.42)+vec3(.15,.07,0.),hz*.85);col=(col-.5)*(1.+gh*.18)+.5;}
@@ -125,10 +135,22 @@ void main(){
    float br=(.45+.55*smoothstep(.25,.75,fbm(vec2(fx*3.+uT*.06,fj*3.))))*(1.-fj*.22);
    float a1=prof*ry*br;au+=a1;
    auC+=a1*mix(vec3(1.,.84,.58),mix(vec3(.95,.12,.10),vec3(.50,.03,.04),smoothstep(.06,.24,up)),smoothstep(.0,.035,up));}
-  auC/=max(au,1e-4);au=clamp(au*.85,0.,1.);
-  vec3 skyN=mix(vec3(.05,.06,.11),vec3(.11,.13,.21),smoothstep(1.,.45,q.y));
+  auC/=max(au,1e-4);au=clamp(au*.85,0.,1.)*step(uNt,1.5);float st2=step(1.5,uNt);
+  vec3 skyN=mix(vec3(.05,.06,.11),vec3(.11,.13,.21),smoothstep(1.,.45,q.y));if(uNt>1.5)skyN=mix(vec3(.035,.045,.075),vec3(.075,.09,.13),smoothstep(1.,.45,q.y));
   vec2 st=q*vec2(iA,1.)*260.;vec2 sid=floor(st);float sh=h21(sid);float star=step(.988,sh)*smoothstep(.35,0.,length(fract(st)-.5))*(.55+.45*sin(uT*(2.+sh*5.)+sh*40.));
-  vec3 night=mix(moon,skyN+vec3(star),sky);night=mix(night,night+auC*1.15,au*sky);night+=vec3(.6,.06,.05)*.10*sky*smoothstep(.55,.70,q.y)*(1.-smoothstep(.70,.95,q.y));night+=vec3(.8,.12,.06)*au*.10*(1.-sky)*smoothstep(.3,.7,lum3);
+  /* Sternennacht (Pfälzerwald): mehr Sterne + Milchstraße, Abendglühen bleibt am Horizont, Sternschnuppe, Glühwürmchen */
+  vec2 stb=q*vec2(iA,1.)*150.;float shb=h21(floor(stb)+7.);star+=st2*step(.975,shb)*smoothstep(.30,0.,length(fract(stb)-.5))*(.5+.5*sin(uT*(1.5+shb*4.)+shb*30.))*.8;
+  float mw=st2*smoothstep(.42,.75,fbm(vec2((q.x+q.y*.7)*3.,(q.y-q.x*.7)*9.)))*exp(-pow(((q.y-.72)+(q.x-.5)*.45)*5.,2.));skyN+=vec3(.10,.11,.16)*mw;
+  vec2 gs=(q-uSun.xy)*vec2(.55,3.4);skyN+=st2*vec3(1.,.40,.06)*exp(-length(gs)*3.0)*.62+st2*vec3(.70,.22,.04)*exp(-max(q.y-uSun.y,0.)*12.)*.26;
+  float sT=uT/7.,sI=floor(sT),sF=fract(sT);vec2 sp0=vec2(.25+.6*h21(vec2(sI,3.)),.72+.22*h21(vec2(sI,8.)));vec2 sdr=normalize(vec2(.8,-.38-.3*h21(vec2(sI,5.))));
+  vec2 rel=(q-sp0-sdr*sF*1.6)*vec2(iA,1.);float al=dot(rel,sdr*vec2(iA,1.)/length(sdr*vec2(iA,1.)));float pe=length(rel-al*sdr*vec2(iA,1.)/length(sdr*vec2(iA,1.)));
+  star+=st2*step(sF,.16)*smoothstep(.0025,0.,pe)*smoothstep(-.09,0.,al)*step(al,0.)*1.6*step(.35,h21(vec2(sI,1.)));
+  vec3 night=mix(moon,skyN+vec3(star),sky);
+  if(st2>0.){float ff=0.;for(int L=0;L<2;L++){float fL=float(L);vec2 g2=uv*vec2(A,1.)*(7.+fL*5.)+vec2(sin(uT*.21+fL*3.),cos(uT*.17+fL))*.35;vec2 id2=floor(g2);float hr=h21(id2+fL*31.);
+    vec2 o2=vec2(sin(uT*(.5+hr)+hr*40.),cos(uT*(.4+hr*.7)+hr*17.))*.28;float bl=smoothstep(.2,.9,sin(uT*(1.1+hr*1.7)+hr*60.)*.5+.5);
+    ff+=step(.62,hr)*bl*(exp(-length(fract(g2)-.5-o2)*(26.-fL*8.))+smoothstep(.035,0.,length(fract(g2)-.5-o2))*.8);}
+   night+=vec3(.98,.86,.34)*ff*(1.-sky)*smoothstep(.62,.30,q.y)*.9;}night=mix(night,night+auC*1.15,au*sky);night+=(1.-st2)*vec3(.6,.06,.05)*.10*sky*smoothstep(.55,.70,q.y)*(1.-smoothstep(.70,.95,q.y));night+=vec3(.8,.12,.06)*au*.10*(1.-sky)*smoothstep(.3,.7,lum3);
+  float pk2=clamp(min(night.r,night.b)-night.g,0.,1.)*5.;night=mix(night,vec3(dot(night,vec3(.3,.59,.11))),clamp(pk2,0.,.9));
   col=mix(col,night,nn);}
  /* Lesbarkeit links: Milchglas (wie die Seite) */
  float calm=mob?.50*smoothstep(.18,.55,uv.y):smoothstep(.62,.16,uv.x)*.74;
@@ -145,7 +167,7 @@ var cv,gl,buf,pr,U={},W=0,H=0,dpr=1,raf,t0=performance.now(),M=[.5,.5],Mt=[.5,.5
 function sh(t,s){var o=gl.createShader(t);gl.shaderSource(o,s);gl.compileShader(o);if(!gl.getShaderParameter(o,gl.COMPILE_STATUS))throw new Error(gl.getShaderInfoLog(o));return o}
 function build(){pr=gl.createProgram();gl.attachShader(pr,sh(gl.VERTEX_SHADER,VQ));gl.attachShader(pr,sh(gl.FRAGMENT_SHADER,FSRC));gl.bindAttribLocation(pr,0,'a');gl.linkProgram(pr);
  if(!gl.getProgramParameter(pr,gl.LINK_STATUS))throw new Error(gl.getProgramInfoLog(pr));
- ['uFg','uSn','uSz','uSc','uLd','uDf','uGr','uCs','uDy','uNt','uTy','uWf','uR','uM','uFoc','uImg','uT','uS','uFl','uFp','uAm','uSp','uFade','uV','uK','uSun','uP','uD','uE','uPo'].forEach(function(n){U[n]=gl.getUniformLocation(pr,n)});
+ ['uFg','uSn','uSz','uSc','uLd','uDf','uGr','uCs','uDy','uNt','uWr','uTg','uTy','uWf','uR','uM','uFoc','uImg','uT','uS','uFl','uFp','uAm','uSp','uFade','uV','uK','uSun','uP','uD','uE','uPo'].forEach(function(n){U[n]=gl.getUniformLocation(pr,n)});
  buf=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,buf);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,3,-1,-1,3]),gl.STATIC_DRAW);gl.enableVertexAttribArray(0)}
 function tex(img){var t=gl.createTexture();gl.bindTexture(gl.TEXTURE_2D,t);gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL,true);
  gl.texImage2D(gl.TEXTURE_2D,0,gl.RGB,gl.RGB,gl.UNSIGNED_BYTE,img);
@@ -174,8 +196,8 @@ function frame(){raf=requestAnimationFrame(frame);var now=performance.now();if(T
  gl.activeTexture(gl.TEXTURE1);gl.bindTexture(gl.TEXTURE_2D,e.d);gl.uniform1i(U.uD,1);
  gl.activeTexture(gl.TEXTURE2);gl.bindTexture(gl.TEXTURE_2D,e.e||e.d);gl.uniform1i(U.uE,2);
  gl.uniform2f(U.uR,W,H);gl.uniform1f(U.uT,t);gl.uniform1f(U.uS,sc);gl.uniform2f(U.uM,M[0],M[1]);gl.uniform3f(U.uK,K[0],K[1],K[2]);
- gl.uniform2f(U.uImg,e.w,e.h);gl.uniform2f(U.uFoc,W/H<.9?c.fxm:c.fx,c.fy);gl.uniform1f(U.uFl,c.fl);gl.uniform2f(U.uWf,c.wf[0],c.wf[1]);gl.uniform1f(U.uFg,c.fg);gl.uniform1f(U.uSn,c.sn);var sc3=c.sc||[.98,.985,1];gl.uniform1f(U.uSz,c.sz||1);gl.uniform1f(U.uLd,c.ld||0);gl.uniform1f(U.uDf,c.df||0);gl.uniform1f(U.uGr,c.gr||0);gl.uniform1f(U.uCs,c.cs||0);gl.uniform1f(U.uDy,c.dy||0);gl.uniform1f(U.uNt,c.nt||0);gl.uniform3f(U.uSc,sc3[0],sc3[1],sc3[2]);gl.uniform2f(U.uTy,c.ty?c.ty[0]:0,c.ty?c.ty[1]:0);gl.uniform1f(U.uFp,c.fp);gl.uniform1f(U.uAm,c.am);gl.uniform1f(U.uSp,c.sp);
- var sx=c.sun[0],sy=c.sun[1],sz2=c.sun[2];if(c.dy){var tg=Math.max(0,Math.min(1,sc/2.6));sx=.18+.70*tg;sy=.62+.34*Math.sin(Math.PI*Math.min(1,tg*1.15));sz2=c.sun[2]*(1+1.4*tg)}if(c.nt)sz2*=Math.max(0,1-sc/1.2);gl.uniform3f(U.uSun,c.fl?1-sx:sx,sy,sz2);gl.uniform1f(U.uFade,fade*fade*(3-2*fade));gl.uniform1f(U.uV,0);gl.uniform3f(U.uPo,Po[0],Po[1],Po[2]);
+ gl.uniform2f(U.uImg,e.w,e.h);gl.uniform2f(U.uFoc,W/H<.9?c.fxm:c.fx,c.fy);gl.uniform1f(U.uFl,c.fl);gl.uniform2f(U.uWf,c.wf[0],c.wf[1]);gl.uniform1f(U.uFg,c.fg);gl.uniform1f(U.uSn,c.sn);var sc3=c.sc||[.98,.985,1];gl.uniform1f(U.uSz,c.sz||1);gl.uniform1f(U.uLd,c.ld||0);gl.uniform1f(U.uDf,c.df||0);gl.uniform1f(U.uGr,c.gr||0);gl.uniform1f(U.uCs,c.cs||0);gl.uniform1f(U.uDy,c.dy||0);gl.uniform1f(U.uWr,c.wr||0);gl.uniform1f(U.uTg,c.rt?TG0:0);gl.uniform1f(U.uNt,c.nt||0);gl.uniform3f(U.uSc,sc3[0],sc3[1],sc3[2]);gl.uniform2f(U.uTy,c.ty?c.ty[0]:0,c.ty?c.ty[1]:0);gl.uniform1f(U.uFp,c.fp);gl.uniform1f(U.uAm,c.am);gl.uniform1f(U.uSp,c.sp);
+ var sx=c.sun[0],sy=c.sun[1],sz2=c.sun[2];if(c.dy){var tz0=c.rt?TG0:0,tg=Math.max(0,Math.min(1,tz0+(1-tz0)*sc/2.6));sx=.18+.70*tg;sy=.62+.34*Math.sin(Math.PI*Math.min(1,tg*1.15));sz2=c.sun[2]*(1+1.4*tg)}if(c.nt)sz2*=Math.max(0,1-sc/1.2);gl.uniform3f(U.uSun,c.fl?1-sx:sx,sy,sz2);gl.uniform1f(U.uFade,fade*fade*(3-2*fade));gl.uniform1f(U.uV,0);gl.uniform3f(U.uPo,Po[0],Po[1],Po[2]);
  gl.bindBuffer(gl.ARRAY_BUFFER,buf);gl.vertexAttribPointer(0,2,gl.FLOAT,false,0,0);gl.drawArrays(gl.TRIANGLES,0,3)}
 function click(e){if(e.target&&e.target.closest&&e.target.closest('#ueSw'))return;K=[e.clientX/innerWidth,1-e.clientY/innerHeight,(performance.now()-t0)/1000]}
 function init(){cv=document.createElement('canvas');cv.id='hg';cv.setAttribute('aria-hidden','true');document.body.insertBefore(cv,document.body.firstChild);
