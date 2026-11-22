@@ -493,3 +493,10 @@
 - Alle: Scroll-Tempo beschleunigt das Band (gemeinsam.js). Live bleibt unverändert bis Tiry eine wählt.
 - **Nachtrag 22.11.2026 (Tiry: „gefallen mir alle drei nicht“):** Vorlagen immer mit Umschalter 1·2·3 links auf EINER Seite; Bänder laufen immer komplett von Bildschirmrand zu Bildschirmrand (keine Pille mit Enden). Neue Seite `/vorschau-baender/` (`laufband/bauen.py`, `kern.js` + `v1-seide`, `v2-licht`, `v3-magnet`): 1 Seidenband 3D (WebGL-Lackbänder mit Wellen/Drehung/Licht), 2 Lichtspuren (Langzeitbelichtung Rück-/Frontlichter im roten Glasband), 3 Magnet-Lettern (jeder Buchstabe federt zur Maus, Scroll-Welle). Alte Seiten `vorschau-laufband-1..3` abgelehnt.
 - **Nachtrag 2 (22.11.2026, Tiry: „zu ähnlich … teils unprofessionell“):** Seidenband/Lichtspuren/Magnet-Lettern verworfen. Neu auf `/vorschau-baender/`: 1 Glas-Monolith (gerade Milchglas-Schiene, unscharfe rote Tiefenebene, roter Lichtleiter), 2 Fokus-Zone (große Geisterschrift ohne Kasten, in der Bildmitte rot gefüllt mit echten Logo-Farben, Haarlinien), 3 Präzisions-Tafel (Anthrazit-Anzeigetafel, Info-Schiene, rote Trennschiene, Positionsnummern, rote Unterkante beim Zeigen). Lehre: keine Text-Umrisse mit Outfit (zeigt innere Überlappungen), nie Rosa durch halbtransparentes Weiß über Rot.
+
+### Laufband-Vorlagen – Nachtrag 3 (Tiry 22.11.2026: „wirkt wie 1990 … wie vom Jahr 2200, Richtung Brabus, rötlicher Akzent“)
+- Neue Vorschau `vorschau-baender/` (Umschalter 1·2·3 links), Typografie gemeinsam in `laufband/x-typo.css` (Großbuchstaben, gesperrt, weiß, Rot nur als Akzent):
+  1. **Carbon-Plasma** – echtes Sichtcarbon (WebGL, 2/2-Köper), Licht folgt der Maus, rotes Plasma an den Kanten.
+  2. **Laser-Gravur** – roter Laser brennt die Schrift im Lauf ein, Funkenflug, glühende Gravur-Zone.
+  3. **Partikel-Schrift** – Schrift aus Tausenden Partikeln, setzt sich rechts zusammen, zerfällt links in rote Glut, Maus wirbelt Buchstaben auf.
+- Abgelöst: Glas-Monolith, Fokus-Zone, Präzisions-Tafel. Live bleibt unverändert, bis Tiry wählt.

@@ -1,0 +1,17 @@
+/* gemeinsam: Schrift im Brabus-Stil – gerade, breit gesperrt, weiß; Akzente nur Rot (Tiry 22.11.2026) */
+html:is(.lbv1,.lbv2,.lbv3) body .view[data-v="start"] .bands.top .band.b{display:none!important}
+html:is(.lbv1,.lbv2,.lbv3) body .view[data-v="start"] .bands.top .band.a{left:0!important;right:0!important;border:0!important;padding:0!important;display:flex;align-items:center;overflow:hidden;isolation:isolate}
+html:is(.lbv1,.lbv2,.lbv3) .bands.top .band.a .lbvp,html:is(.lbv1,.lbv2,.lbv3) .bands.top .band.a>.tk{position:relative;z-index:2}
+html:is(.lbv1,.lbv2,.lbv3) body .view[data-v="start"] .bands.top .band.a span{transform:none!important;font:600 clamp(16px,1.55vw,23px)/1 var(--display)!important;letter-spacing:.2em!important;text-transform:uppercase;
+ color:#F2F3F5!important;-webkit-text-stroke:0!important;text-shadow:none!important}
+html:is(.lbv1,.lbv2,.lbv3) body .view[data-v="start"] .bands.top .band.a span b{font:inherit!important;color:inherit!important;text-shadow:none!important;-webkit-text-stroke:0!important}
+html:is(.lbv1,.lbv2,.lbv3) body .view[data-v="start"] .bands.top .band.a span b.tkn,html:is(.lbv1,.lbv2,.lbv3) body .view[data-v="start"] .bands.top .band.a span b.tks{color:#FF2A36!important}
+html:is(.lbv1,.lbv2,.lbv3) body .view[data-v="start"] .bands.top .band.a span b.tkg i{color:inherit!important}
+html:is(.lbv1,.lbv2,.lbv3) body .view[data-v="start"] .bands.top .band.a span b.tkb,html:is(.lbv1,.lbv2,.lbv3) body .view[data-v="start"] .bands.top .band.a span b.tkg{padding:0 .15em!important;margin:0!important}
+html:is(.lbv1,.lbv2,.lbv3) body .view[data-v="start"] .bands.top .band.a span b.tkb{padding-left:1.45em!important}
+html:is(.lbv1,.lbv2,.lbv3) .bands.top .band.a span b.tkb::after,html:is(.lbv1,.lbv2,.lbv3) .bands.top .band.a span b.tkg::after{display:none!important}
+html:is(.lbv1,.lbv2,.lbv3) .bands.top .band.a span b.tkb::before{transform:none!important;filter:brightness(0) invert(1);left:0!important;width:1em!important;height:1em!important;margin-top:-.5em!important;background-size:auto 1em!important;top:50%!important}
+html:is(.lbv1,.lbv2,.lbv3) body .view[data-v="start"] .bands.top .band.a span em{font-size:0!important;padding:0!important;display:inline-block;vertical-align:middle;width:22px;height:2px;margin:0 clamp(26px,2.6vw,42px);
+ background:#FF2A36;box-shadow:0 0 10px rgba(255,42,54,.9);animation:none}
+@media (max-width:980px){html:is(.lbv1,.lbv2,.lbv3) body .view[data-v="start"] .bands.top .band.a span{font-size:14px!important;letter-spacing:.16em!important}
+ html:is(.lbv1,.lbv2,.lbv3) body .view[data-v="start"] .bands.top .band.a span em{width:14px;margin:0 18px}}

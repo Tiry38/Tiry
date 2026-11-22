@@ -1,0 +1,5 @@
+html.lbv1 body .view[data-v="start"] .bands.top{height:clamp(96px,8vw,116px)!important}
+html.lbv1 body .view[data-v="start"] .bands.top .band.a{top:50%!important;height:clamp(62px,5vw,74px);transform:translateY(-50%)!important;background:#060607!important;
+ box-shadow:0 -1px 0 rgba(255,42,54,.9),0 1px 0 rgba(255,42,54,.9),0 0 24px rgba(255,30,45,.45),0 30px 60px -24px rgba(0,0,0,.8)!important}
+html.lbv1 .bands.top .band.a .lbC{position:absolute;inset:0;width:100%;height:100%;z-index:0;pointer-events:none}
+@media (max-width:980px){html.lbv1 body .view[data-v="start"] .bands.top{height:76px!important}html.lbv1 body .view[data-v="start"] .bands.top .band.a{height:50px}}
