@@ -1,0 +1,4 @@
+html.lbv1 body .view[data-v="start"] .bands.top{overflow:visible}
+html.lbv1 body .view[data-v="start"] .bands.top .band{visibility:hidden!important}
+.bands.top .lbS{display:none}
+html.lbv1 .bands.top .lbS{display:block;position:absolute;left:calc(50% - 50vw);width:100vw;top:-50px;bottom:-50px;height:calc(100% + 100px);pointer-events:none;z-index:2}
