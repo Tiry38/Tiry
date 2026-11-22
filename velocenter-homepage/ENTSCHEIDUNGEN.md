@@ -410,3 +410,10 @@
 - Gleiche Technik wie hintergrund10 (echtes Foto + KI-Tiefenkarte, Live-3D), drei neue Szenen: Nebelstraße (Nebelbank zieht), Bergsee (Wasser kräuselt, Dunst), Winterpass (Schneefall in drei Tiefen).
 - Fotos frei (Unsplash-Lizenz), Person/Auto/Baustellenfässer wegretuschiert, Quellen in `entwurf-modern/hintergrund11/QUELLEN.md`.
 - Teilbare Vorschau: https://tiry38.github.io/velo-center-web/vorschau-landschaften-2/ (nicht verlinkt, `noindex`). Startseite unverändert.
+
+## 22.11.2026 – Vorlage „Herbst, Wein & Polarlicht“ (hintergrund12, Tiry: „noch mehr Innovation“)
+- 3 Modi: Herbstallee (3D-Laub, Maus = Wind, Lichtstrahlen), Weinberg (Scrollen = Tageslauf), Hochland (Scrollen = Polarlicht-Nacht, Gold-Weiß → Rot, kein Pink).
+- Neu für alle drei: Kino-Schärfe folgt der Maus, Wolkenschatten, automatische Qualitätsanpassung.
+- Fotos frei (Unsplash-Lizenz), ohne Personen/Fahrzeuge, Quellen in `entwurf-modern/hintergrund12/QUELLEN.md`.
+- Tiry 22.11.: Linke Seite wirkte schwarz-weiß → Milchglas links ist jetzt farbtreu (nur heller/flacher, keine Entsättigung).
+- Vorschau (nicht verlinkt, noindex): https://tiry38.github.io/velo-center-web/vorschau-landschaften-3/ – Live-Seite unverändert.
