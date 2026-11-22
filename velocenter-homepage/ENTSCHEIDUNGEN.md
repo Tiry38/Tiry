@@ -435,7 +435,20 @@
 - Motive: Dünensteg (Sylt), Heideweg (violett, nicht rosa), Zypressentunnel. Vorschau: `vorschau-landschaften-5/` (nicht verlinkt, noindex).
 
 ## Showroom-Wechsel mit Herbstlaub (22.11.2026, Vorschau 3, nur Hintergrund 1 „Herbstallee“)
-- Tiry: Rad- und Logo-Wechsel nicht als Nanoschwarm, sondern mit Mini-Herbstblättern, flüssig, Blätter sollen fliegen, gleich schnell.
-- Umsetzung in `vMorphJs` (`uLeaf`): bis ca. 5.200 Blätter je Rad, Windböe im Bogen, Trudeln, Kippen (Vorder-/Rückseite), Drehung, Blattform mit Mittelrippe und Stiel.
-- Farben: echte Radfarbe am Anfang und Ende, im Flug Gold, Orange, Rot und Braun. Helle Pixel gehen früh ins Laubgold, damit kein Rosa entsteht.
-- Dauer wie bisher (`VM.dur` 2600 ms). Hintergrund 2 und 3 behalten den Nanoschwarm. Schalter ist `window.HG12_MODE`.
+- **Wunsch von Tiry:**
+  - Der Rad- und Logo-Wechsel läuft mit Herbstblättern statt mit dem Nanoschwarm.
+  - Die Blätter sollen natürlich wie im Wind fliegen und nicht gezogen werden.
+  - Keine Wirbel, es soll wie Zauberei aussehen.
+  - Die erste Fassung aus Dreiecken war ihm zu schwach.
+- **Umsetzung:** eigenes Grafikprogramm `VS_L`/`FS_L` in `vMorphJs`.
+  - **Formen:** Ahorn, Buche/Eiche, Birke, je mit Mittelrippe, Seitenadern, Stiel, Farbverlauf, Flecken und dunklerem, trockenem Rand. Die Rückseite ist matter, dazu kommt Glanz.
+  - **Ablauf:** Eine Windböe weht das alte Rad nach rechts oben weg, wie bei einem Laubhaufen.
+  - Das neue Rad weht mit demselben Wind von links herein und landet sanft gebremst.
+  - **Bewegung:** Die Blätter flattern wie Pendel, kippen (3D-Wenden) und trudeln teils. Einige fliegen auf die Kamera zu (werden größer), andere nach hinten weg.
+  - **Effekte:** Beim Loslösen und Landen gibt es ein kurzes goldenes Funkeln. Jedes Blatt wirft einen weichen Schatten auf den Showroom. Am Rand der Zeichenfläche blenden die Blätter weich aus.
+- **Farben:**
+  - Im Flug Gold, Orange, Rot, Braun und Olivgrün; kein Rosa.
+  - Am alten und neuen Pixel trägt jedes Blatt die echte Radfarbe.
+- **Weitere Regeln:**
+  - Die Dauer bleibt wie bisher (`VM.dur` 2600 ms).
+  - Hintergrund 2 und 3 behalten den Nanoschwarm. Umgeschaltet wird über `window.HG12_MODE`.
