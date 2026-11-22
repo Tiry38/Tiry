@@ -99,7 +99,7 @@ void main(){
  col+=vec3(1.,.93,.84)*uSun.z*(exp(-sr*7.)*.35*pul+ray*exp(-sr*2.2)*.20*max(sky,fm*.6));
  /* Klick: rote Lichtwelle läuft durch die Tiefe (kein Ring am Mauszeiger, Tiry 22.11.2026) */
  float age=uT-uK.z;
- if(age<7.5&&uLd>.5){
+ if(age<10.5&&uLd>.5){
   /* Herbstallee (Tiry 22.11.2026): Scan NUR auf der Straße – läuft vorne los, über die Kuppe die Straße hinauf bis in den Nebel,
      wird nach hinten langsamer. Haarfeine Lichtkante, dahinter Holo-Raster in echter Perspektive auf dem Asphalt,
      Asphalt-Körnung/Mittellinie/Laub leuchten im Band fein auf, einzelne Messpunkte. Keine Bäume, kein Himmel. */
@@ -112,7 +112,7 @@ void main(){
   float road=max(onN*(1.-smoothstep(.34,.55,sat)*.5),onF*(1.-smoothstep(.16,.32,sat)));
   float nn=q.y<.388?max((.6164-q.y)*1.647,.38):mix(.085,.004,tf);
   float sp=q.y<.388?(1.-nn)/.62*.70:.70+.30*tf;
-  float pr=clamp(age/5.6,0.,1.);float S=-.04+1.08*(1.-pow(1.-pr,1.45));
+  float pr=clamp(age/8.2,0.,1.);float S=-.04+1.08*(1.-pow(1.-pr,1.45));
   float dz=sp-S,bw=mix(.034,.014,sp);
   float front=exp(-pow(dz/bw,2.));
   float rim=exp(-pow((dz+bw*1.05)/(bw*.20),2.));
@@ -126,11 +126,23 @@ void main(){
   float lu=dot(base,vec3(.333));
   float lb=(dot(P(q+vec2(.0035,0.)),vec3(.333))+dot(P(q-vec2(.0035,0.)),vec3(.333))+dot(P(q+vec2(0.,.0035)),vec3(.333))+dot(P(q-vec2(0.,.0035)),vec3(.333)))*.25;
   float hp=clamp((lu-lb)*7.,0.,1.);
-  float A=road*(1.-smoothstep(6.,7.5,age))*(1.-smoothstep(.75,1.,sky)*.3);
+  float A=road*(1.-smoothstep(8.6,10.4,age))*(1.-smoothstep(.75,1.,sky)*.3);
   float fF=mix(1.,.38,smoothstep(0.,.15,tf)*(1.-onN));
   col=mix(col,RED,clamp((front*(.42+.38*hp)*fF+scn*grid*.40+scn*.06*fF)*A,0.,1.));
-  col+=vec3(1.,.86,.86)*(rim*.60+front*hp*.45+scn*grid*.10+pt*(front+scn*.6)*.9)*A;
-  col+=vec3(.9,.25,.3)*rim*.18*A;
+  /* Feinraster (2. Ebene), dichte Punktwolke auf der Asphalt-Körnung, Mittellinie nachgezeichnet */
+  float gz2=abs(fract(z*5.1)-.5),gx2=abs(fract(xw*3.9)-.5);
+  float grid2=max(smoothstep(.06,.0,gz2),smoothstep(.06,.0,gx2))*smoothstep(.20,.55,nn);
+  vec2 g2=vec2((q.x-vx)*uImg.x/uImg.y,q.y)*mix(1700.,520.,nn);
+  vec2 c2=floor(g2);float h2=fract(sin(dot(c2,vec2(269.5,183.3)))*43758.5);
+  vec2 f2=fract(g2)-.5;
+  float cloud=step(.62,h2)*smoothstep(.32,.10,length(f2))*(.45+.55*hp);
+  float hp2=clamp((lu-(dot(P(q+vec2(.0016,0.)),vec3(.333))+dot(P(q-vec2(.0016,0.)),vec3(.333))+dot(P(q+vec2(0.,.0016)),vec3(.333))+dot(P(q-vec2(0.,.0016)),vec3(.333)))*.25)*9.,0.,1.);
+  float yel=smoothstep(.22,.42,base.r-base.b);
+  float yx=dot(P(q+vec2(.004,0.)),vec3(1.,0.,-1.))-dot(P(q-vec2(.004,0.)),vec3(1.,0.,-1.));
+  float yedge=smoothstep(.10,.35,abs(yx));
+  float band=front+scn*.45;
+  col=mix(col,RED,clamp((front*grid2*.38+band*yedge*.45+front*yel*.12)*A,0.,1.));
+  col+=vec3(1.,.80,.80)*(front*hp*.32+front*hp2*.30+cloud*band*1.1+pt*(front+scn*.6)*.8+scn*grid*.06)*A;
  }else if(age<6.){float fr=1.05-age*.42;float wvv=exp(-pow((d-fr)*24.,2.))*exp(-age*.55)*(1.-smoothstep(.2,.6,sky));
   col=mix(col,RED,clamp(wvv*.85,0.,1.));col+=vec3(1.,.7,.7)*wvv*.15;}
  /* Farbführung Rot/Grau/Weiß: Rosa/Lila raus, leicht entsättigt, klar */
