@@ -514,3 +514,7 @@
   1. **Satin & Lichtlauf** – Satin-Wölbung, alle 8 s läuft ein Lichtstreif durch, hinteres Band Rauchglas, Funkeln dreht sich.
   2. **Klarlack & Tiefe** – Lack-Glanzkante, laufende Kupferlinien oben/unten, Pillen mit Glasschliff, hinteres Band unscharf (Tiefenschärfe).
   3. **Champagner-Linie** – feine 115°-Riffel der Homepage, Champagner-Doppellinien mit Lichtlauf, Funkeln in Champagner.
+
+### Laufband „Klarlack & Tiefe“ live (Tiry 22.11.2026: „setze Nummer 2 um in live … lösche danach die Vorlagen von den Laufbändern“)
+- Live: `laufband/z2.css` über `laufband/live_band.py` (aufgerufen in `tools/live_bauen.py` nach `live_hg12.py`) – Lack-Glanzkante, laufende Kupferlinien, Pillen mit Glasschliff, hinteres Band unscharf. Aufbau/Inhalte des Bands unverändert.
+- Alle Laufband-Vorlagen gelöscht (Vorschau `vorschau-band`, Varianten 1/3, Umschalter-Werkzeug).

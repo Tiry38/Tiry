@@ -279,6 +279,7 @@ def main():
     plus_design()
     # Hintergrund „Herbstallee“ + Laub-Verwandlung + Handy-Kopf (live seit 22.11.2026, Tiry)
     subprocess.run([sys.executable, os.path.join(QUELLE, 'entwurf-modern', 'hintergrund12', 'live_hg12.py'), ZIEL], check=True)
+    subprocess.run([sys.executable, os.path.join(QUELLE, 'entwurf-modern', 'laufband', 'live_band.py'), ZIEL], check=True)
     groesse = sum(os.path.getsize(os.path.join(dp, f)) for dp, _, fs in os.walk(ZIEL) for f in fs)
     print(f'Live-Fassung: {ZIEL}  ·  {len(dateien)} Bilder/Schriften  ·  {groesse / 1e6:.1f} MB')
 
