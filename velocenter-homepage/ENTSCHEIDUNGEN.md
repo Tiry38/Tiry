@@ -507,3 +507,10 @@
   2. **Hyperloop-Glasröhre** – massive Glasröhre bricht den echten Herbst-Hintergrund (mit Farbzerlegung), rote Licht-Kapseln rasen durch, Maus = Flüssig-Linse.
   3. **3D-Titan-Lettern** – echte 3D-Buchstaben per Raymarching, Torsionswellen drehen die Schrift einmal um die eigene Achse, rot glühende Flanken.
 - Abgelöst: Carbon-Plasma, Laser-Gravur, Partikel-Schrift. Live bleibt unverändert, bis Tiry wählt.
+
+### Laufband – Neustart „bestehendes Band veredeln“ (Tiry 22.11.2026)
+- Tiry: keine der Laufband-Vorlagen nutzbar → alle Band-Vorschauen gelöscht (vorschau-baender, vorschau-laufband-1..3).
+- Neu: `vorschau-band/` = das bestehende Doppelband (Aufbau, Schrift, Pillen, Inhalte gleich), nur veredelt, reines CSS (`laufband/z1..z3.css`):
+  1. **Satin & Lichtlauf** – Satin-Wölbung, alle 8 s läuft ein Lichtstreif durch, hinteres Band Rauchglas, Funkeln dreht sich.
+  2. **Klarlack & Tiefe** – Lack-Glanzkante, laufende Kupferlinien oben/unten, Pillen mit Glasschliff, hinteres Band unscharf (Tiefenschärfe).
+  3. **Champagner-Linie** – feine 115°-Riffel der Homepage, Champagner-Doppellinien mit Lichtlauf, Funkeln in Champagner.

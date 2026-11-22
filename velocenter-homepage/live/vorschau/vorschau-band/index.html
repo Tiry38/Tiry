@@ -8,7 +8,7 @@
 <link rel="apple-touch-icon" href="../apple-touch-icon.png">
 <meta property="og:image" content="https://tiry38.github.io/velo-center-web/og-bild.jpg"><meta property="og:image:secure_url" content="https://tiry38.github.io/velo-center-web/og-bild.jpg"><meta property="og:image:type" content="image/jpeg"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630"><meta property="og:image:alt" content="Velocenter Hessert: E-Bike- und E-Dreirad-Spezialist mit eigener Werkstatt in Wörth am Rhein"><meta name="twitter:image" content="https://tiry38.github.io/velo-center-web/og-bild.jpg">
 <meta property="og:url" content="https://tiry38.github.io/velo-center-web/"><meta name="twitter:card" content="summary_large_image">
-<title>Vorschau Laufband 1 · Glas-Kapsel</title>
+<title>Vorschau Band veredelt 1–3</title>
 <meta name="color-scheme" content="only light">
 <meta name="darkreader-lock">
 <meta name="description" content="E-Bikes, Bosch Service Center und eigene Werkstatt in Wörth am Rhein. i:SY Experte, KTM, QiO, Velo de Ville, Victoria. Leasing, 0 % Finanzierung. Familienbetrieb seit 1995.">
@@ -6839,81 +6839,83 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
 }
 </style>
 <style id="lbCss">
-/* Laufband 1 „Glas-Kapsel“: schwebende Flüssigglas-Schiene mit rotem Lichtleiter, darunter eine schmale Daten-Zeile */
-html.lb1 body .view[data-v="start"] .bands.top{height:clamp(112px,9.6vw,136px)!important;perspective:1400px;overflow:visible}
-html.lb1 body .view[data-v="start"] .bands.top .band{position:absolute;transform:none!important;border:0!important;background:none!important;padding:0!important;filter:none!important}
-html.lb1 .bands.top .lbvp{position:absolute;inset:0;display:flex;align-items:center;overflow:hidden;
- -webkit-mask-image:linear-gradient(90deg,transparent,#000 5%,#000 95%,transparent);mask-image:linear-gradient(90deg,transparent,#000 5%,#000 95%,transparent)}
-html.lb1 .bands.top .lbvp .tk{align-items:center}
-/* Kapsel */
-html.lb1 body .view[data-v="start"] .bands.top .band.a{top:6px!important;left:clamp(12px,2.6vw,44px)!important;right:clamp(12px,2.6vw,44px)!important;height:clamp(60px,5.4vw,78px);border-radius:999px;overflow:hidden;
- transform:rotateX(var(--rx,0deg)) rotateY(var(--ry,0deg)) translateZ(0)!important;transform-style:preserve-3d;
- background:linear-gradient(180deg,rgba(255,255,255,.78),rgba(255,255,255,.34) 46%,rgba(250,236,238,.5))!important;
- -webkit-backdrop-filter:blur(16px) saturate(1.7);backdrop-filter:blur(16px) saturate(1.7);
- box-shadow:inset 0 1.5px 0 rgba(255,255,255,.95),inset 0 -1px 0 rgba(255,255,255,.5),inset 0 -18px 30px -14px rgba(226,35,45,.30),
-  0 0 0 1px rgba(255,255,255,.55),0 2px 0 1px rgba(160,20,40,.18),0 26px 50px -20px rgba(40,12,16,.55),0 14px 34px -10px rgba(226,35,45,.38)!important}
-/* Glanz, der über die Kapsel wandert */
-html.lb1 .bands.top .band.a::before{content:"";position:absolute;inset:0;z-index:2;pointer-events:none;border-radius:inherit;
- background:linear-gradient(104deg,transparent 38%,rgba(255,255,255,.75) 47%,rgba(255,255,255,.15) 52%,transparent 60%) 0 0/260% 100% no-repeat;
- mix-blend-mode:soft-light;animation:lb1Glanz 7.5s cubic-bezier(.6,0,.2,1) infinite}
-@keyframes lb1Glanz{0%,30%{background-position:120% 0}75%,100%{background-position:-60% 0}}
-/* roter Lichtleiter unten + Zeigerlicht */
-html.lb1 .bands.top .band.a::after{content:"";position:absolute;left:5%;right:5%;bottom:0;height:3px;z-index:3;pointer-events:none;border-radius:3px;
- background:linear-gradient(90deg,transparent,#9F1239 8%,#E2232D 25%,#FF8A8F 40%,#FFF0F1 var(--px,50%),#FF8A8F 60%,#E2232D 75%,#9F1239 92%,transparent);
- box-shadow:0 0 10px 1px rgba(226,35,45,.85),0 0 26px 4px rgba(226,35,45,.45);animation:lb1Puls 2.6s ease-in-out infinite}
-@keyframes lb1Puls{50%{opacity:.72;box-shadow:0 0 6px 0 rgba(226,35,45,.7),0 0 18px 2px rgba(226,35,45,.3)}}
-html.lb1 .bands.top .band.a .lbvp::after{content:"";position:absolute;inset:0;pointer-events:none;
- background:radial-gradient(160px 90px at var(--px,50%) 110%,rgba(226,35,45,.22),transparent 70%)}
-/* Schrift in der Kapsel */
-html.lb1 body .view[data-v="start"] .bands.top .band.a span{color:#17181E!important;-webkit-text-stroke:0!important;font-size:clamp(20px,2.3vw,34px)!important;
- text-shadow:0 1px 0 rgba(255,255,255,.7)!important;transform:skewX(calc(-9deg - var(--v,0)*3deg));transition:color .3s}
-html.lb1 .bands.top .band.a span:hover{color:#C8102E!important}
-html.lb1 .bands.top .band.a span b.tkn{color:transparent!important;background:linear-gradient(180deg,#FF4B55,#B3122B);-webkit-background-clip:text;background-clip:text;text-shadow:none!important}
-html.lb1 .bands.top .band.a span b.tko{color:#E85D00!important;text-shadow:none!important}
-html.lb1 .bands.top .band.a span b.tks{color:#F0A000!important;text-shadow:0 1px 0 rgba(255,255,255,.6)!important}
-html.lb1 .bands.top .band.a span b.tkb::after,html.lb1 .bands.top .band.a span b.tkg::after{box-shadow:0 0 0 1.5px rgba(226,35,45,.55),0 8px 18px -8px rgba(120,10,30,.6)!important}
-/* Trenner: roter Kristall */
-html.lb1 body .view[data-v="start"] .bands.top .band span em{font-size:0!important;padding:0!important;margin:0 clamp(16px,1.8vw,28px);display:inline-block;vertical-align:middle;width:clamp(9px,.8vw,12px);height:clamp(9px,.8vw,12px);
- transform:rotate(45deg) skewX(9deg);border-radius:2px;background:linear-gradient(135deg,#FFB3B6,#E2232D 45%,#7E0D22);
- box-shadow:0 0 0 1px rgba(255,255,255,.6),0 0 12px rgba(226,35,45,.75);text-shadow:none!important;animation:lb1Kr 2.4s ease-in-out infinite}
-@keyframes lb1Kr{50%{box-shadow:0 0 0 1px rgba(255,255,255,.6),0 0 20px 2px rgba(226,35,45,.95)}}
-/* Daten-Zeile */
-html.lb1 body .view[data-v="start"] .bands.top .band.b{top:calc(6px + clamp(60px,5.4vw,78px) + 12px)!important;left:22%!important;right:22%!important;height:26px;border-radius:999px;overflow:hidden;
- background:linear-gradient(90deg,rgba(20,21,26,.55),rgba(20,21,26,.78) 50%,rgba(20,21,26,.55))!important;-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);
- box-shadow:inset 0 1px 0 rgba(255,255,255,.16),0 10px 24px -12px rgba(0,0,0,.6)!important}
-html.lb1 body .view[data-v="start"] .bands.top .band.b span{font:700 11px/1 var(--display)!important;letter-spacing:.3em!important;color:rgba(236,237,242,.92)!important;-webkit-text-stroke:0!important;transform:none!important;text-transform:uppercase}
-html.lb1 body .view[data-v="start"] .bands.top .band.b span em{font-size:0!important;padding:0!important;display:inline-block;width:5px;height:5px;margin:0 18px 1px;border-radius:50%;background:#E2232D;box-shadow:0 0 8px #E2232D;vertical-align:middle;animation:none}
-@media (max-width:980px){
- html.lb1 body .view[data-v="start"] .bands.top{height:96px!important;margin:6px 0 0!important}
- html.lb1 body .view[data-v="start"] .bands.top .band.a{height:52px;top:4px!important;left:10px!important;right:10px!important}
- html.lb1 body .view[data-v="start"] .bands.top .band.a span{font-size:18px!important}
- html.lb1 body .view[data-v="start"] .bands.top .band.b{top:66px!important;left:8%!important;right:8%!important;height:22px}
- html.lb1 body .view[data-v="start"] .bands.top .band.b span{font-size:9.5px!important;letter-spacing:.24em!important}
-}
+/* 1 · Satin & Lichtlauf */
+html.lbv1 body .view[data-v="start"] .bands.top .band.a{background:linear-gradient(180deg,rgba(255,255,255,.24) 0,rgba(255,255,255,.07) 20%,rgba(255,255,255,0) 46%,rgba(0,0,0,.16) 78%,rgba(0,0,0,.34) 100%),
+ linear-gradient(100deg,#D2132F 0%,#A8102C 36%,#741428 62%,#3A3D44 100%)!important;border-block:1px solid rgba(240,200,160,.78)!important;
+ box-shadow:inset 0 1px 0 rgba(255,255,255,.28),inset 0 -1px 0 rgba(0,0,0,.35),0 24px 46px -16px rgba(130,10,28,.6),0 10px 18px -10px rgba(0,0,0,.5)!important}
+html.lbv1 body .view[data-v="start"] .bands.top .band.a::after{content:"";position:absolute;left:0;right:0;top:-30%;bottom:-30%;pointer-events:none;z-index:3;mix-blend-mode:screen;
+ background:linear-gradient(104deg,transparent 42%,rgba(255,236,220,.0) 45%,rgba(255,236,220,.38) 50%,rgba(255,236,220,0) 55%,transparent 58%) 0 0/260% 100% no-repeat;animation:lbSheen 8s cubic-bezier(.5,0,.25,1) infinite}
+@keyframes lbSheen{0%{background-position:130% 0}55%,100%{background-position:-30% 0}}
+html.lbv1 body .view[data-v="start"] .bands.top .band.a span{text-shadow:0 1px 0 rgba(60,0,10,.35),0 6px 14px rgba(60,0,10,.35)}
+html.lbv1 body .view[data-v="start"] .bands.top .band.b{background:linear-gradient(90deg,rgba(32,34,40,.78),rgba(60,42,50,.78) 50%,rgba(32,34,40,.78))!important;-webkit-backdrop-filter:blur(7px) saturate(1.25);backdrop-filter:blur(7px) saturate(1.25);
+ border-block:1px solid rgba(255,255,255,.14)!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.08)!important}
+html.lbv1 body .view[data-v="start"] .bands.top .band.b span{-webkit-text-stroke:1.2px rgba(255,255,255,.42)!important}
+html.lbv1 body .view[data-v="start"] .bands.top .band.a span em{display:inline-block;animation:lbTw 3.6s ease-in-out infinite}
+html.lbv1 body .view[data-v="start"] .bands.top .band.a span:nth-child(3n+1) em{animation-delay:-1.2s}html.lbv1 body .view[data-v="start"] .bands.top .band.a span:nth-child(3n+2) em{animation-delay:-2.4s}
+@keyframes lbTw{0%,100%{transform:scale(.86) rotate(0);opacity:.8}50%{transform:scale(1.12) rotate(45deg);opacity:1;text-shadow:0 0 18px rgba(94,234,212,.95)}}
+/* 2 · Klarlack & Tiefe */
+html.lbv2 body .view[data-v="start"] .bands.top .band.a{background:linear-gradient(180deg,rgba(255,255,255,0) 0,rgba(255,255,255,0) 22%,rgba(255,255,255,.30) 24%,rgba(255,255,255,.08) 31%,rgba(255,255,255,0) 48%,rgba(0,0,0,.28) 100%),
+ linear-gradient(100deg,#C8102E 0%,#9A0F2A 40%,#5E1426 66%,#2E3138 100%)!important;border:0!important;
+ box-shadow:0 30px 50px -18px rgba(0,0,0,.6),0 14px 30px -12px rgba(150,12,32,.55)!important}
+html.lbv2 body .view[data-v="start"] .bands.top .band.a::before,html.lbv2 body .view[data-v="start"] .bands.top .band.a::after{content:"";position:absolute;left:0;right:0;height:2px;z-index:3;pointer-events:none;
+ background:linear-gradient(90deg,#7A4A2A,#E8B98C 20%,#FFF1E0 30%,#B87333 42%,#7A4A2A 55%,#E8B98C 75%,#FFF1E0 82%,#B87333 92%,#7A4A2A) 0 0/200% 100%;animation:lbCu 9s linear infinite}
+html.lbv2 body .view[data-v="start"] .bands.top .band.a::before{top:0}html.lbv2 body .view[data-v="start"] .bands.top .band.a::after{bottom:0;animation-direction:reverse}
+@keyframes lbCu{to{background-position:-200% 0}}
+html.lbv2 body .view[data-v="start"] .bands.top .band.a span{text-shadow:0 2px 0 rgba(70,0,12,.45),0 10px 18px rgba(40,0,8,.45)}
+html.lbv2 body .view[data-v="start"] .bands.top .band.b{background:linear-gradient(90deg,#1E2026,#2C2F36 50%,#1E2026)!important;filter:blur(2px) brightness(.82);opacity:.92;border-block:0!important}
+html.lbv2 body .view[data-v="start"] .bands.top .band span b.tkb::after,html.lbv2 body .view[data-v="start"] .bands.top .band span b.tkg::after{background:linear-gradient(180deg,#FFFFFF 0,#F4F4F7 48%,#E2E3E8 52%,#F7F7F9 100%)!important;
+ box-shadow:inset 0 1px 0 #fff,inset 0 -2px 4px rgba(0,0,0,.12),0 8px 16px -8px rgba(0,0,0,.6)!important}
+html.lbv2 body .view[data-v="start"] .bands.top .band.a span em{animation:lbPu 2.8s ease-in-out infinite}
+@keyframes lbPu{50%{text-shadow:0 0 22px rgba(94,234,212,1),0 0 6px rgba(255,255,255,.8)}}
+/* 3 · Champagner-Linie */
+html.lbv3 body .view[data-v="start"] .bands.top .band.a{background:repeating-linear-gradient(115deg,rgba(255,255,255,0) 0,rgba(255,255,255,.075) 2px,rgba(255,255,255,0) 4px),
+ linear-gradient(180deg,rgba(255,255,255,.12),rgba(255,255,255,0) 40%,rgba(0,0,0,.22)),linear-gradient(100deg,#C8102E 0%,#9C112C 42%,#5C1526 68%,#33363D 100%)!important;
+ border:0!important;padding-block:calc(clamp(7px,.9vw,12px) + 5px)!important;box-shadow:0 22px 44px -16px rgba(120,10,25,.5)!important}
+html.lbv3 body .view[data-v="start"] .bands.top .band.a::before,html.lbv3 body .view[data-v="start"] .bands.top .band.a::after{content:"";position:absolute;left:0;right:0;height:5px;z-index:3;pointer-events:none;
+ background:linear-gradient(90deg,transparent 0,rgba(255,244,228,.95) 50%,transparent 100%) -40% 0/24% 1px no-repeat,
+ linear-gradient(90deg,transparent 0,rgba(255,244,228,.95) 50%,transparent 100%) -40% 4px/24% 1px no-repeat,
+ linear-gradient(#F0C8A0,#F0C8A0) 0 0/100% 1px no-repeat,linear-gradient(rgba(240,200,160,.55),rgba(240,200,160,.55)) 0 4px/100% 1px no-repeat;animation:lbGo 6s cubic-bezier(.5,0,.3,1) infinite}
+html.lbv3 body .view[data-v="start"] .bands.top .band.a::before{top:3px}html.lbv3 body .view[data-v="start"] .bands.top .band.a::after{bottom:3px;transform:scaleY(-1);animation-delay:-3s}
+@keyframes lbGo{0%{background-position:-40% 0,-40% 4px,0 0,0 4px}70%,100%{background-position:140% 0,140% 4px,0 0,0 4px}}
+html.lbv3 body .view[data-v="start"] .bands.top .band.a span em{color:#F0C8A0!important;text-shadow:0 0 12px rgba(240,200,160,.85)!important}
+html.lbv3 body .view[data-v="start"] .bands.top .band.a span{text-shadow:0 2px 10px rgba(50,0,10,.4)}
+html.lbv3 body .view[data-v="start"] .bands.top .band.b{background:linear-gradient(90deg,#24262C,#33363D 50%,#24262C)!important;border-block:1px solid rgba(240,200,160,.28)!important}
+html.lbv3 body .view[data-v="start"] .bands.top .band.b span{-webkit-text-stroke:1.2px rgba(240,200,160,.42)!important}
+html.lbv3 body .view[data-v="start"] .bands.top .band.b span em{color:#F0C8A0!important;text-shadow:none!important;opacity:.7!important}
 </style>
 <script id="lbJs">
-/* Laufband-Vorlagen (Tiry 22.11.2026): gemeinsame Physik – Scroll-Tempo, Zeiger, Sichtbarkeit */
-window.LB=function(cls,tick){
- var de=document.documentElement;de.classList.add(cls);
- function go(){var bt=document.querySelector('.view[data-v="start"] .bands.top');if(!bt)return;
-  bt.querySelectorAll('.band').forEach(function(b){var tk=b.querySelector('.tk');if(!tk||tk.parentNode.classList.contains('lbvp'))return;
-   var vp=document.createElement('div');vp.className='lbvp';b.insertBefore(vp,tk);vp.appendChild(tk)});
-  var st={bt:bt,v:0,px:.5,py:.5,tx:.5,ty:.5,over:0,on:true,t:performance.now()},ly=scrollY,anims=[],lr=1;
-  bt.addEventListener('pointermove',function(e){var r=bt.getBoundingClientRect();st.tx=(e.clientX-r.left)/r.width;st.ty=(e.clientY-r.top)/r.height;st.over=1});
-  bt.addEventListener('pointerleave',function(){st.over=0;st.tx=.5;st.ty=.5});
-  if(window.IntersectionObserver)new IntersectionObserver(function(e){st.on=e[0].isIntersecting;if(st.on)requestAnimationFrame(f)}).observe(bt);
-  function f(now){if(!st.on)return;if(document.hidden){setTimeout(function(){requestAnimationFrame(f)},400);return}
-   var dt=Math.min(.05,((now||performance.now())-st.t)/1000);st.t=now||performance.now();
-   var d=Math.abs(scrollY-ly);ly=scrollY;st.v+=(Math.min(d/9,4)-st.v)*Math.min(1,dt*6);
-   st.px+=(st.tx-st.px)*Math.min(1,dt*7);st.py+=(st.ty-st.py)*Math.min(1,dt*7);
-   bt.style.setProperty('--v',st.v.toFixed(3));bt.style.setProperty('--px',(st.px*100).toFixed(2)+'%');bt.style.setProperty('--py',(st.py*100).toFixed(2)+'%');
-   if(!anims.length)bt.querySelectorAll('.tk').forEach(function(t){if(t.getAnimations)t.getAnimations().forEach(function(x){anims.push(x)})});
-   var r=1+st.v*1.6;if(Math.abs(r-lr)>.02){anims.forEach(function(x){x.playbackRate=r});lr=r}
-   if(tick)tick(st,dt);requestAnimationFrame(f)}
-  requestAnimationFrame(f)}
- if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',go);else go();
-};
-LB('lb1',function(st){var a=st.bt.querySelector('.band.a');if(!a)return;
- a.style.setProperty('--rx',((.5-st.py)*9).toFixed(2)+'deg');a.style.setProperty('--ry',((st.px-.5)*5).toFixed(2)+'deg')});
+/* Laufband-Vorlagen mit Umschalter (Tiry 22.11.2026: „mit 1, 2, 3 durchklicken links … komplett von Rand zu Rand“).
+   Jede Variante: {name, info, on(bt), off(bt), tick(st,dt)}; gemeinsamer Takt mit Scroll-Tempo und Zeiger. */
+(function(){var V=window.LBV=[],cur=-1,st=null,de=document.documentElement;
+function go(){var bt=document.querySelector('.view[data-v="start"] .bands.top');if(!bt||!V.length)return;
+ st={bt:bt,v:0,px:.5,py:.5,tx:.5,ty:.5,cx:-1e4,cy:-1e4,over:0,t:performance.now(),T:0,on:true};var ly=scrollY,anims=[],lr=1;
+ addEventListener('pointermove',function(e){st.cx=e.clientX;st.cy=e.clientY;var r=bt.getBoundingClientRect();st.tx=(e.clientX-r.left)/r.width;st.ty=(e.clientY-r.top)/r.height;
+  st.over=st.ty>-.4&&st.ty<1.4?1:0;if(!st.over){st.tx=.5;st.ty=.5}},{passive:true});
+ if(window.IntersectionObserver)new IntersectionObserver(function(e){st.on=e[0].isIntersecting;if(st.on)requestAnimationFrame(f)},{rootMargin:'120px'}).observe(bt);
+ function f(now){if(!st.on)return;now=now||performance.now();var dt=Math.min(.05,(now-st.t)/1000);st.t=now;st.T+=dt;
+  var d=Math.abs(scrollY-ly);ly=scrollY;st.v+=(Math.min(d/9,4)-st.v)*Math.min(1,dt*6);
+  st.px+=(st.tx-st.px)*Math.min(1,dt*7);st.py+=(st.ty-st.py)*Math.min(1,dt*7);
+  bt.style.setProperty('--v',st.v.toFixed(3));bt.style.setProperty('--px',(st.px*100).toFixed(2)+'%');
+  anims=[];bt.querySelectorAll('.tk').forEach(function(t){if(t.getAnimations)t.getAnimations().forEach(function(x){anims.push(x)})});
+  var r=1+st.v*1.6;if(Math.abs(r-lr)>.02){lr=r}anims.forEach(function(x){if(Math.abs(x.playbackRate-lr)>.02)x.playbackRate=lr});
+  if(cur>=0&&V[cur].tick)V[cur].tick(st,dt);requestAnimationFrame(f)}
+ function pick(i){if(i===cur)return;if(cur>=0){V[cur].off&&V[cur].off(bt);de.classList.remove('lbv'+(cur+1))}cur=i;de.classList.add('lbv'+(i+1));V[i].on&&V[i].on(bt,st);up();try{localStorage.setItem('vc_lbv',String(i))}catch(_){}}
+ /* Umschalter links (gleiche Optik wie bei den Hintergründen) */
+ var b=document.createElement('div');b.id='ueSw';b.setAttribute('role','group');b.setAttribute('aria-label','Laufband wählen');
+ b.innerHTML='<span class="ue-k">Laufband</span>'+V.map(function(m,i){return'<button type="button" data-i="'+i+'" aria-pressed="false"><b>'+(i+1)+'</b><span>'+m.name+'<small>'+m.info+'</small></span></button>'}).join('');
+ document.body.appendChild(b);
+ function up(){[].forEach.call(b.querySelectorAll('button'),function(x){var on=+x.dataset.i===cur;x.classList.toggle('on',on);x.setAttribute('aria-pressed',String(on))})}
+ var tt=0;function tip(){var n=document.getElementById('ueTip');if(!n){n=document.createElement('div');n.id='ueTip';document.body.appendChild(n)}
+  n.innerHTML='<b>Laufband '+(cur+1)+'</b> · '+V[cur].name+' – '+V[cur].info;n.classList.remove('on');void n.offsetWidth;n.classList.add('on');clearTimeout(tt);tt=setTimeout(function(){n.classList.remove('on')},2800)}
+ b.addEventListener('click',function(e){var x=e.target.closest('button');if(!x)return;e.stopPropagation();pick(+x.dataset.i);tip()});
+ var s0=0;try{var q=new URLSearchParams(location.search).get('lb');if(q)s0=+q-1;else s0=+(localStorage.getItem('vc_lbv')||0)}catch(_){}
+ if(!(s0>=0&&s0<V.length))s0=0;pick(s0);setTimeout(tip,1200);requestAnimationFrame(f)}
+window.LBV_START=function(){if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',go);else go()};
+})();
+/* Veredelte Fassungen des bestehenden Bands (Tiry 22.11.2026: „das Band, das wir haben, ein bisschen verschönert“) – nur CSS */
+LBV.push({name:'Satin & Lichtlauf',info:'Satin-Wölbung, Lichtstreif läuft durch, Rauchglas-Band dahinter'});
+LBV.push({name:'Klarlack & Tiefe',info:'Lack-Glanzkante, Kupferlinien, Tiefenschärfe wie im Kino'});
+LBV.push({name:'Champagner-Linie',info:'Feine Homepage-Riffel, Champagner-Doppellinien mit Lichtlauf'});
+LBV_START();
 </script>
 </html>
