@@ -469,3 +469,7 @@
 ## Herbstallee: Klick-Scan bis hinten raus (22.11.2026)
 - **Tiry:** Der rote Scan beim Klick soll über die Ebene und die Straße hinten hinauf laufen, keine unsichtbare Wand nach 5 m. Nur Boden und Seiten, nie den Himmel, kein Kreis. Stil so dezent wie vorher, nur detailreicher bei genauem Hinsehen (kein Laser-Look).
 - Umsetzung (`hg12.js`, nur Modus herbst): Scan-Tiefe aus der Bodenebene (bis Kuppe) und weiter linear die Straße hinauf bis zum Nebel (`cr=.385`, `vy=.64`), darüber nichts. Im Band leuchten Kanten zart nach, vereinzelte feine Messpunkte; Bäume an den Seiten abgeschwächt.
+
+## Vorschau 3 (Herbstallee) Handy-Kopf mit Burger (22.11.2026)
+- **Tiry:** Am Handy nur eine Leiste oben: Öffnungsstatus · A+ · Burger-Menü (aufklappbar). Dadurch ist oben Platz, und der Laufband-Banner läuft am Handy wieder mit (Pflicht). Gilt vorerst nur für diese Vorlage.
+- Umsetzung: `<style id="hgMobKopf">` am Ende von `vorschau-landschaften-3/index.html` (blendet `.mnav` aus, zeigt `.burger` mit dem bestehenden Vollbild-Menü `.mnu`, Kopf klappt beim Scrollen nicht mehr ein, `.bands.top` am Handy sichtbar).
