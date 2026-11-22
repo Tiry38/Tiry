@@ -1,8 +1,11 @@
 name: Luna-Auftrag an Claude Code
 
 # Tiry sagt Luna, was an ihr verbessert werden soll → Luna legt ein Issue mit Label „luna-auftrag“ an →
-# Claude Code setzt es in luna-app/ um, testet, pusht auf den Branch, aus dem Luna gebaut wurde → die APK wird gebaut
-# und Luna aktualisiert sich selbst.
+# Claude Code setzt es in luna-app/ um → DIESER ABLAUF prüft selbst (Tests), pusht, baut das Update,
+# kommentiert und schließt den Auftrag. Nichts bleibt offen:
+#   • Umsetzung fehlgeschlagen (keine Änderung, Tests rot, Push-Konflikt) → automatisch ein zweiter Versuch.
+#   • Auch der zweite scheitert → Auftrag wird mit Begründung geschlossen (Luna liest den Grund vor).
+#   • Wachhund (luna-wachhund.yml) startet stündlich liegengebliebene Aufträge.
 # Sicherheit: läuft NUR für Issues, die Tirys eigenes Konto angelegt hat.
 # Einmalig nötig: Repository-Secret CLAUDE_CODE_OAUTH_TOKEN (am PC „claude setup-token“, Claude-Abo)
 # oder ANTHROPIC_API_KEY (API-Abrechnung).
@@ -15,6 +18,10 @@ on:
       issue:
         description: "Nummer des Luna-Auftrags (Issue), der (erneut) umgesetzt werden soll"
         required: true
+      versuch:
+        description: "Versuch Nr. (1 oder 2)"
+        required: false
+        default: "1"
 
 permissions:
   contents: write
@@ -35,13 +42,14 @@ jobs:
        github.event.issue.user.login == 'Tiry38' &&
        github.event.issue.state == 'open')
     runs-on: ubuntu-latest
-    timeout-minutes: 90
+    timeout-minutes: 120
     steps:
       - name: Auftrag und Ziel-Branch lesen
         id: auftrag
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NUM: ${{ github.event.issue.number || inputs.issue }}
+          VERSUCH: ${{ inputs.versuch || '1' }}
         run: |
           gh api "repos/${{ github.repository }}/issues/$NUM" > /tmp/issue.json
           AUTHOR=$(jq -r .user.login /tmp/issue.json)
@@ -49,36 +57,55 @@ jobs:
           if [ "$AUTHOR" != "Tiry38" ] || ! echo "$LABELS" | grep -q luna-auftrag; then
             echo "Kein Luna-Auftrag von Tiry – Abbruch."; exit 1
           fi
+          if [ "$(jq -r .state /tmp/issue.json)" != "open" ]; then
+            echo "Auftrag #$NUM ist schon geschlossen – nichts zu tun."; echo "skip=1" >> "$GITHUB_OUTPUT"; exit 0
+          fi
           B=$(jq -r .body /tmp/issue.json | sed -n 's/^Branch: `\([A-Za-z0-9._/-]*\)`.*/\1/p' | head -1)
           [ -z "$B" ] && B="ccr-5a20bb04-mr0zu4"
           echo "branch=$B" >> "$GITHUB_OUTPUT"
           echo "num=$NUM" >> "$GITHUB_OUTPUT"
+          case "$VERSUCH" in 2) echo "versuch=2" >> "$GITHUB_OUTPUT";; *) echo "versuch=1" >> "$GITHUB_OUTPUT";; esac
           {
             echo "text<<LUNA_EOF"
             jq -r '.title + "\n\n" + (.body // "")' /tmp/issue.json
             echo "LUNA_EOF"
           } >> "$GITHUB_OUTPUT"
+          # Beim zweiten Versuch: Grund des ersten Fehlschlags mitgeben (steht im letzten Ablauf-Kommentar)
+          {
+            echo "hinweis<<LUNA_EOF"
+            if [ "$VERSUCH" = "2" ]; then
+              gh api "repos/${{ github.repository }}/issues/$NUM/comments" --jq '[.[] | select(.body | startswith("⏳"))][-1].body // ""'
+            fi
+            echo "LUNA_EOF"
+          } >> "$GITHUB_OUTPUT"
       - uses: actions/checkout@v4
+        if: steps.auftrag.outputs.skip != '1'
         with:
           ref: ${{ steps.auftrag.outputs.branch }}
           fetch-depth: 0
       - name: Ausgangsstand merken
+        if: steps.auftrag.outputs.skip != '1'
         id: start
-        run: echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+        run: |
+          echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+          rm -f /tmp/luna-antwort.md
       - uses: actions/setup-java@v4
+        if: steps.auftrag.outputs.skip != '1'
         with:
           distribution: temurin
           java-version: 17
           cache: gradle
       - uses: anthropics/claude-code-action@v1
+        if: steps.auftrag.outputs.skip != '1'
+        continue-on-error: true   # Ergebnis prüft der Abschluss-Schritt selbst
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
-          # Die Kette (nächster Auftrag) startet den Ablauf per GitHub-Automat – den ausdrücklich erlauben
+          # Kette, zweiter Versuch und Wachhund starten den Ablauf per GitHub-Automat – den ausdrücklich erlauben
           allowed_bots: "github-actions"
           claude_args: |
             --model claude-opus-5-5
-            --max-turns 80
+            --max-turns 120
             --allowedTools Bash,Edit,Read,Write,Glob,Grep
           prompt: |
             Du arbeitest an Luna, Tirys Android-Sprachassistentin (Ordner luna-app/, Anleitung luna-app/README.md und CLAUDE.md).
@@ -87,45 +114,96 @@ jobs:
             ---
             ${{ steps.auftrag.outputs.text }}
             ---
+            ${{ steps.auftrag.outputs.hinweis != '' && format('ACHTUNG, zweiter Versuch – der erste ist gescheitert: {0}', steps.auftrag.outputs.hinweis) || '' }}
 
             So gehst du vor:
             1. Prüfe zuerst, ob der Auftrag im aktuellen Stand schon erledigt ist (schau dir die letzten Commits an). Wenn ja,
-               ändere nichts, sondern schreib das im Kommentar.
+               ändere nichts und begründe das in der Antwort-Datei (Schritt 5).
             2. Sonst setz den Auftrag vollständig und sorgfältig in luna-app/ um. Halte dich an CLAUDE.md (Deutsch,
                Design-Regeln, keine Geheimnisse committen). Unklare Stellen entscheidest du sinnvoll im Sinne von Tiry.
                SCHNELLWEG: Lässt sich der Wunsch über Live-Inhalte lösen (Persönlichkeit/Verhalten → luna-app/live/persona.md,
                Stimme → live/config.json, Gesicht/Mimik/Licht → live/luna3d/*.vert|frag, live/luna_face.jpg, live/luna3d/head.bin;
                siehe luna-app/live/LIESMICH.md), dann NUR dort ändern und danach python3 luna-app/tools/live_manifest.py ausführen –
                Luna holt das in Sekunden ohne Installation. Programmcode nur ändern, wenn es anders nicht geht.
+               Live-Inhalte müssen zu älteren App-Versionen passen (Luna lädt sie sofort).
                Öffentliches Repo: keine privaten Daten über Tiry in live/.
             3. Teste: cd luna-app && ./gradlew --no-daemon :app:testDebugUnitTest – alles muss grün sein (auch kompilieren!).
-               Ergänze Tests, wo sinnvoll. Schlagen Tests fehl oder lassen sie sich nicht ausführen: NICHT pushen, sondern beheben.
-               Achtung Android: Regex-Muster mit „{“/„}“ immer maskieren (Test RegexAndroidTest).
-            4. Committe mit einer deutschen Nachricht und pushe auf den aktuellen Branch:
-               git push origin HEAD:${{ steps.auftrag.outputs.branch }}
-               (Abgelehnt, weil der Branch weiter ist? Dann git pull --no-rebase origin ${{ steps.auftrag.outputs.branch }} und erneut pushen.)
-            5. Schreib als Kommentar an Auftrag #${{ steps.auftrag.outputs.num }} in 2–4 kurzen deutschen Sätzen, was du geändert hast
-               (Luna liest das Tiry vor), und schließe den Auftrag.
+               Ergänze Tests, wo sinnvoll. Achtung Android: Regex-Muster mit „{“/„}“ immer maskieren (Test RegexAndroidTest).
+            4. Committe mit einer deutschen Nachricht (git add + git commit). NICHT pushen, NICHT kommentieren, das Issue
+               NICHT schließen – das erledigt der Ablauf danach selbst, nachdem er die Tests noch einmal geprüft hat.
+            5. Schreib zum Schluss IMMER die Datei /tmp/luna-antwort.md: 2–4 kurze deutsche Sätze an Tiry, was du geändert hast
+               (Luna liest das vor). Geht der Auftrag wirklich nicht umzusetzen, beginne die Datei mit „NICHT MÖGLICH:“ und nenne
+               den Grund in einem Satz.
             Ändere nichts außerhalb von luna-app/ und .github/workflows/luna-apk.yml.
-      - name: Update für Luna bauen lassen (nur bei Programm-Änderungen)
+            Arbeite zügig: lieber eine saubere, getestete Umsetzung als eine riesige.
+      - name: Prüfen, pushen, abschließen
+        if: always() && steps.auftrag.outcome == 'success' && steps.auftrag.outputs.skip != '1'
+        id: ende
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           BR: ${{ steps.auftrag.outputs.branch }}
           START: ${{ steps.start.outputs.sha }}
+          NUM: ${{ steps.auftrag.outputs.num }}
+          VERSUCH: ${{ steps.auftrag.outputs.versuch }}
         run: |
-          git fetch -q origin "$BR"
-          if git diff --quiet "$START" "origin/$BR" -- luna-app ':!luna-app/live'; then
-            echo "Nur Live-Inhalte (oder nichts) geändert – Luna holt das ohne neue App."
-          else
-            gh workflow run luna-apk.yml --ref "$BR"
+          REPO="${{ github.repository }}"
+          git config user.name "claude[bot]"; git config user.email "claude[bot]@users.noreply.github.com"
+          git remote set-url origin "https://x-access-token:${GH_TOKEN}@github.com/${REPO}.git"
+          ANTWORT=$(cat /tmp/luna-antwort.md 2>/dev/null || true)
+          # Nicht committete Reste des Agenten verwerfen (nur Committetes zählt)
+          git reset -q --hard HEAD; git clean -qfd
+          N=$(git rev-list --count "$START..HEAD")
+          fehler=""
+          if [ "$N" -gt 0 ]; then
+            # Selbst prüfen: kompiliert und alle Tests grün?
+            if ! (cd luna-app && ./gradlew --no-daemon -q :app:testDebugUnitTest > /tmp/tests.log 2>&1); then
+              fehler="Tests nach der Umsetzung rot: $(grep -m3 -E 'FAILED|error:|e: ' /tmp/tests.log | cut -c1-200 | tr '\n' ' ')"
+            else
+              ok=""
+              for i in 1 2 3 4; do
+                git fetch -q origin "$BR"
+                if ! git merge -q --no-edit "origin/$BR"; then git merge --abort; fehler="Konflikt mit neueren Änderungen auf dem Branch."; break; fi
+                if git push -q origin "HEAD:$BR"; then ok=1; break; fi
+                sleep $((i * 10))
+              done
+              [ -z "$ok" ] && [ -z "$fehler" ] && fehler="Push nach 4 Versuchen abgelehnt."
+            fi
+          elif [ -z "$ANTWORT" ]; then
+            fehler="Claude Code hat weder etwas geändert noch eine Antwort hinterlassen (abgebrochen oder Zeitlimit)."
           fi
-      # GitHub hält pro Warteschlange nur EINEN wartenden Lauf – liegengebliebene Aufträge daher nacheinander abarbeiten
+
+          if [ -z "$fehler" ] && echo "$ANTWORT" | grep -q '^NICHT MÖGLICH:'; then
+            gh issue comment "$NUM" -R "$REPO" --body "❌ $ANTWORT"
+            gh issue close "$NUM" -R "$REPO" --reason "not planned"
+            echo "ergebnis=unmoeglich" >> "$GITHUB_OUTPUT"
+          elif [ -z "$fehler" ]; then
+            [ -z "$ANTWORT" ] && ANTWORT="Erledigt."
+            if [ "$N" -gt 0 ] && ! git diff --quiet "$START" HEAD -- luna-app ':!luna-app/live'; then
+              gh workflow run luna-apk.yml -R "$REPO" --ref "$BR"
+              ANTWORT="$ANTWORT"$'\n\n'"Das Update für die App wird jetzt gebaut und kommt in ein paar Minuten von selbst."
+            elif [ "$N" -gt 0 ]; then
+              ANTWORT="$ANTWORT"$'\n\n'"Ist schon aktiv – Luna holt sich das ohne neue App."
+            fi
+            gh issue comment "$NUM" -R "$REPO" --body "✅ $ANTWORT"
+            gh issue close "$NUM" -R "$REPO" --reason completed
+            echo "ergebnis=fertig" >> "$GITHUB_OUTPUT"
+          elif [ "$VERSUCH" = "1" ]; then
+            gh issue comment "$NUM" -R "$REPO" --body "⏳ Erster Versuch gescheitert – ich versuche es automatisch noch einmal. Grund: $fehler"
+            gh workflow run luna-auftrag.yml -R "$REPO" --ref main -f issue="$NUM" -f versuch=2
+            echo "ergebnis=nochmal" >> "$GITHUB_OUTPUT"
+          else
+            gh issue comment "$NUM" -R "$REPO" --body "❌ Auch der zweite Versuch ist gescheitert, deshalb habe ich den Auftrag geschlossen. Grund: $fehler Sag ihn mir gern noch einmal, dann starte ich neu."
+            gh issue close "$NUM" -R "$REPO" --reason "not planned"
+            echo "ergebnis=gescheitert" >> "$GITHUB_OUTPUT"
+          fi
+      # Nächsten offenen Auftrag starten (nicht, wenn gerade der zweite Versuch dieses Auftrags angestoßen wurde –
+      # der wartet in derselben Warteschlange; danach geht die Kette weiter)
       - name: Nächsten offenen Auftrag starten
-        if: success()   # nur nach erfolgreichem Auftrag – verhindert Endlosschleifen bei Fehlern
+        if: always() && steps.ende.outputs.ergebnis != 'nochmal'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           CUR: ${{ steps.auftrag.outputs.num }}
         run: |
           NEXT=$(gh api "repos/${{ github.repository }}/issues?labels=luna-auftrag&state=open&creator=Tiry38&sort=created&direction=asc&per_page=50" \
-            --jq "[.[] | select(.number != ${CUR:-0} and .comments == 0)][0].number // empty")
+            --jq "[.[] | select(.number != ${CUR:-0})][0].number // empty")
           if [ -n "$NEXT" ]; then echo "Nächster Auftrag: #$NEXT"; gh workflow run luna-auftrag.yml --ref main -f issue="$NEXT"; else echo "Keine offenen Aufträge mehr."; fi
