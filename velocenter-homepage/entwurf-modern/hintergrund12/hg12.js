@@ -10,8 +10,8 @@
 (function(){
 var MODES=[['herbst','Herbstallee','Laub fällt in 3D, Maus = Wind'],['wein','Weinberg','Scrollen = der Tag vergeht'],['island','Hochland','Scrollen = Polarlicht-Nacht']];
 /* je Szene: ty = Kamera schwenkt beim Scrollen, Fokus (Bild-x, Bild-y von unten), Spiegeln, Fokus-Ebene, Wolken (Stärke, Tempo), Wasser (Weg, Tempo), Sonne (x,y von unten; z = Stärke),
-   fg = Dunst, sn/sz/sc = Teilchen (Stärke/Größe/Farbe), ld = Laub mit 3D-Verdeckung + Maus-Wind, df = Kino-Schärfe, gr = Lichtstrahlen, cs = Wolkenschatten, dy = Tageslauf, nt = Polarlicht-Nacht */
-var CFG={herbst:{ty:[0,-.04],fxm:.50,fx:.50,fy:.55,fl:0,fp:.20,am:.030,sp:.012,wf:[0,0],sun:[.50,.66,.20],fg:1.6,sn:.95,sz:2.2,sc:[.92,.46,.12],ld:1,df:1,gr:.30,cs:0,dy:0,nt:0},
+   fg = Dunst, sn/sz/sc = Teilchen (Stärke/Größe/Farbe), ld = Laub mit 3D-Verdeckung + Maus-Wind, df = Kino-Schärfe (negativ = nur Nahes unscharf, Ferne bleibt scharf), gr = Lichtstrahlen, cs = Wolkenschatten, dy = Tageslauf, nt = Polarlicht-Nacht */
+var CFG={herbst:{ty:[0,-.04],fxm:.50,fx:.50,fy:.55,fl:0,fp:.20,am:.030,sp:.012,wf:[0,0],sun:[.50,.66,.20],fg:1.6,sn:.95,sz:2.2,sc:[.92,.46,.12],ld:1,df:-1,gr:.30,cs:0,dy:0,nt:0},
  wein:{ty:[.02,-.05],fxm:.70,fx:.52,fy:.50,fl:0,fp:.25,am:.060,sp:.016,wf:[0,0],sun:[.62,.90,.18],fg:1,sn:0,ld:0,df:1,gr:0,cs:.42,dy:1,nt:0},
  island:{ty:[.02,-.04],fxm:.62,fx:.50,fy:.50,fl:1,fp:.30,am:.055,sp:.014,wf:[0,0],sun:[.40,.85,.10],fg:1.2,sn:0,ld:0,df:1,gr:0,cs:.32,dy:0,nt:1}};
 var BASE=(window.HG12_BASE||'img/hg12/');
@@ -57,8 +57,8 @@ void main(){
  float ok=(1.-smoothstep(.06,.14,max(D(s1).r,D(s2).r)))*(1.-smoothstep(.06,.14,d));
  ok*=smoothstep(.55,.95,min(min(D(s1).g,D(s2).g),sky));
  vec3 base=P(q);
- if(uDf>0.){vec2 pm=c+(uM-.5)*s;float fd=(D(pm).r*2.+D(pm+vec2(.02,0)).r+D(pm-vec2(.02,0)).r+D(pm+vec2(0,.02)).r+D(pm-vec2(0,.02)).r)/6.;
-  float rb=uDf*.0024*smoothstep(.10,.55,abs(d-fd))*(1.-sky);
+ if(uDf!=0.){vec2 pm=c+(uM-.5)*s;float fd=(D(pm).r*2.+D(pm+vec2(.02,0)).r+D(pm-vec2(.02,0)).r+D(pm+vec2(0,.02)).r+D(pm-vec2(0,.02)).r)/6.;
+  float rb=abs(uDf)*.0024*smoothstep(.10,.55,abs(d-fd))*(1.-sky);if(uDf<0.)rb*=smoothstep(fd,fd+.08,d);
   if(rb>.0002){vec3 acc=base;float ga=2.39996;for(int i=0;i<10;i++){float fi=float(i)+.5;float rr2=sqrt(fi/10.)*rb;vec2 off=vec2(cos(fi*ga),sin(fi*ga))*rr2*vec2(1.,iA);acc+=P(q+off);}base=acc/11.;}}
  vec3 col=mix(base,mix(P(s1),P(s2),1.-wv),ok);
  /* Wolkenschatten: ziehen mit dem Wind übers Gelände (nicht im Himmel) */
