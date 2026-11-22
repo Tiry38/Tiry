@@ -6280,7 +6280,7 @@ const VS_Q=`attribute vec2 aP;uniform vec4 uRect;uniform vec2 uRes;uniform float
 void main(){vec2 c=uRect.xy+aP*uRect.zw;vU=aP;if(uRefl>.5){c.y=uRect.y+uRect.w+2.+aP.y*uRect.w;}vC=c;
 vec2 d=c*uDpr/uRes*2.-1.;gl_Position=vec4(d.x,-d.y,0.,1.);}`;
 const FS_Q=`precision highp float;${GLSL_KEY}
-uniform sampler2D uTex;uniform vec4 uRect;uniform float uT,uMode,uRefl,uGlowOn,uR0,uRW,uF;uniform vec3 uEdge,uHolo;varying vec2 vU;varying vec2 vC;
+uniform sampler2D uTex;uniform vec4 uRect;uniform float uT,uMode,uRefl,uGlowOn,uR0,uRW,uF,uLeaf;uniform vec3 uEdge,uHolo;varying vec2 vU;varying vec2 vC;
 void main(){vec2 uv=vU;vec2 p=vC;float m=1.;
  if(uRefl>.5){float s=vU.y;uv=vec2(vU.x,1.-vU.y);p=vec2(vC.x,uRect.y+uRect.w-s*uRect.w);m=.17*clamp((1.-s-.68)/.32,0.,1.);}
  float r=uR0+kn(p)*uRW;float d=uMode<.5?r-uT:uT-(r+uF);float vis=smoothstep(0.,.006,d);
@@ -6288,12 +6288,12 @@ void main(){vec2 uv=vU;vec2 p=vC;float m=1.;
  float h=(1.-smoothstep(0.,uMode<.5?.035:.05,d))*uGlowOn*fade;
  vec2 off=vec2(.004*h,0.);vec4 c=texture2D(uTex,uv),cl=texture2D(uTex,uv-off),cr=texture2D(uTex,uv+off);
  c=mix(c,vec4(cl.r,c.g,cr.b,max(c.a,max(cl.a,cr.a))),h);
- float lum=dot(c.rgb,vec3(.3,.59,.11));float scan=.62+.38*sin(gl_FragCoord.y*1.9);
+ float lum=dot(c.rgb,vec3(.3,.59,.11));float scan=mix(.62+.38*sin(gl_FragCoord.y*1.9),1.,uLeaf);h*=1.-.55*uLeaf;
  vec3 holo=min(c.rgb*1.35+.1*c.a,vec3(c.a));vec3 rgb=mix(c.rgb,holo,h*.6);float a=c.a*mix(1.,scan,h*.9);rgb*=mix(1.,scan,h*.9);
- float e=(1.-smoothstep(0.,.007,d))*uGlowOn*fade;float ec=1.-smoothstep(0.,.0025,d);vec3 own=c.a>.01?c.rgb/c.a:vec3(1.);rgb=mix(rgb,mix(min(own*1.6+.18,vec3(1.)),vec3(1.),ec*.65)*a,e);
+ float e=(1.-smoothstep(0.,.007,d))*uGlowOn*fade;float ec=1.-smoothstep(0.,.0025,d);vec3 own=c.a>.01?c.rgb/c.a:vec3(1.);rgb=mix(rgb,mix(mix(min(own*1.6+.18,vec3(1.)),vec3(1.),ec*.65),mix(vec3(1.,.62,.16),vec3(1.,.9,.55),ec),uLeaf*.8)*a,e);
  gl_FragColor=vec4(rgb,a)*vis*m;}`;
-const VS_P=`attribute vec2 aA,aB,aK;attribute vec3 aCA,aCB;attribute float aR;uniform vec2 uRes,uCA,uCB;uniform float uDpr,uT,uPs,uGlowOn,uR0,uRW,uF,uLag,uTrail,uSW;uniform vec3 uEdge,uHolo,uDA,uDB;
-varying vec3 vCol;varying float vA,vHot,vSq;
+const VS_P=`attribute vec2 aA,aB,aK;attribute vec3 aCA,aCB;attribute float aR;uniform vec2 uRes,uCA,uCB;uniform float uDpr,uT,uPs,uGlowOn,uR0,uRW,uF,uLag,uTrail,uSW,uLeaf;uniform vec3 uEdge,uHolo,uDA,uDB;
+varying vec3 vCol;varying float vA,vHot,vSq,vAng,vFlip,vLf,vSh;
 mat2 rot(float a){float c=cos(a),s=sin(a);return mat2(c,-s,s,c);}
 void main(){float t0=uR0+aK.x*uRW;float t1=max(uR0+aK.y*uRW+uF,t0+.12);float p=clamp((uT-uLag-t0)/(t1-t0),0.,1.);
  float mv=smoothstep(.12,.88,p);float e=mv<.5?4.*mv*mv*mv:1.-pow(-2.*mv+2.,3.)/2.;
@@ -6307,10 +6307,19 @@ void main(){float t0=uR0+aK.x*uRW;float t1=max(uR0+aK.y*uRW+uF,t0+.12);float p=c
  pos+=(vec2(sin(q.y*1.3+tt+cos(q.x*.9-tt*.6)),cos(q.x*1.1-tt*.8+sin(q.y*.8)))*.016+vec2(sin(q.y*2.9-tt*1.7),cos(q.x*3.1+tt*1.5))*.007)*uSW*w;
  pos+=vec2(fract(aR*91.7)-.5,fract(aR*57.3)-.5)*uSW*.028*w+vec2(sin(uT*95.+aR*517.),cos(uT*88.+aR*311.))*1.3*w;
  float g=3.2;float sn=smoothstep(0.,.10,p)*(1.-smoothstep(.90,1.,p))*(1.-w)*uGlowOn;pos=mix(pos,(floor(pos/g)+.5)*g,sn);
+ /* Herbstallee (Tiry 22.11.2026): statt Nano-Schwarm fliegen Mini-Herbstblätter – Windböe hebt sie im Bogen an, sie trudeln, kippen und drehen sich */
+ float r1=fract(aR*37.1),r2=fract(aR*71.9),r3=fract(aR*13.3),fw=sin(3.1416*e);
+ vec2 lp=mix(aA,aB,e);
+ lp+=vec2((.06+.09*r1)*fw,-(.12+.14*r2)*fw)*uSW;
+ float ph=uT*(15.+9.*r3)+aR*40.;
+ lp+=vec2(sin(ph)*(.016+.014*r2),abs(cos(ph))*(.010+.008*r1)-.006)*uSW*fw;
+ lp+=vec2(sin(uT*4.+lp.y/uSW*7.),cos(uT*3.3+lp.x/uSW*6.))*.012*uSW*fw;
+ pos=mix(pos,lp,uLeaf);sn*=1.-uLeaf;
+ vAng=aR*6.2832+(uT*(9.+8.*r1)*(r2<.5?-1.:1.))*fw+.6*sin(ph);vFlip=cos(uT*(11.+7.*r3)+aR*23.)*fw+(1.-fw)*(.75+.25*r2);vLf=uLeaf;vSh=r3;
  vec2 c=pos*uDpr/uRes*2.-1.;gl_Position=vec4(c.x,-c.y,0.,1.);
  float hot=max(exp(-p*18.),exp(-(1.-p)*18.))*uGlowOn;
  float isE=step(fract(aR*13.7),.12);
- gl_PointSize=mix(uPs*(1.+.5*hot+.6*w),g*.84,sn)*uDpr*(1.+.5*isE*w)*(1.-.2*uTrail);
+ gl_PointSize=mix(mix(uPs*(1.+.5*hot+.6*w),g*.84,sn)*(1.+.5*isE*w)*(1.-.2*uTrail),uPs*(.75+.55*r1)*(1.+.35*fw),uLeaf)*uDpr;
  vA=smoothstep(0.,.03,p)*(1.-smoothstep(.97,1.,p))*(1.-uTrail);
  /* Farben: echte Radfarben, kräftiger; graue/schwarze Pixel nehmen im Schwarm die Hauptfarbe des Rads an */
  float cm=smoothstep(.30,.70,p);vec3 col=mix(aCA,aCB,cm);float lu=dot(col,vec3(.3,.59,.11));
@@ -6318,9 +6327,22 @@ void main(){float t0=uR0+aK.x*uRW;float t1=max(uR0+aK.y*uRW+uF,t0+.12);float p=c
  col=clamp(mix(vec3(lu),col,1.9),0.,1.);
  vec3 dom=mix(uDA,uDB,cm);col=mix(col,dom*(.5+.85*lu),clamp(1.-sat*3.5,0.,1.)*w);
  col=col*(1.+.18*w);
- vCol=mix(clamp(col,0.,1.),min(col*1.5+.15,vec3(1.)),clamp(isE*w+.6*hot,0.,1.));vHot=max(hot,isE*w*.8)*uGlowOn;vSq=sn;}`;
-const FS_P=`precision mediump float;varying vec3 vCol;varying float vA,vHot,vSq;
-void main(){vec2 q=abs(gl_PointCoord-.5);float r=mix(length(q),max(q.x,q.y),vSq);
+ vCol=mix(clamp(col,0.,1.),min(col*1.5+.15,vec3(1.)),clamp(isE*w+.6*hot,0.,1.));vHot=max(hot,isE*w*.8)*uGlowOn;vSq=sn;
+ if(uLeaf>.5){vec3 au=r2<.3?vec3(.97,.70,.14):r2<.58?vec3(.93,.42,.08):r2<.82?vec3(.80,.15,.06):vec3(.55,.20,.07);
+  vec3 bc=clamp(mix(vec3(lu),mix(aCA,aCB,cm),1.4),0.,1.);float ls=clamp(1.-sat*3.,0.,1.);vCol=mix(bc,au*(.85+.3*r1),mix(.25+.6*fw,smoothstep(0.,.3,fw),ls));vHot=hot*.5;}}`;
+const FS_P=`precision mediump float;varying vec3 vCol;varying float vA,vHot,vSq,vAng,vFlip,vLf,vSh;
+void main(){if(vLf>.5){vec2 q=gl_PointCoord-.5;float cs=cos(vAng),sa=sin(vAng);q=vec2(cs*q.x-sa*q.y,sa*q.x+cs*q.y);
+  float fl=max(abs(vFlip),.18);q.x/=fl;
+  /* Blattform: spitze Linse, leicht gezackter Rand (Ahorn-Anklang je Blatt), Stiel unten */
+  float y=q.y+.04;float hw=.20*pow(max(0.,1.-pow(abs(y)/.40,2.)),.75);
+  hw*=1.+.18*vSh*smoothstep(.0,.5,sin(y*30.+vSh*6.))*step(-.25,y);
+  float dE=abs(q.x)-hw;float lf=1.-smoothstep(-.03,.01,dE);
+  float st=(1.-smoothstep(.012,.03,abs(q.x)))*step(.36,y)*step(y,.50);
+  float a=max(lf,st*.9)*vA;if(a<.004)discard;
+  float vein=1.-smoothstep(.0,.018,abs(q.x));float side=1.-smoothstep(.0,.014,abs(abs(q.x)-(.4-y)*.35*step(-.3,y)*step(y,.25))*1.);
+  vec3 c=vCol*(vFlip>0.?1.:.72);c*=1.-.28*vein*lf-.12*side*lf*step(abs(q.x),hw*.9);
+  c+=vCol*.35*smoothstep(-.06,-.01,dE)*lf;c*=.82+.3*(.5-q.x*fl);
+  c=mix(c,vec3(1.,.85,.5),.35*vHot);gl_FragColor=vec4(c*a,a);return;}vec2 q=abs(gl_PointCoord-.5);float r=mix(length(q),max(q.x,q.y),vSq);
  float a=mix(smoothstep(.5,.1,r),1.-smoothstep(.40,.5,r),vSq)*vA;if(a<.004)discard;
  float rim=vSq*smoothstep(.30,.46,r);vec3 c=mix(vCol,vCol*.85,rim);
  c=mix(c,vec3(1.),.6*smoothstep(.24,.0,r)*vHot);gl_FragColor=vec4(c*a,a);}`;
@@ -6365,18 +6387,18 @@ async function layer(root,cv,o,kind){const dpr=Math.min(2,devicePixelRatio||1),W
  const [ia,ib,ra,rb]=await Promise.all([load(o.from),load(o.to),measure(o.tplA,o.from),measure(o.tplB,o.to)]);if(!ia||!ib)throw new Error('Bild');
  cv.width=Math.round(W*dpr);cv.height=Math.round(H*dpr);if(!cv._G)cv._G=mk(cv);const G=await cv._G;if(!G)throw new Error('WebGL');const chk=()=>{if(o.dead&&o.dead())throw new Error('abgelöst')};chk();
  const yl=()=>new Promise(r=>setTimeout(r,0)).then(chk);texUp(G,G.tex[0],raster(ia,ra,dpr));await yl();texUp(G,G.tex[1],raster(ib,rb,dpr));await yl();
- const area=Math.max(ra.w*ra.h,rb.w*rb.h);const N=Math.round(Math.min(kind==='bike'?28000:11000,Math.max(3000,area/(kind==='bike'?6:10))));
+ const lf=window.HG12_MODE==='herbst'?1:0;const area=Math.max(ra.w*ra.h,rb.w*rb.h);const N=lf?Math.round(Math.min(kind==='bike'?5200:1800,Math.max(900,area/(kind==='bike'?70:90)))):Math.round(Math.min(kind==='bike'?28000:11000,Math.max(3000,area/(kind==='bike'?6:10))));
  const step=kind==='bike'?1.1:1.4;const A=points(ia,ra,step,N,W,H);await yl();const B=points(ib,rb,step,N,W,H);await yl();
  const dom=P=>{let r=0,g=0,b=0,t=0;for(const q of P){const mx=Math.max(q[2],q[3],q[4]),mn=Math.min(q[2],q[3],q[4]),w=(mx-mn)*(mx-mn)*mx;r+=q[2]*w;g+=q[3]*w;b+=q[4]*w;t+=w}if(t<.5)return[.62,.66,.72];const m=Math.max(r,g,b)/t;const k=Math.min(1.6,.85/Math.max(m,.05));return[r/t*k,g/t*k,b/t*k].map(v=>Math.min(1,v))};const dA=dom(A),dB=dom(B);
  let k0=Infinity,k1=-Infinity;for(const p of A){k0=Math.min(k0,p[5]);k1=Math.max(k1,p[5])}for(const p of B){k0=Math.min(k0,p[5]);k1=Math.max(k1,p[5])}if(k1-k0<.01)k1=k0+.01;
  const f=new Float32Array(N*13);for(let i=0;i<N;i++){const a=A[i],b=B[i],q=i*13;f[q]=a[0];f[q+1]=a[1];f[q+2]=b[0];f[q+3]=b[1];f[q+4]=(a[5]-k0)/(k1-k0);f[q+5]=(b[5]-k0)/(k1-k0);f[q+6]=a[2];f[q+7]=a[3];f[q+8]=a[4];f[q+9]=b[2];f[q+10]=b[3];f[q+11]=b[4];f[q+12]=Math.random()}
  const gl=G.gl;gl.bindBuffer(gl.ARRAY_BUFFER,G.pb);gl.bufferData(gl.ARRAY_BUFFER,f,gl.STATIC_DRAW);
- return{G,N,ra,rb,k0,k1,W,H,dpr,dA,dB,ps:kind==='bike'?1.3:1.6,glow:kind==='bike'?1:.7,refl:!!o.refl}}
+ return{G,N,ra,rb,k0,k1,W,H,dpr,dA,dB,lf,ps:lf?Math.min(15,Math.max(7,Math.sqrt(area/N)*1.45)):kind==='bike'?1.3:1.6,glow:kind==='bike'?1:.7,refl:!!o.refl}}
 function draw(L,T,glow){const{G,N,ra,rb,k0,k1,W,H,dpr}=L,gl=G.gl;gl.viewport(0,0,gl.canvas.width,gl.canvas.height);gl.clearColor(0,0,0,0);gl.clear(gl.COLOR_BUFFER_BIT);
  gl.enable(gl.BLEND);gl.blendFunc(gl.ONE,gl.ONE_MINUS_SRC_ALPHA);
  const Q=G.q;gl.useProgram(Q.p);gl.bindBuffer(gl.ARRAY_BUFFER,G.quad);gl.enableVertexAttribArray(Q.a.aP);gl.vertexAttribPointer(Q.a.aP,2,gl.FLOAT,false,0,0);
  gl.uniform2f(Q.u.uRes,gl.canvas.width,gl.canvas.height);gl.uniform1f(Q.u.uDpr,dpr);gl.uniform2f(Q.u.uCss,W,H);gl.uniform1f(Q.u.uK0,k0);gl.uniform1f(Q.u.uK1,k1);gl.uniform1f(Q.u.uT,T);
- gl.uniform1f(Q.u.uR0,R0);gl.uniform1f(Q.u.uRW,RW);gl.uniform1f(Q.u.uF,FL);gl.uniform3fv(Q.u.uEdge,glow);gl.uniform3fv(Q.u.uHolo,HOLO);gl.uniform1f(Q.u.uGlowOn,L.glow);
+ gl.uniform1f(Q.u.uR0,R0);gl.uniform1f(Q.u.uRW,RW);gl.uniform1f(Q.u.uF,FL);gl.uniform1f(Q.u.uLeaf,L.lf);gl.uniform3fv(Q.u.uEdge,glow);gl.uniform3fv(Q.u.uHolo,HOLO);gl.uniform1f(Q.u.uGlowOn,L.glow);
  gl.activeTexture(gl.TEXTURE1);gl.bindTexture(gl.TEXTURE_2D,G.nt);gl.uniform1i(Q.u.uN,1);gl.activeTexture(gl.TEXTURE0);gl.uniform1i(Q.u.uTex,0);
  [[0,ra],[1,rb]].forEach(([m,r])=>{gl.bindTexture(gl.TEXTURE_2D,G.tex[m]);gl.uniform1f(Q.u.uMode,m);gl.uniform4f(Q.u.uRect,r.x,r.y,r.w,r.h);
   for(const rf of L.refl?[1,0]:[0]){gl.uniform1f(Q.u.uRefl,rf);gl.drawArrays(gl.TRIANGLE_STRIP,0,4)}});
@@ -6384,10 +6406,10 @@ function draw(L,T,glow){const{G,N,ra,rb,k0,k1,W,H,dpr}=L,gl=G.gl;gl.viewport(0,0
  const P=G.pt;gl.useProgram(P.p);gl.bindBuffer(gl.ARRAY_BUFFER,G.pb);const S=13*4,at=(n,sz,off)=>{gl.enableVertexAttribArray(P.a[n]);gl.vertexAttribPointer(P.a[n],sz,gl.FLOAT,false,S,off*4)};
  at('aA',2,0);at('aB',2,2);at('aK',2,4);at('aCA',3,6);at('aCB',3,9);at('aR',1,12);
  gl.uniform2f(P.u.uRes,gl.canvas.width,gl.canvas.height);gl.uniform1f(P.u.uDpr,dpr);gl.uniform1f(P.u.uT,T);gl.uniform1f(P.u.uPs,L.ps);gl.uniform1f(P.u.uGlowOn,L.glow);gl.uniform3fv(P.u.uEdge,glow);gl.uniform3fv(P.u.uHolo,HOLO);
- gl.uniform1f(P.u.uR0,R0);gl.uniform1f(P.u.uRW,RW);gl.uniform1f(P.u.uF,FL);
+ gl.uniform1f(P.u.uR0,R0);gl.uniform1f(P.u.uRW,RW);gl.uniform1f(P.u.uF,FL);gl.uniform1f(P.u.uLeaf,L.lf);
  gl.uniform2f(P.u.uCA,ra.x+ra.w/2,ra.y+ra.h/2);gl.uniform2f(P.u.uCB,rb.x+rb.w/2,rb.y+rb.h/2);gl.uniform1f(P.u.uSW,Math.max(ra.w,rb.w));gl.uniform3fv(P.u.uDA,L.dA);gl.uniform3fv(P.u.uDB,L.dB);
  /* Schweif: zwei verzögerte, blassere Durchgänge, dann die Partikel selbst */
- for(const [lag,tr] of L.glow?[[.045,.8],[.022,.55],[0,0]]:[[0,0]]){gl.uniform1f(P.u.uLag,lag);gl.uniform1f(P.u.uTrail,tr);gl.drawArrays(gl.POINTS,0,N)}
+ for(const [lag,tr] of L.glow&&!L.lf?[[.045,.8],[.022,.55],[0,0]]:[[0,0]]){gl.uniform1f(P.u.uLag,lag);gl.uniform1f(P.u.uTrail,tr);gl.drawArrays(gl.POINTS,0,N)}
  ['aA','aB','aK','aCA','aCB','aR'].forEach(n=>gl.disableVertexAttribArray(P.a[n]))}
 /* Zeichenflächen je Showroom (bleiben bestehen, im Ruhezustand ausgeblendet) */
 function cvFor(root,key,place){root._vm=root._vm||{};let c=root._vm[key];if(!c){c=document.createElement('canvas');c.className='vmcv';c.style.display='none';c.setAttribute('aria-hidden','true');root._vm[key]=c;place(c)}return c}
@@ -6551,7 +6573,7 @@ var CFG={herbst:{ty:[0,-.04],fxm:.50,fx:.50,fy:.55,fl:0,fp:.20,am:.030,sp:.012,w
 var BASE=(window.HG12_BASE||'../img/hg12/');
 var mode=window.HG12_DEFAULT||'herbst';
 try{var q=new URLSearchParams(location.search).get('hg');if(q)mode=q;else{var s0=localStorage.getItem('vc_hg12');if(s0)mode=s0}}catch(e){}
-if(!MODES.some(function(m){return m[0]===mode}))mode='herbst';
+if(!MODES.some(function(m){return m[0]===mode}))mode='herbst';window.HG12_MODE=mode;
 var de=document.documentElement;
 
 var FSRC=`#extension GL_OES_standard_derivatives : enable
@@ -6732,7 +6754,7 @@ function sw(){var b=document.createElement('div');b.id='ueSw';b.setAttribute('ro
  b.innerHTML='<span class="ue-k">Hintergrund</span>'+MODES.map(function(m,i){return'<button type="button" data-hg="'+m[0]+'" aria-pressed="false"><b>'+(i+1)+'</b><span>'+m[1]+'<small>'+m[2]+'</small></span></button>'}).join('');
  document.body.appendChild(b);
  function up(){[].forEach.call(b.querySelectorAll('button'),function(x){var on=x.dataset.hg===mode;x.classList.toggle('on',on);x.setAttribute('aria-pressed',String(on))})}
- b.addEventListener('click',function(e){var x=e.target.closest('button');if(!x)return;e.stopPropagation();mode=x.dataset.hg;try{localStorage.setItem('vc_hg12',mode)}catch(_){}load(mode);pose();up();tip()});
+ b.addEventListener('click',function(e){var x=e.target.closest('button');if(!x)return;e.stopPropagation();mode=x.dataset.hg;window.HG12_MODE=mode;try{localStorage.setItem('vc_hg12',mode)}catch(_){}load(mode);pose();up();tip()});
  var tt=0;function tip(){var n=document.getElementById('ueTip');if(!n){n=document.createElement('div');n.id='ueTip';document.body.appendChild(n)}
   var i=MODES.findIndex(function(m){return m[0]===mode}),m=MODES[i];n.innerHTML='<b>Hintergrund '+(i+1)+'</b> · '+m[1]+' – '+m[2];n.classList.remove('on');void n.offsetWidth;n.classList.add('on');clearTimeout(tt);tt=setTimeout(function(){n.classList.remove('on')},2800)}
  up();setTimeout(tip,1200)}

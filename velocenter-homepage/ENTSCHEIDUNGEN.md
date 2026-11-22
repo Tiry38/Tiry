@@ -433,3 +433,9 @@
 - Tiry: keine E-Bikes im Bild. Stattdessen Landschaften wie bei den anderen Vorlagen, mit etwas mehr Fahrrad-Bezug.
 - **Kein Motiv doppelt:** Vor jeder neuen Vorlage gegen alle bisherigen Motive prüfen (Liste in `entwurf-modern/hintergrund14/QUELLEN.md`). Der Raps-Radweg war versehentlich dasselbe Foto wie in hintergrund9.
 - Motive: Dünensteg (Sylt), Heideweg (violett, nicht rosa), Zypressentunnel. Vorschau: `vorschau-landschaften-5/` (nicht verlinkt, noindex).
+
+## Showroom-Wechsel mit Herbstlaub (22.11.2026, Vorschau 3, nur Hintergrund 1 „Herbstallee“)
+- Tiry: Rad- und Logo-Wechsel nicht als Nanoschwarm, sondern mit Mini-Herbstblättern, flüssig, Blätter sollen fliegen, gleich schnell.
+- Umsetzung in `vMorphJs` (`uLeaf`): bis ca. 5.200 Blätter je Rad, Windböe im Bogen, Trudeln, Kippen (Vorder-/Rückseite), Drehung, Blattform mit Mittelrippe und Stiel.
+- Farben: echte Radfarbe am Anfang und Ende, im Flug Gold, Orange, Rot und Braun. Helle Pixel gehen früh ins Laubgold, damit kein Rosa entsteht.
+- Dauer wie bisher (`VM.dur` 2600 ms). Hintergrund 2 und 3 behalten den Nanoschwarm. Schalter ist `window.HG12_MODE`.
