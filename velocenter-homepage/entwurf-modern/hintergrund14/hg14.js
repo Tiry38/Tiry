@@ -1,16 +1,19 @@
-/* Vorlage „E-Bike-Momente“ (Tiry 22.11.2026: Hintergründe mit E-Bikes, nur Lifestyle, nur aktuelle Bosch-Systeme
-   – Mittelmotor + Akku im Unterrohr, keine Gepäckträgerakkus, keine Sportler, keine Personen).
-   - Gasse: zwei KTM Macina (Bosch) an einer Altstadtmauer am Gardasee. Sonnenflecken mit wiegenden Blätterschatten;
-     Scrollen = Abenddämmerung: Fenster glüht warm, Bosch-Displays und Rücklichter gehen an.
+/* Vorlage „Wege am Wasser & in der Heide“ (Tiry 22.11.2026: Landschaften wie die anderen Vorlagen, aber mit mehr Fahrrad-Bezug;
+   keine Fahrräder, Personen, Fahrzeuge; nur Motive, die es in den Vorlagen 9–13 noch nicht gibt).
+   - Dünensteg: Holzsteg durch die Sylter Dünen zum Meer. Strandhafer wiegt, Sand flimmert im Licht; Scrollen = Polarlicht über dem Meer.
+   - Heideweg: Pfad durch blühende Heide bei Sonnenaufgang. Bodennebel zieht, Lichtstrahlen, Pollen.
+   - Zypressentunnel: Weg unter alten Zypressen im Abendlicht. Kronen wiegen; Scrollen = Sternennacht mit Glühwürmchen.
+   Der Abend-/Lichter-Effekt (rl, ls) aus dem verworfenen Gassen-Motiv bleibt im Code, ist hier aber aus.
    Technik wie hg13 (Kino-Schärfe, Tiefenkarte, automatische Qualität, Milchglas links farbtreu).
-   Daten je Szene: <name>-2400/1400.webp, <name>-d.png (R Tiefe, G Himmel, B Wolken/Dunst), <name>-m.png (R Pflanzen bzw. Fensterglas, G Wasser, B Lichtflächen). */
+   Daten je Szene: <name>-2400/1400.webp, <name>-d.png (R Tiefe, G Himmel, B Wolken/Dunst), <name>-m.png (R Pflanzen, G Wasser, B Lichtflächen). */
 (function(){
-var MODES=[['gasse','Altstadt-Gasse','Sonnenflecken · Scrollen = Abend, Licht an']];
+var MODES=[['duene','Dünensteg','Strandhafer im Wind · Scrollen = Polarlicht über dem Meer'],['heide','Heideweg','Morgennebel & Lichtstrahlen'],['zypresse','Zypressentunnel','Scrollen = Sternennacht mit Glühwürmchen']];
 /* je Szene: ty = Kamera schwenkt beim Scrollen, Fokus (Bild-x, Bild-y von unten), Spiegeln, Fokus-Ebene, Wolken (Stärke, Tempo), Sonne (x,y von unten; z = Stärke),
    fg = Dunst, df = Kino-Schärfe, gr = Lichtstrahlen, mo = Pollen im Licht, wr = lebendiges Wasser, dy/rt = Tageslauf/echte Uhrzeit, nt = Nacht (1 Polarlicht, 2 Sternennacht) */
 /* ls = Sonnenflecken/Blätterschatten, rl = Abend mit E-Bike-Lichtern; L1 = zwei Rücklichter, L2 = zwei Displays (Bild-x, Bild-y von unten, ungespiegelt) */
-var CFG={gasse:{ty:[0,-.02],fxm:.70,fx:.57,fy:.46,fl:1,fp:.45,am:0,sp:.01,wf:[0,0],sun:[.80,.95,0],fg:0,sn:0,ld:0,df:.7,gr:0,cs:0,dy:0,nt:0,ls:1,rl:1,
- L1:[.4236,.4060,.1867,.4956],L2:[.2280,.5810,.0760,.6270]}};
+var CFG={duene:{ty:[0,-.03],fxm:.50,fx:.50,fy:.50,fl:0,fp:.30,am:.030,sp:.012,wf:[0,0],sun:[.18,.62,.0],fg:.5,sn:0,ld:0,df:.8,gr:0,cs:0,dy:0,nt:1,mo:1},
+ heide:{ty:[0,-.03],fxm:.52,fx:.52,fy:.50,fl:0,fp:.28,am:.025,sp:.010,wf:[0,0],sun:[.655,.69,.30],fg:1.8,sn:0,ld:0,df:.9,gr:.32,cs:0,dy:0,nt:0,mo:1},
+ zypresse:{ty:[0,-.03],fxm:.50,fx:.50,fy:.45,fl:0,fp:.35,am:0,sp:.010,wf:[0,0],sun:[.97,.30,.12],fg:.9,sn:0,ld:0,df:1,gr:0,cs:0,dy:0,nt:2}};
 /* echte Uhrzeit -> Tageslicht 0..1 (6 Uhr Morgen, 12 Uhr Mittag, 17 Uhr Goldene Stunde, 20 Uhr Dämmerung); ?zeit=18.5 zum Testen */
 function tagZeit(){var h;try{h=parseFloat(new URLSearchParams(location.search).get('zeit'))}catch(e){}if(!(h>=0)){var n=new Date();h=n.getHours()+n.getMinutes()/60}
  var P=[[0,.86],[5,.86],[6.5,0],[12,.3],[15,.42],[17.5,.65],[20,.86],[24,.86]];for(var i=1;i<P.length;i++)if(h<=P[i][0]){var a=P[i-1],b=P[i];return a[1]+(b[1]-a[1])*(h-a[0])/(b[0]-a[0])}return .86}
@@ -102,7 +105,7 @@ void main(){
  if(uMo>0.){float mo=0.;for(int L=0;L<2;L++){float fL=float(L);vec2 g3=uv*vec2(A,1.)*(15.+fL*11.)+vec2(uT*.035+sin(uT*.13+fL)*.3,uT*(.018+fL*.012));vec2 id3=floor(g3);float hm=h21(id3+fL*13.);
    vec2 o4=vec2(sin(uT*(.35+hm*.5)+hm*30.),cos(uT*(.28+hm*.4)+hm*11.))*.30;float dd3=length(fract(g3)-.5-o4);
    mo+=step(.45,hm)*(smoothstep(.055-fL*.015,0.,dd3)*.9+exp(-dd3*22.)*.25)*(.5+.5*sin(uT*(.8+hm*1.3)+hm*50.));}
-  col+=vec3(1.,.93,.72)*mo*uMo*smoothstep(.30,.75,dot(col,vec3(.33)))*.55;}
+  col+=vec3(1.,.93,.72)*mo*uMo*smoothstep(.30,.75,dot(col,vec3(.33)))*.55*(1.-sky);}
  /* Lichtstrahlen: helle Stellen (Dunst/Himmel) streuen zur Sonne hin – Strahlen wandern langsam */
  if(uGr>0.){vec2 dl2=(uSun.xy-q);float acc2=0.,wt=1.;for(int i=0;i<14;i++){vec2 sp2=q+dl2*(float(i)/14.)*.85;vec3 cc=P(sp2);acc2+=smoothstep(.80,.98,dot(cc,vec3(.33)))*wt;wt*=.88;}
   float shim=.65+.35*nz(vec2(atan(dl2.y,dl2.x*iA)*14.,uT*.15));col+=vec3(1.,.86,.62)*acc2/7.*uGr*shim*.55*(1.-smoothstep(.55,.9,dot(col,vec3(.33))))*(1.-smoothstep(.0,.9,length(dl2*vec2(iA,1.))));}
