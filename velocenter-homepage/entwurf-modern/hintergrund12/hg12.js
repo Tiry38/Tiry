@@ -10,14 +10,14 @@
 (function(){
 var MODES=[['herbst','Herbstallee','Laub fällt in 3D, Maus = Wind'],['wein','Weinberg','Scrollen = der Tag vergeht'],['island','Hochland','Scrollen = Polarlicht-Nacht']];
 /* je Szene: ty = Kamera schwenkt beim Scrollen, Fokus (Bild-x, Bild-y von unten), Spiegeln, Fokus-Ebene, Wolken (Stärke, Tempo), Wasser (Weg, Tempo), Sonne (x,y von unten; z = Stärke),
-   fg = Dunst, sn/sz/sc = Teilchen (Stärke/Größe/Farbe), ld = Laub mit 3D-Verdeckung + Maus-Wind, df = Kino-Schärfe (negativ = nur Nahes unscharf, Ferne bleibt scharf), gr = Lichtstrahlen, cs = Wolkenschatten, dy = Tageslauf, nt = Polarlicht-Nacht */
+   fg = Dunst, sn/sz/sc = Teilchen (Stärke/Größe/Farbe), ld = Laub mit 3D-Verdeckung + Maus-Wind, df = Kino-Schärfe, gr = Lichtstrahlen, cs = Wolkenschatten, dy = Tageslauf, nt = Polarlicht-Nacht */
 var CFG={herbst:{ty:[0,-.04],fxm:.50,fx:.50,fy:.55,fl:0,fp:.20,am:.030,sp:.012,wf:[0,0],sun:[.50,.66,.20],fg:1.6,sn:.95,sz:2.2,sc:[.92,.46,.12],ld:1,df:-1,gr:.30,cs:0,dy:0,nt:0},
  wein:{ty:[.02,-.05],fxm:.70,fx:.52,fy:.50,fl:0,fp:.25,am:.060,sp:.016,wf:[0,0],sun:[.62,.90,.18],fg:1,sn:0,ld:0,df:1,gr:0,cs:.42,dy:1,nt:0},
  island:{ty:[.02,-.04],fxm:.62,fx:.50,fy:.50,fl:1,fp:.30,am:.055,sp:.014,wf:[0,0],sun:[.40,.85,.10],fg:1.2,sn:0,ld:0,df:1,gr:0,cs:.32,dy:0,nt:1}};
 var BASE=(window.HG12_BASE||'img/hg12/');
 var mode=window.HG12_DEFAULT||'herbst';
 try{var q=new URLSearchParams(location.search).get('hg');if(q)mode=q;else{var s0=localStorage.getItem('vc_hg12');if(s0)mode=s0}}catch(e){}
-if(!MODES.some(function(m){return m[0]===mode}))mode='herbst';
+if(!MODES.some(function(m){return m[0]===mode}))mode='herbst';window.HG12_MODE=mode;
 var de=document.documentElement;
 
 var FSRC=`#extension GL_OES_standard_derivatives : enable
@@ -213,7 +213,7 @@ function sw(){var b=document.createElement('div');b.id='ueSw';b.setAttribute('ro
  b.innerHTML='<span class="ue-k">Hintergrund</span>'+MODES.map(function(m,i){return'<button type="button" data-hg="'+m[0]+'" aria-pressed="false"><b>'+(i+1)+'</b><span>'+m[1]+'<small>'+m[2]+'</small></span></button>'}).join('');
  document.body.appendChild(b);
  function up(){[].forEach.call(b.querySelectorAll('button'),function(x){var on=x.dataset.hg===mode;x.classList.toggle('on',on);x.setAttribute('aria-pressed',String(on))})}
- b.addEventListener('click',function(e){var x=e.target.closest('button');if(!x)return;e.stopPropagation();mode=x.dataset.hg;try{localStorage.setItem('vc_hg12',mode)}catch(_){}load(mode);pose();up();tip()});
+ b.addEventListener('click',function(e){var x=e.target.closest('button');if(!x)return;e.stopPropagation();mode=x.dataset.hg;window.HG12_MODE=mode;try{localStorage.setItem('vc_hg12',mode)}catch(_){}load(mode);pose();up();tip()});
  var tt=0;function tip(){var n=document.getElementById('ueTip');if(!n){n=document.createElement('div');n.id='ueTip';document.body.appendChild(n)}
   var i=MODES.findIndex(function(m){return m[0]===mode}),m=MODES[i];n.innerHTML='<b>Hintergrund '+(i+1)+'</b> · '+m[1]+' – '+m[2];n.classList.remove('on');void n.offsetWidth;n.classList.add('on');clearTimeout(tt);tt=setTimeout(function(){n.classList.remove('on')},2800)}
  up();setTimeout(tip,1200)}

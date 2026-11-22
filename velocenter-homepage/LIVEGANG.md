@@ -93,3 +93,5 @@ Datenschutzerklärung: Absatz zu Google Firebase setzt das Bau-Skript automatisc
 - **Testzeitraum endet 13.02.2027** → vorher in der Google Cloud auf „Pay as you go“ umstellen (Upgrade), sonst schlägt der Abruf fehl (Seite zeigt dann die letzten Werte).
 - Schlüssel am 13.11.2026 auf „Places API (New)“ eingeschränkt, Abruf danach weiter OK.
 - **Kostenbremse geht erst nach dem Upgrade** (im Testzeitraum sind Kontingent-Änderungen gesperrt): direkt nach „Pay as you go“ unter https://console.cloud.google.com/apis/api/places.googleapis.com/quotas → ⋮ → „Kontingent bearbeiten“: **GetPlaceRequest per day = 10**, **SearchTextRequest per day = 5**.
+
+- **Seit 22.11.2026:** Nach `plus_design()` legt `entwurf-modern/hintergrund12/live_hg12.py` den Herbstallee-Hintergrund, die Laub-Verwandlung und den Handy-Kopf auf alle Seiten (Bilder `img/hg12/`). Änderungen am Hintergrund nur in `entwurf-modern/hintergrund12/` machen.

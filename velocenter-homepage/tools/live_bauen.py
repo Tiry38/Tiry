@@ -12,7 +12,7 @@ Der Prototyp bleibt unverändert. Die Live-Fassung:
 - hat echte Unterseiten (SEITEN) mit eigenem Titel/Beschreibung/canonical für Google,
 - bringt CNAME, robots.txt, sitemap.xml, 404.html und Weiterleitungen der restlichen alten Coco-Adressen mit.
 """
-import json, os, re, shutil, sys, datetime
+import json, os, re, shutil, subprocess, sys, datetime
 
 QUELLE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 ZIEL = os.path.abspath(sys.argv[1]) if len(sys.argv) > 1 else os.path.join(os.path.dirname(QUELLE), 'velocenter-homepage-live')
@@ -277,6 +277,8 @@ def main():
         '<!doctype html><html lang="de"><head><meta charset="utf-8"><title>Velocenter Hessert</title><meta name="robots" content="noindex">'
         f'<meta http-equiv="refresh" content="0;url={BASIS}"></head><body><a href="{BASIS}">Weiter zu Velocenter Hessert</a></body></html>\n')
     plus_design()
+    # Hintergrund „Herbstallee“ + Laub-Verwandlung + Handy-Kopf (live seit 22.11.2026, Tiry)
+    subprocess.run([sys.executable, os.path.join(QUELLE, 'entwurf-modern', 'hintergrund12', 'live_hg12.py'), ZIEL], check=True)
     groesse = sum(os.path.getsize(os.path.join(dp, f)) for dp, _, fs in os.walk(ZIEL) for f in fs)
     print(f'Live-Fassung: {ZIEL}  ·  {len(dateien)} Bilder/Schriften  ·  {groesse / 1e6:.1f} MB')
 
