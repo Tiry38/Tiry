@@ -452,3 +452,11 @@
 - **Weitere Regeln:**
   - Die Dauer bleibt wie bisher (`VM.dur` 2600 ms).
   - Hintergrund 2 und 3 behalten den Nanoschwarm. Umgeschaltet wird über `window.HG12_MODE`.
+
+## Hintergrund 15 „Regen, blaue Stunde, Pusteblumen“ (22.11.2026, Vorschau 6)
+- **Wunsch von Tiry:** Landschaften mit mehr E-Bike-Bezug. Jede Szene bekommt einen passenden technischen Effekt (wie das Laub der Herbstallee).
+- **Regenstraße:** 3D-Regen, nasse Straße, Tropfen auf der Linse.
+- **Blaue Stunde:** E-Bike-Scheinwerfer, mit der Maus lenkbar.
+- **Pusteblumenweg:** schwebende Samen im Gegenlicht.
+- Quellen stehen in `entwurf-modern/hintergrund15/QUELLEN.md`.
+- **Liegt unter:** `vorschau-landschaften-6`. Die echte Homepage bleibt unverändert.

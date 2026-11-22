@@ -1,19 +1,19 @@
-/* Vorlage „Wege am Wasser & in der Heide“ (Tiry 22.11.2026: Landschaften wie die anderen Vorlagen, aber mit mehr Fahrrad-Bezug;
-   keine Fahrräder, Personen, Fahrzeuge; nur Motive, die es in den Vorlagen 9–13 noch nicht gibt).
-   - Dünensteg: Holzsteg durch die Sylter Dünen zum Meer. Strandhafer wiegt, Sand flimmert im Licht; Scrollen = Polarlicht über dem Meer.
-   - Heideweg: Pfad durch blühende Heide bei Sonnenaufgang. Bodennebel zieht, Lichtstrahlen, Pollen.
-   - Zypressentunnel: Weg unter alten Zypressen im Abendlicht. Kronen wiegen; Scrollen = Sternennacht mit Glühwürmchen.
-   Der Abend-/Lichter-Effekt (rl, ls) aus dem verworfenen Gassen-Motiv bleibt im Code, ist hier aber aus.
+/* Vorlage „Regen, blaue Stunde, Pusteblumen“ (Tiry 22.11.2026: mehr Bezug zum E-Bike-Fahren, mit passenden technischen Effekten
+   wie das fallende Laub der Herbstallee; keine Fahrräder, Personen, Fahrzeuge; keine Motive aus den Vorlagen 9–14).
+   - Regenstraße: nasse Waldstraße. Regen fällt in drei Tiefen (verdeckt von Näherem), Maus = Wind, Spritzer auf dem Asphalt, Tropfen auf der Linse.
+   - Blaue Stunde: leere Straße in der Dämmerung. Maus lenkt den Lichtkegel des E-Bike-Scheinwerfers, Linien und Rückstrahler leuchten, Mücken im Licht; Scrollen = Nacht.
+   - Pusteblumenweg: Weg durch die Wiese im Gegenlicht. Pusteblumen-Samen schweben in drei Tiefen und leuchten zur Sonne hin, Maus = Wind.
+   Abend-/Lichter-Effekte (rl, ls) aus früheren Entwürfen bleiben im Code, sind hier aber aus.
    Technik wie hg13 (Kino-Schärfe, Tiefenkarte, automatische Qualität, Milchglas links farbtreu).
-   Daten je Szene: <name>-2400/1400.webp, <name>-d.png (R Tiefe, G Himmel, B Wolken/Dunst), <name>-m.png (R Pflanzen, G Wasser, B Lichtflächen). */
+   Daten je Szene: <name>-2400/1400.webp, <name>-d.png (R Tiefe, G Himmel, B Wolken/Dunst), <name>-m.png (R Pflanzen, G Wasser, B nasse/helle Flächen). */
 (function(){
-var MODES=[['duene','Dünensteg','Strandhafer im Wind · Scrollen = Polarlicht über dem Meer'],['heide','Heideweg','Morgennebel & Lichtstrahlen'],['zypresse','Zypressentunnel','Scrollen = Sternennacht mit Glühwürmchen']];
+var MODES=[['regen','Regenstraße','Regen in 3D · Maus = Wind · Tropfen auf der Linse'],['abend','Blaue Stunde','Maus = E-Bike-Scheinwerfer · Scrollen = Nacht'],['wiese','Pusteblumenweg','Samen schweben im Gegenlicht · Maus = Wind']];
 /* je Szene: ty = Kamera schwenkt beim Scrollen, Fokus (Bild-x, Bild-y von unten), Spiegeln, Fokus-Ebene, Wolken (Stärke, Tempo), Sonne (x,y von unten; z = Stärke),
    fg = Dunst, df = Kino-Schärfe, gr = Lichtstrahlen, mo = Pollen im Licht, wr = lebendiges Wasser, dy/rt = Tageslauf/echte Uhrzeit, nt = Nacht (1 Polarlicht, 2 Sternennacht) */
 /* ls = Sonnenflecken/Blätterschatten, rl = Abend mit E-Bike-Lichtern; L1 = zwei Rücklichter, L2 = zwei Displays (Bild-x, Bild-y von unten, ungespiegelt) */
-var CFG={duene:{ty:[0,-.03],fxm:.50,fx:.50,fy:.50,fl:0,fp:.30,am:.030,sp:.012,wf:[0,0],sun:[.18,.62,.0],fg:.5,sn:0,ld:0,df:.8,gr:0,cs:0,dy:0,nt:1,mo:1},
- heide:{ty:[0,-.03],fxm:.52,fx:.52,fy:.50,fl:0,fp:.28,am:.025,sp:.010,wf:[0,0],sun:[.655,.69,.30],fg:1.8,sn:0,ld:0,df:.9,gr:.32,cs:0,dy:0,nt:0,mo:1},
- zypresse:{ty:[0,-.03],fxm:.50,fx:.50,fy:.45,fl:0,fp:.35,am:0,sp:.010,wf:[0,0],sun:[.97,.30,.12],fg:.9,sn:0,ld:0,df:1,gr:0,cs:0,dy:0,nt:2}};
+var CFG={regen:{ty:[0,-.03],fxm:.50,fx:.50,fy:.40,fl:0,fp:.25,am:.020,sp:.010,wf:[0,0],sun:[.50,.40,0],fg:1.5,sn:0,ld:0,df:-1,gr:0,cs:0,dy:0,nt:0,mo:0,rn:1},
+ abend:{ty:[0,-.03],fxm:.50,fx:.50,fy:.40,fl:0,fp:.25,am:.020,sp:.008,wf:[0,0],sun:[.50,.45,0],fg:.6,sn:0,ld:0,df:-1,gr:0,cs:0,dy:0,nt:0,mo:0,hl:1,hz:.325},
+ wiese:{ty:[0,-.03],fxm:.45,fx:.50,fy:.45,fl:0,fp:.30,am:.025,sp:.010,wf:[0,0],sun:[.80,.80,.30],fg:1.2,sn:0,ld:0,df:.8,gr:.30,cs:0,dy:0,nt:0,mo:0,pb:1}};
 /* echte Uhrzeit -> Tageslicht 0..1 (6 Uhr Morgen, 12 Uhr Mittag, 17 Uhr Goldene Stunde, 20 Uhr Dämmerung); ?zeit=18.5 zum Testen */
 function tagZeit(){var h;try{h=parseFloat(new URLSearchParams(location.search).get('zeit'))}catch(e){}if(!(h>=0)){var n=new Date();h=n.getHours()+n.getMinutes()/60}
  var P=[[0,.86],[5,.86],[6.5,0],[12,.3],[15,.42],[17.5,.65],[20,.86],[24,.86]];for(var i=1;i<P.length;i++)if(h<=P[i][0]){var a=P[i-1],b=P[i];return a[1]+(b[1]-a[1])*(h-a[0])/(b[0]-a[0])}return .86}
@@ -26,7 +26,7 @@ var de=document.documentElement;
 
 var FSRC=`#extension GL_OES_standard_derivatives : enable
 precision highp float;
-uniform vec2 uR,uM,uFoc,uImg;uniform vec2 uTy,uWf;uniform float uFg,uSn,uSz,uLd,uDf,uGr,uCs,uDy,uNt,uWr,uTg,uMo,uLs,uRl,uRn,uHl,uPb;uniform vec4 uL1,uL2;uniform vec3 uSc;uniform float uT,uS,uFl,uFp,uAm,uSp,uFade,uV;uniform vec3 uK,uSun,uPo;
+uniform vec2 uR,uM,uFoc,uImg;uniform vec2 uTy,uWf;uniform float uFg,uSn,uSz,uLd,uDf,uGr,uCs,uDy,uNt,uWr,uTg,uMo,uLs,uRl,uRn,uHl,uPb,uHz;uniform vec4 uL1,uL2;uniform vec3 uSc;uniform float uT,uS,uFl,uFp,uAm,uSp,uFade,uV;uniform vec3 uK,uSun,uPo;
 uniform sampler2D uP,uD,uE;
 const vec3 RED=vec3(.886,.137,.176);
 float h21(vec2 p){p=fract(p*vec2(123.34,456.21));p+=dot(p,p+45.32);return fract(p.x*p.y);}
@@ -172,22 +172,25 @@ void main(){
    lg+=vec3(.75,.86,1.)*(smoothstep(.010,.003,dd)*.9+exp(-dd*45.)*.35);}
   col=mix(col,du,nn);col+=lg*on;}
 
- /* E-Bike-Scheinwerfer: Lichtkegel vom Lenker aus, Maus lenkt ihn; Boden hell, Rückstrahler/Linien leuchten, Mücken tanzen im Licht, Dunst im Kegel */
- if(uHl>0.){float nn=smoothstep(.2,2.2,uS);vec2 O=vec2(mob?.50:.64,-.06);vec2 T=vec2(clamp(uM.x,.15,.95)+.025*sin(uT*.35),clamp(mix(.42,uM.y,.6),.18,.52)+.012*sin(uT*.5+1.));
-  vec2 bd=normalize((T-O)*vec2(A,1.));vec2 rp=(uv-O)*vec2(A,1.);float al=dot(rp,bd);float pe=abs(rp.x*bd.y-rp.y*bd.x);float tl=length((T-O)*vec2(A,1.));
-  float cone=smoothstep(0.,.08,al)*smoothstep(al*.30+.015,al*.10,pe)*(1.-smoothstep(tl*1.05,tl*1.9,al));
-  float pool=exp(-dot((uv-T)*vec2(A*.42,1.9),(uv-T)*vec2(A*.42,1.9))*9.);
-  float Lt=clamp(cone*.55+pool*.95,0.,1.3)*(1.-sky)*(.45+.55*smoothstep(.1,.6,d));
-  float dark=mix(.62,.34,nn);vec3 lit=col*vec3(1.08,1.04,.96)*(1.+Lt*2.6);
-  float lum=dot(col,vec3(.3,.59,.11));float sat=max(col.r,max(col.g,col.b))-min(col.r,min(col.g,col.b));
-  float refl=smoothstep(.42,.72,lum)*(1.-smoothstep(.10,.28,sat))*(1.-sky);
-  vec3 c2=col*dark+(lit-col*dark)*clamp(Lt,0.,1.);c2+=vec3(1.,.96,.88)*refl*Lt*1.3;
+ /* E-Bike-Scheinwerfer (Abblendlicht): Lichtkegel fällt perspektivisch richtig auf die Straße (Bodenebene aus Horizont uHz), Maus = Lenker.
+    Linien und Rückstrahler leuchten im Licht auf, weicher Lichtdunst über der Fahrbahn, Mücken nur im Licht; Scrollen = tiefere Nacht, Licht reicht weiter. */
+ if(uHl>0.){float nn=smoothstep(.2,2.2,uS);
+  float hq=max(uHz-q.y,.002);float Z=1./hq;float X=(q.x-.5)*1.5*Z;
+  float th=clamp((uM.x-.5)*1.1,-.55,.55)-.05+.025*sin(uT*.6)+.01*sin(uT*2.3);
+  float ang=atan(X-.95,Z)-th;
+  float beam=exp(-ang*ang/.028)+.35*exp(-ang*ang/.11);
+  float rng=mix(20.,32.,nn);float fall=smoothstep(rng*1.4,rng*.55,Z)*(.55+.75*exp(-pow((Z-8.)/5.5,2.)));
+  float Lt=beam*fall*(1.-sky)*smoothstep(0.,.015,uHz-q.y);
+  float dark=mix(.62,.30,nn);float lum=dot(col,vec3(.3,.59,.11));vec3 lit=mix(col,vec3(lum)*vec3(1.,.98,.93)*1.25,.75)*(1.+Lt*3.4);float sat=max(col.r,max(col.g,col.b))-min(col.r,min(col.g,col.b));
+  float refl=smoothstep(.30,.60,lum)*(1.-smoothstep(.10,.30,sat))*(1.-sky);
+  vec3 c2=col*dark+(lit-col*dark)*clamp(Lt,0.,1.);c2+=vec3(1.,.97,.90)*refl*Lt*1.6;
   float rr2=smoothstep(.5,.9,col.r-col.g*.6-col.b*.6)*(1.-sky);c2+=RED*rr2*Lt*1.4;
-  float hz=cone*(.05+.07*fbm(vec2(al*6.-uT*.25,pe*14.+uT*.1)))*(1.-smoothstep(tl*.9,tl*1.6,al));c2+=vec3(.80,.86,.95)*hz;
-  float mg=0.;for(int L=0;L<2;L++){float fL=float(L);vec2 g=uv*vec2(A,1.)*(22.+fL*16.)+vec2(sin(uT*.9+fL)*.6,cos(uT*.7)*.5+uT*.15);vec2 id=floor(g);float hm=h21(id+fL*3.);
-   vec2 o=vec2(sin(uT*(2.+hm*3.)+hm*40.),cos(uT*(1.7+hm*2.)+hm*13.))*.32;mg+=step(.55,hm)*smoothstep(.07,0.,length(fract(g)-.5-o));}
-  c2+=vec3(1.,.97,.9)*mg*cone*.9;
-  vec2 lg=(uv-O)*vec2(A,1.);c2+=vec3(1.,.97,.92)*exp(-length(lg)*9.)*.45;
+  float x8=(.95+tan(th)*9.)/(1.5*9.)+.5;float hzg=exp(-pow((q.x-x8)*2.6,2.))*exp(-pow((q.y-uHz+.03)/.09,2.));
+  c2+=vec3(.62,.68,.80)*hzg*(.08+.06*nn)*(.85+.15*fbm(vec2(q.x*8.-uT*.08,q.y*20.)));
+  float mg=0.;for(int L=0;L<2;L++){float fL=float(L);vec2 g=uv*vec2(A,1.)*(26.+fL*18.)+vec2(sin(uT*.9+fL)*.6,cos(uT*.7)*.5+uT*.12);vec2 id=floor(g);float hm=h21(id+fL*3.);
+   vec2 o=vec2(sin(uT*(2.+hm*3.)+hm*40.),cos(uT*(1.7+hm*2.)+hm*13.))*.32;mg+=step(.62,hm)*smoothstep(.06,0.,length(fract(g)-.5-o));}
+  c2+=vec3(1.,.96,.86)*mg*smoothstep(.15,.7,Lt+hzg*.3)*step(q.y,uHz+.06)*.8;
+  vec2 lg=(uv-vec2(mob?.50:.62,-.05))*vec2(A,1.);c2+=vec3(1.,.97,.92)*exp(-length(lg)*10.)*.30;
   col=mix(col,c2,uHl);}
  /* Klick: rote Lichtwelle läuft durch die Tiefe + Ring am Klickpunkt */
  float age=uT-uK.z;
@@ -249,7 +252,7 @@ var cv,gl,buf,pr,U={},W=0,H=0,dpr=1,raf,t0=performance.now(),M=[.5,.5],Mt=[.5,.5
 function sh(t,s){var o=gl.createShader(t);gl.shaderSource(o,s);gl.compileShader(o);if(!gl.getShaderParameter(o,gl.COMPILE_STATUS))throw new Error(gl.getShaderInfoLog(o));return o}
 function build(){pr=gl.createProgram();gl.attachShader(pr,sh(gl.VERTEX_SHADER,VQ));gl.attachShader(pr,sh(gl.FRAGMENT_SHADER,FSRC));gl.bindAttribLocation(pr,0,'a');gl.linkProgram(pr);
  if(!gl.getProgramParameter(pr,gl.LINK_STATUS))throw new Error(gl.getProgramInfoLog(pr));
- ['uRn','uHl','uPb','uFg','uSn','uSz','uSc','uLd','uDf','uGr','uCs','uDy','uNt','uWr','uTg','uMo','uLs','uRl','uL1','uL2','uTy','uWf','uR','uM','uFoc','uImg','uT','uS','uFl','uFp','uAm','uSp','uFade','uV','uK','uSun','uP','uD','uE','uPo'].forEach(function(n){U[n]=gl.getUniformLocation(pr,n)});
+ ['uRn','uHl','uPb','uHz','uFg','uSn','uSz','uSc','uLd','uDf','uGr','uCs','uDy','uNt','uWr','uTg','uMo','uLs','uRl','uL1','uL2','uTy','uWf','uR','uM','uFoc','uImg','uT','uS','uFl','uFp','uAm','uSp','uFade','uV','uK','uSun','uP','uD','uE','uPo'].forEach(function(n){U[n]=gl.getUniformLocation(pr,n)});
  buf=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,buf);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,3,-1,-1,3]),gl.STATIC_DRAW);gl.enableVertexAttribArray(0)}
 function tex(img){var t=gl.createTexture();gl.bindTexture(gl.TEXTURE_2D,t);gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL,true);
  gl.texImage2D(gl.TEXTURE_2D,0,gl.RGB,gl.RGB,gl.UNSIGNED_BYTE,img);
@@ -278,7 +281,7 @@ function frame(){raf=requestAnimationFrame(frame);var now=performance.now();if(T
  gl.activeTexture(gl.TEXTURE1);gl.bindTexture(gl.TEXTURE_2D,e.d);gl.uniform1i(U.uD,1);
  gl.activeTexture(gl.TEXTURE2);gl.bindTexture(gl.TEXTURE_2D,e.e||e.d);gl.uniform1i(U.uE,2);
  gl.uniform2f(U.uR,W,H);gl.uniform1f(U.uT,t);gl.uniform1f(U.uS,sc);gl.uniform2f(U.uM,M[0],M[1]);gl.uniform3f(U.uK,K[0],K[1],K[2]);
- gl.uniform2f(U.uImg,e.w,e.h);gl.uniform2f(U.uFoc,W/H<.9?c.fxm:c.fx,c.fy);gl.uniform1f(U.uFl,c.fl);gl.uniform2f(U.uWf,c.wf[0],c.wf[1]);gl.uniform1f(U.uFg,c.fg);gl.uniform1f(U.uSn,c.sn);var sc3=c.sc||[.98,.985,1];gl.uniform1f(U.uSz,c.sz||1);gl.uniform1f(U.uLd,c.ld||0);gl.uniform1f(U.uDf,c.df||0);gl.uniform1f(U.uGr,c.gr||0);gl.uniform1f(U.uCs,c.cs||0);gl.uniform1f(U.uDy,c.dy||0);gl.uniform1f(U.uWr,c.wr||0);gl.uniform1f(U.uMo,c.mo||0);gl.uniform1f(U.uLs,c.ls||0);gl.uniform1f(U.uRl,c.rl||0);gl.uniform1f(U.uRn,c.rn||0);gl.uniform1f(U.uHl,c.hl||0);gl.uniform1f(U.uPb,c.pb||0);var l1=c.L1||[0,0,0,0],l2=c.L2||[0,0,0,0];gl.uniform4f(U.uL1,l1[0],l1[1],l1[2],l1[3]);gl.uniform4f(U.uL2,l2[0],l2[1],l2[2],l2[3]);gl.uniform1f(U.uTg,c.rt?TG0:0);gl.uniform1f(U.uNt,c.nt||0);gl.uniform3f(U.uSc,sc3[0],sc3[1],sc3[2]);gl.uniform2f(U.uTy,c.ty?c.ty[0]:0,c.ty?c.ty[1]:0);gl.uniform1f(U.uFp,c.fp);gl.uniform1f(U.uAm,c.am);gl.uniform1f(U.uSp,c.sp);
+ gl.uniform2f(U.uImg,e.w,e.h);gl.uniform2f(U.uFoc,W/H<.9?c.fxm:c.fx,c.fy);gl.uniform1f(U.uFl,c.fl);gl.uniform2f(U.uWf,c.wf[0],c.wf[1]);gl.uniform1f(U.uFg,c.fg);gl.uniform1f(U.uSn,c.sn);var sc3=c.sc||[.98,.985,1];gl.uniform1f(U.uSz,c.sz||1);gl.uniform1f(U.uLd,c.ld||0);gl.uniform1f(U.uDf,c.df||0);gl.uniform1f(U.uGr,c.gr||0);gl.uniform1f(U.uCs,c.cs||0);gl.uniform1f(U.uDy,c.dy||0);gl.uniform1f(U.uWr,c.wr||0);gl.uniform1f(U.uMo,c.mo||0);gl.uniform1f(U.uLs,c.ls||0);gl.uniform1f(U.uRl,c.rl||0);gl.uniform1f(U.uRn,c.rn||0);gl.uniform1f(U.uHl,c.hl||0);gl.uniform1f(U.uPb,c.pb||0);gl.uniform1f(U.uHz,c.hz||.33);var l1=c.L1||[0,0,0,0],l2=c.L2||[0,0,0,0];gl.uniform4f(U.uL1,l1[0],l1[1],l1[2],l1[3]);gl.uniform4f(U.uL2,l2[0],l2[1],l2[2],l2[3]);gl.uniform1f(U.uTg,c.rt?TG0:0);gl.uniform1f(U.uNt,c.nt||0);gl.uniform3f(U.uSc,sc3[0],sc3[1],sc3[2]);gl.uniform2f(U.uTy,c.ty?c.ty[0]:0,c.ty?c.ty[1]:0);gl.uniform1f(U.uFp,c.fp);gl.uniform1f(U.uAm,c.am);gl.uniform1f(U.uSp,c.sp);
  var sx=c.sun[0],sy=c.sun[1],sz2=c.sun[2];if(c.dy){var tz0=c.rt?TG0:0,tg=Math.max(0,Math.min(1,tz0+(1-tz0)*sc/2.6));sx=.18+.70*tg;sy=.62+.34*Math.sin(Math.PI*Math.min(1,tg*1.15));sz2=c.sun[2]*(1+1.4*tg)}if(c.nt)sz2*=Math.max(0,1-sc/1.2);gl.uniform3f(U.uSun,c.fl?1-sx:sx,sy,sz2);gl.uniform1f(U.uFade,fade*fade*(3-2*fade));gl.uniform1f(U.uV,0);gl.uniform3f(U.uPo,Po[0],Po[1],Po[2]);
  gl.bindBuffer(gl.ARRAY_BUFFER,buf);gl.vertexAttribPointer(0,2,gl.FLOAT,false,0,0);gl.drawArrays(gl.TRIANGLES,0,3)}
 function click(e){if(e.target&&e.target.closest&&e.target.closest('#ueSw'))return;K=[e.clientX/innerWidth,1-e.clientY/innerHeight,(performance.now()-t0)/1000]}
