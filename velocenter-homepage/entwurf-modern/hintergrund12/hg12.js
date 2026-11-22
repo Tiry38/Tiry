@@ -150,7 +150,7 @@ void main(){
  /* farbtreu (Tiry 22.11.: links nicht mehr schwarz-weiss): Milchglas behaelt die Farben des Fotos, nur heller + flacher */
  vec3 fr=vec3(.95,.955,.962)*.76+col*.28;
  /* Lesbarkeit überall (Tiry 22.11.2026: „Schriften schlecht lesbar“): Milchglas genau hinter dunkler Schrift, weich auslaufend – Foto bleibt dazwischen klar */
- float tk=0.;if(uMo.z>.5){float dy=uMo.x+(1.-uv.y)*uMo.y;if(dy>0.&&dy<1.)tk=texture2D(uMk,vec2(uv.x,dy)).r;}
+ float tk=0.;if(uMo.z>.5){float dy=uMo.x+(1.-uv.y)*uMo.y;if(dy>0.&&dy<1.)tk=texture2D(uMk,vec2(uv.x,dy)).a;}
  col=mix(col,fr,max(min(calm*1.08,.82),tk*.90));
  col*=1.-.10*pow(length(uv-vec2(.62,.5)),2.);
  col+=(h21(gl_FragCoord.xy+fract(uT))-.5)*.010;
@@ -214,16 +214,19 @@ function mkBuild(){MK.tm=0;MK.last=performance.now();if(!gl)return;
    var q=r.getClientRects();for(var i=0;i<q.length;i++){var a=q[i];if(a.width>1&&a.height>3)R.push([a.left,a.top+sy,a.width,a.height])}}});
  var mx=Math.min(4096,gl.getParameter(gl.MAX_TEXTURE_SIZE)||4096),s=Math.max(cw/240,dh/mx),w=Math.ceil(cw/s),h=Math.ceil(dh/s);
  var c=MK.c||(MK.c=document.createElement('canvas'));c.width=w;c.height=h;var x=c.getContext('2d');x.clearRect(0,0,w,h);x.fillStyle='#fff';
- var px=24,py=16;R.forEach(function(a){x.fillRect((a[0]-px)/s,(a[1]-py)/s,(a[2]+2*px)/s,(a[3]+2*py)/s)});
- /* weich auslaufen: zweimal verkleinern/vergrößern (geht in jedem Browser, auch ohne canvas-filter) */
- var b=document.createElement('canvas'),k=4;b.width=Math.max(1,Math.ceil(w/k));b.height=Math.max(1,Math.ceil(h/k));var bx=b.getContext('2d');bx.imageSmoothingEnabled=true;
- for(var j=0;j<2;j++){bx.clearRect(0,0,b.width,b.height);bx.drawImage(c,0,0,b.width,b.height);x.globalCompositeOperation='lighter';x.globalAlpha=.55;x.imageSmoothingEnabled=true;x.drawImage(b,0,0,w,h);x.globalAlpha=1;x.globalCompositeOperation='source-over'}
+ var px=40,py=30;R.forEach(function(a){x.fillRect((a[0]-px)/s,(a[1]-py)/s,(a[2]+2*px)/s,(a[3]+2*py)/s)});
+ /* weich auslaufen wie beschlagenes Glas: echte Unschärfe (canvas-filter), sonst mehrstufig verkleinern/vergrößern */
+ var f=MK.f||(MK.f=document.createElement('canvas'));f.width=w;f.height=h;var fx=f.getContext('2d');fx.clearRect(0,0,w,h);
+ var br=Math.max(2,34/s);
+ if('filter' in fx){fx.filter='blur('+br.toFixed(1)+'px)';fx.drawImage(c,0,0);fx.filter='none';fx.globalCompositeOperation='lighter';fx.globalAlpha=.45;fx.filter='blur('+(br*.5).toFixed(1)+'px)';fx.drawImage(c,0,0);fx.filter='none';fx.globalAlpha=1;fx.globalCompositeOperation='source-over'}
+ else{fx.drawImage(c,0,0);var b=document.createElement('canvas'),bx=b.getContext('2d');[3,6,10].forEach(function(k){b.width=Math.max(1,Math.ceil(w/k));b.height=Math.max(1,Math.ceil(h/k));bx.imageSmoothingEnabled=true;bx.drawImage(f,0,0,b.width,b.height);fx.clearRect(0,0,w,h);fx.imageSmoothingEnabled=true;fx.drawImage(b,0,0,w,h)});fx.globalCompositeOperation='lighter';fx.globalAlpha=.5;fx.drawImage(c,0,0);fx.globalAlpha=1;fx.globalCompositeOperation='source-over'}
+ c=f;
  if(!MK.t)MK.t=gl.createTexture();gl.bindTexture(gl.TEXTURE_2D,MK.t);gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL,false);
  gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE,c);
  gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.LINEAR);
  gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,gl.CLAMP_TO_EDGE);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE);
  MK.h=h*s;MK.w=w*s;MK.on=1}
-function mkSoon(d){if(MK.tm)return;var wait=Math.max(d||400,1500-(performance.now()-MK.last));MK.tm=setTimeout(function(){(window.requestIdleCallback||setTimeout)(mkBuild)},wait)}
+function mkSoon(d){if(MK.tm)return;var wait=Math.max(d||400,1500-(performance.now()-MK.last));MK.tm=setTimeout(function(){if(window.requestIdleCallback)requestIdleCallback(mkBuild,{timeout:600});else mkBuild()},wait)}
 function mkUse(){gl.activeTexture(gl.TEXTURE3);gl.bindTexture(gl.TEXTURE_2D,MK.t||null);gl.uniform1i(U.uMk,3);
  var ch=cv.clientHeight||innerHeight;gl.uniform3f(U.uMo,scrollY/MK.h,ch/MK.h,MK.on&&MK.t?1:0)}
 function mkInit(){mkSoon(300);addEventListener('load',function(){mkSoon(200)});addEventListener('resize',function(){mkSoon(300)});

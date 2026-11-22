@@ -528,3 +528,9 @@
 - Behoben: `.lbp:not(.on),.lbp:not(.on) *{pointer-events:none!important}` + `close()` nimmt auch `.on` von den Vorschauseiten. Nicht zurückbauen.
 - Alias `#showroom` zeigte ins Leere → jetzt `marken#showroom2`.
 - Gesamtprüfung (PC 1366×768 alle 11 Ansichten mit echtem Mausklick, Handy Pixel 7 Burger-Menü): alle internen Links landen in der richtigen Ansicht/am richtigen Abschnitt, alle Knöpfe reagieren, keine JS-Fehler. 57 externe Links erreichbar (bosch-ebike.com sperrt nur Prüf-Programme mit 403, Seiten sind echt vorhanden). „Gespeicherte Einstellungen löschen“ (Datenschutz) lädt absichtlich neu.
+
+### Lesbarkeit auf dem Herbst-Hintergrund: Milchglas folgt der Schrift (Tiry 22.11.2026)
+- Problem: Das Milchglas des Hintergrunds lag nur links. Mitte/rechts stand dunkle Schrift direkt auf dem Foto (z. B. Leasing „So funktioniert es“, Fußzeile Impressum/Datenschutz am Handy).
+- Lösung in `hintergrund12/hg12.js`: Maske aus allen dunklen Texten der aktiven Ansicht + Fußzeile (nur Text ohne eigene Karte/Fläche), in Seiten-Koordinaten weichgezeichnet (canvas-filter blur, Rückfall mehrstufig), als Textur im Shader – dort wird das Foto hinter der Schrift bis 90 % zu Milchglas, dazwischen bleibt es klar. Neu gerechnet nur bei Layout-Änderung (Laden, Größe, Reiterwechsel, ResizeObserver/MutationObserver auf `main`, gedrosselt ≥ 1,5 s), pro Bild nur verschoben.
+- Wichtig: Maske über den Alpha-Kanal lesen (`.a`), `requestIdleCallback` mit `timeout` (sonst wird die Maske am Handy nie gebaut).
+- Geprüft per Kontrast-Scan (Text ausgeblendet → echter Hintergrund-Pixel gegen Textfarbe) in allen 11 Ansichten PC + Handy.
