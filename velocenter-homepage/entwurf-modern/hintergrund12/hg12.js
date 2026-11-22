@@ -16,7 +16,7 @@ var CFG={herbst:{ty:[0,-.04],fxm:.50,fx:.50,fy:.55,fl:0,fp:.20,am:.030,sp:.012,w
  island:{ty:[.02,-.04],fxm:.62,fx:.50,fy:.50,fl:1,fp:.30,am:.055,sp:.014,wf:[0,0],sun:[.40,.85,.10],fg:1.2,sn:0,ld:0,df:1,gr:0,cs:.32,dy:0,nt:1}};
 var BASE=(window.HG12_BASE||'img/hg12/');
 var mode=window.HG12_DEFAULT||'herbst';
-try{var q=new URLSearchParams(location.search).get('hg');if(q)mode=q;else{var s0=localStorage.getItem('vc_hg12');if(s0)mode=s0}}catch(e){}
+var FEST=window.HG12_FEST;if(FEST)mode=FEST;else try{var q=new URLSearchParams(location.search).get('hg');if(q)mode=q;else{var s0=localStorage.getItem('vc_hg12');if(s0)mode=s0}}catch(e){}
 if(!MODES.some(function(m){return m[0]===mode}))mode='herbst';window.HG12_MODE=mode;
 var de=document.documentElement;
 
@@ -204,7 +204,7 @@ function init(){cv=document.createElement('canvas');cv.id='hg';cv.setAttribute('
  cv.addEventListener('webglcontextlost',function(e){e.preventDefault();cancelAnimationFrame(raf)});
  cv.addEventListener('webglcontextrestored',function(){TX={};shown='';try{build()}catch(err){return}load(mode);frame()});
  addEventListener('hashchange',pose);addEventListener('popstate',pose);pose();Po=Pt.slice();Pv=[0,0,0];
- load(mode);frame();sw();
+ load(mode);frame();if(FEST)return;/* Live-Homepage: nur die Herbstallee, kein Umschalter (Tiry 22.11.2026) */sw();
  /* übrige Szenen leise vorladen */
  setTimeout(function(){MODES.forEach(function(m){load(m[0])})},4000)}
 

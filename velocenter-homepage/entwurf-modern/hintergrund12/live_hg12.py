@@ -3,7 +3,7 @@
 
 Aufruf:  python3 live_hg12.py <live-ordner>      (von tools/live_bauen.py nach plus_design() aufgerufen)
 Legt auf alle gebauten Seiten genau den Stand von Vorschau „Landschaften 3“:
-  - hg12-Hintergrund (Herbstallee als Standard, Weinberg/Hochland per Umschalter), nasse Straße beim Scrollen,
+  - hg12-Hintergrund NUR Herbstallee (HG12_FEST, kein Umschalter, Tiry 22.11.2026: „nur diese eine Vorlage“), nasse Straße beim Scrollen,
     Laub folgt dem Scrollen, kein Klick-Ring, kein Scan
   - Showroom-Verwandlung mit Blättern (vmorph-laub.js ersetzt den vMorphJs-Block)
   - Handy-Kopf: Öffnungsstatus, A+, roter Burger; Laufband auf dem Handy sichtbar (hgmob.css)
@@ -35,7 +35,7 @@ for sp in SEITEN:
     i = s.index('</style>') + len('</style>')
     s = s[:i] + '\n<style id="vHg">\n' + CSS + '</style>\n<script>document.documentElement.classList.add("hg3")</script>' + s[i:]
     k = s.rindex('</html>')
-    s = (s[:k] + '<script id="vHg11Js">window.HG12_DEFAULT=\'herbst\';\n' + JS + '</script>\n'
+    s = (s[:k] + '<script id="vHg11Js">window.HG12_FEST=\'herbst\';\n' + JS + '</script>\n'
          + '<style id="hgMobKopf">' + MOB + '</style>\n' + s[k:])
     open(p, 'w', encoding='utf-8').write(s)
     print('hg12:', sp, len(s.encode()) // 1024, 'KB')
@@ -43,5 +43,7 @@ for sp in SEITEN:
 zi = os.path.join(ZIEL, 'img', 'hg12')
 os.makedirs(zi, exist_ok=True)
 for f in sorted(os.listdir(os.path.join(D, 'img'))):
+    if not f.startswith('herbst'):
+        continue  # nur die Herbstallee ist live
     shutil.copy2(os.path.join(D, 'img', f), os.path.join(zi, f))
 print('hg12: Bilder', len(os.listdir(zi)))
