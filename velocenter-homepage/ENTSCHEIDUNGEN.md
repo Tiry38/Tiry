@@ -428,3 +428,7 @@
 ## 22.11.2026 – Vorschau-Seiten überleben jeden Lauf
 - Ursache des Fehlers: Der nächtliche Bilder-Agent räumt das Web-Repo leer und kopiert nur den frischen Bau hinein – alle `vorschau-landschaften*`-Ordner waren weg, die Adresse sprang über `404.html` auf www.velo-center.de.
 - Regel: Vorschau-Seiten liegen jetzt in `velocenter-homepage/live/vorschau/<name>/` und werden von `tools/live_bauen.py` mitgebaut. Neue Vorschau **immer dort ablegen**, nie nur ins Web-Repo.
+
+## Hintergrund 14 „E-Bike-Momente“ (22.11.2026, wartet auf Fotos)
+- Nur E-Bikes aktueller Modelle: Bosch-Mittelmotor + Akku voll im Unterrohr versteckt. Kein Gepäckträgerakku, kein teilintegrierter Akku, kein Nabenmotor, keine Sportler, keine Personen.
+- Freie Bildbörsen und Pressefotos liefern nichts Passendes (Details `entwurf-modern/hintergrund14/QUELLEN.md`). Bilder kommen aus Händlerportalen oder eigenen Fotos.
