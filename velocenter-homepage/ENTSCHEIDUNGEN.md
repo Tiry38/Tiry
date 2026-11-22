@@ -417,3 +417,10 @@
 - Fotos frei (Unsplash-Lizenz), ohne Personen/Fahrzeuge, Quellen in `entwurf-modern/hintergrund12/QUELLEN.md`.
 - Tiry 22.11.: Linke Seite wirkte schwarz-weiß → Milchglas links ist jetzt farbtreu (nur heller/flacher, keine Entsättigung).
 - Vorschau (nicht verlinkt, noindex): https://tiry38.github.io/velo-center-web/vorschau-landschaften-3/ – Live-Seite unverändert.
+
+## 22.11.2026 – Vorlage „Wege ins Grüne“ (hintergrund13)
+- Tiry: Hintergründe sollen zur „Fahrrad-Natur“ passen (Wege zum Radfahren). **Region ist egal, es zählt, dass es schön aussieht** – keine Motiv-Suche mehr nach Wörth/Pfalz.
+- 3 Modi: Waldweg (Lichtstrahlen, Pollen im Licht), Kanalweg (Wasser reagiert auf Maus und Klick, Morgennebel), Blumenweg (Scrollen = Sternennacht mit Glühwürmchen).
+- Fotos frei (Pexels-Lizenz), Quellen in `entwurf-modern/hintergrund13/QUELLEN.md`.
+- Milchglas links: farbtreu, bei dunklen Fotos dichter (Schrift bleibt lesbar).
+- Vorschau (nicht verlinkt, noindex): https://tiry38.github.io/velo-center-web/vorschau-landschaften-4/ – Live-Seite unverändert.

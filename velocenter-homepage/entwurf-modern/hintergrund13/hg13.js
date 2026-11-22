@@ -1,30 +1,30 @@
-/* Vorlage „Heimat: Rheinaue, Reben & Pfälzerwald“ (Tiry 22.11.2026: „ortsbezogen zu uns … Wörth am Rhein … womit wir mehr Verbindung haben“).
-   Drei echte Fotos aus unserer Gegend (frei: CC0 bzw. Pexels-Lizenz), ohne Fahrräder, Personen, Fahrzeuge:
-   - Rheinaue Wörth (NSG Goldgrund, Goldkehle): Wasser lebt – Maus zieht Wellen, Klick wirft einen Stein, Sonne glitzert.
-   - Weinberge Maikammer (Blick zum Blättersberg): Licht nach echter Uhrzeit (morgens kühl, abends golden), Scrollen = Abend, Wolkenschatten, Wind in den Reben.
-   - Pfälzerwald (Felsen bei Wilgartswiesen): Scrollen = Sternennacht mit Abendglühen, Sternschnuppen und Glühwürmchen.
-   Technik wie hg12 (Kino-Schärfe, Tiefenkarte, automatische Qualität).
+/* Vorlage „Wege ins Grüne“ (Tiry 22.11.2026: „Fahrrad-Natur … es kommt drauf an, dass es schön aussieht“).
+   Drei echte Fotos mit einem Weg ins Bild (Pexels-Lizenz, frei auch gewerblich), ohne Fahrräder, Personen, Fahrzeuge:
+   - Waldweg: Lichtstrahlen wandern durch den Morgendunst, Pollen/Staub glitzert im Licht, Nebel zieht.
+   - Kanalweg: Wasser lebt – Maus zieht Wellen, Klick wirft einen Stein; Morgennebel zieht übers Wasser.
+   - Blumenweg: Wind in den Blüten; Scrollen = Sonnenuntergang wird Sternennacht mit Abendglühen, Sternschnuppen und Glühwürmchen.
+   Technik wie hg12 (Kino-Schärfe, Tiefenkarte, automatische Qualität, Milchglas links farbtreu).
    Daten je Szene: <name>-2400/1400.webp, <name>-d.png (R Tiefe, G Himmel, B Wolken/Dunst), <name>-m.png (R Pflanzen, G Wasser, B frei). */
 (function(){
-var MODES=[['auen','Rheinaue Wörth','Wasser lebt: Maus & Klick schlagen Wellen'],['reben','Weinberge Maikammer','Licht nach echter Uhrzeit'],['pfalz','Pfälzerwald','Scrollen = Sternennacht']];
-/* je Szene: ty = Kamera schwenkt beim Scrollen, Fokus (Bild-x, Bild-y von unten), Spiegeln, Fokus-Ebene, Wolken (Stärke, Tempo), Wasser (Weg, Tempo), Sonne (x,y von unten; z = Stärke),
-   fg = Dunst, sn/sz/sc = Teilchen (Stärke/Größe/Farbe), ld = Laub mit 3D-Verdeckung + Maus-Wind, df = Kino-Schärfe, gr = Lichtstrahlen, cs = Wolkenschatten, dy = Tageslauf, nt = Polarlicht-Nacht */
-var CFG={auen:{ty:[0,-.03],fxm:.50,fx:.50,fy:.50,fl:1,fp:.25,am:.035,sp:.012,wf:[0,0],sun:[.45,.80,.08],fg:.6,sn:0,ld:0,df:1,gr:0,cs:0,dy:0,nt:0,wr:1},
- reben:{ty:[0,-.04],fxm:.60,fx:.50,fy:.48,fl:0,fp:.25,am:.050,sp:.014,wf:[0,0],sun:[.70,.88,.14],fg:.8,sn:0,ld:0,df:1,gr:0,cs:.38,dy:1,nt:0,rt:1},
- pfalz:{ty:[0,-.03],fxm:.45,fx:.50,fy:.50,fl:0,fp:.30,am:.030,sp:.010,wf:[0,0],sun:[.03,.42,.22],fg:1.0,sn:0,ld:0,df:.45,gr:0,cs:0,dy:0,nt:2}};
+var MODES=[['wald','Waldweg','Lichtstrahlen & Pollen im Morgendunst'],['kanal','Kanalweg','Wasser lebt: Maus & Klick schlagen Wellen'],['blumen','Blumenweg','Scrollen = Sternennacht']];
+/* je Szene: ty = Kamera schwenkt beim Scrollen, Fokus (Bild-x, Bild-y von unten), Spiegeln, Fokus-Ebene, Wolken (Stärke, Tempo), Sonne (x,y von unten; z = Stärke),
+   fg = Dunst, df = Kino-Schärfe, gr = Lichtstrahlen, mo = Pollen im Licht, wr = lebendiges Wasser, dy/rt = Tageslauf/echte Uhrzeit, nt = Nacht (1 Polarlicht, 2 Sternennacht) */
+var CFG={wald:{ty:[0,-.03],fxm:.50,fx:.50,fy:.50,fl:1,fp:.25,am:.030,sp:.012,wf:[0,0],sun:[.19,.80,.17],fg:1.5,sn:0,ld:0,df:1,gr:.28,cs:0,dy:0,nt:0,mo:1},
+ kanal:{ty:[0,-.03],fxm:.45,fx:.50,fy:.50,fl:0,fp:.25,am:.014,sp:.010,wf:[0,0],sun:[.60,.80,.20],fg:1.6,sn:0,ld:0,df:.8,gr:0,cs:0,dy:0,nt:0,wr:1},
+ blumen:{ty:[0,-.03],fxm:.50,fx:.50,fy:.50,fl:1,fp:.28,am:.030,sp:.010,wf:[0,0],sun:[.23,.625,.30],fg:.6,sn:0,ld:0,df:.8,gr:0,cs:0,dy:0,nt:2}};
 /* echte Uhrzeit -> Tageslicht 0..1 (6 Uhr Morgen, 12 Uhr Mittag, 17 Uhr Goldene Stunde, 20 Uhr Dämmerung); ?zeit=18.5 zum Testen */
 function tagZeit(){var h;try{h=parseFloat(new URLSearchParams(location.search).get('zeit'))}catch(e){}if(!(h>=0)){var n=new Date();h=n.getHours()+n.getMinutes()/60}
  var P=[[0,.86],[5,.86],[6.5,0],[12,.3],[15,.42],[17.5,.65],[20,.86],[24,.86]];for(var i=1;i<P.length;i++)if(h<=P[i][0]){var a=P[i-1],b=P[i];return a[1]+(b[1]-a[1])*(h-a[0])/(b[0]-a[0])}return .86}
 var TG0=tagZeit();setInterval(function(){TG0=tagZeit()},60000);
 var BASE=(window.HG13_BASE||'img/hg13/');
-var mode=window.HG13_DEFAULT||'auen';
+var mode=window.HG13_DEFAULT||'wald';
 try{var q=new URLSearchParams(location.search).get('hg');if(q)mode=q;else{var s0=localStorage.getItem('vc_hg13');if(s0)mode=s0}}catch(e){}
-if(!MODES.some(function(m){return m[0]===mode}))mode='auen';
+if(!MODES.some(function(m){return m[0]===mode}))mode='wald';
 var de=document.documentElement;
 
 var FSRC=`#extension GL_OES_standard_derivatives : enable
 precision highp float;
-uniform vec2 uR,uM,uFoc,uImg;uniform vec2 uTy,uWf;uniform float uFg,uSn,uSz,uLd,uDf,uGr,uCs,uDy,uNt,uWr,uTg;uniform vec3 uSc;uniform float uT,uS,uFl,uFp,uAm,uSp,uFade,uV;uniform vec3 uK,uSun,uPo;
+uniform vec2 uR,uM,uFoc,uImg;uniform vec2 uTy,uWf;uniform float uFg,uSn,uSz,uLd,uDf,uGr,uCs,uDy,uNt,uWr,uTg,uMo;uniform vec3 uSc;uniform float uT,uS,uFl,uFp,uAm,uSp,uFade,uV;uniform vec3 uK,uSun,uPo;
 uniform sampler2D uP,uD,uE;
 const vec3 RED=vec3(.886,.137,.176);
 float h21(vec2 p){p=fract(p*vec2(123.34,456.21));p+=dot(p,p+45.32);return fract(p.x*p.y);}
@@ -99,6 +99,11 @@ void main(){
    float hh=h21(id+9.3);vec3 pc=uLd>.5?mix(mix(vec3(.72,.16,.07),uSc,smoothstep(.0,.5,hh)),vec3(.97,.70,.18),smoothstep(.5,1.,hh)):uSc;
    pc*=.75+.35*abs(sin(an*1.7));sn+=w;lc+=pc*w;}}
   col=mix(col,lc/max(sn,1e-4)*(.88+.12*sin(uT+uv.x*9.)),clamp(sn*uSn,0.,.92));}
+ /* Pollen/Staub schwebt in zwei Tiefen und leuchtet nur dort auf, wo Licht hinfällt */
+ if(uMo>0.){float mo=0.;for(int L=0;L<2;L++){float fL=float(L);vec2 g3=uv*vec2(A,1.)*(15.+fL*11.)+vec2(uT*.035+sin(uT*.13+fL)*.3,uT*(.018+fL*.012));vec2 id3=floor(g3);float hm=h21(id3+fL*13.);
+   vec2 o4=vec2(sin(uT*(.35+hm*.5)+hm*30.),cos(uT*(.28+hm*.4)+hm*11.))*.30;float dd3=length(fract(g3)-.5-o4);
+   mo+=step(.45,hm)*(smoothstep(.055-fL*.015,0.,dd3)*.9+exp(-dd3*22.)*.25)*(.5+.5*sin(uT*(.8+hm*1.3)+hm*50.));}
+  col+=vec3(1.,.93,.72)*mo*uMo*smoothstep(.30,.75,dot(col,vec3(.33)))*.55;}
  /* Lichtstrahlen: helle Stellen (Dunst/Himmel) streuen zur Sonne hin – Strahlen wandern langsam */
  if(uGr>0.){vec2 dl2=(uSun.xy-q);float acc2=0.,wt=1.;for(int i=0;i<14;i++){vec2 sp2=q+dl2*(float(i)/14.)*.85;vec3 cc=P(sp2);acc2+=smoothstep(.80,.98,dot(cc,vec3(.33)))*wt;wt*=.88;}
   float shim=.65+.35*nz(vec2(atan(dl2.y,dl2.x*iA)*14.,uT*.15));col+=vec3(1.,.86,.62)*acc2/7.*uGr*shim*.55*(1.-smoothstep(.55,.9,dot(col,vec3(.33))))*(1.-smoothstep(.0,.9,length(dl2*vec2(iA,1.))));}
@@ -125,7 +130,7 @@ void main(){
   float hz=sky*smoothstep(.35,1.,tg)*(1.-smoothstep(.0,.45,q.y-.45));col=mix(col,col*vec3(1.28,.84,.42)+vec3(.15,.07,0.),hz*.85);col=(col-.5)*(1.+gh*.18)+.5;}
  /* Polarlicht-Nacht (Island): Gelände ins Mondlicht, Himmel Nachtblau, Sterne funkeln, rot-weiße Vorhänge wogen */
  if(uNt>0.){float nn=smoothstep(.25,1.9,uS);
-  float lum3=dot(col,vec3(.3,.59,.11));vec3 moon=vec3(.46,.54,.76)*(.08+lum3*.55);
+  float lum3=dot(col,vec3(.3,.59,.11));vec3 moon=vec3(.46,.54,.76)*(.08+lum3*.55);if(uNt>1.5)moon=mix(moon*.78,col*vec3(.30,.40,.62),.40);
   vec2 aq=q;float au=0.;vec3 auC=vec3(0.);
   for(int j=0;j<3;j++){float fj=float(j);
    float fx=aq.x+.06*fbm(vec2(aq.x*1.3+fj*4.,uT*.035+fj));
@@ -153,9 +158,9 @@ void main(){
   float pk2=clamp(min(night.r,night.b)-night.g,0.,1.)*5.;night=mix(night,vec3(dot(night,vec3(.3,.59,.11))),clamp(pk2,0.,.9));
   col=mix(col,night,nn);}
  /* Lesbarkeit links: Milchglas (wie die Seite) */
- float calm=mob?.50*smoothstep(.18,.55,uv.y):smoothstep(.62,.16,uv.x)*.74;
+ float calm=mob?.50*smoothstep(.18,.55,uv.y):smoothstep(.68,.18,uv.x)*.78;
  /* farbtreu (Tiry 22.11.: links nicht mehr schwarz-weiss): Milchglas behaelt die Farben des Fotos, nur heller + flacher */
- vec3 fr=vec3(.95,.955,.962)*.76+col*.28;col=mix(col,fr,min(calm*1.08,.82));
+ vec3 fr=vec3(.95,.955,.962)*.76+col*.28;float cl=dot(col,vec3(.3,.59,.11));col=mix(col,fr,min(calm*(1.08+.50*(1.-cl)),.92));/* dunkle Fotos: Schleier dichter, damit die Schrift lesbar bleibt */
  col*=1.-.10*pow(length(uv-vec2(.62,.5)),2.);
  col+=(h21(gl_FragCoord.xy+fract(uT))-.5)*.010;
  gl_FragColor=vec4(mix(vec3(.914,.922,.933),col,uFade),1.);}
@@ -167,7 +172,7 @@ var cv,gl,buf,pr,U={},W=0,H=0,dpr=1,raf,t0=performance.now(),M=[.5,.5],Mt=[.5,.5
 function sh(t,s){var o=gl.createShader(t);gl.shaderSource(o,s);gl.compileShader(o);if(!gl.getShaderParameter(o,gl.COMPILE_STATUS))throw new Error(gl.getShaderInfoLog(o));return o}
 function build(){pr=gl.createProgram();gl.attachShader(pr,sh(gl.VERTEX_SHADER,VQ));gl.attachShader(pr,sh(gl.FRAGMENT_SHADER,FSRC));gl.bindAttribLocation(pr,0,'a');gl.linkProgram(pr);
  if(!gl.getProgramParameter(pr,gl.LINK_STATUS))throw new Error(gl.getProgramInfoLog(pr));
- ['uFg','uSn','uSz','uSc','uLd','uDf','uGr','uCs','uDy','uNt','uWr','uTg','uTy','uWf','uR','uM','uFoc','uImg','uT','uS','uFl','uFp','uAm','uSp','uFade','uV','uK','uSun','uP','uD','uE','uPo'].forEach(function(n){U[n]=gl.getUniformLocation(pr,n)});
+ ['uFg','uSn','uSz','uSc','uLd','uDf','uGr','uCs','uDy','uNt','uWr','uTg','uMo','uTy','uWf','uR','uM','uFoc','uImg','uT','uS','uFl','uFp','uAm','uSp','uFade','uV','uK','uSun','uP','uD','uE','uPo'].forEach(function(n){U[n]=gl.getUniformLocation(pr,n)});
  buf=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,buf);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,3,-1,-1,3]),gl.STATIC_DRAW);gl.enableVertexAttribArray(0)}
 function tex(img){var t=gl.createTexture();gl.bindTexture(gl.TEXTURE_2D,t);gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL,true);
  gl.texImage2D(gl.TEXTURE_2D,0,gl.RGB,gl.RGB,gl.UNSIGNED_BYTE,img);
@@ -196,7 +201,7 @@ function frame(){raf=requestAnimationFrame(frame);var now=performance.now();if(T
  gl.activeTexture(gl.TEXTURE1);gl.bindTexture(gl.TEXTURE_2D,e.d);gl.uniform1i(U.uD,1);
  gl.activeTexture(gl.TEXTURE2);gl.bindTexture(gl.TEXTURE_2D,e.e||e.d);gl.uniform1i(U.uE,2);
  gl.uniform2f(U.uR,W,H);gl.uniform1f(U.uT,t);gl.uniform1f(U.uS,sc);gl.uniform2f(U.uM,M[0],M[1]);gl.uniform3f(U.uK,K[0],K[1],K[2]);
- gl.uniform2f(U.uImg,e.w,e.h);gl.uniform2f(U.uFoc,W/H<.9?c.fxm:c.fx,c.fy);gl.uniform1f(U.uFl,c.fl);gl.uniform2f(U.uWf,c.wf[0],c.wf[1]);gl.uniform1f(U.uFg,c.fg);gl.uniform1f(U.uSn,c.sn);var sc3=c.sc||[.98,.985,1];gl.uniform1f(U.uSz,c.sz||1);gl.uniform1f(U.uLd,c.ld||0);gl.uniform1f(U.uDf,c.df||0);gl.uniform1f(U.uGr,c.gr||0);gl.uniform1f(U.uCs,c.cs||0);gl.uniform1f(U.uDy,c.dy||0);gl.uniform1f(U.uWr,c.wr||0);gl.uniform1f(U.uTg,c.rt?TG0:0);gl.uniform1f(U.uNt,c.nt||0);gl.uniform3f(U.uSc,sc3[0],sc3[1],sc3[2]);gl.uniform2f(U.uTy,c.ty?c.ty[0]:0,c.ty?c.ty[1]:0);gl.uniform1f(U.uFp,c.fp);gl.uniform1f(U.uAm,c.am);gl.uniform1f(U.uSp,c.sp);
+ gl.uniform2f(U.uImg,e.w,e.h);gl.uniform2f(U.uFoc,W/H<.9?c.fxm:c.fx,c.fy);gl.uniform1f(U.uFl,c.fl);gl.uniform2f(U.uWf,c.wf[0],c.wf[1]);gl.uniform1f(U.uFg,c.fg);gl.uniform1f(U.uSn,c.sn);var sc3=c.sc||[.98,.985,1];gl.uniform1f(U.uSz,c.sz||1);gl.uniform1f(U.uLd,c.ld||0);gl.uniform1f(U.uDf,c.df||0);gl.uniform1f(U.uGr,c.gr||0);gl.uniform1f(U.uCs,c.cs||0);gl.uniform1f(U.uDy,c.dy||0);gl.uniform1f(U.uWr,c.wr||0);gl.uniform1f(U.uMo,c.mo||0);gl.uniform1f(U.uTg,c.rt?TG0:0);gl.uniform1f(U.uNt,c.nt||0);gl.uniform3f(U.uSc,sc3[0],sc3[1],sc3[2]);gl.uniform2f(U.uTy,c.ty?c.ty[0]:0,c.ty?c.ty[1]:0);gl.uniform1f(U.uFp,c.fp);gl.uniform1f(U.uAm,c.am);gl.uniform1f(U.uSp,c.sp);
  var sx=c.sun[0],sy=c.sun[1],sz2=c.sun[2];if(c.dy){var tz0=c.rt?TG0:0,tg=Math.max(0,Math.min(1,tz0+(1-tz0)*sc/2.6));sx=.18+.70*tg;sy=.62+.34*Math.sin(Math.PI*Math.min(1,tg*1.15));sz2=c.sun[2]*(1+1.4*tg)}if(c.nt)sz2*=Math.max(0,1-sc/1.2);gl.uniform3f(U.uSun,c.fl?1-sx:sx,sy,sz2);gl.uniform1f(U.uFade,fade*fade*(3-2*fade));gl.uniform1f(U.uV,0);gl.uniform3f(U.uPo,Po[0],Po[1],Po[2]);
  gl.bindBuffer(gl.ARRAY_BUFFER,buf);gl.vertexAttribPointer(0,2,gl.FLOAT,false,0,0);gl.drawArrays(gl.TRIANGLES,0,3)}
 function click(e){if(e.target&&e.target.closest&&e.target.closest('#ueSw'))return;K=[e.clientX/innerWidth,1-e.clientY/innerHeight,(performance.now()-t0)/1000]}
