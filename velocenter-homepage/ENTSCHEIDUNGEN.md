@@ -518,3 +518,7 @@
 ### Laufband „Klarlack & Tiefe“ live (Tiry 22.11.2026: „setze Nummer 2 um in live … lösche danach die Vorlagen von den Laufbändern“)
 - Live: `laufband/z2.css` über `laufband/live_band.py` (aufgerufen in `tools/live_bauen.py` nach `live_hg12.py`) – Lack-Glanzkante, laufende Kupferlinien, Pillen mit Glasschliff, hinteres Band unscharf. Aufbau/Inhalte des Bands unverändert.
 - Alle Laufband-Vorlagen gelöscht (Vorschau `vorschau-band`, Varianten 1/3, Umschalter-Werkzeug).
+
+### Winter-Aktion: Kristall-Schneeflocken + Service ohne i:SY-Blumenbild (Tiry 22.11.2026)
+- Statt weißer Punkte fallen in allen –20-€-Aktionen echte kleine Schneeflocken (6 Arme mit Ästen, Sechseck-Kern, scharf als Vektor, drehen sich), nur ganz leichtes Funkeln, kein Glitzern: Canvas `#snow` (Startseite `#deal`) und Winter-Karte `.wcard .wsn` (Service, SVG-Flocken).
+- Service: Bild `isy-blumen.webp` (Oval unter der Winter-Karte) entfernt.
