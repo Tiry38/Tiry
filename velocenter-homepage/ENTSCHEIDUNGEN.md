@@ -473,3 +473,4 @@
 ## Vorschau 3 (Herbstallee) Handy-Kopf mit Burger (22.11.2026)
 - **Tiry:** Am Handy nur eine Leiste oben: Öffnungsstatus · A+ · Burger-Menü (aufklappbar). Dadurch ist oben Platz, und der Laufband-Banner läuft am Handy wieder mit (Pflicht). Gilt vorerst nur für diese Vorlage.
 - Umsetzung: `<style id="hgMobKopf">` am Ende von `vorschau-landschaften-3/index.html` (blendet `.mnav` aus, zeigt `.burger` mit dem bestehenden Vollbild-Menü `.mnu`, Kopf klappt beim Scrollen nicht mehr ein, `.bands.top` am Handy sichtbar).
+- **Nachtrag (Tiry: „vorher detailreicher“, „technisch beeindruckend“):** Scan-Tiefe wieder aus der Tiefenkarte (Bäume als echte Formen), nur ohne Wand: Boden = max(Tiefe, Bodenebene), dahinter max(Tiefe×2,4, Straßen-Rampe). Dazu scharfe helle Vorderkante und feine Tiefen-Höhenlinien in der Welle. Himmel/Kronen oben weiter ausgeblendet.
