@@ -465,3 +465,7 @@
 ## Kein Klick-Ring am Mauszeiger (22.11.2026, alle Hintergrund-Vorlagen)
 - **Tiry:** Der rote Ring direkt am Mauszeiger beim Klick fliegt raus. Die rote Lichtwelle, die beim Klick durch das Bild läuft, bleibt (Tiry: „sau cool“).
 - Betroffen: hintergrund5 (Speichenwand), 7, 9–15 und alle Vorschau-Seiten Landschaften 1–6. Nicht wieder einbauen.
+
+## Herbstallee: Klick-Scan bis hinten raus (22.11.2026)
+- **Tiry:** Der rote Scan beim Klick soll über die Ebene und die Straße hinten hinauf laufen, keine unsichtbare Wand nach 5 m. Nur Boden und Seiten, nie den Himmel, kein Kreis. Stil so dezent wie vorher, nur detailreicher bei genauem Hinsehen (kein Laser-Look).
+- Umsetzung (`hg12.js`, nur Modus herbst): Scan-Tiefe aus der Bodenebene (bis Kuppe) und weiter linear die Straße hinauf bis zum Nebel (`cr=.385`, `vy=.64`), darüber nichts. Im Band leuchten Kanten zart nach, vereinzelte feine Messpunkte; Bäume an den Seiten abgeschwächt.

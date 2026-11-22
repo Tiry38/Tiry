@@ -6703,7 +6703,27 @@ void main(){
  col+=vec3(1.,.93,.84)*uSun.z*(exp(-sr*7.)*.35*pul+ray*exp(-sr*2.2)*.20*max(sky,fm*.6));
  /* Klick: rote Lichtwelle läuft durch die Tiefe (kein Ring am Mauszeiger, Tiry 22.11.2026) */
  float age=uT-uK.z;
- if(age<6.){float fr=1.05-age*.42;float wvv=exp(-pow((d-fr)*24.,2.))*exp(-age*.55)*(1.-smoothstep(.2,.6,sky));
+ if(age<6.&&uLd>.5){
+  /* Herbstallee: Scan läuft als ruhiges Band über die Ebene, über die Kuppe und die Straße hinauf bis in den Nebel (keine Wand);
+     fein: Kanten/Blätter im Band leuchten zart nach, nur bei genauem Hinsehen */
+  float cr=.385,vy=.64;
+  float ds=q.y<cr?(.6164-q.y)*1.647:.38*(1.-(q.y-cr)/(vy-cr));
+  float fr=1.05-age*.42,dz=ds-fr,ft=exp(-age*.22);
+  float bw=mix(46.,24.,clamp(ds,0.,1.));
+  float front=exp(-pow(dz*bw,2.));
+  float trail=step(0.,dz)*exp(-dz*14.)*(1.-front);
+  float sat=max(base.r,max(base.g,base.b))-min(base.r,min(base.g,base.b));
+  float tree=q.y>cr?smoothstep(.10,.28,sat):0.;
+  vec2 ex=vec2(.0014,0.),ey=vec2(0.,.0014);
+  float eg=abs(dot(P(q+ex)-P(q-ex),vec3(.33)))+abs(dot(P(q+ey)-P(q-ey),vec3(.33)));
+  float edg=smoothstep(.04,.18,eg);
+  vec2 gq=q*vec2(uImg.x/uImg.y,1.)*300.;float hp=fract(sin(dot(floor(gq),vec2(127.1,311.7)))*43758.5);
+  float pts=step(.965,hp)*smoothstep(.45,.1,length(fract(gq)-.5));
+  float m=(1.-smoothstep(vy-.035,vy,q.y))*(1.-tree*.6)*(1.-smoothstep(.6,1.,sky)*.15)*(1.-smoothstep(5.,6.,age));
+  float a1=(front*(.62+.38*edg)+trail*edg*.22)*ft*m;
+  col=mix(col,RED,clamp(a1*.85,0.,1.));
+  col+=vec3(1.,.72,.70)*(front*(.15+.25*edg)+pts*front*.5)*ft*m;
+ }else if(age<6.){float fr=1.05-age*.42;float wvv=exp(-pow((d-fr)*24.,2.))*exp(-age*.55)*(1.-smoothstep(.2,.6,sky));
   col=mix(col,RED,clamp(wvv*.85,0.,1.));col+=vec3(1.,.7,.7)*wvv*.15;}
  /* Farbführung Rot/Grau/Weiß: Rosa/Lila raus, leicht entsättigt, klar */
  float lu=dot(col,vec3(.299,.587,.114));
