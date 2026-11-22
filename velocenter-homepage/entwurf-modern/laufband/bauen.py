@@ -6,7 +6,7 @@ import os, re, sys
 D = os.path.dirname(os.path.abspath(__file__))
 src, ziel = sys.argv[1], sys.argv[2]
 rd = lambda n: open(os.path.join(D, n), encoding='utf-8').read()
-TEILE = ['x-typo', 'x1-carbon', 'x2-laser', 'x3-partikel']
+TEILE = ['y-basis', 'gkern', 'y1-chrom', 'y2-roehre', 'y3-titan']
 s = open(src, encoding='utf-8').read()
 assert s.count('<meta name="robots" content="index,follow">') == 1
 s = s.replace('<meta name="robots" content="index,follow">', '<meta name="robots" content="noindex,nofollow">')
@@ -15,7 +15,7 @@ i = s.index('<title>'); j = s.index('</title>') + 8
 s = s[:i] + '<title>Vorschau Laufbänder 1–3</title>' + s[j:]
 s = re.sub(r'''(["'(])(img/|fonts/|favicon\.png|apple-touch-icon\.png|google\.json)''', r'\1../\2', s)
 k = s.rindex('</html>')
-s = (s[:k] + '<style id="lbCss">\n' + ''.join(rd(t + '.css') for t in TEILE) + '</style>\n<script id="lbJs">\n' + rd('kern.js')
+s = (s[:k] + '<style id="lbCss">\n' + ''.join(rd(t + '.css') for t in TEILE if os.path.exists(os.path.join(D, t + '.css'))) + '</style>\n<script id="lbJs">\n' + rd('kern.js')
      + ''.join(rd(t + '.js') for t in TEILE if os.path.exists(os.path.join(D, t + '.js'))) + 'LBV_START();\n</script>\n' + s[k:])
 os.makedirs(os.path.join(ziel, 'vorschau-baender'), exist_ok=True)
 open(os.path.join(ziel, 'vorschau-baender', 'index.html'), 'w', encoding='utf-8').write(s)

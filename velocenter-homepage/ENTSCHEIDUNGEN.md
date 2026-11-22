@@ -500,3 +500,10 @@
   2. **Laser-Gravur** – roter Laser brennt die Schrift im Lauf ein, Funkenflug, glühende Gravur-Zone.
   3. **Partikel-Schrift** – Schrift aus Tausenden Partikeln, setzt sich rechts zusammen, zerfällt links in rote Glut, Maus wirbelt Buchstaben auf.
 - Abgelöst: Glas-Monolith, Fokus-Zone, Präzisions-Tafel. Live bleibt unverändert, bis Tiry wählt.
+
+### Laufband-Vorlagen – Nachtrag 4 (Tiry 22.11.2026: „alles Schrott … bahnbrechend, Wunderwerk der Technik“)
+- Neuer Kern `laufband/gkern.js`: Schrift wird als Signed-Distance-Field (Felzenszwalb-EDT) in eine Textur gerechnet und vom Shader als Geometrie benutzt; DOM-Text bleibt unsichtbar für Screenreader.
+  1. **Flüssigmetall** – Band = Höhenfeld aus flüssigem Chrom, Buchstaben steigen rechts aus dem Metall auf und versinken links; Maus wirft Ringwellen.
+  2. **Hyperloop-Glasröhre** – massive Glasröhre bricht den echten Herbst-Hintergrund (mit Farbzerlegung), rote Licht-Kapseln rasen durch, Maus = Flüssig-Linse.
+  3. **3D-Titan-Lettern** – echte 3D-Buchstaben per Raymarching, Torsionswellen drehen die Schrift einmal um die eigene Achse, rot glühende Flanken.
+- Abgelöst: Carbon-Plasma, Laser-Gravur, Partikel-Schrift. Live bleibt unverändert, bis Tiry wählt.

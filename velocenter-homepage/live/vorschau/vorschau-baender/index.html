@@ -6839,61 +6839,18 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
 }
 </style>
 <style id="lbCss">
-/* gemeinsam: Schrift im Brabus-Stil – gerade, breit gesperrt, weiß; Akzente nur Rot (Tiry 22.11.2026) */
+/* gemeinsam für die Laufbänder „2200“: Schrift zeichnet WebGL (SDF), DOM-Text bleibt für Screenreader unsichtbar erhalten */
+html:is(.lbv1,.lbv2,.lbv3) body .view[data-v="start"] .bands.top{height:clamp(100px,8.4vw,124px)!important;overflow:visible!important}
 html:is(.lbv1,.lbv2,.lbv3) body .view[data-v="start"] .bands.top .band.b{display:none!important}
-html:is(.lbv1,.lbv2,.lbv3) body .view[data-v="start"] .bands.top .band.a{left:0!important;right:0!important;border:0!important;padding:0!important;display:flex;align-items:center;overflow:hidden;isolation:isolate}
-html:is(.lbv1,.lbv2,.lbv3) .bands.top .band.a .lbvp,html:is(.lbv1,.lbv2,.lbv3) .bands.top .band.a>.tk{position:relative;z-index:2}
-html:is(.lbv1,.lbv2,.lbv3) body .view[data-v="start"] .bands.top .band.a span{transform:none!important;font:600 clamp(16px,1.55vw,23px)/1 var(--display)!important;letter-spacing:.2em!important;text-transform:uppercase;
- color:#F2F3F5!important;-webkit-text-stroke:0!important;text-shadow:none!important}
-html:is(.lbv1,.lbv2,.lbv3) body .view[data-v="start"] .bands.top .band.a span b{font:inherit!important;color:inherit!important;text-shadow:none!important;-webkit-text-stroke:0!important}
-html:is(.lbv1,.lbv2,.lbv3) body .view[data-v="start"] .bands.top .band.a span b.tkn,html:is(.lbv1,.lbv2,.lbv3) body .view[data-v="start"] .bands.top .band.a span b.tks{color:#FF2A36!important}
-html:is(.lbv1,.lbv2,.lbv3) body .view[data-v="start"] .bands.top .band.a span b.tkg i{color:inherit!important}
-html:is(.lbv1,.lbv2,.lbv3) body .view[data-v="start"] .bands.top .band.a span b.tkb,html:is(.lbv1,.lbv2,.lbv3) body .view[data-v="start"] .bands.top .band.a span b.tkg{padding:0 .15em!important;margin:0!important}
-html:is(.lbv1,.lbv2,.lbv3) body .view[data-v="start"] .bands.top .band.a span b.tkb{padding-left:1.45em!important}
-html:is(.lbv1,.lbv2,.lbv3) .bands.top .band.a span b.tkb::after,html:is(.lbv1,.lbv2,.lbv3) .bands.top .band.a span b.tkg::after{display:none!important}
-html:is(.lbv1,.lbv2,.lbv3) .bands.top .band.a span b.tkb::before{transform:none!important;filter:brightness(0) invert(1);left:0!important;width:1em!important;height:1em!important;margin-top:-.5em!important;background-size:auto 1em!important;top:50%!important}
-html:is(.lbv1,.lbv2,.lbv3) body .view[data-v="start"] .bands.top .band.a span em{font-size:0!important;padding:0!important;display:inline-block;vertical-align:middle;width:22px;height:2px;margin:0 clamp(26px,2.6vw,42px);
- background:#FF2A36;box-shadow:0 0 10px rgba(255,42,54,.9);animation:none}
-@media (max-width:980px){html:is(.lbv1,.lbv2,.lbv3) body .view[data-v="start"] .bands.top .band.a span{font-size:14px!important;letter-spacing:.16em!important}
- html:is(.lbv1,.lbv2,.lbv3) body .view[data-v="start"] .bands.top .band.a span em{width:14px;margin:0 18px}}
-html.lbv1 body .view[data-v="start"] .bands.top{height:clamp(96px,8vw,116px)!important}
-html.lbv1 body .view[data-v="start"] .bands.top .band.a{top:50%!important;height:clamp(62px,5vw,74px);transform:translateY(-50%)!important;background:#060607!important;
- box-shadow:0 -1px 0 rgba(255,42,54,.9),0 1px 0 rgba(255,42,54,.9),0 0 24px rgba(255,30,45,.45),0 30px 60px -24px rgba(0,0,0,.8)!important}
-html.lbv1 .bands.top .band.a .lbC{position:absolute;inset:0;width:100%;height:100%;z-index:0;pointer-events:none}
-@media (max-width:980px){html.lbv1 body .view[data-v="start"] .bands.top{height:76px!important}html.lbv1 body .view[data-v="start"] .bands.top .band.a{height:50px}}
-html.lbv2 body .view[data-v="start"] .bands.top{height:clamp(104px,8.6vw,124px)!important;overflow:visible}
-html.lbv2 body .view[data-v="start"] .bands.top .band.a{top:50%!important;height:clamp(62px,5vw,74px);overflow:visible!important;transform:translateY(-50%)!important;
- background:linear-gradient(180deg,#17181C,#0B0C0F 45%,#050506)!important;
- box-shadow:inset 0 1px 0 rgba(255,255,255,.16),inset 0 -1px 0 rgba(255,255,255,.05),0 1px 0 rgba(0,0,0,.6),0 30px 60px -24px rgba(0,0,0,.8)!important}
-html.lbv2 .bands.top .band.a .lbvp{position:absolute;inset:0;display:flex;align-items:center;z-index:2;-webkit-mask-image:linear-gradient(90deg,#000 calc(var(--hx,84%) - 1px),transparent var(--hx,84%));mask-image:linear-gradient(90deg,#000 calc(var(--hx,84%) - 1px),transparent var(--hx,84%))}
-html.lbv2 body .view[data-v="start"] .bands.top .band.a>.tk span{color:#E9EBEF!important;text-shadow:0 -1px 0 rgba(0,0,0,.9),0 1px 0 rgba(255,255,255,.14)!important}
-html.lbv2 .bands.top .band.a .lbH{position:absolute;left:0;right:0;top:0;bottom:0;display:flex;align-items:center;z-index:3;pointer-events:none;
- -webkit-mask-image:linear-gradient(90deg,transparent calc(var(--hx,84%) - 300px),rgba(0,0,0,.35) calc(var(--hx,84%) - 140px),#000 calc(var(--hx,84%) - 14px),#000 calc(var(--hx,84%) - 1px),transparent var(--hx,84%));
- mask-image:linear-gradient(90deg,transparent calc(var(--hx,84%) - 300px),rgba(0,0,0,.35) calc(var(--hx,84%) - 140px),#000 calc(var(--hx,84%) - 14px),#000 calc(var(--hx,84%) - 1px),transparent var(--hx,84%))}
-html.lbv2 body .view[data-v="start"] .bands.top .band.a .lbH span,html.lbv2 body .view[data-v="start"] .bands.top .band.a .lbH span b{color:#FFE4D6!important;text-shadow:0 0 3px #FF7A50,0 0 10px rgba(255,60,40,.95),0 0 26px rgba(255,30,40,.85)!important}
-html.lbv2 body .view[data-v="start"] .bands.top .band.a .lbH span em{background:#FFB08A;box-shadow:0 0 12px #FF3A2A}
-/* Laserstrahl + Brennpunkt */
-html.lbv2 .bands.top .lbBeam{position:absolute;left:var(--hx,84%);top:-46px;width:2px;height:calc(var(--hy,50%) + 46px);margin-left:-1px;z-index:4;pointer-events:none;
- background:linear-gradient(180deg,rgba(255,40,50,0),rgba(255,40,50,.55) 40%,#FF4A4A 85%,#FFE2DC);box-shadow:0 0 8px 1px rgba(255,40,50,.8),0 0 22px 3px rgba(255,40,50,.35)}
-html.lbv2 .bands.top .lbBeam::after{content:"";position:absolute;left:50%;bottom:-13px;width:26px;height:26px;margin-left:-13px;border-radius:50%;
- background:radial-gradient(circle,#fff 0 18%,#FFD2C2 30%,rgba(255,60,50,.85) 52%,rgba(255,40,50,0) 72%);filter:blur(.3px)}
-html.lbv2 .bands.top .lbBeam::before{content:"";position:absolute;left:50%;bottom:-60px;width:220px;height:120px;margin-left:-110px;border-radius:50%;
- background:radial-gradient(closest-side,rgba(255,60,50,.6),rgba(255,40,50,0));mix-blend-mode:screen}
-html.lbv2 .bands.top .lbSp{position:absolute;left:0;top:-60px;width:100%;height:calc(100% + 120px);z-index:5;pointer-events:none}
-html.lbv2 .bands.top .lbHead{position:absolute;left:calc(var(--hx,84%) - 30px);top:-52px;width:60px;height:8px;z-index:4;border-radius:2px;
- background:linear-gradient(180deg,#3A3D44,#16171B);box-shadow:inset 0 1px 0 rgba(255,255,255,.25),0 0 0 1px rgba(0,0,0,.4)}
-html.lbv2 .bands.top .lbHead::after{content:"";position:absolute;left:50%;bottom:-3px;width:10px;height:3px;margin-left:-5px;background:#FF2A36;box-shadow:0 0 8px #FF2A36}
-@media (max-width:980px){html.lbv2 body .view[data-v="start"] .bands.top{height:92px!important}html.lbv2 body .view[data-v="start"] .bands.top .band.a{height:50px}}
-html.lbv3 body .view[data-v="start"] .bands.top{height:clamp(104px,8.6vw,124px)!important;overflow:visible}
-html.lbv3 body .view[data-v="start"] .bands.top .band.a{top:50%!important;height:clamp(62px,5vw,74px);transform:translateY(-50%)!important;
- background:linear-gradient(90deg,rgba(6,6,8,.0),rgba(6,6,8,.82) 14%,rgba(10,10,13,.9) 50%,rgba(6,6,8,.82) 86%,rgba(6,6,8,0))!important;
- -webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);box-shadow:none!important}
-html.lbv3 body .view[data-v="start"] .bands.top .band.a::before,html.lbv3 body .view[data-v="start"] .bands.top .band.a::after{content:"";position:absolute;left:0;right:0;height:1px;z-index:1;
- background:linear-gradient(90deg,transparent,rgba(255,42,54,.9) 20%,rgba(255,255,255,.55) 50%,rgba(255,42,54,.9) 80%,transparent)}
-html.lbv3 body .view[data-v="start"] .bands.top .band.a::before{top:0}html.lbv3 body .view[data-v="start"] .bands.top .band.a::after{bottom:0}
-html.lbv3 body .view[data-v="start"] .bands.top .band.a>.tk{visibility:hidden}
-html.lbv3 .bands.top .lbP{position:absolute;left:calc(50% - 50vw);width:100vw;top:-60px;height:calc(100% + 120px);z-index:3;pointer-events:none}
-@media (max-width:980px){html.lbv3 body .view[data-v="start"] .bands.top{height:92px!important}html.lbv3 body .view[data-v="start"] .bands.top .band.a{height:50px}}
+html:is(.lbv1,.lbv2,.lbv3) body .view[data-v="start"] .bands.top .band.a{left:0!important;right:0!important;top:50%!important;transform:translateY(-50%)!important;border:0!important;padding:0!important;
+ background:none!important;box-shadow:none!important;overflow:visible!important;height:clamp(66px,5.4vw,80px);display:block!important;isolation:isolate}
+html:is(.lbv1,.lbv2,.lbv3) body .view[data-v="start"] .bands.top .band.a>.tk{opacity:0!important}
+html:is(.lbv1,.lbv2,.lbv3) .bands.top .band.a>canvas{position:absolute;left:0;width:100%;top:0;height:100%;z-index:1;pointer-events:none;display:block}
+@media (max-width:980px){html:is(.lbv1,.lbv2,.lbv3) body .view[data-v="start"] .bands.top{height:84px!important}
+ html:is(.lbv1,.lbv2,.lbv3) body .view[data-v="start"] .bands.top .band.a{height:56px}}
+html.lbv1 .bands.top .band.a>canvas{filter:drop-shadow(0 14px 22px rgba(0,0,0,.55))}
+html.lbv2 .bands.top .band.a>canvas{filter:drop-shadow(0 18px 20px rgba(0,0,0,.45)) drop-shadow(0 0 14px rgba(255,30,45,.25))}
+html.lbv3 .bands.top .band.a>canvas{filter:drop-shadow(0 14px 24px rgba(0,0,0,.55))}
 </style>
 <script id="lbJs">
 /* Laufband-Vorlagen mit Umschalter (Tiry 22.11.2026: „mit 1, 2, 3 durchklicken links … komplett von Rand zu Rand“).
@@ -6924,106 +6881,177 @@ function go(){var bt=document.querySelector('.view[data-v="start"] .bands.top');
  if(!(s0>=0&&s0<V.length))s0=0;pick(s0);setTimeout(tip,1200);requestAnimationFrame(f)}
 window.LBV_START=function(){if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',go);else go()};
 })();
-/* 1 · Carbon-Plasma: Echtzeit-Shader – 2/2-Köper-Carbongeflecht mit anisotropem Glanz (Licht = Maus, sonst wandernd),
-   Klarlack-Reflex, an den Kanten fließt rotes Plasma; Scrollen beschleunigt den Energiefluss. */
-(function(){var C=null;
-var FS='precision highp float;uniform vec2 uR,uM;uniform float uT,uS,uV,uOv,uD;\
-float h(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}\
-float n(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);return mix(mix(h(i),h(i+vec2(1,0)),f.x),mix(h(i+vec2(0,1)),h(i+1.),f.x),f.y);}\
-void main(){vec2 px=gl_FragCoord.xy;vec2 g=px/(uD*5.2);vec2 c=floor(g),f=fract(g);\
-bool hz=mod(c.x+c.y,4.)<2.;float a=hz?f.y:f.x;float bul=(a-.5)*2.;\
-vec3 N=hz?normalize(vec3(0.,bul*.8,1.)):normalize(vec3(bul*.8,0.,1.));vec3 T=hz?vec3(1.,0.,0.):vec3(0.,1.,0.);\
-float fib=.82+.18*sin(a*70.+n(c*2.3)*7.);\
-vec2 lp=mix(vec2(uR.x*(.5+.48*sin(uT*.21+uS*1.7)),uR.y*2.2),uM,uOv);\
-vec3 L=normalize(vec3((lp-px)/uR.x*1.6,.75));vec3 H=normalize(L+vec3(0.,0.,1.));\
-float th=dot(T,H);float an=pow(sqrt(max(0.,1.-th*th)),120.);float sp=pow(max(0.,dot(N,H)),36.);\
-float gap=smoothstep(0.,.1,a)*smoothstep(1.,.9,a);\
-vec3 col=vec3(.022,.023,.027)*fib+vec3(.55,.58,.66)*(an*.55+sp*.18)*fib*(1.-.5*bul*bul);col*=.5+.5*gap;\
-float xs=px.x/uR.x,ys=px.y/uR.y;float cc=exp(-pow((xs-fract(uT*.045))*5.-ys*.9,2.)*10.);col+=vec3(.85,.87,.92)*cc*.07;\
-col*=.85+.3*smoothstep(0.,1.,ys);\
-float e=min(px.y,uR.y-px.y)/uD;float fl=n(vec2(px.x/uD*.018-uT*2.2*(1.+uV*1.5),ys*4.+uT*.3))*.65+n(vec2(px.x/uD*.07+uT*3.4,ys*12.))*.35;\
-float pl=exp(-e*.42)*(.35+fl*1.1);float ps=fract(uT*.13*(1.+uV*2.));float d=xs-ps;pl+=exp(-d*d*260.)*exp(-e*.25)*1.6;\
-float mm=exp(-pow(length((px-uM)/uD)/90.,2.))*uOv;pl+=mm*exp(-e*.35)*.9;\
-col+=vec3(1.,.07,.12)*pl+vec3(1.,.55,.55)*pow(pl,3.)*.35;\
-gl_FragColor=vec4(col,1.);}';
-function mk(band){var cv=document.createElement('canvas');cv.className='lbC';band.insertBefore(cv,band.firstChild);
- var gl=cv.getContext('webgl',{antialias:false,alpha:false});if(!gl){cv.remove();return null}
- function s(t,x){var o=gl.createShader(t);gl.shaderSource(o,x);gl.compileShader(o);if(!gl.getShaderParameter(o,gl.COMPILE_STATUS))throw gl.getShaderInfoLog(o);return o}
- var p=gl.createProgram();gl.attachShader(p,s(gl.VERTEX_SHADER,'attribute vec2 a;void main(){gl_Position=vec4(a,0.,1.);}'));gl.attachShader(p,s(gl.FRAGMENT_SHADER,FS));gl.linkProgram(p);gl.useProgram(p);
+/* Gemeinsamer WebGL-Kern der Laufbänder „2200“ (Tiry 22.11.2026: „bahnbrechend, Wunderwerk der Technik“).
+   Die Laufband-Schrift wird als Signed-Distance-Field (Felzenszwalb-EDT) in eine Textur gerechnet – wie in Spiele-Engines.
+   Damit können die Shader die Buchstaben als echte Geometrie behandeln (Höhe, 3D-Körper, Brechung). Endlos nahtlos (mod). */
+(function(){var G=window.LBG={},INF=1e20,BI=null,BOK=false;
+G.prog=function(gl,FS){function s(t,x){var o=gl.createShader(t);gl.shaderSource(o,x);gl.compileShader(o);if(!gl.getShaderParameter(o,gl.COMPILE_STATUS))throw gl.getShaderInfoLog(o);return o}
+ var p=gl.createProgram();gl.attachShader(p,s(gl.VERTEX_SHADER,'attribute vec2 a;void main(){gl_Position=vec4(a,0.,1.);}'));gl.attachShader(p,s(gl.FRAGMENT_SHADER,FS));gl.linkProgram(p);
+ if(!gl.getProgramParameter(p,gl.LINK_STATUS))throw gl.getProgramInfoLog(p);gl.useProgram(p);
  var b=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,b);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,1,-1,-1,1,1,1]),gl.STATIC_DRAW);
  var l=gl.getAttribLocation(p,'a');gl.enableVertexAttribArray(l);gl.vertexAttribPointer(l,2,gl.FLOAT,false,0,0);
- var U={};['uR','uM','uT','uS','uV','uOv','uD'].forEach(function(k){U[k]=gl.getUniformLocation(p,k)});return {cv:cv,gl:gl,U:U,ov:0}}
-LBV.push({name:'Carbon-Plasma',info:'Echtzeit-Carbon mit Lichtreflex, rotes Plasma an den Kanten',
- on:function(bt){if(!C){try{C=mk(bt.querySelector('.band.a'))}catch(e){console.error('lbC',e)}}if(C)C.cv.style.display=''},
- off:function(){if(C)C.cv.style.display='none'},
- tick:function(st,dt){if(!C)return;var gl=C.gl,U=C.U,band=C.cv.parentNode,r=band.getBoundingClientRect(),d=Math.min(1.5,devicePixelRatio||1);
-  var W=Math.round(band.offsetWidth*d),H=Math.round(band.offsetHeight*d);if(!W)return;if(C.cv.width!==W||C.cv.height!==H){C.cv.width=W;C.cv.height=H;gl.viewport(0,0,W,H)}
-  var inb=st.cy>r.top-80&&st.cy<r.bottom+80;C.ov+=((inb?1:0)-C.ov)*Math.min(1,dt*5);
-  gl.uniform2f(U.uR,W,H);gl.uniform2f(U.uM,(st.cx-r.left)*d,(r.bottom-st.cy)*d);gl.uniform1f(U.uT,st.T);gl.uniform1f(U.uS,scrollY/innerHeight);
-  gl.uniform1f(U.uV,st.v);gl.uniform1f(U.uOv,C.ov);gl.uniform1f(U.uD,d);gl.drawArrays(gl.TRIANGLE_STRIP,0,4)}});
+ var U={};return function(n){if(!(n in U))U[n]=gl.getUniformLocation(p,n);return U[n]}};
+/* Schrift-Abfrage im Shader: q = Streifen-Koordinate (Textur-Pixel, y relativ zur Mitte) → (Abstand, Rot-Anteil) */
+G.GLSL='uniform sampler2D uTx;uniform vec4 uTA;uniform vec2 uTS;uniform float uSW,uSP;\n\
+vec2 tx(vec2 q){float y=q.y+uTA.y*.5;if(y<1.||y>uTA.y-1.)return vec2(uSP,0.);float u=mod(q.x,uSW);float k=floor(u/uTA.x);\n\
+vec4 t=texture2D(uTx,vec2(u-k*uTA.x+uTA.z,y+k*uTA.y)/uTS);return vec2((.5-t.r)*2.*uSP,t.g);}\n';
+function e1(g,o,st,n,f,v,z){v[0]=0;z[0]=-INF;z[1]=INF;f[0]=g[o];
+ for(var q=1,k=0,s=0;q<n;q++){f[q]=g[o+q*st];var q2=q*q;do{var r=v[k];s=(f[q]-f[r]+q2-r*r)/(q-r)/2}while(s<=z[k]&&--k>-1);k++;v[k]=q;z[k]=s;z[k+1]=INF}
+ for(q=0,k=0;q<n;q++){while(z[k+1]<q)k++;var r2=v[k],qr=q-r2;g[o+q*st]=f[r2]+qr*qr}}
+function edt(g,w,h){var m=Math.max(w,h),f=new Float64Array(m),v=new Uint32Array(m),z=new Float64Array(m+1);
+ for(var x=0;x<w;x++)e1(g,x,w,h,f,v,z);for(var y=0;y<h;y++)e1(g,y*w,1,w,f,v,z)}
+function bosch(){if(BI)return;var r=document.querySelector('.bands.top .band.a b.tkb');if(!r)return;
+ var u=(getComputedStyle(r,'::before').backgroundImage||'').match(/url\(["']?([^"')]+)/);if(!u)return;BI=new Image();BI.onload=function(){BOK=true;G.ver++};BI.src=u[1]}
+G.ver=0;
+/* Streifen bauen: Großbuchstaben, gesperrt; ★ und 300+ rot; Trenner = roter Strich; Bosch-Emblem als Zeichen */
+G.strip=function(txt,need,gl){bosch();var fs=40,ls=fs*.2,RH=84,SP=10,F='600 '+fs+'px Outfit,ui-sans-serif,system-ui,sans-serif',items=txt.split('|').filter(Boolean);
+ var c=document.createElement('canvas'),x=c.getContext('2d');x.font=F;
+ function runs(it){var o=[];it.toUpperCase().replace(/I:SY/g,'i:SY').split(/(★|300\+)/).forEach(function(p){if(p)o.push([p,p==='★'||p==='300+'])});return o}
+ function tw(s){var w=0;for(var i=0;i<s.length;i++)w+=x.measureText(s[i]).width+ls;return w}
+ var gap=fs*3.4,one=0;items.forEach(function(it){if(/^BOSCH/i.test(it))one+=fs*1.45;runs(it).forEach(function(q){one+=tw(q[0])});one+=gap});
+ var rep=Math.max(1,Math.ceil(need/one)),SW=Math.ceil(one*rep);c.width=SW;c.height=RH;
+ var r=document.createElement('canvas');r.width=SW;r.height=RH;var y=r.getContext('2d');
+ [x,y].forEach(function(k){k.font=F;k.textBaseline='middle';k.fillStyle='#fff'});var X=0,M=RH/2+1;
+ for(var n=0;n<rep;n++)items.forEach(function(it){
+  if(/^BOSCH/i.test(it)){if(BOK){var e=document.createElement('canvas');e.width=e.height=fs;var ex=e.getContext('2d');var sq=BI.naturalHeight||BI.height||fs;ex.drawImage(BI,0,0,sq,sq,0,0,fs,fs);
+    ex.globalCompositeOperation='source-in';ex.fillStyle='#fff';ex.fillRect(0,0,fs,fs);x.drawImage(e,X,M-fs*.5,fs*.9,fs*.9)}X+=fs*1.45}
+  runs(it).forEach(function(q){for(var i=0;i<q[0].length;i++){var ch=q[0][i];x.fillText(ch,X,M);if(q[1])y.fillText(ch,X,M);X+=x.measureText(ch).width+ls}});
+  x.fillRect(X+gap*.5-fs*.32,M-2,fs*.64,4);y.fillRect(X+gap*.5-fs*.32,M-2,fs*.64,4);X+=gap});
+ var a=x.getImageData(0,0,SW,RH).data,red=y.getImageData(0,0,SW,RH).data,N=SW*RH,go=new Float64Array(N),gi=new Float64Array(N),i;
+ for(i=0;i<N;i++){var al=a[i*4+3]/255;go[i]=al===1?0:al===0?INF:Math.pow(Math.max(0,.5-al),2);gi[i]=al===1?INF:al===0?0:Math.pow(Math.max(0,al-.5),2)}
+ edt(go,SW,RH);edt(gi,SW,RH);
+ var mx=gl.getParameter(gl.MAX_TEXTURE_SIZE),pad=16,RW=Math.min(2048,mx-2*pad),rows=Math.ceil(SW/RW),TW=RW+2*pad,TH=rows*RH;
+ if(TH>mx){RW=Math.min(mx-2*pad,4096);rows=Math.ceil(SW/RW);TW=RW+2*pad;TH=rows*RH}
+ var out=new Uint8Array(TW*TH*4);
+ for(var k=0;k<rows;k++)for(var yy=0;yy<RH;yy++)for(var j=0;j<TW;j++){var sx=((k*RW+j-pad)%SW+SW)%SW,si=yy*SW+sx,o=((k*RH+yy)*TW+j)*4,d=Math.sqrt(go[si])-Math.sqrt(gi[si]);
+  out[o]=Math.max(0,Math.min(255,Math.round((.5-d/(2*SP))*255)));out[o+1]=red[si*4+3];out[o+3]=255}
+ var t=gl.createTexture();gl.bindTexture(gl.TEXTURE_2D,t);gl.pixelStorei(gl.UNPACK_ALIGNMENT,1);gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,TW,TH,0,gl.RGBA,gl.UNSIGNED_BYTE,out);
+ [gl.TEXTURE_MIN_FILTER,gl.TEXTURE_MAG_FILTER].forEach(function(p){gl.texParameteri(gl.TEXTURE_2D,p,gl.LINEAR)});
+ [gl.TEXTURE_WRAP_S,gl.TEXTURE_WRAP_T].forEach(function(p){gl.texParameteri(gl.TEXTURE_2D,p,gl.CLAMP_TO_EDGE)});
+ return {t:t,RW:RW,RH:RH,pad:pad,TW:TW,TH:TH,SW:SW,SP:SP,fs:fs}};
+G.bind=function(gl,U,S,unit){gl.activeTexture(gl.TEXTURE0+(unit||0));gl.bindTexture(gl.TEXTURE_2D,S.t);gl.uniform1i(U('uTx'),unit||0);
+ gl.uniform4f(U('uTA'),S.RW,S.RH,S.pad,0);gl.uniform2f(U('uTS'),S.TW,S.TH);gl.uniform1f(U('uSW'),S.SW);gl.uniform1f(U('uSP'),S.SP)};
+/* Ein Band-Renderer: Canvas, Schrift-Streifen, Lauf-Versatz; jede Variante liefert nur Shader + eigene Uniforms */
+G.band=function(o){var R={o:o,cv:null,gl:null,U:null,S:null,key:'',pos:0,ov:0};
+ R.on=function(bt){if(!R.cv){var a=bt.querySelector('.band.a');R.cv=document.createElement('canvas');R.cv.className=o.cls;R.cv.setAttribute('aria-hidden','true');a.insertBefore(R.cv,a.firstChild);
+   try{R.gl=R.cv.getContext('webgl',{antialias:false,alpha:true,premultipliedAlpha:true});R.U=G.prog(R.gl,o.fs);o.init&&o.init(R)}catch(e){console.error(o.cls,e);R.gl=null}}
+  R.cv.style.display='';R.key=''};
+ R.off=function(){if(R.cv)R.cv.style.display='none'};
+ R.tick=function(st,dt){if(!R.gl)return;var gl=R.gl,r=R.cv.getBoundingClientRect(),d=Math.min(o.dpr||1.5,devicePixelRatio||1),W=Math.round(r.width*d),H=Math.round(r.height*d);if(!W||!H)return;
+  if(R.cv.width!==W||R.cv.height!==H){R.cv.width=W;R.cv.height=H;gl.viewport(0,0,W,H)}
+  var mob=innerWidth<=980,fc=mob?15:Math.min(23,Math.max(16,innerWidth*.0155)),txt=(st.bt.querySelector('.band.a .tk')||{dataset:{}}).dataset.t||'';
+  var key=txt+'|'+Math.round(innerWidth/50)+'|'+G.ver;
+  if(key!==R.key&&(!document.fonts||document.fonts.check('600 20px Outfit'))){R.key=key;if(R.S)gl.deleteTexture(R.S.t);R.S=G.strip(txt,innerWidth*40/fc+400,gl)}
+  if(!R.S)return;var inb=st.cy>r.top-70&&st.cy<r.bottom+70;R.ov+=((inb?1:0)-R.ov)*Math.min(1,dt*5);
+  R.pos+=dt*(mob?52:74)*(1+st.v*1.8);var s=R.S.fs/(fc*d),U=R.U;
+  G.bind(gl,U,R.S,0);gl.uniform2f(U('uR'),W,H);gl.uniform1f(U('uS'),s);gl.uniform1f(U('uO'),(R.pos*d)%(R.S.SW/s));gl.uniform1f(U('uT'),st.T);
+  gl.uniform1f(U('uV'),st.v);gl.uniform1f(U('uOv'),R.ov);gl.uniform1f(U('uD'),d);gl.uniform2f(U('uM'),(st.cx-r.left)*d,(r.bottom-st.cy)*d);
+  o.frame&&o.frame(R,st,dt,W,H,d,r);gl.clearColor(0,0,0,0);gl.clear(gl.COLOR_BUFFER_BIT);gl.drawArrays(gl.TRIANGLE_STRIP,0,4)};
+ (G.all=G.all||[]).push(R);return R};
+G.add=function(name,info,o){var R=G.band(o);LBV.push({name:name,info:info,on:R.on,off:R.off,tick:R.tick})};
 })();
-/* 2 · Laser-Gravur: rechts sitzt ein Laserkopf; jeder Buchstabe wird beim Durchlaufen live in schwarzes Glas graviert –
-   glühend rot am Brennpunkt, kühlt nach links silbern ab, Funken sprühen. Brennpunkt rastert auf und ab. */
-(function(){var E=null,K=null,MO=null;
-function sync(bt){var a=bt.querySelector('.band.a'),tk=a.querySelector('.lbvp>.tk')||a.querySelector(':scope>.tk');if(tk.parentNode===a){var vp=document.createElement('div');vp.className='lbvp';a.insertBefore(vp,tk);vp.appendChild(tk)}if(!E){
-  E={a:a,H:document.createElement('div'),beam:document.createElement('i'),head:document.createElement('i'),sp:document.createElement('canvas'),P:[]};
-  E.H.className='lbH';E.H.setAttribute('aria-hidden','true');K=document.createElement('div');K.className='tk';E.H.appendChild(K);a.appendChild(E.H);
-  E.beam.className='lbBeam';E.head.className='lbHead';E.sp.className='lbSp';a.appendChild(E.beam);a.appendChild(E.head);a.appendChild(E.sp);E.x=E.sp.getContext('2d')}
- K.innerHTML=tk.innerHTML;requestAnimationFrame(function(){var o=tk.getAnimations()[0],c=K.getAnimations()[0];if(o&&c){c.currentTime=o.currentTime;c.playbackRate=o.playbackRate}})}
-LBV.push({name:'Laser-Gravur',info:'Laser graviert die Schrift live in schwarzes Glas, Funken inklusive',
- on:function(bt){sync(bt);[E.H,E.beam,E.head,E.sp].forEach(function(e){e.style.display=''});
-  if(!MO){MO=new MutationObserver(function(){sync(bt)});MO.observe(bt.querySelector('.band.a .lbvp>.tk'),{childList:true})}},
- off:function(){if(E)[E.H,E.beam,E.head,E.sp].forEach(function(e){e.style.display='none'})},
- tick:function(st,dt){if(!E)return;var a=E.a,w=a.offsetWidth,h=a.offsetHeight,hx=w<760?w*.78:w*.84;
-  var hy=.5+.36*Math.sin(st.T*31)*Math.sin(st.T*2.3+1.1);a.style.setProperty('--hx',hx.toFixed(1)+'px');a.style.setProperty('--hy',(hy*100).toFixed(1)+'%');
-  var tk=a.querySelector('.lbvp>.tk'),o=tk.getAnimations()[0],c=K.getAnimations()[0];if(o&&c&&Math.abs((c.currentTime||0)-(o.currentTime||0))>30)c.currentTime=o.currentTime;
-  /* Funken */
-  var cv=E.sp,d=Math.min(2,devicePixelRatio||1),W=Math.round(w*d),Hh=Math.round((h+120)*d);if(cv.width!==W||cv.height!==Hh){cv.width=W;cv.height=Hh}
-  var x=E.x,n=Math.round((34+st.v*40)*dt*60*.5);for(var i=0;i<n;i++){var an=Math.PI*(.55+Math.random()*.9),sp=60+Math.random()*260;
-   E.P.push({x:hx,y:60+h*hy,vx:Math.cos(an)*sp-40,vy:-Math.sin(an)*sp*.7*(Math.random()<.5?1:-1),l:0,m:.25+Math.random()*.5})}
-  x.clearRect(0,0,W,Hh);x.globalCompositeOperation='lighter';
-  E.P=E.P.filter(function(p){p.l+=dt;if(p.l>p.m)return false;p.vy+=520*dt;p.vx*=.985;var ox=p.x,oy=p.y;p.x+=p.vx*dt;p.y+=p.vy*dt;var k=1-p.l/p.m;
-   x.strokeStyle='rgba(255,'+(120+k*120|0)+','+(60+k*100|0)+','+k.toFixed(2)+')';x.lineWidth=(1.2+k*1.6)*d;x.beginPath();x.moveTo(ox*d,oy*d);x.lineTo(p.x*d,p.y*d);x.stroke();return true});
-  if(E.P.length>500)E.P.splice(0,E.P.length-500);x.globalCompositeOperation='source-over'}});
+/* 1 · Flüssigmetall: das Band ist eine Fläche aus flüssigem Chrom (Höhenfeld in Echtzeit). Die Buchstaben steigen rechts als
+   Chrom-Relief aus dem Metall auf und versinken links wieder. Spiegelung eines Studio-Lichts mit roten Neon-Leisten (Fresnel).
+   Maus = Wellen im Metall (gedämpfte Ringwellen), Scrollen = Unruhe in der Oberfläche. */
+(function(){var RP=[],last=null,acc=0;
+var FS='precision highp float;uniform vec2 uR,uM;uniform float uS,uO,uT,uV,uOv,uD;uniform vec4 uRp[8];\n'+LBG.GLSL+'\
+float h1(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}\
+float n2(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);return mix(mix(h1(i),h1(i+vec2(1,0)),f.x),mix(h1(i+vec2(0,1)),h1(i+1.),f.x),f.y);}\
+vec2 TX(vec2 p){return tx(vec2((p.x+uO)*uS,(uR.y*.5-p.y)*uS));}\
+float HF(vec2 p,out float red){vec2 t=TX(p);red=t.y;float xs=p.x/uR.x;\
+ float tt=clamp((1.6-t.x)/6.5,0.,1.);float em=smoothstep(1.03,.84,xs)*smoothstep(-.03,.13,xs);\
+ float h=sqrt(tt*(2.-tt))*2.8*uD*(.1+.9*em);\
+ h+=(n2(p/uD*vec2(.010,.045)+vec2(uT*.22,-uT*.13))-.5)*1.1*uD*(1.+uV*2.5)+(n2(p/uD*vec2(.03,.09)-vec2(uT*.5,0.))-.5)*.8*uD;\
+ for(int i=0;i<8;i++){vec4 r=uRp[i];if(r.w>0.){float d=length(p-r.xy)/uD;float a=r.z;float fr=smoothstep(a*150.+14.,a*150.-6.,d);\
+  h+=r.w*uD*sin(d*.17-a*9.)*exp(-a*1.8)*exp(-d*.010)*fr;}}\
+ float ey=min(p.y,uR.y-p.y)/uD;h-=pow(max(0.,1.-ey/7.5),2.)*9.*uD;return h;}\
+vec3 env(vec3 r,float sx){float y=r.y,x=r.x;vec3 c=vec3(.010,.011,.014);\
+ c+=vec3(.92,.95,1.)*smoothstep(.05,.75,y)*1.15+vec3(1.)*smoothstep(.04,0.,abs(y-.42))*.8;\
+ c+=vec3(.55,.58,.64)*smoothstep(.05,.8,-x)*smoothstep(-.4,.2,y)*.7;\
+ c+=vec3(1.,.06,.09)*smoothstep(-.08,-.7,y)*1.25;\
+return c;}\
+void main(){vec2 p=gl_FragCoord.xy;float e=1.25*uD,rd,r2;float h=HF(p,rd);\
+ float hx=HF(p+vec2(e,0.),r2)-HF(p-vec2(e,0.),r2),hy=HF(p+vec2(0.,e),r2)-HF(p-vec2(0.,e),r2);\
+ vec3 N=normalize(vec3(-hx/(2.*e),-hy/(2.*e),1.));vec3 V=vec3(0.,0.,1.);vec3 R=reflect(-V,N);float sx=p.x/uR.x;\
+ float fr=.55+.45*pow(1.-N.z,1.5);vec3 c=env(R,sx)*fr;\
+ vec3 L=normalize(vec3((uM-p)/uR.x*1.2,.55));float sp=pow(max(0.,dot(N,normalize(L+V))),90.)*uOv;c+=vec3(1.)*sp*.9*clamp(h/(2.*uD),0.,1.);\
+ vec3 tint=mix(vec3(.93,.95,1.),vec3(1.,.16,.18),rd);float lift=clamp(h/(5.*uD),0.,1.);vec3 lc=(c+vec3(.16,.17,.19))*tint;c=mix(c,lc,lift);\
+ c+=vec3(1.,.1,.12)*rd*lift*.10;\
+ float ey=min(p.y,uR.y-p.y);float a=smoothstep(0.,1.5*uD,ey);gl_FragColor=vec4(c*a,a);}';
+LBG.add('Flüssigmetall','Schrift steigt als Chrom aus flüssigem Metall – Maus wirft Wellen',{cls:'lbY1',fs:FS,dpr:1.5,
+ frame:function(R,st,dt,W,H,d,r){acc+=dt;var inb=st.cy>r.top-10&&st.cy<r.bottom+10;
+  if(inb){var p=[(st.cx-r.left)*d,(r.bottom-st.cy)*d];if(!last||Math.hypot(p[0]-last[0],p[1]-last[1])>34*d){RP.push([p[0],p[1],0,acc<.6?.8:1.2]);last=p;acc=0}}
+  if(!inb)last=null;if(!inb&&acc>2.6){RP.push([W*(.15+Math.random()*.7),H*(.2+Math.random()*.6),0,.7]);acc=0}
+  RP.forEach(function(q){q[2]+=dt});RP=RP.filter(function(q){return q[2]<3.2}).slice(-8);var a=new Float32Array(32);RP.forEach(function(q,i){a.set(q,i*4)});
+  R.gl.uniform4fv(R.U('uRp'),a)}});
 })();
-/* 3 · Partikel-Schrift: die Schrift besteht aus tausenden Lichtpunkten (WebGL). Rechts setzen sie sich aus rotem Strom zusammen,
-   links zerfallen sie zu roter Glut; die Maus ist ein Kraftfeld, das sie wegdrückt. Scrollen = schneller. */
-(function(){var P=null;
-var VS='attribute vec2 h;attribute vec3 c;attribute vec2 r;uniform vec2 uR,uM;uniform float uOf,uSW,uCy,uT,uV,uOv,uD,uSH;varying vec3 vC;varying float vA;\
-void main(){float x=mod(h.x-uOf,uSW)-60.*uD;float y=uCy+(h.y-uSH*.5);float e=x/uR.x;\
-float kin=1.-smoothstep(.80,.97,e);float kout=smoothstep(.0,.15,e);float k=1.-min(kin,kout);float L=e<.5?1.:0.;\
-vec2 off=vec2((r.x-.5)*(L>.5?-160.:140.)-(L>.5?60.:-90.)*k,(r.y-.5)*110.)*uD*k*k+vec2(sin(uT*2.+r.x*40.),cos(uT*1.7+r.y*30.))*7.*uD*k;\
-vec2 p=vec2(x,y)+off;vec2 d=p-uM;float dl=length(d)/uD;float f=max(0.,1.-dl/120.);p+=normalize(d+.001)*f*f*44.*uD*uOv;\
-vC=mix(c,vec3(1.,.12,.16),smoothstep(.08,.3,k+f*uOv*.9));vA=1.-k*k*.85;\
-gl_PointSize=uD*(1.75+k*1.4+f*uOv*.8);gl_Position=vec4(p.x/uR.x*2.-1.,1.-p.y/uR.y*2.,0.,1.);}';
-var FS='precision mediump float;varying vec3 vC;varying float vA;void main(){float d=length(gl_PointCoord-.5);float a=smoothstep(.5,.32,d)*vA;gl_FragColor=vec4(vC*a,a);}';
-function strip(txt,fs,need){var items=txt.split('|'),c=document.createElement('canvas'),x=c.getContext('2d'),F='600 '+fs+'px Outfit,ui-sans-serif,system-ui,sans-serif',ls=fs*.2,H=Math.ceil(fs*1.6);
- function runs(it){var o=[];it.toUpperCase().replace(/I:SY/g,'i:SY').split(/(★|300\+)/).forEach(function(p){if(p)o.push([p,p==='★'||p==='300+'?'#FF2A36':'#F2F3F5'])});return o}
- x.font=F;function tw(s){return x.measureText(s).width+ls*s.length}
- var seq=[],W=0;while(W<need){items.forEach(function(it){var r=runs(it);r.forEach(function(q){W+=tw(q[0])});W+=fs*3.2;seq.push(r)})}
- c.width=Math.ceil(W);c.height=H;x.font=F;x.textBaseline='middle';var X=0;
- seq.forEach(function(r){r.forEach(function(q){x.fillStyle=q[1];for(var i=0;i<q[0].length;i++){x.fillText(q[0][i],X,H/2);X+=x.measureText(q[0][i]).width+ls}});
-  x.fillStyle='#FF2A36';x.fillRect(X+fs*1.6-fs*.5,H/2-1,fs,2);X+=fs*3.2});return {c:c,w:W,h:H}}
-function build(bt){var cv=document.createElement('canvas');cv.className='lbP';cv.setAttribute('aria-hidden','true');bt.appendChild(cv);
- var gl=cv.getContext('webgl',{antialias:false,premultipliedAlpha:true,alpha:true});if(!gl){cv.remove();return null}
- function s(t,x){var o=gl.createShader(t);gl.shaderSource(o,x);gl.compileShader(o);if(!gl.getShaderParameter(o,gl.COMPILE_STATUS))throw gl.getShaderInfoLog(o);return o}
- var p=gl.createProgram();gl.attachShader(p,s(gl.VERTEX_SHADER,VS));gl.attachShader(p,s(gl.FRAGMENT_SHADER,FS));gl.linkProgram(p);gl.useProgram(p);
- var U={};['uR','uM','uOf','uSW','uCy','uT','uV','uOv','uD','uSH'].forEach(function(k){U[k]=gl.getUniformLocation(p,k)});
- gl.enable(gl.BLEND);gl.blendFunc(gl.ONE,gl.ONE_MINUS_SRC_ALPHA);return {cv:cv,gl:gl,p:p,U:U,n:0,src:'',off:0,ov:0,buf:gl.createBuffer()}}
-function fill(P,txt,d,need){var gl=P.gl,mob=need<900*d,fs=Math.round((mob?14:21)*d*1.1),S=strip(txt,fs,need+400*d),x=S.c.getContext('2d'),im=x.getImageData(0,0,S.c.width,S.c.height).data,st=Math.max(1,Math.round(.85*d)),a=[];
- for(var y=0;y<S.h;y+=st)for(var X=0;X<S.c.width;X+=st){var i=(y*S.c.width+X)*4;if(im[i+3]>110)a.push(X,y,im[i]/255,im[i+1]/255,im[i+2]/255,Math.random(),Math.random())}
- gl.bindBuffer(gl.ARRAY_BUFFER,P.buf);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(a),gl.STATIC_DRAW);var B=28;
- [['h',2,0],['c',3,8],['r',2,20]].forEach(function(q){var l=gl.getAttribLocation(P.p,q[0]);gl.enableVertexAttribArray(l);gl.vertexAttribPointer(l,q[1],gl.FLOAT,false,B,q[2])});
- P.n=a.length/7;P.sw=S.w;P.sh=S.h}
-LBV.push({name:'Partikel-Schrift',info:'Schrift aus tausenden Lichtpunkten, Maus = Kraftfeld, Zerfall in rote Glut',
- on:function(bt){if(!P){try{P=build(bt)}catch(e){console.error('lbP',e)}}if(P){P.cv.style.display='';P.src=''}},
- off:function(){if(P)P.cv.style.display='none'},
- tick:function(st,dt){if(!P)return;var gl=P.gl,U=P.U,r=P.cv.getBoundingClientRect(),d=Math.min(2,devicePixelRatio||1),W=Math.round(r.width*d),H=Math.round(r.height*d);if(!W)return;
-  if(P.cv.width!==W||P.cv.height!==H){P.cv.width=W;P.cv.height=H;gl.viewport(0,0,W,H);P.src=''}
-  var txt=st.bt.querySelector('.band.a>.tk').dataset.t||'',key=txt+W;if(key!==P.src&&document.fonts&&document.fonts.check('600 20px Outfit')){P.src=key;fill(P,txt,d,W)}if(!P.n)return;
-  var inb=st.cy>r.top&&st.cy<r.bottom;P.ov+=((inb?1:0)-P.ov)*Math.min(1,dt*5);P.off=(P.off+dt*(W<900*d?60:95)*d*(1+st.v*1.8))%P.sw;
-  gl.clearColor(0,0,0,0);gl.clear(gl.COLOR_BUFFER_BIT);gl.uniform2f(U.uR,W,H);gl.uniform2f(U.uM,(st.cx-r.left)*d,(st.cy-r.top)*d);gl.uniform1f(U.uOf,P.off);gl.uniform1f(U.uSW,P.sw);
-  gl.uniform1f(U.uCy,H/2);gl.uniform1f(U.uT,st.T);gl.uniform1f(U.uV,st.v);gl.uniform1f(U.uOv,P.ov);gl.uniform1f(U.uD,d);gl.uniform1f(U.uSH,P.sh);gl.drawArrays(gl.POINTS,0,P.n)}});
+/* 2 · Hyperloop-Glasröhre: eine massive Glasröhre über die ganze Breite. Sie bricht den echten Herbst-Hintergrund dahinter
+   (Bild steht Kopf wie in einem Glasstab, mit Farbzerlegung an den Rändern). Im Vakuum-Kern schwebt die Schrift auf einem
+   gewölbten Innenzylinder; rote Licht-Kapseln rasen durch die Röhre und beleuchten die Buchstaben. Maus = Flüssig-Linse. */
+(function(){var IM=null,IT=null,IOK=false;
+var FS='precision highp float;uniform vec2 uR,uM;uniform float uS,uO,uT,uV,uOv,uD;uniform sampler2D uBg;uniform vec4 uCv,uBx;uniform float uBk;\n'+LBG.GLSL+'\
+vec3 bg(vec2 s){vec2 u=(s-uCv.xy)/uCv.zw;return texture2D(uBg,clamp(u,.001,.999)).rgb;}\
+void main(){vec2 p=gl_FragCoord.xy;float yy=(p.y-uR.y*.5)/(uR.y*.5);float ay=abs(yy);if(ay>=1.){gl_FragColor=vec4(0.);return;}\
+ float nz=sqrt(1.-yy*yy);float sx=p.x/uR.x;vec2 sc=vec2(uBx.x+p.x/uD,uBx.y+uBx.w*.5);float hc=uBx.w;\
+ vec3 col;float k=1.55+.25*nz;\
+ col.r=bg(sc+vec2(0.,yy*hc*k*1.04)).r;col.g=bg(sc+vec2(0.,yy*hc*k)).g;col.b=bg(sc+vec2(0.,yy*hc*k*.96)).b;\
+ col=mix(col,vec3(dot(col,vec3(.3,.5,.2))),.35);\
+ float core=smoothstep(.86,.80,ay);col*=mix(.62,.20,core);col+=vec3(.010,.010,.014);\
+ float pl=0.,pc=0.;for(int i=0;i<4;i++){float fi=float(i);float sp=.42+fi*.13+uV*.6;float c=fract(-uT*sp*.5+fi*.29)*1.5-.25;float d=sx-c;\
+  float hd=exp(-d*d*2600.);float tl=d>0.?exp(-d*7.):0.;float w=hd*1.2+tl*.55;pl+=w*exp(-yy*yy*9.);pc+=w*exp(-pow((ay-.9)/.05,2.))*.6;}\
+ float yi=clamp(yy/.80,-1.,1.);float ty=asin(yi)*.80*uR.y*.5;vec2 q=vec2((p.x+uO)*uS,-ty*uS);\
+ vec2 m=uM;float g=exp(-pow(length((p-m)/uD)/62.,2.))*uOv;q.x=((m.x+uO)*uS)+(q.x-(m.x+uO)*uS)/(1.+.75*g);q.y/=(1.+.75*g);\
+ vec2 t=tx(q);float px=uS/(1.+.75*g);float f=clamp(.5-t.x/(px*1.15),0.,1.)*core;float gl=exp(-max(t.x,0.)/5.)*core;\
+ float sh=.62+.38*pow(nz,.7);vec3 tc=mix(vec3(.97,.98,1.),vec3(1.,.14,.17),t.y)*sh;\
+ col+=vec3(1.,.08,.1)*gl*(.10+pl*.9)*(1.-f);col=mix(col,tc+vec3(1.,.25,.25)*pl*.55,f);\
+ col+=vec3(1.,.09,.11)*pl*.55*(1.-f)+vec3(1.,.75,.75)*pow(pl,3.)*.25+vec3(1.,.1,.12)*pc;\
+ col+=vec3(1.)*exp(-pow((yy-.60)/.045,2.))*(.55+.25*sin(sx*9.-uT*.7))+vec3(1.)*exp(-pow((yy-.86)/.03,2.))*.35;\
+ col+=vec3(.85,.9,1.)*exp(-pow((yy+.66)/.06,2.))*.12+vec3(1.,.08,.1)*exp(-pow((yy+.93)/.035,2.))*.9;\
+ col+=vec3(1.,.9,.9)*g*.10+vec3(1.)*pow(max(0.,1.-length((p-m-vec2(-14.,16.)*uD)/uD)/9.),2.)*uOv*.8*smoothstep(.95,.7,ay);\
+ col*=mix(1.,.35,smoothstep(.93,1.,ay));float a=smoothstep(1.,.965,ay);gl_FragColor=vec4(col*a,a);}';
+LBG.add('Hyperloop-Glasröhre','Echte Lichtbrechung des Hintergrunds, rote Licht-Kapseln, Maus = Flüssig-Linse',{cls:'lbY2',fs:FS,dpr:1.5,
+ init:function(R){var gl=R.gl;IT=gl.createTexture();gl.activeTexture(gl.TEXTURE1);gl.bindTexture(gl.TEXTURE_2D,IT);
+  gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,1,1,0,gl.RGBA,gl.UNSIGNED_BYTE,new Uint8Array([70,50,40,255]));
+  [gl.TEXTURE_MIN_FILTER,gl.TEXTURE_MAG_FILTER].forEach(function(p){gl.texParameteri(gl.TEXTURE_2D,p,gl.LINEAR)});
+  [gl.TEXTURE_WRAP_S,gl.TEXTURE_WRAP_T].forEach(function(p){gl.texParameteri(gl.TEXTURE_2D,p,gl.CLAMP_TO_EDGE)});
+  IM=new Image();IM.onload=function(){gl.activeTexture(gl.TEXTURE1);gl.bindTexture(gl.TEXTURE_2D,IT);gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE,IM);IOK=true};
+  IM.src=(window.HG12_BASE||'img/hg12/')+(window.HG12_MODE||'herbst')+'-1400.webp'},
+ frame:function(R,st,dt,W,H,d,r){var gl=R.gl,U=R.U,vw=innerWidth,vh=innerHeight,iw=IOK?IM.naturalWidth:16,ih=IOK?IM.naturalHeight:9,s=Math.max(vw/iw,vh/ih);
+  gl.activeTexture(gl.TEXTURE1);gl.bindTexture(gl.TEXTURE_2D,IT);gl.uniform1i(U('uBg'),1);
+  gl.uniform4f(U('uCv'),(vw-iw*s)*.5,(vh-ih*s)*.55,iw*s,ih*s);gl.uniform4f(U('uBx'),r.left,r.top,r.width,r.height)}});
+})();
+/* 3 · 3D-Titan-Lettern: jeder Buchstabe ist ein massiver 3D-Körper (aus dem Distanzfeld extrudiert, Raymarching pro Pixel).
+   Torsionswellen laufen durch das Band und drehen die Schrift einmal komplett um die eigene Achse – dabei sieht man die
+   rot glühenden Flanken. Front satiniertes Titan mit Licht, Schatten und Spiegelung. Maus = Buchstaben neigen sich zum Zeiger. */
+(function(){
+var FS='precision highp float;uniform vec2 uR,uM;uniform float uS,uO,uT,uV,uOv,uD;\n'+LBG.GLSL+'\
+const float DZ=6.5;\
+float ang(float x){float sx=x/uR.x,a=0.;for(int i=0;i<2;i++){float fi=float(i);float c=fract(uT*(.075+fi*.031)*(1.+uV*.8)+fi*.5)*1.6-.3;\
+ a+=6.2831853*smoothstep(c-.07,c+.07,sx)*(fi<.5?1.:-1.);}\
+ float dm=(x-uM.x)/uD;a+=uOv*1.05*exp(-dm*dm/9000.)*sign(dm+.001)*min(1.,abs(dm)/40.);return a;}\
+float sdf(vec3 p,float a,out vec3 o){float c=cos(a),s=sin(a);o=vec3(p.x,c*p.y+s*p.z,-s*p.y+c*p.z);\
+ float d2=tx(o.xy).x;float dz=abs(o.z)-DZ;return min(max(d2,dz),0.)+length(max(vec2(d2,dz),0.))-.6;}\
+void main(){vec2 p=gl_FragCoord.xy;float a=ang(p.x);float qx=(p.x+uO)*uS,qy=(p.y-uR.y*.5)*uS;\
+ float yy=(p.y-uR.y*.5)/(uR.y*.5);float ay=abs(yy);\
+ vec3 bgc=vec3(.016,.016,.02)+vec3(.03,.03,.036)*(1.-ay);bgc+=vec3(1.,.07,.1)*exp(-pow((ay-.985)/.012,2.))*1.1;\
+ bgc+=vec3(1.,.08,.1)*exp(-pow(yy/.05,2.))*.025;\
+ vec2 tb=tx(vec2(qx,-qy));bgc+=vec3(1.,.08,.1)*exp(-max(tb.x,0.)/7.)*.10*(.4+.6*abs(sin(a)));\
+ vec3 col=bgc;float hit=0.;\
+ if(abs(qy)<uSP+DZ+22.){vec3 ro=vec3(qx,-qy,30.),rd=vec3(0.,0.,-1.);float z=0.;vec3 o;float m=1e3;\
+  for(int i=0;i<56;i++){vec3 q=ro+rd*z;float d=sdf(q,a,o);m=min(m,d);if(d<.08){hit=1.;break;}z+=max(d*.72,.05);if(z>60.)break;}\
+  if(hit>0.){vec3 q=ro+rd*z;vec2 e=vec2(.35,0.);vec3 o1;float d0=sdf(q,a,o);\
+   vec3 n=normalize(vec3(sdf(q+e.xyy,a,o1)-sdf(q-e.xyy,a,o1),sdf(q+e.yxy,a,o1)-sdf(q-e.yxy,a,o1),sdf(q+e.yyx,a,o1)-sdf(q-e.yyx,a,o1)));\
+   float c=cos(a),s=sin(a);vec3 nl=vec3(n.x,c*n.y+s*n.z,-s*n.y+c*n.z);float side=1.-smoothstep(.55,.85,abs(nl.z));\
+   vec3 L=normalize(vec3(-.35,-.75,.6));vec3 H=normalize(L+vec3(0.,0.,1.));float df=max(0.,dot(n,L));float sp=pow(max(0.,dot(n,H)),48.);\
+   vec3 ml=normalize(vec3(vec2(uM.x-p.x,p.y-uM.y)/uD*.012,.9));float msp=pow(max(0.,dot(n,normalize(ml+vec3(0.,0.,1.)))),70.)*uOv;\
+   float red=tx(o.xy).y;vec3 base=mix(vec3(.92,.94,.98),vec3(1.,.13,.16),red);\
+   float br=.82+.18*sin(o.x*1.9+o.y*.3);vec3 face=base*(.55+.5*df)*br+vec3(1.)*sp*.75+vec3(1.,.8,.8)*msp*.9;\
+   face+=vec3(.6,.65,.75)*pow(max(0.,-n.y),3.)*.25;\
+   float ed=smoothstep(-.9,-.1,d0);vec3 flank=vec3(1.,.07,.09)*(.65+.55*df)+vec3(1.,.55,.5)*sp*.6;\
+   col=mix(face,flank,side);col+=vec3(1.,.1,.12)*side*.25;col*=.9+.1*ed;}\
+  else col+=vec3(1.,.07,.1)*exp(-m*.35)*.22;}\
+ float al=smoothstep(1.,.975,ay);gl_FragColor=vec4(col*al,al);}';
+LBG.add('3D-Titan-Lettern','Echte 3D-Buchstaben (Raymarching), Torsionswellen, rot glühende Flanken',{cls:'lbY3',fs:FS,dpr:1.25});
 })();
 LBV_START();
 </script>
