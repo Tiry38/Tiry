@@ -61,17 +61,22 @@ void main(){
   float rb=abs(uDf)*.0024*smoothstep(.10,.55,abs(d-fd))*(1.-sky);if(uDf<0.)rb*=smoothstep(fd,fd+.08,d);
   if(rb>.0002){vec3 acc=base;float ga=2.39996;for(int i=0;i<10;i++){float fi=float(i)+.5;float rr2=sqrt(fi/10.)*rb;vec2 off=vec2(cos(fi*ga),sin(fi*ga))*rr2*vec2(1.,iA);acc+=P(q+off);}base=acc/11.;}}
  vec3 col=mix(base,mix(P(s1),P(s2),1.-wv),ok);
- /* Herbstallee (Tiry 22.11.2026): Scrollen = Fahrt die Straße entlang – Asphalt + Mittellinie strömen perspektivisch heran,
-    schnelles Scrollen = Bewegungsunschärfe; nur auf der nahen Straße bis vor die Kuppe */
- if(uLd>.5&&q.y<.40&&uS>.001){float vx=.497,n0=(.6164-q.y)*1.647,z0=1./max(n0,.05);
-  float rm=(1.-smoothstep(.31,.372,q.y))*smoothstep(.001,.06,uS);
-  float drv=uS*1.6,g1=fract(drv),g2=fract(drv+.5),w1=1.-abs(2.*g1-1.),L=.62;
-  vec3 a1=vec3(0.),a2=vec3(0.);
-  for(int i=0;i<4;i++){float bl=float(i)*.045*uV;
-   float z1=z0+g1*L+bl,z2=z0+g2*L+bl;
-   a1+=P(vec2(vx+(q.x-vx)*z0/z1,.6164-1./(1.647*z1)));a2+=P(vec2(vx+(q.x-vx)*z0/z2,.6164-1./(1.647*z2)));}
-  vec3 rc=mix(a2,a1,w1)*.25;
-  col=mix(col,rc,rm);}
+ /* Herbstallee (Tiry 22.11.2026): Scrollen = die Straße wird nass – Pfützen bilden sich von hinten nach vorne,
+    darin spiegeln sich die goldenen Bäume und das Licht, leicht gekräuselt. Das Foto selbst wird nicht verschoben. */
+ if(uLd>.5&&q.y<.39&&uS>.001){float vx=.497,n0=max((.6164-q.y)*1.647,.05),z0=1./n0,xw=(q.x-vx)*z0;
+  float wet=clamp(uS/1.6,0.,1.);
+  float far=(q.y)/.385;
+  float wm=smoothstep(0.,.35,wet*1.35-(1.-far)*.9)*(1.-smoothstep(.372,.388,q.y));
+  float pn=fbm(vec2(xw*2.6,z0*1.9))*.7+fbm(vec2(xw*7.,z0*5.5))*.3;
+  float pud=smoothstep(.62-.22*wet,.70-.22*wet,pn);
+  float rip=sin(z0*38.-uT*2.2+fbm(vec2(xw*4.,z0*3.)+uT*.05)*6.)*.0016*(.4+.6*n0);
+  vec2 rq=vec2(q.x+rip,.385+(.385-q.y)*1.05+rip*.6);
+  vec3 rf=P(clamp(rq,.003,.997));
+  float fres=.35+.45*(1.-n0);
+  col*=1.-.22*wm;
+  col=mix(col,rf*vec3(.86,.84,.82),wm*pud*fres);
+  col=mix(col,rf,wm*(1.-pud)*.07);
+  float gl=pow(max(0.,nz(vec2(xw*60.,z0*80.+uT*.4))-.55)*2.2,6.);col+=vec3(1.,.93,.8)*gl*wm*pud*.5;}
  /* Wolkenschatten: ziehen mit dem Wind übers Gelände (nicht im Himmel) */
  if(uCs>0.){float cs2=fbm(vec2(q.x*2.4-uT*.022,q.y*5.5+uT*.004));col*=1.-uCs*smoothstep(.48,.66,cs2)*(1.-sky)*(.55+.45*(1.-d));}
  /* Wasser stürzt/rollt abwärts (Wasserfall, Bach, Brandung): zwei Phasen, nur innerhalb der Wasser-Maske */
