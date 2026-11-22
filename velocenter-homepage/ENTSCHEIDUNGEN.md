@@ -484,3 +484,10 @@
 - Vorschau „Landschaften 3“ ist jetzt die echte Homepage (Startseite + alle Unterseiten): hg12-Hintergrund mit Herbstallee als Standard (Weinberg/Hochland über den Umschalter „Hintergrund 1/2/3“), nasse Straße beim Scrollen, Laub folgt dem Scrollen, kein Klick-Ring, kein Scan, Showroom-Verwandlung mit Blättern, Handy-Kopf (Öffnungsstatus, A+, roter Burger) und Laufband auf dem Handy.
 - Fest im Bau: `tools/live_bauen.py` ruft nach `plus_design()` `entwurf-modern/hintergrund12/live_hg12.py` auf. Quellen: `hg12.js`, `hg12.css`, `vmorph-laub.js` (ersetzt den vMorphJs-Block, Hash-Prüfung bricht ab, wenn sich der Block im Prototyp ändert), `hgmob.css`; Bilder nach `img/hg12/`.
 - **Korrektur Tiry 22.11.2026 („nur diese eine Vorlage Herbstallee … nicht dass man auf der richtigen Homepage die Vorlagen auswählen kann“):** Live gibt es NUR die Herbstallee, keinen Umschalter „Hintergrund 1/2/3“, kein Hinweis-Schild. `live_hg12.py` setzt `HG12_FEST='herbst'` (ignoriert `?hg=` und gespeicherte Wahl, lädt keine anderen Szenen), nur `herbst-*`-Bilder gehen live. Umschalter gibt es nur in den Vorschau-Seiten.
+
+## Laufband oben – 3 Vorlagen (Tiry 22.11.2026)
+- Wunsch: aktuelles Design, nur das Laufband oben neu, „2060“, Rot muss drin bleiben. Quelle `entwurf-modern/laufband/` (`bauen.py <live-index> <ziel>`), Vorschauen `/vorschau-laufband-1..3/` (noindex, nicht verlinkt):
+  1. **Glas-Kapsel** – Flüssigglas-Schiene mit rotem Lichtleiter, rote Kristall-Trenner, Kippen zum Zeiger, darunter schmale Daten-Zeile.
+  2. **Mikro-LED-Wand** – Canvas-LED-Matrix auf schräger Glasplatte, rote Lichtkante, Zeiger-Lichtkegel, Klick = Lichtwelle, Nachzieh-Spur beim schnellen Scrollen.
+  3. **Rot-Metall** – die zwei gekreuzten Bänder als Körper (eloxiertes Rot mit Kante/Bürstung, Rauchglas dahinter), federn beim Scrollen, Lichtläufer am Zeiger, glühender Kreuzungspunkt.
+- Alle: Scroll-Tempo beschleunigt das Band (gemeinsam.js). Live bleibt unverändert bis Tiry eine wählt.

@@ -1,0 +1,51 @@
+/* Laufband 1 „Glas-Kapsel“: schwebende Flüssigglas-Schiene mit rotem Lichtleiter, darunter eine schmale Daten-Zeile */
+html.lb1 body .view[data-v="start"] .bands.top{height:clamp(112px,9.6vw,136px)!important;perspective:1400px;overflow:visible}
+html.lb1 body .view[data-v="start"] .bands.top .band{position:absolute;transform:none!important;border:0!important;background:none!important;padding:0!important;filter:none!important}
+html.lb1 .bands.top .lbvp{position:absolute;inset:0;display:flex;align-items:center;overflow:hidden;
+ -webkit-mask-image:linear-gradient(90deg,transparent,#000 5%,#000 95%,transparent);mask-image:linear-gradient(90deg,transparent,#000 5%,#000 95%,transparent)}
+html.lb1 .bands.top .lbvp .tk{align-items:center}
+/* Kapsel */
+html.lb1 body .view[data-v="start"] .bands.top .band.a{top:6px!important;left:clamp(12px,2.6vw,44px)!important;right:clamp(12px,2.6vw,44px)!important;height:clamp(60px,5.4vw,78px);border-radius:999px;overflow:hidden;
+ transform:rotateX(var(--rx,0deg)) rotateY(var(--ry,0deg)) translateZ(0)!important;transform-style:preserve-3d;
+ background:linear-gradient(180deg,rgba(255,255,255,.78),rgba(255,255,255,.34) 46%,rgba(250,236,238,.5))!important;
+ -webkit-backdrop-filter:blur(16px) saturate(1.7);backdrop-filter:blur(16px) saturate(1.7);
+ box-shadow:inset 0 1.5px 0 rgba(255,255,255,.95),inset 0 -1px 0 rgba(255,255,255,.5),inset 0 -18px 30px -14px rgba(226,35,45,.30),
+  0 0 0 1px rgba(255,255,255,.55),0 2px 0 1px rgba(160,20,40,.18),0 26px 50px -20px rgba(40,12,16,.55),0 14px 34px -10px rgba(226,35,45,.38)!important}
+/* Glanz, der über die Kapsel wandert */
+html.lb1 .bands.top .band.a::before{content:"";position:absolute;inset:0;z-index:2;pointer-events:none;border-radius:inherit;
+ background:linear-gradient(104deg,transparent 38%,rgba(255,255,255,.75) 47%,rgba(255,255,255,.15) 52%,transparent 60%) 0 0/260% 100% no-repeat;
+ mix-blend-mode:soft-light;animation:lb1Glanz 7.5s cubic-bezier(.6,0,.2,1) infinite}
+@keyframes lb1Glanz{0%,30%{background-position:120% 0}75%,100%{background-position:-60% 0}}
+/* roter Lichtleiter unten + Zeigerlicht */
+html.lb1 .bands.top .band.a::after{content:"";position:absolute;left:5%;right:5%;bottom:0;height:3px;z-index:3;pointer-events:none;border-radius:3px;
+ background:linear-gradient(90deg,transparent,#9F1239 8%,#E2232D 25%,#FF8A8F 40%,#FFF0F1 var(--px,50%),#FF8A8F 60%,#E2232D 75%,#9F1239 92%,transparent);
+ box-shadow:0 0 10px 1px rgba(226,35,45,.85),0 0 26px 4px rgba(226,35,45,.45);animation:lb1Puls 2.6s ease-in-out infinite}
+@keyframes lb1Puls{50%{opacity:.72;box-shadow:0 0 6px 0 rgba(226,35,45,.7),0 0 18px 2px rgba(226,35,45,.3)}}
+html.lb1 .bands.top .band.a .lbvp::after{content:"";position:absolute;inset:0;pointer-events:none;
+ background:radial-gradient(160px 90px at var(--px,50%) 110%,rgba(226,35,45,.22),transparent 70%)}
+/* Schrift in der Kapsel */
+html.lb1 body .view[data-v="start"] .bands.top .band.a span{color:#17181E!important;-webkit-text-stroke:0!important;font-size:clamp(20px,2.3vw,34px)!important;
+ text-shadow:0 1px 0 rgba(255,255,255,.7)!important;transform:skewX(calc(-9deg - var(--v,0)*3deg));transition:color .3s}
+html.lb1 .bands.top .band.a span:hover{color:#C8102E!important}
+html.lb1 .bands.top .band.a span b.tkn{color:transparent!important;background:linear-gradient(180deg,#FF4B55,#B3122B);-webkit-background-clip:text;background-clip:text;text-shadow:none!important}
+html.lb1 .bands.top .band.a span b.tko{color:#E85D00!important;text-shadow:none!important}
+html.lb1 .bands.top .band.a span b.tks{color:#F0A000!important;text-shadow:0 1px 0 rgba(255,255,255,.6)!important}
+html.lb1 .bands.top .band.a span b.tkb::after,html.lb1 .bands.top .band.a span b.tkg::after{box-shadow:0 0 0 1.5px rgba(226,35,45,.55),0 8px 18px -8px rgba(120,10,30,.6)!important}
+/* Trenner: roter Kristall */
+html.lb1 body .view[data-v="start"] .bands.top .band span em{font-size:0!important;padding:0!important;margin:0 clamp(16px,1.8vw,28px);display:inline-block;vertical-align:middle;width:clamp(9px,.8vw,12px);height:clamp(9px,.8vw,12px);
+ transform:rotate(45deg) skewX(9deg);border-radius:2px;background:linear-gradient(135deg,#FFB3B6,#E2232D 45%,#7E0D22);
+ box-shadow:0 0 0 1px rgba(255,255,255,.6),0 0 12px rgba(226,35,45,.75);text-shadow:none!important;animation:lb1Kr 2.4s ease-in-out infinite}
+@keyframes lb1Kr{50%{box-shadow:0 0 0 1px rgba(255,255,255,.6),0 0 20px 2px rgba(226,35,45,.95)}}
+/* Daten-Zeile */
+html.lb1 body .view[data-v="start"] .bands.top .band.b{top:calc(6px + clamp(60px,5.4vw,78px) + 12px)!important;left:22%!important;right:22%!important;height:26px;border-radius:999px;overflow:hidden;
+ background:linear-gradient(90deg,rgba(20,21,26,.55),rgba(20,21,26,.78) 50%,rgba(20,21,26,.55))!important;-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);
+ box-shadow:inset 0 1px 0 rgba(255,255,255,.16),0 10px 24px -12px rgba(0,0,0,.6)!important}
+html.lb1 body .view[data-v="start"] .bands.top .band.b span{font:700 11px/1 var(--display)!important;letter-spacing:.3em!important;color:rgba(236,237,242,.92)!important;-webkit-text-stroke:0!important;transform:none!important;text-transform:uppercase}
+html.lb1 body .view[data-v="start"] .bands.top .band.b span em{font-size:0!important;padding:0!important;display:inline-block;width:5px;height:5px;margin:0 18px 1px;border-radius:50%;background:#E2232D;box-shadow:0 0 8px #E2232D;vertical-align:middle;animation:none}
+@media (max-width:980px){
+ html.lb1 body .view[data-v="start"] .bands.top{height:96px!important;margin:6px 0 0!important}
+ html.lb1 body .view[data-v="start"] .bands.top .band.a{height:52px;top:4px!important;left:10px!important;right:10px!important}
+ html.lb1 body .view[data-v="start"] .bands.top .band.a span{font-size:18px!important}
+ html.lb1 body .view[data-v="start"] .bands.top .band.b{top:66px!important;left:8%!important;right:8%!important;height:22px}
+ html.lb1 body .view[data-v="start"] .bands.top .band.b span{font-size:9.5px!important;letter-spacing:.24em!important}
+}
