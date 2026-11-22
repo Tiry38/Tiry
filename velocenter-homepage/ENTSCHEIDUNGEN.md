@@ -424,3 +424,7 @@
 - Fotos frei (Pexels-Lizenz), Quellen in `entwurf-modern/hintergrund13/QUELLEN.md`.
 - Milchglas links: farbtreu, bei dunklen Fotos dichter (Schrift bleibt lesbar).
 - Vorschau (nicht verlinkt, noindex): https://tiry38.github.io/velo-center-web/vorschau-landschaften-4/ – Live-Seite unverändert.
+
+## 22.11.2026 – Vorschau-Seiten überleben jeden Lauf
+- Ursache des Fehlers: Der nächtliche Bilder-Agent räumt das Web-Repo leer und kopiert nur den frischen Bau hinein – alle `vorschau-landschaften*`-Ordner waren weg, die Adresse sprang über `404.html` auf www.velo-center.de.
+- Regel: Vorschau-Seiten liegen jetzt in `velocenter-homepage/live/vorschau/<name>/` und werden von `tools/live_bauen.py` mitgebaut. Neue Vorschau **immer dort ablegen**, nie nur ins Web-Repo.

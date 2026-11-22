@@ -247,6 +247,13 @@ def main():
             if os.path.isfile(q):
                 os.makedirs(os.path.join(ZIEL, n), exist_ok=True)
                 shutil.copy2(q, os.path.join(ZIEL, n, 'index.html'))
+    # Vorschau-Seiten für Tiry (live/vorschau/<name>/ -> /<name>/, nicht verlinkt, noindex). Müssen hier mitgebaut werden,
+    # sonst löscht sie der nächste Lauf (Bilder-Agent/Livegang räumt das Web-Repo vor dem Kopieren leer – so passiert am 22.11.2026).
+    vs = os.path.join(QUELLE, 'live', 'vorschau')
+    if os.path.isdir(vs):
+        for n in sorted(os.listdir(vs)):
+            if os.path.isfile(os.path.join(vs, n, 'index.html')) and not os.path.exists(os.path.join(ZIEL, n)):
+                shutil.copytree(os.path.join(vs, n), os.path.join(ZIEL, n))
     # Google-Bewertung: Abruf-Skript + GitHub-Lauf (google.json selbst schreibt nur der Lauf im Web-Repo)
     os.makedirs(os.path.join(ZIEL, '.github', 'workflows'), exist_ok=True)
     shutil.copy2(os.path.join(QUELLE, 'tools', 'google_bewertung.js'), os.path.join(ZIEL, '.github', 'google_bewertung.js'))
