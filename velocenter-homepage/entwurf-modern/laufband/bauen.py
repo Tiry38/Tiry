@@ -6,7 +6,7 @@ import os, re, sys
 D = os.path.dirname(os.path.abspath(__file__))
 src, ziel = sys.argv[1], sys.argv[2]
 rd = lambda n: open(os.path.join(D, n), encoding='utf-8').read()
-TEILE = ['v1-seide', 'v2-licht', 'v3-magnet']
+TEILE = ['w1-glas', 'w2-fokus', 'w3-tafel']
 s = open(src, encoding='utf-8').read()
 assert s.count('<meta name="robots" content="index,follow">') == 1
 s = s.replace('<meta name="robots" content="index,follow">', '<meta name="robots" content="noindex,nofollow">')

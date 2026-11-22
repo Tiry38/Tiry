@@ -1,0 +1,30 @@
+/* 3 · Präzisions-Tafel: gerade Anthrazit-Tafel wie eine Zeitnahme-Anzeige – oben schmale Info-Schiene, rote Trennschiene,
+   unten die Hauptzeile mit Positionsnummern; Zeiger hebt das Feld darunter mit roter Unterkante hervor. */
+html.lbv3 body .view[data-v="start"] .bands.top{height:clamp(104px,8.4vw,122px)!important;overflow:visible}
+html.lbv3 body .view[data-v="start"] .bands.top .band{left:0!important;right:0!important;border:0!important;transform:none!important}
+html.lbv3 body .view[data-v="start"] .bands.top .band.b{top:calc(50% - clamp(46px,3.8vw,56px))!important;height:28px;padding:0!important;display:flex;align-items:center;
+ background:linear-gradient(180deg,#16171B,#1E2025)!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.08)!important}
+html.lbv3 body .view[data-v="start"] .bands.top .band.b span{font:600 11px/1 var(--display)!important;letter-spacing:.32em!important;color:#9A9DA6!important;-webkit-text-stroke:0!important;transform:none!important}
+html.lbv3 body .view[data-v="start"] .bands.top .band.b span em{font-size:0!important;padding:0!important;display:inline-block;width:1px;height:12px;margin:0 22px;background:rgba(255,255,255,.18);vertical-align:middle}
+html.lbv3 body .view[data-v="start"] .bands.top .band.a{top:calc(50% - clamp(46px,3.8vw,56px) + 28px)!important;height:clamp(64px,5.2vw,76px);padding:0!important;display:flex;align-items:center;
+ background:
+  linear-gradient(180deg,rgba(255,255,255,.05),transparent 40%),
+  repeating-linear-gradient(90deg,rgba(255,255,255,.018) 0 1px,transparent 1px 4px),
+  linear-gradient(180deg,#2A2C32,#1F2126 60%,#191A1E)!important;
+ box-shadow:inset 0 3px 0 #E2232D,inset 0 4px 10px -2px rgba(226,35,45,.55),0 24px 44px -20px rgba(0,0,0,.6)!important}
+html.lbv3 body .view[data-v="start"] .bands.top .band.a span{position:relative;color:#F4F5F7!important;-webkit-text-stroke:0!important;font-size:clamp(22px,2.3vw,34px)!important;transform:none!important;
+ font-style:normal;letter-spacing:.01em!important;padding:0 clamp(26px,2.6vw,40px) 0 clamp(52px,4.6vw,66px)!important;text-shadow:none!important;transition:color .3s}
+html.lbv3 body .view[data-v="start"] .bands.top .band.a span::before{content:attr(data-n);position:absolute;left:clamp(16px,1.6vw,24px);top:50%;transform:translateY(-50%);
+ font:700 11px/1 var(--display);letter-spacing:.08em;color:#E2232D;padding:4px 5px;border:1px solid rgba(226,35,45,.6);border-radius:4px}
+html.lbv3 body .view[data-v="start"] .bands.top .band.a span::after{content:"";position:absolute;left:clamp(16px,1.6vw,24px);right:clamp(26px,2.6vw,40px);bottom:calc(-1 * clamp(18px,1.6vw,22px));height:2px;
+ background:#E2232D;box-shadow:0 0 10px rgba(226,35,45,.8);transform:scaleX(0);transform-origin:0 50%;transition:transform .45s cubic-bezier(.2,.8,.2,1)}
+html.lbv3 body .view[data-v="start"] .bands.top .band.a span:hover::after{transform:scaleX(1)}
+html.lbv3 body .view[data-v="start"] .bands.top .band.a span em{font-size:0!important;padding:0!important;display:inline-block;width:1px;height:28px;margin:0 0 0 clamp(26px,2.6vw,40px);background:linear-gradient(180deg,transparent,rgba(255,255,255,.22),transparent);vertical-align:middle;position:absolute;right:0;top:50%;transform:translateY(-50%)}
+html.lbv3 body .view[data-v="start"] .bands.top .band.a span b.tkn{color:#FF4B55!important;text-shadow:none!important}
+html.lbv3 body .view[data-v="start"] .bands.top .band.a::after{content:"";position:absolute;left:0;right:0;top:0;height:3px;z-index:2;pointer-events:none;
+ background:linear-gradient(90deg,transparent calc(var(--px,50%) - 160px),rgba(255,210,214,.95) var(--px,50%),transparent calc(var(--px,50%) + 160px))}
+@media (max-width:980px){html.lbv3 body .view[data-v="start"] .bands.top{height:88px!important}
+ html.lbv3 body .view[data-v="start"] .bands.top .band.b{top:4px!important;height:24px}
+ html.lbv3 body .view[data-v="start"] .bands.top .band.a{top:28px!important;height:54px}
+ html.lbv3 body .view[data-v="start"] .bands.top .band.a span{font-size:18px!important;padding:0 22px 0 48px!important}
+ html.lbv3 body .view[data-v="start"] .bands.top .band.b span{font-size:9.5px!important;letter-spacing:.24em!important}}
