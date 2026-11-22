@@ -97,11 +97,10 @@ void main(){
  float ray=pow(max(0.,nz(vec2(atan(sv.y,sv.x)*8.,uT*.05))*.6+.4*nz(vec2(atan(sv.y,sv.x)*21.,uT*.08+3.))-.25),2.);
  float pul=.85+.15*sin(uT*.6);
  col+=vec3(1.,.93,.84)*uSun.z*(exp(-sr*7.)*.35*pul+ray*exp(-sr*2.2)*.20*max(sky,fm*.6));
- /* Klick: rote Lichtwelle läuft durch die Tiefe + Ring am Klickpunkt */
+ /* Klick: rote Lichtwelle läuft durch die Tiefe (kein Ring am Mauszeiger, Tiry 22.11.2026) */
  float age=uT-uK.z;
  if(age<6.){float fr=1.05-age*.42;float wvv=exp(-pow((d-fr)*24.,2.))*exp(-age*.55)*(1.-smoothstep(.2,.6,sky));
-  float rg=abs(length((uv-uK.xy)*vec2(A,1.))-age*.55);float ring=smoothstep(.012,0.,rg)*exp(-age*1.2);
-  col=mix(col,RED,clamp(wvv*.85+ring*.8,0.,1.));col+=vec3(1.,.7,.7)*wvv*.15;}
+  col=mix(col,RED,clamp(wvv*.85,0.,1.));col+=vec3(1.,.7,.7)*wvv*.15;}
  /* Farbführung Rot/Grau/Weiß: Rosa/Lila raus, leicht entsättigt, klar */
  float lu=dot(col,vec3(.299,.587,.114));
  float pink=clamp(min(col.r,col.b)-col.g,0.,1.)*4.;col=mix(col,vec3(lu*1.02),clamp(pink,0.,.9));

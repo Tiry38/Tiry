@@ -461,3 +461,7 @@
 - **Pusteblumenweg:** schwebende Samen im Gegenlicht.
 - Quellen stehen in `entwurf-modern/hintergrund15/QUELLEN.md`.
 - **Liegt unter:** `vorschau-landschaften-6`. Die echte Homepage bleibt unverändert.
+
+## Kein Klick-Ring am Mauszeiger (22.11.2026, alle Hintergrund-Vorlagen)
+- **Tiry:** Der rote Ring direkt am Mauszeiger beim Klick fliegt raus. Die rote Lichtwelle, die beim Klick durch das Bild läuft, bleibt (Tiry: „sau cool“).
+- Betroffen: hintergrund5 (Speichenwand), 7, 9–15 und alle Vorschau-Seiten Landschaften 1–6. Nicht wieder einbauen.

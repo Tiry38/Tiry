@@ -45,7 +45,7 @@ var FS_RAD='#extension GL_OES_standard_derivatives : enable\n'+HEAD+
 ' float sh=cover(ws,sp,blur);col*=1.-.20*sh;'+
 ' float ao=cover(ws*.92,sp,.10)*.0;'+
 /* Klick-Welle auf der Wand */
-' float kt=uT-uK.z;vec2 kp=(vec2(uK.x*A,uK.y)-c)/sc;float kd=length(p-kp);col=mix(col,RED,step(0.,kt)*exp(-kt*.9)*smoothstep(.02,0.,abs(kd-kt*1.6))*.55);'+
+' /* Klick-Ring am Mauszeiger entfernt (Tiry 22.11.2026) */'+
 /* Rad */
 ' float dn=dot(rd,n);float t=dot(C,n)/dn;vec3 P=rd*t;vec2 w=vec2(dot(P-C,e1),dot(P-C,e2));float r=length(w);'+
 ' float pw=max(length(fwidth(w))*.75,.0008);float th0=atan(w.y,w.x);float th=th0+sp;vec2 wr=r*vec2(cos(th),sin(th));'+
