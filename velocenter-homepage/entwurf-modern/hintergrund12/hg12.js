@@ -23,7 +23,7 @@ var de=document.documentElement;
 var FSRC=`#extension GL_OES_standard_derivatives : enable
 precision highp float;
 uniform vec2 uR,uM,uFoc,uImg;uniform vec2 uTy,uWf;uniform float uFg,uSn,uSz,uLd,uDf,uGr,uCs,uDy,uNt;uniform vec3 uSc;uniform float uT,uS,uFl,uFp,uAm,uSp,uFade,uV;uniform vec3 uK,uSun,uPo;
-uniform sampler2D uP,uD,uE;
+uniform sampler2D uP,uD,uE,uMk;uniform vec3 uMo;
 const vec3 RED=vec3(.886,.137,.176);
 float h21(vec2 p){p=fract(p*vec2(123.34,456.21));p+=dot(p,p+45.32);return fract(p.x*p.y);}
 float nz(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);
@@ -148,7 +148,10 @@ void main(){
  /* Lesbarkeit links: Milchglas (wie die Seite) */
  float calm=mob?.50*smoothstep(.18,.55,uv.y):smoothstep(.62,.16,uv.x)*.74;
  /* farbtreu (Tiry 22.11.: links nicht mehr schwarz-weiss): Milchglas behaelt die Farben des Fotos, nur heller + flacher */
- vec3 fr=vec3(.95,.955,.962)*.76+col*.28;col=mix(col,fr,min(calm*1.08,.82));
+ vec3 fr=vec3(.95,.955,.962)*.76+col*.28;
+ /* Lesbarkeit überall (Tiry 22.11.2026: „Schriften schlecht lesbar“): Milchglas genau hinter dunkler Schrift, weich auslaufend – Foto bleibt dazwischen klar */
+ float tk=0.;if(uMo.z>.5){float dy=uMo.x+(1.-uv.y)*uMo.y;if(dy>0.&&dy<1.)tk=texture2D(uMk,vec2(uv.x,dy)).r;}
+ col=mix(col,fr,max(min(calm*1.08,.82),tk*.90));
  col*=1.-.10*pow(length(uv-vec2(.62,.5)),2.);
  col+=(h21(gl_FragCoord.xy+fract(uT))-.5)*.010;
  gl_FragColor=vec4(mix(vec3(.914,.922,.933),col,uFade),1.);}
@@ -160,7 +163,7 @@ var cv,gl,buf,pr,U={},W=0,H=0,dpr=1,raf,t0=performance.now(),M=[.5,.5],Mt=[.5,.5
 function sh(t,s){var o=gl.createShader(t);gl.shaderSource(o,s);gl.compileShader(o);if(!gl.getShaderParameter(o,gl.COMPILE_STATUS))throw new Error(gl.getShaderInfoLog(o));return o}
 function build(){pr=gl.createProgram();gl.attachShader(pr,sh(gl.VERTEX_SHADER,VQ));gl.attachShader(pr,sh(gl.FRAGMENT_SHADER,FSRC));gl.bindAttribLocation(pr,0,'a');gl.linkProgram(pr);
  if(!gl.getProgramParameter(pr,gl.LINK_STATUS))throw new Error(gl.getProgramInfoLog(pr));
- ['uFg','uSn','uSz','uSc','uLd','uDf','uGr','uCs','uDy','uNt','uTy','uWf','uR','uM','uFoc','uImg','uT','uS','uFl','uFp','uAm','uSp','uFade','uV','uK','uSun','uP','uD','uE','uPo'].forEach(function(n){U[n]=gl.getUniformLocation(pr,n)});
+ ['uFg','uSn','uSz','uSc','uLd','uDf','uGr','uCs','uDy','uNt','uTy','uWf','uR','uM','uFoc','uImg','uT','uS','uFl','uFp','uAm','uSp','uFade','uV','uK','uSun','uP','uD','uE','uPo','uMk','uMo'].forEach(function(n){U[n]=gl.getUniformLocation(pr,n)});
  buf=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,buf);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,3,-1,-1,3]),gl.STATIC_DRAW);gl.enableVertexAttribArray(0)}
 function tex(img){var t=gl.createTexture();gl.bindTexture(gl.TEXTURE_2D,t);gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL,true);
  gl.texImage2D(gl.TEXTURE_2D,0,gl.RGB,gl.RGB,gl.UNSIGNED_BYTE,img);
@@ -191,7 +194,43 @@ function frame(){raf=requestAnimationFrame(frame);var now=performance.now();if(T
  gl.uniform2f(U.uR,W,H);gl.uniform1f(U.uT,t);gl.uniform1f(U.uS,sc);gl.uniform2f(U.uM,M[0],M[1]);gl.uniform3f(U.uK,K[0],K[1],K[2]);
  gl.uniform2f(U.uImg,e.w,e.h);gl.uniform2f(U.uFoc,W/H<.9?c.fxm:c.fx,c.fy);gl.uniform1f(U.uFl,c.fl);gl.uniform2f(U.uWf,c.wf[0],c.wf[1]);gl.uniform1f(U.uFg,c.fg);gl.uniform1f(U.uSn,c.sn);var sc3=c.sc||[.98,.985,1];gl.uniform1f(U.uSz,c.sz||1);gl.uniform1f(U.uLd,c.ld||0);gl.uniform1f(U.uDf,c.df||0);gl.uniform1f(U.uGr,c.gr||0);gl.uniform1f(U.uCs,c.cs||0);gl.uniform1f(U.uDy,c.dy||0);gl.uniform1f(U.uNt,c.nt||0);gl.uniform3f(U.uSc,sc3[0],sc3[1],sc3[2]);gl.uniform2f(U.uTy,c.ty?c.ty[0]:0,c.ty?c.ty[1]:0);gl.uniform1f(U.uFp,c.fp);gl.uniform1f(U.uAm,c.am);gl.uniform1f(U.uSp,c.sp);
  var sx=c.sun[0],sy=c.sun[1],sz2=c.sun[2];if(c.dy){var tg=Math.max(0,Math.min(1,sc/2.6));sx=.18+.70*tg;sy=.62+.34*Math.sin(Math.PI*Math.min(1,tg*1.15));sz2=c.sun[2]*(1+1.4*tg)}if(c.nt)sz2*=Math.max(0,1-sc/1.2);gl.uniform3f(U.uSun,c.fl?1-sx:sx,sy,sz2);gl.uniform1f(U.uFade,fade*fade*(3-2*fade));gl.uniform1f(U.uV,VS);gl.uniform3f(U.uPo,Po[0],Po[1],Po[2]);
+ mkUse();
  gl.bindBuffer(gl.ARRAY_BUFFER,buf);gl.vertexAttribPointer(0,2,gl.FLOAT,false,0,0);gl.drawArrays(gl.TRIANGLES,0,3)}
+/* ---------- Milchglas-Maske hinter Text (Seiten-Koordinaten, einmal je Layout gerechnet, pro Bild nur verschoben) ---------- */
+var MK={c:null,t:null,h:1,w:1,on:0,tm:0,last:0};
+function mkSurf(el){var cs=getComputedStyle(el);if(cs.position==='fixed'||cs.display==='none'||cs.visibility==='hidden')return 1;
+ if(cs.backdropFilter&&cs.backdropFilter!=='none'||cs.webkitBackdropFilter&&cs.webkitBackdropFilter!=='none')return 1;
+ if(cs.backgroundImage&&cs.backgroundImage!=='none'&&!/^url\(/.test(cs.backgroundImage))return 1;
+ var m=cs.backgroundColor.match(/[\d.]+/g);return m&&(m.length<4||+m[3]>=.55)&&cs.backgroundColor!=='rgba(0, 0, 0, 0)'?1:0}
+function mkDark(el){var m=getComputedStyle(el).color.match(/[\d.]+/g);if(!m)return 0;var f=function(v){v/=255;return v<=.03928?v/12.92:Math.pow((v+.055)/1.055,2.4)};return .2126*f(+m[0])+.7152*f(+m[1])+.0722*f(+m[2])<.30}
+function mkBuild(){MK.tm=0;MK.last=performance.now();if(!gl)return;
+ var roots=[document.querySelector('main > section.view:not([hidden])')||document.querySelector('main'),document.querySelector('footer')].filter(Boolean);
+ var cw=cv.clientWidth||innerWidth,dh=Math.max(document.documentElement.scrollHeight,innerHeight),sy=scrollY,R=[];
+ roots.forEach(function(root){var tw=document.createTreeWalker(root,NodeFilter.SHOW_ELEMENT|NodeFilter.SHOW_TEXT,{acceptNode:function(n){
+   if(n.nodeType===1){var t=n.tagName;if(t==='SCRIPT'||t==='STYLE'||t==='svg'||t==='IMG'||t==='VIDEO'||t==='CANVAS'||t==='IFRAME'||n.hidden)return NodeFilter.FILTER_REJECT;
+    return n!==root&&mkSurf(n)?NodeFilter.FILTER_REJECT:NodeFilter.FILTER_SKIP}
+   return n.textContent.trim().length>1?NodeFilter.FILTER_ACCEPT:NodeFilter.FILTER_SKIP}}),n;
+  while(n=tw.nextNode()){var el=n.parentElement;if(!el||!mkDark(el))continue;var r=document.createRange();r.selectNodeContents(n);
+   var q=r.getClientRects();for(var i=0;i<q.length;i++){var a=q[i];if(a.width>1&&a.height>3)R.push([a.left,a.top+sy,a.width,a.height])}}});
+ var mx=Math.min(4096,gl.getParameter(gl.MAX_TEXTURE_SIZE)||4096),s=Math.max(cw/240,dh/mx),w=Math.ceil(cw/s),h=Math.ceil(dh/s);
+ var c=MK.c||(MK.c=document.createElement('canvas'));c.width=w;c.height=h;var x=c.getContext('2d');x.clearRect(0,0,w,h);x.fillStyle='#fff';
+ var px=24,py=16;R.forEach(function(a){x.fillRect((a[0]-px)/s,(a[1]-py)/s,(a[2]+2*px)/s,(a[3]+2*py)/s)});
+ /* weich auslaufen: zweimal verkleinern/vergrößern (geht in jedem Browser, auch ohne canvas-filter) */
+ var b=document.createElement('canvas'),k=4;b.width=Math.max(1,Math.ceil(w/k));b.height=Math.max(1,Math.ceil(h/k));var bx=b.getContext('2d');bx.imageSmoothingEnabled=true;
+ for(var j=0;j<2;j++){bx.clearRect(0,0,b.width,b.height);bx.drawImage(c,0,0,b.width,b.height);x.globalCompositeOperation='lighter';x.globalAlpha=.55;x.imageSmoothingEnabled=true;x.drawImage(b,0,0,w,h);x.globalAlpha=1;x.globalCompositeOperation='source-over'}
+ if(!MK.t)MK.t=gl.createTexture();gl.bindTexture(gl.TEXTURE_2D,MK.t);gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL,false);
+ gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE,c);
+ gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.LINEAR);
+ gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,gl.CLAMP_TO_EDGE);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE);
+ MK.h=h*s;MK.w=w*s;MK.on=1}
+function mkSoon(d){if(MK.tm)return;var wait=Math.max(d||400,1500-(performance.now()-MK.last));MK.tm=setTimeout(function(){(window.requestIdleCallback||setTimeout)(mkBuild)},wait)}
+function mkUse(){gl.activeTexture(gl.TEXTURE3);gl.bindTexture(gl.TEXTURE_2D,MK.t||null);gl.uniform1i(U.uMk,3);
+ var ch=cv.clientHeight||innerHeight;gl.uniform3f(U.uMo,scrollY/MK.h,ch/MK.h,MK.on&&MK.t?1:0)}
+function mkInit(){mkSoon(300);addEventListener('load',function(){mkSoon(200)});addEventListener('resize',function(){mkSoon(300)});
+ addEventListener('hashchange',function(){mkSoon(1200);setTimeout(function(){mkSoon(200)},2600)});
+ if(document.fonts&&document.fonts.ready)document.fonts.ready.then(function(){mkSoon(200)});
+ var mn=document.querySelector('main');if(mn){if(window.ResizeObserver)new ResizeObserver(function(){mkSoon(400)}).observe(mn);
+  new MutationObserver(function(){mkSoon(700)}).observe(mn,{childList:true,subtree:true,attributes:true,attributeFilter:['hidden','open']})}}
 function click(e){if(e.target&&e.target.closest&&e.target.closest('#ueSw'))return;K=[e.clientX/innerWidth,1-e.clientY/innerHeight,(performance.now()-t0)/1000]}
 function init(){cv=document.createElement('canvas');cv.id='hg';cv.setAttribute('aria-hidden','true');document.body.insertBefore(cv,document.body.firstChild);
  gl=cv.getContext('webgl',{antialias:false,alpha:false,premultipliedAlpha:false,powerPreference:'high-performance'});
@@ -202,9 +241,9 @@ function init(){cv=document.createElement('canvas');cv.id='hg';cv.setAttribute('
  /* Handy: Neigen = Blickwinkel */
  addEventListener('deviceorientation',function(e){if(e.gamma==null)return;Mt=[.5+Math.max(-1,Math.min(1,e.gamma/30))*.5,.5+Math.max(-1,Math.min(1,(e.beta-45)/30))*.5]},{passive:true});
  cv.addEventListener('webglcontextlost',function(e){e.preventDefault();cancelAnimationFrame(raf)});
- cv.addEventListener('webglcontextrestored',function(){TX={};shown='';try{build()}catch(err){return}load(mode);frame()});
+ cv.addEventListener('webglcontextrestored',function(){TX={};shown='';MK.t=null;MK.on=0;mkSoon(100);try{build()}catch(err){return}load(mode);frame()});
  addEventListener('hashchange',pose);addEventListener('popstate',pose);pose();Po=Pt.slice();Pv=[0,0,0];
- load(mode);frame();if(FEST)return;/* Live-Homepage: nur die Herbstallee, kein Umschalter (Tiry 22.11.2026) */sw();
+ load(mode);mkInit();frame();if(FEST)return;/* Live-Homepage: nur die Herbstallee, kein Umschalter (Tiry 22.11.2026) */sw();
  /* übrige Szenen leise vorladen */
  setTimeout(function(){MODES.forEach(function(m){load(m[0])})},4000)}
 
