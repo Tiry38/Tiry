@@ -6276,9 +6276,9 @@ const R0=.03,RW=.47,FL=.47,HOLO=[.13,.69,.93];/* Eisblau-Cyan der Hologramm-Zone
 const GLSL_KEY=`uniform sampler2D uN;uniform vec2 uCss;uniform float uK0,uK1;
 float kraw(vec2 p){return .6*(p.x/uCss.x)+.12*(1.-p.y/uCss.y)+.28*(.65*texture2D(uN,p/150.).r+.35*texture2D(uN,p/57.+vec2(.37,.71)).r);}
 float kn(vec2 p){return clamp((kraw(p)-uK0)/(uK1-uK0),0.,1.);}`;
-const VS_Q=`attribute vec2 aP;uniform vec4 uRect;uniform vec2 uRes;uniform float uDpr,uRefl;varying vec2 vU;varying vec2 vC;
+const VS_Q=`attribute vec2 aP;uniform vec4 uRect;uniform vec2 uRes,uO;uniform float uDpr,uRefl;varying vec2 vU;varying vec2 vC;
 void main(){vec2 c=uRect.xy+aP*uRect.zw;vU=aP;if(uRefl>.5){c.y=uRect.y+uRect.w+2.+aP.y*uRect.w;}vC=c;
-vec2 d=c*uDpr/uRes*2.-1.;gl_Position=vec4(d.x,-d.y,0.,1.);}`;
+vec2 d=(c+uO)*uDpr/uRes*2.-1.;gl_Position=vec4(d.x,-d.y,0.,1.);}`;
 const FS_Q=`precision highp float;${GLSL_KEY}
 uniform sampler2D uTex;uniform vec4 uRect;uniform float uT,uMode,uRefl,uGlowOn,uR0,uRW,uF,uLeaf;uniform vec3 uEdge,uHolo;varying vec2 vU;varying vec2 vC;
 void main(){vec2 uv=vU;vec2 p=vC;float m=1.;
@@ -6325,40 +6325,44 @@ void main(){vec2 q=abs(gl_PointCoord-.5);float r=mix(length(q),max(q.x,q.y),vSq)
  float rim=vSq*smoothstep(.30,.46,r);vec3 c=mix(vCol,vCol*.85,rim);
  c=mix(c,vec3(1.),.6*smoothstep(.24,.0,r)*vHot);gl_FragColor=vec4(c*a,a);}`;
 
-/* Herbstallee (Tiry 22.11.2026): Laub-Zauber statt Nano-Schwarm. Eine Windböe weht das alte Rad wie einen Laubhaufen davon (nach rechts, hoch, teils auf die Kamera zu),
-   das neue Rad weht mit demselben Wind von links herein und setzt sich sanft gleitend zusammen. Kein Ziehen zum Ziel, keine Wirbel: Flattern, Kippen, Trudeln wie echtes Laub.
-   Jedes Teilchen wird zweimal gezeichnet: als abfliegendes Blatt (uPh 0, Start am alten Pixel) und als ankommendes Blatt (uPh 1, Ziel am neuen Pixel), dazu ein weicher Schatten (uSh). */
+/* Herbstallee (Tiry 22.11.2026): Laub-Zauber statt Nano-Schwarm. Abbau und Neubau gleichzeitig: Entlang der wandernden Front lösen sich Blätter vom alten Rad,
+   steigen im Bogen mit dem Wind auf, flattern, kippen und trudeln – und sinken sanft gebremst genau an ihren Platz im neuen Rad. Der Showroom ist nie leer.
+   Dazu weht ein Teil des alten Laubs davon (uPh 1) – wie ein Laubhaufen im Wind, ohne Wirbel. Zeichenfläche größer als der Showroom (uO), Ränder blenden weich aus. */
 const VS_L=`attribute vec2 aA,aB,aK;attribute vec3 aCA,aCB;attribute float aR;
-uniform vec2 uRes;uniform float uDpr,uT,uPs,uR0,uRW,uF,uSW,uPh,uSh,uDs;
+uniform vec2 uRes,uO;uniform float uDpr,uT,uPs,uR0,uRW,uF,uSW,uPh,uSh,uDs;
 varying vec3 vC1,vC2;varying float vA,vAng,vFlip,vTy,vGl,vPx;
 float hs(float n){return fract(sin(n)*43758.5453);}
 vec3 pal(float h){return h<.17?vec3(.98,.80,.20):h<.33?vec3(.97,.58,.10):h<.49?vec3(.92,.38,.07):h<.64?vec3(.80,.13,.05):h<.76?vec3(.58,.15,.06):h<.88?vec3(.56,.60,.17):vec3(.54,.32,.12);}
-void main(){float r1=hs(aR*91.7),r2=hs(aR*57.3+1.),r3=hs(aR*13.1+2.),r4=hs(aR*71.9+3.),r5=hs(aR*33.3+4.);
- float t0=uR0+aK.x*uRW;float t1=max(uR0+aK.y*uRW+uF,t0+.12);
- bool dep=uPh<.5;float DD=.44,DA=.40;float s=dep?(uT-t0)/DD:(t1-uT)/DA;
- if(s<=0.||s>=1.){gl_Position=vec4(2.,2.,2.,1.);gl_PointSize=0.;vA=0.;return;}
- vec2 base=dep?aA:aB;vec3 pc=dep?aCA:aCB;float sg=dep?1.:-1.;
- float z=r3*2.-1.;
- float gu=.85+.30*sin(base.y/uSW*4.+base.x/uSW*1.5+r4*2.);
- float g=s*s*(1.5-.5*s);
- vec2 off=vec2(sg*(.62+.80*r1)*gu*(1.+.45*z),-(.14+.30*r2))*g*uSW;
- off.y+=uSW*.10*r5*s*s*s;
- float tau=s*(dep?DD:DA)*uDs;float ph=(1.5+1.5*r2)*6.2832*tau+aR*40.;
- float fa=uSW*(.016+.022*r4)*sin(3.1416*min(s*1.7,1.))*(dep?1.:min(1.,s*1.3));
- off+=normalize(vec2(.30,1.))*sin(ph)*fa;off.y-=abs(cos(ph))*fa*.45;
- float sc=1.+(z>0.?z*1.15:z*.45)*smoothstep(0.,.8,s);
- vec2 pos=base+off;if(uSh>.5)pos+=vec2(.030,.055)*uSW*smoothstep(0.,.45,s)*(1.+.6*max(z,0.)*s);
- vec2 c=pos*uDpr/uRes*2.-1.;gl_Position=vec4(c.x,-c.y,0.,1.);
+void main(){float r1=hs(aR*91.7),r2=hs(aR*57.3+1.),r3=hs(aR*13.1+2.),r4=hs(aR*71.9+3.),r5=hs(aR*33.3+4.),r6=hs(aR*7.7+5.);
+ float t0=uR0+aK.x*uRW;float t1=max(uR0+aK.y*uRW+uF,t0+.10);
+ bool fly=uPh>.5;float p,dur;
+ if(fly){if(r6>.20){gl_Position=vec4(2.,2.,2.,1.);gl_PointSize=0.;vA=0.;return;}dur=.40;p=(uT-t0)/dur;}else{dur=t1-t0;p=(uT-t0)/dur;}
+ if(p<=0.||p>=1.){gl_Position=vec4(2.,2.,2.,1.);gl_PointSize=0.;vA=0.;return;}
+ float z=r3*2.-1.;float bump=sin(3.1416*p);float tau=p*dur*uDs;
+ float ph=(1.4+1.4*r2)*6.2832*tau+aR*40.;
+ vec2 pos;float sc;
+ if(fly){float g=p*p*(1.5-.5*p);float gu=.85+.3*sin(aA.y/uSW*4.+aA.x/uSW*1.5+r4*2.);
+  pos=aA+vec2((.12+.30*r1)*gu*(1.+.45*z),-(.18+.30*r2))*g*uSW+vec2(0.,.10*r5*p*p*p)*uSW;
+  float fa=uSW*(.016+.022*r4)*sin(3.1416*min(p*1.7,1.));pos+=normalize(vec2(.3,1.))*sin(ph)*fa;pos.y-=abs(cos(ph))*fa*.45;
+  sc=1.+(z>0.?z*1.1:z*.45)*smoothstep(0.,.8,p);}
+ else{float e=p*p*p*(p*(p*6.-15.)+10.);
+  vec2 lift=vec2((.02+.08*r1)*(r4<.5?1.:-.6),-(.05+.11*r2))*uSW;
+  vec2 m=mix(aA,aB,.5)+lift;pos=mix(mix(aA,m,e),mix(m,aB,e),e);
+  float fa=uSW*(.010+.016*r4)*bump;pos+=normalize(vec2(.3,1.))*sin(ph)*fa;pos.y-=abs(cos(ph))*fa*.40;
+  sc=1.+(z>0.?z*.9:z*.35)*bump;}
+ if(uSh>.5)pos+=vec2(.028,.050)*uSW*(fly?smoothstep(0.,.45,p):bump)*(1.+.6*max(z,0.));
+ vec2 c=(pos+uO)*uDpr/uRes*2.-1.;gl_Position=vec4(c.x,-c.y,0.,1.);
  gl_PointSize=uPs*(.72+.62*r5)*sc*uDpr*(uSh>.5?1.15:1.);vPx=1./max(gl_PointSize,1.);
- bool tb=r4<.32;
- vAng=r1*6.2832+.75*cos(ph)+(tb?(r2-.5)*8.*tau*sg:(r2-.5)*1.6*tau);
+ bool tb=r4<.32;float env=fly?smoothstep(0.,.15,p):pow(bump,.6);
+ vAng=r1*6.2832+.75*cos(ph)*env+(tb?(r2-.5)*7.*tau:(r2-.5)*1.4*tau);
  float fl=tb?cos((2.2+3.*r5)*3.1416*tau+aR*9.):mix(.85,cos(ph*.5+aR*7.),.45+.35*r1);
- vFlip=mix(1.,fl,smoothstep(0.,.14,s));
- float am=smoothstep(0.,.20,s);vec3 a1=pal(r2),a2=pal(fract(r2+.17+.33*r5));
+ vFlip=mix(1.,fl,env);
+ float am=fly?smoothstep(0.,.20,p):smoothstep(0.,.20,p)*(1.-smoothstep(.80,1.,p));
+ vec3 pc=fly?aCA:mix(aCA,aCB,smoothstep(.45,.75,p));vec3 a1=pal(r2),a2=pal(fract(r2+.17+.33*r5));
  vC1=mix(pc,a1,am);vC2=mix(pc,a2,am);
- vec2 cssR=uRes/uDpr;vec2 ed=min(pos,cssR-pos)/(uSW*.10);
- vA=smoothstep(0.,.025,s)*(1.-smoothstep(.68,1.,s))*(uSh>.5?.11:1.)*clamp(min(ed.x,ed.y),0.,1.);
- vGl=exp(-s*13.)*(1.-uSh);vTy=uSh>.5?-1.:hs(aR*5.7+9.);}`;
+ vec2 cssR=uRes/uDpr;vec2 q=pos+uO;vec2 ed=min(q,cssR-q)/(uSW*.12);
+ vA=smoothstep(0.,.02,p)*(fly?1.-smoothstep(.62,1.,p):1.-smoothstep(.97,1.,p))*(uSh>.5?.11:1.)*clamp(min(ed.x,ed.y),0.,1.);
+ vGl=(fly?exp(-p*13.):exp(-p*14.)+exp(-(1.-p)*14.))*(1.-uSh);vTy=uSh>.5?-1.:hs(aR*5.7+9.);}`;
 const FS_L=`precision mediump float;varying vec3 vC1,vC2;varying float vA,vAng,vFlip,vTy,vGl,vPx;
 void main(){vec2 q0=gl_PointCoord-.5;q0.y=-q0.y;float cs=cos(vAng),sn=sin(vAng);vec2 q=vec2(cs*q0.x-sn*q0.y,sn*q0.x+cs*q0.y);
  float af=max(abs(vFlip),.10);q.x/=af;float r=length(q);float th=atan(q.x,q.y);float ty=vTy<0.?.5:vTy;float aa=1.8*vPx/af;
@@ -6420,28 +6424,30 @@ const hex=s=>{s=String(s||'').trim();const m=s.match(/^#?([0-9a-f]{6})$/i);if(m)
 /* ---- eine Ebene (Rad oder Logo) vorbereiten ---- */
 async function layer(root,cv,o,kind){const dpr=Math.min(2,devicePixelRatio||1),W=root.clientWidth,H=root.clientHeight;
  const [ia,ib,ra,rb]=await Promise.all([load(o.from),load(o.to),measure(o.tplA,o.from),measure(o.tplB,o.to)]);if(!ia||!ib)throw new Error('Bild');
- cv.width=Math.round(W*dpr);cv.height=Math.round(H*dpr);if(!cv._G)cv._G=mk(cv);const G=await cv._G;if(!G)throw new Error('WebGL');const chk=()=>{if(o.dead&&o.dead())throw new Error('abgelöst')};chk();
+ if(!cv._G)cv._G=mk(cv);const G=await cv._G;if(!G)throw new Error('WebGL');const lf0=window.HG12_MODE==='herbst'&&G.lf;let ox=0,oy=0,ox2=0,oy2=0;
+ if(lf0){const rr=root.getBoundingClientRect(),vw=document.documentElement.clientWidth;ox=Math.max(0,Math.min(W*.6,rr.left-4));ox2=Math.max(0,Math.min(W*.45,vw-rr.right-4));oy=H*.45;oy2=H*.30}
+ cv.width=Math.round((W+ox+ox2)*dpr);cv.height=Math.round((H+oy+oy2)*dpr);const chk=()=>{if(o.dead&&o.dead())throw new Error('abgelöst')};chk();
  const yl=()=>new Promise(r=>setTimeout(r,0)).then(chk);texUp(G,G.tex[0],raster(ia,ra,dpr));await yl();texUp(G,G.tex[1],raster(ib,rb,dpr));await yl();
- const lf=window.HG12_MODE==='herbst'&&G.lf?1:0;const area=Math.max(ra.w*ra.h,rb.w*rb.h);const N=lf?Math.round(Math.min(kind==='bike'?1500:560,Math.max(400,area/(kind==='bike'?140:190)))):Math.round(Math.min(kind==='bike'?28000:11000,Math.max(3000,area/(kind==='bike'?6:10))));
+ const lf=lf0?1:0;const area=Math.max(ra.w*ra.h,rb.w*rb.h);const N=lf?Math.round(Math.min(kind==='bike'?1800:650,Math.max(450,area/(kind==='bike'?115:160)))):Math.round(Math.min(kind==='bike'?28000:11000,Math.max(3000,area/(kind==='bike'?6:10))));
  const step=kind==='bike'?1.1:1.4;const A=points(ia,ra,step,N,W,H);await yl();const B=points(ib,rb,step,N,W,H);await yl();
  const dom=P=>{let r=0,g=0,b=0,t=0;for(const q of P){const mx=Math.max(q[2],q[3],q[4]),mn=Math.min(q[2],q[3],q[4]),w=(mx-mn)*(mx-mn)*mx;r+=q[2]*w;g+=q[3]*w;b+=q[4]*w;t+=w}if(t<.5)return[.62,.66,.72];const m=Math.max(r,g,b)/t;const k=Math.min(1.6,.85/Math.max(m,.05));return[r/t*k,g/t*k,b/t*k].map(v=>Math.min(1,v))};const dA=dom(A),dB=dom(B);
  let k0=Infinity,k1=-Infinity;for(const p of A){k0=Math.min(k0,p[5]);k1=Math.max(k1,p[5])}for(const p of B){k0=Math.min(k0,p[5]);k1=Math.max(k1,p[5])}if(k1-k0<.01)k1=k0+.01;
  const f=new Float32Array(N*13);for(let i=0;i<N;i++){const a=A[i],b=B[i],q=i*13;f[q]=a[0];f[q+1]=a[1];f[q+2]=b[0];f[q+3]=b[1];f[q+4]=(a[5]-k0)/(k1-k0);f[q+5]=(b[5]-k0)/(k1-k0);f[q+6]=a[2];f[q+7]=a[3];f[q+8]=a[4];f[q+9]=b[2];f[q+10]=b[3];f[q+11]=b[4];f[q+12]=Math.random()}
  const gl=G.gl;gl.bindBuffer(gl.ARRAY_BUFFER,G.pb);gl.bufferData(gl.ARRAY_BUFFER,f,gl.STATIC_DRAW);
- return{G,N,ra,rb,k0,k1,W,H,dpr,dA,dB,lf,sh:kind==='bike',ps:lf?Math.min(24,Math.max(12,Math.sqrt(area/N)*1.75)):kind==='bike'?1.3:1.6,glow:kind==='bike'?1:.7,refl:!!o.refl}}
+ return{G,N,ra,rb,k0,k1,W,H,dpr,dA,dB,lf,ox,oy,cw:W+ox+ox2,ch:H+oy+oy2,sh:kind==='bike',ps:lf?Math.min(24,Math.max(12,Math.sqrt(area/N)*1.75)):kind==='bike'?1.3:1.6,glow:kind==='bike'?1:.7,refl:!!o.refl}}
 function draw(L,T,glow){const{G,N,ra,rb,k0,k1,W,H,dpr}=L,gl=G.gl;gl.viewport(0,0,gl.canvas.width,gl.canvas.height);gl.clearColor(0,0,0,0);gl.clear(gl.COLOR_BUFFER_BIT);
  gl.enable(gl.BLEND);gl.blendFunc(gl.ONE,gl.ONE_MINUS_SRC_ALPHA);
  const Q=G.q;gl.useProgram(Q.p);gl.bindBuffer(gl.ARRAY_BUFFER,G.quad);gl.enableVertexAttribArray(Q.a.aP);gl.vertexAttribPointer(Q.a.aP,2,gl.FLOAT,false,0,0);
- gl.uniform2f(Q.u.uRes,gl.canvas.width,gl.canvas.height);gl.uniform1f(Q.u.uDpr,dpr);gl.uniform2f(Q.u.uCss,W,H);gl.uniform1f(Q.u.uK0,k0);gl.uniform1f(Q.u.uK1,k1);gl.uniform1f(Q.u.uT,T);
- gl.uniform1f(Q.u.uR0,R0);gl.uniform1f(Q.u.uRW,RW);gl.uniform1f(Q.u.uF,FL);gl.uniform1f(Q.u.uLeaf,L.lf);gl.uniform3fv(Q.u.uEdge,glow);gl.uniform3fv(Q.u.uHolo,HOLO);gl.uniform1f(Q.u.uGlowOn,L.glow);
+ gl.uniform2f(Q.u.uRes,gl.canvas.width,gl.canvas.height);gl.uniform2f(Q.u.uO,L.ox,L.oy);gl.uniform1f(Q.u.uDpr,dpr);gl.uniform2f(Q.u.uCss,W,H);gl.uniform1f(Q.u.uK0,k0);gl.uniform1f(Q.u.uK1,k1);gl.uniform1f(Q.u.uT,T);
+ gl.uniform1f(Q.u.uR0,R0);gl.uniform1f(Q.u.uRW,L.lf?.62:RW);gl.uniform1f(Q.u.uF,L.lf?.24:FL);gl.uniform1f(Q.u.uLeaf,L.lf);gl.uniform3fv(Q.u.uEdge,glow);gl.uniform3fv(Q.u.uHolo,HOLO);gl.uniform1f(Q.u.uGlowOn,L.glow);
  gl.activeTexture(gl.TEXTURE1);gl.bindTexture(gl.TEXTURE_2D,G.nt);gl.uniform1i(Q.u.uN,1);gl.activeTexture(gl.TEXTURE0);gl.uniform1i(Q.u.uTex,0);
  [[0,ra],[1,rb]].forEach(([m,r])=>{gl.bindTexture(gl.TEXTURE_2D,G.tex[m]);gl.uniform1f(Q.u.uMode,m);gl.uniform4f(Q.u.uRect,r.x,r.y,r.w,r.h);
   for(const rf of L.refl?[1,0]:[0]){gl.uniform1f(Q.u.uRefl,rf);gl.drawArrays(gl.TRIANGLE_STRIP,0,4)}});
  gl.disableVertexAttribArray(Q.a.aP);
  if(L.lf){const P=G.lf;gl.useProgram(P.p);gl.bindBuffer(gl.ARRAY_BUFFER,G.pb);const S=13*4,at=(n,sz,off)=>{if(P.a[n]==null||P.a[n]<0)return;gl.enableVertexAttribArray(P.a[n]);gl.vertexAttribPointer(P.a[n],sz,gl.FLOAT,false,S,off*4)};
   at('aA',2,0);at('aB',2,2);at('aK',2,4);at('aCA',3,6);at('aCB',3,9);at('aR',1,12);
-  gl.uniform2f(P.u.uRes,gl.canvas.width,gl.canvas.height);gl.uniform1f(P.u.uDpr,dpr);gl.uniform1f(P.u.uT,T);gl.uniform1f(P.u.uPs,L.ps);gl.uniform1f(P.u.uR0,R0);gl.uniform1f(P.u.uRW,RW);gl.uniform1f(P.u.uF,FL);
-  gl.uniform1f(P.u.uSW,Math.max(ra.w,rb.w));gl.uniform1f(P.u.uDs,VM.dur/1000);
+  gl.uniform2f(P.u.uRes,gl.canvas.width,gl.canvas.height);gl.uniform1f(P.u.uDpr,dpr);gl.uniform1f(P.u.uT,T);gl.uniform1f(P.u.uPs,L.ps);gl.uniform1f(P.u.uR0,R0);gl.uniform1f(P.u.uRW,.62);gl.uniform1f(P.u.uF,.24);
+  gl.uniform1f(P.u.uSW,Math.max(ra.w,rb.w));gl.uniform1f(P.u.uDs,VM.dur/1000);gl.uniform2f(P.u.uO,L.ox,L.oy);
   for(const [ph,sh] of L.sh?[[0,1],[1,1],[1,0],[0,0]]:[[1,0],[0,0]]){gl.uniform1f(P.u.uPh,ph);gl.uniform1f(P.u.uSh,sh);gl.drawArrays(gl.POINTS,0,N)}
   ['aA','aB','aK','aCA','aCB','aR'].forEach(n=>{if(P.a[n]!=null&&P.a[n]>=0)gl.disableVertexAttribArray(P.a[n])});return}
  const P=G.pt;gl.useProgram(P.p);gl.bindBuffer(gl.ARRAY_BUFFER,G.pb);const S=13*4,at=(n,sz,off)=>{gl.enableVertexAttribArray(P.a[n]);gl.vertexAttribPointer(P.a[n],sz,gl.FLOAT,false,S,off*4)};
@@ -6469,8 +6475,9 @@ VM.run=async function(o){const root=o.root,bk=o.bike,lg=o.logo;const bOld=bk.old
  try{let Lb,Ll;const prep=Promise.all([layer(root,cB,{from,to:bk.to,tplA:bOld,tplB:bNew,refl:(csB.webkitBoxReflect||'none')!=='none',dead},'bike'),
    layer(root,cL,{from:lFrom,to:lg.to,tplA:lg.el,tplB:lg.el,dead},'logo')]);prep.catch(()=>{});
   let tm;[Lb,Ll]=await Promise.race([prep,new Promise((_,rj)=>{tm=setTimeout(()=>{if(!dead())root._vmTok++;rj(new Error('Zeit'))},window.__vmSW?60000:5000)})]);clearTimeout(tm);
-  cB.style.cssText='position:absolute;left:0;top:0;width:100%;height:100%;pointer-events:none;filter:'+csB.filter;
-  cL.style.cssText='position:absolute;left:0;top:0;width:100%;height:100%;pointer-events:none;mix-blend-mode:'+csL.mixBlendMode+';filter:'+csL.filter+';opacity:'+op0;
+  const pos=L=>L.lf?'left:'+(-L.ox)+'px;top:'+(-L.oy)+'px;width:'+L.cw+'px;height:'+L.ch+'px':'left:0;top:0;width:100%;height:100%';
+  cB.style.cssText='position:absolute;'+pos(Lb)+';pointer-events:none;filter:'+csB.filter;
+  cL.style.cssText='position:absolute;'+pos(Ll)+';pointer-events:none;mix-blend-mode:'+csL.mixBlendMode+';filter:'+csL.filter+';opacity:'+op0;
   const ac=()=>hex(getComputedStyle(root.closest('.show')||root).getPropertyValue('--ac')||'#E2232D');let glow=[.886,.137,.176];try{glow=ac()}catch(_){}
   draw(Lb,0,glow);draw(Ll,0,glow);root.classList.add('vmrun');
   /* gleicher Takt: Zeichenfläche zeigt exakt das alte Bild, dann echte Bilder still ausblenden */

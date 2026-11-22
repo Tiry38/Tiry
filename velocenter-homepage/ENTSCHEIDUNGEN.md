@@ -442,8 +442,9 @@
   - Die erste Fassung aus Dreiecken war ihm zu schwach.
 - **Umsetzung:** eigenes Grafikprogramm `VS_L`/`FS_L` in `vMorphJs`.
   - **Formen:** Ahorn, Buche/Eiche, Birke, je mit Mittelrippe, Seitenadern, Stiel, Farbverlauf, Flecken und dunklerem, trockenem Rand. Die Rückseite ist matter, dazu kommt Glanz.
-  - **Ablauf:** Eine Windböe weht das alte Rad nach rechts oben weg, wie bei einem Laubhaufen.
-  - Das neue Rad weht mit demselben Wind von links herein und landet sanft gebremst.
+  - **Ablauf (Fassung 2, Tiry 22.11.):** Abbau und Neubau gleichzeitig am selben Ort. Jedes Blatt löst sich vom alten Rad, fliegt in einem kurzen, engen Bogen zu seinem Platz im neuen Rad und landet sanft gebremst. Der Showroom ist nie leer, die Radform bleibt die ganze Zeit erkennbar.
+  - **Verboten:** Blätterschwall von links, Rad abziehen und neues draufkleben, sichtbare Kanten der Zeichenfläche. Die Zeichenfläche ist im Laub-Modus größer als der Showroom, damit keine Kästen links/rechts zu sehen sind.
+  - Nur ca. 20 % Deko-Blätter wehen kurz nach oben weg und blenden aus.
   - **Bewegung:** Die Blätter flattern wie Pendel, kippen (3D-Wenden) und trudeln teils. Einige fliegen auf die Kamera zu (werden größer), andere nach hinten weg.
   - **Effekte:** Beim Loslösen und Landen gibt es ein kurzes goldenes Funkeln. Jedes Blatt wirft einen weichen Schatten auf den Showroom. Am Rand der Zeichenfläche blenden die Blätter weich aus.
 - **Farben:**
