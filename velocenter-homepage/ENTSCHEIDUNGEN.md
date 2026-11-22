@@ -522,3 +522,9 @@
 ### Winter-Aktion: Kristall-Schneeflocken + Service ohne i:SY-Blumenbild (Tiry 22.11.2026)
 - Statt weißer Punkte fallen in allen –20-€-Aktionen echte kleine Schneeflocken (6 Arme mit Ästen, Sechseck-Kern, scharf als Vektor, drehen sich), nur ganz leichtes Funkeln, kein Glitzern: Canvas `#snow` (Startseite `#deal`) und Winter-Karte `.wcard .wsn` (Service, SVG-Flocken).
 - Service: Bild `isy-blumen.webp` (Oval unter der Winter-Karte) entfernt.
+
+### Knöpfe-Prüfung + Klick-Sperre durch Menü-Vorschau behoben (Tiry 22.11.2026)
+- Ursache „Inspektion & Reparatur nicht anklickbar“: Die Vorschau-Tafel des Menübands (`#lbp`, fixiert) blieb nach Hover/Klick im Menü unsichtbar über dem Inhalt liegen – ihre zuletzt gezeigte Seite (`.lbp-pg.on`) hatte `pointer-events:auto`. Das blockierte auf allen Seiten alles unterhalb des Menüs.
+- Behoben: `.lbp:not(.on),.lbp:not(.on) *{pointer-events:none!important}` + `close()` nimmt auch `.on` von den Vorschauseiten. Nicht zurückbauen.
+- Alias `#showroom` zeigte ins Leere → jetzt `marken#showroom2`.
+- Gesamtprüfung (PC 1366×768 alle 11 Ansichten mit echtem Mausklick, Handy Pixel 7 Burger-Menü): alle internen Links landen in der richtigen Ansicht/am richtigen Abschnitt, alle Knöpfe reagieren, keine JS-Fehler. 57 externe Links erreichbar (bosch-ebike.com sperrt nur Prüf-Programme mit 403, Seiten sind echt vorhanden). „Gespeicherte Einstellungen löschen“ (Datenschutz) lädt absichtlich neu.
