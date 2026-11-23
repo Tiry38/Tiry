@@ -267,3 +267,20 @@ html.er body .finder{border-radius:var(--pl-r-xl)!important;box-shadow:var(--pl-
 
 /* ---------- Tempo (19.11.2026): --plH ohne Vererbung, nur an #main gesetzt (plus.js) ---------- */
 @property --plH{syntax:'<length>';inherits:false;initial-value:158px}
+/* Service-Symbole modern (Tiry 22.11.2026: „sehen schrecklich aus“): Kristall-Kugel in Crimson-Metall mit Glasglanz, Duoton-Symbol in Weiß, Lichtring beim Drüberfahren */
+html.er body .srow .ic{position:relative;isolation:isolate;width:60px!important;height:60px!important;color:#fff!important;
+ background:radial-gradient(120% 120% at 30% 16%,#FF7478 0%,#E2232D 32%,#A30E26 66%,#4E0B19 100%)!important;
+ box-shadow:inset 0 1px 1px rgba(255,255,255,.6),inset 0 -8px 14px rgba(48,0,10,.5),0 0 0 4px rgba(255,255,255,.78),0 0 0 5px rgba(84,104,134,.16),0 14px 26px -10px rgba(163,14,38,.7)!important;
+ transition:transform .55s var(--spring),box-shadow .45s!important}
+html.er body .srow .ic::after{content:"";position:absolute;inset:3px 8px 50% 8px;border-radius:50% 50% 45% 45%/70% 70% 30% 30%;z-index:1;pointer-events:none;
+ background:linear-gradient(180deg,rgba(255,255,255,.62),rgba(255,255,255,0))}
+html.er body .srow .ic::before{content:"";position:absolute;inset:-7px;border-radius:50%;z-index:-1;pointer-events:none;opacity:0;
+ background:conic-gradient(from 0deg,transparent 0 55%,rgba(226,35,45,.9) 70%,#fff 76%,rgba(127,140,160,.7) 84%,transparent 92%);
+ -webkit-mask:radial-gradient(closest-side,transparent calc(100% - 2px),#000 calc(100% - 1.5px));mask:radial-gradient(closest-side,transparent calc(100% - 2px),#000 calc(100% - 1.5px));
+ transition:opacity .4s;animation:icRing 2.6s linear infinite}
+@keyframes icRing{to{transform:rotate(1turn)}}
+html.er body .srow .ic svg{position:relative;z-index:2;width:30px!important;height:30px!important;filter:drop-shadow(0 1px 1.5px rgba(60,0,12,.55))}
+html.er body .srow:hover .ic{background:radial-gradient(120% 120% at 30% 16%,#FF8A8D 0%,#F0353F 32%,#B5122C 66%,#560C1C 100%)!important;transform:translateY(-2px) rotate(-6deg) scale(1.05);
+ box-shadow:inset 0 1px 1px rgba(255,255,255,.7),inset 0 -8px 14px rgba(48,0,10,.45),0 0 0 4px #fff,0 0 0 5px rgba(226,35,45,.25),0 18px 30px -10px rgba(163,14,38,.8)!important}
+html.er body .srow:hover .ic::before{opacity:1}
+@media (max-width:720px){html.er body .srow .ic{width:52px!important;height:52px!important}html.er body .srow .ic svg{width:26px!important;height:26px!important}}

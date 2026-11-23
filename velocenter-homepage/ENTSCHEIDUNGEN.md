@@ -529,8 +529,8 @@
 - Alias `#showroom` zeigte ins Leere → jetzt `marken#showroom2`.
 - Gesamtprüfung (PC 1366×768 alle 11 Ansichten mit echtem Mausklick, Handy Pixel 7 Burger-Menü): alle internen Links landen in der richtigen Ansicht/am richtigen Abschnitt, alle Knöpfe reagieren, keine JS-Fehler. 57 externe Links erreichbar (bosch-ebike.com sperrt nur Prüf-Programme mit 403, Seiten sind echt vorhanden). „Gespeicherte Einstellungen löschen“ (Datenschutz) lädt absichtlich neu.
 
-### Lesbarkeit auf dem Herbst-Hintergrund: Milchglas folgt der Schrift (Tiry 22.11.2026)
-- Problem: Das Milchglas des Hintergrunds lag nur links. Mitte/rechts stand dunkle Schrift direkt auf dem Foto (z. B. Leasing „So funktioniert es“, Fußzeile Impressum/Datenschutz am Handy).
-- Lösung in `hintergrund12/hg12.js`: Maske aus allen dunklen Texten der aktiven Ansicht + Fußzeile (nur Text ohne eigene Karte/Fläche), in Seiten-Koordinaten weichgezeichnet (canvas-filter blur, Rückfall mehrstufig), als Textur im Shader – dort wird das Foto hinter der Schrift bis 90 % zu Milchglas, dazwischen bleibt es klar. Neu gerechnet nur bei Layout-Änderung (Laden, Größe, Reiterwechsel, ResizeObserver/MutationObserver auf `main`, gedrosselt ≥ 1,5 s), pro Bild nur verschoben.
-- Wichtig: Maske über den Alpha-Kanal lesen (`.a`), `requestIdleCallback` mit `timeout` (sonst wird die Maske am Handy nie gebaut).
-- Geprüft per Kontrast-Scan (Text ausgeblendet → echter Hintergrund-Pixel gegen Textfarbe) in allen 11 Ansichten PC + Handy.
+### Lesbarkeit auf dem Herbst-Hintergrund: echte Glasplatten statt Milchglas-Maske (Tiry 22.11.2026)
+- Verworfen: weichgezeichnete Milchglas-Maske im Shader (Tiry: „sieht aus wie hingesprayt“). Nie wieder Nebel/Maske hinter der Schrift.
+- Jetzt in `hintergrund12/hg12.js` (`gpBuild`) + `hg12.css` (`#hgGl .hgp`): dunkle Freitexte der aktiven Ansicht + Fußzeile werden zu Blöcken gruppiert, dahinter liegt je Block eine echte Glasplatte im Look der Service-Karten (weißes Perlglas, Radius 28 px, Lichtkante, weiche Tiefe, Hauch Rot oben links / Eisblau unten rechts). Platten richten sich an der Inhaltsspalte (`.wrap`) aus, wenn der Text breiter als die halbe Spalte ist. Texte mit eigener Fläche (Karten, Bilder, backdrop-filter) bekommen keine Platte.
+- Neu gerechnet nur bei Layout-Änderung (Laden, Größe, Schriften, Reiterwechsel, Resize-/MutationObserver auf `main`, gedrosselt, `requestIdleCallback` mit `timeout`).
+- Service-Symbole (`.srow .ic`, 15 Stück) neu: eigene Duotone-Symbole `#d-*` (bike, wrench, euro, shield, case, box, chat, map, star) in roter Kristall-Kugel mit weißem Ring, Glanz und Lichtring beim Drüberfahren (`plus.css`).

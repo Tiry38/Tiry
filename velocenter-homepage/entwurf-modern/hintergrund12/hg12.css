@@ -40,3 +40,14 @@ html.hg3{background:#E9EBEE!important}html.hg3 body{background:transparent!impor
 @media (max-width:400px){#ueSw .ue-k{display:none}}
 /* Handy: über der festen Leiste (Anrufen/WhatsApp) */
 @media (max-width:720px){#ueSw{bottom:calc(86px + env(safe-area-inset-bottom,0px))}#ueTip{bottom:calc(148px + env(safe-area-inset-bottom,0px))}}
+/* Glasplatten hinter freier Schrift (Tiry 22.11.2026: „richtige Glaselemente, nicht gesprüht“) – exakt das Glas der Service-Karten (.srow).
+   Lage/Größe rechnet hg12.js (gpBuild) aus den Textgruppen; liegen in Seiten-Koordinaten unter dem Inhalt, über dem Foto. */
+#hgGl{position:absolute;left:0;top:0;width:100%;height:0;z-index:-1;pointer-events:none}
+#hgGl .hgp{position:absolute;border-radius:28px;isolation:isolate;
+ background:radial-gradient(120% 90% at 0% 0%,rgba(255,255,255,.96),rgba(255,255,255,0) 52%),linear-gradient(135deg,rgba(255,251,253,.86) 0%,rgba(238,245,252,.8) 38%,rgba(248,242,236,.8) 70%,rgba(236,243,251,.84) 100%);
+ box-shadow:inset 0 1px 0 rgba(255,255,255,.98),inset 0 0 0 1px rgba(255,255,255,.55),inset 0 -1px 0 rgba(84,104,134,.16),0 1px 2px rgba(18,24,38,.06),0 6px 14px -4px rgba(18,24,38,.1),0 24px 44px -20px rgba(18,24,38,.24),0 50px 90px -40px rgba(28,44,74,.26);
+ transition:opacity .45s ease}
+#hgGl .hgp::before{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;
+ background:radial-gradient(40% 80% at 0% 0%,rgba(226,35,45,.12),transparent 70%),radial-gradient(40% 70% at 100% 100%,rgba(127,180,216,.18),transparent 70%)}
+#hgGl.off .hgp{opacity:0}
+@media (max-width:720px){#hgGl .hgp{border-radius:24px}}
