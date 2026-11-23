@@ -255,12 +255,11 @@ function gpBuild(){GP.tm=0;GP.last=performance.now();
    walk(n,root,ah,nx,ny,c2,null)}}
  roots.forEach(function(r){walk(r,r,0,0,0,null,null)});
  /* Freitext auf dem Foto: keine Platte mehr (Tiry 23.11.2026: „zu viele weiße Kästen“) – die Schrift selbst bekommt einen feinen Lichtsaum (CSS .hgTx*) */
- function onCard(e){for(var p=e;p&&p!==document.body;p=p.parentElement){var g=getComputedStyle(p),a=(g.backgroundColor.match(/[\d.]+/g)||[]);if(a.length>3?+a[3]>.3:a.length===3)return 1;if(p!==e&&p.getBoundingClientRect().width<innerWidth*.9){if(/gradient|url/.test(g.backgroundImage))return 1;for(var k=0;k<2;k++){var ps=getComputedStyle(p,k?'::after':'::before');if(ps.content!=='none'&&ps.position==='absolute'){var pa=(ps.backgroundColor.match(/[\d.]+/g)||[]);if((pa.length>3?+pa[3]>.5:pa.length===3)||(/gradient/.test(ps.backgroundImage)&&+ps.opacity>.5&&parseFloat(ps.width)>p.offsetWidth*.8))return 1}}}}return 0}
- var tSet=new Set(T.map(function(t){return t.el}));document.querySelectorAll('.hgTxL,.hgTxW,.hgTxD').forEach(function(e){if(!tSet.has(e)){e.classList.remove('hgTxL','hgTxW','hgTxD');e.querySelectorAll('.hgTxG').forEach(function(k){k.classList.remove('hgTxG')})}});TXE=TXE.filter(function(e){return tSet.has(e)});
+ function onCard(e){for(var p=e;p&&p!==document.body;p=p.parentElement){if(p.classList.contains('pre')&&!p.classList.contains('in'))return 1;var g=getComputedStyle(p),a=(g.backgroundColor.match(/[\d.]+/g)||[]);if(a.length>3?+a[3]>.3:a.length===3)return 1;if(p!==e&&p.getBoundingClientRect().width<innerWidth*.9){if(/gradient|url/.test(g.backgroundImage))return 1;for(var k=0;k<2;k++){var ps=getComputedStyle(p,k?'::after':'::before');if(ps.content!=='none'&&ps.position==='absolute'){var pa=(ps.backgroundColor.match(/[\d.]+/g)||[]);if((pa.length>3?+pa[3]>.5:pa.length===3)||(/gradient/.test(ps.backgroundImage)&&+ps.opacity>.5&&parseFloat(ps.width)>p.offsetWidth*.8))return 1}}}}return 0}
  T.forEach(function(t){var e=t.el;if(onCard(e)){e.classList.remove('hgTxG','hgTxD','hgTxL','hgTxW');var ix=TXE.indexOf(e);if(ix>=0)TXE.splice(ix,1);return}var c=getComputedStyle(e),f=c.webkitTextFillColor||c.color,m=(f.match(/[\d.]+/g)||[0,0,0,1]).map(Number);
   var cls=(m.length>3&&m[3]<.1)?'hgTxG':((.2126*m[0]+.7152*m[1]+.0722*m[2])>150?'hgTxD':'hgTxL');
-  e.classList.remove('hgTxG','hgTxD','hgTxL','hgTxW');e.classList.add(cls);
-  e.querySelectorAll('*').forEach(function(k){var g=getComputedStyle(k),z=(g.webkitTextFillColor||'').match(/[\d.]+/g);if(z&&z.length>3&&+z[3]<.1)k.classList.add('hgTxG')})});T=[];txWant();
+  if(!e.classList.contains(cls)){e.classList.remove('hgTxG','hgTxD','hgTxL','hgTxW');e.classList.add(cls)}
+  e.querySelectorAll('*').forEach(function(k){var g=getComputedStyle(k),z=(g.webkitTextFillColor||'').match(/[\d.]+/g);if(z&&z.length>3&&+z[3]<.1&&!k.classList.contains('hgTxG'))k.classList.add('hgTxG')})});T=[];return;/* Platten aus (Tiry 23.11.2026) – nur noch Schrift markieren, kein Plattenbau */
  function bb(L){var b=[1e9,1e9,-1e9,-1e9];L.forEach(function(a){if(a[0]<b[0])b[0]=a[0];if(a[1]<b[1])b[1]=a[1];if(a[2]>b[2])b[2]=a[2];if(a[3]>b[3])b[3]=a[3]});return b}
  function hit(a,b,e){e=e||0;return a[0]<b[2]-e&&a[2]>b[0]+e&&a[1]<b[3]-e&&a[3]>b[1]+e}
  /* Blöcke (Schrift, die auf einem Foto steht, bekommt keine Platte) */
@@ -322,11 +321,12 @@ function gpPos(el){var a=el.getBoundingClientRect(),x=a.left+scrollX,y=a.top+scr
 function gpShift(){GP.sh=0;if(!GP.el||!GP.dbg)return;var k=GP.el.children,i,d,a,dx,dy;for(i=0;i<GP.dbg.length&&i<k.length;i++){d=GP.dbg[i];if(!d.e.isConnected)continue;a=gpPos(d.e);
   dx=Math.round(a[0]-d.x);dy=Math.round(a[1]-d.y);k[i].style.transform=dx||dy?'translate('+dx+'px,'+dy+'px)':''}}
 function gpSoon(d){if(GP.tm)return;var wait=Math.max(d||400,1200-(performance.now()-GP.last));GP.tm=setTimeout(function(){if(window.requestIdleCallback)requestIdleCallback(gpBuild,{timeout:500});else gpBuild()},wait)}
-function gpInit(){gpSoon(200);addEventListener('load',function(){gpSoon(150)});addEventListener('resize',function(){gpSoon(250)});
- addEventListener('hashchange',function(){if(GP.el)GP.el.classList.add('off');gpSoon(900);setTimeout(function(){gpSoon(150)},2200)});
- if(document.fonts&&document.fonts.ready)document.fonts.ready.then(function(){gpSoon(150)});
- var mn=document.querySelector('main');if(mn){if(window.ResizeObserver)new ResizeObserver(function(){if(!GP.sh)GP.sh=requestAnimationFrame(gpShift);gpSoon(300)}).observe(mn);
-  new MutationObserver(function(){gpSoon(600)}).observe(mn,{childList:true,subtree:true,attributes:true,attributeFilter:['hidden','open']})}}
+function gpInit(){/* Schrift-Markierung nur bei Laden, Ansichtswechsel (nach dem Einblenden) und Größenänderung – keine Dauer-Beobachter mehr
+   (Tiry 23.11.2026: Schrift „blinkte“, die Beobachter lösten die Markierung ständig neu aus) */
+ gpSoon(1200);addEventListener('load',function(){gpSoon(1200)});addEventListener('resize',function(){gpSoon(600)});
+ addEventListener('hashchange',function(){gpSoon(1600)});
+ /* einmalig je Element, wenn es beim Scrollen eingeblendet wird (.pre → .in) */
+ var mn=document.querySelector('main');if(mn)new MutationObserver(function(ms){for(var i=0;i<ms.length;i++){var t=ms[i].target,o=ms[i].oldValue||'';if(t.classList&&t.classList.contains('in')&&!/(^| )in( |$)/.test(o)){gpSoon(700);return}}}).observe(mn,{subtree:true,attributes:true,attributeFilter:['class'],attributeOldValue:true});if(document.fonts&&document.fonts.ready)document.fonts.ready.then(function(){gpSoon(1200)})}
 function click(e){if(e.target&&e.target.closest&&e.target.closest('#ueSw'))return;K=[e.clientX/innerWidth,1-e.clientY/innerHeight,(performance.now()-t0)/1000]}
 function init(){cv=document.createElement('canvas');cv.id='hg';cv.setAttribute('aria-hidden','true');document.body.insertBefore(cv,document.body.firstChild);
  gl=cv.getContext('webgl',{antialias:false,alpha:false,premultipliedAlpha:false,powerPreference:'high-performance'});
