@@ -584,3 +584,8 @@
 - Finanzierung: „effektiver Jahreszins 0,00 %, gebundener Sollzins 0,00 % p. a.“ + Bonität in Fußnote und Kurzkarte.
 - „300+ / über 300 E-Bikes“ → überall 250 (Tiry). „Weltmarktführer“ (Van Raam) entfernt – kein Beleg gefunden; jetzt „Spezialrad-Hersteller“. Rahmen-Garantie = „Herstellergarantie von Van Raam“.
 - Herstellerfotos: Tiry geht von Nutzungsrecht über Händlerstatus aus (23.11.2026).
+
+### Google-Bewertungen automatisch (Tiry 23.11.2026)
+- Die KI-Zentrale (Haupt-PC) holt die Bewertungen über die Google-Schnittstelle und schreibt nach jedem Abruf (höchstens alle 6 Std.) die 5-Sterne-Bewertungen mit deutschem Text (25–320 Zeichen, ohne Links, Name sichtbar) als Vorrat in `site/bewertungen` (max. 40 neueste, Name „Vorname N.“, Feld `g` = Google-Kennung). Startseite zeigt je Besuch 3 zufällige.
+- Eigenes Firebase-Konto `bewertungen@admin.velo-center.de`, Regel: darf nur `site/bewertungen` schreiben (Felder score/items/ts/von, ≤ 80 Einträge). Im Admin von Hand eingetragene und „ausgeblendete“ bleiben erhalten.
+- Hinweis unter den Bewertungen (§ 5b Abs. 3 UWG, Pflicht, bleibt): „Auswahl echter 5-Sterne-Bewertungen aus unserem Google-Profil. Ob die Verfasser bei uns gekauft haben, prüfen weder wir noch Google.“
