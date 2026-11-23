@@ -564,3 +564,6 @@
 - **Regler v2 (`gov`):** prüft jede Sekunde (vorher alle 75 Bilder = auf langsamen PCs Minuten → Seite hing). Reihenfolge: 1. Hintergrund 30 statt 60 Bilder, 2. Auflösung bis 60 %, 3. 20/15 Bilder. Unter 16 Bildern/s: 30 Bilder + 75 % sofort. Jede Stufe wird nach ≥ 15 Bildern geprüft und ggf. zurückgenommen.
 - **Schwache Grafik ab Start erkannt (`WEAK`)**: Intel HD/UHD (ohne Iris, z. B. Mini-PC N5000 = UHD 605), Mali-T/G1x–G5x, Adreno ≤ 61x, PowerVR, ≤ 2 Kerne → Hintergrund von Anfang an mit 30 Bildern, bleibt dort.
 - Prüfen am Gerät: Konsole `HG12_STAT()` zeigt weak/qs/skip/ft.
+
+### Schrift auf dem Foto: dauerhaft dunkel mit weißer Umrandung (Tiry 23.11.2026: „blinkt ins Weiß“ → „standardmäßig schwarze Schrift mit leicht weißer Umrandung, bei allen“)
+- Umschalten nach Hintergrund (`txSample`, `hgTxW`) komplett entfernt – kein Pixel-Lesen mehr. Dunkler Freitext auf dem Foto = `hgTxL`: Umrandung `-webkit-text-stroke:max(2.2px,.06em)` weiß .95 hinter den Buchstaben (`paint-order:stroke fill`) + kleiner weißer Schein. Helle Schrift (`hgTxD`) und Verlaufsschrift (`hgTxG`) wie gehabt. Nicht wieder auf adaptive Farben umstellen.
