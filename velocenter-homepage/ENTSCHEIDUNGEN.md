@@ -598,3 +598,6 @@
 - `.wcard` (Service + alle Unterseiten): kein Pink/Magenta mehr – „2026/27“, „–20 €“-Verlauf, „Marken-Fahrräder/Bosch-Antrieb“ in Champagner (#F3CFA6/#F6D7B4), „!“ und „Gratis“ Velocenter-Rot, Pillen dunkles Glas, violetter Schimmer → Grau.
 - Schneeflocken über Schrift nur noch 12 % (Maske `.wsn` aus den Textflächen, neu berechnet bei Laden/Schrift/Größe), wie `#snow` auf der Startseite.
 - Menü-Vorschau Service: Zeile „Nur Marken-Fahrräder mit Bosch-Antrieb“ Champagner statt Rosa. Übrige Winter-Stellen (Schnellzugriff, Service-Liste) ohne Pink/Schnee – geprüft.
+
+### Symbole realistisch (Tiry 23.11.2026: „mehr Realistik“)
+- `.srow .ic` zeigt echte 3D-Renderings statt Linien-Symbolen: `img/ic3d-<name>.webp` (bike, wrench, euro, shield, case, box, map, star, chat; 192 px, zusammen ~45 KB), gerendert mit Three.js (Rotlack mit Klarlack, Chrom, Gummi, Gold, Karton) in Studio-Licht, frei stehend mit weichem Bodenschatten (Klasse `.ic.i3`, 76 px, Handy 62 px). Hover hebt das Objekt leicht an und dreht es. Ersetzt die Glas-Linse von vorher; nicht zurück auf flache Symbole.
