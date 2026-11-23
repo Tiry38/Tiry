@@ -5395,11 +5395,34 @@ function drDraw(){const o=$('#drO');if(!o)return;const c=drCalc(),f=$('#drF');f.
 const BEW0={score:'4,8',items:$$('#qs .q').map(q=>({t:q.querySelector('p').textContent,n:q.querySelector('small').textContent.replace(/\s*·\s*Google$/,'')}))};
 function bewRender(d){d=d&&Array.isArray(d.items)&&d.items.filter(x=>x&&x.t).length?d:BEW0;const it=d.items.filter(x=>x&&x.t&&!x.aus);if(!it.length)return;
  /* Tiry 23.11.2026: bei jedem Besuch 3 zufällige aus dem Pool echter Google-Bewertungen */
- for(let i=it.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[it[i],it[j]]=[it[j],it[i]]}it.splice(3);
+ for(let i=it.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[it[i],it[j]]=[it[j],it[i]]}
+ /* Tiry 23.11.2026: alle 10 s rückt alles nach links, links fällt eine raus, rechts kommt eine neue zufällige (nur 5 Sterne) */
+ BWP=it.map((x,i)=>Object.assign({k:'b'+i},x));BWQ=BWP.slice(3);
  const sc=$('.score b');if(sc&&d.score)sc.textContent=d.score;
- $('#qs').innerHTML=it.map((x,i)=>'<div class="q'+(i?'':' on')+'"><p>'+esc(x.t)+'</p><small>'+esc(x.n||'Kunde')+' · Google</small></div>').join('');
+ $('#qs').innerHTML=BWP.slice(0,3).map((x,i)=>bwCard(x,i?'':' on')).join('');it.splice(3);
  $('#qd').innerHTML=it.map((x,i)=>'<button class="'+(i?'':'on')+'" aria-label="Bewertung '+(i+1)+'"></button>').join('');qBind()}
 
+/* ---------- Bewertungen laufen durch (Tiry 23.11.2026) ---------- */
+function bwCard(x,c){return '<div class="q'+(c||'')+'" data-k="'+x.k+'"><p>'+esc(x.t)+'</p><small>'+esc(x.n||'Kunde')+' · Google</small></div>'}
+let BWP=[],BWQ=[],BWSEH=true,BWBUSY=false;
+function bwNext(zeig){if(!BWQ.length){const s=new Set(zeig);BWQ=BWP.filter(x=>!s.has(x.k));for(let i=BWQ.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[BWQ[i],BWQ[j]]=[BWQ[j],BWQ[i]]}}
+ return BWQ.shift()||null}
+function bwSt(e,o){for(const k in o)e.style.setProperty(k,o[k],'important')}
+function bwTick(){const box=$('#qs');if(!box||BWBUSY||document.hidden||!BWSEH||BWP.length<2)return;const cs=[...box.children];if(cs.length<2)return;
+ const out=cs[0];let nx=bwNext(cs.slice(1).map(c=>c.dataset.k));if(!nx)nx=BWP.find(x=>x.k===out.dataset.k);if(!nx)return;BWBUSY=true;
+ /* die neue Karte schiebt sich rechts herein und drückt im selben Zug die linke hinaus */
+ const b=box.getBoundingClientRect(),r0=out.getBoundingClientRect(),r1=cs[1].getBoundingClientRect(),rl=cs[cs.length-1].getBoundingClientRect();
+ const dx=r1.left-r0.left,dy=r1.top-r0.top,quer=Math.abs(dx)>Math.abs(dy);
+ box.insertAdjacentHTML('beforeend',bwCard(nx));const neu=box.lastElementChild;
+ bwSt(neu,{position:'absolute',left:(rl.left-b.left+dx)+'px',top:(rl.top-b.top+dy)+'px',width:rl.width+'px',height:rl.height+'px',transition:'none',transform:'none',opacity:'1'});
+ if(quer)bwSt(box,{'clip-path':'inset(-60px -6px -60px -6px)'});
+ void box.offsetWidth;const T='transform 1s cubic-bezier(.65,0,.35,1)';
+ [...cs,neu].forEach(c=>bwSt(c,{'will-change':'transform,opacity',transition:T+',opacity .8s ease',transform:'translate('+(-dx)+'px,'+(-dy)+'px)'}));
+ bwSt(out,{opacity:'0'});
+ setTimeout(()=>{out.remove();[...box.children].forEach(c=>c.removeAttribute('style'));box.style.removeProperty('clip-path');
+  [...box.children].forEach((c,i)=>c.classList.toggle('on',!i));BWBUSY=false},1050)}
+setInterval(bwTick,10000);
+if('IntersectionObserver' in window){const qb=$('#qs');if(qb)new IntersectionObserver(es=>{BWSEH=es[0].isIntersecting},{rootMargin:'200px'}).observe(qb)}
 bewRender(null);
 /* ---------- YouTube erst nach Freigabe ---------- */
 const ytOk=()=>!!LS.get('vc_yt',0);
