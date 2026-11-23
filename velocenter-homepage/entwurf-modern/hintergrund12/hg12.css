@@ -52,24 +52,6 @@ html.hg3{background:#E9EBEE!important}html.hg3 body{background:transparent!impor
 #hgGl.off .hgp{opacity:0}
 @media (max-width:720px){#hgGl .hgp{border-radius:24px}}
 
-/* Luft für die Glasplatten (Tiry 23.11.2026): wo Freitext direkt an einer Karte/Pille klebte, mehr Abstand, damit die Platte nicht gequetscht sitzt */
-html body .pl-foot .fnote{margin-top:46px!important}
-html body #m-bikearea{margin-top:48px!important}
-html body #m-sinfo{margin-top:30px!important}
-html body .tsub + .etw,html body .etw + .anhint{margin-top:42px!important}
-html body .lgh2{margin-bottom:42px!important}
-html body section[data-v="treffen"]>.ph + .sec{padding-top:64px!important}
-html body .htxt .logobox{margin-bottom:44px!important}
-@media (max-width:720px){
- html body .pl-foot .fnote{margin-top:30px!important}
- html body #m-bikearea{margin-top:34px!important}
- html body #m-sinfo{margin-top:22px!important}
- html body .tsub + .etw,html body .etw + .anhint{margin-top:30px!important}
- html body .lgh2{margin-bottom:30px!important}
- html body section[data-v="treffen"]>.ph + .sec{padding-top:20px!important}
- html body .htxt .logobox{margin-bottom:10px!important}
- html.er body .hgrid>.hvis.hvis.hvis{margin-top:28px!important;margin-bottom:24px!important}
-}
 /* Lange Links/Wörter in Rechtstexten brechen am Handy um (kein Überlauf über den Bildschirmrand) */
 .legal a,.legal h3,.legal p,.legal li{overflow-wrap:anywhere}
 
@@ -85,3 +67,15 @@ html body .ostat::before{inset:0 auto 0 -250%!important;width:750%!important;bor
 /* Lichtring der Service-Symbole dreht nur, wenn er zu sehen ist (beim Drüberfahren) – vorher lief er unsichtbar dauernd mit */
 html body .srow .ic::before{animation-play-state:paused}
 html body .srow:hover .ic::before{animation-play-state:running}
+
+/* Schrift auf dem Foto (Tiry 23.11.2026): statt weißer Glasplatten ein enger, weicher Lichtsaum direkt an den Buchstaben –
+   dunkle Schrift hebt sich hell ab, helle Schrift dunkel, Verlaufs-Schrift per drop-shadow (text-shadow würde den Verlauf überdecken). */
+html body [class*=hgTx],html body [class*=hgTx] *{paint-order:stroke fill;transition:color .45s ease,-webkit-text-stroke-color .45s ease,text-shadow .45s ease}
+html body .hgTxL,html body .hgTxL *{-webkit-text-stroke:max(2px,.055em) rgba(255,255,255,.9);text-shadow:0 0 4px rgba(255,255,255,.7),0 1px 10px rgba(255,255,255,.35)!important}
+html body .hgTxW,html body .hgTxW *{color:#fff!important;-webkit-text-stroke:max(2px,.05em) rgba(14,16,22,.5);text-shadow:0 1px 3px rgba(8,10,14,.55),0 2px 14px rgba(8,10,14,.38)!important}
+html body .hgTxD,html body .hgTxD *{-webkit-text-stroke:max(2px,.05em) rgba(14,16,22,.5);text-shadow:0 1px 3px rgba(8,10,14,.5),0 2px 12px rgba(8,10,14,.32)!important}
+html body .hgTxG,html body [class*=hgTx] .hgTxG{-webkit-text-stroke:0!important;text-shadow:none!important;filter:drop-shadow(0 0 1px rgba(255,255,255,.95)) drop-shadow(0 0 1px rgba(255,255,255,.9)) drop-shadow(0 1px 6px rgba(255,255,255,.55))}
+html body .hgTxW .hgTxG{filter:drop-shadow(0 0 1px rgba(255,255,255,.95)) drop-shadow(0 0 2px rgba(255,255,255,.9)) drop-shadow(0 1px 8px rgba(8,10,14,.45))}
+
+/* Alle Glasplatten aus (Tiry 23.11.2026) – gpBuild markiert nur noch die Schrift */
+#hgGl{display:none!important}

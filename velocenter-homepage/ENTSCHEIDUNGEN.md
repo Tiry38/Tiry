@@ -529,7 +529,7 @@
 - Alias `#showroom` zeigte ins Leere → jetzt `marken#showroom2`.
 - Gesamtprüfung (PC 1366×768 alle 11 Ansichten mit echtem Mausklick, Handy Pixel 7 Burger-Menü): alle internen Links landen in der richtigen Ansicht/am richtigen Abschnitt, alle Knöpfe reagieren, keine JS-Fehler. 57 externe Links erreichbar (bosch-ebike.com sperrt nur Prüf-Programme mit 403, Seiten sind echt vorhanden). „Gespeicherte Einstellungen löschen“ (Datenschutz) lädt absichtlich neu.
 
-### Lesbarkeit auf dem Herbst-Hintergrund: echte Glasplatten statt Milchglas-Maske (Tiry 22./23.11.2026)
+### (ERSETZT 23.11.2026, siehe „Schrift passt sich an“) Lesbarkeit auf dem Herbst-Hintergrund: echte Glasplatten statt Milchglas-Maske (Tiry 22./23.11.2026)
 - Verworfen: weichgezeichnete Milchglas-Maske im Shader (Tiry: „sieht aus wie hingesprayt“). Nie wieder Nebel/Maske hinter der Schrift.
 - Verworfen (23.11.): Platten nur aus Textzeilen gerechnet – Folge: riesige Flächen, Knöpfe/Pillen/Logos hingen halb in der Platte, Platten überlappten Karten und die Fußzeile. **Regel: nichts hängt halb in einer Platte, keine Platte überlappt eine Karte oder eine andere Platte, keine Riesen-Flächen.**
 - Jetzt in `hintergrund12/hg12.js` (`gpBuild`) + `hg12.css` (`#hgGl .hgp`):
@@ -550,3 +550,11 @@
 - Lichtring der Service-Symbole dreht nur beim Drüberfahren (lief vorher unsichtbar dauernd).
 - Messwerte Startseite (Testrechner ohne Grafikkarte): PC 2–3 → 32–57 Bilder/s; Handy (4-fach gedrosselt) 4–5 → ~60 im Stand, ~32 beim Scrollen. Mal-Arbeit (RasterTask) Seitenmitte 1.583 → 121 ms/s, unten 1.865 → 14 ms/s.
 - Offen/möglich: Laufband-Leuchten `lbPu` (text-shadow, nur oben auf der Startseite) und `flow` (Verlaufsschrift) malen weiter jedes Bild – nur wenn sichtbar.
+
+### Lesbarkeit: Schrift passt sich dem Foto an, keine weißen Kästen (Tiry 23.11.2026: „so viele weiße Kästen zerstören den Look“, „eher was mit der Schrift machen als mit dem Hintergrund“)
+- **Alle Glasplatten aus** (`#hgGl{display:none}`). Der Hintergrund bleibt unverändert (kein Nebel, keine Maske – beides abgelehnt).
+- `gpBuild` sucht weiter den Freitext, der direkt auf dem Foto liegt, und markiert ihn nur noch: `hgTxL` dunkle Schrift, `hgTxD` helle Schrift, `hgTxG` Verlaufsschrift (Kinder mit transparenter Füllung).
+- **Anpassung live:** Direkt nach dem Zeichnen liest `txSample` je Textblock 9 Pixel des Hintergrunds (alle 140 ms, nur sichtbare Blöcke). Hell → dunkle Schrift mit feiner weißer Kontur. Dunkel (< 0,63, zurück erst > 0,71) → **weiße Schrift mit feiner dunkler Kontur** (`hgTxW`), Farbwechsel weich 0,45 s.
+- Kontur = `-webkit-text-stroke` mit `paint-order:stroke fill` (sitzt hinter den Buchstaben), max(2px, ~0,05em) + kleiner Schatten. **Kein breiter Lichtsaum** (wirkte verschmiert).
+- Text in Karten mit eigener Fläche (Hintergrundfarbe > 30 %, Verlauf, deckendes ::before/::after) wird nie markiert (`onCard`); Markierungen, die nicht mehr zutreffen, werden bei jedem Neuaufbau entfernt.
+- Abstands-Block „Luft für die Glasplatten“ entfernt.
