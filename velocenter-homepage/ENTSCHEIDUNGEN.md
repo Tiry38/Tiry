@@ -590,3 +590,6 @@
 - Eigenes Firebase-Konto `bewertungen@admin.velo-center.de`, Regel: darf nur `site/bewertungen` schreiben (Felder score/items/ts/von, ≤ 400 Einträge). Im Admin von Hand eingetragene und „ausgeblendete“ bleiben erhalten.
 - Hinweis unter den Bewertungen (§ 5b Abs. 3 UWG, Pflicht, bleibt): „Auswahl echter 5-Sterne-Bewertungen aus unserem Google-Profil. Ob die Verfasser bei uns gekauft haben, prüfen weder wir noch Google.“
 - Bewertungen laufen durch (Tiry 23.11.2026): alle 10 s schiebt sich rechts eine neue zufällige Bewertung herein und drückt die linke hinaus (`bwTick`, nur transform/opacity, will-change nur während der Bewegung, Pause bei verstecktem Tab/außer Sicht). Gemessen CPU 4×: 60 Bilder/s, 0 ms Layout.
+
+### Symbole modern (Tiry 23.11.2026: „sehen aus wie WhatsApp-Icons“)
+- `.srow .ic`: Glas-Linse (weiß, Tiefe, feiner Kupferrand) statt glänzender roter Kugel mit Lichtfleck; Symbole `e-*` = Kopie der `d-*` mit Rot-Verlauf (`#icg`/`#icf`, userSpaceOnUse). Hover: rote Linse ohne Glanzfleck, Symbol weiß, Lichtring kreist. Glanzkugel nicht wieder einbauen.
