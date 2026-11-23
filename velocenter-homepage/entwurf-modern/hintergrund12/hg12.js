@@ -173,17 +173,29 @@ function load(k){if(TX[k])return;var e=TX[k]={ok:0};var big=Math.max(screen.widt
  e.ih=new Image();e.ih.onload=done;e.ih.src=BASE+k+'-m.png'}
 /* Qualität passt sich an: ruckelt das Gerät, wird mit weniger Pixeln gerechnet (min. 50 %) */
 var QS=1,FT=16,FN=0,TL=0;
+/* Leistungs-Regler (Tiry 23.11.2026): hält die Seite flüssig, statt den Hintergrund auf Biegen und Brechen mit 60 Bildern zu rechnen.
+   Stufe 1: Auflösung des Hintergrunds sinkt schrittweise (bis 50 %). Stufe 2: der Hintergrund wird nur noch jedes 2./3./4. Bild neu gerechnet
+   (Laub mit 30/20/15 Bildern pro Sekunde) – Scrollen und alle anderen Animationen bekommen die frei gewordene Zeit. Jede Stufe wird geprüft:
+   bringt sie nichts (z. B. Stromsparmodus mit 30 Bildern), wird sie zurückgenommen. Geht es dem Gerät wieder gut, wird alles wieder hochgefahren.
+   Rechner ganz ohne Grafikkarte (Software-Darstellung): ein stehendes Bild, neu nur nach Scrollen/Größenänderung. */
+var SK=0,SKc=0,GT=null,LOCK=0,HOLD=0,RZ=0,SOFT=0,NEED=1,DOK=0;
+function gov(now){if(now<4000)return;
+ if(GT){if(FT>GT.ft*.9){if(GT.k==='q')QS=GT.v;else SK=GT.v;LOCK=now+60000}GT=null;return}
+ if(FT>26&&now>LOCK){if(QS>.5){GT={k:'q',v:QS,ft:FT};QS=Math.max(.5,QS-.15)}else if(SK<3){GT={k:'s',v:SK,ft:FT};SK++}else return;HOLD=now+(now-RZ<5000?60000:10000)}
+ else if(FT<19&&now>HOLD){if(SK>0){SK--;RZ=now;HOLD=now+10000}else if(QS<1){QS=Math.min(1,QS+.05);RZ=now}}}
 function size(){var big=innerWidth*innerHeight>1.4e6;dpr=Math.min(devicePixelRatio||1,1.25)*(big?.8:.95)*QS;
  var w=Math.round(cv.clientWidth*dpr),h=Math.round(cv.clientHeight*dpr);if(w!==W||h!==H){W=cv.width=w;H=cv.height=h}}
 var VS=0,Po=[0,0,0],Pv=[0,0,0],Pt=[0,0,0];
 function pose(){var h=0,k=(location.hash||'#start')+mode;for(var i=0;i<k.length;i++)h=(h*31+k.charCodeAt(i))|0;h=Math.abs(h);
  Pt=[((h%7)-3)*.010,(((h>>3)%5)-2)*.006,.03+(h>>6)%4*.025];Pv[2]-=.10}
-function frame(){raf=requestAnimationFrame(frame);var now=performance.now();if(TL&&!document.hidden){var dt=Math.min(200,now-TL);FT+=(dt-FT)*.05;if(++FN>90){FN=0;if(FT>38&&QS>.5)QS=Math.max(.5,QS-.15);else if(FT<20&&QS<1)QS=Math.min(1,QS+.05)}}TL=now;size();var t=(now-t0)/1000;
+function frame(){raf=requestAnimationFrame(frame);var now=performance.now();if(SOFT){var e0=TX[mode];if(e0&&e0.ok&&!DOK){DOK=1;NEED=1}if(DOK&&!NEED)return;NEED=0;sc=scrollY/innerHeight}
+ else{if(TL&&!document.hidden){var dt=Math.min(200,now-TL);FT+=(dt-FT)*.05;if(++FN>75){FN=0;gov(now)}}TL=now;if(SK&&(++SKc%(SK+1)))return}
+ size();var t=(now-t0)/1000;
  for(var i=0;i<3;i++){Pv[i]+=(Pt[i]-Po[i])*.012;Pv[i]*=.90;Po[i]+=Pv[i]}
  M[0]+=(Mt[0]-M[0])*.045;M[1]+=(Mt[1]-M[1])*.045;var sc0=sc;sc+=(scrollY/innerHeight-sc)*.10;VS+=(Math.min(1.5,Math.abs(sc-sc0)*45)-VS)*.10;
  var e=TX[mode];gl.viewport(0,0,W,H);
  if(!e||!e.ok){gl.clearColor(.914,.922,.933,1);gl.clear(gl.COLOR_BUFFER_BIT);return}
- if(shown!==mode){shown=mode;fade=0}fade=Math.min(1,fade+.025);
+ if(shown!==mode){shown=mode;fade=0}fade=SOFT?1:Math.min(1,fade+.025);
  var c=CFG[mode];gl.useProgram(pr);
  gl.activeTexture(gl.TEXTURE0);gl.bindTexture(gl.TEXTURE_2D,e.p);gl.uniform1i(U.uP,0);
  gl.activeTexture(gl.TEXTURE1);gl.bindTexture(gl.TEXTURE_2D,e.d);gl.uniform1i(U.uD,1);
@@ -304,6 +316,9 @@ function init(){cv=document.createElement('canvas');cv.id='hg';cv.setAttribute('
  gl=cv.getContext('webgl',{antialias:false,alpha:false,premultipliedAlpha:false,powerPreference:'high-performance'});
  if(!gl){cv.remove();de.classList.remove('hg3');return}gl.getExtension('OES_standard_derivatives');
  try{build()}catch(err){console.error('hg12',err.message);cv.remove();de.classList.remove('hg3');return}
+ try{var di=gl.getExtension('WEBGL_debug_renderer_info');if(di&&/swiftshader|llvmpipe|software|basic render/i.test(String(gl.getParameter(di.UNMASKED_RENDERER_WEBGL))))SOFT=1}catch(_){}
+ if(SOFT){QS=.6;var st0=0,nd=function(){NEED=1};addEventListener('resize',nd);addEventListener('hashchange',function(){NEED=1;setTimeout(nd,500)});addEventListener('scroll',function(){clearTimeout(st0);st0=setTimeout(nd,220)},{passive:true})}
+ window.HG12_STAT=function(){return {soft:SOFT,qs:QS,skip:SK,ft:Math.round(FT*10)/10}};
  addEventListener('pointermove',function(e){Mt=[e.clientX/innerWidth,1-e.clientY/innerHeight]},{passive:true});
  addEventListener('pointerdown',click,{passive:true});
  /* Handy: Neigen = Blickwinkel */
@@ -326,3 +341,16 @@ function sw(){var b=document.createElement('div');b.id='ueSw';b.setAttribute('ro
  up();setTimeout(tip,1200)}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
 })();
+
+/* ---------- Spar-Logik für Animationen (Tiry 23.11.2026: „weniger Leistung, gleiche Qualität, kein Ruckeln auf schwachen Geräten“) ----------
+   Gemessen: Dauer-Animationen AUSSERHALB des Bildschirms kosteten mitten auf der Seite ~90 % der Rechenzeit (Glanzläufe, Laufbänder, Leuchten).
+   Jedes Element mit einer CSS-Animation wird beobachtet; ist es nicht im Bild (240 px Vorlauf), wird nur seine Animation angehalten und beim
+   Hereinscrollen an derselben Stelle fortgesetzt. Sichtbar ändert sich nichts: alles im Bild läuft immer (keine Reduce-Regel). */
+(function(){if(!window.IntersectionObserver||!document.head)return;
+ var st=document.createElement('style');st.id='vSpar';st.textContent='.vOff,.vOff::before,.vOff::after{animation-play-state:paused!important}';document.head.appendChild(st);
+ var seen=new WeakSet(),io=new IntersectionObserver(function(es){for(var i=0;i<es.length;i++)es[i].target.classList.toggle('vOff',!es[i].isIntersecting)},{rootMargin:'240px 4000px 240px 4000px'});
+ function add(el){if(!el||el.nodeType!==1||seen.has(el)||el===document.documentElement||el===document.body)return;seen.add(el);io.observe(el)}
+ function scan(){if(!document.getAnimations)return;var a=document.getAnimations();for(var i=0;i<a.length;i++){var t=a[i].effect&&a[i].effect.target;if(t&&a[i].animationName)add(t)}}
+ document.addEventListener('animationstart',function(e){add(e.target)},true);
+ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',scan);else scan();
+ addEventListener('load',function(){scan();setTimeout(scan,2500)});addEventListener('hashchange',function(){setTimeout(scan,700);setTimeout(scan,2600)})})();

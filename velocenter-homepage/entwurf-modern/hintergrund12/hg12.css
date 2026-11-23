@@ -72,3 +72,16 @@ html body .htxt .logobox{margin-bottom:44px!important}
 }
 /* Lange Links/Wörter in Rechtstexten brechen am Handy um (kein Überlauf über den Bildschirmrand) */
 .legal a,.legal h3,.legal p,.legal li{overflow-wrap:anywhere}
+
+/* Sparsame Glanzläufe (Tiry 23.11.2026: weniger Leistung, gleiche Optik). Vorher wanderte der Schimmer per background-position – der Browser
+   musste die ganze Glasfläche 60× pro Sekunde neu malen. Jetzt liegt derselbe Verlauf als breites, fertiges Band in der Fläche und wird nur
+   verschoben (transform, läuft auf der Grafikkarte). Gleiche Kurve, gleiche Dauer, gleiche Kacheln – Bildvergleich alt/neu ohne Abweichung. */
+html.er body :is(.gcard,.score,.visit .in,.pf){overflow:clip!important}
+html.er body :is(.gcard,.score,.visit .in,.pf)::after{inset:0 auto 0 -260%!important;width:780%!important;border-radius:0!important;background-size:33.3333% 100%!important;background-position:0 0!important;animation-name:plSheenT!important;will-change:transform}
+@keyframes plSheenT{0%{transform:translateX(-26.6667%)}100%{transform:translateX(6.1538%)}}
+html body .ostat{overflow:clip!important}
+html body .ostat::before{inset:0 auto 0 -250%!important;width:750%!important;border-radius:0!important;background-size:33.3333% 100%!important;background-position:0 0!important;animation-name:osheenT!important;will-change:transform}
+@keyframes osheenT{0%,55%{transform:translateX(-24%)}100%{transform:translateX(24%)}}
+/* Lichtring der Service-Symbole dreht nur, wenn er zu sehen ist (beim Drüberfahren) – vorher lief er unsichtbar dauernd mit */
+html body .srow .ic::before{animation-play-state:paused}
+html body .srow:hover .ic::before{animation-play-state:running}
