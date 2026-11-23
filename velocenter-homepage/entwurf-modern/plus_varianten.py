@@ -14,6 +14,7 @@ REGELN = [
     (r'^bestand/[A-Za-z0-9_-]+\.webp$', (400, 640)),      # Lager-Karten, Schnellzugriff
     (r'^(laden-innen|laden-eingang|isy-ausstellung|treffen-luft)\.webp$', (640, 960)),
     (r'^sattelueberzug\.webp$', (560,)),
+    (r'^fassade\.webp$', (640,)),
 ]
 VAR = re.compile(r'-(\d{3,4})\.webp$')
 

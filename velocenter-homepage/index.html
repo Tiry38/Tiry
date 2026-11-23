@@ -2824,6 +2824,22 @@ footer .soc a{display:grid!important;place-items:center}
 .lbp-yr a.rk{color:#B30F2B;box-shadow:inset 0 0 0 1.5px rgba(207,26,44,.55),inset 0 1px 0 #fff,0 0 0 4px rgba(207,26,44,.08),0 10px 18px -12px rgba(207,26,44,.7)}
 .lbp-yr a.rk i{font-style:normal;font-size:12px;line-height:1}
 .lbp-yr a.rk:hover,.lbp-yr a.rk:focus-visible{color:#fff}
+
+/* Winter-Aktion Kontrast + Ränder (Tiry 23.11.2026): kein Pink/Magenta, Champagner + Velocenter-Rot, Text sauber im Raster */
+.ice .eyebrow b{color:#F3CFA6!important}
+.ice .minus{display:inline-block;white-space:nowrap;padding:0 .1em 0 0;margin:0 -.1em 0 -.05em;transform-origin:0 72%;background:linear-gradient(180deg,#FFFFFF 12%,#EEF2F7 52%,#F3CFA6 100%)!important;-webkit-background-clip:text!important;background-clip:text!important;color:transparent}
+.ice .wbk b{background:none!important;-webkit-background-clip:border-box!important;background-clip:border-box!important;color:#F6D7B4!important}
+.ice .wbk>i,.ice .sust{background:linear-gradient(135deg,#FF4A55,#E2232D 50%,#A50F1E)!important;box-shadow:0 8px 18px -6px rgba(226,35,45,.65)!important}
+.ice .wbk{background:linear-gradient(135deg,rgba(20,22,28,.55),rgba(20,22,28,.35))!important}
+.ice .winc>i{background:linear-gradient(135deg,rgba(20,22,28,.5),rgba(20,22,28,.3))!important}
+.ice .lead{color:#F1F3F7!important}.ice .lead b{color:#fff}
+.ice .sug{inset:-8%!important}
+.ice .suimg img{width:90%;justify-self:center}
+.nlive{background:linear-gradient(135deg,#FF4A55,#E2232D 55%,#A50F1E)!important;box-shadow:0 4px 10px -4px rgba(226,35,45,.7)!important}
+.mnr .nlive{box-shadow:0 2px 6px rgba(226,35,45,.35)!important}
+.mbar a.mw{background:linear-gradient(120deg,#15803D,#11703A 55%,#0E5F33)!important}
+/* Schnellzugriff-Fotos erst laden, wenn die Kachel in die Nähe kommt */
+.qa:not(.ld) .bg{background-image:none!important}
 </style>
 <style id="vtExplo">
 /* Seitenwechsel „Explosionszeichnung“ (Tiry 21.11.2026) */
@@ -4571,17 +4587,24 @@ $('.skip')?.addEventListener('click',e=>{e.preventDefault();const m=$('#main');m
   for(let i=0;i<=6;i++){const t=i*Math.PI/3+Math.PI/6,x=Math.sin(t)*.17,y=-Math.cos(t)*.17;i?q.lineTo(x,y):q.moveTo(x,y)}return q});
  function size(){const r=cv.getBoundingClientRect();D=Math.min(2,devicePixelRatio||1);W=r.width;H2=r.height;cv.width=Math.round(W*D);cv.height=Math.round(H2*D);
   F=Array.from({length:Math.round(W/16)},()=>{const r=4.2+Math.random()*3.4;return {x:Math.random()*W,y:Math.random()*H2,r:r,v:.22+Math.random()*.5+r*.06,s:Math.random()*6,a:Math.random()*6.3,w:(Math.random()-.5)*.025,k:Math.random()*3|0,o:.72+Math.random()*.28,g:Math.random()*40,gf:.6+Math.random()*.9}})}
- size();addEventListener('resize',size);
+ let TX=[];function txr(){const c=cv.getBoundingClientRect();TX=[...cv.parentElement.querySelectorAll('.eyebrow,.minus,h2,.wbk,.sux,.winc,.lead,.cdn,.cta')].map(e=>{const r=e.getBoundingClientRect();return [r.left-c.left-10,r.top-c.top-10,r.right-c.left+10,r.bottom-c.top+10]})}
+ size();txr();addEventListener('resize',()=>{size();txr()});setTimeout(txr,1200);setTimeout(txr,4000);
  function star(x,y,l,al){cx.setTransform(D,0,0,D,x*D,y*D);cx.globalAlpha=al;const gr=cx.createRadialGradient(0,0,0,0,0,l);gr.addColorStop(0,'rgba(255,255,255,1)');gr.addColorStop(.35,'rgba(210,232,255,.55)');gr.addColorStop(1,'rgba(210,232,255,0)');cx.fillStyle=gr;
   cx.beginPath();cx.moveTo(0,-l);cx.lineTo(l*.09,-l*.09);cx.lineTo(l,0);cx.lineTo(l*.09,l*.09);cx.lineTo(0,l);cx.lineTo(-l*.09,l*.09);cx.lineTo(-l,0);cx.lineTo(-l*.09,-l*.09);cx.closePath();cx.fill()}
  let t0=0,vis=false,on=false;new IntersectionObserver(e=>{vis=e[0].isIntersecting;if(vis&&!on){on=true;t0=0;requestAnimationFrame(loop)}}).observe(cv);function loop(t){if(!vis||document.hidden){on=false;return}const dt=t0?Math.min(3,(t-t0)/16.67)*.7:1;t0=t;if(cur==='start'){if(!W)size();cx.setTransform(1,0,0,1,0,0);cx.clearRect(0,0,cv.width,cv.height);cx.lineCap='round';cx.lineJoin='round';const ts=t/1000;
   F.forEach(f=>{f.y+=f.v*dt;f.x+=Math.sin(ts*.8+f.s)*.28;f.a+=f.w*dt;if(f.y>H2+10){f.y=-10;f.x=Math.random()*W}
-   const sh=.5+.5*Math.sin(ts*f.gf*2.2+f.s*3),gl=Math.pow(Math.max(0,Math.sin(ts*.45*f.gf+f.g)),60)*.45;
+   let m=1;for(const r of TX)if(f.x>r[0]&&f.x<r[2]&&f.y>r[1]&&f.y<r[3]){m=.12;break}
+   const sh=.5+.5*Math.sin(ts*f.gf*2.2+f.s*3),gl=Math.pow(Math.max(0,Math.sin(ts*.45*f.gf+f.g)),60)*.45*m;
    cx.setTransform(D*f.r,0,0,D*f.r,f.x*D,f.y*D);cx.rotate(f.a);
-   cx.globalAlpha=f.o*(.24+.06*sh);cx.strokeStyle='#BFE0FF';cx.lineWidth=2.6/f.r;cx.stroke(P[f.k]);
-   cx.globalAlpha=f.o*(.88+.08*sh+gl*.3);cx.strokeStyle='#FFFFFF';cx.lineWidth=.95/f.r;cx.stroke(P[f.k]);
+   cx.globalAlpha=f.o*(.24+.06*sh)*m;cx.strokeStyle='#BFE0FF';cx.lineWidth=2.6/f.r;cx.stroke(P[f.k]);
+   cx.globalAlpha=f.o*(.88+.08*sh+gl*.3)*m;cx.strokeStyle='#FFFFFF';cx.lineWidth=.95/f.r;cx.stroke(P[f.k]);
    if(gl>.03){cx.globalCompositeOperation='lighter';star(f.x,f.y,f.r*1.5,gl*.7);cx.globalCompositeOperation='source-over'}});cx.globalAlpha=1}requestAnimationFrame(loop)}
 })();
+
+
+/* ---------- Schnellzugriff: Hintergrundfotos erst in Sichtnähe laden ---------- */
+(function(){const q=[...document.querySelectorAll('.qa')];if(!('IntersectionObserver' in window)){q.forEach(x=>x.classList.add('ld'));return}
+ const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('ld');io.unobserve(e.target)}}),{rootMargin:'400px'});q.forEach(x=>io.observe(x))})();
 
 /* ---------- Bewertungen wechseln ---------- */
 let qi=0,qs=[],qd=[],qt=0;

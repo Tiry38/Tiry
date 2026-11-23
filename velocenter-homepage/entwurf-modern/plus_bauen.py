@@ -117,6 +117,8 @@ rep('<img src="img/laden-eingang.webp" alt="Eingang des Velocenter Hessert',
 # 4b) Schnellzugriff-Kacheln (CSS-Hintergründe): kleinere Fotos
 rep('--img:url(img/laden-innen.webp)', '--img:url(%s)' % var('img/laden-innen.webp', 640))
 rep('--img:url(img/laden-eingang.webp)', '--img:url(%s)' % var('img/laden-eingang.webp', 640))
+rep('--img:url(img/fassade.webp)', '--img:url(%s)' % var('img/fassade.webp', 640))
+rep('<img src="img/sattelueberzug.webp" alt="Sattelüberzug in Neongelb', '<img src="%s" alt="Sattelüberzug in Neongelb' % var('img/sattelueberzug.webp', 560))
 # Rauch-Ebene: im Eis-Rot-Look nur noch 3 % Deckkraft → Bild (129 KB) entfällt, Fläche bleibt
 rep('.smoke{position:fixed;inset:0;z-index:-2;pointer-events:none;background:url(img/rauch.webp) center/cover no-repeat;opacity:.4',
     '.smoke{position:fixed;inset:0;z-index:-2;pointer-events:none;background:none;opacity:.4')
