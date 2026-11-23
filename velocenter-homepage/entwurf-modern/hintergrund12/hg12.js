@@ -181,14 +181,20 @@ var QS=1,FT=16,FN=0,TL=0;
 var SK=0,SKc=0,GT=null,LOCK=0,HOLD=0,RZ=0,SOFT=0,NEED=1,DOK=0;
 /* Schrift passt sich dem Foto an (Tiry 23.11.2026): direkt nach dem Zeichnen werden je Textblock ein paar Pixel des Hintergrunds gelesen.
    Hell → dunkle Schrift mit feiner Lichtkontur (hgTxL), dunkel → weiße Schrift mit feiner Schattenkontur (hgTxW). Mit Schwellen-Abstand, damit nichts flackert. */
-var TXE=[],TXT=0,TXP=new Uint8Array(4);
-function txSample(){var cw=cv.clientWidth,ch=cv.clientHeight;if(!cw||!ch)return;var fx=W/cw,fy=H/ch;
+var TXE=[],TXT=0,TXQ=1,TXC=null,TXX=null,TXS=0;
+/* Sparsam (Tiry 23.11.2026: Mini-PC hing): kein Pixel-Lesen pro Bild. Nur wenn das Scrollen steht (oder alle 2,5 s): Hintergrund einmal
+   auf 48×30 verkleinert in ein 2D-Canvas kopieren (ein einziger kleiner Rücklauf von der Grafik), Rest rechnet der Prozessor. */
+function txWant(){TXQ=1;NEED=1}
+var TXSC=0,TXSt=0;addEventListener('scroll',function(){TXSC=1;clearTimeout(TXSt);TXSt=setTimeout(function(){TXSC=0;txWant()},160)},{passive:true});addEventListener('resize',function(){txWant()});
+function txSample(){var cw=cv.clientWidth,ch=cv.clientHeight;if(!cw||!ch)return;var t0=performance.now();
+ if(!TXC){TXC=document.createElement('canvas');TXC.width=48;TXC.height=30;TXX=TXC.getContext('2d',{willReadFrequently:true})}
+ try{TXX.drawImage(cv,0,0,48,30)}catch(e){return}var D=TXX.getImageData(0,0,48,30).data;
  for(var i=0;i<TXE.length;i++){var el=TXE[i];if(!el.isConnected)continue;var r=el.getBoundingClientRect();if(r.bottom<0||r.top>ch||r.width<2)continue;
-  var y0=Math.max(r.top,2),y1=Math.min(r.bottom,ch-2);if(y1<=y0)continue;var Ls=0,n=0;
-  for(var a=0;a<3;a++)for(var b=0;b<3;b++){var px=r.left+r.width*(.12+.38*a),py=y0+(y1-y0)*(.15+.35*b);
-   gl.readPixels(Math.round(px*fx),Math.round(H-py*fy),1,1,gl.RGBA,gl.UNSIGNED_BYTE,TXP);Ls+=(.2126*TXP[0]+.7152*TXP[1]+.0722*TXP[2])/255;n++}
-  if(!n)continue;var L=Ls/n,w=el.classList.contains('hgTxW');
-  if(!w&&L<.63){el.classList.add('hgTxW');el.classList.remove('hgTxL')}else if(w&&L>.71){el.classList.remove('hgTxW');el.classList.add('hgTxL')}}}
+  var x0=Math.max(0,Math.floor(r.left/cw*48)),x1=Math.min(47,Math.floor(r.right/cw*48)),y0=Math.max(0,Math.floor(r.top/ch*30)),y1=Math.min(29,Math.floor(r.bottom/ch*30)),Ls=0,n=0;
+  for(var y=y0;y<=y1;y++)for(var x=x0;x<=x1;x++){var k=(y*48+x)*4;Ls+=.2126*D[k]+.7152*D[k+1]+.0722*D[k+2];n++}
+  if(!n)continue;var L=Ls/n/255,w=el.classList.contains('hgTxW');
+  if(!w&&L<.63){el.classList.add('hgTxW');el.classList.remove('hgTxL')}else if(w&&L>.71){el.classList.remove('hgTxW');el.classList.add('hgTxL')}}
+ TXS=performance.now()-t0}
 function gov(now){if(now<4000)return;
  if(GT){if(FT>GT.ft*.9){if(GT.k==='q')QS=GT.v;else SK=GT.v;LOCK=now+60000}GT=null;return}
  if(FT>26&&now>LOCK){if(QS>.5){GT={k:'q',v:QS,ft:FT};QS=Math.max(.5,QS-.15)}else if(SK<3){GT={k:'s',v:SK,ft:FT};SK++}else return;HOLD=now+(now-RZ<5000?60000:10000)}
@@ -213,7 +219,7 @@ function frame(){raf=requestAnimationFrame(frame);var now=performance.now();if(S
  gl.uniform2f(U.uR,W,H);gl.uniform1f(U.uT,t);gl.uniform1f(U.uS,sc);gl.uniform2f(U.uM,M[0],M[1]);gl.uniform3f(U.uK,K[0],K[1],K[2]);
  gl.uniform2f(U.uImg,e.w,e.h);gl.uniform2f(U.uFoc,W/H<.9?c.fxm:c.fx,c.fy);gl.uniform1f(U.uFl,c.fl);gl.uniform2f(U.uWf,c.wf[0],c.wf[1]);gl.uniform1f(U.uFg,c.fg);gl.uniform1f(U.uSn,c.sn);var sc3=c.sc||[.98,.985,1];gl.uniform1f(U.uSz,c.sz||1);gl.uniform1f(U.uLd,c.ld||0);gl.uniform1f(U.uDf,c.df||0);gl.uniform1f(U.uGr,c.gr||0);gl.uniform1f(U.uCs,c.cs||0);gl.uniform1f(U.uDy,c.dy||0);gl.uniform1f(U.uNt,c.nt||0);gl.uniform3f(U.uSc,sc3[0],sc3[1],sc3[2]);gl.uniform2f(U.uTy,c.ty?c.ty[0]:0,c.ty?c.ty[1]:0);gl.uniform1f(U.uFp,c.fp);gl.uniform1f(U.uAm,c.am);gl.uniform1f(U.uSp,c.sp);
  var sx=c.sun[0],sy=c.sun[1],sz2=c.sun[2];if(c.dy){var tg=Math.max(0,Math.min(1,sc/2.6));sx=.18+.70*tg;sy=.62+.34*Math.sin(Math.PI*Math.min(1,tg*1.15));sz2=c.sun[2]*(1+1.4*tg)}if(c.nt)sz2*=Math.max(0,1-sc/1.2);gl.uniform3f(U.uSun,c.fl?1-sx:sx,sy,sz2);gl.uniform1f(U.uFade,fade*fade*(3-2*fade));gl.uniform1f(U.uV,VS);gl.uniform3f(U.uPo,Po[0],Po[1],Po[2]);
- gl.bindBuffer(gl.ARRAY_BUFFER,buf);gl.vertexAttribPointer(0,2,gl.FLOAT,false,0,0);gl.drawArrays(gl.TRIANGLES,0,3);if(TXE.length&&now-TXT>140){TXT=now;txSample()}}
+ gl.bindBuffer(gl.ARRAY_BUFFER,buf);gl.vertexAttribPointer(0,2,gl.FLOAT,false,0,0);gl.drawArrays(gl.TRIANGLES,0,3);if(TXE.length&&(TXQ||now-TXT>(TXS>12?8000:2500))&&!TXSC){TXQ=0;TXT=now;txSample()}}
 /* ---------- Glasplatten hinter freier Schrift (Tiry 22.11.2026: „richtige Glaselemente statt gesprüht“) ----------
    Alle dunklen Texte der aktiven Ansicht + Fußzeile, die nicht schon auf einer eigenen Karte stehen, werden zu Gruppen
    zusammengefasst (Abstand < 2×Luft) und bekommen je eine echte Glasplatte im Stil der Fußzeilen-Karte (Seiten-Koordinaten). */
@@ -261,7 +267,7 @@ function gpBuild(){GP.tm=0;GP.last=performance.now();
  T.forEach(function(t){var e=t.el;if(onCard(e)){e.classList.remove('hgTxG','hgTxD','hgTxL','hgTxW');var ix=TXE.indexOf(e);if(ix>=0)TXE.splice(ix,1);return}var c=getComputedStyle(e),f=c.webkitTextFillColor||c.color,m=(f.match(/[\d.]+/g)||[0,0,0,1]).map(Number);
   var cls=(m.length>3&&m[3]<.1)?'hgTxG':((.2126*m[0]+.7152*m[1]+.0722*m[2])>150?'hgTxD':'hgTxL');
   if(!(cls=='hgTxL'&&e.classList.contains('hgTxW'))){e.classList.remove('hgTxG','hgTxD','hgTxL','hgTxW');e.classList.add(cls)}if(cls=='hgTxL'&&TXE.indexOf(e)<0)TXE.push(e);
-  e.querySelectorAll('*').forEach(function(k){var g=getComputedStyle(k),z=(g.webkitTextFillColor||'').match(/[\d.]+/g);if(z&&z.length>3&&+z[3]<.1)k.classList.add('hgTxG')})});T=[];
+  e.querySelectorAll('*').forEach(function(k){var g=getComputedStyle(k),z=(g.webkitTextFillColor||'').match(/[\d.]+/g);if(z&&z.length>3&&+z[3]<.1)k.classList.add('hgTxG')})});T=[];txWant();
  function bb(L){var b=[1e9,1e9,-1e9,-1e9];L.forEach(function(a){if(a[0]<b[0])b[0]=a[0];if(a[1]<b[1])b[1]=a[1];if(a[2]>b[2])b[2]=a[2];if(a[3]>b[3])b[3]=a[3]});return b}
  function hit(a,b,e){e=e||0;return a[0]<b[2]-e&&a[2]>b[0]+e&&a[1]<b[3]-e&&a[3]>b[1]+e}
  /* Blöcke (Schrift, die auf einem Foto steht, bekommt keine Platte) */

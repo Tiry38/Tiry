@@ -70,10 +70,11 @@ html body .srow:hover .ic::before{animation-play-state:running}
 
 /* Schrift auf dem Foto (Tiry 23.11.2026): statt weißer Glasplatten ein enger, weicher Lichtsaum direkt an den Buchstaben –
    dunkle Schrift hebt sich hell ab, helle Schrift dunkel, Verlaufs-Schrift per drop-shadow (text-shadow würde den Verlauf überdecken). */
-html body [class*=hgTx],html body [class*=hgTx] *{paint-order:stroke fill;transition:color .45s ease,-webkit-text-stroke-color .45s ease,text-shadow .45s ease}
-html body .hgTxL,html body .hgTxL *{-webkit-text-stroke:max(2px,.055em) rgba(255,255,255,.9);text-shadow:0 0 4px rgba(255,255,255,.7),0 1px 10px rgba(255,255,255,.35)!important}
-html body .hgTxW,html body .hgTxW *{color:#fff!important;-webkit-text-stroke:max(2px,.05em) rgba(14,16,22,.5);text-shadow:0 1px 3px rgba(8,10,14,.55),0 2px 14px rgba(8,10,14,.38)!important}
-html body .hgTxD,html body .hgTxD *{-webkit-text-stroke:max(2px,.05em) rgba(14,16,22,.5);text-shadow:0 1px 3px rgba(8,10,14,.5),0 2px 12px rgba(8,10,14,.32)!important}
+html body [class*=hgTx],html body [class*=hgTx] *{paint-order:stroke fill}
+html body .hgTxL,html body .hgTxW{transition:color .35s ease}
+html body .hgTxL,html body .hgTxL *{-webkit-text-stroke:max(2px,.055em) rgba(255,255,255,.9);text-shadow:0 0 4px rgba(255,255,255,.65)!important}
+html body .hgTxW,html body .hgTxW *{color:#fff!important;-webkit-text-stroke:max(2px,.05em) rgba(14,16,22,.5);text-shadow:0 1px 4px rgba(8,10,14,.6)!important}
+html body .hgTxD,html body .hgTxD *{-webkit-text-stroke:max(2px,.05em) rgba(14,16,22,.5);text-shadow:0 1px 4px rgba(8,10,14,.55)!important}
 html body .hgTxG,html body [class*=hgTx] .hgTxG{-webkit-text-stroke:0!important;text-shadow:none!important;filter:drop-shadow(0 0 1px rgba(255,255,255,.95)) drop-shadow(0 0 1px rgba(255,255,255,.9)) drop-shadow(0 1px 6px rgba(255,255,255,.55))}
 html body .hgTxW .hgTxG{filter:drop-shadow(0 0 1px rgba(255,255,255,.95)) drop-shadow(0 0 2px rgba(255,255,255,.9)) drop-shadow(0 1px 8px rgba(8,10,14,.45))}
 
