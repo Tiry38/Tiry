@@ -1,0 +1,64 @@
+{
+  "name": "velo-tv",
+  "productName": "Velo-TV",
+  "version": "1.0.0",
+  "description": "Ladenfernseher-Steuerung für Velocenter Hessert: Dateien hineinziehen, anordnen, planen – alle PCs synchron, der Fernseher zeigt es per WLAN.",
+  "main": "src/main/main.js",
+  "author": "Velocenter Hessert",
+  "license": "UNLICENSED",
+  "private": true,
+  "scripts": {
+    "start": "electron .",
+    "test": "node --test test/*.test.js",
+    "smoke": "node scripts/smoke.js",
+    "dist": "electron-builder --win --x64"
+  },
+  "dependencies": {
+    "electron-updater": "^6.8.11",
+    "pdfjs-dist": "^4.10.38"
+  },
+  "devDependencies": {
+    "electron": "^45.2.1",
+    "electron-builder": "^26.18.0",
+    "playwright": "^1.63.0"
+  },
+  "build": {
+    "appId": "de.velocenter.velotv",
+    "productName": "Velo-TV",
+    "directories": {
+      "output": "dist",
+      "buildResources": "build"
+    },
+    "files": [
+      "src/**/*",
+      "package.json",
+      "build/icon.png",
+      "!src/**/*.map"
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "icon": "build/icon.png"
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "shortcutName": "Velo-TV",
+      "artifactName": "Velo-TV-Setup.${ext}"
+    },
+    "publish": [
+      {
+        "provider": "generic",
+        "url": "https://github.com/Tiry38/Tiry/releases/download/velo-tv-latest"
+      }
+    ]
+  }
+}

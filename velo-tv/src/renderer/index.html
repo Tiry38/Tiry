@@ -1,0 +1,233 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' http: data: blob:; media-src 'self' http: blob:; connect-src 'self' http: data: blob:; frame-src http:; worker-src 'self' blob:; font-src 'self'">
+<title>Velo-TV</title>
+<link rel="stylesheet" href="app.css">
+</head>
+<body>
+<div class="bg" aria-hidden="true"><div class="bg-fog"></div></div>
+
+<!-- ============ Ersteinrichtung ============ -->
+<section id="setup" class="setup" hidden>
+  <div class="setup-card glass">
+    <img src="assets/logo.png" alt="Velocenter Hessert" class="setup-logo">
+    <span class="eyebrow"><i></i>Velo-TV · <b>Einrichtung</b></span>
+    <h1>Welche Rolle hat <em>dieser PC?</em></h1>
+    <p class="lead">Ein PC ist die Zentrale und beliefert den Fernseher. Alle anderen PCs sind Bedienplätze und sehen live dasselbe.</p>
+    <label class="field"><span>Name dieses PCs</span><input id="setupName" maxlength="40" placeholder="z. B. Kasse, Büro Kevin"></label>
+    <div class="roles">
+      <button class="role" data-role="zentrale">
+        <span class="role-ico"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="12" rx="3"/><path d="M8 20h8M12 16v4"/></svg></span>
+        <b>Zentrale</b><small>Kassen-PC direkt beim Fernseher. Läuft während der Öffnungszeiten.</small>
+      </button>
+      <button class="role" data-role="bedienplatz">
+        <span class="role-ico"><svg viewBox="0 0 24 24"><rect x="2" y="5" width="13" height="9" rx="2"/><path d="M6 18h5M8.5 14v4"/><path d="M18 8l4 4-4 4"/></svg></span>
+        <b>Bedienplatz</b><small>Büro-PC. Steuert alles, die Dateien liegen auf der Zentrale.</small>
+      </button>
+    </div>
+    <div id="pairBox" class="pair" hidden>
+      <span class="eyebrow small"><i></i>Zentrale im Netz <b id="pairSearch">wird gesucht …</b></span>
+      <div id="foundList" class="found"></div>
+      <div class="pair-row">
+        <label class="field grow"><span>Adresse der Zentrale (falls nicht gefunden)</span><input id="pairHost" placeholder="z. B. 192.168.178.23"></label>
+        <label class="field pin"><span>PIN</span><input id="pairPin" inputmode="numeric" maxlength="4" placeholder="••••"></label>
+      </div>
+      <button id="pairGo" class="cta">Koppeln <svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
+      <p class="hint">Die PIN steht an der Zentrale unter <b>Fernseher</b>.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ Hauptprogramm ============ -->
+<div id="app" hidden>
+  <header class="hdr">
+    <img src="assets/logo.png" alt="Velocenter Hessert" class="hdr-logo">
+    <nav class="nav" id="nav">
+      <button data-view="programm" class="on">Programm</button>
+      <button data-view="fernseher">Fernseher</button>
+      <button data-view="verlauf">Verlauf</button>
+      <button data-view="papierkorb">Papierkorb <span class="count" id="trashCount" hidden></span></button>
+      <button data-view="einstellungen">Einstellungen</button>
+    </nav>
+    <div class="hdr-right">
+      <div class="status" id="tvStatus"><span class="dot"></span><span class="status-tx">Fernseher wird gesucht</span></div>
+      <button class="cta sm" id="addBtn">Dateien <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button>
+    </div>
+  </header>
+
+  <div class="offline" id="offline" hidden>
+    <b>Zentrale nicht erreichbar.</b> Läuft Velo-TV am Kassen-PC? Es wird automatisch neu verbunden …
+  </div>
+
+  <main>
+    <!-- Programm -->
+    <section class="view" id="view-programm">
+      <div class="cols">
+        <div class="col-main">
+          <span class="eyebrow"><i></i>Programm · <b id="activeCount">0 aktiv</b></span>
+          <h1>Was läuft auf <em>dem Fernseher.</em></h1>
+          <p class="lead">Dateien hineinziehen, mit dem Griff sortieren, auf einen Beitrag klicken für Dauer und Zeitplan. Alle PCs sehen jede Änderung sofort.</p>
+
+          <div class="drop glass" id="drop" tabindex="0" role="button" aria-label="Dateien hinzufügen">
+            <span class="drop-ico"><svg viewBox="0 0 24 24"><path d="M12 16V4M7 9l5-5 5 5"/><path d="M4 16v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg></span>
+            <div><b>Dateien hier hineinziehen</b><small>Bilder · Videos · PDF · PowerPoint – oder klicken zum Auswählen</small></div>
+            <button class="ghost" id="textBtn" type="button">Text-Folie <svg viewBox="0 0 24 24"><path d="M5 6h14M12 6v13"/></svg></button>
+          </div>
+          <input type="file" id="fileInput" multiple hidden accept="image/*,video/*,.pdf,.ppt,.pptx,.pps,.ppsx,.odp">
+
+          <div id="queue" class="queue"></div>
+          <div id="list" class="list"></div>
+          <div id="empty" class="empty glass" hidden>
+            <b>Noch nichts im Programm.</b>
+            <span>Der Fernseher zeigt so lange das Velocenter-Startbild.</span>
+          </div>
+        </div>
+
+        <aside class="col-side">
+          <div class="preview glass">
+            <div class="preview-head">
+              <span class="eyebrow small"><i></i>Vorschau</span>
+              <span class="mut" id="nowShowing">–</span>
+            </div>
+            <div class="screen"><iframe id="previewFrame" title="Vorschau Fernseher" tabindex="-1"></iframe></div>
+          </div>
+          <div class="side-card glass">
+            <span class="eyebrow small"><i></i>Verbunden</span>
+            <div id="pcs" class="chips"></div>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <!-- Fernseher -->
+    <section class="view" id="view-fernseher" hidden>
+      <span class="eyebrow"><i></i>Fernseher · <b>LG per WLAN</b></span>
+      <h1>So kommt das Programm <em>auf den Fernseher.</em></h1>
+      <div class="tv-grid">
+        <div class="glass card">
+          <div class="addr-label">Adresse für den Fernseher</div>
+          <div class="addr" id="tvAddr">–</div>
+          <ol class="steps">
+            <li><span>1</span><div><b>Fernseher ins WLAN</b>Gleiches WLAN wie der Kassen-PC (Einstellungen → Netzwerk → WLAN).</div></li>
+            <li><span>2</span><div><b>Webbrowser öffnen</b>Auf der Fernbedienung die Home-Taste drücken und die App „Webbrowser“ starten.</div></li>
+            <li><span>3</span><div><b>Adresse eingeben</b>Die Adresse oben in die Adresszeile tippen und als Startseite bzw. Lesezeichen speichern.</div></li>
+            <li><span>4</span><div><b>Vollbild</b>OK auf der Fernbedienung drücken – das Programm läuft ab jetzt automatisch.</div></li>
+          </ol>
+          <p class="hint" id="tvAddrHint"></p>
+        </div>
+        <div class="glass card">
+          <div class="tv-now">
+            <div class="tv-dot" id="tvDot"></div>
+            <div><b id="tvNowTitle">Noch keine Verbindung</b><small id="tvNowSub">Sobald der Fernseher die Adresse öffnet, erscheint er hier.</small></div>
+          </div>
+          <div class="settings">
+            <label class="row"><span>Überblendung</span>
+              <select id="setTransition"><option value="fade">Weich überblenden</option><option value="slide">Schieben</option><option value="zoom">Zoom</option><option value="none">Ohne</option></select></label>
+            <label class="row"><span>Standard-Dauer für Bilder</span>
+              <span class="num"><input type="number" id="setDuration" min="2" max="300"> s</span></label>
+            <label class="row"><span>Uhrzeit oben rechts</span><input type="checkbox" class="sw" id="setClock"></label>
+            <label class="row"><span>Logo unten links</span><input type="checkbox" class="sw" id="setLogo"></label>
+          </div>
+          <button class="ghost" id="tvReload">Fernseher neu laden</button>
+        </div>
+        <div class="glass card" id="zentraleCard">
+          <span class="eyebrow small"><i></i>Für Bedienplätze</span>
+          <div class="pin-show"><small>PIN zum Koppeln</small><b id="pinShow">––––</b></div>
+          <div class="btn-row">
+            <button class="ghost" id="pinNew">Neue PIN</button>
+            <button class="ghost" id="firewallBtn">Windows-Firewall freigeben</button>
+          </div>
+          <p class="hint">Fragt Windows beim ersten Start nach dem Netzwerkzugriff, bitte <b>„Private Netzwerke“ zulassen</b>. Sonst erreicht der Fernseher die Zentrale nicht.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Verlauf -->
+    <section class="view" id="view-verlauf" hidden>
+      <span class="eyebrow"><i></i>Verlauf · <b>alle PCs</b></span>
+      <h1>Wer hat <em>was geändert.</em></h1>
+      <div class="timeline glass" id="log"></div>
+    </section>
+
+    <!-- Papierkorb -->
+    <section class="view" id="view-papierkorb" hidden>
+      <span class="eyebrow"><i></i>Papierkorb · <b>30 Tage</b></span>
+      <h1>Gelöscht, <em>aber nicht weg.</em></h1>
+      <p class="lead">Gelöschte Beiträge bleiben 30 Tage hier und lassen sich mit einem Klick wiederherstellen.</p>
+      <div class="list" id="trash"></div>
+      <button class="ghost danger" id="trashEmpty" hidden>Papierkorb endgültig leeren</button>
+    </section>
+
+    <!-- Einstellungen -->
+    <section class="view" id="view-einstellungen" hidden>
+      <span class="eyebrow"><i></i>Einstellungen · <b>dieser PC</b></span>
+      <h1>Velo-TV <em>auf diesem PC.</em></h1>
+      <div class="glass card settings wide">
+        <label class="row"><span>Name dieses PCs <small>steht im Verlauf</small></span><input id="pcName" maxlength="40"></label>
+        <div class="row"><span>Rolle</span><b id="roleShow">–</b></div>
+        <label class="row" id="autostartRow"><span>Mit Windows starten <small>empfohlen für die Zentrale</small></span><input type="checkbox" class="sw" id="autostart"></label>
+        <div class="row" id="zentraleRow"><span>Zentrale</span><b id="zentraleShow">–</b></div>
+        <div class="row"><span>Version</span><b id="versionShow">–</b></div>
+        <div class="row"><span>Rolle wechseln <small>setzt diesen PC zurück, Inhalte der Zentrale bleiben</small></span><button class="ghost danger" id="resetRole">Neu einrichten</button></div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<!-- ============ Beitrag bearbeiten ============ -->
+<div class="sheet-bg" id="sheetBg" hidden></div>
+<aside class="sheet glass" id="sheet" hidden aria-modal="true" role="dialog">
+  <button class="x" id="sheetClose" aria-label="Schließen"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+  <span class="eyebrow small"><i></i><span id="sheetKind">Beitrag</span></span>
+  <input class="title-input" id="edName" maxlength="160">
+  <div class="sheet-prev" id="edPrev"></div>
+
+  <div class="ed-block" id="edTextBlock">
+    <label class="field"><span>Kleine Zeile oben <small>(optional)</small></span><input id="edBadge" maxlength="40" placeholder="z. B. Nur diese Woche"></label>
+    <label class="field"><span>Überschrift <small>*Wort* = rot hervorgehoben</small></span><input id="edTitle" maxlength="120"></label>
+    <label class="field"><span>Text darunter <small>(optional)</small></span><textarea id="edSub" maxlength="240" rows="2"></textarea></label>
+    <div class="field"><span>Stil</span><div class="themes" id="edTheme"></div></div>
+  </div>
+
+  <div class="ed-block">
+    <div class="field"><span>Anzeigedauer</span>
+      <div class="dur"><input type="range" id="edDur" min="3" max="60" step="1"><b id="edDurShow"></b></div>
+      <label class="check" id="edFullRow"><input type="checkbox" id="edFull"> Video komplett abspielen</label>
+      <label class="check" id="edSoundRow"><input type="checkbox" id="edSound"> Mit Ton (falls der Fernseher es erlaubt)</label>
+    </div>
+    <div class="field" id="edFitRow"><span>Darstellung</span>
+      <div class="seg"><button data-fit="contain">Ganz zeigen</button><button data-fit="cover">Bildschirm füllen</button></div>
+    </div>
+  </div>
+
+  <div class="ed-block">
+    <div class="field"><span>Zeitplan <small id="edPlanShow"></small></span>
+      <div class="days" id="edDays"></div>
+      <div class="pair-row">
+        <label class="field"><span>Von</span><input type="time" id="edFrom"></label>
+        <label class="field"><span>Bis</span><input type="time" id="edTo"></label>
+      </div>
+      <div class="pair-row">
+        <label class="field"><span>Ab Datum</span><input type="date" id="edStart"></label>
+        <label class="field"><span>Bis Datum</span><input type="date" id="edEnd"></label>
+      </div>
+    </div>
+  </div>
+
+  <div class="sheet-actions">
+    <button class="cta" id="edSave">Speichern <svg viewBox="0 0 24 24"><path d="M5 12l5 5 9-10"/></svg></button>
+    <button class="ghost" id="edShow">Jetzt auf dem TV zeigen</button>
+    <button class="ghost danger" id="edDelete">Löschen</button>
+  </div>
+</aside>
+
+<div class="toasts" id="toasts" aria-live="polite"></div>
+<div class="update" id="updateBar" hidden><b>Neue Version bereit.</b><button class="cta sm" id="updateGo">Jetzt neu starten</button></div>
+<div class="dragcover" id="dragcover" hidden><div><b>Loslassen</b><span>zum Hinzufügen</span></div></div>
+
+<script src="../shared/schedule.js"></script>
+<script type="module" src="app.js"></script>
+</body>
+</html>

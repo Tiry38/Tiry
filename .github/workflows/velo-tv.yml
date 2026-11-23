@@ -1,0 +1,62 @@
+name: Velo-TV bauen & ausliefern
+
+# Jede Änderung an velo-tv/ auf main baut den Windows-Installer.
+# Feste Download-Adresse für Tiry: https://github.com/Tiry38/Tiry/releases/download/velo-tv-latest/Velo-TV-Setup.exe
+# Installierte Programme holen sich Updates über latest.yml im selben Release (electron-updater, generic).
+on:
+  push:
+    branches: [main]
+    paths: ['velo-tv/**', '.github/workflows/velo-tv.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: velo-tv
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: windows-latest
+    timeout-minutes: 30
+    defaults:
+      run:
+        working-directory: velo-tv
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: velo-tv/package-lock.json
+      - run: npm ci
+      - run: npm test
+      - name: Versionsnummer setzen (1.0.<Lauf>)
+        shell: bash
+        run: npm version "1.0.${{ github.run_number }}" --no-git-tag-version --allow-same-version
+      - name: Installer bauen
+        run: npx electron-builder --win --x64 --publish never
+      - name: Release velo-tv-latest aktualisieren
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          TAG="velo-tv-latest"
+          ls -la dist
+          test -f dist/latest.yml || { echo "dist/latest.yml fehlt"; exit 1; }
+          git tag -f "$TAG" "$GITHUB_SHA"
+          git push -f origin "refs/tags/$TAG"
+          FILES=(dist/Velo-TV-Setup.exe dist/Velo-TV-Setup.exe.blockmap dist/latest.yml)
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            gh release upload "$TAG" "${FILES[@]}" --clobber
+            gh release edit "$TAG" --title "Velo-TV 1.0.${{ github.run_number }}" --latest=false
+          else
+            gh release create "$TAG" "${FILES[@]}" --verify-tag --latest=false \
+              --title "Velo-TV 1.0.${{ github.run_number }}" \
+              --notes "Ladenfernseher-Steuerung für Velocenter Hessert. Installieren: Velo-TV-Setup.exe herunterladen und ausführen. Installierte Programme aktualisieren sich selbst."
+          fi
+      - uses: actions/upload-artifact@v4
+        with:
+          name: velo-tv-installer
+          path: velo-tv/dist/Velo-TV-Setup.exe

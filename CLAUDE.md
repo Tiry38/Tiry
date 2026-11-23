@@ -53,3 +53,8 @@ testet, bewertet und dauerhaft selbst weiterentwickelt. Besitzer: Tiry. UI-Sprac
 - **WoW-Forever-Add-ons** in `wow-addons/` – eigener Leitfaden `wow-addons/CLAUDE.md`, Stand in `wow-addons/UEBERGABE.md`.
   Für Arbeit dort gelten die Regeln aus `wow-addons/CLAUDE.md` (die App-Forge-Befehle oben betreffen nur `app-forge/`).
   Arbeitsstand im Branch **`claude/wow-addons`**, bis Tiry ihn nach `main` holt. Skills dafür: `.claude/skills/wow-*`.
+
+## Velo-TV (Ladenfernseher)
+- Ordner `velo-tv/`, Leitfaden `velo-tv/LIESMICH.md`. Electron-Programm: Kassen-PC = Zentrale, Büro-PCs = Bedienplätze,
+  LG-Fernseher zeigt `http://<Zentrale>:8833` im Browser. Design = www.velo-center.de (Herbstfoto, Milchglas, rote Pillen).
+- `npm test` muss grün sein; nach UI-Änderungen den Smoke-Test (siehe LIESMICH) laufen lassen und Screenshots ansehen.

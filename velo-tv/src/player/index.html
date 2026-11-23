@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Velo-TV</title>
+<link rel="stylesheet" href="/player.css">
+</head>
+<body>
+<div id="stage"></div>
+<div id="idle" class="idle" hidden>
+  <div class="idle-fog"></div>
+  <div class="idle-card">
+    <img src="/assets/logo.png" alt="Velocenter Hessert" class="idle-logo">
+    <span class="eyebrow"><i></i>Familienbetrieb seit 1995 · <b>Wörth am Rhein</b></span>
+  </div>
+</div>
+<div id="clock" class="clock" hidden></div>
+<img id="cornerLogo" class="corner-logo" src="/assets/logo.png" alt="" hidden>
+<div id="hint" class="hint" hidden>OK auf der Fernbedienung drücken = Vollbild</div>
+<div id="offline" class="offline-dot" hidden></div>
+<script src="/shared/schedule.js"></script>
+<script src="/player.js"></script>
+</body>
+</html>
