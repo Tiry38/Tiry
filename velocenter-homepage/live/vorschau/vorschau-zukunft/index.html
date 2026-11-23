@@ -1,0 +1,756 @@
+<!doctype html>
+<html lang="de" data-type="place">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Velocenter Hessert · E-Bikes &amp; Werkstatt in Wörth am Rhein</title>
+<meta name="description" content="Über 300 E-Bikes zum Probefahren, Bosch Service Center und Dienstrad-Leasing. Familienbetrieb seit 1995 in Wörth am Rhein.">
+<meta name="robots" content="noindex,nofollow">
+<meta name="page-type" content="place"><meta name="site-kind" content="other"><meta name="page-kind" content="place">
+<meta name="theme-color" content="#0E1015">
+<meta property="og:title" content="Velocenter Hessert · E-Bikes & Werkstatt in Wörth am Rhein">
+<meta property="og:description" content="Über 300 E-Bikes zum Probefahren, Bosch Service Center, Familienbetrieb seit 1995.">
+<meta property="og:image" content="../og-bild.jpg">
+<link rel="icon" href="../favicon.png">
+<link rel="preload" href="../fonts/outfit-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="../img/p-ktm-1200.webp" as="image">
+<style>
+@font-face{font-family:"Outfit";font-weight:300 900;font-display:swap;src:url(../fonts/outfit-latin.woff2) format("woff2")}
+@font-face{font-family:"Sora";font-weight:300 700;font-display:swap;src:url(../fonts/sora-latin.woff2) format("woff2")}
+:root{
+ --ink:#0D0F14;--ink2:#151821;--ink3:#1D212C;--pearl:#F4F2EE;--pearl2:#ECEAE5;--paper:#FFFFFF;
+ --red:#C8102E;--red2:#E3263F;--copper:#B87333;--champ:#E8C9A0;--steel:#7F8FA6;
+ --tx:#15171C;--mut:#4A4F59;--txd:#F3F1EC;--mutd:#B3B6BE;
+ --grad:linear-gradient(100deg,#E3263F 0%,#C8102E 30%,#B87333 70%,#E8C9A0 100%);
+ --display:"Outfit",system-ui,sans-serif;--body:"Sora",system-ui,sans-serif;
+ --wrap:min(1240px,100% - 48px);--ease:cubic-bezier(.2,.8,.2,1);--spring:cubic-bezier(.34,1.56,.64,1);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--pearl);color:var(--tx);font:400 16.5px/1.6 var(--body);overflow-x:hidden;-webkit-font-smoothing:antialiased}
+img{display:block;max-width:100%;height:auto}
+a{color:inherit}
+h1,h2,h3{font-family:var(--display);margin:0;letter-spacing:-.02em}
+p{margin:0}
+.wrap{width:var(--wrap);margin-inline:auto}
+.skip{position:fixed;left:16px;top:-80px;z-index:100;background:var(--paper);color:var(--tx);padding:12px 18px;border-radius:999px;font-weight:700;text-decoration:none}
+.skip:focus{top:16px}
+:focus-visible{outline:3px solid var(--copper);outline-offset:3px;border-radius:14px}
+.gt{background:var(--grad);background-size:200% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:gtf 9s ease-in-out infinite alternate}
+@keyframes gtf{to{background-position:100% 0}}
+.eyebrow{font:700 12.5px/1 var(--display);letter-spacing:.22em;text-transform:uppercase;color:var(--copper);display:inline-flex;align-items:center;gap:12px}
+.eyebrow::before{content:"";width:28px;height:2px;border-radius:2px;background:var(--grad)}
+.h2{font-size:clamp(34px,5vw,64px);line-height:1.02;font-weight:800}
+.lead{font-size:clamp(16.5px,1.4vw,19px);color:var(--mut);max-width:56ch}
+.dark .lead{color:var(--mutd)}
+
+/* ---------- Knöpfe ---------- */
+.btn{--bx:0px;--by:0px;position:relative;display:inline-flex;align-items:center;justify-content:center;gap:10px;min-height:52px;padding:0 26px;border-radius:999px;border:0;cursor:pointer;
+ font:700 16px/1 var(--display);text-decoration:none;letter-spacing:.01em;transform:translate(var(--bx),var(--by));transition:transform .35s var(--spring),box-shadow .35s var(--ease),background .3s}
+.btn svg{width:18px;height:18px;flex:none;transition:transform .35s var(--spring)}
+.btn:hover svg{transform:translateX(4px)}
+.btn:active{transform:translate(var(--bx),calc(var(--by) + 2px)) scale(.97)}
+.btn-p{color:#fff;background:linear-gradient(120deg,#E3263F,#C8102E 55%,#9E0C24);box-shadow:0 14px 34px -12px rgba(200,16,46,.75),inset 0 1px 0 rgba(255,255,255,.35)}
+.btn-p:hover{box-shadow:0 20px 44px -12px rgba(200,16,46,.9),0 0 0 4px rgba(227,38,63,.16),inset 0 1px 0 rgba(255,255,255,.35)}
+.btn-g{color:var(--tx);background:rgba(255,255,255,.72);box-shadow:inset 0 0 0 1.5px rgba(21,23,28,.14)}
+.btn-g:hover{background:#fff;box-shadow:inset 0 0 0 1.5px rgba(184,115,51,.6),0 12px 30px -14px rgba(0,0,0,.3)}
+.dark .btn-g{color:#fff;background:rgba(255,255,255,.07);box-shadow:inset 0 0 0 1.5px rgba(255,255,255,.22)}
+.dark .btn-g:hover{background:rgba(255,255,255,.13);box-shadow:inset 0 0 0 1.5px rgba(232,201,160,.7)}
+.lnk{position:relative;font-weight:700;text-decoration:none;color:var(--red)}
+.lnk::after{content:"";position:absolute;left:0;right:0;bottom:-3px;height:2px;background:currentColor;transform:scaleX(0);transform-origin:left;transition:transform .35s var(--ease)}
+.lnk:hover::after{transform:scaleX(1)}
+
+/* ---------- Navi ---------- */
+.nav{position:fixed;z-index:50;top:14px;left:50%;transform:translateX(-50%);width:min(1240px,calc(100% - 24px));display:flex;align-items:center;gap:10px;padding:8px 8px 8px 18px;border-radius:999px;
+ background:rgba(16,18,24,.62);backdrop-filter:blur(18px) saturate(1.4);-webkit-backdrop-filter:blur(18px) saturate(1.4);box-shadow:0 18px 50px -20px rgba(0,0,0,.6),inset 0 0 0 1px rgba(255,255,255,.1);transition:background .4s}
+.nav.lt{background:rgba(250,249,246,.78);box-shadow:0 18px 50px -24px rgba(0,0,0,.35),inset 0 0 0 1px rgba(21,23,28,.08)}
+.logo{display:flex;align-items:center;gap:10px;text-decoration:none;color:#fff;font:800 17px/1 var(--display);min-height:44px}
+.logo img{width:96px;height:auto;filter:brightness(1.5) saturate(1.1)}
+.nav.lt .logo{color:var(--tx)}.nav.lt .logo img{filter:none}
+
+.nl{display:flex;gap:2px;margin-left:auto}
+.nl a{position:relative;padding:0 14px;min-height:44px;display:flex;align-items:center;border-radius:999px;color:rgba(255,255,255,.82);text-decoration:none;font:600 14.5px/1 var(--display);transition:color .25s,background .25s}
+.nl a:hover{color:#fff;background:rgba(255,255,255,.08)}
+.nav.lt .nl a{color:var(--mut)}.nav.lt .nl a:hover{color:var(--tx);background:rgba(21,23,28,.05)}
+.nl a.on{color:#fff}.nav.lt .nl a.on{color:var(--red)}
+.nl a.on::after{content:"";position:absolute;left:50%;bottom:6px;width:5px;height:5px;margin-left:-2.5px;border-radius:50%;background:var(--red2);box-shadow:0 0 10px var(--red2)}
+.live{display:inline-flex;align-items:center;gap:9px;min-height:44px;padding:0 16px;border-radius:999px;background:rgba(255,255,255,.06);color:#fff;font:600 13.5px/1.1 var(--display);text-decoration:none;white-space:nowrap}
+.nav.lt .live{background:rgba(21,23,28,.05);color:var(--tx)}
+.live i{width:9px;height:9px;border-radius:50%;background:#9AA1AC;flex:none}
+.live.open i{background:#2BD47A;box-shadow:0 0 0 0 rgba(43,212,122,.6);animation:pulse 2s infinite}
+@keyframes pulse{70%{box-shadow:0 0 0 9px rgba(43,212,122,0)}100%{box-shadow:0 0 0 0 rgba(43,212,122,0)}}
+.nav .btn{min-height:46px;padding:0 22px}
+.mb{display:none;width:48px;height:48px;border-radius:50%;border:0;background:rgba(255,255,255,.1);color:#fff;cursor:pointer;place-items:center}
+.nav.lt .mb{background:rgba(21,23,28,.07);color:var(--tx)}
+.mb svg{width:22px;height:22px}
+.menu{position:fixed;inset:0;z-index:60;background:radial-gradient(120% 70% at 100% 0%,rgba(200,16,46,.35),transparent 60%),radial-gradient(90% 60% at 0% 100%,rgba(184,115,51,.3),transparent 60%),var(--ink);
+ padding:96px 24px 40px;display:flex;flex-direction:column;gap:6px;opacity:0;visibility:hidden;transition:opacity .35s,visibility .35s}
+.menu.on{opacity:1;visibility:visible}
+.menu a{color:#fff;text-decoration:none;font:800 clamp(30px,8vw,44px)/1.25 var(--display);padding:6px 0;transform:translateY(16px);opacity:0;transition:transform .5s var(--spring),opacity .4s}
+.menu.on a{transform:none;opacity:1}
+.menu.on a:nth-child(2){transition-delay:.04s}.menu.on a:nth-child(3){transition-delay:.08s}.menu.on a:nth-child(4){transition-delay:.12s}.menu.on a:nth-child(5){transition-delay:.16s}.menu.on a:nth-child(6){transition-delay:.2s}.menu.on a:nth-child(7){transition-delay:.24s}
+.menu .mx{position:absolute;top:22px;right:22px}
+
+/* ---------- Hero / Bühne dunkel ---------- */
+.dark{background:var(--ink);color:var(--txd);position:relative;isolation:isolate;overflow:clip}
+.aura{position:absolute;inset:-20%;z-index:-2;pointer-events:none;
+ background:radial-gradient(38% 42% at 72% 38%,rgba(200,16,46,.42),transparent 70%),radial-gradient(30% 36% at 18% 80%,rgba(184,115,51,.28),transparent 70%),radial-gradient(34% 40% at 90% 90%,rgba(127,143,166,.22),transparent 70%),radial-gradient(28% 30% at 10% 10%,rgba(232,201,160,.12),transparent 70%);
+ animation:aura 22s ease-in-out infinite alternate;will-change:transform}
+@keyframes aura{50%{transform:translate3d(-3%,2%,0) rotate(4deg) scale(1.04)}100%{transform:translate3d(2%,-2%,0) rotate(-3deg) scale(1.02)}}
+.grain{position:absolute;inset:0;z-index:-1;pointer-events:none;opacity:.5;background:repeating-linear-gradient(115deg,rgba(255,255,255,.025) 0 1px,transparent 1px 7px)}
+.spot{position:absolute;left:0;top:0;width:900px;height:900px;margin:-450px 0 0 -450px;z-index:-1;pointer-events:none;border-radius:50%;
+ background:radial-gradient(closest-side,rgba(255,236,214,.13),rgba(255,236,214,.04) 55%,transparent);transform:translate3d(70vw,40vh,0);will-change:transform;transition:opacity .6s}
+
+.hero{min-height:100svh;display:flex;align-items:center;padding:120px 0 40px}
+.hero .wrap{display:grid;grid-template-columns:minmax(0,1.12fr) minmax(0,.88fr);align-items:center;gap:20px}
+.hero h1{font-size:clamp(44px,6vw,96px);line-height:.94;font-weight:800;letter-spacing:-.035em;margin:22px 0 24px}
+.hero h1 .ln{display:block;overflow:hidden;padding-bottom:.06em}
+.hero h1 .ln>span{display:block;transform:translateY(105%);animation:rise 1.1s var(--ease) forwards}
+.hero h1 .ln:nth-child(2)>span{animation-delay:.12s}.hero h1 .ln:nth-child(3)>span{animation-delay:.24s}
+@keyframes rise{to{transform:none}}
+.fade{opacity:0;transform:translateY(18px);animation:fin .9s var(--ease) forwards}
+@keyframes fin{to{opacity:1;transform:none}}
+.d1{animation-delay:.45s}.d2{animation-delay:.6s}.d3{animation-delay:.75s}.d4{animation-delay:.95s}
+.hero .lead{margin-bottom:34px}
+.acts{display:flex;flex-wrap:wrap;gap:12px}
+.facts{display:flex;flex-wrap:wrap;gap:10px 28px;margin-top:44px;padding-top:26px;border-top:1px solid rgba(255,255,255,.1)}
+.facts div{display:flex;align-items:baseline;gap:10px}
+.facts b{font:800 clamp(26px,2.6vw,34px)/1 var(--display);color:#fff}
+.facts span{font-size:13.5px;color:var(--mutd);line-height:1.3}
+.stars{color:var(--champ);letter-spacing:2px;font-size:14px}
+
+.bikestage{position:relative;aspect-ratio:1.18;display:grid;place-items:center}
+.floor{position:absolute;left:-6%;right:-6%;bottom:7%;height:28%;border-radius:50%;
+ background:radial-gradient(closest-side,rgba(200,16,46,.55),rgba(200,16,46,.12) 55%,transparent);filter:blur(6px);transform:scaleY(.42)}
+.ring{position:absolute;left:4%;right:4%;bottom:10%;height:22%;border-radius:50%;border:1.5px solid rgba(232,201,160,.38);transform:scaleY(.36);box-shadow:0 0 40px rgba(232,201,160,.18),inset 0 0 30px rgba(232,201,160,.12)}
+.streak{position:absolute;left:-30%;bottom:16%;width:60%;height:3px;border-radius:3px;background:linear-gradient(90deg,transparent,#fff,#E3263F,transparent);filter:blur(.5px);opacity:0;animation:streak 1.5s .35s var(--ease) forwards}
+@keyframes streak{0%{opacity:0;transform:translateX(0)}30%{opacity:1}100%{opacity:0;transform:translateX(160%)}}
+.bike{position:relative;width:100%;filter:drop-shadow(0 30px 30px rgba(0,0,0,.55))}
+.hero .bike{opacity:0;animation:rollin 1.4s .2s var(--ease) forwards}
+@keyframes rollin{0%{opacity:0;transform:translateX(38%) skewX(-6deg);filter:blur(10px) drop-shadow(0 30px 30px rgba(0,0,0,.55))}60%{opacity:1}100%{opacity:1;transform:none;filter:blur(0) drop-shadow(0 30px 30px rgba(0,0,0,.55))}}
+.refl{position:absolute;left:0;right:0;top:100%;transform:scaleY(-1);opacity:.14;-webkit-mask:linear-gradient(to top,#000,transparent 40%);mask:linear-gradient(to top,#000,transparent 40%);pointer-events:none}
+.tag{position:absolute;right:2%;top:8%;padding:12px 18px;border-radius:999px;background:rgba(255,255,255,.08);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);box-shadow:inset 0 0 0 1px rgba(255,255,255,.14);font:600 13.5px/1.25 var(--display);color:#fff}
+.tag small{display:block;color:var(--champ);font-size:11px;letter-spacing:.16em;text-transform:uppercase}
+
+/* ---------- Marken-Bühne ---------- */
+.sec{padding:clamp(90px,11vh,130px) 0;min-height:100svh;display:flex;align-items:center}
+.sec>.wrap{width:var(--wrap)}
+.shead{display:flex;align-items:flex-end;justify-content:space-between;gap:24px;flex-wrap:wrap;margin-bottom:34px}
+.shead .h2{margin-top:14px}
+.rail{display:flex;gap:10px;flex-wrap:wrap}
+.rail button{height:58px;min-width:58px;padding:0 20px;border-radius:999px;border:0;cursor:pointer;background:rgba(255,255,255,.9);display:grid;place-items:center;
+ box-shadow:0 10px 24px -14px rgba(0,0,0,.8);transition:transform .35s var(--spring),box-shadow .3s,background .3s}
+.rail button img{height:26px;width:auto;max-width:118px;object-fit:contain}
+.rail button:hover{transform:translateY(-2px);background:#fff}
+.rail button[aria-pressed=true]{background:#fff;box-shadow:0 0 0 2.5px var(--red2),0 0 0 7px rgba(227,38,63,.18),0 14px 30px -10px rgba(200,16,46,.7)}
+.stage{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(0,1fr);gap:28px;align-items:center}
+.view{position:relative;aspect-ratio:1.45;touch-action:pan-y}
+.view .floor{bottom:3%}.view .ring{bottom:6%}
+.slot{position:absolute;inset:4% 2% 10%;display:grid;place-items:center}
+.slot img{max-height:100%;width:auto;max-width:100%;object-fit:contain;filter:drop-shadow(0 26px 26px rgba(0,0,0,.6))}
+.slot.out{animation:out .55s var(--ease) forwards}.slot.in{animation:inn .75s var(--ease) forwards}
+.slot.out.rev{animation-name:outr}.slot.in.rev{animation-name:innr}
+@keyframes out{to{opacity:0;transform:translateX(-26%) skewX(5deg);filter:blur(6px)}}
+@keyframes inn{from{opacity:0;transform:translateX(26%) skewX(-5deg);filter:blur(6px)}to{opacity:1;transform:none;filter:none}}
+@keyframes outr{to{opacity:0;transform:translateX(26%) skewX(-5deg);filter:blur(6px)}}
+@keyframes innr{from{opacity:0;transform:translateX(-26%) skewX(5deg);filter:blur(6px)}to{opacity:1;transform:none;filter:none}}
+.arrows{position:absolute;left:0;right:0;bottom:-6px;display:flex;justify-content:space-between;pointer-events:none}
+.arrows button{pointer-events:auto;width:52px;height:52px;border-radius:50%;border:0;cursor:pointer;color:#fff;background:rgba(255,255,255,.08);box-shadow:inset 0 0 0 1px rgba(255,255,255,.18);display:grid;place-items:center;transition:transform .35s var(--spring),background .3s}
+.arrows button:hover{background:rgba(255,255,255,.16);transform:scale(1.06)}
+.arrows svg{width:20px;height:20px}
+.info{padding:34px;border-radius:36px;background:linear-gradient(160deg,rgba(255,255,255,.09),rgba(255,255,255,.03));box-shadow:inset 0 0 0 1px rgba(255,255,255,.12),0 30px 60px -30px rgba(0,0,0,.7)}
+.info .cnt{font:700 13px/1 var(--display);letter-spacing:.2em;color:var(--champ)}
+.info .cat{display:inline-block;margin:18px 0 10px;padding:7px 14px;border-radius:999px;background:rgba(200,16,46,.18);color:#FFB3BE;font:700 12.5px/1 var(--display);letter-spacing:.08em;text-transform:uppercase}
+.info h3{font-size:clamp(26px,2.6vw,36px);line-height:1.08;font-weight:800;color:#fff}
+.info p{color:var(--mutd);margin:14px 0 26px}
+.info .acts .btn{flex:1 1 auto}
+.swap{transition:opacity .3s}.swap.hide{opacity:0}
+.also{margin-top:22px;font-size:14px;color:var(--mutd)}
+
+/* ---------- Rad-Finder (hell) ---------- */
+.light{position:relative;isolation:isolate;overflow:clip;background:var(--pearl)}
+.light::before{content:"";position:absolute;inset:0;z-index:-2;background:radial-gradient(50% 50% at 100% 0%,rgba(200,16,46,.08),transparent 70%),radial-gradient(50% 60% at 0% 100%,rgba(184,115,51,.1),transparent 70%),radial-gradient(40% 40% at 50% 50%,rgba(127,143,166,.08),transparent 70%)}
+.light::after{content:"";position:absolute;inset:0;z-index:-1;background:repeating-linear-gradient(115deg,rgba(255,255,255,.55) 0 1px,transparent 1px 8px);opacity:.5;pointer-events:none}
+.fgrid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);gap:clamp(28px,4vw,64px);align-items:center}
+.opts{display:grid;gap:12px;margin-top:34px}
+.opt{display:flex;align-items:center;gap:18px;width:100%;min-height:76px;padding:12px 24px 12px 12px;border-radius:999px;border:0;cursor:pointer;text-align:left;background:rgba(255,255,255,.75);
+ box-shadow:inset 0 0 0 1.5px rgba(21,23,28,.08),0 10px 30px -22px rgba(0,0,0,.4);font:inherit;color:var(--tx);transition:transform .35s var(--spring),box-shadow .3s,background .3s}
+.opt:hover{transform:translateY(-2px);background:#fff}
+.opt .ic{width:52px;height:52px;border-radius:50%;flex:none;display:grid;place-items:center;background:var(--pearl2);transition:background .3s}
+.opt .ic svg{width:24px;height:24px;color:var(--red)}
+.opt b{display:block;font:700 17.5px/1.2 var(--display)}
+.opt span span{font-size:14px;color:var(--mut)}
+.opt[aria-pressed=true]{background:#fff;box-shadow:inset 0 0 0 2px var(--red),0 16px 40px -20px rgba(200,16,46,.55)}
+.opt[aria-pressed=true] .ic{background:linear-gradient(135deg,#E3263F,#B87333)}
+.opt[aria-pressed=true] .ic svg{color:#fff}
+.result{position:relative;border-radius:48px;padding:30px 36px 36px;display:flex;flex-direction:column;overflow:hidden;
+ background:radial-gradient(70% 60% at 50% 45%,#fff,rgba(255,255,255,.55) 70%),linear-gradient(150deg,rgba(232,201,160,.4),rgba(127,143,166,.25));box-shadow:inset 0 0 0 1px rgba(255,255,255,.9),0 40px 80px -40px rgba(21,23,28,.45)}
+.result .pics{height:clamp(220px,30vh,320px);margin-bottom:22px;display:flex;align-items:flex-end;justify-content:center}
+.result .pics img{max-height:96%;width:auto;max-width:60%;object-fit:contain;filter:drop-shadow(0 20px 20px rgba(0,0,0,.25));transition:transform .5s var(--spring)}
+.result .pics img+img{margin-left:-8%;max-width:52%;transform:translateY(8%)}
+.result:hover .pics img:first-child{transform:translateY(-4px) scale(1.02)}
+.result .rk{font:700 12.5px/1 var(--display);letter-spacing:.2em;text-transform:uppercase;color:var(--copper)}
+.result h3{font-size:clamp(24px,2.4vw,32px);margin:10px 0 8px;font-weight:800}
+.result p{color:var(--mut);margin-bottom:20px;max-width:46ch}
+.result.pop .pics img{animation:popin .7s var(--spring) both}.result.pop .pics img+img{animation-delay:.08s}
+@keyframes popin{from{opacity:0;transform:translateY(30px) scale(.94)}}
+.result .acts .btn{min-height:48px}
+
+/* ---------- Werkstatt-Kapitel ---------- */
+.chap{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);gap:clamp(30px,5vw,80px)}
+.pin{position:sticky;top:12vh;align-self:start;height:76vh;border-radius:48px;overflow:hidden;box-shadow:0 40px 80px -40px rgba(21,23,28,.55)}
+.pin img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transform:scale(1.08);transition:opacity .9s var(--ease),transform 1.6s var(--ease)}
+.pin img.on{opacity:1;transform:scale(1)}
+.pin::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,transparent 55%,rgba(13,15,20,.55));pointer-events:none}
+.pin .pg{position:absolute;left:24px;bottom:22px;z-index:2;display:flex;gap:8px}
+.pin .pg i{width:34px;height:4px;border-radius:4px;background:rgba(255,255,255,.35);overflow:hidden;position:relative}
+.pin .pg i::after{content:"";position:absolute;inset:0;background:#fff;transform:scaleX(0);transform-origin:left;transition:transform .6s var(--ease)}
+.pin .pg i.on::after{transform:none}
+.steps{display:flex;flex-direction:column}
+.step{min-height:76vh;display:flex;flex-direction:column;justify-content:center;opacity:.32;transition:opacity .6s}
+.step.on{opacity:1}
+.step .no{font:800 15px/1 var(--display);color:var(--copper);letter-spacing:.14em}
+.step h3{font-size:clamp(30px,3.6vw,50px);line-height:1.04;font-weight:800;margin:14px 0 18px}
+.step p{color:var(--mut);max-width:44ch}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:22px}
+.chips span{padding:9px 15px;border-radius:999px;background:rgba(255,255,255,.8);box-shadow:inset 0 0 0 1px rgba(21,23,28,.08);font:600 13.5px/1 var(--display)}
+blockquote{margin:0}
+.q{font:700 clamp(22px,2.2vw,28px)/1.35 var(--display);color:var(--tx);letter-spacing:-.01em}
+.q+cite{display:block;margin-top:14px;font-style:normal;color:var(--mut);font-size:14.5px}
+.chap .head{grid-column:1/-1;margin-bottom:10px}
+
+/* ---------- Winter-Aktion ---------- */
+.deal .wrap{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:clamp(24px,4vw,60px);align-items:center}
+.big{white-space:nowrap;transition:-webkit-text-stroke-color 1s 1.2s;font:900 clamp(96px,14vw,220px)/.86 var(--display);letter-spacing:-.06em;margin:20px 0 6px;color:transparent;-webkit-text-stroke:2px rgba(232,201,160,.55);position:relative;display:inline-block}
+.big::after{content:attr(data-t);position:absolute;inset:0;color:transparent;-webkit-text-stroke:0;background:var(--grad);-webkit-background-clip:text;background-clip:text;clip-path:inset(0 100% 0 0);transition:clip-path 1.6s var(--ease)}
+.deal.go .big::after{clip-path:inset(0 0 0 0)}.deal.go .big{-webkit-text-stroke-color:transparent}
+.deal h2{font-size:clamp(30px,3.6vw,48px);line-height:1.05;font-weight:800;color:#fff}
+.deal .lead{margin:18px 0 30px}
+.gift{position:relative;aspect-ratio:1;max-width:460px;justify-self:center;width:100%}
+.gift .halo{position:absolute;inset:6%;border-radius:50%;background:conic-gradient(from 0deg,#C8102E,#B87333,#E8C9A0,#7F8FA6,#C8102E);animation:spin 14s linear infinite;-webkit-mask:radial-gradient(closest-side,transparent 86%,#000 87%,#000 99%,transparent);mask:radial-gradient(closest-side,transparent 86%,#000 87%,#000 99%,transparent)}
+@keyframes spin{to{transform:rotate(1turn)}}
+.gift .disc{position:absolute;inset:13%;border-radius:50%;overflow:hidden;padding:9%;background:radial-gradient(circle at 50% 40%,#fff 55%,#EFEDE8);box-shadow:0 30px 70px -20px rgba(0,0,0,.7)}
+.gift .disc img{width:100%;height:100%;object-fit:contain;transition:transform .6s var(--ease)}
+.gift:hover .disc img{transform:scale(1.03)}
+.gift .plus{position:absolute;right:4%;top:8%;padding:14px 20px;border-radius:999px;background:var(--grad);color:#fff;font:800 15px/1.15 var(--display);box-shadow:0 16px 40px -14px rgba(200,16,46,.8);text-align:center}
+.small{font-size:13.5px;color:var(--mutd);margin-top:18px}
+
+/* ---------- Dienstrad ---------- */
+.dgrid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.35fr);gap:clamp(28px,5vw,80px);align-items:center}
+.track{position:relative;display:grid;gap:14px;margin-top:6px}
+.track::before{content:"";position:absolute;left:35px;top:36px;bottom:36px;width:3px;border-radius:3px;background:linear-gradient(180deg,#E3263F,#B87333,#E8C9A0)}
+.tstep{position:relative;display:flex;gap:22px;align-items:center;padding:12px 26px 12px 0;border-radius:999px;transition:background .3s,transform .35s var(--spring)}
+.tstep:hover{background:rgba(255,255,255,.7);transform:translateX(4px)}
+.tstep b{width:72px;height:72px;flex:none;border-radius:50%;display:grid;place-items:center;font:800 26px/1 var(--display);background:#fff;box-shadow:0 0 0 3px var(--red),0 12px 30px -12px rgba(200,16,46,.6);z-index:1}
+.tstep h3{font-size:21px;font-weight:800}
+.tstep p{font-size:15px;color:var(--mut)}
+.logos{display:flex;flex-wrap:wrap;gap:10px;margin:30px 0 8px}
+.logos span{height:54px;padding:0 20px;border-radius:999px;background:rgba(255,255,255,.85);box-shadow:inset 0 0 0 1px rgba(21,23,28,.07);display:grid;place-items:center;transition:transform .35s var(--spring),box-shadow .3s}
+.logos span:hover{transform:translateY(-2px);box-shadow:inset 0 0 0 1px rgba(184,115,51,.5),0 12px 26px -14px rgba(0,0,0,.35)}
+.logos img{height:20px;width:auto;max-width:110px;object-fit:contain}
+.pay{display:flex;flex-wrap:wrap;gap:12px;margin-top:22px}
+.pay div{flex:1 1 220px;padding:22px 26px;border-radius:32px;background:rgba(255,255,255,.8);box-shadow:inset 0 0 0 1px rgba(21,23,28,.07)}
+.pay b{display:block;font:800 22px/1.1 var(--display);margin-bottom:6px}
+.pay p{font-size:14.5px;color:var(--mut)}
+
+/* ---------- Stimmen ---------- */
+.voices .wrap{display:grid;grid-template-columns:minmax(0,.8fr) minmax(0,1.2fr);gap:clamp(28px,5vw,80px);align-items:center}
+.score{font:900 clamp(120px,15vw,210px)/.85 var(--display);padding-bottom:.08em;letter-spacing:-.05em}
+.score small{font-size:.32em;color:var(--mut);letter-spacing:-.02em}
+.rv{display:grid;gap:16px}
+.rv blockquote{padding:28px 32px;border-radius:40px;background:rgba(255,255,255,.82);box-shadow:inset 0 0 0 1px rgba(21,23,28,.06),0 24px 50px -34px rgba(0,0,0,.4);transition:transform .35s var(--spring)}
+.rv blockquote:nth-child(2){margin-left:clamp(0px,5vw,70px)}
+.rv blockquote:hover{transform:translateY(-2px)}
+.rv p{font:700 clamp(18px,1.6vw,21px)/1.45 var(--display)}
+.rv cite{display:block;margin-top:10px;font-style:normal;font-size:14px;color:var(--mut)}
+
+/* ---------- Besuch ---------- */
+.visit{min-height:100svh;display:flex;align-items:flex-end;padding:120px 0 60px}
+.visit .bg{position:absolute;inset:0;z-index:-2}
+.visit .bg img{width:100%;height:100%;object-fit:cover;object-position:50% 40%;transform:scale(1.04)}
+.visit .bg::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(13,15,20,.92) 0%,rgba(13,15,20,.7) 45%,rgba(13,15,20,.2) 100%),linear-gradient(0deg,rgba(13,15,20,.8),transparent 50%)}
+.visit .wrap{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,.9fr);gap:30px;align-items:end}
+.visit h2{font-size:clamp(38px,4.6vw,70px);line-height:.98;font-weight:800;color:#fff;margin:16px 0 20px}
+.hours{padding:30px;border-radius:40px;background:rgba(16,18,24,.55);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);box-shadow:inset 0 0 0 1px rgba(255,255,255,.14)}
+.hours h3{font-size:20px;color:#fff;margin-bottom:14px;display:flex;align-items:center;gap:10px}
+.hours ul{list-style:none;margin:0;padding:0;display:grid;gap:2px}
+.hours li{display:flex;justify-content:space-between;gap:16px;padding:9px 16px;border-radius:999px;font-size:14.5px;color:var(--mutd)}
+.hours li b{color:#fff;font-weight:600;font-family:var(--display)}
+.hours li.now{background:linear-gradient(90deg,rgba(200,16,46,.35),rgba(184,115,51,.2));color:#fff}
+.hours li.zu{opacity:.6}
+
+/* ---------- Abschluss / Fuß ---------- */
+.close{min-height:auto;padding:clamp(90px,14vh,150px) 0;text-align:center}
+.close h2{font-size:clamp(44px,8vw,120px);line-height:.95;font-weight:800;letter-spacing:-.04em;color:#fff}
+.close .acts{justify-content:center;margin-top:36px}
+footer{background:var(--ink);color:var(--mutd);padding:40px 0 110px;font-size:14px;border-top:1px solid rgba(255,255,255,.08)}
+footer .wrap{display:flex;flex-wrap:wrap;gap:16px 30px;justify-content:space-between;align-items:center}
+footer nav{display:flex;flex-wrap:wrap;gap:6px 22px}
+footer a{color:var(--mutd);text-decoration:none;min-height:44px;display:inline-flex;align-items:center}
+footer a:hover{color:#fff}
+.vtag{position:fixed;left:14px;bottom:14px;z-index:40;padding:9px 15px;border-radius:999px;background:rgba(16,18,24,.78);color:#fff;font:700 12px/1 var(--display);letter-spacing:.08em;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);box-shadow:inset 0 0 0 1px rgba(232,201,160,.35)}
+.vtag a{color:var(--champ)}
+
+/* ---------- Termin-Fenster ---------- */
+dialog{width:min(620px,calc(100% - 24px));max-height:calc(100svh - 24px);padding:0;border:0;border-radius:40px;background:var(--pearl);color:var(--tx);box-shadow:0 40px 120px -20px rgba(0,0,0,.6)}
+dialog::backdrop{background:rgba(13,15,20,.6);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
+dialog[open]{animation:dlg .5s var(--spring)}
+@keyframes dlg{from{opacity:0;transform:translateY(30px) scale(.96)}}
+.dlg{padding:34px;overflow:auto;max-height:calc(100svh - 24px)}
+.dlg h2{font-size:30px;font-weight:800;margin:10px 0 6px}
+.dlg .x{position:absolute;right:18px;top:18px;width:46px;height:46px;border-radius:50%;border:0;background:rgba(21,23,28,.06);cursor:pointer;display:grid;place-items:center}
+.dlg .x svg{width:18px;height:18px}
+fieldset{border:0;margin:20px 0 0;padding:0}
+legend,.fl{display:block;font:700 14px/1.2 var(--display);margin-bottom:9px}
+.seg{display:flex;flex-wrap:wrap;gap:8px}
+.seg label{position:relative}
+.seg input{position:absolute;opacity:0;inset:0;cursor:pointer}
+.seg span{display:inline-flex;align-items:center;min-height:44px;padding:0 18px;border-radius:999px;background:#fff;box-shadow:inset 0 0 0 1.5px rgba(21,23,28,.1);font:600 14.5px/1 var(--display);transition:background .25s,box-shadow .25s,color .25s}
+.seg input:checked+span{background:var(--red);color:#fff;box-shadow:0 10px 24px -12px rgba(200,16,46,.8)}
+.seg input:focus-visible+span{outline:3px solid var(--copper);outline-offset:2px}
+.fr{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:20px}
+.f input,.f select{width:100%;min-height:52px;padding:0 18px;border-radius:999px;border:0;background:#fff;box-shadow:inset 0 0 0 1.5px rgba(21,23,28,.1);font:500 15.5px/1 var(--body);color:var(--tx)}
+.f input:focus,.f select:focus{outline:0;box-shadow:inset 0 0 0 2px var(--copper)}
+.f .err{display:block;min-height:18px;margin-top:5px;padding-left:16px;font-size:13px;color:var(--red);font-weight:600}
+.send{display:flex;flex-wrap:wrap;gap:10px;margin-top:22px}
+.send .btn{flex:1 1 200px}
+.wa{color:#fff;background:linear-gradient(120deg,#25D366,#128C4A);box-shadow:0 14px 30px -14px rgba(18,140,74,.9)}
+.note{font-size:13px;color:var(--mut);margin-top:14px}
+
+/* ---------- Handy-Leiste ---------- */
+.mbar{display:none}
+
+@media (max-width:1100px){
+ .nl{display:none}.mb{display:grid}.nav .live{margin-left:auto}
+}
+@media (max-width:900px){
+ .hero .wrap,.stage,.fgrid,.chap,.deal .wrap,.dgrid,.voices .wrap,.visit .wrap{grid-template-columns:minmax(0,1fr)}
+ .hero{padding-top:110px}.hero .bikestage{order:-1;max-width:560px;width:100%;margin:0 auto -10px}
+ .hero h1{margin-top:14px}
+ .pin{position:relative;top:0;height:58vh}
+ .step{min-height:auto;padding:34px 0;opacity:1}
+ .chap .pin{display:none}
+ .step .pimg{display:block;margin-bottom:22px;border-radius:32px;aspect-ratio:16/10;width:100%;object-fit:cover}
+ .rv blockquote:nth-child(2){margin-left:0}
+ .result{min-height:460px}
+ .sec{min-height:auto}
+}
+.step .pimg{display:none}
+@media (max-width:900px){.step .pimg{display:block}}
+@media (max-width:640px){
+ :root{--wrap:calc(100% - 32px)}
+ .nav{top:10px;padding:6px 6px 6px 14px}.logo img{width:78px}
+ .nav .btn{display:none}
+ .live{padding:0 12px;font-size:12.5px}
+ .hero h1{font-size:clamp(44px,13vw,64px)}
+ .acts .btn{flex:1 1 100%}
+ .facts{gap:14px 22px}
+ .rail{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;margin-inline:-16px;padding:6px 16px 10px}
+ .rail::-webkit-scrollbar{display:none}
+ .rail button{flex:none}
+ .info{padding:26px;border-radius:30px}
+ .opt{border-radius:30px;padding-right:18px}
+ .result{padding:26px;border-radius:36px}
+ .result .pics{inset:20px 16px 210px}
+ .tstep{padding-right:12px}
+ .fr{grid-template-columns:1fr}
+ .dlg{padding:26px 20px}
+ .mbar{display:flex;position:fixed;z-index:45;left:10px;right:10px;bottom:10px;gap:8px;padding:8px;border-radius:999px;background:rgba(16,18,24,.82);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);box-shadow:0 18px 40px -16px rgba(0,0,0,.7)}
+ .mbar a,.mbar button{flex:1;min-height:50px;border-radius:999px;border:0;display:flex;align-items:center;justify-content:center;gap:8px;color:#fff;text-decoration:none;font:700 14.5px/1 var(--display);background:rgba(255,255,255,.08);cursor:pointer}
+ .mbar button{background:linear-gradient(120deg,#E3263F,#C8102E)}
+ .mbar .w{background:linear-gradient(120deg,#25D366,#128C4A)}
+ .mbar svg{width:18px;height:18px}
+ .vtag{bottom:auto;top:74px;left:50%;transform:translateX(-50%);white-space:nowrap;font-size:10.5px;padding:7px 12px}
+ .hours{padding:22px 16px}.hours li{font-size:13.5px;padding:8px 12px}
+}
+</style>
+</head>
+<body>
+<!-- Vorlage „Zukunft“ (23.11.2026): Showroom-Bühne dunkel + Perlglas hell; Rot/Kupfer/Champagner/Stahl; Outfit + Sora; Momente: Marken-Bühne, Werkstatt-Kapitel, –20 €-Schriftzug -->
+<a class="skip" href="#main">Zum Inhalt springen</a>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+ <symbol id="i-ar" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+ <symbol id="i-al" viewBox="0 0 24 24"><path d="M19 12H5M11 6l-6 6 6 6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+ <symbol id="i-cal" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3.5" y="5" width="17" height="15.5" rx="4"/><path d="M8 3v4M16 3v4M3.5 10h17"/></g></symbol>
+ <symbol id="i-ph" viewBox="0 0 24 24"><path d="M6.6 3.5h2.7l1.4 4-2 1.6a12 12 0 0 0 6.2 6.2l1.6-2 4 1.4v2.7a2 2 0 0 1-2.2 2A16.5 16.5 0 0 1 4.6 5.7a2 2 0 0 1 2-2.2z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></symbol>
+ <symbol id="i-wa" viewBox="0 0 24 24"><path fill="currentColor" d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm0 18.2a8.2 8.2 0 0 1-4.2-1.2l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8s-.4-.1-.6.1l-.8 1c-.1.2-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.3-.4.3-.4.8-1.4.1-.2 0-.3 0-.4l-.8-1.8c-.2-.5-.4-.4-.6-.4h-.5a1 1 0 0 0-.7.3 3 3 0 0 0-.9 2.2 5.2 5.2 0 0 0 1.1 2.7 11.8 11.8 0 0 0 4.5 4c1.7.7 2.3.8 3.2.6a2.7 2.7 0 0 0 1.8-1.3 2.2 2.2 0 0 0 .2-1.3c-.1-.1-.3-.2-.5-.3z"/></symbol>
+ <symbol id="i-pin" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></g></symbol>
+ <symbol id="i-x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></symbol>
+ <symbol id="i-menu" viewBox="0 0 24 24"><path d="M4 8h16M4 16h16" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></symbol>
+ <symbol id="i-city" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M3 21V9l6-3v15M9 21V4l8 4v13M3 21h18M12 9h2M12 13h2M12 17h2"/></g></symbol>
+ <symbol id="i-tour" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 19l6-10 4 6 3-4 5 8z"/><circle cx="17" cy="5" r="2"/></g></symbol>
+ <symbol id="i-box" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M4 8l8-4 8 4v8l-8 4-8-4z"/><path d="M4 8l8 4 8-4M12 12v8"/></g></symbol>
+ <symbol id="i-shield" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M12 3l8 3v6c0 4.5-3.4 8-8 9-4.6-1-8-4.5-8-9V6z"/><path d="M8.5 12l2.5 2.5 4.5-5" stroke-linecap="round"/></g></symbol>
+</svg>
+
+<header class="nav" id="nav">
+ <a class="logo" href="#top" aria-label="Velocenter Hessert, zum Seitenanfang"><img src="../img/velocenter-logo.svg" alt="" width="96" height="50"></a>
+ <nav class="nl" aria-label="Hauptmenü">
+  <a href="#buehne">Marken</a><a href="#finder">Rad-Finder</a><a href="#werkstatt">Werkstatt</a><a href="#aktion">Winter-Aktion</a><a href="#dienstrad">Dienstrad</a><a href="#besuch">Besuch</a>
+ </nav>
+ <a class="live" id="live" href="#besuch"><i></i><span>Öffnungszeiten</span></a>
+ <button class="btn btn-p" type="button" data-termin>Termin anfragen</button>
+ <button class="mb" type="button" id="mb" aria-label="Menü öffnen" aria-expanded="false" aria-controls="menu"><svg><use href="#i-menu"/></svg></button>
+</header>
+<div class="menu" id="menu" aria-hidden="true">
+ <button class="mb mx" type="button" id="mx" aria-label="Menü schließen" style="display:grid"><svg><use href="#i-x"/></svg></button>
+ <a href="#buehne">Marken</a><a href="#finder">Rad-Finder</a><a href="#werkstatt">Werkstatt</a><a href="#aktion">Winter-Aktion</a><a href="#dienstrad">Dienstrad</a><a href="#besuch">Besuch</a><a href="../lager/">Auf Lager</a>
+</div>
+
+<main id="main">
+<!-- 1 · Hero -->
+<section class="dark hero" id="top" data-enter>
+ <div class="aura"></div><div class="grain"></div><div class="spot" id="spot"></div>
+ <div class="wrap">
+  <div>
+   <p class="eyebrow fade">Familienbetrieb seit 1995 · Wörth am Rhein</p>
+   <h1><span class="ln"><span>E-Bikes und</span></span><span class="ln"><span>Werkstatt in</span></span><span class="ln"><span class="gt">Wörth am Rhein.</span></span></h1>
+   <p class="lead fade d1">Über 300 E-Bikes zum Anfassen und Probefahren, dazu ein Bosch Service Center. Wir finden das Rad, das zu dir passt, und bleiben an deiner Seite.</p>
+   <div class="acts fade d2"><button class="btn btn-p mag" type="button" data-termin><svg><use href="#i-cal"/></svg>Termin anfragen</button><a class="btn btn-g" href="#buehne">Marken entdecken<svg><use href="#i-ar"/></svg></a></div>
+   <div class="facts fade d3">
+    <div><b>4,8</b><span><span class="stars" aria-hidden="true">★★★★★</span><br>221 Google-Rezensionen</span></div>
+    <div><b>300+</b><span>E-Bikes<br>vor Ort</span></div>
+    <div><b>Bosch</b><span>Service<br>Center</span></div>
+   </div>
+  </div>
+  <div class="bikestage">
+   <div class="floor"></div><div class="ring"></div><div class="streak"></div>
+   <img class="bike" src="../img/p-ktm-1200.webp" srcset="../img/p-ktm-900.webp 900w,../img/p-ktm-1200.webp 1200w,../img/p-ktm.webp 1600w" sizes="(max-width:900px) 92vw,48vw" width="1200" height="755" alt="KTM Macina E-Bike" fetchpriority="high">
+   <p class="tag fade d4"><small>Probefahrt</small>auch übers Wochenende</p>
+  </div>
+ </div>
+</section>
+
+<!-- 2 · Marken-Bühne (Moment) -->
+<section class="dark sec" id="buehne" aria-roledescription="Marken-Bühne">
+ <div class="aura" style="animation-duration:28s"></div><div class="grain"></div>
+ <div class="wrap">
+  <div class="shead">
+   <div><p class="eyebrow">Unser Showroom</p><h2 class="h2">Sieben Marken. <span class="gt">Eine Bühne.</span></h2></div>
+   <div class="rail" id="rail" role="group" aria-label="Marke wählen"></div>
+  </div>
+  <div class="stage">
+   <div class="view" id="view">
+    <div class="floor"></div><div class="ring"></div>
+    <div class="slot" id="slot"><img src="../img/p-isy-orange-900.webp" srcset="../img/p-isy-orange-900.webp 900w,../img/p-isy-orange-1200.webp 1200w" sizes="(max-width:900px) 92vw,56vw" width="900" height="672" loading="lazy" alt="i:SY N3.8 ZR CX Auto Comfort E-Kompaktrad in Happy Orange"></div>
+    <div class="arrows"><button type="button" id="prev" aria-label="Vorherige Marke"><svg><use href="#i-al"/></svg></button><button type="button" id="next" aria-label="Nächste Marke"><svg><use href="#i-ar"/></svg></button></div>
+   </div>
+   <div class="info" aria-live="polite">
+    <div class="swap" id="swap">
+     <p class="cnt" id="cnt">01 / 07</p>
+     <span class="cat" id="cat">E-Kompaktrad</span>
+     <h3 id="mdl">i:SY N3.8 ZR CX Auto Comfort</h3>
+     <p id="txt">Seit 2015 sind wir i:SY Experte, über 1.000 i:SY verkauft. Probefahrt auch übers Wochenende.</p>
+    </div>
+    <div class="acts"><button class="btn btn-p" type="button" id="probe"><svg><use href="#i-cal"/></svg>Probefahrt anfragen</button><a class="btn btn-g" href="../lager/">Bestand ansehen<svg><use href="#i-ar"/></svg></a></div>
+    <p class="also">Außerdem im Laden: Stevens und gutes Zubehör von Ortlieb bis Schwalbe.</p>
+   </div>
+  </div>
+ </div>
+</section>
+
+<!-- 3 · Rad-Finder -->
+<section class="light sec" id="finder">
+ <div class="wrap fgrid">
+  <div>
+   <p class="eyebrow">Rad-Finder</p>
+   <h2 class="h2" style="margin-top:14px">Welches E-Bike passt <span class="gt">zu dir?</span></h2>
+   <p class="lead" style="margin-top:16px">Ein Klick, ein Vorschlag. Im Laden zeigen wir dir die passende Auswahl und du fährst Probe.</p>
+   <div class="opts" id="opts" role="group" aria-label="Wofür brauchst du dein Rad?">
+    <button class="opt" type="button" data-f="alltag" aria-pressed="true"><span class="ic"><svg><use href="#i-city"/></svg></span><span><b>Alltag &amp; Stadt</b><span>Einkauf, Arbeit, bequem aufsteigen</span></span></button>
+    <button class="opt" type="button" data-f="touren" aria-pressed="false"><span class="ic"><svg><use href="#i-tour"/></svg></span><span><b>Touren &amp; Ausflüge</b><span>Längere Strecken, am Rhein und in der Pfalz</span></span></button>
+    <button class="opt" type="button" data-f="kompakt" aria-pressed="false"><span class="ic"><svg><use href="#i-box"/></svg></span><span><b>Platzsparend &amp; mitnehmen</b><span>Wohnmobil, Auto, kleiner Keller</span></span></button>
+    <button class="opt" type="button" data-f="sicher" aria-pressed="false"><span class="ic"><svg><use href="#i-shield"/></svg></span><span><b>Maximal sicher &amp; stabil</b><span>Drei Räder, kein Umkippen</span></span></button>
+   </div>
+  </div>
+  <div class="result" id="res" aria-live="polite">
+   <div class="pics" id="rpics"></div>
+   <p class="rk">Unser Vorschlag</p>
+   <h3 id="rh"></h3>
+   <p id="rp"></p>
+   <div class="acts"><button class="btn btn-p" type="button" id="rgo">Auf der Bühne ansehen<svg><use href="#i-ar"/></svg></button><button class="btn btn-g" type="button" data-termin data-pre="Beratung">Beratung anfragen</button></div>
+  </div>
+ </div>
+</section>
+
+<!-- 4 · Werkstatt (Moment: Foto-Kapitel) -->
+<section class="light" id="werkstatt" style="padding:clamp(90px,11vh,130px) 0">
+ <div class="wrap chap">
+  <div class="head"><p class="eyebrow">Werkstatt &amp; Service</p><h2 class="h2" style="margin-top:14px">Wir überzeugen <span class="gt">mit Service.</span></h2></div>
+  <div class="pin" id="pin">
+   <img class="on" src="../img/laden-innen-960.webp" srcset="../img/laden-innen-960.webp 960w,../img/laden-innen.webp 1280w" sizes="50vw" width="1280" height="722" alt="Verkaufsraum des Velocenter Hessert mit E-Bikes und Zubehör" loading="lazy">
+   <img src="../img/bosch-motor.webp" width="1920" height="450" alt="Bosch Performance Line CX Antrieb" loading="lazy" style="object-position:86% 50%">
+   <img src="../img/laden-eingang-960.webp" srcset="../img/laden-eingang-960.webp 960w,../img/laden-eingang.webp 1280w" sizes="50vw" width="1280" height="722" alt="Eingang des Velocenter Hessert in der Hartmannstraße" loading="lazy">
+   <div class="pg"><i class="on"></i><i></i><i></i></div>
+  </div>
+  <div class="steps">
+   <article class="step on" data-i="0">
+    <img class="pimg" src="../img/laden-innen-640.webp" width="640" height="361" alt="Verkaufsraum des Velocenter Hessert" loading="lazy">
+    <p class="no">01 · Beratung</p><h3>Erst zuhören, dann Probe fahren.</h3>
+    <p>Wir wollen dir nicht irgendein E-Bike verkaufen, sondern das Rad finden, das perfekt zu dir passt. Wir zeigen eine passende Auswahl und begleiten dich auf Wunsch bei der Probefahrt.</p>
+    <div class="chips"><span>Probefahrt vor Ort</span><span>i:SY übers Wochenende</span><span>300+ E-Bikes</span></div>
+   </article>
+   <article class="step" data-i="1">
+    <img class="pimg" src="../img/bosch-motor.webp" width="1920" height="450" alt="Bosch Performance Line CX Antrieb" loading="lazy" style="object-position:86% 50%">
+    <p class="no">02 · Bosch Service Center</p><h3>Ausgewiesen. Geschult.</h3>
+    <p>Inspektion, Reparatur, Fehlerspeicher und Software-Update für deinen Bosch-Antrieb. Du bekommst eine Checkliste und den Bosch Servicebericht dazu.</p>
+    <div class="chips"><span>Inspektion</span><span>Reparatur</span><span>Software-Update</span><span>Servicebericht</span></div>
+   </article>
+   <article class="step" data-i="2">
+    <img class="pimg" src="../img/laden-eingang-640.webp" width="640" height="361" alt="Eingang des Velocenter Hessert" loading="lazy">
+    <p class="no">03 · Unser Versprechen</p><h3>Hier schraubt der Chef noch selbst.</h3>
+    <blockquote><p class="q">„Uns ist wichtig, dass du am Ende glücklich mit deinem E-Bike bist und dich ehrlich beraten fühlst.“</p><cite>Stefan Hessert, Inhaber</cite></blockquote>
+    <div class="acts" style="margin-top:26px"><button class="btn btn-p" type="button" data-termin data-pre="Inspektion"><svg><use href="#i-cal"/></svg>Werkstatt-Termin anfragen</button></div>
+   </article>
+  </div>
+ </div>
+</section>
+
+<!-- 5 · Winter-Aktion (Moment: Schriftzug) -->
+<section class="dark sec deal" id="aktion">
+ <div class="aura" style="animation-duration:26s;animation-direction:alternate-reverse"></div><div class="grain"></div>
+ <div class="wrap">
+  <div>
+   <p class="eyebrow">Winter-Inspektion 2026/27</p>
+   <div class="big" data-t="–20 €" aria-hidden="true">–20 €</div>
+   <h2><span class="sr" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)">20 € weniger </span>auf jede Inspektion. Dazu ein Sattelüberzug geschenkt.</h2>
+   <p class="lead">Jetzt ist die Werkstatt entspannt, im Frühling ist dein Rad startklar. Mit Checkliste und Bosch Servicebericht.</p>
+   <div class="acts"><button class="btn btn-p mag" type="button" data-termin data-pre="Inspektion"><svg><use href="#i-cal"/></svg>Inspektion buchen</button></div>
+   <p class="small">Gültig vom 01.11.2026 bis 28.02.2027, nur solange Termine verfügbar sind.</p>
+  </div>
+  <div class="gift">
+   <div class="halo"></div>
+   <div class="disc"><img src="../img/sattelueberzug-560.webp" srcset="../img/sattelueberzug-560.webp 560w,../img/sattelueberzug.webp 894w" sizes="(max-width:900px) 80vw,32vw" width="560" height="564" alt="Sattelüberzug in Neongelb mit Velocenter-Logo" loading="lazy"></div>
+   <p class="plus">geschenkt</p>
+  </div>
+ </div>
+</section>
+
+<!-- 6 · Dienstrad & Finanzierung -->
+<section class="light sec" id="dienstrad">
+ <div class="wrap dgrid">
+  <div>
+   <p class="eyebrow">Dienstrad &amp; Finanzierung</p>
+   <h2 class="h2" style="margin-top:14px">In 4 Schritten <span class="gt">zum Dienstrad.</span></h2>
+   <p class="lead" style="margin-top:16px">Wir arbeiten mit fast allen Leasing-Firmen zusammen. Die Einzelheiten hängen vom Anbieter und deinem Arbeitgeber ab, wir erklären sie dir gern.</p>
+   <div class="logos" aria-label="Leasing-Partner">
+    <span><img src="../img/lea-jr.svg" alt="JobRad" width="110" height="24" loading="lazy"></span><span><img src="../img/lea-bl.svg" alt="Bikeleasing" width="110" height="16" loading="lazy"></span><span><img src="../img/lea-cb.webp" alt="Company Bike" width="110" height="30" loading="lazy"></span><span><img src="../img/lea-bb.svg" alt="Businessbike" width="90" height="23" loading="lazy"></span><span><img src="../img/lea-dd.svg" alt="Deutsche Dienstrad" width="110" height="20" loading="lazy"></span><span><img src="../img/lea-er.svg" alt="Eurorad" width="110" height="17" loading="lazy"></span><span><img src="../img/lea-lb.svg" alt="Lease a Bike" width="34" height="21" loading="lazy"></span><span><img src="../img/lea-km.svg" alt="Kazenmaier Leasing" width="66" height="20" loading="lazy"></span><span><img src="../img/lea-rd.webp" alt="RIDE" width="60" height="20" loading="lazy"></span>
+   </div>
+  </div>
+  <div>
+   <div class="track">
+    <div class="tstep"><b>1</b><div><h3>Rad aussuchen</h3><p>Beratung und Probefahrt bei uns im Laden.</p></div></div>
+    <div class="tstep"><b>2</b><div><h3>Angebot</h3><p>Wir erstellen das Angebot für deinen Leasing-Anbieter.</p></div></div>
+    <div class="tstep"><b>3</b><div><h3>Freigabe</h3><p>Dein Arbeitgeber genehmigt den Vertrag im Portal.</p></div></div>
+    <div class="tstep"><b>4</b><div><h3>Losfahren</h3><p>Wir machen das Rad fertig, du holst es ab.</p></div></div>
+   </div>
+   <div class="pay">
+    <div><b>0 % Finanzierung</b><p>Über die TARGOBANK, bis zu 24 Monate, mit Anzahlung. Zum regulären Preis.</p></div>
+    <div><b>ENRA Versicherung</b><p>Schutz gegen Diebstahl, dazu Vollkasko mit Verschleiß und Pick-up-Service.</p></div>
+   </div>
+  </div>
+ </div>
+</section>
+
+<!-- 7 · Stimmen -->
+<section class="light sec voices" id="stimmen">
+ <div class="wrap">
+  <div>
+   <p class="eyebrow">Google-Bewertungen</p>
+   <div class="score" style="margin-top:18px">4,8<small> / 5</small></div>
+   <p class="stars" style="font-size:22px;margin:10px 0 6px;color:var(--copper)" aria-hidden="true">★★★★★</p>
+   <h2 style="font-size:clamp(26px,2.6vw,34px);font-weight:800;margin-bottom:22px">221 Rezensionen bei Google.</h2>
+   <a class="btn btn-g" href="https://g.page/r/CYlWWOy1HBsvEBM/review" target="_blank" rel="noopener">Uns bei Google bewerten<svg><use href="#i-ar"/></svg></a>
+  </div>
+  <div class="rv">
+   <blockquote><p>„Gesagt, getan: Zeitrahmen und Kostenprognose eingehalten. So ist das guter Kundenservice. Weiter so.“</p><cite>Bernd M. · Google</cite></blockquote>
+   <blockquote><p>„Super Service. Gestern gebracht, heute vormittag abgeholt. Wartung/Inspektion 👍“</p><cite>Peter · Google</cite></blockquote>
+   <blockquote><p>„Seit wir die Fahrräder haben, einfach einen guten Service.“</p><cite>Jürgen K. · Google</cite></blockquote>
+  </div>
+ </div>
+</section>
+
+<!-- 8 · Besuch -->
+<section class="dark visit" id="besuch">
+ <div class="bg"><img src="../img/fassade.webp" width="800" height="600" alt="Fassade des Velocenter Hessert mit Wandbild" loading="lazy"></div>
+ <div class="wrap">
+  <div>
+   <p class="eyebrow">Besuch uns</p>
+   <h2>Hartmannstraße 25.<br><span class="gt">Wörth am Rhein.</span></h2>
+   <p class="lead" style="margin-bottom:28px">Zum Be- und Entladen darfst du kurz vor dem Geschäft halten. Parkplätze gibt es ca. 100 m entfernt am Friedhof.</p>
+   <div class="acts">
+    <a class="btn btn-p" href="https://www.google.com/maps/dir/?api=1&amp;destination=Velocenter%20Hessert%2C%20Hartmannstra%C3%9Fe%2025%2C%2076744%20W%C3%B6rth%20am%20Rhein" target="_blank" rel="noopener"><svg><use href="#i-pin"/></svg>Route planen</a>
+    <a class="btn btn-g" href="tel:+49727178033"><svg><use href="#i-ph"/></svg>07271 78033</a>
+   </div>
+  </div>
+  <div class="hours">
+   <h3><span class="live" id="live2" style="padding:0;background:none;min-height:0"><i></i></span>Öffnungszeiten</h3>
+   <ul id="hrs"></ul>
+  </div>
+ </div>
+</section>
+
+<!-- Abschluss -->
+<section class="dark close" id="los">
+ <div class="aura"></div><div class="grain"></div>
+ <div class="wrap">
+  <p class="eyebrow" style="justify-content:center">Probefahrt · Inspektion · Beratung</p>
+  <h2 style="margin-top:18px">Komm vorbei.<br><span class="gt">Fahr Probe.</span></h2>
+  <div class="acts"><button class="btn btn-p mag" type="button" data-termin><svg><use href="#i-cal"/></svg>Termin anfragen</button><a class="btn btn-g" href="https://wa.me/491635343133" target="_blank" rel="noopener"><svg><use href="#i-wa"/></svg>WhatsApp schreiben</a></div>
+ </div>
+</section>
+</main>
+
+<footer>
+ <div class="wrap">
+  <span>© <span id="yr">2026</span> Velocenter Hessert · Hartmannstraße 25, 76744 Wörth am Rhein</span>
+  <nav aria-label="Rechtliches"><a href="../">Aktuelle Homepage</a><a href="../lager/">Auf Lager</a><a href="../impressum/">Impressum</a><a href="../datenschutz/">Datenschutz</a></nav>
+ </div>
+</footer>
+
+<p class="vtag">VORLAGE „ZUKUNFT“ · <a href="../">zur echten Seite</a></p>
+
+<div class="mbar" aria-label="Schnellkontakt">
+ <a href="tel:+49727178033"><svg><use href="#i-ph"/></svg>Anrufen</a>
+ <button type="button" data-termin><svg><use href="#i-cal"/></svg>Termin</button>
+ <a class="w" href="https://wa.me/491635343133" target="_blank" rel="noopener"><svg><use href="#i-wa"/></svg>WhatsApp</a>
+</div>
+
+<dialog id="dlg" aria-labelledby="dlgT">
+ <form class="dlg" id="tf" novalidate method="dialog">
+  <button class="x" type="button" id="dx" aria-label="Fenster schließen"><svg><use href="#i-x"/></svg></button>
+  <p class="eyebrow">In 30 Sekunden</p>
+  <h2 id="dlgT">Termin anfragen</h2>
+  <p class="lead" style="font-size:15px">Wir melden uns und bestätigen den Termin.</p>
+  <fieldset><legend>Worum geht es?</legend><div class="seg" id="anl">
+   <label><input type="radio" name="a" value="Probefahrt" checked><span>Probefahrt</span></label>
+   <label><input type="radio" name="a" value="Inspektion"><span>Inspektion</span></label>
+   <label><input type="radio" name="a" value="Reparatur"><span>Reparatur</span></label>
+   <label><input type="radio" name="a" value="Beratung"><span>Beratung</span></label>
+  </div></fieldset>
+  <div class="fr">
+   <div class="f"><label class="fl" for="fm">Rad oder Marke</label><input id="fm" name="m" placeholder="z. B. i:SY N3.8" autocomplete="off"><span class="err"></span></div>
+   <div class="f"><label class="fl" for="fd">Wunschtag</label><input id="fd" name="d" type="date" required><span class="err" id="fde"></span></div>
+  </div>
+  <fieldset><legend>Tageszeit</legend><div class="seg">
+   <label><input type="radio" name="z" value="Vormittag" checked><span>Vormittag</span></label>
+   <label><input type="radio" name="z" value="Nachmittag"><span>Nachmittag</span></label>
+   <label><input type="radio" name="z" value="egal"><span>egal</span></label>
+  </div></fieldset>
+  <div class="fr">
+   <div class="f"><label class="fl" for="fn">Dein Name</label><input id="fn" name="n" required autocomplete="name"><span class="err" id="fne"></span></div>
+   <div class="f"><label class="fl" for="ft">Telefon</label><input id="ft" name="t" type="tel" required autocomplete="tel" inputmode="tel"><span class="err" id="fte"></span></div>
+  </div>
+  <div class="send">
+   <button class="btn wa" type="submit" value="wa"><svg><use href="#i-wa"/></svg>Per WhatsApp senden</button>
+   <button class="btn btn-g" type="submit" value="mail">Per E-Mail senden<svg><use href="#i-ar"/></svg></button>
+  </div>
+  <p class="note">Die Anfrage öffnet WhatsApp bzw. dein Mailprogramm mit fertigem Text. Gesendet wird erst, wenn du dort auf Senden tippst.</p>
+ </form>
+</dialog>
+
+<script>
+(()=>{const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
+/* Öffnungszeiten (Mo, Di, Do, Fr 9–12 + 14:30–18 · Sa 9–12 · Mi, So zu) */
+const H={1:[[540,720],[870,1080]],2:[[540,720],[870,1080]],4:[[540,720],[870,1080]],5:[[540,720],[870,1080]],6:[[540,720]]},
+ DN=['So','Mo','Di','Mi','Do','Fr','Sa'],DL=['Sonntag','Montag','Dienstag','Mittwoch','Donnerstag','Freitag','Samstag'],
+ hm=m=>Math.floor(m/60)+':'+String(m%60).padStart(2,'0');
+function stat(){const n=new Date(),d=n.getDay(),m=n.getHours()*60+n.getMinutes(),t=H[d]||[];
+ for(const [a,b] of t){if(m>=a&&m<b)return{o:1,s:'Geöffnet · bis '+hm(b)}}
+ for(const [a] of t){if(m<a)return{o:0,s:'Zu · öffnet '+hm(a)}}
+ for(let i=1;i<8;i++){const k=(d+i)%7;if(H[k])return{o:0,s:'Zu · öffnet '+DN[k]+' '+hm(H[k][0][0])}}}
+function upd(){const s=stat();$$('#live,#live2').forEach(e=>e.classList.toggle('open',!!s.o));$('#live span').textContent=s.s;
+ const d=new Date().getDay();$('#hrs').innerHTML=[1,2,3,4,5,6,0].map(k=>`<li class="${k===d?'now':''} ${H[k]?'':'zu'}"><span>${DL[k]}${k===d?' · heute':''}</span><b>${H[k]?H[k].map(([a,b])=>hm(a)+'–'+hm(b)).join(' · '):'geschlossen'}</b></li>`).join('')}
+upd();setInterval(upd,60000);$('#yr').textContent=new Date().getFullYear();
+
+/* Navi: hell über hellen Abschnitten, aktiver Punkt */
+const nav=$('#nav'),links=$$('.nl a');
+const io=new IntersectionObserver(es=>{es.forEach(e=>{if(!e.isIntersecting)return;const t=e.target;nav.classList.toggle('lt',t.classList.contains('light'));
+ links.forEach(a=>a.classList.toggle('on',a.getAttribute('href')==='#'+t.id))})},{rootMargin:'-40px 0px -92% 0px'});
+$$('main>section').forEach(s=>io.observe(s));
+
+/* Menü Handy */
+const menu=$('#menu'),mb=$('#mb');function mt(o){menu.classList.toggle('on',o);menu.setAttribute('aria-hidden',!o);mb.setAttribute('aria-expanded',o);document.body.style.overflow=o?'hidden':''; if(o)$('#mx').focus();else mb.focus()}
+mb.onclick=()=>mt(true);$('#mx').onclick=()=>mt(false);$$('#menu a').forEach(a=>a.addEventListener('click',()=>mt(false)));
+addEventListener('keydown',e=>{if(e.key==='Escape'&&menu.classList.contains('on'))mt(false)});
+
+/* Licht folgt der Maus (nur ein verschobenes Element, kein Neuzeichnen) */
+const spot=$('#spot'),hero=$('#top');let sx=0,sy=0,raf=0;
+hero.addEventListener('pointermove',e=>{const r=hero.getBoundingClientRect();sx=e.clientX-r.left;sy=e.clientY-r.top;if(!raf)raf=requestAnimationFrame(()=>{spot.style.transform=`translate3d(${sx}px,${sy}px,0)`;raf=0})});
+
+/* Magnetische Knöpfe */
+if(matchMedia('(pointer:fine)').matches)$$('.mag').forEach(b=>{b.addEventListener('pointermove',e=>{const r=b.getBoundingClientRect();b.style.setProperty('--bx',((e.clientX-r.left)/r.width-.5)*10+'px');b.style.setProperty('--by',((e.clientY-r.top)/r.height-.5)*8+'px')});
+ b.addEventListener('pointerleave',()=>{b.style.setProperty('--bx','0px');b.style.setProperty('--by','0px')})});
+
+/* Marken-Bühne */
+const B=[
+ {k:'isy',logo:'marke-isy.svg',img:'p-isy-orange',w:1600,h:1195,m:'i:SY N3.8 ZR CX Auto Comfort',alt:'i:SY N3.8 ZR CX Auto Comfort E-Kompaktrad in Happy Orange',c:'E-Kompaktrad',t:'Seit 2015 sind wir i:SY Experte, über 1.000 i:SY verkauft. Probefahrt auch übers Wochenende.'},
+ {k:'ktm',logo:'marke-ktm.svg',img:'p-ktm',w:1600,h:1006,m:'KTM Macina',alt:'KTM Macina E-Bike',c:'E-Bike',t:'Sportlich und robust, für den Alltag und die Tour am Wochenende.'},
+ {k:'gudereit',logo:'marke-gudereit.svg',img:'p-gudereit',w:1600,h:1128,m:'Gudereit EC-35 Evo',alt:'Gudereit EC-35 Evo E-Bike',c:'E-Bike · tiefer Einstieg',t:'Bequem auf- und absteigen und entspannt unterwegs sein.'},
+ {k:'qio',logo:'marke-qio.svg',img:'p-qio-eins-fineline',w:1600,h:1068,m:'QiO EINS P-E Fine Line',alt:'QiO EINS P-E Fine Line E-Kompaktrad',c:'E-Kompaktrad',t:'Kompakt und wendig, ideal, wenn der Platz knapp ist.'},
+ {k:'vdv',logo:'marke-vdv.svg',img:'p-vdv-aebpro',w:1600,h:1001,m:'Velo de Ville AEB PRO',alt:'Velo de Ville AEB PRO E-Bike in French Lavender',c:'E-Bike',t:'Aus Deutschland und nach deinen Wünschen konfiguriert.'},
+ {k:'victoria',logo:'marke-victoria.svg',img:'p-victoria-veloa7',w:1600,h:1000,m:'Victoria Veloa 7',alt:'Victoria Veloa 7 E-Bike',c:'E-Bike',t:'Leicht zu fahren und gemacht für jeden Tag.'},
+ {k:'vanraam',logo:'marke-vanraam.svg',img:'p-vanraam',w:1600,h:1193,m:'Van Raam Easy Rider',alt:'Van Raam Easy Rider E-Dreirad',c:'E-Dreirad',t:'Drei Räder und ein tiefer Sitz: sicher und stabil unterwegs.'}];
+const rail=$('#rail');rail.innerHTML=B.map((b,i)=>`<button type="button" aria-pressed="${i?'false':'true'}" aria-label="${b.m}" data-i="${i}"><img src="../img/${b.logo}" alt="" height="26" width="96" loading="lazy" decoding="async"></button>`).join('');
+let cur=0,busy=0;
+const src=b=>`../img/${b.img}-${innerWidth<900||devicePixelRatio<1.5&&innerWidth<1500?900:1200}.webp`,pre=i=>{const b=B[(i+B.length)%B.length];if(!b.pre){b.pre=new Image();b.pre.src=src(b)}};
+function show(i,dir){i=(i+B.length)%B.length;if(i===cur||busy)return;busy=1;const b=B[i],rev=dir<0||(dir===undefined&&i<cur);
+ const v=$('#view'),old=$('#slot'),nw=document.createElement('div');nw.className='slot in'+(rev?' rev':'');nw.id='slot';
+ nw.innerHTML=`<img src="${src(b)}" width="1200" height="${Math.round(1200*b.h/b.w)}" alt="${b.alt}">`;
+ old.id='';old.className='slot out'+(rev?' rev':'');v.insertBefore(nw,v.querySelector('.arrows'));
+ const sw=$('#swap');sw.classList.add('hide');
+ setTimeout(()=>{$('#cnt').textContent=String(i+1).padStart(2,'0')+' / 0'+B.length;$('#cat').textContent=b.c;$('#mdl').textContent=b.m;$('#txt').textContent=b.t;sw.classList.remove('hide')},260);
+ setTimeout(()=>{old.remove();nw.className='slot';busy=0},760);
+ $$('#rail button').forEach((x,j)=>x.setAttribute('aria-pressed',j===i));cur=i;pre(i+1);pre(i-1)}
+rail.addEventListener('click',e=>{const t=e.target.closest('button');if(t)show(+t.dataset.i)});
+$('#prev').onclick=()=>show(cur-1,-1);$('#next').onclick=()=>show(cur+1,1);
+$('#buehne').addEventListener('keydown',e=>{if(e.key==='ArrowRight'){show(cur+1,1)}else if(e.key==='ArrowLeft'){show(cur-1,-1)}});
+let tx=null;$('#view').addEventListener('pointerdown',e=>{tx=e.clientX});$('#view').addEventListener('pointerup',e=>{if(tx!==null&&Math.abs(e.clientX-tx)>40)show(cur+(e.clientX<tx?1:-1),e.clientX<tx?1:-1);tx=null});
+/* nur die Nachbarn vorladen (spart Daten auf dem Handy) */
+new IntersectionObserver((es,o)=>{if(es[0].isIntersecting){pre(1);pre(-1);o.disconnect()}},{rootMargin:'300px'}).observe($('#buehne'));
+rail.addEventListener('pointerover',e=>{const t=e.target.closest('button');if(t)pre(+t.dataset.i)});
+$('#probe').onclick=()=>openT('Probefahrt',B[cur].m);
+
+/* Rad-Finder */
+const F={alltag:{h:'Gudereit EC-35 Evo oder Victoria Veloa 7',p:'Tiefer Einstieg, bequeme Sitzposition, gemacht für jeden Tag in der Stadt.',b:['gudereit','victoria']},
+ touren:{h:'KTM Macina oder Velo de Ville AEB PRO',p:'Kraftvoller Antrieb und Ausstattung für lange Strecken am Rhein und in der Pfalz.',b:['ktm','vdv']},
+ kompakt:{h:'i:SY oder QiO EINS',p:'Kompakträder mit 20-Zoll-Laufrädern: wenig Platz im Keller, schnell im Auto oder Wohnmobil.',b:['isy','qio']},
+ sicher:{h:'Van Raam Easy Rider',p:'Das E-Dreirad mit tiefem Sitz. Drei Räder, kein Umkippen, entspannt anhalten.',b:['vanraam']}};
+let fk='alltag';
+function fset(k){fk=k;const f=F[k],r=$('#res');$$('#opts .opt').forEach(o=>o.setAttribute('aria-pressed',o.dataset.f===k));
+ $('#rh').textContent=f.h;$('#rp').textContent=f.p;
+ $('#rpics').innerHTML=f.b.map(x=>{const b=B.find(y=>y.k===x);return `<img src="../img/${b.img}-600.webp" width="600" height="${Math.round(600*b.h/b.w)}" alt="${b.alt}" loading="lazy">`}).join('');
+ r.classList.remove('pop');void r.offsetWidth;r.classList.add('pop')}
+$('#opts').addEventListener('click',e=>{const o=e.target.closest('.opt');if(o)fset(o.dataset.f)});fset('alltag');
+$('#rgo').onclick=()=>{const i=B.findIndex(b=>b.k===F[fk].b[0]);$('#buehne').scrollIntoView({behavior:'smooth'});setTimeout(()=>show(i),500)};
+
+/* Werkstatt-Kapitel */
+const pimgs=$$('#pin img'),pgs=$$('#pin .pg i'),steps=$$('.step');
+const stepIO=new IntersectionObserver(es=>{es.forEach(e=>{if(!e.isIntersecting)return;const i=+e.target.dataset.i;steps.forEach((s,j)=>s.classList.toggle('on',j===i));pimgs.forEach((p,j)=>p.classList.toggle('on',j===i));pgs.forEach((p,j)=>p.classList.toggle('on',j<=i))})},{rootMargin:'-45% 0px -45% 0px'});
+steps.forEach(s=>stepIO.observe(s));
+
+/* –20 €: Schriftzug füllt sich einmal, wenn die Aktion ins Bild kommt */
+new IntersectionObserver((es,o)=>{if(es[0].isIntersecting){$('#aktion').classList.add('go');o.disconnect()}},{threshold:.35}).observe($('#aktion'));
+
+/* Termin-Fenster: baut eine fertige WhatsApp- bzw. E-Mail-Nachricht */
+const dlg=$('#dlg'),tf=$('#tf');let opener=null;
+function openT(a,m){opener=document.activeElement;if(a){const r=tf.querySelector(`input[name=a][value="${a}"]`);if(r)r.checked=true}if(m!==undefined)$('#fm').value=m;
+ const d=new Date();d.setDate(d.getDate()+1);$('#fd').min=d.toISOString().slice(0,10);dlg.showModal();setTimeout(()=>$('#fm').focus(),60)}
+$$('[data-termin]').forEach(b=>b.addEventListener('click',()=>openT(b.dataset.pre||null)));
+$('#dx').onclick=()=>dlg.close();dlg.addEventListener('click',e=>{if(e.target===dlg)dlg.close()});dlg.addEventListener('close',()=>{if(opener)opener.focus()});
+function err(id,t){$(id).textContent=t||'';return !t}
+function check(){const d=$('#fd').value,n=$('#fn').value.trim(),t=$('#ft').value.replace(/[^\d+]/g,'');let ok=true;
+ if(!d)ok=err('#fde','Bitte einen Tag wählen.')&&ok;else{const x=new Date(d+'T12:00'),w=x.getDay(),min=new Date($('#fd').min+'T00:00');
+  if(x<min)ok=err('#fde','Bitte einen Tag ab morgen wählen.')&&ok;else if(w===0||w===3)ok=err('#fde','Mittwoch und Sonntag haben wir geschlossen.')&&ok;else err('#fde')}
+ ok=(n.length<2?err('#fne','Bitte deinen Namen eintragen.'):err('#fne'))&&ok;
+ ok=(t.length<6?err('#fte','Bitte eine Telefonnummer eintragen.'):err('#fte'))&&ok;return ok}
+['#fd','#fn','#ft'].forEach(i=>$(i).addEventListener('blur',()=>{if($(i).value)check()}));
+tf.addEventListener('submit',e=>{e.preventDefault();if(!check()){const f=tf.querySelector('.err:not(:empty)');if(f)f.previousElementSibling.focus();return}
+ const g=k=>(tf.querySelector(`input[name=${k}]:checked`)||{}).value,d=new Date($('#fd').value+'T12:00'),ds=DL[d.getDay()]+', '+d.toLocaleDateString('de-DE');
+ const txt=`Hallo Velocenter-Team,\nich möchte einen Termin anfragen.\n\nAnliegen: ${g('a')}\nRad/Marke: ${$('#fm').value.trim()||'–'}\nWunschtag: ${ds}, ${g('z')}\nName: ${$('#fn').value.trim()}\nTelefon: ${$('#ft').value.trim()}\n\nViele Grüße`;
+ const via=(e.submitter&&e.submitter.value)||'wa';
+ window.open(via==='wa'?'https://wa.me/491635343133?text='+encodeURIComponent(txt):'mailto:info@velo-center.de?subject='+encodeURIComponent('Terminanfrage: '+g('a'))+'&body='+encodeURIComponent(txt),'_blank','noopener');dlg.close()});
+})();
+</script>
+</body>
+</html>
