@@ -606,3 +606,4 @@
 
 ### Google-Logo an der 4,8-Karte (Tiry 23.11.2026)
 - `.score` hat unten rechts eine weiße Glas-Plakette mit dem originalen mehrfarbigen Google-„G“ (`.sgl`, 58 px, Handy 48 px). Oben rechts überdeckte sie am PC die „8“.
+- Bewertungskarten alle gleich hoch (Tiry 24.11.2026, „Seite springt hoch und runter“): `bwH()` misst beim Laden, nach den Schriften und bei Fenstergröße alle Bewertungen im Vorrat und setzt `--qh` = längste (gedeckelt PC 50 %, Handy 42 % der Fensterhöhe); längere Texte blenden unten weich aus (`.qcut`). Gemessen: Karten PC 337 px, Handy 276 px konstant über mehrere Wechsel; 4,8-Karte konstant 355×342. Vorher wuchs der Block 261 → 285 → 316 px (Ursache des Springens, nicht die 4,8-Karte).
