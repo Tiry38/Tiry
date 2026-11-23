@@ -558,3 +558,9 @@
 - Kontur = `-webkit-text-stroke` mit `paint-order:stroke fill` (sitzt hinter den Buchstaben), max(2px, ~0,05em) + kleiner Schatten. **Kein breiter Lichtsaum** (wirkte verschmiert).
 - Text in Karten mit eigener Fläche (Hintergrundfarbe > 30 %, Verlauf, deckendes ::before/::after) wird nie markiert (`onCard`); Markierungen, die nicht mehr zutreffen, werden bei jedem Neuaufbau entfernt.
 - Abstands-Block „Luft für die Glasplatten“ entfernt.
+
+### Leistung Hintergrund für schwache Geräte, ohne sichtbaren Verlust (Tiry 23.11.2026)
+- **Shader schlanker (−26 % Rechenzeit, Pixelvergleich alt/neu bei gleichem Zeitpunkt: Ø 0,3/255, 99 % ≤ 3/255):** Cinemagraph-, Nebel-, Lichtstrahl-, Sonnenstrahl- und Glitzer-Teile werden nur dort gerechnet, wo sie etwas beitragen; Tiefen-Schleife 4 statt 6; Kino-Unschärfe 6 statt 10 Abtastungen, Lichtstrahlen 8 statt 14 – beide mit Zufallsversatz je Pixel (keine Stufen), Gewichte gleich.
+- **Regler v2 (`gov`):** prüft jede Sekunde (vorher alle 75 Bilder = auf langsamen PCs Minuten → Seite hing). Reihenfolge: 1. Hintergrund 30 statt 60 Bilder, 2. Auflösung bis 60 %, 3. 20/15 Bilder. Unter 16 Bildern/s: 30 Bilder + 75 % sofort. Jede Stufe wird nach ≥ 15 Bildern geprüft und ggf. zurückgenommen.
+- **Schwache Grafik ab Start erkannt (`WEAK`)**: Intel HD/UHD (ohne Iris, z. B. Mini-PC N5000 = UHD 605), Mali-T/G1x–G5x, Adreno ≤ 61x, PowerVR, ≤ 2 Kerne → Hintergrund von Anfang an mit 30 Bildern, bleibt dort.
+- Prüfen am Gerät: Konsole `HG12_STAT()` zeigt weak/qs/skip/ft.

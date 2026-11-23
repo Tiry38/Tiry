@@ -42,7 +42,7 @@ void main(){
  /* Kamera: Maus + ruhiges Schweben, Scrollen = Fahrt ins Bild (nahe Dinge wachsen schneller) */
  vec2 cam=(uM-.5)*vec2(.034,.014)+vec2(sin(uT*.13),sin(uT*.097+1.))*vec2(.006,.002);
  float dol=min(uS,3.)*.045+.010*sin(uT*.19);
- vec2 q=p;for(int i=0;i<6;i++){float d=D(q).r;q=c+(p-c)/(1.+dol*(d-uFp))+cam*(d-uFp);}q=clamp(q,.003,.997);
+ vec2 q=p;for(int i=0;i<4;i++){float d=D(q).r;q=c+(p-c)/(1.+dol*(d-uFp))+cam*(d-uFp);}q=clamp(q,.003,.997);
  vec3 dat=D(q);float d=dat.r,sky=dat.g,fm=dat.b;
  /* Wind im Gras/Büschen (Böen laufen übers Bild) + Wasser kräuselt */
  vec3 mk3=texture2D(uE,fl(q)).rgb;vec2 mk=mk3.rg;
@@ -54,13 +54,13 @@ void main(){
  float f1=fract(uT*uSp),f2=fract(uT*uSp+.5);float wv=abs(1.-2.*f1);
  vec2 o=dir*uAm*fm;
  vec2 s1=q-o*f1,s2=q-o*f2;
- float ok=(1.-smoothstep(.06,.14,max(D(s1).r,D(s2).r)))*(1.-smoothstep(.06,.14,d));
- ok*=smoothstep(.55,.95,min(min(D(s1).g,D(s2).g),sky));
+ float ok=0.;if(fm>.001&&sky>.5){vec2 e1=D(s1).rg,e2=D(s2).rg;ok=(1.-smoothstep(.06,.14,max(e1.x,e2.x)))*(1.-smoothstep(.06,.14,d));
+ ok*=smoothstep(.55,.95,min(min(e1.y,e2.y),sky));}
  vec3 base=P(q);
  if(uDf!=0.){vec2 pm=c+(uM-.5)*s;float fd=(D(pm).r*2.+D(pm+vec2(.02,0)).r+D(pm-vec2(.02,0)).r+D(pm+vec2(0,.02)).r+D(pm-vec2(0,.02)).r)/6.;
   float rb=abs(uDf)*.0024*smoothstep(.10,.55,abs(d-fd))*(1.-sky);if(uDf<0.)rb*=smoothstep(fd,fd+.08,d);
-  if(rb>.0002){vec3 acc=base;float ga=2.39996;for(int i=0;i<10;i++){float fi=float(i)+.5;float rr2=sqrt(fi/10.)*rb;vec2 off=vec2(cos(fi*ga),sin(fi*ga))*rr2*vec2(1.,iA);acc+=P(q+off);}base=acc/11.;}}
- vec3 col=mix(base,mix(P(s1),P(s2),1.-wv),ok);
+  if(rb>.0002){vec3 acc=base;float ga=2.39996,j0=h21(gl_FragCoord.xy)*6.283;for(int i=0;i<6;i++){float fi=float(i)+.5;float rr2=sqrt(fi/6.)*rb;vec2 off=vec2(cos(fi*ga+j0),sin(fi*ga+j0))*rr2*vec2(1.,iA);acc+=P(q+off);}base=acc/7.;}}
+ vec3 col=base;if(ok>.002)col=mix(base,mix(P(s1),P(s2),1.-wv),ok);
  /* Herbstallee (Tiry 22.11.2026): Scrollen = die Straße wird nass – Pfützen bilden sich von hinten nach vorne,
     darin spiegeln sich die goldenen Bäume und das Licht, leicht gekräuselt. Das Foto selbst wird nicht verschoben. */
  if(uLd>.5&&q.y<.39&&uS>.001){float vx=.497,n0=max((.6164-q.y)*1.647,.05),z0=1./n0,xw=(q.x-vx)*z0;
@@ -85,13 +85,13 @@ void main(){
   float wo=min(texture2D(uE,fl(w1)).b,texture2D(uE,fl(w2)).b);
   vec3 wc=mix(P(w1),P(w2),1.-gw);col=mix(col,wc,clamp(mk3.b*smoothstep(.15,.6,wo)*1.1,0.,1.));
   col+=vec3(.06)*mk3.b*smoothstep(.55,.9,nz(vec2(q.x*90.,q.y*160.+uT*uWf.y*9.)));}
- col+=vec3(1.,.98,.94)*mk.g*pow(nz(vec2(q.x*520.,q.y*1300.+uT*2.8)),26.)*1.6*step(D(q).r,.35);
+ if(mk.g>.002)col+=vec3(1.,.98,.94)*mk.g*pow(nz(vec2(q.x*520.,q.y*1300.+uT*2.8)),26.)*1.6*step(d,.35);
  /* zusätzliche Nebelschleier (bewegt) auf Fließ-Flächen und im Tal */
- float mist=fbm(vec2(q.x*5.-uT*.035,q.y*14.+uT*.01));
  float band=fm*(1.-sky*.6)*.20*uFg+smoothstep(.10,.0,abs(d-.16))*.14*(1.-sky);
- col=mix(col,vec3(.95,.955,.965),clamp(band*smoothstep(.35,.85,mist),0.,.85));
+ float mist=0.;if(band>.003){mist=fbm(vec2(q.x*5.-uT*.035,q.y*14.+uT*.01));
+ col=mix(col,vec3(.95,.955,.965),clamp(band*smoothstep(.35,.85,mist),0.,.85));}
  /* dichte Nebelbank: zweite, gegenläufige Schicht rollt über die Flächen */
- if(uFg>1.2){float m2=fbm(vec2(q.x*2.6+uT*.045,q.y*7.-uT*.012)+mist*.8);
+ if(uFg>1.2&&fm*(1.-sky*.5)>.003){float m2=fbm(vec2(q.x*2.6+uT*.045,q.y*7.-uT*.012)+mist*.8);
   col=mix(col,vec3(.955,.96,.968),fm*(1.-sky*.5)*smoothstep(.42,.78,m2)*.22*(uFg-1.));}
  /* Teilchen in drei Tiefen: Schnee bzw. Laub. Laub: vorne groß, verschwindet hinter näheren Bäumen (Tiefenkarte), Maus bläst es weg */
  if(uSn>0.){float sn=0.;vec3 lc=vec3(0.);for(int L=0;L<3;L++){float fL=float(L),k=(26.+fL*30.)/uSz/(1.+uLd*.35);
@@ -106,13 +106,14 @@ void main(){
    pc*=.75+.35*abs(sin(an*1.7));sn+=w;lc+=pc*w;}}
   col=mix(col,lc/max(sn,1e-4)*(.88+.12*sin(uT+uv.x*9.)),clamp(sn*uSn,0.,.92));}
  /* Lichtstrahlen: helle Stellen (Dunst/Himmel) streuen zur Sonne hin – Strahlen wandern langsam */
- if(uGr>0.){vec2 dl2=(uSun.xy-q);float acc2=0.,wt=1.;for(int i=0;i<14;i++){vec2 sp2=q+dl2*(float(i)/14.)*.85;vec3 cc=P(sp2);acc2+=smoothstep(.80,.98,dot(cc,vec3(.33)))*wt;wt*=.88;}
-  float shim=.65+.35*nz(vec2(atan(dl2.y,dl2.x*iA)*14.,uT*.15));col+=vec3(1.,.86,.62)*acc2/7.*uGr*shim*.55*(1.-smoothstep(.55,.9,dot(col,vec3(.33))))*(1.-smoothstep(.0,.9,length(dl2*vec2(iA,1.))));}
+ vec2 dl2=(uSun.xy-q);float gk=uGr*(1.-smoothstep(.55,.9,dot(col,vec3(.33))))*(1.-smoothstep(.0,.9,length(dl2*vec2(iA,1.))));
+ if(gk>.002){float acc2=0.,wt=1.,jr=h21(gl_FragCoord.xy+.37);for(int i=0;i<8;i++){vec2 sp2=q+dl2*((float(i)+jr)/8.)*.85;vec3 cc=P(sp2);acc2+=smoothstep(.80,.98,dot(cc,vec3(.33)))*wt;wt*=.7999;}acc2*=1.669;
+  float shim=.65+.35*nz(vec2(atan(dl2.y,dl2.x*iA)*14.,uT*.15));col+=vec3(1.,.86,.62)*acc2/7.*shim*.55*gk;}
  /* Sonne: Glühen + Strahlen nur im Himmel / auf Nebel */
  vec2 sv=(q-uSun.xy)*vec2(iA,1.);float sr=length(sv);
- float ray=pow(max(0.,nz(vec2(atan(sv.y,sv.x)*8.,uT*.05))*.6+.4*nz(vec2(atan(sv.y,sv.x)*21.,uT*.08+3.))-.25),2.);
- float pul=.85+.15*sin(uT*.6);
- col+=vec3(1.,.93,.84)*uSun.z*(exp(-sr*7.)*.35*pul+ray*exp(-sr*2.2)*.20*max(sky,fm*.6));
+ float pul=.85+.15*sin(uT*.6);float rk=exp(-sr*2.2)*.20*max(sky,fm*.6);float ray=0.;
+ if(rk*uSun.z>.0015){float an2=atan(sv.y,sv.x);ray=pow(max(0.,nz(vec2(an2*8.,uT*.05))*.6+.4*nz(vec2(an2*21.,uT*.08+3.))-.25),2.);}
+ col+=vec3(1.,.93,.84)*uSun.z*(exp(-sr*7.)*.35*pul+ray*rk);
  /* Klick: rote Lichtwelle läuft durch die Tiefe (kein Ring am Mauszeiger, Tiry 22.11.2026) */
  float age=uT-uK.z;
  if(uLd>.5){ }else if(age<6.){float fr=1.05-age*.42;float wvv=exp(-pow((d-fr)*24.,2.))*exp(-age*.55)*(1.-smoothstep(.2,.6,sky));
@@ -178,7 +179,7 @@ var QS=1,FT=16,FN=0,TL=0;
    (Laub mit 30/20/15 Bildern pro Sekunde) – Scrollen und alle anderen Animationen bekommen die frei gewordene Zeit. Jede Stufe wird geprüft:
    bringt sie nichts (z. B. Stromsparmodus mit 30 Bildern), wird sie zurückgenommen. Geht es dem Gerät wieder gut, wird alles wieder hochgefahren.
    Rechner ganz ohne Grafikkarte (Software-Darstellung): ein stehendes Bild, neu nur nach Scrollen/Größenänderung. */
-var SK=0,SKc=0,GT=null,LOCK=0,HOLD=0,RZ=0,SOFT=0,NEED=1,DOK=0;
+var SK=0,SKc=0,GT=null,LOCK=0,HOLD=0,RZ=0,SOFT=0,NEED=1,DOK=0,WEAK=0;
 /* Schrift passt sich dem Foto an (Tiry 23.11.2026): direkt nach dem Zeichnen werden je Textblock ein paar Pixel des Hintergrunds gelesen.
    Hell → dunkle Schrift mit feiner Lichtkontur (hgTxL), dunkel → weiße Schrift mit feiner Schattenkontur (hgTxW). Mit Schwellen-Abstand, damit nichts flackert. */
 var TXE=[],TXT=0,TXQ=1,TXC=null,TXX=null,TXS=0;
@@ -195,17 +196,23 @@ function txSample(){var cw=cv.clientWidth,ch=cv.clientHeight;if(!cw||!ch)return;
   if(!n)continue;var L=Ls/n/255,w=el.classList.contains('hgTxW');
   if(!w&&L<.63){el.classList.add('hgTxW');el.classList.remove('hgTxL')}else if(w&&L>.71){el.classList.remove('hgTxW');el.classList.add('hgTxL')}}
  TXS=performance.now()-t0}
-function gov(now){if(now<4000)return;
- if(GT){if(FT>GT.ft*.9){if(GT.k==='q')QS=GT.v;else SK=GT.v;LOCK=now+60000}GT=null;return}
- if(FT>26&&now>LOCK){if(QS>.5){GT={k:'q',v:QS,ft:FT};QS=Math.max(.5,QS-.15)}else if(SK<3){GT={k:'s',v:SK,ft:FT};SK++}else return;HOLD=now+(now-RZ<5000?60000:10000)}
- else if(FT<19&&now>HOLD){if(SK>0){SK--;RZ=now;HOLD=now+10000}else if(QS<1){QS=Math.min(1,QS+.05);RZ=now}}}
+/* Regler v2 (Tiry 23.11.2026: „schwache Geräte ohne Probleme, ohne Qualitätsverlust“): prüft jede Sekunde statt alle 75 Bilder
+   (auf einem langsamen PC dauerte das Herunterregeln vorher Minuten = Seite hing). Reihenfolge nach Sichtbarkeit:
+   1. Hintergrund mit 30 statt 60 Bildern (langsamer Nebel/Laub – kaum sichtbar), 2. Auflösung in Stufen bis 60 %, 3. 20/15 Bilder.
+   Sehr langsam (< 16 Bilder/s): Stufe 1+2 sofort zusammen. Jede Stufe wird geprüft und zurückgenommen, wenn sie nichts bringt. */
+var GN=0;
+function gov(now){if(now<GN)return;GN=now+1000;if(now<1500+t0)return;
+ if(GT){if(FN-GT.n<15){GN=now+250;return}if(FT>GT.ft*.9){if(GT.k==='q')QS=GT.v;else SK=GT.v;LOCK=now+60000}GT=null;return}
+ if(FT>60&&SK===0&&now>LOCK){SK=1;QS=Math.min(QS,.75);HOLD=now+15000;return}
+ if(FT>26&&now>LOCK){if(SK<1){GT={k:'s',v:SK,ft:FT,n:FN};SK=1}else if(QS>.6){GT={k:'q',v:QS,ft:FT,n:FN};QS=Math.max(.6,QS-.15)}else if(SK<3){GT={k:'s',v:SK,ft:FT,n:FN};SK++}else return;HOLD=now+(now-RZ<5000?60000:10000)}
+ else if(FT<19&&now>HOLD){if(SK>1){SK--;RZ=now;HOLD=now+10000}else if(QS<1){QS=Math.min(1,QS+.05);RZ=now}else if(SK===1&&!WEAK){SK=0;RZ=now;HOLD=now+10000}}}
 function size(){var big=innerWidth*innerHeight>1.4e6;dpr=Math.min(devicePixelRatio||1,1.25)*(big?.8:.95)*QS;
  var w=Math.round(cv.clientWidth*dpr),h=Math.round(cv.clientHeight*dpr);if(w!==W||h!==H){W=cv.width=w;H=cv.height=h}}
 var VS=0,Po=[0,0,0],Pv=[0,0,0],Pt=[0,0,0];
 function pose(){var h=0,k=(location.hash||'#start')+mode;for(var i=0;i<k.length;i++)h=(h*31+k.charCodeAt(i))|0;h=Math.abs(h);
  Pt=[((h%7)-3)*.010,(((h>>3)%5)-2)*.006,.03+(h>>6)%4*.025];Pv[2]-=.10}
 function frame(){raf=requestAnimationFrame(frame);var now=performance.now();if(SOFT){var e0=TX[mode];if(e0&&e0.ok&&!DOK){DOK=1;NEED=1}if(DOK&&!NEED)return;NEED=0;sc=scrollY/innerHeight}
- else{if(TL&&!document.hidden){var dt=Math.min(200,now-TL);FT+=(dt-FT)*.05;if(++FN>75){FN=0;gov(now)}}TL=now;if(SK&&(++SKc%(SK+1)))return}
+ else{if(TL&&!document.hidden){var dt=Math.min(200,now-TL);FT+=(dt-FT)*.12;FN++;gov(now)}TL=now;if(SK&&(++SKc%(SK+1)))return}
  size();var t=(now-t0)/1000;
  for(var i=0;i<3;i++){Pv[i]+=(Pt[i]-Po[i])*.012;Pv[i]*=.90;Po[i]+=Pv[i]}
  M[0]+=(Mt[0]-M[0])*.045;M[1]+=(Mt[1]-M[1])*.045;var sc0=sc;sc+=(scrollY/innerHeight-sc)*.10;VS+=(Math.min(1.5,Math.abs(sc-sc0)*45)-VS)*.10;
@@ -339,9 +346,11 @@ function init(){cv=document.createElement('canvas');cv.id='hg';cv.setAttribute('
  gl=cv.getContext('webgl',{antialias:false,alpha:false,premultipliedAlpha:false,powerPreference:'high-performance'});
  if(!gl){cv.remove();de.classList.remove('hg3');return}gl.getExtension('OES_standard_derivatives');
  try{build()}catch(err){console.error('hg12',err.message);cv.remove();de.classList.remove('hg3');return}
- try{var di=gl.getExtension('WEBGL_debug_renderer_info');if(di&&/swiftshader|llvmpipe|software|basic render/i.test(String(gl.getParameter(di.UNMASKED_RENDERER_WEBGL))))SOFT=1}catch(_){}
+ try{var di=gl.getExtension('WEBGL_debug_renderer_info');var rn=di?String(gl.getParameter(di.UNMASKED_RENDERER_WEBGL)):'';if(/swiftshader|llvmpipe|software|basic render/i.test(rn))SOFT=1;
+  /* schwache Grafik von Anfang an mit 30 Bildern (Hintergrund), damit nichts erst hängen muss: Intel HD/UHD 4xx–6xx (z. B. N5000), ältere Handy-Chips */
+  else if(/(U?HD Graphics( \d{3})?\b(?!.*Iris))|Mali-(T|G[1-5]\d\b)|Adreno.{0,8}([1-5]\d\d|6[01]\d)\b|PowerVR/i.test(rn)||(navigator.hardwareConcurrency||8)<=2){WEAK=1;SK=1}}catch(_){}
  if(SOFT){QS=.6;var st0=0,nd=function(){NEED=1};addEventListener('resize',nd);addEventListener('hashchange',function(){NEED=1;setTimeout(nd,500)});addEventListener('scroll',function(){clearTimeout(st0);st0=setTimeout(nd,220)},{passive:true})}
- window.HG12_STAT=function(){return {soft:SOFT,qs:QS,skip:SK,ft:Math.round(FT*10)/10}};
+ window.HG12_STAT=function(){return {soft:SOFT,weak:WEAK,qs:QS,skip:SK,ft:Math.round(FT*10)/10}};
  addEventListener('pointermove',function(e){Mt=[e.clientX/innerWidth,1-e.clientY/innerHeight]},{passive:true});
  addEventListener('pointerdown',click,{passive:true});
  /* Handy: Neigen = Blickwinkel */
