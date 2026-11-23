@@ -2275,6 +2275,7 @@ a.hchip.hc.hlive .hla b svg{width:16px;height:16px;fill:none;stroke:#fff;stroke-
 #qs .q::before{content:"★★★★★";color:#FBBF24;letter-spacing:3px;font-size:15px;line-height:1}
 #qs .q p{font:600 16px/1.5 var(--body,inherit)!important;letter-spacing:0!important;color:var(--ink)}
 #qs .q p::before,#qs .q p::after{content:none!important}
+#qs .q.ql p{font-size:14px!important;line-height:1.45!important}
 #qs .q small{margin-top:auto;font:700 12px/1 var(--display);letter-spacing:.1em;text-transform:uppercase;color:var(--dim)}
 #qd{display:none!important}
 @media (max-width:1100px){#qs.qwrap{grid-template-columns:1fr}}
@@ -5403,7 +5404,7 @@ function bewRender(d){d=d&&Array.isArray(d.items)&&d.items.filter(x=>x&&x.t).len
  $('#qd').innerHTML=it.map((x,i)=>'<button class="'+(i?'':'on')+'" aria-label="Bewertung '+(i+1)+'"></button>').join('');qBind()}
 
 /* ---------- Bewertungen laufen durch (Tiry 23.11.2026) ---------- */
-function bwCard(x,c){return '<div class="q'+(c||'')+'" data-k="'+x.k+'"><p>'+esc(x.t)+'</p><small>'+esc(x.n||'Kunde')+' · Google</small></div>'}
+function bwCard(x,c){return '<div class="q'+(c||'')+(String(x.t).length>220?' ql':'')+'" data-k="'+x.k+'"><p>'+esc(x.t)+'</p><small>'+esc(x.n||'Kunde')+' · Google</small></div>'}
 let BWP=[],BWQ=[],BWSEH=true,BWBUSY=false;
 function bwNext(zeig){if(!BWQ.length){const s=new Set(zeig);BWQ=BWP.filter(x=>!s.has(x.k));for(let i=BWQ.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[BWQ[i],BWQ[j]]=[BWQ[j],BWQ[i]]}}
  return BWQ.shift()||null}

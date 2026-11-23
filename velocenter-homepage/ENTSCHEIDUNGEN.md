@@ -586,7 +586,7 @@
 - Herstellerfotos: Tiry geht von Nutzungsrecht über Händlerstatus aus (23.11.2026).
 
 ### Google-Bewertungen automatisch (Tiry 23.11.2026)
-- Die KI-Zentrale (Haupt-PC) holt die Bewertungen über die Google-Schnittstelle und schreibt nach jedem Abruf (höchstens alle 6 Std.) die 5-Sterne-Bewertungen mit deutschem Text (25–320 Zeichen, ohne Links, Name sichtbar) als Vorrat in `site/bewertungen` (max. 40 neueste, Name „Vorname N.“, Feld `g` = Google-Kennung). Startseite zeigt je Besuch 3 zufällige.
-- Eigenes Firebase-Konto `bewertungen@admin.velo-center.de`, Regel: darf nur `site/bewertungen` schreiben (Felder score/items/ts/von, ≤ 80 Einträge). Im Admin von Hand eingetragene und „ausgeblendete“ bleiben erhalten.
+- Die KI-Zentrale (Haupt-PC) holt die Bewertungen über die Google-Schnittstelle und schreibt nach jedem Abruf (höchstens alle 6 Std.) die 5-Sterne-Bewertungen mit deutschem Text (25–320 Zeichen, ohne Links, Name sichtbar) als Vorrat in `site/bewertungen` (seit 23.11. abends alle 5-Sterne mit Text, 8–600 Zeichen, max. 350; vorher max. 40 neueste, Name „Vorname N.“, Feld `g` = Google-Kennung). Startseite zeigt je Besuch 3 zufällige.
+- Eigenes Firebase-Konto `bewertungen@admin.velo-center.de`, Regel: darf nur `site/bewertungen` schreiben (Felder score/items/ts/von, ≤ 400 Einträge). Im Admin von Hand eingetragene und „ausgeblendete“ bleiben erhalten.
 - Hinweis unter den Bewertungen (§ 5b Abs. 3 UWG, Pflicht, bleibt): „Auswahl echter 5-Sterne-Bewertungen aus unserem Google-Profil. Ob die Verfasser bei uns gekauft haben, prüfen weder wir noch Google.“
 - Bewertungen laufen durch (Tiry 23.11.2026): alle 10 s schiebt sich rechts eine neue zufällige Bewertung herein und drückt die linke hinaus (`bwTick`, nur transform/opacity, will-change nur während der Bewegung, Pause bei verstecktem Tab/außer Sicht). Gemessen CPU 4×: 60 Bilder/s, 0 ms Layout.

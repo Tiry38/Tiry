@@ -19,7 +19,7 @@ service cloud.firestore {
     match /site/{d}    { allow read: if d in ['einstellungen', 'bewertungen', 'texte'] || admin();
                          allow write: if admin() || (bewBot() && d == 'bewertungen'
                            && request.resource.data.keys().hasOnly(['score', 'items', 'ts', 'von'])
-                           && request.resource.data.items is list && request.resource.data.items.size() <= 80); }
+                           && request.resource.data.items is list && request.resource.data.items.size() <= 400); }
     match /lager/{d}   { allow read, write: if admin(); }
     // Besucher-Statistik (anonym, ohne Cookies): je Tag ein Dokument mit Zählern. Besucher dürfen nur hochzählen, lesen nur Admins.
     match /stats/{d} {
