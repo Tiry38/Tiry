@@ -67,7 +67,7 @@
         el.innerHTML = '<div class="txt th-' + esc(t.theme || 'herbst') + '"><div class="inner">' +
           (t.badge ? '<span class="eyebrow"><i></i>' + esc(t.badge) + '</span>' : '') +
           '<h1>' + akzent(t.title) + '</h1>' + (t.sub ? '<p>' + esc(t.sub) + '</p>' : '') +
-          '</div><img class="logo" src="/assets/logo.png" alt=""></div>';
+          '</div><img class="logo" src="/assets/logo.svg" alt=""></div>';
         return ok(el);
       }
       var src = '/media/' + encodeURIComponent(item.file);
@@ -109,6 +109,7 @@
 
   function zeigeLeerlauf(an) {
     idle.hidden = !an;
+    if (window.VeloIdle) { if (an) window.VeloIdle.start(); else window.VeloIdle.stop(); }
   }
 
   function weiter(sofort) {
