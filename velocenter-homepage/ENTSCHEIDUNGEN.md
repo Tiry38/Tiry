@@ -593,3 +593,8 @@
 
 ### Symbole modern (Tiry 23.11.2026: „sehen aus wie WhatsApp-Icons“)
 - `.srow .ic`: Glas-Linse (weiß, Tiefe, feiner Kupferrand) statt glänzender roter Kugel mit Lichtfleck; Symbole `e-*` = Kopie der `d-*` mit Rot-Verlauf (`#icg`/`#icf`, userSpaceOnUse). Hover: rote Linse ohne Glanzfleck, Symbol weiß, Lichtring kreist. Glanzkugel nicht wieder einbauen.
+
+### Winterkarte im Termin-Bereich wie Start-Aktion (Tiry 23.11.2026)
+- `.wcard` (Service + alle Unterseiten): kein Pink/Magenta mehr – „2026/27“, „–20 €“-Verlauf, „Marken-Fahrräder/Bosch-Antrieb“ in Champagner (#F3CFA6/#F6D7B4), „!“ und „Gratis“ Velocenter-Rot, Pillen dunkles Glas, violetter Schimmer → Grau.
+- Schneeflocken über Schrift nur noch 12 % (Maske `.wsn` aus den Textflächen, neu berechnet bei Laden/Schrift/Größe), wie `#snow` auf der Startseite.
+- Menü-Vorschau Service: Zeile „Nur Marken-Fahrräder mit Bosch-Antrieb“ Champagner statt Rosa. Übrige Winter-Stellen (Schnellzugriff, Service-Liste) ohne Pink/Schnee – geprüft.
