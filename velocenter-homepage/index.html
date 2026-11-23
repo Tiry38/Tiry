@@ -2825,6 +2825,12 @@ footer .soc a{display:grid!important;place-items:center}
 .lbp-yr a.rk i{font-style:normal;font-size:12px;line-height:1}
 .lbp-yr a.rk:hover,.lbp-yr a.rk:focus-visible{color:#fff}
 
+
+/* Rechtsprüfung 23.11.2026: UVP-Kennzeichnung der Streichpreise, Bewertungs-Hinweis (§ 5b UWG) */
+.uvw{display:inline-flex;align-items:baseline;gap:4px}
+.uvp{font:800 10.5px/1 var(--display);letter-spacing:.08em;color:var(--dim);text-decoration:none}
+.lbp-cap .uvp{color:inherit;opacity:.75;margin-right:2px}
+.bwh{margin:14px 0 0;max-width:62ch;padding:9px 14px;border-radius:16px;background:rgba(255,255,255,.78);box-shadow:0 8px 22px -12px rgba(0,0,0,.35);font:500 12.5px/1.45 var(--display);color:#3A3F4A}
 /* Winter-Aktion Kontrast + Ränder (Tiry 23.11.2026): kein Pink/Magenta, Champagner + Velocenter-Rot, Text sauber im Raster */
 .ice .eyebrow b{color:#F3CFA6!important}
 .ice .minus{display:inline-block;white-space:nowrap;padding:0 .1em 0 0;margin:0 -.1em 0 -.05em;transform-origin:0 72%;background:linear-gradient(180deg,#FFFFFF 12%,#EEF2F7 52%,#F3CFA6 100%)!important;-webkit-background-clip:text!important;background-clip:text!important;color:transparent}
@@ -3099,7 +3105,7 @@ body:has(.hdr.nosoc) .strk .sa{-webkit-mask-image:linear-gradient(180deg,transpa
 <section class="view" data-v="start">
  <div class="bands top" aria-hidden="true">
   <div class="band b"><div class="tk" data-t="Wörth am Rhein|Hartmannstraße 25|Familienbetrieb|Probefahrt|Ehrliche Beratung|0 % Finanzierung"></div></div>
-  <div class="band a"><div class="tk" data-t="Seit 1995|300+ E-Bikes|4,8 ★ bei Google|Bosch Service Center|i:SY Experte|Weltrekord 283 i:SY's"></div></div>
+  <div class="band a"><div class="tk" data-t="Seit 1995|250+ E-Bikes|4,8 ★ bei Google|Bosch Service Center|i:SY Experte|Weltrekord 283 i:SY's"></div></div>
  </div>
  <div class="stage0" id="hero">
   <canvas id="speed" aria-hidden="true"></canvas>
@@ -3416,7 +3422,7 @@ m696 -454 c28 -13 46 -31 55 -51 22 -53 -50 -177 -173 -300 -187 -186 -647
 </svg><span class="shine" aria-hidden="true"></span></div>
      <a class="hnote" id="hnote" hidden></a><p class="eyebrow hello" style="--d:.9s">Familienbetrieb seit 1995 · <b>Wörth am Rhein</b></p>
      <h1 class="hh1 hello" style="--d:1s">Dein E-Bike <span class="amp">&amp;</span> <span style="white-space:nowrap">E-Dreirad-Spezialist</span><br><span class="gt it">mit eigener Werkstatt.</span></h1>
-     <p class="lead hello" style="--d:1.1s">Über 300 E-Bikes zum Probefahren, ehrliche Beratung und ein Bosch Service Center, in dem der Chef noch selbst schraubt.</p>
+     <p class="lead hello" style="--d:1.1s">Über 250 E-Bikes zum Probefahren, ehrliche Beratung und ein Bosch Service Center, in dem der Chef noch selbst schraubt.</p>
      <div class="row hello" style="--d:1.2s"><a class="cta" href="#termin"><svg><use href="#i-cal"/></svg>Werkstatt-Termin anfragen</a><a class="ghost" href="#finder"><svg><use href="#i-spark"/></svg>E-Bike finden</a></div>
      <div class="trust hello" style="--d:1.3s"><a class="tb tgl" href="https://www.google.com/maps/search/?api=1&amp;query=Velocenter+Hessert+W%C3%B6rth+am+Rhein&amp;query_place_id=ChIJcfN0kxMAl0cRiVZY7LUcGy8" target="_blank" rel="noopener" title="Unternehmensprofil bei Google öffnen"><i class="tic"><svg class="tg" viewBox="0 0 48 48" aria-hidden="true"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg></i><svg class="tst" aria-hidden="true"><use href="#i-star"/></svg><b data-g="r">4,8</b> bei <b class="ggl" aria-label="Google"><i>G</i><i>o</i><i>o</i><i>g</i><i>l</i><i>e</i></b></a><span class="tb"><i class="tic tbo" aria-hidden="true"></i><b class="bsh">Bosch</b> Service Center</span></div>
     </div>
@@ -3431,7 +3437,7 @@ m696 -454 c28 -13 46 -31 55 -51 22 -53 -50 -177 -173 -300 -187 -186 -647
      <img class="hb off" data-src="img/p-gudereit.webp" alt="Gudereit EC-35 Evo E-Bike" data-l="img/marke-gudereit.svg" width="1600" height="1128" loading="lazy">
      <img class="hb off" data-src="img/p-victoria-veloa7.webp" alt="Victoria Veloa 7 E-Bike" data-l="img/marke-victoria.svg" width="2770" height="1732" loading="lazy">
      <div class="hfloor"></div>
-     <a class="hchip hc c1" href="#lager" aria-label="300+ E-Bikes vor Ort – zum Lager"><span class="hn">300<i>+</i></span><span class="hl"><strong>E-Bikes vor Ort</strong></span><span class="ha"><svg><use href="#i-arrow"/></svg></span></a>
+     <a class="hchip hc c1" href="#lager" aria-label="250+ E-Bikes vor Ort – zum Lager"><span class="hn">250<i>+</i></span><span class="hl"><strong>E-Bikes vor Ort</strong></span><span class="ha"><svg><use href="#i-arrow"/></svg></span></a>
      <a class="hchip hc c2 hlive" id="hLive" href="#lager" aria-label="Unser Live-Bestand: Räder auf Lager ansehen"><span class="hlv"><i class="qld" aria-hidden="true"></i>Live</span><span class="hl"><strong>Unser Live-Bestand</strong></span><span class="hgo">Jetzt ansehen<svg><use href="#i-arrow"/></svg></span></a>
     </div>
    </div>
@@ -3487,7 +3493,7 @@ m696 -454 c28 -13 46 -31 55 -51 22 -53 -50 -177 -173 -300 -187 -186 -647
    <div class="rows">
     <a class="srow pre" href="#beratung" style="--c:#F472B6"><span class="ic"><svg><use href="#d-bike"/></svg></span><span><h3>Beratung & Probefahrt</h3><p>Wir hören zu, zeigen eine passende Auswahl und begleiten dich auf Wunsch bei der Probefahrt.</p></span><span class="go"><svg><use href="#i-arrow"/></svg></span></a>
     <a class="srow pre" href="#werkstatt" style="--c:#22D3EE"><span class="ic"><svg><use href="#d-wrench"/></svg></span><span><h3>Inspektion & Reparatur</h3><p>Geschultes Bosch Service Center. Fachkundige Inspektionen und Reparaturen, auch nach dem Kauf.</p></span><span class="go"><svg><use href="#i-arrow"/></svg></span></a>
-    <a class="srow pre" href="#finanzierung" style="--c:#E2232D"><span class="ic"><svg><use href="#d-euro"/></svg></span><span><h3>0 % Finanzierung</h3><p>0 % Zinsen über die TARGOBANK, bis zu 24 Monate, mit Anzahlung. Zum regulären Preis, nicht auf Aktionspreise.</p></span><span class="go"><svg><use href="#i-arrow"/></svg></span></a>
+    <a class="srow pre" href="#finanzierung" style="--c:#E2232D"><span class="ic"><svg><use href="#d-euro"/></svg></span><span><h3>0 % Finanzierung</h3><p>0 % Zinsen über die TARGOBANK (effektiver Jahreszins 0,00 %), bis zu 24 Monate, mit Anzahlung. Zum regulären Preis, nicht auf Aktionspreise. Bonität vorausgesetzt.</p></span><span class="go"><svg><use href="#i-arrow"/></svg></span></a>
     <a class="srow pre" href="#versicherung" style="--c:#34D399"><span class="ic"><svg><use href="#d-shield"/></svg></span><span><h3>ENRA Versicherung</h3><p>Schutz gegen Diebstahl, dazu Vollkasko mit Verschleiß und Pick-up-Service.</p></span><span class="go"><svg><use href="#i-arrow"/></svg></span></a>
     <a class="srow pre" href="#leasing" style="--c:#60A5FA"><span class="ic"><svg><use href="#d-case"/></svg></span><span><h3>Dienstrad-Leasing</h3><p>Wir arbeiten mit fast allen Leasing-Firmen zusammen, z. B. JobRad, Bikeleasing, Company Bike.</p></span><span class="go"><svg><use href="#i-arrow"/></svg></span></a>
    </div>
@@ -3505,6 +3511,7 @@ m696 -454 c28 -13 46 -31 55 -51 22 -53 -50 -177 -173 -300 -187 -186 -647
      <div class="q"><p>Seit wir die Fahrräder haben, einfach einen guten Service.</p><small>Jürgen K. · Google</small></div>
     </div>
     <div class="dots" id="qd"><button class="on" aria-label="Bewertung 1"></button><button aria-label="Bewertung 2"></button><button aria-label="Bewertung 3"></button></div>
+    <p class="bwh">Echte Google-Bewertungen, Text unverändert, Namen gekürzt wie bei Google. Wir wählen sie aus unserem Google-Profil aus, die Anzeige wechselt zufällig. Ob die Verfasser bei uns gekauft haben, prüfen weder wir noch Google.</p>
     <div class="row" style="margin-top:22px"><a class="ghost" href="https://g.page/r/CYlWWOy1HBsvEBM/review" target="_blank" rel="noopener"><svg style="color:#FBBF24"><use href="#i-star"/></svg>Uns bei Google bewerten</a></div>
    </div>
   </div>
@@ -3630,7 +3637,7 @@ m696 -454 c28 -13 46 -31 55 -51 22 -53 -50 -177 -173 -300 -187 -186 -647
      <li><b>14 Tage Widerrufsrecht</b> ohne Angabe von Gründen.</li>
      <li><b>Laufzeit bis zu 24 Monate, mit Anzahlung.</b> Anzahlung und Rate rechnen wir dir im Laden aus.</li>
     </ul>
-    <p class="anhint">* Finanzierung zum regulären Preis. Aktions- und Angebotspreise gelten nicht. Bonität vorausgesetzt. Darlehensgeber: TARGOBANK AG, Kasernenstraße 10, 40213 Düsseldorf.</p>
+    <p class="anhint">* Effektiver Jahreszins 0,00 %, gebundener Sollzins 0,00 % p. a., Laufzeit bis 24 Monate, mit Anzahlung. Finanzierung zum regulären Preis (UVP); Aktions- und Angebotspreise gelten nicht. Bonität vorausgesetzt. Darlehensgeber: TARGOBANK AG, Kasernenstraße 10, 40213 Düsseldorf.</p>
     <div class="tact"><a class="ghost" href="#lager">Räder auf Lager<svg><use href="#i-arrow"/></svg></a></div>
    </div>
 
@@ -3749,14 +3756,14 @@ m696 -454 c28 -13 46 -31 55 -51 22 -53 -50 -177 -173 -300 -187 -186 -647
  <div class="sec show" id="showroom2" style="padding-top:0">
   <div class="glow"></div>
   <div class="wrap">
-   <div class="showtop pre"><div><p class="eyebrow">Unser <b>Showroom</b></p><h2 class="big" style="margin-top:14px">Acht Marken.<br><span class="gt">Ein Laden.</span></h2></div><p class="lead" style="max-width:40ch">Klick dich durch. Im Laden warten über 300 E-Bikes zum Anfassen und Probefahren.</p></div>
+   <div class="showtop pre"><div><p class="eyebrow">Unser <b>Showroom</b></p><h2 class="big" style="margin-top:14px">Acht Marken.<br><span class="gt">Ein Laden.</span></h2></div><p class="lead" style="max-width:40ch">Klick dich durch. Im Laden warten über 250 E-Bikes zum Anfassen und Probefahren.</p></div>
    <div class="hvis mvis pre" id="m-bikearea">
     <div class="hring"></div>
     <img class="hlg" id="m-swm" src="img/marke-isy.svg" alt="" aria-hidden="true">
     <img class="hb mbk" id="m-bk" src="img/p-isy.webp" alt="i:SY E5 ZR F CX Century" width="1600" height="1104">
     <img id="m-brefl" src="img/p-isy.webp" alt="" aria-hidden="true" hidden>
     <div class="hfloor"></div>
-    <a class="hchip hc c1" href="#lager" aria-label="300+ E-Bikes vor Ort – zum Lager"><span class="hn">300<i>+</i></span><span class="hl"><strong>E-Bikes vor Ort</strong></span><span class="ha"><svg><use href="#i-arrow"/></svg></span></a>
+    <a class="hchip hc c1" href="#lager" aria-label="250+ E-Bikes vor Ort – zum Lager"><span class="hn">250<i>+</i></span><span class="hl"><strong>E-Bikes vor Ort</strong></span><span class="ha"><svg><use href="#i-arrow"/></svg></span></a>
     <a class="hchip hc c2 hlive" href="#lager" aria-label="Unser Live-Bestand: Räder auf Lager ansehen"><span class="hlv"><i class="qld" aria-hidden="true"></i>Live</span><span class="hl"><strong>Unser Live-Bestand</strong></span><span class="hgo">Jetzt ansehen<svg><use href="#i-arrow"/></svg></span></a>
     <button class="arrow p" id="m-sp" aria-label="Vorherige Marke" hidden></button><button class="arrow n" id="m-sn" aria-label="Nächste Marke" hidden></button>
    </div>
@@ -3917,7 +3924,7 @@ m696 -454 c28 -13 46 -31 55 -51 22 -53 -50 -177 -173 -300 -187 -186 -647
    <div>
     <p class="eyebrow hello">Neu bei uns · <b>Van Raam</b></p>
     <h1 class="mega hello" style="--d:.08s;margin-top:18px">Sicher auf<br><span class="gt it">drei Rädern.</span></h1>
-    <p class="lead hello" style="--d:.16s">E-Dreiräder vom Weltmarktführer Van Raam aus Holland. Bei uns: der Easy Rider Compact Plus und der Easy Rider 3. Du sitzt bequem wie im Sessel und hast drei Räder unter dir.</p>
+    <p class="lead hello" style="--d:.16s">E-Dreiräder vom niederländischen Spezialrad-Hersteller Van Raam. Bei uns: der Easy Rider Compact Plus und der Easy Rider 3. Du sitzt bequem wie im Sessel und hast drei Räder unter dir.</p>
     <div class="row hello" style="--d:.24s;margin-top:32px"><a class="cta" href="#termin" data-pre="Probefahrt E-Dreirad"><svg><use href="#i-tri"/></svg>Jetzt Probe fahren</a><a class="ghost" href="https://www.vanraam.com/" target="_blank" rel="noopener">Van Raam entdecken<svg><use href="#i-arrow"/></svg></a></div>
    </div>
    <div class="ped hello" style="--d:.2s;--a1:#22D3EE;--a2:#60A5FA;--a3:#C084FC"><img src="img/p-vanraam.webp" alt="Van Raam Easy Rider E-Dreirad" width="1600" height="1193"></div>
@@ -3934,7 +3941,7 @@ m696 -454 c28 -13 46 -31 55 -51 22 -53 -50 -177 -173 -300 -187 -186 -647
  <div class="sec drsec" style="padding-bottom:0">
   <div class="wrap">
    <div class="pre"><p class="eyebrow">Zwei Modelle · <b>bei uns im Laden</b></p><h2 class="big" style="margin-top:14px">Welcher Easy Rider<br><span class="gt">passt zu dir?</span></h2>
-   <p class="lead" style="margin-top:18px;max-width:760px">Beide sind Sesseldreiräder vom Weltmarktführer Van Raam: bequem sitzen, tief einsteigen, drei Räder unter dir. Der Unterschied liegt in Größe, Belastbarkeit und Ausstattung.</p></div>
+   <p class="lead" style="margin-top:18px;max-width:760px">Beide sind Sesseldreiräder vom Spezialrad-Hersteller Van Raam: bequem sitzen, tief einsteigen, drei Räder unter dir. Der Unterschied liegt in Größe, Belastbarkeit und Ausstattung.</p></div>
    <div class="etw drcmp pre"><table class="etab">
     <thead><tr><th scope="col"><span class="sr">Merkmal</span></th><th scope="col" class="ep"><b>Easy Rider Compact Plus</b><small>kompakt · voll ausgestattet</small></th><th scope="col"><b>Easy Rider 3</b><small>der Klassiker · bis 140 kg</small></th></tr></thead>
     <tbody>
@@ -4049,7 +4056,7 @@ m696 -454 c28 -13 46 -31 55 -51 22 -53 -50 -177 -173 -300 -187 -186 -647
      <li><b>Lenkeinschlagbegrenzer</b> und <b>Differenzial</b>.</li>
      <li><b>Gepäckablage mit Korb</b> und Schnellspanngurten – fährt beim Verstellen des Sitzes mit.</li>
      <li><b>Licht, Schloss, Klingel</b>, verstellbarer Lenkervorbau und Kettenschlauch.</li>
-     <li><b>5 Jahre Garantie</b> auf den Rahmen.</li>
+     <li><b>5 Jahre Herstellergarantie</b> von Van Raam auf den Rahmen.</li>
     </ul>
    </div>
    <div class="drcard pre" style="--c:#22C55E;--c2:#A3E635">
@@ -4359,7 +4366,7 @@ const BR=[
  {k:'ktm',n:'KTM',m:'KTM Macina Style 830',img:'img/p-ktm.webp',logo:'img/marke-ktm.svg',o:.23,c:'#FF6A00',t:'Traditionsmarke mit großer E-Bike-Auswahl, vom bequemen Tiefeinsteiger bis zum Trekking-Rad.',a:[['ktm-bikes.at','https://www.ktm-bikes.at/']]},
  {k:'qio',n:'QiO',m:'QiO EINS P-E Fine Line',img:'img/p-qio-eins-fineline.webp',logo:'img/marke-qio.svg',o:.22,c:'#38BDF8',t:'Innovatives Kompaktrad-Konzept. Am besten selbst erleben: Probefahrt bei uns im Laden.',a:[['qio-bikes.com','https://www.qio-bikes.com/']]},
  {k:'vdv',n:'Velo de Ville',m:'Velo de Ville AEB PRO',img:'img/p-vdv-aebpro.webp',logo:'img/marke-vdv.svg',o:.29,c:'#F97316',t:'Rad nach Wunsch: Rahmen, Farbe und Ausstattung stellst du selbst zusammen.',a:[['Zum Konfigurator','https://konfigurator.velo-de-ville.com/de?h_ident=28181&direct=true']]},
- {k:'vanraam',n:'Van Raam',m:'Van Raam Easy Rider',img:'img/p-vanraam.webp',logo:'img/marke-vanraam.svg',o:.47,c:'#A855F7',t:'E-Dreiräder vom Weltmarktführer aus Holland. Bei uns: Easy Rider Compact Plus und Easy Rider 3.',a:[['Mehr zu E-Dreirädern','#dreirad']]},
+ {k:'vanraam',n:'Van Raam',m:'Van Raam Easy Rider',img:'img/p-vanraam.webp',logo:'img/marke-vanraam.svg',o:.47,c:'#A855F7',t:'E-Dreiräder vom Spezialrad-Hersteller aus Holland. Bei uns: Easy Rider Compact Plus und Easy Rider 3.',a:[['Mehr zu E-Dreirädern','#dreirad']]},
  {k:'gudereit',n:'Gudereit',m:'Gudereit EC-35 Evo',img:'img/p-gudereit.webp',logo:'img/marke-gudereit.svg',o:.4,c:'#E2232D',t:'Bei uns das EC-35 Evo von Gudereit.',a:[['gudereit.de','https://www.gudereit.de/']]},
  {k:'victoria',n:'Victoria',m:'Victoria Veloa 7',img:'img/p-victoria-veloa7.webp',logo:'img/marke-victoria.svg',o:.43,c:'#22D3EE',t:'Traditionsmarke mit alltagstauglichen E-Bikes.',a:[['victoria-bikes.com','https://www.victoria-bikes.com/']]},
  {k:'stevens',n:'Stevens',m:"Stevens E-Juke 29''",img:'img/show/rest-05.webp',logo:'img/marke-stevens.svg',o:.3,c:'#84CC16',t:'Bei uns das E-Juke 29\u2019\u2019 von Stevens.',a:[['stevensbikes.de','https://www.stevensbikes.de/']]}
@@ -4368,7 +4375,7 @@ const ACC=[['Bosch','bosch.svg'],['Shimano','shimano.webp'],['Schwalbe','schwalb
 $('#acc').innerHTML=ACC.map(([n,f])=>'<span><img src="img/zub-'+f+'" alt="'+esc(n)+'" loading="lazy"></span>').join('');
 
 /* ---------- Laufbänder ---------- */
-const tkIt=u=>u.split('|').map(x=>'<span>'+esc(x).replace('★','<b class="tks">★</b>').replace("i:SY&#39;s",'<b class="tko">i:SY&#39;s</b>').replace("i:SY's",'<b class="tko">i:SY\'s</b>').replace('i:SY Experte','<b class="tko">i:SY</b> Experte').replace('Bosch ','<b class="tkb">Bosch</b> ').replace('300+','<b class="tkn">300+</b>').replace('bei Google','bei <b class="tkg" aria-label="Google"><i>G</i><i>o</i><i>o</i><i>g</i><i>l</i><i>e</i></b>')+'<em aria-hidden="true">✦</em></span>').join('');
+const tkIt=u=>u.split('|').map(x=>'<span>'+esc(x).replace('★','<b class="tks">★</b>').replace("i:SY&#39;s",'<b class="tko">i:SY&#39;s</b>').replace("i:SY's",'<b class="tko">i:SY\'s</b>').replace('i:SY Experte','<b class="tko">i:SY</b> Experte').replace('Bosch ','<b class="tkb">Bosch</b> ').replace('250+','<b class="tkn">250+</b>').replace('bei Google','bei <b class="tkg" aria-label="Google"><i>G</i><i>o</i><i>o</i><i>g</i><i>l</i><i>e</i></b>')+'<em aria-hidden="true">✦</em></span>').join('');
 $$('.band .tk').forEach(t=>{const items=tkIt(t.dataset.t);t.innerHTML=items+items+items+items});
 /* Google-Bewertung: google.json (alle 3 Tage vom GitHub-Lauf geschrieben); fehlt sie, bleiben die eingetragenen Werte */
 fetch('google.json',{cache:'no-store'}).then(r=>r.ok?r.json():null).then(g=>{if(!g)return;const v=Number(g.rating),n=Number(g.count);if(!(v>=1&&v<=5)||!(Number.isInteger(n)&&n>0))return;
@@ -4647,7 +4654,7 @@ const Q=[
  {q:'Wofür soll dein neues E-Bike sein?',o:[['alltag','Alltag & Einkauf','Kurze Wege, Brötchen holen, Besuche','i-bike'],['tour','Touren & Ausflüge','Längere Strecken, am Rhein entlang','i-map'],['mit','Platzsparend & mitnehmen','Wohnmobil, Auto, kleine Garage','i-car'],['sicher','Maximal sicher & stabil','Drei Räder, kein Kippen beim Anhalten','i-tri']]},
  {q:'Was ist dir besonders wichtig?',o:[['tief','Ganz bequemer Einstieg','Tief einsteigen, aufrecht sitzen','i-shield'],['wunsch','Rad nach meinen Wünschen','Farbe und Ausstattung selbst wählen','i-tune'],['lager','Schnell losfahren','Am liebsten direkt ab Lager','i-box'],['egal','Ich lasse mich beraten','Zeigt mir einfach, was passt','i-spark']]}
 ];
-const RT={isy:'20-Zoll-Kompaktrad: wendig, handlich und platzsparend. Über 100 i:SY bei uns vorrätig, Probefahrt auch übers Wochenende.',qio:'Innovatives Kompaktrad mit modernem Konzept. Am besten direkt im Laden ausprobieren.',ktm:'Große E-Bike-Auswahl einer Traditionsmarke, vom Tiefeinsteiger bis zum Trekking-Rad.',vdv:'Du stellst Rahmen, Farbe und Ausstattung selbst zusammen. Wir beraten dich dabei.',vanraam:'E-Dreirad vom Weltmarktführer aus Holland: bequem sitzen, drei Räder, Motorunterstützung.',gudereit:'Bei uns das EC-35 Evo von Gudereit.',victoria:'Alltagstaugliche E-Bikes einer Traditionsmarke.'};
+const RT={isy:'20-Zoll-Kompaktrad: wendig, handlich und platzsparend. Über 100 i:SY bei uns vorrätig, Probefahrt auch übers Wochenende.',qio:'Innovatives Kompaktrad mit modernem Konzept. Am besten direkt im Laden ausprobieren.',ktm:'Große E-Bike-Auswahl einer Traditionsmarke, vom Tiefeinsteiger bis zum Trekking-Rad.',vdv:'Du stellst Rahmen, Farbe und Ausstattung selbst zusammen. Wir beraten dich dabei.',vanraam:'E-Dreirad vom Spezialrad-Hersteller aus Holland: bequem sitzen, drei Räder, Motorunterstützung.',gudereit:'Bei uns das EC-35 Evo von Gudereit.',victoria:'Alltagstaugliche E-Bikes einer Traditionsmarke.'};
 const SC={alltag:{isy:2,qio:2,gudereit:2,victoria:2,ktm:1},tour:{ktm:3,vdv:2,gudereit:1,victoria:1},mit:{isy:3,qio:2},sicher:{vanraam:5},tief:{gudereit:2,isy:1,qio:1,victoria:1,ktm:1,vanraam:1},wunsch:{vdv:3},lager:{isy:3,qio:1},egal:{isy:1,ktm:1}};
 let ans=[];
 const FIC={alltag:['#E2232D,#F43F5E,#FB923C','<svg viewBox="0 0 32 32" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="21" r="5"/><circle cx="24.5" cy="21" r="5"/><path d="M8 21l5-9h8l3.5 9M13 12l4.5 9H24.5M19 8h3l-1 4"/><path d="M5 9h6l-1 4H6z" fill="#fff" fill-opacity=".28"/><path d="M13 9h3"/><circle cx="17.5" cy="21" r="1.2" fill="#fff"/></svg>'],tour:['#2563EB,#06B6D4,#34D399','<svg viewBox="0 0 32 32" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9l7-3 10 3 7-3v17l-7 3-10-3-7 3z" fill="#fff" fill-opacity=".28"/><path d="M11 6v17M21 9v17"/><path d="M7 19c2-4 5-1 7-4s5-3 8-6" stroke-dasharray="1.5 2.5"/><circle cx="23" cy="8.5" r="2.2" fill="#fff"/></svg>'],mit:['#7C3AED,#A855F7,#EC4899','<svg viewBox="0 0 32 32" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20v-4l3-5h12l4 5h4a2 2 0 012 2v2H4z" fill="#fff" fill-opacity=".28"/><circle cx="9" cy="21" r="2.6" fill="#fff"/><circle cx="23" cy="21" r="2.6" fill="#fff"/><path d="M8 11l2-4h6l2 4M10 7l1.5-2"/></svg>'],sicher:['#059669,#10B981,#84CC16','<svg viewBox="0 0 32 32" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="7" cy="22" r="4.5"/><circle cx="26" cy="21" r="4.5" stroke-opacity=".55"/><circle cx="22" cy="22" r="4.5"/><path d="M7 22l3-12M7.5 10h5M9.2 15H18l4 7M18 15l-1.5-5M14 10h5"/><path d="M12 22h10" stroke-opacity=".7"/></svg>'],tief:['#E2232D,#C026D3,#6366F1','<svg viewBox="0 0 32 32" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="22" r="5"/><circle cx="24" cy="22" r="5"/><path d="M8 22l4-10M12 12c0 7 3 10 7 10h5M24 22l-3-12h3M10 9h5"/></svg>'],wunsch:['#F59E0B,#F97316,#EC4899','<svg viewBox="0 0 32 32" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4C9 4 4 9 4 15c0 6 5 11 10 11 2 0 2.5-1.5 2-3-.6-1.8.6-3 2.4-3H22c3.3 0 6-2.6 6-5.8C28 8.5 22.6 4 16 4z" fill="#fff" fill-opacity=".28"/><circle cx="10" cy="13" r="1.8" fill="#fff"/><circle cx="15" cy="9" r="1.8" fill="#fff"/><circle cx="21" cy="10.5" r="1.8" fill="#fff"/><circle cx="10.5" cy="19" r="1.8" fill="#fff"/></svg>'],lager:['#0EA5E9,#2563EB,#7C3AED','<svg viewBox="0 0 32 32" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10l12-6 12 6v12l-12 6-12-6z" fill="#fff" fill-opacity=".28"/><path d="M4 10l12 6 12-6M16 16v12M10 7l12 6"/><path d="M19.5 17.5l-2.5 4h3l-2.5 4" stroke-width="1.8"/></svg>'],egal:['#DB2777,#E2232D,#F97316','<svg viewBox="0 0 32 32" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6h20a3 3 0 013 3v11a3 3 0 01-3 3H14l-6 5v-5H6a3 3 0 01-3-3V9a3 3 0 013-3z" fill="#fff" fill-opacity=".28"/><path d="M16 18.5s-5-2.8-5-6a2.6 2.6 0 015-1 2.6 2.6 0 015 1c0 3.2-5 6-5 6z" fill="#fff"/></svg>']};
@@ -4782,7 +4789,7 @@ function lgStat(lager,ab){return lager?'<span class="bd ok">Sofort verfügbar</s
 function lgSave(m){const S=m.v.filter(x=>x.angebot&&x.preis>x.angebot).map(x=>x.preis-x.angebot);if(!S.length)return '';const mx=Math.max(...S);return (S.some(v=>v!==mx)?'bis ':'')+'–'+eur(mx)}
 function lgBadgesM(m){const vl=m.v.filter(x=>x.status!=='bestellt');return (m.lager?'<span class="bd ok dt" role="img" title="Sofort verfügbar" aria-label="Sofort verfügbar"><i></i></span>':lgStat(m.lager,m.ab))+(vl.length&&vl.every(x=>x.res)?'<span class="bd rs">Reserviert</span>':'')+(m.deal?'<span class="bd an">'+(lgSave(m)||'Sonderangebot')+'</span>':'')+(m.v.some(x=>x.vorfuehr)?'<span class="bd vf">Vorführrad</span>':'')+(m.v.some(x=>x.gebraucht)?'<span class="bd gb">Gebraucht</span>':'')}
 function lgPriceM(m){const d=m.v.filter(x=>x.angebot).sort((a,b)=>a.angebot-b.angebot)[0];
- if(d)return '<span class="lgpr"><s>'+eur(d.preis)+'</s><b class="an">'+(m.multiP?'<em>ab</em> ':'')+eur(d.angebot)+'<sup class="ast" title="Nicht bei Leasing & Finanzierung">*</sup></b></span>';
+ if(d)return '<span class="lgpr"><span class="uvw"><small class="uvp">UVP</small> <s>'+eur(d.preis)+'</s></span><b class="an">'+(m.multiP?'<em>ab</em> ':'')+eur(d.angebot)+'<sup class="ast" title="Nicht bei Leasing & Finanzierung">*</sup></b></span>';
  return m.minP?'<span class="lgpr"><b>'+(m.multiP?'<em>ab</em> ':'')+eur(m.minP)+'</b></span>':'<span class="lgpr"><b>Preis auf Anfrage</b></span>'}
 function lgRender(){if(!LG.ok)return;const L=LG.list=lgFilter();const g=$('#lgGrid');
  if(!L.length){g.innerHTML='<p class="lgempty">'+(LG.f.deal?'Aktuell gibt es dazu keine Sonderangebote.':'Kein Rad passt zu diesen Filtern.')+' <button type="button" class="ghost" id="lgReset">Filter zurücksetzen</button></p>';return}
@@ -4800,7 +4807,7 @@ function lgInfo(){const m=LG.list[LG.i],v=m.v[LG.vi]||m.v[0];const row=(l,x,h)=>
  const farben=inSz.length>1?'<div class="lgvar"><span class="flab">Farbe wählen'+(m.sz.length>1?' · '+esc(sz):'')+'</span><div class="vs">'+inSz.map(([x,j])=>'<button type="button" data-vi="'+j+'" class="'+(j===LG.vi?'on':'')+'">'+(x.farbe?'<i style="background:'+lgFarbe(x.farbe)+'"></i>':'')+'<span>'+esc(x.farbe||'Ausführung')+'</span><small class="'+(x.res||x.status==='bestellt'?'z':'ok')+'">'+(x.res?'reserviert':x.status==='bestellt'?'Lieferung ausstehend':'verfügbar')+'</small></button>').join('')+'</div></div>':'';
  const auch='';
  $('#lgmInfo').innerHTML='<p class="eyebrow">'+esc(m.marke)+'</p><h2 id="lgmT">'+esc(m.modell)+'</h2><div class="bds">'+lgStat(v.status!=='bestellt',v.ab)+(v.res?'<span class="bd rs">Reserviert</span>':'')+(v.angebot?'<span class="bd an">Sonderangebot</span>':'')+(v.vorfuehr?'<span class="bd vf">Vorführrad</span>':'')+(v.gebraucht?'<span class="bd gb">Gebraucht</span>':'')+'</div>'+
-  '<div class="lgm-price">'+(v.preis?'<span class="lgpr">'+(v.angebot?'<s>'+eur(v.preis)+'</s><b class="an">'+eur(v.angebot)+'</b>':'<b>'+eur(v.preis)+'</b>')+'</span>':'<span class="lgpr"><b>Preis auf Anfrage</b></span>')+(v.angebot?'<span class="sv">Du sparst '+eur(v.preis-v.angebot)+'</span><p class="anbox"><span aria-hidden="true">ⓘ</span><span><b>Aktionspreis gilt nicht bei Leasing &amp; Finanzierung.</b> Dafür gilt der reguläre Preis von '+eur(v.preis)+'.</span></p>':'')+'</div>'+groessen+farben+auch+
+  '<div class="lgm-price">'+(v.preis?'<span class="lgpr">'+(v.angebot?'<span class="uvw"><small class="uvp">UVP</small> <s>'+eur(v.preis)+'</s></span><b class="an">'+eur(v.angebot)+'</b>':'<b>'+eur(v.preis)+'</b>')+'</span>':'<span class="lgpr"><b>Preis auf Anfrage</b></span>')+(v.angebot?'<span class="sv">Du sparst '+eur(v.preis-v.angebot)+'</span><p class="anbox"><span aria-hidden="true">ⓘ</span><span><b>Aktionspreis gilt nicht bei Leasing &amp; Finanzierung.</b> Dafür gilt die UVP von '+eur(v.preis)+'.</span></p>':'')+'</div>'+groessen+farben+auch+
   '<dl class="lgm-spec">'+row('Rahmenhöhe',v.gr)+row('Farbe',v.farbe,'<i style="background:'+lgFarbe(v.farbe)+'"></i>'+esc(v.farbe||''))+row('Rahmenform',v.rahmen)+row('Art',v.typ)+row('Motor',v.motor)+row('Akku',v.akku)+row('Display',v.display)+row('Schaltung',v.schaltung)+row('Reifen',v.reifen)+row('Gewicht',v.gewicht)+row('Zul. Gesamtgewicht',v.zgg)+row('Kilometerstand',v.km)+row('Verfügbarkeit',1,v.res?'Reserviert – frag gern nach einem gleichen Rad':v.status==='bestellt'?'Lieferung ausstehend'+(v.ab?', voraussichtlich '+esc(v.ab):''):'Sofort, steht bei uns in Wörth')+'</dl>'+
   lgActHtml(m,v)+
   '<form class="lgm-form" id="lgmF" hidden novalidate><div class="fl"><span class="flab">Dein Wunsch</span><div class="choice" id="lgW"><button type="button" class="on" data-v="Kaufen">Kaufen</button><button type="button" data-v="Reservieren">Reservieren</button><button type="button" data-v="Probefahrt">Probefahrt</button><button type="button" data-v="Andere Größe/Farbe bestellen">Andere Größe/Farbe</button></div></div>'+
@@ -5289,7 +5296,7 @@ $('#lgm').addEventListener('click',e=>{const sh=e.target.closest('[data-share]')
  const d=e.target.closest('[data-dr]');if(d){const pr=+d.dataset.dr;lgClose();DR.p=pr;drSync();setTimeout(()=>{location.hash='dienstrad'},250)}});
 function lgActHtml(m,v){const k=mKey(m),on=merkHas(k),pr=v.preis||v.angebot||0;
  return '<div class="row lgm-act"><button type="button" class="cta" data-ask="Kaufen">Dieses Rad anfragen</button><button type="button" class="cta wa" data-pf><svg><use href="#i-chat"/></svg>Probefahrt per WhatsApp</button><button type="button" class="ghost hrtb'+(on?' on':'')+'" data-merk="'+esc(k)+'" aria-pressed="'+on+'">'+HEART+'<span>'+(on?'Gemerkt':'Merken')+'</span></button><button type="button" class="ghost shb" data-share><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="2.6"/><circle cx="6" cy="12" r="2.6"/><circle cx="18" cy="19" r="2.6"/><path d="M8.3 10.8l7.4-4.4M8.3 13.2l7.4 4.4"/></svg><span>Teilen</span></button></div>'+
-  (pr>=500?'<button type="button" class="lgdr" data-dr="'+pr+'"><span>Als <b>Dienstrad</b> leasen: Was kostet es dich im Monat?'+(v.angebot&&v.preis?'<small>Leasing zum regulären Preis '+eur(v.preis)+', nicht zum Aktionspreis</small>':'')+'</span><span aria-hidden="true">Rechner →</span></button>':'')}
+  (pr>=500?'<button type="button" class="lgdr" data-dr="'+pr+'"><span>Als <b>Dienstrad</b> leasen: Was kostet es dich im Monat?'+(v.angebot&&v.preis?'<small>Leasing zur UVP '+eur(v.preis)+', nicht zum Aktionspreis</small>':'')+'</span><span aria-hidden="true">Rechner →</span></button>':'')}
 
 /* ---------- Rad-Finder ---------- */
 const RFI={alltag:'<path d="M5 8h14l-1.5 11h-11z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/>',tour:'<path d="M3 20l6-12 4 7 3-4 5 9z"/><circle cx="17" cy="6" r="2"/>',sport:'<path d="M13 4l-4 8h6l-4 8"/>',drei:'<circle cx="5" cy="17" r="3"/><circle cx="19" cy="17" r="3"/><path d="M8 17h8M12 17V9h3l2 3M9 9h3"/>',
@@ -5341,7 +5348,7 @@ function rfResult(){const R=(LG.M||[]).map(m=>{const b=rfScore(m);return b?{m,b,
   (R.length?'<div class="rf-res">'+R.map((x,i)=>{const m=x.m,v=m.v[x.b.vi]||m.v[0],b=lgBrand(m.marke),im=lgImg(m,x.b.vi)||lgImg(m),k=mKey(m),on=merkHas(k),dl=!!(v.angebot&&v.preis>v.angebot);
    return '<div class="rfc" role="button" tabindex="0" data-rfshow="'+i+'" style="--ac:'+(b?b.c:'#8C9097')+'"><div class="im">'+(im?'<img src="'+im+'" alt="" loading="lazy">':'<span class="nf">Foto folgt</span>')+(dl?'<span class="rfdl">% Sonderangebot</span>':'')+'</div><span class="pc">'+x.p+' % passend</span><button type="button" class="hrt'+(on?' on':'')+'" data-merk="'+esc(k)+'" aria-pressed="'+on+'" aria-label="Merken">'+HEART+'</button>'+
     '<div class="bd2"><span class="mk">'+esc(m.marke)+'</span><h4>'+esc(m.modell)+'</h4><div class="why">'+x.b.why.slice(0,4).map(w=>'<span>'+esc(w)+'</span>').join('')+x.b.warn.map(w=>'<span class="w">'+esc(w)+'</span>').join('')+'</div>'+
-    '<div class="pr'+(dl?' dl':'')+'"><span>'+(dl?'<s>'+eur(v.preis)+'</s><b class="an">'+eur(v.angebot)+'<sup class="ast">*</sup></b><small class="sv">Du sparst '+eur(v.preis-v.angebot)+'</small><small class="anl">* Angebotspreis, nicht bei Leasing & Finanzierung</small>':(vP(v)?eur(vP(v)):'Preis auf Anfrage'))+'</span><i>'+(v.status!=='bestellt'?'Sofort da':'Lieferung ausstehend')+'</i></div></div></div>'}).join('')+'</div>':'<div class="rf-none"><a class="cta wa" href="https://wa.me/'+WA+'?text='+encodeURIComponent('Hallo Velocenter, ich suche ein Rad. Könnt ihr mich beraten?')+'" target="_blank" rel="noopener"><svg><use href="#i-chat"/></svg>Beratung per WhatsApp</a></div>')+
+    '<div class="pr'+(dl?' dl':'')+'"><span>'+(dl?'<span class="uvw"><small class="uvp">UVP</small> <s>'+eur(v.preis)+'</s></span><b class="an">'+eur(v.angebot)+'<sup class="ast">*</sup></b><small class="sv">Du sparst '+eur(v.preis-v.angebot)+'</small><small class="anl">* Angebotspreis, nicht bei Leasing & Finanzierung</small>':(vP(v)?eur(vP(v)):'Preis auf Anfrage'))+'</span><i>'+(v.status!=='bestellt'?'Sofort da':'Lieferung ausstehend')+'</i></div></div></div>'}).join('')+'</div>':'<div class="rf-none"><a class="cta wa" href="https://wa.me/'+WA+'?text='+encodeURIComponent('Hallo Velocenter, ich suche ein Rad. Könnt ihr mich beraten?')+'" target="_blank" rel="noopener"><svg><use href="#i-chat"/></svg>Beratung per WhatsApp</a></div>')+
   '<div class="rf-nav"><button type="button" class="lk" data-rfre>Nochmal von vorn</button><div class="row" style="gap:10px"><a class="ghost" href="#termin" data-pre="Probefahrt" data-rfx>Beratungstermin</a><a class="cta" href="#lager" data-rfx>Ganzes Lager ansehen</a></div></div>';B.scrollTop=0}
 $('#rf').addEventListener('click',e=>{const t=e.target;if(t.closest('[data-rfx]')){rfClose();return}
  const S=rfSteps(),q=S[RF.i];
@@ -5387,10 +5394,13 @@ function drDraw(){const o=$('#drO');if(!o)return;const c=drCalc(),f=$('#drF');f.
 /* ---------- Bewertungen (aus dem Admin, sonst die festen drei) ---------- */
 const BEW0={score:'4,8',items:$$('#qs .q').map(q=>({t:q.querySelector('p').textContent,n:q.querySelector('small').textContent.replace(/\s*·\s*Google$/,'')}))};
 function bewRender(d){d=d&&Array.isArray(d.items)&&d.items.filter(x=>x&&x.t).length?d:BEW0;const it=d.items.filter(x=>x&&x.t&&!x.aus);if(!it.length)return;
+ /* Tiry 23.11.2026: bei jedem Besuch 3 zufällige aus dem Pool echter Google-Bewertungen */
+ for(let i=it.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[it[i],it[j]]=[it[j],it[i]]}it.splice(3);
  const sc=$('.score b');if(sc&&d.score)sc.textContent=d.score;
  $('#qs').innerHTML=it.map((x,i)=>'<div class="q'+(i?'':' on')+'"><p>'+esc(x.t)+'</p><small>'+esc(x.n||'Kunde')+' · Google</small></div>').join('');
  $('#qd').innerHTML=it.map((x,i)=>'<button class="'+(i?'':'on')+'" aria-label="Bewertung '+(i+1)+'"></button>').join('');qBind()}
 
+bewRender(null);
 /* ---------- YouTube erst nach Freigabe ---------- */
 const ytOk=()=>!!LS.get('vc_yt',0);
 function ytConsent(id,t){return '<div class="ytc"><b>Video von YouTube</b><p>Beim Abspielen wird eine Verbindung zu YouTube (Google Ireland Limited) hergestellt. Dabei werden Daten wie deine IP-Adresse übertragen. Mehr dazu in der <a href="#datenschutz" data-tgx>Datenschutzerklärung</a>.</p><label><input type="checkbox" id="ytRem"> Für alle Videos merken</label><div class="row"><button type="button" class="cta" data-ytgo="'+esc(id)+'" data-t="'+esc(t)+'">Video laden</button><a class="ghost" href="https://www.youtube.com/watch?v='+esc(id)+'" target="_blank" rel="noopener">Auf YouTube öffnen</a></div></div>'}
@@ -5419,7 +5429,7 @@ ADM.bew=null;ADM.live={};ADM.bewEd=null;
 const LIVE=[['schrift','Schriften lokal eingebunden – keine Verbindung zu Google Fonts',1],['yt','YouTube-Videos laden erst nach Klick und Zustimmung',1],['form','Formulare senden nichts an einen Server – WhatsApp/E-Mail öffnet sich beim Kunden',1],['intern','Keine internen Daten auf der Seite: kein EK, keine Rahmennummer, kein Lagerort, keine Stückzahlen',1],
  ['personen','Fotos mit Personen (i:SY-Treffen): Nutzung geklärt (Tiry, 12.11.2026)',1],
  ['ds','Datenschutzerklärung von Anwalt oder Datenschutz-Generator prüfen lassen und Hosting eintragen'],['imp','Impressum: 1:1 aus geprüfter Fassung von velo-center.de übernommen'],['host','Hosting-Anbieter festlegen und Auftragsverarbeitungsvertrag (AVV) abschließen'],
- ['domain','Domain velo-center.de umziehen, SSL aktiv, Agentur-Vertrag kündigen (Fristen prüfen)'],['preise','Streichpreise: als „UVP“ kennzeichnen oder niedrigsten Preis der letzten 30 Tage angeben (§ 11 PAngV)'],
+ ['domain','Domain velo-center.de umziehen, SSL aktiv, Agentur-Vertrag kündigen (Fristen prüfen)'],['preise','Streichpreise als „UVP“ gekennzeichnet (§ 11 PAngV, Tiry 23.11.2026)',1],
  ['bilder','Herstellerfotos: Händler-Nutzungsrecht je Marke bestätigen lassen'],['bfsg','Barrierefreiheitsstärkungsgesetz prüfen (gilt für Online-Verkauf/-Buchung, Kleinstunternehmen teils ausgenommen)'],
  ['seo','Jeder Bereich als eigene Adresse (Unterseite) für Google + Sitemap; „noindex“ aus dem Prototyp entfernen'],['gbp','Google-Unternehmensprofil: Website-Link und Öffnungszeiten abgleichen']];
 function admBew(b){const d=ADM.bew||BEW0;if(!ADM.bewEd)ADM.bewEd={score:d.score||'4,8',items:JSON.parse(JSON.stringify(d.items||[]))};const E=ADM.bewEd;
@@ -5923,8 +5933,8 @@ const tx=(ey,hh,p,k,it,c,x)=>`<div class="lbp-tx"><div class="lbp-ey">${ey}</div
 const yr=ys=>`<div class="lbp-on">Jahrgänge</div><div class="lbp-yr">${ys.map(y=>`<a href="#treffen" tabindex="-1" data-lbq="treffen|#tgY" data-tgy="${y}"${y==='2024'?' class="rk" title="2024: Weltrekord"':''}>${y==='2024'?'<i aria-hidden="true">★</i>':''}${y}</a>`).join('')}</div>`;
 const M=['ktm','isy','gudereit','vdv','qio','vanraam','victoria','stevens'];
 const P={
-start:tx('Start · Familienbetrieb seit 1995','<span style="white-space:nowrap">E-Bike &amp;</span> <span style="white-space:nowrap">E-Dreirad-Spezialist</span><br><span class="gt it">mit eigener Werkstatt.</span>','Über 300 E-Bikes zum Probefahren und ein Bosch Service Center in Wörth.','start',['Showroom: über 300 E-Bikes vor Ort','Hier schraubt der Chef noch selbst','Das sagen unsere Kunden bei Google','Besuch uns: Hartmannstraße 25'],cta(['Zur Startseite','#start'],['Termin','#termin']))+
- `<div class="lbp-vi"><div class="lbp-ph"><img src="img/laden-innen.webp" alt=""></div><div class="lbp-tag" style="right:-14px;bottom:-10px"><b>300<i>+</i></b><span><em>E-Bikes vor Ort</em>zum Probefahren</span></div></div>`,
+start:tx('Start · Familienbetrieb seit 1995','<span style="white-space:nowrap">E-Bike &amp;</span> <span style="white-space:nowrap">E-Dreirad-Spezialist</span><br><span class="gt it">mit eigener Werkstatt.</span>','Über 250 E-Bikes zum Probefahren und ein Bosch Service Center in Wörth.','start',['Showroom: über 250 E-Bikes vor Ort','Hier schraubt der Chef noch selbst','Das sagen unsere Kunden bei Google','Besuch uns: Hartmannstraße 25'],cta(['Zur Startseite','#start'],['Termin','#termin']))+
+ `<div class="lbp-vi"><div class="lbp-ph"><img src="img/laden-innen.webp" alt=""></div><div class="lbp-tag" style="right:-14px;bottom:-10px"><b>250<i>+</i></b><span><em>E-Bikes vor Ort</em>zum Probefahren</span></div></div>`,
 service:tx('Service · Bosch Service Center','Wir überzeugen<br><span class="gt it">mit Service.</span>','Beratung, Werkstatt und clevere Bezahlung aus einer Hand.','service',['Beratung &amp; Probefahrt','Inspektion &amp; Reparatur','Termin anfragen in 30 Sekunden','0 % Finanzierung, ENRA-Versicherung, Dienstrad-Leasing'],cta(['Zum Service','#service'],['Termin','#termin']))+
  `<div class="lbp-vi"><div class="lbp-blob"></div><img class="lbp-cut" src="img/sattelueberzug.webp" alt="" style="width:200px;left:64px;top:22px"><div class="lbp-tag" style="right:-14px;bottom:2px"><b>–20<i>€</i></b><span><em>Winter-Aktion</em>auf jede Inspektion<strong><i>+</i> Sattelüberzug geschenkt</strong><strong><i>✓</i> Checkliste + Bosch Servicebericht</strong><u>Nur Marken-Fahrräder mit Bosch-Antrieb</u></span></div></div>`,
 marken:tx('Marken','Top-Marken.<br><span class="gt it">Große Auswahl.</span>','Von KTM bis i:SY: acht Marken, dazu gutes Zubehör.','marken',['Acht Marken. Ein Laden.','Gutes Zubehör macht den Unterschied.'],cta(['Zu den Marken','#marken']))+
@@ -5959,7 +5969,7 @@ function lgPrep(){let q=null;try{q=window.vcLager&&window.vcLager()}catch(_){}
 function lgShow(i){if(!LGB||!LGB.length)return;lgI=(i+LGB.length)%LGB.length;const x=LGB[lgI],nx=LGB[(lgI+1)%LGB.length];
  [x,nx].forEach(y=>{if(!y.el.src)y.el.src=y.el.dataset.src});
  LGB.forEach(y=>y.el.classList.toggle('on',y===x));
- pan.querySelector('.lbp-cap').innerHTML=`<span class="m">${x.m} ${x.n}</span>`+(x.o&&x.p>x.o?`<s>${eur(x.p)}</s><em>${eur(x.o)}</em>`:(x.p?`<b>${eur(x.p)}</b>`:''))}
+ pan.querySelector('.lbp-cap').innerHTML=`<span class="m">${x.m} ${x.n}</span>`+(x.o&&x.p>x.o?`<small class="uvp">UVP</small> <s>${eur(x.p)}</s><em>${eur(x.o)}</em>`:(x.p?`<b>${eur(x.p)}</b>`:''))}
 function lgRun(on){clearInterval(lgT);if(!on)return;lgPrep();lgShow(lgI);lgT=setInterval(()=>lgShow(lgI+1),2800)}
 let pan=null;const pg={};
 function init(){if(pan)return;pan=document.createElement('div');pan.className='lbp';pan.id='lbp';pan.setAttribute('aria-hidden','true');

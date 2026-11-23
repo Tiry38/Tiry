@@ -577,3 +577,10 @@
 - WhatsApp-Knopf Handyleiste dunkleres Grün (Kontrast). Sattelüberzug in 560 px, Fassade-Kachel 640 px (`plus_varianten.py`/`plus_bauen.py`).
 - Schnellzugriff-Kacheln laden ihr Foto erst in Sichtnähe (`.qa:not(.ld) .bg{background-image:none}` + IntersectionObserver). Bosch-Kachel bleibt Original (Panorama 1920×450, kleinere Variante wäre unscharf).
 - Bewusst nicht geändert: Bilder, die nur bei 1×-Messung „zu groß“ wirken (Hero-KTM 900 px, Lager-Karten 400 px) – auf Handys mit 3×-Bildschirm genau richtig.
+
+## 23.11.2026 – Rechtsprüfung umgesetzt (Tiry)
+- Streichpreise überall mit „UVP“ davor (Lager-Karte, Detail, Rad-Finder, Admin-Vorschau); „regulärer Preis“ bei Leasing/Aktion = UVP. Livegang-Haken `preise` erledigt.
+- Bewertungen: bei jedem Besuch 3 zufällige aus dem Pool (`bewRender` mischt), darunter Pflichthinweis § 5b Abs. 3 UWG (`.bwh`). Pool = Admin → Bewertungen (nur echte Google-Texte, unverändert). Hinweis nie entfernen.
+- Finanzierung: „effektiver Jahreszins 0,00 %, gebundener Sollzins 0,00 % p. a.“ + Bonität in Fußnote und Kurzkarte.
+- „300+ / über 300 E-Bikes“ → überall 250 (Tiry). „Weltmarktführer“ (Van Raam) entfernt – kein Beleg gefunden; jetzt „Spezialrad-Hersteller“. Rahmen-Garantie = „Herstellergarantie von Van Raam“.
+- Herstellerfotos: Tiry geht von Nutzungsrecht über Händlerstatus aus (23.11.2026).
