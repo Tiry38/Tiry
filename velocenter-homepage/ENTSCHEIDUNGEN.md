@@ -601,3 +601,4 @@
 
 ### Symbole realistisch (Tiry 23.11.2026: „mehr Realistik“)
 - `.srow .ic` zeigt echte 3D-Renderings statt Linien-Symbolen: `img/ic3d-<name>.webp` (bike, wrench, euro, shield, case, box, map, star, chat; 192 px, zusammen ~45 KB), gerendert mit Three.js (Rotlack mit Klarlack, Chrom, Gummi, Gold, Karton) in Studio-Licht, frei stehend mit weichem Bodenschatten (Klasse `.ic.i3`, 76 px, Handy 62 px). Hover hebt das Objekt leicht an und dreht es. Ersetzt die Glas-Linse von vorher; nicht zurück auf flache Symbole.
+- Stufe 2 (Tiry 23.11.2026 nachts: „1000 % realistischer“): Oberflächen mit Struktur (gebürstetes Chrom, Lederkorn mit Ziernaht + Chrom-Ecken/Schlössern, Kartonfaser, Reifenprofil, Rippen-Griff am Schlüssel, geriffelter Münzrand), echter weicher Kontaktschatten im Bild (kein CSS-Schatten mehr), E-Bike mit Schutzblechen, Kettenblatt, Pedal, Gepäckträger, Lampe; Render 768 px → 224 px. Quelle: Scratchpad-Szene (Three.js r159).
