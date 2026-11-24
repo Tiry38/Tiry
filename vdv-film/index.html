@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<title>AEB PRO MY2027 Konfigurator-Film</title>
+<style>
+@font-face{font-family:Sora;src:url(assets/fonts/sora-latin.woff2) format('woff2');font-weight:100 800}
+@font-face{font-family:Outfit;src:url(assets/fonts/outfit-latin.woff2) format('woff2');font-weight:100 900}
+:root{--bg:#121214;--ink:#EEEBE5;--ink2:#B4B0A8;--ink3:#8F8B84;--line:#2A2A2E;--card:#1A1A1D;--card2:#202024;--acc:#FF6F00;--ok:#3FBF72;--wait:#E9B73C}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:var(--bg);overflow:hidden}
+#film{position:relative;overflow:hidden;background:var(--bg);font-family:Outfit,sans-serif;color:var(--ink)}
+#cv{position:absolute;inset:0}
+.layer{position:absolute;inset:0;pointer-events:none}
+.mono{font-family:Outfit;font-weight:500;letter-spacing:.14em;text-transform:uppercase}
+#giant{position:absolute;font-family:Sora;font-weight:700;letter-spacing:-.055em;line-height:.8;color:transparent;-webkit-text-stroke:1px #2B2B30;white-space:nowrap}
+#hd{position:absolute}
+#hd .tag{font-size:13px;color:var(--acc);margin-bottom:14px;display:flex;gap:14px;align-items:center}
+#hd .tag i{display:inline-block;height:1px;width:44px;background:var(--acc)}
+#hd h1{font-family:Sora;font-weight:600;letter-spacing:-.045em;line-height:.92;white-space:nowrap;position:relative}
+#hd h1 .scan{position:absolute;top:-6%;bottom:-6%;width:2px;background:var(--acc)}
+#hd .was{margin-top:22px;font-size:13px;color:var(--ink3)}
+#hd .was b{display:block;font-weight:500;color:var(--ink2);font-size:19px;letter-spacing:.02em;text-transform:none;margin-top:6px}
+#hd .warum{margin-top:18px;font-size:22px;line-height:1.35;color:var(--ink);font-weight:300;max-width:620px}
+#hd .warum span{display:block;font-size:13px;color:var(--ink3);font-weight:500;letter-spacing:.14em;text-transform:uppercase;margin-bottom:6px}
+#cap{position:absolute}
+#cap .k{font-size:12px;color:var(--ink3)}
+#cap .v{font-family:Sora;font-weight:500;font-size:30px;letter-spacing:-.02em;margin-top:6px}
+#cap .s{font-size:16px;color:var(--ink2);margin-top:6px}
+#price{position:absolute;display:flex;align-items:baseline;gap:26px}
+#price .p{font-family:Sora;font-weight:500;color:var(--acc);letter-spacing:-.03em;font-variant-numeric:tabular-nums}
+#price .kg{font-size:12px;color:var(--ink3)}
+#top{position:absolute;left:0;right:0;top:0;height:92px;display:flex;align-items:center;padding:0 56px;gap:22px;font-size:12px;color:var(--ink2)}
+#top .brand{font-family:Sora;font-weight:600;font-size:17px;letter-spacing:.32em;color:var(--ink);margin:0 auto}
+#top .btn{border:1px solid #3A3A40;border-radius:3px;padding:9px 14px}
+#top .btn.a{border-color:var(--acc);color:var(--acc)}
+#concept{position:absolute;font-size:11px;color:var(--ink3)}
+/* panel = Dark-Mode-Nachbau */
+#panel{position:absolute;overflow:hidden;background:var(--card);border-radius:22px}
+#pin{position:absolute;left:0;top:0;right:0}
+.grp{position:absolute;left:28px;font-size:15px;color:var(--acc);font-weight:500;letter-spacing:.06em}
+.row{position:absolute;left:18px;right:18px;background:var(--card2);border-radius:14px;overflow:hidden}
+.row .h{height:60px;display:flex;align-items:center;padding:0 22px;gap:16px}
+.row .h .n{font-size:16px;font-weight:500;letter-spacing:.08em;min-width:150px}
+.row .h .act{font-size:12.5px;color:var(--ink3);flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.row .h .pr{font-size:12.5px;color:var(--ink3)}
+.row .h .chev{width:10px;height:10px;border-right:2px solid var(--acc);border-bottom:2px solid var(--acc);transform:rotate(45deg) translateY(-3px)}
+.row .opts{position:absolute;left:0;right:0;top:60px}
+.opt{height:40px;display:flex;align-items:center;gap:12px;padding:0 22px;font-size:14px;color:var(--ink2);border-top:1px solid #29292D}
+.opt .d{width:7px;height:7px;border-radius:50%}
+.opt .on{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.opt .op{font-size:13px;color:var(--ink3);font-variant-numeric:tabular-nums}
+.opt.sel{color:var(--ink)}
+.opt.sel .op{color:var(--acc)}
+.opt .mk{width:14px;height:14px;border:1.5px solid #4A4A50;border-radius:50%;position:relative}
+.opt.sel .mk{border-color:var(--acc)}
+.opt.sel .mk:after{content:'';position:absolute;inset:3px;border-radius:50%;background:var(--acc)}
+.pk .h .n{min-width:0;flex:1}
+.pk .h .pp{color:var(--acc);font-size:15px}
+.pk .h .box{width:20px;height:20px;border:1.5px solid #55555B;border-radius:4px}
+.pk .dsc{position:absolute;left:22px;right:22px;top:52px;font-size:14px;color:var(--ink2)}
+#tabs{position:absolute;display:flex;align-items:center;font-size:15px;letter-spacing:.06em;color:var(--ink2)}
+#tabs .t{position:relative;white-space:nowrap}
+#tabs .fin{background:var(--acc);color:#141414;border-radius:3px;padding:8px 14px;font-weight:600;font-size:13px}
+#uline{position:absolute;height:2px;background:var(--acc)}
+#note{position:absolute;border-left:2px solid var(--acc);padding:4px 0 4px 18px}
+#note .k{font-size:12px;color:var(--acc)}
+#note .v{font-size:17px;line-height:1.4;color:var(--ink);margin-top:6px;font-weight:300}
+/* overview + motors */
+#ov{position:absolute}
+#ov .cat{font-size:13px;color:var(--acc);margin-bottom:18px}
+.ovr{display:flex;align-items:baseline;gap:30px;height:66px;border-top:1px solid #2A2A2E;white-space:nowrap}
+.ovr .n{font-family:Sora;font-weight:500;font-size:30px;letter-spacing:-.02em;width:330px}
+.ovr .s{font-size:14px;color:var(--ink3);width:150px}
+#motors{position:absolute;perspective:1800px}
+.mo{position:absolute;transform-style:preserve-3d}
+.mo .mn{font-size:12px;color:var(--ink3);margin-top:16px}
+.mo .mm{font-family:Sora;font-size:20px;font-weight:500;margin-top:4px;letter-spacing:-.01em}
+.mo .nm{font-family:Sora;font-weight:700;letter-spacing:-.06em;line-height:.85;margin-top:14px;font-variant-numeric:tabular-nums}
+.mo .nm small{font-size:.22em;letter-spacing:.02em;font-weight:500;color:var(--ink3);margin-left:8px}
+.mo .bar{height:3px;background:#3A3A40;margin-top:14px;position:relative}
+.mo .bar i{position:absolute;left:0;top:0;bottom:0;background:var(--acc)}
+.mo .use{font-size:15px;color:var(--ink2);margin-top:12px;line-height:1.35}
+.mo .mp{font-size:12px;color:var(--ink3);margin-top:8px}
+#sum{position:absolute}
+#sum .m{font-family:Sora;font-weight:700;letter-spacing:-.05em;line-height:.85}
+#sum .l{font-size:13px;color:var(--ink3);margin-top:20px}
+#sum ul{list-style:none;margin-top:26px}
+#sum li{font-family:Sora;font-weight:400;letter-spacing:-.02em;border-top:1px solid #2A2A2E;padding:10px 0;display:flex;justify-content:space-between;gap:40px}
+#sum li span{font-family:Outfit;font-size:12px;letter-spacing:.14em;color:var(--ink3);text-transform:uppercase;align-self:center}
+#sum .pr{font-family:Sora;color:var(--acc);font-weight:500;letter-spacing:-.03em;margin-top:24px}
+#sum .src{font-size:11px;color:var(--ink3);margin-top:10px}
+#out{position:absolute}
+#out .a{font-family:Sora;font-weight:600;letter-spacing:-.05em;line-height:.9}
+#out .b{font-size:14px;color:var(--ink2);margin-top:30px}
+#out .c{font-family:Sora;font-size:24px;color:var(--acc);margin-top:12px;letter-spacing:-.01em}
+#out .d{font-size:12px;color:var(--ink3);margin-top:40px}
+#intro{position:absolute}
+#intro .t{font-family:Sora;font-weight:700;letter-spacing:-.06em;line-height:.8}
+#intro .u{font-size:13px;color:var(--ink2);margin-top:24px;display:flex;gap:26px}
+#cur{position:absolute;left:0;top:0;width:0;height:0}
+#cur .ring{position:absolute;width:26px;height:26px;left:-13px;top:-13px;border:1.5px solid #F4F1EA;border-radius:50%}
+#cur .dot{position:absolute;width:6px;height:6px;left:-3px;top:-3px;background:var(--acc);border-radius:50%}
+#cur .rip{position:absolute;border:1.5px solid var(--acc);border-radius:50%}
+#sub{position:absolute;left:0;right:0;text-align:center;font-size:24px;line-height:1.35;color:#fff;display:none}
+#sub span{background:rgba(0,0,0,.72);padding:4px 12px;box-decoration-break:clone;-webkit-box-decoration-break:clone}
+</style>
+</head>
+<body>
+<div id="film">
+  <canvas id="cv"></canvas>
+  <div class="layer" id="Lback"><div id="giant"></div></div>
+  <div class="layer" id="Lmid">
+    <div id="intro"><div class="t">AEB PRO</div><div class="u mono"><span>Modelljahr 2027</span><span>Allround</span><span>Custom Made in Germany</span></div></div>
+    <div id="ov"></div>
+    <div id="motors"></div>
+    <div id="sum"></div>
+    <div id="out"></div>
+  </div>
+  <div class="layer" id="Lui">
+    <div id="top"><span class="btn mono">Neue Konfiguration</span><span class="btn a mono">Velo ID speichern</span><span class="brand">VELO DE VILLE</span><span class="btn mono">Dein Bike</span><span class="btn a mono">Händler kontaktieren</span></div>
+    <div id="hd"><div class="tag mono"><i></i><span></span></div><h1><span class="tx"></span><span class="scan"></span></h1><div class="was mono">Was du hier einstellst<b></b></div><div class="warum"><span>Warum das zählt</span><em style="font-style:normal"></em></div></div>
+    <div id="cap"><div class="k mono"></div><div class="v"></div><div class="s"></div></div>
+    <div id="note"><div class="k mono"></div><div class="v"></div></div>
+    <div id="price"><span class="p"></span><span class="kg mono"></span></div>
+    <div id="panel"><div id="pin"></div></div>
+    <div id="tabs"></div><div id="uline"></div>
+    <div id="concept" class="mono">Konzeptfilm · Entwurf · keine offizielle Werbung von VELO DE VILLE</div>
+  </div>
+  <div class="layer"><div id="sub"><span></span></div></div>
+  <div class="layer"><div id="cur"><div class="rip"></div><div class="ring"></div><div class="dot"></div></div></div>
+</div>
+<script src="data.js"></script>
+<script src="engine.js"></script>
+</body>
+</html>
