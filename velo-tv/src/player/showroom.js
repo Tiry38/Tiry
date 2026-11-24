@@ -67,10 +67,12 @@
             '<img class="hb off" alt=""><img class="hb off" alt="">' +
             '<div class="hfloor"></div>' +
           '</div>' +
-          '<div class="spar hello" style="--d:.8s"><span class="sp-in"><small>Du sparst</small><b class="sp-b"></b></span></div>' +
           '<div class="deal hello" style="--d:.6s">' +
-            '<div class="dl-l"><span class="dl-k"><i></i>Angebot · <b class="dl-mk"></b></span><b class="dl-m"></b><span class="dl-chips"></span></div>' +
-            '<div class="dl-r"><span class="dl-uvp"><em>UVP</em> <s></s></span><b class="dl-ap"></b></div>' +
+            '<div class="dhalo"></div>' +
+            '<h2 class="dl-m"></h2>' +
+            '<p class="dl-uvp"><span class="stt">statt</span> <s></s></p>' +
+            '<div class="dl-pz"><span class="dl-ap"></span><em class="sp-b"></em></div>' +
+            '<p class="dl-chips"></p>' +
           '</div>' +
           '<div class="dl-prog"><span class="dl-bar"><i></i></span><span class="dl-n"></span></div>' +
         '</div>' +
@@ -78,7 +80,7 @@
 
     var stage = el.querySelector('.sr-stage');
     var bikes = el.querySelectorAll('.hb'), logo = el.querySelector('.hlg'), deal = el.querySelector('.deal'), hvis = el.querySelector('.hvis');
-    var prog = el.querySelector('.dl-prog'), spar = el.querySelector('.spar');
+    var prog = el.querySelector('.dl-prog'), spar = el.querySelector('.sp-b');
     var i = opts.start != null ? ((opts.start - 2) % items.length + items.length) % items.length : -1, an = 0, timer = 0, aktiv = false;
 
     function skalieren() {
@@ -94,15 +96,15 @@
     }
     function scale() { return Math.min(window.innerWidth / 1920, window.innerHeight / 1080); }
     function texte(x) {
-      el.querySelector('.dl-mk').textContent = x.marke;
-      el.querySelector('.dl-m').textContent = x.modell;
-      el.querySelector('.dl-chips').innerHTML = [String(x.farbe || '').replace(/\s*\(.*?\)\s*/g, ' ').trim(), x.gr, x.jahr ? 'Modell ' + x.jahr : ''].filter(Boolean)
-        .map(function (c) { return '<i>' + esc(c) + '</i>'; }).join('');
+            var nm = x.marke + ' ' + x.modell, dm = el.querySelector('.dl-m');
+      dm.textContent = nm;
+      dm.style.fontSize = nm.length > 26 ? '50px' : nm.length > 20 ? '58px' : '';
+      el.querySelector('.dl-chips').textContent = [String(x.farbe || '').replace(/\s*\(.*?\)\s*/g, ' ').trim(), x.rahmen, x.gr].filter(Boolean).join(' · ');
       el.querySelector('.dl-uvp s').textContent = euro(x.preis);
-      el.querySelector('.dl-ap').textContent = euro(x.angebot);
+      el.querySelector('.dl-ap').innerHTML = esc(euro(x.angebot)).replace(' €', '<i>€</i>');
       var gespart = Math.round(x.preis - x.angebot);
       spar.hidden = !(gespart >= 50);
-      el.querySelector('.sp-b').textContent = euro(gespart);
+      el.querySelector('.sp-b').innerHTML = '<small>Du sparst</small>' + esc(euro(gespart));
       stage.style.setProperty('--ac', x.akzent || '#8C9097');
       logo.style.setProperty('--wz', x.wz);
       punkte();
@@ -124,14 +126,13 @@
       }
       busy = true;
       neu.src = x.img; neu.alt = x.marke + ' ' + x.modell;
-      deal.classList.add('swap'); spar.classList.add('swap');
+      deal.classList.add('swap');
       var fertig = function () { busy = false; };
       var dec = function (im) { return im.decode ? im.decode().catch(function () {}) : Promise.resolve(); };
       Promise.race([dec(neu), new Promise(function (r) { setTimeout(r, 2500); })]).then(function () {
         if (!aktiv) return fertig();
         an ^= 1;
         setTimeout(function () { texte(x); deal.classList.remove('swap'); }, 450);
-        setTimeout(function () { spar.classList.remove('swap'); }, 1500);
         // Original-Verwandlung der Homepage: Rad zerfällt in Laub und setzt sich neu zusammen (nur ohne Skalierung, sonst stimmen die Maße nicht)
         if (window.VM && VM.on && VM.ok && x.logo && Math.abs(scale() - 1) < 0.02) {
           logo.hidden = false;

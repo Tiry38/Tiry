@@ -76,42 +76,36 @@ html.hg-an #stage{background:transparent}
 .sr .hb.off{opacity:0;transform:translate(-36%,-50%)}
 .sr .hfloor{position:absolute;left:16%;right:16%;bottom:18%;height:3px;border-radius:3px;background:linear-gradient(90deg,transparent,#B87333,#F0C8A0,#B87333,transparent);box-shadow:0 0 22px rgba(184,115,51,.55),0 10px 30px -6px rgba(18,22,32,.28)}
 
-/* ---- Angebot unter dem Kreis: Glaskarte wie auf der Homepage (ohne Knöpfe) ---- */
-.sr .deal{position:absolute;left:1360px;top:822px;transform:translateX(-50%);width:820px;display:flex;align-items:center;justify-content:space-between;gap:28px;
-  padding:22px 30px 22px 34px;border-radius:40px;background:linear-gradient(160deg,rgba(255,255,255,.95),rgba(246,248,251,.82));border:1px solid rgba(255,255,255,.95);
-  box-shadow:inset 0 1px 0 #fff,0 0 0 1px rgba(184,115,51,.18),0 30px 60px -26px rgba(60,6,18,.55),0 12px 30px -18px rgba(28,44,74,.35);transition:opacity .45s ease,transform .7s cubic-bezier(.2,.8,.2,1)}
-.sr .deal::before{content:"";position:absolute;left:34px;right:34px;top:-1px;height:2px;border-radius:2px;background:linear-gradient(90deg,transparent,#B87333,#F0C8A0,#B87333,transparent);opacity:.8}
-.sr .deal.swap{opacity:0;transform:translate(-50%,16px)}
-.sr .dl-l{display:flex;flex-direction:column;gap:9px;min-width:0}
-.sr .dl-k{display:inline-flex;align-items:center;gap:9px;font:800 13px/1 "Outfit",sans-serif;letter-spacing:.2em;text-transform:uppercase;color:#4A5161}
-.sr .dl-k i{width:9px;height:9px;border-radius:50%;background:#E2232D;box-shadow:0 0 0 4px rgba(226,35,45,.18)}
-.sr .dl-k b{color:#C8102E;font-weight:800}
-.sr .dl-m{font:900 38px/1.02 "Outfit",sans-serif;letter-spacing:-.025em;color:#1B1E25;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:460px}
-.sr .dl-chips{display:flex;gap:7px;flex-wrap:nowrap;overflow:hidden;max-width:470px}
-.sr .dl-chips i{font-style:normal;white-space:nowrap;padding:7px 13px;border-radius:999px;background:#fff;box-shadow:inset 0 0 0 1px rgba(27,30,37,.08),0 4px 10px -6px rgba(27,30,37,.25);font:600 14px/1 "Sora",sans-serif;color:#4A5161;overflow:hidden;text-overflow:ellipsis;max-width:240px}
-.sr .dl-r{display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex:none}
-.sr .dl-uvp{font:600 17px/1 "Sora",sans-serif;color:#6B7282}
-.sr .dl-uvp em{font:800 12px/1 "Outfit",sans-serif;font-style:normal;letter-spacing:.1em;margin-right:3px}
-.sr .dl-uvp s{text-decoration-thickness:2px;text-decoration-color:rgba(200,16,46,.7)}
-.sr .dl-ap{font:900 66px/1 "Outfit",sans-serif;letter-spacing:-.035em;background:linear-gradient(160deg,#F2333D 10%,#C8102E 50%,#8E1420 95%);-webkit-background-clip:text;background-clip:text;color:transparent;padding:0 2px 4px}
-
-/* ---- Spar-Siegel am Kreis ---- */
-.sr .spar{position:absolute;left:1552px;top:236px;width:172px;height:172px;border-radius:50%;display:grid;place-items:center;transform:rotate(-10deg);
-  background:radial-gradient(circle at 32% 26%,rgba(255,255,255,.45),transparent 38%),linear-gradient(140deg,#F2333D 0%,#D0142A 42%,#8E1420 100%);
-  box-shadow:inset 0 2px 0 rgba(255,255,255,.35),inset 0 -6px 12px rgba(0,0,0,.25),0 0 0 6px rgba(255,255,255,.9),0 0 0 7px rgba(184,115,51,.45),0 26px 50px -16px rgba(120,10,30,.7);
-  transition:transform .8s cubic-bezier(.34,1.5,.64,1),opacity .35s ease}
-.sr .spar.swap{transform:rotate(-30deg) scale(.4);opacity:0}
-.sr .spar .sp-in{display:flex;flex-direction:column;align-items:center;gap:6px;color:#fff;text-align:center}
-.sr .spar small{font:800 13px/1 "Outfit",sans-serif;letter-spacing:.18em;text-transform:uppercase;opacity:.9}
-.sr .spar b{font:900 36px/1 "Outfit",sans-serif;letter-spacing:-.03em;text-shadow:0 2px 0 rgba(70,0,12,.35)}
+/* ---- Angebot unter dem Kreis: groß und eindeutig – Modell, alter Preis durchgestrichen, neuer Preis, rotes Spar-Schild ---- */
+.sr .hvis{top:150px;transform:scale(.94);transform-origin:50% 0}
+.sr .deal{position:absolute;left:1360px;top:690px;transform:translateX(-50%);width:980px;display:flex;flex-direction:column;align-items:center;text-align:center;transition:opacity .45s ease,transform .7s cubic-bezier(.2,.8,.2,1)}
+.sr .deal.swap{opacity:0;transform:translate(-50%,18px)}
+.sr .dhalo{position:absolute;z-index:-1;left:50%;top:58%;width:1400px;height:600px;border-radius:50%;transform:translate(-50%,-50%);background:radial-gradient(closest-side,rgba(14,12,12,.66),rgba(14,12,12,.42) 55%,rgba(14,12,12,0) 85%)}
+.sr .dl-m{margin:0;font:900 62px/1.02 "Outfit",sans-serif;letter-spacing:-1.8px;color:#fff;white-space:nowrap;max-width:860px;overflow:hidden;text-overflow:ellipsis;
+  text-shadow:0 2px 4px rgba(0,0,0,.6),0 6px 24px rgba(0,0,0,.55)}
+.sr .dl-uvp{transform:skewX(-9deg);margin:10px 0 0;font:800 96px/1 "Outfit",sans-serif;letter-spacing:-3px;color:rgba(255,255,255,.92);text-shadow:0 2px 10px rgba(0,0,0,.75)}
+.sr .dl-uvp .stt{color:#FFC83D;text-shadow:0 0 18px rgba(255,200,61,.55),0 2px 8px rgba(0,0,0,.7);font-size:44px;letter-spacing:0;font-weight:700;margin-right:6px;vertical-align:.35em}
+.sr .dl-uvp s{text-decoration-thickness:8px;text-decoration-color:#FF2E45}
+.sr .dl-pz{display:flex;align-items:center;gap:30px;margin-top:4px}
+.sr .dl-ap{display:inline-block;font:900 128px/1 "Outfit",sans-serif;letter-spacing:-4px;color:#FFC83D;transform:skewX(-9deg);
+  text-shadow:0 3px 0 rgba(120,60,0,.55),0 0 34px rgba(255,200,61,.55),0 8px 30px rgba(0,0,0,.6)}
+.sr .dl-ap i{font-style:normal;margin-left:18px}
+/* Spar-Schild wie die roten „−800 €“-Schilder der Rad-Karten auf der Homepage, groß */
+.sr .sp-b{display:inline-flex;flex-direction:column;align-items:center;gap:6px;font:900 60px/1 "Outfit",sans-serif;font-style:normal;letter-spacing:-1px;color:#fff;padding:14px 26px 16px;border-radius:16px;transform:rotate(-4deg);
+  background:linear-gradient(90deg,#C8102E,#E0162F);box-shadow:0 14px 34px -10px rgba(200,16,46,.85),0 0 0 4px rgba(255,255,255,.9)}
+.sr .sp-b small{font:800 17px/1 "Outfit",sans-serif;letter-spacing:.18em;text-transform:uppercase;color:rgba(255,255,255,.92)}
+.sr .sp-b[hidden]{display:none}
+.sr .dl-chips{margin:12px 0 0;font:600 32px/1 "Sora",sans-serif;color:rgba(255,255,255,.9);text-shadow:0 2px 8px rgba(0,0,0,.75)}
+.sr .dl-prog{display:none!important}
 
 /* ---- Fortschritt bis zum nächsten Rad ---- */
-.sr .dl-prog{position:absolute;left:1360px;top:984px;transform:translateX(-50%);display:flex;align-items:center;gap:14px}
-.sr .dl-bar{position:relative;width:320px;height:6px;border-radius:6px;background:rgba(255,255,255,.4);box-shadow:0 1px 3px rgba(0,0,0,.25);overflow:hidden}
-.sr .dl-bar i{position:absolute;left:0;top:0;bottom:0;width:0;border-radius:6px;background:linear-gradient(90deg,#B87333,#F0C8A0 50%,#E2232D)}
+.sr .dl-prog{position:absolute;left:1360px;top:1046px;transform:translateX(-50%);display:flex;align-items:center;gap:14px}
+.sr .dl-bar{position:relative;width:260px;height:4px;border-radius:4px;background:rgba(255,255,255,.25);box-shadow:0 1px 3px rgba(0,0,0,.25);overflow:hidden}
+.sr .dl-bar i{position:absolute;left:0;top:0;bottom:0;width:0;border-radius:6px;background:linear-gradient(90deg,#FF3A52,#C8102E 40%,#B87333 75%,#E8C9A0)}
 .sr .dl-bar.run i{animation:fuell 8s linear forwards}
 @keyframes fuell{to{width:100%}}
-.sr .dl-n{padding:7px 14px;border-radius:999px;background:rgba(27,30,37,.72);color:rgba(255,255,255,.85);font:600 14px/1 "Sora",sans-serif;white-space:nowrap}
+.sr .dl-n{font:700 15px/1 "Outfit",sans-serif;letter-spacing:.12em;color:rgba(255,255,255,.75);white-space:nowrap;text-shadow:0 2px 6px rgba(0,0,0,.7)}
+.sr .dl-n b{color:#fff}
 .sr .dl-n b{color:#fff;font-weight:800}
 
 @media (prefers-reduced-motion:reduce){.sr .band .tk,.sr .hring::after,.sr .halo,.sr .gt{animation:none}}
