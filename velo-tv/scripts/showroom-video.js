@@ -102,7 +102,8 @@ async function segment(browser, base, daten, von, bis, datei, nr, opts) {
   for (let f = 0; f < frames; f++) {
     if (f % proSlot === 0) {
       // Wechsel zum nächsten Rad; Vorbereitung der Verwandlung abwarten (echte Zeit, virtuelle Uhr steht)
-      await page.evaluate(() => window.__srEl._wechsel());
+      // Wechsel auslösen und neue Übergänge sofort an die virtuelle Uhr binden (sonst laufen sie während der Vorbereitung in Echtzeit ab)
+      await page.evaluate((tt) => { window.__srEl._wechsel(); document.body.offsetWidth; window.__vtTick(tt); }, t);
       for (let k = 0; k < 200; k++) {
         await page.clock.runFor(0);
         const bereit = await page.evaluate(() => { const h = document.querySelector('.sr .hvis'); return !window.VM || !VM.on || !VM.ok || (h && h.classList.contains('vmrun')); });
