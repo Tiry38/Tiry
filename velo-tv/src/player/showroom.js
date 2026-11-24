@@ -69,9 +69,9 @@
           '</div>' +
           '<div class="deal hello" style="--d:.6s">' +
             '<div class="dhalo"></div>' +
-            '<p class="eyebrow"><i></i>Sonderangebot · <b class="dl-mk"></b></p>' +
             '<h2 class="dl-m"></h2>' +
-            '<div class="dl-pz"><span class="dl-ap"></span><span class="dl-side"><span class="dl-uvp">statt <s></s></span><em class="sp-b"></em></span></div>' +
+            '<p class="dl-uvp">statt <s></s></p>' +
+            '<div class="dl-pz"><span class="dl-ap"></span><em class="sp-b"></em></div>' +
             '<p class="dl-chips"></p>' +
           '</div>' +
           '<div class="dl-prog"><span class="dl-bar"><i></i></span><span class="dl-n"></span></div>' +
@@ -96,14 +96,15 @@
     }
     function scale() { return Math.min(window.innerWidth / 1920, window.innerHeight / 1080); }
     function texte(x) {
-      el.querySelector('.dl-mk').textContent = x.marke;
-      el.querySelector('.dl-m').textContent = x.modell;
-      el.querySelector('.dl-chips').textContent = [String(x.farbe || '').replace(/\s*\(.*?\)\s*/g, ' ').trim(), x.gr, x.jahr ? 'Modell ' + x.jahr : ''].filter(Boolean).join(' · ');
+            var nm = x.marke + ' ' + x.modell, dm = el.querySelector('.dl-m');
+      dm.textContent = nm;
+      dm.style.fontSize = nm.length > 26 ? '50px' : nm.length > 20 ? '58px' : '';
+      el.querySelector('.dl-chips').textContent = [String(x.farbe || '').replace(/\s*\(.*?\)\s*/g, ' ').trim(), x.gr].filter(Boolean).join(' · ');
       el.querySelector('.dl-uvp s').textContent = euro(x.preis);
       el.querySelector('.dl-ap').innerHTML = esc(euro(x.angebot)).replace(' €', '<i>€</i>');
       var gespart = Math.round(x.preis - x.angebot);
       spar.hidden = !(gespart >= 50);
-      el.querySelector('.sp-b').textContent = euro(gespart) + ' gespart';
+      el.querySelector('.sp-b').textContent = '−' + euro(gespart);
       stage.style.setProperty('--ac', x.akzent || '#8C9097');
       logo.style.setProperty('--wz', x.wz);
       punkte();
