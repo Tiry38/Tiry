@@ -4,7 +4,15 @@ Musik: 100 BPM, A-Moll, Pad + Pluck-Arpeggio + weicher Kick; UI-Ticks, mechanisc
 import json, sys, numpy as np
 SR = 48000
 rs = np.random.default_rng(7)
-ev = json.load(open(sys.argv[1])); out = sys.argv[2]
+ev = json.load(open(sys.argv[1])); out = sys.argv[2]; NOBGM = '--nobgm' in sys.argv
+import subprocess, os
+MIX = os.environ.get('MIXKIT', '/root/.claude/plugins/synced/7f8b61a0-ca0f-464b-bd68-09fe3affcc3a_4a6d179b-84d6-4884-87c1-abcfc68dc82d/74655670-1540-4e3d-8509-c2f446898c2c/assets/audio/sfx')
+_cache = {}
+def smp(name):  # Mixkit-Sample (Mixkit Sound Effects Free License) als Mono-Array, Spitze = 1
+    if name not in _cache:
+        p = subprocess.run(['ffmpeg', '-v', 'error', '-i', f'{MIX}/{name}.mp3', '-ac', '1', '-ar', str(SR), '-f', 'f32le', '-'], capture_output=True).stdout
+        a = np.frombuffer(p, np.float32).copy(); _cache[name] = a / max(1e-6, np.abs(a).max())
+    return _cache[name]
 T = ev['T']; N = int((T + 1.5) * SR)
 mus = np.zeros((N, 2)); fx = np.zeros((N, 2))
 
@@ -96,21 +104,22 @@ def swell(d=2.6, g=0.22):
 
 for e in ev['sfx']:
     t0, k = e['t'], e['k']
-    if k == 'tick': put(fx, t0, tick(), 0.8, 0.25)
-    elif k == 'hover': put(fx, t0, tick(1800, .01, .1), 1, 0.25)
-    elif k == 'select': put(fx, t0, tick(3000, .02, .3), 1, .25); put(fx, t0 + .01, mech(.28), 1, 0)
-    elif k == 'build': put(fx, t0 - .05, whoosh(.8, 400, 6000, .12), 1, -0.2); put(fx, t0 + .55, mech(.22), 1, -0.1)
-    elif k == 'color': put(fx, t0 - .4, swell(2.6, .2)); put(fx, t0, whoosh(1.4, 200, 4000, .16), 1, -.2)
-    elif k == 'tab': put(fx, t0, whoosh(.45, 800, 3000, .06), 1, .1)
+    if k == 'tick': put(fx, t0 - .01, smp('ui/switch-click-quick'), .32, .25)
+    elif k == 'hover': put(fx, t0, smp('ui/switch-tap'), .12, .25)
+    elif k == 'select': put(fx, t0 - .01, smp('ui/ui-option-select'), .3, .25); put(fx, t0 + .02, smp('mech/gear-lock-metallic'), .22, 0)
+    elif k == 'build': put(fx, t0 - .08, smp('transition/sweep-metal-quick'), .22, -0.2); put(fx, t0 + .55, smp('mech/lock-quick'), .2, -0.1)
+    elif k == 'color': put(fx, t0 - .4, swell(2.6, .14)); put(fx, t0 - .1, smp('light/shimmer-sparkle-sweep'), .3, .2); put(fx, t0, smp('transition/air-woosh-deep'), .3, -.2)
+    elif k == 'tab': put(fx, t0, smp('transition/sweep-short'), .14, .1)
     elif k == 'rise':
-        for i in range(4): put(fx, t0 + 1.4 + i * .22, thump(.35), 1, -0.5 + i * .33)
-    elif k == 'hum': put(fx, t0 - .2, hum(2.4, .14))
-    elif k == 'ui': put(fx, t0, whoosh(.9, 300, 2500, .1), 1, .5)
-    elif k == 'scan': put(fx, t0 + .3, whoosh(3.2, 600, 7000, .07), 1, 0)
+        put(fx, t0 + 1.35, smp('impact/bass-hit-futuristic'), .35)
+        for i in range(4): put(fx, t0 + 1.4 + i * .22, thump(.25), 1, -0.5 + i * .33)
+    elif k == 'hum': put(fx, t0 - .2, hum(2.4, .12)); put(fx, t0 - .1, smp('mech/mech-tech-movement'), .22)
+    elif k == 'ui': put(fx, t0, smp('transition/transition-tech-slide'), .22, .5)
+    elif k == 'scan': put(fx, t0 + .3, smp('transition/transition-soft'), .2, 0)
     elif k == 'free': put(fx, t0 + .2, ratchet(2.2, .1), 1, .1)
-    elif k == 'sum': put(fx, t0, swell(2.0, .12))
-if ev.get('beam'): put(fx, ev['beam'], mech(.3)); put(fx, ev['beam'], hum(1.5, .05))
-
+    elif k == 'sum': put(fx, t0, smp('light/light-aura'), .22)
+if ev.get('beam'): put(fx, ev['beam'] - .02, smp('ui/switch-light'), .35); put(fx, ev['beam'], hum(1.5, .04))
+if NOBGM: mus[:] = 0
 # Ducking der Musik unter SFX
 envfx = np.abs(fx).max(axis=1); envfx = lpf(envfx, 6); duck = 1 - np.clip(envfx * 1.6, 0, .45)
 mix = mus * duck[:, None] * 0.9 + fx
