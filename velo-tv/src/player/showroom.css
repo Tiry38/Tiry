@@ -128,10 +128,10 @@ html.render .slide{transition:none}
 .sr-video video{width:100%;height:100%;object-fit:cover;display:block}
 
 /* Social-Media-Kreise wie oben links auf der Homepage (Instagram, Facebook, WhatsApp), für den Fernseher groß */
-.sr .soc{display:flex;gap:26px;margin-top:34px}
-.sr .soc span{width:96px;height:96px;border-radius:50%;display:grid;place-items:center;color:#fff;box-shadow:0 14px 30px -12px rgba(0,0,0,.45),inset 0 2px 0 rgba(255,255,255,.35)}
-.sr .soc svg{width:48px;height:48px}
+.sr .soc{display:flex;justify-content:center;gap:40px;width:680px;margin-top:44px}
+.sr .soc span{width:128px;height:128px;border-radius:50%;display:grid;place-items:center;color:#fff;box-shadow:0 14px 30px -12px rgba(0,0,0,.45),inset 0 2px 0 rgba(255,255,255,.35)}
+.sr .soc svg{width:64px;height:64px}
 .sr .soc .ig{background:radial-gradient(circle at 30% 107%,#FDF497 0%,#FD5949 45%,#D6249F 60%,#285AEB 90%)}
 .sr .soc .fb{background:linear-gradient(135deg,#1877F2,#0B5FD1)}
-.sr .soc .fb svg{width:54px;height:54px}
+.sr .soc .fb svg{width:72px;height:72px}
 .sr .soc .wa{background:linear-gradient(135deg,#25D366,#128C7E)}
