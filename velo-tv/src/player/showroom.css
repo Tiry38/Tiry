@@ -1,4 +1,4 @@
-/* Velo-TV Live-Showroom – Werte 1:1 von www.velo-center.de (Startseite, 1920 px) übernommen, für den Fernseher ohne Knöpfe */
+/* Velo-TV Live-Showroom – Werte 1:1 von der neuen Homepage (tiry38.github.io/velo-center-web) (Startseite, 1920 px) übernommen, für den Fernseher ohne Knöpfe */
 .sr{background:#2a2118}
 .sr-stage{position:absolute;left:50%;top:50%;width:1920px;height:1080px;transform-origin:50% 50%;overflow:hidden;--ac:#8C9097;color:#1B1E25;font-family:"Sora",system-ui,sans-serif}
 .sr-photo{position:absolute;inset:-3%;background:url(/assets/hg-herbst-gross.webp) center 62%/cover;animation:kamera 46s ease-in-out infinite alternate;will-change:transform}

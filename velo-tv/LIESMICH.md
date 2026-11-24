@@ -1,7 +1,7 @@
 # Velo-TV – Ladenfernseher für Velocenter Hessert
 
 Windows-Programm (Electron). Dateien hineinziehen, sortieren, planen – der LG-Fernseher im Laden zeigt es per WLAN.
-Alle PCs mit Velo-TV sehen jede Änderung sofort. Design wie www.velo-center.de.
+Alle PCs mit Velo-TV sehen jede Änderung sofort. Design wie die neue Homepage (tiry38.github.io/velo-center-web).
 
 ## So funktioniert es
 - **Zentrale** (Kassen-PC): liefert dem Fernseher die Inhalte (Port **8833**), hält Programm, Papierkorb und Verlauf.

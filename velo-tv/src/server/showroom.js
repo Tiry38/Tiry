@@ -8,7 +8,7 @@ const path = require('path');
 const crypto = require('crypto');
 
 const FB = { projectId: 'velo-center-web', apiKey: 'AIzaSyCgQIqsjjeNxyOcZhNdNlkmKxAZEAWQa7U' }; // öffentlicher Web-Schlüssel der Homepage
-const BILD_BASEN = ['https://tiry38.github.io/velo-center-web/', 'https://www.velo-center.de/'];
+const BILD_BASEN = ['https://tiry38.github.io/velo-center-web/'];
 
 // Marken wie auf der Homepage (BR/BRK): Schlüssel, Name, Logo, Deckkraft des Wasserzeichens, Akzentfarbe
 const MARKEN = [

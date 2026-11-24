@@ -87,6 +87,10 @@ async function run(win, { PORT, getServer }) {
   await js(`document.querySelector('[data-view=programm]').click()`);
   await warte(1500);
   await shot('03-programm');
+  await js(`document.querySelector('#srNow').click()`);
+  await warte(3000);
+  if (srv.anwesenheit().tv.showing !== sr.id) throw new Error('Showroom-Knopf: Fernseher zeigt nicht den Showroom');
+  console.log('[smoke] Showroom-Knopf ok');
   await js(`document.querySelectorAll('#list .item')[1].click()`);
   await warte(1800);
   await shot('04-text-bearbeiten');

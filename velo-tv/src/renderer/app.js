@@ -316,7 +316,7 @@ function neueTextFolie() {
   editId = null;
   entwurf = { kind: 'text', name: 'Neue Text-Folie', duration: state ? state.settings.defaultDuration : 10, enabled: true, fit: 'contain',
     plan: { days: [], from: '', to: '', startDate: '', endDate: '' },
-    text: { badge: 'Velocenter Hessert', title: 'Winter-Check *jetzt buchen.*', sub: 'Termin direkt an der Kasse oder unter velo-center.de', theme: 'herbst' } };
+    text: { badge: 'Velocenter Hessert', title: 'Winter-Check *jetzt buchen.*', sub: 'Termin direkt hier an der Kasse.', theme: 'herbst' } };
   sheetFuellen(true);
 }
 
@@ -424,6 +424,23 @@ $('#edDelete').onclick = async () => {
   try { await api('DELETE', '/api/items/' + editId); toast('In den Papierkorb gelegt'); schliesseSheet(); } catch (e) { toast(e.message, true); }
 };
 $('#textBtn').onclick = (e) => { e.stopPropagation(); if (state) neueTextFolie(); };
+// Ein Klick: Showroom sofort auf dem Fernseher (legt ihn bei Bedarf an und schaltet ihn ein)
+async function showroomJetzt(knopf) {
+  if (!state) return toast('Noch keine Verbindung zur Zentrale', true);
+  if (knopf) knopf.disabled = true;
+  try {
+    let it = state.items.find((i) => i.kind === 'showroom');
+    if (!it) it = await api('POST', '/api/items', { kind: 'showroom', duration: 120 });
+    else if (it.enabled === false) await api('PATCH', '/api/items/' + it.id, { enabled: true });
+    await api('POST', '/api/tv/show', { id: it.id });
+    const tvOn = presence.tv && presence.tv.online;
+    toast(tvOn ? 'Showroom läuft jetzt auf dem Fernseher' : 'Showroom ist dran – der Fernseher ist gerade aber nicht verbunden', !tvOn);
+  } catch (e) { toast(e.message, true); }
+  if (knopf) knopf.disabled = false;
+}
+$('#srNow').onclick = (e) => showroomJetzt(e.currentTarget);
+$('#srNow2').onclick = (e) => showroomJetzt(e.currentTarget);
+
 $('#showroomBtn').onclick = async (e) => {
   e.stopPropagation();
   if (!state) return;

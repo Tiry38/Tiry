@@ -56,5 +56,5 @@ testet, bewertet und dauerhaft selbst weiterentwickelt. Besitzer: Tiry. UI-Sprac
 
 ## Velo-TV (Ladenfernseher)
 - Ordner `velo-tv/`, Leitfaden `velo-tv/LIESMICH.md`. Electron-Programm: Kassen-PC = Zentrale, Büro-PCs = Bedienplätze,
-  LG-Fernseher zeigt `http://<Zentrale>:8833` im Browser. Design = www.velo-center.de (Herbstfoto, Milchglas, rote Pillen).
+  LG-Fernseher zeigt `http://<Zentrale>:8833` im Browser. Design = neue Homepage (tiry38.github.io/velo-center-web) (Herbstfoto, Milchglas, rote Pillen).
 - `npm test` muss grün sein; nach UI-Änderungen den Smoke-Test (siehe LIESMICH) laufen lassen und Screenshots ansehen.
