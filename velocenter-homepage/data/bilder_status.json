@@ -703,17 +703,11 @@
   "zuletzt": "2026-11-24"
  },
  "velodeville|aeb400allround288ggnex|2022|winered": {
-  "gesucht": "2026-11-22",
-  "grund": "Ältere Kollektion (vor 2026): Konfigurator kennt nur 2027 und „MY26“-Modelle, velo-de-ville.com-Modellseiten älterer Jahrgänge sind weg; im Netz nur Gebrauchtrad-Fotos (upway, refurbed, buycycle) – kein offizielles Farbfoto.",
-  "notiz": "Velo de Ville liefert keine Farbfotos je Ausführung für ältere Kollektionen; ggf. eigenes Ladenfoto im Admin hochladen.",
-  "versuche": 3,
+  "versuche": 0,
   "zuletzt": "2026-11-24"
  },
  "velodeville|aeb400classicxsrt|2027|nightbluematt": {
   "geprueft": "2026-11-16",
-  "gesucht": "2026-11-16",
-  "grund": "Exakte Konfiguration aus der Velo-ID: AEB 400 CLASSIC XS Tiefeinsteiger in Night Blue Matt, Originalbild des Konfigurators.",
-  "notiz": "Modellseite velo-de-ville.com/de/E-Bikes/… und Konfigurator-Werbebilder (vdv_website_bikes_27_*) geprüft; Farben passen nicht.",
   "qcheck": "2026-11-21",
   "quelle": "konfigurator.velo-de-ville.com (Velo-ID V27-ID-01247829)",
   "seite": "https://konfigurator.velo-de-ville.com/de-de/configure/027-AEB-CLX15.html",
@@ -722,9 +716,6 @@
  },
  "velodeville|aeb400classicxsrt|2027|stonebasaltmatt": {
   "geprueft": "2026-11-16",
-  "gesucht": "2026-11-16",
-  "grund": "Exakte Konfiguration aus der Velo-ID: AEB 400 CLASSIC XS Tiefeinsteiger in Stone Basalt Matt (grau matt), Originalbild des Konfigurators.",
-  "notiz": "Modellseite velo-de-ville.com/de/E-Bikes/… und Konfigurator-Werbebilder (vdv_website_bikes_27_*) geprüft; Farben passen nicht.",
   "qcheck": "2026-11-21",
   "quelle": "konfigurator.velo-de-ville.com (Velo-ID V27-ID-01247819)",
   "seite": "https://konfigurator.velo-de-ville.com/de-de/configure/027-AEB-CLX15.html",
@@ -732,115 +723,67 @@
   "zuletzt": "2026-11-24"
  },
  "velodeville|aeb490allround288ggnex|2021|stonebasaltmatt": {
-  "gesucht": "2026-11-22",
-  "grund": "Ältere Kollektion (vor 2026): Konfigurator kennt nur 2027 und „MY26“-Modelle, velo-de-ville.com-Modellseiten älterer Jahrgänge sind weg; im Netz nur Gebrauchtrad-Fotos (upway, refurbed, buycycle) – kein offizielles Farbfoto.",
-  "notiz": "Velo de Ville liefert keine Farbfotos je Ausführung für ältere Kollektionen; ggf. eigenes Ladenfoto im Admin hochladen.",
-  "versuche": 3,
+  "versuche": 0,
   "zuletzt": "2026-11-24"
  },
  "velodeville|aeb490allround288ggnex|2023|britishgreenmatt": {
-  "gesucht": "2026-11-22",
-  "grund": "Ältere Kollektion (vor 2026): Konfigurator kennt nur 2027 und „MY26“-Modelle, velo-de-ville.com-Modellseiten älterer Jahrgänge sind weg; im Netz nur Gebrauchtrad-Fotos (upway, refurbed, buycycle) – kein offizielles Farbfoto.",
-  "notiz": "Velo de Ville liefert keine Farbfotos je Ausführung für ältere Kollektionen; ggf. eigenes Ladenfoto im Admin hochladen.",
-  "versuche": 3,
+  "versuche": 0,
   "zuletzt": "2026-11-24"
  },
  "velodeville|aeb490allround288ggnex|2023|moccabrownmatt": {
-  "gesucht": "2026-11-22",
-  "grund": "Ältere Kollektion (vor 2026): Konfigurator kennt nur 2027 und „MY26“-Modelle, velo-de-ville.com-Modellseiten älterer Jahrgänge sind weg; im Netz nur Gebrauchtrad-Fotos (upway, refurbed, buycycle) – kein offizielles Farbfoto.",
-  "notiz": "Velo de Ville liefert keine Farbfotos je Ausführung für ältere Kollektionen; ggf. eigenes Ladenfoto im Admin hochladen.",
-  "versuche": 3,
+  "versuche": 0,
   "zuletzt": "2026-11-24"
  },
  "velodeville|aeb490allround288ggnex|2023|nightbluematt": {
-  "gesucht": "2026-11-22",
-  "grund": "Ältere Kollektion (vor 2026): Konfigurator kennt nur 2027 und „MY26“-Modelle, velo-de-ville.com-Modellseiten älterer Jahrgänge sind weg; im Netz nur Gebrauchtrad-Fotos (upway, refurbed, buycycle) – kein offizielles Farbfoto.",
-  "notiz": "Velo de Ville liefert keine Farbfotos je Ausführung für ältere Kollektionen; ggf. eigenes Ladenfoto im Admin hochladen.",
-  "versuche": 3,
+  "versuche": 0,
   "zuletzt": "2026-11-24"
  },
  "velodeville|aeb490allround288ggnex|2023|purewhite": {
-  "gesucht": "2026-11-22",
-  "grund": "Ältere Kollektion (vor 2026): Konfigurator kennt nur 2027 und „MY26“-Modelle, velo-de-ville.com-Modellseiten älterer Jahrgänge sind weg; im Netz nur Gebrauchtrad-Fotos (upway, refurbed, buycycle) – kein offizielles Farbfoto.",
-  "notiz": "Velo de Ville liefert keine Farbfotos je Ausführung für ältere Kollektionen; ggf. eigenes Ladenfoto im Admin hochladen.",
-  "versuche": 3,
+  "versuche": 0,
   "zuletzt": "2026-11-24"
  },
  "velodeville|aeb490allround288ggrt|2023|britishgreenmatt": {
-  "gesucht": "2026-11-22",
-  "grund": "Ältere Kollektion (vor 2026): Konfigurator kennt nur 2027 und „MY26“-Modelle, velo-de-ville.com-Modellseiten älterer Jahrgänge sind weg; im Netz nur Gebrauchtrad-Fotos (upway, refurbed, buycycle) – kein offizielles Farbfoto.",
-  "notiz": "Velo de Ville liefert keine Farbfotos je Ausführung für ältere Kollektionen; ggf. eigenes Ladenfoto im Admin hochladen.",
-  "versuche": 3,
+  "versuche": 0,
   "zuletzt": "2026-11-24"
  },
  "velodeville|aeb490allround288ggrt|2023|nightbluematt": {
-  "gesucht": "2026-11-22",
-  "grund": "Ältere Kollektion (vor 2026): Konfigurator kennt nur 2027 und „MY26“-Modelle, velo-de-ville.com-Modellseiten älterer Jahrgänge sind weg; im Netz nur Gebrauchtrad-Fotos (upway, refurbed, buycycle) – kein offizielles Farbfoto.",
-  "notiz": "Velo de Ville liefert keine Farbfotos je Ausführung für ältere Kollektionen; ggf. eigenes Ladenfoto im Admin hochladen.",
-  "versuche": 3,
+  "versuche": 0,
   "zuletzt": "2026-11-24"
  },
  "velodeville|aeb800allround289gg|2021|stonebasaltmatt": {
-  "gesucht": "2026-11-22",
-  "grund": "Ältere Kollektion (vor 2026): Konfigurator kennt nur 2027 und „MY26“-Modelle, velo-de-ville.com-Modellseiten älterer Jahrgänge sind weg; im Netz nur Gebrauchtrad-Fotos (upway, refurbed, buycycle) – kein offizielles Farbfoto.",
-  "notiz": "Velo de Ville liefert keine Farbfotos je Ausführung für ältere Kollektionen; ggf. eigenes Ladenfoto im Admin hochladen.",
-  "versuche": 3,
+  "versuche": 0,
   "zuletzt": "2026-11-24"
  },
  "velodeville|aeb800classic26|2026|emeraldgreenglanz": {
-  "gesucht": "2026-11-22",
-  "grund": "Velo-ID V26-ID-00485883 vom Konfigurator abgelehnt; der Konfigurator führt nur das 2027er „AEB 800 CLASSIC XS“, dessen Rahmen sichtbar anders ist als beim 2026er AEB 800 Classic (Vergleich mit bikes-opt.b-cdn.net/velo-de-ville/2026/5001716_01.jpg) – daher nicht übernommen.",
-  "notiz": "bikes.de führt 2026er AEB 800 Classic in eucalyptus/crystal pearl/scarlet red mit Velo-ID im Link – Emerald Green glanz dort bisher nicht gelistet.",
-  "versuche": 3,
+  "versuche": 0,
   "zuletzt": "2026-11-24"
  },
  "velodeville|aeb890allround285ggrt|2023|britishgreenmatt": {
-  "gesucht": "2026-11-22",
-  "grund": "Ältere Kollektion (vor 2026): Konfigurator kennt nur 2027 und „MY26“-Modelle, velo-de-ville.com-Modellseiten älterer Jahrgänge sind weg; im Netz nur Gebrauchtrad-Fotos (upway, refurbed, buycycle) – kein offizielles Farbfoto.",
-  "notiz": "Velo de Ville liefert keine Farbfotos je Ausführung für ältere Kollektionen; ggf. eigenes Ladenfoto im Admin hochladen.",
-  "versuche": 3,
+  "versuche": 0,
   "zuletzt": "2026-11-24"
  },
  "velodeville|aeb890allround285ggrt|2023|stonebasaltmatt": {
-  "gesucht": "2026-11-22",
-  "grund": "Ältere Kollektion (vor 2026): Konfigurator kennt nur 2027 und „MY26“-Modelle, velo-de-ville.com-Modellseiten älterer Jahrgänge sind weg; im Netz nur Gebrauchtrad-Fotos (upway, refurbed, buycycle) – kein offizielles Farbfoto.",
-  "notiz": "Velo de Ville liefert keine Farbfotos je Ausführung für ältere Kollektionen; ggf. eigenes Ladenfoto im Admin hochladen.",
-  "versuche": 3,
+  "versuche": 0,
   "zuletzt": "2026-11-24"
  },
  "velodeville|aeb890allround285gg|2023|scarletred": {
-  "gesucht": "2026-11-22",
-  "grund": "Ältere Kollektion (vor 2026): Konfigurator kennt nur 2027 und „MY26“-Modelle, velo-de-ville.com-Modellseiten älterer Jahrgänge sind weg; im Netz nur Gebrauchtrad-Fotos (upway, refurbed, buycycle) – kein offizielles Farbfoto.",
-  "notiz": "Velo de Ville liefert keine Farbfotos je Ausführung für ältere Kollektionen; ggf. eigenes Ladenfoto im Admin hochladen.",
-  "versuche": 3,
+  "versuche": 0,
   "zuletzt": "2026-11-24"
  },
  "velodeville|aeb890allround285gg|2024|saharabrownglanz": {
-  "gesucht": "2026-11-22",
-  "grund": "Ältere Kollektion (vor 2026): Konfigurator kennt nur 2027 und „MY26“-Modelle, velo-de-ville.com-Modellseiten älterer Jahrgänge sind weg; im Netz nur Gebrauchtrad-Fotos (upway, refurbed, buycycle) – kein offizielles Farbfoto.",
-  "notiz": "Velo de Ville liefert keine Farbfotos je Ausführung für ältere Kollektionen; ggf. eigenes Ladenfoto im Admin hochladen.",
-  "versuche": 3,
+  "versuche": 0,
   "zuletzt": "2026-11-24"
  },
  "velodeville|aeb890allround289gg|2023|nightbluematt": {
-  "gesucht": "2026-11-22",
-  "grund": "Ältere Kollektion (vor 2026): Konfigurator kennt nur 2027 und „MY26“-Modelle, velo-de-ville.com-Modellseiten älterer Jahrgänge sind weg; im Netz nur Gebrauchtrad-Fotos (upway, refurbed, buycycle) – kein offizielles Farbfoto.",
-  "notiz": "Velo de Ville liefert keine Farbfotos je Ausführung für ältere Kollektionen; ggf. eigenes Ladenfoto im Admin hochladen.",
-  "versuche": 3,
+  "versuche": 0,
   "zuletzt": "2026-11-24"
  },
  "velodeville|aeb890allround289gg|2023|stonebasaltmatt": {
-  "gesucht": "2026-11-22",
-  "grund": "Ältere Kollektion (vor 2026): Konfigurator kennt nur 2027 und „MY26“-Modelle, velo-de-ville.com-Modellseiten älterer Jahrgänge sind weg; im Netz nur Gebrauchtrad-Fotos (upway, refurbed, buycycle) – kein offizielles Farbfoto.",
-  "notiz": "Velo de Ville liefert keine Farbfotos je Ausführung für ältere Kollektionen; ggf. eigenes Ladenfoto im Admin hochladen.",
-  "versuche": 3,
+  "versuche": 0,
   "zuletzt": "2026-11-24"
  },
  "velodeville|aeb990pxprort|2027|purewhiteglanz": {
   "geprueft": "2026-11-16",
-  "gesucht": "2026-11-16",
-  "grund": "Exakte Konfiguration aus der Velo-ID: AEB 990PX PRO Tiefeinsteiger in Pure White Glanz, Originalbild des Konfigurators.",
-  "notiz": "Modellseite velo-de-ville.com/de/E-Bikes/… und Konfigurator-Werbebilder (vdv_website_bikes_27_*) geprüft; Farben passen nicht.",
   "qcheck": "2026-11-21",
   "quelle": "konfigurator.velo-de-ville.com (Velo-ID V27-ID-01247834)",
   "seite": "https://konfigurator.velo-de-ville.com/de-de/configure/027-AEB-PRO17.html",
@@ -849,9 +792,6 @@
  },
  "velodeville|aeb990pxpro|2026|oceanbluematt": {
   "geprueft": "2026-11-22",
-  "gesucht": "2026-11-22",
-  "grund": "Offizieller Velo-de-Ville-Konfigurator, Modell „AEB 990PX PRO 2026“ (AEB PRO MY26, Bosch PX) genau wie im Bestand eingestellt: Rahmen Low (Tiefeinsteiger) M 48 cm, PowerTube 625 Wh, 10-Gang CUES U6000, Rahmenfarbe Ocean Blue matt.",
-  "notiz": "Velo-ID V26-D1-06C9F236 wird abgelehnt; Konfigurator führt das 2026er Modell aber noch als „AEB PRO MY26“ (configure/027-AEB-LCH17.html = PX). Zubehörpakete nicht bekannt, Grundausstattung gewählt.",
   "qcheck": "2026-11-23",
   "quelle": "https://konfigurator.velo-de-ville.com/de-de/configure/027-AEB-LCH17.html",
   "seite": "https://konfigurator.velo-de-ville.com/de-de/e-bikes/allround/ (AEB PRO MY26)",
@@ -859,17 +799,11 @@
   "zuletzt": "2026-11-24"
  },
  "velodeville|aeb990pxpro|2026|velvetpurplematt": {
-  "gesucht": "2026-11-23",
-  "grund": "Velo-ID V26-ID-00804668 vom Konfigurator abgelehnt; der Konfigurator „AEB 990PX PRO 2026“ (configure/027-AEB-LCH17.html) bietet Velvet Purple nicht mehr an (Farbliste geprüft), auf bikes.de keine 2026er Listung in Velvet purple.",
-  "notiz": "bikes.de-CDN bikes-opt.b-cdn.net/velo-de-ville/2026/<Nr>_01.jpg führt Konfigurator-Renderings je Ausführung – nach Listung in Velvet purple matt suchen.",
-  "versuche": 3,
+  "versuche": 0,
   "zuletzt": "2026-11-24"
  },
  "velodeville|aeb990pxpurert|2027|stonebasaltmatt": {
   "geprueft": "2026-11-22",
-  "gesucht": "2026-11-17",
-  "grund": "AEB 990 PX PURE Tiefeinsteiger in Stone Basalt Matt (grau-blau) – exakt aus Velo-ID im Konfigurator geladen.",
-  "notiz": "Velo-ID V27-ID-01247815",
   "qcheck": "2026-11-22",
   "quelle": "https://konfigurator.velo-de-ville.com/ (Velo-ID V27-ID-01247815)",
   "seite": "https://konfigurator.velo-de-ville.com/de-de/configure/027-AEB-PUR17.html",
@@ -878,9 +812,6 @@
  },
  "velodeville|hubexs|2027|icebluematt": {
   "geprueft": "2026-11-22",
-  "gesucht": "2026-11-17",
-  "grund": "HUBe XS Tiefeinsteiger in Ice Blue Matt (hellblau-grün) – exakt aus Velo-ID im Konfigurator geladen.",
-  "notiz": "Velo-ID V27-ID-01247811",
   "qcheck": "2026-11-22",
   "quelle": "https://konfigurator.velo-de-ville.com/ (Velo-ID V27-ID-01247811)",
   "seite": "https://konfigurator.velo-de-ville.com/de-de/configure/027-HEB-HUX12.html",
@@ -889,9 +820,6 @@
  },
  "velodeville|hube|2027|nightbluematt": {
   "geprueft": "2026-11-22",
-  "gesucht": "2026-11-17",
-  "grund": "HUBe Tiefeinsteiger in Night Blue Matt (dunkelblau) – exakt aus Velo-ID im Konfigurator geladen.",
-  "notiz": "Velo-ID V27-ID-01247823",
   "qcheck": "2026-11-22",
   "quelle": "https://konfigurator.velo-de-ville.com/ (Velo-ID V27-ID-01247823)",
   "seite": "https://konfigurator.velo-de-ville.com/de-de/configure/027-HEB-HUB12.html",
@@ -900,9 +828,6 @@
  },
  "velodeville|hube|2027|rubyredmatt": {
   "geprueft": "2026-11-22",
-  "gesucht": "2026-11-17",
-  "grund": "HUBe Tiefeinsteiger in Ruby Red Matt (rot) – exakt aus Velo-ID im Konfigurator geladen.",
-  "notiz": "Velo-ID V27-ID-01247799",
   "qcheck": "2026-11-22",
   "quelle": "https://konfigurator.velo-de-ville.com/ (Velo-ID V27-ID-01247799)",
   "seite": "https://konfigurator.velo-de-ville.com/de-de/configure/027-HEB-HUB12.html",
@@ -910,73 +835,43 @@
   "zuletzt": "2026-11-24"
  },
  "velodeville|seb890275envioloautomatiq|2024|nightbluematt": {
-  "gesucht": "2026-11-23",
-  "grund": "SEB890 27,5\" Enviolo Automatiq 2024 in Night Blue Matt: Konfigurator kennt nur MY26/2027-Modelle, Herstellerseiten älterer Jahrgänge sind weg, bikes.de listet keine 2024er Ausführung dieses Modells – kein offizielles Farbfoto.",
-  "notiz": "Velo de Ville liefert für ältere Kollektionen keine Farbfotos je Ausführung; ggf. eigenes Ladenfoto im Admin hochladen.",
-  "versuche": 3,
+  "versuche": 0,
   "zuletzt": "2026-11-24"
  },
  "velodeville|seb890suvsmart2759gg|2023|deepblackmatt": {
-  "gesucht": "2026-11-23",
-  "grund": "SEB890 SUV SMART 27,5\" 9Gg 2023 in Deep Black Matt: Konfigurator kennt nur MY26/2027-Modelle, Herstellerseiten älterer Jahrgänge sind weg, bikes.de listet keine 2023er Ausführung dieses Modells – kein offizielles Farbfoto.",
-  "notiz": "Velo de Ville liefert für ältere Kollektionen keine Farbfotos je Ausführung; ggf. eigenes Ladenfoto im Admin hochladen.",
-  "versuche": 3,
+  "versuche": 0,
   "zuletzt": "2026-11-24"
  },
  "velodeville|seb890suvsmart2759gg|2023|purewhite": {
-  "gesucht": "2026-11-23",
-  "grund": "SEB890 SUV SMART 27,5\" 9Gg 2023 in Pure White: Konfigurator kennt nur MY26/2027-Modelle, Herstellerseiten älterer Jahrgänge sind weg, bikes.de listet keine 2023er Ausführung dieses Modells – kein offizielles Farbfoto.",
-  "notiz": "Velo de Ville liefert für ältere Kollektionen keine Farbfotos je Ausführung; ggf. eigenes Ladenfoto im Admin hochladen.",
-  "versuche": 3,
+  "versuche": 0,
   "zuletzt": "2026-11-24"
  },
  "velodeville|seb890suvsmart2759gg|2023|stonebasaltmatt": {
-  "gesucht": "2026-11-23",
-  "grund": "SEB890 SUV SMART 27,5\" 9Gg 2023 in Stone Basalt Matt: Konfigurator kennt nur MY26/2027-Modelle, Herstellerseiten älterer Jahrgänge sind weg, bikes.de listet keine 2023er Ausführung dieses Modells – kein offizielles Farbfoto.",
-  "notiz": "Velo de Ville liefert für ältere Kollektionen keine Farbfotos je Ausführung; ggf. eigenes Ladenfoto im Admin hochladen.",
-  "versuche": 3,
+  "versuche": 0,
   "zuletzt": "2026-11-24"
  },
  "velodeville|seb890suvsmart2759gg|2024|blackmatt": {
-  "gesucht": "2026-11-23",
-  "grund": "SEB890 SUV SMART 27,5\" 9Gg 2024 in Black-matt: Konfigurator kennt nur MY26/2027-Modelle, Herstellerseiten älterer Jahrgänge sind weg, bikes.de listet keine 2024er Ausführung dieses Modells – kein offizielles Farbfoto.",
-  "notiz": "Velo de Ville liefert für ältere Kollektionen keine Farbfotos je Ausführung; ggf. eigenes Ladenfoto im Admin hochladen.",
-  "versuche": 3,
+  "versuche": 0,
   "zuletzt": "2026-11-24"
  },
  "velodeville|seb890suvsmart2759gg|2024|iceblueglanz": {
-  "gesucht": "2026-11-23",
-  "grund": "SEB890 SUV SMART 27,5\" 9Gg 2024 in Ice blue glanz: Konfigurator kennt nur MY26/2027-Modelle, Herstellerseiten älterer Jahrgänge sind weg, bikes.de listet keine 2024er Ausführung dieses Modells – kein offizielles Farbfoto.",
-  "notiz": "Velo de Ville liefert für ältere Kollektionen keine Farbfotos je Ausführung; ggf. eigenes Ladenfoto im Admin hochladen.",
-  "versuche": 3,
+  "versuche": 0,
   "zuletzt": "2026-11-24"
  },
  "velodeville|seb890suvsmart2759gg|2024|purewhiteglanz": {
-  "gesucht": "2026-11-23",
-  "grund": "SEB890 SUV SMART 27,5\" 9Gg 2024 in Pure white glanz: Konfigurator kennt nur MY26/2027-Modelle, Herstellerseiten älterer Jahrgänge sind weg, bikes.de listet keine 2024er Ausführung dieses Modells – kein offizielles Farbfoto.",
-  "notiz": "Velo de Ville liefert für ältere Kollektionen keine Farbfotos je Ausführung; ggf. eigenes Ladenfoto im Admin hochladen.",
-  "versuche": 3,
+  "versuche": 0,
   "zuletzt": "2026-11-24"
  },
  "velodeville|seb990pro|2025|emeraldgreenmatt": {
-  "gesucht": "2026-11-23",
-  "grund": "SEB 990 PRO 2025 in Emerald Green Matt (Tiefeinsteiger): bikes.de führt 2025er SEB 990 PRO nur in Night Blue, Ocean Blue, Petrol Blue, Ice Blue, Ruby Red, Deep Black und Stone Basalt matt als Trapez/Wave – diese Farbe/Rahmenform nicht; Konfigurator kennt nur MY26/2027.",
-  "notiz": "bikes.de-Listungen 025-SEB-990xx-V25 regelmäßig prüfen (Bild bikes-opt.b-cdn.net/velo-de-ville/2025/<Nr>_01.jpg); Stone Basalt matt Trapez = 5002056.",
-  "versuche": 3,
+  "versuche": 0,
   "zuletzt": "2026-11-24"
  },
  "velodeville|seb990pro|2025|stonebasaltmatt": {
-  "gesucht": "2026-11-23",
-  "grund": "SEB 990 PRO 2025 in Stone Basalt Matt (Diamant): bikes.de führt 2025er SEB 990 PRO nur in Night Blue, Ocean Blue, Petrol Blue, Ice Blue, Ruby Red, Deep Black und Stone Basalt matt als Trapez/Wave – diese Farbe/Rahmenform nicht; Konfigurator kennt nur MY26/2027.",
-  "notiz": "bikes.de-Listungen 025-SEB-990xx-V25 regelmäßig prüfen (Bild bikes-opt.b-cdn.net/velo-de-ville/2025/<Nr>_01.jpg); Stone Basalt matt Trapez = 5002056.",
-  "versuche": 3,
+  "versuche": 0,
   "zuletzt": "2026-11-24"
  },
  "velodeville|seb990pxpro|2027|iceblueglanz": {
   "geprueft": "2026-11-22",
-  "gesucht": "2026-11-17",
-  "grund": "SEB 990 PX PRO Tiefeinsteiger in Ice Blue Glanz – exakt aus Velo-ID im Konfigurator geladen.",
-  "notiz": "Velo-ID V27-ID-01247846",
   "qcheck": "2026-11-22",
   "quelle": "https://konfigurator.velo-de-ville.com/ (Velo-ID V27-ID-01247846)",
   "seite": "https://konfigurator.velo-de-ville.com/de-de/configure/027-SEB-PRO17.html",
@@ -985,9 +880,6 @@
  },
  "velodeville|seb990pxpro|2027|stonebasaltmatt": {
   "geprueft": "2026-11-22",
-  "gesucht": "2026-11-17",
-  "grund": "SEB 990 PX PRO Tiefeinsteiger in Stone Basalt Matt – exakt aus Velo-ID im Konfigurator geladen.",
-  "notiz": "Velo-ID V27-ID-01247889",
   "qcheck": "2026-11-22",
   "quelle": "https://konfigurator.velo-de-ville.com/ (Velo-ID V27-ID-01247889)",
   "seite": "https://konfigurator.velo-de-ville.com/de-de/configure/027-SEB-PRO17.html",
@@ -995,17 +887,11 @@
   "zuletzt": "2026-11-24"
  },
  "velodeville|seb990suvsmart27511gg|2023|nightbluematt": {
-  "gesucht": "2026-11-23",
-  "grund": "SEB990 SUV SMART 27,5\" 11Gg 2023 in Night Blue Matt: Konfigurator kennt nur MY26/2027-Modelle, Herstellerseiten älterer Jahrgänge sind weg, bikes.de listet keine 2023er Ausführung dieses Modells – kein offizielles Farbfoto.",
-  "notiz": "Velo de Ville liefert für ältere Kollektionen keine Farbfotos je Ausführung; ggf. eigenes Ladenfoto im Admin hochladen.",
-  "versuche": 3,
+  "versuche": 0,
   "zuletzt": "2026-11-24"
  },
  "velodeville|seb990suvsmart2759gg|2023|scarletredglanz": {
-  "gesucht": "2026-11-23",
-  "grund": "SEB990 SUV SMART 27,5\" 9Gg 2023 in Scarlet Red Glanz: Konfigurator kennt nur MY26/2027-Modelle, Herstellerseiten älterer Jahrgänge sind weg, bikes.de listet keine 2023er Ausführung dieses Modells – kein offizielles Farbfoto.",
-  "notiz": "Velo de Ville liefert für ältere Kollektionen keine Farbfotos je Ausführung; ggf. eigenes Ladenfoto im Admin hochladen.",
-  "versuche": 3,
+  "versuche": 0,
   "zuletzt": "2026-11-24"
  },
  "victoria|avyon5275|2027|slategreymatt": {

@@ -45,7 +45,11 @@ dann nur eine bessere Fassung **genau dieses Bildes** (gleiche Aufnahme) nehmen,
    (Rahmenfarbe, Rahmenform, Ausstattung). Liefert das Werkzeug `bild_datei`, ist das **das exakte Originalbild, schon freigestellt**:
    Screenshot ansehen (Farbe/Modell stimmen?), dann `holen "<key>" "<bild_datei>"` (lokaler Pfad erlaubt) → `neu`/`ersetzen`, Quelle
    `konfigurator.velo-de-ville.com`, sicher (`ub` nicht setzen). Ein Bild aus der Velo-ID hat Vorrang vor jedem anderen Fund.
-   „Velo-ID nicht gefunden“ = ältere Kollektion (z. B. V25/V26, der Konfigurator kennt nur die aktuelle) → normal weitersuchen.
+   **Ältere Kollektion (V25/V26 …):** der Konfigurator kennt sie nicht – das Werkzeug holt dann automatisch das Bild aus der offiziellen
+   VELOWALLET von Velo de Ville (`quelle: velowallet.app`, dazu `modell_code` wie „026-AEB-806-G5“). Auch das ist **exakt dieses konfigurierte
+   Rad, freigestellt**: Bild mit Read ansehen (Farbe/Rahmenform passen zur Veloport-Farbe?), dann `holen "<key>" "<bild_datei>"`, Quelle
+   `velowallet.app (Velo de Ville)`, sicher. Hat ein Eintrag mehrere `veloids`, reicht eine mit Bild.
+   Erst wenn auch dort nichts kommt („Velo-ID nicht gefunden“) → normal weitersuchen.
 Farbnamen in Veloport weichen oft ab (z. B. „Stone Basalt Matt“ = „stone basalt matt“, „Dunkelblau-Matt“ = „dark blue matt“, Doppel-Farben
 „(grey+night red)“). Vergleiche sorgfältig, auch Englisch/Deutsch. Rahmenform (Tiefeinsteiger/Trapez/Diamant/Kompakt) soll passen, wenn der Hersteller
 sie unterscheidet; Größe ist egal.

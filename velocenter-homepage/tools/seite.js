@@ -23,7 +23,21 @@ const raus = o => { console.log(JSON.stringify(o, null, 1)); process.exit(0) };
     // Velo-ID im Browser laden (wie Knopf „Konfiguration laden“) – die Konfiguration hängt an der Sitzung
     await p.goto('https://konfigurator.velo-de-ville.com/de-de/', { waitUntil: 'domcontentloaded', timeout: 60000 }).catch(() => {});
     const d = await p.evaluate(async id => { try { const r = await fetch('/de-de/catalog/index/velo/?id=' + encodeURIComponent(id), { credentials: 'include', headers: { 'X-Requested-With': 'XMLHttpRequest' } }); return JSON.parse(await r.text()) } catch (e) { return {} } }, velo);
-    if (!d.product_url) { await b.close(); raus({ fehler: 'Velo-ID nicht gefunden', antwort: String(d.message || '').replace(/<[^>]+>/g, '').slice(0, 200) }) }
+    if (!d.product_url) {
+      // Ältere Kollektion (V25/V26 …): der Konfigurator kennt nur die aktuelle. Offizielle VELOWALLET von Velo de Ville
+      // (velowallet.app, Produktionsstatus) zeigt genau dieses konfigurierte Rad als freigestelltes Studiobild.
+      const api = 'https://vdv-backend-api-external.azurewebsites.net/api/numenor/v1/CustomerJourney/' + encodeURIComponent(velo);
+      let info = {}; try { const r = await p.request.get(api, { timeout: 30000, headers: { Accept: 'application/json' } }); if (r.ok()) info = await r.json() } catch (_) {}
+      let bild = null;
+      for (const e of ['webp', 'png']) {
+        const u = 'https://vdvfileexchange.blob.core.windows.net/bike-images/' + encodeURIComponent(velo) + '.' + e;
+        try { const r = await p.request.get(u, { timeout: 40000 }); if (r.ok()) { const buf = await r.body(); if (buf.length > 20000) { bild = path.join(TMP, 'velo-' + velo.replace(/[^A-Za-z0-9-]/g, '') + '.' + e); fs.writeFileSync(bild, buf); break } } } catch (_) {}
+      }
+      await b.close();
+      if (!bild) raus({ fehler: 'Velo-ID nicht gefunden', antwort: String(d.message || '').replace(/<[^>]+>/g, '').slice(0, 200), velowallet: info.checklistNo ? 'ID bekannt, aber kein Bild' : 'unbekannt' });
+      // Nur Rad-Daten melden, nie Kundendaten (die Schnittstelle hat Kundenfelder – werden bewusst weggelassen)
+      raus({ quelle: 'velowallet.app (Velo de Ville, offizielles Konfigurationsbild)', bild_datei: bild, screenshot: bild, modell_code: info.bikeModel || null, seriennummer: info.serialNo || null, hinweis: 'Bild = exakt dieses konfigurierte Rad, freigestellt. Mit Read ansehen, Modell/Farbe prüfen, dann holen.' });
+    }
     url = d.product_url;
   }
   await p.goto(url, { waitUntil: 'networkidle', timeout: 60000 }).catch(() => {});
