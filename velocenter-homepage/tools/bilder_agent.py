@@ -77,6 +77,13 @@ def bestand_alle(s):
     aktiv = fb if fb and isinstance(fb.get('raeder'), list) and fb['raeder'] else datei
     return aktiv, datei, fb, (fs_get('pub/lager') or {}).get('rows') or {}
 
+def _vids():
+    """Velo-IDs, die in Veloport fehlen, aus den Lieferanten-Rechnungen nachgetragen: {Veloport-ID oder Schlüssel: Velo-ID}."""
+    p = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'data', 'velo_ids.json')
+    try: return {k: v for k, v in json.load(open(p, encoding='utf-8')).items() if not k.startswith('_')}
+    except Exception: return {}
+VIDS = _vids()
+
 def varianten(aktiv, rows):
     """Eindeutige Farb-Ausführungen (Schlüssel) mit Angaben für die Suche. Admin-Fotos/-Entscheidungen -> 'admin'."""
     out = {}
@@ -94,6 +101,8 @@ def varianten(aktiv, rows):
             if r.get('rahmen'): e['rahmen'].add(r['rahmen'])
             if r.get('gr'): e['groessen'].add(r['gr'])
             if f.get('veloid'): e['veloids'].add(str(f['veloid']))
+            for x in (VIDS.get(str(f.get('id'))), VIDS.get(k)):  # nachgetragen aus Lieferanten-Rechnungen (data/velo_ids.json)
+                if x: e['veloids'].update([x] if isinstance(x, str) else x)
             if 'bild' in o: e['admin'] = True  # Admin hat Foto selbst gesetzt oder entfernt
     for e in out.values():
         e['rahmen'] = sorted(e['rahmen']); e['groessen'] = sorted(e['groessen']); e['veloids'] = sorted(e['veloids'])[:3]

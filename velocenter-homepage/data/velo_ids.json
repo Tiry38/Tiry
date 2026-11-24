@@ -1,0 +1,4 @@
+{
+ "_hinweis": "Velo-IDs, die in Veloport fehlen, aus den Velo-de-Ville-Lieferanten-Rechnungen (Z:\\Lieferanten-Rechnungen) nachgetragen. Schlüssel = Veloport-Fahrzeug-ID (z. B. \"4804\"), Wert = Velo-ID (z. B. \"V23-…\"). Der Bilder-Agent holt damit das Bild aus der VELOWALLET.",
+ "_offen": "4021 4058 4605 4801 4804 4806 4807 4808 4815 4820 4821 5161 5167 5168 5173 5177 5213 5712 5807 5961 5962 5965 6034 6035 6182 6357 6359"
+}
