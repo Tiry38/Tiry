@@ -55,7 +55,7 @@ function fakeFetch() {
 test('Zentrale lädt Angebote + Fotos und liefert sie dem Fernseher', async () => {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'velotv-sr-'));
   const ROOT = path.join(__dirname, '..', 'src');
-  const srv = createServer({ dataDir: dir, playerDir: path.join(ROOT, 'player'), version: 'test', fetch: fakeFetch(), showroomAutoStart: false });
+  const srv = createServer({ dataDir: dir, playerDir: path.join(ROOT, 'player'), version: 'test', fetch: fakeFetch(), showroomAutoStart: false, tvSteuerung: false });
   const port = await srv.listen(0, '127.0.0.1');
   const base = 'http://127.0.0.1:' + port;
   try {

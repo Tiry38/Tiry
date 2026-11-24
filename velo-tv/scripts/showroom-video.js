@@ -152,7 +152,7 @@ async function concat(dateien, ziel, extra) {
   fs.mkdirSync(OUT, { recursive: true });
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'velotv-render-'));
   const srv = createServer({
-    dataDir: dir, playerDir: path.join(R, 'src/player'), version: 'render', showroomAutoStart: false,
+    dataDir: dir, playerDir: path.join(R, 'src/player'), version: 'render', showroomAutoStart: false, tvSteuerung: false,
     assetDirs: { '/assets/': path.join(R, 'src/renderer/assets'), '/shared/': path.join(R, 'src/shared') }
   });
   const port = await srv.listen(0, '127.0.0.1');

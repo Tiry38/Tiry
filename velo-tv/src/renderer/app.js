@@ -126,6 +126,8 @@ function verbinden() {
   es.addEventListener('state', (e) => { $('#offline').hidden = true; state = JSON.parse(e.data); renderAlles(); });
   es.addEventListener('presence', (e) => { presence = JSON.parse(e.data); renderPresence(); });
   es.addEventListener('showroom', () => showroomLaden());
+  es.addEventListener('tvsteuerung', (e) => tvstZeigen(JSON.parse(e.data)));
+  api('GET', '/api/tvsteuerung').then(tvstZeigen).catch(() => { $('#tvstCard').hidden = true; });
   showroomLaden();
   es.onerror = () => {
     $('#offline').hidden = false;
@@ -552,6 +554,41 @@ function zeigeView(v) {
 $$('#nav button').forEach((b) => b.onclick = () => zeigeView(b.dataset.view));
 
 // ---------- Fernseher & Einstellungen ----------
+// ---------- Fernseher ein-/ausschalten ----------
+const TAGNAMEN = ['', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'];
+function tvstZeigen(i) {
+  if (!i) return;
+  $('#tvstCard').hidden = false;
+  const st = i.status || {};
+  $('#tvstDot').classList.toggle('on', !!st.verbunden);
+  $('#tvstTitel').textContent = st.frage ? 'Bitte am Fernseher „Zulassen“ drücken' : !i.host ? 'Fernseher noch nicht gefunden' : !st.gekoppelt ? 'Noch nicht gekoppelt' : st.verbunden ? 'Gekoppelt · Fernseher erreichbar' : 'Gekoppelt · Fernseher aus oder nicht erreichbar';
+  $('#tvstSub').textContent = (i.host ? 'Fernseher ' + i.host : 'Erst die Velo-TV-Adresse am Fernseher öffnen') + (st.letzte ? ' · zuletzt: ' + st.letzte : '') + (st.fehler ? ' · ' + st.fehler : '');
+  $('#tvstNext').textContent = i.an ? 'Nächste Aktion: ' + i.naechste : 'aus';
+  if (document.activeElement !== $('#tvstAn')) $('#tvstAn').checked = !!i.an;
+  $('#tvstMittag').checked = !!i.mittagBildschirm;
+  $('#tvstKoppeln').textContent = st.gekoppelt ? 'Neu koppeln' : 'Fernseher koppeln';
+  if (!$('#tvstZeiten').contains(document.activeElement)) {
+    $('#tvstZeiten').innerHTML = [1, 2, 3, 4, 5, 6, 7].map((t) => {
+      const z = i.zeiten[t] || [];
+      const f = (k, j) => `<input type="time" data-t="${t}" data-k="${k}" data-j="${j}" value="${(z[k] || [])[j] || ''}">`;
+      return `<div class="ztag${z.length ? '' : ' zu'}"><b>${TAGNAMEN[t]}</b><span>${f(0, 0)}–${f(0, 1)}</span><span>${f(1, 0)}–${f(1, 1)}</span></div>`;
+    }).join('');
+    document.querySelectorAll('#tvstZeiten input').forEach((inp) => { inp.onchange = tvstZeitenSpeichern; });
+  }
+}
+function tvstZeitenSpeichern() {
+  const z = {};
+  for (let t = 1; t <= 7; t++) {
+    z[t] = [0, 1].map((k) => [0, 1].map((j) => ($(`#tvstZeiten input[data-t="${t}"][data-k="${k}"][data-j="${j}"]`) || {}).value || '')).filter(([a, b]) => a && b);
+  }
+  api('PATCH', '/api/tvsteuerung', { zeiten: z }).then((i) => { tvstZeigen(i); toast('Öffnungszeiten gespeichert'); }).catch((e) => toast(e.message, true));
+}
+$('#tvstAn').onchange = (e) => api('PATCH', '/api/tvsteuerung', { an: e.target.checked }).then((i) => { tvstZeigen(i); toast(e.target.checked ? 'Fernseher schaltet sich jetzt nach den Öffnungszeiten' : 'Automatik aus'); }).catch((er) => toast(er.message, true));
+$('#tvstMittag').onchange = (e) => api('PATCH', '/api/tvsteuerung', { mittagBildschirm: e.target.checked }).then(tvstZeigen).catch((er) => toast(er.message, true));
+$('#tvstKoppeln').onclick = () => api('POST', '/api/tvsteuerung/koppeln').then((i) => { tvstZeigen(i); toast('Verbinde … bitte am Fernseher mit OK „Zulassen“ drücken'); }).catch((e) => toast(e.message, true));
+$('#tvstAus').onclick = (e) => { e.target.disabled = true; api('POST', '/api/tvsteuerung/aus').then((i) => { tvstZeigen(i); toast('Fernseher ausgeschaltet'); }).catch((er) => toast(er.message, true)).finally(() => { e.target.disabled = false; }); };
+$('#tvstEin').onclick = (e) => { e.target.disabled = true; toast('Fernseher wird eingeschaltet … das kann bis zu 1 Minute dauern'); api('POST', '/api/tvsteuerung/an').then((i) => { tvstZeigen(i); toast('Fernseher ist an, Velo-TV wird geöffnet'); }).catch((er) => toast(er.message, true)).finally(() => { e.target.disabled = false; }); };
+
 // ---------- Live-Showroom ----------
 async function showroomLaden() {
   try {

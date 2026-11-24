@@ -141,6 +141,21 @@
           <p class="hint" id="srInfo">Die Zentrale holt alle 30 Minuten den Live-Bestand der Homepage und zeigt nur Angebotsräder, die auf Lager sind und ein Foto haben.</p>
           <div class="btn-row"><button class="cta sm" id="srNow2">Showroom jetzt zeigen <svg viewBox="0 0 24 24"><path d="M7 5l12 7-12 7z"/></svg></button><button class="ghost" id="srRefresh">Jetzt aktualisieren</button></div>
         </div>
+        <div class="glass card tvst" id="tvstCard">
+          <span class="eyebrow small"><i></i>Ein- und Ausschalten</span>
+          <div class="tv-now"><div class="tv-dot" id="tvstDot"></div><div><b id="tvstTitel">Noch nicht gekoppelt</b><small id="tvstSub">Fernseher einmal koppeln, dann schaltet Velo-TV ihn nach euren Öffnungszeiten.</small></div></div>
+          <div class="settings">
+            <label class="row"><span>Automatisch nach Öffnungszeiten <small id="tvstNext"></small></span><input type="checkbox" class="sw" id="tvstAn"></label>
+            <label class="row"><span>Mittagspause: nur Bildschirm aus <small>kommt schneller und sicherer wieder an</small></span><input type="checkbox" class="sw" id="tvstMittag"></label>
+          </div>
+          <div class="zeiten" id="tvstZeiten"></div>
+          <div class="btn-row">
+            <button class="cta sm" id="tvstKoppeln">Fernseher koppeln</button>
+            <button class="ghost" id="tvstAus">Jetzt aus</button>
+            <button class="ghost" id="tvstEin">Jetzt an</button>
+          </div>
+          <p class="hint">Einmalig am Fernseher: <b>Einstellungen → Support → IP-Steuerungseinstellungen → Wake on LAN: Ein</b> (bei älterer Software: Allgemein → Mobile TV On → Über WLAN einschalten). Beim Koppeln erscheint am Fernseher eine Frage – mit OK <b>„Zulassen“</b>.</p>
+        </div>
         <div class="glass card" id="zentraleCard">
           <span class="eyebrow small"><i></i>Für Bedienplätze</span>
           <div class="pin-show"><small>PIN zum Koppeln</small><b id="pinShow">––––</b></div>

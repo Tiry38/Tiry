@@ -283,3 +283,15 @@ input[type=range]{flex:1;accent-color:var(--red)}
 
 .diag{margin:0 0 14px;padding:12px 16px;border-radius:20px;background:rgba(27,30,37,.06);font:500 13px/1.5 var(--body);color:var(--mut)}
 .diag b{font:900 18px/1 var(--display);color:var(--ink)}
+
+/* Fernseher-Zeiten */
+.zeiten{display:flex;flex-direction:column;gap:6px;margin:4px 0 16px}
+.ztag{display:grid;grid-template-columns:44px 1fr 1fr;align-items:center;gap:10px;padding:6px 6px 6px 14px;border-radius:999px;background:rgba(255,255,255,.75)}
+.ztag b{font:800 14px/1 var(--display)}
+.ztag span{display:flex;align-items:center;gap:4px;color:var(--dim)}
+.ztag input{height:38px;padding:0 10px;border-radius:999px;border:1px solid var(--line);background:#fff;font-size:13px;min-width:0;width:100%}
+.ztag.zu b{color:var(--dim)}
+.tvst .tv-now{margin:14px 0 6px}
+.tvst{grid-column:1/-1}
+.tvst .settings{max-width:820px}
+.zeiten{display:grid;grid-template-columns:repeat(auto-fit,minmax(500px,1fr));gap:8px 14px}

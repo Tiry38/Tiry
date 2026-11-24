@@ -101,6 +101,9 @@ async function run(win, { PORT, getServer }) {
   await warte(800);
   await js(`document.querySelector('[data-view=fernseher]').click()`);
   await shot('06-fernseher');
+  await js(`document.querySelector('#tvstCard').scrollIntoView({block:'center'})`);
+  await shot('06b-fernseher-zeiten');
+  await js(`scrollTo(0,0)`);
   await js(`document.querySelector('[data-view=verlauf]').click()`);
   await shot('07-verlauf');
   await js(`document.querySelector('[data-view=papierkorb]').click()`);

@@ -12,6 +12,7 @@ const path = require('path');
 const crypto = require('crypto');
 const os = require('os');
 const { createShowroom } = require('./showroom');
+const { createTvSteuerung } = require('./tvsteuerung');
 
 const MAX_UPLOAD = 4 * 1024 * 1024 * 1024; // 4 GB
 const LOG_MAX = 300;
@@ -80,6 +81,15 @@ function createServer(opts) {
     dataDir, fetch: opts.fetch, autoStart: opts.showroomAutoStart,
     onChange: (d) => senden('showroom', { ts: d.ts, anzahl: d.items.length, fehler: d.fehler })
   });
+  // Fernseher nach Öffnungszeiten ein-/ausschalten (LG webOS über das Netzwerk)
+  let eigenerPort = 0;
+  const tvSt = opts.tvSteuerung === false ? null : createTvSteuerung({
+    dataDir,
+    url: () => { const a = lokaleAdressen()[0]; return a && eigenerPort ? 'http://' + a.address + ':' + eigenerPort + '/' : ''; },
+    broadcast: () => { const a = lokaleAdressen()[0]; return a ? a.address.replace(/\.\d+$/, '.255') : '255.255.255.255'; },
+    onStatus: (i) => senden('tvsteuerung', i, 'pc')
+  });
+
   function showroomInfo() {
     if (!showroom) return { items: [], stand: '', ts: 0, fehler: 'Showroom aus' };
     return showroom.daten;
@@ -338,6 +348,7 @@ function createServer(opts) {
         ip: (req.socket.remoteAddress || '').replace('::ffff:', '')
       };
       anwesenheitSenden();
+      if (tvSt && tv.ip && /^[\d.]+$/.test(tv.ip) && tv.ip !== '127.0.0.1' && tvSt.info().host !== tv.ip && !/Vorschau/.test(b.showingName || '')) tvSt.einstellen({ host: tv.ip }).catch(() => {});
       return json(res, 200, { ok: true, version });
     }
 
@@ -511,6 +522,28 @@ function createServer(opts) {
       return json(res, 200, { anzahl: d.items.length, stand: d.stand, ts: d.ts, fehler: d.fehler });
     }
 
+    if (p === '/api/tvsteuerung' && m === 'GET') {
+      if (!tvSt) return json(res, 404, { error: 'Steuerung aus' });
+      return json(res, 200, tvSt.info());
+    }
+    if (p === '/api/tvsteuerung' && m === 'PATCH') {
+      if (!tvSt) return json(res, 404, { error: 'Steuerung aus' });
+      const b = await koerper(req);
+      const i = await tvSt.einstellen(b);
+      protokoll(pc, 'Fernseher-Zeiten geändert' + ('an' in b ? (b.an ? ' (Automatik an)' : ' (Automatik aus)') : ''));
+      state.rev++; speichern(); senden('state', state);
+      return json(res, 200, i);
+    }
+    if ((mm = /^\/api\/tvsteuerung\/(koppeln|an|aus)$/.exec(p)) && m === 'POST') {
+      if (!tvSt) return json(res, 404, { error: 'Steuerung aus' });
+      if (mm[1] === 'koppeln') return json(res, 200, await tvSt.koppeln(tv && tv.ip));
+      try {
+        if (mm[1] === 'an') await tvSt.einschalten(); else await tvSt.ausschalten(false);
+      } catch (e) { return json(res, 502, { error: e.message }); }
+      protokoll(pc, 'Fernseher von Hand ' + (mm[1] === 'an' ? 'eingeschaltet' : 'ausgeschaltet'));
+      return json(res, 200, tvSt.info());
+    }
+
     if (p === '/api/tv/reload' && m === 'POST') {
       senden('reload', {}, 'tv');
       return json(res, 200, { ok: true });
@@ -561,11 +594,11 @@ function createServer(opts) {
     listen(port, host) {
       return new Promise((resolve, reject) => {
         server.once('error', reject);
-        server.listen(port, host || '0.0.0.0', () => { server.off('error', reject); resolve(server.address().port); });
+        server.listen(port, host || '0.0.0.0', () => { server.off('error', reject); eigenerPort = server.address().port; resolve(eigenerPort); });
       });
     },
     async close() {
-      clearInterval(pingTimer); clearInterval(aufraeumTimer); if (showroom) showroom.stop();
+      clearInterval(pingTimer); clearInterval(aufraeumTimer); if (showroom) showroom.stop(); if (tvSt) tvSt.stop();
       for (const res of clients.keys()) { try { res.end(); } catch (e) { /* egal */ } }
       clients.clear();
       await speichernJetzt().catch(() => {});

@@ -15,6 +15,7 @@
   },
   "dependencies": {
     "electron-updater": "^6.8.11",
+    "lgtv2": "^2.1.0",
     "pdfjs-dist": "^4.10.38"
   },
   "devDependencies": {
