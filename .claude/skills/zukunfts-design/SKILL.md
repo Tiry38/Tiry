@@ -80,4 +80,4 @@ Immer mit Rückfall (ohne WebGL / reduzierte Bewegung) und 60 fps.
 - Lesbarkeit: Kontrast Text ≥ 4.5:1, Tipp-Flächen ≥ 44 px, kein horizontales Scrollen.
 - `prefers-reduced-motion`: Bewegung stark reduzieren, aber Design bleibt besonders.
 - Leistung: 60 fps auf Mittelklasse-Handy; Shader mit Auflösungsfaktor und Pause im Hintergrund-Tab.
-- Projekt-Vorgaben (Velocenter: keine Personen/Gesichter; App Forge: eine Offline-HTML-Datei) gehen vor.
+- Projekt-Vorgaben (Velocenter: keine Personen/Gesichter) gehen vor.
