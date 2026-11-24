@@ -101,7 +101,8 @@ async function segment(browser, base, daten, von, bis, datei, nr, opts) {
   // Startzustand einmal wirklich zeichnen lassen, sonst springt der erste Übergang (Text verschwindet ohne Animation)
   await page.evaluate(() => { document.querySelectorAll('.sr .deal > *, .sr .sp-b').forEach((e) => getComputedStyle(e).transform); return document.body.offsetWidth; });
   await page.screenshot({ type: 'jpeg', quality: 10, timeout: 0 });
-  await page.evaluate(() => { window.__vtLaeuft = true; });
+  // bereits laufende Dauer-Animationen auf die absolute Zeit des Segments setzen (lückenlos über Segmentgrenzen)
+  await page.evaluate(() => { window.__vtTick(0); window.__vtLaeuft = true; });
 
   const enc = ffmpeg(datei);
   const proSlot = SEK * FPS, frames = (bis - von) * proSlot, dt = 1000 / FPS;
