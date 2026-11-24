@@ -20,13 +20,13 @@ const R0=.03,RW=.47,FL=.47,HOLO=[.13,.69,.93];/* Eisblau-Cyan der Hologramm-Zone
 const GLSL_KEY=`uniform sampler2D uN;uniform vec2 uCss;uniform float uK0,uK1;
 float kraw(vec2 p){return .6*(p.x/uCss.x)+.12*(1.-p.y/uCss.y)+.28*(.65*texture2D(uN,p/150.).r+.35*texture2D(uN,p/57.+vec2(.37,.71)).r);}
 float kn(vec2 p){return clamp((kraw(p)-uK0)/(uK1-uK0),0.,1.);}`;
-const VS_Q=`attribute vec2 aP;uniform vec4 uRect;uniform vec2 uRes,uO;uniform float uDpr,uRefl;varying vec2 vU;varying vec2 vC;
-void main(){vec2 c=uRect.xy+aP*uRect.zw;vU=aP;if(uRefl>.5){c.y=uRect.y+uRect.w+2.+aP.y*uRect.w;}vC=c;
+const VS_Q=`attribute vec2 aP;uniform vec4 uRect;uniform vec2 uRes,uO,uBox;uniform vec3 uRf;uniform float uDpr,uRefl;varying vec2 vU;varying vec2 vC;
+void main(){vec2 c=uRect.xy+aP*uRect.zw;vU=aP;if(uRefl>.5){c.y=2.*(uBox.x+uBox.y)+uRf.x-(uRect.y+uRect.w)+aP.y*uRect.w;}vC=c;
 vec2 d=(c+uO)*uDpr/uRes*2.-1.;gl_Position=vec4(d.x,-d.y,0.,1.);}`;
 const FS_Q=`precision highp float;${GLSL_KEY}
-uniform sampler2D uTex;uniform vec4 uRect;uniform float uT,uMode,uRefl,uGlowOn,uR0,uRW,uF,uLeaf;uniform vec3 uEdge,uHolo;varying vec2 vU;varying vec2 vC;
+uniform sampler2D uTex;uniform vec4 uRect;uniform vec2 uBox;uniform vec3 uRf;uniform float uT,uMode,uRefl,uGlowOn,uR0,uRW,uF,uLeaf;uniform vec3 uEdge,uHolo;varying vec2 vU;varying vec2 vC;
 void main(){vec2 uv=vU;vec2 p=vC;float m=1.;
- if(uRefl>.5){float s=vU.y;uv=vec2(vU.x,1.-vU.y);p=vec2(vC.x,uRect.y+uRect.w-s*uRect.w);m=.17*clamp((1.-s-.68)/.32,0.,1.);}
+ if(uRefl>.5){float s=vU.y;uv=vec2(vU.x,1.-vU.y);float yo=uRect.y+uRect.w-s*uRect.w;p=vec2(vC.x,yo);m=uRf.z*clamp(((yo-uBox.x)/uBox.y-uRf.y)/max(1.-uRf.y,.001),0.,1.);}
  float r=uR0+kn(p)*uRW;float d=uMode<.5?r-uT:uT-(r+uF);float vis=smoothstep(0.,.006,d);
  float fade=uMode<.5?smoothstep(0.,.03,uT):1.-smoothstep(.93,1.,uT);
  float h=(1.-smoothstep(0.,uMode<.5?.035:.05,d))*uGlowOn*fade*(1.-uLeaf);
@@ -150,10 +150,11 @@ function texUp(G,t,cv){const gl=G.gl;gl.bindTexture(gl.TEXTURE_2D,t);gl.pixelSto
 /* ---- Hilfen ---- */
 const load=src=>new Promise(res=>{const im=new Image();im.decoding='async';im.onload=()=>res(im);im.onerror=()=>res(null);im.src=src});
 /* Box eines Bildes so messen, wie die Seite es zeigen würde (gleiche Klassen, keine Übergänge) */
-function measure(tpl,src){return new Promise(res=>{const m=tpl.cloneNode(false);m.removeAttribute('id');m.removeAttribute('loading');m.removeAttribute('data-src');m.removeAttribute('hidden');
+function measure(tpl,src,root){return new Promise(res=>{const m=tpl.cloneNode(false);m.removeAttribute('id');m.removeAttribute('loading');m.removeAttribute('data-src');m.removeAttribute('hidden');
  m.className=tpl.className.replace(/\b(off|out-l|in-r|swap)\b/g,' ');m.style.cssText='visibility:hidden;transition:none;animation:none;opacity:0';m.alt='';m.setAttribute('aria-hidden','true');
- const done=()=>{const w=m.offsetWidth,h=m.offsetHeight,cx=m.offsetLeft,cy=m.offsetTop,nw=m.naturalWidth||w,nh=m.naturalHeight||h;m.remove();
-  const s=Math.min(w/nw,h/nh),cw=nw*s,ch=nh*s;res({x:cx-cw/2,y:cy-ch/2,w:cw,h:ch})};
+ const done=()=>{/* exakt wie gezeichnet: Bruchteil-Pixel, inkl. transform (Tiry 24.11.2026: Rad sprang nach der Verwandlung) */
+  const pe=root||tpl.parentNode,R=m.getBoundingClientRect(),P=pe.getBoundingClientRect(),w=R.width,h=R.height,nw=m.naturalWidth||w,nh=m.naturalHeight||h,fill=getComputedStyle(m).objectFit==='fill';m.remove();
+  const s=Math.min(w/nw,h/nh),cw=fill?w:nw*s,ch=fill?h:nh*s,bx=R.left-P.left-pe.clientLeft,by=R.top-P.top-pe.clientTop;res({x:bx+(w-cw)/2,y:by+(h-ch)/2,w:cw,h:ch,by,bh:h})};
  tpl.parentNode.insertBefore(m,tpl);m.onload=()=>(m.decode?m.decode().catch(()=>{}):Promise.resolve()).then(done);m.onerror=done;m.src=src;if(m.complete&&m.naturalWidth)m.onload()})}
 function raster(im,r,dpr){const c=document.createElement('canvas');c.width=Math.max(1,Math.round(r.w*dpr));c.height=Math.max(1,Math.round(r.h*dpr));const x=c.getContext('2d');x.imageSmoothingQuality='high';x.drawImage(im,0,0,c.width,c.height);return c}
 /* Punkte aus den deckenden Pixeln eines Bildes */
@@ -163,11 +164,12 @@ function points(im,r,step,N,W,H){const cw=Math.max(2,Math.round(r.w/step)),ch=Ma
  if(!P.length)P.push([r.x+r.w/2,r.y+r.h/2,.5,.5,.5,keyRaw(r.x+r.w/2,r.y+r.h/2,W,H)]);
  const out=new Array(N);if(P.length>=N){for(let i=0;i<N;i++){const j=i+Math.floor(Math.random()*(P.length-i));const t=P[i];P[i]=P[j];P[j]=t;out[i]=P[i]}}else for(let i=0;i<N;i++)out[i]=P[Math.floor(Math.random()*P.length)];
  return out.sort((a,b)=>a[5]-b[5])}
+const rfP=s=>{s=String(s||'');const m=s.match(/below\s+(-?[\d.]+)px/);if(!m)return[2,.68,.17];const g=s.match(/([\d.]+)%\s*,\s*rgba?\(\s*0\s*,\s*0\s*,\s*0\s*,\s*([\d.]+)\s*\)\s*\)\s*$/);return[+m[1],g?g[1]/100:.68,g?+g[2]:.17]};
 const hex=s=>{s=String(s||'').trim();const m=s.match(/^#?([0-9a-f]{6})$/i);if(m){const n=parseInt(m[1],16);return[(n>>16&255)/255,(n>>8&255)/255,(n&255)/255]}
  const r=s.match(/rgba?\(([\d.]+)[ ,]+([\d.]+)[ ,]+([\d.]+)/);return r?[r[1]/255,r[2]/255,r[3]/255]:[.886,.137,.176]};
 /* ---- eine Ebene (Rad oder Logo) vorbereiten ---- */
-async function layer(root,cv,o,kind){const dpr=Math.min(2,devicePixelRatio||1),W=root.clientWidth,H=root.clientHeight;
- const [ia,ib,ra,rb]=await Promise.all([load(o.from),load(o.to),measure(o.tplA,o.from),measure(o.tplB,o.to)]);if(!ia||!ib)throw new Error('Bild');
+async function layer(root,cv,o,kind){const dpr=Math.min(2,devicePixelRatio||1),RB=root.getBoundingClientRect(),W=RB.width-(root.offsetWidth-root.clientWidth),H=RB.height-(root.offsetHeight-root.clientHeight);
+ const [ia,ib,ra,rb]=await Promise.all([load(o.from),load(o.to),measure(o.tplA,o.from,root),measure(o.tplB,o.to,root)]);if(!ia||!ib)throw new Error('Bild');
  if(!cv._G)cv._G=mk(cv);const G=await cv._G;if(!G)throw new Error('WebGL');const lf0=window.HG12_MODE==='herbst'&&G.lf;let ox=0,oy=0,ox2=0,oy2=0;
  if(lf0){const rr=root.getBoundingClientRect(),vw=document.documentElement.clientWidth;ox=Math.max(0,Math.min(W*.6,rr.left-4));ox2=Math.max(0,Math.min(W*.45,vw-rr.right-4));oy=H*.45;oy2=H*.30}
  cv.width=Math.round((W+ox+ox2)*dpr);cv.height=Math.round((H+oy+oy2)*dpr);const chk=()=>{if(o.dead&&o.dead())throw new Error('abgelöst')};chk();
@@ -178,14 +180,14 @@ async function layer(root,cv,o,kind){const dpr=Math.min(2,devicePixelRatio||1),W
  let k0=Infinity,k1=-Infinity;for(const p of A){k0=Math.min(k0,p[5]);k1=Math.max(k1,p[5])}for(const p of B){k0=Math.min(k0,p[5]);k1=Math.max(k1,p[5])}if(k1-k0<.01)k1=k0+.01;
  const f=new Float32Array(N*13);for(let i=0;i<N;i++){const a=A[i],b=B[i],q=i*13;f[q]=a[0];f[q+1]=a[1];f[q+2]=b[0];f[q+3]=b[1];f[q+4]=(a[5]-k0)/(k1-k0);f[q+5]=(b[5]-k0)/(k1-k0);f[q+6]=a[2];f[q+7]=a[3];f[q+8]=a[4];f[q+9]=b[2];f[q+10]=b[3];f[q+11]=b[4];f[q+12]=Math.random()}
  const gl=G.gl;gl.bindBuffer(gl.ARRAY_BUFFER,G.pb);gl.bufferData(gl.ARRAY_BUFFER,f,gl.STATIC_DRAW);
- return{G,N,ra,rb,k0,k1,W,H,dpr,dA,dB,lf,ox,oy,cw:W+ox+ox2,ch:H+oy+oy2,sh:kind==='bike',ps:lf?Math.min(24,Math.max(12,Math.sqrt(area/N)*1.75)):kind==='bike'?1.3:1.6,glow:kind==='bike'?1:.7,refl:!!o.refl}}
+ return{G,N,ra,rb,k0,k1,W,H,dpr,dA,dB,lf,ox,oy,cw:cv.width/dpr,ch:cv.height/dpr,rf:rfP(o.refl),sh:kind==='bike',ps:lf?Math.min(24,Math.max(12,Math.sqrt(area/N)*1.75)):kind==='bike'?1.3:1.6,glow:kind==='bike'?1:.7,refl:!!o.refl&&o.refl!=='none'}}
 function draw(L,T,glow){const{G,N,ra,rb,k0,k1,W,H,dpr}=L,gl=G.gl;gl.viewport(0,0,gl.canvas.width,gl.canvas.height);gl.clearColor(0,0,0,0);gl.clear(gl.COLOR_BUFFER_BIT);
  gl.enable(gl.BLEND);gl.blendFunc(gl.ONE,gl.ONE_MINUS_SRC_ALPHA);
  const Q=G.q;gl.useProgram(Q.p);gl.bindBuffer(gl.ARRAY_BUFFER,G.quad);gl.enableVertexAttribArray(Q.a.aP);gl.vertexAttribPointer(Q.a.aP,2,gl.FLOAT,false,0,0);
  gl.uniform2f(Q.u.uRes,gl.canvas.width,gl.canvas.height);gl.uniform2f(Q.u.uO,L.ox,L.oy);gl.uniform1f(Q.u.uDpr,dpr);gl.uniform2f(Q.u.uCss,W,H);gl.uniform1f(Q.u.uK0,k0);gl.uniform1f(Q.u.uK1,k1);gl.uniform1f(Q.u.uT,T);
  gl.uniform1f(Q.u.uR0,R0);gl.uniform1f(Q.u.uRW,L.lf?.62:RW);gl.uniform1f(Q.u.uF,L.lf?.24:FL);gl.uniform1f(Q.u.uLeaf,L.lf);gl.uniform3fv(Q.u.uEdge,glow);gl.uniform3fv(Q.u.uHolo,HOLO);gl.uniform1f(Q.u.uGlowOn,L.glow);
  gl.activeTexture(gl.TEXTURE1);gl.bindTexture(gl.TEXTURE_2D,G.nt);gl.uniform1i(Q.u.uN,1);gl.activeTexture(gl.TEXTURE0);gl.uniform1i(Q.u.uTex,0);
- [[0,ra],[1,rb]].forEach(([m,r])=>{gl.bindTexture(gl.TEXTURE_2D,G.tex[m]);gl.uniform1f(Q.u.uMode,m);gl.uniform4f(Q.u.uRect,r.x,r.y,r.w,r.h);
+ [[0,ra],[1,rb]].forEach(([m,r])=>{gl.bindTexture(gl.TEXTURE_2D,G.tex[m]);gl.uniform1f(Q.u.uMode,m);gl.uniform4f(Q.u.uRect,r.x,r.y,r.w,r.h);gl.uniform2f(Q.u.uBox,r.by,r.bh);gl.uniform3fv(Q.u.uRf,L.rf);
   for(const rf of L.refl?[1,0]:[0]){gl.uniform1f(Q.u.uRefl,rf);gl.drawArrays(gl.TRIANGLE_STRIP,0,4)}});
  gl.disableVertexAttribArray(Q.a.aP);
  if(L.lf){const P=G.lf;gl.useProgram(P.p);gl.bindBuffer(gl.ARRAY_BUFFER,G.pb);const S=13*4,at=(n,sz,off)=>{if(P.a[n]==null||P.a[n]<0)return;gl.enableVertexAttribArray(P.a[n]);gl.vertexAttribPointer(P.a[n],sz,gl.FLOAT,false,S,off*4)};
@@ -216,10 +218,10 @@ VM.run=async function(o){const root=o.root,bk=o.bike,lg=o.logo;const bOld=bk.old
   if(bOld!==bNew)quiet(bOld,()=>{bOld.classList.add('off');bOld.style.opacity=''});if(bk.alt)bNew.alt=bk.alt;
   quiet(lg.el,()=>{lg.el.style.opacity=''});cB.style.display='none';cL.style.display='none';root.classList.remove('vmrun');root._vmH=0};
  const tok=root._vmTok=(root._vmTok||0)+1,dead=()=>root._vmTok!==tok;
- try{let Lb,Ll;const prep=Promise.all([layer(root,cB,{from,to:bk.to,tplA:bOld,tplB:bNew,refl:(csB.webkitBoxReflect||'none')!=='none',dead},'bike'),
+ try{let Lb,Ll;const prep=Promise.all([layer(root,cB,{from,to:bk.to,tplA:bOld,tplB:bNew,refl:csB.webkitBoxReflect||'none',dead},'bike'),
    layer(root,cL,{from:lFrom,to:lg.to,tplA:lg.el,tplB:lg.el,dead},'logo')]);prep.catch(()=>{});
   let tm;[Lb,Ll]=await Promise.race([prep,new Promise((_,rj)=>{tm=setTimeout(()=>{if(!dead())root._vmTok++;rj(new Error('Zeit'))},window.__vmSW?60000:5000)})]);clearTimeout(tm);
-  const pos=L=>L.lf?'left:'+(-L.ox)+'px;top:'+(-L.oy)+'px;width:'+L.cw+'px;height:'+L.ch+'px':'left:0;top:0;width:100%;height:100%';
+  const pos=L=>'left:'+(-L.ox)+'px;top:'+(-L.oy)+'px;width:'+L.cw+'px;height:'+L.ch+'px';
   cB.style.cssText='position:absolute;'+pos(Lb)+';pointer-events:none;filter:'+csB.filter;
   cL.style.cssText='position:absolute;'+pos(Ll)+';pointer-events:none;mix-blend-mode:'+csL.mixBlendMode+';filter:'+csL.filter+';opacity:'+op0;
   const ac=()=>hex(getComputedStyle(root.closest('.show')||root).getPropertyValue('--ac')||'#E2232D');let glow=[.886,.137,.176];try{glow=ac()}catch(_){}
