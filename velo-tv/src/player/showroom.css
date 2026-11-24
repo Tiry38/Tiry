@@ -95,7 +95,7 @@ html.hg-an #stage{background:transparent}
   background:linear-gradient(90deg,#C8102E,#E0162F);box-shadow:0 14px 34px -10px rgba(200,16,46,.85),0 0 0 4px rgba(255,255,255,.9)}
 .sr .sp-b small{font:800 17px/1 "Outfit",sans-serif;letter-spacing:.18em;text-transform:uppercase;color:rgba(255,255,255,.92)}
 .sr .sp-b[hidden]{display:none}
-.sr .dl-chips{margin:10px 0 0;font:500 24px/1 "Sora",sans-serif;color:rgba(255,255,255,.9);text-shadow:0 2px 8px rgba(0,0,0,.75)}
+.sr .dl-chips{margin:12px 0 0;font:600 32px/1 "Sora",sans-serif;color:rgba(255,255,255,.9);text-shadow:0 2px 8px rgba(0,0,0,.75)}
 .sr .dl-prog{display:none!important}
 
 /* ---- Fortschritt bis zum nächsten Rad ---- */

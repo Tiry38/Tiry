@@ -99,7 +99,7 @@
             var nm = x.marke + ' ' + x.modell, dm = el.querySelector('.dl-m');
       dm.textContent = nm;
       dm.style.fontSize = nm.length > 26 ? '50px' : nm.length > 20 ? '58px' : '';
-      el.querySelector('.dl-chips').textContent = [String(x.farbe || '').replace(/\s*\(.*?\)\s*/g, ' ').trim(), x.gr].filter(Boolean).join(' · ');
+      el.querySelector('.dl-chips').textContent = [String(x.farbe || '').replace(/\s*\(.*?\)\s*/g, ' ').trim(), x.rahmen, x.gr].filter(Boolean).join(' · ');
       el.querySelector('.dl-uvp s').textContent = euro(x.preis);
       el.querySelector('.dl-ap').innerHTML = esc(euro(x.angebot)).replace(' €', '<i>€</i>');
       var gespart = Math.round(x.preis - x.angebot);
