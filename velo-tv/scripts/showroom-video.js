@@ -44,6 +44,8 @@ function reihenfolge(items) {
   return out;
 }
 
+const UHR_START = 60000; // virtuelle Uhr wird bei 60 s angehalten (Laden passiert davor in Echtzeit)
+
 function ffmpeg(datei) {
   const p = spawn('ffmpeg', ['-y', '-loglevel', 'error', '-f', 'image2pipe', '-framerate', String(FPS), '-c:v', 'mjpeg', '-i', '-',
     '-c:v', 'libx264', '-preset', 'medium', '-crf', '19', '-pix_fmt', 'yuv420p', '-r', String(FPS), datei], { stdio: ['pipe', 'inherit', 'inherit'] });
@@ -55,6 +57,7 @@ function ffmpeg(datei) {
 async function segment(browser, base, daten, von, bis, datei, nr, opts) {
   opts = opts || {};
   const page = await browser.newPage({ viewport: { width: 1920, height: 1080 }, deviceScaleFactor: 1 });
+  await page.addInitScript(rafShim(FPS));
   const fehler = [];
   page.on('pageerror', (e) => fehler.push(e.message));
   const offset = von * SEK * 1000;
@@ -83,6 +86,8 @@ async function segment(browser, base, daten, von, bis, datei, nr, opts) {
     await Promise.all(urls.map((u) => new Promise((r) => { const im = new Image(); im.onload = im.onerror = () => (im.decode ? im.decode().catch(() => {}).then(r) : r()); im.src = u; })));
     if (document.fonts && document.fonts.ready) await document.fonts.ready;
   }, daten);
+  // Uhr anhalten: ab jetzt läuft die Zeit nur noch über runFor (exakt 1/30 s je Videobild)
+  await page.clock.pauseAt(UHR_START);
   for (let k = 0; k < 40; k++) { await page.clock.runFor(16); await page.waitForTimeout(50); }
   await page.evaluate(({ d, s }) => { window.__srEl = window.VeloRender(d, s); }, { d: daten, s: von });
   for (let k = 0; k < 20; k++) { await page.clock.runFor(0); await page.waitForTimeout(30); }
@@ -120,13 +125,21 @@ async function segment(browser, base, daten, von, bis, datei, nr, opts) {
 }
 
 /** Hintergrund-Schleife (nur WebGL-Herbstallee) für Zeitraum [von, bis) Sekunden */
+
+/* Bildwiederholung (requestAnimationFrame) fest an die virtuelle Uhr koppeln: genau 1 Bild je Videobild */
+function rafShim(fps) {
+  return `(function(){var ms=1000/${fps};window.requestAnimationFrame=function(cb){return setTimeout(function(){cb(performance.now())},ms)};window.cancelAnimationFrame=function(id){clearTimeout(id)}})();`;
+}
+
 async function hgSegment(browser, base, von, bis, datei, nr) {
   const page = await browser.newPage({ viewport: { width: 1920, height: 1080 }, deviceScaleFactor: 1 });
+  await page.addInitScript(rafShim(FPS));
   await page.addInitScript((o) => { window.HG_RENDER = 1; window.HG_RENDER_DPR = 0.8; window.HG_T0 = -o; }, von * 1000);
   await page.clock.install({ time: 0 });
   await page.goto(base + '/?render=1', { waitUntil: 'load' });
   await page.evaluate(() => { document.documentElement.classList.add('hg-an'); window.HG_PAUSE = false; });
-  for (let k = 0; k < 40; k++) { await page.clock.runFor(16); await page.waitForTimeout(80); }   // Texturen laden
+  await page.clock.pauseAt(UHR_START);
+  for (let k = 0; k < 40; k++) { await page.clock.runFor(34); await page.waitForTimeout(80); }   // Texturen laden
   const enc = ffmpeg(datei), frames = Math.round((bis - von) * FPS);
   // Zeit zurück auf den Segment-Anfang: Kamera-Glättung ist eingeschwungen, Szene-Zeit = von + t
   await page.evaluate((o) => { window.HG_T0 = -o + performance.now(); }, von * 1000);
