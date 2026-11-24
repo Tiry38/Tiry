@@ -3607,7 +3607,7 @@ m696 -454 c28 -13 46 -31 55 -51 22 -53 -50 -177 -173 -300 -187 -186 -647
     <div class="tph"><span class="ic"><svg><use href="#i-bike"/></svg></span><h2>Beratung &amp; Probefahrt</h2></div>
     <p class="lead">Wir wollen dir nicht irgendein E-Bike verkaufen, sondern das Rad finden, das wirklich zu dir passt.</p>
     <ul class="tfl">
-     <li><b>Über 300 E-Bikes vor Ort</b> zum Anschauen, Vergleichen und Probefahren.</li>
+     <li><b>Über 250 E-Bikes vor Ort</b> zum Anschauen, Vergleichen und Probefahren.</li>
      <li><b>Persönliche Beratung:</b> Wir gehen genau auf deine Wünsche ein und zeigen dir eine passende Auswahl.</li>
      <li><b>Probefahrt</b> ausdrücklich erwünscht. Auf Wunsch begleiten wir dich.</li>
      <li><b>i:SY übers Wochenende testen:</b> Als i:SY Experte geben wir dir ein i:SY gern länger mit.</li>
@@ -4442,18 +4442,24 @@ function liveSoon(el,on){if(!el)return;on=!!on;if(el.classList.contains('soon')=
  lv.lastChild.nodeValue=on?'Bestellt':'Live';st.textContent=on?'Kommt bald zu uns':'Unser Live-Bestand';go.firstChild.nodeValue=on?'Ansehen':'Jetzt ansehen';
  el.setAttribute('aria-label',on?'Dieses Rad kommt bald zu uns – Räder auf Lager ansehen':'Unser Live-Bestand: Räder auf Lager ansehen')}
 const srBase=b=>({k:b.k,m:b.m,f:'',img:b.img,st:'',cur:1});
+/* Nachgereichte Fotos (Bilder-Agent, img/bestand/a-…, freigestellt) laufen automatisch mit – nur E-Bikes (Tiry 24.11.2026) */
+const srAgent=x=>/^img\/bestand\/a-[a-z0-9-]+\.webp$/.test(x.bild)&&(!!x.motor||/pedelec|e-?bike|dreirad/i.test(x.typ||''));
 const SRDUP=new Set(['isy-34.webp','isy-36.webp','qio-19.webp']);/* bildgleiche Dubletten */
 function srBuild(){const P={},G=new Set();BR.forEach(b=>P[b.k]=[srBase(b)]);
  (LG.M||[]).forEach(m=>{if(m.hidden||m.gebraucht||m.vorfuehr)return;const br=lgBrand(m.marke+' '+m.modell);if(!br)return;
-  const seen=new Set();m.v.forEach(x=>{if(x._hid||!x.bild)return;const fn=x.bild.split('/').pop();const gk=srNorm(m.modell)+'|'+srNorm(x.farbe);if(!SHOWOK.has(fn)||SRDUP.has(fn)||seen.has(fn)||G.has(gk))return;seen.add(fn);G.add(gk);
-   P[br.k].push({k:br.k,m:(m.marke+' '+m.modell).replace(/\s+/g,' ').trim(),f:x.farbe||'',img:'img/show/'+fn,st:x.status==='bestellt'?'bestellt':'lager'})})});
+  const seen=new Set();m.v.forEach(x=>{if(x._hid||!x.bild)return;const fn=x.bild.split('/').pop();const gk=srNorm(m.modell)+'|'+srNorm(x.farbe);
+   const img=SHOWOK.has(fn)?'img/show/'+fn:(srAgent(x)?x.bild:'');if(!img||SRDUP.has(fn)||seen.has(fn)||G.has(gk))return;seen.add(fn);G.add(gk);
+   P[br.k].push({k:br.k,m:(m.marke+' '+m.modell).replace(/\s+/g,' ').trim(),f:x.farbe||'',img,st:x.status==='bestellt'?'bestellt':'lager'})})});
  SR.all={};Object.keys(P).forEach(k=>SR.all[k]=P[k].filter(x=>!x.cur));/* alle echten Bestandsfotos je Marke (Start-Showroom) */
+ SR.rnd={};SRFIX.forEach(k=>{const fi=new Set((P[k]||[]).filter(x=>x.cur).map(x=>x.img)),L=(P[k]||[]).filter(x=>!x.cur&&!fi.has(x.img)&&!(k==='vanraam'&&/compact\s*plus/i.test(x.m)));if(L.length)SR.rnd[k]=L});/* Bestandsfotos der Marken mit festem Platz laufen zusätzlich im Zufall mit */
  Object.keys(P).forEach(k=>{P[k]=SRFIX.includes(k)?P[k].filter(x=>x.cur||(k==='vanraam'&&/compact\s*plus/i.test(x.m))):(P[k].length>1?P[k].filter(x=>!x.cur):P[k])});/* feste Plätze = festes Bild, Rest nur aus dem Bestand */
  const first=!SR.pool;SR.pool=P;SR.th={};Object.keys(P).forEach(k=>{const L=P[k];SR.th[k]=L[srRnd(L.length)].img});if(first)SR.subs.forEach(f=>f())}
 /* Marken-Runde (Tiry 14.11.2026): jede Marke mit Foto 1× pro Runde, zufällige Reihenfolge, nie dieselbe Marke direkt hintereinander */
 function bagNext(B,keys){if(!B.q||!B.q.length){const q=keys.slice();for(let i=q.length-1;i>0;i--){const j=srRnd(i+1);[q[i],q[j]]=[q[j],q[i]]}if(q.length>1&&q[0]===B.l){const j=1+srRnd(q.length-1);[q[0],q[j]]=[q[j],q[0]]}B.q=q}B.l=B.q.shift();return B.l}
 const srNorm=t=>String(t||'').toLowerCase().replace(/\(.*?\)/g,'').replace(/matt|glanz|glossy|glänzend/g,'').replace(/[^a-zäöü]/g,'');
-function srPick(k){const L=k==='*'?(SR.pool?Object.keys(SR.pool).filter(j=>!SRFIX.includes(j)).flatMap(j=>SR.pool[j]):BR.filter(b=>!SRFIX.includes(b.k)).map(srBase)):((SR.pool&&SR.pool[k])||[srBase(BR.find(b=>b.k===k))]);
+/* how: 'fix' = fester Platz (nur festes Bild), 'rnd' = Zufallsfluss (bei festen Marken nur deren Bestandsfotos), sonst Marke gewählt (alles der Marke) */
+function srPick(k,how){const R=SR.rnd||{},F=SRFIX.includes(k);const L=k==='*'?(SR.pool?Object.keys(SR.pool).filter(j=>!SRFIX.includes(j)).flatMap(j=>SR.pool[j]).concat(...Object.values(R)):BR.filter(b=>!SRFIX.includes(b.k)).map(srBase)):
+  F&&how==='rnd'&&R[k]?R[k]:F&&how!=='fix'&&R[k]?((SR.pool&&SR.pool[k])||[]).concat(R[k]):((SR.pool&&SR.pool[k])||[srBase(BR.find(b=>b.k===k))]);
  let c=L.filter(x=>!SR.last.includes(x.img)&&(!SR.lastF||srNorm(x.f)!==SR.lastF));if(!c.length)c=L.filter(x=>x.img!==SR.lb[k]&&x.img!==SR.last[0]);if(!c.length)c=L.filter(x=>x.img!==SR.lb[k]);if(!c.length)c=L;
 const x=c[srRnd(c.length)];SR.lb[k]=x.img;if(L.length>1){SR.last.unshift(x.img);SR.last.length=Math.min(SR.last.length,24);srLS(SR.last)}SR.lastF=srNorm(x.f);return x}
 function showroom(root,prefix){
@@ -4476,7 +4482,7 @@ function showroom(root,prefix){
  /* how: 'tab' = Marke gewählt (bleibt bei der Marke), sonst Pfeil/Wischen/automatisch */
  function to(n,how){if(busy){if(how==='tab'||how==='prev'||how==='next'&&hold>Date.now()){pend=[n,how];if(how==='tab')$$('button',th).forEach((y,j)=>y.classList.toggle('on',j===(n+BR.length)%BR.length));if(window.VM&&VM.hurry)VM.hurry(area)}return}cnt++;n=(n+BR.length)%BR.length;
   FX.forEach(([e,j])=>{if(cnt%e===0&&!q.includes(j))q.push(j)});
-  let x;if(how!=='tab'){if(q.length){n=q.shift();x=srPick(BR[n].k)}else{const ks=SR.pool?Object.keys(SR.pool).filter(j=>!SRFIX.includes(j)&&SR.pool[j].length&&BR.some(b=>b.k===j)):[];x=ks.length?srPick(bagNext(MB,ks)):srPick('*');n=BR.findIndex(b=>b.k===x.k)}MB.l=BR[n].k}
+  let x;if(how!=='tab'){if(q.length){n=q.shift();x=srPick(BR[n].k,'fix')}else{const ks=SR.pool?Object.keys(SR.pool).filter(j=>!SRFIX.includes(j)&&SR.pool[j].length&&BR.some(b=>b.k===j)).concat(Object.keys(SR.rnd||{}).filter(j=>BR.some(b=>b.k===j))):[];x=ks.length?srPick(bagNext(MB,ks),'rnd'):srPick('*');n=BR.findIndex(b=>b.k===x.k)}MB.l=BR[n].k}
   else{q=q.filter(j=>j!==n);x=srPick(BR[n].k)}if(n===i&&cur&&x.img===cur.img)return;i=n;cur=x;const b=BR[i];busy=1;$$('button',th).forEach((y,j)=>y.classList.toggle('on',j===i));
   if(window.VM&&VM.on&&VM.ok){const op0=getComputedStyle(wm).opacity,from=bk.currentSrc||bk.src,lf=wm.currentSrc||wm.src;Promise.race([Promise.all([dec(x.img),dec(b.logo)]),new Promise(r=>setTimeout(r,2500))]).then(()=>{thSet(i,x.img);const pr=VM.run({root:area,bike:{oldEl:bk,newEl:bk,from,to:x.img,alt:x.m+(x.f?' in '+x.f:'')},logo:{el:wm,from:lf,to:b.logo,op0}});paint();pr.then(()=>{rf.src=x.img;busy=0;nxt()})});return}bk.classList.add('out-l');wm.classList.add('swap');rf.style.opacity=0;
   setTimeout(()=>{const go=()=>{bk.classList.add('in-r');bk.classList.remove('out-l');bk.src=x.img;bk.alt=x.m+(x.f?' in '+x.f:'');rf.src=x.img;wm.src=b.logo;thSet(i,x.img);paint();rdy([bk,wm]).then(()=>{void bk.offsetWidth;bk.classList.remove('in-r');wm.classList.remove('swap');rf.style.opacity='';busy=0;nxt()})};Promise.race([Promise.all([dec(x.img),dec(b.logo)]),new Promise(r=>setTimeout(r,2500))]).then(go)},420);}
@@ -5412,7 +5418,7 @@ function steuer(gJahr,kl,ki){const vor=.093*Math.min(gJahr,101400)+(.0875+.018)*
  const est=sp?2*est26(zve/2):kl==='5'?est5(zve):est26(zve);const fg=sp?40700:20350;const soli=est<=fg?0:Math.min(.055*est,.119*(est-fg));return est+soli+(ki?est*.09:0)}
 function sozial(b,kd){return .093*Math.min(b,8450)+.013*Math.min(b,8450)+.0875*Math.min(b,5812.5)+(kd?.018:.024)*Math.min(b,5812.5)}
 function drCalc(){const P=DR.p,B=DR.b,R0=DR.r!==''&&+DR.r>0?+DR.r:Math.round(P*DR.f)/100,V=DR.vz?Math.max(2.38,Math.round(P*.3)/100):0,SPm=Math.round(DRSP[DR.sp]*119)/100,R=R0+V+SPm,U=Math.max(0,R-DR.z),GV=.0025*Math.floor(P/100)*100,B1=B-U+GV;
- const st=(steuer(12*B,DR.k,DR.ki)-steuer(12*B1,DR.k,DR.ki))/12,sv=sozial(B,DR.kd)-sozial(B1,DR.kd),net=Math.max(0,U-st-sv);return{R,R0,V,SPm,U,GV,st,sv,net,tot:net*36,P}}
+ const st=Math.round((steuer(12*B,DR.k,DR.ki)-steuer(12*B1,DR.k,DR.ki))/12*100)/100,sv=Math.round((sozial(B,DR.kd)-sozial(B1,DR.kd))*100)/100,net=Math.max(0,Math.round((U-st-sv)*100)/100);return{R,R0,V,SPm,U,GV,st,sv,net,tot:net*36,P}}
 const e2=n=>(Math.round(n*100)/100).toLocaleString('de-DE',{minimumFractionDigits:2,maximumFractionDigits:2})+' €',e0=n=>Math.round(n).toLocaleString('de-DE')+' €';
 function drSync(){const f=$('#drF');if(!f)return;f.p.value=DR.p;f.pr.value=DR.p;f.b.value=DR.b;f.br.value=DR.b;drDraw()}
 function drDraw(){const o=$('#drO');if(!o)return;const c=drCalc(),f=$('#drF');f.querySelector('[name=po]').textContent=e0(DR.p);f.querySelector('[name=bo]').textContent=e0(DR.b);

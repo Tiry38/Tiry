@@ -167,7 +167,7 @@ rep('<script type="application/json" id="bestandData">', pvjs + '<script type="a
 # 4e) JS-Vorlagen: Quellen auf Varianten umstellen
 for f in ('p-isy', 'p-ktm', 'p-qio-eins-fineline', 'p-vdv-aebpro', 'p-vanraam', 'p-gudereit', 'p-victoria-veloa7'):
     rep("img:'img/%s.webp'" % f, "img:PV('img/%s.webp',600)" % f)
-rep("img:'img/show/'+fn,", "img:PV('img/show/'+fn,600),")
+rep("const img=SHOWOK.has(fn)?'img/show/'+fn:(srAgent(x)?x.bild:'');", "const img=SHOWOK.has(fn)?PV('img/show/'+fn,600):(srAgent(x)?PV(x.bild,600):'');")
 rep("img:'img/show/rest-05.webp'", "img:PV('img/show/rest-05.webp',600)")                       # Showroom-/Kopf-Pool
 rep("im.src=src;o.classList.remove('qin')", "im.src=PV(src,Math.min(190,innerWidth*.34));o.classList.remove('qin')")  # Schnellzugriff „Auf Lager“
 rep("e.alt='';e.decoding='async';box.appendChild(e)", "e.alt='';e.decoding='async';e.loading='lazy';e.width=400;e.height=260;box.appendChild(e)")  # Maße: CSS füllt die Kachel (object-fit)
