@@ -70,7 +70,7 @@
           '<div class="deal hello" style="--d:.6s">' +
             '<div class="dhalo"></div>' +
             '<h2 class="dl-m"></h2>' +
-            '<p class="dl-uvp">statt <s></s></p>' +
+            '<p class="dl-uvp"><span class="stt">statt</span> <s></s></p>' +
             '<div class="dl-pz"><span class="dl-ap"></span><em class="sp-b"></em></div>' +
             '<p class="dl-chips"></p>' +
           '</div>' +

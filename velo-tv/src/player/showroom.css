@@ -77,16 +77,17 @@ html.hg-an #stage{background:transparent}
 .sr .hfloor{position:absolute;left:16%;right:16%;bottom:18%;height:3px;border-radius:3px;background:linear-gradient(90deg,transparent,#B87333,#F0C8A0,#B87333,transparent);box-shadow:0 0 22px rgba(184,115,51,.55),0 10px 30px -6px rgba(18,22,32,.28)}
 
 /* ---- Angebot unter dem Kreis: groß und eindeutig – Modell, alter Preis durchgestrichen, neuer Preis, rotes Spar-Schild ---- */
-.sr .hvis{top:170px}
-.sr .deal{position:absolute;left:1360px;top:712px;transform:translateX(-50%);width:980px;display:flex;flex-direction:column;align-items:center;text-align:center;transition:opacity .45s ease,transform .7s cubic-bezier(.2,.8,.2,1)}
+.sr .hvis{top:150px;transform:scale(.94);transform-origin:50% 0}
+.sr .deal{position:absolute;left:1360px;top:690px;transform:translateX(-50%);width:980px;display:flex;flex-direction:column;align-items:center;text-align:center;transition:opacity .45s ease,transform .7s cubic-bezier(.2,.8,.2,1)}
 .sr .deal.swap{opacity:0;transform:translate(-50%,18px)}
 .sr .dhalo{position:absolute;z-index:-1;left:50%;top:58%;width:1400px;height:600px;border-radius:50%;transform:translate(-50%,-50%);background:radial-gradient(closest-side,rgba(14,12,12,.66),rgba(14,12,12,.42) 55%,rgba(14,12,12,0) 85%)}
-.sr .dl-m{margin:0;font:900 68px/1.02 "Outfit",sans-serif;letter-spacing:-1.8px;color:#fff;white-space:nowrap;max-width:860px;overflow:hidden;text-overflow:ellipsis;
+.sr .dl-m{margin:0;font:900 62px/1.02 "Outfit",sans-serif;letter-spacing:-1.8px;color:#fff;white-space:nowrap;max-width:860px;overflow:hidden;text-overflow:ellipsis;
   text-shadow:0 2px 4px rgba(0,0,0,.6),0 6px 24px rgba(0,0,0,.55)}
-.sr .dl-uvp{margin:14px 0 0;font:700 46px/1 "Outfit",sans-serif;color:rgba(255,255,255,.92);text-shadow:0 2px 10px rgba(0,0,0,.75)}
-.sr .dl-uvp s{text-decoration-thickness:5px;text-decoration-color:#FF2E45}
-.sr .dl-pz{display:flex;align-items:center;gap:30px;margin-top:2px}
-.sr .dl-ap{display:inline-block;font:900 140px/1 "Outfit",sans-serif;letter-spacing:-4px;color:#fff;transform:skewX(-9deg);
+.sr .dl-uvp{transform:skewX(-9deg);margin:10px 0 0;font:800 96px/1 "Outfit",sans-serif;letter-spacing:-3px;color:rgba(255,255,255,.92);text-shadow:0 2px 10px rgba(0,0,0,.75)}
+.sr .dl-uvp .stt{color:rgba(255,255,255,.92);font-size:44px;letter-spacing:0;font-weight:700;margin-right:6px;vertical-align:.35em}
+.sr .dl-uvp s{text-decoration-thickness:8px;text-decoration-color:#FF2E45}
+.sr .dl-pz{display:flex;align-items:center;gap:30px;margin-top:4px}
+.sr .dl-ap{display:inline-block;font:900 128px/1 "Outfit",sans-serif;letter-spacing:-4px;color:#fff;transform:skewX(-9deg);
   text-shadow:0 3px 0 rgba(120,8,24,.55),0 8px 30px rgba(0,0,0,.6)}
 .sr .dl-ap i{font-style:normal;margin-left:18px}
 /* Spar-Schild wie die roten „−800 €“-Schilder der Rad-Karten auf der Homepage, groß */
