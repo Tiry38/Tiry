@@ -12,7 +12,8 @@ const { startBeacon, startListener } = require('../server/discovery');
 
 const PORT = 8833;
 const ROOT = path.join(__dirname, '..');
-const ICON = path.join(ROOT, '..', 'build', 'icon.png');
+const ICON = path.join(ROOT, '..', 'build', process.platform === 'win32' ? 'icon.ico' : 'icon.png');
+const TRAY = path.join(ROOT, '..', 'build', 'tray.png');
 const SMOKE = process.argv.includes('--smoke');
 
 app.commandLine.appendSwitch('lang', 'de-DE'); // deutsches Datums-/Zeitformat in Eingabefeldern
@@ -95,7 +96,7 @@ function erstelleFenster() {
 function erstelleTray() {
   if (tray || SMOKE) return;
   try {
-    tray = new Tray(nativeImage.createFromPath(ICON).resize({ width: 16, height: 16 }));
+    tray = new Tray(nativeImage.createFromPath(TRAY).resize({ width: 16, height: 16, quality: 'best' }));
     tray.setToolTip('Velo-TV');
     tray.setContextMenu(Menu.buildFromTemplate([
       { label: 'Velo-TV öffnen', click: () => { win.show(); win.focus(); } },

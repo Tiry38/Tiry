@@ -33,6 +33,8 @@
       "src/**/*",
       "package.json",
       "build/icon.png",
+      "build/icon.ico",
+      "build/tray.png",
       "!src/**/*.map"
     ],
     "win": {
@@ -44,7 +46,7 @@
           ]
         }
       ],
-      "icon": "build/icon.png"
+      "icon": "build/icon.ico"
     },
     "nsis": {
       "oneClick": false,
@@ -52,7 +54,10 @@
       "allowToChangeInstallationDirectory": true,
       "createDesktopShortcut": true,
       "shortcutName": "Velo-TV",
-      "artifactName": "Velo-TV-Setup.${ext}"
+      "artifactName": "Velo-TV-Setup.${ext}",
+      "installerIcon": "build/icon.ico",
+      "uninstallerIcon": "build/icon.ico",
+      "installerHeaderIcon": "build/icon.ico"
     },
     "publish": [
       {

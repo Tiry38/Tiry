@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' http: data: blob:; media-src 'self' http: blob:; connect-src 'self' http: data: blob:; frame-src http:; worker-src 'self' blob:; font-src 'self'">
 <title>Velo-TV</title>
+<link rel="icon" href="assets/symbol.svg">
 <link rel="stylesheet" href="app.css">
 </head>
 <body>
@@ -12,7 +13,7 @@
 <!-- ============ Ersteinrichtung ============ -->
 <section id="setup" class="setup" hidden>
   <div class="setup-card glass">
-    <img src="assets/logo.png" alt="Velocenter Hessert" class="setup-logo">
+    <div class="brand big"><img src="assets/symbol.svg" alt="" class="brand-ico"><div><b>Velo-<em>TV</em></b><span>Velocenter Hessert</span></div></div>
     <span class="eyebrow"><i></i>Velo-TV · <b>Einrichtung</b></span>
     <h1>Welche Rolle hat <em>dieser PC?</em></h1>
     <p class="lead">Ein PC ist die Zentrale und beliefert den Fernseher. Alle anderen PCs sind Bedienplätze und sehen live dasselbe.</p>
@@ -43,7 +44,7 @@
 <!-- ============ Hauptprogramm ============ -->
 <div id="app" hidden>
   <header class="hdr">
-    <img src="assets/logo.png" alt="Velocenter Hessert" class="hdr-logo">
+    <div class="brand"><img src="assets/symbol.svg" alt="" class="brand-ico"><div><b>Velo-<em>TV</em></b><span>Velocenter Hessert</span></div></div>
     <nav class="nav" id="nav">
       <button data-view="programm" class="on">Programm</button>
       <button data-view="fernseher">Fernseher</button>
