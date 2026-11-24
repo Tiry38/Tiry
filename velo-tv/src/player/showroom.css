@@ -76,26 +76,43 @@ html.hg-an #stage{background:transparent}
 .sr .hb.off{opacity:0;transform:translate(-36%,-50%)}
 .sr .hfloor{position:absolute;left:16%;right:16%;bottom:18%;height:3px;border-radius:3px;background:linear-gradient(90deg,transparent,#B87333,#F0C8A0,#B87333,transparent);box-shadow:0 0 22px rgba(184,115,51,.55),0 10px 30px -6px rgba(18,22,32,.28)}
 
-/* ---- Angebots-Schild unter dem Kreis (statt Knöpfen) ---- */
-.sr .deal{position:absolute;left:1360px;top:850px;transform:translateX(-50%);display:flex;align-items:center;gap:18px;padding:10px 10px 10px 10px;border-radius:999px;white-space:nowrap;
-  background:linear-gradient(rgba(255,255,255,.96),rgba(242,246,251,.9));box-shadow:inset 0 1px 0 #fff,0 0 0 2px rgba(255,255,255,.7),0 24px 50px -20px rgba(60,6,18,.55);transition:opacity .45s ease,transform .6s cubic-bezier(.2,.8,.2,1)}
-.sr .deal.swap{opacity:0;transform:translate(-50%,14px)}
-.sr .dl-tag{display:inline-flex;align-items:center;gap:9px;height:56px;padding:0 20px 0 16px;border-radius:999px;background:#1B1E25;color:#fff;font:800 17px/1 "Outfit",sans-serif;letter-spacing:.14em;text-transform:uppercase}
-.sr .dl-tag i{width:11px;height:11px;border-radius:50%;background:#E2232D;box-shadow:0 0 0 4px rgba(226,35,45,.3);animation:puls 2.4s ease-in-out infinite}
-@keyframes puls{50%{box-shadow:0 0 0 8px rgba(226,35,45,.08)}}
-.sr .dl-txt{display:flex;flex-direction:column;gap:6px;min-width:0;max-width:520px}
-.sr .dl-m{font:900 27px/1.05 "Outfit",sans-serif;letter-spacing:-.02em;color:#1B1E25;overflow:hidden;text-overflow:ellipsis}
-.sr .dl-d{font:500 16px/1 "Sora",sans-serif;color:#4A5161;overflow:hidden;text-overflow:ellipsis}
-.sr .dl-p{display:inline-flex;align-items:center;gap:14px;height:76px;padding:0 26px 0 24px;border-radius:999px;color:#fff;
-  background:linear-gradient(115deg,#F2333D 0%,#D0142A 30%,#8E1420 58%,#3A0E14 100%);border:1px solid rgba(255,90,100,.35);box-shadow:inset 0 1px 0 rgba(255,255,255,.28),inset 0 -3px 0 rgba(0,0,0,.35),0 14px 32px rgba(207,26,44,.38)}
-.sr .dl-uvp{font:600 18px/1 "Sora",sans-serif;color:rgba(255,255,255,.78);text-decoration-thickness:2px}
-.sr .dl-uvp em{font:800 12px/1 "Outfit",sans-serif;font-style:normal;letter-spacing:.08em;margin-right:2px}
-.sr .dl-ap{font:900 40px/1 "Outfit",sans-serif;letter-spacing:-.02em}
-.sr .dl-dots{position:absolute;left:1360px;top:968px;transform:translateX(-50%);display:flex;align-items:center;gap:7px}
-.sr .dl-dots i{width:9px;height:9px;border-radius:50%;background:rgba(255,255,255,.55);box-shadow:0 1px 3px rgba(0,0,0,.3);transition:all .4s}
-.sr .dl-dots i.on{width:30px;border-radius:9px;background:#E2232D}
-.sr .dl-dots span{white-space:nowrap;margin-left:10px;padding:7px 14px;border-radius:999px;background:rgba(27,30,37,.72);color:#fff;font:600 14px/1 "Sora",sans-serif}
+/* ---- Angebot unter dem Kreis: Glaskarte wie auf der Homepage (ohne Knöpfe) ---- */
+.sr .deal{position:absolute;left:1360px;top:822px;transform:translateX(-50%);width:820px;display:flex;align-items:center;justify-content:space-between;gap:28px;
+  padding:22px 30px 22px 34px;border-radius:40px;background:linear-gradient(160deg,rgba(255,255,255,.95),rgba(246,248,251,.82));border:1px solid rgba(255,255,255,.95);
+  box-shadow:inset 0 1px 0 #fff,0 0 0 1px rgba(184,115,51,.18),0 30px 60px -26px rgba(60,6,18,.55),0 12px 30px -18px rgba(28,44,74,.35);transition:opacity .45s ease,transform .7s cubic-bezier(.2,.8,.2,1)}
+.sr .deal::before{content:"";position:absolute;left:34px;right:34px;top:-1px;height:2px;border-radius:2px;background:linear-gradient(90deg,transparent,#B87333,#F0C8A0,#B87333,transparent);opacity:.8}
+.sr .deal.swap{opacity:0;transform:translate(-50%,16px)}
+.sr .dl-l{display:flex;flex-direction:column;gap:9px;min-width:0}
+.sr .dl-k{display:inline-flex;align-items:center;gap:9px;font:800 13px/1 "Outfit",sans-serif;letter-spacing:.2em;text-transform:uppercase;color:#4A5161}
+.sr .dl-k i{width:9px;height:9px;border-radius:50%;background:#E2232D;box-shadow:0 0 0 4px rgba(226,35,45,.18)}
+.sr .dl-k b{color:#C8102E;font-weight:800}
+.sr .dl-m{font:900 38px/1.02 "Outfit",sans-serif;letter-spacing:-.025em;color:#1B1E25;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:460px}
+.sr .dl-chips{display:flex;gap:7px;flex-wrap:nowrap;overflow:hidden;max-width:470px}
+.sr .dl-chips i{font-style:normal;white-space:nowrap;padding:7px 13px;border-radius:999px;background:#fff;box-shadow:inset 0 0 0 1px rgba(27,30,37,.08),0 4px 10px -6px rgba(27,30,37,.25);font:600 14px/1 "Sora",sans-serif;color:#4A5161;overflow:hidden;text-overflow:ellipsis;max-width:240px}
+.sr .dl-r{display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex:none}
+.sr .dl-uvp{font:600 17px/1 "Sora",sans-serif;color:#6B7282}
+.sr .dl-uvp em{font:800 12px/1 "Outfit",sans-serif;font-style:normal;letter-spacing:.1em;margin-right:3px}
+.sr .dl-uvp s{text-decoration-thickness:2px;text-decoration-color:rgba(200,16,46,.7)}
+.sr .dl-ap{font:900 66px/1 "Outfit",sans-serif;letter-spacing:-.035em;background:linear-gradient(160deg,#F2333D 10%,#C8102E 50%,#8E1420 95%);-webkit-background-clip:text;background-clip:text;color:transparent;padding:0 2px 4px}
 
+/* ---- Spar-Siegel am Kreis ---- */
+.sr .spar{position:absolute;left:1552px;top:236px;width:172px;height:172px;border-radius:50%;display:grid;place-items:center;transform:rotate(-10deg);
+  background:radial-gradient(circle at 32% 26%,rgba(255,255,255,.45),transparent 38%),linear-gradient(140deg,#F2333D 0%,#D0142A 42%,#8E1420 100%);
+  box-shadow:inset 0 2px 0 rgba(255,255,255,.35),inset 0 -6px 12px rgba(0,0,0,.25),0 0 0 6px rgba(255,255,255,.9),0 0 0 7px rgba(184,115,51,.45),0 26px 50px -16px rgba(120,10,30,.7);
+  transition:transform .8s cubic-bezier(.34,1.5,.64,1),opacity .35s ease}
+.sr .spar.swap{transform:rotate(-30deg) scale(.4);opacity:0}
+.sr .spar .sp-in{display:flex;flex-direction:column;align-items:center;gap:6px;color:#fff;text-align:center}
+.sr .spar small{font:800 13px/1 "Outfit",sans-serif;letter-spacing:.18em;text-transform:uppercase;opacity:.9}
+.sr .spar b{font:900 36px/1 "Outfit",sans-serif;letter-spacing:-.03em;text-shadow:0 2px 0 rgba(70,0,12,.35)}
+
+/* ---- Fortschritt bis zum nächsten Rad ---- */
+.sr .dl-prog{position:absolute;left:1360px;top:984px;transform:translateX(-50%);display:flex;align-items:center;gap:14px}
+.sr .dl-bar{position:relative;width:320px;height:6px;border-radius:6px;background:rgba(255,255,255,.4);box-shadow:0 1px 3px rgba(0,0,0,.25);overflow:hidden}
+.sr .dl-bar i{position:absolute;left:0;top:0;bottom:0;width:0;border-radius:6px;background:linear-gradient(90deg,#B87333,#F0C8A0 50%,#E2232D)}
+.sr .dl-bar.run i{animation:fuell 8s linear forwards}
+@keyframes fuell{to{width:100%}}
+.sr .dl-n{padding:7px 14px;border-radius:999px;background:rgba(27,30,37,.72);color:rgba(255,255,255,.85);font:600 14px/1 "Sora",sans-serif;white-space:nowrap}
+.sr .dl-n b{color:#fff;font-weight:800}
 
 @media (prefers-reduced-motion:reduce){.sr .band .tk,.sr .hring::after,.sr .halo,.sr .gt{animation:none}}
 
