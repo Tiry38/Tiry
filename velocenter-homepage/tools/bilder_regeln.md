@@ -10,6 +10,8 @@ Die Arbeitsliste steht in `$RUNNER_TEMP/bilder/auftrag.json` (lies sie mit Read,
 - `pruefen`: Ausführungen **mit** Bild (`bild_jetzt`, Datei in `velocenter-homepage/`). Sieh dir das jetzige Bild mit Read an und prüfe es
   streng gegen Modell, Modelljahr und Farbe. Ist es falsch → besseres suchen (`ersetzen`) oder `entfernen`.
   Ist es richtig, aber es gibt eine klar bessere Fassung (höhere Auflösung, echte Seitenansicht, sauberer Hintergrund) → `ersetzen`. Sonst `ok`.
+  **Wichtig:** Ein Foto, das zweimal mit `ok` geprüft wurde, gilt danach als endgültig bestätigt und kommt nie mehr in `pruefen`.
+  Gib `ok` deshalb nur, wenn Modell, Modelljahr und Farbe wirklich sicher stimmen – sonst `ersetzen`, `entfernen` oder `unsicher`.
 - `geschwister`: andere Farben desselben Modells und ihre Bilder – nie dasselbe Bild für zwei verschiedene Farben.
 - `abgelehnt`: Bild-Adressen, die der Admin als falsch markiert hat – **nie wieder verwenden.**
 

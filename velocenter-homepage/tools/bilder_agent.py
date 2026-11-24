@@ -99,6 +99,8 @@ def varianten(aktiv, rows):
         e['rahmen'] = sorted(e['rahmen']); e['groessen'] = sorted(e['groessen']); e['veloids'] = sorted(e['veloids'])[:3]
     return out
 
+OK_AUTO = 2  # so oft ohne Mangel geprüft -> automatisch bestätigt (wie Admin „✓ Richtig“)
+
 def tage_seit(d):
     try: return (datetime.date.today() - datetime.date.fromisoformat(d)).days
     except Exception: return 9999
@@ -310,7 +312,7 @@ def cmd_anwenden(args):
     if isinstance(E, dict): E = E.get('entscheidungen', [])
     s = html_lesen(); bm = json_aus(s, 'bilderData'); st = status_lesen(); ber = json_aus(s, 'bilderBericht')
     unsicher = [u for u in ber.get('unsicher', [])]
-    z = dict(neu=[], ersetzt=[], entfernt=[], unsicher=[], ok=0, nicht=0)
+    z = dict(neu=[], ersetzt=[], entfernt=[], unsicher=[], ok=0, nicht=0, auto=0)
     for e in E[:120]:
         k = e.get('key'); akt = e.get('aktion'); info = A.get(k)
         if not info: print('übersprungen (nicht in Arbeitsliste):', k); continue
@@ -331,7 +333,9 @@ def cmd_anwenden(args):
             shutil.copyfile(kp, os.path.join(BASIS, ziel))
             war = bm.get(k) or ''
             bm[k] = ziel; s = bestand_patchen(s, k, ziel)
-            x.update(quelle=quelle, seite=seite, geprueft=HEUTE, gesucht=HEUTE, versuche=0, grund=grund)
+            x.update(quelle=quelle, seite=seite, geprueft=HEUTE, gesucht=HEUTE, versuche=0, grund=grund, ok_n=0)
+            if info.get('art') != 'qualitaet':  # anderes Foto -> Bestätigung gilt nicht mehr (Qualitäts-Runde = gleiche Aufnahme)
+                for f in ('pinned', 'bestaetigt', 'auto_bestaetigt'): x.pop(f, None)
             (z['ersetzt'] if war else z['neu']).append(dict(key=k, label=label(info), bild=ziel, quelle=quelle, seite=seite, grund=grund, ub=ub))
             if ub: z['unsicher'].append(k)
             unsicher = [u for u in unsicher if u['key'] != k]
@@ -342,6 +346,11 @@ def cmd_anwenden(args):
             z['entfernt'].append(dict(key=k, label=label(info), grund=grund))
         elif akt == 'ok':
             x.update(geprueft=HEUTE); z['ok'] += 1
+            # Tiry 24.11.2026: zweimal ohne Mangel geprüft (Modell, Jahr, Farbe) = automatisch bestätigt, nie mehr ersetzt.
+            # Zählt nur die echte Prüfung (`pruefen`), nicht die Qualitäts-Runde. Qualitäts-Runde läuft weiter (gleiche Aufnahme in besser).
+            if info.get('art') == 'pruefen' and bm.get(k) and not x.get('pinned'):
+                x['ok_n'] = x.get('ok_n', 0) + 1
+                if x['ok_n'] >= OK_AUTO: x.update(pinned=True, bestaetigt=HEUTE, auto_bestaetigt=True); z['auto'] += 1
             if e.get('quelle') and not x.get('quelle'): x['quelle'] = quelle
         elif akt == 'nicht_gefunden':
             x.update(gesucht=HEUTE, versuche=x.get('versuche', 0) + 1, grund=grund); z['nicht'] += 1
@@ -362,8 +371,8 @@ def cmd_anwenden(args):
     ber['gesamt'] = dict(auftrag['gesamt'], ohne_bild=max(0, neu_ohne))
     s = json_setzen(s, 'bilderBericht', ber)
     open(HTML, 'w', encoding='utf-8').write(s); status_schreiben(st)
-    print('neu=%d ersetzt=%d entfernt=%d unsicher=%d ok=%d nicht_gefunden=%d' % (
-        len(z['neu']), len(z['ersetzt']), len(z['entfernt']), len(z['unsicher']), z['ok'], z['nicht']))
+    print('neu=%d ersetzt=%d entfernt=%d unsicher=%d ok=%d nicht_gefunden=%d auto_bestaetigt=%d' % (
+        len(z['neu']), len(z['ersetzt']), len(z['entfernt']), len(z['unsicher']), z['ok'], z['nicht'], z['auto']))
     zus = os.path.join(TMP, 'zusammenfassung.txt')
     open(zus, 'w', encoding='utf-8').write('Bilder-Agent: %d neu, %d ersetzt, %d entfernt' % (
         len(z['neu']), len(z['ersetzt']), len(z['entfernt'])))
@@ -381,6 +390,7 @@ def cmd_entscheid(args, ja):
         if q and q not in ab: ab.append(q)
         bm[k] = ''; s = bestand_patchen(s, k, '')
         x.update(versuche=0, grund='vom Admin als falsch markiert'); x.pop('geprueft', None); x.pop('gesucht', None); x.pop('quelle', None)
+        for f in ('pinned', 'bestaetigt', 'auto_bestaetigt', 'ok_n'): x.pop(f, None)  # neues Foto muss wieder geprüft werden
         for f in ('neu', 'ersetzt'): ber[f] = [v for v in ber.get(f, []) if v['key'] != k]
         lab = alt.get('label') or k
         ber.setdefault('entfernt', []).append(dict(key=k, label=lab, grund='vom Admin als falsch markiert'))
