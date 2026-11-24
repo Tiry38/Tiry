@@ -2,3 +2,6 @@ forge-data/
 
 # lokale Abhängigkeiten (Container-Setup), nicht versionieren
 app-forge/node_modules/
+
+# private Fassungen mit transkribierter Original-Melodie – nicht veröffentlichen
+musik/privat/
