@@ -12,10 +12,12 @@ Marken- und Produktbilder gehören VELO DE VILLE. Die Renderings liegen deshalb 
 |---|---|---|
 | `AEB-PRO-MY27_Hauptfassung_4K60.mp4` | 16:9, 3840×2160, 60 fps, ohne Sprecher | 3:21 |
 | `AEB-PRO-MY27_Hauptfassung_Sprecher_4K60.mp4` | dito, mit Google-TTS-Stimme (Chirp3-HD Charon) | 3:21 |
-| `AEB-PRO-MY27_60s_16x9.mp4` | 1920×1080, 60 fps | 0:60 |
-| `AEB-PRO-MY27_60s_1x1.mp4` | 1080×1080, 60 fps | 0:60 |
-| `AEB-PRO-MY27_30s_9x16.mp4` | 1080×1920, 60 fps | 0:30 |
-| `AEB-PRO-MY27_15s_9x16.mp4` | 1080×1920, 60 fps | 0:15 |
+| `AEB-PRO-MY27_Hauptfassung_ohneMusik_4K60.mp4` | dito, nur Soundeffekte | 3:21 |
+| `AEB-PRO-MY27_60s_16x9.mp4` / `_1x1.mp4` | 1920×1080 bzw. 1080×1080, 60 fps: Basis + Farbe ausführlich, Fernlicht, Lichtfahrt für den Rest | 0:60 |
+| `AEB-PRO-MY27_30s_9x16.mp4` | 1080×1920, 60 fps: Motor, Akku, Automatik, Riemen, Farbe, Lichtfahrt, Preis | 0:30 |
+| `AEB-PRO-MY27_15s_9x16.mp4` | 1080×1920, 60 fps: Motor, Farbe, Lichtfahrt, Preis | 0:15 |
+| `*_ohneMusik.mp4` | jede Fassung zusätzlich nur mit Soundeffekten | |
+| `*_ProRes422LT.mov` | 15 s und 30 s als ProRes 422 LT | |
 | `*.srt` | Text-Overlays bzw. Sprechertext als Untertitel | |
 
 ## Technik
