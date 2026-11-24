@@ -6,17 +6,18 @@
  */
 
 const DESIGN_RULES = `
-# Design-Standard (Pflicht – "bombenmäßig", niemals altbacken)
-- Wirkung wie eine Premium-App 2026 (Apple Design Award / Dribbble-Top-Niveau). Verboten: Windows-98-/Baukasten-Look, Standard-Browser-Buttons und -Inputs, harte graue 1px-Kästen, flache graue Flächen, Serifen-Standardschrift, gequetschte Abstände, fehlende Hierarchie, statische Oberfläche ohne Bewegung.
-- KEINE Baukasten-Formen: keine Kasten-in-Kasten-Stapel, keine gleichförmigen Kachelraster, keine eckigen Standard-Boxen. Stattdessen organische, fließende Komposition: animierte Blobs (morphende border-radius-Formen), Wellen-Trenner, Kreise, Bubbles, Pillenformen, schwebende Elemente mit Glow, asymmetrische Hero-Bereiche, Tiefe durch Ebenen.
-- Coole, lebendige Farbverläufe überall: mehrstufige Verläufe (3+ Farben), sanft animierte Verlaufs-Verschiebung (background-position) auf Überschriften und Primär-Buttons, conic-/radial-gradient-Blobs, Verlaufs-Haarlinien-Ränder (mask-composite), Verläufe in Fortschrittsringen, Balken und Icons.
-- Hintergrund: mehrschichtige Verläufe (radiale "Aurora"-Glows + linearer Verlauf) aus der vorgegebenen Palette. Karten: Glassmorphism (backdrop-filter: blur, halbtransparente Fläche, feiner heller Rand), weiche Schatten, Radius 18–28px.
-- Primär-Buttons: Verlauf aus den Akzentfarben, Glow-Schatten, Druck-Animation (scale .97). Sekundär: Glas-Stil.
-- Typografie: System-Schriften ("Segoe UI Variable", "SF Pro Display", Inter, system-ui, Roboto, sans-serif), klare Skala (z. B. 32/22/17/15/13px), Zahlen mit font-variant-numeric: tabular-nums, großzügige Zeilenhöhe.
-- Bewegung: Mikro-Animationen 150–350ms (transform/opacity), sanftes Einblenden von Listenelementen, animierte Fortschrittsringe/-balken; @media (prefers-reduced-motion: reduce) schaltet Animationen ab.
-- Layout: mobile-first 360–430px, max-width 480px zentriert, 8px-Raster, safe-area-insets (env()), Tipp-Flächen >= 44px, kein horizontales Scrollen, Bottom-Navigation oder ein klar fokussierter Hauptscreen.
-- Scrollbalken ausblenden wie in nativen Apps (scrollbar-width:none; ::-webkit-scrollbar{display:none}), Scrollen bleibt möglich.
-- Icons: inline SVG mit einheitlicher Strichstärke. Leere Zustände mit kleiner Illustration und klarer Handlungsaufforderung.
+# Design-Standard (Pflicht – Zukunfts-Design, 20 Jahre voraus)
+- Ziel: Die App sieht aus, als käme sie aus der Zukunft. Alles, was jede KI standardmäßig baut, gilt als veraltet. Milliarden-Test vor dem Bauen: "Würde jede KI für jeden Nutzer genau das bauen?" Wenn ja: verwerfen, neu denken.
+- VERBOTEN (KI-Einheitslook): Glas-Karten/backdrop-filter-Pillen als Hauptstilmittel, Lila-Pink-Blau-Verläufe, Aurora-/Verlaufs-Blobs als Hintergrundtapete, "weiche Glows" überall, Kartenraster (3 Kacheln), Kasten-in-Kasten, zentrierter Hero mit Titel+Untertitel+2 Buttons, Emojis als Icons, eine einzige Schriftgröße, gleichförmige Abstände, Fade-in-up auf jedem Element, Standard-Schatten auf allem, Windows-98-/Baukasten-Look, Standard-Browser-Buttons und -Inputs.
+- KONZEPT ZUERST: eine Welt/Metapher in einem Satz (z. B. "Die Zeit als Flüssigkeit, die man mit dem Finger verschiebt"). Daraus folgen Formen, Bewegung, Farbe. Dazu EIN Signatur-Moment, das man jemandem auf dem Handy zeigt.
+- Pro App mindestens 3 Zukunfts-Techniken: (1) echte Räumlichkeit per Canvas/WebGL mit Tiefe, Licht und Parallaxe aus Finger/Gyroskop (DeviceOrientation, mit Rückfall); (2) generative Oberflächen per Shader oder Canvas (Noise-Felder, SDF-Formen, Flüssigkeit, Partikel), live gerechnet und auf Eingabe reagierend; (3) Physik statt Easing: Feder-Dynamik (Masse/Steifigkeit/Dämpfung), Trägheit, Elemente zum Ziehen und Werfen; (4) Typografie als Architektur: riesige Zahlen/Wörter (20–40vw) als Bildelement, extremer Größenkontrast, variable Schriftachsen (font-variation-settings) animiert; (5) gebrochenes Editorial-Raster: asymmetrisch, überlappend, mutiger Leerraum; (6) Material statt Effekt: Körnung/Grain (SVG feTurbulence), Dithering, Chrom, Flüssigmetall; (7) morphende Übergänge (View Transitions API mit Rückfall, ein Element verwandelt sich ins nächste); (8) reaktive Umgebung: Oberfläche reagiert auf Fingernähe, Tageszeit, Geschwindigkeit; (9) dezentes erzeugtes Sound-Design per WebAudio (standardmäßig leise, abschaltbar).
+- Farbe: zurückhaltend und radikal zugleich – ein Grundton aus der Palette + EIN starker Akzent, Farben in oklch(). Farbe ist ein Ereignis (Erfolg, Interaktion), keine Tapete. Verläufe nur mit Bedeutung, nie als Standarddekor.
+- Modernes CSS nutzen: @property (animierbare Variablen), oklch(), color-mix(), Container Queries, :has(), animation-timeline: scroll()/view() mit Rückfall, text-wrap: balance, clip-path/mask für nicht-rechteckige Formen.
+- Typografie: System-Schriften ("Segoe UI Variable", "SF Pro Display", system-ui, Roboto, sans-serif), harte Hierarchie mit großem Sprung (z. B. 96/28/15/12px), Zahlen mit font-variant-numeric: tabular-nums, enge Laufweite bei großen Größen.
+- Bewegung: jede Animation hat Bedeutung (Ursache → Wirkung), Federn statt fester Dauer; @media (prefers-reduced-motion: reduce) reduziert Bewegung stark, das Design bleibt trotzdem besonders.
+- Layout: mobile-first 360–430px, safe-area-insets (env()), Tipp-Flächen >= 44px, kein horizontales Scrollen. Scrollbalken ausblenden (scrollbar-width:none; ::-webkit-scrollbar{display:none}).
+- Icons: eigene inline-SVG mit einheitlicher Strichstärke, gern animiert (Pfad-Morph). Leere Zustände mit generativer Illustration und klarer Handlungsaufforderung.
+- Leistung: 60 fps auf Mittelklasse-Handy; Canvas/WebGL mit begrenztem devicePixelRatio (max. 2), Pause bei visibilitychange, WebGL immer mit Canvas-2D-Rückfall.
 - Kontrast: Text >= 4.5:1. Farben ausschließlich über CSS-Variablen aus der Palette.
 `;
 
@@ -128,7 +129,7 @@ Farbpalette (als CSS-Variablen verwenden):
 - Hintergrund-Verlauf: ${palette.bg.join(', ')}
 - Akzent-Verlauf: ${palette.accent.join(', ')}  · Glow: ${palette.glow}
 - Text: ${palette.text} · gedämpft: ${palette.muted} · Text auf Akzent: ${palette.onAccent}
-Stil-Richtung: ${style.name} (Radius ~${style.radius}px, Blur ~${style.blur}px)
+Material-Hinweis: ${style.name} (Radius ~${style.radius}px) – nur ein Ausgangspunkt, die Zukunfts-Design-Regeln haben Vorrang (kein Glas-Einheitslook).
 Sprache: ${lang}
 
 Alle Features aus dem Konzept müssen funktionieren. Liefere nur das HTML-Dokument.`;
@@ -149,7 +150,7 @@ ${html}
 Liefere das vollständige, korrigierte HTML-Dokument.`;
 }
 
-const REVIEW_SYSTEM = `Du bist ein extrem strenger Design-Juror (Apple Design Award) und UX-Tester. Du bewertest einen Screenshot einer Handy-App plus ihren Code. Du bist ehrlich und kritisch: 9–10 nur für echte Spitzenklasse, 7–8 für gut, darunter für Mittelmaß. Altbackener, blockartiger oder Standard-Browser-Look ergibt maximal 4 Punkte im Design. Baukasten-Optik (gestapelte Kästen, starre Kachelraster, eckige Boxen) ergibt maximal 5 Punkte. Fehlende oder langweilige Farbverläufe ergeben maximal 6 Punkte.`;
+const REVIEW_SYSTEM = `Du bist ein extrem strenger Design-Juror (Apple Design Award) und UX-Tester. Du bewertest einen Screenshot einer Handy-App plus ihren Code. Du bist ehrlich und kritisch: 9–10 nur für echte Spitzenklasse, 7–8 für gut, darunter für Mittelmaß. Altbackener, blockartiger oder Standard-Browser-Look ergibt maximal 4 Punkte im Design. Baukasten-Optik (gestapelte Kästen, starre Kachelraster, eckige Boxen) ergibt maximal 5 Punkte. Der KI-Einheitslook (Glas-Karten und Glaspillen als Hauptstil, Lila-Pink-Verläufe, Aurora-Blobs als Tapete, Glows überall, zentrierter Standard-Hero) ergibt maximal 5 Punkte im Design. Kein erkennbares Konzept und kein Signatur-Moment ergibt maximal 6 Punkte. 9–10 nur, wenn die App aussieht, als käme sie aus der Zukunft: Räumlichkeit, generative Oberflächen, Physik, radikale Typografie, mutiges Layout.`;
 
 const REVIEW_SCHEMA = {
   type: 'object',
@@ -173,7 +174,7 @@ Kernidee: ${concept.core_loop}
 Automatischer Testbericht: ${test.errors.length} Fehler, ${test.warnings.length} Warnungen.
 ${test.warnings.map((w) => `- ${w}`).join('\n')}
 
-Bewerte (1–10): design (visuelle Qualität, modern, Verläufe, Hierarchie), ux (Bedienbarkeit, Klarheit), sense (ergibt die App Sinn, würde man sie nutzen/bezahlen), polish (Details, Animationen, leere Zustände, Texte).
+Bewerte (1–10): design (visuelle Qualität, Zukunfts-Design statt KI-Einheitslook, Konzept, Signatur-Moment, Hierarchie), ux (Bedienbarkeit, Klarheit), sense (ergibt die App Sinn, würde man sie nutzen/bezahlen), polish (Details, Animationen, leere Zustände, Texte).
 Nenne konkrete Bugs und die wichtigsten 3–6 Verbesserungen (präzise umsetzbar).
 
 Code:

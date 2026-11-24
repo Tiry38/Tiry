@@ -37,10 +37,17 @@ testet, bewertet und dauerhaft selbst weiterentwickelt. Besitzer: Tiry. UI-Sprac
 - `scripts/cloud-run.js` + `.github/workflows/forge-cloud.yml` – Cloud-Autopilot, Bibliothek im Branch `forge-library`.
 - `cloud/` – Firebase Hosting (Galerie + Fernsteuerung) und Firestore-Regeln.
 
-## Design-Regeln (Pflicht – für das Programm UND für erzeugte Apps)
-- „Bombenmäßig“, Premium 2026. **Keine Baukasten-Formen**: keine Kasten-in-Kasten, keine eckigen Kachelraster.
-  Organisch: Kreise, Pillen, Blobs, Wellen, große Radien, gestaffelte Layouts.
-- **Coole Farbverläufe** überall (3+ Farben, sanft animiert), Glas-Effekte, weiche Glows.
+## Design-Regeln (Pflicht – für ALLES Visuelle in diesem Repo: Programm, erzeugte Apps, Velo-TV, Webseiten)
+- **Vor jeder visuellen Arbeit den Skill `zukunfts-design` laden** (`.claude/skills/zukunfts-design/SKILL.md`) und
+  zusätzlich vorhandene Design-Skills (`design-taste-frontend`, `modern-awwwards-web-design`, `artifact-design` bei Artifacts).
+  Tiry muss das nie extra sagen.
+- Ziel: **Zukunfts-Design, 20 Jahre voraus** – nicht „modern 2026“. Milliarden-Test: Würde jede KI das so bauen? Dann verwerfen.
+- **Verboten (KI-Einheitslook):** Glas-Karten/Glaspillen als Hauptstil, Lila-Pink-Verläufe, Aurora-Blobs als Tapete,
+  Glows überall, Kachelraster, Kasten-in-Kasten, zentrierter Standard-Hero, Emoji-Icons, Fade-in-up auf allem.
+- **Pflicht:** Konzept-Satz + Signatur-Moment vor dem Code; mind. 3 Zukunfts-Techniken (Räumlichkeit/WebGL, generative
+  Shader-Oberflächen, Feder-Physik, Typografie als Architektur, gebrochenes Editorial-Raster, Material/Grain,
+  morphende Übergänge, reaktive Umgebung). Farbe: ein Grundton + ein radikaler Akzent (oklch).
+- Generator-Regeln der App Forge stehen in `app-forge/src/core/prompts.js` (`DESIGN_RULES`, Design-Jury) – synchron halten.
 - Kontrast Text ≥ 4.5:1, Tipp-Flächen ≥ 44 px, `prefers-reduced-motion` beachten, kein horizontales Scrollen.
 - Erzeugte Apps: eine HTML-Datei, offline, keine externen Ressourcen/Google Fonts, keine Tracker.
 
@@ -56,5 +63,5 @@ testet, bewertet und dauerhaft selbst weiterentwickelt. Besitzer: Tiry. UI-Sprac
 
 ## Velo-TV (Ladenfernseher)
 - Ordner `velo-tv/`, Leitfaden `velo-tv/LIESMICH.md`. Electron-Programm: Büro-PC = Zentrale, Kasse und zweiter Büro-PC = Bedienplätze,
-  LG-Fernseher zeigt `http://<Zentrale>:8833` im Browser. Design = neue Homepage (tiry38.github.io/velo-center-web) (Herbstfoto, Milchglas, rote Pillen).
+  LG-Fernseher zeigt `http://<Zentrale>:8833` im Browser. Markenbasis = neue Homepage (tiry38.github.io/velo-center-web): Herbstfoto und Velocenter-Rot bleiben; bei Neugestaltung gilt `zukunfts-design` (kein Milchglas-/Pillen-Einheitslook).
 - `npm test` muss grün sein; nach UI-Änderungen den Smoke-Test (siehe LIESMICH) laufen lassen und Screenshots ansehen.
