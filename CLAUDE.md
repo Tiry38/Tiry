@@ -55,6 +55,7 @@ testet, bewertet und dauerhaft selbst weiterentwickelt. Besitzer: Tiry. UI-Sprac
 - Quelle: `velocenter-homepage/` (Regeln in `ENTSCHEIDUNGEN.md`, Ablauf in `LIVEGANG.md`), bauen mit
   `python3 tools/live_bauen.py <tmp>`, dann in Repo `Tiry38/velo-center-web` (`main`) kopieren (ohne `CNAME`, `README.md`, `google.json`).
 
+- **Direkt live (Tiry 24.11.2026):** Fehlerbehebungen und von Tiry konkret bestellte Änderungen sofort live stellen und danach live prüfen – keine Vorschau-Seiten dafür. Vorschauen nur für neue Design-Vorschläge, danach wieder löschen.
 - **Qualitäts-Regel für jeden Vorschlag (Tiry 15.11.2026, verbindlich):** Nie „Billo“-Entwürfe zeigen. Jeder Vorschlag muss auf dem Niveau der
   bestehenden Homepage oder darüber liegen: hochmodern wie bei einem Hightech-Unternehmen (Glas, Tiefe, Licht, saubere Bewegung, starke Funktionen).
   Vor dem Zeigen selbst vergrößert gegen die echte Seite prüfen; was dagegen abfällt, wird nicht gezeigt. Lieber ein ausgearbeiteter Vorschlag als mehrere schnelle.
