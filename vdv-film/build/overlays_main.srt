@@ -1,5 +1,5 @@
 1
-00:00:00,500 --> 00:00:09,000
+00:00:00,300 --> 00:00:09,000
 AEB PRO · Modelljahr 2027
 
 2
@@ -7,7 +7,7 @@ AEB PRO · Modelljahr 2027
 Allround. Neu gedacht. Ein Rahmen, vier Motoren.
 
 3
-00:00:18,800 --> 00:00:40,500
+00:00:18,700 --> 00:00:40,500
 Vier Motoren: 60, 75, 90 und 120 Nm. Gewählt: Performance Line CX, 120 Nm.
 
 4
@@ -111,9 +111,9 @@ Front-Korb, Frontträger oder Adapter: vorne mehr Platz für Einkauf und Gepäck
 Doppelter Ladestrom gegenüber 2 A – Bosch 4A
 
 29
-00:02:58,300 --> 00:03:11,000
+00:02:58,200 --> 00:03:11,000
 AEB 990CX PRO · 120 Nm · 800 Wh · Automatik + Riemen · 6.677 €
 
 30
-00:03:11,300 --> 00:03:21,000
+00:03:11,200 --> 00:03:20,950
 Dein AEB PRO. Konfiguriere deins: konfigurator.velo-de-ville.com

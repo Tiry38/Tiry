@@ -14,13 +14,13 @@ const ASP = W / H; const V = ASP < 0.8, SQ = !V && ASP < 1.3;
 const L = V ? {
   stage: { x: 0, y: 620, w: 1080, h: 600 }, sc: { x: 540, y: 905 }, bw: 1040,
   panel: { x: 40, y: 1250, w: 1000, h: 520 }, tabs: { x: 40, y: 1812, w: 1000 },
-  hd: { x: 60, y: 170, h1: 104, small: .5 }, cap: { x: 60, y: 1080 }, price: { x: 60, y: 1190, fs: 46 }, note: { x: 60, y: 600, w: 900 },
+  hd: { x: 60, y: 170, h1: 80, small: .62 }, cap: { x: 60, y: 1080 }, price: { x: 60, y: 1190, fs: 46 }, note: { x: 60, y: 600, w: 900 },
   giant: { x: -40, y: 420, fs: 420 }, motors: 'list', top: false, concept: { x: 60, y: 1880 }
 } : SQ ? {
   stage: { x: 0, y: 200, w: 1080, h: 560 }, sc: { x: 540, y: 470 }, bw: 900,
-  panel: { x: 40, y: 760, w: 1000, h: 260 }, tabs: { x: 40, y: 1040, w: 1000 },
+  panel: { x: 40, y: 760, w: 1000, h: 250 }, tabs: { x: 40, y: 1020, w: 1000 },
   hd: { x: 50, y: 64, h1: 70, small: .55 }, cap: { x: 50, y: 560 }, price: { x: 50, y: 690, fs: 34 }, note: { x: 50, y: 560, w: 900 },
-  giant: { x: -30, y: 200, fs: 330 }, motors: 'list', top: false, concept: { x: 50, y: 1058 }
+  giant: { x: -30, y: 200, fs: 330 }, motors: 'list', top: false, concept: { x: 50, y: 1052 }
 } : {
   stage: { x: 0, y: 120, w: 1240, h: 820 }, sc: { x: 640, y: 560 }, bw: 1160,
   panel: { x: 1268, y: 118, w: 600, h: 840 }, tabs: { x: 120, y: 1010, w: 1720 },
@@ -30,7 +30,7 @@ const L = V ? {
 const IW = 3312, IH = 2032; const S0 = L.bw / IW;
 if (!L.top) $('#top').style.display = 'none';
 const scale = SQ ? 0.82 : 1; // Text-Skalierung im Quadrat
-$('#concept').style.left = L.concept.x + 'px'; $('#concept').style.top = L.concept.y + 'px';
+{ const ce = $('#concept'); ce.style.top = L.concept.y + 'px'; ce.style.fontSize = (V ? 22 : 13) + 'px'; if (!V && !SQ) { ce.style.right = '56px'; } else ce.style.left = L.concept.x + 'px'; }
 
 /* ---------- Mathe ---------- */
 const clamp = (v, a = 0, b = 1) => Math.max(a, Math.min(b, v));
@@ -43,7 +43,7 @@ function spring(t, f = 1.4, z = 0.72) { // Sprungantwort einer gedämpften Feder
 }
 function track(list, t, f, z, v0) { // Überlagerung von Federsprüngen
   let v = v0 !== undefined ? v0 : (list.length ? list[0].v : 0), prev = v;
-  for (const e of list) { if (e.t > t) break; v += (e.v - prev) * spring(t - e.t, f, z); prev = e.v; }
+  for (const e of list) { if (e.t > t) break; v += (e.v - prev) * spring(t - e.t, e.f || f, e.z || z); prev = e.v; }
   return v;
 }
 const ease = k => k < .5 ? 4 * k * k * k : 1 - Math.pow(-2 * k + 2, 3) / 2;
@@ -89,12 +89,12 @@ function panelLayout(t, settled) { // y-Positionen aller Zeilen
 function openAt(id, t) { return track(P(id), t, 1.5, .86, 0); }
 ev.appearAt = {}; rows.forEach(r => { if (r.appear) ev.appearAt[r.id] = 1e9; });
 
-const pan = L.panel;
+const pan = L.panel; const PS = V ? 1.45 : 1; const PH = pan.h / PS; // Panel-Skalierung (Handy lesbar)
 function optScreen(id, oi, t) { // Bildschirmposition einer Option (eingeschwungen)
   const lay = panelLayout(t, true); const sc = track(ev.scroll, t + 5, 1, .9, 0);
-  return { x: pan.x + pan.w * 0.56, y: pan.y + lay[id].y + ROW + oi * OPT + OPT / 2 + 4 - sc };
+  return { x: pan.x + pan.w * 0.56, y: pan.y + (lay[id].y + ROW + oi * OPT + OPT / 2 + 4 - sc) * PS };
 }
-function headScreen(id, t, sc) { const lay = panelLayout(t, true); return { x: pan.x + pan.w - 70, y: pan.y + lay[id].y + ROW / 2 - sc }; }
+function headScreen(id, t, sc) { const lay = panelLayout(t, true); return { x: pan.x + pan.w - 70, y: pan.y + (lay[id].y + ROW / 2 - sc) * PS }; }
 
 let cam0 = { cx: .5, cy: .52, z: 1 };
 let curPos = { x: W * .55, y: H * .55 };
@@ -113,7 +113,7 @@ for (const step of plan) {
     ev.sfx.push({ t: T, k: 'tab' });
     let t = T + pace.head;
     if (tb.id === 'AUSSTATTUNGSPAKETE' && pace.pk) { // erklären, nicht wählen
-      tb.q.forEach((q, i) => { const id = tb.id + '/' + q.n; const l = panelLayout(t, true); const y = pan.y + l[id].y + 40 - scrollV;
+      tb.q.forEach((q, i) => { const id = tb.id + '/' + q.n; const l = panelLayout(t, true); const y = pan.y + (l[id].y + 40 - scrollV) * PS;
         addCur(t, pan.x + pan.w - 120, y); ev.hover.push({ t, id, until: t + pace.pk }); ev.sfx.push({ t: t + .25, k: 'hover' }); t += pace.pk; });
       t += .6;
     }
@@ -127,11 +127,12 @@ for (const step of plan) {
       const id = tb.id + '/' + c.q;
       // 1 Kopfzeile anklicken -> öffnet
       const hp = headScreen(id, t, scrollV); addCur(t, hp.x, hp.y); const tc = t + pace.open * .55; click(tc, 'tick');
-      P(id).push({ t: tc, v: 1 });
+      const qk = (step[2] === 'fast' || step[2] === 'turbo') ? { f: 5, z: .95 } : {};
+      P(id).push({ t: tc, v: 1, ...qk });
       const lay2 = panelLayout(tc + 3, true); const rowY = lay2[id].y; const nOpt = rows.find(r => r.id === id).q.o.length;
       let target = rowY - 14; const optY = rowY + ROW + c.o * OPT;
-      if (optY + OPT + 30 - target > pan.h) target = optY - pan.h * .55;
-      scrollV = target; ev.scroll.push({ t: tc + .05, v: scrollV });
+      if (optY + OPT + 30 - target > PH) target = optY - PH * .55;
+      scrollV = target; ev.scroll.push({ t: tc + .05, v: scrollV, ...qk });
       ev.cam.push({ t: tc, cx: .5, cy: .52, z: 1 });
       t += pace.open;
       // 2 Option wählen
@@ -146,7 +147,7 @@ for (const step of plan) {
       t += pace.pick + pace.hold;
       ev.caps.push({ t: tp + .25, until: t + .1, k: c.q, v: c.cap, s: c.capS, fast: step[2] !== 'full' && step[2] !== 'mid' });
       if (c.note && pace.note) { ev.cam.push({ t: t - .2, cx: .5, cy: .52, z: 1 }); ev.notes.push({ t, until: t + pace.note, k: c.note[0], v: c.note[1] }); t += pace.note; }
-      P(id).push({ t: t - .15, v: 0 });
+      P(id).push({ t: t - .15, v: 0, ...qk });
     }
     t += pace.tail; ev.cam.push({ t: t - pace.tail * .8, cx: .5, cy: .52, z: 1 });
     s.dur = t - T;
@@ -164,7 +165,7 @@ ev.sel = ev.sel || [];
 const sc = k => scenes.find(s => s.kind === k);
 const sMotor = sc('motor'), sModel = sc('model'), sIntro = sc('intro'), sSum = sc('summary'), sOut = sc('outro');
 const mFast = sMotor.dur < 15;
-const MT = sMotor.dur < 6 ? { rise: 0, scan: .2, nm: .15, hl: 9e9, click: sMotor.dur * .42, morph: sMotor.dur * .56, ui: sMotor.dur * .86 }
+const MT = sMotor.dur < 6 ? { rise: 0, scan: .2, nm: .1, hl: 9e9, click: sMotor.dur * .55, morph: sMotor.dur * .66, ui: sMotor.dur * .9 }
   : mFast ? { rise: 0, scan: 1.2, nm: 1.0, hl: 9e9, click: sMotor.dur * .52, morph: sMotor.dur * .62, ui: sMotor.dur * .84 }
   : { rise: 1.4, scan: 3.6, nm: 3.8, hl: 6.6, click: 15.6, morph: 16.6, ui: 19.8 };
 // Bike erscheint beim Motor-Morph
@@ -177,6 +178,7 @@ ev.sfx.sort((a, b) => a.t - b.t); ev.cur.sort((a, b) => a.t - b.t); ev.cam.sort(
 
 /* ---------- DOM aufbauen ---------- */
 const pin = $('#pin'); const rowEls = {};
+if (PS !== 1) { pin.style.transform = `scale(${PS})`; pin.style.transformOrigin = '0 0'; pin.style.width = (pan.w / PS) + 'px'; pin.style.right = 'auto'; }
 const panel = $('#panel'); Object.assign(panel.style, { left: pan.x + 'px', top: pan.y + 'px', width: pan.w + 'px', height: pan.h + 'px' });
 D.tabs.forEach((tb, ti) => { const gEl = document.createElement('div'); gEl.className = 'grp'; gEl.textContent = tb.id; gEl.id = 'G' + ti; pin.appendChild(gEl); });
 for (const r of rows) {
@@ -218,7 +220,7 @@ Object.assign(ov.style, V ? { left: '60px', top: '700px' } : SQ ? { left: '50px'
 if (V) ov.querySelectorAll('.s').forEach((e, i) => { if (i % 4 > 1) e.style.display = 'none'; });
 // Summary + Outro
 const sumEl = $('#sum'); const labels = ['Motor', 'Akku', 'Schaltung + Antrieb', 'Display', 'Licht', 'Farbe'];
-const SS = V ? { x: 60, y: 1180, m: 110, li: 30 } : SQ ? { x: 560, y: 110, m: 50, li: 20 } : { x: 1150, y: 170, m: 120, li: 30 };
+const SS = V ? { x: 60, y: 960, m: 96, li: 28 } : SQ ? { x: 560, y: 110, m: 50, li: 20 } : { x: 1150, y: 170, m: 120, li: 30 };
 sumEl.innerHTML = `<div class="l mono" style="margin:0 0 14px">Deine Konfiguration</div><div class="m" style="font-size:${SS.m}px">AEB 990CX<br>PRO</div><ul style="font-size:${SS.li}px">${D.summary.map((x, i) => `<li><span>${labels[i]}</span>${x}</li>`).join('')}</ul><div class="pr" style="font-size:${SS.m * .62}px">${euro(D.finalPrice)}</div><div class="src mono">Preis laut Konfigurator · Stand 24.11.2026 · ${D.finalKg} (± 10 %)</div>`;
 Object.assign(sumEl.style, { left: SS.x + 'px', top: SS.y + 'px', width: (V ? 960 : SQ ? 440 : 680) + 'px' });
 if (SQ) sumEl.querySelector('ul').style.display = 'none';
@@ -283,7 +285,7 @@ function seek(t) {
   const inSum = S.kind === 'summary' || S.kind === 'outro';
   const sumK = clamp(spring(t - sSum.t0, .5, .95));
   let shiftX = 0, shiftY = 0;
-  if (!V && !SQ) shiftX = -sumK * 120; else if (V) shiftY = -sumK * 0;
+  if (!V && !SQ) shiftX = -sumK * 120; if (V) shiftY = -sumK * 300; else if (V) shiftY = -sumK * 0;
   if (S.kind === 'summary') { cam.z *= 1 + lt * .004; }
   const outK = clamp(spring(t - sOut.t0, .5, .95));
   const outK0 = clamp(spring(t - sOut.t0, .5, .95)); if (!V && !SQ) shiftX += outK0 * 640; if (V) shiftY += outK0 * 380; if (SQ) shiftY += outK0 * 140;
@@ -341,7 +343,7 @@ function seek(t) {
     if (outK > 0) { g.globalAlpha = outK * .8; g.drawImage(lines[1], r.x, r.y, r.w, r.h); g.globalAlpha = 1; }
   }
   { const tg = g.createLinearGradient(0, 0, 0, 150); tg.addColorStop(0, 'rgba(18,18,20,.92)'); tg.addColorStop(1, 'rgba(18,18,20,0)'); g.fillStyle = tg; g.fillRect(0, 0, W, 150);
-    if (!V) { const bg3 = g.createLinearGradient(0, H * .62, 0, H); bg3.addColorStop(0, 'rgba(18,18,20,0)'); bg3.addColorStop(1, 'rgba(18,18,20,.82)'); g.fillStyle = bg3; g.fillRect(0, H * .62, W * .7, H * .38); } }
+    if (!V) { const bg3 = g.createLinearGradient(0, H * .62, 0, H); bg3.addColorStop(0, 'rgba(18,18,20,0)'); bg3.addColorStop(1, 'rgba(18,18,20,.92)'); g.fillStyle = bg3; g.fillRect(0, H * .62, W * .7, H * .38); } }
   // Vignette + Grain (Material)
   const vg = g.createRadialGradient(W / 2, H / 2, Math.min(W, H) * .35, W / 2, H / 2, Math.max(W, H) * .75); vg.addColorStop(0, 'rgba(0,0,0,0)'); vg.addColorStop(1, 'rgba(0,0,0,.45)');
   g.fillStyle = vg; g.fillRect(0, 0, W, H);
@@ -364,18 +366,18 @@ function seek(t) {
   // Motoren
   { const on = S.kind === 'motor'; motorsEl.style.display = on ? 'block' : 'none';
     if (on) {
-      const tClick = MT.click, tm = MT.morph;
+      const tClick = MT.click, tm = MT.morph; const lead = Math.min(.9, tm - tClick - .05);
       mEls.forEach((e, i) => {
-        const rise = clamp(spring(lt - MT.rise - i * .22, .9, .42), -.2, 1.3);
+        const rf = sMotor.dur < 6 ? 2.6 : mFast ? 1.6 : .9; const rise = clamp(spring(lt - MT.rise - i * (sMotor.dur < 6 ? .1 : .22), rf, L.motors === 'row' ? .42 : .7), -.2, 1.3);
         const fall = i < 3 ? clamp(spring(lt - tClick - .15 - i * .06, .8, .9)) : 0;
-        const z = lerp(-1600, 0, rise) - fall * 1400, rx = lerp(38, 0, clamp(rise));
+        const zd = L.motors === 'row' ? 1600 : 500; const z = lerp(-zd, 0, rise) - fall * zd * .9, rx = lerp(38, 0, clamp(rise));
         let x, y;
         if (L.motors === 'row') { x = mLay.x0 + i * mLay.dx; y = mLay.y; } else { x = mLay.x0; y = mLay.y + i * mLay.dy; }
         let tr = `translate3d(${x}px,${y}px,${z}px) rotateX(${rx}deg)`;
         e.style.opacity = clamp(rise * 1.5) * (1 - fall);
         // CX morpht in den Rahmen
         const disc = e.querySelector('.disc'), txt = e.querySelector('.txt');
-        if (i === 3 && lt > tm - .9) { const k = ease(clamp((lt - tm + .9) / 1.0));
+        if (i === 3 && lt > tm - lead) { const k = ease(clamp((lt - tm + lead) / (lead + .1)));
           const bx = L.sc.x - (.5 - .455) * IW * S0, by = L.sc.y + (.765 - .52) * IH * S0; const d = mLay.disc;
           const tx = bx - d / 2 - x, ty = by - d / 2 - y; const sTarget = (IW * S0 * .062) / (d * .76);
           disc.style.transform = `translate(${tx * k}px,${ty * k}px) scale(${lerp(1, sTarget, k)})`; disc.style.transformOrigin = '50% 50%';
@@ -393,7 +395,7 @@ function seek(t) {
         // nacheinander hervorheben
         const hl = MT.hl + i * 2.2; const isH = lt > hl && lt < hl + 2.2;
         const dim = (lt > MT.hl && lt < MT.hl + 8.8 && !isH) ? .45 : 1;
-        txt.style.filter = ''; e.querySelector('.use').style.color = isH ? 'var(--ink)' : ''; e.querySelector('.txt').style.opacity = (i === 3 && lt > tm - .9) ? txt.style.opacity : dim;
+        txt.style.filter = ''; e.querySelector('.use').style.color = isH ? 'var(--ink)' : ''; e.querySelector('.txt').style.opacity = (i === 3 && lt > tm - lead) ? txt.style.opacity : dim;
       });
       // Scan-Linie
       const sp2 = clamp((lt - MT.scan) / 1.6); if (sp2 > 0 && sp2 < 1) { const sx = lerp(-200, W + 200, sp2); g.fillStyle = 'rgba(255,200,150,.55)'; g.fillRect(sx, (L.motors === 'row' ? mLay.y - 60 : mLay.y - 40), 1.5, L.motors === 'row' ? 720 : mLay.dy * 4 + 40); }
@@ -422,7 +424,7 @@ function seek(t) {
 
   // Konfigurator-UI ein
   const uiOn = t >= sMotor.t0 + MT.ui - .2 && !(t > sSum.t0 + .1);
-  const uiK = clamp(spring(t - (sMotor.t0 + MT.ui), .9, .82)) * (1 - clamp(spring(t - sSum.t0, .8, .9)));
+  const uiK = clamp(spring(t - (sMotor.t0 + MT.ui), .9, .82)) * (1 - clamp((t - sSum.t0 + .45) / .4));
   panel.style.transform = `translateX(${(1 - uiK) * (V || SQ ? 0 : 680)}px) translateY(${(1 - uiK) * (V || SQ ? 600 : 0)}px)`; panel.style.opacity = clamp(uiK * 3);
   tabsEl.style.opacity = uiK; $('#uline').style.opacity = uiK; $('#top').style.opacity = clamp(uiK * 1.5) * (L.top ? 1 : 0);
   $('#price').style.opacity = uiOn ? uiK : 0;
@@ -462,7 +464,7 @@ function seek(t) {
       sumEl.style.opacity = clamp((S.dur - lt) / .5); }
     const o2 = S.kind === 'outro'; outEl.style.display = o2 ? 'block' : 'none';
     if (o2) { const f = Math.min(1, S.dur / 6); const ch = outEl.children; for (let i = 0; i < ch.length; i++) { const k = clamp((lt - (.3 + i * .35) * f) / (.6 * f)); ch[i].style.clipPath = `inset(-10% ${100 - ease(k) * 100}% -10% 0)`; } } }
-  $('#concept').style.opacity = (S.kind === 'intro' || S.kind === 'outro') ? 1 : .55;
+  $('#concept').style.opacity = 1;
   // Cursor
   { const cx2 = track(ev.cur.map(e => ({ t: e.t, v: e.x })), t, 1.5, .8, W * .55), cy2 = track(ev.cur.map(e => ({ t: e.t, v: e.y })), t, 1.5, .8, H * .6);
     const curOn = (S.kind === 'model' && lt > 2) || (S.kind === 'motor' && lt > MT.hl - 1 && lt < MT.click + .8) || (S.kind === 'tab' && !(scenes.find(s => s === S).pace === 'turbo'));
