@@ -625,4 +625,10 @@
 - Kein Video (nicht interaktiv). Stattdessen in `hintergrund12/hg12.js`: Tiefenunschärfe (24 Proben) + Lichtstrahlen (14 Proben) einmal beim Laden im Bildraum in eine Textur (`pre`, höchstens 1400 px breit); Fokus-Tiefe unter der Maus rechnet JS einmal je Bild (`dmap`/`dAt`/`focus`) statt je Pixel; Laub-Wind einmal statt je Ebene. Fällt das Vorrechnen aus (`uPre`/`uFd<0`), läuft der alte Weg.
 - Gemessen (Chromium ohne Grafikkarte, 1120×700): 284 → 198 ms/Bild (−30 %). Bild alt/neu bei gleicher Zeit/Maus/Scroll: Ø 0,24–0,44/255, mit Lupe kein Unterschied. Pfützen, nasse Straße, Scroll-Fahrt, Laub-Wind bleiben live.
 - Geprüft und verworfen: Zufallstafel statt Rechen-Rauschen (auf dem Testrechner langsamer), Parallaxe 3 statt 4 Schritte (kein messbarer Gewinn).
-- Vorschau `/vorschau-leistung/` (noindex). Live erst nach Tirys Freigabe.
+- Live seit 24.11.2026 (Tiry: „beides ja“), Vorschau gelöscht.
+
+## 24.11.2026 – Showroom-Verwandlung: Partikel vorgerechnet (Tiry: „beides ja“)
+- Kein Video (Zufallsfluss, Transparenz auf iPhone, Speichenschärfe, Datenmenge). Stattdessen: `hintergrund12/partikel.py` (in `tools/live_bauen.py` nach `live_band.py`) legt je Showroom-Rad (`img/show`, `img/bestand/a-*`, ohne Größen-Varianten) `img/pt/<ordner>~<name>.bin` an: 1800 gemischte Punkte (u16 x/y im Bildrechteck + RGB, feste Zufallszahl je Datei). Markenlogos: `pt/marke-*.bin` (650 Punkte, erzeugt mit `pt_logos.js`), nur übernommen, wenn die SVG-Prüfsumme in `pt/logos.json` passt.
+- `vmorph-laub.js`: `ptLoad`/`ptPts` statt `points()` (getImageData) im Laub-Modus; fehlt eine Datei → alter Weg. Neue/entfernte Räder: Bau rechnet automatisch mit.
+- Gemessen je Wechsel (2× Rad + 2× Logo): PC 120 → 3 ms, CPU 4× gebremst 400 → 15 ms. Sichtvergleich mitten in der Verwandlung: gleich.
+- Vorschau `/vorschau-showroom/` (noindex); Live erst nach Tirys Freigabe. Neues Logo → `node pt_logos.js <velo-center-web>` ausführen.

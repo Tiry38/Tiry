@@ -164,18 +164,29 @@ function points(im,r,step,N,W,H){const cw=Math.max(2,Math.round(r.w/step)),ch=Ma
  if(!P.length)P.push([r.x+r.w/2,r.y+r.h/2,.5,.5,.5,keyRaw(r.x+r.w/2,r.y+r.h/2,W,H)]);
  const out=new Array(N);if(P.length>=N){for(let i=0;i<N;i++){const j=i+Math.floor(Math.random()*(P.length-i));const t=P[i];P[i]=P[j];P[j]=t;out[i]=P[i]}}else for(let i=0;i<N;i++)out[i]=P[Math.floor(Math.random()*P.length)];
  return out.sort((a,b)=>a[5]-b[5])}
+/* Vorgerechnete Partikel (Tiry 24.11.2026, partikel.py beim Bauen): spart je Wechsel das Zerlegen per getImageData (≈150–400 ms Ruckler).
+   Datei img/pt/<ordner>~<name>.bin bzw. img/pt/marke-*.bin: je Punkt u16 x, u16 y (im Bildrechteck), RGB – schon gemischt. Fehlt sie: alter Weg. */
+const PTV=[400,480,640,960,600,900,1200],PTC=new Map();
+const ptUrl=src=>{try{const u=new URL(src,document.baseURI),p=u.pathname,i=p.lastIndexOf('/img/');if(i<0)return null;const r=p.slice(i+5),pre=u.origin+p.slice(0,i)+'/img/pt/';
+ let m=r.match(/^(show|bestand)\/([^/]+)\.webp$/);if(m){let st=m[2];const v=st.match(/^(.*)-(\d+)$/),V=(window.PVV||{})['img/'+m[1]+'/'+(v?v[1]:'')+'.webp'];
+  if(v&&(V?V.indexOf(+v[2])>=0:PTV.indexOf(+v[2])>=0))st=v[1];if(m[1]==='bestand'&&!/^a-/.test(st))return null;return pre+m[1]+'~'+st+'.bin'}
+ m=r.match(/^(marke-[a-z0-9-]+)\.svg$/);return m?pre+m[1]+'.bin':null}catch(_){return null}};
+const ptLoad=src=>{const u=ptUrl(src);if(!u)return Promise.resolve(null);let q=PTC.get(u);if(!q){q=fetch(u).then(r=>r.ok?r.arrayBuffer():null).then(b=>b&&b.byteLength>=7?{n:Math.floor(b.byteLength/7),dv:new DataView(b)}:null).catch(()=>null);PTC.set(u,q)}return q};
+function ptPts(d,r,N,W,H){const P=new Array(N),s0=Math.floor(Math.random()*d.n),dv=d.dv;
+ for(let i=0;i<N;i++){const o=((s0+i)%d.n)*7,px=r.x+dv.getUint16(o,true)/65535*r.w,py=r.y+dv.getUint16(o+2,true)/65535*r.h;P[i]=[px,py,dv.getUint8(o+4)/255,dv.getUint8(o+5)/255,dv.getUint8(o+6)/255,keyRaw(px,py,W,H)]}
+ return P.sort((a,b)=>a[5]-b[5])}
 const rfP=s=>{s=String(s||'');const m=s.match(/below\s+(-?[\d.]+)px/);if(!m)return[2,.68,.17];const g=s.match(/([\d.]+)%\s*,\s*rgba?\(\s*0\s*,\s*0\s*,\s*0\s*,\s*([\d.]+)\s*\)\s*\)\s*$/);return[+m[1],g?g[1]/100:.68,g?+g[2]:.17]};
 const hex=s=>{s=String(s||'').trim();const m=s.match(/^#?([0-9a-f]{6})$/i);if(m){const n=parseInt(m[1],16);return[(n>>16&255)/255,(n>>8&255)/255,(n&255)/255]}
  const r=s.match(/rgba?\(([\d.]+)[ ,]+([\d.]+)[ ,]+([\d.]+)/);return r?[r[1]/255,r[2]/255,r[3]/255]:[.886,.137,.176]};
 /* ---- eine Ebene (Rad oder Logo) vorbereiten ---- */
 async function layer(root,cv,o,kind){const dpr=Math.min(2,devicePixelRatio||1),RB=root.getBoundingClientRect(),W=RB.width-(root.offsetWidth-root.clientWidth),H=RB.height-(root.offsetHeight-root.clientHeight);
- const [ia,ib,ra,rb]=await Promise.all([load(o.from),load(o.to),measure(o.tplA,o.from,root),measure(o.tplB,o.to,root)]);if(!ia||!ib)throw new Error('Bild');
+ const [ia,ib,ra,rb,pa,pb]=await Promise.all([load(o.from),load(o.to),measure(o.tplA,o.from,root),measure(o.tplB,o.to,root),ptLoad(o.from),ptLoad(o.to)]);if(!ia||!ib)throw new Error('Bild');
  if(!cv._G)cv._G=mk(cv);const G=await cv._G;if(!G)throw new Error('WebGL');const lf0=window.HG12_MODE==='herbst'&&G.lf;let ox=0,oy=0,ox2=0,oy2=0;
  if(lf0){const rr=root.getBoundingClientRect(),vw=document.documentElement.clientWidth;ox=Math.max(0,Math.min(W*.6,rr.left-4));ox2=Math.max(0,Math.min(W*.45,vw-rr.right-4));oy=H*.45;oy2=H*.30}
  cv.width=Math.round((W+ox+ox2)*dpr);cv.height=Math.round((H+oy+oy2)*dpr);const chk=()=>{if(o.dead&&o.dead())throw new Error('abgelöst')};chk();
  const yl=()=>new Promise(r=>setTimeout(r,0)).then(chk);texUp(G,G.tex[0],raster(ia,ra,dpr));await yl();texUp(G,G.tex[1],raster(ib,rb,dpr));await yl();
  const lf=lf0?1:0;const area=Math.max(ra.w*ra.h,rb.w*rb.h);const N=lf?Math.round(Math.min(kind==='bike'?1800:650,Math.max(450,area/(kind==='bike'?115:160)))):Math.round(Math.min(kind==='bike'?28000:11000,Math.max(3000,area/(kind==='bike'?6:10))));
- const step=kind==='bike'?1.1:1.4;const A=points(ia,ra,step,N,W,H);await yl();const B=points(ib,rb,step,N,W,H);await yl();
+ const step=kind==='bike'?1.1:1.4;const A=lf&&pa?ptPts(pa,ra,N,W,H):points(ia,ra,step,N,W,H);await yl();const B=lf&&pb?ptPts(pb,rb,N,W,H):points(ib,rb,step,N,W,H);await yl();
  const dom=P=>{let r=0,g=0,b=0,t=0;for(const q of P){const mx=Math.max(q[2],q[3],q[4]),mn=Math.min(q[2],q[3],q[4]),w=(mx-mn)*(mx-mn)*mx;r+=q[2]*w;g+=q[3]*w;b+=q[4]*w;t+=w}if(t<.5)return[.62,.66,.72];const m=Math.max(r,g,b)/t;const k=Math.min(1.6,.85/Math.max(m,.05));return[r/t*k,g/t*k,b/t*k].map(v=>Math.min(1,v))};const dA=dom(A),dB=dom(B);
  let k0=Infinity,k1=-Infinity;for(const p of A){k0=Math.min(k0,p[5]);k1=Math.max(k1,p[5])}for(const p of B){k0=Math.min(k0,p[5]);k1=Math.max(k1,p[5])}if(k1-k0<.01)k1=k0+.01;
  const f=new Float32Array(N*13);for(let i=0;i<N;i++){const a=A[i],b=B[i],q=i*13;f[q]=a[0];f[q+1]=a[1];f[q+2]=b[0];f[q+3]=b[1];f[q+4]=(a[5]-k0)/(k1-k0);f[q+5]=(b[5]-k0)/(k1-k0);f[q+6]=a[2];f[q+7]=a[3];f[q+8]=a[4];f[q+9]=b[2];f[q+10]=b[3];f[q+11]=b[4];f[q+12]=Math.random()}
