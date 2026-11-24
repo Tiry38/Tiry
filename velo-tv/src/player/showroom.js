@@ -59,8 +59,11 @@
             '<p class="eyebrow"><i></i>Familienbetrieb seit 1995 · <b>Wörth am Rhein</b></p>' +
             '<h1 class="hh1">Dein E-Bike <span class="amp">&amp;</span> <span class="nw">E-Dreirad-Spezialist</span><br><span class="gt">mit eigener Werkstatt.</span></h1>' +
             '<p class="lead">Über 250 E-Bikes zum Probefahren, ehrliche Beratung und ein Bosch Service Center, in dem der Chef noch selbst schraubt.</p>' +
-            '<div class="trust"><span class="tb"><i class="tic tg">G</i><b class="st">★</b><b>4,8</b> bei <b class="ggl"><i>G</i><i>o</i><i>o</i><i>g</i><i>l</i><i>e</i></b></span>' +
-            '<span class="tb"><i class="tic tbo"></i><b class="bsh">Bosch</b> Service Center</span></div>' +
+            '<div class="soc">' +
+              '<span class="ig"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="5.5"/><circle cx="12" cy="12" r="4.2"/><circle cx="17.3" cy="6.7" r="1.1" fill="currentColor" stroke="none"/></svg></span>' +
+              '<span class="fb"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M13.5 21v-7.3H16l.4-3h-2.9V8.9c0-.9.3-1.4 1.5-1.4h1.5V4.8c-.3 0-1.2-.1-2.2-.1-2.2 0-3.7 1.3-3.7 3.8v2.2H8v3h2.6V21z"/></svg></span>' +
+              '<span class="wa"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm5.3 14.1c-.2.6-1.3 1.2-1.8 1.3-.5.1-1 .1-3.3-.8-2.8-1.1-4.5-3.9-4.7-4.1-.1-.2-1.1-1.5-1.1-2.8s.7-2 1-2.3c.2-.3.5-.3.7-.3h.5c.2 0 .4 0 .6.5l.8 2c.1.2.1.4 0 .5l-.3.5-.4.5c-.1.1-.3.3-.1.6.2.3.8 1.3 1.7 2.1 1.2 1 2.1 1.4 2.4 1.5.3.1.5.1.6-.1l.9-1c.2-.3.4-.2.6-.1l1.9.9c.3.1.5.2.5.3.1.2.1.7-.1 1.3z"/></svg></span>' +
+            '</div>' +
           '</div>' +
           '<div class="hvis hello" style="--d:.35s">' +
             '<div class="hring"></div><img class="hlg" alt="">' +
