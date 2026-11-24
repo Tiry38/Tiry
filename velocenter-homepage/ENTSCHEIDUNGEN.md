@@ -639,3 +639,7 @@
 - Stern-Puls: Leuchten als eigene Ebene `em::after`, animiert nur `opacity` statt `text-shadow`.
 - Gemessen (3 s, Chromium-Trace): Paint ~37 → ~13 ms, Raster ~22 → ~4 ms. Bildvergleich: nur Stern-Leuchten minimal anders.
 - Nicht wieder `background-position`/`text-shadow` animieren.
+
+## i:SY Experte: Zitate lesbar + Bus fährt wieder (24.11.2026, Tiry)
+- Zitat-Karten `.isyq` (zart getönt) bekamen keinen Lichtsaum (zählten als Karte) → Schrift jetzt mit demselben weißen Saum wie freie Schrift (`hg12.css`).
+- Bus blieb nach der ersten Runde links außerhalb stehen: Spar-Logik `vSpar` (23.11.) hielt ihn an, weil er jede Runde außerhalb der Straße (`overflow:hidden`) startet. Teile in `.road` werden jetzt über die ganze Straße beobachtet (`hg12.js`). Außerhalb des Bildes pausiert er weiter.

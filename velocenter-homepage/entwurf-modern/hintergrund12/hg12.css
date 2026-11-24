@@ -74,6 +74,8 @@ html body [class*=hgTx],html body [class*=hgTx] *{paint-order:stroke fill}
 html body .hgTxL,html body .hgTxL *{-webkit-text-stroke:max(2.2px,.06em) rgba(255,255,255,.95);text-shadow:0 0 3px rgba(255,255,255,.8),0 0 8px rgba(255,255,255,.35)!important}
 html body .hgTxD,html body .hgTxD *{-webkit-text-stroke:max(2px,.05em) rgba(14,16,22,.5);text-shadow:0 1px 4px rgba(8,10,14,.55)!important}
 html body .hgTxG,html body [class*=hgTx] .hgTxG{-webkit-text-stroke:0!important;text-shadow:none!important;filter:drop-shadow(0 0 1px rgba(255,255,255,.95)) drop-shadow(0 0 1px rgba(255,255,255,.9)) drop-shadow(0 1px 6px rgba(255,255,255,.55))}
+/* i:SY-Experte-Zitate (Tiry 24.11.2026): zart getönte Karte auf dem Foto – Schrift bekommt denselben weißen Lichtsaum wie freie Schrift */
+html body .isyq blockquote :is(p,cite,a){paint-order:stroke fill;-webkit-text-stroke:max(2.2px,.06em) rgba(255,255,255,.95);text-shadow:0 0 3px rgba(255,255,255,.8),0 0 8px rgba(255,255,255,.35)!important}
 
 /* Alle Glasplatten aus (Tiry 23.11.2026) – gpBuild markiert nur noch die Schrift */
 #hgGl{display:none!important}

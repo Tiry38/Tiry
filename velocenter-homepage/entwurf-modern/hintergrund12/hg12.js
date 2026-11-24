@@ -403,8 +403,11 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
    Hereinscrollen an derselben Stelle fortgesetzt. Sichtbar ändert sich nichts: alles im Bild läuft immer (keine Reduce-Regel). */
 (function(){if(!window.IntersectionObserver||!document.head)return;
  var st=document.createElement('style');st.id='vSpar';st.textContent='.vOff,.vOff::before,.vOff::after{animation-play-state:paused!important}';document.head.appendChild(st);
- var seen=new WeakSet(),io=new IntersectionObserver(function(es){for(var i=0;i<es.length;i++)es[i].target.classList.toggle('vOff',!es[i].isIntersecting)},{rootMargin:'240px 4000px 240px 4000px'});
- function add(el){if(!el||el.nodeType!==1||seen.has(el)||el===document.documentElement||el===document.body)return;seen.add(el);io.observe(el)}
+ /* Fahrzeuge (i:SY-Bus, Tiry 24.11.2026: „fährt nicht“): der Bus startet jede Runde rechts außerhalb der Straße (overflow:hidden) und galt dort als
+    unsichtbar → angehalten, kam nie wieder. Teile in einer .road werden daher über die ganze Straße beobachtet, nicht einzeln. */
+ var seen=new WeakSet(),HM=new Map(),io=new IntersectionObserver(function(es){for(var i=0;i<es.length;i++){var t=es[i].target,off=!es[i].isIntersecting,L=HM.get(t);if(L)L.forEach(function(x){x.classList.toggle('vOff',off)});else t.classList.toggle('vOff',off)}},{rootMargin:'240px 4000px 240px 4000px'});
+ function add(el){if(!el||el.nodeType!==1||seen.has(el)||el===document.documentElement||el===document.body)return;seen.add(el);
+  var h=el.closest&&el.closest('.road');if(h){var L=HM.get(h);if(!L){HM.set(h,L=[]);io.observe(h)}L.push(el);return}io.observe(el)}
  function scan(){if(!document.getAnimations)return;var a=document.getAnimations();for(var i=0;i<a.length;i++){var t=a[i].effect&&a[i].effect.target;if(t&&a[i].animationName)add(t)}}
  document.addEventListener('animationstart',function(e){add(e.target)},true);
  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',scan);else scan();
