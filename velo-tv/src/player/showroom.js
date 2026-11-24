@@ -104,7 +104,7 @@
       el.querySelector('.dl-ap').innerHTML = esc(euro(x.angebot)).replace(' €', '<i>€</i>');
       var gespart = Math.round(x.preis - x.angebot);
       spar.hidden = !(gespart >= 50);
-      el.querySelector('.sp-b').textContent = '−' + euro(gespart);
+      el.querySelector('.sp-b').innerHTML = '<small>Du sparst</small>' + esc(euro(gespart));
       stage.style.setProperty('--ac', x.akzent || '#8C9097');
       logo.style.setProperty('--wz', x.wz);
       punkte();

@@ -90,8 +90,9 @@ html.hg-an #stage{background:transparent}
   text-shadow:0 3px 0 rgba(120,8,24,.55),0 8px 30px rgba(0,0,0,.6)}
 .sr .dl-ap i{font-style:normal;margin-left:18px}
 /* Spar-Schild wie die roten „−800 €“-Schilder der Rad-Karten auf der Homepage, groß */
-.sr .sp-b{display:inline-block;font:900 64px/1 "Outfit",sans-serif;font-style:normal;letter-spacing:-1px;color:#fff;padding:16px 26px 18px;border-radius:16px;transform:rotate(-4deg);
+.sr .sp-b{display:inline-flex;flex-direction:column;align-items:center;gap:6px;font:900 60px/1 "Outfit",sans-serif;font-style:normal;letter-spacing:-1px;color:#fff;padding:14px 26px 16px;border-radius:16px;transform:rotate(-4deg);
   background:linear-gradient(90deg,#C8102E,#E0162F);box-shadow:0 14px 34px -10px rgba(200,16,46,.85),0 0 0 4px rgba(255,255,255,.9)}
+.sr .sp-b small{font:800 17px/1 "Outfit",sans-serif;letter-spacing:.18em;text-transform:uppercase;color:rgba(255,255,255,.92)}
 .sr .sp-b[hidden]{display:none}
 .sr .dl-chips{margin:10px 0 0;font:500 24px/1 "Sora",sans-serif;color:rgba(255,255,255,.9);text-shadow:0 2px 8px rgba(0,0,0,.75)}
 .sr .dl-prog{display:none!important}
