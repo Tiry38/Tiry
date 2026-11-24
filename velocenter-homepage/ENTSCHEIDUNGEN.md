@@ -631,4 +631,4 @@
 - Kein Video (Zufallsfluss, Transparenz auf iPhone, Speichenschärfe, Datenmenge). Stattdessen: `hintergrund12/partikel.py` (in `tools/live_bauen.py` nach `live_band.py`) legt je Showroom-Rad (`img/show`, `img/bestand/a-*`, ohne Größen-Varianten) `img/pt/<ordner>~<name>.bin` an: 1800 gemischte Punkte (u16 x/y im Bildrechteck + RGB, feste Zufallszahl je Datei). Markenlogos: `pt/marke-*.bin` (650 Punkte, erzeugt mit `pt_logos.js`), nur übernommen, wenn die SVG-Prüfsumme in `pt/logos.json` passt.
 - `vmorph-laub.js`: `ptLoad`/`ptPts` statt `points()` (getImageData) im Laub-Modus; fehlt eine Datei → alter Weg. Neue/entfernte Räder: Bau rechnet automatisch mit.
 - Gemessen je Wechsel (2× Rad + 2× Logo): PC 120 → 3 ms, CPU 4× gebremst 400 → 15 ms. Sichtvergleich mitten in der Verwandlung: gleich.
-- Vorschau `/vorschau-showroom/` (noindex); Live erst nach Tirys Freigabe. Neues Logo → `node pt_logos.js <velo-center-web>` ausführen.
+- Live seit 24.11.2026 (Tiry: „live“), Vorschau gelöscht. Neues Logo → `node pt_logos.js <velo-center-web>` ausführen.
