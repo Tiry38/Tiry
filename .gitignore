@@ -1,1 +1,4 @@
 forge-data/
+
+# lokale Abhängigkeiten (Container-Setup), nicht versionieren
+app-forge/node_modules/
