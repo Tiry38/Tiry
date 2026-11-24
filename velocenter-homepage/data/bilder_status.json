@@ -703,7 +703,10 @@
   "zuletzt": "2026-11-24"
  },
  "velodeville|aeb400allround288ggnex|2022|winered": {
-  "versuche": 0,
+  "gesucht": "2026-11-24",
+  "grund": "Velo de Ville zeigt alte Kollektionen (MY21–MY24) nicht mehr: alte Modellseiten leiten auf die Startseite um, der Konfigurator kennt nur MY27, im Webarchiv liegt pro Modell nur ein Hauptbild in anderer Farbe (z. B. MY24 AEB490 Olive Green, MY24 AEB890 Trapez Sahara Brown matt, MY23 AEB890 Eco Grey),",
+  "notiz": "Velo-ID (Veloport) nachtragen – dann liefert seite.js --velo das exakte Bild aus der VELOWALLET.",
+  "versuche": 1,
   "zuletzt": "2026-11-24"
  },
  "velodeville|aeb400classicxsrt|2027|nightbluematt": {
@@ -723,63 +726,111 @@
   "zuletzt": "2026-11-24"
  },
  "velodeville|aeb490allround288ggnex|2021|stonebasaltmatt": {
-  "versuche": 0,
+  "gesucht": "2026-11-24",
+  "grund": "Velo de Ville zeigt alte Kollektionen (MY21–MY24) nicht mehr: alte Modellseiten leiten auf die Startseite um, der Konfigurator kennt nur MY27, im Webarchiv liegt pro Modell nur ein Hauptbild in anderer Farbe (z. B. MY24 AEB490 Olive Green, MY24 AEB890 Trapez Sahara Brown matt, MY23 AEB890 Eco Grey),",
+  "notiz": "Velo-ID (Veloport) nachtragen – dann liefert seite.js --velo das exakte Bild aus der VELOWALLET.",
+  "versuche": 1,
   "zuletzt": "2026-11-24"
  },
  "velodeville|aeb490allround288ggnex|2023|britishgreenmatt": {
-  "versuche": 0,
+  "gesucht": "2026-11-24",
+  "grund": "Velo de Ville zeigt alte Kollektionen (MY21–MY24) nicht mehr: alte Modellseiten leiten auf die Startseite um, der Konfigurator kennt nur MY27, im Webarchiv liegt pro Modell nur ein Hauptbild in anderer Farbe (z. B. MY24 AEB490 Olive Green, MY24 AEB890 Trapez Sahara Brown matt, MY23 AEB890 Eco Grey),",
+  "notiz": "Velo-ID (Veloport) nachtragen – dann liefert seite.js --velo das exakte Bild aus der VELOWALLET.",
+  "versuche": 1,
   "zuletzt": "2026-11-24"
  },
  "velodeville|aeb490allround288ggnex|2023|moccabrownmatt": {
-  "versuche": 0,
+  "gesucht": "2026-11-24",
+  "grund": "Velo de Ville zeigt alte Kollektionen (MY21–MY24) nicht mehr: alte Modellseiten leiten auf die Startseite um, der Konfigurator kennt nur MY27, im Webarchiv liegt pro Modell nur ein Hauptbild in anderer Farbe (z. B. MY24 AEB490 Olive Green, MY24 AEB890 Trapez Sahara Brown matt, MY23 AEB890 Eco Grey),",
+  "notiz": "Velo-ID (Veloport) nachtragen – dann liefert seite.js --velo das exakte Bild aus der VELOWALLET.",
+  "versuche": 1,
   "zuletzt": "2026-11-24"
  },
  "velodeville|aeb490allround288ggnex|2023|nightbluematt": {
-  "versuche": 0,
+  "gesucht": "2026-11-24",
+  "grund": "Velo de Ville zeigt alte Kollektionen (MY21–MY24) nicht mehr: alte Modellseiten leiten auf die Startseite um, der Konfigurator kennt nur MY27, im Webarchiv liegt pro Modell nur ein Hauptbild in anderer Farbe (z. B. MY24 AEB490 Olive Green, MY24 AEB890 Trapez Sahara Brown matt, MY23 AEB890 Eco Grey),",
+  "notiz": "Velo-ID (Veloport) nachtragen – dann liefert seite.js --velo das exakte Bild aus der VELOWALLET.",
+  "versuche": 1,
   "zuletzt": "2026-11-24"
  },
  "velodeville|aeb490allround288ggnex|2023|purewhite": {
-  "versuche": 0,
+  "gesucht": "2026-11-24",
+  "grund": "Velo de Ville zeigt alte Kollektionen (MY21–MY24) nicht mehr: alte Modellseiten leiten auf die Startseite um, der Konfigurator kennt nur MY27, im Webarchiv liegt pro Modell nur ein Hauptbild in anderer Farbe (z. B. MY24 AEB490 Olive Green, MY24 AEB890 Trapez Sahara Brown matt, MY23 AEB890 Eco Grey),",
+  "notiz": "Velo-ID (Veloport) nachtragen – dann liefert seite.js --velo das exakte Bild aus der VELOWALLET.",
+  "versuche": 1,
   "zuletzt": "2026-11-24"
  },
  "velodeville|aeb490allround288ggrt|2023|britishgreenmatt": {
-  "versuche": 0,
+  "gesucht": "2026-11-24",
+  "grund": "Velo de Ville zeigt alte Kollektionen (MY21–MY24) nicht mehr: alte Modellseiten leiten auf die Startseite um, der Konfigurator kennt nur MY27, im Webarchiv liegt pro Modell nur ein Hauptbild in anderer Farbe (z. B. MY24 AEB490 Olive Green, MY24 AEB890 Trapez Sahara Brown matt, MY23 AEB890 Eco Grey),",
+  "notiz": "Velo-ID (Veloport) nachtragen – dann liefert seite.js --velo das exakte Bild aus der VELOWALLET.",
+  "versuche": 1,
   "zuletzt": "2026-11-24"
  },
  "velodeville|aeb490allround288ggrt|2023|nightbluematt": {
-  "versuche": 0,
+  "gesucht": "2026-11-24",
+  "grund": "Velo de Ville zeigt alte Kollektionen (MY21–MY24) nicht mehr: alte Modellseiten leiten auf die Startseite um, der Konfigurator kennt nur MY27, im Webarchiv liegt pro Modell nur ein Hauptbild in anderer Farbe (z. B. MY24 AEB490 Olive Green, MY24 AEB890 Trapez Sahara Brown matt, MY23 AEB890 Eco Grey),",
+  "notiz": "Velo-ID (Veloport) nachtragen – dann liefert seite.js --velo das exakte Bild aus der VELOWALLET.",
+  "versuche": 1,
   "zuletzt": "2026-11-24"
  },
  "velodeville|aeb800allround289gg|2021|stonebasaltmatt": {
-  "versuche": 0,
+  "gesucht": "2026-11-24",
+  "grund": "Velo de Ville zeigt alte Kollektionen (MY21–MY24) nicht mehr: alte Modellseiten leiten auf die Startseite um, der Konfigurator kennt nur MY27, im Webarchiv liegt pro Modell nur ein Hauptbild in anderer Farbe (z. B. MY24 AEB490 Olive Green, MY24 AEB890 Trapez Sahara Brown matt, MY23 AEB890 Eco Grey),",
+  "notiz": "Velo-ID (Veloport) nachtragen – dann liefert seite.js --velo das exakte Bild aus der VELOWALLET.",
+  "versuche": 1,
   "zuletzt": "2026-11-24"
  },
  "velodeville|aeb800classic26|2026|emeraldgreenglanz": {
+  "geprueft": "2026-11-24",
+  "gesucht": "2026-11-24",
+  "grund": "Offizielles VELOWALLET-Konfigurationsbild zur Velo-ID V26-ID-00485883 (Modellcode 026-AEB-806-G5): Tiefeinsteiger, Emerald Green glänzend, Rücktritt-Nabe.",
+  "ok_n": 0,
+  "quelle": "velowallet.app (Velo de Ville) V26-ID-00485883",
+  "seite": "velowallet.app (Velo de Ville)",
   "versuche": 0,
   "zuletzt": "2026-11-24"
  },
  "velodeville|aeb890allround285ggrt|2023|britishgreenmatt": {
-  "versuche": 0,
+  "gesucht": "2026-11-24",
+  "grund": "Velo de Ville zeigt alte Kollektionen (MY21–MY24) nicht mehr: alte Modellseiten leiten auf die Startseite um, der Konfigurator kennt nur MY27, im Webarchiv liegt pro Modell nur ein Hauptbild in anderer Farbe (z. B. MY24 AEB490 Olive Green, MY24 AEB890 Trapez Sahara Brown matt, MY23 AEB890 Eco Grey),",
+  "notiz": "Velo-ID (Veloport) nachtragen – dann liefert seite.js --velo das exakte Bild aus der VELOWALLET.",
+  "versuche": 1,
   "zuletzt": "2026-11-24"
  },
  "velodeville|aeb890allround285ggrt|2023|stonebasaltmatt": {
-  "versuche": 0,
+  "gesucht": "2026-11-24",
+  "grund": "Velo de Ville zeigt alte Kollektionen (MY21–MY24) nicht mehr: alte Modellseiten leiten auf die Startseite um, der Konfigurator kennt nur MY27, im Webarchiv liegt pro Modell nur ein Hauptbild in anderer Farbe (z. B. MY24 AEB490 Olive Green, MY24 AEB890 Trapez Sahara Brown matt, MY23 AEB890 Eco Grey),",
+  "notiz": "Velo-ID (Veloport) nachtragen – dann liefert seite.js --velo das exakte Bild aus der VELOWALLET.",
+  "versuche": 1,
   "zuletzt": "2026-11-24"
  },
  "velodeville|aeb890allround285gg|2023|scarletred": {
-  "versuche": 0,
+  "gesucht": "2026-11-24",
+  "grund": "Velo de Ville zeigt alte Kollektionen (MY21–MY24) nicht mehr: alte Modellseiten leiten auf die Startseite um, der Konfigurator kennt nur MY27, im Webarchiv liegt pro Modell nur ein Hauptbild in anderer Farbe (z. B. MY24 AEB490 Olive Green, MY24 AEB890 Trapez Sahara Brown matt, MY23 AEB890 Eco Grey),",
+  "notiz": "Velo-ID (Veloport) nachtragen – dann liefert seite.js --velo das exakte Bild aus der VELOWALLET.",
+  "versuche": 1,
   "zuletzt": "2026-11-24"
  },
  "velodeville|aeb890allround285gg|2024|saharabrownglanz": {
-  "versuche": 0,
+  "gesucht": "2026-11-24",
+  "grund": "Velo de Ville zeigt alte Kollektionen (MY21–MY24) nicht mehr: alte Modellseiten leiten auf die Startseite um, der Konfigurator kennt nur MY27, im Webarchiv liegt pro Modell nur ein Hauptbild in anderer Farbe (z. B. MY24 AEB490 Olive Green, MY24 AEB890 Trapez Sahara Brown matt, MY23 AEB890 Eco Grey),",
+  "notiz": "Velo-ID (Veloport) nachtragen – dann liefert seite.js --velo das exakte Bild aus der VELOWALLET.",
+  "versuche": 1,
   "zuletzt": "2026-11-24"
  },
  "velodeville|aeb890allround289gg|2023|nightbluematt": {
-  "versuche": 0,
+  "gesucht": "2026-11-24",
+  "grund": "Velo de Ville zeigt alte Kollektionen (MY21–MY24) nicht mehr: alte Modellseiten leiten auf die Startseite um, der Konfigurator kennt nur MY27, im Webarchiv liegt pro Modell nur ein Hauptbild in anderer Farbe (z. B. MY24 AEB490 Olive Green, MY24 AEB890 Trapez Sahara Brown matt, MY23 AEB890 Eco Grey),",
+  "notiz": "Velo-ID (Veloport) nachtragen – dann liefert seite.js --velo das exakte Bild aus der VELOWALLET.",
+  "versuche": 1,
   "zuletzt": "2026-11-24"
  },
  "velodeville|aeb890allround289gg|2023|stonebasaltmatt": {
-  "versuche": 0,
+  "gesucht": "2026-11-24",
+  "grund": "Velo de Ville zeigt alte Kollektionen (MY21–MY24) nicht mehr: alte Modellseiten leiten auf die Startseite um, der Konfigurator kennt nur MY27, im Webarchiv liegt pro Modell nur ein Hauptbild in anderer Farbe (z. B. MY24 AEB490 Olive Green, MY24 AEB890 Trapez Sahara Brown matt, MY23 AEB890 Eco Grey),",
+  "notiz": "Velo-ID (Veloport) nachtragen – dann liefert seite.js --velo das exakte Bild aus der VELOWALLET.",
+  "versuche": 1,
   "zuletzt": "2026-11-24"
  },
  "velodeville|aeb990pxprort|2027|purewhiteglanz": {
@@ -799,6 +850,12 @@
   "zuletzt": "2026-11-24"
  },
  "velodeville|aeb990pxpro|2026|velvetpurplematt": {
+  "geprueft": "2026-11-24",
+  "gesucht": "2026-11-24",
+  "grund": "Offizielles VELOWALLET-Konfigurationsbild zur Velo-ID V26-ID-00804668 (Modellcode 026-AEB-P990-G5): Tiefeinsteiger, Velvet Purple matt, Enviolo-Nabe; andere Farbe als das Ocean-Blue-Geschwister.",
+  "ok_n": 0,
+  "quelle": "velowallet.app (Velo de Ville) V26-ID-00804668",
+  "seite": "velowallet.app (Velo de Ville)",
   "versuche": 0,
   "zuletzt": "2026-11-24"
  },
@@ -835,39 +892,66 @@
   "zuletzt": "2026-11-24"
  },
  "velodeville|seb890275envioloautomatiq|2024|nightbluematt": {
-  "versuche": 0,
+  "gesucht": "2026-11-24",
+  "grund": "SEB 890/990 SUV Smart MY23/MY24 in dieser Farbe weder beim Hersteller (alte Seiten weg, Konfigurator nur MY27) noch im Webarchiv (nur Hauptbild, Bilder nicht archiviert) gefunden; Händlerfunde nur Gebraucht-Fotos (upway/refurbed) – unzulässig.",
+  "notiz": "Velo-ID (Veloport) nachtragen – dann liefert seite.js --velo das exakte Bild aus der VELOWALLET.",
+  "versuche": 1,
   "zuletzt": "2026-11-24"
  },
  "velodeville|seb890suvsmart2759gg|2023|deepblackmatt": {
-  "versuche": 0,
+  "gesucht": "2026-11-24",
+  "grund": "SEB 890/990 SUV Smart MY23/MY24 in dieser Farbe weder beim Hersteller (alte Seiten weg, Konfigurator nur MY27) noch im Webarchiv (nur Hauptbild, Bilder nicht archiviert) gefunden; Händlerfunde nur Gebraucht-Fotos (upway/refurbed) – unzulässig.",
+  "notiz": "Velo-ID (Veloport) nachtragen – dann liefert seite.js --velo das exakte Bild aus der VELOWALLET.",
+  "versuche": 1,
   "zuletzt": "2026-11-24"
  },
  "velodeville|seb890suvsmart2759gg|2023|purewhite": {
-  "versuche": 0,
+  "gesucht": "2026-11-24",
+  "grund": "SEB 890/990 SUV Smart MY23/MY24 in dieser Farbe weder beim Hersteller (alte Seiten weg, Konfigurator nur MY27) noch im Webarchiv (nur Hauptbild, Bilder nicht archiviert) gefunden; Händlerfunde nur Gebraucht-Fotos (upway/refurbed) – unzulässig.",
+  "notiz": "Velo-ID (Veloport) nachtragen – dann liefert seite.js --velo das exakte Bild aus der VELOWALLET.",
+  "versuche": 1,
   "zuletzt": "2026-11-24"
  },
  "velodeville|seb890suvsmart2759gg|2023|stonebasaltmatt": {
-  "versuche": 0,
+  "gesucht": "2026-11-24",
+  "grund": "SEB 890/990 SUV Smart MY23/MY24 in dieser Farbe weder beim Hersteller (alte Seiten weg, Konfigurator nur MY27) noch im Webarchiv (nur Hauptbild, Bilder nicht archiviert) gefunden; Händlerfunde nur Gebraucht-Fotos (upway/refurbed) – unzulässig.",
+  "notiz": "Velo-ID (Veloport) nachtragen – dann liefert seite.js --velo das exakte Bild aus der VELOWALLET.",
+  "versuche": 1,
   "zuletzt": "2026-11-24"
  },
  "velodeville|seb890suvsmart2759gg|2024|blackmatt": {
-  "versuche": 0,
+  "gesucht": "2026-11-24",
+  "grund": "SEB 890/990 SUV Smart MY23/MY24 in dieser Farbe weder beim Hersteller (alte Seiten weg, Konfigurator nur MY27) noch im Webarchiv (nur Hauptbild, Bilder nicht archiviert) gefunden; Händlerfunde nur Gebraucht-Fotos (upway/refurbed) – unzulässig.",
+  "notiz": "Velo-ID (Veloport) nachtragen – dann liefert seite.js --velo das exakte Bild aus der VELOWALLET.",
+  "versuche": 1,
   "zuletzt": "2026-11-24"
  },
  "velodeville|seb890suvsmart2759gg|2024|iceblueglanz": {
-  "versuche": 0,
+  "gesucht": "2026-11-24",
+  "grund": "SEB 890/990 SUV Smart MY23/MY24 in dieser Farbe weder beim Hersteller (alte Seiten weg, Konfigurator nur MY27) noch im Webarchiv (nur Hauptbild, Bilder nicht archiviert) gefunden; Händlerfunde nur Gebraucht-Fotos (upway/refurbed) – unzulässig.",
+  "notiz": "Velo-ID (Veloport) nachtragen – dann liefert seite.js --velo das exakte Bild aus der VELOWALLET.",
+  "versuche": 1,
   "zuletzt": "2026-11-24"
  },
  "velodeville|seb890suvsmart2759gg|2024|purewhiteglanz": {
-  "versuche": 0,
+  "gesucht": "2026-11-24",
+  "grund": "SEB 890/990 SUV Smart MY23/MY24 in dieser Farbe weder beim Hersteller (alte Seiten weg, Konfigurator nur MY27) noch im Webarchiv (nur Hauptbild, Bilder nicht archiviert) gefunden; Händlerfunde nur Gebraucht-Fotos (upway/refurbed) – unzulässig.",
+  "notiz": "Velo-ID (Veloport) nachtragen – dann liefert seite.js --velo das exakte Bild aus der VELOWALLET.",
+  "versuche": 1,
   "zuletzt": "2026-11-24"
  },
  "velodeville|seb990pro|2025|emeraldgreenmatt": {
-  "versuche": 0,
+  "gesucht": "2026-11-24",
+  "grund": "SEB 990 PRO MY25 Wave in Emerald Green matt nirgends gefunden (MY25-Listen bei Händlern führen nur Eucalyptus Green, Night/Ocean/Ice/Petrol Blue, Deep Black, Ruby Red, Stone Basalt); Emerald Green erst ab MY26.",
+  "notiz": "Farbe evtl. Eucalyptus Green matt? In Veloport prüfen; Velo-ID nachtragen.",
+  "versuche": 1,
   "zuletzt": "2026-11-24"
  },
  "velodeville|seb990pro|2025|stonebasaltmatt": {
-  "versuche": 0,
+  "gesucht": "2026-11-24",
+  "grund": "Offizielles MY25-Bild gibt es nur als SEB 990 PRO Trapez Stone Basalt matt (Art.-Nr. 5002056) – Veloport sagt Diamant, Rahmenform passt nicht; Diamant-Fassung in Stone Basalt matt nirgends gefunden.",
+  "notiz": "Art.-Nr. 5002056 = Trapez-Fassung; Diamant-Artikelnummer suchen oder Velo-ID nachtragen.",
+  "versuche": 1,
   "zuletzt": "2026-11-24"
  },
  "velodeville|seb990pxpro|2027|iceblueglanz": {
@@ -887,11 +971,17 @@
   "zuletzt": "2026-11-24"
  },
  "velodeville|seb990suvsmart27511gg|2023|nightbluematt": {
-  "versuche": 0,
+  "gesucht": "2026-11-24",
+  "grund": "SEB 890/990 SUV Smart MY23/MY24 in dieser Farbe weder beim Hersteller (alte Seiten weg, Konfigurator nur MY27) noch im Webarchiv (nur Hauptbild, Bilder nicht archiviert) gefunden; Händlerfunde nur Gebraucht-Fotos (upway/refurbed) – unzulässig.",
+  "notiz": "Velo-ID (Veloport) nachtragen – dann liefert seite.js --velo das exakte Bild aus der VELOWALLET.",
+  "versuche": 1,
   "zuletzt": "2026-11-24"
  },
  "velodeville|seb990suvsmart2759gg|2023|scarletredglanz": {
-  "versuche": 0,
+  "gesucht": "2026-11-24",
+  "grund": "SEB 890/990 SUV Smart MY23/MY24 in dieser Farbe weder beim Hersteller (alte Seiten weg, Konfigurator nur MY27) noch im Webarchiv (nur Hauptbild, Bilder nicht archiviert) gefunden; Händlerfunde nur Gebraucht-Fotos (upway/refurbed) – unzulässig.",
+  "notiz": "Velo-ID (Veloport) nachtragen – dann liefert seite.js --velo das exakte Bild aus der VELOWALLET.",
+  "versuche": 1,
   "zuletzt": "2026-11-24"
  },
  "victoria|avyon5275|2027|slategreymatt": {
