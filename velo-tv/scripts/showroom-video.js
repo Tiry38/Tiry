@@ -18,7 +18,7 @@ const { createServer } = require('../src/server/server');
 const R = path.join(__dirname, '..');
 const arg = (n, d) => { const i = process.argv.indexOf('--' + n); return i < 0 ? d : (process.argv[i + 1] && !process.argv[i + 1].startsWith('--') ? process.argv[i + 1] : true); };
 const OUT = path.resolve(arg('out', path.join(R, 'video-out')));
-const FPS = Number(arg('fps', 30));
+const FPS = Number(arg('fps', 60));
 const SEK = Number(arg('sek', 8));          // Sekunden je Rad (wie im Live-Showroom)
 const MAX = Number(arg('max-slots', 0));     // nur zum Testen
 const WORKERS = Number(arg('workers', Math.max(1, Math.min(4, os.cpus().length))));

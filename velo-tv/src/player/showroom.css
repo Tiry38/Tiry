@@ -77,9 +77,17 @@ html.hg-an #stage{background:transparent}
 .sr .hfloor{position:absolute;left:16%;right:16%;bottom:18%;height:3px;border-radius:3px;background:linear-gradient(90deg,transparent,#B87333,#F0C8A0,#B87333,transparent);box-shadow:0 0 22px rgba(184,115,51,.55),0 10px 30px -6px rgba(18,22,32,.28)}
 
 /* ---- Angebot unter dem Kreis: groß und eindeutig – Modell, alter Preis durchgestrichen, neuer Preis, rotes Spar-Schild ---- */
-.sr .hvis{top:150px;transform:scale(.94);transform-origin:50% 0}
+.sr .hvis{top:150px;left:1031px;width:658px;height:577px}
 .sr .deal{position:absolute;left:1360px;top:690px;transform:translateX(-50%);width:980px;display:flex;flex-direction:column;align-items:center;text-align:center;transition:opacity .45s ease,transform .7s cubic-bezier(.2,.8,.2,1)}
-.sr .deal.swap{opacity:0;transform:translate(-50%,18px)}
+/* Übergang: Zeile für Zeile hinter einer unsichtbaren Kante nach oben weg – neue Zeilen zeitversetzt von unten herein */
+.sr .deal>:not(.dhalo){transition:transform .8s cubic-bezier(.16,1,.3,1),clip-path .8s cubic-bezier(.16,1,.3,1),opacity .5s ease;clip-path:inset(-30% -20% -30% -20%)}
+.sr .deal>:nth-child(3){transition-delay:.07s}
+.sr .deal>:nth-child(4){transition-delay:.14s}
+.sr .deal>:nth-child(5){transition-delay:.21s}
+.sr .deal.aus>:not(.dhalo){transform:translateY(-46px);clip-path:inset(-30% -20% 130% -20%);opacity:0;transition-duration:.5s,.5s,.35s;transition-timing-function:cubic-bezier(.7,0,.84,0)}
+.sr .deal.unten>:not(.dhalo){transform:translateY(64px);clip-path:inset(130% -20% -30% -20%);opacity:0;transition:none}
+.sr .deal .sp-b{transition:transform .9s cubic-bezier(.34,1.56,.64,1) .45s}
+.sr .deal.unten .sp-b,.sr .deal.aus .sp-b{transform:rotate(-16deg) scale(.4);transition:none}
 .sr .dhalo{position:absolute;z-index:-1;left:50%;top:58%;width:1400px;height:600px;border-radius:50%;transform:translate(-50%,-50%);background:radial-gradient(closest-side,rgba(14,12,12,.66),rgba(14,12,12,.42) 55%,rgba(14,12,12,0) 85%)}
 .sr .dl-m{margin:0;font:900 62px/1.02 "Outfit",sans-serif;letter-spacing:-1.8px;color:#fff;white-space:nowrap;max-width:860px;overflow:hidden;text-overflow:ellipsis;
   text-shadow:0 2px 4px rgba(0,0,0,.6),0 6px 24px rgba(0,0,0,.55)}

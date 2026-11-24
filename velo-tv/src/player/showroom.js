@@ -126,13 +126,19 @@
       }
       busy = true;
       neu.src = x.img; neu.alt = x.marke + ' ' + x.modell;
-      deal.classList.add('swap');
+      deal.classList.add('aus');   // Zeilen gleiten nach oben weg
       var fertig = function () { busy = false; };
       var dec = function (im) { return im.decode ? im.decode().catch(function () {}) : Promise.resolve(); };
       Promise.race([dec(neu), new Promise(function (r) { setTimeout(r, 2500); })]).then(function () {
         if (!aktiv) return fertig();
         an ^= 1;
-        setTimeout(function () { texte(x); deal.classList.remove('swap'); }, 450);
+        // neue Zeilen: unten bereitstellen (ohne Übergang), dann zeitversetzt nach oben hereingleiten
+        setTimeout(function () {
+          texte(x);
+          deal.classList.add('unten'); deal.classList.remove('aus');
+          void deal.offsetWidth;
+          requestAnimationFrame(function () { deal.classList.remove('unten'); });
+        }, 700);
         // Original-Verwandlung der Homepage: Rad zerfällt in Laub und setzt sich neu zusammen (nur ohne Skalierung, sonst stimmen die Maße nicht)
         if (window.VM && VM.on && VM.ok && x.logo && Math.abs(scale() - 1) < 0.02) {
           logo.hidden = false;
