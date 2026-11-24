@@ -67,7 +67,14 @@ async function segment(browser, base, daten, von, bis, datei, nr, opts) {
     // CSS-Animationen an die virtuelle Uhr koppeln: Dauer-Animationen absolut (lückenlos über Segmente), neue ab ihrem Start
     window.__vtTick = function (t) {
       document.getAnimations().forEach(function (a) {
-        if (a.__vt == null) { a.__vt = window.__vtLaeuft ? t : -o; try { a.pause(); } catch (e) { /* egal */ } }
+        if (a.__vt == null) {
+          // CSS-Endlos-Animationen werden vom Browser manchmal neu erzeugt – Startzeit je Element+Name merken, sonst springt sie auf Anfang
+          var el = a.effect && a.effect.target, nm = a.animationName;
+          var m = el && nm ? (el.__vtStart || (el.__vtStart = {})) : null;
+          if (m && m[nm] != null) a.__vt = m[nm];
+          else { a.__vt = window.__vtLaeuft ? t : -o; if (m) m[nm] = a.__vt; }
+          try { a.pause(); } catch (e) { /* egal */ }
+        }
         try { a.currentTime = Math.max(0, t - a.__vt); } catch (e) { /* egal */ }
       });
     };
