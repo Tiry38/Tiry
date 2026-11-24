@@ -217,7 +217,7 @@ VM.run=async function(o){const root=o.root,bk=o.bike,lg=o.logo;const bOld=bk.old
  const csB=getComputedStyle(bOld),csL=getComputedStyle(lg.el);const op0=lg.op0!=null?lg.op0:csL.opacity;
  const finish=()=>{if(bNew===bOld){if(bNew.getAttribute('src')!==bk.to)bNew.src=bk.to}quiet(bNew,()=>{bNew.classList.remove('off','out-l','in-r');bNew.style.opacity=''});
   if(bOld!==bNew)quiet(bOld,()=>{bOld.classList.add('off');bOld.style.opacity=''});if(bk.alt)bNew.alt=bk.alt;
-  quiet(lg.el,()=>{lg.el.style.opacity=''});cB.style.display='none';cL.style.display='none';root.classList.remove('vmrun');root._vmH=0};
+  quiet(lg.el,()=>{lg.el.style.opacity=''});/* Velo-TV: Zeichenfläche weich ausblenden statt hart tauschen (sonst Ruck: weiches Raster -> scharfes Foto) */cL.style.display='none';cB.style.transition='opacity .4s ease';cB.style.opacity='0';setTimeout(()=>{cB.style.display='none';cB.style.opacity=''},450);root.classList.remove('vmrun');root._vmH=0};
  const tok=root._vmTok=(root._vmTok||0)+1,dead=()=>root._vmTok!==tok;
  try{let Lb,Ll;const prep=Promise.all([layer(root,cB,{from,to:bk.to,tplA:bOld,tplB:bNew,refl:csB.webkitBoxReflect||'none',dead},'bike'),
    layer(root,cL,{from:lFrom,to:lg.to,tplA:lg.el,tplB:lg.el,dead},'logo')]);prep.catch(()=>{});

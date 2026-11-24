@@ -271,6 +271,10 @@
   }, 30000);
 
   // Vollbild (Browser verlangt einen Tastendruck)
+  // Markierungen sofort aufheben (Fernbedienung kann sonst Text markieren)
+  document.addEventListener('selectstart', function (e) { e.preventDefault(); });
+  setInterval(function () { try { var sel = window.getSelection(); if (sel && sel.rangeCount) sel.removeAllRanges(); } catch (e) { /* egal */ } }, 2000);
+
   function vollbild() {
     var d = document.documentElement;
     var f = d.requestFullscreen || d.webkitRequestFullscreen;

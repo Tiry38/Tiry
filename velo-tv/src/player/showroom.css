@@ -49,8 +49,8 @@ html.hg-an #stage{background:transparent}
 .sr .nw{white-space:nowrap}
 .sr .amp,.sr .gt{background-clip:text;-webkit-background-clip:text;color:transparent;filter:drop-shadow(0 0 1px rgba(255,255,255,.95)) drop-shadow(0 0 1px rgba(255,255,255,.9)) drop-shadow(0 1px 6px rgba(255,255,255,.55));text-shadow:none}
 .sr .amp{font-weight:800;padding:0 2.5px;background-image:linear-gradient(135deg,#FF4D63,#C8102E 55%,#8E0B20)}
-.sr .gt{display:inline-block;padding:0 8px 10px 6px;margin:0 -8px -10px -6px;background-image:linear-gradient(100deg,#C8102E 0%,#8E1530 25%,#3A3D44 50%,#8E1530 75%,#C8102E 100%);background-size:200% 100%;transform:skewX(-9deg);animation:flow 9s linear infinite}
-@keyframes flow{to{background-position:200% 0}}
+.sr .gt{display:inline-block;padding:0 8px 10px 6px;margin:0 -8px -10px -6px;background-image:linear-gradient(100deg,#C8102E 0%,#8E1530 45%,#3A3D44 100%);background-size:200% 100%;background-repeat:repeat;transform:skewX(-9deg);animation:gtflow 9s linear infinite}
+@keyframes gtflow{to{background-position:200% 0}}
 .sr .lead{margin:20px 0 0;max-width:680px;font:400 23px/1.55 "Sora",sans-serif;color:#262B35;font-weight:500;text-shadow:0 0 2px #fff,0 0 3px #fff,0 0 6px rgba(255,255,255,.95),0 0 14px rgba(255,255,255,.7)}
 .sr .trust{display:flex;gap:12px;margin-top:30px}
 .sr .tb{display:inline-flex;align-items:center;gap:8px;height:50px;padding:0 20px 0 8px;border-radius:999px;font:600 17px/1 "Outfit",sans-serif;color:#262B35;background:linear-gradient(rgba(255,255,255,.92),rgba(240,245,251,.8));box-shadow:inset 0 1px 0 #fff,0 8px 20px -10px rgba(18,24,38,.3)}
@@ -77,9 +77,18 @@ html.hg-an #stage{background:transparent}
 .sr .hfloor{position:absolute;left:16%;right:16%;bottom:18%;height:3px;border-radius:3px;background:linear-gradient(90deg,transparent,#B87333,#F0C8A0,#B87333,transparent);box-shadow:0 0 22px rgba(184,115,51,.55),0 10px 30px -6px rgba(18,22,32,.28)}
 
 /* ---- Angebot unter dem Kreis: groß und eindeutig – Modell, alter Preis durchgestrichen, neuer Preis, rotes Spar-Schild ---- */
-.sr .hvis{top:150px;transform:scale(.94);transform-origin:50% 0}
+.sr .hvis{top:150px;left:1031px;width:658px;height:577px}
 .sr .deal{position:absolute;left:1360px;top:690px;transform:translateX(-50%);width:980px;display:flex;flex-direction:column;align-items:center;text-align:center;transition:opacity .45s ease,transform .7s cubic-bezier(.2,.8,.2,1)}
-.sr .deal.swap{opacity:0;transform:translate(-50%,18px)}
+/* Übergang: Zeile für Zeile hinter einer unsichtbaren Kante nach oben weg – neue Zeilen zeitversetzt von unten herein */
+.sr .deal>:not(.dhalo){transition:transform .8s cubic-bezier(.16,1,.3,1),clip-path .8s cubic-bezier(.16,1,.3,1),opacity .5s ease;clip-path:inset(-30% -20% -30% -20%)}
+.sr .deal>:nth-child(3){transition-delay:.07s}
+.sr .deal>:nth-child(4){transition-delay:.14s}
+.sr .deal>:nth-child(5){transition-delay:.21s}
+.sr .deal.aus>:not(.dhalo){transform:translateY(-46px);clip-path:inset(-30% -20% 130% -20%);opacity:0;transition-duration:.5s,.5s,.35s;transition-timing-function:cubic-bezier(.7,0,.84,0)}
+.sr .deal.unten>:not(.dhalo){transform:translateY(64px);clip-path:inset(130% -20% -30% -20%);opacity:0;transition:none}
+.sr .deal .sp-b{transition:transform .9s cubic-bezier(.34,1.56,.64,1) .45s}
+.sr .deal.aus .sp-b{transform:rotate(8deg) scale(.6);transition:transform .45s cubic-bezier(.7,0,.84,0)}
+.sr .deal.unten .sp-b{transform:rotate(-16deg) scale(.4);transition:none}
 .sr .dhalo{position:absolute;z-index:-1;left:50%;top:58%;width:1400px;height:600px;border-radius:50%;transform:translate(-50%,-50%);background:radial-gradient(closest-side,rgba(14,12,12,.66),rgba(14,12,12,.42) 55%,rgba(14,12,12,0) 85%)}
 .sr .dl-m{margin:0;font:900 62px/1.02 "Outfit",sans-serif;letter-spacing:-1.8px;color:#fff;white-space:nowrap;max-width:860px;overflow:hidden;text-overflow:ellipsis;
   text-shadow:0 2px 4px rgba(0,0,0,.6),0 6px 24px rgba(0,0,0,.55)}
@@ -117,3 +126,12 @@ html.render .slide{transition:none}
 /* Showroom als Video */
 .sr-video{background:#000}
 .sr-video video{width:100%;height:100%;object-fit:cover;display:block}
+
+/* Social-Media-Kreise wie oben links auf der Homepage (Instagram, Facebook, WhatsApp), für den Fernseher groß */
+.sr .soc{display:flex;justify-content:center;gap:40px;width:680px;margin-top:44px}
+.sr .soc span{width:128px;height:128px;border-radius:50%;display:grid;place-items:center;color:#fff;box-shadow:0 14px 30px -12px rgba(0,0,0,.45),inset 0 2px 0 rgba(255,255,255,.35)}
+.sr .soc svg{width:64px;height:64px}
+.sr .soc .ig{background:radial-gradient(circle at 30% 107%,#FDF497 0%,#FD5949 45%,#D6249F 60%,#285AEB 90%)}
+.sr .soc .fb{background:linear-gradient(135deg,#1877F2,#0B5FD1)}
+.sr .soc .fb svg{width:72px;height:72px}
+.sr .soc .wa{background:linear-gradient(135deg,#25D366,#128C7E)}

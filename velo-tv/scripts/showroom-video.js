@@ -18,7 +18,7 @@ const { createServer } = require('../src/server/server');
 const R = path.join(__dirname, '..');
 const arg = (n, d) => { const i = process.argv.indexOf('--' + n); return i < 0 ? d : (process.argv[i + 1] && !process.argv[i + 1].startsWith('--') ? process.argv[i + 1] : true); };
 const OUT = path.resolve(arg('out', path.join(R, 'video-out')));
-const FPS = Number(arg('fps', 30));
+const FPS = Number(arg('fps', 60));
 const SEK = Number(arg('sek', 8));          // Sekunden je Rad (wie im Live-Showroom)
 const MAX = Number(arg('max-slots', 0));     // nur zum Testen
 const WORKERS = Number(arg('workers', Math.max(1, Math.min(4, os.cpus().length))));
@@ -67,7 +67,14 @@ async function segment(browser, base, daten, von, bis, datei, nr, opts) {
     // CSS-Animationen an die virtuelle Uhr koppeln: Dauer-Animationen absolut (lückenlos über Segmente), neue ab ihrem Start
     window.__vtTick = function (t) {
       document.getAnimations().forEach(function (a) {
-        if (a.__vt == null) { a.__vt = window.__vtLaeuft ? t : -o; try { a.pause(); } catch (e) { /* egal */ } }
+        if (a.__vt == null) {
+          // CSS-Endlos-Animationen werden vom Browser manchmal neu erzeugt – Startzeit je Element+Name merken, sonst springt sie auf Anfang
+          var el = a.effect && a.effect.target, nm = a.animationName;
+          var m = el && nm ? (el.__vtStart || (el.__vtStart = {})) : null;
+          if (m && m[nm] != null) a.__vt = m[nm];
+          else { a.__vt = window.__vtLaeuft ? t : -o; if (m) m[nm] = a.__vt; }
+          try { a.pause(); } catch (e) { /* egal */ }
+        }
         try { a.currentTime = Math.max(0, t - a.__vt); } catch (e) { /* egal */ }
       });
     };
@@ -91,7 +98,11 @@ async function segment(browser, base, daten, von, bis, datei, nr, opts) {
   for (let k = 0; k < 40; k++) { await page.clock.runFor(16); await page.waitForTimeout(50); }
   await page.evaluate(({ d, s }) => { window.__srEl = window.VeloRender(d, s); }, { d: daten, s: von });
   for (let k = 0; k < 20; k++) { await page.clock.runFor(0); await page.waitForTimeout(30); }
-  await page.evaluate(() => { window.__vtLaeuft = true; });
+  // Startzustand einmal wirklich zeichnen lassen, sonst springt der erste Übergang (Text verschwindet ohne Animation)
+  await page.evaluate(() => { document.querySelectorAll('.sr .deal > *, .sr .sp-b').forEach((e) => getComputedStyle(e).transform); return document.body.offsetWidth; });
+  await page.screenshot({ type: 'jpeg', quality: 10, timeout: 0 });
+  // bereits laufende Dauer-Animationen auf die absolute Zeit des Segments setzen (lückenlos über Segmentgrenzen)
+  await page.evaluate(() => { window.__vtTick(0); window.__vtLaeuft = true; });
 
   const enc = ffmpeg(datei);
   const proSlot = SEK * FPS, frames = (bis - von) * proSlot, dt = 1000 / FPS;
@@ -99,7 +110,8 @@ async function segment(browser, base, daten, von, bis, datei, nr, opts) {
   for (let f = 0; f < frames; f++) {
     if (f % proSlot === 0) {
       // Wechsel zum nächsten Rad; Vorbereitung der Verwandlung abwarten (echte Zeit, virtuelle Uhr steht)
-      await page.evaluate(() => window.__srEl._wechsel());
+      // Wechsel auslösen und neue Übergänge sofort an die virtuelle Uhr binden (sonst laufen sie während der Vorbereitung in Echtzeit ab)
+      await page.evaluate((tt) => { window.__srEl._wechsel(); document.body.offsetWidth; window.__vtTick(tt); }, t);
       for (let k = 0; k < 200; k++) {
         await page.clock.runFor(0);
         const bereit = await page.evaluate(() => { const h = document.querySelector('.sr .hvis'); return !window.VM || !VM.on || !VM.ok || (h && h.classList.contains('vmrun')); });
