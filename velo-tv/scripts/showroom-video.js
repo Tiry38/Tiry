@@ -48,7 +48,7 @@ const UHR_START = 60000; // virtuelle Uhr wird bei 60 s angehalten (Laden passie
 
 function ffmpeg(datei) {
   const p = spawn('ffmpeg', ['-y', '-loglevel', 'error', '-f', 'image2pipe', '-framerate', String(FPS), '-c:v', 'mjpeg', '-i', '-',
-    '-c:v', 'libx264', '-preset', 'medium', '-crf', '19', '-pix_fmt', 'yuv420p', '-r', String(FPS), datei], { stdio: ['pipe', 'inherit', 'inherit'] });
+    '-c:v', 'libx264', '-preset', 'slow', '-crf', '21', '-pix_fmt', 'yuv420p', '-r', String(FPS), datei], { stdio: ['pipe', 'inherit', 'inherit'] });
   const fertig = new Promise((res, rej) => p.on('close', (c) => (c === 0 ? res() : rej(new Error('ffmpeg ' + c)))));
   return { schreib: (buf) => new Promise((res) => (p.stdin.write(buf) ? res() : p.stdin.once('drain', res))), ende: () => { p.stdin.end(); return fertig; } };
 }
@@ -175,7 +175,8 @@ async function concat(dateien, ziel, extra) {
   try {
     if (HG_MODUS) {
       // Hintergrund-Schleife: L+B Sekunden rendern, Ende weich in den Anfang überblenden → nahtlos
-      const gesamt = HG_LAENGE + HG_BLENDE, w = Math.min(2, WORKERS), browser = await starte(), t0 = Date.now();
+      const gesamt = HG_LAENGE + HG_BLENDE, w = 1,  // ein Durchgang: keine Naht zwischen Rechensträngen
+        browser = await starte(), t0 = Date.now();
       const teile = [...Array(w)].map((_, k) => [k * gesamt / w, (k + 1) * gesamt / w]);
       const dateien = teile.map((_, k) => path.join(dir, 'hg' + k + '.mp4'));
       await Promise.all(teile.map(([a, b], k) => hgSegment(browser, base, a, b, dateien[k], k)));
@@ -185,7 +186,7 @@ async function concat(dateien, ziel, extra) {
       const B = HG_BLENDE, L = HG_LAENGE;
       await ff(['-i', roh, '-filter_complex',
         `[0:v]split=3[a][b][c];[a]trim=0:${B},setpts=PTS-STARTPTS[p1];[b]trim=${B}:${L},setpts=PTS-STARTPTS[p2];[c]trim=${L}:${L + B},setpts=PTS-STARTPTS[p3];` +
-        `[p3][p1]blend=all_expr='A*(1-T/${B})+B*(T/${B})'[x];[p2][x]concat=n=2:v=1:a=0,format=yuv420p[v]`,
+        `[p3][p1]blend=all_expr='A*(1-N/${B * FPS - 1})+B*(N/${B * FPS - 1})'[x];[p2][x]concat=n=2:v=1:a=0,format=yuv420p[v]`,
         '-map', '[v]', '-c:v', 'libx264', '-preset', 'slow', '-crf', '16', '-r', String(FPS), '-movflags', '+faststart', path.join(OUT, 'hintergrund.mp4')]);
       log('Hintergrund-Schleife fertig in ' + Math.round((Date.now() - t0) / 1000) + ' s');
       return;
