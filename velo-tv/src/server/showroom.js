@@ -9,6 +9,8 @@ const crypto = require('crypto');
 
 const FB = { projectId: 'velo-center-web', apiKey: 'AIzaSyCgQIqsjjeNxyOcZhNdNlkmKxAZEAWQa7U' }; // öffentlicher Web-Schlüssel der Homepage
 const BILD_BASEN = ['https://tiry38.github.io/velo-center-web/'];
+// Fertig gerendertes Showroom-Video (GitHub Actions, Workflow velo-tv-showroom.yml)
+const VIDEO_BASIS = 'https://github.com/Tiry38/Tiry/releases/download/velo-tv-showroom/';
 
 // Marken wie auf der Homepage (BR/BRK): Schlüssel, Name, Logo, Deckkraft des Wasserzeichens, Akzentfarbe
 const MARKEN = [
@@ -99,6 +101,12 @@ function createShowroom(opts) {
   const dir = path.join(opts.dataDir, 'showroom');
   const bildDir = path.join(dir, 'bilder');
   const datei = path.join(dir, 'showroom.json');
+  const videoDir = path.join(dir, 'video');
+  const videoMetaDatei = path.join(videoDir, 'video.json');
+  fs.mkdirSync(videoDir, { recursive: true });
+  let video = null;
+  try { video = JSON.parse(fs.readFileSync(videoMetaDatei, 'utf8')); if (!fs.existsSync(path.join(videoDir, video.datei))) video = null; } catch (e) { video = null; }
+  let videoLaeuft = null, videoFehler = null;
   const fetchImpl = opts.fetch || fetch;
   fs.mkdirSync(bildDir, { recursive: true });
   let daten = { items: [], stand: '', ts: 0, fehler: null };
@@ -151,14 +159,53 @@ function createShowroom(opts) {
     return laeuft;
   }
 
+  /** Neues Showroom-Video aus der Cloud holen, wenn es eins gibt (alle 15 min) */
+  async function videoHolen() {
+    if (videoLaeuft) return videoLaeuft;
+    videoLaeuft = (async () => {
+      try {
+        const r = await fetchImpl(VIDEO_BASIS + 'showroom-video.json?v=' + Date.now(), { signal: AbortSignal.timeout(30000), redirect: 'follow' });
+        if (r.status === 404) { videoFehler = null; return; } // noch kein Video gebaut
+        if (!r.ok) throw new Error('Video-Info nicht erreichbar (' + r.status + ')');
+        const meta = await r.json();
+        if (!meta || !meta.version) throw new Error('Video-Info ungültig');
+        if (video && video.version === meta.version) { videoFehler = null; return; }
+        const name = 'showroom-' + String(meta.version).replace(/[^a-z0-9]/gi, '') + '.mp4';
+        const ziel = path.join(videoDir, name);
+        const v = await fetchImpl(VIDEO_BASIS + 'showroom.mp4?v=' + meta.version, { signal: AbortSignal.timeout(30 * 60 * 1000), redirect: 'follow' });
+        if (!v.ok || !v.body) throw new Error('Video-Download fehlgeschlagen (' + v.status + ')');
+        const { Readable } = require('stream');
+        const { pipeline } = require('stream/promises');
+        await pipeline(Readable.fromWeb(v.body), fs.createWriteStream(ziel + '.teil'));
+        const groesse = fs.statSync(ziel + '.teil').size;
+        if (meta.groesse && Math.abs(groesse - meta.groesse) > 1024) throw new Error('Video unvollständig');
+        await fsp.rename(ziel + '.teil', ziel);
+        const alt = video;
+        video = Object.assign({}, meta, { datei: name, url: '/showroom-video/' + name, geholt: Date.now() });
+        delete video.items;
+        await fsp.writeFile(videoMetaDatei, JSON.stringify(video, null, 1));
+        if (alt && alt.datei !== name) await fsp.unlink(path.join(videoDir, alt.datei)).catch(() => {});
+        videoFehler = null;
+        if (opts.onChange) opts.onChange(daten);
+      } catch (e) {
+        videoFehler = e.message || 'Fehler';
+        for (const f of await fsp.readdir(videoDir).catch(() => [])) if (f.endsWith('.teil')) await fsp.unlink(path.join(videoDir, f)).catch(() => {});
+      } finally { videoLaeuft = null; }
+    })();
+    return videoLaeuft;
+  }
+
   const timer = setInterval(() => aktualisieren(), 30 * 60 * 1000);
-  if (opts.autoStart !== false) setTimeout(() => aktualisieren(), 1500);
+  const videoTimer = setInterval(() => videoHolen(), 15 * 60 * 1000);
+  if (opts.autoStart !== false) { setTimeout(() => aktualisieren(), 1500); setTimeout(() => videoHolen(), 5000); }
 
   return {
-    get daten() { return daten; },
+    get daten() { return Object.assign({}, daten, { video: video ? Object.assign({}, video, { fehler: videoFehler }) : (videoFehler ? { fehler: videoFehler } : null) }); },
     bildDir,
+    videoDir,
     aktualisieren,
-    stop() { clearInterval(timer); }
+    videoHolen,
+    stop() { clearInterval(timer); clearInterval(videoTimer); }
   };
 }
 

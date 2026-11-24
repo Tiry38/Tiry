@@ -192,24 +192,24 @@ var TXE=[];function txWant(){}
    1. Hintergrund mit 30 statt 60 Bildern (langsamer Nebel/Laub – kaum sichtbar), 2. Auflösung in Stufen bis 60 %, 3. 20/15 Bilder.
    Sehr langsam (< 16 Bilder/s): Stufe 1+2 sofort zusammen. Jede Stufe wird geprüft und zurückgenommen, wenn sie nichts bringt. */
 var GN=0;
-function gov(now){if(now<GN)return;GN=now+1000;if(now<1500+t0)return;
+function gov(now){if(window.HG_RENDER)return;if(now<GN)return;GN=now+1000;if(now<1500+t0)return;
  if(GT){if(FN-GT.n<15){GN=now+250;return}if(FT>GT.ft*.9){if(GT.k==='q')QS=GT.v;else SK=GT.v;LOCK=now+60000}GT=null;return}
  if(FT>60&&SK===0&&now>LOCK){SK=1;QS=Math.min(QS,.75);HOLD=now+15000;return}
  if(FT>26&&now>LOCK){if(SK<1){GT={k:'s',v:SK,ft:FT,n:FN};SK=1}else if(QS>.6){GT={k:'q',v:QS,ft:FT,n:FN};QS=Math.max(.6,QS-.15)}else if(SK<3){GT={k:'s',v:SK,ft:FT,n:FN};SK++}else return;HOLD=now+(now-RZ<5000?60000:10000)}
  else if(FT<19&&now>HOLD){if(SK>1){SK--;RZ=now;HOLD=now+10000}else if(QS<1){QS=Math.min(1,QS+.05);RZ=now}else if(SK===1&&!WEAK){SK=0;RZ=now;HOLD=now+10000}}}
-function size(){var big=innerWidth*innerHeight>1.4e6;dpr=Math.min(devicePixelRatio||1,1.25)*(big?.8:.95)*QS;
+function size(){var big=innerWidth*innerHeight>1.4e6;dpr=window.HG_RENDER?(window.HG_RENDER_DPR||1):Math.min(devicePixelRatio||1,1.25)*(big?.8:.95)*QS;
  var w=Math.round(cv.clientWidth*dpr),h=Math.round(cv.clientHeight*dpr);if(w!==W||h!==H){W=cv.width=w;H=cv.height=h}}
 var VS=0,Po=[0,0,0],Pv=[0,0,0],Pt=[0,0,0];
 function pose(){var h=0,k=(location.hash||'#start')+mode;for(var i=0;i<k.length;i++)h=(h*31+k.charCodeAt(i))|0;h=Math.abs(h);
  Pt=[((h%7)-3)*.010,(((h>>3)%5)-2)*.006,.03+(h>>6)%4*.025];Pv[2]-=.10}
 function frame(){raf=requestAnimationFrame(frame);if(window.HG_PAUSE){TL=0;return}var now=performance.now();if(SOFT){var e0=TX[mode];if(e0&&e0.ok&&!DOK){DOK=1;NEED=1}if(DOK&&!NEED)return;NEED=0;sc=scrollY/innerHeight}
  else{if(TL&&!document.hidden){var dt=Math.min(200,now-TL);FT+=(dt-FT)*.12;FN++;gov(now)}TL=now;if(SK&&(++SKc%(SK+1)))return}
- size();var t=(now-t0)/1000;
+ size();var t=(now-(window.HG_T0!=null?window.HG_T0:t0))/1000;
  for(var i=0;i<3;i++){Pv[i]+=(Pt[i]-Po[i])*.012;Pv[i]*=.90;Po[i]+=Pv[i]}
  M[0]+=(Mt[0]-M[0])*.045;M[1]+=(Mt[1]-M[1])*.045;var sc0=sc;sc+=(scrollY/innerHeight-sc)*.10;VS+=(Math.min(1.5,Math.abs(sc-sc0)*45)-VS)*.10;
  var e=TX[mode];gl.viewport(0,0,W,H);
  if(!e||!e.ok){gl.clearColor(.914,.922,.933,1);gl.clear(gl.COLOR_BUFFER_BIT);return}
- if(shown!==mode){shown=mode;fade=0}fade=SOFT?1:Math.min(1,fade+.025);
+ if(shown!==mode){shown=mode;fade=0}fade=(SOFT||window.HG_RENDER)?1:Math.min(1,fade+.025);
  var c=CFG[mode];gl.useProgram(pr);
  gl.activeTexture(gl.TEXTURE0);gl.bindTexture(gl.TEXTURE_2D,e.p);gl.uniform1i(U.uP,0);
  gl.activeTexture(gl.TEXTURE1);gl.bindTexture(gl.TEXTURE_2D,e.d);gl.uniform1i(U.uD,1);
@@ -337,9 +337,9 @@ function init(){cv=document.createElement('canvas');cv.id='hg';cv.setAttribute('
  gl=cv.getContext('webgl',{antialias:false,alpha:false,premultipliedAlpha:false,powerPreference:'high-performance'});
  if(!gl){cv.remove();de.classList.remove('hg3');return}gl.getExtension('OES_standard_derivatives');
  try{build()}catch(err){console.error('hg12',err.message);cv.remove();de.classList.remove('hg3');return}
- try{var di=gl.getExtension('WEBGL_debug_renderer_info');var rn=di?String(gl.getParameter(di.UNMASKED_RENDERER_WEBGL)):'';if(/swiftshader|llvmpipe|software|basic render/i.test(rn))SOFT=1;
+ try{var di=gl.getExtension('WEBGL_debug_renderer_info');var rn=di?String(gl.getParameter(di.UNMASKED_RENDERER_WEBGL)):'';if(!window.HG_RENDER&&/swiftshader|llvmpipe|software|basic render/i.test(rn))SOFT=1;
   /* schwache Grafik von Anfang an mit 30 Bildern (Hintergrund), damit nichts erst hängen muss: Intel HD/UHD 4xx–6xx (z. B. N5000), ältere Handy-Chips */
-  else if(/(U?HD Graphics( \d{3})?\b(?!.*Iris))|Mali-(T|G[1-5]\d\b)|Adreno.{0,8}([1-5]\d\d|6[01]\d)\b|PowerVR/i.test(rn)||(navigator.hardwareConcurrency||8)<=2){WEAK=1;SK=1}}catch(_){}
+  else if(/(U?HD Graphics( \d{3})?\b(?!.*Iris))|Mali-(T|G[1-5]\d\b)|Adreno.{0,8}([1-5]\d\d|6[01]\d)\b|PowerVR/i.test(rn)||(navigator.hardwareConcurrency||8)<=2){WEAK=1;SK=1}}catch(_){}if(window.HG_RENDER){SK=0;WEAK=0;QS=1}
  if(SOFT){QS=.6;var st0=0,nd=function(){NEED=1};addEventListener('resize',nd);addEventListener('hashchange',function(){NEED=1;setTimeout(nd,500)});addEventListener('scroll',function(){clearTimeout(st0);st0=setTimeout(nd,220)},{passive:true})}
  window.HG12_STAT=function(){return {soft:SOFT,weak:WEAK,qs:QS,skip:SK,ft:Math.round(FT*10)/10}};
  addEventListener('pointermove',function(e){Mt=[e.clientX/innerWidth,1-e.clientY/innerHeight]},{passive:true});

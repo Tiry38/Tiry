@@ -5,6 +5,7 @@
   var VERSION = '1.0';
   var qs = new URLSearchParams(location.search);
   var VORSCHAU = qs.has('vorschau');
+  var RENDER = qs.has('render');
   var stage = document.getElementById('stage');
   var idle = document.getElementById('idle');
   var clockEl = document.getElementById('clock');
@@ -230,7 +231,7 @@
 
   var letzterHerzschlag = 0, serverVersion = '';
   function herzschlag() {
-    if (VORSCHAU) return;
+    if (VORSCHAU || RENDER) return;
     if (Date.now() - letzterHerzschlag < 3000) return;
     letzterHerzschlag = Date.now();
     var body = JSON.stringify({
@@ -276,13 +277,23 @@
     if (f && !document.fullscreenElement && !document.webkitFullscreenElement) { try { f.call(d); } catch (e) { /* egal */ } }
     hint.hidden = true;
   }
-  if (!VORSCHAU && !qs.get('probe')) {
+  if (!VORSCHAU && !RENDER && !qs.get('probe')) {
     hint.hidden = false;
     setTimeout(function () { hint.hidden = true; }, 12000);
     document.addEventListener('keydown', vollbild);
     document.addEventListener('click', vollbild);
   }
 
+  // Render-Modus (Showroom-Video in der Cloud): nur der Showroom, gesteuert vom Render-Programm, keine Verbindung
+  if (qs.has('render')) {
+    document.documentElement.classList.add('render');
+    window.VeloRender = function (daten, start) {
+      var el = window.VeloShowroom.baue(daten, { fest: true, start: start, manuell: true });
+      stage.appendChild(el); el.classList.add('on'); el._start();
+      return el;
+    };
+    return;
+  }
   // Probe-Modus (Text-Folien-Editor): genau einen Beitrag zeigen, ohne Verbindung
   if (qs.get('probe')) {
     try { anwenden({ items: [Object.assign({ enabled: true, plan: {}, duration: 3600 }, JSON.parse(qs.get('probe')))], settings: {} }); } catch (e) { /* egal */ }

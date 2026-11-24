@@ -224,7 +224,7 @@ function createServer(opts) {
       const st = await fsp.stat(datei);
       if (!st.isFile()) throw new Error('kein File');
       const typ = MIME[path.extname(datei).toLowerCase()] || 'application/octet-stream';
-      const istMedia = datei.startsWith(mediaDir) || (showroom && datei.startsWith(showroom.bildDir));
+      const istMedia = datei.startsWith(mediaDir) || (showroom && (datei.startsWith(showroom.bildDir) || datei.startsWith(showroom.videoDir)));
       const kopf = {
         'Content-Type': typ,
         'Accept-Ranges': 'bytes',
@@ -505,6 +505,7 @@ function createServer(opts) {
     if (p === '/api/showroom/refresh' && m === 'POST') {
       if (!showroom) return json(res, 404, { error: 'Showroom aus' });
       const d = await showroom.aktualisieren();
+      await showroom.videoHolen();
       protokoll(pc, 'Showroom-Angebote aktualisiert (' + d.items.length + ')');
       state.rev++; speichern(); senden('state', state);
       return json(res, 200, { anzahl: d.items.length, stand: d.stand, ts: d.ts, fehler: d.fehler });
@@ -532,6 +533,7 @@ function createServer(opts) {
     try {
       if (p.startsWith('/api/')) return await api(req, res, url);
       if (p.startsWith('/showroom/') && showroom) return statisch(res, sicher(showroom.bildDir, p.slice(10)) || '/nix', req);
+      if (p.startsWith('/showroom-video/') && showroom) return statisch(res, sicher(showroom.videoDir, p.slice(16)) || '/nix', req);
       if (p.startsWith('/media/')) {
         const ziel = sicher(mediaDir, p.slice(7));
         return statisch(res, ziel || '/nix', req);
@@ -553,6 +555,7 @@ function createServer(opts) {
   return {
     get pin() { return zugang.pin; },
     localKey,
+    assetDirs,
     get state() { return state; },
     anwesenheit,
     listen(port, host) {

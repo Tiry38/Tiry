@@ -35,15 +35,17 @@
   function hgAn(d) {
     hgZahl = Math.max(0, hgZahl + d);
     document.documentElement.classList.toggle('hg-an', hgZahl > 0);
-    window.HG_PAUSE = hgZahl === 0;
+    window.HG_PAUSE = hgZahl === 0 || !!window.HG_AUS;
   }
 
   window.VeloHG = hgAn;
   // Vorschau in der Steuerung: Verwandlung aus, damit der Büro-PC nicht unnötig rechnet
   if (/[?&]vorschau/.test(location.search) && window.VM) VM.on = false;
 
-  function baue(daten) {
-    var items = reihum((daten && daten.items) || []);
+  /* opts (nur für das Video-Rendern): fest = Reihenfolge wie geliefert, start = Index des ersten Wechsels, manuell = Wechsel nur über el._wechsel() */
+  function baue(daten, opts) {
+    opts = opts || {};
+    var items = opts.fest ? ((daten && daten.items) || []).slice() : reihum((daten && daten.items) || []);
     if (!items.length) return null;
     var el = document.createElement('div');
     el.className = 'slide sr';
@@ -77,7 +79,7 @@
     var stage = el.querySelector('.sr-stage');
     var bikes = el.querySelectorAll('.hb'), logo = el.querySelector('.hlg'), deal = el.querySelector('.deal'), hvis = el.querySelector('.hvis');
     var dots = el.querySelector('.dl-dots');
-    var i = -1, an = 0, timer = 0, aktiv = false;
+    var i = opts.start != null ? ((opts.start - 2) % items.length + items.length) % items.length : -1, an = 0, timer = 0, aktiv = false;
 
     function skalieren() {
       var s = Math.min(window.innerWidth / 1920, window.innerHeight / 1080);
@@ -103,7 +105,7 @@
     function zeige() {
       if (!aktiv) return;
       clearTimeout(timer);
-      if (items.length > 1) timer = setTimeout(zeige, WECHSEL_MS);
+      if (items.length > 1 && !opts.manuell) timer = setTimeout(zeige, WECHSEL_MS);
       if (busy) return;
       i = (i + 1) % items.length;
       var x = items[i];
@@ -147,6 +149,7 @@
       zeige();
       if (window.VM && VM.warm) setTimeout(function () { VM.warm(hvis, bikes[0], logo); }, 1200);
     };
+    el._wechsel = function () { zeige(); };
     el._stop = function () {
       aktiv = false; clearTimeout(timer);
       window.removeEventListener('resize', skalieren);
@@ -156,10 +159,31 @@
     return el;
   }
 
+  // Fertig gerendertes Showroom-Video (aus der Cloud): absolut flüssig auf jedem Fernseher.
+  // Die Stelle wird gemerkt – beim nächsten Mal geht es mit den nächsten Rädern weiter.
+  var videoPos = {};
+  function baueVideo(v, einziges) {
+    var el = document.createElement('div');
+    el.className = 'slide sr-video';
+    var vid = document.createElement('video');
+    vid.muted = true; vid.setAttribute('muted', ''); vid.setAttribute('playsinline', '');
+    vid.preload = 'auto'; vid.loop = true;
+    vid.src = v.url;
+    el.appendChild(vid);
+    var start = videoPos[v.version] || 0;
+    vid.addEventListener('loadedmetadata', function () { if (start && start < vid.duration - 2) vid.currentTime = start; });
+    el._start = function () { var p = vid.play(); if (p && p.catch) p.catch(function () {}); };
+    el._stop = function () { try { videoPos[v.version] = vid.currentTime || 0; vid.pause(); } catch (e) { /* egal */ } };
+    return el;
+  }
+
   window.VeloShowroom = {
-    /** lädt die Angebote von der Zentrale und baut die Folie (null = keine Angebote) */
+    /** lädt die Angebote von der Zentrale und baut die Folie: Video, wenn vorhanden – sonst Live-Showroom (null = keine Angebote) */
     laden: function () {
-      return fetch('/api/showroom', { cache: 'no-store' }).then(function (r) { return r.json(); }).then(baue);
+      return fetch('/api/showroom', { cache: 'no-store' }).then(function (r) { return r.json(); }).then(function (d) {
+        if (d && d.video && d.video.url && !/[?&]live/.test(location.search)) return baueVideo(d.video);
+        return baue(d);
+      });
     },
     baue: baue
   };

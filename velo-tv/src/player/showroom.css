@@ -98,3 +98,11 @@ html.hg-an #stage{background:transparent}
 
 
 @media (prefers-reduced-motion:reduce){.sr .band .tk,.sr .hring::after,.sr .halo,.sr .gt{animation:none}}
+
+/* Video-Rendern: keine Einblend-Animation, keine Übergänge der Folie */
+html.render .sr .hello{animation:none}
+html.render .slide{transition:none}
+
+/* Showroom als Video */
+.sr-video{background:#000}
+.sr-video video{width:100%;height:100%;object-fit:cover;display:block}

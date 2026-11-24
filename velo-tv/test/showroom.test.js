@@ -46,6 +46,8 @@ function fakeFetch() {
     if (url.includes('documents/bestand/aktuell')) return new Response(JSON.stringify({ fields: fsWert(BESTAND).mapValue.fields }), { status: 200 });
     if (url.includes('documents/pub/lager')) return new Response('{}', { status: 404 });
     if (url.includes('/img/bestand/')) return new Response(bild, { status: 200, headers: { 'content-type': 'image/webp' } });
+    if (url.includes('showroom-video.json')) return new Response(JSON.stringify({ version: 'abc123', ts: 1, anzahl: 3, dauer: 24, groesse: 4096 }), { status: 200 });
+    if (url.includes('showroom.mp4')) return new Response(Buffer.alloc(4096, 3), { status: 200, headers: { 'content-type': 'video/mp4' } });
     return new Response('x', { status: 404 });
   };
 }
@@ -71,6 +73,13 @@ test('Zentrale lädt Angebote + Fotos und liefert sie dem Fernseher', async () =
     assert.equal(item.kind, 'showroom');
     assert.equal(item.duration, 120);
     assert.equal((await fetch(base + '/api/showroom/refresh', { method: 'POST' })).status, 401, 'Aktualisieren nur gekoppelt');
+    // fertiges Video aus der Cloud wurde geholt und wird mit Range ausgeliefert
+    d = await (await fetch(base + '/api/showroom')).json();
+    assert.equal(d.video.version, 'abc123');
+    assert.equal(d.video.anzahl, 3);
+    const v = await fetch(base + d.video.url, { headers: { Range: 'bytes=0-99' } });
+    assert.equal(v.status, 206);
+    assert.equal(Buffer.from(await v.arrayBuffer()).length, 100);
   } finally {
     await srv.close();
     fs.rmSync(dir, { recursive: true, force: true });

@@ -558,8 +558,13 @@ async function showroomLaden() {
     const d = await (await fetch(info.base + '/api/showroom', { cache: 'no-store' })).json();
     $('#srCount').textContent = d.ts ? String(d.items.length) : '–';
     const wann = d.ts ? new Date(d.ts).toLocaleString('de-DE', { dateStyle: 'short', timeStyle: 'short' }) : 'noch nie';
-    $('#srInfo').textContent = (d.fehler ? 'Letzter Abruf fehlgeschlagen: ' + d.fehler + '. ' : '') +
-      'Bestand vom ' + (d.stand || '–') + ', abgeholt ' + wann + '. Gezeigt werden nur Angebotsräder, die auf Lager sind und ein Foto haben. Aktualisiert sich alle 30 Minuten selbst.';
+    const v = d.video;
+    const vText = v && v.version
+      ? `Video: ${v.anzahl} Angebote · ${Math.floor(v.dauer / 60)}:${String(v.dauer % 60).padStart(2, '0')} Min · erstellt ${new Date(v.ts).toLocaleString('de-DE', { dateStyle: 'short', timeStyle: 'short' })}.`
+      : 'Noch kein Video – bis es da ist, zeigt der Fernseher den Live-Showroom.';
+    $('#srInfo').textContent = (d.fehler ? 'Letzter Abruf fehlgeschlagen: ' + d.fehler + '. ' : '') + vText +
+      (v && v.fehler ? ' Video-Abruf: ' + v.fehler + '.' : '') +
+      ' Bestand vom ' + (d.stand || '–') + ', geprüft ' + wann + '. Nur Angebotsräder auf Lager mit Foto. Neue Videos kommen automatisch.';
   } catch (e) { /* Zentrale gerade weg */ }
 }
 $('#srRefresh').onclick = async () => {

@@ -1,0 +1,82 @@
+name: Velo-TV Showroom-Video
+
+# Stündlich: prüft die Angebotsräder im Live-Bestand der Homepage. Hat sich etwas geändert (neues Angebot, Preis,
+# verkauft/ausgeblendet, Foto) oder wurde das Showroom-Design geändert, wird das Video neu berechnet und ins Release
+# „velo-tv-showroom“ gelegt. Die Velo-TV-Zentrale holt es sich alle 15 Minuten von dort.
+on:
+  schedule:
+    - cron: '23 * * * *'
+  workflow_dispatch:
+    inputs:
+      force:
+        description: 'Video auf jeden Fall neu bauen'
+        type: boolean
+        default: false
+  push:
+    branches: [main]
+    paths: ['velo-tv/src/player/**', 'velo-tv/scripts/showroom-video.js', '.github/workflows/velo-tv-showroom.yml']
+
+permissions:
+  contents: write
+
+concurrency:
+  group: velo-tv-showroom
+  cancel-in-progress: false
+
+jobs:
+  video:
+    runs-on: ubuntu-latest
+    timeout-minutes: 340
+    defaults:
+      run:
+        working-directory: velo-tv
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: velo-tv/package-lock.json
+      - run: npm ci
+      - name: Geändert?
+        id: check
+        run: node scripts/showroom-video.js --check --out out --alt https://github.com/Tiry38/Tiry/releases/download/velo-tv-showroom/showroom-video.json ${{ inputs.force && '--force' || '' }}
+      - name: Browser + ffmpeg
+        if: steps.check.outputs.changed == 'true'
+        run: |
+          npx playwright install --with-deps chromium
+          sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg
+      - name: Hintergrund-Schleife (einmal gebaut, danach aus dem Release)
+        id: hg
+        if: steps.check.outputs.changed == 'true'
+        shell: bash
+        run: |
+          HG="hintergrund-$(sha1sum src/player/vendor/hg12.js | cut -c1-10).mp4"
+          echo "name=$HG" >> "$GITHUB_OUTPUT"
+          mkdir -p out
+          if curl -fsSL -o out/hintergrund.mp4 "https://github.com/Tiry38/Tiry/releases/download/velo-tv-showroom/$HG"; then
+            echo "neu=false" >> "$GITHUB_OUTPUT"; echo "Hintergrund aus dem Release: $HG"
+          else
+            node scripts/showroom-video.js --hintergrund --out out
+            echo "neu=true" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Video rendern
+        if: steps.check.outputs.changed == 'true'
+        run: node scripts/showroom-video.js --out out --force --hintergrund-datei out/hintergrund.mp4
+      - name: Release velo-tv-showroom aktualisieren
+        if: steps.check.outputs.changed == 'true'
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          TAG="velo-tv-showroom"
+          ls -la out
+          if ! gh release view "$TAG" >/dev/null 2>&1; then
+            git tag -f "$TAG" "$GITHUB_SHA" && git push -f origin "refs/tags/$TAG"
+            gh release create "$TAG" --verify-tag --latest=false --title "Velo-TV Showroom-Video" \
+              --notes "Automatisch gebautes Showroom-Video (Angebotsräder aus dem Live-Bestand). Wird stündlich geprüft und bei Änderungen neu gebaut."
+          fi
+          if [ "${{ steps.hg.outputs.neu }}" = "true" ]; then cp out/hintergrund.mp4 "out/${{ steps.hg.outputs.name }}"; gh release upload "$TAG" "out/${{ steps.hg.outputs.name }}" --clobber; fi
+          # erst das Video, dann die Info-Datei – so lädt die Zentrale nie ein halbes Video
+          gh release upload "$TAG" out/showroom.mp4 --clobber
+          gh release upload "$TAG" out/showroom-video.json --clobber
