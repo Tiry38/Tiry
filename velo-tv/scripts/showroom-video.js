@@ -91,6 +91,9 @@ async function segment(browser, base, daten, von, bis, datei, nr, opts) {
   for (let k = 0; k < 40; k++) { await page.clock.runFor(16); await page.waitForTimeout(50); }
   await page.evaluate(({ d, s }) => { window.__srEl = window.VeloRender(d, s); }, { d: daten, s: von });
   for (let k = 0; k < 20; k++) { await page.clock.runFor(0); await page.waitForTimeout(30); }
+  // Startzustand einmal wirklich zeichnen lassen, sonst springt der erste Übergang (Text verschwindet ohne Animation)
+  await page.evaluate(() => { document.querySelectorAll('.sr .deal > *, .sr .sp-b').forEach((e) => getComputedStyle(e).transform); return document.body.offsetWidth; });
+  await page.screenshot({ type: 'jpeg', quality: 10, timeout: 0 });
   await page.evaluate(() => { window.__vtLaeuft = true; });
 
   const enc = ffmpeg(datei);
