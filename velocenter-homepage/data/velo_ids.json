@@ -1,4 +1,27 @@
 {
  "_hinweis": "Velo-IDs, die in Veloport fehlen, aus den Velo-de-Ville-Lieferanten-Rechnungen (Z:\\Lieferanten-Rechnungen) nachgetragen. Schlüssel = Veloport-Fahrzeug-ID (z. B. \"4804\"), Wert = Velo-ID (z. B. \"V23-…\"). Der Bilder-Agent holt damit das Bild aus der VELOWALLET.",
- "_offen": "4021 4058 4605 4801 4804 4806 4807 4808 4815 4820 4821 5161 5167 5168 5173 5177 5213 5712 5807 5961 5962 5965 6034 6035 6182 6357 6359"
+ "_offen": "4804 4807 4808 6357 6359",
+ "4021": "V22-126347",
+ "4058": "V22-130014",
+ "4605": "V22-143656",
+ "4801": "V23-112013",
+ "4806": "V23-112016",
+ "4815": "V23-111996",
+ "4820": "V23-113404",
+ "4821": "V23-112971",
+ "5161": "V23-144034",
+ "5167": "V23-144082",
+ "5168": "V23-143943",
+ "5173": "V23-157937",
+ "5177": "V23-157939",
+ "5213": "V23-163793",
+ "5712": "V23-143947",
+ "5807": "V23-176374",
+ "5961": "V24-D2-F4851E1E",
+ "5962": "V24-D1-57906D26",
+ "5965": "V24-D2-7788ED2B",
+ "6034": "V24-D2-54C86F50",
+ "6035": "V24-I-21FD3417",
+ "6182": "V24-I-F41326D8",
+ "_stand": "24.11.2026: 22 IDs aus Lieferanten-Rechnungen (V22/V23 = Seriennummer). VELOWALLET und Konfigurator kennen V22–V24 nicht (getestet) – bleiben für später gespeichert."
 }
