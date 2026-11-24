@@ -58,7 +58,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;color:#fff;font
 @keyframes flow{0%,100%{background-position:0% 50%}50%{background-position:100% 50%}}
 
 /* ---------- Leerlauf: animiertes Herbstallee-Wallpaper ---------- */
-.idle{position:fixed;inset:0;overflow:hidden;background:#2a2118}
+.idle{position:fixed;inset:0;overflow:hidden;background:transparent}
 .idle-photo{position:absolute;inset:-4%;background:url(/assets/hg-herbst-gross.webp) center 60%/cover;animation:kamera 46s ease-in-out infinite alternate;will-change:transform}
 @keyframes kamera{0%{transform:scale(1) translate3d(0,0,0)}50%{transform:scale(1.07) translate3d(-1.2%,.8%,0)}100%{transform:scale(1.13) translate3d(1%,1.6%,0)}}
 /* Lichtstrahlen aus dem Nebel am Ende der Allee */

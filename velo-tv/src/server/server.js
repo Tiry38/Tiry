@@ -334,6 +334,7 @@ function createServer(opts) {
         agent: sauber(b.agent, 200),
         active: Number(b.active) || 0,
         version: sauber(b.version, 20),
+        diag: b.diag && typeof b.diag === 'object' ? { fps: Number(b.diag.fps) || 0, gpu: sauber(b.diag.gpu, 80), vw: Number(b.diag.vw) || 0, vh: Number(b.diag.vh) || 0, dpr: Number(b.diag.dpr) || 1, morph: !!b.diag.morph, hg: sauber(b.diag.hg, 40) } : null,
         ip: (req.socket.remoteAddress || '').replace('::ffff:', '')
       };
       anwesenheitSenden();

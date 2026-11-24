@@ -30,6 +30,18 @@
     return '<div class="tk">' + eins + eins + eins + eins + '</div>';
   }
 
+  // Homepage-Hintergrund (WebGL) nur rechnen, solange ein Showroom sichtbar ist
+  var hgZahl = 0;
+  function hgAn(d) {
+    hgZahl = Math.max(0, hgZahl + d);
+    document.documentElement.classList.toggle('hg-an', hgZahl > 0);
+    window.HG_PAUSE = hgZahl === 0;
+  }
+
+  window.VeloHG = hgAn;
+  // Vorschau in der Steuerung: Verwandlung aus, damit der Büro-PC nicht unnötig rechnet
+  if (/[?&]vorschau/.test(location.search) && window.VM) VM.on = false;
+
   function baue(daten) {
     var items = reihum((daten && daten.items) || []);
     if (!items.length) return null;
@@ -37,10 +49,10 @@
     el.className = 'slide sr';
     el.innerHTML =
       '<div class="sr-stage">' +
-        '<div class="sr-photo"></div><div class="sr-fog"></div><canvas class="sr-leaves"></canvas>' +
+        '<div class="sr-fog"></div><div class="halo"></div>' +
         '<div class="bands"><div class="band b">' + band(BAND_B) + '</div><div class="band a">' + band(BAND_A) + '</div></div>' +
         '<div class="sr-hero">' +
-          '<div class="htxt">' +
+          '<div class="htxt hello">' +
             '<img class="biglogo" src="/assets/logo.svg" alt="Velocenter Hessert">' +
             '<p class="eyebrow"><i></i>Familienbetrieb seit 1995 · <b>Wörth am Rhein</b></p>' +
             '<h1 class="hh1">Dein E-Bike <span class="amp">&amp;</span> <span class="nw">E-Dreirad-Spezialist</span><br><span class="gt">mit eigener Werkstatt.</span></h1>' +
@@ -48,12 +60,12 @@
             '<div class="trust"><span class="tb"><i class="tic tg">G</i><b class="st">★</b><b>4,8</b> bei <b class="ggl"><i>G</i><i>o</i><i>o</i><i>g</i><i>l</i><i>e</i></b></span>' +
             '<span class="tb"><i class="tic tbo"></i><b class="bsh">Bosch</b> Service Center</span></div>' +
           '</div>' +
-          '<div class="hvis">' +
+          '<div class="hvis hello" style="--d:.35s">' +
             '<div class="hring"></div><img class="hlg" alt="">' +
             '<img class="hb off" alt=""><img class="hb off" alt="">' +
             '<div class="hfloor"></div>' +
           '</div>' +
-          '<div class="deal">' +
+          '<div class="deal hello" style="--d:.6s">' +
             '<span class="dl-tag"><i></i>Angebot</span>' +
             '<span class="dl-txt"><b class="dl-m"></b><small class="dl-d"></small></span>' +
             '<span class="dl-p"><s class="dl-uvp"></s><b class="dl-ap"></b></span>' +
@@ -63,9 +75,9 @@
       '</div>';
 
     var stage = el.querySelector('.sr-stage');
-    var bikes = el.querySelectorAll('.hb'), logo = el.querySelector('.hlg'), deal = el.querySelector('.deal');
+    var bikes = el.querySelectorAll('.hb'), logo = el.querySelector('.hlg'), deal = el.querySelector('.deal'), hvis = el.querySelector('.hvis');
     var dots = el.querySelector('.dl-dots');
-    var i = -1, an = 0, timer = 0, aktiv = false, blaetter = null;
+    var i = -1, an = 0, timer = 0, aktiv = false;
 
     function skalieren() {
       var s = Math.min(window.innerWidth / 1920, window.innerHeight / 1080);
@@ -77,36 +89,53 @@
       for (var j = 0; j < n; j++) h += '<i' + (j === k ? ' class="on"' : '') + '></i>';
       dots.innerHTML = h + (items.length > 1 ? '<span>' + (i + 1) + ' / ' + items.length + ' Angeboten</span>' : '');
     }
+    function scale() { return Math.min(window.innerWidth / 1920, window.innerHeight / 1080); }
+    function texte(x) {
+      el.querySelector('.dl-m').textContent = x.marke + ' ' + x.modell;
+      el.querySelector('.dl-d').textContent = [x.farbe, x.gr, x.jahr ? 'Modell ' + x.jahr : ''].filter(Boolean).join(' · ');
+      el.querySelector('.dl-uvp').innerHTML = '<em>UVP</em> ' + euro(x.preis);
+      el.querySelector('.dl-ap').textContent = euro(x.angebot);
+      stage.style.setProperty('--ac', x.akzent || '#8C9097');
+      logo.style.setProperty('--wz', x.wz);
+      punkte();
+    }
+    var erstes = true, busy = false;
     function zeige() {
       if (!aktiv) return;
-      i = (i + 1) % items.length;
-      var x = items[i];
-      var neu = bikes[an ^ 1], alt = bikes[an];
-      var pre = new Image();
-      var fertig = false;
-      function los() {
-        if (fertig || !aktiv) return; fertig = true;
-        neu.src = x.img; neu.alt = x.marke + ' ' + x.modell;
-        an ^= 1;
-        alt.classList.add('off');
-        logo.classList.add('swap');
-        deal.classList.add('swap');
-        setTimeout(function () {
-          if (x.logo) { logo.src = x.logo; logo.style.opacity = ''; logo.style.setProperty('--wz', x.wz); logo.hidden = false; } else logo.hidden = true;
-          el.querySelector('.dl-m').textContent = x.marke + ' ' + x.modell;
-          el.querySelector('.dl-d').textContent = [x.farbe, x.gr, x.jahr ? 'Modell ' + x.jahr : ''].filter(Boolean).join(' · ');
-          el.querySelector('.dl-uvp').innerHTML = '<em>UVP</em> ' + euro(x.preis);
-          el.querySelector('.dl-ap').textContent = euro(x.angebot);
-          stage.style.setProperty('--ac', x.akzent || '#8C9097');
-          punkte();
-          requestAnimationFrame(function () { neu.classList.remove('off'); logo.classList.remove('swap'); deal.classList.remove('swap'); });
-        }, 320);
-      }
-      pre.onload = los; pre.onerror = los;
-      pre.src = x.img;
-      setTimeout(los, 2500);
       clearTimeout(timer);
       if (items.length > 1) timer = setTimeout(zeige, WECHSEL_MS);
+      if (busy) return;
+      i = (i + 1) % items.length;
+      var x = items[i];
+      var alt = bikes[an], neu = bikes[an ^ 1];
+      if (erstes) { // erstes Rad ohne Übergang
+        erstes = false;
+        alt.src = x.img; logo.src = x.logo || ''; logo.hidden = !x.logo; texte(x);
+        alt.classList.remove('off');
+        return;
+      }
+      busy = true;
+      neu.src = x.img; neu.alt = x.marke + ' ' + x.modell;
+      deal.classList.add('swap');
+      var fertig = function () { busy = false; };
+      var dec = function (im) { return im.decode ? im.decode().catch(function () {}) : Promise.resolve(); };
+      Promise.race([dec(neu), new Promise(function (r) { setTimeout(r, 2500); })]).then(function () {
+        if (!aktiv) return fertig();
+        an ^= 1;
+        setTimeout(function () { texte(x); deal.classList.remove('swap'); }, 450);
+        // Original-Verwandlung der Homepage: Rad zerfällt in Laub und setzt sich neu zusammen (nur ohne Skalierung, sonst stimmen die Maße nicht)
+        if (window.VM && VM.on && VM.ok && x.logo && Math.abs(scale() - 1) < 0.02) {
+          logo.hidden = false;
+          VM.run({ root: hvis, bike: { oldEl: alt, newEl: neu, to: neu.currentSrc || neu.src, alt: neu.alt }, logo: { el: logo, to: x.logo } }).then(fertig, fertig);
+          return;
+        }
+        // einfacher Wechsel wie die Homepage ohne WebGL
+        alt.classList.add('off'); logo.classList.add('swap');
+        setTimeout(function () {
+          if (x.logo) { logo.src = x.logo; logo.hidden = false; } else logo.hidden = true;
+          requestAnimationFrame(function () { neu.classList.remove('off'); logo.classList.remove('swap'); fertig(); });
+        }, 300);
+      });
     }
 
     el._start = function () {
@@ -114,13 +143,14 @@
       aktiv = true;
       skalieren();
       window.addEventListener('resize', skalieren);
-      if (window.VeloBlaetter) { blaetter = blaetter || window.VeloBlaetter(el.querySelector('.sr-leaves'), el); blaetter.start(); }
+      hgAn(1);
       zeige();
+      if (window.VM && VM.warm) setTimeout(function () { VM.warm(hvis, bikes[0], logo); }, 1200);
     };
     el._stop = function () {
       aktiv = false; clearTimeout(timer);
       window.removeEventListener('resize', skalieren);
-      if (blaetter) blaetter.stop();
+      hgAn(-1);
     };
     skalieren();
     return el;

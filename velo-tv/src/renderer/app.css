@@ -280,3 +280,6 @@ input[type=range]{flex:1;accent-color:var(--red)}
 .brand b,.brand span,.srnow,.nav button{white-space:nowrap}
 .status{max-width:290px}
 @media (max-width:1560px){.brand span{display:none}.hdr{gap:14px;padding:14px 20px}.nav button{padding:11px 12px}.status{max-width:230px}}
+
+.diag{margin:0 0 14px;padding:12px 16px;border-radius:20px;background:rgba(27,30,37,.06);font:500 13px/1.5 var(--body);color:var(--mut)}
+.diag b{font:900 18px/1 var(--display);color:var(--ink)}

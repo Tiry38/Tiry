@@ -111,9 +111,11 @@
     });
   }
 
+  var idleAn = false;
   function zeigeLeerlauf(an) {
     idle.hidden = !an;
-    if (window.VeloIdle) { if (an) window.VeloIdle.start(); else window.VeloIdle.stop(); }
+    // Startbild: Herbstallee-Hintergrund der Homepage (WebGL) statt eigener Blätter
+    if (an !== idleAn) { idleAn = an; if (window.VeloHG) window.VeloHG(an ? 1 : -1); }
   }
 
   function weiter(sofort) {
@@ -215,7 +217,18 @@
     es.onopen = function () { offlineDot.hidden = true; };
   }
 
-  var letzterHerzschlag = 0;
+  // Leistungsmessung (für die Anzeige in Velo-TV): Bilder pro Sekunde, Grafikchip, Bildschirm
+  var fpsN = 0, fpsT = performance.now(), fps = 0;
+  (function zaehl() { fpsN++; var n = performance.now(); if (n - fpsT >= 5000) { fps = Math.round(fpsN * 1000 / (n - fpsT)); fpsN = 0; fpsT = n; } requestAnimationFrame(zaehl); })();
+  var gpu = '';
+  try { var tg = document.createElement('canvas').getContext('webgl'); var dx = tg && tg.getExtension('WEBGL_debug_renderer_info'); gpu = dx ? String(tg.getParameter(dx.UNMASKED_RENDERER_WEBGL)) : (tg ? 'WebGL' : 'kein WebGL'); var lx = tg && tg.getExtension('WEBGL_lose_context'); if (lx) lx.loseContext(); } catch (e) { gpu = '?'; }
+  function diagnose() {
+    var hg = window.HG12_STAT ? window.HG12_STAT() : null;
+    return { fps: fps, gpu: gpu.slice(0, 80), vw: window.innerWidth, vh: window.innerHeight, dpr: window.devicePixelRatio || 1,
+      morph: !!(window.VM && VM.ok && VM.on), hg: hg ? (hg.soft ? 'Software' : 'Stufe ' + hg.skip + ' · ' + Math.round(hg.qs * 100) + ' %') : '' };
+  }
+
+  var letzterHerzschlag = 0, serverVersion = '';
   function herzschlag() {
     if (VORSCHAU) return;
     if (Date.now() - letzterHerzschlag < 3000) return;
@@ -226,10 +239,17 @@
       screen: screen.width + '×' + screen.height + ' @' + (window.devicePixelRatio || 1),
       agent: navigator.userAgent,
       active: aktive().length,
-      version: VERSION
+      version: VERSION,
+      diag: diagnose()
     });
     fetch('/api/tv/heartbeat', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: body })
       .then(function (r) { return r.json(); })
+      .then(function (d) {
+        // Neue Velo-TV-Version auf der Zentrale → Fernseher lädt den neuen Player von selbst
+        if (!d || !d.version) return;
+        if (!serverVersion) serverVersion = d.version;
+        else if (d.version !== serverVersion && !VORSCHAU) location.reload();
+      })
       .catch(function () { /* Zentrale gerade weg – Player läuft weiter */ });
   }
   setInterval(function () { letzterHerzschlag = 0; herzschlag(); }, 10000);

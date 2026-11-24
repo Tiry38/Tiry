@@ -34,6 +34,9 @@ Alle PCs mit Velo-TV sehen jede Änderung sofort. Design wie die neue Homepage (
 - `src/server/server.js` – Zentrale (nur Node-Bordmittel): REST + Server-Sent-Events, Range-Streaming für Videos, `state.json`.
 - `src/server/showroom.js` – Angebote aus dem Homepage-Bestand. `src/player/showroom.js|css` – Showroom-Folie (Bühne 1920×1080).
 - `scripts/icon.js` – erzeugt Programm-Symbol (Velocenter-Fahrrad im Fernseher) als SVG/ICO/PNG.
+- `src/player/vendor/hg12.js` + `morph.js` – **Original-Motoren der Homepage** (WebGL-Herbstallee mit 3D-Laub + Leistungsregler,
+  Rad-Verwandlung „Laub“). Nur Pfade/Pause angepasst – bei Änderungen an der Homepage hier neu übernehmen.
+  Text-Kontur (`-webkit-text-stroke` + `paint-order`) nicht verwenden: LG webOS 25 = Chrome 120 zeichnet sie über die Buchstaben.
 - `src/server/discovery.js` – automatische Suche im Netz.
 - `src/player/` – Fernseher-Player (ES2017, ohne Module, für TV-Browser).
 - `src/shared/schedule.js` – Zeitplan-Logik für Player, Steuerung und Tests.

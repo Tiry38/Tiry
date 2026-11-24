@@ -283,6 +283,9 @@ function renderPresence() {
   $('#nowShowing').textContent = online ? 'Fernseher zeigt: ' + (name || 'Startbild') : 'Fernseher nicht verbunden';
   $('#tvDot').classList.toggle('on', online);
   $('#tvNowTitle').textContent = online ? 'Fernseher verbunden' : (tv ? 'Fernseher getrennt' : 'Noch keine Verbindung');
+  const dg = online && tv.diag;
+  $('#tvDiag').hidden = !dg;
+  if (dg) $('#tvDiag').innerHTML = `<b>${dg.fps || '–'}</b> Bilder/s · ${dg.vw}×${dg.vh} @${dg.dpr} · Laub-Wechsel ${dg.morph ? 'an' : 'aus'}${dg.hg ? ' · Hintergrund ' + esc(dg.hg) : ''}<br><small>${esc(dg.gpu)}</small>`;
   $('#tvNowSub').textContent = online ? 'Zeigt gerade: ' + (name || 'Startbild') + (tv.screen ? ' · ' + tv.screen : '') : (tv ? 'Zuletzt gesehen ' + new Date(tv.lastSeen).toLocaleString('de-DE') : 'Sobald der Fernseher die Adresse öffnet, erscheint er hier.');
   const ich = info.pcName;
   const pcs = [...new Map(presence.pcs.map((p) => [p.pc, p])).values()];
