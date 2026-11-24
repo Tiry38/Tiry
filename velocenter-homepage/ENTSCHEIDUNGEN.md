@@ -632,3 +632,10 @@
 - `vmorph-laub.js`: `ptLoad`/`ptPts` statt `points()` (getImageData) im Laub-Modus; fehlt eine Datei → alter Weg. Neue/entfernte Räder: Bau rechnet automatisch mit.
 - Gemessen je Wechsel (2× Rad + 2× Logo): PC 120 → 3 ms, CPU 4× gebremst 400 → 15 ms. Sichtvergleich mitten in der Verwandlung: gleich.
 - Live seit 24.11.2026 (Tiry: „live“), Vorschau gelöscht. Neues Logo → `node pt_logos.js <velo-center-web>` ausführen.
+
+## Laufband sparsamer (24.11.2026, Tiry: „leg los“)
+- Kein Video (Laufband bleibt echtes HTML: scharf, Logos/Text austauschbar).
+- Kupferlinien: Verlauf läuft per `transform` statt `background-position` (keine Neuzeichnung je Bild).
+- Stern-Puls: Leuchten als eigene Ebene `em::after`, animiert nur `opacity` statt `text-shadow`.
+- Gemessen (3 s, Chromium-Trace): Paint ~37 → ~13 ms, Raster ~22 → ~4 ms. Bildvergleich: nur Stern-Leuchten minimal anders.
+- Nicht wieder `background-position`/`text-shadow` animieren.
