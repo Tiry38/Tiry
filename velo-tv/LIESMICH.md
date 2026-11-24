@@ -48,6 +48,9 @@ Alle PCs mit Velo-TV sehen jede Änderung sofort. Design wie die neue Homepage (
 - Workflow `.github/workflows/velo-tv-showroom.yml`: stündlich `--check` (Angebote + Design-Fingerabdruck), nur bei Änderung
   wird gerendert. Hintergrund-Schleife (Herbstallee, 24 s, nahtlos) wird einmal gebaut und als `hintergrund-<hash>.mp4`
   im Release **velo-tv-showroom** wiederverwendet; das Video (`showroom.mp4` + `showroom-video.json`) liegt im selben Release.
+  Schleifen-Naht: Der Fernseher spielt das Video in Endlosschleife. Die erste Sekunde wird per `xfade` über die letzte
+  geblendet und vorne weggelassen, damit Laufband und Hintergrund am Übergang nicht springen (Länge = Räder × 8 s − 1 s).
+  Test auf ein fertiges Video: `node scripts/showroom-video.js --nur-naht <video> --frames <Anzahl> --out <dir>`.
 - Die Zentrale holt alle 15 min ein neues Video (`showroom.js` → `videoHolen`), der Player spielt es ab und setzt beim
   nächsten Mal an der letzten Stelle fort. Ohne Video: Live-Showroom (HTML/WebGL) als Rückfall.
 - Lokal testen: `node scripts/showroom-video.js --hintergrund --out <dir>` und

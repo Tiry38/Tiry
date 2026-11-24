@@ -29,6 +29,7 @@ const HG_MODUS = !!arg('hintergrund', false);           // nur die Hintergrund-S
 const HG_DATEI = arg('hintergrund-datei', '');           // fertige Hintergrund-Schleife für das Showroom-Video
 const HG_LAENGE = 24, HG_BLENDE = 3;                     // Schleife 24 s, nahtlos überblendet   // nur prüfen, ob sich etwas geändert hat (Ausgabe changed=true/false)
 const log = (...a) => console.log('[showroom-video]', ...a);
+const NUR_NAHT = arg('nur-naht', '');                    // Test: Naht auf ein fertiges Video anwenden (--nur-naht <datei> --out <ordner>)
 
 // Design-Fingerabdruck: ändert sich der Showroom-Code, wird neu gerendert
 const DESIGN_DATEIEN = ['src/player/showroom.js', 'src/player/showroom.css', 'src/player/player.css', 'src/player/vendor/hg12.js', 'src/player/vendor/morph.js', 'scripts/showroom-video.js'];
@@ -166,6 +167,19 @@ async function hgSegment(browser, base, von, bis, datei, nr) {
 
 function ff(args) { return new Promise((res, rej) => spawn('ffmpeg', ['-y', '-loglevel', 'error', ...args], { stdio: 'inherit' }).on('close', (c) => (c === 0 ? res() : rej(new Error('ffmpeg ' + c))))); }
 
+/** Naht der Endlosschleife: Das Video läuft am Fernseher in Schleife (vid.loop). Ende und Anfang passen inhaltlich,
+    aber Laufband, Hintergrund und Farbverlauf stehen am Ende an einer anderen Stelle als am Anfang → ohne Blende
+    springt es alle ~8 Minuten einmal. Lösung: die erste Sekunde wird weich über die letzte Sekunde geblendet und
+    vorne weggelassen. Dann geht das letzte Bild fließend in das erste über. Länge = Originallänge − 1 s. */
+async function naht(roh, ziel, frames) {
+  const B = FPS, e = frames - B;   // xfade (nicht blend: blend setzt das letzte Bild falsch)
+  await ff(['-i', roh, '-filter_complex',
+    `[0:v]split=3[a][b][c];[a]trim=start_frame=${B}:end_frame=${e},setpts=PTS-STARTPTS[mitte];` +
+    `[b]trim=start_frame=${e},setpts=PTS-STARTPTS[ende];[c]trim=end_frame=${B},setpts=PTS-STARTPTS[anfang];` +
+    `[ende][anfang]xfade=transition=fade:duration=1:offset=0[ueber];[mitte][ueber]concat=n=2:v=1:a=0[v]`,
+    '-map', '[v]', '-c:v', 'libx264', '-preset', 'slow', '-crf', '21', '-r', String(FPS), '-movflags', '+faststart', ziel]);
+}
+
 async function concat(dateien, ziel, extra) {
   const liste = ziel + '.txt';
   fs.writeFileSync(liste, dateien.map((f) => "file '" + f.replace(/'/g, "'\\''") + "'").join('\n'));
@@ -175,6 +189,12 @@ async function concat(dateien, ziel, extra) {
 
 (async () => {
   fs.mkdirSync(OUT, { recursive: true });
+  if (NUR_NAHT) {
+    const n = Number(arg('frames', 0));
+    if (!n) throw new Error('--frames <Anzahl Bilder> fehlt');
+    await naht(path.resolve(NUR_NAHT), path.join(OUT, 'showroom.mp4'), n);
+    return log('Naht fertig: ' + path.join(OUT, 'showroom.mp4'));
+  }
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'velotv-render-'));
   const srv = createServer({
     dataDir: dir, playerDir: path.join(R, 'src/player'), version: 'render', showroomAutoStart: false, tvSteuerung: false,
@@ -253,10 +273,12 @@ async function concat(dateien, ziel, extra) {
     await browser.close();
     log('Segmente fertig in ' + Math.round((Date.now() - t0) / 1000) + ' s', JSON.stringify(infos));
 
-    const ziel = path.join(OUT, 'showroom.mp4');
-    await concat(dateien, ziel, ['-movflags', '+faststart']);
+    const ziel = path.join(OUT, 'showroom.mp4'), roh = path.join(dir, 'roh.mp4');
+    await concat(dateien, roh);
+    log('Schleifen-Naht wird geblendet …');
+    await naht(roh, ziel, items.length * SEK * FPS);
     const meta = {
-      version, ts: Date.now(), stand: d.stand || '', anzahl: items.length, dauer: items.length * SEK, fps: FPS, sekProRad: SEK,
+      version, ts: Date.now(), stand: d.stand || '', anzahl: items.length, dauer: items.length * SEK - 1, fps: FPS, sekProRad: SEK, naht: true,
       groesse: fs.statSync(ziel).size, morph: infos.every((i) => i.vm),
       items: items.map((x) => ({ marke: x.marke, modell: x.modell, farbe: x.farbe, angebot: x.angebot }))
     };
