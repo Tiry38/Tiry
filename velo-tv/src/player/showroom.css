@@ -76,33 +76,33 @@ html.hg-an #stage{background:transparent}
 .sr .hb.off{opacity:0;transform:translate(-36%,-50%)}
 .sr .hfloor{position:absolute;left:16%;right:16%;bottom:18%;height:3px;border-radius:3px;background:linear-gradient(90deg,transparent,#B87333,#F0C8A0,#B87333,transparent);box-shadow:0 0 22px rgba(184,115,51,.55),0 10px 30px -6px rgba(18,22,32,.28)}
 
-/* ---- Angebot unter dem Kreis: reine Typografie wie die Homepage-Überschriften (keine Karte) ---- */
+/* ---- Angebot unter dem Kreis: weiße Typografie auf der dunklen Straße (gut lesbar aus der Ferne) ---- */
 .sr .hvis{top:200px}
-.sr .deal{position:absolute;left:1360px;top:770px;transform:translateX(-50%);width:900px;display:flex;flex-direction:column;align-items:center;text-align:center;transition:opacity .45s ease,transform .7s cubic-bezier(.2,.8,.2,1)}
+.sr .deal{position:absolute;left:1360px;top:762px;transform:translateX(-50%);width:900px;display:flex;flex-direction:column;align-items:center;text-align:center;transition:opacity .45s ease,transform .7s cubic-bezier(.2,.8,.2,1)}
 .sr .deal.swap{opacity:0;transform:translate(-50%,18px)}
-.sr .dhalo{position:absolute;z-index:-1;left:50%;top:52%;width:1100px;height:420px;border-radius:50%;transform:translate(-50%,-50%);background:radial-gradient(closest-side,rgba(255,255,255,.82),rgba(255,255,255,.5) 50%,rgba(255,255,255,0) 82%)}
-.sr .deal .eyebrow{margin:0 0 12px}
-.sr .dl-m{margin:0;font:900 46px/1.02 "Outfit",sans-serif;letter-spacing:-1.4px;color:#1B1E25;white-space:nowrap;max-width:900px;overflow:hidden;text-overflow:ellipsis;
-  text-shadow:0 0 2px #fff,0 0 3px #fff,0 0 5px rgba(255,255,255,.95),0 0 12px rgba(255,255,255,.75)}
-.sr .dl-pz{display:flex;align-items:center;gap:22px;margin-top:2px}
-.sr .dl-ap{display:inline-block;padding:0 14px 14px 8px;margin:0 -14px -14px -8px;font:900 118px/1 "Outfit",sans-serif;letter-spacing:-4px;transform:skewX(-9deg);
-  background-image:linear-gradient(100deg,#C8102E 0%,#8E1530 25%,#3A3D44 50%,#8E1530 75%,#C8102E 100%);background-size:200% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;
-  filter:drop-shadow(0 0 1px rgba(255,255,255,.95)) drop-shadow(0 0 1px rgba(255,255,255,.9)) drop-shadow(0 1px 8px rgba(255,255,255,.6));animation:flow 9s linear infinite}
-.sr .dl-side{display:flex;flex-direction:column;align-items:flex-start;gap:10px}
-.sr .dl-uvp{font:600 22px/1 "Sora",sans-serif;color:#4A5161;text-shadow:0 0 3px #fff,0 0 8px rgba(255,255,255,.8)}
-.sr .dl-uvp s{text-decoration-thickness:2px;text-decoration-color:#C8102E}
-.sr .sp-b{font:800 20px/1 "Outfit",sans-serif;font-style:normal;letter-spacing:.06em;text-transform:uppercase;color:#C8102E;text-shadow:0 0 3px #fff,0 0 8px rgba(255,255,255,.8)}
+.sr .dhalo{position:absolute;z-index:-1;left:50%;top:58%;width:1300px;height:520px;border-radius:50%;transform:translate(-50%,-50%);background:radial-gradient(closest-side,rgba(14,12,12,.62),rgba(14,12,12,.38) 55%,rgba(14,12,12,0) 85%)}
+.sr .deal .eyebrow{margin:0 0 14px}
+.sr .dl-m{margin:0;font:900 48px/1.02 "Outfit",sans-serif;letter-spacing:-1.2px;color:#fff;white-space:nowrap;max-width:900px;overflow:hidden;text-overflow:ellipsis;
+  text-shadow:0 2px 4px rgba(0,0,0,.6),0 6px 24px rgba(0,0,0,.55)}
+.sr .dl-pz{display:flex;align-items:center;gap:24px;margin-top:4px}
+.sr .dl-ap{display:inline-block;font:900 124px/1 "Outfit",sans-serif;letter-spacing:-4px;color:#fff;transform:skewX(-9deg);
+  text-shadow:0 3px 0 rgba(120,8,24,.55),0 8px 30px rgba(0,0,0,.6),0 0 60px rgba(226,35,45,.35)}
+.sr .dl-ap i{font-style:normal;color:#FF3B4E;margin-left:22px}
+.sr .dl-side{display:flex;flex-direction:column;align-items:flex-start;gap:12px}
+.sr .dl-uvp{font:600 24px/1 "Sora",sans-serif;color:rgba(255,255,255,.85);text-shadow:0 2px 8px rgba(0,0,0,.7)}
+.sr .dl-uvp s{text-decoration-thickness:3px;text-decoration-color:#FF3B4E}
+.sr .sp-b{font:900 24px/1 "Outfit",sans-serif;font-style:normal;letter-spacing:.06em;text-transform:uppercase;color:#FF4D5E;text-shadow:0 2px 8px rgba(0,0,0,.75)}
 .sr .sp-b[hidden]{display:none}
-.sr .dl-chips{margin:8px 0 0;font:500 19px/1 "Sora",sans-serif;color:#262B35;text-shadow:0 0 3px #fff,0 0 8px rgba(255,255,255,.8)}
+.sr .dl-chips{margin:6px 0 0;font:500 21px/1 "Sora",sans-serif;color:rgba(255,255,255,.9);text-shadow:0 2px 8px rgba(0,0,0,.75)}
 
 /* ---- Fortschritt bis zum nächsten Rad ---- */
-.sr .dl-prog{position:absolute;left:1360px;top:1032px;transform:translateX(-50%);display:flex;align-items:center;gap:14px}
-.sr .dl-bar{position:relative;width:260px;height:4px;border-radius:4px;background:rgba(27,30,37,.18);box-shadow:0 1px 3px rgba(0,0,0,.25);overflow:hidden}
+.sr .dl-prog{position:absolute;left:1360px;top:1046px;transform:translateX(-50%);display:flex;align-items:center;gap:14px}
+.sr .dl-bar{position:relative;width:260px;height:4px;border-radius:4px;background:rgba(255,255,255,.25);box-shadow:0 1px 3px rgba(0,0,0,.25);overflow:hidden}
 .sr .dl-bar i{position:absolute;left:0;top:0;bottom:0;width:0;border-radius:6px;background:linear-gradient(90deg,#FF3A52,#C8102E 40%,#B87333 75%,#E8C9A0)}
 .sr .dl-bar.run i{animation:fuell 8s linear forwards}
 @keyframes fuell{to{width:100%}}
-.sr .dl-n{font:700 15px/1 "Outfit",sans-serif;letter-spacing:.12em;color:#4A5161;white-space:nowrap;text-shadow:0 0 3px #fff,0 0 8px rgba(255,255,255,.8)}
-.sr .dl-n b{color:#C8102E}
+.sr .dl-n{font:700 15px/1 "Outfit",sans-serif;letter-spacing:.12em;color:rgba(255,255,255,.75);white-space:nowrap;text-shadow:0 2px 6px rgba(0,0,0,.7)}
+.sr .dl-n b{color:#fff}
 .sr .dl-n b{color:#fff;font-weight:800}
 
 @media (prefers-reduced-motion:reduce){.sr .band .tk,.sr .hring::after,.sr .halo,.sr .gt{animation:none}}

@@ -100,7 +100,7 @@
       el.querySelector('.dl-m').textContent = x.modell;
       el.querySelector('.dl-chips').textContent = [String(x.farbe || '').replace(/\s*\(.*?\)\s*/g, ' ').trim(), x.gr, x.jahr ? 'Modell ' + x.jahr : ''].filter(Boolean).join(' · ');
       el.querySelector('.dl-uvp s').textContent = euro(x.preis);
-      el.querySelector('.dl-ap').textContent = euro(x.angebot);
+      el.querySelector('.dl-ap').innerHTML = esc(euro(x.angebot)).replace(' €', '<i>€</i>');
       var gespart = Math.round(x.preis - x.angebot);
       spar.hidden = !(gespart >= 50);
       el.querySelector('.sp-b').textContent = euro(gespart) + ' gespart';
