@@ -55,6 +55,6 @@ testet, bewertet und dauerhaft selbst weiterentwickelt. Besitzer: Tiry. UI-Sprac
   Arbeitsstand im Branch **`claude/wow-addons`**, bis Tiry ihn nach `main` holt. Skills dafür: `.claude/skills/wow-*`.
 
 ## Velo-TV (Ladenfernseher)
-- Ordner `velo-tv/`, Leitfaden `velo-tv/LIESMICH.md`. Electron-Programm: Kassen-PC = Zentrale, Büro-PCs = Bedienplätze,
+- Ordner `velo-tv/`, Leitfaden `velo-tv/LIESMICH.md`. Electron-Programm: Büro-PC = Zentrale, Kasse und zweiter Büro-PC = Bedienplätze,
   LG-Fernseher zeigt `http://<Zentrale>:8833` im Browser. Design = neue Homepage (tiry38.github.io/velo-center-web) (Herbstfoto, Milchglas, rote Pillen).
 - `npm test` muss grün sein; nach UI-Änderungen den Smoke-Test (siehe LIESMICH) laufen lassen und Screenshots ansehen.

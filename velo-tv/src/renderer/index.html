@@ -17,15 +17,15 @@
     <span class="eyebrow"><i></i>Velo-TV · <b>Einrichtung</b></span>
     <h1>Welche Rolle hat <em>dieser PC?</em></h1>
     <p class="lead">Ein PC ist die Zentrale und beliefert den Fernseher. Alle anderen PCs sind Bedienplätze und sehen live dasselbe.</p>
-    <label class="field"><span>Name dieses PCs</span><input id="setupName" maxlength="40" placeholder="z. B. Kasse, Büro Kevin"></label>
+    <label class="field"><span>Name dieses PCs</span><input id="setupName" maxlength="40" placeholder="z. B. Büro, Kasse"></label>
     <div class="roles">
       <button class="role" data-role="zentrale">
         <span class="role-ico"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="12" rx="3"/><path d="M8 20h8M12 16v4"/></svg></span>
-        <b>Zentrale</b><small>Kassen-PC direkt beim Fernseher. Läuft während der Öffnungszeiten.</small>
+        <b>Zentrale</b><small>Büro-PC. Beliefert den Fernseher, läuft während der Öffnungszeiten.</small>
       </button>
       <button class="role" data-role="bedienplatz">
         <span class="role-ico"><svg viewBox="0 0 24 24"><rect x="2" y="5" width="13" height="9" rx="2"/><path d="M6 18h5M8.5 14v4"/><path d="M18 8l4 4-4 4"/></svg></span>
-        <b>Bedienplatz</b><small>Büro-PC. Steuert alles, die Dateien liegen auf der Zentrale.</small>
+        <b>Bedienplatz</b><small>Kasse oder zweiter Büro-PC. Steuert alles, die Dateien liegen auf der Zentrale.</small>
       </button>
     </div>
     <div id="pairBox" class="pair" hidden>
@@ -60,7 +60,7 @@
   </header>
 
   <div class="offline" id="offline" hidden>
-    <b>Zentrale nicht erreichbar.</b> Läuft Velo-TV am Kassen-PC? Es wird automatisch neu verbunden …
+    <b>Zentrale nicht erreichbar.</b> Läuft Velo-TV am Büro-PC (Zentrale)? Es wird automatisch neu verbunden …
   </div>
 
   <main>
@@ -112,7 +112,7 @@
           <div class="addr-label">Adresse für den Fernseher</div>
           <div class="addr" id="tvAddr">–</div>
           <ol class="steps">
-            <li><span>1</span><div><b>Fernseher ins WLAN</b>Gleiches WLAN wie der Kassen-PC (Einstellungen → Netzwerk → WLAN).</div></li>
+            <li><span>1</span><div><b>Fernseher ins WLAN</b>Gleiches Netzwerk wie der Büro-PC (Zentrale) (Einstellungen → Netzwerk → WLAN).</div></li>
             <li><span>2</span><div><b>Webbrowser öffnen</b>Auf der Fernbedienung die Home-Taste drücken und die App „Webbrowser“ starten.</div></li>
             <li><span>3</span><div><b>Adresse eingeben</b>Die Adresse oben in die Adresszeile tippen und als Startseite bzw. Lesezeichen speichern.</div></li>
             <li><span>4</span><div><b>Vollbild</b>OK auf der Fernbedienung drücken – das Programm läuft ab jetzt automatisch.</div></li>

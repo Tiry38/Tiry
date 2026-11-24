@@ -633,7 +633,7 @@ function einstellungenFuellen() {
   $('#tvAddr').textContent = host ? host + ':' + info.port : 'Keine Netzwerkverbindung';
   const weitere = z ? (info.adressen || []).slice(1).filter((a) => !a.virtuell).map((a) => a.address) : [];
   $('#tvAddrHint').innerHTML = (weitere.length ? 'Andere Adressen dieses PCs: ' + weitere.map(esc).join(', ') + '. ' : '') +
-    'Tipp: Im Router dem Kassen-PC eine <b>feste IP-Adresse</b> geben, damit sich die Adresse nie ändert.';
+    'Tipp: Im Router dem Büro-PC (Zentrale) eine <b>feste IP-Adresse</b> geben, damit sich die Adresse nie ändert.';
   $('#pcName').value = info.pcName || '';
   $('#roleShow').textContent = z ? 'Zentrale (beliefert den Fernseher)' : 'Bedienplatz';
   $('#zentraleRow').hidden = z;

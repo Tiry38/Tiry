@@ -4,7 +4,7 @@ Windows-Programm (Electron). Dateien hineinziehen, sortieren, planen – der LG-
 Alle PCs mit Velo-TV sehen jede Änderung sofort. Design wie die neue Homepage (tiry38.github.io/velo-center-web).
 
 ## So funktioniert es
-- **Zentrale** (Kassen-PC): liefert dem Fernseher die Inhalte (Port **8833**), hält Programm, Papierkorb und Verlauf.
+- **Zentrale** (Büro-PC): liefert dem Fernseher die Inhalte (Port **8833**), hält Programm, Papierkorb und Verlauf.
   Läuft im Hintergrund weiter (Symbol unten rechts), startet mit Windows, verhindert Standby.
 - **Bedienplätze** (Büro-PCs): finden die Zentrale automatisch (UDP 8834) und koppeln sich einmalig mit der **PIN**
   (steht an der Zentrale unter „Fernseher“). Ändert sich die IP der Zentrale, ziehen Bedienplätze automatisch nach.

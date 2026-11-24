@@ -1,6 +1,6 @@
 'use strict';
 /* Velo-TV – Electron-Hauptprozess.
-   Modus „Zentrale“ (Kassen-PC): startet den Server, ruft sich im Netz aus, läuft im Hintergrund weiter.
+   Modus „Zentrale“ (Büro-PC): startet den Server, ruft sich im Netz aus, läuft im Hintergrund weiter.
    Modus „Bedienplatz“ (Büro-PCs): findet die Zentrale automatisch und koppelt sich per PIN. */
 const { app, BrowserWindow, ipcMain, Tray, Menu, nativeImage, shell, powerSaveBlocker, dialog } = require('electron');
 const path = require('path');
@@ -47,7 +47,7 @@ async function starteZentrale() {
       : 'Server konnte nicht starten: ' + e.message);
   }
   stopBeacon = startBeacon(() => ({ port: PORT, name: cfg.pcName || os.hostname(), version: app.getVersion() }));
-  psbId = powerSaveBlocker.start('prevent-app-suspension'); // Kassen-PC darf nicht schlafen, sonst steht der TV
+  psbId = powerSaveBlocker.start('prevent-app-suspension'); // Zentrale (Büro-PC) darf nicht schlafen, sonst steht der TV
 }
 
 async function stoppeZentrale() {
@@ -138,7 +138,7 @@ ipcMain.handle('setup', async (_e, opts) => {
     let r;
     try {
       r = await fetch(base + '/api/pair', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ pin: opts.pin, pc: cfg.pcName }), signal: AbortSignal.timeout(6000) });
-    } catch (e) { throw new Error('Zentrale nicht erreichbar unter ' + opts.host + '. Läuft Velo-TV am Kassen-PC?'); }
+    } catch (e) { throw new Error('Zentrale nicht erreichbar unter ' + opts.host + '. Läuft Velo-TV am Büro-PC (Zentrale)?'); }
     const d = await r.json().catch(() => ({}));
     if (!r.ok) throw new Error(d.error || 'Kopplung fehlgeschlagen');
     await stoppeZentrale();
