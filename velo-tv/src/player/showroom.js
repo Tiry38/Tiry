@@ -142,6 +142,7 @@
         // Original-Verwandlung der Homepage: Rad zerfällt in Laub und setzt sich neu zusammen (nur ohne Skalierung, sonst stimmen die Maße nicht)
         if (window.VM && VM.on && VM.ok && x.logo && Math.abs(scale() - 1) < 0.02) {
           logo.hidden = false;
+          logo.style.setProperty('--wz', x.wz); // Deckkraft der neuen Marke vor der Verwandlung (sonst Ruck am Ende)
           VM.run({ root: hvis, bike: { oldEl: alt, newEl: neu, to: neu.currentSrc || neu.src, alt: neu.alt }, logo: { el: logo, to: x.logo } }).then(fertig, fertig);
           return;
         }
