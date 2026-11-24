@@ -620,3 +620,9 @@
 - Alte Velo-de-Ville-Räder (V25/V26): Bilder-Agent holt das Bild des konfigurierten Rads aus der offiziellen VELOWALLET
   von Velo de Ville (`seite.js --velo`), wenn der Konfigurator die alte Velo-ID ablehnt.
 - Quelle übernommen: „Über 250 E-Bikes“ und Dienstrad-Rechner auf Cent gerundet (wie velo-center-web `9ec01ad`).
+
+## 24.11.2026 – Hintergrund Herbstallee: ruhende Teile vorgerechnet (Tiry: „übelst Leistung sparen, aber alles so wie jetzt“)
+- Kein Video (nicht interaktiv). Stattdessen in `hintergrund12/hg12.js`: Tiefenunschärfe (24 Proben) + Lichtstrahlen (14 Proben) einmal beim Laden im Bildraum in eine Textur (`pre`, höchstens 1400 px breit); Fokus-Tiefe unter der Maus rechnet JS einmal je Bild (`dmap`/`dAt`/`focus`) statt je Pixel; Laub-Wind einmal statt je Ebene. Fällt das Vorrechnen aus (`uPre`/`uFd<0`), läuft der alte Weg.
+- Gemessen (Chromium ohne Grafikkarte, 1120×700): 284 → 198 ms/Bild (−30 %). Bild alt/neu bei gleicher Zeit/Maus/Scroll: Ø 0,24–0,44/255, mit Lupe kein Unterschied. Pfützen, nasse Straße, Scroll-Fahrt, Laub-Wind bleiben live.
+- Geprüft und verworfen: Zufallstafel statt Rechen-Rauschen (auf dem Testrechner langsamer), Parallaxe 3 statt 4 Schritte (kein messbarer Gewinn).
+- Vorschau `/vorschau-leistung/` (noindex). Live erst nach Tirys Freigabe.

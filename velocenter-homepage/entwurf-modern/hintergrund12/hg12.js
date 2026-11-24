@@ -23,7 +23,7 @@ var de=document.documentElement;
 var FSRC=`#extension GL_OES_standard_derivatives : enable
 precision highp float;
 uniform vec2 uR,uM,uFoc,uImg;uniform vec2 uTy,uWf;uniform float uFg,uSn,uSz,uLd,uDf,uGr,uCs,uDy,uNt;uniform vec3 uSc;uniform float uT,uS,uFl,uFp,uAm,uSp,uFade,uV;uniform vec3 uK,uSun,uPo;
-uniform sampler2D uP,uD,uE;
+uniform sampler2D uP,uD,uE,uB;uniform float uFd,uPre;
 const vec3 RED=vec3(.886,.137,.176);
 float h21(vec2 p){p=fract(p*vec2(123.34,456.21));p+=dot(p,p+45.32);return fract(p.x*p.y);}
 float nz(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);
@@ -57,9 +57,9 @@ void main(){
  float ok=0.;if(fm>.001&&sky>.5){vec2 e1=D(s1).rg,e2=D(s2).rg;ok=(1.-smoothstep(.06,.14,max(e1.x,e2.x)))*(1.-smoothstep(.06,.14,d));
  ok*=smoothstep(.55,.95,min(min(e1.y,e2.y),sky));}
  vec3 base=P(q);
- if(uDf!=0.){vec2 pm=c+(uM-.5)*s;float fd=(D(pm).r*2.+D(pm+vec2(.02,0)).r+D(pm-vec2(.02,0)).r+D(pm+vec2(0,.02)).r+D(pm-vec2(0,.02)).r)/6.;
+ if(uDf!=0.){float fd=uFd;if(fd<0.){vec2 pm=c+(uM-.5)*s;fd=(D(pm).r*2.+D(pm+vec2(.02,0)).r+D(pm-vec2(.02,0)).r+D(pm+vec2(0,.02)).r+D(pm-vec2(0,.02)).r)/6.;}
   float rb=abs(uDf)*.0024*smoothstep(.10,.55,abs(d-fd))*(1.-sky);if(uDf<0.)rb*=smoothstep(fd,fd+.08,d);
-  if(rb>.0002){vec3 acc=base;float ga=2.39996,j0=h21(gl_FragCoord.xy)*6.283;for(int i=0;i<6;i++){float fi=float(i)+.5;float rr2=sqrt(fi/6.)*rb;vec2 off=vec2(cos(fi*ga+j0),sin(fi*ga+j0))*rr2*vec2(1.,iA);acc+=P(q+off);}base=acc/7.;}}
+  if(uPre>.5){if(rb>.0002)base=mix(base,texture2D(uB,fl(q)).rgb,rb/(abs(uDf)*.0024));}else if(rb>.0002){vec3 acc=base;float ga=2.39996,j0=h21(gl_FragCoord.xy)*6.283;for(int i=0;i<6;i++){float fi=float(i)+.5;float rr2=sqrt(fi/6.)*rb;vec2 off=vec2(cos(fi*ga+j0),sin(fi*ga+j0))*rr2*vec2(1.,iA);acc+=P(q+off);}base=acc/7.;}}
  vec3 col=base;if(ok>.002)col=mix(base,mix(P(s1),P(s2),1.-wv),ok);
  /* Herbstallee (Tiry 22.11.2026): Scrollen = die Straße wird nass – Pfützen bilden sich von hinten nach vorne,
     darin spiegeln sich die goldenen Bäume und das Licht, leicht gekräuselt. Das Foto selbst wird nicht verschoben. */
@@ -94,9 +94,9 @@ void main(){
  if(uFg>1.2&&fm*(1.-sky*.5)>.003){float m2=fbm(vec2(q.x*2.6+uT*.045,q.y*7.-uT*.012)+mist*.8);
   col=mix(col,vec3(.955,.96,.968),fm*(1.-sky*.5)*smoothstep(.42,.78,m2)*.22*(uFg-1.));}
  /* Teilchen in drei Tiefen: Schnee bzw. Laub. Laub: vorne groß, verschwindet hinter näheren Bäumen (Tiefenkarte), Maus bläst es weg */
- if(uSn>0.){float sn=0.;vec3 lc=vec3(0.);for(int L=0;L<3;L++){float fL=float(L),k=(26.+fL*30.)/uSz/(1.+uLd*.35);
-  float Ld=.95-fL*.33;vec2 du=(uv-uM)*vec2(A,1.);float dl=length(du);
-  vec2 uvL=uv-uLd*normalize(du+1e-4)*exp(-dl*5.5)*(.10-fL*.025);
+ if(uSn>0.){float sn=0.;vec3 lc=vec3(0.);vec2 du=(uv-uM)*vec2(A,1.);vec2 nd=uLd*normalize(du+1e-4)*exp(-length(du)*5.5);for(int L=0;L<3;L++){float fL=float(L),k=(26.+fL*30.)/uSz/(1.+uLd*.35);
+  float Ld=.95-fL*.33;
+  vec2 uvL=uv-nd*(.10-fL*.025);
   vec2 g=uvL*vec2(A,1.)*k;g.y+=uT*(1.5-fL*.38)*k*.07/uSz+uLd*uS*k*(.16+fL*.05);g.x+=sin(uT*.55+g.y*.045+fL*2.)*(.7+uLd*.8)+(uM.x-.5)*(3.-fL)*1.6+uT*(.25+uLd*.35);
   vec2 id=floor(g),f=fract(g)-.5;float rr=h21(id+fL*17.);
   if(rr>.80){vec2 o3=(vec2(h21(id+3.1),h21(id+5.7))-.5)*.55;vec2 lv=f-o3;float an=uT*(1.2+rr)+rr*20.;lv=mat2(cos(an),-sin(an),sin(an),cos(an))*lv;lv.y*=mix(1.,2.6,step(1.5,uSz));
@@ -107,7 +107,7 @@ void main(){
   col=mix(col,lc/max(sn,1e-4)*(.88+.12*sin(uT+uv.x*9.)),clamp(sn*uSn,0.,.92));}
  /* Lichtstrahlen: helle Stellen (Dunst/Himmel) streuen zur Sonne hin – Strahlen wandern langsam */
  vec2 dl2=(uSun.xy-q);float gk=uGr*(1.-smoothstep(.55,.9,dot(col,vec3(.33))))*(1.-smoothstep(.0,.9,length(dl2*vec2(iA,1.))));
- if(gk>.002){float acc2=0.,wt=1.,jr=h21(gl_FragCoord.xy+.37);for(int i=0;i<8;i++){vec2 sp2=q+dl2*((float(i)+jr)/8.)*.85;vec3 cc=P(sp2);acc2+=smoothstep(.80,.98,dot(cc,vec3(.33)))*wt;wt*=.7999;}acc2*=1.669;
+ if(gk>.002){float acc2=0.;if(uPre>.5)acc2=texture2D(uB,fl(q)).a*7.;else{float wt=1.,jr=h21(gl_FragCoord.xy+.37);for(int i=0;i<8;i++){vec2 sp2=q+dl2*((float(i)+jr)/8.)*.85;vec3 cc=P(sp2);acc2+=smoothstep(.80,.98,dot(cc,vec3(.33)))*wt;wt*=.7999;}acc2*=1.669;}
   float shim=.65+.35*nz(vec2(atan(dl2.y,dl2.x*iA)*14.,uT*.15));col+=vec3(1.,.86,.62)*acc2/7.*shim*.55*gk;}
  /* Sonne: Glühen + Strahlen nur im Himmel / auf Nebel */
  vec2 sv=(q-uSun.xy)*vec2(iA,1.);float sr=length(sv);
@@ -154,6 +154,18 @@ void main(){
  col+=(h21(gl_FragCoord.xy+fract(uT))-.5)*.010;
  gl_FragColor=vec4(mix(vec3(.914,.922,.933),col,uFade),1.);}
 `;
+/* Leistung (Tiry 24.11.2026: „übelst Leistung sparen, aber alles so wie jetzt“): was sich nie bewegt, wird einmal beim Laden im Bildraum gerechnet
+   statt in jedem Bild – rgb = Tiefenunschärfe mit größtem Radius (24 Proben, goldener Winkel), a = Lichtstrahlen zur Sonne (14 Proben, gleiche Gewichte wie live).
+   Der Live-Shader mischt nur noch nach der Fokus-Tiefe unter der Maus (rechnet JS einmal je Bild statt je Pixel). Fällt das Vorrechnen aus, läuft der alte Weg. */
+var PSRC=`precision highp float;
+uniform vec2 uWH;uniform vec2 uSun;uniform sampler2D uP;
+void main(){vec2 q=gl_FragCoord.xy/uWH;float iA=uWH.x/uWH.y;
+ vec3 acc=texture2D(uP,q).rgb;float ga=2.39996;
+ for(int i=0;i<24;i++){float fi=float(i)+.5;vec2 off=vec2(cos(fi*ga),sin(fi*ga))*sqrt(fi/24.)*.0024*vec2(1.,iA);acc+=texture2D(uP,q+off).rgb;}
+ vec2 dl2=uSun-q;float a2=0.,wt=1.;
+ for(int i=0;i<14;i++){vec3 cc=texture2D(uP,q+dl2*(float(i)/14.)*.85).rgb;a2+=smoothstep(.80,.98,dot(cc,vec3(.33)))*wt;wt*=.88;}
+ gl_FragColor=vec4(acc/25.,a2/7.);}
+`;
 var VQ='attribute vec2 a;void main(){gl_Position=vec4(a,0.,1.);}';
 
 /* ---------- Motor ---------- */
@@ -161,14 +173,38 @@ var cv,gl,buf,pr,U={},W=0,H=0,dpr=1,raf,t0=performance.now(),M=[.5,.5],Mt=[.5,.5
 function sh(t,s){var o=gl.createShader(t);gl.shaderSource(o,s);gl.compileShader(o);if(!gl.getShaderParameter(o,gl.COMPILE_STATUS))throw new Error(gl.getShaderInfoLog(o));return o}
 function build(){pr=gl.createProgram();gl.attachShader(pr,sh(gl.VERTEX_SHADER,VQ));gl.attachShader(pr,sh(gl.FRAGMENT_SHADER,FSRC));gl.bindAttribLocation(pr,0,'a');gl.linkProgram(pr);
  if(!gl.getProgramParameter(pr,gl.LINK_STATUS))throw new Error(gl.getProgramInfoLog(pr));
- ['uFg','uSn','uSz','uSc','uLd','uDf','uGr','uCs','uDy','uNt','uTy','uWf','uR','uM','uFoc','uImg','uT','uS','uFl','uFp','uAm','uSp','uFade','uV','uK','uSun','uP','uD','uE','uPo'].forEach(function(n){U[n]=gl.getUniformLocation(pr,n)});
+ ['uFg','uSn','uSz','uSc','uLd','uDf','uGr','uCs','uDy','uNt','uTy','uWf','uR','uM','uFoc','uImg','uT','uS','uFl','uFp','uAm','uSp','uFade','uV','uK','uSun','uP','uD','uE','uPo','uB','uFd','uPre'].forEach(function(n){U[n]=gl.getUniformLocation(pr,n)});
  buf=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,buf);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,3,-1,-1,3]),gl.STATIC_DRAW);gl.enableVertexAttribArray(0)}
 function tex(img){var t=gl.createTexture();gl.bindTexture(gl.TEXTURE_2D,t);gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL,true);
  gl.texImage2D(gl.TEXTURE_2D,0,gl.RGB,gl.RGB,gl.UNSIGNED_BYTE,img);
  gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.LINEAR);
  gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,gl.CLAMP_TO_EDGE);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE);return t}
+function texP(){gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.LINEAR);
+ gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,gl.CLAMP_TO_EDGE);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE)}
+/* einmal je Szene: Unschärfe-Foto + Lichtstrahlen in eine Textur (Fotogröße, höchstens 1400 breit – beides ist weich, mehr Pixel bringen nichts) */
+var PP=null;function pre(e,c0){if(!PP){PP=gl.createProgram();gl.attachShader(PP,sh(gl.VERTEX_SHADER,VQ));gl.attachShader(PP,sh(gl.FRAGMENT_SHADER,PSRC));gl.bindAttribLocation(PP,0,'a');gl.linkProgram(PP);
+  if(!gl.getProgramParameter(PP,gl.LINK_STATUS))throw new Error('pre')}
+ var k=Math.min(1,1400/e.w),w=Math.round(e.w*k),h=Math.round(e.h*k),t=gl.createTexture(),fb=gl.createFramebuffer();
+ gl.bindTexture(gl.TEXTURE_2D,t);gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,w,h,0,gl.RGBA,gl.UNSIGNED_BYTE,null);texP();
+ gl.bindFramebuffer(gl.FRAMEBUFFER,fb);gl.framebufferTexture2D(gl.FRAMEBUFFER,gl.COLOR_ATTACHMENT0,gl.TEXTURE_2D,t,0);
+ var ok=gl.checkFramebufferStatus(gl.FRAMEBUFFER)===gl.FRAMEBUFFER_COMPLETE;
+ if(ok){gl.viewport(0,0,w,h);gl.useProgram(PP);gl.activeTexture(gl.TEXTURE0);gl.bindTexture(gl.TEXTURE_2D,e.p);gl.uniform1i(gl.getUniformLocation(PP,'uP'),0);
+  gl.uniform2f(gl.getUniformLocation(PP,'uWH'),w,h);gl.uniform2f(gl.getUniformLocation(PP,'uSun'),c0.sun[0],c0.sun[1]);
+  gl.bindBuffer(gl.ARRAY_BUFFER,buf);gl.vertexAttribPointer(0,2,gl.FLOAT,false,0,0);gl.drawArrays(gl.TRIANGLES,0,3)}
+ gl.bindFramebuffer(gl.FRAMEBUFFER,null);gl.deleteFramebuffer(fb);if(!ok){gl.deleteTexture(t);return null}return t}
+/* Tiefenkarte für JS (Rotkanal), bilinear wie die Textur (Zeile 0 = unten) */
+function dmap(img){var w=img.naturalWidth,h=img.naturalHeight,k=document.createElement('canvas');k.width=w;k.height=h;var x=k.getContext('2d',{willReadFrequently:true});x.drawImage(img,0,0);
+ var px=x.getImageData(0,0,w,h).data,r=new Uint8Array(w*h);for(var i=0;i<w*h;i++)r[i]=px[i*4];return {w:w,h:h,r:r}}
+function dAt(m,u,v){var w=m.w,h=m.h,x=Math.min(w-1,Math.max(0,u*w-.5)),y=Math.min(h-1,Math.max(0,(1-v)*h-.5)),x0=x|0,y0=y|0,x1=Math.min(w-1,x0+1),y1=Math.min(h-1,y0+1),fx=x-x0,fy=y-y0,R=m.r;
+ return ((R[y0*w+x0]*(1-fx)+R[y0*w+x1]*fx)*(1-fy)+(R[y1*w+x0]*(1-fx)+R[y1*w+x1]*fx)*fy)/255}
+/* Fokus-Tiefe unter der Maus – genau wie früher im Shader (Bildausschnitt c/s nachgerechnet), aber einmal je Bild */
+function focus(e,c,t){var m=e.dm;if(!m||!c.df)return -1;var A=W/H,iA=e.w/e.h,cl=function(v,a,b){return Math.max(a,Math.min(b,v))};
+ var zoom=1.10+Math.min(sc,3)*.09+Po[2]+.025*Math.sin(t*.15),sx=A>iA?1:A/iA,sy=A>iA?iA/A:1;sx=Math.min(sx/zoom,.9);sy=Math.min(sy/zoom,.9);
+ var ty=c.ty||[0,0],fx=(A<.9?c.fxm:c.fx)+(M[0]-.5)*.045+Po[0]*1.6+Math.sin(t*.13)*.010+ty[0]*Math.min(sc,2.2),fy=c.fy+(M[1]-.5)*.020+Po[1]*1.6+Math.sin(t*.097+1)*.004+ty[1]*Math.min(sc,2.2);
+ var cx=cl(fx,sx*.5+.05,1-sx*.5-.05),cy=cl(fy,sy*.5+.05,1-sy*.5-.05),px=cx+(M[0]-.5)*sx,py=cy+(M[1]-.5)*sy;
+ var D=function(u,v){return dAt(m,c.fl?1-u:u,v)};return (D(px,py)*2+D(px+.02,py)+D(px-.02,py)+D(px,py+.02)+D(px,py-.02))/6}
 function load(k){if(TX[k])return;var e=TX[k]={ok:0};var big=Math.max(screen.width,screen.height)*Math.min(devicePixelRatio||1,2)>1700;
- var n=3;function done(){if(--n===0){e.p=tex(e.ip);e.d=tex(e.id);if(e.ih)e.e=tex(e.ih);e.w=e.ip.naturalWidth;e.h=e.ip.naturalHeight;e.ok=1}}
+ var n=3;function done(){if(--n===0){e.p=tex(e.ip);e.d=tex(e.id);if(e.ih)e.e=tex(e.ih);e.w=e.ip.naturalWidth;e.h=e.ip.naturalHeight;var c0=CFG[k];if(c0.df||c0.gr){try{e.b=pre(e,c0)}catch(x){e.b=null}try{e.dm=dmap(e.id)}catch(x){e.dm=null}}e.ok=1}}
  e.ip=new Image();e.ip.decoding='async';e.ip.onload=done;e.ip.src=BASE+k+'-'+(big?2400:1400)+'.webp';
  e.id=new Image();e.id.onload=done;e.id.src=BASE+k+'-d.png';
  e.ih=new Image();e.ih.onload=done;e.ih.src=BASE+k+'-m.png'}
@@ -212,6 +248,7 @@ function frame(){raf=requestAnimationFrame(frame);var now=performance.now();if(S
  gl.uniform2f(U.uR,W,H);gl.uniform1f(U.uT,t);gl.uniform1f(U.uS,sc);gl.uniform2f(U.uM,M[0],M[1]);gl.uniform3f(U.uK,K[0],K[1],K[2]);
  gl.uniform2f(U.uImg,e.w,e.h);gl.uniform2f(U.uFoc,W/H<.9?c.fxm:c.fx,c.fy);gl.uniform1f(U.uFl,c.fl);gl.uniform2f(U.uWf,c.wf[0],c.wf[1]);gl.uniform1f(U.uFg,c.fg);gl.uniform1f(U.uSn,c.sn);var sc3=c.sc||[.98,.985,1];gl.uniform1f(U.uSz,c.sz||1);gl.uniform1f(U.uLd,c.ld||0);gl.uniform1f(U.uDf,c.df||0);gl.uniform1f(U.uGr,c.gr||0);gl.uniform1f(U.uCs,c.cs||0);gl.uniform1f(U.uDy,c.dy||0);gl.uniform1f(U.uNt,c.nt||0);gl.uniform3f(U.uSc,sc3[0],sc3[1],sc3[2]);gl.uniform2f(U.uTy,c.ty?c.ty[0]:0,c.ty?c.ty[1]:0);gl.uniform1f(U.uFp,c.fp);gl.uniform1f(U.uAm,c.am);gl.uniform1f(U.uSp,c.sp);
  var sx=c.sun[0],sy=c.sun[1],sz2=c.sun[2];if(c.dy){var tg=Math.max(0,Math.min(1,sc/2.6));sx=.18+.70*tg;sy=.62+.34*Math.sin(Math.PI*Math.min(1,tg*1.15));sz2=c.sun[2]*(1+1.4*tg)}if(c.nt)sz2*=Math.max(0,1-sc/1.2);gl.uniform3f(U.uSun,c.fl?1-sx:sx,sy,sz2);gl.uniform1f(U.uFade,fade*fade*(3-2*fade));gl.uniform1f(U.uV,VS);gl.uniform3f(U.uPo,Po[0],Po[1],Po[2]);
+ gl.activeTexture(gl.TEXTURE3);gl.bindTexture(gl.TEXTURE_2D,e.b||e.p);gl.uniform1i(U.uB,3);gl.uniform1f(U.uPre,e.b?1:0);gl.uniform1f(U.uFd,focus(e,c,t));
  gl.bindBuffer(gl.ARRAY_BUFFER,buf);gl.vertexAttribPointer(0,2,gl.FLOAT,false,0,0);gl.drawArrays(gl.TRIANGLES,0,3)}
 /* ---------- Glasplatten hinter freier Schrift (Tiry 22.11.2026: „richtige Glaselemente statt gesprüht“) ----------
    Alle dunklen Texte der aktiven Ansicht + Fußzeile, die nicht schon auf einer eigenen Karte stehen, werden zu Gruppen
