@@ -10,7 +10,7 @@ let srv, base, dir, key;
 
 test.before(async () => {
   dir = fs.mkdtempSync(path.join(os.tmpdir(), 'velotv-'));
-  srv = createServer({ dataDir: dir, playerDir: path.join(ROOT, 'player'), assetDirs: { '/assets/': path.join(ROOT, 'renderer', 'assets'), '/shared/': path.join(ROOT, 'shared') }, version: 'test' });
+  srv = createServer({ dataDir: dir, playerDir: path.join(ROOT, 'player'), assetDirs: { '/assets/': path.join(ROOT, 'renderer', 'assets'), '/shared/': path.join(ROOT, 'shared') }, version: 'test', showroom: false });
   const port = await srv.listen(0, '127.0.0.1');
   base = 'http://127.0.0.1:' + port;
 });
@@ -116,7 +116,7 @@ test('Herzschlag des Fernsehers', async () => {
 
 test('Zustand übersteht Neustart', async () => {
   await srv.close();
-  srv = createServer({ dataDir: dir, playerDir: path.join(ROOT, 'player'), version: 'test' });
+  srv = createServer({ dataDir: dir, playerDir: path.join(ROOT, 'player'), version: 'test', showroom: false });
   const port = await srv.listen(0, '127.0.0.1');
   base = 'http://127.0.0.1:' + port;
   const st = (await call('GET', '/api/state')).data;

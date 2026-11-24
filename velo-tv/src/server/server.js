@@ -11,6 +11,7 @@ const fsp = require('fs/promises');
 const path = require('path');
 const crypto = require('crypto');
 const os = require('os');
+const { createShowroom } = require('./showroom');
 
 const MAX_UPLOAD = 4 * 1024 * 1024 * 1024; // 4 GB
 const LOG_MAX = 300;
@@ -74,6 +75,15 @@ function createServer(opts) {
   const version = opts.version || 'dev';
 
   fs.mkdirSync(mediaDir, { recursive: true });
+  // Live-Showroom (Angebotsräder aus dem Homepage-Bestand)
+  const showroom = opts.showroom === false ? null : createShowroom({
+    dataDir, fetch: opts.fetch, autoStart: opts.showroomAutoStart,
+    onChange: (d) => senden('showroom', { ts: d.ts, anzahl: d.items.length, fehler: d.fehler })
+  });
+  function showroomInfo() {
+    if (!showroom) return { items: [], stand: '', ts: 0, fehler: 'Showroom aus' };
+    return showroom.daten;
+  }
 
   let state = leererZustand();
   try {
@@ -214,7 +224,7 @@ function createServer(opts) {
       const st = await fsp.stat(datei);
       if (!st.isFile()) throw new Error('kein File');
       const typ = MIME[path.extname(datei).toLowerCase()] || 'application/octet-stream';
-      const istMedia = datei.startsWith(mediaDir);
+      const istMedia = datei.startsWith(mediaDir) || (showroom && datei.startsWith(showroom.bildDir));
       const kopf = {
         'Content-Type': typ,
         'Accept-Ranges': 'bytes',
@@ -312,6 +322,8 @@ function createServer(opts) {
       return json(res, 200, { key });
     }
 
+    if (p === '/api/showroom' && m === 'GET') return json(res, 200, showroomInfo());
+
     if (p === '/api/tv/heartbeat' && m === 'POST') {
       const b = await koerper(req, 20000);
       tv = {
@@ -379,6 +391,17 @@ function createServer(opts) {
 
     if (p === '/api/items' && m === 'POST') {
       const b = await koerper(req);
+      if (b.kind === 'showroom') {
+        const item = {
+          id: id(), kind: 'showroom', name: 'Live-Showroom · Angebote', file: null, thumb: null, size: 0,
+          duration: Math.min(1800, Math.max(20, Number(b.duration) || 120)),
+          fit: 'contain', enabled: true, plan: planSauber(b.plan), group: null, addedBy: pc, addedAt: jetzt()
+        };
+        state.items.push(item);
+        geaendert(pc, 'Live-Showroom hinzugefügt');
+        if (showroom && !showroom.daten.ts) showroom.aktualisieren();
+        return json(res, 200, item);
+      }
       if (b.kind !== 'text') return json(res, 400, { error: 'Nur Text-Folien können so angelegt werden' });
       const text = textSauber(b.text);
       if (!text.title) return json(res, 400, { error: 'Überschrift fehlt' });
@@ -478,6 +501,14 @@ function createServer(opts) {
       return json(res, 200, { ok: true });
     }
 
+    if (p === '/api/showroom/refresh' && m === 'POST') {
+      if (!showroom) return json(res, 404, { error: 'Showroom aus' });
+      const d = await showroom.aktualisieren();
+      protokoll(pc, 'Showroom-Angebote aktualisiert (' + d.items.length + ')');
+      state.rev++; speichern(); senden('state', state);
+      return json(res, 200, { anzahl: d.items.length, stand: d.stand, ts: d.ts, fehler: d.fehler });
+    }
+
     if (p === '/api/tv/reload' && m === 'POST') {
       senden('reload', {}, 'tv');
       return json(res, 200, { ok: true });
@@ -499,6 +530,7 @@ function createServer(opts) {
     const p = decodeURIComponent(url.pathname);
     try {
       if (p.startsWith('/api/')) return await api(req, res, url);
+      if (p.startsWith('/showroom/') && showroom) return statisch(res, sicher(showroom.bildDir, p.slice(10)) || '/nix', req);
       if (p.startsWith('/media/')) {
         const ziel = sicher(mediaDir, p.slice(7));
         return statisch(res, ziel || '/nix', req);
@@ -529,7 +561,7 @@ function createServer(opts) {
       });
     },
     async close() {
-      clearInterval(pingTimer); clearInterval(aufraeumTimer);
+      clearInterval(pingTimer); clearInterval(aufraeumTimer); if (showroom) showroom.stop();
       for (const res of clients.keys()) { try { res.end(); } catch (e) { /* egal */ } }
       clients.clear();
       await speichernJetzt().catch(() => {});

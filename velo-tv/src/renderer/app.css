@@ -117,7 +117,7 @@ main{padding:28px 28px 60px;max-width:1500px;margin:0 auto}
 .thumb img{width:100%;height:100%;object-fit:cover;display:block}
 .thumb .kind{position:absolute;left:8px;bottom:8px;display:flex;align-items:center;gap:5px;padding:4px 9px;border-radius:999px;background:rgba(27,30,37,.72);color:#fff;font:700 10px/1 var(--display);letter-spacing:.1em;text-transform:uppercase}
 .thumb .kind svg{width:11px;height:11px}
-.tthumb{display:flex;flex-direction:column;justify-content:flex-start;padding:12px 12px 30px;height:100%;overflow:hidden;color:#fff;font:900 13px/1.05 var(--display);letter-spacing:-.02em}
+.tthumb{position:relative;display:flex;flex-direction:column;justify-content:flex-start;padding:12px 12px 30px;height:100%;overflow:hidden;color:#fff;font:900 13px/1.05 var(--display);letter-spacing:-.02em}
 .tthumb small{display:block;margin-bottom:5px;font:700 7px/1 var(--display);letter-spacing:.16em;text-transform:uppercase;opacity:.85}
 .th-herbst{background:url(assets/hg-herbst.webp) center/cover;color:var(--ink)}
 .th-herbst.tthumb{background:linear-gradient(rgba(255,255,255,.62),rgba(255,255,255,.62)),url(assets/hg-herbst.webp) center/cover}
@@ -125,6 +125,9 @@ main{padding:28px 28px 60px;max-width:1500px;margin:0 auto}
 .th-dunkel{background:linear-gradient(170deg,#4A4C57,#2A2C35)}
 .th-hell{background:#FAF7F4;color:var(--ink)}
 .th-verlauf{background:var(--grad)}
+.th-showroom{background:linear-gradient(rgba(250,247,244,.35),rgba(250,247,244,.1)),url(assets/hg-herbst.webp) center/cover;color:#fff;text-shadow:0 1px 6px rgba(0,0,0,.6)}
+.th-showroom::after{content:"";position:absolute;left:8px;right:8px;top:8px;height:9px;border-radius:2px;background:linear-gradient(100deg,#C8102E,#5E1426);transform:rotate(-2deg)}
+.drop>.drop-btns{flex:none;display:flex;flex-direction:row;gap:8px;flex-wrap:nowrap}
 .meta{min-width:0}
 .meta h3{margin:0 0 6px;font:800 19px/1.15 var(--display);letter-spacing:-.015em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .pills{display:flex;flex-wrap:wrap;gap:6px}

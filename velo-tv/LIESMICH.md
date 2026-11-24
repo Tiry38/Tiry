@@ -13,6 +13,10 @@ Alle PCs mit Velo-TV sehen jede Änderung sofort. Design wie www.velo-center.de.
 ## Funktionen
 - Bilder (werden auf 2560×1440 optimiert), Videos (MP4/H.264 am sichersten), **PDF** und **PowerPoint**
   (eine Folie je Seite; PowerPoint über installiertes PowerPoint, sonst LibreOffice).
+- **Live-Showroom** (Knopf „Live-Showroom“): Startseite der Homepage als Fernseher-Version – Laufbänder, Logo, Überschrift,
+  Glas-Kreis mit Marken-Wasserzeichen, fallende Blätter; zeigt reihum **nur Angebotsräder** (Angebotspreis, auf Lager, eigenes Foto)
+  aus dem Live-Bestand der Homepage (Firestore `bestand/aktuell` + Ausblendungen aus `pub/lager`, wie `admMerge`).
+  Die Zentrale holt alle 30 min neu und speichert die Fotos lokal (`src/server/showroom.js`). Ohne Knöpfe/Aufrufe zum Tippen.
 - **Text-Folien** in 5 Stilen (Herbst, Rot, Dunkel, Hell, Verlauf), `*Wort*` = roter Akzent.
 - Je Beitrag: Dauer, „ganzes Video“, Ton, Bild füllen/ganz zeigen, **Zeitplan** (Wochentage, Uhrzeit, Datumsbereich).
 - „Jetzt auf dem TV zeigen“, Live-Vorschau, Anzeige was der Fernseher gerade zeigt, Verlauf mit PC-Namen,
@@ -28,6 +32,8 @@ Alle PCs mit Velo-TV sehen jede Änderung sofort. Design wie www.velo-center.de.
 
 ## Aufbau
 - `src/server/server.js` – Zentrale (nur Node-Bordmittel): REST + Server-Sent-Events, Range-Streaming für Videos, `state.json`.
+- `src/server/showroom.js` – Angebote aus dem Homepage-Bestand. `src/player/showroom.js|css` – Showroom-Folie (Bühne 1920×1080).
+- `scripts/icon.js` – erzeugt Programm-Symbol (Velocenter-Fahrrad im Fernseher) als SVG/ICO/PNG.
 - `src/server/discovery.js` – automatische Suche im Netz.
 - `src/player/` – Fernseher-Player (ES2017, ohne Module, für TV-Browser).
 - `src/shared/schedule.js` – Zeitplan-Logik für Player, Steuerung und Tests.

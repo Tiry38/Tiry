@@ -18,6 +18,7 @@ const ICON = {
   image: '<svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="3"/><circle cx="9" cy="10" r="2"/><path d="M21 16l-5-5-9 9"/></svg>',
   video: '<svg viewBox="0 0 24 24"><path d="M7 5l12 7-12 7z"/></svg>',
   text: '<svg viewBox="0 0 24 24"><path d="M5 6h14M12 6v13"/></svg>',
+  shop: '<svg viewBox="0 0 24 24"><circle cx="6" cy="16" r="4"/><circle cx="18" cy="16" r="4"/><path d="M6 16l4-8h6l2 8M10 8L8 5H6"/></svg>',
   clock: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>',
   cal: '<svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>',
   tv: '<svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="12" rx="3"/><path d="M8 20h8"/></svg>',
@@ -124,6 +125,8 @@ function verbinden() {
   es = new EventSource(url);
   es.addEventListener('state', (e) => { $('#offline').hidden = true; state = JSON.parse(e.data); renderAlles(); });
   es.addEventListener('presence', (e) => { presence = JSON.parse(e.data); renderPresence(); });
+  es.addEventListener('showroom', () => showroomLaden());
+  showroomLaden();
   es.onerror = () => {
     $('#offline').hidden = false;
     // 401 (Kopplung ungültig) erkennt EventSource nicht – einmal nachfragen
@@ -149,6 +152,9 @@ function renderAlles() {
 }
 
 function thumbHtml(it) {
+  if (it.kind === 'showroom') {
+    return `<div class="tthumb th-showroom"><small>Live · Angebote</small>Showroom</div><span class="kind">${ICON.shop}Live</span>`;
+  }
   if (it.kind === 'text') {
     const t = it.text || {};
     return `<div class="tthumb th-${esc(t.theme)}">${t.badge ? `<small>${esc(t.badge)}</small>` : ''}${esc((t.title || '').replace(/\*/g, ''))}</div><span class="kind">${ICON.text}Text</span>`;
@@ -158,6 +164,7 @@ function thumbHtml(it) {
 }
 
 function dauerText(it) {
+  if (it.kind === 'showroom') return (it.duration >= 60 ? Math.floor(it.duration / 60) + ':' + String(it.duration % 60).padStart(2, '0') + ' Min.' : it.duration + ' s') + ' · Räder wechseln alle 8 s';
   if (it.kind === 'video') {
     if (!it.duration) return it.mediaLength ? 'Ganzes Video · ' + Math.round(it.mediaLength) + ' s' : 'Ganzes Video';
     return it.duration + ' s';
@@ -316,11 +323,11 @@ function neueTextFolie() {
 function sheetFuellen(neu) {
   const it = entwurf;
   $('#sheetBg').hidden = false; $('#sheet').hidden = false;
-  $('#sheetKind').textContent = neu ? 'Neue Text-Folie' : ({ image: 'Bild', video: 'Video', text: 'Text-Folie' }[it.kind]);
+  $('#sheetKind').textContent = neu ? 'Neue Text-Folie' : ({ image: 'Bild', video: 'Video', text: 'Text-Folie', showroom: 'Live-Showroom' }[it.kind]);
   $('#edName').value = it.name;
-  $('#edName').hidden = it.kind === 'text';
+  $('#edName').hidden = it.kind === 'text' || it.kind === 'showroom';
   $('#edTextBlock').hidden = it.kind !== 'text';
-  $('#edFitRow').hidden = it.kind === 'text';
+  $('#edFitRow').hidden = it.kind === 'text' || it.kind === 'showroom';
   $('#edFullRow').hidden = it.kind !== 'video';
   $('#edSoundRow').hidden = it.kind !== 'video';
   $('#edShow').hidden = neu;
@@ -335,8 +342,10 @@ function sheetFuellen(neu) {
   }
   $('#edFull').checked = it.kind === 'video' && !it.duration;
   $('#edSound').checked = !!it.sound;
+  const sr = it.kind === 'showroom';
+  Object.assign($('#edDur'), sr ? { min: 20, max: 600, step: 10 } : { min: 3, max: 60, step: 1 });
   const d = it.duration || Math.min(60, Math.round(it.mediaLength || 10)) || 10;
-  $('#edDur').value = Math.min(60, Math.max(3, d));
+  $('#edDur').value = sr ? Math.min(600, Math.max(20, d)) : Math.min(60, Math.max(3, d));
   durAnzeigen();
   $$('#edFitRow .seg button').forEach((b) => b.classList.toggle('on', b.dataset.fit === (it.fit || 'contain')));
   $('#edDays').innerHTML = S.TAGE.map((t, i) => `<button type="button" data-d="${i + 1}" class="${!it.plan.days.length || it.plan.days.includes(i + 1) ? 'on' : ''}">${t}</button>`).join('');
@@ -348,6 +357,7 @@ function sheetFuellen(neu) {
   const p = $('#edPrev');
   if (it.kind === 'image') p.innerHTML = `<img src="${media(it.file)}" alt="" style="object-fit:${it.fit === 'cover' ? 'cover' : 'contain'}">`;
   else if (it.kind === 'video') p.innerHTML = `<video src="${media(it.file)}" muted autoplay loop playsinline style="object-fit:${it.fit === 'cover' ? 'cover' : 'contain'}"></video>`;
+  else if (it.kind === 'showroom') { p.innerHTML = '<iframe tabindex="-1" title="Vorschau"></iframe>'; $('#edPrev iframe').src = info.base + '/?vorschau=1&probe=' + encodeURIComponent(JSON.stringify({ id: 'probe', kind: 'showroom' })); }
   else { p.innerHTML = '<iframe tabindex="-1" title="Vorschau"></iframe>'; textVorschau(); }
   setTimeout(skaliereFrames, 30);
 }
@@ -368,7 +378,8 @@ function textVorschau() {
 function durAnzeigen() {
   const voll = !$('#edFullRow').hidden && $('#edFull').checked;
   $('#edDur').disabled = voll;
-  $('#edDurShow').textContent = voll ? 'Ganzes Video' : $('#edDur').value + ' Sekunden';
+  const sek = +$('#edDur').value;
+  $('#edDurShow').textContent = voll ? 'Ganzes Video' : sek >= 60 ? Math.floor(sek / 60) + ':' + String(sek % 60).padStart(2, '0') + ' Min.' : sek + ' Sekunden';
 }
 $('#edDur').oninput = durAnzeigen;
 $('#edFull').onchange = durAnzeigen;
@@ -413,6 +424,12 @@ $('#edDelete').onclick = async () => {
   try { await api('DELETE', '/api/items/' + editId); toast('In den Papierkorb gelegt'); schliesseSheet(); } catch (e) { toast(e.message, true); }
 };
 $('#textBtn').onclick = (e) => { e.stopPropagation(); if (state) neueTextFolie(); };
+$('#showroomBtn').onclick = async (e) => {
+  e.stopPropagation();
+  if (!state) return;
+  if (state.items.some((i) => i.kind === 'showroom') && !confirm('Der Live-Showroom ist schon im Programm. Trotzdem ein zweites Mal hinzufügen?')) return;
+  try { await api('POST', '/api/items', { kind: 'showroom', duration: 120 }); toast('Live-Showroom hinzugefügt – zeigt die Angebotsräder aus dem Bestand'); } catch (er) { toast(er.message, true); }
+};
 
 // ---------- Dateien hinzufügen ----------
 function queueZeile(name) {
@@ -515,6 +532,23 @@ function zeigeView(v) {
 $$('#nav button').forEach((b) => b.onclick = () => zeigeView(b.dataset.view));
 
 // ---------- Fernseher & Einstellungen ----------
+// ---------- Live-Showroom ----------
+async function showroomLaden() {
+  try {
+    const d = await (await fetch(info.base + '/api/showroom', { cache: 'no-store' })).json();
+    $('#srCount').textContent = d.ts ? String(d.items.length) : '–';
+    const wann = d.ts ? new Date(d.ts).toLocaleString('de-DE', { dateStyle: 'short', timeStyle: 'short' }) : 'noch nie';
+    $('#srInfo').textContent = (d.fehler ? 'Letzter Abruf fehlgeschlagen: ' + d.fehler + '. ' : '') +
+      'Bestand vom ' + (d.stand || '–') + ', abgeholt ' + wann + '. Gezeigt werden nur Angebotsräder, die auf Lager sind und ein Foto haben. Aktualisiert sich alle 30 Minuten selbst.';
+  } catch (e) { /* Zentrale gerade weg */ }
+}
+$('#srRefresh').onclick = async () => {
+  $('#srRefresh').disabled = true;
+  try { const d = await api('POST', '/api/showroom/refresh'); toast(d.fehler ? 'Abruf fehlgeschlagen: ' + d.fehler : d.anzahl + ' Angebotsräder geladen', !!d.fehler); showroomLaden(); }
+  catch (e) { toast(e.message, true); }
+  $('#srRefresh').disabled = false;
+};
+
 function tvEinstellungenFuellen() {
   const s = state.settings;
   if (document.activeElement !== $('#setDuration')) $('#setDuration').value = s.defaultDuration;

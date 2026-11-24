@@ -74,7 +74,7 @@
           <div class="drop glass" id="drop" tabindex="0" role="button" aria-label="Dateien hinzufügen">
             <span class="drop-ico"><svg viewBox="0 0 24 24"><path d="M12 16V4M7 9l5-5 5 5"/><path d="M4 16v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg></span>
             <div><b>Dateien hier hineinziehen</b><small>Bilder · Videos · PDF · PowerPoint – oder klicken zum Auswählen</small></div>
-            <button class="ghost" id="textBtn" type="button">Text-Folie <svg viewBox="0 0 24 24"><path d="M5 6h14M12 6v13"/></svg></button>
+            <div class="drop-btns"><button class="ghost" id="showroomBtn" type="button">Live-Showroom <svg viewBox="0 0 24 24"><circle cx="6" cy="16" r="4"/><circle cx="18" cy="16" r="4"/><path d="M6 16l4-8h6l2 8"/></svg></button><button class="ghost" id="textBtn" type="button">Text-Folie <svg viewBox="0 0 24 24"><path d="M5 6h14M12 6v13"/></svg></button></div>
           </div>
           <input type="file" id="fileInput" multiple hidden accept="image/*,video/*,.pdf,.ppt,.pptx,.pps,.ppsx,.odp">
 
@@ -132,6 +132,12 @@
             <label class="row"><span>Logo unten links</span><input type="checkbox" class="sw" id="setLogo"></label>
           </div>
           <button class="ghost" id="tvReload">Fernseher neu laden</button>
+        </div>
+        <div class="glass card">
+          <span class="eyebrow small"><i></i>Live-Showroom</span>
+          <div class="pin-show"><small>Angebotsräder aus dem Bestand</small><b id="srCount">–</b></div>
+          <p class="hint" id="srInfo">Die Zentrale holt alle 30 Minuten den Live-Bestand der Homepage und zeigt nur Angebotsräder, die auf Lager sind und ein Foto haben.</p>
+          <div class="btn-row"><button class="ghost" id="srRefresh">Jetzt aktualisieren</button></div>
         </div>
         <div class="glass card" id="zentraleCard">
           <span class="eyebrow small"><i></i>Für Bedienplätze</span>

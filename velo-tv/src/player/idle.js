@@ -8,8 +8,7 @@
     ['#FFD43B', '#F59F00'], ['#C92A2A', '#7A1526'], ['#B87333', '#6B3A1E'], ['#F76707', '#A61E1E']
   ];
   var ruhig = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  var canvas, ctx, sprites = [], blaetter = [], laeuft = false, raf = 0, letzte = 0, w = 0, h = 0, dpr = 1;
-  var wind = 0, windZiel = 0, windT = 0, zeitMittel = 16, ziel = 46, startZeit = 0, leicht = false;
+  var sprites = [];
 
   // ---------- Blattformen ----------
   function ahorn(c, s) { // 5-zipfliges Ahornblatt
@@ -76,81 +75,91 @@
     for (var f = 0; f < FORMEN.length; f++) for (var k = 0; k < FARBEN.length; k++) sprites.push(baueSprite(FORMEN[f], FARBEN[k]));
   }
 
-  // Tiefe: 0 = fern (klein, blass, langsam), 2 = nah (groß, schnell)
-  function neuesBlatt(oben) {
-    var r = Math.random(), tiefe = r < .5 ? 0 : (r < .85 ? 1 : 2);
-    var groesse = [20, 38, 70][tiefe] * (0.75 + Math.random() * .5) * Math.min(1.6, Math.max(.7, w / 1920));
+  /** Blätter-Animation auf einer Leinwand. leichtEl bekommt die Klasse „leicht“, wenn der Fernseher zu langsam ist. */
+  function Blaetter(canvas, leichtEl) {
+    var ctx = canvas.getContext('2d'), blaetter = [], laeuft = false, raf = 0, letzte = 0, w = 0, h = 0, dpr = 1;
+    var wind = 0, windZiel = 0, windT = 0, zeitMittel = 16, ziel = 46, startZeit = 0, leicht = false;
+
+    // Tiefe: 0 = fern (klein, blass, langsam), 2 = nah (groß, schnell)
+    function neuesBlatt(oben) {
+      var r = Math.random(), tiefe = r < .5 ? 0 : (r < .85 ? 1 : 2);
+      var groesse = [20, 38, 70][tiefe] * (0.75 + Math.random() * .5) * Math.min(1.6, Math.max(.7, w / 1920));
+      return {
+        x: Math.random() * w * 1.2 - w * .1,
+        y: oben ? -groesse * 2 - Math.random() * h * .3 : Math.random() * h,
+        s: groesse, tiefe: tiefe,
+        vy: [26, 46, 88][tiefe] * (0.7 + Math.random() * .6),
+        sway: 18 + Math.random() * 46, swayF: .4 + Math.random() * .9, phase: Math.random() * 6.3,
+        rot: Math.random() * 6.3, vr: (Math.random() - .5) * 1.6,
+        flip: Math.random() * 6.3, vf: .8 + Math.random() * 2.2,
+        alpha: [.55, .82, .95][tiefe],
+        img: sprites[(Math.random() * sprites.length) | 0]
+      };
+    }
+    function groesseAnpassen() {
+      dpr = Math.min(1.5, window.devicePixelRatio || 1);
+      w = canvas.clientWidth || window.innerWidth; h = canvas.clientHeight || window.innerHeight;
+      canvas.width = Math.round(w * dpr); canvas.height = Math.round(h * dpr);
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    }
+    function bild(t) {
+      if (!laeuft) return;
+      raf = requestAnimationFrame(bild);
+      var dt = Math.min(.05, (t - (letzte || t)) / 1000);
+      zeitMittel = zeitMittel * .95 + (t - (letzte || t)) * .05;
+      letzte = t;
+      // Leistung (nach 4 s Anlauf): erst Licht/Nebel anhalten, dann weniger Blätter
+      if (!startZeit) startZeit = t;
+      if (t - startZeit > 4000 && zeitMittel > 36) {
+        if (!leicht) { leicht = true; if (leichtEl) leichtEl.classList.add('leicht'); zeitMittel = 20; }
+        else if (ziel > 16) ziel -= 1;
+      }
+      while (blaetter.length > ziel) blaetter.pop();
+      while (blaetter.length < ziel) blaetter.push(neuesBlatt(true));
+      windT -= dt;
+      if (windT <= 0) { windZiel = (Math.random() - .35) * 70; windT = 4 + Math.random() * 6; }
+      wind += (windZiel - wind) * dt * .5;
+      ctx.clearRect(0, 0, w, h);
+      for (var i = 0; i < blaetter.length; i++) {
+        var b = blaetter[i];
+        b.phase += dt * b.swayF;
+        b.y += b.vy * dt;
+        b.x += (Math.sin(b.phase) * b.sway + wind * (0.5 + b.tiefe * .45)) * dt;
+        b.rot += b.vr * dt + Math.sin(b.phase) * dt * .6;
+        b.flip += b.vf * dt;
+        if (b.y > h + b.s * 2 || b.x < -w * .2 || b.x > w * 1.2) { blaetter[i] = neuesBlatt(true); continue; }
+        ctx.save();
+        ctx.globalAlpha = b.alpha;
+        ctx.translate(b.x, b.y);
+        ctx.rotate(b.rot);
+        ctx.scale(Math.cos(b.flip) * .85 + .15 * (Math.cos(b.flip) < 0 ? -1 : 1), 1); // Taumeln (3D-Wende)
+        ctx.drawImage(b.img, -b.s, -b.s, b.s * 2, b.s * 2);
+        ctx.restore();
+      }
+    }
+    function onResize() { groesseAnpassen(); }
     return {
-      x: Math.random() * w * 1.2 - w * .1,
-      y: oben ? -groesse * 2 - Math.random() * h * .3 : Math.random() * h,
-      s: groesse, tiefe: tiefe,
-      vy: [26, 46, 88][tiefe] * (0.7 + Math.random() * .6),
-      sway: 18 + Math.random() * 46, swayF: .4 + Math.random() * .9, phase: Math.random() * 6.3,
-      rot: Math.random() * 6.3, vr: (Math.random() - .5) * 1.6,
-      flip: Math.random() * 6.3, vf: .8 + Math.random() * 2.2,
-      alpha: [.55, .82, .95][tiefe],
-      img: sprites[(Math.random() * sprites.length) | 0]
+      start: function () {
+        if (laeuft || ruhig) return;
+        sprites_();
+        groesseAnpassen();
+        if (!blaetter.length) for (var i = 0; i < ziel; i++) blaetter.push(neuesBlatt(false));
+        laeuft = true; letzte = 0; startZeit = 0;
+        window.addEventListener('resize', onResize);
+        raf = requestAnimationFrame(bild);
+      },
+      stop: function () { laeuft = false; cancelAnimationFrame(raf); window.removeEventListener('resize', onResize); }
     };
   }
 
-  function groesseAnpassen() {
-    dpr = Math.min(1.5, window.devicePixelRatio || 1);
-    w = window.innerWidth; h = window.innerHeight;
-    canvas.width = Math.round(w * dpr); canvas.height = Math.round(h * dpr);
-    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-  }
-
-  function bild(t) {
-    if (!laeuft) return;
-    raf = requestAnimationFrame(bild);
-    var dt = Math.min(.05, (t - (letzte || t)) / 1000);
-    zeitMittel = zeitMittel * .95 + (t - (letzte || t)) * .05;
-    letzte = t;
-    // Leistung (nach 4 s Anlauf): erst Licht/Nebel anhalten, dann weniger Blätter
-    if (!startZeit) startZeit = t;
-    if (t - startZeit > 4000 && zeitMittel > 36) {
-      if (!leicht) { leicht = true; var el = document.getElementById('idle'); if (el) el.classList.add('leicht'); zeitMittel = 20; }
-      else if (ziel > 16) ziel -= 1;
-    }
-    while (blaetter.length > ziel) blaetter.pop();
-    while (blaetter.length < ziel) blaetter.push(neuesBlatt(true));
-    // Wind: sanfte Böen
-    windT -= dt;
-    if (windT <= 0) { windZiel = (Math.random() - .35) * 70; windT = 4 + Math.random() * 6; }
-    wind += (windZiel - wind) * dt * .5;
-
-    ctx.clearRect(0, 0, w, h);
-    for (var i = 0; i < blaetter.length; i++) {
-      var b = blaetter[i];
-      b.phase += dt * b.swayF;
-      b.y += b.vy * dt;
-      b.x += (Math.sin(b.phase) * b.sway + wind * (0.5 + b.tiefe * .45)) * dt;
-      b.rot += b.vr * dt + Math.sin(b.phase) * dt * .6;
-      b.flip += b.vf * dt;
-      if (b.y > h + b.s * 2 || b.x < -w * .2 || b.x > w * 1.2) { blaetter[i] = neuesBlatt(true); continue; }
-      ctx.save();
-      ctx.globalAlpha = b.alpha;
-      ctx.translate(b.x, b.y);
-      ctx.rotate(b.rot);
-      ctx.scale(Math.cos(b.flip) * .85 + .15 * (Math.cos(b.flip) < 0 ? -1 : 1), 1); // Taumeln (3D-Wende)
-      ctx.drawImage(b.img, -b.s, -b.s, b.s * 2, b.s * 2);
-      ctx.restore();
-    }
-  }
-
+  var idleEngine = null;
   function start() {
-    if (laeuft || ruhig) return;
-    canvas = canvas || document.getElementById('leaves');
-    if (!canvas) return;
-    ctx = ctx || canvas.getContext('2d');
-    sprites_();
-    groesseAnpassen();
-    if (!blaetter.length) for (var i = 0; i < ziel; i++) blaetter.push(neuesBlatt(false));
-    laeuft = true; letzte = 0; startZeit = 0;
-    raf = requestAnimationFrame(bild);
+    var c = document.getElementById('leaves');
+    if (!c) return;
+    idleEngine = idleEngine || Blaetter(c, document.getElementById('idle'));
+    idleEngine.start();
   }
-  function stop() { laeuft = false; cancelAnimationFrame(raf); }
-  window.addEventListener('resize', function () { if (canvas) groesseAnpassen(); });
+  function stop() { if (idleEngine) idleEngine.stop(); }
 
   // Uhr + Datum im Startbild
   var TAGE = ['Sonntag', 'Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag'];
@@ -164,4 +173,5 @@
   uhr(); setInterval(uhr, 10000);
 
   window.VeloIdle = { start: start, stop: stop };
+  window.VeloBlaetter = Blaetter;
 })();

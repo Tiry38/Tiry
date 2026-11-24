@@ -62,6 +62,10 @@
       function ok(x) { if (!fertig) { fertig = true; resolve(x); } }
       setTimeout(function () { ok(item.kind === 'video' ? null : el); }, 12000);
 
+      if (item.kind === 'showroom') {
+        if (!window.VeloShowroom) return ok(null);
+        return window.VeloShowroom.laden().then(function (sr) { ok(sr); }, function () { ok(null); });
+      }
       if (item.kind === 'text') {
         var t = item.text || {};
         el.innerHTML = '<div class="txt th-' + esc(t.theme || 'herbst') + '"><div class="inner">' +
@@ -138,6 +142,7 @@
       }
       fehlerZaehler = 0;
       stage.appendChild(el);
+      if (el._start) el._start();
       var alt = aktuell;
       aktuell = { item: item, el: el, index: index, rev: itemRev(item) };
       // zwei Frames warten, damit die Überblendung greift
@@ -152,7 +157,7 @@
   }
   var fehlerZaehler = 0;
 
-  function itemRev(i) { return JSON.stringify([i.file, i.fit, i.text, i.duration, i.sound]); }
+  function itemRev(i) { return JSON.stringify([i.kind, i.file, i.fit, i.text, i.duration, i.sound]); }
 
   function starteVideo(v, item) {
     var maxMs = item.duration > 0 ? item.duration * 1000 : ((item.mediaLength || 600) + 10) * 1000;
@@ -174,6 +179,7 @@
 
   function entferne(a) {
     if (!a || !a.el) return;
+    if (a.el._stop) a.el._stop();
     var v = a.el.querySelector('video');
     if (v) { v.pause(); v.removeAttribute('src'); try { v.load(); } catch (e) { /* egal */ } }
     if (a.el.parentNode) a.el.parentNode.removeChild(a.el);
