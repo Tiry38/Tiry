@@ -56,17 +56,20 @@ const PACE = {
   full: { head: 5.2, open: 1.5, pick: 1.0, hold: 2.3, note: 3.6, tail: .9, pk: 1.45 },
   mid: { head: 2.2, open: .8, pick: .6, hold: .9, note: 0, tail: .4, pk: 0 },
   fast: { head: .7, open: .25, pick: .3, hold: .15, note: 0, tail: .2, pk: 0 },
-  turbo: { head: .3, open: .1, pick: .14, hold: .06, note: 0, tail: .05, pk: 0 }
+  turbo: { head: .3, open: .1, pick: .14, hold: .06, note: 0, tail: .05, pk: 0 },
+  calm: { head: 2.2, open: .8, pick: .7, hold: 1.4, note: 0, tail: .4, pk: 0 },
+  hl: { head: 1.3, open: .6, pick: .6, hold: 1.3, note: 0, tail: .3, pk: 0 }
 };
 const CUTS = {
   main: [['intro', 9], ['model', 9.5], ['motor', 22], ...D.tabs.map((x, i) => ['tab', i, 'full']), ['summary', 13], ['outro', 10]],
-  c60: [['intro', 5], ['motor', 12], ['tab', 0, 'mid'], ['tab', 1, 'mid'], ['tab', 3, 'fast'], ['tab', 4, 'fast'], ['tab', 5, 'fast'], ['tab', 6, 'fast'], ['summary', 8], ['outro', 5.5]],
-  c30: [['intro', 2.2], ['motor', 5.5], ['tab', 0, 'fast'], ['tab', 1, 'fast'], ['tab', 3, 'fast'], ['tab', 4, 'fast'], ['tab', 5, 'fast'], ['tab', 6, 'fast'], ['summary', 3], ['outro', 2.8]],
-  c15: [['intro', 1.2], ['motor', 2.8], ['tab', 0, 'turbo'], ['tab', 1, 'turbo'], ['tab', 3, 'turbo'], ['tab', 4, 'turbo'], ['tab', 5, 'turbo'], ['tab', 6, 'turbo'], ['summary', 2], ['outro', 2.1]]
+  // Kurzfassungen: nur Höhepunkte in ruhigem Takt, der Rest wechselt in einer Lichtfahrt mit (Endpreis bleibt korrekt)
+  c60: [['intro', 4.5], ['motor', 12], ['tab', 0, 'calm'], ['tab', 1, 'calm'], ['tab', 5, 'hl', [1]], ['rest', 3.2, [3, 4, 5, 6]], ['summary', 8], ['outro', 5.5]],
+  c30: [['intro', 2.2], ['motor', 6], ['tab', 0, 'hl', [0, 2, 3]], ['tab', 1, 'hl'], ['rest', 2.6, [3, 4, 5, 6]], ['summary', 3.4], ['outro', 2.7]],
+  c15: [['intro', 1.1], ['motor', 3.4], ['tab', 1, 'hl'], ['rest', 2.0, [0, 3, 4, 5, 6]], ['summary', 2.4], ['outro', 2.0]]
 };
 const plan = CUTS[CUT];
 const scenes = []; let T = 0;
-const ev = { cam: [], img: [], price: [], cur: [], clicks: [], open: {}, scroll: [], tab: [], sfx: [], caps: [], notes: [], heads: [], hover: [] };
+const ev = { cam: [], img: [], price: [], cur: [], clicks: [], open: {}, scroll: [], tab: [], sfx: [], caps: [], notes: [], heads: [], hover: [], sel: [], priceHide: [] };
 const P = id => ev.open[id] || (ev.open[id] = []);
 
 /* Panel-Modell: alle Reiter untereinander, wie im Original */
@@ -123,7 +126,11 @@ for (const step of plan) {
       P(id).push({ t: t + .6, v: 1 }); ev.notes.push({ t: t + 1.0, until: t + 1.0 + pace.note + .6, k: tb.infoNote[0], v: tb.infoNote[1] });
       t += 1.0 + pace.note; P(id).push({ t, v: 0 }); t += .5;
     }
-    for (const c of tb.clicks) {
+    const pick = step[3]; const cl = pick ? pick.map(i => tb.clicks[i]) : tb.clicks;
+    if (pick || step[2] === 'hl') ev.priceHide.push([T, 1e9]);
+    tb.clicks.forEach((c, i) => { if (!cl.includes(c)) { ev.sel.push({ t: T, id: tb.id + '/' + c.q, o: c.o }); if (c.q === 'SCHALTUNG') ev.appearAt[tb.id + '/ANTRIEB'] = T; } });
+    if (tb.id === 'STYLE' && !ev.prevColor) {}
+    for (const c of cl) {
       const id = tb.id + '/' + c.q;
       // 1 Kopfzeile anklicken -> öffnet
       const hp = headScreen(id, t, scrollV); addCur(t, hp.x, hp.y); const tc = t + pace.open * .55; click(tc, 'tick');
@@ -137,7 +144,7 @@ for (const step of plan) {
       t += pace.open;
       // 2 Option wählen
       const op = optScreen(id, c.o, t); addCur(t, op.x, op.y); const tp = t + pace.pick * .6; click(tp, 'select');
-      ev.sel = ev.sel || []; ev.sel.push({ t: tp, id, o: c.o });
+      ev.sel.push({ t: tp, id, o: c.o });
       ev.img.push({ t: tp + .05, v: c.img }); ev.price.push({ t: tp + .1, v: c.price });
       ev.cam.push({ t: tp + .1, cx: c.cam[0], cy: c.cam[1], z: step[2] === 'turbo' ? 1 : (step[2] === 'fast' ? 1 + (c.cam[2] - 1) * .5 : c.cam[2]) });
       ev.sfx.push({ t: tp + .1, k: c.event === 'color' ? 'color' : 'build' });
@@ -153,13 +160,21 @@ for (const step of plan) {
     s.dur = t - T;
   } else {
     s.dur = step[1];
+    if (kind === 'rest') { // alle übrigen Teile in einer Lichtfahrt
+      const tabsR = step[2]; ev.priceHide.push([T, 1e9]);
+      tabsR.forEach((ti, k) => { ev.tab.push({ t: T + k * s.dur / (tabsR.length + 1), v: ti }); D.tabs[ti].clicks.forEach(c => { ev.sel.push({ t: T + .2, id: D.tabs[ti].id + '/' + c.q, o: c.o }); if (c.q === 'SCHALTUNG') ev.appearAt[D.tabs[ti].id + '/ANTRIEB'] = T + .2; }); });
+      const lay = panelLayout(T, true); scrollV = lay['G' + tabsR[0]] - 6; ev.scroll.push({ t: T, v: scrollV });
+      ev.img.push({ t: T + .3, v: 16, d: 1.8 }); ev.price.push({ t: T + .3, v: D.finalPrice }); ev.cam.push({ t: T, cx: .5, cy: .52, z: 1 });
+      ev.notes.push({ t: T + .2, until: T + s.dur, k: 'Und der Rest', v: tabsR.map(i => D.tabs[i].short || D.tabs[i].id[0] + D.tabs[i].id.slice(1).toLowerCase()).join(' · ') + ': jedes Teil einzeln gewählt.' });
+      ev.sfx.push({ t: T + .3, k: 'build' }); ev.heads.push({ t: T, ti: -1, dock: T, pace: 'rest' });
+    }
     if (kind === 'model') { addCur(T + 2.6, W * .3, H * .5); }
     if (kind === 'motor') { ev.sfx.push({ t: T + .2, k: 'rise' }); }
   }
   s.t1 = T + s.dur; scenes.push(s); T += s.dur;
 }
 const TOTAL = T;
-ev.sel = ev.sel || [];
+ev.sel.sort((a, b) => a.t - b.t);
 
 /* Motor-, Modell-, Summary-Klicks brauchen Szenen-Zeiten */
 const sc = k => scenes.find(s => s.kind === k);
@@ -306,7 +321,7 @@ function seek(t) {
 
   // Bild-Wechsel
   const imL = ev.img; let cur = 0, prevI = 0, tch = -9; for (const e of imL) { if (e.t <= t) { prevI = cur; cur = e.v; tch = e.t; } }
-  let nxt = 9e9; for (const e of imL) if (e.t > tch + 1e-6) { nxt = e.t; break; } const wd = clamp((nxt - tch) * .9, .2, .95); const wp = clamp((t - tch) / wd); const wx = r.x - r.w * .05 + ease(wp) * r.w * 1.1;
+  let nxt = 9e9, cd = 0; for (const e of imL) { if (e.t === tch && e.d) cd = e.d; if (e.t > tch + 1e-6) { nxt = e.t; break; } } const wd = cd || clamp((nxt - tch) * .9, .2, .95); const wp = clamp((t - tch) / wd); const wx = r.x - r.w * .05 + ease(wp) * r.w * 1.1;
 
   // Intro: Licht-Linie zeichnet das Rad
   if (S.kind === 'intro') {
@@ -408,11 +423,11 @@ function seek(t) {
     if (S.kind === 'motor' && !mFast) { txt = 'Vier Motoren. Deine Kraft.'; tag = 'Motorstufe · 4 Optionen'; was = 'Motor · Drehmoment · Einsatzzweck'; warum = 'Das Drehmoment bestimmt, wie souverän du anfährst, kletterst und Gepäck ziehst.';
       rev = clamp((lt - .2) / .9); dockK = clamp(spring(lt - 1.5, .8, .9)); a = clamp((MT.ui - lt) / .5); gi = 'Nm'; }
     else if (S.kind === 'model') { txt = 'Allround. Neu gedacht.'; tag = 'Modell · AEB PRO MY2027'; was = 'Modellreihe · Motorstufe'; warum = 'Ein Rahmen, vier Motoren: Du wählst die Kraft, die zu deinen Wegen passt.'; rev = clamp((lt - .2) / 1.0); dockK = clamp(spring(lt - 2.6, .8, .9)); a = clamp((S.dur - lt) / .4); gi = 'AEB'; }
-    else if (S.kind === 'tab' && hs) { const tb = D.tabs[hs.ti]; txt = tb.head; tag = `${String(hs.ti + 1).padStart(2, '0')} / 07 · ${tb.id}`; was = tb.was; warum = tb.warum;
+    else if (S.kind === 'tab' && hs && hs.ti >= 0) { const tb = D.tabs[hs.ti]; txt = tb.head; tag = `${String(hs.ti + 1).padStart(2, '0')} / 07 · ${tb.id}`; was = tb.was; warum = tb.warum;
       const lh = t - hs.t; rev = clamp((lh - .15) / (hs.pace === 'turbo' ? .25 : hs.pace === 'fast' ? .4 : .9)); dockK = clamp(spring(t - hs.dock, .8, .9)); a = 1; gi = tb.short || tb.id;
       if (hs.pace !== 'full' && hs.pace !== 'mid') { was = ''; warum = ''; } }
     if (S.kind === 'summary' || S.kind === 'outro' || S.kind === 'intro') a = 0;
-    hd.style.opacity = a; hd.querySelector('.tag span').textContent = tag; hd.querySelector('.tx').textContent = txt;
+    hd.style.opacity = a; hd.querySelector('.tag span').textContent = tag; hd.querySelector('.tx').textContent = txt; { const h1e = hd.querySelector('h1'); h1e.style.fontSize = L.hd.h1 + 'px'; const maxW = V ? 960 : SQ ? 980 : 1150; if (txt && h1e.scrollWidth > maxW) h1e.style.fontSize = (L.hd.h1 * maxW / h1e.scrollWidth) + 'px'; }
     hd.querySelector('.was b').textContent = was; hd.querySelector('.warum em').textContent = warum;
     hd.querySelector('.was').style.display = was ? '' : 'none'; hd.querySelector('.warum').style.display = warum ? '' : 'none';
     const h1 = hd.querySelector('h1'); h1.style.clipPath = `inset(-10% ${100 - ease(rev) * 100}% -10% 0)`;
@@ -427,7 +442,7 @@ function seek(t) {
   const uiK = clamp(spring(t - (sMotor.t0 + MT.ui), .9, .82)) * (1 - clamp((t - sSum.t0 + .45) / .4));
   panel.style.transform = `translateX(${(1 - uiK) * (V || SQ ? 0 : 680)}px) translateY(${(1 - uiK) * (V || SQ ? 600 : 0)}px)`; panel.style.opacity = clamp(uiK * 3);
   tabsEl.style.opacity = uiK; $('#uline').style.opacity = uiK; $('#top').style.opacity = clamp(uiK * 1.5) * (L.top ? 1 : 0);
-  $('#price').style.opacity = uiOn ? uiK : 0;
+  const ph = ev.priceHide.some(([a, b]) => t >= a && t < b) && S.kind !== 'summary'; $('#price').style.opacity = uiOn && !ph ? uiK : 0;
   // Panel-Inhalt
   { const lay = panelLayout(t, false); const scr = track(ev.scroll, t, 1.0, .9, 0);
     D.tabs.forEach((tb, ti) => { const e = document.getElementById('G' + ti); e.style.transform = `translateY(${lay['G' + ti] - scr + 14}px)`; });

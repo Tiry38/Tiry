@@ -1,47 +1,59 @@
 1
-00:00:00,300 --> 00:00:05,000
+00:00:00,300 --> 00:00:04,500
 AEB PRO · Modelljahr 2027
 
 2
-00:00:05,200 --> 00:00:17,000
+00:00:04,700 --> 00:00:16,500
 Vier Motoren: 60, 75, 90 und 120 Nm. Gewählt: Performance Line CX, 120 Nm.
 
 3
-00:00:17,200 --> 00:00:20,570
+00:00:16,700 --> 00:00:20,130
 Das Fundament. Hier entscheidest du, wie weit, wie entspannt und wie wartungsarm du fährst.
 
 4
-00:00:20,610 --> 00:00:31,100
-Bosch PowerTube 800 Wh · Bosch Kiox 500 · Smart System · Enviolo TR AUTOMATiQ · Bosch eShift · Gates CDX Riemenantrieb · Mid · L (53 cm) · 1,70–1,85 m
+00:00:20,170 --> 00:00:21,700
+Größter integrierter Akku – Bosch PowerTube 800 Wh
 
 5
-00:00:31,300 --> 00:00:34,670
-Farbe als Haltung. 18 Farbtöne, glanz oder matt. Dein Rad erkennst du unter hunderten.
+00:00:23,070 --> 00:00:24,600
+2,8-Zoll-Farbdisplay mit Navigation – Bosch Kiox 500 · Smart System
 
 6
-00:00:34,710 --> 00:00:36,000
-Melon Yellow glanz
+00:00:25,970 --> 00:00:27,500
+Schaltet automatisch und stufenlos – Enviolo TR AUTOMATiQ · Bosch eShift
 
 7
-00:00:36,100 --> 00:00:38,300
-Auf dich gebaut. Ergotec Riser · 660 mm · Selle Royal Explora Moderate
+00:00:28,870 --> 00:00:30,400
+Riemen statt Kette. Ohne Öl. – Gates CDX Riemenantrieb
 
 8
-00:00:38,400 --> 00:00:41,300
-Jeder Meter weicher. by.Schulz G.2 ST · SR Suntour NRX32 Air · 75 mm · Schwalbe Marathon E Plus 50-622
+00:00:31,770 --> 00:00:33,300
+Drei Rahmenformen, S bis XXL – Mid · L (53 cm) · 1,70–1,85 m
 
 9
-00:00:41,400 --> 00:00:45,000
-Sehen. Bremsen. Schützen. Shimano MT420 · 4-Kolben / 2-Kolben · Supernova M99 Pro 2 · ABUS 4750 XL · VELOMATE · 1 Jahr
+00:00:33,800 --> 00:00:37,230
+Farbe als Haltung. 18 Farbtöne, glanz oder matt. Dein Rad erkennst du unter hunderten.
 
 10
-00:00:45,100 --> 00:00:46,600
-Bereit für mehr. Bosch 4A
+00:00:37,270 --> 00:00:38,800
+Eine Farbe, die man sieht – Melon Yellow glanz
 
 11
-00:00:46,800 --> 00:00:54,600
-AEB 990CX PRO · 120 Nm · 800 Wh · Automatik + Riemen · 6.677 €
+00:00:39,200 --> 00:00:41,570
+Sehen. Bremsen. Schützen.
 
 12
-00:00:54,800 --> 00:01:00,050
+00:00:41,610 --> 00:00:42,000
+130 Lux, Fernlicht 450 Lux – Supernova M99 Pro 2
+
+13
+00:00:43,400 --> 00:00:46,400
+Ergonomie · Komfort · Sicherheit · Zubehör: jedes Teil einzeln gewählt.
+
+14
+00:00:46,600 --> 00:00:54,400
+AEB 990CX PRO · 120 Nm · 800 Wh · Automatik + Riemen · 6.677 €
+
+15
+00:00:54,600 --> 00:00:59,850
 Dein AEB PRO. Konfiguriere deins: konfigurator.velo-de-ville.com

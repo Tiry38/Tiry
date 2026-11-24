@@ -1,19 +1,27 @@
 1
-00:00:00,300 --> 00:00:01,200
+00:00:00,300 --> 00:00:01,100
 AEB PRO · Modelljahr 2027
 
 2
-00:00:01,400 --> 00:00:04,000
+00:00:01,300 --> 00:00:04,500
 Vier Motoren: 60, 75, 90 und 120 Nm. Gewählt: Performance Line CX, 120 Nm.
 
 3
-00:00:04,100 --> 00:00:10,900
-Basis · Style · Ergonomie · Komfort · Sicherheit · Zubehör: jedes Teil einzeln gewählt.
+00:00:04,600 --> 00:00:06,970
+Farbe als Haltung.
 
 4
-00:00:11,100 --> 00:00:12,900
-AEB 990CX PRO · 120 Nm · 800 Wh · Automatik + Riemen · 6.677 €
+00:00:07,010 --> 00:00:08,400
+Eine Farbe, die man sieht – Melon Yellow glanz
 
 5
-00:00:13,100 --> 00:00:14,950
+00:00:08,800 --> 00:00:10,600
+Basis · Ergonomie · Komfort · Sicherheit · Zubehör: jedes Teil einzeln gewählt.
+
+6
+00:00:10,800 --> 00:00:13,000
+AEB 990CX PRO · 120 Nm · 800 Wh · Automatik + Riemen · 6.677 €
+
+7
+00:00:13,200 --> 00:00:14,950
 Dein AEB PRO. Konfiguriere deins: konfigurator.velo-de-ville.com

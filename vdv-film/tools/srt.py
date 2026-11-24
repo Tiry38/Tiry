@@ -15,10 +15,14 @@ for cut in ['main','c60','c30','c15']:
         S.append((tabs[0]['t0']+.1,tabs[-1]['t0']+tabs[-1]['dur'],'Basis · Style · Ergonomie · Komfort · Sicherheit · Zubehör: jedes Teil einzeln gewählt.')); tabs=[]
     for s in tabs:
         caps=[c for c in ev['caps'] if QT[c['k']]==s['ti']]
-        if s['pace'] in ('full','mid'):
+        if s['pace'] == 'hl':
+            capS=[c for c in caps if s['t0']<=c['t']<s['t0']+s['dur']]
+            S.append((s['t0']+.1,capS[0]['t'] if capS else s['t0']+s['dur'],H[s['ti']]))
+            for c in capS: S.append((c['t'],c['until'],f"{c['v']} – {c['s']}"))
+        elif s['pace'] in ('full','mid','calm'):
             hend=caps[0]['t'] if caps else s['t0']+s['dur']
             S.append((s['t0']+.2,min(hend,s['t0']+s['dur']),H[s['ti']]+' '+W[s['ti']]))
-            if s['pace']=='full':
+            if s['pace'] in ('full','calm'):
                 for c in caps: S.append((c['t'],c['until'],f"{c['v']} – {c['s']}"))
             elif caps: S.append((caps[0]['t'],s['t0']+s['dur'],' · '.join(c['s'] for c in caps)))
         else:  # schneller Takt: ein Untertitel pro Reiter

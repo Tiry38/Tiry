@@ -3,37 +3,41 @@
 AEB PRO · Modelljahr 2027
 
 2
-00:00:02,400 --> 00:00:07,700
+00:00:02,400 --> 00:00:08,200
 Vier Motoren: 60, 75, 90 und 120 Nm. Gewählt: Performance Line CX, 120 Nm.
 
 3
-00:00:07,800 --> 00:00:12,100
-Das Fundament. Bosch PowerTube 800 Wh · Bosch Kiox 500 · Smart System · Enviolo TR AUTOMATiQ · Bosch eShift · Gates CDX Riemenantrieb · Mid · L (53 cm) · 1,70–1,85 m
+00:00:08,300 --> 00:00:10,670
+Das Fundament.
 
 4
-00:00:12,200 --> 00:00:13,700
-Farbe als Haltung. Melon Yellow glanz
+00:00:10,710 --> 00:00:12,100
+Größter integrierter Akku – Bosch PowerTube 800 Wh
 
 5
-00:00:13,800 --> 00:00:15,000
-Auf dich gebaut. Ergotec Riser · 660 mm · Selle Royal Explora Moderate
+00:00:13,210 --> 00:00:14,600
+Schaltet automatisch und stufenlos – Enviolo TR AUTOMATiQ · Bosch eShift
 
 6
-00:00:16,100 --> 00:00:18,000
-Jeder Meter weicher. by.Schulz G.2 ST · SR Suntour NRX32 Air · 75 mm · Schwalbe Marathon E Plus 50-622
+00:00:15,710 --> 00:00:17,100
+Riemen statt Kette. Ohne Öl. – Gates CDX Riemenantrieb
 
 7
-00:00:19,100 --> 00:00:22,700
-Sehen. Bremsen. Schützen. Shimano MT420 · 4-Kolben / 2-Kolben · Supernova M99 Pro 2 · ABUS 4750 XL · VELOMATE · 1 Jahr
+00:00:17,400 --> 00:00:19,770
+Farbe als Haltung.
 
 8
-00:00:22,800 --> 00:00:24,300
-Bereit für mehr. Bosch 4A
+00:00:19,810 --> 00:00:21,200
+Eine Farbe, die man sieht – Melon Yellow glanz
 
 9
-00:00:24,500 --> 00:00:27,300
-AEB 990CX PRO · 120 Nm · 800 Wh · Automatik + Riemen · 6.677 €
+00:00:21,600 --> 00:00:24,000
+Ergonomie · Komfort · Sicherheit · Zubehör: jedes Teil einzeln gewählt.
 
 10
-00:00:27,500 --> 00:00:30,050
+00:00:24,200 --> 00:00:27,400
+AEB 990CX PRO · 120 Nm · 800 Wh · Automatik + Riemen · 6.677 €
+
+11
+00:00:27,600 --> 00:00:30,050
 Dein AEB PRO. Konfiguriere deins: konfigurator.velo-de-ville.com
