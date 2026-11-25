@@ -5,7 +5,9 @@
 HTML und Bilder liegen flach im ZIP, wie es die rapidmail-Hilfe verlangt. Der Abmeldelink nutzt `{%link_unsubscribe}`.
 
 - `newsletter-dezember-2026.html` – die Mail (600 px, Tabellen, Inline-CSS, Texte und Preise als echter Text)
-- `*.jpg`, `logo.png` – 12 Bilder, zusammen ca. 590 KB, jedes unter 110 KB
+- Look „Winternacht“: dunkel, 2 animierte GIFs (Schnee + Sattelüberzug im Aufmacher, Antelao rollt durch −39 %), 16 Bilder, zusammen ca. 1,1 MB
+- Interaktiv: Knöpfe und Social-Buttons reagieren auf Maus/Finger; in Apple Mail pulsiert „Termin sichern“, der WhatsApp-Knopf wackelt. Gmail zeigt die GIFs, aber keine CSS-Animation. Outlook (Windows) zeigt bei GIFs nur das erste Bild.
+- Werkstatt-Block nutzt das Bild als Hintergrund – ob rapidmail Hintergrundbilder aus dem ZIP einbettet, ist ungeprüft; sonst erscheint dunkles Anthrazit, Text bleibt lesbar.
 - `vorschau-desktop.png`, `vorschau-handy.png` – Kontrollbilder, **nicht** mit hochladen
 
 ## Betreff + Vorschautext (eine Variante wählen)
@@ -14,6 +16,7 @@ HTML und Bilder liegen flach im ZIP, wie es die rapidmail-Hilfe verlangt. Der Ab
 3. **Weihnachten beim Velocenter: Freiheit auf drei Rädern** / Van Raam E-Dreirad, GPS-Klingel für 39,95 € und Zubehör bis −70 %.
 
 ## Vor dem Versand bestätigen
+- Echtes Werkstattfoto (Werkbank/Montageständer, ohne Personen) nachreichen – aktuell Bosch-Motor-Nahaufnahme.
 - Sind alle 5 Räder noch da, Preise so richtig (Stand Bestand 23.11.2026)?
 - Öffnungszeiten 24.12.–06.01. → Platzhalter in der Mail ersetzen.
 - Velo de Ville SEB890: kein Foto im Bestand – zeigt aktuell die große „−30%“ als Bild-Ersatz.
