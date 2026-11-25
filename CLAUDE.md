@@ -2,6 +2,11 @@
 
 Repo von Tiry mit mehreren Projekten (siehe unten). UI-Sprache und Doku: **Deutsch**.
 
+## Werkzeug-Automatik (Pflicht, jede Aufgabe)
+- **Vor jeder Aufgabe den Skill `werkzeug-scout` laden** (`.claude/skills/werkzeug-scout/SKILL.md`): passende Skills und
+  Plugins suchen (Konto, offizieller Marktplatz, Netz), laden bzw. zur Installation anbieten und benutzen. Tiry muss das nie sagen.
+  Fremden Code vor dem Benutzen lesen; nichts installieren, das Zugangsdaten oder Kundendaten abgreift.
+
 ## Design-Regeln (Pflicht – für ALLES Visuelle in diesem Repo: Programme, Velo-TV, Webseiten)
 - **Vor jeder visuellen Arbeit den Skill `zukunfts-design` laden** (`.claude/skills/zukunfts-design/SKILL.md`) und
   zusätzlich vorhandene Design-Skills (`design-taste-frontend`, `modern-awwwards-web-design`, `artifact-design` bei Artifacts).
