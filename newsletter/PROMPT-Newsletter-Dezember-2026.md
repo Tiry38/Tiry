@@ -59,7 +59,7 @@ Wir bauen den Laden um und räumen aus: **Lenkertaschen, Fahrradtaschen, Gepäck
 Als **Collage mehrerer Produktbilder nebeneinander** gestalten (wie Tiry es im November mochte), aber im neuen Stil: freigestellte Produkte auf ruhigem Grund, Prozent-Marker in Markenrot. Prozentangaben nur so übernehmen, wie sie im November-Design stehen; ⚠ neue Prozente/Preise nur nach Rückfrage.
 
 ### 3.4 Weihnachts-Geschenkideen (neu, kreativ)
-- **„Schenk deinen Eltern ein Stück Freiheit zurück“** – Van Raam E-Dreirad (stabil auf drei Rädern, tiefer Einstieg, E-Unterstützung), CTA „Probefahrt vereinbaren – gern gemeinsam mit deinen Eltern“. Vorlage: Canva-Design „Weihnachts-Werbepost für Velocenter Hessert“ (ID `DAHbb-y7Kxw`). Dort zeigt das Bild Personen → für den Newsletter ein Bild **ohne Gesichter** wählen (z. B. Van-Raam-Rad im Winterlicht, Bilder unter `https://www.velo-center.de/img/dreirad/`).
+- **„Schenk deinen Eltern ein Stück Freiheit zurück“** – Van Raam E-Dreirad (stabil auf drei Rädern, tiefer Einstieg, E-Unterstützung), CTA „Probefahrt vereinbaren – gern gemeinsam mit deinen Eltern“. Vorlage: Canva-Design „Weihnachts-Werbepost für Velocenter Hessert“ (ID `DAHbb-y7Kxw`). Dort zeigt das Bild Personen → für den Newsletter ein Bild **ohne Gesichter** wählen (z. B. Van-Raam-Rad im Winterlicht; Herstellerbild oder ⚠ Foto von Tiry – die Bilder unter `velo-center.de/img/dreirad/` sind YouTube-Vorschaubilder und zeigen evtl. Personen).
 - **Klingel mit GPS – 39,95 € einmalig, „Neu bei uns“** (Canva-Design „Klingel mit TRACKER“, ID `DAHWGEumaNk`) als Geschenk unter 40 €.
 - Zubehör aus der Umbau-Räumung als Geschenk unter dem Baum.
 - ⚠ Gutscheine nur erwähnen, wenn Tiry bestätigt, dass es welche gibt.
