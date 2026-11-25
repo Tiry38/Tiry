@@ -1,0 +1,3 @@
+const {chromium}=require('playwright');(async()=>{const b=await chromium.launch();const f='file:///home/user/Tiry/newsletter-dezember-2026/newsletter-dezember-2026.html';
+for(const [n,w,s] of [['desktop',1000,1],['handy',390,1]]){const p=await b.newPage({viewport:{width:w,height:900},deviceScaleFactor:s});await p.goto(f,{waitUntil:'networkidle'}).catch(()=>{});await p.waitForTimeout(800);
+const sw=await p.evaluate(()=>document.documentElement.scrollWidth);console.log(n,'scrollWidth',sw);await p.screenshot({path:`/tmp/claude-0/nl/shot-${n}.png`,fullPage:true});await p.close()}await b.close()})()
