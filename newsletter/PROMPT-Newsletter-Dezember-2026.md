@@ -77,9 +77,18 @@ Als **Collage mehrerer Produktbilder nebeneinander** gestalten (wie Tiry es im N
 ## 4. Texte
 Kurz, warm, regional, kein Werbe-Blabla, keine „Willkommen“-Floskeln. Jeder Block: starkes Intro + klarer CTA. Keine Reparaturanleitungen/DIY-Tipps – jedes Problem gehört in die Werkstatt. Du-Form wie bisher. Rechtschreibung prüfen (Oktober-Titel hatte „Lewsletter“ – so etwas darf nicht passieren).
 
-## 5. Abgabe
-1. Fertige Canva-Kopie „Newsletter Dezember 2026“ + Bearbeitungslink.
-2. Export als PNG (alle Seiten) für rapidmail; Links (WhatsApp, Telefon, E-Mail, Homepage, ENRA, JobRad) auf den richtigen Elementen prüfen.
-3. Betreffzeile + Vorschautext (3 Varianten zur Wahl).
-4. Thumbnails aller Seiten zeigen und selbst gegen die Verbotsliste aus `zukunfts-design` prüfen – erst dann „fertig“ sagen.
-5. Liste offener ⚠-Punkte, die Tiry bestätigen muss.
+## 5. Abgabe – Endergebnis ist EINE Datei für rapidmail
+**Ziel: Tiry bekommt am Ende eine fertige Datei, die er direkt in rapidmail einfügt** (rapidmail-Editor „Eigener HTML-Code“ bzw. HTML-Import). Vorgehen:
+1. Gestaltung in Canva (Kopie „Newsletter Dezember 2026“) – dient als Design-Vorlage und Bildquelle.
+2. Daraus eine **E-Mail-taugliche HTML-Datei** `newsletter-dezember-2026.html` bauen:
+   - Tabellen-Layout, **600–640 px** breit, **alles Inline-CSS** (kein `<style>`-Zwang, kein JavaScript, keine Webfonts-Pflicht: Sora/Outfit mit Fallback Arial/Helvetica).
+   - Texte, Preise und Buttons als **echter HTML-Text** (nicht nur ein großes Bild) – sonst landet die Mail im Spam und ist am Handy unlesbar.
+   - Bilder als einzelne Dateien (Rad-Fotos, Collage, Logos) mit **absoluten https-URLs** (z. B. von velo-center.de oder nach dem Hochladen in rapidmail) und `alt`-Text; Bildgewicht klein halten (je < 200 KB).
+   - Alle Links klickbar: WhatsApp `https://wa.me/491635343133`, Telefon `tel:+49727178033`, `mailto:info@velo-center.de`, Homepage, ENRA, JobRad.
+   - Abmeldelink/Impressum über die rapidmail-Platzhalter (rapidmail ergänzt den Abmeldelink – Platzhalter laut aktueller rapidmail-Hilfe einsetzen, nicht raten).
+   - Handy-tauglich (einspaltig auf schmalen Bildschirmen), Dark-Mode-Farben prüfen.
+3. Falls Bilder lokal liegen: zusätzlich ein **ZIP (HTML + Bilder-Ordner)**, falls rapidmail den ZIP-Import anbietet – vorher in der rapidmail-Hilfe prüfen, welches Format der Import aktuell annimmt.
+4. HTML im Browser rendern und **Screenshots Handy (390 px) + Desktop** zeigen, bevor „fertig“ gesagt wird.
+5. Betreffzeile + Vorschautext (3 Varianten zur Wahl).
+6. Screenshots selbst gegen die Verbotsliste aus `zukunfts-design` prüfen – erst dann „fertig“ sagen.
+7. Liste offener ⚠-Punkte, die Tiry bestätigen muss.
