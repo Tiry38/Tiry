@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="de"><head><meta charset="utf-8">
+<style>
+@font-face{font-family:Outfit;src:url(a/outfit-latin.woff2) format('woff2');font-weight:100 900}
+@font-face{font-family:Sora;src:url(a/sora-latin.woff2) format('woff2');font-weight:100 900}
+@font-face{font-family:Hand;src:url(a/caveat.ttf) format('truetype');font-weight:700}
+:root{--paper:#F4EFEA;--paper2:#FAF7F4;--ink:#1B1E25;--mut:#4A5161;--red:#C8102E;--red2:#E2232D;--kraft:#C9A47E;--kraft2:#B98F66;--kink:#3B2A1C}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:var(--paper)}
+#st{position:relative;overflow:hidden;background:var(--paper)}
+.grain{position:absolute;inset:0;pointer-events:none;opacity:.5;mix-blend-mode:multiply}
+.abs{position:absolute}
+.tag{position:absolute;transform-origin:50% 0;}
+.tagbody{position:absolute;inset:0;background:var(--kraft);
+ clip-path:polygon(18% 0,82% 0,100% 11%,100% 100%,0 100%,0 11%);}
+.tagbody::after{content:"";position:absolute;inset:0;background:
+ radial-gradient(ellipse at 30% 20%,rgba(255,255,255,.18),transparent 60%),
+ radial-gradient(ellipse at 80% 90%,rgba(80,50,20,.18),transparent 55%);}
+.hole{position:absolute;left:50%;width:22px;height:22px;margin-left:-11px;border-radius:50%;background:var(--paper);box-shadow:0 0 0 5px #E9DCCB,0 0 0 6px rgba(60,40,20,.25)}
+.string{position:absolute;width:2px;background:#8E1420;transform-origin:50% 0}
+.form{font:600 11px/1 Sora;letter-spacing:.14em;text-transform:uppercase;color:rgba(59,42,28,.78)}
+.line{border-bottom:1.5px solid rgba(59,42,28,.35)}
+.hand{font:700 30px/1 Hand;color:#1F2A44}
+.stamp{position:absolute;color:var(--red);border:5px solid var(--red);border-radius:10px;font:900 74px/1 Outfit;letter-spacing:-.03em;padding:6px 16px 10px;
+}
+.big{font:900 140px/1 Outfit;letter-spacing:-.05em;white-space:nowrap}
+.out{color:transparent;-webkit-text-stroke:1.6px var(--red)}
+.kick{font:700 11px/1 Sora;letter-spacing:.2em;text-transform:uppercase;color:var(--red)}
+</style></head><body>
+<div id="st"></div>
+<svg width="0" height="0" style="position:absolute">
+ <filter id="noise"><feTurbulence type="fractalNoise" baseFrequency=".9" numOctaves="2" seed="7"/><feColorMatrix values="0 0 0 0 .35  0 0 0 0 .27  0 0 0 0 .2  0 0 0 .22 0"/></filter>
+ <filter id="ink"><feTurbulence type="fractalNoise" baseFrequency="1.1" numOctaves="2" seed="3" result="n"/>
+  <feColorMatrix in="n" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 -1.4 1.55" result="m"/>
+  <feComposite in="SourceGraphic" in2="m" operator="in"/></filter>
+</svg>
+<script>
+const $=s=>document.querySelector(s);
+const cl=(x,a=0,b=1)=>Math.max(a,Math.min(b,x));
+const ease=x=>1-Math.pow(1-cl(x),3);
+const eio=x=>{x=cl(x);return x<.5?4*x*x*x:1-Math.pow(-2*x+2,3)/2};
+// gedaempfte Feder: Start-Auslenkung A, Rest 0
+const spring=(t,A,w=9,k=3.2)=>{const v=t<0?A:A*Math.exp(-k*t)*Math.cos(w*t);return Math.abs(v)<.35&&t>.3?0:Math.round(v*4)/4};
+const grain=(w,h)=>`<svg class="grain" width="${w}" height="${h}"><rect width="100%" height="100%" filter="url(#noise)"/></svg>`;
+const leafPath='M0,-14 C7,-10 10,-2 8,6 C6,11 2,14 0,16 C-2,14 -6,11 -8,6 C-10,-2 -7,-10 0,-14 Z M0,-12 L0,15';
+function leaf(c,x,y,r,s){return `<svg class="abs" style="left:${x}px;top:${y}px;transform:rotate(${r}deg) scale(${s});overflow:visible" width="1" height="1"><path d="${leafPath}" fill="${c}" stroke="rgba(80,40,10,.35)" stroke-width=".8"/></svg>`}
+
+const S={};
+/* ---------- HERO: Werkstatt-Auftrag + Stempel ---------- */
+S.hero={w:600,h:590,dur:2.6,render(t){
+ const W=600,H=590;
+ const sw=spring(t-0.0,10,9,4.2);           // Anhaenger schwingt ein
+ const st=t-1.25;                              // Stempel
+ const sScale=st<0?0:(st<.12?1.9-0.9*ease(st/.12):1+0.04*Math.exp(-14*(st-.12))*Math.cos(40*(st-.12)));
+ const sOp=st<0?0:1;
+ const sat=ease((t-1.75)/.55);                 // Sattelueberzug
+ const wr=ease((t-.55)/.6);                    // Handschrift
+ let leaves='';
+ const L=[[70,'#C2652A',.9,0],[515,'#D08A2C',1,.25],[430,'#A8481F',.8,.55],[150,'#C98A3C',.75,.8]];
+ for(const [x0,c,s,d] of L){const p=cl((t-d)/1.5);const y=-30+p*(H-40)*(.55+.45*s)-0;const x=x0+Math.sin(p*7+d*5)*22;
+   const yy=Math.min(y,[545,560,552,566][L.findIndex(q=>q[0]==x0)]);leaves+=leaf(c,x,yy,p*260+d*90,s*1.3)}
+ $('#st').style.cssText=`width:${W}px;height:${H}px`;
+ $('#st').innerHTML=`
+ <div class="abs" style="left:0;top:0;width:600px;height:300px;background:url(a/herbst-1400.webp) center 42%/cover;opacity:.30;filter:saturate(.8) brightness(1.18);-webkit-mask-image:linear-gradient(#000 30%,transparent)"></div>
+ ${grain(W,H)}
+ <div class="abs kick" style="right:34px;top:40px;text-align:right;line-height:1.7">Winter-Aktion<br><span style="color:#1B1E25">bis 28.02.2027</span></div>
+ <div class="abs" style="left:255px;top:22px;width:10px;height:10px;border-radius:50%;background:#5A5F69;box-shadow:0 1px 0 #fff"></div>
+ <div class="tag" style="left:105px;top:27px;width:310px;height:520px;transform:rotate(${sw}deg)">
+   <div class="string" style="left:154px;top:0;height:64px"></div>
+   <div class="tag" style="left:0;top:54px;width:310px;height:466px">
+    <div class="tagbody"></div>
+    <div class="hole" style="top:14px"></div>
+    <div class="abs form" style="left:28px;top:62px">Werkstatt-Auftrag · Velocenter</div>
+    <div class="abs" style="left:28px;top:84px;width:254px;border-top:2px solid rgba(59,42,28,.55)"></div>
+    <div class="abs form" style="left:28px;top:106px;font-size:10px">Leistung</div>
+    <div class="abs line" style="left:28px;top:150px;width:254px"></div>
+    <div class="abs hand" style="left:30px;top:118px;clip-path:inset(0 ${100-wr*100}% 0 0)">Winter-Inspektion</div>
+    <div class="abs form" style="left:28px;top:166px;font-size:10px">Rad</div>
+    <div class="abs line" style="left:28px;top:208px;width:254px"></div>
+    <div class="abs hand" style="left:30px;top:176px;font-size:27px;clip-path:inset(0 ${100-cl(wr*1.6-.6)*100}% 0 0)">Marken-Rad, Bosch-Antrieb</div>
+    <div class="abs form" style="left:28px;top:224px;font-size:10px">Inklusive</div>
+    <div class="abs hand" style="left:30px;top:238px;font-size:25px;color:#3B2A1C;line-height:1.1">✓ Checkliste<br>✓ Bosch Servicebericht</div>
+    <div class="stamp" style="left:58px;top:330px;transform:rotate(-9deg) scale(${sScale});opacity:${sOp};filter:url(#ink)">−20 €</div>
+   </div>
+ </div>
+ <img class="abs" src="a/sattelueberzug.webp" style="left:${415+(1-sat)*200}px;top:380px;width:165px;transform:rotate(${8-sat*4}deg);opacity:${sat};filter:drop-shadow(0 10px 10px rgba(60,40,20,.25))">
+ <div class="abs hand" style="left:440px;top:318px;font-size:28px;color:var(--red);opacity:${sat};transform:rotate(-6deg)">+ geschenkt</div>
+ <svg class="abs" style="left:455px;top:348px;opacity:${sat}" width="40" height="30"><path d="M5,2 C10,14 18,22 32,25 M24,18 L33,25 L24,29" fill="none" stroke="#C8102E" stroke-width="2.2" stroke-linecap="round"/></svg>
+ ${leaves}`;
+}};
+
+/* ---------- ANGEBOT: Preis-Anhaenger dreht ---------- */
+function offer(o){return {w:600,h:330,dur:2.2,render(t){
+ const W=600,H=330;
+ const sw=spring(t,-14,9,3);
+ const fl=cl((t-.55)/.38);                     // Flip 0..1
+ const side=fl<.5?0:1, sx=Math.abs(Math.cos(fl*Math.PI));
+ const fill=eio((t-1.0)/.7);                    // Ersparnis fuellt sich
+ const bike=o.img?`<img class="abs" src="a/${o.img}" style="left:${o.bx||18}px;top:${o.by||70}px;width:${o.bw||380}px;filter:drop-shadow(0 14px 12px rgba(40,30,20,.18))">`
+  :`<div class="abs" style="left:24px;top:84px;width:366px;height:220px;border:2px dashed rgba(200,16,46,.55);border-radius:6px;background:rgba(255,255,255,.35)"></div>
+    <div class="abs hand" style="left:44px;top:140px;width:330px;color:var(--red);font-size:34px;line-height:1.05">[FOTO FOLGT]</div>
+    <div class="abs" style="left:46px;top:186px;width:320px;font:600 14px/1.35 Sora;color:var(--ink)">${o.ph}</div>`;
+ $('#st').style.cssText=`width:${W}px;height:${H}px`;
+ $('#st').innerHTML=`${grain(W,H)}
+ <div class="abs big out" style="left:${o.nx||-6}px;top:-2px;font-size:${o.ns||150}px">−${o.spar}</div>
+ <div class="abs big" style="left:${o.nx||-6}px;top:-2px;font-size:${o.ns||150}px;color:var(--red);clip-path:inset(0 ${100-fill*100}% 0 0);opacity:.92">−${o.spar}</div>
+ ${bike}
+ <div class="abs" style="left:${W-122}px;top:6px;width:9px;height:9px;border-radius:50%;background:#5A5F69"></div>
+ <div class="tag" style="left:${W-206}px;top:10px;width:178px;height:300px;transform:rotate(${sw}deg)">
+  <div class="string" style="left:88px;top:0;height:60px;transform:rotate(${-sw*0.2}deg)"></div>
+  <div class="tag" style="left:0;top:52px;width:178px;height:248px;transform:scaleX(${Math.max(sx,.02)})">
+   <div class="tagbody" style="${side?'':'background:#D9C2A5'}"></div>
+   <div class="hole" style="top:12px;width:18px;height:18px;margin-left:-9px"></div>
+   ${side?`
+    <div class="abs form" style="left:0;width:178px;text-align:center;top:48px;font-size:10px">Dein Preis</div>
+    <div class="abs" style="left:0;width:178px;text-align:center;top:68px;font:900 46px/1 Outfit;letter-spacing:-.03em;color:var(--ink)">${o.preis}</div>
+    <div class="abs" style="left:0;width:178px;text-align:center;top:124px;font:600 13px/1 Sora;color:#4A3A2A">statt <s>${o.uvp}</s></div>
+    <div class="abs" style="left:39px;top:152px;width:100px;height:56px;border:3.5px solid var(--red);border-radius:8px;transform:rotate(-7deg);color:var(--red);font:900 32px/48px Outfit;text-align:center;filter:url(#ink)">−${o.pct}</div>
+    <div class="abs form" style="left:0;width:178px;text-align:center;top:224px;font-size:9px">Einzelstück</div>`
+   :`<div class="abs form" style="left:0;width:178px;text-align:center;top:60px;font-size:10px">UVP</div>
+     <div class="abs" style="left:0;width:178px;text-align:center;top:84px;font:900 40px/1 Outfit;color:#5b4a3a">${o.uvp}</div>`}
+  </div>
+ </div>
+ <div class="abs kick" style="left:24px;top:${H-26}px;color:var(--mut)">${o.k}</div>`;
+}}}
+S.o1=offer({img:'rest-04.webp',spar:'1.600 €',preis:'2.499 €',uvp:'4.099 €',pct:'39 %',k:'Stevens · E-Antelao 29″'});
+S.o2=offer({img:'isy-03.webp',spar:'1.100 €',preis:'3.499 €',uvp:'4.599 €',pct:'24 %',k:'i:SY · Pop Art E5 ZR F',bw:330,bx:40,by:66});
+S.o3=offer({img:null,ph:'Velo de Ville SEB890 SUV Smart 27,5″<br>Pure White · 45 cm · Trapez<br>seitlich, Antriebsseite',spar:'1.125 €',preis:'2.620 €',uvp:'3.745 €',pct:'30 %',k:'Velo de Ville · SEB890 SUV Smart'});
+S.o4=offer({img:'a-ktm-20663aa4df.webp',spar:'1.000 €',preis:'2.799 €',uvp:'3.799 €',pct:'26 %',k:'KTM · Macina City P610 RT'});
+S.o5=offer({img:'isy-17.webp',spar:'1.000 €',preis:'3.999 €',uvp:'4.999 €',pct:'20 %',k:'i:SY · E5 ZR F CX Century',bw:330,bx:40,by:66});
+S.o6=offer({img:null,ph:'Velo de Ville AEB400 Allround 28″<br>wine red · 55 cm · Tiefeinsteiger<br>seitlich, Antriebsseite',spar:'960 €',preis:'2.239 €',uvp:'3.199 €',pct:'30 %',k:'Velo de Ville · AEB400 Allround'});
+
+/* ---------- VAN RAAM: Geschenkanhaenger am Lenker ---------- */
+S.vr={w:600,h:400,dur:2.4,render(t){
+ const W=600,H=400;
+ const sw=spring(t-.15,22,7.5,2.4);
+ const wr=ease((t-.7)/.9);
+ const roll=ease((t-1.3)/.8);
+ const n=Math.round(1168*roll);
+ $('#st').style.cssText=`width:${W}px;height:${H}px`;
+ $('#st').innerHTML=`<div class="abs" style="inset:0;background:var(--paper2)"></div>${grain(W,H)}
+ <div class="abs big" style="left:-6px;top:-10px;font-size:158px;color:transparent;-webkit-text-stroke:1.4px rgba(200,16,46,.55)">3 Räder</div>
+ <img class="abs" src="a/a-van-raam-ecbad81d7a.webp" style="left:20px;top:74px;width:420px;filter:drop-shadow(0 16px 14px rgba(40,30,20,.2))">
+ <div class="tag" style="left:400px;top:120px;width:170px;height:240px;transform:rotate(${sw}deg)">
+   <div class="string" style="left:84px;top:0;height:46px;background:#C8102E;width:2.5px"></div>
+   <div class="tag" style="left:0;top:40px;width:170px;height:200px">
+    <div class="tagbody"></div><div class="hole" style="top:12px;width:18px;height:18px;margin-left:-9px"></div>
+    <div class="abs hand" style="left:16px;top:46px;font-size:34px;clip-path:inset(0 ${100-wr*100}% 0 0)">Für Mama</div>
+    <div class="abs hand" style="left:16px;top:80px;font-size:34px;clip-path:inset(0 ${100-cl(wr*1.8-.8)*100}% 0 0)">&amp; Papa</div>
+    <div class="abs form" style="left:16px;top:132px;font-size:9px">Du sparst</div>
+    <div class="abs" style="left:14px;top:146px;font:900 34px/1 Outfit;color:var(--red);letter-spacing:-.02em">${n.toLocaleString('de-DE')} €</div>
+   </div>
+ </div>
+ <div class="abs kick" style="left:24px;top:${H-28}px;color:var(--mut)">Van Raam · Easy Rider Compact · Modell 2025</div>`;
+}};
+
+window.SC=S;
+window.draw=(n,t)=>{S[n].render(t)};
+</script></body></html>

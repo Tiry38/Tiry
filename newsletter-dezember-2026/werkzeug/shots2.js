@@ -1,0 +1,11 @@
+const {chromium}=require('playwright');
+(async()=>{const b=await chromium.launch();
+const run=async(file,w,dsf,name,dark)=>{const p=await b.newPage({viewport:{width:w,height:900},deviceScaleFactor:dsf,colorScheme:dark?'dark':'light'});
+await p.goto('file://'+__dirname+'/out/'+file,{waitUntil:'networkidle'});await p.waitForTimeout(900);
+if(dark==='invert')await p.addStyleTag({content:'html{filter:invert(1) hue-rotate(180deg)} img{filter:invert(1) hue-rotate(180deg)}'});
+await p.screenshot({path:name,fullPage:true});await p.close();};
+await run('newsletter-dezember-2026.html',390,2,'vorschau-handy.png');
+await run('newsletter-dezember-2026.html',1280,2,'vorschau-desktop.png');
+await run('_outlook.html',1280,1,'kontrolle-outlook-erstbild.png');
+await run('newsletter-dezember-2026.html',390,1,'kontrolle-darkmode.png','invert');
+await b.close();})();
