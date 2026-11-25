@@ -48,12 +48,14 @@ for yi in range(len(ys)-1):
             dur=[200 if an['name']=='gt' else 80]*len(seq)
             if once: dur[0]=2600; dur[-1]=2600
             pal=seq[0].quantize(colors=255,method=Image.MEDIANCUT,dither=Image.Dither.NONE)
-            if an['name']=='hero':  # Pixel ohne Laub-Bewegung stabil halten
+            if an['name']=='hero':  # nahtlose Schleife: Ende blendet in den Anfang, kein Ruck
                 import numpy as np
-                b0=np.asarray(seq[0]).astype(int);ns=[seq[0]]
-                for f in seq[1:]:
-                    a_=np.asarray(f).astype(int);m=(np.abs(a_-b0).sum(2)>36)
-                    ns.append(Image.fromarray(np.where(m[...,None],a_,b0).astype('uint8')))
+                F=[np.asarray(f).astype(np.float32) for f in seq]; Lh=len(F)//2
+                cf=[F[k+Lh]*(1-k/Lh)+F[k]*(k/Lh) for k in range(Lh)]
+                b0=cf[0];ns=[Image.fromarray(b0.astype('uint8'))]
+                for f in cf[1:]:
+                    m=(np.abs(f-b0).sum(2)>14)
+                    ns.append(Image.fromarray(np.where(m[...,None],f,b0).astype('uint8')))
                 seq=ns
             dz=Image.Dither.NONE
             q=[s.quantize(palette=pal,dither=dz) for s in seq]

@@ -26,6 +26,8 @@ Danach freigestellt ablegen, in `werkzeug-v3/page.html` im Feld `O` bei Nr. 2 un
 - keine (Fotos SEB890/AEB400 folgen)
 
 ## Bestätigt (Tiry 25.11.2026)
+- E-Antelao wird ohne Schutzbleche und Gepäckträger verkauft: Foto retuschiert (`werkzeug-v3/retusche.py`, Reifen/Speichen aus sauberen Radbereichen ergänzt). Van Raam = Vorführmodell, reduziert.
+- Laub/Schnee als nahtlose Überblend-Schleifen (kein Zurückspringen).
 - Alle 6 Räder noch da. Ortlieb Vario PS: Tirys Grafik (80 € statt 169,99 €) unter der Räumung, verlinkt auf WhatsApp-Anfrage.
 - Animationen 10× langsamer: Laub (Shader-Zeit ×0,1), Schnee eigener Kristall-Schnee ×0,1, Sattel steht; Preise/Tafel ca. 3× langsamer.
 - Umbau-Räumung gilt den ganzen Dezember. Weihnachtspause: letzter Tag Di 22.12.2026, wieder offen Mo 04.01.2027.

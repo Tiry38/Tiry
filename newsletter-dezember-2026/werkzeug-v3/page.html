@@ -23,7 +23,7 @@ section{position:relative;z-index:1}
 .gt{background:linear-gradient(100deg,#C8102E 0%,#8E1530 22.5%,#3A3D44 50%,#C8102E 50.01%,#8E1530 72.5%,#3A3D44 100%);background-size:200% 100%;-webkit-background-clip:text;background-clip:text;color:transparent}
 .t,.kick,.mut{text-shadow:0 0 1px rgba(255,255,255,.95),0 0 3px rgba(255,255,255,.8),0 0 8px rgba(255,255,255,.45)}
 .h:not(.gt):not(.out){text-shadow:0 0 2px rgba(255,255,255,.7),0 0 10px rgba(255,255,255,.35)}
-.out{color:transparent;-webkit-text-stroke:2px var(--red)}
+.out{text-shadow:none!important;color:transparent;-webkit-text-stroke:2px var(--red)}
 .chk{border:2px dashed var(--red);color:var(--red);font:700 16px/1.4 Sora;padding:10px 14px;border-radius:12px;background:rgba(255,255,255,.55)}
 /* Abfahrtstafel */
 .flap{display:inline-block;width:30px;height:46px;margin-right:3px;background:linear-gradient(#24262E 50%,#1C1E25 50%);border-radius:5px;text-align:center;font:800 32px/46px Outfit;color:#F4EFEA;position:relative;vertical-align:middle}
@@ -91,9 +91,10 @@ section{position:relative;z-index:1}
  <div class="abs h" style="left:32px;top:66px;font-size:66px">Ein Stück Freiheit<br><span style="color:var(--red)">für Mama &amp; Papa.</span></div>
  <div class="abs glass" style="left:20px;top:250px;width:600px;height:630px"></div>
  <img class="abs" src="../a/a-van-raam-ecbad81d7a.webp" style="left:150px;top:210px;width:470px;filter:drop-shadow(0 26px 22px rgba(60,40,20,.28))">
- <div class="abs" style="left:48px;top:300px;font:700 34px/1 Hand;color:var(--red);transform:rotate(-6deg)">Für Mama<br>&amp; Papa</div>
+ <div class="abs" style="left:46px;top:272px;font:700 34px/1 Hand;color:var(--red);transform:rotate(-6deg)">Für Mama<br>&amp; Papa</div>
+ <div class="abs" style="left:46px;top:356px;padding:9px 12px;border-radius:12px;background:#1B1E25;color:#fff;font:700 11px/1.35 Sora;letter-spacing:.12em;text-transform:uppercase;box-shadow:0 10px 20px -12px rgba(0,0,0,.6)">Vorführmodell<br><span style="color:#F2D4B0">reduziert</span></div>
  <div class="abs t" style="left:52px;top:560px;width:540px;font-size:19px">Drei Räder, tiefer Einstieg, Sitz mit Rückenlehne, 880 Wh Rückenwind. Selbst zum Markt, zum Arzt, zu Freunden. Und es kippt im Stand nicht um.</div>
- <div class="abs" style="left:52px;top:672px;font:700 14px/1 Sora;letter-spacing:.2em;color:var(--mut);text-transform:uppercase">Van Raam Easy Rider Compact · 2025 · weinrot</div>
+ <div class="abs" style="left:52px;top:672px;font:700 14px/1 Sora;letter-spacing:.2em;color:var(--mut);text-transform:uppercase">Easy Rider Compact · Vorführmodell 2025</div>
  <div class="abs h" style="left:50px;top:698px;font-size:58px">6.900 €</div>
  <div class="abs" style="left:290px;top:712px;font:400 19px/1.3 Sora;color:var(--mut)">statt <s>8.068 €</s><br><b style="color:var(--red)">du sparst 1.168 €</b></div>
  <a class="abs btn r" data-href="#termin" style="left:50px;top:790px">Probefahrt mit deinen Eltern</a>
@@ -112,10 +113,10 @@ section{position:relative;z-index:1}
 </section>
 
 <!-- ============ BESUCH ============ -->
-<section id="s-visit" style="height:770px">
+<section id="s-visit" style="height:820px">
  <div class="abs h" style="left:32px;top:20px;font-size:72px">Komm<br><span style="color:var(--red)">vorbei.</span></div>
- <div class="abs glass" style="left:20px;top:200px;width:600px;height:540px"></div>
- <div class="abs" style="left:0;top:640px;width:640px;height:130px;background:linear-gradient(rgba(233,227,220,0),#E9E3DC 92%);z-index:-1"></div>
+ <div class="abs glass" style="left:20px;top:200px;width:600px;height:592px"></div>
+ <div class="abs" style="left:0;top:690px;width:640px;height:130px;background:linear-gradient(rgba(233,227,220,0),#E9E3DC 92%);z-index:-1"></div>
  <div class="abs" style="left:52px;top:236px;font:800 24px/1.2 Outfit;color:var(--ink)">Velocenter Hessert</div>
  <div class="abs t" style="left:52px;top:270px;font-size:19px;line-height:1.6">Hartmannstraße 25<br>76744 Wörth am Rhein</div>
  <a class="abs t" data-href="tel:+49727178033" style="left:52px;top:338px;font-size:19px;color:var(--ink);font-weight:700">07271 78033</a>
@@ -124,11 +125,19 @@ section{position:relative;z-index:1}
  <div class="abs" style="left:350px;top:236px;width:240px;font:400 17px/1.75 Sora;color:var(--ink)">
   <div style="font:700 13px/1 Sora;letter-spacing:.2em;color:var(--red);text-transform:uppercase;margin-bottom:10px">Öffnungszeiten</div>
   <b>Mo Di Do Fr</b><br>09:00–12:00<br>14:30–18:00<br><b>Sa</b> 09:00–12:00<br><span style="color:var(--mut)">Mi &amp; So geschlossen</span></div>
- <div class="abs" style="left:52px;top:462px;width:538px;padding:12px 16px;border-radius:14px;background:rgba(200,16,46,.08);border-left:4px solid var(--red);font:400 17px/1.45 Sora;color:var(--ink)"><b>Weihnachtspause:</b> Letzter Tag 2026 ist Dienstag, der 22.12. Ab Montag, 04.01.2027 sind wir wieder für dich da.</div>
- <div class="abs" style="left:52px;top:540px;width:56px;height:56px;border-radius:10px;background:#1E5AA8;color:#fff;font:800 40px/56px Outfit;text-align:center;box-shadow:0 0 0 3px #fff">P</div>
- <div class="abs t" style="left:126px;top:540px;width:470px;font-size:17px">Zum Be- und Entladen darfst du kurz vor dem Laden halten. Parkplätze ca. 100 m entfernt am Friedhof.</div>
- <a class="abs btn r" data-href="MAPS" style="left:52px;top:630px">Route planen</a>
- <a class="abs btn g" data-href="" style="left:300px;top:630px">Zur Homepage</a>
+<div class="abs" style="left:44px;top:452px;width:552px;height:128px;border-radius:20px;background:#fff;box-shadow:0 18px 40px -22px rgba(27,30,37,.45),inset 0 0 0 1px rgba(184,115,51,.35);overflow:hidden">
+  <div class="abs" style="left:0;top:0;width:552px;height:30px;background:linear-gradient(90deg,#C8102E,#8E1530);color:#fff;font:700 12px/30px Sora;letter-spacing:.26em;text-transform:uppercase;text-align:center">Weihnachtspause</div>
+  <div class="abs" style="left:26px;top:42px;font:900 46px/1 Outfit;letter-spacing:-.04em;color:#C8102E">22.12.</div>
+  <div class="abs" style="left:28px;top:94px;font:700 12px/1 Sora;letter-spacing:.14em;text-transform:uppercase;color:#4A5161">Di · letzter Tag 2026</div>
+  <div class="abs" style="left:196px;top:66px;width:160px;height:2px;background:repeating-linear-gradient(90deg,#B87333 0 8px,transparent 8px 14px)"></div>
+  <div class="abs" style="left:246px;top:46px;width:60px;text-align:center;font:700 26px/1 Hand;color:#B87333">Pause</div>
+  <div class="abs" style="right:26px;top:42px;font:900 46px/1 Outfit;letter-spacing:-.04em;color:#1B1E25;text-align:right">04.01.</div>
+  <div class="abs" style="right:28px;top:94px;font:700 12px/1 Sora;letter-spacing:.14em;text-transform:uppercase;color:#1F9765;text-align:right">Mo · wieder für dich da</div>
+ </div>
+ <div class="abs" style="left:52px;top:604px;width:48px;height:48px;border-radius:9px;background:#1E5AA8;color:#fff;font:800 34px/48px Outfit;text-align:center;box-shadow:0 0 0 3px #fff">P</div>
+ <div class="abs t" style="left:118px;top:604px;width:478px;font-size:17px;line-height:1.45">Zum Be- und Entladen darfst du kurz vor dem Laden halten. Parkplätze ca. 100 m entfernt am Friedhof.</div>
+ <a class="abs btn r" data-href="MAPS" style="left:52px;top:686px">Route planen</a>
+ <a class="abs btn g" data-href="" style="left:300px;top:686px">Zur Homepage</a>
 </section>
 
 <script>
@@ -137,7 +146,7 @@ const eio=x=>{x=cl(x);return x<.5?4*x*x*x:1-Math.pow(-2*x+2,3)/2};
 const eur=n=>Math.round(n).toLocaleString('de-DE')+' €';
 const HP='https://tiry38.github.io/velo-center-web/';
 const O=[
- {img:'rest-04.webp',logo:'marke-stevens.svg',lh:20,marke:'Stevens',modell:'E-Antelao 29″',jahr:'2022',a:'625 Wh',m:'Bosch Performance CX',g:'22″ · Arctic Grey',preis:2499,uvp:4099,href:'#rad=stevens-e-antelao-29',k:'Ansehen'},
+ {img:'rest-04-ohne.webp',logo:'marke-stevens.svg',lh:20,marke:'Stevens',modell:'E-Antelao 29″',jahr:'2022',a:'625 Wh',m:'Bosch Performance CX',g:'22″ · Arctic Grey',preis:2499,uvp:4099,href:'#rad=stevens-e-antelao-29',k:'Ansehen'},
  {img:null,ph:'Velo de Ville SEB890 SUV Smart<br>Pure White · 45 cm · Trapez',logo:'marke-vdv.svg',lh:30,marke:'Velo de Ville',modell:'SEB890 SUV Smart',jahr:'2023',a:'625 Wh',m:'Bosch Performance Line',g:'45 cm · Pure White',preis:2620,uvp:3745,href:'WA:Hallo Velocenter, ich interessiere mich für das Velo de Ville SEB890 SUV Smart in Pure White (45 cm) für 2.620 €.',k:'Anfragen'},
  {img:'isy-03.webp',logo:'marke-isy.svg',lh:28,marke:'i:SY',modell:'Pop Art E5 ZR F',jahr:'2023',a:'545 Wh',m:'Bosch Performance Line',g:'47 cm · Kompakt',preis:3499,uvp:4599,href:'#rad=i-sy-pop-art-e5-zr-f',k:'Ansehen'},
  {img:'a-ktm-20663aa4df.webp',logo:'marke-ktm.svg',lh:28,marke:'KTM',modell:'Macina City P610 RT',jahr:'2022',a:'625 Wh',m:'Bosch Performance Line',g:'56 cm · Oak',preis:2799,uvp:3799,href:'WA:Hallo Velocenter, ich interessiere mich für das KTM Macina City P610 RT (56 cm, Oak) für 2.799 €.',k:'Anfragen'},
@@ -202,11 +211,12 @@ let sr=11;const SR=()=>{sr=(sr*16807)%2147483647;return sr/2147483647};
 const ARM=(()=>{let d='';for(let i=0;i<6;i++){const a=i*Math.PI/3,ux=Math.sin(a),uy=-Math.cos(a),px=-uy,py=ux;d+=`M${ux*.17} ${uy*.17}L${ux} ${uy}`;
  [[.38,.26],[.62,.22],[.82,.13]].forEach(([q,l])=>{const bx=ux*q,by=uy*q;d+=`M${bx} ${by}L${bx+(ux+px)*l*.72} ${by+(uy+py)*l*.72}M${bx} ${by}L${bx+(ux-px)*l*.72} ${by+(uy-py)*l*.72}`})}return d})();
 const FL=Array.from({length:34},()=>{const r=4.2+SR()*3.4;return {x:SR()*600,y:SR()*700,r,v:(.22+SR()*.5+r*.06)*60*.1,ph:SR(),a:SR()*6.3,o:.55+SR()*.35}});
-function snowAt(t){const L=3.2;$('#snowL').innerHTML=FL.map(f=>{const p=((t/L)+f.ph)%1;const al=Math.sin(Math.PI*p)*f.o;const y=f.y+f.v*p*L;
- return `<g transform="translate(${f.x.toFixed(1)} ${y.toFixed(1)}) rotate(${(f.a*57+p*20).toFixed(1)}) scale(${f.r})" opacity="${al.toFixed(3)}"><path d="${ARM}" stroke="#fff" stroke-width="${(1.1/f.r).toFixed(3)}" stroke-linecap="round" fill="none"/></g>`}).join('')}
+function snowAt(t){const L=3.2,w=(t%L)/L;const one=(tt,al)=>FL.map(f=>{const y=f.y+f.v*tt;
+ return `<g transform="translate(${f.x.toFixed(2)} ${y.toFixed(2)}) rotate(${(f.a*57+tt*3).toFixed(2)}) scale(${f.r})" opacity="${(al*f.o).toFixed(3)}"><path d="${ARM}" stroke="#fff" stroke-width="${(1.1/f.r).toFixed(3)}" stroke-linecap="round" fill="none"/></g>`}).join('');
+ $('#snowL').innerHTML=one(t%L,w)+one((t%L)+L,1-w)}
 window.setT=t=>{
  const gp=(t>=99?0:.12*(1-Math.cos(2*Math.PI*t/4))/2);document.querySelectorAll('.gt').forEach(e=>e.style.backgroundPosition=(gp*100)+'% 0');
- const hi=t>=99?0:Math.min(39,Math.round(t*12.5));$('#heroImg').src='../fr/hg/'+String(hi).padStart(3,'0')+'.png';snowAt(t>=99?0:t);
+ const hi=t>=99?0:Math.min(59,Math.round(t*12.5));$('#heroImg').src='../fr/hg/'+String(hi).padStart(3,'0')+'.png';snowAt(t>=99?0:t);
  boardAt(t);
  O.forEach((o,i)=>{const r=eio((t-.1)/1.1);$('#pp'+i).textContent=eur(o.uvp-(o.uvp-o.preis)*r);
   $('#us'+i).style.width=(cl((t-.05)/.4)*100)+'%';const b=t<1.15?0:1+.2*Math.exp(-8*(t-1.15))*Math.sin(18*(t-1.15));$('#pt'+i).style.transform=`scale(${b})`});
