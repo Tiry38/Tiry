@@ -1,14 +1,14 @@
 {
  "gudereit|ec35evo|2026|dunkelblaumatt": {
-  "geprueft": "2026-11-22",
+  "geprueft": "2026-11-25",
   "gesucht": "2026-11-13",
   "grund": "vom Admin freigegeben",
   "notiz": "Qualität: dünne Speichen teils lückenhaft nach Freistellung; keine bessere Fassung gefunden (nur 1330-px-JPG auf bikes-opt.b-cdn.net, gudereit.de ohne größere Datei).",
-  "qcheck": "2026-11-22",
+  "qcheck": "2026-11-25",
   "quelle": "https://bikes-opt.b-cdn.net/gudereit/2026/3105681_01.jpg",
   "seite": "https://www.gudereit.de/faltrad/item/ec-35-evo-compact.html",
   "versuche": 0,
-  "zuletzt": "2026-11-24"
+  "zuletzt": "2026-11-25"
  },
  "gudereit|ec35evo|2026|graphitmatt": {
   "bestaetigt": "2026-11-13",
@@ -24,18 +24,18 @@
   "zuletzt": "2026-11-23"
  },
  "gudereit|ec35evo|2026|rotglanz": {
-  "geprueft": "2026-11-22",
+  "geprueft": "2026-11-25",
   "notiz": "Qualität: Speichen teils gestrichelt nach Freistellung; keine bessere Fassung gefunden (bikes-opt.b-cdn.net/gudereit/2026/3105684_01.jpg ist dieselbe Aufnahme, nur 1330 px; gudereit.de liefert keine PNG).",
-  "qcheck": "2026-11-22",
+  "qcheck": "2026-11-25",
   "quelle": "https://www.gudereit.de/fileadmin/user_upload/EC-35_evo_rotglanz.jpg",
-  "zuletzt": "2026-11-24"
+  "zuletzt": "2026-11-25"
  },
  "isy|e5zrf20jahre|2027|dunkelblauorangegabel": {
   "gesucht": "2026-11-22",
   "grund": "isy.de zeigt am 22.11.2026 weiterhin nur 2026er Modelle (E5-Modelle, Skyfly E5 inkl. Produktseiten E5 ZR RT Touring 2026 / Skyfly E5 ZR RT PX 2026 geprüft – Farben dort darkmore green/galactic blue bzw. UD Carbon/grau/grün/schwarz); 2027 kommt die neue 2.0-Rahmenplattform, daher kein 2026er Foto übe",
   "notiz": "Nach Marktstart 2027 isy.de/de-de/E-Bike-Kategorien/iSY-Kompakt/E5-Modelle und …/iSY-SKYFLY/iSY-SKYFLY-E5 erneut prüfen (ZEG-Bilder cdn-assets.zeg.de/brands/<id>/2400x1600_png/ISY_327…_main.png).",
   "versuche": 3,
-  "zuletzt": "2026-11-24"
+  "zuletzt": "2026-11-25"
  },
  "isy|e5zrfadventure|2026|cloudgreyglanz": {
   "geprueft": "2026-11-22",
@@ -47,45 +47,45 @@
   "geprueft": "2026-11-22",
   "notiz": "i:SY führt online nur die E5 ZR F CX Adventure 2025 – gleiche Aufnahme; bei neuer 2026-Seite ggf. neu prüfen.",
   "qcheck": "2026-11-23",
-  "zuletzt": "2026-11-24"
+  "zuletzt": "2026-11-25"
  },
  "isy|e5zrfadventure|2026|dustybluematt": {
   "geprueft": "2026-11-22",
   "notiz": "i:SY führt online nur die E5 ZR F CX Adventure 2025 – gleiche Aufnahme; bei neuer 2026-Seite ggf. neu prüfen.",
   "qcheck": "2026-11-23",
-  "zuletzt": "2026-11-24"
+  "zuletzt": "2026-11-25"
  },
  "isy|e5zrfadventure|2026|opalgreenglanz": {
   "geprueft": "2026-11-22",
   "notiz": "i:SY führt online nur die E5 ZR F CX Adventure 2025 – gleiche Aufnahme; bei neuer 2026-Seite ggf. neu prüfen.",
   "qcheck": "2026-11-23",
-  "zuletzt": "2026-11-24"
+  "zuletzt": "2026-11-25"
  },
  "isy|e5zrfadventure|2026|pepperblackmatt": {
   "geprueft": "2026-11-22",
   "notiz": "i:SY führt online nur die E5 ZR F CX Adventure 2025 – gleiche Aufnahme; bei neuer 2026-Seite ggf. neu prüfen.",
   "qcheck": "2026-11-23",
-  "zuletzt": "2026-11-24"
+  "zuletzt": "2026-11-25"
  },
  "isy|e5zrfcxcentury|2024|racinggreen": {
   "geprueft": "2026-11-22",
   "qcheck": "2026-11-23",
-  "zuletzt": "2026-11-24"
+  "zuletzt": "2026-11-25"
  },
  "isy|e5zrfcxcentury|2024|rivierablue": {
   "geprueft": "2026-11-22",
   "qcheck": "2026-11-23",
-  "zuletzt": "2026-11-24"
+  "zuletzt": "2026-11-25"
  },
  "isy|e5zrfcx|2023|opalgreen": {
   "geprueft": "2026-11-22",
   "qcheck": "2026-11-23",
-  "zuletzt": "2026-11-24"
+  "zuletzt": "2026-11-25"
  },
  "isy|e5zrfcx|2024|pepperblack": {
   "geprueft": "2026-11-22",
   "qcheck": "2026-11-23",
-  "zuletzt": "2026-11-24"
+  "zuletzt": "2026-11-25"
  },
  "isy|e5zrf|2023|opalgreen": {
   "geprueft": "2026-11-22",
@@ -96,19 +96,19 @@
   "quelle": "https://bikes-opt.b-cdn.net/isy/2023/102367_01.jpg",
   "seite": "https://www.bikes.de/shop/e-bikes/marke.i-sy/i-sy-e5-zr-f-2023/",
   "versuche": 0,
-  "zuletzt": "2026-11-24"
+  "zuletzt": "2026-11-25"
  },
  "isy|e5zrf|2023|pepperblack": {
   "geprueft": "2026-11-22",
   "qcheck": "2026-11-23",
   "quelle": "https://bikes-opt.b-cdn.net/isy/2023/102360_01.jpg",
-  "zuletzt": "2026-11-24"
+  "zuletzt": "2026-11-25"
  },
  "isy|e5zrf|2023|sunnyyellow": {
   "geprueft": "2026-11-24",
   "qcheck": "2026-11-24",
   "quelle": "https://bikes-opt.b-cdn.net/isy/2023/102366_01.jpg",
-  "zuletzt": "2026-11-24"
+  "zuletzt": "2026-11-25"
  },
  "isy|e5zrf|2024|berryred": {
   "geprueft": "2026-11-24",
@@ -119,7 +119,7 @@
   "quelle": "https://bikes-opt.b-cdn.net/isy/2024/3000908_1.webp",
   "seite": "https://www.bikes.de/shop/e-bikes/marke.i-sy/isy-e5-zr-f-2024/?sku=3000908",
   "versuche": 0,
-  "zuletzt": "2026-11-24"
+  "zuletzt": "2026-11-25"
  },
  "isy|e5zrf|2024|pepperblack": {
   "geprueft": "2026-11-24",
@@ -130,202 +130,209 @@
   "quelle": "https://bikes-opt.b-cdn.net/isy/2024/3000913_1.webp",
   "seite": "https://www.bikes.de/shop/e-bikes/marke.i-sy/isy-e5-zr-f-2024/?sku=3000913",
   "versuche": 0,
-  "zuletzt": "2026-11-24"
+  "zuletzt": "2026-11-25"
  },
  "isy|e5zrf|2025|berryred": {
   "geprueft": "2026-11-24",
   "notiz": "2025er Art.-Nr. bei bikes.de nicht gefunden (3046741 = cloud grey, 3046742-45 sind CX Adventure).",
   "qcheck": "2026-11-24",
-  "zuletzt": "2026-11-24"
+  "zuletzt": "2026-11-25"
  },
  "isy|e5zrrtclassic|2024|pepperblack": {
   "geprueft": "2026-11-24",
   "notiz": "E5 ZR RT 2024 pepper black = Art.-Nr. 3000931 (Foto ohne Federsattelstütze).",
   "qcheck": "2026-11-24",
-  "zuletzt": "2026-11-24"
+  "zuletzt": "2026-11-25"
  },
  "isy|e5zrrttouring|2027|creamybeige": {
   "gesucht": "2026-11-22",
   "grund": "isy.de zeigt am 22.11.2026 weiterhin nur 2026er Modelle (E5-Modelle, Skyfly E5 inkl. Produktseiten E5 ZR RT Touring 2026 / Skyfly E5 ZR RT PX 2026 geprüft – Farben dort darkmore green/galactic blue bzw. UD Carbon/grau/grün/schwarz); 2027 kommt die neue 2.0-Rahmenplattform, daher kein 2026er Foto übe",
   "notiz": "Nach Marktstart 2027 isy.de/de-de/E-Bike-Kategorien/iSY-Kompakt/E5-Modelle und …/iSY-SKYFLY/iSY-SKYFLY-E5 erneut prüfen (ZEG-Bilder cdn-assets.zeg.de/brands/<id>/2400x1600_png/ISY_327…_main.png).",
   "versuche": 3,
-  "zuletzt": "2026-11-24"
+  "zuletzt": "2026-11-25"
  },
  "isy|e5zrrttouring|2027|darkmoregreen": {
   "gesucht": "2026-11-22",
   "grund": "isy.de zeigt am 22.11.2026 weiterhin nur 2026er Modelle (E5-Modelle, Skyfly E5 inkl. Produktseiten E5 ZR RT Touring 2026 / Skyfly E5 ZR RT PX 2026 geprüft – Farben dort darkmore green/galactic blue bzw. UD Carbon/grau/grün/schwarz); 2027 kommt die neue 2.0-Rahmenplattform, daher kein 2026er Foto übe",
   "notiz": "Nach Marktstart 2027 isy.de/de-de/E-Bike-Kategorien/iSY-Kompakt/E5-Modelle und …/iSY-SKYFLY/iSY-SKYFLY-E5 erneut prüfen (ZEG-Bilder cdn-assets.zeg.de/brands/<id>/2400x1600_png/ISY_327…_main.png).",
   "versuche": 3,
-  "zuletzt": "2026-11-24"
+  "zuletzt": "2026-11-25"
  },
  "isy|e5zrrt|2024|seashellwhite": {
   "geprueft": "2026-11-24",
   "qcheck": "2026-11-24",
   "quelle": "https://bikes-opt.b-cdn.net/isy/2024/3000932_1.webp",
-  "zuletzt": "2026-11-24"
+  "zuletzt": "2026-11-25"
  },
  "isy|e5zrrt|2027|creamybeige": {
   "gesucht": "2026-11-22",
   "grund": "isy.de zeigt am 22.11.2026 weiterhin nur 2026er Modelle (E5-Modelle, Skyfly E5 inkl. Produktseiten E5 ZR RT Touring 2026 / Skyfly E5 ZR RT PX 2026 geprüft – Farben dort darkmore green/galactic blue bzw. UD Carbon/grau/grün/schwarz); 2027 kommt die neue 2.0-Rahmenplattform, daher kein 2026er Foto übe",
   "notiz": "Nach Marktstart 2027 isy.de/de-de/E-Bike-Kategorien/iSY-Kompakt/E5-Modelle und …/iSY-SKYFLY/iSY-SKYFLY-E5 erneut prüfen (ZEG-Bilder cdn-assets.zeg.de/brands/<id>/2400x1600_png/ISY_327…_main.png).",
   "versuche": 3,
-  "zuletzt": "2026-11-24"
+  "zuletzt": "2026-11-25"
  },
  "isy|e5zrrt|2027|pepperblack": {
   "gesucht": "2026-11-22",
   "grund": "isy.de zeigt am 22.11.2026 weiterhin nur 2026er Modelle (E5-Modelle, Skyfly E5 inkl. Produktseiten E5 ZR RT Touring 2026 / Skyfly E5 ZR RT PX 2026 geprüft – Farben dort darkmore green/galactic blue bzw. UD Carbon/grau/grün/schwarz); 2027 kommt die neue 2.0-Rahmenplattform, daher kein 2026er Foto übe",
   "notiz": "Nach Marktstart 2027 isy.de/de-de/E-Bike-Kategorien/iSY-Kompakt/E5-Modelle und …/iSY-SKYFLY/iSY-SKYFLY-E5 erneut prüfen (ZEG-Bilder cdn-assets.zeg.de/brands/<id>/2400x1600_png/ISY_327…_main.png).",
   "versuche": 3,
-  "zuletzt": "2026-11-24"
+  "zuletzt": "2026-11-25"
  },
  "isy|e5zrrt|2027|racingred": {
   "gesucht": "2026-11-22",
   "grund": "isy.de zeigt am 22.11.2026 weiterhin nur 2026er Modelle (E5-Modelle, Skyfly E5 inkl. Produktseiten E5 ZR RT Touring 2026 / Skyfly E5 ZR RT PX 2026 geprüft – Farben dort darkmore green/galactic blue bzw. UD Carbon/grau/grün/schwarz); 2027 kommt die neue 2.0-Rahmenplattform, daher kein 2026er Foto übe",
   "notiz": "Nach Marktstart 2027 isy.de/de-de/E-Bike-Kategorien/iSY-Kompakt/E5-Modelle und …/iSY-SKYFLY/iSY-SKYFLY-E5 erneut prüfen (ZEG-Bilder cdn-assets.zeg.de/brands/<id>/2400x1600_png/ISY_327…_main.png).",
   "versuche": 3,
-  "zuletzt": "2026-11-24"
+  "zuletzt": "2026-11-25"
  },
  "isy|n38zrb|2023|urbanblue": {
   "geprueft": "2026-11-24",
   "qcheck": "2026-11-24",
   "quelle": "https://bikes-opt.b-cdn.net/isy/2023/102406_01.jpg",
-  "zuletzt": "2026-11-24"
+  "zuletzt": "2026-11-25"
  },
  "isy|n38zrcxautocomfort|2025|pepperblack": {
   "geprueft": "2026-11-24",
   "qcheck": "2026-11-24",
   "quelle": "https://bikes-opt.b-cdn.net/isy/2025/3046756_01.jpg",
-  "zuletzt": "2026-11-24"
+  "zuletzt": "2026-11-25"
  },
  "isy|n38zrcxcomfort|2024|berryred": {
   "geprueft": "2026-11-24",
   "qcheck": "2026-11-24",
   "quelle": "https://bikes-opt.b-cdn.net/isy/2024/3000941_1.webp",
-  "zuletzt": "2026-11-24"
+  "zuletzt": "2026-11-25"
  },
  "isy|n38zrcxcomfort|2024|cosmosblue": {
   "geprueft": "2026-11-22",
-  "qcheck": "2026-11-22",
-  "zuletzt": "2026-11-24"
+  "qcheck": "2026-11-25",
+  "zuletzt": "2026-11-25"
  },
  "isy|n38zrcxcomfort|2024|opalgreen": {
   "geprueft": "2026-11-22",
-  "qcheck": "2026-11-22",
-  "zuletzt": "2026-11-24"
+  "qcheck": "2026-11-25",
+  "zuletzt": "2026-11-25"
  },
  "isy|n38zrcxcomfort|2024|pepperblack": {
   "geprueft": "2026-11-22",
-  "qcheck": "2026-11-22",
-  "zuletzt": "2026-11-24"
+  "qcheck": "2026-11-25",
+  "zuletzt": "2026-11-25"
  },
  "isy|n38zr|2023|froggygreen": {
   "geprueft": "2026-11-22",
-  "qcheck": "2026-11-22",
-  "zuletzt": "2026-11-24"
+  "qcheck": "2026-11-25",
+  "zuletzt": "2026-11-25"
  },
  "isy|n38zr|2023|opalgreen": {
   "geprueft": "2026-11-22",
-  "qcheck": "2026-11-22",
-  "zuletzt": "2026-11-24"
+  "qcheck": "2026-11-25",
+  "zuletzt": "2026-11-25"
  },
  "isy|n38zr|2023|poppyred": {
   "geprueft": "2026-11-22",
-  "qcheck": "2026-11-22",
-  "zuletzt": "2026-11-24"
+  "qcheck": "2026-11-25",
+  "zuletzt": "2026-11-25"
  },
  "isy|n38zr|2023|sunnyyellow": {
   "geprueft": "2026-11-22",
-  "qcheck": "2026-11-22",
-  "zuletzt": "2026-11-24"
+  "qcheck": "2026-11-25",
+  "zuletzt": "2026-11-25"
  },
  "isy|n38zr|2025|berryred": {
   "geprueft": "2026-11-22",
-  "qcheck": "2026-11-22",
-  "zuletzt": "2026-11-24"
+  "qcheck": "2026-11-25",
+  "zuletzt": "2026-11-25"
  },
  "isy|p12zr|2024|pepperblack": {
   "geprueft": "2026-11-24",
   "qcheck": "2026-11-24",
-  "zuletzt": "2026-11-24"
+  "zuletzt": "2026-11-25"
  },
  "isy|poparte5zrf|2023|popartwhite": {
   "geprueft": "2026-11-24",
   "qcheck": "2026-11-23",
-  "zuletzt": "2026-11-24"
+  "zuletzt": "2026-11-25"
  },
  "isy|s8zrfb|2024|seashellwhite": {
   "geprueft": "2026-11-24",
   "qcheck": "2026-11-23",
-  "zuletzt": "2026-11-24"
+  "zuletzt": "2026-11-25"
  },
  "isy|s8zrf|2024|berryred": {
   "geprueft": "2026-11-24",
   "qcheck": "2026-11-23",
-  "zuletzt": "2026-11-24"
+  "zuletzt": "2026-11-25"
  },
  "isy|s8zrf|2024|opalgreen": {
   "geprueft": "2026-11-24",
   "qcheck": "2026-11-23",
-  "zuletzt": "2026-11-24"
+  "zuletzt": "2026-11-25"
  },
  "isy|s8zrf|2024|pepperblack": {
   "geprueft": "2026-11-24",
   "qcheck": "2026-11-23",
-  "zuletzt": "2026-11-24"
+  "zuletzt": "2026-11-25"
  },
  "isy|skyflye5zrfcx|2025|stardust": {
   "geprueft": "2026-11-24",
   "qcheck": "2026-11-23",
-  "zuletzt": "2026-11-24"
+  "zuletzt": "2026-11-25"
  },
  "isy|skyflye5zrfcx|2025|udcarbon": {
   "geprueft": "2026-11-24",
   "qcheck": "2026-11-23",
-  "zuletzt": "2026-11-24"
+  "zuletzt": "2026-11-25"
  },
  "isy|skyflye5zrrtpx|2027|juicyorangematt": {
   "gesucht": "2026-11-22",
   "grund": "isy.de zeigt am 22.11.2026 weiterhin nur 2026er Modelle (E5-Modelle, Skyfly E5 inkl. Produktseiten E5 ZR RT Touring 2026 / Skyfly E5 ZR RT PX 2026 geprüft – Farben dort darkmore green/galactic blue bzw. UD Carbon/grau/grün/schwarz); 2027 kommt die neue 2.0-Rahmenplattform, daher kein 2026er Foto übe",
   "notiz": "Nach Marktstart 2027 isy.de/de-de/E-Bike-Kategorien/iSY-Kompakt/E5-Modelle und …/iSY-SKYFLY/iSY-SKYFLY-E5 erneut prüfen (ZEG-Bilder cdn-assets.zeg.de/brands/<id>/2400x1600_png/ISY_327…_main.png).",
   "versuche": 3,
-  "zuletzt": "2026-11-24"
+  "zuletzt": "2026-11-25"
  },
  "isy|skyflye5zrrtpx|2027|lightblue": {
   "gesucht": "2026-11-22",
   "grund": "isy.de zeigt am 22.11.2026 weiterhin nur 2026er Modelle (E5-Modelle, Skyfly E5 inkl. Produktseiten E5 ZR RT Touring 2026 / Skyfly E5 ZR RT PX 2026 geprüft – Farben dort darkmore green/galactic blue bzw. UD Carbon/grau/grün/schwarz); 2027 kommt die neue 2.0-Rahmenplattform, daher kein 2026er Foto übe",
   "notiz": "Nach Marktstart 2027 isy.de/de-de/E-Bike-Kategorien/iSY-Kompakt/E5-Modelle und …/iSY-SKYFLY/iSY-SKYFLY-E5 erneut prüfen (ZEG-Bilder cdn-assets.zeg.de/brands/<id>/2400x1600_png/ISY_327…_main.png).",
   "versuche": 3,
-  "zuletzt": "2026-11-24"
+  "zuletzt": "2026-11-25"
  },
  "isy|xxle5zrfcxadventurefedergabelair|2027|galacticblue": {
   "geprueft": "2026-11-24",
   "qcheck": "2026-11-23",
-  "zuletzt": "2026-11-24"
+  "zuletzt": "2026-11-25"
  },
  "isy|xxle5zrfcx|2023|cosmosblue": {
   "geprueft": "2026-11-24",
   "qcheck": "2026-11-23",
-  "zuletzt": "2026-11-24"
+  "zuletzt": "2026-11-25"
  },
  "ktm|macinaaera671lfc|2023|vitalbluemattblackorange": {
   "geprueft": "2026-11-24",
   "qcheck": "2026-11-23",
-  "zuletzt": "2026-11-24"
+  "zuletzt": "2026-11-25"
  },
  "ktm|macinaaera872lfc|2027|platinbronzemattblackorange": {
-  "geprueft": "2026-11-15",
+  "geprueft": "2026-11-25",
+  "ok_n": 1,
   "qcheck": "2026-11-23",
-  "zuletzt": "2026-11-24"
+  "quelle": "https://www.ktm-bikes.at/fileadmin/products/bicycles/1270097506_macina_aera_872_lfc_us_46__platin-bronze-matt__black_orange_4800.webp",
+  "zuletzt": "2026-11-25"
  },
  "ktm|macinaaera872lfc|2027|sagegreenmattblackwhite": {
-  "geprueft": "2026-11-16",
+  "geprueft": "2026-11-25",
+  "notiz": "KTM hat für das 872 in sage green kein eigenes Foto (1270097536_…872…webp gibt 404) und zeigt dort das 892-Foto 1270097546 – bei neuem KTM-Foto ersetzen.",
+  "ok_n": 1,
   "qcheck": "2026-11-23",
-  "zuletzt": "2026-11-24"
+  "quelle": "https://www.ktm-bikes.at/fileadmin/products/bicycles/1270097546_macina_aera_892_lfc_us_56__sage-green-matt__black_white_4800.webp",
+  "zuletzt": "2026-11-25"
  },
  "ktm|macinaaera892lfc|2027|platinbronzemattblackorange": {
-  "geprueft": "2026-11-16",
+  "geprueft": "2026-11-25",
+  "ok_n": 1,
   "qcheck": "2026-11-23",
-  "zuletzt": "2026-11-24"
+  "quelle": "https://www.ktm-bikes.at/fileadmin/products/bicycles/1270097516_macina_aera_892_lfc_us_56__platin-bronze-matt__black_orange_4800.webp",
+  "zuletzt": "2026-11-25"
  },
  "ktm|macinacityp610rt|2022|oakblackorange": {
   "geprueft": "2026-11-23",
@@ -336,7 +343,7 @@
   "quelle": "https://www.ktm-bikes.at/fileadmin/products/bicycles/022384506_MACINA_CITY_P610__US_46cm__oak__black-orange.jpg",
   "seite": "https://www.ktm-bikes.at/e-bikes/detail/macina-city-p610-oak-black-orange-5-g-shimano-nexus-ll-2022",
   "versuche": 0,
-  "zuletzt": "2026-11-24"
+  "zuletzt": "2026-11-25"
  },
  "ktm|macinacityp610rt|2023|oakmattchampagneorange": {
   "geprueft": "2026-11-23",
@@ -347,42 +354,51 @@
   "quelle": "https://bikes-opt.b-cdn.net/ktm/2024/1292600_01.jpg",
   "seite": "https://www.bikes.de/shop/e-bikes/marke.ktm/ktm-macina-city-p610-rt-2024/",
   "versuche": 0,
-  "zuletzt": "2026-11-24"
+  "zuletzt": "2026-11-25"
  },
  "ktm|macinacitypx720beltrt|2027|darkseamattgrey": {
-  "geprueft": "2026-11-16",
+  "geprueft": "2026-11-25",
+  "ok_n": 1,
   "qcheck": "2026-11-23",
-  "zuletzt": "2026-11-24"
+  "quelle": "https://www.ktm-bikes.at/fileadmin/products/bicycles/1270186506_macina_city_px_720_belt_rt_us_46__dark-sea-matt__grey_4800_1.webp",
+  "zuletzt": "2026-11-25"
  },
  "ktm|macinacitypx720belt|2027|darkseamattgrey": {
-  "geprueft": "2026-11-16",
+  "geprueft": "2026-11-25",
+  "ok_n": 1,
   "qcheck": "2026-11-23",
-  "zuletzt": "2026-11-24"
+  "quelle": "https://www.ktm-bikes.at/fileadmin/products/bicycles/1270185506_macina_city_px_720_belt_us_46__dark-sea-matt__grey_4800.webp",
+  "zuletzt": "2026-11-25"
  },
  "ktm|macinaevery840|2026|oxygengreen": {
-  "geprueft": "2026-11-16",
+  "geprueft": "2026-11-25",
+  "ok_n": 1,
   "qcheck": "2026-11-23",
-  "zuletzt": "2026-11-24"
+  "quelle": "https://www.ktm-bikes.at/fileadmin/products/bicycles/1260083641_macina_every_840_pts_51__oxygen-green__black_orange_4800.webp",
+  "zuletzt": "2026-11-25"
  },
  "ktm|macinagran830|2026|machinegreymatt": {
-  "geprueft": "2026-11-16",
+  "geprueft": "2026-11-25",
+  "notiz": "Trapez-Foto gäbe es als 1260133211_macina_gran_830_d_51__…webp.",
+  "ok_n": 1,
   "qcheck": "2026-11-23",
-  "zuletzt": "2026-11-24"
+  "quelle": "https://www.ktm-bikes.at/fileadmin/products/bicycles/1260133111_macina_gran_830_h_51__machine-grey-matt__silver_blue_4800.webp",
+  "zuletzt": "2026-11-25"
  },
  "ktm|macinaracesx10|2027|capetownmattblack": {
   "geprueft": "2026-11-24",
   "qcheck": "2026-11-24",
-  "zuletzt": "2026-11-24"
+  "zuletzt": "2026-11-25"
  },
  "ktm|macinasportsx20|2027|darkseasilver": {
   "geprueft": "2026-11-24",
   "qcheck": "2026-11-24",
-  "zuletzt": "2026-11-24"
+  "zuletzt": "2026-11-25"
  },
  "ktm|macinasportsx20|2027|platinbronzemattblack": {
   "geprueft": "2026-11-24",
   "qcheck": "2026-11-24",
-  "zuletzt": "2026-11-24"
+  "zuletzt": "2026-11-25"
  },
  "ktm|macinastyle720|2022|metallicwhitegreynightred": {
   "bestaetigt": "2026-11-13",
@@ -395,12 +411,12 @@
   "quelle": "https://www.rabe-bike.de/img/0/0/resize/catalog/product/k/t/ktm-macina-style-720-metallic-white_12.jpg",
   "seite": "https://www.rabe-bike.de/de/ktm-macina-style-720-metallic-white-grey-night-red-2022",
   "versuche": 0,
-  "zuletzt": "2026-11-24"
+  "zuletzt": "2026-11-25"
  },
  "ktm|macinastyle730|2025|blackmattgreyorange": {
   "geprueft": "2026-11-24",
   "qcheck": "2026-11-24",
-  "zuletzt": "2026-11-24"
+  "zuletzt": "2026-11-25"
  },
  "ktm|macinastyle820xl|2026|machinegreymatt": {
   "geprueft": "2026-11-17",
@@ -410,257 +426,257 @@
  "ktm|macinastyle830|2025|diamondblackgreyorange": {
   "geprueft": "2026-11-24",
   "qcheck": "2026-11-24",
-  "zuletzt": "2026-11-24"
+  "zuletzt": "2026-11-25"
  },
  "ktm|macinastyle830|2026|diamondblack": {
   "geprueft": "2026-11-24",
   "qcheck": "2026-11-24",
-  "zuletzt": "2026-11-24"
+  "zuletzt": "2026-11-25"
  },
  "ktm|macinastylexl|2023|machinegreyblacksilver": {
   "geprueft": "2026-11-24",
   "notiz": "Qualität: Speichen beim Freistellen stellenweise unterbrochen, keine bessere Fassung gefunden (ktm-bikes.at: nur JPG auf Weiß, 023366111_MACINA_STYLE_XL__H_51__machine_grey__silver-black_7.jpg).",
   "qcheck": "2026-11-24",
-  "zuletzt": "2026-11-24"
+  "zuletzt": "2026-11-25"
  },
  "ktm|macinastylexl|2023|maschinegreysilverblack": {
   "geprueft": "2026-11-24",
   "notiz": "Qualität: Speichen beim Freistellen stellenweise unterbrochen (Vorderrad), keine bessere Fassung gefunden (ktm-bikes.at hat nur dasselbe 1800-px-JPG 023366111_…silver-black_7.jpg auf Weiß; Original hat vollständige Speichen – Freisteller verliert sie).",
   "qcheck": "2026-11-24",
-  "zuletzt": "2026-11-24"
+  "zuletzt": "2026-11-25"
  },
  "ktm|macinateam691|2023|vitalbluesilverblack": {
   "geprueft": "2026-11-24",
   "qcheck": "2026-11-24",
-  "zuletzt": "2026-11-24"
+  "zuletzt": "2026-11-25"
  },
  "ktm|macinateam750lfcltd|2027|brighttealmattblacksilver": {
   "geprueft": "2026-11-24",
   "qcheck": "2026-11-24",
-  "zuletzt": "2026-11-24"
+  "zuletzt": "2026-11-25"
  },
  "ktm|macinateam793|2023|burntorangeblacksilver": {
   "geprueft": "2026-11-24",
   "qcheck": "2026-11-24",
-  "zuletzt": "2026-11-24"
+  "zuletzt": "2026-11-25"
  },
  "ktm|macinateam892|2027|diamondblackmattsilverburntorange": {
   "geprueft": "2026-11-24",
   "qcheck": "2026-11-24",
-  "zuletzt": "2026-11-24"
+  "zuletzt": "2026-11-25"
  },
  "ktm|macinateam893lfc|2027|muddymattblacksilver": {
   "geprueft": "2026-11-24",
   "qcheck": "2026-11-24",
-  "zuletzt": "2026-11-24"
+  "zuletzt": "2026-11-25"
  },
  "ktm|macinateam893|2027|capetownmatt": {
   "geprueft": "2026-11-24",
   "qcheck": "2026-11-24",
-  "zuletzt": "2026-11-24"
+  "zuletzt": "2026-11-25"
  },
  "ktm|macinateamxl|2022|machinegreysilverorange": {
   "geprueft": "2026-11-24",
   "notiz": "Qualität: Speichen beim Freistellen stellenweise unterbrochen (beide Räder), keine bessere Fassung gefunden (nur KTM-JPG auf Weiß bekannt; bikes.de/rabe-bike.de nur Kopien).",
   "qcheck": "2026-11-24",
-  "zuletzt": "2026-11-24"
+  "zuletzt": "2026-11-25"
  },
  "ktm|macinateamxl|2023|machinegreysilverorangematt": {
   "geprueft": "2026-11-24",
   "qcheck": "2026-11-24",
-  "zuletzt": "2026-11-24"
+  "zuletzt": "2026-11-25"
  },
  "ktm|macinatourcx830|2026|diamondblack": {
   "geprueft": "2026-11-24",
   "qcheck": "2026-11-24",
-  "zuletzt": "2026-11-24"
+  "zuletzt": "2026-11-25"
  },
  "ktm|macinatourpx7202|2027|emeraldgrey": {
   "geprueft": "2026-11-24",
   "qcheck": "2026-11-24",
-  "zuletzt": "2026-11-24"
+  "zuletzt": "2026-11-25"
  },
  "ktm|macinatourpx7202|2027|emeraldgreyblack": {
   "geprueft": "2026-11-24",
   "qcheck": "2026-11-24",
-  "zuletzt": "2026-11-24"
+  "zuletzt": "2026-11-25"
  },
  "ktm|macinatourpx7202|2027|moonrockmattsilver": {
   "geprueft": "2026-11-24",
   "qcheck": "2026-11-24",
-  "zuletzt": "2026-11-24"
+  "zuletzt": "2026-11-25"
  },
  "ktm|macinatourpx810|2027|machinegreymatt": {
   "geprueft": "2026-11-22",
-  "qcheck": "2026-11-22",
-  "zuletzt": "2026-11-24"
+  "qcheck": "2026-11-25",
+  "zuletzt": "2026-11-25"
  },
  "ktm|macinatourpx810|2027|machinegreymattblackglossy": {
   "geprueft": "2026-11-19",
-  "qcheck": "2026-11-21",
-  "zuletzt": "2026-11-24"
+  "qcheck": "2026-11-25",
+  "zuletzt": "2026-11-25"
  },
  "ktm|macinatourpx810|2027|platinbronzemattblackglossy": {
   "geprueft": "2026-11-19",
-  "qcheck": "2026-11-21",
-  "zuletzt": "2026-11-24"
+  "qcheck": "2026-11-25",
+  "zuletzt": "2026-11-25"
  },
  "qio|compactp5rbn|2026|petrolbluematt": {
-  "geprueft": "2026-11-21",
+  "geprueft": "2026-11-25",
   "notiz": "Qualität: dünne Speichen nach Freistellung teils gestrichelt/lückenhaft, Bild ca. 1100 px breit; keine bessere Fassung gefunden (qio-bikes.com Produktseiten /modelle/compact/… liefern nur 1920x1080-JPG mit kleinem Rad, keine PNG je Farbe; Kategoriebild_*.png sind andere Modelle/klein).",
-  "qcheck": "2026-11-21",
-  "zuletzt": "2026-11-24"
+  "qcheck": "2026-11-25",
+  "zuletzt": "2026-11-25"
  },
  "qio|compactp5rbn|2027|leadmetal": {
-  "geprueft": "2026-11-21",
+  "geprueft": "2026-11-25",
   "notiz": "Qualität: dünne Speichen nach Freistellung teils gestrichelt/lückenhaft, Bild ca. 1100 px breit; keine bessere Fassung gefunden (qio-bikes.com Produktseiten /modelle/compact/… liefern nur 1920x1080-JPG mit kleinem Rad, keine PNG je Farbe; Kategoriebild_*.png sind andere Modelle/klein).",
-  "qcheck": "2026-11-21",
-  "zuletzt": "2026-11-24"
+  "qcheck": "2026-11-25",
+  "zuletzt": "2026-11-25"
  },
  "qio|compactp5rbn|2027|lunarwhitematt": {
-  "geprueft": "2026-11-21",
+  "geprueft": "2026-11-25",
   "notiz": "Qualität: dünne Speichen nach Freistellung teils gestrichelt/lückenhaft, Bild ca. 1100 px breit; keine bessere Fassung gefunden (qio-bikes.com Produktseiten /modelle/compact/… liefern nur 1920x1080-JPG mit kleinem Rad, keine PNG je Farbe; Kategoriebild_*.png sind andere Modelle/klein).",
-  "qcheck": "2026-11-21",
-  "zuletzt": "2026-11-24"
+  "qcheck": "2026-11-25",
+  "zuletzt": "2026-11-25"
  },
  "qio|compactp5rbn|2027|nightblackmatt": {
-  "geprueft": "2026-11-21",
+  "geprueft": "2026-11-25",
   "notiz": "Qualität: dünne Speichen nach Freistellung teils gestrichelt/lückenhaft, Bild ca. 1100 px breit; keine bessere Fassung gefunden (qio-bikes.com Produktseiten /modelle/compact/… liefern nur 1920x1080-JPG mit kleinem Rad, keine PNG je Farbe; Kategoriebild_*.png sind andere Modelle/klein).",
-  "qcheck": "2026-11-21",
-  "zuletzt": "2026-11-24"
+  "qcheck": "2026-11-25",
+  "zuletzt": "2026-11-25"
  },
  "qio|compactp5rbn|2027|petrolbluematt": {
-  "geprueft": "2026-11-21",
+  "geprueft": "2026-11-25",
   "notiz": "Qualität: dünne Speichen nach Freistellung teils gestrichelt/lückenhaft, Bild ca. 1100 px breit; keine bessere Fassung gefunden (qio-bikes.com Produktseiten /modelle/compact/… liefern nur 1920x1080-JPG mit kleinem Rad, keine PNG je Farbe; Kategoriebild_*.png sind andere Modelle/klein).",
-  "qcheck": "2026-11-21",
-  "zuletzt": "2026-11-24"
+  "qcheck": "2026-11-25",
+  "zuletzt": "2026-11-25"
  },
  "qio|compactp5rbn|2027|retrobluematt": {
-  "geprueft": "2026-11-21",
+  "geprueft": "2026-11-25",
   "notiz": "Qualität: dünne Speichen nach Freistellung teils gestrichelt/lückenhaft, Bild ca. 1100 px breit; keine bessere Fassung gefunden (qio-bikes.com Produktseiten /modelle/compact/… liefern nur 1920x1080-JPG mit kleinem Rad, keine PNG je Farbe; Kategoriebild_*.png sind andere Modelle/klein).",
-  "qcheck": "2026-11-21",
-  "zuletzt": "2026-11-24"
+  "qcheck": "2026-11-25",
+  "zuletzt": "2026-11-25"
  },
  "qio|compactpe|2026|lunarwhitematt": {
-  "geprueft": "2026-11-21",
+  "geprueft": "2026-11-25",
   "notiz": "Qualität: dünne Speichen nach Freistellung teils gestrichelt/lückenhaft, Bild ca. 1100 px breit; keine bessere Fassung gefunden (qio-bikes.com Produktseiten /modelle/compact/… liefern nur 1920x1080-JPG mit kleinem Rad, keine PNG je Farbe; Kategoriebild_*.png sind andere Modelle/klein).",
-  "qcheck": "2026-11-21",
-  "zuletzt": "2026-11-24"
+  "qcheck": "2026-11-25",
+  "zuletzt": "2026-11-25"
  },
  "qio|compactpe|2027|darkolivematt": {
-  "geprueft": "2026-11-21",
+  "geprueft": "2026-11-25",
   "notiz": "Qualität: dünne Speichen nach Freistellung teils gestrichelt/lückenhaft, Bild ca. 1100 px breit; keine bessere Fassung gefunden (qio-bikes.com Produktseiten /modelle/compact/… liefern nur 1920x1080-JPG mit kleinem Rad, keine PNG je Farbe; Kategoriebild_*.png sind andere Modelle/klein).",
-  "qcheck": "2026-11-21",
-  "zuletzt": "2026-11-24"
+  "qcheck": "2026-11-25",
+  "zuletzt": "2026-11-25"
  },
  "qio|compactpe|2027|imolaredglanz": {
-  "geprueft": "2026-11-21",
+  "geprueft": "2026-11-25",
   "notiz": "Qualität: dünne Speichen nach Freistellung teils gestrichelt/lückenhaft, Bild ca. 1100 px breit; keine bessere Fassung gefunden (qio-bikes.com Produktseiten /modelle/compact/… liefern nur 1920x1080-JPG mit kleinem Rad, keine PNG je Farbe; Kategoriebild_*.png sind andere Modelle/klein).",
-  "qcheck": "2026-11-21",
-  "zuletzt": "2026-11-24"
+  "qcheck": "2026-11-25",
+  "zuletzt": "2026-11-25"
  },
  "qio|compactpe|2027|petrolbluematt": {
   "geprueft": "2026-11-22",
-  "qcheck": "2026-11-22",
-  "zuletzt": "2026-11-24"
+  "qcheck": "2026-11-25",
+  "zuletzt": "2026-11-25"
  },
  "qio|einsap8pianoline|2025|nightblackglanz": {
   "geprueft": "2026-11-22",
-  "qcheck": "2026-11-22",
-  "zuletzt": "2026-11-24"
+  "qcheck": "2026-11-25",
+  "zuletzt": "2026-11-25"
  },
  "qio|einsap8r|2024|forestgreen": {
   "geprueft": "2026-11-22",
-  "qcheck": "2026-11-22",
-  "zuletzt": "2026-11-24"
+  "qcheck": "2026-11-25",
+  "zuletzt": "2026-11-25"
  },
  "qio|einsap8r|2024|leadmetal": {
   "geprueft": "2026-11-22",
-  "qcheck": "2026-11-22",
-  "zuletzt": "2026-11-24"
+  "qcheck": "2026-11-25",
+  "zuletzt": "2026-11-25"
  },
  "qio|einsap8r|2024|sweetlavendermatt": {
   "geprueft": "2026-11-22",
-  "qcheck": "2026-11-22",
-  "zuletzt": "2026-11-24"
+  "qcheck": "2026-11-25",
+  "zuletzt": "2026-11-25"
  },
  "qio|einsp5rbn|2025|forestgreen": {
   "geprueft": "2026-11-22",
-  "qcheck": "2026-11-22",
-  "zuletzt": "2026-11-24"
+  "qcheck": "2026-11-25",
+  "zuletzt": "2026-11-25"
  },
  "qio|einsp5rbn|2026|leadmetalglanz": {
   "geprueft": "2026-11-22",
-  "qcheck": "2026-11-22",
-  "zuletzt": "2026-11-24"
+  "qcheck": "2026-11-25",
+  "zuletzt": "2026-11-25"
  },
  "qio|einsp5rbn|2026|nightblackmatt": {
   "geprueft": "2026-11-22",
-  "qcheck": "2026-11-22",
-  "zuletzt": "2026-11-24"
+  "qcheck": "2026-11-25",
+  "zuletzt": "2026-11-25"
  },
  "qio|einsp5|2023|crystalwhitematt": {
-  "geprueft": "2026-11-22",
+  "geprueft": "2026-11-25",
   "notiz": "Qualität: Bremsscheibe/Nabe vorne nach Freistellung zerstückelt, einige Vorderrad-Speichen fehlen; keine bessere Fassung gefunden (QiO-Archiv qio-bikes.com/archiv/2023/eins/p-5/…?number=02650901, Original qiobikes.cstatic.io …/02650901_…_1-jpg.jpg 1920 px JPG auf Weiß zeigt nach Freistellen dieselbe",
-  "qcheck": "2026-11-22",
-  "zuletzt": "2026-11-24"
+  "qcheck": "2026-11-25",
+  "zuletzt": "2026-11-25"
  },
  "qio|einsp5|2023|iceblue": {
   "geprueft": "2026-11-22",
   "qcheck": "2026-11-22",
-  "zuletzt": "2026-11-24"
+  "zuletzt": "2026-11-25"
  },
  "qio|einsp5|2023|leadmetal": {
   "geprueft": "2026-11-22",
   "qcheck": "2026-11-22",
-  "zuletzt": "2026-11-24"
+  "zuletzt": "2026-11-25"
  },
  "qio|einsp5|2023|softmint": {
   "geprueft": "2026-11-22",
   "notiz": "Qualität: Bremsscheibe/Nabe vorne nach Freistellung lückenhaft; keine bessere Fassung gefunden (QiO-Archiv 2023 ?number=02650927 bzw. 02651008, Original qiobikes.cstatic.io …/02650927_…_1-jpg.jpg 1920 px JPG auf Weiß – gleiche Lücken).",
   "qcheck": "2026-11-22",
-  "zuletzt": "2026-11-24"
+  "zuletzt": "2026-11-25"
  },
  "qio|einspe|2024|forestgreen": {
   "geprueft": "2026-11-22",
   "qcheck": "2026-11-22",
-  "zuletzt": "2026-11-24"
+  "zuletzt": "2026-11-25"
  },
  "qio|einspe|2024|imolaredmatt": {
   "geprueft": "2026-11-22",
   "qcheck": "2026-11-22",
-  "zuletzt": "2026-11-24"
+  "zuletzt": "2026-11-25"
  },
  "qio|einspe|2024|nightblackmatt": {
   "geprueft": "2026-11-22",
   "qcheck": "2026-11-22",
-  "zuletzt": "2026-11-24"
+  "zuletzt": "2026-11-25"
  },
  "qio|einspe|2025|crystalwhite": {
   "geprueft": "2026-11-22",
   "qcheck": "2026-11-22",
-  "zuletzt": "2026-11-24"
+  "zuletzt": "2026-11-25"
  },
  "qio|einspe|2025|icebluematt": {
   "geprueft": "2026-11-22",
   "qcheck": "2026-11-22",
-  "zuletzt": "2026-11-24"
+  "zuletzt": "2026-11-25"
  },
  "qio|einsxpe|2025|imolaredmatt": {
   "geprueft": "2026-11-21",
   "qcheck": "2026-11-23",
-  "zuletzt": "2026-11-24"
+  "zuletzt": "2026-11-25"
  },
  "stevens|eantelao29|2022|arcticgrey": {
   "geprueft": "2026-11-21",
   "qcheck": "2026-11-23",
-  "zuletzt": "2026-11-24"
+  "zuletzt": "2026-11-25"
  },
  "stevens|ejuke29|2023|chromegreen": {
   "geprueft": "2026-11-23",
   "notiz": "Qualität: vordere Bremsscheibe und Speichen nach dem Freistellen lückenhaft, keine bessere Fassung gefunden (stevensbikes.de high_res 2752 px schon getestet, kein PNG beim Hersteller).",
   "qcheck": "2026-11-23",
-  "zuletzt": "2026-11-24"
+  "zuletzt": "2026-11-25"
  },
  "vanraam|easyridercompactplus|2026|copperbrownmatt": {
   "geprueft": "2026-11-19",
@@ -671,25 +687,25 @@
   "quelle": "https://www.vanraam.com/assets/img/92379/1776419334-easy-rider-compact-plus-vanraam-tricycle.avif?fm=png",
   "seite": "https://www.vanraam.com/de-de/unsere-fahrrader/dreirader/dreirader-fur-erwachsene/easy-rider-compact",
   "versuche": 0,
-  "zuletzt": "2026-11-24"
+  "zuletzt": "2026-11-25"
  },
  "vanraam|easyridercompact|2025|weinrotmatt": {
-  "geprueft": "2026-11-21",
+  "geprueft": "2026-11-25",
   "gesucht": "2026-11-16",
   "grund": "Offizielles Van-Raam-Freisteller des Easy Rider Compact (E-Version, Sitz mit Lehne, 16\"-Vorderrad) in Weinrot matt; Aufnahme von 2023, Original nur 600 px breit, daher etwas weich.",
-  "notiz": "Qualität: blockig, aus 600 px hochgerechnet, Lücken in Rädern nach Freistellung; keine bessere Fassung gefunden (vanraam.com Original nur 600x400, Produktseite zeigt jetzt Compact+).",
-  "qcheck": "2026-11-21",
+  "notiz": "Qualität: blockig, aus 600 px hochgerechnet, Flecken/Lücken in den Rädern nach Freistellung; keine bessere Fassung gefunden (vanraam.com: Original 1688034348 nur 600x400, neu freigestellt ohne Gewinn; alle anderen Easy-Rider-Compact-Bilder dort sind Fahrszenen mit Personen oder Compact+ in anderer F",
+  "qcheck": "2026-11-25",
   "quelle": "https://www.vanraam.com/assets/img/92379/1688034348-van-raam-easy-rider-compact-e-tricycle.jpg?w=2400",
   "seite": "https://www.vanraam.com/de/unsere-fahrrader/dreirader-fur-erwachsene/easy-rider-compact",
   "versuche": 0,
-  "zuletzt": "2026-11-24"
+  "zuletzt": "2026-11-25"
  },
  "vanraam|easyrider|2024|gelborangematt": {
   "gesucht": "2026-11-22",
   "grund": "Kein Studio-Freisteller des Easy Rider (2024) in Gelborange matt: vanraam.com zeigt die Farbe nur als Fahrszene mit Person, Webshop-Konfigurator bietet sie nicht mehr (frühere Läufe, heute nicht erneut gefunden).",
   "notiz": "Gelborange matt = RAL 2000, Basisfarbe 2 im Farbüberblick 2025 (vanraam.com/assets/img/92379/1739264461-color-overview-van-raam-bikes-2025.pdf); Studio-Freisteller im Händlerportal anfragen.",
   "versuche": 3,
-  "zuletzt": "2026-11-24"
+  "zuletzt": "2026-11-25"
  },
  "vanraam|easyrider|2027|lichengrey": {
   "geprueft": "2026-11-24",
@@ -700,146 +716,148 @@
   "quelle": "https://www.vanraam.com/assets/img/92379/1790842768-easy-rider-tricycle-vanraam-freestanding.png",
   "seite": "https://www.vanraam.com/de-de/unsere-fahrrader/dreirader-fur-erwachsene/easy-rider",
   "versuche": 0,
-  "zuletzt": "2026-11-24"
+  "zuletzt": "2026-11-25"
  },
  "velodeville|aeb400allround288ggnex|2022|winered": {
   "gesucht": "2026-11-24",
   "grund": "Velo de Ville zeigt alte Kollektionen (MY21–MY24) nicht mehr: alte Modellseiten leiten auf die Startseite um, der Konfigurator kennt nur MY27, im Webarchiv liegt pro Modell nur ein Hauptbild in anderer Farbe (z. B. MY24 AEB490 Olive Green, MY24 AEB890 Trapez Sahara Brown matt, MY23 AEB890 Eco Grey),",
   "notiz": "Velo-ID (Veloport) nachtragen – dann liefert seite.js --velo das exakte Bild aus der VELOWALLET.",
   "versuche": 1,
-  "zuletzt": "2026-11-24"
+  "zuletzt": "2026-11-25"
  },
  "velodeville|aeb400classicxsrt|2027|nightbluematt": {
-  "geprueft": "2026-11-16",
+  "geprueft": "2026-11-25",
+  "ok_n": 1,
   "qcheck": "2026-11-21",
   "quelle": "konfigurator.velo-de-ville.com (Velo-ID V27-ID-01247829)",
   "seite": "https://konfigurator.velo-de-ville.com/de-de/configure/027-AEB-CLX15.html",
   "versuche": 0,
-  "zuletzt": "2026-11-24"
+  "zuletzt": "2026-11-25"
  },
  "velodeville|aeb400classicxsrt|2027|stonebasaltmatt": {
   "geprueft": "2026-11-16",
-  "qcheck": "2026-11-21",
+  "qcheck": "2026-11-25",
   "quelle": "konfigurator.velo-de-ville.com (Velo-ID V27-ID-01247819)",
   "seite": "https://konfigurator.velo-de-ville.com/de-de/configure/027-AEB-CLX15.html",
   "versuche": 0,
-  "zuletzt": "2026-11-24"
+  "zuletzt": "2026-11-25"
  },
  "velodeville|aeb490allround288ggnex|2021|stonebasaltmatt": {
   "gesucht": "2026-11-24",
   "grund": "Velo de Ville zeigt alte Kollektionen (MY21–MY24) nicht mehr: alte Modellseiten leiten auf die Startseite um, der Konfigurator kennt nur MY27, im Webarchiv liegt pro Modell nur ein Hauptbild in anderer Farbe (z. B. MY24 AEB490 Olive Green, MY24 AEB890 Trapez Sahara Brown matt, MY23 AEB890 Eco Grey),",
   "notiz": "Velo-ID (Veloport) nachtragen – dann liefert seite.js --velo das exakte Bild aus der VELOWALLET.",
   "versuche": 1,
-  "zuletzt": "2026-11-24"
+  "zuletzt": "2026-11-25"
  },
  "velodeville|aeb490allround288ggnex|2023|britishgreenmatt": {
   "gesucht": "2026-11-24",
   "grund": "Velo de Ville zeigt alte Kollektionen (MY21–MY24) nicht mehr: alte Modellseiten leiten auf die Startseite um, der Konfigurator kennt nur MY27, im Webarchiv liegt pro Modell nur ein Hauptbild in anderer Farbe (z. B. MY24 AEB490 Olive Green, MY24 AEB890 Trapez Sahara Brown matt, MY23 AEB890 Eco Grey),",
   "notiz": "Velo-ID (Veloport) nachtragen – dann liefert seite.js --velo das exakte Bild aus der VELOWALLET.",
   "versuche": 1,
-  "zuletzt": "2026-11-24"
+  "zuletzt": "2026-11-25"
  },
  "velodeville|aeb490allround288ggnex|2023|moccabrownmatt": {
   "gesucht": "2026-11-24",
   "grund": "Velo de Ville zeigt alte Kollektionen (MY21–MY24) nicht mehr: alte Modellseiten leiten auf die Startseite um, der Konfigurator kennt nur MY27, im Webarchiv liegt pro Modell nur ein Hauptbild in anderer Farbe (z. B. MY24 AEB490 Olive Green, MY24 AEB890 Trapez Sahara Brown matt, MY23 AEB890 Eco Grey),",
   "notiz": "Velo-ID (Veloport) nachtragen – dann liefert seite.js --velo das exakte Bild aus der VELOWALLET.",
   "versuche": 1,
-  "zuletzt": "2026-11-24"
+  "zuletzt": "2026-11-25"
  },
  "velodeville|aeb490allround288ggnex|2023|nightbluematt": {
   "gesucht": "2026-11-24",
   "grund": "Velo de Ville zeigt alte Kollektionen (MY21–MY24) nicht mehr: alte Modellseiten leiten auf die Startseite um, der Konfigurator kennt nur MY27, im Webarchiv liegt pro Modell nur ein Hauptbild in anderer Farbe (z. B. MY24 AEB490 Olive Green, MY24 AEB890 Trapez Sahara Brown matt, MY23 AEB890 Eco Grey),",
   "notiz": "Velo-ID (Veloport) nachtragen – dann liefert seite.js --velo das exakte Bild aus der VELOWALLET.",
   "versuche": 1,
-  "zuletzt": "2026-11-24"
+  "zuletzt": "2026-11-25"
  },
  "velodeville|aeb490allround288ggnex|2023|purewhite": {
   "gesucht": "2026-11-24",
   "grund": "Velo de Ville zeigt alte Kollektionen (MY21–MY24) nicht mehr: alte Modellseiten leiten auf die Startseite um, der Konfigurator kennt nur MY27, im Webarchiv liegt pro Modell nur ein Hauptbild in anderer Farbe (z. B. MY24 AEB490 Olive Green, MY24 AEB890 Trapez Sahara Brown matt, MY23 AEB890 Eco Grey),",
   "notiz": "Velo-ID (Veloport) nachtragen – dann liefert seite.js --velo das exakte Bild aus der VELOWALLET.",
   "versuche": 1,
-  "zuletzt": "2026-11-24"
+  "zuletzt": "2026-11-25"
  },
  "velodeville|aeb490allround288ggrt|2023|britishgreenmatt": {
   "gesucht": "2026-11-24",
   "grund": "Velo de Ville zeigt alte Kollektionen (MY21–MY24) nicht mehr: alte Modellseiten leiten auf die Startseite um, der Konfigurator kennt nur MY27, im Webarchiv liegt pro Modell nur ein Hauptbild in anderer Farbe (z. B. MY24 AEB490 Olive Green, MY24 AEB890 Trapez Sahara Brown matt, MY23 AEB890 Eco Grey),",
   "notiz": "Velo-ID (Veloport) nachtragen – dann liefert seite.js --velo das exakte Bild aus der VELOWALLET.",
   "versuche": 1,
-  "zuletzt": "2026-11-24"
+  "zuletzt": "2026-11-25"
  },
  "velodeville|aeb490allround288ggrt|2023|nightbluematt": {
   "gesucht": "2026-11-24",
   "grund": "Velo de Ville zeigt alte Kollektionen (MY21–MY24) nicht mehr: alte Modellseiten leiten auf die Startseite um, der Konfigurator kennt nur MY27, im Webarchiv liegt pro Modell nur ein Hauptbild in anderer Farbe (z. B. MY24 AEB490 Olive Green, MY24 AEB890 Trapez Sahara Brown matt, MY23 AEB890 Eco Grey),",
   "notiz": "Velo-ID (Veloport) nachtragen – dann liefert seite.js --velo das exakte Bild aus der VELOWALLET.",
   "versuche": 1,
-  "zuletzt": "2026-11-24"
+  "zuletzt": "2026-11-25"
  },
  "velodeville|aeb800allround289gg|2021|stonebasaltmatt": {
   "gesucht": "2026-11-24",
   "grund": "Velo de Ville zeigt alte Kollektionen (MY21–MY24) nicht mehr: alte Modellseiten leiten auf die Startseite um, der Konfigurator kennt nur MY27, im Webarchiv liegt pro Modell nur ein Hauptbild in anderer Farbe (z. B. MY24 AEB490 Olive Green, MY24 AEB890 Trapez Sahara Brown matt, MY23 AEB890 Eco Grey),",
   "notiz": "Velo-ID (Veloport) nachtragen – dann liefert seite.js --velo das exakte Bild aus der VELOWALLET.",
   "versuche": 1,
-  "zuletzt": "2026-11-24"
+  "zuletzt": "2026-11-25"
  },
  "velodeville|aeb800classic26|2026|emeraldgreenglanz": {
   "geprueft": "2026-11-24",
   "gesucht": "2026-11-24",
   "grund": "Offizielles VELOWALLET-Konfigurationsbild zur Velo-ID V26-ID-00485883 (Modellcode 026-AEB-806-G5): Tiefeinsteiger, Emerald Green glänzend, Rücktritt-Nabe.",
   "ok_n": 0,
+  "qcheck": "2026-11-25",
   "quelle": "velowallet.app (Velo de Ville) V26-ID-00485883",
   "seite": "velowallet.app (Velo de Ville)",
   "versuche": 0,
-  "zuletzt": "2026-11-24"
+  "zuletzt": "2026-11-25"
  },
  "velodeville|aeb890allround285ggrt|2023|britishgreenmatt": {
   "gesucht": "2026-11-24",
   "grund": "Velo de Ville zeigt alte Kollektionen (MY21–MY24) nicht mehr: alte Modellseiten leiten auf die Startseite um, der Konfigurator kennt nur MY27, im Webarchiv liegt pro Modell nur ein Hauptbild in anderer Farbe (z. B. MY24 AEB490 Olive Green, MY24 AEB890 Trapez Sahara Brown matt, MY23 AEB890 Eco Grey),",
   "notiz": "Velo-ID (Veloport) nachtragen – dann liefert seite.js --velo das exakte Bild aus der VELOWALLET.",
   "versuche": 1,
-  "zuletzt": "2026-11-24"
+  "zuletzt": "2026-11-25"
  },
  "velodeville|aeb890allround285ggrt|2023|stonebasaltmatt": {
   "gesucht": "2026-11-24",
   "grund": "Velo de Ville zeigt alte Kollektionen (MY21–MY24) nicht mehr: alte Modellseiten leiten auf die Startseite um, der Konfigurator kennt nur MY27, im Webarchiv liegt pro Modell nur ein Hauptbild in anderer Farbe (z. B. MY24 AEB490 Olive Green, MY24 AEB890 Trapez Sahara Brown matt, MY23 AEB890 Eco Grey),",
   "notiz": "Velo-ID (Veloport) nachtragen – dann liefert seite.js --velo das exakte Bild aus der VELOWALLET.",
   "versuche": 1,
-  "zuletzt": "2026-11-24"
+  "zuletzt": "2026-11-25"
  },
  "velodeville|aeb890allround285gg|2023|scarletred": {
   "gesucht": "2026-11-24",
   "grund": "Velo de Ville zeigt alte Kollektionen (MY21–MY24) nicht mehr: alte Modellseiten leiten auf die Startseite um, der Konfigurator kennt nur MY27, im Webarchiv liegt pro Modell nur ein Hauptbild in anderer Farbe (z. B. MY24 AEB490 Olive Green, MY24 AEB890 Trapez Sahara Brown matt, MY23 AEB890 Eco Grey),",
   "notiz": "Velo-ID (Veloport) nachtragen – dann liefert seite.js --velo das exakte Bild aus der VELOWALLET.",
   "versuche": 1,
-  "zuletzt": "2026-11-24"
+  "zuletzt": "2026-11-25"
  },
  "velodeville|aeb890allround285gg|2024|saharabrownglanz": {
   "gesucht": "2026-11-24",
   "grund": "Velo de Ville zeigt alte Kollektionen (MY21–MY24) nicht mehr: alte Modellseiten leiten auf die Startseite um, der Konfigurator kennt nur MY27, im Webarchiv liegt pro Modell nur ein Hauptbild in anderer Farbe (z. B. MY24 AEB490 Olive Green, MY24 AEB890 Trapez Sahara Brown matt, MY23 AEB890 Eco Grey),",
   "notiz": "Velo-ID (Veloport) nachtragen – dann liefert seite.js --velo das exakte Bild aus der VELOWALLET.",
   "versuche": 1,
-  "zuletzt": "2026-11-24"
+  "zuletzt": "2026-11-25"
  },
  "velodeville|aeb890allround289gg|2023|nightbluematt": {
   "gesucht": "2026-11-24",
   "grund": "Velo de Ville zeigt alte Kollektionen (MY21–MY24) nicht mehr: alte Modellseiten leiten auf die Startseite um, der Konfigurator kennt nur MY27, im Webarchiv liegt pro Modell nur ein Hauptbild in anderer Farbe (z. B. MY24 AEB490 Olive Green, MY24 AEB890 Trapez Sahara Brown matt, MY23 AEB890 Eco Grey),",
   "notiz": "Velo-ID (Veloport) nachtragen – dann liefert seite.js --velo das exakte Bild aus der VELOWALLET.",
   "versuche": 1,
-  "zuletzt": "2026-11-24"
+  "zuletzt": "2026-11-25"
  },
  "velodeville|aeb890allround289gg|2023|stonebasaltmatt": {
   "gesucht": "2026-11-24",
   "grund": "Velo de Ville zeigt alte Kollektionen (MY21–MY24) nicht mehr: alte Modellseiten leiten auf die Startseite um, der Konfigurator kennt nur MY27, im Webarchiv liegt pro Modell nur ein Hauptbild in anderer Farbe (z. B. MY24 AEB490 Olive Green, MY24 AEB890 Trapez Sahara Brown matt, MY23 AEB890 Eco Grey),",
   "notiz": "Velo-ID (Veloport) nachtragen – dann liefert seite.js --velo das exakte Bild aus der VELOWALLET.",
   "versuche": 1,
-  "zuletzt": "2026-11-24"
+  "zuletzt": "2026-11-25"
  },
  "velodeville|aeb990pxprort|2027|purewhiteglanz": {
   "geprueft": "2026-11-16",
-  "qcheck": "2026-11-21",
+  "qcheck": "2026-11-25",
   "quelle": "konfigurator.velo-de-ville.com (Velo-ID V27-ID-01247834)",
   "seite": "https://konfigurator.velo-de-ville.com/de-de/configure/027-AEB-PRO17.html",
   "versuche": 0,
-  "zuletzt": "2026-11-24"
+  "zuletzt": "2026-11-25"
  },
  "velodeville|aeb990pxpro|2026|oceanbluematt": {
   "geprueft": "2026-11-22",
@@ -847,17 +865,18 @@
   "quelle": "https://konfigurator.velo-de-ville.com/de-de/configure/027-AEB-LCH17.html",
   "seite": "https://konfigurator.velo-de-ville.com/de-de/e-bikes/allround/ (AEB PRO MY26)",
   "versuche": 0,
-  "zuletzt": "2026-11-24"
+  "zuletzt": "2026-11-25"
  },
  "velodeville|aeb990pxpro|2026|velvetpurplematt": {
   "geprueft": "2026-11-24",
   "gesucht": "2026-11-24",
   "grund": "Offizielles VELOWALLET-Konfigurationsbild zur Velo-ID V26-ID-00804668 (Modellcode 026-AEB-P990-G5): Tiefeinsteiger, Velvet Purple matt, Enviolo-Nabe; andere Farbe als das Ocean-Blue-Geschwister.",
   "ok_n": 0,
+  "qcheck": "2026-11-25",
   "quelle": "velowallet.app (Velo de Ville) V26-ID-00804668",
   "seite": "velowallet.app (Velo de Ville)",
   "versuche": 0,
-  "zuletzt": "2026-11-24"
+  "zuletzt": "2026-11-25"
  },
  "velodeville|aeb990pxpurert|2027|stonebasaltmatt": {
   "geprueft": "2026-11-22",
@@ -865,7 +884,7 @@
   "quelle": "https://konfigurator.velo-de-ville.com/ (Velo-ID V27-ID-01247815)",
   "seite": "https://konfigurator.velo-de-ville.com/de-de/configure/027-AEB-PUR17.html",
   "versuche": 0,
-  "zuletzt": "2026-11-24"
+  "zuletzt": "2026-11-25"
  },
  "velodeville|hubexs|2027|icebluematt": {
   "geprueft": "2026-11-22",
@@ -873,7 +892,7 @@
   "quelle": "https://konfigurator.velo-de-ville.com/ (Velo-ID V27-ID-01247811)",
   "seite": "https://konfigurator.velo-de-ville.com/de-de/configure/027-HEB-HUX12.html",
   "versuche": 0,
-  "zuletzt": "2026-11-24"
+  "zuletzt": "2026-11-25"
  },
  "velodeville|hube|2027|nightbluematt": {
   "geprueft": "2026-11-22",
@@ -881,7 +900,7 @@
   "quelle": "https://konfigurator.velo-de-ville.com/ (Velo-ID V27-ID-01247823)",
   "seite": "https://konfigurator.velo-de-ville.com/de-de/configure/027-HEB-HUB12.html",
   "versuche": 0,
-  "zuletzt": "2026-11-24"
+  "zuletzt": "2026-11-25"
  },
  "velodeville|hube|2027|rubyredmatt": {
   "geprueft": "2026-11-22",
@@ -889,70 +908,70 @@
   "quelle": "https://konfigurator.velo-de-ville.com/ (Velo-ID V27-ID-01247799)",
   "seite": "https://konfigurator.velo-de-ville.com/de-de/configure/027-HEB-HUB12.html",
   "versuche": 0,
-  "zuletzt": "2026-11-24"
+  "zuletzt": "2026-11-25"
  },
  "velodeville|seb890275envioloautomatiq|2024|nightbluematt": {
   "gesucht": "2026-11-24",
   "grund": "SEB 890/990 SUV Smart MY23/MY24 in dieser Farbe weder beim Hersteller (alte Seiten weg, Konfigurator nur MY27) noch im Webarchiv (nur Hauptbild, Bilder nicht archiviert) gefunden; Händlerfunde nur Gebraucht-Fotos (upway/refurbed) – unzulässig.",
   "notiz": "Velo-ID (Veloport) nachtragen – dann liefert seite.js --velo das exakte Bild aus der VELOWALLET.",
   "versuche": 1,
-  "zuletzt": "2026-11-24"
+  "zuletzt": "2026-11-25"
  },
  "velodeville|seb890suvsmart2759gg|2023|deepblackmatt": {
   "gesucht": "2026-11-24",
   "grund": "SEB 890/990 SUV Smart MY23/MY24 in dieser Farbe weder beim Hersteller (alte Seiten weg, Konfigurator nur MY27) noch im Webarchiv (nur Hauptbild, Bilder nicht archiviert) gefunden; Händlerfunde nur Gebraucht-Fotos (upway/refurbed) – unzulässig.",
   "notiz": "Velo-ID (Veloport) nachtragen – dann liefert seite.js --velo das exakte Bild aus der VELOWALLET.",
   "versuche": 1,
-  "zuletzt": "2026-11-24"
+  "zuletzt": "2026-11-25"
  },
  "velodeville|seb890suvsmart2759gg|2023|purewhite": {
   "gesucht": "2026-11-24",
   "grund": "SEB 890/990 SUV Smart MY23/MY24 in dieser Farbe weder beim Hersteller (alte Seiten weg, Konfigurator nur MY27) noch im Webarchiv (nur Hauptbild, Bilder nicht archiviert) gefunden; Händlerfunde nur Gebraucht-Fotos (upway/refurbed) – unzulässig.",
   "notiz": "Velo-ID (Veloport) nachtragen – dann liefert seite.js --velo das exakte Bild aus der VELOWALLET.",
   "versuche": 1,
-  "zuletzt": "2026-11-24"
+  "zuletzt": "2026-11-25"
  },
  "velodeville|seb890suvsmart2759gg|2023|stonebasaltmatt": {
   "gesucht": "2026-11-24",
   "grund": "SEB 890/990 SUV Smart MY23/MY24 in dieser Farbe weder beim Hersteller (alte Seiten weg, Konfigurator nur MY27) noch im Webarchiv (nur Hauptbild, Bilder nicht archiviert) gefunden; Händlerfunde nur Gebraucht-Fotos (upway/refurbed) – unzulässig.",
   "notiz": "Velo-ID (Veloport) nachtragen – dann liefert seite.js --velo das exakte Bild aus der VELOWALLET.",
   "versuche": 1,
-  "zuletzt": "2026-11-24"
+  "zuletzt": "2026-11-25"
  },
  "velodeville|seb890suvsmart2759gg|2024|blackmatt": {
   "gesucht": "2026-11-24",
   "grund": "SEB 890/990 SUV Smart MY23/MY24 in dieser Farbe weder beim Hersteller (alte Seiten weg, Konfigurator nur MY27) noch im Webarchiv (nur Hauptbild, Bilder nicht archiviert) gefunden; Händlerfunde nur Gebraucht-Fotos (upway/refurbed) – unzulässig.",
   "notiz": "Velo-ID (Veloport) nachtragen – dann liefert seite.js --velo das exakte Bild aus der VELOWALLET.",
   "versuche": 1,
-  "zuletzt": "2026-11-24"
+  "zuletzt": "2026-11-25"
  },
  "velodeville|seb890suvsmart2759gg|2024|iceblueglanz": {
   "gesucht": "2026-11-24",
   "grund": "SEB 890/990 SUV Smart MY23/MY24 in dieser Farbe weder beim Hersteller (alte Seiten weg, Konfigurator nur MY27) noch im Webarchiv (nur Hauptbild, Bilder nicht archiviert) gefunden; Händlerfunde nur Gebraucht-Fotos (upway/refurbed) – unzulässig.",
   "notiz": "Velo-ID (Veloport) nachtragen – dann liefert seite.js --velo das exakte Bild aus der VELOWALLET.",
   "versuche": 1,
-  "zuletzt": "2026-11-24"
+  "zuletzt": "2026-11-25"
  },
  "velodeville|seb890suvsmart2759gg|2024|purewhiteglanz": {
   "gesucht": "2026-11-24",
   "grund": "SEB 890/990 SUV Smart MY23/MY24 in dieser Farbe weder beim Hersteller (alte Seiten weg, Konfigurator nur MY27) noch im Webarchiv (nur Hauptbild, Bilder nicht archiviert) gefunden; Händlerfunde nur Gebraucht-Fotos (upway/refurbed) – unzulässig.",
   "notiz": "Velo-ID (Veloport) nachtragen – dann liefert seite.js --velo das exakte Bild aus der VELOWALLET.",
   "versuche": 1,
-  "zuletzt": "2026-11-24"
+  "zuletzt": "2026-11-25"
  },
  "velodeville|seb990pro|2025|emeraldgreenmatt": {
   "gesucht": "2026-11-24",
   "grund": "SEB 990 PRO MY25 Wave in Emerald Green matt nirgends gefunden (MY25-Listen bei Händlern führen nur Eucalyptus Green, Night/Ocean/Ice/Petrol Blue, Deep Black, Ruby Red, Stone Basalt); Emerald Green erst ab MY26.",
   "notiz": "Farbe evtl. Eucalyptus Green matt? In Veloport prüfen; Velo-ID nachtragen.",
   "versuche": 1,
-  "zuletzt": "2026-11-24"
+  "zuletzt": "2026-11-25"
  },
  "velodeville|seb990pro|2025|stonebasaltmatt": {
   "gesucht": "2026-11-24",
   "grund": "Offizielles MY25-Bild gibt es nur als SEB 990 PRO Trapez Stone Basalt matt (Art.-Nr. 5002056) – Veloport sagt Diamant, Rahmenform passt nicht; Diamant-Fassung in Stone Basalt matt nirgends gefunden.",
   "notiz": "Art.-Nr. 5002056 = Trapez-Fassung; Diamant-Artikelnummer suchen oder Velo-ID nachtragen.",
   "versuche": 1,
-  "zuletzt": "2026-11-24"
+  "zuletzt": "2026-11-25"
  },
  "velodeville|seb990pxpro|2027|iceblueglanz": {
   "geprueft": "2026-11-22",
@@ -960,7 +979,7 @@
   "quelle": "https://konfigurator.velo-de-ville.com/ (Velo-ID V27-ID-01247846)",
   "seite": "https://konfigurator.velo-de-ville.com/de-de/configure/027-SEB-PRO17.html",
   "versuche": 0,
-  "zuletzt": "2026-11-24"
+  "zuletzt": "2026-11-25"
  },
  "velodeville|seb990pxpro|2027|stonebasaltmatt": {
   "geprueft": "2026-11-22",
@@ -968,65 +987,67 @@
   "quelle": "https://konfigurator.velo-de-ville.com/ (Velo-ID V27-ID-01247889)",
   "seite": "https://konfigurator.velo-de-ville.com/de-de/configure/027-SEB-PRO17.html",
   "versuche": 0,
-  "zuletzt": "2026-11-24"
+  "zuletzt": "2026-11-25"
  },
  "velodeville|seb990suvsmart27511gg|2023|nightbluematt": {
   "gesucht": "2026-11-24",
   "grund": "SEB 890/990 SUV Smart MY23/MY24 in dieser Farbe weder beim Hersteller (alte Seiten weg, Konfigurator nur MY27) noch im Webarchiv (nur Hauptbild, Bilder nicht archiviert) gefunden; Händlerfunde nur Gebraucht-Fotos (upway/refurbed) – unzulässig.",
   "notiz": "Velo-ID (Veloport) nachtragen – dann liefert seite.js --velo das exakte Bild aus der VELOWALLET.",
   "versuche": 1,
-  "zuletzt": "2026-11-24"
+  "zuletzt": "2026-11-25"
  },
  "velodeville|seb990suvsmart2759gg|2023|scarletredglanz": {
   "gesucht": "2026-11-24",
   "grund": "SEB 890/990 SUV Smart MY23/MY24 in dieser Farbe weder beim Hersteller (alte Seiten weg, Konfigurator nur MY27) noch im Webarchiv (nur Hauptbild, Bilder nicht archiviert) gefunden; Händlerfunde nur Gebraucht-Fotos (upway/refurbed) – unzulässig.",
   "notiz": "Velo-ID (Veloport) nachtragen – dann liefert seite.js --velo das exakte Bild aus der VELOWALLET.",
   "versuche": 1,
-  "zuletzt": "2026-11-24"
+  "zuletzt": "2026-11-25"
  },
  "victoria|avyon5275|2027|slategreymatt": {
-  "geprueft": "2026-11-15",
+  "geprueft": "2026-11-25",
   "gesucht": "2026-11-15",
   "grund": "Qualität: altes Bild mit weißen Resten an Bremsscheiben/Ausfallende und punktierten Speichen; gleiche offizielle Aufnahme vom Victoria-Hersteller Hartje (Avyon 5 Wave, 'slate grey matt', Art. 02921075) in 2000 px, sauber freigestellt.",
-  "notiz": "Hartje-Original-Nr. KHA261029; bikes.de zeigt unter slate grey matt (3085004) ein dunkelgraues Bild – Hartje-Bild ist maßgeblich.",
+  "notiz": "Hartje nennt 600 Wh, Veloport 720 Wh – gleiches Rad/Farbe, Akkuangabe abweichend.",
+  "ok_n": 1,
   "qcheck": "2026-11-23",
   "quelle": "https://meinhartje.cstatic.io/media/6d/45/57/1784194370/02921075_VICTORIA_AVYON_5_Wave_2026-png.jpg?ts=1784194370",
   "seite": "https://meinhartje.com/en/victoria-electric-suv-avyon-5-2/02921075",
   "versuche": 0,
-  "zuletzt": "2026-11-24"
+  "zuletzt": "2026-11-25"
  },
  "victoria|avyon6275|2027|marblegrey": {
-  "geprueft": "2026-11-15",
+  "geprueft": "2026-11-25",
   "gesucht": "2026-11-15",
   "grund": "Qualität: altes Bild mit punktierten Speichen und kleinen weißen Resten an Kassette/Bremsscheibe; gleiche offizielle Hartje-Aufnahme (Avyon 6 Diamant, 'marble grey', Art. 02921078) in 1772 px, sauber freigestellt.",
+  "ok_n": 1,
   "qcheck": "2026-11-23",
   "quelle": "https://meinhartje.cstatic.io/media/ab/d2/ba/1784142930/02921078_VICTORIA_AVYON_6_Diamant_2026.jpg",
   "seite": "https://meinhartje.com/en/victoria-electric-suv-avyon-6-2/02921078",
   "versuche": 0,
-  "zuletzt": "2026-11-24"
+  "zuletzt": "2026-11-25"
  },
  "victoria|utilyon13|2027|slategreymatt": {
   "geprueft": "2026-11-24",
   "notiz": "Qualität: Speichen am Hinterrad stellenweise unterbrochen (Freistellung); keine bessere Fassung gefunden (victoria-bikes.com führt Utilyon 13 nicht; lease-a-bike.nl/.de haben 2500-px-PNG bf_victoria_Utilyon_13_2026_*.jpg nur in Spinellrot).",
   "qcheck": "2026-11-24",
-  "zuletzt": "2026-11-24"
+  "zuletzt": "2026-11-25"
  },
  "victoria|veloa7|2027|bluematt": {
   "geprueft": "2026-11-24",
   "notiz": "Qualität: Speichen stellenweise unterbrochen; keine bessere Fassung gefunden (victoria-bikes.com zeigt den 2027er Veloa noch nicht).",
   "qcheck": "2026-11-24",
-  "zuletzt": "2026-11-24"
+  "zuletzt": "2026-11-25"
  },
  "victoria|veloa7|2027|darkolivematt": {
   "geprueft": "2026-11-24",
   "notiz": "Qualität: Speichen stellenweise unterbrochen; keine bessere Fassung gefunden (victoria-bikes.com zeigt den 2027er Veloa noch nicht).",
   "qcheck": "2026-11-24",
-  "zuletzt": "2026-11-24"
+  "zuletzt": "2026-11-25"
  },
  "victoria|veloa7|2027|roseglossy": {
   "geprueft": "2026-11-24",
   "notiz": "Qualität: Speichen stellenweise unterbrochen; keine bessere Fassung gefunden (victoria-bikes.com zeigt den 2027er Veloa noch nicht).",
   "qcheck": "2026-11-24",
-  "zuletzt": "2026-11-24"
+  "zuletzt": "2026-11-25"
  }
 }
