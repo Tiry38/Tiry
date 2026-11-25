@@ -643,3 +643,7 @@
 ## i:SY Experte: Zitate lesbar + Bus fährt wieder (24.11.2026, Tiry)
 - Zitat-Karten `.isyq` (zart getönt) bekamen keinen Lichtsaum (zählten als Karte) → Schrift jetzt mit demselben weißen Saum wie freie Schrift (`hg12.css`).
 - Bus blieb nach der ersten Runde links außerhalb stehen: Spar-Logik `vSpar` (23.11.) hielt ihn an, weil er jede Runde außerhalb der Straße (`overflow:hidden`) startet. Teile in `.road` werden jetzt über die ganze Straße beobachtet (`hg12.js`). Außerhalb des Bildes pausiert er weiter.
+
+## 25.11.2026 – Keine Räder-Anzahl mehr (Tiry, verbindlich)
+- „250+ E-Bikes vor Ort“ überall entfernt: schwebender Knopf in beiden Showrooms (Start + Marken), Laufband-Eintrag, Startseiten-Text, Marken-Text, Service-Liste, Menü-Vorschau Start (Text + Schild).
+- Nie wieder eine Räder-Anzahl („250+“, „über 300“ …) auf die Homepage. Reiter „Auf Lager“ und „Live-Bestand“ bleiben.
