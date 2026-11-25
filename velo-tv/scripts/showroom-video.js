@@ -29,7 +29,6 @@ const HG_MODUS = !!arg('hintergrund', false);           // nur die Hintergrund-S
 const HG_DATEI = arg('hintergrund-datei', '');           // fertige Hintergrund-Schleife für das Showroom-Video
 const HG_LAENGE = 24, HG_BLENDE = 3;                     // Schleife 24 s, nahtlos überblendet   // nur prüfen, ob sich etwas geändert hat (Ausgabe changed=true/false)
 const log = (...a) => console.log('[showroom-video]', ...a);
-const NUR_NAHT = arg('nur-naht', '');                    // Test: Naht auf ein fertiges Video anwenden (--nur-naht <datei> --out <ordner>)
 
 // Design-Fingerabdruck: ändert sich der Showroom-Code, wird neu gerendert
 const DESIGN_DATEIEN = ['src/player/showroom.js', 'src/player/showroom.css', 'src/player/player.css', 'src/player/vendor/hg12.js', 'src/player/vendor/morph.js', 'scripts/showroom-video.js'];
@@ -62,8 +61,18 @@ async function segment(browser, base, daten, von, bis, datei, nr, opts) {
   const fehler = [];
   page.on('pageerror', (e) => fehler.push(e.message));
   const offset = von * SEK * 1000;
-  await page.addInitScript((o) => {
+  await page.addInitScript(({ o, T }) => {
     window.HG_RENDER = 1; window.HG_T0 = -o; window.__vmSW = 1;
+    // Nahtlose Endlosschleife: Dauer-Animationen (Laufband, Halo, Verlauf, Ring …) laufen minimal schneller/langsamer,
+    // so dass genau eine ganze Zahl Durchläufe in die Videolänge T passt → letztes Bild geht exakt ins erste über.
+    var takt = function (a) {
+      try {
+        var tm = a.effect.getTiming(), D = Number(tm.duration);
+        if (tm.iterations !== Infinity || !(D > 0) || !(T > 0)) return 1;
+        var P = D * (/alternate/.test(tm.direction) ? 2 : 1);
+        return P * Math.max(1, Math.round(T / P)) / T;
+      } catch (e) { return 1; }
+    };
     if (window.__bgAnzahl) window.HG_AUS = 1;
     // CSS-Animationen an die virtuelle Uhr koppeln: Dauer-Animationen absolut (lückenlos über Segmente), neue ab ihrem Start
     window.__vtTick = function (t) {
@@ -76,17 +85,23 @@ async function segment(browser, base, daten, von, bis, datei, nr, opts) {
           else { a.__vt = window.__vtLaeuft ? t : -o; if (m) m[nm] = a.__vt; }
           try { a.pause(); } catch (e) { /* egal */ }
         }
-        try { a.currentTime = Math.max(0, t - a.__vt); } catch (e) { /* egal */ }
+        if (a.__vf == null) a.__vf = a.__vt === -o ? takt(a) : 1;   // nur durchgehende Animationen (nicht die je Rad)
+        try { a.currentTime = Math.max(0, t - a.__vt) * a.__vf; } catch (e) { /* egal */ }
       });
     };
-  }, offset);
+  }, { o: offset, T: opts.gesamt || 0 });
   if (opts.bgAnzahl) await page.addInitScript((n) => { window.__bgAnzahl = n; }, opts.bgAnzahl);
   await page.clock.install({ time: 0 });
   await page.goto(base + '/?render=1', { waitUntil: 'load' });
   if (opts.bgAnzahl) {
     // Hintergrund = fertige Bilder der Schleife; WebGL-Hintergrund aus (spart 95 % Rechenzeit)
     await page.addStyleTag({ content: '#hg{display:none!important} html.hg-an #stage,#stage{background:transparent!important} #bgf{position:fixed;left:0;top:0;width:100vw;height:100vh;z-index:0;object-fit:cover}' });
-    await page.evaluate(() => { window.HG_PAUSE = true; const i = document.createElement('img'); i.id = 'bgf'; document.body.insertBefore(i, document.body.firstChild); });
+    await page.addStyleTag({ content: '#bgf2{position:fixed;left:0;top:0;width:100vw;height:100vh;z-index:0;object-fit:cover;opacity:0}' });
+    await page.evaluate(() => {
+      window.HG_PAUSE = true;
+      const i = document.createElement('img'); i.id = 'bgf'; const j = document.createElement('img'); j.id = 'bgf2';
+      document.body.insertBefore(j, document.body.firstChild); document.body.insertBefore(i, document.body.firstChild);
+    });
   }
   // Bilder vorladen + dekodieren, Hintergrund-Texturen laden lassen
   await page.evaluate(async (d) => {
@@ -123,9 +138,17 @@ async function segment(browser, base, daten, von, bis, datei, nr, opts) {
     await page.clock.runFor(dt);
     t += dt;
     if (opts.bgAnzahl) {
-      const k = (Math.round((offset + t) / 1000 * FPS) % opts.bgAnzahl) + 1;
-      await page.evaluate(async ({ tt, src }) => { window.__vtTick(tt); const i = document.getElementById('bgf'); i.src = src; if (i.decode) await i.decode().catch(() => {}); window.HG_PAUSE = true; },
-        { tt: t, src: '/bgframes/' + String(k).padStart(5, '0') + '.jpg' });
+      const n = opts.bgAnzahl, gf = (opts.gesamt / 1000) * FPS;                 // Hintergrundbilder / Videobilder gesamt
+      const fak = gf > 0 ? n * Math.max(1, Math.round(gf / n)) / gf : 1;       // ganze Zahl Schleifen in der Videolänge
+      const pos = ((offset + t) / 1000 * FPS * fak) % n, a = Math.floor(pos), mix = Math.round((pos - a) * 100) / 100;
+      const src = (k) => '/bgframes/' + String((k % n) + 1).padStart(5, '0') + '.jpg';
+      await page.evaluate(async ({ tt, s1, s2, mix }) => {
+        window.__vtTick(tt);
+        const i = document.getElementById('bgf'), j = document.getElementById('bgf2');
+        i.src = s1; j.src = s2; j.style.opacity = String(mix);
+        await Promise.all([i, j].map((x) => (x.decode ? x.decode().catch(() => {}) : null)));
+        window.HG_PAUSE = true;
+      }, { tt: t, s1: src(a), s2: src(a + 1), mix });
     } else await page.evaluate((tt) => window.__vtTick(tt), t);
     await enc.schreib(await page.screenshot({ type: 'jpeg', quality: 92, timeout: 0 }));
     if (f % (FPS * 10) === 0) log(`Segment ${nr}: ${Math.round(f / frames * 100)} %`);
@@ -167,19 +190,6 @@ async function hgSegment(browser, base, von, bis, datei, nr) {
 
 function ff(args) { return new Promise((res, rej) => spawn('ffmpeg', ['-y', '-loglevel', 'error', ...args], { stdio: 'inherit' }).on('close', (c) => (c === 0 ? res() : rej(new Error('ffmpeg ' + c))))); }
 
-/** Naht der Endlosschleife: Das Video läuft am Fernseher in Schleife (vid.loop). Ende und Anfang passen inhaltlich,
-    aber Laufband, Hintergrund und Farbverlauf stehen am Ende an einer anderen Stelle als am Anfang → ohne Blende
-    springt es alle ~8 Minuten einmal. Lösung: die erste Sekunde wird weich über die letzte Sekunde geblendet und
-    vorne weggelassen. Dann geht das letzte Bild fließend in das erste über. Länge = Originallänge − 1 s. */
-async function naht(roh, ziel, frames) {
-  const B = FPS, e = frames - B;   // xfade (nicht blend: blend setzt das letzte Bild falsch)
-  await ff(['-i', roh, '-filter_complex',
-    `[0:v]split=3[a][b][c];[a]trim=start_frame=${B}:end_frame=${e},setpts=PTS-STARTPTS[mitte];` +
-    `[b]trim=start_frame=${e},setpts=PTS-STARTPTS[ende];[c]trim=end_frame=${B},setpts=PTS-STARTPTS[anfang];` +
-    `[ende][anfang]xfade=transition=fade:duration=1:offset=0[ueber];[mitte][ueber]concat=n=2:v=1:a=0[v]`,
-    '-map', '[v]', '-c:v', 'libx264', '-preset', 'slow', '-crf', '21', '-r', String(FPS), '-movflags', '+faststart', ziel]);
-}
-
 async function concat(dateien, ziel, extra) {
   const liste = ziel + '.txt';
   fs.writeFileSync(liste, dateien.map((f) => "file '" + f.replace(/'/g, "'\\''") + "'").join('\n'));
@@ -189,12 +199,6 @@ async function concat(dateien, ziel, extra) {
 
 (async () => {
   fs.mkdirSync(OUT, { recursive: true });
-  if (NUR_NAHT) {
-    const n = Number(arg('frames', 0));
-    if (!n) throw new Error('--frames <Anzahl Bilder> fehlt');
-    await naht(path.resolve(NUR_NAHT), path.join(OUT, 'showroom.mp4'), n);
-    return log('Naht fertig: ' + path.join(OUT, 'showroom.mp4'));
-  }
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'velotv-render-'));
   const srv = createServer({
     dataDir: dir, playerDir: path.join(R, 'src/player'), version: 'render', showroomAutoStart: false, tvSteuerung: false,
@@ -269,16 +273,14 @@ async function concat(dateien, ziel, extra) {
     for (let k = 0; k < w; k++) teile.push([Math.floor(k * n / w), Math.floor((k + 1) * n / w)]);
     const t0 = Date.now();
     const dateien = teile.map((_, k) => path.join(dir, 'seg' + k + '.mp4'));
-    const infos = await Promise.all(teile.map(([a, b], k) => segment(browser, base, daten, a, b, dateien[k], k, { bgAnzahl })));
+    const infos = await Promise.all(teile.map(([a, b], k) => segment(browser, base, daten, a, b, dateien[k], k, { bgAnzahl, gesamt: n * SEK * 1000 })));
     await browser.close();
     log('Segmente fertig in ' + Math.round((Date.now() - t0) / 1000) + ' s', JSON.stringify(infos));
 
-    const ziel = path.join(OUT, 'showroom.mp4'), roh = path.join(dir, 'roh.mp4');
-    await concat(dateien, roh);
-    log('Schleifen-Naht wird geblendet …');
-    await naht(roh, ziel, items.length * SEK * FPS);
+    const ziel = path.join(OUT, 'showroom.mp4');
+    await concat(dateien, ziel, ['-movflags', '+faststart']);
     const meta = {
-      version, ts: Date.now(), stand: d.stand || '', anzahl: items.length, dauer: items.length * SEK - 1, fps: FPS, sekProRad: SEK, naht: true,
+      version, ts: Date.now(), stand: d.stand || '', anzahl: items.length, dauer: items.length * SEK, fps: FPS, sekProRad: SEK, naht: 'takt',
       groesse: fs.statSync(ziel).size, morph: infos.every((i) => i.vm),
       items: items.map((x) => ({ marke: x.marke, modell: x.modell, farbe: x.farbe, angebot: x.angebot }))
     };
