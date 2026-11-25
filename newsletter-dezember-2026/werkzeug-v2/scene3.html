@@ -1,0 +1,71 @@
+<!doctype html><html lang="de"><head><meta charset="utf-8"><style>
+@font-face{font-family:Outfit;src:url(a/outfit-latin.woff2) format('woff2');font-weight:100 900}
+@font-face{font-family:Sora;src:url(a/sora-latin.woff2) format('woff2');font-weight:100 900}
+*{box-sizing:border-box;margin:0;padding:0}html,body{background:#000}
+#st{position:relative;overflow:hidden}.abs{position:absolute}
+</style></head><body><div id="st"></div>
+<script>
+const $=s=>document.querySelector(s);const cl=(x,a=0,b=1)=>Math.max(a,Math.min(b,x));
+const ease=x=>1-Math.pow(1-cl(x),3);const eio=x=>{x=cl(x);return x<.5?4*x*x*x:1-Math.pow(-2*x+2,3)/2};
+const back=x=>{x=cl(x);const c=1.6;return 1+(c+1)*Math.pow(x-1,3)+c*Math.pow(x-1,2)};
+let s=5;const R=()=>{s=(s*16807)%2147483647;return s/2147483647};
+const leafSVG=(c,d)=>`<svg viewBox="-12 -16 24 34" width="100%" height="100%"><path d="M0,-14 C8,-10 11,-2 8,6 C6,11 2,14 0,16 C-2,14 -6,11 -8,6 C-11,-2 -8,-10 0,-14 Z" fill="${c}"/><path d="M0,-12 L0,17" stroke="${d}" stroke-width="1.2"/></svg>`;
+const LC=[['#D9822B','#8A4512'],['#C8102E','#6E0A18'],['#E3A63B','#94660F'],['#B5531F','#5E270C']];
+const LV=[];for(let i=0;i<16;i++){const z=R();LV.push({x:R()*640,y0:-60-R()*500,z,sz:10+z*z*34,sp:120+z*260,ph:R()*6,c:LC[Math.floor(R()*4)],r:R()*360,bl:z>.8?(z-.8)*14:0})}
+const S={};
+/* KOPF: Allee-Foto (identisch mit Mail-Hintergrund), Laub in Tiefe, "Dezember" baut sich auf */
+S.hero={w:640,h:600,dur:3.76,render(t){
+ const idx=String(Math.min(47,Math.round(t*12.5))).padStart(3,'0');
+ $('#st').style.cssText=`width:640px;height:600px;background:url(fr/hg/${idx}.png) 0 0/640px 820px no-repeat`;
+ $('#st').innerHTML=`
+ <div class="abs" style="left:0;top:0;width:640px;height:600px;background:linear-gradient(180deg,rgba(15,16,20,.30) 0%,rgba(15,16,20,0) 20%)"></div>
+ <div class="abs" style="left:24px;top:22px;width:152px;height:84px;background:#FAF7F4;clip-path:polygon(0 0,100% 0,100% 82%,0 100%);display:flex;align-items:center;justify-content:center;padding-bottom:8px"><img src="a/velocenter-logo.svg" style="width:122px"></div>
+ <div class="abs" style="right:26px;top:30px;text-align:right;font:700 11px/18px Sora;letter-spacing:.22em;text-transform:uppercase;color:#fff;text-shadow:0 1px 8px rgba(0,0,0,.6)">Newsletter<br><span style="color:#F2D4B0">Dezember 2026</span></div>
+ <div class="abs" style="left:22px;top:430px;font:900 118px/1 Outfit;letter-spacing:-.055em;color:#fff;white-space:nowrap;text-shadow:0 6px 30px rgba(0,0,0,.35)">Dezember</div>
+ <div class="abs" style="left:28px;top:556px;height:6px;width:250px;background:#E2232D"></div>
+ <div class="abs" style="left:292px;top:552px;font:700 12px/1 Sora;letter-spacing:.22em;text-transform:uppercase;color:#fff;text-shadow:0 1px 8px rgba(0,0,0,.6)">Wörth am Rhein · seit 1995</div>`;
+}};
+/* LAUFBAND wie auf der Homepage: schraeges rotes Band, Text laeuft nahtlos */
+const TXT='250+ E-Bikes <i>✦</i> 4,8 ★ bei Google <i>✦</i> Bosch Service Center <i>✦</i> i:SY Experte <i>✦</i> Familienbetrieb seit 1995 <i>✦</i> ';
+S.band={w:640,h:96,dur:4.0,y:600,render(t){
+ $('#st').style.cssText='width:640px;height:96px;background:url(a/bg.jpg) 0 -600px/640px auto no-repeat';
+ $('#st').innerHTML=`<div class="abs" style="left:-40px;top:18px;width:720px;height:58px;transform:rotate(-2.2deg);background:linear-gradient(90deg,#8E0E26,#C8102E 30%,#C8102E 70%,#8E0E26);box-shadow:0 8px 20px rgba(0,0,0,.35);overflow:hidden">
+  <div id="mq" class="abs" style="left:0;top:0;height:58px;white-space:nowrap;font:italic 900 25px/58px Outfit;letter-spacing:.01em;text-transform:uppercase;color:#fff"><span id="a1">${TXT}</span><span>${TXT}</span><span>${TXT}</span></div></div>
+  <style>#mq i{font-style:normal;color:#F2D4B0;margin:0 14px}</style>`;
+ const w=$('#a1').getBoundingClientRect().width; $('#mq').style.transform=`translateX(${-(t/4)*w}px)`;
+}};
+/* ABFAHRTSTAFEL (Fallblatt): 6 Angebote, Preise klappen von UVP auf Aktionspreis */
+const ROWS=[['01','STEVENS E-ANTELAO','4.099','2.499'],['02','VDV SEB890 SUV','3.745','2.620'],['03','I:SY POP ART E5','4.599','3.499'],['04','KTM MACINA CITY','3.799','2.799'],['05','I:SY E5 CX CENTURY','4.999','3.999'],['06','VDV AEB400','3.199','2.239']];
+const CH='0123456789.';
+function flapRow(str,t0,t,col){return str.split('').map((c,i)=>{const p=(t-t0-i*.07)/.6;let ch=c;
+  if(p<1&&p>0&&c!==' '){ch=CH[Math.floor((p*13+i*3)%CH.length)]} 
+  const flip=p>0&&p<1?Math.abs(Math.sin(p*13*Math.PI)):0;
+  return `<span style="display:inline-block;width:23px;height:36px;margin-right:2px;background:#1E2027;border-radius:3px;position:relative;text-align:center;font:800 25px/36px Outfit;color:${col};overflow:hidden">
+   <span style="display:block;transform:scaleY(${1-flip*.85})">${ch}</span><span style="position:absolute;left:0;right:0;top:17.5px;height:1px;background:#0B0C10"></span></span>`}).join('')}
+S.board={w:600,h:480,dur:2.6,render(t){
+ const rows=ROWS.map((r,k)=>{const t0=.2+k*.16;
+  const pr=r[3].padStart(5,' ');
+  return `<tr><td style="padding:6px 10px 6px 0;font:800 15px/36px Outfit;color:#E2232D">${r[0]}</td>
+  <td style="padding:6px 0;font:700 14px/36px Sora;color:#F4EFEA;letter-spacing:.04em;white-space:nowrap">${r[1]}</td>
+  <td style="padding:6px 12px;font:600 14px/36px Sora;color:#8B8F9A;text-decoration:line-through;text-decoration-color:#E2232D;white-space:nowrap">${r[2]}</td>
+  <td style="padding:6px 0;white-space:nowrap">${flapRow(pr,t0,t,'#F2D4B0')}<span style="font:800 22px/36px Outfit;color:#F2D4B0;margin-left:4px">€</span></td></tr>`}).join('');
+ const blink=Math.floor(t*2.5)%2;
+ $('#st').style.cssText='width:600px;height:480px;background:#121318';
+ $('#st').innerHTML=`<div class="abs" style="left:0;top:0;right:0;height:6px;background:repeating-linear-gradient(90deg,#E2232D 0 40px,#121318 40px 56px)"></div>
+ <div class="abs" style="left:26px;top:30px;font:700 11px/1 Sora;letter-spacing:.26em;text-transform:uppercase;color:#8B8F9A">Abfahrt · Umbau-Angebote · Gleis Hartmannstraße 25</div>
+ <div class="abs" style="left:26px;top:52px;font:900 34px/1.1 Outfit;letter-spacing:-.02em;color:#fff">6 E-Bikes. Einzelstücke.</div>
+ <div class="abs" style="right:26px;top:56px;display:flex;align-items:center;gap:8px;font:700 12px/1 Sora;letter-spacing:.14em;color:#F2D4B0"><span style="width:9px;height:9px;border-radius:50%;background:${blink?'#34D399':'#1E5E46'}"></span>AB LAGER</div>
+ <table class="abs" style="left:26px;top:104px;border-collapse:collapse">
+  <tr><td style="font:700 10px/1 Sora;letter-spacing:.2em;color:#6B7282;padding-bottom:6px">NR</td><td style="font:700 10px/1 Sora;letter-spacing:.2em;color:#6B7282">RAD</td><td style="font:700 10px/1 Sora;letter-spacing:.2em;color:#6B7282;padding-left:12px">UVP</td><td style="font:700 10px/1 Sora;letter-spacing:.2em;color:#6B7282">JETZT</td></tr>${rows}</table>`;
+}};
+/* 0 % : Rollen auf 0,00 */
+S.zero={w:300,h:150,dur:1.8,render(t){
+ const reel=(fin,t0,big)=>{const p=eio((t-t0)/1.1);const off=(1-p)*9;const h=big?112:62;
+  let s='';for(let k=9;k>=0;k--)s+=`<div style="height:${h}px">${(fin+k)%10}</div>`;
+  return `<span style="display:inline-block;height:${h}px;overflow:hidden;vertical-align:top"><span style="display:block;transform:translateY(${-(9-off)*h}px)">${s}</span></span>`};
+ $('#st').style.cssText='width:300px;height:150px;background:#FAF7F4';
+ $('#st').innerHTML=`<div class="abs" style="left:0;top:8px;font:900 112px/112px Outfit;letter-spacing:-.04em;color:#1B1E25;white-space:nowrap">${reel(0,.05,1)}<span style="font:900 54px/62px Outfit;vertical-align:top">,</span><span style="font:900 54px/62px Outfit;vertical-align:top">${reel(0,.2,0)}${reel(0,.35,0)}</span><span style="color:#C8102E">%</span></div>
+ <div class="abs" style="left:4px;top:126px;font:700 10px/1 Sora;letter-spacing:.22em;text-transform:uppercase;color:#4A5161">Effektiver Jahreszins</div>`;
+}};
+window.SC=S;window.draw=(n,t)=>S[n].render(t);
+</script></body></html>

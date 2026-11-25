@@ -3,13 +3,13 @@
 200 | https://wa.me/491635343133?text=Hallo%20Velocenter%2C%20ich%20m%C3%B6chte%20einen%20Termin%20f%C3%BCr%20die%20Winter-Inspektion. | 
 -- | tel:+49727178033 | Platzhalter/Protokoll
 200 | https://tiry38.github.io/velo-center-web/#kontakt | Ziel #kontakt FEHLT
+200 | https://tiry38.github.io/velo-center-web/#lager | Ziel #lager FEHLT
 200 | https://tiry38.github.io/velo-center-web/#rad=stevens-e-antelao-29 | × STEVENS E-Antelao 29'' Sofort verfügbar Sonderangebot UVP 4.099 € 2.499 € Du sparst 1.
 200 | https://wa.me/491635343133?text=Hallo%20Velocenter%2C%20ich%20interessiere%20mich%20f%C3%BCr%20das%20Velo%20de%20Ville%20SEB890%20SUV%20Smart%20in%20Pure%20White%20%2845%20cm%29%20f%C3%BCr%202.620%20%E2%82%AC. | 
 200 | https://tiry38.github.io/velo-center-web/#rad=i-sy-pop-art-e5-zr-f | × I:SY POP ART E5 ZR F Sofort verfügbar Sonderangebot UVP 4.599 € 3.499 € Du sparst 1.10
 200 | https://wa.me/491635343133?text=Hallo%20Velocenter%2C%20ich%20interessiere%20mich%20f%C3%BCr%20das%20KTM%20Macina%20City%20P610%20RT%20%2856%20cm%2C%20Oak%29%20f%C3%BCr%202.799%20%E2%82%AC. | 
 200 | https://wa.me/491635343133?text=Hallo%20Velocenter%2C%20ich%20interessiere%20mich%20f%C3%BCr%20das%20i%3ASY%20E5%20ZR%20F%20CX%20Century%20in%20Riviera%20Blue%20f%C3%BCr%203.999%20%E2%82%AC. | 
 200 | https://tiry38.github.io/velo-center-web/#rad=velo-de-ville-aeb400-allround-28-8gg-nex | × FOTO FOLGT VELO DE VILLE AEB400 Allround 28" 8Gg Nex Sofort verfügbar Sonderangebot UV
-200 | https://tiry38.github.io/velo-center-web/#lager | Ziel #lager FEHLT
 200 | https://tiry38.github.io/velo-center-web/#dreirad | Ziel #dreirad FEHLT
 200 | https://wa.me/491635343133?text=Hallo%20Velocenter%2C%20ich%20habe%20eine%20Frage%20zu%20meinem%20E-Bike. | 
 200 | https://wa.me/491635343133 | 
