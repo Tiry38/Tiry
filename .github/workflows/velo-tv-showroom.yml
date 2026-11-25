@@ -3,6 +3,7 @@ name: Velo-TV Showroom-Video
 # Stündlich: prüft die Angebotsräder im Live-Bestand der Homepage. Hat sich etwas geändert (neues Angebot, Preis,
 # verkauft/ausgeblendet, Foto) oder wurde das Showroom-Design geändert, wird das Video neu berechnet und ins Release
 # „velo-tv-showroom“ gelegt. Die Velo-TV-Zentrale holt es sich alle 15 Minuten von dort.
+# Verteilt (Tiry 25.11.2026): bis zu 20 Rechner rendern gleichzeitig je 2–3 Räder → fertig in ca. 20 Minuten.
 on:
   schedule:
     - cron: '23 * * * *'
@@ -23,60 +24,117 @@ concurrency:
   group: velo-tv-showroom
   cancel-in-progress: false
 
+env:
+  ALT: https://github.com/Tiry38/Tiry/releases/download/velo-tv-showroom/showroom-video.json
+
 jobs:
-  video:
+  pruefen:
     runs-on: ubuntu-latest
-    timeout-minutes: 340
-    defaults:
-      run:
-        working-directory: velo-tv
+    timeout-minutes: 10
+    defaults: { run: { working-directory: velo-tv } }
+    outputs:
+      changed: ${{ steps.check.outputs.changed }}
+      version: ${{ steps.check.outputs.version }}
+      teile: ${{ steps.check.outputs.teile }}
+      matrix: ${{ steps.check.outputs.matrix }}
+      hg: ${{ steps.hg.outputs.name }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: npm
-          cache-dependency-path: velo-tv/package-lock.json
+        with: { node-version: 22, cache: npm, cache-dependency-path: velo-tv/package-lock.json }
       - run: npm ci
       - name: Geändert?
         id: check
-        run: node scripts/showroom-video.js --check --out out --alt https://github.com/Tiry38/Tiry/releases/download/velo-tv-showroom/showroom-video.json ${{ inputs.force && '--force' || '' }}
-      - name: Browser + ffmpeg
-        if: steps.check.outputs.changed == 'true'
+        run: node scripts/showroom-video.js --check --out out --alt "$ALT" ${{ inputs.force && '--force' || '' }}
+      - name: Name der Hintergrund-Schleife
+        id: hg
+        run: echo "name=hintergrund-$(sha1sum src/player/vendor/hg12.js | cut -c1-10).mp4" >> "$GITHUB_OUTPUT"
+
+  hintergrund:
+    needs: pruefen
+    if: needs.pruefen.outputs.changed == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    defaults: { run: { working-directory: velo-tv } }
+    steps:
+      - name: Schon im Release?
+        id: da
+        working-directory: .
         run: |
+          if curl -fsIL "https://github.com/Tiry38/Tiry/releases/download/velo-tv-showroom/${{ needs.pruefen.outputs.hg }}" >/dev/null; then echo "ja=true" >> "$GITHUB_OUTPUT"; else echo "ja=false" >> "$GITHUB_OUTPUT"; fi
+      - uses: actions/checkout@v4
+        if: steps.da.outputs.ja != 'true'
+      - uses: actions/setup-node@v4
+        if: steps.da.outputs.ja != 'true'
+        with: { node-version: 22, cache: npm, cache-dependency-path: velo-tv/package-lock.json }
+      - name: Hintergrund-Schleife einmal bauen
+        if: steps.da.outputs.ja != 'true'
+        env: { GH_TOKEN: '${{ secrets.GITHUB_TOKEN }}' }
+        run: |
+          npm ci
           npx playwright install --with-deps chromium
           sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg
-      - name: Hintergrund-Schleife (einmal gebaut, danach aus dem Release)
-        id: hg
-        if: steps.check.outputs.changed == 'true'
-        shell: bash
+          node scripts/showroom-video.js --hintergrund --out out
+          gh release view velo-tv-showroom >/dev/null 2>&1 || { git tag -f velo-tv-showroom "$GITHUB_SHA" && git push -f origin refs/tags/velo-tv-showroom && gh release create velo-tv-showroom --verify-tag --latest=false --title "Velo-TV Showroom-Video" --notes "Automatisch gebautes Showroom-Video (Angebotsräder aus dem Live-Bestand)."; }
+          cp out/hintergrund.mp4 "out/${{ needs.pruefen.outputs.hg }}"
+          gh release upload velo-tv-showroom "out/${{ needs.pruefen.outputs.hg }}" --clobber
+
+  rendern:
+    needs: [pruefen, hintergrund]
+    if: needs.pruefen.outputs.changed == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    strategy:
+      fail-fast: true
+      max-parallel: 20
+      matrix:
+        teil: ${{ fromJSON(needs.pruefen.outputs.matrix) }}
+    defaults: { run: { working-directory: velo-tv } }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: npm, cache-dependency-path: velo-tv/package-lock.json }
+      - name: Programme
         run: |
-          HG="hintergrund-$(sha1sum src/player/vendor/hg12.js | cut -c1-10).mp4"
-          echo "name=$HG" >> "$GITHUB_OUTPUT"
+          npm ci
+          npx playwright install --with-deps chromium
+          sudo apt-get install -y -qq ffmpeg || { sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg; }
           mkdir -p out
-          if curl -fsSL -o out/hintergrund.mp4 "https://github.com/Tiry38/Tiry/releases/download/velo-tv-showroom/$HG"; then
-            echo "neu=false" >> "$GITHUB_OUTPUT"; echo "Hintergrund aus dem Release: $HG"
-          else
-            node scripts/showroom-video.js --hintergrund --out out
-            echo "neu=true" >> "$GITHUB_OUTPUT"
-          fi
-      - name: Video rendern
-        if: steps.check.outputs.changed == 'true'
-        run: node scripts/showroom-video.js --out out --force --hintergrund-datei out/hintergrund.mp4
+          curl -fsSL -o out/hintergrund.mp4 "https://github.com/Tiry38/Tiry/releases/download/velo-tv-showroom/${{ needs.pruefen.outputs.hg }}"
+      - name: Stück ${{ matrix.teil }} rendern
+        run: node scripts/showroom-video.js --out out/teile --force --hintergrund-datei out/hintergrund.mp4 --teil ${{ matrix.teil }} --teile ${{ needs.pruefen.outputs.teile }} --version-soll ${{ needs.pruefen.outputs.version }}
+      - uses: actions/upload-artifact@v4
+        with:
+          name: teil-${{ matrix.teil }}
+          path: velo-tv/out/teile/
+          retention-days: 1
+
+  zusammen:
+    needs: [pruefen, rendern]
+    if: needs.pruefen.outputs.changed == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    defaults: { run: { working-directory: velo-tv } }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: npm, cache-dependency-path: velo-tv/package-lock.json }
+      - run: |
+          npm ci
+          sudo apt-get install -y -qq ffmpeg || { sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg; }
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: teil-*
+          path: velo-tv/out/teile
+          merge-multiple: true
+      - name: Zusammenfügen
+        run: node scripts/showroom-video.js --zusammen out/teile --out out --force --version-soll ${{ needs.pruefen.outputs.version }}
       - name: Release velo-tv-showroom aktualisieren
-        if: steps.check.outputs.changed == 'true'
-        shell: bash
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        env: { GH_TOKEN: '${{ secrets.GITHUB_TOKEN }}' }
         run: |
           TAG="velo-tv-showroom"
           ls -la out
-          if ! gh release view "$TAG" >/dev/null 2>&1; then
-            git tag -f "$TAG" "$GITHUB_SHA" && git push -f origin "refs/tags/$TAG"
-            gh release create "$TAG" --verify-tag --latest=false --title "Velo-TV Showroom-Video" \
-              --notes "Automatisch gebautes Showroom-Video (Angebotsräder aus dem Live-Bestand). Wird stündlich geprüft und bei Änderungen neu gebaut."
-          fi
-          if [ "${{ steps.hg.outputs.neu }}" = "true" ]; then cp out/hintergrund.mp4 "out/${{ steps.hg.outputs.name }}"; gh release upload "$TAG" "out/${{ steps.hg.outputs.name }}" --clobber; fi
+          gh release view "$TAG" >/dev/null 2>&1 || { git tag -f "$TAG" "$GITHUB_SHA" && git push -f origin "refs/tags/$TAG" && gh release create "$TAG" --verify-tag --latest=false --title "Velo-TV Showroom-Video" --notes "Automatisch gebautes Showroom-Video (Angebotsräder aus dem Live-Bestand)."; }
           # erst das Video, dann die Info-Datei – so lädt die Zentrale nie ein halbes Video
           gh release upload "$TAG" out/showroom.mp4 --clobber
           gh release upload "$TAG" out/showroom-video.json --clobber

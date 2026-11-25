@@ -25,6 +25,10 @@ const WORKERS = Number(arg('workers', Math.max(1, Math.min(4, os.cpus().length))
 const FORCE = !!arg('force', false);
 const ALT = arg('alt', '');
 const CHECK = !!arg('check', false);
+// Verteilter Bau (GitHub-Matrix): --teil k --teile N rendert nur ein Stück; --zusammen <ordner> fügt alle Stücke zusammen.
+const TEIL = arg('teil', ''), TEILE = Number(arg('teile', 0)), ZUSAMMEN = arg('zusammen', '');
+const VERSION_SOLL = arg('version-soll', '');           // alle Stücke müssen denselben Bestand zeigen
+const MAX_TEILE = 20;                                    // GitHub erlaubt 20 gleichzeitige Rechner (kostenlos)
 const HG_MODUS = !!arg('hintergrund', false);           // nur die Hintergrund-Schleife rendern
 const HG_DATEI = arg('hintergrund-datei', '');           // fertige Hintergrund-Schleife für das Showroom-Video
 const HG_LAENGE = 24, HG_BLENDE = 3;                     // Schleife 24 s, nahtlos überblendet   // nur prüfen, ob sich etwas geändert hat (Ausgabe changed=true/false)
@@ -254,7 +258,31 @@ async function concat(dateien, ziel, extra) {
 
     if (CHECK) {
       log('Geändert (oder erzwungen) – neues Video wird gebaut.');
-      if (process.env.GITHUB_OUTPUT) fs.appendFileSync(process.env.GITHUB_OUTPUT, 'changed=true\n');
+      const N = Math.min(MAX_TEILE, items.length);
+      if (process.env.GITHUB_OUTPUT) fs.appendFileSync(process.env.GITHUB_OUTPUT,
+        'changed=true\nversion=' + version + '\nteile=' + N + '\nmatrix=' + JSON.stringify([...Array(N).keys()]) + '\n');
+      return;
+    }
+    if (VERSION_SOLL && VERSION_SOLL !== true && VERSION_SOLL !== version)
+      throw new Error('Bestand hat sich während des Baus geändert (' + version + ' statt ' + VERSION_SOLL + ') – der nächste stündliche Lauf baut neu.');
+    const metaSchreiben = (ziel, morph) => {
+      const meta = {
+        version, ts: Date.now(), stand: d.stand || '', anzahl: items.length, dauer: items.length * SEK, fps: FPS, sekProRad: SEK, naht: 'takt',
+        groesse: fs.statSync(ziel).size, morph,
+        items: items.map((x) => ({ marke: x.marke, modell: x.modell, farbe: x.farbe, angebot: x.angebot }))
+      };
+      fs.writeFileSync(path.join(OUT, 'showroom-video.json'), JSON.stringify(meta, null, 1));
+      log('Fertig: ' + ziel + ' (' + Math.round(meta.groesse / 1e6) + ' MB, ' + meta.dauer + ' s)');
+    };
+    if (ZUSAMMEN) {
+      const quelle = path.resolve(ZUSAMMEN);
+      const stuecke = fs.readdirSync(quelle).filter((f) => /^teil-\d+\.mp4$/.test(f)).sort();
+      const infos = stuecke.map((f) => JSON.parse(fs.readFileSync(path.join(quelle, f.replace('.mp4', '.json')), 'utf8')));
+      if (!stuecke.length || infos.some((i) => i.version !== version) || infos[0].teile !== stuecke.length)
+        throw new Error('Stücke unvollständig oder aus anderem Bestand: ' + stuecke.length + ' Stücke');
+      const ziel = path.join(OUT, 'showroom.mp4');
+      await concat(stuecke.map((f) => path.join(quelle, f)), ziel, ['-movflags', '+faststart']);
+      metaSchreiben(ziel, infos.every((i) => i.morph));
       return;
     }
     const daten = { items };
@@ -269,24 +297,28 @@ async function concat(dateien, ziel, extra) {
       log('Hintergrund: ' + bgAnzahl + ' Bilder');
     }
     const browser = await starte();
-    const n = items.length, w = Math.min(WORKERS, n), teile = [];
-    for (let k = 0; k < w; k++) teile.push([Math.floor(k * n / w), Math.floor((k + 1) * n / w)]);
+    const n = items.length;
+    // Bereich dieses Rechners: alles oder nur ein Stück (verteilter Bau)
+    let A = 0, Bis = n;
+    if (TEIL !== '' && TEILE > 0) { const k = Number(TEIL); A = Math.floor(k * n / TEILE); Bis = Math.floor((k + 1) * n / TEILE); }
+    const w = Math.max(1, Math.min(WORKERS, Bis - A)), teile = [];
+    for (let k = 0; k < w; k++) teile.push([A + Math.floor(k * (Bis - A) / w), A + Math.floor((k + 1) * (Bis - A) / w)]);
     const t0 = Date.now();
     const dateien = teile.map((_, k) => path.join(dir, 'seg' + k + '.mp4'));
     const infos = await Promise.all(teile.map(([a, b], k) => segment(browser, base, daten, a, b, dateien[k], k, { bgAnzahl, gesamt: n * SEK * 1000 })));
     await browser.close();
     log('Segmente fertig in ' + Math.round((Date.now() - t0) / 1000) + ' s', JSON.stringify(infos));
 
+    if (TEIL !== '' && TEILE > 0) {
+      const name = 'teil-' + String(TEIL).padStart(2, '0');
+      await concat(dateien, path.join(OUT, name + '.mp4'));
+      fs.writeFileSync(path.join(OUT, name + '.json'), JSON.stringify({ version, teil: Number(TEIL), teile: TEILE, von: A, bis: Bis, morph: infos.every((i) => i.vm) }));
+      log('Stück ' + TEIL + '/' + TEILE + ' fertig (Räder ' + A + '–' + (Bis - 1) + ')');
+      return;
+    }
     const ziel = path.join(OUT, 'showroom.mp4');
     await concat(dateien, ziel, ['-movflags', '+faststart']);
-    const meta = {
-      version, ts: Date.now(), stand: d.stand || '', anzahl: items.length, dauer: items.length * SEK, fps: FPS, sekProRad: SEK, naht: 'takt',
-      groesse: fs.statSync(ziel).size, morph: infos.every((i) => i.vm),
-      items: items.map((x) => ({ marke: x.marke, modell: x.modell, farbe: x.farbe, angebot: x.angebot }))
-    };
-    fs.writeFileSync(path.join(OUT, 'showroom-video.json'), JSON.stringify(meta, null, 1));
-    if (process.env.GITHUB_OUTPUT) fs.appendFileSync(process.env.GITHUB_OUTPUT, 'changed=true\n');
-    log('Fertig: ' + ziel + ' (' + Math.round(meta.groesse / 1e6) + ' MB, ' + meta.dauer + ' s)');
+    metaSchreiben(ziel, infos.every((i) => i.vm));
   } finally {
     await srv.close();
     fs.rmSync(dir, { recursive: true, force: true });

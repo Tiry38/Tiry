@@ -52,6 +52,10 @@ Alle PCs mit Velo-TV sehen jede Änderung sofort. Design wie die neue Homepage (
   Halo, Verlauf, Ring) und die Hintergrund-Schleife werden beim Rendern minimal im Tempo angepasst, so dass genau eine
   ganze Zahl Durchläufe in die Videolänge passt – das letzte Bild geht exakt ins erste über, ohne Blende.
   Hintergrund-Zwischenbilder werden dafür aus zwei Nachbarbildern gemischt.
+  Verteilter Bau (Tiry 25.11.2026): Job `pruefen` → `hintergrund` (nur falls Schleife fehlt) → `rendern` als Matrix mit bis zu
+  20 Rechnern (`--teil k --teile N`, je 2–3 Räder) → `zusammen` (`--zusammen <ordner>`, fügt die Stücke verlustfrei
+  aneinander). Alle Stücke prüfen `--version-soll`: Ändert sich der Bestand während des Baus, wird nichts hochgeladen und
+  der nächste stündliche Lauf baut neu. Dauer ca. 20 Minuten statt 3+ Stunden.
 - Die Zentrale holt alle 15 min ein neues Video (`showroom.js` → `videoHolen`), der Player spielt es ab und setzt beim
   nächsten Mal an der letzten Stelle fort. Ohne Video: Live-Showroom (HTML/WebGL) als Rückfall.
 - Lokal testen: `node scripts/showroom-video.js --hintergrund --out <dir>` und
