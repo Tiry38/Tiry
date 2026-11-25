@@ -365,11 +365,11 @@ function seek(t) {
   if (showBike) for (const m of ev.marks) { if (t < m.t || t > m.until) continue; const k = t - m.t, out = clamp((m.until - t) / .25);
     const mx = r.x + m.u * r.w, my = r.y + m.v * r.h; const R0 = Math.max(16, r.w * .018);
     g.save(); g.globalAlpha = out;
-    const gl = g.createRadialGradient(mx, my, 0, mx, my, R0 * 3.2); gl.addColorStop(0, 'rgba(255,111,0,.38)'); gl.addColorStop(1, 'rgba(255,111,0,0)'); g.fillStyle = gl; g.fillRect(mx - R0 * 4, my - R0 * 4, R0 * 8, R0 * 8);
+    const gl = g.createRadialGradient(mx, my, 0, mx, my, R0 * 3.2); gl.addColorStop(0, 'rgba(255,111,0,.16)'); gl.addColorStop(1, 'rgba(255,111,0,0)'); g.fillStyle = gl; g.fillRect(mx - R0 * 4, my - R0 * 4, R0 * 8, R0 * 8);
     for (let p = 0; p < 3; p++) { const q = ((k - p * .45) % 1.35) / 1.35; if (k - p * .45 < 0 || q < 0) continue; g.beginPath(); g.arc(mx, my, R0 * (1 + q * 2.4), 0, 7); g.strokeStyle = `rgba(255,111,0,${(1 - q) * .95})`; g.lineWidth = 3 - q * 1.5; g.stroke(); }
     const blink = .55 + .45 * Math.cos(k * Math.PI * 2 / .7);
     g.beginPath(); g.arc(mx, my, R0, 0, 7); g.strokeStyle = `rgba(255,140,40,${blink})`; g.lineWidth = 3.5; g.stroke();
-    g.beginPath(); g.arc(mx, my, R0 * .28, 0, 7); g.fillStyle = '#FF6F00'; g.fill();
+    g.beginPath(); g.arc(mx, my, R0 * .14, 0, 7); g.fillStyle = '#FF6F00'; g.fill();
     if (ev.caps.some(c => t >= c.t + .2 && t < c.until)) { const cx2 = L.cap.x + 180, cy2 = L.cap.y; const lk = ease(clamp(k / .5));
       g.beginPath(); g.moveTo(mx, my); g.lineTo(lerp(mx, cx2, lk), lerp(my, cy2, lk)); g.strokeStyle = 'rgba(255,111,0,.85)'; g.lineWidth = 2; g.stroke(); }
     g.restore(); }
@@ -467,7 +467,7 @@ function seek(t) {
       hd.querySelector('.warum i').style.transform = `scaleX(${ease(clamp((tIn - 1.6 - wb.children.length * .2) / .8))})`;
       hd.style.transform = `translate(${-px * .15}px,${-py * .15}px)`;
     }
-    giant.textContent = gi; giant.style.opacity = a * .9 * (1 - (S.kind === 'motor' ? clamp((lt - 1) / 1) : 0)); }
+    giant.textContent = gi; giant.style.opacity = a * .9 * (1 - (S.kind === 'motor' ? clamp((lt - 1) / 1) : 0)) * clamp((1.12 - cam.z) / .12); }
 
   // Konfigurator-UI ein
   const uiOn = t >= sMotor.t0 + MT.ui - .2 && !(t > sSum.t0 + .1);
