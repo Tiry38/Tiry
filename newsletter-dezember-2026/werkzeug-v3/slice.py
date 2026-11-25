@@ -9,7 +9,7 @@ LEA={'jr':'https://www.jobrad.org/','bl':'https://www.bikeleasing.de/','bb':'htt
      'cb':'https://company-bike.com/','km':'https://www.kazenmaier.de/','lb':'https://www.lease-a-bike.de/','er':'https://www.eurorad.de/','rd':'https://radimdienst.de/'}
 def res(h):
     if h=='' : return HP
-    if h.startswith('#'): return HP+h
+    if h.startswith('#'): return HP+'#'+urllib.parse.quote(h[1:],safe='=~-')
     if h.startswith('WA:'): return 'https://wa.me/491635343133?text='+urllib.parse.quote(h[3:])
     if h=='MAPS': return 'https://www.google.com/maps/search/?api=1&query=Velocenter+Hessert+Hartmannstra%C3%9Fe+25+76744+W%C3%B6rth+am+Rhein'
     if h.startswith('LEA:'): return LEA[h[4:]]
@@ -47,7 +47,7 @@ for yi in range(len(ys)-1):
             once=an['name'] not in ('hero','gt') and not an['name'].startswith('snow')
             if once: seq=[seq[-1]]+seq+[seq[-1]]
             dur=[50 if an['name']=='gt' else (40 if an['name']=='hero' else (50 if an['name'].startswith('snow') else 80))]*len(seq)
-            if once: dur[0]=2600; dur[-1]=2600
+            if once: dur[0]=60; dur[-1]=1800
             pal=seq[0].quantize(colors=255,method=Image.MEDIANCUT,dither=Image.Dither.NONE)
             if an['name']=='hero':  # nahtlose Schleife: Ende blendet in den Anfang, kein Ruck
                 import numpy as np
