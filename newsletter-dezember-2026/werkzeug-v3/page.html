@@ -215,7 +215,7 @@ function snowAt(t){const L=3.2;$('#snowL').innerHTML=FL.map(f=>{const p=((t/L)+f
  return `<g transform="translate(${f.x.toFixed(2)} ${y.toFixed(2)}) rotate(${(f.a*57+p*6).toFixed(2)}) scale(${f.r})" opacity="${al.toFixed(3)}"><path d="${ARM}" stroke="#fff" stroke-width="${(1.1/f.r).toFixed(3)}" stroke-linecap="round" fill="none"/></g>`}).join('')}
 window.setT=t=>{
  const gp=(t>=99?0:.12*(1-Math.cos(2*Math.PI*t/4))/2);document.querySelectorAll('.gt').forEach(e=>e.style.backgroundPosition=(gp*100)+'% 0');
- const hi=t>=99?0:Math.min(59,Math.round(t*12.5));$('#heroImg').src='../fr/hg/'+String(hi).padStart(3,'0')+'.png';snowAt(t>=99?0:t);
+ const hi=t>=99?0:Math.min(119,Math.round(t*25));$('#heroImg').src='../fr/hg/'+String(hi).padStart(3,'0')+'.png';snowAt(t>=99?0:t);
  boardAt(t);
  O.forEach((o,i)=>{const r=eio((t-.1)/1.1);$('#pp'+i).textContent=eur(o.uvp-(o.uvp-o.preis)*r);
   $('#us'+i).style.width=(cl((t-.05)/.4)*100)+'%';const b=t<1.15?0:1+.2*Math.exp(-8*(t-1.15))*Math.sin(18*(t-1.15));$('#pt'+i).style.transform=`scale(${b})`});

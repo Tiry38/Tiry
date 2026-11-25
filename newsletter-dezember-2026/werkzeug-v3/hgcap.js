@@ -15,5 +15,5 @@ console.log('patched',await p.evaluate(()=>window.__patched));
 await p.addStyleTag({content:'*{visibility:hidden!important} #hg{visibility:visible!important} #snow{display:none!important} html,body{overflow:hidden!important}'});
 await p.evaluate(()=>{for(const c of document.querySelectorAll('canvas')){let e=c.parentElement;while(e&&e!==document.body){e.style.visibility='visible';e=e.parentElement}c.style.visibility='visible'}});
 fs.mkdirSync('fr/hg',{recursive:true});
-for(let i=0;i<N;i++){for(let k=0;k<2;k++){await p.clock.runFor(16);await p.waitForTimeout(60);}await p.screenshot({path:`fr/hg/${String(i).padStart(3,'0')}.png`});}
+for(let i=0;i<N;i++){for(let k=0;k<1;k++){await p.clock.runFor(16);await p.waitForTimeout(60);}await p.screenshot({path:`fr/hg/${String(i).padStart(3,'0')}.png`});}
 await b.close();})();
