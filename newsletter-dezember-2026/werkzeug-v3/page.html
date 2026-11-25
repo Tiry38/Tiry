@@ -1,0 +1,205 @@
+<!doctype html>
+<html lang="de"><head><meta charset="utf-8">
+<style>
+@font-face{font-family:Outfit;src:url(../a/outfit-latin.woff2) format('woff2');font-weight:100 900}
+@font-face{font-family:Sora;src:url(../a/sora-latin.woff2) format('woff2');font-weight:100 900}
+@font-face{font-family:Hand;src:url(../a/caveat.ttf) format('truetype');font-weight:700}
+:root{--red:#C8102E;--red2:#E2232D;--cu:#B87333;--ink:#1B1E25;--mut:#3F4552;--glass:rgba(255,255,255,.58);--glass2:rgba(255,255,255,.50)}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{width:640px;background:#E9E3DC}
+body{position:relative;font-family:Sora,Arial,sans-serif;color:var(--ink);overflow-x:hidden}
+#bg{position:absolute;left:0;top:0;width:640px;z-index:0}
+section{position:relative;z-index:1}
+.abs{position:absolute}
+.glass{background:var(--glass);border-radius:22px;box-shadow:inset 0 1px 0 rgba(255,255,255,.9)}
+.kick{font:700 15px/1 Sora;letter-spacing:.24em;text-transform:uppercase;color:var(--red)}
+.kick::before{content:"";display:inline-block;width:34px;height:2px;background:var(--cu);vertical-align:5px;margin-right:12px}
+.h{font-family:Outfit;font-weight:900;letter-spacing:-.04em;line-height:.95;color:var(--ink)}
+.t{font:400 21px/1.45 Sora;color:var(--mut)}
+.btn{display:inline-flex;align-items:center;gap:12px;height:62px;padding:0 26px;border-radius:999px;font:700 17px/1 Sora;letter-spacing:.06em;text-transform:uppercase;white-space:nowrap}
+.btn.r{background:linear-gradient(115deg,#C8102E,#E2232D);color:#fff;box-shadow:0 14px 30px -14px rgba(200,16,46,.9)}
+.btn.g{background:rgba(255,255,255,.62);color:var(--ink);box-shadow:inset 0 0 0 1.5px rgba(255,255,255,.95)}
+.btn svg{width:22px;height:22px}
+.out{color:transparent;-webkit-text-stroke:2px var(--red)}
+.chk{border:2px dashed var(--red);color:var(--red);font:700 16px/1.4 Sora;padding:10px 14px;border-radius:12px;background:rgba(255,255,255,.55)}
+/* Abfahrtstafel */
+.flap{display:inline-block;width:30px;height:46px;margin-right:3px;background:linear-gradient(#24262E 50%,#1C1E25 50%);border-radius:5px;text-align:center;font:800 32px/46px Outfit;color:#F4EFEA;position:relative;vertical-align:middle}
+.flap::after{content:"";position:absolute;left:0;right:0;top:22.5px;height:1px;background:#0D0E12}
+</style></head><body>
+<img id="bg" src="bg2.jpg" alt="">
+
+<!-- ============ KOPF: Homepage-Szene ============ -->
+<section id="s-hero" style="height:760px" data-anim="hero">
+ <img id="heroImg" class="abs" src="../fr/hg/000.png" style="left:0;top:0;width:640px;height:820px;-webkit-mask-image:linear-gradient(#000 78%,transparent 100%)">
+ <div class="abs" style="left:0;top:0;width:640px;height:300px;background:radial-gradient(120% 90% at 0% 0%,rgba(255,255,255,.88),rgba(255,255,255,.55) 38%,rgba(255,255,255,0) 72%)"></div>
+ <img class="abs" src="../a/velocenter-logo.svg" style="left:34px;top:30px;width:200px">
+ <div class="abs kick" style="left:36px;top:150px">Newsletter · Dezember 2026</div>
+ <div class="abs h" style="left:26px;top:548px;font-size:132px;color:#fff;text-shadow:0 10px 40px rgba(0,0,0,.35)">Dezember</div>
+ <div class="abs" style="left:34px;top:690px;width:300px;height:6px;background:var(--red2)"></div>
+ <div class="abs" style="left:350px;top:684px;font:700 16px/1 Sora;letter-spacing:.22em;text-transform:uppercase;color:#fff;text-shadow:0 2px 10px rgba(0,0,0,.5)">Wörth am Rhein</div>
+</section>
+
+<!-- ============ EINSTIEG + WINTER ============ -->
+<section id="s-intro" style="height:330px">
+ <div class="abs glass" style="left:20px;top:0;width:600px;height:300px"></div>
+ <div class="abs kick" style="left:52px;top:36px">Winter · Umbau · Angebote</div>
+ <div class="abs h" style="left:50px;top:70px;font-size:54px">Dein Rad hat Pause.<br><span style="color:var(--red)">Wir haben Zeit.</span></div>
+ <div class="abs t" style="left:52px;top:196px;width:540px">Jetzt 20 € weniger auf jede Inspektion. Dazu bauen wir den Laden um und räumen aus.</div>
+</section>
+<section id="s-deal" style="height:830px">
+ <img id="dealImg" class="abs" data-anim="deal" src="../fr/deal/000.png" style="left:20px;top:0;width:600px;height:730px;object-fit:cover;object-position:top;border-radius:22px">
+ <a class="abs btn r" data-href="#termin" style="left:20px;top:750px;width:340px;justify-content:center"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>Winter-Termin sichern</a>
+ <a class="abs btn g" data-href="WA:Hallo Velocenter, ich möchte einen Termin für die Winter-Inspektion." style="left:372px;top:750px;width:172px;padding:0;justify-content:center"><svg viewBox="0 0 24 24" fill="#1FA855"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm5.3 14.1c-.2.6-1.3 1.2-1.8 1.3-.5.1-1 .1-3.3-.8-2.8-1.1-4.5-3.9-4.7-4.1-.1-.2-1.1-1.5-1.1-2.8s.7-2 1-2.3c.2-.3.5-.3.7-.3h.5c.2 0 .4 0 .6.5l.8 2c.1.2.1.4 0 .5l-.3.5-.4.5c-.1.1-.3.3-.1.6.2.3.8 1.3 1.7 2.1 1.2 1 2.1 1.4 2.4 1.5.3.1.5.1.6-.1l.9-1c.2-.3.4-.2.6-.1l1.9.9c.3.1.5.2.5.3.1.2.1.7-.1 1.3z"/></svg>WhatsApp</a>
+ <a class="abs btn g" data-href="tel:+49727178033" style="left:556px;top:750px;width:64px;padding:0;justify-content:center"><svg viewBox="0 0 24 24" fill="none" stroke="#1B1E25" stroke-width="2.2" stroke-linejoin="round"><path d="M5 3h4l2 5-2.5 1.5a11 11 0 0 0 6 6L16 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 5a2 2 0 0 1 2-2z"/></svg></a>
+</section>
+
+<!-- ============ UMBAU ============ -->
+<section id="s-umbau" style="height:560px">
+ <div class="abs h out" style="left:-8px;top:0;font-size:250px;-webkit-text-stroke-color:var(--cu)">70%</div>
+ <div class="abs glass" style="left:120px;top:150px;width:500px;height:390px"></div>
+ <div class="abs kick" style="left:154px;top:186px">Umbau-Räumung</div>
+ <div class="abs h" style="left:152px;top:218px;font-size:46px">Bis zu 70 %<br>auf Zubehör.</div>
+ <div class="abs t" style="left:154px;top:332px;width:440px;font-size:19px">Lenkertaschen, Fahrradtaschen, Gepäckträgerkörbe, i:SY- und QiO-Zubehör. Racktime Agnetha 2.0, Ortlieb Packtaschen. Nur im Laden.</div>
+ <div class="abs chk" style="left:154px;top:448px;font-size:14px">[⚠ PRÜFEN: Räumung im Dezember noch gültig?]</div>
+ <div class="abs" style="left:20px;top:300px;font:700 30px/1.05 Hand;color:var(--red);transform:rotate(-8deg)">solange<br>Vorrat<br>reicht</div>
+</section>
+
+<!-- ============ ABFAHRTSTAFEL ============ -->
+<section id="s-board" style="height:690px">
+ <div class="abs kick" style="left:36px;top:20px">Umbau-Angebote · ab Lager</div>
+ <div class="abs h" style="left:32px;top:54px;font-size:72px">6 E-Bikes.<br><span class="out" style="-webkit-text-stroke-color:var(--ink)">Einzelstücke.</span></div>
+ <div class="abs glass" style="left:20px;top:220px;width:600px;height:450px"></div>
+ <div id="board" class="abs" data-anim="board" style="left:20px;top:220px;width:600px;height:450px;padding:26px 28px">
+  <div style="display:flex;justify-content:space-between;font:700 13px/1 Sora;letter-spacing:.2em;color:#6B7282;text-transform:uppercase;margin-bottom:14px"><span>Abfahrt · Gleis Hartmannstraße 25</span><span id="live" style="color:#1F9765">● ab Lager</span></div>
+  <div id="rows"></div>
+ </div>
+</section>
+
+<!-- ============ ANGEBOTE ============ -->
+<div id="offers"></div>
+
+<!-- ============ VAN RAAM ============ -->
+<section id="s-vr" style="height:900px">
+ <div class="abs kick" style="left:36px;top:30px">Geschenkidee</div>
+ <div class="abs h" style="left:32px;top:66px;font-size:66px">Ein Stück Freiheit<br><span style="color:var(--red)">für Mama &amp; Papa.</span></div>
+ <div class="abs glass" style="left:20px;top:250px;width:600px;height:630px"></div>
+ <img class="abs" src="../a/a-van-raam-ecbad81d7a.webp" style="left:150px;top:210px;width:470px;filter:drop-shadow(0 26px 22px rgba(60,40,20,.28))">
+ <div class="abs" style="left:48px;top:300px;font:700 34px/1 Hand;color:var(--red);transform:rotate(-6deg)">Für Mama<br>&amp; Papa</div>
+ <div class="abs t" style="left:52px;top:560px;width:540px;font-size:19px">Drei Räder, tiefer Einstieg, Sitz mit Rückenlehne, 880 Wh Rückenwind. Selbst zum Markt, zum Arzt, zu Freunden. Und es kippt im Stand nicht um.</div>
+ <div class="abs" style="left:52px;top:672px;font:700 14px/1 Sora;letter-spacing:.2em;color:var(--mut);text-transform:uppercase">Van Raam Easy Rider Compact · 2025 · weinrot</div>
+ <div class="abs h" style="left:50px;top:698px;font-size:58px">6.900 €</div>
+ <div class="abs" style="left:290px;top:712px;font:400 19px/1.3 Sora;color:var(--mut)">statt <s>8.068 €</s><br><b style="color:var(--red)">du sparst 1.168 €</b></div>
+ <a class="abs btn r" data-href="#termin" style="left:50px;top:790px">Probefahrt mit deinen Eltern</a>
+ <a class="abs btn g" data-href="#dreirad" style="left:470px;top:790px;padding:0 22px">Mehr</a>
+</section>
+<section id="s-vrnote" style="height:90px">
+ <div class="abs t" style="left:36px;top:0;width:570px;font-size:15px;line-height:1.5">Das Compact ist für kleinere Erwachsene gebaut, ob es passt, zeigt die Probefahrt. 0 % Finanzierung gilt zum regulären Preis (8.068 €), nicht zum Aktionspreis.</div>
+</section>
+
+<!-- ============ GUT ZU WISSEN ============ -->
+<section id="s-info" style="height:1250px">
+ <div class="abs kick" style="left:36px;top:20px">Gut zu wissen</div>
+ <div class="abs h" style="left:32px;top:54px;font-size:72px">Werkstatt,<br>Raten, Schutz.</div>
+ <div class="abs glass" style="left:20px;top:236px;width:600px;height:990px"></div>
+ <div id="facts"></div>
+</section>
+
+<!-- ============ BESUCH ============ -->
+<section id="s-visit" style="height:880px">
+ <div class="abs h" style="left:32px;top:20px;font-size:72px">Komm<br><span style="color:var(--red)">vorbei.</span></div>
+ <div class="abs glass" style="left:20px;top:200px;width:600px;height:660px"></div>
+ <div class="abs" style="left:52px;top:236px;font:800 24px/1.2 Outfit;color:var(--ink)">Velocenter Hessert</div>
+ <div class="abs t" style="left:52px;top:270px;font-size:19px;line-height:1.6">Hartmannstraße 25<br>76744 Wörth am Rhein</div>
+ <a class="abs t" data-href="tel:+49727178033" style="left:52px;top:338px;font-size:19px;color:var(--ink);font-weight:700">07271 78033</a>
+ <a class="abs t" data-href="https://wa.me/491635343133" style="left:52px;top:368px;font-size:19px;color:var(--ink)">WhatsApp 0163 5343133</a>
+ <a class="abs t" data-href="mailto:info@velo-center.de" style="left:52px;top:398px;font-size:19px;color:var(--ink)">info@velo-center.de</a>
+ <div class="abs" style="left:350px;top:236px;width:240px;font:400 17px/1.75 Sora;color:var(--ink)">
+  <div style="font:700 13px/1 Sora;letter-spacing:.2em;color:var(--red);text-transform:uppercase;margin-bottom:10px">Öffnungszeiten</div>
+  <b>Mo Di Do Fr</b><br>09:00–12:00<br>14:30–18:00<br><b>Sa</b> 09:00–12:00<br><span style="color:var(--mut)">Mi &amp; So geschlossen</span></div>
+ <div class="abs chk" style="left:52px;top:470px;width:538px;font-size:14px">[⚠ PRÜFEN: Öffnungszeiten 24.12.2026 bis 06.01.2027 eintragen]</div>
+ <div class="abs" style="left:52px;top:540px;width:56px;height:56px;border-radius:10px;background:#1E5AA8;color:#fff;font:800 40px/56px Outfit;text-align:center;box-shadow:0 0 0 3px #fff">P</div>
+ <div class="abs t" style="left:126px;top:540px;width:470px;font-size:17px">Zum Be- und Entladen darfst du kurz vor dem Laden halten. Parkplätze ca. 100 m entfernt am Friedhof.</div>
+ <a class="abs btn r" data-href="MAPS" style="left:52px;top:630px">Route planen</a>
+ <a class="abs btn g" data-href="" style="left:300px;top:630px">Zur Homepage</a>
+ <div class="abs" style="left:52px;top:730px;font:700 13px/1 Sora;letter-spacing:.2em;color:var(--mut);text-transform:uppercase">Folge uns</div>
+ <div id="soc" class="abs" style="left:52px;top:760px;display:flex;gap:14px"></div>
+</section>
+
+<script>
+const $=s=>document.querySelector(s);const cl=(x,a=0,b=1)=>Math.max(a,Math.min(b,x));
+const eio=x=>{x=cl(x);return x<.5?4*x*x*x:1-Math.pow(-2*x+2,3)/2};
+const eur=n=>Math.round(n).toLocaleString('de-DE')+' €';
+const HP='https://tiry38.github.io/velo-center-web/';
+const O=[
+ {img:'rest-04.webp',logo:'marke-stevens.svg',lh:20,marke:'Stevens',modell:'E-Antelao 29″',jahr:'2022',a:'625 Wh',m:'Bosch Performance CX',g:'22″ · Arctic Grey',preis:2499,uvp:4099,href:'#rad=stevens-e-antelao-29',k:'Ansehen'},
+ {img:null,ph:'Velo de Ville SEB890 SUV Smart<br>Pure White · 45 cm · Trapez',logo:'marke-vdv.svg',lh:30,marke:'Velo de Ville',modell:'SEB890 SUV Smart',jahr:'2023',a:'625 Wh',m:'Bosch Performance Line',g:'45 cm · Pure White',preis:2620,uvp:3745,href:'WA:Hallo Velocenter, ich interessiere mich für das Velo de Ville SEB890 SUV Smart in Pure White (45 cm) für 2.620 €.',k:'Anfragen'},
+ {img:'isy-03.webp',logo:'marke-isy.svg',lh:28,marke:'i:SY',modell:'Pop Art E5 ZR F',jahr:'2023',a:'545 Wh',m:'Bosch Performance Line',g:'47 cm · Kompakt',preis:3499,uvp:4599,href:'#rad=i-sy-pop-art-e5-zr-f',k:'Ansehen'},
+ {img:'a-ktm-20663aa4df.webp',logo:'marke-ktm.svg',lh:28,marke:'KTM',modell:'Macina City P610 RT',jahr:'2022',a:'625 Wh',m:'Bosch Performance Line',g:'56 cm · Oak',preis:2799,uvp:3799,href:'WA:Hallo Velocenter, ich interessiere mich für das KTM Macina City P610 RT (56 cm, Oak) für 2.799 €.',k:'Anfragen'},
+ {img:'isy-17.webp',logo:'marke-isy.svg',lh:28,marke:'i:SY',modell:'E5 ZR F CX Century',jahr:'2024',a:'545 Wh',m:'Bosch Performance CX',g:'47 cm · Riviera Blue',preis:3999,uvp:4999,href:'WA:Hallo Velocenter, ich interessiere mich für das i:SY E5 ZR F CX Century in Riviera Blue für 3.999 €.',k:'Anfragen'},
+ {img:null,ph:'Velo de Ville AEB400 Allround 28″<br>Wine Red · 55 cm · Tiefeinsteiger',logo:'marke-vdv.svg',lh:30,marke:'Velo de Ville',modell:'AEB400 Allround 28″',jahr:'2022',a:'500 Wh',m:'Bosch Active Line Plus',g:'55 cm · Wine Red',preis:2239,uvp:3199,href:'#rad=velo-de-ville-aeb400-allround-28-8gg-nex',k:'Ansehen'}];
+O.forEach(o=>{o.spar=o.uvp-o.preis;o.pct=Math.round(100*o.spar/o.uvp)});
+// Angebote als Magazin-Doppelseiten, abwechselnd links/rechts
+$('#offers').innerHTML=O.map((o,i)=>{const L=i%2===0;
+ const bike=o.img?`<img class="abs" src="../a/${o.img}" style="${L?'left:-30px':'right:-30px'};top:${o.img.startsWith('isy')?96:118}px;width:${o.img.startsWith('isy')?350:400}px;filter:drop-shadow(0 24px 20px rgba(60,40,20,.30))">`
+  :`<div class="abs" style="${L?'left:40px':'right:40px'};top:150px;width:320px;height:210px;border:2.5px dashed var(--red);border-radius:18px;background:rgba(255,255,255,.4)"></div><div class="abs" style="${L?'left:64px':'right:64px'};top:184px;width:280px;font:800 30px/1 Outfit;color:var(--red)">[FOTO FOLGT]<div style="margin-top:12px;font:500 16px/1.4 Sora;color:var(--mut)">${o.ph}</div></div>`;
+ const side=L?'right:44px;text-align:right':'left:44px;text-align:left';
+ return `<section id="s-o${i+1}" style="height:640px">
+  <div class="abs h" style="${L?'right:-10px':'left:-10px'};top:0;font-size:150px;white-space:nowrap;color:transparent;-webkit-text-stroke:2px rgba(200,16,46,.45)">−${eur(o.spar)}</div>
+  <div class="abs glass" style="left:20px;top:150px;width:600px;height:470px"></div>
+  ${bike}
+  <div class="abs" style="${L?'left:44px':'left:44px'};top:388px;font:800 64px/1 Outfit;letter-spacing:-.05em;color:var(--red)">0${i+1}</div>
+  <img class="abs" src="../a/${o.logo}" style="left:140px;top:396px;height:${o.lh}px">
+  <div class="abs h" style="left:140px;top:${396+o.lh+10}px;font-size:34px;letter-spacing:-.03em;width:460px;white-space:nowrap">${o.modell}</div>
+  <div class="abs" style="left:44px;top:478px;width:560px;font:400 19px/1.5 Sora;color:var(--mut)">${o.jahr} · ${o.m} · ${o.a}<br>${o.g}</div>
+  <div class="abs" data-anim="p${i}" style="${L?'right:20px':'left:20px'};top:180px;width:240px;height:170px">
+   <div class="abs" style="${L?'right:24px':'left:24px'};top:18px;font:600 18px/1 Sora;color:var(--mut)" id="u${i}">statt ${eur(o.uvp)}<span class="abs" id="us${i}" style="left:0;top:9px;height:2.5px;background:var(--red2)"></span></div>
+   <div class="abs h" id="pp${i}" style="${L?'right:24px':'left:24px'};top:46px;font-size:62px;font-variant-numeric:tabular-nums;white-space:nowrap">${eur(o.preis)}</div>
+   <div class="abs" id="pt${i}" style="${L?'right:24px':'left:24px'};top:118px;padding:9px 14px;border-radius:999px;background:var(--red);color:#fff;font:800 18px/1 Outfit;transform-origin:${L?'100%':'0%'} 50%">−${o.pct} % · Einzelstück</div>
+  </div>
+  <a class="abs btn r" data-href="${o.href}" style="right:44px;top:540px;height:56px;font-size:15px">${o.k} →</a>
+  <a class="abs btn g" data-href="#termin" style="right:${o.k==='Ansehen'?212:220}px;top:540px;height:56px;font-size:15px;padding:0 20px">Probefahrt</a>
+ </section>`}).join('')+`<section style="height:250px"><div class="abs glass" style="left:20px;top:0;width:600px;height:226px"></div>
+ <div class="abs t" style="left:48px;top:26px;width:544px;font-size:17px"><b style="color:var(--ink)">Noch da aus dem November:</b> Stevens E-Juke 29″ für <b style="color:var(--ink)">2.799 €</b> statt 4.399 €, Velo de Ville AEB490 Mocca Brown für <b style="color:var(--ink)">2.499 €</b> statt 3.599 €.</div>
+ <div class="abs chk" style="left:48px;top:104px;font-size:13px">[⚠ PRÜFEN: Alle Räder noch da? Bestand 12.11.2026]</div>
+ <a class="abs btn r" data-href="#lager" style="left:48px;top:152px;height:52px;font-size:14px;padding:0 22px">Alle Räder auf Lager →</a></section>`;
+// Abfahrtstafel
+const SN=['STEVENS E-ANTELAO','VDV SEB890 SUV','I:SY POP ART E5','KTM MACINA CITY','I:SY E5 CX CENTURY','VDV AEB400'];
+const BR=O.map((o,i)=>[String(i+1).padStart(2,'0'),SN[i],o.uvp.toLocaleString('de-DE'),o.preis.toLocaleString('de-DE')]);
+const DG='0123456789';
+function boardAt(t){$('#rows').innerHTML=BR.map((r,k)=>{const t0=.15+k*.14;
+ const fl=r[3].split('').map((c,i)=>{const p=(t-t0-i*.06)/.55;let ch=c;if(p>0&&p<1&&c!=='.')ch=DG[Math.floor(p*17+i*3)%10];
+   return c==='.'?`<span style="display:inline-block;width:9px;font:800 30px/46px Outfit;color:#1B1E25;vertical-align:middle">.</span>`:`<span class="flap">${ch}</span>`}).join('');
+ return `<div style="display:flex;align-items:center;height:62px;border-top:1px solid rgba(184,115,51,.45)">
+  <span style="width:42px;font:800 20px/1 Outfit;color:var(--red)">${r[0]}</span>
+  <span style="flex:1;font:700 17px/1.15 Sora;letter-spacing:.03em;color:var(--ink)">${r[1]}</span>
+  <span style="width:84px;font:600 16px/1 Sora;color:#6B7282;text-decoration:line-through;text-decoration-color:var(--red2)">${r[2]}</span>
+  <span style="white-space:nowrap">${fl}<span style="font:800 26px/46px Outfit;color:var(--ink);margin-left:4px;vertical-align:middle">€</span></span></div>`}).join('');
+ $('#live').style.opacity=Math.floor(t*2.5)%2?1:.35}
+// Fakten
+const F=[['0<small>%</small>','Finanzierung','TARGOBANK, effektiver Jahreszins 0,00 %. Bis 24 Monate, mit Anzahlung, zum regulären Preis. Bonität vorausgesetzt.','#finanzierung','Mehr erfahren'],
+ ['120<small>€</small>','ENRA-Versicherung','Neue E-Bikes ab ca. 120 € im Jahr, gebrauchte ab ca. 70 €. Diebstahl, Unfall, Akku, Pick-up-Service.','https://www.enra.eu/?dealerid=10190','Tarif ansehen'],
+ ['9','Leasing-Partner','Dein E-Bike als Dienstrad, die Rate läuft über den Arbeitgeber. Zum regulären Preis.','#leasing','Dienstrad-Rechner'],
+ ['1','Werkstatt im Haus','Bosch Service Center. E-Bike-Inspektion inklusive Softwareupdate.','#termin','Termin buchen']];
+$('#facts').innerHTML=F.map((f,i)=>{const y=270+i*200;return `
+ ${i?`<div class="abs" style="left:52px;top:${y-22}px;width:536px;height:1.5px;background:rgba(184,115,51,.55)"></div>`:''}
+ <div class="abs h" style="left:48px;top:${y}px;font-size:96px;color:${i===0?'var(--red)':'var(--ink)'};width:190px">${f[0].replace('<small>','<span style="font-size:48px;vertical-align:38px;margin-left:4px">').replace('</small>','</span>')}</div>
+ <div class="abs" style="left:250px;top:${y+4}px;width:340px"><div style="font:800 24px/1.1 Outfit;color:var(--ink)">${f[1]}</div><div style="margin-top:8px;font:400 17px/1.45 Sora;color:var(--mut)">${f[2]}</div></div>
+ <a class="abs" data-href="${f[3]}" style="left:250px;top:${y+142}px;font:700 15px/1 Sora;letter-spacing:.12em;text-transform:uppercase;color:var(--red);padding:10px 0;border-bottom:2px solid var(--red)">${f[4]} →</a>`}).join('')+
+ `<div class="abs" style="left:40px;top:1090px;width:560px;display:grid;grid-template-columns:repeat(5,1fr);row-gap:8px;align-items:center;justify-items:center">`+
+ ['jr','bl','bb','dd','cb','km','lb','er','rd'].map(k=>`<a data-href="LEA:${k}" style="display:flex;width:104px;height:46px;align-items:center;justify-content:center"><img src="../a/lea-${k}.${k==='cb'||k==='rd'?'webp':'svg'}" style="max-width:96px;max-height:30px"></a>`).join('')+`</div>`;
+// Social
+const SO=[['fb','https://www.facebook.com/velocenterhessert','#1877F2','<path fill="#fff" d="M13.5 21v-7.3H16l.4-3h-2.9V8.9c0-.9.3-1.4 1.5-1.4h1.5V4.8c-.3 0-1.2-.1-2.2-.1-2.2 0-3.7 1.3-3.7 3.8v2.2H8v3h2.6V21z"/>'],
+ ['ig','https://www.instagram.com/velocenterhessert/','#C13584','<g fill="none" stroke="#fff" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="5.5"/><circle cx="12" cy="12" r="4.2"/></g><circle cx="17.3" cy="6.7" r="1.1" fill="#fff"/>'],
+ ['wa','https://whatsapp.com/channel/0029VaIekua60eBc6k2bMD0q','#1FA855','<path fill="#fff" d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm5.3 14.1c-.2.6-1.3 1.2-1.8 1.3-.5.1-1 .1-3.3-.8-2.8-1.1-4.5-3.9-4.7-4.1-.1-.2-1.1-1.5-1.1-2.8s.7-2 1-2.3c.2-.3.5-.3.7-.3h.5c.2 0 .4 0 .6.5l.8 2c.1.2.1.4 0 .5l-.3.5-.4.5c-.1.1-.3.3-.1.6.2.3.8 1.3 1.7 2.1 1.2 1 2.1 1.4 2.4 1.5.3.1.5.1.6-.1l.9-1c.2-.3.4-.2.6-.1l1.9.9c.3.1.5.2.5.3.1.2.1.7-.1 1.3z"/>']];
+$('#soc').innerHTML=SO.map(s=>`<a data-href="${s[1]}" style="width:64px;height:64px;border-radius:50%;background:${s[2]};display:flex;align-items:center;justify-content:center;box-shadow:0 10px 22px -12px ${s[2]}"><svg viewBox="0 0 24 24" width="30" height="30">${s[3]}</svg></a>`).join('');
+// Zeitsteuerung: setT(t) fuer alle Animationen; t=99 = Endzustand
+window.setT=t=>{
+ const hi=Math.min(29,Math.round(t*12.5));$('#heroImg').src='../fr/hg/'+String(hi).padStart(3,'0')+'.png';
+ $('#dealImg').src='../fr/deal/'+String(Math.min(29,Math.round(t*12.5))).padStart(3,'0')+'.png';
+ boardAt(t);
+ O.forEach((o,i)=>{const r=eio((t-.1)/1.1);$('#pp'+i).textContent=eur(o.uvp-(o.uvp-o.preis)*r);
+  $('#us'+i).style.width=(cl((t-.05)/.4)*100)+'%';const b=t<1.15?0:1+.2*Math.exp(-8*(t-1.15))*Math.sin(18*(t-1.15));$('#pt'+i).style.transform=`scale(${b})`});
+};
+window.setT(99);
+</script>
+</body></html>

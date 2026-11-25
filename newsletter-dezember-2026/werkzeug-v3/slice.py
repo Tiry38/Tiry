@@ -1,0 +1,66 @@
+#!/usr/bin/env python3
+"""Zerschneidet die gestaltete Seite in Bildstuecke fuer die Mail: Knopf-Flaechen = eigene verlinkte Zellen,
+Animationen = eigene GIF-Zellen. Ergebnis: mail/ (HTML + Bilder flach)."""
+import json, os, glob, subprocess, urllib.parse, html, shutil
+from PIL import Image
+Image.MAX_IMAGE_PIXELS=None
+HP='https://tiry38.github.io/velo-center-web/'
+LEA={'jr':'https://www.jobrad.org/','bl':'https://www.bikeleasing.de/','bb':'https://www.businessbike.de/','dd':'https://www.deutsche-dienstrad.de/',
+     'cb':'https://company-bike.com/','km':'https://www.kazenmaier.de/','lb':'https://www.lease-a-bike.de/','er':'https://www.eurorad.de/','rd':'https://radimdienst.de/'}
+def res(h):
+    if h=='' : return HP
+    if h.startswith('#'): return HP+h
+    if h.startswith('WA:'): return 'https://wa.me/491635343133?text='+urllib.parse.quote(h[3:])
+    if h=='MAPS': return 'https://www.google.com/maps/search/?api=1&query=Velocenter+Hessert+Hartmannstra%C3%9Fe+25+76744+W%C3%B6rth+am+Rhein'
+    if h.startswith('LEA:'): return LEA[h[4:]]
+    return h
+L=json.load(open('out/layout.json')); H=L['H']; W=640
+r=lambda v:int(round(v))
+links=[dict(x0=max(0,r(a['x'])),y0=r(a['y']),x1=min(W,r(a['x']+a['w'])),y1=r(a['y']+a['h']),href=res(a['href']),txt=a['txt']) for a in L['links']]
+anims=[dict(x0=r(a['x']),y0=r(a['y']),x1=r(a['x']+a['w']),y1=r(a['y']+a['h']),name=a['name']) for a in L['anims']]
+ys=sorted({0,H}|{v for a in links+anims for v in (a['y0'],a['y1'])})
+st=Image.open('out/static.png').convert('RGB')
+shutil.rmtree('mail',ignore_errors=True);os.makedirs('mail')
+# GIF-Frames je Animation laden (2x -> 1x)
+AF={}
+for a in anims:
+    fs=sorted(glob.glob(f"out/fr-{a['name']}/*.png"))
+    AF[a['name']]=[Image.open(f).convert('RGB').resize((a['x1']-a['x0'],a['y1']-a['y0']),Image.LANCZOS) for f in fs]
+rows=[];n=0;alts=[]
+def cover(c,x0,y0,x1,y1): return c['x0']<=x0 and c['y0']<=y0 and c['x1']>=x1 and c['y1']>=y1
+for yi in range(len(ys)-1):
+    y0,y1=ys[yi],ys[yi+1]
+    if y1-y0<1: continue
+    inb=[a for a in links+anims if a['y0']<y1 and a['y1']>y0]
+    xs=sorted({0,W}|{v for a in inb for v in (a['x0'],a['x1']) if 0<v<W})
+    cells=[]
+    for xi in range(len(xs)-1):
+        x0,x1=xs[xi],xs[xi+1]
+        an=next((a for a in anims if cover(a,x0,y0,x1,y1)),None)
+        ln=next((l for l in links if cover(l,x0,y0,x1,y1)),None)
+        n+=1
+        if an:
+            fr=AF[an['name']]; box=(x0-an['x0'],y0-an['y0'],x1-an['x0'],y1-an['y0'])
+            seq=[f.crop(box) for f in fr]
+            once=an['name'] not in ('hero','deal')
+            if once: seq=[seq[-1]]+seq+[seq[-1]]
+            dur=[80]*len(seq)
+            if once: dur[0]=2600; dur[-1]=2600
+            pal=seq[0].quantize(colors=255,method=Image.MEDIANCUT,dither=Image.Dither.NONE)
+            if an['name']=='hero':  # Pixel ohne Laub-Bewegung stabil halten
+                import numpy as np
+                b0=np.asarray(seq[0]).astype(int);ns=[seq[0]]
+                for f in seq[1:]:
+                    a_=np.asarray(f).astype(int);m=(np.abs(a_-b0).sum(2)>36)
+                    ns.append(Image.fromarray(np.where(m[...,None],a_,b0).astype('uint8')))
+                seq=ns
+            dz=Image.Dither.FLOYDSTEINBERG if once else Image.Dither.NONE
+            q=[s.quantize(palette=pal,dither=dz) for s in seq]
+            fn=f'n{n:03d}.gif'; q[0].save('mail/_t.gif',save_all=True,append_images=q[1:],duration=dur,loop=0,disposal=1)
+            subprocess.run(['gifsicle','-O3','--lossy=60','-o','mail/'+fn,'mail/_t.gif'],check=True); os.remove('mail/_t.gif')
+        else:
+            fn=f'n{n:03d}.jpg'; st.crop((x0*2,y0*2,x1*2,y1*2)).save('mail/'+fn,quality=64,optimize=True,progressive=True)
+        cells.append(dict(x0=x0,x1=x1,fn=fn,href=ln['href'] if ln else None,alt=(ln['txt'] if ln else '')))
+    rows.append(dict(y0=y0,y1=y1,cells=cells))
+json.dump(rows,open('out/rows.json','w'),indent=0)
+print('Zeilen',len(rows),'Bilder',n)
