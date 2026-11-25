@@ -1,0 +1,417 @@
+{
+ "H": 11480,
+ "links": [
+  {
+   "x": 20,
+   "y": 1922,
+   "w": 340,
+   "h": 62,
+   "href": "#termin",
+   "txt": "Winter-Termin sichern"
+  },
+  {
+   "x": 372,
+   "y": 1922,
+   "w": 172,
+   "h": 62,
+   "href": "WA:Hallo Velocenter, ich möchte einen Termin für die Winter-Inspektion.",
+   "txt": "WhatsApp"
+  },
+  {
+   "x": 556,
+   "y": 1922,
+   "w": 64,
+   "h": 62,
+   "href": "tel:+49727178033",
+   "txt": ""
+  },
+  {
+   "x": 32,
+   "y": 2574,
+   "w": 576,
+   "h": 736,
+   "href": "WA:Hallo Velocenter, ich interessiere mich für die Ortlieb Vario PS für 80 €.",
+   "txt": ""
+  },
+  {
+   "x": 439.90625,
+   "y": 4582,
+   "w": 156.09375,
+   "h": 56,
+   "href": "#rad=stevens-e-antelao-29",
+   "txt": "Ansehen →"
+  },
+  {
+   "x": 274.578125,
+   "y": 4582,
+   "w": 153.421875,
+   "h": 56,
+   "href": "WA:Hallo Velocenter, ich möchte eine Probefahrt mit dem Stevens E-Antelao 29″ (22″, Arctic Grey) für 2.499 € vereinbaren.",
+   "txt": "Probefahrt"
+  },
+  {
+   "x": 439.90625,
+   "y": 5222,
+   "w": 156.09375,
+   "h": 56,
+   "href": "WA:Hallo Velocenter, ich interessiere mich für das Velo de Ville SEB890 SUV Smart in Pure White (45 cm) für 2.620 €.",
+   "txt": "Ansehen →"
+  },
+  {
+   "x": 274.578125,
+   "y": 5222,
+   "w": 153.421875,
+   "h": 56,
+   "href": "WA:Hallo Velocenter, ich möchte eine Probefahrt mit dem Velo de Ville SEB890 SUV Smart (45 cm, Pure White) für 2.620 € vereinbaren.",
+   "txt": "Probefahrt"
+  },
+  {
+   "x": 439.90625,
+   "y": 5862,
+   "w": 156.09375,
+   "h": 56,
+   "href": "#rad=i-sy-pop-art-e5-zr-f",
+   "txt": "Ansehen →"
+  },
+  {
+   "x": 274.578125,
+   "y": 5862,
+   "w": 153.421875,
+   "h": 56,
+   "href": "WA:Hallo Velocenter, ich möchte eine Probefahrt mit dem i:SY Pop Art E5 ZR F (47 cm) für 3.499 € vereinbaren.",
+   "txt": "Probefahrt"
+  },
+  {
+   "x": 439.90625,
+   "y": 6502,
+   "w": 156.09375,
+   "h": 56,
+   "href": "WA:Hallo Velocenter, ich interessiere mich für das KTM Macina City P610 RT in Oak (56 cm) für 2.799 €.",
+   "txt": "Ansehen →"
+  },
+  {
+   "x": 274.578125,
+   "y": 6502,
+   "w": 153.421875,
+   "h": 56,
+   "href": "WA:Hallo Velocenter, ich möchte eine Probefahrt mit dem KTM Macina City P610 RT (56 cm, Oak) für 2.799 € vereinbaren.",
+   "txt": "Probefahrt"
+  },
+  {
+   "x": 439.90625,
+   "y": 7142,
+   "w": 156.09375,
+   "h": 56,
+   "href": "WA:Hallo Velocenter, ich interessiere mich für das i:SY E5 ZR F CX Century in Riviera Blue (47 cm) für 3.999 €.",
+   "txt": "Ansehen →"
+  },
+  {
+   "x": 274.578125,
+   "y": 7142,
+   "w": 153.421875,
+   "h": 56,
+   "href": "WA:Hallo Velocenter, ich möchte eine Probefahrt mit dem i:SY E5 ZR F CX Century (47 cm, Riviera Blue) für 3.999 € vereinbaren.",
+   "txt": "Probefahrt"
+  },
+  {
+   "x": 439.90625,
+   "y": 7782,
+   "w": 156.09375,
+   "h": 56,
+   "href": "#rad=velo-de-ville-aeb400-allround-28-8gg-nex",
+   "txt": "Ansehen →"
+  },
+  {
+   "x": 274.578125,
+   "y": 7782,
+   "w": 153.421875,
+   "h": 56,
+   "href": "WA:Hallo Velocenter, ich möchte eine Probefahrt mit dem Velo de Ville AEB400 Allround 28″ (55 cm, Wine Red) für 2.239 € vereinbaren.",
+   "txt": "Probefahrt"
+  },
+  {
+   "x": 226,
+   "y": 8182,
+   "w": 84,
+   "h": 44,
+   "href": "#rad=stevens-e-juke-29",
+   "txt": "Ansehen"
+  },
+  {
+   "x": 512,
+   "y": 8182,
+   "w": 84,
+   "h": 44,
+   "href": "WA:Hallo Velocenter, ich interessiere mich für das Velo de Ville AEB490 Allround in Mocca Brown Matt (50 cm) für 2.499 €.",
+   "txt": "Ansehen"
+  },
+  {
+   "x": 400,
+   "y": 8244,
+   "w": 146.71875,
+   "h": 31,
+   "href": "#lager",
+   "txt": "Alle auf Lager →"
+  },
+  {
+   "x": 50,
+   "y": 9200,
+   "w": 377.25,
+   "h": 62,
+   "href": "WA:Hallo Velocenter, ich möchte eine Probefahrt mit dem Van Raam Easy Rider Compact (Vorführmodell, weinrot) für 6.900 € vereinbaren.",
+   "txt": "Probefahrt mit deinen Eltern"
+  },
+  {
+   "x": 470,
+   "y": 9200,
+   "w": 100.703125,
+   "h": 62,
+   "href": "#dreirad",
+   "txt": "Mehr"
+  },
+  {
+   "x": 250,
+   "y": 9812,
+   "w": 179.015625,
+   "h": 37,
+   "href": "#finanzierung",
+   "txt": "Mehr erfahren →"
+  },
+  {
+   "x": 250,
+   "y": 10012,
+   "w": 170.5,
+   "h": 37,
+   "href": "https://www.enra.eu/?dealerid=10190",
+   "txt": "Tarif ansehen →"
+  },
+  {
+   "x": 250,
+   "y": 10212,
+   "w": 228.78125,
+   "h": 37,
+   "href": "#leasing",
+   "txt": "Dienstrad-Rechner →"
+  },
+  {
+   "x": 250,
+   "y": 10412,
+   "w": 178.140625,
+   "h": 37,
+   "href": "#termin",
+   "txt": "Termin buchen →"
+  },
+  {
+   "x": 44,
+   "y": 10490,
+   "w": 104,
+   "h": 46,
+   "href": "LEA:jr",
+   "txt": ""
+  },
+  {
+   "x": 156,
+   "y": 10490,
+   "w": 104,
+   "h": 46,
+   "href": "LEA:bl",
+   "txt": ""
+  },
+  {
+   "x": 268,
+   "y": 10490,
+   "w": 104,
+   "h": 46,
+   "href": "LEA:bb",
+   "txt": ""
+  },
+  {
+   "x": 380,
+   "y": 10490,
+   "w": 104,
+   "h": 46,
+   "href": "LEA:dd",
+   "txt": ""
+  },
+  {
+   "x": 492,
+   "y": 10490,
+   "w": 104,
+   "h": 46,
+   "href": "LEA:cb",
+   "txt": ""
+  },
+  {
+   "x": 44,
+   "y": 10544,
+   "w": 104,
+   "h": 46,
+   "href": "LEA:km",
+   "txt": ""
+  },
+  {
+   "x": 156,
+   "y": 10544,
+   "w": 104,
+   "h": 46,
+   "href": "LEA:lb",
+   "txt": ""
+  },
+  {
+   "x": 268,
+   "y": 10544,
+   "w": 104,
+   "h": 46,
+   "href": "LEA:er",
+   "txt": ""
+  },
+  {
+   "x": 380,
+   "y": 10544,
+   "w": 104,
+   "h": 46,
+   "href": "LEA:rd",
+   "txt": ""
+  },
+  {
+   "x": 52,
+   "y": 10988,
+   "w": 124.421875,
+   "h": 27.546875,
+   "href": "tel:+49727178033",
+   "txt": "07271 78033"
+  },
+  {
+   "x": 52,
+   "y": 11018,
+   "w": 235.28125,
+   "h": 27.546875,
+   "href": "https://wa.me/491635343133",
+   "txt": "WhatsApp 0163 5343133"
+  },
+  {
+   "x": 52,
+   "y": 11048,
+   "w": 200.21875,
+   "h": 27.546875,
+   "href": "mailto:info@velo-center.de",
+   "txt": "info@velo-center.de"
+  },
+  {
+   "x": 52,
+   "y": 11336,
+   "w": 202.625,
+   "h": 62,
+   "href": "MAPS",
+   "txt": "Route planen"
+  },
+  {
+   "x": 300,
+   "y": 11336,
+   "w": 206.78125,
+   "h": 62,
+   "href": "",
+   "txt": "Zur Homepage"
+  }
+ ],
+ "anims": [
+  {
+   "x": 0,
+   "y": 0,
+   "w": 640,
+   "h": 520,
+   "name": "hero"
+  },
+  {
+   "x": 0,
+   "y": 520,
+   "w": 640,
+   "h": 360,
+   "name": "leaf"
+  },
+  {
+   "x": 40,
+   "y": 882,
+   "w": 557.625,
+   "h": 59.6875,
+   "name": "gt"
+  },
+  {
+   "x": 460,
+   "y": 1194,
+   "w": 142,
+   "h": 358,
+   "name": "snow0"
+  },
+  {
+   "x": 312,
+   "y": 1280,
+   "w": 146,
+   "h": 150,
+   "name": "snow1"
+  },
+  {
+   "x": 380,
+   "y": 1634,
+   "w": 222,
+   "h": 150,
+   "name": "snow2"
+  },
+  {
+   "x": 42,
+   "y": 1190,
+   "w": 416,
+   "h": 56,
+   "name": "snow3"
+  },
+  {
+   "x": 20,
+   "y": 3572,
+   "w": 600,
+   "h": 450,
+   "name": "board"
+  },
+  {
+   "x": 380,
+   "y": 4222,
+   "w": 240,
+   "h": 170,
+   "name": "p0"
+  },
+  {
+   "x": 20,
+   "y": 4862,
+   "w": 240,
+   "h": 170,
+   "name": "p1"
+  },
+  {
+   "x": 380,
+   "y": 5502,
+   "w": 240,
+   "h": 170,
+   "name": "p2"
+  },
+  {
+   "x": 20,
+   "y": 6142,
+   "w": 240,
+   "h": 170,
+   "name": "p3"
+  },
+  {
+   "x": 380,
+   "y": 6782,
+   "w": 240,
+   "h": 170,
+   "name": "p4"
+  },
+  {
+   "x": 20,
+   "y": 7422,
+   "w": 240,
+   "h": 170,
+   "name": "p5"
+  }
+ ]
+}
