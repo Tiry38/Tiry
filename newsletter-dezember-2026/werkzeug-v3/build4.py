@@ -17,10 +17,18 @@ for r in rows:
         cells+=f'<td width="{w}" style="width:{w/6.4:.4f}%;padding:0;font-size:0;line-height:0" valign="top">{im}</td>'
     out.append(f'<tr><td style="padding:0;font-size:0;line-height:0"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="table-layout:fixed;border-collapse:collapse"><tr>{cells}</tr></table></td></tr>')
 PRE='Inspektion 20 € günstiger, Sattelüberzug gratis. Dazu 6 E-Bikes bis 1.600 € unter UVP.'
-FOOT='''<tr><td style="padding:22px 26px 36px;font:400 12px/1.65 Arial,Helvetica,sans-serif;color:#3F4552;background:#E9E3DC">
-Impressum: VELOCENTER Hessert, Inhaber Stefan Hessert, Hartmannstraße 25, 76744 Wörth am Rhein. Telefon 07271-78033, Fax 07271-78039, E-Mail info@velo-center.de. Umsatzsteuer-ID gemäß § 27 a UStG: DE171696150.<br><br>
-Alle Preise inkl. MwSt. Angebote solange Vorrat reicht, Zwischenverkauf vorbehalten. Aktionspreise gelten nicht bei Leasing und Finanzierung, dafür gilt der reguläre Preis (UVP). Abbildungen ähnlich.<br><br>
-Du bekommst diese E-Mail, weil du dich für den Newsletter vom Velocenter Hessert angemeldet hast. Keine Lust mehr? <a href="{%link_unsubscribe}" style="color:#C8102E;font-weight:700">Hier abmelden</a>.</td></tr>'''
+FOOT='''<tr><td align="center" style="padding:38px 34px 44px;background:#E9E3DC;text-align:center">
+<img src="fuss-logo.png" width="180" alt="Velocenter Hessert" style="display:block;margin:0 auto 14px;width:180px;height:auto;border:0">
+<div style="font:700 11px/1.6 Arial,Helvetica,sans-serif;letter-spacing:.24em;text-transform:uppercase;color:#C8102E">Familienbetrieb seit 1995 · Wörth am Rhein</div>
+<div style="margin:16px 0 0;font:400 14px/1.8 Arial,Helvetica,sans-serif;color:#1B1E25">Hartmannstraße 25 · 76744 Wörth am Rhein<br>
+<a href="tel:+49727178033" style="color:#1B1E25;text-decoration:none;font-weight:700">07271 78033</a> &nbsp;·&nbsp; <a href="https://wa.me/491635343133" style="color:#1B1E25;text-decoration:none">WhatsApp 0163 5343133</a><br>
+<a href="mailto:info@velo-center.de" style="color:#C8102E;text-decoration:none">info@velo-center.de</a> &nbsp;·&nbsp; <a href="https://tiry38.github.io/velo-center-web/" style="color:#C8102E;text-decoration:none">Homepage</a></div>
+<div style="width:60px;height:2px;background:#B87333;margin:24px auto 20px;font-size:0;line-height:0">&nbsp;</div>
+<div style="font:700 10px/1.6 Arial,Helvetica,sans-serif;letter-spacing:.24em;text-transform:uppercase;color:#4A5161">Impressum</div>
+<div style="margin:6px auto 0;max-width:480px;font:400 12px/1.7 Arial,Helvetica,sans-serif;color:#3F4552">VELOCENTER Hessert · Inhaber Stefan Hessert · Einzelunternehmen<br>Hartmannstraße 25, 76744 Wörth am Rhein<br>Telefon 07271-78033 · Fax 07271-78039 · info@velo-center.de<br>USt-IdNr. gemäß § 27 a UStG: DE171696150</div>
+<div style="margin:18px auto 0;max-width:480px;font:400 11px/1.65 Arial,Helvetica,sans-serif;color:#5A6070">Alle Preise inkl. MwSt. Angebote solange Vorrat reicht, Zwischenverkauf vorbehalten. Aktionspreise gelten nicht bei Leasing und Finanzierung, dafür gilt der reguläre Preis (UVP). Abbildungen ähnlich.<br><br>Du bekommst diese E-Mail, weil du dich für den Newsletter vom Velocenter Hessert angemeldet hast.</div>
+<table role="presentation" cellpadding="0" cellspacing="0" border="0" align="center" style="margin:18px auto 0"><tr><td style="border:1.5px solid #C8102E;border-radius:999px"><a href="{%link_unsubscribe}" style="display:inline-block;padding:9px 20px;font:700 11px/1 Arial,Helvetica,sans-serif;letter-spacing:.14em;text-transform:uppercase;color:#C8102E;text-decoration:none">Newsletter abmelden</a></td></tr></table>
+</td></tr>'''
 doc=f'''<!DOCTYPE html>
 <html lang="de" xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
 <head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta http-equiv="X-UA-Compatible" content="IE=edge">

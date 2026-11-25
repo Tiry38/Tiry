@@ -9,8 +9,8 @@ const info=await p.evaluate(()=>{const R=e=>{const r=e.getBoundingClientRect();r
 fs.mkdirSync('out',{recursive:true});fs.writeFileSync('out/layout.json',JSON.stringify(info,null,1));
 await p.setViewportSize({width:640,height:info.H});await p.waitForTimeout(400);
 await p.screenshot({path:'out/static.png',fullPage:true});
-for(const a of info.anims){const loop=(a.name==='hero'||a.name==='deal');const N=loop?30:31;fs.mkdirSync('out/fr-'+a.name,{recursive:true});
- for(let i=0;i<N;i++){const t=loop?i/12.5:i*0.08;await p.evaluate(t=>setT(t),t);
+for(const a of info.anims){const loop=(a.name==='hero'||a.name==='deal'||a.name==='gt');const N=a.name==='gt'?40:(loop?30:31);fs.mkdirSync('out/fr-'+a.name,{recursive:true});
+ for(let i=0;i<N;i++){const t=a.name==='gt'?i*0.1:(loop?i/12.5:i*0.08);await p.evaluate(t=>setT(t),t);
   if(loop) await p.evaluate(()=>Promise.all([...document.images].map(im=>im.complete?1:new Promise(r=>{im.onload=r;im.onerror=r}))));
   await p.screenshot({path:`out/fr-${a.name}/${String(i).padStart(3,'0')}.png`,clip:{x:Math.round(a.x),y:Math.round(a.y),width:Math.round(a.w),height:Math.round(a.h)}});}
  console.log('anim',a.name,N);}

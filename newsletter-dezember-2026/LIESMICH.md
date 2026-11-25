@@ -23,7 +23,11 @@ Danach freigestellt ablegen, in `werkzeug-v3/page.html` im Feld `O` bei Nr. 2 un
 `node render.js`, `python3 slice.py`, `python3 build4.py`, ZIP neu.
 
 ## Sichtbare Platzhalter ([⚠ PRÜFEN])
-- Sind alle 6 Räder noch da (Bestand 12.11.)? · Umbau-Räumung bis 70 % im Dezember noch gültig? · Öffnungszeiten 24.12.–06.01.
+- Sind alle 6 Räder noch da (Bestand 12.11.)?
+- Tirys Foto mit der Ortlieb Vario PS fehlt (Platz unter der Umbau-Räumung, `#ortl` in `page.html`).
+
+## Bestätigt (Tiry 25.11.2026)
+- Umbau-Räumung gilt den ganzen Dezember. Weihnachtspause: letzter Tag Di 22.12.2026, wieder offen Mo 04.01.2027.
 
 ## Betreff + Vorschautext
 1. 6 E-Bikes bis 1.600 € unter UVP · 2. Inspektion 20 € günstiger + Sattelüberzug · 3. E-Dreirad für Mama und Papa: 1.168 € weniger

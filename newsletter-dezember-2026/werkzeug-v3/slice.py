@@ -20,7 +20,7 @@ links=[dict(x0=max(0,r(a['x'])),y0=r(a['y']),x1=min(W,r(a['x']+a['w'])),y1=r(a['
 anims=[dict(x0=r(a['x']),y0=r(a['y']),x1=r(a['x']+a['w']),y1=r(a['y']+a['h']),name=a['name']) for a in L['anims']]
 ys=sorted({0,H}|{v for a in links+anims for v in (a['y0'],a['y1'])})
 st=Image.open('out/static.png').convert('RGB')
-shutil.rmtree('mail',ignore_errors=True);os.makedirs('mail')
+shutil.rmtree('mail',ignore_errors=True);os.makedirs('mail');shutil.copy('out/fuss-logo.png','mail/fuss-logo.png')
 # GIF-Frames je Animation laden (2x -> 1x)
 AF={}
 for a in anims:
@@ -42,9 +42,9 @@ for yi in range(len(ys)-1):
         if an:
             fr=AF[an['name']]; box=(x0-an['x0'],y0-an['y0'],x1-an['x0'],y1-an['y0'])
             seq=[f.crop(box) for f in fr]
-            once=an['name'] not in ('hero','deal')
+            once=an['name'] not in ('hero','deal','gt')
             if once: seq=[seq[-1]]+seq+[seq[-1]]
-            dur=[80]*len(seq)
+            dur=[100 if an['name']=='gt' else 80]*len(seq)
             if once: dur[0]=2600; dur[-1]=2600
             pal=seq[0].quantize(colors=255,method=Image.MEDIANCUT,dither=Image.Dither.NONE)
             if an['name']=='hero':  # Pixel ohne Laub-Bewegung stabil halten
@@ -54,7 +54,7 @@ for yi in range(len(ys)-1):
                     a_=np.asarray(f).astype(int);m=(np.abs(a_-b0).sum(2)>36)
                     ns.append(Image.fromarray(np.where(m[...,None],a_,b0).astype('uint8')))
                 seq=ns
-            dz=Image.Dither.FLOYDSTEINBERG if once else Image.Dither.NONE
+            dz=Image.Dither.FLOYDSTEINBERG if (once or an['name']=='gt') else Image.Dither.NONE
             q=[s.quantize(palette=pal,dither=dz) for s in seq]
             fn=f'n{n:03d}.gif'; q[0].save('mail/_t.gif',save_all=True,append_images=q[1:],duration=dur,loop=0,disposal=1)
             subprocess.run(['gifsicle','-O3','--lossy=60','-o','mail/'+fn,'mail/_t.gif'],check=True); os.remove('mail/_t.gif')

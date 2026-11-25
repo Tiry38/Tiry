@@ -20,6 +20,7 @@ section{position:relative;z-index:1}
 .btn.r{background:linear-gradient(115deg,#C8102E,#E2232D);color:#fff;box-shadow:0 14px 30px -14px rgba(200,16,46,.9)}
 .btn.g{background:rgba(255,255,255,.62);color:var(--ink);box-shadow:inset 0 0 0 1.5px rgba(255,255,255,.95)}
 .btn svg{width:22px;height:22px}
+.gt{background:linear-gradient(100deg,#C8102E 0%,#8E1530 22.5%,#3A3D44 50%,#C8102E 50.01%,#8E1530 72.5%,#3A3D44 100%);background-size:200% 100%;-webkit-background-clip:text;background-clip:text;color:transparent}
 .out{color:transparent;-webkit-text-stroke:2px var(--red)}
 .chk{border:2px dashed var(--red);color:var(--red);font:700 16px/1.4 Sora;padding:10px 14px;border-radius:12px;background:rgba(255,255,255,.55)}
 /* Abfahrtstafel */
@@ -31,9 +32,9 @@ section{position:relative;z-index:1}
 <!-- ============ KOPF: Homepage-Szene ============ -->
 <section id="s-hero" style="height:760px" data-anim="hero">
  <img id="heroImg" class="abs" src="../fr/hg/000.png" style="left:0;top:0;width:640px;height:820px;-webkit-mask-image:linear-gradient(#000 78%,transparent 100%)">
- <div class="abs" style="left:0;top:0;width:640px;height:300px;background:radial-gradient(120% 90% at 0% 0%,rgba(255,255,255,.88),rgba(255,255,255,.55) 38%,rgba(255,255,255,0) 72%)"></div>
- <img class="abs" src="../a/velocenter-logo.svg" style="left:34px;top:30px;width:200px">
- <div class="abs kick" style="left:36px;top:150px">Newsletter · Dezember 2026</div>
+ <div class="abs" style="left:0;top:0;width:640px;height:300px;background:radial-gradient(60% 100% at 50% 0%,rgba(255,255,255,.92),rgba(255,255,255,.6) 45%,rgba(255,255,255,0) 80%)"></div>
+ <img class="abs" src="../a/velocenter-logo.svg" style="left:170px;top:26px;width:300px">
+ <div class="abs kick" style="left:0;top:196px;width:640px;text-align:center">Newsletter · Dezember 2026<span style="display:inline-block;width:34px;height:2px;background:var(--cu);vertical-align:5px;margin-left:12px"></span></div>
  <div class="abs h" style="left:26px;top:548px;font-size:132px;color:#fff;text-shadow:0 10px 40px rgba(0,0,0,.35)">Dezember</div>
  <div class="abs" style="left:34px;top:690px;width:300px;height:6px;background:var(--red2)"></div>
  <div class="abs" style="left:350px;top:684px;font:700 16px/1 Sora;letter-spacing:.22em;text-transform:uppercase;color:#fff;text-shadow:0 2px 10px rgba(0,0,0,.5)">Wörth am Rhein</div>
@@ -43,7 +44,7 @@ section{position:relative;z-index:1}
 <section id="s-intro" style="height:330px">
  <div class="abs glass" style="left:20px;top:0;width:600px;height:300px"></div>
  <div class="abs kick" style="left:52px;top:36px">Winter · Umbau · Angebote</div>
- <div class="abs h" style="left:50px;top:70px;font-size:54px">Dein Rad hat Pause.<br><span style="color:var(--red)">Wir haben Zeit.</span></div>
+ <div class="abs h" style="left:50px;top:70px;font-size:54px">Dein Rad hat Pause.</div><div class="abs h gt" data-anim="gt" style="left:40px;top:122px;font-size:46px;padding:4px 12px 12px 10px;font-style:italic;white-space:nowrap">Zeit für den Winter-Check.</div>
  <div class="abs t" style="left:52px;top:196px;width:540px">Jetzt 20 € weniger auf jede Inspektion. Dazu bauen wir den Laden um und räumen aus.</div>
 </section>
 <section id="s-deal" style="height:830px">
@@ -60,11 +61,16 @@ section{position:relative;z-index:1}
  <div class="abs kick" style="left:154px;top:186px">Umbau-Räumung</div>
  <div class="abs h" style="left:152px;top:218px;font-size:46px">Bis zu 70 %<br>auf Zubehör.</div>
  <div class="abs t" style="left:154px;top:332px;width:440px;font-size:19px">Lenkertaschen, Fahrradtaschen, Gepäckträgerkörbe, i:SY- und QiO-Zubehör. Racktime Agnetha 2.0, Ortlieb Packtaschen. Nur im Laden.</div>
- <div class="abs chk" style="left:154px;top:448px;font-size:14px">[⚠ PRÜFEN: Räumung im Dezember noch gültig?]</div>
+ <div class="abs" style="left:154px;top:452px;font:800 22px/1 Outfit;color:var(--red)">Gilt den ganzen Dezember.</div>
  <div class="abs" style="left:20px;top:300px;font:700 30px/1.05 Hand;color:var(--red);transform:rotate(-8deg)">solange<br>Vorrat<br>reicht</div>
 </section>
 
 <!-- ============ ABFAHRTSTAFEL ============ -->
+<section id="s-ortlieb" style="height:470px">
+ <div class="abs glass" style="left:20px;top:0;width:600px;height:440px"></div>
+ <div id="ortl" class="abs" style="left:40px;top:20px;width:560px;height:400px;border-radius:16px;overflow:hidden;border:2.5px dashed var(--red);display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(255,255,255,.45)">
+  <div style="font:800 30px/1 Outfit;color:var(--red)">[FOTO FOLGT]</div><div style="margin-top:12px;font:500 17px/1.4 Sora;color:var(--mut);text-align:center">Tirys Foto mit der Ortlieb Vario PS</div></div>
+</section>
 <section id="s-board" style="height:690px">
  <div class="abs kick" style="left:36px;top:20px">Umbau-Angebote · ab Lager</div>
  <div class="abs h" style="left:32px;top:54px;font-size:72px">6 E-Bikes.<br><span class="out" style="-webkit-text-stroke-color:var(--ink)">Einzelstücke.</span></div>
@@ -116,13 +122,13 @@ section{position:relative;z-index:1}
  <div class="abs" style="left:350px;top:236px;width:240px;font:400 17px/1.75 Sora;color:var(--ink)">
   <div style="font:700 13px/1 Sora;letter-spacing:.2em;color:var(--red);text-transform:uppercase;margin-bottom:10px">Öffnungszeiten</div>
   <b>Mo Di Do Fr</b><br>09:00–12:00<br>14:30–18:00<br><b>Sa</b> 09:00–12:00<br><span style="color:var(--mut)">Mi &amp; So geschlossen</span></div>
- <div class="abs chk" style="left:52px;top:470px;width:538px;font-size:14px">[⚠ PRÜFEN: Öffnungszeiten 24.12.2026 bis 06.01.2027 eintragen]</div>
+ <div class="abs" style="left:52px;top:462px;width:538px;padding:12px 16px;border-radius:14px;background:rgba(200,16,46,.08);border-left:4px solid var(--red);font:400 17px/1.45 Sora;color:var(--ink)"><b>Weihnachtspause:</b> Letzter Tag 2026 ist Dienstag, der 22.12. Ab Montag, 04.01.2027 sind wir wieder für dich da.</div>
  <div class="abs" style="left:52px;top:540px;width:56px;height:56px;border-radius:10px;background:#1E5AA8;color:#fff;font:800 40px/56px Outfit;text-align:center;box-shadow:0 0 0 3px #fff">P</div>
  <div class="abs t" style="left:126px;top:540px;width:470px;font-size:17px">Zum Be- und Entladen darfst du kurz vor dem Laden halten. Parkplätze ca. 100 m entfernt am Friedhof.</div>
  <a class="abs btn r" data-href="MAPS" style="left:52px;top:630px">Route planen</a>
  <a class="abs btn g" data-href="" style="left:300px;top:630px">Zur Homepage</a>
- <div class="abs" style="left:52px;top:730px;font:700 13px/1 Sora;letter-spacing:.2em;color:var(--mut);text-transform:uppercase">Folge uns</div>
- <div id="soc" class="abs" style="left:52px;top:760px;display:flex;gap:14px"></div>
+ <div class="abs" style="left:0;top:730px;width:640px;text-align:center;font:700 13px/1 Sora;letter-spacing:.2em;color:var(--mut);text-transform:uppercase">Folge uns</div>
+ <div id="soc" class="abs" style="left:0;top:760px;width:640px;display:flex;justify-content:center;gap:18px"></div>
 </section>
 
 <script>
@@ -140,7 +146,7 @@ const O=[
 O.forEach(o=>{o.spar=o.uvp-o.preis;o.pct=Math.round(100*o.spar/o.uvp)});
 // Angebote als Magazin-Doppelseiten, abwechselnd links/rechts
 $('#offers').innerHTML=O.map((o,i)=>{const L=i%2===0;
- const bike=o.img?`<img class="abs" src="../a/${o.img}" style="${L?'left:-30px':'right:-30px'};top:${o.img.startsWith('isy')?96:118}px;width:${o.img.startsWith('isy')?350:400}px;filter:drop-shadow(0 24px 20px rgba(60,40,20,.30))">`
+ const bike=o.img?`<img class="abs" src="../a/${o.img}" style="${L?'left:28px':'right:28px'};top:${o.img.startsWith('isy')?104:124}px;width:${o.img.startsWith('isy')?320:350}px;filter:drop-shadow(0 24px 20px rgba(60,40,20,.30))">`
   :`<div class="abs" style="${L?'left:40px':'right:40px'};top:150px;width:320px;height:210px;border:2.5px dashed var(--red);border-radius:18px;background:rgba(255,255,255,.4)"></div><div class="abs" style="${L?'left:64px':'right:64px'};top:184px;width:280px;font:800 30px/1 Outfit;color:var(--red)">[FOTO FOLGT]<div style="margin-top:12px;font:500 16px/1.4 Sora;color:var(--mut)">${o.ph}</div></div>`;
  const side=L?'right:44px;text-align:right':'left:44px;text-align:left';
  return `<section id="s-o${i+1}" style="height:640px">
@@ -194,6 +200,7 @@ const SO=[['fb','https://www.facebook.com/velocenterhessert','#1877F2','<path fi
 $('#soc').innerHTML=SO.map(s=>`<a data-href="${s[1]}" style="width:64px;height:64px;border-radius:50%;background:${s[2]};display:flex;align-items:center;justify-content:center;box-shadow:0 10px 22px -12px ${s[2]}"><svg viewBox="0 0 24 24" width="30" height="30">${s[3]}</svg></a>`).join('');
 // Zeitsteuerung: setT(t) fuer alle Animationen; t=99 = Endzustand
 window.setT=t=>{
+ const gp=(t>=99?0:(t/4)%1);document.querySelectorAll('.gt').forEach(e=>e.style.backgroundPosition=(gp*100)+'% 0');
  const hi=Math.min(29,Math.round(t*12.5));$('#heroImg').src='../fr/hg/'+String(hi).padStart(3,'0')+'.png';
  $('#dealImg').src='../fr/deal/'+String(Math.min(29,Math.round(t*12.5))).padStart(3,'0')+'.png';
  boardAt(t);
