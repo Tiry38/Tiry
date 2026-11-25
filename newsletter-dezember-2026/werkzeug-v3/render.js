@@ -5,7 +5,7 @@ await p.evaluate(()=>setT(99));await p.waitForTimeout(500);
 const info=await p.evaluate(()=>{const R=e=>{const r=e.getBoundingClientRect();return {x:r.left+scrollX,y:r.top+scrollY,w:r.width,h:r.height}};
  return {H:document.body.scrollHeight,
   links:[...document.querySelectorAll('[data-href]')].map(e=>({...R(e),href:e.dataset.href,txt:(e.textContent||'').trim().slice(0,60)})),
-  anims:[...document.querySelectorAll('[data-anim]')].map(e=>({...R(e),name:e.dataset.anim}))}});
+  anims:[...document.querySelectorAll('[data-anim]')].map(e=>{const q={...R(e),name:e.dataset.anim};if(q.name==='deal'){q.x+=26;q.y+=26;q.w-=52;q.h-=52}return q})}});
 fs.mkdirSync('out',{recursive:true});fs.writeFileSync('out/layout.json',JSON.stringify(info,null,1));
 await p.setViewportSize({width:640,height:info.H});await p.waitForTimeout(400);
 await p.screenshot({path:'out/static.png',fullPage:true});

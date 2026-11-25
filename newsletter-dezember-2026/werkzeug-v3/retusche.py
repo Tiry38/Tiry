@@ -14,7 +14,7 @@ def poly_mask(pts):
     from PIL import ImageDraw
     m=Image.new('L',(W,H),0);ImageDraw.Draw(m).polygon(pts,fill=255);return np.asarray(m)>0
 fork=poly_mask([(818,150),(895,150),(990,470),(922,470)])   # Gabel vom Steuerrohr bis Ausfallende
-seat=poly_mask([(395,60),(470,60),(520,360),(440,360)])      # Sattelrohr/Sattelstuetze
+seat=poly_mask([(418,60),(462,60),(496,368),(454,368)])      # Sattelrohr/Sattelstuetze
 protect=frameish|fork|seat
 # 1) Gepaecktraeger oben + Ruecklicht wegnehmen
 box=(xx>=78)&(xx<=345)&(yy>=155)&(yy<=236)&~protect; out[box,3]=0
@@ -26,29 +26,33 @@ sm=np.asarray(m)>0
 # Kassette/Nabe/Rahmen schuetzen: nur deutlich oberhalb der Nabe
 sm&=(yy<425)&~protect
 out[sm,3]=0
-for key,cover,src in [('rear',(-170,-24),(50,150)),('front',(160,-42),(18,140))]:
+for key,cover in [('rear',(-166,6)),('front',(156,-66))]:
     cx,cy,R=wh[key]
     dx=xx-cx;dy=yy-cy;r=np.sqrt(dx*dx+dy*dy);th=np.degrees(np.arctan2(dy,dx))
     cov=inarc(th,*cover)
-    # Blech ausserhalb des Reifens weg (bis 1.2 R)
-    out[cov&(r>R*1.0)&(r<=R*1.2)&~protect,3]=0
-    # Reifenband aus sauberem Bereich nachbilden
-    band=cov&(r>=R*0.855)&(r<=R*1.006)&~fork&~seat
-    span_s=(src[1]-src[0])%360; span_c=(cover[1]-cover[0])%360
-    d=(th-cover[0])%360
-    ths=np.radians(src[0]+(d%span_s))
-    sx=cx+r*np.cos(ths);sy=cy+r*np.sin(ths)
-    samp=bil(im,sx,sy)
-    out[band]=samp[band]
-    # weicher Rand an der Aussenkante
-    edge=cov&(r>R*0.995)&(r<=R*1.006)&~fork&~seat
-    out[edge,3]=np.minimum(out[edge,3],255*(1-(r[edge]-R*0.995)/(R*0.011)))
+    out[cov&inarc(th,cover[0],(-16 if key=='rear' else cover[1]))&(r>R*1.0)&(r<=R*1.22)&~protect,3]=0
+    band=cov&(r>=R*0.84)&(r<=R*1.01)&~fork&~seat
+    span=(cover[1]-cover[0])%360; d=(th-cover[0])%360
+    w=np.clip(np.minimum(d,span-d)/7.0,0,1)[...,None]
+    samp=bil(im,2*cx-xx,2*cy-yy)          # Rad 180 Grad um die Nabe gedreht
+    if key=='rear':                        # links oben: an der Nabe gespiegelt (Quelle unten links, ohne Kette)
+        mir=bil(im,xx,2*cy-yy); k=np.clip((th+128)/-10,0,1)[...,None]   # -166..-138 Spiegel, ab -128 Drehung
+        samp=mir*k+samp*(1-k)
+    out[band]=samp[band]*w[band]+out[band]*(1-w[band])
 # Speichen oben links im Hinterrad aus unterer Haelfte spiegeln (Streben weg)
 cx,cy,R=wh['rear'];dx=xx-cx;dy=yy-cy;r=np.sqrt(dx*dx+dy*dy);th=np.degrees(np.arctan2(dy,dx))
 tgt=(th>=-172)&(th<=-52)&(r>=R*0.20)&(r<R*0.857)&~protect
 d=(th+172)%24; ths=np.radians(126+d)   # Quelle: sauberer Bereich unten links (112..168 Grad)
 samp=bil(im,cx+r*np.cos(ths),cy+r*np.sin(ths))
 out[tgt]=samp[tgt]
+stub=(xx>=426)&(xx<=463)&(yy>=300)&(yy<=375)&(lum<75)
+cxr,cyr,Rr=wh['rear'];rr=np.sqrt((xx-cxr)**2+(yy-cyr)**2)
+out[stub&(rr>Rr*1.005),3]=0
+thr=np.degrees(np.arctan2(yy-cyr,xx-cxr))
+fend=(thr>=-34)&(thr<=7)&(rr>Rr*1.008)&(rr<Rr*1.13)&(yy<452)&~seat
+fend&=~(frameish&(lum>70))
+out[fend,3]=0
+out[(xx>=423)&(xx<=449)&(yy>=286)&(yy<=318),3]=0
 res=Image.fromarray(out.clip(0,255).astype(np.uint8),'RGBA')
 res.save('a/rest-04-ohne.webp',quality=95)
 bg=Image.new('RGBA',res.size,(255,255,255,255));bg.alpha_composite(res);bg.convert('RGB').save('/tmp/claude-0/-home-user/81f098d1-e8e1-5590-ae66-e9aa510acead/scratchpad/ant4.png')

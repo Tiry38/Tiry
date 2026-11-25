@@ -60,7 +60,7 @@ for yi in range(len(ys)-1):
             dz=Image.Dither.NONE
             q=[s.quantize(palette=pal,dither=dz) for s in seq]
             fn=f'n{n:03d}.gif'; q[0].save('mail/_t.gif',save_all=True,append_images=q[1:],duration=dur,loop=0,disposal=1)
-            subprocess.run(['gifsicle','-O3','--lossy=85','-o','mail/'+fn,'mail/_t.gif'],check=True); os.remove('mail/_t.gif')
+            subprocess.run(['gifsicle','-O3','--lossy='+('0' if an['name']=='deal' else '85'),'-o','mail/'+fn,'mail/_t.gif'],check=True); os.remove('mail/_t.gif')
         else:
             fn=f'n{n:03d}.jpg'; st.crop((x0*2,y0*2,x1*2,y1*2)).save('mail/'+fn,quality=64,optimize=True,progressive=True)
         cells.append(dict(x0=x0,x1=x1,fn=fn,href=ln['href'] if ln else None,alt=(ln['txt'] if ln else '')))
