@@ -26,14 +26,14 @@ sm=np.asarray(m)>0
 # Kassette/Nabe/Rahmen schuetzen: nur deutlich oberhalb der Nabe
 sm&=(yy<425)&~protect
 out[sm,3]=0
-for key,cover in [('rear',(-166,6)),('front',(156,-66))]:
+for key,cover in [('rear',(-166,6)),('front',(156,-38))]:
     cx,cy,R=wh[key]
     dx=xx-cx;dy=yy-cy;r=np.sqrt(dx*dx+dy*dy);th=np.degrees(np.arctan2(dy,dx))
     cov=inarc(th,*cover)
     out[cov&inarc(th,cover[0],(-16 if key=='rear' else cover[1]))&(r>R*1.0)&(r<=R*1.22)&~protect,3]=0
-    band=cov&(r>=R*0.84)&(r<=R*1.01)&~fork&~seat
+    band=cov&(r>=R*0.84)&(r<=R*1.01)&~fork&~seat&~(frameish&(xx>320)&(xx<520)&(key=='rear'))
     span=(cover[1]-cover[0])%360; d=(th-cover[0])%360
-    w=np.clip(np.minimum(d,span-d)/7.0,0,1)[...,None]
+    w=np.clip(np.minimum(d,span-d)/12.0,0,1)[...,None]
     samp=bil(im,2*cx-xx,2*cy-yy)          # Rad 180 Grad um die Nabe gedreht
     if key=='rear':                        # links oben: an der Nabe gespiegelt (Quelle unten links, ohne Kette)
         mir=bil(im,xx,2*cy-yy); k=np.clip((th+128)/-10,0,1)[...,None]   # -166..-138 Spiegel, ab -128 Drehung
@@ -53,6 +53,12 @@ fend=(thr>=-34)&(thr<=7)&(rr>Rr*1.008)&(rr<Rr*1.13)&(yy<452)&~seat
 fend&=~(frameish&(lum>70))
 out[fend,3]=0
 out[(xx>=423)&(xx<=449)&(yy>=286)&(yy<=318),3]=0
+# Rahmen zurueckholen: blaugrauer Lack aus dem Original im Bereich Sattelrohr/Sitzstreben
+orig=im; ob=orig[...,2]-orig[...,0]
+keep=(xx>=360)&(xx<=520)&(yy>=180)&(yy<=480)&(ob>6)&(orig[...,:3].mean(2)>55)&(orig[...,3]>200)
+kp=Image.fromarray((keep*255).astype(np.uint8)).filter(ImageFilter.MaxFilter(3))
+keep=np.asarray(kp)>0
+out[keep]=orig[keep]
 res=Image.fromarray(out.clip(0,255).astype(np.uint8),'RGBA')
 res.save('a/rest-04-ohne.webp',quality=95)
 bg=Image.new('RGBA',res.size,(255,255,255,255));bg.alpha_composite(res);bg.convert('RGB').save('/tmp/claude-0/-home-user/81f098d1-e8e1-5590-ae66-e9aa510acead/scratchpad/ant4.png')

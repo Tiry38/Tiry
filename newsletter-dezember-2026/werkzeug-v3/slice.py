@@ -25,7 +25,8 @@ shutil.rmtree('mail',ignore_errors=True);os.makedirs('mail');shutil.copy('out/fu
 AF={}
 for a in anims:
     fs=sorted(glob.glob(f"out/fr-{a['name']}/*.png"))
-    AF[a['name']]=[Image.open(f).convert('RGB').resize((a['x1']-a['x0'],a['y1']-a['y0']),Image.LANCZOS) for f in fs]
+    HI=a['name'].startswith('snow')
+    AF[a['name']]=[(Image.open(f).convert('RGB').resize((2*(a['x1']-a['x0']),2*(a['y1']-a['y0'])),Image.LANCZOS) if HI else Image.open(f).convert('RGB').resize((a['x1']-a['x0'],a['y1']-a['y0']),Image.LANCZOS)) for f in fs]
 rows=[];n=0;alts=[]
 def cover(c,x0,y0,x1,y1): return c['x0']<=x0 and c['y0']<=y0 and c['x1']>=x1 and c['y1']>=y1
 for yi in range(len(ys)-1):
@@ -41,10 +42,11 @@ for yi in range(len(ys)-1):
         n+=1
         if an:
             fr=AF[an['name']]; box=(x0-an['x0'],y0-an['y0'],x1-an['x0'],y1-an['y0'])
+            if an['name'].startswith('snow'): box=tuple(2*v for v in box)
             seq=[f.crop(box) for f in fr]
-            once=an['name'] not in ('hero','deal','gt')
+            once=an['name'] not in ('hero','gt') and not an['name'].startswith('snow')
             if once: seq=[seq[-1]]+seq+[seq[-1]]
-            dur=[50 if an['name']=='gt' else (40 if an['name'] in ('hero','deal') else 80)]*len(seq)
+            dur=[50 if an['name']=='gt' else (40 if an['name']=='hero' else (50 if an['name'].startswith('snow') else 80))]*len(seq)
             if once: dur[0]=2600; dur[-1]=2600
             pal=seq[0].quantize(colors=255,method=Image.MEDIANCUT,dither=Image.Dither.NONE)
             if an['name']=='hero':  # nahtlose Schleife: Ende blendet in den Anfang, kein Ruck
@@ -60,7 +62,7 @@ for yi in range(len(ys)-1):
             dz=Image.Dither.NONE
             q=[s.quantize(palette=pal,dither=dz) for s in seq]
             fn=f'n{n:03d}.gif'; q[0].save('mail/_t.gif',save_all=True,append_images=q[1:],duration=dur,loop=0,disposal=1)
-            subprocess.run(['gifsicle','-O3','--lossy='+('20' if an['name']=='deal' else ('80' if an['name']=='hero' else '85')),'-o','mail/'+fn,'mail/_t.gif'],check=True); os.remove('mail/_t.gif')
+            subprocess.run(['gifsicle','-O3','--lossy='+('30' if an['name'].startswith('snow') else ('80' if an['name']=='hero' else '85')),'-o','mail/'+fn,'mail/_t.gif'],check=True); os.remove('mail/_t.gif')
         else:
             fn=f'n{n:03d}.jpg'; st.crop((x0*2,y0*2,x1*2,y1*2)).save('mail/'+fn,quality=64,optimize=True,progressive=True)
         cells.append(dict(x0=x0,x1=x1,fn=fn,href=ln['href'] if ln else None,alt=(ln['txt'] if ln else '')))
