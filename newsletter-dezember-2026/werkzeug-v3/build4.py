@@ -46,7 +46,7 @@ doc=f'''<!DOCTYPE html>
 <style>
 body{{margin:0!important;padding:0!important;background:#E9E3DC;-webkit-text-size-adjust:100%}}
 table{{mso-table-lspace:0;mso-table-rspace:0}} img{{-ms-interpolation-mode:bicubic}}
-.hl img{{transition:filter .2s ease,transform .2s ease}} .hl:hover img{{filter:brightness(1.07) saturate(1.08)}} .hl:active img{{filter:brightness(.92)}}
+
 @media screen and (max-width:640px){{.wrap{{width:100%!important}}}}
 </style></head>
 <body style="margin:0;padding:0;background:#E9E3DC">
