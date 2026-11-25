@@ -45,7 +45,7 @@ Alle PCs mit Velo-TV sehen jede Änderung sofort. Design wie die neue Homepage (
 ## Showroom als Video (flüssig auf jedem Fernseher)
 - Fernseher-Browser sind für WebGL-Animationen zu schwach (LG webOS 25 ruckelt schon bei der Homepage). Darum wird der
   Showroom in der Cloud **Bild für Bild mit virtueller Uhr** gerendert: `scripts/showroom-video.js`.
-- Workflow `.github/workflows/velo-tv-showroom.yml`: stündlich `--check` (Angebote + Design-Fingerabdruck), nur bei Änderung
+- Workflow `.github/workflows/velo-tv-showroom.yml`: alle 15 Minuten `--check` (Angebote + Design-Fingerabdruck), nur bei Änderung
   wird gerendert. Hintergrund-Schleife (Herbstallee, 24 s, nahtlos) wird einmal gebaut und als `hintergrund-<hash>.mp4`
   im Release **velo-tv-showroom** wiederverwendet; das Video (`showroom.mp4` + `showroom-video.json`) liegt im selben Release.
   Schleifen-Naht: Der Fernseher spielt das Video in Endlosschleife. Alle durchgehenden Endlos-Animationen (Laufband,
@@ -55,7 +55,7 @@ Alle PCs mit Velo-TV sehen jede Änderung sofort. Design wie die neue Homepage (
   Verteilter Bau (Tiry 25.11.2026): Job `pruefen` → `hintergrund` (nur falls Schleife fehlt) → `rendern` als Matrix mit bis zu
   20 Rechnern (`--teil k --teile N`, je 2–3 Räder) → `zusammen` (`--zusammen <ordner>`, fügt die Stücke verlustfrei
   aneinander). Alle Stücke prüfen `--version-soll`: Ändert sich der Bestand während des Baus, wird nichts hochgeladen und
-  der nächste stündliche Lauf baut neu. Dauer ca. 20 Minuten statt 3+ Stunden.
+  der nächste Lauf (15 min) baut neu. Dauer ca. 20 Minuten statt 3+ Stunden.
 - Die Zentrale holt alle 15 min ein neues Video (`showroom.js` → `videoHolen`), der Player spielt es ab und setzt beim
   nächsten Mal an der letzten Stelle fort. Ohne Video: Live-Showroom (HTML/WebGL) als Rückfall.
 - Lokal testen: `node scripts/showroom-video.js --hintergrund --out <dir>` und

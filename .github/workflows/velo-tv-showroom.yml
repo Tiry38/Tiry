@@ -1,12 +1,12 @@
 name: Velo-TV Showroom-Video
 
-# Stündlich: prüft die Angebotsräder im Live-Bestand der Homepage. Hat sich etwas geändert (neues Angebot, Preis,
+# Alle 15 Minuten (Tiry 25.11.2026): prüft die Angebotsräder im Live-Bestand der Homepage. Hat sich etwas geändert (neues Angebot, Preis,
 # verkauft/ausgeblendet, Foto) oder wurde das Showroom-Design geändert, wird das Video neu berechnet und ins Release
 # „velo-tv-showroom“ gelegt. Die Velo-TV-Zentrale holt es sich alle 15 Minuten von dort.
 # Verteilt (Tiry 25.11.2026): bis zu 20 Rechner rendern gleichzeitig je 2–3 Räder → fertig in ca. 20 Minuten.
 on:
   schedule:
-    - cron: '23 * * * *'
+    - cron: '8,23,38,53 * * * *'
   workflow_dispatch:
     inputs:
       force:
