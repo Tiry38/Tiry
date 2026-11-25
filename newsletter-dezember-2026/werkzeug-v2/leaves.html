@@ -1,0 +1,14 @@
+<!doctype html><html><body style="margin:0;background:transparent">
+<canvas id="c" width="640" height="960"></canvas>
+<script>
+const W=640,H=960,N=60; // 60 Bilder = 1 Schleife
+let s=7;const R=()=>{s=(s*16807)%2147483647;return s/2147483647};
+const COLS=[['#D9822B','#9A4E14'],['#C8102E','#7E0A1C'],['#E0A23A','#9C6A18'],['#B5531F','#6E2E0E'],['#CF6A22','#83400F']];
+const L=[];for(let i=0;i<22;i++){const z=R();L.push({x:R()*W,y0:R()*H,k:z<.5?1:(z<.85?1:2),sz:6+z*9,amp:12+R()*26,ph:R()*6.28,sp:R()*6.28,sw:1+Math.floor(R()*2),c:COLS[Math.floor(R()*COLS.length)],rot:R()*6.28,rs:(R()<.5?-1:1)})}
+function leaf(g,sz,c){g.beginPath();g.moveTo(0,-sz);g.bezierCurveTo(sz*.7,-sz*.7,sz*.75,sz*.35,0,sz);g.bezierCurveTo(-sz*.75,sz*.35,-sz*.7,-sz*.7,0,-sz);g.fillStyle=c[0];g.fill();
+ g.strokeStyle=c[1];g.lineWidth=Math.max(1,sz*.12);g.beginPath();g.moveTo(0,-sz*.85);g.lineTo(0,sz*1.25);g.stroke();}
+window.draw=f=>{const g=document.getElementById('c').getContext('2d');g.clearRect(0,0,W,H);const t=f/N;
+ for(const l of L){const y=((l.y0+t*H*l.k)%H);
+  for(const yy of [y,y-H]){const x=l.x+Math.sin(t*6.283*l.sw+l.ph)*l.amp;
+   g.save();g.translate(x,yy);g.rotate(l.rot+t*6.283*l.rs);g.scale(Math.cos(t*6.283*l.sw+l.sp),1);leaf(g,l.sz,l.c);g.restore();}}};
+</script></body></html>
