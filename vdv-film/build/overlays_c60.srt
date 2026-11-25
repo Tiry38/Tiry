@@ -1,59 +1,59 @@
 1
-00:00:00,300 --> 00:00:04,500
+00:00:00,300 --> 00:00:03,500
 AEB PRO · Modelljahr 2027
 
 2
-00:00:04,700 --> 00:00:16,500
+00:00:03,700 --> 00:00:13,500
 Vier Motoren: 60, 75, 90 und 120 Nm. Gewählt: Performance Line CX, 120 Nm.
 
 3
-00:00:16,700 --> 00:00:20,130
+00:00:13,700 --> 00:00:18,930
 Das Fundament. Hier entscheidest du, wie weit, wie entspannt und wie wartungsarm du fährst.
 
 4
-00:00:20,170 --> 00:00:21,700
+00:00:18,970 --> 00:00:20,800
 Größter integrierter Akku – Bosch PowerTube 800 Wh
 
 5
-00:00:23,070 --> 00:00:24,600
+00:00:22,170 --> 00:00:24,000
 2,8-Zoll-Farbdisplay mit Navigation – Bosch Kiox 500 · Smart System
 
 6
-00:00:25,970 --> 00:00:27,500
+00:00:25,370 --> 00:00:27,200
 Schaltet automatisch und stufenlos – Enviolo TR AUTOMATiQ · Bosch eShift
 
 7
-00:00:28,870 --> 00:00:30,400
+00:00:28,570 --> 00:00:30,400
 Riemen statt Kette. Ohne Öl. – Gates CDX Riemenantrieb
 
 8
-00:00:31,770 --> 00:00:33,300
+00:00:31,770 --> 00:00:33,600
 Drei Rahmenformen, S bis XXL – Mid · L (53 cm) · 1,70–1,85 m
 
 9
-00:00:33,800 --> 00:00:37,230
+00:00:34,100 --> 00:00:39,330
 Farbe als Haltung. 18 Farbtöne, glanz oder matt. Dein Rad erkennst du unter hunderten.
 
 10
-00:00:37,270 --> 00:00:38,800
+00:00:39,370 --> 00:00:41,200
 Eine Farbe, die man sieht – Melon Yellow glanz
 
 11
-00:00:39,200 --> 00:00:41,570
+00:00:41,600 --> 00:00:44,070
 Sehen. Bremsen. Schützen.
 
 12
-00:00:41,610 --> 00:00:42,000
+00:00:44,110 --> 00:00:45,800
 130 Lux, Fernlicht 450 Lux – Supernova M99 Pro 2
 
 13
-00:00:43,400 --> 00:00:46,400
+00:00:46,200 --> 00:00:48,800
 Ergonomie · Komfort · Sicherheit · Zubehör: jedes Teil einzeln gewählt.
 
 14
-00:00:46,600 --> 00:00:54,400
+00:00:48,000 --> 00:00:55,300
 AEB 990CX PRO · 120 Nm · 800 Wh · Automatik + Riemen · 6.677 €
 
 15
-00:00:54,600 --> 00:00:59,850
+00:00:55,500 --> 00:00:59,750
 Dein AEB PRO. Konfiguriere deins: konfigurator.velo-de-ville.com

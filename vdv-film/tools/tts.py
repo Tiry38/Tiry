@@ -20,7 +20,7 @@ HEAD = ['Basis. Hier entscheidest du, wie weit, wie entspannt und wie wartungsar
         'Zubehör. Mehr Platz vorne, und schneller laden.']
 for i, h in enumerate(HEAD): L.append((heads[i] + 0.5, h))
 CAP = ['Der größte integrierte Akku: 800 Wattstunden.', 'Kiox 500, mit Farbdisplay und Navigation.', 'Enviolo AUTOMATiQ schaltet automatisch und stufenlos.',
-       'Dazu der Gates-Riemen. Ganz ohne Öl.', 'Rahmenform Mid, Größe L.', 'Melon Yellow. Eine Farbe, die man sieht.',
+       'Dazu der Gates-Riemen. Ganz ohne Öl.', 'Tiefeinstieg, Größe L. Bequem auf- und absteigen.', 'Melon Yellow. Eine Farbe, die man sieht.',
        'Ein Riser-Lenker für die entspannte Haltung.', 'Und der passende Tourensattel.', 'Eine gefederte Parallelogramm-Stütze.', 'Eine Luftfedergabel mit Lockout.',
        'Reifen, die für E-Bikes gemacht sind.', 'Vier Kolben am Vorderrad.', 'Fernlicht mit 450 Lux.', 'Ein Rahmenschloss.', 'Und GPS-Ortung bei Diebstahl.', 'Ein Ladegerät mit doppeltem Ladestrom.']
 for c, s in zip(caps, CAP): L.append((c['t'] + 0.15, s))

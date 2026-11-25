@@ -7,7 +7,7 @@ const D = window.VDV;
 const $ = s => document.querySelector(s);
 const film = $('#film'); film.style.width = W + 'px'; film.style.height = H + 'px';
 const cv = $('#cv'); cv.width = W * DPR; cv.height = H * DPR; cv.style.width = W + 'px'; cv.style.height = H + 'px';
-const g = cv.getContext('2d');
+const g = cv.getContext('2d'); g.imageSmoothingQuality = 'high';
 const ASP = W / H; const V = ASP < 0.8, SQ = !V && ASP < 1.3;
 
 /* ---------- Layout ---------- */
@@ -19,7 +19,7 @@ const L = V ? {
 } : SQ ? {
   stage: { x: 0, y: 200, w: 1080, h: 560 }, sc: { x: 540, y: 470 }, bw: 900,
   panel: { x: 40, y: 760, w: 1000, h: 250 }, tabs: { x: 40, y: 1020, w: 1000 },
-  hd: { x: 50, y: 64, h1: 70, small: .55 }, cap: { x: 50, y: 560 }, price: { x: 50, y: 690, fs: 34 }, note: { x: 50, y: 560, w: 900 },
+  hd: { x: 50, y: 64, h1: 70, small: .55 }, cap: { x: 50, y: 560 }, price: { x: 700, y: 700, fs: 34 }, note: { x: 50, y: 560, w: 900 },
   giant: { x: -30, y: 200, fs: 330 }, motors: 'list', top: false, concept: { x: 50, y: 1052 }
 } : {
   stage: { x: 0, y: 120, w: 1240, h: 820 }, sc: { x: 640, y: 560 }, bw: 1160,
@@ -53,23 +53,23 @@ function rng(s) { return () => { s = (s * 1664525 + 1013904223) >>> 0; return s 
 
 /* ---------- Zeitplan ---------- */
 const PACE = {
-  full: { head: 5.2, open: 1.5, pick: 1.0, hold: 2.3, note: 3.6, tail: .9, pk: 1.45 },
+  full: { head: 6.8, open: 1.3, pick: 1.0, hold: 3.2, note: 4.2, tail: 1.0, pk: 1.6 },
   mid: { head: 2.2, open: .8, pick: .6, hold: .9, note: 0, tail: .4, pk: 0 },
   fast: { head: .7, open: .25, pick: .3, hold: .15, note: 0, tail: .2, pk: 0 },
   turbo: { head: .3, open: .1, pick: .14, hold: .06, note: 0, tail: .05, pk: 0 },
-  calm: { head: 2.2, open: .8, pick: .7, hold: 1.4, note: 0, tail: .4, pk: 0 },
-  hl: { head: 1.3, open: .6, pick: .6, hold: 1.3, note: 0, tail: .3, pk: 0 }
+  calm: { head: 4.0, open: .8, pick: .7, hold: 1.7, note: 0, tail: .4, pk: 0 },
+  hl: { head: 1.4, open: .6, pick: .6, hold: 1.6, note: 0, tail: .3, pk: 0 }
 };
 const CUTS = {
-  main: [['intro', 9], ['model', 9.5], ['motor', 22], ...D.tabs.map((x, i) => ['tab', i, 'full']), ['summary', 13], ['outro', 10]],
+  main: [['intro', 9], ['model', 10.5], ['motor', 24], ...D.tabs.map((x, i) => ['tab', i, 'full']), ['summary', 13], ['outro', 10]],
   // Kurzfassungen: nur Höhepunkte in ruhigem Takt, der Rest wechselt in einer Lichtfahrt mit (Endpreis bleibt korrekt)
-  c60: [['intro', 4.5], ['motor', 12], ['tab', 0, 'calm'], ['tab', 1, 'calm'], ['tab', 5, 'hl', [1]], ['rest', 3.2, [3, 4, 5, 6]], ['summary', 8], ['outro', 5.5]],
-  c30: [['intro', 2.2], ['motor', 6], ['tab', 0, 'hl', [0, 2, 3]], ['tab', 1, 'hl'], ['rest', 2.6, [3, 4, 5, 6]], ['summary', 3.4], ['outro', 2.7]],
-  c15: [['intro', 1.1], ['motor', 3.4], ['tab', 1, 'hl'], ['rest', 2.0, [0, 3, 4, 5, 6]], ['summary', 2.4], ['outro', 2.0]]
+  c60: [['intro', 3.5], ['motor', 10], ['tab', 0, 'calm'], ['tab', 1, 'calm'], ['tab', 5, 'hl', [1]], ['rest', 2.8, [3, 4, 5, 6]], ['summary', 6.5], ['outro', 4.5]],
+  c30: [['intro', 2.0], ['motor', 5.4], ['tab', 0, 'hl', [0, 2, 3]], ['tab', 1, 'hl'], ['rest', 2.6, [3, 4, 5, 6]], ['summary', 3.0], ['outro', 2.4]],
+  c15: [['intro', 1.1], ['motor', 3.4], ['tab', 1, 'hl'], ['rest', 2.0, [0, 3, 4, 5, 6]], ['summary', 2.2], ['outro', 1.8]]
 };
 const plan = CUTS[CUT];
 const scenes = []; let T = 0;
-const ev = { cam: [], img: [], price: [], cur: [], clicks: [], open: {}, scroll: [], tab: [], sfx: [], caps: [], notes: [], heads: [], hover: [], sel: [], priceHide: [] };
+const ev = { cam: [], img: [], price: [], cur: [], clicks: [], open: {}, scroll: [], tab: [], sfx: [], caps: [], notes: [], heads: [], hover: [], sel: [], priceHide: [], marks: [] };
 const P = id => ev.open[id] || (ev.open[id] = []);
 
 /* Panel-Modell: alle Reiter untereinander, wie im Original */
@@ -146,7 +146,9 @@ for (const step of plan) {
       const op = optScreen(id, c.o, t); addCur(t, op.x, op.y); const tp = t + pace.pick * .6; click(tp, 'select');
       ev.sel.push({ t: tp, id, o: c.o });
       ev.img.push({ t: tp + .05, v: c.img }); ev.price.push({ t: tp + .1, v: c.price });
-      ev.cam.push({ t: tp + .1, cx: c.cam[0], cy: c.cam[1], z: step[2] === 'turbo' ? 1 : (step[2] === 'fast' ? 1 + (c.cam[2] - 1) * .5 : c.cam[2]) });
+      const mk = c.mk || [c.cam[0], c.cam[1]]; const zc = c.mk ? ({ full: 2.1, calm: 1.8, mid: 1.8, hl: 1.7, fast: 1.4, turbo: 1 })[step[2]] : 1;
+      ev.cam.push({ t: tp + .1, cx: zc > 1 ? mk[0] : .5, cy: zc > 1 ? mk[1] : .52, z: zc });
+      if (c.mk) ev.marks.push({ t: tp + .15, until: tp + pace.pick * .4 + pace.hold + .05, u: c.mk[0], v: c.mk[1] });
       ev.sfx.push({ t: tp + .1, k: c.event === 'color' ? 'color' : 'build' });
       if (c.q === 'SCHALTUNG') { ev.appearAt[D.tabs[ti].id + '/ANTRIEB'] = tp + .3; }
       if (c.q === 'RAHMENFARBE') { ev.appearAt[D.tabs[ti].id + '/DEKOR'] = tp + .3; }
@@ -182,12 +184,12 @@ const sMotor = sc('motor'), sModel = sc('model'), sIntro = sc('intro'), sSum = s
 const mFast = sMotor.dur < 15;
 const MT = sMotor.dur < 6 ? { rise: 0, scan: .2, nm: .1, hl: 9e9, click: sMotor.dur * .55, morph: sMotor.dur * .66, ui: sMotor.dur * .9 }
   : mFast ? { rise: 0, scan: 1.2, nm: 1.0, hl: 9e9, click: sMotor.dur * .52, morph: sMotor.dur * .62, ui: sMotor.dur * .84 }
-  : { rise: 1.4, scan: 3.6, nm: 3.8, hl: 6.6, click: 15.6, morph: 16.6, ui: 19.8 };
+  : { rise: 4.0, scan: 6.0, nm: 6.2, hl: 8.6, click: 17.6, morph: 18.6, ui: 21.8 };
 // Bike erscheint beim Motor-Morph
 ev.img.unshift({ t: 0, v: 0 }); ev.price.unshift({ t: 0, v: 4049 });
 ev.sfx.push({ t: sMotor.t0 + MT.click, k: 'select' }, { t: sMotor.t0 + MT.morph, k: 'hum' }, { t: sMotor.t0 + MT.ui, k: 'ui' });
 ev.clicks.push(sMotor.t0 + MT.click);
-if (sModel) { ev.clicks.push(sModel.t0 + 4.3); ev.sfx.push({ t: sModel.t0 + 4.3, k: 'select' }); }
+if (sModel) { ev.clicks.push(sModel.t0 + 5.5); ev.sfx.push({ t: sModel.t0 + 5.5, k: 'select' }); }
 ev.sfx.push({ t: sIntro.t0 + .5, k: 'scan' }, { t: sSum.t0 + .3, k: 'sum' }, { t: sOut.t0, k: 'free' });
 ev.sfx.sort((a, b) => a.t - b.t); ev.cur.sort((a, b) => a.t - b.t); ev.cam.sort((a, b) => a.t - b.t);
 
@@ -248,20 +250,20 @@ if (V) introEl.querySelector('.u').style.flexDirection = 'column';
 // Headline
 const hd = $('#hd'); Object.assign(hd.style, { left: L.hd.x + 'px', top: L.hd.y + 'px', transformOrigin: '0 0' });
 hd.querySelector('h1').style.fontSize = L.hd.h1 + 'px';
-if (SQ) { hd.querySelector('.warum').style.fontSize = '17px'; hd.querySelector('.was b').style.fontSize = '15px'; hd.querySelector('.warum').style.maxWidth = '520px'; }
-if (V) { hd.querySelector('.warum').style.maxWidth = '900px'; hd.querySelector('.warum').style.fontSize = '30px'; hd.querySelector('.was b').style.fontSize = '24px'; }
+if (SQ) { hd.querySelector('.warum').style.fontSize = '21px'; hd.querySelector('.was b').style.fontSize = '18px'; hd.querySelector('.warum').style.maxWidth = '620px'; hd.style.padding = '20px 28px 22px 24px'; $('#cap .v').style.fontSize = '30px'; $('#cap .s').style.fontSize = '17px'; $('#note .v').style.fontSize = '19px'; }
+if (V) { hd.querySelector('.warum').style.maxWidth = '860px'; hd.querySelector('.warum').style.fontSize = '34px'; hd.querySelector('.was b').style.fontSize = '28px'; hd.querySelector('.tag').style.fontSize = '20px'; }
 const giant = $('#giant'); Object.assign(giant.style, { left: L.giant.x + 'px', top: L.giant.y + 'px', fontSize: L.giant.fs + 'px' });
 Object.assign($('#cap').style, { left: L.cap.x + 'px', top: L.cap.y + 'px' });
 Object.assign($('#price').style, { left: L.price.x + 'px', top: L.price.y + 'px' }); $('#price .p').style.fontSize = L.price.fs + 'px';
 Object.assign($('#note').style, { left: L.note.x + 'px', top: L.note.y + 'px', width: L.note.w + 'px' });
-if (V) { $('#cap .v').style.fontSize = '40px'; $('#cap .s').style.fontSize = '22px'; $('#note .v').style.fontSize = '26px'; }
+if (V) { $('#cap .v').style.fontSize = '46px'; $('#cap .s').style.fontSize = '25px'; $('#cap .k').style.fontSize = '19px'; $('#note .v').style.fontSize = '30px'; $('#note .k').style.fontSize = '19px'; }
 
 /* ---------- Bilder ---------- */
 const imgs = []; const lines = {};
 const loadImg = src => new Promise(r => { const i = new Image(); i.onload = () => r(i); i.src = src; });
 const grains = [];
 async function load() {
-  for (let i = 0; i < 17; i++) imgs[i] = await loadImg(`assets/bike/b${String(i).padStart(2, '0')}.webp`);
+  for (let i = 0; i < 17; i++) imgs[i] = await loadImg(`assets/bike/${Q.get('ip') || ''}b${String(i).padStart(2, '0')}x.webp`);
   lines[0] = await loadImg('assets/bike/line0.webp'); lines[1] = await loadImg('assets/bike/line1.webp');
   for (let k = 0; k < 6; k++) { const c = document.createElement('canvas'); c.width = c.height = 256; const x = c.getContext('2d'); const d = x.createImageData(256, 256); const r = rng(77 + k * 991);
     for (let p = 0; p < d.data.length; p += 4) { const v = r() * 255; d.data[p] = d.data[p + 1] = d.data[p + 2] = v; d.data[p + 3] = 255; } x.putImageData(d, 0, 0); grains.push(c); }
@@ -359,6 +361,18 @@ function seek(t) {
   }
   { const tg = g.createLinearGradient(0, 0, 0, 150); tg.addColorStop(0, 'rgba(18,18,20,.92)'); tg.addColorStop(1, 'rgba(18,18,20,0)'); g.fillStyle = tg; g.fillRect(0, 0, W, 150);
     if (!V) { const bg3 = g.createLinearGradient(0, H * .62, 0, H); bg3.addColorStop(0, 'rgba(18,18,20,0)'); bg3.addColorStop(1, 'rgba(18,18,20,.92)'); g.fillStyle = bg3; g.fillRect(0, H * .62, W * .7, H * .38); } }
+  // Bauteil-Marker: pulsierende Ringe in Akzentfarbe + Leitlinie zur Bauteil-Tafel
+  if (showBike) for (const m of ev.marks) { if (t < m.t || t > m.until) continue; const k = t - m.t, out = clamp((m.until - t) / .25);
+    const mx = r.x + m.u * r.w, my = r.y + m.v * r.h; const R0 = Math.max(16, r.w * .018);
+    g.save(); g.globalAlpha = out;
+    const gl = g.createRadialGradient(mx, my, 0, mx, my, R0 * 3.2); gl.addColorStop(0, 'rgba(255,111,0,.38)'); gl.addColorStop(1, 'rgba(255,111,0,0)'); g.fillStyle = gl; g.fillRect(mx - R0 * 4, my - R0 * 4, R0 * 8, R0 * 8);
+    for (let p = 0; p < 3; p++) { const q = ((k - p * .45) % 1.35) / 1.35; if (k - p * .45 < 0 || q < 0) continue; g.beginPath(); g.arc(mx, my, R0 * (1 + q * 2.4), 0, 7); g.strokeStyle = `rgba(255,111,0,${(1 - q) * .95})`; g.lineWidth = 3 - q * 1.5; g.stroke(); }
+    const blink = .55 + .45 * Math.cos(k * Math.PI * 2 / .7);
+    g.beginPath(); g.arc(mx, my, R0, 0, 7); g.strokeStyle = `rgba(255,140,40,${blink})`; g.lineWidth = 3.5; g.stroke();
+    g.beginPath(); g.arc(mx, my, R0 * .28, 0, 7); g.fillStyle = '#FF6F00'; g.fill();
+    if (ev.caps.some(c => t >= c.t + .2 && t < c.until)) { const cx2 = L.cap.x + 180, cy2 = L.cap.y; const lk = ease(clamp(k / .5));
+      g.beginPath(); g.moveTo(mx, my); g.lineTo(lerp(mx, cx2, lk), lerp(my, cy2, lk)); g.strokeStyle = 'rgba(255,111,0,.85)'; g.lineWidth = 2; g.stroke(); }
+    g.restore(); }
   // Vignette + Grain (Material)
   const vg = g.createRadialGradient(W / 2, H / 2, Math.min(W, H) * .35, W / 2, H / 2, Math.max(W, H) * .75); vg.addColorStop(0, 'rgba(0,0,0,0)'); vg.addColorStop(1, 'rgba(0,0,0,.45)');
   g.fillStyle = vg; g.fillRect(0, 0, W, H);
@@ -375,8 +389,8 @@ function seek(t) {
     introEl.style.transform = `translateX(${-lt * 4}px)`; }
   // Übersicht
   ov.style.display = 'none'; if (sModel) { const on = S.kind === 'model'; ov.style.display = on ? 'block' : 'none';
-    if (on) { const k = clamp(spring(lt - 4.4, 1.1, .85)); ov.querySelector('.mx').style.height = (k * 230) + 'px';
-      ov.querySelectorAll('.ovr').forEach((e, i) => { const rv = clamp((lt - 2.9 - i * .12) / .5); e.style.clipPath = `inset(0 ${100 - ease(rv) * 100}% 0 0)`; e.style.opacity = i === 0 ? 1 : 1 - k * .7; });
+    if (on) { const k = clamp(spring(lt - 5.6, 1.1, .85)); ov.querySelector('.mx').style.height = (k * 230) + 'px';
+      ov.querySelectorAll('.ovr').forEach((e, i) => { const rv = clamp((lt - 3.7 - i * .12) / .5); e.style.clipPath = `inset(0 ${100 - ease(rv) * 100}% 0 0)`; e.style.opacity = i === 0 ? 1 : 1 - k * .7; });
       ov.style.opacity = clamp((S.dur - lt) / .5); } }
   // Motoren
   { const on = S.kind === 'motor'; motorsEl.style.display = on ? 'block' : 'none';
@@ -417,24 +431,42 @@ function seek(t) {
     } }
   function m(i) { return D.motors[i].nm; }
 
-  // Headline-Block
+  // Erklär-Block (Tafel): Headline, Was du hier einstellst, Warum das zählt. Kommt per Lichtkante, geht komplett wieder.
   { let hs = null; for (const h of ev.heads) if (h.t <= t) hs = h;
-    let txt = '', tag = '', was = '', warum = '', rev = 0, dockK = 0, a = 0, gi = '';
+    let txt = '', tag = '', was = '', warum = '', rev = 0, ex = 0, a = 0, gi = '', tIn = 0;
     if (S.kind === 'motor' && !mFast) { txt = 'Vier Motoren. Deine Kraft.'; tag = 'Motorstufe · 4 Optionen'; was = 'Motor · Drehmoment · Einsatzzweck'; warum = 'Das Drehmoment bestimmt, wie souverän du anfährst, kletterst und Gepäck ziehst.';
-      rev = clamp((lt - .2) / .9); dockK = clamp(spring(lt - 1.5, .8, .9)); a = clamp((MT.ui - lt) / .5); gi = 'Nm'; }
-    else if (S.kind === 'model') { txt = 'Allround. Neu gedacht.'; tag = 'Modell · AEB PRO MY2027'; was = 'Modellreihe · Motorstufe'; warum = 'Ein Rahmen, vier Motoren: Du wählst die Kraft, die zu deinen Wegen passt.'; rev = clamp((lt - .2) / 1.0); dockK = clamp(spring(lt - 2.6, .8, .9)); a = clamp((S.dur - lt) / .4); gi = 'AEB'; }
+      tIn = lt; ex = clamp((lt - MT.rise + .5) / .5); a = 1; gi = 'Nm'; }
+    else if (S.kind === 'model') { txt = 'Allround. Neu gedacht.'; tag = 'Modell · AEB PRO MY2027'; was = 'Modellreihe · Motorstufe'; warum = 'Ein Rahmen, vier Motoren: Du wählst die Kraft, die zu deinen Wegen passt.'; tIn = lt; ex = clamp((lt - 3.4) / .5); a = 1; gi = 'AEB'; }
     else if (S.kind === 'tab' && hs && hs.ti >= 0) { const tb = D.tabs[hs.ti]; txt = tb.head; tag = `${String(hs.ti + 1).padStart(2, '0')} / 07 · ${tb.id}`; was = tb.was; warum = tb.warum;
-      const lh = t - hs.t; rev = clamp((lh - .15) / (hs.pace === 'turbo' ? .25 : hs.pace === 'fast' ? .4 : .9)); dockK = clamp(spring(t - hs.dock, .8, .9)); a = 1; gi = tb.short || tb.id;
-      if (hs.pace !== 'full' && hs.pace !== 'mid') { was = ''; warum = ''; } }
+      tIn = t - hs.t; ex = clamp((t - hs.dock + .1) / .6); a = 1; gi = tb.short || tb.id;
+      if (hs.pace !== 'full' && hs.pace !== 'mid' && hs.pace !== 'calm') { was = ''; warum = ''; } }
     if (S.kind === 'summary' || S.kind === 'outro' || S.kind === 'intro') a = 0;
-    hd.style.opacity = a; hd.querySelector('.tag span').textContent = tag; hd.querySelector('.tx').textContent = txt; { const h1e = hd.querySelector('h1'); h1e.style.fontSize = L.hd.h1 + 'px'; const maxW = V ? 960 : SQ ? 980 : 1150; if (txt && h1e.scrollWidth > maxW) h1e.style.fontSize = (L.hd.h1 * maxW / h1e.scrollWidth) + 'px'; }
-    hd.querySelector('.was b').textContent = was; hd.querySelector('.warum em').textContent = warum;
-    hd.querySelector('.was').style.display = was ? '' : 'none'; hd.querySelector('.warum').style.display = warum ? '' : 'none';
-    const h1 = hd.querySelector('h1'); h1.style.clipPath = `inset(-10% ${100 - ease(rev) * 100}% -10% 0)`;
-    hd.querySelector('.scan').style.left = (ease(rev) * 100) + '%'; hd.querySelector('.scan').style.opacity = rev > 0 && rev < 1 ? 1 : 0;
-    const rv2 = ease(clamp(rev * 1.6 - .6)); hd.querySelector('.was').style.clipPath = `inset(0 ${100 - rv2 * 100}% 0 0)`; hd.querySelector('.warum').style.clipPath = `inset(0 ${100 - ease(clamp(rev * 1.6 - .9)) * 100}% 0 0)`;
-    const sm = lerp(1, L.hd.small, dockK); hd.style.transform = `translate(${-px * .2}px,${-dockK * (V ? 60 : 50) - py * .2}px) scale(${sm})`;
-    hd.querySelector('.was').style.opacity = 1 - dockK * 1.3; hd.querySelector('.warum').style.opacity = 1 - dockK * 1.3;
+    const quick = hs && (hs.pace === 'turbo' || hs.pace === 'fast' || hs.pace === 'hl') && S.kind === 'tab';
+    rev = clamp((tIn - .1) / (quick ? .3 : .7));
+    hd.style.display = a && ex < 1 && txt ? '' : 'none';
+    if (hd.style.display === '') {
+      hd.querySelector('.tag span').textContent = tag; hd.querySelector('.tx').textContent = txt;
+      const h1e = hd.querySelector('h1'); h1e.style.fontSize = L.hd.h1 + 'px'; const maxW = V ? 900 : SQ ? 940 : 1040; if (txt && h1e.scrollWidth > maxW) h1e.style.fontSize = (L.hd.h1 * maxW / h1e.scrollWidth) + 'px';
+      const wb = hd.querySelector('.was b'); if (wb.dataset.k !== was) { wb.dataset.k = was; wb.innerHTML = was.split(' · ').map(w => `<span>${w}</span>`).join(''); }
+      hd.querySelector('.warum em').textContent = warum;
+      hd.querySelector('.was').style.display = was ? '' : 'none'; hd.querySelector('.warum').style.display = warum ? '' : 'none';
+      // Lichtklinge wächst, Tafel klappt aus der Klinge auf, Buchstaben federn mit Gewichts-Morph ein; Abgang: Tafel faltet in die Klinge
+      const bladeIn = ease(clamp(tIn / (quick ? .14 : .28))), exP = clamp(ex * 1.45), exB = clamp((ex - .62) / .38);
+      hd.querySelector('.blade').style.transform = `scaleY(${bladeIn * (1 - ease(exB))})`;
+      const unfold = ease(clamp((tIn - (quick ? .08 : .18)) / (quick ? .22 : .42)));
+      const cr = Math.max(100 - unfold * 100, ease(exP) * 100);
+      hd.querySelector('.plate').style.clipPath = `inset(0 ${cr}% 0 0)`; hd.querySelector('.in').style.clipPath = `inset(-20% ${cr}% -20% 0)`;
+      hd.style.clipPath = '';
+      const h1 = hd.querySelector('h1'); h1.style.clipPath = ''; hd.querySelector('.scan').style.opacity = 0;
+      const tx = hd.querySelector('.tx'); if (tx.dataset.k !== txt) { tx.dataset.k = txt; tx.innerHTML = [...txt].map(c => `<span class="ch">${c}</span>`).join(''); }
+      tx.querySelectorAll('.ch').forEach((c, i) => { const k = clamp(spring(tIn - (quick ? .15 : .34) - i * (quick ? .012 : .024), quick ? 3 : 1.9, .62), -.25, 1.25);
+        c.style.transform = `translateY(${(1 - k) * 0.62}em)`; c.style.opacity = clamp(k * 2.5); c.style.fontVariationSettings = `'wght' ${Math.round(160 + 440 * clamp(k))}`; });
+      hd.querySelector('.tag').style.clipPath = `inset(-20% ${100 - ease(clamp((tIn - .3) / .4)) * 100}% -20% 0)`;
+      wb.querySelectorAll('span').forEach((sp, i) => { const kk = clamp(spring(tIn - 1.0 - i * .2, 1.8, .7), 0, 1.2); const k = clamp(kk); sp.style.clipPath = `inset(-20% ${100 - ease(k) * 100}% -20% 0)`; sp.style.transform = `translateX(${(1 - kk) * -18}px)`; sp.style.borderColor = k > .05 && tIn - 1.0 - i * .2 < .7 ? 'var(--acc)' : ''; });
+      const wk = ease(clamp((tIn - 1.1 - Math.max(1, wb.children.length) * .2) / .6)); const we = hd.querySelector('.warum'); we.style.clipPath = `inset(0 ${100 - wk * 100}% 0 0)`;
+      hd.querySelector('.warum i').style.transform = `scaleX(${ease(clamp((tIn - 1.6 - wb.children.length * .2) / .8))})`;
+      hd.style.transform = `translate(${-px * .15}px,${-py * .15}px)`;
+    }
     giant.textContent = gi; giant.style.opacity = a * .9 * (1 - (S.kind === 'motor' ? clamp((lt - 1) / 1) : 0)); }
 
   // Konfigurator-UI ein
@@ -455,7 +487,7 @@ function seek(t) {
       e.querySelector('.act').textContent = o[0]; e.querySelector('.pr').textContent = o[1];
       e.querySelector('.chev').style.transform = `rotate(${45 + 180 * clamp(p.op || 0)}deg) translateY(-3px)`;
       const opts = e.querySelectorAll('.opt'); opts.forEach((oe, oi) => oe.classList.toggle('sel', oi === sel));
-      const fl = selNow[rr.id] ? clamp(1 - (t - selNow[rr.id].t) / .6) : 0; if (fl > 0) opts[sel].style.background = `rgba(255,111,0,${fl * .18})`; else opts[sel].style.background = '';
+      const dt = selNow[rr.id] ? t - selNow[rr.id].t : 9; const fl = dt < 1.6 && selNow[rr.id].t > 0.5 ? (.5 + .5 * Math.cos(dt * Math.PI * 2 / .53)) * clamp((1.6 - dt) / .3) : 0; opts[sel].style.background = fl > 0 ? `rgba(255,111,0,${.15 + fl * .4})` : ''; opts[sel].style.boxShadow = fl > 0 ? `inset 3px 0 0 #FF6F00` : '';
     } }
   // Reiter-Linie (Feder)
   { const ti = track(ev.tab, t, 1.1, .7, 0); const i0 = Math.floor(clamp(ti, 0, 6)), i1 = Math.min(6, i0 + 1), k = ti - i0;
@@ -482,7 +514,7 @@ function seek(t) {
   $('#concept').style.opacity = 1;
   // Cursor
   { const cx2 = track(ev.cur.map(e => ({ t: e.t, v: e.x })), t, 1.5, .8, W * .55), cy2 = track(ev.cur.map(e => ({ t: e.t, v: e.y })), t, 1.5, .8, H * .6);
-    const curOn = (S.kind === 'model' && lt > 2) || (S.kind === 'motor' && lt > MT.hl - 1 && lt < MT.click + .8) || (S.kind === 'tab' && !(scenes.find(s => s === S).pace === 'turbo'));
+    const curOn = (S.kind === 'model' && lt > 4.2) || (S.kind === 'motor' && lt > MT.hl - 1 && lt < MT.click + .8) || (S.kind === 'tab' && !(scenes.find(s => s === S).pace === 'turbo'));
     let mx = cx2, my = cy2;
     if (S.kind === 'motor') { const hlI = clamp(Math.floor((lt - MT.hl) / 2.2), 0, 3); const tgt = lt > MT.click - 1.2 ? 3 : hlI; const ex = L.motors === 'row' ? mLay.x0 + tgt * mLay.dx + mLay.disc / 2 : mLay.x0 + mLay.disc / 2; const ey = L.motors === 'row' ? mLay.y + mLay.disc / 2 : mLay.y + tgt * mLay.dy + mLay.disc / 2; mx = ex + 20; my = ey + 10; }
     if (S.kind === 'model') { mx = (V ? 60 : 80) + 160; my = parseFloat(ov.style.top) + 70; if (SQ) { mx = 180; my = 360; } }

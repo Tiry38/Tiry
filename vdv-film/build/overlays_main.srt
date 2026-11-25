@@ -3,117 +3,117 @@
 AEB PRO · Modelljahr 2027
 
 2
-00:00:09,300 --> 00:00:18,500
+00:00:09,300 --> 00:00:19,500
 Allround. Neu gedacht. Ein Rahmen, vier Motoren.
 
 3
-00:00:18,700 --> 00:00:40,500
+00:00:19,700 --> 00:00:43,500
 Vier Motoren: 60, 75, 90 und 120 Nm. Gewählt: Performance Line CX, 120 Nm.
 
 4
-00:00:40,700 --> 00:00:48,010
+00:00:43,700 --> 00:00:52,410
 Das Fundament. Hier entscheidest du, wie weit, wie entspannt und wie wartungsarm du fährst.
 
 5
-00:00:48,050 --> 00:00:50,460
+00:00:52,450 --> 00:00:55,760
 Größter integrierter Akku – Bosch PowerTube 800 Wh
 
 6
-00:00:50,500 --> 00:00:54,100
+00:00:55,800 --> 00:01:00,000
 Bosch PowerMore 250 Wh in Trinkflaschengröße. Mit 800 Wh zusammen bis 1.050 Wh für lange Touren.
 
 7
-00:00:56,450 --> 00:00:59,000
+00:01:02,150 --> 00:01:05,600
 2,8-Zoll-Farbdisplay mit Navigation – Bosch Kiox 500 · Smart System
 
 8
-00:01:01,250 --> 00:01:03,800
+00:01:07,650 --> 00:01:11,100
 Schaltet automatisch und stufenlos – Enviolo TR AUTOMATiQ · Bosch eShift
 
 9
-00:01:06,050 --> 00:01:08,600
+00:01:13,150 --> 00:01:16,600
 Riemen statt Kette. Ohne Öl. – Gates CDX Riemenantrieb
 
 10
-00:01:10,850 --> 00:01:13,400
+00:01:18,650 --> 00:01:22,100
 Drei Rahmenformen, S bis XXL – Mid · L (53 cm) · 1,70–1,85 m
 
 11
-00:01:14,400 --> 00:01:21,710
+00:01:23,200 --> 00:01:31,910
 Farbe als Haltung. 18 Farbtöne, glanz oder matt. Dein Rad erkennst du unter hunderten.
 
 12
-00:01:21,750 --> 00:01:24,300
+00:01:31,950 --> 00:01:35,400
 Eine Farbe, die man sieht – Melon Yellow glanz
 
 13
-00:01:25,300 --> 00:01:40,500
+00:01:36,500 --> 00:01:54,300
 Gebündelt gedacht. Ein Paket tauscht mehrere Teile auf einmal. Wir wählen hier jedes Teil einzeln.
 
 14
-00:01:40,700 --> 00:01:48,010
+00:01:54,500 --> 00:02:03,210
 Auf dich gebaut. Die richtige Haltung entlastet Hände, Rücken und Gesäß auf jeder Strecke.
 
 15
-00:01:48,050 --> 00:01:50,600
+00:02:03,250 --> 00:02:06,700
 Breiter, leicht erhöhter Griff – Ergotec Riser · 660 mm
 
 16
-00:01:52,850 --> 00:01:55,400
+00:02:08,750 --> 00:02:12,200
 Für die aufrechte Tourenhaltung – Selle Royal Explora Moderate
 
 17
-00:01:56,400 --> 00:02:03,710
+00:02:13,300 --> 00:02:22,010
 Jeder Meter weicher. Federung und Reifen schlucken Kanten, bevor du sie spürst.
 
 18
-00:02:03,750 --> 00:02:06,300
+00:02:22,050 --> 00:02:25,500
 Parallelogramm-Federung – by.Schulz G.2 ST
 
 19
-00:02:08,550 --> 00:02:11,100
+00:02:27,550 --> 00:02:30,000
 Luftfederung mit Lockout – SR Suntour NRX32 Air · 75 mm
 
 20
-00:02:13,350 --> 00:02:15,900
+00:02:33,050 --> 00:02:36,500
 Für E-Bikes entwickelt – Schwalbe Marathon E Plus 50-622
 
 21
-00:02:16,900 --> 00:02:24,210
+00:02:37,600 --> 00:02:46,310
 Sehen. Bremsen. Schützen. Mehr Bremskraft, mehr Licht und ein Rad, das sich wiederfinden lässt.
 
 22
-00:02:24,250 --> 00:02:26,800
+00:02:46,350 --> 00:02:49,800
 Mehr Kolben, mehr Biss – Shimano MT420 · 4-Kolben / 2-Kolben
 
 23
-00:02:29,050 --> 00:02:31,600
+00:02:51,850 --> 00:02:55,300
 130 Lux, Fernlicht 450 Lux – Supernova M99 Pro 2
 
 24
-00:02:33,850 --> 00:02:36,400
+00:02:57,350 --> 00:03:00,800
 Schnell abgeschlossen, Schlüssel abziehbar – ABUS 4750 XL
 
 25
-00:02:38,650 --> 00:02:41,200
+00:03:02,850 --> 00:03:06,300
 GPS-Ortung bei Diebstahl – VELOMATE · 1 Jahr
 
 26
-00:02:42,200 --> 00:02:48,160
+00:03:07,400 --> 00:03:14,960
 Bereit für mehr. Korb oder Frontträger für den Einkauf. Ein stärkeres Ladegerät für kurze Pausen.
 
 27
-00:02:48,200 --> 00:02:52,400
+00:03:14,000 --> 00:03:19,800
 Front-Korb, Frontträger oder Adapter: vorne mehr Platz für Einkauf und Gepäck.
 
 28
-00:02:54,650 --> 00:02:57,200
+00:03:21,850 --> 00:03:25,300
 Doppelter Ladestrom gegenüber 2 A – Bosch 4A
 
 29
-00:02:58,200 --> 00:03:11,000
+00:03:26,400 --> 00:03:39,200
 AEB 990CX PRO · 120 Nm · 800 Wh · Automatik + Riemen · 6.677 €
 
 30
-00:03:11,200 --> 00:03:20,950
+00:03:39,400 --> 00:03:49,150
 Dein AEB PRO. Konfiguriere deins: konfigurator.velo-de-ville.com

@@ -38,7 +38,8 @@ Lieferampel im Konfigurator: grün = Teil sofort verfügbar, Lieferung 2–6 Woc
 | Display | Kiox 500 | 4.647 € | Größtes Bosch-Display im Angebot, 2,8 Zoll Farbe mit Navigation. |
 | Schaltung | Enviolo TR AUTOMATiQ | 5.397 € | Automatisch und stufenlos, per Bosch eShift. |
 | Antrieb | Gates CDX Riemenantrieb | 5.696 € | Kein Öl, nahezu wartungsfrei. |
-| Rahmen | Mid · L (53 cm) | 5.696 € | Mittlere Rahmenform, Größe für 1,70–1,85 m. |
+| Rahmen | Low · L (53 cm) = Tiefeinstieg | 5.696 € | Tiefeinstieg (Tirys Vorgabe), Größe für 1,70–1,85 m. |
+| Startfarbe | Poppy Red glanz (inkl., vor Filmbeginn gesetzt) | 4.049 € | Rad ist von Anfang an farbig (Tirys Vorgabe). |
 | Farbe | Melon Yellow glanz | 5.746 € | Stärkster Kontrast im Dark Mode. Hinweis: MY27-Neuheit nicht belegt (gab es schon 2026). |
 | Pakete | keine | – | Jedes Paket sperrt Komponenten (Tirys Vorgabe). |
 | Lenker | Ergotec Riser 660 mm | 5.755 € | Entspannte, breite Griffposition. |

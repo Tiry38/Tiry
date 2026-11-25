@@ -25,17 +25,17 @@ window.VDV = {
         { n: 'RAHMEN', o: [['Low · S (45 cm) · (1,55-1,70 m)', 'inkl.', 'g'], ['Low · M (48 cm) · (1,60-1,80 m)', 'inkl.', 'g'], ['Low · L (53 cm) · (1,70-1,85 m)', 'inkl.', 'g'], ['Low · XL (58 cm) · (1,80-1,95 m)', 'inkl.', 'g'], ['Low · XXL (63 cm) · (1,90-2,05 m)', 'inkl.', 'y'], ['High · M (48 cm) · (1,60-1,75 m)', 'inkl.', 'g'], ['High · L (53 cm) · (1,70-1,85 m)', 'inkl.', 'y'], ['High · XL (58 cm) · (1,80-1,95 m)', 'inkl.', 'y'], ['High · XXL (63 cm) · (1,90-2,05 m)', 'inkl.', 'g'], ['Mid · M (48 cm) · (1,60-1,75 m)', 'inkl.', 'g'], ['Mid · L (53 cm) · (1,70-1,85 m)', 'inkl.', 'g'], ['Mid · XL (58 cm) · (1,80-1,95 m)', 'inkl.', 'g']], a: 2 }
       ],
       clicks: [
-        { q: 'AKKU', o: 2, img: 1, price: 4528, cam: [0.56, 0.47, 2.0], cap: 'Größter integrierter Akku', capS: 'Bosch PowerTube 800 Wh',
+        { q: 'AKKU', o: 2, mk: [0.545, 0.49], img: 1, price: 4528, cam: [0.56, 0.47, 2.0], cap: 'Größter integrierter Akku', capS: 'Bosch PowerTube 800 Wh',
           note: ['OPTIONAL · RANGE EXTENDER', 'Bosch PowerMore 250 Wh in Trinkflaschengröße. Mit 800 Wh zusammen bis 1.050 Wh für lange Touren.'] },
-        { q: 'DISPLAY', o: 4, img: 2, price: 4647, cam: [0.64, 0.14, 2.7], cap: '2,8-Zoll-Farbdisplay mit Navigation', capS: 'Bosch Kiox 500 · Smart System' },
-        { q: 'SCHALTUNG', o: 8, img: 3, price: 5397, cam: [0.215, 0.70, 2.5], cap: 'Schaltet automatisch und stufenlos', capS: 'Enviolo TR AUTOMATiQ · Bosch eShift' },
-        { q: 'ANTRIEB', o: 1, img: 4, price: 5696, cam: [0.32, 0.76, 2.4], cap: 'Riemen statt Kette. Ohne Öl.', capS: 'Gates CDX Riemenantrieb' },
-        { q: 'RAHMEN', o: 10, img: 5, price: 5696, cam: [0.5, 0.52, 1.05], cap: 'Drei Rahmenformen, S bis XXL', capS: 'Mid · L (53 cm) · 1,70–1,85 m' }
+        { q: 'DISPLAY', o: 4, mk: [0.635, 0.11], img: 2, price: 4647, cam: [0.64, 0.14, 2.7], cap: '2,8-Zoll-Farbdisplay mit Navigation', capS: 'Bosch Kiox 500 · Smart System' },
+        { q: 'SCHALTUNG', o: 8, mk: [0.215, 0.71], img: 3, price: 5397, cam: [0.215, 0.70, 2.5], cap: 'Schaltet automatisch und stufenlos', capS: 'Enviolo TR AUTOMATiQ · Bosch eShift' },
+        { q: 'ANTRIEB', o: 1, mk: [0.315, 0.77], img: 4, price: 5696, cam: [0.32, 0.76, 2.4], cap: 'Riemen statt Kette. Ohne Öl.', capS: 'Gates CDX Riemenantrieb' },
+        { q: 'RAHMEN', o: 2, mk: [0.45, 0.675], img: 5, price: 5696, cam: [0.5, 0.52, 1.05], cap: 'Tiefeinstieg: bequem auf- und absteigen', capS: 'Low · L (53 cm) · 1,70–1,85 m' }
       ] },
     { id: 'STYLE', head: 'Farbe als Haltung.', was: 'Rahmenfarbe · Oberfläche glanz oder matt · Dekor',
       warum: '18 Farbtöne, glanz oder matt. Dein Rad erkennst du unter hunderten.',
       q: [
-        { n: 'RAHMENFARBE', o: [['Deep Black glanz', 'inkl.', 'g'], ['Deep Black matt', '50 €', 'g'], ['Night Blue glanz', 'inkl.', 'g'], ['Night Blue matt', '50 €', 'g'], ['Poppy Red glanz', 'inkl.', 'g'], ['Poppy Red matt', 'inkl.', 'g'], ['Ice Blue glanz', 'inkl.', 'g'], ['Ice Blue matt', '50 €', 'g'], ['Stone Basalt glanz', 'inkl.', 'g'], ['Stone Basalt matt', '50 €', 'g'], ['Scarlet Red glanz', 'inkl.', 'g'], ['Scarlet Red matt', '50 €', 'g'], ['French Lavender glanz', '50 €', 'g'], ['French Lavender matt', '50 €', 'g'], ['Olive Green glanz', '50 €', 'g'], ['Olive Green matt', '50 €', 'g'], ['Emerald Green glanz', '50 €', 'g'], ['Emerald Green matt', '50 €', 'g'], ['Crystal Pearl glanz', '50 €', 'g'], ['Crystal Pearl matt', '50 €', 'g'], ['Petrol Blue glanz', '50 €', 'g'], ['Petrol Blue matt', '50 €', 'g'], ['Pure White glanz', '50 €', 'g'], ['Pure White matt', '50 €', 'g'], ['Eucalyptus Green glanz', '50 €', 'g'], ['Eucalyptus Green matt', '50 €', 'g'], ['Ocean Blue glanz', '50 €', 'g'], ['Ocean Blue matt', '50 €', 'g'], ['Lime Green glanz', '50 €', 'g'], ['Lime Green matt', '50 €', 'g'], ['Ruby Red glanz', '50 €', 'g'], ['Ruby Red matt', '50 €', 'g'], ['Melon Yellow glanz', '50 €', 'g'], ['Melon Yellow matt', '50 €', 'g'], ['ECO Grey', 'inkl.', 'g']], a: 0 },
+        { n: 'RAHMENFARBE', o: [['Deep Black glanz', 'inkl.', 'g'], ['Deep Black matt', '50 €', 'g'], ['Night Blue glanz', 'inkl.', 'g'], ['Night Blue matt', '50 €', 'g'], ['Poppy Red glanz', 'inkl.', 'g'], ['Poppy Red matt', 'inkl.', 'g'], ['Ice Blue glanz', 'inkl.', 'g'], ['Ice Blue matt', '50 €', 'g'], ['Stone Basalt glanz', 'inkl.', 'g'], ['Stone Basalt matt', '50 €', 'g'], ['Scarlet Red glanz', 'inkl.', 'g'], ['Scarlet Red matt', '50 €', 'g'], ['French Lavender glanz', '50 €', 'g'], ['French Lavender matt', '50 €', 'g'], ['Olive Green glanz', '50 €', 'g'], ['Olive Green matt', '50 €', 'g'], ['Emerald Green glanz', '50 €', 'g'], ['Emerald Green matt', '50 €', 'g'], ['Crystal Pearl glanz', '50 €', 'g'], ['Crystal Pearl matt', '50 €', 'g'], ['Petrol Blue glanz', '50 €', 'g'], ['Petrol Blue matt', '50 €', 'g'], ['Pure White glanz', '50 €', 'g'], ['Pure White matt', '50 €', 'g'], ['Eucalyptus Green glanz', '50 €', 'g'], ['Eucalyptus Green matt', '50 €', 'g'], ['Ocean Blue glanz', '50 €', 'g'], ['Ocean Blue matt', '50 €', 'g'], ['Lime Green glanz', '50 €', 'g'], ['Lime Green matt', '50 €', 'g'], ['Ruby Red glanz', '50 €', 'g'], ['Ruby Red matt', '50 €', 'g'], ['Melon Yellow glanz', '50 €', 'g'], ['Melon Yellow matt', '50 €', 'g'], ['ECO Grey', 'inkl.', 'g']], a: 4 },
         { n: 'DEKOR', o: [['VDV Schwarz', 'inkl.', 'g'], ['VDV Weiß', 'inkl.', 'g']], a: 0, appear: 'RAHMENFARBE' }
       ],
       clicks: [
@@ -60,8 +60,8 @@ window.VDV = {
         { n: 'SATTEL', o: [['Selle Royal Explora Relaxed', 'inkl.', 'y'], ['Selle Royal Explora Moderate', 'inkl.', 'g'], ['Selle Royal Explora Moderate Wide', 'inkl.', 'g']], a: 0 }
       ],
       clicks: [
-        { q: 'LENKER', o: 1, img: 7, price: 5755, cam: [0.64, 0.13, 2.6], cap: 'Breiter, leicht erhöhter Griff', capS: 'Ergotec Riser · 660 mm' },
-        { q: 'SATTEL', o: 1, img: 8, price: 5755, cam: [0.37, 0.27, 2.7], cap: 'Für die aufrechte Tourenhaltung', capS: 'Selle Royal Explora Moderate' }
+        { q: 'LENKER', o: 1, mk: [0.645, 0.118], img: 7, price: 5755, cam: [0.64, 0.13, 2.6], cap: 'Breiter, leicht erhöhter Griff', capS: 'Ergotec Riser · 660 mm' },
+        { q: 'SATTEL', o: 1, mk: [0.37, 0.27], img: 8, price: 5755, cam: [0.37, 0.27, 2.7], cap: 'Für die aufrechte Tourenhaltung', capS: 'Selle Royal Explora Moderate' }
       ] },
     { id: 'KOMFORT', head: 'Jeder Meter weicher.', was: 'Sattelstütze · Gabel · Bereifung',
       warum: 'Federung und Reifen schlucken Kanten, bevor du sie spürst.',
@@ -71,9 +71,9 @@ window.VDV = {
         { n: 'BEREIFUNG', o: [['Schwalbe Green Marathon 50-622 (28")', 'inkl.', 'g'], ['Schwalbe Marathon E Plus 50-622 (28")', '29 €', 'g'], ['Schwalbe Motion Big Apple 50-622 (28")', '9 €', 'g'], ['Schwalbe Marathon Plus Tour 60-584 (27,5")', '49 €', 'g']], a: 0 }
       ],
       clicks: [
-        { q: 'SATTELSTÜTZE', o: 1, img: 9, price: 5934, cam: [0.375, 0.32, 2.6], cap: 'Parallelogramm-Federung', capS: 'by.Schulz G.2 ST' },
-        { q: 'GABEL', o: 2, img: 10, price: 6003, cam: [0.70, 0.55, 2.2], cap: 'Luftfederung mit Lockout', capS: 'SR Suntour NRX32 Air · 75 mm' },
-        { q: 'BEREIFUNG', o: 1, img: 11, price: 6032, cam: [0.80, 0.84, 2.1], cap: 'Für E-Bikes entwickelt', capS: 'Schwalbe Marathon E Plus 50-622' }
+        { q: 'SATTELSTÜTZE', o: 1, mk: [0.383, 0.315], img: 9, price: 5934, cam: [0.375, 0.32, 2.6], cap: 'Parallelogramm-Federung', capS: 'by.Schulz G.2 ST' },
+        { q: 'GABEL', o: 2, mk: [0.69, 0.54], img: 10, price: 6003, cam: [0.70, 0.55, 2.2], cap: 'Luftfederung mit Lockout', capS: 'SR Suntour NRX32 Air · 75 mm' },
+        { q: 'BEREIFUNG', o: 1, mk: [0.915, 0.7], img: 11, price: 6032, cam: [0.80, 0.84, 2.1], cap: 'Für E-Bikes entwickelt', capS: 'Schwalbe Marathon E Plus 50-622' }
       ] },
     { id: 'SICHERHEIT', head: 'Sehen. Bremsen. Schützen.', was: 'Bremsen · Scheinwerfer · Rahmenschloss · GPS-Tracking',
       warum: 'Mehr Bremskraft, mehr Licht und ein Rad, das sich wiederfinden lässt.',
@@ -84,9 +84,9 @@ window.VDV = {
         { n: 'GPS TRACKING', o: [['VELOMATE (1 Jahr)', '109 €', 'g'], ['ohne', 'inkl.', 'g']], a: 1 }
       ],
       clicks: [
-        { q: 'BREMSEN', o: 1, img: 12, price: 6161, cam: [0.765, 0.69, 2.7], cap: 'Mehr Kolben, mehr Biss', capS: 'Shimano MT420 · 4-Kolben / 2-Kolben' },
-        { q: 'SCHEINWERFER', o: 2, img: 13, price: 6500, cam: [0.725, 0.37, 2.8], cap: '130 Lux, Fernlicht 450 Lux', capS: 'Supernova M99 Pro 2', event: 'beam' },
-        { q: 'RAHMENSCHLOSS', o: 1, img: 14, price: 6539, cam: [0.25, 0.62, 2.4], cap: 'Schnell abgeschlossen, Schlüssel abziehbar', capS: 'ABUS 4750 XL' },
+        { q: 'BREMSEN', o: 1, mk: [0.75, 0.7], img: 12, price: 6161, cam: [0.765, 0.69, 2.7], cap: 'Mehr Kolben, mehr Biss', capS: 'Shimano MT420 · 4-Kolben / 2-Kolben' },
+        { q: 'SCHEINWERFER', o: 2, mk: [0.72, 0.37], img: 13, price: 6500, cam: [0.725, 0.37, 2.8], cap: '130 Lux, Fernlicht 450 Lux', capS: 'Supernova M99 Pro 2', event: 'beam' },
+        { q: 'RAHMENSCHLOSS', o: 1, mk: [0.355, 0.53], img: 14, price: 6539, cam: [0.25, 0.62, 2.4], cap: 'Schnell abgeschlossen, Schlüssel abziehbar', capS: 'ABUS 4750 XL' },
         { q: 'GPS TRACKING', o: 0, img: 15, price: 6648, cam: [0.5, 0.52, 1.0], cap: 'GPS-Ortung bei Diebstahl', capS: 'VELOMATE · 1 Jahr' }
       ] },
     { id: 'ZUBEHÖR', head: 'Bereit für mehr.', was: 'Frontzubehör · Ladegerät',
