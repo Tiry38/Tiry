@@ -29,7 +29,7 @@ object WireGuardImport {
         val adressen = werte(iface, "Address")
         if (adressen.isEmpty()) throw Fehler("Address fehlt.")
         val pub = werte(peer, "PublicKey").firstOrNull() ?: throw Fehler("PublicKey der FRITZ!Box fehlt.")
-        val endpunkt = werte(peer, "Endpoint").firstOrNull() ?: throw Fehler("Endpoint fehlt – in der FRITZ!Box MyFRITZ! oder DynDNS aktivieren.")
+        val endpunkt = werte(peer, "Endpoint").firstOrNull() ?: throw Fehler("In der Datei fehlt die Internet-Adresse deiner FRITZ!Box (Endpoint) – die Verbindung wurde angelegt, bevor MyFRITZ! lief. So geht es: 1. Schritt F: MyFRITZ! einrichten (Internet → MyFRITZ!-Konto). 2. In der Box unter Internet → Freigaben → VPN (WireGuard) die Verbindung löschen. 3. Neu anlegen (Schritt G) und die NEUE Datei bzw. den neuen QR-Code nehmen.")
         val psk = werte(peer, "PresharedKey").firstOrNull()
         val keep = werte(peer, "PersistentKeepalive").firstOrNull()
 
