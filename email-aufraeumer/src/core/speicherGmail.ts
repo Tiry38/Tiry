@@ -58,5 +58,35 @@ export class SpeicherGmail implements GmailPort {
   async filterListe() { return [...this.filter]; }
   async filterAnlegen(criteria: FilterKriterien, action: FilterAktion) { const id = `f${this.filter.length + 1}`; this.filter.push({ id, criteria, action }); return id; }
   async filterLoeschen(id: string) { this.filter = this.filter.filter((f) => f.id !== id); }
-  async sendeMail(raw: string) { this.gesendet.push(raw); }
+  async sendeMail(raw: string, threadId?: string) {
+    this.gesendet.push(raw);
+    const id = `gesendet${this.gesendet.length}`;
+    const h = (k: string) => (new RegExp(`^${k}: (.*)$`, 'mi').exec(raw)?.[1] ?? '').trim();
+    this.hinzufuegen({ id, threadId: threadId ?? id, labelIds: ['SENT'], snippet: '', internalDate: Date.now(), headers: { from: h('From'), to: h('To'), subject: h('Subject') } }, false);
+  }
+  /** Volltexte für Demo/Tests: id → { html, text } */
+  inhalte = new Map<string, { html?: string; text?: string }>();
+  async listeOrdner(labelId: string | null, q: string, pageToken?: string, max = 50) {
+    let alle = [...this.mails.values()].filter((m) => (labelId ? m.labelIds.includes(labelId) : !m.labelIds.includes('TRASH') && !m.labelIds.includes('SPAM')));
+    if (q) { const w = q.toLowerCase(); alle = alle.filter((m) => `${m.headers.from} ${m.headers.subject} ${m.snippet}`.toLowerCase().includes(w)); }
+    alle.sort((a, b) => b.internalDate - a.internalDate);
+    const start = pageToken ? Number(pageToken) : 0;
+    return { ids: alle.slice(start, start + max).map((m) => m.id), nextPageToken: start + max < alle.length ? String(start + max) : undefined, geschaetzt: alle.length };
+  }
+  async holeVoll(id: string) {
+    const m = this.mails.get(id);
+    if (!m) throw Object.assign(new Error('nicht gefunden'), { code: 404 });
+    const inh = this.inhalte.get(id) ?? { text: `${m.headers.subject ?? ''}\n\n${m.snippet}` };
+    const b = (s: string) => Buffer.from(s, 'utf8').toString('base64url');
+    const parts: any[] = [];
+    if (inh.text) parts.push({ mimeType: 'text/plain', headers: [{ name: 'Content-Type', value: 'text/plain; charset=UTF-8' }], body: { data: b(inh.text) } });
+    if (inh.html) parts.push({ mimeType: 'text/html', headers: [{ name: 'Content-Type', value: 'text/html; charset=UTF-8' }], body: { data: b(inh.html) } });
+    return { id: m.id, threadId: m.threadId, labelIds: [...m.labelIds], internalDate: String(m.internalDate),
+      payload: { mimeType: 'multipart/alternative', headers: Object.entries(m.headers).map(([name, value]) => ({ name, value })), parts } };
+  }
+  async anhang() { return new Uint8Array(); }
+  async labelInfo(id: string) {
+    const alle = [...this.mails.values()].filter((m) => m.labelIds.includes(id));
+    return { gesamt: alle.length, ungelesen: alle.filter((m) => m.labelIds.includes('UNREAD')).length };
+  }
 }

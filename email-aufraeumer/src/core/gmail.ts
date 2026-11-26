@@ -21,8 +21,16 @@ export interface GmailPort {
   filterListe(): Promise<Array<{ id: string; criteria: FilterKriterien; action: FilterAktion }>>;
   filterAnlegen(criteria: FilterKriterien, action: FilterAktion): Promise<string>;
   filterLoeschen(id: string): Promise<void>;
-  /** Für Abmelden per mailto: (RFC 2369). raw = komplette RFC-822-Nachricht. */
-  sendeMail(raw: string): Promise<void>;
+  /** Verschickt eine komplette RFC-822-Nachricht (Abmelden per mailto, Tirys eigene Mails). */
+  sendeMail(raw: string, threadId?: string): Promise<void>;
+  /** Postfach: Mails eines Ordners (Label) und/oder einer Suche, neueste zuerst. */
+  listeOrdner(labelId: string | null, q: string, pageToken?: string, max?: number): Promise<{ ids: string[]; nextPageToken?: string; geschaetzt?: number }>;
+  /** Ganze Mail (format: full) – roh, zerlegt wird in mime.ts. */
+  holeVoll(id: string): Promise<any>;
+  /** Anhang als Bytes. */
+  anhang(mailId: string, anhangId: string): Promise<Uint8Array>;
+  /** Ungelesene im Posteingang etc. */
+  labelInfo(id: string): Promise<{ ungelesen: number; gesamt: number }>;
 }
 
 export const METADATEN_HEADER = [
@@ -34,7 +42,7 @@ export const METADATEN_HEADER = [
 export const QUOTE: Record<string, number> = {
   getProfile: 1, 'messages.list': 5, 'messages.get': 5, 'history.list': 2, 'messages.modify': 5, 'messages.batchModify': 50,
   'messages.trash': 5, 'messages.untrash': 5, 'labels.list': 1, 'labels.create': 5, 'filters.list': 1, 'filters.create': 5,
-  'filters.delete': 5, 'messages.send': 100,
+  'filters.delete': 5, 'messages.send': 100, 'messages.attachments.get': 5, 'labels.get': 1,
 };
 
 export function wiederholbar(err: any): boolean {
@@ -205,9 +213,26 @@ export function erzeugeGoogleGmail(auth: any, zaehle: (methode: string, einheite
       return r.data.id!;
     },
     async filterLoeschen(id) { await ruf('filters.delete', () => gmail.users.settings.filters.delete({ userId: me, id })); },
-    async sendeMail(raw) {
+    async sendeMail(raw, threadId) {
       const b64 = Buffer.from(raw, 'utf8').toString('base64url');
-      await ruf('messages.send', () => gmail.users.messages.send({ userId: me, requestBody: { raw: b64 } }));
+      await ruf('messages.send', () => gmail.users.messages.send({ userId: me, requestBody: { raw: b64, threadId } }));
+    },
+    async listeOrdner(labelId, q, pageToken, max = 50) {
+      const r = await ruf('messages.list', () => gmail.users.messages.list({ userId: me, labelIds: labelId ? [labelId] : undefined, q: q || undefined,
+        pageToken, maxResults: max, includeSpamTrash: labelId === 'TRASH' || labelId === 'SPAM' }));
+      return { ids: (r.data.messages ?? []).map((m) => m.id!), nextPageToken: r.data.nextPageToken ?? undefined, geschaetzt: r.data.resultSizeEstimate ?? undefined };
+    },
+    async holeVoll(id) {
+      const r = await ruf('messages.get', () => gmail.users.messages.get({ userId: me, id, format: 'full' }));
+      return r.data;
+    },
+    async anhang(mailId, anhangId) {
+      const r = await ruf('messages.attachments.get', () => gmail.users.messages.attachments.get({ userId: me, messageId: mailId, id: anhangId }));
+      return new Uint8Array(Buffer.from(String(r.data.data ?? '').replace(/-/g, '+').replace(/_/g, '/'), 'base64'));
+    },
+    async labelInfo(id) {
+      const r = await ruf('labels.get', () => gmail.users.labels.get({ userId: me, id }));
+      return { ungelesen: r.data.messagesUnread ?? 0, gesamt: r.data.messagesTotal ?? 0 };
     },
   };
 }
