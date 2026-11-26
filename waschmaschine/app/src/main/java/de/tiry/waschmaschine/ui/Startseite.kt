@@ -118,13 +118,14 @@ fun Startseite(
                     Spacer(Modifier.height(26.dp))
                     Etikett("01", "Programm")
                     Text(z?.programm ?: "—", style = Schrift.Gross, modifier = Modifier.padding(top = 6.dp))
-                    val details = listOfNotNull(z?.temperatur, z?.schleudern).joinToString("  /  ")
+                    // Eco 40-60 wählt die Temperatur selbst (Gerät zeigt „– –“) → keine Temperatur anzeigen
+                    val details = listOfNotNull(z?.temperatur?.takeIf { z.programm != "Eco 40-60" }, z?.schleudern).joinToString("  /  ")
                     if (details.isNotEmpty()) Text(details, style = Schrift.Text.copy(color = Farbe.Nebel), modifier = Modifier.padding(top = 4.dp))
                     Spacer(Modifier.height(22.dp))
                     Row {
                         Column(Modifier.weight(1f)) {
                             Etikett("02", "Fortschritt")
-                            Text(z?.fortschritt?.let { "$it %" } ?: "—", style = Schrift.Mittel, modifier = Modifier.padding(top = 6.dp))
+                            Text(z?.fortschritt?.takeIf { z.laeuftGerade || z.status == Status.FERTIG }?.let { "$it %" } ?: "—", style = Schrift.Mittel, modifier = Modifier.padding(top = 6.dp))
                         }
                         Column(Modifier.weight(1f)) {
                             Etikett("03", "Tür")
