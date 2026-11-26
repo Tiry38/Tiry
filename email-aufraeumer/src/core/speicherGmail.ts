@@ -2,6 +2,7 @@
 import type { GmailPort, FilterAktion, FilterKriterien } from './gmail';
 import { HistoryZuAlt } from './gmail';
 import type { Mail } from './types';
+import { bytesZuBase64 } from './mime';
 
 export class SpeicherGmail implements GmailPort {
   mails = new Map<string, Mail>();
@@ -77,7 +78,7 @@ export class SpeicherGmail implements GmailPort {
     const m = this.mails.get(id);
     if (!m) throw Object.assign(new Error('nicht gefunden'), { code: 404 });
     const inh = this.inhalte.get(id) ?? { text: `${m.headers.subject ?? ''}\n\n${m.snippet}` };
-    const b = (s: string) => Buffer.from(s, 'utf8').toString('base64url');
+    const b = (s: string) => bytesZuBase64(new TextEncoder().encode(s)).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
     const parts: any[] = [];
     if (inh.text) parts.push({ mimeType: 'text/plain', headers: [{ name: 'Content-Type', value: 'text/plain; charset=UTF-8' }], body: { data: b(inh.text) } });
     if (inh.html) parts.push({ mimeType: 'text/html', headers: [{ name: 'Content-Type', value: 'text/html; charset=UTF-8' }], body: { data: b(inh.html) } });

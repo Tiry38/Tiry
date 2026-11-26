@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content">
+<meta name="theme-color" content="#1b1815">
+<meta name="color-scheme" content="dark">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Tiry's Mails">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; font-src 'self'; connect-src 'self' https://gmail.googleapis.com; frame-src 'self' blob:; child-src 'self' blob:; worker-src 'self'; base-uri 'self'; form-action 'self'">
+<title>Tiry's Mails</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="stylesheet" href="./style.css">
+<script type="module" src="./app.ts"></script>
+</head>
+<body data-ansicht="laden">
+<div class="spur" aria-hidden="true"></div>
+<main id="app" aria-live="polite"></main>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+</body>
+</html>

@@ -429,6 +429,8 @@ async function einstellungen() {
       <div class="zeile"><button class="knopf ${z.drive ? '' : 'voll'}" data-tat="neu-anmelden">Neu anmelden</button></div></div>
     <div class="einst"><div><h2>Updates</h2><p class="erkl">Das Programm hält sich selbst aktuell: Neue Versionen lädt es im Hintergrund und spielt sie beim nächsten Neustart ein. Du musst nie wieder etwas installieren.</p><p class="erkl" id="version-stand">${h(updateText(updateStand))}</p></div>
       <div class="zeile"><button class="knopf" data-tat="update-suchen">Jetzt nachsehen</button></div></div>
+    <div class="einst"><div><h2>Aufs Handy</h2><p class="erkl">Tiry's Mails gibt es auch fürs Handy (iPhone und Android). Öffne auf dem Handy <b>tiry38.github.io/Tiry/mails</b> und tippe auf „Zum Home-Bildschirm“. Die App führt dich durch die Einrichtung.</p></div>
+      <div class="zeile"><button class="knopf" data-tat="handy">Im Browser öffnen</button></div></div>
     <div class="einst"><div><h2>Probelauf</h2><p class="erkl">${e.trockenlauf ? 'Gerade ist Probelauf: Ich zeige nur, was ich tun würde. Zum Aufräumen in der Übersicht auf „Jetzt wirklich aufräumen“ drücken.' : 'Ich räume wirklich auf. Du kannst jederzeit zurück in den Probelauf.'}</p></div>
       <div class="zeile">${e.trockenlauf ? '<span class="etikett">Probelauf läuft – nichts wird verändert</span>' : '<button class="knopf" data-tat="trocken">Zurück in den Probelauf</button>'}</div></div>
     <div class="einst"><div><h2>Wie streng?</h2><p class="erkl"><b>Vorsichtig:</b> Ich räume nur weg, wenn ich mir ganz sicher bin – mehr landet bei „Du entscheidest“.<br><b>Streng:</b> Ich räume mehr selbst weg.</p></div>
@@ -489,6 +491,7 @@ async function einstellungen() {
     if (an && !(await filterFrage())) return false;
     if (!an) await speichere({ filterExportFreigegeben: false });
   });
+  el.querySelector('[data-tat="handy"]')?.addEventListener('click', () => { window.open('https://tiry38.github.io/Tiry/mails/', '_blank'); });
   el.querySelector('[data-tat="update-suchen"]')?.addEventListener('click', async () => {
     const v = document.getElementById('version-stand'); if (v) v.textContent = 'Suche nach Updates …';
     await api.rufe('updateSuchen'); zeigeUpdate(await api.rufe('updateStand'));

@@ -1,7 +1,6 @@
 // Tiry's Mails: das eigene Postfach – Ordner, Liste, Lesen, Schreiben, Aktionen.
 // Gelöscht wird auch hier nie endgültig: „Löschen“ = Papierkorb (Gmail leert ihn nach 30 Tagen).
 import type { GmailPort } from './gmail';
-import type { Speicher } from './db';
 import type { Kategorie, Mail } from './types';
 import { parseAdresse, parseAdressListe, dekodiereMimeWort } from './headers';
 import { zerlegeVoll, baueMail, betreffMit, type VolleMail, type Anhang } from './mime';
@@ -30,7 +29,8 @@ export class Postfach {
   /** Letzte Aktion für „Rückgängig“: Mail-IDs mit ihren Labels vorher. */
   private letzte: Array<{ id: string; vorher: string[] }> = [];
 
-  constructor(private gmail: GmailPort, private db: Speicher, private eigeneAdresse: () => string) {}
+  /** kategorieVon: am PC aus dem Verlauf (Datenbank), in der Handy-App aus den Gmail-Labels „Aufräumer/…“. */
+  constructor(private gmail: GmailPort, private kategorieVon: (id: string, labelIds: string[]) => Kategorie | null, private eigeneAdresse: () => string) {}
 
   async ordner(): Promise<Ordner[]> {
     const labels = await this.gmail.labels();
@@ -48,7 +48,7 @@ export class Postfach {
 
   private zeile(m: Mail): Zeile {
     const von = parseAdresse(m.headers['from']);
-    const k = this.kategorie(m.id);
+    const k = this.kategorieVon(m.id, m.labelIds);
     return {
       id: m.id, threadId: m.threadId, von: von.name || von.adresse, vonAdresse: von.adresse, betreff: dekodiereMimeWort(m.headers['subject'] ?? ''),
       vorschau: m.snippet, datum: m.internalDate, ungelesen: m.labelIds.includes('UNREAD'), stern: m.labelIds.includes('STARRED'),
@@ -56,10 +56,6 @@ export class Postfach {
     };
   }
 
-  private kategorie(mailId: string): Kategorie | null {
-    const r = this.db.db.prepare('SELECT kategorie FROM protokoll WHERE mail_id = ? ORDER BY id DESC LIMIT 1').get(mailId) as any;
-    return r?.kategorie ?? null;
-  }
 
   /** Eine Seite eines Ordners (neueste zuerst). Metadaten werden 2 Minuten zwischengespeichert. */
   async liste(ordnerId: string, suche = '', pageToken?: string): Promise<{ zeilen: Zeile[]; weiter?: string; gesamt?: number }> {
@@ -83,7 +79,7 @@ export class Postfach {
       const c = this.cache.get(id); if (c) c.mail.labelIds = c.mail.labelIds.filter((l) => l !== 'UNREAD');
     }
     const von = parseAdresse(v.headers['from']);
-    const kategorie = this.kategorie(id);
+    const kategorie = this.kategorieVon(id, v.labelIds);
     const warnung = kategorie === 'phishing' ? 'Achtung: Diese Mail sieht nach Betrug aus. Klick keine Links an und gib keine Daten ein.'
       : kategorie === 'spam' ? 'Diese Mail ist wahrscheinlich Spam.' : null;
     return { ...v, von: von.name || von.adresse, vonAdresse: von.adresse, an: v.headers['to'] ?? '', cc: v.headers['cc'] ?? '', betreff: dekodiereMimeWort(v.headers['subject'] ?? ''), kategorie, warnung };

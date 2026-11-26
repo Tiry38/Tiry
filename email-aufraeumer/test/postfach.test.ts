@@ -9,7 +9,7 @@ function mail(id: string, von: string, betreff: string, labels = ['INBOX', 'UNRE
   return { id, threadId: `t-${id}`, labelIds: labels, snippet: `Vorschau ${betreff}`, internalDate: zeit, headers: { from: von, to: 'tiry@gmail.com', subject: betreff, 'message-id': `<${id}@x>` } };
 }
 function aufbau() {
-  const g = new SpeicherGmail(); const db = new Speicher(); const p = new Postfach(g, db, () => 'Tiry <tiry@gmail.com>');
+  const g = new SpeicherGmail(); const db = new Speicher(); const p = new Postfach(g, (id) => (db.db.prepare('SELECT kategorie FROM protokoll WHERE mail_id = ? ORDER BY id DESC LIMIT 1').get(id) as any)?.kategorie ?? null, () => 'Tiry <tiry@gmail.com>');
   g.hinzufuegen(mail('a', 'Amazon <shop@amazon.de>', 'Ihre Bestellung', ['INBOX', 'UNREAD'], 3000));
   g.hinzufuegen(mail('b', 'Mama <mama@web.de>', 'Sonntag?', ['INBOX'], 2000));
   g.hinzufuegen(mail('c', 'Alt <alt@x.de>', 'Archiviert', [], 1000));

@@ -7,8 +7,23 @@ export interface VolleMail {
   html: string | null; text: string | null; anhaenge: Anhang[];
 }
 
+// Base64 ohne Node-Buffer, damit derselbe Code auch in der Handy-App (Browser) läuft
+export function bytesZuBase64(b: Uint8Array): string {
+  let s = '';
+  for (let i = 0; i < b.length; i += 0x8000) s += String.fromCharCode.apply(null, Array.from(b.subarray(i, i + 0x8000)));
+  return btoa(s);
+}
+export function base64ZuBytes(s: string): Uint8Array {
+  const bin = atob(s.replace(/\s+/g, ''));
+  const out = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i);
+  return out;
+}
+const utf8Base64 = (s: string) => bytesZuBase64(new TextEncoder().encode(s));
+
 export function base64urlZuBytes(s: string): Uint8Array {
-  return new Uint8Array(Buffer.from(s.replace(/-/g, '+').replace(/_/g, '/'), 'base64'));
+  const t = s.replace(/-/g, '+').replace(/_/g, '/');
+  return base64ZuBytes(t + '='.repeat((4 - (t.length % 4)) % 4));
 }
 
 function zeichensatz(contentType: string | undefined): string {
@@ -58,7 +73,7 @@ export function textZuHtml(t: string): string {
 }
 
 function wort(s: string): string {
-  return /^[\x20-\x7e]*$/.test(s) ? s : `=?UTF-8?B?${Buffer.from(s, 'utf8').toString('base64')}?=`;
+  return /^[\x20-\x7e]*$/.test(s) ? s : `=?UTF-8?B?${utf8Base64(s)}?=`;
 }
 function adressen(liste: string[]): string {
   return liste.map((a) => a.trim()).filter(Boolean).map((a) => {
@@ -88,7 +103,7 @@ export function baueMail(e: Entwurf): string {
     ...(e.references ? [`References: ${kopfZeileSauber(e.references)}`] : []),
     'MIME-Version: 1.0',
   ];
-  const b64 = (s: string) => Buffer.from(s, 'utf8').toString('base64').replace(/.{76}/g, '$&\r\n');
+  const b64 = (s: string) => utf8Base64(s).replace(/.{76}/g, '$&\r\n');
   const text64 = b64(e.text.replace(/\r?\n/g, '\r\n'));
   // Inhalt: nur Text – oder Text + HTML als multipart/alternative (Mailprogramme nehmen die beste Fassung)
   const alt = `tma-${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}`;
@@ -104,7 +119,7 @@ export function baueMail(e: Entwurf): string {
     ...e.anhaenge.flatMap((a) => [
       `--${grenze}`, `Content-Type: ${a.mime || 'application/octet-stream'}; name="${wort(a.name).replace(/"/g, '')}"`,
       `Content-Disposition: attachment; filename="${wort(a.name).replace(/"/g, '')}"`, 'Content-Transfer-Encoding: base64', '',
-      Buffer.from(a.daten).toString('base64').replace(/.{76}/g, '$&\r\n'),
+      bytesZuBase64(a.daten).replace(/.{76}/g, '$&\r\n'),
     ]),
     `--${grenze}--`,
   ];

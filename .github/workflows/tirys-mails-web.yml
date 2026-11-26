@@ -1,0 +1,57 @@
+name: Tiry's Mails Handy-App veröffentlichen
+
+# Baut die Handy-App (email-aufraeumer/web) und legt sie in den Zweig gh-pages.
+# GitHub Pages zeigt sie dann unter https://tiry38.github.io/Tiry/mails/
+# (einmalig in den Repo-Einstellungen: Pages → Quelle „Deploy from a branch“ → gh-pages / root).
+on:
+  push:
+    branches: [main, 'claude/**']
+    paths: ['email-aufraeumer/web/**', 'email-aufraeumer/src/core/**', 'email-aufraeumer/vite.web.config.mjs', 'email-aufraeumer/package.json', '.github/workflows/tirys-mails-web.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: tirys-mails-web
+  cancel-in-progress: true
+
+jobs:
+  web:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: email-aufraeumer
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: email-aufraeumer/package-lock.json
+      - run: npm ci
+      - run: npm test
+      - name: Handy-App bauen
+        run: npm run web
+      - name: Nach gh-pages legen (Ordner mails/)
+        shell: bash
+        run: |
+          set -e
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          cd "$RUNNER_TEMP"
+          if git ls-remote --exit-code --heads "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git" gh-pages >/dev/null; then
+            git clone --depth 1 --branch gh-pages "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git" seite
+          else
+            mkdir seite && cd seite && git init -b gh-pages && git remote add origin "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git" && cd ..
+          fi
+          cd seite
+          find mails -mindepth 1 -delete 2>/dev/null || true
+          mkdir -p mails
+          cp -r "$GITHUB_WORKSPACE/email-aufraeumer/dist-web/." mails/
+          touch .nojekyll
+          test -f index.html || printf '<!doctype html><meta charset="utf-8"><meta http-equiv="refresh" content="0;url=mails/"><title>Tiry</title>' > index.html
+          git add -A
+          git commit -m "Handy-App ${GITHUB_SHA::7}" || { echo "Nichts geändert"; exit 0; }
+          git push origin gh-pages

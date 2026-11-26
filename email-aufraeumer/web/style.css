@@ -1,0 +1,234 @@
+/* Tiry's Mails – Handy.
+   Konzept: „Die Sortiermaschine in der Hosentasche“ – jede Mail ist ein Körper mit Gewicht.
+   Wegwischen wirft sie mit Federkraft in ihr Fach, Herunterziehen spannt die fünf Sortenbalken wie eine Feder.
+   Warmes Graphit, Farbe nur als Bedeutung (Sorte), ein radikaler Akzent: Signalgelb. */
+
+@font-face { font-family: 'Funnel Display'; src: url('../src/renderer/fonts/funnel-display.woff2') format('woff2'); font-weight: 300 800; font-display: swap; }
+@font-face { font-family: 'Funnel Sans'; src: url('../src/renderer/fonts/funnel-sans.woff2') format('woff2'); font-weight: 300 800; font-display: swap; }
+
+@property --lauf { syntax: '<percentage>'; inherits: false; initial-value: 0%; }
+
+:root {
+  --grund: oklch(0.205 0.012 70);
+  --flaeche: oklch(0.255 0.013 70);
+  --flaeche-2: oklch(0.31 0.014 70);
+  --linie: oklch(0.36 0.014 70);
+  --text: oklch(0.965 0.01 85);
+  --text-2: oklch(0.82 0.016 80);
+  --text-3: oklch(0.72 0.016 80);
+  --tinte: oklch(0.2 0.012 70);
+  --c-wichtig: oklch(0.8 0.17 145);
+  --c-persoenlich: oklch(0.9 0.05 80);
+  --c-benachrichtigung: oklch(0.76 0.1 190);
+  --c-newsletter: oklch(0.87 0.16 92);
+  --c-werbung: oklch(0.76 0.17 55);
+  --c-muell: oklch(0.68 0.2 30);
+  --akzent: oklch(0.87 0.16 92);
+  --spektrum: linear-gradient(90deg, var(--c-wichtig), var(--c-benachrichtigung), var(--c-newsletter), var(--c-werbung), var(--c-muell));
+  --sans: 'Funnel Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --display: 'Funnel Display', 'Funnel Sans', system-ui, sans-serif;
+  --oben: env(safe-area-inset-top, 0px);
+  --unten: env(safe-area-inset-bottom, 0px);
+  --dock: calc(74px + var(--unten));
+  color-scheme: dark;
+  -webkit-tap-highlight-color: transparent;
+}
+
+* { box-sizing: border-box; }
+html { background: var(--grund); }
+body { margin: 0; min-height: 100dvh; background: var(--grund); color: var(--text); font: 400 16px/1.45 var(--sans); -webkit-font-smoothing: antialiased; overscroll-behavior-y: none; overflow-x: hidden; }
+/* Körnung: Material statt glatter Fläche */
+body::before { content: ''; position: fixed; inset: 0; pointer-events: none; z-index: 100; opacity: .07; mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); }
+button, input, textarea, select { font: inherit; color: inherit; }
+button { cursor: pointer; }
+a { color: var(--akzent); }
+:focus-visible { outline: 3px solid var(--akzent); outline-offset: 2px; border-radius: 6px; }
+[hidden] { display: none !important; }
+a.knopf { text-decoration: none; }
+.unsichtbar { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+svg.i { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; flex: none; }
+
+/* Spektrum-Spur ganz oben: läuft beim Laden/Senden, blitzt bei neuer Mail */
+.spur { position: fixed; top: 0; left: 0; right: 0; height: calc(3px + var(--oben)); z-index: 60; pointer-events: none; background: var(--grund); }
+.spur::after { content: ''; position: absolute; left: 0; right: 0; bottom: 0; height: 3px; background: var(--spektrum); background-size: 200% 100%; transform-origin: left; transform: scaleX(var(--spur, 1)); opacity: .9; }
+body.arbeitet .spur::after { animation: spurLauf 1.1s linear infinite; }
+body.blitz .spur::after { animation: blitz 1.2s cubic-bezier(.2, 1.3, .35, 1); }
+@keyframes spurLauf { from { background-position: 0 0; } to { background-position: 200% 0; } }
+@keyframes blitz { 0% { transform: scaleX(0); } 100% { transform: scaleX(1); } }
+
+/* ---------- Knöpfe ---------- */
+.knopf { min-height: 48px; padding: 0 20px; border: 0; border-radius: 14px; background: var(--flaeche-2); font-weight: 700; display: inline-flex; align-items: center; justify-content: center; gap: 10px; }
+.knopf.voll { background: var(--akzent); color: var(--tinte); }
+.knopf:active { transform: scale(.97); }
+.knopf[disabled] { opacity: .55; }
+.ikon { width: 48px; height: 48px; border: 0; border-radius: 14px; background: transparent; display: inline-grid; place-items: center; }
+.ikon:active { background: var(--flaeche-2); }
+
+/* ---------- Kopf der Liste ---------- */
+.liste-ansicht { padding: calc(14px + var(--oben)) 0 calc(var(--dock) + 20px); }
+.kopf { display: flex; align-items: center; gap: 6px; padding: 0 12px 0 20px; height: 56px; }
+.marke { display: grid; grid-template-columns: repeat(5, 7px); gap: 3px; align-items: end; height: 34px; margin-right: auto; }
+.marke i { display: block; border-radius: 3px; height: calc(var(--h, 20) * 1px); transform-origin: bottom; }
+.marke i:nth-child(1) { background: var(--c-wichtig); }
+.marke i:nth-child(2) { background: var(--c-benachrichtigung); }
+.marke i:nth-child(3) { background: var(--c-newsletter); }
+.marke i:nth-child(4) { background: var(--c-werbung); }
+.marke i:nth-child(5) { background: var(--c-muell); }
+.titel { padding: 8px 20px 18px; display: grid; gap: 4px; }
+.titel h1 { margin: 0; font: 800 clamp(40px, 12.5vw, 64px)/.92 var(--display); letter-spacing: -.035em; overflow-wrap: anywhere; }
+.titel p { margin: 0; display: flex; align-items: center; gap: 8px; color: var(--text-2); font-size: 15px; }
+.live { width: 9px; height: 9px; border-radius: 50%; background: var(--c-wichtig); box-shadow: 0 0 0 0 oklch(0.8 0.17 145 / .6); animation: puls 2.4s ease-out infinite; }
+.live.aus { background: var(--text-3); animation: none; }
+@keyframes puls { 0% { box-shadow: 0 0 0 0 oklch(0.8 0.17 145 / .55); } 70%, 100% { box-shadow: 0 0 0 9px oklch(0.8 0.17 145 / 0); } }
+.suche { display: flex; gap: 8px; padding: 0 16px 14px; }
+.suche input { flex: 1; min-height: 48px; border-radius: 14px; border: 2px solid var(--linie); background: var(--flaeche); padding: 0 16px; font-size: 16px; }
+.suche input:focus { border-color: var(--akzent); outline: none; }
+
+/* Herunterziehen: Spannung als Feder */
+.zug { height: 0; overflow: visible; display: grid; place-items: center; position: relative; z-index: 0; }
+.zug-text { position: absolute; top: 6px; font-size: 13px; font-weight: 700; color: var(--text-3); opacity: var(--zug, 0); }
+
+/* ---------- Mail-Zeilen ---------- */
+.zeilen { list-style: none; margin: 0; padding: 0; position: relative; z-index: 1; }
+.tag { padding: 18px 20px 8px; font-size: 12px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; color: var(--text-3); }
+.zeile { position: relative; overflow: hidden; }
+.zeile-unter { position: absolute; inset: 0; display: flex; align-items: center; justify-content: space-between; padding: 0 26px; font-weight: 800; font-size: 15px; color: var(--tinte); }
+.zeile-unter span { display: flex; align-items: center; gap: 10px; opacity: var(--sicht, 0); transform: scale(calc(.8 + var(--sicht, 0) * .2)); }
+.zeile-unter .rechts { margin-left: auto; }
+.zeile[data-richtung='rechts'] .zeile-unter { background: var(--c-benachrichtigung); }
+.zeile[data-richtung='links'] .zeile-unter { background: var(--c-muell); }
+.zeile[data-richtung='rechts'] .zeile-unter .rechts, .zeile[data-richtung='links'] .zeile-unter .links { visibility: hidden; }
+.karte { position: relative; display: grid; grid-template-columns: 1fr auto; gap: 2px 12px; padding: 14px 20px 14px 26px; background: var(--grund); border: 0; width: 100%; text-align: left; touch-action: pan-y; will-change: transform; }
+.karte::before { content: ''; position: absolute; left: 12px; top: 16px; bottom: 16px; width: 4px; border-radius: 4px; background: var(--farbe, var(--linie)); }
+.karte .von { font-weight: 600; font-size: 16px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.karte time { font-size: 13px; color: var(--text-3); align-self: center; }
+.karte .betreff { grid-column: 1 / -1; font-size: 15px; color: var(--text-2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.karte .vorschau { grid-column: 1 / -1; font-size: 14px; color: var(--text-3); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.karte.neu .von, .karte.neu .betreff { font-weight: 800; color: var(--text); }
+.karte.neu .von::before { content: ''; display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--akzent); margin-right: 8px; vertical-align: 2px; }
+.karte .zeichen { display: inline-flex; gap: 4px; margin-left: 6px; color: var(--akzent); vertical-align: -3px; }
+.karte .zeichen svg { width: 15px; height: 15px; }
+.zeile + .zeile .karte { border-top: 1px solid oklch(0.3 0.013 70); }
+.zeile.weg { transition: height .38s cubic-bezier(.2, 1.1, .3, 1), opacity .3s; opacity: 0; }
+.leer { padding: 60px 24px; color: var(--text-3); font-size: 17px; }
+.leer b { display: block; font: 800 34px/1 var(--display); color: var(--text); margin-bottom: 8px; letter-spacing: -.02em; }
+.mehr { height: 64px; display: grid; place-items: center; color: var(--text-3); font-size: 14px; }
+
+/* ---------- Dock unten ---------- */
+.dock { position: fixed; left: 0; right: 0; bottom: 0; z-index: 30; display: grid; grid-template-columns: repeat(3, 1fr) 96px; gap: 4px; align-items: stretch;
+  padding: 8px 10px calc(8px + var(--unten)); background: var(--grund); border-top: 1px solid var(--linie); }
+.dock button { min-height: 56px; border: 0; border-radius: 14px; background: transparent; display: grid; place-items: center; gap: 2px; padding: 6px 0 4px; font-size: 12px; font-weight: 700; color: var(--text-2); position: relative; }
+.dock button:active { background: var(--flaeche); }
+.dock .schreiben { background: var(--akzent); color: var(--tinte); font-size: 13px; }
+.dock .schreiben:active { background: oklch(0.8 0.16 92); }
+.dock .zahl { position: absolute; top: 4px; left: calc(50% + 8px); min-width: 20px; height: 20px; padding: 0 5px; border-radius: 7px; background: var(--c-muell); color: var(--tinte); font-size: 12px; line-height: 20px; }
+
+/* ---------- Ebenen (Lesen, Schreiben) gleiten mit Federkraft herein ---------- */
+.ebene { position: fixed; inset: 0; z-index: 40; background: var(--grund); display: flex; flex-direction: column; will-change: transform; }
+.ebene-kopf { display: flex; align-items: center; gap: 2px; padding: calc(8px + var(--oben)) 8px 6px; background: var(--grund); position: relative; z-index: 2; }
+.ebene-kopf .platz { flex: 1; }
+.ebene-inhalt { flex: 1; overflow-y: auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; }
+.ebene-fuss { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; padding: 10px 12px calc(10px + var(--unten)); border-top: 1px solid var(--linie); background: var(--grund); }
+.ebene-fuss .knopf { padding: 0 8px; font-size: 15px; }
+
+/* Lesen */
+.lesen-kopf { padding: 6px 20px 16px; }
+.lesen-kopf h2 { margin: 0 0 14px; font: 800 clamp(26px, 7.5vw, 38px)/1.04 var(--display); letter-spacing: -.025em; overflow-wrap: anywhere; }
+.absender { display: grid; grid-template-columns: 44px 1fr; gap: 0 12px; align-items: center; }
+.absender .kreis { grid-row: span 2; width: 44px; height: 44px; border-radius: 14px; display: grid; place-items: center; font: 800 19px var(--display); background: var(--farbe, var(--flaeche-2)); color: var(--kreis-text, var(--tinte)); }
+.absender b { font-size: 16px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.absender small { font-size: 13px; color: var(--text-3); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sorte { display: inline-block; margin-top: 12px; padding: 3px 10px; border-radius: 8px; font-size: 13px; font-weight: 800; background: var(--farbe); color: var(--tinte); }
+.warnung { margin: 0 16px 14px; padding: 14px 16px; border-radius: 14px; background: var(--c-muell); color: var(--tinte); font-weight: 700; }
+.mail-rahmen { display: block; width: 100%; border: 0; background: #fff; min-height: 200px; }
+.anhaenge { display: grid; gap: 8px; padding: 16px; }
+.anhang { display: grid; grid-template-columns: 44px 1fr auto; align-items: center; gap: 12px; padding: 10px 12px; border-radius: 14px; background: var(--flaeche); border: 0; text-align: left; min-height: 60px; }
+.anhang .typ { width: 44px; height: 44px; border-radius: 10px; display: grid; place-items: center; background: var(--flaeche-2); font: 800 11px var(--sans); text-transform: uppercase; color: var(--akzent); }
+.anhang b { display: block; font-size: 15px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.anhang small { color: var(--text-3); font-size: 13px; }
+
+/* Schreiben */
+.feld { display: grid; grid-template-columns: 64px 1fr auto; align-items: center; border-bottom: 1px solid var(--linie); padding: 0 8px 0 20px; min-height: 56px; }
+.feld label { font-size: 14px; color: var(--text-3); font-weight: 700; }
+.feld input { border: 0; background: transparent; min-height: 54px; font-size: 17px; width: 100%; }
+.feld input:focus, .text-feld:focus { outline: none; }
+.feld:focus-within { border-bottom-color: var(--akzent); }
+.text-feld { display: block; width: 100%; min-height: 40vh; border: 0; background: transparent; padding: 18px 20px; font-size: 17px; line-height: 1.55; resize: none; }
+.schreib-optionen { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; padding: 8px 16px 20px; }
+.schalter { display: inline-flex; align-items: center; gap: 12px; min-height: 48px; font-weight: 600; font-size: 15px; }
+.schalter input { appearance: none; width: 52px; height: 32px; border-radius: 16px; background: var(--flaeche-2); position: relative; margin: 0; transition: background .2s; }
+.schalter input::after { content: ''; position: absolute; top: 4px; left: 4px; width: 24px; height: 24px; border-radius: 50%; background: var(--text); transition: transform .35s cubic-bezier(.2, 1.4, .35, 1); }
+.schalter input:checked { background: var(--c-wichtig); }
+.schalter input:checked::after { transform: translateX(20px); background: var(--tinte); }
+.dateien { display: grid; gap: 8px; padding: 0 16px 12px; }
+.datei { display: flex; align-items: center; gap: 10px; padding: 8px 8px 8px 14px; border-radius: 12px; background: var(--flaeche); font-size: 14px; }
+.datei span { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.datei small { color: var(--text-3); }
+
+/* ---------- Bogen (Bottom-Sheet) mit Zug-Physik ---------- */
+.schleier { position: fixed; inset: 0; z-index: 50; background: oklch(0.12 0.01 70 / .6); opacity: var(--schleier, 0); }
+.bogen { position: fixed; left: 0; right: 0; bottom: 0; z-index: 51; max-height: 86dvh; display: flex; flex-direction: column; background: var(--flaeche); border-radius: 26px 26px 0 0; padding-bottom: var(--unten); will-change: transform; }
+.bogen-griff { padding: 10px 0 4px; display: grid; place-items: center; touch-action: none; }
+.bogen-griff i { width: 44px; height: 5px; border-radius: 3px; background: var(--linie); }
+.bogen h2 { margin: 0; padding: 6px 22px 12px; font: 800 30px/1 var(--display); letter-spacing: -.025em; touch-action: none; }
+.bogen-inhalt { overflow-y: auto; overscroll-behavior: contain; padding: 0 10px 16px; }
+.wahl { display: flex; align-items: center; gap: 14px; width: 100%; min-height: 54px; padding: 0 12px; border: 0; border-radius: 14px; background: transparent; text-align: left; font-size: 17px; font-weight: 600; }
+.wahl:active, .wahl[aria-current='true'] { background: var(--flaeche-2); }
+.wahl b { margin-left: auto; font-size: 14px; color: var(--tinte); background: var(--akzent); border-radius: 8px; padding: 1px 8px; }
+.wahl .punkt { width: 12px; height: 12px; border-radius: 4px; background: var(--farbe, var(--linie)); flex: none; margin: 0 6px; }
+.gruppe { padding: 18px 12px 6px; font-size: 12px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; color: var(--text-3); }
+
+/* Aufräumer heute: die Sortiermaschine als Balken */
+.maschine { display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px; align-items: end; height: 190px; padding: 10px 12px 0; }
+.fach { display: grid; grid-template-rows: auto 1fr; justify-items: center; height: 100%; align-items: end; }
+.fach b { font: 800 26px/1 var(--display); margin-bottom: 6px; }
+.fach i { display: block; width: 100%; border-radius: 10px 10px 4px 4px; background: var(--farbe); height: calc(var(--anteil, 0) * 100% + 8px); transform-origin: bottom; animation: wachsen .9s cubic-bezier(.2, 1.35, .35, 1) both; animation-delay: calc(var(--n) * 70ms); }
+@keyframes wachsen { from { transform: scaleY(0); } }
+.faecher-namen { display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px; padding: 8px 12px 0; }
+.faecher-namen span { font-size: clamp(10px, 2.75vw, 13px); font-weight: 700; text-align: center; color: var(--text-2); hyphens: auto; -webkit-hyphens: auto; overflow-wrap: normal; line-height: 1.2; }
+.erklaer { padding: 16px 14px 6px; color: var(--text-2); font-size: 15px; margin: 0; }
+
+/* ---------- Toast ---------- */
+.toast { position: fixed; left: 12px; right: 12px; bottom: calc(var(--dock) + 10px); z-index: 70; display: flex; align-items: center; gap: 12px; padding: 8px 8px 8px 18px; min-height: 56px; border-radius: 16px; background: var(--text); color: var(--tinte); font-weight: 700;
+  transform: translateY(calc(100% + var(--dock) + 30px)); transition: transform .5s cubic-bezier(.2, 1.25, .35, 1); }
+body:has(.ebene) .toast { bottom: calc(84px + var(--unten)); }
+.toast:not(.an) { visibility: hidden; transition: transform .5s cubic-bezier(.2, 1.25, .35, 1), visibility 0s .5s; }
+.toast.an { transform: none; }
+.toast span { flex: 1; }
+.toast .knopf { min-height: 44px; background: var(--tinte); color: var(--text); padding: 0 16px; }
+
+/* ---------- Einrichtung ---------- */
+.start { padding: calc(28px + var(--oben)) 22px calc(40px + var(--unten)); max-width: 640px; }
+.start .marke { margin-bottom: 26px; height: 54px; grid-template-columns: repeat(5, 11px); gap: 5px; }
+.start h1 { margin: 0 0 14px; font: 800 clamp(48px, 15vw, 92px)/.88 var(--display); letter-spacing: -.045em; }
+.start h1 em { font-style: normal; color: var(--akzent); }
+.start > p { margin: 0 0 28px; font-size: 18px; color: var(--text-2); max-width: 30ch; }
+.schritte { list-style: none; margin: 0 0 24px; padding: 0; display: grid; gap: 4px; }
+.schritt { display: grid; grid-template-columns: 52px 1fr; gap: 0 14px; padding: 16px 0; border-top: 1px solid var(--linie); }
+.schritt > b { font: 800 46px/.9 var(--display); color: var(--text-3); }
+.schritt.jetzt > b { color: var(--akzent); }
+.schritt.fertig > b { color: var(--c-wichtig); }
+.schritt strong { display: block; font-size: 18px; margin-bottom: 4px; }
+.schritt p { margin: 0 0 10px; color: var(--text-2); font-size: 15px; }
+.kopie { display: flex; align-items: center; gap: 8px; margin: 6px 0; padding: 6px 6px 6px 12px; border-radius: 12px; background: var(--flaeche); font: 600 13px/1.3 ui-monospace, Menlo, monospace; }
+.kopie code { flex: 1; overflow-wrap: anywhere; }
+.kopie .knopf { min-height: 40px; padding: 0 12px; font: 700 13px var(--sans); }
+.eingabe { width: 100%; min-height: 52px; border-radius: 14px; border: 2px solid var(--linie); background: var(--flaeche); padding: 0 14px; font-size: 15px; }
+.eingabe:focus { outline: none; border-color: var(--akzent); }
+.fehler { color: var(--c-muell); font-weight: 700; }
+.demo-link { color: var(--text-3); font-size: 15px; }
+
+/* ---------- Breite Bildschirme: Liste + Lesen nebeneinander ---------- */
+@media (min-width: 900px) {
+  .liste-ansicht { max-width: 460px; border-right: 1px solid var(--linie); min-height: 100dvh; }
+  .dock { right: auto; width: 460px; }
+  .ebene.lesen-ebene { left: 460px; }
+  .bogen { left: 50%; right: auto; width: 520px; margin-left: -260px; }
+  .toast { left: 24px; right: auto; width: 420px; }
+  body:not(:has(.lesen-ebene)) main::after { content: 'Wähl links eine Mail aus.'; position: fixed; left: 460px; right: 0; top: 50%; text-align: center; font: 800 30px var(--display); color: var(--text-3); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+}

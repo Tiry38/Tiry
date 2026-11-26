@@ -35,10 +35,13 @@ export function parseAdressListe(wert: string | undefined): Adresse[] {
 
 /** RFC-2047-Wörter (=?UTF-8?B?...?=) – Gmail liefert meist schon dekodiert, das ist der Rückfall. */
 export function dekodiereMimeWort(s: string): string {
-  return s.replace(/=\?([^?]+)\?([BbQq])\?([^?]*)\?=/g, (_, _cs, enc, text) => {
+  // ohne Node-Buffer (läuft auch im Browser der Handy-App); Zeichensatz wird beachtet
+  const bytes = (bin: string) => Uint8Array.from(bin, (c) => c.charCodeAt(0) & 0xff);
+  const dek = (b: Uint8Array, cs: string) => { try { return new TextDecoder(cs).decode(b); } catch { return new TextDecoder('utf-8').decode(b); } };
+  return s.replace(/=\?([^?]+)\?([BbQq])\?([^?]*)\?=/g, (_, cs, enc, text) => {
     try {
-      if (enc.toUpperCase() === 'B') return Buffer.from(text, 'base64').toString('utf8');
-      return Buffer.from(text.replace(/_/g, ' ').replace(/=([0-9A-F]{2})/gi, (_m: string, h: string) => String.fromCharCode(parseInt(h, 16))), 'latin1').toString('utf8');
+      if (enc.toUpperCase() === 'B') return dek(bytes(atob(text)), cs);
+      return dek(bytes(text.replace(/_/g, ' ').replace(/=([0-9A-F]{2})/gi, (_m: string, h: string) => String.fromCharCode(parseInt(h, 16)))), cs);
     } catch { return text; }
   });
 }

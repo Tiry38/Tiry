@@ -78,7 +78,7 @@ async function dienstStarten(gmail: GmailPort) {
   dienst?.stoppen();
   dienst = new Aufraeumer({ gmail, db, ki: erzeugeClaudeKi() });
   const d = dienst;
-  postfach = new Postfach(gmail, db, () => d.email || 'ich');
+  postfach = new Postfach(gmail, (id) => (db.db.prepare('SELECT kategorie FROM protokoll WHERE mail_id = ? ORDER BY id DESC LIMIT 1').get(id) as any)?.kategorie ?? null, () => d.email || 'ich');
   for (const k of ['aktion', 'status', 'altbestand', 'frage', 'postfach']) dienst.on(k, (d) => { sende(k, d); if (k === 'status') aktualisiereTray(); });
   dienst.on('log', log);
   await dienst.starten();

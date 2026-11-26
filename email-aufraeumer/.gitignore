@@ -10,3 +10,4 @@ tokens*
 .env
 screens/tmp/
 screens/*-ganz.png
+dist-web/
