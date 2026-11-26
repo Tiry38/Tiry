@@ -130,6 +130,9 @@ function tagGruppe(t: number) {
 const ALS_APP = matchMedia('(display-mode: standalone), (display-mode: fullscreen)').matches || (navigator as any).standalone === true;
 let installAngebot: any = null;
 addEventListener('beforeinstallprompt', (e) => { e.preventDefault(); installAngebot = e; document.querySelectorAll<HTMLElement>('[data-install]').forEach((b) => (b.hidden = false)); });
+const ANDROID = /Android/i.test(navigator.userAgent);
+/** Öffnet dieselbe Seite im richtigen Chrome (nicht in der App) – dort kann man zwischen Tabs wechseln. */
+const chromeLink = () => `intent://${location.host}${location.pathname}#Intent;scheme=https;package=com.android.chrome;end`;
 function installHinweis(): string {
   if (ALS_APP) return '<p class="app-ok">✓ Du bist schon in der App – sie liegt auf deinem Startbildschirm als <b>Tiry\'s Mails</b>.</p>';
   const ios = /iPhone|iPad/i.test(navigator.userAgent);
@@ -158,7 +161,10 @@ function startSeite(fehler?: string) {
     <p>Einmal einrichten, danach öffnest du Tiry's Mails wie eine App – live mit deinem Gmail.</p>
     ${installHinweis()}
     <ol class="schritte">
-      ${zeile(1, 'Zugang bei Google anlegen', `<p>Dauert 2 Minuten. Tipp für jeden Punkt: <b>abhaken</b>, dann weißt du, wo du warst.</p>
+      ${ALS_APP && !id ? `<li class="wechsel"><strong>Die Einrichtung machst du in Chrome – nicht hier in der App.</strong>
+        <p>In Chrome kannst du zwischen Google und dieser Seite hin- und herspringen (Kopieren → Einfügen). Hier in der App geht das nicht. Danach ist die App automatisch fertig eingerichtet.</p>
+        ${ANDROID ? `<a class="knopf voll" href="${h(chromeLink())}">In Chrome öffnen</a>` : '<p>Öffne <b>Safari</b> und gib dort ein: <b>tiry38.github.io/Tiry/mails</b></p>'}</li>` : ''}
+      ${zeile(1, 'Zugang bei Google anlegen', `<p>Dauert 2 Minuten. Jeden Punkt <b>abhaken</b>, dann weißt du, wo du warst. Google öffnet sich in einem <b>neuen Tab</b>. <b>Zurück hierher:</b> oben rechts auf das Kästchen mit der Zahl drücken → Tab <b>„Tiry's Mails“</b> antippen.</p>
         <ol class="unter">
           <li><label><input type="checkbox"><span>Knopf unten drücken. Google öffnet die Seite <b>„Client erstellen“</b>. Fragt Google nach dem Konto: <b>dein Gmail-Konto</b> wählen.</span></label>
             <a class="knopf voll" href="https://console.cloud.google.com/auth/clients/create" target="_blank" rel="noopener">Google öffnen</a></li>
@@ -711,6 +717,7 @@ async function start() {
   }
   post = new Postfach(gmail, kategorieVon, () => ich || 'ich');
   listeGeruest();
+  if (r?.ok && !ALS_APP && !DEMO) setTimeout(() => toast('Fertig eingerichtet ✓ Ab jetzt öffnest du Tiry\'s Mails über das Symbol auf dem Startbildschirm.'), 600);
   arbeitet(true);
   const p = await sicher(() => gmail.profil());
   if (!p) return;

@@ -233,6 +233,10 @@ body:has(.ebene) .toast { bottom: calc(84px + var(--unten)); }
 .unter .knopf { justify-self: start; }
 /* so sehen die Wörter bei Google aus: blaue Schrift auf Weiß */
 .g { display: inline-block; padding: 0 6px; border-radius: 5px; background: #fff; color: #0b57d0; font-weight: 700; font-size: 14px; line-height: 1.5; }
+.wechsel { list-style: none; margin: 0 0 8px; padding: 18px; border-radius: 18px; background: var(--akzent); color: var(--tinte); display: grid; gap: 10px; }
+.wechsel strong { font: 800 22px/1.1 var(--display); letter-spacing: -.01em; }
+.wechsel p { margin: 0; font-size: 15px; color: var(--tinte); }
+.wechsel .knopf { background: var(--tinte); color: var(--text); justify-self: start; }
 .tipp { font-size: 14px; color: var(--text-3); margin: 6px 0 0; }
 .demo-link { color: var(--text-3); font-size: 15px; }
 
