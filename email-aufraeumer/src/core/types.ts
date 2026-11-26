@@ -98,6 +98,8 @@ export interface Einstellungen {
   ordnerAn: boolean;
   /** Ab so vielen Mails einer Firma wird ein Ordner angelegt. */
   ordnerAb: number;
+  /** Bilder in Mails automatisch laden (außer bei Spam/Betrug). */
+  bilderAuto: boolean;
 }
 
 export interface ProtokollEintrag {

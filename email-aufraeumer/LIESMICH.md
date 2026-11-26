@@ -49,7 +49,7 @@ So vermeidet man es für den privaten Gebrauch:
 (`client_secret_….json`). Diese Datei **nie** ins Repo legen.
 
 ### 4. Programm
-1. `Email-Aufraeumer-Setup.exe` installieren und starten.
+1. `Tirys-Mails-Setup.exe` installieren und starten. Danach aktualisiert sich das Programm selbst (lädt neue Versionen im Hintergrund, spielt sie beim nächsten Neustart ein).
 2. Cockpit: **„credentials.json auswählen“** → die heruntergeladene Datei wählen (wird nach `%APPDATA%\Email-Aufräumer` kopiert).
 3. **„Mit Google anmelden“** → Browser öffnet sich → beide Häkchen setzen → fertig. Der Trockenlauf beginnt.
 4. Optional, **nur lesen** (Phase-1-Test): `"%LOCALAPPDATA%\Programs\email-aufraeumer\Email-Aufräumer.exe" --lesetest` zeigt die letzten 50 Mails
@@ -128,7 +128,7 @@ npm run demo
 - Symbole: `node scripts/icon.mjs`. Installer: `npm run dist` **auf Windows** (unter Linux braucht electron-builder Wine).
 - Workflow `.github/workflows/email-aufraeumer.yml`: baut bei jedem Push mit Änderungen in `email-aufraeumer/` auf einem Windows-Rechner,
   führt die Tests aus, startet die fertige `.exe` 25 s im Demo-Modus (Start-Test) und legt den Installer als Artefakt ab.
-  Auf `main` zusätzlich feste Adresse: https://github.com/Tiry38/Tiry/releases/download/email-aufraeumer-latest/Email-Aufraeumer-Setup.exe
+  Feste Adresse (main und claude/-Zweige): https://github.com/Tiry38/Tiry/releases/download/tirys-mails-latest/Tirys-Mails-Setup.exe – dort liegt auch `latest.yml`, aus der sich installierte Programme alle 30 Minuten Updates holen.
 
 ### Aufbau
 - `src/core/` – Logik ohne Electron: `pipeline.ts` (Einordnung), `signals.ts`, `headers.ts`, `actions.ts` (Ausführen/Trockenlauf/Rückgängig),

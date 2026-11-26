@@ -189,7 +189,10 @@ async function cockpit() {
   $('#maschine-summe').innerHTML = `<b>${zahl(eintraege.length)}</b>Mails heute · ${probe ? `${zahl(st.heuteEntfernt)} würde ich wegräumen` : `${zahl(st.heuteEntfernt)} weggeräumt`}`;
 
   const liste: Eintrag[] = await api.rufe('protokoll', { limit: 10 });
-  unten.innerHTML = `<div class="zwei">
+  unten.innerHTML = `<section class="karte alt-karte" data-k="werbung"><div class="alt-kopf"><div><h2>Altes Postfach aufräumen</h2>
+      <p>Ich gehe einmal durch <b>alle</b> Mails, die schon da sind – auch Archiviertes. Erst siehst du nur, was passieren würde.</p></div></div>
+      <div id="altbestand">${altbestandHtml(z.altbestand)}</div></section>
+    <div class="zwei">
       <section class="karte"><h2>Was zuletzt passiert ist</h2>
         <ol class="strom-liste" id="strom-liste">${liste.map((e) => stromZeile(e)).join('') || '<li class="leer-zeile">Noch keine neue Mail angekommen. Sobald eine kommt, siehst du sie oben in die Maschine fallen.</li>'}</ol></section>
       <section class="karte"><h2>Diese Woche</h2>
@@ -217,6 +220,7 @@ async function cockpit() {
   });
   el.querySelector('[data-tat="pruefen"]')?.addEventListener('click', async () => { await api.rufe('jetztPruefen'); await laden(); void zeichne(); });
   el.querySelector('[data-tat="zu-pruefen"]')?.addEventListener('click', () => zeigeAnsicht('pruefen', true));
+  altbestandKnoepfe();
 }
 const art_ = (e: Eintrag) => art(e);
 
@@ -325,6 +329,18 @@ async function regeln() {
         <div class="meta"><span>${r.art === 'weiss' ? 'Von dir: nie anfassen' : r.art === 'schwarz' ? 'Von dir: immer wegräumen' : `Gelernt – du hast es ${r.bestaetigt}× bestätigt`}</span>
           ${r.gmailFilterId ? '<span class="gmail-aktiv">wirkt auch, wenn der PC aus ist</span>' : kandidaten.includes(r.id) ? `<span>${z.einstellungen.trockenlauf ? 'wirkt nach dem Probelauf auch bei ausgeschaltetem PC' : z.einstellungen.filterExportFreigegeben ? 'wird gerade in Gmail eingetragen' : 'kann auch bei ausgeschaltetem PC wirken – Einstellungen'}</span>` : ''}</div>
       </li>`).join('')}</ul>` : '<p class="leer">Noch keine Regeln. Sie entstehen von selbst, wenn du unter „Du entscheidest“ etwas wählst.</p>'}`;
+  const ordner: any[] = await api.rufe('ordnerListe');
+  el.insertAdjacentHTML('beforeend', `<h2 class="abschnitt">Deine Firmen-Ordner</h2>
+    ${ordner.length ? `<ul class="regel-liste">${ordner.map((o) => `<li class="regel ${o.aktiv ? '' : 'aus'}" data-basis="${h(o.basis)}">
+      <div class="satz">Mails von <em>@${h(o.basis)}</em> → Ordner <span class="schutz">„${h(o.name)}“</span></div>
+      <button class="schalter" role="switch" aria-checked="${o.aktiv}" aria-label="Ordner ${h(o.name)}" data-ordner-an></button><span></span>
+      <div class="meta"><span>${zahl(o.anzahl)} Mails</span><span>${o.ueberSchwelle ? 'Ordner aktiv' : `ab ${z.einstellungen.ordnerAb} Mails`}</span></div></li>`).join('')}</ul>`
+      : '<p class="leer">Noch keine Firma schreibt oft genug. Sobald eine Firma 5 Mails geschickt hat, bekommt sie hier ihren Ordner.</p>'}`);
+  for (const b of $$('[data-ordner-an]', el)) b.addEventListener('click', async () => {
+    const li = b.closest('.regel') as HTMLElement; const an = b.getAttribute('aria-checked') !== 'true';
+    b.setAttribute('aria-checked', String(an)); li.classList.toggle('aus', !an);
+    await api.rufe('ordnerSchalten', li.dataset.basis, an);
+  });
   const form = $<HTMLFormElement>('#neue-regel');
   const artSel = form.elements.namedItem('art') as HTMLSelectElement;
   const katSel = form.elements.namedItem('kat') as HTMLSelectElement;
@@ -411,13 +427,19 @@ async function einstellungen() {
     <div class="einst-gruppe">
     <div class="einst"><div><h2>Konto</h2><p class="erkl">${h(z.status?.email || '')}${z.drive ? ' · große Dateien über Google Drive: bereit' : ' · große Dateien über Google Drive: noch nicht erlaubt – einmal neu anmelden (vorher in Google Cloud die Drive-API einschalten, siehe Anleitung).'}</p></div>
       <div class="zeile"><button class="knopf ${z.drive ? '' : 'voll'}" data-tat="neu-anmelden">Neu anmelden</button></div></div>
+    <div class="einst"><div><h2>Updates</h2><p class="erkl">Das Programm hält sich selbst aktuell: Neue Versionen lädt es im Hintergrund und spielt sie beim nächsten Neustart ein. Du musst nie wieder etwas installieren.</p><p class="erkl" id="version-stand">${h(updateText(updateStand))}</p></div>
+      <div class="zeile"><button class="knopf" data-tat="update-suchen">Jetzt nachsehen</button></div></div>
     <div class="einst"><div><h2>Probelauf</h2><p class="erkl">${e.trockenlauf ? 'Gerade ist Probelauf: Ich zeige nur, was ich tun würde. Zum Aufräumen in der Übersicht auf „Jetzt wirklich aufräumen“ drücken.' : 'Ich räume wirklich auf. Du kannst jederzeit zurück in den Probelauf.'}</p></div>
       <div class="zeile">${e.trockenlauf ? '<span class="etikett">Probelauf läuft – nichts wird verändert</span>' : '<button class="knopf" data-tat="trocken">Zurück in den Probelauf</button>'}</div></div>
     <div class="einst"><div><h2>Wie streng?</h2><p class="erkl"><b>Vorsichtig:</b> Ich räume nur weg, wenn ich mir ganz sicher bin – mehr landet bei „Du entscheidest“.<br><b>Streng:</b> Ich räume mehr selbst weg.</p></div>
       <div class="regler"><span class="regler-wert" id="schwelle-wert">${strengText(e.schwelle)}</span><input type="range" min="0" max="100" value="${schwelleZuRegler(e.schwelle)}" id="schwelle" aria-label="Wie streng">
       <div class="regler-enden"><span>vorsichtig</span><span>streng</span></div></div></div>
-    <div class="einst"><div><h2>Alten Posteingang aufräumen</h2><p class="erkl">Ich sortiere einmal alles, was schon im Posteingang liegt. Zuerst siehst du nur eine Vorschau – angefasst wird erst, wenn du startest.</p></div>
-      <div id="altbestand">${altbestandHtml(ab)}</div></div></div>
+    <div class="einst"><div><h2>Bilder in Mails</h2><p class="erkl">Bilder werden automatisch angezeigt. Bei Spam und Betrug bleiben sie immer blockiert – sonst erfährt der Absender, dass deine Adresse echt ist.</p></div>
+      <div class="zeile"><button class="schalter" role="switch" id="bilder" aria-checked="${e.bilderAuto !== false}" aria-label="Bilder automatisch anzeigen"></button><span>${e.bilderAuto !== false ? 'Immer anzeigen' : 'Erst auf Klick'}</span></div></div>
+    <div class="einst"><div><h2>Firmen-Ordner</h2><p class="erkl">Schreibt eine Firma oft (z. B. Amazon, DHL), lege ich ihr einen eigenen Ordner an und sortiere ihre Mails dort ein – auch Bestellungen und Rechnungen. Privatadressen und Leute, denen du schreibst, nie.</p></div>
+      <div class="zeile"><button class="schalter" role="switch" id="ordner-an" aria-checked="${e.ordnerAn !== false}" aria-label="Firmen-Ordner"></button>
+        <label class="feld"><span class="etikett">Ab wie vielen Mails?</span><select id="ordner-ab">${[3, 5, 10, 20].map((n) => `<option value="${n}" ${n === e.ordnerAb ? 'selected' : ''}>${n} Mails</option>`).join('')}</select></label>
+        <button class="knopf klein" data-tat="zu-regeln">Ordner ansehen</button></div></div></div>
 
     <details class="profi">
       <summary><span>Mehr Einstellungen</span><span class="etikett">für Profis – musst du nicht anfassen</span></summary>
@@ -458,10 +480,18 @@ async function einstellungen() {
     if ((await f(an)) === false) return; b.setAttribute('aria-checked', String(an));
   });
   schalter('ki', (an) => speichere({ kiAn: an }));
+  schalter('bilder', (an) => speichere({ bilderAuto: an }));
+  schalter('ordner-an', (an) => speichere({ ordnerAn: an }));
+  $('#ordner-ab', el).addEventListener('change', (ev) => speichere({ ordnerAb: Number((ev.target as HTMLSelectElement).value) }));
+  el.querySelector('[data-tat="zu-regeln"]')?.addEventListener('click', () => zeigeAnsicht('regeln', true));
   schalter('autostart', (an) => speichere({ autostart: an }));
   schalter('filter', async (an) => {
     if (an && !(await filterFrage())) return false;
     if (!an) await speichere({ filterExportFreigegeben: false });
+  });
+  el.querySelector('[data-tat="update-suchen"]')?.addEventListener('click', async () => {
+    const v = document.getElementById('version-stand'); if (v) v.textContent = 'Suche nach Updates …';
+    await api.rufe('updateSuchen'); zeigeUpdate(await api.rufe('updateStand'));
   });
   el.querySelector('[data-tat="neu-anmelden"]')?.addEventListener('click', async () => {
     melde('Browser geöffnet – bitte dort anmelden und alle Haken setzen.');
@@ -471,22 +501,50 @@ async function einstellungen() {
   altbestandKnoepfe();
 }
 
+function speicher(b: number) { return b > 1_073_741_824 ? `${(b / 1_073_741_824).toFixed(1).replace('.', ',')} GB` : `${Math.max(1, Math.round(b / 1_048_576))} MB`; }
 function altbestandHtml(ab: any): string {
-  if (!ab || ab.phase === 'leer') return '<button class="knopf voll gross" data-ab="vorschau">Vorschau ansehen</button>';
+  const platz = z?.einstellungen?.altPlatzSchaffen !== false;
+  const platzSchalter = `<label class="zeile alt-platz"><button class="schalter" role="switch" aria-checked="${platz}" data-ab="platz" aria-label="Platz schaffen"></button>
+    <span><b>Platz schaffen:</b> alte Werbung und Newsletter in den Papierkorb (statt nur ins Archiv). Rechnungen, Bestellungen und Leute, denen du schreibst, bleiben.</span></label>`;
+  if (!ab || ab.phase === 'leer') return `${platzSchalter}<div class="zeile"><button class="knopf voll gross" data-ab="vorschau">Postfach durchsehen</button></div>`;
   const prozent = ab.gesamt ? Math.round((ab.erledigt / ab.gesamt) * 100) : 0;
-  const zaehler = `<div class="zaehler-liste">${Object.entries(ab.zaehler).map(([k, n]) => `<span data-k="${k}"><b>${zahl(n as number)}</b>${KAT[k as Kategorie]}</span>`).join('')}</div>`;
-  if (ab.phase === 'vorschau') return `<span class="etikett">Ich schaue mir alles an … ${zahl(ab.erledigt)} von ${zahl(ab.gesamt)} Mails</span><div class="fortschritt"><i data-stil="width:${prozent}%"></i></div>${zaehler}`;
-  if (ab.phase === 'bereit') return `<span class="etikett">Fertig angeschaut: ${zahl(ab.gesamt)} Mails – noch nichts verändert. Das habe ich gefunden:</span>${zaehler}
-    ${ab.beispiele.length ? `<ul class="beispiele">${ab.beispiele.map((b: any) => `<li>${KAT[b.kategorie as Kategorie]} · ${h(b.absender)} – ${h(b.betreff)}</li>`).join('')}</ul>` : ''}
-    <div class="zeile"><button class="knopf voll" data-ab="start">${z.einstellungen.trockenlauf ? 'Probeweise durchspielen' : 'Jetzt aufräumen'}</button><button class="knopf" data-ab="vorschau">Nochmal ansehen</button></div>`;
-  if (ab.phase === 'laeuft') return `<span class="etikett">Ich räume auf … ${zahl(ab.erledigt)} von ${zahl(ab.gesamt)} Mails</span><div class="fortschritt"><i data-stil="width:${prozent}%"></i></div>`;
-  return `<span class="etikett">Fertig – ${zahl(ab.gesamt)} Mails durchgesehen. Zurückholen geht unter „Verlauf“.</span>${zaehler}<div class="zeile"><button class="knopf" data-ab="vorschau">Nochmal ansehen</button></div>`;
+  if (ab.phase === 'vorschau') return `<p class="alt-status">Ich sehe mir alle Mails an … <b>${zahl(ab.erledigt)}</b> von ${zahl(ab.gesamt)}</p><div class="fortschritt"><i data-stil="width:${prozent}%"></i></div>`;
+  if (ab.phase === 'laeuft') return `<p class="alt-status">Ich räume auf … <b>${zahl(ab.erledigt)}</b> von ${zahl(ab.gesamt)}</p><div class="fortschritt"><i data-stil="width:${prozent}%"></i></div>`;
+  const zi = ab.ziele ?? {};
+  const zahlen = `<div class="alt-zahlen">
+      <div data-k="muell"><b>${zahl(zi.papierkorb ?? 0)}</b><span>in den Papierkorb</span><small>${ab.freiBytes ? `ca. ${speicher(ab.freiBytes)} frei` : ''}</small></div>
+      <div data-k="newsletter"><b>${zahl(zi.archiv ?? 0)}</b><span>ins Archiv</span></div>
+      <div data-k="benachrichtigung"><b>${zahl(zi.ordner ?? 0)}</b><span>in Firmen-Ordner</span></div>
+      <div data-k="wichtig"><b>${zahl((zi.bleibt ?? 0) + (zi.pruefen ?? 0))}</b><span>bleibt</span><small>${zi.pruefen ? `${zahl(zi.pruefen)} fragst du selbst` : ''}</small></div>
+    </div>`;
+  const ordner = ab.ordner?.length ? `<p class="alt-ordner"><span class="etikett">Neue Ordner:</span> ${ab.ordner.slice(0, 12).map((o: any) => `<span>${h(o.name)} <small>${zahl(o.anzahl)}</small></span>`).join('')}${ab.ordner.length > 12 ? ` <span>+ ${ab.ordner.length - 12} weitere</span>` : ''}</p>` : '';
+  if (ab.phase === 'bereit') {
+    const probe = z.einstellungen.trockenlauf;
+    return `<p class="alt-status">${zahl(ab.gesamt)} Mails angesehen – noch nichts verändert. So würde ich aufräumen:</p>${zahlen}${ordner}${platzSchalter}
+      <div class="zeile"><button class="knopf voll gross" data-ab="${probe ? 'start-echt' : 'start'}">Jetzt aufräumen</button>
+      ${probe ? '<button class="knopf" data-ab="start">Nur probeweise</button>' : ''}<button class="knopf leise" data-ab="vorschau">Nochmal durchsehen</button></div>`;
+  }
+  const g = ab.geschafft ?? {};
+  return `<p class="alt-status"><b>Fertig.</b> ${zahl(g.papierkorb ?? 0)} im Papierkorb, ${zahl(g.archiv ?? 0)} im Archiv, ${zahl(g.ordner ?? 0)} in Firmen-Ordnern.
+    ${g.freiBytes ? `Gmail gibt ca. <b>${speicher(g.freiBytes)}</b> frei, sobald der Papierkorb geleert ist – automatisch nach 30 Tagen oder sofort in Gmail unter „Papierkorb → Jetzt leeren“.` : ''} Zurückholen geht unter „Verlauf“.</p>
+    <div class="zeile"><button class="knopf" data-ab="vorschau">Nochmal durchsehen</button></div>`;
 }
 function altbestandKnoepfe() {
   for (const b of $$('[data-ab]')) b.addEventListener('click', async () => {
     try {
-      if (b.dataset.ab === 'vorschau') await api.rufe('altbestandVorschau');
-      else if (await bestaetigen('Alten Posteingang aufräumen?', z.einstellungen.trockenlauf ? 'Probelauf: Ich trage nur in den Verlauf ein, was ich tun würde. Angefasst wird nichts.' : 'Ich räume jetzt den ganzen Posteingang auf. Geschützte und unsichere Mails bleiben liegen. Alles lässt sich 30 Tage lang zurückholen.', 'Starten', !z.einstellungen.trockenlauf)) await api.rufe('altbestandStarten');
+      const was = b.dataset.ab;
+      if (was === 'platz') {
+        const an = b.getAttribute('aria-checked') !== 'true'; b.setAttribute('aria-checked', String(an));
+        z.einstellungen = await api.rufe('speichereEinstellungen', { altPlatzSchaffen: an });
+        if (z.altbestand?.phase === 'bereit') melde('Geändert – „Nochmal durchsehen“ zeigt die neuen Zahlen.');
+      } else if (was === 'vorschau') await api.rufe('altbestandVorschau');
+      else if (was === 'start-echt') {
+        if (!(await bestaetigen('Jetzt wirklich aufräumen?', 'Ich räume dein ganzes Postfach so auf, wie oben gezeigt, und ab jetzt auch jede neue Mail. <b>Endgültig gelöscht wird nie etwas</b> – der Papierkorb leert sich erst nach 30 Tagen, und unter „Verlauf“ holst du alles mit einem Klick zurück.', 'Ja, aufräumen'))) return;
+        await api.rufe('scharfSchalten'); await laden(); await api.rufe('altbestandStarten');
+      } else if (was === 'start') {
+        if (!(await bestaetigen(z.einstellungen.trockenlauf ? 'Nur probeweise?' : 'Postfach aufräumen?', z.einstellungen.trockenlauf ? 'Ich trage nur in den Verlauf ein, was ich tun würde. Angefasst wird nichts.' : 'Ich räume jetzt alles so auf, wie oben gezeigt. Alles lässt sich 30 Tage lang zurückholen.', 'Starten'))) return;
+        await api.rufe('altbestandStarten');
+      }
     } catch (e) { melde((e as Error).message); }
   });
 }
@@ -499,7 +557,27 @@ async function filterFrage(anzahl?: number): Promise<boolean> {
 
 // ---------------- Live-Ereignisse ----------------
 let statistikTimer: any;
+/** Update-Anzeige unten in der Seitenleiste: lädt (Spektrum füllt sich) → bereit (Knopf „Neu starten“). */
+let updateStand: any = null;
+function zeigeUpdate(s: any) {
+  updateStand = s;
+  const el = $('#update');
+  if (!s || (s.stand !== 'laedt' && s.stand !== 'bereit')) { el.hidden = true; el.innerHTML = ''; return; }
+  el.hidden = false; el.dataset.stand = s.stand;
+  el.innerHTML = s.stand === 'laedt'
+    ? `<span class="update-zeile"><b>Update ${h(s.neu)}</b><span>wird geladen</span></span><span class="update-balken"><i data-stil="width:${Math.max(4, s.prozent)}%"></i></span>`
+    : `<span class="update-zeile"><b>Update ${h(s.neu)} ist da</b><span>Installiert sich beim nächsten Neustart von selbst.</span></span><button class="knopf klein voll" data-update="jetzt" title="Update ${h(s.neu)} jetzt einspielen"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 12a8 8 0 1 1-2.4-5.7M20 4v5h-5"/></svg><span>Jetzt neu starten</span></button>`;
+  el.querySelector('[data-update]')?.addEventListener('click', () => { void api.rufe('updateJetzt'); });
+  if (ansicht === 'einstellungen') { const v = document.getElementById('version-stand'); if (v) v.textContent = updateText(s); }
+}
+function updateText(s: any): string {
+  if (!s) return '';
+  return ({ aus: `Version ${s.version} · Updates nur im installierten Programm`, sucht: `Version ${s.version} · suche nach Updates …`, aktuell: `Version ${s.version} · du hast die neueste Version`,
+    laedt: `Version ${s.version} · Update ${s.neu} wird geladen (${s.prozent} %)`, bereit: `Version ${s.version} · Update ${s.neu} ist bereit`, fehler: `Version ${s.version} · Update-Server gerade nicht erreichbar, ich versuche es später wieder` } as Record<string, string>)[s.stand] ?? '';
+}
+
 function ereignis(kanal: string, d: any) {
+  if (kanal === 'update') { zeigeUpdate(d); return; }
   if (kanal === 'aktion' || (kanal === 'postfach' && d?.neu)) {
     // Spektrum-Leiste oben blitzt einmal auf: es ist gerade eine Mail angekommen
     document.body.classList.remove('blitz'); void document.body.offsetWidth; document.body.classList.add('blitz');
@@ -549,7 +627,11 @@ new MutationObserver((ms) => { for (const m of ms) for (const n of m.addedNodes)
 // ---------------- Start ----------------
 async function start() {
   maschine = new Sortierer($<HTMLCanvasElement>('#maschine'));
-  post = new PostfachUI($('#ansicht-postfach'), api, melde);
+  post = new PostfachUI($('#ansicht-postfach'), api, melde,
+    () => ({ probe: !!z?.einstellungen?.trockenlauf, weg: z?.statistik?.heuteEntfernt ?? 0, pruefen: z?.statistik?.zuPruefen ?? 0 }),
+    (a) => zeigeAnsicht(a, true));
+  // Beschriftung beim Drüberfahren (wichtig, wenn die Leiste eingeklappt ist)
+  for (const b of $$('#nav button')) b.title = b.querySelector('.nav-name')?.textContent ?? '';
   (window as any).__maschine = maschine;
   // Landet ein Umschlag, hüpft die Zahl unter dem Fach und zählt eins hoch
   maschine.beiKlick = (i) => {
@@ -591,6 +673,7 @@ async function start() {
     navSetzen();
   });
   api.auf(ereignis);
+  zeigeUpdate(await api.rufe('updateStand'));
   await laden();
   zeigeAnsicht(new URLSearchParams(location.search).get('ansicht') ?? (z.angemeldet ? 'postfach' : 'cockpit'));
   maschine.start();

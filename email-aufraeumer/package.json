@@ -18,6 +18,7 @@
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^1.14.0",
+    "electron-updater": "^6.8.11",
     "googleapis": "^190.0.0"
   },
   "devDependencies": {
@@ -58,6 +59,12 @@
       "allowToChangeInstallationDirectory": true,
       "artifactName": "Tirys-Mails-Setup.exe",
       "shortcutName": "Tiry's Mails"
-    }
+    },
+    "publish": [
+      {
+        "provider": "generic",
+        "url": "https://github.com/Tiry38/Tiry/releases/download/tirys-mails-latest"
+      }
+    ]
   }
 }

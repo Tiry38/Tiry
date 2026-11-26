@@ -31,6 +31,7 @@ export function standardEinstellungen(jetzt = Date.now()): Einstellungen {
     altPlatzSchaffen: true,
     ordnerAn: true,
     ordnerAb: 5,
+    bilderAuto: true,
   };
 }
 

@@ -28,7 +28,8 @@ export class PostfachUI {
   private offen: string | null = null;
   private laedt = false;
 
-  constructor(private wurzel: HTMLElement, private api: Api, private melde: (t: string, rueck?: () => void) => void) {}
+  constructor(private wurzel: HTMLElement, private api: Api, private melde: (t: string, rueck?: () => void) => void,
+    private aufraeumer: () => { probe: boolean; weg: number; pruefen: number } = () => ({ probe: true, weg: 0, pruefen: 0 }), private gehe: (ansicht: string) => void = () => {}) {}
 
   /** Grundgerüst einmal aufbauen. */
   async zeigen() {
@@ -79,7 +80,12 @@ export class PostfachUI {
       return `${titel ? `<h2>${titel}</h2>` : ''}<ul>${os.map((o) => `<li><button data-ordner="${h(o.id)}" ${o.id === this.aktiv ? 'aria-current="page"' : ''}>
         <svg viewBox="0 0 24 24" aria-hidden="true">${SYMBOL[o.id] ?? SYMBOL.ordner}</svg><span>${h(o.name)}</span>${o.ungelesen ? `<b>${o.ungelesen}</b>` : ''}</button></li>`).join('')}</ul>`;
     };
-    $('#pf-ordnerliste', this.wurzel).innerHTML = gruppe(['system'], '') + gruppe(['firma', 'eigen'], 'Deine Ordner') + gruppe(['sorte'], 'Sortiert');
+    const a = this.aufraeumer();
+    $('#pf-ordnerliste', this.wurzel).innerHTML = gruppe(['system'], '') + gruppe(['firma', 'eigen'], 'Deine Ordner') + gruppe(['sorte'], 'Sortiert') + `
+      <div class="pf-aufr"><div class="pf-aufr-kopf"><span class="marke-zeichen" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span><b>Aufräumer</b></div>
+        <p>${a.probe ? `Probelauf – heute würde ich <b>${a.weg}</b> Mails wegräumen.` : `Heute <b>${a.weg}</b> Mails weggeräumt.`}${a.pruefen ? ` <b>${a.pruefen}</b> warten auf dich.` : ''}</p>
+        <button class="knopf klein voll" data-gehe="cockpit">Aufräumen öffnen</button></div>`;
+    this.wurzel.querySelector<HTMLButtonElement>('[data-gehe]')?.addEventListener('click', () => this.gehe('cockpit'));
     for (const b of this.wurzel.querySelectorAll<HTMLButtonElement>('button[data-ordner]')) b.addEventListener('click', () => this.ordnerWaehlen(b.dataset.ordner!));
     $('#pf-ordnerwahl', this.wurzel).innerHTML = this.ordner.map((o) => `<option value="${h(o.id)}" ${o.id === this.aktiv ? 'selected' : ''}>${h(o.name)}${o.ungelesen ? ` (${o.ungelesen})` : ''}</option>`).join('');
   }
@@ -152,6 +158,8 @@ export class PostfachUI {
     try { m = await this.api.rufe('pfLesen', id); } catch (e) { ziel.innerHTML = `<div class="pf-leer"><b>Konnte die Mail nicht öffnen.</b><span>${h((e as Error).message)}</span></div>`; return; }
     if (this.offen !== id) return;
     const sperre = m.kategorie === 'phishing';
+    // Bilder immer anzeigen – nur bei Spam/Betrug bleiben sie blockiert (sonst erfährt der Absender, dass die Adresse echt ist)
+    const bilderAn = m.bilderAuto && m.kategorie !== 'spam' && m.kategorie !== 'phishing';
     const groesse = (n: number) => (n > 1_048_576 ? `${(n / 1_048_576).toFixed(1).replace('.', ',')} MB` : `${Math.max(1, Math.round(n / 1024))} KB`);
     const anh = m.anhaenge.filter((a: any) => !a.inline || !/^image\//.test(a.mime));
     const mehrere = (m.an.split(',').length + (m.cc ? m.cc.split(',').length : 0)) > 1;
@@ -177,9 +185,9 @@ export class PostfachUI {
         ${m.kategorie ? `<span class="pf-kat">${KAT[m.kategorie as Kat]}</span>` : ''}
       </header>
       ${m.warnung ? `<p class="pf-warnung">${h(m.warnung)}${sperre ? ' Links sind gesperrt.' : ''}</p>` : ''}
-      ${m.fernBilder ? '<p class="pf-bilder" id="pf-bilder">Bilder aus dem Internet sind blockiert – so merkt der Absender nicht, dass du die Mail geöffnet hast. <button class="knopf klein" data-tat="bilder">Bilder anzeigen</button></p>' : ''}
+      ${m.fernBilder && !bilderAn ? '<p class="pf-bilder" id="pf-bilder">Bilder aus dem Internet sind blockiert – so merkt der Absender nicht, dass du die Mail geöffnet hast. <button class="knopf klein" data-tat="bilder">Bilder anzeigen</button></p>' : ''}
       ${anh.length ? `<ul class="pf-anhaenge">${anh.map((a: any, i: number) => `<li><button class="knopf klein" data-anhang="${i}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 12l6-6a3 3 0 014 4l-8 8a5 5 0 01-7-7l7-7"/></svg>${h(a.name)} <small>${groesse(a.groesse)}</small></button></li>`).join('')}</ul>` : ''}
-      <iframe class="pf-inhalt" id="pf-inhalt" title="Inhalt der Mail" sandbox="allow-popups allow-popups-to-escape-sandbox" src="${m.anzeigeUrl}?sperre=${sperre ? 1 : 0}"></iframe>`;
+      <iframe class="pf-inhalt" id="pf-inhalt" title="Inhalt der Mail" sandbox="allow-popups allow-popups-to-escape-sandbox" src="${m.anzeigeUrl}?bilder=${bilderAn ? 1 : 0}&sperre=${sperre ? 1 : 0}"></iframe>`;
     ziel.querySelectorAll<HTMLButtonElement>('[data-tat]').forEach((b) => b.addEventListener('click', () => void this.tat(b.dataset.tat!, m)));
     ziel.querySelectorAll<HTMLButtonElement>('[data-anhang]').forEach((b) => b.addEventListener('click', async () => {
       try { await this.api.rufe('pfAnhangSpeichern', id, anh[Number(b.dataset.anhang)]); } catch (e) { this.melde((e as Error).message); }
@@ -235,6 +243,38 @@ export class PostfachUI {
       try { const id = await this.api.rufe('pfOrdnerAnlegen', name); await this.ordnerLaden(); await fertig(id); } catch (err) { this.melde((err as Error).message); }
     });
     d.showModal();
+  }
+
+  /** Geführte Einrichtung für große Dateien (Google Drive) – mit Live-Prüfung. true = fertig eingerichtet. */
+  driveAssistent(start: { schritt?: number; grund?: string }): Promise<boolean> {
+    const d = document.querySelector<HTMLDialogElement>('#dialog')!;
+    return new Promise((fertig) => {
+      const zeichnen = (st: { schritt?: number; grund?: string; ok?: boolean }) => {
+        const schritt = st.ok ? 3 : st.schritt ?? 1;
+        const zeile = (n: number, titel: string, text: string, knopf: string) => `<li class="${schritt > n ? 'erledigt' : schritt === n ? 'jetzt' : ''}">
+          <b>${schritt > n ? '✓' : n}</b><div><strong>${titel}</strong><p>${text}</p>${schritt === n ? knopf : ''}</div></li>`;
+        d.innerHTML = `<h2 id="dialog-titel">Große Dateien einrichten</h2>
+          <p>Gmail nimmt pro Mail höchstens 25 MB an. Größere Dateien lege ich in dein Google Drive und schicke einen Download-Link – wie Gmail und Outlook es auch machen. Einmalig zwei Schritte:</p>
+          <ol class="assistent">
+            ${zeile(1, 'Drive bei Google einschalten', 'Öffnet die richtige Seite. Dort oben dein Projekt wählen und auf <b>Aktivieren</b> drücken.', '<button class="knopf voll" data-a="link">Seite öffnen</button> <button class="knopf" data-a="pruefen">Erledigt – prüfen</button>')}
+            ${zeile(2, 'Einmal neu anmelden', 'Der Browser öffnet sich. Dort <b>alle Haken</b> setzen – ich sehe dann nur Dateien, die ich selbst hochlade.', '<button class="knopf voll" data-a="login">Neu anmelden</button>')}
+          </ol>
+          ${st.grund && !st.ok ? `<p class="assistent-hinweis">${h(st.grund)}</p>` : ''}
+          ${st.ok ? '<p class="assistent-ok">Alles bereit. Große Dateien gehen ab jetzt als Download-Link.</p>' : ''}
+          <div class="zeile" data-stil="margin-top:18px"><button class="knopf ${st.ok ? 'voll' : ''}" data-a="${st.ok ? 'weiter' : 'abbrechen'}">${st.ok ? 'Jetzt senden' : 'Abbrechen'}</button></div>`;
+        const a = (n: string) => d.querySelector<HTMLButtonElement>(`[data-a="${n}"]`);
+        a('link')?.addEventListener('click', () => { window.open('https://console.cloud.google.com/apis/library/drive.googleapis.com', '_blank'); });
+        a('pruefen')?.addEventListener('click', async () => { const t = await this.api.rufe('driveTest'); zeichnen(t.ok ? t : { ...t, schritt: t.schritt === 1 ? 1 : 2, grund: t.schritt === 2 ? '' : t.grund }); });
+        a('login')?.addEventListener('click', async () => {
+          try { await this.api.rufe('anmelden'); zeichnen(await this.api.rufe('driveTest')); } catch (e) { zeichnen({ schritt: 2, grund: (e as Error).message }); }
+        });
+        a('abbrechen')?.addEventListener('click', () => { d.close(); fertig(false); });
+        a('weiter')?.addEventListener('click', () => { d.close(); fertig(true); });
+      };
+      zeichnen(start);
+      d.addEventListener('cancel', () => fertig(false), { once: true });
+      if (!d.open) d.showModal();
+    });
   }
 
   /** Schreibfenster (neu, Antwort, Weiterleitung): Vollbild mit Tinten-Hintergrund und Live-Vorschau. */
@@ -339,7 +379,13 @@ export class PostfachUI {
     const status = el.querySelector('#tm-status')!;
     (window as any).__sendeStatus = (t: string) => { status.textContent = t; };
     el.querySelector('[data-senden]')!.addEventListener('click', async (ev) => {
-      const b = ev.currentTarget as HTMLButtonElement; b.disabled = true; status.textContent = 'Wird gesendet …';
+      const b = ev.currentTarget as HTMLButtonElement;
+      // Große Dateien brauchen Google Drive – fehlt das, führt ein Assistent Schritt für Schritt durch die Einrichtung
+      if (anhaenge.some((a) => a.gross)) {
+        const t = await this.api.rufe('driveTest');
+        if (!t.ok && !(await this.driveAssistent(t))) return;
+      }
+      b.disabled = true; status.textContent = 'Wird gesendet …';
       const liste = (s: string) => s.split(/[,;]/).map((x) => x.trim()).filter(Boolean);
       try {
         const r = await this.api.rufe('pfSenden', { an: liste(feld('an').value), cc: liste(feld('cc').value), betreff: feld('betreff').value, text: text.value,

@@ -14,6 +14,7 @@ import { Postfach } from '../core/postfach';
 import { textZuHtml } from '../core/mime';
 import { grosseDateiHochladen, DRIVE_SCOPE } from './drive';
 import { vorlageHtml } from '../core/vorlage';
+import { starteUpdater } from './update';
 /** Live-Vorschau der gestalteten Mail beim Schreiben. */
 let vorschauHtml = '';
 
@@ -27,7 +28,9 @@ const NAME = "Tiry's Mails";
 protocol.registerSchemesAsPrivileged([{ scheme: 'tmail', privileges: { standard: true, secure: true, supportFetchAPI: true } }]);
 
 const DEMO = process.argv.includes('--demo');
-const VERSTECKT = process.argv.includes('--hidden');
+// Nach einem stillen Update (PC war unbenutzt) wieder unsichtbar im Tray starten
+const STILL_MARKE = path.join(app.getPath('appData'), 'Email-Aufräumer', 'nach-update-still');
+const VERSTECKT = process.argv.includes('--hidden') || (() => { try { fs.unlinkSync(STILL_MARKE); return true; } catch { return false; } })();
 const LESETEST = process.argv.includes('--lesetest');
 const SMOKE = process.env.AUFRAEUMER_SMOKE === '1';
 
@@ -42,6 +45,7 @@ let fenster: BrowserWindow | null = null;
 let tray: Tray | null = null;
 let beenden = false;
 let dienst: Aufraeumer | null = null;
+let updater: ReturnType<typeof starteUpdater> | null = null;
 let postfach: Postfach | null = null;
 /** Zuletzt geöffnete Mails für die Anzeige über tmail:// (id → HTML + Anhänge). */
 const anzeige = new Map<string, { html: string; cids: Record<string, string> }>();
@@ -144,6 +148,9 @@ function mailDokument(id: string, bilder: boolean, sperre: boolean): string {
 }
 
 const API: Record<string, Fn> = {
+  updateStand: () => updater?.stand() ?? { stand: 'aus', version: app.getVersion() },
+  updateJetzt: () => updater?.jetzt(),
+  updateSuchen: () => updater?.suchen(),
   async zustand() {
     return {
       demo: DEMO, credentials: DEMO || anmeldung.hatCredentials(), angemeldet: DEMO || anmeldung.istAngemeldet(),
@@ -193,7 +200,7 @@ const API: Record<string, Fn> = {
     anzeige.set(id, { html: m.html ?? textZuHtml(m.text ?? ''), cids });
     if (anzeige.size > 30) anzeige.delete(anzeige.keys().next().value!);
     const fern = /<img[^>]+src\s*=\s*["']?https?:/i.test(m.html ?? '') || /url\(\s*["']?https?:/i.test(m.html ?? '');
-    return { ...m, html: undefined, text: undefined, fernBilder: fern, anzeigeUrl: `tmail://mail/${encodeURIComponent(id)}` };
+    return { ...m, html: undefined, text: undefined, fernBilder: fern, bilderAuto: db.einstellungen().bilderAuto !== false, anzeigeUrl: `tmail://mail/${encodeURIComponent(id)}` };
   },
   pfVorlage: (id, art) => postfach!.vorlage(id, art),
   async pfSenden(e) {
@@ -242,6 +249,20 @@ const API: Record<string, Fn> = {
   ordnerListe: () => dienst?.ordnerListe() ?? [],
   ordnerSchalten: (basis, an) => dienst?.ordnerSchalten(basis, an),
   driveBereit: () => DEMO || anmeldung.hatScope(DRIVE_SCOPE),
+  /** Live-Prüfung für den Drive-Assistenten: Berechtigung da? Drive-API im Google-Projekt an? */
+  async driveTest() {
+    if (DEMO) return { ok: true };
+    if (!anmeldung.hatScope(DRIVE_SCOPE)) return { ok: false, schritt: 2, grund: 'Die Anmeldung hat noch keine Drive-Berechtigung.' };
+    try {
+      const { google } = require('googleapis') as typeof import('googleapis');
+      await google.drive({ version: 'v3', auth: anmeldung.client_() }).files.list({ pageSize: 1, fields: 'files(id)' });
+      return { ok: true };
+    } catch (e: any) {
+      const t = String(e?.message ?? e);
+      if (/has not been used|is disabled|accessNotConfigured|SERVICE_DISABLED/i.test(t)) return { ok: false, schritt: 1, grund: 'Die Drive-API ist im Google-Projekt noch nicht eingeschaltet.' };
+      return { ok: false, schritt: 0, grund: t };
+    }
+  },
   pfVorschau(e) {
     vorschauHtml = vorlageHtml({ betreff: e.betreff ?? '', text: e.text ?? '', vonName: e.vonName ?? 'Tiry',
       anhaenge: (e.anhaenge ?? []).map((a: any) => ({ name: a.name, groesse: a.groesse })),
@@ -298,6 +319,11 @@ app.whenReady().then(async () => {
   tray.on('click', zeigeFenster);
   aktualisiereTray();
   erzeugeFenster();
+  if (!DEMO && !SMOKE) updater = starteUpdater({
+    melde: (s) => sende('update', s), log,
+    fensterSichtbar: () => !!fenster && !fenster.isDestroyed() && fenster.isVisible(),
+    vorBeenden: (still) => { beenden = true; dienst?.stoppen(); if (still) try { fs.writeFileSync(STILL_MARKE, '1'); } catch { /* egal */ } },
+  });
 
   if (DEMO) {
     const demo = erzeugeDemo();

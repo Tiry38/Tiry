@@ -293,6 +293,10 @@ dialog p { color: var(--text-2); font-size: 16.5px; }
   .nav-kurz { display: block; line-height: 1.1; font-size: 11px; }
   .nav-zahl:not(:empty) { position: absolute; top: 2px; right: 6px; min-width: 18px; height: 18px; font-size: 11px; padding: 0 4px; border-radius: 6px; }
   .schiene-fuss { display: none; }
+  .update, body[data-nav] .update { position: fixed; left: 10px; right: 10px; width: auto; bottom: calc(84px + env(safe-area-inset-bottom)); margin: 0; z-index: 21; grid-template-columns: minmax(0, 1fr) auto; align-items: center; padding: 12px 12px 10px 14px; box-shadow: 0 12px 30px oklch(0 0 0 / .45); }
+  .update .update-zeile span { display: none; }
+  .update .knopf { width: auto; padding: 0 14px; }
+  .update-balken { grid-column: 1 / -1; }
   .ansicht { padding: 16px 14px 40px; }
   .lage { grid-template-columns: 1fr; padding: 22px 20px; }
   .lage h2 { font-size: 30px; }
@@ -361,13 +365,13 @@ body[data-nav='klein'] .nav-zahl:not(:empty) { position: absolute; top: 4px; rig
 .pf-neu svg, .pf-suche svg, .pf-anhaenge svg, .pf-zurueck svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 .pf-ordner h2 { margin: 18px 10px 6px; font-size: 12px; font-weight: 700; color: var(--text-3); text-transform: uppercase; letter-spacing: .08em; }
 .pf-ordner ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; }
-.pf-ordner button { all: unset; box-sizing: border-box; cursor: pointer; width: 100%; min-height: 44px; padding: 0 12px; border-radius: 12px;
+.pf-ordner ul button { all: unset; box-sizing: border-box; cursor: pointer; width: 100%; min-height: 44px; padding: 0 12px; border-radius: 12px;
   display: grid; grid-template-columns: 22px minmax(0, 1fr) auto; gap: 10px; align-items: center; color: var(--text-2); font-weight: 550; transition: background .2s; }
-.pf-ordner button span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.pf-ordner button:hover { background: var(--flaeche); color: var(--text); }
-.pf-ordner button[aria-current] { background: var(--flaeche-2); color: var(--text); font-weight: 700; }
+.pf-ordner ul button span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pf-ordner ul button:hover { background: var(--flaeche); color: var(--text); }
+.pf-ordner ul button[aria-current] { background: var(--flaeche-2); color: var(--text); font-weight: 700; }
 .pf-ordner svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linejoin: round; stroke-linecap: round; }
-.pf-ordner b { font-size: 13px; font-weight: 800; color: var(--dunkel); background: var(--c-newsletter); border-radius: 7px; padding: 1px 7px; }
+.pf-ordner ul button b { font-size: 13px; font-weight: 800; color: var(--dunkel); background: var(--c-newsletter); border-radius: 7px; padding: 1px 7px; }
 
 .pf-liste { overflow-y: auto; border-right: 1px solid var(--linie); background: var(--flaeche); }
 .pf-kopf { position: sticky; top: 0; z-index: 2; padding: 16px 16px 10px; background: var(--flaeche); display: grid; gap: 8px; }
@@ -523,18 +527,18 @@ body.blitz::after { animation: spektrumLauf 14s linear infinite, blitz 1.4s var(
 .knopf.voll:hover, .pf-neu:hover { background-position: 100% 0; filter: none; }
 
 /* Lichtkegel, der der Maus folgt – Farbe = Sorte des Elements (sonst Gelb) */
-.lage, .karte, .maschine, .pf-zeile, .absender, .regel, .eintrag, .pruef, .einst-gruppe, .leer, .pf-ordner button, .zaehler-liste span { position: relative; isolation: isolate; }
-.lage::after, .karte::after, .maschine::after, .pf-zeile::after, .absender::after, .regel::after, .eintrag::after, .pruef::after, .einst-gruppe::after, .leer::after, .pf-ordner button::after, .zaehler-liste span::after {
+.lage, .karte, .maschine, .pf-zeile, .absender, .regel, .eintrag, .pruef, .einst-gruppe, .leer, .pf-ordner ul button, .zaehler-liste span { position: relative; isolation: isolate; }
+.lage::after, .karte::after, .maschine::after, .pf-zeile::after, .absender::after, .regel::after, .eintrag::after, .pruef::after, .einst-gruppe::after, .leer::after, .pf-ordner ul button::after, .zaehler-liste span::after {
   content: ''; position: absolute; inset: 0; z-index: -1; border-radius: inherit; pointer-events: none; opacity: 0; transition: opacity .35s;
   background: radial-gradient(380px circle at var(--mx, 50%) var(--my, 50%), color-mix(in oklch, var(--k, var(--c-newsletter)) 26%, transparent), transparent 65%);
 }
 .lage:hover::after { background: radial-gradient(520px circle at var(--mx, 50%) var(--my, 50%), oklch(1 0 0 / .32), transparent 60%); }
-:is(.lage, .karte, .maschine, .pf-zeile, .absender, .regel, .eintrag, .pruef, .einst-gruppe, .leer, .pf-ordner button, .zaehler-liste span):hover::after { opacity: 1; }
+:is(.lage, .karte, .maschine, .pf-zeile, .absender, .regel, .eintrag, .pruef, .einst-gruppe, .leer, .pf-ordner ul button, .zaehler-liste span):hover::after { opacity: 1; }
 
 /* Gewählte Mail: Verlauf aus ihrer Sortenfarbe */
 .pf-zeile.offen { background: linear-gradient(100deg, color-mix(in oklch, var(--k, var(--c-newsletter)) 42%, var(--text)) 0%, var(--text) 70%); }
 .pf-zeile .strich, .eintrag .strich, .strom-liste .strich, .pruef .strich { background: linear-gradient(180deg, var(--k, transparent), color-mix(in oklch, var(--k, transparent) 45%, transparent)); }
-.pf-ordner b, .nav-zahl:not(:empty) { background-image: linear-gradient(120deg, var(--c-newsletter), var(--c-werbung)); }
+.pf-ordner ul button b, .nav-zahl:not(:empty) { background-image: linear-gradient(120deg, var(--c-newsletter), var(--c-werbung)); }
 
 /* Fächer: anklickbar */
 .maschine-buehne canvas { cursor: pointer; }
@@ -596,3 +600,64 @@ body.blitz::after { animation: spektrumLauf 14s linear infinite, blitz 1.4s var(
   .tm-editor header { padding-right: 110px; }
 }
 @media (prefers-reduced-motion: reduce) { .tm-editor h2 { animation: none; } }
+
+/* Aufräumer-Karte in der Ordner-Spalte */
+.pf-aufr { margin: 22px 4px 8px; padding: 16px; border-radius: 18px; background: linear-gradient(140deg, color-mix(in oklch, var(--c-newsletter) 22%, var(--flaeche)), var(--flaeche) 70%); }
+.pf-aufr-kopf { display: flex; align-items: center; gap: 10px; }
+.pf-aufr .marke-zeichen { height: 20px; grid-template-columns: repeat(5, 4px); gap: 2px; }
+.pf-aufr .marke-zeichen i:nth-child(1) { height: 20px; } .pf-aufr .marke-zeichen i:nth-child(2) { height: 13px; } .pf-aufr .marke-zeichen i:nth-child(3) { height: 17px; }
+.pf-aufr .marke-zeichen i:nth-child(4) { height: 9px; } .pf-aufr .marke-zeichen i:nth-child(5) { height: 15px; }
+.pf-aufr p { margin: 10px 0 12px; font-size: 14px; color: var(--text-2); }
+.pf-aufr .knopf { width: 100%; }
+/* Karte „Altes Postfach aufräumen“ */
+.alt-karte { margin-top: 18px; }
+.alt-kopf h2 { margin: 0 0 6px; font: 750 24px/1.15 var(--display); }
+.alt-kopf p { margin: 0 0 14px; color: var(--text-2); max-width: 70ch; }
+.alt-status { margin: 4px 0 12px; font-size: 16px; }
+.alt-zahlen { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; margin: 6px 0 14px; }
+.alt-zahlen > div { padding: 16px; border-radius: 16px; background: linear-gradient(150deg, color-mix(in oklch, var(--k) 26%, var(--flaeche-2)), var(--flaeche-2) 75%); display: grid; gap: 2px; }
+.alt-zahlen b { font: 780 34px/1 var(--display); color: var(--k); }
+.alt-zahlen span { font-weight: 650; }
+.alt-zahlen small { color: var(--text-3); font-size: 13px; min-height: 1em; }
+.alt-ordner { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin: 0 0 14px; }
+.alt-ordner > span:not(.etikett) { padding: 6px 10px; border-radius: 10px; background: var(--flaeche-2); font-weight: 650; font-size: 14px; }
+.alt-ordner small { color: var(--text-3); }
+.alt-platz { margin: 0 0 14px; align-items: flex-start; flex-wrap: nowrap; }
+.alt-platz span { font-size: 14.5px; color: var(--text-2); padding-top: 10px; }
+/* Assistent */
+.assistent { list-style: none; padding: 0; margin: 16px 0 0; display: grid; gap: 10px; }
+.assistent li { display: grid; grid-template-columns: 40px 1fr; gap: 12px; padding: 14px; border-radius: 16px; background: var(--flaeche-2); opacity: .6; }
+.assistent li.jetzt, .assistent li.erledigt { opacity: 1; }
+.assistent li > b { width: 36px; height: 36px; border-radius: 12px; display: grid; place-items: center; background: var(--grund); font: 800 17px var(--display); }
+.assistent li.jetzt > b { background: var(--c-newsletter); color: var(--dunkel); }
+.assistent li.erledigt > b { background: var(--c-wichtig); color: var(--dunkel); }
+.assistent strong { display: block; font: 700 17px var(--display); }
+.assistent p { margin: 4px 0 10px; font-size: 14.5px; }
+.assistent-hinweis { margin: 12px 0 0; padding: 10px 14px; border-radius: 12px; background: color-mix(in oklch, var(--c-muell) 25%, var(--flaeche-2)); }
+.assistent-ok { margin: 12px 0 0; padding: 10px 14px; border-radius: 12px; background: color-mix(in oklch, var(--c-wichtig) 30%, var(--flaeche-2)); font-weight: 650; }
+@media (max-width: 760px) { .alt-zahlen { grid-template-columns: 1fr 1fr; } .alt-zahlen b { font-size: 28px; } }
+.pf-aufr b { color: var(--text); } .pf-aufr-kopf b { font: 750 16px var(--display); }
+
+/* ---------- Selbst-Update (Seitenleiste unten) ---------- */
+.update { margin: auto 0 12px; padding: 16px 14px 14px; border-radius: 14px; background: var(--flaeche-2); display: grid; gap: 10px; position: relative; overflow: hidden; }
+.update::before { content: ''; position: absolute; inset: 0 0 auto; height: 3px; background: var(--spektrum); background-size: 200% 100%; animation: spektrumLauf 6s linear infinite; }
+.update[hidden] { display: none; }
+.update + .schiene-fuss { margin-top: 0; }
+.update-zeile { display: grid; gap: 2px; font-size: 13px; line-height: 1.4; color: var(--text-2); }
+.update-zeile b { font-size: 14px; color: var(--text); }
+.update-balken { height: 8px; border-radius: 8px; background: var(--flaeche-2); overflow: hidden; }
+.update-balken i { display: block; height: 100%; background: var(--spektrum); background-size: 300% 100%; animation: spektrumLauf 3s linear infinite; transition: width .4s var(--feder); }
+.update .knopf { width: 100%; min-height: 44px; }
+.update .knopf svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; flex: none; }
+.update .knopf { display: inline-flex; align-items: center; justify-content: center; gap: 8px; }
+/* schmale Leiste: nur Ring-Knopf bzw. dünner Balken */
+@media (min-width: 761px) {
+body[data-nav='klein'] .update { width: 52px; padding: 6px; border-radius: 16px; gap: 6px; justify-items: center; }
+body[data-nav='klein'] .update::before { display: none; }
+body[data-nav='klein'] .update-zeile, body[data-nav='klein'] .update .knopf span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+body[data-nav='klein'] .update-balken { width: 100%; height: 6px; }
+body[data-nav='klein'] .update .knopf { width: 40px; min-height: 40px; height: 40px; padding: 0; border-radius: 12px; }
+body[data-nav='klein'] .update[data-stand='bereit'] .knopf { animation: pochen 2.4s var(--feder) infinite; }
+}
+@keyframes pochen { 0%, 70%, 100% { transform: scale(1); } 35% { transform: scale(1.08); } }
+@media (prefers-reduced-motion: reduce) { .update::before, .update-balken i, body[data-nav='klein'] .update[data-stand='bereit'] .knopf { animation: none; } }
