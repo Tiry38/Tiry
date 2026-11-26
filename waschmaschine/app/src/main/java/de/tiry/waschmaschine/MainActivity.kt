@@ -189,13 +189,12 @@ class MainActivity : ComponentActivity() {
             return
         }
         if (einrichten && seite != Seite.EINSTELLUNGEN) {
-            Einrichtung(
-                stand,
-                verbinden = { abruf = SchluesselAbruf(); seite = Seite.ANMELDUNG },
+            de.tiry.waschmaschine.ui.UnterwegsAssistent(stand, aktionen = de.tiry.waschmaschine.ui.UnterwegsAktionen(
+                fritzBoxOeffnen = { oeffne("http://fritz.box") },
                 qrScannen = { scanne() },
                 dateiWaehlen = { datei.launch(arrayOf("*/*")) },
                 spaeter = { z.ablage.unterwegsUebersprungen = true; unterwegsFertig = true },
-            )
+            ))
             return
         }
 

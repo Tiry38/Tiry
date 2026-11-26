@@ -83,6 +83,10 @@ class BildschirmTest {
     @Test fun assistentC() = foto("16-assistent-c-koppeln", 2500) { Assistent(EinrichtungsStand(1), Teilschritt.KOPPELN, null, false, AssistentAktionen()) }
     @Test fun assistentD() = foto("17-assistent-d-schluessel") { Assistent(EinrichtungsStand(1), Teilschritt.SCHLUESSEL, null, false, AssistentAktionen()) }
 
+    @Test fun unterwegsE() = foto("18-unterwegs-e-erreichbar") { UnterwegsAssistent(EinrichtungsStand(2, meldung = "Verbunden: SIEMENS WM14UR5EM2 unter 192.168.178.47."), 0, UnterwegsAktionen()) }
+    @Test fun unterwegsG() = foto("19-unterwegs-g-wireguard") { UnterwegsAssistent(EinrichtungsStand(2), 2, UnterwegsAktionen()) }
+    @Test fun unterwegsH() = foto("20-unterwegs-h-qr") { UnterwegsAssistent(EinrichtungsStand(2), 3, UnterwegsAktionen()) }
+
     @Test fun verlauf() = foto("10-verlauf") {
         Verlauf(listOf(
             VerlaufEintrag("Baumwolle", jetzt - 3 * 3600_000, jetzt - 3600_000, "40 °C", "1400 U/min"),

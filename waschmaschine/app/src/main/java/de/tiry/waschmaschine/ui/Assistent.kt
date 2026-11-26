@@ -86,7 +86,7 @@ fun Assistent(
             }
             Text("WASCHMASCHINE VERBINDEN", style = Schrift.Etikett.copy(color = Farbe.Tinte), modifier = Modifier.padding(top = 4.dp))
             Spacer(Modifier.height(16.dp))
-            Fortschrittsbahn(schritt) { schritt = it }
+            Fortschrittsbahn(Teilschritt.entries.map { it.buchstabe }, schritt.titel, schritt.ordinal) { schritt = Teilschritt.entries[it] }
             Spacer(Modifier.height(22.dp))
             AnimatedContent(schritt, transitionSpec = { (slideInHorizontally(spring(0.85f, 380f)) { it / 6 } + fadeIn()) togetherWith fadeOut() }, label = "teil") { t ->
                 Column {
@@ -159,23 +159,23 @@ fun Assistent(
     }
 }
 
-/** Waagrechte Bahn A–D: erledigte Knoten gefüllt, aktueller in Akzent. Antippen springt zurück. */
+/** Waagrechte Bahn: erledigte Knoten gefüllt, aktueller in Akzent. Antippen springt zurück. */
 @Composable
-private fun Fortschrittsbahn(aktiv: Teilschritt, wahl: (Teilschritt) -> Unit) {
+fun Fortschrittsbahn(buchstaben: List<String>, titel: String, aktiv: Int, wahl: (Int) -> Unit) {
     Column {
         Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-            Teilschritt.entries.forEachIndexed { i, t ->
-                val fertig = t.ordinal < aktiv.ordinal; val jetzt = t == aktiv
+            buchstaben.forEachIndexed { i, b ->
+                val fertig = i < aktiv; val jetzt = i == aktiv
                 Box(
                     Modifier.size(44.dp).then(if (jetzt) Modifier.background(Farbe.Akzent) else if (fertig) Modifier.background(Farbe.Linie) else Modifier.border(1.dp, Farbe.Linie))
-                        .androidx_clickable(t.ordinal <= aktiv.ordinal) { wahl(t) },
+                        .androidx_clickable(i <= aktiv) { wahl(i) },
                     contentAlignment = Alignment.Center,
-                ) { Text(t.buchstabe, style = Schrift.Etikett.copy(fontSize = 14.sp, color = if (jetzt) Farbe.AufAkzent else Farbe.Tinte)) }
-                if (i < Teilschritt.entries.size - 1) Box(Modifier.weight(1f).height(2.dp).background(if (fertig) Farbe.Akzent else Farbe.Linie))
+                ) { Text(b, style = Schrift.Etikett.copy(fontSize = 14.sp, color = if (jetzt) Farbe.AufAkzent else Farbe.Tinte)) }
+                if (i < buchstaben.size - 1) Box(Modifier.weight(1f).height(2.dp).background(if (fertig) Farbe.Akzent else Farbe.Linie))
             }
         }
         Spacer(Modifier.height(10.dp))
-        Text(aktiv.titel.uppercase(), style = Schrift.Etikett.copy(color = Farbe.Tinte))
+        Text(titel.uppercase(), style = Schrift.Etikett.copy(color = Farbe.Tinte))
     }
 }
 
@@ -183,7 +183,7 @@ private fun Modifier.androidx_clickable(an: Boolean, onClick: () -> Unit) =
     this.clickable(enabled = an, role = androidx.compose.ui.semantics.Role.Tab, onClick = onClick)
 
 @Composable
-private fun Anweisung(n: Int, text: String) {
+fun Anweisung(n: Int, text: String) {
     Row(Modifier.padding(vertical = 7.dp)) {
         Text(n.toString().padStart(2, '0'), style = Schrift.Etikett.copy(color = Farbe.Akzent, fontSize = 12.sp), modifier = Modifier.width(34.dp).padding(top = 3.dp))
         Text(fett(text), style = Schrift.Text.copy(fontSize = 15.sp, lineHeight = 22.sp))
@@ -191,7 +191,7 @@ private fun Anweisung(n: Int, text: String) {
 }
 
 @Composable
-private fun Hinweis(text: String) {
+fun Hinweis(text: String) {
     Text(fett(text), style = Schrift.Text.copy(color = Farbe.Nebel, fontSize = 13.sp, lineHeight = 19.sp), modifier = Modifier.padding(top = 8.dp))
 }
 
