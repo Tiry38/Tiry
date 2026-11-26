@@ -10,7 +10,7 @@ object WireGuardImport {
     class Fehler(meldung: String) : Exception(meldung)
 
     fun alsSplitTunnel(roh: String, paket: String): Ergebnis {
-        val text = roh.replace("\r", "").trim()
+        val text = roh.replace("\uFEFF", "").replace("\r", "").trim()
         if (!text.contains("[Interface]", true) || !text.contains("[Peer]", true))
             throw Fehler("Das ist keine WireGuard-Konfiguration. Bitte den QR-Code aus der FRITZ!Box scannen.")
         val abschnitte = ArrayList<Pair<String, MutableList<Pair<String, String>>>>()

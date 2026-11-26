@@ -67,6 +67,13 @@ class WegUndTunnelTest {
         assertTrue(ohneEndpunkt!!.message!!.contains("MyFRITZ"))
     }
 
+    @Test fun kompakteSchreibweiseUndBomWerdenGelesen() {
+        val kompakt = "\uFEFF" + fritz.lines().joinToString("\r\n") { it.replace(" = ", "=") }
+        val e = WireGuardImport.alsSplitTunnel(kompakt, "x")
+        assertEquals(listOf("192.168.178.0/24"), e.heimnetze)
+        assertEquals("abcdefghijkl.myfritz.net:51820", e.endpunkt)
+    }
+
     @Test fun privateNetze() {
         assertTrue(WireGuardImport.istPrivat("10.0.0.0/8")); assertTrue(WireGuardImport.istPrivat("172.20.1.0/24"))
         assertFalse(WireGuardImport.istPrivat("0.0.0.0/0")); assertFalse(WireGuardImport.istPrivat("8.8.8.8/32"))

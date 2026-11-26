@@ -128,13 +128,21 @@ class MainActivity : ComponentActivity() {
                 if (i == null) tunnelSpeichern(t) else { wartenderTunnel = t; vpnZustimmung.launch(i) }
             } catch (f: WireGuardImport.Fehler) { stand = stand.copy(laeuft = false, fehler = f.message) }
         }
-        val qr = rememberLauncherForActivityResult(ScanContract()) { r -> importiere(r.contents) }
         val datei = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { u ->
             importiere(u?.let { runCatching { contentResolver.openInputStream(it)?.use { s -> s.readBytes().decodeToString() } }.getOrNull() })
         }
+        val zxing = rememberLauncherForActivityResult(ScanContract()) { r -> importiere(r.contents) }
         fun scanne() {
             stand = stand.copy(fehler = null)
-            qr.launch(ScanOptions().setDesiredBarcodeFormats(ScanOptions.QR_CODE).setPrompt("QR-Code aus der FRITZ!Box").setBeepEnabled(false).setOrientationLocked(false))
+            // Erst der starke Google-Scanner; gibt es den auf dem Handy nicht, der eingebaute
+            de.tiry.waschmaschine.netz.QrLeser.scanne(ctx, ok = { importiere(it) }, fehler = { e ->
+                if (e != null) zxing.launch(ScanOptions().setDesiredBarcodeFormats(ScanOptions.QR_CODE).setPrompt("QR-Code aus der FRITZ!Box").setBeepEnabled(false).setOrientationLocked(false))
+            })
+        }
+        val bild = rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) { u ->
+            if (u == null) return@rememberLauncherForActivityResult
+            stand = stand.copy(laeuft = true, fehler = null, meldung = "Lese den QR-Code aus dem Bild …")
+            de.tiry.waschmaschine.netz.QrLeser.ausBild(ctx, u, ok = { importiere(it) }, fehler = { e -> stand = stand.copy(laeuft = false, meldung = null, fehler = e.message ?: "Kein QR-Code im Bild gefunden.") })
         }
 
         BackHandler(seite != Seite.START) { seite = Seite.START }
@@ -194,6 +202,7 @@ class MainActivity : ComponentActivity() {
                 qrScannen = { scanne() },
                 dateiWaehlen = { datei.launch(arrayOf("*/*")) },
                 spaeter = { z.ablage.unterwegsUebersprungen = true; unterwegsFertig = true },
+                ausBild = { bild.launch(androidx.activity.result.PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)) },
             ))
             return
         }

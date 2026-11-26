@@ -110,7 +110,7 @@ fun Assistent(
                             Maschinenbild(position = null, anzeige = "Aut")
                             Spacer(Modifier.height(18.dp))
                             Anweisung(1, "Maschine einschalten (Drehwähler auf irgendein Programm).")
-                            Anweisung(2, "**Fernstart-Taste** (Symbol mit Funkwellen) **mindestens 3 Sekunden** drücken. Das Display zeigt **Aut**.")
+                            Anweisung(2, "**Fernstart-Taste** (Handy-Symbol mit Wellen, oben links im Viererblock) **mindestens 3 Sekunden** drücken. Das Display zeigt **Aut**.")
                             Anweisung(3, "**Start/Pause** drücken. Das WLAN-Symbol im Display blinkt.")
                             Anweisung(4, "**Innerhalb von 2 Minuten** an der FRITZ!Box WPS starten: die **Connect/WPS-Taste** kurz drücken – oder unten „FRITZ!Box öffnen“ → **WLAN → Sicherheit → WPS-Schnellverbindung → WPS starten**.")
                             Anweisung(5, "Zeigt das Display dauerhaft **con**, ist die Maschine im WLAN.")

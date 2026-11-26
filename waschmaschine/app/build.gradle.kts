@@ -84,6 +84,9 @@ dependencies {
     implementation("com.wireguard.android:tunnel:1.0.20250531")
     // QR-Code der FRITZ!Box scannen (ohne Google-Dienste)
     implementation("com.journeyapps:zxing-android-embedded:4.3.0")
+    // Starker QR-Leser (Google): Kamera-Scanner über Play-Dienste + gebündeltes Modell für Screenshots/Fotos
+    implementation("com.google.android.gms:play-services-code-scanner:16.1.0")
+    implementation("com.google.mlkit:barcode-scanning:17.3.0")
 
     debugImplementation("androidx.compose.ui:ui-tooling")
     debugImplementation("androidx.compose.ui:ui-test-manifest")

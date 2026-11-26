@@ -37,6 +37,7 @@ data class UnterwegsAktionen(
     val qrScannen: () -> Unit = {},
     val dateiWaehlen: () -> Unit = {},
     val spaeter: () -> Unit = {},
+    val ausBild: () -> Unit = {},
 )
 
 private val titel = listOf("Ist die Box erreichbar?", "MyFRITZ! einschalten", "WireGuard-Zugang anlegen", "QR-Code scannen")
@@ -91,12 +92,13 @@ fun UnterwegsAssistent(stand: EinrichtungsStand, start: Int = 0, aktionen: Unter
                             Spacer(Modifier.height(18.dp)); Haupttaste("QR-Code ist zu sehen – weiter") { schritt = 3 }
                         }
                         else -> {
-                            Anweisung(1, "Unten **„QR-Code scannen“** antippen und den Code auf dem Bildschirm abfilmen.")
+                            Anweisung(1, "Unten **„QR-Code scannen“** antippen und den Code abfilmen. Klappt das nicht: einen **Screenshot oder ein Foto** vom Code machen → **„QR aus Bild lesen“**. Oder in der Box **„Einstellungen herunterladen“** → **„Konfig-Datei wählen“**.")
                             Anweisung(2, "Android fragt **„Verbindungsanfrage – VPN“** → **OK**. Das ist der eingebaute Tunnel – er leitet **nur** Verkehr dieser App ins Heimnetz, sonst nichts.")
                             Anweisung(3, "Fertig. Oben steht ab jetzt **ZUHAUSE** oder **UNTERWEGS** – die App wählt selbst.")
                             Spacer(Modifier.height(18.dp))
                             Haupttaste(if (stand.laeuft) "Einen Moment …" else "QR-Code scannen", aktiv = !stand.laeuft, onClick = aktionen.qrScannen)
                             Spacer(Modifier.height(6.dp))
+                            Textaktion("QR AUS SCREENSHOT/FOTO LESEN", farbe = Farbe.Akzent, onClick = aktionen.ausBild)
                             Row { Textaktion("KONFIG-DATEI WÄHLEN", farbe = Farbe.Nebel, onClick = aktionen.dateiWaehlen); Spacer(Modifier.width(26.dp)); Textaktion("SPÄTER", farbe = Farbe.Nebel, onClick = aktionen.spaeter) }
                             Spacer(Modifier.height(18.dp))
                             Etikett("+", "Tipp für schnelleres Verbinden")
