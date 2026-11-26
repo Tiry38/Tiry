@@ -64,6 +64,22 @@ setx ANTHROPIC_API_KEY "sk-ant-..."
 Programm neu starten → Einstellungen → KI-Stufe an, Monatsbudget in Euro festlegen. Modell: `claude-haiku-5-5`
 (0,10 $/1 Mio. Eingabe-, 0,50 $/1 Mio. Ausgabe-Tokens) – eine Einordnung kostet rund 0,00003 $. Ist das Budget erschöpft, wird die KI bis Monatsende nicht mehr gefragt.
 
+### 6. Große Dateien verschicken (über Google Drive)
+Gmail nimmt pro Mail höchstens 25 MB an. Wie Gmail und Outlook selbst lädt Tiry's Mails größere Dateien in dein Google Drive
+(Ordner „Tiry's Mails Anhänge“) und setzt einen Download-Link in die Mail. Bis ca. 18 MB gehen Dateien normal als Anhang mit.
+Einmalig einrichten:
+1. <https://console.cloud.google.com/apis/library/drive.googleapis.com> → Projekt „Email-Aufraeumer“ → **Aktivieren**.
+2. In Tiry's Mails: **Einstellungen → Konto → „Neu anmelden“** → im Browser alle Haken setzen.
+Das Programm bekommt damit nur Zugriff auf Dateien, die es selbst hochlädt (`drive.file`), nicht auf dein übriges Drive.
+Wer den Link hat, kann die Datei herunterladen – also nur an Leute schicken, die sie sehen dürfen.
+
+### 7. Die gestaltete Mail
+Jede Mail geht mit zwei Fassungen raus: gestaltet (HTML-Vorlage „Spektrum“) und als reiner Text für einfache Programme.
+Die Vorlage ist für Gmail, Apple Mail/iPhone, Outlook (Windows, Mac, Web), Android und Thunderbird gebaut: nur Tabellen-Layout,
+feste Stile, Farbverlauf aus echten Farbzellen, keine Bilder aus dem Internet, Hell- und Dunkelmodus. Im Schreibfenster lässt
+sie sich mit „Gestaltet“ ausschalten. Getestet wurde die Darstellung im Chromium-Browser (PC, Handy, dunkel); echte Prüfungen in
+Outlook für Windows und auf dem iPhone stehen noch aus.
+
 ## So entscheidet das Programm
 | Stufe | Was | Beispiele |
 |---|---|---|

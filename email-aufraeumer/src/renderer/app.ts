@@ -408,7 +408,10 @@ async function einstellungen() {
   const rest = z.status?.trockenlaufRestTage ?? 7;
   el.innerHTML = `<div class="kopf"><h1 id="h-einstellungen">Einstellungen</h1><p>Normalerweise musst du hier nichts ändern. Alles wird sofort gespeichert.</p></div>
     <h2 class="abschnitt">Das Wichtigste</h2>
-    <div class="einst-gruppe"><div class="einst"><div><h2>Probelauf</h2><p class="erkl">${e.trockenlauf ? 'Gerade ist Probelauf: Ich zeige nur, was ich tun würde. Zum Aufräumen in der Übersicht auf „Jetzt wirklich aufräumen“ drücken.' : 'Ich räume wirklich auf. Du kannst jederzeit zurück in den Probelauf.'}</p></div>
+    <div class="einst-gruppe">
+    <div class="einst"><div><h2>Konto</h2><p class="erkl">${h(z.status?.email || '')}${z.drive ? ' · große Dateien über Google Drive: bereit' : ' · große Dateien über Google Drive: noch nicht erlaubt – einmal neu anmelden (vorher in Google Cloud die Drive-API einschalten, siehe Anleitung).'}</p></div>
+      <div class="zeile"><button class="knopf ${z.drive ? '' : 'voll'}" data-tat="neu-anmelden">Neu anmelden</button></div></div>
+    <div class="einst"><div><h2>Probelauf</h2><p class="erkl">${e.trockenlauf ? 'Gerade ist Probelauf: Ich zeige nur, was ich tun würde. Zum Aufräumen in der Übersicht auf „Jetzt wirklich aufräumen“ drücken.' : 'Ich räume wirklich auf. Du kannst jederzeit zurück in den Probelauf.'}</p></div>
       <div class="zeile">${e.trockenlauf ? '<span class="etikett">Probelauf läuft – nichts wird verändert</span>' : '<button class="knopf" data-tat="trocken">Zurück in den Probelauf</button>'}</div></div>
     <div class="einst"><div><h2>Wie streng?</h2><p class="erkl"><b>Vorsichtig:</b> Ich räume nur weg, wenn ich mir ganz sicher bin – mehr landet bei „Du entscheidest“.<br><b>Streng:</b> Ich räume mehr selbst weg.</p></div>
       <div class="regler"><span class="regler-wert" id="schwelle-wert">${strengText(e.schwelle)}</span><input type="range" min="0" max="100" value="${schwelleZuRegler(e.schwelle)}" id="schwelle" aria-label="Wie streng">
@@ -459,6 +462,10 @@ async function einstellungen() {
   schalter('filter', async (an) => {
     if (an && !(await filterFrage())) return false;
     if (!an) await speichere({ filterExportFreigegeben: false });
+  });
+  el.querySelector('[data-tat="neu-anmelden"]')?.addEventListener('click', async () => {
+    melde('Browser geöffnet – bitte dort anmelden und alle Haken setzen.');
+    try { await api.rufe('anmelden'); await laden(); void einstellungen(); melde('Neu angemeldet.'); } catch (e) { melde((e as Error).message); }
   });
   el.querySelector('[data-tat="trocken"]')?.addEventListener('click', async () => { await api.rufe('trockenlaufWieder'); await laden(); void einstellungen(); });
   altbestandKnoepfe();

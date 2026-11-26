@@ -150,7 +150,7 @@ const API: Record<string, Fn> = {
       status: dienst?.statusInfo() ?? null, statistik: db.statistik(), einstellungen: db.einstellungen(),
       altbestand: dienst?.altbestand ?? null, kontakte: db.anzahlKontakte(),
       ki: { schluessel: !!process.env.ANTHROPIC_API_KEY, ausgegebenEuro: kiBudget(() => db.get('kiVerbrauch', { ausgegebenUsd: 0, monat: '' }), () => {}, () => 0, () => db.einstellungen().kiUsdProEuro).ausgegebenEuro() },
-      autostart: app.getLoginItemSettings().openAtLogin, kategorien: KATEGORIE_NAME,
+      autostart: app.getLoginItemSettings().openAtLogin, kategorien: KATEGORIE_NAME, drive: DEMO || anmeldung.hatScope(DRIVE_SCOPE),
     };
   },
   protokoll: (f) => db.protokoll(f ?? {}),
