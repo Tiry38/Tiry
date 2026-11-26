@@ -67,7 +67,23 @@ function createTvSteuerung(opts) {
   const speichern = () => { try { fs.writeFileSync(datei, JSON.stringify(cfg, null, 1)); } catch (e) { /* egal */ } };
 
   const status = { verbunden: false, gekoppelt: !!cfg.clientKey, frage: false, zustand: '', letzte: '', fehler: '' };
-  let tv = null, LGTV = null, bildschirmAus = false, zuletztSoll = null;
+  let tv = null, LGTV = null, bildschirmAus = false, zuletztSoll = null, letzterFehler = '';
+  const net = require('net');
+  /** Port am Fernseher prüfen: 'offen' | 'abgelehnt' | 'keine Antwort' */
+  const portTest = (host, port) => new Promise((res) => {
+    const s = net.connect({ host, port, timeout: 4000 });
+    const fertig = (r) => { s.destroy(); res(r); };
+    s.on('connect', () => fertig('offen'));
+    s.on('timeout', () => fertig('keine Antwort'));
+    s.on('error', (e) => fertig(e.code === 'ECONNREFUSED' ? 'abgelehnt' : 'keine Antwort'));
+  });
+  /** Klare Ursache, wenn der Fernseher nicht antwortet (Tiry 26.11.2026: beim Koppeln kam nichts) */
+  async function diagnose() {
+    const [p1, p2] = await Promise.all([portTest(cfg.host, 3001), portTest(cfg.host, 3000)]);
+    if (p1 === 'offen' || p2 === 'offen') return 'Fernseher ' + cfg.host + ' antwortet, zeigt aber keine Frage – Fernseher einmal ganz aus- und einschalten (Netzstecker 30 s), dann nochmal koppeln';
+    if (p1 === 'abgelehnt' && p2 === 'abgelehnt') return 'Fernseher ' + cfg.host + ' ist erreichbar, lässt aber keine Steuerung zu – am Fernseher „Mit Mobilgerät einschalten“ bzw. „LG Connect Apps“ einschalten';
+    return 'Unter ' + cfg.host + ' antwortet nichts – ist der Fernseher an und zeigt gerade Velo-TV im Browser? Sonst stimmt die Adresse nicht' + (letzterFehler ? ' (' + letzterFehler.slice(0, 120) + ')' : '');
+  }
   const melden = () => opts.onStatus && opts.onStatus(info());
   const protokoll = (t) => { status.letzte = new Date().toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' }) + ' ' + t; melden(); if (opts.log) opts.log(t); };
 
@@ -89,7 +105,7 @@ function createTvSteuerung(opts) {
       melden();
     });
     tv.on('close', () => { status.verbunden = false; melden(); });
-    tv.on('error', (e) => { if (status.verbunden) return; status.fehler = e && e.code === 'ECONNFAILED' ? '' : (e && e.message) || ''; });
+    tv.on('error', (e) => { if (status.verbunden) return; letzterFehler = (e && (e.code ? e.code + ': ' : '') + e.message) || ''; });
     return tv;
   }
 
@@ -203,7 +219,11 @@ function createTvSteuerung(opts) {
     async koppeln(host) {
       if (host && host !== cfg.host) await this.einstellen({ host });
       if (!cfg.host) throw new Error('Fernseher-Adresse unbekannt – öffnet der Fernseher Velo-TV schon im Browser?');
+      status.fehler = ''; letzterFehler = ''; melden();
       await verbinden();
+      // bis zu 12 s auf Frage/Verbindung warten, sonst Ursache melden
+      for (let k = 0; k < 24 && !status.verbunden && !status.frage; k++) await warte(500);
+      if (!status.verbunden && !status.frage) { status.fehler = await diagnose(); melden(); }
       return info();
     },
     einschalten, ausschalten,

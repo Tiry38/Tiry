@@ -563,7 +563,7 @@ function tvstZeigen(i) {
   const st = i.status || {};
   $('#tvstDot').classList.toggle('on', !!st.verbunden);
   $('#tvstTitel').textContent = st.frage ? 'Bitte am Fernseher „Zulassen“ drücken' : !i.host ? 'Fernseher noch nicht gefunden' : !st.gekoppelt ? 'Noch nicht gekoppelt' : st.verbunden ? 'Gekoppelt · Fernseher erreichbar' : 'Gekoppelt · Fernseher aus oder nicht erreichbar';
-  $('#tvstSub').textContent = (i.host ? 'Fernseher ' + i.host : 'Erst die Velo-TV-Adresse am Fernseher öffnen') + (st.letzte ? ' · zuletzt: ' + st.letzte : '') + (st.fehler ? ' · ' + st.fehler : '');
+  $('#tvstSub').textContent = (st.fehler ? st.fehler + ' · ' : '') + (i.host ? 'Fernseher ' + i.host : 'Erst die Velo-TV-Adresse am Fernseher öffnen') + (st.letzte ? ' · zuletzt: ' + st.letzte : '');
   $('#tvstNext').textContent = i.an ? 'Nächste Aktion: ' + i.naechste : 'aus';
   if (document.activeElement !== $('#tvstAn')) $('#tvstAn').checked = !!i.an;
   $('#tvstMittag').checked = !!i.mittagBildschirm;
@@ -591,7 +591,17 @@ function tvstZeitenSpeichern() {
 }
 $('#tvstAn').onchange = (e) => api('PATCH', '/api/tvsteuerung', { an: e.target.checked }).then((i) => { tvstZeigen(i); toast(e.target.checked ? 'Fernseher schaltet sich jetzt nach den Öffnungszeiten' : 'Automatik aus'); }).catch((er) => toast(er.message, true));
 $('#tvstMittag').onchange = (e) => api('PATCH', '/api/tvsteuerung', { mittagBildschirm: e.target.checked }).then(tvstZeigen).catch((er) => toast(er.message, true));
-$('#tvstKoppeln').onclick = () => api('POST', '/api/tvsteuerung/koppeln').then((i) => { tvstZeigen(i); toast('Verbinde … bitte am Fernseher mit OK „Zulassen“ drücken'); }).catch((e) => toast(e.message, true));
+$('#tvstKoppeln').onclick = (e) => {
+  const b = e.currentTarget; b.disabled = true;
+  toast('Verbinde mit dem Fernseher … (bis zu 15 Sekunden)');
+  api('POST', '/api/tvsteuerung/koppeln').then((i) => {
+    tvstZeigen(i);
+    const st = i.status || {};
+    if (st.frage) toast('Jetzt am Fernseher mit OK „Zulassen“ drücken');
+    else if (st.verbunden) toast('Fernseher ist gekoppelt');
+    else toast(st.fehler || 'Fernseher antwortet nicht', true);
+  }).catch((er) => toast(er.message, true)).finally(() => { b.disabled = false; });
+};
 document.querySelectorAll('#tvstLaenger button').forEach((b) => b.onclick = () => {
   b.disabled = true;
   api('POST', '/api/tvsteuerung/laenger', { min: +b.dataset.min }).then((i) => {
