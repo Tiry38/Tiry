@@ -485,35 +485,46 @@ function popupBogen() {
 }
 
 // ---------- Aufräumer heute ----------
-const FAECHER: Array<{ name: string; farbe: string; kat: string[] }> = [
-  { name: 'Wichtig', farbe: FARBE.wichtig, kat: ['Wichtig'] }, { name: 'Persönlich', farbe: FARBE.persoenlich, kat: ['Persönlich'] },
-  { name: 'Info', farbe: FARBE.benachrichtigung, kat: ['Benachrichtigung'] }, { name: 'Newsletter', farbe: FARBE.newsletter, kat: ['Newsletter'] },
-  { name: 'Werbung', farbe: FARBE.werbung, kat: ['Werbung'] }, { name: 'Spam & Betrug', farbe: FARBE.spam, kat: ['Spam', 'Phishing'] },
+const SORTIERT = [
+  { name: 'Werbung', label: 'Werbung', was: 'Angebote, Rabatte, Shops', farbe: 'var(--c-werbung)' },
+  { name: 'Newsletter', label: 'Newsletter', was: 'Rundschreiben, Abos', farbe: 'var(--c-newsletter)' },
+  { name: 'Infos', label: 'Benachrichtigung', was: 'Pakete, Konten, Apps', farbe: 'var(--c-benachrichtigung)' },
 ];
 async function aufraeumerBogen() {
-  const b = bogen('Aufräumer heute', '<p class="erklaer">Zähle …</p>');
-  const r = await sicher(async () => Promise.all(FAECHER.map(async (f) => {
-    let n = 0;
-    for (const k of f.kat) {
-      const l = [...labelName.entries()].find(([, name]) => name === `Aufräumer/${k}`);
-      if (!l) continue;
-      if (DEMO) { n += [...(gmail as any).mails.values()].filter((m: any) => m.labelIds.includes(l[0]) && Date.now() - m.internalDate < 86400_000).length; continue; }
-      const x = await gmail.listeOrdner(null, `label:"Aufräumer/${k}" newer_than:1d in:anywhere`, undefined, 100);
-      n += x.ids.length;
-    }
-    return n;
-  })));
-  if (!r || !b.el.isConnected) return;
-  const max = Math.max(1, ...r);
-  const summe = r.reduce((a, x) => a + x, 0);
-  b.el.querySelector('.bogen-inhalt')!.innerHTML = `
-    <div class="maschine" role="img" aria-label="Heute einsortiert: ${FAECHER.map((f, i) => `${f.name} ${r[i]}`).join(', ')}">
-      ${FAECHER.map((f, i) => `<div class="fach"><b>${r[i]}</b><i style="--farbe:${f.farbe};--anteil:${r[i] / max};--n:${i}"></i></div>`).join('')}
-    </div>
-    <div class="faecher-namen" aria-hidden="true">${FAECHER.map((f) => `<span>${f.name}</span>`).join('')}</div>
-    <p class="erklaer"><b>${summe} Mails</b> hat dein PC in den letzten 24 Stunden einsortiert. Das Aufräumen selbst läuft auf dem PC – solange er an ist, auch während du hier liest.${summe === 0 ? ' Nichts gezählt? Dann hat der Aufräumer am PC die Sorten noch nicht als Ordner markiert (Einstellungen → Profi).' : ''}</p>
-    ${FAECHER.some((f) => [...labelName.values()].includes(`Aufräumer/${f.kat[0]}`)) ? '<button class="wahl" id="a-sortiert">Sortierte Mails ansehen</button>' : ''}`;
-  b.el.querySelector('#a-sortiert')?.addEventListener('click', () => { b.zu(); ordnerBogen(); });
+  // Der PC markiert Werbung, Newsletter und Infos mit eigenen Ordnern – genau die zählen wir hier.
+  // (Wichtiges und Persönliches lässt er unberührt im Posteingang, Spam wirft er in den Papierkorb.)
+  const faecher = SORTIERT.map((f) => ({ ...f, id: [...labelName.entries()].find(([, n]) => n === `Aufräumer/${f.label}`)?.[0] }));
+  const fachHtml = (f: typeof faecher[number], heute: number | null, gesamt: number | null, max: number) => `
+    <button class="fach-zeile" data-fach="${h(f.id ?? '')}" ${f.id ? '' : 'disabled'} style="--farbe:${f.farbe}">
+      <span class="fach-kopf"><b>${h(f.name)}</b><span>${h(f.was)}</span></span>
+      <span class="fach-zahl">${heute === null ? '<i class="lade"></i>' : `<b>${heute.toLocaleString('de-DE')}</b><small>heute</small>`}</span>
+      <span class="fach-balken"><i style="--anteil:${heute === null ? 0 : heute / max}"></i></span>
+      <span class="fach-gesamt">${gesamt === null ? '&nbsp;' : f.id ? `insgesamt ${gesamt.toLocaleString('de-DE')} im Ordner „${h(f.label)}“ →` : 'Ordner gibt es noch nicht'}</span>
+    </button>`;
+  const rahmen = (innen: string, unten: string) => `
+    <p class="erklaer">Das hat <b>dein PC</b> in den <b>letzten 24 Stunden</b> aus deinem Posteingang geräumt und einsortiert:</p>
+    <div class="faecher">${innen}</div>${unten}`;
+  const b = bogen('Aufräumer heute', rahmen(faecher.map((f) => fachHtml(f, null, null, 1)).join(''), ''));
+  const zahlen = await Promise.all(faecher.map(async (f) => {
+    if (!f.id) return { heute: 0, gesamt: 0 };
+    try {
+      if (DEMO) { const alle = [...(gmail as any).mails.values()].filter((m: any) => m.labelIds.includes(f.id)); return { heute: alle.filter((m: any) => Date.now() - m.internalDate < 86400_000).length, gesamt: alle.length }; }
+      const [x, info] = await Promise.all([gmail.listeOrdner(f.id, 'newer_than:1d', undefined, 500), gmail.labelInfo(f.id)]);
+      return { heute: x.ids.length, gesamt: info.gesamt };
+    } catch { return { heute: 0, gesamt: 0 }; }
+  }));
+  if (!b.el.isConnected) return;
+  const max = Math.max(1, ...zahlen.map((z) => z.heute));
+  const summe = zahlen.reduce((a, z) => a + z.heute, 0);
+  const keinOrdner = faecher.every((f) => !f.id);
+  b.el.querySelector('.bogen-inhalt')!.innerHTML = rahmen(faecher.map((f, i) => fachHtml(f, zahlen[i].heute, zahlen[i].gesamt, max)).join(''), `
+    <p class="erklaer summe"><b>${summe.toLocaleString('de-DE')}</b> Mails heute weggeräumt. <b>Wichtiges und Persönliches</b> lässt der PC im Posteingang, <b>Spam</b> wirft er in den Papierkorb.</p>
+    ${keinOrdner ? '<p class="erklaer">Noch keine Ordner vom Aufräumer gefunden. Läuft das PC-Programm im <b>Probelauf</b>? Dann räumt es noch nichts weg – am PC auf „Jetzt wirklich aufräumen“ drücken.</p>' : ''}
+    <p class="erklaer klein">Antippen öffnet den Ordner.</p>`);
+  b.el.querySelectorAll<HTMLButtonElement>('[data-fach]').forEach((x) => x.addEventListener('click', () => {
+    if (!x.dataset.fach) return;
+    ordner = x.dataset.fach; suche = ''; b.zu(); titelSetzen(); scrollTo(0, 0); void laden(true);
+  }));
 }
 
 // ---------- Lesen ----------

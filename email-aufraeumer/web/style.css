@@ -251,6 +251,23 @@ body:has(.ebene) .toast { bottom: calc(84px + var(--unten)); }
 .pz p { margin: 2px 0 10px; color: var(--text-2); font-size: 15px; }
 .pz.ok p { margin-bottom: 0; }
 .pz-schalter { padding: 12px; }
+.faecher { display: grid; gap: 10px; padding: 4px 4px 8px; }
+.fach-zeile { display: grid; grid-template-columns: 1fr auto; gap: 6px 12px; align-items: end; width: 100%; text-align: left; padding: 14px 14px 12px; border: 0; border-radius: 18px; background: var(--grund); position: relative; overflow: hidden; }
+.fach-zeile::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 5px; background: var(--farbe); }
+.fach-zeile:active:not([disabled]) { transform: scale(.985); }
+.fach-zeile[disabled] { opacity: .55; }
+.fach-kopf b { display: block; font: 800 22px/1.05 var(--display); letter-spacing: -.01em; }
+.fach-kopf span { font-size: 14px; color: var(--text-3); }
+.fach-zahl { text-align: right; }
+.fach-zahl b { display: block; font: 800 40px/.9 var(--display); color: var(--farbe); letter-spacing: -.03em; }
+.fach-zahl small { font-size: 12px; font-weight: 700; color: var(--text-3); text-transform: uppercase; letter-spacing: .1em; }
+.fach-balken { grid-column: 1 / -1; height: 10px; border-radius: 6px; background: var(--flaeche-2); overflow: hidden; }
+.fach-balken i { display: block; height: 100%; width: calc(var(--anteil) * 100%); min-width: 6px; border-radius: 6px; background: var(--farbe); transform-origin: left; animation: quer .9s cubic-bezier(.2, 1.3, .35, 1) both; }
+@keyframes quer { from { transform: scaleX(0); } }
+.fach-gesamt { grid-column: 1 / -1; font-size: 13px; color: var(--text-2); }
+.lade { display: inline-block; width: 46px; height: 34px; border-radius: 10px; background: linear-gradient(90deg, var(--flaeche-2), var(--linie), var(--flaeche-2)); background-size: 200% 100%; animation: spurLauf 1.2s linear infinite; }
+.erklaer.summe { font-size: 16px; color: var(--text); }
+.erklaer.klein { font-size: 13px; color: var(--text-3); padding-top: 0; }
 .tipp { font-size: 14px; color: var(--text-3); margin: 6px 0 0; }
 .demo-link { color: var(--text-3); font-size: 15px; }
 
