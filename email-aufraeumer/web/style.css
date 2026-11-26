@@ -217,6 +217,9 @@ body:has(.ebene) .toast { bottom: calc(84px + var(--unten)); }
 .eingabe { width: 100%; min-height: 52px; border-radius: 14px; border: 2px solid var(--linie); background: var(--flaeche); padding: 0 14px; font-size: 15px; }
 .eingabe:focus { outline: none; border-color: var(--akzent); }
 .fehler { color: var(--c-muell); font-weight: 700; }
+.app-ok { margin: 0 0 24px; padding: 14px 16px; border-radius: 14px; background: oklch(0.8 0.17 145 / .16); color: var(--text); font-weight: 600; }
+.app-hinweis { margin: 0 0 24px; display: grid; gap: 10px; }
+.app-hinweis p { margin: 0; padding: 14px 16px; border-radius: 14px; background: var(--flaeche); color: var(--text-2); font-size: 15px; }
 .demo-link { color: var(--text-3); font-size: 15px; }
 
 /* ---------- Breite Bildschirme: Liste + Lesen nebeneinander ---------- */

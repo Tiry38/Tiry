@@ -126,6 +126,22 @@ function tagGruppe(t: number) {
   return d.toLocaleDateString('de-DE', { month: 'long', year: d.getFullYear() === j.getFullYear() ? undefined : 'numeric' });
 }
 
+// ---------- Auf den Startbildschirm ----------
+const ALS_APP = matchMedia('(display-mode: standalone), (display-mode: fullscreen)').matches || (navigator as any).standalone === true;
+let installAngebot: any = null;
+addEventListener('beforeinstallprompt', (e) => { e.preventDefault(); installAngebot = e; document.querySelectorAll<HTMLElement>('[data-install]').forEach((b) => (b.hidden = false)); });
+function installHinweis(): string {
+  if (ALS_APP) return '<p class="app-ok">✓ Du bist schon in der App – sie liegt auf deinem Startbildschirm als <b>Tiry\'s Mails</b>.</p>';
+  const ios = /iPhone|iPad/i.test(navigator.userAgent);
+  return `<div class="app-hinweis"><button class="knopf voll" data-install ${installAngebot ? '' : 'hidden'}>Auf den Startbildschirm</button>
+    <p>${ios ? 'In Safari: Teilen-Knopf (Viereck mit Pfeil) → <b>„Zum Home-Bildschirm“</b>.' : 'In Chrome: <b>⋮</b> oben rechts → <b>„App installieren“</b> oder <b>„Zum Startbildschirm hinzufügen“</b>.'} Danach die App über das neue Symbol öffnen und dort weitermachen.</p></div>`;
+}
+document.addEventListener('click', async (e) => {
+  if (!(e.target as Element).closest?.('[data-install]') || !installAngebot) return;
+  installAngebot.prompt(); await installAngebot.userChoice.catch(() => null); installAngebot = null;
+  document.querySelectorAll<HTMLElement>('[data-install]').forEach((b) => (b.hidden = true));
+});
+
 // ---------- Einrichtung / Anmeldung ----------
 function startSeite(fehler?: string) {
   document.body.dataset.ansicht = 'start';
@@ -139,6 +155,7 @@ function startSeite(fehler?: string) {
     ${marke(true)}
     <h1>Dein Post&shy;fach. <em>Jetzt auch hier.</em></h1>
     <p>Einmal einrichten, danach öffnest du Tiry's Mails wie eine App – live mit deinem Gmail.</p>
+    ${installHinweis()}
     <ol class="schritte">
       ${zeile(1, 'Zugang bei Google anlegen', `<p>Öffnet dein Google-Projekt (dasselbe wie am PC). Dort <b>+ Anmeldedaten erstellen → OAuth-Client-ID</b>, Typ <b>Webanwendung</b>.</p>
         <a class="knopf voll" href="https://console.cloud.google.com/apis/credentials" target="_blank" rel="noopener">Google öffnen</a>`)}
@@ -369,6 +386,7 @@ function ordnerBogen() {
 
 function kontoBogen() {
   const b = bogen('Konto', `<p class="erklaer">${DEMO ? 'Vorschau ohne Konto.' : `Angemeldet als <b>${h(ich)}</b>.`} Mails gehen nur zwischen diesem Handy und Google hin und her – kein Server dazwischen.</p>
+    ${installHinweis().replace('class="app-ok"', 'class="app-ok erklaer"').replace('class="app-hinweis"', 'class="app-hinweis erklaer"')}
     <button class="wahl" id="k-pc">Was macht der PC?</button>
     <button class="wahl" id="k-ab">${DEMO ? 'Vorschau beenden' : 'Abmelden'}</button>`);
   $('#k-pc', b.el).addEventListener('click', () => { b.zu(); aufraeumerBogen(); });
