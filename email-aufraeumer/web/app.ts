@@ -158,12 +158,13 @@ function startSeite(fehler?: string) {
     <p>Einmal einrichten, danach öffnest du Tiry's Mails wie eine App – live mit deinem Gmail.</p>
     ${installHinweis()}
     <ol class="schritte">
-      ${zeile(1, 'Zugang bei Google anlegen', `<p>Erst <b>diese 6 Schritte merken</b> (oder Bildschirmfoto machen) – dann den gelben Knopf drücken. Der kopiert die Adresse für dich und öffnet Google.</p>
+      ${zeile(1, 'Zugang bei Google anlegen', `<p>Erst <b>diese 7 Schritte merken</b> (oder Bildschirmfoto machen) – dann den gelben Knopf drücken. Der kopiert die Adresse für dich und öffnet Google.</p>
         <ol class="merk">
           <li><span>Oben links muss <b>dein Projekt vom PC-Programm</b> stehen.</span></li>
           <li><span><span class="g">Anwendungstyp</span> → <span class="g">Webanwendung</span></span></li>
           <li><span><span class="g">Name</span>: <b>Handy</b></span></li>
-          <li><span>Runterscrollen zu <span class="g">Autorisierte Weiterleitungs-URIs</span> → <span class="g">+ URI hinzufügen</span> → ins Feld <b>lange drücken → Einfügen</b></span></li>
+          <li><span>Bei <span class="g">Autorisierte JavaScript-Quellen</span> → <span class="g">+ URI hinzufügen</span> → nur das eintippen: <b class="mono">${h(ursprung)}</b> (ohne Schrägstrich, ohne Rest)</span></li>
+          <li><span><b>Darunter</b> bei <span class="g">Autorisierte Weiterleitungs-URIs</span> – das <b>zweite</b> <span class="g">+ URI hinzufügen</span> → ins Feld <b>lange drücken → Einfügen</b></span></li>
           <li><span>Ganz unten <span class="g">Erstellen</span>. Im Fenster neben der <b>Client-ID</b> auf das <b>Kopier-Symbol</b> (zwei Blätter).</span></li>
           <li><span>Oben links auf <b>✕</b> – du bist wieder hier.</span></li>
         </ol>
