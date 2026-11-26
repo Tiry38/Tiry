@@ -1,0 +1,38 @@
+{
+  "name": "email-aufraeumer",
+  "productName": "Email-Aufräumer",
+  "version": "0.1.0",
+  "description": "Räumt Tirys Gmail-Postfach vollautomatisch auf – sicher, protokolliert, rückgängig machbar.",
+  "main": "build/main/main.js",
+  "author": "Tiry",
+  "license": "UNLICENSED",
+  "private": true,
+  "scripts": {
+    "build": "tsc -p tsconfig.json && tsc -p tsconfig.renderer.json && node scripts/copy-static.mjs",
+    "start": "npm run build && electron .",
+    "demo": "npm run build && electron . --demo",
+    "test": "vitest run",
+    "typecheck": "tsc -p tsconfig.json --noEmit && tsc -p tsconfig.renderer.json --noEmit",
+    "screens": "npm run build && node scripts/screenshots.mjs",
+    "dist": "npm run build && electron-builder --win --x64"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^1.14.0",
+    "googleapis": "^190.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "electron": "45.5.0",
+    "electron-builder": "^26.18.0",
+    "typescript": "^5.9.3",
+    "vitest": "^5.1.2"
+  },
+  "build": {
+    "appId": "de.tiry.email-aufraeumer",
+    "productName": "Email-Aufräumer",
+    "directories": { "output": "dist", "buildResources": "assets" },
+    "files": ["build/**/*", "assets/icon.png", "assets/tray.png", "package.json", "!**/*.map"],
+    "win": { "target": [{ "target": "nsis", "arch": ["x64"] }], "icon": "assets/icon.ico" },
+    "nsis": { "oneClick": false, "perMachine": false, "allowToChangeInstallationDirectory": true, "artifactName": "Email-Aufraeumer-Setup.exe", "shortcutName": "Email-Aufräumer" }
+  }
+}

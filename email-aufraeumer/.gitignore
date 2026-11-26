@@ -1,0 +1,11 @@
+node_modules/
+build/
+dist/
+# Zugangsdaten – niemals committen
+credentials.json
+client_secret*.json
+tokens*
+*.token
+*.bin
+.env
+screens/tmp/

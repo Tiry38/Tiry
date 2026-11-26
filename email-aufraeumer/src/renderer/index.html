@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; font-src 'self'; img-src 'self' data:; connect-src 'none'; object-src 'none'; base-uri 'none'">
+<title>Email-Aufräumer</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body data-ansicht="cockpit">
+<a class="sprung" href="#inhalt">Zum Inhalt springen</a>
+
+<header class="schiene">
+  <div class="marke" aria-label="Email-Aufräumer">
+    <span class="marke-a">Auf</span><span class="marke-b">räumer</span>
+  </div>
+  <p class="zustand" id="zustand" role="status" aria-live="polite"><span class="zustand-strich"></span><span id="zustand-text">startet …</span></p>
+  <nav aria-label="Bereiche">
+    <ol class="nav" id="nav">
+      <li><button data-ziel="cockpit"><span class="nr">01</span><span class="nav-name">Cockpit</span></button></li>
+      <li><button data-ziel="pruefen"><span class="nr">02</span><span class="nav-name">Zu prüfen</span><span class="nav-zahl" id="nav-pruefen"></span></button></li>
+      <li><button data-ziel="absender"><span class="nr">03</span><span class="nav-name">Absender</span></button></li>
+      <li><button data-ziel="regeln"><span class="nr">04</span><span class="nav-name">Regeln</span></button></li>
+      <li><button data-ziel="protokoll"><span class="nr">05</span><span class="nav-name">Protokoll</span></button></li>
+      <li><button data-ziel="einstellungen"><span class="nr">06</span><span class="nav-name">Einstellungen</span></button></li>
+    </ol>
+    <span class="nav-zeiger" id="nav-zeiger" aria-hidden="true"></span>
+  </nav>
+  <p class="schiene-fuss" id="schiene-fuss"></p>
+</header>
+
+<div class="anlage" id="anlage" aria-hidden="true">
+  <canvas id="strom"></canvas>
+  <div class="anlage-beschriftung" id="anlage-beschriftung">
+    <span data-m="0">01 Signale</span><span data-m="1">02 Regeln</span><span data-m="2">03 KI · Schwelle</span>
+    <span data-rinne>ausgesiebt</span><span data-boden>bleibt</span>
+    <i class="wand" data-wand="schraeg"></i><i class="wand" data-wand="links"></i><i class="wand" data-wand="rechts"></i>
+  </div>
+</div>
+
+<main id="inhalt" tabindex="-1">
+  <section class="ansicht" id="ansicht-cockpit" data-ansicht="cockpit" aria-labelledby="h-cockpit"></section>
+  <section class="ansicht" id="ansicht-pruefen" data-ansicht="pruefen" aria-labelledby="h-pruefen" hidden></section>
+  <section class="ansicht" id="ansicht-absender" data-ansicht="absender" aria-labelledby="h-absender" hidden></section>
+  <section class="ansicht" id="ansicht-regeln" data-ansicht="regeln" aria-labelledby="h-regeln" hidden></section>
+  <section class="ansicht" id="ansicht-protokoll" data-ansicht="protokoll" aria-labelledby="h-protokoll" hidden></section>
+  <section class="ansicht" id="ansicht-einstellungen" data-ansicht="einstellungen" aria-labelledby="h-einstellungen" hidden></section>
+</main>
+
+<dialog id="dialog" aria-labelledby="dialog-titel"></dialog>
+<div class="meldung" id="meldung" role="status" aria-live="polite"></div>
+
+<script type="module" src="app.js"></script>
+</body>
+</html>
