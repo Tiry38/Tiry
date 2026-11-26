@@ -130,9 +130,6 @@ function tagGruppe(t: number) {
 const ALS_APP = matchMedia('(display-mode: standalone), (display-mode: fullscreen)').matches || (navigator as any).standalone === true;
 let installAngebot: any = null;
 addEventListener('beforeinstallprompt', (e) => { e.preventDefault(); installAngebot = e; document.querySelectorAll<HTMLElement>('[data-install]').forEach((b) => (b.hidden = false)); });
-const ANDROID = /Android/i.test(navigator.userAgent);
-/** Öffnet dieselbe Seite im richtigen Chrome (nicht in der App) – dort kann man zwischen Tabs wechseln. */
-const chromeLink = () => `intent://${location.host}${location.pathname}#Intent;scheme=https;package=com.android.chrome;end`;
 function installHinweis(): string {
   if (ALS_APP) return '<p class="app-ok">✓ Du bist schon in der App – sie liegt auf deinem Startbildschirm als <b>Tiry\'s Mails</b>.</p>';
   const ios = /iPhone|iPad/i.test(navigator.userAgent);
@@ -161,25 +158,19 @@ function startSeite(fehler?: string) {
     <p>Einmal einrichten, danach öffnest du Tiry's Mails wie eine App – live mit deinem Gmail.</p>
     ${installHinweis()}
     <ol class="schritte">
-      ${ALS_APP && !id ? `<li class="wechsel"><strong>Die Einrichtung machst du in Chrome – nicht hier in der App.</strong>
-        <p>In Chrome kannst du zwischen Google und dieser Seite hin- und herspringen (Kopieren → Einfügen). Hier in der App geht das nicht. Danach ist die App automatisch fertig eingerichtet.</p>
-        ${ANDROID ? `<a class="knopf voll" href="${h(chromeLink())}">In Chrome öffnen</a>` : '<p>Öffne <b>Safari</b> und gib dort ein: <b>tiry38.github.io/Tiry/mails</b></p>'}</li>` : ''}
-      ${zeile(1, 'Zugang bei Google anlegen', `<p>Dauert 2 Minuten. Jeden Punkt <b>abhaken</b>, dann weißt du, wo du warst. Google öffnet sich in einem <b>neuen Tab</b>. <b>Zurück hierher:</b> oben rechts auf das Kästchen mit der Zahl drücken → Tab <b>„Tiry's Mails“</b> antippen.</p>
-        <ol class="unter">
-          <li><label><input type="checkbox"><span>Knopf unten drücken. Google öffnet die Seite <b>„Client erstellen“</b>. Fragt Google nach dem Konto: <b>dein Gmail-Konto</b> wählen.</span></label>
-            <a class="knopf voll" href="https://console.cloud.google.com/auth/clients/create" target="_blank" rel="noopener">Google öffnen</a></li>
-          <li><label><input type="checkbox"><span>Ganz oben links steht ein Projektname. Das muss <b>dasselbe Projekt wie beim PC-Programm</b> sein. Wenn nicht: draufdrücken und das richtige wählen.</span></label></li>
-          <li><label><input type="checkbox"><span>Bei <span class="g">Anwendungstyp</span> aufklappen und <span class="g">Webanwendung</span> wählen.</span></label></li>
-          <li><label><input type="checkbox"><span>Bei <span class="g">Name</span> etwas eintragen, z.&nbsp;B. <b>Handy</b>.</span></label></li>
-          <li><label><input type="checkbox"><span>Etwas runterscrollen zu <span class="g">Autorisierte JavaScript-Quellen</span> → <span class="g">+ URI hinzufügen</span> → diese Adresse einfügen:</span></label>
-            <div class="kopie"><code>${h(ursprung)}</code><button class="knopf" data-kopie="${h(ursprung)}">Kopieren</button></div></li>
-          <li><label><input type="checkbox"><span>Darunter bei <span class="g">Autorisierte Weiterleitungs-URIs</span> → <span class="g">+ URI hinzufügen</span> → diese Adresse einfügen (mit Schrägstrich am Ende):</span></label>
-            <div class="kopie"><code>${h(rueck)}</code><button class="knopf" data-kopie="${h(rueck)}">Kopieren</button></div></li>
-          <li><label><input type="checkbox"><span>Ganz unten <span class="g">Erstellen</span> drücken. Es erscheint ein Fenster <b>„OAuth-Client erstellt“</b>. Dort neben der <b>Client-ID</b> auf das <b>Kopier-Symbol</b> (zwei Blätter) drücken.</span></label></li>
-          <li><label><input type="checkbox"><span>Zurück hierher wechseln und bei Schritt 2 einfügen. (Das Fenster bei Google kannst du danach schließen – den „Clientschlüssel“ brauchst du nicht.)</span></label></li>
+      ${zeile(1, 'Zugang bei Google anlegen', `<p>Erst <b>diese 6 Schritte merken</b> (oder Bildschirmfoto machen) – dann den gelben Knopf drücken. Der kopiert die Adresse für dich und öffnet Google.</p>
+        <ol class="merk">
+          <li><span>Oben links muss <b>dein Projekt vom PC-Programm</b> stehen.</span></li>
+          <li><span><span class="g">Anwendungstyp</span> → <span class="g">Webanwendung</span></span></li>
+          <li><span><span class="g">Name</span>: <b>Handy</b></span></li>
+          <li><span>Runterscrollen zu <span class="g">Autorisierte Weiterleitungs-URIs</span> → <span class="g">+ URI hinzufügen</span> → ins Feld <b>lange drücken → Einfügen</b></span></li>
+          <li><span>Ganz unten <span class="g">Erstellen</span>. Im Fenster neben der <b>Client-ID</b> auf das <b>Kopier-Symbol</b> (zwei Blätter).</span></li>
+          <li><span>Oben links auf <b>✕</b> – du bist wieder hier.</span></li>
         </ol>
-        <p class="tipp">Steht oben „Google Auth Platform noch nicht konfiguriert“? Dann bist du im falschen Projekt – zurück zu Punkt 2.</p>`)}
-      ${zeile(2, 'Client-ID hier einfügen', `<p>Lange in das Feld drücken → <b>Einfügen</b>. Die Client-ID endet auf <b>.apps.googleusercontent.com</b>.</p>
+        <button class="knopf voll gross" data-google>Adresse kopieren &amp; Google öffnen</button>
+        <p class="tipp">Kopiert wird: <code>${h(rueck)}</code></p>`)}
+      ${zeile(2, 'Client-ID einfügen', `<p>Zurück von Google? Dann einfach drücken – die kopierte Client-ID kommt von selbst ins Feld.</p>
+        <button class="knopf voll" data-einfuegen>Client-ID einfügen</button>
         <input class="eingabe" id="client" inputmode="url" autocomplete="off" spellcheck="false" placeholder="123…-abc….apps.googleusercontent.com" value="${h(id)}">`)}
       ${zeile(3, 'Anmelden', `<p>Bei Google <b>dein Konto wählen</b> und alles erlauben. Kommt „Google hat diese App nicht überprüft“: <b>Weiter</b> – das ist deine eigene App.</p>
         <button class="knopf voll" id="los">Mit Google anmelden</button>`)}
@@ -187,6 +178,18 @@ function startSeite(fehler?: string) {
     ${fehler ? `<p class="fehler" role="alert">${h(fehler)}</p>` : ''}
     <a class="demo-link" href="?demo">Erst mal ansehen (Vorschau ohne Konto)</a>
   </section>`;
+  app.querySelector('[data-google]')?.addEventListener('click', async () => {
+    try { await navigator.clipboard.writeText(rueck); } catch { /* Feld zeigt die Adresse zum Abtippen */ }
+    window.open('https://console.cloud.google.com/auth/clients/create', '_blank', 'noopener');
+  });
+  app.querySelector('[data-einfuegen]')?.addEventListener('click', async () => {
+    const feld = $<HTMLInputElement>('#client');
+    try {
+      const t = (await navigator.clipboard.readText()).trim();
+      if (an.gueltigeClientId(t)) { feld.value = t; feld.classList.add('ok'); $('#los').scrollIntoView({ behavior: 'smooth', block: 'center' }); return; }
+      toast('In der Zwischenablage ist keine Client-ID. Bei Google neben „Client-ID“ aufs Kopier-Symbol drücken.');
+    } catch { feld.focus(); toast('Lange ins Feld drücken → Einfügen.'); }
+  });
   app.querySelectorAll<HTMLButtonElement>('[data-kopie]').forEach((b) => b.addEventListener('click', async () => {
     try { await navigator.clipboard.writeText(b.dataset.kopie!); b.textContent = 'Kopiert ✓'; } catch { b.textContent = 'Markieren & kopieren'; }
   }));
