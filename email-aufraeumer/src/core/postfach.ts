@@ -5,6 +5,7 @@ import type { Speicher } from './db';
 import type { Kategorie, Mail } from './types';
 import { parseAdresse, parseAdressListe, dekodiereMimeWort } from './headers';
 import { zerlegeVoll, baueMail, betreffMit, type VolleMail, type Anhang } from './mime';
+import { vorlageHtml } from './vorlage';
 
 export interface Ordner { id: string; name: string; art: 'system' | 'firma' | 'sorte' | 'eigen'; ungelesen?: number }
 export interface Zeile {
@@ -114,11 +115,14 @@ export class Postfach {
     };
   }
 
-  async senden(e: { an: string[]; cc?: string[]; bcc?: string[]; betreff: string; text: string; threadId?: string; inReplyTo?: string; references?: string; anhaenge?: Array<{ name: string; mime: string; daten: Uint8Array }> }) {
+  async senden(e: { an: string[]; cc?: string[]; bcc?: string[]; betreff: string; text: string; threadId?: string; inReplyTo?: string; references?: string;
+    anhaenge?: Array<{ name: string; mime: string; daten: Uint8Array }>; links?: Array<{ name: string; groesse: number; link: string }>; gestaltet?: boolean; vonName?: string }) {
     const an = e.an.flatMap((x) => x.split(/[,;]/)).map((x) => x.trim()).filter(Boolean);
     if (!an.length) throw new Error('Bitte mindestens einen Empfänger eintragen.');
     for (const x of [...an, ...(e.cc ?? []), ...(e.bcc ?? [])]) if (!/@[^@\s>]+\.[^@\s>]+/.test(x)) throw new Error(`„${x}“ ist keine gültige Adresse.`);
-    const raw = baueMail({ von: this.eigeneAdresse(), an, cc: e.cc, bcc: e.bcc, betreff: e.betreff, text: e.text, inReplyTo: e.inReplyTo, references: e.references, anhaenge: e.anhaenge });
+    const html = e.gestaltet === false ? undefined : vorlageHtml({ betreff: e.betreff, text: e.text, vonName: e.vonName ?? 'Tiry', links: e.links,
+      anhaenge: e.anhaenge?.map((a) => ({ name: a.name, groesse: a.daten.length })) });
+    const raw = baueMail({ von: this.eigeneAdresse(), an, cc: e.cc, bcc: e.bcc, betreff: e.betreff, text: e.text, inReplyTo: e.inReplyTo, references: e.references, anhaenge: e.anhaenge, html });
     await this.gmail.sendeMail(raw, e.threadId);
   }
 

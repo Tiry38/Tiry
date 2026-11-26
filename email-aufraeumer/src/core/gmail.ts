@@ -215,6 +215,11 @@ export function erzeugeGoogleGmail(auth: any, zaehle: (methode: string, einheite
     },
     async filterLoeschen(id) { await ruf('filters.delete', () => gmail.users.settings.filters.delete({ userId: me, id })); },
     async sendeMail(raw, threadId) {
+      if (raw.length > 4_000_000) {
+        // Große Mails (bis 35 MB) per Upload-Verfahren – „raw“ im JSON ist dafür zu klein
+        await ruf('messages.send', () => gmail.users.messages.send({ userId: me, requestBody: { threadId }, media: { mimeType: 'message/rfc822', body: raw } }));
+        return;
+      }
       const b64 = Buffer.from(raw, 'utf8').toString('base64url');
       await ruf('messages.send', () => gmail.users.messages.send({ userId: me, requestBody: { raw: b64, threadId } }));
     },

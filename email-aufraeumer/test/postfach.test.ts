@@ -71,6 +71,8 @@ describe('Tiry’s Mails – Postfach', () => {
     const raw = g.gesendet[0];
     expect(raw).toMatch(/^To: Amazon <shop@amazon.de>/m);
     expect(raw).toMatch(/^In-Reply-To: <a@x>/m);
+    expect(raw).toMatch(/multipart\/alternative/);
+    expect(raw).toMatch(/Content-Type: text\/html; charset=UTF-8/);
     expect(g.get('gesendet1').threadId).toBe('t-a');
     await expect(p.senden({ an: ['kein-empfaenger'], betreff: 'x', text: 'y' })).rejects.toThrow(/keine gültige Adresse/);
   });

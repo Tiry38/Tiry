@@ -1,4 +1,5 @@
 // Tiry's Mails – das Postfach: Ordner | Liste | Lesen, dazu Schreiben.
+import { Tinte } from './tinte.js';
 type Kat = 'wichtig' | 'persoenlich' | 'werbung' | 'newsletter' | 'benachrichtigung' | 'spam' | 'phishing';
 interface Zeile { id: string; threadId: string; von: string; vonAdresse: string; betreff: string; vorschau: string; datum: number; ungelesen: boolean; stern: boolean; anhang: boolean; kategorie: Kat | null; labelIds: string[] }
 interface Ordner { id: string; name: string; art: 'system' | 'firma' | 'sorte' | 'eigen'; ungelesen?: number }
@@ -236,41 +237,117 @@ export class PostfachUI {
     d.showModal();
   }
 
-  /** Schreibfenster (neu, Antwort, Weiterleitung). */
+  /** Schreibfenster (neu, Antwort, Weiterleitung): Vollbild mit Tinten-Hintergrund und Live-Vorschau. */
   schreiben(v: { an?: string[]; cc?: string[]; betreff?: string; text?: string; threadId?: string; inReplyTo?: string; references?: string }) {
-    document.querySelector('.pf-schreiben')?.remove();
+    document.querySelector('.tm-schreiben')?.remove();
     const el = document.createElement('section');
-    el.className = 'pf-schreiben'; el.setAttribute('role', 'dialog'); el.setAttribute('aria-label', 'Neue Mail');
-    let anhaenge: Array<{ name: string; mime: string; daten: Uint8Array }> = [];
+    el.className = 'tm-schreiben'; el.setAttribute('role', 'dialog'); el.setAttribute('aria-modal', 'true'); el.setAttribute('aria-label', 'Mail schreiben');
+    type Datei = { name: string; mime: string; groesse: number; pfad: string; gross?: boolean };
+    let anhaenge: Datei[] = [];
+    const titel = v.inReplyTo ? 'Antworten' : v.betreff?.startsWith('Fwd') ? 'Weiterleiten' : 'Neue Mail';
     el.innerHTML = `
-      <header><h2>${v.inReplyTo ? 'Antworten' : v.betreff?.startsWith('Fwd') ? 'Weiterleiten' : 'Neue Mail'}</h2><button class="knopf klein" data-x aria-label="Schließen">✕</button></header>
-      <label class="feld"><span class="etikett">An</span><input name="an" value="${h((v.an ?? []).join(', '))}" placeholder="name@beispiel.de" autocomplete="off"></label>
-      <label class="feld"><span class="etikett">Cc</span><input name="cc" value="${h((v.cc ?? []).join(', '))}" autocomplete="off"></label>
-      <label class="feld"><span class="etikett">Betreff</span><input name="betreff" value="${h(v.betreff ?? '')}"></label>
-      <label class="feld pf-text"><span class="etikett">Text</span><textarea name="text">${h(v.text ?? '')}</textarea></label>
-      <ul class="pf-anhaenge" id="pf-neu-anh"></ul>
-      <footer><button class="knopf voll gross" data-senden>Senden</button><button class="knopf" data-anhang>Anhang</button><span></span><button class="knopf leise" data-x>Verwerfen</button></footer>`;
+      <canvas class="tm-tinte" aria-hidden="true"></canvas>
+      <div class="tm-rahmen">
+        <div class="tm-editor">
+          <header><h2>${titel}</h2><button class="einklappen" data-x aria-label="Schließen" title="Schließen (Esc)"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button></header>
+          <label class="tm-feld"><span>An</span><input name="an" value="${h((v.an ?? []).join(', '))}" placeholder="name@beispiel.de" autocomplete="off"></label>
+          <label class="tm-feld"><span>Cc</span><input name="cc" value="${h((v.cc ?? []).join(', '))}" autocomplete="off"></label>
+          <label class="tm-feld"><span>Betreff</span><input name="betreff" value="${h(v.betreff ?? '')}" placeholder="Worum geht's?"></label>
+          <label class="tm-text"><span class="unsichtbar">Text</span><textarea name="text" placeholder="Schreib einfach los …">${h(v.text ?? '')}</textarea></label>
+          <ul class="tm-anhaenge" id="tm-anh"></ul>
+          <footer>
+            <button class="knopf voll gross" data-senden><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12l16-8-6 16-3-7z"/></svg>Senden</button>
+            <button class="knopf" data-anhang><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 12l6-6a3 3 0 014 4l-8 8a5 5 0 01-7-7l7-7"/></svg>Dateien</button>
+            <label class="tm-gestaltet"><button class="schalter" role="switch" aria-checked="true" data-gestaltet aria-label="Gestaltete Mail"></button><span>Gestaltet</span></label>
+            <span class="tm-status" id="tm-status" role="status"></span>
+            <button class="knopf leise" data-x>Verwerfen</button>
+          </footer>
+        </div>
+        <div class="tm-vorschau">
+          <div class="tm-vorschau-kopf"><b>So sieht es beim Empfänger aus</b>
+            <div class="tm-geraet" role="group" aria-label="Gerät"><button class="knopf klein" aria-pressed="true" data-geraet="pc">PC</button><button class="knopf klein" aria-pressed="false" data-geraet="handy">Handy</button></div>
+            <button class="knopf klein tm-nur-handy" data-vorschau-zu>Zurück zum Text</button></div>
+          <div class="tm-buehne"><iframe class="tm-frame" title="Vorschau der Mail" sandbox></iframe></div>
+        </div>
+      </div>
+      <button class="knopf tm-vorschau-knopf" data-vorschau-auf>Vorschau</button>`;
     document.body.append(el);
     const feld = (n: string) => el.querySelector<HTMLInputElement | HTMLTextAreaElement>(`[name="${n}"]`)!;
-    (v.an?.length ? feld('text') : feld('an')).focus();
-    if (v.an?.length) (feld('text') as HTMLTextAreaElement).setSelectionRange(0, 0);
-    const anhZeichnen = () => {
-      el.querySelector('#pf-neu-anh')!.innerHTML = anhaenge.map((a, i) => `<li><button class="knopf klein" data-weg="${i}">${h(a.name)} ✕</button></li>`).join('');
-      el.querySelectorAll<HTMLButtonElement>('[data-weg]').forEach((b) => b.addEventListener('click', () => { anhaenge.splice(Number(b.dataset.weg), 1); anhZeichnen(); }));
+    const text = feld('text') as HTMLTextAreaElement;
+    const tinte = new Tinte(el.querySelector('canvas')!);
+    tinte.start();
+    let gestaltet = true;
+
+    // Live-Vorschau (gedrosselt)
+    const frame = el.querySelector<HTMLIFrameElement>('.tm-frame')!;
+    let vt: any;
+    const vorschau = () => { clearTimeout(vt); vt = setTimeout(async () => {
+      if (!gestaltet) { frame.removeAttribute('src'); return; }
+      frame.src = await this.api.rufe('pfVorschau', { betreff: feld('betreff').value, text: text.value, anhaenge });
+    }, 220); };
+    vorschau();
+
+    // Tippen → Welle an der Schreibstelle
+    const stelle = () => {
+      const r = text.getBoundingClientRect(); const cs = getComputedStyle(text);
+      const vor = text.value.slice(0, text.selectionStart ?? 0).split('\n');
+      const zeile = vor.length - 1, spalte = vor[vor.length - 1].length;
+      const lh = parseFloat(cs.lineHeight) || 24, cw = (parseFloat(cs.fontSize) || 16) * 0.52;
+      return { x: r.left + parseFloat(cs.paddingLeft) + Math.min(r.width - 30, (spalte % 80) * cw), y: r.top + parseFloat(cs.paddingTop) + Math.min(r.height - 20, zeile * lh - text.scrollTop + lh / 2) };
     };
-    el.querySelectorAll('[data-x]').forEach((b) => b.addEventListener('click', () => el.remove()));
-    el.querySelector('[data-anhang]')!.addEventListener('click', async () => {
-      try { anhaenge = [...anhaenge, ...(await this.api.rufe('pfAnhangWaehlen'))]; anhZeichnen(); } catch (e) { this.melde((e as Error).message); }
+    el.addEventListener('input', (e) => {
+      const t = e.target as HTMLElement;
+      if (t === text) { const p = stelle(); tinte.impuls(p.x, p.y); }
+      else { const r = t.getBoundingClientRect(); tinte.impuls(r.left + 40 + Math.random() * (r.width - 80), r.top + r.height / 2); }
+      vorschau();
     });
+
+    const schliessen = () => { tinte.stopp(); el.remove(); document.removeEventListener('keydown', esc); };
+    const esc = (e: KeyboardEvent) => { if (e.key === 'Escape' && !document.querySelector('dialog[open]')) schliessen(); };
+    document.addEventListener('keydown', esc);
+    el.querySelectorAll('[data-x]').forEach((b) => b.addEventListener('click', schliessen));
+    (v.an?.length ? text : feld('an')).focus();
+    if (v.an?.length) text.setSelectionRange(0, 0);
+
+    // Gerät für die Vorschau, Vorschau auf dem Handy ein-/ausblenden
+    el.querySelectorAll<HTMLButtonElement>('[data-geraet]').forEach((b) => b.addEventListener('click', () => {
+      el.querySelectorAll('[data-geraet]').forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
+      el.dataset.geraet = b.dataset.geraet;
+    }));
+    el.querySelector('[data-vorschau-auf]')!.addEventListener('click', () => { el.dataset.ansicht = 'vorschau'; });
+    el.querySelector('[data-vorschau-zu]')!.addEventListener('click', () => { el.dataset.ansicht = ''; });
+    el.querySelector<HTMLButtonElement>('[data-gestaltet]')!.addEventListener('click', (ev) => {
+      gestaltet = !gestaltet; (ev.currentTarget as HTMLElement).setAttribute('aria-checked', String(gestaltet));
+      el.classList.toggle('schlicht', !gestaltet); vorschau();
+    });
+
+    // Anhänge: Größe zeigen, große Dateien gehen als Download-Link über Google Drive
+    const GRENZE = 18 * 1024 * 1024;
+    const mb = (n: number) => (n > 1_048_576 ? `${(n / 1_048_576).toFixed(1).replace('.', ',')} MB` : `${Math.max(1, Math.round(n / 1024))} KB`);
+    const anhZeichnen = () => {
+      let summe = 0;
+      for (const a of [...anhaenge].sort((x, y) => x.groesse - y.groesse)) { a.gross = summe + a.groesse > GRENZE; if (!a.gross) summe += a.groesse; }
+      el.querySelector('#tm-anh')!.innerHTML = anhaenge.map((a, i) => `<li class="${a.gross ? 'gross' : ''}"><span>${h(a.name)}</span><small>${mb(a.groesse)}${a.gross ? ' · als Download-Link (Google Drive)' : ''}</small>
+        <button class="einklappen" data-weg="${i}" aria-label="${h(a.name)} entfernen"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button></li>`).join('');
+      el.querySelectorAll<HTMLButtonElement>('[data-weg]').forEach((b) => b.addEventListener('click', () => { anhaenge.splice(Number(b.dataset.weg), 1); anhZeichnen(); vorschau(); }));
+    };
+    el.querySelector('[data-anhang]')!.addEventListener('click', async () => {
+      try { anhaenge = [...anhaenge, ...(await this.api.rufe('pfAnhangWaehlen'))]; anhZeichnen(); vorschau(); } catch (e) { this.melde((e as Error).message); }
+    });
+    // Dateien auch per Ziehen & Ablegen? Nur über den Dialog – so bleiben die erlaubten Pfade unter Kontrolle.
+
+    const status = el.querySelector('#tm-status')!;
+    (window as any).__sendeStatus = (t: string) => { status.textContent = t; };
     el.querySelector('[data-senden]')!.addEventListener('click', async (ev) => {
-      const b = ev.currentTarget as HTMLButtonElement; b.disabled = true; b.textContent = 'Sende …';
+      const b = ev.currentTarget as HTMLButtonElement; b.disabled = true; status.textContent = 'Wird gesendet …';
       const liste = (s: string) => s.split(/[,;]/).map((x) => x.trim()).filter(Boolean);
       try {
-        await this.api.rufe('pfSenden', { an: liste(feld('an').value), cc: liste(feld('cc').value), betreff: feld('betreff').value, text: feld('text').value,
-          threadId: v.threadId, inReplyTo: v.inReplyTo, references: v.references, anhaenge });
-        el.remove(); this.melde('Gesendet.');
+        const r = await this.api.rufe('pfSenden', { an: liste(feld('an').value), cc: liste(feld('cc').value), betreff: feld('betreff').value, text: text.value,
+          threadId: v.threadId, inReplyTo: v.inReplyTo, references: v.references, anhaenge, gestaltet });
+        schliessen();
+        this.melde(r.links ? `Gesendet – ${r.links} große ${r.links === 1 ? 'Datei' : 'Dateien'} als Download-Link.` : 'Gesendet.');
         if (this.aktiv === 'SENT') void this.laden();
-      } catch (e) { this.melde((e as Error).message); b.disabled = false; b.textContent = 'Senden'; }
+      } catch (e) { this.melde((e as Error).message); b.disabled = false; status.textContent = ''; }
     });
   }
 }

@@ -1,5 +1,5 @@
 // Electron-Hauptprozess: Fenster, Tray, Autostart, IPC, Hintergrunddienst.
-import { app, BrowserWindow, Tray, Menu, nativeImage, ipcMain, dialog, powerMonitor, protocol, shell } from 'electron';
+import { app, BrowserWindow, Tray, Menu, nativeImage, ipcMain, dialog, powerMonitor, protocol, shell, session } from 'electron';
 import path from 'node:path';
 import fs from 'node:fs';
 import { Speicher } from '../core/db';
@@ -12,6 +12,15 @@ import { Anmeldung } from './auth';
 import { erzeugeDemo } from './demo';
 import { Postfach } from '../core/postfach';
 import { textZuHtml } from '../core/mime';
+import { grosseDateiHochladen, DRIVE_SCOPE } from './drive';
+import { vorlageHtml } from '../core/vorlage';
+/** Live-Vorschau der gestalteten Mail beim Schreiben. */
+let vorschauHtml = '';
+
+/** Bis zu dieser Summe gehen Dateien als normaler Anhang mit (Gmail-Grenze 25 MB, Base64 macht ~33 % größer). */
+const ANHANG_GRENZE = 18 * 1024 * 1024;
+/** Nur Dateien, die Tiry selbst im Datei-Dialog gewählt hat, dürfen verschickt werden. */
+const erlaubtePfade = new Set<string>();
 
 const NAME = "Tiry's Mails";
 // Eigenes Protokoll für die abgeschottete Anzeige von Mail-Inhalten (eigene CSP je Antwort)
@@ -187,7 +196,31 @@ const API: Record<string, Fn> = {
     return { ...m, html: undefined, text: undefined, fernBilder: fern, anzeigeUrl: `tmail://mail/${encodeURIComponent(id)}` };
   },
   pfVorlage: (id, art) => postfach!.vorlage(id, art),
-  pfSenden: (e) => postfach!.senden(e),
+  async pfSenden(e) {
+    const dateien: Array<{ name: string; mime: string; groesse: number; pfad: string }> = (e.anhaenge ?? []).filter((a: any) => erlaubtePfade.has(a.pfad));
+    // kleinste zuerst als Anhang, bis die Grenze erreicht ist; der Rest über Google Drive
+    const sortiert = [...dateien].sort((a, b) => a.groesse - b.groesse);
+    const anhang: typeof dateien = [], gross: typeof dateien = [];
+    let summe = 0;
+    for (const d of sortiert) { if (summe + d.groesse <= ANHANG_GRENZE) { anhang.push(d); summe += d.groesse; } else gross.push(d); }
+    const links: Array<{ name: string; groesse: number; link: string }> = [];
+    if (gross.length) {
+      if (DEMO) gross.forEach((d) => links.push({ name: d.name, groesse: d.groesse, link: `https://drive.google.com/file/d/demo-${encodeURIComponent(d.name)}/view` }));
+      else {
+        if (!anmeldung.hatScope(DRIVE_SCOPE)) throw new Error('Große Dateien gehen über Google Drive. Dafür einmal neu anmelden: Einstellungen → Konto → „Neu anmelden“ (und in Google Cloud die Drive-API einschalten, siehe Anleitung).');
+        for (const d of gross) {
+          const r = await grosseDateiHochladen(anmeldung.client_(), d, (p) => sende('senden', `„${d.name}“ wird hochgeladen … ${p} %`));
+          links.push({ name: d.name, groesse: d.groesse, link: r.link });
+        }
+      }
+    }
+    const mb = (n: number) => `${(n / 1_048_576).toFixed(1).replace('.', ',')} MB`;
+    const text = links.length ? `${e.text}\n\n— Große Dateien zum Herunterladen —\n${links.map((l) => `${l.name} (${mb(l.groesse)}): ${l.link}`).join('\n')}` : e.text;
+    sende('senden', 'Wird gesendet …');
+    await postfach!.senden({ ...e, text, links, anhaenge: anhang.map((d) => ({ name: d.name, mime: d.mime, daten: new Uint8Array(fs.readFileSync(d.pfad)) })) });
+    for (const d of dateien) erlaubtePfade.delete(d.pfad);
+    return { anhaenge: anhang.length, links: links.length };
+  },
   pfAktion: (ids, a) => postfach!.aktion(ids, a),
   pfRueckgaengig: () => postfach!.rueckgaengig(),
   pfOrdnerAnlegen: (name) => postfach!.ordnerAnlegen(name),
@@ -202,13 +235,19 @@ const API: Record<string, Fn> = {
     const r = await dialog.showOpenDialog(fenster!, { title: 'Anhänge auswählen', properties: ['openFile', 'multiSelections'] });
     if (r.canceled) return [];
     return r.filePaths.map((p) => {
-      const daten = fs.readFileSync(p);
-      if (daten.length > 24 * 1024 * 1024) throw new Error(`${path.basename(p)} ist größer als 24 MB – Gmail nimmt das nicht an.`);
-      return { name: path.basename(p), mime: mimeVon(p), daten: new Uint8Array(daten) };
+      erlaubtePfade.add(p);
+      return { name: path.basename(p), mime: mimeVon(p), groesse: fs.statSync(p).size, pfad: p };
     });
   },
   ordnerListe: () => dienst?.ordnerListe() ?? [],
   ordnerSchalten: (basis, an) => dienst?.ordnerSchalten(basis, an),
+  driveBereit: () => DEMO || anmeldung.hatScope(DRIVE_SCOPE),
+  pfVorschau(e) {
+    vorschauHtml = vorlageHtml({ betreff: e.betreff ?? '', text: e.text ?? '', vonName: e.vonName ?? 'Tiry',
+      anhaenge: (e.anhaenge ?? []).map((a: any) => ({ name: a.name, groesse: a.groesse })),
+      links: (e.anhaenge ?? []).filter((a: any) => a.gross).map((a: any) => ({ name: a.name, groesse: a.groesse, link: '#' })) });
+    return `tmail://vorschau/${Date.now()}`;
+  },
   async anmelden() {
     await anmeldung.anmelden();
     const g = gmailErzeugen();
@@ -237,6 +276,8 @@ async function lesetest(gmail: GmailPort) {
 }
 
 app.whenReady().then(async () => {
+  // Rechtschreibprüfung auf Deutsch
+  try { session.defaultSession.setSpellCheckerLanguages(['de-DE']); } catch { /* Linux ohne Wörterbuch */ }
   fs.mkdirSync(ORDNER, { recursive: true });
   db = new Speicher(path.join(ORDNER, 'aufraeumer.db'));
   if (process.platform === 'win32') app.setAppUserModelId('de.tiry.email-aufraeumer');
@@ -308,6 +349,9 @@ app.whenReady().then(() => {
     if (u.host === 'mail') {
       const id = decodeURIComponent(u.pathname.slice(1));
       return new Response(mailDokument(id, u.searchParams.get('bilder') === '1', u.searchParams.get('sperre') === '1'), { headers: { 'Content-Type': 'text/html; charset=utf-8', ...sicher } });
+    }
+    if (u.host === 'vorschau') {
+      return new Response(vorschauHtml, { headers: { 'Content-Type': 'text/html; charset=utf-8', 'Content-Security-Policy': "default-src 'none'; style-src 'unsafe-inline'; img-src data: https:; font-src data:" } });
     }
     if (u.host === 'anhang' && postfach) {
       const [, mailId, anhangId] = u.pathname.split('/').map(decodeURIComponent);

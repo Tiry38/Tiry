@@ -542,3 +542,57 @@ body.blitz::after { animation: spektrumLauf 14s linear infinite, blitz 1.4s var(
 @media (prefers-reduced-motion: reduce) {
   body::after, .nav button[aria-current='page'], .lage[data-art] { animation: none !important; }
 }
+
+/* =================== Schreiben: Tinte im Strom + Live-Vorschau =================== */
+.tm-schreiben { position: fixed; inset: 0; z-index: 40; background: var(--grund); animation: aufgehen .5s var(--feder); }
+@keyframes aufgehen { from { opacity: 0; transform: scale(.985); } }
+.tm-tinte { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.tm-rahmen { position: relative; z-index: 1; height: 100%; display: grid; grid-template-columns: minmax(380px, 1fr) minmax(360px, 1fr); gap: 40px; padding: 44px clamp(24px, 4vw, 70px); max-width: 1700px; margin: 0 auto; }
+.tm-editor { display: flex; flex-direction: column; gap: 4px; min-height: 0; padding: 22px 26px; border-radius: var(--rund-gross);
+  background: oklch(0.205 0.012 70 / .74); box-shadow: inset 0 0 0 1px oklch(1 0 0 / .08); }
+.tm-editor header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+.tm-editor h2 { margin: 0; font: 780 32px/1 var(--display); letter-spacing: -.025em;
+  background: var(--spektrum); background-size: 200% 100%; -webkit-background-clip: text; background-clip: text; color: transparent; animation: spektrumLauf 10s linear infinite; }
+.tm-feld { display: grid; grid-template-columns: 74px 1fr; align-items: center; border-bottom: 1px solid var(--linie); }
+.tm-feld span { font-size: 14px; font-weight: 650; color: var(--text-3); }
+.tm-feld input { all: unset; min-height: 48px; font: 500 16px var(--sans); color: var(--text); }
+.tm-feld:focus-within { border-bottom-color: var(--c-newsletter); }
+.tm-feld input[name='betreff'] { font: 700 19px var(--display); }
+.tm-text { flex: 1; display: flex; min-height: 0; margin-top: 10px; }
+.tm-text textarea { all: unset; flex: 1; font: 400 17px/1.65 var(--sans); color: var(--text); white-space: pre-wrap; overflow-y: auto; padding: 6px 2px; caret-color: var(--c-newsletter); }
+.tm-text textarea::placeholder { color: var(--text-3); }
+.tm-anhaenge { list-style: none; margin: 8px 0 0; padding: 0; display: grid; gap: 6px; }
+.tm-anhaenge li { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; gap: 12px; align-items: center; padding: 4px 4px 4px 14px; border-radius: 12px; background: var(--flaeche-2); }
+.tm-anhaenge li span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 600; }
+.tm-anhaenge small { color: var(--text-3); }
+.tm-anhaenge li.gross { background: linear-gradient(100deg, color-mix(in oklch, var(--c-benachrichtigung) 30%, var(--flaeche-2)), var(--flaeche-2) 70%); }
+.tm-anhaenge li.gross small { color: var(--c-benachrichtigung); font-weight: 650; }
+.tm-editor footer { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-top: 14px; }
+.tm-editor footer svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.tm-gestaltet { display: flex; align-items: center; gap: 6px; font-size: 14px; font-weight: 650; color: var(--text-2); }
+.tm-status { flex: 1; font-size: 14px; color: var(--text-2); }
+.tm-vorschau { display: flex; flex-direction: column; min-height: 0; border-radius: var(--rund-gross); background: oklch(0.255 0.013 70 / .6); padding: 14px; box-shadow: inset 0 0 0 1px oklch(1 0 0 / .06); }
+.tm-vorschau-kopf { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 4px 6px 12px; }
+.tm-vorschau-kopf b { font: 700 15px var(--display); }
+.tm-geraet { display: flex; gap: 4px; }
+.tm-geraet .knopf[aria-pressed='true'] { background: var(--text); color: var(--dunkel); }
+.tm-buehne { flex: 1; min-height: 0; display: grid; justify-items: center; overflow: hidden; border-radius: 18px; background: #f2efe8; }
+.tm-frame { width: 100%; height: 100%; border: 0; transition: width .5s var(--feder); background: #f2efe8; }
+.tm-schreiben[data-geraet='handy'] .tm-frame { width: 390px; max-width: 100%; box-shadow: 0 0 0 10px #1b1b1b; border-radius: 26px; margin: 16px 0; height: calc(100% - 32px); }
+.tm-schreiben.schlicht .tm-buehne::before { content: 'Schlicht: Die Mail geht als einfacher Text raus.'; margin: auto; color: #555; font-weight: 600; }
+.tm-schreiben.schlicht .tm-frame { display: none; }
+.tm-nur-handy, .tm-vorschau-knopf { display: none !important; }
+@media (max-width: 900px) {
+  .tm-rahmen { grid-template-columns: 1fr; padding: 12px; }
+  .tm-vorschau { display: none; }
+  .tm-schreiben[data-ansicht='vorschau'] .tm-editor { display: none; }
+  .tm-schreiben[data-ansicht='vorschau'] .tm-vorschau { display: flex; }
+  .tm-vorschau-knopf { display: inline-flex !important; position: absolute; z-index: 2; right: 18px; top: 22px; }
+  .tm-schreiben[data-ansicht='vorschau'] .tm-vorschau-knopf { display: none !important; }
+  .tm-nur-handy { display: inline-flex !important; }
+  .tm-geraet { display: none; }
+  .tm-editor { padding: 16px; }
+  .tm-editor h2 { font-size: 26px; }
+  .tm-editor header { padding-right: 110px; }
+}
+@media (prefers-reduced-motion: reduce) { .tm-editor h2 { animation: none; } }

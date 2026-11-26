@@ -528,6 +528,7 @@ function ereignis(kanal: string, d: any) {
   } else if (kanal === 'status') { if (z) { const vorher = z.status?.status; z.status = d; setzeStatus(d); if (ansicht === 'cockpit' && vorher !== d.status) void cockpit(); } }
   else if (kanal === 'altbestand') { if (z) z.altbestand = d; const ab = document.getElementById('altbestand'); if (ab) { ab.innerHTML = altbestandHtml(d); altbestandKnoepfe(); } }
   else if (kanal === 'frage' && d?.art === 'filter') { void filterFrage(d.anzahl); }
+  else if (kanal === 'senden' && typeof d === 'string') { (window as any).__sendeStatus?.(d); }
   else if (kanal === 'sichtbar') { d ? maschine.start() : maschine.pause(); }
 }
 

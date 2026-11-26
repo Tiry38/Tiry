@@ -72,6 +72,8 @@ export interface Entwurf {
   von: string; an: string[]; cc?: string[]; bcc?: string[]; betreff: string; text: string;
   inReplyTo?: string; references?: string; threadId?: string;
   anhaenge?: Array<{ name: string; mime: string; daten: Uint8Array }>;
+  /** Gestaltete HTML-Fassung (Vorlage); der Text bleibt als Rückfall für einfache Mailprogramme dabei. */
+  html?: string;
 }
 
 /** Baut eine RFC-822-Nachricht (UTF-8, base64), optional mit Anhängen. */
@@ -86,13 +88,19 @@ export function baueMail(e: Entwurf): string {
     ...(e.references ? [`References: ${kopfZeileSauber(e.references)}`] : []),
     'MIME-Version: 1.0',
   ];
-  const text64 = Buffer.from(e.text.replace(/\r?\n/g, '\r\n'), 'utf8').toString('base64').replace(/.{76}/g, '$&\r\n');
-  if (!e.anhaenge?.length) {
-    return [...zeilen, 'Content-Type: text/plain; charset=UTF-8', 'Content-Transfer-Encoding: base64', '', text64].join('\r\n');
-  }
+  const b64 = (s: string) => Buffer.from(s, 'utf8').toString('base64').replace(/.{76}/g, '$&\r\n');
+  const text64 = b64(e.text.replace(/\r?\n/g, '\r\n'));
+  // Inhalt: nur Text – oder Text + HTML als multipart/alternative (Mailprogramme nehmen die beste Fassung)
+  const alt = `tma-${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}`;
+  const inhaltKopf = e.html ? [`Content-Type: multipart/alternative; boundary="${alt}"`] : ['Content-Type: text/plain; charset=UTF-8', 'Content-Transfer-Encoding: base64'];
+  const inhaltKoerper = e.html
+    ? [`--${alt}`, 'Content-Type: text/plain; charset=UTF-8', 'Content-Transfer-Encoding: base64', '', text64,
+       `--${alt}`, 'Content-Type: text/html; charset=UTF-8', 'Content-Transfer-Encoding: base64', '', b64(e.html), `--${alt}--`]
+    : [text64];
+  if (!e.anhaenge?.length) return [...zeilen, ...inhaltKopf, '', ...inhaltKoerper].join('\r\n');
   const grenze = `tm-${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}`;
   const teile = [
-    `--${grenze}`, 'Content-Type: text/plain; charset=UTF-8', 'Content-Transfer-Encoding: base64', '', text64,
+    `--${grenze}`, ...inhaltKopf, '', ...inhaltKoerper,
     ...e.anhaenge.flatMap((a) => [
       `--${grenze}`, `Content-Type: ${a.mime || 'application/octet-stream'}; name="${wort(a.name).replace(/"/g, '')}"`,
       `Content-Disposition: attachment; filename="${wort(a.name).replace(/"/g, '')}"`, 'Content-Transfer-Encoding: base64', '',

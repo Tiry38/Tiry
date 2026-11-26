@@ -9,7 +9,10 @@ import { safeStorage, shell } from 'electron';
 export const SCOPES = [
   'https://www.googleapis.com/auth/gmail.modify',
   'https://www.googleapis.com/auth/gmail.settings.basic',
+  // Große Anhänge über Google Drive – nur Dateien, die das Programm selbst anlegt
+  'https://www.googleapis.com/auth/drive.file',
 ];
+const PFLICHT = SCOPES.slice(0, 2);
 
 export class Anmeldung {
   private client: any = null;
@@ -54,6 +57,11 @@ export class Anmeldung {
     return c;
   }
 
+  /** Hat die gespeicherte Anmeldung diese Berechtigung? (Drive kam später dazu → evtl. neu anmelden) */
+  hatScope(scope: string): boolean {
+    try { return String(this.ladeTokens().scope ?? '').split(' ').includes(scope); } catch { return false; }
+  }
+
   abmelden() { try { fs.unlinkSync(this.tokenPfad); } catch { /* schon weg */ } this.client = null; }
 
   /** Browser öffnen, Zustimmung abholen, Code gegen Tokens tauschen. */
@@ -88,7 +96,7 @@ export class Anmeldung {
     const { tokens } = await client.getToken({ code, codeVerifier, redirect_uri: redirect });
     if (!tokens.refresh_token) throw new Error('Google hat kein Refresh-Token geliefert. App-Zugriff unter myaccount.google.com/permissions entfernen und neu anmelden.');
     const erteilt = String(tokens.scope ?? '').split(' ');
-    for (const s of SCOPES) if (!erteilt.includes(s)) throw new Error(`Berechtigung fehlt: ${s}. Bitte bei der Anmeldung alle Haken setzen.`);
+    for (const s of PFLICHT) if (!erteilt.includes(s)) throw new Error(`Berechtigung fehlt: ${s}. Bitte bei der Anmeldung alle Haken setzen.`);
     this.speichereTokens(tokens);
     this.client = null;
   }
