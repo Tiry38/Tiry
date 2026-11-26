@@ -115,6 +115,7 @@ const marke = (gross = false) => `<span class="marke"${gross ? '' : ' aria-hidde
 function zeit(t: number) {
   const d = new Date(t), j = new Date();
   if (d.toDateString() === j.toDateString()) return d.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
+  if (d.toDateString() === new Date(Date.now() - 86400_000).toDateString()) return d.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
   if (Date.now() - t < 6 * 86400_000) return d.toLocaleDateString('de-DE', { weekday: 'short' });
   return d.toLocaleDateString('de-DE', { day: 'numeric', month: 'short' });
 }
@@ -236,7 +237,7 @@ function titelSetzen() {
   const o = ordnerListe.find((x) => x.id === ordner);
   const t = document.getElementById('titel'); if (!t) return;
   t.textContent = suche ? `„${suche}“` : o?.name ?? 'Posteingang';
-  const u = o?.id === 'INBOX' && o.ungelesen ? `${o.ungelesen} ungelesen · live` : 'live mit Gmail';
+  const u = o?.id === 'INBOX' && o.ungelesen ? `${o.ungelesen.toLocaleString('de-DE')} ungelesen · live` : 'live mit Gmail';
   $('#unter').textContent = DEMO ? `${u} · Vorschau` : u;
 }
 
