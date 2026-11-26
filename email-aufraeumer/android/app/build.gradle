@@ -1,0 +1,38 @@
+// Tiry's Mails für Android: dünne native Hülle um die Handy-App (lädt tiry38.github.io/Tiry/mails)
+// plus Hintergrund-Wächter für eigene Popups. Keine Fremdbibliotheken.
+plugins { id 'com.android.application' }
+
+def versionNr = (System.getenv('APP_VERSION') ?: '1').toInteger()
+
+android {
+    namespace 'de.tiry.mails'
+    compileSdk 35
+    defaultConfig {
+        applicationId 'de.tiry.mails'
+        minSdk 26
+        targetSdk 35
+        versionCode versionNr
+        versionName "1.${versionNr}"
+    }
+    signingConfigs {
+        release {
+            def ks = System.getenv('KEYSTORE_DATEI')
+            if (ks) {
+                storeFile file(ks)
+                storePassword System.getenv('KEYSTORE_PASSWORT')
+                keyAlias 'tirysmails'
+                keyPassword System.getenv('KEYSTORE_PASSWORT')
+            }
+        }
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            signingConfig System.getenv('KEYSTORE_DATEI') ? signingConfigs.release : signingConfigs.debug
+        }
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+}

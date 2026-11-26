@@ -1,0 +1,80 @@
+name: Tiry's Mails Android-App bauen
+
+# Baut die Android-App (email-aufraeumer/android) und legt sie ins Release „tirys-mails-android“:
+#   https://github.com/Tiry38/Tiry/releases/download/tirys-mails-android/Tirys-Mails.apk
+# Die App prüft version.json im selben Release und aktualisiert sich selbst.
+# Signatur-Schlüssel: liegt in einem ENTWURFS-Release (nur für Repo-Besitzer sichtbar), wird beim ersten Lauf erzeugt.
+# Gleicher Schlüssel = Updates installieren sich über die alte Version (ohne Deinstallieren).
+on:
+  push:
+    branches: [main, 'claude/**']
+    paths: ['email-aufraeumer/android/**', '.github/workflows/tirys-mails-android.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: tirys-mails-android
+  cancel-in-progress: false
+
+jobs:
+  apk:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    defaults:
+      run:
+        working-directory: email-aufraeumer/android
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      KEYSTORE_PASSWORT: tirysmails-signatur
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+      - name: Signatur-Schlüssel holen (oder einmalig erzeugen)
+        shell: bash
+        run: |
+          set -e
+          ID=$(gh api "repos/${{ github.repository }}/releases?per_page=100" --jq '[.[] | select(.draft and .name=="Tirys Mails Signatur")][0].assets[] | select(.name=="signatur.jks") | .id' || true)
+          if [ -n "$ID" ]; then
+            gh api -H "Accept: application/octet-stream" "repos/${{ github.repository }}/releases/assets/$ID" > "$RUNNER_TEMP/signatur.jks"
+            echo "Schlüssel vorhanden"
+          else
+            keytool -genkeypair -v -keystore "$RUNNER_TEMP/signatur.jks" -alias tirysmails -keyalg RSA -keysize 4096 -validity 20000 \
+              -storepass "$KEYSTORE_PASSWORT" -keypass "$KEYSTORE_PASSWORT" -dname "CN=Tirys Mails, O=Tiry, C=DE"
+            gh release create "tirys-mails-signatur" "$RUNNER_TEMP/signatur.jks" --draft --title "Tirys Mails Signatur" \
+              --notes "Nicht veröffentlichen, nicht löschen: Signatur-Schlüssel der Android-App (sonst gehen Updates nicht mehr)." --repo "${{ github.repository }}"
+            echo "Schlüssel neu erzeugt und als Entwurf gesichert"
+          fi
+          echo "KEYSTORE_DATEI=$RUNNER_TEMP/signatur.jks" >> "$GITHUB_ENV"
+      - name: APK bauen
+        run: |
+          chmod +x gradlew
+          APP_VERSION=${{ github.run_number }} ./gradlew assembleRelease --no-daemon --console=plain
+          cp app/build/outputs/apk/release/app-release.apk Tirys-Mails.apk
+          echo "{\"code\": ${{ github.run_number }}, \"name\": \"1.${{ github.run_number }}\"}" > version.json
+          ls -la Tirys-Mails.apk
+      - name: Signatur prüfen
+        run: |
+          "$ANDROID_HOME"/build-tools/$(ls "$ANDROID_HOME"/build-tools | sort -V | tail -1)/apksigner verify --print-certs Tirys-Mails.apk | head -3
+      - uses: actions/upload-artifact@v4
+        with:
+          name: tirys-mails-apk
+          path: email-aufraeumer/android/Tirys-Mails.apk
+      - name: Release tirys-mails-android aktualisieren
+        shell: bash
+        run: |
+          TAG="tirys-mails-android"
+          git tag -f "$TAG" "$GITHUB_SHA"
+          git push -f origin "refs/tags/$TAG"
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            gh release upload "$TAG" Tirys-Mails.apk version.json --clobber
+            gh release edit "$TAG" --title "Tiry's Mails Android 1.${{ github.run_number }}" --latest=false
+          else
+            gh release create "$TAG" Tirys-Mails.apk version.json --verify-tag --latest=false \
+              --title "Tiry's Mails Android 1.${{ github.run_number }}" \
+              --notes "Tiry's Mails als echte Android-App mit eigenen Popups. Einmal installieren, danach aktualisiert sie sich selbst."
+          fi

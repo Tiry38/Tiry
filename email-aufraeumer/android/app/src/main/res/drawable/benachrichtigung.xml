@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Fünf Sortenbalken als weißes Symbol für die Statusleiste -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp" android:height="24dp" android:viewportWidth="24" android:viewportHeight="24">
+    <path android:fillColor="#FFFFFFFF" android:pathData="M3,4h2.4a0.6,0.6 0 0 1 0.6,0.6v15.4h-3.6v-15.4a0.6,0.6 0 0 1 0.6,-0.6z" />
+    <path android:fillColor="#FFFFFFFF" android:pathData="M7.2,9.3h2.4a0.6,0.6 0 0 1 0.6,0.6v10.1h-3.6v-10.1a0.6,0.6 0 0 1 0.6,-0.6z" />
+    <path android:fillColor="#FFFFFFFF" android:pathData="M11.4,6.1h2.4a0.6,0.6 0 0 1 0.6,0.6v13.3h-3.6v-13.3a0.6,0.6 0 0 1 0.6,-0.6z" />
+    <path android:fillColor="#FFFFFFFF" android:pathData="M15.6,12.5h2.4a0.6,0.6 0 0 1 0.6,0.6v6.9h-3.6v-6.9a0.6,0.6 0 0 1 0.6,-0.6z" />
+    <path android:fillColor="#FFFFFFFF" android:pathData="M19.8,8.2h1.6a0.6,0.6 0 0 1 0.6,0.6v11.2h-2.8v-11.2a0.6,0.6 0 0 1 0.6,-0.6z" />
+</vector>

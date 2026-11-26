@@ -16,7 +16,11 @@ export const clientId = () => lies(K.client);
 export function clientIdSetzen(id: string) { schreib(K.client, id.trim()); }
 export const gueltigeClientId = (id: string) => /^[0-9]+-[a-z0-9]+\.apps\.googleusercontent\.com$/i.test(id.trim());
 
+/** Echte Android-App (Hülle): Anmeldung und dauerhafter Schlüssel liegen dort verschlüsselt. */
+export const nativ = (): any => (window as any).TirysNative ?? null;
+
 export function token(): string | null {
+  if (nativ()) return nativ().zugang() || null;
   const t = lies(K.token), a = Number(lies(K.ablauf) ?? 0);
   return t && Date.now() < a - 60_000 ? t : null;
 }
@@ -55,4 +59,5 @@ export function anmelden(still = false) {
   location.assign(u.toString());
 }
 
-export function abmelden() { schreib(K.token, null); schreib(K.ablauf, null); }
+export function abmelden() {
+  if (nativ()) nativ().abmelden(); schreib(K.token, null); schreib(K.ablauf, null); }

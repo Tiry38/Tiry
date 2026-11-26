@@ -2,7 +2,7 @@
 import { Postfach, type Ordner, type Zeile, type Lesen } from '../src/core/postfach';
 import type { GmailPort } from '../src/core/gmail';
 import { KATEGORIE_NAME, type Kategorie } from '../src/core/types';
-import { textZuHtml } from '../src/core/mime';
+import { textZuHtml, bytesZuBase64 } from '../src/core/mime';
 import { erzeugeWebGmail, AnmeldungAbgelaufen } from './gmailWeb';
 import * as an from './anmeldung';
 
@@ -80,19 +80,20 @@ function kategorieVon(_id: string, labels: string[]): Kategorie | null {
   return labels.includes('SPAM') ? 'spam' : null;
 }
 
-function toast(text: string, rueck?: () => void) {
+function toast(text: string, rueck?: () => void, knopf?: { text: string; tun: () => void }) {
   const t = $('#toast');
-  t.innerHTML = `<span>${h(text)}</span>${rueck ? '<button class="knopf">Rückgängig</button>' : ''}`;
-  if (rueck) t.querySelector('button')!.addEventListener('click', () => { t.classList.remove('an'); rueck(); });
+  const k = knopf ?? (rueck ? { text: 'Rückgängig', tun: rueck } : null);
+  t.innerHTML = `<span>${h(text)}</span>${k ? `<button class="knopf">${h(k.text)}</button>` : ''}`;
+  if (k) t.querySelector('button')!.addEventListener('click', () => { t.classList.remove('an'); k.tun(); });
   t.classList.add('an');
-  clearTimeout((t as any)._t); (t as any)._t = setTimeout(() => t.classList.remove('an'), rueck ? 6500 : 3500);
+  clearTimeout((t as any)._t); (t as any)._t = setTimeout(() => t.classList.remove('an'), knopf ? 12000 : rueck ? 6500 : 3500);
 }
 const arbeitet = (an_: boolean) => document.body.classList.toggle('arbeitet', an_);
 function blitz() { document.body.classList.remove('blitz'); void document.body.offsetWidth; document.body.classList.add('blitz'); }
 
 async function sicher<T>(f: () => Promise<T>): Promise<T | undefined> {
   try { return await f(); } catch (e) {
-    if (e instanceof AnmeldungAbgelaufen) { an.anmelden(true); return undefined; }
+    if (e instanceof AnmeldungAbgelaufen) { if (NATIV) nativStartSeite('Die Anmeldung ist abgelaufen – bitte einmal neu anmelden.'); else an.anmelden(true); return undefined; }
     toast(`Hat nicht geklappt: ${(e as Error).message}`); return undefined;
   } finally { arbeitet(false); }
 }
@@ -128,7 +129,8 @@ function tagGruppe(t: number) {
 }
 
 // ---------- Auf den Startbildschirm ----------
-const ALS_APP = matchMedia('(display-mode: standalone), (display-mode: fullscreen)').matches || (navigator as any).standalone === true;
+const NATIV = an.nativ();
+const ALS_APP = !!NATIV || matchMedia('(display-mode: standalone), (display-mode: fullscreen)').matches || (navigator as any).standalone === true;
 let installAngebot: any = null;
 addEventListener('beforeinstallprompt', (e) => { e.preventDefault(); installAngebot = e; document.querySelectorAll<HTMLElement>('[data-install]').forEach((b) => (b.hidden = false)); });
 function installHinweis(): string {
@@ -407,10 +409,79 @@ function ordnerBogen() {
 function kontoBogen() {
   const b = bogen('Konto', `<p class="erklaer">${DEMO ? 'Vorschau ohne Konto.' : `Angemeldet als <b>${h(ich)}</b>.`} Mails gehen nur zwischen diesem Handy und Google hin und her – kein Server dazwischen.</p>
     ${installHinweis().replace('class="app-ok"', 'class="app-ok erklaer"').replace('class="app-hinweis"', 'class="app-hinweis erklaer"')}
+    ${NATIV ? '<button class="wahl" id="k-popups">Popups bei neuen Mails</button>' : ANDROID_BROWSER ? `<a class="wahl" href="${APK}">Echte Android-App mit Popups laden</a>` : ''}
     <button class="wahl" id="k-pc">Was macht der PC?</button>
     <button class="wahl" id="k-ab">${DEMO ? 'Vorschau beenden' : 'Abmelden'}</button>`);
   $('#k-pc', b.el).addEventListener('click', () => { b.zu(); aufraeumerBogen(); });
+  b.el.querySelector('#k-popups')?.addEventListener('click', () => { b.zu(); setTimeout(popupBogen, 250); });
   $('#k-ab', b.el).addEventListener('click', () => { an.abmelden(); location.href = location.pathname; });
+}
+
+// ---------- Echte Android-App: Einrichtung, Popups, Update ----------
+const APK = 'https://github.com/Tiry38/Tiry/releases/download/tirys-mails-android/Tirys-Mails.apk';
+const ANDROID_BROWSER = !NATIV && /Android/i.test(navigator.userAgent);
+
+function nativStartSeite(fehler?: string) {
+  document.body.dataset.ansicht = 'start';
+  const datei = NATIV.hatZugangsdatei();
+  const schritt = datei ? 3 : 1;
+  const zeile = (n: number, titel: string, inhalt: string) =>
+    `<li class="schritt ${schritt > n ? 'fertig' : schritt === n ? 'jetzt' : ''}"><b>${n}</b><div><strong>${titel}</strong>${inhalt}</div></li>`;
+  app.innerHTML = `<section class="start">
+    ${marke(true)}
+    <h1>Fast <em>fertig.</em></h1>
+    <p>Die echte App braucht einen eigenen Zugang bei Google – damit sie dauerhaft angemeldet bleibt und dir Popups schicken kann.</p>
+    <ol class="schritte">
+      ${zeile(1, 'Zugang bei Google anlegen', `<p>Erst <b>diese 5 Schritte merken</b> (oder Bildschirmfoto), dann den Knopf drücken.</p>
+        <ol class="merk">
+          <li><span>Oben links muss <b>dein Projekt vom PC-Programm</b> stehen.</span></li>
+          <li><span><span class="g">Anwendungstyp</span> → <span class="g">Desktop-App</span></span></li>
+          <li><span><span class="g">Name</span>: <b>Handy-App</b></span></li>
+          <li><span>Unten <span class="g">Erstellen</span>. Im Fenster auf <span class="g">JSON herunterladen</span> drücken.</span></li>
+          <li><span>Zurück zu Tiry's Mails (unten in der Leiste wischen oder über „Letzte Apps“).</span></li>
+        </ol>
+        <button class="knopf voll gross" data-n="google">Google öffnen</button>
+        <p class="tipp">Keine Adressen eintragen nötig – bei „Desktop-App“ fragt Google nicht danach.</p>`)}
+      ${zeile(2, 'Heruntergeladene Datei wählen', `<p>Die Datei heißt <b>client_secret_….json</b> und liegt in <b>Downloads</b>.</p>
+        <button class="knopf voll" data-n="datei">${datei ? 'Datei gewählt ✓ – andere wählen' : 'Datei wählen'}</button>`)}
+      ${zeile(3, 'Anmelden', `<p>Der Browser öffnet sich: <b>dein Konto wählen</b>. Kommt „Google hat diese App nicht überprüft“: <b>Weiter</b>. Dann <b>alle Haken setzen</b> und <b>Weiter</b>. Danach springst du von selbst hierher zurück.</p>
+        <button class="knopf voll" data-n="los" ${datei ? '' : 'disabled'}>Mit Google anmelden</button>`)}
+    </ol>
+    ${fehler ? `<p class="fehler" role="alert">${h(fehler)}</p>` : ''}
+  </section>`;
+  $('[data-n="google"]').addEventListener('click', () => NATIV.extern('https://console.cloud.google.com/auth/clients/create'));
+  $('[data-n="datei"]').addEventListener('click', () => NATIV.zugangsdateiWaehlen());
+  $('[data-n="los"]').addEventListener('click', (e) => { (e.currentTarget as HTMLButtonElement).textContent = 'Warte auf Google …'; NATIV.anmelden(); });
+}
+(window as any).__nativeDatei = (fehler: string) => { if (fehler) nativStartSeite(fehler); else { nativStartSeite(); toast('Datei übernommen ✓ Jetzt anmelden.'); } };
+(window as any).__nativeAngemeldet = (fehler: string) => { if (fehler) nativStartSeite(fehler); else location.replace(location.pathname + '?app=1'); };
+(window as any).__oeffneMail = (id: string) => { if (document.querySelector('.schreib-ebene')) return; void lesen(id); };
+(window as any).__schreibeAn = (adr: string) => schreiben({ an: [decodeURIComponent(adr.split('?')[0])] });
+(window as any).__nativeUpdate = (name: string) => toast(`Neue App-Version ${name} ist da.`, undefined, { text: 'Installieren', tun: () => NATIV?.updateInstallieren() });
+(window as any).__nativeUpdateFehler = (t: string) => toast(t);
+(window as any).__nativeZustand = () => { if (document.querySelector('.bogen[aria-label="Popups"]')) popupBogen(); };
+
+/** Popups einrichten: Erlaubnis, Wächter, Akku-Ausnahme – mit Live-Zustand. */
+function popupBogen() {
+  if (!NATIV) return;
+  const erlaubt = NATIV.popupsErlaubt(), waechter = NATIV.waechterAn(), akku = NATIV.akkuFrei();
+  const zeile = (ok: boolean, titel: string, text: string, knopf: string) => `<div class="pz ${ok ? 'ok' : ''}"><b>${ok ? '✓' : '!'}</b><div><strong>${titel}</strong><p>${text}</p>${ok ? '' : knopf}</div></div>`;
+  const offen = document.querySelector('.bogen[aria-label="Popups"]');
+  const inhalt = `
+    ${zeile(erlaubt, 'Popups erlaubt', erlaubt ? 'Android darf dir Popups von Tiry\'s Mails zeigen.' : 'Android muss Popups für Tiry\'s Mails einmal erlauben.', '<button class="knopf voll" data-p="erlauben">Erlauben</button>')}
+    ${zeile(akku, 'Läuft auch im Ruhezustand', akku ? 'Android schickt den Wächter nicht schlafen.' : 'Sonst kommen Popups bei ausgeschaltetem Bildschirm verspätet. Im nächsten Fenster <b>Zulassen</b> drücken.', '<button class="knopf voll" data-p="akku">Freigeben</button>')}
+    <label class="schalter pz-schalter"><input type="checkbox" data-p="waechter" ${waechter ? 'checked' : ''}>Popups bei neuen wichtigen Mails</label>
+    <p class="erklaer">Popups kommen nur für <b>wichtige und persönliche Mails</b> – Werbung, Newsletter, soziale Netzwerke und Spam bleiben still. Oben in der Leiste siehst du dafür dauerhaft ein kleines Symbol.</p>
+    <button class="wahl" data-p="einst">Ton & Vibration bei Popups ändern</button>`;
+  if (offen) { offen.querySelector('.bogen-inhalt')!.innerHTML = inhalt; binden(offen as HTMLElement); return; }
+  const b = bogen('Popups', inhalt);
+  binden(b.el);
+  function binden(el: HTMLElement) {
+    el.querySelector('[data-p="erlauben"]')?.addEventListener('click', () => NATIV.popupsAnfragen());
+    el.querySelector('[data-p="akku"]')?.addEventListener('click', () => NATIV.akkuAnfragen());
+    el.querySelector('[data-p="einst"]')?.addEventListener('click', () => NATIV.popupEinstellungen());
+    el.querySelector<HTMLInputElement>('[data-p="waechter"]')?.addEventListener('change', (e) => { NATIV.waechter((e.target as HTMLInputElement).checked); toast((e.target as HTMLInputElement).checked ? 'Popups an' : 'Popups aus'); });
+  }
 }
 
 // ---------- Aufräumer heute ----------
@@ -513,6 +584,7 @@ async function lesen(id: string) {
   rest.querySelectorAll<HTMLButtonElement>('[data-anhang]').forEach((b) => b.addEventListener('click', async () => {
     const a = liste[Number(b.dataset.anhang)]; arbeitet(true);
     const daten = await sicher(() => post.anhang(m.id, a)); if (!daten) return;
+    if (NATIV) { const f = NATIV.speichern(a.name, a.mime, bytesZuBase64(daten)); toast(f ? `Nicht gespeichert: ${f}` : `„${a.name}“ liegt in Downloads`); return; }
     const url = URL.createObjectURL(new Blob([daten as BlobPart], { type: a.mime }));
     const l = document.createElement('a'); l.href = url; l.download = a.name; document.body.append(l); l.click(); l.remove();
     setTimeout(() => URL.revokeObjectURL(url), 30_000);
@@ -674,7 +746,7 @@ async function abgleich() {
       void ordnerLaden();
     }
   } catch (e) {
-    if (e instanceof AnmeldungAbgelaufen) { if (!document.querySelector('.schreib-ebene')) an.anmelden(true); return; }
+    if (e instanceof AnmeldungAbgelaufen) { if (NATIV) return; if (!document.querySelector('.schreib-ebene')) an.anmelden(true); return; }
     if ((e as any)?.code === 404) { const p = await gmail.profil(); historyId = p.historyId; }
     document.getElementById('live')?.classList.add('aus');
   }
@@ -714,7 +786,10 @@ async function start() {
   if ('serviceWorker' in navigator && !DEMO && location.protocol === 'https:') navigator.serviceWorker.register('sw.js').catch(() => {});
   const r = an.rueckkehrAuswerten();
   if (DEMO) { gmail = await demoGmail(); ich = 'tiry@gmail.com'; }
-  else {
+  else if (NATIV) {
+    if (!NATIV.angemeldet()) { nativStartSeite(); return; }
+    gmail = erzeugeWebGmail(an.token);
+  } else {
     if (r && !r.ok) { if (r.still) { an.anmelden(false); return; } startSeite(r.fehler); return; }
     if (!an.clientId()) { startSeite(); return; }
     if (!an.token()) { if (an.email()) { an.anmelden(true); return; } startSeite(); return; }
@@ -727,6 +802,7 @@ async function start() {
   const p = await sicher(() => gmail.profil());
   if (!p) return;
   ich = p.email; historyId = p.historyId; if (!DEMO) an.merkeEmail(ich);
+  if (NATIV) { NATIV.merkeEmail(ich); if (!NATIV.popupsErlaubt() || !NATIV.akkuFrei()) setTimeout(popupBogen, 900); }
   await ordnerLaden();
   await laden(true);
   balkenStoss(0.8);

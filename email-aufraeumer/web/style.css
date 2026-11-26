@@ -244,6 +244,13 @@ body:has(.ebene) .toast { bottom: calc(84px + var(--unten)); }
 .eingabe.ok { border-color: var(--c-wichtig); }
 .tipp code { font-size: 12px; overflow-wrap: anywhere; }
 .mono { font-family: ui-monospace, Menlo, monospace; font-size: 15px; overflow-wrap: anywhere; }
+.pz { display: grid; grid-template-columns: 40px 1fr; gap: 12px; padding: 14px 12px; border-bottom: 1px solid var(--linie); }
+.pz > b { width: 40px; height: 40px; border-radius: 12px; display: grid; place-items: center; font: 800 20px var(--display); background: var(--c-werbung); color: var(--tinte); }
+.pz.ok > b { background: var(--c-wichtig); }
+.pz strong { display: block; font-size: 17px; }
+.pz p { margin: 2px 0 10px; color: var(--text-2); font-size: 15px; }
+.pz.ok p { margin-bottom: 0; }
+.pz-schalter { padding: 12px; }
 .tipp { font-size: 14px; color: var(--text-3); margin: 6px 0 0; }
 .demo-link { color: var(--text-3); font-size: 15px; }
 
