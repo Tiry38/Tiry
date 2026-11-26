@@ -27,8 +27,7 @@ function gesendet(gmail: FakeGmail) {
 }
 
 async function scharf(t: ReturnType<typeof aufbau>) {
-  t.vor(7 * TAG + 1);
-  expect(t.dienst.scharfSchalten().ok).toBe(true);
+  expect((await t.dienst.scharfSchalten()).ok).toBe(true);
 }
 
 describe('Trockenlauf', () => {
@@ -49,14 +48,19 @@ describe('Trockenlauf', () => {
     expect(t.posts.length + t.gmail.gesendet.length).toBe(0);
   });
 
-  it('Scharf schalten erst nach 7 Tagen', async () => {
-    const t = aufbau();
-    expect(t.dienst.scharfSchalten()).toMatchObject({ ok: false });
-    t.vor(6 * TAG);
-    expect(t.dienst.scharfSchalten().grund).toMatch(/1 Tag/);
-    t.vor(TAG + 1);
-    expect(t.dienst.scharfSchalten().ok).toBe(true);
+  it('„Jetzt wirklich aufräumen“ geht sofort und räumt die Mails aus dem Probelauf mit auf', async () => {
+    const t = aufbau(); gesendet(t.gmail);
+    await t.dienst.starten(); t.dienst.stoppen();
+    const spam = fall('Gmail-Spam Krypto'); const mama = fall('Mama (Kontakt)'); const rechnung = fall('Rechnung Vodafone');
+    for (const m of [spam, mama, rechnung]) t.gmail.hinzufuegen(m);
+    await t.dienst.tick();
+    expect(t.gmail.get(spam.id).labelIds).not.toContain('TRASH'); // Probelauf: nichts angefasst
+    const r = await t.dienst.scharfSchalten();
+    expect(r).toMatchObject({ ok: true, nachgeholt: 1 });
     expect(t.db.einstellungen().trockenlauf).toBe(false);
+    expect(t.gmail.get(spam.id).labelIds).toContain('TRASH');
+    expect(t.gmail.get(mama.id).labelIds).toEqual(mama.labelIds);
+    expect(t.gmail.get(rechnung.id).labelIds).toEqual(rechnung.labelIds);
   });
 });
 

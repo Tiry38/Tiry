@@ -9,3 +9,4 @@ tokens*
 *.bin
 .env
 screens/tmp/
+screens/*-ganz.png

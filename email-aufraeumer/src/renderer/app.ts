@@ -1,5 +1,6 @@
 // Oberfläche des Email-Aufräumers. Vanilla TypeScript, kein Framework.
-import { Strom, type Art } from './strom.js';
+import { Sortierer, FAECHER, type Fach } from './sortierer.js';
+type Art = 'weg' | 'bleibt' | 'pruefen';
 
 type Kategorie = 'wichtig' | 'persoenlich' | 'werbung' | 'newsletter' | 'benachrichtigung' | 'spam' | 'phishing';
 type Aktion = 'behalten' | 'label' | 'archivieren' | 'gelesen' | 'abmelden' | 'papierkorb';
@@ -20,7 +21,7 @@ const AKT: Record<Aktion, string> = { behalten: 'Behalten', label: 'Etikett', ar
 
 let z: any = null;              // Zustand vom Hauptprozess
 let ansicht = 'cockpit';
-let strom: Strom;
+let maschine: Sortierer;
 let protokollFilter = { suche: '', kategorie: '' };
 
 // ---------------- Hilfen ----------------
@@ -46,7 +47,9 @@ function art(e: Eintrag): Art {
   if (e.status === 'zu_pruefen') return 'pruefen';
   return e.aktionen.includes('papierkorb') || e.aktionen.includes('archivieren') ? 'weg' : 'bleibt';
 }
-function stufeNr(e: Eintrag): 0 | 1 | 2 { return e.stufe === 'regeln' ? 1 : e.stufe === 'ki' ? 2 : 0; }
+const fachVon = (k: Kategorie): Fach => (k === 'spam' || k === 'phishing' ? 'muell' : k);
+const FACH_KURZ: Record<Fach, string> = { wichtig: 'Wichtig', persoenlich: 'Privat', benachrichtigung: 'Info', newsletter: 'News', werbung: 'Werbung', muell: 'Müll' };
+const FACH_NAME: Record<Fach, string> = { wichtig: 'Wichtig', persoenlich: 'Persönlich', benachrichtigung: 'Benachrich\u00ADtigung', newsletter: 'Newsletter', werbung: 'Werbung', muell: 'Spam & Betrug' };
 function rueckgaengigMoeglich(e: Eintrag) {
   return !e.trocken && !e.rueckgaengig && e.status === 'ok' && !(e.aktionen.length === 1 && e.aktionen[0] === 'behalten') && Date.now() - e.zeit < 30 * 86400_000;
 }
@@ -90,7 +93,7 @@ function setzeStatus(s: any) {
   if (!z?.angemeldet) { b.dataset.status = 'aus'; $('#zustand-text').textContent = 'Nicht angemeldet'; return; }
   if (!s) return;
   b.dataset.status = s.status === 'fehler' ? 'fehler' : s.trockenlauf ? 'trockenlauf' : s.status === 'laeuft' ? 'laeuft' : s.status;
-  const t = s.status === 'fehler' ? 'Problem · siehe Übersicht' : s.status === 'startet' ? 'richtet sich ein …' : s.trockenlauf ? `Probelauf · Tag ${Math.min(7, 8 - s.trockenlaufRestTage)}/7` : s.status === 'laeuft' ? 'Läuft · räumt auf' : s.status === 'startet' ? 'startet …' : s.status;
+  const t = s.status === 'fehler' ? 'Problem · siehe Übersicht' : s.status === 'startet' ? 'richtet sich ein …' : s.trockenlauf ? 'Probelauf' : s.status === 'laeuft' ? 'Läuft · räumt auf' : s.status === 'startet' ? 'startet …' : s.status;
   $('#zustand-text').textContent = t;
   $('#schiene-fuss').innerHTML = `${s.email ? h(s.email) + '<br>' : ''}${s.letzterLauf ? 'Zuletzt nachgeschaut ' + uhr(s.letzterLauf) : 'Noch nicht nachgeschaut'}`;
 }
@@ -109,14 +112,7 @@ function zeigeAnsicht(ziel: string, fokus = false) {
   const dvt = (document as any).startViewTransition;
   if (dvt && !RUHIG) dvt.call(document, wechsel); else wechsel();
 }
-function zeiger() {
-  const aktiv = $(`#nav button[aria-current='page']`);
-  const z = $('#nav-zeiger');
-  if (!aktiv) return;
-  const li = aktiv.parentElement!;
-  if (matchMedia('(max-width: 760px)').matches) z.style.setProperty('--x', `${li.offsetLeft}px`);
-  else { z.style.setProperty('--y', `${li.offsetTop}px`); z.style.height = `${li.offsetHeight}px`; }
-}
+function zeiger() { /* aktive Seite wird per aria-current hervorgehoben */ }
 
 async function zeichne() {
   switch (ansicht) {
@@ -131,83 +127,98 @@ async function zeichne() {
 
 // ---------------- 1 Cockpit ----------------
 let heldWert = 0;
+/** Was mit einer Sorte passiert, in drei Wörtern. */
+function fachTat(f: Fach): string {
+  const a: Aktion[] = z.einstellungen.aktionen[f === 'muell' ? 'spam' : f] ?? [];
+  if (a.includes('papierkorb')) return '→ Papierkorb';
+  if (a.includes('archivieren')) return '→ Archiv';
+  if (a.includes('label')) return 'bleibt, mit Etikett';
+  return 'bleibt';
+}
+
 async function cockpit() {
   const el = $('#ansicht-cockpit');
-  if (!z.angemeldet) return anmeldung(el);
+  const oben = $('#cockpit-oben'), unten = $('#cockpit-unten');
+  $('#maschine-box').hidden = !z.angemeldet;
+  if (!z.angemeldet) { unten.innerHTML = ''; return anmeldung(oben); }
   const st = z.statistik; const s = z.status ?? {};
   const probe = z.einstellungen.trockenlauf;
-  const rest = s.trockenlaufRestTage ?? 7;
-  const tag = Math.min(7, 8 - rest);
-  const liste: Eintrag[] = await api.rufe('protokoll', { limit: 12 });
   const lesezeit = st.lesezeitMinutenWoche >= 60 ? `${Math.floor(st.lesezeitMinutenWoche / 60)} Std. ${st.lesezeitMinutenWoche % 60} Min.` : `${st.lesezeitMinutenWoche} Min.`;
 
-  // Die Ansage: ein Satz, was gerade los ist, und was Tiry tun muss
-  let titel: string, text: string, schritt: string, knopf = '';
+  let art = '', titel: string, text: string, naechstes: string, knopf = '';
   if (s.status === 'fehler') {
-    titel = 'Es hakt gerade.';
-    text = `Google meldet: „${h(s.fehler)}“. Deine Mails sind sicher – es wurde nichts verändert.`;
-    schritt = 'Drück auf „Nochmal versuchen“. Hilft das nicht, schick einen Screenshot.';
-    knopf = '<button class="knopf voll gross" data-tat="pruefen">Nochmal versuchen</button>';
+    art = 'fehler'; titel = 'Es hakt gerade.';
+    text = `Google meldet: „${h(s.fehler)}“. Deine Mails sind sicher – nichts wurde verändert.`;
+    naechstes = 'Drück auf „Nochmal versuchen“. Hilft das nicht, schick mir einen Screenshot.';
+    knopf = '<button class="knopf gross" data-tat="pruefen">Nochmal versuchen</button>';
   } else if (s.status === 'startet') {
-    titel = 'Ich richte mich ein …';
-    text = 'Ich lese gerade, wem du schon geschrieben hast. Diese Leute fasse ich nie an. Das dauert 1–2 Minuten.';
-    schritt = 'Du musst nichts tun.';
+    art = 'startet'; titel = 'Ich richte mich ein …';
+    text = 'Ich lese, wem du schon geschrieben hast – diese Leute fasse ich nie an. Dauert 1–2 Minuten.';
+    naechstes = 'Du musst nichts tun.';
   } else if (probe) {
-    titel = 'Alles läuft. Du musst nichts tun.';
-    text = `Ich schaue jede Minute nach neuen Mails. Noch ist <b>Probelauf</b>: Ich zeige dir nur, was ich wegräumen würde – angefasst wird nichts.`;
-    schritt = rest > 0 ? `In ${rest} ${rest === 1 ? 'Tag' : 'Tagen'} kannst du hier auf „Jetzt wirklich aufräumen“ drücken.` : 'Die 7 Probetage sind um. Wenn dir gefällt, was du unten siehst: los.';
-    knopf = `<button class="knopf rot gross" data-tat="scharf" ${rest > 0 ? 'disabled' : ''}>Jetzt wirklich aufräumen</button>`;
+    art = 'probe'; titel = 'Probelauf: Ich zeige nur, was ich tun würde.';
+    text = 'Ich sortiere jede neue Mail – aber angefasst wird noch nichts. Gestreifte Fächer = würde ich wegräumen.';
+    naechstes = 'Passt das? Dann los – ab dann räume ich echt auf.';
+    knopf = '<button class="knopf gross" data-tat="scharf">Jetzt wirklich aufräumen</button>';
   } else {
-    titel = 'Alles läuft. Ich räume auf.';
-    text = `Neue Mails sortiere ich innerhalb einer Minute. Rechnungen, Verträge und Leute, denen du schreibst, fasse ich nie an.`;
-    schritt = 'Du musst nichts tun. Alles lässt sich unter „Verlauf“ 30 Tage lang zurückholen.';
+    art = 'laeuft'; titel = 'Läuft. Ich räume für dich auf.';
+    text = 'Neue Mails sortiere ich innerhalb einer Minute. Rechnungen, Verträge und Leute, denen du schreibst, fasse ich nie an.';
+    naechstes = 'Du musst nichts tun. Unter „Verlauf“ holst du alles 30 Tage lang zurück.';
   }
+  oben.innerHTML = `${z.demo ? '<span class="demo-band">Demo – dein echtes Postfach wird nicht berührt</span>' : ''}
+    <section class="lage" data-art="${art}" aria-live="polite">
+      <div><h1 class="unsichtbar" id="h-cockpit">Übersicht</h1><h2>${titel}</h2><p>${text}</p><p class="naechstes">${naechstes}</p></div>
+      ${knopf}
+    </section>`;
 
-  el.innerHTML = `
-    <h1 class="unsichtbar" id="h-cockpit">Übersicht</h1>
-    ${z.demo ? '<span class="demo-band">Demo – dein echtes Postfach wird nicht berührt</span>' : ''}
-    <section class="ansage ${s.status === 'fehler' ? 'fehler' : ''}" aria-live="polite">
-      <h2 class="ansage-titel">${titel}</h2>
-      <p class="ansage-text">${text}</p>
-      ${probe && s.status !== 'fehler' ? `<div class="probetage" aria-label="Probelauf Tag ${tag} von 7">${Array.from({ length: 7 }, (_, i) => `<i class="${i < tag ? 'voll' : ''}"><span>${i + 1}</span></i>`).join('')}</div>` : ''}
-      <div class="ansage-fuss"><p><span class="etikett">Was jetzt?</span> ${schritt}</p>${knopf}</div>
-    </section>
+  // Fächer: heutige Zahlen je Sorte
+  const heute = new Date(); heute.setHours(0, 0, 0, 0);
+  const eintraege: Eintrag[] = (await api.rufe('protokoll', { limit: 3000 })).filter((e: Eintrag) => e.zeit >= heute.getTime());
+  const echt = FAECHER.map(() => 0), probeZ = FAECHER.map(() => 0);
+  for (const e of eintraege) { const i = FAECHER.indexOf(fachVon(e.kategorie)); if (e.trocken && art_(e) === 'weg') probeZ[i]++; else echt[i]++; }
+  maschine.setzeStaende(echt, probeZ);
+  $('#faecher').innerHTML = FAECHER.map((f, i) => `<li data-k="${f}"><b id="fach-${f}">${zahl(echt[i] + probeZ[i])}</b><span><span class="lang">${FACH_NAME[f]}</span><span class="kurz">${FACH_KURZ[f]}</span></span><small>${fachTat(f)}</small></li>`).join('');
+  $('#maschine-summe').innerHTML = `<b>${zahl(eintraege.length)}</b>Mails heute · ${probe ? `${zahl(st.heuteEntfernt)} würde ich wegräumen` : `${zahl(st.heuteEntfernt)} weggeräumt`}`;
 
-    <div class="zahlen">
-      <div class="zahl-gross"><b class="held-zahl ${st.heuteEntfernt ? '' : 'null'}" id="held-zahl">${zahl(heldWert)}</b>
-        <span>${probe ? 'Mails hätte ich heute<br>weggeräumt' : 'Mails heute<br>weggeräumt'}</span></div>
-      <dl class="zahlen-klein">
-        <div><dt>Diese Woche</dt><dd id="z-woche">${zahl(st.wocheEntfernt)}</dd></div>
-        <div><dt>Gesparte Lesezeit</dt><dd id="z-lesezeit">${lesezeit}</dd></div>
-        <div class="${st.zuPruefen ? 'rot' : ''}"><dt>Wartet auf dich</dt><dd>${zahl(st.zuPruefen)}${st.zuPruefen ? ' <button class="knopf klein" data-tat="zu-pruefen">Ansehen</button>' : ''}</dd></div>
-      </dl>
-    </div>
+  const liste: Eintrag[] = await api.rufe('protokoll', { limit: 10 });
+  unten.innerHTML = `<div class="zwei">
+      <section class="karte"><h2>Was zuletzt passiert ist</h2>
+        <ol class="strom-liste" id="strom-liste">${liste.map((e) => stromZeile(e)).join('') || '<li class="leer-zeile">Noch keine neue Mail angekommen. Sobald eine kommt, siehst du sie oben in die Maschine fallen.</li>'}</ol></section>
+      <section class="karte"><h2>Diese Woche</h2>
+        <dl class="zahlen-klein">
+          <div><dt>${probe ? 'Würde ich wegräumen' : 'Weggeräumt'}</dt><dd id="z-woche">${zahl(st.wocheEntfernt)}</dd></div>
+          <div><dt>Gesparte Lesezeit</dt><dd id="z-lesezeit">${lesezeit}</dd></div>
+          <div><dt>Wartet auf dich</dt><dd>${zahl(st.zuPruefen)}${st.zuPruefen ? ' <button class="knopf klein voll" data-tat="zu-pruefen">Ansehen</button>' : ''}</dd></div>
+        </dl>
+        <dl class="legende">
+          <div><dt>Archiv</dt><dd>Raus aus dem Posteingang, aber nicht gelöscht – in Gmail unter „Alle Nachrichten“.</dd></div>
+          <div><dt>Papierkorb</dt><dd>Gmail löscht nach 30 Tagen. Bis dahin holst du alles mit einem Klick zurück.</dd></div>
+          <div><dt>Geschützt</dt><dd>Rechnungen, Verträge, Bank, Leute, denen du schreibst – fasse ich nie an.</dd></div>
+        </dl></section>
+    </div>`;
 
-    <h2 class="abschnitt">Was zuletzt passiert ist</h2>
-    <ol class="strom-liste" id="strom-liste">${liste.map((e) => stromZeile(e)).join('') || '<li class="leer-zeile">Noch keine neue Mail angekommen. Sobald eine kommt, steht sie hier.</li>'}</ol>
-    <dl class="legende">
-      <div><dt>Archiv</dt><dd>raus aus dem Posteingang, aber nicht gelöscht – in Gmail unter „Alle Nachrichten“.</dd></div>
-      <div><dt>Papierkorb</dt><dd>Gmail löscht nach 30 Tagen. Bis dahin holst du alles mit einem Klick zurück.</dd></div>
-      <div><dt>Geschützt</dt><dd>Rechnungen, Verträge, Bank, Leute, denen du schreibst – fasse ich nie an.</dd></div>
-    </dl>`;
-  const zielZahl = st.heuteEntfernt;
-  const zEl = $('#held-zahl');
-  feder(heldWert, zielZahl, (v) => { zEl.textContent = zahl(Math.max(0, Math.round(v))); }, { k: 60, d: 14 });
-  heldWert = zielZahl;
   el.querySelector('[data-tat="scharf"]')?.addEventListener('click', async () => {
-    if (!(await bestaetigen('Jetzt wirklich aufräumen?', 'Ab jetzt räume ich Mails wirklich weg: ins Archiv oder in den Papierkorb. <b>Endgültig gelöscht wird nie etwas.</b> Unter „Verlauf“ holst du 30 Tage lang alles mit einem Klick zurück.', 'Ja, aufräumen', true))) return;
-    const r = await api.rufe('scharfSchalten'); melde(r.ok ? 'Los geht’s – ab jetzt wird aufgeräumt.' : r.grund); await laden(); void zeichne();
+    if (!(await bestaetigen('Jetzt wirklich aufräumen?', 'Ab jetzt räume ich Mails wirklich weg – ins Archiv oder in den Papierkorb, auch die aus dem Probelauf. <b>Endgültig gelöscht wird nie etwas.</b> Rechnungen, Verträge und Leute, denen du schreibst, fasse ich nie an. Unter „Verlauf“ holst du 30 Tage lang alles mit einem Klick zurück.', 'Ja, aufräumen'))) return;
+    const r = await api.rufe('scharfSchalten');
+    melde(r.ok ? `Los geht’s – ab jetzt wird aufgeräumt.${r.nachgeholt ? ` ${r.nachgeholt} Mails aus dem Probelauf habe ich gleich mit erledigt.` : ''}` : r.grund);
+    await laden(); void zeichne();
+    if (r.ok && await bestaetigen('Auch den alten Posteingang?', 'Bisher räume ich nur neue Mails auf. Soll ich mir auch alles anschauen, was schon im Posteingang liegt? Du siehst zuerst eine Vorschau – angefasst wird erst, wenn du dort startest.', 'Ja, Vorschau zeigen')) {
+      zeigeAnsicht('einstellungen', true);
+      try { await api.rufe('altbestandVorschau'); } catch (e) { melde((e as Error).message); }
+    }
   });
   el.querySelector('[data-tat="pruefen"]')?.addEventListener('click', async () => { await api.rufe('jetztPruefen'); await laden(); void zeichne(); });
   el.querySelector('[data-tat="zu-pruefen"]')?.addEventListener('click', () => zeigeAnsicht('pruefen', true));
 }
+const art_ = (e: Eintrag) => art(e);
+
 /** Eine Zeile in Alltagssprache: „Newsletter von gamestar.de · Betreff … → würde ins Archiv“ */
 function stromZeile(e: Eintrag, neu = false) {
   const weg = art(e) === 'weg';
   const probe = e.trocken && e.status === 'ok' && weg;
-  return `<li class="${neu ? 'neu' : ''}"><span class="zeit">${uhr(e.zeit)}</span>
-    <span class="wer"><b class="kat ${MUELL.includes(e.kategorie) && weg ? 'muell' : ''}">${KAT[e.kategorie]}</b> von ${h(e.absender)}<span class="betreff">${h(e.betreff || '(ohne Betreff)')}</span></span>
-    <span class="tat ${weg ? 'weg' : ''}">${probe ? 'würde ' : ''}${h(tatText(e))}</span></li>`;
+  return `<li class="${neu ? 'neu' : ''}" data-k="${e.kategorie}"><i class="strich"></i><span class="zeit">${uhr(e.zeit)}</span>
+    <span class="wer"><b class="kat">${KAT[e.kategorie]}</b> <span class="von">von ${h(e.absender)}</span><span class="betreff">${h(e.betreff || '(ohne Betreff)')}</span></span>
+    <span class="tat">${probe ? 'würde ' : ''}${h(tatText(e))}</span></li>`;
 }
 
 function anmeldung(el: HTMLElement) {
@@ -232,11 +243,11 @@ async function pruefen() {
   const liste = await api.rufe('zuPruefen');
   el.innerHTML = `<div class="kopf"><h1 id="h-pruefen">Du entscheidest</h1><p>Bei diesen Mails war ich mir nicht sicher. Sag mir einmal, was du willst – <b>ich merke es mir</b> für alle Mails von diesem Absender.</p></div>
     ${liste.length ? `<ul class="pruef-liste">${liste.map((p: any) => `
-      <li class="pruef" data-id="${h(p.mailId)}">
+      <li class="pruef" data-id="${h(p.mailId)}" data-k="${p.kategorie}"><i class="strich"></i>
         <div><span class="von">${h(p.name || p.absender)} · ${h(p.absender)}</span><h3>${h(p.betreff || '(ohne Betreff)')}</h3>
           ${p.snippet ? `<p class="vorschau">${h(p.snippet)}</p>` : ''}
           <p class="warum">Ich glaube: <b>${KAT[p.kategorie as Kategorie]}</b>, bin mir aber nur zu ${p.sicherheit} % sicher. <span>${h(p.begruendung)}</span></p></div>
-        <div class="pruef-knoepfe"><button class="knopf gross" data-wahl="behalten">Behalten</button><button class="knopf rot gross" data-wahl="weg">Weg damit</button></div>
+        <div class="pruef-knoepfe"><button class="knopf gross" data-wahl="behalten">Behalten</button><button class="knopf voll gross" data-wahl="weg">Weg damit</button></div>
       </li>`).join('')}</ul>` : '<p class="leer">Gerade nichts zu entscheiden. Alles, was reinkam, war eindeutig.</p>'}`;
   for (const b of $$('[data-wahl]', el)) b.addEventListener('click', async () => {
     const li = b.closest('.pruef') as HTMLElement; const wahl = b.dataset.wahl as 'behalten' | 'weg';
@@ -259,9 +270,9 @@ async function absender() {
   const el = $('#ansicht-absender');
   const liste = await api.rufe('absender');
   const max = Math.max(1, ...liste.map((a: any) => a.anzahl));
-  el.innerHTML = `<div class="kopf"><h1 id="h-absender">Wer schreibt dir?</h1><p>Die Absender mit den meisten Mails. Der Balken zeigt die Menge – der schwarze Teil, wie viele du davon geöffnet hast.</p></div>
+  el.innerHTML = `<div class="kopf"><h1 id="h-absender">Wer schreibt dir?</h1><p>Die Absender mit den meisten Mails. Der Balken zeigt die Menge – der kräftige Teil, wie viele du davon geöffnet hast.</p></div>
     ${liste.length ? `<ul class="absender-liste">${liste.map((a: any) => `
-      <li class="absender" data-adr="${h(a.adresse)}">
+      <li class="absender" data-adr="${h(a.adresse)}" data-k="${a.kategorie ?? ''}">
         <span class="menge">${zahl(a.anzahl)}</span>
         <div><div class="name">${h(a.name)}</div><div class="adr">${h(a.adresse)} · ${a.gelesen} von ${a.anzahl} gelesen${a.kategorie ? ' · ' + KAT[a.kategorie as Kategorie] : ''}${a.abgemeldet ? ' · abgemeldet' : ''}</div>
           <div class="balken" data-stil="width:${Math.max(6, (a.anzahl / max) * 100)}%"><u></u><i data-stil="width:${(a.gelesen / a.anzahl) * 100}%"></i></div></div>
@@ -361,9 +372,9 @@ async function protokollListe() {
     const name = lauf === 'fortlaufend' ? 'Neue Mails' : lauf.startsWith('altbestand') ? 'Alter Posteingang aufgeräumt' : lauf.startsWith('entscheidung') ? 'Deine Entscheidung' : lauf.startsWith('abmelden') ? 'Abmeldung' : 'Durchgang';
     return `<section class="lauf"><div class="lauf-kopf"><span class="etikett">${name} · ${datum(es[es.length - 1].zeit)} · ${es.length} ${es.length === 1 ? 'Mail' : 'Mails'}</span>
       ${offen > 1 && lauf !== 'fortlaufend' ? `<button class="knopf klein" data-lauf="${h(lauf)}">Alle ${offen} zurückholen</button>` : ''}</div>
-      ${es.map((e) => `<div class="eintrag ${e.rueckgaengig ? 'zurueck' : ''}"><span class="zeit">${uhr(e.zeit)}</span><span class="kat ${MUELL.includes(e.kategorie) ? 'muell' : ''}">${KAT[e.kategorie]} ${e.sicherheit}%</span>
-        <span class="wer"><b>${h(e.absender)}</b> <span>${h(e.betreff)}</span></span>
-        <div class="rechts"><span class="tat ${e.trocken && art(e) === 'weg' && e.status === 'ok' ? 'trocken' : ''}">${h(tatText(e))}</span>
+      ${es.map((e) => `<div class="eintrag ${e.rueckgaengig ? 'zurueck' : ''}" data-k="${e.kategorie}"><i class="strich"></i><span class="zeit">${uhr(e.zeit)}</span>
+        <span class="wer"><b class="kat">${KAT[e.kategorie]}</b> <span class="von">von ${h(e.absender)}</span><span class="betreff">${h(e.betreff || '(ohne Betreff)')}</span></span>
+        <div class="rechts"><span class="tat">${e.trocken && art(e) === 'weg' && e.status === 'ok' ? 'würde ' : ''}${h(tatText(e))}</span>
           ${e.rueckgaengig ? '<span class="etikett">zurückgeholt</span>' : rueckgaengigMoeglich(e) ? `<button class="knopf klein" data-id="${e.id}">Zurückholen</button>` : ''}</div>
         <span class="grund">${h(e.begruendung)}${e.hinweis ? ' ' + h(e.hinweis) : ''}</span></div>`).join('')}</section>`;
   }).join('') : '<p class="leer">Keine Einträge.</p>';
@@ -389,13 +400,13 @@ async function einstellungen() {
   const rest = z.status?.trockenlaufRestTage ?? 7;
   el.innerHTML = `<div class="kopf"><h1 id="h-einstellungen">Einstellungen</h1><p>Normalerweise musst du hier nichts ändern. Alles wird sofort gespeichert.</p></div>
     <h2 class="abschnitt">Das Wichtigste</h2>
-    <div class="einst"><div><h2>Probelauf</h2><p class="erkl">${e.trockenlauf ? `Gerade ist Probelauf: Ich zeige nur, was ich tun würde. Noch ${rest} ${rest === 1 ? 'Tag' : 'Tage'}, dann kannst du in der Übersicht „Jetzt wirklich aufräumen“ drücken.` : 'Ich räume wirklich auf. Du kannst jederzeit zurück in den Probelauf.'}</p></div>
+    <div class="einst-gruppe"><div class="einst"><div><h2>Probelauf</h2><p class="erkl">${e.trockenlauf ? 'Gerade ist Probelauf: Ich zeige nur, was ich tun würde. Zum Aufräumen in der Übersicht auf „Jetzt wirklich aufräumen“ drücken.' : 'Ich räume wirklich auf. Du kannst jederzeit zurück in den Probelauf.'}</p></div>
       <div class="zeile">${e.trockenlauf ? '<span class="etikett">Probelauf läuft – nichts wird verändert</span>' : '<button class="knopf" data-tat="trocken">Zurück in den Probelauf</button>'}</div></div>
     <div class="einst"><div><h2>Wie streng?</h2><p class="erkl"><b>Vorsichtig:</b> Ich räume nur weg, wenn ich mir ganz sicher bin – mehr landet bei „Du entscheidest“.<br><b>Streng:</b> Ich räume mehr selbst weg.</p></div>
       <div class="regler"><span class="regler-wert" id="schwelle-wert">${strengText(e.schwelle)}</span><input type="range" min="0" max="100" value="${schwelleZuRegler(e.schwelle)}" id="schwelle" aria-label="Wie streng">
       <div class="regler-enden"><span>vorsichtig</span><span>streng</span></div></div></div>
     <div class="einst"><div><h2>Alten Posteingang aufräumen</h2><p class="erkl">Ich sortiere einmal alles, was schon im Posteingang liegt. Zuerst siehst du nur eine Vorschau – angefasst wird erst, wenn du startest.</p></div>
-      <div id="altbestand">${altbestandHtml(ab)}</div></div>
+      <div id="altbestand">${altbestandHtml(ab)}</div></div></div>
 
     <details class="profi">
       <summary><span>Mehr Einstellungen</span><span class="etikett">für Profis – musst du nicht anfassen</span></summary>
@@ -449,11 +460,11 @@ async function einstellungen() {
 function altbestandHtml(ab: any): string {
   if (!ab || ab.phase === 'leer') return '<button class="knopf voll gross" data-ab="vorschau">Vorschau ansehen</button>';
   const prozent = ab.gesamt ? Math.round((ab.erledigt / ab.gesamt) * 100) : 0;
-  const zaehler = `<div class="zaehler-liste">${Object.entries(ab.zaehler).map(([k, n]) => `<span><b>${zahl(n as number)}</b>${KAT[k as Kategorie]}</span>`).join('')}</div>`;
+  const zaehler = `<div class="zaehler-liste">${Object.entries(ab.zaehler).map(([k, n]) => `<span data-k="${k}"><b>${zahl(n as number)}</b>${KAT[k as Kategorie]}</span>`).join('')}</div>`;
   if (ab.phase === 'vorschau') return `<span class="etikett">Ich schaue mir alles an … ${zahl(ab.erledigt)} von ${zahl(ab.gesamt)} Mails</span><div class="fortschritt"><i data-stil="width:${prozent}%"></i></div>${zaehler}`;
   if (ab.phase === 'bereit') return `<span class="etikett">Fertig angeschaut: ${zahl(ab.gesamt)} Mails – noch nichts verändert. Das habe ich gefunden:</span>${zaehler}
     ${ab.beispiele.length ? `<ul class="beispiele">${ab.beispiele.map((b: any) => `<li>${KAT[b.kategorie as Kategorie]} · ${h(b.absender)} – ${h(b.betreff)}</li>`).join('')}</ul>` : ''}
-    <div class="zeile"><button class="knopf rot" data-ab="start">${z.einstellungen.trockenlauf ? 'Probeweise durchspielen' : 'Jetzt aufräumen'}</button><button class="knopf" data-ab="vorschau">Nochmal ansehen</button></div>`;
+    <div class="zeile"><button class="knopf voll" data-ab="start">${z.einstellungen.trockenlauf ? 'Probeweise durchspielen' : 'Jetzt aufräumen'}</button><button class="knopf" data-ab="vorschau">Nochmal ansehen</button></div>`;
   if (ab.phase === 'laeuft') return `<span class="etikett">Ich räume auf … ${zahl(ab.erledigt)} von ${zahl(ab.gesamt)} Mails</span><div class="fortschritt"><i data-stil="width:${prozent}%"></i></div>`;
   return `<span class="etikett">Fertig – ${zahl(ab.gesamt)} Mails durchgesehen. Zurückholen geht unter „Verlauf“.</span>${zaehler}<div class="zeile"><button class="knopf" data-ab="vorschau">Nochmal ansehen</button></div>`;
 }
@@ -476,27 +487,28 @@ async function filterFrage(anzahl?: number): Promise<boolean> {
 let statistikTimer: any;
 function ereignis(kanal: string, d: any) {
   if (kanal === 'aktion' && d) {
-    strom.mail(art(d), stufeNr(d), d.id);
-    const ol = document.getElementById('strom-liste');
-    if (ol && ansicht === 'cockpit') {
-      ol.insertAdjacentHTML('afterbegin', stromZeile(d, true));
-      while (ol.children.length > 14) ol.lastElementChild!.remove();
+    if (ansicht === 'cockpit') {
+      maschine.mail(fachVon(d.kategorie), d.trocken && art(d) === 'weg');
+      const ol = document.getElementById('strom-liste');
+      if (ol) {
+        ol.querySelector('.leer-zeile')?.remove();
+        ol.insertAdjacentHTML('afterbegin', stromZeile(d, true));
+        while (ol.children.length > 10) ol.lastElementChild!.remove();
+      }
     }
     clearTimeout(statistikTimer);
     statistikTimer = setTimeout(async () => {
-      await laden(); strom.setzePruefen(z.statistik.zuPruefen);
+      await laden();
       if (ansicht === 'cockpit') {
-        const ziel = z.statistik.heuteEntfernt; const el = document.getElementById('held-zahl');
         const st = z.statistik; const m = st.lesezeitMinutenWoche;
         const w = document.getElementById('z-woche'); if (w) w.textContent = zahl(st.wocheEntfernt);
         const l = document.getElementById('z-lesezeit'); if (l) l.textContent = m >= 60 ? `${Math.floor(m / 60)} Std. ${m % 60} Min.` : `${m} Min.`;
-        if (el && ziel !== heldWert) { el.classList.toggle('null', !ziel); feder(heldWert, ziel, (v) => { el.textContent = zahl(Math.max(0, Math.round(v))); }, { k: 60, d: 14 }); heldWert = ziel; }
       }
     }, 400);
-  } else if (kanal === 'status') { if (z) { z.status = d; setzeStatus(d); } }
+  } else if (kanal === 'status') { if (z) { const vorher = z.status?.status; z.status = d; setzeStatus(d); if (ansicht === 'cockpit' && vorher !== d.status) void cockpit(); } }
   else if (kanal === 'altbestand') { if (z) z.altbestand = d; const ab = document.getElementById('altbestand'); if (ab) { ab.innerHTML = altbestandHtml(d); altbestandKnoepfe(); } }
   else if (kanal === 'frage' && d?.art === 'filter') { void filterFrage(d.anzahl); }
-  else if (kanal === 'sichtbar') { d ? strom.start() : strom.pause(); }
+  else if (kanal === 'sichtbar') { d ? maschine.start() : maschine.pause(); }
 }
 
 // CSP erlaubt keine style-Attribute im HTML – Breiten u. ä. werden per CSSOM gesetzt.
@@ -508,32 +520,21 @@ new MutationObserver((ms) => { for (const m of ms) for (const n of m.addedNodes)
 
 // ---------------- Start ----------------
 async function start() {
-  strom = new Strom($<HTMLCanvasElement>('#strom'));
-  (window as any).__strom = strom;
-  const beschriften = () => {
-    const g = strom.geometrie();
-    $$('[data-m]').forEach((s) => { s.style.top = `${g.membranen[Number(s.dataset.m)]}px`; });
-    const r = $('[data-rinne]'); r.style.top = `${g.membranen[0] + 20}px`;
-    const b = $('[data-boden]'); b.style.top = `${g.boden + 18}px`; b.style.display = g.hoehe > 260 ? '' : 'none';
-    // Rinne: schräger Überlauf von der ersten Membran in einen senkrechten Schacht
-    const y0 = g.membranen[0], xl = g.rinne - 22, xr = g.rinne + 24;
-    const w = (k: string, css: string) => { $(`[data-wand="${k}"]`).style.cssText = css; };
-    const dx = xl - (g.mx1 + 4), dy = 26;
-    w('schraeg', `left:${g.mx1 + 4}px;top:${y0}px;width:${Math.hypot(dx, dy)}px;height:1.5px;transform:rotate(${Math.atan2(dy, dx)}rad)`);
-    w('links', `left:${xl}px;top:${y0 + 26}px;bottom:0;width:1.5px`);
-    w('rechts', `left:${xr}px;top:${y0 - 40}px;bottom:0;width:1.5px`);
+  maschine = new Sortierer($<HTMLCanvasElement>('#maschine'));
+  (window as any).__maschine = maschine;
+  // Landet ein Umschlag, hüpft die Zahl unter dem Fach und zählt eins hoch
+  maschine.beiLandung = (i) => {
+    const b = document.getElementById(`fach-${FAECHER[i]}`);
+    if (!b) return;
+    b.textContent = zahl((Number(b.textContent?.replace(/\./g, '')) || 0) + 1);
+    b.classList.toggle('hupf', false); void b.offsetWidth; b.classList.toggle('hupf', true);
+    setTimeout(() => b.classList.toggle('hupf', false), 260);
   };
-  new ResizeObserver(beschriften).observe($('#anlage'));
-  addEventListener('resize', zeiger);
   for (const b of $$('#nav button')) b.addEventListener('click', () => zeigeAnsicht(b.dataset.ziel!, true));
   api.auf(ereignis);
   await laden();
   zeigeAnsicht(new URLSearchParams(location.search).get('ansicht') ?? 'cockpit');
-  strom.start();
-  // Bereits vorhandene Einträge als ruhiges Sediment/Rinne vorbefüllen
-  const alt: Eintrag[] = await api.rufe('protokoll', { limit: 30 });
-  alt.reverse().forEach((e, i) => setTimeout(() => strom.mail(art(e), stufeNr(e)), i * 90));
-  setTimeout(() => strom.setzePruefen(z.statistik.zuPruefen), 3000);
+  maschine.start();
   (window as any).__bereit = true;
 }
 void start();

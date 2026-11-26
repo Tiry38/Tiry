@@ -409,14 +409,17 @@ export class Aufraeumer extends EventEmitter {
   durchlaufRueckgaengig(durchlauf: string) { return this.aus.durchlaufRueckgaengig(durchlauf); }
 
   // ---------------- Scharf schalten ----------------
-  scharfSchalten(): { ok: boolean; grund?: string } {
-    const e = this.db.einstellungen();
-    const rest = trockenlaufRestTage(e, this.jetzt());
-    if (rest > 0) return { ok: false, grund: `Der Trockenlauf läuft noch ${rest} ${rest === 1 ? 'Tag' : 'Tage'}.` };
+  /** Probelauf beenden – geht jederzeit (Tirys Entscheidung, 26.11.2026). Mails, die im Probelauf nur
+   *  angezeigt wurden, werden dabei jetzt wirklich eingeordnet. Gibt die Anzahl dieser Mails zurück. */
+  async scharfSchalten(): Promise<{ ok: boolean; grund?: string; nachgeholt: number }> {
     this.db.speichereEinstellungen({ trockenlauf: false });
     this.setStatus('laeuft');
+    const ids = [...new Set(this.db.protokoll({ limit: 100000 }).filter((e) => e.trocken && e.status === 'ok'
+      && !(e.aktionen.length === 1 && e.aktionen[0] === 'behalten')).map((e) => e.mailId))];
+    for (const id of ids) this.db.vergiss(id);
+    const nachgeholt = await this.verarbeiteIds(ids, `nach-probelauf-${new Date(this.jetzt()).toISOString()}`);
     void this.filterExport();
-    return { ok: true };
+    return { ok: true, nachgeholt };
   }
   trockenlaufWieder() {
     this.db.speichereEinstellungen({ trockenlauf: true, trockenlaufSeit: this.jetzt() });

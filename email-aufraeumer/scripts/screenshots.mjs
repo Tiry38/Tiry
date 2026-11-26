@@ -44,7 +44,7 @@ for (const g of GROESSEN) {
     }
   }
 }
-const technik = await fenster.evaluate(() => document.querySelector('#strom').getContext ? 'ok' : 'kein canvas');
+const technik = await fenster.evaluate(() => document.querySelector('#maschine').getContext ? 'ok' : 'kein canvas');
 const breite = await fenster.evaluate(() => ({ sw: document.documentElement.scrollWidth, cw: document.documentElement.clientWidth }));
 console.log(JSON.stringify({ fehler, technik, breite }, null, 1));
 await app.close();

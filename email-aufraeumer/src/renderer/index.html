@@ -12,34 +12,38 @@
 
 <header class="schiene">
   <div class="marke" aria-label="Email-Aufräumer">
-    <span class="marke-a">Auf</span><span class="marke-b">räumer</span>
+    <span class="marke-zeichen" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span>
+    <span class="marke-name">Aufräumer</span>
   </div>
-  <p class="zustand" id="zustand" role="status" aria-live="polite"><span class="zustand-strich"></span><span id="zustand-text">startet …</span></p>
+  <p class="zustand" id="zustand" role="status" aria-live="polite"><span class="zustand-punkt"></span><span id="zustand-text">startet …</span></p>
   <nav aria-label="Bereiche">
     <ol class="nav" id="nav">
-      <li><button data-ziel="cockpit"><span class="nr">01</span><span class="nav-name">Übersicht</span></button></li>
-      <li><button data-ziel="pruefen"><span class="nr">02</span><span class="nav-name">Du entscheidest</span><span class="nav-zahl" id="nav-pruefen"></span></button></li>
-      <li><button data-ziel="absender"><span class="nr">03</span><span class="nav-name">Wer schreibt dir</span></button></li>
-      <li><button data-ziel="regeln"><span class="nr">04</span><span class="nav-name">Deine Regeln</span></button></li>
-      <li><button data-ziel="protokoll"><span class="nr">05</span><span class="nav-name">Verlauf</span></button></li>
-      <li><button data-ziel="einstellungen"><span class="nr">06</span><span class="nav-name">Einstellungen</span></button></li>
+      <li><button data-ziel="cockpit"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5h18l-7 8v6l-4 2v-8z"/></svg><span class="nav-name">Übersicht</span><span class="nav-kurz" aria-hidden="true">Übersicht</span></button></li>
+      <li><button data-ziel="pruefen"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v7M12 10l-6 6M12 10l6 6M4 19h4M16 19h4"/></svg><span class="nav-name">Du entscheidest</span><span class="nav-kurz" aria-hidden="true">Prüfen</span><span class="nav-zahl" id="nav-pruefen"></span></button></li>
+      <li><button data-ziel="absender"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg><span class="nav-name">Wer schreibt dir</span><span class="nav-kurz" aria-hidden="true">Absender</span></button></li>
+      <li><button data-ziel="regeln"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h10M4 12h10M4 18h10M17 5l1.5 1.5L21 4M17 17l1.5 1.5L21 16"/></svg><span class="nav-name">Deine Regeln</span><span class="nav-kurz" aria-hidden="true">Regeln</span></button></li>
+      <li><button data-ziel="protokoll"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M12 7v5l3.5 2"/></svg><span class="nav-name">Verlauf</span><span class="nav-kurz" aria-hidden="true">Verlauf</span></button></li>
+      <li><button data-ziel="einstellungen"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h9M17 7h3M4 17h3M11 17h9"/><circle cx="15" cy="7" r="2.2"/><circle cx="9" cy="17" r="2.2"/></svg><span class="nav-name">Einstellungen</span><span class="nav-kurz" aria-hidden="true">Optionen</span></button></li>
     </ol>
-    <span class="nav-zeiger" id="nav-zeiger" aria-hidden="true"></span>
   </nav>
   <p class="schiene-fuss" id="schiene-fuss"></p>
 </header>
 
-<div class="anlage" id="anlage" aria-hidden="true">
-  <canvas id="strom"></canvas>
-  <div class="anlage-beschriftung" id="anlage-beschriftung">
-    <span data-m="0">1 · Erkennen</span><span data-m="1">2 · Deine Regeln</span><span data-m="2">3 · Unsicher? Du entscheidest</span>
-    <span data-rinne>weggeräumt</span><span data-boden>bleibt im Posteingang</span>
-    <i class="wand" data-wand="schraeg"></i><i class="wand" data-wand="links"></i><i class="wand" data-wand="rechts"></i>
-  </div>
-</div>
-
 <main id="inhalt" tabindex="-1">
-  <section class="ansicht" id="ansicht-cockpit" data-ansicht="cockpit" aria-labelledby="h-cockpit"></section>
+  <section class="ansicht" id="ansicht-cockpit" data-ansicht="cockpit" aria-labelledby="h-cockpit">
+    <div id="cockpit-oben"></div>
+    <div class="maschine" id="maschine-box">
+      <div class="maschine-kopf">
+        <h2>Heute sortiert</h2>
+        <p id="maschine-summe"></p>
+      </div>
+      <div class="maschine-buehne">
+        <canvas id="maschine" aria-hidden="true"></canvas>
+      </div>
+      <ol class="faecher" id="faecher"></ol>
+    </div>
+    <div id="cockpit-unten"></div>
+  </section>
   <section class="ansicht" id="ansicht-pruefen" data-ansicht="pruefen" aria-labelledby="h-pruefen" hidden></section>
   <section class="ansicht" id="ansicht-absender" data-ansicht="absender" aria-labelledby="h-absender" hidden></section>
   <section class="ansicht" id="ansicht-regeln" data-ansicht="regeln" aria-labelledby="h-regeln" hidden></section>
