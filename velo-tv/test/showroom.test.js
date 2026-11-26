@@ -71,7 +71,7 @@ test('Zentrale lädt Angebote + Fotos und liefert sie dem Fernseher', async () =
     assert.equal(Buffer.from(await img.arrayBuffer()).length, 5000);
     const item = await (await fetch(base + '/api/items', { method: 'POST', headers: { 'X-Key': key, 'Content-Type': 'application/json' }, body: JSON.stringify({ kind: 'showroom' }) })).json();
     assert.equal(item.kind, 'showroom');
-    assert.equal(item.duration, 120);
+    assert.equal(item.duration, 0, 'Showroom-Video standardmäßig komplett');
     assert.equal((await fetch(base + '/api/showroom/refresh', { method: 'POST' })).status, 401, 'Aktualisieren nur gekoppelt');
     // fertiges Video aus der Cloud wurde geholt und wird mit Range ausgeliefert
     d = await (await fetch(base + '/api/showroom')).json();

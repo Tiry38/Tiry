@@ -166,6 +166,7 @@ function thumbHtml(it) {
 }
 
 function dauerText(it) {
+  if (it.kind === 'showroom' && !it.duration) return 'Video komplett · Räder wechseln alle 8 s';
   if (it.kind === 'showroom') return (it.duration >= 60 ? Math.floor(it.duration / 60) + ':' + String(it.duration % 60).padStart(2, '0') + ' Min.' : it.duration + ' s') + ' · Räder wechseln alle 8 s';
   if (it.kind === 'video') {
     if (!it.duration) return it.mediaLength ? 'Ganzes Video · ' + Math.round(it.mediaLength) + ' s' : 'Ganzes Video';
@@ -333,7 +334,7 @@ function sheetFuellen(neu) {
   $('#edName').hidden = it.kind === 'text' || it.kind === 'showroom';
   $('#edTextBlock').hidden = it.kind !== 'text';
   $('#edFitRow').hidden = it.kind === 'text' || it.kind === 'showroom';
-  $('#edFullRow').hidden = it.kind !== 'video';
+  $('#edFullRow').hidden = it.kind !== 'video' && it.kind !== 'showroom';
   $('#edSoundRow').hidden = it.kind !== 'video';
   $('#edShow').hidden = neu;
   $('#edDelete').hidden = neu;
@@ -345,7 +346,7 @@ function sheetFuellen(neu) {
     $('#edTheme').innerHTML = ['herbst', 'rot', 'dunkel', 'hell', 'verlauf'].map((t) => `<button type="button" class="th-${t}${it.text.theme === t ? ' on' : ''}" data-t="${t}" title="${t}"></button>`).join('');
     $$('#edTheme button').forEach((b) => b.onclick = () => { it.text.theme = b.dataset.t; $$('#edTheme button').forEach((x) => x.classList.toggle('on', x === b)); textVorschau(); });
   }
-  $('#edFull').checked = it.kind === 'video' && !it.duration;
+  $('#edFull').checked = (it.kind === 'video' || it.kind === 'showroom') && !it.duration;
   $('#edSound').checked = !!it.sound;
   const sr = it.kind === 'showroom';
   Object.assign($('#edDur'), sr ? { min: 20, max: 600, step: 10 } : { min: 3, max: 60, step: 1 });
@@ -384,7 +385,7 @@ function durAnzeigen() {
   const voll = !$('#edFullRow').hidden && $('#edFull').checked;
   $('#edDur').disabled = voll;
   const sek = +$('#edDur').value;
-  $('#edDurShow').textContent = voll ? 'Ganzes Video' : sek >= 60 ? Math.floor(sek / 60) + ':' + String(sek % 60).padStart(2, '0') + ' Min.' : sek + ' Sekunden';
+  $('#edDurShow').textContent = voll ? (entwurf && entwurf.kind === 'showroom' ? 'Showroom-Video komplett' : 'Ganzes Video') : sek >= 60 ? Math.floor(sek / 60) + ':' + String(sek % 60).padStart(2, '0') + ' Min.' : sek + ' Sekunden';
 }
 $('#edDur').oninput = durAnzeigen;
 $('#edFull').onchange = durAnzeigen;
@@ -409,7 +410,7 @@ $('#edSave').onclick = async () => {
   const plan = planLesen();
   if ($$('#edDays button.on').length === 0) return toast('Mindestens einen Wochentag wählen', true);
   if (plan.startDate && plan.endDate && plan.startDate > plan.endDate) return toast('Das Enddatum liegt vor dem Startdatum', true);
-  const voll = entwurf.kind === 'video' && $('#edFull').checked;
+  const voll = (entwurf.kind === 'video' || entwurf.kind === 'showroom') && $('#edFull').checked;
   const body = { plan, duration: voll ? 0 : +$('#edDur').value };
   if (entwurf.kind !== 'text') { body.name = $('#edName').value.trim() || entwurf.name; body.fit = $('.seg button.on', $('#edFitRow')).dataset.fit; }
   if (entwurf.kind === 'video') body.sound = $('#edSound').checked;
@@ -435,7 +436,7 @@ async function showroomJetzt(knopf) {
   if (knopf) knopf.disabled = true;
   try {
     let it = state.items.find((i) => i.kind === 'showroom');
-    if (!it) it = await api('POST', '/api/items', { kind: 'showroom', duration: 120 });
+    if (!it) it = await api('POST', '/api/items', { kind: 'showroom', duration: 0 });
     else if (it.enabled === false) await api('PATCH', '/api/items/' + it.id, { enabled: true });
     await api('POST', '/api/tv/show', { id: it.id });
     const tvOn = presence.tv && presence.tv.online;
@@ -450,7 +451,7 @@ $('#showroomBtn').onclick = async (e) => {
   e.stopPropagation();
   if (!state) return;
   if (state.items.some((i) => i.kind === 'showroom') && !confirm('Der Live-Showroom ist schon im Programm. Trotzdem ein zweites Mal hinzufügen?')) return;
-  try { await api('POST', '/api/items', { kind: 'showroom', duration: 120 }); toast('Live-Showroom hinzugefügt – zeigt die Angebotsräder aus dem Bestand'); } catch (er) { toast(er.message, true); }
+  try { await api('POST', '/api/items', { kind: 'showroom', duration: 0 }); toast('Live-Showroom hinzugefügt – zeigt die Angebotsräder aus dem Bestand'); } catch (er) { toast(er.message, true); }
 };
 
 // ---------- Dateien hinzufügen ----------

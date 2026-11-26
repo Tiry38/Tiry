@@ -192,6 +192,8 @@
     vid.addEventListener('loadedmetadata', function () { if (start && start < vid.duration - 2) vid.currentTime = start; });
     el._start = function () { var p = vid.play(); if (p && p.catch) p.catch(function () {}); };
     el._stop = function () { try { videoPos[v.version] = vid.currentTime || 0; vid.pause(); } catch (e) { /* egal */ } };
+    el._dauer = v.dauer || 0;
+    el._ganz = function () { start = 0; videoPos[v.version] = 0; try { if (vid.currentTime > 0.5) vid.currentTime = 0; } catch (e) { /* egal */ } };
     return el;
   }
 

@@ -101,6 +101,8 @@ function createServer(opts) {
     state = Object.assign(leererZustand(), roh);
     state.settings = Object.assign(leererZustand().settings, roh.settings || {});
   } catch (e) { /* erster Start */ }
+  // einmalig (Tiry 26.11.2026): Showroom-Video komplett abspielen, damit es sich mit anderen Videos abwechselt
+  if (!state.migSrGanz) { state.migSrGanz = true; state.items.forEach((i) => { if (i.kind === 'showroom') i.duration = 0; }); }
 
   let zugang;
   try { zugang = JSON.parse(fs.readFileSync(secretFile, 'utf8')); } catch (e) { zugang = null; }
@@ -406,7 +408,7 @@ function createServer(opts) {
       if (b.kind === 'showroom') {
         const item = {
           id: id(), kind: 'showroom', name: 'Live-Showroom · Angebote', file: null, thumb: null, size: 0,
-          duration: Math.min(1800, Math.max(20, Number(b.duration) || 120)),
+          duration: Number(b.duration) > 0 ? Math.min(1800, Math.max(20, Number(b.duration))) : 0, // 0 = Video komplett
           fit: 'contain', enabled: true, plan: planSauber(b.plan), group: null, addedBy: pc, addedAt: jetzt()
         };
         state.items.push(item);
@@ -433,7 +435,7 @@ function createServer(opts) {
       const b = await koerper(req);
       const was = [];
       if ('name' in b) { const n = sauber(b.name, 160); if (n && n !== item.name) { was.push('umbenannt'); item.name = n; } }
-      if ('duration' in b) { const d = Math.min(3600, Math.max(item.kind === 'video' ? 0 : 2, Number(b.duration) || 0)); if (d !== item.duration) { item.duration = d; was.push('Dauer ' + (d ? d + ' s' : 'ganzes Video')); } }
+      if ('duration' in b) { const d = Math.min(3600, Math.max(item.kind === 'video' || item.kind === 'showroom' ? 0 : 2, Number(b.duration) || 0)); if (d !== item.duration) { item.duration = d; was.push('Dauer ' + (d ? d + ' s' : 'ganzes Video')); } }
       if ('fit' in b && ['cover', 'contain'].includes(b.fit) && b.fit !== item.fit) { item.fit = b.fit; was.push(b.fit === 'cover' ? 'Bild füllt' : 'Bild ganz'); }
       if ('enabled' in b && !!b.enabled !== item.enabled) { item.enabled = !!b.enabled; was.push(item.enabled ? 'eingeschaltet' : 'pausiert'); }
       if ('sound' in b && !!b.sound !== !!item.sound) { item.sound = !!b.sound; was.push(item.sound ? 'Ton an' : 'Ton aus'); }

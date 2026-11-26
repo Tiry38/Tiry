@@ -131,7 +131,7 @@
     }
     zeigeLeerlauf(false);
     // einzelnes Bild/Text: nicht neu überblenden, nur später neu prüfen
-    if (aktuell && aktuell.item.id === item.id && item.kind !== 'video' && aktive().length === 1 && !sofort && aktuell.rev === itemRev(item)) {
+    if (aktuell && aktuell.item.id === item.id && item.kind !== 'video' && !(item.kind === 'showroom' && !item.duration) && aktive().length === 1 && !sofort && aktuell.rev === itemRev(item)) {
       planeNeu(item.duration * 1000);
       return;
     }
@@ -154,6 +154,7 @@
         if (alt) { alt.el.classList.remove('on'); alt.el.classList.add('off'); setTimeout(function () { entferne(alt); }, 1300); }
       }); });
       if (item.kind === 'video') starteVideo(el.querySelector('video'), item);
+      else if (item.kind === 'showroom' && !item.duration) showroomGanz(el);
       else planeNeu(Math.max(2, item.duration || 10) * 1000);
       herzschlag();
     });
@@ -161,6 +162,16 @@
   var fehlerZaehler = 0;
 
   function itemRev(i) { return JSON.stringify([i.kind, i.file, i.fit, i.text, i.duration, i.sound]); }
+
+  // Showroom „komplett“ (Dauer 0): Video einmal von vorn bis Ende, dann nächster Beitrag (Tiry 26.11.2026)
+  function showroomGanz(el) {
+    var v = el.querySelector('video');
+    if (!v) return planeNeu(120000); // noch kein Video → Live-Showroom 2 Minuten
+    v.loop = false;
+    v.onended = function () { weiter(); };
+    if (el._ganz) el._ganz();
+    planeNeu(((el._dauer || 1200) + 15) * 1000);
+  }
 
   function starteVideo(v, item) {
     var maxMs = item.duration > 0 ? item.duration * 1000 : ((item.mediaLength || 600) + 10) * 1000;
