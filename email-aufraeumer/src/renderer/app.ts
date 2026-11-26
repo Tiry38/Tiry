@@ -177,8 +177,8 @@ async function cockpit() {
       <div class="zahl-gross"><b class="held-zahl ${st.heuteEntfernt ? '' : 'null'}" id="held-zahl">${zahl(heldWert)}</b>
         <span>${probe ? 'Mails hätte ich heute<br>weggeräumt' : 'Mails heute<br>weggeräumt'}</span></div>
       <dl class="zahlen-klein">
-        <div><dt>Diese Woche</dt><dd>${zahl(st.wocheEntfernt)}</dd></div>
-        <div><dt>Gesparte Lesezeit</dt><dd>${lesezeit}</dd></div>
+        <div><dt>Diese Woche</dt><dd id="z-woche">${zahl(st.wocheEntfernt)}</dd></div>
+        <div><dt>Gesparte Lesezeit</dt><dd id="z-lesezeit">${lesezeit}</dd></div>
         <div class="${st.zuPruefen ? 'rot' : ''}"><dt>Wartet auf dich</dt><dd>${zahl(st.zuPruefen)}${st.zuPruefen ? ' <button class="knopf klein" data-tat="zu-pruefen">Ansehen</button>' : ''}</dd></div>
       </dl>
     </div>
@@ -487,6 +487,9 @@ function ereignis(kanal: string, d: any) {
       await laden(); strom.setzePruefen(z.statistik.zuPruefen);
       if (ansicht === 'cockpit') {
         const ziel = z.statistik.heuteEntfernt; const el = document.getElementById('held-zahl');
+        const st = z.statistik; const m = st.lesezeitMinutenWoche;
+        const w = document.getElementById('z-woche'); if (w) w.textContent = zahl(st.wocheEntfernt);
+        const l = document.getElementById('z-lesezeit'); if (l) l.textContent = m >= 60 ? `${Math.floor(m / 60)} Std. ${m % 60} Min.` : `${m} Min.`;
         if (el && ziel !== heldWert) { el.classList.toggle('null', !ziel); feder(heldWert, ziel, (v) => { el.textContent = zahl(Math.max(0, Math.round(v))); }, { k: 60, d: 14 }); heldWert = ziel; }
       }
     }, 400);
