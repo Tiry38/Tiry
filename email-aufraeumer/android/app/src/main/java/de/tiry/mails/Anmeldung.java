@@ -112,8 +112,16 @@ final class Anmeldung {
                 }
                 if (fehler != null) { ergebnis.fertig(fehler); return; }
 
-                JSONObject t = tokenAnfrage("code=" + enc(code) + "&client_id=" + enc(tresor.lies("client_id")) + "&client_secret=" + enc(tresor.lies("client_secret"))
-                        + "&redirect_uri=" + enc(rueck) + "&grant_type=authorization_code&code_verifier=" + verifier);
+                // Erst die App nach vorne holen: im Hintergrund sperren manche Handys (Akku-Sparen) das Internet für Apps –
+                // dann scheitert sogar die Namensauflösung („Unable to resolve host“). Danach mehrmals versuchen.
+                c.startActivity(new Intent(c, Haupt.class).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_REORDER_TO_FRONT));
+                String body = "code=" + enc(code) + "&client_id=" + enc(tresor.lies("client_id")) + "&client_secret=" + enc(tresor.lies("client_secret"))
+                        + "&redirect_uri=" + enc(rueck) + "&grant_type=authorization_code&code_verifier=" + verifier;
+                JSONObject t = null;
+                for (int versuch = 0; t == null; versuch++) {
+                    try { t = tokenAnfrage(body); }
+                    catch (java.io.IOException netz) { if (versuch >= 30) throw netz; Thread.sleep(1000); }
+                }
                 if (!t.has("refresh_token")) { ergebnis.fertig("Google hat keinen dauerhaften Schlüssel geschickt. Bitte noch einmal anmelden."); return; }
                 tresor.setze("refresh", t.getString("refresh_token"));
                 zugang = t.getString("access_token");
