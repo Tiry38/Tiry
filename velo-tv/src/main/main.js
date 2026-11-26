@@ -201,9 +201,15 @@ function autoUpdate() {
     const { autoUpdater } = require('electron-updater');
     autoUpdater.setFeedURL({ provider: 'generic', url: 'https://github.com/Tiry38/Tiry/releases/download/velo-tv-latest' });
     autoUpdater.autoInstallOnAppQuit = true;
-    autoUpdater.on('update-downloaded', () => { if (win) win.webContents.send('update-bereit'); });
+    // Zentrale läuft rund um die Uhr und wird nie beendet → Update dort selbst einspielen (Tiry 26.11.2026:
+    // der Fernseher zeigte tagelang den alten Showroom, weil „beim Beenden installieren“ nie eintrat).
+    // Neustart dauert ca. 20 s, der Fernseher lädt danach von selbst neu. Bedienplätze: Leiste „Jetzt neu starten“.
+    autoUpdater.on('update-downloaded', () => {
+      if (win) win.webContents.send('update-bereit');
+      if (cfg.mode === 'zentrale') setTimeout(() => { beendet = true; try { autoUpdater.quitAndInstall(true, true); } catch (e) { /* egal */ } }, 60 * 1000);
+    });
     autoUpdater.checkForUpdates().catch(() => {});
-    setInterval(() => autoUpdater.checkForUpdates().catch(() => {}), 6 * 3600 * 1000);
+    setInterval(() => autoUpdater.checkForUpdates().catch(() => {}), 30 * 60 * 1000);
   } catch (e) { /* ohne Updater weiter */ }
 }
 ipcMain.handle('update-installieren', () => { try { beendet = true; require('electron-updater').autoUpdater.quitAndInstall(true, true); } catch (e) { /* egal */ } });

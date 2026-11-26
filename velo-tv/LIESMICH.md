@@ -28,7 +28,8 @@ Alle PCs mit Velo-TV sehen jede Änderung sofort. Design wie die neue Homepage (
   `VELOTV_DATA_DIR=<tmp> VELOTV_SMOKE_OUT=<tmp> xvfb-run -a -s "-screen 0 1600x1000x24" npx electron . --smoke --no-sandbox --disable-gpu`
 - Installer: Workflow `.github/workflows/velo-tv.yml` baut bei Push auf `main` und legt ihn ins Release
   **velo-tv-latest** → https://github.com/Tiry38/Tiry/releases/download/velo-tv-latest/Velo-TV-Setup.exe
-  Installierte Programme aktualisieren sich daraus selbst.
+  Installierte Programme prüfen alle 30 min. Die **Zentrale spielt ein Update selbst ein** (1 min nach dem Download, Neustart ca. 20 s,
+  Fernseher lädt von selbst neu); Bedienplätze zeigen „Jetzt neu starten“ bzw. installieren beim Beenden.
 
 ## Aufbau
 - `src/server/server.js` – Zentrale (nur Node-Bordmittel): REST + Server-Sent-Events, Range-Streaming für Videos, `state.json`.
