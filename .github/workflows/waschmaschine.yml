@@ -1,0 +1,73 @@
+name: Waschmaschine-App bauen
+
+# Baut die Android-App (waschmaschine/) bei jeder Änderung, führt alle Tests aus und legt die APK als Download ab.
+# Feste Download-Adresse: https://github.com/Tiry38/Tiry/releases/download/waschmaschine-latest/Waschmaschine.apk
+on:
+  push:
+    branches: [main, 'claude/**']
+    paths: ['waschmaschine/**', '.github/workflows/waschmaschine.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: waschmaschine
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    defaults:
+      run:
+        working-directory: waschmaschine
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+      - uses: gradle/actions/setup-gradle@v4
+      - name: Eigener Signaturschlüssel (optional, aus GitHub-Secret)
+        env:
+          KS: ${{ secrets.WM_KEYSTORE_B64 }}
+        run: |
+          if [ -n "$KS" ]; then echo "$KS" | base64 -d > "$RUNNER_TEMP/wm.keystore"; echo "WM_KEYSTORE_FILE=$RUNNER_TEMP/wm.keystore" >> "$GITHUB_ENV"; fi
+      - name: Tests (Protokoll, Pop-up-Regeln, Zuhause/Unterwegs, Bildschirme)
+        env:
+          WM_KEYSTORE_PASSWORD: ${{ secrets.WM_KEYSTORE_PASSWORD }}
+          WM_KEY_ALIAS: ${{ secrets.WM_KEY_ALIAS }}
+          WM_KEY_PASSWORD: ${{ secrets.WM_KEY_PASSWORD }}
+        run: ./gradlew --no-daemon :app:testDebugUnitTest -Proborazzi.test.record=true
+      - name: APK bauen
+        env:
+          WM_KEYSTORE_PASSWORD: ${{ secrets.WM_KEYSTORE_PASSWORD }}
+          WM_KEY_ALIAS: ${{ secrets.WM_KEY_ALIAS }}
+          WM_KEY_PASSWORD: ${{ secrets.WM_KEY_PASSWORD }}
+        run: |
+          ./gradlew --no-daemon :app:assembleRelease
+          cp app/build/outputs/apk/release/app-release.apk Waschmaschine.apk
+          ls -la Waschmaschine.apk
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: waschmaschine-bildschirme-und-tests
+          path: |
+            waschmaschine/bildschirme/
+            waschmaschine/app/build/reports/tests/
+      - name: Release waschmaschine-latest aktualisieren
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          TAG="waschmaschine-latest"
+          git tag -f "$TAG" "$GITHUB_SHA"
+          git push -f origin "refs/tags/$TAG"
+          TITEL="Waschmaschine 1.0.${{ github.run_number }}"
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            gh release upload "$TAG" Waschmaschine.apk --clobber
+            gh release edit "$TAG" --title "$TITEL" --latest=false
+          else
+            gh release create "$TAG" Waschmaschine.apk --verify-tag --latest=false --title "$TITEL" \
+              --notes "Waschmaschinen-App (Siemens iQ500, lokal + WireGuard). Auf dem Android-Handy Waschmaschine.apk öffnen und installieren. Anleitung: waschmaschine/LIESMICH.md"
+          fi

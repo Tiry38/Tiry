@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Klartext ist nur zur Waschmaschine im Heimnetz nötig (Port 80, dort ist jede Nachricht AES-verschlüsselt). -->
+<network-security-config>
+    <base-config cleartextTrafficPermitted="true" />
+</network-security-config>
