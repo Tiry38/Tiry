@@ -47,14 +47,26 @@ export function wiederholbar(err: any): boolean {
   return ['ECONNRESET', 'ETIMEDOUT', 'EAI_AGAIN', 'ENOTFOUND'].includes(err?.code);
 }
 
+/** Wartezeit, die Google selbst vorgibt (Retry-After-Header), in ms. */
+export function retryAfterMs(err: any): number | null {
+  const h = err?.response?.headers;
+  const v = h?.get?.('retry-after') ?? h?.['retry-after'];
+  if (v == null) return null;
+  const sek = Number(v);
+  if (Number.isFinite(sek)) return sek * 1000;
+  const t = Date.parse(String(v));
+  return Number.isFinite(t) ? Math.max(0, t - Date.now()) : null;
+}
+
 export async function mitBackoff<T>(fn: () => Promise<T>, opt: { versuche?: number; basisMs?: number; warte?: (ms: number) => Promise<void>; log?: (s: string) => void } = {}): Promise<T> {
-  const versuche = opt.versuche ?? 6;
+  // 8 Versuche: 1+2+4+8+16+32+64 s ≈ 2 min – länger als Googles Minuten-Fenster für die Nutzer-Quote
+  const versuche = opt.versuche ?? 8;
   const basis = opt.basisMs ?? 1000;
   const warte = opt.warte ?? ((ms) => new Promise((r) => setTimeout(r, ms)));
   for (let i = 0; ; i++) {
     try { return await fn(); } catch (err) {
       if (i >= versuche - 1 || !wiederholbar(err)) throw err;
-      const ms = Math.min(64_000, basis * 2 ** i) + Math.floor(Math.random() * 500);
+      const ms = Math.max(retryAfterMs(err) ?? 0, Math.min(64_000, basis * 2 ** i)) + Math.floor(Math.random() * 500);
       opt.log?.(`API-Grenze/Fehler (${(err as any)?.code ?? (err as any)?.status}) – neuer Versuch in ${Math.round(ms / 1000)} s`);
       await warte(ms);
     }
@@ -74,6 +86,38 @@ export function zuMail(m: any): Mail {
   };
 }
 
+/**
+ * Drossel (Token-Eimer): höchstens `proSekunde` Quoten-Einheiten pro Sekunde.
+ * Gmail begrenzt die Einheiten pro Nutzer und Minute – die Drossel hält das Programm von sich aus deutlich darunter.
+ */
+export class Drossel {
+  private vorrat: number;
+  private stand: number;
+  constructor(private proSekunde = 50, private eimer = 250, private jetzt: () => number = Date.now,
+    private warte: (ms: number) => Promise<void> = (ms) => new Promise((r) => setTimeout(r, ms))) {
+    this.vorrat = eimer; this.stand = jetzt();
+  }
+  private auffuellen() {
+    const t = this.jetzt();
+    this.vorrat = Math.min(this.eimer, this.vorrat + ((t - this.stand) / 1000) * this.proSekunde);
+    this.stand = t;
+  }
+  private kette: Promise<void> = Promise.resolve();
+  /** Wartet, bis `einheiten` verfügbar sind (Aufrufe werden der Reihe nach bedient). */
+  nimm(einheiten: number): Promise<void> {
+    const schritt = this.kette.then(async () => {
+      this.auffuellen();
+      while (this.vorrat < einheiten) {
+        await this.warte(Math.ceil(((einheiten - this.vorrat) / this.proSekunde) * 1000));
+        this.auffuellen();
+      }
+      this.vorrat -= einheiten;
+    });
+    this.kette = schritt.catch(() => {});
+    return schritt;
+  }
+}
+
 /** Echte Umsetzung über das offizielle googleapis-Paket. */
 export function erzeugeGoogleGmail(auth: any, zaehle: (methode: string, einheiten: number) => void, log?: (s: string) => void): GmailPort {
   // Lazy-Import, damit Tests ohne googleapis-Initialisierung laufen.
@@ -81,8 +125,14 @@ export function erzeugeGoogleGmail(auth: any, zaehle: (methode: string, einheite
   const { google } = require('googleapis') as typeof import('googleapis');
   const gmail = google.gmail({ version: 'v1', auth });
   const me = 'me';
+  const drossel = new Drossel(50, 250);
   const ruf = async <T>(methode: string, fn: () => Promise<T>): Promise<T> =>
-    mitBackoff(async () => { zaehle(methode, QUOTE[methode] ?? 5); return fn(); }, { log });
+    mitBackoff(async () => {
+      const e = QUOTE[methode] ?? 5;
+      await drossel.nimm(e);
+      zaehle(methode, e);
+      return fn();
+    }, { log });
 
   async function parallel<T, R>(items: T[], n: number, f: (t: T) => Promise<R>): Promise<R[]> {
     const out: R[] = new Array(items.length);

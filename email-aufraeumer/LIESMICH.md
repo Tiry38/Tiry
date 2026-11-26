@@ -83,7 +83,8 @@ Regel ausschalten/löschen entfernt auch den Gmail-Filter. Mails, die Gmail so w
 | „Google hat kein Refresh-Token geliefert“ | Zugriff unter myaccount.google.com/permissions entfernen, neu anmelden. |
 | „Berechtigung fehlt“ | Bei der Anmeldung nicht alle Häkchen gesetzt → neu anmelden. |
 | „historyId zu alt“ im Log | Normal nach langer Pause: die letzten 14 Tage werden automatisch neu durchsucht. |
-| 429 / „API-Grenze“ im Log | Gmail bremst kurz; das Programm wartet automatisch (exponentielles Backoff) und macht weiter. |
+| 429 / „API-Grenze“ im Log | Gmail bremst kurz; das Programm wartet automatisch (exponentielles Backoff bis ca. 2 min, Retry-After wird beachtet) und macht weiter. |
+| „Quota exceeded … Units per minute per user“ | Trat in 0.1.1 beim ersten Start auf (Kontakte zu schnell gelesen). Seit 0.1.2 drosselt das Programm sich selbst auf 50 Einheiten/s. Einfach „Erneut versuchen“. |
 | „Windows-Verschlüsselung nicht verfügbar“ | Tokens werden absichtlich nicht unverschlüsselt gespeichert – mit normalem Windows-Benutzerkonto starten. |
 | Status „Fehler“ im Cockpit | Text lesen, „Erneut versuchen“. Protokolldatei: `%APPDATA%\Email-Aufräumer\aufraeumer.log`. |
 

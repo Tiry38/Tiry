@@ -90,7 +90,7 @@ function setzeStatus(s: any) {
   if (!z?.angemeldet) { b.dataset.status = 'aus'; $('#zustand-text').textContent = 'Nicht angemeldet'; return; }
   if (!s) return;
   b.dataset.status = s.status === 'fehler' ? 'fehler' : s.trockenlauf ? 'trockenlauf' : s.status === 'laeuft' ? 'laeuft' : s.status;
-  const t = s.status === 'fehler' ? `Fehler – ${s.fehler}` : s.trockenlauf ? `Trockenlauf · Tag ${Math.min(7, 8 - s.trockenlaufRestTage)}/7` : s.status === 'laeuft' ? 'Läuft · scharf' : s.status === 'startet' ? 'startet …' : s.status;
+  const t = s.status === 'fehler' ? 'Fehler · siehe Cockpit' : s.trockenlauf ? `Trockenlauf · Tag ${Math.min(7, 8 - s.trockenlaufRestTage)}/7` : s.status === 'laeuft' ? 'Läuft · scharf' : s.status === 'startet' ? 'startet …' : s.status;
   $('#zustand-text').textContent = t;
   $('#schiene-fuss').innerHTML = `${s.email ? h(s.email) + '<br>' : ''}${s.letzterLauf ? 'Zuletzt geprüft ' + uhr(s.letzterLauf) + '<br>' : ''}alle ${s.intervallSek} s · Quote heute ${zahl(s.quote?.einheiten ?? 0)} E.`;
 }

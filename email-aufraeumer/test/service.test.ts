@@ -273,3 +273,40 @@ describe('Abmelden (Sicherheitsregel 4)', () => {
     expect(baueMailtoNachricht('mailto:a@b.de%0ABcc:x@y.de', 'me@x.de')).toBeNull();
   });
 });
+
+describe('Quote: Drossel und Kontakte-Reihenfolge', () => {
+  it('Drossel hält die Einheiten pro Sekunde ein und nutzt Retry-After', async () => {
+    const { Drossel, retryAfterMs } = await import('../src/core/gmail');
+    let uhr = 0; const gewartet: number[] = [];
+    const d = new Drossel(50, 250, () => uhr, async (ms) => { gewartet.push(ms); uhr += ms; });
+    for (let i = 0; i < 250; i++) await d.nimm(5); // 1250 Einheiten
+    // 250 aus dem Eimer sofort, 1000 weitere bei 50/s → ≈ 20 s
+    expect(uhr).toBeGreaterThanOrEqual(19_900);
+    expect(uhr).toBeLessThanOrEqual(20_200);
+    expect(retryAfterMs({ response: { headers: { 'retry-after': '30' } } })).toBe(30_000);
+    expect(retryAfterMs({})).toBeNull();
+  });
+
+  it('Backoff wartet bei Minuten-Sperre mindestens so lange wie Google verlangt', async () => {
+    let versuche = 0; const wartezeiten: number[] = [];
+    const r = await mitBackoff(async () => { if (++versuche < 3) throw { code: 429, response: { headers: { 'retry-after': '45' } } }; return 'ok'; },
+      { warte: async (ms) => { wartezeiten.push(ms); } });
+    expect(r).toBe('ok');
+    expect(Math.min(...wartezeiten)).toBeGreaterThanOrEqual(45_000);
+  });
+
+  it('schlägt das Laden der Kontakte fehl, wird keine Mail eingeordnet', async () => {
+    const t = aufbau(); gesendet(t.gmail);
+    await t.dienst.starten(); t.dienst.stoppen();
+    t.db.set('kontakteStand', 0); // Kontakte veraltet
+    const echteListe = t.gmail.liste.bind(t.gmail);
+    t.gmail.liste = async (q: string, ...rest: any[]) => { if (q.includes('in:sent')) throw { code: 429 }; return (echteListe as any)(q, ...rest); };
+    t.gmail.hinzufuegen(fall('Mama (Kontakt)'));
+    await t.dienst.tick();
+    expect(t.dienst.status).toBe('fehler');
+    expect(t.db.protokoll()).toHaveLength(0);
+    t.gmail.liste = echteListe as any; // Google wieder erreichbar
+    await t.dienst.tick();
+    expect(t.db.protokoll()[0]).toMatchObject({ status: 'geschuetzt' });
+  });
+});

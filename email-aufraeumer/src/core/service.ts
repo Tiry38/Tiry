@@ -68,8 +68,7 @@ export class Aufraeumer extends EventEmitter {
       const p = await this.gmail.profil();
       this.email = p.email;
       if (!this.db.get<string | null>('historyId', null)) this.db.set('historyId', p.historyId);
-      await this.kontakteAktualisieren();
-      await this.tick(); // verpasste Mails nachholen
+      await this.tick(); // holt zuerst die Kontakte, dann verpasste Mails
     } catch (err) {
       this.setStatus('fehler', (err as Error).message);
     }
@@ -95,6 +94,8 @@ export class Aufraeumer extends EventEmitter {
     const durchlauf = `lauf-${new Date(this.jetzt()).toISOString()}`;
     let anzahl = 0;
     try {
+      // Sicherheitsregel 3: ohne aktuelle Kontaktliste wird nichts eingeordnet
+      if (this.jetzt() - this.db.get<number>('kontakteStand', 0) > KONTAKTE_ALLE_MS) await this.kontakteAktualisieren();
       let start = this.db.get<string | null>('historyId', null);
       if (!start) { start = (await this.gmail.profil()).historyId; this.db.set('historyId', start); }
       let ids: string[] = [];
@@ -114,7 +115,6 @@ export class Aufraeumer extends EventEmitter {
         anzahl = await this.verarbeiteIds(ids, durchlauf);
         this.db.set('historyId', profil.historyId);
       }
-      if (this.jetzt() - this.db.get<number>('kontakteStand', 0) > KONTAKTE_ALLE_MS) await this.kontakteAktualisieren();
       this.letzterLauf = this.jetzt();
       this.setStatus(this.db.einstellungen().trockenlauf ? 'trockenlauf' : 'laeuft');
     } catch (err) {
@@ -214,7 +214,7 @@ export class Aufraeumer extends EventEmitter {
   }
 
   // ---------------- Kontakte (Sicherheitsregel 3) ----------------
-  async kontakteAktualisieren(grenze = 2000) {
+  async kontakteAktualisieren(grenze = 1000) {
     const ids = await this.alleIds('in:sent', grenze);
     const adressen = new Set<string>();
     for (let i = 0; i < ids.length; i += 100) {
