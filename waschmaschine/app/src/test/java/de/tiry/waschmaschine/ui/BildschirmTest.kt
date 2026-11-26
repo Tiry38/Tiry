@@ -78,6 +78,11 @@ class BildschirmTest {
         Absturzbericht("Version 1.0.2 · Android 15 · samsung SM-S921B\n\njava.lang.IllegalStateException: Beispiel\n\tat de.tiry.waschmaschine.MainActivity.onCreate(MainActivity.kt:42)", {}, {})
     }
 
+    @Test fun assistentA() = foto("14-assistent-a-frage") { Assistent(EinrichtungsStand(1), Teilschritt.FRAGE, null, true, AssistentAktionen()) }
+    @Test fun assistentB() = foto("15-assistent-b-wlan", 2500) { Assistent(EinrichtungsStand(1), Teilschritt.WLAN, "SIEMENS-WM14UR5EM2-68A40E3F11C2", false, AssistentAktionen()) }
+    @Test fun assistentC() = foto("16-assistent-c-koppeln", 2500) { Assistent(EinrichtungsStand(1), Teilschritt.KOPPELN, null, false, AssistentAktionen()) }
+    @Test fun assistentD() = foto("17-assistent-d-schluessel") { Assistent(EinrichtungsStand(1), Teilschritt.SCHLUESSEL, null, false, AssistentAktionen()) }
+
     @Test fun verlauf() = foto("10-verlauf") {
         Verlauf(listOf(
             VerlaufEintrag("Baumwolle", jetzt - 3 * 3600_000, jetzt - 3600_000, "40 °C", "1400 U/min"),

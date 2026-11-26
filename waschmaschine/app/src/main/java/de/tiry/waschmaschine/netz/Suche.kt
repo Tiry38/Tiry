@@ -52,6 +52,24 @@ class Suche(private val ctx: Context, private val netz: Netz) {
         Verbindung.oeffne(profil, adresse, sockets, 1500).use { k -> k.empfange()?.contains("/ei/initialValues") == true }
     }.getOrDefault(false)
 
+    /** Für den Assistenten: Ist IRGENDEIN Home-Connect-Gerät im WLAN zu sehen? Liefert dessen Namen. */
+    @Suppress("DEPRECATION")
+    suspend fun homeConnectImWlan(ms: Long = 8000): String? = withTimeoutOrNull(ms) {
+        val nsd = ctx.getSystemService(NsdManager::class.java)
+        suspendCancellableCoroutine<String?> { k ->
+            val l = object : NsdManager.DiscoveryListener {
+                override fun onServiceFound(s: NsdServiceInfo) { runCatching { nsd.stopServiceDiscovery(this) }; if (k.isActive) k.resume(s.serviceName) }
+                override fun onDiscoveryStarted(t: String) {}
+                override fun onDiscoveryStopped(t: String) {}
+                override fun onServiceLost(s: NsdServiceInfo) {}
+                override fun onStartDiscoveryFailed(t: String, e: Int) { if (k.isActive) k.resume(null) }
+                override fun onStopDiscoveryFailed(t: String, e: Int) {}
+            }
+            nsd.discoverServices("_homeconnect._tcp", NsdManager.PROTOCOL_DNS_SD, l)
+            k.invokeOnCancellation { runCatching { nsd.stopServiceDiscovery(l) } }
+        }
+    }
+
     @Suppress("DEPRECATION")
     private suspend fun mdns(profil: GeraeteProfil): String? = withTimeoutOrNull(6000) {
         val nsd = ctx.getSystemService(NsdManager::class.java)

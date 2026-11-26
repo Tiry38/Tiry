@@ -12,9 +12,15 @@ von unterwegs über einen **eingebauten WireGuard-Tunnel** zur FRITZ!Box. Keine 
 
 1. **APK laden und installieren** – Link oben auf dem Handy öffnen, `Waschmaschine.apk` antippen.
    Android fragt einmal „Installation aus dieser Quelle erlauben?“ → erlauben.
-2. **01 · Waschmaschine verbinden** – App öffnen, Knopf antippen, **einmalig** mit dem Home-Connect-Konto anmelden.
-   Die App holt den Geräteschlüssel, sucht die Maschine im WLAN und fragt nach *Benachrichtigungen* (→ Zulassen) und
-   *Akku-Optimierung* (→ Zulassen). Beides ist nötig, damit Pop-ups auch bei geschlossener App kommen.
+2. **01 · Waschmaschine verbinden** – die App führt in vier Teilschritten (A–D) durch alles, mit nachgezeichnetem
+   Drehwähler und Display deiner Maschine:
+   - **B · Maschine ins WLAN** (ohne Home-Connect-App, per WPS): Fernstart-Taste 3 s → Display **Aut** → Start/Pause →
+     innerhalb von 2 min WPS an der FRITZ!Box → Display **con**. Die App zeigt live, sobald die Maschine im WLAN auftaucht.
+   - **C · Einmal mit Konto koppeln**: Der einzige Schritt, für den BSH die Home-Connect-App verlangt (Konto + Kopplung gibt es
+     nur dort, ein offener Nachbau existiert nicht). Fernstart-Taste 3 s → Drehwähler **Position 3** → Display **APP** →
+     Start/Pause → in der Home-Connect-App bestätigen. Danach darf die Home-Connect-App wieder runter.
+   - **D · Schlüssel holen**: einmal anmelden, die App holt den Geräteschlüssel und findet die Maschine selbst.
+   Danach fragt sie nach *Benachrichtigungen* und *Akku-Optimierung* → beides zulassen.
 3. **02 · Von unterwegs** – in der FRITZ!Box eine WireGuard-Verbindung anlegen (Klickpfad unten), den QR-Code mit der
    App scannen, die VPN-Frage mit **OK** bestätigen. Fertig – nie wieder einrichten.
 

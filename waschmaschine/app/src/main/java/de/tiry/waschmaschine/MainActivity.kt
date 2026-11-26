@@ -59,6 +59,9 @@ import kotlinx.coroutines.withTimeoutOrNull
 
 enum class Seite { START, STEUERN, VERLAUF, EINSTELLUNGEN, ANMELDUNG }
 
+/** Offizielle Home-Connect-App (nur zum einmaligen Koppeln nötig). */
+const val HOME_CONNECT_PAKET = "com.bshg.homeconnect.android.release"
+
 class MainActivity : ComponentActivity() {
     private val z by lazy { Zentrale.von(this) }
 
@@ -159,6 +162,30 @@ class MainActivity : ComponentActivity() {
                     }
                 }
             }
+            return
+        }
+        // Live-Prüfung für den Assistenten: Ist schon ein Home-Connect-Gerät im WLAN?
+        var imWlan by remember { mutableStateOf<String?>(null) }
+        var suchtWlan by remember { mutableStateOf(false) }
+        LaunchedEffect(profil == null) {
+            while (profil == null && imWlan == null) {
+                suchtWlan = true; imWlan = z.suche.homeConnectImWlan(7000); suchtWlan = false
+                if (imWlan == null) delay(4000)
+            }
+        }
+        fun oeffne(url: String) = runCatching { startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)) }
+            .onFailure { Toast.makeText(ctx, "Kein Browser gefunden: $url", Toast.LENGTH_LONG).show() }
+
+        if (profil == null && seite != Seite.EINSTELLUNGEN) {
+            de.tiry.waschmaschine.ui.Assistent(stand, imWlanGefunden = imWlan, sucht = suchtWlan, aktionen = de.tiry.waschmaschine.ui.AssistentAktionen(
+                fritzBoxOeffnen = { oeffne("http://fritz.box") },
+                homeConnectApp = {
+                    val start = packageManager.getLaunchIntentForPackage(HOME_CONNECT_PAKET)
+                    if (start != null) startActivity(start) else oeffne("https://play.google.com/store/search?q=Home%20Connect%20BSH&c=apps")
+                },
+                schluesselHolen = { abruf = SchluesselAbruf(); seite = Seite.ANMELDUNG },
+                anleitungPdf = { oeffne("https://www.siemens-home.bsh-group.com/de/de/product/WM14UR5EM2") },
+            ))
             return
         }
         if (einrichten && seite != Seite.EINSTELLUNGEN) {

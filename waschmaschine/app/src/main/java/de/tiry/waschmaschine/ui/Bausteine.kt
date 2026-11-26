@@ -31,16 +31,16 @@ val Gestanzt = GenericShape { s, _ ->
 
 /** Haupthandlung: voller Akzent-Streifen, Text links, Pfeil rechts. Mind. 64 dp hoch. */
 @Composable
-fun Haupttaste(text: String, modifier: Modifier = Modifier, aktiv: Boolean = true, onClick: () -> Unit) {
+fun Haupttaste(text: String, modifier: Modifier = Modifier, aktiv: Boolean = true, dunkel: Boolean = false, onClick: () -> Unit) {
     Row(
         modifier.fillMaxWidth().defaultMinSize(minHeight = 64.dp)
-            .background(if (aktiv) Farbe.Akzent else Farbe.Linie, Gestanzt)
+            .background(if (aktiv && !dunkel) Farbe.Akzent else Farbe.Linie, Gestanzt)
             .clickable(enabled = aktiv, role = Role.Button, onClick = onClick)
             .padding(horizontal = 20.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Text(text, style = Schrift.Mittel.copy(color = if (aktiv) Farbe.AufAkzent else Farbe.Nebel, fontWeight = androidx.compose.ui.text.font.FontWeight(500)), modifier = Modifier.weight(1f))
-        Text("→", style = Schrift.Gross.copy(color = if (aktiv) Farbe.AufAkzent else Farbe.Nebel))
+        Text(text, style = Schrift.Mittel.copy(color = if (aktiv && !dunkel) Farbe.AufAkzent else if (dunkel) Farbe.Tinte else Farbe.Nebel, fontWeight = androidx.compose.ui.text.font.FontWeight(500)), modifier = Modifier.weight(1f))
+        Text("→", style = Schrift.Gross.copy(color = if (aktiv && !dunkel) Farbe.AufAkzent else if (dunkel) Farbe.Tinte else Farbe.Nebel))
     }
 }
 

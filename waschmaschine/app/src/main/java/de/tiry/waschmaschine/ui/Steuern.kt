@@ -85,7 +85,7 @@ fun Steuern(profil: GeraeteProfil, fernstartErlaubt: Boolean, zurueck: () -> Uni
             }
             Spacer(Modifier.height(28.dp))
             if (!fernstartErlaubt) {
-                Text("Fernstart ist an der Maschine aus. Wäsche rein, Tür zu, an der Maschine „Fernstart“ antippen – dann geht es von hier.", style = Schrift.Text.copy(color = Farbe.Akzent))
+                Text("Fernstart ist an der Maschine aus. Wäsche rein, Tür zu, Programm am Drehwähler wählen und die Fernstart-Taste KURZ drücken (Symbol leuchtet). Öffnen der Tür, Ausschalten oder Stromausfall schalten ihn wieder aus.", style = Schrift.Text.copy(color = Farbe.Akzent))
                 Spacer(Modifier.height(14.dp))
             }
             Haupttaste("Starten", aktiv = fernstartErlaubt) { auftrag()?.let(starten) }
