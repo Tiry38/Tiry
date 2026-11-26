@@ -155,7 +155,7 @@ const API: Record<string, Fn> = {
     return {
       demo: DEMO, credentials: DEMO || anmeldung.hatCredentials(), angemeldet: DEMO || anmeldung.istAngemeldet(),
       status: dienst?.statusInfo() ?? null, statistik: db.statistik(), einstellungen: db.einstellungen(),
-      altbestand: dienst?.altbestand ?? null, kontakte: db.anzahlKontakte(),
+      altbestand: dienst?.altbestand ?? null, autoFilter: dienst?.autoFilterAnzahl() ?? 0, kontakte: db.anzahlKontakte(),
       ki: { schluessel: !!process.env.ANTHROPIC_API_KEY, ausgegebenEuro: kiBudget(() => db.get('kiVerbrauch', { ausgegebenUsd: 0, monat: '' }), () => {}, () => 0, () => db.einstellungen().kiUsdProEuro).ausgegebenEuro() },
       autostart: app.getLoginItemSettings().openAtLogin, kategorien: KATEGORIE_NAME, drive: DEMO || anmeldung.hatScope(DRIVE_SCOPE),
     };
@@ -177,6 +177,7 @@ const API: Record<string, Fn> = {
   },
   scharfSchalten: () => dienst!.scharfSchalten(),
   trockenlaufWieder: () => dienst!.trockenlaufWieder(),
+  autoFilterAus: async () => dienst?.autoFilterEntfernen() ?? 0,
   filterFreigeben: async () => { db.speichereEinstellungen({ filterExportFreigegeben: true }); return dienst!.filterExport(); },
   rueckgaengig: (id) => dienst!.rueckgaengig(id),
   durchlaufRueckgaengig: (lauf) => dienst!.durchlaufRueckgaengig(lauf),

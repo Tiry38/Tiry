@@ -453,7 +453,7 @@ async function einstellungen() {
         <label class="feld"><span class="unsichtbar">Schutzwörter</span><textarea id="schutz" rows="6">${h(e.schutzwoerter.join('\n'))}</textarea></label></div>
       <div class="einst"><div><h2>Wie oft nachschauen?</h2><p class="erkl">Standard: alle 5 Sekunden – so siehst du neue Mails praktisch sofort.</p></div>
         <label class="feld"><span class="unsichtbar">Wie oft nachschauen</span><select id="intervall">${[3, 5, 10, 30, 60, 300].map((s) => `<option value="${s}" ${s === e.intervallSek ? 'selected' : ''}>${intervallText(s)}</option>`).join('')}</select></label></div>
-      <div class="einst"><div><h2>Auch bei ausgeschaltetem PC</h2><p class="erkl">Absender, die du ${e.filterExportAb}× weggeräumt hast (oder auf „Immer weg“ gesetzt), trage ich als Filter direkt in Gmail ein. Dann räumt Google selbst auf, auch wenn dein PC aus ist.</p></div>
+      <div class="einst"><div><h2>Auch bei ausgeschaltetem PC</h2><p class="erkl">Ich trage Regeln direkt in dein Gmail ein – dann räumt Google selbst auf, rund um die Uhr, auch wenn PC und Handy aus sind: Werbung und Newsletter von Absendern, die ich schon oft weggeräumt habe, und deine Firmen-Ordner (Amazon, DHL …). Rechnungen und Verträge bleiben verschont.${z.autoFilter ? ` <b>${z.autoFilter} Regeln</b> arbeiten gerade in Gmail.` : ''}</p></div>
         <div class="zeile"><button class="schalter" role="switch" id="filter" aria-checked="${e.filterExportFreigegeben}" aria-label="Filter in Gmail eintragen erlauben"></button><span>${e.filterExportFreigegeben ? 'Erlaubt' : 'Noch nicht erlaubt'}</span></div></div>
       <div class="einst"><div><h2>Mit Windows starten</h2><p class="erkl">Ich starte unsichtbar unten rechts im Infobereich.</p></div>
         <div class="zeile"><button class="schalter" role="switch" id="autostart" aria-checked="${e.autostart}" aria-label="Mit Windows starten"></button></div></div>
@@ -489,7 +489,7 @@ async function einstellungen() {
   schalter('autostart', (an) => speichere({ autostart: an }));
   schalter('filter', async (an) => {
     if (an && !(await filterFrage())) return false;
-    if (!an) await speichere({ filterExportFreigegeben: false });
+    if (!an) { await speichere({ filterExportFreigegeben: false }); const n = await api.rufe('autoFilterAus'); if (n) melde(`${n} Gmail-Regeln wieder gelöscht.`); }
   });
   el.querySelector('[data-tat="handy"]')?.addEventListener('click', () => { window.open('https://tiry38.github.io/Tiry/mails/', '_blank'); });
   el.querySelector('[data-tat="update-suchen"]')?.addEventListener('click', async () => {
@@ -553,7 +553,7 @@ function altbestandKnoepfe() {
 }
 
 async function filterFrage(anzahl?: number): Promise<boolean> {
-  const ok = await bestaetigen('Auch bei ausgeschaltetem PC aufräumen?', `${anzahl ? `${anzahl} ${anzahl === 1 ? 'Absender ist' : 'Absender sind'} eindeutig Müll. ` : ''}Darf ich dafür Filter direkt in dein Gmail eintragen? Dann räumt Google selbst auf, auch wenn dein PC aus ist. Mails mit Schutzwörtern bleiben trotzdem verschont. Schaltest du die Regel aus, lösche ich den Filter wieder.`, 'Ja, erlauben');
+  const ok = await bestaetigen('Auch bei ausgeschaltetem PC aufräumen?', `Darf ich Regeln direkt in dein Gmail eintragen? Dann räumt Google selbst auf – rund um die Uhr, auch wenn PC und Handy aus sind: Werbung und Newsletter von Absendern, die ich schon oft weggeräumt habe${anzahl ? ` (gerade ${anzahl})` : ''}, und deine Firmen-Ordner (Amazon, DHL …). Rechnungen und Verträge bleiben trotzdem verschont, Kontakte werden nie angefasst. Schaltest du es aus, lösche ich die Regeln wieder.`, 'Ja, erlauben');
   if (ok) { const r = await api.rufe('filterFreigeben'); melde(`${r.angelegt} ${r.angelegt === 1 ? 'Filter' : 'Filter'} in Gmail eingetragen.`); await laden(); }
   return ok;
 }

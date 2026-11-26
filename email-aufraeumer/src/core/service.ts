@@ -132,6 +132,15 @@ export class Aufraeumer extends EventEmitter {
       }
       this.letzterLauf = this.jetzt();
       this.setStatus(this.db.einstellungen().trockenlauf ? 'trockenlauf' : 'laeuft');
+      // Alle 30 Minuten: neue Gmail-Filter nachtragen, damit Google auch ohne PC aufräumt (einmal fragen, danach still)
+      const einst = this.db.einstellungen();
+      if (!einst.trockenlauf && this.jetzt() - this.db.get<number>('filterStand', 0) > 30 * 60_000) {
+        this.db.set('filterStand', this.jetzt());
+        if (einst.filterExportFreigegeben || !this.db.get<boolean>('filterGefragt', false)) {
+          if (!einst.filterExportFreigegeben) this.db.set('filterGefragt', true);
+          void this.filterExport().catch(() => {});
+        }
+      }
     } catch (err) {
       this.log(`Fehler im Durchlauf: ${(err as Error).message}`);
       this.setStatus('fehler', (err as Error).message);
@@ -381,9 +390,10 @@ export class Aufraeumer extends EventEmitter {
   async filterExport(): Promise<{ angelegt: number; wartet: number; frage: boolean }> {
     const e = this.db.einstellungen();
     const offen = this.filterKandidaten().filter((r) => !r.gmailFilterId);
-    if (!offen.length) return { angelegt: 0, wartet: 0, frage: false };
+    const autoOffen = this.autoFilterPlan().filter((p) => !this.db.get<Record<string, string>>('autoFilter', {})[p.schluessel]).length;
+    if (!offen.length && !autoOffen) return { angelegt: 0, wartet: 0, frage: false };
     if (e.trockenlauf) return { angelegt: 0, wartet: offen.length, frage: false };
-    if (!e.filterExportFreigegeben) { this.emit('frage', { art: 'filter', anzahl: offen.length }); return { angelegt: 0, wartet: offen.length, frage: true }; }
+    if (!e.filterExportFreigegeben) { this.emit('frage', { art: 'filter', anzahl: offen.length + autoOffen }); return { angelegt: 0, wartet: offen.length + autoOffen, frage: true }; }
     const negatedQuery = e.schutzwoerter.filter(Boolean).map((w) => (/\s/.test(w) ? `"${w}"` : w)).join(' OR ');
     let angelegt = 0;
     for (const r of offen) {
@@ -396,8 +406,64 @@ export class Aufraeumer extends EventEmitter {
         this.log(`Gmail-Filter angelegt: ${beschreibeBedingung(r)}.`);
       } catch (err) { this.log(`Gmail-Filter für ${r.wert} fehlgeschlagen: ${(err as Error).message}`); }
     }
-    return { angelegt, wartet: offen.length - angelegt, frage: false };
+    const auto = await this.autoFilterExport(negatedQuery);
+    return { angelegt: angelegt + auto, wartet: offen.length - angelegt, frage: false };
   }
+
+  /**
+   * Damit auch bei ausgeschaltetem PC aufgeräumt wird: Gmail-Filter, die Google selbst rund um die Uhr ausführt –
+   * für Absender, die der Aufräumer schon oft als Werbung/Newsletter einsortiert hat, und für die Firmen-Ordner (Amazon, DHL …).
+   * Schutzwörter (Rechnung, Bestellung …) bleiben bei Werbung/Newsletter ausgenommen; Firmen-Ordner nehmen Bestellungen mit (Tirys Wunsch).
+   * Nie für Kontakte, Weiße Liste oder Privat-Adressen.
+   */
+  autoFilterPlan(): Array<{ schluessel: string; von: string; kategorie?: Kategorie; ordner?: string }> {
+    const e = this.db.einstellungen();
+    const weiss = new Set(this.db.regeln().filter((r) => r.art === 'weiss' && r.aktiv).map((r) => r.wert));
+    const schonRegel = new Set(this.db.regeln().filter((r) => r.art !== 'weiss').map((r) => r.wert)); // eigene Regeln haben eigene Filter
+    const ordner = this.ordnerListe().filter((o) => o.aktiv && o.ueberSchwelle && e.ordnerAn);
+    const ordnerBasen = new Set(ordner.map((o) => o.basis));
+    const liste: Array<{ schluessel: string; von: string; kategorie?: Kategorie; ordner?: string }> = [];
+    for (const o of ordner) if (!weiss.has(o.basis)) liste.push({ schluessel: `ordner:${o.basis}`, von: o.basis, ordner: o.name });
+    for (const a of this.db.vielschreiberMuell(Math.max(3, e.filterExportAb))) {
+      const dom = a.adresse.split('@')[1] ?? '';
+      if (weiss.has(a.adresse) || weiss.has(dom) || schonRegel.has(a.adresse) || !ordnerBasis(dom) || [...ordnerBasen].some((b) => dom === b || dom.endsWith(`.${b}`))) continue;
+      liste.push({ schluessel: `absender:${a.adresse}`, von: a.adresse, kategorie: a.kategorie as Kategorie });
+    }
+    return liste.slice(0, 400); // Gmail erlaubt höchstens 1000 Filter
+  }
+
+  private async autoFilterExport(negatedQuery: string): Promise<number> {
+    const bekannt = this.db.get<Record<string, string>>('autoFilter', {});
+    let n = 0;
+    for (const p of this.autoFilterPlan()) {
+      if (bekannt[p.schluessel]) continue;
+      try {
+        let akt: { addLabelIds: string[]; removeLabelIds: string[] } | null;
+        if (p.ordner) akt = { addLabelIds: [await this.aus.labelId(p.ordner)], removeLabelIds: ['INBOX'] };
+        else {
+          akt = this.filterAktion(p.kategorie!);
+          if (akt && this.db.einstellungen().aktionen[p.kategorie!].includes('label')) akt.addLabelIds.push(await this.aus.labelId(`${LABEL_PREFIX}/${KATEGORIE_NAME[p.kategorie!]}`));
+        }
+        if (!akt) continue;
+        bekannt[p.schluessel] = await this.gmail.filterAnlegen(p.ordner ? { from: p.von } : { from: p.von, negatedQuery }, akt);
+        this.db.set('autoFilter', bekannt); n++;
+        this.log(`Gmail-Filter (wirkt auch ohne PC): ${p.ordner ? `Mails von ${p.von} → Ordner „${p.ordner}“` : `${p.von} → ${KATEGORIE_NAME[p.kategorie!]}`}.`);
+      } catch (err) { this.log(`Gmail-Filter für ${p.von} fehlgeschlagen: ${(err as Error).message}`); }
+    }
+    return n;
+  }
+
+  /** Tiry schaltet „Auch bei ausgeschaltetem PC“ aus: alle automatisch angelegten Gmail-Filter wieder löschen. */
+  async autoFilterEntfernen(): Promise<number> {
+    const bekannt = this.db.get<Record<string, string>>('autoFilter', {});
+    let n = 0;
+    for (const [k, id] of Object.entries(bekannt)) { try { await this.gmail.filterLoeschen(id); } catch { /* schon weg */ } delete bekannt[k]; n++; }
+    this.db.set('autoFilter', bekannt);
+    return n;
+  }
+
+  /** Wie viele Filter räumen schon ohne PC auf? */
+  autoFilterAnzahl(): number { return Object.keys(this.db.get<Record<string, string>>('autoFilter', {})).length + this.db.regeln().filter((r) => r.gmailFilterId).length; }
 
   async regelSchalten(id: number, aktiv: boolean) {
     const r = this.db.regel(id);

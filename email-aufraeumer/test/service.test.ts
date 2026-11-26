@@ -389,3 +389,31 @@ describe('Ordner für Vielschreiber', () => {
     expect(t.gmail.get('amz30').labelIds).not.toContain('INBOX'); // auch die Rechnung liegt im Ordner
   });
 });
+
+describe('Aufräumen ohne PC (Gmail-Filter)', () => {
+  it('Vielschreiber-Werbung und Firmen-Ordner werden zu Gmail-Filtern – erst nach Zustimmung, ausschaltbar', async () => {
+    const t = aufbau(); gesendet(t.gmail); await t.dienst.starten(); t.dienst.stoppen(); await scharf(t);
+    const absender = (a: string, d: string, kat: string, n: number) => { for (let i = 0; i < n; i++) t.db.absenderZaehlen({ adresse: a, domain: d, name: a, gelesen: false, zeit: 1, kategorie: kat, listUnsub: null } as any); };
+    absender('news@zalando.de', 'zalando.de', 'newsletter', 4);
+    absender('mama.thirolf@web.de', 'web.de', 'werbung', 5);      // Kontakt + Privat-Adresse: nie
+    absender('einmal@shop.de', 'shop.de', 'werbung', 1);          // zu selten
+    absender('bestellung@amazon.de', 'amazon.de', 'wichtig', 6);  // Firmen-Ordner
+    const plan = t.dienst.autoFilterPlan();
+    expect(plan.map((p) => p.von).sort()).toEqual(['amazon.de', 'news@zalando.de']);
+    expect(t.gmail.filter).toHaveLength(0);
+    await t.dienst.filterExport();
+    expect(t.gmail.filter).toHaveLength(0);                       // ohne Zustimmung nichts
+    t.db.speichereEinstellungen({ filterExportFreigegeben: true });
+    await t.dienst.filterExport();
+    const zal = t.gmail.filter.find((f) => f.criteria.from === 'news@zalando.de')!;
+    expect(zal.criteria.negatedQuery).toContain('Rechnung');
+    expect(zal.action.removeLabelIds).toContain('INBOX');
+    const amz = t.gmail.filter.find((f) => f.criteria.from === 'amazon.de')!;
+    expect(amz.criteria.negatedQuery).toBeUndefined();            // Bestellungen kommen mit in den Ordner
+    expect(t.gmail.labelListe.find((l) => l.id === amz.action.addLabelIds![0])!.name).toBe('Amazon');
+    await t.dienst.filterExport();
+    expect(t.gmail.filter).toHaveLength(2);                       // keine Doppelten
+    expect(await t.dienst.autoFilterEntfernen()).toBe(2);
+    expect(t.gmail.filter).toHaveLength(0);
+  });
+});

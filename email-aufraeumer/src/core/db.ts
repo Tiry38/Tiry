@@ -187,6 +187,11 @@ export class Speicher {
   istKontakt(adresse: string): boolean {
     return !!this.db.prepare('SELECT 1 FROM kontakte WHERE adresse = ?').get(adresse.toLowerCase());
   }
+  /** Absender, die regelmäßig Werbung/Newsletter schicken (für Gmail-Filter, die auch ohne PC wirken). */
+  vielschreiberMuell(ab: number, max = 300): Array<{ adresse: string; kategorie: string; anzahl: number }> {
+    return this.db.prepare(`SELECT adresse, kategorie, anzahl FROM absender WHERE kategorie IN ('werbung','newsletter') AND anzahl >= ?
+      AND adresse NOT IN (SELECT adresse FROM kontakte) ORDER BY anzahl DESC LIMIT ?`).all(ab, max) as any;
+  }
   anzahlKontakte(): number { return (this.db.prepare('SELECT COUNT(*) AS n FROM kontakte').get() as any).n; }
 
   // ---------- Zu prüfen ----------
