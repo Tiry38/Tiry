@@ -148,7 +148,7 @@ class MainActivity : ComponentActivity() {
                     try {
                         val funde = withContext(Dispatchers.IO) { abruf!!.hole(abruf!!.codeAus(url)) }
                         val f = funde.firstOrNull { it.istWaschmaschine } ?: funde.firstOrNull()
-                            ?: throw IllegalStateException("Im Konto ist keine Waschmaschine gekoppelt.")
+                            ?: throw IllegalStateException("In deinem Konto ist keine Waschmaschine gekoppelt – die alte Kopplung ist weg. Tippe oben auf „C“ und koppel sie einmal neu, dann hier nochmal.")
                         stand = stand.copy(meldung = "Schlüssel da. Suche die Maschine im WLAN …")
                         val adr = withTimeoutOrNull(60_000) { z.suche.finde(f.profil) { m -> stand = stand.copy(meldung = m) } }
                         z.ablage.profil = f.profil.copy(adresse = adr)

@@ -77,6 +77,7 @@ fun Assistent(
     aktionen: AssistentAktionen,
 ) {
     var schritt by remember { mutableStateOf(start) }
+    var schonGekoppelt by remember { mutableStateOf(false) }
     Flaeche(Modifier.background(Farbe.Grund)) {
         Column(Modifier.fillMaxSize().windowInsetsPadding(WindowInsets.safeDrawing).verticalScroll(rememberScrollState()).padding(horizontal = 20.dp)) {
             Spacer(Modifier.height(18.dp))
@@ -96,9 +97,12 @@ fun Assistent(
                             Spacer(Modifier.height(10.dp))
                             Text("Wenn du sie früher schon mal mit der Home-Connect-App eingerichtet hast: Ja. Sonst: Nein – ich führe dich durch alles.", style = Schrift.Text.copy(color = Farbe.Nebel))
                             Spacer(Modifier.height(24.dp))
-                            Haupttaste("Nein, noch nicht", onClick = { schritt = Teilschritt.WLAN })
+                            Haupttaste("Nein, noch nie", onClick = { schonGekoppelt = false; schritt = Teilschritt.WLAN })
                             Spacer(Modifier.height(10.dp))
-                            Haupttaste("Ja, ist gekoppelt", aktiv = true, onClick = { schritt = Teilschritt.SCHLUESSEL }, dunkel = true)
+                            Haupttaste("Ja, aber WLAN ist neu", dunkel = true, onClick = { schonGekoppelt = true; schritt = Teilschritt.WLAN })
+                            Text("Neues WLAN-Passwort oder neuer Router (z. B. neue FRITZ!Box): Die Kopplung im Konto bleibt, nur das WLAN wird neu verbunden.", style = Schrift.Text.copy(color = Farbe.Nebel, fontSize = 12.sp), modifier = Modifier.padding(top = 6.dp, bottom = 4.dp))
+                            Spacer(Modifier.height(10.dp))
+                            Haupttaste("Ja, Display zeigt con", dunkel = true, onClick = { schonGekoppelt = true; schritt = Teilschritt.SCHLUESSEL })
                         }
                         Teilschritt.WLAN -> {
                             Text("Ohne Passwort-Tippen: per WPS-Knopf der FRITZ!Box.", style = Schrift.Text.copy(color = Farbe.Nebel))
@@ -115,7 +119,7 @@ fun Assistent(
                             Spacer(Modifier.height(14.dp))
                             Livepruefung(imWlanGefunden, sucht)
                             Spacer(Modifier.height(18.dp))
-                            Haupttaste(if (imWlanGefunden != null) "Im WLAN – weiter" else "Display zeigt con – weiter", onClick = { schritt = Teilschritt.KOPPELN })
+                            Haupttaste(if (imWlanGefunden != null) "Im WLAN – weiter" else "Display zeigt con – weiter", onClick = { schritt = if (schonGekoppelt) Teilschritt.SCHLUESSEL else Teilschritt.KOPPELN })
                             Spacer(Modifier.height(18.dp))
                             Etikett("?", "Klappt nicht")
                             Hinweis("Display zeigt „Home Connect Error“: Maschine ist zu weit vom WLAN weg oder WPS kam zu spät. Schritte 2–4 wiederholen.")
