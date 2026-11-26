@@ -487,3 +487,58 @@ body { transition: grid-template-columns .45s var(--feder); }
 .pf[data-spalte='zu'] .pf-ordner-knopf svg { transform: scaleX(-1); }
 @media (max-width: 1100px) { .pf-ordner-knopf { display: none !important; } }
 @media (max-width: 760px) { .schiene .einklappen { display: none; } }
+
+/* =================== Verläufe & Interaktion („Spektrum“) ===================
+   Verläufe nur aus den eigenen Sortenfarben – Grün → Petrol → Gelb → Orange → Rot. Kein Lila, keine Blobs. */
+@property --winkel { syntax: '<angle>'; inherits: false; initial-value: 0deg; }
+@property --fluss { syntax: '<percentage>'; inherits: false; initial-value: 0%; }
+:root {
+  --spektrum: linear-gradient(90deg, var(--c-wichtig), var(--c-benachrichtigung), var(--c-newsletter), var(--c-werbung), var(--c-muell), var(--c-wichtig));
+  --spektrum-rund: conic-gradient(from var(--winkel), var(--c-wichtig), var(--c-benachrichtigung), var(--c-newsletter), var(--c-werbung), var(--c-muell), var(--c-wichtig));
+}
+
+/* Spektrum-Leiste oben: läuft ständig ruhig, blitzt bei jeder neuen Mail einmal auf */
+body::after { content: ''; position: fixed; left: 0; right: 0; top: 0; height: 3px; z-index: 50; pointer-events: none;
+  background: var(--spektrum); background-size: 200% 100%; animation: spektrumLauf 14s linear infinite; opacity: .85; transform-origin: left; }
+body.blitz::after { animation: spektrumLauf 14s linear infinite, blitz 1.4s var(--feder); }
+@keyframes spektrumLauf { to { background-position: 200% 0; } }
+@keyframes blitz { 0% { transform: scaleY(1); filter: brightness(1); } 25% { transform: scaleY(2.6); filter: brightness(1.6); } 100% { transform: scaleY(1); filter: brightness(1); } }
+
+/* Aktiver Menüpunkt: drehender Farbring */
+.nav button[aria-current='page'] { border: 2px solid transparent; background: linear-gradient(var(--text), var(--text)) padding-box, var(--spektrum-rund) border-box; animation: drehen 7s linear infinite; }
+@keyframes drehen { to { --winkel: 360deg; } }
+.marke-zeichen i { transition: height .6s var(--feder); }
+.marke:hover .marke-zeichen i:nth-child(odd) { height: 12px; }
+.marke:hover .marke-zeichen i:nth-child(even) { height: 30px; }
+
+/* Ansage-Karte: fließender Verlauf je Zustand */
+.lage[data-art] { background-size: 240% 240%; animation: fliessen 16s ease-in-out infinite alternate; }
+.lage[data-art='probe'] { background-image: linear-gradient(125deg, var(--c-newsletter) 0%, oklch(0.84 0.17 75) 45%, var(--c-werbung) 100%); }
+.lage[data-art='laeuft'] { background-image: linear-gradient(125deg, var(--c-wichtig) 0%, oklch(0.8 0.14 165) 50%, var(--c-benachrichtigung) 100%); }
+.lage[data-art='fehler'] { background-image: linear-gradient(125deg, var(--c-muell) 0%, oklch(0.72 0.19 42) 60%, var(--c-werbung) 100%); }
+@keyframes fliessen { from { background-position: 0% 40%; } to { background-position: 100% 60%; } }
+
+/* Hauptknöpfe: Verlauf, der beim Drüberfahren weiterwandert */
+.knopf.voll, .pf-neu { background-image: linear-gradient(110deg, var(--c-newsletter), oklch(0.83 0.17 72), var(--c-werbung)); background-size: 200% 100%; background-position: 0% 0; transition: background-position .6s var(--feder), transform .35s var(--feder), filter .2s; }
+.knopf.voll:hover, .pf-neu:hover { background-position: 100% 0; filter: none; }
+
+/* Lichtkegel, der der Maus folgt – Farbe = Sorte des Elements (sonst Gelb) */
+.lage, .karte, .maschine, .pf-zeile, .absender, .regel, .eintrag, .pruef, .einst-gruppe, .leer, .pf-ordner button, .zaehler-liste span { position: relative; isolation: isolate; }
+.lage::after, .karte::after, .maschine::after, .pf-zeile::after, .absender::after, .regel::after, .eintrag::after, .pruef::after, .einst-gruppe::after, .leer::after, .pf-ordner button::after, .zaehler-liste span::after {
+  content: ''; position: absolute; inset: 0; z-index: -1; border-radius: inherit; pointer-events: none; opacity: 0; transition: opacity .35s;
+  background: radial-gradient(380px circle at var(--mx, 50%) var(--my, 50%), color-mix(in oklch, var(--k, var(--c-newsletter)) 26%, transparent), transparent 65%);
+}
+.lage:hover::after { background: radial-gradient(520px circle at var(--mx, 50%) var(--my, 50%), oklch(1 0 0 / .32), transparent 60%); }
+:is(.lage, .karte, .maschine, .pf-zeile, .absender, .regel, .eintrag, .pruef, .einst-gruppe, .leer, .pf-ordner button, .zaehler-liste span):hover::after { opacity: 1; }
+
+/* Gewählte Mail: Verlauf aus ihrer Sortenfarbe */
+.pf-zeile.offen { background: linear-gradient(100deg, color-mix(in oklch, var(--k, var(--c-newsletter)) 42%, var(--text)) 0%, var(--text) 70%); }
+.pf-zeile .strich, .eintrag .strich, .strom-liste .strich, .pruef .strich { background: linear-gradient(180deg, var(--k, transparent), color-mix(in oklch, var(--k, transparent) 45%, transparent)); }
+.pf-ordner b, .nav-zahl:not(:empty) { background-image: linear-gradient(120deg, var(--c-newsletter), var(--c-werbung)); }
+
+/* Fächer: anklickbar */
+.maschine-buehne canvas { cursor: pointer; }
+
+@media (prefers-reduced-motion: reduce) {
+  body::after, .nav button[aria-current='page'], .lage[data-art] { animation: none !important; }
+}

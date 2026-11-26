@@ -1,8 +1,13 @@
-# Email-Aufräumer
+# Tiry's Mails (früher „Email-Aufräumer“)
 
-Windows-Programm (Electron), das Tirys Gmail-Postfach vollautomatisch aufräumt. Neue Mails werden spätestens nach
-60 Sekunden eingeordnet: **behalten**, **als Werbung archivieren**, **abmelden** oder **als Spam/Phishing in den Papierkorb**.
-Läuft unsichtbar im Infobereich (Tray), startet mit Windows, arbeitet weiter, wenn das Fenster zu ist.
+Tirys eigenes Postfach für Gmail als Windows-Programm (Electron): **Posteingang, Ordner, Lesen, Schreiben, Antworten, Anhänge** –
+und dazu der eingebaute **Aufräumer**, der neue Mails automatisch einordnet: behalten, in Firmen-Ordner (z. B. „Amazon“, „DHL“),
+Werbung archivieren, abmelden oder Spam/Phishing in den Papierkorb. **Live:** alle 5 Sekunden wird bei Gmail nachgeschaut
+(auch Änderungen vom Handy), gesendet wird sofort. Läuft unsichtbar im Infobereich weiter, startet mit Windows.
+
+**Postfach-Sicherheit:** Mail-Inhalte laufen in einem abgeschotteten Rahmen (eigene CSP, keine Skripte), Bilder aus dem Internet erst auf Klick
+(Schutz vor Lese-Trackern), Links öffnen nur im normalen Browser, bei Betrugsverdacht sind sie gesperrt. „Löschen“ = Papierkorb.
+Navigation und Ordner-Spalte lassen sich einklappen. Daten und Anmeldung liegen weiter in `%APPDATA%\Email-Aufräumer`.
 
 ## Sicherheitsregeln (fest eingebaut)
 1. **Nie endgültig löschen** – nur Papierkorb (Gmail leert ihn nach 30 Tagen). Der Vollzugriff `https://mail.google.com/` wird nie angefordert.

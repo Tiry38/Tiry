@@ -22,12 +22,23 @@ export class Sortierer {
   readonly ruhig = matchMedia('(prefers-reduced-motion: reduce)').matches;
   /** Wird aufgerufen, wenn ein Umschlag im Fach landet. */
   beiLandung?: (fach: number) => void;
+  /** Klick auf ein Fach. */
+  beiKlick?: (fach: number) => void;
+  private zuletzt = -1;
 
   constructor(private canvas: HTMLCanvasElement) {
     this.ctx = canvas.getContext('2d')!;
     this.farbenLesen();
     new ResizeObserver(() => this.groesse()).observe(canvas);
     this.groesse();
+    // Maus über einem Fach: es federt kurz an (einmal pro Betreten)
+    canvas.addEventListener('pointermove', (e) => {
+      const i = this.fachBei(e.offsetX);
+      if (i !== this.zuletzt && i >= 0 && e.offsetY > this.fachOben() - 20) { this.federn[i].v -= 60; this.start(); }
+      this.zuletzt = e.offsetY > this.fachOben() - 20 ? i : -1;
+    });
+    canvas.addEventListener('pointerleave', () => { this.zuletzt = -1; });
+    canvas.addEventListener('click', (e) => { const i = this.fachBei(e.offsetX); if (i >= 0) this.beiKlick?.(i); });
     document.addEventListener('visibilitychange', () => (document.hidden ? this.pause() : this.start()));
   }
 
@@ -51,6 +62,7 @@ export class Sortierer {
   // ---- Geometrie ----
   private get bandY() { return Math.max(34, this.h * 0.16); }
   private fachBreite() { return (this.w - 24) / FAECHER.length; }
+  private fachBei(x: number) { const i = Math.floor((x - 12) / this.fachBreite()); return i >= 0 && i < FAECHER.length ? i : -1; }
   private fachX(i: number) { return 12 + i * this.fachBreite() + this.fachBreite() / 2; }
   private fachOben() { return this.h * 0.42; }
   private fachUnten() { return this.h - 8; }
@@ -158,7 +170,10 @@ export class Sortierer {
       const hProbe = (this.probeStand[i] / max) * innen * 0.9;
       c.save(); this.rr(x, oben, w, unten - oben, 14); c.clip();
       c.fillStyle = farbe; c.globalAlpha = 0.16; c.fillRect(x, oben, w, unten - oben); c.globalAlpha = 1;
-      c.fillStyle = farbe; c.fillRect(x, unten - hEcht, w, hEcht);
+      // Füllung als Verlauf: unten die eigene Farbe, nach oben in die Nachbarfarbe
+      const verlauf = c.createLinearGradient(0, unten, 0, unten - Math.max(hEcht, 40));
+      verlauf.addColorStop(0, farbe); verlauf.addColorStop(1, this.farben[(i + 1) % this.farben.length]);
+      c.fillStyle = verlauf; c.fillRect(x, unten - hEcht, w, hEcht);
       if (hProbe > 0) {
         const y0 = unten - hEcht - hProbe;
         c.save(); c.beginPath(); c.rect(x, y0, w, hProbe); c.clip();

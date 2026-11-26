@@ -493,6 +493,11 @@ async function filterFrage(anzahl?: number): Promise<boolean> {
 // ---------------- Live-Ereignisse ----------------
 let statistikTimer: any;
 function ereignis(kanal: string, d: any) {
+  if (kanal === 'aktion' || (kanal === 'postfach' && d?.neu)) {
+    // Spektrum-Leiste oben blitzt einmal auf: es ist gerade eine Mail angekommen
+    document.body.classList.remove('blitz'); void document.body.offsetWidth; document.body.classList.add('blitz');
+    clearTimeout((window as any).__blitz); (window as any).__blitz = setTimeout(() => document.body.classList.remove('blitz'), 1500);
+  }
   if ((kanal === 'postfach' || kanal === 'aktion') && ansicht === 'postfach' && post) {
     clearTimeout(postTimer); postTimer = setTimeout(() => { void post.laden(); void post.ordnerLaden(); }, 300);
   }
@@ -539,6 +544,26 @@ async function start() {
   post = new PostfachUI($('#ansicht-postfach'), api, melde);
   (window as any).__maschine = maschine;
   // Landet ein Umschlag, hüpft die Zahl unter dem Fach und zählt eins hoch
+  maschine.beiKlick = (i) => {
+    const f = FAECHER[i];
+    protokollFilter = { suche: '', kategorie: f === 'muell' ? 'spam' : f };
+    zeigeAnsicht('protokoll', true);
+    setTimeout(() => { const sel = document.getElementById('kat-filter') as HTMLSelectElement | null; if (sel) sel.value = protokollFilter.kategorie; }, 50);
+  };
+  // Lichtkegel: Mausposition relativ zum Element unter der Maus (nur bei Bewegung, gedrosselt auf Bildwechsel)
+  const LICHT = '.lage, .karte, .maschine, .pf-zeile, .absender, .regel, .eintrag, .pruef, .einst-gruppe, .leer, .pf-ordner button, .zaehler-liste span';
+  let lichtRaf = 0, lichtEvt: PointerEvent | null = null;
+  document.addEventListener('pointermove', (e) => {
+    lichtEvt = e;
+    if (lichtRaf) return;
+    lichtRaf = requestAnimationFrame(() => {
+      lichtRaf = 0;
+      const el = (lichtEvt?.target as Element | null)?.closest?.(LICHT) as HTMLElement | null;
+      if (!el || !lichtEvt) return;
+      const r = el.getBoundingClientRect();
+      el.style.setProperty('--mx', `${lichtEvt.clientX - r.left}px`); el.style.setProperty('--my', `${lichtEvt.clientY - r.top}px`);
+    });
+  }, { passive: true });
   maschine.beiLandung = (i) => {
     const b = document.getElementById(`fach-${FAECHER[i]}`);
     if (!b) return;
