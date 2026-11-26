@@ -104,6 +104,9 @@ npm run demo
 - `npm run demo` – echtes Programm mit Postfach im Arbeitsspeicher (dein Konto wird nicht berührt), neue Mails tröpfeln alle 6 s herein.
 - Screenshots aller 6 Bereiche bei 1440 px und 390 px: `npm run build && xvfb-run -a node scripts/screenshots.mjs` (liegen in `screens/`).
 - Symbole: `node scripts/icon.mjs`. Installer: `npm run dist` **auf Windows** (unter Linux braucht electron-builder Wine).
+- Workflow `.github/workflows/email-aufraeumer.yml`: baut bei jedem Push mit Änderungen in `email-aufraeumer/` auf einem Windows-Rechner,
+  führt die Tests aus, startet die fertige `.exe` 25 s im Demo-Modus (Start-Test) und legt den Installer als Artefakt ab.
+  Auf `main` zusätzlich feste Adresse: https://github.com/Tiry38/Tiry/releases/download/email-aufraeumer-latest/Email-Aufraeumer-Setup.exe
 
 ### Aufbau
 - `src/core/` – Logik ohne Electron: `pipeline.ts` (Einordnung), `signals.ts`, `headers.ts`, `actions.ts` (Ausführen/Trockenlauf/Rückgängig),
