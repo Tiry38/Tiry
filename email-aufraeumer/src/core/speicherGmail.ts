@@ -36,7 +36,7 @@ export class SpeicherGmail implements GmailPort {
     this.aufrufe.push('history');
     if (this.historyZuAlt) throw new HistoryZuAlt();
     const ids = this.verlauf.filter((v) => v.h > Number(start)).map((v) => v.id);
-    return { neueIds: ids, historyId: String(this.historyId) };
+    return { neueIds: ids, historyId: String(this.historyId), geaendert: ids.length > 0 };
   }
   async modify(id: string, add: string[], remove: string[]) {
     this.aufrufe.push(`modify:${id}`);

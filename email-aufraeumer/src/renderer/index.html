@@ -3,22 +3,27 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; font-src 'self'; img-src 'self' data:; connect-src 'none'; object-src 'none'; base-uri 'none'">
-<title>Email-Aufräumer</title>
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; font-src 'self'; img-src 'self' data:; frame-src tmail:; connect-src 'none'; object-src 'none'; base-uri 'none'">
+<title>Tiry's Mails</title>
 <link rel="stylesheet" href="style.css">
 </head>
 <body data-ansicht="cockpit">
 <a class="sprung" href="#inhalt">Zum Inhalt springen</a>
 
 <header class="schiene">
-  <div class="marke" aria-label="Email-Aufräumer">
-    <span class="marke-zeichen" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span>
-    <span class="marke-name">Aufräumer</span>
+  <div class="schiene-kopf">
+    <div class="marke" aria-label="Tiry's Mails">
+      <span class="marke-zeichen" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span>
+      <span class="marke-name">Tiry's Mails</span>
+    </div>
+    <button class="einklappen" id="nav-klappe" aria-label="Navigation einklappen" title="Navigation ein-/ausklappen"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg></button>
   </div>
   <p class="zustand" id="zustand" role="status" aria-live="polite"><span class="zustand-punkt"></span><span id="zustand-text">startet …</span></p>
   <nav aria-label="Bereiche">
     <ol class="nav" id="nav">
-      <li><button data-ziel="cockpit"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5h18l-7 8v6l-4 2v-8z"/></svg><span class="nav-name">Übersicht</span><span class="nav-kurz" aria-hidden="true">Übersicht</span></button></li>
+      <li><button data-ziel="postfach"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18v12H3zM3 7l9 6 9-6"/></svg><span class="nav-name">Postfach</span><span class="nav-kurz" aria-hidden="true">Postfach</span><span class="nav-zahl" id="nav-post"></span></button></li>
+      <li class="nav-trenner" aria-hidden="true">Aufräumen</li>
+      <li><button data-ziel="cockpit"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5h18l-7 8v6l-4 2v-8z"/></svg><span class="nav-name">Aufräumen</span><span class="nav-kurz" aria-hidden="true">Aufräumen</span></button></li>
       <li><button data-ziel="pruefen"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v7M12 10l-6 6M12 10l6 6M4 19h4M16 19h4"/></svg><span class="nav-name">Du entscheidest</span><span class="nav-kurz" aria-hidden="true">Prüfen</span><span class="nav-zahl" id="nav-pruefen"></span></button></li>
       <li><button data-ziel="absender"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg><span class="nav-name">Wer schreibt dir</span><span class="nav-kurz" aria-hidden="true">Absender</span></button></li>
       <li><button data-ziel="regeln"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h10M4 12h10M4 18h10M17 5l1.5 1.5L21 4M17 17l1.5 1.5L21 16"/></svg><span class="nav-name">Deine Regeln</span><span class="nav-kurz" aria-hidden="true">Regeln</span></button></li>
@@ -30,6 +35,7 @@
 </header>
 
 <main id="inhalt" tabindex="-1">
+  <section class="ansicht ansicht-voll" id="ansicht-postfach" data-ansicht="postfach" aria-label="Postfach" hidden></section>
   <section class="ansicht" id="ansicht-cockpit" data-ansicht="cockpit" aria-labelledby="h-cockpit">
     <div id="cockpit-oben"></div>
     <div class="maschine" id="maschine-box">

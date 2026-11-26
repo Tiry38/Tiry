@@ -7,7 +7,7 @@ import path from 'node:path';
 
 const AUS = process.env.SCREENS_OUT ?? 'screens';
 mkdirSync(AUS, { recursive: true });
-const BEREICHE = ['cockpit', 'pruefen', 'absender', 'regeln', 'protokoll', 'einstellungen'];
+const BEREICHE = ['postfach', 'cockpit', 'pruefen', 'absender', 'regeln', 'protokoll', 'einstellungen'];
 const GROESSEN = [{ name: 'desktop', w: 1440, h: 900 }, { name: 'handy', w: 390, h: 844 }];
 
 const app = await electron.launch({
@@ -28,6 +28,7 @@ for (const g of GROESSEN) {
   for (const b of BEREICHE) {
     await fenster.click(`#nav button[data-ziel="${b}"]`);
     await fenster.waitForTimeout(b === 'cockpit' ? 2500 : 900);
+    if (b === 'postfach') { await fenster.waitForSelector('.pf-zeile', { timeout: 8000 }).catch(() => {}); if (g.name === 'desktop') { await fenster.click('.pf-zeile >> nth=1').catch(() => {}); await fenster.waitForTimeout(1500); } }
     if (b === 'einstellungen' && g.name === 'desktop') {
       await fenster.click('[data-ab="vorschau"]').catch(() => {});
       await fenster.waitForTimeout(1500);

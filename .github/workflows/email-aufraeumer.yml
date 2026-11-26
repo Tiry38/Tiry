@@ -1,9 +1,9 @@
-name: Email-Aufräumer bauen
+name: Tiry's Mails bauen
 
 # Baut den Windows-Installer auf einem Windows-Rechner von GitHub.
 # - Jeder Push mit Änderungen in email-aufraeumer/: Tests, Installer, Start-Test der .exe, Installer als Artefakt.
 # - Auf main zusätzlich feste Download-Adresse:
-#   https://github.com/Tiry38/Tiry/releases/download/email-aufraeumer-latest/Email-Aufraeumer-Setup.exe
+#   https://github.com/Tiry38/Tiry/releases/download/email-aufraeumer-latest/Tirys-Mails-Setup.exe
 on:
   push:
     branches: [main, 'claude/**']
@@ -41,18 +41,18 @@ jobs:
       - name: Start-Test der .exe (Demo-Modus, 25 s)
         shell: pwsh
         run: |
-          $exe = Get-ChildItem dist/win-unpacked -Filter *.exe | Where-Object { $_.Name -like 'Email-Aufr*' } | Select-Object -First 1
+          $exe = Get-ChildItem dist/win-unpacked -Filter *.exe | Where-Object { $_.Name -like 'Tiry*' } | Select-Object -First 1
           if (-not $exe) { throw 'Programmdatei fehlt' }
           $p = Start-Process $exe.FullName -ArgumentList '--demo' -PassThru
           Start-Sleep -Seconds 25
           if ($p.HasExited) { throw "Programm hat sich beendet (Code $($p.ExitCode))" }
           Write-Host "Läuft nach 25 s noch: $($exe.Name) (PID $($p.Id))"
           Stop-Process -Id $p.Id -Force
-          Get-Item dist/Email-Aufraeumer-Setup.exe | Format-List Name, Length
+          Get-Item dist/Tirys-Mails-Setup.exe | Format-List Name, Length
       - uses: actions/upload-artifact@v4
         with:
           name: email-aufraeumer-installer
-          path: email-aufraeumer/dist/Email-Aufraeumer-Setup.exe
+          path: email-aufraeumer/dist/Tirys-Mails-Setup.exe
       - name: Release email-aufraeumer-latest aktualisieren (nur main)
         if: github.ref == 'refs/heads/main'
         shell: bash
@@ -63,10 +63,10 @@ jobs:
           git tag -f "$TAG" "$GITHUB_SHA"
           git push -f origin "refs/tags/$TAG"
           if gh release view "$TAG" >/dev/null 2>&1; then
-            gh release upload "$TAG" dist/Email-Aufraeumer-Setup.exe --clobber
-            gh release edit "$TAG" --title "Email-Aufräumer 0.1.${{ github.run_number }}" --latest=false
+            gh release upload "$TAG" dist/Tirys-Mails-Setup.exe --clobber
+            gh release edit "$TAG" --title "Tiry's Mails 0.1.${{ github.run_number }}" --latest=false
           else
-            gh release create "$TAG" dist/Email-Aufraeumer-Setup.exe --verify-tag --latest=false \
-              --title "Email-Aufräumer 0.1.${{ github.run_number }}" \
+            gh release create "$TAG" dist/Tirys-Mails-Setup.exe --verify-tag --latest=false \
+              --title "Tiry's Mails 0.1.${{ github.run_number }}" \
               --notes "Räumt das Gmail-Postfach automatisch auf. Einrichtung: email-aufraeumer/LIESMICH.md."
           fi

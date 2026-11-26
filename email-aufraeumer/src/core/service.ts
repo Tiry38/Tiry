@@ -57,6 +57,11 @@ export class Aufraeumer extends EventEmitter {
     this.gmail = o.gmail; this.db = o.db; this.ki = o.ki ?? null; this.post = o.post;
     this.jetzt = o.jetzt ?? Date.now;
     if (!this.db.get('einstellungen', null)) this.db.set('einstellungen', standardEinstellungen(this.jetzt()));
+    // Tiry's Mails ist live: alte Standard-Einstellung (60 s) einmalig auf 5 s umstellen
+    if (!this.db.get('migrationLive', false)) {
+      if (this.db.einstellungen().intervallSek === 60) this.db.speichereEinstellungen({ intervallSek: 5 });
+      this.db.set('migrationLive', true);
+    }
     this.aus = new Ausfuehrer(this.gmail, this.db, { eigeneAdresse: () => this.email, post: this.post, log: (s) => this.log(s) });
   }
 
@@ -88,7 +93,7 @@ export class Aufraeumer extends EventEmitter {
 
   private planeNaechsten() {
     if (this.timer) clearTimeout(this.timer);
-    const sek = Math.max(15, this.db.einstellungen().intervallSek);
+    const sek = Math.max(3, this.db.einstellungen().intervallSek);
     this.timer = setTimeout(async () => { await this.tick(); this.planeNaechsten(); }, sek * 1000);
     this.timer.unref?.();
   }
@@ -109,11 +114,12 @@ export class Aufraeumer extends EventEmitter {
       if (!start) { start = (await this.gmail.profil()).historyId; this.db.set('historyId', start); }
       let ids: string[] = [];
       try {
-        let token: string | undefined; let neueHistory = start;
+        let token: string | undefined; let neueHistory = start; let geaendert = false;
         do {
           const r = await this.gmail.history(start, token);
-          ids.push(...r.neueIds); neueHistory = r.historyId; token = r.nextPageToken;
+          ids.push(...r.neueIds); neueHistory = r.historyId; token = r.nextPageToken; geaendert ||= !!r.geaendert;
         } while (token);
+        if (geaendert) this.emit('postfach', { neu: ids.length });
         anzahl = await this.verarbeiteIds(ids, durchlauf);
         this.db.set('historyId', neueHistory);
       } catch (err) {

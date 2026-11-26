@@ -339,3 +339,151 @@ dialog p { color: var(--text-2); font-size: 16.5px; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition-duration: 0s !important; }
 }
+
+/* =================== Tiry's Mails: Postfach =================== */
+.nav-trenner { margin: 14px 12px 4px; font-size: 12px; font-weight: 700; color: var(--text-3); text-transform: uppercase; letter-spacing: .08em; }
+.ansicht.ansicht-voll { padding: 0; max-width: none; height: 100%; }
+main:has(> .ansicht-voll:not([hidden])) { overflow: hidden; }
+
+/* Eingeklappte Seitenleiste: nur Symbole */
+body[data-nav='klein'] { grid-template-columns: 78px minmax(0, 1fr); }
+body[data-nav='klein'] .schiene { padding: 22px 10px; align-items: center; }
+body[data-nav='klein'] .marke { padding: 0; }
+body[data-nav='klein'] .marke-name, body[data-nav='klein'] .nav-name, body[data-nav='klein'] #zustand-text,
+body[data-nav='klein'] .schiene-fuss, body[data-nav='klein'] .nav-trenner { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+body[data-nav='klein'] .zustand { padding: 10px; justify-content: center; }
+body[data-nav='klein'] .nav button { grid-template-columns: 1fr; justify-items: center; width: 54px; padding: 0; position: relative; }
+body[data-nav='klein'] .nav-zahl:not(:empty) { position: absolute; top: 4px; right: 2px; min-width: 18px; height: 18px; font-size: 11px; padding: 0 4px; border-radius: 6px; }
+
+.pf { display: grid; grid-template-columns: 232px minmax(300px, 400px) minmax(0, 1fr); height: 100vh; }
+.pf-ordner { overflow-y: auto; padding: 22px 14px; border-right: 1px solid var(--linie); }
+.pf-neu { width: 100%; margin-bottom: 18px; }
+.pf-neu svg, .pf-suche svg, .pf-anhaenge svg, .pf-zurueck svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.pf-ordner h2 { margin: 18px 10px 6px; font-size: 12px; font-weight: 700; color: var(--text-3); text-transform: uppercase; letter-spacing: .08em; }
+.pf-ordner ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; }
+.pf-ordner button { all: unset; box-sizing: border-box; cursor: pointer; width: 100%; min-height: 44px; padding: 0 12px; border-radius: 12px;
+  display: grid; grid-template-columns: 22px minmax(0, 1fr) auto; gap: 10px; align-items: center; color: var(--text-2); font-weight: 550; transition: background .2s; }
+.pf-ordner button span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pf-ordner button:hover { background: var(--flaeche); color: var(--text); }
+.pf-ordner button[aria-current] { background: var(--flaeche-2); color: var(--text); font-weight: 700; }
+.pf-ordner svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linejoin: round; stroke-linecap: round; }
+.pf-ordner b { font-size: 13px; font-weight: 800; color: var(--dunkel); background: var(--c-newsletter); border-radius: 7px; padding: 1px 7px; }
+
+.pf-liste { overflow-y: auto; border-right: 1px solid var(--linie); background: var(--flaeche); }
+.pf-kopf { position: sticky; top: 0; z-index: 2; padding: 16px 16px 10px; background: var(--flaeche); display: grid; gap: 8px; }
+.pf-suche { display: flex; align-items: center; gap: 10px; min-height: 46px; padding: 0 14px; border-radius: 14px; background: var(--flaeche-2); color: var(--text-3); }
+.pf-suche:focus-within { outline: 2px solid var(--c-newsletter); }
+.pf-suche input { all: unset; flex: 1; color: var(--text); font: 500 15px var(--sans); min-height: 44px; }
+.pf-suche input::placeholder { color: var(--text-3); }
+#pf-ordnerwahl { display: none; }
+.pf-titel { margin: 4px 18px 6px; font: 750 26px/1.1 var(--display); letter-spacing: -.02em; }
+.pf-zeilen { list-style: none; margin: 0; padding: 0 8px 12px; }
+.pf-gruppe { margin: 14px 12px 4px; font-size: 12px; font-weight: 700; color: var(--text-3); text-transform: uppercase; letter-spacing: .08em; }
+.pf-lade { padding: 30px 18px; color: var(--text-2); }
+.pf-zeile { all: unset; box-sizing: border-box; cursor: pointer; width: 100%; display: grid; grid-template-columns: 5px minmax(0, 1fr) auto; gap: 2px 12px;
+  padding: 12px 12px 12px 10px; border-radius: 14px; transition: background .15s, transform .3s var(--feder); }
+.pf-zeile:hover { background: var(--flaeche-2); }
+.pf-zeile:active { transform: scale(.99); }
+.pf-zeile.offen { background: var(--text); color: var(--dunkel); }
+.pf-zeile .strich { grid-row: 1 / span 3; width: 5px; height: auto; align-self: stretch; border-radius: 3px; background: var(--k, transparent); }
+.pf-von { font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pf-zeit { font-size: 13px; color: var(--text-3); }
+.pf-betreff { grid-column: 2 / -1; font-size: 14.5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pf-vorschau { grid-column: 2 / -1; font-size: 13.5px; color: var(--text-3); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pf-zeile .pf-kat { grid-column: 2 / -1; justify-self: start; margin-top: 4px; font-size: 12px; font-weight: 750; color: var(--k); }
+.pf-zeile.neu .pf-von, .pf-zeile.neu .pf-betreff { font-weight: 800; color: var(--text); }
+.pf-zeile.neu .pf-von::before { content: ''; display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--c-newsletter); margin-right: 7px; vertical-align: 1px; }
+.pf-zeile.offen .pf-zeit, .pf-zeile.offen .pf-vorschau { color: oklch(0.4 0.01 70); }
+.pf-zeile.offen.neu .pf-von, .pf-zeile.offen.neu .pf-betreff { color: var(--dunkel); }
+.pf-stern { color: var(--c-newsletter); }
+.pf-mehr { margin: 4px 16px 20px; width: calc(100% - 32px); }
+
+.pf-lesen { overflow: hidden; display: flex; flex-direction: column; min-width: 0; }
+.pf-leer { margin: auto; text-align: center; display: grid; gap: 6px; color: var(--text-2); padding: 30px; }
+.pf-leer b { font: 750 24px/1.2 var(--display); color: var(--text); }
+.pf-werkzeug { display: flex; gap: 8px; flex-wrap: wrap; padding: 14px 22px; border-bottom: 1px solid var(--linie); align-items: center; }
+.pf-trenn { flex: 1; }
+.pf-zurueck { display: none !important; }
+.pf-mailkopf { padding: 20px 26px 10px; position: relative; }
+.pf-mailkopf h2 { margin: 0 0 10px; font: 750 clamp(22px, 2.2vw, 30px)/1.15 var(--display); letter-spacing: -.015em; overflow-wrap: anywhere; }
+.pf-mailkopf p { margin: 0; overflow-wrap: anywhere; }
+.pf-mailkopf p span, .pf-an { color: var(--text-3); font-size: 14px; }
+.pf-mailkopf .pf-kat { position: absolute; top: 22px; right: 26px; padding: 4px 10px; border-radius: 9px; background: var(--k); color: var(--dunkel); font-size: 13px; font-weight: 750; }
+.pf-mailkopf .pf-kat:empty { display: none; }
+.pf-warnung { margin: 6px 26px; padding: 12px 16px; border-radius: 14px; background: var(--c-muell); color: var(--dunkel); font-weight: 650; }
+.pf-bilder { margin: 6px 26px; padding: 8px 8px 8px 16px; border-radius: 14px; background: var(--flaeche-2); display: flex; align-items: center; justify-content: space-between; gap: 12px; font-size: 14px; color: var(--text-2); }
+.pf-anhaenge { list-style: none; margin: 6px 26px; padding: 0; display: flex; gap: 8px; flex-wrap: wrap; }
+.pf-anhaenge small { color: var(--text-3); font-weight: 500; }
+.pf-inhalt { flex: 1; min-height: 300px; margin: 10px 22px 22px; border: 0; border-radius: 18px; background: #fff; }
+
+.pf-ordnerwahl { list-style: none; padding: 0; margin: 0 0 18px; display: flex; flex-wrap: wrap; gap: 8px; }
+.pf-schreiben { position: fixed; right: 24px; bottom: 24px; z-index: 30; width: min(680px, calc(100vw - 48px)); height: min(720px, calc(100vh - 48px));
+  display: flex; flex-direction: column; gap: 10px; padding: 18px 22px; border-radius: var(--rund-gross); background: var(--flaeche-2); box-shadow: 0 24px 60px oklch(0.1 0.01 70 / .6); animation: hoch .45s var(--feder); }
+@keyframes hoch { from { transform: translateY(30px); opacity: 0; } }
+.pf-schreiben header { display: flex; justify-content: space-between; align-items: center; }
+.pf-schreiben h2 { margin: 0; font: 750 24px var(--display); }
+.pf-schreiben .feld input, .pf-schreiben .feld textarea { background: var(--flaeche); }
+.pf-text { flex: 1; min-height: 0; }
+.pf-text textarea { flex: 1; min-height: 160px; resize: none; font: 15px/1.5 var(--sans); }
+.pf-schreiben footer { display: flex; gap: 10px; align-items: center; }
+.pf-schreiben footer span { flex: 1; }
+.meldung { display: flex; align-items: center; gap: 14px; }
+.meldung .knopf { background: var(--dunkel); color: var(--text); }
+
+@media (max-width: 1100px) {
+  .pf { grid-template-columns: minmax(280px, 360px) minmax(0, 1fr); }
+  .pf-ordner { display: none; }
+  #pf-ordnerwahl { display: block; min-height: 44px; border-radius: 12px; border: 0; background: var(--flaeche-2); color: var(--text); font: 600 15px var(--sans); padding: 0 12px; }
+}
+@media (max-width: 760px) {
+  .nav { grid-template-columns: repeat(7, minmax(0, 1fr)); }
+  .nav-trenner { display: none; }
+  .nav button { font-size: 9.5px; }
+  .nav-kurz { font-size: 9.5px; }
+  .ansicht.ansicht-voll { height: auto; }
+  .pf { display: block; height: auto; }
+  .pf-liste { border: 0; background: transparent; overflow: visible; }
+  .pf-kopf { position: static; background: transparent; padding: 14px 14px 6px; }
+  .pf-lesen { position: fixed; inset: 0 0 74px; z-index: 15; background: var(--grund); overflow-y: auto; display: none; }
+  .pf[data-offen='ja'] .pf-lesen { display: flex; }
+  .pf-zurueck { display: inline-flex !important; }
+  .pf-werkzeug { padding: 10px 12px; position: sticky; top: 0; background: var(--grund); z-index: 2; }
+  .pf-werkzeug .knopf { padding: 0 12px; }
+  .pf-mailkopf { padding: 14px 16px 6px; }
+  .pf-mailkopf .pf-kat { position: static; display: inline-block; margin-top: 8px; }
+  .pf-warnung, .pf-bilder, .pf-anhaenge { margin: 6px 14px; }
+  .pf-inhalt { margin: 8px 10px 14px; min-height: 70vh; }
+  .pf-schreiben { inset: 0 0 0 0; width: auto; height: auto; border-radius: 0; right: 0; bottom: 0; }
+}
+
+.pf-werkzeug .knopf svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
+.pf-werkzeug .knopf.symbol { width: 44px; padding: 0; }
+.pf-werkzeug .knopf.symbol.an svg { fill: var(--c-newsletter); stroke: var(--c-newsletter); }
+@media (max-width: 760px) {
+  .pf-werkzeug { flex-wrap: nowrap; gap: 6px; }
+  .pf-werkzeug .knopf.voll { padding: 0 12px; }
+  .pf-werkzeug .pf-trenn { display: none; }
+}
+@media (max-width: 760px) {
+  .pf-werkzeug { overflow-x: auto; scrollbar-width: none; }
+  .pf-werkzeug::-webkit-scrollbar { display: none; }
+  .pf-werkzeug .knopf { flex: none; }
+  .pf-werkzeug .knopf.voll { width: 52px; padding: 0; font-size: 0; gap: 0; }
+}
+
+/* Einklapp-Knöpfe */
+.einklappen { all: unset; box-sizing: border-box; cursor: pointer; width: 44px; height: 44px; border-radius: 12px; display: grid; place-items: center; color: var(--text-2); transition: background .2s, transform .4s var(--feder); }
+.einklappen:hover { background: var(--flaeche-2); color: var(--text); }
+.einklappen svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; transition: transform .4s var(--feder); }
+.schiene-kopf { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+body[data-nav='klein'] .schiene-kopf { flex-direction: column; }
+body[data-nav='klein'] .einklappen svg { transform: scaleX(-1); }
+body { transition: grid-template-columns .45s var(--feder); }
+.pf { transition: grid-template-columns .45s var(--feder); }
+.pf[data-spalte='zu'] { grid-template-columns: 0 minmax(300px, 440px) minmax(0, 1fr); }
+.pf[data-spalte='zu'] .pf-ordner { overflow: hidden; padding: 0; border: 0; }
+.pf-kopfzeile { display: flex; gap: 8px; align-items: center; }
+.pf-kopfzeile .pf-suche { flex: 1; }
+.pf[data-spalte='zu'] .pf-ordner-knopf svg { transform: scaleX(-1); }
+@media (max-width: 1100px) { .pf-ordner-knopf { display: none !important; } }
+@media (max-width: 760px) { .schiene .einklappen { display: none; } }

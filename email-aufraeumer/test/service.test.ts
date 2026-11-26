@@ -127,7 +127,7 @@ describe('Hintergrunddienst', () => {
     const t = aufbau(); await t.dienst.starten(); t.dienst.stoppen();
     const gemeldet: any[] = []; t.dienst.on('aktion', (e) => gemeldet.push(e));
     t.gmail.hinzufuegen(fall('Gmail-Spam Krypto'));
-    expect(t.db.einstellungen().intervallSek).toBe(60);
+    expect(t.db.einstellungen().intervallSek).toBe(5);
     await t.dienst.tick();
     expect(gemeldet).toHaveLength(1);
     expect(gemeldet[0]).toMatchObject({ kategorie: 'spam', trocken: true });

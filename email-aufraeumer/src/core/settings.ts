@@ -8,7 +8,7 @@ export const TROCKENLAUF_TAGE = 7;
 
 export function standardEinstellungen(jetzt = Date.now()): Einstellungen {
   return {
-    intervallSek: 60,
+    intervallSek: 5,
     schwelle: 85,
     schutzwoerter: [...SCHUTZWOERTER_STANDARD],
     kiAn: false,

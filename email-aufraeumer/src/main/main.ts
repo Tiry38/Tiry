@@ -1,5 +1,5 @@
 // Electron-Hauptprozess: Fenster, Tray, Autostart, IPC, Hintergrunddienst.
-import { app, BrowserWindow, Tray, Menu, nativeImage, ipcMain, dialog, powerMonitor } from 'electron';
+import { app, BrowserWindow, Tray, Menu, nativeImage, ipcMain, dialog, powerMonitor, protocol, shell } from 'electron';
 import path from 'node:path';
 import fs from 'node:fs';
 import { Speicher } from '../core/db';
@@ -10,13 +10,21 @@ import { ordneEin } from '../core/pipeline';
 import { KATEGORIE_NAME } from '../core/types';
 import { Anmeldung } from './auth';
 import { erzeugeDemo } from './demo';
+import { Postfach } from '../core/postfach';
+import { textZuHtml } from '../core/mime';
+
+const NAME = "Tiry's Mails";
+// Eigenes Protokoll für die abgeschottete Anzeige von Mail-Inhalten (eigene CSP je Antwort)
+protocol.registerSchemesAsPrivileged([{ scheme: 'tmail', privileges: { standard: true, secure: true, supportFetchAPI: true } }]);
 
 const DEMO = process.argv.includes('--demo');
 const VERSTECKT = process.argv.includes('--hidden');
 const LESETEST = process.argv.includes('--lesetest');
 const SMOKE = process.env.AUFRAEUMER_SMOKE === '1';
 
+// Daten bleiben im bisherigen Ordner (Anmeldung, Verlauf, Regeln) – auch nach der Umbenennung in „Tiry's Mails“
 if (process.env.AUFRAEUMER_DATA) app.setPath('userData', process.env.AUFRAEUMER_DATA);
+else app.setPath('userData', path.join(app.getPath('appData'), 'Email-Aufräumer'));
 const ORDNER = DEMO ? path.join(app.getPath('temp'), `email-aufraeumer-demo-${process.pid}`) : app.getPath('userData');
 
 if (!SMOKE && !app.requestSingleInstanceLock()) app.quit();
@@ -25,6 +33,9 @@ let fenster: BrowserWindow | null = null;
 let tray: Tray | null = null;
 let beenden = false;
 let dienst: Aufraeumer | null = null;
+let postfach: Postfach | null = null;
+/** Zuletzt geöffnete Mails für die Anzeige über tmail:// (id → HTML + Anhänge). */
+const anzeige = new Map<string, { html: string; cids: Record<string, string> }>();
 let db: Speicher;
 const anmeldung = new Anmeldung(ORDNER);
 const logZeilen: string[] = [];
@@ -53,7 +64,9 @@ function gmailErzeugen(): GmailPort | null {
 async function dienstStarten(gmail: GmailPort) {
   dienst?.stoppen();
   dienst = new Aufraeumer({ gmail, db, ki: erzeugeClaudeKi() });
-  for (const k of ['aktion', 'status', 'altbestand', 'frage']) dienst.on(k, (d) => { sende(k, d); if (k === 'status') aktualisiereTray(); });
+  const d = dienst;
+  postfach = new Postfach(gmail, db, () => d.email || 'ich');
+  for (const k of ['aktion', 'status', 'altbestand', 'frage', 'postfach']) dienst.on(k, (d) => { sende(k, d); if (k === 'status') aktualisiereTray(); });
   dienst.on('log', log);
   await dienst.starten();
 }
@@ -62,9 +75,9 @@ function aktualisiereTray() {
   if (!tray) return;
   const s = dienst?.statusInfo();
   const text = !s ? 'Nicht angemeldet' : s.status === 'fehler' ? `Fehler: ${s.fehler}` : s.trockenlauf ? 'Trockenlauf' : 'Läuft';
-  tray.setToolTip(`Email-Aufräumer – ${text}`);
+  tray.setToolTip(`${NAME} – ${text}`);
   tray.setContextMenu(Menu.buildFromTemplate([
-    { label: `Email-Aufräumer – ${text}`, enabled: false },
+    { label: `${NAME} – ${text}`, enabled: false },
     { type: 'separator' },
     { label: 'Öffnen', click: zeigeFenster },
     { label: 'Jetzt prüfen', enabled: !!dienst, click: () => void dienst?.tick() },
@@ -81,7 +94,7 @@ function zeigeFenster() {
 function erzeugeFenster() {
   fenster = new BrowserWindow({
     width: 1440, height: 920, minWidth: 380, minHeight: 600, show: false, backgroundColor: '#14161a',
-    title: 'Email-Aufräumer', icon: icon('icon.png'), autoHideMenuBar: true,
+    title: NAME, icon: icon('icon.png'), autoHideMenuBar: true,
     webPreferences: { preload: path.join(__dirname, 'preload.js'), contextIsolation: true, sandbox: true, nodeIntegration: false, backgroundThrottling: true },
   });
   fenster.setMenu(null);
@@ -92,12 +105,35 @@ function erzeugeFenster() {
   for (const ev of ['minimize', 'hide', 'restore', 'show'] as const) {
     fenster.on(ev as any, () => sende('sichtbar', !(fenster!.isMinimized() || !fenster!.isVisible())));
   }
-  fenster.webContents.setWindowOpenHandler(() => ({ action: 'deny' })); // keine Links aus Inhalten öffnen
+  // Links aus Mails: nie im Programm öffnen. http(s) → normaler Browser, mailto → eigenes Schreibfenster.
+  fenster.webContents.setWindowOpenHandler(({ url }) => { linkOeffnen(url); return { action: 'deny' }; });
   fenster.webContents.on('will-navigate', (e) => e.preventDefault());
+  fenster.webContents.on('will-frame-navigate', (e: any) => {
+    if (e.isMainFrame) return;
+    if (String(e.url).startsWith('tmail:')) return;
+    e.preventDefault(); linkOeffnen(e.url);
+  });
 }
 
 // ---------------- IPC ----------------
 type Fn = (...a: any[]) => unknown;
+function linkOeffnen(url: string) {
+  if (/^mailto:/i.test(url)) { sende('mailto', url); return; }
+  if (/^https?:\/\//i.test(url)) void shell.openExternal(url);
+}
+
+/** Baut das sichere Anzeige-Dokument einer Mail. */
+function mailDokument(id: string, bilder: boolean, sperre: boolean): string {
+  const a = anzeige.get(id);
+  let html = a?.html ?? '<p>Mail nicht geladen.</p>';
+  // eingebettete Bilder (cid:) aus den Anhängen
+  html = html.replace(/(["'(])cid:([^"')\s>]+)/gi, (m, q, cid) => (a?.cids[cid] ? `${q}${a.cids[cid]}` : m));
+  if (sperre) html = html.replace(/\shref\s*=\s*("[^"]*"|'[^']*'|[^\s>]+)/gi, ' data-gesperrt="1"');
+  const csp = `default-src 'none'; style-src 'unsafe-inline' data:; font-src data:; img-src data: tmail:${bilder ? ' https: http:' : ''}; media-src 'none'; frame-src 'none'; form-action 'none'`;
+  return `<!doctype html><html><head><meta charset="utf-8"><meta http-equiv="Content-Security-Policy" content="${csp}"><base target="_blank">
+<style>html{background:#fff;color:#16181c}body{margin:22px 26px;font:15px/1.55 system-ui,'Segoe UI',sans-serif;overflow-wrap:anywhere}img{max-width:100%;height:auto}a{color:#0b57d0}[data-gesperrt]{color:#888;text-decoration:line-through;pointer-events:none}</style></head><body>${html}</body></html>`;
+}
+
 const API: Record<string, Fn> = {
   async zustand() {
     return {
@@ -138,6 +174,41 @@ const API: Record<string, Fn> = {
     anmeldung.credentialsUebernehmen(r.filePaths[0]);
     return true;
   },
+  // ---------------- Tiry's Mails: Postfach ----------------
+  pfOrdner: () => postfach!.ordner(),
+  pfListe: (ordner, suche, token) => postfach!.liste(ordner, suche ?? '', token ?? undefined),
+  async pfLesen(id) {
+    const m = await postfach!.lesen(id);
+    const cids: Record<string, string> = {};
+    for (const an of m.anhaenge) if (an.cid && an.anhangId) cids[an.cid] = `tmail://anhang/${encodeURIComponent(id)}/${encodeURIComponent(an.anhangId)}?mime=${encodeURIComponent(an.mime)}`;
+    anzeige.set(id, { html: m.html ?? textZuHtml(m.text ?? ''), cids });
+    if (anzeige.size > 30) anzeige.delete(anzeige.keys().next().value!);
+    const fern = /<img[^>]+src\s*=\s*["']?https?:/i.test(m.html ?? '') || /url\(\s*["']?https?:/i.test(m.html ?? '');
+    return { ...m, html: undefined, text: undefined, fernBilder: fern, anzeigeUrl: `tmail://mail/${encodeURIComponent(id)}` };
+  },
+  pfVorlage: (id, art) => postfach!.vorlage(id, art),
+  pfSenden: (e) => postfach!.senden(e),
+  pfAktion: (ids, a) => postfach!.aktion(ids, a),
+  pfRueckgaengig: () => postfach!.rueckgaengig(),
+  pfOrdnerAnlegen: (name) => postfach!.ordnerAnlegen(name),
+  async pfAnhangSpeichern(mailId, anhang) {
+    const r = await dialog.showSaveDialog(fenster!, { defaultPath: path.join(app.getPath('downloads'), anhang.name) });
+    if (r.canceled || !r.filePath) return false;
+    fs.writeFileSync(r.filePath, await postfach!.anhang(mailId, anhang));
+    shell.showItemInFolder(r.filePath);
+    return true;
+  },
+  async pfAnhangWaehlen() {
+    const r = await dialog.showOpenDialog(fenster!, { title: 'Anhänge auswählen', properties: ['openFile', 'multiSelections'] });
+    if (r.canceled) return [];
+    return r.filePaths.map((p) => {
+      const daten = fs.readFileSync(p);
+      if (daten.length > 24 * 1024 * 1024) throw new Error(`${path.basename(p)} ist größer als 24 MB – Gmail nimmt das nicht an.`);
+      return { name: path.basename(p), mime: mimeVon(p), daten: new Uint8Array(daten) };
+    });
+  },
+  ordnerListe: () => dienst?.ordnerListe() ?? [],
+  ordnerSchalten: (basis, an) => dienst?.ordnerSchalten(basis, an),
   async anmelden() {
     await anmeldung.anmelden();
     const g = gmailErzeugen();
@@ -189,6 +260,7 @@ app.whenReady().then(async () => {
 
   if (DEMO) {
     const demo = erzeugeDemo();
+    demoInhalte(demo.gmail);
     db.regelMerken('schwarz', 'adresse', 'win@bitprofit.top', 'spam');
     db.regelMerken('weiss', 'domain', 'veloport.de', null);
     db.regelMerken('gelernt', 'adresse', 'werbung@weko.de', 'werbung'); db.regelMerken('gelernt', 'adresse', 'werbung@weko.de', 'werbung');
@@ -209,3 +281,40 @@ app.whenReady().then(async () => {
 app.on('window-all-closed', () => { /* im Tray weiterlaufen */ });
 app.on('second-instance', zeigeFenster);
 app.on('before-quit', () => { beenden = true; dienst?.stoppen(); });
+
+function mimeVon(p: string): string {
+  const e = path.extname(p).toLowerCase();
+  return ({ '.pdf': 'application/pdf', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.png': 'image/png', '.gif': 'image/gif', '.txt': 'text/plain',
+    '.doc': 'application/msword', '.docx': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', '.xlsx': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    '.zip': 'application/zip', '.mp4': 'video/mp4' } as Record<string, string>)[e] ?? 'application/octet-stream';
+}
+
+/** Demo: ein paar Mails mit echtem Inhalt, damit die Leseansicht etwas zeigt. */
+function demoInhalte(g: any) {
+  for (const [id, m] of g.mails as Map<string, any>) {
+    const betreff = m.headers.subject ?? '';
+    if (/Bestellung|Paket|Rechnung|Black Week|Sonntag/i.test(betreff)) {
+      g.inhalte.set(id, { html: `<table width="100%" cellpadding="0" cellspacing="0"><tr><td style="background:#f3efe6;padding:24px"><h1 style="font:700 24px system-ui;margin:0 0 8px">${betreff}</h1>
+        <p>Hallo Tiry,</p><p>${m.snippet || 'hier ist deine Nachricht.'}</p><p><a href="https://example.com">Mehr erfahren</a></p>
+        <img src="https://example.com/tracker.png" width="1" height="1"></td></tr></table>` });
+    }
+  }
+}
+
+app.whenReady().then(() => {
+  protocol.handle('tmail', async (req) => {
+    const u = new URL(req.url);
+    const sicher = { 'Content-Security-Policy': "default-src 'none'; style-src 'unsafe-inline' data:; font-src data:; img-src data: tmail: https: http:", 'X-Content-Type-Options': 'nosniff' };
+    if (u.host === 'mail') {
+      const id = decodeURIComponent(u.pathname.slice(1));
+      return new Response(mailDokument(id, u.searchParams.get('bilder') === '1', u.searchParams.get('sperre') === '1'), { headers: { 'Content-Type': 'text/html; charset=utf-8', ...sicher } });
+    }
+    if (u.host === 'anhang' && postfach) {
+      const [, mailId, anhangId] = u.pathname.split('/').map(decodeURIComponent);
+      const mime = u.searchParams.get('mime') ?? 'application/octet-stream';
+      if (!/^image\//.test(mime)) return new Response('', { status: 403 });
+      return new Response(Buffer.from(await postfach.anhang(mailId, { anhangId })), { headers: { 'Content-Type': mime, ...sicher } });
+    }
+    return new Response('', { status: 404 });
+  });
+});

@@ -1,8 +1,8 @@
 {
   "name": "email-aufraeumer",
-  "productName": "Email-Aufräumer",
+  "productName": "Tiry's Mails",
   "version": "0.1.0",
-  "description": "Räumt Tirys Gmail-Postfach vollautomatisch auf – sicher, protokolliert, rückgängig machbar.",
+  "description": "Tirys eigenes Postfach für Gmail – räumt automatisch auf, sortiert in Ordner, sicher und rückgängig machbar.",
   "main": "build/main/main.js",
   "author": "Tiry",
   "license": "UNLICENSED",
@@ -29,10 +29,35 @@
   },
   "build": {
     "appId": "de.tiry.email-aufraeumer",
-    "productName": "Email-Aufräumer",
-    "directories": { "output": "dist", "buildResources": "assets" },
-    "files": ["build/**/*", "assets/icon.png", "assets/tray.png", "package.json", "!**/*.map"],
-    "win": { "target": [{ "target": "nsis", "arch": ["x64"] }], "icon": "assets/icon.ico" },
-    "nsis": { "oneClick": false, "perMachine": false, "allowToChangeInstallationDirectory": true, "artifactName": "Email-Aufraeumer-Setup.exe", "shortcutName": "Email-Aufräumer" }
+    "productName": "Tiry's Mails",
+    "directories": {
+      "output": "dist",
+      "buildResources": "assets"
+    },
+    "files": [
+      "build/**/*",
+      "assets/icon.png",
+      "assets/tray.png",
+      "package.json",
+      "!**/*.map"
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "icon": "assets/icon.ico"
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "artifactName": "Tirys-Mails-Setup.exe",
+      "shortcutName": "Tiry's Mails"
+    }
   }
 }

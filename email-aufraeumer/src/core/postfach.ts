@@ -3,7 +3,7 @@
 import type { GmailPort } from './gmail';
 import type { Speicher } from './db';
 import type { Kategorie, Mail } from './types';
-import { parseAdresse, parseAdressListe } from './headers';
+import { parseAdresse, parseAdressListe, dekodiereMimeWort } from './headers';
 import { zerlegeVoll, baueMail, betreffMit, type VolleMail, type Anhang } from './mime';
 
 export interface Ordner { id: string; name: string; art: 'system' | 'firma' | 'sorte' | 'eigen'; ungelesen?: number }
@@ -49,7 +49,7 @@ export class Postfach {
     const von = parseAdresse(m.headers['from']);
     const k = this.kategorie(m.id);
     return {
-      id: m.id, threadId: m.threadId, von: von.name || von.adresse, vonAdresse: von.adresse, betreff: m.headers['subject'] ?? '',
+      id: m.id, threadId: m.threadId, von: von.name || von.adresse, vonAdresse: von.adresse, betreff: dekodiereMimeWort(m.headers['subject'] ?? ''),
       vorschau: m.snippet, datum: m.internalDate, ungelesen: m.labelIds.includes('UNREAD'), stern: m.labelIds.includes('STARRED'),
       anhang: /multipart\/mixed/i.test(m.headers['content-type'] ?? ''), kategorie: k, labelIds: m.labelIds,
     };
@@ -85,7 +85,7 @@ export class Postfach {
     const kategorie = this.kategorie(id);
     const warnung = kategorie === 'phishing' ? 'Achtung: Diese Mail sieht nach Betrug aus. Klick keine Links an und gib keine Daten ein.'
       : kategorie === 'spam' ? 'Diese Mail ist wahrscheinlich Spam.' : null;
-    return { ...v, von: von.name || von.adresse, vonAdresse: von.adresse, an: v.headers['to'] ?? '', cc: v.headers['cc'] ?? '', betreff: v.headers['subject'] ?? '', kategorie, warnung };
+    return { ...v, von: von.name || von.adresse, vonAdresse: von.adresse, an: v.headers['to'] ?? '', cc: v.headers['cc'] ?? '', betreff: dekodiereMimeWort(v.headers['subject'] ?? ''), kategorie, warnung };
   }
 
   async anhang(mailId: string, a: Pick<Anhang, 'anhangId'>): Promise<Uint8Array> { return this.gmail.anhang(mailId, a.anhangId); }

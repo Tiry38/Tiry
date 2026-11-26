@@ -11,7 +11,8 @@ export interface GmailPort {
   profil(): Promise<{ email: string; historyId: string }>;
   liste(q: string, pageToken?: string, max?: number): Promise<{ ids: string[]; nextPageToken?: string }>;
   holeMetadaten(ids: string[]): Promise<Mail[]>;
-  history(startHistoryId: string, pageToken?: string): Promise<{ neueIds: string[]; historyId: string; nextPageToken?: string }>;
+  /** neueIds = neu angekommene Mails; geaendert = irgendetwas im Postfach hat sich geändert (gelesen, verschoben, gelöscht …). */
+  history(startHistoryId: string, pageToken?: string): Promise<{ neueIds: string[]; historyId: string; nextPageToken?: string; geaendert?: boolean }>;
   modify(id: string, add: string[], remove: string[]): Promise<void>;
   batchModify(ids: string[], add: string[], remove: string[]): Promise<void>;
   trash(id: string): Promise<void>;
@@ -176,10 +177,10 @@ export function erzeugeGoogleGmail(auth: any, zaehle: (methode: string, einheite
     },
     async history(startHistoryId, pageToken) {
       try {
-        const r = await ruf('history.list', () => gmail.users.history.list({ userId: me, startHistoryId, pageToken, historyTypes: ['messageAdded'], maxResults: 500 }));
+        const r = await ruf('history.list', () => gmail.users.history.list({ userId: me, startHistoryId, pageToken, maxResults: 500 }));
         const ids: string[] = [];
         for (const h of r.data.history ?? []) for (const a of h.messagesAdded ?? []) if (a.message?.id) ids.push(a.message.id);
-        return { neueIds: [...new Set(ids)], historyId: String(r.data.historyId ?? startHistoryId), nextPageToken: r.data.nextPageToken ?? undefined };
+        return { neueIds: [...new Set(ids)], historyId: String(r.data.historyId ?? startHistoryId), nextPageToken: r.data.nextPageToken ?? undefined, geaendert: (r.data.history ?? []).length > 0 };
       } catch (err: any) {
         if (err?.code === 404 || err?.status === 404) throw new HistoryZuAlt();
         throw err;

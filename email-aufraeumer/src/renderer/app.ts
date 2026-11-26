@@ -1,5 +1,6 @@
 // Oberfläche des Email-Aufräumers. Vanilla TypeScript, kein Framework.
 import { Sortierer, FAECHER, type Fach } from './sortierer.js';
+import { PostfachUI } from './postfach.js';
 type Art = 'weg' | 'bleibt' | 'pruefen';
 
 type Kategorie = 'wichtig' | 'persoenlich' | 'werbung' | 'newsletter' | 'benachrichtigung' | 'spam' | 'phishing';
@@ -22,6 +23,8 @@ const AKT: Record<Aktion, string> = { behalten: 'Behalten', label: 'Etikett', ar
 let z: any = null;              // Zustand vom Hauptprozess
 let ansicht = 'cockpit';
 let maschine: Sortierer;
+let post: PostfachUI;
+let postTimer: any;
 let protokollFilter = { suche: '', kategorie: '' };
 
 // ---------------- Hilfen ----------------
@@ -54,9 +57,12 @@ function rueckgaengigMoeglich(e: Eintrag) {
   return !e.trocken && !e.rueckgaengig && e.status === 'ok' && !(e.aktionen.length === 1 && e.aktionen[0] === 'behalten') && Date.now() - e.zeit < 30 * 86400_000;
 }
 
-function melde(text: string) {
-  const m = $('#meldung'); m.textContent = text; m.classList.add('an');
-  clearTimeout((m as any)._t); (m as any)._t = setTimeout(() => m.classList.remove('an'), 4200);
+function melde(text: string, rueck?: () => void) {
+  const m = $('#meldung');
+  m.innerHTML = `<span>${h(text)}</span>${rueck ? '<button class="knopf klein">Rückgängig</button>' : ''}`;
+  if (rueck) m.querySelector('button')!.addEventListener('click', () => { m.classList.remove('an'); rueck(); });
+  m.classList.add('an');
+  clearTimeout((m as any)._t); (m as any)._t = setTimeout(() => m.classList.remove('an'), rueck ? 7000 : 4200);
 }
 
 /** Feder (Masse 1, Steifigkeit k, Dämpfung d) statt Easing. */
@@ -103,6 +109,7 @@ function zeigeAnsicht(ziel: string, fokus = false) {
   const wechsel = () => {
     ansicht = ziel;
     document.body.dataset.ansicht = ziel;
+    (window as any).__navSetzen?.();
     for (const s of $$('.ansicht')) s.hidden = s.dataset.ansicht !== ziel;
     for (const b of $$('#nav button')) { if (b.dataset.ziel === ziel) b.setAttribute('aria-current', 'page'); else b.removeAttribute('aria-current'); }
     zeiger();
@@ -116,6 +123,7 @@ function zeiger() { /* aktive Seite wird per aria-current hervorgehoben */ }
 
 async function zeichne() {
   switch (ansicht) {
+    case 'postfach': return z.angemeldet ? post.zeigen() : zeigeAnsicht('cockpit');
     case 'cockpit': return cockpit();
     case 'pruefen': return pruefen();
     case 'absender': return absender();
@@ -162,7 +170,7 @@ async function cockpit() {
     knopf = '<button class="knopf gross" data-tat="scharf">Jetzt wirklich aufräumen</button>';
   } else {
     art = 'laeuft'; titel = 'Läuft. Ich räume für dich auf.';
-    text = 'Neue Mails sortiere ich innerhalb einer Minute. Rechnungen, Verträge und Leute, denen du schreibst, fasse ich nie an.';
+    text = 'Neue Mails sortiere ich innerhalb weniger Sekunden. Rechnungen, Verträge und Leute, denen du schreibst, fasse ich nie an.';
     naechstes = 'Du musst nichts tun. Unter „Verlauf“ holst du alles 30 Tage lang zurück.';
   }
   oben.innerHTML = `${z.demo ? '<span class="demo-band">Demo – dein echtes Postfach wird nicht berührt</span>' : ''}
@@ -416,9 +424,8 @@ async function einstellungen() {
         </tbody></table></div>
       <div class="einst"><div><h2>Schutzwörter</h2><p class="erkl">Mails mit diesen Wörtern fasse ich nie an – egal ob im Betreff, im Text-Anfang oder beim Absender. Ein Wort pro Zeile.</p></div>
         <label class="feld"><span class="unsichtbar">Schutzwörter</span><textarea id="schutz" rows="6">${h(e.schutzwoerter.join('\n'))}</textarea></label></div>
-      <div class="einst"><div><h2>Wie oft nachschauen?</h2><p class="erkl">Standard: jede Minute.</p></div>
-        <div class="regler"><span class="regler-wert" id="intervall-wert">${intervallText(e.intervallSek)}</span><input type="range" min="15" max="600" step="15" value="${e.intervallSek}" id="intervall" aria-label="Wie oft nachschauen">
-        <div class="regler-enden"><span>alle 15 Sek.</span><span>alle 10 Min.</span></div></div></div>
+      <div class="einst"><div><h2>Wie oft nachschauen?</h2><p class="erkl">Standard: alle 5 Sekunden – so siehst du neue Mails praktisch sofort.</p></div>
+        <label class="feld"><span class="unsichtbar">Wie oft nachschauen</span><select id="intervall">${[3, 5, 10, 30, 60, 300].map((s) => `<option value="${s}" ${s === e.intervallSek ? 'selected' : ''}>${intervallText(s)}</option>`).join('')}</select></label></div>
       <div class="einst"><div><h2>Auch bei ausgeschaltetem PC</h2><p class="erkl">Absender, die du ${e.filterExportAb}× weggeräumt hast (oder auf „Immer weg“ gesetzt), trage ich als Filter direkt in Gmail ein. Dann räumt Google selbst auf, auch wenn dein PC aus ist.</p></div>
         <div class="zeile"><button class="schalter" role="switch" id="filter" aria-checked="${e.filterExportFreigegeben}" aria-label="Filter in Gmail eintragen erlauben"></button><span>${e.filterExportFreigegeben ? 'Erlaubt' : 'Noch nicht erlaubt'}</span></div></div>
       <div class="einst"><div><h2>Mit Windows starten</h2><p class="erkl">Ich starte unsichtbar unten rechts im Infobereich.</p></div>
@@ -430,7 +437,7 @@ async function einstellungen() {
     </details>`;
 
   const speichere = (teil: object) => api.rufe('speichereEinstellungen', teil).then((n: any) => { z.einstellungen = n; });
-  const iv = $<HTMLInputElement>('#intervall', el); iv.addEventListener('input', () => { $('#intervall-wert').textContent = intervallText(Number(iv.value)); }); iv.addEventListener('change', () => speichere({ intervallSek: Number(iv.value) }));
+  const iv = $<HTMLSelectElement>('#intervall', el); iv.addEventListener('change', () => speichere({ intervallSek: Number(iv.value) }));
   const sw = $<HTMLInputElement>('#schwelle', el); sw.addEventListener('input', () => { $('#schwelle-wert').textContent = strengText(reglerZuSchwelle(Number(sw.value))); }); sw.addEventListener('change', () => speichere({ schwelle: reglerZuSchwelle(Number(sw.value)) }));
   for (const b of $$('.haken', el)) b.addEventListener('click', () => {
     const k = b.dataset.k as Kategorie; const a = b.dataset.a as Aktion;
@@ -486,6 +493,14 @@ async function filterFrage(anzahl?: number): Promise<boolean> {
 // ---------------- Live-Ereignisse ----------------
 let statistikTimer: any;
 function ereignis(kanal: string, d: any) {
+  if ((kanal === 'postfach' || kanal === 'aktion') && ansicht === 'postfach' && post) {
+    clearTimeout(postTimer); postTimer = setTimeout(() => { void post.laden(); void post.ordnerLaden(); }, 300);
+  }
+  if (kanal === 'mailto' && typeof d === 'string') {
+    const u = new URL(d); zeigeAnsicht('postfach');
+    post.schreiben({ an: [decodeURIComponent(u.pathname)], betreff: u.searchParams.get('subject') ?? '', text: u.searchParams.get('body') ?? '' });
+    return;
+  }
   if (kanal === 'aktion' && d) {
     if (ansicht === 'cockpit') {
       maschine.mail(fachVon(d.kategorie), d.trocken && art(d) === 'weg');
@@ -521,6 +536,7 @@ new MutationObserver((ms) => { for (const m of ms) for (const n of m.addedNodes)
 // ---------------- Start ----------------
 async function start() {
   maschine = new Sortierer($<HTMLCanvasElement>('#maschine'));
+  post = new PostfachUI($('#ansicht-postfach'), api, melde);
   (window as any).__maschine = maschine;
   // Landet ein Umschlag, hüpft die Zahl unter dem Fach und zählt eins hoch
   maschine.beiLandung = (i) => {
@@ -531,9 +547,19 @@ async function start() {
     setTimeout(() => b.classList.toggle('hupf', false), 260);
   };
   for (const b of $$('#nav button')) b.addEventListener('click', () => zeigeAnsicht(b.dataset.ziel!, true));
+  // Navigation ein-/ausklappen (Wahl merken; Standard: eingeklappt im Postfach)
+  let navWahl: string | null = null;
+  try { navWahl = localStorage.getItem('nav'); } catch { /* egal */ }
+  const navSetzen = () => { document.body.dataset.nav = navWahl ?? (ansicht === 'postfach' ? 'klein' : 'gross'); };
+  (window as any).__navSetzen = navSetzen;
+  $('#nav-klappe').addEventListener('click', () => {
+    navWahl = document.body.dataset.nav === 'klein' ? 'gross' : 'klein';
+    try { localStorage.setItem('nav', navWahl); } catch { /* egal */ }
+    navSetzen();
+  });
   api.auf(ereignis);
   await laden();
-  zeigeAnsicht(new URLSearchParams(location.search).get('ansicht') ?? 'cockpit');
+  zeigeAnsicht(new URLSearchParams(location.search).get('ansicht') ?? (z.angemeldet ? 'postfach' : 'cockpit'));
   maschine.start();
   (window as any).__bereit = true;
 }
