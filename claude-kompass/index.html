@@ -1,0 +1,310 @@
+<title>Tirys Stellwerk</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wdth,wght@12..96,75..100,300..800&family=JetBrains+Mono:wght@400;600&family=Instrument+Sans:wght@400;500;600&display=swap">
+<style>
+/* Layout: Stellwerk – vier Gleise (Bereiche), jede Sitzung ein Signal auf der Zeitachse; darunter das Fahrplanbuch mit Direktlinks. */
+:root{
+  --bg:oklch(0.97 0.006 60);
+  --ink:oklch(0.2 0.012 60);
+  --mute:oklch(0.46 0.012 60);
+  --line:oklch(0.86 0.01 60);
+  --panel:oklch(0.94 0.008 60);
+  --sig:oklch(0.62 0.21 38);
+  --ok:oklch(0.55 0.13 150);
+  --wait:oklch(0.6 0.17 70);
+  --run:oklch(0.55 0.16 250);
+  --display:"Bricolage Grotesque",ui-sans-serif,system-ui,sans-serif;
+  --body:"Instrument Sans",ui-sans-serif,system-ui,sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:oklch(0.17 0.01 60);--ink:oklch(0.94 0.008 60);--mute:oklch(0.72 0.01 60);
+  --line:oklch(0.3 0.01 60);--panel:oklch(0.21 0.01 60);--sig:oklch(0.7 0.19 40);
+  --ok:oklch(0.74 0.14 150);--wait:oklch(0.8 0.15 75);--run:oklch(0.74 0.13 250);color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:oklch(0.17 0.01 60);--ink:oklch(0.94 0.008 60);--mute:oklch(0.72 0.01 60);
+  --line:oklch(0.3 0.01 60);--panel:oklch(0.21 0.01 60);--sig:oklch(0.7 0.19 40);
+  --ok:oklch(0.74 0.14 150);--wait:oklch(0.8 0.15 75);--run:oklch(0.74 0.13 250);color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font:400 15px/1.55 var(--body);
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0 64px;overflow-x:hidden}
+body::after{content:"";position:fixed;inset:0;pointer-events:none;opacity:.06;mix-blend-mode:multiply;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+.wrap{max-width:1180px;margin:0 auto}
+a{color:inherit}
+:focus-visible{outline:2px solid var(--sig);outline-offset:3px}
+
+/* Kopf: Typografie als Architektur */
+header{display:grid;grid-template-columns:1fr auto;align-items:end;gap:8px 24px;padding-top:28px;border-bottom:1px solid var(--line)}
+.eyebrow{font:600 11px/1 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--mute)}
+h1{font-family:var(--display);font-weight:800;font-stretch:75%;font-size:clamp(64px,17vw,210px);line-height:.78;letter-spacing:-.04em;margin:14px 0 0;
+  font-variation-settings:"opsz" 96}
+h1 em{font-style:normal;color:var(--sig)}
+.count{text-align:right;padding-bottom:10px}
+.count b{display:block;font:700 clamp(40px,8vw,88px)/.9 var(--display);font-stretch:75%;font-variant-numeric:tabular-nums}
+.count span{font:500 12px/1.3 var(--mono);color:var(--mute)}
+.lead{grid-column:1/-1;max-width:62ch;margin:18px 0 22px;color:var(--mute);font-size:16px}
+.lead strong{color:var(--ink)}
+
+/* Signal-Gleise */
+.yard{position:relative;margin:28px 0 8px}
+.yard canvas{display:block;width:100%;height:300px;touch-action:pan-y;cursor:crosshair}
+.tip{position:absolute;pointer-events:none;background:var(--ink);color:var(--bg);font:500 13px/1.35 var(--body);padding:8px 10px;max-width:260px;transform:translate(-50%,calc(-100% - 14px));opacity:0;transition:opacity .12s}
+.tip i{display:block;font:400 11px/1.3 var(--mono);font-style:normal;opacity:.75;margin-top:2px}
+.legend{display:flex;flex-wrap:wrap;gap:6px 18px;font:500 12px/1 var(--mono);color:var(--mute)}
+.legend span{display:inline-flex;align-items:center;gap:7px}
+.dot{width:9px;height:9px;border-radius:50%;display:inline-block}
+
+/* Ursache-Block: gebrochenes Raster */
+.why{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:24px 56px;margin:64px 0 40px;align-items:start}
+.why h2{font:800 clamp(34px,6vw,64px)/.92 var(--display);font-stretch:80%;letter-spacing:-.03em;margin:0;text-wrap:balance;position:sticky;top:calc(env(safe-area-inset-top,0px) + 16px)}
+.why h2 small{display:block;font:600 11px/1 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--sig);margin-bottom:14px}
+.causes{display:flex;flex-direction:column;gap:0;border-top:2px solid var(--ink)}
+.cause{display:grid;grid-template-columns:44px minmax(0,1fr);gap:4px 14px;padding:18px 0;border-bottom:1px solid var(--line)}
+.cause .n{font:700 28px/1 var(--display);color:var(--sig)}
+.cause h3{margin:0;font:700 19px/1.2 var(--display)}
+.cause p{grid-column:2;margin:4px 0 0;color:var(--mute);max-width:60ch}
+.cause p b{color:var(--ink);font-weight:600}
+.fix{grid-column:2;margin-top:8px;font:500 13px/1.45 var(--mono);background:var(--panel);padding:10px 12px;border-left:3px solid var(--sig)}
+
+/* Fahrplanbuch */
+.book{margin-top:40px}
+.bar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;border-top:2px solid var(--ink);padding-top:14px;margin-bottom:6px}
+.bar h2{margin:0;font:800 28px/1 var(--display);font-stretch:80%}
+.filters{display:flex;flex-wrap:wrap;gap:6px}
+.filters button{font:600 12px/1 var(--mono);letter-spacing:.06em;text-transform:uppercase;min-height:44px;padding:0 14px;border:1px solid var(--line);background:transparent;color:var(--ink);cursor:pointer}
+.filters button[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+#q{min-height:44px;font:500 14px var(--body);padding:0 12px;border:1px solid var(--line);background:var(--panel);color:var(--ink);width:min(100%,260px)}
+.group{margin-top:34px}
+.group > h3{display:flex;align-items:baseline;gap:12px;margin:0 0 6px;font:800 clamp(30px,5vw,48px)/1 var(--display);font-stretch:75%;letter-spacing:-.02em}
+.group > h3 span{font:500 12px var(--mono);color:var(--mute);letter-spacing:0}
+.group > p{margin:0 0 10px;color:var(--mute);font-size:14px}
+.row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px 16px;align-items:center;padding:12px 0;border-bottom:1px solid var(--line);text-decoration:none;min-height:56px;transition:padding-left .25s cubic-bezier(.2,1.4,.4,1)}
+.row:hover{padding-left:10px}
+.row .t{font:600 16px/1.3 var(--body)}
+.row .s{grid-column:1;font-size:13px;color:var(--mute);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.row .meta{grid-row:1/3;grid-column:2;text-align:right;font:500 11px/1.5 var(--mono);color:var(--mute);white-space:nowrap}
+.chip{display:inline-flex;align-items:center;gap:6px;font:600 11px/1 var(--mono);text-transform:uppercase;letter-spacing:.06em}
+.go{color:var(--sig)}
+.rules{margin-top:64px;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:0 40px;border-top:2px solid var(--ink);padding-top:16px}
+.rules h2{grid-column:1/-1;margin:0 0 8px;font:800 28px/1 var(--display);font-stretch:80%}
+.rules li{padding:10px 0;border-bottom:1px solid var(--line)}
+.rules ul{list-style:none;margin:0;padding:0}
+.rules code{font:600 13px var(--mono);color:var(--sig)}
+footer{margin-top:40px;font:500 12px/1.5 var(--mono);color:var(--mute)}
+@media (max-width:720px){
+  header{grid-template-columns:1fr}.count{text-align:left}
+  .why{grid-template-columns:1fr}.why h2{position:static}
+  .yard canvas{height:260px}
+}
+@media (prefers-reduced-motion:reduce){.row{transition:none}}
+</style>
+
+<div class="wrap">
+<header>
+  <div>
+    <div class="eyebrow">Claude Code · Sitzungs-Stellwerk · Stand 26.11.2026, 13:35</div>
+    <h1>Stell<em>werk</em></h1>
+  </div>
+  <div class="count"><b id="cnt">38</b><span>aktive Sitzungen<br>in 4 Gleisen</span></div>
+  <p class="lead"><strong>Jede Sitzung hat jetzt ein Gleis-Kürzel vorne im Namen</strong> – VELO, APP, CLAUDE, PRIVAT. Links in der App siehst du sofort, wohin sie gehört. Hier unten: jede Sitzung mit Direktlink, und warum dir Sitzungen „verschwinden“.</p>
+</header>
+
+<div class="yard" id="yard">
+  <canvas id="cv" aria-label="Zeitachse aller Sitzungen nach Bereich"></canvas>
+  <div class="tip" id="tip"></div>
+</div>
+<div class="legend">
+  <span><i class="dot" style="background:var(--wait)"></i>wartet auf dich</span>
+  <span><i class="dot" style="background:var(--run)"></i>arbeitet gerade</span>
+  <span><i class="dot" style="background:var(--ok)"></i>fertig</span>
+  <span>Finger/Maus über die Gleise ziehen · Signal antippen öffnet die Sitzung</span>
+</div>
+
+<section class="why">
+  <h2><small>Warum fehlt links eine Sitzung?</small>Drei Ursachen. Alle lösbar.</h2>
+  <div class="causes">
+    <div class="cause"><span class="n">1</span><h3>Lokal gestartet statt in der Cloud</h3>
+      <p>Startest du im Geschäft eine Sitzung in der Desktop-App als <b>lokale Sitzung</b> (läuft auf dem Büro-PC), liegt sie <b>nur auf diesem PC</b>. Zu Hause und auf dem Handy taucht sie nie auf. Das ist mit großer Wahrscheinlichkeit dein Fall: In deiner Cloud-Liste fehlt keine Sitzung von heute – die von vorhin im Geschäft ist also eine lokale.</p>
+      <div class="fix">Lösung: Beim Start einer neuen Sitzung oben die Umgebung auf <b>Cloud</b> stellen statt auf den lokalen Ordner. Cloud-Sitzungen siehst du überall.</div></div>
+    <div class="cause"><span class="n">2</span><h3>Archiviert</h3>
+      <p>Archivierte Sitzungen verschwinden aus der normalen Liste. Bei dir sind <b>4 archiviert</b> (unten aufgelistet, Links funktionieren weiter).</p>
+      <div class="fix">Lösung: Nichts archivieren, was du noch brauchst. Ich archiviere nur, wenn du es sagst.</div></div>
+    <div class="cause"><span class="n">3</span><h3>Untergegangen in der Liste</h3>
+      <p>Die Liste sortiert nach letzter Aktivität. Alte Sitzungen rutschen nach unten, und zwei Sitzungen hießen fast gleich („Newsletter Dezember“ zweimal, Konfigurator-Video zweimal).</p>
+      <div class="fix">Gelöst: Kürzel vorne, Dubletten mit „(Haupt)“/„(alt)“ markiert, und diese Seite als Lesezeichen.</div></div>
+  </div>
+</section>
+
+<section class="book">
+  <div class="bar">
+    <h2>Fahrplanbuch</h2>
+    <div class="filters" role="group" aria-label="Bereich filtern">
+      <button data-f="ALLE" aria-pressed="true">Alle</button>
+      <button data-f="VELO" aria-pressed="false">Velo</button>
+      <button data-f="APP" aria-pressed="false">App</button>
+      <button data-f="CLAUDE" aria-pressed="false">Claude</button>
+      <button data-f="PRIVAT" aria-pressed="false">Privat</button>
+    </div>
+    <label for="q" class="eyebrow" hidden>Suchen</label>
+    <input id="q" type="search" placeholder="Sitzung suchen …">
+  </div>
+  <div id="groups"></div>
+</section>
+
+<section class="rules">
+  <h2>Drei Regeln ab jetzt</h2>
+  <ul>
+    <li><code>1 Projekt = 1 Sitzung.</code> Newsletter, Planer, Homepage: immer in der bestehenden Sitzung weitermachen, nicht neu anfangen.</li>
+    <li><code>Immer Cloud.</code> Neue Sitzungen in der Cloud starten, dann sind sie im Geschäft, zu Hause und auf dem Handy gleich.</li>
+  </ul>
+  <ul>
+    <li><code>Kürzel im Namen.</code> Neue Sitzung? Sag mir „ordne ein“ – ich setze VELO/APP/CLAUDE/PRIVAT davor.</li>
+    <li><code>Suche nutzen.</code> In der Sitzungsliste nach dem Kürzel suchen, z. B. „VELO“, falls die App ein Suchfeld zeigt.</li>
+  </ul>
+</section>
+<footer>Daten: Sitzungsliste deines Kontos am 26.11.2026. Neue Sitzungen erscheinen hier nicht automatisch – sag „Stellwerk aktualisieren“.</footer>
+</div>
+
+<script>
+const D=[
+["session_01AC3hVfmyggCs1bMeGoriqH","CLAUDE","Sitzungs-Ordnung & Kompass","2026-11-26T12:30","run","Diese Seite"],
+["session_01AC3hVdWSVNJhTZ4f6trdT7","APP","Waschmaschinen-App","2026-11-26T12:06","run","Erster Build durch, APK wird geprüft"],
+["session_01AC3hVdhUkpQB3jep9uPbsA","APP","Gmail-Aufräumer","2026-11-26T12:27","run","Windows-Build läuft"],
+["session_01AC3hVfxbeh7ysoEZPEXtjd","PRIVAT","Wetter-App Vergleich","2026-11-25T21:02","ok","Meteoblue als Haupt-App"],
+["session_01AC3hVgXXJhKmyKyJjRa1Y2","PRIVAT","Katzenbrunnen & Wasser","2026-11-25T13:34","ok","Weiches Wasser oder Filterkrug"],
+["session_01AC3hVcND7LiZatnHc4wxa1","VELO","Newsletter Dezember (Haupt)","2026-11-25T19:14","ok","Wartet auf 3 Radfotos (FID 5173, 4605, 4815)"],
+["session_01AC3hVfcsFF6jcrAtf1sMD8","VELO","Newsletter Dezember (Nebensitzung)","2026-11-25T01:28","ok","Nur Aufräumarbeit – Haupt-Sitzung nutzen"],
+["session_01AC3hVeMaDRecvBMJkcxA5w","CLAUDE","App-Forge Aufräumen","2026-11-25T00:34","ok","App-Forge aus 11 Branches entfernt"],
+["session_01AC3hVfpZDBUZ2dGagJac5V","VELO","Kundendaten von GitHub entfernen","2026-11-25T02:14","ok","Offen: GitHub-E-Mail-Schutz, EmailJS-Vertrag"],
+["session_01AC3hVeQxctAkvamC55tjTS","PRIVAT","Klavierversion (Musik)","2026-11-25T14:46","ok","Klavier-Sinfonie 2:28 fertig"],
+["session_01AC3hVgLDARPrWXGUth5Enn","VELO","VDV Konfigurator-Video (aktuell)","2026-11-26T11:09","ok","Fassung ohne Ton im Einsatz"],
+["session_01AC3hVc4L5ELRt8zGQjsQou","VELO","VDV Konfigurator-Video (alt)","2026-11-24T20:07","ok","Erster Anlauf – aktuelle Sitzung nutzen"],
+["session_01AC3hVfoRVkWDqSUoFwkZ4D","CLAUDE","Design-Anweisungen","2026-11-24T20:54","ok","Neuer Anweisungstext liegt bereit"],
+["session_01AC3hVfgG9ABBkuZ33kR7fk","CLAUDE","Konnektoren (Firecrawl)","2026-11-24T11:54","wait","Firecrawl-Bedingungen bestätigen"],
+["session_01AC3hVfnhbe31APvTXJ3km7","VELO","Velo-TV","2026-11-26T12:25","ok","Bleibt eigenständig, Zeitplan steht"],
+["session_01AC3hVcTd3QEKMDPUNi2hk4","CLAUDE","ElevenLabs-Plugin","2026-11-23T19:41","wait","Frage: Pull Request beobachten?"],
+["session_01AC3hVfJYRjL9qaPvbKzVKN","VELO","Social-Post Hammerpreis","2026-11-23T15:00","ok","Ortlieb Vario PS – Post fertig"],
+["session_01AC3hVgg3HTz4BifpGcV6Pn","VELO","Studioaufnahme & Profilbild","2026-11-25T11:00","ok","Profilbild gespeichert"],
+["session_01AC3hVc4Q42nSQX9Zg8HRz2","PRIVAT","PC-Phänomen","2026-11-23T07:13","wait","Pfad zu java.exe schicken"],
+["session_01AC3hVgTcuiQJA5j8ofZpEN","PRIVAT","Razer Synapse Audio","2026-11-22T20:11","ok","EQ-Preset fertig"],
+["session_01AC3hVdEBSz5JfirfAATY8V","CLAUDE","Top 10 Skills","2026-11-22T18:45","wait","Frage offen: „Soll ich das prüfen?“"],
+["session_01AC3hVeQgzZRFZumPLk899S","PRIVAT","Essen & Rezepte","2026-11-22T12:23","ok","Edamame direkt in die Pfanne"],
+["session_01AC3hVefvGxsa4HNgSaq8Sg","APP","KI-Startup Webseite","2026-11-21T14:53","ok","8 Seiten überarbeitet"],
+["session_01AC3hVeihxKmKb7pQj1h34h","APP","SparRadar Verbesserung","2026-11-21T01:08","ok","v163 live"],
+["session_01AC3hVfPsR9B5ai6q2wWvfn","CLAUDE","Skills & Plugins optimieren","2026-11-26T08:27","ok","Bosch-Post-Suche: nicht in Claude Code"],
+["session_01AC3hVgJSFhwmqVZCg3Vz8W","PRIVAT","GTA 6 Sprache","2026-11-19T18:03","ok","Keine deutsche Synchro"],
+["session_01AC3hVfxjr3iFo4QoWSRbp6","VELO","Bosch Drive-Unit & Flow-App","2026-11-19T09:12","ok","eBike Lock nach Tausch neu aktivieren"],
+["session_01AC3hVdzsHLHGZYtVTGcpR1","CLAUDE","Tools installieren","2026-11-19T06:23","ok","Nutzung zurückgesetzt"],
+["session_01AC3hVc9g3VwUeFN8n12Y9t","VELO","Targobank 0%-Finanzierung","2026-11-17T08:54","ok","Gesamtbetrag zählt"],
+["session_01AC3hVgirwcrBbYbwrH3i9e","VELO","Garantie Lagerverschleiß","2026-11-16T13:06","ok","Kulanz über Shimano/Magura"],
+["session_01AC3hVewaNJcK2C8gBchcme","APP","Aether Front (Spiel)","2026-11-15T22:09","ok","Neuer Build als Actions-Artefakt"],
+["session_01AC3hVdMMJayFA5k58UgPiU","VELO","Homepage","2026-11-25T18:36","ok","„250+ E-Bikes“ entfernt, live"],
+["session_01AC3hVdRLuG7sVMRBYhsELv","PRIVAT","QR-Code Überweisung","2026-11-11T11:59","ok","QR-Datei geschickt"],
+["session_01AC3hVdnMTHuM5N2bCDt2Ev","APP","WoW Add-ons","2026-11-21T22:08","ok","KampfWerk 1.4.0, Tests grün"],
+["session_01AC3hVdnztw8JVGQ1txZroR","PRIVAT","Rechtsfrage Hausrat","2026-11-09T17:27","ok","Beantwortet"],
+["session_01AC3hVdLBbudKaot7hhJ33r","VELO","Planer (Werkstatt-Cockpit)","2026-11-23T22:21","ok","Bereit zur Durchsicht"],
+["session_01AC3hVfQx9645Jk8dZLm6az","APP","SparRadar","2026-11-21T00:19","ok","Bereit zur Durchsicht"],
+["session_01AC3hVcBL27SpETSCVLqega","VELO","KI-Zentrale","2026-11-25T16:54","wait","Fußzeile Checkliste korrigieren?"],
+];
+const ARCH=[
+["session_01AC3hVeYYmeQcfU4hPzn15f","Claude-Code-Werkzeuge installieren (über Remote Control vom PC)","18.11."],
+["session_01AC3hVcJz985isdWHpTnSUj","Bosch SX-Motor Geschwindigkeitsprogramm","06.11."],
+["session_01AC3hVgEAHVvNGPgYUA5ibx","Windows-App-Generator mit Selbstverbesserung","01.11."],
+["session_01AC3hVfm4dSRbr8Nzstfs3P","Forge Gratis-Nachtschicht","01.11."],
+];
+const LANES={VELO:"Velocenter – Geschäft, Werkstatt, Marketing",APP:"Eigene Programme und Spiele",CLAUDE:"Claude einrichten, Skills, Werkzeuge",PRIVAT:"Alltag, Freizeit, Technik zu Hause"};
+const ORDER=["VELO","APP","CLAUDE","PRIVAT"];
+const ST={wait:["wartet auf dich","--wait"],run:["arbeitet","--run"],ok:["fertig","--ok"]};
+const url=id=>"https://claude.ai/code/"+id;
+const css=v=>getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+const fmt=s=>{const d=new Date(s);return d.toLocaleDateString("de-DE",{day:"2-digit",month:"2-digit"})+" · "+d.toLocaleTimeString("de-DE",{hour:"2-digit",minute:"2-digit"})};
+
+/* Fahrplanbuch */
+let F="ALLE",Q="";
+function render(){
+  const g=document.getElementById("groups");g.innerHTML="";
+  ORDER.forEach(l=>{
+    if(F!=="ALLE"&&F!==l)return;
+    const rows=D.filter(r=>r[1]===l&&(r[2]+" "+r[5]).toLowerCase().includes(Q)).sort((a,b)=>{
+      const w={wait:0,run:1,ok:2};return w[a[4]]-w[b[4]]||b[3].localeCompare(a[3])});
+    if(!rows.length)return;
+    const s=document.createElement("div");s.className="group";
+    s.innerHTML=`<h3>${l}<span>${rows.length} Sitzungen</span></h3><p>${LANES[l]}</p>`+
+      rows.map(r=>`<a class="row" href="${url(r[0])}" target="_blank" rel="noopener">
+        <span class="t">${r[2]}</span><span class="s">${r[5]}</span>
+        <span class="meta"><span class="chip" style="color:var(${ST[r[4]][1]})"><i class="dot" style="background:var(${ST[r[4]][1]})"></i>${ST[r[4]][0]}</span><br>${fmt(r[3])}<br><span class="go">öffnen →</span></span></a>`).join("");
+    g.appendChild(s);
+  });
+  if(F==="ALLE"&&!Q){
+    const s=document.createElement("div");s.className="group";
+    s.innerHTML=`<h3>Archiv<span>${ARCH.length} versteckt</span></h3><p>Nicht mehr in der normalen Liste – Links funktionieren weiter.</p>`+
+      ARCH.map(r=>`<a class="row" href="${url(r[0])}" target="_blank" rel="noopener"><span class="t">${r[1]}</span><span class="s">archiviert</span><span class="meta">${r[2]}<br><span class="go">öffnen →</span></span></a>`).join("");
+    g.appendChild(s);
+  }
+}
+document.querySelectorAll(".filters button").forEach(b=>b.onclick=()=>{
+  F=b.dataset.f;document.querySelectorAll(".filters button").forEach(x=>x.setAttribute("aria-pressed",x===b));render();draw()});
+document.getElementById("q").oninput=e=>{Q=e.target.value.toLowerCase();render()};
+render();
+
+/* Signal-Gleise mit Feder-Lupe */
+const cv=document.getElementById("cv"),ctx=cv.getContext("2d"),tip=document.getElementById("tip"),yard=document.getElementById("yard");
+const t0=new Date("2026-11-08T00:00").getTime(),t1=new Date("2026-11-27T00:00").getTime();
+const reduce=matchMedia("(prefers-reduced-motion:reduce)").matches;
+let W=0,H=0,dpr=1,mx=-1,lens=0,lensV=0,target=0,hover=null,pts=[];
+function size(){dpr=Math.min(2,devicePixelRatio||1);W=cv.clientWidth;H=cv.clientHeight;cv.width=W*dpr;cv.height=H*dpr;ctx.setTransform(dpr,0,0,dpr,0,0);draw()}
+const padL=()=>W<600?70:96,padR=18;
+function xOf(t){const L=padL(),u=(t-t0)/(t1-t0);let x=L+u*(W-L-padR);
+  if(mx>=0&&lens>0.01){const d=x-mx,r=W<600?70:120,k=lens*1.6;x=mx+d*(1+k*Math.exp(-(d*d)/(2*r*r)))}
+  return x}
+function draw(){
+  if(!W)return;ctx.clearRect(0,0,W,H);
+  const ink=css("--ink"),mute=css("--mute"),line=css("--line"),sig=css("--sig");
+  const top=24,laneH=(H-top-30)/4;pts=[];
+  ctx.font="500 10px JetBrains Mono, monospace";ctx.fillStyle=mute;ctx.textAlign="center";
+  for(let d=new Date(t0);d<=new Date(t1);d.setDate(d.getDate()+1)){
+    const x=xOf(d.getTime()),mon=d.getDay()===1;
+    ctx.strokeStyle=line;ctx.globalAlpha=mon?1:.45;ctx.beginPath();ctx.moveTo(x,top);ctx.lineTo(x,H-24);ctx.stroke();ctx.globalAlpha=1;
+    if(mon||d.getDate()===26)ctx.fillText(d.getDate()+"."+(d.getMonth()+1)+".",x,H-8)}
+  const now=xOf(new Date("2026-11-26T13:35").getTime());
+  ctx.strokeStyle=sig;ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(now,top-10);ctx.lineTo(now,H-24);ctx.stroke();ctx.lineWidth=1;
+  ctx.fillStyle=sig;ctx.textAlign="right";ctx.fillText("JETZT",now-5,top-2);
+  ORDER.forEach((l,i)=>{
+    const y=top+laneH*i+laneH/2,dim=F!=="ALLE"&&F!==l;
+    ctx.globalAlpha=dim?.25:1;
+    ctx.strokeStyle=ink;ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(padL()-6,y);ctx.lineTo(W-padR,y);ctx.stroke();ctx.lineWidth=1;
+    ctx.fillStyle=ink;ctx.textAlign="left";ctx.font="800 "+(W<600?15:20)+"px Bricolage Grotesque, sans-serif";ctx.fillText(l,0,y+6);
+    ctx.font="500 10px JetBrains Mono, monospace";
+    const rows=D.filter(r=>r[1]===l).sort((a,b)=>a[3].localeCompare(b[3]));
+    let lastX=-99,stack=0;
+    rows.forEach(r=>{
+      const x=xOf(new Date(r[3]).getTime());stack=(x-lastX<10)?stack+1:0;lastX=x;
+      const yy=y+(stack%2?1:-1)*Math.ceil(stack/2)*11;
+      const isH=hover&&hover[0]===r[0],rad=isH?8:5.5;
+      ctx.strokeStyle=ink;ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x,yy);ctx.stroke();
+      ctx.fillStyle=css(ST[r[4]][1]);ctx.beginPath();ctx.arc(x,yy,rad,0,7);ctx.fill();
+      if(isH){ctx.strokeStyle=ink;ctx.lineWidth=2;ctx.stroke();ctx.lineWidth=1}
+      if(!dim)pts.push({r,x,y:yy});
+    });
+    ctx.globalAlpha=1;
+  });
+}
+function loop(){const a=(target-lens)*0.12;lensV=lensV*0.72+a;lens+=lensV;draw();
+  if(Math.abs(target-lens)>0.002||Math.abs(lensV)>0.002)requestAnimationFrame(loop);else{lens=target;draw()}}
+function pick(px,py){let b=null,bd=24;pts.forEach(p=>{const d=Math.hypot(p.x-px,p.y-py);if(d<bd){bd=d;b=p}});return b}
+function move(e){const r=cv.getBoundingClientRect();mx=e.clientX-r.left;const my=e.clientY-r.top;
+  if(!reduce&&target!==1){target=1;requestAnimationFrame(loop)}else draw();
+  const p=pick(mx,my);hover=p?p.r:null;
+  if(p){tip.style.left=Math.min(Math.max(p.x,120),W-120)+"px";tip.style.top=p.y+"px";tip.innerHTML=`${p.r[1]} · ${p.r[2]}<i>${ST[p.r[4]][0]} · ${fmt(p.r[3])}</i>`;tip.style.opacity=1}
+  else tip.style.opacity=0;draw()}
+cv.addEventListener("pointermove",move);
+cv.addEventListener("pointerdown",move);
+cv.addEventListener("pointerleave",()=>{target=0;hover=null;tip.style.opacity=0;if(!reduce)requestAnimationFrame(loop);else{mx=-1;draw()}});
+cv.addEventListener("click",e=>{const r=cv.getBoundingClientRect(),p=pick(e.clientX-r.left,e.clientY-r.top);if(p&&e.pointerType!=="touch")window.open(url(p.r[0]),"_blank")});
+cv.addEventListener("dblclick",e=>{const r=cv.getBoundingClientRect(),p=pick(e.clientX-r.left,e.clientY-r.top);if(p)window.open(url(p.r[0]),"_blank")});
+new ResizeObserver(size).observe(cv);
+matchMedia("(prefers-color-scheme:dark)").addEventListener("change",draw);
+document.fonts&&document.fonts.ready.then(draw);
+</script>
