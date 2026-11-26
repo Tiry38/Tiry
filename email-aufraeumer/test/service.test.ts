@@ -236,13 +236,32 @@ describe('Altbestand', () => {
     for (const f of FAELLE) t.gmail.hinzufuegen(structuredClone(f.mail), false);
     const v = await t.dienst.altbestandVorschau();
     expect(v.phase).toBe('bereit');
-    expect(v.gesamt).toBe(FAELLE.filter((f) => f.mail.labelIds.includes('INBOX')).length);
+    expect(v.gesamt).toBe(FAELLE.length); // ganzes Postfach, nicht nur der Posteingang
+    expect(v.ziele.papierkorb).toBeGreaterThan(0);
+    expect(v.freiBytes).toBeGreaterThan(0);
     expect(v.zaehler.werbung).toBeGreaterThan(0);
     expect(t.gmail.aufrufe.some((a) => /modify|trash/.test(a))).toBe(false); // Vorschau ändert nichts
     await t.dienst.altbestandStarten();
     expect(t.gmail.aufrufe.some((a) => a.startsWith('batchModify'))).toBe(true);
     for (const f of FAELLE.filter((x) => x.niePapierkorb)) expect(t.gmail.get(f.mail.id).labelIds, f.name).toEqual(f.mail.labelIds);
     expect(t.posts).toHaveLength(0); // kein rückwirkendes Massen-Abmelden
+    // Platz schaffen: alte Werbung und Newsletter liegen im Papierkorb, nicht nur im Archiv
+    expect(t.gmail.get(fall('Shop-Werbung').id).labelIds).toContain('TRASH');
+    expect(t.gmail.get(fall('Tech-Newsletter').id).labelIds).toContain('TRASH');
+    expect(t.dienst.altbestand.geschafft!.papierkorb).toBeGreaterThan(0);
+  });
+
+  it('auch schon archivierte Mails werden gefunden; ohne „Platz schaffen“ kommt Werbung nur ins Archiv', async () => {
+    const t = aufbau(); gesendet(t.gmail); await t.dienst.starten(); t.dienst.stoppen(); await scharf(t);
+    t.db.speichereEinstellungen({ altPlatzSchaffen: false });
+    const alt = fall('Shop-Werbung'); alt.labelIds = alt.labelIds.filter((l) => l !== 'INBOX'); // liegt schon im Archiv
+    const neu = fall('Elektronik-Werbung');
+    t.gmail.hinzufuegen(alt, false); t.gmail.hinzufuegen(neu, false);
+    const v = await t.dienst.altbestandVorschau();
+    expect(v.gesamt).toBe(2);
+    await t.dienst.altbestandStarten();
+    expect(t.gmail.get(neu.id).labelIds).not.toContain('INBOX');
+    expect(t.gmail.get(neu.id).labelIds).not.toContain('TRASH');
   });
 });
 
@@ -312,5 +331,61 @@ describe('Quote: Drossel und Kontakte-Reihenfolge', () => {
     t.gmail.liste = echteListe as any; // Google wieder erreichbar
     await t.dienst.tick();
     expect(t.db.protokoll()[0]).toMatchObject({ status: 'geschuetzt' });
+  });
+});
+
+
+describe('Ordner für Vielschreiber', () => {
+  const amazon = (i: number, betreff: string, extra: Partial<Mail> = {}): Mail => ({
+    id: `amz${i}`, threadId: `amz${i}`, labelIds: ['INBOX', 'UNREAD', 'CATEGORY_UPDATES'], snippet: '', internalDate: Date.UTC(2026, 10, 1, 8, i),
+    headers: { from: `Amazon.de <${i % 2 ? 'bestellbestaetigung' : 'versandbestaetigung'}@amazon.de>`, subject: betreff, 'authentication-results': 'dkim=pass; spf=pass; dmarc=pass' }, ...extra,
+  });
+
+  it('ab 5 Mails einer Firma: eigener Ordner – auch Bestellungen kommen hinein, nichts wird gelöscht, alles zurückholbar', async () => {
+    const t = aufbau(); gesendet(t.gmail); await t.dienst.starten(); t.dienst.stoppen(); await scharf(t);
+    for (let i = 0; i < 4; i++) t.gmail.hinzufuegen(amazon(i, `Versand ${i}`));
+    await t.dienst.tick();
+    expect(t.gmail.labelListe.find((l) => l.name === 'Amazon')).toBeUndefined(); // erst 4 Mails
+    const bestellung = amazon(9, 'Ihre Bestellung #302-9 wurde versandt');
+    t.gmail.hinzufuegen(bestellung);
+    await t.dienst.tick();
+    const ordner = t.gmail.labelListe.find((l) => l.name === 'Amazon')!;
+    expect(ordner).toBeDefined();
+    const jetzt = t.gmail.get(bestellung.id).labelIds;
+    expect(jetzt).toContain(ordner.id);
+    expect(jetzt).not.toContain('INBOX');
+    expect(jetzt).not.toContain('TRASH');
+    const e = t.db.protokoll().find((x) => x.mailId === bestellung.id)!;
+    expect(e.begruendung).toMatch(/Ordner „Amazon“/);
+    expect((await t.dienst.rueckgaengig(e.id)).ok).toBe(true);
+    expect(new Set(t.gmail.get(bestellung.id).labelIds)).toEqual(new Set(bestellung.labelIds));
+  });
+
+  it('nie für Privatadressen, Kontakte, Stern oder Spam', async () => {
+    const t = aufbau(); gesendet(t.gmail); await t.dienst.starten(); t.dienst.stoppen(); await scharf(t);
+    const privat = (i: number): Mail => ({ id: `p${i}`, threadId: `p${i}`, labelIds: ['INBOX'], snippet: '', internalDate: i,
+      headers: { from: `Freund ${i} <freund${i}@gmail.com>`, subject: 'Hi', 'authentication-results': 'dkim=pass' } });
+    for (let i = 0; i < 6; i++) t.gmail.hinzufuegen(privat(i));
+    for (let i = 0; i < 6; i++) t.gmail.hinzufuegen({ ...fall('Mama (Kontakt)'), id: `mama${i}` });
+    for (let i = 0; i < 6; i++) t.gmail.hinzufuegen({ ...amazon(20 + i, 'Angebot', { labelIds: ['INBOX', 'STARRED'] }) });
+    await t.dienst.tick();
+    for (let i = 0; i < 6; i++) {
+      expect(t.gmail.get(`p${i}`).labelIds).toEqual(['INBOX']);
+      expect(t.gmail.get(`mama${i}`).labelIds).toEqual(fall('Mama (Kontakt)').labelIds);
+      expect(t.gmail.get(`amz${20 + i}`).labelIds).toEqual(['INBOX', 'STARRED']);
+    }
+    expect(t.gmail.labelListe.some((l) => ['Gmail', 'Example', 'Freund'].includes(l.name))).toBe(false);
+  });
+
+  it('Altbestand: Vorschau zählt Firmen und zeigt die Ordner, Start sortiert sie ein', async () => {
+    const t = aufbau(); gesendet(t.gmail); await t.dienst.starten(); t.dienst.stoppen(); await scharf(t);
+    for (let i = 0; i < 7; i++) t.gmail.hinzufuegen(amazon(30 + i, i === 0 ? 'Ihre Rechnung' : `Versand ${i}`), false);
+    const v = await t.dienst.altbestandVorschau();
+    expect(v.ordner).toEqual([{ name: 'Amazon', anzahl: 7 }]);
+    expect(v.ziele.ordner).toBe(7);
+    await t.dienst.altbestandStarten();
+    const id = t.gmail.labelListe.find((l) => l.name === 'Amazon')!.id;
+    for (let i = 0; i < 7; i++) expect(t.gmail.get(`amz${30 + i}`).labelIds).toEqual(expect.arrayContaining([id]));
+    expect(t.gmail.get('amz30').labelIds).not.toContain('INBOX'); // auch die Rechnung liegt im Ordner
   });
 });

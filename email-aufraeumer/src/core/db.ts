@@ -163,6 +163,10 @@ export class Speicher {
       .map((r) => ({ adresse: r.adresse, domain: r.domain, name: r.name, anzahl: r.anzahl, gelesen: r.gelesen, letzte: r.letzte,
         kategorie: r.kategorie, abgemeldet: r.abgemeldet ?? null, abmeldbar: !!r.listunsub }));
   }
+  /** Mails je Absender-Domain (für Ordner). */
+  domainAnzahlen(): Array<{ domain: string; anzahl: number }> {
+    return (this.db.prepare('SELECT domain, SUM(anzahl) AS anzahl FROM absender GROUP BY domain').all() as any[]).map((r) => ({ domain: r.domain, anzahl: r.anzahl }));
+  }
   absenderListUnsub(adresse: string): string | null {
     const r = this.db.prepare('SELECT listunsub FROM absender WHERE adresse = ?').get(adresse) as any;
     return r?.listunsub ?? null;

@@ -28,6 +28,9 @@ export function standardEinstellungen(jetzt = Date.now()): Einstellungen {
     filterExportFreigegeben: false,
     filterExportAb: 3,
     kiUsdProEuro: 1.08,
+    altPlatzSchaffen: true,
+    ordnerAn: true,
+    ordnerAb: 5,
   };
 }
 

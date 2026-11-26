@@ -92,6 +92,12 @@ export interface Einstellungen {
   filterExportFreigegeben: boolean; // Tiry hat dem ersten Gmail-Filter zugestimmt
   filterExportAb: number;          // ab so vielen Bestätigungen wird ein Filter angelegt
   kiUsdProEuro: number;
+  /** Altbestand: Werbung und Newsletter in den Papierkorb statt ins Archiv (schafft Speicherplatz). */
+  altPlatzSchaffen: boolean;
+  /** Ordner für Vielschreiber (z. B. „Amazon“, „DHL“). */
+  ordnerAn: boolean;
+  /** Ab so vielen Mails einer Firma wird ein Ordner angelegt. */
+  ordnerAb: number;
 }
 
 export interface ProtokollEintrag {

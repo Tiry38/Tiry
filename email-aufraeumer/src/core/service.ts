@@ -11,6 +11,8 @@ import { parseAdressListe } from './headers';
 import { abmelden, type HttpPost } from './unsubscribe';
 import { kiBudget } from './ai';
 import { standardEinstellungen, trockenlaufRestTage } from './settings';
+import { ordnerBasis, ordnerName } from './ordner';
+import type { Schutz } from './types';
 
 export type DienstStatus = 'nicht_angemeldet' | 'startet' | 'trockenlauf' | 'laeuft' | 'fehler' | 'angehalten';
 
@@ -39,9 +41,16 @@ export class Aufraeumer extends EventEmitter {
   fehler: string | null = null;
   letzterLauf: number | null = null;
   email = '';
-  altbestand: { phase: 'leer' | 'vorschau' | 'bereit' | 'laeuft' | 'fertig'; gesamt: number; erledigt: number; zaehler: Partial<Record<Kategorie, number>>; durchlauf: string | null; beispiele: Array<{ absender: string; betreff: string; kategorie: Kategorie }> } =
-    { phase: 'leer', gesamt: 0, erledigt: 0, zaehler: {}, durchlauf: null, beispiele: [] };
+  altbestand: {
+    phase: 'leer' | 'vorschau' | 'bereit' | 'laeuft' | 'fertig'; gesamt: number; erledigt: number; zaehler: Partial<Record<Kategorie, number>>;
+    durchlauf: string | null; beispiele: Array<{ absender: string; betreff: string; kategorie: Kategorie }>;
+    ziele: { papierkorb: number; archiv: number; bleibt: number; pruefen: number; ordner: number }; freiBytes: number;
+    ordner: Array<{ name: string; anzahl: number }>;
+    geschafft?: { papierkorb: number; archiv: number; ordner: number; freiBytes: number };
+  } = { phase: 'leer', gesamt: 0, erledigt: 0, zaehler: {}, durchlauf: null, beispiele: [], ziele: { papierkorb: 0, archiv: 0, bleibt: 0, pruefen: 0, ordner: 0 }, freiBytes: 0, ordner: [] };
   private altIds: string[] = [];
+  /** Mails je Firma aus der Altbestand-Vorschau – damit schon beim ersten Aufräumen Ordner entstehen. */
+  private altZaehler = new Map<string, number>();
 
   constructor(o: DienstOptionen) {
     super();
@@ -169,7 +178,13 @@ export class Aufraeumer extends EventEmitter {
     }
 
     let id: number;
-    if (schutz.geschuetzt) {
+    const ordner = this.ordnerFuer(mail, s, schutz, entscheidung);
+    if (ordner && (schutz.geschuetzt || !this.plan(mail, s, entscheidung).papierkorb)) {
+      // Firmen-Ordner: auch Bestellungen/Rechnungen (Tirys Wunsch) – nur verschieben, nie löschen
+      const plan = this.mitOrdner(schutz.geschuetzt ? null : this.plan(mail, s, entscheidung), mail, ordner.name);
+      const grund = `${entscheidung.begruendung} Kommt in den Ordner „${ordner.name}“ (${ordner.anzahl} Mails von dieser Firma).`;
+      id = await this.aus.ausfuehren(mail, s, { ...entscheidung, begruendung: grund }, plan, { durchlauf, trocken: e.trockenlauf, zeit });
+    } else if (schutz.geschuetzt) {
       id = this.db.protokolliere({ zeit, durchlauf, mailId: mail.id, absender: s.absender, betreff: s.betreff, kategorie: entscheidung.kategorie,
         sicherheit: 100, stufe: 'schutz', begruendung: entscheidung.begruendung, aktionen: ['behalten'], trocken: e.trockenlauf,
         vorherLabels: mail.labelIds, nachherLabels: mail.labelIds, status: 'geschuetzt', hinweis: null });
@@ -190,6 +205,55 @@ export class Aufraeumer extends EventEmitter {
     this.db.markiereVerarbeitet(mail.id, zeit);
     this.emit('aktion', this.db.eintrag(id));
     return true;
+  }
+
+  // ---------------- Ordner für Vielschreiber ----------------
+  /** Kommt diese Mail grundsätzlich für einen Firmen-Ordner in Frage (ohne Mengen-Schwelle)? */
+  ordnerKandidat(mail: Mail, s: Signale, schutz: Schutz, e: Entscheidung): { basis: string; name: string } | null {
+    if (!this.db.einstellungen().ordnerAn) return null;
+    if (e.kategorie === 'spam' || e.kategorie === 'phishing' || s.phishingMerkmale.length) return null;
+    if (mail.labelIds.includes('STARRED') || (s.absender && this.db.istKontakt(s.absender))) return null;
+    if (schutz.geschuetzt && !String(schutz.grund ?? '').startsWith('Schutzwort')) return null; // Weiße Liste, Stern, Kontakt: nie
+    const basis = ordnerBasis(s.domain);
+    if (!basis || this.db.get<string[]>('ordnerAus', []).includes(basis)) return null;
+    return { basis, name: ordnerName(basis) };
+  }
+
+  /** Mails je Firma (Datenbank + Altbestand-Vorschau). */
+  private firmenAnzahl(): Map<string, number> {
+    const m = new Map<string, number>();
+    for (const r of this.db.domainAnzahlen()) { const b = ordnerBasis(r.domain); if (b) m.set(b, (m.get(b) ?? 0) + r.anzahl); }
+    for (const [b, n] of this.altZaehler) m.set(b, Math.max(m.get(b) ?? 0, n));
+    return m;
+  }
+
+  ordnerFuer(mail: Mail, s: Signale, schutz: Schutz, e: Entscheidung, anzahl = this.firmenAnzahl()): { basis: string; name: string; anzahl: number } | null {
+    const k = this.ordnerKandidat(mail, s, schutz, e);
+    if (!k) return null;
+    const n = anzahl.get(k.basis) ?? 0;
+    return n >= this.db.einstellungen().ordnerAb ? { ...k, anzahl: n } : null;
+  }
+
+  /** Plan „in den Ordner verschieben“: Ordner-Etikett statt Sorten-Etikett, raus aus dem Posteingang. */
+  private mitOrdner(plan: Plan | null, mail: Mail, name: string): Plan {
+    const p: Plan = { aktionen: ['label'], add: [name], remove: [], papierkorb: false, abmelden: !!plan?.abmelden };
+    if (mail.labelIds.includes('INBOX')) { p.remove.push('INBOX'); p.aktionen.push('archivieren'); }
+    if (plan?.remove.includes('UNREAD')) { p.remove.push('UNREAD'); p.aktionen.push('gelesen'); }
+    if (p.abmelden) p.aktionen.push('abmelden');
+    return p;
+  }
+
+  /** Alle Firmen-Ordner mit Mengen (für die Oberfläche). */
+  ordnerListe(): Array<{ basis: string; name: string; anzahl: number; aktiv: boolean; ueberSchwelle: boolean }> {
+    const aus = this.db.get<string[]>('ordnerAus', []); const ab = this.db.einstellungen().ordnerAb;
+    return [...this.firmenAnzahl()].filter(([, n]) => n >= Math.min(ab, 3))
+      .sort((a, b) => b[1] - a[1]).slice(0, 60)
+      .map(([basis, anzahl]) => ({ basis, name: ordnerName(basis), anzahl, aktiv: !aus.includes(basis), ueberSchwelle: anzahl >= ab }));
+  }
+  ordnerSchalten(basis: string, aktiv: boolean) {
+    const aus = new Set(this.db.get<string[]>('ordnerAus', []));
+    if (aktiv) aus.delete(basis); else aus.add(basis);
+    this.db.set('ordnerAus', [...aus]);
   }
 
   private plan(mail: Mail, s: Signale, e: Entscheidung): Plan {
@@ -344,25 +408,74 @@ export class Aufraeumer extends EventEmitter {
   }
 
   // ---------------- Altbestand ----------------
-  async altbestandVorschau(grenze = 100_000) {
-    this.altbestand = { phase: 'vorschau', gesamt: 0, erledigt: 0, zaehler: {}, durchlauf: null, beispiele: [] };
+  /** Ganzes Postfach: alle Ordner außer Gesendet/Entwürfe (Spam und Papierkorb schließt Gmail ohnehin aus). */
+  static readonly ALT_SUCHE = '-in:sent -in:drafts -in:chats';
+
+  /** Was mit einer alten Mail passiert. Platz schaffen: Werbung/Newsletter in den Papierkorb statt ins Archiv. */
+  private async altEntscheiden(m: Mail, e: ReturnType<Speicher['einstellungen']>, anzahl: Map<string, number>) {
+    const r = await ordneEin(m, { einstellungen: { ...e, kiAn: false }, regeln: this.db.regeln(), istKontakt: (a) => this.db.istKontakt(a), historie: (a) => this.db.absenderHistorie(a) });
+    const kandidat = this.ordnerKandidat(m, r.signale, r.schutz, r.entscheidung);
+    const ordner = kandidat && (anzahl.get(kandidat.basis) ?? 0) >= e.ordnerAb ? kandidat : null;
+    if (ordner) {
+      const grundPlan = r.schutz.geschuetzt ? null : this.plan(m, r.signale, r.entscheidung);
+      const trash = !!grundPlan && (grundPlan.papierkorb || (e.altPlatzSchaffen && (r.entscheidung.kategorie === 'werbung' || r.entscheidung.kategorie === 'newsletter')));
+      if (!trash) {
+        const plan = this.mitOrdner(grundPlan, m, ordner.name); plan.abmelden = false; plan.aktionen = plan.aktionen.filter((x) => x !== 'abmelden');
+        return { r, plan, ziel: 'ordner' as const, kandidat, ordnerName: ordner.name };
+      }
+    }
+    if (r.schutz.geschuetzt) return { r, plan: null as Plan | null, ziel: 'bleibt' as const, kandidat };
+    const k = r.entscheidung.kategorie;
+    let plan = this.plan(m, r.signale, r.entscheidung);
+    if (e.altPlatzSchaffen && (k === 'werbung' || k === 'newsletter')) {
+      plan = planeAktionen(k, ['papierkorb'], m, r.signale, { abmeldenErlaubt: false });
+    }
+    // Altbestand: nie massenhaft rückwirkend abmelden
+    plan.abmelden = false; plan.aktionen = plan.aktionen.filter((a) => a !== 'abmelden');
+    if (!plan.aktionen.length) plan.aktionen = ['behalten'];
+    const nurBehalten = plan.aktionen.length === 1 && plan.aktionen[0] === 'behalten';
+    if (nurBehalten) return { r, plan: null, ziel: 'bleibt' as const, kandidat };
+    if (r.entscheidung.sicherheit < e.schwelle) return { r, plan, ziel: 'pruefen' as const, kandidat };
+    return { r, plan, ziel: plan.papierkorb ? 'papierkorb' as const : plan.remove.includes('INBOX') ? 'archiv' as const : 'bleibt' as const, kandidat };
+  }
+
+  async altbestandVorschau(grenze = 200_000) {
+    this.altbestand = { phase: 'vorschau', gesamt: 0, erledigt: 0, zaehler: {}, durchlauf: null, beispiele: [], ziele: { papierkorb: 0, archiv: 0, bleibt: 0, pruefen: 0, ordner: 0 }, freiBytes: 0, ordner: [] };
     this.emit('altbestand', this.altbestand);
-    this.altIds = (await this.alleIds('in:inbox', grenze)).filter((id) => !this.db.istVerarbeitet(id));
+    this.altIds = (await this.alleIds(Aufraeumer.ALT_SUCHE, grenze)).filter((id) => !this.db.istVerarbeitet(id));
     this.altbestand.gesamt = this.altIds.length;
+    this.emit('altbestand', this.altbestand);
     const e = this.db.einstellungen();
-    const zaehler: Partial<Record<Kategorie, number>> = {};
+    const leer = new Map<string, number>();
+    // Durchgang 1 (eine Abfrage je Mail): einordnen ohne Ordner und Firmen zählen
+    const notiz: Array<{ ziel: 'papierkorb' | 'archiv' | 'bleibt' | 'pruefen'; basis: string | null; groesse: number; kat: Kategorie; ab: string; betreff: string }> = [];
+    const firmen = new Map<string, number>();
     for (let i = 0; i < this.altIds.length; i += 100) {
       const mails = await this.gmail.holeMetadaten(this.altIds.slice(i, i + 100));
       for (const m of mails) {
-        const r = await ordneEin(m, { einstellungen: { ...e, kiAn: false }, regeln: this.db.regeln(), istKontakt: (a) => this.db.istKontakt(a), historie: (a) => this.db.absenderHistorie(a) });
-        const k = r.entscheidung.kategorie;
-        zaehler[k] = (zaehler[k] ?? 0) + 1;
-        if (this.altbestand.beispiele.length < 12 && !r.schutz.geschuetzt && MUELL.includes(k)) this.altbestand.beispiele.push({ absender: r.signale.absender, betreff: r.signale.betreff, kategorie: k });
+        const x = await this.altEntscheiden(m, e, leer);
+        const basis = ordnerBasis(x.r.signale.domain);
+        if (basis) firmen.set(basis, (firmen.get(basis) ?? 0) + 1);
+        notiz.push({ ziel: x.ziel as any, basis: x.kandidat?.basis ?? null, groesse: m.sizeEstimate ?? 0, kat: x.r.entscheidung.kategorie, ab: x.r.signale.absender, betreff: x.r.signale.betreff });
       }
       this.altbestand.erledigt = Math.min(this.altIds.length, i + 100);
-      this.altbestand.zaehler = { ...zaehler };
-      this.emit('altbestand', this.altbestand);
+      this.emit('altbestand', { ...this.altbestand });
     }
+    // Firmen-Zählung merken (zusammen mit der Datenbank)
+    this.altZaehler = firmen;
+    const anzahl = this.firmenAnzahl();
+    const ordner = new Map<string, number>();
+    for (const n of notiz) {
+      this.altbestand.zaehler[n.kat] = (this.altbestand.zaehler[n.kat] ?? 0) + 1;
+      const inOrdner = e.ordnerAn && n.basis && (anzahl.get(n.basis) ?? 0) >= e.ordnerAb && n.ziel !== 'papierkorb';
+      if (inOrdner) { this.altbestand.ziele.ordner++; ordner.set(n.basis!, (ordner.get(n.basis!) ?? 0) + 1); continue; }
+      this.altbestand.ziele[n.ziel]++;
+      if (n.ziel === 'papierkorb') {
+        this.altbestand.freiBytes += n.groesse;
+        if (this.altbestand.beispiele.length < 12) this.altbestand.beispiele.push({ absender: n.ab, betreff: n.betreff, kategorie: n.kat });
+      }
+    }
+    this.altbestand.ordner = [...ordner].sort((a, b) => b[1] - a[1]).map(([basis, n]) => ({ name: ordnerName(basis), anzahl: n }));
     this.altbestand.phase = 'bereit'; this.altbestand.erledigt = 0;
     this.emit('altbestand', this.altbestand);
     return this.altbestand;
@@ -371,33 +484,32 @@ export class Aufraeumer extends EventEmitter {
   async altbestandStarten() {
     if (this.altbestand.phase !== 'bereit') throw new Error('Erst die Vorschau erstellen.');
     const durchlauf = `altbestand-${new Date(this.jetzt()).toISOString()}`;
-    this.altbestand = { ...this.altbestand, phase: 'laeuft', erledigt: 0, durchlauf };
+    this.altbestand = { ...this.altbestand, phase: 'laeuft', erledigt: 0, durchlauf, geschafft: { papierkorb: 0, archiv: 0, ordner: 0, freiBytes: 0 } };
     this.emit('altbestand', this.altbestand);
     const e = this.db.einstellungen();
+    const anzahl = this.firmenAnzahl();
     for (let i = 0; i < this.altIds.length; i += 100) {
       const mails = await this.gmail.holeMetadaten(this.altIds.slice(i, i + 100).filter((id) => !this.db.istVerarbeitet(id)));
       const stapel: Array<{ mail: Mail; s: Signale; e: Entscheidung; plan: Plan }> = [];
       for (const m of mails) {
-        const r = await ordneEin(m, { einstellungen: { ...e, kiAn: false }, regeln: this.db.regeln(), istKontakt: (a) => this.db.istKontakt(a), historie: (a) => this.db.absenderHistorie(a) });
+        const { r, plan, ziel } = await this.altEntscheiden(m, e, anzahl);
         if (r.signale.absender) this.db.absenderZaehlen({ adresse: r.signale.absender, domain: r.signale.domain, name: r.signale.anzeigename || r.signale.absender,
           gelesen: !m.labelIds.includes('UNREAD'), zeit: m.internalDate, kategorie: r.entscheidung.kategorie, listUnsub: r.signale.listUnsubscribe ? JSON.stringify(r.signale.listUnsubscribe) : null });
-        const plan = r.schutz.geschuetzt ? null : this.plan(m, r.signale, r.entscheidung);
-        // Altbestand: Abmelden nur bei neuen Mails, nicht massenhaft rückwirkend
-        if (plan) { plan.abmelden = false; plan.aktionen = plan.aktionen.filter((a) => a !== 'abmelden'); if (!plan.aktionen.length) plan.aktionen = ['behalten']; }
-        const nurBehalten = !plan || (plan.aktionen.length === 1 && plan.aktionen[0] === 'behalten');
-        if (r.schutz.geschuetzt || nurBehalten || r.entscheidung.sicherheit < e.schwelle) {
-          if (!r.schutz.geschuetzt && !nurBehalten) this.db.zuPruefenMerken({ mailId: m.id, zeit: this.jetzt(), absender: r.signale.absender, name: r.signale.anzeigename,
+        if (ziel === 'pruefen' && plan) {
+          this.db.zuPruefenMerken({ mailId: m.id, zeit: this.jetzt(), absender: r.signale.absender, name: r.signale.anzeigename,
             betreff: r.signale.betreff, snippet: m.snippet, kategorie: r.entscheidung.kategorie, sicherheit: r.entscheidung.sicherheit, begruendung: r.entscheidung.begruendung });
-          this.db.markiereVerarbeitet(m.id, this.jetzt());
-          continue;
         }
-        stapel.push({ mail: m, s: r.signale, e: r.entscheidung, plan: plan! });
+        if (!plan || ziel === 'pruefen' || ziel === 'bleibt' && !plan.add.length) { this.db.markiereVerarbeitet(m.id, this.jetzt()); continue; }
+        if (ziel === 'papierkorb') { this.altbestand.geschafft!.papierkorb++; this.altbestand.geschafft!.freiBytes += m.sizeEstimate ?? 0; }
+        if (ziel === 'archiv') this.altbestand.geschafft!.archiv++;
+        if (ziel === 'ordner') this.altbestand.geschafft!.ordner++;
+        stapel.push({ mail: m, s: r.signale, e: r.entscheidung, plan });
       }
       const ids = await this.aus.ausfuehrenStapel(stapel, { durchlauf, trocken: e.trockenlauf });
       for (const m of mails) this.db.markiereVerarbeitet(m.id, this.jetzt());
-      for (const id of ids.slice(-20)) this.emit('aktion', this.db.eintrag(id));
+      for (const id of ids.slice(-12)) this.emit('aktion', this.db.eintrag(id));
       this.altbestand.erledigt = Math.min(this.altIds.length, i + 100);
-      this.emit('altbestand', this.altbestand);
+      this.emit('altbestand', { ...this.altbestand });
     }
     this.altbestand.phase = 'fertig';
     this.emit('altbestand', this.altbestand);

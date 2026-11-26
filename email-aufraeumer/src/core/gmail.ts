@@ -125,7 +125,8 @@ export function erzeugeGoogleGmail(auth: any, zaehle: (methode: string, einheite
   const { google } = require('googleapis') as typeof import('googleapis');
   const gmail = google.gmail({ version: 'v1', auth });
   const me = 'me';
-  const drossel = new Drossel(50, 250);
+  // 150 Einheiten/s: zügig fürs ganze Postfach, aber unter Googles Nutzer-Grenze; 429 fängt zusätzlich der Backoff ab
+  const drossel = new Drossel(150, 300);
   const ruf = async <T>(methode: string, fn: () => Promise<T>): Promise<T> =>
     mitBackoff(async () => {
       const e = QUOTE[methode] ?? 5;
