@@ -7,8 +7,8 @@ sc = {s['k']: s for s in ev['scenes']}
 heads = {h['ti']: h['t'] for h in ev['heads']}
 caps = ev['caps']; notes = ev['notes']
 L = []
-L.append((sc['intro']['t0'] + 1.2, 'Das AEB PRO. Modelljahr 2027.'))
-L.append((sc['model']['t0'] + 0.5, 'Wir starten bei Allround, mit dem AEB PRO. Ein Rahmen, vier Motoren.'))
+L.append((sc['intro']['t0'] + 1.2, 'Das A E B Pro. Modelljahr 2027.'))
+L.append((sc['model']['t0'] + 0.5, 'Wir starten bei Allround, mit dem A E B Pro. Ein Rahmen, vier Motoren.'))
 L.append((sc['motor']['t0'] + 0.6, 'Vier Bosch-Motoren stehen zur Wahl: von der leisen Active Line Plus mit 60 Newtonmetern bis zur Performance Line CX mit 120.'))
 L.append((sc['motor']['t0'] + 12.2, 'Wir nehmen die stärkste Stufe. Für Berge und Gepäck.'))
 HEAD = ['Basis. Hier entscheidest du, wie weit, wie entspannt und wie wartungsarm du fährst.',
@@ -27,7 +27,7 @@ for c, s in zip(caps, CAP): L.append((c['t'] + 0.15, s))
 NOTE = {'OPTIONAL · RANGE EXTENDER': 'Optional gibt es den Range Extender. Zusammen sind bis zu 1.050 Wattstunden möglich.',
         'OPTIONAL · FRONTZUBEHÖR': 'Für Einkauf und Gepäck gibt es vorne Korb oder Träger.'}
 for n in notes: L.append((n['t'] + 0.2, NOTE[n['k']]))
-L.append((sc['summary']['t0'] + 0.8, 'Dein AEB 990CX PRO. 120 Newtonmeter, 800 Wattstunden, Automatik mit Riemen. 6.677 Euro laut Konfigurator.'))
+L.append((sc['summary']['t0'] + 0.8, 'Dein A E B 990 C X Pro. 120 Newtonmeter, 800 Wattstunden, Automatik mit Riemen. 6.677 Euro laut Konfigurator.'))
 L.append((sc['outro']['t0'] + 0.6, 'Konfiguriere deins. Und mach die Probefahrt bei deinem Fachhändler.'))
 L.sort()
 
