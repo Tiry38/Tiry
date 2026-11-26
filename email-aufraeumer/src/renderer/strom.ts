@@ -72,7 +72,7 @@ export class Strom {
   get technik() { return this.gl ? 'WebGL2' : '2D'; }
 
   private initGl(gl: WebGL2RenderingContext): boolean {
-    const sh = (t: number, src: string) => { const s = gl.createShader(t)!; gl.shaderSource(s, src); gl.compileShader(s); return gl.getShaderParameter(s, gl.COMPILE_STATUS) ? s : null; };
+    const sh = (t: number, src: string) => { const s = gl.createShader(t)!; gl.shaderSource(s, src); gl.compileShader(s); if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) { (window as any).__glLog = gl.getShaderInfoLog(s); return null; } return s; };
     const v = sh(gl.VERTEX_SHADER, VS), f = sh(gl.FRAGMENT_SHADER, FS);
     if (!v || !f) return false;
     const p = gl.createProgram()!; gl.attachShader(p, v); gl.attachShader(p, f); gl.linkProgram(p);
@@ -122,7 +122,7 @@ export class Strom {
 
   private staub(verteilt = false) {
     this.teile.push({ x: Math.random() * this.w * 0.66 + this.w * 0.05, y: verteilt ? Math.random() * this.h : -10, vx: 0, vy: 8 + Math.random() * 10,
-      r: 1.2 + Math.random() * 1.2, art: 'staub', ziel: 2, phase: 'fall', a: 0.18 + Math.random() * 0.2, rot: 0, durch: 0, t: 0 });
+      r: 1.6 + Math.random() * 1.4, art: 'staub', ziel: 2, phase: 'fall', a: 0.3 + Math.random() * 0.25, rot: 0, durch: 0, t: 0 });
   }
 
   /** Eine echte Mail kommt herein. stufe: 0 Signale, 1 Regeln, 2 KI/Schwelle. */

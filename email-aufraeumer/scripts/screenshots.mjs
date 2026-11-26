@@ -12,7 +12,7 @@ const GROESSEN = [{ name: 'desktop', w: 1440, h: 900 }, { name: 'handy', w: 390,
 
 const app = await electron.launch({
   executablePath: path.resolve('node_modules/electron/dist/electron'),
-  args: ['.', '--demo', '--no-sandbox', '--disable-gpu-sandbox'],
+  args: ['.', '--demo', '--no-sandbox', '--disable-gpu-sandbox', '--use-angle=swiftshader', '--enable-unsafe-swiftshader'],
   env: { ...process.env, AUFRAEUMER_SMOKE: '1' },
 });
 const fenster = await app.firstWindow();

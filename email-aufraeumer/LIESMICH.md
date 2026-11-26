@@ -12,7 +12,7 @@ Läuft unsichtbar im Infobereich (Tray), startet mit Windows, arbeitet weiter, w
    Mails mit Schutzwörtern (Rechnung, Bestellung, Lieferung, Vertrag, Kündigung, Bank, Steuer, Versicherung, Termin, Veloport – in den Einstellungen änderbar).
 4. **Abmelden nur über den `List-Unsubscribe`-Header** (RFC 8058 One-Click-POST oder mailto). Links aus dem Mail-Text werden nie geöffnet,
    ein Link ohne One-Click-Kennzeichnung auch nicht. Bei Phishing-Verdacht wird nie abgemeldet.
-5. **7 Tage Trockenlauf:** Es wird nur angezeigt, was passieren würde. „Scharf schalten“ geht erst nach 7 Tagen und nur per Klick.
+5. **7 Tage Trockenlauf:** Es wird nur angezeigt, was passieren würde. „Jetzt wirklich aufräumen“ geht erst nach 7 Tagen und nur per Klick.
 6. **Keine Zugangsdaten im Repo.** `credentials.json` und die Tokens liegen nur auf dem PC (`%APPDATA%\Email-Aufräumer`), die Tokens
    verschlüsselt mit Windows-DPAPI (Electron `safeStorage`).
 7. **KI nur auf Wunsch** (standardmäßig aus) und dann nur Absender, Betreff und Vorschau-Snippet – nie der Text, nie Anhänge.
@@ -49,7 +49,7 @@ So vermeidet man es für den privaten Gebrauch:
 3. **„Mit Google anmelden“** → Browser öffnet sich → beide Häkchen setzen → fertig. Der Trockenlauf beginnt.
 4. Optional, **nur lesen** (Phase-1-Test): `"%LOCALAPPDATA%\Programs\email-aufraeumer\Email-Aufräumer.exe" --lesetest` zeigt die letzten 50 Mails
    mit Einordnung in der Konsole und verändert nichts.
-5. Nach 7 Tagen im Cockpit **„Scharf schalten“**. Ab dann werden Aktionen ausgeführt.
+5. Nach 7 Tagen im Cockpit **„Jetzt wirklich aufräumen“**. Ab dann werden Aktionen ausgeführt.
 
 ### 5. KI-Stufe (optional)
 API-Schlüssel von <https://console.anthropic.com/> als Umgebungsvariable setzen (nie in eine Datei im Repo):

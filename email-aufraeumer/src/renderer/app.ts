@@ -15,8 +15,8 @@ const $ = <T extends HTMLElement = HTMLElement>(s: string, r: ParentNode = docum
 const $$ = <T extends HTMLElement = HTMLElement>(s: string, r: ParentNode = document) => [...r.querySelectorAll(s)] as T[];
 const RUHIG = matchMedia('(prefers-reduced-motion: reduce)').matches;
 const MUELL: Kategorie[] = ['werbung', 'newsletter', 'spam', 'phishing', 'benachrichtigung'];
-const KAT: Record<Kategorie, string> = { wichtig: 'Wichtig', persoenlich: 'Persönlich', werbung: 'Werbung', newsletter: 'Newsletter', benachrichtigung: 'Benachrichtigung', spam: 'Spam', phishing: 'Phishing' };
-const AKT: Record<Aktion, string> = { behalten: 'Behalten', label: 'Label', archivieren: 'Archivieren', gelesen: 'Gelesen', abmelden: 'Abmelden', papierkorb: 'Papierkorb' };
+const KAT: Record<Kategorie, string> = { wichtig: 'Wichtig', persoenlich: 'Persönlich', werbung: 'Werbung', newsletter: 'Newsletter', benachrichtigung: 'Benachrichtigung', spam: 'Spam', phishing: 'Betrug' };
+const AKT: Record<Aktion, string> = { behalten: 'Behalten', label: 'Etikett', archivieren: 'Archiv', gelesen: 'Gelesen', abmelden: 'Abmelden', papierkorb: 'Papierkorb' };
 
 let z: any = null;              // Zustand vom Hauptprozess
 let ansicht = 'cockpit';
@@ -32,14 +32,14 @@ const datum = (t: number) => new Date(t).toLocaleString('de-DE', { weekday: 'sho
 const zahl = (n: number) => n.toLocaleString('de-DE');
 
 function tatText(e: Eintrag): string {
-  if (e.status === 'zu_pruefen') return 'wartet · zu prüfen';
+  if (e.status === 'zu_pruefen') return 'wartet auf dich';
   if (e.status === 'geschuetzt') return 'geschützt';
   if (e.status === 'fehler') return 'Fehler';
-  if (e.aktionen.includes('papierkorb')) return '→ Papierkorb';
-  if (e.aktionen.includes('archivieren')) return e.aktionen.includes('abmelden') ? '→ Archiv + abmelden' : '→ Archiv';
+  if (e.aktionen.includes('papierkorb')) return 'in den Papierkorb';
+  if (e.aktionen.includes('archivieren')) return e.aktionen.includes('abmelden') ? 'ins Archiv + abmelden' : 'ins Archiv';
   if (e.aktionen.includes('abmelden')) return 'abmelden';
-  if (e.aktionen.includes('label')) return 'Label';
-  if (e.aktionen.includes('gelesen')) return 'gelesen';
+  if (e.aktionen.includes('label')) return 'bleibt, mit Etikett';
+  if (e.aktionen.includes('gelesen')) return 'als gelesen markiert';
   return 'bleibt';
 }
 function art(e: Eintrag): Art {
@@ -90,9 +90,9 @@ function setzeStatus(s: any) {
   if (!z?.angemeldet) { b.dataset.status = 'aus'; $('#zustand-text').textContent = 'Nicht angemeldet'; return; }
   if (!s) return;
   b.dataset.status = s.status === 'fehler' ? 'fehler' : s.trockenlauf ? 'trockenlauf' : s.status === 'laeuft' ? 'laeuft' : s.status;
-  const t = s.status === 'fehler' ? 'Fehler · siehe Cockpit' : s.trockenlauf ? `Trockenlauf · Tag ${Math.min(7, 8 - s.trockenlaufRestTage)}/7` : s.status === 'laeuft' ? 'Läuft · scharf' : s.status === 'startet' ? 'startet …' : s.status;
+  const t = s.status === 'fehler' ? 'Problem · siehe Übersicht' : s.status === 'startet' ? 'richtet sich ein …' : s.trockenlauf ? `Probelauf · Tag ${Math.min(7, 8 - s.trockenlaufRestTage)}/7` : s.status === 'laeuft' ? 'Läuft · räumt auf' : s.status === 'startet' ? 'startet …' : s.status;
   $('#zustand-text').textContent = t;
-  $('#schiene-fuss').innerHTML = `${s.email ? h(s.email) + '<br>' : ''}${s.letzterLauf ? 'Zuletzt geprüft ' + uhr(s.letzterLauf) + '<br>' : ''}alle ${s.intervallSek} s · Quote heute ${zahl(s.quote?.einheiten ?? 0)} E.`;
+  $('#schiene-fuss').innerHTML = `${s.email ? h(s.email) + '<br>' : ''}${s.letzterLauf ? 'Zuletzt nachgeschaut ' + uhr(s.letzterLauf) : 'Noch nicht nachgeschaut'}`;
 }
 
 // ---------------- Navigation ----------------
@@ -135,46 +135,79 @@ async function cockpit() {
   const el = $('#ansicht-cockpit');
   if (!z.angemeldet) return anmeldung(el);
   const st = z.statistik; const s = z.status ?? {};
-  const trocken = z.einstellungen.trockenlauf;
+  const probe = z.einstellungen.trockenlauf;
   const rest = s.trockenlaufRestTage ?? 7;
-  const liste: Eintrag[] = await api.rufe('protokoll', { limit: 14 });
-  const lesezeit = st.lesezeitMinutenWoche >= 60 ? `${Math.floor(st.lesezeitMinutenWoche / 60)} h ${st.lesezeitMinutenWoche % 60} min` : `${st.lesezeitMinutenWoche} min`;
+  const tag = Math.min(7, 8 - rest);
+  const liste: Eintrag[] = await api.rufe('protokoll', { limit: 12 });
+  const lesezeit = st.lesezeitMinutenWoche >= 60 ? `${Math.floor(st.lesezeitMinutenWoche / 60)} Std. ${st.lesezeitMinutenWoche % 60} Min.` : `${st.lesezeitMinutenWoche} Min.`;
+
+  // Die Ansage: ein Satz, was gerade los ist, und was Tiry tun muss
+  let titel: string, text: string, schritt: string, knopf = '';
+  if (s.status === 'fehler') {
+    titel = 'Es hakt gerade.';
+    text = `Google meldet: „${h(s.fehler)}“. Deine Mails sind sicher – es wurde nichts verändert.`;
+    schritt = 'Drück auf „Nochmal versuchen“. Hilft das nicht, schick einen Screenshot.';
+    knopf = '<button class="knopf voll gross" data-tat="pruefen">Nochmal versuchen</button>';
+  } else if (s.status === 'startet') {
+    titel = 'Ich richte mich ein …';
+    text = 'Ich lese gerade, wem du schon geschrieben hast. Diese Leute fasse ich nie an. Das dauert 1–2 Minuten.';
+    schritt = 'Du musst nichts tun.';
+  } else if (probe) {
+    titel = 'Alles läuft. Du musst nichts tun.';
+    text = `Ich schaue jede Minute nach neuen Mails. Noch ist <b>Probelauf</b>: Ich zeige dir nur, was ich wegräumen würde – angefasst wird nichts.`;
+    schritt = rest > 0 ? `In ${rest} ${rest === 1 ? 'Tag' : 'Tagen'} kannst du hier auf „Jetzt wirklich aufräumen“ drücken.` : 'Die 7 Probetage sind um. Wenn dir gefällt, was du unten siehst: los.';
+    knopf = `<button class="knopf rot gross" data-tat="scharf" ${rest > 0 ? 'disabled' : ''}>Jetzt wirklich aufräumen</button>`;
+  } else {
+    titel = 'Alles läuft. Ich räume auf.';
+    text = `Neue Mails sortiere ich innerhalb einer Minute. Rechnungen, Verträge und Leute, denen du schreibst, fasse ich nie an.`;
+    schritt = 'Du musst nichts tun. Alles lässt sich unter „Verlauf“ 30 Tage lang zurückholen.';
+  }
+
   el.innerHTML = `
-    <h1 class="unsichtbar" id="h-cockpit">Cockpit</h1>
-    <div class="held">
-      <span class="etikett">${trocken ? 'Heute würde der Aufräumer wegräumen' : 'Heute aus dem Weg geräumt'}</span>
-      <span class="held-zahl ${st.heuteEntfernt ? '' : 'null'}" id="held-zahl">${zahl(heldWert)}</span>
-      <div class="held-unter"><strong>${trocken ? 'Mails, nur angezeigt' : 'Mails'}</strong><span class="etikett">${zahl(st.heuteGeprueft)} heute geprüft</span></div>
-      ${z.demo ? '<span class="demo-band">Demo-Postfach – dein Konto wird nicht berührt</span>' : ''}
+    <h1 class="unsichtbar" id="h-cockpit">Übersicht</h1>
+    ${z.demo ? '<span class="demo-band">Demo – dein echtes Postfach wird nicht berührt</span>' : ''}
+    <section class="ansage ${s.status === 'fehler' ? 'fehler' : ''}" aria-live="polite">
+      <h2 class="ansage-titel">${titel}</h2>
+      <p class="ansage-text">${text}</p>
+      ${probe && s.status !== 'fehler' ? `<div class="probetage" aria-label="Probelauf Tag ${tag} von 7">${Array.from({ length: 7 }, (_, i) => `<i class="${i < tag ? 'voll' : ''}"><span>${i + 1}</span></i>`).join('')}</div>` : ''}
+      <div class="ansage-fuss"><p><span class="etikett">Was jetzt?</span> ${schritt}</p>${knopf}</div>
+    </section>
+
+    <div class="zahlen">
+      <div class="zahl-gross"><b class="held-zahl ${st.heuteEntfernt ? '' : 'null'}" id="held-zahl">${zahl(heldWert)}</b>
+        <span>${probe ? 'Mails hätte ich heute<br>weggeräumt' : 'Mails heute<br>weggeräumt'}</span></div>
+      <dl class="zahlen-klein">
+        <div><dt>Diese Woche</dt><dd>${zahl(st.wocheEntfernt)}</dd></div>
+        <div><dt>Gesparte Lesezeit</dt><dd>${lesezeit}</dd></div>
+        <div class="${st.zuPruefen ? 'rot' : ''}"><dt>Wartet auf dich</dt><dd>${zahl(st.zuPruefen)}${st.zuPruefen ? ' <button class="knopf klein" data-tat="zu-pruefen">Ansehen</button>' : ''}</dd></div>
+      </dl>
     </div>
-    <div class="werte">
-      <div class="wert"><span class="etikett">Diese Woche</span><b>${zahl(st.wocheEntfernt)}</b></div>
-      <div class="wert"><span class="etikett">Lesezeit gespart</span><b>${lesezeit}</b></div>
-      <div class="wert ${st.zuPruefen ? 'rot' : ''}"><span class="etikett">Zu prüfen</span><b>${zahl(st.zuPruefen)}</b></div>
-    </div>
-    <div class="betrieb">
-      ${s.status === 'fehler' ? `<div><h2>Fehler</h2><p>${h(s.fehler)}</p></div><button class="knopf voll" data-tat="pruefen">Erneut versuchen</button>` :
-        trocken ? `<div><h2>Trockenlauf – Tag ${Math.min(7, 8 - rest)} von 7</h2><p>Es wird nur angezeigt, was passieren würde. ${rest > 0 ? `„Scharf schalten“ geht in ${rest} ${rest === 1 ? 'Tag' : 'Tagen'}.` : 'Die 7 Tage sind um – du kannst scharf schalten.'}</p></div>
-          <button class="knopf rot" data-tat="scharf" ${rest > 0 ? 'disabled' : ''}>Scharf schalten</button>
-          <div class="trocken-skala" aria-hidden="true">${Array.from({ length: 7 }, (_, i) => `<i class="${i < 7 - rest ? 'voll' : ''}"></i>`).join('')}</div>` :
-        `<div><h2>Läuft – scharf</h2><p>Neue Mails werden spätestens nach ${z.einstellungen.intervallSek} s eingeordnet. ${z.kontakte} Kontakte aus „Gesendet“ sind geschützt.</p></div>
-          <button class="knopf" data-tat="pruefen">Jetzt prüfen</button>`}
-    </div>
-    <h2 class="etikett" data-stil="margin:34px 0 0">Live-Strom · letzte Aktionen</h2>
-    <ol class="strom-liste" id="strom-liste">${liste.map((e) => stromZeile(e)).join('') || '<li><span></span><span></span><span class="wer"><span>Noch nichts eingeordnet.</span></span></li>'}</ol>`;
+
+    <h2 class="abschnitt">Was zuletzt passiert ist</h2>
+    <ol class="strom-liste" id="strom-liste">${liste.map((e) => stromZeile(e)).join('') || '<li class="leer-zeile">Noch keine neue Mail angekommen. Sobald eine kommt, steht sie hier.</li>'}</ol>
+    <dl class="legende">
+      <div><dt>Archiv</dt><dd>raus aus dem Posteingang, aber nicht gelöscht – in Gmail unter „Alle Nachrichten“.</dd></div>
+      <div><dt>Papierkorb</dt><dd>Gmail löscht nach 30 Tagen. Bis dahin holst du alles mit einem Klick zurück.</dd></div>
+      <div><dt>Geschützt</dt><dd>Rechnungen, Verträge, Bank, Leute, denen du schreibst – fasse ich nie an.</dd></div>
+    </dl>`;
   const zielZahl = st.heuteEntfernt;
   const zEl = $('#held-zahl');
   feder(heldWert, zielZahl, (v) => { zEl.textContent = zahl(Math.max(0, Math.round(v))); }, { k: 60, d: 14 });
   heldWert = zielZahl;
   el.querySelector('[data-tat="scharf"]')?.addEventListener('click', async () => {
-    if (!(await bestaetigen('Scharf schalten?', 'Ab jetzt werden Mails wirklich verschoben, archiviert und in den Papierkorb gelegt. Endgültig gelöscht wird nie etwas, und jede Aktion lässt sich 30 Tage lang rückgängig machen.', 'Scharf schalten', true))) return;
-    const r = await api.rufe('scharfSchalten'); melde(r.ok ? 'Scharf geschaltet.' : r.grund); await laden(); void zeichne();
+    if (!(await bestaetigen('Jetzt wirklich aufräumen?', 'Ab jetzt räume ich Mails wirklich weg: ins Archiv oder in den Papierkorb. <b>Endgültig gelöscht wird nie etwas.</b> Unter „Verlauf“ holst du 30 Tage lang alles mit einem Klick zurück.', 'Ja, aufräumen', true))) return;
+    const r = await api.rufe('scharfSchalten'); melde(r.ok ? 'Los geht’s – ab jetzt wird aufgeräumt.' : r.grund); await laden(); void zeichne();
   });
   el.querySelector('[data-tat="pruefen"]')?.addEventListener('click', async () => { await api.rufe('jetztPruefen'); await laden(); void zeichne(); });
+  el.querySelector('[data-tat="zu-pruefen"]')?.addEventListener('click', () => zeigeAnsicht('pruefen', true));
 }
+/** Eine Zeile in Alltagssprache: „Newsletter von gamestar.de · Betreff … → würde ins Archiv“ */
 function stromZeile(e: Eintrag, neu = false) {
-  return `<li class="${neu ? 'neu' : ''}"><span class="zeit">${uhr(e.zeit)}</span><span class="kat ${MUELL.includes(e.kategorie) && art(e) === 'weg' ? 'muell' : ''}">${KAT[e.kategorie]}</span>
-    <span class="wer"><b>${h(e.absender)}</b> <span>${h(e.betreff)}</span></span><span class="tat ${e.trocken && e.status === 'ok' && art(e) === 'weg' ? 'trocken' : ''}">${h(tatText(e))}</span></li>`;
+  const weg = art(e) === 'weg';
+  const probe = e.trocken && e.status === 'ok' && weg;
+  return `<li class="${neu ? 'neu' : ''}"><span class="zeit">${uhr(e.zeit)}</span>
+    <span class="wer"><b class="kat ${MUELL.includes(e.kategorie) && weg ? 'muell' : ''}">${KAT[e.kategorie]}</b> von ${h(e.absender)}<span class="betreff">${h(e.betreff || '(ohne Betreff)')}</span></span>
+    <span class="tat ${weg ? 'weg' : ''}">${probe ? 'würde ' : ''}${h(tatText(e))}</span></li>`;
 }
 
 function anmeldung(el: HTMLElement) {
@@ -189,7 +222,7 @@ function anmeldung(el: HTMLElement) {
   el.querySelector('[data-tat="cred"]')!.addEventListener('click', async () => { try { if (await api.rufe('credentialsWaehlen')) { await laden(); void zeichne(); } } catch (e) { melde((e as Error).message); } });
   el.querySelector('[data-tat="login"]')!.addEventListener('click', async () => {
     melde('Browser geöffnet – bitte dort anmelden.');
-    try { await api.rufe('anmelden'); await laden(); void zeichne(); melde('Angemeldet. Trockenlauf startet.'); } catch (e) { melde((e as Error).message); }
+    try { await api.rufe('anmelden'); await laden(); void zeichne(); melde('Angemeldet. Der Probelauf startet.'); } catch (e) { melde((e as Error).message); }
   });
 }
 
@@ -197,20 +230,20 @@ function anmeldung(el: HTMLElement) {
 async function pruefen() {
   const el = $('#ansicht-pruefen');
   const liste = await api.rufe('zuPruefen');
-  el.innerHTML = `<div class="kopf"><h1 id="h-pruefen">Zu prüfen</h1><p>Hier war sich der Aufräumer nicht sicher genug (unter ${z.einstellungen.schwelle}&nbsp;%). Jede Entscheidung trainiert eine Regel für diesen Absender.</p></div>
+  el.innerHTML = `<div class="kopf"><h1 id="h-pruefen">Du entscheidest</h1><p>Bei diesen Mails war ich mir nicht sicher. Sag mir einmal, was du willst – <b>ich merke es mir</b> für alle Mails von diesem Absender.</p></div>
     ${liste.length ? `<ul class="pruef-liste">${liste.map((p: any) => `
       <li class="pruef" data-id="${h(p.mailId)}">
         <div><span class="von">${h(p.name || p.absender)} · ${h(p.absender)}</span><h3>${h(p.betreff || '(ohne Betreff)')}</h3>
           ${p.snippet ? `<p class="vorschau">${h(p.snippet)}</p>` : ''}
-          <p class="warum"><b>${KAT[p.kategorie as Kategorie]} · ${p.sicherheit} %</b> – ${h(p.begruendung)}</p></div>
-        <div class="pruef-knoepfe"><button class="knopf" data-wahl="behalten">Behalten</button><button class="knopf rot" data-wahl="weg">Weg damit</button></div>
-      </li>`).join('')}</ul>` : '<p class="leer">Nichts offen. Alles, was reinkam, war eindeutig.</p>'}`;
+          <p class="warum">Ich glaube: <b>${KAT[p.kategorie as Kategorie]}</b>, bin mir aber nur zu ${p.sicherheit} % sicher. <span>${h(p.begruendung)}</span></p></div>
+        <div class="pruef-knoepfe"><button class="knopf gross" data-wahl="behalten">Behalten</button><button class="knopf rot gross" data-wahl="weg">Weg damit</button></div>
+      </li>`).join('')}</ul>` : '<p class="leer">Gerade nichts zu entscheiden. Alles, was reinkam, war eindeutig.</p>'}`;
   for (const b of $$('[data-wahl]', el)) b.addEventListener('click', async () => {
     const li = b.closest('.pruef') as HTMLElement; const wahl = b.dataset.wahl as 'behalten' | 'weg';
     $$('button', li).forEach((x) => ((x as HTMLButtonElement).disabled = true));
     try {
       const r = await api.rufe('entscheide', li.dataset.id, wahl);
-      melde(wahl === 'weg' ? `Gelernt: ${r.regel.wert} → weg (${r.regel.bestaetigt}× bestätigt).` : `Gelernt: ${r.regel.wert} wird behalten.`);
+      melde(wahl === 'weg' ? `Gemerkt: Mails von ${r.regel.wert} räume ich weg.` : `Gemerkt: Mails von ${r.regel.wert} bleiben.`);
       // Feder-Wurf: weg = nach rechts in die Rinne, behalten = sinkt ab
       feder(0, 1, (v) => {
         li.style.transform = wahl === 'weg' ? `translateX(${v * 110}%) rotate(${v * 4}deg)` : `translateY(${v * 18}px)`;
@@ -226,11 +259,11 @@ async function absender() {
   const el = $('#ansicht-absender');
   const liste = await api.rufe('absender');
   const max = Math.max(1, ...liste.map((a: any) => a.anzahl));
-  el.innerHTML = `<div class="kopf"><h1 id="h-absender">Absender</h1><p>Wer am meisten schickt. Der Balken zeigt die Menge, schwarz = davon geöffnet.</p></div>
+  el.innerHTML = `<div class="kopf"><h1 id="h-absender">Wer schreibt dir?</h1><p>Die Absender mit den meisten Mails. Der Balken zeigt die Menge – der schwarze Teil, wie viele du davon geöffnet hast.</p></div>
     ${liste.length ? `<ul class="absender-liste">${liste.map((a: any) => `
       <li class="absender" data-adr="${h(a.adresse)}">
         <span class="menge">${zahl(a.anzahl)}</span>
-        <div><div class="name">${h(a.name)}</div><div class="adr">${h(a.adresse)} · ${a.gelesen} von ${a.anzahl} geöffnet${a.kategorie ? ' · ' + KAT[a.kategorie as Kategorie] : ''}${a.abgemeldet ? ' · abgemeldet' : ''}</div>
+        <div><div class="name">${h(a.name)}</div><div class="adr">${h(a.adresse)} · ${a.gelesen} von ${a.anzahl} gelesen${a.kategorie ? ' · ' + KAT[a.kategorie as Kategorie] : ''}${a.abgemeldet ? ' · abgemeldet' : ''}</div>
           <div class="balken" data-stil="width:${Math.max(6, (a.anzahl / max) * 100)}%"><u></u><i data-stil="width:${(a.gelesen / a.anzahl) * 100}%"></i></div></div>
         <div class="absender-knoepfe">
           <button class="knopf klein" data-akt="immer_behalten">Immer behalten</button>
@@ -240,7 +273,7 @@ async function absender() {
       </li>`).join('')}</ul>` : '<p class="leer">Noch keine Absender gezählt.</p>'}`;
   for (const b of $$('[data-akt]', el)) b.addEventListener('click', async () => {
     const adr = (b.closest('.absender') as HTMLElement).dataset.adr!;
-    if (b.dataset.akt === 'abmelden' && !(await bestaetigen('Abmelden?', `Der Aufräumer meldet <b>${h(adr)}</b> über den Abmelde-Header der Mail ab (One-Click oder Abmelde-Mail). Links aus dem Mail-Text werden nie geöffnet. Abmelden lässt sich nicht rückgängig machen.`, 'Abmelden'))) return;
+    if (b.dataset.akt === 'abmelden' && !(await bestaetigen('Abmelden?', `Ich melde dich bei <b>${h(adr)}</b> ab – über den offiziellen Abmelde-Weg, nie über Links aus der Mail. <b>Das lässt sich nicht zurücknehmen.</b>`, 'Ja, abmelden'))) return;
     melde(await api.rufe('absenderAktion', adr, b.dataset.akt)); await laden(); void absender();
   });
 }
@@ -257,12 +290,12 @@ async function regeln() {
   const el = $('#ansicht-regeln');
   const { regeln: liste, kandidaten } = await api.rufe('regeln');
   const wer = (r: any) => r.feld === 'adresse' ? `von <em>${h(r.wert)}</em>` : r.feld === 'domain' ? `von <em>@${h(r.wert)}</em>` : `mit <em>„${h(r.wert)}“</em>`;
-  el.innerHTML = `<div class="kopf"><h1 id="h-regeln">Regeln</h1><p>Jede Regel als Satz. Eindeutige Regeln laufen zusätzlich als echter Gmail-Filter – auch wenn der PC aus ist.</p></div>
+  el.innerHTML = `<div class="kopf"><h1 id="h-regeln">Deine Regeln</h1><p>Was ich mir von dir gemerkt habe. Du musst hier nichts anlegen – Regeln entstehen von selbst, wenn du unter „Du entscheidest“ etwas wählst.</p></div>
     <form class="neue-regel" id="neue-regel">
-      <label class="feld"><span class="etikett">Liste</span><select name="art"><option value="schwarz">Schwarze Liste</option><option value="weiss">Weiße Liste</option></select></label>
-      <label class="feld"><span class="etikett">Bedingung</span><select name="feld"><option value="adresse">Adresse</option><option value="domain">Domain</option><option value="stichwort">Stichwort</option></select></label>
-      <label class="feld"><span class="etikett">Wert</span><input name="wert" required placeholder="z. B. deals@shop.de"></label>
-      <label class="feld"><span class="etikett">Ziel</span><select name="kat">${MUELL.map((k) => `<option value="${k}">${KAT[k]}</option>`).join('')}</select></label>
+      <label class="feld"><span class="etikett">Was soll passieren?</span><select name="art"><option value="schwarz">Immer wegräumen</option><option value="weiss">Nie anfassen</option></select></label>
+      <label class="feld"><span class="etikett">Woran erkennen?</span><select name="feld"><option value="adresse">Absender-Adresse</option><option value="domain">ganze Firma (@…)</option><option value="stichwort">Wort im Betreff</option></select></label>
+      <label class="feld"><span class="etikett">Adresse, Firma oder Wort</span><input name="wert" required placeholder="z. B. deals@shop.de"></label>
+      <label class="feld"><span class="etikett">Als was?</span><select name="kat">${MUELL.map((k) => `<option value="${k}">${KAT[k]}</option>`).join('')}</select></label>
       <button class="knopf voll">Regel anlegen</button>
     </form>
     ${liste.length ? `<ul class="regel-liste">${liste.map((r: any) => `
@@ -270,9 +303,9 @@ async function regeln() {
         <div class="satz">Mails ${wer(r)} → <span class="${r.art === 'weiss' ? 'schutz' : 'ziel'}">${h(zielText(r.kategorie))}</span></div>
         <button class="schalter" role="switch" aria-checked="${r.aktiv}" aria-label="Regel ${r.aktiv ? 'ausschalten' : 'einschalten'}" data-tat="schalten"></button>
         <button class="knopf leise loeschen" data-tat="loeschen">Löschen</button>
-        <div class="meta"><span>${r.art === 'weiss' ? 'Weiße Liste' : r.art === 'schwarz' ? 'Schwarze Liste' : `Gelernt · ${r.bestaetigt}× bestätigt`}</span>
-          ${r.gmailFilterId ? '<span class="gmail-aktiv">läuft auch in Gmail</span>' : kandidaten.includes(r.id) ? `<span>${z.einstellungen.trockenlauf ? 'wird Gmail-Filter, sobald scharf geschaltet' : z.einstellungen.filterExportFreigegeben ? 'Gmail-Filter wird angelegt' : 'Gmail-Filter wartet auf deine Zustimmung'}</span>` : ''}</div>
-      </li>`).join('')}</ul>` : '<p class="leer">Noch keine Regeln. Sie entstehen, wenn du in „Zu prüfen“ entscheidest.</p>'}`;
+        <div class="meta"><span>${r.art === 'weiss' ? 'Von dir: nie anfassen' : r.art === 'schwarz' ? 'Von dir: immer wegräumen' : `Gelernt – du hast es ${r.bestaetigt}× bestätigt`}</span>
+          ${r.gmailFilterId ? '<span class="gmail-aktiv">wirkt auch, wenn der PC aus ist</span>' : kandidaten.includes(r.id) ? `<span>${z.einstellungen.trockenlauf ? 'wirkt nach dem Probelauf auch bei ausgeschaltetem PC' : z.einstellungen.filterExportFreigegeben ? 'wird gerade in Gmail eingetragen' : 'kann auch bei ausgeschaltetem PC wirken – Einstellungen'}</span>` : ''}</div>
+      </li>`).join('')}</ul>` : '<p class="leer">Noch keine Regeln. Sie entstehen von selbst, wenn du unter „Du entscheidest“ etwas wählst.</p>'}`;
   const form = $<HTMLFormElement>('#neue-regel');
   const artSel = form.elements.namedItem('art') as HTMLSelectElement;
   const katSel = form.elements.namedItem('kat') as HTMLSelectElement;
@@ -299,10 +332,10 @@ async function regeln() {
 async function protokoll() {
   const el = $('#ansicht-protokoll');
   if (!el.querySelector('#suche')) {
-    el.innerHTML = `<div class="kopf"><h1 id="h-protokoll">Protokoll</h1><p>Jede Aktion mit Begründung. Rückgängig geht 30 Tage lang – einzeln oder für einen ganzen Durchlauf.</p></div>
+    el.innerHTML = `<div class="kopf"><h1 id="h-protokoll">Verlauf</h1><p>Alles, was ich gemacht habe, und warum. Etwas falsch? <b>„Zurückholen“</b> drücken – geht 30 Tage lang.</p></div>
       <div class="werkzeug">
-        <label class="feld"><span class="etikett">Suche</span><input type="search" id="suche" placeholder="Absender, Betreff, Grund"></label>
-        <label class="feld"><span class="etikett">Kategorie</span><select id="kat-filter"><option value="">Alle</option>${Object.entries(KAT).map(([k, v]) => `<option value="${k}">${v}</option>`).join('')}</select></label>
+        <label class="feld"><span class="etikett">Suchen</span><input type="search" id="suche" placeholder="z. B. amazon oder Rechnung"></label>
+        <label class="feld"><span class="etikett">Nur zeigen</span><select id="kat-filter"><option value="">Alles</option>${Object.entries(KAT).map(([k, v]) => `<option value="${k}">${v}</option>`).join('')}</select></label>
       </div><div id="protokoll-liste"></div>`;
     let t: any;
     $('#suche', el).addEventListener('input', (e) => { clearTimeout(t); t = setTimeout(() => { protokollFilter.suche = (e.target as HTMLInputElement).value; void protokollListe(); }, 220); });
@@ -325,61 +358,69 @@ async function protokollListe() {
   }
   ziel.innerHTML = liste.length ? bloecke.map(([lauf, es]) => {
     const offen = es.filter(rueckgaengigMoeglich).length;
-    const name = lauf === 'fortlaufend' ? 'Laufend' : lauf.startsWith('altbestand') ? 'Altbestand' : lauf.startsWith('entscheidung') ? 'Deine Entscheidung' : lauf.startsWith('abmelden') ? 'Abmeldung' : 'Durchlauf';
+    const name = lauf === 'fortlaufend' ? 'Neue Mails' : lauf.startsWith('altbestand') ? 'Alter Posteingang aufgeräumt' : lauf.startsWith('entscheidung') ? 'Deine Entscheidung' : lauf.startsWith('abmelden') ? 'Abmeldung' : 'Durchgang';
     return `<section class="lauf"><div class="lauf-kopf"><span class="etikett">${name} · ${datum(es[es.length - 1].zeit)} · ${es.length} ${es.length === 1 ? 'Mail' : 'Mails'}</span>
-      ${offen > 1 && lauf !== 'fortlaufend' ? `<button class="knopf klein" data-lauf="${h(lauf)}">Ganzen Durchlauf rückgängig (${offen})</button>` : ''}</div>
+      ${offen > 1 && lauf !== 'fortlaufend' ? `<button class="knopf klein" data-lauf="${h(lauf)}">Alle ${offen} zurückholen</button>` : ''}</div>
       ${es.map((e) => `<div class="eintrag ${e.rueckgaengig ? 'zurueck' : ''}"><span class="zeit">${uhr(e.zeit)}</span><span class="kat ${MUELL.includes(e.kategorie) ? 'muell' : ''}">${KAT[e.kategorie]} ${e.sicherheit}%</span>
         <span class="wer"><b>${h(e.absender)}</b> <span>${h(e.betreff)}</span></span>
         <div class="rechts"><span class="tat ${e.trocken && art(e) === 'weg' && e.status === 'ok' ? 'trocken' : ''}">${h(tatText(e))}</span>
-          ${e.rueckgaengig ? '<span class="etikett">rückgängig gemacht</span>' : rueckgaengigMoeglich(e) ? `<button class="knopf klein leise" data-id="${e.id}">Rückgängig</button>` : ''}</div>
+          ${e.rueckgaengig ? '<span class="etikett">zurückgeholt</span>' : rueckgaengigMoeglich(e) ? `<button class="knopf klein" data-id="${e.id}">Zurückholen</button>` : ''}</div>
         <span class="grund">${h(e.begruendung)}${e.hinweis ? ' ' + h(e.hinweis) : ''}</span></div>`).join('')}</section>`;
   }).join('') : '<p class="leer">Keine Einträge.</p>';
   for (const b of $$('[data-id]', ziel)) b.addEventListener('click', async () => {
-    const r = await api.rufe('rueckgaengig', Number(b.dataset.id)); melde(r.ok ? 'Wiederhergestellt – Labels, Ordner und gelesen-Status wie vorher.' : r.grund); void protokollListe(); void laden();
+    const r = await api.rufe('rueckgaengig', Number(b.dataset.id)); melde(r.ok ? 'Zurückgeholt – die Mail ist wieder genau wie vorher.' : r.grund); void protokollListe(); void laden();
   });
   for (const b of $$('[data-lauf]', ziel)) b.addEventListener('click', async () => {
-    if (!(await bestaetigen('Ganzen Durchlauf rückgängig?', 'Alle Mails dieses Durchlaufs werden exakt wiederhergestellt.', 'Rückgängig machen'))) return;
-    const r = await api.rufe('durchlaufRueckgaengig', b.dataset.lauf); melde(`${r.ok} wiederhergestellt${r.fehler ? `, ${r.fehler} nicht möglich` : ''}.`); void protokollListe(); void laden();
+    if (!(await bestaetigen('Alle zurückholen?', 'Alle Mails dieses Durchgangs kommen wieder genau so zurück, wie sie vorher waren.', 'Ja, zurückholen'))) return;
+    const r = await api.rufe('durchlaufRueckgaengig', b.dataset.lauf); melde(`${r.ok} zurückgeholt${r.fehler ? `, ${r.fehler} ging nicht` : ''}.`); void protokollListe(); void laden();
   });
 }
 
 // ---------------- 6 Einstellungen ----------------
 const schwelleZuRegler = (s: number) => Math.round((98 - s) / 0.4);
 const reglerZuSchwelle = (r: number) => Math.round(98 - r * 0.4);
+const strengText = (schwelle: number) => schwelle >= 90 ? 'Sehr vorsichtig' : schwelle >= 80 ? 'Vorsichtig' : schwelle >= 70 ? 'Mittel' : 'Streng';
+const intervallText = (sek: number) => sek < 60 ? `alle ${sek} Sek.` : sek === 60 ? 'jede Minute' : sek % 60 === 0 ? `alle ${sek / 60} Min.` : `alle ${Math.floor(sek / 60)} Min. ${sek % 60} Sek.`;
 async function einstellungen() {
   const el = $('#ansicht-einstellungen');
   await laden();
   const e = z.einstellungen; const ab = z.altbestand;
   const akt: Aktion[] = ['behalten', 'label', 'archivieren', 'gelesen', 'abmelden', 'papierkorb'];
-  el.innerHTML = `<div class="kopf"><h1 id="h-einstellungen">Einstellungen</h1><p>Alles wird sofort gespeichert.</p></div>
-    <div class="einst"><div><h2>Betrieb</h2><p class="erkl">${e.trockenlauf ? `Trockenlauf – noch ${z.status?.trockenlaufRestTage ?? 7} Tage, dann kannst du im Cockpit scharf schalten.` : 'Scharf geschaltet.'}</p></div>
-      <div class="zeile">${e.trockenlauf ? '<span class="etikett">Trockenlauf aktiv – es wird nichts verändert</span>' : '<button class="knopf" data-tat="trocken">Zurück in den Trockenlauf</button>'}</div></div>
-    <div class="einst"><div><h2>Intervall</h2><p class="erkl">Wie oft nach neuen Mails geschaut wird.</p></div>
-      <div class="regler"><span class="regler-wert" id="intervall-wert">${e.intervallSek} s</span><input type="range" min="15" max="600" step="15" value="${e.intervallSek}" id="intervall" aria-label="Intervall in Sekunden">
-      <div class="regler-enden"><span>15 s</span><span>10 min</span></div></div></div>
-    <div class="einst"><div><h2>Aggressivität</h2><p class="erkl">Bestimmt die Sicherheitsschwelle. Darunter wird nichts verschoben – die Mail landet in „Zu prüfen“.</p></div>
-      <div class="regler"><span class="regler-wert" id="schwelle-wert">${e.schwelle} %</span><input type="range" min="0" max="100" value="${schwelleZuRegler(e.schwelle)}" id="schwelle" aria-label="Aggressivität">
+  const rest = z.status?.trockenlaufRestTage ?? 7;
+  el.innerHTML = `<div class="kopf"><h1 id="h-einstellungen">Einstellungen</h1><p>Normalerweise musst du hier nichts ändern. Alles wird sofort gespeichert.</p></div>
+    <h2 class="abschnitt">Das Wichtigste</h2>
+    <div class="einst"><div><h2>Probelauf</h2><p class="erkl">${e.trockenlauf ? `Gerade ist Probelauf: Ich zeige nur, was ich tun würde. Noch ${rest} ${rest === 1 ? 'Tag' : 'Tage'}, dann kannst du in der Übersicht „Jetzt wirklich aufräumen“ drücken.` : 'Ich räume wirklich auf. Du kannst jederzeit zurück in den Probelauf.'}</p></div>
+      <div class="zeile">${e.trockenlauf ? '<span class="etikett">Probelauf läuft – nichts wird verändert</span>' : '<button class="knopf" data-tat="trocken">Zurück in den Probelauf</button>'}</div></div>
+    <div class="einst"><div><h2>Wie streng?</h2><p class="erkl"><b>Vorsichtig:</b> Ich räume nur weg, wenn ich mir ganz sicher bin – mehr landet bei „Du entscheidest“.<br><b>Streng:</b> Ich räume mehr selbst weg.</p></div>
+      <div class="regler"><span class="regler-wert" id="schwelle-wert">${strengText(e.schwelle)}</span><input type="range" min="0" max="100" value="${schwelleZuRegler(e.schwelle)}" id="schwelle" aria-label="Wie streng">
       <div class="regler-enden"><span>vorsichtig</span><span>streng</span></div></div></div>
-    <div class="einst"><div><h2>Aktionen</h2><p class="erkl">Was pro Kategorie passiert. „Abmelden“ nur über den Abmelde-Header und nur bei Absendern, deren Mails du nie öffnest – nie bei Phishing.</p></div>
-      <table class="matrix"><thead><tr><th>Kategorie</th>${akt.map((a) => `<th>${AKT[a]}</th>`).join('')}</tr></thead><tbody>
-      ${(Object.keys(KAT) as Kategorie[]).map((k) => `<tr><td>${KAT[k].replace('Benachrichtigung', 'Benachrich&shy;tigung')}</td>${akt.map((a) => `<td><button class="haken ${a === 'papierkorb' ? 'rot' : ''}" role="checkbox" aria-checked="${(e.aktionen[k] ?? []).includes(a)}" aria-label="${KAT[k]}: ${AKT[a]}" data-k="${k}" data-a="${a}" ${(a === 'abmelden' && k === 'phishing') ? 'disabled' : ''}></button></td>`).join('')}</tr>`).join('')}
-      </tbody></table></div>
-    <div class="einst"><div><h2>Schutzwörter</h2><p class="erkl">Mails mit diesen Wörtern in Betreff, Vorschau oder Absender werden nie angefasst. Ein Wort pro Zeile.</p></div>
-      <label class="feld"><span class="unsichtbar">Schutzwörter</span><textarea id="schutz" rows="6">${h(e.schutzwoerter.join('\n'))}</textarea></label></div>
-    <div class="einst"><div><h2>KI-Stufe</h2><p class="erkl">Nur für unsichere Fälle, mit Claude Haiku. Es gehen nur Absender, Betreff und Vorschau raus – nie der Text, nie Anhänge. Schlüssel über die Umgebungsvariable ANTHROPIC_API_KEY.</p></div>
-      <div class="zeile"><button class="schalter" role="switch" id="ki" aria-checked="${e.kiAn}" aria-label="KI-Stufe"></button>
-        <label class="feld"><span class="etikett">Budget pro Monat (€)</span><input type="number" id="budget" min="0" step="0.5" value="${e.kiBudgetEuro}" data-stil="width:120px"></label>
-        <span class="etikett">${z.ki.schluessel ? `diesen Monat ${z.ki.ausgegebenEuro.toFixed(2).replace('.', ',')} €` : 'kein API-Schlüssel gefunden'}</span></div></div>
-    <div class="einst"><div><h2>Gmail-Filter</h2><p class="erkl">Eindeutige Regeln (Schwarze Liste oder ${e.filterExportAb}× bestätigt) werden echte Gmail-Filter und wirken auch bei ausgeschaltetem PC. Schutzwörter werden im Filter ausgenommen.</p></div>
-      <div class="zeile"><button class="schalter" role="switch" id="filter" aria-checked="${e.filterExportFreigegeben}" aria-label="Gmail-Filter anlegen erlauben"></button><span>${e.filterExportFreigegeben ? 'Erlaubt' : 'Noch nicht erlaubt'}</span></div></div>
-    <div class="einst"><div><h2>Autostart</h2><p class="erkl">Startet mit Windows unsichtbar im Infobereich.</p></div>
-      <div class="zeile"><button class="schalter" role="switch" id="autostart" aria-checked="${e.autostart}" aria-label="Autostart"></button></div></div>
-    <div class="einst"><div><h2>Altbestand</h2><p class="erkl">Einmal den ganzen Posteingang aufräumen. Erst Vorschau, dann Start. Abgemeldet wird dabei nicht.</p></div>
-      <div id="altbestand">${altbestandHtml(ab)}</div></div>`;
+    <div class="einst"><div><h2>Alten Posteingang aufräumen</h2><p class="erkl">Ich sortiere einmal alles, was schon im Posteingang liegt. Zuerst siehst du nur eine Vorschau – angefasst wird erst, wenn du startest.</p></div>
+      <div id="altbestand">${altbestandHtml(ab)}</div></div>
+
+    <details class="profi">
+      <summary><span>Mehr Einstellungen</span><span class="etikett">für Profis – musst du nicht anfassen</span></summary>
+      <div class="einst"><div><h2>Was passiert womit?</h2><p class="erkl">Pro Sorte Mail, was ich mache. „Abmelden“ nur über den offiziellen Abmelde-Weg und nie bei Betrugs-Mails (Phishing).</p></div>
+        <table class="matrix"><thead><tr><th>Sorte</th>${akt.map((a) => `<th>${AKT[a]}</th>`).join('')}</tr></thead><tbody>
+        ${(Object.keys(KAT) as Kategorie[]).map((k) => `<tr><td>${KAT[k].replace('Benachrichtigung', 'Benachrich&shy;tigung')}</td>${akt.map((a) => `<td><button class="haken ${a === 'papierkorb' ? 'rot' : ''}" role="checkbox" aria-checked="${(e.aktionen[k] ?? []).includes(a)}" aria-label="${KAT[k]}: ${AKT[a]}" data-k="${k}" data-a="${a}" ${(a === 'abmelden' && k === 'phishing') ? 'disabled' : ''}></button></td>`).join('')}</tr>`).join('')}
+        </tbody></table></div>
+      <div class="einst"><div><h2>Schutzwörter</h2><p class="erkl">Mails mit diesen Wörtern fasse ich nie an – egal ob im Betreff, im Text-Anfang oder beim Absender. Ein Wort pro Zeile.</p></div>
+        <label class="feld"><span class="unsichtbar">Schutzwörter</span><textarea id="schutz" rows="6">${h(e.schutzwoerter.join('\n'))}</textarea></label></div>
+      <div class="einst"><div><h2>Wie oft nachschauen?</h2><p class="erkl">Standard: jede Minute.</p></div>
+        <div class="regler"><span class="regler-wert" id="intervall-wert">${intervallText(e.intervallSek)}</span><input type="range" min="15" max="600" step="15" value="${e.intervallSek}" id="intervall" aria-label="Wie oft nachschauen">
+        <div class="regler-enden"><span>alle 15 Sek.</span><span>alle 10 Min.</span></div></div></div>
+      <div class="einst"><div><h2>Auch bei ausgeschaltetem PC</h2><p class="erkl">Absender, die du ${e.filterExportAb}× weggeräumt hast (oder auf „Immer weg“ gesetzt), trage ich als Filter direkt in Gmail ein. Dann räumt Google selbst auf, auch wenn dein PC aus ist.</p></div>
+        <div class="zeile"><button class="schalter" role="switch" id="filter" aria-checked="${e.filterExportFreigegeben}" aria-label="Filter in Gmail eintragen erlauben"></button><span>${e.filterExportFreigegeben ? 'Erlaubt' : 'Noch nicht erlaubt'}</span></div></div>
+      <div class="einst"><div><h2>Mit Windows starten</h2><p class="erkl">Ich starte unsichtbar unten rechts im Infobereich.</p></div>
+        <div class="zeile"><button class="schalter" role="switch" id="autostart" aria-checked="${e.autostart}" aria-label="Mit Windows starten"></button></div></div>
+      <div class="einst"><div><h2>KI-Hilfe</h2><p class="erkl">Nur für knifflige Fälle. Dafür gehen Absender, Betreff und die erste Zeile an Claude (Anthropic) – nie die ganze Mail, nie Anhänge. Braucht einen API-Schlüssel (siehe Anleitung).</p></div>
+        <div class="zeile"><button class="schalter" role="switch" id="ki" aria-checked="${e.kiAn}" aria-label="KI-Hilfe"></button>
+          <label class="feld"><span class="etikett">Höchstens pro Monat (€)</span><input type="number" id="budget" min="0" step="0.5" value="${e.kiBudgetEuro}" data-stil="width:120px"></label>
+          <span class="etikett">${z.ki.schluessel ? `diesen Monat ${z.ki.ausgegebenEuro.toFixed(2).replace('.', ',')} €` : 'kein API-Schlüssel eingerichtet'}</span></div></div>
+    </details>`;
 
   const speichere = (teil: object) => api.rufe('speichereEinstellungen', teil).then((n: any) => { z.einstellungen = n; });
-  const iv = $<HTMLInputElement>('#intervall', el); iv.addEventListener('input', () => { $('#intervall-wert').textContent = `${iv.value} s`; }); iv.addEventListener('change', () => speichere({ intervallSek: Number(iv.value) }));
-  const sw = $<HTMLInputElement>('#schwelle', el); sw.addEventListener('input', () => { $('#schwelle-wert').textContent = `${reglerZuSchwelle(Number(sw.value))} %`; }); sw.addEventListener('change', () => speichere({ schwelle: reglerZuSchwelle(Number(sw.value)) }));
+  const iv = $<HTMLInputElement>('#intervall', el); iv.addEventListener('input', () => { $('#intervall-wert').textContent = intervallText(Number(iv.value)); }); iv.addEventListener('change', () => speichere({ intervallSek: Number(iv.value) }));
+  const sw = $<HTMLInputElement>('#schwelle', el); sw.addEventListener('input', () => { $('#schwelle-wert').textContent = strengText(reglerZuSchwelle(Number(sw.value))); }); sw.addEventListener('change', () => speichere({ schwelle: reglerZuSchwelle(Number(sw.value)) }));
   for (const b of $$('.haken', el)) b.addEventListener('click', () => {
     const k = b.dataset.k as Kategorie; const a = b.dataset.a as Aktion;
     let liste: Aktion[] = [...(z.einstellungen.aktionen[k] ?? [])];
@@ -406,28 +447,28 @@ async function einstellungen() {
 }
 
 function altbestandHtml(ab: any): string {
-  if (!ab || ab.phase === 'leer') return '<button class="knopf voll" data-ab="vorschau">Vorschau erstellen</button>';
+  if (!ab || ab.phase === 'leer') return '<button class="knopf voll gross" data-ab="vorschau">Vorschau ansehen</button>';
   const prozent = ab.gesamt ? Math.round((ab.erledigt / ab.gesamt) * 100) : 0;
   const zaehler = `<div class="zaehler-liste">${Object.entries(ab.zaehler).map(([k, n]) => `<span><b>${zahl(n as number)}</b>${KAT[k as Kategorie]}</span>`).join('')}</div>`;
-  if (ab.phase === 'vorschau') return `<span class="etikett">Vorschau läuft – ${zahl(ab.erledigt)} von ${zahl(ab.gesamt)}</span><div class="fortschritt"><i data-stil="width:${prozent}%"></i></div>${zaehler}`;
-  if (ab.phase === 'bereit') return `<span class="etikett">${zahl(ab.gesamt)} Mails im Posteingang eingeordnet – noch nichts verändert</span>${zaehler}
+  if (ab.phase === 'vorschau') return `<span class="etikett">Ich schaue mir alles an … ${zahl(ab.erledigt)} von ${zahl(ab.gesamt)} Mails</span><div class="fortschritt"><i data-stil="width:${prozent}%"></i></div>${zaehler}`;
+  if (ab.phase === 'bereit') return `<span class="etikett">Fertig angeschaut: ${zahl(ab.gesamt)} Mails – noch nichts verändert. Das habe ich gefunden:</span>${zaehler}
     ${ab.beispiele.length ? `<ul class="beispiele">${ab.beispiele.map((b: any) => `<li>${KAT[b.kategorie as Kategorie]} · ${h(b.absender)} – ${h(b.betreff)}</li>`).join('')}</ul>` : ''}
-    <div class="zeile"><button class="knopf rot" data-ab="start">${z.einstellungen.trockenlauf ? 'Im Trockenlauf durchspielen' : 'Jetzt aufräumen'}</button><button class="knopf" data-ab="vorschau">Neu berechnen</button></div>`;
-  if (ab.phase === 'laeuft') return `<span class="etikett">Räumt auf – ${zahl(ab.erledigt)} von ${zahl(ab.gesamt)}</span><div class="fortschritt"><i data-stil="width:${prozent}%"></i></div>`;
-  return `<span class="etikett">Fertig – ${zahl(ab.gesamt)} Mails durchgesehen. Rückgängig im Protokoll unter „Altbestand“.</span>${zaehler}<div class="zeile"><button class="knopf" data-ab="vorschau">Erneut prüfen</button></div>`;
+    <div class="zeile"><button class="knopf rot" data-ab="start">${z.einstellungen.trockenlauf ? 'Probeweise durchspielen' : 'Jetzt aufräumen'}</button><button class="knopf" data-ab="vorschau">Nochmal ansehen</button></div>`;
+  if (ab.phase === 'laeuft') return `<span class="etikett">Ich räume auf … ${zahl(ab.erledigt)} von ${zahl(ab.gesamt)} Mails</span><div class="fortschritt"><i data-stil="width:${prozent}%"></i></div>`;
+  return `<span class="etikett">Fertig – ${zahl(ab.gesamt)} Mails durchgesehen. Zurückholen geht unter „Verlauf“.</span>${zaehler}<div class="zeile"><button class="knopf" data-ab="vorschau">Nochmal ansehen</button></div>`;
 }
 function altbestandKnoepfe() {
   for (const b of $$('[data-ab]')) b.addEventListener('click', async () => {
     try {
       if (b.dataset.ab === 'vorschau') await api.rufe('altbestandVorschau');
-      else if (await bestaetigen('Altbestand aufräumen?', z.einstellungen.trockenlauf ? 'Trockenlauf: es wird nur protokolliert, was passieren würde.' : 'Die eingestellten Aktionen werden auf den ganzen Posteingang angewendet. Geschützte und unsichere Mails bleiben liegen. Alles ist 30 Tage rückgängig machbar.', 'Starten', !z.einstellungen.trockenlauf)) await api.rufe('altbestandStarten');
+      else if (await bestaetigen('Alten Posteingang aufräumen?', z.einstellungen.trockenlauf ? 'Probelauf: Ich trage nur in den Verlauf ein, was ich tun würde. Angefasst wird nichts.' : 'Ich räume jetzt den ganzen Posteingang auf. Geschützte und unsichere Mails bleiben liegen. Alles lässt sich 30 Tage lang zurückholen.', 'Starten', !z.einstellungen.trockenlauf)) await api.rufe('altbestandStarten');
     } catch (e) { melde((e as Error).message); }
   });
 }
 
 async function filterFrage(anzahl?: number): Promise<boolean> {
-  const ok = await bestaetigen('Gmail-Filter anlegen?', `${anzahl ? `${anzahl} eindeutige ${anzahl === 1 ? 'Regel ist' : 'Regeln sind'} bereit. ` : ''}Der Aufräumer legt dafür echte Filter in deinem Gmail an. Sie wirken auch, wenn der PC aus ist, nehmen Mails mit Schutzwörtern aus und verschwinden, wenn du die Regel ausschaltest.`, 'Filter erlauben');
-  if (ok) { const r = await api.rufe('filterFreigeben'); melde(`${r.angelegt} Gmail-Filter angelegt.`); await laden(); }
+  const ok = await bestaetigen('Auch bei ausgeschaltetem PC aufräumen?', `${anzahl ? `${anzahl} ${anzahl === 1 ? 'Absender ist' : 'Absender sind'} eindeutig Müll. ` : ''}Darf ich dafür Filter direkt in dein Gmail eintragen? Dann räumt Google selbst auf, auch wenn dein PC aus ist. Mails mit Schutzwörtern bleiben trotzdem verschont. Schaltest du die Regel aus, lösche ich den Filter wieder.`, 'Ja, erlauben');
+  if (ok) { const r = await api.rufe('filterFreigeben'); melde(`${r.angelegt} ${r.angelegt === 1 ? 'Filter' : 'Filter'} in Gmail eingetragen.`); await laden(); }
   return ok;
 }
 

@@ -17,11 +17,11 @@
   <p class="zustand" id="zustand" role="status" aria-live="polite"><span class="zustand-strich"></span><span id="zustand-text">startet …</span></p>
   <nav aria-label="Bereiche">
     <ol class="nav" id="nav">
-      <li><button data-ziel="cockpit"><span class="nr">01</span><span class="nav-name">Cockpit</span></button></li>
-      <li><button data-ziel="pruefen"><span class="nr">02</span><span class="nav-name">Zu prüfen</span><span class="nav-zahl" id="nav-pruefen"></span></button></li>
-      <li><button data-ziel="absender"><span class="nr">03</span><span class="nav-name">Absender</span></button></li>
-      <li><button data-ziel="regeln"><span class="nr">04</span><span class="nav-name">Regeln</span></button></li>
-      <li><button data-ziel="protokoll"><span class="nr">05</span><span class="nav-name">Protokoll</span></button></li>
+      <li><button data-ziel="cockpit"><span class="nr">01</span><span class="nav-name">Übersicht</span></button></li>
+      <li><button data-ziel="pruefen"><span class="nr">02</span><span class="nav-name">Du entscheidest</span><span class="nav-zahl" id="nav-pruefen"></span></button></li>
+      <li><button data-ziel="absender"><span class="nr">03</span><span class="nav-name">Wer schreibt dir</span></button></li>
+      <li><button data-ziel="regeln"><span class="nr">04</span><span class="nav-name">Deine Regeln</span></button></li>
+      <li><button data-ziel="protokoll"><span class="nr">05</span><span class="nav-name">Verlauf</span></button></li>
       <li><button data-ziel="einstellungen"><span class="nr">06</span><span class="nav-name">Einstellungen</span></button></li>
     </ol>
     <span class="nav-zeiger" id="nav-zeiger" aria-hidden="true"></span>
@@ -32,8 +32,8 @@
 <div class="anlage" id="anlage" aria-hidden="true">
   <canvas id="strom"></canvas>
   <div class="anlage-beschriftung" id="anlage-beschriftung">
-    <span data-m="0">01 Signale</span><span data-m="1">02 Regeln</span><span data-m="2">03 KI · Schwelle</span>
-    <span data-rinne>ausgesiebt</span><span data-boden>bleibt</span>
+    <span data-m="0">1 · Erkennen</span><span data-m="1">2 · Deine Regeln</span><span data-m="2">3 · Unsicher? Du entscheidest</span>
+    <span data-rinne>weggeräumt</span><span data-boden>bleibt im Posteingang</span>
     <i class="wand" data-wand="schraeg"></i><i class="wand" data-wand="links"></i><i class="wand" data-wand="rechts"></i>
   </div>
 </div>
