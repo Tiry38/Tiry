@@ -74,6 +74,10 @@ class BildschirmTest {
         Einstellungen(PopupEinstellungen(), {}, {}, true, {}, {}, "192.168.178.47")
     }
 
+    @Test fun absturz() = foto("13-absturzbericht") {
+        Absturzbericht("Version 1.0.2 · Android 15 · samsung SM-S921B\n\njava.lang.IllegalStateException: Beispiel\n\tat de.tiry.waschmaschine.MainActivity.onCreate(MainActivity.kt:42)", {}, {})
+    }
+
     @Test fun verlauf() = foto("10-verlauf") {
         Verlauf(listOf(
             VerlaufEintrag("Baumwolle", jetzt - 3 * 3600_000, jetzt - 3600_000, "40 °C", "1400 U/min"),

@@ -21,20 +21,16 @@ android {
     }
 
     signingConfigs {
-        create("release") {
-            // Eigener, fester Signaturschlüssel aus GitHub-Secret (falls gesetzt),
-            // sonst der feste App-Testschlüssel im Repo (nur Signatur, keine Geräte-/VPN-Schlüssel).
+        // Eigener Schlüssel von Tiry: liegt AES-256-verschlüsselt in signatur/eigen.keystore.enc,
+        // die Werkstatt (GitHub Actions) entschlüsselt ihn mit dem Secret WM_SIGNATUR_PASSWORT.
+        create("eigen") {
             val ks = System.getenv("WM_KEYSTORE_FILE")
             if (ks != null && file(ks).exists()) {
                 storeFile = file(ks)
-                storePassword = System.getenv("WM_KEYSTORE_PASSWORD")
-                keyAlias = System.getenv("WM_KEY_ALIAS")
-                keyPassword = System.getenv("WM_KEY_PASSWORD")
-            } else {
-                storeFile = file("signatur/app-test.keystore")
-                storePassword = "waschmaschine"
+                storePassword = System.getenv("WM_SIGNATUR_PASSWORT")
                 keyAlias = "waschmaschine"
-                keyPassword = "waschmaschine"
+                keyPassword = System.getenv("WM_SIGNATUR_PASSWORT")
+                storeType = "PKCS12"
             }
         }
     }
@@ -42,10 +38,7 @@ android {
     buildTypes {
         release {
             isMinifyEnabled = false
-            signingConfig = signingConfigs.getByName("release")
-        }
-        debug {
-            signingConfig = signingConfigs.getByName("release")
+            signingConfig = signingConfigs.getByName("eigen").takeIf { it.storeFile != null }
         }
     }
     compileOptions {

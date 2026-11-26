@@ -95,3 +95,20 @@ private fun Schalter(text: String, an: Boolean, wechsel: (Boolean) -> Unit) {
         }
     }
 }
+
+/** Nach einem Absturz: Grund anzeigen, mit einem Tipp kopierbar. */
+@Composable
+fun Absturzbericht(bericht: String, kopieren: () -> Unit, weiter: () -> Unit) {
+    Flaeche(Modifier.background(Farbe.Grund)) {
+        Column(Modifier.fillMaxSize().windowInsetsPadding(WindowInsets.safeDrawing).verticalScroll(rememberScrollState()).padding(horizontal = 20.dp)) {
+            Spacer(Modifier.height(20.dp))
+            Text("Abge-\nstürzt.", style = Schrift.Riesig.copy(fontSize = 56.sp, lineHeight = 58.sp, letterSpacing = (-2).sp, color = Farbe.Akzent))
+            Text("Beim letzten Mal ist die App abgestürzt. Den Bericht kopieren und an Claude schicken – dann ist der Fehler schnell behoben.", style = Schrift.Text, modifier = Modifier.padding(vertical = 14.dp))
+            Haupttaste("Bericht kopieren", onClick = kopieren)
+            Textaktion("WEITER ZUR APP", farbe = Farbe.Nebel, onClick = weiter)
+            Spacer(Modifier.height(16.dp))
+            Text(bericht, style = Schrift.Text.copy(fontSize = 11.sp, lineHeight = 15.sp, color = Farbe.Nebel))
+            Spacer(Modifier.height(30.dp))
+        }
+    }
+}

@@ -96,6 +96,14 @@ class MainActivity : ComponentActivity() {
         val weg by z.weg.collectAsState()
         val verbindet by z.verbindet.collectAsState()
 
+        var absturz by remember { mutableStateOf(java.io.File(filesDir, "absturz.txt").takeIf { it.exists() }?.readText()) }
+        absturz?.let { bericht ->
+            de.tiry.waschmaschine.ui.Absturzbericht(bericht,
+                kopieren = { getSystemService(android.content.ClipboardManager::class.java).setPrimaryClip(android.content.ClipData.newPlainText("Absturz", bericht)); Toast.makeText(ctx, "Kopiert – einfach an Claude schicken.", Toast.LENGTH_LONG).show() },
+                weiter = { java.io.File(filesDir, "absturz.txt").delete(); absturz = null })
+            return
+        }
+
         val benachrichtigung = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { akkuAusnahme() }
 
         fun tunnelSpeichern(t: TunnelDaten) {

@@ -29,25 +29,26 @@ jobs:
           distribution: temurin
           java-version: 17
       - uses: gradle/actions/setup-gradle@v4
-      - name: Eigener Signaturschlüssel (optional, aus GitHub-Secret)
+      - name: Eigenen Signaturschlüssel entschlüsseln
         env:
-          KS: ${{ secrets.WM_KEYSTORE_B64 }}
+          WM_SIGNATUR_PASSWORT: ${{ secrets.WM_SIGNATUR_PASSWORT }}
         run: |
-          if [ -n "$KS" ]; then echo "$KS" | base64 -d > "$RUNNER_TEMP/wm.keystore"; echo "WM_KEYSTORE_FILE=$RUNNER_TEMP/wm.keystore" >> "$GITHUB_ENV"; fi
+          if [ -z "$WM_SIGNATUR_PASSWORT" ]; then
+            echo "::warning::Secret WM_SIGNATUR_PASSWORT fehlt – es wird KEINE APK veröffentlicht (nur Tests)."
+            exit 0
+          fi
+          openssl enc -d -aes-256-cbc -pbkdf2 -iter 200000 -in app/signatur/eigen.keystore.enc -out "$RUNNER_TEMP/wm.keystore" -pass env:WM_SIGNATUR_PASSWORT
+          echo "WM_KEYSTORE_FILE=$RUNNER_TEMP/wm.keystore" >> "$GITHUB_ENV"
       - name: Tests (Protokoll, Pop-up-Regeln, Zuhause/Unterwegs, Bildschirme)
-        env:
-          WM_KEYSTORE_PASSWORD: ${{ secrets.WM_KEYSTORE_PASSWORD }}
-          WM_KEY_ALIAS: ${{ secrets.WM_KEY_ALIAS }}
-          WM_KEY_PASSWORD: ${{ secrets.WM_KEY_PASSWORD }}
         run: ./gradlew --no-daemon :app:testDebugUnitTest -Proborazzi.test.record=true
-      - name: APK bauen
+      - name: APK bauen (mit Tirys eigenem Schlüssel)
+        if: env.WM_KEYSTORE_FILE != ''
         env:
-          WM_KEYSTORE_PASSWORD: ${{ secrets.WM_KEYSTORE_PASSWORD }}
-          WM_KEY_ALIAS: ${{ secrets.WM_KEY_ALIAS }}
-          WM_KEY_PASSWORD: ${{ secrets.WM_KEY_PASSWORD }}
+          WM_SIGNATUR_PASSWORT: ${{ secrets.WM_SIGNATUR_PASSWORT }}
         run: |
           ./gradlew --no-daemon :app:assembleRelease
           cp app/build/outputs/apk/release/app-release.apk Waschmaschine.apk
+          "$(ls -d "$ANDROID_HOME"/build-tools/* | sort -V | tail -1)/apksigner" verify --print-certs Waschmaschine.apk | head -3
           ls -la Waschmaschine.apk
       - uses: actions/upload-artifact@v4
         if: always()
@@ -57,6 +58,7 @@ jobs:
             waschmaschine/bildschirme/
             waschmaschine/app/build/reports/tests/
       - name: Release waschmaschine-latest aktualisieren
+        if: env.WM_KEYSTORE_FILE != ''
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |

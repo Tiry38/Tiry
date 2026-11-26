@@ -99,6 +99,8 @@ Android Keystore), sind von Backups ausgenommen und stehen **nie** im Repository
 - Tests: `./gradlew :app:testDebugUnitTest` – Protokoll gegen eine **simulierte Maschine** (TLS-PSK und AES-HMAC),
   bitgenauer Abgleich mit hcpy, Pop-up-Regeln, Zuhause/Unterwegs-Umschaltung, WireGuard-Import, Bildschirmfotos (Roborazzi → `bildschirme/`).
 - Kreuztest gegen OpenSSL (wie im Gerät): Python-Server starten und `KREUZTEST=1 ./gradlew :app:testDebugUnitTest --tests '*OpenSslKreuzTest*'`.
-- Eigener Signaturschlüssel (empfohlen): Secrets `WM_KEYSTORE_B64`, `WM_KEYSTORE_PASSWORD`, `WM_KEY_ALIAS`, `WM_KEY_PASSWORD`
-  setzen. Ohne sie wird mit dem Test-Signaturschlüssel in `app/signatur/` signiert (enthält keine Geräte- oder VPN-Schlüssel).
-  Achtung: Ein Wechsel des Signaturschlüssels erfordert Neuinstallation + neue Einrichtung.
+- **Signatur:** Die APK wird mit Tirys eigenem Schlüssel signiert. Er liegt AES-256-verschlüsselt in
+  `app/signatur/eigen.keystore.enc`; die Werkstatt (GitHub Actions) entschlüsselt ihn mit dem Secret `WM_SIGNATUR_PASSWORT`.
+  Fehlt das Secret, laufen nur die Tests – es wird keine APK veröffentlicht. Passwort NIE ändern oder verlieren:
+  Ein anderer Schlüssel bedeutet Neuinstallation + neue Einrichtung.
+- **Absturzbericht:** Stürzt die App ab, zeigt sie beim nächsten Start den Grund an („Bericht kopieren“).

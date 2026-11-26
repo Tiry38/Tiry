@@ -145,8 +145,10 @@ fun Trommel(
         // Innenraum: Shader oder Rückfall
         val innen = Path().apply { addOval(androidx.compose.ui.geometry.Rect(m, innenR)) }
         clipPath(innen) {
-            if (shader != null && Build.VERSION.SDK_INT >= 33) zeichneShader(shader, m, innenR, zeit, pegel.value, winkel, if (ruhig) 0f else (0.4f + (tempo.value / 11f)).coerceAtMost(1.4f))
-            else zeichneRueckfall(m, innenR, zeit, pegel.value, winkel)
+            val gpu = shader != null && Build.VERSION.SDK_INT >= 33 && Darstellung.gpuWasser && runCatching {
+                zeichneShader(shader!!, m, innenR, zeit, pegel.value, winkel, if (ruhig) 0f else (0.4f + (tempo.value / 11f)).coerceAtMost(1.4f))
+            }.onFailure { Darstellung.gpuWasser = false }.isSuccess
+            if (!gpu) zeichneRueckfall(m, innenR, zeit, pegel.value, winkel)
             zeichneWaesche(m, innenR, winkel, tempo.value)
         }
         // Glas: ein einziger harter Lichtreflex, kein Glow
@@ -161,7 +163,7 @@ fun Trommel(
 private fun DrawScope.zeichneShader(s: RuntimeShader, m: Offset, r: Float, zeit: Float, pegel: Float, winkel: Float, bewegung: Float) {
     s.setFloatUniform("mitte", m.x, m.y); s.setFloatUniform("radius", r); s.setFloatUniform("zeit", zeit)
     s.setFloatUniform("pegel", pegel); s.setFloatUniform("drehung", winkel); s.setFloatUniform("bewegung", bewegung)
-    s.setColorUniform("akzent", android.graphics.Color.valueOf(0.83f, 1f, 0.23f, 1f))
+    s.setFloatUniform("akzent", 0.83f, 1f, 0.23f, 1f)
     drawRect(ShaderBrush(s))
 }
 
