@@ -149,6 +149,7 @@ function startSeite(fehler?: string) {
   const rueck = an.rueckAdresse();
   const ursprung = location.origin;
   const schritt = id ? 3 : 1;
+  void schritt;
   const zeile = (n: number, titel: string, inhalt: string) =>
     `<li class="schritt ${schritt > n ? 'fertig' : schritt === n ? 'jetzt' : ''}"><b>${n}</b><div><strong>${titel}</strong>${inhalt}</div></li>`;
   app.innerHTML = `<section class="start">
@@ -157,16 +158,24 @@ function startSeite(fehler?: string) {
     <p>Einmal einrichten, danach öffnest du Tiry's Mails wie eine App – live mit deinem Gmail.</p>
     ${installHinweis()}
     <ol class="schritte">
-      ${zeile(1, 'Zugang bei Google anlegen', `<p>Öffnet dein Google-Projekt (dasselbe wie am PC). Dort <b>+ Anmeldedaten erstellen → OAuth-Client-ID</b>, Typ <b>Webanwendung</b>.</p>
-        <a class="knopf voll" href="https://console.cloud.google.com/apis/credentials" target="_blank" rel="noopener">Google öffnen</a>`)}
-      ${zeile(2, 'Diese zwei Adressen eintragen', `<p>Bei <b>Autorisierte JavaScript-Quellen</b>:</p>
-        <div class="kopie"><code>${h(ursprung)}</code><button class="knopf" data-kopie="${h(ursprung)}">Kopieren</button></div>
-        <p>Bei <b>Autorisierte Weiterleitungs-URIs</b>:</p>
-        <div class="kopie"><code>${h(rueck)}</code><button class="knopf" data-kopie="${h(rueck)}">Kopieren</button></div>
-        <p>Dann <b>Erstellen</b> drücken.</p>`)}
-      ${zeile(3, 'Client-ID hier einfügen', `<p>Google zeigt jetzt eine <b>Client-ID</b> (endet auf .apps.googleusercontent.com).</p>
+      ${zeile(1, 'Zugang bei Google anlegen', `<p>Dauert 2 Minuten. Tipp für jeden Punkt: <b>abhaken</b>, dann weißt du, wo du warst.</p>
+        <ol class="unter">
+          <li><label><input type="checkbox"><span>Knopf unten drücken. Google öffnet die Seite <b>„Client erstellen“</b>. Fragt Google nach dem Konto: <b>dein Gmail-Konto</b> wählen.</span></label>
+            <a class="knopf voll" href="https://console.cloud.google.com/auth/clients/create" target="_blank" rel="noopener">Google öffnen</a></li>
+          <li><label><input type="checkbox"><span>Ganz oben links steht ein Projektname. Das muss <b>dasselbe Projekt wie beim PC-Programm</b> sein. Wenn nicht: draufdrücken und das richtige wählen.</span></label></li>
+          <li><label><input type="checkbox"><span>Bei <span class="g">Anwendungstyp</span> aufklappen und <span class="g">Webanwendung</span> wählen.</span></label></li>
+          <li><label><input type="checkbox"><span>Bei <span class="g">Name</span> etwas eintragen, z.&nbsp;B. <b>Handy</b>.</span></label></li>
+          <li><label><input type="checkbox"><span>Etwas runterscrollen zu <span class="g">Autorisierte JavaScript-Quellen</span> → <span class="g">+ URI hinzufügen</span> → diese Adresse einfügen:</span></label>
+            <div class="kopie"><code>${h(ursprung)}</code><button class="knopf" data-kopie="${h(ursprung)}">Kopieren</button></div></li>
+          <li><label><input type="checkbox"><span>Darunter bei <span class="g">Autorisierte Weiterleitungs-URIs</span> → <span class="g">+ URI hinzufügen</span> → diese Adresse einfügen (mit Schrägstrich am Ende):</span></label>
+            <div class="kopie"><code>${h(rueck)}</code><button class="knopf" data-kopie="${h(rueck)}">Kopieren</button></div></li>
+          <li><label><input type="checkbox"><span>Ganz unten <span class="g">Erstellen</span> drücken. Es erscheint ein Fenster <b>„OAuth-Client erstellt“</b>. Dort neben der <b>Client-ID</b> auf das <b>Kopier-Symbol</b> (zwei Blätter) drücken.</span></label></li>
+          <li><label><input type="checkbox"><span>Zurück hierher wechseln und bei Schritt 2 einfügen. (Das Fenster bei Google kannst du danach schließen – den „Clientschlüssel“ brauchst du nicht.)</span></label></li>
+        </ol>
+        <p class="tipp">Steht oben „Google Auth Platform noch nicht konfiguriert“? Dann bist du im falschen Projekt – zurück zu Punkt 2.</p>`)}
+      ${zeile(2, 'Client-ID hier einfügen', `<p>Lange in das Feld drücken → <b>Einfügen</b>. Die Client-ID endet auf <b>.apps.googleusercontent.com</b>.</p>
         <input class="eingabe" id="client" inputmode="url" autocomplete="off" spellcheck="false" placeholder="123…-abc….apps.googleusercontent.com" value="${h(id)}">`)}
-      ${zeile(4, 'Anmelden', `<p>Bei Google <b>dein Konto wählen</b> und alles erlauben. Kommt „Google hat diese App nicht überprüft“: <b>Weiter</b> – das ist deine eigene App.</p>
+      ${zeile(3, 'Anmelden', `<p>Bei Google <b>dein Konto wählen</b> und alles erlauben. Kommt „Google hat diese App nicht überprüft“: <b>Weiter</b> – das ist deine eigene App.</p>
         <button class="knopf voll" id="los">Mit Google anmelden</button>`)}
     </ol>
     ${fehler ? `<p class="fehler" role="alert">${h(fehler)}</p>` : ''}

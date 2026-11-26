@@ -220,6 +220,20 @@ body:has(.ebene) .toast { bottom: calc(84px + var(--unten)); }
 .app-ok { margin: 0 0 24px; padding: 14px 16px; border-radius: 14px; background: oklch(0.8 0.17 145 / .16); color: var(--text); font-weight: 600; }
 .app-hinweis { margin: 0 0 24px; display: grid; gap: 10px; }
 .app-hinweis p { margin: 0; padding: 14px 16px; border-radius: 14px; background: var(--flaeche); color: var(--text-2); font-size: 15px; }
+.unter { list-style: none; counter-reset: u; margin: 4px 0 8px; padding: 0; display: grid; gap: 2px; }
+.unter li { counter-increment: u; padding: 10px 0; border-bottom: 1px dashed var(--linie); display: grid; gap: 8px; }
+.unter label { display: grid; grid-template-columns: 28px 1fr; gap: 10px; align-items: start; font-size: 15px; color: var(--text-2); cursor: pointer; }
+.unter label::before { content: counter(u, lower-alpha); grid-row: 1; grid-column: 1; width: 28px; height: 28px; border-radius: 8px; background: var(--flaeche-2); display: grid; place-items: center; font: 800 14px var(--display); color: var(--text); }
+.unter input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+.unter label span { grid-column: 2; grid-row: 1; }
+.unter label:has(input:checked)::before { content: '✓'; background: var(--c-wichtig); color: var(--tinte); }
+.unter label:has(input:checked) span { color: var(--text-3); text-decoration: line-through; text-decoration-color: oklch(0.72 0.016 80 / .5); }
+.unter label:has(input:focus-visible)::before { outline: 3px solid var(--akzent); outline-offset: 2px; }
+.unter .knopf, .unter .kopie { margin-left: 38px; }
+.unter .knopf { justify-self: start; }
+/* so sehen die Wörter bei Google aus: blaue Schrift auf Weiß */
+.g { display: inline-block; padding: 0 6px; border-radius: 5px; background: #fff; color: #0b57d0; font-weight: 700; font-size: 14px; line-height: 1.5; }
+.tipp { font-size: 14px; color: var(--text-3); margin: 6px 0 0; }
 .demo-link { color: var(--text-3); font-size: 15px; }
 
 /* ---------- Breite Bildschirme: Liste + Lesen nebeneinander ---------- */
@@ -229,7 +243,7 @@ body:has(.ebene) .toast { bottom: calc(84px + var(--unten)); }
   .ebene.lesen-ebene { left: 460px; }
   .bogen { left: 50%; right: auto; width: 520px; margin-left: -260px; }
   .toast { left: 24px; right: auto; width: 420px; }
-  body:not(:has(.lesen-ebene)) main::after { content: 'Wähl links eine Mail aus.'; position: fixed; left: 460px; right: 0; top: 50%; text-align: center; font: 800 30px var(--display); color: var(--text-3); }
+  body[data-ansicht='liste']:not(:has(.lesen-ebene)) main::after { content: 'Wähl links eine Mail aus.'; position: fixed; left: 460px; right: 0; top: 50%; text-align: center; font: 800 30px var(--display); color: var(--text-3); }
 }
 
 @media (prefers-reduced-motion: reduce) {
