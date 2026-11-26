@@ -31,6 +31,11 @@ function sollAn(zeiten, d) {
   return (zeiten[wtag(d)] || []).some(([a, b]) => m >= min(a) && m < min(b));
 }
 
+/** Soll an sein – Öffnungszeiten oder „länger an“ bis bisAn (ms) (Tiry 26.11.2026: Kunden nach 12 Uhr) */
+function sollJetzt(zeiten, bisAn, d) {
+  return sollAn(zeiten, d) || (bisAn > 0 && d.getTime() < bisAn);
+}
+
 /** Nächste Schaltzeit ab d: { zeit: Date, an: bool, mittag: bool } (mittag = heute geht es nochmal weiter) */
 function naechsteAktion(zeiten, d) {
   for (let k = 0; k < 8; k++) {
@@ -56,7 +61,7 @@ function beschreibe(n) {
 
 function createTvSteuerung(opts) {
   const datei = path.join(opts.dataDir, 'tv-steuerung.json');
-  let cfg = { an: false, host: '', clientKey: '', mittagBildschirm: true, zeiten: STANDARD };
+  let cfg = { an: false, host: '', clientKey: '', mittagBildschirm: true, zeiten: STANDARD, bisAn: 0 };
   try { cfg = Object.assign(cfg, JSON.parse(fs.readFileSync(datei, 'utf8'))); } catch (e) { /* erster Start */ }
   cfg.zeiten = zeitenSauber(cfg.zeiten);
   const speichern = () => { try { fs.writeFileSync(datei, JSON.stringify(cfg, null, 1)); } catch (e) { /* egal */ } };
@@ -136,7 +141,8 @@ function createTvSteuerung(opts) {
 
   async function takt() {
     if (!cfg.an || !cfg.host) { zuletztSoll = null; return; }
-    const jetzt = new Date(), soll = sollAn(cfg.zeiten, jetzt);
+    const jetzt = new Date(), soll = sollJetzt(cfg.zeiten, cfg.bisAn, jetzt);
+    if (cfg.bisAn && jetzt.getTime() >= cfg.bisAn) { cfg.bisAn = 0; speichern(); melden(); }
     if (zuletztSoll === null) { zuletztSoll = soll; return; } // beim Start nichts umschalten
     if (soll === zuletztSoll) return;
     zuletztSoll = soll;
@@ -149,6 +155,12 @@ function createTvSteuerung(opts) {
       }
     } catch (e) { status.fehler = e.message; protokoll('Fehler: ' + e.message); }
   }
+  // Liegt „jetzt“ in einem Öffnungsfenster, zählt die Verlängerung ab dessen Ende (11:50 + 30 Min → 12:30)
+  function ende(ms) {
+    const d = new Date(ms), m = d.getHours() * 60 + d.getMinutes();
+    const f = (cfg.zeiten[wtag(d)] || []).find(([a, b]) => m >= min(a) && m < min(b));
+    return f ? new Date(d.getFullYear(), d.getMonth(), d.getDate(), Math.floor(min(f[1]) / 60), min(f[1]) % 60).getTime() : 0;
+  }
   const timer = setInterval(() => takt().catch(() => {}), 20000);
   if (cfg.host && cfg.clientKey) verbinden().catch(() => {});
 
@@ -156,12 +168,26 @@ function createTvSteuerung(opts) {
     return {
       an: cfg.an, host: cfg.host, mittagBildschirm: cfg.mittagBildschirm, zeiten: cfg.zeiten,
       status: Object.assign({}, status, { mac: tv ? tv.mac || '' : '' }),
-      naechste: cfg.an ? beschreibe(naechsteAktion(cfg.zeiten, new Date())) : 'Automatik aus'
+      bisAn: cfg.bisAn > Date.now() ? cfg.bisAn : 0,
+      naechste: !cfg.an ? 'Automatik aus' : cfg.bisAn > Date.now() && !sollAn(cfg.zeiten, new Date(cfg.bisAn))
+        ? 'länger an bis ' + uhr(new Date(cfg.bisAn)) + ' Uhr, dann aus'
+        : beschreibe(naechsteAktion(cfg.zeiten, new Date(Math.max(Date.now(), cfg.bisAn || 0))))
     };
   }
 
+  const uhr = (z) => String(z.getHours()).padStart(2, '0') + ':' + String(z.getMinutes()).padStart(2, '0');
+
   return {
     info,
+    /** Länger anlassen: min Minuten ab jetzt (bzw. ab laufender Verlängerung), 0 = Verlängerung beenden */
+    async laenger(min) {
+      min = Math.max(0, Math.min(600, Number(min) || 0));
+      const jetzt = Date.now();
+      cfg.bisAn = min ? Math.max(jetzt, cfg.bisAn || 0, ende(jetzt)) + min * 60000 : 0;
+      speichern(); melden();
+      await takt();
+      return info();
+    },
     async einstellen(b) {
       if ('an' in b) cfg.an = !!b.an;
       if ('mittagBildschirm' in b) cfg.mittagBildschirm = !!b.mittagBildschirm;
@@ -185,4 +211,4 @@ function createTvSteuerung(opts) {
   };
 }
 
-module.exports = { createTvSteuerung, sollAn, naechsteAktion, zeitenSauber, STANDARD };
+module.exports = { createTvSteuerung, sollAn, sollJetzt, naechsteAktion, zeitenSauber, STANDARD };

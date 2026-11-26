@@ -33,3 +33,12 @@ test('Ungültige Zeiten werden verworfen', () => {
   assert.deepEqual(z[1], [['08:00', '09:30']]);
   assert.deepEqual(z[3], []);
 });
+
+test('Länger anlassen: über 12 Uhr hinaus, danach wieder nach Öffnungszeiten', () => {
+  const { sollJetzt } = require('../src/server/tvsteuerung');
+  const bis = d('2026-11-23T12:30').getTime();
+  assert.equal(sollJetzt(Z, bis, d('2026-11-23T12:10')), true);  // Mittagspause, aber verlängert
+  assert.equal(sollJetzt(Z, bis, d('2026-11-23T12:30')), false); // Verlängerung vorbei
+  assert.equal(sollJetzt(Z, 0, d('2026-11-23T12:10')), false);
+  assert.equal(sollJetzt(Z, 0, d('2026-11-23T15:00')), true);
+});

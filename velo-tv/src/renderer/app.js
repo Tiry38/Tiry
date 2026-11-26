@@ -567,6 +567,11 @@ function tvstZeigen(i) {
   $('#tvstNext').textContent = i.an ? 'Nächste Aktion: ' + i.naechste : 'aus';
   if (document.activeElement !== $('#tvstAn')) $('#tvstAn').checked = !!i.an;
   $('#tvstMittag').checked = !!i.mittagBildschirm;
+  $('#tvstLaenger').hidden = !i.an;
+  const bis = i.bisAn ? new Date(i.bisAn).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' }) : '';
+  $('#tvstLaengerInfo').textContent = bis ? 'Fernseher bleibt an bis ' + bis + ' Uhr – nochmal tippen verlängert weiter' : 'z. B. wenn nach 12 oder 18 Uhr noch Kunden da sind';
+  $('#tvstLaenger').classList.toggle('aktiv', !!bis);
+  $('#tvstLaengerAus').hidden = !bis;
   $('#tvstKoppeln').textContent = st.gekoppelt ? 'Neu koppeln' : 'Fernseher koppeln';
   if (!$('#tvstZeiten').contains(document.activeElement)) {
     $('#tvstZeiten').innerHTML = [1, 2, 3, 4, 5, 6, 7].map((t) => {
@@ -587,6 +592,13 @@ function tvstZeitenSpeichern() {
 $('#tvstAn').onchange = (e) => api('PATCH', '/api/tvsteuerung', { an: e.target.checked }).then((i) => { tvstZeigen(i); toast(e.target.checked ? 'Fernseher schaltet sich jetzt nach den Öffnungszeiten' : 'Automatik aus'); }).catch((er) => toast(er.message, true));
 $('#tvstMittag').onchange = (e) => api('PATCH', '/api/tvsteuerung', { mittagBildschirm: e.target.checked }).then(tvstZeigen).catch((er) => toast(er.message, true));
 $('#tvstKoppeln').onclick = () => api('POST', '/api/tvsteuerung/koppeln').then((i) => { tvstZeigen(i); toast('Verbinde … bitte am Fernseher mit OK „Zulassen“ drücken'); }).catch((e) => toast(e.message, true));
+document.querySelectorAll('#tvstLaenger button').forEach((b) => b.onclick = () => {
+  b.disabled = true;
+  api('POST', '/api/tvsteuerung/laenger', { min: +b.dataset.min }).then((i) => {
+    tvstZeigen(i);
+    toast(i.bisAn ? 'Fernseher bleibt an bis ' + new Date(i.bisAn).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' }) + ' Uhr' : 'Verlängerung beendet – wieder nach Öffnungszeiten');
+  }).catch((e) => toast(e.message, true)).finally(() => { b.disabled = false; });
+});
 $('#tvstAus').onclick = (e) => { e.target.disabled = true; api('POST', '/api/tvsteuerung/aus').then((i) => { tvstZeigen(i); toast('Fernseher ausgeschaltet'); }).catch((er) => toast(er.message, true)).finally(() => { e.target.disabled = false; }); };
 $('#tvstEin').onclick = (e) => { e.target.disabled = true; toast('Fernseher wird eingeschaltet … das kann bis zu 1 Minute dauern'); api('POST', '/api/tvsteuerung/an').then((i) => { tvstZeigen(i); toast('Fernseher ist an, Velo-TV wird geöffnet'); }).catch((er) => toast(er.message, true)).finally(() => { e.target.disabled = false; }); };
 

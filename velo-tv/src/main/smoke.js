@@ -103,6 +103,11 @@ async function run(win, { PORT, getServer }) {
   await shot('06-fernseher');
   await js(`document.querySelector('#tvstCard').scrollIntoView({block:'center'})`);
   await shot('06b-fernseher-zeiten');
+  // „Länger anlassen“ mit laufender Verlängerung (nur Anzeige)
+  await js(`(() => { const l = document.querySelector('#tvstLaenger'); l.hidden = false; l.classList.add('aktiv'); document.querySelector('#tvstLaengerAus').hidden = false; document.querySelector('#tvstLaengerInfo').textContent = 'Fernseher bleibt an bis 12:45 Uhr – nochmal tippen verlängert weiter'; })()`);
+  await warte(300);
+  await js(`document.querySelector('#tvstLaenger').scrollIntoView({block:'center'})`);
+  await shot('06c-fernseher-laenger');
   await js(`scrollTo(0,0)`);
   await js(`document.querySelector('[data-view=verlauf]').click()`);
   await shot('07-verlauf');

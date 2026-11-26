@@ -67,6 +67,8 @@ Alle PCs mit Velo-TV sehen jede Änderung sofort. Design wie die neue Homepage (
 - `src/server/tvsteuerung.js` (Bibliothek lgtv2, MIT): Kopplung per Netzwerk, Wake-on-LAN, `system/turnOff`,
   `turnOffScreen` (Mittagspause), danach `system.launcher/open` mit der Velo-TV-Adresse. Schaltet nur an Zeitgrenzen.
 - Am Fernseher einmalig: Support → IP-Steuerungseinstellungen → Wake on LAN: Ein. Koppeln in Velo-TV unter „Fernseher“.
+- **Länger anlassen** (Tiry 26.11.2026): +30 Min. / +1 Std. / +2 Std. / Beenden unter „Fernseher“ (`/api/tvsteuerung/laenger`, `cfg.bisAn`).
+  Im Öffnungsfenster zählt die Verlängerung ab dessen Ende (11:50 + 30 Min. → 12:30). Ist der Fernseher schon aus, geht er sofort an; danach wieder nach Öffnungszeiten.
 
 ## Offen
 - Genaues LG-Modell prüfen (webOS-Version, Videoformate, Browser-Autostart nach dem Einschalten).

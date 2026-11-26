@@ -148,6 +148,15 @@
             <label class="row"><span>Automatisch nach Öffnungszeiten <small id="tvstNext"></small></span><input type="checkbox" class="sw" id="tvstAn"></label>
             <label class="row"><span>Mittagspause: nur Bildschirm aus <small>kommt schneller und sicherer wieder an</small></span><input type="checkbox" class="sw" id="tvstMittag"></label>
           </div>
+          <div class="laenger" id="tvstLaenger">
+            <div><b>Länger anlassen</b><small id="tvstLaengerInfo">z. B. wenn nach 12 oder 18 Uhr noch Kunden da sind</small></div>
+            <div class="btn-row">
+              <button class="ghost" data-min="30">+30 Min.</button>
+              <button class="ghost" data-min="60">+1 Std.</button>
+              <button class="ghost" data-min="120">+2 Std.</button>
+              <button class="ghost" data-min="0" id="tvstLaengerAus" hidden>Beenden</button>
+            </div>
+          </div>
           <div class="zeiten" id="tvstZeiten"></div>
           <div class="btn-row">
             <button class="cta sm" id="tvstKoppeln">Fernseher koppeln</button>

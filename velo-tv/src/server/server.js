@@ -536,6 +536,14 @@ function createServer(opts) {
       state.rev++; speichern(); senden('state', state);
       return json(res, 200, i);
     }
+    if (p === '/api/tvsteuerung/laenger' && m === 'POST') {
+      if (!tvSt) return json(res, 404, { error: 'Steuerung aus' });
+      const b = await koerper(req);
+      let i;
+      try { i = await tvSt.laenger(b.min); } catch (e) { return json(res, 502, { error: e.message }); }
+      protokoll(pc, i.bisAn ? 'Fernseher länger an bis ' + new Date(i.bisAn).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' }) + ' Uhr' : 'Verlängerung beendet');
+      return json(res, 200, i);
+    }
     if ((mm = /^\/api\/tvsteuerung\/(koppeln|an|aus)$/.exec(p)) && m === 'POST') {
       if (!tvSt) return json(res, 404, { error: 'Steuerung aus' });
       if (mm[1] === 'koppeln') return json(res, 200, await tvSt.koppeln(tv && tv.ip));

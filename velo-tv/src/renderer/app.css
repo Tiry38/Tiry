@@ -295,3 +295,10 @@ input[type=range]{flex:1;accent-color:var(--red)}
 .tvst{grid-column:1/-1}
 .tvst .settings{max-width:820px}
 .zeiten{display:grid;grid-template-columns:repeat(auto-fit,minmax(500px,1fr));gap:8px 14px}
+
+.tvst .laenger{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px 20px;max-width:820px;margin:14px 0 6px;padding:14px 18px;border-radius:18px;border:1px solid rgba(0,0,0,.08)}
+.tvst .laenger>div:first-child{display:flex;flex-direction:column;gap:2px}
+.tvst .laenger small{opacity:.75}
+.tvst .laenger .btn-row{margin:0}
+.tvst .laenger.aktiv{border-color:var(--red,#c8102e);box-shadow:inset 4px 0 0 var(--red,#c8102e)}
+.tvst .laenger[hidden]{display:none}
