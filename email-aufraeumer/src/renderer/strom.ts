@@ -22,13 +22,14 @@ in vec2 p; in float s; in vec4 c;
 uniform vec2 aufl; out vec4 farbe; out float groesse;
 void main(){ vec2 q = p / aufl * 2.0 - 1.0; gl_Position = vec4(q.x, -q.y, 0.0, 1.0); gl_PointSize = s; farbe = c; groesse = s; }`;
 const FS = `#version 300 es
-precision mediump float;
+precision highp float;
 in vec4 farbe; in float groesse; uniform float punkte; uniform float zeit; out vec4 o;
-float h(vec2 v){ return fract(sin(dot(v, vec2(12.9898, 78.233))) * 43758.5453); }
+// hash without sin (Dave Hoskins), stays finite on every GPU
+float h(vec2 v){ vec3 p3 = fract(vec3(v.xyx) * 0.1031); p3 += dot(p3, p3.yzx + 33.33); return fract((p3.x + p3.y) * p3.z); }
 void main(){
   if (punkte < 0.5) { o = farbe; return; }
   vec2 d = gl_PointCoord - 0.5; float r = length(d);
-  // Tintentropfen: harter Rand mit ausgefranster Kante + Körnung
+  // ink drop: hard edge with frayed rim + grain
   float kante = 0.5 - 0.6 / max(groesse, 1.0);
   float rand = (h(floor(gl_FragCoord.xy) + floor(zeit * 6.0)) - 0.5) * 0.08;
   float m = 1.0 - smoothstep(kante - 0.06 + rand, kante + rand, r);
@@ -55,9 +56,14 @@ export class Strom {
 
   constructor(private canvas: HTMLCanvasElement) {
     for (let i = 0; i < 3; i++) this.membran.push({ d: new Float32Array(KNOTEN), v: new Float32Array(KNOTEN) });
-    const gl = canvas.getContext('webgl2', { antialias: true, premultipliedAlpha: false, alpha: true });
-    if (gl && this.initGl(gl)) this.gl = gl; else this.ctx2d = canvas.getContext('2d');
-    new ResizeObserver(() => this.groesse()).observe(canvas);
+    const gl = new URLSearchParams(location.search).has('nur2d') ? null : canvas.getContext('webgl2', { antialias: true, premultipliedAlpha: false, alpha: true });
+    if (gl && this.initGl(gl)) this.gl = gl;
+    else {
+      // Rückfall: frisches Canvas (auf einem WebGL-Canvas gibt es keinen 2D-Kontext mehr)
+      if (gl) { const neu = canvas.cloneNode(false) as HTMLCanvasElement; canvas.replaceWith(neu); this.canvas = neu; }
+      this.ctx2d = this.canvas.getContext('2d');
+    }
+    new ResizeObserver(() => this.groesse()).observe(this.canvas);
     this.groesse();
     for (let i = 0; i < 70; i++) this.staub(true);
     document.addEventListener('visibilitychange', () => (document.hidden ? this.pause() : this.start()));
@@ -75,7 +81,26 @@ export class Strom {
     for (const a of ['p', 's', 'c']) this.loc[a] = gl.getAttribLocation(p, a);
     for (const u of ['aufl', 'punkte', 'zeit']) this.loc[u] = gl.getUniformLocation(p, u);
     gl.enable(gl.BLEND); gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
-    return true;
+    return this.probeTropfen(gl);
+  }
+
+  /** Selbsttest: zeichnet einen Probe-Tropfen und liest ihn zurück. Sieht die Grafikkarte nichts → Rückfall auf 2D. */
+  private probeTropfen(gl: WebGL2RenderingContext): boolean {
+    try {
+      this.canvas.width = 32; this.canvas.height = 32;
+      gl.viewport(0, 0, 32, 32); gl.clearColor(0, 0, 0, 0); gl.clear(gl.COLOR_BUFFER_BIT);
+      gl.useProgram(this.prog);
+      gl.uniform2f(this.loc.aufl, 32, 32); gl.uniform1f(this.loc.zeit, 0); gl.uniform1f(this.loc.punkte, 1);
+      gl.bindBuffer(gl.ARRAY_BUFFER, this.buf);
+      gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([16, 16, 20, ...TINTE, 1]), gl.STATIC_DRAW);
+      gl.enableVertexAttribArray(this.loc.p); gl.vertexAttribPointer(this.loc.p, 2, gl.FLOAT, false, 28, 0);
+      gl.enableVertexAttribArray(this.loc.s); gl.vertexAttribPointer(this.loc.s, 1, gl.FLOAT, false, 28, 8);
+      gl.enableVertexAttribArray(this.loc.c); gl.vertexAttribPointer(this.loc.c, 4, gl.FLOAT, false, 28, 12);
+      gl.drawArrays(gl.POINTS, 0, 1);
+      const px = new Uint8Array(4);
+      gl.readPixels(16, 16, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, px);
+      return px[3] > 128;
+    } catch { return false; }
   }
 
   private groesse() {
