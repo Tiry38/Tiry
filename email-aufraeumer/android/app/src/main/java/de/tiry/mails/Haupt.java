@@ -104,6 +104,21 @@ public class Haupt extends Activity {
             }
         });
 
+        // Update-Rückmeldung des Android-Installers: Bestätigungsfenster aus dem Vordergrund öffnen
+        android.content.BroadcastReceiver updateEmpfaenger = new android.content.BroadcastReceiver() {
+            @Override public void onReceive(android.content.Context c, Intent i) {
+                int st = i.getIntExtra(android.content.pm.PackageInstaller.EXTRA_STATUS, android.content.pm.PackageInstaller.STATUS_FAILURE);
+                if (st == android.content.pm.PackageInstaller.STATUS_PENDING_USER_ACTION) {
+                    Intent ok = (Intent) i.getParcelableExtra(Intent.EXTRA_INTENT);
+                    if (ok != null) { try { startActivity(ok); } catch (Exception e) { js("window.__nativeUpdateFehler && window.__nativeUpdateFehler('Bestätigung ließ sich nicht öffnen – bitte über den Download-Link installieren.')"); } }
+                } else if (st != android.content.pm.PackageInstaller.STATUS_SUCCESS) {
+                    String grund = i.getStringExtra(android.content.pm.PackageInstaller.EXTRA_STATUS_MESSAGE);
+                    js("window.__nativeUpdateFehler && window.__nativeUpdateFehler(" + JSONObject.quote("Update nicht installiert" + (grund != null ? ": " + grund : "")) + ")");
+                }
+            }
+        };
+        registerReceiver(updateEmpfaenger, new android.content.IntentFilter(Aktualisierer.AKTION_STATUS), android.content.Context.RECEIVER_NOT_EXPORTED);
+
         if (b == null) web.loadUrl(START + "?app=1");
         else web.restoreState(b);
         absichtVerarbeiten(getIntent());
@@ -295,6 +310,7 @@ public class Haupt extends Activity {
                 js("window.__nativeUpdateFehler && window.__nativeUpdateFehler('Bitte „Aus dieser Quelle zulassen“ einschalten, dann noch einmal drücken.')");
                 return;
             }
+            js("window.__nativeUpdateFehler && window.__nativeUpdateFehler('Update wird geladen … gleich fragt Android, ob es installieren darf.')");
             new Thread(() -> {
                 String f = Aktualisierer.installieren(Haupt.this);
                 if (f != null) js("window.__nativeUpdateFehler && window.__nativeUpdateFehler(" + JSONObject.quote(f) + ")");

@@ -17,6 +17,7 @@ import java.net.URL;
  * schaut im GitHub-Release „tirys-mails-android“ nach version.json, lädt die neue APK und übergibt sie dem Android-Installer.
  */
 final class Aktualisierer {
+    static final String AKTION_STATUS = "de.tiry.mails.UPDATE_STATUS";
     static final String BASIS = "https://github.com/Tiry38/Tiry/releases/download/tirys-mails-android/";
 
     static long eigeneVersion(Context c) {
@@ -52,7 +53,9 @@ final class Aktualisierer {
                     while ((n = in.read(buf)) > 0) out.write(buf, 0, n);
                     s.fsync(out);
                 }
-                PendingIntent rueck = PendingIntent.getBroadcast(c, 7, new Intent(c, Installiert.class), PendingIntent.FLAG_MUTABLE | PendingIntent.FLAG_UPDATE_CURRENT);
+                // Rückmeldung geht an das offene Hauptfenster (darf das Bestätigungsfenster sicher öffnen) – Ersatz: Installiert-Empfänger
+                Intent an = new Intent(AKTION_STATUS).setPackage(c.getPackageName());
+                PendingIntent rueck = PendingIntent.getBroadcast(c, 7, an, PendingIntent.FLAG_MUTABLE | PendingIntent.FLAG_UPDATE_CURRENT);
                 s.commit(rueck.getIntentSender());
             }
             return null;
