@@ -12,7 +12,7 @@ export interface Stand {
   zeit: number;
   status: string;            // laeuft | trockenlauf | fehler | startet …
   heute: Record<string, { echt: number; probe: number }>; // je Fach: wichtig, persoenlich, benachrichtigung, newsletter, werbung, muell
-  statistik: { heuteEntfernt: number; wocheEntfernt: number; gesamtEntfernt: number; heuteGeprueft: number; lesezeitMinutenWoche: number; zuPruefen: number };
+  statistik: { heuteEntfernt: number; wocheEntfernt: number; gesamtEntfernt: number; heuteGeprueft: number; lesezeitMinutenWoche: number; zuPruefen: number; platzGesamt?: number; platzWoche?: number; platzHeute?: number };
   letzte: Array<{ zeit: number; absender: string; betreff: string; kategorie: Kategorie; ziel: 'papierkorb' | 'archiv' | 'ordner' | 'bleibt' | 'pruefen' | 'geschuetzt'; ordner?: string; trocken: boolean }>;
   altbestand: { phase: string; gesamt: number; erledigt: number; geschafft?: { papierkorb: number; archiv: number; ordner: number; freiBytes: number } } | null;
   ordner: Array<{ name: string; anzahl: number }>;

@@ -202,6 +202,8 @@ async function cockpit() {
         <dl class="zahlen-klein">
           <div><dt>${probe ? 'Würde ich wegräumen' : 'Weggeräumt'}</dt><dd id="z-woche">${zahl(st.wocheEntfernt)}</dd></div>
           <div><dt>Gesparte Lesezeit</dt><dd id="z-lesezeit">${lesezeit}</dd></div>
+          <div><dt>Platz frei gemacht</dt><dd>${speicher(st.platzWoche ?? 0)}</dd></div>
+          <div><dt>Platz frei – insgesamt</dt><dd>${speicher(st.platzGesamt ?? 0)}</dd></div>
           <div><dt>Wartet auf dich</dt><dd>${zahl(st.zuPruefen)}${st.zuPruefen ? ' <button class="knopf klein voll" data-tat="zu-pruefen">Ansehen</button>' : ''}</dd></div>
         </dl>
         <dl class="legende">

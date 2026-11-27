@@ -73,6 +73,7 @@ export class Ausfuehrer {
       try {
         if (plan.papierkorb) {
           await this.gmail.trash(mail.id);
+          this.db.platzMerken(mail.sizeEstimate ?? 0);
           nachher = simuliere(vorher, plan);
         } else if (plan.add.length || plan.remove.length) {
           const add = await Promise.all(plan.add.map((n) => this.labelId(n)));
@@ -152,6 +153,7 @@ export class Ausfuehrer {
     if (!aktuell) return { ok: false, grund: 'Mail existiert nicht mehr in Gmail.' };
     if (aktuell.labelIds.includes('TRASH') && !e.vorherLabels.includes('TRASH')) {
       await this.gmail.untrash(e.mailId);
+      this.db.platzMerken(-(aktuell.sizeEstimate ?? 0));
       [aktuell] = await this.gmail.holeMetadaten([e.mailId]);
     }
     const ist = new Set(aktuell.labelIds);

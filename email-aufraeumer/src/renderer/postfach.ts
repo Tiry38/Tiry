@@ -274,7 +274,8 @@ export class PostfachUI {
     try {
       const r = await this.api.rufe('pfOrdnerLoeschen', id);
       d.close();
-      this.melde(`Ordner „${r.name}“ gelöscht – ${r.papierkorb.toLocaleString('de-DE')} Mails im Papierkorb.`, async () => {
+      const mb = r.bytes ? ` · ${r.bytes >= 1e9 ? `${(r.bytes / 1e9).toLocaleString('de-DE', { maximumFractionDigits: 1 })} GB` : `${Math.max(1, Math.round(r.bytes / 1e6)).toLocaleString('de-DE')} MB`} frei` : '';
+      this.melde(`Ordner „${r.name}“ gelöscht – ${r.papierkorb.toLocaleString('de-DE')} Mails im Papierkorb${mb}.`, async () => {
         const n = await this.api.rufe('pfOrdnerZurueck'); this.melde(`${n.toLocaleString('de-DE')} Mails und der Ordner sind zurück.`); void this.ordnerLaden();
       });
       if (this.aktiv === id) this.ordnerWaehlen('INBOX');

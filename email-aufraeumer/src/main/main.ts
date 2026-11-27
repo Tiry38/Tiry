@@ -79,6 +79,7 @@ async function dienstStarten(gmail: GmailPort) {
   dienst = new Aufraeumer({ gmail, db, ki: erzeugeClaudeKi() });
   const d = dienst;
   postfach = new Postfach(gmail, (id) => (db.db.prepare('SELECT kategorie FROM protokoll WHERE mail_id = ? ORDER BY id DESC LIMIT 1').get(id) as any)?.kategorie ?? null, () => d.email || 'ich');
+  postfach.platz = (b) => db.platzMerken(b);
   for (const k of ['aktion', 'status', 'altbestand', 'frage', 'postfach', 'entruempeln']) dienst.on(k, (d) => { sende(k, d); if (k === 'status') aktualisiereTray(); });
   dienst.on('log', log);
   await dienst.starten();
@@ -239,14 +240,15 @@ const API: Record<string, Fn> = {
   pfOrdnerInhalt: (id) => postfach!.ordnerInhalt(id as string),
   async pfOrdnerLoeschen(id) {
     const r = await postfach!.ordnerLoeschen(id as string, (erledigt, gesamt) => sende('ordnerLoeschen', { erledigt, gesamt }));
-    db.set('ordnerGeloescht', { name: r.name, ids: r.papierkorb, zeit: Date.now() });
+    db.set('ordnerGeloescht', { name: r.name, ids: r.papierkorb, zeit: Date.now(), bytes: r.bytes ?? 0 });
     dienst?.ordnerVergessen(r.name);
-    return { name: r.name, papierkorb: r.papierkorb.length, stern: r.stern };
+    return { name: r.name, papierkorb: r.papierkorb.length, stern: r.stern, bytes: r.bytes ?? 0 };
   },
   async pfOrdnerZurueck() {
     const g = db.get<{ name: string; ids: string[] } | null>('ordnerGeloescht', null);
     if (!g) return 0;
     const n = await postfach!.ordnerWiederherstellen(g.name, g.ids);
+    db.platzMerken(-((g as any).bytes ?? 0));
     db.set('ordnerGeloescht', null);
     return n;
   },

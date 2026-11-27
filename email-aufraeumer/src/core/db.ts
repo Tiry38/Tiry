@@ -220,6 +220,23 @@ export class Speicher {
   }
 
   // ---------- Statistik ----------
+  /** Freigemachten Speicher mitzählen (Mails im Papierkorb – Gmail gibt den Platz frei, sobald der Papierkorb geleert ist). */
+  platzMerken(bytes: number, jetzt = Date.now()) {
+    if (!bytes) return;
+    const p = this.get<{ gesamt: number; tage: Record<string, number> }>('platz', { gesamt: 0, tage: {} });
+    const tag = new Date(jetzt).toISOString().slice(0, 10);
+    p.gesamt = Math.max(0, p.gesamt + bytes);
+    p.tage[tag] = Math.max(0, (p.tage[tag] ?? 0) + bytes);
+    for (const t of Object.keys(p.tage)) if (jetzt - Date.parse(t) > 60 * 86400_000) delete p.tage[t];
+    this.set('platz', p);
+  }
+  platz(jetzt = Date.now()): { gesamt: number; woche: number; heute: number } {
+    const p = this.get<{ gesamt: number; tage: Record<string, number> }>('platz', { gesamt: 0, tage: {} });
+    const heute = new Date(jetzt).toISOString().slice(0, 10);
+    const woche = Object.entries(p.tage).filter(([t]) => jetzt - Date.parse(t) < 7 * 86400_000).reduce((a, [, n]) => a + n, 0);
+    return { gesamt: p.gesamt, woche, heute: p.tage[heute] ?? 0 };
+  }
+
   statistik(jetzt = Date.now()) {
     const tagStart = new Date(jetzt); tagStart.setHours(0, 0, 0, 0);
     const wocheStart = jetzt - 7 * 86400_000;
@@ -236,6 +253,7 @@ export class Speicher {
       // Annahme: 20 Sekunden Lesezeit je weggeräumter Mail (Betreff erfassen, entscheiden, wegklicken)
       lesezeitMinutenWoche: Math.round((woche * 20) / 60),
       zuPruefen: (this.db.prepare('SELECT COUNT(*) AS n FROM pruefen WHERE erledigt IS NULL').get() as any).n as number,
+      platzGesamt: this.platz(jetzt).gesamt, platzWoche: this.platz(jetzt).woche, platzHeute: this.platz(jetzt).heute,
     };
   }
 }

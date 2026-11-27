@@ -503,6 +503,7 @@ const FACH: Array<{ k: string; name: string; farbe: string; tat: string }> = [
   { k: 'werbung', name: 'Werbung', farbe: 'var(--c-werbung)', tat: '→ Archiv' }, { k: 'muell', name: 'Spam & Betrug', farbe: 'var(--c-muell)', tat: '→ Papierkorb' },
 ];
 const ZIEL: Record<string, string> = { papierkorb: '→ Papierkorb', archiv: '→ Archiv', bleibt: 'bleibt im Posteingang', pruefen: 'wartet auf dich (am PC)', geschuetzt: 'geschützt – nicht angefasst' };
+const speicherText = (b: number) => b >= 1e9 ? `${(b / 1e9).toLocaleString('de-DE', { maximumFractionDigits: 1 })} GB` : b >= 1e6 ? `${Math.round(b / 1e6).toLocaleString('de-DE')} MB` : b > 0 ? `${Math.max(1, Math.round(b / 1e3))} KB` : '0 MB';
 const dauer = (min: number) => min >= 60 ? `${Math.floor(min / 60)} Std. ${min % 60} Min.` : `${min} Min.`;
 const vor = (t: number) => { const m = Math.round((Date.now() - t) / 60000); return m < 1 ? 'gerade eben' : m < 60 ? `vor ${m} Min.` : m < 1440 ? `vor ${Math.round(m / 60)} Std.` : `vor ${Math.round(m / 1440)} Tagen`; };
 
@@ -553,7 +554,9 @@ function aufrHtml(s: Stand) {
         <div><dt>Gesparte Lesezeit</dt><dd>${dauer(st.lesezeitMinutenWoche)}</dd></div>
         <div><dt>Wartet auf dich</dt><dd>${st.zuPruefen.toLocaleString('de-DE')}</dd></div>
         <div><dt>Insgesamt weggeräumt</dt><dd>${st.gesamtEntfernt.toLocaleString('de-DE')}</dd></div>
-      </dl>${st.zuPruefen ? '<p class="erklaer klein">„Wartet auf dich“ entscheidest du am PC unter „Du entscheidest“.</p>' : ''}</section>
+        <div><dt>Platz frei gemacht</dt><dd>${speicherText(st.platzWoche ?? 0)}</dd></div>
+        <div><dt>Platz frei – insgesamt</dt><dd>${speicherText(st.platzGesamt ?? 0)}</dd></div>
+      </dl><p class="erklaer klein">Platz: Mails im Papierkorb geben ihren Speicher frei, sobald Gmail den Papierkorb leert (nach 30 Tagen).</p>${st.zuPruefen ? '<p class="erklaer klein">„Wartet auf dich“ entscheidest du am PC unter „Du entscheidest“.</p>' : ''}</section>
     ${a && a.gesamt ? `<section class="aufr-block"><h3>Altes Postfach</h3>
       <p class="alt-zeile"><b>${a.erledigt.toLocaleString('de-DE')}</b> von ${a.gesamt.toLocaleString('de-DE')} · ${a.phase === 'fertig' ? 'fertig ✓' : a.phase === 'laeuft' ? (alt ? 'pausiert (PC aus)' : 'läuft') : a.phase === 'bereit' ? 'Vorschau fertig – am PC starten' : 'Vorschau läuft'}</p>
       <span class="fach-balken alt-balken"><i style="--farbe:var(--akzent);--anteil:${a.erledigt / a.gesamt}"></i></span>
@@ -832,7 +835,7 @@ async function demoGmail(): Promise<GmailPort> {
   const jetzt2 = Date.now();
   const demoStand: Stand = { v: 1, zeit: jetzt2 - 60_000, status: 'laeuft',
     heute: { wichtig: { echt: 6, probe: 0 }, persoenlich: { echt: 2, probe: 0 }, benachrichtigung: { echt: 9, probe: 0 }, newsletter: { echt: 14, probe: 0 }, werbung: { echt: 23, probe: 0 }, muell: { echt: 4, probe: 0 } },
-    statistik: { heuteEntfernt: 41, wocheEntfernt: 312, gesamtEntfernt: 7180, heuteGeprueft: 58, lesezeitMinutenWoche: 104, zuPruefen: 3 },
+    statistik: { heuteEntfernt: 41, wocheEntfernt: 312, gesamtEntfernt: 7180, heuteGeprueft: 58, lesezeitMinutenWoche: 104, zuPruefen: 3, platzWoche: 186_000_000, platzGesamt: 1_320_000_000 },
     letzte: [...g.mails.values()].slice(0, 12).map((m, i) => ({ zeit: m.internalDate, absender: (m.headers.from ?? '').replace(/<.*>/, '').trim(), betreff: m.headers.subject ?? '',
       kategorie: (['werbung', 'newsletter', 'benachrichtigung', 'wichtig', 'spam'] as const)[i % 5], trocken: false,
       ziel: (['archiv', 'archiv', 'ordner', 'bleibt', 'papierkorb'] as const)[i % 5], ordner: i % 5 === 2 ? 'DHL' : undefined })),

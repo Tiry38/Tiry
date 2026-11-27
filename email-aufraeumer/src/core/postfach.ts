@@ -30,7 +30,9 @@ export class Postfach {
   private laeuft = new Map<string, Promise<any>>();
   private labelNamen = new Map<string, string>();
   /** Letzte Aktion für „Rückgängig“: Mail-IDs mit ihren Labels vorher. */
-  private letzte: Array<{ id: string; vorher: string[] }> = [];
+  private letzte: Array<{ id: string; vorher: string[]; groesse?: number }> = [];
+  /** Wird mit der Größe aufgerufen, wenn Mails in den Papierkorb gehen (negativ beim Zurückholen) – für „Platz frei gemacht“. */
+  platz: (bytes: number) => void = () => {};
 
   /** kategorieVon: am PC aus dem Verlauf (Datenbank), in der Handy-App aus den Gmail-Labels „Aufräumer/…“. */
   constructor(private gmail: GmailPort, private kategorieVon: (id: string, labelIds: string[]) => Kategorie | null, private eigeneAdresse: () => string) {}
@@ -155,7 +157,8 @@ export class Postfach {
     const bekannt = ids.map((id) => this.cache.get(id)?.mail).filter((m): m is Mail => !!m);
     const fehlt = ids.filter((id) => !this.cache.has(id));
     const vorher = [...bekannt.map((m) => structuredClone(m)), ...(fehlt.length ? await this.gmail.holeMetadaten(fehlt) : [])];
-    this.letzte = vorher.map((m) => ({ id: m.id, vorher: [...m.labelIds] }));
+    this.letzte = vorher.map((m) => ({ id: m.id, vorher: [...m.labelIds], groesse: m.sizeEstimate ?? 0 }));
+    if (a === 'papierkorb') this.platz(vorher.filter((m) => !m.labelIds.includes('TRASH')).reduce((s, m) => s + (m.sizeEstimate ?? 0), 0));
     await Promise.all(vorher.map(async (m) => {
       if (a === 'papierkorb') await this.gmail.trash(m.id);
       else if (a === 'archiv') await this.gmail.modify(m.id, [], ['INBOX']);
@@ -172,10 +175,10 @@ export class Postfach {
   /** Letzte Aktion zurücknehmen – Labels exakt wie vorher. */
   async rueckgaengig(): Promise<number> {
     let n = 0;
-    for (const { id, vorher } of this.letzte) {
+    for (const { id, vorher, groesse } of this.letzte) {
       let [ist] = await this.gmail.holeMetadaten([id]);
       if (!ist) continue;
-      if (ist.labelIds.includes('TRASH') && !vorher.includes('TRASH')) { await this.gmail.untrash(id); [ist] = await this.gmail.holeMetadaten([id]); }
+      if (ist.labelIds.includes('TRASH') && !vorher.includes('TRASH')) { await this.gmail.untrash(id); this.platz(-(groesse ?? 0)); [ist] = await this.gmail.holeMetadaten([id]); }
       const add = vorher.filter((l) => !ist.labelIds.includes(l) && l !== 'TRASH');
       const rem = ist.labelIds.filter((l) => !vorher.includes(l) && l !== 'TRASH');
       if (add.length || rem.length) await this.gmail.modify(id, add, rem);
@@ -203,15 +206,21 @@ export class Postfach {
    * Ordner löschen samt Inhalt: alle Mails in den Papierkorb (Gmail löscht erst nach 30 Tagen – bis dahin zurückholbar),
    * danach den Ordner selbst. Mails mit Stern bleiben unberührt (Sicherheitsregel). Nur eigene/Firmen-Ordner, nie System-Ordner.
    */
-  async ordnerLoeschen(id: string, fortschritt: (erledigt: number, gesamt: number) => void = () => {}): Promise<{ name: string; papierkorb: string[]; stern: number }> {
+  async ordnerLoeschen(id: string, fortschritt: (erledigt: number, gesamt: number) => void = () => {}): Promise<{ name: string; papierkorb: string[]; stern: number; bytes?: number }> {
     if (/^[A-Z_]+$/.test(id)) throw new Error('System-Ordner (Posteingang, Gesendet …) kann man nicht löschen.');
     if (!this.labelNamen.size) await this.ordner();
     const name = this.labelNamen.get(id) ?? id;
     const ids = await this.alleIds(id, '-is:starred');
     const stern = (await this.alleIds(id, 'is:starred')).length;
-    for (let i = 0; i < ids.length; i++) { await this.gmail.trash(ids[i]); this.cache.delete(ids[i]); if (i % 10 === 9 || i === ids.length - 1) fortschritt(i + 1, ids.length); }
+    let bytes = 0;
+    for (let i = 0; i < ids.length; i += 100) {
+      const teil = ids.slice(i, i + 100);
+      for (const m of await this.gmail.holeMetadaten(teil)) bytes += m.sizeEstimate ?? 0; // für „Platz frei gemacht“
+      for (let k = 0; k < teil.length; k++) { await this.gmail.trash(teil[k]); this.cache.delete(teil[k]); if ((i + k) % 10 === 9 || i + k === ids.length - 1) fortschritt(i + k + 1, ids.length); }
+    }
+    this.platz(bytes);
     if (this.gmail.labelLoeschen) await this.gmail.labelLoeschen(id);
-    return { name, papierkorb: ids, stern };
+    return { name, papierkorb: ids, stern, bytes };
   }
 
   /** Gelöschten Ordner zurückholen: Ordner neu anlegen, Mails aus dem Papierkorb holen und wieder hineinlegen. */
