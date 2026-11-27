@@ -16,14 +16,13 @@ Abmeldelink: `{%link_unsubscribe}`. Der Ordner `mail/` enthält dieselben Dateie
 - Korrigiert gegenüber November (laut Homepage): Winter-Aktion nur Marken-Räder mit Bosch-Antrieb; Finanzierung mit Anzahlung,
   nur regulärer Preis; ENRA ab ca. 120 € / 70 €; RIDE statt mein-dienstrad.de.
 
-## Fotos fehlen (Donnerstag 26.11.2026)
-1. Velo de Ville SEB890 SUV Smart 27,5″ · Pure White · 45 cm · Trapez – seitlich, Antriebsseite
-2. Velo de Ville AEB400 Allround 28″ · wine red · 55 cm · Tiefeinsteiger – seitlich, Antriebsseite
-Danach freigestellt ablegen, in `werkzeug-v3/page.html` im Feld `O` bei Nr. 2 und 6 `img:` setzen,
-`node render.js`, `python3 slice.py`, `python3 build4.py`, ZIP neu.
+## Fotos (eingebaut 27.11.2026, Bildlieferung Branch `ccr-782d147e-vm3iq0`, `bildlieferung/QUELLEN.md`)
+- FID 5173 SEB890 SUV Smart Pure White → `werkzeug-v3/a/seb890.png` (Studiofoto, Nabe kann abweichen)
+- FID 4605 AEB400 wine red → `werkzeug-v3/a/aeb400.png` (Werksbild)
+- FID 4815 AEB490 Mocca → `werkzeug-v3/a/aeb490.png` (Werksbild, Farbe angepasst)
 
 ## Sichtbare Platzhalter ([⚠ PRÜFEN])
-- keine (Fotos SEB890/AEB400 folgen)
+- keine
 
 ## Bestätigt (Tiry 25.11.2026)
 - E-Antelao wird ohne Schutzbleche und Gepäckträger verkauft: Foto retuschiert (`werkzeug-v3/retusche.py`, Reifen/Speichen aus sauberen Radbereichen ergänzt). Van Raam = Vorführmodell, reduziert.
