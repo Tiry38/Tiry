@@ -465,6 +465,65 @@ export class Aufraeumer extends EventEmitter {
     return n;
   }
 
+  // ---------------- Posteingang entrümpeln (Tirys Wunsch nach dem Altbestand) ----------------
+  // Alte ungelesene Mails als gelesen markieren (nichts verschoben/gelöscht) und alte Infos ins Archiv.
+  // Mit Stern bleibt unberührt. Ein Klick macht alles wieder rückgängig.
+  entruempeln: { phase: 'leer' | 'zaehlt' | 'bereit' | 'laeuft' | 'fertig'; gelesen: number; archiv: number; erledigt: number; gesamt: number; zeit?: number } = { phase: 'leer', gelesen: 0, archiv: 0, erledigt: 0, gesamt: 0 };
+  private entIds: { gelesen: string[]; archiv: string[] } = { gelesen: [], archiv: [] };
+
+  async entruempelnVorschau(tageGelesen = 14, tageArchiv = 30) {
+    this.entruempeln = { phase: 'zaehlt', gelesen: 0, archiv: 0, erledigt: 0, gesamt: 0 };
+    this.emit('entruempeln', this.entruempeln);
+    const gelesen = await this.alleIds(`in:inbox is:unread older_than:${tageGelesen}d -is:starred`);
+    const labels = await this.gmail.labels();
+    const info = labels.find((l) => l.name === `${LABEL_PREFIX}/${KATEGORIE_NAME.benachrichtigung}`);
+    let archiv: string[] = [];
+    if (info) {
+      let token: string | undefined;
+      do { const r = await this.gmail.listeOrdner(info.id, `in:inbox older_than:${tageArchiv}d -is:starred`, token, 500); archiv.push(...r.ids); token = r.nextPageToken; } while (token);
+      archiv = archiv.filter((id, i, a) => a.indexOf(id) === i);
+    }
+    this.entIds = { gelesen, archiv };
+    this.entruempeln = { phase: 'bereit', gelesen: gelesen.length, archiv: archiv.length, erledigt: 0, gesamt: gelesen.length + archiv.length };
+    this.emit('entruempeln', this.entruempeln);
+    return this.entruempeln;
+  }
+
+  async entruempelnStarten() {
+    if (this.entruempeln.phase !== 'bereit') throw new Error('Erst nachzählen.');
+    const { gelesen, archiv } = this.entIds;
+    this.entruempeln = { ...this.entruempeln, phase: 'laeuft', erledigt: 0 };
+    this.emit('entruempeln', this.entruempeln);
+    // für „Rückgängig“ merken
+    this.db.set('entruempelnLetzter', { zeit: this.jetzt(), gelesen, archiv });
+    const stapel = async (ids: string[], remove: string[]) => {
+      for (let i = 0; i < ids.length; i += 1000) {
+        await this.gmail.batchModify(ids.slice(i, i + 1000), [], remove);
+        this.entruempeln.erledigt += Math.min(1000, ids.length - i);
+        this.emit('entruempeln', { ...this.entruempeln });
+      }
+    };
+    await stapel(gelesen, ['UNREAD']);
+    await stapel(archiv, ['INBOX']);
+    this.entruempeln = { ...this.entruempeln, phase: 'fertig', zeit: this.jetzt() };
+    this.log(`Posteingang entrümpelt: ${gelesen.length} als gelesen markiert, ${archiv.length} alte Infos ins Archiv.`);
+    this.emit('entruempeln', this.entruempeln);
+    this.emit('postfach', { neu: 0 });
+    return this.entruempeln;
+  }
+
+  async entruempelnRueckgaengig(): Promise<number> {
+    const l = this.db.get<{ zeit: number; gelesen: string[]; archiv: string[] } | null>('entruempelnLetzter', null);
+    if (!l) return 0;
+    for (let i = 0; i < l.gelesen.length; i += 1000) await this.gmail.batchModify(l.gelesen.slice(i, i + 1000), ['UNREAD'], []);
+    for (let i = 0; i < l.archiv.length; i += 1000) await this.gmail.batchModify(l.archiv.slice(i, i + 1000), ['INBOX'], []);
+    this.db.set('entruempelnLetzter', null);
+    this.entruempeln = { phase: 'leer', gelesen: 0, archiv: 0, erledigt: 0, gesamt: 0 };
+    this.emit('entruempeln', this.entruempeln);
+    this.emit('postfach', { neu: 0 });
+    return l.gelesen.length + l.archiv.length;
+  }
+
   /** Übersicht fürs Handy (siehe stand.ts). */
   baueStand(): Stand {
     const tag = new Date(this.jetzt()); tag.setHours(0, 0, 0, 0);

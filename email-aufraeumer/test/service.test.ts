@@ -417,3 +417,23 @@ describe('Aufräumen ohne PC (Gmail-Filter)', () => {
     expect(t.gmail.filter).toHaveLength(0);
   });
 });
+
+describe('Posteingang entrümpeln', () => {
+  it('markiert als gelesen, archiviert alte Infos – und macht alles mit einem Klick rückgängig', async () => {
+    const t = aufbau(); gesendet(t.gmail); await t.dienst.starten(); t.dienst.stoppen(); await scharf(t);
+    const info = await t.gmail.labelAnlegen('Aufräumer/Benachrichtigung');
+    t.gmail.hinzufuegen({ id: 'alt1', threadId: 'alt1', labelIds: ['INBOX', 'UNREAD'], snippet: '', internalDate: 1, headers: { from: 'a@b.de', subject: 'alt' } }, false);
+    t.gmail.hinzufuegen({ id: 'info1', threadId: 'info1', labelIds: ['INBOX', 'UNREAD', info], snippet: '', internalDate: 1, headers: { from: 'dhl@dhl.de', subject: 'Paket' } }, false);
+    const v = await t.dienst.entruempelnVorschau();
+    expect(v.phase).toBe('bereit');
+    expect(v.archiv).toBe(1);
+    expect(t.gmail.get('alt1').labelIds).toContain('UNREAD');          // Vorschau ändert nichts
+    await t.dienst.entruempelnStarten();
+    expect(t.gmail.get('alt1').labelIds).not.toContain('UNREAD');
+    expect(t.gmail.get('alt1').labelIds).toContain('INBOX');           // bleibt, wo sie ist
+    expect(t.gmail.get('info1').labelIds).not.toContain('INBOX');      // alte Info im Archiv
+    expect(await t.dienst.entruempelnRueckgaengig()).toBeGreaterThan(0);
+    expect(t.gmail.get('alt1').labelIds).toContain('UNREAD');
+    expect(t.gmail.get('info1').labelIds).toContain('INBOX');
+  });
+});

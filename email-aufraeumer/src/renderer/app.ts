@@ -192,6 +192,9 @@ async function cockpit() {
   unten.innerHTML = `<section class="karte alt-karte" data-k="werbung"><div class="alt-kopf"><div><h2>Altes Postfach aufräumen</h2>
       <p>Ich gehe einmal durch <b>alle</b> Mails, die schon da sind – auch Archiviertes. Erst siehst du nur, was passieren würde.</p></div></div>
       <div id="altbestand">${altbestandHtml(z.altbestand)}</div></section>
+    <section class="karte alt-karte" data-k="benachrichtigung"><div class="alt-kopf"><div><h2>Posteingang entrümpeln</h2>
+      <p>Für die ungelesenen Mails, die noch im Posteingang liegen: Alles, was <b>älter als 2 Wochen</b> ist, markiere ich als <b>gelesen</b> – verschoben oder gelöscht wird dabei nichts. <b>Infos</b> (Pakete, Konten, Apps), die älter als 30 Tage sind, kommen ins <b>Archiv</b>. Mit Stern bleibt unberührt. Ein Klick macht alles rückgängig.</p></div></div>
+      <div id="entruempeln">${entruempelnHtml(z.entruempeln)}</div></section>
     <div class="zwei">
       <section class="karte"><h2>Was zuletzt passiert ist</h2>
         <ol class="strom-liste" id="strom-liste">${liste.map((e) => stromZeile(e)).join('') || '<li class="leer-zeile">Noch keine neue Mail angekommen. Sobald eine kommt, siehst du sie oben in die Maschine fallen.</li>'}</ol></section>
@@ -221,6 +224,7 @@ async function cockpit() {
   el.querySelector('[data-tat="pruefen"]')?.addEventListener('click', async () => { await api.rufe('jetztPruefen'); await laden(); void zeichne(); });
   el.querySelector('[data-tat="zu-pruefen"]')?.addEventListener('click', () => zeigeAnsicht('pruefen', true));
   altbestandKnoepfe();
+  entruempelnKnoepfe();
 }
 const art_ = (e: Eintrag) => art(e);
 
@@ -532,6 +536,36 @@ function altbestandHtml(ab: any): string {
     ${g.freiBytes ? `Gmail gibt ca. <b>${speicher(g.freiBytes)}</b> frei, sobald der Papierkorb geleert ist – automatisch nach 30 Tagen oder sofort in Gmail unter „Papierkorb → Jetzt leeren“.` : ''} Zurückholen geht unter „Verlauf“.</p>
     <div class="zeile"><button class="knopf" data-ab="vorschau">Nochmal durchsehen</button></div>`;
 }
+function entruempelnHtml(en: any): string {
+  const rueck = (z?.entruempelnRueck || en?.phase === 'fertig') ? '<button class="knopf leise" data-en="zurueck">Letztes Entrümpeln rückgängig machen</button>' : '';
+  if (!en || en.phase === 'leer') return `<div class="zeile"><button class="knopf voll gross" data-en="vorschau">Nachzählen</button>${rueck}</div>`;
+  if (en.phase === 'zaehlt') return '<p class="alt-status">Ich zähle nach … (dauert bei vielen Mails ein, zwei Minuten)</p>';
+  const p = en.gesamt ? Math.round((en.erledigt / en.gesamt) * 100) : 0;
+  if (en.phase === 'laeuft') return `<p class="alt-status">Ich entrümple … <b>${zahl(en.erledigt)}</b> von ${zahl(en.gesamt)}</p><div class="fortschritt"><i data-stil="width:${p}%"></i></div>`;
+  const zahlen = `<div class="alt-zahlen">
+      <div data-k="wichtig"><b>${zahl(en.gelesen)}</b><span>als gelesen markieren</span><small>bleiben, wo sie sind</small></div>
+      <div data-k="benachrichtigung"><b>${zahl(en.archiv)}</b><span>alte Infos ins Archiv</span><small>über die Suche jederzeit da</small></div></div>`;
+  if (en.phase === 'bereit') return `<p class="alt-status">So würde ich es machen – noch ist nichts verändert:</p>${zahlen}
+    <div class="zeile">${en.gesamt ? '<button class="knopf voll gross" data-en="start">Jetzt entrümpeln</button>' : '<span>Nichts zu tun – dein Posteingang ist schon sauber.</span>'}<button class="knopf leise" data-en="vorschau">Neu zählen</button></div>`;
+  return `<p class="alt-status"><b>Fertig.</b> ${zahl(en.gelesen)} als gelesen markiert, ${zahl(en.archiv)} alte Infos im Archiv.</p>
+    <div class="zeile"><button class="knopf" data-en="vorschau">Nochmal nachzählen</button>${rueck}</div>`;
+}
+function entruempelnKnoepfe() {
+  for (const b of $$('[data-en]')) b.addEventListener('click', async () => {
+    try {
+      const was = b.dataset.en;
+      if (was === 'vorschau') await api.rufe('entruempelnVorschau');
+      else if (was === 'start') {
+        if (!(await bestaetigen('Posteingang entrümpeln?', 'Ich markiere die alten Mails als gelesen und lege alte Infos ins Archiv. <b>Gelöscht wird nichts.</b> Mit „Rückgängig machen“ ist alles mit einem Klick wieder wie vorher.', 'Ja, entrümpeln'))) return;
+        await api.rufe('entruempelnStarten'); z.entruempelnRueck = true; melde('Posteingang entrümpelt.');
+      } else if (was === 'zurueck') {
+        if (!(await bestaetigen('Rückgängig machen?', 'Alle Mails vom letzten Entrümpeln werden wieder ungelesen bzw. kommen zurück in den Posteingang.', 'Ja, zurück'))) return;
+        const n = await api.rufe('entruempelnRueckgaengig'); z.entruempelnRueck = false; melde(`${zahl(n)} Mails sind wieder wie vorher.`);
+      }
+    } catch (e) { melde((e as Error).message); }
+  });
+}
+
 function altbestandKnoepfe() {
   for (const b of $$('[data-ab]')) b.addEventListener('click', async () => {
     try {
@@ -614,6 +648,7 @@ function ereignis(kanal: string, d: any) {
       }
     }, 400);
   } else if (kanal === 'status') { if (z) { const vorher = z.status?.status; z.status = d; setzeStatus(d); if (ansicht === 'cockpit' && vorher !== d.status) void cockpit(); } }
+  else if (kanal === 'entruempeln') { if (z) z.entruempeln = d; const en = document.getElementById('entruempeln'); if (en) { en.innerHTML = entruempelnHtml(d); entruempelnKnoepfe(); } }
   else if (kanal === 'altbestand') { if (z) z.altbestand = d; const ab = document.getElementById('altbestand'); if (ab) { ab.innerHTML = altbestandHtml(d); altbestandKnoepfe(); } }
   else if (kanal === 'frage' && d?.art === 'filter') { void filterFrage(d.anzahl); }
   else if (kanal === 'senden' && typeof d === 'string') { (window as any).__sendeStatus?.(d); }

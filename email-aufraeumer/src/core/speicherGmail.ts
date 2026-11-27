@@ -69,6 +69,10 @@ export class SpeicherGmail implements GmailPort {
   inhalte = new Map<string, { html?: string; text?: string }>();
   async listeOrdner(labelId: string | null, q: string, pageToken?: string, max = 50) {
     let alle = [...this.mails.values()].filter((m) => (labelId ? m.labelIds.includes(labelId) : !m.labelIds.includes('TRASH') && !m.labelIds.includes('SPAM')));
+    if (/(^|\s)in:inbox/.test(q)) alle = alle.filter((m) => m.labelIds.includes('INBOX'));
+    if (/(^|\s)is:unread/.test(q)) alle = alle.filter((m) => m.labelIds.includes('UNREAD'));
+    if (/(^|\s)-is:starred/.test(q)) alle = alle.filter((m) => !m.labelIds.includes('STARRED'));
+    q = q.replace(/(^|\s)-?[a-z_]+:\S+/gi, ' ').trim(); // Such-Befehle (in:, is:, older_than: …) sind keine Wörter
     if (q) { const w = q.toLowerCase(); alle = alle.filter((m) => `${m.headers.from} ${m.headers.subject} ${m.snippet}`.toLowerCase().includes(w)); }
     alle.sort((a, b) => b.internalDate - a.internalDate);
     const start = pageToken ? Number(pageToken) : 0;
