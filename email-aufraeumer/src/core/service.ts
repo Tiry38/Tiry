@@ -268,6 +268,16 @@ export class Aufraeumer extends EventEmitter {
       .sort((a, b) => b[1] - a[1]).slice(0, 60)
       .map(([basis, anzahl]) => ({ basis, name: ordnerName(basis), anzahl, aktiv: !aus.includes(basis), ueberSchwelle: anzahl >= ab }));
   }
+  /** Tiry hat einen Ordner gelöscht: Ist es ein Firmen-Ordner, wird er nicht wieder angelegt und seine Gmail-Regel entfällt. */
+  ordnerVergessen(name: string) {
+    const o = [...this.firmenAnzahl().keys()].find((b) => ordnerName(b) === name);
+    if (!o) return;
+    this.ordnerSchalten(o, false);
+    const bekannt = this.db.get<Record<string, string>>('autoFilter', {});
+    const fid = bekannt[`ordner:${o}`];
+    if (fid) { delete bekannt[`ordner:${o}`]; this.db.set('autoFilter', bekannt); void this.gmail.filterLoeschen(fid).catch(() => {}); }
+  }
+
   ordnerSchalten(basis: string, aktiv: boolean) {
     const aus = new Set(this.db.get<string[]>('ordnerAus', []));
     if (aktiv) aus.delete(basis); else aus.add(basis);

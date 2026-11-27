@@ -19,6 +19,8 @@ export interface GmailPort {
   untrash(id: string): Promise<void>;
   labels(): Promise<Array<{ id: string; name: string }>>;
   labelAnlegen(name: string): Promise<string>;
+  /** Ordner (Label) entfernen – die Mails selbst bleiben dabei erhalten. */
+  labelLoeschen?(id: string): Promise<void>;
   filterListe(): Promise<Array<{ id: string; criteria: FilterKriterien; action: FilterAktion }>>;
   filterAnlegen(criteria: FilterKriterien, action: FilterAktion): Promise<string>;
   filterLoeschen(id: string): Promise<void>;
@@ -47,7 +49,7 @@ export const METADATEN_HEADER = [
 export const QUOTE: Record<string, number> = {
   getProfile: 1, 'messages.list': 5, 'messages.get': 5, 'history.list': 2, 'messages.modify': 5, 'messages.batchModify': 50,
   'messages.trash': 5, 'messages.untrash': 5, 'labels.list': 1, 'labels.create': 5, 'filters.list': 1, 'filters.create': 5,
-  'filters.delete': 5, 'drafts.create': 10, 'drafts.update': 15, 'drafts.list': 5, 'drafts.get': 5, 'messages.send': 100, 'messages.attachments.get': 5, 'labels.get': 1,
+  'filters.delete': 5, 'drafts.create': 10, 'drafts.update': 15, 'drafts.list': 5, 'drafts.get': 5, 'messages.send': 100, 'messages.attachments.get': 5, 'labels.get': 1, 'labels.delete': 5,
 };
 
 export function wiederholbar(err: any): boolean {
@@ -205,6 +207,7 @@ export function erzeugeGoogleGmail(auth: any, zaehle: (methode: string, einheite
       const r = await ruf('labels.list', () => gmail.users.labels.list({ userId: me }));
       return (r.data.labels ?? []).map((l) => ({ id: l.id!, name: l.name! }));
     },
+    async labelLoeschen(id) { await ruf('labels.delete', () => gmail.users.labels.delete({ userId: me, id })); },
     async labelAnlegen(name) {
       const r = await ruf('labels.create', () => gmail.users.labels.create({ userId: me, requestBody: { name, labelListVisibility: 'labelShow', messageListVisibility: 'show' } }));
       return r.data.id!;

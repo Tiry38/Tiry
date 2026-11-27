@@ -648,6 +648,7 @@ function ereignis(kanal: string, d: any) {
       }
     }, 400);
   } else if (kanal === 'status') { if (z) { const vorher = z.status?.status; z.status = d; setzeStatus(d); if (ansicht === 'cockpit' && vorher !== d.status) void cockpit(); } }
+  else if (kanal === 'ordnerLoeschen') { (window as any).__ordnerLoeschen?.(d); }
   else if (kanal === 'entruempeln') { if (z) z.entruempeln = d; const en = document.getElementById('entruempeln'); if (en) { en.innerHTML = entruempelnHtml(d); entruempelnKnoepfe(); } }
   else if (kanal === 'altbestand') { if (z) z.altbestand = d; const ab = document.getElementById('altbestand'); if (ab) { ab.innerHTML = altbestandHtml(d); altbestandKnoepfe(); } }
   else if (kanal === 'frage' && d?.art === 'filter') { void filterFrage(d.anzahl); }

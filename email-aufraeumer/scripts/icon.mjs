@@ -1,19 +1,18 @@
-// Erzeugt das Programm-Symbol: drei Sieb-Linien, ein Tintentropfen fällt durch, ein roter wird ausgesiebt.
+// Erzeugt das Programm-Symbol: fünf farbige Sortenbalken (wie die Handy-App).
 // Ausgabe: assets/icon.png (256), assets/tray.png (32), assets/icon.ico (16–256, PNG-gepackt).
 import { createRequire } from 'node:module';
 const { chromium } = createRequire(import.meta.url)('playwright');
 import { writeFileSync, mkdirSync } from 'node:fs';
 
-const svg = (s) => `<svg xmlns="http://www.w3.org/2000/svg" width="${s}" height="${s}" viewBox="0 0 64 64">
-  <rect width="64" height="64" fill="#f4f0e7"/>
-  <rect x="1.5" y="1.5" width="61" height="61" fill="none" stroke="#12161d" stroke-width="3"/>
-  <g stroke="#12161d" stroke-width="${s <= 32 ? 4 : 3}" stroke-linecap="square">
-    <line x1="10" y1="22" x2="40" y2="22"/><line x1="10" y1="34" x2="40" y2="34"/><line x1="10" y1="46" x2="40" y2="46"/>
-  </g>
-  <path d="M42 18 L52 24 L52 56" fill="none" stroke="#12161d" stroke-width="${s <= 32 ? 3 : 2}"/>
-  <circle cx="25" cy="54" r="5" fill="#12161d"/>
-  <circle cx="47" cy="${s <= 32 ? 34 : 33}" r="6" fill="#eb2100"/>
-</svg>`;
+// Fünf Sortenbalken auf warmem Graphit – dasselbe Zeichen wie in der Handy-App und im Programm
+const FARBEN = ['#5fd38a', '#4fc3b8', '#f6c945', '#f59a3c', '#ec5a3f'];
+const HOEHE = [30, 20, 26, 14, 22];
+const svg = (s) => {
+  const klein = s <= 32;
+  const innen = s * (klein ? 0.86 : 0.7), b = innen / (klein ? 7.6 : 9.2), g = b * (klein ? 0.4 : 0.55), x0 = (s - (5 * b + 4 * g)) / 2, boden = s * 0.5 + innen * 0.36;
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${s}" height="${s}"><rect width="${s}" height="${s}" rx="${s * 0.22}" fill="#1b1815"/>${FARBEN.map((f, i) => {
+    const hh = HOEHE[i] / 30 * innen * 0.72; return `<rect x="${(x0 + i * (b + g)).toFixed(2)}" y="${(boden - hh).toFixed(2)}" width="${b.toFixed(2)}" height="${hh.toFixed(2)}" rx="${(b * 0.4).toFixed(2)}" fill="${f}"/>`; }).join('')}</svg>`;
+};
 
 const browser = await chromium.launch();
 const page = await browser.newPage();

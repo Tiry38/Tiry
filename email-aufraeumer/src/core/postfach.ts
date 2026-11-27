@@ -25,6 +25,9 @@ const SYSTEM: Ordner[] = [
 
 export class Postfach {
   private cache = new Map<string, { mail: Mail; zeit: number }>();
+  /** Vollständige Mails (vorgeladen), damit das Öffnen sofort geht. */
+  private volle = new Map<string, { roh: any; zeit: number }>();
+  private laeuft = new Map<string, Promise<any>>();
   private labelNamen = new Map<string, string>();
   /** Letzte Aktion für „Rückgängig“: Mail-IDs mit ihren Labels vorher. */
   private letzte: Array<{ id: string; vorher: string[] }> = [];
@@ -69,13 +72,37 @@ export class Postfach {
     return { zeilen, weiter: r.nextPageToken, gesamt: r.geschaetzt };
   }
 
-  /** Ganze Mail öffnen; ungelesene werden als gelesen markiert. */
+  /** Eine ganze Mail holen – aus dem Vorrat, wenn schon vorgeladen (höchstens 10 Min. alt). */
+  private holeVoll(id: string): Promise<any> {
+    const v = this.volle.get(id);
+    if (v && Date.now() - v.zeit < 600_000) return Promise.resolve(v.roh);
+    const l = this.laeuft.get(id); if (l) return l;
+    const p = this.gmail.holeVoll(id).then((roh) => {
+      this.volle.set(id, { roh, zeit: Date.now() });
+      if (this.volle.size > 150) for (const k of [...this.volle.keys()].slice(0, 50)) this.volle.delete(k);
+      return roh;
+    }).finally(() => this.laeuft.delete(id));
+    this.laeuft.set(id, p);
+    return p;
+  }
+
+  /** Mails im Hintergrund vorladen (die oberen der Liste, die unter dem Mauszeiger/Finger) – Fehler sind egal. */
+  async vorladen(ids: string[]): Promise<void> {
+    const offen = ids.filter((id) => !this.volle.has(id)).slice(0, 12);
+    let i = 0;
+    await Promise.all(Array.from({ length: Math.min(3, offen.length) }, async () => {
+      while (i < offen.length) { const id = offen[i++]; try { await this.holeVoll(id); } catch { /* egal */ } }
+    }));
+  }
+
+  /** Ganze Mail öffnen; ungelesene werden als gelesen markiert (im Hintergrund – das Öffnen wartet nicht darauf). */
   async lesen(id: string): Promise<Lesen> {
-    const roh = await this.gmail.holeVoll(id);
+    const roh = await this.holeVoll(id);
     const v = zerlegeVoll(roh);
     if (v.labelIds.includes('UNREAD')) {
-      await this.gmail.modify(id, [], ['UNREAD']);
+      void this.gmail.modify(id, [], ['UNREAD']).catch(() => {});
       v.labelIds = v.labelIds.filter((l) => l !== 'UNREAD');
+      roh.labelIds = (roh.labelIds ?? []).filter((l: string) => l !== 'UNREAD');
       const c = this.cache.get(id); if (c) c.mail.labelIds = c.mail.labelIds.filter((l) => l !== 'UNREAD');
     }
     const von = parseAdresse(v.headers['from']);
@@ -124,9 +151,12 @@ export class Postfach {
 
   /** Aktionen auf eine oder mehrere Mails; merkt sich den Zustand vorher für „Rückgängig“. */
   async aktion(ids: string[], a: PostAktion): Promise<void> {
-    const vorher = await this.gmail.holeMetadaten(ids);
+    // Zustand vorher aus dem Zwischenspeicher (spart eine Abfrage) – nur was fehlt, wird geholt
+    const bekannt = ids.map((id) => this.cache.get(id)?.mail).filter((m): m is Mail => !!m);
+    const fehlt = ids.filter((id) => !this.cache.has(id));
+    const vorher = [...bekannt.map((m) => structuredClone(m)), ...(fehlt.length ? await this.gmail.holeMetadaten(fehlt) : [])];
     this.letzte = vorher.map((m) => ({ id: m.id, vorher: [...m.labelIds] }));
-    for (const m of vorher) {
+    await Promise.all(vorher.map(async (m) => {
       if (a === 'papierkorb') await this.gmail.trash(m.id);
       else if (a === 'archiv') await this.gmail.modify(m.id, [], ['INBOX']);
       else if (a === 'posteingang') { if (m.labelIds.includes('TRASH')) await this.gmail.untrash(m.id); await this.gmail.modify(m.id, ['INBOX'], ['SPAM']); }
@@ -135,8 +165,8 @@ export class Postfach {
       else if (a === 'gelesen') await this.gmail.modify(m.id, [], ['UNREAD']);
       else if (a === 'ungelesen') await this.gmail.modify(m.id, ['UNREAD'], []);
       else await this.gmail.modify(m.id, [a.ordner], ['INBOX']);
-      this.cache.delete(m.id);
-    }
+      this.cache.delete(m.id); this.volle.delete(m.id);
+    }));
   }
 
   /** Letzte Aktion zurücknehmen – Labels exakt wie vorher. */
@@ -152,6 +182,44 @@ export class Postfach {
       this.cache.delete(id); n++;
     }
     this.letzte = [];
+    return n;
+  }
+
+  /** Wie viele Mails liegen in einem Ordner (für die Rückfrage vor dem Löschen)? */
+  async ordnerInhalt(id: string): Promise<{ name: string; gesamt: number; stern: number }> {
+    if (!this.labelNamen.size) await this.ordner();
+    const name = this.labelNamen.get(id) ?? id;
+    const stern = (await this.alleIds(id, 'is:starred')).length;
+    return { name, gesamt: (await this.gmail.labelInfo(id)).gesamt, stern };
+  }
+
+  private async alleIds(labelId: string, q = ''): Promise<string[]> {
+    const ids: string[] = []; let token: string | undefined;
+    do { const r = await this.gmail.listeOrdner(labelId, q, token, 500); ids.push(...r.ids); token = r.nextPageToken; } while (token);
+    return [...new Set(ids)];
+  }
+
+  /**
+   * Ordner löschen samt Inhalt: alle Mails in den Papierkorb (Gmail löscht erst nach 30 Tagen – bis dahin zurückholbar),
+   * danach den Ordner selbst. Mails mit Stern bleiben unberührt (Sicherheitsregel). Nur eigene/Firmen-Ordner, nie System-Ordner.
+   */
+  async ordnerLoeschen(id: string, fortschritt: (erledigt: number, gesamt: number) => void = () => {}): Promise<{ name: string; papierkorb: string[]; stern: number }> {
+    if (/^[A-Z_]+$/.test(id)) throw new Error('System-Ordner (Posteingang, Gesendet …) kann man nicht löschen.');
+    if (!this.labelNamen.size) await this.ordner();
+    const name = this.labelNamen.get(id) ?? id;
+    const ids = await this.alleIds(id, '-is:starred');
+    const stern = (await this.alleIds(id, 'is:starred')).length;
+    for (let i = 0; i < ids.length; i++) { await this.gmail.trash(ids[i]); this.cache.delete(ids[i]); if (i % 10 === 9 || i === ids.length - 1) fortschritt(i + 1, ids.length); }
+    if (this.gmail.labelLoeschen) await this.gmail.labelLoeschen(id);
+    return { name, papierkorb: ids, stern };
+  }
+
+  /** Gelöschten Ordner zurückholen: Ordner neu anlegen, Mails aus dem Papierkorb holen und wieder hineinlegen. */
+  async ordnerWiederherstellen(name: string, ids: string[]): Promise<number> {
+    let id: string;
+    try { id = await this.gmail.labelAnlegen(name); } catch { id = (await this.gmail.labels()).find((l) => l.name === name)?.id ?? ''; }
+    let n = 0;
+    for (const m of ids) { try { await this.gmail.untrash(m); if (id) await this.gmail.modify(m, [id], []); n++; } catch { /* endgültig weg */ } }
     return n;
   }
 

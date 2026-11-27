@@ -661,3 +661,43 @@ body[data-nav='klein'] .update[data-stand='bereit'] .knopf { animation: pochen 2
 }
 @keyframes pochen { 0%, 70%, 100% { transform: scale(1); } 35% { transform: scale(1.08); } }
 @media (prefers-reduced-motion: reduce) { .update::before, .update-balken i, body[data-nav='klein'] .update[data-stand='bereit'] .knopf { animation: none; } }
+
+/* ---------- Postfach: Papierkorb direkt in der Liste + Ziehen in Ordner ---------- */
+.pf-li { position: relative; }
+.pf-li .pf-zeile { padding-right: 56px; }
+.pf-weg { all: unset; box-sizing: border-box; cursor: pointer; position: absolute; right: 8px; bottom: 10px; width: 40px; height: 40px; border-radius: 12px;
+  display: grid; place-items: center; color: var(--text-3); opacity: .55; transition: opacity .15s, background .15s, color .15s, transform .3s var(--feder); }
+.pf-weg svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.pf-li:hover .pf-weg, .pf-weg:focus-visible { opacity: 1; }
+.pf-weg:hover { background: var(--c-muell); color: var(--dunkel); transform: scale(1.08); }
+.pf-weg:focus-visible { outline: 3px solid var(--c-newsletter); outline-offset: 2px; }
+.pf-li:has(.pf-zeile.offen) .pf-weg { color: oklch(0.4 0.01 70); }
+.pf-li:has(.pf-zeile.offen) .pf-weg:hover { color: var(--dunkel); }
+.pf-li.fliegt { animation: pfFliegt .25s ease-in forwards; }
+@keyframes pfFliegt { to { transform: translateX(40px) scale(.96); opacity: 0; } }
+.pf-zeile.gezogen { opacity: .35; transform: scale(.98); }
+.pf-zieh-bild { position: fixed; top: -100px; left: 0; max-width: 320px; padding: 10px 14px; border-radius: 12px; background: var(--c-newsletter); color: var(--dunkel);
+  font: 700 14px/1.3 var(--sans); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.zieht .pf-ordner ul button { transition: background .15s, transform .35s var(--feder), box-shadow .15s; }
+.zieht .pf-ordner ul button:not([aria-current]):not([data-ordner="SENT"]) { box-shadow: inset 0 0 0 1px var(--linie); }
+.pf-ordner ul button.ablage { background: var(--c-newsletter) !important; color: var(--dunkel) !important; transform: translateX(6px) scale(1.03); box-shadow: none !important; }
+.pf-ordner ul button.ablage svg { stroke: var(--dunkel); }
+.pf-ordner ul button.geschluckt { animation: pfSchluck .55s var(--feder); }
+@keyframes pfSchluck { 30% { transform: scale(1.08); background: var(--c-wichtig); color: var(--dunkel); } }
+@media (prefers-reduced-motion: reduce) { .pf-li.fliegt, .pf-ordner ul button.geschluckt { animation: none; } }
+
+/* Ordner löschen: Papierkorb neben dem Ordner (bei Mauszeiger) */
+.pf-oli { position: relative; }
+.pf-ordner ul .pf-oweg { all: unset; box-sizing: border-box; cursor: pointer; position: absolute; right: 6px; top: 50%; translate: 0 -50%; width: 34px; height: 34px; border-radius: 10px;
+  display: grid; place-items: center; color: var(--text-3); opacity: 0; transition: opacity .15s, background .15s, color .15s; }
+.pf-ordner ul .pf-oweg svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.pf-ordner ul .pf-oli:hover .pf-oweg, .pf-ordner ul .pf-oweg:focus-visible { opacity: 1; }
+.pf-oli:hover > button[data-ordner] b { opacity: 0; }
+.pf-ordner ul .pf-oweg:hover { background: var(--c-muell); color: var(--dunkel); }
+.pf-ordner ul .pf-oweg:focus-visible { outline: 3px solid var(--c-newsletter); outline-offset: 1px; }
+.knopf.gefahr { background: var(--c-muell); color: var(--dunkel); }
+#ol-balken { display: block; height: 100%; width: 0; background: var(--c-muell); transition: width .3s; }
+
+.pf-kopf-vorab { padding: 26px 28px; }
+.pf-kopf-vorab h2 { margin: 0 0 6px; font: 750 26px/1.15 var(--display); }
+.pf-kopf-vorab p { margin: 0; color: var(--text-2); }

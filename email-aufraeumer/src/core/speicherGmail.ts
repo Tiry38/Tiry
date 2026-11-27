@@ -52,6 +52,7 @@ export class SpeicherGmail implements GmailPort {
   async trash(id: string) { this.aufrufe.push(`trash:${id}`); const m = this.mails.get(id)!; m.labelIds = [...m.labelIds.filter((l) => l !== 'INBOX'), 'TRASH']; }
   async untrash(id: string) { this.aufrufe.push(`untrash:${id}`); const m = this.mails.get(id)!; m.labelIds = m.labelIds.filter((l) => l !== 'TRASH'); }
   async labels() { return [...this.labelListe]; }
+  async labelLoeschen(id: string) { this.labelListe = this.labelListe.filter((l) => l.id !== id); for (const m of this.mails.values()) m.labelIds = m.labelIds.filter((l) => l !== id); }
   async labelAnlegen(name: string) {
     if (this.labelListe.some((l) => l.name === name)) throw new Error('exists');
     const id = `Label_${this.labelListe.length + 1}`; this.labelListe.push({ id, name }); return id;
@@ -72,6 +73,7 @@ export class SpeicherGmail implements GmailPort {
     if (/(^|\s)in:inbox/.test(q)) alle = alle.filter((m) => m.labelIds.includes('INBOX'));
     if (/(^|\s)is:unread/.test(q)) alle = alle.filter((m) => m.labelIds.includes('UNREAD'));
     if (/(^|\s)-is:starred/.test(q)) alle = alle.filter((m) => !m.labelIds.includes('STARRED'));
+    else if (/(^|\s)is:starred/.test(q)) alle = alle.filter((m) => m.labelIds.includes('STARRED'));
     q = q.replace(/(^|\s)-?[a-z_]+:\S+/gi, ' ').trim(); // Such-Befehle (in:, is:, older_than: …) sind keine Wörter
     if (q) { const w = q.toLowerCase(); alle = alle.filter((m) => `${m.headers.from} ${m.headers.subject} ${m.snippet}`.toLowerCase().includes(w)); }
     alle.sort((a, b) => b.internalDate - a.internalDate);

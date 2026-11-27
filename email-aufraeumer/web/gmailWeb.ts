@@ -63,6 +63,7 @@ export function erzeugeWebGmail(token: () => string | null): GmailPort {
     async trash(id) { await rufe(`/messages/${id}/trash`, { method: 'POST' }); },
     async untrash(id) { await rufe(`/messages/${id}/untrash`, { method: 'POST' }); },
     async labels() { const r = await rufe('/labels'); return (r.labels ?? []).map((l: any) => ({ id: l.id, name: l.name })); },
+    async labelLoeschen(id) { await rufe(`/labels/${id}`, { method: 'DELETE' }); },
     async labelAnlegen(name) { const r = await rufe('/labels', { method: 'POST', body: JSON.stringify({ name, labelListVisibility: 'labelShow', messageListVisibility: 'show' }) }); return r.id; },
     async filterListe() { throw new Error('Filter gibt es nur am PC.'); },
     async filterAnlegen() { throw new Error('Filter gibt es nur am PC.'); },

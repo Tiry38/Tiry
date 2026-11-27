@@ -86,9 +86,10 @@ public class Waechter extends Service {
     @Override public int onStartCommand(Intent intent, int flags, int startId) {
         Notification n = new Notification.Builder(this, KANAL_DIENST)
                 .setSmallIcon(R.drawable.benachrichtigung)
-                .setContentTitle("Tiry's Mails wartet auf neue Mails")
-                .setContentText("Popups nur für wichtige und persönliche Mails")
-                .setOngoing(true)
+                .setContentTitle("Tiry's Mails")
+                .setOngoing(false)            // ab Android 14 wegwischbar
+                .setShowWhen(false)
+                .setVisibility(Notification.VISIBILITY_SECRET)
                 .setContentIntent(PendingIntent.getActivity(this, 0, new Intent(this, Haupt.class), PendingIntent.FLAG_IMMUTABLE))
                 .build();
         if (Build.VERSION.SDK_INT >= 34) startForeground(1, n, ServiceInfo.FOREGROUND_SERVICE_TYPE_SPECIAL_USE);

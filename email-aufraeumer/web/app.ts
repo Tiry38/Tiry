@@ -275,6 +275,7 @@ async function laden(neu: boolean, still = false) {
     zeilen = neu ? r.zeilen : [...zeilen, ...r.zeilen.filter((z) => !zeilen.some((x) => x.id === z.id))];
     weiter = r.weiter;
     listeZeichnen();
+    void post.vorladen(zeilen.slice(0, 6).map((z) => z.id)); // die obersten Mails gleich mitladen → Öffnen ohne Warten
   } finally { laedt = false; arbeitet(false); }
 }
 
@@ -301,6 +302,7 @@ function wischbar(li: HTMLElement) {
   };
   karte.addEventListener('pointerdown', (e) => {
     if (e.pointerType === 'mouse' && e.button !== 0) return;
+    void post.vorladen([li.dataset.id!]); // beim Antippen schon laden – bis der Finger oben ist, ist sie meist da
     stop(); x0 = e.clientX; y0 = e.clientY; dx = 0; aktiv = true; entschieden = false; quer = false; t0 = performance.now();
   });
   karte.addEventListener('pointermove', (e) => {
@@ -473,7 +475,8 @@ function popupBogen() {
     ${zeile(erlaubt, 'Popups erlaubt', erlaubt ? 'Android darf dir Popups von Tiry\'s Mails zeigen.' : 'Android muss Popups für Tiry\'s Mails einmal erlauben.', '<button class="knopf voll" data-p="erlauben">Erlauben</button>')}
     ${zeile(akku, 'Läuft auch im Ruhezustand', akku ? 'Android schickt den Wächter nicht schlafen.' : 'Sonst kommen Popups bei ausgeschaltetem Bildschirm verspätet. Im nächsten Fenster <b>Zulassen</b> drücken.', '<button class="knopf voll" data-p="akku">Freigeben</button>')}
     <label class="schalter pz-schalter"><input type="checkbox" data-p="waechter" ${waechter ? 'checked' : ''}>Popups bei neuen wichtigen Mails</label>
-    <p class="erklaer">Popups kommen nur für <b>wichtige und persönliche Mails</b> – Werbung, Newsletter, soziale Netzwerke und Spam bleiben still. Oben in der Leiste siehst du dafür dauerhaft ein kleines Symbol.</p>
+    ${NATIV.dauerHinweisSichtbar?.() ? `<div class="pz"><b>i</b><div><strong>Dauer-Hinweis oben ausblenden</strong><p>Android verlangt für Apps, die im Hintergrund wach bleiben, einen Hinweis in der Leiste. Den kannst du abschalten – <b>Popups bei neuen Mails kommen trotzdem</b>. Im nächsten Fenster den Schalter <b>ausschalten</b>.</p><button class="knopf voll" data-p="hinweis">Hinweis ausblenden</button></div></div>` : ''}
+    <p class="erklaer">Popups kommen nur für <b>wichtige und persönliche Mails</b> – Werbung, Newsletter, soziale Netzwerke und Spam bleiben still. Nur wenn eine neue Mail kommt, erscheint ein Popup.</p>
     <button class="wahl" data-p="einst">Ton & Vibration bei Popups ändern</button>`;
   if (offen) { offen.querySelector('.bogen-inhalt')!.innerHTML = inhalt; binden(offen as HTMLElement); return; }
   const b = bogen('Popups', inhalt);
@@ -482,6 +485,7 @@ function popupBogen() {
     el.querySelector('[data-p="erlauben"]')?.addEventListener('click', () => NATIV.popupsAnfragen());
     el.querySelector('[data-p="akku"]')?.addEventListener('click', () => NATIV.akkuAnfragen());
     el.querySelector('[data-p="einst"]')?.addEventListener('click', () => NATIV.popupEinstellungen());
+    el.querySelector('[data-p="hinweis"]')?.addEventListener('click', () => NATIV.dauerHinweisAus());
     el.querySelector<HTMLInputElement>('[data-p="waechter"]')?.addEventListener('change', (e) => { NATIV.waechter((e.target as HTMLInputElement).checked); toast((e.target as HTMLInputElement).checked ? 'Popups an' : 'Popups aus'); });
   }
 }
@@ -684,14 +688,15 @@ async function lesenAktion(a: string) {
     const v = await sicher(() => post.vorlage(m.id, a as 'antworten' | 'allen' | 'weiter')); if (v) schreiben(v); return;
   }
   if (a === 'verschieben') { verschiebenBogen([m.id]); return; }
-  const ok = await sicher(async () => { await post.aktion([m.id], a as any); return true; });
-  if (!ok) return;
   if (a === 'archiv' || a === 'papierkorb') {
+    // sofort zu und weg – Gmail bekommt es im Hintergrund
+    void sicher(async () => { await post.aktion([m.id], a as any); return true; }).then((ok) => { if (!ok) void laden(true, true); });
     history.back();
     zeilen = zeilen.filter((z) => z.id !== m.id);
     const li = document.querySelector<HTMLElement>(`.zeile[data-id="${CSS.escape(m.id)}"]`);
     if (li) { li.style.height = `${li.offsetHeight}px`; void li.offsetHeight; li.classList.add('weg'); li.style.height = '0px'; setTimeout(() => li.remove(), 400); }
     toast(a === 'archiv' ? 'Archiviert' : 'In den Papierkorb gelegt', async () => { await sicher(() => post.rueckgaengig()); await laden(true, true); });
+  } else if (!(await sicher(async () => { await post.aktion([m.id], a as any); return true; }))) { return;
   } else if (a === 'ungelesen') { history.back(); toast('Als ungelesen markiert'); void laden(true, true); }
   else { toast(a === 'stern' ? 'Stern gesetzt' : 'Stern entfernt'); const b = document.querySelector<HTMLButtonElement>('.lesen-ebene [data-a^="stern"]'); if (b) { b.dataset.a = a === 'stern' ? 'sternWeg' : 'stern'; b.style.color = a === 'stern' ? 'var(--akzent)' : ''; } void laden(true, true); }
   void ordnerLaden();
@@ -874,7 +879,7 @@ async function start() {
   const p = await sicher(() => gmail.profil());
   if (!p) return;
   ich = p.email; historyId = p.historyId; if (!DEMO) an.merkeEmail(ich);
-  if (NATIV) { NATIV.merkeEmail(ich); if (!NATIV.popupsErlaubt() || !NATIV.akkuFrei()) setTimeout(popupBogen, 900); }
+  if (NATIV) { NATIV.merkeEmail(ich); if (!NATIV.popupsErlaubt() || !NATIV.akkuFrei() || NATIV.dauerHinweisSichtbar?.()) setTimeout(popupBogen, 900); }
   await ordnerLaden();
   await laden(true);
   balkenStoss(0.8);

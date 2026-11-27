@@ -238,6 +238,16 @@ public class Haupt extends Activity {
             if (!erlaubt()) return;
             ui.post(() -> startActivity(new Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS).putExtra(Settings.EXTRA_APP_PACKAGE, getPackageName())));
         }
+        /** Öffnet direkt die Einstellung des Dauer-Hinweises, damit Tiry ihn ausschalten kann (der Wächter läuft trotzdem weiter). */
+        @JavascriptInterface public void dauerHinweisAus() {
+            if (!erlaubt()) return;
+            ui.post(() -> startActivity(new Intent(Settings.ACTION_CHANNEL_NOTIFICATION_SETTINGS)
+                    .putExtra(Settings.EXTRA_APP_PACKAGE, getPackageName()).putExtra(Settings.EXTRA_CHANNEL_ID, Waechter.KANAL_DIENST)));
+        }
+        @JavascriptInterface public boolean dauerHinweisSichtbar() {
+            android.app.NotificationChannel k = getSystemService(android.app.NotificationManager.class).getNotificationChannel(Waechter.KANAL_DIENST);
+            return k != null && k.getImportance() != android.app.NotificationManager.IMPORTANCE_NONE;
+        }
         @JavascriptInterface public boolean akkuFrei() {
             return getSystemService(PowerManager.class).isIgnoringBatteryOptimizations(getPackageName());
         }

@@ -233,8 +233,23 @@ const API: Record<string, Fn> = {
     return { anhaenge: anhang.length, links: links.length };
   },
   pfAktion: (ids, a) => postfach!.aktion(ids, a),
+  pfVorladen: (ids) => postfach!.vorladen(ids as string[]),
   pfRueckgaengig: () => postfach!.rueckgaengig(),
   pfOrdnerAnlegen: (name) => postfach!.ordnerAnlegen(name),
+  pfOrdnerInhalt: (id) => postfach!.ordnerInhalt(id as string),
+  async pfOrdnerLoeschen(id) {
+    const r = await postfach!.ordnerLoeschen(id as string, (erledigt, gesamt) => sende('ordnerLoeschen', { erledigt, gesamt }));
+    db.set('ordnerGeloescht', { name: r.name, ids: r.papierkorb, zeit: Date.now() });
+    dienst?.ordnerVergessen(r.name);
+    return { name: r.name, papierkorb: r.papierkorb.length, stern: r.stern };
+  },
+  async pfOrdnerZurueck() {
+    const g = db.get<{ name: string; ids: string[] } | null>('ordnerGeloescht', null);
+    if (!g) return 0;
+    const n = await postfach!.ordnerWiederherstellen(g.name, g.ids);
+    db.set('ordnerGeloescht', null);
+    return n;
+  },
   async pfAnhangSpeichern(mailId, anhang) {
     const r = await dialog.showSaveDialog(fenster!, { defaultPath: path.join(app.getPath('downloads'), anhang.name) });
     if (r.canceled || !r.filePath) return false;

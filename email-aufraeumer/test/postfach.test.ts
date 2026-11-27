@@ -100,3 +100,25 @@ describe('MIME', () => {
     expect(dekodiere(new Uint8Array([0xfc]), 'windows-1252')).toBe('ü');
   });
 });
+
+describe('Ordner löschen', () => {
+  it('legt den Inhalt in den Papierkorb (Stern bleibt), entfernt den Ordner und holt alles zurück', async () => {
+    const { g, p } = aufbau();
+    const id = await g.labelAnlegen('Onthatass');
+    g.hinzufuegen(mail('x1', 'Shop <a@shop.de>', 'Eins', [id, 'UNREAD']));
+    g.hinzufuegen(mail('x2', 'Shop <a@shop.de>', 'Zwei', [id, 'INBOX']));
+    g.hinzufuegen(mail('x3', 'Shop <a@shop.de>', 'Wichtig', [id, 'STARRED']));
+    const info = await p.ordnerInhalt(id);
+    expect(info).toMatchObject({ name: 'Onthatass', gesamt: 3, stern: 1 });
+    const r = await p.ordnerLoeschen(id);
+    expect(r.papierkorb.sort()).toEqual(['x1', 'x2']);
+    expect(g.get('x1').labelIds).toContain('TRASH');
+    expect(g.get('x3').labelIds).not.toContain('TRASH');                 // Stern bleibt
+    expect(g.labelListe.find((l) => l.name === 'Onthatass')).toBeUndefined();
+    await expect(p.ordnerLoeschen('INBOX')).rejects.toThrow();           // System-Ordner nie
+    expect(await p.ordnerWiederherstellen(r.name, r.papierkorb)).toBe(2);
+    const neu = g.labelListe.find((l) => l.name === 'Onthatass')!;
+    expect(g.get('x1').labelIds).toContain(neu.id);
+    expect(g.get('x1').labelIds).not.toContain('TRASH');
+  });
+});
