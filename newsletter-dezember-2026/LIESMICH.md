@@ -21,6 +21,11 @@ Abmeldelink: `{%link_unsubscribe}`. Der Ordner `mail/` enthält dieselben Dateie
 - FID 4605 AEB400 wine red → `werkzeug-v3/a/aeb400.png` (Werksbild)
 - FID 4815 AEB490 Mocca → `werkzeug-v3/a/aeb490.png` (Werksbild, Farbe angepasst)
 
+## Links (27.11.2026, live geprüft)
+- Rad-Knöpfe: `#rad=<slug>~<FID>` öffnet genau dieses Rad (Homepage aad7a6d).
+- Probefahrt/Termin: `#termin=<Text>` öffnet das Formular mit passender Art und vorbelegtem Text.
+- WhatsApp nur noch bei Ortlieb und beim WhatsApp-Knopf der Winter-Inspektion.
+
 ## Sichtbare Platzhalter ([⚠ PRÜFEN])
 - keine
 

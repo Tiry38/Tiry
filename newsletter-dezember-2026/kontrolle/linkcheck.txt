@@ -1,40 +1,42 @@
-200 | https://tiry38.github.io/velo-center-web/ | 
-200 | https://tiry38.github.io/velo-center-web/#termin | Ziel #termin FEHLT
-200 | https://wa.me/491635343133?text=Hallo%20Velocenter%2C%20ich%20m%C3%B6chte%20einen%20Termin%20f%C3%BCr%20die%20Winter-Inspektion. | 
--- | tel:+49727178033 | Platzhalter/Protokoll
-200 | https://tiry38.github.io/velo-center-web/#kontakt | Ziel #kontakt FEHLT
-200 | https://tiry38.github.io/velo-center-web/#lager | Ziel #lager FEHLT
-200 | https://tiry38.github.io/velo-center-web/#rad=stevens-e-antelao-29 | × STEVENS E-Antelao 29'' Sofort verfügbar Sonderangebot UVP 4.099 € 2.499 € Du sparst 1.
-200 | https://wa.me/491635343133?text=Hallo%20Velocenter%2C%20ich%20interessiere%20mich%20f%C3%BCr%20das%20Velo%20de%20Ville%20SEB890%20SUV%20Smart%20in%20Pure%20White%20%2845%20cm%29%20f%C3%BCr%202.620%20%E2%82%AC. | 
-200 | https://tiry38.github.io/velo-center-web/#rad=i-sy-pop-art-e5-zr-f | × I:SY POP ART E5 ZR F Sofort verfügbar Sonderangebot UVP 4.599 € 3.499 € Du sparst 1.10
-200 | https://wa.me/491635343133?text=Hallo%20Velocenter%2C%20ich%20interessiere%20mich%20f%C3%BCr%20das%20KTM%20Macina%20City%20P610%20RT%20%2856%20cm%2C%20Oak%29%20f%C3%BCr%202.799%20%E2%82%AC. | 
-200 | https://wa.me/491635343133?text=Hallo%20Velocenter%2C%20ich%20interessiere%20mich%20f%C3%BCr%20das%20i%3ASY%20E5%20ZR%20F%20CX%20Century%20in%20Riviera%20Blue%20f%C3%BCr%203.999%20%E2%82%AC. | 
-200 | https://tiry38.github.io/velo-center-web/#rad=velo-de-ville-aeb400-allround-28-8gg-nex | × FOTO FOLGT VELO DE VILLE AEB400 Allround 28" 8Gg Nex Sofort verfügbar Sonderangebot UV
-200 | https://tiry38.github.io/velo-center-web/#dreirad | Ziel #dreirad FEHLT
-200 | https://wa.me/491635343133?text=Hallo%20Velocenter%2C%20ich%20habe%20eine%20Frage%20zu%20meinem%20E-Bike. | 
-200 | https://wa.me/491635343133 | 
--- | mailto:info@velo-center.de | Platzhalter/Protokoll
-200 | https://www.targobank.de/ | 
-200 | https://tiry38.github.io/velo-center-web/#finanzierung | Ziel #finanzierung FEHLT
-200 | https://www.enra.eu/?dealerid=10190 | 
-200 | https://tiry38.github.io/velo-center-web/#versicherung | Ziel #versicherung FEHLT
-200 | https://www.jobrad.org/ | 
-200 | https://www.bikeleasing.de/ | 
-200 | https://www.businessbike.de/ | 
-200 | https://www.deutsche-dienstrad.de/ | 
-200 | https://company-bike.com/ | 
-200 | https://www.kazenmaier.de/ | 
-200 | https://www.lease-a-bike.de/ | 
-200 | https://www.eurorad.de/ | 
-200 | https://radimdienst.de/ | 
-200 | https://www.jobrad.org/arbeitnehmer/ersparnis-berechnen | 
-200 | https://bikeleasing.de/leasingrechner/arbeitnehmer | 
-200 | https://www.businessbike.de/leasing-rechner/ | 
-200 | https://www.deutsche-dienstrad.de/jetzt-berechnen | 
-200 | https://tiry38.github.io/velo-center-web/#leasing | Ziel #leasing FEHLT
-200 | https://www.google.com/maps/search/?api=1&query=Velocenter+Hessert+Hartmannstra%C3%9Fe+25+76744+W%C3%B6rth+am+Rhein | 
-200 | https://tiry38.github.io/velo-center-web/#marken | Ziel #marken FEHLT
-200 | https://www.facebook.com/velocenterhessert | 
-429 | https://www.instagram.com/velocenterhessert/ | 
-200 | https://whatsapp.com/channel/0029VaIekua60eBc6k2bMD0q | 
--- | {%link_unsubscribe} | Platzhalter/Protokoll
+href="https://company-bike.com/"
+href="https://radimdienst.de/"
+href="https://tiry38.github.io/velo-center-web/"
+href="https://tiry38.github.io/velo-center-web/#dreirad"
+href="https://tiry38.github.io/velo-center-web/#finanzierung"
+href="https://tiry38.github.io/velo-center-web/#lager"
+href="https://tiry38.github.io/velo-center-web/#leasing"
+href="https://tiry38.github.io/velo-center-web/#rad=i-sy-e5-zr-f-cx-century~5991"
+href="https://tiry38.github.io/velo-center-web/#rad=i-sy-pop-art-e5-zr-f~5054"
+href="https://tiry38.github.io/velo-center-web/#rad=ktm-macina-city-p610-rt~4490"
+href="https://tiry38.github.io/velo-center-web/#rad=stevens-e-antelao-29~4537"
+href="https://tiry38.github.io/velo-center-web/#rad=stevens-e-juke-29"
+href="https://tiry38.github.io/velo-center-web/#rad=velo-de-ville-aeb400-allround-28-8gg-nex~4605"
+href="https://tiry38.github.io/velo-center-web/#rad=velo-de-ville-aeb490-allround-28-8gg-nex~4815"
+href="https://tiry38.github.io/velo-center-web/#rad=velo-de-ville-seb890-suv-smart-27-5-9gg~5173"
+href="https://tiry38.github.io/velo-center-web/#termin"
+href="https://tiry38.github.io/velo-center-web/#termin=Inspektion%20mit%20Winter-Aktion%20%2820%20%E2%82%AC%20g%C3%BCnstiger%20und%20Sattel%C3%BCberzug%20gratis%29"
+href="https://tiry38.github.io/velo-center-web/#termin=Probefahrt%20KTM%20Macina%20City%20P610%20RT%20%2856%20cm%2C%20Oak%29%20f%C3%BCr%202.799%20%E2%82%AC"
+href="https://tiry38.github.io/velo-center-web/#termin=Probefahrt%20Stevens%20E-Antelao%2029%E2%80%B3%20%2822%E2%80%B3%2C%20Arctic%20Grey%29%20f%C3%BCr%202.499%20%E2%82%AC"
+href="https://tiry38.github.io/velo-center-web/#termin=Probefahrt%20Van%20Raam%20Easy%20Rider%20Compact%20%28Vorf%C3%BChrmodell%2C%20weinrot%29%20f%C3%BCr%206.900%20%E2%82%AC"
+href="https://tiry38.github.io/velo-center-web/#termin=Probefahrt%20Velo%20de%20Ville%20AEB400%20Allround%2028%E2%80%B3%20%2855%20cm%2C%20Wine%20Red%29%20f%C3%BCr%202.239%20%E2%82%AC"
+href="https://tiry38.github.io/velo-center-web/#termin=Probefahrt%20Velo%20de%20Ville%20SEB890%20SUV%20Smart%20%2845%20cm%2C%20Pure%20White%29%20f%C3%BCr%202.620%20%E2%82%AC"
+href="https://tiry38.github.io/velo-center-web/#termin=Probefahrt%20i%3ASY%20E5%20ZR%20F%20CX%20Century%20%2847%20cm%2C%20Riviera%20Blue%29%20f%C3%BCr%203.999%20%E2%82%AC"
+href="https://tiry38.github.io/velo-center-web/#termin=Probefahrt%20i%3ASY%20Pop%20Art%20E5%20ZR%20F%20%2847%20cm%29%20f%C3%BCr%203.499%20%E2%82%AC"
+href="https://wa.me/491635343133"
+href="https://wa.me/491635343133?text=Hallo%20Velocenter%2C%20ich%20interessiere%20mich%20f%C3%BCr%20die%20Ortlieb%20Vario%20PS%20f%C3%BCr%2080%20%E2%82%AC."
+href="https://wa.me/491635343133?text=Hallo%20Velocenter%2C%20ich%20m%C3%B6chte%20einen%20Termin%20f%C3%BCr%20die%20Winter-Inspektion."
+href="https://whatsapp.com/channel/0029VaIekua60eBc6k2bMD0q"
+href="https://www.bikeleasing.de/"
+href="https://www.businessbike.de/"
+href="https://www.deutsche-dienstrad.de/"
+href="https://www.enra.eu/?dealerid=10190"
+href="https://www.eurorad.de/"
+href="https://www.facebook.com/velocenterhessert"
+href="https://www.google.com/maps/search/?api=1&amp;query=Velocenter+Hessert+Hartmannstra%C3%9Fe+25+76744+W%C3%B6rth+am+Rhein"
+href="https://www.instagram.com/velocenterhessert/"
+href="https://www.jobrad.org/"
+href="https://www.kazenmaier.de/"
+href="https://www.lease-a-bike.de/"
+href="mailto:info@velo-center.de"
+href="tel:+49727178033"
+href="{%link_unsubscribe}"
