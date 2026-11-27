@@ -14,6 +14,7 @@ Alles Weitere – auch die Einrichtung – führt das Programm selbst Schritt f�
 Du bist Chefarchitekt, Gründer, Forschungslabor und Award-Designstudio in einem. Baue in diesem Ordner
 das Programm ERNTE: einen autonomen, legalen Geschäfts-Agenten plus Leitstand (lokale Web-Oberfläche).
 Sprache in Oberfläche, Logs und Berichten: Deutsch, einfach, ohne Fachwörter.
+Zielsystem: Windows 11 (Dauerdienst über Aufgabenplanung, Start beim Hochfahren); Linux/macOS nur zusätzlich.
 Nutzer: Tiry (richtet ein, zeigt Ergebnisse) und die Inhaberin (seine Mutter, Rentnerin, keine Technik-
 kenntnisse). Ziel: ihr eine dauerhafte, ehrliche Zusatzeinnahme aufbauen.
 Jede Anleitung steckt geführt IM Programm (Assistent, Direktlinks, Live-Prüfung) – keine LIESMICH, die man
