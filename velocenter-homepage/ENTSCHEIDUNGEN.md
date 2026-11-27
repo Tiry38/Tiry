@@ -647,3 +647,9 @@
 ## 25.11.2026 – Keine Räder-Anzahl mehr (Tiry, verbindlich)
 - „250+ E-Bikes vor Ort“ überall entfernt: schwebender Knopf in beiden Showrooms (Start + Marken), Laufband-Eintrag, Startseiten-Text, Marken-Text, Service-Liste, Menü-Vorschau Start (Text + Schild).
 - Nie wieder eine Räder-Anzahl („250+“, „über 300“ …) auf die Homepage. Reiter „Auf Lager“ und „Live-Bestand“ bleiben.
+
+## 27.11.2026 – 35 Lagerbilder aus Bildlieferung (Tiry)
+- 36 Räder ohne Bild (27 Velo de Ville, 8 i:SY 2027, Van Raam Easy Rider 6279) aus einer anderen Sitzung geliefert, Quellen in `data/bildlieferung-2026-11-27.md`. Eingebaut wie der Bilder-Agent: `img/bestand/a-…`, `#bilderData` + `#bestandData`. 6034/6035 haben denselben Schlüssel → ein Bild.
+- 12 im Admin als „unsicher“ markiert (umgefärbt oder Ersatzmodell), Rad 4815 am echten Rad prüfen (Rahmenform).
+- Danach: 0 Lagerräder ohne Bild, alle 82 Angebotsräder mit Bild und Preis unter UVP.
+- Such-Methode für künftige Funde: `tools/bilder_methode.md`.
