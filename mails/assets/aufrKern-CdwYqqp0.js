@@ -1,1 +1,0 @@
-export{t as handyKern}from"./aufrKern-CGfxbefm.js";
