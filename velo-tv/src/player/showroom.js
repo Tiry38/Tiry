@@ -102,7 +102,9 @@
     function texte(x) {
             var nm = x.marke + ' ' + x.modell, dm = el.querySelector('.dl-m');
       dm.textContent = nm;
-      dm.style.fontSize = nm.length > 26 ? '50px' : nm.length > 20 ? '58px' : '';
+      // Name immer ganz zeigen (Tiry 27.11.2026: lange Velo-de-Ville-Namen wurden mit „…“ abgeschnitten): Schrift passt sich an
+      dm.style.fontSize = '';
+      for (var fs = 62; fs > 34 && dm.scrollWidth > dm.clientWidth + 1; fs -= 2) dm.style.fontSize = fs + 'px';
       el.querySelector('.dl-chips').textContent = [String(x.farbe || '').replace(/\s*\(.*?\)\s*/g, ' ').trim(), x.rahmen, x.gr].filter(Boolean).join(' · ');
       el.querySelector('.dl-uvp s').textContent = euro(x.preis);
       el.querySelector('.dl-ap').innerHTML = esc(euro(x.angebot)).replace(' €', '<i>€</i>');
