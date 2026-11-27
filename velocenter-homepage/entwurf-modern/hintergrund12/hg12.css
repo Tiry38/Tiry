@@ -1,7 +1,7 @@
 /* Vorlage „Nebel, See & Schnee“ (Tiry 21.11.2026): echte Fotos als lebende 3D-Szene, ganze Seite.
    Alte Hintergrund-Ebenen werden ausgeblendet, #hg (fest, hinter allem) übernimmt. */
 html.hg3 .sky,html.hg3 .blobs,html.hg3 .ribbons,html.hg3 .smoke,html.hg3 .pl-depth,html.hg3 .erl,html.hg3 .strk,html.hg3 #speed{display:none!important}
-html.hg3{background:#E9EBEE!important}html.hg3 body{background:transparent!important}
+html.hg3{background-color:#E9EBEE!important}html.hg3.hgO{background:#E9EBEE!important}html.hg3 body{background:transparent!important}
 #hg{position:fixed;left:0;top:0;width:100vw;height:100lvh;z-index:-3;pointer-events:none;display:block}
 /* Umschalter */
 #ueSw{position:fixed;z-index:9000;left:calc(12px + env(safe-area-inset-left,0px));top:50%;transform:translateY(-50%);

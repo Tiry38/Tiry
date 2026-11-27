@@ -182,7 +182,7 @@ void main(){vec2 q=gl_FragCoord.xy/uWH*vec2(1.,.39);
 var VQ='attribute vec2 a;void main(){gl_Position=vec4(a,0.,1.);}';
 
 /* ---------- Motor ---------- */
-var cv,gl,buf,pr,U={},W=0,H=0,dpr=1,raf,t0=performance.now(),M=[.5,.5],Mt=[.5,.5],sc=0,K=[0,0,-99],TX={},fade=0,shown='';
+var HP=0,cv,gl,buf,pr,U={},W=0,H=0,dpr=1,raf,t0=performance.now(),M=[.5,.5],Mt=[.5,.5],sc=0,K=[0,0,-99],TX={},fade=0,shown='';
 function sh(t,s){var o=gl.createShader(t);gl.shaderSource(o,s);gl.compileShader(o);if(!gl.getShaderParameter(o,gl.COMPILE_STATUS))throw new Error(gl.getShaderInfoLog(o));return o}
 /* Leistung (Tiry 27.11.2026: „viel weniger Leistung, alles bleibt gleich“): steht die Szene fest (HG12_FEST), werden ihre festen Werte
    als Konstanten in den Shader geschrieben – der Grafiktreiber wirft dann alles weg, was diese Szene nie braucht (Tageslauf, Polarlicht,
@@ -272,12 +272,14 @@ window.HG12_SHOT=function(o){FX=o;var sk=SK,so=SOFT,qs=QS;SK=0;SOFT=0;QS=1;cance
 function frame(){raf=requestAnimationFrame(frame);var now=performance.now();if(SOFT){var e0=TX[mode];if(e0&&e0.ok&&!DOK){DOK=1;NEED=1}if(DOK&&!NEED)return;NEED=0;sc=scrollY/innerHeight}
  else{if(TL&&!document.hidden){var dt=Math.min(200,now-TL);FT+=(dt-FT)*.12;FN++;gov(now)}TL=now;if(SK&&(++SKc%(SK+1)))return}
  size();var t=(now-t0)/1000;
- if(FX){t=FX.t;M=FX.m.slice();Mt=FX.m.slice();sc=FX.s;Po=[0,0,0];Pv=[0,0,0];VS=0;fade=1;shown=mode}else{
+ if(FX){t=FX.t;M=FX.m.slice();Mt=FX.m.slice();sc=FX.s;Po=FX.po?Pt.slice():[0,0,0];Pv=[0,0,0];VS=0;fade=1;shown=mode}else{
  for(var i=0;i<3;i++){Pv[i]+=(Pt[i]-Po[i])*.012;Pv[i]*=.90;Po[i]+=Pv[i]}
  M[0]+=(Mt[0]-M[0])*.045;M[1]+=(Mt[1]-M[1])*.045;var sc0=sc;sc+=(scrollY/innerHeight-sc)*.10;VS+=(Math.min(1.5,Math.abs(sc-sc0)*45)-VS)*.10}
  var e=TX[mode];gl.viewport(0,0,W,H);
  if(!e||!e.ok){gl.clearColor(.914,.922,.933,1);gl.clear(gl.COLOR_BUFFER_BIT);return}
- if(shown!==mode){shown=mode;fade=0}fade=SOFT?1:Math.min(1,fade+.025);
+ if(shown!==mode){var fst=!shown;shown=mode;fade=0;
+  /* Standbild (Tiry 27.11.2026): das erste echte Bild ist genau das Standbild (t=0, Start-Pose) – kein Einblenden aus Grau, die Fläche wird sichtbar und das Standbild geht weg */
+  if(fst&&HP){t0=now;t=0;fade=1;HP=2}}fade=SOFT||HP===2?1:Math.min(1,fade+.025);
  var c=CFG[mode];gl.useProgram(pr);
  gl.activeTexture(gl.TEXTURE0);gl.bindTexture(gl.TEXTURE_2D,e.p);gl.uniform1i(U.uP,0);
  gl.activeTexture(gl.TEXTURE1);gl.bindTexture(gl.TEXTURE_2D,e.d);gl.uniform1i(U.uD,1);
@@ -286,7 +288,9 @@ function frame(){raf=requestAnimationFrame(frame);var now=performance.now();if(S
  gl.uniform2f(U.uImg,e.w,e.h);gl.uniform2f(U.uFoc,W/H<.9?c.fxm:c.fx,c.fy);gl.uniform1f(U.uFl,c.fl);gl.uniform2f(U.uWf,c.wf[0],c.wf[1]);gl.uniform1f(U.uFg,c.fg);gl.uniform1f(U.uSn,c.sn);var sc3=c.sc||[.98,.985,1];gl.uniform1f(U.uSz,c.sz||1);gl.uniform1f(U.uLd,c.ld||0);gl.uniform1f(U.uDf,c.df||0);gl.uniform1f(U.uGr,c.gr||0);gl.uniform1f(U.uCs,c.cs||0);gl.uniform1f(U.uDy,c.dy||0);gl.uniform1f(U.uNt,c.nt||0);gl.uniform3f(U.uSc,sc3[0],sc3[1],sc3[2]);gl.uniform2f(U.uTy,c.ty?c.ty[0]:0,c.ty?c.ty[1]:0);gl.uniform1f(U.uFp,c.fp);gl.uniform1f(U.uAm,c.am);gl.uniform1f(U.uSp,c.sp);
  var sx=c.sun[0],sy=c.sun[1],sz2=c.sun[2];if(c.dy){var tg=Math.max(0,Math.min(1,sc/2.6));sx=.18+.70*tg;sy=.62+.34*Math.sin(Math.PI*Math.min(1,tg*1.15));sz2=c.sun[2]*(1+1.4*tg)}if(c.nt)sz2*=Math.max(0,1-sc/1.2);gl.uniform3f(U.uSun,c.fl?1-sx:sx,sy,sz2);gl.uniform1f(U.uFade,fade*fade*(3-2*fade));gl.uniform1f(U.uV,VS);gl.uniform3f(U.uPo,Po[0],Po[1],Po[2]);
  gl.activeTexture(gl.TEXTURE3);gl.bindTexture(gl.TEXTURE_2D,e.b||e.p);gl.uniform1i(U.uB,3);gl.uniform1f(U.uPre,e.b?1:0);gl.uniform1f(U.uFd,focus(e,c,t));gl.activeTexture(gl.TEXTURE4);gl.bindTexture(gl.TEXTURE_2D,PW||e.p);gl.uniform1i(U.uW,4);gl.uniform1f(U.uPw,PW?1:0);
- gl.bindBuffer(gl.ARRAY_BUFFER,buf);gl.vertexAttribPointer(0,2,gl.FLOAT,false,0,0);gl.drawArrays(gl.TRIANGLES,0,3)}
+ gl.bindBuffer(gl.ARRAY_BUFFER,buf);gl.vertexAttribPointer(0,2,gl.FLOAT,false,0,0);gl.drawArrays(gl.TRIANGLES,0,3);if(HP===2){HP=3;hpGo()}}
+/* Übergabe Standbild → Live: Fläche liegt deckungsgleich über dem Standbild, danach wird das Standbild (Seitenhintergrund) abgeräumt */
+function hpGo(){requestAnimationFrame(function(){cv.style.transition='opacity .25s linear';cv.style.opacity='';setTimeout(function(){de.classList.add('hgO');cv.style.transition=''},450)})}
 /* ---------- Glasplatten hinter freier Schrift (Tiry 22.11.2026: „richtige Glaselemente statt gesprüht“) ----------
    Alle dunklen Texte der aktiven Ansicht + Fußzeile, die nicht schon auf einer eigenen Karte stehen, werden zu Gruppen
    zusammengefasst (Abstand < 2×Luft) und bekommen je eine echte Glasplatte im Stil der Fußzeilen-Karte (Seiten-Koordinaten). */
@@ -403,9 +407,10 @@ function gpInit(){/* Schrift-Markierung nur bei Laden, Ansichtswechsel (nach dem
  var mn=document.querySelector('main');if(mn)new MutationObserver(function(ms){for(var i=0;i<ms.length;i++){var t=ms[i].target,o=ms[i].oldValue||'';if(t.classList&&t.classList.contains('in')&&!/(^| )in( |$)/.test(o)){gpSoon(700);return}}}).observe(mn,{subtree:true,attributes:true,attributeFilter:['class'],attributeOldValue:true});if(document.fonts&&document.fonts.ready)document.fonts.ready.then(function(){gpSoon(1200)})}
 function click(e){if(e.target&&e.target.closest&&e.target.closest('#ueSw'))return;K=[e.clientX/innerWidth,1-e.clientY/innerHeight,(performance.now()-t0)/1000]}
 function init(){cv=document.createElement('canvas');cv.id='hg';cv.setAttribute('aria-hidden','true');document.body.insertBefore(cv,document.body.firstChild);
+ try{HP=getComputedStyle(de).backgroundImage.indexOf('hg12/p/')>=0?1:0}catch(_){}if(HP)cv.style.opacity='0';
  gl=cv.getContext('webgl',{antialias:false,alpha:false,premultipliedAlpha:false,powerPreference:'high-performance'});
- if(!gl){cv.remove();de.classList.remove('hg3');return}gl.getExtension('OES_standard_derivatives');
- try{build()}catch(err){console.error('hg12',err.message);cv.remove();de.classList.remove('hg3');return}
+ if(!gl){cv.remove();de.classList.remove('hg3');de.classList.add('hgO');return}gl.getExtension('OES_standard_derivatives');
+ try{build()}catch(err){console.error('hg12',err.message);cv.remove();de.classList.remove('hg3');de.classList.add('hgO');return}
  try{var di=gl.getExtension('WEBGL_debug_renderer_info');var rn=di?String(gl.getParameter(di.UNMASKED_RENDERER_WEBGL)):'';if(/swiftshader|llvmpipe|software|basic render/i.test(rn))SOFT=1;
   /* schwache Grafik von Anfang an mit 30 Bildern (Hintergrund), damit nichts erst hängen muss: Intel HD/UHD 4xx–6xx (z. B. N5000), ältere Handy-Chips */
   else if(/(U?HD Graphics( \d{3})?\b(?!.*Iris))|Mali-(T|G[1-5]\d\b)|Adreno.{0,8}([1-5]\d\d|6[01]\d)\b|PowerVR/i.test(rn)||(navigator.hardwareConcurrency||8)<=2){WEAK=1;SK=1}}catch(_){}
