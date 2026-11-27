@@ -15,7 +15,7 @@ on:
         default: false
   push:
     branches: [main]
-    paths: ['velo-tv/src/player/**', 'velo-tv/scripts/showroom-video.js', '.github/workflows/velo-tv-showroom.yml']
+    paths: ['velo-tv/src/player/**', 'velo-tv/src/server/showroom.js', 'velo-tv/scripts/showroom-video.js', '.github/workflows/velo-tv-showroom.yml']
 
 permissions:
   contents: write

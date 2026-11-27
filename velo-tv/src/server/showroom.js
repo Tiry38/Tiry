@@ -70,6 +70,28 @@ function merge(bestand, rows) {
   return R;
 }
 
+/** Bild-Zuordnung der Homepage (Block bilderData der Live-Seite, wie bmKey/bmApply in index.html).
+    Tiry 27.11.2026: Lager-Bilder stehen dort, nicht in Firestore bestand/aktuell. */
+function bmKey(m, mo, j, f) {
+  const n = (t) => String(t == null ? '' : t).toLowerCase().replace(/[^a-z0-9]+/g, '');
+  return [m, mo, j, f].map(n).join('|');
+}
+function bmApply(d, bmap) {
+  if (!bmap) return d;
+  ((d && d.raeder) || []).forEach((r) => (r.farben || []).forEach((v) => {
+    const k = bmKey(r.marke, r.modell, v.jahr, v.farbe);
+    if (!(k in bmap)) return;
+    if (v.bild && !/^img\/bestand\//.test(v.bild)) return;
+    if (bmap[k]) v.bild = bmap[k]; else delete v.bild;
+  }));
+  return d;
+}
+function bilderDataAus(html) {
+  const m = /<script type="application\/json" id="bilderData">([\s\S]*?)<\/script>/.exec(html || '');
+  if (!m) return null;
+  try { const o = JSON.parse(m[1]); return o && typeof o === 'object' ? o : null; } catch (e) { return null; }
+}
+
 function marke(name) {
   const m = MARKEN.find(([re]) => re.test(name || ''));
   return m ? { k: m[1], n: m[2], o: m[3], c: m[4], logo: '/assets/marken/marke-' + m[1] + '.svg' } : null;
@@ -132,13 +154,27 @@ function createShowroom(opts) {
     return null;
   }
 
+  // Bild-Zuordnung von der Live-Seite; ohne Antwort die zuletzt bekannte (nie Bilder verlieren, nur weil die Seite hängt)
+  let bmapAlt = null;
+  async function bilderLaden() {
+    for (const basis of BILD_BASEN) {
+      try {
+        const r = await fetchImpl(basis + 'lager/?v=' + Date.now(), { signal: AbortSignal.timeout(30000) });
+        if (!r.ok) continue;
+        const b = bilderDataAus(await r.text());
+        if (b) { bmapAlt = b; return b; }
+      } catch (e) { /* nächste Adresse */ }
+    }
+    return bmapAlt;
+  }
+
   async function aktualisieren() {
     if (laeuft) return laeuft;
     laeuft = (async () => {
       try {
-        const [bestand, pub] = await Promise.all([fsGet('bestand/aktuell', fetchImpl), fsGet('pub/lager', fetchImpl).catch(() => null)]);
+        const [bestand, pub, bmap] = await Promise.all([fsGet('bestand/aktuell', fetchImpl), fsGet('pub/lager', fetchImpl).catch(() => null), bilderLaden()]);
         if (!bestand || !Array.isArray(bestand.raeder)) throw new Error('Kein Bestand gefunden');
-        const liste = angebote(merge(bestand, pub && pub.rows));
+        const liste = angebote(merge(bmApply(bestand, bmap), pub && pub.rows));
         const items = [];
         for (const a of liste) {
           const name = await bildLaden(a.quelle);
@@ -209,4 +245,4 @@ function createShowroom(opts) {
   };
 }
 
-module.exports = { createShowroom, merge, angebote, admKey, marke, fsObj };
+module.exports = { createShowroom, merge, angebote, admKey, marke, fsObj, bmKey, bmApply, bilderDataAus };

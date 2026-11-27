@@ -85,3 +85,17 @@ test('Zentrale lädt Angebote + Fotos und liefert sie dem Fernseher', async () =
     fs.rmSync(dir, { recursive: true, force: true });
   }
 });
+
+test('Bild-Zuordnung der Homepage (bilderData) wie bmApply', () => {
+  const { bmKey, bmApply, bilderDataAus } = require('../src/server/showroom');
+  assert.equal(bmKey('Velo de Ville', 'AEB400 Allround 28"', 2025, 'wine red'), 'velodeville|aeb400allround28|2025|winered');
+  const html = '<script type="application/json" id="bilderData">{"velodeville|aeb400allround28|2025|winered":"img/bestand/a-x.webp","a|b||weg":""}</script>';
+  const map = bilderDataAus(html);
+  const d = { raeder: [{ marke: 'Velo de Ville', modell: 'AEB400 Allround 28"', farben: [{ jahr: 2025, farbe: 'wine red' }] },
+    { marke: 'A', modell: 'B', farben: [{ farbe: 'weg', bild: 'img/bestand/alt.webp' }, { farbe: 'fremd', bild: 'https://x/y.jpg' }] }] };
+  bmApply(d, map);
+  assert.equal(d.raeder[0].farben[0].bild, 'img/bestand/a-x.webp');
+  assert.equal(d.raeder[1].farben[0].bild, undefined, 'leerer Wert = Bild entfernt');
+  assert.equal(d.raeder[1].farben[1].bild, 'https://x/y.jpg');
+  assert.equal(bilderDataAus('<html>'), null);
+});

@@ -18,6 +18,7 @@ Alle PCs mit Velo-TV sehen jede Änderung sofort. Design wie die neue Homepage (
   aus dem Live-Bestand der Homepage (Firestore `bestand/aktuell` + Ausblendungen aus `pub/lager`, wie `admMerge`).
   Die Zentrale holt alle 30 min neu und speichert die Fotos lokal (`src/server/showroom.js`). Ohne Knöpfe/Aufrufe zum Tippen.
 - **Showroom komplett** (Standard seit 26.11.2026): Dauer 0 = Showroom-Video einmal ganz von vorn bis Ende, dann der nächste Beitrag (z. B. weiteres Video ohne Ton) – so wechseln sich Videos automatisch ab.
+- **Lager-Bilder** (Tiry 27.11.2026): Fotos kommen auch aus dem Block `bilderData` der Live-Seite `/lager/` (wie `bmKey`/`bmApply` der Homepage), nicht nur aus Firestore.
 - **Angebots-Hinweis** (Tiry 27.11.2026): unter jedem Angebotspreis „Angebotspreise gelten nicht bei Leasing & 0 % Finanzierung“ (`.dl-hin`).
 - **Text-Folien** in 5 Stilen (Herbst, Rot, Dunkel, Hell, Verlauf), `*Wort*` = roter Akzent.
 - Je Beitrag: Dauer, „ganzes Video“, Ton, Bild füllen/ganz zeigen, **Zeitplan** (Wochentage, Uhrzeit, Datumsbereich).
