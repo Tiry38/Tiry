@@ -4591,8 +4591,11 @@ function arm(sec){$$('.pre',sec).forEach(el=>{el.classList.remove('in');if(!io){
 let cur=null,busy=false,pend=false;
 /* Sprungziel nachführen, falls Bilder/Animationen darüber die Höhe noch ändern */
 function anchFix(t,d=0){let n=0;const k=()=>{if(++n>6)return;const y=t.getBoundingClientRect().top;if(Math.abs(y-96)>24)t.scrollIntoView({behavior:'auto',block:'start'});setTimeout(k,350)};setTimeout(k,d+250);['wheel','touchstart','keydown'].forEach(e=>addEventListener(e,()=>{n=99},{once:true,passive:true}))}
-let RADK=null;
-function target(){const h=decodeURIComponent(location.hash.slice(1));if(h.startsWith('rad=')){RADK=h.slice(4);return['lager',null]}if(ALIAS[h])return ALIAS[h];return[ROUTES.includes(h)?h:'start',null]}
+let RADK=null,RADV=null;
+/* Newsletter-Links (Tiry 27.11.2026): #termin=<Text> füllt das Terminformular vor, #rad=<slug>~<Bestand-ID> öffnet genau diese Farbe */
+function tmPre(t){t=String(t||'').replace(/\s+/g,' ').trim().slice(0,300);if(!t)return;if(/^Probefahrt/i.test(t)){preset(t.replace(/^probefahrt/i,'Probefahrt'));return}
+ const art=['Inspektion','Reparatur','Verfügbarkeit'].find(x=>new RegExp(x,'i').test(t));if(art)$$('#tArt button').forEach(b=>b.classList.toggle('on',b.dataset.v===art));const m=$('#tMsg');if(m)m.value=t}
+function target(){const h=decodeURIComponent(location.hash.slice(1));if(h.startsWith('rad=')){const k=h.slice(4).split('~');RADK=k[0];RADV=k[1]||null;return['lager',null]}if(h.startsWith('termin=')){tmPre(h.slice(7));return ALIAS.termin}if(ALIAS[h])return ALIAS[h];return[ROUTES.includes(h)?h:'start',null]}
 function show(v,anchor,first){
  /* Reiterwechsel (auch Zurück-Taste am Handy) schließt offene Fenster, sonst bleibt die Seite gesperrt */
  if(!first){if(!$('#lgm').hidden&&!RADK)lgClose();if(!$('#rf').hidden)rfClose();if(!$('#cmp').hidden)cmpClose()}
@@ -4845,7 +4848,7 @@ function lgRender(){if(!LG.ok)return;const L=LG.list=lgFilter();const g=$('#lgGr
   '<div class="lgst">'+'<button type="button" class="hrt'+(merkHas(mKey(m))?' on':'')+'" data-merk="'+esc(mKey(m))+'" aria-pressed="'+merkHas(mKey(m))+'" aria-label="'+esc(m.marke+' '+m.modell)+' merken">'+HEART+'</button>'+(b?'<img class="wl" src="'+b.logo+'" alt="">':'')+(im?'<img class="bk" src="'+im+'" alt="" loading="lazy">':'<span class="phl">'+(b?'<img src="'+b.logo+'" alt="">':'<b>'+esc(m.marke)+'</b>')+'<small>Foto folgt</small></span>')+'<div class="bds">'+lgBadgesM(m)+'</div></div>'+
   '<div class="lgin"><span class="mk">'+esc(m.marke)+'</span><h3>'+esc(m.modell)+'</h3><div class="sp">'+(m.grs.length?'<span>'+esc(m.grs.length>1?m.grs.length+' Größen: '+m.grs.join(' · '):m.grs[0])+'</span>':'')+(m.fs.length?'<span class="fs">'+m.fs.slice(0,8).map(f=>'<i title="'+esc(f)+'" style="background:'+lgFarbe(f)+'"></i>').join('')+(m.fs.length===1?esc(m.fs[0]):m.fs.length+' Farben')+'</span>':'')+(m.rahmen?'<span>'+esc(m.rahmen)+'</span>':'')+'</div>'+
   '<div class="ft">'+lgPriceM(m)+'<button type="button" class="go" aria-label="'+esc(m.marke+' '+m.modell)+' ansehen">Ansehen</button></div></div></article>'}).join('')}
-function lgOpen(){lgLoad().then(()=>{lgChips();lgRender();if(RADK&&Array.isArray(LG.M)){const i=LG.M.findIndex(m=>rk(m)===RADK);RADK=null;if(i>=0)lgOpenList(LG.M,i)}})}
+function lgOpen(){lgLoad().then(()=>{lgChips();lgRender();if(RADK&&Array.isArray(LG.M)){const i=LG.M.findIndex(m=>rk(m)===RADK),vid=RADV;RADK=RADV=null;if(i>=0){lgOpenList(LG.M,i);const j=vid?LG.list[LG.i].v.findIndex(x=>String(x.id)===vid):-1;if(j>=0){LG.vi=j;lgStage();lgInfo()}}}})}
 const rk=m=>admSlug(mKey(m).replace(/\|/g,' '));
 /* Detailansicht im Showroom-Stil */
 function lgInfo(){const m=LG.list[LG.i],v=m.v[LG.vi]||m.v[0];const row=(l,x,h)=>x?'<div><dt>'+l+'</dt><dd>'+(h||esc(x))+'</dd></div>':'';
@@ -5337,7 +5340,7 @@ $('#cmp').addEventListener('click',e=>{if(e.target.closest('[data-cmpx]')){cmpCl
 $('#mkBar').addEventListener('click',cmpOpen);
 
 /* ---------- Probefahrt per WhatsApp + Dienstrad-Link im Detail ---------- */
-$('#lgm').addEventListener('click',e=>{const sh=e.target.closest('[data-share]');if(sh){const m=LG.list[LG.i],url=location.origin+location.pathname+'#rad='+rk(m),t=m.marke+' '+m.modell+' beim Velocenter Hessert in Wörth am Rhein';
+$('#lgm').addEventListener('click',e=>{const sh=e.target.closest('[data-share]');if(sh){const m=LG.list[LG.i],vid=(m.v[LG.vi]||{}).id,url=location.origin+location.pathname+'#rad='+rk(m)+(vid?'~'+vid:''),t=m.marke+' '+m.modell+' beim Velocenter Hessert in Wörth am Rhein';
   shOpen(m,url,t);return}
  const p=e.target.closest('[data-pf]');if(p){const m=LG.list[LG.i],v=m.v[LG.vi]||m.v[0];
   waOpen('Hallo Velocenter,\nich möchte gern dieses Rad Probe fahren'+(v.status==='bestellt'?' (sobald es da ist)':'')+':\n\n'+m.marke+' '+m.modell+'\n'+[v.gr&&'Größe: '+v.gr,v.farbe&&'Farbe: '+v.farbe].filter(Boolean).join(' · ')+(v.id?'\nBestands-Nr.: '+v.id:'')+'\n\nWann passt es euch?');return}

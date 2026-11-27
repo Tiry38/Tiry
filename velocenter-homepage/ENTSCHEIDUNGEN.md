@@ -653,3 +653,7 @@
 - 12 im Admin als „unsicher“ markiert (umgefärbt oder Ersatzmodell), Rad 4815 am echten Rad prüfen (Rahmenform).
 - Danach: 0 Lagerräder ohne Bild, alle 82 Angebotsräder mit Bild und Preis unter UVP.
 - Such-Methode für künftige Funde: `tools/bilder_methode.md`.
+
+## Newsletter-Links (Tiry 27.11.2026)
+- `#rad=<slug>~<Bestand-ID>` öffnet das Rad direkt in genau dieser Farbe/Ausführung (ohne `~ID` wie bisher). „Teilen“ hängt die ID automatisch an.
+- `#termin=<Text>` springt zum Terminformular und füllt die Nachricht vor; „Probefahrt …“ wählt Probefahrt, „Inspektion/Reparatur/Verfügbarkeit“ im Text wählt die passende Art. Text max. 300 Zeichen.
