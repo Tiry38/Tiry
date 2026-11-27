@@ -23,7 +23,7 @@ var de=document.documentElement;
 var FSRC=`#extension GL_OES_standard_derivatives : enable
 precision highp float;
 uniform vec2 uR,uM,uFoc,uImg;uniform vec2 uTy,uWf;uniform float uFg,uSn,uSz,uLd,uDf,uGr,uCs,uDy,uNt;uniform vec3 uSc;uniform float uT,uS,uFl,uFp,uAm,uSp,uFade,uV;uniform vec3 uK,uSun,uPo;
-uniform sampler2D uP,uD,uE,uB;uniform float uFd,uPre;
+uniform sampler2D uP,uD,uE,uB,uW;uniform float uFd,uPre,uPw;
 const vec3 RED=vec3(.886,.137,.176);
 float h21(vec2 p){p=fract(p*vec2(123.34,456.21));p+=dot(p,p+45.32);return fract(p.x*p.y);}
 float nz(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);
@@ -67,7 +67,7 @@ void main(){
   float wet=clamp(uS/1.6,0.,1.);
   float far=(q.y)/.385;
   float wm=smoothstep(0.,.35,wet*1.35-(1.-far)*.9)*(1.-smoothstep(.372,.388,q.y));
-  float pn=fbm(vec2(xw*2.6,z0*1.9))*.7+fbm(vec2(xw*7.,z0*5.5))*.3;
+  float pn;if(uPw>.5){vec4 w4=texture2D(uW,vec2(q.x,q.y/.39));pn=w4.r+w4.g/255.;}else pn=fbm(vec2(xw*2.6,z0*1.9))*.7+fbm(vec2(xw*7.,z0*5.5))*.3;
   float pud=smoothstep(.62-.22*wet,.70-.22*wet,pn);
   float rip=sin(z0*38.-uT*2.2+fbm(vec2(xw*4.,z0*3.)+uT*.05)*6.)*.0016*(.4+.6*n0);
   vec2 rq=vec2(q.x+rip,.385+(.385-q.y)*1.05+rip*.6);
@@ -166,14 +166,36 @@ void main(){vec2 q=gl_FragCoord.xy/uWH;float iA=uWH.x/uWH.y;
  for(int i=0;i<14;i++){vec3 cc=texture2D(uP,q+dl2*(float(i)/14.)*.85).rgb;a2+=smoothstep(.80,.98,dot(cc,vec3(.33)))*wt;wt*=.88;}
  gl_FragColor=vec4(acc/25.,a2/7.);}
 `;
+/* Pfützen-Form (Tiry 27.11.2026): hängt nur vom Ort auf der Straße ab, nie von Zeit/Maus -> einmal beim Laden in eine Textur
+   (Straße q.y 0–0,39, 16 Bit in Rot/Grün). Spiegelung, Kräuseln, Glitzern und das Nasswerden beim Scrollen bleiben live. */
+var WSRC=`precision highp float;
+uniform vec2 uWH;
+float h21(vec2 p){p=fract(p*vec2(123.34,456.21));p+=dot(p,p+45.32);return fract(p.x*p.y);}
+float nz(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);
+ return mix(mix(h21(i),h21(i+vec2(1,0)),f.x),mix(h21(i+vec2(0,1)),h21(i+vec2(1,1)),f.x),f.y);}
+float fbm(vec2 p){float s=0.,a=.5;for(int i=0;i<4;i++){s+=a*nz(p);p=p*2.03+vec2(1.7,9.2);a*=.5;}return s;}
+void main(){vec2 q=gl_FragCoord.xy/uWH*vec2(1.,.39);
+ float vx=.497,n0=max((.6164-q.y)*1.647,.05),z0=1./n0,xw=(q.x-vx)*z0;
+ float pn=fbm(vec2(xw*2.6,z0*1.9))*.7+fbm(vec2(xw*7.,z0*5.5))*.3;
+ float v=clamp(pn,0.,1.)*255.;gl_FragColor=vec4(floor(v)/255.,fract(v),0.,1.);}
+`;
 var VQ='attribute vec2 a;void main(){gl_Position=vec4(a,0.,1.);}';
 
 /* ---------- Motor ---------- */
 var cv,gl,buf,pr,U={},W=0,H=0,dpr=1,raf,t0=performance.now(),M=[.5,.5],Mt=[.5,.5],sc=0,K=[0,0,-99],TX={},fade=0,shown='';
 function sh(t,s){var o=gl.createShader(t);gl.shaderSource(o,s);gl.compileShader(o);if(!gl.getShaderParameter(o,gl.COMPILE_STATUS))throw new Error(gl.getShaderInfoLog(o));return o}
-function build(){pr=gl.createProgram();gl.attachShader(pr,sh(gl.VERTEX_SHADER,VQ));gl.attachShader(pr,sh(gl.FRAGMENT_SHADER,FSRC));gl.bindAttribLocation(pr,0,'a');gl.linkProgram(pr);
- if(!gl.getProgramParameter(pr,gl.LINK_STATUS))throw new Error(gl.getProgramInfoLog(pr));
- ['uFg','uSn','uSz','uSc','uLd','uDf','uGr','uCs','uDy','uNt','uTy','uWf','uR','uM','uFoc','uImg','uT','uS','uFl','uFp','uAm','uSp','uFade','uV','uK','uSun','uP','uD','uE','uPo','uB','uFd','uPre'].forEach(function(n){U[n]=gl.getUniformLocation(pr,n)});
+/* Leistung (Tiry 27.11.2026: „viel weniger Leistung, alles bleibt gleich“): steht die Szene fest (HG12_FEST), werden ihre festen Werte
+   als Konstanten in den Shader geschrieben – der Grafiktreiber wirft dann alles weg, was diese Szene nie braucht (Tageslauf, Polarlicht,
+   Wasserfall, Wolkenschatten, Klick-Welle …) und rechnet feste Werte vorab. Gleiches Bild, weniger Arbeit je Pixel. Fehler → alter Shader. */
+function spec(c){var f=function(v){v=String(+v);if(!/[.e]/.test(v))v+='.';return '('+v+')'},sc3=c.sc||[.98,.985,1],ty=c.ty||[0,0];
+ var D={uFg:f(c.fg),uSn:f(c.sn),uSz:f(c.sz||1),uLd:f(c.ld||0),uDf:f(c.df||0),uGr:f(c.gr||0),uCs:f(c.cs||0),uDy:f(c.dy||0),uNt:f(c.nt||0),uFl:f(c.fl),uFp:f(c.fp),uAm:f(c.am),uSp:f(c.sp),
+  uSc:'vec3'+'('+[sc3[0],sc3[1],sc3[2]].map(f).join(',')+')',uTy:'vec2('+f(ty[0])+','+f(ty[1])+')',uWf:'vec2('+f(c.wf[0])+','+f(c.wf[1])+')'};
+ var L=FSRC.split('\n');L[2]='uniform vec2 uR,uM,uFoc,uImg;uniform vec3 uSun,uK,uPo;uniform float uT,uS,uFade,uV;';
+ return L[0]+'\n'+Object.keys(D).map(function(k){return '#define '+k+' '+D[k]}).join('\n')+'\n'+L.slice(1).join('\n')}
+function link(fs){var p=gl.createProgram();gl.attachShader(p,sh(gl.VERTEX_SHADER,VQ));gl.attachShader(p,sh(gl.FRAGMENT_SHADER,fs));gl.bindAttribLocation(p,0,'a');gl.linkProgram(p);
+ if(!gl.getProgramParameter(p,gl.LINK_STATUS))throw new Error(gl.getProgramInfoLog(p));return p}
+function build(){pr=null;if(FEST&&CFG[mode]&&!window.HG12_GENERISCH)try{pr=link(spec(CFG[mode]))}catch(x){pr=null}if(!pr)pr=link(FSRC);
+ ['uFg','uSn','uSz','uSc','uLd','uDf','uGr','uCs','uDy','uNt','uTy','uWf','uR','uM','uFoc','uImg','uT','uS','uFl','uFp','uAm','uSp','uFade','uV','uK','uSun','uP','uD','uE','uPo','uB','uFd','uPre','uW','uPw'].forEach(function(n){U[n]=gl.getUniformLocation(pr,n)});
  buf=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,buf);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,3,-1,-1,3]),gl.STATIC_DRAW);gl.enableVertexAttribArray(0)}
 function tex(img){var t=gl.createTexture();gl.bindTexture(gl.TEXTURE_2D,t);gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL,true);
  gl.texImage2D(gl.TEXTURE_2D,0,gl.RGB,gl.RGB,gl.UNSIGNED_BYTE,img);
@@ -192,6 +214,15 @@ var PP=null;function pre(e,c0){if(!PP){PP=gl.createProgram();gl.attachShader(PP,
   gl.uniform2f(gl.getUniformLocation(PP,'uWH'),w,h);gl.uniform2f(gl.getUniformLocation(PP,'uSun'),c0.sun[0],c0.sun[1]);
   gl.bindBuffer(gl.ARRAY_BUFFER,buf);gl.vertexAttribPointer(0,2,gl.FLOAT,false,0,0);gl.drawArrays(gl.TRIANGLES,0,3)}
  gl.bindFramebuffer(gl.FRAMEBUFFER,null);gl.deleteFramebuffer(fb);if(!ok){gl.deleteTexture(t);return null}return t}
+var PW=null,PWT=0;function prePw(){if(PWT)return;PWT=1;var P=gl.createProgram();gl.attachShader(P,sh(gl.VERTEX_SHADER,VQ));gl.attachShader(P,sh(gl.FRAGMENT_SHADER,WSRC));gl.bindAttribLocation(P,0,'a');gl.linkProgram(P);
+  if(!gl.getProgramParameter(P,gl.LINK_STATUS))return;
+ var mx=gl.getParameter(gl.MAX_TEXTURE_SIZE)||2048,w=Math.min(PWW,mx),h=Math.min(PWH,mx),t=gl.createTexture(),fb=gl.createFramebuffer();
+ gl.bindTexture(gl.TEXTURE_2D,t);gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,w,h,0,gl.RGBA,gl.UNSIGNED_BYTE,null);texP();
+ gl.bindFramebuffer(gl.FRAMEBUFFER,fb);gl.framebufferTexture2D(gl.FRAMEBUFFER,gl.COLOR_ATTACHMENT0,gl.TEXTURE_2D,t,0);
+ var ok=gl.checkFramebufferStatus(gl.FRAMEBUFFER)===gl.FRAMEBUFFER_COMPLETE;
+ if(ok){gl.viewport(0,0,w,h);gl.useProgram(P);gl.uniform2f(gl.getUniformLocation(P,'uWH'),w,h);gl.bindBuffer(gl.ARRAY_BUFFER,buf);gl.vertexAttribPointer(0,2,gl.FLOAT,false,0,0);gl.drawArrays(gl.TRIANGLES,0,3)}
+ gl.bindFramebuffer(gl.FRAMEBUFFER,null);gl.deleteFramebuffer(fb);gl.deleteProgram(P);if(ok)PW=t;else gl.deleteTexture(t)}
+var PWW=2048,PWH=1024;
 /* Tiefenkarte für JS (Rotkanal), bilinear wie die Textur (Zeile 0 = unten) */
 function dmap(img){var w=img.naturalWidth,h=img.naturalHeight,k=document.createElement('canvas');k.width=w;k.height=h;var x=k.getContext('2d',{willReadFrequently:true});x.drawImage(img,0,0);
  var px=x.getImageData(0,0,w,h).data,r=new Uint8Array(w*h);for(var i=0;i<w*h;i++)r[i]=px[i*4];return {w:w,h:h,r:r}}
@@ -204,7 +235,7 @@ function focus(e,c,t){var m=e.dm;if(!m||!c.df)return -1;var A=W/H,iA=e.w/e.h,cl=
  var cx=cl(fx,sx*.5+.05,1-sx*.5-.05),cy=cl(fy,sy*.5+.05,1-sy*.5-.05),px=cx+(M[0]-.5)*sx,py=cy+(M[1]-.5)*sy;
  var D=function(u,v){return dAt(m,c.fl?1-u:u,v)};return (D(px,py)*2+D(px+.02,py)+D(px-.02,py)+D(px,py+.02)+D(px,py-.02))/6}
 function load(k){if(TX[k])return;var e=TX[k]={ok:0};var big=Math.max(screen.width,screen.height)*Math.min(devicePixelRatio||1,2)>1700;
- var n=3;function done(){if(--n===0){e.p=tex(e.ip);e.d=tex(e.id);if(e.ih)e.e=tex(e.ih);e.w=e.ip.naturalWidth;e.h=e.ip.naturalHeight;var c0=CFG[k];if(c0.df||c0.gr){try{e.b=pre(e,c0)}catch(x){e.b=null}try{e.dm=dmap(e.id)}catch(x){e.dm=null}}e.ok=1}}
+ var n=3;function done(){if(--n===0){e.p=tex(e.ip);e.d=tex(e.id);if(e.ih)e.e=tex(e.ih);e.w=e.ip.naturalWidth;e.h=e.ip.naturalHeight;var c0=CFG[k];if(c0.df||c0.gr){try{e.b=pre(e,c0)}catch(x){e.b=null}if(c0.ld&&!window.HG12_OHNEPW)try{prePw()}catch(x){PW=null}try{e.dm=dmap(e.id)}catch(x){e.dm=null}}e.ok=1}}
  e.ip=new Image();e.ip.decoding='async';e.ip.onload=done;e.ip.src=BASE+k+'-'+(big?2400:1400)+'.webp';
  e.id=new Image();e.id.onload=done;e.id.src=BASE+k+'-d.png';
  e.ih=new Image();e.ih.onload=done;e.ih.src=BASE+k+'-m.png'}
@@ -228,16 +259,22 @@ function gov(now){if(now<GN)return;GN=now+1000;if(now<1500+t0)return;
  if(FT>60&&SK===0&&now>LOCK){SK=1;QS=Math.min(QS,.75);HOLD=now+15000;return}
  if(FT>26&&now>LOCK){if(SK<1){GT={k:'s',v:SK,ft:FT,n:FN};SK=1}else if(QS>.6){GT={k:'q',v:QS,ft:FT,n:FN};QS=Math.max(.6,QS-.15)}else if(SK<3){GT={k:'s',v:SK,ft:FT,n:FN};SK++}else return;HOLD=now+(now-RZ<5000?60000:10000)}
  else if(FT<19&&now>HOLD){if(SK>1){SK--;RZ=now;HOLD=now+10000}else if(QS<1){QS=Math.min(1,QS+.05);RZ=now}else if(SK===1&&!WEAK){SK=0;RZ=now;HOLD=now+10000}}}
-function size(){var big=innerWidth*innerHeight>1.4e6;dpr=Math.min(devicePixelRatio||1,1.25)*(big?.8:.95)*QS;
- var w=Math.round(cv.clientWidth*dpr),h=Math.round(cv.clientHeight*dpr);if(w!==W||h!==H){W=cv.width=w;H=cv.height=h}}
+/* Größe der Fläche nur bei Größenänderung messen – clientWidth je Bild zwang den Browser jedes Mal zum Layout (Tiry 27.11.2026) */
+var CW=0,CH=0;function meas(){CW=cv.clientWidth;CH=cv.clientHeight}
+function size(){if(!CW)meas();var big=innerWidth*innerHeight>1.4e6;dpr=Math.min(devicePixelRatio||1,1.25)*(big?.8:.95)*QS;
+ var w=Math.round(CW*dpr),h=Math.round(CH*dpr);if(w!==W||h!==H){W=cv.width=w;H=cv.height=h}}
 var VS=0,Po=[0,0,0],Pv=[0,0,0],Pt=[0,0,0];
 function pose(){var h=0,k=(location.hash||'#start')+mode;for(var i=0;i<k.length;i++)h=(h*31+k.charCodeAt(i))|0;h=Math.abs(h);
  Pt=[((h%7)-3)*.010,(((h>>3)%5)-2)*.006,.03+(h>>6)%4*.025];Pv[2]-=.10}
+/* Messplatz (Tests): feste Zeit/Maus/Scrollposition, misst ms je Hintergrund-Bild bzw. liefert das Bild zum Vergleich */
+var FX=null;window.HG12_BENCH=function(o,n){FX=o;var sk=SK,so=SOFT,qs=QS;SK=0;SOFT=0;QS=1;cancelAnimationFrame(raf);frame();gl.finish();var a=performance.now();for(var i=0;i<(n||5);i++){frame();cancelAnimationFrame(raf);gl.readPixels(0,0,1,1,gl.RGBA,gl.UNSIGNED_BYTE,new Uint8Array(4))}var ms=(performance.now()-a)/(n||5);SK=sk;SOFT=so;QS=qs;FX=null;raf=requestAnimationFrame(frame);return ms};
+window.HG12_SHOT=function(o){FX=o;var sk=SK,so=SOFT,qs=QS;SK=0;SOFT=0;QS=1;cancelAnimationFrame(raf);frame();cancelAnimationFrame(raf);var px=new Uint8Array(W*H*4);gl.readPixels(0,0,W,H,gl.RGBA,gl.UNSIGNED_BYTE,px);SK=sk;SOFT=so;QS=qs;FX=null;raf=requestAnimationFrame(frame);return {w:W,h:H,px:px}};
 function frame(){raf=requestAnimationFrame(frame);var now=performance.now();if(SOFT){var e0=TX[mode];if(e0&&e0.ok&&!DOK){DOK=1;NEED=1}if(DOK&&!NEED)return;NEED=0;sc=scrollY/innerHeight}
  else{if(TL&&!document.hidden){var dt=Math.min(200,now-TL);FT+=(dt-FT)*.12;FN++;gov(now)}TL=now;if(SK&&(++SKc%(SK+1)))return}
  size();var t=(now-t0)/1000;
+ if(FX){t=FX.t;M=FX.m.slice();Mt=FX.m.slice();sc=FX.s;Po=[0,0,0];Pv=[0,0,0];VS=0;fade=1;shown=mode}else{
  for(var i=0;i<3;i++){Pv[i]+=(Pt[i]-Po[i])*.012;Pv[i]*=.90;Po[i]+=Pv[i]}
- M[0]+=(Mt[0]-M[0])*.045;M[1]+=(Mt[1]-M[1])*.045;var sc0=sc;sc+=(scrollY/innerHeight-sc)*.10;VS+=(Math.min(1.5,Math.abs(sc-sc0)*45)-VS)*.10;
+ M[0]+=(Mt[0]-M[0])*.045;M[1]+=(Mt[1]-M[1])*.045;var sc0=sc;sc+=(scrollY/innerHeight-sc)*.10;VS+=(Math.min(1.5,Math.abs(sc-sc0)*45)-VS)*.10}
  var e=TX[mode];gl.viewport(0,0,W,H);
  if(!e||!e.ok){gl.clearColor(.914,.922,.933,1);gl.clear(gl.COLOR_BUFFER_BIT);return}
  if(shown!==mode){shown=mode;fade=0}fade=SOFT?1:Math.min(1,fade+.025);
@@ -248,7 +285,7 @@ function frame(){raf=requestAnimationFrame(frame);var now=performance.now();if(S
  gl.uniform2f(U.uR,W,H);gl.uniform1f(U.uT,t);gl.uniform1f(U.uS,sc);gl.uniform2f(U.uM,M[0],M[1]);gl.uniform3f(U.uK,K[0],K[1],K[2]);
  gl.uniform2f(U.uImg,e.w,e.h);gl.uniform2f(U.uFoc,W/H<.9?c.fxm:c.fx,c.fy);gl.uniform1f(U.uFl,c.fl);gl.uniform2f(U.uWf,c.wf[0],c.wf[1]);gl.uniform1f(U.uFg,c.fg);gl.uniform1f(U.uSn,c.sn);var sc3=c.sc||[.98,.985,1];gl.uniform1f(U.uSz,c.sz||1);gl.uniform1f(U.uLd,c.ld||0);gl.uniform1f(U.uDf,c.df||0);gl.uniform1f(U.uGr,c.gr||0);gl.uniform1f(U.uCs,c.cs||0);gl.uniform1f(U.uDy,c.dy||0);gl.uniform1f(U.uNt,c.nt||0);gl.uniform3f(U.uSc,sc3[0],sc3[1],sc3[2]);gl.uniform2f(U.uTy,c.ty?c.ty[0]:0,c.ty?c.ty[1]:0);gl.uniform1f(U.uFp,c.fp);gl.uniform1f(U.uAm,c.am);gl.uniform1f(U.uSp,c.sp);
  var sx=c.sun[0],sy=c.sun[1],sz2=c.sun[2];if(c.dy){var tg=Math.max(0,Math.min(1,sc/2.6));sx=.18+.70*tg;sy=.62+.34*Math.sin(Math.PI*Math.min(1,tg*1.15));sz2=c.sun[2]*(1+1.4*tg)}if(c.nt)sz2*=Math.max(0,1-sc/1.2);gl.uniform3f(U.uSun,c.fl?1-sx:sx,sy,sz2);gl.uniform1f(U.uFade,fade*fade*(3-2*fade));gl.uniform1f(U.uV,VS);gl.uniform3f(U.uPo,Po[0],Po[1],Po[2]);
- gl.activeTexture(gl.TEXTURE3);gl.bindTexture(gl.TEXTURE_2D,e.b||e.p);gl.uniform1i(U.uB,3);gl.uniform1f(U.uPre,e.b?1:0);gl.uniform1f(U.uFd,focus(e,c,t));
+ gl.activeTexture(gl.TEXTURE3);gl.bindTexture(gl.TEXTURE_2D,e.b||e.p);gl.uniform1i(U.uB,3);gl.uniform1f(U.uPre,e.b?1:0);gl.uniform1f(U.uFd,focus(e,c,t));gl.activeTexture(gl.TEXTURE4);gl.bindTexture(gl.TEXTURE_2D,PW||e.p);gl.uniform1i(U.uW,4);gl.uniform1f(U.uPw,PW?1:0);
  gl.bindBuffer(gl.ARRAY_BUFFER,buf);gl.vertexAttribPointer(0,2,gl.FLOAT,false,0,0);gl.drawArrays(gl.TRIANGLES,0,3)}
 /* ---------- Glasplatten hinter freier Schrift (Tiry 22.11.2026: „richtige Glaselemente statt gesprüht“) ----------
    Alle dunklen Texte der aktiven Ansicht + Fußzeile, die nicht schon auf einer eigenen Karte stehen, werden zu Gruppen
@@ -373,6 +410,7 @@ function init(){cv=document.createElement('canvas');cv.id='hg';cv.setAttribute('
   /* schwache Grafik von Anfang an mit 30 Bildern (Hintergrund), damit nichts erst hängen muss: Intel HD/UHD 4xx–6xx (z. B. N5000), ältere Handy-Chips */
   else if(/(U?HD Graphics( \d{3})?\b(?!.*Iris))|Mali-(T|G[1-5]\d\b)|Adreno.{0,8}([1-5]\d\d|6[01]\d)\b|PowerVR/i.test(rn)||(navigator.hardwareConcurrency||8)<=2){WEAK=1;SK=1}}catch(_){}
  if(SOFT){QS=.6;var st0=0,nd=function(){NEED=1};addEventListener('resize',nd);addEventListener('hashchange',function(){NEED=1;setTimeout(nd,500)});addEventListener('scroll',function(){clearTimeout(st0);st0=setTimeout(nd,220)},{passive:true})}
+ addEventListener('resize',function(){CW=0});
  window.HG12_STAT=function(){return {soft:SOFT,weak:WEAK,qs:QS,skip:SK,ft:Math.round(FT*10)/10}};
  addEventListener('pointermove',function(e){Mt=[e.clientX/innerWidth,1-e.clientY/innerHeight]},{passive:true});
  addEventListener('pointerdown',click,{passive:true});
