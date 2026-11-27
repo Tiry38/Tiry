@@ -1,12 +1,13 @@
 name: Velo-TV Showroom-Video
 
-# Alle 15 Minuten (Tiry 25.11.2026): prüft die Angebotsräder im Live-Bestand der Homepage. Hat sich etwas geändert (neues Angebot, Preis,
+# Angestoßen vom Wächter (velo-tv-waechter.yml, prüft alle 10 Minuten – der GitHub-Zeitplan allein lief nur selten),
+# zusätzlich einmal früh morgens als Rückfall. Prüft die Angebotsräder im Live-Bestand der Homepage. Hat sich etwas geändert (neues Angebot, Preis,
 # verkauft/ausgeblendet, Foto) oder wurde das Showroom-Design geändert, wird das Video neu berechnet und ins Release
 # „velo-tv-showroom“ gelegt. Die Velo-TV-Zentrale holt es sich alle 15 Minuten von dort.
 # Verteilt (Tiry 25.11.2026): bis zu 20 Rechner rendern gleichzeitig je 2–3 Räder → fertig in ca. 20 Minuten.
 on:
   schedule:
-    - cron: '8,23,38,53 * * * *'
+    - cron: '41 4 * * *'
   workflow_dispatch:
     inputs:
       force:
@@ -45,7 +46,11 @@ jobs:
       - run: npm ci
       - name: Geändert?
         id: check
-        run: node scripts/showroom-video.js --check --out out --alt "$ALT" ${{ inputs.force && '--force' || '' }}
+        run: node scripts/showroom-video.js --check --out out --alt "$ALT" --schnappschuss-speichern out/schnappschuss.json ${{ inputs.force && '--force' || '' }}
+      - name: Schnappschuss für alle Stücke
+        if: steps.check.outputs.changed == 'true'
+        uses: actions/upload-artifact@v4
+        with: { name: schnappschuss, path: velo-tv/out/schnappschuss.json, retention-days: 1 }
       - name: Name der Hintergrund-Schleife
         id: hg
         run: echo "name=hintergrund-$(sha1sum src/player/vendor/hg12.js | cut -c1-10).mp4" >> "$GITHUB_OUTPUT"
@@ -101,8 +106,10 @@ jobs:
           sudo apt-get install -y -qq ffmpeg || { sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg; }
           mkdir -p out
           curl -fsSL -o out/hintergrund.mp4 "https://github.com/Tiry38/Tiry/releases/download/velo-tv-showroom/${{ needs.pruefen.outputs.hg }}"
+      - uses: actions/download-artifact@v4
+        with: { name: schnappschuss, path: velo-tv/out }
       - name: Stück ${{ matrix.teil }} rendern
-        run: node scripts/showroom-video.js --out out/teile --force --hintergrund-datei out/hintergrund.mp4 --teil ${{ matrix.teil }} --teile ${{ needs.pruefen.outputs.teile }} --version-soll ${{ needs.pruefen.outputs.version }}
+        run: node scripts/showroom-video.js --out out/teile --force --hintergrund-datei out/hintergrund.mp4 --teil ${{ matrix.teil }} --teile ${{ needs.pruefen.outputs.teile }} --version-soll ${{ needs.pruefen.outputs.version }} --schnappschuss out/schnappschuss.json
       - uses: actions/upload-artifact@v4
         with:
           name: teil-${{ matrix.teil }}
@@ -123,12 +130,14 @@ jobs:
           npm ci
           sudo apt-get install -y -qq ffmpeg || { sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg; }
       - uses: actions/download-artifact@v4
+        with: { name: schnappschuss, path: velo-tv/out }
+      - uses: actions/download-artifact@v4
         with:
           pattern: teil-*
           path: velo-tv/out/teile
           merge-multiple: true
       - name: Zusammenfügen
-        run: node scripts/showroom-video.js --zusammen out/teile --out out --force --version-soll ${{ needs.pruefen.outputs.version }}
+        run: node scripts/showroom-video.js --zusammen out/teile --out out --force --version-soll ${{ needs.pruefen.outputs.version }} --schnappschuss out/schnappschuss.json
       - name: Release velo-tv-showroom aktualisieren
         env: { GH_TOKEN: '${{ secrets.GITHUB_TOKEN }}' }
         run: |

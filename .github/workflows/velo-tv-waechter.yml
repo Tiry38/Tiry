@@ -1,0 +1,55 @@
+name: Velo-TV Wächter
+
+# Tiry 27.11.2026: Der GitHub-Zeitplan „alle 15 Minuten“ lief nur alle paar Stunden. Der Wächter läuft dauerhaft,
+# prüft tagsüber alle 10 Minuten (nachts stündlich), ob sich Angebote/Preise/Fotos geändert haben, und startet dann
+# den Bau „Velo-TV Showroom-Video“. Nach ca. 5,5 Stunden startet er sich selbst neu (Kette), der Zeitplan ist nur Rückfall.
+on:
+  schedule:
+    - cron: '7 */3 * * *'
+  workflow_dispatch:
+
+permissions:
+  actions: write
+  contents: read
+
+concurrency:
+  group: velo-tv-waechter
+  cancel-in-progress: false
+
+env:
+  ALT: https://github.com/Tiry38/Tiry/releases/download/velo-tv-showroom/showroom-video.json
+  GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  GH_REPO: ${{ github.repository }}
+
+jobs:
+  waechter:
+    runs-on: ubuntu-latest
+    timeout-minutes: 345
+    defaults: { run: { working-directory: velo-tv } }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: npm, cache-dependency-path: velo-tv/package-lock.json }
+      - run: npm ci
+      - name: Wachen
+        run: |
+          ENDE=$(( $(date +%s) + 330*60 ))
+          while [ "$(date +%s)" -lt "$ENDE" ]; do
+            laeuft=$(gh run list --workflow velo-tv-showroom.yml --limit 5 --json status --jq '[.[] | select(.status != "completed")] | length' || echo 1)
+            if [ "$laeuft" = "0" ]; then
+              rm -f "$GITHUB_OUTPUT.w"; touch "$GITHUB_OUTPUT.w"
+              if GITHUB_OUTPUT="$GITHUB_OUTPUT.w" node scripts/showroom-video.js --check --out out --alt "$ALT"; then
+                if grep -q '^changed=true' "$GITHUB_OUTPUT.w"; then
+                  echo "$(date -u +%H:%M) Änderung → Bau starten"; gh workflow run velo-tv-showroom.yml --ref main; sleep 120
+                fi
+              else echo "$(date -u +%H:%M) Prüfung fehlgeschlagen, nächster Versuch später"; fi
+            else echo "$(date -u +%H:%M) Bau läuft noch"; fi
+            STD=$(TZ=Europe/Berlin date +%H)
+            STD=${STD#0}; STD=${STD:-0}
+            if [ "$STD" -ge 6 ] && [ "$STD" -lt 20 ]; then P=600; else P=3600; fi
+            REST=$(( ENDE - $(date +%s) )); [ "$REST" -lt "$P" ] && P=$REST
+            [ "$P" -gt 0 ] && sleep "$P"
+          done
+      - name: Nächsten Wächter starten
+        if: always()
+        run: gh workflow run velo-tv-waechter.yml --ref main

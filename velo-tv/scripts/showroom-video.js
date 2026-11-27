@@ -31,6 +31,9 @@ const VERSION_SOLL = arg('version-soll', '');           // alle Stücke müssen 
 const MAX_TEILE = 20;                                    // GitHub erlaubt 20 gleichzeitige Rechner (kostenlos)
 const HG_MODUS = !!arg('hintergrund', false);           // nur die Hintergrund-Schleife rendern
 const HG_DATEI = arg('hintergrund-datei', '');           // fertige Hintergrund-Schleife für das Showroom-Video
+// Schnappschuss (Tiry 27.11.2026): die Prüfung speichert Bestand + Bild-Zuordnung, alle Stücke rendern genau diesen Stand.
+// So bricht der Bau nicht mehr ab, wenn sich die Homepage währenddessen ändert.
+const SCHNAPP_SPEICHERN = arg('schnappschuss-speichern', ''), SCHNAPP = arg('schnappschuss', '');
 const HG_LAENGE = 24, HG_BLENDE = 3;                     // Schleife 24 s, nahtlos überblendet   // nur prüfen, ob sich etwas geändert hat (Ausgabe changed=true/false)
 const log = (...a) => console.log('[showroom-video]', ...a);
 
@@ -204,7 +207,20 @@ async function concat(dateien, ziel, extra) {
 (async () => {
   fs.mkdirSync(OUT, { recursive: true });
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'velotv-render-'));
+  const schnappKey = (u) => String(u).replace(/[?&]v=\d+/, '').replace(/[?&]key=[^&]*/, '');
+  const schnapp = SCHNAPP ? JSON.parse(fs.readFileSync(path.resolve(SCHNAPP), 'utf8')) : null, aufnahme = {};
+  const fetchSchnapp = async (url, o) => {
+    const k = schnappKey(url), merken = /firestore\.googleapis\.com|\/lager\/$/.test(k);
+    if (schnapp && merken) {
+      if (!(k in schnapp)) return new Response('', { status: 404 });
+      return new Response(schnapp[k].body, { status: schnapp[k].status });
+    }
+    const r = await fetch(url, o);
+    if (SCHNAPP_SPEICHERN && merken) { const body = await r.text(); aufnahme[k] = { status: r.status, body }; return new Response(body, { status: r.status }); }
+    return r;
+  };
   const srv = createServer({
+    fetch: fetchSchnapp,
     dataDir: dir, playerDir: path.join(R, 'src/player'), version: 'render', showroomAutoStart: false, tvSteuerung: false,
     assetDirs: { '/assets/': path.join(R, 'src/renderer/assets'), '/shared/': path.join(R, 'src/shared') }
   });
@@ -258,6 +274,7 @@ async function concat(dateien, ziel, extra) {
 
     if (CHECK) {
       log('Geändert (oder erzwungen) – neues Video wird gebaut.');
+      if (SCHNAPP_SPEICHERN) { fs.writeFileSync(path.resolve(SCHNAPP_SPEICHERN), JSON.stringify(aufnahme)); log('Schnappschuss: ' + Object.keys(aufnahme).length + ' Quellen'); }
       const N = Math.min(MAX_TEILE, items.length);
       if (process.env.GITHUB_OUTPUT) fs.appendFileSync(process.env.GITHUB_OUTPUT,
         'changed=true\nversion=' + version + '\nteile=' + N + '\nmatrix=' + JSON.stringify([...Array(N).keys()]) + '\n');

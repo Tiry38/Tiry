@@ -49,7 +49,7 @@ Alle PCs mit Velo-TV sehen jede Änderung sofort. Design wie die neue Homepage (
 ## Showroom als Video (flüssig auf jedem Fernseher)
 - Fernseher-Browser sind für WebGL-Animationen zu schwach (LG webOS 25 ruckelt schon bei der Homepage). Darum wird der
   Showroom in der Cloud **Bild für Bild mit virtueller Uhr** gerendert: `scripts/showroom-video.js`.
-- Workflow `.github/workflows/velo-tv-showroom.yml`: alle 15 Minuten `--check` (Angebote + Design-Fingerabdruck), nur bei Änderung
+- Workflow `.github/workflows/velo-tv-showroom.yml`: angestoßen vom **Wächter** `.github/workflows/velo-tv-waechter.yml` (läuft dauerhaft, tagsüber alle 10 min `--check`, nachts stündlich, startet sich nach ~5,5 h selbst neu; der GitHub-Zeitplan allein lief nur alle paar Stunden – Tiry 27.11.2026). `--check` speichert einen **Schnappschuss** (Bestand + Bild-Zuordnung), alle Stücke rendern genau diesen Stand (`--schnappschuss`) → kein Abbruch mehr, wenn sich die Homepage während des Baus ändert. Prüfung: (Angebote + Design-Fingerabdruck), nur bei Änderung
   wird gerendert. Hintergrund-Schleife (Herbstallee, 24 s, nahtlos) wird einmal gebaut und als `hintergrund-<hash>.mp4`
   im Release **velo-tv-showroom** wiederverwendet; das Video (`showroom.mp4` + `showroom-video.json`) liegt im selben Release.
   Schleifen-Naht: Der Fernseher spielt das Video in Endlosschleife. Alle durchgehenden Endlos-Animationen (Laufband,
