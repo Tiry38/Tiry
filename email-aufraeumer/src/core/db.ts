@@ -1,5 +1,19 @@
-// SQLite-Speicher (eingebautes node:sqlite – keine native Zusatz-Abhängigkeit).
-import { DatabaseSync } from 'node:sqlite';
+// SQLite-Speicher. Am PC: eingebautes node:sqlite (keine native Zusatz-Abhängigkeit).
+// In der Handy-App: dieselbe Datenbank über sql.js (WebAssembly) – siehe web/sqlSpeicher.ts.
+
+/** Was der Speicher von einer SQLite-Verbindung braucht (node:sqlite erfüllt das direkt). */
+export interface SqlDb {
+  exec(sql: string): void;
+  prepare(sql: string): { get(...a: any[]): any; all(...a: any[]): any[]; run(...a: any[]): { lastInsertRowid: number | bigint; changes: number | bigint } };
+  close(): void;
+}
+
+function nodeSqlite(pfad: string): SqlDb {
+  // ohne import – sonst landet node:sqlite im Handy-Paket
+  const m = (globalThis as any).process?.getBuiltinModule?.('node:sqlite');
+  if (!m) throw new Error('Kein SQLite verfügbar – bitte eine Datenbank übergeben.');
+  return new m.DatabaseSync(pfad);
+}
 import type { Aktion, Einstellungen, Kategorie, ProtokollEintrag, Regel } from './types';
 import { standardEinstellungen } from './settings';
 
@@ -38,11 +52,12 @@ CREATE TABLE IF NOT EXISTS quote (tag TEXT NOT NULL, methode TEXT NOT NULL, einh
 export type NeuerEintrag = Omit<ProtokollEintrag, 'id' | 'rueckgaengig'>;
 
 export class Speicher {
-  readonly db: DatabaseSync;
+  readonly db: SqlDb;
 
-  constructor(pfad = ':memory:') {
-    this.db = new DatabaseSync(pfad);
-    this.db.exec('PRAGMA journal_mode = WAL;');
+  constructor(pfadOderDb: string | SqlDb = ':memory:') {
+    const eigene = typeof pfadOderDb === 'string';
+    this.db = eigene ? nodeSqlite(pfadOderDb) : pfadOderDb;
+    if (eigene) this.db.exec('PRAGMA journal_mode = WAL;');
     this.db.exec(SCHEMA);
   }
 

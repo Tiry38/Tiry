@@ -4,6 +4,7 @@ export default defineConfig({
   root: 'web',
   base: './',
   publicDir: 'public',
-  build: { outDir: '../dist-web', emptyOutDir: true, target: 'es2022', assetsInlineLimit: 0, chunkSizeWarningLimit: 600 },
+  build: { outDir: '../dist-web', emptyOutDir: true, target: 'es2022', assetsInlineLimit: 0, chunkSizeWarningLimit: 900,
+    rollupOptions: { input: { index: 'web/index.html', aufraeumer: 'web/aufraeumer.html' } } },
   server: { host: true, port: 5180 },
 });

@@ -701,3 +701,6 @@ body[data-nav='klein'] .update[data-stand='bereit'] .knopf { animation: pochen 2
 .pf-kopf-vorab { padding: 26px 28px; }
 .pf-kopf-vorab h2 { margin: 0 0 6px; font: 750 26px/1.15 var(--display); }
 .pf-kopf-vorab p { margin: 0; color: var(--text-2); }
+
+/* Aufräumer in der Handy-App: PC-Einstellungen ausblenden */
+body.handy [data-nur-pc], body.handy #update { display: none !important; }

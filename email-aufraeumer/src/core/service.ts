@@ -1,5 +1,5 @@
 // Hintergrunddienst: neue Mails über history.list, Nachholen, Altbestand, Lernen, Gmail-Filter-Export.
-import { EventEmitter } from 'node:events';
+import { Ereignisse } from './emitter';
 import type { Aktion, Entscheidung, Kategorie, Mail, Regel, Signale } from './types';
 import { KATEGORIE_NAME, KATEGORIEN } from './types';
 import type { GmailPort } from './gmail';
@@ -29,13 +29,13 @@ export interface DienstOptionen {
   jetzt?: () => number;
 }
 
-export class Aufraeumer extends EventEmitter {
+export class Aufraeumer extends Ereignisse {
   readonly db: Speicher;
   private gmail: GmailPort;
   private ki: KiPort | null;
   private aus: Ausfuehrer;
   private post?: HttpPost;
-  private timer: NodeJS.Timeout | null = null;
+  private timer: ReturnType<typeof setTimeout> | null = null;
   private laeuftGerade = false;
   private jetzt: () => number;
   status: DienstStatus = 'startet';
@@ -400,7 +400,11 @@ export class Aufraeumer extends EventEmitter {
   }
 
   /** Legt fehlende Filter an. Erst nach Tirys Zustimmung und nie im Trockenlauf. */
+  /** Handy: Gmail-Regeln trägt nur der PC ein (sonst doppelt). */
+  ohneGmailRegeln = false;
+
   async filterExport(): Promise<{ angelegt: number; wartet: number; frage: boolean }> {
+    if (this.ohneGmailRegeln) return { angelegt: 0, wartet: 0, frage: false };
     const e = this.db.einstellungen();
     const offen = this.filterKandidaten().filter((r) => !r.gmailFilterId);
     const autoOffen = this.autoFilterPlan().filter((p) => !this.db.get<Record<string, string>>('autoFilter', {})[p.schluessel]).length;

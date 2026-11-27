@@ -225,7 +225,7 @@ function listeGeruest() {
   </nav>`;
   balkenSetzen(balkenStand);
   $('#d-ordner').addEventListener('click', ordnerBogen);
-  $('#d-aufr').addEventListener('click', () => void aufraeumerAnsicht());
+  $('#d-aufr').addEventListener('click', () => void zumAufraeumer());
   const sucheAuf = () => { $('#suchform').hidden = false; $<HTMLInputElement>('#suchfeld').focus(); };
   $('#d-suche').addEventListener('click', sucheAuf); $('#suchen').addEventListener('click', sucheAuf);
   $('#suchform').addEventListener('submit', (e) => { e.preventDefault(); suche = $<HTMLInputElement>('#suchfeld').value.trim(); void laden(true); $<HTMLInputElement>('#suchfeld').blur(); });
@@ -436,7 +436,7 @@ function kontoBogen() {
     ${NATIV ? '<button class="wahl" id="k-popups">Popups bei neuen Mails</button>' : ANDROID_BROWSER ? `<a class="wahl" href="${APK}">Echte Android-App mit Popups laden</a>` : ''}
     <button class="wahl" id="k-pc">Was macht der PC?</button>
     <button class="wahl" id="k-ab">${DEMO ? 'Vorschau beenden' : 'Abmelden'}</button>`);
-  $('#k-pc', b.el).addEventListener('click', () => { b.zu(); void aufraeumerAnsicht(); });
+  $('#k-pc', b.el).addEventListener('click', () => { b.zu(); void zumAufraeumer(); });
   b.el.querySelector('#k-popups')?.addEventListener('click', () => { b.zu(); setTimeout(popupBogen, 250); });
   $('#k-ab', b.el).addEventListener('click', () => { an.abmelden(); location.href = location.pathname; });
 }
@@ -526,6 +526,14 @@ const ZIEL: Record<string, string> = { papierkorb: '→ Papierkorb', archiv: '�
 const speicherText = (b: number) => b >= 1e9 ? `${(b / 1e9).toLocaleString('de-DE', { maximumFractionDigits: 1 })} GB` : b >= 1e6 ? `${Math.round(b / 1e6).toLocaleString('de-DE')} MB` : b > 0 ? `${Math.max(1, Math.round(b / 1e3))} KB` : '0 MB';
 const dauer = (min: number) => min >= 60 ? `${Math.floor(min / 60)} Std. ${min % 60} Min.` : `${min} Min.`;
 const vor = (t: number) => { const m = Math.round((Date.now() - t) / 60000); return m < 1 ? 'gerade eben' : m < 60 ? `vor ${m} Min.` : m < 1440 ? `vor ${Math.round(m / 60)} Std.` : `vor ${Math.round(m / 1440)} Tagen`; };
+
+/** Der volle Aufräumer – dieselbe Seite wie am PC, läuft hier auf dem Handy. */
+async function zumAufraeumer() {
+  arbeitet(true);
+  try { if (kernLaeuft) await (await kernLaeuft).sichern(); } catch { /* egal */ }
+  location.assign(`aufraeumer.html?ansicht=cockpit${DEMO ? '&demo' : ''}`);
+}
+let kernLaeuft: Promise<import('./aufrKern').HandyKern> | null = null;
 
 async function aufraeumerAnsicht() {
   history.pushState({ aufr: 1 }, '');
@@ -907,6 +915,8 @@ async function start() {
   await laden(true);
   balkenStoss(0.8);
   setInterval(abgleich, DEMO ? 4000 : 8000);
+  // Der Aufräumer räumt auch hier mit auf, solange die App offen ist (eigene Datenbank auf dem Handy)
+  if (!DEMO) kernLaeuft = import('./aufrKern').then((m) => m.handyKern(gmail));
   document.addEventListener('visibilitychange', () => { if (!document.hidden) { void abgleich(); void neueFassung(); } });
   setInterval(() => void neueFassung(), 30 * 60_000);
   (window as any).__bereit = true;
