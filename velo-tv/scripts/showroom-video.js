@@ -210,13 +210,23 @@ async function concat(dateien, ziel, extra) {
   const schnappKey = (u) => String(u).replace(/[?&]v=\d+/, '').replace(/[?&]key=[^&]*/, '');
   const schnapp = SCHNAPP ? JSON.parse(fs.readFileSync(path.resolve(SCHNAPP), 'utf8')) : null, aufnahme = {};
   const fetchSchnapp = async (url, o) => {
-    const k = schnappKey(url), merken = /firestore\.googleapis\.com|\/lager\/$/.test(k);
+    // auch die Fotos: sonst fehlt einem Rechner ein Rad, wenn ein Bild-Download hakt (27.11.2026: 79 statt 80)
+    const k = schnappKey(url), bild = /\/img\/bestand\//.test(k), merken = bild || /firestore\.googleapis\.com|\/lager\/$/.test(k);
     if (schnapp && merken) {
-      if (!(k in schnapp)) return new Response('', { status: 404 });
-      return new Response(schnapp[k].body, { status: schnapp[k].status });
+      const e = schnapp[k];
+      if (!e) return new Response('', { status: 404 });
+      return e.b64 ? new Response(Buffer.from(e.b64, 'base64'), { status: e.status, headers: { 'content-type': e.typ || 'image/webp' } })
+        : new Response(e.body, { status: e.status });
     }
     const r = await fetch(url, o);
-    if (SCHNAPP_SPEICHERN && merken) { const body = await r.text(); aufnahme[k] = { status: r.status, body }; return new Response(body, { status: r.status }); }
+    if (SCHNAPP_SPEICHERN && merken) {
+      if (bild) {
+        const buf = Buffer.from(await r.arrayBuffer()), typ = r.headers.get('content-type') || '';
+        if (r.ok) aufnahme[k] = { status: r.status, typ, b64: buf.toString('base64') };
+        return new Response(buf, { status: r.status, headers: { 'content-type': typ } });
+      }
+      const body = await r.text(); aufnahme[k] = { status: r.status, body }; return new Response(body, { status: r.status });
+    }
     return r;
   };
   const srv = createServer({
@@ -281,7 +291,7 @@ async function concat(dateien, ziel, extra) {
       return;
     }
     if (VERSION_SOLL && VERSION_SOLL !== true && VERSION_SOLL !== version)
-      throw new Error('Bestand hat sich während des Baus geändert (' + version + ' statt ' + VERSION_SOLL + ') – der nächste stündliche Lauf baut neu.');
+      throw new Error('Bestand hat sich während des Baus geändert (' + version + ' statt ' + VERSION_SOLL + ') – der Wächter baut in ein paar Minuten neu.');
     const metaSchreiben = (ziel, morph) => {
       const meta = {
         version, ts: Date.now(), stand: d.stand || '', anzahl: items.length, dauer: items.length * SEK, fps: FPS, sekProRad: SEK, naht: 'takt',

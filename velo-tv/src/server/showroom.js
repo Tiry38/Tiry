@@ -139,7 +139,7 @@ function createShowroom(opts) {
     const name = crypto.createHash('sha1').update(quelle).digest('hex').slice(0, 16) + path.extname(quelle).toLowerCase();
     const ziel = path.join(bildDir, name);
     if (fs.existsSync(ziel)) return name;
-    for (const basis of BILD_BASEN) {
+    for (const basis of [].concat(BILD_BASEN, BILD_BASEN, BILD_BASEN)) { // bis zu 3 Versuche je Bild
       try {
         const r = await fetchImpl(basis + quelle, { signal: AbortSignal.timeout(30000) });
         const typ = r.headers.get('content-type') || '';
