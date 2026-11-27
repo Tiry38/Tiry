@@ -44,15 +44,20 @@ for yi in range(len(ys)-1):
             fr=AF[an['name']]; box=(x0-an['x0'],y0-an['y0'],x1-an['x0'],y1-an['y0'])
             if an['name'].startswith('snow') or an['name']=='leaf': box=tuple(2*v for v in box)
             seq=[f.crop(box) for f in fr]
-            once=an['name'] not in ('hero','gt','leaf') and not an['name'].startswith('snow')
+            once=an['name'] not in ('hero','gt','leaf','deal') and not an['name'].startswith('snow')
             if once: seq=[seq[-1]]+seq+[seq[-1]]
-            dur=[50 if an['name']=='gt' else (40 if an['name'] in ('hero','leaf') else (50 if an['name'].startswith('snow') else 80))]*len(seq)
+            dur=[50 if an['name'] in ('gt','deal') else (40 if an['name'] in ('hero','leaf') else (50 if an['name'].startswith('snow') else 80))]*len(seq)
             if once: dur[0]=60; dur[-1]=1800
             pal=seq[0].quantize(colors=255,method=Image.MEDIANCUT,dither=Image.Dither.NONE)
-            if an['name']=='leaf':
+            if an['name'] in ('leaf','deal'):
                 import numpy as np
                 b0=np.asarray(seq[0]).astype(np.float32);ns=[seq[0]]
-                for f in seq[1:]:
+                if an['name']=='deal':  # Schleife: Startzustand = Endzustand eines ersten Durchlaufs, kein Sprung am Ende
+                    for f in seq:
+                        f=np.asarray(f).astype(np.float32);m=(np.abs(f-b0).sum(2)>18);b0=np.where(m[...,None],f,b0)
+                    ns=[];src=seq
+                else: src=seq[1:]
+                for f in src:
                     f=np.asarray(f).astype(np.float32);m=(np.abs(f-b0).sum(2)>18)
                     b0=np.where(m[...,None],f,b0);ns.append(Image.fromarray(b0.astype('uint8')))
                 seq=ns
@@ -67,9 +72,15 @@ for yi in range(len(ys)-1):
                     ns.append(Image.fromarray(b0.astype('uint8')))
                 seq=ns
             dz=Image.Dither.NONE
+            if an['name']=='deal':  # eigene k-means-Palette + festes Bayer-Raster: keine Farbstufen, kein Flimmern
+                import numpy as np
+                from kmpal import kmeans_pal,bayer
+                C=kmeans_pal([seq[i] for i in range(0,len(seq),50)]);pal=Image.new('P',(1,1));pal.putpalette(list(C.flatten())+[0,0,0])
+                BY=bayer(seq[0].size[1],seq[0].size[0],12)
+                seq=[Image.fromarray(np.clip(np.asarray(s).astype(np.float32)+BY,0,255).astype('uint8')) for s in seq]
             q=[s.quantize(palette=pal,dither=dz) for s in seq]
             fn=f'n{n:03d}.gif'; q[0].save('mail/_t.gif',save_all=True,append_images=q[1:],duration=dur,loop=0,disposal=1)
-            subprocess.run(['gifsicle','-O3','--lossy='+('0' if an['name'].startswith('snow') else ('60' if an['name']=='leaf' else ('80' if an['name']=='hero' else '85'))),'-o','mail/'+fn,'mail/_t.gif'],check=True); os.remove('mail/_t.gif')
+            subprocess.run(['gifsicle','-O3','--lossy='+('0' if an['name'].startswith('snow') else ('20' if an['name']=='deal' else '60' if an['name']=='leaf' else ('80' if an['name']=='hero' else '85'))),'-o','mail/'+fn,'mail/_t.gif'],check=True); os.remove('mail/_t.gif')
         else:
             fn=f'n{n:03d}.jpg'; st.crop((x0*2,y0*2,x1*2,y1*2)).save('mail/'+fn,quality=70,subsampling=0,optimize=True,progressive=True)
         cells.append(dict(x0=x0,x1=x1,fn=fn,href=ln['href'] if ln else None,alt=(ln['txt'] if ln else '')))

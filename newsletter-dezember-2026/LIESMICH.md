@@ -21,6 +21,11 @@ Abmeldelink: `{%link_unsubscribe}`. Der Ordner `mail/` enthält dieselben Dateie
 - FID 4605 AEB400 wine red → `werkzeug-v3/a/aeb400.png` (Werksbild)
 - FID 4815 AEB490 Mocca → `werkzeug-v3/a/aeb490.png` (Werksbild, Farbe angepasst)
 
+## Winter-Karte (27.11.2026)
+- Eine durchgehende GIF-Schleife (10 s, 200 Bilder à 50 ms), aufgenommen von der Live-Homepage: `werkzeug-v3/deal2.js`.
+  Kristall-Schnee mit den Homepage-Formeln (Frequenzen auf 10 s gerundet, jede Flocke blendet einmal weich), Sattel schwebt (suf 5 s).
+  Palette k-means + festes Bayer-Raster (`kmpal.py`) gegen Farbstufen. Ca. 1,1 MB.
+
 ## Links (27.11.2026, live geprüft)
 - Rad-Knöpfe: `#rad=<slug>~<FID>` öffnet genau dieses Rad (Homepage aad7a6d).
 - Probefahrt/Termin: `#termin=<Text>` öffnet das Formular mit passender Art und vorbelegtem Text.
