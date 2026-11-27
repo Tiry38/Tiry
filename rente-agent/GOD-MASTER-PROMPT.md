@@ -133,6 +133,30 @@ Im Modus GUTHABEN:
   für Strategie und Produktqualität.
 </kasse_ohne_tod>
 
+<aus_knopf>
+Drei Stufen, immer sichtbar im Leitstand (oben, groß, auch auf dem Handy im Heimnetz erreichbar):
+
+1. NULLTARIF (Knopf „Nulltarif – nichts mehr kosten“)
+   Das Programm läuft weiter, macht aber NUR noch Dinge, die weder Geld noch Abo-Nutzung kosten:
+   - ERLAUBT: Leitstand anzeigen; bestehende Verkaufsseite bleibt online (GitHub Pages kostet nichts);
+     Verkäufe und Erstattungen bei Stripe lesen; Rückerstattungen automatisch auslösen (Kundenrecht, läuft
+     immer weiter); Berichte aus vorhandenen Zahlen ohne KI (feste Textvorlage); Backups.
+   - GESPERRT: jeder Modellaufruf (API UND Claude-Code-Abo), bezahlte Suche, Bild-/Video-Erzeugung, Labor,
+     neue Produkte, neue Veröffentlichungen.
+   - Option im Dialog: „Verkaufsseite zusätzlich offline nehmen“ (kostenlos).
+   - Aufheben nur per Klick „Weiterarbeiten“ + Bestätigung. Zustand übersteht Neustarts.
+2. NOT-AUS (Knopf „Alles stoppen“ oder Datei STOP)
+   Agent-Prozess beendet sich komplett. Nur der Leitstand bleibt, um wieder einzuschalten.
+   Ausnahme, auch hier: Rückerstattungen laufen über Stripe ohne ERNTE weiter.
+3. AUTOMATISCHE KOSTENBREMSE (ohne dass jemand drückt)
+   In den Einstellungen: Tageslimit € (Standard 3 €), Monatslimit € (Standard 50 €), im Abo-Modus
+   Höchstzahl Aufrufe pro Tag (Standard 40). Wird ein Limit erreicht → automatisch NULLTARIF + Hinweis im
+   Leitstand + E-Mail an die Inhaberin (nur LIVE). Bei 80 % eines Limits: Warnung.
+Technik: Der Nulltarif wird in kasse.py erzwungen – kasse.py ist das einzige Tor für JEDEN kostenpflichtigen
+Aufruf (Modell, Abo-CLI, Suche, Bild). Kein Werkzeug darf daran vorbei. Zustand in zustand.json + Prüfsumme.
+Äußere Sicherung, unabhängig vom Programm: Monatslimit in der Anthropic-Konsole (Punkt 11 der Checkliste).
+</aus_knopf>
+
 <weltweite_lueckensuche>
 Kernauftrag von ERNTE: In ALLEN Branchen und Ländern der Welt Stellen finden, an denen die Nachfrage hoch
 und das Angebot im Verhältnis dazu extrem niedrig oder schlecht ist – und dort das beste Produkt bauen.
@@ -183,7 +207,8 @@ Lokale Web-Oberfläche (http://localhost:8840), selbst im Zukunfts-Design gebaut
 Konzept-Vorschlag: „Ein Gewächshaus bei Nacht – jedes Produkt ist eine wachsende, leuchtende Pflanze,
 deren Größe dem Umsatz entspricht“ (darf verbessert werden, nicht verflacht).
 Inhalt:
-- Modus-Anzeige (STUDIO / EINRICHTUNG / LIVE), Not-Aus immer sichtbar.
+- Modus-Anzeige (STUDIO / EINRICHTUNG / LIVE), Knöpfe NULLTARIF und NOT-AUS immer sichtbar (siehe <aus_knopf>),
+  Kostenanzeige heute / diesen Monat mit Balken bis zum Limit.
 - Schaufenster: alle Produkte mit Live-Vorschau, Screenshots, „würde online so aussehen“, Status.
 - Lücken-Radar: Top-20 weltweit mit Belegen.
 - Labor: Fähigkeiten in Entwicklung, Testergebnisse, beförderte Fähigkeiten.
@@ -239,6 +264,9 @@ Startausstattung, zuerst bauen und testen:
    - Freigabe 2 ist gesperrt, solange auch nur ein Checklistenpunkt rot ist; jede Prüfung erkennt „erfüllt“
      und „nicht erfüllt“ korrekt (mit Attrappen getestet).
    - Not-Aus/STOP beendet sofort; Geheimnisse stehen in keiner Datei und keinem Log.
+   - NULLTARIF: jeder Modell-, Abo-, Such- und Bildaufruf wird blockiert (auch direkt aus Labor und Werkzeugen
+     versucht); Rückerstattungen und Verkaufslesen laufen weiter; Zustand bleibt nach Neustart erhalten;
+     Tageslimit, Monatslimit und Abo-Aufruflimit schalten automatisch auf NULLTARIF.
    - Missbrauch wird BLOCKIERT: Schreiben außerhalb erlaubter Ordner; Preis 0 € oder 150 €; erfundene
      Bewertung; Markenname; Sperrwort; fehlender KI-Hinweis; Änderung geschützter Dateien; Laborfähigkeit
      mit Netzzugang; unbekanntes Werkzeug („email_an_kunde“); E-Mail an fremde Adresse.
