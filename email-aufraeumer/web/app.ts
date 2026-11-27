@@ -289,6 +289,8 @@ function listeZeichnen() {
 
 async function laden(neu: boolean, still = false) {
   if (laedt) return; laedt = true; if (!still) arbeitet(true);
+  const ul0 = document.getElementById('zeilen');
+  if (ul0 && neu && !zeilen.length && !ul0.children.length) ul0.innerHTML = '<li class="leer"><b>Lade Mails …</b>Gleich da.</li>';
   try {
     const r = await sicher(() => post.liste(ordner, suche, neu ? undefined : weiter));
     if (!r) return;
@@ -916,7 +918,8 @@ async function start() {
   balkenStoss(0.8);
   setInterval(abgleich, DEMO ? 4000 : 8000);
   // Der Aufräumer räumt auch hier mit auf, solange die App offen ist (eigene Datenbank auf dem Handy)
-  if (!DEMO) kernLaeuft = import('./aufrKern').then((m) => m.handyKern(gmail));
+  // eigene Leitung (eigene Bremse) und erst nach dem ersten Laden – die Mail-Liste hat immer Vorrang
+  if (!DEMO) setTimeout(() => { kernLaeuft = import('./aufrKern').then((m) => m.handyKern(erzeugeWebGmail(an.token), { hintergrund: true })); }, 15_000);
   document.addEventListener('visibilitychange', () => { if (!document.hidden) { void abgleich(); void neueFassung(); } });
   setInterval(() => void neueFassung(), 30 * 60_000);
   (window as any).__bereit = true;

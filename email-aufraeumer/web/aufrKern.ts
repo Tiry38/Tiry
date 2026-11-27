@@ -6,6 +6,7 @@ import { Postfach } from '../src/core/postfach';
 import { KATEGORIE_NAME } from '../src/core/types';
 import type { GmailPort } from '../src/core/gmail';
 import { oeffneHandyDb } from './sqlSpeicher';
+import { STAND_BETREFF, standLesen } from '../src/core/stand';
 import { pcImport, handyExport, datenNachricht, PC_DATEN, HANDY_DATEN, type PcDaten } from '../src/core/abgleich';
 
 type Hoerer = (kanal: string, daten: unknown) => void;
@@ -20,12 +21,12 @@ export interface HandyKern {
 
 let kern: Promise<HandyKern> | null = null;
 
-export function handyKern(gmail: GmailPort): Promise<HandyKern> {
-  if (!kern) kern = baue(gmail);
+export function handyKern(gmail: GmailPort, opt: { hintergrund?: boolean } = {}): Promise<HandyKern> {
+  if (!kern) kern = baue(gmail, opt);
   return kern;
 }
 
-async function baue(gmail: GmailPort): Promise<HandyKern> {
+async function baue(gmail: GmailPort, opt: { hintergrund?: boolean }): Promise<HandyKern> {
   const roh = await oeffneHandyDb();
   const db = new Speicher(roh);
   // Gmail-Regeln trägt nur der PC ein (sonst entstünden sie doppelt) – am Handy nie fragen
@@ -108,7 +109,19 @@ async function baue(gmail: GmailPort): Promise<HandyKern> {
   await vomPc();
   setInterval(() => void vomPc(), 3 * 60_000);
 
-  void dienst.starten();
+  // Räumt der PC gerade auf (Stand jünger als 10 Min.)? Dann übernimmt das Handy nur seine Daten und räumt nicht doppelt auf –
+  // das spart Googles Anfrage-Grenze. Ist der PC aus, räumt das Handy selbst auf. Alle 3 Min. neu prüfen.
+  const pcAktiv = async () => {
+    try { const t = await gmail.standText?.(STAND_BETREFF); const s = t ? standLesen(t) : null; return !!s && Date.now() - s.zeit < 10 * 60_000; } catch { return false; }
+  };
+  let laeuft = false;
+  const pruefePc = async () => {
+    const pc = await pcAktiv();
+    if (pc && laeuft) { dienst.stoppen(); laeuft = false; dienst.log('PC räumt auf – das Handy pausiert.'); }
+    else if (!pc && !laeuft) { laeuft = true; void dienst.starten(); }
+  };
+  if (opt.hintergrund) { await pruefePc(); setInterval(() => void pruefePc(), 3 * 60_000); }
+  else void dienst.starten(); // auf der Aufräumer-Seite immer bereit (Knöpfe sollen sofort gehen)
   return {
     db, dienst, postfach,
     async rufe(name, ...args) { const f = API[name]; if (!f) throw new Error(`Am Handy nicht verfügbar: ${name}`); return f(...args); },
