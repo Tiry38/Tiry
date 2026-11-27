@@ -19,6 +19,27 @@ const SYMBOL: Record<string, string> = {
   ordner: '<path d="M3 7h7l2 2h9v10H3z"/>',
 };
 
+/**
+ * Liste ruhig aktualisieren: vorhandene Zeilen bleiben stehen (gleiche Mail, gleicher Inhalt = gleiches Element),
+ * nur Neues/Geändertes wird ausgetauscht – in einem einzigen Schritt. So blinkt oder leert sich die Liste nie.
+ */
+function ruhigAbgleichen(ul: HTMLElement, teile: Array<{ k: string; html: string }>, binden: (el: HTMLElement) => void) {
+  const alt = new Map<string, HTMLElement>();
+  for (const el of Array.from(ul.children) as HTMLElement[]) if (el.dataset.k2) alt.set(el.dataset.k2, el);
+  const neu = teile.map((t) => {
+    const e = alt.get(t.k);
+    if (e && e.dataset.sig === t.html) return e;
+    const tpl = document.createElement('template'); tpl.innerHTML = t.html.trim();
+    const el = tpl.content.firstElementChild as HTMLElement;
+    el.dataset.k2 = t.k; el.dataset.sig = t.html;
+    binden(el);
+    return el;
+  });
+  const kinder = ul.children;
+  if (neu.length === kinder.length && neu.every((e, i) => kinder[i] === e)) return;
+  ul.replaceChildren(...neu);
+}
+
 export class PostfachUI {
   private ordner: Ordner[] = [];
   private aktiv = 'INBOX';
@@ -155,17 +176,24 @@ export class PostfachUI {
     const ol = $('#pf-zeilen', this.wurzel);
     if (!this.zeilen.length) { ol.innerHTML = `<li class="pf-lade">${this.suche ? 'Nichts gefunden.' : 'Hier ist nichts. Aufgeräumt!'}</li>`; $('#pf-mehr', this.wurzel).hidden = true; return; }
     let letzte = '';
-    ol.innerHTML = this.zeilen.map((z) => {
-      const g = this.gruppe(z.datum); const kopf = g !== letzte ? `<li class="pf-gruppe">${g}</li>` : ''; letzte = g;
-      return `${kopf}<li class="pf-li"><button class="pf-zeile ${z.ungelesen ? 'neu' : ''} ${z.id === this.offen ? 'offen' : ''}" data-id="${h(z.id)}" data-k="${z.kategorie ?? ''}" draggable="true" title="In einen Ordner links ziehen zum Verschieben">
+    const teile: Array<{ k: string; html: string }> = [];
+    for (const z of this.zeilen) {
+      const g = this.gruppe(z.datum); if (g !== letzte) { teile.push({ k: `g:${g}`, html: `<li class="pf-gruppe">${g}</li>` }); letzte = g; }
+      teile.push({ k: z.id, html: `<li class="pf-li"><button class="pf-zeile ${z.ungelesen ? 'neu' : ''} ${z.id === this.offen ? 'offen' : ''}" data-id="${h(z.id)}" data-k="${z.kategorie ?? ''}" draggable="true" title="In einen Ordner links ziehen zum Verschieben">
         <i class="strich"></i>
         <span class="pf-von">${h(z.von)}</span><span class="pf-zeit">${this.datum(z.datum)}</span>
         <span class="pf-betreff">${z.stern ? '<span class="pf-stern" aria-label="Stern">★</span> ' : ''}${h(z.betreff || '(ohne Betreff)')}</span>
         <span class="pf-vorschau">${h(z.vorschau)}</span>
         ${z.kategorie ? `<span class="pf-kat">${KAT[z.kategorie]}</span>` : ''}
-      </button>${this.aktiv === 'TRASH' ? '' : `<button class="pf-weg" data-weg="${h(z.id)}" aria-label="In den Papierkorb" title="In den Papierkorb"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13M10 11v6M14 11v6"/></svg></button>`}</li>`;
-    }).join('');
-    for (const b of ol.querySelectorAll<HTMLButtonElement>('.pf-zeile')) {
+      </button>${this.aktiv === 'TRASH' ? '' : `<button class="pf-weg" data-weg="${h(z.id)}" aria-label="In den Papierkorb" title="In den Papierkorb"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13M10 11v6M14 11v6"/></svg></button>`}</li>` });
+    }
+    ruhigAbgleichen(ol, teile, (li) => this.zeileBinden(li));
+    $('#pf-mehr', this.wurzel).hidden = !this.weiter;
+  }
+
+  /** Klick, Vorladen, Ziehen und Papierkorb an einer (neuen) Zeile anbringen. */
+  private zeileBinden(li: HTMLElement) {
+    for (const b of li.querySelectorAll<HTMLButtonElement>('.pf-zeile')) {
       b.addEventListener('click', () => void this.oeffnen(b.dataset.id!));
       b.addEventListener('mouseenter', () => void this.api.rufe('pfVorladen', [b.dataset.id!]).catch(() => {}));
       // Ziehen & Ablegen: Mail auf einen Ordner links ziehen
@@ -178,8 +206,7 @@ export class PostfachUI {
       });
       b.addEventListener('dragend', () => { b.classList.remove('gezogen'); this.wurzel.classList.remove('zieht'); });
     }
-    for (const b of ol.querySelectorAll<HTMLButtonElement>('[data-weg]')) b.addEventListener('click', (e) => { e.stopPropagation(); void this.wegwerfen(b.dataset.weg!); });
-    $('#pf-mehr', this.wurzel).hidden = !this.weiter;
+    for (const b of li.querySelectorAll<HTMLButtonElement>('[data-weg]')) b.addEventListener('click', (e) => { e.stopPropagation(); void this.wegwerfen(b.dataset.weg!); });
   }
 
   async oeffnen(id: string) {

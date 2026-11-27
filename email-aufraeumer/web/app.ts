@@ -257,13 +257,33 @@ function zeileHtml(z: Zeile) {
     </button></li>`;
 }
 
+/**
+ * Liste ruhig aktualisieren: vorhandene Zeilen bleiben stehen (gleiche Mail, gleicher Inhalt = gleiches Element),
+ * nur Neues/Geändertes wird ausgetauscht – in einem einzigen Schritt. So blinkt oder leert sich die Liste nie.
+ */
+function ruhigAbgleichen(ul: HTMLElement, teile: Array<{ k: string; html: string }>, binden: (el: HTMLElement) => void) {
+  const alt = new Map<string, HTMLElement>();
+  for (const el of Array.from(ul.children) as HTMLElement[]) if (el.dataset.k2) alt.set(el.dataset.k2, el);
+  const neu = teile.map((t) => {
+    const e = alt.get(t.k);
+    if (e && e.dataset.sig === t.html) return e;
+    const tpl = document.createElement('template'); tpl.innerHTML = t.html.trim();
+    const el = tpl.content.firstElementChild as HTMLElement;
+    el.dataset.k2 = t.k; el.dataset.sig = t.html;
+    binden(el);
+    return el;
+  });
+  const kinder = ul.children;
+  if (neu.length === kinder.length && neu.every((e, i) => kinder[i] === e)) return;
+  ul.replaceChildren(...neu);
+}
+
 function listeZeichnen() {
   const ul = document.getElementById('zeilen'); if (!ul) return;
   if (!zeilen.length) { ul.innerHTML = `<li class="leer"><b>${suche ? 'Nichts gefunden.' : 'Alles leer.'}</b>${suche ? 'Probier ein anderes Wort.' : 'Hier liegt gerade keine Mail.'}</li>`; return; }
-  let html = '', gruppe = '';
-  for (const z of zeilen) { const g = tagGruppe(z.datum); if (g !== gruppe) { gruppe = g; html += `<li class="tag" aria-hidden="true">${g}</li>`; } html += zeileHtml(z); }
-  ul.innerHTML = html;
-  ul.querySelectorAll<HTMLElement>('.zeile').forEach(wischbar);
+  const teile: Array<{ k: string; html: string }> = []; let gruppe = '';
+  for (const z of zeilen) { const g = tagGruppe(z.datum); if (g !== gruppe) { gruppe = g; teile.push({ k: `g:${g}`, html: `<li class="tag" aria-hidden="true">${g}</li>` }); } teile.push({ k: z.id, html: zeileHtml(z) }); }
+  ruhigAbgleichen(ul, teile, (el) => { if (el.classList.contains('zeile')) wischbar(el); });
   $('#mehr').textContent = weiter ? 'Lade weitere …' : zeilen.length > 12 ? 'Das war alles.' : '';
 }
 
