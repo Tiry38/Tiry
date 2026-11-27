@@ -36,6 +36,8 @@ jobs:
           ENDE=$(( $(date +%s) + 330*60 ))
           while [ "$(date +%s)" -lt "$ENDE" ]; do
             laeuft=$(gh run list --workflow velo-tv-showroom.yml --limit 5 --json status --jq '[.[] | select(.status != "completed")] | length' || echo 1)
+            # immer mit dem neuesten Code prüfen (sonst gilt jede Design-Änderung dauerhaft als „geändert“)
+            git pull -q --ff-only origin main || true
             if [ "$laeuft" = "0" ]; then
               rm -f "$GITHUB_OUTPUT.w"; touch "$GITHUB_OUTPUT.w"
               if GITHUB_OUTPUT="$GITHUB_OUTPUT.w" node scripts/showroom-video.js --check --out out --alt "$ALT"; then
