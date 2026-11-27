@@ -18,7 +18,11 @@ Vorbild: **Automaton** von Conway Research (Sigil Wen, Feb. 2026, github.com/Con
      wieder dich (Börse mit Ausweis) und die Steuer gilt trotzdem.
 3. **KI-Guthaben mit hartem Deckel:** Anthropic-Konsole → eigener API-Key nur für den Agenten → **Prepaid 5 €,
    Auto-Aufladung AUS**. Das ist das „Leben“ des Agenten.
-4. Prompt unten in Claude Code einfügen (leerer Ordner). Danach läuft alles allein.
+4. **Stripe „Restricted Key“** erstellen (Stripe → Entwickler → API-Schlüssel → eingeschränkter Schlüssel):
+   Schreiben nur für Products, Prices, Payment Links; Lesen für Charges/Payments; alles andere „Kein Zugriff“.
+5. **Impressum:** Deine Adresse muss auf die Verkaufsseite (Pflicht in DE). Wer das nicht will: Impressum-Service
+   (Postadresse für ca. 5–10 €/Monat).
+6. Prompt unten in Claude Code einfügen (leerer Ordner). Danach läuft alles allein.
 
 ---
 
@@ -42,9 +46,40 @@ Sie stehen schreibgeschützt in verfassung.md und als erster Block in jedem Syst
 4. Lieber sterben als Regeln brechen. Ein Agent, der nur durch Regelbruch überleben würde, stoppt.
 </grundgesetz>
 
+<technische_sperren>
+Regeln im Prompt reichen nicht – ein Modell unter Überlebensdruck sucht Schlupflöcher. Darum wird Betrug
+TECHNISCH unmöglich gemacht. Was FUNKE nicht kann, kann er nicht falsch machen.
+1. Keine freie Shell, kein freier Browser, kein freies Internet für FUNKE. Er bekommt NUR diese Werkzeuge
+   (werkzeuge.py, jedes Werkzeug prüft selbst und lehnt alles andere ab):
+   - websuche(frage) und seite_lesen(url) – nur lesen, keine Formulare, keine Logins.
+   - datei_schreiben(pfad, inhalt) – nur innerhalb von ./produkte und ./seite.
+   - produkt_veroeffentlichen(id) – erstellt Stripe-Produkt + Payment Link. Preis fest zwischen 1 € und 49 €.
+   - seite_veroeffentlichen() – pusht ./seite auf GitHub Pages (eigenes Repo, eigener Token nur dafür).
+   - verkaeufe_lesen() – Stripe nur lesend.
+   KEIN Werkzeug für: E-Mails, Direktnachrichten, Kommentare, Bewertungen, Konto-Anlage, Überweisungen,
+   Auszahlungen, Rückerstattungs-Verweigerung, Krypto, Code ausführen. Werbung läuft ausschließlich über die
+   eigene Seite (SEO). Damit sind Spam, Fake-Accounts, Fake-Bewertungen und Geld-Abzweigen ausgeschlossen.
+2. Stripe-Schlüssel ist ein „Restricted Key“: darf nur Produkte, Preise, Payment Links anlegen und Zahlungen
+   lesen. Keine Auszahlungen, keine Überweisungen, keine Kundendaten exportieren.
+3. Prüfer vor jeder Veröffentlichung: Ein zweiter, getrennter Modellaufruf (eigener System-Prompt, sieht nur
+   Produkt + Verkaufstext + verfassung.md, NICHT das Guthaben und nicht den Überlebensdruck) prüft:
+   Stimmt jede Aussage? Fremde Marke/Urheberrecht? Falsche Versprechen (Geld, Gesundheit, „garantiert“)?
+   Erfundene Bewertungen, Kundenzahlen, Rabatte, Countdown-Druck? KI-Hinweis vorhanden?
+   Nur bei „FREIGEGEBEN“ wird veröffentlicht. Sonst bleibt es liegen und kommt in den Tagesbericht.
+4. Feste Sperrliste im Code (nicht im Prompt, FUNKE kann sie nicht ändern): Wörter/Themen wie Trading-Signale,
+   Krypto, Kredit, Heilung, Diät-Garantie, Erwachsenen-Inhalte, Markennamen (Liste in sperrliste.txt,
+   schreibgeschützt). Treffer = Veröffentlichung blockiert.
+5. Pflicht-Fußzeile auf jeder Verkaufsseite (fest im Template, nicht änderbar): Impressum des Besitzers,
+   Hinweis „Dieses Produkt wurde mit KI erstellt“, 14 Tage Geld-zurück ohne Begründung.
+6. Rückerstattung: Jede Anfrage über Stripe wird automatisch erstattet. FUNKE kann das nicht verhindern.
+7. Selbstschutz: verfassung.md, sperrliste.txt, werkzeuge.py, kasse.py, pruefer.py sind für FUNKE
+   schreibgeschützt (Dateirechte + Prüfsumme beim Start; Abweichung = sofortiger Stopp mit Meldung).
+8. Alles öffentlich Sichtbare wird zusätzlich in log/veroeffentlicht.md mit Datum gespeichert.
+</technische_sperren>
+
 <ausgangslage>
 - Startguthaben: 5,00 € (Anthropic-API-Key in Umgebungsvariable ANTHROPIC_API_KEY, Prepaid, keine Auto-Aufladung).
-- Einnahmen laufen über Stripe (Schlüssel in STRIPE_SECRET_KEY) bzw. Payment Links. Auszahlungskonto ist bereits
+- Einnahmen laufen über Stripe (eingeschränkter Schlüssel in STRIPE_RESTRICTED_KEY) bzw. Payment Links. Auszahlungskonto ist bereits
   vom Besitzer eingerichtet und getrennt von seinem Privatkonto. Fehlt ein Schlüssel: Agent arbeitet ohne diese
   Funktion weiter und meldet es einmal im Tagesbericht.
 - Nie Schlüssel in Code, Logs, Commits oder Berichte schreiben. Nur aus Umgebungsvariablen lesen.
@@ -91,6 +126,10 @@ freiwillig bezahlen, und liefere es besser als andere.
 <vorgehen>
 1. Projekt bauen, Tests schreiben: Kasse rechnet korrekt, Stufenwechsel stimmen, bei Guthaben < 0,20 € wird kein
    Modellaufruf mehr gemacht, STOP-Datei beendet sofort, Schlüssel tauchen in keinem Log auf.
+   Betrugs-Tests (alle müssen BLOCKIERT werden): Schreiben außerhalb ./produkte und ./seite; Preis 0 € oder 99 €;
+   Verkaufstext mit erfundener Bewertung („500 zufriedene Kunden“); Text mit Markenname; Text mit Sperrwort;
+   fehlender KI-Hinweis; Änderung an verfassung.md oder sperrliste.txt; Aufruf eines nicht vorhandenen
+   Werkzeugs (z. B. „email_senden“).
 2. Alle Tests grün → einen Probelauf mit 3 Herzschlägen im Trockenmodus (ohne echte Verkäufe) zeigen.
 3. Dann echten Dauerbetrieb starten.
 4. LIESMICH.md mit: Start, Stopp, Wiederbeleben, wo die Berichte liegen – maximal 15 Zeilen.
