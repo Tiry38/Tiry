@@ -657,3 +657,10 @@
 ## Newsletter-Links (Tiry 27.11.2026)
 - `#rad=<slug>~<Bestand-ID>` öffnet das Rad direkt in genau dieser Farbe/Ausführung (ohne `~ID` wie bisher). „Teilen“ hängt die ID automatisch an.
 - `#termin=<Text>` springt zum Terminformular und füllt die Nachricht vor; „Probefahrt …“ wählt Probefahrt, „Inspektion/Reparatur/Verfügbarkeit“ im Text wählt die passende Art. Text max. 300 Zeichen.
+
+## 27.11.2026 – Weniger Leistung, gleiches Bild (Tiry: „viel weniger Leistung, alles bleibt wie es ist, auch die Maus“)
+- Kein Video (Maus, Scroll-Fahrt, Pfützen, Laub bleiben live).
+- Hintergrund `hg12.js`: Szene steht fest (`HG12_FEST`) → ihre festen Werte als Konstanten in den Shader (`spec()`), der Treiber wirft Tageslauf/Polarlicht/Wasserfall/Wolkenschatten/Klick-Welle weg; Fehler → alter Shader. Pfützen-Form (2× fbm je Pixel) einmal beim Laden in eine 16-Bit-Textur (`prePw`, 2048×1024, Straße q.y 0–0,39); Spiegelung, Kräuseln, Glitzern, Nasswerden bleiben live. Fenstergröße nur bei Größenänderung messen (`meas`, vorher Layout-Zwang je Bild).
+- Gemessen (Software-Grafik, 1366×768, gleiche Zeit/Maus/Scroll): oben 454 → 424 ms, gescrollt 484/603/605 → 328/356/411 ms je Bild (−32 bis −41 %). Bildvergleich: max. 1/255 Abweichung.
+- Winter-Karte: Schnee gleitet per `transform` (`.wsn::before`) statt `background-position` + Leuchtfilter je Bild neu zu malen; Bildvergleich bei gleicher Animationszeit: Schnee identisch.
+- Messplatz: `HG12_BENCH(o,n)` / `HG12_SHOT(o)` mit `o={t,m:[x,y],s}`; `HG12_GENERISCH=1` bzw. `HG12_OHNEPW=1` schaltet die Sparwege zum Vergleich ab.
