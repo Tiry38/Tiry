@@ -184,7 +184,8 @@ async function layer(root,cv,o,kind){const dpr=Math.min(2,devicePixelRatio||1),R
  if(!cv._G)cv._G=mk(cv);const G=await cv._G;if(!G)throw new Error('WebGL');const lf0=window.HG12_MODE==='herbst'&&G.lf;let ox=0,oy=0,ox2=0,oy2=0;
  if(lf0){const rr=root.getBoundingClientRect(),vw=document.documentElement.clientWidth;ox=Math.max(0,Math.min(W*.6,rr.left-4));ox2=Math.max(0,Math.min(W*.45,vw-rr.right-4));oy=H*.45;oy2=H*.30}
  cv.width=Math.round((W+ox+ox2)*dpr);cv.height=Math.round((H+oy+oy2)*dpr);const chk=()=>{if(o.dead&&o.dead())throw new Error('abgelöst')};chk();
- const yl=()=>new Promise(r=>setTimeout(r,0)).then(chk);texUp(G,G.tex[0],raster(ia,ra,dpr));await yl();texUp(G,G.tex[1],raster(ib,rb,dpr));await yl();
+ /* Vorbereitung in der Standzeit (o.slow): höchstens ein Arbeitsschritt je Bild, damit der Hintergrund nie stockt */
+ const yl=()=>new Promise(r=>o.slow?requestAnimationFrame(()=>setTimeout(r,0)):setTimeout(r,0)).then(chk);const ca=raster(ia,ra,dpr);await yl();texUp(G,G.tex[0],ca);await yl();const cb=raster(ib,rb,dpr);await yl();texUp(G,G.tex[1],cb);await yl();
  const lf=lf0?1:0;const area=Math.max(ra.w*ra.h,rb.w*rb.h);const N=lf?Math.round(Math.min(kind==='bike'?1800:650,Math.max(450,area/(kind==='bike'?115:160)))):Math.round(Math.min(kind==='bike'?28000:11000,Math.max(3000,area/(kind==='bike'?6:10))));
  const step=kind==='bike'?1.1:1.4;const A=lf&&pa?ptPts(pa,ra,N,W,H):points(ia,ra,step,N,W,H);await yl();const B=lf&&pb?ptPts(pb,rb,N,W,H):points(ib,rb,step,N,W,H);await yl();
  const dom=P=>{let r=0,g=0,b=0,t=0;for(const q of P){const mx=Math.max(q[2],q[3],q[4]),mn=Math.min(q[2],q[3],q[4]),w=(mx-mn)*(mx-mn)*mx;r+=q[2]*w;g+=q[3]*w;b+=q[4]*w;t+=w}if(t<.5)return[.62,.66,.72];const m=Math.max(r,g,b)/t;const k=Math.min(1.6,.85/Math.max(m,.05));return[r/t*k,g/t*k,b/t*k].map(v=>Math.min(1,v))};const dA=dom(A),dB=dom(B);
@@ -221,20 +222,30 @@ const cvs=(root,bNew,lgEl)=>{const fl=root.querySelector(':scope>.hfloor');retur
 /* Vorwärmen im Leerlauf: Grafik-Programme schon fertig, bevor der erste Wechsel kommt */
 VM.warm=(root,bikeEl,logoEl)=>{if(!VM.ok||!root||root._vmW)return;root._vmW=1;const go=()=>{try{cvs(root,bikeEl,logoEl).forEach(c=>{if(!c._G)c._G=mk(c).catch(()=>null)})}catch(_){}};window.requestIdleCallback?requestIdleCallback(go,{timeout:2500}):setTimeout(go,600)};
 const quiet=(el,fn)=>{el.style.transition='none';fn();requestAnimationFrame(()=>requestAnimationFrame(()=>{el.style.transition=''}))};
-/* o = {root, bike:{oldEl,newEl,to,from?,alt?}, logo:{el,to,from?,op0?}} – erledigt den kompletten Wechsel */
-VM.run=async function(o){const root=o.root,bk=o.bike,lg=o.logo;const bOld=bk.oldEl,bNew=bk.newEl,from=bk.from||bOld.currentSrc||bOld.src,lFrom=lg.from||lg.el.currentSrc||lg.el.src;
+/* o = {root, bike:{oldEl,newEl,to,from?,alt?}, logo:{el,to,from?,op0?}}
+   VM.prep(o) bereitet einen Wechsel komplett vor (Bilder laden, messen, Texturen + Partikel hochladen) – läuft in der Standzeit,
+   damit beim Wechsel selbst nur noch gezeichnet wird (Tiry 27.11.2026: Ruckler vor/nach dem Wechsel). h.play() spielt ihn ab, h.cancel() verwirft ihn.
+   VM.run(o) = vorbereiten + sofort abspielen (Klick auf Marke, Pfeile). */
+VM.prep=async function(o,fast){const root=o.root,bk=o.bike,lg=o.logo;const bOld=bk.oldEl,bNew=bk.newEl,from=bk.from||bOld.currentSrc||bOld.src,lFrom=lg.from||lg.el.currentSrc||lg.el.src;
  const [cB,cL]=cvs(root,bNew,lg.el);
- const csB=getComputedStyle(bOld),csL=getComputedStyle(lg.el);const op0=lg.op0!=null?lg.op0:csL.opacity;
+ const csB=getComputedStyle(bOld),csL=getComputedStyle(lg.el);const op0=lg.op0!=null?lg.op0:csL.opacity,fB=csB.filter,refl=csB.webkitBoxReflect||'none',mbL=csL.mixBlendMode,fL=csL.filter;
  const finish=()=>{if(bNew===bOld){if(bNew.getAttribute('src')!==bk.to)bNew.src=bk.to}quiet(bNew,()=>{bNew.classList.remove('off','out-l','in-r');bNew.style.opacity=''});
   if(bOld!==bNew)quiet(bOld,()=>{bOld.classList.add('off');bOld.style.opacity=''});if(bk.alt)bNew.alt=bk.alt;
   quiet(lg.el,()=>{lg.el.style.opacity=''});cB.style.display='none';cL.style.display='none';root.classList.remove('vmrun');root._vmH=0};
  const tok=root._vmTok=(root._vmTok||0)+1,dead=()=>root._vmTok!==tok;
- try{let Lb,Ll;const prep=Promise.all([layer(root,cB,{from,to:bk.to,tplA:bOld,tplB:bNew,refl:csB.webkitBoxReflect||'none',dead},'bike'),
-   layer(root,cL,{from:lFrom,to:lg.to,tplA:lg.el,tplB:lg.el,dead},'logo')]);prep.catch(()=>{});
-  let tm;[Lb,Ll]=await Promise.race([prep,new Promise((_,rj)=>{tm=setTimeout(()=>{if(!dead())root._vmTok++;rj(new Error('Zeit'))},window.__vmSW?60000:5000)})]);clearTimeout(tm);
-  const pos=L=>'left:'+(-L.ox)+'px;top:'+(-L.oy)+'px;width:'+L.cw+'px;height:'+L.ch+'px';
-  cB.style.cssText='position:absolute;'+pos(Lb)+';pointer-events:none;filter:'+csB.filter;
-  cL.style.cssText='position:absolute;'+pos(Ll)+';pointer-events:none;mix-blend-mode:'+csL.mixBlendMode+';filter:'+csL.filter+';opacity:'+op0;
+ const geo=()=>{const r=root.getBoundingClientRect();return [r.width,r.height,r.left,document.documentElement.clientWidth,devicePixelRatio].join('|')},g0=geo();
+ const fail=e=>{if(!dead())console.warn('Verwandlung:',e);return{dead,cancel(){},play(){if(fast){finish();return Promise.resolve()}return VM.run(o)}}};/* misslungene Vorbereitung: beim Abspielen frisch versuchen */
+ let Lb,Ll;try{const prep=Promise.all([layer(root,cB,{from,to:bk.to,tplA:bOld,tplB:bNew,refl,dead,slow:!fast},'bike'),
+   layer(root,cL,{from:lFrom,to:lg.to,tplA:lg.el,tplB:lg.el,dead,slow:!fast},'logo')]);prep.catch(()=>{});
+  let tm;[Lb,Ll]=await Promise.race([prep,new Promise((_,rj)=>{tm=setTimeout(()=>{if(!dead())root._vmTok++;rj(new Error('Zeit'))},window.__vmSW?60000:fast?5000:15000)})]);clearTimeout(tm)}
+ catch(e){return fail(e)}
+ if(dead())return fail(new Error('abgelöst'));
+ return{dead,cancel(){if(!dead())root._vmTok++},play:async function(){
+  /* Größe/Lage geändert (Fenster gedreht, Zoom) seit der Vorbereitung -> frisch vorbereiten */
+  if(dead())return;if(geo()!==g0){const h=await VM.prep(o,1);return h.play()}
+  try{const pos=L=>'left:'+(-L.ox)+'px;top:'+(-L.oy)+'px;width:'+L.cw+'px;height:'+L.ch+'px';
+  cB.style.cssText='position:absolute;'+pos(Lb)+';pointer-events:none;filter:'+fB;
+  cL.style.cssText='position:absolute;'+pos(Ll)+';pointer-events:none;mix-blend-mode:'+mbL+';filter:'+fL+';opacity:'+op0;
   const ac=()=>hex(getComputedStyle(root.closest('.show')||root).getPropertyValue('--ac')||'#E2232D');let glow=[.886,.137,.176];try{glow=ac()}catch(_){}
   draw(Lb,0,glow);draw(Ll,0,glow);root.classList.add('vmrun');
   /* gleicher Takt: Zeichenfläche zeigt exakt das alte Bild, dann echte Bilder still ausblenden */
@@ -246,7 +257,8 @@ VM.run=async function(o){const root=o.root,bk=o.bike,lg=o.logo;const bOld=bk.old
   if(VM.fixT==null&&!root._vmH&&sd>600&&fr<sd/1000*12){VM.on=false;console.info('Verwandlung: zu langsam auf diesem Gerät, ab jetzt einfacher Wechsel')}
   await Promise.all([bNew.decode?bNew.decode().catch(()=>{}):0,lg.el.decode?lg.el.decode().catch(()=>{}):0]);
   bNew.style.opacity='';finish()}
- catch(e){console.warn('Verwandlung:',e);finish()}};
+  catch(e){console.warn('Verwandlung:',e);finish()}}}};
+VM.run=async function(o){const h=await VM.prep(o,1);return h.play()};
 /* Klick während einer Verwandlung: Rest in ~0,4 s fertig spielen (Tiry 17.11.2026: Klicks gingen verloren) */
 VM.hurry=root=>{if(root)root._vmH=1};
 /* WebGL vorhanden? */

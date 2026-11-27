@@ -4427,13 +4427,13 @@ fetch('google.json',{cache:'no-store'}).then(r=>r.ok?r.json():null).then(g=>{if(
  $$('.band .tk').forEach(t=>{const o=t.dataset.t,u=o.replace(/\d,\d ★ bei Google/,vs+' ★ bei Google');if(u===o)return;t.dataset.t=u;const it=tkIt(u);t.innerHTML=it+it+it+it})}).catch(()=>{});
 
 /* ---------- Showroom (Start + Marken) ---------- */
-/* Showroom-Pool: zufällige Räder aus dem Bestand (nur mit Foto, freigestellt + geschärft in img/show/), jeder 5. Wechsel = Van Raam Dreirad */
+/* Showroom-Pool: zufällige Räder aus dem Bestand (nur mit Foto, freigestellt + geschärft in img/show/).
+   Tiry 27.11.2026: komplett zufällig – jedes freigegebene Rad (alle Marken, inkl. Dreiräder) hat bei jedem Wechsel die gleiche Chance,
+   nur nie zweimal direkt dasselbe Rad. Feste Plätze (Van Raam/VdV/Victoria/Stevens) und Marken-Runden gibt es nicht mehr. */
 const SHOWOK=new Set(["b2-isy-0.webp","b2-isy-1.webp","b2-isy-10.webp","b2-ktm-0.webp","b2-ktm-10.webp","b2-ktm-11.webp","b2-ktm-12.webp","b2-ktm-13.webp","b2-ktm-14.webp","b2-ktm-15.webp","b2-ktm-16.webp","b2-ktm-17.webp","b2-ktm-2.webp","b2-ktm-3.webp","b2-ktm-4.webp","b2-ktm-5.webp","b2-ktm-6.webp","b2-ktm-7.webp","b2-ktm-8.webp","b2-ktm-9.webp","b2-qio-0.webp","b2-qio-1.webp","b2-qio-2.webp","b2-qio-3.webp","b2-qio-4.webp","b2-qio-5.webp","b2-qio-6.webp","b2-rest-0.webp","b2-rest-1.webp","b2-rest-2.webp","b2-rest-3.webp","b2-rest-4.webp","b2-rest-5.webp","b2-rest-8.webp","isy-01.webp","isy-02.webp","isy-03.webp","isy-04.webp","isy-05.webp","isy-06.webp","isy-07.webp","isy-08.webp","isy-11.webp","isy-12.webp","isy-13.webp","isy-14.webp","isy-15.webp","isy-16.webp","isy-17.webp","isy-18.webp","isy-19.webp","isy-20.webp","isy-21.webp","isy-22.webp","isy-23.webp","isy-24.webp","isy-25.webp","isy-26.webp","isy-27.webp","isy-28.webp","isy-29.webp","isy-30.webp","isy-31.webp","isy-32.webp","isy-33.webp","isy-34.webp","isy-36.webp","isy-37.webp","isy-45.webp","ktm-13.webp","ktm-15.webp","ktm-16.webp","ktm-17.webp","ktm-18.webp","ktm-19.webp","ktm-20.webp","ktm-21.webp","ktm-22.webp","ktm-23.webp","ktm-24.webp","ktm-25.webp","ktm-26.webp","ktm-27.webp","ktm-28.webp","ktm-29.webp","ktm-30.webp","ktm-31.webp","ktm-32.webp","ktm-33.webp","ktm-34.webp","qio-0.webp","qio-1.webp","qio-11.webp","qio-13.webp","qio-14.webp","qio-15.webp","qio-16.webp","qio-17.webp","qio-18.webp","qio-19.webp","qio-2.webp","qio-20.webp","qio-21.webp","qio-22.webp","qio-23.webp","qio-24.webp","qio-25.webp","qio-3.webp","qio-6.webp","qio-7.webp","rest-01.webp","rest-05.webp"]);
-const SRFIX=['vanraam','vdv','victoria','stevens'];/* feste Plätze: jeder 5. / ca. 7. / ca. 9. / ca. 10. Wechsel */
-/* echter Zufall (crypto) + Merken der zuletzt gezeigten Räder über Besuche hinweg */
+/* echter Zufall (crypto) */
 const srRnd=n=>{try{const a=new Uint32Array(1);crypto.getRandomValues(a);return ((a[0]^(Date.now()*2654435761>>>0)^((performance.now()*1e3)|0))>>>0)%n}catch(e){return Math.floor(Math.random()*n)}};
-const srLS=v=>{try{if(v===undefined)return JSON.parse(localStorage.getItem('vc_srl')||'[]');localStorage.setItem('vc_srl',JSON.stringify(v))}catch(e){return []}};
-const SR={lb:{},pool:null,last:srLS().slice(0,24),lastF:'',n:0,vr:0,subs:[]};
+const SR={pool:null,subs:[]};
 /* Chip unter dem Showroom-Rad: bestelltes Rad = „Kommt bald“ statt „Live-Bestand“ (Tiry 15.11.2026) */
 function liveSoon(el,on){if(!el)return;on=!!on;if(el.classList.contains('soon')===on)return;el.classList.toggle('soon',on);
  const lv=el.querySelector('.hlv'),st=el.querySelector('.hl strong'),go=el.querySelector('.hgo');
@@ -4449,17 +4449,15 @@ function srBuild(){const P={},G=new Set();BR.forEach(b=>P[b.k]=[srBase(b)]);
    const img=SHOWOK.has(fn)?'img/show/'+fn:(srAgent(x)?x.bild:'');if(!img||SRDUP.has(fn)||seen.has(fn)||G.has(gk))return;seen.add(fn);G.add(gk);
    P[br.k].push({k:br.k,m:(m.marke+' '+m.modell).replace(/\s+/g,' ').trim(),f:x.farbe||'',img,st:x.status==='bestellt'?'bestellt':'lager'})})});
  SR.all={};Object.keys(P).forEach(k=>SR.all[k]=P[k].filter(x=>!x.cur));/* alle echten Bestandsfotos je Marke (Start-Showroom) */
- SR.rnd={};SRFIX.forEach(k=>{const fi=new Set((P[k]||[]).filter(x=>x.cur).map(x=>x.img)),L=(P[k]||[]).filter(x=>!x.cur&&!fi.has(x.img)&&!(k==='vanraam'&&/compact\s*plus/i.test(x.m)));if(L.length)SR.rnd[k]=L});/* Bestandsfotos der Marken mit festem Platz laufen zusätzlich im Zufall mit */
- Object.keys(P).forEach(k=>{P[k]=SRFIX.includes(k)?P[k].filter(x=>x.cur||(k==='vanraam'&&/compact\s*plus/i.test(x.m))):(P[k].length>1?P[k].filter(x=>!x.cur):P[k])});/* feste Plätze = festes Bild, Rest nur aus dem Bestand */
+ Object.keys(P).forEach(k=>{if(P[k].length>1)P[k]=P[k].filter(x=>!x.cur)});/* je Marke nur echte Bestandsfotos, Katalogbild nur, wenn die Marke keins hat */
+ const uq=L=>{const m=new Map();L.forEach(x=>{if(!m.has(x.img))m.set(x.img,x)});return [...m.values()]};SR.flat=uq(Object.values(P).flat());SR.hflat=uq(Object.values(SR.all).flat());/* jedes Bild genau einmal im Topf = gleiche Chance */
  const first=!SR.pool;SR.pool=P;SR.th={};Object.keys(P).forEach(k=>{const L=P[k];SR.th[k]=L[srRnd(L.length)].img});if(first)SR.subs.forEach(f=>f())}
-/* Marken-Runde (Tiry 14.11.2026): jede Marke mit Foto 1× pro Runde, zufällige Reihenfolge, nie dieselbe Marke direkt hintereinander */
+/* Marken-Runde (Tiry 14.11.2026) – nur noch für die Kachel „Auf Lager“, nicht für die Showrooms */
 function bagNext(B,keys){if(!B.q||!B.q.length){const q=keys.slice();for(let i=q.length-1;i>0;i--){const j=srRnd(i+1);[q[i],q[j]]=[q[j],q[i]]}if(q.length>1&&q[0]===B.l){const j=1+srRnd(q.length-1);[q[0],q[j]]=[q[j],q[0]]}B.q=q}B.l=B.q.shift();return B.l}
 const srNorm=t=>String(t||'').toLowerCase().replace(/\(.*?\)/g,'').replace(/matt|glanz|glossy|glänzend/g,'').replace(/[^a-zäöü]/g,'');
-/* how: 'fix' = fester Platz (nur festes Bild), 'rnd' = Zufallsfluss (bei festen Marken nur deren Bestandsfotos), sonst Marke gewählt (alles der Marke) */
-function srPick(k,how){const R=SR.rnd||{},F=SRFIX.includes(k);const L=k==='*'?(SR.pool?Object.keys(SR.pool).filter(j=>!SRFIX.includes(j)).flatMap(j=>SR.pool[j]).concat(...Object.values(R)):BR.filter(b=>!SRFIX.includes(b.k)).map(srBase)):
-  F&&how==='rnd'&&R[k]?R[k]:F&&how!=='fix'&&R[k]?((SR.pool&&SR.pool[k])||[]).concat(R[k]):((SR.pool&&SR.pool[k])||[srBase(BR.find(b=>b.k===k))]);
- let c=L.filter(x=>!SR.last.includes(x.img)&&(!SR.lastF||srNorm(x.f)!==SR.lastF));if(!c.length)c=L.filter(x=>x.img!==SR.lb[k]&&x.img!==SR.last[0]);if(!c.length)c=L.filter(x=>x.img!==SR.lb[k]);if(!c.length)c=L;
-const x=c[srRnd(c.length)];SR.lb[k]=x.img;if(L.length>1){SR.last.unshift(x.img);SR.last.length=Math.min(SR.last.length,24);srLS(SR.last)}SR.lastF=srNorm(x.f);return x}
+/* k = Marke oder '*' (alle), not = Bild des gerade gezeigten Rads (nie zweimal direkt dasselbe) – gleiche Chance für jedes Rad */
+function srPick(k,not){const L=k==='*'?(SR.pool?SR.flat:BR.map(srBase)):((SR.pool&&SR.pool[k])||[srBase(BR.find(b=>b.k===k))]);
+ let c=L.filter(x=>x.img!==not);if(!c.length)c=L;return c[srRnd(c.length)]}
 function showroom(root,prefix){
  const s=root.closest('.show')||root;
  let i=0,cur=null,bk=$('#'+prefix+'bk'),rf=$('#'+prefix+'brefl'),wm=$('#'+prefix+'swm'),info=$('#'+prefix+'sinfo'),th=$('#'+prefix+'thumbs'),busy=0,cnt=0,pend=0,hold=0;
@@ -4475,15 +4473,26 @@ function showroom(root,prefix){
   liveSoon($('.hlive',s),x.st==='bestellt');
   info.innerHTML='<span class="blogo"><img src="'+b.logo+'" alt="'+esc(b.n)+'"></span><div><p class="mdl">'+tag+' · '+esc(x.m)+(x.f?' · <span class="srf">'+esc(x.f)+'</span>':'')+'</p><h3>'+esc(b.n)+'</h3><p>'+esc(b.t)+'</p></div><div class="row">'+b.a.map(([t,h])=>'<a class="ghost" href="'+h+'"'+(h.startsWith('http')?' target="_blank" rel="noopener"':'')+'>'+esc(t)+'<svg><use href="#i-arrow"/></svg></a>').join('')+'<a class="ghost" href="#lager" data-brand="'+esc(b.n)+'">Auf Lager</a><a class="cta" href="#termin" data-pre="Probefahrt '+esc(b.n)+'"><svg><use href="#i-bike"/></svg>Probefahrt</a></div>';
   $$('button',th).forEach((y,j)=>y.classList.toggle('on',j===i));}
- const MB={};/* Markenrunden: jede Marke einmal je Runde, nie zweimal hintereinander */
- const FX=[[5,BR.findIndex(b=>b.k==='vanraam')],[7,BR.findIndex(b=>b.k==='vdv')],[9,BR.findIndex(b=>b.k==='victoria')],[10,BR.findIndex(b=>b.k==='stevens')]],FXI=FX.map(f=>f[1]);let q=[];
- /* how: 'tab' = Marke gewählt (bleibt bei der Marke), sonst Pfeil/Wischen/automatisch */
- function to(n,how){if(busy){if(how==='tab'||how==='prev'||how==='next'&&hold>Date.now()){pend=[n,how];if(how==='tab')$$('button',th).forEach((y,j)=>y.classList.toggle('on',j===(n+BR.length)%BR.length));if(window.VM&&VM.hurry)VM.hurry(area)}return}cnt++;n=(n+BR.length)%BR.length;
-  FX.forEach(([e,j])=>{if(cnt%e===0&&!q.includes(j))q.push(j)});
-  let x;if(how!=='tab'){if(q.length){n=q.shift();x=srPick(BR[n].k,'fix')}else{const ks=SR.pool?Object.keys(SR.pool).filter(j=>!SRFIX.includes(j)&&SR.pool[j].length&&BR.some(b=>b.k===j)).concat(Object.keys(SR.rnd||{}).filter(j=>BR.some(b=>b.k===j))):[];x=ks.length?srPick(bagNext(MB,ks),'rnd'):srPick('*');n=BR.findIndex(b=>b.k===x.k)}MB.l=BR[n].k}
-  else{q=q.filter(j=>j!==n);x=srPick(BR[n].k)}if(n===i&&cur&&x.img===cur.img)return;i=n;cur=x;const b=BR[i];busy=1;$$('button',th).forEach((y,j)=>y.classList.toggle('on',j===i));
-  if(window.VM&&VM.on&&VM.ok){const op0=getComputedStyle(wm).opacity,from=bk.currentSrc||bk.src,lf=wm.currentSrc||wm.src;Promise.race([Promise.all([dec(x.img),dec(b.logo)]),new Promise(r=>setTimeout(r,2500))]).then(()=>{thSet(i,x.img);const pr=VM.run({root:area,bike:{oldEl:bk,newEl:bk,from,to:x.img,alt:x.m+(x.f?' in '+x.f:'')},logo:{el:wm,from:lf,to:b.logo,op0}});paint();pr.then(()=>{rf.src=x.img;busy=0;nxt()})});return}bk.classList.add('out-l');wm.classList.add('swap');rf.style.opacity=0;
-  setTimeout(()=>{const go=()=>{bk.classList.add('in-r');bk.classList.remove('out-l');bk.src=x.img;bk.alt=x.m+(x.f?' in '+x.f:'');rf.src=x.img;wm.src=b.logo;thSet(i,x.img);paint();rdy([bk,wm]).then(()=>{void bk.offsetWidth;bk.classList.remove('in-r');wm.classList.remove('swap');rf.style.opacity='';busy=0;nxt()})};Promise.race([Promise.all([dec(x.img),dec(b.logo)]),new Promise(r=>setTimeout(r,2500))]).then(go)},420);}
+ /* Tiry 27.11.2026: Rad steht nach jeder Verwandlung gleichmäßig STAND ms (vorher je nach Takt 0,4–1,3 s, Mittel 1,2 s; jetzt +1,5 s).
+    In der Standzeit wird der nächste Wechsel komplett vorbereitet (nx), beim Wechsel wird nur noch gezeichnet. */
+ const STAND=2750;let due=Infinity,nx=null;
+ const vmOn=()=>window.VM&&VM.on&&VM.ok;
+ const pick=()=>{const x=srPick('*',cur&&cur.img);return{x,n:BR.findIndex(b=>b.k===x.k)}};
+ function prepNext(){if(nx||busy||!SR.pool||!vis)return;const p=pick();if(p.n<0)return;nx=p;const b=BR[p.n];
+  p.hp=Promise.race([Promise.all([dec(p.x.img),dec(b.logo)]),new Promise(r=>setTimeout(r,2500))]).then(()=>{if(nx!==p||busy||!vmOn())return null;
+   return VM.prep({root:area,bike:{oldEl:bk,newEl:bk,from:bk.currentSrc||bk.src,to:p.x.img,alt:p.x.m+(p.x.f?' in '+p.x.f:'')},logo:{el:wm,from:wm.currentSrc||wm.src,to:b.logo,op0:getComputedStyle(wm).opacity}})}).catch(()=>null)}
+ const drop=()=>{const p=nx;nx=null;if(p&&p.hp)p.hp.then(h=>h&&h.cancel())};
+ const done=()=>{busy=0;due=performance.now()+STAND;arm();nxt();setTimeout(prepNext,700)};/* Vorbereitung erst nach dem Ausklingen */
+ /* how: 'tab' = Marke gewählt (bleibt bei der Marke), sonst Pfeil/Wischen/automatisch (zufällig aus allen); p = vorbereiteter Wechsel */
+ function to(n,how){if(busy){if(how==='tab'||how==='prev'||how==='next'&&hold>Date.now()){pend=[n,how];if(how==='tab')$$('button',th).forEach((y,j)=>y.classList.toggle('on',j===(n+BR.length)%BR.length));if(window.VM&&VM.hurry)VM.hurry(area)}return}
+  let p=null;if(how!=='tab'&&nx){p=nx;nx=null}else drop();n=(n+BR.length)%BR.length;
+  let x;if(p){x=p.x;n=p.n}else if(how!=='tab'){const q=pick();x=q.x;n=q.n}else x=srPick(BR[n].k,cur&&cur.img);
+  if(n<0)return;if(n===i&&cur&&x.img===cur.img)return;i=n;cur=x;const b=BR[i];busy=1;$$('button',th).forEach((y,j)=>y.classList.toggle('on',j===i));
+  if(vmOn()){const go=h=>{thSet(i,x.img);const o={root:area,bike:{oldEl:bk,newEl:bk,from:bk.currentSrc||bk.src,to:x.img,alt:x.m+(x.f?' in '+x.f:'')},logo:{el:wm,from:wm.currentSrc||wm.src,to:b.logo,op0:getComputedStyle(wm).opacity}};
+    const pr=h&&!h.dead()?h.play():VM.run(o);paint();pr.then(()=>{rf.src=x.img;done()})};
+   if(p&&p.hp)p.hp.then(go);else Promise.race([Promise.all([dec(x.img),dec(b.logo)]),new Promise(r=>setTimeout(r,2500))]).then(()=>go(null));return}
+  bk.classList.add('out-l');wm.classList.add('swap');rf.style.opacity=0;
+  setTimeout(()=>{const go=()=>{bk.classList.add('in-r');bk.classList.remove('out-l');bk.src=x.img;bk.alt=x.m+(x.f?' in '+x.f:'');rf.src=x.img;wm.src=b.logo;thSet(i,x.img);paint();rdy([bk,wm]).then(()=>{void bk.offsetWidth;bk.classList.remove('in-r');wm.classList.remove('swap');rf.style.opacity='';done()})};Promise.race([Promise.all([dec(x.img),dec(b.logo)]),new Promise(r=>setTimeout(r,2500))]).then(go)},420);}
  const nxt=()=>{if(!pend)return;const [n,h]=pend;pend=0;to(n,h)};
  const user=()=>{hold=Date.now()+20000};
  th.addEventListener('click',e=>{const b=e.target.closest('button');if(b){user();to(+b.dataset.j,'tab')}});
@@ -4491,12 +4500,13 @@ function showroom(root,prefix){
  $('#'+prefix+'sn').addEventListener('click',()=>{user();to(i+1,'next')});
  let sx=0;const area=$('#'+prefix+'bikearea');area.addEventListener('pointerdown',e=>sx=e.clientX);area.addEventListener('pointerup',e=>{const d=e.clientX-sx;if(Math.abs(d)>50){user();to(i+(d<0?1:-1),d<0?'next':'prev')}});
  /* automatisch weiter, nur wenn sichtbar, Tab aktiv und niemand gerade klickt/zeigt */
- let vis=false,over=false;new IntersectionObserver(e=>{vis=e[0].isIntersecting;if(vis&&window.VM&&VM.warm)VM.warm(area,bk,wm)},{threshold:.35}).observe(area);
+ let vis=false,over=false;new IntersectionObserver(e=>{vis=e[0].isIntersecting;if(vis&&window.VM&&VM.warm)VM.warm(area,bk,wm);if(vis&&s.classList.contains('srok'))prepNext()},{threshold:.35}).observe(area);
   th.addEventListener('pointerenter',e=>{if(e.pointerType==='mouse')over=true});th.addEventListener('pointerleave',()=>over=false);
- setInterval(()=>{if(vis&&!over&&!busy&&!document.hidden&&Date.now()>hold&&SR.pool)to(i+1,'next')},4000);
+ /* Zeitgeber genau auf das Ende der Standzeit (kein Raster), bei Pause alle 100 ms nachsehen */
+ function arm(){clearTimeout(arm.t);arm.t=setTimeout(function k(){if(busy)return;if(vis&&!over&&!document.hidden&&Date.now()>hold&&SR.pool&&performance.now()>=due-4)to(i+1,'next');else arm.t=setTimeout(k,Math.max(4,Math.min(100,due-performance.now())))},Math.max(0,due-performance.now()))}
  /* Start: zufälliges Bestandsrad der ersten Marke, sobald der Bestand geladen ist */
  SR.subs.push(()=>{BR.forEach((b,j)=>{const t=SR.th&&SR.th[b.k];if(t)thSet(j,t)});
-  const x=srPick('*');const n=BR.findIndex(b=>b.k===x.k);if(n<0)return;i=n;cur=x;MB.l=x.k;thSet(i,x.img);const go=()=>{bk.src=x.img;rf.src=x.img;bk.alt=x.m+(x.f?' in '+x.f:'');wm.src=BR[i].logo;paint();rdy([bk,wm]).then(()=>s.classList.add('srok'))};Promise.all([dec(x.img),dec(BR[i].logo)]).then(go)});
+  const x=srPick('*');const n=BR.findIndex(b=>b.k===x.k);if(n<0)return;i=n;cur=x;thSet(i,x.img);const go=()=>{bk.src=x.img;rf.src=x.img;bk.alt=x.m+(x.f?' in '+x.f:'');wm.src=BR[i].logo;paint();rdy([bk,wm]).then(()=>{s.classList.add('srok');due=performance.now()+STAND;arm();prepNext()})};Promise.all([dec(x.img),dec(BR[i].logo)]).then(go)});
  paint();return{to};
 }
 /* Showroom nur noch auf der Markenseite (Start-Showroom entfernt, Tiry 14.11.2026) */
@@ -4721,23 +4731,27 @@ fRender();
 
 
 /* ---------- Kopf: Rad-Wechsel + heutige Öffnungszeit ---------- */
-(function(){const hv=$('#hvis');if(!hv)return;const bs=$$('.hb',hv),lg=$('#hlg'),fl=$('.hfloor',hv);let k=0,on=bs[0],fx=true,D=[],dk=0,busy=0;const HB={};
- /* Tiry 14.11.2026: die festen Bilder genau 1× durch, danach nur noch zufällige Räder aus dem Bestand (srPick) */
- const ld=el=>{if(el&&el.dataset.src&&!el.getAttribute('src'))el.src=el.dataset.src};addEventListener('load',()=>setTimeout(()=>ld(bs[1]),1500),{once:true});
+(function(){const hv=$('#hvis');if(!hv)return;const bs=$$('.hb',hv),lg=$('#hlg'),fl=$('.hfloor',hv);let on=bs[0],D=[],busy=0;
+ /* Tiry 27.11.2026: Startbild aus dem HTML, danach komplett zufällig aus allen echten Bestandsrädern mit eigenem Foto (gleiche Chance, nie zweimal direkt dasselbe).
+    Rad steht nach jeder Verwandlung gleichmäßig STAND ms (vorher 0,2–3,4 s, Mittel 2,0 s; jetzt +1,5 s); in der Standzeit wird der nächste Wechsel komplett vorbereitet. */
  /* Tiry 15.11.2026: Logo und Rad kommen exakt gleichzeitig – Logo vorab geladen + dekodiert, beide starten im selben Frame mit gleicher Dauer */
  const dec=src=>{if(!src)return Promise.resolve();const im=new Image();im.src=src;return (im.decode?im.decode():new Promise((r,j)=>{im.onload=r;im.onerror=j})).catch(()=>{})};
  bs.forEach(b=>dec(b.dataset.l));if(typeof BR!=='undefined')BR.forEach(b=>dec(b.logo));
- const swap=(el,logo)=>{ld(el);ld(bs[(bs.indexOf(el)+1)%bs.length]);busy=1;
-  const wt=Promise.race([Promise.all([dec(el.currentSrc||el.src),dec(logo)]),new Promise(r=>setTimeout(r,2500))]);
-  wt.then(()=>{if(window.VM&&VM.on&&VM.ok){const o=on;on=el;VM.run({root:hv,bike:{oldEl:o,newEl:el,to:el.currentSrc||el.src},logo:{el:lg,to:logo}}).then(()=>{busy=0});return}on.classList.add('off');lg.classList.add('swap');on=el;
-   setTimeout(()=>{lg.src=logo;requestAnimationFrame(()=>{el.classList.remove('off');lg.classList.remove('swap');busy=0})},300)})};
- const vmTick=f=>{if(busy||(!f&&(cur!=='start'||scrollY>innerHeight||document.hidden)))return;
-  if(fx&&(k<bs.length-1||!SR.pool)){k=(k+1)%bs.length;swap(bs[k],bs[k].dataset.l);return}
-  fx=false;if(!D.length)for(let j=0;j<2;j++){const im=document.createElement('img');im.className='hb off';im.decoding='async';hv.insertBefore(im,fl);D.push(im)}
-  const ks=Object.keys(SR.all||{}).filter(j=>SR.all[j].length);if(!ks.length)return;/* nur echte Bestandsräder mit eigenem Foto, nie Katalogbild */
-  const bk=bagNext(HB,ks),L=SR.all[bk];if(!L||!L.length){HB.q=null;return}let c=L.filter(y=>!SR.last.includes(y.img)&&(!SR.lastF||srNorm(y.f)!==SR.lastF));if(!c.length)c=L.filter(y=>y.img!==SR.lb['h'+bk]);if(!c.length)c=L;
-  const x=c[srRnd(c.length)];SR.lb['h'+bk]=x.img;SR.last.unshift(x.img);SR.last.length=Math.min(SR.last.length,24);srLS(SR.last);SR.lastF=srNorm(x.f);const br=BR.find(y=>y.k===x.k);if(!br)return;dk^=1;const el=D[dk];busy=1;
-  const pre=new Image();pre.src=x.img;const go=()=>{el.src=x.img;el.alt=x.m+(x.f?' in '+x.f:'');requestAnimationFrame(()=>{swap(el,br.logo);liveSoon($('#hLive'),x.st==='bestellt')})};pre.decode?pre.decode().then(go,go):(pre.onload=go)};window.VMhero=vmTick;setInterval(()=>vmTick(),4800);setTimeout(()=>{if(window.VM&&VM.warm&&cur==='start')VM.warm(hv,bs[0],lg)},1500);
+ const STAND=3500;let due=performance.now()+STAND,nx=null,last='';
+ const vmOn=()=>window.VM&&VM.on&&VM.ok,ok=()=>cur==='start'&&scrollY<=innerHeight&&!document.hidden;
+ const mkD=()=>{if(!D.length)for(let j=0;j<2;j++){const im=document.createElement('img');im.className='hb off';im.decoding='async';hv.insertBefore(im,fl);D.push(im)}};
+ function prepNext(){if(nx||busy||!SR.hflat||!SR.hflat.length)return;let c=SR.hflat.filter(y=>y.img!==last&&BR.some(b=>b.k===y.k));if(!c.length)return;
+  const x=c[srRnd(c.length)],br=BR.find(y=>y.k===x.k);mkD();const el=D[0]===on?D[1]:D[0],p={x,br,el};nx=p;el.src=x.img;el.alt=x.m+(x.f?' in '+x.f:'');
+  p.hp=Promise.race([Promise.all([el.decode?el.decode().catch(()=>{}):0,dec(br.logo)]),new Promise(r=>setTimeout(r,2500))]).then(()=>{if(nx!==p||busy||!vmOn())return null;
+   return VM.prep({root:hv,bike:{oldEl:on,newEl:el,to:el.currentSrc||el.src},logo:{el:lg,to:br.logo}})}).catch(()=>null)}
+ const done=()=>{busy=0;due=performance.now()+STAND;arm();setTimeout(prepNext,700)};
+ function fire(){const p=nx;if(!p){prepNext();return}nx=null;busy=1;last=p.x.img;
+  p.hp.then(h=>{const el=p.el,logo=p.br.logo;liveSoon($('#hLive'),p.x.st==='bestellt');
+   if(vmOn()){const o=on;on=el;(h&&!h.dead()?h.play():VM.run({root:hv,bike:{oldEl:o,newEl:el,to:el.currentSrc||el.src},logo:{el:lg,to:logo}})).then(done);return}
+   on.classList.add('off');lg.classList.add('swap');on=el;setTimeout(()=>{lg.src=logo;requestAnimationFrame(()=>{el.classList.remove('off');lg.classList.remove('swap');done()})},300)})}
+ SR.subs.push(prepNext);window.VMhero=()=>{if(!busy)fire()};
+ function arm(){clearTimeout(arm.t);arm.t=setTimeout(function k(){if(busy)return;if(ok()&&!nx)prepNext();if(ok()&&nx&&performance.now()>=due-4)fire();else arm.t=setTimeout(k,Math.max(4,Math.min(100,due-performance.now())))},Math.max(0,due-performance.now()))}arm();
+ setTimeout(()=>{if(window.VM&&VM.warm&&cur==='start')VM.warm(hv,bs[0],lg)},1500);
  const bq=berlin(),{d,m}=bq,q=$('#qkHours'),TD=slotsAt(bq.y,bq.mo,bq.dd,d);if(q){const op=TD.some(([a,b])=>m>=a&&m<b);q.innerHTML='<i class="qd'+(op?' on':'')+'"></i>'+(op?'Jetzt geöffnet':'Heute: '+(TD.length?TD.map(([a,b])=>hm(a)+'–'+hm(b)).join(' · '):'geschlossen'))}})();
 
 /* ================= AUF LAGER (Modelle mit Varianten, ohne Stückzahlen) ================= */
