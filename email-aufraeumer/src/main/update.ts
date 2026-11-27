@@ -12,7 +12,7 @@ export type UpdateStand =
   | { stand: 'bereit'; version: string; neu: string }
   | { stand: 'fehler'; version: string; grund: string };
 
-export function starteUpdater(opt: { melde: (s: UpdateStand) => void; log: (t: string) => void; fensterSichtbar: () => boolean; vorBeenden: (still: boolean) => void }) {
+export function starteUpdater(opt: { melde: (s: UpdateStand) => void; log: (t: string) => void; fensterSichtbar: () => boolean; beschaeftigt?: () => boolean; vorBeenden: (still: boolean) => void }) {
   const version = app.getVersion();
   let aktuell: UpdateStand = { stand: 'aus', version };
   const setze = (s: UpdateStand) => { aktuell = s; opt.melde(s); };
@@ -40,7 +40,7 @@ export function starteUpdater(opt: { melde: (s: UpdateStand) => void; log: (t: s
   setInterval(suchen, 30 * 60 * 1000).unref();
   // Unbemerkt einspielen: Update bereit, Fenster zu, PC seit 10 Minuten unbenutzt → still neu starten
   setInterval(() => {
-    if (aktuell.stand === 'bereit' && !opt.fensterSichtbar() && powerMonitor.getSystemIdleTime() > 600) { opt.log(`Update auf ${neu} wird still eingespielt`); jetzt(true); }
+    if (aktuell.stand === 'bereit' && !opt.fensterSichtbar() && !opt.beschaeftigt?.() && powerMonitor.getSystemIdleTime() > 600) { opt.log(`Update auf ${neu} wird still eingespielt`); jetzt(true); }
   }, 60 * 1000).unref();
 
   return { stand: () => aktuell, jetzt, suchen };

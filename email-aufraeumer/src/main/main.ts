@@ -323,6 +323,8 @@ app.whenReady().then(async () => {
   if (!DEMO && !SMOKE) updater = starteUpdater({
     melde: (s) => sende('update', s), log,
     fensterSichtbar: () => !!fenster && !fenster.isDestroyed() && fenster.isVisible(),
+    // nie still neu starten, während das alte Postfach aufgeräumt wird
+    beschaeftigt: () => ['vorschau', 'laeuft'].includes(dienst?.altbestand?.phase ?? ''),
     vorBeenden: (still) => { beenden = true; dienst?.stoppen(); if (still) try { fs.writeFileSync(STILL_MARKE, '1'); } catch { /* egal */ } },
   });
 
