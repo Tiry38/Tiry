@@ -664,3 +664,6 @@
 - Gemessen (Software-Grafik, 1366×768, gleiche Zeit/Maus/Scroll): oben 454 → 424 ms, gescrollt 484/603/605 → 328/356/411 ms je Bild (−32 bis −41 %). Bildvergleich: max. 1/255 Abweichung.
 - Winter-Karte: Schnee gleitet per `transform` (`.wsn::before`) statt `background-position` + Leuchtfilter je Bild neu zu malen; Bildvergleich bei gleicher Animationszeit: Schnee identisch.
 - Messplatz: `HG12_BENCH(o,n)` / `HG12_SHOT(o)` mit `o={t,m:[x,y],s}`; `HG12_GENERISCH=1` bzw. `HG12_OHNEPW=1` schaltet die Sparwege zum Vergleich ab.
+
+- **27.11.2026 – Showroom-Verwandlung ohne MSAA:** `vmorph-laub.js` `mk()` mit `antialias:false`. Das Laub glättet seine Kanten selbst im Shader (`vPx`), deshalb entfällt der 4-fache Kantenglättungs-Puffer auf beiden Leinwänden. Bild-für-Bild-Vergleich bei 7 festen Zeitpunkten: Abweichung nur an einzelnen Randpixeln winziger Blätter (Ø ≤ 0,04/255), bei 2-facher Vergrößerung nicht sichtbar. Nicht wieder einschalten.
+- **Geprüft und bewusst nicht geändert:** Der Start-Schnee (`#snow`) wird je Bild mit wenigen Vektor-Strichen gezeichnet. Das ist billig, und vorgerenderte Bilder wären beim Drehen nicht pixelgleich. Die schimmernden Überschriften (`.gt` flow, `hcflow`) bleiben, weil kein pixelgleicher Ersatz existiert.
