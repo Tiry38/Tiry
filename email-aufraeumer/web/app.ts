@@ -4,6 +4,7 @@ import type { GmailPort } from '../src/core/gmail';
 import { KATEGORIE_NAME, type Kategorie } from '../src/core/types';
 import { textZuHtml, bytesZuBase64 } from '../src/core/mime';
 import { erzeugeWebGmail, AnmeldungAbgelaufen } from './gmailWeb';
+import { STAND_BETREFF, standLesen, standNachricht, type Stand } from '../src/core/stand';
 import * as an from './anmeldung';
 
 // ---------- Grundlagen ----------
@@ -31,6 +32,7 @@ const I = {
   klammer: '<path d="M16 7l-7.5 7.5a2.5 2.5 0 0 0 3.5 3.5L19.5 10.5a4.5 4.5 0 0 0-6.4-6.4L5.6 11.6a6.5 6.5 0 0 0 9.2 9.2L20 15.6"/>',
   senden: '<path d="M4 12l16-8-6 16-3-7z"/><path d="M11 13l9-9"/>',
   abmelden: '<path d="M10 4H5v16h5M15 8l4 4-4 4M19 12H9"/>',
+  neu: '<path d="M20 12a8 8 0 1 1-2.4-5.7M20 4v5h-5"/>',
 };
 const ik = (n: keyof typeof I, label?: string) => `<svg class="i" viewBox="0 0 24 24" aria-hidden="true">${I[n]}</svg>${label ? `<span class="unsichtbar">${h(label)}</span>` : ''}`;
 
@@ -223,7 +225,7 @@ function listeGeruest() {
   </nav>`;
   balkenSetzen(balkenStand);
   $('#d-ordner').addEventListener('click', ordnerBogen);
-  $('#d-aufr').addEventListener('click', aufraeumerBogen);
+  $('#d-aufr').addEventListener('click', () => void aufraeumerAnsicht());
   const sucheAuf = () => { $('#suchform').hidden = false; $<HTMLInputElement>('#suchfeld').focus(); };
   $('#d-suche').addEventListener('click', sucheAuf); $('#suchen').addEventListener('click', sucheAuf);
   $('#suchform').addEventListener('submit', (e) => { e.preventDefault(); suche = $<HTMLInputElement>('#suchfeld').value.trim(); void laden(true); $<HTMLInputElement>('#suchfeld').blur(); });
@@ -412,7 +414,7 @@ function kontoBogen() {
     ${NATIV ? '<button class="wahl" id="k-popups">Popups bei neuen Mails</button>' : ANDROID_BROWSER ? `<a class="wahl" href="${APK}">Echte Android-App mit Popups laden</a>` : ''}
     <button class="wahl" id="k-pc">Was macht der PC?</button>
     <button class="wahl" id="k-ab">${DEMO ? 'Vorschau beenden' : 'Abmelden'}</button>`);
-  $('#k-pc', b.el).addEventListener('click', () => { b.zu(); aufraeumerBogen(); });
+  $('#k-pc', b.el).addEventListener('click', () => { b.zu(); void aufraeumerAnsicht(); });
   b.el.querySelector('#k-popups')?.addEventListener('click', () => { b.zu(); setTimeout(popupBogen, 250); });
   $('#k-ab', b.el).addEventListener('click', () => { an.abmelden(); location.href = location.pathname; });
 }
@@ -490,41 +492,74 @@ const SORTIERT = [
   { name: 'Newsletter', label: 'Newsletter', was: 'Rundschreiben, Abos', farbe: 'var(--c-newsletter)' },
   { name: 'Infos', label: 'Benachrichtigung', was: 'Pakete, Konten, Apps', farbe: 'var(--c-benachrichtigung)' },
 ];
-async function aufraeumerBogen() {
-  // Der PC markiert Werbung, Newsletter und Infos mit eigenen Ordnern – genau die zählen wir hier.
-  // (Wichtiges und Persönliches lässt er unberührt im Posteingang, Spam wirft er in den Papierkorb.)
-  const faecher = SORTIERT.map((f) => ({ ...f, id: [...labelName.entries()].find(([, n]) => n === `Aufräumer/${f.label}`)?.[0] }));
-  const fachHtml = (f: typeof faecher[number], heute: number | null, gesamt: number | null, max: number) => `
-    <button class="fach-zeile" data-fach="${h(f.id ?? '')}" ${f.id ? '' : 'disabled'} style="--farbe:${f.farbe}">
-      <span class="fach-kopf"><b>${h(f.name)}</b><span>${h(f.was)}</span></span>
-      <span class="fach-zahl">${heute === null ? '<i class="lade"></i>' : `<b>${heute.toLocaleString('de-DE')}</b><small>heute</small>`}</span>
-      <span class="fach-balken"><i style="--anteil:${heute === null ? 0 : heute / max}"></i></span>
-      <span class="fach-gesamt">${gesamt === null ? '&nbsp;' : f.id ? `insgesamt ${gesamt.toLocaleString('de-DE')} im Ordner „${h(f.label)}“ →` : 'Ordner gibt es noch nicht'}</span>
-    </button>`;
-  const rahmen = (innen: string, unten: string) => `
-    <p class="erklaer">Das hat <b>dein PC</b> in den <b>letzten 24 Stunden</b> aus deinem Posteingang geräumt und einsortiert:</p>
-    <div class="faecher">${innen}</div>${unten}`;
-  const b = bogen('Aufräumer heute', rahmen(faecher.map((f) => fachHtml(f, null, null, 1)).join(''), ''));
-  const zahlen = await Promise.all(faecher.map(async (f) => {
-    if (!f.id) return { heute: 0, gesamt: 0 };
-    try {
-      if (DEMO) { const alle = [...(gmail as any).mails.values()].filter((m: any) => m.labelIds.includes(f.id)); return { heute: alle.filter((m: any) => Date.now() - m.internalDate < 86400_000).length, gesamt: alle.length }; }
-      const [x, info] = await Promise.all([gmail.listeOrdner(f.id, 'newer_than:1d', undefined, 500), gmail.labelInfo(f.id)]);
-      return { heute: x.ids.length, gesamt: info.gesamt };
-    } catch { return { heute: 0, gesamt: 0 }; }
-  }));
-  if (!b.el.isConnected) return;
-  const max = Math.max(1, ...zahlen.map((z) => z.heute));
-  const summe = zahlen.reduce((a, z) => a + z.heute, 0);
-  const keinOrdner = faecher.every((f) => !f.id);
-  b.el.querySelector('.bogen-inhalt')!.innerHTML = rahmen(faecher.map((f, i) => fachHtml(f, zahlen[i].heute, zahlen[i].gesamt, max)).join(''), `
-    <p class="erklaer summe"><b>${summe.toLocaleString('de-DE')}</b> Mails heute weggeräumt. <b>Wichtiges und Persönliches</b> lässt der PC im Posteingang, <b>Spam</b> wirft er in den Papierkorb.</p>
-    ${keinOrdner ? '<p class="erklaer">Noch keine Ordner vom Aufräumer gefunden. Läuft das PC-Programm im <b>Probelauf</b>? Dann räumt es noch nichts weg – am PC auf „Jetzt wirklich aufräumen“ drücken.</p>' : ''}
-    <p class="erklaer klein">Antippen öffnet den Ordner.</p>`);
-  b.el.querySelectorAll<HTMLButtonElement>('[data-fach]').forEach((x) => x.addEventListener('click', () => {
-    if (!x.dataset.fach) return;
-    ordner = x.dataset.fach; suche = ''; b.zu(); titelSetzen(); scrollTo(0, 0); void laden(true);
-  }));
+// ---------- Aufräumer: dieselbe Übersicht wie am PC (aus dem Stand-Entwurf, den der PC alle 2 Min. schreibt) ----------
+const FACH: Array<{ k: string; name: string; farbe: string; tat: string }> = [
+  { k: 'wichtig', name: 'Wichtig', farbe: 'var(--c-wichtig)', tat: 'bleibt' }, { k: 'persoenlich', name: 'Persönlich', farbe: 'var(--c-persoenlich)', tat: 'bleibt' },
+  { k: 'benachrichtigung', name: 'Info', farbe: 'var(--c-benachrichtigung)', tat: 'bleibt, Etikett' }, { k: 'newsletter', name: 'Newsletter', farbe: 'var(--c-newsletter)', tat: '→ Archiv' },
+  { k: 'werbung', name: 'Werbung', farbe: 'var(--c-werbung)', tat: '→ Archiv' }, { k: 'muell', name: 'Spam & Betrug', farbe: 'var(--c-muell)', tat: '→ Papierkorb' },
+];
+const ZIEL: Record<string, string> = { papierkorb: '→ Papierkorb', archiv: '→ Archiv', bleibt: 'bleibt im Posteingang', pruefen: 'wartet auf dich (am PC)', geschuetzt: 'geschützt – nicht angefasst' };
+const dauer = (min: number) => min >= 60 ? `${Math.floor(min / 60)} Std. ${min % 60} Min.` : `${min} Min.`;
+const vor = (t: number) => { const m = Math.round((Date.now() - t) / 60000); return m < 1 ? 'gerade eben' : m < 60 ? `vor ${m} Min.` : m < 1440 ? `vor ${Math.round(m / 60)} Std.` : `vor ${Math.round(m / 1440)} Tagen`; };
+
+async function aufraeumerAnsicht() {
+  history.pushState({ aufr: 1 }, '');
+  const e = ebene('aufr-ebene', `<div class="ebene-kopf"><button class="ikon" data-z aria-label="Zurück">${ik('zurueck')}</button><span class="platz"></span>
+      <button class="ikon" data-neu aria-label="Aktualisieren">${ik('neu')}</button></div>
+    <div class="ebene-inhalt aufr" id="aufr"><p class="aufr-lade">Hole den Stand von deinem PC …</p></div>`);
+  aufrEbene = e;
+  e.el.querySelector('[data-z]')!.addEventListener('click', () => history.back());
+  const zeichne = async () => {
+    let stand: Stand | null = null;
+    try { const t = await gmail.standText?.(STAND_BETREFF); stand = t ? standLesen(t) : null; } catch { /* unten Hinweis */ }
+    if (!e.el.isConnected) return;
+    $('#aufr', e.el).innerHTML = stand ? aufrHtml(stand) : `<section class="aufr-lage" data-art="aus"><h2>Noch kein Stand vom PC.</h2>
+      <p>Damit du hier alles siehst wie am PC: Tiry's Mails am PC <b>aktualisieren</b> (unten links „Jetzt neu starten“). Danach schickt der PC alle 2 Minuten seinen Stand hierher.</p></section>`;
+    e.el.querySelectorAll<HTMLButtonElement>('[data-ordnername]').forEach((b) => b.addEventListener('click', () => {
+      const o = ordnerListe.find((x) => x.name === b.dataset.ordnername); if (!o) { toast('Den Ordner gibt es in Gmail noch nicht.'); return; }
+      ordner = o.id; suche = ''; history.back(); titelSetzen(); scrollTo(0, 0); void laden(true);
+    }));
+  };
+  e.el.querySelector('[data-neu]')!.addEventListener('click', () => { $('#aufr', e.el).classList.add('laedt'); void zeichne().then(() => $('#aufr', e.el).classList.remove('laedt')); });
+  await zeichne();
+}
+let aufrEbene: { el: HTMLElement; zu: () => void } | null = null;
+
+function aufrHtml(s: Stand) {
+  const alt = Date.now() - s.zeit > 10 * 60_000;
+  const probe = s.status === 'trockenlauf';
+  const art = alt ? 'aus' : s.status === 'fehler' ? 'fehler' : probe ? 'probe' : 'laeuft';
+  const titel = alt ? 'Dein PC ist gerade aus.' : art === 'fehler' ? 'Am PC hakt etwas.' : probe ? 'Probelauf.' : 'Läuft. Ich räume für dich auf.';
+  const text = alt ? `Letzter Stand: ${vor(s.zeit)} – neue Werbung räumt Gmail trotzdem weg${s.gmailRegeln ? ` – ${s.gmailRegeln} Regeln arbeiten direkt bei Google` : ''}.`
+    : probe ? 'Der PC zeigt nur, was er tun würde – angefasst wird noch nichts. Am PC „Jetzt wirklich aufräumen“ drücken.'
+    : `Neue Mails sortiert der PC in Sekunden. Stand: ${vor(s.zeit)}`;
+  const max = Math.max(1, ...FACH.map((f) => s.heute[f.k].echt + s.heute[f.k].probe));
+  const sum = FACH.reduce((a, f) => a + s.heute[f.k].echt + s.heute[f.k].probe, 0);
+  const st = s.statistik; const a = s.altbestand;
+  return `
+    <section class="aufr-lage" data-art="${art}"><h2>${titel}</h2><p>${text}</p></section>
+    <section class="aufr-block"><div class="aufr-kopf"><h3>Heute sortiert</h3><p><b>${sum.toLocaleString('de-DE')}</b> Mails · ${st.heuteEntfernt.toLocaleString('de-DE')} ${probe ? 'würde ich wegräumen' : 'weggeräumt'}</p></div>
+      <div class="maschine" role="img" aria-label="${FACH.map((f) => `${f.name} ${s.heute[f.k].echt + s.heute[f.k].probe}`).join(', ')}">
+        ${FACH.map((f, i) => { const n = s.heute[f.k].echt + s.heute[f.k].probe; return `<div class="fach${s.heute[f.k].probe ? ' gestreift' : ''}"><b>${n.toLocaleString('de-DE')}</b><i style="--farbe:${f.farbe};--anteil:${n / max};--n:${i}"></i></div>`; }).join('')}
+      </div>
+      <div class="faecher-namen">${FACH.map((f) => `<span>${f.name}<small>${f.tat}</small></span>`).join('')}</div></section>
+    <section class="aufr-block"><h3>Diese Woche</h3>
+      <dl class="woche">
+        <div><dt>${probe ? 'Würde ich wegräumen' : 'Weggeräumt'}</dt><dd>${st.wocheEntfernt.toLocaleString('de-DE')}</dd></div>
+        <div><dt>Gesparte Lesezeit</dt><dd>${dauer(st.lesezeitMinutenWoche)}</dd></div>
+        <div><dt>Wartet auf dich</dt><dd>${st.zuPruefen.toLocaleString('de-DE')}</dd></div>
+        <div><dt>Insgesamt weggeräumt</dt><dd>${st.gesamtEntfernt.toLocaleString('de-DE')}</dd></div>
+      </dl>${st.zuPruefen ? '<p class="erklaer klein">„Wartet auf dich“ entscheidest du am PC unter „Du entscheidest“.</p>' : ''}</section>
+    ${a && a.gesamt ? `<section class="aufr-block"><h3>Altes Postfach</h3>
+      <p class="alt-zeile"><b>${a.erledigt.toLocaleString('de-DE')}</b> von ${a.gesamt.toLocaleString('de-DE')} · ${a.phase === 'fertig' ? 'fertig ✓' : a.phase === 'laeuft' ? (alt ? 'pausiert (PC aus)' : 'läuft') : a.phase === 'bereit' ? 'Vorschau fertig – am PC starten' : 'Vorschau läuft'}</p>
+      <span class="fach-balken alt-balken"><i style="--farbe:var(--akzent);--anteil:${a.erledigt / a.gesamt}"></i></span>
+      ${a.geschafft ? `<p class="erklaer klein">${a.geschafft.papierkorb.toLocaleString('de-DE')} in den Papierkorb · ${a.geschafft.archiv.toLocaleString('de-DE')} ins Archiv · ${a.geschafft.ordner.toLocaleString('de-DE')} in Firmen-Ordner${a.geschafft.freiBytes ? ` · ${(a.geschafft.freiBytes / 1_048_576).toLocaleString('de-DE', { maximumFractionDigits: 0 })} MB frei, sobald der Papierkorb leer ist` : ''}</p>` : ''}</section>` : ''}
+    <section class="aufr-block"><h3>Was zuletzt passiert ist</h3>
+      <ol class="aufr-liste">${s.letzte.map((x) => `<li style="--farbe:${FACH.find((f) => f.k === (x.kategorie === 'spam' || x.kategorie === 'phishing' ? 'muell' : x.kategorie))?.farbe ?? 'var(--linie)'}">
+        <span class="wer">${h(x.absender)}</span><time>${zeit(x.zeit)}</time><span class="was">${h(x.betreff || '(kein Betreff)')}</span>
+        <span class="wohin">${x.trocken && ['papierkorb', 'archiv', 'ordner'].includes(x.ziel) ? 'würde ' : ''}${x.ziel === 'ordner' ? `→ Ordner „${h(x.ordner)}“` : ZIEL[x.ziel]}</span></li>`).join('') || '<li class="leer-z">Noch nichts passiert.</li>'}</ol></section>
+    ${s.ordner.length ? `<section class="aufr-block"><h3>Deine Firmen-Ordner</h3><div class="ordner-wolke">${s.ordner.map((o) => `<button data-ordnername="${h(o.name)}">${h(o.name)}<b>${o.anzahl.toLocaleString('de-DE')}</b></button>`).join('')}</div></section>` : ''}
+    <section class="aufr-block"><h3>Auch ohne PC</h3><p class="erklaer">${s.gmailRegeln ? `<b>${s.gmailRegeln} Regeln</b> stehen direkt in deinem Gmail – Google räumt damit Werbung, Newsletter und Firmen-Mails rund um die Uhr weg, auch wenn PC und Handy aus sind.` : 'Noch keine Regeln in Gmail. Am PC unter Einstellungen „Auch bei ausgeschaltetem PC“ einschalten – dann räumt Google selbst weiter auf.'}</p></section>`;
 }
 
 // ---------- Lesen ----------
@@ -741,6 +776,7 @@ let schreibEbene: { el: HTMLElement; zu: () => void } | null = null;
 addEventListener('popstate', () => {
   if (document.querySelector('.bogen')) { (document.querySelector('.schleier') as HTMLElement)?.click(); }
   if (schreibEbene) { schreibEbene.zu(); schreibEbene = null; return; }
+  if (aufrEbene && !lesenEbene) { aufrEbene.zu(); aufrEbene = null; return; }
   if (lesenEbene) { lesenSchliessen(); }
 });
 
@@ -788,6 +824,16 @@ async function demoGmail(): Promise<GmailPort> {
   for (const [id, m] of g.mails) {
     if (/Black Week|Rechnung|Sonntag|Versandt/.test(m.headers.subject ?? '')) g.inhalte.set(id, { html: `<table width="100%" cellpadding="0" cellspacing="0"><tr><td style="background:#f3efe6;padding:24px 22px;font-family:system-ui"><h1 style="font-size:26px;margin:0 0 10px;color:#1d1a17">${m.headers.subject}</h1><p style="color:#3a3632">Hallo Tiry,</p><p style="color:#3a3632">${m.snippet || 'hier ist deine Nachricht.'}</p><p><a href="https://example.com" style="display:inline-block;background:#1d1a17;color:#fff;padding:12px 18px;border-radius:10px;text-decoration:none;font-weight:700">Ansehen</a></p></td></tr></table>` });
   }
+  const jetzt2 = Date.now();
+  const demoStand: Stand = { v: 1, zeit: jetzt2 - 60_000, status: 'laeuft',
+    heute: { wichtig: { echt: 6, probe: 0 }, persoenlich: { echt: 2, probe: 0 }, benachrichtigung: { echt: 9, probe: 0 }, newsletter: { echt: 14, probe: 0 }, werbung: { echt: 23, probe: 0 }, muell: { echt: 4, probe: 0 } },
+    statistik: { heuteEntfernt: 41, wocheEntfernt: 312, gesamtEntfernt: 7180, heuteGeprueft: 58, lesezeitMinutenWoche: 104, zuPruefen: 3 },
+    letzte: [...g.mails.values()].slice(0, 12).map((m, i) => ({ zeit: m.internalDate, absender: (m.headers.from ?? '').replace(/<.*>/, '').trim(), betreff: m.headers.subject ?? '',
+      kategorie: (['werbung', 'newsletter', 'benachrichtigung', 'wichtig', 'spam'] as const)[i % 5], trocken: false,
+      ziel: (['archiv', 'archiv', 'ordner', 'bleibt', 'papierkorb'] as const)[i % 5], ordner: i % 5 === 2 ? 'DHL' : undefined })),
+    altbestand: { phase: 'laeuft', gesamt: 25737, erledigt: 7100, geschafft: { papierkorb: 4210, archiv: 1830, ordner: 1060, freiBytes: 1_320_000_000 } },
+    ordner: [{ name: 'Amazon', anzahl: 412 }, { name: 'DHL', anzahl: 188 }, { name: 'PayPal', anzahl: 141 }, { name: 'Vodafone', anzahl: 64 }, { name: 'eBay', anzahl: 57 }], gmailRegeln: 86 };
+  await g.standSpeichern(standNachricht(demoStand, 'tiry@gmail.com'), null);
   setInterval(() => { d.tropfen(); }, 9000);
   return g;
 }

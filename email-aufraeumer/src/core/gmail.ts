@@ -32,6 +32,10 @@ export interface GmailPort {
   anhang(mailId: string, anhangId: string): Promise<Uint8Array>;
   /** Ungelesene im Posteingang etc. */
   labelInfo(id: string): Promise<{ ungelesen: number; gesamt: number }>;
+  /** Aufräumer-Stand als ein Gmail-Entwurf (PC schreibt, Handy liest). Liefert die Entwurfs-ID. */
+  standSpeichern?(raw: string, draftId: string | null): Promise<string>;
+  /** Text des Stand-Entwurfs (oder null). */
+  standText?(betreff: string): Promise<string | null>;
 }
 
 export const METADATEN_HEADER = [
@@ -43,7 +47,7 @@ export const METADATEN_HEADER = [
 export const QUOTE: Record<string, number> = {
   getProfile: 1, 'messages.list': 5, 'messages.get': 5, 'history.list': 2, 'messages.modify': 5, 'messages.batchModify': 50,
   'messages.trash': 5, 'messages.untrash': 5, 'labels.list': 1, 'labels.create': 5, 'filters.list': 1, 'filters.create': 5,
-  'filters.delete': 5, 'messages.send': 100, 'messages.attachments.get': 5, 'labels.get': 1,
+  'filters.delete': 5, 'drafts.create': 10, 'drafts.update': 15, 'drafts.list': 5, 'drafts.get': 5, 'messages.send': 100, 'messages.attachments.get': 5, 'labels.get': 1,
 };
 
 export function wiederholbar(err: any): boolean {
@@ -239,6 +243,15 @@ export function erzeugeGoogleGmail(auth: any, zaehle: (methode: string, einheite
     async labelInfo(id) {
       const r = await ruf('labels.get', () => gmail.users.labels.get({ userId: me, id }));
       return { ungelesen: r.data.messagesUnread ?? 0, gesamt: r.data.messagesTotal ?? 0 };
+    },
+    async standSpeichern(raw, draftId) {
+      const b64 = Buffer.from(raw, 'utf8').toString('base64url');
+      if (draftId) {
+        try { await ruf('drafts.update', () => gmail.users.drafts.update({ userId: me, id: draftId, requestBody: { id: draftId, message: { raw: b64 } } })); return draftId; }
+        catch (e: any) { if ((e?.code ?? e?.status) !== 404) throw e; } // Entwurf gelöscht → neu anlegen
+      }
+      const r = await ruf('drafts.create', () => gmail.users.drafts.create({ userId: me, requestBody: { message: { raw: b64 } } }));
+      return r.data.id!;
     },
   };
 }

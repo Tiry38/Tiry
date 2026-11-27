@@ -12,6 +12,7 @@ import { abmelden, type HttpPost } from './unsubscribe';
 import { kiBudget } from './ai';
 import { standardEinstellungen, trockenlaufRestTage } from './settings';
 import { ordnerBasis, ordnerName } from './ordner';
+import { standNachricht, zielVon, fachVon, type Stand } from './stand';
 import type { Schutz } from './types';
 
 export type DienstStatus = 'nicht_angemeldet' | 'startet' | 'trockenlauf' | 'laeuft' | 'fehler' | 'angehalten';
@@ -132,6 +133,8 @@ export class Aufraeumer extends EventEmitter {
       }
       this.letzterLauf = this.jetzt();
       this.setStatus(this.db.einstellungen().trockenlauf ? 'trockenlauf' : 'laeuft');
+      // Alle 2 Minuten: Stand für die Handy-App in Gmail ablegen
+      if (this.jetzt() - this.db.get<number>('standZeit', 0) > 2 * 60_000) { this.db.set('standZeit', this.jetzt()); void this.standSchreiben().catch((e) => this.log(`Stand fürs Handy: ${(e as Error).message}`)); }
       // Alle 30 Minuten: neue Gmail-Filter nachtragen, damit Google auch ohne PC aufräumt (einmal fragen, danach still)
       const einst = this.db.einstellungen();
       if (!einst.trockenlauf && this.jetzt() - this.db.get<number>('filterStand', 0) > 30 * 60_000) {
@@ -460,6 +463,33 @@ export class Aufraeumer extends EventEmitter {
     for (const [k, id] of Object.entries(bekannt)) { try { await this.gmail.filterLoeschen(id); } catch { /* schon weg */ } delete bekannt[k]; n++; }
     this.db.set('autoFilter', bekannt);
     return n;
+  }
+
+  /** Übersicht fürs Handy (siehe stand.ts). */
+  baueStand(): Stand {
+    const tag = new Date(this.jetzt()); tag.setHours(0, 0, 0, 0);
+    const heute: Stand['heute'] = {};
+    for (const f of ['wichtig', 'persoenlich', 'benachrichtigung', 'newsletter', 'werbung', 'muell']) heute[f] = { echt: 0, probe: 0 };
+    const alle = this.db.protokoll({ limit: 3000 });
+    for (const e of alle) {
+      if (e.zeit < tag.getTime() || e.mailId === '-') continue;
+      const weg = e.aktionen.includes('papierkorb') || e.aktionen.includes('archivieren');
+      heute[fachVon(e.kategorie)][e.trocken && weg ? 'probe' : 'echt']++;
+    }
+    const a = this.altbestand;
+    return {
+      v: 1, zeit: this.jetzt(), status: this.statusInfo().status, heute, statistik: this.db.statistik(this.jetzt()),
+      letzte: alle.filter((e) => e.mailId !== '-').slice(0, 25).map((e) => ({ zeit: e.zeit, absender: e.absender, betreff: e.betreff.slice(0, 120), kategorie: e.kategorie, trocken: e.trocken, ...zielVon(e) })),
+      altbestand: a && a.phase !== 'leer' ? { phase: a.phase, gesamt: a.gesamt, erledigt: a.erledigt, geschafft: a.geschafft } : null,
+      ordner: this.ordnerListe().filter((o) => o.aktiv && o.ueberSchwelle).slice(0, 20).map((o) => ({ name: o.name, anzahl: o.anzahl })),
+      gmailRegeln: this.autoFilterAnzahl(),
+    };
+  }
+
+  async standSchreiben(): Promise<void> {
+    if (!this.gmail.standSpeichern) return;
+    const id = await this.gmail.standSpeichern(standNachricht(this.baueStand(), this.email || 'ich'), this.db.get<string | null>('standEntwurf', null));
+    this.db.set('standEntwurf', id);
   }
 
   /** Wie viele Filter räumen schon ohne PC auf? */

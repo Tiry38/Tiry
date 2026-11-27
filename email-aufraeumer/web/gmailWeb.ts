@@ -2,7 +2,7 @@
 // nur über fetch statt googleapis. Kein Server dazwischen – Mails gehen nur zwischen Handy und Google hin und her.
 import type { GmailPort } from '../src/core/gmail';
 import { zuMail, METADATEN_HEADER } from '../src/core/gmail';
-import { base64urlZuBytes } from '../src/core/mime';
+import { base64urlZuBytes, zerlegeVoll } from '../src/core/mime';
 import type { Mail } from '../src/core/types';
 
 const API = 'https://gmail.googleapis.com/gmail/v1/users/me';
@@ -79,6 +79,14 @@ export function erzeugeWebGmail(token: () => string | null): GmailPort {
     },
     async holeVoll(id) { return rufe(`/messages/${id}?format=full`); },
     async anhang(mailId, anhangId) { const r = await rufe(`/messages/${mailId}/attachments/${anhangId}`); return base64urlZuBytes(r.data ?? ''); },
+    async standText(betreff) {
+      const l = await rufe(`/drafts?maxResults=5&q=${encodeURIComponent(`subject:"${betreff.split('(')[0].trim()}"`)}`);
+      const id = l.drafts?.[0]?.id;
+      if (!id) return null;
+      const d = await rufe(`/drafts/${id}?format=full`);
+      const v = zerlegeVoll(d.message);
+      return v.text ?? null;
+    },
     async labelInfo(id) { const r = await rufe(`/labels/${id}`); return { ungelesen: r.messagesUnread ?? 0, gesamt: r.messagesTotal ?? 0 }; },
   };
   return port;

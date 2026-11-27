@@ -86,6 +86,10 @@ export class SpeicherGmail implements GmailPort {
       payload: { mimeType: 'multipart/alternative', headers: Object.entries(m.headers).map(([name, value]) => ({ name, value })), parts } };
   }
   async anhang() { return new Uint8Array(); }
+  /** Entwürfe (nur für den Aufräumer-Stand): id → roher Text */
+  entwuerfe = new Map<string, string>();
+  async standSpeichern(raw: string, id: string | null) { const neu = id && this.entwuerfe.has(id) ? id : `entwurf${this.entwuerfe.size + 1}`; this.entwuerfe.set(neu, raw); return neu; }
+  async standText(betreff: string) { for (const r of this.entwuerfe.values()) if (r.includes('Subject:') && betreff) return r; return null; }
   async labelInfo(id: string) {
     const alle = [...this.mails.values()].filter((m) => m.labelIds.includes(id));
     return { gesamt: alle.length, ungelesen: alle.filter((m) => m.labelIds.includes('UNREAD')).length };
