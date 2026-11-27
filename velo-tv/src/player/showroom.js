@@ -76,6 +76,7 @@
             '<p class="dl-uvp"><span class="stt">statt</span> <s></s></p>' +
             '<div class="dl-pz"><span class="dl-ap"></span><em class="sp-b"></em></div>' +
             '<p class="dl-chips"></p>' +
+            '<p class="dl-hin">Angebotspreise gelten nicht bei Leasing &amp; 0&nbsp;% Finanzierung</p>' +
           '</div>' +
           '<div class="dl-prog"><span class="dl-bar"><i></i></span><span class="dl-n"></span></div>' +
         '</div>' +
