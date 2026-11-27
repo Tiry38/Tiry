@@ -838,6 +838,21 @@ async function demoGmail(): Promise<GmailPort> {
   return g;
 }
 
+// ---------- Immer die neueste Oberfläche ----------
+// Die App bleibt oft tagelang offen (in der Android-App hält der Wächter sie wach) – dann lädt sie sich
+// beim Zurückkommen selbst neu, sobald auf GitHub eine neuere Fassung liegt. Nie mitten im Schreiben.
+let pruefteFassung = 0;
+async function neueFassung() {
+  if (DEMO || Date.now() - pruefteFassung < 60_000) return;
+  pruefteFassung = Date.now();
+  try {
+    const jetzt = document.querySelector<HTMLScriptElement>('script[type="module"][src]')?.getAttribute('src') ?? '';
+    const html = await (await fetch(location.pathname, { cache: 'no-store' })).text();
+    const neu = /<script[^>]+type="module"[^>]+src="([^"]+)"/.exec(html)?.[1] ?? /src="(\.\/assets\/index-[^"]+\.js)"/.exec(html)?.[1];
+    if (neu && jetzt && neu !== jetzt && !document.querySelector('.schreib-ebene')) location.reload();
+  } catch { /* offline – später */ }
+}
+
 // ---------- Start ----------
 async function start() {
   if ('serviceWorker' in navigator && !DEMO && location.protocol === 'https:') navigator.serviceWorker.register('sw.js').catch(() => {});
@@ -864,7 +879,8 @@ async function start() {
   await laden(true);
   balkenStoss(0.8);
   setInterval(abgleich, DEMO ? 4000 : 8000);
-  document.addEventListener('visibilitychange', () => { if (!document.hidden) void abgleich(); });
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) { void abgleich(); void neueFassung(); } });
+  setInterval(() => void neueFassung(), 30 * 60_000);
   (window as any).__bereit = true;
 }
 void start();
