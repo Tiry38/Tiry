@@ -132,7 +132,7 @@ void main(){vec2 q0=gl_PointCoord-.5;q0.y=-q0.y;float cs=cos(vAng),sn=sin(vAng);
 /* ---- GL je Zeichenfläche ---- */
 /* Aufbau asynchron (Tiry 17.11.2026: Seite hing kurz beim ersten Wechsel): Shader werden – wo der Browser es kann – im Hintergrund
    übersetzt (KHR_parallel_shader_compile), erst danach wird der Status abgefragt; sonst blockiert die Abfrage den Hauptfaden */
-async function mk(cv){const gl=cv.getContext('webgl',{premultipliedAlpha:true,alpha:true,antialias:true,preserveDrawingBuffer:false});if(!gl)return null;
+async function mk(cv){const gl=cv.getContext('webgl',{premultipliedAlpha:true,alpha:true,antialias:false,preserveDrawingBuffer:false});if(!gl)return null;
  const pc=gl.getExtension('KHR_parallel_shader_compile');
  const sh=(t,s)=>{const o=gl.createShader(t);gl.shaderSource(o,s);gl.compileShader(o);return o};
  const P0=[[VS_Q,FS_Q],[VS_P,FS_P],[VS_L,FS_L]].map(([v,f])=>{const p=gl.createProgram(),a=sh(gl.VERTEX_SHADER,v),b=sh(gl.FRAGMENT_SHADER,f);gl.attachShader(p,a);gl.attachShader(p,b);gl.linkProgram(p);return{p,a,b}});
