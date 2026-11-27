@@ -109,16 +109,6 @@ export class PostfachUI {
     this.wurzel.querySelector<HTMLButtonElement>('[data-gehe]')?.addEventListener('click', () => this.gehe('cockpit'));
     for (const b of this.wurzel.querySelectorAll<HTMLButtonElement>('button[data-ordner]')) {
       b.addEventListener('click', () => this.ordnerWaehlen(b.dataset.ordner!));
-      const ziel = b.dataset.ordner!;
-      if (ziel === 'SENT' || ziel === this.aktiv) continue; // in „Gesendet“ oder den offenen Ordner nicht ablegen
-      b.addEventListener('dragover', (e) => { if (!e.dataTransfer?.types.includes('text/x-tmail')) return; e.preventDefault(); e.dataTransfer.dropEffect = 'move'; b.classList.add('ablage'); });
-      b.addEventListener('dragleave', () => b.classList.remove('ablage'));
-      b.addEventListener('drop', (e) => {
-        e.preventDefault(); b.classList.remove('ablage');
-        const id = e.dataTransfer?.getData('text/x-tmail'); if (!id) return;
-        b.classList.add('geschluckt'); setTimeout(() => b.classList.remove('geschluckt'), 600);
-        void this.ablegen(id, ziel);
-      });
     }
     for (const b of this.wurzel.querySelectorAll<HTMLButtonElement>('[data-oweg]')) b.addEventListener('click', (e) => { e.stopPropagation(); void this.ordnerLoeschen(b.dataset.oweg!); });
     $('#pf-ordnerwahl', this.wurzel).innerHTML = this.ordner.map((o) => `<option value="${h(o.id)}" ${o.id === this.aktiv ? 'selected' : ''}>${h(o.name)}${o.ungelesen ? ` (${o.ungelesen})` : ''}</option>`).join('');
@@ -179,13 +169,13 @@ export class PostfachUI {
     const teile: Array<{ k: string; html: string }> = [];
     for (const z of this.zeilen) {
       const g = this.gruppe(z.datum); if (g !== letzte) { teile.push({ k: `g:${g}`, html: `<li class="pf-gruppe">${g}</li>` }); letzte = g; }
-      teile.push({ k: z.id, html: `<li class="pf-li"><button class="pf-zeile ${z.ungelesen ? 'neu' : ''} ${z.id === this.offen ? 'offen' : ''}" data-id="${h(z.id)}" data-k="${z.kategorie ?? ''}" draggable="true" title="In einen Ordner links ziehen zum Verschieben">
+      teile.push({ k: z.id, html: `<li class="pf-li"><div role="button" tabindex="0" class="pf-zeile ${z.ungelesen ? 'neu' : ''} ${z.id === this.offen ? 'offen' : ''}" data-id="${h(z.id)}" data-k="${z.kategorie ?? ''}" title="Zum Verschieben in einen Ordner links ziehen">
         <i class="strich"></i>
         <span class="pf-von">${h(z.von)}</span><span class="pf-zeit">${this.datum(z.datum)}</span>
         <span class="pf-betreff">${z.stern ? '<span class="pf-stern" aria-label="Stern">★</span> ' : ''}${h(z.betreff || '(ohne Betreff)')}</span>
         <span class="pf-vorschau">${h(z.vorschau)}</span>
         ${z.kategorie ? `<span class="pf-kat">${KAT[z.kategorie]}</span>` : ''}
-      </button>${this.aktiv === 'TRASH' ? '' : `<button class="pf-weg" data-weg="${h(z.id)}" aria-label="In den Papierkorb" title="In den Papierkorb"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13M10 11v6M14 11v6"/></svg></button>`}</li>` });
+      </div>${this.aktiv === 'TRASH' ? '' : `<button class="pf-weg" data-weg="${h(z.id)}" aria-label="In den Papierkorb" title="In den Papierkorb"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13M10 11v6M14 11v6"/></svg></button>`}</li>` });
     }
     ruhigAbgleichen(ol, teile, (li) => this.zeileBinden(li));
     $('#pf-mehr', this.wurzel).hidden = !this.weiter;
@@ -193,18 +183,12 @@ export class PostfachUI {
 
   /** Klick, Vorladen, Ziehen und Papierkorb an einer (neuen) Zeile anbringen. */
   private zeileBinden(li: HTMLElement) {
-    for (const b of li.querySelectorAll<HTMLButtonElement>('.pf-zeile')) {
+    for (const b of li.querySelectorAll<HTMLElement>('.pf-zeile')) {
       b.addEventListener('click', () => void this.oeffnen(b.dataset.id!));
+      b.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); void this.oeffnen(b.dataset.id!); } });
       b.addEventListener('mouseenter', () => void this.api.rufe('pfVorladen', [b.dataset.id!]).catch(() => {}));
-      // Ziehen & Ablegen: Mail auf einen Ordner links ziehen
-      b.addEventListener('dragstart', (e) => {
-        e.dataTransfer!.setData('text/x-tmail', b.dataset.id!); e.dataTransfer!.effectAllowed = 'move';
-        const z = this.zeilen.find((x) => x.id === b.dataset.id);
-        const bild = document.createElement('div'); bild.className = 'pf-zieh-bild'; bild.textContent = z ? `${z.von} – ${z.betreff || '(ohne Betreff)'}` : 'Mail';
-        document.body.append(bild); e.dataTransfer!.setDragImage(bild, 20, 20); setTimeout(() => bild.remove(), 0);
-        b.classList.add('gezogen'); this.wurzel.classList.add('zieht');
-      });
-      b.addEventListener('dragend', () => { b.classList.remove('gezogen'); this.wurzel.classList.remove('zieht'); });
+      // Ziehen & Ablegen mit eigener Maus-Logik (zuverlässiger als das eingebaute Ziehen des Browsers)
+      b.addEventListener('pointerdown', (e) => { if (e.button === 0) this.ziehStart(e, b); });
     }
     for (const b of li.querySelectorAll<HTMLButtonElement>('[data-weg]')) b.addEventListener('click', (e) => { e.stopPropagation(); void this.wegwerfen(b.dataset.weg!); });
   }
@@ -274,6 +258,40 @@ export class PostfachUI {
       await this.api.rufe('pfAktion', ids, t);
       if (!weg) void this.laden();
     } catch (e) { this.melde(`Hat nicht geklappt: ${(e as Error).message}`); void this.laden(); }
+  }
+
+  /** Mail mit der Maus greifen: ab 6 px Bewegung schwebt eine Karte mit, der Ordner darunter leuchtet, Loslassen legt ab. */
+  private ziehStart(e: PointerEvent, zeile: HTMLElement) {
+    const id = zeile.dataset.id!, x0 = e.clientX, y0 = e.clientY;
+    let bild: HTMLElement | null = null, ziel: HTMLElement | null = null, gezogen = false;
+    const zielUnter = (x: number, y: number) => {
+      const el = document.elementFromPoint(x, y)?.closest<HTMLElement>('.pf-ordner ul button[data-ordner]') ?? null;
+      return el && el.dataset.ordner !== 'SENT' && el.dataset.ordner !== this.aktiv ? el : null;
+    };
+    const bewegen = (ev: PointerEvent) => {
+      if (!gezogen) {
+        if (Math.hypot(ev.clientX - x0, ev.clientY - y0) < 6) return;
+        gezogen = true;
+        const z = this.zeilen.find((x) => x.id === id);
+        bild = document.createElement('div'); bild.className = 'pf-zieh-bild schwebt';
+        bild.textContent = z ? `${z.von} – ${z.betreff || '(ohne Betreff)'}` : 'Mail';
+        document.body.append(bild); zeile.classList.add('gezogen'); this.wurzel.classList.add('zieht');
+        document.body.style.cursor = 'grabbing';
+      }
+      bild!.style.transform = `translate(${ev.clientX + 14}px, ${ev.clientY + 10}px)`;
+      const neu = zielUnter(ev.clientX, ev.clientY);
+      if (neu !== ziel) { ziel?.classList.remove('ablage'); neu?.classList.add('ablage'); ziel = neu; }
+    };
+    const ende = (ev: PointerEvent) => {
+      removeEventListener('pointermove', bewegen); removeEventListener('pointerup', ende); removeEventListener('pointercancel', ende);
+      if (!gezogen) return;
+      // der Klick nach dem Ziehen darf die Mail nicht öffnen
+      zeile.addEventListener('click', (c) => { c.stopImmediatePropagation(); c.preventDefault(); }, { capture: true, once: true });
+      bild?.remove(); zeile.classList.remove('gezogen'); this.wurzel.classList.remove('zieht'); document.body.style.cursor = '';
+      const t = zielUnter(ev.clientX, ev.clientY); ziel?.classList.remove('ablage');
+      if (t) { t.classList.add('geschluckt'); setTimeout(() => t.classList.remove('geschluckt'), 600); void this.ablegen(id, t.dataset.ordner!); }
+    };
+    addEventListener('pointermove', bewegen); addEventListener('pointerup', ende); addEventListener('pointercancel', ende);
   }
 
   /** Ordner samt Inhalt löschen – mit klarer Rückfrage, Fortschritt und Rückgängig. */

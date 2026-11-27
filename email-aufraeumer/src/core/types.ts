@@ -100,6 +100,8 @@ export interface Einstellungen {
   ordnerAb: number;
   /** Bilder in Mails automatisch laden (außer bei Spam/Betrug). */
   bilderAuto: boolean;
+  /** Gelesene Mails automatisch aus dem Posteingang in ihren Ordner (Firma / Privat / Zum Einordnen). */
+  gelesenEinordnen: boolean;
 }
 
 export interface ProtokollEintrag {

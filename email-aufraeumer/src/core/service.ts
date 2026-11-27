@@ -30,6 +30,7 @@ export interface DienstOptionen {
   jetzt?: () => number;
 }
 
+
 export class Aufraeumer extends Ereignisse {
   readonly db: Speicher;
   private gmail: GmailPort;
@@ -136,6 +137,10 @@ export class Aufraeumer extends Ereignisse {
       this.setStatus(this.db.einstellungen().trockenlauf ? 'trockenlauf' : 'laeuft');
       // Abgleich mit dem Handy (nur am PC): alle 2 Min. Handy-Änderungen holen, alle 5 Min. eigene Daten ablegen
       if (!this.ohneGmailRegeln && this.jetzt() - this.db.get<number>('abgleichZeit', 0) > 2 * 60_000) { this.db.set('abgleichZeit', this.jetzt()); void this.abgleichPc().catch((e) => this.log(`Abgleich mit dem Handy: ${(e as Error).message}`)); }
+      // Alle 15 Minuten: gelesene Mails einordnen (wenn Tiry das eingeschaltet hat)
+      if (this.db.einstellungen().gelesenEinordnen && !this.db.einstellungen().trockenlauf && this.jetzt() - this.db.get<number>('einordnenZeit', 0) > 15 * 60_000) {
+        this.db.set('einordnenZeit', this.jetzt()); void this.gelesenNachEinordnen().catch((e) => this.log(`Einordnen: ${(e as Error).message}`));
+      }
       // Alle 2 Minuten: Stand für die Handy-App in Gmail ablegen
       if (this.jetzt() - this.db.get<number>('standZeit', 0) > 2 * 60_000) { this.db.set('standZeit', this.jetzt()); void this.standSchreiben().catch((e) => this.log(`Stand fürs Handy: ${(e as Error).message}`)); }
       // Alle 30 Minuten: neue Gmail-Filter nachtragen, damit Google auch ohne PC aufräumt (einmal fragen, danach still)
@@ -539,6 +544,92 @@ export class Aufraeumer extends Ereignisse {
     this.emit('entruempeln', this.entruempeln);
     this.emit('postfach', { neu: 0 });
     return l.gelesen.length + l.archiv.length;
+  }
+
+  // ---------------- Posteingang einordnen: im Posteingang bleibt nur Ungelesenes ----------------
+  // Jede gelesene Mail kommt in ihren Ordner: Firma → Firmen-Ordner, Privat-Adresse → „Privat“, sonst → „Zum Einordnen“.
+  // Nichts wird gelöscht. Mit Stern bleibt im Posteingang. Ein Klick macht alles rückgängig.
+  static readonly PRIVAT = 'Privat';
+  static readonly EINORDNEN = 'Zum Einordnen';
+  einordnen: { phase: 'leer' | 'zaehlt' | 'bereit' | 'laeuft' | 'fertig'; gesamt: number; erledigt: number; ziele: Array<{ name: string; anzahl: number }>; zeit?: number } = { phase: 'leer', gesamt: 0, erledigt: 0, ziele: [] };
+  private einIds = new Map<string, string[]>();
+
+  private zielOrdnerFuer(m: Mail): string {
+    // Spam/Betrug bekommt nie einen eigenen Ordner, sondern landet im Spam
+    const kat = (this.db.db.prepare('SELECT kategorie FROM protokoll WHERE mail_id = ? ORDER BY id DESC LIMIT 1').get(m.id) as any)?.kategorie;
+    if (kat === 'spam' || kat === 'phishing' || /dkim=fail|spf=fail|dmarc=fail/i.test(m.headers['authentication-results'] ?? '')) return 'SPAM';
+    const von = (m.headers['from'] ?? '').toLowerCase();
+    const adresse = /[^<\s"]+@[^>\s"]+/.exec(von)?.[0] ?? '';
+    const domain = adresse.split('@')[1] ?? '';
+    const basis = ordnerBasis(domain);
+    if (basis && !this.db.get<string[]>('ordnerAus', []).includes(basis)) return ordnerName(basis);
+    if (domain) return Aufraeumer.PRIVAT;
+    return Aufraeumer.EINORDNEN;
+  }
+
+  async einordnenVorschau(q = 'in:inbox -is:unread -is:starred') {
+    this.einordnen = { phase: 'zaehlt', gesamt: 0, erledigt: 0, ziele: [] };
+    this.emit('einordnen', this.einordnen);
+    const ids = await this.alleIds(q);
+    this.einordnen.gesamt = ids.length; this.emit('einordnen', { ...this.einordnen });
+    const gruppen = new Map<string, string[]>();
+    for (let i = 0; i < ids.length; i += 100) {
+      for (const m of await this.gmail.holeMetadaten(ids.slice(i, i + 100))) {
+        const ziel = this.zielOrdnerFuer(m);
+        if (!gruppen.has(ziel)) gruppen.set(ziel, []);
+        gruppen.get(ziel)!.push(m.id);
+      }
+      this.einordnen.erledigt = Math.min(ids.length, i + 100); this.emit('einordnen', { ...this.einordnen });
+    }
+    this.einIds = gruppen;
+    this.einordnen = { phase: 'bereit', gesamt: ids.length, erledigt: 0, ziele: [...gruppen].map(([name, l]) => ({ name: name === 'SPAM' ? 'Spam' : name, anzahl: l.length })).sort((a, b) => b.anzahl - a.anzahl) };
+    this.emit('einordnen', this.einordnen);
+    return this.einordnen;
+  }
+
+  async einordnenStarten(still = false) {
+    if (this.einordnen.phase !== 'bereit') throw new Error('Erst nachzählen.');
+    this.einordnen = { ...this.einordnen, phase: 'laeuft', erledigt: 0 };
+    if (!still) this.emit('einordnen', this.einordnen);
+    const rueck: Record<string, string[]> = this.db.get('einordnenLetzter', null) && still ? (this.db.get<any>('einordnenLetzter', null).ordner ?? {}) : {};
+    for (const [name, ids] of this.einIds) {
+      const label = name === 'SPAM' ? 'SPAM' : await this.aus.labelId(name);
+      for (let i = 0; i < ids.length; i += 1000) {
+        await this.gmail.batchModify(ids.slice(i, i + 1000), [label], ['INBOX']);
+        this.einordnen.erledigt += Math.min(1000, ids.length - i);
+        if (!still) this.emit('einordnen', { ...this.einordnen });
+      }
+      rueck[name] = [...(rueck[name] ?? []), ...ids];
+    }
+    if (!still) this.db.set('einordnenLetzter', { zeit: this.jetzt(), ordner: rueck });
+    this.einordnen = { ...this.einordnen, phase: 'fertig', zeit: this.jetzt() };
+    this.log(`Posteingang eingeordnet: ${this.einordnen.gesamt} Mails in ${this.einIds.size} Ordner.`);
+    if (!still) { this.emit('einordnen', this.einordnen); this.emit('postfach', { neu: 0 }); }
+    return this.einordnen;
+  }
+
+  async einordnenRueckgaengig(): Promise<number> {
+    const l = this.db.get<{ zeit: number; ordner: Record<string, string[]> } | null>('einordnenLetzter', null);
+    if (!l) return 0;
+    let n = 0;
+    for (const [name, ids] of Object.entries(l.ordner)) {
+      const label = name === 'SPAM' ? 'SPAM' : await this.aus.labelId(name);
+      for (let i = 0; i < ids.length; i += 1000) await this.gmail.batchModify(ids.slice(i, i + 1000), ['INBOX'], [label]);
+      n += ids.length;
+    }
+    this.db.set('einordnenLetzter', null);
+    this.einordnen = { phase: 'leer', gesamt: 0, erledigt: 0, ziele: [] };
+    this.emit('einordnen', this.einordnen); this.emit('postfach', { neu: 0 });
+    return n;
+  }
+
+  /** Laufend (wenn eingeschaltet): gelesene Mails, die schon einen Tag im Posteingang liegen, still einordnen. */
+  private async gelesenNachEinordnen() {
+    const alt = this.einordnen;
+    try {
+      await this.einordnenVorschau('in:inbox -is:unread -is:starred older_than:1d');
+      if (this.einordnen.gesamt) await this.einordnenStarten(true);
+    } finally { this.einordnen = alt; }
   }
 
   /** Übersicht fürs Handy (siehe stand.ts). */

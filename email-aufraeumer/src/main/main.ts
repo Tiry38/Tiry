@@ -80,7 +80,7 @@ async function dienstStarten(gmail: GmailPort) {
   const d = dienst;
   postfach = new Postfach(gmail, (id) => (db.db.prepare('SELECT kategorie FROM protokoll WHERE mail_id = ? ORDER BY id DESC LIMIT 1').get(id) as any)?.kategorie ?? null, () => d.email || 'ich');
   postfach.platz = (b) => db.platzMerken(b);
-  for (const k of ['aktion', 'status', 'altbestand', 'frage', 'postfach', 'entruempeln']) dienst.on(k, (d) => { sende(k, d); if (k === 'status') aktualisiereTray(); });
+  for (const k of ['aktion', 'status', 'altbestand', 'frage', 'postfach', 'entruempeln', 'einordnen']) dienst.on(k, (d) => { sende(k, d); if (k === 'status') aktualisiereTray(); });
   dienst.on('log', log);
   await dienst.starten();
 }
@@ -156,7 +156,7 @@ const API: Record<string, Fn> = {
     return {
       demo: DEMO, credentials: DEMO || anmeldung.hatCredentials(), angemeldet: DEMO || anmeldung.istAngemeldet(),
       status: dienst?.statusInfo() ?? null, statistik: db.statistik(), einstellungen: db.einstellungen(),
-      altbestand: dienst?.altbestand ?? null, entruempeln: dienst?.entruempeln ?? null, entruempelnRueck: !!db.get('entruempelnLetzter', null), autoFilter: dienst?.autoFilterAnzahl() ?? 0, kontakte: db.anzahlKontakte(),
+      altbestand: dienst?.altbestand ?? null, einordnen: dienst?.einordnen ?? null, einordnenRueck: !!db.get('einordnenLetzter', null), entruempeln: dienst?.entruempeln ?? null, entruempelnRueck: !!db.get('entruempelnLetzter', null), autoFilter: dienst?.autoFilterAnzahl() ?? 0, kontakte: db.anzahlKontakte(),
       ki: { schluessel: !!process.env.ANTHROPIC_API_KEY, ausgegebenEuro: kiBudget(() => db.get('kiVerbrauch', { ausgegebenUsd: 0, monat: '' }), () => {}, () => 0, () => db.einstellungen().kiUsdProEuro).ausgegebenEuro() },
       autostart: app.getLoginItemSettings().openAtLogin, kategorien: KATEGORIE_NAME, drive: DEMO || anmeldung.hatScope(DRIVE_SCOPE),
     };
@@ -178,6 +178,9 @@ const API: Record<string, Fn> = {
   },
   scharfSchalten: () => dienst!.scharfSchalten(),
   trockenlaufWieder: () => dienst!.trockenlaufWieder(),
+  einordnenVorschau: () => dienst!.einordnenVorschau(),
+  einordnenStarten: async () => { const r = await dienst!.einordnenStarten(); db.speichereEinstellungen({ gelesenEinordnen: true }); return r; },
+  einordnenRueckgaengig: () => dienst!.einordnenRueckgaengig(),
   entruempelnVorschau: () => dienst!.entruempelnVorschau(),
   entruempelnStarten: () => dienst!.entruempelnStarten(),
   entruempelnRueckgaengig: () => dienst!.entruempelnRueckgaengig(),

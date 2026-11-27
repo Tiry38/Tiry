@@ -32,6 +32,7 @@ export function standardEinstellungen(jetzt = Date.now()): Einstellungen {
     ordnerAn: true,
     ordnerAb: 5,
     bilderAuto: true,
+    gelesenEinordnen: false,
   };
 }
 

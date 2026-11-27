@@ -192,6 +192,9 @@ async function cockpit() {
   unten.innerHTML = `<section class="karte alt-karte" data-k="werbung"><div class="alt-kopf"><div><h2>Altes Postfach aufräumen</h2>
       <p>Ich gehe einmal durch <b>alle</b> Mails, die schon da sind – auch Archiviertes. Erst siehst du nur, was passieren würde.</p></div></div>
       <div id="altbestand">${altbestandHtml(z.altbestand)}</div></section>
+    <section class="karte alt-karte" data-k="newsletter"><div class="alt-kopf"><div><h2>Posteingang einordnen</h2>
+      <p>Im Posteingang bleibt nur, was du <b>noch nicht gelesen</b> hast. Jede gelesene Mail kommt in ihren Ordner: <b>Firmen-Mails</b> in den Ordner der Firma, <b>private Absender</b> nach „Privat“, alles Unklare nach <b>„Zum Einordnen“</b> – dort ziehst du sie selbst in den passenden Ordner. Gelöscht wird nichts, mit Stern bleibt im Posteingang. Danach mache ich das von selbst weiter (gelesen + 1 Tag alt).</p></div></div>
+      <div id="einordnen">${einordnenHtml(z.einordnen)}</div></section>
     <section class="karte alt-karte" data-k="benachrichtigung"><div class="alt-kopf"><div><h2>Posteingang entrümpeln</h2>
       <p>Für die ungelesenen Mails, die noch im Posteingang liegen: Alles, was <b>älter als 2 Wochen</b> ist, markiere ich als <b>gelesen</b> – verschoben oder gelöscht wird dabei nichts. <b>Infos</b> (Pakete, Konten, Apps), die älter als 30 Tage sind, kommen ins <b>Archiv</b>. Mit Stern bleibt unberührt. Ein Klick macht alles rückgängig.</p></div></div>
       <div id="entruempeln">${entruempelnHtml(z.entruempeln)}</div></section>
@@ -227,6 +230,7 @@ async function cockpit() {
   el.querySelector('[data-tat="zu-pruefen"]')?.addEventListener('click', () => zeigeAnsicht('pruefen', true));
   altbestandKnoepfe();
   entruempelnKnoepfe();
+  einordnenKnoepfe();
 }
 const art_ = (e: Eintrag) => art(e);
 
@@ -538,6 +542,34 @@ function altbestandHtml(ab: any): string {
     ${g.freiBytes ? `Gmail gibt ca. <b>${speicher(g.freiBytes)}</b> frei, sobald der Papierkorb geleert ist – automatisch nach 30 Tagen oder sofort in Gmail unter „Papierkorb → Jetzt leeren“.` : ''} Zurückholen geht unter „Verlauf“.</p>
     <div class="zeile"><button class="knopf" data-ab="vorschau">Nochmal durchsehen</button></div>`;
 }
+function einordnenHtml(ei: any): string {
+  const rueck = (z?.einordnenRueck || ei?.phase === 'fertig') ? '<button class="knopf leise" data-ei="zurueck">Einordnen rückgängig machen</button>' : '';
+  const auto = z?.einstellungen?.gelesenEinordnen ? '<p class="alt-status">✓ Läuft automatisch: gelesene Mails ordne ich nach einem Tag ein.</p>' : '';
+  if (!ei || ei.phase === 'leer') return `${auto}<div class="zeile"><button class="knopf voll gross" data-ei="vorschau">Nachzählen</button>${rueck}</div>`;
+  const p = ei.gesamt ? Math.round((ei.erledigt / ei.gesamt) * 100) : 0;
+  if (ei.phase === 'zaehlt') return `<p class="alt-status">Ich sehe mir die gelesenen Mails an … <b>${zahl(ei.erledigt)}</b> von ${zahl(ei.gesamt)}</p><div class="fortschritt"><i data-stil="width:${p}%"></i></div>`;
+  if (ei.phase === 'laeuft') return `<p class="alt-status">Ich ordne ein … <b>${zahl(ei.erledigt)}</b> von ${zahl(ei.gesamt)}</p><div class="fortschritt"><i data-stil="width:${p}%"></i></div>`;
+  const liste = `<p class="alt-ordner"><span class="etikett">${zahl(ei.gesamt)} Mails in ${zahl(ei.ziele.length)} Ordner:</span> ${ei.ziele.slice(0, 24).map((o: any) => `<span>${h(o.name)} <small>${zahl(o.anzahl)}</small></span>`).join('')}${ei.ziele.length > 24 ? ` <span>+ ${ei.ziele.length - 24} weitere</span>` : ''}</p>`;
+  if (ei.phase === 'bereit') return `<p class="alt-status">So würde ich es machen – noch ist nichts verändert:</p>${liste}
+    <div class="zeile">${ei.gesamt ? '<button class="knopf voll gross" data-ei="start">Jetzt einordnen</button>' : '<span>Nichts zu tun – im Posteingang liegt nur Ungelesenes.</span>'}<button class="knopf leise" data-ei="vorschau">Neu zählen</button></div>`;
+  return `<p class="alt-status"><b>Fertig.</b> ${zahl(ei.gesamt)} Mails sind in ${zahl(ei.ziele.length)} Ordnern. Ab jetzt mache ich das von selbst.</p><div class="zeile"><button class="knopf" data-ei="vorschau">Nochmal nachzählen</button>${rueck}</div>`;
+}
+function einordnenKnoepfe() {
+  for (const b of $$('[data-ei]')) b.addEventListener('click', async () => {
+    try {
+      const was = b.dataset.ei;
+      if (was === 'vorschau') await api.rufe('einordnenVorschau');
+      else if (was === 'start') {
+        if (!(await bestaetigen('Posteingang einordnen?', 'Alle gelesenen Mails kommen aus dem Posteingang in ihren Ordner (Firma, „Privat“ oder „Zum Einordnen“). <b>Gelöscht wird nichts.</b> Danach mache ich das automatisch weiter. Mit „Rückgängig machen“ ist alles wieder wie vorher.', 'Ja, einordnen'))) return;
+        await api.rufe('einordnenStarten'); z.einordnenRueck = true; z.einstellungen.gelesenEinordnen = true; melde('Posteingang eingeordnet.');
+      } else if (was === 'zurueck') {
+        if (!(await bestaetigen('Rückgängig machen?', 'Alle eingeordneten Mails kommen zurück in den Posteingang. Das automatische Einordnen schalte ich aus.', 'Ja, zurück'))) return;
+        const n = await api.rufe('einordnenRueckgaengig'); await api.rufe('speichereEinstellungen', { gelesenEinordnen: false }); z.einordnenRueck = false; z.einstellungen.gelesenEinordnen = false; melde(`${zahl(n)} Mails sind zurück im Posteingang.`);
+      }
+    } catch (e) { melde((e as Error).message); }
+  });
+}
+
 function entruempelnHtml(en: any): string {
   const rueck = (z?.entruempelnRueck || en?.phase === 'fertig') ? '<button class="knopf leise" data-en="zurueck">Letztes Entrümpeln rückgängig machen</button>' : '';
   if (!en || en.phase === 'leer') return `<div class="zeile"><button class="knopf voll gross" data-en="vorschau">Nachzählen</button>${rueck}</div>`;
@@ -652,6 +684,7 @@ function ereignis(kanal: string, d: any) {
   } else if (kanal === 'status') { if (z) { const vorher = z.status?.status; z.status = d; setzeStatus(d); if (ansicht === 'cockpit' && vorher !== d.status) void cockpit(); } }
   else if (kanal === 'abgleich') { void laden().then(() => zeichne()); }
   else if (kanal === 'ordnerLoeschen') { (window as any).__ordnerLoeschen?.(d); }
+  else if (kanal === 'einordnen') { if (z) z.einordnen = d; const ei = document.getElementById('einordnen'); if (ei) { ei.innerHTML = einordnenHtml(d); einordnenKnoepfe(); } }
   else if (kanal === 'entruempeln') { if (z) z.entruempeln = d; const en = document.getElementById('entruempeln'); if (en) { en.innerHTML = entruempelnHtml(d); entruempelnKnoepfe(); } }
   else if (kanal === 'altbestand') { if (z) z.altbestand = d; const ab = document.getElementById('altbestand'); if (ab) { ab.innerHTML = altbestandHtml(d); altbestandKnoepfe(); } }
   else if (kanal === 'frage' && d?.art === 'filter') { void filterFrage(d.anzahl); }

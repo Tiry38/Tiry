@@ -704,3 +704,6 @@ body[data-nav='klein'] .update[data-stand='bereit'] .knopf { animation: pochen 2
 
 /* Aufräumer in der Handy-App: PC-Einstellungen ausblenden */
 body.handy [data-nur-pc], body.handy #update { display: none !important; }
+
+.pf-zieh-bild.schwebt { top: 0; left: 0; z-index: 1000; pointer-events: none; box-shadow: 0 10px 30px oklch(0 0 0 / .45); will-change: transform; }
+.pf-zeile { user-select: none; }
