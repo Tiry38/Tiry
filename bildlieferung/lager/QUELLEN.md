@@ -31,3 +31,19 @@ Art: W = Werksbild/Konfigurator-Render, H = Haendlerfoto, U = Werksbild umgefaer
 | 5807 | SEB990 SUV Smart 9-Gang, Scarlet Red Glanz, Wave 50 (2023) | W | bosch-ebike.com 258351-6ad1 (SEB 990 PURE 2025) | Ersatzmodell 2025, Nexus |
 | 6357 | SEB 990 PRO Cues 10, Emerald Green Matt, Wave 53 (2025) | W | bosch-ebike.com 257905-5888 | glanz statt matt |
 | 6359 | SEB 990 PRO Cues 10, Stone Basalt Matt, Diamant 58 (2025) | W | bosch-ebike.com 304886-01cf (SEB 990CX PRO 2026) | Nabenschaltung statt Cues |
+
+# Weitere Marken (ohne Bild im Lager)
+| FID | Rad | Art | Quelle | Abweichung |
+|---|---|---|---|---|
+| 6812 | i:SY E5 ZR RT, Creamy Beige (2027) | Hersteller | 2rad-prumbaum.de Art. 327540100110 | – |
+| 6813 | i:SY E5 ZR RT, Pepper Black (2027) | Hersteller | 2rad-prumbaum.de Art. 327540100100 | zeigt F (Freilauf)-Version |
+| 6814 | i:SY E5 ZR RT, Racing Red (2027) | Hersteller | 2rad-prumbaum.de Art. 327540100109 | – |
+| 6808 | i:SY E5 ZR F CX Di2 „20 Jahre“, Dunkelblau/Orange (2027) | Studiofoto | e-bike-cafe.de Art. 327540100400 | – |
+| 6815 | i:SY E5 ZR RT Touring, Creamy Beige (2027) | Hersteller | 2rad-prumbaum.de Art. 327540100204 | zeigt F Touring |
+| 6816 | i:SY E5 ZR RT Touring, Darkmore Green | Hersteller | cdn-assets.zeg.de ISY_326545100027_main.png | Modelljahr 2026 |
+| 6817 | i:SY Skyfly E5 ZR RT PX, Juicy Orange Matt (2027) | Hersteller | 2rad-prumbaum.de Art. 327540100501 | zeigt F PX |
+| 6818 | i:SY Skyfly E5 ZR RT PX, Lightblue (2027) | Hersteller | zweiradladen-aurich.de iSY_327540100504_main.png | zeigt F PX |
+| 6279 | Van Raam Easy Rider M, Gelborange matt (2024) | Haendlerfoto | mamachari.co.uk „Easy Rider M Yellow Orange Matt“ | Korb hinter dem Sitz (Zubehoer) |
+
+Quellen-Tipps andere Marken: i:SY/ZEG-Bilder transparent unter cdn-assets.zeg.de/brands/<id>/2400x1600_png/ISY_<artikelnr>_main.png;
+isy.de API https://www.isy.de/.rest/product/slider/isy-de?identifier=<uuid>; Haendler 2rad-prumbaum.de (/product/x-<ID>/, Originale prumbaum.mh-cf.de/cache/renditeimages/...png).
