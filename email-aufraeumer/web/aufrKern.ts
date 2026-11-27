@@ -6,6 +6,7 @@ import { Postfach } from '../src/core/postfach';
 import { KATEGORIE_NAME } from '../src/core/types';
 import type { GmailPort } from '../src/core/gmail';
 import { oeffneHandyDb } from './sqlSpeicher';
+import { pcImport, handyExport, datenNachricht, PC_DATEN, HANDY_DATEN, type PcDaten } from '../src/core/abgleich';
 
 type Hoerer = (kanal: string, daten: unknown) => void;
 
@@ -85,6 +86,27 @@ async function baue(gmail: GmailPort): Promise<HandyKern> {
     pfRueckgaengig: () => postfach.rueckgaengig(),
     pfVorladen: (ids) => postfach.vorladen(ids),
   };
+
+  // Abgleich mit dem PC: beim Öffnen und alle 3 Minuten PC-Daten holen; eigene Änderungen kurz nach jeder Aktion zurückschicken
+  const vomPc = async () => {
+    try {
+      const t = await gmail.entwurfDatei?.(PC_DATEN); if (!t) return;
+      if (pcImport(db, JSON.parse(t) as PcDaten)) { db.set('regelnBeiImport', (db.db.prepare('SELECT COUNT(*) c FROM regeln').get() as any).c); await roh.speichernJetzt(); sende('abgleich', null); sende('status', dienst.statusInfo()); }
+    } catch (e) { dienst.log(`Abgleich vom PC: ${(e as Error).message}`); }
+  };
+  let zumPcTimer: ReturnType<typeof setTimeout> | null = null;
+  const zumPc = () => {
+    if (zumPcTimer) clearTimeout(zumPcTimer);
+    zumPcTimer = setTimeout(async () => {
+      try {
+        const d = handyExport(db); if (!d || !gmail.standSpeichern) return;
+        db.set('handyDatenEntwurf', await gmail.standSpeichern(datenNachricht(HANDY_DATEN, dienst.email || 'ich', JSON.stringify(d)), db.get<string | null>('handyDatenEntwurf', null)));
+      } catch (e) { dienst.log(`Abgleich zum PC: ${(e as Error).message}`); }
+    }, 8000);
+  };
+  dienst.on('aktion', () => zumPc());
+  await vomPc();
+  setInterval(() => void vomPc(), 3 * 60_000);
 
   void dienst.starten();
   return {

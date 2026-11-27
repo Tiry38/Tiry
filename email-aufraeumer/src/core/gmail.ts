@@ -38,6 +38,8 @@ export interface GmailPort {
   standSpeichern?(raw: string, draftId: string | null): Promise<string>;
   /** Text des Stand-Entwurfs (oder null). */
   standText?(betreff: string): Promise<string | null>;
+  /** Inhalt der Datei „daten.json“ im Entwurf mit diesem Betreff (Abgleich PC ⇄ Handy). */
+  entwurfDatei?(betreff: string): Promise<string | null>;
 }
 
 export const METADATEN_HEADER = [
@@ -141,7 +143,7 @@ export function erzeugeGoogleGmail(auth: any, zaehle: (methode: string, einheite
   const gmail = google.gmail({ version: 'v1', auth });
   const me = 'me';
   // 150 Einheiten/s: zügig fürs ganze Postfach, aber unter Googles Nutzer-Grenze; 429 fängt zusätzlich der Backoff ab
-  const drossel = new Drossel(150, 300);
+  const drossel = new Drossel(120, 240); // Platz lassen fürs Handy (gemeinsame Grenze ~250/s)
   const ruf = async <T>(methode: string, fn: () => Promise<T>): Promise<T> =>
     mitBackoff(async () => {
       const e = QUOTE[methode] ?? 5;
@@ -246,6 +248,16 @@ export function erzeugeGoogleGmail(auth: any, zaehle: (methode: string, einheite
     async labelInfo(id) {
       const r = await ruf('labels.get', () => gmail.users.labels.get({ userId: me, id }));
       return { ungelesen: r.data.messagesUnread ?? 0, gesamt: r.data.messagesTotal ?? 0 };
+    },
+    async entwurfDatei(betreff) {
+      const l = await ruf('drafts.list', () => gmail.users.drafts.list({ userId: me, maxResults: 5, q: `subject:"${betreff.split('(')[0].trim()}"` }));
+      const id = l.data.drafts?.[0]?.id; if (!id) return null;
+      const d = await ruf('drafts.get', () => gmail.users.drafts.get({ userId: me, id, format: 'full' }));
+      const teil = (function such(p: any): any { if (!p) return null; if (p.filename === 'daten.json') return p; for (const k of p.parts ?? []) { const t = such(k); if (t) return t; } return null; })(d.data.message?.payload);
+      if (!teil) return null;
+      let daten = teil.body?.data as string | undefined;
+      if (!daten && teil.body?.attachmentId) daten = (await ruf('messages.attachments.get', () => gmail.users.messages.attachments.get({ userId: me, messageId: d.data.message!.id!, id: teil.body.attachmentId }))).data.data ?? undefined;
+      return daten ? Buffer.from(daten.replace(/-/g, '+').replace(/_/g, '/'), 'base64').toString('utf8') : null;
     },
     async standSpeichern(raw, draftId) {
       const b64 = Buffer.from(raw, 'utf8').toString('base64url');

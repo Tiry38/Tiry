@@ -1,7 +1,7 @@
 // Gmail direkt aus dem Browser (Handy-App): dieselbe Schnittstelle wie am PC (GmailPort),
 // nur über fetch statt googleapis. Kein Server dazwischen – Mails gehen nur zwischen Handy und Google hin und her.
 import type { GmailPort } from '../src/core/gmail';
-import { zuMail, METADATEN_HEADER } from '../src/core/gmail';
+import { zuMail, METADATEN_HEADER, Drossel } from '../src/core/gmail';
 import { base64urlZuBytes, zerlegeVoll } from '../src/core/mime';
 import type { Mail } from '../src/core/types';
 
@@ -10,17 +10,26 @@ const API = 'https://gmail.googleapis.com/gmail/v1/users/me';
 export class AnmeldungAbgelaufen extends Error { constructor() { super('Anmeldung abgelaufen'); } }
 
 export function erzeugeWebGmail(token: () => string | null): GmailPort {
+  const drossel = new Drossel(60, 150);
   const warte = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
+  // Google erlaubt pro Nutzer und Minute nur eine bestimmte Menge – PC und Handy teilen sie sich.
+  // Darum hält sich das Handy deutlich zurück (60 Einheiten/s) und wartet bei „Quota exceeded“ geduldig.
+  const kostenVon = (pfad: string, m: string) => /\/send/.test(pfad) ? 100 : /batchModify/.test(pfad) ? 50 : /\/history/.test(pfad) ? 2 : /\/labels|\/profile/.test(pfad) && m === 'GET' ? 1 : /\/drafts/.test(pfad) ? (m === 'GET' ? 5 : 15) : 5;
   async function rufe(pfad: string, init: RequestInit = {}, basis = API): Promise<any> {
+    await drossel.nimm(kostenVon(pfad, (init.method ?? 'GET').toUpperCase()));
     for (let i = 0; ; i++) {
       const t = token();
       if (!t) throw new AnmeldungAbgelaufen();
       const r = await fetch(basis + pfad, { ...init, headers: { Authorization: `Bearer ${t}`, ...(init.body && typeof init.body === 'string' && !(init.headers as any)?.['Content-Type'] ? { 'Content-Type': 'application/json' } : {}), ...(init.headers ?? {}) } });
       if (r.status === 401) throw new AnmeldungAbgelaufen();
-      if ((r.status === 429 || r.status >= 500 || r.status === 403) && i < 5) {
-        const text = r.status === 403 ? await r.clone().text() : '';
-        if (r.status !== 403 || /rateLimit/i.test(text)) { await warte(Math.min(16000, 800 * 2 ** i) + Math.random() * 300); continue; }
+      if ((r.status === 429 || r.status >= 500 || r.status === 403) && i < 7) {
+        const text = r.status !== 500 ? await r.clone().text() : '';
+        if (r.status !== 403 || /rateLimit|quota/i.test(text)) {
+          const nach = Number(r.headers.get('retry-after')) * 1000;
+          await warte(Math.max(Number.isFinite(nach) ? nach : 0, Math.min(64_000, 1000 * 2 ** i)) + Math.random() * 500);
+          continue;
+        }
       }
       if (!r.ok) {
         let grund = `${r.status}`;
@@ -80,6 +89,30 @@ export function erzeugeWebGmail(token: () => string | null): GmailPort {
     },
     async holeVoll(id) { return rufe(`/messages/${id}?format=full`); },
     async anhang(mailId, anhangId) { const r = await rufe(`/messages/${mailId}/attachments/${anhangId}`); return base64urlZuBytes(r.data ?? ''); },
+    async entwurfDatei(betreff) {
+      const l = await rufe(`/drafts?maxResults=5&q=${encodeURIComponent(`subject:"${betreff.split('(')[0].trim()}"`)}`);
+      const id = l.drafts?.[0]?.id; if (!id) return null;
+      const d = await rufe(`/drafts/${id}?format=full`);
+      const such = (p: any): any => { if (!p) return null; if (p.filename === 'daten.json') return p; for (const k of p.parts ?? []) { const t = such(k); if (t) return t; } return null; };
+      const teil = such(d.message?.payload); if (!teil) return null;
+      let daten: string | undefined = teil.body?.data;
+      if (!daten && teil.body?.attachmentId) daten = (await rufe(`/messages/${d.message.id}/attachments/${teil.body.attachmentId}`)).data;
+      return daten ? new TextDecoder().decode(base64urlZuBytes(daten)) : null;
+    },
+    async standSpeichern(raw, draftId) {
+      // Entwurf anlegen/ersetzen (Upload-Weg, damit auch große Daten passen)
+      const grenze = `tmw${Date.now().toString(36)}`;
+      const meta = draftId ? { id: draftId, message: {} } : { message: {} };
+      const body = `--${grenze}\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n${JSON.stringify(meta)}\r\n--${grenze}\r\nContent-Type: message/rfc822\r\n\r\n${raw}\r\n--${grenze}--`;
+      const basis = 'https://gmail.googleapis.com/upload/gmail/v1/users/me';
+      const kopf = { 'Content-Type': `multipart/related; boundary=${grenze}` };
+      if (draftId) {
+        try { await rufe(`/drafts/${draftId}?uploadType=multipart`, { method: 'PUT', body, headers: kopf }, basis); return draftId; }
+        catch (e: any) { if (e?.code !== 404) throw e; }
+      }
+      const r = await rufe('/drafts?uploadType=multipart', { method: 'POST', body, headers: kopf }, basis);
+      return r.id;
+    },
     async standText(betreff) {
       const l = await rufe(`/drafts?maxResults=5&q=${encodeURIComponent(`subject:"${betreff.split('(')[0].trim()}"`)}`);
       const id = l.drafts?.[0]?.id;

@@ -13,6 +13,7 @@ import { kiBudget } from './ai';
 import { standardEinstellungen, trockenlaufRestTage } from './settings';
 import { ordnerBasis, ordnerName } from './ordner';
 import { standNachricht, zielVon, fachVon, type Stand } from './stand';
+import { pcExport, pcFingerabdruck, handyImport, datenNachricht, PC_DATEN, HANDY_DATEN, type HandyDaten } from './abgleich';
 import type { Schutz } from './types';
 
 export type DienstStatus = 'nicht_angemeldet' | 'startet' | 'trockenlauf' | 'laeuft' | 'fehler' | 'angehalten';
@@ -133,6 +134,8 @@ export class Aufraeumer extends Ereignisse {
       }
       this.letzterLauf = this.jetzt();
       this.setStatus(this.db.einstellungen().trockenlauf ? 'trockenlauf' : 'laeuft');
+      // Abgleich mit dem Handy (nur am PC): alle 2 Min. Handy-Änderungen holen, alle 5 Min. eigene Daten ablegen
+      if (!this.ohneGmailRegeln && this.jetzt() - this.db.get<number>('abgleichZeit', 0) > 2 * 60_000) { this.db.set('abgleichZeit', this.jetzt()); void this.abgleichPc().catch((e) => this.log(`Abgleich mit dem Handy: ${(e as Error).message}`)); }
       // Alle 2 Minuten: Stand für die Handy-App in Gmail ablegen
       if (this.jetzt() - this.db.get<number>('standZeit', 0) > 2 * 60_000) { this.db.set('standZeit', this.jetzt()); void this.standSchreiben().catch((e) => this.log(`Stand fürs Handy: ${(e as Error).message}`)); }
       // Alle 30 Minuten: neue Gmail-Filter nachtragen, damit Google auch ohne PC aufräumt (einmal fragen, danach still)
@@ -563,6 +566,18 @@ export class Aufraeumer extends Ereignisse {
     if (!this.gmail.standSpeichern) return;
     const id = await this.gmail.standSpeichern(standNachricht(this.baueStand(), this.email || 'ich'), this.db.get<string | null>('standEntwurf', null));
     this.db.set('standEntwurf', id);
+  }
+
+  /** PC-Seite des Abgleichs: Handy-Änderungen einfügen, dann (wenn sich etwas geändert hat) eigene Daten fürs Handy ablegen. */
+  async abgleichPc() {
+    if (!this.gmail.standSpeichern || !this.gmail.entwurfDatei) return;
+    const h = await this.gmail.entwurfDatei(HANDY_DATEN);
+    if (h) { const n = handyImport(this.db, JSON.parse(h) as HandyDaten); if (n) { this.log(`${n} Einträge vom Handy übernommen.`); this.emit('aktion', null); } }
+    const fp = pcFingerabdruck(this.db);
+    if (fp === this.db.get<string>('pcDatenFp', '') && this.jetzt() - this.db.get<number>('pcDatenZeit', 0) < 60 * 60_000) return;
+    if (this.jetzt() - this.db.get<number>('pcDatenZeit', 0) < 5 * 60_000 && this.db.get<number>('pcDatenZeit', 0)) return;
+    const id = await this.gmail.standSpeichern(datenNachricht(PC_DATEN, this.email || 'ich', JSON.stringify(pcExport(this.db, this.jetzt()))), this.db.get<string | null>('pcDatenEntwurf', null));
+    this.db.set('pcDatenEntwurf', id); this.db.set('pcDatenFp', fp); this.db.set('pcDatenZeit', this.jetzt());
   }
 
   /** Wie viele Filter räumen schon ohne PC auf? */

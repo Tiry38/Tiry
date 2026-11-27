@@ -2,7 +2,8 @@
 import type { GmailPort, FilterAktion, FilterKriterien } from './gmail';
 import { HistoryZuAlt } from './gmail';
 import type { Mail } from './types';
-import { bytesZuBase64 } from './mime';
+import { bytesZuBase64, base64ZuBytes } from './mime';
+import { dekodiereMimeWort } from './headers';
 
 export class SpeicherGmail implements GmailPort {
   mails = new Map<string, Mail>();
@@ -95,7 +96,13 @@ export class SpeicherGmail implements GmailPort {
   /** Entwürfe (nur für den Aufräumer-Stand): id → roher Text */
   entwuerfe = new Map<string, string>();
   async standSpeichern(raw: string, id: string | null) { const neu = id && this.entwuerfe.has(id) ? id : `entwurf${this.entwuerfe.size + 1}`; this.entwuerfe.set(neu, raw); return neu; }
-  async standText(betreff: string) { for (const r of this.entwuerfe.values()) if (r.includes('Subject:') && betreff) return r; return null; }
+  private betreffVon(raw: string) { const m = /^Subject: (.*)$/m.exec(raw); return m ? dekodiereMimeWort(m[1].trim()) : ''; }
+  async standText(betreff: string) { for (const r of this.entwuerfe.values()) if (this.betreffVon(r) === betreff) return r; return null; }
+  async entwurfDatei(betreff: string) {
+    const r = await this.standText(betreff); if (!r) return null;
+    const m = /filename="daten\.json"\r\nContent-Transfer-Encoding: base64\r\n\r\n([\s\S]*?)\r\n--/.exec(r);
+    return m ? new TextDecoder().decode(base64ZuBytes(m[1])) : null;
+  }
   async labelInfo(id: string) {
     const alle = [...this.mails.values()].filter((m) => m.labelIds.includes(id));
     return { gesamt: alle.length, ungelesen: alle.filter((m) => m.labelIds.includes('UNREAD')).length };
