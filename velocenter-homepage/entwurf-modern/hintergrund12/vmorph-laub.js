@@ -264,7 +264,9 @@ VM.hurry=root=>{if(root)root._vmH=1};
 /* WebGL vorhanden? */
 /* Nur mit echter Grafik-Beschleunigung: Software-Grafik (SwiftShader/llvmpipe, z. B. gesperrter Treiber) friert die Seite
    beim Shader-Bau sekundenlang ein -> dort bleibt der einfache Wechsel (Tiry 17.11.2026: „Seite hängt sich ab und zu auf“) */
-try{const t=document.createElement('canvas'),sw=!!window.__vmSW,g=t.getContext('webgl',sw?{}:{failIfMajorPerformanceCaveat:true});VM.ok=!!g;
- if(g&&!sw){const d=g.getExtension('WEBGL_debug_renderer_info'),r=d?String(g.getParameter(d.UNMASKED_RENDERER_WEBGL)):'';if(/swiftshader|llvmpipe|software|basic render/i.test(r))VM.ok=false}
- const lx=g&&g.getExtension('WEBGL_lose_context');if(lx)lx.loseContext()}catch(_){VM.ok=false}
+/* Prüfung erst beim ersten Bedarf (Tiry 27.11.2026: das Anlegen der Test-Zeichenfläche blockierte beim Laden den ganzen Seitenaufbau) */
+let OK=null;Object.defineProperty(VM,'ok',{configurable:true,enumerable:true,get(){if(OK===null){OK=false;
+try{const t=document.createElement('canvas'),sw=!!window.__vmSW,g=t.getContext('webgl',sw?{}:{failIfMajorPerformanceCaveat:true});OK=!!g;
+ if(g&&!sw){const d=g.getExtension('WEBGL_debug_renderer_info'),r=d?String(g.getParameter(d.UNMASKED_RENDERER_WEBGL)):'';if(/swiftshader|llvmpipe|software|basic render/i.test(r))OK=false}
+ const lx=g&&g.getExtension('WEBGL_lose_context');if(lx)lx.loseContext()}catch(_){OK=false}}return OK},set(v){OK=!!v}});
 })();
