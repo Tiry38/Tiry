@@ -667,3 +667,8 @@
 
 - **27.11.2026 – Showroom-Verwandlung ohne MSAA:** `vmorph-laub.js` `mk()` mit `antialias:false`. Das Laub glättet seine Kanten selbst im Shader (`vPx`), deshalb entfällt der 4-fache Kantenglättungs-Puffer auf beiden Leinwänden. Bild-für-Bild-Vergleich bei 7 festen Zeitpunkten: Abweichung nur an einzelnen Randpixeln winziger Blätter (Ø ≤ 0,04/255), bei 2-facher Vergrößerung nicht sichtbar. Nicht wieder einschalten.
 - **Geprüft und bewusst nicht geändert:** Der Start-Schnee (`#snow`) wird je Bild mit wenigen Vektor-Strichen gezeichnet. Das ist billig, und vorgerenderte Bilder wären beim Drehen nicht pixelgleich. Die schimmernden Überschriften (`.gt` flow, `hcflow`) bleiben, weil kein pixelgleicher Ersatz existiert.
+
+## 28.11.2026 – Showroom zufällig + Standbild beim Seitenaufruf (Tiry, Mega-Prompt Flüssigkeit)
+- Showrooms (Start + Marken) komplett zufällig aus allen freigegebenen Rädern, gleiche Chance, nie zweimal dasselbe hintereinander (SRFIX, Markenrunde, Merken über Besuche hinweg entfernt). Kachel „Auf Lager“ bleibt bei bagNext.
+- Standzeit gleichmäßig: Start 3,5 s, Marken 2,75 s, Zeit läuft ab Ende der Verwandlung; nächster Wechsel wird in der Standzeit vorbereitet (VM.prep).
+- Standbild: je Seite × 5 Formate das erste echte Shader-Bild (img/hg12/p), steht im ersten Paint; Animation startet bei t=0 deckungsgleich, 0,25 s Übergabe. Bei Änderung an hg12.js/Herbstallee-Bildern: `python3 entwurf-modern/hintergrund12/standbild.py` (~10 Min.), sonst bricht der Bau ab.
