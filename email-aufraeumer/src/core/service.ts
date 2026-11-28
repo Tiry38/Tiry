@@ -86,6 +86,8 @@ export class Aufraeumer extends Ereignisse {
       this.email = p.email;
       if (!this.db.get<string | null>('historyId', null)) this.db.set('historyId', p.historyId);
       await this.tick(); // holt zuerst die Kontakte, dann verpasste Mails
+      // einmalig nach dem Update: alte Ordner-Regeln umstellen und verpasste neue Mails zurück in den Posteingang
+      if (!this.ohneGmailRegeln && !this.db.einstellungen().trockenlauf) void this.ordnerFilterUmstellen().catch((e) => this.log(`Umstellen: ${(e as Error).message}`));
     } catch (err) {
       this.setStatus('fehler', (err as Error).message);
     }
