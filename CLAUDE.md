@@ -20,9 +20,11 @@ Repo von Tiry mit mehreren Projekten (siehe unten). UI-Sprache und Doku: **Deuts
 - Keine Geheimnisse committen (API-Keys, Service-Accounts). Secrets nur über GitHub-Secrets bzw. verschlüsselte Settings.
 
 ## Homepage (wichtigstes Thema aktuell)
-- **„Homepage“ meint IMMER die neue Seite https://tiry38.github.io/velo-center-web/** – nie die alte velo-center.de (Coco).
+- **„Homepage“ meint IMMER die neue Seite https://www.velo-center.de (früher tiry38.github.io/velo-center-web)** – nie die alte velo-center.de (Coco).
 - Quelle: `velocenter-homepage/` (Regeln in `ENTSCHEIDUNGEN.md`, Ablauf in `LIVEGANG.md`), bauen mit
-  `python3 tools/live_bauen.py <tmp>`, dann in Repo `Tiry38/velo-center-web` (`main`) kopieren (ohne `CNAME`, `README.md`, `google.json`).
+  `python3 tools/live_bauen.py <tmp>`, dann in Repo `Tiry38/velo-center-web` (`main`) kopieren (ohne `README.md`, `google.json`).
+- **Eigene Domain seit 28.11.2026: https://www.velo-center.de** (IONOS-DNS → GitHub Pages). Die Datei **`CNAME` im Web-Repo nie löschen**
+  (Tiry: „ganz wichtig“) – sonst ist die Seite weg. Bilder-Agent und Admin-Chat (`.github/workflows/homepage-*.yml`) lassen sie stehen.
 
 - **Direkt live (Tiry 24.11.2026):** Fehlerbehebungen und von Tiry konkret bestellte Änderungen sofort live stellen und danach live prüfen – keine Vorschau-Seiten dafür. Vorschauen nur für neue Design-Vorschläge, danach wieder löschen.
 - **Qualitäts-Regel für jeden Vorschlag (Tiry 15.11.2026, verbindlich):** Nie „Billo“-Entwürfe zeigen. Jeder Vorschlag muss auf dem Niveau der

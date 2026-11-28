@@ -1,5 +1,7 @@
 # Livegang www.velo-center.de
 
+**Erledigt 28.11.2026:** DNS bei IONOS umgestellt (4× A @ 185.199.108–111.153, CNAME www → tiry38.github.io; Mail/rapidmail unverändert), `CNAME` im Web-Repo, HTTPS-Zertifikat aktiv, `BILD_BASIS = BASIS`. Bilder-Agent + Admin-Chat löschen `CNAME` nicht mehr (Tiry-Repo `main` 20bba51). Offen: „Enforce HTTPS“ (Tiry), Google Search Console, Unternehmensprofil-Link, danach Coco kündigen.
+
 Stand 13.11.2026. Die Live-Fassung baut `python3 tools/live_bauen.py` aus dem Prototyp (`index.html`).
 Der Prototyp bleibt unverändert, Änderungen immer dort machen und neu bauen.
 
