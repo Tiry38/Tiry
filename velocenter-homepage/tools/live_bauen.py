@@ -18,9 +18,8 @@ QUELLE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 ZIEL = os.path.abspath(sys.argv[1]) if len(sys.argv) > 1 else os.path.join(os.path.dirname(QUELLE), 'velocenter-homepage-live')
 DOMAIN = 'www.velo-center.de'
 BASIS = 'https://' + DOMAIN + '/'
-# Vorschaubild + og:url für WhatsApp/Facebook: müssen JETZT erreichbar sein. Bis zum Domain-Umzug liefert www.velo-center.de noch Coco (404).
-# github.io leitet nach dem Umzug automatisch auf die eigene Domain weiter. Am Umzugstag auf BASIS umstellen (LIVEGANG.md).
-BILD_BASIS = 'https://tiry38.github.io/velo-center-web/'
+# Vorschaubild + og:url für WhatsApp/Facebook: seit dem Domain-Umzug (28.11.2026) auf der eigenen Domain.
+BILD_BASIS = BASIS
 
 # alte Adressen der Coco-Seite -> neue Bereiche
 ALT = {
