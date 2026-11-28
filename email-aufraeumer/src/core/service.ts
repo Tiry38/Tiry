@@ -61,6 +61,11 @@ export class Aufraeumer extends Ereignisse {
     this.jetzt = o.jetzt ?? Date.now;
     if (!this.db.get('einstellungen', null)) this.db.set('einstellungen', standardEinstellungen(this.jetzt()));
     // Tiry's Mails ist live: alte Standard-Einstellung (60 s) einmalig auf 5 s umstellen
+    // Tirys Geschäft: eigene Adressen nie wegräumen (Weiße Liste) – bleiben immer im Posteingang
+    if (!this.db.get('weissGeschaeft', false)) {
+      for (const d of ['velo-center.de', 'velocenter-hessert.de']) this.db.regelMerken('weiss', 'domain', d, null, this.jetzt());
+      this.db.set('weissGeschaeft', true);
+    }
     if (!this.db.get('migrationLive', false)) {
       if (this.db.einstellungen().intervallSek === 60) this.db.speichereEinstellungen({ intervallSek: 5 });
       this.db.set('migrationLive', true);
@@ -88,6 +93,7 @@ export class Aufraeumer extends Ereignisse {
       await this.tick(); // holt zuerst die Kontakte, dann verpasste Mails
       // einmalig nach dem Update: alte Ordner-Regeln umstellen und verpasste neue Mails zurück in den Posteingang
       if (!this.ohneGmailRegeln && !this.db.einstellungen().trockenlauf) void this.ordnerFilterUmstellen().catch((e) => this.log(`Umstellen: ${(e as Error).message}`));
+      void this.geschaeftZurueck().catch((e) => this.log(`Geschäftsmails zurückholen: ${(e as Error).message}`));
     } catch (err) {
       this.setStatus('fehler', (err as Error).message);
     }
@@ -506,6 +512,18 @@ export class Aufraeumer extends Ereignisse {
       if (zurueck.length) { this.log(`${zurueck.length} neue Mails zurück in den Posteingang geholt.`); this.emit('postfach', { neu: zurueck.length }); }
     } catch (e) { this.log(`Zurückholen: ${(e as Error).message}`); }
     this.db.set('ordnerFilterV2', true);
+  }
+
+  /** Einmalig: Mails vom eigenen Geschäft (velo-center.de) der letzten 7 Tage, die weggeräumt wurden, zurück in den Posteingang. */
+  private async geschaeftZurueck() {
+    if (this.db.get<boolean>('geschaeftZurueck', false)) return;
+    const ids = await this.alleIds('from:(velo-center.de OR velocenter-hessert.de) newer_than:7d -in:inbox -in:sent -in:drafts in:anywhere', 500);
+    for (const m of await this.gmail.holeMetadaten(ids)) {
+      if (m.labelIds.includes('TRASH')) await this.gmail.untrash(m.id);
+      await this.gmail.modify(m.id, ['INBOX'], m.labelIds.includes('SPAM') ? ['SPAM'] : []);
+    }
+    if (ids.length) { this.log(`${ids.length} Mails vom Velocenter zurück in den Posteingang geholt.`); this.emit('postfach', { neu: ids.length }); }
+    this.db.set('geschaeftZurueck', true);
   }
 
   /** Tiry schaltet „Auch bei ausgeschaltetem PC“ aus: alle automatisch angelegten Gmail-Filter wieder löschen. */

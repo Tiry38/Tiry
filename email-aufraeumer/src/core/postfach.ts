@@ -64,8 +64,9 @@ export class Postfach {
 
   /** Eine Seite eines Ordners (neueste zuerst). Metadaten werden 2 Minuten zwischengespeichert. */
   async liste(ordnerId: string, suche = '', pageToken?: string): Promise<{ zeilen: Zeile[]; weiter?: string; gesamt?: number }> {
-    const label = ordnerId === 'ALLE' ? null : ordnerId;
-    const r = await this.gmail.listeOrdner(label, suche, pageToken, 50);
+    // Suchen geht immer über das ganze Postfach (auch Archiv, Ordner, Spam, Papierkorb) – wie bei Gmail
+    const label = ordnerId === 'ALLE' || suche ? null : ordnerId;
+    const r = await this.gmail.listeOrdner(label, suche ? `${suche} in:anywhere` : suche, pageToken, 50);
     const jetzt = Date.now();
     const fehlt = r.ids.filter((id) => { const c = this.cache.get(id); return !c || jetzt - c.zeit > 120_000; });
     if (fehlt.length) for (const m of await this.gmail.holeMetadaten(fehlt)) this.cache.set(m.id, { mail: m, zeit: jetzt });
