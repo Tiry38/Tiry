@@ -53,6 +53,10 @@ def seite(s, pfad, view, seo):
     url = BASIS + (pfad + '/' if pfad else '')
     if pfad:
         s = ersetze(s, '<meta charset="utf-8">\n', '<meta charset="utf-8">\n<base href="../">\n<script>history.replaceState(null,"",location.pathname.replace(/[^\\/]+\\/(index\\.html)?$/,"")+location.search+(location.hash||"#' + view + '"));document.currentScript.previousElementSibling.remove()</script>\n')
+        # Tiry 28.11.2026: der Bereich der Unterseite steht schon im HTML sichtbar (vorher kurz die Startseite, dann Sprung = Verspringen der ganzen Seite)
+        if view != 'start':
+            s = ersetze(s, '<section class="view" data-v="start">', '<section class="view" data-v="start" hidden>')
+            s = ersetze(s, '<section class="view" data-v="' + view + '" hidden>', '<section class="view" data-v="' + view + '">')
     s = re.sub(r'<title>[^<]*</title>', '<title>' + t.replace('&', '&amp;') + '</title>', s, count=1)
     s = re.sub(r'<meta name="description" content="[^"]*">', '<meta name="description" content="' + html_attr(d) + '">', s, count=1)
     s = re.sub(r'<meta property="og:title" content="[^"]*">', '<meta property="og:title" content="' + html_attr(t) + '">', s, count=1)

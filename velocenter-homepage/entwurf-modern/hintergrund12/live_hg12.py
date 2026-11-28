@@ -68,7 +68,14 @@ def main(ZIEL):
         assert h == MORPH_BASIS, (sp, 'vMorphJs im Prototyp geändert – vmorph-laub.js nachziehen', h)
         s = s[:a] + MORPH + s[b:]
         i = s.index('</style>') + len('</style>')
-        s = s[:i] + '\n<style id="vHg">\n' + CSS + '</style>\n<script>document.documentElement.classList.add("hg3")</script>' + s[i:]
+        # Handy-Kopf zusätzlich schon im Kopf der Seite (Tiry 28.11.2026: sonst stand der Kopf beim ersten Bild anders und alles sprang ~90 px);
+        # die Kopie am Seitenende bleibt, damit das fertige Aussehen exakt gleich bleibt
+        s = s[:i] + '\n<style id="vHg">\n' + CSS + '</style>\n<style id="hgMobKopf0">' + MOB + '</style>\n<script>document.documentElement.classList.add("hg3")</script>' + s[i:]
+        # zweite Kopie direkt hinter plusCss (Tiry 28.11.2026: plusCss blendet das Laufband am Handy aus, die Kopie im Kopf verlor
+        # gegen diese spätere Regel -> Laufband kam erst mit der Kopie am Seitenende, alles sprang 88 px)
+        if '<style id="plusCss">' in s:
+            j = s.index('</style>', s.index('<style id="plusCss">')) + len('</style>')
+            s = s[:j] + '\n<style id="hgMobKopf1">' + MOB + '</style>' + s[j:]
         k = s.rindex('</html>')
         s = (s[:k] + '<script id="vHg11Js">window.HG12_FEST=\'herbst\';\n' + JS + '</script>\n'
              + '<style id="hgMobKopf">' + MOB + '</style>\n' + s[k:])
