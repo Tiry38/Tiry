@@ -674,3 +674,4 @@
 - Standbild: je Seite × 5 Formate das erste echte Shader-Bild (img/hg12/p), steht im ersten Paint; Animation startet bei t=0 deckungsgleich, 0,25 s Übergabe. Bei Änderung an hg12.js/Herbstallee-Bildern: `python3 entwurf-modern/hintergrund12/standbild.py` (~10 Min.), sonst bricht der Bau ab.
 
 - 28.11.2026 (Tiry „A“): Beim Seitenaufruf kein Einflug (.hello) mehr – Inhalt steht sofort; Einflug nur beim Reiterwechsel (`show(...,first)`).
+- 28.11.2026 (Prüfung aller Seiten): Seitenaufruf ohne Springen. Unterseiten haben ihren Bereich schon im HTML sichtbar (Start `hidden`, `live_bauen.py`); Handy-Kopf/Laufband (hgmob.css) zusätzlich im Kopf (`hgMobKopf0`) und direkt hinter `plusCss` (`hgMobKopf1`, sonst blendete plusCss das Laufband bis zum Seitenende aus → 88 px Sprung). Die Kopie am Seitenende bleibt. Endaussehen unverändert (Element-Positionen verglichen).
