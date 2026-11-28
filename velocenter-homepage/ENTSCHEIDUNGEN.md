@@ -672,3 +672,5 @@
 - Showrooms (Start + Marken) komplett zufällig aus allen freigegebenen Rädern, gleiche Chance, nie zweimal dasselbe hintereinander (SRFIX, Markenrunde, Merken über Besuche hinweg entfernt). Kachel „Auf Lager“ bleibt bei bagNext.
 - Standzeit gleichmäßig: Start 3,5 s, Marken 2,75 s, Zeit läuft ab Ende der Verwandlung; nächster Wechsel wird in der Standzeit vorbereitet (VM.prep).
 - Standbild: je Seite × 5 Formate das erste echte Shader-Bild (img/hg12/p), steht im ersten Paint; Animation startet bei t=0 deckungsgleich, 0,25 s Übergabe. Bei Änderung an hg12.js/Herbstallee-Bildern: `python3 entwurf-modern/hintergrund12/standbild.py` (~10 Min.), sonst bricht der Bau ab.
+
+- 28.11.2026 (Tiry „A“): Beim Seitenaufruf kein Einflug (.hello) mehr – Inhalt steht sofort; Einflug nur beim Reiterwechsel (`show(...,first)`).

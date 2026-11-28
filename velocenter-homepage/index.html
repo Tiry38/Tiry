@@ -4610,7 +4610,9 @@ function show(v,anchor,first){
  /* Reiterwechsel (auch Zurück-Taste am Handy) schließt offene Fenster, sonst bleibt die Seite gesperrt */
  if(!first){if(!$('#lgm').hidden&&!RADK)lgClose();if(!$('#rf').hidden)rfClose();if(!$('#cmp').hidden)cmpClose()}
  $$('.view').forEach(s=>{s.hidden=s.dataset.v!==v;s.classList.remove('enter')});
- const sec=$('.view[data-v="'+v+'"]');void sec.offsetWidth;sec.classList.add('enter');
+ const sec=$('.view[data-v="'+v+'"]');
+ /* Tiry 28.11.2026: beim Seitenaufruf steht alles sofort fertig da (kein Einflug, der Text war vorher kurz sichtbar, verschwand und flog neu ein); Einflug nur beim Reiterwechsel */
+ if(!first){void sec.offsetWidth;sec.classList.add('enter')}
  $$('[data-r]').forEach(a=>a.classList.toggle('on',a.dataset.r===v));{const t=$('#mnt'),a=t&&t.querySelector('a.on');if(a&&t.offsetParent)t.scrollTo({left:a.offsetLeft-(t.clientWidth-a.offsetWidth)/2,behavior:'smooth'})}
  seoSet(v);
  cur=v;merkUI();
