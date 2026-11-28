@@ -16,8 +16,11 @@ def res(h):
     return h
 L=json.load(open('out/layout.json')); H=L['H']; W=640
 r=lambda v:int(round(v))
-links=[dict(x0=max(0,r(a['x'])),y0=r(a['y']),x1=min(W,r(a['x']+a['w'])),y1=r(a['y']+a['h']),href=res(a['href']),txt=a['txt']) for a in L['links']]
-anims=[dict(x0=r(a['x']),y0=r(a['y']),x1=r(a['x']+a['w']),y1=r(a['y']+a['h']),name=a['name']) for a in L['anims']]
+# Streifengrenzen auf Vielfache von 4 px: Outlook bei 125/150/175 % Skalierung ohne 1-px-Lücken
+f4=lambda v:4*int(v//4); c4=lambda v:min(H,4*int(-(-v//4)))
+links=[dict(x0=max(0,r(a['x'])),y0=f4(r(a['y'])),x1=min(W,r(a['x']+a['w'])),y1=c4(r(a['y']+a['h'])),href=res(a['href']),txt=a['txt']) for a in L['links']]
+anims=[dict(x0=r(a['x']),y0=f4(r(a['y'])),x1=r(a['x']+a['w']),y1=c4(r(a['y']+a['h'])),oy0=r(a['y']),oy1=r(a['y']+a['h']),name=a['name']) for a in L['anims']]
+HIN=lambda n:n.startswith('snow') or n in ('leaf','gt','board','p0','p1','p2','p3','p4','p5')
 ys=sorted({0,H}|{v for a in links+anims for v in (a['y0'],a['y1'])})
 st=Image.open('out/static.png').convert('RGB')
 shutil.rmtree('mail',ignore_errors=True);os.makedirs('mail');shutil.copy('out/fuss-logo.png','mail/fuss-logo.png');[shutil.copy(f'out/so-{k}.png',f'mail/so-{k}.png') for k in ('fb','ig','wa','hp')]
@@ -25,8 +28,10 @@ shutil.rmtree('mail',ignore_errors=True);os.makedirs('mail');shutil.copy('out/fu
 AF={}
 for a in anims:
     fs=sorted(glob.glob(f"out/fr-{a['name']}/*.png"))
-    HI=a['name'].startswith('snow') or a['name'] in ('leaf','gt')
-    AF[a['name']]=[(Image.open(f).convert('RGB').resize((2*(a['x1']-a['x0']),2*(a['y1']-a['y0'])),Image.LANCZOS) if HI else Image.open(f).convert('RGB').resize((a['x1']-a['x0'],a['y1']-a['y0']),Image.LANCZOS)) for f in fs]
+    HI=HIN(a['name']); w,h=a['x1']-a['x0'],a['oy1']-a['oy0']; base=st.crop((a['x0']*2,a['y0']*2,a['x1']*2,a['y1']*2))
+    def ext(im):  # Bild der Original-Zone in die auf 4 px erweiterte Zone setzen (Rand aus der Standansicht)
+        b=base.copy(); b.paste(im.resize((2*w,2*h),Image.LANCZOS),(0,2*(a['oy0']-a['y0']))); return b if HI else b.resize((a['x1']-a['x0'],a['y1']-a['y0']),Image.LANCZOS)
+    AF[a['name']]=[ext(Image.open(f).convert('RGB')) for f in fs]
 rows=[];n=0;alts=[]
 def cover(c,x0,y0,x1,y1): return c['x0']<=x0 and c['y0']<=y0 and c['x1']>=x1 and c['y1']>=y1
 for yi in range(len(ys)-1):
@@ -42,7 +47,7 @@ for yi in range(len(ys)-1):
         n+=1
         if an:
             fr=AF[an['name']]; box=(x0-an['x0'],y0-an['y0'],x1-an['x0'],y1-an['y0'])
-            if an['name'].startswith('snow') or an['name'] in ('leaf','gt'): box=tuple(2*v for v in box)
+            if HIN(an['name']): box=tuple(2*v for v in box)
             seq=[f.crop(box) for f in fr]
             once=an['name'] not in ('hero','gt','leaf','deal') and not an['name'].startswith('snow')
             if once: seq=[seq[-1]]+seq+[seq[-1]]
@@ -78,7 +83,7 @@ for yi in range(len(ys)-1):
                 C=kmeans_pal([seq[i] for i in range(0,len(seq),max(1,len(seq)//4))]);pal=Image.new('P',(1,1));pal.putpalette(list(C.flatten())+[0,0,0])
                 BY=bayer(seq[0].size[1],seq[0].size[0],12 if an['name']=='deal' else 6)
                 seq=[Image.fromarray(np.clip(np.asarray(s).astype(np.float32)+BY,0,255).astype('uint8')) for s in seq]
-            if an['name']=='gt':  # Fehlerstreuung gegen Farbversatz zum Umfeld; unveränderte Pixel behalten ihren Index (kein Flimmern)
+            if an['name']=='gt' or an['name']=='board' or an['name'] in ('p0','p1','p2','p3','p4','p5'):  # Fehlerstreuung gegen Farbversatz zum Umfeld; unveränderte Pixel behalten ihren Index (kein Flimmern)
                 import numpy as np
                 pal=seq[0].quantize(colors=255,method=Image.MEDIANCUT,dither=Image.Dither.NONE)
                 qq=[s.quantize(palette=pal,dither=Image.Dither.FLOYDSTEINBERG) for s in seq];out=[qq[0]];prev=np.asarray(qq[0])
@@ -88,7 +93,7 @@ for yi in range(len(ys)-1):
                 q=out
             else: q=[s.quantize(palette=pal,dither=dz) for s in seq]
             fn=f'n{n:03d}.gif'; q[0].save('mail/_t.gif',save_all=True,append_images=q[1:],duration=dur,loop=0,disposal=1)
-            subprocess.run(['gifsicle','-O3','--lossy='+('0' if an['name'].startswith('snow') or an['name']=='gt' else ('20' if an['name']=='deal' else '60' if an['name']=='leaf' else ('80' if an['name']=='hero' else '85'))),'-o','mail/'+fn,'mail/_t.gif'],check=True); os.remove('mail/_t.gif')
+            subprocess.run(['gifsicle','-O3','--lossy='+('0' if an['name'].startswith('snow') or an['name']=='gt' else '20' if an['name'] in ('board','p0','p1','p2','p3','p4','p5') else ('20' if an['name']=='deal' else '60' if an['name']=='leaf' else ('80' if an['name']=='hero' else '85'))),'-o','mail/'+fn,'mail/_t.gif'],check=True); os.remove('mail/_t.gif')
         else:
             fn=f'n{n:03d}.jpg'; st.crop((x0*2,y0*2,x1*2,y1*2)).save('mail/'+fn,quality=70,subsampling=0,optimize=True,progressive=True)
         cells.append(dict(x0=x0,x1=x1,fn=fn,href=ln['href'] if ln else None,alt=(ln['txt'] if ln else '')))
