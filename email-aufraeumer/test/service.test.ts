@@ -353,7 +353,7 @@ describe('Ordner für Vielschreiber', () => {
     expect(ordner).toBeDefined();
     const jetzt = t.gmail.get(bestellung.id).labelIds;
     expect(jetzt).toContain(ordner.id);
-    expect(jetzt).not.toContain('INBOX');
+    expect(jetzt).toContain('INBOX');                    // neue Mail bleibt sichtbar im Posteingang – nur mit Firmen-Etikett
     expect(jetzt).not.toContain('TRASH');
     const e = t.db.protokoll().find((x) => x.mailId === bestellung.id)!;
     expect(e.begruendung).toMatch(/Ordner „Amazon“/);

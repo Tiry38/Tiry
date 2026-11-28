@@ -207,7 +207,7 @@ export class Aufraeumer extends Ereignisse {
     const ordner = this.ordnerFuer(mail, s, schutz, entscheidung);
     if (ordner && (schutz.geschuetzt || !this.plan(mail, s, entscheidung).papierkorb)) {
       // Firmen-Ordner: auch Bestellungen/Rechnungen (Tirys Wunsch) – nur verschieben, nie löschen
-      const plan = this.mitOrdner(schutz.geschuetzt ? null : this.plan(mail, s, entscheidung), mail, ordner.name);
+      const plan = this.mitOrdner(schutz.geschuetzt ? null : this.plan(mail, s, entscheidung), mail, ordner.name, true);
       const grund = `${entscheidung.begruendung} Kommt in den Ordner „${ordner.name}“ (${ordner.anzahl} Mails von dieser Firma).`;
       id = await this.aus.ausfuehren(mail, s, { ...entscheidung, begruendung: grund }, plan, { durchlauf, trocken: e.trockenlauf, zeit });
     } else if (schutz.geschuetzt) {
@@ -261,9 +261,12 @@ export class Aufraeumer extends Ereignisse {
   }
 
   /** Plan „in den Ordner verschieben“: Ordner-Etikett statt Sorten-Etikett, raus aus dem Posteingang. */
-  private mitOrdner(plan: Plan | null, mail: Mail, name: string): Plan {
+  private mitOrdner(plan: Plan | null, mail: Mail, name: string, neueMail = false): Plan {
     const p: Plan = { aktionen: ['label'], add: [name], remove: [], papierkorb: false, abmelden: !!plan?.abmelden };
-    if (mail.labelIds.includes('INBOX')) { p.remove.push('INBOX'); p.aktionen.push('archivieren'); }
+    // Neue Mails bleiben im Posteingang (Tiry will sie sehen) – sie bekommen nur das Firmen-Etikett und wandern nach dem Lesen
+    // per „Einordnen“ in den Ordner. Werbung/Newsletter räumt der Aufräumer wie gewohnt gleich weg.
+    const raus = !neueMail || !!plan?.remove.includes('INBOX');
+    if (raus && mail.labelIds.includes('INBOX')) { p.remove.push('INBOX'); p.aktionen.push('archivieren'); }
     if (plan?.remove.includes('UNREAD')) { p.remove.push('UNREAD'); p.aktionen.push('gelesen'); }
     if (p.abmelden) p.aktionen.push('abmelden');
     return p;
@@ -413,6 +416,7 @@ export class Aufraeumer extends Ereignisse {
 
   async filterExport(): Promise<{ angelegt: number; wartet: number; frage: boolean }> {
     if (this.ohneGmailRegeln) return { angelegt: 0, wartet: 0, frage: false };
+    if (this.db.einstellungen().filterExportFreigegeben && !this.db.einstellungen().trockenlauf) await this.ordnerFilterUmstellen();
     const e = this.db.einstellungen();
     const offen = this.filterKandidaten().filter((r) => !r.gmailFilterId);
     const autoOffen = this.autoFilterPlan().filter((p) => !this.db.get<Record<string, string>>('autoFilter', {})[p.schluessel]).length;
@@ -458,13 +462,14 @@ export class Aufraeumer extends Ereignisse {
   }
 
   private async autoFilterExport(negatedQuery: string): Promise<number> {
+    await this.ordnerFilterUmstellen();
     const bekannt = this.db.get<Record<string, string>>('autoFilter', {});
     let n = 0;
     for (const p of this.autoFilterPlan()) {
       if (bekannt[p.schluessel]) continue;
       try {
         let akt: { addLabelIds: string[]; removeLabelIds: string[] } | null;
-        if (p.ordner) akt = { addLabelIds: [await this.aus.labelId(p.ordner)], removeLabelIds: ['INBOX'] };
+        if (p.ordner) akt = { addLabelIds: [await this.aus.labelId(p.ordner)], removeLabelIds: [] }; // nur Etikett – bleibt im Posteingang
         else {
           akt = this.filterAktion(p.kategorie!);
           if (akt && this.db.einstellungen().aktionen[p.kategorie!].includes('label')) akt.addLabelIds.push(await this.aus.labelId(`${LABEL_PREFIX}/${KATEGORIE_NAME[p.kategorie!]}`));
@@ -476,6 +481,29 @@ export class Aufraeumer extends Ereignisse {
       } catch (err) { this.log(`Gmail-Filter für ${p.von} fehlgeschlagen: ${(err as Error).message}`); }
     }
     return n;
+  }
+
+  /**
+   * Einmalig: alte Firmen-Ordner-Regeln (haben neue Mails aus dem Posteingang genommen) löschen – sie werden neu als
+   * „nur Etikett“ angelegt. Und ungelesene Mails der letzten Tage, die dadurch am Posteingang vorbei gingen, zurückholen.
+   */
+  private async ordnerFilterUmstellen() {
+    if (this.db.get<boolean>('ordnerFilterV2', false)) return;
+    const bekannt = this.db.get<Record<string, string>>('autoFilter', {});
+    for (const [k, id] of Object.entries(bekannt)) if (k.startsWith('ordner:')) { try { await this.gmail.filterLoeschen(id); } catch { /* schon weg */ } delete bekannt[k]; }
+    this.db.set('autoFilter', bekannt);
+    try {
+      const ids = await this.alleIds('is:unread newer_than:4d -in:inbox -in:spam -in:trash -in:sent -in:drafts', 2000);
+      const zurueck: string[] = [];
+      for (let i = 0; i < ids.length; i += 100) for (const m of await this.gmail.holeMetadaten(ids.slice(i, i + 100))) {
+        const kat = (this.db.db.prepare('SELECT kategorie FROM protokoll WHERE mail_id = ? ORDER BY id DESC LIMIT 1').get(m.id) as any)?.kategorie;
+        if (kat === 'werbung' || kat === 'newsletter' || kat === 'spam' || kat === 'phishing' || m.labelIds.includes('CATEGORY_PROMOTIONS')) continue;
+        zurueck.push(m.id);
+      }
+      for (let i = 0; i < zurueck.length; i += 1000) await this.gmail.batchModify(zurueck.slice(i, i + 1000), ['INBOX'], []);
+      if (zurueck.length) { this.log(`${zurueck.length} neue Mails zurück in den Posteingang geholt.`); this.emit('postfach', { neu: zurueck.length }); }
+    } catch (e) { this.log(`Zurückholen: ${(e as Error).message}`); }
+    this.db.set('ordnerFilterV2', true);
   }
 
   /** Tiry schaltet „Auch bei ausgeschaltetem PC“ aus: alle automatisch angelegten Gmail-Filter wieder löschen. */
