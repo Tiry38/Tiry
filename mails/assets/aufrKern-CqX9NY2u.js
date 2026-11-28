@@ -1,0 +1,1 @@
+export{t as handyKern}from"./aufrKern-CX5JV303.js";
