@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
 import json, html
+
+# Unterlage: verkleinertes Abbild der Seite hinter den Bildstreifen (Fugen beim Skalieren zeigen dasselbe Bild statt dunkler Linien)
+from PIL import Image as _I
+_st=_I.open('out/static.png').convert('RGB');_st.resize((240,round(_st.size[1]*240/1280)),_I.LANCZOS).save('mail/unterlage.jpg',quality=60,optimize=True,progressive=True)
 e=html.escape
 rows=json.load(open('out/rows.json')); secs=json.load(open('out/secs.json'))
 DEAL='Winter-Inspektion 2026/27: minus 20 Euro auf jede Inspektion, gültig nur für Marken-Fahrräder mit Bosch-Antrieb. Gratis dazu: Sattelüberzug mit Velocenter-Logo. Inklusive Checkliste und Bosch Servicebericht. Gültig vom 01.11.2026 bis 28.02.2027, nur solange Termine verfügbar sind.'
@@ -12,7 +16,7 @@ for r in rows:
         alt=c['alt']
         if not alt and sec and sec['y0'] not in done:
             alt=DEAL if sec['id']=='s-deal' else sec['txt']; done.add(sec['y0'])
-        im=f'<img src="{c["fn"]}" width="{w}" height="{h}" alt="{e(alt)}" border="0" align="top" style="display:block;width:100%;height:auto;border:0;outline:none;vertical-align:top;font:700 14px/1.4 Arial,sans-serif;color:#1B1E25">'
+        im=f'<img src="{c["fn"]}" width="{w}" height="{h}" alt="{e(alt)}" border="0" style="display:block;width:100%;height:auto;border:0;outline:none;vertical-align:top;font:700 14px/1.4 Arial,sans-serif;color:#1B1E25">'
         if c['href']: im=f'<a href="{e(c["href"])}" target="_blank" class="hl" style="display:block">{im}</a>'
         cells+=f'<td width="{w}" style="width:{w/6.4:.4f}%;padding:0;font-size:0;line-height:0;mso-line-height-rule:exactly" valign="top">{im}</td>'
     out.append(f'<tr><td style="padding:0;font-size:0;line-height:0;mso-line-height-rule:exactly"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="table-layout:fixed;border-collapse:collapse;mso-table-lspace:0;mso-table-rspace:0"><tr>{cells}</tr></table></td></tr>')
@@ -56,7 +60,7 @@ table{{mso-table-lspace:0;mso-table-rspace:0}} img{{-ms-interpolation-mode:bicub
 <div style="display:none;max-height:0;overflow:hidden;mso-hide:all;font-size:1px;line-height:1px;color:#E9E3DC">{PRE}{'&#847;&zwnj;&nbsp;'*40}</div>
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#E9E3DC" style="background:#E9E3DC"><tr><td align="center" style="padding:0">
 <!--[if mso]><table role="presentation" width="640" cellpadding="0" cellspacing="0" border="0"><tr><td><![endif]-->
-<table role="presentation" class="wrap" width="640" cellpadding="0" cellspacing="0" border="0" style="width:640px;max-width:640px">
+<table role="presentation" class="wrap" width="640" cellpadding="0" cellspacing="0" border="0" style="width:640px;max-width:640px;background-image:url(unterlage.jpg);background-size:100% auto;background-repeat:no-repeat;background-position:0 0">
 {chr(10).join(out)}
 {FOOT}
 </table>

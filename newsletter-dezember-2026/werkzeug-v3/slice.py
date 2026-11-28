@@ -19,7 +19,8 @@ r=lambda v:int(round(v))
 # Streifengrenzen auf Vielfache von 4 px: Outlook bei 125/150/175 % Skalierung ohne 1-px-Lücken
 f4=lambda v:4*int(v//4); c4=lambda v:min(H,4*int(-(-v//4)))
 links=[dict(x0=max(0,r(a['x'])),y0=f4(r(a['y'])),x1=min(W,r(a['x']+a['w'])),y1=c4(r(a['y']+a['h'])),href=res(a['href']),txt=a['txt']) for a in L['links']]
-anims=[dict(x0=r(a['x']),y0=f4(r(a['y'])),x1=r(a['x']+a['w']),y1=c4(r(a['y']+a['h'])),oy0=r(a['y']),oy1=r(a['y']+a['h']),name=a['name']) for a in L['anims']]
+ex0=lambda v:0 if v<80 else v; ex1=lambda v:W if W-v<80 else v  # schmale Ränder neben Animationen in die Animation nehmen
+anims=[dict(x0=ex0(r(a['x'])),y0=f4(r(a['y'])),x1=ex1(r(a['x']+a['w'])),y1=c4(r(a['y']+a['h'])),ox0=r(a['x']),ox1=r(a['x']+a['w']),oy0=r(a['y']),oy1=r(a['y']+a['h']),name=a['name']) for a in L['anims']]
 HIN=lambda n:n.startswith('snow') or n in ('leaf','gt','board','p0','p1','p2','p3','p4','p5')
 ys=sorted({0,H}|{v for a in links+anims for v in (a['y0'],a['y1'])})
 st=Image.open('out/static.png').convert('RGB')
@@ -28,9 +29,9 @@ shutil.rmtree('mail',ignore_errors=True);os.makedirs('mail');shutil.copy('out/fu
 AF={}
 for a in anims:
     fs=sorted(glob.glob(f"out/fr-{a['name']}/*.png"))
-    HI=HIN(a['name']); w,h=a['x1']-a['x0'],a['oy1']-a['oy0']; base=st.crop((a['x0']*2,a['y0']*2,a['x1']*2,a['y1']*2))
+    HI=HIN(a['name']); w,h=a['ox1']-a['ox0'],a['oy1']-a['oy0']; base=st.crop((a['x0']*2,a['y0']*2,a['x1']*2,a['y1']*2))
     def ext(im):  # Bild der Original-Zone in die auf 4 px erweiterte Zone setzen (Rand aus der Standansicht)
-        b=base.copy(); b.paste(im.resize((2*w,2*h),Image.LANCZOS),(0,2*(a['oy0']-a['y0']))); return b if HI else b.resize((a['x1']-a['x0'],a['y1']-a['y0']),Image.LANCZOS)
+        b=base.copy(); b.paste(im.resize((2*w,2*h),Image.LANCZOS),(2*(a['ox0']-a['x0']),2*(a['oy0']-a['y0']))); return b if HI else b.resize((a['x1']-a['x0'],a['y1']-a['y0']),Image.LANCZOS)
     AF[a['name']]=[ext(Image.open(f).convert('RGB')) for f in fs]
 rows=[];n=0;alts=[]
 def cover(c,x0,y0,x1,y1): return c['x0']<=x0 and c['y0']<=y0 and c['x1']>=x1 and c['y1']>=y1
@@ -40,10 +41,25 @@ for yi in range(len(ys)-1):
     inb=[a for a in links+anims if a['y0']<y1 and a['y1']>y0]
     xs=sorted({0,W}|{v for a in inb for v in (a['x0'],a['x1']) if 0<v<W})
     cells=[]
+    # Spalten bestimmen; schmale Füllzellen (< 80 px, ohne Link/Animation) mit dem Nachbarn verschmelzen.
+    # Gmail (Android) setzt sehr schmale Zellen verschoben/verzerrt zusammen.
+    seg=[]
     for xi in range(len(xs)-1):
         x0,x1=xs[xi],xs[xi+1]
-        an=next((a for a in anims if cover(a,x0,y0,x1,y1)),None)
-        ln=next((l for l in links if cover(l,x0,y0,x1,y1)),None)
+        seg.append([x0,x1,next((a for a in anims if cover(a,x0,y0,x1,y1)),None),next((l for l in links if cover(l,x0,y0,x1,y1)),None)])
+    ch=True
+    while ch and len(seg)>1:
+        ch=False
+        for i,sg in enumerate(seg):
+            if sg[2] is None and sg[3] is None and sg[1]-sg[0]<80:
+                nb=[j for j in (i-1,i+1) if 0<=j<len(seg) and seg[j][2] is None]
+                if not nb: continue
+                st_nb=[j for j in nb if seg[j][3] is None]
+                j=(st_nb or nb)[0]
+                if j<i: seg[j][1]=sg[1]
+                else: seg[j][0]=sg[0]
+                del seg[i]; ch=True; break
+    for x0,x1,an,ln in seg:
         n+=1
         if an:
             fr=AF[an['name']]; box=(x0-an['x0'],y0-an['y0'],x1-an['x0'],y1-an['y0'])
