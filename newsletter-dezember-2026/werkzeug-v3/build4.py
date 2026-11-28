@@ -12,10 +12,10 @@ for r in rows:
         alt=c['alt']
         if not alt and sec and sec['y0'] not in done:
             alt=DEAL if sec['id']=='s-deal' else sec['txt']; done.add(sec['y0'])
-        im=f'<img src="{c["fn"]}" width="{w}" height="{h}" alt="{e(alt)}" style="display:block;width:100%;height:auto;border:0;outline:none;font:700 14px/1.4 Arial,sans-serif;color:#1B1E25">'
+        im=f'<img src="{c["fn"]}" width="{w}" height="{h}" alt="{e(alt)}" border="0" align="top" style="display:block;width:100%;height:auto;border:0;outline:none;vertical-align:top;font:700 14px/1.4 Arial,sans-serif;color:#1B1E25">'
         if c['href']: im=f'<a href="{e(c["href"])}" target="_blank" class="hl" style="display:block">{im}</a>'
-        cells+=f'<td width="{w}" style="width:{w/6.4:.4f}%;padding:0;font-size:0;line-height:0" valign="top">{im}</td>'
-    out.append(f'<tr><td style="padding:0;font-size:0;line-height:0"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="table-layout:fixed;border-collapse:collapse"><tr>{cells}</tr></table></td></tr>')
+        cells+=f'<td width="{w}" style="width:{w/6.4:.4f}%;padding:0;font-size:0;line-height:0;mso-line-height-rule:exactly" valign="top">{im}</td>'
+    out.append(f'<tr><td style="padding:0;font-size:0;line-height:0;mso-line-height-rule:exactly"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="table-layout:fixed;border-collapse:collapse;mso-table-lspace:0;mso-table-rspace:0"><tr>{cells}</tr></table></td></tr>')
 PRE='Inspektion 20 € günstiger, Sattelüberzug gratis. Dazu 6 E-Bikes bis 1.600 € unter UVP.'
 FOOT='''<tr><td align="center" style="padding:4px 34px 44px;background:#E9E3DC;text-align:center">
 <img src="fuss-logo.png" width="180" alt="Velocenter Hessert" style="display:block;margin:0 auto 14px;width:180px;height:auto;border:0">
@@ -46,6 +46,9 @@ doc=f'''<!DOCTYPE html>
 <style>
 body{{margin:0!important;padding:0!important;background:#E9E3DC;-webkit-text-size-adjust:100%}}
 table{{mso-table-lspace:0;mso-table-rspace:0}} img{{-ms-interpolation-mode:bicubic}}
+</style>
+<!--[if mso]><style>table{{border-collapse:collapse;mso-table-lspace:0pt;mso-table-rspace:0pt}} td{{mso-line-height-rule:exactly;line-height:0;font-size:0}} img{{display:block;border:0}} a img{{border:0}}</style><![endif]-->
+<style>
 
 @media screen and (max-width:640px){{.wrap{{width:100%!important}}}}
 </style></head>
