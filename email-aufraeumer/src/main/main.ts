@@ -243,17 +243,33 @@ const API: Record<string, Fn> = {
   pfOrdnerInhalt: (id) => postfach!.ordnerInhalt(id as string),
   async pfOrdnerLoeschen(id) {
     const r = await postfach!.ordnerLoeschen(id as string, (erledigt, gesamt) => sende('ordnerLoeschen', { erledigt, gesamt }));
-    db.set('ordnerGeloescht', { name: r.name, ids: r.papierkorb, zeit: Date.now(), bytes: r.bytes ?? 0 });
+    db.set('ordnerGeloescht', { name: r.name, ids: r.papierkorb, zeit: Date.now(), bytes: r.bytes ?? 0 }); db.set('ordnerGeloeschtListe', null);
     dienst?.ordnerVergessen(r.name);
     return { name: r.name, papierkorb: r.papierkorb.length, stern: r.stern, bytes: r.bytes ?? 0 };
   },
   async pfOrdnerZurueck() {
-    const g = db.get<{ name: string; ids: string[] } | null>('ordnerGeloescht', null);
-    if (!g) return 0;
-    const n = await postfach!.ordnerWiederherstellen(g.name, g.ids);
-    db.platzMerken(-((g as any).bytes ?? 0));
-    db.set('ordnerGeloescht', null);
+    // einzelner Ordner oder mehrere auf einmal
+    const liste = db.get<Array<{ name: string; ids: string[]; bytes?: number }> | null>('ordnerGeloeschtListe', null);
+    const g = db.get<{ name: string; ids: string[]; bytes?: number } | null>('ordnerGeloescht', null);
+    const alle = liste ?? (g ? [g] : []);
+    let n = 0;
+    for (const x of alle) { n += await postfach!.ordnerWiederherstellen(x.name, x.ids); db.platzMerken(-(x.bytes ?? 0)); }
+    db.set('ordnerGeloescht', null); db.set('ordnerGeloeschtListe', null);
     return n;
+  },
+  /** Mehrere Ordner samt Mails auf einmal löschen (Fortschritt über alle Ordner zusammen). */
+  async pfOrdnerMehrLoeschen(ids) {
+    const liste = ids as string[];
+    const geloescht: Array<{ name: string; ids: string[]; bytes: number }> = [];
+    let fertig = 0, papierkorb = 0, bytes = 0;
+    for (const id of liste) {
+      const r = await postfach!.ordnerLoeschen(id, (erledigt, gesamt) => sende('ordnerLoeschen', { erledigt, gesamt, ordner: fertig + 1, ordnerGesamt: liste.length, name: '' }));
+      geloescht.push({ name: r.name, ids: r.papierkorb, bytes: r.bytes ?? 0 });
+      dienst?.ordnerVergessen(r.name);
+      papierkorb += r.papierkorb.length; bytes += r.bytes ?? 0; fertig++;
+      db.set('ordnerGeloeschtListe', geloescht); db.set('ordnerGeloescht', null);
+    }
+    return { ordner: fertig, papierkorb, bytes };
   },
   async pfAnhangSpeichern(mailId, anhang) {
     const r = await dialog.showSaveDialog(fenster!, { defaultPath: path.join(app.getPath('downloads'), anhang.name) });

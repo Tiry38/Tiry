@@ -98,7 +98,9 @@ export class PostfachUI {
     const gruppe = (art: Ordner['art'][], titel: string) => {
       const os = this.ordner.filter((o) => art.includes(o.art));
       if (!os.length) return '';
-      return `${titel ? `<h2>${titel}</h2>` : ''}<ul>${os.map((o) => `<li class="pf-oli"><button data-ordner="${h(o.id)}" ${o.id === this.aktiv ? 'aria-current="page"' : ''}>
+      const waehlbar = art.includes('firma');
+      const kopf = titel ? `<h2 class="pf-okopf">${titel}${waehlbar ? `<button class="pf-wahl-knopf" data-wahlmodus aria-pressed="${this.wahlModus}">${this.wahlModus ? 'Fertig' : 'Auswählen'}</button>` : ''}</h2>` : '';
+      return `${kopf}<ul>${os.map((o) => `<li class="pf-oli">${waehlbar && this.wahlModus && (o.art === 'firma' || o.art === 'eigen') ? `<label class="pf-ohaken"><input type="checkbox" data-owahl="${h(o.id)}" ${this.gewaehlt.has(o.id) ? 'checked' : ''} aria-label="${h(o.name)} auswählen"></label>` : ''}<button data-ordner="${h(o.id)}" ${o.id === this.aktiv ? 'aria-current="page"' : ''}>
         <svg viewBox="0 0 24 24" aria-hidden="true">${SYMBOL[o.id] ?? SYMBOL.ordner}</svg><span>${h(o.name)}</span>${o.ungelesen ? `<b>${o.ungelesen}</b>` : ''}</button>${o.art === 'firma' || o.art === 'eigen' ? `<button class="pf-oweg" data-oweg="${h(o.id)}" aria-label="Ordner ${h(o.name)} löschen" title="Ordner samt Mails löschen"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/></svg></button>` : ''}</li>`).join('')}</ul>`;
     };
     const a = this.aufraeumer();
@@ -108,9 +110,18 @@ export class PostfachUI {
         <button class="knopf klein voll" data-gehe="cockpit">Aufräumen öffnen</button></div>`;
     this.wurzel.querySelector<HTMLButtonElement>('[data-gehe]')?.addEventListener('click', () => this.gehe('cockpit'));
     for (const b of this.wurzel.querySelectorAll<HTMLButtonElement>('button[data-ordner]')) {
-      b.addEventListener('click', () => this.ordnerWaehlen(b.dataset.ordner!));
+      b.addEventListener('click', () => {
+        // im Auswahl-Modus: Antippen des Ordners setzt/entfernt den Haken
+        const haken = this.wahlModus ? b.parentElement?.querySelector<HTMLInputElement>('[data-owahl]') : null;
+        if (haken) { haken.checked = !haken.checked; haken.dispatchEvent(new Event('change')); return; }
+        this.ordnerWaehlen(b.dataset.ordner!);
+      });
     }
     for (const b of this.wurzel.querySelectorAll<HTMLButtonElement>('[data-oweg]')) b.addEventListener('click', (e) => { e.stopPropagation(); void this.ordnerLoeschen(b.dataset.oweg!); });
+    // Mehrere Ordner auswählen und auf einmal löschen
+    this.wurzel.querySelector('[data-wahlmodus]')?.addEventListener('click', () => { this.wahlModus = !this.wahlModus; if (!this.wahlModus) this.gewaehlt.clear(); void this.ordnerLaden(); });
+    for (const c of this.wurzel.querySelectorAll<HTMLInputElement>('[data-owahl]')) c.addEventListener('change', () => { if (c.checked) this.gewaehlt.add(c.dataset.owahl!); else this.gewaehlt.delete(c.dataset.owahl!); this.wahlLeiste(); });
+    this.wahlLeiste();
     $('#pf-ordnerwahl', this.wurzel).innerHTML = this.ordner.map((o) => `<option value="${h(o.id)}" ${o.id === this.aktiv ? 'selected' : ''}>${h(o.name)}${o.ungelesen ? ` (${o.ungelesen})` : ''}</option>`).join('');
   }
 
@@ -292,6 +303,56 @@ export class PostfachUI {
       if (t) { t.classList.add('geschluckt'); setTimeout(() => t.classList.remove('geschluckt'), 600); void this.ablegen(id, t.dataset.ordner!); }
     };
     addEventListener('pointermove', bewegen); addEventListener('pointerup', ende); addEventListener('pointercancel', ende);
+  }
+
+  private wahlModus = false;
+  private gewaehlt = new Set<string>();
+
+  /** Leiste unten in der Ordner-Spalte: „3 Ordner löschen“. */
+  private wahlLeiste() {
+    let l = this.wurzel.querySelector<HTMLElement>('.pf-wahl-leiste');
+    if (!this.wahlModus) { l?.remove(); return; }
+    if (!l) { l = document.createElement('div'); l.className = 'pf-wahl-leiste'; $('#pf-ordnerliste', this.wurzel).after(l); }
+    const n = this.gewaehlt.size;
+    l.innerHTML = `<span>${n ? `<b>${n}</b> ${n === 1 ? 'Ordner' : 'Ordner'} ausgewählt` : 'Ordner antippen zum Auswählen'}</span>
+      <button class="knopf gefahr" data-mehrweg ${n ? '' : 'disabled'}>${n > 1 ? `${n} Ordner löschen` : 'Löschen'}</button>`;
+    l.querySelector('[data-mehrweg]')?.addEventListener('click', () => void this.mehrereLoeschen());
+  }
+
+  private async mehrereLoeschen() {
+    const ids = [...this.gewaehlt]; if (!ids.length) return;
+    const d = $<HTMLDialogElement>('#dialog');
+    d.innerHTML = '<h2 id="dialog-titel">Ordner löschen?</h2><p>Ich zähle die Mails …</p>';
+    if (!d.open) d.showModal();
+    let summe = 0, stern = 0; const namen: string[] = [];
+    try { for (const id of ids) { const i = await this.api.rufe('pfOrdnerInhalt', id); summe += Math.max(0, i.gesamt - i.stern); stern += i.stern; namen.push(i.name); } }
+    catch (e) { d.close(); this.melde((e as Error).message); return; }
+    d.innerHTML = `<h2 id="dialog-titel">${ids.length} Ordner löschen?</h2>
+      <p class="pf-namen">${namen.map((n) => `<span>${h(n)}</span>`).join('')}</p>
+      <p><b>${summe.toLocaleString('de-DE')} Mails</b> kommen in den <b>Papierkorb</b> und die Ordner verschwinden. Gmail löscht den Papierkorb erst nach 30 Tagen – bis dahin holst du alles mit einem Klick zurück.${stern ? ` <b>${stern} Mails mit Stern</b> bleiben erhalten.` : ''}</p>
+      <div class="zeile" data-stil="margin-top:18px"><button class="knopf gefahr" data-ja>${ids.length} Ordner und ${summe.toLocaleString('de-DE')} Mails löschen</button><button class="knopf" data-nein>Abbrechen</button></div>`;
+    const ok = await new Promise<boolean>((fertig) => {
+      d.querySelector('[data-ja]')!.addEventListener('click', () => fertig(true));
+      d.querySelector('[data-nein]')!.addEventListener('click', () => fertig(false));
+      d.addEventListener('cancel', () => fertig(false), { once: true });
+    });
+    if (!ok) { d.close(); return; }
+    d.innerHTML = `<h2 id="dialog-titel">Lösche ${ids.length} Ordner …</h2><p class="alt-status" id="ol-stand">Ordner 1 von ${ids.length}</p><div class="fortschritt"><i id="ol-balken"></i></div>`;
+    (window as any).__ordnerLoeschen = (s: { erledigt: number; gesamt: number; ordner?: number; ordnerGesamt?: number }) => {
+      const t = d.querySelector('#ol-stand'); if (t) t.textContent = `Ordner ${s.ordner ?? 1} von ${s.ordnerGesamt ?? 1} · ${s.erledigt.toLocaleString('de-DE')} von ${s.gesamt.toLocaleString('de-DE')} Mails`;
+      const b = d.querySelector<HTMLElement>('#ol-balken'); if (b) b.style.width = `${Math.round((((s.ordner ?? 1) - 1) + s.erledigt / Math.max(1, s.gesamt)) / Math.max(1, s.ordnerGesamt ?? 1) * 100)}%`;
+    };
+    try {
+      const r = await this.api.rufe('pfOrdnerMehrLoeschen', ids);
+      d.close();
+      const mb = r.bytes ? ` · ${r.bytes >= 1e9 ? `${(r.bytes / 1e9).toLocaleString('de-DE', { maximumFractionDigits: 1 })} GB` : `${Math.max(1, Math.round(r.bytes / 1e6)).toLocaleString('de-DE')} MB`} frei` : '';
+      this.melde(`${r.ordner} Ordner gelöscht – ${r.papierkorb.toLocaleString('de-DE')} Mails im Papierkorb${mb}.`, async () => {
+        const n = await this.api.rufe('pfOrdnerZurueck'); this.melde(`${n.toLocaleString('de-DE')} Mails und die Ordner sind zurück.`); void this.ordnerLaden();
+      });
+      if (ids.includes(this.aktiv)) this.ordnerWaehlen('INBOX');
+      this.gewaehlt.clear(); this.wahlModus = false;
+      void this.ordnerLaden();
+    } catch (e) { d.close(); this.melde((e as Error).message); void this.ordnerLaden(); }
   }
 
   /** Ordner samt Inhalt löschen – mit klarer Rückfrage, Fortschritt und Rückgängig. */
