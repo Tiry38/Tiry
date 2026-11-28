@@ -36,8 +36,9 @@ export function starteUpdater(opt: { melde: (s: UpdateStand) => void; log: (t: s
   const suchen = async () => { try { await autoUpdater.checkForUpdates(); } catch { /* Fehler-Ereignis meldet */ } };
   const jetzt = (still = false) => { opt.vorBeenden(still); setImmediate(() => autoUpdater.quitAndInstall(true, true)); };
 
+  // Neue Versionen schnell erkennen: kurz nach dem Start, dann alle 5 Minuten (die Abfrage ist eine winzige Datei)
   setTimeout(suchen, 8000);
-  setInterval(suchen, 30 * 60 * 1000).unref();
+  setInterval(suchen, 5 * 60 * 1000).unref();
   // Unbemerkt einspielen: Update bereit, Fenster zu, PC seit 10 Minuten unbenutzt → still neu starten
   setInterval(() => {
     if (aktuell.stand === 'bereit' && !opt.fensterSichtbar() && !opt.beschaeftigt?.() && powerMonitor.getSystemIdleTime() > 600) { opt.log(`Update auf ${neu} wird still eingespielt`); jetzt(true); }

@@ -366,6 +366,10 @@ app.whenReady().then(async () => {
     beschaeftigt: () => ['vorschau', 'laeuft'].includes(dienst?.altbestand?.phase ?? ''),
     vorBeenden: (still) => { beenden = true; dienst?.stoppen(); if (still) try { fs.writeFileSync(STILL_MARKE, '1'); } catch { /* egal */ } },
   });
+  // Sobald Tiry das Fenster öffnet oder anklickt: gleich nach einer neuen Version schauen (höchstens jede Minute)
+  let letzteSuche = 0;
+  const suchenBeiBlick = () => { if (Date.now() - letzteSuche > 60_000) { letzteSuche = Date.now(); void updater?.suchen(); } };
+  fenster?.on('focus', suchenBeiBlick); fenster?.on('show', suchenBeiBlick);
 
   if (DEMO) {
     const demo = erzeugeDemo();
