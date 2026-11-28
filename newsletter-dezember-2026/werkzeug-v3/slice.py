@@ -4,7 +4,7 @@ Animationen = eigene GIF-Zellen. Ergebnis: mail/ (HTML + Bilder flach)."""
 import json, os, glob, subprocess, urllib.parse, html, shutil
 from PIL import Image
 Image.MAX_IMAGE_PIXELS=None
-HP='https://tiry38.github.io/velo-center-web/'
+HP='https://www.velo-center.de/'
 LEA={'jr':'https://www.jobrad.org/','bl':'https://www.bikeleasing.de/','bb':'https://www.businessbike.de/','dd':'https://www.deutsche-dienstrad.de/',
      'cb':'https://company-bike.com/','km':'https://www.kazenmaier.de/','lb':'https://www.lease-a-bike.de/','er':'https://www.eurorad.de/','rd':'https://radimdienst.de/'}
 def res(h):

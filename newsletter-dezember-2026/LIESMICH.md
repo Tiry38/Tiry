@@ -26,7 +26,8 @@ Abmeldelink: `{%link_unsubscribe}`. Der Ordner `mail/` enthält dieselben Dateie
   Kristall-Schnee mit den Homepage-Formeln (Frequenzen auf 10 s gerundet, jede Flocke blendet einmal weich), Sattel schwebt (suf 5 s).
   Palette k-means + festes Bayer-Raster (`kmpal.py`) gegen Farbstufen. Ca. 1,1 MB.
 
-## Links (27.11.2026, live geprüft)
+## Links (28.11.2026, live geprüft auf www.velo-center.de)
+- Alle Homepage-Links gehen seit 28.11.2026 auf https://www.velo-center.de/ (neue Homepage hat jetzt diese Domain).
 - Rad-Knöpfe: `#rad=<slug>~<FID>` öffnet genau dieses Rad (Homepage aad7a6d).
 - Probefahrt/Termin: `#termin=<Text>` öffnet das Formular mit passender Art und vorbelegtem Text.
 - WhatsApp nur noch bei Ortlieb und beim WhatsApp-Knopf der Winter-Inspektion.
